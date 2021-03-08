@@ -762,7 +762,7 @@ class CNTV2AncDataTester
 
 			//	Start over...
 			v210VancLine.clear();	u16Pkts.clear();	u16s.clear();	pktList.Clear();
-			delete p708Pkt;			p708Pkt = NULL;		pPkt = NULL;
+			delete p708Pkt;			p708Pkt = NULL;		pPkt = AJA_NULL;
 
 			//	TEST 2:		C-channel-only CEA708 PACKET
 			for (unsigned ndx(0);  ndx < sizeof(pv210YSamples);  ndx++)
@@ -779,7 +779,7 @@ class CNTV2AncDataTester
 			SHOULD_BE_EQUAL(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
 			pPkt = pktList.GetAncillaryDataAtIndex(0);			//	Get a pointer to the 1 and only packet
 			SHOULD_BE_NON_NULL(pPkt);							//	Pointer should be non-NULL
-			SHOULD_BE_UNEQUAL(AJAAncillaryDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	This should fail -- because it's not in Y channel
+			SHOULD_BE_EQUAL(AJAAncillaryDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	This used to fail because it's not in Y channel, but changed in SDK 16.1 to succeed & log warning
 			SHOULD_SUCCEED(pPkt->GetPayloadData(u16s));					//	Get its packet data as uint16_t vector (with parity)
 			SHOULD_BE_EQUAL(uint32_t(u16s.size()), pPkt->GetDC());		//	Vector element count should match packet data count
 			SHOULD_BE_TRUE(size_t(u16s.size()) <= sizeof(pv210YSamples));//	Vector element count should be <= original pkt data count
@@ -787,7 +787,7 @@ class CNTV2AncDataTester
 				SHOULD_BE_EQUAL(pv210YSamples[ndx+6], u16s.at(ndx));	//	Each element should match original
 
 			//	Start over...
-			v210VancLine.clear();	u16Pkts.clear();	u16s.clear();	pktList.Clear();	pPkt = NULL;
+			v210VancLine.clear();	u16Pkts.clear();	u16s.clear();	pktList.Clear();	pPkt = AJA_NULL;
 
 			//	TEST 3:		Y&C-channel CEA708 PACKET
 			for (unsigned ndx(0);  ndx < sizeof(pv210YSamples);  ndx++)
@@ -802,7 +802,7 @@ class CNTV2AncDataTester
 			SHOULD_BE_EQUAL(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
 			pPkt = pktList.GetAncillaryDataAtIndex(0);			//	Get a pointer to the 1 and only packet
 			SHOULD_BE_NON_NULL(pPkt);							//	Pointer should be non-NULL
-			SHOULD_BE_UNEQUAL(AJAAncillaryDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	This should fail -- because it's not in Y channel
+			SHOULD_BE_EQUAL(AJAAncillaryDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	This used to fail, but changed in SDK 16.1 to succeed as CEA708 starting to be carried in SD
 			SHOULD_SUCCEED(pPkt->GetPayloadData(u16s));					//	Get its packet data as uint16_t vector (with parity)
 			SHOULD_BE_EQUAL(uint32_t(u16s.size()), pPkt->GetDC());		//	Vector element count should match packet data count
 			SHOULD_BE_TRUE(size_t(u16s.size()) <= sizeof(pv210YSamples));//	Vector element count should be <= original pkt data count

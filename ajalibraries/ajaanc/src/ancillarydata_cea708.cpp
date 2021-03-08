@@ -100,13 +100,19 @@ AJAStatus AJAAncillaryData_Cea708::GeneratePayloadData (void)
 	return status;
 }
 
+#define	LOGMYWARN(__x__)	AJA_sWARNING(AJA_DebugUnit_AJAAncList,		AJAFUNC << ": " << __x__)
 
 AJAAncillaryDataType AJAAncillaryData_Cea708::RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData)
 {
 	if (pInAncData->GetLocationVideoSpace() == AJAAncillaryDataSpace_VANC)		//	Must be VANC (per SMPTE 334-2)
 		if (pInAncData->GetDID() == AJAAncillaryData_CEA708_DID)				//	DID == 0x61
 			if (pInAncData->GetSID() == AJAAncillaryData_CEA708_SID)			//	SDID == 0x01
-				return AJAAncillaryDataType_Cea708;
+				if (IS_VALID_AJAAncillaryDataVideoStream(pInAncData->GetLocationDataChannel()))	//	Valid channel?
+				{
+					if (pInAncData->GetLocationDataChannel() == AJAAncillaryDataChannel_C)	//	Y OK, Y+C OK
+						LOGMYWARN("CEA708 packet on C-channel");	//	Violates SMPTE 334-1 sec 4 -- bad praxis, but will allow
+					return AJAAncillaryDataType_Cea708;
+				}
 	return AJAAncillaryDataType_Unknown;
 }
 
