@@ -993,7 +993,9 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
         {
             CHECK_GT(tempDir.size(), 0);
             status = AJAFileIO::DoesDirectoryExist(tempDir);
-	    	CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "Expected temp directory '" + tempDir + "' not found! Check result of ::TempDirectory sub-case.");
+            const std::string checkMsg = "Expected temp directory '" +
+                tempDir + "' not found! Check result of ::TempDirectory sub-case.";
+            CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, checkMsg);
         }
 
         SUBCASE("::GetWorkingDirectory")
@@ -1028,18 +1030,19 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
         {
 
             tempFilePath = tempDir;
-		
+
             // remove any trailing path separator on tempDir
             // then add the pathSepStr, simple way to sanitize the created path
             aja::rstrip(tempFilePath, pathSepStr);
             tempFilePath += pathSepStr;
-            tempFileName = "AJAFileIO_unittest_file_" + 
+            tempFileName = "AJAFileIO_unittest_file_" +
                 aja::to_string((unsigned long)AJATime::GetSystemMilliseconds()) + ".txt";
             tempFilePath += tempFileName;
 
             AJAFileIO file;
             status = file.Open(tempFilePath, eAJAReadWrite|eAJACreateAlways, 0);
-            REQUIRE_MESSAGE(status == AJA_STATUS_SUCCESS, "Error creating temp file: '" + tempFilePath + "'");
+            std::string reqMsg = "Error creating temp file: '" + tempFilePath + "'";
+            REQUIRE_MESSAGE(status == AJA_STATUS_SUCCESS, reqMsg);
             CHECK(file.IsOpen() == true);
             CHECK(file.Tell() == 0);
             // seek forward 64

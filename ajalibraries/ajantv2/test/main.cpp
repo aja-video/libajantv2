@@ -13,8 +13,10 @@
 
 #include <vector>
 
+#include "ntv2bitfile.h"
 #include "ntv2card.h"
 #include "ntv2debug.h"
+#include "ntv2endian.h"
 #include "ntv2utils.h"
 #include "ntv2vpid.h"
 
@@ -819,3 +821,179 @@ TEST_SUITE("CNTV2VPID" * doctest::description("CNTV2VPID functions")) {
 		}
 	}
 } // ntv2vpid
+
+void bft_marker() {}
+TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
+    TEST_CASE("NTV2SegmentedXferInfo")
+    {
+		SUBCASE("NTV2SegmentedXferInfo Basic Test")
+		{
+			const NTV2SegmentedXferInfo nfo;
+			CHECK(nfo.isValid() == false);
+			CHECK(nfo.getElementLength() == 1);
+			CHECK(nfo.getSegmentCount() == 0);
+			CHECK(nfo.getSegmentLength() == 0);
+			CHECK(nfo.getTotalElements() == 0);
+			CHECK(nfo.getTotalBytes() == 0);
+			CHECK(nfo.getSourceOffset() == 0);
+			CHECK(nfo.getDestOffset() == 0);
+			CHECK(nfo.isSourceTopDown() == true);
+			CHECK(nfo.isSourceBottomUp() == false);
+			CHECK(nfo.isDestTopDown() == true);
+			CHECK(nfo.isDestBottomUp() == false);
+		}
+
+		// TEST_CASE("NTV2SegmentedXfrInfo 1920x1080 YUV8")
+		// {
+		// 	NTV2SegmentedXferInfo nfo;
+		// 	nfo.setSegmentCount(64);
+		// 	nfo.setSegmentLength(1024);	// bytes
+		// 	nfo.setSourcePitch(3840);	// bytes
+		// }
+
+		SUBCASE("NTV2SegmentedXfrInfo 1920x1080 NTV2_FBF_RGBA")
+		{
+			NTV2SegmentedXferInfo nfo;
+			nfo.setSegmentCount(64);
+			nfo.setSegmentLength(1024);	// bytes
+			nfo.setSourcePitch(7680);	// 0x1E00 bytes
+			CHECK(nfo.isValid() == true);
+			CHECK(nfo.getTotalBytes() == 0x00010000);	//	64K
+		}
+		SUBCASE("1920x1080 ARGB8 src buffer, 256x64 selection at upper-left corner 0,0")
+		{	//	1920x1080 ARGB8 src buffer, 256x64 selection at upper-right corner 1664,0
+			NTV2SegmentedXferInfo segInfo;
+			segInfo.setSegmentCount(64);
+			segInfo.setSegmentLength(1024);	// bytes
+			segInfo.setSourceOffset(6656);	// 0x1A00 bytes
+			segInfo.setSourcePitch(7680);	// 0x1E00 bytes
+			CHECK(segInfo.isValid() == true);
+			CHECK(segInfo.getTotalBytes() == 0x00010000);	//	64K
+		}
+		SUBCASE("1920x1080 ARGB8 src buffer, 256x64 selection at upper-right corner 1664,0	")
+		{
+			NTV2SegmentedXferInfo segInfo;
+			segInfo.setSegmentCount(64);
+			segInfo.setSegmentLength(1024);		// bytes
+			segInfo.setSourceOffset(1957376);	// 0x1DDE00 bytes
+			segInfo.setSourcePitch(7680);		// 0x1E00 bytes
+			CHECK(segInfo.isValid() == true);
+			CHECK(segInfo.getTotalBytes() == 0x00010000);	//	64K
+		}
+		SUBCASE("1920x1080 ARGB8 src buffer, 256x64 selection at bottom-left corner 0,1016")
+		{
+			NTV2SegmentedXferInfo segInfo;
+			segInfo.setSegmentCount(64);
+			segInfo.setSegmentLength(1024);		// bytes
+			segInfo.setSourceOffset(1950720);	// 0x1DC400 bytes
+			segInfo.setSourcePitch(7680);		// 0x1E00 bytes
+			CHECK(segInfo.isValid() == true);
+			CHECK(segInfo.getTotalBytes() == 0x00010000);	//	64K
+		}
+		SUBCASE("1920x1080 ARGB8 src buffer, 256x64 selection at dead-center 832,508")
+		{
+			NTV2SegmentedXferInfo segInfo;
+			segInfo.setSegmentCount(64);
+			segInfo.setSegmentLength(1024);		// bytes
+			segInfo.setSourceOffset(978688);	// 0xEEF00 bytes
+			segInfo.setSourcePitch(7680);		// 0x1E00 bytes
+			CHECK(segInfo.isValid() == true);
+			CHECK(segInfo.getTotalBytes() == 0x00010000);	//	64K
+		}
+    }
+
+	TEST_CASE("NTV2Bitfile")
+	{
+		static unsigned char sTTapPro[] = {	//	.............a.Et_tap_pro;COMPRESS=TRUE;UserID=0XFFFFFFFF;TANDEM=TRUE;Version=2019.1.b..xcku035-fbva676-1LV-i.c..2020/11/04.d..14:58:54.e..'......................................................................".D..........Uf ... ...0. .....0.......0......
+			0x00, 0x09, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x00, 0x00, 0x01, 0x61, 0x00, 0x45, 0x74, 0x5f, 0x74, 0x61, 0x70, 0x5f, 0x70, 0x72, 0x6f, 0x3b, 0x43, 0x4f, 0x4d, 0x50, 0x52, 0x45, 0x53, 0x53, 0x3d, 0x54, 0x52, 0x55, 0x45, 0x3b, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x3d, 0x30, 0x58, 0x46, 0x46, 0x46, 0x46, 0x46, 0x46, 0x46, 0x46, 0x3b, 0x54, 0x41, 0x4e, 0x44, 0x45, 0x4d,
+			0x3d, 0x54, 0x52, 0x55, 0x45, 0x3b, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x3d, 0x32, 0x30, 0x31, 0x39, 0x2e, 0x31, 0x00, 0x62, 0x00, 0x16, 0x78, 0x63, 0x6b, 0x75, 0x30, 0x33, 0x35, 0x2d, 0x66, 0x62, 0x76, 0x61, 0x36, 0x37, 0x36, 0x2d, 0x31, 0x4c, 0x56, 0x2d, 0x69, 0x00, 0x63, 0x00, 0x0b, 0x32, 0x30, 0x32, 0x30, 0x2f, 0x31, 0x31, 0x2f, 0x30, 0x34, 0x00, 0x64, 0x00, 0x09, 0x31,
+			0x34, 0x3a, 0x35, 0x38, 0x3a, 0x35, 0x34, 0x00, 0x65, 0x00, 0xd2, 0x27, 0xd4, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+			0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0xbb, 0x11, 0x22, 0x00, 0x44, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xaa, 0x99, 0x55, 0x66, 0x20, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x30, 0x02, 0x20, 0x01, 0x00, 0x00, 0x00, 0x00, 0x30, 0x02, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x30, 0x00, 0x80, 0x01, 0x00, 0x00, 0x00	};
+
+		const NTV2_POINTER TTapPro(sTTapPro, sizeof(sTTapPro));
+		NTV2_POINTER sub(TTapPro.GetHostAddress(0), TTapPro.GetByteCount());
+		CNTV2Bitfile bf;
+		std::string err;
+
+		SUBCASE("Bitfile Header Parsing")
+		{
+
+			while (true) {
+				err = bf.ParseHeaderFromBuffer(sub);
+				if (sub.GetByteCount() < 226) {
+					CHECK_NE(err, "");
+				}
+				else {
+					CHECK_EQ(err, "");
+					CHECK_EQ(bf.GetDate(), "2020/11/04");
+					CHECK_EQ(bf.GetTime(), "14:58:54");
+				}
+
+				if (!sub)
+					break;
+
+				sub.Set(sub.GetHostAddress(0), sub.GetByteCount()-1);
+			}
+		}
+
+		SUBCASE("Bitfile Section Parsing")
+		{
+			uint16_t aSectionExpected(NTV2EndianSwap16BtoH(TTapPro.U16(7)));
+			uint16_t bSectionExpected(NTV2EndianSwap16BtoH(TTapPro.U16(43)));
+			uint16_t cSectionExpected(uint16_t(TTapPro.U8(86+16+9) << 8) | uint16_t(TTapPro.U8(86+16+10)));
+			CHECK_EQ(cSectionExpected, 0x000B);
+			uint16_t dSectionExpected(uint16_t(TTapPro.U8(125) << 8) | uint16_t(TTapPro.U8(126)));
+			CHECK_EQ(dSectionExpected, 0x0009);
+
+			NTV2_POINTER aSectionBad(TTapPro);
+			NTV2_POINTER bSectionBad(TTapPro);
+			NTV2_POINTER cSectionBad(TTapPro);
+			NTV2_POINTER dSectionBad(TTapPro);
+			for (uint16_t fnLen(0);  fnLen < 0xFFFF;  fnLen++) {
+
+				// A Section -- bad FileName length test
+				aSectionBad.U16(7) = NTV2EndianSwap16HtoB(fnLen);
+				err = bf.ParseHeaderFromBuffer(aSectionBad);
+				if (fnLen != aSectionExpected) {
+					CHECK_NE(err, "");
+				}
+				else {
+					CHECK_EQ(err, "");
+				}
+
+				// B Section -- bad PartName length test
+				bSectionBad.U16(43) = NTV2EndianSwap16HtoB(fnLen);
+				err = bf.ParseHeaderFromBuffer(bSectionBad);
+				if (fnLen != bSectionExpected) {
+					CHECK_NE(err, "");
+				}
+				else {
+					CHECK_EQ(err, "");
+				}
+
+				// C Section -- bad DateName length test
+				cSectionBad.U8(86+16+9) = uint8_t(fnLen >> 8);
+				cSectionBad.U8(86+16+10) = uint8_t(fnLen & 0x00FF);
+				err = bf.ParseHeaderFromBuffer(cSectionBad);
+				if (fnLen != cSectionExpected) {
+					CHECK_NE(err, "");
+				}
+				else {
+					CHECK_EQ(err, "");
+				}
+
+				// D Section -- bad TimeName length test
+				dSectionBad.U8(125) = uint8_t(fnLen >> 8);
+				dSectionBad.U8(126) = uint8_t(fnLen & 0x00FF);
+				err = bf.ParseHeaderFromBuffer(dSectionBad);
+				if (fnLen != dSectionExpected) {
+					CHECK_NE(err, "");
+				}
+				else {
+					CHECK_EQ(err, "");
+				}
+			}
+		}
+	}
+} //bft
+
