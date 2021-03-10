@@ -835,9 +835,12 @@ NTV2VideoFormat NTV2CCGrabber::WaitForStableInputSignal (void)
 		mSquares = NTV2_IS_4K_VIDEO_FORMAT(result) ? false : true;
 
 		if (::NTV2DeviceCanDo4KVideo(mDeviceID))
+			//	This code only handles 4x3G ... not 2x6G or 1x12G
 			if (sdiConnector == NTV2_CHANNEL1  ||  sdiConnector == NTV2_CHANNEL5)
 				if (::GetNTV2StandardFromVideoFormat(result) == NTV2_STANDARD_1080p)
-				{	UWord matches(0);
+				{	//	Ensure the next 3 input spigots are in receive mode (if bidirectional),
+					//	and confirm all 3 match SDI1/SDI5's input video format...
+					UWord matches(0);
 					bool isXmit(false);
 					NTV2ChannelSet xmitSDIs, sdi234(::NTV2MakeChannelSet(NTV2Channel(sdiConnector+1),3));
 					for (NTV2ChannelSetConstIter it(sdi234.begin());  it != sdi234.end();  ++it)
