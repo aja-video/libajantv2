@@ -71,12 +71,12 @@ NTV2RecordDPX::NTV2RecordDPX(int deviceIndex,
 	}
 
 #ifndef AJA_LINUX
-	uint32_t cores = SSE_QueryCoreCount();
+	uint32_t cores = AJACONV_QueryCoreCount();
 	if (cores > 1)
 	{
 		cores /= 2;	// use half the available cores
 	}
-	mUseSSE = SSE_Initialize_WithMaxcores(cores);
+	mUseSSE = AJACONV_Initialize_WithMaxcores(cores);
 #else
 	mUseSSE = false;
 #endif
@@ -653,7 +653,7 @@ void NTV2RecordDPX::previewFrame(uint8_t* videoBuffer,QString statusString)
 			if (mUseSSE)
 			{
 #ifndef AJA_LINUX
-				SSE_Frame(SSE_DPX_BE_To_BGRA8_HalfRes,
+				AJACONV_Frame(AJACONV_DPX_BE_To_BGRA8_HalfRes,
 					pBits,					// target
 					(mRasterWidth/2)*4,		// target pitch
 					videoBuffer,			// source
@@ -691,7 +691,7 @@ void NTV2RecordDPX::previewFrame(uint8_t* videoBuffer,QString statusString)
 			if (mUseSSE)
 			{
 #ifndef AJA_LINUX
-				SSE_Frame(SSE_DPX_LE_To_BGRA8_HalfRes,
+				AJACONV_Frame(AJACONV_DPX_LE_To_BGRA8_HalfRes,
 					      pBits,				// target
 						  (mRasterWidth/2)*4,	// target pitch
 						  videoBuffer,			// source
@@ -732,7 +732,7 @@ void NTV2RecordDPX::previewFrame(uint8_t* videoBuffer,QString statusString)
 #ifndef AJA_LINUX
 			// Big Endian.
 ////			uint32_t pitch = NTV4PixelFormatInfo::ConvertPixelsToBytesPitch(NTV4_PixelFormat_YCbCr_DPX, mRasterWidth);
-			SSE_Frame_HalfRes(SSE_DPX_BE_CbYCrY10_709_To_BGRA8_HalfRes,
+			AJACONV_Frame_HalfRes(AJACONV_DPX_BE_CbYCrY10_709_To_BGRA8_HalfRes,
 								pBits,						// target
 								(mRasterWidth/2)*4,			// target pitch
 								videoBuffer,				// source
@@ -835,7 +835,7 @@ void testSSE1()
 	memset(pt->dest,  0x03, ((1280/2)*4) * (720/2));
 	memset(pt->pad2,  0x04, 4096);
 	
-	SSE_Frame_HalfRes(SSE_DPX_BE_CbYCrY10_709_To_BGRA8_HalfRes,
+	AJACONV_Frame_HalfRes(AJACONV_DPX_BE_CbYCrY10_709_To_BGRA8_HalfRes,
 					  pt->dest,						// target
 					  (1280/2)*4,					// target pitch
 					  pt->source,						// source
@@ -864,7 +864,7 @@ void testSSE2()
 	memset(pt->dest,  0x03, ((WIDTH/2)*4) * (HEIGHT/2));
 	memset(pt->pad2,  0x04, 4096);
 	
-	SSE_Frame_HalfRes(SSE_DPX_BE_CbYCrY10_709_To_BGRA8_HalfRes,
+	AJACONV_Frame_HalfRes(AJACONV_DPX_BE_CbYCrY10_709_To_BGRA8_HalfRes,
 					  pt->dest,						// target
 					  (WIDTH/2)*4,					// target pitch
 					  pt->source,						// source

@@ -39,12 +39,12 @@ NTV2PlaybackDPX::NTV2PlaybackDPX(int deviceIndex,const std::string& directoryNam
 
 
 #ifndef AJA_LINUX
-    uint32_t cores = SSE_QueryCoreCount();
+    uint32_t cores = AJACONV_QueryCoreCount();
     if (cores > 1)
     {
         cores /= 2;	// use half the available cores
     }
-    mUseSSE = SSE_Initialize_WithMaxcores(cores);
+    mUseSSE = AJACONV_Initialize_WithMaxcores(cores);
 #else
     mUseSSE = false;
 #endif
@@ -629,7 +629,7 @@ void NTV2PlaybackDPX::previewFrame(uint8_t* videoBuffer)
         if (mUseSSE)
         {
 #ifndef AJA_LINUX
-            SSE_Frame(SSE_DPX_BE_To_BGRA8_HalfRes,pBits,(mRasterWidth/2)*4,videoBuffer,(mRasterWidth*4*2),mRasterWidth,mRasterHeight/2);
+            AJACONV_Frame(AJACONV_DPX_BE_To_BGRA8_HalfRes,pBits,(mRasterWidth/2)*4,videoBuffer,(mRasterWidth*4*2),mRasterWidth,mRasterHeight/2);
             //qDebug("SSE NTV4_PixelFormat_RGB_DPX Preview: %d",timer.ElapsedTime());
 #endif
         }
@@ -659,7 +659,7 @@ void NTV2PlaybackDPX::previewFrame(uint8_t* videoBuffer)
         if (mUseSSE)
         {
 #ifndef AJA_LINUX
-            SSE_Frame(SSE_DPX_LE_To_BGRA8_HalfRes,pBits,(mRasterWidth/2)*4,videoBuffer,(mRasterWidth*4*2),mRasterWidth,mRasterHeight/2);
+            AJACONV_Frame(AJACONV_DPX_LE_To_BGRA8_HalfRes,pBits,(mRasterWidth/2)*4,videoBuffer,(mRasterWidth*4*2),mRasterWidth,mRasterHeight/2);
             //qDebug("SSE NTV4_PixelFormat_RGB_DPX_LE Preview: %d",timer.ElapsedTime());
 #endif
         }
@@ -687,14 +687,14 @@ void NTV2PlaybackDPX::previewFrame(uint8_t* videoBuffer)
     case NTV2_FBF_10BIT_YCBCR_DPX:
     {
         // Big Endian.
-        //SSE_Frame_HalfRes(SSE_DPX_BE_CbYCrY10_709_To_BGRA8_HalfRes,pBits,(mRasterWidth/2)*4,videoBuffer,(mRasterWidth / 6) * 4 * 4,mRasterWidth,mRasterHeight);
+        //AJACONV_Frame_HalfRes(AJACONV_DPX_BE_CbYCrY10_709_To_BGRA8_HalfRes,pBits,(mRasterWidth/2)*4,videoBuffer,(mRasterWidth / 6) * 4 * 4,mRasterWidth,mRasterHeight);
         AJATimer timer;
         timer.Start();
         if ( pBits != NULL )
         {
 #ifndef AJA_LINUX
             int pitch =  AJA_CalcRowBytesForFormat(AJA_PixelFormat_YCbCr10,mRasterWidth);
-            SSE_Frame_HalfRes(SSE_DPX_BE_CbYCrY10_709_To_BGRA8_HalfRes,
+            AJACONV_Frame_HalfRes(AJACONV_DPX_BE_CbYCrY10_709_To_BGRA8_HalfRes,
                               pBits,						// target
                               (mRasterWidth/2)*4,			// target pitch
                               videoBuffer,					// source
