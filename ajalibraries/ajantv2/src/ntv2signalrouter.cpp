@@ -1664,6 +1664,7 @@ bool CNTV2SignalRouter::CreateFromString (const string & inString, NTV2XptConnec
 	string	stringToParse(inString);    aja::strip(aja::lower(stringToParse));
 	aja::replace(stringToParse, " ", "");
 	aja::replace(stringToParse, "\t", "");
+	aja::replace(stringToParse, "&lt;","<");	//	in case uuencoded
 
 	outConnections.clear();
 	if (Tokenize(stringToParse, lines, "\n\r", true).empty())	//	Split the string at line breaks
