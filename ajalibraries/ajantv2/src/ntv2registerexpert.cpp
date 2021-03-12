@@ -3060,9 +3060,9 @@ private:
 		{
 			(void) inRegNum;
 			ostringstream	oss;
-            static const string	sHDMIStdV1[]	=	{	"1080i",	"720p",	"480i",	"576i",	"1080p",	"SXGA",	""	};
-			static const string	sHDMIStdV2V3[]	=	{	"1080i",	"720p",	"480i",	"576i",	"1080p",	"1556i",	"2Kx1080p",	"2Kx1080i",	"UHD",	"4K",	""	};
-			static const string	sVidRates[]		=	{	"",	"60.00",	"59.94",	"30.00",	"29.97",	"25.00",	"24.00",	"23.98",	"50.00",	"48.00",	"47.95"	};
+            static const string	sHDMIStdV1[]	=	{	"1080i",	"720p",	"480i",	"576i",	"1080p",	"SXGA", "", "", "", "", "", "", "", "", "", "" };
+			static const string	sHDMIStdV2V3[]	=	{	"1080i",	"720p",	"480i",	"576i",	"1080p",	"1556i",	"2Kx1080p",	"2Kx1080i",	"UHD",	"4K", "", "", "", "", "", "" };
+			static const string	sVidRates[]		=	{	"",	"60.00",	"59.94",	"30.00",	"29.97",	"25.00",	"24.00",	"23.98",	"50.00",	"48.00",	"47.95", "", "", "", "", "" };
 			static const string	sSrcSampling[]	=	{	"YC422",	"RGB",	"YC420",	"Unknown/invalid"	};
 			static const string	sBitDepth[]		=	{	"8",		"10",	"12",		"Unknown/invalid"	};
             const ULWord	hdmiVers		(::NTV2DeviceGetHDMIVersion(inDeviceID));
