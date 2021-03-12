@@ -216,10 +216,10 @@ bool CNTV2Card::GetHDMIInBitDepth (NTV2HDMIBitDepth & outValue, const NTV2Channe
 {
 	outValue = NTV2_INVALID_HDMIBitDepth;
 	ULWord status(0), maskVal, shiftVal;
-	bool bV4(NTV2DeviceGetHDMIVersion(_boardID) >= 4);
-	maskVal = bV4 ? kRegMaskHDMIInColorDepth : kLHIRegMaskHDMIInputBitDepth;
-	shiftVal = bV4 ? kRegShiftHDMIInColorDepth : kLHIRegShiftHDMIInputBitDepth;
-	if (!GetHDMIInputStatus(status, inChannel, bV4))
+	bool bV2(NTV2DeviceGetHDMIVersion(_boardID) >= 2);
+	maskVal = bV2 ? kRegMaskHDMIInColorDepth : kLHIRegMaskHDMIInputBitDepth;
+	shiftVal = bV2 ? kRegShiftHDMIInColorDepth : kLHIRegShiftHDMIInputBitDepth;
+	if (!GetHDMIInputStatus(status, inChannel, bV2))
 		return false;
 	outValue = NTV2HDMIBitDepth((status & maskVal) >> shiftVal);
 	return NTV2_IS_VALID_HDMI_BITDEPTH(outValue);
@@ -483,17 +483,20 @@ bool CNTV2Card::SetHDMIOutBitDepth (const NTV2HDMIBitDepth value)
 
 	if (value == NTV2_HDMI12Bit)
 	{
-		ret &= WriteRegister (kRegHDMIOutControl, 1, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth);
+		ret &= WriteRegister (kRegHDMIOutControl, 0, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth);
+		ret &= WriteRegister (kRegHDMIOutControl, 2, kRegMaskHDMIVOBD, kLHIRegShiftHDMIVOBD);
 		ret &= WriteRegister (kRegHDMIInputControl, 1, kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
 	}
 	else if (value == NTV2_HDMI10Bit)
 	{
 		ret &= WriteRegister (kRegHDMIOutControl, 1, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth);
+		ret &= WriteRegister (kRegHDMIOutControl, 0, kRegMaskHDMIVOBD, kLHIRegShiftHDMIVOBD);
 		ret &= WriteRegister (kRegHDMIInputControl, 0, kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
 	}
 	else
 	{
 		ret &= WriteRegister (kRegHDMIOutControl, 0, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth);
+		ret &= WriteRegister (kRegHDMIOutControl, 0, kRegMaskHDMIVOBD, kLHIRegShiftHDMIVOBD);
 		ret &= WriteRegister (kRegHDMIInputControl, 0, kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
 	}
 
