@@ -1747,24 +1747,24 @@ double GetFramesPerSecond (const NTV2FrameRate inFrameRate)
     switch (inFrameRate)
     {
 		case NTV2_FRAMERATE_12000:	return 120.0;
-		case NTV2_FRAMERATE_11988:	return 120.0 / 1.001;
+		case NTV2_FRAMERATE_11988:	return 120000.0 / 1001.0;
 		case NTV2_FRAMERATE_6000:	return 60.0;
-		case NTV2_FRAMERATE_5994:	return 60.0 / 1.001;
+		case NTV2_FRAMERATE_5994:	return 60000.0 / 1001.0;
 		case NTV2_FRAMERATE_5000:	return 50.0;
 		case NTV2_FRAMERATE_4800:	return 48.0;
-		case NTV2_FRAMERATE_4795:	return 48.0 / 1.001;
+		case NTV2_FRAMERATE_4795:	return 48000.0 / 1001.0;
 		case NTV2_FRAMERATE_3000:	return 30.0;
-		case NTV2_FRAMERATE_2997:	return 30.0 / 1.001;
+		case NTV2_FRAMERATE_2997:	return 30000.0 / 1001.0;
 		case NTV2_FRAMERATE_2500:	return 25.0;
 		case NTV2_FRAMERATE_2400:	return 24.0;
-		case NTV2_FRAMERATE_2398:	return 24.0 / 1.001;
+		case NTV2_FRAMERATE_2398:	return 24000.0 / 1001.0;
 		case NTV2_FRAMERATE_1500:	return 15.0;
-		case NTV2_FRAMERATE_1498:	return 15.0 / 1.001;
+		case NTV2_FRAMERATE_1498:	return 15000.0 / 1001.0;
 #if !defined(NTV2_DEPRECATE_16_0)
 		case NTV2_FRAMERATE_1900:	return 19.0;
-		case NTV2_FRAMERATE_1898:	return 19.0 / 1.001;
+		case NTV2_FRAMERATE_1898:	return 19000.0 / 1001.0;
 		case NTV2_FRAMERATE_1800:	return 18.0;
-		case NTV2_FRAMERATE_1798:	return 18.0 / 1.001;
+		case NTV2_FRAMERATE_1798:	return 18000.0 / 1001.0;
 #endif	//!defined(NTV2_DEPRECATE_16_0)
 #if defined(_DEBUG)
 		case NTV2_NUM_FRAMERATES:
