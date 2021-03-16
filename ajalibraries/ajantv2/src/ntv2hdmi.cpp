@@ -484,19 +484,19 @@ bool CNTV2Card::SetHDMIOutBitDepth (const NTV2HDMIBitDepth value)
 	if (value == NTV2_HDMI12Bit)
 	{
 		ret &= WriteRegister (kRegHDMIOutControl, 0, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth);
-		ret &= WriteRegister (kRegHDMIOutControl, 2, kRegMaskHDMIVOBD, kLHIRegShiftHDMIVOBD);
+		ret &= WriteRegister (kRegHDMIOutControl, 2, kRegMaskHDMIVOBD, kRegShiftHDMIVOBD);
 		ret &= WriteRegister (kRegHDMIInputControl, 1, kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
 	}
 	else if (value == NTV2_HDMI10Bit)
 	{
 		ret &= WriteRegister (kRegHDMIOutControl, 1, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth);
-		ret &= WriteRegister (kRegHDMIOutControl, 0, kRegMaskHDMIVOBD, kLHIRegShiftHDMIVOBD);
+		ret &= WriteRegister (kRegHDMIOutControl, 0, kRegMaskHDMIVOBD, kRegShiftHDMIVOBD);
 		ret &= WriteRegister (kRegHDMIInputControl, 0, kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
 	}
 	else
 	{
 		ret &= WriteRegister (kRegHDMIOutControl, 0, kLHIRegMaskHDMIOutBitDepth, kLHIRegShiftHDMIOutBitDepth);
-		ret &= WriteRegister (kRegHDMIOutControl, 0, kRegMaskHDMIVOBD, kLHIRegShiftHDMIVOBD);
+		ret &= WriteRegister (kRegHDMIOutControl, 0, kRegMaskHDMIVOBD, kRegShiftHDMIVOBD);
 		ret &= WriteRegister (kRegHDMIInputControl, 0, kRegMaskHDMIOut12Bit, kRegShiftHDMIOut12Bit);
 	}
 
