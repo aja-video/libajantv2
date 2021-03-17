@@ -2340,6 +2340,7 @@ static TPStringMap & CreateTPStringMap (TPStringMap & outMap)
 	outMap.insert(TPStringPair(NTV2_TestPatt_ColorQuadrant,			string("Color Quadrant")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_ColorQuadrantBorder,	string("Color Quadrant Border")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_ColorQuadrantTsi,		string("Color Quadrant Tsi")));
+	outMap.insert(TPStringPair(NTV2_TestPatt_ColorQuadrantTsi2,		string("Color Quadrant Tsi2")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_ZonePlate_12b_RGB,		string("ZonePlate 12b RGB")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_LinearRamp_12b_RGB,	string("LinearRamp 12b RGB")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_HLG_Narrow_12b_RGB,	string("HLG_Narrow 12b RGB")));
@@ -2654,6 +2655,7 @@ bool NTV2TestPatternGen::drawIt (void)
 		case NTV2_TestPatt_ColorQuadrantBorder:	result = DrawQuadrantBorderFrame();		break;
 		case NTV2_TestPatt_LinearRamp:			result = DrawLinearRampFrame();			break;
 		case NTV2_TestPatt_ColorQuadrantTsi:	result = DrawColorQuadrantFrameTsi();	break;
+		case NTV2_TestPatt_ColorQuadrantTsi2:	result = DrawColorQuadrantFrameTsi2();	break;
 		case NTV2_TestPatt_ZonePlate_12b_RGB:	result = Draw12BitZonePlate();			break;
 		case NTV2_TestPatt_LinearRamp_12b_RGB:	result = Draw12BitRamp();				break;
 		case NTV2_TestPatt_HLG_Narrow_12b_RGB:	result = DrawTestPatternNarrowHLG();	break;
@@ -3383,6 +3385,82 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi()
 	delete [] pPackedLowerLineBuffer;
 	return true;
 }
+
+
+bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi2()
+{
+	uint16_t* pUnPackedLineBuffer= new uint16_t[mDstFrameWidth*2];
+
+	YCbCr10BitPixel yCbCrPixelBlack;
+	YCbCr10BitPixel yCbCrPixelWhite;
+
+	// Colors for the quadrants are from SMPTE 435-1-2009 section 6.4.2
+	static const unsigned char fullRange = 235;
+	
+	RGBAlphaPixel rgbaPixel;
+	rgbaPixel.Alpha = 0;  // white
+	rgbaPixel.Red = fullRange;
+	rgbaPixel.Green = fullRange;
+	rgbaPixel.Blue = fullRange;
+	HDConvertRGBAlphatoYCbCr(&rgbaPixel, &yCbCrPixelWhite);
+
+	rgbaPixel.Alpha = 0;  // black
+	rgbaPixel.Red = 0;
+	rgbaPixel.Green = 0;
+	rgbaPixel.Blue = 0;
+	HDConvertRGBAlphatoYCbCr(&rgbaPixel, &yCbCrPixelBlack);
+	
+	uint32_t marginWidth 	= (mDstFrameWidth - mDstFrameHeight) / 2;
+
+	for (uint32_t v(0);  v < mDstFrameHeight;  v ++)
+	{
+		uint32_t h(0);
+		uint32_t marginLeft		= marginWidth*2;
+		uint32_t marginRight	= (mDstFrameWidth - marginWidth)*2;
+		
+		if (marginLeft > marginRight)
+		{
+			uint32_t temp = marginLeft;
+			marginLeft = marginRight;
+			marginRight = temp;
+		}
+			
+		// left white
+		for (; h < marginLeft; )
+		{
+			pUnPackedLineBuffer [h++]	= yCbCrPixelWhite.cb;
+			pUnPackedLineBuffer [h++]	= yCbCrPixelWhite.y;
+		}
+		
+		// black pixel left side of x
+		pUnPackedLineBuffer [h++]	= yCbCrPixelBlack.cb;
+		pUnPackedLineBuffer [h++]	= yCbCrPixelBlack.y;
+		
+		// center white
+		for (; h < marginRight; )
+		{
+			pUnPackedLineBuffer [h++]	= yCbCrPixelWhite.cb;
+			pUnPackedLineBuffer [h++]	= yCbCrPixelWhite.y;
+		}
+		
+		// black pixel right side of x
+		pUnPackedLineBuffer [h++]	= yCbCrPixelBlack.cb;
+		pUnPackedLineBuffer [h++]	= yCbCrPixelBlack.y;
+		
+		for (; h < mDstFrameWidth*2; )
+		{
+			pUnPackedLineBuffer [h++]	= yCbCrPixelWhite.cb;
+			pUnPackedLineBuffer [h++]	= yCbCrPixelWhite.y;
+		}
+		
+		ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedLineBuffer, (uint32_t*)mpDstBuffer, mDstFrameWidth, mDstPixelFormat);
+		mpDstBuffer += mDstLinePitch;
+	}
+
+	delete [] pUnPackedLineBuffer;
+	return true;
+}
+
 
 bool NTV2TestPatternGen::GetStandard (int & outStandard, bool & outIs4K, bool & outIs8K) const
 {

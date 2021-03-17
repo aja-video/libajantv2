@@ -44,6 +44,7 @@ enum NTV2TestPatternSelect
 	NTV2_TestPatt_ColorQuadrant,
 	NTV2_TestPatt_ColorQuadrantBorder,
 	NTV2_TestPatt_ColorQuadrantTsi,
+	NTV2_TestPatt_ColorQuadrantTsi2,
 	NTV2_TestPatt_ZonePlate_12b_RGB,
 	NTV2_TestPatt_LinearRamp_12b_RGB,
 	NTV2_TestPatt_HLG_Narrow_12b_RGB,
@@ -222,6 +223,7 @@ class AJAExport NTV2TestPatternGen
 		virtual bool	DrawQuadrantBorderFrame ();
 		virtual bool	DrawColorQuadrantFrame ();
 		virtual bool	DrawColorQuadrantFrameTsi ();
+		virtual bool	DrawColorQuadrantFrameTsi2 ();
 
 		//	12-bit patterns:
 		virtual bool	DrawTestPatternNarrowHLG();
