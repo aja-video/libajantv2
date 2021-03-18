@@ -2340,7 +2340,7 @@ static TPStringMap & CreateTPStringMap (TPStringMap & outMap)
 	outMap.insert(TPStringPair(NTV2_TestPatt_ColorQuadrant,			string("Color Quadrant")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_ColorQuadrantBorder,	string("Color Quadrant Border")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_ColorQuadrantTsi,		string("Color Quadrant Tsi")));
-	outMap.insert(TPStringPair(NTV2_TestPatt_ColorQuadrantTsi2,		string("Color Quadrant Tsi2")));
+	outMap.insert(TPStringPair(NTV2_TestPatt_TsiAlignment,		string("Color Quadrant Tsi2")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_ZonePlate_12b_RGB,		string("ZonePlate 12b RGB")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_LinearRamp_12b_RGB,	string("LinearRamp 12b RGB")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_HLG_Narrow_12b_RGB,	string("HLG_Narrow 12b RGB")));
@@ -2655,7 +2655,7 @@ bool NTV2TestPatternGen::drawIt (void)
 		case NTV2_TestPatt_ColorQuadrantBorder:	result = DrawQuadrantBorderFrame();		break;
 		case NTV2_TestPatt_LinearRamp:			result = DrawLinearRampFrame();			break;
 		case NTV2_TestPatt_ColorQuadrantTsi:	result = DrawColorQuadrantFrameTsi();	break;
-		case NTV2_TestPatt_ColorQuadrantTsi2:	result = DrawColorQuadrantFrameTsi2();	break;
+		case NTV2_TestPatt_TsiAlignment:	result = DrawColorQuadrantFrameTsi2();	break;
 		case NTV2_TestPatt_ZonePlate_12b_RGB:	result = Draw12BitZonePlate();			break;
 		case NTV2_TestPatt_LinearRamp_12b_RGB:	result = Draw12BitRamp();				break;
 		case NTV2_TestPatt_HLG_Narrow_12b_RGB:	result = DrawTestPatternNarrowHLG();	break;
