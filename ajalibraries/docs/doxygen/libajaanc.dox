@@ -5,8 +5,6 @@
 	from host buffers in a manner that is compatible with the ways in which NTV2 devices transmit and/or
 	receive ancillary data. See \ref ancillarydata for more information.
 
-	Full source code is provided.
-
 	Prior to SDK 15.0, these classes were compiled into their own <b>libajaanc</b> library.
 	Starting with SDK 15.0, they were merged into the <b>libajantv2</b> library.
 
@@ -49,6 +47,9 @@
 		- AJAAncillaryData_FrameStatusInfo5251:  A “5251” frame status info packet.
 	- AJAAncillaryDataFactory:  Provides AJAAncillaryDataFactory::Create and AJAAncillaryDataFactory::GuessAncillaryDataType class methods.
 	- AJAAncillaryList:  An ordered collection of AJAAncillaryData packets.
+
+	@note	Avoid deriving subclasses from AJA-provided classes.
+			AJA recommends using aggregation techniques to incorporate NTV2 functionality into your own classes.
 
 	@dot
 		digraph AJAAncHierarchy

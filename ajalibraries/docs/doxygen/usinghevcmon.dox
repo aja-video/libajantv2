@@ -1,7 +1,7 @@
 /**
 @page	toolsandutilities
 
-@section	hevcmon-about	"HEVC Monitor"
+@section	hevcmon-about	“HEVC Monitor”
 
 The NTV2 <b>HEVC Monitor</b> is a development tool that provides setup, control and state information for the \ref corvidhevc codec board,
 which is a standard NTV2 video video ingest board coupled with an HEVC hardware codec.

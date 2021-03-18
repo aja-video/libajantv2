@@ -18,6 +18,9 @@
 	-	::NTV2_POINTER — describes memory buffers and perform operations on them
 	-	::AUTOCIRCULATE_TRANSFER — Provides information used in CNTV2Card::AutoCirculateTransfer calls
 
+	@note	Avoid deriving subclasses from AJA-provided classes.
+			AJA recommends using aggregation techniques to incorporate NTV2 functionality into your own classes.
+
 
 
 	@par		Device Scanner Class

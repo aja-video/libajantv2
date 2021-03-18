@@ -3,9 +3,7 @@
 
 @section	gs-downloadinstallsdk	Downloading and Installing the SDK
 
-@note	Only registered OEMs who have agreed to the AJA OEM Developer agreement are authorized to download and use the NTV2 SDK.
-
-Registered OEMs are given login credentials to access AJA’s SDK support site, which can be securely accessed using any modern
+Registered OEMs are given login credentials to access AJA’s OEM SDK support site, which can be securely accessed using any modern
 web browser at <https://sdksupport.aja.com/>.
 
 -#	Log in to the <a href="https://sdksupport.aja.com/">SDK support site</a> using the credentials that were provided by AJA.
@@ -21,28 +19,20 @@ web browser at <https://sdksupport.aja.com/>.
 
 @image	html	sdkdownloadpage-75.png
 
-@note	On MacOS, if the .zip file was downloaded using a web browser, it will have a “quarantine” attribute.
-		AJA recommends clearing this attribute prior to unzipping, to avoid quarantining the unzipped SDK,
-		which may interfere with your development. To remove the quarantine attributes, enter this command in a Terminal window:
-		<tt>xattr -c ~/Downloads/ntv2sdk*.zip</tt>
 
-
-The SDK’s complete documentation set is available online. The documentation link is on the download page.
-The URLs are typically of this form:
--	<b>Release SDKs:</b>   <tt>https://sdksupport.aja.com/docs/NTV2SDK_docs_x_y_z/</tt>
--	<b>Beta SDKs:</b>      <tt>https://sdksupport.aja.com/docs/NTV2SDK_docs_x_y_z_beta/</tt>
-...where <tt>x</tt>, <tt>y</tt> and <tt>z</tt> are the SDK’s major, minor and point version numbers, respectively.
+The SDK’s documentation is online. The link to it is on the SDK download page.
+The URLs are typically of this form  <tt>https://sdksupport.aja.com/docs/NTV2SDK_docs_x_y/</tt>
+…where <b>x</b> and <b>y</b> are the SDK’s <i>major</i> and <i>minor</i> version numbers.
 The documentation is fully cross-referenced, searchable, and includes collaboration diagrams and call graphs.
 
 
 <hr size="50px">
 @section	gs-sdkcontents		SDK Contents
 
-This section explores the contents of the SDK, which is nearly identical on all three platforms.
+The contents of the SDK is nearly identical on all three platforms, and also mostly identical between the <b>OEM Developer SDK</b>
+and the publically-available <b>Open Source SDK</b>.
 
--	<b>ntv2sdk</b><i>PPP</i>_<i>XX</i><b>.</b><i>YY</i><b>.</b><i>ZZ</i><b>.</b><i>nn</i> — This is the folder that results from
-	extracting the <b>.zip</b> file.  <i>PPP</i> is the platform, <i>XX</i> is the major version number, <i>YY</i> is the minor
-	version number, <i>ZZ</i> is the point release number, and <i>nn</i> is the build number.
+-	<b>ntv2</b> — This is the folder that results from cloning the SDK from its GitHub repository.
 	-	<b>ajaapps</b> — Contains sources used to build applications and tools.
 		-	<b>crossplatform  </b>
 			-	<b>ajalogger</b> — Contains sources for \ref usingajalogger.
@@ -50,48 +40,106 @@ This section explores the contents of the SDK, which is nearly identical on all 
 			-	<b>pciwhacker</b> <i>(Linux only)</i> — Contains sources for “PCI Whacker”, a command-line tool that measures
 				PCI throughput, similar to what the \ref systest-dev does in \ref usingsystemtest.
 			-	<b>supportlog</b> — Contains sources for \ref usingsupportlog.
-		-	<b>lin  </b><i>(Linux-only apps)</i>
-		-	<b>win  </b><i>(Windows-only apps)</i>
-	-	<b>ajadriver  </b><i>(Linux only)</i>
+	-	<b>ajadriver</b>
 		-	<b>linux</b> — Device driver source code <i>(Linux only)</i>.
+		-	<b>mac</b> — Device driver installer <b>.pkg</b> <i>(MacOS only)</i>.
+		-	<b>windows</b> — Device driver installer <b>.msi</b> <i>(Windows only)</i>.
 	-	<b>ajalibraries</b>
-		-	<b>ajabase</b> — Contains \ref ajabase, which has several platform-independent utility classes for threading,
-			locking, memory allocation, plug-and-play, logging, etc. Starting in SDK 15.0, these classes are provided in
-			‘libajantv2’, not in ‘libajabase’.
 		-	<b>ajaanc</b> — Contains \ref ajaanc, a set of handy classes for parsing and manipulating ancillary data packets.
 			Starting in SDK 15.0, these classes are no longer proprietary, and are provided in ‘libajantv2’, not in ‘libajaanc’.
-		-	<b>ajacc</b> — Contains the \ref ajacc, a proprietary class library handy for encoding, decoding and rendering CEA-608/708 captions.
+			-	<b>includes</b> — header files for this class library
+		-	<b>ajabase</b> — \ref ajabase, organized by <b>common</b>, <b>network</b>, <b>persistence</b>, <b>pnp</b> (plug & play),
+			and <b>system</b>, encapsulating several platform-independent utility classes for threading, locking, memory allocation,
+			plug-and-play, logging, etc. Starting in SDK 15.0, these classes are provided in ‘libajantv2’, not in ‘libajabase’.
+			-	<b>common</b> — miscellaneous and common classes.
+			-	<b>network</b> — socket classes.
+			-	<b>persistence</b> — SQLite and the AJAPersistence class.
+			-	<b>pnp</b> — plug & play classes.
+			-	<b>system</b> — threading, locking, memory allocation, logging and other classes.
 		-	<b>ajantv2</b> — Contains the \ref ajantv2.
 			-	<b>build</b> — <i>(MacOS & Windows only)</i>  Project solution files for building the SDK, tools and demo
 				applications using Visual Studio (Windows) or Xcode (MacOS).
-			-	<b>codecs</b> — Principal user level NTV2 HEVC classes and header files (\ref corvidhevc only, <i>Windows and Linux only</i>).
-				See \ref hevcsupplement.
-			-	<b>includes</b> — the NTV2 class header/include files.
-			-	<b>src</b> — the NTV2 implementation source files (with platform-specific subdirectories).
-	-	<b>bin</b> — Destination directory for all executables and requisite dynamically-loaded libraries.
+			-	<b>includes</b> — header files
+	-	<b>bin</b> — Destination directory for all executables and dynamically-loaded libraries.
 		Also contains all pre-built \ref toolsandutilities.
 	-	<b>build</b> — Provided for developers who prefer to use <a href="https://doc.qt.io/" target="_qt">Qt</a>
 		and/or <a href="https://doc.qt.io/qtcreator/" target="_qtcreator">Qt Creator</a>.
 		See \ref gs-qtbuild.
-	-	<b>docs</b> — Contains a webloc file that points to the NTV2 online API documentation.
-	-	<b>lib</b> — Contains the pre-built libraries. This is the destination directory for all static library builds.
+	-	<b>docs</b> — Contains a webloc file that points to the online API documentation.
+	-	<b>lib</b> — Contains the pre-built static libraries. This is the destination directory for all static library builds.
 	-	<b>gpustuff</b> — <i>(Linux & Windows only)</i>
 
+The <b>OEM Developer SDK</b> has additional items that are not present in the <b>Open Source SDK</b>:
 
-@subsection		gs-contents-libs	SDK Libraries
+-	<b>ntv2sdk</b><i>PPP</i>_<i>XX</i><b>.</b><i>YY</i><b>.</b><i>ZZ</i><b>.</b><i>nn</i> — This is the folder that results from
+	extracting the downloaded <b>.zip</b> file, where <b>PPP</b> is the platform, <b>XX</b> is the <i>major</i> version number,
+	<b>YY</b> is the <i>minor</i> version number, <b>ZZ</b> is the <i>point</i> release number, and <b>nn</b> is the <i>build</i> number.
+	-	<b>ajaapps</b>
+		-	<b>crossplatform</b>
+			-	<b>hevcmaintenance</b> — Contains sources for the <b>hevcmaintenance</b> utility.
+			-	<b>qthevcmon</b> — Contains sources for the \ref hevcmon-about utility.
+		-	<b>lin</b> — <i>(Linux-only apps)</i>
+		-	<b>win</b> — <i>(Windows-only apps)</i>
+	-	<b>ajalibraries</b>
+		-	<b>ajaanc</b>
+			-	<b>src</b> — implementation source files.
+		-	<b>ajacc</b> — The \ref ajacc, an AJA-proprietary class library for encoding, decoding and rendering CEA-608 captions.
+			-	<b>includes</b> — header files for this class library
+		-	<b>ajantv2</b>
+			-	<b>codecs</b> — The principal NTV2 HEVC classes and header files for \ref corvidhevc <i>(Windows and Linux only)</i>
+				See \ref hevcsupplement for details.
+			-	<b>src</b> — implementation source files (with platform-specific subdirectories).
 
-The SDK distribution comes with the following libraries:
--	\ref ajantv2 which, starting with SDK 15.0, includes \ref ajabase and \ref ajaanc
--	\ref ajacc
+
+@subsection		gs-contents-libs	Static Libraries
+
+By default, the OEM SDK distribution comes with statically-linked libraries:
+-	\ref ajantv2 (includes \ref ajabase and \ref ajaanc )
+-	AJA’s proprietary \ref ajacc (Debug and Release)
 
 On Windows, pre-built versions of the debug versions of the static and dynamic libraries are not installed.
 These can be built using the provided Visual Studio project files.
 
-On Linux, except for the proprietary libraries, pre-built versions of the static libraries are not provided.
-They must be built using the provided Makefiles. Follow the instructions below (\ref gs-linuxsdkbuild).
+On Linux, except for \ref ajacc, pre-built versions of the static libraries are not provided.
+They must be built using the provided <b>Makefile</b>s. Follow the instructions below (\ref gs-linuxsdkbuild).
 
-@note	Avoid deriving subclasses from AJA-provided classes.
-		AJA recommends using aggregation techniques to incorporate NTV2 functionality into your own classes.
+
+@subsection		gs-dylibs	Dynamic Libraries
+
+Starting in SDK 16.1, AJA opened the NTV2 SDK to the <b>Open Source</b> community, and started to distribute \ref ajantv2
+(which includes the \ref ajabase and \ref ajaanc) as a dynamic library both on public forums (including source header files on GitHub),
+and in AJA’s MacOS, Windows, and Linux “retail” desktop software installers.
+
+@note	For more information on <b>AJA’s Open Source Initiative</b>, visit  <a href="https://www.aja.com/products/developer/open-source">https://www.aja.com/products/developer/open-source</a>.
+
+The \ref ajantv2 is publically-distributed as a dynamic library.
+-	<b>Location:</b> AJA’s retail desktop installers will install the NTV2 dynamic libraries into the following locations on the host:
+	-	<b>Linux</b> — <b>/opt/aja</b>
+		-	<b>ajantv2_</b><i>MM</i><b>.so</b>
+	-	<b>MacOS</b> — <b>/Library/Application Support/AJA</b>
+		-	<b>ajantv2_</b><i>MM</i><b>.dylib</b>
+		-	<b>ajantv2d_</b><i>MM</i><b>.dylib</b> — if present, the debug version of the library
+	-	<b>Windows</b> — <b>\\Program Files\\AJA</b>
+		-	<i>MM</i><b><b>AJANTV2</b>.DLL</b> — contains the \ref ajantv2 including the \ref ajabase and \ref ajaanc
+-	<b>File Name:</b> The libary's file name includes the SDK major version number in the name (e.g. “ajantv2_16.dylib”).
+-	All public, non-static symbols are exported from the \ref ajantv2 – including \ref ajabase and \ref ajaanc – as intended for “strong” linkage.
+-	The <b>dylib</b>s are intended for “tight” integration with client applications. Changing even one NTV2 data type, class
+	definition or function signature without rebuilding both the SDK dylib and the client application(s) will likely
+	yield dynamic loader failures at launch-time, or unexpected results at runtime (e.g. crashes).
+
+@par Determining dynamic library SDK version
+
+When dynamically loading the NTV2 library at runtime (as opposed to having it automatically loaded by the host operating
+system at launch time), the library can be queried for more specific version information by two utility functions:
+-	::NTV2GetVersionString – returns a string that starts with "<i>major</i><b>.</b><i>minor</i><b>.</b><i>point</i>"
+	that includes the <i>major</i>, <i>minor</i>, and <i>point</i> version number values in decimal form.
+-	::NTV2GetSDKVersionComponent – returns any of the <i>major</i>, <i>minor</i>, and <i>point</i> version number values
+	by passing 0, 1, 2 or 3, respectively, for the <i>version component</i> being requested.
+
+@note	It is strongly recommended that the SDK client software operates with the SDK dynamic library that has the same version.
+
+@warning	Do not use an SDK dynamic library whose <i>major</i> version number differs from the SDK <i>major</i>
+			version number when the SDK client was compiled.
 
 
 
@@ -335,37 +383,6 @@ AJA always recommends that NTV2-based applications be built from the same SDK ve
 For a given SDK release, the “CanDoXXXX”, “GetNumXXXX”, etc. <b>Device Features API</b> responses should be correct for all supported devices
 running the latest firmware available on or after the SDK release date. AJA will do its best to document any exceptions on the SDK’s
 download page and/or the device firmware page in the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/List">Knowledgebase</a>.
-
-
-@subsubsection		gs-dylibs	Using Dynamic Libraries
-
-Starting in SDK 16.1, AJA opened the NTV2 SDK to the <b>Open Source</b> community, and started to distribute dynamic libraries,
-not only with the SDK on public forums, but also in its MacOS, Windows, and Linux retail desktop software installers.
--	For more information on <b>AJA’s Open Source Initiative</b>, visit  <a href="https://www.aja.com/products/developer/open-source">https://www.aja.com/products/developer/open-source</a>.
-
-@par Determining dynamic library SDK version
-
-There are two utility functions that can be called to determine the SDK version:
--	::NTV2GetVersionString – returns a string that starts with "<i>major</i><b>.</b><i>minor</i><b>.</b><i>point</i>"
-	that includes the <i>major</i>, <i>minor</i>, and <i>point</i> version number values in decimal form.
--	::NTV2GetSDKVersionComponent – returns any of the <i>major</i>, <i>minor</i>, and <i>point</i> version number values
-	by passing 0, 1, 2 or 3, respectively, for the <i>version component</i> being requested.
-
-@note	It is strongly recommended that the SDK client software operates with the SDK dynamic library that has the same version.
-
-@warning	Do not use an SDK dynamic library whose <i>major</i> version number differs from that of the SDK client.
-
-
-@par Dynamic library locations
-
-AJA’s retail desktop installers will install the NTV2 dynamic libraries into the following locations on the host:
--	<b>Linux</b> — <tt>/opt/aja</tt>
-	-	<b>ajantv2_</b><i>MM</i><b>.so</b> — contains the \ref ajantv2 including the \ref ajabase and \ref ajaanc
--	<b>MacOS</b> — <tt>/Library/Application Support/AJA</tt>
-	-	<b>ajantv2_</b><i>MM</i><b>.dylib</b> — contains the \ref ajantv2 including the \ref ajabase and \ref ajaanc
-	-	<b>ajantv2d_</b><i>MM</i><b>.dylib</b> — if present, the debug version of the library
--	<b>Windows</b> — <tt>\\Program Files\\AJA</tt>
-	-	<i>MM</i><b><b>AJANTV2</b>.DLL</b> — contains the \ref ajantv2 including the \ref ajabase and \ref ajaanc
 
 
 
@@ -614,24 +631,22 @@ Many OEM developers choose to create their own NTV2-based Xcode projects “from
 		-	<b>Foundation.framework</b>
 		-	<b>IOKit.framework</b>
 -	<b>Dynamic Linking:</b>
-	-	Link with these frameworks/dylibs (in “Build Phases”, in “Link Binary With Libraries”) as “Required”:
+	-	Use “Required” linkage (in Xcode, click “Build Phases”, then “Link Binary With Libraries”) for these Frameworks:
 		-	<b>CoreFoundation.framework</b>
 		-	<b>CoreServices.framework</b>
 		-	<b>Foundation.framework</b>
 		-	<b>IOKit.framework</b>
-		-	<i>sdkroot</i>/lib/<b>ajantv2d.dylib</b> (Debug) or <i>sdkroot</i>/lib/<b>ajantv2.dylib</b> (Release)
-		-	If \ref ajacc is required, <i>sdkroot</i>/lib/<b>ajaccd.dylib</b> (Debug) or <i>sdkroot</i>/lib/<b>ajacc.dylib</b> (Release)
-	-	The supplied <b>dylib</b>s have these characteristics:
-		-	Version numbers all default to “1.0.0”.
-		-	All public, non-static symbols are exported for “strong” linkage.
-		-	The <b>dylib</b>s are intended for “tight” integration with client applications. Changing even one NTV2 data type, class
-			definition or function signature without rebuilding both the SDK dylib and the client application(s) will likely
-			yield <b>dyld</b> failures at launch, or unexpected results (e.g. crashes).
-	-	Set the “Runpath Search Paths” (\c LD_RUNPATH_SEARCH_PATHS) based on the expected runtime location of the AJA <b>dylib</b>(s) —
-		e.g. <b>\@rpath</b>/…, <b>\@executablepath</b>/…, <b>\@loader_path</b>/…, etc.
-		See Apple’s “<a href="https://developer.apple.com/library/content/documentation/DeveloperTools/Conceptual/DynamicLibraries/000-Introduction/Introduction.html">Dynamic
-		Library Design Guidelines</a>” document for more information.  For command line executables, it’s easy from the <b>bash</b> (or equiv.) shell to set the
-		<b>DYLD_LIBRARY_PATH</b> environment variable to point to <i>sdkroot</i>/<b>bin</b> that contains the AJA <b>dylib</b>s.
+	-	For AJA <b>dylib</b>s:
+		-	See the \ref gs-dylibs section for more information on using AJA’s publically-released open-source <b>dylib</b>s.
+		-	Provided the terms of the MIT License are followed, you can build the <b>dylib</b>s yourself and link with them, but note that
+			they are named <b>ajantv2d.dylib</b> (Debug) or <b>ajantv2.dylib</b> (Release) without the SDK major version number in the name.
+		-	If your application requires the AJA-proprietary \ref ajacc (which is not publically distributed), you’ll need to carry it in your
+			application bundle or install it elsewhere.
+		-	Set the “Runpath Search Paths” (\c LD_RUNPATH_SEARCH_PATHS) based on the expected runtime location of the AJA <b>dylib</b>(s) —
+			e.g. <b>\@rpath</b>/…, <b>\@executablepath</b>/…, <b>\@loader_path</b>/…, etc.
+			See Apple’s “<a href="https://developer.apple.com/library/content/documentation/DeveloperTools/Conceptual/DynamicLibraries/000-Introduction/Introduction.html">Dynamic
+			Library Design Guidelines</a>” document for more information.  For command line executables, it’s easy from the <b>bash</b> (or equiv.) shell to set the
+			<b>DYLD_LIBRARY_PATH</b> environment variable to point to <i>sdkroot</i>/<b>bin</b> that contains the AJA <b>dylib</b>s.
 
 
 @subsection	gs-newwinprojects	Windows

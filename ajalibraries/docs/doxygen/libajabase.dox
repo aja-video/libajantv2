@@ -39,7 +39,8 @@
 		-	sqlite3 —  the SQLite mini RDBMS
 		-	AJAPnp —  get notified when AJA devices get attached/detached to/from the host
 
-	Full source code is provided.
+	@note	Avoid deriving subclasses from AJA-provided classes.
+			AJA recommends using aggregation techniques to incorporate NTV2 functionality into your own classes.
 
 	Prior to SDK 15.0, these “base” classes were compiled into their own <b>libajabase</b> library.
 	Starting with SDK 15.0, they were merged into the <b>libajantv2</b> library.
