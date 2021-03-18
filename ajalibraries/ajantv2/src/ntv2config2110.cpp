@@ -2520,7 +2520,7 @@ bool CNTV2Config2110::ExtractRxVideoConfigFromSDP(std::string sdp, multiRx_2110C
 		}
 
         //if there is a source-filter attribute, it overrides the o= source attribute
-        rv = getDescriptionValue(index,"a=source-filter",value);
+        rv = getDescriptionValue(index,"a=source-filter:",value);
         if (rv > index)
         {
             tokens = split(value.c_str(), ' ');
@@ -2707,7 +2707,7 @@ bool CNTV2Config2110::ExtractRxVideoConfigFromSDP(std::string sdp, rx_2110Config
 	}
 
     // if there is a source-filter attribute, it overrides the o= source attribute
-    rv = getDescriptionValue(index,"a=source-filter",value);
+    rv = getDescriptionValue(index,"a=source-filter:",value);
     if (rv > index)
     {
 		tokens = split(value.c_str(), ' ');
@@ -2894,7 +2894,7 @@ bool CNTV2Config2110::ExtractRxAudioConfigFromSDP(std::string sdp, rx_2110Config
 	}
 
     // if there is a source-filter attribute, it overrides the o= source attribute
-    rv = getDescriptionValue(index,"a=source-filter",value);
+    rv = getDescriptionValue(index,"a=source-filter:",value);
     if (rv > index)
     {
 		tokens = split(value.c_str(), ' ');
@@ -3050,7 +3050,7 @@ bool CNTV2Config2110::ExtractRxAncConfigFromSDP(std::string sdp, rx_2110Config &
 	}
 
     // if there is a source-filter attribute, it overrides the o= source attribute
-    rv = getDescriptionValue(index,"a=source-filter",value);
+    rv = getDescriptionValue(index,"a=source-filter:",value);
     if (rv > index)
     {
 		tokens = split(value.c_str(), ' ');
