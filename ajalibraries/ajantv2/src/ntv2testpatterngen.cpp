@@ -3389,7 +3389,7 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi()
 
 bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi2()
 {
-	uint16_t* pUnPackedLineBuffer= new uint16_t[mDstFrameWidth*2];
+	uint16_t* pUnPackedLineBuffer= new uint16_t[mDstFrameWidth*4];
 
 	YCbCr10BitPixel yCbCrPixelBlack;
 	YCbCr10BitPixel yCbCrPixelWhite;
@@ -3415,8 +3415,8 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi2()
 	for (uint32_t v(0);  v < mDstFrameHeight;  v ++)
 	{
 		uint32_t h(0);
-		uint32_t marginLeft		= marginWidth*2;
-		uint32_t marginRight	= (mDstFrameWidth - marginWidth)*2;
+		uint32_t marginLeft		= (marginWidth + v) * 2;
+		uint32_t marginRight	= (mDstFrameWidth - marginWidth - v) * 2;
 		
 		if (marginLeft > marginRight)
 		{
