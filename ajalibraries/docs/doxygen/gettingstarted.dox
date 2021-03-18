@@ -339,9 +339,9 @@ download page and/or the device firmware page in the <a href="https://sdksupport
 
 @subsubsection		gs-dylibs	Using Dynamic Libraries
 
-Starting in SDK 16.1, AJA opened the NTV2 SDK to the open source community, and started to distribute dynamic libraries, not only with
-the SDK on public forums, but also in its MacOS, Windows, and Linux retail desktop software installers.
-Click <a href="https://www.aja.com/opensource/">here</a> for more information about this initiative.
+Starting in SDK 16.1, AJA opened the NTV2 SDK to the <b>Open Source</b> community, and started to distribute dynamic libraries,
+not only with the SDK on public forums, but also in its MacOS, Windows, and Linux retail desktop software installers.
+-	For more information on <b>AJA’s Open Source Initiative</b>, visit  <a href="https://www.aja.com/products/developer/open-source">https://www.aja.com/products/developer/open-source</a>.
 
 @par Determining dynamic library SDK version
 
