@@ -3389,7 +3389,11 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi()
 
 bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi2()
 {
-	uint16_t* pUnPackedLineBuffer= new uint16_t[mDstFrameWidth*4];
+	uint32_t unpackBufferSize = mDstFrameWidth * 4; // for each pixel: 2 components * 2 bytes per component
+	uint16_t* pUnPackedWhiteBuffer= new uint16_t[unpackBufferSize];
+	uint16_t* pUnPackedLineBuffer= new uint16_t[unpackBufferSize];
+	uint16_t* pUnPackedPillarBuffer= new uint16_t[unpackBufferSize];
+	uint16_t* pUnPackedTempBuffer= new uint16_t[unpackBufferSize];
 
 	YCbCr10BitPixel yCbCrPixelBlack;
 	YCbCr10BitPixel yCbCrPixelWhite;
@@ -3410,54 +3414,90 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi2()
 	rgbaPixel.Blue = 0;
 	HDConvertRGBAlphatoYCbCr(&rgbaPixel, &yCbCrPixelBlack);
 	
-	uint32_t marginWidth 	= (mDstFrameWidth - mDstFrameHeight) / 2;
+	// square line params
+	uint32_t lineWidth		= 3;
+	uint32_t sqareMinV		= (mDstFrameHeight / 4);
+	uint32_t sqareMaxV		= (mDstFrameHeight * 3 / 4);
+	uint32_t sqareMinH		= (mDstFrameWidth / 4);
+	uint32_t sqareMaxH		= (mDstFrameWidth * 3 / 4);
+	
+	// white line
+	uint32_t h;
+	uint16_t *ptr;
+	for (h = 0, ptr = pUnPackedWhiteBuffer; h < mDstFrameWidth; h++)
+	{
+		*ptr++				= yCbCrPixelWhite.cb;
+		*ptr++				= yCbCrPixelWhite.y;
+	}
 
+	// black horizontal line
+	for (h = 0, ptr = pUnPackedLineBuffer; h < sqareMinH; h++)
+	{
+		*ptr++				= yCbCrPixelWhite.cb;
+		*ptr++				= yCbCrPixelWhite.y;
+	}
+	for (; h < sqareMaxH; h++)
+	{
+		*ptr++				= yCbCrPixelBlack.cb;
+		*ptr++				= yCbCrPixelBlack.y;
+	}
+	for (; h < mDstFrameWidth; h++)
+	{
+		*ptr++				= yCbCrPixelWhite.cb;
+		*ptr++				= yCbCrPixelWhite.y;
+	}
+	
+	// pillar lines
+	for (h = 0, ptr = pUnPackedPillarBuffer; h < mDstFrameWidth; h++)
+	{
+		*ptr++						= yCbCrPixelWhite.cb;
+		*ptr++						= yCbCrPixelWhite.y;
+	}
+	for (h=sqareMinH; h < sqareMinH + lineWidth; h++)
+	{
+		pUnPackedPillarBuffer[h*2]		= yCbCrPixelBlack.cb;
+		pUnPackedPillarBuffer[h*2 + 1]	= yCbCrPixelBlack.y;
+	}
+	for (h=sqareMaxH - lineWidth; h < sqareMaxH; h++)
+	{
+		pUnPackedPillarBuffer[h*2]		= yCbCrPixelBlack.cb;
+		pUnPackedPillarBuffer[h*2 + 1]	= yCbCrPixelBlack.y;
+	}
+	
+	// image top
+	uint32_t marginWidth				= (mDstFrameWidth - mDstFrameHeight) / 2;
+	uint32_t diagLeftIdx				= marginWidth * 2;
+	uint32_t diagRightIdx				= (mDstFrameWidth - marginWidth) * 2;
+	
 	for (uint32_t v(0);  v < mDstFrameHeight;  v ++)
 	{
-		uint32_t h(0);
-		uint32_t marginLeft		= (marginWidth + v) * 2;
-		uint32_t marginRight	= (mDstFrameWidth - marginWidth - v) * 2;
-		
-		if (marginLeft > marginRight)
-		{
-			uint32_t temp = marginLeft;
-			marginLeft = marginRight;
-			marginRight = temp;
-		}
+		// fill in background line for center square
+		if (v < sqareMinV)
+			::memcpy(pUnPackedTempBuffer, pUnPackedWhiteBuffer, unpackBufferSize);
+		else if (v < sqareMinV+lineWidth)
+			::memcpy(pUnPackedTempBuffer, pUnPackedLineBuffer, unpackBufferSize);
+		else if (v < sqareMaxV-lineWidth)
+			::memcpy(pUnPackedTempBuffer, pUnPackedPillarBuffer, unpackBufferSize);
+		else if (v < sqareMaxV)
+			::memcpy(pUnPackedTempBuffer, pUnPackedLineBuffer, unpackBufferSize);
+		else
+			::memcpy(pUnPackedTempBuffer, pUnPackedWhiteBuffer, unpackBufferSize);
 			
-		// left white
-		for (; h < marginLeft; )
-		{
-			pUnPackedLineBuffer [h++]	= yCbCrPixelWhite.cb;
-			pUnPackedLineBuffer [h++]	= yCbCrPixelWhite.y;
-		}
+		// overlay one-pixel diagonal cross
+		pUnPackedTempBuffer[diagLeftIdx++]	= yCbCrPixelBlack.cb;
+		pUnPackedTempBuffer[diagLeftIdx++]	= yCbCrPixelBlack.y;
+		pUnPackedTempBuffer[diagRightIdx--]	= yCbCrPixelBlack.cb;
+		pUnPackedTempBuffer[diagRightIdx--]	= yCbCrPixelBlack.y;
 		
-		// black pixel left side of x
-		pUnPackedLineBuffer [h++]	= yCbCrPixelBlack.cb;
-		pUnPackedLineBuffer [h++]	= yCbCrPixelBlack.y;
-		
-		// center white
-		for (; h < marginRight; )
-		{
-			pUnPackedLineBuffer [h++]	= yCbCrPixelWhite.cb;
-			pUnPackedLineBuffer [h++]	= yCbCrPixelWhite.y;
-		}
-		
-		// black pixel right side of x
-		pUnPackedLineBuffer [h++]	= yCbCrPixelBlack.cb;
-		pUnPackedLineBuffer [h++]	= yCbCrPixelBlack.y;
-		
-		for (; h < mDstFrameWidth*2; )
-		{
-			pUnPackedLineBuffer [h++]	= yCbCrPixelWhite.cb;
-			pUnPackedLineBuffer [h++]	= yCbCrPixelWhite.y;
-		}
-		
-		ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedLineBuffer, (uint32_t*)mpDstBuffer, mDstFrameWidth, mDstPixelFormat);
+		// copy to output buffer
+		ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedTempBuffer, (uint32_t*)mpDstBuffer, mDstFrameWidth, mDstPixelFormat);
 		mpDstBuffer += mDstLinePitch;
 	}
 
+	delete [] pUnPackedWhiteBuffer;
 	delete [] pUnPackedLineBuffer;
+	delete [] pUnPackedPillarBuffer;
+	delete [] pUnPackedTempBuffer;
 	return true;
 }
 
