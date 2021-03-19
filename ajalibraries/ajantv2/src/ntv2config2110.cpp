@@ -45,6 +45,7 @@ void tx_2110Config::init()
     numAudioChannels    = 0;
     firstAudioChannel   = 0;
     audioPktInterval    = PACKET_INTERVAL_1mS;
+    channel             = (NTV2Channel)0;
 }
 
 bool tx_2110Config::operator != ( const tx_2110Config &other )
