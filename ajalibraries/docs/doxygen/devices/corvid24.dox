@@ -7,14 +7,17 @@
 	@subsection		corvid24		Corvid 24
 
 	This page describes the <b>Corvid 24</b> OEM capture/playout board, which features bypass relays on each SDI
-	connector that can operate under software control or hardware control (using the built-in "watchdog" timer).
+	connector that can operate under software control or hardware control (using the built-in “watchdog” timer).
 	Its four SDI connectors can programmatically be configured as inputs or outputs.
 	It’s identified by ::DEVICE_ID_CORVID24.
 
+	@note	This board has been superseded by \ref kona4quad.
+			See the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/eolnotice-corvid24">EOL Announcement</a> for details.
+
 	@image	html	corvid24.png
 
-	The Corvid24 has four bi-directional SDI connectors, plus a reference input. The connector on the far left
-	is for the optional AJA 102953 breakout cable.
+	The Corvid24 has four bi-directional SDI connectors, plus a reference input.
+	The connector on the far left is for the optional AJA \ref aja102953 .
 
 	@par	PCI Interface
 
@@ -95,10 +98,12 @@
 	-	CNTV2Card::GetSDIWatchdogStatus
 	-	CNTV2Card::GetSDIRelayPosition
 
+
 	@par	SDK Support
 
 	-	At least since 2012 in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/25">SDK v4.4 (Windows)</a>
 		and <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/51">SDK v3.6.2 (MacOS)</a>.
+	-	Feature-complete in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/ntv2-sdk-160">SDK v16.0</a>.
 
 	@par		Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/131/25>

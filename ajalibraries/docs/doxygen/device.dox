@@ -4,7 +4,6 @@
 	@section	ntv2hwcorvid	Corvid OEM Boards
 
 	-	\ref corvid22
-	-	\ref corvid24
 	-	\ref corvid44
 	-	\ref corvid4412g
 	-	\ref corvid88
@@ -13,11 +12,9 @@
 	@section	ntv2hwio		Io Thunderbolt and PCMCIA Devices
 
 	-	\ref io4kplus
-	-	\ref ioexpress
 	-	\ref ioip
-	-	\ref ioxt
+	-	\ref iox3
 	-	\ref ttappro
-	-	\ref ttap
 
 	@section	ntv2hwkona		Kona Boards
 
@@ -32,9 +29,13 @@
 	@section	ntv2hwlegacy	Legacy Devices
 
 	-	\ref corvid1corvid3g
+	-	\ref corvid24
 	-	\ref corvidhbr
 	-	\ref io4kquad and \ref io4kufc
+	-	\ref ioexpress
+	-	\ref ioxt
 	-	\ref kona3gquad and \ref kona3gufc
+	-	\ref ttap
 
 	@section	ntv2hwaccessories	Breakout Boxes and Cables
 

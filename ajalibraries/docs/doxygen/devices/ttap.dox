@@ -9,6 +9,9 @@
 	This page describes the T-Tap video playout device.
 	It’s identified by ::DEVICE_ID_TTAP.
 
+	@note	This device has been superseded by \ref ttappro.
+			See the <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/eol-notice-ttap">EOL Announcement</a> for details.
+
 	@image	html	ttap.png
 
 	The T-Tap has one Thunderbolt-I input on the left side.
@@ -45,6 +48,7 @@
 
 	-	Introduced in 2012 in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/51">SDK v3.6.2 (MacOS)</a>
 		and <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/72">SDK v11.1 (Windows)</a>.
+	-	Feature-complete in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/ntv2-sdk-160">SDK v16.0</a>.
 
 	@par	Firmware
 	<https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/144/25>
