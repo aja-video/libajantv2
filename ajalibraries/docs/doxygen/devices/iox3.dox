@@ -91,15 +91,14 @@
 
 	If the IoX3 still fails to be recognized, it may be that its main firmware image is corrupt.
 	To force the IoX3 to load its fail-safe firmware:
-	-#	With the IoX3’s power cord connected, and a known-good Thunderbolt cable connected from IoX3 to host,
-		and with the host powered-on and awake…
-	-#	Press the fail-safe button in the IoX3 by inserting an unbent paperclip lead into the hole next to
-		the power button (see photo below).
-	-#	While the fail-safe button is pressed, press the IoX3’s power button. When it lights up, release
-		both the power button and fail-safe button.
+	-#	Be sure the IoX3’s power cord is connected to a known-good power source.
+	-#	Have a known-good Thunderbolt cable connected on only one end (either to the IoX3, or the host).
+	-#	Press the fail-safe button in the IoX3 by inserting an unbent paperclip lead into the hole shown in the photo (below).
+	-#	While the fail-safe button is pressed, connect the free end of the Thunderbolt cable to the IoX3 or host, as appropriate.
+	-#	When the IoX3 lights up, release the fail-safe button.
 	@image	html	iox3safemode.jpg
 
-	If the IoX3 is recognized by the host OS and AJA software, you may try re-flashing the firmware.
+	If the IoX3 is recognized by the host OS and AJA software, try re-flashing the firmware.
 	If it’s still not recognized, you should contact <a href="https://www.aja.com/support/contact">AJA Support</a>.
 
 	@par	Environment
