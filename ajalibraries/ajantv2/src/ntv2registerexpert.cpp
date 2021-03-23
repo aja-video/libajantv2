@@ -3462,7 +3462,7 @@ private:
 			(void) inDeviceID;
 			const uint32_t	regNum (inRegNum & 0x1F);
 			const uint32_t	lo (inRegValue & 0x0000FFFF);
-			const uint32_t	hi (inRegValue & 0xFFFF0000);
+			const uint32_t	hi ((inRegValue >> 16) & 0xFFFF);
 			ostringstream	oss;
 			switch (regNum)
 			{
