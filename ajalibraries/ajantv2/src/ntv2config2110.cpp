@@ -1892,17 +1892,17 @@ bool CNTV2Config2110::GenVideoStreamSDP(stringstream &sdp, const bool enableSfp1
 	bool isDash7 = enableSfp1 && enableSfp2;
 	if (isDash7)
 	{
-		sdp << "a=group:DUP 1 2" << endl << endl;
+		sdp << "a=group:DUP 1 2" << endl;
 	}
 	if (enableSfp1)
 	{
 		GenVideoStreamSDPInfo(sdp, SFP_1, stream, gmInfo);
-		sdp << "a=mid:" << (isDash7?"1":"VID") << endl << endl;
+		sdp << "a=mid:" << (isDash7?"1":"VID") << endl;
 	}
 	if (enableSfp2)
 	{
 		GenVideoStreamSDPInfo(sdp, SFP_2, stream, gmInfo);
-		sdp << "a=mid:" << (isDash7?"2":"VID") << endl << endl;
+		sdp << "a=mid:" << (isDash7?"2":"VID") << endl;
 	}
 	return true;
 }
@@ -2014,7 +2014,7 @@ bool CNTV2Config2110::GenVideoStreamMultiSDPInfo(stringstream & sdp, char* gmInf
 	// Read virtual to see if we are to quad swap the outputs
 	mDevice.ReadRegister(kVRegSwizzle4kOutput, quadSwapOut);
 
-	sdp << "a=group:MULTI-2SI 1 2 3 4 " << endl << endl;
+	sdp << "a=group:MULTI-2SI 1 2 3 4 " << endl;
 
 	// generate SDP's for all 4 video streams
 	for (int i=0; i<4; i++)
@@ -2130,7 +2130,7 @@ bool CNTV2Config2110::GenVideoStreamMultiSDPInfo(stringstream & sdp, char* gmInf
 		// PTP
 		sdp << "a=ts-refclk:ptp=IEEE1588-2008:" << gmInfo << endl;
 		sdp << "a=mediaclk:direct=0" << endl;
-		sdp << "a=mid:" << i+1 << endl <<  endl;
+		sdp << "a=mid:" << i+1 << endl;
 	}
 
 	return true;
@@ -2143,17 +2143,17 @@ bool CNTV2Config2110::GenAudioStreamSDP(stringstream &sdp, const bool enableSfp1
 	bool isDash7 = enableSfp1 && enableSfp2;
 	if (isDash7)
 	{
-		sdp << "a=group:DUP 1 2" << endl << endl;
+		sdp << "a=group:DUP 1 2" << endl;
 	}
 	if (enableSfp1)
 	{
 		GenAudioStreamSDPInfo(sdp, SFP_1, stream, gmInfo);
-		sdp << "a=mid:" << (isDash7?"1":"VID") << endl << endl;
+		sdp << "a=mid:" << (isDash7?"1":"VID") << endl;
 	}
 	if (enableSfp2)
 	{
 		GenAudioStreamSDPInfo(sdp, SFP_2, stream, gmInfo);
-		sdp << "a=mid:" << (isDash7?"2":"VID") << endl << endl;
+		sdp << "a=mid:" << (isDash7?"2":"VID") << endl;
 	}
 	return true;
 }
@@ -2254,17 +2254,17 @@ bool CNTV2Config2110::GenAncStreamSDP(stringstream &sdp, const bool enableSfp1,
 	bool isDash7 = enableSfp1 && enableSfp2;
 	if (isDash7)
 	{
-		sdp << "a=group:DUP 1 2" << endl << endl;
+		sdp << "a=group:DUP 1 2" << endl;
 	}
 	if (enableSfp1)
 	{
 		GenAncStreamSDPInfo(sdp, SFP_1, stream, gmInfo);
-		sdp << "a=mid:" << (isDash7?"1":"VID") << endl << endl;
+		sdp << "a=mid:" << (isDash7?"1":"VID") << endl;
 	}
 	if (enableSfp2)
 	{
 		GenAncStreamSDPInfo(sdp, SFP_2, stream, gmInfo);
-		sdp << "a=mid:" << (isDash7?"2":"VID") << endl << endl;
+		sdp << "a=mid:" << (isDash7?"2":"VID") << endl;
 	}
 	return true;
 }
