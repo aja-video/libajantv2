@@ -95,16 +95,24 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	isProgressiveTransport	= isProgressivePicture;							//	Must be a progressive format to start
 
 	if (NTV2_IS_720P_VIDEO_FORMAT(outputFormat) && !is3G)
+	{
 		isProgressiveTransport = false;
-
-	if (NTV2_IS_PSF_VIDEO_FORMAT (outputFormat))
+	}
+	
+	if (NTV2_IS_PSF_VIDEO_FORMAT(outputFormat))
+	{
 		isProgressiveTransport = false;										//	PSF is never a progressive transport
-
-	if ( ! isRGB && isDualLink &&  ! isTSI)
+	}
+	
+	if (!isRGB && isDualLink &&  !isTSI)
+	{
 		isProgressiveTransport = false;										//	Dual link YCbCr is not a progressive transport
-
-	if (isTSI && NTV2_IS_4K_HFR_VIDEO_FORMAT (outputFormat) && isLevelB)
+	}
+	
+	if (isTSI && NTV2_IS_4K_HFR_VIDEO_FORMAT(outputFormat) && isLevelB)
+	{
 		isProgressiveTransport = false;										//	Only TSI Quad Link 3.0 HFR Level B is not progressive
+	}
 
 	//
 	//	Byte 1
@@ -173,7 +181,9 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 		else
 		{
 			if (isDualLink)
-				byte1 = isStereo ? (uint8_t) VPIDStandard_720_1080_Stereo : (uint8_t) VPIDStandard_1080_DualLink;		//	0xB1 : 0x87
+			{
+				byte1 = isStereo ? (uint8_t)VPIDStandard_720_1080_Stereo : (uint8_t)VPIDStandard_1080_DualLink;		//	0xB1 : 0x87
+			}
 			else
 				byte1 = isStereo ? (uint8_t) VPIDStandard_720_1080_Stereo : (uint8_t) VPIDStandard_1080;		//	0xB1 : 0x85
 		}
@@ -196,7 +206,9 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 		if (isRGB)
 			byte1 = isLevelB ? (uint8_t) VPIDStandard_1080_Dual_3Gb : (uint8_t) VPIDStandard_1080_Dual_3Ga;		//	0x95 : 0x94
 		else if (isDualLink)
+		{
 			byte1 = isLevelB ? (uint8_t)VPIDStandard_1080_DualLink_3Gb : (uint8_t)VPIDStandard_1080_DualLink;		//	0x8A : 0x87
+		}
 		else
 			byte1 = isLevelB ? (uint8_t) VPIDStandard_1080_DualLink_3Gb : (uint8_t) VPIDStandard_1080_3Ga;			//	0x8A : 0x89
 		break;
@@ -243,7 +255,9 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 					byte1 = (uint8_t) VPIDStandard_1080_3Ga;   // 89
 			}
 			else
-				byte1 = isDualLink? (uint8_t) VPIDStandard_1080_DualLink : (uint8_t) VPIDStandard_1080;  //  0x87 : 0x85
+			{
+				byte1 = isDualLink ? (uint8_t)VPIDStandard_1080_DualLink : (uint8_t)VPIDStandard_1080;  //  0x87 : 0x85
+			}
 		}
 		break;
     case NTV2_FORMAT_3840x2160psf_2398:
