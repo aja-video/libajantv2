@@ -498,14 +498,11 @@ AJAThreadImpl::SetRealTime(AJAThreadRealTimePolicy policy, int priority)
         int rc = pthread_setschedparam(mThread, pval, &newParam);
         if (rc != 0)
         {
-            printf("AJAThread(%p)::SetRealTime: error %d setting sched param: policy = %d, priority = %d\n", mpThreadContext, rc, pval, newParam.sched_priority);
             AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetRealTime: error %d setting sched param: policy = %d, priority = %d\n", mpThreadContext, rc, pval, newParam.sched_priority);
             return AJA_STATUS_FAIL;
         }
-        printf("AJAThread(%p)::SetRealTime: SUCCESS%d\n", mpThreadContext);
         return AJA_STATUS_SUCCESS;
     }
-    printf("AJAThread(%p)::SetRealTime: Failed to set realtime thread is not running\n", mpThreadContext);
     AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetRealTime: Failed to set realtime thread is not running\n", mpThreadContext);
     return AJA_STATUS_FAIL;
 }
