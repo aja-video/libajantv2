@@ -166,7 +166,7 @@ bool CNTV2EnhancedCSC::SendToHardware (CNTV2Card & inDevice, const NTV2Channel i
 	cscRegs [0] = (cscRegs[0] & ~kK2RegMaskEnhancedCSCChromaFilterSelect) | ULWord(mChromaFilterSelect << kK2RegShiftEnhancedCSCChromaFilterSelect);
 	cscRegs [0] = (cscRegs[0] & ~kK2RegMaskEnhancedCSCChromaEdgeControl)  | ULWord(mChromaEdgeControl  << kK2RegShiftEnhancedCSCChromaEdgeControl);
 
-	cscRegs [1] = (ULWord(Matrix().GetOffset(NTV2CSCOffsetIndex_Pre1)) << 16) | ULWord(Matrix().GetOffset(NTV2CSCOffsetIndex_Pre0));
+    cscRegs [1] = (ULWord(Matrix().GetOffset(NTV2CSCOffsetIndex_Pre1)) << 16) | (ULWord(Matrix().GetOffset(NTV2CSCOffsetIndex_Pre0)&0xFFFF));
 
 	cscRegs [2] = ULWord(Matrix().GetOffset(NTV2CSCOffsetIndex_Pre2));
 
@@ -179,7 +179,7 @@ bool CNTV2EnhancedCSC::SendToHardware (CNTV2Card & inDevice, const NTV2Channel i
 	cscRegs [9] = ConvertCoeffDoubleToULWord (Matrix().GetCoefficient (NTV2CSCCoeffIndex_C0));
 	cscRegs [10] = ConvertCoeffDoubleToULWord (Matrix().GetCoefficient (NTV2CSCCoeffIndex_C1));
 	cscRegs [11] = ConvertCoeffDoubleToULWord (Matrix().GetCoefficient (NTV2CSCCoeffIndex_C2));
-	cscRegs [12] = (ULWord(Matrix().GetOffset (NTV2CSCOffsetIndex_PostB)) << 16) | ULWord(Matrix().GetOffset (NTV2CSCOffsetIndex_PostA));
+    cscRegs [12] = (ULWord(Matrix().GetOffset (NTV2CSCOffsetIndex_PostB)) << 16) | (ULWord(Matrix().GetOffset (NTV2CSCOffsetIndex_PostA)&0xFFFF));
 	cscRegs [13] = ULWord(Matrix().GetOffset (NTV2CSCOffsetIndex_PostC));
 	cscRegs [14] = ULWord((mKeyOutputRange  & kK2RegMaskEnhancedCSCKeyOutputRange)  << kK2RegShiftEnhancedCSCKeyOutputRange) |
 				   ULWord((mKeySource       & kK2RegMaskEnhancedCSCKeySource)       << kK2RegShiftEnhancedCSCKeySource);
