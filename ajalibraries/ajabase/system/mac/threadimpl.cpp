@@ -404,6 +404,13 @@ AJAThreadImpl::GetPriority(AJAThreadPriority* pThreadPriority)
 
 
 AJAStatus
+AJAThreadImpl::SetRealTime(AJAThreadRealTimePolicy policy, int priority)
+{
+    return AJA_STATUS_FAIL;
+}
+
+
+AJAStatus
 AJAThreadImpl::Attach(AJAThreadFunction* pThreadFunction, void* pUserContext)
 {
 	// remember the users thread function

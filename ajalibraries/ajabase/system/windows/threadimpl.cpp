@@ -162,7 +162,6 @@ AJAThreadImpl::IsCurrentThread()
 }
 
 
-
 AJAStatus
 AJAThreadImpl::SetPriority(AJAThreadPriority threadPriority)
 {
@@ -214,6 +213,13 @@ AJAThreadImpl::GetPriority(AJAThreadPriority* pTheadPPriority)
 	*pTheadPPriority = mPriority;
 
 	return AJA_STATUS_SUCCESS;
+}
+
+
+AJAStatus
+AJAThreadImpl::SetRealTime(AJAThreadRealTimePolicy policy, int priority)
+{
+    return AJA_STATUS_FAIL;
 }
 
 

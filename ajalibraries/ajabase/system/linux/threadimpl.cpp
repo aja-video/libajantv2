@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include "ajabase/system/linux/threadimpl.h"
 #include "ajabase/common/timer.h"
+#include <string.h>
 
 static const size_t STACK_SIZE = 1024 * 1024;
 
@@ -421,14 +422,13 @@ AJAThreadImpl::SetPriority(AJAThreadPriority threadPriority)
 			break;
 		case AJA_ThreadPriority_TimeCritical:
 			bRTPriority = true;				// use sched_setscheduler()
-			newPriority = 20;				// 1 - 99 (higher values = higher priority)
+            newPriority = 90;				// 1 - 99 (higher values = higher priority)
 			break;
 		case AJA_ThreadPriority_Unknown:
 		default:
 			AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetPriority: bad thread priority %d", mpThreadContext, threadPriority);
 			return AJA_STATUS_RANGE;
 	}
-
 
 	// first, set (or unset) the RT priority
 	struct sched_param newParam;
@@ -437,8 +437,8 @@ AJAThreadImpl::SetPriority(AJAThreadPriority threadPriority)
 	int rc = pthread_setschedparam(mThread, newPolicy, &newParam);
 	if (rc != 0)
 	{
-		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetPriority: error %d setting sched param: policy = %d, priority = %d\n", mpThreadContext, rc, newPolicy, newParam.sched_priority);
-		return AJA_STATUS_FAIL;
+        AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetPriority: error %d setting sched param: policy = %d, priority = %d\n", mpThreadContext, rc, newPolicy, newParam.sched_priority);
+        return AJA_STATUS_FAIL;
 	}
 
 	// now set the standard ("nice") priority
@@ -446,8 +446,8 @@ AJAThreadImpl::SetPriority(AJAThreadPriority threadPriority)
 	rc = setpriority(PRIO_PROCESS, mTid, newNice);
 	if (errno != 0)
 	{
-		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetPriority: error %d setting nice level: %d\n", mpThreadContext, rc, newNice);
-		return AJA_STATUS_FAIL;
+        AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetPriority: error %d setting nice level: %d\n", mpThreadContext, rc, newNice);
+        return AJA_STATUS_FAIL;
 	}
 
 	return AJA_STATUS_SUCCESS;
@@ -465,6 +465,49 @@ AJAThreadImpl::GetPriority(AJAThreadPriority* pThreadPriority)
 	*pThreadPriority = mPriority;
 
 	return AJA_STATUS_SUCCESS;
+}
+
+
+AJAStatus
+AJAThreadImpl::SetRealTime(AJAThreadRealTimePolicy policy, int priority)
+{
+    int pval = 0;
+    switch(policy)
+    {
+        case AJA_ThreadRealTimePolicyFIFO:
+            pval = SCHED_FIFO;
+            break;
+        case AJA_ThreadRealTimePolicyRoundRobin:
+            pval = SCHED_RR;
+            break;
+        default:
+            AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetRealTime: bad thread policy %d", mpThreadContext, policy);
+            return AJA_STATUS_RANGE;
+    }
+
+    for(int i = 0; i < 30; i++)
+    {
+        if(!Active())
+        {
+            usleep(1000);
+            continue;
+        }
+        struct sched_param newParam;
+        memset(&newParam, 0, sizeof(newParam));
+        newParam.sched_priority = priority;
+        int rc = pthread_setschedparam(mThread, pval, &newParam);
+        if (rc != 0)
+        {
+            printf("AJAThread(%p)::SetRealTime: error %d setting sched param: policy = %d, priority = %d\n", mpThreadContext, rc, pval, newParam.sched_priority);
+            AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetRealTime: error %d setting sched param: policy = %d, priority = %d\n", mpThreadContext, rc, pval, newParam.sched_priority);
+            return AJA_STATUS_FAIL;
+        }
+        printf("AJAThread(%p)::SetRealTime: SUCCESS%d\n", mpThreadContext);
+        return AJA_STATUS_SUCCESS;
+    }
+    printf("AJAThread(%p)::SetRealTime: Failed to set realtime thread is not running\n", mpThreadContext);
+    AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetRealTime: Failed to set realtime thread is not running\n", mpThreadContext);
+    return AJA_STATUS_FAIL;
 }
 
 
