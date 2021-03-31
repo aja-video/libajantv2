@@ -227,8 +227,21 @@ bool CNTV2LinuxDriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterr
 	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 	if (     eInterruptType != eVerticalInterrupt
 		  && eInterruptType != eInput1
-		  && eInterruptType != eInput2
-		  && eInterruptType != eAuxVerticalInterrupt
+          && eInterruptType != eInput2
+          && eInterruptType != eInput3
+          && eInterruptType != eInput4
+          && eInterruptType != eInput5
+          && eInterruptType != eInput6
+          && eInterruptType != eInput7
+          && eInterruptType != eInput8
+          && eInterruptType != eOutput2
+          && eInterruptType != eOutput3
+          && eInterruptType != eOutput4
+          && eInterruptType != eOutput5
+          && eInterruptType != eOutput6
+          && eInterruptType != eOutput7
+          && eInterruptType != eOutput8
+          && eInterruptType != eAuxVerticalInterrupt
 		  )
 	{
 		LDIFAIL("Unsupported interrupt count request. Only vertical input interrupts counted.");
