@@ -555,7 +555,7 @@ void CNTV2SupportLogger::FetchRegisterLog (ostringstream & oss) const
 			<< "Register Name: " << CNTV2RegisterExpert::GetDisplayName(regNum) << endl
 			<< "Register Number: " << regNum << endl
 			<< "Register Value: " << value << " : " << xHEX0N(value,8) << endl
-			<< "Register Classes: " << CNTV2RegisterExpert::GetRegisterClasses(regNum) << endl
+		//	<< "Register Classes: " << CNTV2RegisterExpert::GetRegisterClasses(regNum) << endl
 			<< CNTV2RegisterExpert::GetDisplayValue	(regNum, value, deviceID) << endl;
 	}
 
