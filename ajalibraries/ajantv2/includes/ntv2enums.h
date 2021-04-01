@@ -2452,6 +2452,7 @@ typedef enum
 	NTV2_Quadrant4Select,
 	NTV2_Quarter4k,
 	NTV2_4kHalfFrameRate,
+	NTV2_4xHdTo4kMuxSelect,
 	NTV2_AutoOutputSelect,
 	NTV2_MAX_NUM_OutputVideoSelectEnums
 } NTV2OutputVideoSelect;

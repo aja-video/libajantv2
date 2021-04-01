@@ -1070,7 +1070,7 @@ private:
 		DefineRegName	(kVRegForceApplicationPID,				"kVRegForceApplicationPID");
 		DefineRegName	(kVRegForceApplicationCode,				"kVRegForceApplicationCode");
 		DefineRegName	(kVRegIpConfigStreamRefresh,			"kVRegIpConfigStreamRefresh");
-		DefineRegName	(kVRegSDIInput1Raster,					"kVRegSDIInput1Raster");
+		DefineRegName	(kVRegSDIInModel,						"kVRegSDIInModel");
 		DefineRegName	(kVRegInputChangedCount,				"kVRegInputChangedCount");
 		DefineRegName	(kVReg8kOutputTransportSelection,		"kVReg8kOutputTransportSelection");
 		DefineRegName	(kVRegAnalogIoSelect,					"kVRegAnalogIoSelect");

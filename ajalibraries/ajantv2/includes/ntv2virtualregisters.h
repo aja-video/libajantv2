@@ -182,7 +182,7 @@ typedef enum
 	kVRegForceApplicationPID				= VIRTUALREG_START+187,
 	kVRegForceApplicationCode				= VIRTUALREG_START+188,
 	kVRegIpConfigStreamRefresh				= VIRTUALREG_START+189,
-	kVRegSDIInput1Raster					= VIRTUALREG_START+190,
+	kVRegSDIInModel							= VIRTUALREG_START+190,
 	kVRegInputChangedCount					= VIRTUALREG_START+191,
 	kVReg8kOutputTransportSelection			= VIRTUALREG_START+192,
 	kVRegAnalogIoSelect						= VIRTUALREG_START+193,
