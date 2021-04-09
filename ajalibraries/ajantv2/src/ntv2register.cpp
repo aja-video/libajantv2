@@ -350,6 +350,14 @@ bool CNTV2Card::SetVideoFormat (const NTV2VideoFormat value, const bool inIsReta
 		// All other cards
 		WriteOutputTimingControl(K2_NOMINAL_H | (K2_NOMINAL_V<<16), channel);
 	}
+
+    if (::NTV2DeviceCanDoMultiFormat(GetDeviceID()) && !IsMultiFormatActive())
+    {
+        // Copy channel 1 register write mode to all channels in single format mode
+        NTV2RegisterWriteMode writeMode;
+        GetRegisterWriteMode(writeMode);
+        SetRegisterWriteMode(writeMode);
+    }
 	
 	return true; 
 }
@@ -2926,10 +2934,23 @@ bool CNTV2Card::SupportsP2PTarget (void)
 
 bool CNTV2Card::SetRegisterWriteMode (const NTV2RegisterWriteMode value, const NTV2Channel inFrameStore)
 {
+    bool ret;
+
 	if (IS_CHANNEL_INVALID(inFrameStore))
 		return false;
-	return WriteRegister (gChannelToGlobalControlRegNum[IsMultiFormatActive() ? inFrameStore : NTV2_CHANNEL1],
-							value, kRegMaskRegClocking, kRegShiftRegClocking);
+    if (IsMultiFormatActive())
+        return WriteRegister (gChannelToGlobalControlRegNum[inFrameStore], value, kRegMaskRegClocking, kRegShiftRegClocking);
+    if (::NTV2DeviceCanDoMultiFormat(GetDeviceID()))
+    {
+        for (NTV2Channel chan(NTV2_CHANNEL1);  chan < NTV2Channel(::NTV2DeviceGetNumFrameStores(GetDeviceID()));  chan = NTV2Channel(chan+1))
+        {
+            ret = WriteRegister (gChannelToGlobalControlRegNum[chan], value, kRegMaskRegClocking, kRegShiftRegClocking);
+            if (!ret)
+                return false;
+        }
+        return true;
+    }
+    return WriteRegister (gChannelToGlobalControlRegNum[NTV2_CHANNEL1], value, kRegMaskRegClocking, kRegShiftRegClocking);
 }
 
 
