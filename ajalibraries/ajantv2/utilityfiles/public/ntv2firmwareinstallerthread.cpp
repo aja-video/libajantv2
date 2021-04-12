@@ -516,11 +516,13 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate (const NTV2DeviceID inDeviceID, 
 	case DEVICE_ID_KONA5_3DLUT:
 	case DEVICE_ID_KONA5_8KMK:
 	case DEVICE_ID_KONA5_8K:
+	case DEVICE_ID_KONA5_OE1:
         return (designName == GetPrimaryDesignName(DEVICE_ID_KONA5) ||
 				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_2X4K) ||
 				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_3DLUT) ||
                 designName == GetPrimaryDesignName(DEVICE_ID_KONA5_8KMK) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_8K));
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_8K) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE1));
 	case DEVICE_ID_CORVID44_8KMK:
 	case DEVICE_ID_CORVID44_8K:
 	case DEVICE_ID_CORVID44_2X4K:
@@ -623,6 +625,7 @@ string CNTV2FirmwareInstallerThread::GetPrimaryDesignName (const NTV2DeviceID in
 		case DEVICE_ID_KONA5_2X4K:					return "kona_5_2";
 		case DEVICE_ID_KONA5_3DLUT:					return "kona_5_3d_lut";
 		case DEVICE_ID_KONA5_8KMK:					return "kona5_8k_mk";
+		case DEVICE_ID_KONA5_OE1:					return "kona5_oe_cfg1";
 		case DEVICE_ID_CORVID44_8KMK:				return "c44_12g_8k_mk";
 		case DEVICE_ID_KONA5_8K:					return "kona5_8k";
 		case DEVICE_ID_CORVID44_8K:					return "c44_12g_8k";

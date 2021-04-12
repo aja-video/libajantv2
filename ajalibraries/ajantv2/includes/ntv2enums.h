@@ -91,6 +91,7 @@ typedef enum
 	DEVICE_ID_KONA5_8K					= 0x10798402,	///< @brief	See \ref kona5
 	DEVICE_ID_KONA5_2X4K				= 0x10798403,	///< @brief	See \ref kona5
 	DEVICE_ID_KONA5_3DLUT				= 0x10798404,	///< @brief	See \ref kona5
+	DEVICE_ID_KONA5_OE1					= 0x10798405,	///< @brief	See \ref kona5
 	DEVICE_ID_KONAHDMI					= 0x10767400,	///< @brief	See \ref konahdmi
 	DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K	= 0x10646702,	///< @brief	See \ref konaip
 	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,	///< @brief	See \ref konaip
@@ -2713,8 +2714,8 @@ typedef enum NTV2OutputCrosspointID
 	,NTV2_XptMixer2VidYUV				= 0x20
 	,NTV2_XptMixer2KeyYUV				= 0x21
 	,NTV2_XptMixer2VidRGB				= NTV2_XptMixer2VidYUV | 0x80
-	,NTV2_XptDCIMixerVidYUV				= 0x22
-	,NTV2_XptDCIMixerVidRGB				= NTV2_XptDCIMixerVidYUV | 0x80
+	,NTV2_XptOEOutYUV					= 0x22
+	,NTV2_XptOEOutRGB					= NTV2_XptOEOutYUV | 0x80
 	,NTV2_XptStereoCompressorOut		= 0x23
 	,NTV2_XptFrameBuffer3YUV			= 0x24
 	,NTV2_XptFrameBuffer3RGB			= NTV2_XptFrameBuffer3YUV | 0x80
@@ -2855,6 +2856,8 @@ typedef enum NTV2OutputCrosspointID
 	,NTV2_LAST_OUTPUT_CROSSPOINT		= 0xFF
 	,NTV2_OUTPUT_CROSSPOINT_INVALID		= 0xFF
 	#if !defined(NTV2_DEPRECATE_16_0)
+		,NTV2_XptDCIMixerVidYUV			= NTV2_XptOEOutYUV
+		,NTV2_XptDCIMixerVidRGB			= NTV2_XptOEOutRGB
 		,NTV2_XptLUT1RGB				= NTV2_XptLUT1Out					///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptLUT1Out
 		,NTV2_XptLUT2RGB				= NTV2_XptLUT2Out					///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptLUT2Out
 		,NTV2_XptWaterMarkerYUV			= NTV2_XptMultiLinkOut1DS1			///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptMultiLinkOut1DS1
@@ -3053,7 +3056,7 @@ typedef enum NTV2InputCrosspointID
 	NTV2_XptWaterMarker1Input		= 0x7C,	//	deprecate?
 	NTV2_XptWaterMarker2Input		= 0x7D,	//	deprecate?
 	NTV2_XptUpdateRegister			= 0x7E,	//	deprecate?
-	NTV2_XptConversionMod2Input		= 0x7F,	//	deprecate?
+	NTV2_XptOEInput					= 0x7F,
 	NTV2_XptCompressionModInput		= 0x80,	//	deprecate?
 	NTV2_XptConversionModInput		= 0x81,	//	deprecate?
 	NTV2_XptCSC1KeyFromInput2		= 0x82,	//	deprecate?
@@ -3062,6 +3065,7 @@ typedef enum NTV2InputCrosspointID
 	NTV2_LAST_INPUT_CROSSPOINT		= 0x84,
 	NTV2_INPUT_CROSSPOINT_INVALID	= 0xFFFFFFFF
 	#if !defined(NTV2_DEPRECATE_16_0)
+		,NTV2_XptConversionMod2Input = NTV2_XptOEInput				///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptOEInput
 		,NTV2_XptSDIOut1Standard	= NTV2_XptMultiLinkOut1Input	///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptMultiLinkOut1Input
 		,NTV2_XptSDIOut2Standard	= NTV2_XptMultiLinkOut1InputDS2	///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptMultiLinkOut1InputDS2
 		,NTV2_XptSDIOut3Standard	= NTV2_XptMultiLinkOut2Input	///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptMultiLinkOut2Input
@@ -3206,6 +3210,7 @@ typedef enum
 	,NTV2_WgtMultiLinkOut1
 	,NTV2_Wgt3DLUT1
 	,NTV2_WgtMultiLinkOut2
+	,NTV2_WgtOE1
 	,NTV2_WgtModuleTypeCount
 	,NTV2_WgtUndefined = NTV2_WgtModuleTypeCount
 	,NTV2_WIDGET_INVALID = NTV2_WgtModuleTypeCount
@@ -3566,6 +3571,7 @@ typedef enum
 	NTV2_BITFILE_KONA5_3DLUT_MAIN	= 64,
 	NTV2_BITFILE_CORVID44_PLNR_MAIN	= 65,
 	NTV2_BITFILE_IOX3_MAIN			= 66,
+	NTV2_BITFILE_KONA5_OE1_MAIN		= 67,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
 

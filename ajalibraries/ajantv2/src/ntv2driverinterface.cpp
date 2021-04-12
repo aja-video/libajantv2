@@ -772,6 +772,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 		case DEVICE_ID_KONA5_3DLUT:					bitFileInfo.bitFileType = NTV2_BITFILE_KONA5_3DLUT_MAIN;			break;
 		case DEVICE_ID_KONA5_8K:                    bitFileInfo.bitFileType = NTV2_BITFILE_KONA5_8K_MAIN;				break;
 		case DEVICE_ID_KONA5_8KMK:                  bitFileInfo.bitFileType = NTV2_BITFILE_KONA5_8KMK_MAIN;				break;
+		case DEVICE_ID_KONA5_OE1:		            bitFileInfo.bitFileType = NTV2_BITFILE_KONA5_OE1_MAIN;				break;
 		case DEVICE_ID_KONAHDMI:					bitFileInfo.bitFileType = NTV2_BITFILE_KONAHDMI;					break;
 		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_1RX_1TX_1SFP_J2K;		break;
 		case DEVICE_ID_KONAIP_1RX_1TX_2110:			bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_1RX_1TX_2110;			break;
