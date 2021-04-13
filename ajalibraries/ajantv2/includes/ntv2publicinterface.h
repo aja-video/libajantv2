@@ -631,7 +631,6 @@ typedef NTV2RegisterNumber	RegisterNum;
 #define kRegCh1ColorCorrectioncontrol	kRegCh1ColorCorrectionControl	//	CamelCase fixed in SDK 16.0
 #define	kRegCh2ColorCorrectioncontrol	kRegCh2ColorCorrectionControl	//	CamelCase fixed in SDK 16.0
 
-
 //	Discontinuous block of registers used for monitoring the incoming SDI signals
 typedef enum NTV2RXSDIStatusRegister
 {
@@ -934,6 +933,12 @@ typedef enum
 	kRegEnhancedCSC8KeyGain			// 5584
 
 } NTV2EnhancedCSCRegisters;
+
+typedef enum _NTV2OERegisters
+{
+	kRegOEData1					= 0x1700,
+	kRegOEData256				= 0x173F
+} NTV2OERegisters;
 
 typedef enum
 {
