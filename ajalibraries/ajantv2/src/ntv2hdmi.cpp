@@ -37,7 +37,7 @@ bool CNTV2Card::GetHDMIInputStatusRegNum (ULWord & outRegNum, const NTV2Channel 
         outRegNum = in12BitDetection ?  kRegHDMIInputControl : kRegHDMIInputStatus;
 		return true;
 	}
-	outRegNum = gHDMIChannelToInputStatusRegNum[inChannel];
+	outRegNum = in12BitDetection ? gHDMIChannelToControlRegNum[inChannel] : gHDMIChannelToInputStatusRegNum[inChannel];
 	return true;
 }
 bool CNTV2Card::GetHDMIInputStatus (ULWord & outValue, const NTV2Channel inChannel, const bool in12BitDetection)

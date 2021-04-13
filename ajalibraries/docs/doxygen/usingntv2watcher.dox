@@ -17,6 +17,8 @@ This page describes how to use the <b>NTV2 Watcher</b> tool to interactively mon
 		-	\ref inspectorlut — Views/edits LUTs
 		-	\ref inspectorregs — Views/edits registers
 		-	\ref inspectorroute — Views/edits device widget routing
+	-	Global Settings
+		-	\ref watcherprefs — Sets global preferences
 
 <b>Tool Windows:</b>
 	-	\ref fillbufferdlog — for changing the contents of frame buffer memory
@@ -400,6 +402,8 @@ This inspector repeatedly monitors the indicated frame buffer for the selected c
 					remaining bytes from the file are read (or until the highest-numbered frame in device SDRAM has been DMA’d).
 
 
+@note Data coloring in the <b>Frame Buffer Inspector</b> can be configured in the <b>Colors</b> tab of the \ref watcherprefs dialog.
+
 
 
 <hr size="50px">
@@ -631,6 +635,8 @@ if only one caption packet is in the monitored buffer.
 		or <b>Packets</b> view) will write the binary contents of the file into the Anc region of the frame buffer.
 	-	Dropping the file into the <b>VANC Anc</b> data area (if visible, in either <b>Raw</b> or <b>Packets</b>
 		view) will write the binary contents of the file into the VANC lines (if VANC mode enabled) of the frame buffer.
+
+@note Data coloring in the <b>Ancillary Data Inspector</b> can be configured in the <b>Colors</b> tab of the \ref watcherprefs dialog.
 
 
 <hr size="50px">
@@ -965,8 +971,7 @@ Standard behaviors:
 		-	<b>Add Preset…</b> — Prompts for a name under which to save the current routing configuration.
 		-	<b>Show All</b> — Reveals all hidden widgets.
 		-	<b>Hide Unconnected</b> — Hides all widgets that aren’t connected to anything else.
-		-	<b>Enable/Disable Animation</b> — Enables or disables animation effects.
-		-	<b>Clean Up</b> — Re-arrange the widget layout. (Not yet implemented.)
+		-	<b>Reset Positions</b> — Reset the layout of all widgets back to their default positions.
 -	<b>Drag & Drop</b>
 	-	For IDEs, text editors and word processors that support dragging/dropping text, the <b>Routing Diagram</b> panel will accept
 		text data containing C++ code that contains CNTV2Card::Connect calls. If the dropped code parses correctly, whatever is
@@ -992,12 +997,14 @@ The Code Panel shows the device’s current routing configuration in textual for
 		-	<b>+</b> Button — Click to define a new preset for the device’s current routing configuration.
 		-	<b>-</b> Button — Click to delete the current routing preset.
 
-
 <b>Routing Registers Panel</b>
 
 The Registers Panel shows the device’s routing registers.
 To edit a register’s value, click in its value, change the value, then press Enter (or click elsewhere).
 If this causes a routing change, the diagram (and code panel) will reflect the change.
+
+
+@note The <b>Routing Inspector</b> has several preference settings in the <b>Cables</b> tab of the \ref watcherprefs dialog.
 
 
 
@@ -1312,6 +1319,45 @@ buffer (aka “clipboard” or “paste buffer”). It can also display the cont
 To close the <b>Scrap Buffer</b> tool window:
 	-	click its close box;
 	-	or un-check the <b>View</b> menu’s <b>Scrap Buffer</b> command.
+
+
+<hr size="50px">
+@subsection	watcherprefs		NTV2Watcher Preferences
+
+The <b>Preferences</b> dialog is opened by choosing the “Preferences…” menu command, which is located…
+-	MacOS:  under the “NTV2Watcher” application menu
+-	Windows and Linux:  under the “Help” menu
+
+Changing any setting stores the new setting, and it takes effect immediately.
+
+
+<b>General Preferences</b>
+@image	html	watcher-prefs-general.png
+
+The controls in this panel set general (global) preferences for the NTV2Watcher application.
+-	<b>Pre-Lock Host Buffers</b> — When checked, pre-locks host DMA buffers (which can improve performance).
+
+
+<b>Color Preferences</b>
+@image	html	watcher-prefs-colors.png
+
+The controls in this panel set the color preferences for several inspectors that display numeric data.
+-	<b>Generic</b> — For generic video data, sets the colors used for “unchanged” and “changed” video data.
+-	<b>Ancillary</b> — For ancillary data, sets the colors used for “unchanged” and “changed” ancillary data.
+-	<b>Audio</b> — For audio data, sets the colors used for “unchanged” and “changed” audio data.
+
+
+<b>Cables Preferences</b>
+@image	html	watcher-prefs-cables.png
+
+The controls in this panel set the preferences for the \ref inspectorroute.
+-	<b>Allow drag & drop to/from disabled sockets</b> — When checked, allows dragging new connection cables to or from disabled sockets.
+-	<b>FrameStore Preview</b> — When hovering the mouse over a FrameStore widget, you can see previews of the image stored in its current frame buffer.
+	-	<b>Off</b> — Disables the Preview feature.
+	-	<b>Adjacent</b> — Put the preview next to the FrameStore widget.
+	-	<b>In bottom-left corner</b> — Put the preview in the bottom-left corner of the Cables view.
+-	<b>Animate signals in cables</b> — When checked, cables that are actively carrying a signal will display with an animation effect.
+
 
 
 <hr size="50px">
