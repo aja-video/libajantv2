@@ -4843,6 +4843,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONA5_2X4K:				return inForRetailDisplay ?	"KONA 5 2x4K"				: "Kona5-2x4K";
 		case DEVICE_ID_KONA5_3DLUT:				return inForRetailDisplay ?	"KONA 5 3DLUT"				: "Kona5-3DLUT";
         case DEVICE_ID_KONA5_8KMK:				return inForRetailDisplay ?	"KONA 5 8KMK"				: "Kona5-8KMK";
+		case DEVICE_ID_KONA5_OE1:				return "Kona5-OE1";
 		case DEVICE_ID_CORVID44_8KMK:			return inForRetailDisplay ?	"Corvid 44 8KMK"			: "Corvid44-8KMK";
 		case DEVICE_ID_CORVID44_PLNR:			return inForRetailDisplay ?	"Corvid 44 PLNR"			: "Corvid44-PLNR";
 		case DEVICE_ID_KONA5_8K:				return inForRetailDisplay ?	"KONA 5 8K"					: "Kona5-8K";
@@ -6965,13 +6966,13 @@ string NTV2InputCrosspointIDToString (const NTV2InputCrosspointID inValue, const
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Water Marker 1", NTV2_XptWaterMarker1Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Water Marker 2", NTV2_XptWaterMarker2Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Update Register", NTV2_XptUpdateRegister);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Conversion Mod 2", NTV2_XptConversionMod2Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Compression Module", NTV2_XptCompressionModInput);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Conversion Module", NTV2_XptConversionModInput);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "CSC 1 Key From In 2", NTV2_XptCSC1KeyFromInput2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FrameSync2", NTV2_XptFrameSync2Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FrameSync1", NTV2_XptFrameSync1Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "3D LUT 1", NTV2_Xpt3DLUT1Input);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "OE", NTV2_XptOEInput);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "???", NTV2_INPUT_CROSSPOINT_INVALID);
 	}
 	return "";
@@ -7047,8 +7048,6 @@ string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID inValue, con
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "IICT RGB", NTV2_XptIICTRGB);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "IICT 2 RGB", NTV2_XptIICT2RGB);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Test Pattern YUV", NTV2_XptTestPatternYUV);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DCI Mixer Vid YUV", NTV2_XptDCIMixerVidYUV);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "DCI Mixer Vid RGB", NTV2_XptDCIMixerVidRGB);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Mixer 2 Vid YUV", NTV2_XptMixer2VidYUV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Mixer 2 Key YUV", NTV2_XptMixer2KeyYUV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Mixer 2 Vid RGB", NTV2_XptMixer2VidRGB);
@@ -7172,6 +7171,8 @@ string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID inValue, con
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Multi-Link Out 2 DS4", NTV2_XptMultiLinkOut2DS4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "3D LUT 1 YUV", NTV2_Xpt3DLUT1YUV);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "3D LUT 1 RGB", NTV2_Xpt3DLUT1RGB);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "OE Out YUV", NTV2_XptOEOutYUV);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "OE Out RGB", NTV2_XptOEOutRGB);
 	#if !defined(NTV2_DEPRECATE_16_0)
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "WaterMarker 1 RGB", NTV2_XptWaterMarkerRGB);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "WaterMarker 2 RGB", NTV2_XptWaterMarker2RGB);
@@ -7303,6 +7304,7 @@ string NTV2WidgetIDToString (const NTV2WidgetID inValue, const bool inCompactDis
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "MultiLinkOut1", NTV2_WgtMultiLinkOut1);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "MultiLinkOut2", NTV2_WgtMultiLinkOut2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "3DLUT1", NTV2_Wgt3DLUT1);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "OE1", NTV2_WgtOE1);
 		case NTV2_WgtModuleTypeCount:				return "???";  //special case
 	}
 	return "";
@@ -8287,6 +8289,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_KONA5_8KMK:					return "kona5_8k_mk_tprom.bit";
 	case DEVICE_ID_KONA5_8K:					return "kona5_8k_tprom.bit";
 	case DEVICE_ID_KONA5_3DLUT:					return "kona5_3d_lut_tprom.bit";
+	case DEVICE_ID_KONA5_OE1:					return "kona5_oe_cfg1.bit";
 	case DEVICE_ID_CORVID44_8KMK:				return "c44_12g_8k_mk_tprom.bit";
 	case DEVICE_ID_CORVID44_8K:					return "c44_12g_8k_tprom.bit";
 	case DEVICE_ID_CORVID44_2X4K:				return "c44_12g_2x4k_tprom.bit";
@@ -8390,6 +8393,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_KONA5,
 														DEVICE_ID_KONA5_2X4K,
 														DEVICE_ID_KONA5_3DLUT,
+														DEVICE_ID_KONA5_OE1,
                                                         DEVICE_ID_KONAHDMI,
 														DEVICE_ID_KONAIP_2022,
 														DEVICE_ID_KONAIP_4CH_2SFP,

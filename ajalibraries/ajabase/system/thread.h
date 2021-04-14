@@ -45,6 +45,14 @@ enum AJAThreadPriority
 	AJA_ThreadPriority_AboveNormal      /**< Priority between normal and high           */
 };
 
+
+enum AJAThreadRealTimePolicy
+{
+    AJA_ThreadRealTimePolicyFIFO,
+    AJA_ThreadRealTimePolicyRoundRobin
+};
+
+
 /**
  *	System independent class for creating and controlling threads.
  *	@ingroup AJAGroupSystem
@@ -125,6 +133,17 @@ public:
 	 *				AJA_STATUS_NULL			PPriority is null
 	 */
 	virtual AJAStatus GetPriority(AJAThreadPriority* pPriority);
+
+    /**
+     *	Set the thread to be realtime.
+     *
+     *	@param[in]	AJAThreadRealTimePolicy	Thread policy
+     *              int                     Realtime  priority
+     *	@return		AJA_STATUS_SUCCESS		Thread priority set
+     *				AJA_STATUS_RANGE		Unknown priority
+     *				AJA_STATUS_FAIL			Priority not set
+     */
+    virtual AJAStatus SetRealTime(AJAThreadRealTimePolicy policy, int priority);
 
 	/**
 	 *	Controlling function for the new thread.

@@ -189,8 +189,8 @@ typedef enum _AJADebugUnit
 	@ingroup	AJAGroupDebug
 **/
 
-// force 1 byte alignment so can work across 32/64 bit apps
-#pragma pack(push,1)
+// using a 16 byte alignment for arm64 atomic operations to work properly
+#pragma pack(push, 16)
 
 typedef struct _AJADebugMessage
 {

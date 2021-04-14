@@ -1155,8 +1155,6 @@ AJAFileIO::TempDirectory(std::wstring& directory)
 AJAStatus
 AJAFileIO::GetWorkingDirectory(std::string& cwd)
 {
-	AJAStatus status = AJA_STATUS_SUCCESS;
-
 	char buf[AJA_MAX_PATH+1] = "";
 
 #if defined(AJA_WINDOWS)
@@ -1165,17 +1163,8 @@ AJAFileIO::GetWorkingDirectory(std::string& cwd)
 	getcwd(buf, AJA_MAX_PATH);
 #endif
 
-	if (buf != NULL)
-	{
-		cwd = std::string(buf);
-	}
-	else
-	{
-		cwd = std::string();
-		status = AJA_STATUS_NULL;
-	}
-
-	return status;
+	cwd = std::string(buf);
+	return AJA_STATUS_SUCCESS;
 }
 
 AJAStatus

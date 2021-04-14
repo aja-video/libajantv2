@@ -147,6 +147,15 @@ AJAThread::GetPriority(AJAThreadPriority* pThreadPriority)
 }
 
 
+AJAStatus
+AJAThread::SetRealTime(AJAThreadRealTimePolicy policy, int priority)
+{
+    if(mpImpl)
+        return mpImpl->SetRealTime(policy, priority);
+    return AJA_STATUS_FAIL;
+}
+
+
 bool 
 AJAThread::Terminate()
 {
