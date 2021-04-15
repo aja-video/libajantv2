@@ -78,6 +78,8 @@ class RoutingExpert
 			InitOutputXpt2String();
 			InitInputXpt2WidgetIDs();
 			InitOutputXpt2WidgetIDs();
+			InitWidgetIDToChannels();
+			InitWidgetIDToWidgetTypes();
 			AJAAtomic::Increment(&gInstanceTally);
 			AJAAtomic::Increment(&gLivingInstances);
 			SRiNOTE(DEC(gLivingInstances) << " extant, " << DEC(gInstanceTally) << " total");
@@ -212,11 +214,82 @@ class RoutingExpert
 			return gKeyInputXpts.find(inInputXpt) != gKeyInputXpts.end();
 		}
 
+		NTV2WidgetType				WidgetIDToType (const NTV2WidgetID inWidgetID)
+		{
+			AJAAutoLock lock(&gLock);
+			NTV2_ASSERT(!gWidget2Types.empty());
+			for (Widget2TypesConstIter iter = gWidget2Types.begin(); iter != gWidget2Types.end(); iter++) {
+				if (iter->first == inWidgetID) {
+					return iter->second;
+				}
+			}
+			return NTV2WidgetType_Invalid;
+		}
+
+		NTV2Channel			WidgetIDToChannel(const NTV2WidgetID inWidgetID)
+		{
+			AJAAutoLock lock(&gLock);
+			NTV2_ASSERT(!gWidget2Channels.empty());
+			for (Widget2ChannelsConstIter iter = gWidget2Channels.begin(); iter != gWidget2Channels.end(); iter++) {
+				if (iter->first == inWidgetID)
+					return iter->second;
+			}
+			return NTV2_CHANNEL_INVALID;
+		}
+
+		NTV2WidgetID		WidgetIDFromTypeAndChannel(const NTV2WidgetType inWidgetType, const NTV2Channel inChannel)
+		{
+			AJAAutoLock lock(&gLock);
+			NTV2_ASSERT(!gWidget2Types.empty());
+			for (Widget2TypesConstIter iter = gWidget2Types.begin(); iter != gWidget2Types.end(); iter++) {
+				if (iter->second == inWidgetType && WidgetIDToChannel(iter->first) == inChannel)
+					return iter->first;
+			}
+			return NTV2_WIDGET_INVALID;
+		}
+
+		bool				IsSDIWidget(const NTV2WidgetType inWidgetType) const
+		{
+			AJAAutoLock lock(&gLock);
+			NTV2_ASSERT(!gSDIWidgetTypes.empty());
+			return gSDIWidgetTypes.find(inWidgetType) != gSDIWidgetTypes.end();
+		}
+
+		bool				Is3GSDIWidget(const NTV2WidgetType inWidgetType) const
+		{
+			AJAAutoLock lock(&gLock);
+			NTV2_ASSERT(!gSDI3GWidgetTypes.empty());
+			return gSDI3GWidgetTypes.find(inWidgetType) != gSDI3GWidgetTypes.end();
+		}
+
+		bool				Is12GSDIWidget(const NTV2WidgetType inWidgetType) const
+		{
+			AJAAutoLock lock(&gLock);
+			NTV2_ASSERT(!gSDI12GWidgetTypes.empty());
+			return gSDI12GWidgetTypes.find(inWidgetType) != gSDI12GWidgetTypes.end();
+		}
+
+		bool				IsSDIInWidget(const NTV2WidgetType inWidgetType) const
+		{
+			AJAAutoLock lock(&gLock);
+			NTV2_ASSERT(!gSDIInWidgetTypes.empty());
+			return gSDIInWidgetTypes.find(inWidgetType) != gSDIInWidgetTypes.end();
+		}
+
+		bool				IsSDIOutWidget(const NTV2WidgetType inWidgetType) const
+		{
+			AJAAutoLock lock(&gLock);
+			NTV2_ASSERT(!gSDIOutWidgetTypes.empty());
+			return gSDIOutWidgetTypes.find(inWidgetType) != gSDIOutWidgetTypes.end();
+		}
+
 		private:
 			void InitInputXpt2String(void);
 			void InitOutputXpt2String(void);
 			void InitInputXpt2WidgetIDs(void);
 			void InitOutputXpt2WidgetIDs(void);
+			void InitWidgetIDToChannels(void);
+			void InitWidgetIDToWidgetTypes(void);
 
 			mutable AJALock			gLock;
 			String2InputXpt			gString2InputXpt;
@@ -227,9 +300,18 @@ class RoutingExpert
 			OutputXpt2WidgetIDs		gOutputXpt2WidgetIDs;
 			Widget2OutputXpts		gWidget2OutputXpts;
 			Widget2InputXpts		gWidget2InputXpts;
+			Widget2Channels			gWidget2Channels;
+			Widget2Types			gWidget2Types;
+			// NTV2InputXptID Helpers
 			NTV2InputXptIDSet		gRGBOnlyInputXpts;
 			NTV2InputXptIDSet		gYUVOnlyInputXpts;
 			NTV2InputXptIDSet		gKeyInputXpts;
+			// NTV2WidgetType Helpers
+			NTV2WidgetTypeSet		gSDIWidgetTypes;
+			NTV2WidgetTypeSet		gSDI3GWidgetTypes;
+			NTV2WidgetTypeSet		gSDI12GWidgetTypes;
+			NTV2WidgetTypeSet		gSDIInWidgetTypes;
+			NTV2WidgetTypeSet		gSDIOutWidgetTypes;
 
 };	//	RoutingExpert
 
@@ -1121,6 +1203,270 @@ void RoutingExpert::InitOutputXpt2WidgetIDs(void)
 	for (OutputXpt2WidgetIDsConstIter iter (gOutputXpt2WidgetIDs.begin ());  iter != gOutputXpt2WidgetIDs.end ();  ++iter)
 		gWidget2OutputXpts.insert (Widget2OutputXptPair (iter->second, iter->first));
 }
+
+void RoutingExpert::InitWidgetIDToChannels(void)
+{
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtFrameBuffer1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtFrameBuffer2, NTV2_CHANNEL2));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtFrameBuffer3, NTV2_CHANNEL3));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtFrameBuffer4, NTV2_CHANNEL4));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtCSC1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtCSC2, NTV2_CHANNEL2));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtLUT1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtLUT2, NTV2_CHANNEL2));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtFrameSync1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtFrameSync2, NTV2_CHANNEL2));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtSDIIn1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtSDIIn2, NTV2_CHANNEL2));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt3GSDIIn1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt3GSDIIn2, NTV2_CHANNEL2));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt3GSDIIn3, NTV2_CHANNEL3));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt3GSDIIn4, NTV2_CHANNEL4));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtSDIOut1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtSDIOut2, NTV2_CHANNEL2));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtSDIOut3, NTV2_CHANNEL3));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtSDIOut4, NTV2_CHANNEL4));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt3GSDIOut1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt3GSDIOut2, NTV2_CHANNEL2));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt3GSDIOut3, NTV2_CHANNEL3));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt3GSDIOut4, NTV2_CHANNEL4));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkIn1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkV2In1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkV2In2, NTV2_CHANNEL2));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkOut1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkOut2, NTV2_CHANNEL2));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkV2Out1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkV2Out2, NTV2_CHANNEL2));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtAnalogIn1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtAnalogOut1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtAnalogCompositeOut1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtHDMIIn1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtHDMIOut1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtUpDownConverter1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtUpDownConverter2, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtMixer1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtCompression1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtProcAmp1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtWaterMarker1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtWaterMarker2, NTV2_CHANNEL2));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtIICT1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtIICT2, NTV2_CHANNEL2));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtTestPattern1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtGenLock, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDCIMixer1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtMixer2, NTV2_CHANNEL2));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtStereoCompressor, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtLUT3, NTV2_CHANNEL3));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtLUT4, NTV2_CHANNEL4));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkV2In3, NTV2_CHANNEL3));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkV2In4, NTV2_CHANNEL4));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkV2Out3, NTV2_CHANNEL3));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkV2Out4, NTV2_CHANNEL4));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtCSC3, NTV2_CHANNEL3));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtCSC4, NTV2_CHANNEL4));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtHDMIIn1v2, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtHDMIOut1v2, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtSDIMonOut1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtCSC5, NTV2_CHANNEL5));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtLUT5, NTV2_CHANNEL5));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkV2Out5, NTV2_CHANNEL5));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt4KDownConverter, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt3GSDIIn5, NTV2_CHANNEL5));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt3GSDIIn6, NTV2_CHANNEL6));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt3GSDIIn7, NTV2_CHANNEL7));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt3GSDIIn8, NTV2_CHANNEL8));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt3GSDIOut5, NTV2_CHANNEL5));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt3GSDIOut6, NTV2_CHANNEL6));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt3GSDIOut7, NTV2_CHANNEL7));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt3GSDIOut8, NTV2_CHANNEL8));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkV2In5, NTV2_CHANNEL5));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkV2In6, NTV2_CHANNEL6));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkV2In7, NTV2_CHANNEL7));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkV2In8, NTV2_CHANNEL8));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkV2Out6, NTV2_CHANNEL6));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkV2Out7, NTV2_CHANNEL7));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkV2Out8, NTV2_CHANNEL8));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtCSC6, NTV2_CHANNEL6));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtCSC7, NTV2_CHANNEL7));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtCSC8, NTV2_CHANNEL8));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtLUT6, NTV2_CHANNEL6));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtLUT7, NTV2_CHANNEL7));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtLUT8, NTV2_CHANNEL8));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtMixer3, NTV2_CHANNEL3));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtMixer4, NTV2_CHANNEL4));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtFrameBuffer5, NTV2_CHANNEL5));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtFrameBuffer6, NTV2_CHANNEL6));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtFrameBuffer7, NTV2_CHANNEL7));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtFrameBuffer8, NTV2_CHANNEL8));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtHDMIIn1v3, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtHDMIOut1v3, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt425Mux1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt425Mux2, NTV2_CHANNEL2));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt425Mux3, NTV2_CHANNEL3));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt425Mux4, NTV2_CHANNEL4));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt12GSDIIn1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt12GSDIIn2, NTV2_CHANNEL2));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt12GSDIIn3, NTV2_CHANNEL3));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt12GSDIIn4, NTV2_CHANNEL4));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt12GSDIOut1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt12GSDIOut2, NTV2_CHANNEL2));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt12GSDIOut3, NTV2_CHANNEL3));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt12GSDIOut4, NTV2_CHANNEL4));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtHDMIIn1v4, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtHDMIIn2v4, NTV2_CHANNEL2));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtHDMIIn3v4, NTV2_CHANNEL3));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtHDMIIn4v4, NTV2_CHANNEL4));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtHDMIOut1v4, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtHDMIOut1v5, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtMultiLinkOut1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt3DLUT1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtMultiLinkOut2, NTV2_CHANNEL2));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtOE1, NTV2_CHANNEL1));
+}
+
+void RoutingExpert::InitWidgetIDToWidgetTypes(void)
+{
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtFrameBuffer1, NTV2WidgetType_FrameStore));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtFrameBuffer2, NTV2WidgetType_FrameStore));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtFrameBuffer3, NTV2WidgetType_FrameStore));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtFrameBuffer4, NTV2WidgetType_FrameStore));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtCSC1, NTV2WidgetType_CSC));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtCSC2, NTV2WidgetType_CSC));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtLUT1, NTV2WidgetType_LUT));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtLUT2, NTV2WidgetType_LUT));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtFrameSync1, NTV2WidgetType_FrameSync));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtFrameSync2, NTV2WidgetType_FrameSync));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtSDIIn1, NTV2WidgetType_SDIIn));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtSDIIn2, NTV2WidgetType_SDIIn));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt3GSDIIn1, NTV2WidgetType_SDIIn3G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt3GSDIIn2, NTV2WidgetType_SDIIn3G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt3GSDIIn3, NTV2WidgetType_SDIIn3G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt3GSDIIn4, NTV2WidgetType_SDIIn3G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtSDIOut1, NTV2WidgetType_SDIOut));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtSDIOut2, NTV2WidgetType_SDIOut));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtSDIOut3, NTV2WidgetType_SDIOut));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtSDIOut4, NTV2WidgetType_SDIOut));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt3GSDIOut1, NTV2WidgetType_SDIOut3G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt3GSDIOut2, NTV2WidgetType_SDIOut3G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt3GSDIOut3, NTV2WidgetType_SDIOut3G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt3GSDIOut4, NTV2WidgetType_SDIOut3G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDualLinkIn1, NTV2WidgetType_DualLinkV1In));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDualLinkV2In1, NTV2WidgetType_DualLinkV2In));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDualLinkV2In2, NTV2WidgetType_DualLinkV2In));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDualLinkOut1, NTV2WidgetType_DualLinkV1Out));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDualLinkOut2, NTV2WidgetType_DualLinkV1Out));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDualLinkV2Out1, NTV2WidgetType_DualLinkV2Out));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDualLinkV2Out2, NTV2WidgetType_DualLinkV2Out));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtAnalogIn1, NTV2WidgetType_AnalogIn));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtAnalogOut1, NTV2WidgetType_AnalogOut));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtAnalogCompositeOut1, NTV2WidgetType_AnalogCompositeOut));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtHDMIIn1, NTV2WidgetType_HDMIInV1));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtHDMIOut1, NTV2WidgetType_HDMIOutV1));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtUpDownConverter1, NTV2WidgetType_UpDownConverter));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtUpDownConverter2, NTV2WidgetType_UpDownConverter));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtMixer1, NTV2WidgetType_Mixer));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtCompression1, NTV2WidgetType_Compression));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtProcAmp1, NTV2WidgetType_ProcAmp));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtWaterMarker1, NTV2WidgetType_WaterMarker));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtWaterMarker2, NTV2WidgetType_WaterMarker));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtIICT1, NTV2WidgetType_IICT));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtIICT2, NTV2WidgetType_IICT));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtTestPattern1, NTV2WidgetType_TestPattern));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtGenLock, NTV2WidgetType_GenLock));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDCIMixer1, NTV2WidgetType_DCIMixer));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtMixer2, NTV2WidgetType_Mixer));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtStereoCompressor, NTV2WidgetType_StereoCompressor));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtLUT3, NTV2WidgetType_LUT));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtLUT4, NTV2WidgetType_LUT));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDualLinkV2In3, NTV2WidgetType_DualLinkV2In));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDualLinkV2In4, NTV2WidgetType_DualLinkV2In));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDualLinkV2Out3, NTV2WidgetType_DualLinkV2Out));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDualLinkV2Out4, NTV2WidgetType_DualLinkV2Out));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtCSC3, NTV2WidgetType_CSC));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtCSC4, NTV2WidgetType_CSC));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtHDMIIn1v2, NTV2WidgetType_HDMIInV2));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtHDMIOut1v2, NTV2WidgetType_HDMIOutV2));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtSDIMonOut1, NTV2WidgetType_SDIMonOut));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtCSC5, NTV2WidgetType_CSC));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtLUT5, NTV2WidgetType_LUT));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDualLinkV2Out5, NTV2WidgetType_DualLinkV2Out));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt4KDownConverter, NTV2WidgetType_4KDownConverter));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt3GSDIIn5, NTV2WidgetType_SDIIn3G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt3GSDIIn6, NTV2WidgetType_SDIIn3G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt3GSDIIn7, NTV2WidgetType_SDIIn3G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt3GSDIIn8, NTV2WidgetType_SDIIn3G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt3GSDIOut5, NTV2WidgetType_SDIOut3G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt3GSDIOut6, NTV2WidgetType_SDIOut3G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt3GSDIOut7, NTV2WidgetType_SDIOut3G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt3GSDIOut8, NTV2WidgetType_SDIOut3G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDualLinkV2In5, NTV2WidgetType_DualLinkV2In));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDualLinkV2In6, NTV2WidgetType_DualLinkV2In));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDualLinkV2In7, NTV2WidgetType_DualLinkV2In));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDualLinkV2In8, NTV2WidgetType_DualLinkV2In));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDualLinkV2Out6, NTV2WidgetType_DualLinkV2Out));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDualLinkV2Out7, NTV2WidgetType_DualLinkV2Out));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtDualLinkV2Out8, NTV2WidgetType_DualLinkV2Out));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtCSC6, NTV2WidgetType_CSC));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtCSC7, NTV2WidgetType_CSC));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtCSC8, NTV2WidgetType_CSC));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtLUT6, NTV2WidgetType_LUT));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtLUT7, NTV2WidgetType_LUT));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtLUT8, NTV2WidgetType_LUT));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtMixer3, NTV2WidgetType_Mixer));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtMixer4, NTV2WidgetType_Mixer));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtFrameBuffer5, NTV2WidgetType_FrameStore));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtFrameBuffer6, NTV2WidgetType_FrameStore));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtFrameBuffer7, NTV2WidgetType_FrameStore));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtFrameBuffer8, NTV2WidgetType_FrameStore));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtHDMIIn1v3, NTV2WidgetType_HDMIInV3));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtHDMIOut1v3, NTV2WidgetType_HDMIOutV3));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt425Mux1, NTV2WidgetType_SMPTE425Mux));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt425Mux2, NTV2WidgetType_SMPTE425Mux));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt425Mux3, NTV2WidgetType_SMPTE425Mux));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt425Mux4, NTV2WidgetType_SMPTE425Mux));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt12GSDIIn1, NTV2WidgetType_SDIIn12G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt12GSDIIn2, NTV2WidgetType_SDIIn12G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt12GSDIIn3, NTV2WidgetType_SDIIn12G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt12GSDIIn4, NTV2WidgetType_SDIIn12G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt12GSDIOut1, NTV2WidgetType_SDIOut12G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt12GSDIOut2, NTV2WidgetType_SDIOut12G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt12GSDIOut3, NTV2WidgetType_SDIOut12G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt12GSDIOut4, NTV2WidgetType_SDIOut12G));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtHDMIIn1v4, NTV2WidgetType_HDMIInV4));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtHDMIIn2v4, NTV2WidgetType_HDMIInV4));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtHDMIIn3v4, NTV2WidgetType_HDMIInV4));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtHDMIIn4v4, NTV2WidgetType_HDMIInV4));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtHDMIOut1v4, NTV2WidgetType_HDMIOutV4));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtHDMIOut1v5, NTV2WidgetType_HDMIOutV5));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtMultiLinkOut1, NTV2WidgetType_MultiLinkOut));
+	gWidget2Types.insert(Widget2TypePair(NTV2_Wgt3DLUT1, NTV2WidgetType_LUT3D));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtMultiLinkOut2, NTV2WidgetType_MultiLinkOut));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtOE1, NTV2WidgetType_OE));
+
+	// SDI Widget Types
+	gSDIWidgetTypes.insert(NTV2WidgetType_SDIIn);
+	gSDIWidgetTypes.insert(NTV2WidgetType_SDIOut);
+	gSDIWidgetTypes.insert(NTV2WidgetType_SDIIn3G);
+	gSDIWidgetTypes.insert(NTV2WidgetType_SDIOut3G);
+	gSDIWidgetTypes.insert(NTV2WidgetType_SDIIn12G);
+	gSDIWidgetTypes.insert(NTV2WidgetType_SDIOut12G);
+	gSDIWidgetTypes.insert(NTV2WidgetType_SDIMonOut);
+	// SDI Input Widget Types
+	gSDIInWidgetTypes.insert(NTV2WidgetType_SDIIn);
+	gSDIInWidgetTypes.insert(NTV2WidgetType_SDIIn3G);
+	gSDIInWidgetTypes.insert(NTV2WidgetType_SDIIn12G);
+	// SDI Output Widget Types
+	gSDIOutWidgetTypes.insert(NTV2WidgetType_SDIOut);
+	gSDIOutWidgetTypes.insert(NTV2WidgetType_SDIOut3G);
+	gSDIOutWidgetTypes.insert(NTV2WidgetType_SDIOut12G);
+	gSDIOutWidgetTypes.insert(NTV2WidgetType_SDIMonOut);
+	// 3G SDI Widget Types
+	gSDI3GWidgetTypes.insert(NTV2WidgetType_SDIIn3G);
+	gSDI3GWidgetTypes.insert(NTV2WidgetType_SDIOut3G);
+	// 12G SDI Widget Types
+	gSDI12GWidgetTypes.insert(NTV2WidgetType_SDIIn12G);
+	gSDI12GWidgetTypes.insert(NTV2WidgetType_SDIOut12G);
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// ROUTING EXPERT		End
 
 
@@ -1590,6 +1936,60 @@ bool CNTV2SignalRouter::IsKeyInputXpt (const NTV2InputXptID inInputXpt)
 {
 	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
 	return pExpert ? pExpert->IsKeyInputXpt(inInputXpt) : false;
+}
+
+NTV2Channel CNTV2SignalRouter::WidgetIDToChannel(const NTV2WidgetID inWidgetID)
+{
+	RoutingExpertPtr pExpert(RoutingExpert::GetInstance());
+	if (pExpert)
+		return pExpert->WidgetIDToChannel(inWidgetID);
+	return NTV2_CHANNEL_INVALID;
+}
+
+NTV2WidgetID CNTV2SignalRouter::WidgetIDFromTypeAndChannel(const NTV2WidgetType inWidgetType, const NTV2Channel inChannel)
+{
+	RoutingExpertPtr pExpert(RoutingExpert::GetInstance());
+	if (pExpert)
+		return pExpert->WidgetIDFromTypeAndChannel(inWidgetType, inChannel);
+	return NTV2_WIDGET_INVALID;
+}
+
+NTV2WidgetType CNTV2SignalRouter::WidgetIDToType (const NTV2WidgetID inWidgetID)
+{
+	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
+	if (pExpert)
+		return pExpert->WidgetIDToType(inWidgetID);
+	return NTV2WidgetType_Invalid;
+}
+
+bool CNTV2SignalRouter::IsSDIWidgetType (const NTV2WidgetType inWidgetType)
+{
+	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
+	return pExpert ? pExpert->IsSDIWidget(inWidgetType) : false;
+}
+
+bool CNTV2SignalRouter::IsSDIInputWidgetType (const NTV2WidgetType inWidgetType)
+{
+	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
+	return pExpert ? pExpert->IsSDIInWidget(inWidgetType) : false;
+}
+
+bool CNTV2SignalRouter::IsSDIOutputWidgetType (const NTV2WidgetType inWidgetType)
+{
+	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
+	return pExpert ? pExpert->IsSDIOutWidget(inWidgetType) : false;
+}
+
+bool CNTV2SignalRouter::Is3GSDIWidgetType (const NTV2WidgetType inWidgetType)
+{
+	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
+	return pExpert ? pExpert->Is3GSDIWidget(inWidgetType) : false;
+}
+
+bool CNTV2SignalRouter::Is12GSDIWidgetType (const NTV2WidgetType inWidgetType)
+{
+	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
+	return pExpert ? pExpert->Is12GSDIWidget(inWidgetType) : false;
 }
 
 

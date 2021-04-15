@@ -70,6 +70,17 @@ typedef std::pair <NTV2WidgetID, NTV2InputXptID>		Widget2InputXptPair;
 typedef std::multimap <NTV2WidgetID, NTV2InputXptID>	Widget2InputXpts;
 typedef Widget2InputXpts::const_iterator				Widget2InputXptsConstIter;
 
+typedef std::pair <NTV2WidgetID, NTV2Channel>			Widget2ChannelPair;
+typedef std::multimap <NTV2WidgetID, NTV2Channel>		Widget2Channels;
+typedef Widget2Channels::const_iterator					Widget2ChannelsConstIter;
+
+typedef std::pair <NTV2WidgetID, NTV2WidgetType>		Widget2TypePair;
+typedef std::multimap <NTV2WidgetID, NTV2WidgetType>	Widget2Types;
+typedef Widget2Types::const_iterator					Widget2TypesConstIter;
+
+typedef std::set<NTV2WidgetType>						NTV2WidgetTypeSet;
+typedef NTV2WidgetTypeSet::const_iterator				NTV2WidgetTypeSetConstIter;
+
 /**
 	@brief	Answers with the ::NTV2InputXptID and ::NTV2OutputXptIDSet for the given ROM register value.
 	@param[in]	inROMRegNum			Specifies the ROM register number.
@@ -458,6 +469,55 @@ class AJAExport CNTV2SignalRouter
 			@return		True if the input is a mask/key input;  otherwise false.
 		**/
 		static bool					IsKeyInputXpt (const NTV2InputXptID inInputXpt);	//	New in SDK 16.0
+
+		/**
+			@param[in]	inWidgetID		Specifies the widget ID of interest.
+			@return		The corresponding channel.
+		**/		
+		static NTV2Channel			WidgetIDToChannel (const NTV2WidgetID inWidgetID); // New in SDK 16.1
+
+		/**
+			@param[in]	inWidgetType	Specifies the widget type of interest.
+			@param[in]	inChannel		Specifies the channel of interest.
+			@return		The corresponding widget ID.
+		**/
+		static NTV2WidgetID			WidgetIDFromTypeAndChannel(const NTV2WidgetType inWidgetType, const NTV2Channel inChannel); // New in SDK 16.1
+		
+		/**
+			@param[in]	inWidgetID		Specifies the widget ID of interest.
+			@return		The corresponding widget type.
+		**/		
+		static NTV2WidgetType		WidgetIDToType (const NTV2WidgetID inWidgetID); // New in SDK 16.1
+
+		/**
+			@param[in]	inWidgetType	Specifies the widget type of interest.
+			@return		True if the widget type is an SDI widget.
+		**/
+		static bool					IsSDIWidgetType (const NTV2WidgetType inWidgetType); // New in SDK 16.1
+
+		/**
+			@param[in]	inWidgetType	Specifies the widget type of interest.
+			@return		True if the widget type is an SDI Input Widget.
+		**/
+		static bool					IsSDIInputWidgetType (const NTV2WidgetType inWidgetType); // New in SDK 16.1
+
+		/**
+			@param[in]	inWidgetType	Specifies the widget type of interest.
+			@return		True if the widget type is an SDI Output widget.
+		**/
+		static bool					IsSDIOutputWidgetType (const NTV2WidgetType inWidgetType); // New in SDK 16.1
+
+		/**
+			@param[in]	inWidgetType	Specifies the widget type of interest.
+			@return		True if the widget type is a 3G SDI widget.
+		**/
+		static bool					Is3GSDIWidgetType (const NTV2WidgetType inWidgetType); // New in SDK 16.1
+
+		/**
+			@param[in]	inWidgetType	Specifies the widget type of interest.
+			@return		True if the widget type is a 12G SDI widget.
+		**/
+		static bool					Is12GSDIWidgetType (const NTV2WidgetType inWidgetType); // New in SDK 16.1
 
 		/**
 			@brief		Compares two sets of crosspoint connections.

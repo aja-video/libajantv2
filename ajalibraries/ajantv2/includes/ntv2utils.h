@@ -1049,6 +1049,7 @@ AJAExport std::string NTV2ColorCorrectionModeToString	(const NTV2ColorCorrection
 AJAExport std::string NTV2InputCrosspointIDToString		(const NTV2InputCrosspointID	inValue,	const bool inForRetailDisplay = false);
 AJAExport std::string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID	inValue,	const bool inForRetailDisplay = false);
 AJAExport std::string NTV2WidgetIDToString				(const NTV2WidgetID				inValue,	const bool inCompactDisplay = false);
+AJAExport std::string NTV2WidgetTypeToString			(const NTV2WidgetType			inValue,	const bool inCompactDisplay = false);
 AJAExport std::string NTV2TaskModeToString				(const NTV2EveryFrameTaskMode	inValue,	const bool inCompactDisplay = false);
 AJAExport std::string NTV2RegNumSetToString				(const NTV2RegisterNumberSet &	inValue);
 AJAExport std::string NTV2TCIndexToString				(const NTV2TCIndex				inValue,	const bool inCompactDisplay = false);
