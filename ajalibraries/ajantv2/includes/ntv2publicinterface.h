@@ -5926,7 +5926,7 @@ typedef enum
 		#define DMABUFFERLOCK_AUTO					BIT(4)		///< @brief Used in ::NTV2BufferLock to auto page lock buffers.
 		#define DMABUFFERLOCK_MANUAL				BIT(5)		///< @brief Used in ::NTV2BufferLock to manual page lock buffers.
 		#define DMABUFFERLOCK_MAX_SIZE				BIT(6)		///< @brief Used in ::NTV2BufferLock to set max locked size.
-		#define DMACUDALOCK_LOCK					BIT(7)		///< @brief Used in ::NTV2BufferLock to page lock a cuda buffer.
+		#define DMARDMALOCK_LOCK					BIT(7)		///< @brief Used in ::NTV2BufferLock to page lock a rdma buffer
 
 		// Bitstream flags
 		#define BITSTREAM_WRITE						BIT(0)		///< @brief Used in ::NTV2Bitstream to write a bitstream
