@@ -1041,17 +1041,12 @@ TEST_SUITE("signal router" * doctest::description("CNTV2SignalRouter & RoutingEx
 						widgetID, DEVICE_ID_KONA4);
 		CHECK(widgetID == NTV2_WgtDualLinkV2In1);
 		
-		NTV2Channel ch = CNTV2SignalRouter::WidgetIDToChannel(NTV2_Wgt3GSDIIn3);
-		CHECK(ch == NTV2_CHANNEL3);
+		CHECK(CNTV2SignalRouter::WidgetIDToChannel(NTV2_Wgt3GSDIIn3) == NTV2_CHANNEL3);
+		CHECK(CNTV2SignalRouter::WidgetIDFromTypeAndChannel(NTV2WidgetType_CSC, NTV2_CHANNEL4) == NTV2_WgtCSC4);
 
-		NTV2WidgetID wid = CNTV2SignalRouter::WidgetIDFromTypeAndChannel(
-						NTV2WidgetType_CSC, NTV2_CHANNEL4);
-		CHECK(wid == NTV2_WgtCSC4);
+		CHECK(CNTV2SignalRouter::WidgetIDToType(NTV2_WgtFrameBuffer1) == NTV2WidgetType_FrameStore);
 
-		NTV2WidgetType wt = CNTV2SignalRouter::WidgetIDToType(NTV2_WgtFrameBuffer1);
-		CHECK(wt == NTV2WidgetType_FrameStore);
-
-		CHECK(CNTV2SignalRouter::IsSDIWidgetType(wt) == false);
+		CHECK(CNTV2SignalRouter::IsSDIWidgetType(NTV2WidgetType_4KDownConverter) == false);
 		CHECK(CNTV2SignalRouter::IsSDIWidgetType(NTV2WidgetType_SDIOut12G) == true);
 		CHECK(CNTV2SignalRouter::IsSDIInputWidgetType(NTV2WidgetType_SDIIn3G) == true);
 		CHECK(CNTV2SignalRouter::IsSDIInputWidgetType(NTV2WidgetType_SDIOut3G) == false);
