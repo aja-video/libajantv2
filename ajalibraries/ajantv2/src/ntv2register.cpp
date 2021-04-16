@@ -2132,9 +2132,9 @@ bool CNTV2Card::GetPossibleConnections (NTV2PossibleConnections & outConnections
 		return false;
 
 	NTV2RegReads ROMregs;
-	return ::MakeRouteROMRegisters(ROMregs)
+	return CNTV2SignalRouter::MakeRouteROMRegisters(ROMregs)
 			&&  ReadRegisters(ROMregs)
-			&&  ::GetPossibleConnections(ROMregs, outConnections);
+			&&  CNTV2SignalRouter::GetPossibleConnections(ROMregs, outConnections);
 }
 
 /////////////////////////////////
@@ -5199,7 +5199,7 @@ bool CNTV2Card::CanConnect (const NTV2InputCrosspointID inInputXpt, const NTV2Ou
 		ULWord regVal(0);
 		NTV2InputXptID inputXpt;
 		ReadRegister(regBase + ndx, regVal);
-		if (!::GetRouteROMInfoFromReg (regBase + ndx, regVal, inputXpt, legalOutputXpts, true/*append*/))
+		if (!CNTV2SignalRouter::GetRouteROMInfoFromReg (regBase + ndx, regVal, inputXpt, legalOutputXpts, true/*append*/))
 			ROUTEWARN(GetDisplayName() << ":  GetRouteROMInfoFromReg failed for register " << DEC(regBase+ndx)
 					<< ", input xpt ' " << ::NTV2InputCrosspointIDToString(inInputXpt) << "' " << xHEX0N(UWord(inInputXpt),2));
 	}

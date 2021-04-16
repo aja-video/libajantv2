@@ -6,13 +6,13 @@
 
 #ifndef NTV2SIGNALROUTER_H
 #define NTV2SIGNALROUTER_H
+
 #include "ajaexport.h"
 #include "ntv2publicinterface.h"
 #include <stddef.h>
 #include <sstream>
 #include <set>
 #include <map>
-
 
 typedef std::set <NTV2OutputXptID>			NTV2OutputCrosspointIDSet,			NTV2OutputXptIDSet;				///< @brief	A collection of distinct ::NTV2OutputXptID values.
 typedef NTV2OutputXptIDSet::const_iterator	NTV2OutputCrosspointIDSetConstIter,	NTV2OutputXptIDSetConstIter;	///< @brief	A const iterator for iterating over an ::NTV2OutputXptIDSet.
@@ -82,35 +82,6 @@ typedef std::set<NTV2WidgetType>						NTV2WidgetTypeSet;
 typedef NTV2WidgetTypeSet::const_iterator				NTV2WidgetTypeSetConstIter;
 
 /**
-	@brief	Answers with the ::NTV2InputXptID and ::NTV2OutputXptIDSet for the given ROM register value.
-	@param[in]	inROMRegNum			Specifies the ROM register number.
-	@param[in]	inROMRegValue		Specifies the ROM register value.
-	@param[out]	outInputXpt			Receives the input crosspoint associated with the ROM register.
-	@param[out]	outOutputXpts		Receives the valid (implemented) output crosspoint routes.
-	@param[in]	inAppendOutputXpts	If true, appends output crosspoints to the output set;
-									otherwise clears the output crosspoint set (the default).
-	@return	True if successful;  otherwise false.
-**/
-AJAExport bool GetRouteROMInfoFromReg (const ULWord inROMRegNum, const ULWord inROMRegValue,
-										NTV2InputXptID & outInputXpt, NTV2OutputXptIDSet & outOutputXpts,
-										const bool inAppendOutputXpts = false);	//	New in SDK 16.0
-
-/**
-	@brief		Answers with the implemented crosspoint connections as obtained from the given ROM registers.
-	@param[in]	inROMRegisters	The ROM register numbers and values.
-	@param[out]	outConnections	Receives the legal implemented connections/routes.
-	@return	True if successful;  otherwise false.
-**/
-AJAExport bool GetPossibleConnections (const NTV2RegReads & inROMRegisters, NTV2PossibleConnections & outConnections);	//	New in SDK 16.0
-
-/**
-	@brief		Prepares an initialized, zeroed NTV2RegReads that's prepared to read all ROM registers from a device.
-	@param[out]	outROMRegisters	Receives the prepared NTV2RegReads.
-	@return		True if successful;  otherwise false.
-**/
-AJAExport bool MakeRouteROMRegisters (NTV2RegReads & outROMRegisters);	//	New in SDK 16.0
-
-/**
 	@brief	This class is a collection of widget input-to-output connections that can be applied all-at-once to an NTV2 device.
 			Call AddConnection to connect a widget input (specified by ::NTV2InputXptID) to a widget's output (specified by ::NTV2OutputXptID).
 			Call the CNTV2Card::ApplySignalRoute function to apply this route to the device.
@@ -143,6 +114,35 @@ class AJAExport CNTV2SignalRouter
 			virtual NTV2_DEPRECATED_f(bool	addWithValue (const NTV2RoutingEntry & inEntry, const ULWord inValue));				///< @deprecated	Use AddConnection with ::NTV2InputXptIDSet instead.
 			virtual NTV2_DEPRECATED_f(bool	AddConnection (const NTV2RoutingEntry & inEntry, const NTV2OutputCrosspointID inSignalOutput = NTV2_XptBlack));	///< @deprecated	Use AddConnection(::NTV2InputXptID, ::NTV2OutputXptID) instead.
 		#endif	//	!defined (NTV2_DEPRECATE_12_5)
+
+		/**
+			@brief	Answers with the ::NTV2InputXptID and ::NTV2OutputXptIDSet for the given ROM register value.
+			@param[in]	inROMRegNum			Specifies the ROM register number.
+			@param[in]	inROMRegValue		Specifies the ROM register value.
+			@param[out]	outInputXpt			Receives the input crosspoint associated with the ROM register.
+			@param[out]	outOutputXpts		Receives the valid (implemented) output crosspoint routes.
+			@param[in]	inAppendOutputXpts	If true, appends output crosspoints to the output set;
+											otherwise clears the output crosspoint set (the default).
+			@return	True if successful;  otherwise false.
+		**/
+		static bool GetRouteROMInfoFromReg (const ULWord inROMRegNum, const ULWord inROMRegValue,
+												NTV2InputXptID & outInputXpt, NTV2OutputXptIDSet & outOutputXpts,
+												const bool inAppendOutputXpts = false);	//	New in SDK 16.0
+
+		/**
+			@brief		Answers with the implemented crosspoint connections as obtained from the given ROM registers.
+			@param[in]	inROMRegisters	The ROM register numbers and values.
+			@param[out]	outConnections	Receives the legal implemented connections/routes.
+			@return	True if successful;  otherwise false.
+		**/
+		static bool GetPossibleConnections (const NTV2RegReads & inROMRegisters, NTV2PossibleConnections & outConnections);	//	New in SDK 16.0
+
+		/**
+			@brief		Prepares an initialized, zeroed NTV2RegReads that's prepared to read all ROM registers from a device.
+			@param[out]	outROMRegisters	Receives the prepared NTV2RegReads.
+			@return		True if successful;  otherwise false.
+		**/
+		static bool MakeRouteROMRegisters (NTV2RegReads & outROMRegisters);	//	New in SDK 16.0
 
 		/**
 			@brief		Adds a connection between a widget's signal input (sink) and another widget's signal output (source).
@@ -520,6 +520,42 @@ class AJAExport CNTV2SignalRouter
 		static bool					Is12GSDIWidgetType (const NTV2WidgetType inWidgetType); // New in SDK 16.1
 
 		/**
+			@param[in]	inWidgetType	Specifies the widget type of interest.
+			@return		True if the widget type is a Dual Link widget.
+		**/
+		static bool					IsDualLinkWidgetType(const NTV2WidgetType inWidgetType);
+
+		/**
+			@param[in]	inWidgetType	Specifies the widget type of interest.
+			@return		True if the widget type is a Dual Link Input widget.
+		**/
+		static bool					IsDualLinkInWidgetType(const NTV2WidgetType inWidgetType);
+
+		/**
+			@param[in]	inWidgetType	Specifies the widget type of interest.
+			@return		True if the widget type is a Dual Link Output widget.
+		**/
+		static bool					IsDualLinkOutWidgetType(const NTV2WidgetType inWidgetType);
+
+		/**
+			@param[in]	inWidgetType	Specifies the widget type of interest.
+			@return		True if the widget type is an HDMI widget.
+		**/
+		static bool					IsHDMIWidgetType(const NTV2WidgetType inWidgetType);
+
+		/**
+			@param[in]	inWidgetType	Specifies the widget type of interest.
+			@return		True if the widget type is an HDMI Input widget.
+		**/
+		static bool					IsHDMIInWidgetType(const NTV2WidgetType inWidgetType);
+
+		/**
+			@param[in]	inWidgetType	Specifies the widget type of interest.
+			@return		True if the widget type is an HDMI Output widget.
+		**/
+		static bool					IsHDMIOutWidgetType(const NTV2WidgetType inWidgetType);
+
+		/**
 			@brief		Compares two sets of crosspoint connections.
 			@param[in]	inLHS		Specifies the input crosspoints.
 			@param[in]	inRHS		Specifies the crosspoint register values.
@@ -746,7 +782,6 @@ AJAExport NTV2OutputXptID			GetTSIMuxOutputXptFromChannel (const NTV2Channel inT
 
 //	Stream operators
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const CNTV2SignalRouter & inObj);
-
 
 #if !defined (NTV2_DEPRECATE_12_5)
 	//	Stream operators
