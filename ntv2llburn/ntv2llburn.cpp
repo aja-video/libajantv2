@@ -530,6 +530,7 @@ void NTV2LLBurn::ProcessFrames (void)
 	uint32_t	ancBytesCapturedF1		(0);
 	uint32_t	ancBytesCapturedF2		(0);
 	bool		audioIsReset			(true);
+	NTV2DIDSet	savedDIDs;
 	string		timeCodeString;
 
 	const NTV2Standard				videoStandard		(::GetNTV2StandardFromVideoFormat(mVideoFormat));
@@ -540,7 +541,11 @@ void NTV2LLBurn::ProcessFrames (void)
 	zeroesBuffer.Fill(ULWord64(0));
 	BURNNOTE("Thread started");
 
-	mDevice.AncSetFrameBufferSize(NTV2_ANCSIZE_MAX, NTV2_ANCSIZE_MAX);
+	//	Save current Anc buffer capacity (to restore it later), then max it out...
+	ULWord savedF1ByteCapacity(0), savedF2ByteCapacity(0), offset(0);
+	mDevice.GetAncRegionOffsetAndSize (offset, savedF1ByteCapacity, NTV2_AncRgn_Field1);
+	mDevice.GetAncRegionOffsetAndSize (offset, savedF2ByteCapacity, NTV2_AncRgn_Field2);
+	mDevice.AncSetFrameBufferSize (NTV2_ANCSIZE_MAX, NTV2_ANCSIZE_MAX);
 
 	if (doAncInput)
 	{
@@ -549,6 +554,8 @@ void NTV2LLBurn::ProcessFrames (void)
 
 		if (mWithHanc)
 		{
+			mDevice.AncExtractGetFilterDIDs(sdiInput, savedDIDs);	//	Save current ANC filter (so it can be restored later)
+
 			//	Configure ANC extractor not to filter audio
 			NTV2DIDSet dids;
 //			dids.insert(0xe0);	// HD audio group 4 control
@@ -851,9 +858,15 @@ void NTV2LLBurn::ProcessFrames (void)
 	}	//	loop til quit signaled
 
 	if (doAncInput)
-		mDevice.AncExtractSetEnable (sdiInput, false);
+		mDevice.AncExtractSetEnable (sdiInput, false);	//	Stop ANC extractor
 	if (doAncOutput)
-		mDevice.AncInsertSetEnable (sdiOutput, false);
+		mDevice.AncInsertSetEnable (sdiOutput, false);	//	Stop ANC inserter
+
+	if (doAncInput  &&  mWithHanc)
+		mDevice.AncExtractSetFilterDIDs (sdiInput, savedDIDs);	//	Restore prior ANC filtering
+
+	//	Restore previous Anc buffer capacity...
+	mDevice.AncSetFrameBufferSize (savedF1ByteCapacity, savedF2ByteCapacity);
 	BURNNOTE("Thread completed, will exit");
 
 }	//	ProcessFrames
