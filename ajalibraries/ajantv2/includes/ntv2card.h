@@ -802,6 +802,7 @@ public:
 									NTV2_AncRgn_Field2, etc.).  Defaults to all regions, for the maximum offset and size
 									among all of them.
 		@return		True if successful; otherwise false.
+		@see		CNTV2Card::AncSetFrameBufferSize, \ref anccapture-dataspace
 	**/
 	AJA_VIRTUAL bool	GetAncRegionOffsetAndSize (ULWord & outByteOffset, ULWord & outByteCount,
 													const NTV2AncillaryDataRegion inAncRegion = NTV2_AncRgn_All);
@@ -815,6 +816,7 @@ public:
 									NTV2_AncRgn_Field2, etc.).  Defaults to all regions, for the largest offset among
 									them all.
 		@return		True if successful; otherwise false.
+		@see		CNTV2Card::GetAncRegionOffsetAndSize, \ref anccapture-dataspace
 	**/
 	AJA_VIRTUAL bool	GetAncRegionOffsetFromBottom (ULWord & outByteOffsetFromBottom,
 														const NTV2AncillaryDataRegion inAncRegion = NTV2_AncRgn_All);
@@ -6327,13 +6329,15 @@ public:
 	///@{
 
 	/**
-		@brief		Sets the size of the ANC frame buffers.
+		@brief		Sets the capacity of the ANC buffers in device frame memory.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
 		@return		True if successful; otherwise false.
-		@param[in]	inF1Size		Specifies the size of the ANC field 1 frame buffer.
-		@param[in]	inF2Size		Specifies the size of the ANC field 2 frame buffer.
-		@note		Use this function before configuring ancillary extractors and inserters.  The sizes apply
-					to all channels.
+		@param[in]	inF1Size		Specifies the capacity of the Field 1 anc buffer, in bytes.
+		@param[in]	inF2Size		Specifies the capacity of the Field 2 anc buffer, in bytes.
+		@note		This function should be used before configuring the anc extractors/inserters.
+		@note		Size changes apply to all anc extractors/inserters.
+		@warning	Setting these values too large will result in anc data occupying the bottom of the video raster.
+		@see		CNTV2Card::GetAncRegionOffsetAndSize, \ref anccapture-dataspace
 	**/
 	AJA_VIRTUAL bool	AncSetFrameBufferSize (const ULWord inF1Size, const ULWord inF2Size);
 
@@ -6543,7 +6547,7 @@ public:
 		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
 		@param[out]	outDIDs			Receives the ::NTV2DIDSet that contain the DIDs that are currently being
 									filtered (excluded).
-		@see		CNTV2Card::AncExtractSetFilterDIDs, \ref anccapture
+		@see		CNTV2Card::AncExtractSetFilterDIDs, \ref anccapture-filter
 	**/
 	AJA_VIRTUAL bool	AncExtractGetFilterDIDs (const UWord inSDIInput, NTV2DIDSet & outDIDs);
 
@@ -6555,7 +6559,7 @@ public:
 		@param[in]	inDIDs			Specifies the DIDs to be filtered (excluded). Specify an empty set to
 									disable all packet filtering.
 		@note		DIDs having the value 0 (zero) are ignored.
-		@see		CNTV2Card::AncExtractGetFilterDIDs, \ref anccapture
+		@see		CNTV2Card::AncExtractGetFilterDIDs, \ref anccapture-filter
 	**/
 	AJA_VIRTUAL bool	AncExtractSetFilterDIDs (const UWord inSDIInput, const NTV2DIDSet & inDIDs);
 
@@ -6591,7 +6595,7 @@ public:
 
 	/**
 		@return		The maximum number of distinct DIDs that the device Anc extractor filter can accommodate.
-		@see		CNTV2Card::AncExtractSetFilterDIDs, CNTV2Card::AncExtractGetDefaultDIDs, \ref anccapture
+		@see		CNTV2Card::AncExtractSetFilterDIDs, CNTV2Card::AncExtractGetDefaultDIDs, \ref anccapture-filter
 	**/
 	static UWord		AncExtractGetMaxNumFilterDIDs (void);
 
@@ -6600,7 +6604,7 @@ public:
 		@param[in]	inHDAudio	Optionally specifies the desired audio packet filtering.
 								Specify true (the default) for the default HD audio packet DIDs;
 								otherwise false for the default SD audio packet DIDs.
-		@see		CNTV2Card::AncExtractSetFilterDIDs, CNTV2Card::AncExtractGetMaxNumFilterDIDs, \ref anccapture
+		@see		CNTV2Card::AncExtractSetFilterDIDs, CNTV2Card::AncExtractGetMaxNumFilterDIDs, \ref anccapture-filter
 	**/
 	static NTV2DIDSet	AncExtractGetDefaultDIDs (const bool inHDAudio = true);
 
