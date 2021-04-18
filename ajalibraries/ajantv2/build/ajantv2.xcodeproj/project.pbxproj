@@ -488,6 +488,10 @@
 		B4F90FB21C485204004723C9 /* ntv2config2022.h in Headers */ = {isa = PBXBuildFile; fileRef = B4F90FAE1C485204004723C9 /* ntv2config2022.h */; };
 		B4FE2EDC1C7E8A7500C5627A /* ntv2vpidfromspec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4FE2EDA1C7E8A7500C5627A /* ntv2vpidfromspec.cpp */; };
 		B4FE2EDD1C7E8A7500C5627A /* ntv2vpidfromspec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B4FE2EDA1C7E8A7500C5627A /* ntv2vpidfromspec.cpp */; };
+		CAAF116E26293E9000451BE3 /* ntv2routingexpert.h in Headers */ = {isa = PBXBuildFile; fileRef = CAAF116D26293E9000451BE3 /* ntv2routingexpert.h */; };
+		CAAF116F26293E9000451BE3 /* ntv2routingexpert.h in Headers */ = {isa = PBXBuildFile; fileRef = CAAF116D26293E9000451BE3 /* ntv2routingexpert.h */; };
+		CAAF117426293E9F00451BE3 /* ntv2routingexpert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAF117326293E9F00451BE3 /* ntv2routingexpert.cpp */; };
+		CAAF117526293E9F00451BE3 /* ntv2routingexpert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CAAF117326293E9F00451BE3 /* ntv2routingexpert.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -743,6 +747,8 @@
 		B4F90FAE1C485204004723C9 /* ntv2config2022.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2config2022.h; path = ../includes/ntv2config2022.h; sourceTree = SOURCE_ROOT; };
 		B4FE2EDA1C7E8A7500C5627A /* ntv2vpidfromspec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ntv2vpidfromspec.cpp; path = ../src/ntv2vpidfromspec.cpp; sourceTree = SOURCE_ROOT; };
 		B4FE2EDB1C7E8A7500C5627A /* ntv2vpidfromspec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ntv2vpidfromspec.h; path = ../includes/ntv2vpidfromspec.h; sourceTree = SOURCE_ROOT; };
+		CAAF116D26293E9000451BE3 /* ntv2routingexpert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ntv2routingexpert.h; sourceTree = "<group>"; };
+		CAAF117326293E9F00451BE3 /* ntv2routingexpert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ntv2routingexpert.cpp; sourceTree = "<group>"; };
 		D2AAC09D05546B4700DB518D /* ajantv2d.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = ajantv2d.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -799,6 +805,7 @@
 		B41B5DAC16E5329000A9E0DC /* src */ = {
 			isa = PBXGroup;
 			children = (
+				CAAF117326293E9F00451BE3 /* ntv2routingexpert.cpp */,
 				B4CE1CE216E53B180092B564 /* mac */,
 				B455DE3B2106319E002A69FD /* ntv2anc.cpp */,
 				B4058554195A1A7C00425B9E /* ntv2audio.cpp */,
@@ -857,6 +864,7 @@
 		B42AA909182AA44300E0584A /* includes */ = {
 			isa = PBXGroup;
 			children = (
+				CAAF116D26293E9000451BE3 /* ntv2routingexpert.h */,
 				B41B5DB416E5330C00A9E0DC /* ajaexport.h */,
 				B42AA900182AA42500E0584A /* ajatypes.h */,
 				B42AA901182AA42500E0584A /* ntv2audiodefines.h */,
@@ -1284,6 +1292,7 @@
 				B455DF7C210F9734002A69FD /* threadimpl.h in Headers */,
 				B4AC26B82118CF3500EDB0D5 /* ntv2debugmacros.h in Headers */,
 				B455DFC1210F9768002A69FD /* rawfile.h in Headers */,
+				CAAF116F26293E9000451BE3 /* ntv2routingexpert.h in Headers */,
 				B4ACCA991C47226D00655C50 /* ntv2enhancedcsc.h in Headers */,
 				B455DFCA210F9768002A69FD /* timecodeburn.h in Headers */,
 				B455DFC8210F9768002A69FD /* timecode.h in Headers */,
@@ -1415,6 +1424,7 @@
 				B4CE1CE716E53B560092B564 /* ntv2macdriverinterface.h in Headers */,
 				B4AC26B72118CF1600EDB0D5 /* ntv2debugmacros.h in Headers */,
 				B455DF42210F9703002A69FD /* diskstatus.h in Headers */,
+				CAAF116E26293E9000451BE3 /* ntv2routingexpert.h in Headers */,
 				B455E04A210F9C70002A69FD /* ntv2registerexpert.h in Headers */,
 				B455DEE9210F95E9002A69FD /* testpatterngen.h in Headers */,
 				B455DEF1210F95E9002A69FD /* timer.h in Headers */,
@@ -1511,6 +1521,7 @@
 				B4CC23191C5AE48A00171CB6 /* ntv2transcode.cpp in Sources */,
 				B455DFF7210F97CD002A69FD /* ancillarydata_cea708.cpp in Sources */,
 				B4CE1E1216E582A10092B564 /* ntv2card.cpp in Sources */,
+				CAAF117526293E9F00451BE3 /* ntv2routingexpert.cpp in Sources */,
 				B40064DF1CC9401000389528 /* ntv2mcsfile.cpp in Sources */,
 				B455DFC5210F9768002A69FD /* timebase.cpp in Sources */,
 				B4F90FB01C485204004723C9 /* ntv2config2022.cpp in Sources */,
@@ -1626,6 +1637,7 @@
 				B455DEE1210F95E9002A69FD /* performance.cpp in Sources */,
 				B455DF0C210F9662002A69FD /* sqlite3.c in Sources */,
 				B455DEDD210F95E9002A69FD /* guid.cpp in Sources */,
+				CAAF117426293E9F00451BE3 /* ntv2routingexpert.cpp in Sources */,
 				B455DEDA210F95E9002A69FD /* dpxfileio.cpp in Sources */,
 				B41B5E2416E5330C00A9E0DC /* ntv2autocirculate.cpp in Sources */,
 				B4CC23181C5AE48A00171CB6 /* ntv2transcode.cpp in Sources */,

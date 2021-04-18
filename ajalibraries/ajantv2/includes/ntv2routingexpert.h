@@ -22,8 +22,8 @@ class RoutingExpert
 		friend class CNTV2SignalRouter;
 
 		static RoutingExpertPtr		GetInstance(const bool inCreateIfNecessary = true);
-		static bool					DisposeInstance(void);
-		static uint32_t				NumInstances(void);
+		static bool			        DisposeInstance(void);
+		static uint32_t             NumInstances(void);
 
 	private:
 		RoutingExpert();
