@@ -16,6 +16,7 @@
 #include "ajabase/system/lock.h"
 #include "ajabase/system/debug.h"
 #include "ajabase/common/common.h"
+#include "ajaconv/ajaconv.h"
 #include "math.h"
 
 #define	TPGFAIL(__x__)	AJA_sERROR  (AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
@@ -2623,6 +2624,7 @@ NTV2TestPatternGen::NTV2TestPatternGen()
 		mUnPackedRAWBuffer	(),
 		mRGBBuffer			()
 {
+	AJACONV_Initialize(true);
 }
 
 bool NTV2TestPatternGen::drawIt (void)
