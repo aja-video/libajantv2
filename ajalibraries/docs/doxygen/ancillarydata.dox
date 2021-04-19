@@ -512,11 +512,9 @@ For SDKs prior to version 13.0, pass zero to CNTV2Card::WriteRegister for each f
 <b>Filtering Specific Packet Types</b>
 
 To exclude packets having specific DIDs, build an NTV2DIDSet that contains the packet DIDs you wish to exclude,
-then pass the set to CNTV2Card::SetAncExtractorFilterDIDs.
-
-<small>For SDKs and drivers prior to version 13.0, pack up to four DIDs to be excluded into a 4-byte longword,
-and write it (using CNTV2Card::WriteRegister) into one of the filter registers associated with the SDI input of
-interest (see above list).</small>
+then pass the set to CNTV2Card::AncExtractSetFilterDIDs.  <small>For SDKs prior to version 13.0, pack up to four
+DIDs to be excluded into a 4-byte longword, and write the longword (using CNTV2Card::WriteRegister) into one of
+the filter registers associated with the SDI input of interest (see above list).</small>
 
 
 <b>Restoring Default Filtering</b>
@@ -561,19 +559,17 @@ and then restore them afterward:
 Rarely does the ancillary data transmitted with a field of video exceed 5KB (or 10KB for a frame of interlaced video) … but it’s possible.
 If your application must accommodate more than 72KB of ancillary data, you’ll need to enlarge the driver’s ancillary data region.
 
-The NTV2 driver uses two virtual registers (kVRegAncField1Offset and kVRegAncField2Offset) to control where the Anc Extractors
+The NTV2 driver uses two virtual registers (::kVRegAncField1Offset and ::kVRegAncField2Offset) to control where the Anc Extractors
 start writing extracted packet data into (current) frame memory. When the driver starts up, it’s configured to use 0x12000 bytes (~72k)
-of space per field at the very bottom of each 8MB/16MB/etc. (depending on video format and pixel format) frame buffer on the device.
+of space per field at the very bottom of each 8MB/16MB/… frame on the device (depending on video format and pixel format).
 
-If you know the largest byte count you’ll encounter for each field, add some padding,
-then call CNTV2Card::AncSetFrameBufferSize with those values.
+If you know the largest byte count you’ll encounter for each field, add some padding, then call CNTV2Card::AncSetFrameBufferSize with
+those values. <small>For SDKs prior to version 13.0, write the Field 2 maximum byte count to the ::kVRegAncField2Offset register,
+then set the ::kVRegAncField1Offset register to the sum of both byte counts.</small>
 
-<small>For SDKs prior to version 13.0, write the Field 2 maximum byte count to the kVRegAncField2Offset register,
-then set the kVRegAncField1Offset register to the sum of both byte counts.</small>
+@warning	Itʼs possible to reserve a very large ancillary data space that actually runs into the video in the frame buffer.
 
-@warning	It's possible to reserve a very large ancillary data space that actually runs into the video in the frame buffer.
-
-To programmatically check if the Anc space intersects the video in the frame buffer:
+To programmatically check if the Anc space intersects video in the frame buffer:
 @code{.cpp}
 	CNTV2Card device;
 	. . .
@@ -591,7 +587,7 @@ To programmatically check if the Anc space intersects the video in the frame buf
 <b>Maximizing Ancillary Data Capture Capacity</b>
 
 -#	Determine the largest raster your application is expected to handle.
--#	Determine the most “expensive” (in terms of memory) NTV2PixelFormat your application will need to use.
+-#	Determine the most “expensive” (in terms of memory) ::NTV2PixelFormat your application will need to use.
 -#	Determine the “intrinsic” device frame buffer size that will be used for the video format and frame buffer format (8MB/16MB/etc.).
 -#	Calculate the maximum available space for ancillary data in the device frame buffer.
 	This is the distance, in bytes, from just past the last line of the raster to the bottom of the device frame buffer.
@@ -603,13 +599,13 @@ device frame buffer, which leaves 2,859,008 bytes of space for ancillary data.
 If a 16MB frame buffer is used (see CNTV2Card::SetFrameBufferSize), the maximum possible anc space jumps to 11,247,616 bytes — a <i>LOT</i> of space!
 
 The \ref inspectorframebuffer of \ref usingntv2watcher readily illustrates how this works.
--#	Set it to the “Raw” view.
+-#	Set it to the <b>Raw</b> view mode.
 -#	Change the units used for the vertical ruler to <b>Bytes From Top</b>.
 -#	Change the units used for the horizontal ruler to <b>Bytes From Left Edge</b>.
--#	Scroll down to the end of active video. (This is where a noticeable boundary between illuminated and dimmed values
-	indicate where changing pixel data ends.) That offset – 0x00546000 – is the first safe (unchanging) byte of available ancillary buffer space.
+-#	Scroll down to the end of active video (EAV). This is where a noticeable boundary between illuminated and dimmed values
+	indicate where changing pixel data ends. That offset – 0x00546000 – is the first safe (unchanging) byte of available ancillary buffer space.
 	@image	html	watcher-inspector-fb-eav.png
--#	Scroll down further until the data turns into a yellow color. That is the ancillary data region.
+-#	Scroll down further until the data is displayed in a yellow color. That is the ancillary data region.
 	@image	html	watcher-inspector-fb-ancrgn.png
 
 
