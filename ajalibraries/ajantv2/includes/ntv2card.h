@@ -188,41 +188,6 @@ typedef NTV2DIDSet::const_iterator	NTV2DIDSetConstIter;	///< @brief	Handy const 
 AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DIDSet & inDIDs);	///<	@brief	Handy ostream writer for NTV2DIDSet.
 
 
-//////////////////////////////////////////////////////////
-//////////  From ntv2vidproc.h              //////////////
-//////////////////////////////////////////////////////////
-#ifdef AJALinux
-	typedef unsigned int AJARgb;
-	const AJARgb  AJA_RGB_MASK    = 0x00ffffff;		// masks RGB values
-
-	inline int ajaRed( AJARgb rgb )		// get red part of RGB
-	{ return (int)((rgb >> 16) & 0xff); }
-
-	inline int ajaGreen( AJARgb rgb )		// get green part of RGB
-	{ return (int)((rgb >> 8) & 0xff); }
-
-	inline int ajaBlue( AJARgb rgb )		// get blue part of RGB
-	{ return (int)(rgb & 0xff); }
-
-	inline int ajaAlpha( AJARgb rgb )		// get alpha part of RGBA
-	{ return (int)((rgb >> 24) & 0xff); }
-
-	inline AJARgb ajaRgb( int r, int g, int b )// set RGB value
-	{ return (0xff << 24) | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff); }
-
-	inline AJARgb ajaRgba( int r, int g, int b, int a )// set RGBA value
-	{ return ((a & 0xff) << 24) | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff); }
-
-	inline int ajaGray( int r, int g, int b )// convert R,G,B to gray 0..255
-	{ return (r*11+g*16+b*5)/32; }
-
-	inline int ajaGray( AJARgb rgb )		// convert RGB to gray 0..255
-	{ return ajaGray( ajaRed(rgb), ajaGreen(rgb), ajaBlue(rgb) ); }
-#endif	//	AJALinux
-//////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////
-
-
 typedef std::bitset<16>		NTV2AudioChannelsMuted16;				///< @brief	Per-audio-channel mute state for up to 16 audio channels.
 const NTV2AudioChannelsMuted16	NTV2AudioChannelsMuteAll = NTV2AudioChannelsMuted16(0xFFFF);	///< @brief	All 16 audio channels muted/disabled.
 const NTV2AudioChannelsMuted16	NTV2AudioChannelsEnableAll = NTV2AudioChannelsMuted16(0x0000);	///< @brief	All 16 audio channels unmuted/enabled.
