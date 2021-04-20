@@ -673,7 +673,7 @@ public:
 		@param[in]	inMap		Also try to lock the segment map.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	DMABufferLock (const NTV2_POINTER & inBuffer, bool inMap = false);	//	New in SDK 15.5
+    AJA_VIRTUAL bool	DMABufferLock (const NTV2_POINTER & inBuffer, bool inMap = false, bool inRDMA = false);	//	New in SDK 15.5
 
 	/**
 		@brief		Page-locks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
@@ -682,9 +682,9 @@ public:
 		@param[in]	inMap			Also try to lock the segment map.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL inline bool	DMABufferLock (const ULWord * pInBuffer, const ULWord inByteCount, bool inMap = false)
+    AJA_VIRTUAL inline bool	DMABufferLock (const ULWord * pInBuffer, const ULWord inByteCount, bool inMap = false, bool inRDMA = false)
 	{
-		return DMABufferLock(NTV2_POINTER(pInBuffer, inByteCount), inMap);
+        return DMABufferLock(NTV2_POINTER(pInBuffer, inByteCount), inMap, inRDMA);
 	}
 
 
