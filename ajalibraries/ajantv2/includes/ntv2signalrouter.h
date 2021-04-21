@@ -535,63 +535,63 @@ class AJAExport CNTV2SignalRouter
 
 
 /**
-	@return		The appropriate ::NTV2InputXptID for the given FrameStore.
+	@return		The appropriate ::NTV2InputXptID for the given FrameStore, or ::NTV2_INPUT_CROSSPOINT_INVALID upon failure.
 	@param[in]	inFrameStore	Specifies the FrameStore of interest, expressed as an ::NTV2Channel (a zero-based index value).
 	@param[in]	inIsBInput		Specify true to obtain the "B" input crosspoint (for dual-link). Defaults to false (the "A" input crosspoint).
 **/
-AJAExport NTV2InputXptID			GetFrameBufferInputXptFromChannel (const NTV2Channel inFrameStore, const bool inIsBInput = false);
+AJAExport NTV2InputXptID		GetFrameBufferInputXptFromChannel (const NTV2Channel inFrameStore, const bool inIsBInput = false);
 
 /**
-	@return		The appropriate ::NTV2InputXptID for the given color space converter (CSC) widget.
+	@return		The appropriate ::NTV2InputXptID for the given color space converter (CSC) widget, or ::NTV2_INPUT_CROSSPOINT_INVALID upon failure.
 	@param[in]	inCSC			Specifies the CSC of interest, expressed as an ::NTV2Channel (a zero-based index value).
 	@param[in]	inIsKeyInput	Specify true to obtain the key (alpha) input crosspoint. Defaults to false (the video input crosspoint).
 **/
-AJAExport NTV2InputXptID			GetCSCInputXptFromChannel (const NTV2Channel inCSC, const bool inIsKeyInput = false);
+AJAExport NTV2InputXptID		GetCSCInputXptFromChannel (const NTV2Channel inCSC, const bool inIsKeyInput = false);
 
 /**
-	@return		The appropriate ::NTV2InputXptID for the given LUT widget.
+	@return		The appropriate ::NTV2InputXptID for the given LUT widget, or ::NTV2_INPUT_CROSSPOINT_INVALID upon failure.
 	@param[in]	inLUT			Specifies the LUT of interest, expressed as an ::NTV2Channel (a zero-based index value).
 **/
-AJAExport NTV2InputXptID			GetLUTInputXptFromChannel (const NTV2Channel inLUT);	//	New in SDK 16.0
+AJAExport NTV2InputXptID		GetLUTInputXptFromChannel (const NTV2Channel inLUT);	//	New in SDK 16.0
 
 /**
-@return		The appropriate ::NTV2InputXptID for the given Dual-Link Input widget.
-@param[in]	inChannel		Specifies the Dual-Link Input converter of interest, expressed as an ::NTV2Channel (a zero-based index value).
-@param[in]	inLinkB			Specifies whether to return the A or the B link crosspoint ID. Defaults to the A link crosspoint.
+	@return		The appropriate ::NTV2InputXptID for the given Dual-Link Input widget, or ::NTV2_INPUT_CROSSPOINT_INVALID upon failure.
+	@param[in]	inChannel		Specifies the Dual-Link Input converter of interest, expressed as an ::NTV2Channel (a zero-based index value).
+	@param[in]	inLinkB			Specifies whether to return the A or the B link crosspoint ID. Defaults to the A link crosspoint.
 **/
-AJAExport NTV2InputXptID			GetDLInInputXptFromChannel (const NTV2Channel inChannel, const bool inLinkB = false);
+AJAExport NTV2InputXptID		GetDLInInputXptFromChannel (const NTV2Channel inChannel, const bool inLinkB = false);
 
 /**
-@return		The appropriate ::NTV2InputXptID for the given Dual Link Output widget.
-@param[in]	inDLOutWidget		Specifies the Dual Link Output of interest, expressed as an ::NTV2Channel (a zero-based index value).
+	@return		The appropriate ::NTV2InputXptID for the given Dual Link Output widget, or ::NTV2_INPUT_CROSSPOINT_INVALID upon failure.
+	@param[in]	inDLOutWidget		Specifies the Dual Link Output of interest, expressed as an ::NTV2Channel (a zero-based index value).
 **/
-AJAExport NTV2InputXptID			GetDLOutInputXptFromChannel (const NTV2Channel inDLOutWidget);
+AJAExport NTV2InputXptID		GetDLOutInputXptFromChannel (const NTV2Channel inDLOutWidget);
 
 /**
-	@return		The appropriate NTV2OutputCrosspointID for the given color space converter (CSC) widget.
+	@return		The appropriate NTV2OutputCrosspointID for the given color space converter (CSC) widget, or ::NTV2_OUTPUT_CROSSPOINT_INVALID upon failure.
 	@param[in]	inCSC			Specifies the CSC of interest, expressed as an ::NTV2Channel (a zero-based index value).
 	@param[in]	inIsKey			Specify true to obtain the key (alpha) output crosspoint. Defaults to false (the video output crosspoint).
 	@param[in]	inIsRGB			Specify true to obtain the RGB video output crosspoint. Defaults to false (the YUV video output crosspoint).
 								Ignored if true passed to inIsKey.
 **/
-AJAExport NTV2OutputCrosspointID	GetCSCOutputXptFromChannel (const NTV2Channel inCSC, const bool inIsKey = false, const bool inIsRGB = false);
+AJAExport NTV2OutputXptID		GetCSCOutputXptFromChannel (const NTV2Channel inCSC, const bool inIsKey = false, const bool inIsRGB = false);
 
 /**
 	@return		The appropriate NTV2OutputCrosspointID for the given LUT widget.
 	@param[in]	inLUT			Specifies the LUT of interest, expressed as an ::NTV2Channel (a zero-based index value).
 **/
-AJAExport NTV2OutputCrosspointID	GetLUTOutputXptFromChannel (const NTV2Channel inLUT);	//	New in SDK 16.0
+AJAExport NTV2OutputXptID		GetLUTOutputXptFromChannel (const NTV2Channel inLUT);	//	New in SDK 16.0
 
 /**
-	@return		The appropriate NTV2OutputCrosspointID for the given FrameStore.
+	@return		The appropriate NTV2OutputCrosspointID for the given FrameStore, or ::NTV2_OUTPUT_CROSSPOINT_INVALID upon failure.
 	@param[in]	inFrameStore	Specifies the FrameStore of interest, expressed as an ::NTV2Channel (a zero-based index value).
 	@param[in]	inIsRGB			Specify true to obtain the RGB output crosspoint. Defaults to false (the YUV output crosspoint).
 	@param[in]	inIs425			Specify true to obtain the 425 output crosspoint. Defaults to false (the normal non-425 output crosspoint).
 **/
-AJAExport NTV2OutputCrosspointID	GetFrameBufferOutputXptFromChannel (const NTV2Channel inFrameStore, const bool inIsRGB = false, const bool inIs425 = false);
+AJAExport NTV2OutputXptID		GetFrameBufferOutputXptFromChannel (const NTV2Channel inFrameStore, const bool inIsRGB = false, const bool inIs425 = false);
 
 /**
-	@return		The appropriate NTV2OutputCrosspointID for the given NTV2InputSource.
+	@return		The appropriate ::NTV2OutputCrosspointID for the given ::NTV2InputSource, or ::NTV2_OUTPUT_CROSSPOINT_INVALID upon failure.
 	@param[in]	inInputSource	Specifies the NTV2InputSource of interest.
 	@param[in]	inIsSDI_DS2		Specify true to obtain the DS2 output crosspoint (for SDI input sources).
 								Defaults to false (the DS1 output crosspoint).
@@ -602,31 +602,31 @@ AJAExport NTV2OutputCrosspointID	GetFrameBufferOutputXptFromChannel (const NTV2C
 	@param[in]	inHDMI_Quadrant	Specifies the 4K/UHD quadrant of interest (for HDMI input sources), where 0=upperLeft, 1=upperRight, 2=lowerLeft, 3=lowerRight.
 								Defaults to 0 (upperLeft). Ignored for non-HDMI input sources.
 **/
-AJAExport NTV2OutputCrosspointID	GetInputSourceOutputXpt (const NTV2InputSource inInputSource,  const bool inIsSDI_DS2 = false,
+AJAExport NTV2OutputXptID		GetInputSourceOutputXpt (const NTV2InputSource inInputSource,  const bool inIsSDI_DS2 = false,
 																const bool inIsHDMI_RGB = false,  const UWord inHDMI_Quadrant = 0);
 
 /**
-	@return		The appropriate SDI input's ::NTV2OutputCrosspointID for the given SDI Input.
+	@return		The appropriate SDI input's ::NTV2OutputCrosspointID for the given SDI Input, or ::NTV2_OUTPUT_CROSSPOINT_INVALID upon failure.
 	@param[in]	inSDIInput		Specifies the SDI Input widget of interest, expressed as an ::NTV2Channel (a zero-based index value).
 	@param[in]	inIsDS2			Specify true to obtain the DS2 output crosspoint. Defaults to false (the DS1 output crosspoint).
 **/
-AJAExport NTV2OutputCrosspointID	GetSDIInputOutputXptFromChannel (const NTV2Channel inSDIInput,  const bool inIsDS2 = false);
+AJAExport NTV2OutputXptID		GetSDIInputOutputXptFromChannel (const NTV2Channel inSDIInput,  const bool inIsDS2 = false);
 
 /**
-	@return		The ::NTV2OutputCrosspointID for the given Dual Link Output.
+	@return		The ::NTV2OutputCrosspointID for the given Dual Link Output, or ::NTV2_OUTPUT_CROSSPOINT_INVALID upon failure.
 	@param[in]	inDLOutput		Specifies the Dual-Link Output widget of interest, expressed as an ::NTV2Channel (a zero-based index value).
 	@param[in]	inIsLinkB		Specify true to obtain the DS2 output crosspoint. Defaults to false (the DS1 output crosspoint).
 **/
-AJAExport NTV2OutputCrosspointID	GetDLOutOutputXptFromChannel(const NTV2Channel inDLOutput, const bool inIsLinkB = false);
+AJAExport NTV2OutputXptID		GetDLOutOutputXptFromChannel(const NTV2Channel inDLOutput, const bool inIsLinkB = false);
 
 /**
-	@return		The appropriate ::NTV2OutputCrosspointID for the given Dual Link Input.
+	@return		The appropriate ::NTV2OutputCrosspointID for the given Dual Link Input, or ::NTV2_OUTPUT_CROSSPOINT_INVALID upon failure.
 	@param[in]	inDLInput		Specifies the Dual-Link Input widget of interest, expressed as an ::NTV2Channel (a zero-based index value).
 **/
-AJAExport NTV2OutputCrosspointID	GetDLInOutputXptFromChannel(const NTV2Channel inDLInput);
+AJAExport NTV2OutputXptID		GetDLInOutputXptFromChannel(const NTV2Channel inDLInput);
 
 /**
-	@return		The appropriate ::NTV2InputXptID for the given ::NTV2OutputDestination.
+	@return		The appropriate ::NTV2InputXptID for the given ::NTV2OutputDestination, or ::NTV2_INPUT_CROSSPOINT_INVALID upon failure.
 	@param[in]	inOutputDest	Specifies the ::NTV2OutputDestination of interest.
 	@param[in]	inIsSDI_DS2		Specify true to obtain the DS2 input crosspoint (SDI output destinations only). Defaults to false (the DS1 input).
 								Ignored for non-SDI output destinations.
@@ -635,53 +635,53 @@ AJAExport NTV2OutputCrosspointID	GetDLInOutputXptFromChannel(const NTV2Channel i
 								Values above 3 are deemed to be non-4K/UHD (the default).
 								Ignored for non-HDMI output destinations.
 **/
-AJAExport NTV2InputXptID			GetOutputDestInputXpt (const NTV2OutputDestination inOutputDest,  const bool inIsSDI_DS2 = false,  const UWord inHDMI_Quadrant = 99);
+AJAExport NTV2InputXptID		GetOutputDestInputXpt (const NTV2OutputDestination inOutputDest,  const bool inIsSDI_DS2 = false,  const UWord inHDMI_Quadrant = 99);
 
 /**
-	@return		The appropriate ::NTV2InputXptID for the given SDI Output.
+	@return		The appropriate ::NTV2InputXptID for the given SDI Output, or ::NTV2_INPUT_CROSSPOINT_INVALID upon failure.
 	@param[in]	inSDIOutput		Specifies the SDI Output widget of interest, expressed as an ::NTV2Channel (a zero-based index value).
 	@param[in]	inIsDS2			Specify true to obtain the DS2 input crosspoint. Defaults to false (the DS1 input).
 **/
-AJAExport NTV2InputXptID			GetSDIOutputInputXpt (const NTV2Channel inSDIOutput,  const bool inIsDS2 = false);
+AJAExport NTV2InputXptID		GetSDIOutputInputXpt (const NTV2Channel inSDIOutput,  const bool inIsDS2 = false);
 
 /**
-	@return		The appropriate mixer's ::NTV2OutputCrosspointID for the given ::NTV2Channel.
+	@return		The appropriate mixer's ::NTV2OutputCrosspointID for the given ::NTV2Channel, or ::NTV2_OUTPUT_CROSSPOINT_INVALID upon failure.
 	@param[in]	inChannel		Specifies the ::NTV2Channel of interest. Mixer 1 is used for channels 1 & 2, mixer 2 for channels 3 & 4, etc.
 	@param[in]	inIsKey			Specify true to obtain the key output crosspoint. Defaults to false (the video output crosspoint).
 	@see		::GetMixerFGInputXpt, ::GetMixerBGInputXpt, \ref widget_mixkey
 **/
-AJAExport NTV2OutputCrosspointID	GetMixerOutputXptFromChannel (const NTV2Channel inChannel, const bool inIsKey = false);
+AJAExport NTV2OutputXptID		GetMixerOutputXptFromChannel (const NTV2Channel inChannel, const bool inIsKey = false);
 
 /**
-	@return		The appropriate mixer's foreground ::NTV2InputXptID for the given ::NTV2Channel.
+	@return		The appropriate mixer's foreground ::NTV2InputXptID for the given ::NTV2Channel, or ::NTV2_INPUT_CROSSPOINT_INVALID upon failure.
 	@param[in]	inChannel		Specifies the ::NTV2Channel of interest. Mixer 1 is used for channels 1 & 2, mixer 2 for channels 3 & 4, etc.
 	@param[in]	inIsKey			Specify true to obtain the key input crosspoint. Defaults to false (the video input).
 	@see		::GetMixerBGInputXpt, ::GetMixerOutputXptFromChannel, \ref widget_mixkey
 **/
-AJAExport NTV2InputXptID			GetMixerFGInputXpt (const NTV2Channel inChannel,  const bool inIsKey = false);
+AJAExport NTV2InputXptID		GetMixerFGInputXpt (const NTV2Channel inChannel,  const bool inIsKey = false);
 
 /**
-	@return		The appropriate mixer's background ::NTV2InputXptID for the given ::NTV2Channel.
+	@return		The appropriate mixer's background ::NTV2InputXptID for the given ::NTV2Channel, or ::NTV2_INPUT_CROSSPOINT_INVALID upon failure.
 	@param[in]	inChannel		Specifies the ::NTV2Channel of interest. Mixer 1 is used for channels 1 & 2, mixer 2 for channels 3 & 4, etc.
 	@param[in]	inIsKey			Specify true to obtain the key input crosspoint. Defaults to false (the video input).
 	@see		::GetMixerFGInputXpt, ::GetMixerOutputXptFromChannel, \ref widget_mixkey
 **/
-AJAExport NTV2InputXptID			GetMixerBGInputXpt (const NTV2Channel inChannel,  const bool inIsKey = false);
+AJAExport NTV2InputXptID		GetMixerBGInputXpt (const NTV2Channel inChannel,  const bool inIsKey = false);
 
 /**
-    @return		The appropriate ::NTV2InputXptID for the given TSI Muxer widget.
+    @return		The appropriate ::NTV2InputXptID for the given TSI Muxer widget, or ::NTV2_INPUT_CROSSPOINT_INVALID upon failure.
     @param[in]	inTSIMuxer		Specifies the 425Mux widget of interest, expressed as an ::NTV2Channel (a zero-based index value).
     @param[in]	inLinkB			Specify true to obtain the "B" input crosspoint. Defaults to false, the "A" input.
 **/
-AJAExport NTV2InputXptID		     GetTSIMuxInputXptFromChannel(const NTV2Channel inTSIMuxer, const bool inLinkB = false);
+AJAExport NTV2InputXptID	     GetTSIMuxInputXptFromChannel(const NTV2Channel inTSIMuxer, const bool inLinkB = false);
 
 /**
-    @return		The appropriate ::NTV2OutputXptID for the given TSI Muxer.
+    @return		The appropriate ::NTV2OutputXptID for the given TSI Muxer, or ::NTV2_OUTPUT_CROSSPOINT_INVALID upon failure.
     @param[in]	inTSIMuxer		Specifies the 425Mux widget of interest, expressed as an ::NTV2Channel (a zero-based index value).
     @param[in]	inLinkB			Specify true to obtain the "B" output crosspoint. Defaults to false, the "A" output.
     @param[in]	inIsRGB			Specify true to obtain the RGB output crosspoint. Defaults to false, the YUV output.
 **/
-AJAExport NTV2OutputXptID			GetTSIMuxOutputXptFromChannel (const NTV2Channel inTSIMuxer, const bool inLinkB = false, const bool inIsRGB = false);
+AJAExport NTV2OutputXptID		GetTSIMuxOutputXptFromChannel (const NTV2Channel inTSIMuxer, const bool inLinkB = false, const bool inIsRGB = false);
 
 
 //	Stream operators
