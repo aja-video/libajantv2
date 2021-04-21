@@ -783,17 +783,9 @@ The spreadsheets that follow show, in detail for each video format, which lines 
 
 @image	html	vvi-525i-75.png
 
-@subsection	sd525p60		SD 525p60
-
-@image	html	vvi-525p-75.png
-
 @subsection	sd625i			SD 625i
 
 @image	html	vvi-625i-75.png
-
-@subsection	sd625p			SD 625p
-
-@image	html	vvi-625p-75.png
 
 @subsection	hd720p			HD 720p
 
@@ -811,20 +803,9 @@ The spreadsheets that follow show, in detail for each video format, which lines 
 
 @image	html	vvi-1080pduallink-75.png
 
-@subsection	hd1035i60		HD 1035i60 (SMPTE 240)
-
-@image	html	vvi-1035i-75.png
-
 @subsection	hd2k1080p		2K: 1080p
 
 @image	html	vvi-2k1080p-75.png
 
-@subsection	hd2k1556psf15	2K: 1556psF @ 15fps
-
-@image	html	vvi-2k1556psf15-75.png
-
-@subsection	hd2k1556psf18	2K: 1556psF @ 18fps
-
-@image	html	vvi-2k1556psf18-75.png
 
 **/
