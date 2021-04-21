@@ -540,7 +540,10 @@ public:
 											const ULWord	inSegmentHostPitch,
 											const ULWord	inSegmentCardPitch);
 
-	AJA_VIRTUAL bool	DmaP2PTargetFrame (NTV2Channel channel,					// frame buffer channel output frame to update on completion
+    /**
+        @brief		DirectGMA p2p transfers (not GPUDirect: see DMABufferLock)
+    **/
+    AJA_VIRTUAL bool	DmaP2PTargetFrame (NTV2Channel channel,					// frame buffer channel output frame to update on completion
 											ULWord frameNumber,					// frame number to target
 											ULWord frameOffset,					// frame buffer offset (bytes)
 											PCHANNEL_P2P_STRUCT pP2PData);		// p2p target data (output)
@@ -670,8 +673,9 @@ public:
 	/**
 		@brief		Page-locks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
 		@param[in]	inBuffer	Specifies the host buffer to lock.
-		@param[in]	inMap		Also try to lock the segment map.
-		@return		True if successful; otherwise false.
+        @param[in]	inMap		Also lock the segment map.
+        @param[in]	inRDMA		Lock a GPUDirect buffer for p2p DMA.
+        @return		True if successful; otherwise false.
 	**/
     AJA_VIRTUAL bool	DMABufferLock (const NTV2_POINTER & inBuffer, bool inMap = false, bool inRDMA = false);	//	New in SDK 15.5
 
@@ -679,8 +683,9 @@ public:
 		@brief		Page-locks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
 		@param[in]	pInBuffer		Specifies the starting address of the host buffer to lock.
 		@param[in]	inByteCount		Specifies the total length of the host buffer.
-		@param[in]	inMap			Also try to lock the segment map.
-		@return		True if successful; otherwise false.
+        @param[in]	inMap			Also lock the segment map.
+        @param[in]	inRDMA			Lock a GPUDirect buffer for p2p DMA.
+        @return		True if successful; otherwise false.
 	**/
     AJA_VIRTUAL inline bool	DMABufferLock (const ULWord * pInBuffer, const ULWord inByteCount, bool inMap = false, bool inRDMA = false)
 	{
