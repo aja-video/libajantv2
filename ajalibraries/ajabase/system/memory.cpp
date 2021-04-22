@@ -189,7 +189,7 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
 	{
 		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::AllocateShared  share name is empty");
 		return NULL;
-	}
+    }
 
 	// look for share with the same name
 	size_t sizeInBytes = (*pMemorySize + AJA_PAGE_SIZE - 1) / AJA_PAGE_SIZE * AJA_PAGE_SIZE;
@@ -198,10 +198,12 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
 #if defined(AJA_WINDOWS)
     name = "Global\\";
 	name += pShareName;
-#else //Mac and Linux
+#elif defined(AJA_LINUX)
     // Docs say to start name with a slash
     name = "/";
     name += pShareName;
+#else //Mac
+    name = pShareName;
 #endif
 
 	std::list<SharedData>::iterator shareIter;
