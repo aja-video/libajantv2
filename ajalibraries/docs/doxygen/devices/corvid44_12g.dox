@@ -6,9 +6,11 @@
 	<hr>
 	@subsection		corvid4412g		Corvid 44 12G
 
-	This page describes the <b>Corvid 44 12G</b> OEM capture/playout board, which features four SDI connectors that can be programmatically
-	configured as inputs or outputs.
-	It’s identified by ::DEVICE_ID_CORVID44_12G.
+	This page describes the <b>Corvid 44 12G</b> OEM capture/playout board, which features four 12G SDI connectors that can
+	be programmatically configured as inputs or outputs. It’s identified by these device identifiers:
+	-	::DEVICE_ID_CORVID44_8KMK (8K: 4 FrameStores, 1 Mixer, 2 CSCs, no LUTs)
+	-	::DEVICE_ID_CORVID44_8K (OEM 8K: 4 FrameStores, no Mixer, no CSCs, no LUTs)
+	-	::DEVICE_ID_CORVID44_2X4K (2×4K: 2 FrameStores, 1 Mixer, 2 CSCs, 2 LUTs)
 
 	@image	html	corvid4412g_oblique800.png
 
@@ -63,9 +65,9 @@
 
 	@par		Firmware
 
-	-	<b>Standard OEM:</b>  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/corvid4412g-oem-firmware>
-	-	<b>Mixer/Keyer:</b>  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/corvid448kmk-firmware>
-	-	<b>2×4K:</b>  <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/corvid448k2x4k-firmware>
+	-	::DEVICE_ID_CORVID44_8KMK — <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/corvid448kmk-firmware>
+	-	::DEVICE_ID_CORVID44_8K — <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/corvid4412g-oem-firmware>
+	-	::DEVICE_ID_CORVID44_2X4K — <https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/corvid448k2x4k-firmware>
 
 	@par	Physical
 
