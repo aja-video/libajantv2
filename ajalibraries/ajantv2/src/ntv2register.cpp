@@ -668,7 +668,7 @@ bool CNTV2Card::GetNominalMinMaxHV (int & outNominalH, int & outMinH, int & outM
 	return false;
 }
 
-bool CNTV2Card::SetVideoHOffset (int hOffset)
+bool CNTV2Card::SetVideoHOffset (int hOffset, const UWord inOutputSpigot)
 {
 	int				nominalH(0), minH(0), maxH(0), nominalV(0), minV(0), maxV(0), count(0);
 	ULWord			timingValue(0), lineCount(0), lineCount2(0);
@@ -689,15 +689,16 @@ bool CNTV2Card::SetVideoHOffset (int hOffset)
 		nominalH = maxH;
 	else if (nominalH < minH)
 		nominalH = minH;
-	
-	ReadOutputTimingControl(timingValue);
-	
+
+	if (!ReadOutputTimingControl(timingValue, inOutputSpigot))
+		return false;
+
 	// Handle special cases where we increment or decrement the timing by one
 	// Some hardware LS/LH cannot handle this and inorder to do 1 pixel timing moves
 	// we need to move by 3 then subtract 2, or subtract 3 then add 2 depending on 
 	// direction.  Also we need to wait at least one horizontal line between the values
 	// we set.
-		
+
 	if (LWord((timingValue & 0x0000FFFF)) == nominalH)
 		return true;	//	Nothing to change
 	if (((LWord((timingValue & 0x0000FFFF)) + 1) == nominalH) )
@@ -706,8 +707,8 @@ bool CNTV2Card::SetVideoHOffset (int hOffset)
 		// we just need to add 2.
 		timingValue &= 0xFFFF0000;
 		timingValue |= ULWord(nominalH + 2);
-		WriteOutputTimingControl(timingValue);
-		
+		WriteOutputTimingControl(timingValue, inOutputSpigot);
+
 		// Wait a scanline
 		count = 0;
 		ReadLineCount (lineCount);
@@ -717,19 +718,18 @@ bool CNTV2Card::SetVideoHOffset (int hOffset)
 			if (count > 1000000) return false;
 			count++;
 		} while (lineCount == lineCount2);
-		
+
 		// Now move timing back by 2.
 		timingValue -= 2;
-		WriteOutputTimingControl(timingValue);
 	}
 	else if ( ((LWord((timingValue & 0x0000FFFF)) -1) == nominalH ) )
 	{
-		// Subract 3 to the timing value. Note that nominalH is already decremented by one so
+		// Subtract 3 from the timing value. Note that nominalH is already decremented by one so
 		// we just need to subtract 2.
 		timingValue &= 0xFFFF0000;
 		timingValue |= ULWord(nominalH - 2);
-		WriteOutputTimingControl(timingValue);
-		
+		WriteOutputTimingControl(timingValue, inOutputSpigot);
+
 		// Wait a scanline
 		count = 0;
 		ReadLineCount (lineCount);
@@ -742,7 +742,6 @@ bool CNTV2Card::SetVideoHOffset (int hOffset)
 		
 		// Now move timing forward by 2.
 		timingValue += 2;
-		WriteOutputTimingControl(timingValue);
 	}
 	else
 	{
@@ -750,12 +749,12 @@ bool CNTV2Card::SetVideoHOffset (int hOffset)
 		// we can just set the new value
 		timingValue &= 0xFFFF0000;
 		timingValue |= ULWord(nominalH);
-		WriteOutputTimingControl(timingValue);
 	}
-	return true; 
-}
+	return WriteOutputTimingControl(timingValue, inOutputSpigot);
+}	//	SetVideoHOffset
 
-bool CNTV2Card::GetVideoHOffset (int & outHOffset)
+
+bool CNTV2Card::GetVideoHOffset (int & outHOffset,  const UWord inOutputSpigot)
 {
 	int	nominalH(0), minH(0), maxH(0), nominalV(0), minV(0), maxV(0);
 
@@ -764,8 +763,9 @@ bool CNTV2Card::GetVideoHOffset (int & outHOffset)
 		return false;
 
 	ULWord	timingValue(0);
-	ReadOutputTimingControl(timingValue);
-	timingValue &= 0xFFFF;
+	if (!ReadOutputTimingControl(timingValue, inOutputSpigot))
+		return false;
+	timingValue &= 0xFFFF;	//	lower 16 bits has H timing value -- 0x1000 is nominal
 	
 	// Get offset from nominal value (K2 you increment the timing by adding the timing value)
 	if (::NTV2DeviceNeedsRoutingSetup(GetDeviceID()))
@@ -775,7 +775,7 @@ bool CNTV2Card::GetVideoHOffset (int & outHOffset)
 	return true; 
 }
 
-bool CNTV2Card::SetVideoVOffset (int vOffset)
+bool CNTV2Card::SetVideoVOffset (int vOffset, const UWord inOutputSpigot)
 {
 	int	nominalH(0), minH(0), maxH(0), nominalV(0), minV(0), maxV(0);
 
@@ -796,14 +796,13 @@ bool CNTV2Card::SetVideoVOffset (int vOffset)
 		nominalV = minV;
 
 	ULWord	timingValue(0);
-	ReadOutputTimingControl(timingValue);
-	timingValue &= 0x0000FFFF;
-	timingValue |= ULWord(nominalV << 16);
-	WriteOutputTimingControl(timingValue);
-	return true; 
+	if (!ReadOutputTimingControl(timingValue, inOutputSpigot))
+		return false;
+	timingValue &= 0x0000FFFF;				//	Clear V value, keep H value
+	return WriteOutputTimingControl(timingValue | ULWord(nominalV << 16), inOutputSpigot);	//	Change only the V value
 }
 
-bool CNTV2Card::GetVideoVOffset (int & outVOffset)
+bool CNTV2Card::GetVideoVOffset (int & outVOffset, const UWord inOutputSpigot)
 {
 	int	nominalH(0), minH(0), maxH(0), nominalV(0), minV(0), maxV(0);
 	
@@ -812,7 +811,8 @@ bool CNTV2Card::GetVideoVOffset (int & outVOffset)
 		return false;
 
 	ULWord	timingValue(0);
-	ReadOutputTimingControl(timingValue);
+	if (!ReadOutputTimingControl(timingValue, inOutputSpigot))
+		return false;
 	timingValue = (timingValue >> 16);
 
 	// Get offset from nominal value (K2 you increment the timing by adding the timing value)

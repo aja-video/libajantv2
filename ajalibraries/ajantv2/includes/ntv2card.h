@@ -4157,12 +4157,12 @@ public:
 	AJA_VIRTUAL bool	IsChannelEnabled (const NTV2Channel inChannel, bool & outEnabled);
 
 	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetChannel2Disable (bool value));								///< @deprecated	Use EnableChannel or DisableChannel instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetChannel2Disable (bool* value));								///< @deprecated	Use IsChannelEnabled instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetChannel3Disable (bool value));								///< @deprecated	Use EnableChannel or DisableChannel instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetChannel3Disable (bool* value));								///< @deprecated	Use IsChannelEnabled instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetChannel4Disable (bool value));								///< @deprecated	Use EnableChannel or DisableChannel instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetChannel4Disable (bool* value));								///< @deprecated	Use IsChannelEnabled instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetChannel2Disable (bool value));	///< @deprecated	Use EnableChannel or DisableChannel instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetChannel2Disable (bool* value));	///< @deprecated	Use IsChannelEnabled instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetChannel3Disable (bool value));	///< @deprecated	Use EnableChannel or DisableChannel instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetChannel3Disable (bool* value));	///< @deprecated	Use IsChannelEnabled instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetChannel4Disable (bool value));	///< @deprecated	Use EnableChannel or DisableChannel instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetChannel4Disable (bool* value));	///< @deprecated	Use IsChannelEnabled instead.
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	AJA_VIRTUAL bool	SetVideoDACMode (NTV2VideoDACMode inValue);
@@ -4174,10 +4174,56 @@ public:
 	**/
 	///@{
 	AJA_VIRTUAL bool	GetNominalMinMaxHV (int & outNominalH, int & outMinH, int & outMaxH, int & outNominalV, int & outMinV, int & outMaxV);
-	AJA_VIRTUAL bool	SetVideoHOffset (const int inHOffset);
-	AJA_VIRTUAL bool	GetVideoHOffset (int & outHOffset);
-	AJA_VIRTUAL bool	SetVideoVOffset (const int inVOffset);
-	AJA_VIRTUAL bool	GetVideoVOffset (int & outVOffset);
+
+	/**
+		@brief		Returns the current horizontal timing offset, in pixels, for the given SDI output connector.
+		@param[in]	inHOffset		Specifies the horizontal output timing offset, a signed value, in pixels after or before the nominal value.
+		@param[in]	inOutputSpigot	(Added in SDK v16.1) Optionally specifies the SDI output connector of interest. Defaults to 0 (SDI Out 1).
+		@note		The output timing can only be adjusted when the device's reference source is set for external reference.
+		@note		The "inOutputSpigot" parameter is respected only if the device is multi-format-capable (see ::NTV2DeviceCanDoMultiFormat)
+					and the device is currently in multi-format mode (see CNTV2Card::GetMultiFormatMode and CNTV2Card::SetMultiFormatMode).
+					Otherwise, this function sets the horizontal timing offset for SDI Output 1 (i.e., the "global" output timing).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetVideoHOffset, CNTV2Card::SetVideoVOffset
+	**/
+	AJA_VIRTUAL bool	SetVideoHOffset (const int inHOffset, const UWord inOutputSpigot = 0);
+
+	/**
+		@brief		Returns the current horizontal timing offset, in pixels, for the given SDI output connector.
+		@param[out]	outHOffset		Receives the current horizontal output timing offset, a signed value, in pixels after or before the nominal value.
+		@param[in]	inOutputSpigot	(Added in SDK v16.1) Optionally specifies the SDI output connector of interest. Defaults to 0 (SDI Out 1).
+		@note		The "inOutputSpigot" parameter is respected only if the device is multi-format-capable (see ::NTV2DeviceCanDoMultiFormat)
+					and the device is currently in multi-format mode (see CNTV2Card::GetMultiFormatMode and CNTV2Card::SetMultiFormatMode).
+					Otherwise, this function only reports the horizontal timing offset for SDI Output 1 (i.e., the "global" output timing).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetVideoHOffset, CNTV2Card::GetVideoVOffset
+	**/
+	AJA_VIRTUAL bool	GetVideoHOffset (int & outHOffset, const UWord inOutputSpigot = 0);
+
+	/**
+		@brief		Returns the current vertical timing offset, in pixels, for the given SDI output connector.
+		@param[in]	inVOffset		Specifies the vertical output timing offset, a signed value, in pixels after or before the nominal value.
+		@param[in]	inOutputSpigot	(Added in SDK v16.1) Optionally specifies the SDI output connector of interest. Defaults to 0 (SDI Out 1).
+		@note		The output timing can only be adjusted when the device's reference source is set for external reference.
+		@note		The "inOutputSpigot" parameter is respected only if the device is multi-format-capable (see ::NTV2DeviceCanDoMultiFormat)
+					and the device is currently in multi-format mode (see CNTV2Card::GetMultiFormatMode and CNTV2Card::SetMultiFormatMode).
+					Otherwise, this function sets the vertical timing offset for SDI Output 1 (i.e., the "global" output timing).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetVideoVOffset, CNTV2Card::SetVideoHOffset
+	**/
+	AJA_VIRTUAL bool	SetVideoVOffset (const int inVOffset, const UWord inOutputSpigot = 0);
+
+	/**
+		@brief		Returns the current vertical timing offset, in lines, for the given SDI output connector.
+		@param[out]	outVOffset		Receives the current vertical output timing offset, a signed value, in lines after or before the nominal value.
+		@param[in]	inOutputSpigot	(Added in SDK v16.1) Optionally specifies the SDI output spigot of interest. Defaults to 0 (SDI Out 1).
+		@note		The "inOutputSpigot" parameter is respected only if the device is multi-format-capable (see ::NTV2DeviceCanDoMultiFormat)
+					and the device is currently in multi-format mode (see CNTV2Card::GetMultiFormatMode and CNTV2Card::SetMultiFormatMode).
+					Otherwise, this function only reports the vertical timing offset for SDI Output 1 (i.e., the "global" output timing).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetVideoVOffset, CNTV2Card::GetVideoHOffset
+	**/
+	AJA_VIRTUAL bool	GetVideoVOffset (int & outVOffset, const UWord inOutputSpigot = 0);
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetVideoFinePhase (int fOffset));		///< @deprecated	This function is obsolete.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetVideoFinePhase (int* fOffset));		///< @deprecated	This function is obsolete.
@@ -4187,28 +4233,30 @@ public:
 	AJA_VIRTUAL bool	GetAnalogOutHTiming (ULWord & outValue);
 
 	/**
-		@brief	Adjusts the output timing for the given SDI output spigot.
+		@brief		Adjusts the output timing for the given SDI output connector.
 		@param[in]	inValue			Specifies the output timing control value to use. The lower 16 bits of this 32-bit value
 									control the horizontal timing, while the upper 16 bits control the vertical.
 									Each horizontal increment/decrement moves the output relative to the reference by one pixel.
 									Each vertical increment/decrement moves the output relative to the reference by one line.
-		@param[in]	inOutputSpigot	Optionally specifies the SDI output of interest. Defaults to zero (SDI Out 1).
+		@param[in]	inOutputSpigot	Optionally specifies the SDI output connector of interest. Defaults to zero (SDI Out 1).
 		@note		The output timing can only be adjusted when the device's reference source is set for external reference.
 		@note		The "inOutputSpigot" parameter is respected only if the device is multi-format-capable (see ::NTV2DeviceCanDoMultiFormat)
 					and the device is currently in multi-format mode (see CNTV2Card::GetMultiFormatMode and CNTV2Card::SetMultiFormatMode).
 					Otherwise, the timing is changed for all SDI outputs.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::ReadOutputTimingControl
 	**/
 	AJA_VIRTUAL bool	WriteOutputTimingControl (const ULWord inValue, const UWord inOutputSpigot = 0);
 
 	/**
-		@brief	Returns the current output timing control value for the given SDI output spigot.
+		@brief		Returns the current output timing control value for the given SDI output connector.
 		@param[out]	outValue		Receives the current output timing control value.
-		@param[in]	inOutputSpigot	Optionally specifies the SDI output spigot of interest. Defaults to 0 (SDI Out 1).
+		@param[in]	inOutputSpigot	Optionally specifies the SDI output connector of interest. Defaults to 0 (SDI Out 1).
 		@note		The "inOutputSpigot" parameter is respected only if the device is multi-format-capable (see ::NTV2DeviceCanDoMultiFormat)
 					and the device is currently in multi-format mode (see CNTV2Card::GetMultiFormatMode and CNTV2Card::SetMultiFormatMode).
 					Otherwise, this function only reports the timing for SDI Output 1 (i.e., the "global" output timing).
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::WriteOutputTimingControl
 	**/
 	AJA_VIRTUAL bool	ReadOutputTimingControl (ULWord & outValue, const UWord inOutputSpigot = 0);
 
