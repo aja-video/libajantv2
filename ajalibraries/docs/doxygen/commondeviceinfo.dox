@@ -1520,8 +1520,18 @@
 	or if a new widget or feature is present (by simply reading registers).
 	Unfortunately, this puts the burden of feature inquiry entirely into software, and onto the authors of NTV2 client applications.
 
-	AJA will do its best to ensure that the “CanDo” functions are correct for the specific set of firmware bitfiles that have been
-	qualified for a given SDK release. The release notes on the SDK download page will point out any firmware features added (or removed).
+	The \ref libajantv2-devicefeatures functions cover 95% of all hardware and firmware feature variations on all NTV2 devices.
+	There are, however, a few features that can only be determined by querying the running device itself. Here are two examples:
+	-	The \ref io4kplus and <a href="https://www.avid.com/products/avid-artist-io/features#Avid-Artist-DNxIV">Avid DNxIV</a> use
+		identical firmware, but only the Avid device has an XLR microphone input on its front panel.
+		Thus, CNTV2Card::DeviceHasMicInput is the only way to differentiate between the two devices.
+	-	CNTV2Card::HasCanConnectROM is the only way to tell if a given firmware has the ROM feature used by
+		CNTV2Card::CanConnect to determine if a given connection is actually implemented in the firmware.
+
+	AJA will do its best to ensure that the “NTV2DeviceCanDo…”, “NTV2DeviceHas…” and “NTV2DeviceGetNum…” functions are correct
+	for the specific set of firmware bitfiles that have been qualified for a given SDK release. The release notes on the SDK
+	download page will point out any firmware features added (or removed).
+
 
 
 	<hr size="50px">
