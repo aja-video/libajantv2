@@ -359,7 +359,7 @@ bool CNTV2Card::GetEmbeddedAudioInput (NTV2EmbeddedAudioInput & outAudioInput, c
 	bool			status			(false);
 
 	if (numInputs <= 2)
-		status = ReadRegister (regAudSource, value, kRegMaskEmbeddedAudioInput, kRegShiftEmbeddedAudioInput);
+		status = ReadRegister (srcSelectReg, value, kRegMaskEmbeddedAudioInput, kRegShiftEmbeddedAudioInput);
 	else
 	{
 		ULWord	sparse1 (0), sparse2 (0);	//	Sparse bits
