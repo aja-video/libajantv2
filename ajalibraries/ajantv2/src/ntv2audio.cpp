@@ -47,9 +47,6 @@ static const ULWord	gAudioDelayRegisterNumbers []		= {	kRegAud1Delay,	kRegAud2De
 static const ULWord	gAudioSystemToAudioControlRegNum []	= {	kRegAud1Control,		kRegAud2Control,		kRegAud3Control,		kRegAud4Control,
 															kRegAud5Control,		kRegAud6Control,		kRegAud7Control,		kRegAud8Control,		0};
 
-static const ULWord	gAudioSystemToAudioSrcSelectRegNum []= {kRegAud1SourceSelect,	kRegAud2SourceSelect,	kRegAud3SourceSelect,	kRegAud4SourceSelect,
-															kRegAud5SourceSelect,	kRegAud6SourceSelect,	kRegAud7SourceSelect,	kRegAud8SourceSelect,	0};
-
 static const ULWord gAudioRateHighMask [] = { kRegMaskAud1RateHigh, kRegMaskAud2RateHigh, kRegMaskAud3RateHigh, kRegMaskAud4RateHigh,
 											  kRegMaskAud5RateHigh, kRegMaskAud6RateHigh, kRegMaskAud7RateHigh, kRegMaskAud8RateHigh };
 
@@ -327,7 +324,7 @@ bool CNTV2Card::GetEncodedAudioMode (NTV2EncodedAudioMode & outMode, const NTV2A
 
 bool CNTV2Card::SetEmbeddedAudioInput (const NTV2EmbeddedAudioInput inAudioInput, const NTV2AudioSystem inAudioSystem)
 {
-	const ULWord	regAudSource	(gAudioSystemToAudioSrcSelectRegNum [inAudioSystem]);
+	const ULWord	regAudSource	(gAudioSystemToSrcSelectRegNum [inAudioSystem]);
 	const ULWord	numInputs		(::NTV2DeviceGetNumVideoInputs (_boardID));
 	const ULWord	numHDMI			(::NTV2DeviceGetNumHDMIVideoInputs (_boardID));
 	bool			status			(false);
@@ -356,7 +353,7 @@ bool CNTV2Card::SetEmbeddedAudioInput (const NTV2EmbeddedAudioInput inAudioInput
 
 bool CNTV2Card::GetEmbeddedAudioInput (NTV2EmbeddedAudioInput & outAudioInput, const NTV2AudioSystem inAudioSystem)
 {
-	const ULWord	regAudSource	(gAudioSystemToAudioSrcSelectRegNum [inAudioSystem]);
+	const ULWord	srcSelectReg	(gAudioSystemToSrcSelectRegNum [inAudioSystem]);
 	const ULWord	numInputs		(::NTV2DeviceGetNumVideoInputs (_boardID));
 	ULWord			value			(0);
 	bool			status			(false);
@@ -366,8 +363,8 @@ bool CNTV2Card::GetEmbeddedAudioInput (NTV2EmbeddedAudioInput & outAudioInput, c
 	else
 	{
 		ULWord	sparse1 (0), sparse2 (0);	//	Sparse bits
-		status = ReadRegister (regAudSource, sparse1, kRegMaskEmbeddedAudioInput, kRegShiftEmbeddedAudioInput)
-				&& ReadRegister (regAudSource, sparse2, kRegMaskEmbeddedAudioInput2, kRegShiftEmbeddedAudioInput2);
+		status = ReadRegister (srcSelectReg, sparse1, kRegMaskEmbeddedAudioInput, kRegShiftEmbeddedAudioInput)
+				&& ReadRegister (srcSelectReg, sparse2, kRegMaskEmbeddedAudioInput2, kRegShiftEmbeddedAudioInput2);
 		if (!sparse1 && !sparse2)
 			value = NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1;
 		else if (sparse1 && !sparse2)
@@ -377,40 +374,30 @@ bool CNTV2Card::GetEmbeddedAudioInput (NTV2EmbeddedAudioInput & outAudioInput, c
 		else if (sparse1 && sparse2)
 			value = NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_4;
 
-		if(inAudioSystem >= NTV2_AUDIOSYSTEM_5)
-		{
-			switch(value)
+		if (inAudioSystem >= NTV2_AUDIOSYSTEM_5)
+			switch (value)
 			{
-			case NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1:
-				value = NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_5;
-				break;
-			case NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_2:
-				value = NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_6;
-				break;
-			case NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_3:
-				value = NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_7;
-				break;
-			case NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_4:
-				value = NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_5;
-				break;
+				case NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1:		value = NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_5;	break;
+				case NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_2:		value = NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_6;	break;
+				case NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_3:		value = NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_7;	break;
+				case NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_4:		value = NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_8;	break;
 			}
-		}
 	}
 	if (status)
-		outAudioInput = static_cast <NTV2EmbeddedAudioInput> (value);
+		outAudioInput = NTV2EmbeddedAudioInput(value);
 	return status;
 }
 
 
 bool CNTV2Card::SetEmbeddedAudioClock (const NTV2EmbeddedAudioClock inValue, const NTV2AudioSystem inAudioSystem)
 {
-	return WriteRegister (gAudioSystemToAudioSrcSelectRegNum[inAudioSystem], inValue, kRegMaskEmbeddedAudioClock, kRegShiftEmbeddedAudioClock);
+	return WriteRegister (gAudioSystemToSrcSelectRegNum[inAudioSystem], inValue, kRegMaskEmbeddedAudioClock, kRegShiftEmbeddedAudioClock);
 }
 
 
 bool CNTV2Card::GetEmbeddedAudioClock (NTV2EmbeddedAudioClock & outValue, const NTV2AudioSystem inAudioSystem)
 {
-	return CNTV2DriverInterface::ReadRegister (gAudioSystemToAudioSrcSelectRegNum[inAudioSystem], outValue, kRegMaskEmbeddedAudioClock, kRegShiftEmbeddedAudioClock);
+	return CNTV2DriverInterface::ReadRegister (gAudioSystemToSrcSelectRegNum[inAudioSystem], outValue, kRegMaskEmbeddedAudioClock, kRegShiftEmbeddedAudioClock);
 }
 
 
@@ -477,22 +464,22 @@ bool CNTV2Card::ReadAudioLastOut (ULWord & outValue, const NTV2Channel inChannel
 
 bool CNTV2Card::SetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, const NTV2AudioSource inAudioSource, const NTV2EmbeddedAudioInput inEmbeddedSource)
 {
-	bool			result		(false);
+	bool result(false);
+	static const ULWord	sAudioSourceToRegValues []	= {	0x1,	//	NTV2_AUDIO_EMBEDDED
+														0x0,	//	NTV2_AUDIO_AES
+														0x9,	//	NTV2_AUDIO_ANALOG
+														0xA,	//	NTV2_AUDIO_HDMI
+														0xB};	//	NTV2_AUDIO_MIC
 
-	static const ULWord	sAudioSourceToRegValues []	=	{0x1/*NTV2_AUDIO_EMBEDDED*/,  0x0/*NTV2_AUDIO_AES*/,  0x9/*NTV2_AUDIO_ANALOG*/,  0xA/*NTV2_AUDIO_HDMI*/, 0xB/*NTV2_AUDIO_MIC*/};
-
-	if (static_cast <UWord> (inAudioSystem) < (::NTV2DeviceGetNumAudioSystems (_boardID) + (DeviceCanDoAudioMixer() ? 2 : 0)) && NTV2_IS_VALID_AUDIO_SOURCE (inAudioSource))
-		result = WriteRegister (gAudioSystemToSrcSelectRegNum [inAudioSystem], sAudioSourceToRegValues [inAudioSource], kRegMaskAudioSource, kRegShiftAudioSource);
-
+	if (UWord(inAudioSystem) < (::NTV2DeviceGetNumAudioSystems(_boardID) + (DeviceCanDoAudioMixer() ? 2 : 0)))
+		if (NTV2_IS_VALID_AUDIO_SOURCE(inAudioSource))
+			result = WriteRegister (gAudioSystemToSrcSelectRegNum [inAudioSystem],
+									sAudioSourceToRegValues [inAudioSource],
+									kRegMaskAudioSource, kRegShiftAudioSource);
 	if (result)
-	{
-        if ((inAudioSource == NTV2_AUDIO_EMBEDDED) || (inAudioSource == NTV2_AUDIO_HDMI))
-		{
-			//	For SDI, we go the extra mile...
+        if ((inAudioSource == NTV2_AUDIO_EMBEDDED)  ||  (inAudioSource == NTV2_AUDIO_HDMI))
 			if (SetEmbeddedAudioInput (inEmbeddedSource, inAudioSystem))	//	Use the specified input for grabbing embedded audio
-				result = SetEmbeddedAudioClock (NTV2_EMBEDDED_AUDIO_CLOCK_VIDEO_INPUT, inAudioSystem);			//	Use video input clock (not reference)
-		}
-	}
+				result = SetEmbeddedAudioClock (NTV2_EMBEDDED_AUDIO_CLOCK_VIDEO_INPUT, inAudioSystem);	//	Use video input clock (not reference)
 	return result;
 
 }	//	SetAudioSystemInputSource
@@ -1738,7 +1725,7 @@ bool CNTV2Card::GetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, bo
 	if (inAudioSystem >= (::NTV2DeviceGetNumAudioSystems (_boardID) + (DeviceCanDoAudioMixer() ? 1 : 0)))
 		return false;
 	ULWord	regValue	(0);
-	if (!ReadRegister (gAudioSystemToAudioSrcSelectRegNum[inAudioSystem], regValue))
+	if (!ReadRegister (gAudioSystemToSrcSelectRegNum[inAudioSystem], regValue))
 		return false;
 	outEraseModeEnabled = (regValue & kRegMaskAudioAutoErase) ? true : false;
 	return true;
@@ -1751,7 +1738,7 @@ bool CNTV2Card::SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, co
 		return false;
 	if (inAudioSystem >= (::NTV2DeviceGetNumAudioSystems (_boardID) + (DeviceCanDoAudioMixer() ? 1 : 0)))
 		return false;
-	return WriteRegister (gAudioSystemToAudioSrcSelectRegNum[inAudioSystem], inEraseModeEnabled ? 1 : 0, kRegMaskAudioAutoErase, kRegShiftAudioAutoErase);
+	return WriteRegister (gAudioSystemToSrcSelectRegNum[inAudioSystem], inEraseModeEnabled ? 1 : 0, kRegMaskAudioAutoErase, kRegShiftAudioAutoErase);
 }
 
 bool CNTV2Card::SetAnalogAudioIOConfiguration(const NTV2AnalogAudioIO inAudioIOConfiguration)
