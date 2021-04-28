@@ -4177,7 +4177,7 @@ public:
 	AJA_VIRTUAL bool	GetNominalMinMaxHV (int & outNominalH, int & outMinH, int & outMaxH, int & outNominalV, int & outMinV, int & outMaxV);
 
 	/**
-		@brief		Returns the current horizontal timing offset, in pixels, for the given SDI output connector.
+		@brief		Adjusts the horizontal timing offset, in pixels, for the given SDI output connector.
 		@param[in]	inHOffset		Specifies the horizontal output timing offset, a signed value, in pixels after or before the nominal value.
 		@param[in]	inOutputSpigot	(Added in SDK v16.1) Optionally specifies the SDI output connector of interest. Defaults to 0 (SDI Out 1).
 		@note		The output timing can only be adjusted when the device's reference source is set for external reference.
@@ -4190,7 +4190,7 @@ public:
 	AJA_VIRTUAL bool	SetVideoHOffset (const int inHOffset, const UWord inOutputSpigot = 0);
 
 	/**
-		@brief		Returns the current horizontal timing offset, in pixels, for the given SDI output connector.
+		@brief		Answers with the current horizontal timing offset, in pixels, for the given SDI output connector.
 		@param[out]	outHOffset		Receives the current horizontal output timing offset, a signed value, in pixels after or before the nominal value.
 		@param[in]	inOutputSpigot	(Added in SDK v16.1) Optionally specifies the SDI output connector of interest. Defaults to 0 (SDI Out 1).
 		@note		The "inOutputSpigot" parameter is respected only if the device is multi-format-capable (see ::NTV2DeviceCanDoMultiFormat)
@@ -4202,8 +4202,8 @@ public:
 	AJA_VIRTUAL bool	GetVideoHOffset (int & outHOffset, const UWord inOutputSpigot = 0);
 
 	/**
-		@brief		Returns the current vertical timing offset, in pixels, for the given SDI output connector.
-		@param[in]	inVOffset		Specifies the vertical output timing offset, a signed value, in pixels after or before the nominal value.
+		@brief		Adjusts the vertical timing offset, in lines, for the given SDI output connector.
+		@param[in]	inVOffset		Specifies the vertical output timing offset, a signed value, in lines after or before the nominal value.
 		@param[in]	inOutputSpigot	(Added in SDK v16.1) Optionally specifies the SDI output connector of interest. Defaults to 0 (SDI Out 1).
 		@note		The output timing can only be adjusted when the device's reference source is set for external reference.
 		@note		The "inOutputSpigot" parameter is respected only if the device is multi-format-capable (see ::NTV2DeviceCanDoMultiFormat)
@@ -4215,7 +4215,7 @@ public:
 	AJA_VIRTUAL bool	SetVideoVOffset (const int inVOffset, const UWord inOutputSpigot = 0);
 
 	/**
-		@brief		Returns the current vertical timing offset, in lines, for the given SDI output connector.
+		@brief		Answers with the current vertical timing offset, in lines, for the given SDI output connector.
 		@param[out]	outVOffset		Receives the current vertical output timing offset, a signed value, in lines after or before the nominal value.
 		@param[in]	inOutputSpigot	(Added in SDK v16.1) Optionally specifies the SDI output spigot of interest. Defaults to 0 (SDI Out 1).
 		@note		The "inOutputSpigot" parameter is respected only if the device is multi-format-capable (see ::NTV2DeviceCanDoMultiFormat)
@@ -4245,7 +4245,7 @@ public:
 					and the device is currently in multi-format mode (see CNTV2Card::GetMultiFormatMode and CNTV2Card::SetMultiFormatMode).
 					Otherwise, the timing is changed for all SDI outputs.
 		@return		True if successful;  otherwise false.
-		@see		CNTV2Card::ReadOutputTimingControl
+		@see		CNTV2Card::ReadOutputTimingControl, CNTV2Card::SetVideoVOffset, CNTV2Card::SetVideoHOffset
 	**/
 	AJA_VIRTUAL bool	WriteOutputTimingControl (const ULWord inValue, const UWord inOutputSpigot = 0);
 
@@ -4257,7 +4257,7 @@ public:
 					and the device is currently in multi-format mode (see CNTV2Card::GetMultiFormatMode and CNTV2Card::SetMultiFormatMode).
 					Otherwise, this function only reports the timing for SDI Output 1 (i.e., the "global" output timing).
 		@return		True if successful;  otherwise false.
-		@see		CNTV2Card::WriteOutputTimingControl
+		@see		CNTV2Card::WriteOutputTimingControl, CNTV2Card::GetVideoVOffset, CNTV2Card::GetVideoHOffset
 	**/
 	AJA_VIRTUAL bool	ReadOutputTimingControl (ULWord & outValue, const UWord inOutputSpigot = 0);
 
