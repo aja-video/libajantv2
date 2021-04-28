@@ -1,5 +1,5 @@
 /**
-	@page	ntv2signalrouting		Widgets and Signal Routing
+	@page	ntv2signalrouting		Widget Signal Routing
 
 	NTV2 device FPGA firmware implements several types of “widgets“ for receiving, processing and transmitting video data.
 	These can be classified as follows:

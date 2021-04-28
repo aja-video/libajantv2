@@ -116,7 +116,7 @@ const static ANCExtractorInitParams  extractorInitParamsTable [NTV2_NUM_STANDARD
 
 
 /////////////////////////////////////////////
-///////////   ANC FRAME BUFFER    ///////////
+//////////////   ANC BUFFER    //////////////
 /////////////////////////////////////////////
 
 bool CNTV2Card::AncSetFrameBufferSize (const ULWord inF1Size, const ULWord inF2Size)

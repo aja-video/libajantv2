@@ -16,6 +16,8 @@ options.
 	-	\ref ancvpid
 	-	\ref anccaptions
 -	\ref anccapture
+	-	\ref anccapture-filter
+	-	\ref anccapture-dataspace
 -	\ref ancplayout
 -	\ref ancbufferformats
 	-	\ref ancgumpformat
@@ -425,7 +427,9 @@ There are two ways to capture any/all Ancillary data packets:
 		-	Call CNTV2Card::AutoCirculateInitForInput with the ::AUTOCIRCULATE_WITH_ANC option.
 		-	Call AUTOCIRCULATE_TRANSFER::SetAncBuffers to specify the destination host Anc buffer(s).
 		-	After CNTV2Card::AutoCirculateTransfer returns, parse the contents of the host Anc buffer(s).
-			-	Manually parse the data — see \ref ancgumpformat (below).
+			-	AUTOCIRCULATE_TRANSFER::GetCapturedAncByteCount reports the number of bytes recorded/written
+				into the device frame’s anc buffer region.
+			-	Manually parse the anc data that was recorded and transferred — see \ref ancgumpformat (below).
 			-	Or use the \ref ajaanc — call AJAAncillaryList::SetFromDeviceAncBuffers to retrieve the ::AJAAncillaryData packets.
 			-	<b>NOTE:</b> For SMPTE-2110 IP devices, CNTV2Card::AutoCirculateTransfer will have automatically converted the
 				received host ancillary data from  \ref ancrtpformat into \ref ancgumpformat (SDK version 15.2 or later required).
@@ -434,7 +438,9 @@ There are two ways to capture any/all Ancillary data packets:
 		-	See \ref ntv2llburn for example of how to use CNTV2Card::AncExtractInit, CNTV2Card::AncExtractSetEnable,
 			CNTV2Card::AncExtractSetWriteParams, etc.
 		-	After CNTV2Card::DMAReadAnc returns, parse the contents of the host Anc buffer(s).
-			-	Manually — see \ref ancgumpformat (below).
+			-	CNTV2Card::AncExtractGetField1Size and CNTV2Card::AncExtractGetField2Size report the number of bytes
+				recorded/written into the device frame’s anc buffer region for Field1 and Field2, respectively.
+			-	Manually parse the anc data that was recorded and transferred — see \ref ancgumpformat (below).
 			-	Or use the \ref ajaanc — call AJAAncillaryList::SetFromDeviceAncBuffers to retrieve the ::AJAAncillaryData packets.
 			-	<b>NOTE:</b> For SMPTE-2110 IP devices, CNTV2Card::DMAReadAnc will have automatically converted the received
 				host ancillary data from  \ref ancrtpformat into \ref ancgumpformat (SDK version 15.2 or later required).
@@ -459,6 +465,149 @@ There are two ways to capture any/all Ancillary data packets:
 		-	Use AJAAncillaryList::SetFromVANCData to obtain a list of ::AJAAncillaryData packets found in the frame buffer.
 
 <b>TIP:</b> The \ref usingntv2watcher tool’s \ref inspectoranc is useful for diagnosing issues with ancillary data capture.
+
+
+@subsection	anccapture-filter	Ancillary Packet Filtering
+
+For devices that support custom Anc capture, each SDI input has an “Anc Extractor” widget associated with it.
+Each of these widgets have a filter that can exclude unwanted packets based on a packet’s Data IDentifier (DID).
+Each filter is configured using five 32-bit registers, each register accommodating four DID byte values,
+resulting in the ability to filter (exclude) up to 20 different types of packets.
+-	A non-zero byte value in a filter register will cause the Extractor to skip packets whose DID matches that byte value.
+-	A zero byte value is always ignored by the Extractor.
+-	It is not an error to have the same DID in multiple byte positions in the filter registers.
+
+By default, the SDI input’s Anc extractor widget is configured when CNTV2Card::AutoCirculateInitForInput (or CNTV2Card::AncExtractInit)
+are called, and will automatically exclude a default set of packet types. For example, VPID, VITC/ATC, audio control and audio packets
+are filtered by default, because existing device firmware automatically handles audio, timecode and VPID, making such data available by
+way of other high-level API calls.
+
+But what if, for example, you need to parse the raw data that’s inside SMPTE 299M audio packets?
+
+<b>Disabling All Filtering</b>
+
+To disable all filtering of incoming ancillary data packets, pass an empty NTV2DIDSet to CNTV2Card::AncExtractSetFilterDIDs.
+@code{.cpp}
+	CNTV2Card device;
+	. . .
+	const UWord sdiInput(UWord(::GetIndexForNTV2InputSource(NTV2_INPUTSOURCE_SDI1)));
+	device.AncExtractSetFilterDIDs(sdiInput, NTV2DIDSet());   // Disable all filtering
+@endcode
+
+For SDKs prior to version 13.0, pass zero to CNTV2Card::WriteRegister for each filter register for the Anc extractor associated with the SDI input of interest:
+-	SDI In 1: registers 4108-4112 (inclusive)
+-	SDI In 2: registers 4172-4176 (inclusive)
+-	SDI In 3: registers 4236-4240 (inclusive)
+-	SDI In 4: registers 4300-4304 (inclusive)
+-	SDI In 5: registers 4364-4368 (inclusive)
+-	SDI In 6: registers 4428-4432 (inclusive)
+-	SDI In 7: registers 4492-4496 (inclusive)
+-	SDI In 8: registers 4556-4560 (inclusive)
+
+@note	Changing packet filtering takes effect at the next captured frame.
+
+@warning	Disabling packet filtering can result in an extraordinary amount of captured ancillary data.
+
+
+<b>Filtering Specific Packet Types</b>
+
+To exclude packets having specific DIDs, build an NTV2DIDSet that contains the packet DIDs you wish to exclude,
+then pass the set to CNTV2Card::AncExtractSetFilterDIDs.  <small>For SDKs prior to version 13.0, pack up to four
+DIDs to be excluded into a 4-byte longword, and write the longword (using CNTV2Card::WriteRegister) into one of
+the filter registers associated with the SDI input of interest (see above list).</small>
+
+
+<b>Restoring Default Filtering</b>
+
+You can also reset the ANC filtering to the default filter set:
+@code{.cpp}
+	CNTV2Card device;
+	const UWord sdiInput(UWord(::GetIndexForNTV2InputSource(NTV2_INPUTSOURCE_SDI1)));
+	. . .
+	NTV2VideoFormat vfmt(device.GetInputVideoFormat(NTV2_INPUTSOURCE_SDI1));
+	device.AncExtractSetFilterDIDs(sdiInput, AncExtractGetDefaultDIDs(!NTV2_IS_SD_VIDEO_FORMAT(vfmt)));   // Reset anc filtering to default
+@endcode
+
+<small>For SDKs prior to version 13.0, you must copy the default filter register values at startup (using CNTV2Card::ReadRegister) to local variables,
+then restore them afterward (using CNTV2Card::WriteRegister) later. Use the registers that are associated with the SDI input of interest.</small>
+
+It’s a good practice to save the existing filter settings, change them to what’s needed for whatever processing is necessary,
+and then restore them afterward:
+@code{.cpp}
+	CNTV2Card device;
+	. . .
+	const UWord sdiInput(UWord(::GetIndexForNTV2InputSource(NTV2_INPUTSOURCE_SDI1)));
+	NTV2DIDSet  savedDIDs;
+	device.AncExtractGetFilterDIDs(sdiInput, savedDIDs);   // Save current anc filter (so it can be restored later)
+	{
+		// Change the anc filter to include some audio packets...
+		NTV2DIDSet dids;
+		dids.insert(0xA0);   // 3G audio group 8 control
+		dids.insert(0xA1);   // 3G audio group 7 control
+		dids.insert(0xA4);   // 3G audio group 8 data
+		dids.insert(0xA5);   // 3G audio group 7 data
+		device.AncExtractSetFilterDIDs(sdiInput, dids);   // Set new anc filtering
+
+		//	. . . do other processing . . .
+	}
+	device.AncExtractSetFilterDIDs(sdiInput, savedDIDs);   // Restore prior anc filtering
+@endcode
+
+
+@subsection	anccapture-dataspace	Ancillary Data Space Limitations
+
+Rarely does the ancillary data transmitted with a field of video exceed 5KB (or 10KB for a frame of interlaced video) … but it’s possible.
+If your application must accommodate more than 72KB of ancillary data, you’ll need to enlarge the driver’s ancillary data region.
+
+The NTV2 driver uses two virtual registers (::kVRegAncField1Offset and ::kVRegAncField2Offset) to control where the Anc Extractors
+start writing extracted packet data into (current) frame memory. When the driver starts up, it’s configured to use 0x12000 bytes (~72k)
+of space per field at the very bottom of each 8MB/16MB/… frame on the device (depending on video format and pixel format).
+
+If you know the largest byte count you’ll encounter for each field, add some padding, then call CNTV2Card::AncSetFrameBufferSize with
+those values. <small>For SDKs prior to version 13.0, write the Field 2 maximum byte count to the ::kVRegAncField2Offset register,
+then set the ::kVRegAncField1Offset register to the sum of both byte counts.</small>
+
+@warning	Itʼs possible to reserve a very large ancillary data space that actually runs into the video in the frame buffer.
+
+To programmatically check if the Anc space intersects video in the frame buffer:
+@code{.cpp}
+	CNTV2Card device;
+	. . .
+	ULWord byteOffset(0), byteCount(0);
+	NTV2PixelFormat pixelFormat;
+	const NTV2VideoFormat vidFormat(device.GetInputVideoFormat(NTV2_INPUTSOURCE_SDI1));
+	device.GetFrameBufferFormat(NTV2_CHANNEL1, pixelFormat);
+	const NTV2FormatDescriptor fd(vidFormat, pixelFormat);
+	device.GetAncRegionOffsetAndSize(byteOffset, byteCount, NTV2_AncRgn_All);
+	if (fd.GetTotalBytes() > byteOffset)
+		FAIL("Anc in video!");
+@endcode
+
+
+<b>Maximizing Ancillary Data Capture Capacity</b>
+
+-#	Determine the largest raster your application is expected to handle.
+-#	Determine the most “expensive” (in terms of memory) ::NTV2PixelFormat your application will need to use.
+-#	Determine the “intrinsic” device frame buffer size that will be used for the video format and frame buffer format (8MB/16MB/etc.).
+-#	Calculate the maximum available space for ancillary data in the device frame buffer.
+	This is the distance, in bytes, from just past the last line of the raster to the bottom of the device frame buffer.
+-#	Call CNTV2Card::AncSetFrameBufferSize, passing half the byte distance to each of the two parameters.
+
+For example, 1080i video with a 10-bit YCbCr frame buffer format (without a “tall” or “taller” VANC geometry)
+is easily handled by an 8MB device frame buffer. The 1920x1080 raster requires the top 5,529,600 bytes of the
+device frame buffer, which leaves 2,859,008 bytes of space for ancillary data.
+If a 16MB frame buffer is used (see CNTV2Card::SetFrameBufferSize), the maximum possible anc space jumps to 11,247,616 bytes — a <i>LOT</i> of space!
+
+The \ref inspectorframebuffer of \ref usingntv2watcher readily illustrates how this works.
+-#	Set it to the <b>Raw</b> view mode.
+-#	Change the units used for the vertical ruler to <b>Bytes From Top</b>.
+-#	Change the units used for the horizontal ruler to <b>Bytes From Left Edge</b>.
+-#	Scroll down to the end of active video (EAV). This is where a noticeable boundary between illuminated and dimmed values
+	indicate where changing pixel data ends. That offset – 0x00546000 – is the first safe (unchanging) byte of available ancillary buffer space.
+	@image	html	watcher-inspector-fb-eav.png
+-#	Scroll down further until the data is displayed in a yellow color. That is the ancillary data region.
+	@image	html	watcher-inspector-fb-ancrgn.png
+
 
 <hr size="50px">
 
@@ -634,17 +783,9 @@ The spreadsheets that follow show, in detail for each video format, which lines 
 
 @image	html	vvi-525i-75.png
 
-@subsection	sd525p60		SD 525p60
-
-@image	html	vvi-525p-75.png
-
 @subsection	sd625i			SD 625i
 
 @image	html	vvi-625i-75.png
-
-@subsection	sd625p			SD 625p
-
-@image	html	vvi-625p-75.png
 
 @subsection	hd720p			HD 720p
 
@@ -662,20 +803,9 @@ The spreadsheets that follow show, in detail for each video format, which lines 
 
 @image	html	vvi-1080pduallink-75.png
 
-@subsection	hd1035i60		HD 1035i60 (SMPTE 240)
-
-@image	html	vvi-1035i-75.png
-
 @subsection	hd2k1080p		2K: 1080p
 
 @image	html	vvi-2k1080p-75.png
 
-@subsection	hd2k1556psf15	2K: 1556psF @ 15fps
-
-@image	html	vvi-2k1556psf15-75.png
-
-@subsection	hd2k1556psf18	2K: 1556psF @ 18fps
-
-@image	html	vvi-2k1556psf18-75.png
 
 **/

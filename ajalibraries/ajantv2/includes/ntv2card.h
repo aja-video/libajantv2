@@ -188,41 +188,6 @@ typedef NTV2DIDSet::const_iterator	NTV2DIDSetConstIter;	///< @brief	Handy const 
 AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DIDSet & inDIDs);	///<	@brief	Handy ostream writer for NTV2DIDSet.
 
 
-//////////////////////////////////////////////////////////
-//////////  From ntv2vidproc.h              //////////////
-//////////////////////////////////////////////////////////
-#ifdef AJALinux
-	typedef unsigned int AJARgb;
-	const AJARgb  AJA_RGB_MASK    = 0x00ffffff;		// masks RGB values
-
-	inline int ajaRed( AJARgb rgb )		// get red part of RGB
-	{ return (int)((rgb >> 16) & 0xff); }
-
-	inline int ajaGreen( AJARgb rgb )		// get green part of RGB
-	{ return (int)((rgb >> 8) & 0xff); }
-
-	inline int ajaBlue( AJARgb rgb )		// get blue part of RGB
-	{ return (int)(rgb & 0xff); }
-
-	inline int ajaAlpha( AJARgb rgb )		// get alpha part of RGBA
-	{ return (int)((rgb >> 24) & 0xff); }
-
-	inline AJARgb ajaRgb( int r, int g, int b )// set RGB value
-	{ return (0xff << 24) | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff); }
-
-	inline AJARgb ajaRgba( int r, int g, int b, int a )// set RGBA value
-	{ return ((a & 0xff) << 24) | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff); }
-
-	inline int ajaGray( int r, int g, int b )// convert R,G,B to gray 0..255
-	{ return (r*11+g*16+b*5)/32; }
-
-	inline int ajaGray( AJARgb rgb )		// convert RGB to gray 0..255
-	{ return ajaGray( ajaRed(rgb), ajaGreen(rgb), ajaBlue(rgb) ); }
-#endif	//	AJALinux
-//////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////
-
-
 typedef std::bitset<16>		NTV2AudioChannelsMuted16;				///< @brief	Per-audio-channel mute state for up to 16 audio channels.
 const NTV2AudioChannelsMuted16	NTV2AudioChannelsMuteAll = NTV2AudioChannelsMuted16(0xFFFF);	///< @brief	All 16 audio channels muted/disabled.
 const NTV2AudioChannelsMuted16	NTV2AudioChannelsEnableAll = NTV2AudioChannelsMuted16(0x0000);	///< @brief	All 16 audio channels unmuted/enabled.
@@ -575,7 +540,10 @@ public:
 											const ULWord	inSegmentHostPitch,
 											const ULWord	inSegmentCardPitch);
 
-	AJA_VIRTUAL bool	DmaP2PTargetFrame (NTV2Channel channel,					// frame buffer channel output frame to update on completion
+    /**
+        @brief		DirectGMA p2p transfers (not GPUDirect: see DMABufferLock)
+    **/
+    AJA_VIRTUAL bool	DmaP2PTargetFrame (NTV2Channel channel,					// frame buffer channel output frame to update on completion
 											ULWord frameNumber,					// frame number to target
 											ULWord frameOffset,					// frame buffer offset (bytes)
 											PCHANNEL_P2P_STRUCT pP2PData);		// p2p target data (output)
@@ -705,21 +673,23 @@ public:
 	/**
 		@brief		Page-locks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
 		@param[in]	inBuffer	Specifies the host buffer to lock.
-		@param[in]	inMap		Also try to lock the segment map.
-		@return		True if successful; otherwise false.
+        @param[in]	inMap		Also lock the segment map.
+        @param[in]	inRDMA		Lock a GPUDirect buffer for p2p DMA.
+        @return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	DMABufferLock (const NTV2_POINTER & inBuffer, bool inMap = false);	//	New in SDK 15.5
+    AJA_VIRTUAL bool	DMABufferLock (const NTV2_POINTER & inBuffer, bool inMap = false, bool inRDMA = false);	//	New in SDK 15.5
 
 	/**
 		@brief		Page-locks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
 		@param[in]	pInBuffer		Specifies the starting address of the host buffer to lock.
 		@param[in]	inByteCount		Specifies the total length of the host buffer.
-		@param[in]	inMap			Also try to lock the segment map.
-		@return		True if successful; otherwise false.
+        @param[in]	inMap			Also lock the segment map.
+        @param[in]	inRDMA			Lock a GPUDirect buffer for p2p DMA.
+        @return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL inline bool	DMABufferLock (const ULWord * pInBuffer, const ULWord inByteCount, bool inMap = false)
+    AJA_VIRTUAL inline bool	DMABufferLock (const ULWord * pInBuffer, const ULWord inByteCount, bool inMap = false, bool inRDMA = false)
 	{
-		return DMABufferLock(NTV2_POINTER(pInBuffer, inByteCount), inMap);
+        return DMABufferLock(NTV2_POINTER(pInBuffer, inByteCount), inMap, inRDMA);
 	}
 
 
@@ -802,6 +772,7 @@ public:
 									NTV2_AncRgn_Field2, etc.).  Defaults to all regions, for the maximum offset and size
 									among all of them.
 		@return		True if successful; otherwise false.
+		@see		CNTV2Card::AncSetFrameBufferSize, \ref anccapture-dataspace
 	**/
 	AJA_VIRTUAL bool	GetAncRegionOffsetAndSize (ULWord & outByteOffset, ULWord & outByteCount,
 													const NTV2AncillaryDataRegion inAncRegion = NTV2_AncRgn_All);
@@ -815,6 +786,7 @@ public:
 									NTV2_AncRgn_Field2, etc.).  Defaults to all regions, for the largest offset among
 									them all.
 		@return		True if successful; otherwise false.
+		@see		CNTV2Card::GetAncRegionOffsetAndSize, \ref anccapture-dataspace
 	**/
 	AJA_VIRTUAL bool	GetAncRegionOffsetFromBottom (ULWord & outByteOffsetFromBottom,
 														const NTV2AncillaryDataRegion inAncRegion = NTV2_AncRgn_All);
@@ -4185,12 +4157,12 @@ public:
 	AJA_VIRTUAL bool	IsChannelEnabled (const NTV2Channel inChannel, bool & outEnabled);
 
 	#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetChannel2Disable (bool value));								///< @deprecated	Use EnableChannel or DisableChannel instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetChannel2Disable (bool* value));								///< @deprecated	Use IsChannelEnabled instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetChannel3Disable (bool value));								///< @deprecated	Use EnableChannel or DisableChannel instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetChannel3Disable (bool* value));								///< @deprecated	Use IsChannelEnabled instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetChannel4Disable (bool value));								///< @deprecated	Use EnableChannel or DisableChannel instead.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetChannel4Disable (bool* value));								///< @deprecated	Use IsChannelEnabled instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetChannel2Disable (bool value));	///< @deprecated	Use EnableChannel or DisableChannel instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetChannel2Disable (bool* value));	///< @deprecated	Use IsChannelEnabled instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetChannel3Disable (bool value));	///< @deprecated	Use EnableChannel or DisableChannel instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetChannel3Disable (bool* value));	///< @deprecated	Use IsChannelEnabled instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetChannel4Disable (bool value));	///< @deprecated	Use EnableChannel or DisableChannel instead.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetChannel4Disable (bool* value));	///< @deprecated	Use IsChannelEnabled instead.
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	AJA_VIRTUAL bool	SetVideoDACMode (NTV2VideoDACMode inValue);
@@ -4202,10 +4174,56 @@ public:
 	**/
 	///@{
 	AJA_VIRTUAL bool	GetNominalMinMaxHV (int & outNominalH, int & outMinH, int & outMaxH, int & outNominalV, int & outMinV, int & outMaxV);
-	AJA_VIRTUAL bool	SetVideoHOffset (const int inHOffset);
-	AJA_VIRTUAL bool	GetVideoHOffset (int & outHOffset);
-	AJA_VIRTUAL bool	SetVideoVOffset (const int inVOffset);
-	AJA_VIRTUAL bool	GetVideoVOffset (int & outVOffset);
+
+	/**
+		@brief		Returns the current horizontal timing offset, in pixels, for the given SDI output connector.
+		@param[in]	inHOffset		Specifies the horizontal output timing offset, a signed value, in pixels after or before the nominal value.
+		@param[in]	inOutputSpigot	(Added in SDK v16.1) Optionally specifies the SDI output connector of interest. Defaults to 0 (SDI Out 1).
+		@note		The output timing can only be adjusted when the device's reference source is set for external reference.
+		@note		The "inOutputSpigot" parameter is respected only if the device is multi-format-capable (see ::NTV2DeviceCanDoMultiFormat)
+					and the device is currently in multi-format mode (see CNTV2Card::GetMultiFormatMode and CNTV2Card::SetMultiFormatMode).
+					Otherwise, this function sets the horizontal timing offset for SDI Output 1 (i.e., the "global" output timing).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetVideoHOffset, CNTV2Card::SetVideoVOffset
+	**/
+	AJA_VIRTUAL bool	SetVideoHOffset (const int inHOffset, const UWord inOutputSpigot = 0);
+
+	/**
+		@brief		Returns the current horizontal timing offset, in pixels, for the given SDI output connector.
+		@param[out]	outHOffset		Receives the current horizontal output timing offset, a signed value, in pixels after or before the nominal value.
+		@param[in]	inOutputSpigot	(Added in SDK v16.1) Optionally specifies the SDI output connector of interest. Defaults to 0 (SDI Out 1).
+		@note		The "inOutputSpigot" parameter is respected only if the device is multi-format-capable (see ::NTV2DeviceCanDoMultiFormat)
+					and the device is currently in multi-format mode (see CNTV2Card::GetMultiFormatMode and CNTV2Card::SetMultiFormatMode).
+					Otherwise, this function only reports the horizontal timing offset for SDI Output 1 (i.e., the "global" output timing).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetVideoHOffset, CNTV2Card::GetVideoVOffset
+	**/
+	AJA_VIRTUAL bool	GetVideoHOffset (int & outHOffset, const UWord inOutputSpigot = 0);
+
+	/**
+		@brief		Returns the current vertical timing offset, in pixels, for the given SDI output connector.
+		@param[in]	inVOffset		Specifies the vertical output timing offset, a signed value, in pixels after or before the nominal value.
+		@param[in]	inOutputSpigot	(Added in SDK v16.1) Optionally specifies the SDI output connector of interest. Defaults to 0 (SDI Out 1).
+		@note		The output timing can only be adjusted when the device's reference source is set for external reference.
+		@note		The "inOutputSpigot" parameter is respected only if the device is multi-format-capable (see ::NTV2DeviceCanDoMultiFormat)
+					and the device is currently in multi-format mode (see CNTV2Card::GetMultiFormatMode and CNTV2Card::SetMultiFormatMode).
+					Otherwise, this function sets the vertical timing offset for SDI Output 1 (i.e., the "global" output timing).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetVideoVOffset, CNTV2Card::SetVideoHOffset
+	**/
+	AJA_VIRTUAL bool	SetVideoVOffset (const int inVOffset, const UWord inOutputSpigot = 0);
+
+	/**
+		@brief		Returns the current vertical timing offset, in lines, for the given SDI output connector.
+		@param[out]	outVOffset		Receives the current vertical output timing offset, a signed value, in lines after or before the nominal value.
+		@param[in]	inOutputSpigot	(Added in SDK v16.1) Optionally specifies the SDI output spigot of interest. Defaults to 0 (SDI Out 1).
+		@note		The "inOutputSpigot" parameter is respected only if the device is multi-format-capable (see ::NTV2DeviceCanDoMultiFormat)
+					and the device is currently in multi-format mode (see CNTV2Card::GetMultiFormatMode and CNTV2Card::SetMultiFormatMode).
+					Otherwise, this function only reports the vertical timing offset for SDI Output 1 (i.e., the "global" output timing).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetVideoVOffset, CNTV2Card::GetVideoHOffset
+	**/
+	AJA_VIRTUAL bool	GetVideoVOffset (int & outVOffset, const UWord inOutputSpigot = 0);
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetVideoFinePhase (int fOffset));		///< @deprecated	This function is obsolete.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetVideoFinePhase (int* fOffset));		///< @deprecated	This function is obsolete.
@@ -4215,28 +4233,30 @@ public:
 	AJA_VIRTUAL bool	GetAnalogOutHTiming (ULWord & outValue);
 
 	/**
-		@brief	Adjusts the output timing for the given SDI output spigot.
+		@brief		Adjusts the output timing for the given SDI output connector.
 		@param[in]	inValue			Specifies the output timing control value to use. The lower 16 bits of this 32-bit value
 									control the horizontal timing, while the upper 16 bits control the vertical.
 									Each horizontal increment/decrement moves the output relative to the reference by one pixel.
 									Each vertical increment/decrement moves the output relative to the reference by one line.
-		@param[in]	inOutputSpigot	Optionally specifies the SDI output of interest. Defaults to zero (SDI Out 1).
+		@param[in]	inOutputSpigot	Optionally specifies the SDI output connector of interest. Defaults to zero (SDI Out 1).
 		@note		The output timing can only be adjusted when the device's reference source is set for external reference.
 		@note		The "inOutputSpigot" parameter is respected only if the device is multi-format-capable (see ::NTV2DeviceCanDoMultiFormat)
 					and the device is currently in multi-format mode (see CNTV2Card::GetMultiFormatMode and CNTV2Card::SetMultiFormatMode).
 					Otherwise, the timing is changed for all SDI outputs.
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::ReadOutputTimingControl
 	**/
 	AJA_VIRTUAL bool	WriteOutputTimingControl (const ULWord inValue, const UWord inOutputSpigot = 0);
 
 	/**
-		@brief	Returns the current output timing control value for the given SDI output spigot.
+		@brief		Returns the current output timing control value for the given SDI output connector.
 		@param[out]	outValue		Receives the current output timing control value.
-		@param[in]	inOutputSpigot	Optionally specifies the SDI output spigot of interest. Defaults to 0 (SDI Out 1).
+		@param[in]	inOutputSpigot	Optionally specifies the SDI output connector of interest. Defaults to 0 (SDI Out 1).
 		@note		The "inOutputSpigot" parameter is respected only if the device is multi-format-capable (see ::NTV2DeviceCanDoMultiFormat)
 					and the device is currently in multi-format mode (see CNTV2Card::GetMultiFormatMode and CNTV2Card::SetMultiFormatMode).
 					Otherwise, this function only reports the timing for SDI Output 1 (i.e., the "global" output timing).
 		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::WriteOutputTimingControl
 	**/
 	AJA_VIRTUAL bool	ReadOutputTimingControl (ULWord & outValue, const UWord inOutputSpigot = 0);
 
@@ -6327,13 +6347,15 @@ public:
 	///@{
 
 	/**
-		@brief		Sets the size of the ANC frame buffers.
+		@brief		Sets the capacity of the ANC buffers in device frame memory.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
 		@return		True if successful; otherwise false.
-		@param[in]	inF1Size		Specifies the size of the ANC field 1 frame buffer.
-		@param[in]	inF2Size		Specifies the size of the ANC field 2 frame buffer.
-		@note		Use this function before configuring ancillary extractors and inserters.  The sizes apply
-					to all channels.
+		@param[in]	inF1Size		Specifies the capacity of the Field 1 anc buffer, in bytes.
+		@param[in]	inF2Size		Specifies the capacity of the Field 2 anc buffer, in bytes.
+		@note		This function should be used before configuring the anc extractors/inserters.
+		@note		Size changes apply to all anc extractors/inserters.
+		@warning	Setting these values too large will result in anc data occupying the bottom of the video raster.
+		@see		CNTV2Card::GetAncRegionOffsetAndSize, \ref anccapture-dataspace
 	**/
 	AJA_VIRTUAL bool	AncSetFrameBufferSize (const ULWord inF1Size, const ULWord inF2Size);
 
@@ -6543,7 +6565,7 @@ public:
 		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
 		@param[out]	outDIDs			Receives the ::NTV2DIDSet that contain the DIDs that are currently being
 									filtered (excluded).
-		@see		CNTV2Card::AncExtractSetFilterDIDs, \ref anccapture
+		@see		CNTV2Card::AncExtractSetFilterDIDs, \ref anccapture-filter
 	**/
 	AJA_VIRTUAL bool	AncExtractGetFilterDIDs (const UWord inSDIInput, NTV2DIDSet & outDIDs);
 
@@ -6555,7 +6577,7 @@ public:
 		@param[in]	inDIDs			Specifies the DIDs to be filtered (excluded). Specify an empty set to
 									disable all packet filtering.
 		@note		DIDs having the value 0 (zero) are ignored.
-		@see		CNTV2Card::AncExtractGetFilterDIDs, \ref anccapture
+		@see		CNTV2Card::AncExtractGetFilterDIDs, \ref anccapture-filter
 	**/
 	AJA_VIRTUAL bool	AncExtractSetFilterDIDs (const UWord inSDIInput, const NTV2DIDSet & inDIDs);
 
@@ -6591,7 +6613,7 @@ public:
 
 	/**
 		@return		The maximum number of distinct DIDs that the device Anc extractor filter can accommodate.
-		@see		CNTV2Card::AncExtractSetFilterDIDs, CNTV2Card::AncExtractGetDefaultDIDs, \ref anccapture
+		@see		CNTV2Card::AncExtractSetFilterDIDs, CNTV2Card::AncExtractGetDefaultDIDs, \ref anccapture-filter
 	**/
 	static UWord		AncExtractGetMaxNumFilterDIDs (void);
 
@@ -6600,7 +6622,7 @@ public:
 		@param[in]	inHDAudio	Optionally specifies the desired audio packet filtering.
 								Specify true (the default) for the default HD audio packet DIDs;
 								otherwise false for the default SD audio packet DIDs.
-		@see		CNTV2Card::AncExtractSetFilterDIDs, CNTV2Card::AncExtractGetMaxNumFilterDIDs, \ref anccapture
+		@see		CNTV2Card::AncExtractSetFilterDIDs, CNTV2Card::AncExtractGetMaxNumFilterDIDs, \ref anccapture-filter
 	**/
 	static NTV2DIDSet	AncExtractGetDefaultDIDs (const bool inHDAudio = true);
 

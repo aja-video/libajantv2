@@ -447,7 +447,7 @@ bool CNTV2Card::DeviceAddressToFrameNumber (const uint64_t inAddress,  UWord & o
 }
 
 
-bool CNTV2Card::DMABufferLock (const NTV2_POINTER & inBuffer, bool inMap)
+bool CNTV2Card::DMABufferLock (const NTV2_POINTER & inBuffer, bool inMap, bool inRDMA)
 {
 	if (!_boardOpened)
 		return false;		//	Device not open!
@@ -455,8 +455,14 @@ bool CNTV2Card::DMABufferLock (const NTV2_POINTER & inBuffer, bool inMap)
 	if (!inBuffer)
 		return false;
 
-	NTV2BufferLock lockMsg (inBuffer, (DMABUFFERLOCK_LOCK | (inMap? DMABUFFERLOCK_MAP : 0)));
-	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&lockMsg));
+    if (inRDMA)
+    {
+        NTV2BufferLock lockMsg (inBuffer, (DMABUFFERLOCK_LOCK | DMABUFFERLOCK_RDMA));
+        return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&lockMsg));
+    }
+
+    NTV2BufferLock lockMsg (inBuffer, (DMABUFFERLOCK_LOCK | (inMap? DMABUFFERLOCK_MAP : 0)));
+    return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&lockMsg));
 }
 
 
