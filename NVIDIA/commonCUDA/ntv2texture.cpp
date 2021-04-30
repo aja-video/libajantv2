@@ -1,4 +1,3 @@
-/* SPDX-License-Identifier: MIT */
 
 #include "ntv2texture.h"
 #include "ntv2debug.h"
@@ -14,8 +13,13 @@
 CNTV2Texture::CNTV2Texture() :
 	mWidth(0), mHeight(0), mIndex(0), mUnit(0)
 {
+#ifdef ORIG
 	// Allocate 8-bit 4-component CUDA arrays in device memory
 	mChannelDesc = cudaCreateChannelDesc(8, 8, 8, 8, cudaChannelFormatKindUnsigned);
+#else
+	// Allocate 32-bit 1-component CUDA arrays in device memory
+	mChannelDesc = cudaCreateChannelDesc(32, 0, 0, 0, cudaChannelFormatKindUnsigned);
+#endif
 }
 
 CNTV2Texture::CNTV2Texture(ULWord unit) :

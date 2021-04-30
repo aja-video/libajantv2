@@ -1,4 +1,3 @@
-/* SPDX-License-Identifier: MIT */
 //
 // Copyright (C) 2012 AJA Video Systems, Inc.
 // Proprietary and Confidential information.
@@ -12,7 +11,7 @@
 #include "ntv2debug.h"
 #include "ntv2utils.h"
 #include "ntv2audiodefines.h"
-#include "circularbuffer.h"
+#include "ajabase/common/circularbuffer.h"
 
 #include "ntv2texture.h"
 #include "ntv2rendertotexture.h"

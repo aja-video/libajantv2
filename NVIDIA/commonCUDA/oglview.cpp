@@ -1,4 +1,3 @@
-/* SPDX-License-Identifier: MIT */
 
 #include "oglview.h"
 #include <stdio.h>
@@ -182,7 +181,7 @@ bool COglView::init(void)
 
 	// Don't block waiting for vsync
 #ifdef AJA_WINDOWS
-	wglSwapIntervalEXT(0);
+	wglSwapIntervalEXT(1);
 #else
 	//glXSwapIntervalEXT(dpy, win, 0);
 #endif
@@ -364,7 +363,7 @@ void COglView::render(GLuint renderedTexture,
 	sprintf(buf, "Card->GPU: %6.3f msec  Draw: %6.3f msec  GPU->Card: %6.3f msec\n", durationCapture, durationDraw, durationPlayout);
 	size_t len = strlen(buf);
 	glListBase(1000);
-	glColor3f(1.0f, 1.0f, 0.0f);
+	glColor3f(0.0f, 1.0f, 0.0f);
 	glRasterPos2f(-1.0f, -0.98f);
 	glCallLists((GLsizei)len, GL_UNSIGNED_BYTE, buf);
 

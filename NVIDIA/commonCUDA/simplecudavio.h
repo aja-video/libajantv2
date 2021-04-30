@@ -1,10 +1,9 @@
-/* SPDX-License-Identifier: MIT */
 // Video I/O Helper Class Definition
 
 #ifndef SIMPLE_CUDA_VIO_
 #define SIMPLE_CUDA_VIO_
 
-#include "ntv2cudaArrayTransferNV.h"
+//#include "ntv2cudaArrayTransferNV.h"
 
 #include "simplegpuvio.h"
 

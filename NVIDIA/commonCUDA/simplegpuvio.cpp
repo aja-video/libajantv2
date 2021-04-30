@@ -1,7 +1,6 @@
-/* SPDX-License-Identifier: MIT */
 #include "simplegpuvio.h"
 #include "ntv2signalrouter.h"
-#include "systemtime.h"
+#include "ajabase/system/systemtime.h"
 #include "ntv2vpid.h"
 
 static int s_iIndexFirstSource = 0;									// source board first frame buffer index
@@ -52,7 +51,9 @@ CGpuVideoIO::CGpuVideoIO(vioDesc *desc) :
 	mChannel = desc->channel;
 
 	// Get source video info
-	mActiveVideoSize = GetVideoActiveSize(desc->videoFormat, desc->bufferFormat);
+	NTV2VANCMode vancMode;
+	mBoard->GetVANCMode(vancMode);
+	mActiveVideoSize = GetVideoActiveSize(desc->videoFormat, desc->bufferFormat, vancMode);
 	mActiveVideoHeight = GetDisplayHeight(desc->videoFormat);
 	mActiveVideoPitch = mActiveVideoSize / mActiveVideoHeight;
 	mTransferLines = mActiveVideoHeight / s_iSubFrameCount;
@@ -255,11 +256,10 @@ CGpuVideoIO::GetGpuCircularBuffer()
 	return mGPUCircularBuffer;
 }
 
-
+uint64_t lastTime = 0;
 bool 
 CGpuVideoIO::Capture()
 {
-	uint64_t lastTime = 0;
 
 	// Wait for frame interrupt
 	mBoard->WaitForInputFieldID(NTV2_FIELD0, NTV2_CHANNEL1);
@@ -343,7 +343,7 @@ CGpuVideoIO::Playout()
 	ULWord loval, hival;
 	mBoard->ReadRegister(kVRegTimeStampLastInput1VerticalLo, loval);
 	mBoard->ReadRegister(kVRegTimeStampLastInput1VerticalHi, hival);
-	//	uint64_t currentTime = ((uint64_t)hival << 32) + loval;
+//	uint64_t currentTime = ((uint64_t)hival << 32) + loval;
 //	odprintf("Latency Time %llu ", currentTime - frameData->currentTime);
 
 	// Set target frame

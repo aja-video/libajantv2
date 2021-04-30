@@ -1,4 +1,3 @@
-/* SPDX-License-Identifier: MIT */
 #ifndef _UTIL_ASSERTION_H
 #define _UTIL_ASSERTION_H
 

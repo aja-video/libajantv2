@@ -1,4 +1,3 @@
-/* SPDX-License-Identifier: MIT */
 /*
   This software is provided by AJA Video, Inc. "AS IS"
   with no express or implied warranties.
@@ -6,7 +5,7 @@
 
 
 #include "ntv2glTextureTransferNV.h"
-#include "ajabase/system/systemtime.h"
+#include "ajastuff/system/systemtime.h"
 #include <assert.h>
 #include <string>
 #include <map>
@@ -82,7 +81,7 @@ bool CNTV2glTextureTransferNV::Init()
 			      &_semaphorePayloadSize,
 			      &_semaphorePayloadSize));
 
-    _glctx = wglGetCurrentContext();
+    /*_glctx = */wglGetCurrentContext();
 
 	return true;
 }

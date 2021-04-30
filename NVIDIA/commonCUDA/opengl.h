@@ -1,4 +1,3 @@
-/* SPDX-License-Identifier: MIT */
 
 #ifndef _OPENGL_
 #define _OPENGL_
@@ -8,10 +7,10 @@
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
 #else
-#include <gl/glew.h>
+#include <GL/glew.h>
 //#include <glut.h>
 //#include <glu.h>
-#include <gl/gl.h>
+#include <GL/gl.h>
 #endif
 
 

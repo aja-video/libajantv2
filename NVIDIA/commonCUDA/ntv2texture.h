@@ -1,4 +1,3 @@
-/* SPDX-License-Identifier: MIT */
 
 #ifndef _CNTV2_TEXTURE_
 #define _CNTV2_TEXTURE_
@@ -69,7 +68,7 @@ private:
 	
 	// CUDA Array
 	cudaChannelFormatDesc mChannelDesc;
-	cudaArray *mArray;
+	cudaArray_t mArray;
 
 	mutable CNTV2ErrorList mErrorList;
 };

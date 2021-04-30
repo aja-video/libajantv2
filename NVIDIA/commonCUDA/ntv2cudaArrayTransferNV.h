@@ -1,4 +1,3 @@
-/* SPDX-License-Identifier: MIT */
 // CUDA array transfer class
 
 #ifndef _NTV2_CUDA_ARRAY_TRANSFER_NV_
@@ -35,22 +34,30 @@ public:
 
 private:
 	typedef struct TimeInfo{
-
-		SyncInfo cardToSysMemStart;
-		SyncInfo cardToSysMemEnd;
-		SyncInfo sysMemToGpuStart;
-		SyncInfo sysMemToGpuEnd;
-		SyncInfo gpuToSysMemStart;
-		SyncInfo gpuToSysMemEnd;
-		SyncInfo sysMemToCardStart;
-		SyncInfo sysMemToCardEnd;
+#ifdef AJA_WINDOWS		
+		__int64 cardToSysMemStart;
+		__int64 cardToSysMemEnd;
+		__int64 sysMemToGpuStart;
+		__int64 sysMemToGpuEnd;
+		__int64 gpuToSysMemStart;
+		__int64 gpuToSysMemEnd;
+		__int64 sysMemToCardStart;
+		__int64 sysMemToCardEnd;
+#else
+		int64_t cardToSysMemStart;
+		int64_t cardToSysMemEnd;
+		int64_t sysMemToGpuStart;
+		int64_t sysMemToGpuEnd;
+		int64_t gpuToSysMemStart;
+		int64_t gpuToSysMemEnd;
+		int64_t sysMemToCardStart;
+		int64_t sysMemToCardEnd;
+#endif		
 		float cardToGpuTime;
 		float gpuToCardTime;
-	};
+	} TimeInfo;
 
 	mutable std::map<GLuint, TimeInfo*> _bufferTimeInfoMap;
-
-	BufferDVPInfo* GetBufferDVPInfo(uint8_t *buffer) const;
 
 	TimeInfo* GetTimeInfo(const CNTV2Texture* texture) const;
 

@@ -1,4 +1,3 @@
-/* SPDX-License-Identifier: MIT */
 
 #ifndef _OGLVIEW_
 #define _OGLVIEW_

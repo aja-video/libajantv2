@@ -1,4 +1,3 @@
-/* SPDX-License-Identifier: MIT */
 /*
   This software is provided by AJA Video, Inc. "AS IS"
   with no express or implied warranties.
@@ -9,24 +8,8 @@
 
 #include "ntv2gpuTextureTransfer.h"
 
-#include "gpustuff/include/DVPAPI.h"
-#include "gpustuff/include/dvpapi_gl.h"
-#include "gpustuff/include/dvpapi_cuda.h"
-
-struct SyncInfo {
-	volatile uint32_t *sem;
-	volatile uint32_t *semOrg;
-	volatile uint32_t releaseValue;
-	volatile uint32_t acquireValue;
-	DVPSyncObjectHandle syncObj;
-};
-
-struct BufferDVPInfo {
-	DVPBufferHandle handle;
-	SyncInfo sysMemSyncInfo;
-	SyncInfo gpuSyncInfo;
-	uint32_t currentChunk;
-};
+#include "cuda_runtime_api.h"
+#include "cuda_gl_interop.h"
 
 class CNTV2gpuTextureTransferNV : public CNTV2gpuTextureTransfer{
 public:
@@ -82,9 +65,6 @@ protected:
 	uint32_t _semaphorePayloadSize;
 	uint32_t _numChunks; //specifies the number of chunks used in the transfers. Used for overlapped GPU and Video I/O transfers
 
-	mutable std::map<uint8_t*, BufferDVPInfo*> _dvpInfoMap;
-	mutable std::map<GLuint, DVPBufferHandle> _bufferHandleMap;
-
 	void WaitForGpuDma(uint8_t *buffer) const;
 	void SignalSysMemDmaFinished(uint8_t *buffer) const;
 
@@ -96,11 +76,6 @@ protected:
 	virtual void CopyNextChunkBufferToTexture(uint8_t* buffer, CNTV2Texture* texture) const = 0;
 	virtual void CopyNextChunkTextureToBuffer(CNTV2Texture* texture, uint8_t* buffer) const = 0;
 
-	virtual BufferDVPInfo* GetBufferDVPInfo(uint8_t *buffer) const;
-
-	void InitSyncInfo(SyncInfo *si) const;
-
-	DVPBufferHandle GetBufferHandleForTexture(CNTV2Texture* texture) const;
 	ULWord GetBufferSize() const;
 
 	ULWord _width;
@@ -108,7 +83,7 @@ protected:
 
 	CNTV2TextureType _type;
 
-	HGLRC _glctx;
+//	HGLRC _glctx;
 };
 
 #endif

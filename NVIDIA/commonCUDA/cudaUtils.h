@@ -1,4 +1,3 @@
-/* SPDX-License-Identifier: MIT */
 //
 // cudaUtils.h
 //
@@ -21,6 +20,7 @@
 #include <cuda_runtime.h>
 #elif defined(__linux__)
 #include <cuda.h>
+#include <cuda_runtime.h>
 #else
 #error "Unknown platform"
 #endif
@@ -236,6 +236,9 @@ static const char *_cudaGetErrorEnum(cudaError_t error)
 
         case cudaErrorApiFailureBase:
             return "cudaErrorApiFailureBase";
+
+		default:
+			break;
     }
 
     return "<unknown>";
