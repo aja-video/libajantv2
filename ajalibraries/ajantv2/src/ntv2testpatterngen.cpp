@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		testpatterngen.cpp
 	@brief		Contains the implementation of the NTV2TestPatternGen class.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2publicinterface.h
 	@brief		Declares enums and structs used by all platform drivers and the SDK.

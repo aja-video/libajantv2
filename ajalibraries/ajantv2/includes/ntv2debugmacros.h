@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2debugMacros.h
 	@brief		Declares several macros useful for debugging.

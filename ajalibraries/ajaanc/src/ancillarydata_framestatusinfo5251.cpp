@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ancillarydata_framestatusinfo5251.cpp
 	@brief		Implements the AJAAncillaryData_FrameStatusInfo5251 class.

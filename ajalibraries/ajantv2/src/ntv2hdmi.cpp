@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2hdmi.cpp
 	@brief		Implements most of CNTV2Card's HDMI-related functions.

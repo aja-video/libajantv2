@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		timer.h
 	@brief		Declares the AJATimer class.

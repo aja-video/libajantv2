@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2audiodefines.h
 	@brief		Declares common audio macros and structs used in the SDK.

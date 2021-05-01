@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		pnp/mac/pnpimpl.cpp
 	@brief		Implements the AJAPnpImpl class on the Mac platform.

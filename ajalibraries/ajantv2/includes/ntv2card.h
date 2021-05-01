@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2card.h
 	@brief		Declares the CNTV2Card class.

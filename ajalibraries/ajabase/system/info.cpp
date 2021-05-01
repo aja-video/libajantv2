@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file		info.cpp
     @brief		Implements the AJASystemInfo class.

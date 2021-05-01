@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2serialcontrol.cpp
 	@brief		Declares the CNTV2SerialControl class.

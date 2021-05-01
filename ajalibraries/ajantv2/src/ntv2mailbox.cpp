@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2mailbox.cpp
 	@brief		Implementation of CNTV2MailBox class.

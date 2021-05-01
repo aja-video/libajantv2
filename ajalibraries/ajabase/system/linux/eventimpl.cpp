@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		linux/eventimpl.cpp
 	@brief		Implements the AJAEventImpl class on the Linux platform.

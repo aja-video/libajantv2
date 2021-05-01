@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2rp188.h
 	@brief		Declares the CRP188 class. See SMPTE RP188 standard for details.

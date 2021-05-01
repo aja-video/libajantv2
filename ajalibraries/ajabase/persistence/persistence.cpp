@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		persistence/persistence.cpp
 	@brief		Implements the AJAPersistence class.

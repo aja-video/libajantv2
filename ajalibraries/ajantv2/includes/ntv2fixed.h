@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2fixed.h
 	@brief		Declares several fixed-point math routines. Assumes 16-bit fraction.

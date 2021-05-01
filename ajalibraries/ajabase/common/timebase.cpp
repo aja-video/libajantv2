@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		timebase.cpp
 	@brief		Implements the AJATimeBase class.

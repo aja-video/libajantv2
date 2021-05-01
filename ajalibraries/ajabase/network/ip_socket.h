@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ip_socket.h
 	@brief		Declares the AJAIPSocket class.

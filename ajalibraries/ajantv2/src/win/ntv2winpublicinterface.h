@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2winpublicinterface.h
 	@brief		Defines & structs shared between user-space and Windows kernel driver.

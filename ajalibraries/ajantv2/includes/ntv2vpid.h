@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2vpid.h
 	@brief		Declares the CNTV2VPID class. See SMPTE 352 standard for details.

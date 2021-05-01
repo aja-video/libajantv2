@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		wavewriter.cpp
 	@brief		Implements the AJAWavWriter class.

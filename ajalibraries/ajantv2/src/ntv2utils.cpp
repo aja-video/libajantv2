@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2utils.cpp
 	@brief		Implementations for the NTV2 utility functions.

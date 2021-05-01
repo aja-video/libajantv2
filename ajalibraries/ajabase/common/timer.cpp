@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		timer.cpp
 	@brief		Implements the AJATimer class.

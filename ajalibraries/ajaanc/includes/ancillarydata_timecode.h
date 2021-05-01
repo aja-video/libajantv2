@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ancillarydata_timecode.h
 	@brief		Declares the AJAAncillaryData_Timecode class.

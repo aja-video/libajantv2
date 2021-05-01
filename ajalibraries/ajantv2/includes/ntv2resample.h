@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2resample.h
 	@brief		Declares a number of pixel resampling functions.

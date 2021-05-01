@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		mac/lockimpl.h
 	@brief		Declares the AJALockImpl class.

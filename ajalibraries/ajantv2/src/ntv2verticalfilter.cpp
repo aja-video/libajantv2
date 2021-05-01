@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2verticalfilter.cpp
 	@brief		Implementations of the VerticalFilterLine and FieldInterpolateLine functions.

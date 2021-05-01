@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2m31enums.h
 	@brief		Enumerations for controlling NTV2 devices with m31 HEVC encoders.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2mailbox.h
 	@brief		Declares the CNTV2MailBox class.

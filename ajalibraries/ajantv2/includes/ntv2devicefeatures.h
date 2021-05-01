@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2devicefeatures.h
 	@brief		Declares device capability functions.

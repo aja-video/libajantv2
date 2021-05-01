@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file		ntv2config2022.h
     @brief		Declares the NTV2ChoosableBoard struct used for "nub" discovery.

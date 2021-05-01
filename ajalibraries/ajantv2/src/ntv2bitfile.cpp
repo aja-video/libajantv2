@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2bitfile.cpp
 	@brief		Implementation of CNTV2Bitfile class.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		mac/eventimpl.cpp
 	@brief		Implements the AJAEventImpl class on the Mac platform.

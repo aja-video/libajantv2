@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		dllmain.cpp
 	@brief		Implementation of Windows DLL entry.

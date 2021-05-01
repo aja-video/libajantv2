@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		log.h
 	@brief		Declares the AJATimeLog class.

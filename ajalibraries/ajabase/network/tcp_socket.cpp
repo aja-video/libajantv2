@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		tcp_socket.cpp
 	@brief		Implements the AJATCPSocket class.

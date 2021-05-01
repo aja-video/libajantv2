@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		performance.cpp
 	@brief		Monitors the operational performance, timing, and stats of an arbitrary module.

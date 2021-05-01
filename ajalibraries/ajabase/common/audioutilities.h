@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		audioutilities.h
 	@brief		Declaration of AJA_GenerateAudioTone function.

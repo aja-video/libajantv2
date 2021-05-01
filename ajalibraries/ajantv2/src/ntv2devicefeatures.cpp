@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2devicefeatures.cpp
 	@brief		Implementations of non-auto-generated device capability functions.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2linuxpublicinterface.h
 	@brief		Types and defines shared between NTV2 user application interface and Linux device driver.

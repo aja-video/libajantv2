@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file		ntv2registersmb.h
     @brief		Defines the KonaIP/IoIP registers.

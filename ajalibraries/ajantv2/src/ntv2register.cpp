@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2register.cpp
 	@brief		Implements most of CNTV2Card's register-based functions.

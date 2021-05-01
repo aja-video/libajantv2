@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ancillarydata_hdr_sdr.h
 	@brief		Declares the AJAAncillaryData_HDR_SDR class.

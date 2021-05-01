@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2m31publicinterface.h
 	@brief		Declares structs used for the Corvid HEVC.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file		ntv2supportlogger.h
     @brief		Declares the CNTV2SupportLogger class.

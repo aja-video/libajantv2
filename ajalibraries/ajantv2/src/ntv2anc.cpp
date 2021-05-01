@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2anc.cpp
 	@brief		Implementations of anc-centric CNTV2Card methods.

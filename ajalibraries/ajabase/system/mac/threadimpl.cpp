@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		mac/threadimpl.cpp
 	@brief		Implements the AJAThreadImpl class on the Mac platform.

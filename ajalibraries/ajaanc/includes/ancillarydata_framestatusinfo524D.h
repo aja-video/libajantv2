@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ancillarydata_framestatusinfo524D.h
 	@brief		Declares the AJAAncillaryData_FrameStatusInfo524D class.

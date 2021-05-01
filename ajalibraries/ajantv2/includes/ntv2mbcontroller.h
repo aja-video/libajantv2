@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2mbcontroller.h
 	@brief		Declares the CNTV2MBController class.

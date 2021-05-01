@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2utils.h
 	@brief		Declares numerous NTV2 utility functions.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		linux/threadimpl.cpp
 	@brief		Implements the AJAThreadImpl class on the Linux platform.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		bytestream.h
 	@brief		Declaration of AJAByteStream class.

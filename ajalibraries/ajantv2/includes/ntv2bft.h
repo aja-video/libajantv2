@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2bft.h
 	@brief		Handy macros for Basic Functionality Tests.

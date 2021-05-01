@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		circularbuffer.h
 	@brief		Declaration of AJACircularBuffer template class.

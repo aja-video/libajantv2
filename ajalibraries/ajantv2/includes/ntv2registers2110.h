@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2registers2110.h
 	@brief		Defines the KonaIP/IoIP S2110 registers.

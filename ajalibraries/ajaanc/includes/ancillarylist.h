@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ancillarylist.h
 	@brief		Declares the AJAAncillaryList class.

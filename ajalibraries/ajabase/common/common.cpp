@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file		common.cpp
     @brief		Generic helper functions.

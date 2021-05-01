@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ajaexport.h
 	@brief		Defines the import/export macros for producing DLLs or LIBs.

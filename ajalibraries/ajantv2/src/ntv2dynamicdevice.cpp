@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2dynamicdevice.cpp
 	@brief		Implementations of DMA-related CNTV2Card methods.

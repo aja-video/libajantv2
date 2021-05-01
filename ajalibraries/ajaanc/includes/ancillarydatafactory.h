@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ancillarydatafactory.h
 	@brief		Declaration of the AJAAncillaryDataFactory class.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		pnp/pnp.cpp
 	@brief		Implements the AJAPnp (plug-and-play) class.

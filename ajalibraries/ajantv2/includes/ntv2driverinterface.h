@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2driverinterface.h
 	@brief		Declares the CNTV2DriverInterface base class.

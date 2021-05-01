@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2debug.cpp
 	@brief		Implements the NTV2 debug output functions.

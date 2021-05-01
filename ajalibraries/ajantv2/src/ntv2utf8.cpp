@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2utf8.cpp
 	@brief		Implements the bare-bones UTF8 support functions (for the nub).

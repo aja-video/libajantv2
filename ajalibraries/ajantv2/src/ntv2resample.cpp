@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2resample.cpp
 	@brief		Implementations for the pixel resampling functions.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2subscriptions.cpp
 	@brief		Implementation of CNTV2Card's event notification subscription functions.

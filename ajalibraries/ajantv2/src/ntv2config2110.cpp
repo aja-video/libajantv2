@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file       ntv2config2110.cpp
     @brief      Implements the CNTV2Config2110 class.

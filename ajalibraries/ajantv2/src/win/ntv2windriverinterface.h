@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2windriverinterface.h
 	@brief		Declares the MSWindows-specific flavor of CNTV2DriverInterface.

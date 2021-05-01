@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		pnp/linux/pnpimpl.cpp
 	@brief		Implements the AJAPnpImpl class on the Linux platform.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2task.h
 	@brief		Declares the CNTV2Task class (deprecated).

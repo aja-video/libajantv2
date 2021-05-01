@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		persistence/persistence.h
 	@brief		Declares the AJAPersistence class.

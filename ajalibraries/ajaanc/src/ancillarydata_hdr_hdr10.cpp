@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ancillarydata_hdr_hdr10.cpp
 	@brief		Implements the AJAAncillaryData_HDR_HDR10 class.

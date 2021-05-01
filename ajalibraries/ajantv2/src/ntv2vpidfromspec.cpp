@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2vpidfromspec.cpp
 	@brief		Generates a VPID based on a specification struct. See the SMPTE 352 standard for details.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2nubaccess.cpp
 	@brief		Implementation of NTV2 "nub" functions that connect/open/close/send/receive data.
