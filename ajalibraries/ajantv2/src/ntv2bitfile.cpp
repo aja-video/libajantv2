@@ -570,7 +570,7 @@ public:
             sDesignPairToIDMap[make_pair(0x01, 0x02)] = DEVICE_ID_KONA5_8K;
             sDesignPairToIDMap[make_pair(0x01, 0x03)] = DEVICE_ID_KONA5_2X4K;
 			sDesignPairToIDMap[make_pair(0x01, 0x04)] = DEVICE_ID_KONA5_3DLUT;
-			sDesignPairToIDMap[make_pair(0x01, 0x04)] = DEVICE_ID_KONA5_OE1;
+			sDesignPairToIDMap[make_pair(0x01, 0x05)] = DEVICE_ID_KONA5_OE1;
 			sDesignPairToIDMap[make_pair(0x02, 0x00)] = DEVICE_ID_CORVID44_8KMK;
 			sDesignPairToIDMap[make_pair(0x02, 0x01)] = DEVICE_ID_CORVID44_8K;
 			sDesignPairToIDMap[make_pair(0x02, 0x02)] = DEVICE_ID_CORVID44_2X4K;
