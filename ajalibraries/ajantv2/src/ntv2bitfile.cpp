@@ -502,7 +502,8 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_8KMK).append("_tprom")
 											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_8K).append("_tprom")
 											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_3DLUT).append("_tprom")
-											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_2X4K).append("_tprom");
+											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_2X4K).append("_tprom")
+											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_OE1).append("_tprom");
 		case DEVICE_ID_CORVID44_8KMK:
 		case DEVICE_ID_CORVID44_8K:
 		case DEVICE_ID_CORVID44_PLNR:
