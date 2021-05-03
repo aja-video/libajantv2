@@ -1,6 +1,6 @@
 
 /********************************************************************************************
-oglapp:
+cudaapp:
 	A CUDA example that demonstrates usage of GPU Direct for Video for low latency video I/O + gpu processing. 
 	The example is hard-coded for 720p 59.94Hz video format.
 	The demo expects a 720p 59.94 video on channel 1(if bidirectional the code makes it an input)
@@ -9,6 +9,8 @@ oglapp:
 	at 3 frames. 
 ***********************************************************************************************/
 #define _CRT_SECURE_NO_WARNINGS 1
+#define no_init_all
+
 #include "ajatypes.h"
 
 #include "ajabase/system/event.h"
