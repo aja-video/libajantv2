@@ -108,7 +108,7 @@
     <ClInclude Include="..\commonCUDA\ntv2gpuTextureTransferNV.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\ajalibraries\ajantv2\build\libajantv2dll_vs141.vcxproj">
+    <ProjectReference Include="..\..\..\..\..\ajalibraries\ajantv2\build\libajantv2dll_cuda.vcxproj">
       <Project>{8e9fcb9f-934a-4dfa-b9eb-8f0359ebe589}</Project>
     </ProjectReference>
   </ItemGroup>
