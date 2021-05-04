@@ -11,6 +11,9 @@ else
 include $(DIR)/../../../../../build/configure.mk
 
 NVCC ?= nvcc
+ifeq (,$(wildcard $(NVCC)))
+	NVCC := /usr/local/cuda/bin/nvcc
+endif
 
 AJA_APP = $(A_UBER_BIN)/cudaapp
 
