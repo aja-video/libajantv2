@@ -1,7 +1,7 @@
 #include "simplegpuvio.h"
 #include "ntv2signalrouter.h"
+#include "ntv2utils.h"
 #include "ajabase/system/systemtime.h"
-#include "ntv2vpid.h"
 
 static int s_iIndexFirstSource = 0;									// source board first frame buffer index
 static int s_iIndexLastSource = 1;									// source board last frame buffer index (frame mode)
@@ -40,15 +40,12 @@ CGpuVideoIO::CGpuVideoIO(vioDesc *desc) :
 	if (!mBoard)
 		return;
 
-	// Set video format
-	mBoard->SetVideoFormat(desc->videoFormat, false, false, desc->channel);
-
-
-	// Genlock the output to the input
-	mBoard->SetReference(NTV2_REFERENCE_INPUT1);
-
 	// Cache channel
 	mChannel = desc->channel;
+
+	// Set video format
+	mBoard->SetVideoFormat(desc->videoFormat, false, false, mChannel);
+	mBoard->SetQuadFrameEnable(0, mChannel);
 
 	// Get source video info
 	NTV2VANCMode vancMode;
@@ -59,58 +56,21 @@ CGpuVideoIO::CGpuVideoIO(vioDesc *desc) :
 	mTransferLines = mActiveVideoHeight / s_iSubFrameCount;
 	mTransferSize = mActiveVideoPitch * mTransferLines;
 
+	if (desc->type == VIO_IN)
+	{
+		// Genlock the output to the input
+		mBoard->SetReference(::NTV2InputSourceToReferenceSource(::NTV2ChannelToInputSource(mChannel)));
 
-	if (desc->type == VIO_IN) {
-
-
-
-		if (NTV2_IS_QUAD_FRAME_FORMAT(desc->videoFormat))
-		{
-			// Set frame buffer format
-			mBoard->SetFrameBufferFormat(mChannel, desc->bufferFormat);
-			mBoard->SetFrameBufferFormat((NTV2Channel)(mChannel + 1), desc->bufferFormat);
-			mBoard->SetFrameBufferFormat((NTV2Channel)(mChannel + 2), desc->bufferFormat);
-			mBoard->SetFrameBufferFormat((NTV2Channel)(mChannel + 3), desc->bufferFormat);
-
-			mBoard->SetMode(mChannel, NTV2_MODE_CAPTURE);
-			mBoard->SetMode((NTV2Channel)(mChannel + 1), NTV2_MODE_CAPTURE);
-			mBoard->SetMode((NTV2Channel)(mChannel + 2), NTV2_MODE_CAPTURE);
-			mBoard->SetMode((NTV2Channel)(mChannel + 3), NTV2_MODE_CAPTURE);
-
-			// Input specific setup
-			mBoard->SetSDITransmitEnable(mChannel, false);
-			mBoard->SetSDITransmitEnable((NTV2Channel)(mChannel + 1), false);
-			mBoard->SetSDITransmitEnable((NTV2Channel)(mChannel + 2), false);
-			mBoard->SetSDITransmitEnable((NTV2Channel)(mChannel + 3), false);
-
-			mBoard->Connect(NTV2_XptCSC1VidInput, NTV2_XptSDIIn1);
-			mBoard->Connect(NTV2_XptFrameBuffer1Input, NTV2_XptCSC1VidRGB);
-			mBoard->Connect(NTV2_XptCSC2VidInput, NTV2_XptSDIIn2);
-			mBoard->Connect(NTV2_XptFrameBuffer2Input, NTV2_XptCSC2VidRGB);
-			mBoard->Connect(NTV2_XptCSC3VidInput, NTV2_XptSDIIn3);
-			mBoard->Connect(NTV2_XptFrameBuffer3Input, NTV2_XptCSC3VidRGB);
-			mBoard->Connect(NTV2_XptCSC4VidInput, NTV2_XptSDIIn4);
-			mBoard->Connect(NTV2_XptFrameBuffer4Input, NTV2_XptCSC4VidRGB);
-
-			mBoard->SetQuadFrameEnable(1, mChannel);
-		}
-		else
-		{
-
-			// Set frame buffer format
-			mBoard->SetFrameBufferFormat(mChannel, desc->bufferFormat);
-
-			// Put source channel in capture mode
-			mBoard->SetMode(mChannel, NTV2_MODE_CAPTURE);
-			mBoard->SetSDITransmitEnable(mChannel, false);
-
-			mBoard->Connect(NTV2_XptCSC1VidInput, NTV2_XptSDIIn1);
-			mBoard->Connect(NTV2_XptFrameBuffer1Input, NTV2_XptCSC1VidRGB);
-
-			mBoard->SetQuadFrameEnable(0, mChannel);
-		}
+		// Set frame buffer format
+		mBoard->SetFrameBufferFormat(mChannel, desc->bufferFormat);
 	
+		// Put source channel in capture mode
+		mBoard->SetMode(mChannel, NTV2_MODE_CAPTURE);
+		mBoard->SetSDITransmitEnable(mChannel, false);
 
+		// Connect SDI source to frame store
+		mBoard->Connect(::GetCSCInputXptFromChannel(mChannel), ::GetInputSourceOutputXpt(::NTV2ChannelToInputSource(mChannel)));
+		mBoard->Connect(::GetFrameBufferInputXptFromChannel(mChannel), ::GetCSCOutputXptFromChannel(mChannel, false, true));
 
 		// Get video standard
 		NTV2Standard videoStandard;
@@ -129,85 +89,37 @@ CGpuVideoIO::CGpuVideoIO(vioDesc *desc) :
 		if (!s_bSubFrame)
 		{
 			// Subscribe to video input interrupts
-			mBoard->SubscribeInputVerticalEvent(NTV2_CHANNEL1);
+			mBoard->SubscribeInputVerticalEvent(mChannel);
 
 			// Set the input to output delay for full frame transfers
 			mFrameNumber += s_iFrameDelay;
 		}
 
 		mBoard->SetInputFrame(mChannel, mFrameNumber);
+	}
+	else
+	{
+		// Set frame buffer format
+		mBoard->SetFrameBufferFormat(mChannel, desc->bufferFormat);
 
-	} else {
+		mBoard->SetSDITransmitEnable(mChannel, true);
 
+		// Put target in display mode
+		mBoard->SetMode(mChannel, NTV2_MODE_DISPLAY);
 
-		// Set video format
-		mBoard->SetVideoFormat(desc->videoFormat, false, false, desc->channel);
-
-
-		if (NTV2_IS_QUAD_FRAME_FORMAT(desc->videoFormat))
-		{
-			mBoard->SetFrameBufferFormat(mChannel, desc->bufferFormat);
-			mBoard->SetFrameBufferFormat((NTV2Channel)(mChannel + 1), desc->bufferFormat);
-			mBoard->SetFrameBufferFormat((NTV2Channel)(mChannel + 2), desc->bufferFormat);
-			mBoard->SetFrameBufferFormat((NTV2Channel)(mChannel + 3), desc->bufferFormat);
-
-			mBoard->SetMode(mChannel, NTV2_MODE_DISPLAY);
-			mBoard->SetMode((NTV2Channel)(mChannel + 1), NTV2_MODE_DISPLAY);
-			mBoard->SetMode((NTV2Channel)(mChannel + 2), NTV2_MODE_DISPLAY);
-			mBoard->SetMode((NTV2Channel)(mChannel + 3), NTV2_MODE_DISPLAY);
-
-			// Input specific setup
-			mBoard->SetSDITransmitEnable(mChannel, true);
-			mBoard->SetSDITransmitEnable((NTV2Channel)(mChannel + 1), true);
-			mBoard->SetSDITransmitEnable((NTV2Channel)(mChannel + 2), true);
-			mBoard->SetSDITransmitEnable((NTV2Channel)(mChannel + 3), true);
-
-			mBoard->Connect(NTV2_XptCSC5VidInput, NTV2_XptFrameBuffer5RGB);
-			mBoard->Connect(NTV2_XptSDIOut5Input, NTV2_XptCSC5VidYUV);
-			mBoard->Connect(NTV2_XptCSC6VidInput, NTV2_XptFrameBuffer6RGB);
-			mBoard->Connect(NTV2_XptSDIOut6Input, NTV2_XptCSC6VidYUV);
-			mBoard->Connect(NTV2_XptCSC7VidInput, NTV2_XptFrameBuffer7RGB);
-			mBoard->Connect(NTV2_XptSDIOut7Input, NTV2_XptCSC7VidYUV);
-			mBoard->Connect(NTV2_XptCSC8VidInput, NTV2_XptFrameBuffer8RGB);
-			mBoard->Connect(NTV2_XptSDIOut8Input, NTV2_XptCSC8VidYUV);
-
-			mBoard->SetQuadFrameEnable(1, mChannel);
-		}
-		else
-		{
-			// Set frame buffer format
-			mBoard->SetFrameBufferFormat(mChannel, desc->bufferFormat);
-
-			mBoard->SetSDITransmitEnable(mChannel, true);
-
-			// Put target in display mode
-			mBoard->SetMode(mChannel, NTV2_MODE_DISPLAY);
-
-			// Route video out Output 3 via FrameStore 3
-			mBoard->Connect(NTV2_XptCSC3VidInput, NTV2_XptFrameBuffer3RGB);
-			mBoard->Connect(NTV2_XptSDIOut3Input, NTV2_XptCSC3VidYUV);
-
-			mBoard->SetQuadFrameEnable(0, mChannel);
-		}
+		// Connect frame store to SDI output
+		mBoard->Connect(::GetCSCInputXptFromChannel(mChannel), ::GetFrameBufferOutputXptFromChannel(mChannel,  true,  false));
+		mBoard->Connect(::GetSDIOutputInputXpt (mChannel, false), ::GetCSCOutputXptFromChannel(mChannel,  false,  false));
 
 		// Setup the frame buffer parameters
 		mFrameNumber = s_iIndexFirstTarget;
-
 		
-		// NOTE: only support progressive 16:9 formats for now'
-		//////NOTE::::need to update for QuadHD or 4K.
-		CNTV2VPID vpid;
-		vpid.SetVPID(desc->videoFormat, desc->bufferFormat, true, true, VPIDChannel_3);
-		ULWord vpidValue = vpid.GetVPID();
-		mBoard->SetSDIOutVPID(vpidValue, vpidValue, NTV2_CHANNEL3); 
-
 		// Set register update mode to frame
 		mBoard->SetRegisterWriteMode(NTV2_REGWRITE_SYNCTOFRAME);
 
 		// Set target to output first frame
 		mBoard->SetOutputFrame(mChannel, mFrameNumber);
 	}
-
 }
 
 CGpuVideoIO::~CGpuVideoIO()
@@ -220,14 +132,13 @@ CGpuVideoIO::WaitForCaptureStart()
 {
 	NTV2Mode mode;
 	mBoard->GetMode(mChannel, mode);
-	if (mode == NTV2_MODE_CAPTURE) {
-
+	if (mode == NTV2_MODE_CAPTURE)
+	{
 		// Wait for capture to start
-		//mBoard->WaitForInput1FieldID(NTV2_FIELD0);
-		mBoard->WaitForInputVerticalInterrupt(NTV2_CHANNEL1);
-
-	} else {
-
+		mBoard->WaitForInputFieldID(NTV2_FIELD0, mChannel);
+	}
+	else
+	{
 		// Return an error in this case?
 	}
 }
@@ -260,9 +171,9 @@ uint64_t lastTime = 0;
 bool 
 CGpuVideoIO::Capture()
 {
-
 	// Wait for frame interrupt
-	mBoard->WaitForInputFieldID(NTV2_FIELD0, NTV2_CHANNEL1);
+	mBoard->WaitForInputFieldID(NTV2_FIELD0, mChannel);
+	
 	ULWord loval, hival;
 	mBoard->ReadRegister(kVRegTimeStampLastInput1VerticalLo, loval);
 	mBoard->ReadRegister(kVRegTimeStampLastInput1VerticalHi, hival);
@@ -280,13 +191,15 @@ CGpuVideoIO::Capture()
 	uint32_t copiedChunkSize = 0;
 	uint32_t numChunks = mGPUTransfer->GetNumChunks();
 	uint32_t chunkSize = (uint32_t)((float)frameData->videoBufferSize/(float)numChunks);
-    for (uint32_t i = 0; i < numChunks; i++) {
+    for (uint32_t i = 0; i < numChunks; i++)
+	{
 		copiedChunkSize = (frameData->videoBufferSize-copiedSize > chunkSize ? chunkSize : frameData->videoBufferSize-copiedSize);	
 		// Prepare for DMA transfer
 		mGPUTransfer->BeforeRecordTransfer(buffer, frameData->texture, frameData->renderToTexture);
 		// DMA source frame to system memory
 		if(!mBoard->DMAReadSegments(mFrameNumber, 
-			(ULWord*)(buffer + copiedSize), copiedSize, copiedChunkSize, 1, copiedChunkSize, copiedChunkSize)){
+			(ULWord*)(buffer + copiedSize), copiedSize, copiedChunkSize, 1, copiedChunkSize, copiedChunkSize))
+		{
 			printf("error: DMAReadSegment failed\n");
 			return false;
 		}		
@@ -300,7 +213,8 @@ CGpuVideoIO::Capture()
 
 	// Update source frame
 	mFrameNumber++;
-	if(mFrameNumber > (ULWord)s_iIndexLastSource) {
+	if(mFrameNumber > (ULWord)s_iIndexLastSource)
+	{
 		mFrameNumber = s_iIndexFirstSource;
 	}
 
@@ -313,7 +227,6 @@ CGpuVideoIO::Capture()
 bool 
 CGpuVideoIO::Playout()
 {
-
 	// Get next GPU buffer
 	AVTextureBuffer* frameData = mGPUCircularBuffer->StartConsumeNextBuffer();
 	uint8_t* buffer = (uint8_t*)(frameData->videoBuffer);
@@ -324,12 +237,14 @@ CGpuVideoIO::Playout()
 	uint32_t copiedChunkSize = 0;
 	uint32_t numChunks = mGPUTransfer->GetNumChunks();
 	uint32_t chunkSize = (uint32_t)((float)frameData->videoBufferSize/(float)numChunks);
-    for (uint32_t i = 0; i < numChunks; i++) {
+    for (uint32_t i = 0; i < numChunks; i++)
+	{
 		copiedChunkSize = (frameData->videoBufferSize-copiedSize > chunkSize ? chunkSize : frameData->videoBufferSize-copiedSize);
 		// Kickoff DMA from GPU and prepare for DMA from system memory to video I/O device	
 		mGPUTransfer->BeforePlaybackTransfer(buffer, frameData->texture, frameData->renderToTexture);
 		if(!mBoard->DMAWriteSegments(mFrameNumber, 
-			(ULWord*)(buffer + copiedSize), copiedSize, copiedChunkSize, 1, copiedChunkSize, copiedChunkSize)){
+			(ULWord*)(buffer + copiedSize), copiedSize, copiedChunkSize, 1, copiedChunkSize, copiedChunkSize))
+		{
 			printf("error: DMAWriteSegment failed\n");
 			return false;
 		}				
@@ -351,7 +266,8 @@ CGpuVideoIO::Playout()
 
 	// Update target frame
 	mFrameNumber++;
-	if(mFrameNumber > (ULWord)s_iIndexLastTarget) {
+	if(mFrameNumber > (ULWord)s_iIndexLastTarget)
+	{
 		mFrameNumber = s_iIndexFirstTarget;
 	}
 

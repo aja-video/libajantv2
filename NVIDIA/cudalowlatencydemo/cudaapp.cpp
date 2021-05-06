@@ -573,30 +573,14 @@ int main(int argc, char *argv[])
 	ntv2Card.SetMultiFormatMode(false);
 
 	ntv2Card.SetSDITransmitEnable(NTV2_CHANNEL1, false);
-	ntv2Card.SetSDITransmitEnable(NTV2_CHANNEL2, false);
-	ntv2Card.SetSDITransmitEnable(NTV2_CHANNEL3, false);
-	ntv2Card.SetSDITransmitEnable(NTV2_CHANNEL4, false);
+	ntv2Card.WaitForInputVerticalInterrupt(NTV2_CHANNEL1, 10);
 
 	videoFormat = ntv2Card.GetInputVideoFormat(NTV2_INPUTSOURCE_SDI1,true);
-	NTV2VideoFormat vf2 = ntv2Card.GetInputVideoFormat(NTV2_INPUTSOURCE_SDI2,true);
-	NTV2VideoFormat vf3 = ntv2Card.GetInputVideoFormat(NTV2_INPUTSOURCE_SDI3, true);
-	NTV2VideoFormat vf4 = ntv2Card.GetInputVideoFormat(NTV2_INPUTSOURCE_SDI4, true);
-
-	if ((videoFormat == vf2) && (videoFormat == vf3) && (videoFormat == vf4))
-	{
-		NTV2VideoFormat fourKFormat = videoFormat;
-		if (get4KInputFormat(fourKFormat))
-			videoFormat = fourKFormat;
-		//NOTE: check for Corvid88 or 8 channel board.
-	}
-
 	if (videoFormat == NTV2_FORMAT_UNKNOWN)
 		videoFormat = NTV2_FORMAT_720p_5994;
 
 	//  This will work with devices that answer \c true for ::NTV2DeviceCanDo3GLevelConversion
-#if 0
 	bool    is3Gb(false);
-	videoFormat = ntv2Card.GetSDIInputVideoFormat(NTV2_CHANNEL1, false);
 	ntv2Card.GetSDIInput3GbPresent(is3Gb, NTV2_CHANNEL1);
 	if (is3Gb)
 	{
@@ -623,12 +607,9 @@ int main(int argc, char *argv[])
 	{
 		ntv2Card.SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, false);
 	}
-#else
-	ntv2Card.SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, true);
-	videoFormat = NTV2_FORMAT_1080p_5994_A;
-#endif
-	// For this application hardcode the video format to  1080P 60 LEVEL B.
-	//videoFormat = NTV2_FORMAT_1080p_6000_B;
+
+	ntv2Card.SetReference(::NTV2InputSourceToReferenceSource(NTV2_INPUTSOURCE_SDI1));
+	ntv2Card.SetVideoFormat (videoFormat);
 
 	// For this application hardcode the frame buffer format to RGB10
 	NTV2FrameBufferFormat frameBufferFormat = NTV2_FBF_10BIT_RGB;
@@ -662,7 +643,7 @@ int main(int argc, char *argv[])
 	vioDesc outdesc;
 	outdesc.videoFormat = videoFormat;
 	outdesc.bufferFormat = frameBufferFormat;
-	outdesc.channel = NTV2_CHANNEL3;
+	outdesc.channel = NTV2_CHANNEL2;
 	outdesc.type = VIO_OUT;
 	playout = new CCudaVideoIO(&outdesc);
 

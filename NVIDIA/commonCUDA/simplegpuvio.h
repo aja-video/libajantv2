@@ -55,9 +55,8 @@ protected:
 	CNTV2Card*                          mBoard;
 
 	NTV2Channel                         mChannel;
-
+		
 	CNTV2gpuTextureTransfer*			mGPUTransfer;
-
 	CNTV2GpuCircularBuffer*				mGPUCircularBuffer;
 
 	ULWord                              mActiveVideoSize;
