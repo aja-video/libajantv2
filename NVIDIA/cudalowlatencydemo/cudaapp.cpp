@@ -16,7 +16,9 @@ cudaapp:
 #include "ajabase/system/event.h"
 #include "ajabase/system/thread.h"
 #include "ajabase/system/systemtime.h"
+#ifdef AJA_LINUX
 #include "ntv2democommon.h"
+#endif
 
 #include <math.h>
 #include <iostream>
@@ -564,16 +566,13 @@ int main(int argc, const char *argv[])
 #ifdef AJA_WINDOWS
 	HANDLE hThread = GetCurrentThread();
 	SetThreadPriority(hThread, THREAD_PRIORITY_HIGHEST);
-
-	int argc;
-	const char* argv[];
-	poptParseArgvString(lpCmdLine, &argc, &argv);
 #endif
 
-	uint32_t deviceIndex(0);
-	uint32_t inputIndex(0);
-	uint32_t outputIndex(1);
-	
+	uint32_t deviceIndex(0);	// default device index
+	uint32_t inputIndex(0);		// default SDI input index
+	uint32_t outputIndex(1);	// default SDI output index
+
+#ifdef AJA_LINUX
 	//	Command line option descriptions:
 	const CNTV2DemoCommon::PoptOpts optionsTable [] =
 	{
@@ -586,6 +585,7 @@ int main(int argc, const char *argv[])
 	CNTV2DemoCommon::Popt popt(argc, argv, optionsTable);
 	if (!popt)
 		{cerr << "## ERROR: " << popt.errorStr() << endl;  return 2;}
+#endif
 
 	NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
 	CNTV2Card ntv2Card(deviceIndex);
