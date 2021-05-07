@@ -16,6 +16,7 @@ cudaapp:
 #include "ajabase/system/event.h"
 #include "ajabase/system/thread.h"
 #include "ajabase/system/systemtime.h"
+#include "ntv2democommon.h"
 
 #include <math.h>
 #include <iostream>
@@ -554,61 +555,96 @@ int WINAPI WinMain( HINSTANCE hInstance,
 		    LPSTR     lpCmdLine,
 		    int       nCmdShow )
 #else
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 #endif
 {
 	//////////////////////////////////
-	odprintf("CUDA Example v0.3");
+	cout << "CUDA Example v0.4" << endl;
 
 #ifdef AJA_WINDOWS
 	HANDLE hThread = GetCurrentThread();
 	SetThreadPriority(hThread, THREAD_PRIORITY_HIGHEST);
+
+	int argc;
+	const char* argv[];
+	poptParseArgvString(lpCmdLine, &argc, &argv);
 #endif
-	// Just default to current input.
-	// No dynamic checking of inputs.
-	NTV2VideoFormat videoFormat;
-	CNTV2Card ntv2Card(0);
+
+	uint32_t deviceIndex(0);
+	uint32_t inputIndex(0);
+	uint32_t outputIndex(1);
+	
+	//	Command line option descriptions:
+	const CNTV2DemoCommon::PoptOpts optionsTable [] =
+	{
+		{"device",		'd',	POPT_ARG_INT,	&deviceIndex,	0,	"which device",			"index"	},
+		{"input",		'i',	POPT_ARG_INT,	&inputIndex,	0,	"which SDI input",		"index"	},
+		{"output",		'o',	POPT_ARG_INT,	&outputIndex,	0,	"which SDI output",		"index"	},
+		POPT_AUTOHELP
+		POPT_TABLEEND
+	};
+	CNTV2DemoCommon::Popt popt(argc, argv, optionsTable);
+	if (!popt)
+		{cerr << "## ERROR: " << popt.errorStr() << endl;  return 2;}
+
+	NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);
+	CNTV2Card ntv2Card(deviceIndex);
 	if (ntv2Card.IsOpen() == false)
-		return false;
+		{ cerr << "## ERROR: cannot open device index " << deviceIndex << endl;  return 2; }
+
+	NTV2TaskMode savedTaskMode(NTV2_DISABLE_TASKS);
+	ntv2Card.GetEveryFrameServices(savedTaskMode);
+	ntv2Card.SetEveryFrameServices(NTV2_OEM_TASKS);
+
+	NTV2Channel inputChannel = (NTV2Channel)inputIndex;
+	NTV2Channel outputChannel = (NTV2Channel)outputIndex;
+	
 	ntv2Card.SetMultiFormatMode(false);
+	ntv2Card.SetSDITransmitEnable(inputChannel, false);
 
-	ntv2Card.SetSDITransmitEnable(NTV2_CHANNEL1, false);
-	ntv2Card.WaitForInputVerticalInterrupt(NTV2_CHANNEL1, 10);
-
-	videoFormat = ntv2Card.GetInputVideoFormat(NTV2_INPUTSOURCE_SDI1,true);
+	uint64_t sTime = AJATime::GetSystemMilliseconds();
+	videoFormat = ntv2Card.GetInputVideoFormat(::NTV2ChannelToInputSource(inputChannel), true);
+	while (videoFormat == NTV2_FORMAT_UNKNOWN)
+	{
+		if ((AJATime::GetSystemMilliseconds() - sTime) > 1000)
+			break;
+		AJATime::Sleep(50);
+		videoFormat = ntv2Card.GetInputVideoFormat(NTV2_INPUTSOURCE_SDI1,true);
+	}
+	
 	if (videoFormat == NTV2_FORMAT_UNKNOWN)
-		videoFormat = NTV2_FORMAT_720p_5994;
+		{ cerr << "## ERROR: no input detected device index " << deviceIndex << " channel index " << inputIndex << endl;  return 2; }
 
 	//  This will work with devices that answer \c true for ::NTV2DeviceCanDo3GLevelConversion
 	bool    is3Gb(false);
-	ntv2Card.GetSDIInput3GbPresent(is3Gb, NTV2_CHANNEL1);
+	ntv2Card.GetSDIInput3GbPresent(is3Gb, inputChannel);
 	if (is3Gb)
 	{
 		switch (videoFormat)
 		{
 		case NTV2_FORMAT_1080i_5000:
-			ntv2Card.SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, true);
+			ntv2Card.SetSDIInLevelBtoLevelAConversion(inputChannel, true);
 			videoFormat = NTV2_FORMAT_1080p_5000_A;
 			break;
 		case NTV2_FORMAT_1080i_5994:
-			ntv2Card.SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, true);
+			ntv2Card.SetSDIInLevelBtoLevelAConversion(inputChannel, true);
 			videoFormat = NTV2_FORMAT_1080p_5994_A;
 			break;
 		case NTV2_FORMAT_1080i_6000:
-			ntv2Card.SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, true);
+			ntv2Card.SetSDIInLevelBtoLevelAConversion(inputChannel, true);
 			videoFormat = NTV2_FORMAT_1080p_6000_A;
 			break;
 		default:
-			ntv2Card.SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, false);
+			ntv2Card.SetSDIInLevelBtoLevelAConversion(inputChannel, false);
 			break;
 		}
 	}
 	else
 	{
-		ntv2Card.SetSDIInLevelBtoLevelAConversion(NTV2_CHANNEL1, false);
+		ntv2Card.SetSDIInLevelBtoLevelAConversion(inputChannel, false);
 	}
 
-	ntv2Card.SetReference(::NTV2InputSourceToReferenceSource(NTV2_INPUTSOURCE_SDI1));
+	ntv2Card.SetReference(::NTV2InputSourceToReferenceSource(::NTV2ChannelToInputSource(inputChannel)));
 	ntv2Card.SetVideoFormat (videoFormat);
 
 	// For this application hardcode the frame buffer format to RGB10
@@ -630,6 +666,7 @@ int main(int argc, char *argv[])
 
     // Initialize video input
     vioDesc indesc;
+	indesc.deviceIndex = deviceIndex;
     indesc.videoFormat = videoFormat;
 	indesc.bufferFormat = frameBufferFormat;
     indesc.channel = NTV2_CHANNEL1;
@@ -641,6 +678,7 @@ int main(int argc, char *argv[])
 
 	// Initialize video output
 	vioDesc outdesc;
+	outdesc.deviceIndex = deviceIndex;
 	outdesc.videoFormat = videoFormat;
 	outdesc.bufferFormat = frameBufferFormat;
 	outdesc.channel = NTV2_CHANNEL2;
@@ -909,6 +947,8 @@ int main(int argc, char *argv[])
 
 	DestroyWindow(hWnd);
 #endif
+
+	ntv2Card.SetEveryFrameServices(savedTaskMode);
 
 	return TRUE;
 }

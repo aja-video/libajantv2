@@ -28,13 +28,12 @@ CGpuVideoIO::CGpuVideoIO(vioDesc *desc) :
 {
 	//  Open first device that supports input and output
 	CNTV2DeviceScanner * pNTV2DeviceScanner = new CNTV2DeviceScanner();
-	unsigned int   m_uiBoardNumber = 0;
-	if (m_uiBoardNumber >= pNTV2DeviceScanner->GetNumDevices())
+	if (desc->deviceIndex >= pNTV2DeviceScanner->GetNumDevices())
 	{
 		return ;
 	}
 
-	mBoard = new CNTV2Card((UWord)m_uiBoardNumber);
+	mBoard = new CNTV2Card((UWord)desc->deviceIndex);
 
 	// Return if no board compatible board found or opened
 	if (!mBoard)

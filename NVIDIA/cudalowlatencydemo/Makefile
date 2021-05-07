@@ -20,11 +20,12 @@ AJA_APP = $(A_UBER_BIN)/cudaapp
 CUDA_INC_DIR := $(shell find /usr/local/cuda-* -name cuda.h 2>/dev/null|head -1|xargs dirname 2>/dev/null)
 CUDA_LIB_DIR := $(shell find /usr/local/cuda-* -name libcudart.so 2>/dev/null|head -1|xargs dirname 2>/dev/null)
 
-VPATH = $(DIR)/../commonCUDA
-INCLUDES = -I$(DIR)/../commonCUDA -I$(A_LIB_GPUSTUFF_PATH)/include -I$(A_LIB_BASE_PATH)/system -I$(CUDA_INC_DIR)
+VPATH = $(A_DEMOAPPS_PATH):$(DIR)/../commonCUDA
+INCLUDES = -I$(A_DEMOAPPS_PATH) -I$(DIR)/../commonCUDA -I$(A_LIB_GPUSTUFF_PATH)/include -I$(A_LIB_BASE_PATH)/system -I$(CUDA_INC_DIR)
 LIBDIRS = -L$(CUDA_LIB_DIR) -Xlinker -rpath=$(CUDA_LIB_DIR) 
 
 SRCS = cudaapp.cpp \
+       ntv2democommon.cpp \
        ntv2cudaArrayTransferNV.cpp \
        ntv2gpuTextureTransferNV.cpp \
        oglview.cpp \
