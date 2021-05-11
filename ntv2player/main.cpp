@@ -41,7 +41,7 @@ int main (int argc, const char ** argv)
 	int				doMultiChannel	(0);		//	Enable multi-format?
 	int				hdrType			(0);		//	Transmit HDR anc?
 	int				xmitLTC			(0);		//	Use LTC? (Defaults to VITC)
-	poptContext		optionsContext; 			//	Context for parsing command line arguments
+//	poptContext		optionsContext; 			//	Context for parsing command line arguments
 	AJADebug::Open();
 
 	//	Command line option descriptions:

@@ -121,11 +121,16 @@ AJAExport class NTV2FrameData
 																	&& fAudioBuffer.IsNULL() && fAncBuffer.IsNULL()
 																	&& fAncBuffer2.IsNULL();}
 		//	Modifier Methods
-		inline void		ZeroBuffers (void)					{	if (fVideoBuffer)	fVideoBuffer.Fill(ULWord(0));
-																if (fVideoBuffer2)	fVideoBuffer2.Fill(ULWord(0));
-																if (fAudioBuffer)	fAudioBuffer.Fill(ULWord(0));
-																if (fAncBuffer)		fAncBuffer.Fill(ULWord(0));
-																if (fAncBuffer2)	fAncBuffer2.Fill(ULWord(0));
+		inline void		ZeroBuffers (void)					{	if (fVideoBuffer)
+																	fVideoBuffer.Fill(ULWord(0));
+																if (fVideoBuffer2)
+																	fVideoBuffer2.Fill(ULWord(0));
+																if (fAudioBuffer)
+																	fAudioBuffer.Fill(ULWord(0));
+																if (fAncBuffer)
+																	fAncBuffer.Fill(ULWord(0));
+																if (fAncBuffer2)
+																	fAncBuffer2.Fill(ULWord(0));
 																fNumAudioBytes = fNumAncBytes = fNumAnc2Bytes = 0;
 															}
 		bool			LockAll								(CNTV2Card & inDevice);

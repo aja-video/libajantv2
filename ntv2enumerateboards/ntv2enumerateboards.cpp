@@ -60,7 +60,7 @@ bool NTV2EnumerateDevices::GetDeviceInfo (uint32_t inDeviceIndex, NTV2DeviceInfo
 	}
 	else
 	{
-		::memset (&boardInfo, 0, sizeof (boardInfo));
+		::memset ((void*)&boardInfo, 0, sizeof (boardInfo));
 		return false;	//	Fail
 	}
 

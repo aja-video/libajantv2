@@ -150,6 +150,8 @@ int main (int argc, const char ** argv)
 	int				infoData		(0);					//  Picture and encoded information
 	poptContext		optionsContext;							//	Context for parsing command line arguments
 
+	(void)m31Preset;  // stops unused warning
+	
 	AJADebug::Open();
 
 	//	Command line option descriptions:
