@@ -24,3 +24,5 @@ $(NTV2_ROOT)/bin/ntv2qtplaycorder:
 clean:
 	rm -f $(NTV2_ROOT)/bin/ntv2qtplaycorder
 	$(MAKE) -f $(QMAKE_FILE) clean
+
+.NOTPARALLEL:

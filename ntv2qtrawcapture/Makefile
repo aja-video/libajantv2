@@ -22,3 +22,5 @@ $(APP_FULL_PATH):
 clean:
 	@[ -d $(OBJDIR) ] && rm -rf $(OBJDIR) || true
 	@rm -f $(APP_FULL_PATH)
+
+.NOTPARALLEL:

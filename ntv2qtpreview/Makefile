@@ -16,4 +16,8 @@ else
 	QT_PRO_FILE = $(A_BUILD_PATH)/ntv2demos/qtpreview/qtpreview.pro
 
 	include $(DIR)/../../../../build/common.mk
+
+.NOTPARALLEL:
 endif
+
+

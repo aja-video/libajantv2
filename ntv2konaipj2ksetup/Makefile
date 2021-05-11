@@ -16,6 +16,7 @@ default: $(APP_FULL_PATH)
 
 $(APP_FULL_PATH):
 	$(call ensure_dir_exists, $(OBJDIR))
+	$(MAKE) -C $(A_LIB_NTV2_PATH)/build
 	cd $(OBJDIR) && $(QMAKE) $(QT_PRO_FILE) && $(MAKE)
 
 .PHONY: clean
