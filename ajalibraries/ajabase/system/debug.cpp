@@ -75,7 +75,7 @@ AJAStatus AJADebug::Open (bool incrementRefCount)
 			// check version
 			if (spShare->version == 0)
 			{	//	Initialize shared memory region...
-				memset(spShare, 0, sizeof(AJADebugShare));
+				memset((void*)spShare, 0, sizeof(AJADebugShare));
                 spShare->magicId					= AJA_DEBUG_MAGIC_ID;
                 spShare->version					= AJA_DEBUG_VERSION;
                 spShare->writeIndex					= 0;

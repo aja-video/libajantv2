@@ -478,7 +478,7 @@ bool   CNTV2Card::GetFrameStamp (NTV2Crosspoint channelSpec, ULWord frameNum, FR
 
 	// Fill in our OS independent data structure 
 	AUTOCIRCULATE_DATA autoCircData;
-	memset(&autoCircData, 0, sizeof(AUTOCIRCULATE_DATA));
+	memset((void*)&autoCircData, 0, sizeof(AUTOCIRCULATE_DATA));
 	autoCircData.eCommand	 = eGetFrameStamp;
 	autoCircData.channelSpec = channelSpec;
 	autoCircData.lVal1		 = LWord(frameNum);
@@ -512,7 +512,7 @@ bool   CNTV2Card::GetAutoCirculate(NTV2Crosspoint channelSpec, AUTOCIRCULATE_STA
 	
 	// Fill in our OS independent data structure 
 	AUTOCIRCULATE_DATA autoCircData;
-	memset(&autoCircData, 0, sizeof(AUTOCIRCULATE_DATA));
+	memset((void*)&autoCircData, 0, sizeof(AUTOCIRCULATE_DATA));
 	autoCircData.eCommand	 = eGetAutoCirc;
 	autoCircData.channelSpec = channelSpec;
 	autoCircData.pvVal1		 = PVOID(autoCirculateStatus);
