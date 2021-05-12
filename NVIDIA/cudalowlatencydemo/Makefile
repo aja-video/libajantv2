@@ -24,6 +24,13 @@ VPATH = $(A_DEMOAPPS_PATH):$(DIR)/../commonCUDA
 INCLUDES = -I$(A_DEMOAPPS_PATH) -I$(DIR)/../commonCUDA -I$(A_LIB_GPUSTUFF_PATH)/include -I$(A_LIB_BASE_PATH)/system -I$(CUDA_INC_DIR)
 LIBDIRS = -L$(CUDA_LIB_DIR) -Xlinker -rpath=$(CUDA_LIB_DIR) 
 
+ifdef AJA_RDMA
+CPPFLAGS += -DAJA_RDMA=$(AJA_RDMA)
+ifdef AJA_IGPU
+CPPFLAGS += -DAJA_IGPU=$(AJA_IGPU)
+endif
+endif
+
 SRCS = cudaapp.cpp \
        ntv2democommon.cpp \
        ntv2cudaArrayTransferNV.cpp \

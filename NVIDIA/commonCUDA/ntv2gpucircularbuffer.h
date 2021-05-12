@@ -16,9 +16,16 @@
 #include "ntv2texture.h"
 #include "ntv2rendertotexture.h"
 
+#ifdef AJA_RDMA
+#include "cudaUtils.h"
+#endif
+
 typedef struct AVTextureBuffer {
 	CNTV2Texture*			texture;
 	CNTV2RenderToTexture*	renderToTexture;
+#ifdef AJA_RDMA
+	void*                   videoBufferRDMA;
+#endif
 	ULWord*					videoBuffer;
 	ULWord					videoBufferSize;
 	ULWord*					audioBuffer;
@@ -51,9 +58,9 @@ public:
 	void EndConsumeNextBuffer();
 
 	AVTextureBuffer* mAVTextureBuffers;
+	ULWord mNumFrames;
 
 private:
-	ULWord mNumFrames;
 	bool mAbort;
 	AJACircularBuffer<AVTextureBuffer*> mAVCircularBuffer;
 	

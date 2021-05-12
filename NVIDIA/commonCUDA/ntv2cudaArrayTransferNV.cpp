@@ -108,7 +108,11 @@ void CNTV2cudaArrayTransferNV::CopyNextChunkBufferToTexture(uint8_t* buffer, CNT
 void CNTV2cudaArrayTransferNV::CopyBufferToTexture(uint8_t* buffer, CNTV2Texture* texture) const
 {
 	size_t pitch = texture->GetWidth() * 4;
+#ifdef AJA_RDMA
+	checkCudaErrors(cudaMemcpy2DToArray(texture->GetCudaArray(), 0, 0, buffer, pitch, texture->GetWidth() * 4, texture->GetHeight(), cudaMemcpyDeviceToDevice));
+#else
 	checkCudaErrors(cudaMemcpy2DToArray(texture->GetCudaArray(), 0, 0, buffer, pitch, texture->GetWidth() * 4, texture->GetHeight(), cudaMemcpyHostToDevice));
+#endif
 }
 
 void CNTV2cudaArrayTransferNV::CopyNextChunkTextureToBuffer(CNTV2Texture* texture, uint8_t* buffer) const
@@ -117,7 +121,11 @@ void CNTV2cudaArrayTransferNV::CopyNextChunkTextureToBuffer(CNTV2Texture* textur
 void CNTV2cudaArrayTransferNV::CopyTextureToBuffer(CNTV2Texture* texture, uint8_t* buffer) const
 {
 	size_t pitch = texture->GetWidth() * 4;
+#ifdef AJA_RDMA
+	checkCudaErrors(cudaMemcpy2DFromArray(buffer, pitch, texture->GetCudaArray(), 0, 0, texture->GetWidth() * 4, texture->GetHeight(), cudaMemcpyDeviceToDevice));
+#else
 	checkCudaErrors(cudaMemcpy2DFromArray(buffer, pitch, texture->GetCudaArray(), 0, 0, texture->GetWidth() * 4, texture->GetHeight(), cudaMemcpyDeviceToHost));
+#endif
 }
 
 void CNTV2cudaArrayTransferNV::BeforeRecordTransfer(uint8_t *buffer, CNTV2Texture* texture, CNTV2RenderToTexture* renderToTexture) const

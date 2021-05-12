@@ -158,6 +158,22 @@ void
 CGpuVideoIO::SetGpuCircularBuffer(CNTV2GpuCircularBuffer* gpuCircularBuffer)
 {
 	mGPUCircularBuffer = gpuCircularBuffer;
+
+	if (mBoard == NULL)
+		return;
+	
+	for (ULWord i = 0; i < gpuCircularBuffer->mNumFrames; i++)
+	{
+#ifdef AJA_RDMA		
+		mBoard->DMABufferLock((ULWord*)gpuCircularBuffer->mAVTextureBuffers[i].videoBufferRDMA,
+							  gpuCircularBuffer->mAVTextureBuffers[i].videoBufferSize,
+							  true, true);
+#else		
+		mBoard->DMABufferLock((ULWord*)gpuCircularBuffer->mAVTextureBuffers[i].videoBuffer,
+							  gpuCircularBuffer->mAVTextureBuffers[i].videoBufferSize,
+							  true, false);
+#endif		
+	}
 }
 
 CNTV2GpuCircularBuffer* 
@@ -179,7 +195,11 @@ CGpuVideoIO::Capture()
 
 	// Get pointer to next GPU buffer
 	AVTextureBuffer* frameData = mGPUCircularBuffer->StartProduceNextBuffer();
+#ifdef AJA_RDMA
+	uint8_t* buffer = (uint8_t*)frameData->videoBufferRDMA;
+#else
 	uint8_t* buffer = (uint8_t*)frameData->videoBuffer;
+#endif
 	frameData->currentTime = ((uint64_t)hival << 32) + loval;
 //	odprintf("Interrupt Perioe %llu", frameData->currentTime - lastTime);
 	lastTime = frameData->currentTime;
@@ -228,7 +248,11 @@ CGpuVideoIO::Playout()
 {
 	// Get next GPU buffer
 	AVTextureBuffer* frameData = mGPUCircularBuffer->StartConsumeNextBuffer();
-	uint8_t* buffer = (uint8_t*)(frameData->videoBuffer);
+#ifdef AJA_RDMA
+	uint8_t* buffer = (uint8_t*)frameData->videoBufferRDMA;
+#else
+	uint8_t* buffer = (uint8_t*)frameData->videoBuffer;
+#endif
 
 	//Overlap the Dma with the GPU DMAs by using multiple chunks.
 	//make sure the chunks have the same size 

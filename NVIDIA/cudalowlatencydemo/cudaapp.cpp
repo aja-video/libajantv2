@@ -124,9 +124,9 @@ CUcontext cudaCtx;
 cudaChannelFormatDesc cudaChannelDesc;
 cudaChannelFormatDesc cudaChannelDescIN;
 cudaChannelFormatDesc cudaChannelDescOUT;
-
+#if 0
 static bool get4KInputFormat(NTV2VideoFormat & videoFormat);
-
+#endif
 void closeApp();
 
 #ifdef AJA_WINDOWS
@@ -409,11 +409,11 @@ void initApp()
 
 	// Initialize view texture
 	GLubyte* data_ptr = NULL;
-	const GLubyte* data;
+//	const GLubyte* data;
 	ULWord size = gWidth * gHeight * 4;  // Assuming RGBA
 	data_ptr = (UByte*)malloc(size * sizeof(float));
 	memset(data_ptr, 0, size);
-	data = data_ptr;
+//	data = data_ptr;
 
 	glTexImage2D(
 		GL_TEXTURE_2D, 0,           /* target, level */
@@ -597,7 +597,7 @@ int main(int argc, const char *argv[])
 	ntv2Card.SetEveryFrameServices(NTV2_OEM_TASKS);
 
 	NTV2Channel inputChannel = (NTV2Channel)inputIndex;
-	NTV2Channel outputChannel = (NTV2Channel)outputIndex;
+//	NTV2Channel outputChannel = (NTV2Channel)outputIndex;
 	
 	ntv2Card.SetMultiFormatMode(false);
 	ntv2Card.SetSDITransmitEnable(inputChannel, false);
@@ -952,7 +952,7 @@ int main(int argc, const char *argv[])
 
 	return TRUE;
 }
-
+#if 0
 static bool get4KInputFormat(NTV2VideoFormat & videoFormat)
 {
 	bool	status(false);
@@ -1001,4 +1001,4 @@ static bool get4KInputFormat(NTV2VideoFormat & videoFormat)
 	return status;
 
 }	//	get4KInputFormat
-
+#endif
