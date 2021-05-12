@@ -673,9 +673,6 @@ int main(int argc, const char *argv[])
     indesc.type = VIO_IN;
     capture = new CCudaVideoIO(&indesc);
 
-    // Assign GPU circular buffer for input
-    capture->SetGpuCircularBuffer(inGpuCircularBuffer);
-
 	// Initialize video output
 	vioDesc outdesc;
 	outdesc.deviceIndex = deviceIndex;
@@ -684,9 +681,6 @@ int main(int argc, const char *argv[])
 	outdesc.channel = NTV2_CHANNEL2;
 	outdesc.type = VIO_OUT;
 	playout = new CCudaVideoIO(&outdesc);
-
-	// Assign GPU circular buffer for output
-	playout->SetGpuCircularBuffer(outGpuCircularBuffer);
 
 	ULWord numFramesIn = RING_BUFFER_SIZE;
 	ULWord numFramesOut = RING_BUFFER_SIZE;
@@ -706,6 +700,12 @@ int main(int argc, const char *argv[])
 		outGpuCircularBuffer->Allocate(numFramesOut, gWidth * gHeight * 4,
 			gWidth, gHeight, false, /*false*/true, 4096, NTV2_TEXTURE_TYPE_CUDA_ARRAY);
 	}
+
+    // Assign GPU circular buffer for input
+    capture->SetGpuCircularBuffer(inGpuCircularBuffer);
+
+	// Assign GPU circular buffer for output
+	playout->SetGpuCircularBuffer(outGpuCircularBuffer);
 
 	// Initialize input transfer
 	gpuTransferIN = CreateNTV2cudaArrayTransferNV();

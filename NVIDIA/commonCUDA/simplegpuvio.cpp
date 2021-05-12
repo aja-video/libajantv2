@@ -160,18 +160,30 @@ CGpuVideoIO::SetGpuCircularBuffer(CNTV2GpuCircularBuffer* gpuCircularBuffer)
 	mGPUCircularBuffer = gpuCircularBuffer;
 
 	if (mBoard == NULL)
+	{
+		printf("error: no board to use for lock\n");
 		return;
+	}
 	
 	for (ULWord i = 0; i < gpuCircularBuffer->mNumFrames; i++)
 	{
 #ifdef AJA_RDMA		
-		mBoard->DMABufferLock((ULWord*)gpuCircularBuffer->mAVTextureBuffers[i].videoBufferRDMA,
-							  gpuCircularBuffer->mAVTextureBuffers[i].videoBufferSize,
-							  true, true);
+		if (!mBoard->DMABufferLock((ULWord*)gpuCircularBuffer->mAVTextureBuffers[i].videoBufferRDMA,
+								   gpuCircularBuffer->mAVTextureBuffers[i].videoBufferSize,
+								   false, true))
+		{
+			printf("error: RDMA buffer index %d size %d lock failed\n",
+				   i, gpuCircularBuffer->mAVTextureBuffers[i].videoBufferSize);
+			return;
+		}		
 #else		
-		mBoard->DMABufferLock((ULWord*)gpuCircularBuffer->mAVTextureBuffers[i].videoBuffer,
-							  gpuCircularBuffer->mAVTextureBuffers[i].videoBufferSize,
-							  true, false);
+		if (!mBoard->DMABufferLock((ULWord*)gpuCircularBuffer->mAVTextureBuffers[i].videoBuffer,
+								   gpuCircularBuffer->mAVTextureBuffers[i].videoBufferSize,
+								   true, false))
+		{
+			printf("error: system buffer lock failed\n");
+			return;
+		}		
 #endif		
 	}
 }

@@ -90,10 +90,10 @@ void CNTV2GpuCircularBuffer::Allocate(ULWord numFrames,
 			mAVTextureBuffers[i].renderToTexture = renderToTexture;
 		}
 		
+		mAVTextureBuffers[i].videoBufferSize = videoWriteSize;
 #ifdef AJA_RDMA
 		checkCudaErrors(cudaMalloc(&mAVTextureBuffers[i].videoBufferRDMA, mAVTextureBuffers[i].videoBufferSize));
 #else
-		mAVTextureBuffers[i].videoBufferSize = videoWriteSize;
 		mAVTextureBuffers[i].videoBufferUnaligned = new UByte[videoWriteSize + alignment - 1];
 		uint64_t val = (uint64_t)(mAVTextureBuffers[i].videoBufferUnaligned);
 		val += alignment-1;
