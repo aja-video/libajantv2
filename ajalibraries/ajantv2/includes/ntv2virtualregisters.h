@@ -137,7 +137,7 @@ typedef enum
 	kVRegHDMIOutProtocolMode				= VIRTUALREG_START+145,
 	kVRegHDMIOutStereoSelect				= VIRTUALREG_START+146,		// deprecated
 	kVRegHDMIOutStereoCodecSelect			= VIRTUALREG_START+147,		// deprecated
-	kVRegReversePulldownOffset				= VIRTUALREG_START+148,		// deprecated
+	kVRegHdmiOutSubSample					= VIRTUALREG_START+148,
 	kVRegSDIInput1ColorSpaceMode			= VIRTUALREG_START+149,
 
 	kVRegSDIInput2ColorSpaceMode			= VIRTUALREG_START+150,
@@ -747,7 +747,6 @@ typedef enum
 	#define	kHDMIOutProtocolMode				kVRegHDMIOutProtocolMode
 	#define	kRegHDMIOutStereoSelect				kVRegHDMIOutStereoSelect
 	#define	kRegHDMIOutStereoCodecSelect		kVRegHDMIOutStereoCodecSelect
-	#define	kReversePulldownOffset				kVRegReversePulldownOffset
 	#define	kRegSDIInput1ColorSpaceMode			kVRegSDIInput1ColorSpaceMode
 	#define	kRegSDIInput2ColorSpaceMode			kVRegSDIInput2ColorSpaceMode
 	#define	kRegSDIOutput2RGBRange				kVRegSDIOutput2RGBRange

@@ -5448,7 +5448,7 @@ typedef enum
 	kHDMIOutCSCRGB8bit,
 	kHDMIOutCSCRGB10bit,
 	kHDMIOutCSCRGB12bit,
-	kHDMIOutCSCYCbCr8bit,
+	kHDMIOutCSCYCbCr8bit,		// deprecated
 	kHDMIOutCSCYCbCr10bit
 } HDMIOutColorSpaceMode;
 
