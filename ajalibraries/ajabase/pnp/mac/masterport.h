@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		pnp/mac/masterport.h
 	@brief		Declares the MasterPort class.

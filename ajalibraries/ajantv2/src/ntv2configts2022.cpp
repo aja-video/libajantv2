@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file		ntv2config2022.cpp
     @brief		Implements the CNTV2ConfigTs2022 class.

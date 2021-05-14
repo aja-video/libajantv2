@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file		ntv2registerexpert.h
     @brief		Declares the CNTV2RegisterExpert class.

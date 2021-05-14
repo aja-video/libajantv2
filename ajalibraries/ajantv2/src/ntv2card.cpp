@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2card.cpp
 	@brief		Implements several CNTV2Card methods. Other implementation files are 'ntv2audio.cpp', 'ntv2dma.cpp', 'ntv2register.cpp', ...

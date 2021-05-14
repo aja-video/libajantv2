@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ajatypes.h
 	@brief		Declares the most fundamental data types used by NTV2. Since Windows NT was the first principal

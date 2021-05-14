@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2task.cpp
 	@brief		Implements the CNTV2Task class.
@@ -163,7 +164,7 @@ AutoCircGenericTask* CNTV2Task::AddTimeCodeWriteTask(
 	}
 
 	AutoCircGenericTask* pGeneric = &m_TaskArray[index];
-	memset(pGeneric, 0, sizeof(AutoCircGenericTask));
+	memset((void*)pGeneric, 0, sizeof(AutoCircGenericTask));
 
 	pGeneric->taskType = eAutoCircTaskTimeCodeWrite;
 
@@ -280,7 +281,7 @@ AutoCircGenericTask* CNTV2Task::AddTimeCodeReadTask()
 	}
 
 	AutoCircGenericTask* pGeneric = &m_TaskArray[index];
-	memset(pGeneric, 0, sizeof(AutoCircGenericTask));
+	memset((void*)pGeneric, 0, sizeof(AutoCircGenericTask));
 
 	pGeneric->taskType = eAutoCircTaskTimeCodeRead;
 
@@ -306,7 +307,7 @@ const AutoCircGenericTask & CNTV2Task::GetTask (const ULWord inIndex) const
 	if (inIndex >= m_AutoCircTask.numTasks)
 	{
 		static AutoCircGenericTask	nullTask;
-		::memset (&nullTask, 0, sizeof (nullTask));
+		::memset ((void*)&nullTask, 0, sizeof (nullTask));
 		return nullTask;
 	}
 	else
@@ -447,7 +448,7 @@ bool CNTV2Task::InitTaskArray(AutoCircGenericTask* pTaskArray, ULWord numTasks)
 		return false;
 	}
 
-	memset(pTaskArray, 0, numTasks * sizeof(AutoCircGenericTask));
+	memset((void*)pTaskArray, 0, numTasks * sizeof(AutoCircGenericTask));
 
 	return true;
 }

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2driverprocamp.h
 	@brief		Declares functions used in the NTV2 device driver.

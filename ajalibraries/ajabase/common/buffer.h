@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		buffer.h
 	@brief		Implementation of AJABuffer class.

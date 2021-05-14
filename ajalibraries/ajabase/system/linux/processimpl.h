@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		linux/processimpl.h
 	@brief		Declares the AJAProcessImpl class.

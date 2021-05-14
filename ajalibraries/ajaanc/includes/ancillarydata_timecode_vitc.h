@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ancillarydata_timecode_vitc.h
 	@brief		Declares the AJAAncillaryData_Timecode_VITC class.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		windows/threadimpl.cpp
 	@brief		Implements the AJAThreadImpl class for the Windows platform.

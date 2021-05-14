@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file		info.h
     @brief		Declares the AJASystemInfo class.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		process.h
 	@brief		Declares the AJAProcess class.

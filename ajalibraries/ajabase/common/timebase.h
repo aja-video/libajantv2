@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		timebase.h
 	@brief		Declares the AJATimeBase class.

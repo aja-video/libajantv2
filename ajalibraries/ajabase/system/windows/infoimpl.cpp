@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file		windows/infoimpl.cpp
     @brief		Implements the AJASystemInfoImpl class on the Windows platform.

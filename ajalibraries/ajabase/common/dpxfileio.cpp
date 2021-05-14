@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		dpxfileio.cpp
 	@brief		Implementation of the AJADPXFileIO class, for low level file I/O.

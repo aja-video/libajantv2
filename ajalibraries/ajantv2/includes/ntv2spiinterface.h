@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file		ntv2spiinterface.h
     @brief		Declares the CNTV2SpiFlash and CNTV2AxiSpiFlash classes.

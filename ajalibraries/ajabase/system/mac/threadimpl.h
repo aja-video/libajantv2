@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		mac/threadimpl.h
 	@brief		Declares the AJAThreadImpl class.

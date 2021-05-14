@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2registers2022.h
 	@brief		Defines the KonaIP/IoIP S2022 registers.

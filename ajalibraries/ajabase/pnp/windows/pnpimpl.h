@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		pnp/windows/pnpimpl.h
 	@brief		Declares the AJAPnpImpl class.

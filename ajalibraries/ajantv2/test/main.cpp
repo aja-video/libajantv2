@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file		main.cpp
 	@brief		Unittests for the AJA NTV2 Library (using doctest).

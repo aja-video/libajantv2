@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		memory.h
 	@brief		Declares the AJAMemory class.

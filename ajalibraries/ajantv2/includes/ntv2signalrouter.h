@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2signalrouter.h
 	@brief		Declares CNTV2SignalRouter class.

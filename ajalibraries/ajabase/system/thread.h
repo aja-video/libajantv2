@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		thread.h
 	@brief		Declares the AJAThread class.

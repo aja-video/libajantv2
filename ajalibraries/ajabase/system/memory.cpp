@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		memory.cpp
 	@brief		Implements the AJAMemory class.

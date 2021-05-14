@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2publicinterface.cpp
 	@brief		Implementations of methods declared in 'ntv2publicinterface.h'.

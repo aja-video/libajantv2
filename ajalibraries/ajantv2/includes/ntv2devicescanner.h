@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2devicescanner.h
 	@brief		Declares the CNTV2DeviceScanner class.

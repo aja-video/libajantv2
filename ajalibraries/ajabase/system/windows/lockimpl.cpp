@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		windows/lockimpl.cpp
 	@brief		Implements the AJALockImpl class on the Windows platform.

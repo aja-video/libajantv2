@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2registerexpert.cpp
 	@brief		Implements the CNTV2RegisterExpert class.
@@ -1028,7 +1029,7 @@ private:
 		DefineRegName	(kVRegHDMIOutProtocolMode,				"kVRegHDMIOutProtocolMode");
 		DefineRegName	(kVRegHDMIOutStereoSelect,				"kVRegHDMIOutStereoSelect");
 		DefineRegName	(kVRegHDMIOutStereoCodecSelect,			"kVRegHDMIOutStereoCodecSelect");
-		DefineRegName	(kVRegReversePulldownOffset,			"kVRegReversePulldownOffset");
+		DefineRegName	(kVRegHdmiOutSubSample,					"kVRegHdmiOutSubSample");
 		DefineRegName	(kVRegSDIInput1ColorSpaceMode,			"kVRegSDIInput1ColorSpaceMode");
 		DefineRegName	(kVRegSDIInput2ColorSpaceMode,			"kVRegSDIInput2ColorSpaceMode");
 		DefineRegName	(kVRegSDIOutput2RGBRange,				"kVRegSDIOutput2RGBRange");

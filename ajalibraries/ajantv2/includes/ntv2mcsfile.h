@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2mcsfile.h
 	@brief		Declares the CNTV2MCSfile class.

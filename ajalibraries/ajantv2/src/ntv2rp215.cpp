@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2rp215.cpp
 	@brief		Implements the CNTV2RP215Decoder class. See SMPTE RP215 standard for details.

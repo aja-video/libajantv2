@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2nubpktcom.cpp
 	@brief		Implementation of shared NTV2 "nub" packet handling functions.

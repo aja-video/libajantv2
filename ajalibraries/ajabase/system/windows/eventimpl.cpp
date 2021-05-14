@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		windows/eventimpl.cpp
 	@brief		Implements the AJAEventImpl class on the Windows platform.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		debug.h
 	@brief		Declares the AJADebug class.

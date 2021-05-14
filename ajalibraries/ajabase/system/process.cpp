@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		process.cpp
 	@brief		Implements the AJAProcess class.

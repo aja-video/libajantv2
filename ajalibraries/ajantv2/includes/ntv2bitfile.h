@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2bitfile.h
 	@brief		Declares the CNTV2Bitfile class.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		timecode.cpp
 	@brief		Implements the AJATimeCode class.

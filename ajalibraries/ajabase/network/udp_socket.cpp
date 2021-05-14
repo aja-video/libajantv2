@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		udp_socket.cpp
 	@brief		Implements the AJAUDPSocket class.

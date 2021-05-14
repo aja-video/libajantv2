@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2bitfilemanager.h
 	@brief		Declares the CNTV2BitfileManager class that manages Xilinx bitfiles.

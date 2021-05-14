@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2serialcontrol.cpp
 	@brief		Implements the CNTV2SerialControl class.

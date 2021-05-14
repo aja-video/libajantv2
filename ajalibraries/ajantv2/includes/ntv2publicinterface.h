@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2publicinterface.h
 	@brief		Declares enums and structs used by all platform drivers and the SDK.
@@ -5447,7 +5448,7 @@ typedef enum
 	kHDMIOutCSCRGB8bit,
 	kHDMIOutCSCRGB10bit,
 	kHDMIOutCSCRGB12bit,
-	kHDMIOutCSCYCbCr8bit,
+	kHDMIOutCSCYCbCr8bit,		// deprecated
 	kHDMIOutCSCYCbCr10bit
 } HDMIOutColorSpaceMode;
 

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		tcp_socket.h
 	@brief		Declares the AJATCPSocket class.

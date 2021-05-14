@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		diskstatus.cpp
 	@brief		Implements the AJADiskStatus class.

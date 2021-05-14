@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2boardscan.h
 	@deprecated	Include ntv2devicescanner.h instead.

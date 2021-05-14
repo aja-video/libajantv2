@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ancillarydata_cea608_vanc.h
 	@brief		Declares the AJAAncillaryData_Cea608_Vanc class.

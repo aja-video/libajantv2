@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		basemachinecontrol.h
 	@deprecated	Declares the CBaseMachineControl class.

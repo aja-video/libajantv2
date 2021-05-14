@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		pixelformat.h
 	@brief		Contains the declaration of the AJAPixelFormat class.

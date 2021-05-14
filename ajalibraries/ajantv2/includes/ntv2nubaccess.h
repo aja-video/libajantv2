@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2nubaccess.h
 	@brief		Declares functions to connect/open/close/send/receive data via the NTV2 "nub".

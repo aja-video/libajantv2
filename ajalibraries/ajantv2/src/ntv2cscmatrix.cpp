@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file		ntv2cscmatrix.cpp
     @brief		Implementation of the CNTV2CSCMatrix class for abstract color space matrix operations.

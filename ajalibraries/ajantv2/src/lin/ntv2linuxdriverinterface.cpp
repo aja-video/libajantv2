@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2linuxdriverinterface.cpp
 	@brief		Implementation of the CNTV2LinuxDriverInterface class.
@@ -896,7 +897,7 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 			// Can't pass multiple pointers in a single ioctl, so combine
 			// them into a single structure and include channel spec too.
 			AUTOCIRCULATE_TRANSFER_COMBO_STRUCT acXferCombo;
-			memset(&acXferCombo, 0, sizeof acXferCombo);
+			memset((void*)&acXferCombo, 0, sizeof acXferCombo);
 			PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT acStatus = AsTransferStatusStruct(autoCircData.pvVal2);
 			NTV2RoutingTable	*pXena2RoutingTable = AsRoutingTablePtr(autoCircData.pvVal3);
 			acXferCombo.channelSpec = autoCircData.channelSpec;
@@ -933,7 +934,7 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 			// Can't pass multiple pointers in a single ioctl, so combine
 			// them into a single structure and include channel spec too.
 			AUTOCIRCULATE_TRANSFER_COMBO_STRUCT acXferCombo;
-			memset(&acXferCombo, 0, sizeof acXferCombo);
+			memset((void*)&acXferCombo, 0, sizeof acXferCombo);
 			PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT acStatus = AsTransferStatusStruct(autoCircData.pvVal2);
 			NTV2RoutingTable	*pXena2RoutingTable = AsRoutingTablePtr(autoCircData.pvVal3);
 			acXferCombo.channelSpec = autoCircData.channelSpec;
@@ -970,7 +971,7 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 			// Can't pass multiple pointers in a single ioctl, so combine
 			// them into a single structure and include channel spec too.
 			AUTOCIRCULATE_TRANSFER_COMBO_STRUCT acXferCombo;
-			memset(&acXferCombo, 0, sizeof acXferCombo);
+			memset((void*)&acXferCombo, 0, sizeof acXferCombo);
 			PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT acStatus = AsTransferStatusStruct(autoCircData.pvVal2);
 			NTV2RoutingTable *	pXena2RoutingTable = AsRoutingTablePtr(autoCircData.pvVal3);
 			PAUTOCIRCULATE_TASK_STRUCT pTask = AsPTaskStruct(autoCircData.pvVal4);

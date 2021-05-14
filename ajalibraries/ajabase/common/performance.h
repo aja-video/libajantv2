@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		performance.h
 	@brief		Declaration of the AJAPerformance class.

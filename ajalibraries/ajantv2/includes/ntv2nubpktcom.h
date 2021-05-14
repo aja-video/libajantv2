@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2nubpktcom.h
 	@brief		Declares functions that handle NTV2 "nub" packets.

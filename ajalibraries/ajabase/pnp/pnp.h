@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		pnp/pnp.h
 	@brief		Declares the AJAPnp (plug-and-play) class.

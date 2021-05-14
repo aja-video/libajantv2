@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		common.h
 	@brief		Private include file for all ajabase sources.

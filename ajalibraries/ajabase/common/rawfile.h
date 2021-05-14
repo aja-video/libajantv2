@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		rawfile.h
 	@brief		Defines data structures used to read and write AJA raw files.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		windows/processimpl.cpp
 	@brief		Implements the AJAProcessImpl class on the Windows platform.

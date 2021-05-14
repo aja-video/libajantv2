@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		mac/processimpl.cpp
 	@brief		Implements the AJAProcessImpl class on the Mac platform.

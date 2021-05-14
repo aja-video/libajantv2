@@ -165,7 +165,7 @@ The <b>Frame Buffer</b> inspector monitors the contents of frame buffer memory o
 		device or host data transfer budget. Thus, this inspector is not immune from “Heisenbugs” in which the act of monitoring
 		an AJA device affects it and the application(s) under test.
 
-Frame buffer memory contents can be displayed in four ways:
+Frame buffer memory contents can be displayed in four different <b>View Mode</b>s:
 	-	<b>Line</b> — The full raster (including VANC lines, if any), line-by-line, in hexadecimal format, grouped by byte, 2-byte word, 4-byte longword or 8-byte (64-bit) chunks.
 	-	<b>Raw</b> — The entire 8MB or 16MB buffer in fixed-length “lines”, grouped by 1, 2, 4 or 8 byte chunks. The line length is adjustable.
 		By default, unless disabled, boundaries between raster lines are indicated with a blue marker.
@@ -198,16 +198,27 @@ This inspector repeatedly monitors the indicated frame buffer for the selected c
 	-	<b>On/Off</b> — Indicates if the FrameStore/Channel is enabled or not.  It can be changed using this menu
 		(if not in <b>Auto</b> mode and the device <b>Task Mode</b> is not <b>Standard Tasks</b>).
 		-	See also:  CNTV2Card::EnableChannel , CNTV2Card::DisableChannel , CNTV2Card::IsChannelEnabled , \ref vidop-fs
+	-	<b>Frame Size</b> Indicator — This shows the discrete size of the frame … i.e. the location of the frame boundaries
+		in device memory. This will be the “intrinsic” minimum size of 8MB or 16MB, whatever is the largest size required by all device FrameStores
+		(determined by the hardware firmware), and multiplied by 4 or 8 for UHD/4K or UHD2/8K rasters, respectively.
 	-	<b>Auto</b> — If checked, the frame number being monitored will automatically follow the input or output
 		(depending on frame-store mode) “current frame” register, and the frame number spin control will be disabled.
 		If this is unchecked, the frame number spin control will be available, and the frame being watched can be manually controlled.
 		When unchecked, many other aspects of the device can be controlled (e.g., <b>Mode</b>, <b>Geometry</b>, <b>Format</b>, <b>Size</b>, etc.),
 		including the ability to manually edit/change the buffer content.
 	-	<b>Frame Number</b> spin control:  When available, controls which frame to view.
-		When unavailable, indicates the frame being viewed.
-		@note	Even though the current frame’s contents may have been written in the context of <i>another</i> channel/FrameStore (e.g. '2vuy'),
-				this inspector displays the frame’s data in the context of its <i>current</i> channel/FrameStore (e.g. 'v210'), and thus may
-				appear completely wrong.
+		When unavailable, indicates the frame being viewed. Frame 0 is the first frame in device memory.
+		-	Note that this <b>Frame Number</b> in combination with the indicated <b>Frame Size</b> (above) determines the region in device memory
+			being displayed. The offset and length calculation of this region is done in the context of the currently selected <b>FrameStore/Channel</b>.
+		-	For example, if FrameStores 1 and 3 on a \ref kona5 are configured for UHD/2vuy, and FrameStore 2 is configured for 720p/2vuy…
+			-	Each frame of FrameStores 1 and 3 is 32MB in length.
+			-	Each frame of FrameStore 2 is 8MB in length.
+			-	Therefore, frames 0, 1, 2 and 3 of FrameStore 2 would all lie inside frame 0 of FrameStores 1 and 3.
+			-	Similarly, frames 4, 5, 6 and 7 of FrameStore 2 would all lie inside frame 1 of FrameStores 1 and 3.
+			-	And so on…
+		@note	Even though the current frame’s contents may have been written in the context of <i>another</i> <b>FrameStore/Channel</b> (e.g. '2vuy'),
+				this inspector displays the frame’s data in the context of its <i>current</i> <b>FrameStore/Channel</b> (e.g. 'v210'), and thus may
+				appear completely wrong, especially as an Image <b>View Mode</b>.
 
 @par	Device/Channel Configuration
 	-	<b>Mode</b> — Indicates/controls the FrameStore’s current mode (Input or Output).

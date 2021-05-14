@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2bitfile.cpp
 	@brief		Implementation of CNTV2Bitfile class.
@@ -501,7 +502,8 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_8KMK).append("_tprom")
 											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_8K).append("_tprom")
 											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_3DLUT).append("_tprom")
-											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_2X4K).append("_tprom");
+											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_2X4K).append("_tprom")
+											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_OE1).append("_tprom");
 		case DEVICE_ID_CORVID44_8KMK:
 		case DEVICE_ID_CORVID44_8K:
 		case DEVICE_ID_CORVID44_PLNR:
@@ -569,11 +571,14 @@ public:
             sDesignPairToIDMap[make_pair(0x01, 0x02)] = DEVICE_ID_KONA5_8K;
             sDesignPairToIDMap[make_pair(0x01, 0x03)] = DEVICE_ID_KONA5_2X4K;
 			sDesignPairToIDMap[make_pair(0x01, 0x04)] = DEVICE_ID_KONA5_3DLUT;
-			sDesignPairToIDMap[make_pair(0x01, 0x04)] = DEVICE_ID_KONA5_OE1;
+			sDesignPairToIDMap[make_pair(0x01, 0x05)] = DEVICE_ID_KONA5_OE1;
 			sDesignPairToIDMap[make_pair(0x02, 0x00)] = DEVICE_ID_CORVID44_8KMK;
 			sDesignPairToIDMap[make_pair(0x02, 0x01)] = DEVICE_ID_CORVID44_8K;
 			sDesignPairToIDMap[make_pair(0x02, 0x02)] = DEVICE_ID_CORVID44_2X4K;
 			sDesignPairToIDMap[make_pair(0x02, 0x03)] = DEVICE_ID_CORVID44_PLNR;
+            sDesignPairToIDMap[make_pair(0x03, 0x03)] = DEVICE_ID_KONA5_2X4K;
+			sDesignPairToIDMap[make_pair(0x03, 0x04)] = DEVICE_ID_KONA5_3DLUT;
+			sDesignPairToIDMap[make_pair(0x03, 0x05)] = DEVICE_ID_KONA5_OE1;
         }
 	~CDesignPairToIDMapMaker ()
 		{

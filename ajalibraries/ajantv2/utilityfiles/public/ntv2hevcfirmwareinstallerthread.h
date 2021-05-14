@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2hevcfirmwareinstallerthread.h
 	@brief		Declaration of CNTV2HEVCFirmwareInstallerThread class.

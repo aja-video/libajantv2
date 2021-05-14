@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		thread.cpp
 	@brief		Implements the AJAThread class.

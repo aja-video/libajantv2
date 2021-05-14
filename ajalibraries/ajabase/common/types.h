@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		types.h
 	@brief		Declares common types used in the ajabase library.

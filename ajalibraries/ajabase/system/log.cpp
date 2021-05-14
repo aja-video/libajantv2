@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		log.cpp
 	@brief		Implements the AJATimeLog class.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2spiinterface.cpp
 	@brief		Implementation of CNTV2AxiSpiFlash class.

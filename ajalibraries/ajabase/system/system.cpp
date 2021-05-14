@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file		system.cpp
     @brief		System specific helper functions.

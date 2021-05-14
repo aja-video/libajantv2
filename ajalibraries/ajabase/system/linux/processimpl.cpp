@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		linux/processimpl.cpp
 	@brief		Implements the AJAProcessImpl class on the Linux platform.

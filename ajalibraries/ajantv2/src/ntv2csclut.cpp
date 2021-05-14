@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2csclut.cpp
 	@brief		Implements most of CNTV2Card's CSC/LUT-related functions.

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		lock.h
 	@brief		Declares the AJALock class.

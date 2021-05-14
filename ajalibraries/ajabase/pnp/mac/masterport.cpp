@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		pnp/mac/masterport.cpp
 	@brief		Implements the MasterPort class.

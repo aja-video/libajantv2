@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2bitfilemanager.cpp
 	@brief		Implementation of CNTV2BitfileManager class.
@@ -34,10 +35,12 @@ bool CNTV2BitfileManager::AddFile (const string & inBitfilePath)
 	NTV2BitfileInfo Info;
 
 	//	Open bitfile...
-    if (!Fio.FileExists(inBitfilePath))
+    if (!Fio.FileExists(inBitfilePath)) {
         return false;
-    if (!Bitfile.Open(inBitfilePath))
+	}
+    if (!Bitfile.Open(inBitfilePath)) {
         return false;
+	}
 
 	// get bitfile information
 	Info.bitfilePath	= inBitfilePath;
@@ -46,29 +49,39 @@ bool CNTV2BitfileManager::AddFile (const string & inBitfilePath)
 	Info.designVersion	= Bitfile.GetDesignVersion();
 	Info.bitfileID		= Bitfile.GetBitfileID();
 	Info.bitfileVersion	= Bitfile.GetBitfileVersion();
-    if (Bitfile.IsTandem())
+    if (Bitfile.IsTandem()) {
         Info.bitfileFlags = NTV2_BITFILE_FLAG_TANDEM;
-    else if (Bitfile.IsClear())
+	}
+    else if (Bitfile.IsClear()) {
         Info.bitfileFlags = NTV2_BITFILE_FLAG_CLEAR;
-    else if (Bitfile.IsPartial())
+	}
+    else if (Bitfile.IsPartial()) {
         Info.bitfileFlags = NTV2_BITFILE_FLAG_PARTIAL;
-    else
+	}
+    else {
         Info.bitfileFlags = 0;
+	}
 	Info.deviceID		= Bitfile.GetDeviceID();
 
 	//	Check for reconfigurable bitfile...
-    if ((Info.designID == 0) || (Info.designID > 0xfe))
+    if ((Info.designID == 0) || (Info.designID > 0xfe)) {
         return false;
-    if (Info.designVersion > 0xfe)
+	}
+    if (Info.designVersion > 0xfe) {
         return false;
-	if ((Info.bitfileID > 0xfe))
+	}
+	if ((Info.bitfileID > 0xfe)) {
         return false;
-    if (Info.bitfileVersion > 0xfe)
+	}
+    if (Info.bitfileVersion > 0xfe) {
         return false;
-    if (Info.bitfileFlags == 0)
+	}
+    if (Info.bitfileFlags == 0) {
         return false;
-    if (Info.deviceID == 0)
+	}
+    if (Info.deviceID == 0) {
         return false;
+	}
 
 	//	Add to list...
 	_bitfileList.push_back(Info);
@@ -80,8 +93,9 @@ bool CNTV2BitfileManager::AddDirectory (const string & inDirectory)
 	AJAFileIO Fio;
 
 	//	Check if good directory...
-    if (AJA_FAILURE(Fio.DoesDirectoryExist(inDirectory)))
+    if (AJA_FAILURE(Fio.DoesDirectoryExist(inDirectory))) {
         return false;
+	}
 
 	//	Get bitfiles...
 	NTV2StringList fileContainer;
@@ -155,8 +169,9 @@ bool CNTV2BitfileManager::GetBitStream (NTV2_POINTER & outBitstream,
 bool CNTV2BitfileManager::ReadBitstream (const size_t inIndex)
 {
 	//	Already in cache?
-    if ((inIndex < _bitstreamList.size())  &&  !_bitstreamList.at(inIndex).IsNULL())
+    if ((inIndex < _bitstreamList.size())  &&  !_bitstreamList.at(inIndex).IsNULL()) {
         return true;	//	Yes
+	}
 
 	//	Open bitfile to get bitstream...
 	CNTV2Bitfile Bitfile;

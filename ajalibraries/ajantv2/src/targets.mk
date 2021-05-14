@@ -1,6 +1,8 @@
-# Copyright (C) 2004, 2005, 2006, 2007, 2008 AJA Video Systems, Inc.
-# Proprietary and Confidential information.
-# All righs reserved
+# SPDX-License-Identifier: MIT
+#
+# Copyright (C) 2004 - 2021 AJA Video Systems, Inc.
+#
+
 #
 # Here's the idea behind this makefile approach
 # http://make.paulandlesley.org/multi-arch.html

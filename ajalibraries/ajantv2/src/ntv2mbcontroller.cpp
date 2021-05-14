@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file       ntv2mbcontroller.cpp
     @brief      Implementation of CNTV2MBController class.

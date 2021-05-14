@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
 	@file		testpatterngen.h
 	@brief		Declares the AJATestPatternGen class.
