@@ -576,6 +576,9 @@ public:
 			sDesignPairToIDMap[make_pair(0x02, 0x01)] = DEVICE_ID_CORVID44_8K;
 			sDesignPairToIDMap[make_pair(0x02, 0x02)] = DEVICE_ID_CORVID44_2X4K;
 			sDesignPairToIDMap[make_pair(0x02, 0x03)] = DEVICE_ID_CORVID44_PLNR;
+            sDesignPairToIDMap[make_pair(0x03, 0x03)] = DEVICE_ID_KONA5_2X4K;
+			sDesignPairToIDMap[make_pair(0x03, 0x04)] = DEVICE_ID_KONA5_3DLUT;
+			sDesignPairToIDMap[make_pair(0x03, 0x05)] = DEVICE_ID_KONA5_OE1;
         }
 	~CDesignPairToIDMapMaker ()
 		{
