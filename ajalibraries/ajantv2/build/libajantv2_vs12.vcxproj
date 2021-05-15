@@ -303,6 +303,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Disabled</Optimization>
     </ClCompile>
     <ClCompile Include="..\src\ntv2resample.cpp" />
+    <ClCompile Include="..\src\ntv2routingexpert.cpp" />
     <ClCompile Include="..\src\ntv2rp188.cpp" />
     <ClCompile Include="..\src\ntv2rp215.cpp" />
     <ClCompile Include="..\src\ntv2signalrouter.cpp" />
@@ -430,6 +431,7 @@
     <ClInclude Include="..\includes\ntv2procamp.h" />
     <ClInclude Include="..\includes\ntv2registers2022.h" />
     <ClInclude Include="..\includes\ntv2resample.h" />
+    <ClInclude Include="..\includes\ntv2routingexpert.h" />
     <ClInclude Include="..\includes\ntv2rp188.h" />
     <ClInclude Include="..\includes\ntv2rp215.h" />
     <ClInclude Include="..\includes\ntv2signalrouter.h" />

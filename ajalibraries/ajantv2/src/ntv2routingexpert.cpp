@@ -1,7 +1,8 @@
+/* SPDX-License-Identifier: MIT */
 /**
-    @file		ntv2routingexpert.cpp
-    @brief		RoutingExpert implementation used within CNTV2SignalRouter.
-    @copyright	(C) 2014-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@file		ntv2routingexpert.cpp
+	@brief		RoutingExpert implementation used within CNTV2SignalRouter.
+	@copyright	(C) 2004-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
 **/
 
 #include "ntv2routingexpert.h"

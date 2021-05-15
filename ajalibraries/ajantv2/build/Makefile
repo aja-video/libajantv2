@@ -112,6 +112,7 @@ AJA_LIB_SRCS =\
 		ntv2register.cpp \
 		ntv2registerexpert.cpp \
 		ntv2resample.cpp \
+		ntv2routingexpert.cpp \
 		ntv2rp188.cpp \
 		ntv2serialcontrol.cpp \
 		ntv2signalrouter.cpp \
