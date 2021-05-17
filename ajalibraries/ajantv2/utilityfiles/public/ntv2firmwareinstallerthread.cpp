@@ -376,7 +376,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 }	//	run
 
 
-string CNTV2FirmwareInstallerThread::GetStatusString (void) const
+string CNTV2FirmwareInstallerThread::GetR2StatusString (void) const
 {
 	InternalUpdateStatus ();
 	switch (m_statusStruct.programState)
