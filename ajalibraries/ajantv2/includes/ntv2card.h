@@ -677,6 +677,7 @@ public:
         @param[in]	inMap		Also lock the segment map.
         @param[in]	inRDMA		Lock a GPUDirect buffer for p2p DMA.
         @return		True if successful; otherwise false.
+		@see		CNTV2Card::DMABufferUnlock, CNTV2Card::DMABufferAutoLock, CNTV2Card::DMABufferUnlockAll, \ref vidop-fblocking
 	**/
     AJA_VIRTUAL bool	DMABufferLock (const NTV2_POINTER & inBuffer, bool inMap = false, bool inRDMA = false);	//	New in SDK 15.5
 
@@ -687,6 +688,7 @@ public:
         @param[in]	inMap			Also lock the segment map.
         @param[in]	inRDMA			Lock a GPUDirect buffer for p2p DMA.
         @return		True if successful; otherwise false.
+		@see		CNTV2Card::DMABufferUnlock, CNTV2Card::DMABufferAutoLock, CNTV2Card::DMABufferUnlockAll, \ref vidop-fblocking
 	**/
     AJA_VIRTUAL inline bool	DMABufferLock (const ULWord * pInBuffer, const ULWord inByteCount, bool inMap = false, bool inRDMA = false)
 	{
@@ -698,6 +700,7 @@ public:
 		@brief		Unlocks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
 		@param[in]	inBuffer	Specifies the host buffer to unlock.
 		@return		True if successful; otherwise false.
+		@see		CNTV2Card::DMABufferLock, CNTV2Card::DMABufferUnlockAll, \ref vidop-fblocking
 	**/
 	AJA_VIRTUAL bool	DMABufferUnlock (const NTV2_POINTER & inBuffer);
 
@@ -706,6 +709,7 @@ public:
 		@param[in]	pInBuffer		Specifies the starting address of the host buffer to unlock.
 		@param[in]	inByteCount		Specifies the total length of the host buffer.
 		@return		True if successful; otherwise false.
+		@see		CNTV2Card::DMABufferLock, CNTV2Card::DMABufferUnlockAll, \ref vidop-fblocking
 	**/
 	AJA_VIRTUAL inline bool	DMABufferUnlock (const ULWord * pInBuffer, const ULWord inByteCount)
 	{
@@ -715,6 +719,7 @@ public:
 	/**
 		@brief		Unlocks all buffers used for DMA transfers.
 		@return		True if successful; otherwise false.
+		@see		CNTV2Card::DMABufferLock, CNTV2Card::DMABufferUnlock, \ref vidop-fblocking
 	**/
 	AJA_VIRTUAL bool	DMABufferUnlockAll ();
 
@@ -724,6 +729,7 @@ public:
         @param[in]	inMap			Also try to lock the segment map.
         @param[in]	inMaxLockSize	Specify maximum number of locked bytes.
 		@return		True if successful; otherwise false.
+		@see		CNTV2Card::DMABufferLock, CNTV2Card::DMABufferUnlock, CNTV2Card::DMABufferUnlockAll, \ref vidop-fblocking
 	**/
     AJA_VIRTUAL bool	DMABufferAutoLock (const bool inEnable, const bool inMap = false, const ULWord64 inMaxLockSize = 0);
 
