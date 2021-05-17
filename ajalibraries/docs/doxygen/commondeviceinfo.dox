@@ -472,10 +472,10 @@
 	@note	DMA transfer speeds may be affected by the amount of video data being accessed by
 			the device to transmit video. If a channel is in display mode, it is always playing
 			video, and therefore reading from SDRAM, consuming SDRAM bandwidth… the amount consumed
-			determined by the amount of data being read from frame memory… which depends on Frame
-			Buffer Format and Frame Geometry. <b>In some cases, DMA speeds can be increased by
-			disabling unused channels</b> (see CNTV2Card::DisableChannel). Disabling unused channels
-			is especially useful when using larger video & frame buffer formats, which use significant
+			determined by the amount of data being read from frame memory… which depends on
+			\ref fbframegeometries and \ref devicefbformats. <b>In some cases, DMA speeds can be increased
+			by disabling unused channels</b> (see CNTV2Card::DisableChannel). Disabling unused channels
+			is especially useful when using larger video and frame buffer formats, which use significant
 			SDRAM bandwidth to read frame data for playout. In addition to the fact that more data is
 			moved in, say, 48-bit RGB (than YUV8), the transfer of that data may also proceed at a
 			slightly slower rate.
@@ -483,6 +483,29 @@
 	@warning	Accessing memory addresses that are beyond the end of device SDRAM is not recommended,
 				and will result in unexpected behavior — e.g. wrapping around and continuing from the
 				start of device SDRAM.
+
+	@subsubsection  vidop-fblocking		Buffer Locking
+
+	A DMA transfer using CNTV2Card::AutoCirculateTransfer, CNTV2Card::DMAReadFrame, CNTV2Card::DMAWriteFrame, etc.
+	requires the NTV2 device driver to perform these important operations in preparation for the transfer (with
+	some OS-dependent variations):
+	-#	map the host buffer into kernel memory address space;
+	-#	map and lock those pages into physical memory, where they must remain for the duration of the transfer;
+	-#	build the segment list (or scatter-gather list) of memory segments for the DMA transfer.
+
+	These steps can consume a substantial portion of the \ref autocirctimebudget, especially with larger rasters
+	and/or pixel formats, which can contribute to frame-dropping.
+
+	In most use cases, client applications re-use the same buffers over and over again. A substantial time savings can be
+	realized if the host buffers are pre-locked and wired down into physical memory before entering the frame-processing
+	loop (where CNTV2Card::AutoCirculateTransfer or CNTV2Card::DMAReadFrame or CNTV2Card::DMAWriteFrame are called).
+
+	Starting in SDK 16.0, new DMA API functions were added for this purpose:
+	-	CNTV2Card::DMABufferLock — maps and locks down a host buffer into physical memory.
+		-	Starting with SDK 16.0.1, an optional parameter was added to also have the driver pre-build
+			and cache the segment map from the pre-locked buffer.
+	-	CNTV2Card::DMABufferUnlock — unlocks and unmaps a host buffer that was previously locked.
+		-	Starting in SDK 16.0.1, this also frees any previously cached segment map.
 
 
 	@subsection	deviceclockingandsync		Device Clocking and Synchronization

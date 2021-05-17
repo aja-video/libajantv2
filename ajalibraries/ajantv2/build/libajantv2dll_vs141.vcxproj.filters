@@ -63,6 +63,9 @@
     <ClCompile Include="..\src\ntv2resample.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ntv2routingexpert.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\ntv2rp188.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -399,6 +402,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\ntv2resample.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\ntv2routingexpert.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\ntv2rp188.h">

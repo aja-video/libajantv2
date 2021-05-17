@@ -3030,7 +3030,7 @@ private:
 			ostringstream	oss;
 			NTV2InputXptID	inputXpt;
 			NTV2OutputXptIDSet	outputXpts;
-			if (::GetRouteROMInfoFromReg (inRegNum, inRegValue, inputXpt, outputXpts)
+			if (CNTV2SignalRouter::GetRouteROMInfoFromReg (inRegNum, inRegValue, inputXpt, outputXpts)
 				&& NTV2_IS_VALID_InputCrosspointID(inputXpt))
 			{
 				NTV2StringList	outputXptNames;

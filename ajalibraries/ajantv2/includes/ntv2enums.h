@@ -3219,6 +3219,55 @@ typedef enum
 
 #define	NTV2_IS_VALID_WIDGET(__w__)		(((__w__) >= NTV2_WIDGET_FIRST)  &&  ((__w__) < NTV2_WIDGET_INVALID))
 
+typedef enum {
+	NTV2WidgetType_First = 0
+	,NTV2WidgetType_FrameStore = NTV2WidgetType_First
+	,NTV2WidgetType_CSC
+	,NTV2WidgetType_LUT
+	,NTV2WidgetType_FrameSync
+	,NTV2WidgetType_SDIIn
+	,NTV2WidgetType_SDIIn3G
+	,NTV2WidgetType_SDIOut
+	,NTV2WidgetType_SDIOut3G
+	,NTV2WidgetType_SDIMonOut
+	,NTV2WidgetType_DualLinkV1In
+	,NTV2WidgetType_DualLinkV2In
+	,NTV2WidgetType_DualLinkV1Out
+	,NTV2WidgetType_DualLinkV2Out
+	,NTV2WidgetType_AnalogIn
+	,NTV2WidgetType_AnalogOut
+	,NTV2WidgetType_AnalogCompositeOut
+	,NTV2WidgetType_HDMIInV1
+	,NTV2WidgetType_HDMIInV2
+	,NTV2WidgetType_HDMIInV3
+	,NTV2WidgetType_HDMIInV4
+	,NTV2WidgetType_UpDownConverter
+	,NTV2WidgetType_Mixer
+	,NTV2WidgetType_DCIMixer
+	,NTV2WidgetType_Compression
+	,NTV2WidgetType_StereoCompressor
+	,NTV2WidgetType_ProcAmp
+	,NTV2WidgetType_GenLock
+	,NTV2WidgetType_4KDownConverter
+	,NTV2WidgetType_HDMIOutV1
+	,NTV2WidgetType_HDMIOutV2
+	,NTV2WidgetType_HDMIOutV3
+	,NTV2WidgetType_HDMIOutV4
+	,NTV2WidgetType_HDMIOutV5
+	,NTV2WidgetType_SMPTE425Mux
+	,NTV2WidgetType_SDIIn12G
+	,NTV2WidgetType_SDIOut12G
+	,NTV2WidgetType_MultiLinkOut
+	,NTV2WidgetType_LUT3D
+	,NTV2WidgetType_OE
+	,NTV2WidgetType_WaterMarker
+	,NTV2WidgetType_IICT
+	,NTV2WidgetType_TestPattern
+	,NTV2WidgetType_Max
+	,NTV2WidgetType_Invalid = NTV2WidgetType_Max
+} NTV2WidgetType;
+
+#define	NTV2_IS_VALID_WIDGET_TYPE(__w__)		(((__w__) >= NTV2WidgetType_First)  &&  ((__w__) < NTV2WidgetType_Invalid))
 
 #if !defined (NTV2_DEPRECATE)
     typedef enum

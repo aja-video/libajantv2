@@ -14,10 +14,14 @@
 
 #include <vector>
 
+#include "ajabase/system/thread.h"
+
 #include "ntv2bitfile.h"
 #include "ntv2card.h"
 #include "ntv2debug.h"
 #include "ntv2endian.h"
+#include "ntv2signalrouter.h"
+#include "ntv2routingexpert.h"
 #include "ntv2utils.h"
 #include "ntv2vpid.h"
 
@@ -998,3 +1002,72 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 	}
 } //bft
 
+void signalrouter_marker() {}
+TEST_SUITE("signal router" * doctest::description("CNTV2SignalRouter & RoutingExpert tests")) {
+	TEST_CASE("RoutingExpert Instance") {
+		RoutingExpertPtr pExpert1 = RoutingExpert::GetInstance();
+		CHECK(pExpert1->NumInstances() == 1);
+	}
+	TEST_CASE("CNTV2SignalRouter String Conversions") {
+		std::string inpXptStr = CNTV2SignalRouter::
+						NTV2InputCrosspointIDToString(NTV2_FIRST_INPUT_CROSSPOINT);
+		CHECK(inpXptStr == "FB1");
+
+		std::string outXptStr = CNTV2SignalRouter::
+						NTV2OutputCrosspointIDToString(NTV2_FIRST_OUTPUT_CROSSPOINT);
+		CHECK(outXptStr == "Black");
+
+		NTV2InputXptID inpXptID = CNTV2SignalRouter::
+						StringToNTV2InputCrosspointID("DLIn1");
+		CHECK(inpXptID == NTV2_XptDualLinkIn1Input);
+
+		NTV2OutputXptID outXptID = CNTV2SignalRouter::
+						StringToNTV2OutputCrosspointID("FB1RGBDS2");
+		CHECK(outXptID == NTV2_XptFrameBuffer1_DS2RGB);
+	}
+	TEST_CASE("CNTV2SignalRouter WidgetID helpers") {
+		NTV2WidgetIDSet widgetIDs;
+
+		CNTV2SignalRouter::GetWidgetIDs(DEVICE_ID_KONA5, widgetIDs);
+		CHECK(widgetIDs.size() == 39);
+
+		CNTV2SignalRouter::GetWidgetsForInput(NTV2_XptMultiLinkOut1Input, widgetIDs);
+		CHECK(widgetIDs.size() == 1);
+
+		NTV2WidgetIDSet::const_iterator iter = widgetIDs.begin();
+		CHECK(*iter == NTV2_WgtMultiLinkOut1);
+
+		NTV2WidgetID widgetID = NTV2_WIDGET_INVALID;
+		CNTV2SignalRouter::GetWidgetForInput(NTV2_XptDualLinkIn1Input,
+						widgetID, DEVICE_ID_KONA4);
+		CHECK(widgetID == NTV2_WgtDualLinkV2In1);
+		
+		CHECK(CNTV2SignalRouter::WidgetIDToChannel(NTV2_Wgt3GSDIIn3) == NTV2_CHANNEL3);
+		CHECK(CNTV2SignalRouter::WidgetIDFromTypeAndChannel(NTV2WidgetType_CSC, NTV2_CHANNEL4) == NTV2_WgtCSC4);
+
+		CHECK(CNTV2SignalRouter::WidgetIDToType(NTV2_WgtFrameBuffer1) == NTV2WidgetType_FrameStore);
+
+		CHECK(CNTV2SignalRouter::IsSDIWidgetType(NTV2WidgetType_4KDownConverter) == false);
+		CHECK(CNTV2SignalRouter::IsSDIWidgetType(NTV2WidgetType_SDIOut12G) == true);
+		CHECK(CNTV2SignalRouter::IsSDIInputWidgetType(NTV2WidgetType_SDIIn3G) == true);
+		CHECK(CNTV2SignalRouter::IsSDIInputWidgetType(NTV2WidgetType_SDIOut3G) == false);
+		CHECK(CNTV2SignalRouter::IsSDIOutputWidgetType(NTV2WidgetType_SDIOut3G) == true);
+		CHECK(CNTV2SignalRouter::IsSDIOutputWidgetType(NTV2WidgetType_SDIIn3G) == false);
+		CHECK(CNTV2SignalRouter::Is3GSDIWidgetType(NTV2WidgetType_SDIOut3G) == true);
+		CHECK(CNTV2SignalRouter::Is3GSDIWidgetType(NTV2WidgetType_SDIOut12G) == false);
+		CHECK(CNTV2SignalRouter::Is12GSDIWidgetType(NTV2WidgetType_SDIOut12G) == true);
+		CHECK(CNTV2SignalRouter::Is12GSDIWidgetType(NTV2WidgetType_SDIOut3G) == false);
+		CHECK(CNTV2SignalRouter::IsDualLinkWidgetType(NTV2WidgetType_DualLinkV1Out) == true);
+		CHECK(CNTV2SignalRouter::IsDualLinkWidgetType(NTV2WidgetType_LUT) == false);
+		CHECK(CNTV2SignalRouter::IsDualLinkInWidgetType(NTV2WidgetType_DualLinkV2In) == true);
+		CHECK(CNTV2SignalRouter::IsDualLinkInWidgetType(NTV2WidgetType_DualLinkV1Out) == false);
+		CHECK(CNTV2SignalRouter::IsDualLinkOutWidgetType(NTV2WidgetType_DualLinkV1Out) == true);
+		CHECK(CNTV2SignalRouter::IsDualLinkOutWidgetType(NTV2WidgetType_DualLinkV2In) == false);
+		CHECK(CNTV2SignalRouter::IsHDMIWidgetType(NTV2WidgetType_HDMIOutV5) == true);
+		CHECK(CNTV2SignalRouter::IsHDMIWidgetType(NTV2WidgetType_SDIIn) == false);
+		CHECK(CNTV2SignalRouter::IsHDMIInWidgetType(NTV2WidgetType_HDMIInV3) == true);
+		CHECK(CNTV2SignalRouter::IsHDMIInWidgetType(NTV2WidgetType_HDMIOutV5) == false);
+		CHECK(CNTV2SignalRouter::IsHDMIOutWidgetType(NTV2WidgetType_HDMIOutV5) == true);
+		CHECK(CNTV2SignalRouter::IsHDMIOutWidgetType(NTV2WidgetType_HDMIInV2) == false);
+	}
+}

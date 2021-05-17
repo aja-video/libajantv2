@@ -7312,6 +7312,55 @@ string NTV2WidgetIDToString (const NTV2WidgetID inValue, const bool inCompactDis
 
 }	//	NTV2WidgetIDToString
 
+string NTV2WidgetTypeToString (const NTV2WidgetType inValue, const bool inCompactDisplay)
+{
+	switch (inValue) {
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "FrameStore", NTV2WidgetType_FrameStore);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "CSC", NTV2WidgetType_CSC);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "LUT", NTV2WidgetType_LUT);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "FrameSync", NTV2WidgetType_FrameSync);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "SDI Input", NTV2WidgetType_SDIIn);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "SDI Input 3G", NTV2WidgetType_SDIIn3G);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "SDI Output", NTV2WidgetType_SDIOut);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "SDI Output 3G", NTV2WidgetType_SDIOut3G);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "SDI Monitor Output", NTV2WidgetType_SDIMonOut);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "DualLink Input V1", NTV2WidgetType_DualLinkV1In);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "DualLink Input V2", NTV2WidgetType_DualLinkV2In);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "DualLink Output V1", NTV2WidgetType_DualLinkV1Out);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "DualLink Output V2", NTV2WidgetType_DualLinkV2Out);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "Analog Input", NTV2WidgetType_AnalogIn);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "Analog Output", NTV2WidgetType_AnalogOut);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "Analog Composite Output", NTV2WidgetType_AnalogCompositeOut);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMI Input V1", NTV2WidgetType_HDMIInV1);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMI Input V2", NTV2WidgetType_HDMIInV2);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMI Input V3", NTV2WidgetType_HDMIInV3);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMI Input V4", NTV2WidgetType_HDMIInV4);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "Up-Down Converter", NTV2WidgetType_UpDownConverter);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "Mixer", NTV2WidgetType_Mixer);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "DCI Mixer", NTV2WidgetType_DCIMixer);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "Compression", NTV2WidgetType_Compression);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "Stereo Compressor", NTV2WidgetType_StereoCompressor);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "Proc Amp", NTV2WidgetType_ProcAmp);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "Genlock", NTV2WidgetType_GenLock);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "4K Down Converter", NTV2WidgetType_4KDownConverter);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMI Output V1", NTV2WidgetType_HDMIOutV1);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMI Output V2", NTV2WidgetType_HDMIOutV2);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMI Output V3", NTV2WidgetType_HDMIOutV3);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMI Output V4", NTV2WidgetType_HDMIOutV4);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMI Output V5", NTV2WidgetType_HDMIOutV5);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "SMPTE 425 Mux", NTV2WidgetType_SMPTE425Mux);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "SDI Input 12G", NTV2WidgetType_SDIIn12G);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "SDI Output 12G", NTV2WidgetType_SDIOut12G);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "Multi-Link Output", NTV2WidgetType_MultiLinkOut);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "3D LUT", NTV2WidgetType_LUT3D);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "OE", NTV2WidgetType_OE);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "Watermarker", NTV2WidgetType_WaterMarker);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "IICT", NTV2WidgetType_IICT);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "Test Pattern", NTV2WidgetType_TestPattern);
+		case NTV2WidgetType_Max:				return "???";
+	}
+	return "";
+}
 
 string NTV2TaskModeToString (const NTV2EveryFrameTaskMode inValue, const bool inCompactDisplay)
 {
