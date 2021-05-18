@@ -48,7 +48,7 @@ int NeedsFirmwareUpdate (const NTV2DeviceInfo & inDeviceInfo, std::string & outI
 	@brief		I am an AJAThread that installs firmware from a given bitfile on the local host into a specific AJA device.
 	@details	To use, simply construct with an NTV2DeviceInfo that identifies the target device, and a string containing
 				a path (relative or absolute) to the bitfile, then call ThreadRun. You can periodically poll it by calling
-				Active(), or ask for a human-readable status string by calling GetR2StatusString(). When finished, call
+				Active(), or ask for a human-readable status string by calling GetStatusString(). When finished, call
 				IsUpdateSuccessful() to find out if the installation succeeded.
 **/
 class CNTV2FirmwareInstallerThread : public AJAThread
@@ -94,7 +94,7 @@ class CNTV2FirmwareInstallerThread : public AJAThread
 		/**
 			@return		A string containing a human-readable status message based on the current installation state.
 		**/
-		virtual std::string							GetR2StatusString (void) const;
+		virtual std::string							GetStatusString (void) const;
 
 		/**
 			@return		An integer value representing the current progress of the current in-progress installation.
