@@ -1128,13 +1128,13 @@ bool CNTV2Card::GetHDMIOutAudioSource8Channel (NTV2Audio8ChannelSelect & outValu
 
 bool CNTV2Card::SetHDMIOutAudioRate (const NTV2AudioRate inNewValue)
 {
-	return WriteRegister (kRegHDMIOutControl, static_cast <ULWord> (inNewValue), kRegMaskHDMIAudioRate, kRegShiftHDMIAudioRate);
+	return WriteRegister (kRegHDMIInputControl, static_cast <ULWord> (inNewValue), kRegMaskHDMIOutAudioRate, kRegShiftHDMIOutAudioRate);
 }
 
 
 bool CNTV2Card::GetHDMIOutAudioRate (NTV2AudioRate & outValue)
 {
-	return CNTV2DriverInterface::ReadRegister (kRegHDMIOutControl, outValue, kRegMaskHDMIAudioRate, kRegShiftHDMIAudioRate);
+	return CNTV2DriverInterface::ReadRegister (kRegHDMIInputControl, outValue, kRegMaskHDMIOutAudioRate, kRegShiftHDMIOutAudioRate);
 }
 
 
