@@ -98,6 +98,7 @@ typedef enum
 	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,	///< @brief	See \ref konaip
 	DEVICE_ID_KONAIP_2022				= 0x10646700,	///< @brief	See \ref konaip
 	DEVICE_ID_KONAIP_2110				= 0x10646706,	///< @brief	See \ref konaip
+	DEVICE_ID_KONAIP_2110_RGB12			= 0x10646707,	///< @brief	See \ref konaip
 	DEVICE_ID_KONAIP_2TX_1SFP_J2K		= 0x10646703,	///< @brief	See \ref konaip
 	DEVICE_ID_KONAIP_4CH_2SFP			= 0x10646701,	///< @brief	See \ref konaip
 	DEVICE_ID_KONALHEPLUS				= 0x10352300,	///< @brief	See \ref konalheplus
