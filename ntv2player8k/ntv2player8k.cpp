@@ -193,14 +193,8 @@ AJAStatus NTV2Player8K::SetUpVideo (void)
 	//	Configure the device to handle the requested video format...
 	mDevice.SetVideoFormat (mVideoFormat, false, false, mChannel);
 
-	if (mDoTsiRouting)
-	{
-		mDevice.SetQuadQuadFrameEnable(true, mChannel);
-	}
-	else
-	{
-		mDevice.SetQuadQuadSquaresEnable(true, mChannel);
-	}
+    mDevice.SetQuadQuadFrameEnable(true, mChannel);
+    mDevice.SetQuadQuadSquaresEnable(!mDoTsiRouting, mChannel);
 
 	//	VANC data is not processed by this application
 	mDevice.SetEnableVANCData (false, false);

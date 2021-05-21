@@ -193,14 +193,9 @@ AJAStatus NTV2Capture8K::SetupVideo (void)
     // Convert the signal wire format to a 8k format
 	CNTV2DemoCommon::Get8KInputFormat(mVideoFormat);
 	mDevice.SetVideoFormat(mVideoFormat, false, false, mInputChannel);
-    if (mDoTsiRouting)
-    {
-        mDevice.SetQuadQuadFrameEnable(true, mInputChannel);
-    }
-    else
-    {
-        mDevice.SetQuadQuadSquaresEnable(true, mInputChannel);
-    }
+
+    mDevice.SetQuadQuadFrameEnable(true, mInputChannel);
+    mDevice.SetQuadQuadSquaresEnable(!mDoTsiRouting, mInputChannel);
 
 	//	Set the device video format to whatever we detected at the input...
 	//	The user has an option here. If doing multi-format, we are, lock to the board.
