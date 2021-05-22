@@ -6821,14 +6821,6 @@ string NTV2EmbeddedAudioClockToString (const NTV2EmbeddedAudioClock	inValue, con
 }
 
 
-string NTV2AudioMonitorSelectToString (const NTV2AudioMonitorSelect	inValue, const bool inForRetailDisplay)
-{
-	if (NTV2_IS_VALID_AUDIO_MONITOR(inValue))
-		return ::NTV2AudioChannelPairToString(inValue, inForRetailDisplay);
-	return inForRetailDisplay ? "???" : "NTV2_AUDIO_MONITOR_INVALID";
-}
-
-
 string NTV2CrosspointToString (const NTV2Crosspoint inChannel)
 {
 	std::ostringstream	oss;

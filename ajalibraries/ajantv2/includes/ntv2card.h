@@ -2295,28 +2295,24 @@ public:
 	AJA_VIRTUAL bool		SetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, const NTV2AudioSystem inSrcAudioSystem, const NTV2Audio4ChannelSelect inSrcAudioChannels);
 
 	/**
-		@brief		Sets the audio monitor output source to a specified audio system and channel pair. (The audio monitor
-					is typically the L+R RCA jacks on a breakout box, or the headphone jack on an Io device.)
+		@brief		Sets the audio monitor output source to a specified audio system and channel pair. The audio output monitor
+					is typically a pair of RCA jacks (white + red) and/or a headphone jack.
 		@param[in]	inAudioSystem	Specifies the audio system to use.
 		@param[in]	inChannelPair	Specifies the audio channel pair to use.
-		@bug		The \c inChannelPair parameter really should be an ::NTV2AudioChannelPair.
-					The \c inAudioSystem parameter really should be an ::NTV2AudioSystem.
 		@return		True if successful; otherwise false.
 		@see		CNTV2Card::GetAudioOutputMonitorSource, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		SetAudioOutputMonitorSource (const NTV2AudioMonitorSelect inChannelPair, const NTV2Channel inAudioSystem = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		SetAudioOutputMonitorSource (const NTV2AudioChannelPair inChannelPair, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
-		@brief		Answers with the current audio monitor output source. (The audio monitor is typically the L+R RCA jacks on a breakout box,
-					or the headphone jack on an Io device.)
+		@brief		Answers with the current audio monitor source. The audio output monitor
+					is typically a pair of RCA jacks (white + red) and/or a headphone jack.
 		@param[in]	outAudioSystem		Receives the current audio system being used.
 		@param[in]	outChannelPair		Receives the current audio channel pair being used.
-		@bug		The \c outChannelPair parameter really should be an ::NTV2AudioChannelPair.
-					The \c outAudioSystem parameter really should be an ::NTV2AudioSystem.
 		@return		True if successful; otherwise false.
 		@see		CNTV2Card::SetAudioOutputMonitorSource, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		GetAudioOutputMonitorSource (NTV2AudioMonitorSelect & outChannelPair, NTV2Channel & outAudioSystem);
+	AJA_VIRTUAL bool		GetAudioOutputMonitorSource (NTV2AudioChannelPair & outChannelPair, NTV2AudioSystem & outAudioSystem);
 
 	/**
 		@brief		Answers with the current state of the audio output embedder for the given SDI output connector (specified as a channel number).
@@ -2377,8 +2373,25 @@ public:
 	**/
 	AJA_VIRTUAL bool		SetAudioOutputAESSyncModeBit (const NTV2AudioSystem inAudioSystem, const bool & inAESSyncModeBitSet);
 
-	AJA_VIRTUAL bool		SetAnalogAudioIOConfiguration (const NTV2AnalogAudioIO inAudioIOConfiguration);
-	AJA_VIRTUAL bool		GetAnalogAudioIOConfiguration (NTV2AnalogAudioIO & inAudioIOConfiguration);
+	/**
+		@brief		Sets the specified bidirectional XLR audio connectors to collectively act as inputs or outputs.
+		@param[in]	inChannelQuad	Specifies the XLR audio connectors of interest.
+		@param[in]	inEnable		If true, specifies that the connectors are to be used as outputs.
+									If false, specifies they're to be used as inputs.
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetAnalogAudioTransmitEnable
+	**/
+	AJA_VIRTUAL bool		SetAnalogAudioTransmitEnable (const NTV2Audio4ChannelSelect inChannelQuad, const bool inEnable);	//	New in SDK 16.1
+
+	/**
+		@brief		Answers whether or not the specified bidirectional XLR audio connectors are collectively acting as inputs or outputs.
+		@param[in]	inChannelQuad	Specifies the XLR audio connectors of interest.
+		@param[in]	outEnabled		Receives true if the XLR connectors are currently transmitting (output),
+									or false if they're receiving (input).
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetAnalogAudioTransmitEnable
+	**/
+	AJA_VIRTUAL bool		GetAnalogAudioTransmitEnable (const NTV2Audio4ChannelSelect inChannelQuad, bool & outEnabled);	//	New in SDK 16.1
 
 	/**
 		@brief		Answers with the current value of the 48kHz audio clock counter.
@@ -2400,6 +2413,10 @@ public:
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetAudioOutputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioOutputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioOutputRunning instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioInputReset (const NTV2AudioSystem inAudioSystem, const bool inIsReset))	{return inIsReset ? StopAudioInput(inAudioSystem) : StartAudioInput(inAudioSystem);}	///< @deprecated	Call CNTV2Card::StartAudioInput or CNTV2Card::StopAudioInput instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetAudioInputReset (const NTV2AudioSystem inAudioSystem, bool & outIsReset))	{if(!IsAudioInputRunning(inAudioSystem, outIsReset)) return false; outIsReset = !outIsReset; return true; }	///< @deprecated	Call CNTV2Card::IsAudioInputRunning instead.
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
+#if !defined(NTV2_DEPRECATE_16_1)
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetAnalogAudioIOConfiguration (const NTV2AnalogAudioIO inConfig));	///< @deprecated	Use CNTV2Card::SetAnalogAudioTransmitEnable instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetAnalogAudioIOConfiguration (NTV2AnalogAudioIO & outConfig));	///< @deprecated	Use CNTV2Card::GetAnalogAudioTransmitEnable instead.
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 	///@}
 
@@ -5945,7 +5962,7 @@ public:
 	AJA_VIRTUAL bool		SetSDITransmitEnable (const NTV2Channel inChannel, const bool inEnable);
 
 	/**
-		@brief		Answers whether the specified SDI connector is acting as an input or an output.
+		@brief		Sets the specified SDI connector(s) to act as an input or an output.
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIConnectors	Specifies the SDI connector(s) to be affected.
 		@param[in]	inEnable		If true, specifies that the channel connector is to be used as an output.
@@ -7232,6 +7249,11 @@ public:
 	AJA_VIRTUAL        NTV2_DEPRECATED_f(bool	GetEnableVANCData						(bool * pOutIsEnabled,	bool * pOutIsWideVANCEnabled = NULL,  const NTV2Channel inChannel = NTV2_CHANNEL1));	///< @deprecated	Use CNTV2Card::GetVANCMode instead.
 	AJA_VIRTUAL        NTV2_DEPRECATED_f(bool	GetEnableVANCData						(bool & outIsEnabled, bool & outIsWideVANCEnabled, const NTV2Channel inChannel = NTV2_CHANNEL1));	///< @deprecated	Use CNTV2Card::GetVANCMode instead.
 #endif	//	NTV2_DEPRECATE_14_3
+
+#if !defined(NTV2_DEPRECATE_16_1)
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioOutputMonitorSource (const NTV2AudioMonitorSelect inChannelPair, const NTV2Channel inAudioSystem = NTV2_CHANNEL1))	{return SetAudioOutputMonitorSource(inChannelPair, NTV2AudioSystem(inAudioSystem));}	///< @deprecated	Use the function that uses NTV2AudioChannelPair and NTV2AudioSystem params.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetAudioOutputMonitorSource (NTV2AudioMonitorSelect & chp, NTV2Channel & ch))	{NTV2AudioSystem sys;  if (GetAudioOutputMonitorSource(chp, sys)) {ch = NTV2Channel(sys); return true;}  return false;}	///< @deprecated	Use the function that uses NTV2AudioChannelPair and NTV2AudioSystem params.
+#endif	//	NTV2_DEPRECATE_16_1
 
 protected:
 	AJA_VIRTUAL ULWord			GetSerialNumberLow (void);			//	From CNTV2Status

@@ -1150,40 +1150,42 @@ bool CNTV2Card::GetHDMIOutAudioFormat (NTV2AudioFormat & outValue)
 }
 
 
-bool CNTV2Card::SetAudioOutputMonitorSource (const NTV2AudioMonitorSelect inValue, const NTV2Channel inChannel)
+bool CNTV2Card::SetAudioOutputMonitorSource (const NTV2AudioChannelPair inChannelPair, const NTV2AudioSystem inAudioSystem)
 {
-	const ULWord	encoding	((::GetIndexForNTV2Channel(inChannel) << 4) | inValue);
+	if (!NTV2_IS_WITHIN_AUDIO_CHANNELS_1_TO_16(inChannelPair))
+		return false;
+	if (!NTV2_IS_VALID_AUDIO_SYSTEM(inAudioSystem))
+		return false;
+	const ULWord encoding ((ULWord(inAudioSystem) << 4) | inChannelPair);
     return WriteRegister (kRegAudioOutputSourceMap, encoding, kRegMaskMonitorSource, kRegShiftMonitorSource);
 }
 
 
-bool CNTV2Card::GetAudioOutputMonitorSource (NTV2AudioMonitorSelect & outValue, NTV2Channel & outChannel)
+bool CNTV2Card::GetAudioOutputMonitorSource (NTV2AudioChannelPair & outChannelPair, NTV2AudioSystem & outAudioSystem)
 {
-	ULWord	encoding	(0);
+	ULWord encoding (0);
     bool result = ReadRegister (kRegAudioOutputSourceMap, encoding, kRegMaskMonitorSource, kRegShiftMonitorSource);
 	if (result)
 	{
-		outValue = static_cast <NTV2AudioMonitorSelect> (encoding & 0xF);
-		outChannel = static_cast <NTV2Channel> (::GetNTV2ChannelForIndex (encoding >> 4));
+		outChannelPair = NTV2AudioChannelPair(encoding & 0xF);
+		outAudioSystem = NTV2AudioSystem(encoding >> 4);
 	}
-	
 	return result;
 }
 
 #if !defined(NTV2_DEPRECATE_14_3)
 bool CNTV2Card::GetAudioOutputMonitorSource (NTV2AudioMonitorSelect * pOutValue, NTV2Channel * pOutChannel)
 {
-	NTV2AudioMonitorSelect	outValue	(NTV2_AudioMonitor1_2);
-	NTV2Channel				outChannel	(NTV2_MAX_NUM_CHANNELS);
+	NTV2AudioChannelPair	outValue	(NTV2_AudioMonitor1_2);
+	NTV2AudioSystem			outChannel	(NTV2_NUM_AUDIOSYSTEMS);
 	const bool				result		(GetAudioOutputMonitorSource (outValue, outChannel));
 	if (result)
 	{
 		if (pOutValue)
-			*pOutValue = outValue;
+			*pOutValue = NTV2AudioMonitorSelect(outValue);
 		if (pOutChannel)
-			*pOutChannel = outChannel;
+			*pOutChannel = NTV2Channel(outChannel);
 	}
-	
 	return result;
 }
 #endif	//	NTV2_DEPRECATE_14_3
@@ -1742,18 +1744,58 @@ bool CNTV2Card::SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, co
 	return WriteRegister (gAudioSystemToSrcSelectRegNum[inAudioSystem], inEraseModeEnabled ? 1 : 0, kRegMaskAudioAutoErase, kRegShiftAudioAutoErase);
 }
 
-bool CNTV2Card::SetAnalogAudioIOConfiguration(const NTV2AnalogAudioIO inAudioIOConfiguration)
+bool CNTV2Card::SetAnalogAudioTransmitEnable (const NTV2Audio4ChannelSelect inChannelQuad, const bool inEnable)
 {
-	return WriteRegister (kRegGlobalControl3, inAudioIOConfiguration, kRegMaskAnalogIOControl, kRegShiftAnalogIOControl);
+	//	Reg 108 (kRegGlobalControl3) has two bits for controlling XLR direction:  BIT(0) for XLRs 1-4,  BIT(1) for XLRs 5-8
+	if (!NTV2DeviceHasBiDirectionalAnalogAudio(_boardID))
+		return false;	//	unsupported
+	if (inChannelQuad > NTV2_AudioChannel5_8)
+		return false;	//	NTV2_AudioChannel1_4 & NTV2_AudioChannel5_8 only
+	return WriteRegister (kRegGlobalControl3,  inEnable ? 1 : 0,
+							inChannelQuad == NTV2_AudioChannel1_4  ?  kRegMaskAnalogIOControl_14  :  kRegMaskAnalogIOControl_58,
+							ULWord(inChannelQuad));
 }
 
-bool CNTV2Card::GetAnalogAudioIOConfiguration(NTV2AnalogAudioIO & inAudioIOConfiguration)
+bool CNTV2Card::GetAnalogAudioTransmitEnable (const NTV2Audio4ChannelSelect inChannelQuad, bool & outEnabled)
 {
-	ULWord tmpValue = 0;
-	bool status = ReadRegister (kRegGlobalControl3, tmpValue, kRegMaskAnalogIOControl, kRegShiftAnalogIOControl);
-	inAudioIOConfiguration = static_cast <NTV2AnalogAudioIO> (tmpValue);
-	return status;
+	outEnabled = false;
+	//	Reg 108 (kRegGlobalControl3) has two bits for controlling XLR direction:  BIT(0) for XLRs 1-4,  BIT(1) for XLRs 5-8
+	if (!NTV2DeviceHasBiDirectionalAnalogAudio(_boardID))
+		return false;	//	unsupported
+	if (inChannelQuad > NTV2_AudioChannel5_8)
+		return false;	//	NTV2_AudioChannel1_4 & NTV2_AudioChannel5_8 only
+	return CNTV2DriverInterface::ReadRegister (kRegGlobalControl3,  outEnabled,
+						inChannelQuad == NTV2_AudioChannel1_4  ?  kRegMaskAnalogIOControl_14  :  kRegMaskAnalogIOControl_58,
+						ULWord(inChannelQuad));
 }
+
+#if !defined(NTV2_DEPRECATE_16_1)
+	bool CNTV2Card::SetAnalogAudioIOConfiguration (const NTV2AnalogAudioIO inConfig)
+	{
+		if (inConfig > NTV2_AnalogAudioIO_8In)
+			return false;
+		return SetAnalogAudioTransmitEnable (NTV2_AudioChannel1_4, inConfig == NTV2_AnalogAudioIO_8Out || inConfig == NTV2_AnalogAudioIO_4Out_4In)
+			&& SetAnalogAudioTransmitEnable (NTV2_AudioChannel5_8, inConfig == NTV2_AnalogAudioIO_8Out || inConfig == NTV2_AnalogAudioIO_4In_4Out);
+	}
+
+	bool CNTV2Card::GetAnalogAudioIOConfiguration (NTV2AnalogAudioIO & outConfig)
+	{
+		bool xlr14(false), xlr58(false);
+		if (!GetAnalogAudioTransmitEnable (NTV2_AudioChannel1_4, xlr14))
+			return false;
+		if (!GetAnalogAudioTransmitEnable (NTV2_AudioChannel5_8, xlr58))
+			return false;
+		if (xlr14 && xlr58)
+			outConfig = NTV2_AnalogAudioIO_8Out;
+		else if (xlr14 && !xlr58)
+			outConfig = NTV2_AnalogAudioIO_4Out_4In;
+		else if (!xlr14 && xlr58)
+			outConfig = NTV2_AnalogAudioIO_4In_4Out;
+		else
+			outConfig = NTV2_AnalogAudioIO_8In;
+		return true;
+	}
+#endif	//	!defined(NTV2_DEPRECATE_16_1)
 
 bool CNTV2Card::GetAudioOutputAESSyncModeBit (const NTV2AudioSystem inAudioSystem, bool & outAESSyncModeBitSet)
 {

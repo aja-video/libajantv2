@@ -1036,7 +1036,6 @@ AJAExport std::string NTV2AudioSystemToString			(const NTV2AudioSystem			inValue
 AJAExport std::string NTV2AudioRateToString				(const NTV2AudioRate			inValue,	const bool inForRetailDisplay = false);
 AJAExport std::string NTV2AudioBufferSizeToString		(const NTV2AudioBufferSize		inValue,	const bool inForRetailDisplay = false);
 AJAExport std::string NTV2AudioLoopBackToString			(const NTV2AudioLoopBack		inValue,	const bool inForRetailDisplay = false);
-AJAExport std::string NTV2AudioMonitorSelectToString	(const NTV2AudioMonitorSelect	inValue,	const bool inForRetailDisplay = false);
 AJAExport std::string NTV2EmbeddedAudioClockToString	(const NTV2EmbeddedAudioClock	inValue,	const bool inForRetailDisplay = false);
 AJAExport std::string NTV2GetBitfileName				(const NTV2DeviceID				inValue,	const bool useOemNameOnWindows = false);
 AJAExport bool        NTV2IsCompatibleBitfileName		(const std::string & inBitfileName, const NTV2DeviceID inDeviceID);
@@ -1069,17 +1068,18 @@ AJAExport bool	convertHDRFloatToRegisterValues			(const HDRFloatValues & inFloat
 AJAExport bool	convertHDRRegisterToFloatValues			(const HDRRegValues & inRegisterValues,		HDRFloatValues & outFloatValues);
 AJAExport void  setHDRDefaultsForBT2020                 (HDRRegValues & outRegisterValues);
 AJAExport void  setHDRDefaultsForDCIP3                  (HDRRegValues & outRegisterValues);
+#if !defined(NTV2_DEPRECATE_16_1)
+	inline std::string NTV2AudioMonitorSelectToString (const NTV2AudioMonitorSelect inValue, const bool inForRetailDisplay = false)	{return NTV2AudioChannelPairToString(inValue, inForRetailDisplay);}	///< @deprecated	Use ::NTV2AudioChannelPairToString instead.
+#endif	//	!defined(NTV2_DEPRECATE_16_1)
 
-//	New in 12.5 SDK...
-typedef std::vector <std::string>		NTV2StringList;
-typedef NTV2StringList::iterator		NTV2StringListIter;	//	New in SDK 16.0
-typedef NTV2StringList::const_iterator	NTV2StringListConstIter;
-typedef std::set <std::string>			NTV2StringSet;
-typedef NTV2StringSet::const_iterator	NTV2StringSetConstIter;
+typedef std::vector <std::string>		NTV2StringList;			//	New in SDK 12.5
+typedef NTV2StringList::iterator		NTV2StringListIter;		//	New in SDK 16.0
+typedef NTV2StringList::const_iterator	NTV2StringListConstIter;//	New in SDK 12.5
+typedef std::set <std::string>			NTV2StringSet;			//	New in SDK 12.5
+typedef NTV2StringSet::const_iterator	NTV2StringSetConstIter;	//	New in SDK 12.5
 
-//	New in 13.0 SDK...
-AJAExport std::string NTV2EmbeddedAudioInputToString	(const NTV2EmbeddedAudioInput	inValue,	const bool inCompactDisplay = false);
-AJAExport std::string NTV2AudioSourceToString			(const NTV2AudioSource			inValue,	const bool inCompactDisplay = false);
+AJAExport std::string NTV2EmbeddedAudioInputToString	(const NTV2EmbeddedAudioInput	inValue,	const bool inCompactDisplay = false);	//	New in SDK 13.0
+AJAExport std::string NTV2AudioSourceToString			(const NTV2AudioSource			inValue,	const bool inCompactDisplay = false);	//	New in SDK 13.0
 
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2StringList & inData);	//	New in SDK 15.5
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2StringSet & inData);

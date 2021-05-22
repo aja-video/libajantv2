@@ -1081,7 +1081,16 @@
 		-	Call CNTV2Card::SetHDMIInputAudioChannels to change the HDMI audio input configuration.
 	-	<b>AES:</b>  Audio samples are obtained from the AES inputs.
 		-	Call CNTV2Card::GetDetectedAESChannelPairs to determine which audio channel pairs have valid sample data.
-	-	<b>Analog:</b>  Audio samples for audio channels 1&amp;2 are obtained from the analog video input.
+	-	<b>Analog:</b>
+		-	Call ::NTV2DeviceGetNumAnalogAudioInputChannels to determine if the device can capture analog audio, and if so, the maximum
+			number of audio channels.
+		-	On devices that support 2 channels of analog audio, audio samples for audio channels 1&amp;2 are obtained from the analog
+			video input.
+		-	Some devices that support analog audio input through a breakout box or cable (see ::NTV2DeviceCanDoBreakoutBox
+			and ::NTV2DeviceGetNumAnalogAudioInputChannels functions) have bi-directional analog XLR connectors.
+			Call ::NTV2DeviceHasBiDirectionalAnalogAudio to determine if this is true, and if so:
+			-	Call CNTV2Card::GetAnalogAudioTransmitEnable to discover if a given XLR quad (::NTV2Audio4ChannelSelect) is configured for output or input.
+			-	Call CNTV2Card::SetAnalogAudioTransmitEnable to configure a given XLR quad (::NTV2Audio4ChannelSelect) for input by passing <i>false</i> for <i>inEnable</i>.
 
 	When the <b>Audio System</b> is running, each 24-bit sample is copied as-is into the most-significant 3 bytes of each 4-byte
 	sample word in the <b>Audio Input Buffer</b> in device memory at the address specified by the <b>Audio System</b>’s Audio Input
@@ -1230,6 +1239,24 @@
 		(a contiguous band of 4 audio channels) being used for a given set of 4 AES audio channels.
 	-	Call CNTV2Card::SetAESOutputSource to set the 4 audio channels and/or ::NTV2AudioSystem to be used for a given set
 		of 4 AES audio channels.
+
+	<b>Analog Output:</b> For devices that support analog audio output through a breakout box or cable (see ::NTV2DeviceCanDoBreakoutBox
+	and ::NTV2DeviceGetNumAnalogAudioOutputChannels functions), the output XLRs follow whatʼs being carried by the <b>AES/EBU Output</b>s
+	(above).
+	-	Call ::NTV2DeviceGetNumAnalogAudioOutputChannels to determine if the device can output analog audio, and if so, the maximum
+		number of audio channels it supports.
+	-	Some devices have bi-directional analog XLR connectors.  Call ::NTV2DeviceHasBiDirectionalAnalogAudio to determine if this is true.
+		For these bi-directional XLRs:
+		-	Call CNTV2Card::GetAnalogAudioTransmitEnable to discover if a given XLR quad (::NTV2Audio4ChannelSelect) is configured for output or input.
+		-	Call CNTV2Card::SetAnalogAudioTransmitEnable to configure a given XLR quad (::NTV2Audio4ChannelSelect) for output or input.
+
+	<b>Monitor Output:</b> For devices that support analog audio monitoring through two RCA jacks on a breakout box
+	(see ::NTV2DeviceHasAudioMonitorRCAJacks and ::NTV2DeviceCanDoBreakoutBox) and/or a headphone jack (see ::NTV2DeviceHasHeadphoneJack),
+	by default, the monitor output will carry audio channels 1 & 2 (::NTV2_AudioChannel1_2) from <b>Audio Sytem 1</b> (::NTV2_AUDIOSYSTEM_1).
+	-	Call CNTV2Card::GetAudioOutputMonitorSource to determine which ::NTV2AudioChannelPair and ::NTV2AudioSystem is currently providing
+		samples to the audio monitor output.
+	-	Call CNTV2Card::SetAudioOutputMonitorSource to change which ::NTV2AudioChannelPair and ::NTV2AudioSystem will provide samples to
+		the audio monitor output.
 
 	<b>Non-PCM Data:</b><br>
 

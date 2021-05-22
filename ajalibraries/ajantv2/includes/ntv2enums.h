@@ -2263,13 +2263,15 @@ typedef enum
 } NTV2UpConvertMode;
 
 
-typedef enum
-{
-	NTV2_AnalogAudioIO_8Out,
-	NTV2_AnalogAudioIO_4In_4Out,
-	NTV2_AnalogAudioIO_4Out_4In,
-	NTV2_AnalogAudioIO_8In
-} NTV2AnalogAudioIO;
+#if !defined(NTV2_DEPRECATE_16_1)
+	typedef enum
+	{
+		NTV2_AnalogAudioIO_8Out,
+		NTV2_AnalogAudioIO_4In_4Out,
+		NTV2_AnalogAudioIO_4Out_4In,
+		NTV2_AnalogAudioIO_8In
+	} NTV2AnalogAudioIO;
+#endif	//	!defined(NTV2_DEPRECATE_16_1)
 
 
 typedef enum
@@ -3389,20 +3391,21 @@ typedef NTV2AudioChannelPair	NTV2Audio2ChannelSelect;
 #define	NTV2_IS_NORMAL_AUDIO_CHANNEL_PAIR(__p__)			((__p__) >= NTV2_AudioChannel1_2	&& (__p__) <= NTV2_AudioChannel15_16)
 #define	NTV2_IS_EXTENDED_AUDIO_CHANNEL_PAIR(__p__)			((__p__) >= NTV2_AudioChannel17_18	&& (__p__) < NTV2_MAX_NUM_AudioChannelPair)
 
+#if !defined(NTV2_DEPRECATE_16_1)
+	#define	NTV2_AudioMonitor1_2				NTV2_AudioChannel1_2		// Analog Audio Monitor Channels 1-2
+	#define	NTV2_AudioMonitor3_4				NTV2_AudioChannel3_4		// Analog Audio Monitor Channels 3-4
+	#define	NTV2_AudioMonitor5_6				NTV2_AudioChannel5_6		// Analog Audio Monitor Channels 5-6
+	#define	NTV2_AudioMonitor7_8				NTV2_AudioChannel7_8		// Analog Audio Monitor Channels 7-8
+	#define	NTV2_AudioMonitor9_10				NTV2_AudioChannel9_10		// Analog Audio Monitor Channels 9-10
+	#define	NTV2_AudioMonitor11_12				NTV2_AudioChannel11_12		// Analog Audio Monitor Channels 11-12
+	#define	NTV2_AudioMonitor13_14				NTV2_AudioChannel13_14		// Analog Audio Monitor Channels 13-14
+	#define	NTV2_AudioMonitor15_16				NTV2_AudioChannel15_16		// Analog Audio Monitor Channels 15-16
+	#define	NTV2_MAX_NUM_AudioMonitorSelect		NTV2_AudioChannel17_18
+	#define	NTV2_AUDIO_MONITOR_INVALID			NTV2_MAX_NUM_AudioMonitorSelect
+	typedef NTV2AudioChannelPair	NTV2AudioMonitorSelect;
 
-#define	NTV2_AudioMonitor1_2				NTV2_AudioChannel1_2		// Analog Audio Monitor Channels 1-2
-#define	NTV2_AudioMonitor3_4				NTV2_AudioChannel3_4		// Analog Audio Monitor Channels 3-4
-#define	NTV2_AudioMonitor5_6				NTV2_AudioChannel5_6		// Analog Audio Monitor Channels 5-6
-#define	NTV2_AudioMonitor7_8				NTV2_AudioChannel7_8		// Analog Audio Monitor Channels 7-8
-#define	NTV2_AudioMonitor9_10				NTV2_AudioChannel9_10		// Analog Audio Monitor Channels 9-10
-#define	NTV2_AudioMonitor11_12				NTV2_AudioChannel11_12		// Analog Audio Monitor Channels 11-12
-#define	NTV2_AudioMonitor13_14				NTV2_AudioChannel13_14		// Analog Audio Monitor Channels 13-14
-#define	NTV2_AudioMonitor15_16				NTV2_AudioChannel15_16		// Analog Audio Monitor Channels 15-16
-#define	NTV2_MAX_NUM_AudioMonitorSelect		NTV2_AudioChannel17_18
-#define	NTV2_AUDIO_MONITOR_INVALID			NTV2_MAX_NUM_AudioMonitorSelect
-typedef NTV2AudioChannelPair	NTV2AudioMonitorSelect;
-
-#define	NTV2_IS_VALID_AUDIO_MONITOR(__p__)		((__p__) < NTV2_MAX_NUM_AudioMonitorSelect)
+	#define	NTV2_IS_VALID_AUDIO_MONITOR(__p__)		((__p__) < NTV2_MAX_NUM_AudioMonitorSelect)
+#endif	//	!defined(NTV2_DEPRECATE_16_1)
 
 
 typedef enum
