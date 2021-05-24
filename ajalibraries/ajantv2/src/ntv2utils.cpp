@@ -8325,6 +8325,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_IOIP_2022:					return useWindowsName ? "ioip_s2022.mcs"            : "ioip_s2022.mcs";
 	case DEVICE_ID_IOIP_2110:					return useWindowsName ? "ioip_s2110.mcs"            : "ioip_s2110.mcs";
 	case DEVICE_ID_KONAIP_2110:					return useWindowsName ? "kip_s2110.mcs"             : "kip_s2110.mcs";
+	case DEVICE_ID_KONAIP_2110_RGB12:			return useWindowsName ? "kip_s2110_rgb.mcs"			: "kip_s2110_rgb.mcs";
 	case DEVICE_ID_KONAHDMI:					return useWindowsName ? "kona_hdmi_4rx.bit"         : "kona_hdmi_4rx.bit";
 	case DEVICE_ID_KONA1:						return useWindowsName ? "kona1_pcie.bit"            : "kona1.bit";
 	case DEVICE_ID_KONA5:						return "kona5_retail_tprom.bit";
