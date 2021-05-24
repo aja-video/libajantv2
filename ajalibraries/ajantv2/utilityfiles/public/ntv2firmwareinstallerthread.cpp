@@ -566,13 +566,15 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate (const NTV2DeviceID inDeviceID, 
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
 	case DEVICE_ID_KONAIP_2110:
-        return (designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2022) ||
+	case DEVICE_ID_KONAIP_2110_RGB12:
+		return (designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2022) ||
                 designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_2SFP) ||
                 designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
 				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2TX_1SFP_J2K) ||
 				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_2110) ||
 				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2110) ||
-                designName == "s2022_56_2p2ch_rxtx_mb" ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2110_RGB12) ||
+				designName == "s2022_56_2p2ch_rxtx_mb" ||
                 designName == "s2022_12_2ch_tx_spoof" ||
                 designName == "s2022_12_2ch_tx" ||
                 designName == "s2022_12_2ch_rx" ||
@@ -619,8 +621,9 @@ string CNTV2FirmwareInstallerThread::GetPrimaryDesignName (const NTV2DeviceID in
         case DEVICE_ID_IO4KPLUS:					return "IO_XT_4K_PLUS";
         case DEVICE_ID_IOIP_2022:                   return "ioip_s2022";
         case DEVICE_ID_IOIP_2110:                   return "ioip_s2110";
-        case DEVICE_ID_KONAIP_2110:                 return "s2110_4tx";
-        case DEVICE_ID_KONA1:                       return "kona_alpha";
+		case DEVICE_ID_KONAIP_2110:                 return "s2110_4tx";
+		case DEVICE_ID_KONAIP_2110_RGB12:			return "s2110_tx_rgb";
+		case DEVICE_ID_KONA1:                       return "kona_alpha";
         case DEVICE_ID_KONAHDMI:                    return "kona_hdmi";
 		case DEVICE_ID_KONA5:						return "kona_5";
 		case DEVICE_ID_KONA5_2X4K:					return "kona_5_2";
