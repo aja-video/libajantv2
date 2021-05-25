@@ -561,8 +561,12 @@ int main(int argc, const char *argv[])
 #endif
 {
 	//////////////////////////////////
+#ifdef AJA_RDMA
+	cout << "CUDA/RDMA Example v0.4" << endl;
+#else	
 	cout << "CUDA Example v0.4" << endl;
-
+#endif
+	
 #ifdef AJA_WINDOWS
 	HANDLE hThread = GetCurrentThread();
 	SetThreadPriority(hThread, THREAD_PRIORITY_HIGHEST);
