@@ -8445,6 +8445,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_KONAIP_2TX_1SFP_J2K,
 														DEVICE_ID_KONAIP_1RX_1TX_2110,
 														DEVICE_ID_KONAIP_2110,
+														DEVICE_ID_KONAIP_2110_RGB12,
 														DEVICE_ID_KONALHEPLUS,
 														DEVICE_ID_KONALHI,
 														DEVICE_ID_KONALHIDVI,
