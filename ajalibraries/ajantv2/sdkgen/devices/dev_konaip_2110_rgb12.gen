@@ -100,10 +100,6 @@ NTV2_Wgt425Mux1
 NTV2_Wgt425Mux2
 NTV2_Wgt425Mux3
 NTV2_Wgt425Mux4
-NTV2_Wgt3GSDIIn1
-NTV2_Wgt3GSDIIn2
-NTV2_Wgt3GSDIIn3
-NTV2_Wgt3GSDIIn4
 NTV2_Wgt3GSDIOut1
 NTV2_Wgt3GSDIOut2
 NTV2_Wgt3GSDIOut3
@@ -119,13 +115,6 @@ NTV2_WgtHDMIOut1v2
 NTV2_WgtGenLock
 
 
-// NTV2InputSources
-NTV2_INPUTSOURCE_SDI1
-NTV2_INPUTSOURCE_SDI2
-NTV2_INPUTSOURCE_SDI3
-NTV2_INPUTSOURCE_SDI4
-
-
 // GetNums		(see 'getnum_canon.gen' for legal values)
 NTV2DeviceGetActiveMemorySize				0x37800000
 NTV2DeviceGetHDMIVersion					2
@@ -138,15 +127,15 @@ NTV2DeviceGetNumVideoChannels				4
 NTV2DeviceGetPingLED						BIT(16)
 NTV2DeviceGetNumAudioSystems				4
 NTV2DeviceGetNumCSCs						4
-NTV2DeviceGetNumEmbeddedAudioInputChannels	16
+NTV2DeviceGetNumEmbeddedAudioInputChannels	0
 NTV2DeviceGetNumEmbeddedAudioOutputChannels	16
 NTV2DeviceGetNumFrameStores					4
 NTV2DeviceGetNumHDMIAudioOutputChannels		8
 NTV2DeviceGetNumHDMIVideoOutputs			1
 NTV2DeviceGetNumLUTs						4
 NTV2DeviceGetNumMixers						2
-NTV2DeviceGetNumReferenceVideoInputs		1
-NTV2DeviceGetNumVideoInputs					4
+NTV2DeviceGetNumReferenceVideoInputs		0
+NTV2DeviceGetNumVideoInputs					0
 NTV2DeviceGetNumVideoOutputs				4
 NTV2DeviceGetNum2022ChannelsSFP1			4
 
@@ -182,7 +171,6 @@ NTV2DeviceCanDoStereoOut
 NTV2DeviceCanDoVideoProcessing
 NTV2DeviceCanMeasureTemperature
 NTV2DeviceCanReportFrameSize
-NTV2DeviceHasBiDirectionalSDI
 NTV2DeviceHasNWL
 NTV2DeviceHasPCIeGen2
 NTV2DeviceHasRetailSupport
