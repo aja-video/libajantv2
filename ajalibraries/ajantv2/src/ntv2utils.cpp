@@ -4846,6 +4846,17 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONA5_3DLUT:				return inForRetailDisplay ?	"KONA 5 3DLUT"				: "Kona5-3DLUT";
         case DEVICE_ID_KONA5_8KMK:				return inForRetailDisplay ?	"KONA 5 8KMK"				: "Kona5-8KMK";
 		case DEVICE_ID_KONA5_OE1:				return "Kona5-OE1";
+		case DEVICE_ID_KONA5_OE2:				return "Kona5-OE2";
+		case DEVICE_ID_KONA5_OE3:				return "Kona5-OE3";
+		case DEVICE_ID_KONA5_OE4:				return "Kona5-OE4";
+		case DEVICE_ID_KONA5_OE5:				return "Kona5-OE5";
+		case DEVICE_ID_KONA5_OE6:				return "Kona5-OE6";
+		case DEVICE_ID_KONA5_OE7:				return "Kona5-OE7";
+		case DEVICE_ID_KONA5_OE8:				return "Kona5-OE8";
+		case DEVICE_ID_KONA5_OE9:				return "Kona5-OE9";
+		case DEVICE_ID_KONA5_OE10:				return "Kona5-OE10";
+		case DEVICE_ID_KONA5_OE11:				return "Kona5-OE11";
+		case DEVICE_ID_KONA5_OE12:				return "Kona5-OE12";
 		case DEVICE_ID_CORVID44_8KMK:			return inForRetailDisplay ?	"Corvid 44 8KMK"			: "Corvid44-8KMK";
 		case DEVICE_ID_CORVID44_PLNR:			return inForRetailDisplay ?	"Corvid 44 PLNR"			: "Corvid44-PLNR";
 		case DEVICE_ID_KONA5_8K:				return inForRetailDisplay ?	"KONA 5 8K"					: "Kona5-8K";
@@ -8333,7 +8344,18 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_KONA5_8KMK:					return "kona5_8k_mk_tprom.bit";
 	case DEVICE_ID_KONA5_8K:					return "kona5_8k_tprom.bit";
 	case DEVICE_ID_KONA5_3DLUT:					return "kona5_3d_lut_tprom.bit";
-	case DEVICE_ID_KONA5_OE1:					return "kona5_oe_cfg1.bit";
+	case DEVICE_ID_KONA5_OE1:					return "kona5_oe_cfg1_tprom.bit";
+	case DEVICE_ID_KONA5_OE2:					return "kona5_oe_cfg3_tprom.bit";
+	case DEVICE_ID_KONA5_OE3:					return "kona5_oe_cfg3_tprom.bit";
+	case DEVICE_ID_KONA5_OE4:					return "kona5_oe_cfg4_tprom.bit";
+	case DEVICE_ID_KONA5_OE5:					return "kona5_oe_cfg5_tprom.bit";
+	case DEVICE_ID_KONA5_OE6:					return "kona5_oe_cfg6_tprom.bit";
+	case DEVICE_ID_KONA5_OE7:					return "kona5_oe_cfg7_tprom.bit";
+	case DEVICE_ID_KONA5_OE8:					return "kona5_oe_cfg8_tprom.bit";
+	case DEVICE_ID_KONA5_OE9:					return "kona5_oe_cfg9_tprom.bit";
+	case DEVICE_ID_KONA5_OE10:					return "kona5_oe_cfg10_tprom.bit";
+	case DEVICE_ID_KONA5_OE11:					return "kona5_oe_cfg11_tprom.bit";
+	case DEVICE_ID_KONA5_OE12:					return "kona5_oe_cfg12_tprom.bit";
 	case DEVICE_ID_CORVID44_8KMK:				return "c44_12g_8k_mk_tprom.bit";
 	case DEVICE_ID_CORVID44_8K:					return "c44_12g_8k_tprom.bit";
 	case DEVICE_ID_CORVID44_2X4K:				return "c44_12g_2x4k_tprom.bit";
@@ -8438,6 +8460,17 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_KONA5_2X4K,
 														DEVICE_ID_KONA5_3DLUT,
 														DEVICE_ID_KONA5_OE1,
+														DEVICE_ID_KONA5_OE2,
+														DEVICE_ID_KONA5_OE3,
+														DEVICE_ID_KONA5_OE4,
+														DEVICE_ID_KONA5_OE5,
+														DEVICE_ID_KONA5_OE6,
+														DEVICE_ID_KONA5_OE7,
+														DEVICE_ID_KONA5_OE8,
+														DEVICE_ID_KONA5_OE9,
+														DEVICE_ID_KONA5_OE10,
+														DEVICE_ID_KONA5_OE11,
+														DEVICE_ID_KONA5_OE12,
                                                         DEVICE_ID_KONAHDMI,
 														DEVICE_ID_KONAIP_2022,
 														DEVICE_ID_KONAIP_4CH_2SFP,

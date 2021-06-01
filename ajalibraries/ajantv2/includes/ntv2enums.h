@@ -93,6 +93,17 @@ typedef enum
 	DEVICE_ID_KONA5_2X4K				= 0x10798403,	///< @brief	See \ref kona5
 	DEVICE_ID_KONA5_3DLUT				= 0x10798404,	///< @brief	See \ref kona5
 	DEVICE_ID_KONA5_OE1					= 0x10798405,	///< @brief	See \ref kona5
+	DEVICE_ID_KONA5_OE2					= 0x10798406,	///< @brief	See \ref kona5
+	DEVICE_ID_KONA5_OE3					= 0x10798407,	///< @brief	See \ref kona5
+	DEVICE_ID_KONA5_OE4					= 0x10798408,	///< @brief	See \ref kona5
+	DEVICE_ID_KONA5_OE5					= 0x10798409,	///< @brief	See \ref kona5
+	DEVICE_ID_KONA5_OE6					= 0x1079840A,	///< @brief	See \ref kona5
+	DEVICE_ID_KONA5_OE7					= 0x1079840B,	///< @brief	See \ref kona5
+	DEVICE_ID_KONA5_OE8					= 0x1079840C,	///< @brief	See \ref kona5
+	DEVICE_ID_KONA5_OE9					= 0x1079840D,	///< @brief	See \ref kona5
+	DEVICE_ID_KONA5_OE10				= 0x1079840E,	///< @brief	See \ref kona5
+	DEVICE_ID_KONA5_OE11				= 0x1079840F,	///< @brief	See \ref kona5
+	DEVICE_ID_KONA5_OE12				= 0x10798410,	///< @brief	See \ref kona5
 	DEVICE_ID_KONAHDMI					= 0x10767400,	///< @brief	See \ref konahdmi
 	DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K	= 0x10646702,	///< @brief	See \ref konaip
 	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,	///< @brief	See \ref konaip
@@ -126,6 +137,20 @@ typedef enum
 
 #define DEVICE_ID_CORVID44_12G	DEVICE_ID_CORVID44_8KMK
 #define DEVICE_ID_KONA5_4X12G	DEVICE_ID_KONA5_8K
+
+#define DEVICE_IS_KONA5_OE(__d__)								\
+	(	(__d__) == DEVICE_ID_KONA5_OE1	||						\
+		(__d__) == DEVICE_ID_KONA5_OE2	||						\
+		(__d__) == DEVICE_ID_KONA5_OE3	||						\
+		(__d__) == DEVICE_ID_KONA5_OE4	||						\
+		(__d__) == DEVICE_ID_KONA5_OE5	||						\
+		(__d__) == DEVICE_ID_KONA5_OE6	||						\
+		(__d__) == DEVICE_ID_KONA5_OE7	||						\
+		(__d__) == DEVICE_ID_KONA5_OE8	||						\
+		(__d__) == DEVICE_ID_KONA5_OE9	||						\
+		(__d__) == DEVICE_ID_KONA5_OE10	||						\
+		(__d__) == DEVICE_ID_KONA5_OE11	||						\
+		(__d__) == DEVICE_ID_KONA5_OE12)
 
 #if !defined (NTV2_DEPRECATE)
 	typedef NTV2DeviceID	NTV2BoardID;	///< @deprecated	Use NTV2DeviceID instead. Identifiers with "board" in them are being phased out.
@@ -3626,6 +3651,17 @@ typedef enum
 	NTV2_BITFILE_CORVID44_PLNR_MAIN	= 65,
 	NTV2_BITFILE_IOX3_MAIN			= 66,
 	NTV2_BITFILE_KONA5_OE1_MAIN		= 67,
+	NTV2_BITFILE_KONA5_OE2_MAIN		= 68,
+	NTV2_BITFILE_KONA5_OE3_MAIN		= 69,
+	NTV2_BITFILE_KONA5_OE4_MAIN		= 70,
+	NTV2_BITFILE_KONA5_OE5_MAIN		= 71,
+	NTV2_BITFILE_KONA5_OE6_MAIN		= 72,
+	NTV2_BITFILE_KONA5_OE7_MAIN		= 73,
+	NTV2_BITFILE_KONA5_OE8_MAIN		= 74,
+	NTV2_BITFILE_KONA5_OE9_MAIN		= 75,
+	NTV2_BITFILE_KONA5_OE10_MAIN	= 76,
+	NTV2_BITFILE_KONA5_OE11_MAIN	= 77,
+	NTV2_BITFILE_KONA5_OE12_MAIN	= 78,
 	NTV2_BITFILE_KONAIP_2110_RGB12	= 68,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;

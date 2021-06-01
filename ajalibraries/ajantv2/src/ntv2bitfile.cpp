@@ -441,6 +441,17 @@ static string NTV2GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_KONA5_2X4K:		return "kona5_2x4k";
 		case DEVICE_ID_KONA5_3DLUT:		return "kona5_3d_lut";
 		case DEVICE_ID_KONA5_OE1:		return "kona5_oe_cfg1";
+		case DEVICE_ID_KONA5_OE2:		return "kona5_oe_cfg2";
+		case DEVICE_ID_KONA5_OE3:		return "kona5_oe_cfg3";
+		case DEVICE_ID_KONA5_OE4:		return "kona5_oe_cfg4";
+		case DEVICE_ID_KONA5_OE5:		return "kona5_oe_cfg5";
+		case DEVICE_ID_KONA5_OE6:		return "kona5_oe_cfg6";
+		case DEVICE_ID_KONA5_OE7:		return "kona5_oe_cfg7";
+		case DEVICE_ID_KONA5_OE8:		return "kona5_oe_cfg8";
+		case DEVICE_ID_KONA5_OE9:		return "kona5_oe_cfg9";
+		case DEVICE_ID_KONA5_OE10:		return "kona5_oe_cfg10";
+		case DEVICE_ID_KONA5_OE11:		return "kona5_oe_cfg11";
+		case DEVICE_ID_KONA5_OE12:		return "kona5_oe_cfg12";
 		case DEVICE_ID_CORVID44_8KMK:	return "c44_12g_8k_mk";
 		case DEVICE_ID_CORVID44_8K:		return "c44_12g_8k";
 		case DEVICE_ID_CORVID44_2X4K:	return "c44_12g_2x4k";
@@ -487,6 +498,17 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 		case DEVICE_ID_KONAHDMI:	return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_KONAHDMI) == _designName
 											|| _designName == "Corvid_HDMI_4Rx_Top";
 		case DEVICE_ID_KONA5_OE1:
+		case DEVICE_ID_KONA5_OE2:
+		case DEVICE_ID_KONA5_OE3:
+		case DEVICE_ID_KONA5_OE4:
+		case DEVICE_ID_KONA5_OE5:
+		case DEVICE_ID_KONA5_OE6:
+		case DEVICE_ID_KONA5_OE7:
+		case DEVICE_ID_KONA5_OE8:
+		case DEVICE_ID_KONA5_OE9:
+		case DEVICE_ID_KONA5_OE10:
+		case DEVICE_ID_KONA5_OE11:
+		case DEVICE_ID_KONA5_OE12:
 		case DEVICE_ID_KONA5_3DLUT:
 		case DEVICE_ID_KONA5_2X4K:
 		case DEVICE_ID_KONA5_8KMK:
@@ -498,6 +520,17 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_3DLUT)
 											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_2X4K)
 											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_OE1)
+											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_OE2).append("_tprom")
+											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_OE3).append("_tprom")
+											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_OE4).append("_tprom")
+											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_OE5).append("_tprom")
+											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_OE6).append("_tprom")
+											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_OE7).append("_tprom")
+											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_OE8).append("_tprom")
+											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_OE9).append("_tprom")
+											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_OE10).append("_tprom")
+											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_OE11).append("_tprom")
+											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_OE12).append("_tprom")
 											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5).append("_tprom")
 											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_8KMK).append("_tprom")
 											|| _designName == ::NTV2GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_8K).append("_tprom")
@@ -579,6 +612,17 @@ public:
             sDesignPairToIDMap[make_pair(0x03, 0x03)] = DEVICE_ID_KONA5_2X4K;
 			sDesignPairToIDMap[make_pair(0x03, 0x04)] = DEVICE_ID_KONA5_3DLUT;
 			sDesignPairToIDMap[make_pair(0x03, 0x05)] = DEVICE_ID_KONA5_OE1;
+			sDesignPairToIDMap[make_pair(0x03, 0x06)] = DEVICE_ID_KONA5_OE2;
+			sDesignPairToIDMap[make_pair(0x03, 0x07)] = DEVICE_ID_KONA5_OE3;
+			sDesignPairToIDMap[make_pair(0x03, 0x08)] = DEVICE_ID_KONA5_OE4;
+			sDesignPairToIDMap[make_pair(0x03, 0x09)] = DEVICE_ID_KONA5_OE5;
+			sDesignPairToIDMap[make_pair(0x03, 0x0A)] = DEVICE_ID_KONA5_OE6;
+			sDesignPairToIDMap[make_pair(0x03, 0x0B)] = DEVICE_ID_KONA5_OE7;
+			sDesignPairToIDMap[make_pair(0x03, 0x0C)] = DEVICE_ID_KONA5_OE8;
+			sDesignPairToIDMap[make_pair(0x03, 0x0D)] = DEVICE_ID_KONA5_OE9;
+			sDesignPairToIDMap[make_pair(0x03, 0x0E)] = DEVICE_ID_KONA5_OE10;
+			sDesignPairToIDMap[make_pair(0x03, 0x0F)] = DEVICE_ID_KONA5_OE11;
+			sDesignPairToIDMap[make_pair(0x03, 0x10)] = DEVICE_ID_KONA5_OE12;
         }
 	~CDesignPairToIDMapMaker ()
 		{
