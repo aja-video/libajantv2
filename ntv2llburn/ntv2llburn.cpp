@@ -596,16 +596,7 @@ void NTV2LLBurn::ProcessFrames (void)
 	{
 		// Configure inserter
 		mDevice.AncInsertInit (sdiOutput, mInputChannel);
-		if (mWithHanc)
-		{
-			//	Enable HANC insertion
-			mDevice.AncInsertSetComponents (sdiOutput, true, true, true, true);
-		}
-		else
-		{
-			//	Disable HANC insertion
-			mDevice.AncInsertSetComponents (sdiOutput, true, true, false, false);
-		}
+		mDevice.AncInsertSetComponents (sdiOutput, true, true, mWithHanc, mWithHanc);
 		mDevice.AncInsertSetReadParams (sdiOutput, 0, 0, mOutputChannel);
 		mDevice.AncInsertSetField2ReadParams (sdiOutput, 0, 0, mOutputChannel);
 	}
@@ -669,8 +660,8 @@ void NTV2LLBurn::ProcessFrames (void)
 		if (mWithAudio)
 		{
 			//	Read the audio position registers as close to the interrupt as possible...
-			mDevice.ReadAudioLastIn (currentAudioInAddress, mInputChannel);
-			currentAudioInAddress &= ~0x3;	//	Force DWORD alignment
+			mDevice.ReadAudioLastIn (currentAudioInAddress, NTV2AudioSystem(mInputChannel));
+			currentAudioInAddress &= ~0x3UL;	//	Force DWORD alignment
 			currentAudioInAddress += audioReadOffset;
 
 			if (audioIsReset && mAudioOutLastAddress)
