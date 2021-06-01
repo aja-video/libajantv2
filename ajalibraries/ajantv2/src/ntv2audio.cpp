@@ -442,19 +442,19 @@ bool CNTV2Card::GetAudioReadOffset (ULWord & outReadOffset, const NTV2AudioSyste
 }
 
 
-bool CNTV2Card::ReadAudioLastIn (ULWord & outValue,	const NTV2Channel inChannel)
+bool CNTV2Card::ReadAudioLastIn (ULWord & outValue,	const NTV2AudioSystem inAudioSystem)
 {
-	return ReadRegister (gChannelToAudioInLastAddrRegNum [inChannel], outValue);
+	return ReadRegister (gChannelToAudioInLastAddrRegNum[inAudioSystem], outValue);
 }
 
-bool CNTV2Card::WriteAudioLastOut (const ULWord inValue, const NTV2Channel inChannel)
+bool CNTV2Card::WriteAudioLastOut (const ULWord inValue, const NTV2AudioSystem inAudioSystem)
 {
-	return WriteRegister (gChannelToAudioOutLastAddrRegNum [inChannel], inValue);
+	return WriteRegister (gChannelToAudioOutLastAddrRegNum[inAudioSystem], inValue);
 }
 
-bool CNTV2Card::ReadAudioLastOut (ULWord & outValue, const NTV2Channel inChannel)
+bool CNTV2Card::ReadAudioLastOut (ULWord & outValue, const NTV2AudioSystem inAudioSystem)
 {
-	return ReadRegister (gChannelToAudioOutLastAddrRegNum [inChannel], outValue);
+	return ReadRegister (gChannelToAudioOutLastAddrRegNum[inAudioSystem], outValue);
 }
 
 #if !defined(NTV2_DEPRECATE_16_0)

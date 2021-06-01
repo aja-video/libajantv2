@@ -164,9 +164,9 @@ static ULWord readCurrentAudioPosition(CNTV2Card & device, NTV2AudioSystem audio
 {
     ULWord result(0);
     if (NTV2_IS_OUTPUT_MODE (mode))
-        device.ReadAudioLastOut (result, NTV2Channel(audioSystem));	//	read head
+        device.ReadAudioLastOut (result, audioSystem);	//	read head
     else
-        device.ReadAudioLastIn (result, NTV2Channel(audioSystem));	//	write head
+        device.ReadAudioLastIn (result, audioSystem);	//	write head
     return result;
 }
 
