@@ -2417,9 +2417,9 @@ public:
 #if !defined(NTV2_DEPRECATE_16_1)
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetAnalogAudioIOConfiguration (const NTV2AnalogAudioIO inConfig));	///< @deprecated	Use CNTV2Card::SetAnalogAudioTransmitEnable instead.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetAnalogAudioIOConfiguration (NTV2AnalogAudioIO & outConfig));	///< @deprecated	Use CNTV2Card::GetAnalogAudioTransmitEnable instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool WriteAudioLastOut (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1))	{return WriteAudioLastOut(outValue, NTV2AudioSystem(inChannel));}	///< @deprecated	Use CNTV2Card::WriteAudioLastOut(ULWord &, const NTV2AudioSystem) instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadAudioLastOut (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1))	{return ReadAudioLastOut(outValue, NTV2AudioSystem(inChannel));}	///< @deprecated	Use CNTV2Card::ReadAudioLastOut(ULWord &, const NTV2AudioSystem) instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadAudioLastIn (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1))	{return ReadAudioLastIn(outValue, NTV2AudioSystem(inChannel));}	///< @deprecated	Use CNTV2Card::ReadAudioLastIn(ULWord &, const NTV2AudioSystem) instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool WriteAudioLastOut (ULWord & outValue, const NTV2Channel inChannel))	{return WriteAudioLastOut(outValue, NTV2AudioSystem(inChannel));}	///< @deprecated	Use CNTV2Card::WriteAudioLastOut(ULWord &, const NTV2AudioSystem) instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadAudioLastOut (ULWord & outValue, const NTV2Channel inChannel))	{return ReadAudioLastOut(outValue, NTV2AudioSystem(inChannel));}	///< @deprecated	Use CNTV2Card::ReadAudioLastOut(ULWord &, const NTV2AudioSystem) instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadAudioLastIn (ULWord & outValue, const NTV2Channel inChannel))	{return ReadAudioLastIn(outValue, NTV2AudioSystem(inChannel));}	///< @deprecated	Use CNTV2Card::ReadAudioLastIn(ULWord &, const NTV2AudioSystem) instead.
 #endif	//	!defined(NTV2_DEPRECATE_16_1)
 	///@}
 
