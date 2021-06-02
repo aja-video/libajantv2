@@ -94,6 +94,54 @@ ostream & NTV2SDIInputStatus::Print (ostream & inOutStream) const
 }
 
 
+NTV2HDMIOutputStatus::NTV2HDMIOutputStatus ()
+{
+    Clear ();
+}
+
+
+void NTV2HDMIOutputStatus::Clear (void)
+{
+    mEnabled			= false;
+    mPixelRGB    		= false;
+    mRangeFull  		= false;
+    mPixel420           = false;
+    mProtocol           = NTV2_INVALID_HDMI_PROTOCOL;
+    mVideoStandard  	= NTV2_STANDARD_INVALID;
+    mVideoRate          = NTV2_FRAMERATE_UNKNOWN;
+    mVideoBitDepth      = NTV2_INVALID_HDMIBitDepth;
+    mAudioFormat		= NTV2_AUDIO_FORMAT_INVALID;
+    mAudioRate          = NTV2_AUDIO_RATE_INVALID;
+    mAudioChannels      = NTV2_INVALID_HDMI_AUDIO_CHANNELS;
+}
+
+
+ostream & NTV2HDMIOutputStatus::Print (ostream & inOutStream) const
+{
+    if (mVideoRate == NTV2_FRAMERATE_UNKNOWN)
+    {
+        inOutStream	<< "[Enabled="		<< YesNo(false)
+                    << "]";
+    }
+    else
+    {
+        inOutStream	<< "[Enabled="		<< YesNo(true)
+                    << " PixelRGB="		<< YesNo(mPixelRGB)
+                    << " RangeFull="    << YesNo(mRangeFull)
+                    << " Pixel420="     << YesNo(mPixel420)
+                    << " Protocol="     << xHEX0N(mProtocol,16)
+                    << " VidStd="       << xHEX0N(mVideoStandard,16)
+                    << " VidRate="		<< xHEX0N(mVideoRate,16)
+                    << " VidBits="		<< xHEX0N(mVideoBitDepth,16)
+                    << " AudFmt="		<< xHEX0N(mAudioFormat,16)
+                    << " AudRate="		<< xHEX0N(mAudioRate,16)
+                    << " AudChn="		<< xHEX0N(mAudioChannels,16)
+                    << "]";
+    }
+    return inOutStream;
+}
+
+
 AutoCircVidProcInfo::AutoCircVidProcInfo ()
 	:	mode						(AUTOCIRCVIDPROCMODE_MIX),
 		foregroundVideoCrosspoint	(NTV2CROSSPOINT_CHANNEL1),

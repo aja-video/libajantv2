@@ -5642,6 +5642,14 @@ public:
 	**/
 	AJA_VIRTUAL bool		GetHDMIV2Mode (NTV2HDMIV2Mode & outMode);
 
+
+	/**
+		@brief		Answers with the current HDMI output status.
+        	@return		True if successful; otherwise false.
+        	@param[out]	outMode	Receives the current status of the HDMI output.
+	**/
+	AJA_VIRTUAL bool		GetHDMIOutStatus (NTV2HDMIOutputStatus & outStatus);
+
     //protected:	SHOULD BE PROTECTED/PRIVATE:
 		AJA_VIRTUAL bool	GetHDMIInputStatus (ULWord & outValue,  const NTV2Channel inChannel = NTV2_CHANNEL1, const bool in12BitDetection = false);	///< @brief	Answers with the contents of the HDMI Input status register for the given HDMI input.
     protected:

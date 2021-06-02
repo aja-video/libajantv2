@@ -636,8 +636,31 @@ typedef enum
 	kVRegHDMIInDrmLightLevel2				= VIRTUALREG_START+639,
 	
 	kVRegBaseFirmwareDeviceID				= VIRTUALREG_START+640,
-	
-	kVRegLastAJA							= VIRTUALREG_START+641,		///< @brief	The last AJA virtual register slot
+
+    kVRegHDMIOutStatus1                     = VIRTUALREG_START+641,
+
+    kVRegMaskHDMOutVideoStandard			= BIT(3)+BIT(2)+BIT(1)+BIT(0),
+    kVRegShiftHDMOutVideoStandard			= 0,
+    kVRegMaskHDMOutVideoFrameRate			= BIT(7)+BIT(6)+BIT(5)+BIT(4),
+    kVRegShiftHDMOutVideoFrameRate			= 4,
+    kVRegMaskHDMOutBitDepth 	     		= BIT(11)+BIT(10)+BIT(9)+BIT(8),
+    kVRegShiftHDMOutBitDepth    	  		= 12,
+    kVRegMaskHDMOutColorRGB     			= BIT(12),
+    kVRegShiftHDMOutColorRGB     			= 13,
+    kVRegMaskHDMOutRangeFull     			= BIT(13),
+    kVRegShiftHDMOutRangeFull     			= 13,
+    kVRegMaskHDMOutPixel420     			= BIT(14),
+    kVRegShiftHDMOutPixel420     			= 14,
+    kVRegMaskHDMOutProtocol        			= BIT(15),
+    kVRegShiftHDMOutProtocol           		= 15,
+    kVRegMaskHDMOutAudioFormat      		= BIT(19)+BIT(18)+BIT(17)+BIT(16),
+    kVRegShiftHDMOutAudioFormat      		= 16,
+    kVRegMaskHDMOutAudioRate        		= BIT(23)+BIT(22)+BIT(21)+BIT(20),
+    kVRegShiftHDMOutAudioRate        		= 20,
+    kVRegMaskHDMOutAudioChannels			= BIT(27)+BIT(26)+BIT(25)+BIT(24),
+    kVRegShiftHDMOutAudioChannels			= 24,
+
+    kVRegLastAJA							= VIRTUALREG_START+642,		///< @brief	The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
 

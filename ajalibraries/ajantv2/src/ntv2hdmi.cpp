@@ -610,11 +610,46 @@ bool CNTV2Card::SetHDMIV2Mode (const NTV2HDMIV2Mode inMode)
 			&& WriteRegister(kRegRasterizerControl, inMode, kRegMaskRasterMode, kRegShiftRasterMode);
 }
 
+
 bool CNTV2Card::GetHDMIV2Mode (NTV2HDMIV2Mode & outMode)
 {
 	return ::NTV2DeviceGetHDMIVersion(_boardID) > 1
 			&& CNTV2DriverInterface::ReadRegister(kRegRasterizerControl, outMode, kRegMaskRasterMode, kRegShiftRasterMode);
 }
+
+
+bool CNTV2Card::GetHDMIOutStatus (NTV2HDMIOutputStatus & outStatus)
+{
+    ULWord data;
+    NTV2FrameRate rate;
+
+    if (::NTV2DeviceGetHDMIVersion(_boardID) < 4)
+        return false;
+
+    bool ret = CNTV2DriverInterface::ReadRegister(kVRegHDMIOutStatus1, data);
+    if (!ret)
+        return false;
+
+    outStatus.Clear();
+    rate = (NTV2FrameRate)((data & kVRegMaskHDMOutVideoFrameRate) >> kVRegShiftHDMOutVideoFrameRate);
+    if (rate == NTV2_FRAMERATE_UNKNOWN)
+        return true;
+
+    outStatus.mEnabled          = true;
+    outStatus.mPixelRGB    		= ((data & kVRegMaskHDMOutColorRGB) >> kVRegShiftHDMOutColorRGB) == 1;
+    outStatus.mRangeFull  		= ((data & kVRegMaskHDMOutRangeFull) >> kVRegShiftHDMOutRangeFull) == 1;
+    outStatus.mPixel420         = ((data & kVRegMaskHDMOutPixel420) >> kVRegShiftHDMOutPixel420) == 1;
+    outStatus.mProtocol         = (NTV2HDMIProtocol)((data & kVRegMaskHDMOutProtocol) >> kVRegShiftHDMOutProtocol);
+    outStatus.mVideoStandard  	= (NTV2Standard)((data & kVRegMaskHDMOutVideoStandard) >> kVRegShiftHDMOutVideoStandard);
+    outStatus.mVideoRate        = (NTV2FrameRate)((data & kVRegMaskHDMOutVideoFrameRate) >> kVRegShiftHDMOutVideoFrameRate);
+    outStatus.mVideoBitDepth    = (NTV2HDMIBitDepth)((data & kVRegMaskHDMOutBitDepth) >> kVRegShiftHDMOutBitDepth);
+    outStatus.mAudioFormat		= (NTV2AudioFormat)((data & kVRegMaskHDMOutAudioFormat) >> kVRegShiftHDMOutAudioFormat);
+    outStatus.mAudioRate        = (NTV2AudioRate)((data & kVRegMaskHDMOutAudioRate) >> kVRegShiftHDMOutAudioRate);
+    outStatus.mAudioChannels    = (NTV2HDMIAudioChannels)((data & kVRegMaskHDMOutAudioChannels) >> kVRegShiftHDMOutAudioChannels);
+
+    return true;
+}
+
 
 bool CNTV2Card::SetHDMIHDRGreenPrimaryX(const uint16_t inGreenPrimaryX)
 {

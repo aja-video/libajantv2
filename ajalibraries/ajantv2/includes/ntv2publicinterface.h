@@ -7215,7 +7215,44 @@ typedef enum
 		NTV2_STRUCT_END (NTV2SDIInputStatus)
 
 
-		/**
+        /**
+            @brief	The HDMI output status, this struct reports HDMI output status information.
+            @note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
+        **/
+        NTV2_STRUCT_BEGIN (NTV2HDMIOutputStatus)
+            bool                    mEnabled;               ///< @brief The output is enabled
+            bool                    mPixelRGB;              ///< @brief The output color space is RGB
+            bool                    mRangeFull;             ///< @brief The RGB output is full range
+            bool                    mPixel420;              ///< @brief The output pixels are 420 format
+            NTV2HDMIProtocol        mProtocol;              ///< @brief The output protocol (HDMI vs DVI)
+            NTV2Standard            mVideoStandard;         ///< @brief The output standard
+            NTV2FrameRate           mVideoRate;             ///< @brief The output frame rate
+            NTV2HDMIBitDepth        mVideoBitDepth;         ///< @brief The output bit depth
+            NTV2AudioFormat         mAudioFormat;           ///< @brief The output audio format
+            NTV2AudioRate           mAudioRate;             ///< @brief The output audio rate
+            NTV2HDMIAudioChannels   mAudioChannels;         ///< @brief Number of output audio channels
+            #if !defined (NTV2_BUILDING_DRIVER)
+                /**
+                    @brief	Constructs a default NTV2HDMIOutputStatus.
+                **/
+                explicit			NTV2HDMIOutputStatus ();
+
+                /**
+                    @brief	Constructs a default NTV2HDMIoutputStatus.
+                **/
+                void				Clear (void);
+
+                /**
+                    @brief	Prints a human-readable representation of me into the given output stream.
+                    @param	inOutStream		The output stream to receive my human-readable representation.
+                    @return	A reference to the given output stream.
+                **/
+                std::ostream &		Print (std::ostream & inOutStream) const;
+            #endif	//	!defined (NTV2_BUILDING_DRIVER)
+        NTV2_STRUCT_END (NTV2HMDIOutputStatus)
+
+
+        /**
 			@brief	All new NTV2 structs start with this common header.
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
