@@ -1688,10 +1688,9 @@ public:
 	/**
 		@brief		Enables or disables ::NTV2AudioLoopBack mode for the given ::NTV2AudioSystem.
 		@return		True if successful; otherwise false.
-		@param[in]	inMode			Specify ::NTV2_AUDIO_LOOPBACK_ON to force the Audio System's output embedder, when the playout audio
-									system is stopped (i.e., "Reset" mode), to pull audio samples from the Audio System's input de-embedder.
-									Specify ::NTV2_AUDIO_LOOPBACK_OFF to have the output embedder emit silence (zeroes) when the playout
-									audio system is stopped.
+		@param[in]	inMode			Specify ::NTV2_AUDIO_LOOPBACK_ON to force the Audio System's output embedder, to pull audio samples
+									from the Audio System's input de-embedder.
+									Specify ::NTV2_AUDIO_LOOPBACK_OFF to have the output embedder emit silence (zeroes).
 		@param[in]	inAudioSystem	Optionally specifies the Audio System on the device to be affected. Defaults to ::NTV2_AUDIOSYSTEM_1.
 		@see		CNTV2Card::GetAudioLoopBack, \ref audioplayout
 	**/
@@ -1701,9 +1700,8 @@ public:
 		@brief		Answers if ::NTV2AudioLoopBack mode is currently on or off for the given ::NTV2AudioSystem.
 		@return		True if successful; otherwise false.
 		@param[in]	outMode			Receives ::NTV2_AUDIO_LOOPBACK_ON if the Audio System's output embedder will pull audio samples from
-									the Audio System's input de-embedder when the playout audio system is stopped;
-									otherwise receives ::NTV2_AUDIO_LOOPBACK_OFF if the output embedder emits silence (zeroes) when the
-									playout audio system is stopped.
+									the Audio System's input de-embedder;  otherwise receives ::NTV2_AUDIO_LOOPBACK_OFF if the output
+									embedder emits silence (zeroes).
 		@param[in]	inAudioSystem	Optionally specifies the Audio System on the device to be affected. Defaults to ::NTV2_AUDIOSYSTEM_1.
 		@see		CNTV2Card::SetAudioLoopBack, \ref audioplayout
 	**/
@@ -2179,77 +2177,77 @@ public:
 	/**
 		@brief		Sets the device's ::NTV2AudioSystem that will provide audio for the given SDI output's audio embedder.
 					For 3G-capable SDI outputs, this affects Data Stream 1 (or Link A).
-		@param[in]	inSDIOutput		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
-		@param[in]	inAudioSystem	Specifies the Audio System to be used (e.g., ::NTV2_AUDIOSYSTEM_1).
+		@param[in]	inSDIOutputConnector	Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
+		@param[in]	inAudioSystem			Specifies the Audio System to be used (e.g., ::NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
 		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
 		@note		Use the ::NTV2DeviceGetNumVideoOutputs function to determine the number of SDI output jacks the device has.
 		@see		CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		SetSDIOutputAudioSystem (const NTV2Channel inSDIOutput, const NTV2AudioSystem inAudioSystem);
+	AJA_VIRTUAL bool		SetSDIOutputAudioSystem (const NTV2Channel inSDIOutputConnector, const NTV2AudioSystem inAudioSystem);
 
 	/**
 		@brief		Answers with the device's ::NTV2AudioSystem that is currently providing audio for the given SDI output's audio embedder.
 					(For 3G-capable SDI outputs, this is for Data Stream 1, or Link A.)
-		@param[in]	inSDIOutput		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
-		@param[in]	outAudioSystem	Receives the Audio System that's currently being used (e.g., ::NTV2_AUDIOSYSTEM_1).
+		@param[in]	inSDIOutputConnector	Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
+		@param[in]	outAudioSystem			Receives the Audio System that's currently being used (e.g., ::NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
 		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
 		@note		Use the ::NTV2DeviceGetNumVideoOutputs function to determine the number of SDI output jacks the device has.
 		@see		CNTV2Card::SetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		GetSDIOutputAudioSystem (const NTV2Channel inSDIOutput, NTV2AudioSystem & outAudioSystem);
+	AJA_VIRTUAL bool		GetSDIOutputAudioSystem (const NTV2Channel inSDIOutputConnector, NTV2AudioSystem & outAudioSystem);
 
 	/**
 		@brief		Sets the Audio System that will supply audio for the given SDI output's audio embedder for Data Stream 2
 					(Link B) for dual-link playout.
-		@param[in]	inSDIOutput		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
-		@param[in]	inAudioSystem	Specifies the Audio System that is to be used by the SDI output's embedder (e.g., ::NTV2_AUDIOSYSTEM_1).
+		@param[in]	inSDIOutputConnector	Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
+		@param[in]	inAudioSystem			Specifies the Audio System that is to be used by the SDI output's embedder (e.g., ::NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
 		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
 		@see		CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		SetSDIOutputDS2AudioSystem (const NTV2Channel inSDIOutput, const NTV2AudioSystem inAudioSystem);
+	AJA_VIRTUAL bool		SetSDIOutputDS2AudioSystem (const NTV2Channel inSDIOutputConnector, const NTV2AudioSystem inAudioSystem);
 
 	/**
 		@brief		Answers with the device's Audio System that is currently providing audio for the given SDI output's audio
 					embedder for Data Stream 2 (Link B) for dual-link output.
-		@param[in]	inSDIOutput		Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
-		@param[in]	outAudioSystem	Receives the Audio System that's currently being used (e.g., ::NTV2_AUDIOSYSTEM_1).
+		@param[in]	inSDIOutputConnector	Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
+		@param[in]	outAudioSystem			Receives the Audio System that's currently being used (e.g., ::NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
 		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
 		@see		CNTV2Card::SetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		GetSDIOutputDS2AudioSystem (const NTV2Channel inSDIOutput, NTV2AudioSystem & outAudioSystem);
+	AJA_VIRTUAL bool		GetSDIOutputDS2AudioSystem (const NTV2Channel inSDIOutputConnector, NTV2AudioSystem & outAudioSystem);
 
 	/**
 		@brief		For the given SDI input (specified as a channel number), answers if the specified audio channel pair is currently PCM-encoded or not.
-		@param[in]	inSDIInputChannel	Specifies the SDI input of interest.
+		@param[in]	inSDIInputConnector	Specifies the SDI input connector of interest as an ::NTV2Channel (a zero-based index number).
 		@param[in]	inAudioChannelPair	Specifies the audio channel pair of interest.
 		@param[out]	outIsPCM			Receives true if the channel pair is currently PCM-encoded;  otherwise false.
 		@return		True if successful;  otherwise false.
 	**/
-	virtual bool			InputAudioChannelPairHasPCM (const NTV2Channel inSDIInputChannel, const NTV2AudioChannelPair inAudioChannelPair, bool & outIsPCM);
+	virtual bool			InputAudioChannelPairHasPCM (const NTV2Channel inSDIInputConnector, const NTV2AudioChannelPair inAudioChannelPair, bool & outIsPCM);
 
 	/**
 		@brief		For the given SDI input (specified as a channel number), returns the set of audio channel pairs that are currently PCM-encoded.
-		@param[in]	inSDIInputChannel		Specifies the SDI input of interest.
-		@param[out]	outChannelPairs		Receives the channel pairs that are currently PCM-encoded.
+		@param[in]	inSDIInputConnector		Specifies the SDI input connector of interest as an ::NTV2Channel (a zero-based index number).
+		@param[out]	outChannelPairs			Receives the channel pairs that are currently PCM-encoded.
 		@return		True if successful;  otherwise false.
 		@note		The audio de-embedder firmware sets non-PCM-detect bits in registers independently of its channel-pair-detection registers.
 					Non-PCM-detect bits representing missing channel pairs are always clear. Therefore, callers of this function may wish to also
 					call CNTV2Card::GetDetectedAudioChannelPairs (or CNTV2Card::GetDetectedAESChannelPairs), and then use std::set_intersection to
 					produce a more realistic set of PCM channel pairs.
 	**/
-	virtual bool			GetInputAudioChannelPairsWithPCM (const NTV2Channel inSDIInputChannel, NTV2AudioChannelPairs & outChannelPairs);
+	virtual bool			GetInputAudioChannelPairsWithPCM (const NTV2Channel inSDIInputConnector, NTV2AudioChannelPairs & outChannelPairs);
 
 	/**
 		@brief		For the given SDI input (specified as a channel number), returns the set of audio channel pairs that are currently not PCM-encoded.
-		@param[in]	inSDIInputChannel		Specifies the SDI input of interest.
-		@param[out]	outChannelPairs		Receives the channel pairs that are not currently PCM-encoded.
+		@param[in]	inSDIInputConnector		Specifies the SDI input connector of interest as an ::NTV2Channel (a zero-based index number).
+		@param[out]	outChannelPairs			Receives the channel pairs that are not currently PCM-encoded.
 		@return		True if successful;  otherwise false.
 	**/
-	virtual bool			GetInputAudioChannelPairsWithoutPCM (const NTV2Channel inSDIInputChannel, NTV2AudioChannelPairs & outChannelPairs);
+	virtual bool			GetInputAudioChannelPairsWithoutPCM (const NTV2Channel inSDIInputConnector, NTV2AudioChannelPairs & outChannelPairs);
 
 	/**
 		@brief		Answers as to whether or not the host OS audio services for the AJA device (e.g. CoreAudio on MacOS)
