@@ -86,10 +86,10 @@ typedef NTV2WidgetTypeSet::const_iterator				NTV2WidgetTypeSetConstIter;
 	@brief	This class is a collection of widget input-to-output connections that can be applied all-at-once to an NTV2 device.
 			Call AddConnection to connect a widget input (specified by ::NTV2InputXptID) to a widget's output (specified by ::NTV2OutputXptID).
 			Call the CNTV2Card::ApplySignalRoute function to apply this route to the device.
-	@note	Use of this class is optional, as widget signal routing can always be performed using direct calls to NTV2Card::Connect.
+	@note	Use of this class is optional, as widget signal routing can always be performed using direct calls to CNTV2Card::Connect.
 	@note	This class is not thread-safe.
-	@note	Public access to the NTV2RoutingEntry structs are deprecated. Please use ::NTV2InputXptID's instead.
-	@see	ntv2signalrouting
+	@note	Public access to the ::NTV2RoutingEntry structs are deprecated. Please use ::NTV2InputXptID instead.
+	@see	\ref ntv2signalrouting
 **/
 class AJAExport CNTV2SignalRouter
 {
