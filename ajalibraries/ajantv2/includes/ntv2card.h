@@ -6256,14 +6256,14 @@ public:
 	AJA_VIRTUAL bool		GetSDITRSError (const NTV2Channel inChannel);
 
 	/**
-		@return		The SDI Lock count for the given SDI input.
+		@return		True if the given SDI input is currently locked to a valid signal;  otherwise false.
 		@param[in]	inChannel		Specifies the channel (SDI input) of interest.
 		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
 	**/
 	AJA_VIRTUAL bool		GetSDILock (const NTV2Channel inChannel);
 
 	/**
-		@return		The SDI Unlock count for the given SDI input.
+		@return		The number of transitions to the "unlocked" state for the given SDI input.
 		@param[in]	inChannel		Specifies the channel (SDI input) of interest.
 		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
 	**/

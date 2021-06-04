@@ -6654,7 +6654,7 @@ bool CNTV2Card::GetSDILock (const NTV2Channel inChannel)
 	return value ? true : false;
 }
 
-ULWord CNTV2Card::GetSDIUnlockCount(const NTV2Channel inChannel)
+ULWord CNTV2Card::GetSDIUnlockCount (const NTV2Channel inChannel)
 {
 	if (!::NTV2DeviceCanDoSDIErrorChecks(_boardID))
 		return 0;
@@ -6665,7 +6665,7 @@ ULWord CNTV2Card::GetSDIUnlockCount(const NTV2Channel inChannel)
 	return value;
 }
 
-ULWord CNTV2Card::GetCRCErrorCountA(const NTV2Channel inChannel)
+ULWord CNTV2Card::GetCRCErrorCountA (const NTV2Channel inChannel)
 {
 	if (!::NTV2DeviceCanDoSDIErrorChecks(_boardID))
 		return 0;
@@ -6676,7 +6676,7 @@ ULWord CNTV2Card::GetCRCErrorCountA(const NTV2Channel inChannel)
 	return value;
 }
 
-ULWord CNTV2Card::GetCRCErrorCountB(const NTV2Channel inChannel)
+ULWord CNTV2Card::GetCRCErrorCountB (const NTV2Channel inChannel)
 {
 	if (!::NTV2DeviceCanDoSDIErrorChecks(_boardID))
 		return 0;
