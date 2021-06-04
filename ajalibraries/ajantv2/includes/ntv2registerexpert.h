@@ -166,8 +166,8 @@ class AJAExport CNTV2RegisterExpert
         /**
             @brief		Answers with the crosspoint select register and mask information for a given widget input.
             @param[in]	inInputXpt		Specifies the NTV2InputCrosspointID of interest.
-            @param[in]	outXptRegNum	Receives the crosspoint select group register number.
-            @param[in]	outMaskIndex	Receives the mask index (where 0=0x000000FF, 1=0x0000FF00, 2=0x00FF0000, 3=0xFF000000).
+            @param[out]	outXptRegNum	Receives the crosspoint select group register number.
+            @param[out]	outMaskIndex	Receives the mask index (where 0=0x000000FF, 1=0x0000FF00, 2=0x00FF0000, 3=0xFF000000).
             @return		True if successful;  otherwise false.
         **/
         static bool						GetCrosspointSelectGroupRegisterInfo (const NTV2InputCrosspointID inInputXpt, uint32_t & outXptRegNum, uint32_t & outMaskIndex);

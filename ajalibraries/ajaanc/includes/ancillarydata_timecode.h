@@ -84,7 +84,7 @@ public:
 		@brief		Answers with my current raw "time" hex values.
 		@param[in]	inDigitNum	Specifies the index (0-7) of the time digit of interest, in "transmission" order:
 								0 = 1st (frame units) digit, 1 = 2nd digit, ... 7 = last (hour tens) digit.
-		@param[in]	outHexValue	Receives the hex value (least significant 4 bits) to be set.
+		@param[out]	outHexValue	Receives the hex value (least significant 4 bits) to be set.
 		@param[in]	inMask		Optionally specifies which bits to receive: (1 = set bit to new value, 0 = retain current bit value).
 								Defaults to 0x0F.
 		@return		AJA_STATUS_SUCCESS if successful.
@@ -111,14 +111,14 @@ public:
 
 	/**
 		@brief		Answers with my current timecode "time" as discrete BCD digits.
-		@param[in]	outHourTens	Specifies the hours "tens" digit value.
-		@param[in]	outHourOnes	Specifies the hours "ones" digit value.
-		@param[in]	outMinTens	Specifies the minutes "tens" digit value.
-		@param[in]	outMinOnes	Specifies the minutes "ones" digit value.
-		@param[in]	outSecsTens	Specifies the seconds "tens" digit value.
-		@param[in]	outSecsOnes	Specifies the seconds "ones" digit value.
-		@param[in]	outFrameTens	Specifies the frame "tens" digit value.
-		@param[in]	outFrameOnes	Specifies the frame "ones" digit value.
+		@param[out]	outHourTens	Specifies the hours "tens" digit value.
+		@param[out]	outHourOnes	Specifies the hours "ones" digit value.
+		@param[out]	outMinTens	Specifies the minutes "tens" digit value.
+		@param[out]	outMinOnes	Specifies the minutes "ones" digit value.
+		@param[out]	outSecsTens	Specifies the seconds "tens" digit value.
+		@param[out]	outSecsOnes	Specifies the seconds "ones" digit value.
+		@param[out]	outFrameTens	Specifies the frame "tens" digit value.
+		@param[out]	outFrameOnes	Specifies the frame "ones" digit value.
 		@note		Each digit is masked to the number of bits allotted in the payload. Note that the digit order is reversed!
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
@@ -143,10 +143,10 @@ public:
 	/**
 		@brief		Answers with my current timecode "time" as individual hour, minute, second, and frame components (in decimal, not BCD digits).
  		@param[in]	inFormat	Specifies a valid AJAAncillaryData_Timecode_Format.
-		@param[in]	outHours	Receives the hours value.
-		@param[in]	outMinutes	Receives the minutes value.
-		@param[in]	outSeconds	Receives the seconds value.
-		@param[in]	outFrames	Receives the frame value.
+		@param[out]	outHours	Receives the hours value.
+		@param[out]	outMinutes	Receives the minutes value.
+		@param[out]	outSeconds	Receives the seconds value.
+		@param[out]	outFrames	Receives the frame value.
 		@note		This method takes into account the "FieldID" bit for HFR timecode formats (e.g. p50, p59.94, p60, etc.).
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
@@ -164,8 +164,8 @@ public:
 
 	/**
 		@brief		Answers with my timecode "time" as an AJATimeCode.
-		@param[in]	outTimecode		Receives the timecode.
- 		@param[in]	outTimeBase		Receives the time base (frame rate).
+		@param[out]	outTimecode		Receives the timecode.
+ 		@param[out]	outTimeBase		Receives the time base (frame rate).
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus GetTimecode (AJATimeCode & outTimecode, AJATimeBase & outTimeBase) const;
@@ -229,7 +229,7 @@ public:
 
 	/**
 		@brief		Answers with my current binary group flag (3 bits).
-		@param[in]	outBGFlag	Specifies the BG Flag value (only the least significant 3 bits are retained).
+		@param[out]	outBGFlag	Specifies the BG Flag value (only the least significant 3 bits are retained).
  		@param[in]	inFormat	Specifies the timecode format associated with timecode (default is handled as 30-frame timecode).
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/

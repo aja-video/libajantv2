@@ -7482,7 +7482,7 @@ typedef enum
 
 				/**
 					@brief		Copies the given AUTOCIRCULATE_STATUS_STRUCT into me.
-					@param[out]	inOldStruct		Specifies the old AUTOCIRCULATE_STATUS_STRUCT that is to supply the copied data.
+					@param[in]	inOldStruct		Specifies the old AUTOCIRCULATE_STATUS_STRUCT that is to supply the copied data.
 					@return		True if successful;  otherwise false.
 				**/
 				bool					CopyFrom (const AUTOCIRCULATE_STATUS_STRUCT & inOldStruct);

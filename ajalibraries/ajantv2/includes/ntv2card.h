@@ -1082,7 +1082,7 @@ public:
 		@brief		Returns the device's current SMPTE-372 (dual-link) mode, whether it's enabled or not.
 		@note		The enable bits work on channel pairs, thus a parameter of ::NTV2_CHANNEL1 or ::NTV2_CHANNEL2 refers to the same control bit.
 		@return		True if successful; otherwise false.
-		@param[in]	outValue	Receives 1 if the device is currently in dual-link mode;  otherwise receives 0.
+		@param[out]	outValue	Receives 1 if the device is currently in dual-link mode;  otherwise receives 0.
 		@param[in]	inChannel	Specifies the channel of interest. Defaults to channel 1.
 		@todo		Should use bool& parameter instead of a ULWord&.
 		@todo		Should be named GetSMPTE372Enable.
@@ -1252,7 +1252,7 @@ public:
 		@brief		Sets the output frame number for the given channel. This identifies which particular frame
 					in device SDRAM will be used for playout after the next frame interrupt.
 		@param[in]	inChannel	Specifies the Frame Store of interest as an ::NTV2Channel, a zero-based index number.
-		@param[out]	inValue		Specifies the new desired output frame number. This number is a zero-based index into each
+		@param[in]	inValue		Specifies the new desired output frame number. This number is a zero-based index into each
 								8MB or 16MB block of SDRAM on the device.
 		@return		True if successful;  otherwise false.
 		@note		For the effect to be noticeable, the Frame Store should be enabled (see CNTV2Card::EnableChannel)
@@ -1289,7 +1289,7 @@ public:
 		@brief		Sets the current input frame number for the given Frame Store.
 					This identifies which particular frame in device SDRAM will be written after the next frame interrupt.
 		@param[in]	inChannel	Specifies the Frame Store of interest as an ::NTV2Channel, a zero-based index number.
-		@param[out]	inValue		Specifies the frame number in device memory to be written, which is a zero-based index
+		@param[in]	inValue		Specifies the frame number in device memory to be written, which is a zero-based index
 								into each 8/16/32MB block of SDRAM on the device.
 		@return		True if successful;  otherwise false.
 		@note		For the effect to be noticeable, the Frame Store should be enabled (see CNTV2Card::EnableChannel)
@@ -1408,7 +1408,7 @@ public:
 	/**
 		@brief		Answers with the line offset into the frame currently being read (playout) or written
 					(capture) for FrameStore 1.
-		@param[in]	outValue	Receives the line number being read or written for ::NTV2_CHANNEL1.
+		@param[out]	outValue	Receives the line number being read or written for ::NTV2_CHANNEL1.
 		@return		True if successful;  otherwise false.
 	**/
 	AJA_VIRTUAL bool		ReadLineCount (ULWord & outValue);
@@ -1448,7 +1448,7 @@ public:
 					See the \ref ancillarydata discussion for more information.
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer				Specifies the mixer/keyer of interest as a zero-based index number.
-		@param[in]	outIsFromForegroundSource	Receives True if the mixer/keyer's VANC source is its foreground video input;
+		@param[out]	outIsFromForegroundSource	Receives True if the mixer/keyer's VANC source is its foreground video input;
 												otherwise False if it's its background video input.
 		@see		CNTV2Card::SetMixerVancOutputFromForeground, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
@@ -1468,7 +1468,7 @@ public:
 		@brief		Returns the current foreground input control value for the given mixer/keyer.
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
-		@param[in]	outInputControl		Receives the mixer/keyer's foreground input control value; otherwise NTV2MIXERINPUTCONTROL_INVALID upon failure.
+		@param[out]	outInputControl		Receives the mixer/keyer's foreground input control value; otherwise NTV2MIXERINPUTCONTROL_INVALID upon failure.
 		@see		CNTV2Card::SetMixerFGInputControl, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	GetMixerFGInputControl (const UWord inWhichMixer, NTV2MixerKeyerInputControl & outInputControl);
@@ -1486,7 +1486,7 @@ public:
 		@brief		Returns the current background input control value for the given mixer/keyer.
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
-		@param[in]	outInputControl		Receives the mixer/keyer's background input control value; otherwise NTV2MIXERINPUTCONTROL_INVALID upon failure.
+		@param[out]	outInputControl		Receives the mixer/keyer's background input control value; otherwise NTV2MIXERINPUTCONTROL_INVALID upon failure.
 		@see		CNTV2Card::SetMixerBGInputControl, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	GetMixerBGInputControl (const UWord inWhichMixer, NTV2MixerKeyerInputControl & outInputControl);
@@ -1504,7 +1504,7 @@ public:
 		@brief		Returns the current operating mode of the given mixer/keyer.
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
-		@param[in]	outMode				Receives the mode value.
+		@param[out]	outMode				Receives the mode value.
 		@see		CNTV2Card::SetMixerMode, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	GetMixerMode (const UWord inWhichMixer, NTV2MixerKeyerMode & outMode);
@@ -1522,7 +1522,7 @@ public:
 		@brief		Returns the current mix coefficient the given mixer/keyer.
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
-		@param[in]	outMixCoefficient	Receives the current mix coefficient value, where \c 0x10000 is the maximum.
+		@param[out]	outMixCoefficient	Receives the current mix coefficient value, where \c 0x10000 is the maximum.
 		@see		CNTV2Card::SetMixerCoefficient, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	GetMixerCoefficient (const UWord inWhichMixer, ULWord & outMixCoefficient);
@@ -1531,7 +1531,7 @@ public:
 		@brief		Returns the current sync state of the given mixer/keyer.
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
-		@param[in]	outIsSyncOK			Receives the mixer's current sync state. If true, the mixer is synchronized to its inputs.
+		@param[out]	outIsSyncOK			Receives the mixer's current sync state. If true, the mixer is synchronized to its inputs.
 										If false, the mixer is not synchronized to its inputs.
 		@see		See \ref vidop-mixerkeyer for more information
 	**/
@@ -1541,7 +1541,7 @@ public:
 		@brief		Answers if the given mixer/keyer's foreground matte is enabled or not.
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
-		@param[in]	outIsEnabled		Receives true if the mixer's foreground matte is currently enabled;  otherwise false.
+		@param[out]	outIsEnabled		Receives true if the mixer's foreground matte is currently enabled;  otherwise false.
 		@see		CNTV2Card::SetMixerFGMatteEnabled, CNTV2Card::GetMixerBGMatteEnabled, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	GetMixerFGMatteEnabled (const UWord inWhichMixer, bool & outIsEnabled);
@@ -1559,7 +1559,7 @@ public:
 		@brief		Answers if the given mixer/keyer's background matte is enabled or not.
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
-		@param[in]	outIsEnabled		Receives true if the mixer's background matte is currently enabled;  otherwise false.
+		@param[out]	outIsEnabled		Receives true if the mixer's background matte is currently enabled;  otherwise false.
 		@see		CNTV2Card::SetMixerBGMatteEnabled, CNTV2Card::GetMixerFGMatteEnabled, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	GetMixerBGMatteEnabled (const UWord inWhichMixer, bool & outIsEnabled);
@@ -1577,7 +1577,7 @@ public:
 		@brief		Answers with the given mixer/keyer's current matte color value being used.
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
-		@param[in]	outYCbCrValue		Receives the mixer's current matte color value.
+		@param[out]	outYCbCrValue		Receives the mixer's current matte color value.
 		@see		CNTV2Card::SetMixerMatteColor, \ref vidop-mixerkeyer, \ref widget_mixkey
 	**/
 	AJA_VIRTUAL bool	GetMixerMatteColor (const UWord inWhichMixer, YCbCr10BitPixel & outYCbCrValue);
@@ -1595,7 +1595,7 @@ public:
 		@brief		Answers if the given mixer/keyer's has RGB mode support.
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
-		@param[in]	outIsSupported		Receives true if the mixer has RGB mode support.
+		@param[out]	outIsSupported		Receives true if the mixer has RGB mode support.
 	**/
 	AJA_VIRTUAL bool	MixerHasRGBModeSupport (const UWord inWhichMixer, bool & outIsSupported);
 	
@@ -1611,7 +1611,7 @@ public:
 		@brief		Answers with the given mixer/keyer's current RGB Range.
 		@return		True if successful; otherwise false.
 		@param[in]	inWhichMixer		Specifies the mixer/keyer of interest as a zero-based index number.
-		@param[in]	outRGBRange		Receives the mixer's current matte color value.
+		@param[out]	outRGBRange		Receives the mixer's current matte color value.
 	**/
 	AJA_VIRTUAL bool	GetMixerRGBRange (const UWord inWhichMixer, NTV2MixerRGBRange & outRGBRange);
 	///@}
@@ -1679,7 +1679,7 @@ public:
 					Normally the ::NTV2AudioSystem operates in 24-bit mode.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem of interest.
-		@param[in]	outEnable		Receives 'true' if the Audio System is in 20 bit mode, or 'false'
+		@param[out]	outEnable		Receives 'true' if the Audio System is in 20 bit mode, or 'false'
 									if audio is in 24 bit mode.
 		@note		This function is relevant only for the \ref konaip or \ref ioip.
 	**/
@@ -1699,7 +1699,7 @@ public:
 	/**
 		@brief		Answers if ::NTV2AudioLoopBack mode is currently on or off for the given ::NTV2AudioSystem.
 		@return		True if successful; otherwise false.
-		@param[in]	outMode			Receives ::NTV2_AUDIO_LOOPBACK_ON if the Audio System's output embedder will pull audio samples from
+		@param[out]	outMode			Receives ::NTV2_AUDIO_LOOPBACK_ON if the Audio System's output embedder will pull audio samples from
 									the Audio System's input de-embedder;  otherwise receives ::NTV2_AUDIO_LOOPBACK_OFF if the output
 									embedder emits silence (zeroes).
 		@param[in]	inAudioSystem	Optionally specifies the Audio System on the device to be affected. Defaults to ::NTV2_AUDIOSYSTEM_1.
@@ -1840,7 +1840,7 @@ public:
 		@brief		Answers whether or not the playout side of the given ::NTV2AudioSystem is currently running.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem		Specifies the Audio System of interest.
-		@param[in]	outIsRunning		Receives 'true' if the Audio System's playout side is currently running;
+		@param[out]	outIsRunning		Receives 'true' if the Audio System's playout side is currently running;
 										otherwise receives 'false'.
 		@see		CNTV2Card::StartAudioOutput, CNTV2Card::StopAudioOutput, CNTV2Card::SetAudioOutputPause,
 					CNTV2Card::GetAudioOutputPause, \ref audioplayout
@@ -1866,7 +1866,7 @@ public:
 					is not advancing.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem		Specifies the Audio System of interest.
-		@param[in]	outIsPaused			Receives 'true' if audio output is paused, or 'false' if audio
+		@param[out]	outIsPaused			Receives 'true' if audio output is paused, or 'false' if audio
 										playout is running normally.
 		@see		CNTV2Card::SetAudioOutputPause, CNTV2Card::IsAudioOutputRunning, \ref audioplayout
 	**/
@@ -1905,7 +1905,7 @@ public:
 		@brief		Answers whether or not the capture side of the given ::NTV2AudioSystem is currently running.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem		Specifies the Audio System of interest.
-		@param[in]	outIsRunning		Receives 'true' if the Audio System's capture side is currently running;
+		@param[out]	outIsRunning		Receives 'true' if the Audio System's capture side is currently running;
 										otherwise receives 'false'.
 		@see		CNTV2Card::StartAudioInput, CNTV2Card::StopAudioInput, \ref audiocapture
 	**/
@@ -1929,7 +1929,7 @@ public:
 					device audio buffer memory.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem		Specifies the Audio System of interest.
-		@param[in]	outEnable			Receives 'true' if the Audio System will write captured samples into device
+		@param[out]	outEnable			Receives 'true' if the Audio System will write captured samples into device
 										audio buffer memory when running;  otherwise 'false' if the Audio System is
 										prohibited from writing captured samples into device audio buffer memory.
 		@see		CNTV2Card::SetAudioCaptureEnable, \ref audiocapture
@@ -1952,7 +1952,7 @@ public:
 					operating independently.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem		Specifies the Audio System of interest.
-		@param[in]	outEnable			A boolean variable that is to receive 'true' if the Audio System's
+		@param[out]	outEnable			A boolean variable that is to receive 'true' if the Audio System's
 										de-embedder and embedder both start from the audio base address,
 										or 'false' if the Audio System is operating normally.
 	**/
@@ -2190,7 +2190,7 @@ public:
 		@brief		Answers with the device's ::NTV2AudioSystem that is currently providing audio for the given SDI output's audio embedder.
 					(For 3G-capable SDI outputs, this is for Data Stream 1, or Link A.)
 		@param[in]	inSDIOutputConnector	Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
-		@param[in]	outAudioSystem			Receives the Audio System that's currently being used (e.g., ::NTV2_AUDIOSYSTEM_1).
+		@param[out]	outAudioSystem			Receives the Audio System that's currently being used (e.g., ::NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
 		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
 		@note		Use the ::NTV2DeviceGetNumVideoOutputs function to determine the number of SDI output jacks the device has.
@@ -2213,7 +2213,7 @@ public:
 		@brief		Answers with the device's Audio System that is currently providing audio for the given SDI output's audio
 					embedder for Data Stream 2 (Link B) for dual-link output.
 		@param[in]	inSDIOutputConnector	Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
-		@param[in]	outAudioSystem			Receives the Audio System that's currently being used (e.g., ::NTV2_AUDIOSYSTEM_1).
+		@param[out]	outAudioSystem			Receives the Audio System that's currently being used (e.g., ::NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
 		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
 		@see		CNTV2Card::SetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, \ref audioplayout
@@ -2305,8 +2305,8 @@ public:
 	/**
 		@brief		Answers with the current audio monitor source. The audio output monitor
 					is typically a pair of RCA jacks (white + red) and/or a headphone jack.
-		@param[in]	outAudioSystem		Receives the current audio system being used.
-		@param[in]	outChannelPair		Receives the current audio channel pair being used.
+		@param[out]	outAudioSystem		Receives the current audio system being used.
+		@param[out]	outChannelPair		Receives the current audio channel pair being used.
 		@return		True if successful; otherwise false.
 		@see		CNTV2Card::SetAudioOutputMonitorSource, \ref audioplayout
 	**/
@@ -2326,7 +2326,7 @@ public:
 		@brief		Enables or disables the audio output embedder for the given SDI output connector (specified as a channel number).
 					When the embedder is disabled, the device will not embed any SMPTE 299M (HD) or SMPTE 272M (SD) packets in the HANC in the SDI output stream.
 		@param[in]	inSDIOutputConnector	Specifies the SDI output of interest.
-		@param[out]	inEnable				Specify 'true' to enable the audio output embedder (normal operation).
+		@param[in]	inEnable				Specify 'true' to enable the audio output embedder (normal operation).
 											Specify 'false' to disable the embedder.
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::GetAudioOutputEmbedderState, \ref audioplayout
@@ -2384,7 +2384,7 @@ public:
 	/**
 		@brief		Answers whether or not the specified bidirectional XLR audio connectors are collectively acting as inputs or outputs.
 		@param[in]	inChannelQuad	Specifies the XLR audio connectors of interest.
-		@param[in]	outEnabled		Receives true if the XLR connectors are currently transmitting (output),
+		@param[out]	outEnabled		Receives true if the XLR connectors are currently transmitting (output),
 									or false if they're receiving (input).
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::SetAnalogAudioTransmitEnable
@@ -2394,7 +2394,7 @@ public:
 	/**
 		@brief		Answers with the current value of the 48kHz audio clock counter.
 		@return		True if successful; otherwise false.
-		@param[in]	outValue		Receives the number of 48kHz "ticks" that have transpired since the
+		@param[out]	outValue		Receives the number of 48kHz "ticks" that have transpired since the
 									device was powered up.
 		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem of interest. Currently ignored, but
 									may be used if a future NTV2 device has more than one audio clock.
@@ -2976,7 +2976,7 @@ public:
 	/**
 		@brief		Sets the RP188 DBB filter for the given SDI input.
 		@param[in]	inSDIInput		Specifies the SDI input of interest, expressed as an NTV2Channel.
-		@param[out]	inFilterValue	Specifies the new filter value to use. Only the lower 8 bits are used.
+		@param[in]	inFilterValue	Specifies the new filter value to use. Only the lower 8 bits are used.
 									Use 0x00 for LTC;  0x01 for VITC1;  0x02 for VITC2; 0xFF for unfiltered.
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::GetRP188SourceFilter, CNTV2Card::SetRP188BypassSource, \ref anctimecode
@@ -3046,7 +3046,7 @@ public:
 		@brief		For the given SDI output that's in RP188 bypass mode (E-E), answers with the SDI input
 					that's currently being used as a timecode source.
 		@param[in]	inSDIOutput		Specifies the SDI output of interest, expressed as an NTV2Channel.
-		@param[in]	outSDIInput		Receives the SDI input being used as a timecode source, expressed
+		@param[out]	outSDIInput		Receives the SDI input being used as a timecode source, expressed
 									as a zero-based index number.
 		@return		True if successful; otherwise false.
 	**/
@@ -4175,7 +4175,7 @@ public:
 	/**
 		@brief		Answers whether or not the given frame store is enabled.
 		@param[in]	inChannel	Specifies the frame store, as identified by an NTV2Channel value.
-		@param[in]	outEnabled	Specifies a boolean variable that is to receive the value "true" if
+		@param[out]	outEnabled	Specifies a boolean variable that is to receive the value "true" if
 								the frame store is enabled, or "false" if the frame store is disabled.
 		@return		True if successful;  otherwise false.
 	**/
@@ -4589,9 +4589,9 @@ public:
 
 	/**
 		@brief		Reads the LUT tables (as raw, unsigned 10-bit integers).
-		@param[in]	outRedLUT		Receives the Red LUT as a vector of unsigned 10-bit values (0-1023).
-		@param[in]	outGreenLUT		Receives the Green LUT as a vector of unsigned 10-bit values (0-1023).
-		@param[in]	outBlueLUT		Receives the Blue LUT as a vector of unsigned 10-bit values (0-1023).
+		@param[out]	outRedLUT		Receives the Red LUT as a vector of unsigned 10-bit values (0-1023).
+		@param[out]	outGreenLUT		Receives the Green LUT as a vector of unsigned 10-bit values (0-1023).
+		@param[out]	outBlueLUT		Receives the Blue LUT as a vector of unsigned 10-bit values (0-1023).
 		@return		True if successful;  otherwise false.
 		@note		Version 2 LUTs (see ::NTV2DeviceGetLUTVersion) require setup of ::kRegLUTV2Control (register 376)
 					for this function to work properly.
@@ -5299,7 +5299,7 @@ public:
 	///@{
 	/**
 		@brief						Answers with the current colorspace for the given HDMI input.
-		@param[in]	outValue		Receives the HDMI input's current ::NTV2LHIHDMIColorSpace value.
+		@param[out]	outValue		Receives the HDMI input's current ::NTV2LHIHDMIColorSpace value.
 		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
 		@return						True if successful;  otherwise false.
 	**/
@@ -5315,7 +5315,7 @@ public:
 
 	/**
 		@brief						Answers with the given HDMI input's current input range setting.
-		@param[in]	outValue		Receives the HDMI input's current ::NTV2HDMIRange value.
+		@param[out]	outValue		Receives the HDMI input's current ::NTV2HDMIRange value.
 		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
 		@return						True if successful;  otherwise false.
 	**/
@@ -5323,7 +5323,7 @@ public:
 
 	/**
 		@brief						Answers with the current number of audio channels being received on the given HDMI input.
-		@param[in]	outValue		Receives the current ::NTV2HDMIAudioChannels value.
+		@param[out]	outValue		Receives the current ::NTV2HDMIAudioChannels value.
 		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
 		@return						True if successful;  otherwise false.
 	**/
@@ -5339,7 +5339,7 @@ public:
 
 	/**
 		@brief						Answers with the given HDMI input's current color space setting.
-		@param[in]	outValue		Receives the HDMI input's current ::NTV2HDMIColorSpace value.
+		@param[out]	outValue		Receives the HDMI input's current ::NTV2HDMIColorSpace value.
 		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
 		@return						True if successful;  otherwise false.
 	**/
@@ -5347,7 +5347,7 @@ public:
 
 	/**
 		@brief						Answers with the given HDMI input's protocol.
-		@param[in]	outValue		Receives the HDMI input's current ::NTV2HDMIProtocol value.
+		@param[out]	outValue		Receives the HDMI input's current ::NTV2HDMIProtocol value.
 		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
 		@return						True if successful;  otherwise false.
 	**/
@@ -5355,7 +5355,7 @@ public:
 
 	/**
 		@brief						Answers if the given HDMI input is genlocked or not.
-		@param[in]	outIsLocked		Receives \c true if the HDMI input is locked;  otherwise \c false.
+		@param[out]	outIsLocked		Receives \c true if the HDMI input is locked;  otherwise \c false.
 		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
 		@return						True if successful;  otherwise false.
 	**/
@@ -5374,7 +5374,7 @@ public:
 
 	/**
 		@brief						Answers with the given HDMI input's current bit depth setting.
-		@param[in]	outValue		Receives the HDMI input's current ::NTV2HDMIBitDepth value.
+		@param[out]	outValue		Receives the HDMI input's current ::NTV2HDMIBitDepth value.
 		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
 		@return						True if successful;  otherwise false.
 	**/
@@ -5401,7 +5401,7 @@ public:
 
 	/**
 		@brief						Answers with the given HDMI input's video black/white range.
-		@param[in]	outValue		Receives the HDMI input's current ::NTV2HDMIRange value.
+		@param[out]	outValue		Receives the HDMI input's current ::NTV2HDMIRange value.
 		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
 		@return						True if successful;  otherwise false.
 	**/
@@ -5409,7 +5409,7 @@ public:
 
     /**
         @brief						Answers with the given HDMI input's video dynamic range and mastering information.
-        @param[in]	outRegValue     Receives the HDMI input's current HDRRegValues data.
+        @param[out]	outRegValue     Receives the HDMI input's current HDRRegValues data.
         @param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
         @return						True if successful;  false if no information present.
     **/
@@ -5417,7 +5417,7 @@ public:
 
     /**
         @brief						Answers with the given HDMI input's video dynamic range and mastering information.
-        @param[in]	outFloatValue	Receives the HDMI input's current HDRFloatValues data.
+        @param[out]	outFloatValue	Receives the HDMI input's current HDRFloatValues data.
         @param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
         @return						True if successful;  false if no information present.
     **/
@@ -5988,7 +5988,7 @@ public:
 		@brief		Answers whether or not the specified SDI connector is currently acting as a transmitter
 					(i.e. an output).
 		@param[in]	inChannel		Specifies the SDI connector as an ::NTV2Channel (a zero-based index number).
-		@param[in]	outEnabled		Receives true if the SDI channel connector is currently a transmitter (output),
+		@param[out]	outEnabled		Receives true if the SDI channel connector is currently a transmitter (output),
 									or false if it's acting as an input.
 		@return		True if successful; otherwise false.
 		@see		::NTV2DeviceHasBiDirectionalSDI, \ref devicesignalinputsoutputs
@@ -6300,7 +6300,7 @@ public:
 					If enabled, each device channel can accommodate a different video format (subject to certain limitations).
 					If disabled, all device channels have the same video format.
 		@return		True if successful; otherwise false.
-		@param[in]	outIsEnabled	Receives true if the device is currently in multi-format mode,
+		@param[out]	outIsEnabled	Receives true if the device is currently in multi-format mode,
 									or false if it's in uni-format mode.
 		@see		::NTV2DeviceCanDoMultiFormat, \ref deviceclockingandsync
 	**/
@@ -6337,7 +6337,7 @@ public:
 		@param[in]	inSerialPort	Specifies the RS422 serial port of interest, expressed as an ::NTV2Channel
 									(a zero-based index number). Call ::NTV2DeviceGetNumSerialPorts to determine
 									the number of available serial ports.
-		@param[in]	outParity		Receives the serial port's current ::NTV2_RS422_PARITY setting.
+		@param[out]	outParity		Receives the serial port's current ::NTV2_RS422_PARITY setting.
 		@see		CNTV2Card::SetRS422Parity, CNTV2Card::GetRS422BaudRate, ::NTV2DeviceGetNumSerialPorts,
 					::NTV2DeviceCanDoProgrammableRS422
 	**/

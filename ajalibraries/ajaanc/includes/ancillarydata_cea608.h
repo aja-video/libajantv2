@@ -63,9 +63,9 @@ public:
 
 	/**
 		@brief		Answers with the CEA608 payload bytes.
-		@param[in]	outByte1		Receives the first byte of the pair (includes parity).
-		@param[in]	outByte2		Receives the second byte of the pair (includes parity).
-		@param[in]	outIsValid		Receives 'true' if returned data is valid.
+		@param[out]	outByte1		Receives the first byte of the pair (includes parity).
+		@param[out]	outByte2		Receives the second byte of the pair (includes parity).
+		@param[out]	outIsValid		Receives 'true' if returned data is valid.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus				GetCEA608Bytes (uint8_t & outByte1, uint8_t & outByte2, bool & outIsValid) const;
@@ -82,9 +82,9 @@ public:
 
 	/**
 		@brief		Answers with the CEA608 payload characters.
-		@param[in]	outChar1	Receives the first character of the pair (after stripping odd parity).
-		@param[in]	outChar2	Receives the second character of the pair (after stripping odd parity).
-		@param[in]	outIsValid	Receives 'true' if the returned characters are valid;  otherwise 'false'.
+		@param[out]	outChar1	Receives the first character of the pair (after stripping odd parity).
+		@param[out]	outChar2	Receives the second character of the pair (after stripping odd parity).
+		@param[out]	outIsValid	Receives 'true' if the returned characters are valid;  otherwise 'false'.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus				GetCEA608Characters (uint8_t & outChar1, uint8_t & outChar2, bool & outIsValid) const;
