@@ -37,8 +37,8 @@ class NTV2BurnBoardToBoard
 		/**
 			@brief	Constructs me using the given configuration settings.
 			@note	I'm not completely initialized and ready for use until after my Init method has been called.
-			@param[in]	inDeviceSpecifier	Specifies the AJA device to use for Input. Defaults to "0", the first device found.
-			@param[in]	outDeviceSpecifier	Specifies the AJA device to use for Output. Defaults to "1", the first device found.
+			@param[in]	inInputDevice	Specifies the AJA device to use for Input. Defaults to "0", the first device found.
+			@param[in]	inOutputDevice	Specifies the AJA device to use for Output. Defaults to "1", the first device found.
 			@param[in]	inWithAudio			If true (the default), include audio in the output signal;  otherwise, omit it.
 			@param[in]	inPixelFormat		Specifies the pixel format to use for the device's frame buffers. Defaults to 8-bit YUV.
 			@param[in]	inInputSource		Specifies which input to capture from. Defaults to SDI1.
@@ -47,15 +47,15 @@ class NTV2BurnBoardToBoard
 			@param[in]	inTCSource			Specifies the timecode source. Defaults to whatever is found embedded in the input video.
 			@param[in]	inWithAnc			If true, capture & play ancillary data. Defaults to false.
 		**/
-							NTV2BurnBoardToBoard (const std::string &			inDeviceSpecifier	= "0",
-										const std::string &			outDeviceSpecifier = "1",
-										const bool					inWithAudio = true,
-										const bool					disableBurn = true,
-										const NTV2FrameBufferFormat	inPixelFormat = NTV2_FBF_8BIT_YCBCR,
-										const NTV2InputSource		inInputSource		= NTV2_INPUTSOURCE_SDI1,
-										const bool					inMultiFormat		= false,
-										const NTV2TCIndex			inTCSource			= NTV2_TCINDEX_SDI1,
-										const bool					inWithAnc			= false);
+							NTV2BurnBoardToBoard (	const std::string &			inInputDevice	= "0",
+													const std::string &			inOutputDevice	= "1",
+													const bool					inWithAudio		= true,
+													const bool					disableBurn		= true,
+													const NTV2FrameBufferFormat	inPixelFormat	= NTV2_FBF_8BIT_YCBCR,
+													const NTV2InputSource		inInputSource	= NTV2_INPUTSOURCE_SDI1,
+													const bool					inMultiFormat	= false,
+													const NTV2TCIndex			inTCSource		= NTV2_TCINDEX_SDI1,
+													const bool					inWithAnc		= false);
 		virtual				~NTV2BurnBoardToBoard ();
 
 		/**
@@ -81,10 +81,10 @@ class NTV2BurnBoardToBoard
 			@param[out]	outPlayoutFramesDropped	Receives the number of dropped playout frames.
 			@param[out]	outCaptureBufferLevel	Receives the capture driver buffer level.
 			@param[out]	outPlayoutBufferLevel	Receives the playout driver buffer level.
-			@param[out]	inputVideoFormat	    Receives the inputVideoFormat .
+			@param[out]	outInputVideoFormat	    Receives the inputVideoFormat .
 **/
 		virtual void			GetStatus (ULWord & outFramesProcessed, ULWord & outCaptureFramesDropped, ULWord & outPlayoutFramesDropped,
-			ULWord & outCaptureBufferLevel, ULWord & outPlayoutBufferLevel,NTV2VideoFormat &inputVideoFormat);
+											ULWord & outCaptureBufferLevel, ULWord & outPlayoutBufferLevel, NTV2VideoFormat & outInputVideoFormat);
 
 
 	//	Protected Instance Methods

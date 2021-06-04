@@ -72,10 +72,10 @@ class NTV2Burn4KQuadrant
 
 		/**
 			@brief	Provides status information about my input (capture) and output (playout) processes.
-			@param[out]	inputStatus		Receives status information about my input (capture) process.
-			@param[out]	outputStatus	Receives status information about my output (playout) process.
+			@param[out]	outInputStatus		Receives status information about my input (capture) process.
+			@param[out]	outOutputStatus		Receives status information about my output (playout) process.
 		**/
-		virtual void		GetACStatus (AUTOCIRCULATE_STATUS & inputStatus, AUTOCIRCULATE_STATUS & outputStatus);
+		virtual void		GetACStatus (AUTOCIRCULATE_STATUS & outInputStatus, AUTOCIRCULATE_STATUS & outOutputStatus);
 
 
 	//	Protected Instance Methods
