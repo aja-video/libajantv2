@@ -2088,7 +2088,7 @@ typedef enum
 /**
 	@brief	This enum value determines/states if an audio output embedder will embed silence (zeroes)
 			or de-embedded audio from an SDI input.
-	@see	CNTV2Card::SetAudioSystemInputSource, CNTV2Card::GetAudioSystemInputSource, \ref audioplayout
+	@see	CNTV2Card::SetAudioLoopBack, CNTV2Card::GetAudioLoopBack, CNTV2Card::SetAudioSystemInputSource, CNTV2Card::GetAudioSystemInputSource, \ref audioplayout
 **/
 typedef enum
 {
