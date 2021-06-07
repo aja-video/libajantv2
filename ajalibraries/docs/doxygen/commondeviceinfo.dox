@@ -970,48 +970,60 @@
 	<hr size="50px">
 	@section	audiooperation		Audio System Operation
 
-	<b>Audio Systems</b>
-	-	NTV2-compatible devices have a minimum of one <b>Audio System</b> (sometimes referred to as an <b>Audio Engine</b>).
-	-	An <b>Audio System</b> makes it possible to stream audio, whether in <b>Capture</b> (Record) mode,
-		or <b>Playout</b> mode, or both.
-	-	Call ::NTV2DeviceGetNumAudioSystems to determine the number of <b>Audio System</b>s on a device.
-
 	<b>Firmware Implementation</b>
-	-	An <b>Audio System</b> is implemented in FPGA firmware using several hardware registers,
-		which together perform the following functions:
-		-	If it has any SDI, HDMI, analog, or AES inputs (see ::NTV2DeviceCanDoCapture):
-			-	It continually de-embeds 20/24-bit AES audio samples. For SDI inputs, these will come from SMPTE 272M/299M HANC packets
-				detected in the SDI input stream.
-			-	If the <b>Capture</b> aspect of the <b>Audio System</b> is <i>Running</i>, it will write the de-embedded
-				audio samples into its input audio buffer in device SDRAM.
-			-	The audio samples can always be piped through a FIFO to source an <b>Audio System</b>’s output audio
-				embedder for “loopback” play-through.
-		-	If it has any SDI, HDMI, analog or AES outputs (see ::NTV2DeviceCanDoPlayback):
-			-	Unless its embedder is disabled, it will continually embed 20/24-bit AES audio samples into SMPTE 272M/292M
-				HANC packets into its SDI output stream.
-			-	When its <b>Playout</b> aspect is <i>Running</i>, it will read from its output audio buffer in device
-				SDRAM the audio samples to be embedded.
-			-	When its <b>Playout</b> side is not running…
-				-	If configured for “loopback” play-through, it obtains audio samples from an
-					<b>Audio System</b>’s input audio de-embedder.
-				-	Otherwise, it will embed silence (audio packets that contain all-zero sample values).
+	-	An <b>Audio System</b> consists of:
+		-	A Record engine that operates the <b>Capture</b> aspect of the <b>Audio System</b> (if ::NTV2DeviceCanDoCapture returns \c true):
+			-	when <i>Running</i>, continually writes audio samples into its 4MB input audio buffer region in device SDRAM, wrapping as necessary.
+			-	obtains audio samples from a designated source FIFO (see CNTV2Card::SetAudioSystemInputSource).
+		-	A Playback engine that operates the <b>Playout</b> aspect of the <b>Audio System</b> (if ::NTV2DeviceCanDoPlayback returns \c true):
+			-	when <i>Running</i>, continually reads audio samples from its 4MB output audio buffer region in device SDRAM, wrapping as necessary.
+			-	can drive destination/output/sink FIFO(s);
+			-	always sends silence (zeroes) when <i>Stopped</i>.
+		-	Several firmware registers are used to monitor and control each <b>Audio System</b>.
+	-	Audio sources (inputs) and destinations (outputs) have FIFOs associated with them that pipe/stream their audio data to/from other sinks/sources.
+		-	A source FIFO can drive an <b>Audio System</b>’s Record engine (for writing into device SDRAM),
+			or it can feed another audio destination’s FIFO.
+		-	A destination (sink) FIFO can pull audio from an <b>Audio System</b>’s Playout engine (reading from device SDRAM),
+			or it can pull from another audio source’s FIFO.
+		-	Depending on the transport chipset, they accommodate 2, 4, 8 or 16 channels of audio. Some are configurable (e.g. 2 or 8 channel HDMI audio).
+		-	<b>SDI</b>:
+			-	SDI inputs each have an <b>audio de-embedder</b> to decode incoming SMPTE 272M/299M HANC packets found in the input SDI stream,
+				pushing audio into its (source) FIFO.
+			-	SDI outputs each have an <b>audio embedder</b> to encode and insert SMPTE 272M/299M HANC packets into the SDI stream,
+				pulling audio from its (sink) FIFO.
+				-	The SDI <b>audio embedder</b> can be turned off, if desired.
+				-	“Loopback” audio play-through is implemented by tying an output FIFO to an input FIFO (see CNTV2Card::SetAudioLoopBack).
+		-	<b>HDMI</b>, <b>AES/EBU</b> and <b>Analog</b> audio are handled similarly.
+			-	Inputs <i>receive</i> audio, and <i>push</i> the samples into their associated source FIFO(s).
+			-	Outputs <i>transmit</i> audio, <i>pull</i>ing from their associated sink FIFO(s).
+		-	There are bits in certain control registers that control where a destination/sink FIFO pulls its audio from.
+
+	@note	NTV2 devices with custom ancillary data extractors/inserters (see ::NTV2DeviceCanDoCustomAnc) make it possible to capture
+			(and on some devices with special firmware, playback) SDI audio without using an <b>Audio System</b>, instead using the
+			\ref anccapture or \ref ancplayout capabilities. Also note the \ref ancillarydata facility won’t work for HDMI, AES/EBU
+			or Analog transports — the <b>Audio System</b> facility must be used.
+
+	<b>Audio Systems</b>
+	-	NTV2-compatible devices have a minimum of one <b>Audio System</b> (sometimes referred to in the past as an <b>Audio Engine</b>).
+	-	An <b>Audio System</b> can stream audio, whether in <b>Capture</b> (Record) mode, or <b>Playout</b> mode, or both.
+	-	Call ::NTV2DeviceGetNumAudioSystems to determine the number of <b>Audio System</b>s on a device.
 
 	<b>Audio Channels</b>
 	-	Each <b>Audio System</b> can accommodate at least 8 channels of audio.
 	-	Call ::NTV2DeviceGetMaxAudioChannels to determine the maximum number of audio channels that a device’s
-		<b>Audio Systems</b> can handle.
+		<b>Audio System</b>s can handle.
 	-	Call CNTV2Card::GetNumberAudioChannels to determine how many audio channels a device <b>Audio System</b>
 		is currently configured for.
 		-	Modern AJA devices will accommodate up to 16 channels.
-		-	Very old AJA devices defaulted to 6 channels at power-up — these should be
-			configured to use 8 channels.
+		-	Very old AJA devices defaulted to 6 channels at power-up — these should be configured to use 8 channels.
 	-	Call CNTV2Card::SetNumberAudioChannels to change the number of audio channels a device <b>Audio System</b>
 		is configured to use.
 		@note	AJA recommends configuring the <b>Audio System</b> to use the maximum number of audio channels the
 				device is capable of.
 	-	<b>HDMI Audio</b> — The HDMI standard supports a minimum baseline of 2 audio channels up to a maximum of 8.
 	-	<b>AES/EBU Audio</b> — The AES/EBU connectors (on cables or breakout boxes) support 8 audio channels.
-	-	<b>Analog Audio</b> — Analog audio supports 2 audio channels.
+	-	<b>Analog Audio</b> — Analog audio connectors (on cables or breakout boxes) support 4 or 8 audio channels.
+	-	<b>Monitor Audio</b> — Audio monitoring (RCA and/or headphone jacks) supports 2 audio channels.
 	-	The firmware automatically ensures that excess unused audio channels will capture silence or be ignored for
 		playout. For example, an <b>Audio System</b> that’s been configured for 16 channels and is recording 2 HDMI
 		audio channels will carry the HDMI audio in channels 1 and 2, and contain silence in channels 3 thru 16.
