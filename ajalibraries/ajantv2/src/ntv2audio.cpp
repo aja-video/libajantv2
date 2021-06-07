@@ -1744,29 +1744,32 @@ bool CNTV2Card::SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, co
 	return WriteRegister (gAudioSystemToSrcSelectRegNum[inAudioSystem], inEraseModeEnabled ? 1 : 0, kRegMaskAudioAutoErase, kRegShiftAudioAutoErase);
 }
 
-bool CNTV2Card::SetAnalogAudioTransmitEnable (const NTV2Audio4ChannelSelect inChannelQuad, const bool inEnable)
+bool CNTV2Card::SetAnalogAudioTransmitEnable (const NTV2Audio4ChannelSelect inChannelQuad, const bool inXmitEnable)
 {
 	//	Reg 108 (kRegGlobalControl3) has two bits for controlling XLR direction:  BIT(0) for XLRs 1-4,  BIT(1) for XLRs 5-8
 	if (!NTV2DeviceHasBiDirectionalAnalogAudio(_boardID))
 		return false;	//	unsupported
 	if (inChannelQuad > NTV2_AudioChannel5_8)
 		return false;	//	NTV2_AudioChannel1_4 & NTV2_AudioChannel5_8 only
-	return WriteRegister (kRegGlobalControl3,  inEnable ? 1 : 0,
+	return WriteRegister (kRegGlobalControl3,  inXmitEnable ? 0 : 1,	//	0 == xmit		1 == recv
 							inChannelQuad == NTV2_AudioChannel1_4  ?  kRegMaskAnalogIOControl_14  :  kRegMaskAnalogIOControl_58,
 							ULWord(inChannelQuad));
 }
 
-bool CNTV2Card::GetAnalogAudioTransmitEnable (const NTV2Audio4ChannelSelect inChannelQuad, bool & outEnabled)
+bool CNTV2Card::GetAnalogAudioTransmitEnable (const NTV2Audio4ChannelSelect inChannelQuad, bool & outXmitEnabled)
 {
-	outEnabled = false;
+	outXmitEnabled = false;
 	//	Reg 108 (kRegGlobalControl3) has two bits for controlling XLR direction:  BIT(0) for XLRs 1-4,  BIT(1) for XLRs 5-8
 	if (!NTV2DeviceHasBiDirectionalAnalogAudio(_boardID))
 		return false;	//	unsupported
 	if (inChannelQuad > NTV2_AudioChannel5_8)
 		return false;	//	NTV2_AudioChannel1_4 & NTV2_AudioChannel5_8 only
-	return CNTV2DriverInterface::ReadRegister (kRegGlobalControl3,  outEnabled,
-						inChannelQuad == NTV2_AudioChannel1_4  ?  kRegMaskAnalogIOControl_14  :  kRegMaskAnalogIOControl_58,
-						ULWord(inChannelQuad));
+	if (!CNTV2DriverInterface::ReadRegister (kRegGlobalControl3,  outXmitEnabled,		//	false == xmit		true == recv
+											inChannelQuad == NTV2_AudioChannel1_4  ?  kRegMaskAnalogIOControl_14  :  kRegMaskAnalogIOControl_58,
+											ULWord(inChannelQuad)))
+		return false;
+	outXmitEnabled = !outXmitEnabled;	//	Flip the sense, we want xmit == true,  recv == false
+	return true;
 }
 
 #if !defined(NTV2_DEPRECATE_16_1)
@@ -1780,16 +1783,16 @@ bool CNTV2Card::GetAnalogAudioTransmitEnable (const NTV2Audio4ChannelSelect inCh
 
 	bool CNTV2Card::GetAnalogAudioIOConfiguration (NTV2AnalogAudioIO & outConfig)
 	{
-		bool xlr14(false), xlr58(false);
-		if (!GetAnalogAudioTransmitEnable (NTV2_AudioChannel1_4, xlr14))
+		bool xlr14Xmit(false), xlr58Xmit(false);
+		if (!GetAnalogAudioTransmitEnable (NTV2_AudioChannel1_4, xlr14Xmit))
 			return false;
-		if (!GetAnalogAudioTransmitEnable (NTV2_AudioChannel5_8, xlr58))
+		if (!GetAnalogAudioTransmitEnable (NTV2_AudioChannel5_8, xlr58Xmit))
 			return false;
-		if (xlr14 && xlr58)
+		if (xlr14Xmit && xlr58Xmit)
 			outConfig = NTV2_AnalogAudioIO_8Out;
-		else if (xlr14 && !xlr58)
+		else if (xlr14Xmit && !xlr58Xmit)
 			outConfig = NTV2_AnalogAudioIO_4Out_4In;
-		else if (!xlr14 && xlr58)
+		else if (!xlr14Xmit && xlr58Xmit)
 			outConfig = NTV2_AnalogAudioIO_4In_4Out;
 		else
 			outConfig = NTV2_AnalogAudioIO_8In;
