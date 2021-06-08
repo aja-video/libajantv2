@@ -1366,7 +1366,7 @@ typedef enum
 	kRegMaskRP188ModeCh7		= BIT(26),
 	kRegMaskRP188ModeCh8		= BIT(27),
 
-	// Global Control 3
+	// kRegGlobalControl3	(reg 108)
 	kRegMaskAnalogIOControl			= BIT(1) + BIT(0),
 	kRegMaskAnalogIOControl_14	= BIT(0),
 	kRegMaskAnalogIOControl_58	= BIT(1),
@@ -2565,7 +2565,7 @@ typedef enum
 	kRegShiftRP188ModeCh7 = 26,
 	kRegShiftRP188ModeCh8 = 27,
 
-	// Global Control 3
+	// kRegGlobalControl3	(reg 108)
 	kRegShiftAnalogIOControl = 0,
 	kRegShiftQuadQuadMode = 2,
 	kRegShiftQuadQuadMode2 = 3,

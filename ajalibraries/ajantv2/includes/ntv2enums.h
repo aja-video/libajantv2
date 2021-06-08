@@ -81,6 +81,7 @@ typedef enum
 	DEVICE_ID_IOEXPRESS					= 0x10280300,	///< @brief	See \ref ioexpress
 	DEVICE_ID_IOIP_2022					= 0x10710850,	///< @brief	See \ref ioip
 	DEVICE_ID_IOIP_2110					= 0x10710851,	///< @brief	See \ref ioip
+	DEVICE_ID_IOX3						= 0x10920600,	///< @brief	See \ref iox3
 	DEVICE_ID_IOXT						= 0x10378800,	///< @brief	See \ref ioxt
 	DEVICE_ID_KONA1						= 0x10756600,	///< @brief	See \ref kona1
 	DEVICE_ID_KONA3G					= 0x10294700,	///< @brief	See \ref kona3gufc
@@ -117,7 +118,6 @@ typedef enum
 	DEVICE_ID_KONALHIDVI				= 0x10266401,	///< @brief	See \ref konalhi
 	DEVICE_ID_TTAP						= 0x10416000,	///< @brief	See \ref ttap
 	DEVICE_ID_TTAP_PRO					= 0x10879000,	///< @brief See \ref ttappro
-	DEVICE_ID_IOX3						= 0x10920600,	///< @brief	See \ref iox3
 #if !defined (NTV2_DEPRECATE_12_6)
 	DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		//	Will deprecate in 12.6
 #endif	//	NTV2_DEPRECATE_12_6

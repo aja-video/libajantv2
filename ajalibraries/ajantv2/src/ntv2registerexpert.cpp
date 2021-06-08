@@ -1811,9 +1811,16 @@ private:
 			(void) inRegNum;
 			(void) inDeviceID;
 			ostringstream	oss;
-		    oss	<< "Bidirectional analog 1-4 input: "	<< SetNotset(inRegValue & kRegMaskAnalogIOControl_14 )			<< endl
-				<< "Quad Quad Mode Channel 1-4: "		<< SetNotset(inRegValue & kRegMaskQuadQuadMode)					<< endl
-				<< "Quad Quad Squares Mode 1-4: "		<< SetNotset(inRegValue & kRegMaskQuadQuadSquaresMode)			<< endl;
+			oss	<< "Bidirectional analog audio 1-4: "	<< (inRegValue & kRegMaskAnalogIOControl_14 ? "Receive" : "Transmit")	<< endl
+				<< "Bidirectional analog audio 5-8: "	<< (inRegValue & kRegMaskAnalogIOControl_58 ? "Receive" : "Transmit")	<< endl
+				<< "VU Meter Audio Select: "			<< (inRegValue & kRegMaskVUMeterSelect ? "AudMixer" : "AudSys1")		<< endl
+				<< "Quad Quad Mode FrameStores 1-2: "	<< EnabDisab(inRegValue & kRegMaskQuadQuadMode)							<< endl
+				<< "Quad Quad Mode FrameStores 3-4: "	<< EnabDisab(inRegValue & kRegMaskQuadQuadMode2)						<< endl
+				<< "Quad Quad Squares Mode 1-4: "		<< EnabDisab(inRegValue & kRegMaskQuadQuadSquaresMode)					<< endl
+				<< "Frame Pulse Enable: "				<< EnabDisab(inRegValue & kRegMaskFramePulseEnable);
+			if (inRegValue & kRegMaskFramePulseEnable)
+				oss	<< endl
+					<< "Frame Pulse Ref Src: "	<< DEC((inRegValue & kRegMaskFramePulseRefSelect) >> kRegShiftFramePulseRefSelect);
 			return oss.str();
 		}
 		virtual	~DecodeGlobalControl3()	{}
