@@ -697,7 +697,7 @@ public:
 
 
 	/**
-		@brief		Unlocks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
+		@brief		Unlocks the given host buffer that was previously locked using CNTV2Card::DMABufferLock.
 		@param[in]	inBuffer	Specifies the host buffer to unlock.
 		@return		True if successful; otherwise false.
 		@see		CNTV2Card::DMABufferLock, CNTV2Card::DMABufferUnlockAll, \ref vidop-fblocking
@@ -705,9 +705,9 @@ public:
 	AJA_VIRTUAL bool	DMABufferUnlock (const NTV2_POINTER & inBuffer);
 
 	/**
-		@brief		Unlocks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
-		@param[in]	pInBuffer		Specifies the starting address of the host buffer to unlock.
-		@param[in]	inByteCount		Specifies the total length of the host buffer.
+		@brief		Unlocks the given host buffer that was previously locked using CNTV2Card::DMABufferLock.
+		@param[in]	pInBuffer		Specifies the starting address of the previously locked host buffer.
+		@param[in]	inByteCount		Specifies the total length of the previously locked host buffer.
 		@return		True if successful; otherwise false.
 		@see		CNTV2Card::DMABufferLock, CNTV2Card::DMABufferUnlockAll, \ref vidop-fblocking
 	**/
@@ -717,17 +717,17 @@ public:
 	}
 
 	/**
-		@brief		Unlocks all buffers used for DMA transfers.
+		@brief		Unlocks all previously-locked buffers used for DMA transfers.
 		@return		True if successful; otherwise false.
 		@see		CNTV2Card::DMABufferLock, CNTV2Card::DMABufferUnlock, \ref vidop-fblocking
 	**/
 	AJA_VIRTUAL bool	DMABufferUnlockAll ();
 
 	/**
-		@brief		Control automatic buffer locking.
-		@param[in]	inEnable		Specify auto locking state.
-        @param[in]	inMap			Also try to lock the segment map.
-        @param[in]	inMaxLockSize	Specify maximum number of locked bytes.
+		@brief		Enables or disables automatic buffer locking.
+		@param[in]	inEnable		Specify true to enable automatic buffer locking;  otherwise false to disable it.
+        @param[in]	inMap			If enabling automatic locking, also try to lock the segment map.
+        @param[in]	inMaxLockSize	Specify the maximum number of locked bytes.
 		@return		True if successful; otherwise false.
 		@see		CNTV2Card::DMABufferLock, CNTV2Card::DMABufferUnlock, CNTV2Card::DMABufferUnlockAll, \ref vidop-fblocking
 	**/
