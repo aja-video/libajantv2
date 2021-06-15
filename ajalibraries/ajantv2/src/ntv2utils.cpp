@@ -7600,6 +7600,47 @@ string NTV2AncDataRgnToStr (const NTV2AncDataRgn inValue, const bool inCompactDi
 	return "";
 }
 
+string NTV2UpConvertModeToString (const NTV2UpConvertMode inValue, const bool inCompact)
+{
+	switch(inValue)
+	{
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Anamorphic",						NTV2_UpConvertAnamorphic);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "4" "\xC3\x97" "3 Pillar Box",	NTV2_UpConvertPillarbox4x3);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Zoomed 14" "\xC3\x97" "9",		NTV2_UpConvertZoom14x9);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Zoomed Letterbox",				NTV2_UpConvertZoomLetterbox);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Zoomed Wide",					NTV2_UpConvertZoomWide);
+		case NTV2_MAX_NUM_UpConvertModes:			break;  //special case
+	}
+	return "";
+}
+
+string NTV2DownConvertModeToString (const NTV2DownConvertMode inValue, const bool inCompact)
+{
+	switch(inValue)
+	{
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Letterbox",						NTV2_DownConvertLetterbox);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Cropped",						NTV2_DownConvertCrop);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Anamorphic",						NTV2_DownConvertAnamorphic);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Zoomed 14" "\xC3\x97" "9",		NTV2_DownConvert14x9);
+		case NTV2_MAX_NUM_DownConvertModes:			break;  //special case
+	}
+	return "";
+}
+
+string NTV2IsoConvertModeToString (const NTV2IsoConvertMode inValue, const bool inCompact)
+{
+	switch(inValue)
+	{
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Letterbox",						NTV2_IsoLetterBox);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Horiz Cropped",					NTV2_IsoHCrop);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Vert Cropped",					NTV2_IsoVCrop);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Pillar Box",						NTV2_IsoPillarBox);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "14" "\xC3\x97" "9",				NTV2_Iso14x9);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Pass-Through",					NTV2_IsoPassThrough);
+		case NTV2_MAX_NUM_IsoConvertModes:			break;  //special case
+	}
+	return "";
+}
 
 string NTV2EmbeddedAudioInputToString (const NTV2EmbeddedAudioInput inValue,  const bool inCompactDisplay)
 {

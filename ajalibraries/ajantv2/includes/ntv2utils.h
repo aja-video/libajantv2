@@ -1017,53 +1017,55 @@ typedef NTV2InputCrosspointIDs::const_iterator		NTV2InputCrosspointIDsConstIter;
 AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2OutputCrosspointIDs & inList);	///<	@brief	Handy ostream writer for NTV2OutputCrosspointIDs.
 
 
-//	These are new with 12.0 SDK...
-AJAExport std::string NTV2DeviceIDToString				(const NTV2DeviceID				inValue,	const bool inForRetailDisplay = false);
-AJAExport std::string NTV2VideoFormatToString			(const NTV2VideoFormat			inValue,	const bool inUseFrameRate = false);
-AJAExport std::string NTV2StandardToString				(const NTV2Standard				inValue,	const bool inForRetailDisplay = false);
-AJAExport std::string NTV2FrameBufferFormatToString		(const NTV2FrameBufferFormat	inValue,	const bool inForRetailDisplay = false);
-AJAExport std::string NTV2M31VideoPresetToString		(const M31VideoPreset			inValue,	const bool inForRetailDisplay = false);
-AJAExport std::string NTV2FrameGeometryToString			(const NTV2FrameGeometry		inValue,	const bool inForRetailDisplay = false);
-AJAExport std::string NTV2FrameRateToString				(const NTV2FrameRate			inValue,	const bool inForRetailDisplay = false);
-AJAExport std::string NTV2InputSourceToString			(const NTV2InputSource			inValue,	const bool inForRetailDisplay = false);
-AJAExport std::string NTV2OutputDestinationToString		(const NTV2OutputDestination	inValue,	const bool inForRetailDisplay = false);
-AJAExport std::string NTV2ReferenceSourceToString		(const NTV2ReferenceSource		inValue,	const bool inForRetailDisplay = false);
-AJAExport std::string NTV2RegisterWriteModeToString		(const NTV2RegisterWriteMode	inValue,	const bool inForRetailDisplay = false);
+AJAExport std::string NTV2DeviceIDToString				(const NTV2DeviceID				inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2VideoFormatToString			(const NTV2VideoFormat			inValue,	const bool inUseFrameRate = false);	//	New in SDK 12.0
+AJAExport std::string NTV2StandardToString				(const NTV2Standard				inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2FrameBufferFormatToString		(const NTV2FrameBufferFormat	inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2M31VideoPresetToString		(const M31VideoPreset			inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2FrameGeometryToString			(const NTV2FrameGeometry		inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2FrameRateToString				(const NTV2FrameRate			inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2InputSourceToString			(const NTV2InputSource			inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2OutputDestinationToString		(const NTV2OutputDestination	inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2ReferenceSourceToString		(const NTV2ReferenceSource		inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2RegisterWriteModeToString		(const NTV2RegisterWriteMode	inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
 AJAExport std::string NTV2InterruptEnumToString			(const INTERRUPT_ENUMS			inInterruptEnumValue);
 AJAExport std::string NTV2IpErrorEnumToString           (const NTV2IpError              inIpErrorEnumValue);
-AJAExport std::string NTV2ChannelToString				(const NTV2Channel				inValue,	const bool inForRetailDisplay = false);
-AJAExport std::string NTV2AudioSystemToString			(const NTV2AudioSystem			inValue,	const bool inCompactDisplay = false);
-AJAExport std::string NTV2AudioRateToString				(const NTV2AudioRate			inValue,	const bool inForRetailDisplay = false);
-AJAExport std::string NTV2AudioBufferSizeToString		(const NTV2AudioBufferSize		inValue,	const bool inForRetailDisplay = false);
-AJAExport std::string NTV2AudioLoopBackToString			(const NTV2AudioLoopBack		inValue,	const bool inForRetailDisplay = false);
-AJAExport std::string NTV2EmbeddedAudioClockToString	(const NTV2EmbeddedAudioClock	inValue,	const bool inForRetailDisplay = false);
+AJAExport std::string NTV2ChannelToString				(const NTV2Channel				inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2AudioSystemToString			(const NTV2AudioSystem			inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2AudioRateToString				(const NTV2AudioRate			inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2AudioBufferSizeToString		(const NTV2AudioBufferSize		inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2AudioLoopBackToString			(const NTV2AudioLoopBack		inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2EmbeddedAudioClockToString	(const NTV2EmbeddedAudioClock	inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
 AJAExport std::string NTV2GetBitfileName				(const NTV2DeviceID				inValue,	const bool useOemNameOnWindows = false);
 AJAExport bool        NTV2IsCompatibleBitfileName		(const std::string & inBitfileName, const NTV2DeviceID inDeviceID);
 AJAExport NTV2DeviceID NTV2GetDeviceIDFromBitfileName	(const std::string & inBitfileName);
 AJAExport std::string NTV2GetFirmwareFolderPath			(void);
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const RP188_STRUCT & inObj);
 AJAExport std::string NTV2GetVersionString				(const bool inDetailed = false);
-AJAExport std::string NTV2RegisterNumberToString		(const NTV2RegisterNumber		inValue);
-AJAExport std::string AutoCircVidProcModeToString		(const AutoCircVidProcMode		inValue,	const bool inCompactDisplay = false);
-AJAExport std::string NTV2ColorCorrectionModeToString	(const NTV2ColorCorrectionMode	inValue,	const bool inCompactDisplay = false);
-AJAExport std::string NTV2InputCrosspointIDToString		(const NTV2InputCrosspointID	inValue,	const bool inForRetailDisplay = false);
-AJAExport std::string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID	inValue,	const bool inForRetailDisplay = false);
-AJAExport std::string NTV2WidgetIDToString				(const NTV2WidgetID				inValue,	const bool inCompactDisplay = false);
-AJAExport std::string NTV2WidgetTypeToString			(const NTV2WidgetType			inValue,	const bool inCompactDisplay = false);
-AJAExport std::string NTV2TaskModeToString				(const NTV2EveryFrameTaskMode	inValue,	const bool inCompactDisplay = false);
-AJAExport std::string NTV2RegNumSetToString				(const NTV2RegisterNumberSet &	inValue);
-AJAExport std::string NTV2TCIndexToString				(const NTV2TCIndex				inValue,	const bool inCompactDisplay = false);
-AJAExport std::string NTV2AudioChannelPairToString		(const NTV2AudioChannelPair		inValue,	const bool inCompactDisplay = false);
-AJAExport std::string NTV2AudioChannelQuadToString		(const NTV2Audio4ChannelSelect	inValue,	const bool inCompactDisplay = false);
-AJAExport std::string NTV2AudioChannelOctetToString		(const NTV2Audio8ChannelSelect	inValue,	const bool inCompactDisplay = false);
-AJAExport std::string NTV2FramesizeToString				(const NTV2Framesize			inValue,	const bool inCompactDisplay = false);
-AJAExport std::string NTV2ModeToString					(const NTV2Mode					inValue,	const bool inCompactDisplay = false);
-AJAExport std::string NTV2VANCModeToString				(const NTV2VANCMode				inValue,	const bool inCompactDisplay = false);
-AJAExport std::string NTV2MixerKeyerModeToString		(const NTV2MixerKeyerMode		inValue,	const bool inCompactDisplay = false);
-AJAExport std::string NTV2MixerInputControlToString		(const NTV2MixerKeyerInputControl inValue,	const bool inCompactDisplay = false);
-AJAExport std::string NTV2VideoLimitingToString			(const NTV2VideoLimiting		inValue,	const bool inCompactDisplay = false);
+AJAExport std::string NTV2RegisterNumberToString		(const NTV2RegisterNumber		inValue);	//	New in SDK 12.0
+AJAExport std::string AutoCircVidProcModeToString		(const AutoCircVidProcMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2ColorCorrectionModeToString	(const NTV2ColorCorrectionMode	inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2InputCrosspointIDToString		(const NTV2InputCrosspointID	inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID	inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2WidgetIDToString				(const NTV2WidgetID				inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2WidgetTypeToString			(const NTV2WidgetType			inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2TaskModeToString				(const NTV2EveryFrameTaskMode	inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2RegNumSetToString				(const NTV2RegisterNumberSet &	inValue);	//	New in SDK 12.0
+AJAExport std::string NTV2TCIndexToString				(const NTV2TCIndex				inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2AudioChannelPairToString		(const NTV2AudioChannelPair		inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2AudioChannelQuadToString		(const NTV2Audio4ChannelSelect	inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2AudioChannelOctetToString		(const NTV2Audio8ChannelSelect	inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2FramesizeToString				(const NTV2Framesize			inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2ModeToString					(const NTV2Mode					inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2VANCModeToString				(const NTV2VANCMode				inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2MixerKeyerModeToString		(const NTV2MixerKeyerMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2MixerInputControlToString		(const NTV2MixerKeyerInputControl inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2VideoLimitingToString			(const NTV2VideoLimiting		inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
 AJAExport std::string NTV2BreakoutTypeToString			(const NTV2BreakoutType			inValue,	const bool inCompactDisplay = false);	//	New in SDK 15.5
 AJAExport std::string NTV2AncDataRgnToStr				(const NTV2AncDataRgn			inValue,	const bool inCompactDisplay = false);	//	New in SDK 15.5
+AJAExport std::string NTV2UpConvertModeToString			(const NTV2UpConvertMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
+AJAExport std::string NTV2DownConvertModeToString		(const NTV2DownConvertMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
+AJAExport std::string NTV2IsoConvertModeToString		(const NTV2IsoConvertMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
 AJAExport bool	convertHDRFloatToRegisterValues			(const HDRFloatValues & inFloatValues,		HDRRegValues & outRegisterValues);
 AJAExport bool	convertHDRRegisterToFloatValues			(const HDRRegValues & inRegisterValues,		HDRFloatValues & outFloatValues);
 AJAExport void  setHDRDefaultsForBT2020                 (HDRRegValues & outRegisterValues);

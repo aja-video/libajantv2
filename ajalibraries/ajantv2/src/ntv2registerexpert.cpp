@@ -283,6 +283,7 @@ private:
 			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel8);
 		DefineRegister (kRegCh1InputFrame,		"",	mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel1,	kRegClass_NULL);
 
+		DefineRegister (kRegConversionControl,	"",	mConvControlRegDecoder,		READWRITE,	kRegClass_NULL,		kRegClass_Channel1,	kRegClass_Channel2);
 		DefineRegister (kRegSDIWatchdogControlStatus,"", mDecodeRelayCtrlStat,	READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegSDIWatchdogTimeout,	"",	mDecodeWatchdogTimeout,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegSDIWatchdogKick1,	"",	mDecodeWatchdogKick,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
@@ -1922,7 +1923,7 @@ private:
 		}
 		virtual	~DecodeSysmonVccIntDieTemp()	{}
 	}	mDecodeSysmonVccIntDieTemp;
-	
+
 	struct DecodeSDITransmitCtrl : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -1952,7 +1953,46 @@ private:
 		}
 		virtual	~DecodeSDITransmitCtrl()	{}
 	}	mDecodeSDITransmitCtrl;
-	
+
+	struct DecodeConversionCtrl : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{	(void) inRegNum;
+			ostringstream oss;
+			if (!::NTV2DeviceGetUFCVersion(inDeviceID))
+			{
+				const ULWord bitfileID((inRegValue & kK2RegMaskConverterInRate) >> kK2RegShiftConverterInRate);
+				oss	<< "Bitfile ID: "				<< xHEX0N(bitfileID, 2)					<< endl
+					<< "Memory Test: Start: "		<< YesNo(inRegValue & BIT(28))			<< endl
+					<< "Memory Test: Done: "		<< YesNo(inRegValue & BIT(29))			<< endl
+					<< "Memory Test: Passed: "		<< YesNo(inRegValue & BIT(30));
+			}
+			else
+			{
+				const NTV2Standard			inStd		(       NTV2Standard( inRegValue & kK2RegMaskConverterInStandard  ));
+				const NTV2Standard			outStd		(       NTV2Standard((inRegValue & kK2RegMaskConverterOutStandard ) >> kK2RegShiftConverterOutStandard));
+				const NTV2FrameRate			inRate		(      NTV2FrameRate((inRegValue & kK2RegMaskConverterInRate      ) >> kK2RegShiftConverterInRate));
+				const NTV2FrameRate			outRate		(      NTV2FrameRate((inRegValue & kK2RegMaskConverterOutRate     ) >> kK2RegShiftConverterOutRate));
+				const NTV2UpConvertMode		upCvtMode	(  NTV2UpConvertMode((inRegValue & kK2RegMaskUpConvertMode        ) >> kK2RegShiftUpConvertMode));
+				const NTV2DownConvertMode	dnCvtMode	(NTV2DownConvertMode((inRegValue & kK2RegMaskDownConvertMode      ) >> kK2RegShiftDownConvertMode));
+				const NTV2IsoConvertMode	isoCvtMode	( NTV2IsoConvertMode((inRegValue & kK2RegMaskIsoConvertMode       ) >> kK2RegShiftIsoConvertMode));
+				oss	<< "Input Video Standard: "				<< ::NTV2StandardToString(inStd, true)					<< endl
+					<< "Input Video Frame Rate: "			<< ::NTV2FrameRateToString(inRate, true)				<< endl
+					<< "Output Video Standard: "			<< ::NTV2StandardToString(outStd, true)					<< endl
+					<< "Output Video Frame Rate: "			<< ::NTV2FrameRateToString(outRate, true)				<< endl
+					<< "Up Convert Mode: "					<< ::NTV2UpConvertModeToString(upCvtMode, true)			<< endl
+					<< "Down Convert Mode: "				<< ::NTV2DownConvertModeToString(dnCvtMode, true)		<< endl
+					<< "SD Anamorphic ISO Convert Mode: "	<< ::NTV2IsoConvertModeToString(isoCvtMode, true)		<< endl
+					<< "DownCvt 2-3 Pulldown: "				<< EnabDisab(inRegValue & kK2RegMaskConverterPulldown)	<< endl
+					<< "Vert Filter Preload: "				<< DisabEnab(inRegValue & BIT(7))						<< endl
+					<< "Output Vid Std PsF (Deint Mode): "	<< EnabDisab(inRegValue & kK2RegMaskDeinterlaceMode)	<< endl
+					<< "Up Conv Line21 Pass|Blank Mode: "	<< DEC(UWord(inRegValue & kK2RegMaskUCPassLine21) >> kK2RegShiftUCAutoLine21)	<< endl
+					<< "UFC Clock: "						<< EnabDisab(inRegValue & kK2RegMaskEnableConverter);
+			}
+			return oss.str();
+		}
+	}	mConvControlRegDecoder;
+
 	struct DecodeRelayCtrlStat : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -1975,7 +2015,7 @@ private:
 		}
 		virtual	~DecodeRelayCtrlStat()	{}
 	}	mDecodeRelayCtrlStat;
-	
+
 	struct DecodeWatchdogTimeout : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -1997,7 +2037,7 @@ private:
 		}
 		virtual	~DecodeWatchdogTimeout()	{}
 	}	mDecodeWatchdogTimeout;
-	
+
 	struct DecodeWatchdogKick : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
