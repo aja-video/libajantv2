@@ -269,9 +269,8 @@ void AJATimeLog::PrintValue(int64_t val)
 		if (_unit == AJA_DebugUnit_Critical)
 			AJA_LOG("%s = %lld\n", _tag.c_str(), val);
 	#else
-		//if (AJADebug::IsActive(_unit))
-			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, 
-				"%s = %lld\n", _tag.c_str(), val);
+		if (AJADebug::IsActive(_unit))
+			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, "%s = %lld", _tag.c_str(), val);
 	#endif
 }
 
@@ -282,9 +281,8 @@ void AJATimeLog::PrintValue(int64_t val, const char* addedTag)
 		if (_unit == AJA_DebugUnit_Critical)
 			AJA_LOG("%s-%s = %lld\n", _tag.c_str(), addedTag, val);
 	#else
-		//if (AJADebug::IsActive(_unit))
-			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, 
-				"%s-%s = %lld\n", _tag.c_str(), addedTag, val);
+		if (AJADebug::IsActive(_unit))
+			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, "%s-%s = %lld", _tag.c_str(), addedTag, val);
 	#endif
 }
 
@@ -294,11 +292,7 @@ void AJATimeLog::Print(const char* str)
 		if (_unit == AJA_DebugUnit_Critical)
 			AJA_LOG("%s-%s\n", _tag.c_str(), str);
 	#else
-		//if (AJADebug::IsActive(_unit))
-			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, 
-				"%s-%s\n", _tag.c_str(), str);
+		if (AJADebug::IsActive(_unit))
+			AJADebug::Report(_unit, AJA_DebugSeverity_Debug, __FILE__, __LINE__, "%s-%s", _tag.c_str(), str);
 	#endif
 }
-
-
-
