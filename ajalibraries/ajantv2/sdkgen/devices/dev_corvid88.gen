@@ -176,7 +176,6 @@ NTV2DeviceGetMaxTransferCount				BIT(21)-1
 NTV2DeviceGetNumDMAEngines					2
 NTV2DeviceGetNumVideoChannels				8
 NTV2DeviceGetPingLED						BIT(16)
-NTV2DeviceGetUFCVersion						1
 NTV2DeviceGetNumAudioSystems				8
 NTV2DeviceGetNumCSCs						8
 NTV2DeviceGetNumEmbeddedAudioInputChannels	16

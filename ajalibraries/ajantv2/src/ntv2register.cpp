@@ -3964,18 +3964,18 @@ bool CNTV2Card::GetUCPassLine21 (ULWord & outValue)								{return ReadRegister 
 bool CNTV2Card::SetUCAutoLine21 (const ULWord inValue)							{return WriteRegister (kRegConversionControl,	ULWord(inValue),	kK2RegMaskUCPassLine21,			kK2RegShiftUCAutoLine21);}
 bool CNTV2Card::GetUCAutoLine21 (ULWord & outValue)								{return ReadRegister (kRegConversionControl,	outValue,			kK2RegMaskUCPassLine21,			kK2RegShiftUCAutoLine21);}
 
-bool CNTV2Card::SetSecondConverterInStandard (const NTV2Standard inValue)		{return WriteRegister (kRegFS1DownConverter2Control,	ULWord(inValue),	kK2RegMaskConverterInStandard,	kK2RegShiftConverterInStandard);}
-bool CNTV2Card::GetSecondConverterInStandard (NTV2Standard & outValue)			{return CNTV2DriverInterface::ReadRegister (kRegFS1DownConverter2Control,	outValue,		kK2RegMaskConverterInStandard,	kK2RegShiftConverterInStandard);}
-bool CNTV2Card::SetSecondDownConvertMode (const NTV2DownConvertMode inValue)	{return WriteRegister (kRegFS1DownConverter2Control,	ULWord(inValue),	kK2RegMaskDownConvertMode,		kK2RegShiftDownConvertMode);}
-bool CNTV2Card::GetSecondDownConvertMode (NTV2DownConvertMode & outValue)		{return CNTV2DriverInterface::ReadRegister (kRegFS1DownConverter2Control,	outValue,		kK2RegMaskDownConvertMode,		kK2RegShiftDownConvertMode);}
-bool CNTV2Card::SetSecondConverterOutStandard (const NTV2Standard inValue)		{return WriteRegister (kRegFS1DownConverter2Control,	ULWord(inValue),	kK2RegMaskConverterOutStandard,	kK2RegShiftConverterOutStandard);}
-bool CNTV2Card::GetSecondConverterOutStandard (NTV2Standard & outValue)			{return CNTV2DriverInterface::ReadRegister (kRegFS1DownConverter2Control,	outValue,		kK2RegMaskConverterOutStandard,	kK2RegShiftConverterOutStandard);}
-bool CNTV2Card::SetSecondIsoConvertMode (const NTV2IsoConvertMode inValue)		{return WriteRegister (kRegFS1DownConverter2Control,	ULWord(inValue),	kK2RegMaskIsoConvertMode,		kK2RegShiftIsoConvertMode);}
-bool CNTV2Card::GetSecondIsoConvertMode (NTV2IsoConvertMode & outValue)			{return CNTV2DriverInterface::ReadRegister (kRegFS1DownConverter2Control,	outValue,		kK2RegMaskIsoConvertMode,		kK2RegShiftIsoConvertMode);}
-bool CNTV2Card::SetSecondConverterPulldown (const ULWord inValue)				{return WriteRegister (kRegFS1DownConverter2Control,	ULWord(inValue),	kK2RegMaskConverterPulldown,	kK2RegShiftConverterPulldown);}
-bool CNTV2Card::GetSecondConverterPulldown (ULWord & outValue)					{return ReadRegister (kRegFS1DownConverter2Control,	outValue,				kK2RegMaskConverterPulldown,	kK2RegShiftConverterPulldown);}
-
 #if !defined (NTV2_DEPRECATE)
+	bool CNTV2Card::SetSecondConverterInStandard (const NTV2Standard inValue)		{return WriteRegister (kRegFS1DownConverter2Control,	ULWord(inValue),	kK2RegMaskConverterInStandard,	kK2RegShiftConverterInStandard);}
+	bool CNTV2Card::GetSecondConverterInStandard (NTV2Standard & outValue)			{return CNTV2DriverInterface::ReadRegister (kRegFS1DownConverter2Control,	outValue,		kK2RegMaskConverterInStandard,	kK2RegShiftConverterInStandard);}
+	bool CNTV2Card::SetSecondDownConvertMode (const NTV2DownConvertMode inValue)	{return WriteRegister (kRegFS1DownConverter2Control,	ULWord(inValue),	kK2RegMaskDownConvertMode,		kK2RegShiftDownConvertMode);}
+	bool CNTV2Card::GetSecondDownConvertMode (NTV2DownConvertMode & outValue)		{return CNTV2DriverInterface::ReadRegister (kRegFS1DownConverter2Control,	outValue,		kK2RegMaskDownConvertMode,		kK2RegShiftDownConvertMode);}
+	bool CNTV2Card::SetSecondConverterOutStandard (const NTV2Standard inValue)		{return WriteRegister (kRegFS1DownConverter2Control,	ULWord(inValue),	kK2RegMaskConverterOutStandard,	kK2RegShiftConverterOutStandard);}
+	bool CNTV2Card::GetSecondConverterOutStandard (NTV2Standard & outValue)			{return CNTV2DriverInterface::ReadRegister (kRegFS1DownConverter2Control,	outValue,		kK2RegMaskConverterOutStandard,	kK2RegShiftConverterOutStandard);}
+	bool CNTV2Card::SetSecondIsoConvertMode (const NTV2IsoConvertMode inValue)		{return WriteRegister (kRegFS1DownConverter2Control,	ULWord(inValue),	kK2RegMaskIsoConvertMode,		kK2RegShiftIsoConvertMode);}
+	bool CNTV2Card::GetSecondIsoConvertMode (NTV2IsoConvertMode & outValue)			{return CNTV2DriverInterface::ReadRegister (kRegFS1DownConverter2Control,	outValue,		kK2RegMaskIsoConvertMode,		kK2RegShiftIsoConvertMode);}
+	bool CNTV2Card::SetSecondConverterPulldown (const ULWord inValue)				{return WriteRegister (kRegFS1DownConverter2Control,	ULWord(inValue),	kK2RegMaskConverterPulldown,	kK2RegShiftConverterPulldown);}
+	bool CNTV2Card::GetSecondConverterPulldown (ULWord & outValue)					{return ReadRegister (kRegFS1DownConverter2Control,	outValue,				kK2RegMaskConverterPulldown,	kK2RegShiftConverterPulldown);}
+
 	// kK2RegFrameSync1Control & kK2RegFrameSync2Control
 	bool CNTV2Card::SetK2FrameSyncControlFrameDelay (NTV2FrameSyncSelect select, ULWord value)
 	{
@@ -4016,9 +4016,7 @@ bool CNTV2Card::GetSecondConverterPulldown (ULWord & outValue)					{return ReadR
 	{
 		return ReadRegister (select == NTV2_FrameSync1Select ? kK2RegFrameSync1Control : kK2RegFrameSync2Control, (ULWord*)value, kK2RegMaskFrameSyncControlFrameFormat, kK2RegShiftFrameSyncControlFrameFormat);
 	}
-#endif	//	!defined (NTV2_DEPRECATE)
 
-#if !defined (NTV2_DEPRECATE)
 
 	// Note:  One more Crosspoint lurks (in Register 95) ... FS1 Second Analog Out xpt
 	#define XENA2_SEARCHTIMEOUT 5

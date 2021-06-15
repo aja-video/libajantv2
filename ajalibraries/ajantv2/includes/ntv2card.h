@@ -4439,22 +4439,22 @@ public:
 	AJA_VIRTUAL bool	SetDeinterlaceMode (const ULWord inValue);
 	AJA_VIRTUAL bool	GetDeinterlaceMode (ULWord & outValue);
 
-	AJA_VIRTUAL bool	SetSecondConverterOutStandard (const NTV2Standard inValue);
-	AJA_VIRTUAL bool	GetSecondConverterOutStandard (NTV2Standard & outValue);
-	AJA_VIRTUAL bool	SetSecondConverterInStandard (const NTV2Standard inValue);
-	AJA_VIRTUAL bool	GetSecondConverterInStandard (NTV2Standard & outValue);
-	AJA_VIRTUAL bool	SetSecondDownConvertMode (const NTV2DownConvertMode inValue);
-	AJA_VIRTUAL bool	GetSecondDownConvertMode (NTV2DownConvertMode & outValue);
-	AJA_VIRTUAL bool	SetSecondIsoConvertMode (const NTV2IsoConvertMode inValue);
-	AJA_VIRTUAL bool	GetSecondIsoConvertMode (NTV2IsoConvertMode & outValue);
-	AJA_VIRTUAL bool	SetSecondConverterPulldown (const ULWord inValue);
-	AJA_VIRTUAL bool	GetSecondConverterPulldown (ULWord & outValue);
-
 	AJA_VIRTUAL bool	SetConversionMode (const NTV2ConversionMode inConversionMode);
 	AJA_VIRTUAL bool	GetConversionMode (NTV2ConversionMode & outConversionMode);
 	///@}
 
 	#if !defined (NTV2_DEPRECATE)
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetSecondConverterOutStandard (const NTV2Standard inValue));		///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetSecondConverterOutStandard (NTV2Standard & outValue));		///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetSecondConverterInStandard (const NTV2Standard inValue));		///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetSecondConverterInStandard (NTV2Standard & outValue));			///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetSecondDownConvertMode (const NTV2DownConvertMode inValue));	///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetSecondDownConvertMode (NTV2DownConvertMode & outValue));		///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetSecondIsoConvertMode (const NTV2IsoConvertMode inValue));		///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetSecondIsoConvertMode (NTV2IsoConvertMode & outValue));		///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetSecondConverterPulldown (const ULWord inValue));				///< @deprecated	This function is obsolete.
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetSecondConverterPulldown (ULWord & outValue));					///< @deprecated	This function is obsolete.
+
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2FrameSyncControlFrameDelay (NTV2FrameSyncSelect select, ULWord value));					///< @deprecated	This function is obsolete.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetK2FrameSyncControlFrameDelay (NTV2FrameSyncSelect select, ULWord *value));					///< @deprecated	This function is obsolete.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetK2FrameSyncControlStandard (NTV2FrameSyncSelect select, NTV2Standard value));				///< @deprecated	This function is obsolete.
