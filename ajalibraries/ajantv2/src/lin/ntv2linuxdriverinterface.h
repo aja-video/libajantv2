@@ -33,6 +33,10 @@ class CNTV2LinuxDriverInterface : public CNTV2DriverInterface
 
 		AJA_VIRTUAL bool	WriteRegister (const ULWord inRegNum, const ULWord inValue, const ULWord inMask = 0xFFFFFFFF, const ULWord inShift = 0);
 		AJA_VIRTUAL bool	ReadRegister (const ULWord inRegNum,  ULWord & outValue,  const ULWord inMask = 0xFFFFFFFF, const ULWord inShift = 0);
+#if !defined(NTV2_DEPRECATE_14_3)
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadRegister (const ULWord inRegNum, ULWord * pOutValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0x0))
+												{return pOutValue && ReadRegister(inRegNum, *pOutValue, inRegMask, inRegShift);}
+#endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 		AJA_VIRTUAL bool	RestoreHardwareProcampRegisters (void);
 
