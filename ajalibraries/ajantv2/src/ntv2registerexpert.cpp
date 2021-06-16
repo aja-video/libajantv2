@@ -1986,7 +1986,7 @@ private:
 					<< "DownCvt 2-3 Pulldown: "				<< EnabDisab(inRegValue & kK2RegMaskConverterPulldown)	<< endl
 					<< "Vert Filter Preload: "				<< DisabEnab(inRegValue & BIT(7))						<< endl
 					<< "Output Vid Std PsF (Deint Mode): "	<< EnabDisab(inRegValue & kK2RegMaskDeinterlaceMode)	<< endl
-					<< "Up Conv Line21 Pass|Blank Mode: "	<< DEC(UWord(inRegValue & kK2RegMaskUCPassLine21) >> kK2RegShiftUCAutoLine21)	<< endl
+					<< "Up Conv Line21 Pass|Blank Mode: "	<< DEC(ULWord(inRegValue & kK2RegMaskUCPassLine21) >> kK2RegShiftUCAutoLine21)	<< endl
 					<< "UFC Clock: "						<< EnabDisab(inRegValue & kK2RegMaskEnableConverter);
 			}
 			return oss.str();
