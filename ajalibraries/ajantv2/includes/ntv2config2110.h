@@ -331,6 +331,8 @@ public:
 
 	bool		Set4KModeEnable (const bool enable);
 	bool		Get4KModeEnable (bool & enable);
+	uint32_t	GetDepacketizerAddress (const NTV2Stream stream);
+	uint32_t	GetPacketizerAddress (const NTV2Stream stream);
 
 	/**
 		@brief		Enables or disables the audio combiner.
@@ -404,8 +406,12 @@ public:
 	std::string	getLastError (void);
 	NTV2IpError	getLastErrorCode (void);
 
-	static uint32_t	packetizers[8];
-	static uint32_t	depacketizers[8];
+	static uint32_t	videoPacketizers[4];
+	static uint32_t	videoRGB12Packetizers[4];
+	static uint32_t	audioPacketizers[4];
+
+	static uint32_t	videoDepacketizers[4];
+	static uint32_t	audioDepacketizers[4];
 
 protected:
 	uint32_t	GetFramerAddress (const eSFP sfp, const NTV2Stream stream);
@@ -430,8 +436,6 @@ protected:
 
 	void		SetupDepacketizerStream (const NTV2Stream stream, const rx_2110Config & rxConfig);
 	void		ResetDepacketizerStream (const NTV2Stream stream);
-	uint32_t	GetDepacketizerAddress (const NTV2Stream stream);
-	uint32_t	GetPacketizerAddress (const NTV2Stream stream);
 
 	void		SetVideoFormatForRxTx (const NTV2Stream stream, const NTV2VideoFormat format, const bool rx);
 	void		GetVideoFormatForRxTx (const NTV2Stream stream, NTV2VideoFormat & format, uint32_t & hwFormat, const bool rx);

@@ -22,11 +22,30 @@
 
 #define RESET_MILLISECONDS 5
 
-// Meta data not yet defined
-uint32_t CNTV2Config2110::packetizers[8] =     {SAREK_4175_TX_PACKETIZER_1, SAREK_4175_TX_PACKETIZER_2, SAREK_4175_TX_PACKETIZER_3, SAREK_4175_TX_PACKETIZER_4,
-												SAREK_3190_TX_PACKETIZER_0, SAREK_3190_TX_PACKETIZER_1, SAREK_3190_TX_PACKETIZER_2, SAREK_3190_TX_PACKETIZER_3};
-uint32_t CNTV2Config2110::depacketizers[8] =   {SAREK_4175_RX_DEPACKETIZER_1, SAREK_4175_RX_DEPACKETIZER_2, SAREK_4175_RX_DEPACKETIZER_3, SAREK_4175_RX_DEPACKETIZER_4,
-												SAREK_3190_RX_DEPACKETIZER_1, SAREK_3190_RX_DEPACKETIZER_2, SAREK_3190_RX_DEPACKETIZER_3, SAREK_3190_RX_DEPACKETIZER_4};
+uint32_t CNTV2Config2110::videoPacketizers[4]		= {SAREK_4175_TX_PACKETIZER_1,
+													   SAREK_4175_TX_PACKETIZER_2,
+													   SAREK_4175_TX_PACKETIZER_3,
+													   SAREK_4175_TX_PACKETIZER_4};
+
+uint32_t CNTV2Config2110::videoRGB12Packetizers[4]	= {SAREK_4175_TX_PACKETIZER_RGB12_1,
+													   SAREK_4175_TX_PACKETIZER_RGB12_2,
+													   SAREK_4175_TX_PACKETIZER_RGB12_3,
+													   SAREK_4175_TX_PACKETIZER_RGB12_4};
+
+uint32_t CNTV2Config2110::audioPacketizers[4]		= {SAREK_3190_TX_PACKETIZER_0,
+													   SAREK_3190_TX_PACKETIZER_1,
+													   SAREK_3190_TX_PACKETIZER_2,
+													   SAREK_3190_TX_PACKETIZER_3};
+
+uint32_t CNTV2Config2110::videoDepacketizers[4]		= {SAREK_4175_RX_DEPACKETIZER_1,
+													   SAREK_4175_RX_DEPACKETIZER_2,
+													   SAREK_4175_RX_DEPACKETIZER_3,
+													   SAREK_4175_RX_DEPACKETIZER_4};
+
+uint32_t CNTV2Config2110::audioDepacketizers[4]		= {SAREK_3190_RX_DEPACKETIZER_1,
+													   SAREK_3190_RX_DEPACKETIZER_2,
+													   SAREK_3190_RX_DEPACKETIZER_3,
+													   SAREK_3190_RX_DEPACKETIZER_4};
 
 using namespace std;
 
@@ -1489,11 +1508,19 @@ uint32_t CNTV2Config2110::GetDecapsulatorAddress(eSFP sfp, NTV2Stream stream)
 
 uint32_t CNTV2Config2110::GetDepacketizerAddress(NTV2Stream stream)
 {
-	// only video and audio streams have depacketizers
-	if ((StreamType(stream) == VIDEO_STREAM) || (StreamType(stream) == AUDIO_STREAM))
-		return depacketizers[stream];
-	else
-		return 0;
+	uint32_t basePacketizer = 0;
+
+	// Only video and audio streams have depacketizers
+	if (StreamType(stream) == VIDEO_STREAM)
+	{
+		basePacketizer = videoDepacketizers[stream-NTV2_VIDEO1_STREAM];
+	}
+	else if (StreamType(stream) == AUDIO_STREAM)
+	{
+		basePacketizer = audioDepacketizers[stream-NTV2_AUDIO1_STREAM];
+	}
+
+	return basePacketizer;
 }
 
 uint32_t CNTV2Config2110::GetFramerAddress(const eSFP sfp, const NTV2Stream stream)
@@ -1523,22 +1550,23 @@ void CNTV2Config2110::SelectTxFramerChannel(const NTV2Stream stream, const uint3
 
 uint32_t CNTV2Config2110::GetPacketizerAddress(NTV2Stream stream)
 {
-	uint32_t baseAddrPacketizer = 0;
+	uint32_t basePacketizer = 0;
 
+	// Only video and audio streams have packetizers
     if (StreamType(stream) == VIDEO_STREAM)
     {
-		baseAddrPacketizer = packetizers[stream];
+		basePacketizer = videoPacketizers[stream-NTV2_VIDEO1_STREAM];
 		uint32_t index = Get2110TxStreamIndex(stream);
-        mDevice.WriteRegister(kReg4175_pkt_chan_num + baseAddrPacketizer, index);
+		mDevice.WriteRegister(kReg4175_pkt_chan_num + basePacketizer, index);
     }
     else if (StreamType(stream) == AUDIO_STREAM)
     {
-		baseAddrPacketizer = packetizers[stream];
+		basePacketizer = audioPacketizers[stream-NTV2_AUDIO1_STREAM];
 		uint32_t index = Get2110TxStreamIndex(stream);
-        mDevice.WriteRegister(kReg3190_pkt_chan_num + baseAddrPacketizer, index);
+		mDevice.WriteRegister(kReg3190_pkt_chan_num + basePacketizer, index);
     }
 	
-	return baseAddrPacketizer;
+	return basePacketizer;
 }
 
 bool  CNTV2Config2110::ConfigurePTP (const eSFP sfp, const std::string localIPAddress)
