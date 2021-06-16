@@ -131,7 +131,7 @@ The \ref ajantv2 is publically-distributed as a dynamic library.
 
 When dynamically loading the NTV2 library at runtime (as opposed to having it automatically loaded by the host operating
 system at launch time), the library can be queried for more specific version information by two utility functions:
--	::NTV2GetVersionString – returns a string that starts with "<i>major</i><b>.</b><i>minor</i><b>.</b><i>point</i>"
+-	::NTV2GetVersionString – returns a string that starts with “<i>major</i><b>.</b><i>minor</i><b>.</b><i>point</i>”
 	that includes the <i>major</i>, <i>minor</i>, and <i>point</i> version number values in decimal form.
 -	::NTV2GetSDKVersionComponent – returns any of the <i>major</i>, <i>minor</i>, and <i>point</i> version number values
 	by passing 0, 1, 2 or 3, respectively, for the <i>version component</i> being requested.
