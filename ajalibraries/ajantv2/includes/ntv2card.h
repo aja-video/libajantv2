@@ -2870,6 +2870,16 @@ public:
 	**/
 	AJA_VIRTUAL bool	GetRunningFirmwareDate (std::string & outDate, std::string & outTime);
 
+    /**
+        @brief		Reports the UserID number of the currently-running firmware.
+        @param[out]	outUserID		Receives the UserID.
+        @return		True if successful;  otherwise false.
+        @note		This may differ from the revision number of the installed firmware if, after
+                    erasing or reflashing, the device was not power-cycled to force its FPGA to reload.
+        @see		CNTV2Card::GetRunningFirmwareDate, CNTV2Card::GetRunningFirmwareTime, \ref devicefirmware.
+    **/
+    AJA_VIRTUAL bool    GetRunningFirmwareUserID (ULWord & outUserID);
+
 #if !defined(NTV2_DEPRECATE_14_2)
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFirmwareRev (ULWord * pOutRevisionNumber));	///< @deprecated	Use GetRunningFirmwareRevision instead.
 #endif

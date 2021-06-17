@@ -73,7 +73,11 @@ NTV2DeviceIDSet CNTV2Card::GetDynamicDeviceIDs (void)
 	if (!IsOpen())
 		return result;
 
-	//	Get current design ID and version...
+    const NTV2DeviceID currentDeviceID (GetDeviceID());
+    if (currentDeviceID == 0)
+        return result;
+
+    //	Get current design ID and version...
     NTV2ULWordVector reg;
     if (!BitstreamStatus(reg))
 		return result;
@@ -81,36 +85,47 @@ NTV2DeviceIDSet CNTV2Card::GetDynamicDeviceIDs (void)
 	if (reg[BITSTREAM_VERSION] == 0)
 		return result;
 
-	const ULWord designID		(CNTV2Bitfile::GetDesignID(reg[BITSTREAM_VERSION]));
-	const ULWord designVersion	(CNTV2Bitfile::GetDesignVersion(reg[BITSTREAM_VERSION]));
-	if (designID == 0) 
-		return result;
+    ULWord currentUserID = 0;
+    ULWord currentDesignID = 0;
+    ULWord currentDesignVersion = 0;
+    ULWord currentBitfileID = 0;
+    ULWord currentBitfileVersion = 0;
 
-	//	Get current bitfile ID and version...
-	const NTV2DeviceID	currentDeviceID (GetDeviceID());
-    const ULWord		currentBitfileID (CNTV2Bitfile::ConvertToBitfileID(currentDeviceID));
-	UWord				bitfileVersion(0);
-	if (!GetRunningFirmwareRevision(bitfileVersion))
-		return result;
+    if (GetRunningFirmwareUserID(currentUserID) && (currentUserID != 0))
+    {
+        // the new way
+        currentDesignID = CNTV2Bitfile::GetDesignID(currentUserID);
+        currentDesignVersion = CNTV2Bitfile::GetDesignVersion(currentUserID);
+        currentBitfileID = CNTV2Bitfile::GetBitfileID(currentUserID);
+        currentBitfileVersion = CNTV2Bitfile::GetBitfileVersion(currentUserID);
+    }
+    else
+    {
+        // the old way
+        currentDesignID = CNTV2Bitfile::GetDesignID(reg[BITSTREAM_VERSION]);
+        currentDesignVersion = CNTV2Bitfile::GetDesignVersion(reg[BITSTREAM_VERSION]);
+        currentBitfileID = CNTV2Bitfile::ConvertToBitfileID(currentDeviceID);
+        currentBitfileVersion = 0xff; // ignores bitfile version
+    }
 
-	if (!currentDeviceID)
+    if (currentDesignID == 0)
 		return result;
 
 	//	Get the clear file matching current bitfile...
 	NTV2_POINTER clearStream;
 	if (!s_BitfileManager.GetBitStream (clearStream,
-									designID,
-									designVersion,
+                                    currentDesignID,
+                                    currentDesignVersion,
 									currentBitfileID,
-                                    0xff, // bitfileVersion,
+                                    currentBitfileVersion,
 									NTV2_BITFILE_FLAG_CLEAR) || !clearStream)
 		return result;
 
 	//	Build the deviceID set...
 	const NTV2BitfileInfoList infoList(s_BitfileManager.GetBitfileInfoList());
 	for (NTV2BitfileInfoListConstIter it(infoList.begin());  it != infoList.end();  ++it)
-		if (it->designID == designID)
-			if (it->designVersion == designVersion)
+        if (it->designID == currentDesignID)
+            if (it->designVersion == currentDesignVersion)
 				if (it->bitfileFlags & NTV2_BITFILE_FLAG_PARTIAL)
 				{
 					const NTV2DeviceID devID (CNTV2Bitfile::ConvertToDeviceID(it->designID, it->bitfileID));
@@ -131,6 +146,10 @@ bool CNTV2Card::LoadDynamicDevice (const NTV2DeviceID inDeviceID)
 	if (!IsOpen())
 		return false;
 
+    const NTV2DeviceID currentDeviceID (GetDeviceID());
+    if (currentDeviceID == 0)
+        return false;
+
 	//	Get current design ID and version...
     NTV2ULWordVector reg;
     if (!BitstreamStatus(reg))
@@ -139,35 +158,47 @@ bool CNTV2Card::LoadDynamicDevice (const NTV2DeviceID inDeviceID)
 	if (reg[BITSTREAM_VERSION] == 0)
 		return false;
 
-	const ULWord designID (CNTV2Bitfile::GetDesignID(reg[BITSTREAM_VERSION]));
-	const ULWord designVersion (CNTV2Bitfile::GetDesignVersion(reg[BITSTREAM_VERSION]));
-	if (designID == 0) 
-		return false;
+    ULWord currentUserID = 0;
+    ULWord currentDesignID = 0;
+    ULWord currentDesignVersion = 0;
+    ULWord currentBitfileID = 0;
+    ULWord currentBitfileVersion = 0;
 
-	const NTV2DeviceID currentDeviceID (GetDeviceID());
-	const ULWord currentBitfileID (CNTV2Bitfile::ConvertToBitfileID(currentDeviceID));
-	UWord bitfileVersion(0);
-	if (!GetRunningFirmwareRevision(bitfileVersion))
-		return false;
+    if (GetRunningFirmwareUserID(currentUserID) && (currentUserID != 0))
+    {
+        // the new way
+        currentDesignID = CNTV2Bitfile::GetDesignID(currentUserID);
+        currentDesignVersion = CNTV2Bitfile::GetDesignVersion(currentUserID);
+        currentBitfileID = CNTV2Bitfile::GetBitfileID(currentUserID);
+        currentBitfileVersion = CNTV2Bitfile::GetBitfileVersion(currentUserID);
+    }
+    else
+    {
+        // the old way
+        currentDesignID = CNTV2Bitfile::GetDesignID(reg[BITSTREAM_VERSION]);
+        currentDesignVersion = CNTV2Bitfile::GetDesignVersion(reg[BITSTREAM_VERSION]);
+        currentBitfileID = CNTV2Bitfile::ConvertToBitfileID(currentDeviceID);
+        currentBitfileVersion = 0xff; // ignores bitfile version
+    }
 
-	if (!currentDeviceID)
-		return false;
+    if (currentDesignID == 0)
+        return false;
 
 	//	Get the clear file matching current bitfile...
 	NTV2_POINTER clearStream;
 	if (!s_BitfileManager.GetBitStream (clearStream,
-									designID,
-									designVersion,
+                                    currentDesignID,
+                                    currentDesignVersion,
 									currentBitfileID,
-                                    0xff, // bitfileVersion,
+                                    currentBitfileVersion,
 									NTV2_BITFILE_FLAG_CLEAR) || !clearStream)
 		return false;
 
 	//	Get the partial file matching the inDeviceID...
 	NTV2_POINTER partialStream;
 	if (!s_BitfileManager.GetBitStream (partialStream,
-									designID,
-									designVersion,
+                                    currentDesignID,
+                                    currentDesignVersion,
 									CNTV2Bitfile::ConvertToBitfileID(inDeviceID),
 									0xff,
 									NTV2_BITFILE_FLAG_PARTIAL) || !partialStream)

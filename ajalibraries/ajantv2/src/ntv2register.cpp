@@ -2765,6 +2765,21 @@ bool CNTV2Card::GetRunningFirmwareDate (std::string & outDate, std::string & out
 }
 
 
+bool CNTV2Card::GetRunningFirmwareUserID (ULWord & outUserID)
+{
+    outUserID = 0;
+    if (!IsOpen())
+        return false;
+
+    ULWord	regValue	(0);
+    if (!ReadRegister (kRegFirmwareUserID, regValue))
+        return false;
+
+    outUserID = regValue;
+    return true;
+}
+
+
 ///////////////////////////////////////////////////////////////////
 
 bool CNTV2Card::ReadStatusRegister (ULWord *pValue)						{return pValue ? ReadRegister(kRegStatus, *pValue) : false;}

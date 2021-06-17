@@ -251,7 +251,7 @@ typedef enum
 	kRegStereoCompressor,			// 192
 	kRegXptSelectGroup12,			// 193
 	kRegFrameApertureOffset,		// 194
-	kRegReserved195,				// 195
+	kRegFirmwareUserID,				// 195
 	kRegReserved196,				// 196
 	kRegReserved197,				// 197
 	kRegReserved198,				// 198
