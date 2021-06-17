@@ -85,7 +85,7 @@
 #define kRegSarekIfVersion          12
 #define kRegSarekLinkStatus         13
 #define kRegSarekServices           14
-#define kRegSarekunused15           15
+#define kRegSarekSampling           15
 #define kRegSarekMAC                16
 #define kRegSarekMAC1               17
 #define kRegSarekMAC2               18

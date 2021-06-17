@@ -331,8 +331,6 @@ public:
 
 	bool		Set4KModeEnable (const bool enable);
 	bool		Get4KModeEnable (bool & enable);
-	uint32_t	GetDepacketizerAddress (const NTV2Stream stream);
-	uint32_t	GetPacketizerAddress (const NTV2Stream stream);
 
 	/**
 		@brief		Enables or disables the audio combiner.
@@ -414,6 +412,8 @@ public:
 	static uint32_t	audioDepacketizers[4];
 
 protected:
+	uint32_t	GetDepacketizerAddress (const NTV2Stream stream);
+	uint32_t	GetPacketizerAddress (const NTV2Stream stream, const VPIDSampling sampling);
 	uint32_t	GetFramerAddress (const eSFP sfp, const NTV2Stream stream);
 	void		SelectTxFramerChannel (const NTV2Stream stream, const uint32_t baseAddr);
 	void		AcquireFramerControlAccess (const uint32_t baseAddr);
@@ -424,6 +424,9 @@ protected:
 	void		GetFramerStream (const eSFP sfp, const NTV2Stream stream, tx_2110Config  & txConfig);
 	void		SetArbiter (const eSFP sfp, const NTV2Stream stream, bool enable);
 	void		GetArbiter (const eSFP sfp, const NTV2Stream stream, bool & enable);
+
+	void		SetSampling(const eSFP sfp, const NTV2Stream stream, const VPIDSampling sampling);
+	VPIDSampling GetSampling(const eSFP sfp, const NTV2Stream stream);
 
 	void		DisableDepacketizerStream (const NTV2Stream stream);
 	void		EnableDepacketizerStream (const NTV2Stream stream);

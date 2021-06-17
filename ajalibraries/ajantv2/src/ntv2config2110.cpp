@@ -786,7 +786,7 @@ bool CNTV2Config2110::GetTxPacketCount(const NTV2Stream stream, uint32_t & packe
     {
 		uint32_t count;
 
-		uint32_t baseAddrPacketizer = GetPacketizerAddress(NTV2_VIDEO1_STREAM);
+		uint32_t baseAddrPacketizer = GetPacketizerAddress(NTV2_VIDEO1_STREAM, GetSampling(SFP_1, stream));
         mDevice.ReadRegister(kReg4175_pkt_tx_pkt_cnt + baseAddrPacketizer, count);
         packets = count;
     }
@@ -844,11 +844,13 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
 
     SetFramerStream(SFP_1, stream, txConfig);
     SetFramerStream(SFP_2, stream, txConfig);
+	SetSampling(SFP_1, stream, txConfig.videoSamples);
+	SetSampling(SFP_2, stream, txConfig.videoSamples);
 
     if (StreamType(stream) == VIDEO_STREAM)
     {
 		// video setup 3190 packetizer
-		uint32_t baseAddrPacketizer = GetPacketizerAddress(stream);
+		uint32_t baseAddrPacketizer = GetPacketizerAddress(stream, GetSampling(SFP_1, stream));
 
 		NTV2VideoFormat vfmt = txConfig.videoFormat;
 
@@ -954,7 +956,7 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
     else if (StreamType(stream) == AUDIO_STREAM)
     {
 		// audio setup 3190 packetizer
-		uint32_t	baseAddrPacketizer = GetPacketizerAddress(stream);
+		uint32_t	baseAddrPacketizer = GetPacketizerAddress(stream, GetSampling(SFP_1, stream));
 
         uint32_t audioChans = txConfig.numAudioChannels;
         uint32_t samples    = (txConfig.audioPktInterval == PACKET_INTERVAL_125uS) ? 6 : 48;
@@ -1049,12 +1051,13 @@ bool CNTV2Config2110::GetTxStreamConfiguration(const NTV2Stream stream, tx_2110C
 
     GetFramerStream(SFP_1, stream, txConfig);
     GetFramerStream(SFP_2, stream, txConfig);
+	txConfig.videoSamples = GetSampling(SFP_1, stream);
 
     uint32_t val;
     if (StreamType(stream) == VIDEO_STREAM)
     {
 		// select video packetizer
-		baseAddrPacketizer = GetPacketizerAddress(stream);
+		baseAddrPacketizer = GetPacketizerAddress(stream, GetSampling(SFP_1, stream));
 
         // payloadType
         mDevice.ReadRegister(kReg4175_pkt_payload_type + baseAddrPacketizer, val);
@@ -1069,7 +1072,7 @@ bool CNTV2Config2110::GetTxStreamConfiguration(const NTV2Stream stream, tx_2110C
 	else if (StreamType(stream) == AUDIO_STREAM)
 	{
 		// select audio packetizer
-		baseAddrPacketizer = GetPacketizerAddress(stream);
+		baseAddrPacketizer = GetPacketizerAddress(stream, GetSampling(SFP_1, stream));
 
         // audio - payloadType
         mDevice.ReadRegister(kReg3190_pkt_payload_type + baseAddrPacketizer, val);
@@ -1160,7 +1163,7 @@ bool CNTV2Config2110::SetTxStreamEnable(const NTV2Stream stream, bool enableSfp1
 	if ((StreamType(stream) == VIDEO_STREAM) || (StreamType(stream) == AUDIO_STREAM))
 	{
 		// ** Packetizer
-		uint32_t	packetizerBaseAddr = GetPacketizerAddress(stream);
+		uint32_t	packetizerBaseAddr = GetPacketizerAddress(stream, GetSampling(SFP_1, stream));
 
 		if (enableSfp1 || enableSfp2)
 		{
@@ -1548,14 +1551,18 @@ void CNTV2Config2110::SelectTxFramerChannel(const NTV2Stream stream, const uint3
     SetChannel(kRegFramer_channel_access + baseAddrFramer, index);
 }
 
-uint32_t CNTV2Config2110::GetPacketizerAddress(NTV2Stream stream)
+uint32_t CNTV2Config2110::GetPacketizerAddress(const NTV2Stream stream, const VPIDSampling sampling)
 {
 	uint32_t basePacketizer = 0;
 
 	// Only video and audio streams have packetizers
     if (StreamType(stream) == VIDEO_STREAM)
     {
-		basePacketizer = videoPacketizers[stream-NTV2_VIDEO1_STREAM];
+		if (sampling == VPIDSampling_GBR_444)
+			basePacketizer = videoRGB12Packetizers[stream-NTV2_VIDEO1_STREAM];
+		else
+			basePacketizer = videoPacketizers[stream-NTV2_VIDEO1_STREAM];
+
 		uint32_t index = Get2110TxStreamIndex(stream);
 		mDevice.WriteRegister(kReg4175_pkt_chan_num + basePacketizer, index);
     }
@@ -1941,7 +1948,7 @@ bool CNTV2Config2110::GenVideoStreamSDPInfo(stringstream & sdp, const eSFP sfp, 
     tx_2110Config config;
     GetTxStreamConfiguration(stream, config);
 
-	uint32_t baseAddrPacketizer = GetPacketizerAddress(stream);
+	uint32_t baseAddrPacketizer = GetPacketizerAddress(stream, GetSampling(sfp, stream));
 
     uint32_t width;
     mDevice.ReadRegister(kReg4175_pkt_width + baseAddrPacketizer, width);
@@ -2070,7 +2077,7 @@ bool CNTV2Config2110::GenVideoStreamMultiSDPInfo(stringstream & sdp, char* gmInf
 		tx_2110Config config;
 		GetTxStreamConfiguration(stream, config);
 
-		uint32_t baseAddrPacketizer = GetPacketizerAddress(stream);
+		uint32_t baseAddrPacketizer = GetPacketizerAddress(stream, GetSampling(SFP_1, stream));
 
 		uint32_t width;
 		mDevice.ReadRegister(kReg4175_pkt_width + baseAddrPacketizer, width);
@@ -3237,6 +3244,85 @@ void CNTV2Config2110::GetArbiter(const eSFP sfp, NTV2Stream stream, bool & enabl
 
     uint32_t bit = (1 << Get2110TxStreamIndex(stream)) << (int(sfp) * 16);
     enable = (val & bit);
+}
+
+void CNTV2Config2110::SetSampling(const eSFP sfp, const NTV2Stream stream, const VPIDSampling sampling)
+{
+	if (StreamType(stream) == VIDEO_STREAM)
+	{
+		uint32_t samp = sampling;
+		uint32_t mask = 0;
+
+		switch (stream)
+		{
+			case NTV2_VIDEO1_STREAM:
+				mask = 0xfffffff0;
+				break;
+
+			case NTV2_VIDEO2_STREAM:
+				mask = 0xffffff0f;
+				samp = samp << 4;
+				break;
+
+			case NTV2_VIDEO3_STREAM:
+				mask = 0xfffff0ff;
+				samp = samp << 8;
+				break;
+
+			case NTV2_VIDEO4_STREAM:
+				mask = 0xffff0fff;
+				samp = samp << 12;
+				break;
+		}
+
+		if (sfp == SFP_2)
+		{
+			mask = mask << 16;
+			mask |= 0xffff;
+			samp = samp << 16;
+		}
+
+		uint32_t val;
+		mDevice.ReadRegister(SAREK_REGS + kRegSarekSampling, val);
+		val &= mask;
+		val |= samp;
+		mDevice.WriteRegister(SAREK_REGS + kRegSarekSampling, val);
+	}
+}
+
+VPIDSampling CNTV2Config2110::GetSampling(const eSFP sfp, const NTV2Stream stream)
+{
+	VPIDSampling sampling = VPIDSampling_YUV_422;
+
+	if (StreamType(stream) == VIDEO_STREAM)
+	{
+		uint32_t val;
+		mDevice.ReadRegister(SAREK_REGS + kRegSarekSampling, val);
+
+		if (sfp == SFP_2)
+			val = val >> 16;
+
+		switch (stream)
+		{
+			case NTV2_VIDEO1_STREAM:
+				break;
+
+			case NTV2_VIDEO2_STREAM:
+				val = val >> 4;
+				break;
+
+			case NTV2_VIDEO3_STREAM:
+				val = val >> 8;
+				break;
+
+			case NTV2_VIDEO4_STREAM:
+				val = val >> 12;
+				break;
+		}
+		sampling =	(VPIDSampling)(val &= 0x0000000f);
+	}
+
+	return sampling;
 }
 
 bool CNTV2Config2110::SetLLDPInfo(std::string sysname)
