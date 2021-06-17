@@ -887,16 +887,11 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
         int componentsPerPixel;
         int componentsPerUnit;
 
-        VPIDSampling vs = txConfig.videoSamples;
-        switch(vs)
+		VPIDSampling sampling = GetSampling(SFP_1, stream);
+		switch(sampling)
         {
         case VPIDSampling_GBR_444:
             vf = 0;
-            componentsPerPixel = 3;
-            componentsPerUnit  = 3;
-            break;
-        case VPIDSampling_YUV_444:
-            vf = 1;
             componentsPerPixel = 3;
             componentsPerUnit  = 3;
             break;
@@ -927,6 +922,34 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
 
         int payloadLengthLast  = activeLineLength - (payloadLength * (ipktsPerLine -1));
 
+		int ppp = (payloadLength/pixelGroupSize) * 2;   // as per JeffL
+
+		if ((sampling == VPIDSampling_GBR_444) && (mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12))
+		{
+			if (NTV2_IS_2K_1080_VIDEO_FORMAT(txConfig.videoFormat))
+			{
+				ipktsPerLine		= 0x07;
+				payloadLength		= 0x0558;
+				payloadLengthLast	= 0x03f0;
+				ppp					= 0x0130;
+			}
+			else if (NTV2_IS_720P_VIDEO_FORMAT(txConfig.videoFormat))
+			{
+				ipktsPerLine		= 0x05;
+				payloadLength		= 0x0558;
+				payloadLengthLast	= 0x0120;
+				ppp					= 0x0130;
+			}
+			// assume 1920x1080 format
+			else
+			{
+				ipktsPerLine		= 0x07;
+				payloadLength		= 0x0558;
+				payloadLengthLast	= 0x01b0;
+				ppp					= 0x0130;
+			}
+		}
+
         // pkts per line
         mDevice.WriteRegister(kReg4175_pkt_pkts_per_line + baseAddrPacketizer,ipktsPerLine);
 
@@ -943,7 +966,6 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
         mDevice.WriteRegister(kReg4175_pkt_ssrc + baseAddrPacketizer,txConfig.ssrc);
 
         // pix per pkt
-        int ppp = (payloadLength/pixelGroupSize) * 2;   // as per JeffL
         mDevice.WriteRegister(kReg4175_pkt_pix_per_pkt + baseAddrPacketizer,ppp);
 
         // interlace
@@ -1558,7 +1580,7 @@ uint32_t CNTV2Config2110::GetPacketizerAddress(const NTV2Stream stream, const VP
 	// Only video and audio streams have packetizers
     if (StreamType(stream) == VIDEO_STREAM)
     {
-		if (sampling == VPIDSampling_GBR_444)
+		if ((sampling == VPIDSampling_GBR_444) && (mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12))
 			basePacketizer = videoRGB12Packetizers[stream-NTV2_VIDEO1_STREAM];
 		else
 			basePacketizer = videoPacketizers[stream-NTV2_VIDEO1_STREAM];
@@ -3220,6 +3242,9 @@ void CNTV2Config2110::SetArbiter(const eSFP sfp, const NTV2Stream stream, bool e
     mDevice.ReadRegister(reg, val);
 
     uint32_t bit = (1 << Get2110TxStreamIndex(stream)) << (int(sfp) * 16);
+	if ((GetSampling(sfp, stream) == VPIDSampling_GBR_444) && (mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12))
+		bit = bit << 4;
+
     if (enable)
         val |= bit;
     else
@@ -3243,6 +3268,9 @@ void CNTV2Config2110::GetArbiter(const eSFP sfp, NTV2Stream stream, bool & enabl
     mDevice.ReadRegister(reg, val);
 
     uint32_t bit = (1 << Get2110TxStreamIndex(stream)) << (int(sfp) * 16);
+	if ((GetSampling(sfp, stream) == VPIDSampling_GBR_444) && (mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12))
+		bit = bit << 4;
+
     enable = (val & bit);
 }
 
