@@ -1154,7 +1154,7 @@ bool CNTV2Config2022::Set2022_7_Mode(bool enable, uint32_t rx_networkPathDiffere
 
     if (!_is2022_7)
     {
-        mIpErrorCode = NTV2IpErr2022_7NotSupported;
+		mIpErrorCode = NTV2IpErrNotSupported;
         return false;
     }
 
@@ -1246,7 +1246,7 @@ bool  CNTV2Config2022::Get2022_7_Mode(bool & enable, uint32_t & rx_networkPathDi
 
     if (!_is2022_7)
     {
-        mIpErrorCode = NTV2IpErr2022_7NotSupported;
+		mIpErrorCode = NTV2IpErrNotSupported;
         return false;
     }
 

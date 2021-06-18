@@ -5044,7 +5044,7 @@ typedef enum
 	NTV2IpErrSFP2NotConfigured,
 	NTV2IpErrInvalidIGMPVersion,
 	NTV2IpErrCannotGetMacAddress,
-	NTV2IpErr2022_7NotSupported,
+	NTV2IpErrNotSupported,
 	NTV2IpErrWriteSOMToMB,
 	NTV2IpErrWriteSeqToMB,
 	NTV2IpErrWriteCountToMB,

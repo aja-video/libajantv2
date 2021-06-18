@@ -8303,7 +8303,7 @@ std::string NTV2IpErrorEnumToString (const NTV2IpError inIpErrorEnumValue)
 	case NTV2IpErrSFP2NotConfigured:            return "SFP 2 not configured";
 	case NTV2IpErrInvalidIGMPVersion:           return "Invalid IGMP version";
 	case NTV2IpErrCannotGetMacAddress:          return "Failed to retrieve MAC address from ARP table";
-	case NTV2IpErr2022_7NotSupported:           return "2022-7 not supported for by this firmware";
+	case NTV2IpErrNotSupported:					return "Not supported for by this firmware";
 	case NTV2IpErrWriteSOMToMB:                 return "Could not write SOM to MB";
 	case NTV2IpErrWriteSeqToMB:                 return "Could not write sequence number to MB";
 	case NTV2IpErrWriteCountToMB:               return "Could not write count to MB";

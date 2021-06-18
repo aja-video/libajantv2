@@ -296,6 +296,12 @@ bool  CNTV2Config2110::DisableNetworkInterface(const eSFP sfp)
 
 bool CNTV2Config2110::SetRxStreamConfiguration(const eSFP sfp, const NTV2Stream stream, const rx_2110Config & rxConfig)
 {
+	if (mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12)
+	{
+		mIpErrorCode = NTV2IpErrNotSupported;
+		return false;
+	}
+
 	if ((StreamType(stream) == VIDEO_STREAM) ||
 		(StreamType(stream) == AUDIO_STREAM) ||
 		(StreamType(stream) == ANC_STREAM))
@@ -570,6 +576,12 @@ void CNTV2Config2110::GetVideoFormatForRxTx(const NTV2Stream stream, NTV2VideoFo
 
 bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP sfp, const NTV2Stream stream, rx_2110Config & rxConfig)
 {
+	if (mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12)
+	{
+		mIpErrorCode = NTV2IpErrNotSupported;
+		return false;
+	}
+
 	if ((StreamType(stream) == VIDEO_STREAM) ||
 		(StreamType(stream) == AUDIO_STREAM) ||
 		(StreamType(stream) == ANC_STREAM))
@@ -2037,7 +2049,11 @@ bool CNTV2Config2110::GenVideoStreamSDPInfo(stringstream & sdp, const eSFP sfp, 
     //fmtp
     sdp << "a=fmtp:";
     sdp << To_String(config.payloadType);
-    sdp << " sampling=YCbCr-4:2:2; width=";
+	if (config.videoSamples == VPIDSampling_GBR_444)
+		sdp << " sampling=RGB; width=";
+	else
+		sdp << " sampling=YCbCr-4:2:2; width=";
+
     sdp << To_String(width);
     sdp << "; height=";
     sdp << To_String(height);
@@ -3283,13 +3299,9 @@ void CNTV2Config2110::SetSampling(const eSFP sfp, const NTV2Stream stream, const
 
 		switch (stream)
 		{
-			case NTV2_VIDEO1_STREAM:
-				mask = 0xfffffff0;
-				break;
-
-			case NTV2_VIDEO2_STREAM:
-				mask = 0xffffff0f;
-				samp = samp << 4;
+			case NTV2_VIDEO4_STREAM:
+				mask = 0xffff0fff;
+				samp = samp << 12;
 				break;
 
 			case NTV2_VIDEO3_STREAM:
@@ -3297,9 +3309,14 @@ void CNTV2Config2110::SetSampling(const eSFP sfp, const NTV2Stream stream, const
 				samp = samp << 8;
 				break;
 
-			case NTV2_VIDEO4_STREAM:
-				mask = 0xffff0fff;
-				samp = samp << 12;
+			case NTV2_VIDEO2_STREAM:
+				mask = 0xffffff0f;
+				samp = samp << 4;
+				break;
+
+			default:
+			case NTV2_VIDEO1_STREAM:
+				mask = 0xfffffff0;
 				break;
 		}
 
@@ -3332,20 +3349,22 @@ VPIDSampling CNTV2Config2110::GetSampling(const eSFP sfp, const NTV2Stream strea
 
 		switch (stream)
 		{
-			case NTV2_VIDEO1_STREAM:
-				break;
-
-			case NTV2_VIDEO2_STREAM:
-				val = val >> 4;
+			case NTV2_VIDEO4_STREAM:
+				val = val >> 12;
 				break;
 
 			case NTV2_VIDEO3_STREAM:
 				val = val >> 8;
 				break;
 
-			case NTV2_VIDEO4_STREAM:
-				val = val >> 12;
+			case NTV2_VIDEO2_STREAM:
+				val = val >> 4;
 				break;
+
+			default:
+			case NTV2_VIDEO1_STREAM:
+				break;
+
 		}
 		sampling =	(VPIDSampling)(val &= 0x0000000f);
 	}
