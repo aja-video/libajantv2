@@ -650,18 +650,18 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
                                                   rxChannelConfig);
         if (!rv)
         {
-            cerr << "SetRxStreamConfiguration: FAILED: " << config2110.getLastError() << endl;
-            return false;
+			cerr << "SetRxStreamConfiguration: Video FAILED: " << config2110.getLastError() << endl;
         }
-
-        rv = config2110.SetRxStreamEnable(sfp,
-                                          receiveVideo2110.rxVideoCh[i].stream,
-                                          receiveVideo2110.rxVideoCh[i].enable);
-        if (!rv)
-        {
-            cerr << "SetRxStreamEnable: FAILED: " << config2110.getLastError() << endl;
-            return false;
-        }
+		else
+		{
+			rv = config2110.SetRxStreamEnable(sfp,
+											  receiveVideo2110.rxVideoCh[i].stream,
+											  receiveVideo2110.rxVideoCh[i].enable);
+			if (!rv)
+			{
+				cerr << "SetRxStreamEnable: Video FAILED: " << config2110.getLastError() << endl;
+			}
+		}
     }
 
     // fetch parsed receive audio struct
@@ -730,19 +730,19 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
                                                   rxChannelConfig);
         if (!rv)
         {
-            cerr << "SetRxStreamConfiguration: FAILED: " << config2110.getLastError() << endl;
-            return false;
+			cerr << "SetRxStreamConfiguration: Audio FAILED: " << config2110.getLastError() << endl;
         }
-
-        rv = config2110.SetRxStreamEnable(sfp,
-                                          receiveAudio2110.rxAudioCh[i].stream,
-                                          receiveAudio2110.rxAudioCh[i].enable);
-        if (!rv)
-        {
-            cerr << "SetRxStreamEnable: FAILED: " << config2110.getLastError() << endl;
-            return false;
-        }
-    }
+		else
+		{
+			rv = config2110.SetRxStreamEnable(sfp,
+											  receiveAudio2110.rxAudioCh[i].stream,
+											  receiveAudio2110.rxAudioCh[i].enable);
+			if (!rv)
+			{
+				cerr << "SetRxStreamEnable: Audio FAILED: " << config2110.getLastError() << endl;
+			}
+		}
+	}
 
 	// fetch parsed receive anc struct
 	ReceiveAncData2110 receiveAnc2110 = parse2110.m_receiveAnc2110;
@@ -801,24 +801,23 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 		if (rxChannelConfig.ssrc)
 			rxChannelConfig.rxMatch |= RX_MATCH_2110_SSRC;
 
-
 		bool rv;
 		rv = config2110.SetRxStreamConfiguration (sfp,
 												  receiveAnc2110.rxAncCh[i].stream,
 												  rxChannelConfig);
 		if (!rv)
 		{
-			cerr << "SetRxStreamConfiguration: FAILED: " << config2110.getLastError() << endl;
-			return false;
+			cerr << "SetRxStreamConfiguration: ANC FAILED: " << config2110.getLastError() << endl;
 		}
-
-		rv = config2110.SetRxStreamEnable(sfp,
-										  receiveAnc2110.rxAncCh[i].stream,
-										  receiveAnc2110.rxAncCh[i].enable);
-		if (!rv)
+		else
 		{
-			cerr << "SetRxStreamEnable: FAILED: " << config2110.getLastError() << endl;
-			return false;
+			rv = config2110.SetRxStreamEnable(sfp,
+											  receiveAnc2110.rxAncCh[i].stream,
+											  receiveAnc2110.rxAncCh[i].enable);
+			if (!rv)
+			{
+				cerr << "SetRxStreamEnable: ANC FAILED: " << config2110.getLastError() << endl;
+			}
 		}
 	}
 
@@ -851,20 +850,20 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         if (!rv)
         {
             cerr << "SetTxStreamConfiguration Video: FAILED: " << config2110.getLastError() << endl;
-            return false;
         }
-
-        if (transmitVideo2110.txVideoCh[i].enable)
-        {
-            rv = config2110.SetTxStreamEnable(transmitVideo2110.txVideoCh[i].stream,
-                                              transmitVideo2110.txVideoCh[i].sfpEnable[0],
-                                              transmitVideo2110.txVideoCh[i].sfpEnable[1]);
-            if (!rv)
-            {
-                cerr << "SetTxStreamEnable Audio: FAILED: " << config2110.getLastError() << endl;
-                return false;
-            }
-        }
+		else
+		{
+			if (transmitVideo2110.txVideoCh[i].enable)
+			{
+				rv = config2110.SetTxStreamEnable(transmitVideo2110.txVideoCh[i].stream,
+												  transmitVideo2110.txVideoCh[i].sfpEnable[0],
+												  transmitVideo2110.txVideoCh[i].sfpEnable[1]);
+				if (!rv)
+				{
+					cerr << "SetTxStreamEnable Video: FAILED: " << config2110.getLastError() << endl;
+				}
+			}
+		}
     }
 
     // fetch parsed transmit audio struct
@@ -898,20 +897,20 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         if (!rv)
         {
             cerr << "SetTxStreamConfiguration Audio: FAILED: " << config2110.getLastError() << endl;
-            return false;
         }
-
-        if (transmitAudio2110.txAudioCh[i].enable)
-        {
-            rv = config2110.SetTxStreamEnable(transmitAudio2110.txAudioCh[i].stream,
-                                              transmitAudio2110.txAudioCh[i].sfpEnable[0],
-                                              transmitAudio2110.txAudioCh[i].sfpEnable[1]);
-            if (!rv)
-            {
-                cerr << "SetTxStreamEnable Audio: FAILED: " << config2110.getLastError() << endl;
-                return false;
-            }
-        }
+		else
+		{
+			if (transmitAudio2110.txAudioCh[i].enable)
+			{
+				rv = config2110.SetTxStreamEnable(transmitAudio2110.txAudioCh[i].stream,
+												  transmitAudio2110.txAudioCh[i].sfpEnable[0],
+												  transmitAudio2110.txAudioCh[i].sfpEnable[1]);
+				if (!rv)
+				{
+					cerr << "SetTxStreamEnable Audio: FAILED: " << config2110.getLastError() << endl;
+				}
+			}
+		}
     }
 
 	// fetch parsed transmit anc struct
@@ -938,19 +937,19 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
 												 txChannelConfig);
 		if (!rv)
 		{
-			cerr << "SetTxStreamConfiguration Anc: FAILED: " << config2110.getLastError() << endl;
-			return false;
+			cerr << "SetTxStreamConfiguration ANC: FAILED: " << config2110.getLastError() << endl;
 		}
-
-		if (transmitAnc2110.txAncCh[i].enable)
+		else
 		{
-			rv = config2110.SetTxStreamEnable(transmitAnc2110.txAncCh[i].stream,
-											  transmitAnc2110.txAncCh[i].sfpEnable[0],
-											  transmitAnc2110.txAncCh[i].sfpEnable[1]);
-			if (!rv)
+			if (transmitAnc2110.txAncCh[i].enable)
 			{
-				cerr << "SetTxStreamEnable Anc: FAILED: " << config2110.getLastError() << endl;
-				return false;
+				rv = config2110.SetTxStreamEnable(transmitAnc2110.txAncCh[i].stream,
+												  transmitAnc2110.txAncCh[i].sfpEnable[0],
+												  transmitAnc2110.txAncCh[i].sfpEnable[1]);
+				if (!rv)
+				{
+					cerr << "SetTxStreamEnable ANC: FAILED: " << config2110.getLastError() << endl;
+				}
 			}
 		}
 	}
