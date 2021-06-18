@@ -224,10 +224,11 @@ void NTV2Capture::SetupHostBuffers (void)
 	mAVCircularBuffer.SetAbortFlag (&mGlobalQuit);
 
 	if (mConfig.fWithAnc)
-	{
+	{	//	Use the max anc size stipulated by the AncFieldOffset VReg values...
 		ULWord	F1OffsetFromEnd(0), F2OffsetFromEnd(0);
-		mDevice.ReadRegister(kVRegAncField1Offset, F1OffsetFromEnd);
-		mDevice.ReadRegister(kVRegAncField2Offset, F2OffsetFromEnd);
+		mDevice.ReadRegister(kVRegAncField1Offset, F1OffsetFromEnd);	//	# bytes from end of 8MB/16MB frame
+		mDevice.ReadRegister(kVRegAncField2Offset, F2OffsetFromEnd);	//	# bytes from end of 8MB/16MB frame
+		//	Based on the offsets, calculate the max anc capacity
 		F1AncSize = F2OffsetFromEnd > F1OffsetFromEnd ? 0 : F1OffsetFromEnd - F2OffsetFromEnd;
 		F2AncSize = F2OffsetFromEnd > F1OffsetFromEnd ? F2OffsetFromEnd - F1OffsetFromEnd : F2OffsetFromEnd;
 	}
@@ -355,9 +356,9 @@ void NTV2Capture::ConsumeFrames (void)
 				cerr << "Writing raw anc to '" << mConfig.fAncDataFilePath << "', "
 					<< DEC(pFrameData->AncBufferSize() + pFrameData->AncBuffer2Size())
 					<< " bytes per frame" << endl;
-			if (pOFS  &&  pFrameData->fAncBuffer)
+			if (pOFS  &&  pFrameData->AncBuffer())
 				pOFS->write(pFrameData->AncBuffer(), streamsize(pFrameData->AncBufferSize()));
-			if (pOFS  &&  pFrameData->fAncBuffer2)
+			if (pOFS  &&  pFrameData->AncBuffer2())
 				pOFS->write(pFrameData->AncBuffer2(), streamsize(pFrameData->AncBuffer2Size()));
 
 			//	Now release and recycle the buffer...
@@ -402,7 +403,8 @@ void NTV2Capture::CaptureFrames (void)
 {
 	AUTOCIRCULATE_TRANSFER	inputXfer;	//	My A/C input transfer info
 	NTV2AudioChannelPairs	nonPcmPairs, oldNonPcmPairs;
-	ULWord					acOptions (AUTOCIRCULATE_WITH_RP188);
+	ULWord					acOptions (AUTOCIRCULATE_WITH_RP188), overruns(0);
+	UWord					sdiSpigot (UWord(::NTV2InputSourceToChannel(mConfig.fInputSource)));
 	if (mConfig.fWithAnc)
 		acOptions |= AUTOCIRCULATE_WITH_ANC;
 
@@ -444,17 +446,20 @@ void NTV2Capture::CaptureFrames (void)
 				pCaptureData->fNumAudioBytes = inputXfer.GetCapturedAudioByteCount();
 
 			//	If capturing Anc, clear stale anc data from the anc buffers...
-			if (acStatus.WithCustomAnc()  &&  pCaptureData->fAncBuffer)
-			{
+			if (acStatus.WithCustomAnc()  &&  pCaptureData->AncBuffer())
+			{	bool overrun(false);
+				mDevice.AncExtractGetBufferOverrun (sdiSpigot, overrun);
+				if (overrun)
+					{overruns++;  CAPWARN(overruns << " anc overrun(s)");}
 				pCaptureData->fNumAncBytes = inputXfer.GetCapturedAncByteCount(/*isF2*/false);
-				NTV2_POINTER stale (pCaptureData->fAncBuffer.GetHostAddress(inputXfer.GetCapturedAncByteCount(/*isF2*/false), /*fromEnd*/true),
+				NTV2_POINTER stale (pCaptureData->fAncBuffer.GetHostAddress(pCaptureData->fNumAncBytes, /*fromEnd*/true),
 									pCaptureData->fNumAncBytes);
 				stale.Fill(uint8_t(0));
 			}
 			if (acStatus.WithCustomAnc()  &&  pCaptureData->AncBuffer2())
 			{
 				pCaptureData->fNumAnc2Bytes = inputXfer.GetCapturedAncByteCount(/*isF2*/true);
-				NTV2_POINTER excess(pCaptureData->fAncBuffer2.GetHostAddress(inputXfer.GetCapturedAncByteCount(/*isF2*/true), /*fromEnd*/true),
+				NTV2_POINTER excess(pCaptureData->fAncBuffer2.GetHostAddress(pCaptureData->fNumAnc2Bytes, /*fromEnd*/true),
 									pCaptureData->fNumAnc2Bytes);
 				excess.Fill(uint8_t(0));
 			}
