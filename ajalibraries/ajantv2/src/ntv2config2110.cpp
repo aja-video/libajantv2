@@ -654,6 +654,12 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP sfp, const NTV2Stream
 
 bool CNTV2Config2110::SetRxStreamEnable(const eSFP sfp, const NTV2Stream stream, bool enable)
 {
+	if (mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12)
+	{
+		mIpErrorCode = NTV2IpErrNotSupported;
+		return false;
+	}
+
 	if ((StreamType(stream) == VIDEO_STREAM) ||
 		(StreamType(stream) == AUDIO_STREAM) ||
 		(StreamType(stream) == ANC_STREAM))
@@ -712,6 +718,12 @@ bool CNTV2Config2110::SetRxStreamEnable(const eSFP sfp, const NTV2Stream stream,
 
 bool CNTV2Config2110::GetRxStreamEnable(const eSFP sfp, const NTV2Stream stream, bool & enabled)
 {
+	if (mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12)
+	{
+		mIpErrorCode = NTV2IpErrNotSupported;
+		return false;
+	}
+
 	enabled = false;
 
 	if ((StreamType(stream) == VIDEO_STREAM) ||
