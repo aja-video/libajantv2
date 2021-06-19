@@ -740,11 +740,14 @@ public:
 		@param[in]	inEndFrameNumber		Specifies the ending device frame number.
 		@param[in]	inAncRegion				Optionally specifies the ancillary data region to clear (e.g.
 											NTV2_AncRgn_Field1, NTV2_AncRgn_Field2, etc.).  Defaults to all regions.
+		@param[in]	inChannel				Optionally specifies the channel associated with the frame numbers.
+											Defaults to NTV2_CHANNEL1.
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	DMAClearAncRegion (	const UWord inStartFrameNumber,
 											const UWord inEndFrameNumber,
-											const NTV2AncillaryDataRegion inAncRegion = NTV2_AncRgn_All);
+											const NTV2AncillaryDataRegion inAncRegion = NTV2_AncRgn_All,
+											const NTV2Channel = NTV2_CHANNEL1);
 
 	/**
 		@brief		Answers with the address and size of the given frame.
@@ -6649,10 +6652,13 @@ public:
 		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
 		@param[out]	outIsOverrun	Receives true if the extractor is reporting that it overran its buffer limits;
 									otherwise false if it didn't.
+		@param[in]	inField			Optionally specifies the field of interest. Specify 0 for the "total" buffer
+									overflow between the F1 and F2 buffers;  specify 1 for Field 1;  specify 2 for Field 2.
+									Defaults to zero (the "total").
 		@note		The extractor will not actually write any Anc bytes past its "stop" address, but it will
 					report that it was about to via this "overrun" flag.
 	**/
-	AJA_VIRTUAL bool	AncExtractGetBufferOverrun (const UWord inSDIInput, bool & outIsOverrun);
+	AJA_VIRTUAL bool	AncExtractGetBufferOverrun (const UWord inSDIInput, bool & outIsOverrun, const UWord inField = 0);
 
 	/**
 		@return		The maximum number of distinct DIDs that the device Anc extractor filter can accommodate.

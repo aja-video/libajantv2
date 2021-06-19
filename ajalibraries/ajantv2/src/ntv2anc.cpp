@@ -944,7 +944,7 @@ bool CNTV2Card::AncExtractGetField2Size (const UWord inSDIInput, ULWord & outF2S
 	return ok;
 }
 
-bool CNTV2Card::AncExtractGetBufferOverrun (const UWord inSDIInput, bool & outIsOverrun)
+bool CNTV2Card::AncExtractGetBufferOverrun (const UWord inSDIInput, bool & outIsOverrun, const UWord inField)
 {
 	outIsOverrun = false;
 	if (!::NTV2DeviceCanDoCapture(_boardID))
@@ -953,7 +953,23 @@ bool CNTV2Card::AncExtractGetBufferOverrun (const UWord inSDIInput, bool & outIs
 		return false;
 	if (IS_INPUT_SPIGOT_INVALID(inSDIInput))
 		return false;
-	return IsAncExtOverrun (*this, inSDIInput, outIsOverrun);
+	if (inField > 2)
+		return false;
+	ULWord status(0);
+	switch (inField)
+	{
+		case 0:	return IsAncExtOverrun (*this, inSDIInput, outIsOverrun);
+		case 1:	if (!GetAncExtField1Status(*this, inSDIInput, status))
+					return false;
+				outIsOverrun = (status & maskField1Overrun) ? true : false;
+				return true;
+		case 2:	if (!GetAncExtField2Status(*this, inSDIInput, status))
+					return false;
+				outIsOverrun = (status & maskField2Overrun) ? true : false;
+				return true;
+		default: break;
+	}
+	return false;
 }
 
 

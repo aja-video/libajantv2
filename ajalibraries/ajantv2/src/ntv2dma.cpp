@@ -337,8 +337,7 @@ bool CNTV2Card::DMAWriteAnc (const ULWord		inFrameNumber,
 	{
 		byteOffsetToAncData = frameSizeInBytes - F1Offset;
 		result = DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, /*isRead*/false, inFrameNumber,
-								reinterpret_cast <ULWord *> (inAncF1Buffer.GetHostPointer()),
-								byteOffsetToAncData, bytesToTransfer, true);
+								inAncF1Buffer, byteOffsetToAncData, bytesToTransfer, true);
 	}
 	inByteCount      =  inAncF2Buffer.IsNULL()  ?  0  :  inAncF2Buffer.GetByteCount();
 	bytesToTransfer  =  inByteCount > F2Offset  ?  F2Offset  :  inByteCount;
@@ -346,8 +345,7 @@ bool CNTV2Card::DMAWriteAnc (const ULWord		inFrameNumber,
 	{
 		byteOffsetToAncData = frameSizeInBytes - F2Offset;
 		result = DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, /*isRead*/false, inFrameNumber,
-								reinterpret_cast <ULWord *> (inAncF2Buffer.GetHostPointer()),
-								byteOffsetToAncData, bytesToTransfer, true);
+								inAncF2Buffer, byteOffsetToAncData, bytesToTransfer, true);
 	}
 
 	if (tmpLocalRP188F1AncBuffer)	inAncF1Buffer.Deallocate();
@@ -518,7 +516,8 @@ typedef AncRgnSizes::const_iterator		AncRgnSizesConstIter;
 typedef pair<NTV2AncDataRgn,ULWord>	AncRgnOffset, AncRgnSize;
 
 
-bool CNTV2Card::DMAClearAncRegion (const UWord inStartFrameNumber,  const UWord inEndFrameNumber, const NTV2AncillaryDataRegion inAncRegion)
+bool CNTV2Card::DMAClearAncRegion (const UWord inStartFrameNumber,  const UWord inEndFrameNumber,
+									const NTV2AncillaryDataRegion inAncRegion, const NTV2Channel inChannel)
 {
 	if (!::NTV2DeviceCanDoCustomAnc(GetDeviceID()))
 		return false;	//	no anc inserters/extractors
@@ -526,14 +525,13 @@ bool CNTV2Card::DMAClearAncRegion (const UWord inStartFrameNumber,  const UWord 
 	ULWord offsetInBytes(0), sizeInBytes(0);
 	if (!GetAncRegionOffsetAndSize(offsetInBytes, sizeInBytes, inAncRegion))
 		return false;	//	no such region
-	NTV2_ASSERT (sizeInBytes && offsetInBytes);
-
 	NTV2_POINTER zeroBuffer(sizeInBytes);
+	if (!zeroBuffer)
+		return false;
 	zeroBuffer.Fill(ULWord64(0));
+
 	for (UWord ndx(inStartFrameNumber);  ndx < inEndFrameNumber + 1;  ndx++)
-		if (!DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, /*isRead*/false, /*frameNum*/ndx,
-							reinterpret_cast <ULWord *> (zeroBuffer.GetHostPointer()),
-							offsetInBytes, zeroBuffer.GetByteCount(), /*synchronous*/true))
+		if (!DMAWriteAnc (ULWord(ndx), zeroBuffer, zeroBuffer, inChannel))
 			return false;	//	DMA write failure
 	return true;
 }
