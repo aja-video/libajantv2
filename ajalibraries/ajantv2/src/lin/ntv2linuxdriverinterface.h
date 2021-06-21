@@ -2,7 +2,7 @@
 /**
 	@file		ntv2linuxdriverinterface.h
 	@brief		Declares the CNTV2LinuxDriverInterface class.
-	@copyright	(C) 2003-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2003-2021 AJA Video Systems, Inc.
 **/
 #ifndef NTV2LINUXDRIVERINTERFACE_H
 #define NTV2LINUXDRIVERINTERFACE_H

@@ -2,7 +2,7 @@
 /**
 	@file		ntv2csclut.cpp
 	@brief		Implements most of CNTV2Card's CSC/LUT-related functions.
-	@copyright	(C) 2019-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2019-2021 AJA Video Systems, Inc.
 **/
 
 #include "ntv2card.h"

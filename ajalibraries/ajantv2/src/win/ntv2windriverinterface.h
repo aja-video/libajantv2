@@ -2,7 +2,7 @@
 /**
 	@file		ntv2windriverinterface.h
 	@brief		Declares the MSWindows-specific flavor of CNTV2DriverInterface.
-	@copyright	(C) 2003-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2003-2021 AJA Video Systems, Inc.
 **/
 #ifndef NTV2WINDRIVERINTERFACE_H
 #define NTV2WINDRIVERINTERFACE_H

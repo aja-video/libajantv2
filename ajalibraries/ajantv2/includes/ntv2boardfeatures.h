@@ -2,7 +2,7 @@
 /**
 	@file		ntv2boardfeatures.h
 	@deprecated	Please include ntv2devicefeatures.h instead.
-	@copyright	(C) 2004-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2021 AJA Video Systems, Inc.
 **/
 #ifndef NTV2BOARDFEATURES_H
 	#define NTV2BOARDFEATURES_H

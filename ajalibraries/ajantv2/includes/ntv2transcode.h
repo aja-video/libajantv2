@@ -2,7 +2,7 @@
 /**
 	@file		ntv2transcode.h
 	@brief		Declares a number of pixel format transcoder functions.
-	@copyright	(C) 2004-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2021 AJA Video Systems, Inc.
 **/
 
 #ifndef NTV2TRANSCODE_H

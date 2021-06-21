@@ -2,7 +2,7 @@
 /**
 	@file		ntv2rp188.cpp
 	@brief		Implements the CRP188 class. See SMPTE RP188 standard for details.
-	@copyright	(C) 2007-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2007-2021 AJA Video Systems, Inc.
 **/
 
 #include "ntv2rp188.h"

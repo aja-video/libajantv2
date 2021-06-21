@@ -2,7 +2,7 @@
 /**
 	@file		ntv2serialcontrol.cpp
 	@brief		Implements the CNTV2SerialControl class.
-	@copyright	(C) 2004-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2021 AJA Video Systems, Inc.
 **/
 
 #ifndef _NTV2SERIALCONTROL_H

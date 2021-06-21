@@ -2,7 +2,7 @@
 /**
 	@file		ntv2publicinterface.cpp
 	@brief		Implementations of methods declared in 'ntv2publicinterface.h'.
-	@copyright	(C) 2016-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2016-2021 AJA Video Systems, Inc.
 **/
 
 #include "ntv2publicinterface.h"

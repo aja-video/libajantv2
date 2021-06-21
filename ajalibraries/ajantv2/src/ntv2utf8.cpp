@@ -2,7 +2,7 @@
 /**
 	@file		ntv2utf8.cpp
 	@brief		Implements the bare-bones UTF8 support functions (for the nub).
-	@copyright	(C) 2008-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2008-2021 AJA Video Systems, Inc.
 **/
 
 #include <string.h>

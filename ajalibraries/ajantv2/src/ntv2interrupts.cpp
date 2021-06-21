@@ -2,7 +2,7 @@
 /**
 	@file		ntv2interrupts.cpp
 	@brief		Implementation of CNTV2Card's interrupt functions.
-	@copyright	(C) 2004-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2004-2021 AJA Video Systems, Inc.
 **/
 
 #include "ntv2card.h"

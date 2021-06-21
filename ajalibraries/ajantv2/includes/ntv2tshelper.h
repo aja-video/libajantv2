@@ -2,7 +2,7 @@
 /**
 	@file		ntv2tshelper.h
 	@brief		Declares Transport Stream helper classes.
-	@copyright	(C) 2008-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2008-2021 AJA Video Systems, Inc.
 **/
 
 #ifndef NTV2TSHELPER_H

@@ -2,7 +2,7 @@
 /**
 	@file		ancillarydata.h
 	@brief		Declares the AJAAncillaryData class.
-	@copyright	(C) 2010-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2010-2021 AJA Video Systems, Inc.
 **/
 
 #ifndef AJA_ANCILLARYDATA_H

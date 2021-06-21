@@ -2,7 +2,7 @@
 /**
     @file		ntv2registerexpert.h
     @brief		Declares the CNTV2RegisterExpert class.
-    @copyright	(C) 2016-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
+    @copyright	(C) 2016-2021 AJA Video Systems, Inc.
 **/
 
 #ifndef NTV2REGEXPERT_H

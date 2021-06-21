@@ -2,7 +2,7 @@
 /**
 	@file		ancillarylist.h
 	@brief		Declares the AJAAncillaryList class.
-	@copyright	(C) 2010-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2010-2021 AJA Video Systems, Inc.
 **/
 
 #ifndef AJA_ANCILLARYLIST_H

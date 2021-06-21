@@ -2,7 +2,7 @@
 /**
 	@file		ntv2enhancedcsc.h
 	@brief		Declares the CNTV2EnhancedCSC class.
-	@copyright	(C) 2015-2021 AJA Video Systems, Inc.	Proprietary and confidential information.
+	@copyright	(C) 2015-2021 AJA Video Systems, Inc.
 **/
 
 #ifndef NTV2_ENHANCED_CSC_H
