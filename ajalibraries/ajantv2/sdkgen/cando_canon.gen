@@ -112,3 +112,4 @@ NTV2DeviceCanDoHFRRGB						True if the device supports 1080p > 50 RGB rates
 NTV2DeviceCanDoFramePulseSelect				True if the device supports frame pulse source independent of reference source
 NTV2DeviceHasRotaryEncoder					True if the device having the given ID supports rotary encoder volume control
 NTV2DeviceCanDoHDMIMultiView				True if the device can rasterize 4 HD signals into a single HDMI output
+NTV2DeviceCanDoHDMIMultiRasterView			True if the device can rasterize 4 different signals into a single HDMI output

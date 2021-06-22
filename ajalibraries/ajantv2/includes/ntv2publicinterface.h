@@ -963,6 +963,15 @@ typedef enum _NTV2HDMIRegisters
 	kRegHDMIControl4            = 0x3014
 } NTV2HDMIRegisters;
 
+typedef enum _NTV2MultiRasterRegisters
+{
+	kRegMRQ1Control = 0xF00,
+	kRegMRQ2Control,
+	kRegMRQ3Control,
+	kRegMRQ4Control,
+	kRegMROutControl
+} NTV2MultiRasterRegisters;
+
 typedef enum
 {
     kRegRotaryEncoder = 0x940
@@ -2354,7 +2363,11 @@ typedef enum
 	
 	kRegMaskLUTAddress =	BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15) + \
 							BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29),
-	kRegMaskLUTLoad = BIT(31)
+	kRegMaskLUTLoad = BIT(31),
+
+	kRegMaskMRStandard = BIT(0) + BIT(1) + BIT(2) + BIT(3),
+	kRegMaskMRBypass = BIT(20),
+	kRegMaskMREnable = BIT(24),
 
 #if !defined (NTV2_DEPRECATE)
 	,
@@ -3528,7 +3541,11 @@ typedef enum
     kRegShiftRotaryEncoderGain = 8,
 	
 	kRegShiftLUTAddress = 0,
-	kRegShiftLUTLoad = 31
+	kRegShiftLUTLoad = 31,
+
+	kRegShiftMRStandard = 0,
+	kRegShiftMRBypass = 20,
+	kRegShiftMREnable = 24,
 
 #if !defined (NTV2_DEPRECATE)
 	// kRegSDIInput3GStatus
