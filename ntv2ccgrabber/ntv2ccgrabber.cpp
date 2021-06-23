@@ -135,6 +135,11 @@ AJAStatus NTV2CCGrabber::Init (void)
 			cerr	<< "## ERROR:  Device '" << deviceStr << "' can't burn-in captions because at least 2 frame stores are required" << endl;
 			return AJA_STATUS_FAIL;
 		}
+		if (!::NTV2DeviceCanDoPlayback(mDeviceID))
+		{
+			cerr	<< "## ERROR:  Device '" << deviceStr << "' can't burn-in captions because device can only capture/ingest" << endl;
+			return AJA_STATUS_FAIL;
+		}
 		if (::NTV2DeviceGetNumVideoInputs(mDeviceID) < 1  ||  ::NTV2DeviceGetNumVideoOutputs(mDeviceID) < 1)	//	Need 1 input & 1 output
 		{
 			cerr	<< "## ERROR:  Device '" << deviceStr << "' can't be used -- at least 1 SDI input and 1 SDI output required" << endl;
@@ -586,11 +591,15 @@ void NTV2CCGrabber::SetOutputStandards (const NTV2VideoFormat inVideoFormat)
 }	//	SetOutputStandards
 
 
-AJAStatus NTV2CCGrabber::Run ()
+AJAStatus NTV2CCGrabber::Run (void)
 {
 	//	Start the capture thread...
-	StartCaptureThread ();
-	return AJA_STATUS_SUCCESS;
+	AJAStatus result (StartCaptureThread());
+	if (AJA_FAILURE(result))
+		return result;
+
+	AJATime::Sleep(500);	//	Wait a half second for the capture thread to start (or fail?)...
+	return IsCaptureThreadRunning() ? AJA_STATUS_SUCCESS : AJA_STATUS_FAIL;
 
 }	//	Run
 
@@ -598,13 +607,16 @@ AJAStatus NTV2CCGrabber::Run ()
 
 //////////////////////////////////////////////
 
-//	This is where we start the capture thread
-void NTV2CCGrabber::StartCaptureThread (void)
+//	Starts the capture thread
+AJAStatus NTV2CCGrabber::StartCaptureThread (void)
 {
 	//	Create and start the capture thread...
-	mCaptureThread.Attach(CaptureThreadStatic, this);
-	mCaptureThread.SetPriority(AJA_ThreadPriority_High);
-	mCaptureThread.Start ();
+	AJAStatus result (mCaptureThread.Attach(CaptureThreadStatic, this));
+	if (AJA_SUCCESS(result))
+		result = mCaptureThread.SetPriority(AJA_ThreadPriority_High);
+	if (AJA_SUCCESS(result))
+		result = mCaptureThread.Start();
+	return result;
 
 }	//	StartCaptureThread
 
@@ -675,16 +687,18 @@ void NTV2CCGrabber::CaptureFrames (void)
 			SetOutputStandards(currentVF);	//	...output standard may need changing
 
 		mDevice.AutoCirculateStop(mConfig.fInputChannel);
-		mDevice.AutoCirculateInitForInput(	mConfig.fInputChannel,		//	primary channel
-											mConfig.fFrames.count(),	//	numFrames (zero if specifying range)
-											mAudioSystem,				//	audio system
-											AUTOCIRCULATE_WITH_RP188
-												| (DeviceAncExtractorIsAvailable() ? AUTOCIRCULATE_WITH_ANC : 0),	//	flags
-											1,	//	numChannels to gang
-											mConfig.fFrames.firstFrame(), mConfig.fFrames.lastFrame());
+		if (!mDevice.AutoCirculateInitForInput(	mConfig.fInputChannel,		//	primary channel
+												mConfig.fFrames.count(),	//	numFrames (zero if specifying range)
+												mAudioSystem,				//	audio system
+												AUTOCIRCULATE_WITH_RP188
+													| (DeviceAncExtractorIsAvailable() ? AUTOCIRCULATE_WITH_ANC : 0),	//	flags
+												1,	//	numChannels to gang
+												mConfig.fFrames.firstFrame(), mConfig.fFrames.lastFrame()))
+			{CAPFAIL("Failed to init Ch" << DEC(mConfig.fInputChannel+1) << " for input"); break;}
 
 		//	Start AutoCirculate...
-		mDevice.AutoCirculateStart(mConfig.fInputChannel);
+		if (!mDevice.AutoCirculateStart(mConfig.fInputChannel))
+			{CAPFAIL("Failed to start Ch" << DEC(mConfig.fInputChannel+1)); break;}
 
 		//	Process frames until signal format changes...
 		while (!mGlobalQuit)
@@ -1399,14 +1413,17 @@ void NTV2CCGrabber::RouteOutputSignal (const NTV2VideoFormat inVideoFormat)
 }	//	RouteOutputSignal
 
 
-//	This is where the play thread will be started
-void NTV2CCGrabber::StartPlayThread (void)
+//	Starts the play thread
+AJAStatus NTV2CCGrabber::StartPlayThread (void)
 {
 	//	Create and start the playout thread...
 	NTV2_ASSERT(mConfig.fBurnCaptions);
-	mPlayoutThread.Attach(PlayThreadStatic, this);
-	mPlayoutThread.SetPriority(AJA_ThreadPriority_High);
-	mPlayoutThread.Start();
+	AJAStatus result (mPlayoutThread.Attach(PlayThreadStatic, this));
+	if (AJA_SUCCESS(result))
+		result = mPlayoutThread.SetPriority(AJA_ThreadPriority_High);
+	if (AJA_SUCCESS(result))
+		result = mPlayoutThread.Start();
+	return result;
 
 }	//	StartPlayThread
 
@@ -1435,9 +1452,10 @@ void NTV2CCGrabber::PlayFrames (void)
 	SetupOutputVideo (videoFormat);		//	Set up device output
 	RouteOutputSignal (videoFormat);	//	Set up output signal routing
 	mDevice.GetVANCMode (vancMode, mConfig.fInputChannel);
-	if (mDevice.AutoCirculateInitForOutput (mOutputChannel, 2))	//	Let A/C reserve buffer pair
-		if (mDevice.AutoCirculateGetStatus (mOutputChannel, acStatus))	//	Find out which buffers we got
-			fbNum = ULWord(acStatus.acStartFrame);	//	Use them
+	if (mDevice.AutoCirculateInitForOutput (mOutputChannel, 2) && mDevice.AutoCirculateGetStatus (mOutputChannel, acStatus))	//	Find out which buffers we got
+		fbNum = ULWord(acStatus.acStartFrame);	//	Use them
+	else if (mDevice.AutoCirculateGetStatus(mConfig.fInputChannel, acStatus))	//	Use the frame just past the last input A/C frame
+		fbNum = ULWord(acStatus.GetEndFrame()) + 1;
 
 	const NTV2FormatDesc	formatDesc		(videoFormat, mPlayoutFBF, vancMode);
 	const uint32_t			bufferSizeBytes	(formatDesc.GetTotalRasterBytes ());
@@ -1528,7 +1546,7 @@ void NTV2CCGrabber::PlayFrames (void)
 		}	//	if pPlayData
 	}	//	loop til quit signaled
 
-	if (!acStatus.IsStopped())
+	if (mDevice.AutoCirculateGetStatus (mOutputChannel, acStatus)  &&  !acStatus.IsStopped())
 		mDevice.AutoCirculateStop(mOutputChannel);
 	CAPNOTE("Thread completed, will exit");
 

@@ -164,6 +164,12 @@ class NTV2CCGrabber
 
 
 		/**
+			@brief	Returns true if my capture thread is currently running.
+		**/
+		virtual inline bool		IsCaptureThreadRunning (void) const		{return mCaptureThread.Active();}
+
+
+		/**
 			@brief	Returns true if my play thread is currently running.
 		**/
 		virtual inline bool		IsPlayThreadRunning (void) const		{return mPlayoutThread.Active();}
@@ -171,7 +177,7 @@ class NTV2CCGrabber
 		/**
 			@brief	Starts my playout thread.
 		**/
-		virtual void			StartPlayThread (void);
+		virtual AJAStatus		StartPlayThread (void);
 
 		/**
 			@brief	Toggles the Head-Up-Display.
@@ -211,7 +217,7 @@ class NTV2CCGrabber
 		/**
 			@brief	Starts my capture thread.
 		**/
-		virtual void			StartCaptureThread (void);
+		virtual AJAStatus		StartCaptureThread (void);
 
 		/**
 			@brief	Repeatedly captures frames using AutoCirculate (until global quit flag set).
@@ -316,7 +322,7 @@ class NTV2CCGrabber
 	//	Instance Data
 	private:
 		CCGrabberConfig				mConfig;			///< @brief	My configuration
-		AJAThread					mCaptureThread;		///< @brief	My capture thread object
+		mutable AJAThread			mCaptureThread;		///< @brief	My capture thread object
 		CNTV2Card					mDevice;			///< @brief	My CNTV2Card instance
 		NTV2DeviceID				mDeviceID;			///< @brief	Keep device ID handy
 		NTV2EveryFrameTaskMode		mSavedTaskMode;		///< @brief	Used to restore the previous task mode

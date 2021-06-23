@@ -229,15 +229,16 @@ int main (int argc, const char ** argv)
 		::signal (SIGQUIT, SignalHandler);
 	#endif
 
-	NTV2CCGrabber	ccGrabber(config);
+	NTV2CCGrabber ccGrabber (config);
 
 	//	Initialize the ccGrabber instance...
 	status = ccGrabber.Init();
 	if (AJA_FAILURE(status))
-		{cerr << "## ERROR:  'ntv2ccgrabber' initialization failed with status " << status << endl;	return 1;}
+		{cerr << "## ERROR:  'ntv2ccgrabber' initialization failed with status " << status << endl;	return 2;}
 
 	//	Run the ccGrabber...
-	ccGrabber.Run();
+	if (AJA_FAILURE(ccGrabber.Run()))
+		{cerr << "## ERROR:  'ntv2ccgrabber' capture thread failed to run -- check for AutoCirculate messages in AJALogger?" << endl; return 2;}
 
 	//	Loop until someone tells us to stop...
 	while (!gGlobalQuit)
