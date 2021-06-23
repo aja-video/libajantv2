@@ -706,8 +706,8 @@ class CNTV2AncDataTester
 			UWordSequence				v210VancLine;
 			UWordVANCPacketList			u16Pkts;
 			AJAAncillaryList			pktList;
-			AJAAncillaryData *			pPkt	(NULL);
-			AJAAncillaryData_Cea708 *	p708Pkt	(NULL);
+			AJAAncillaryData *			pPkt	(AJA_NULL);
+			AJAAncillaryData_Cea708 *	p708Pkt	(AJA_NULL);
 			UWordSequence				u16s;
 
 			//	WHY TEST SMPTEAncData, which is in the AJACC library, here in the AJAANC BFT?
@@ -2542,14 +2542,14 @@ int main (int argc, const char ** argv)
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
-		{"verbose",			'v',		POPT_ARG_NONE,		&gIsVerbose,		0,	"verbose output",			NULL},
+		{"verbose",		'v',	POPT_ARG_NONE,	&gIsVerbose,	0,	"verbose output",	AJA_NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
 
 	//	Read command line arguments...
 	AJADebug::Open();
-	poptContext optionsContext = ::poptGetContext (NULL, argc, argv, userOptionsTable, 0);
+	poptContext optionsContext = ::poptGetContext (AJA_NULL, argc, argv, userOptionsTable, 0);
 	if (::poptGetNextOpt (optionsContext) < -1)
 	{
 		cerr << "## ERROR:  Bad command line argument(s)" << endl;
