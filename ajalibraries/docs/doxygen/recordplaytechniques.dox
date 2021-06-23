@@ -406,12 +406,12 @@ we wrote the \ref ntv2llburn, a low-latency demo that works without AutoCirculat
 <b>How many frames to circulate?</b> This choice can depend on a number of factors that each affect how many frames are
 available for buffering on the device:
 -	The application’s frame-dropping tolerance;
--	The hardware devices it may need to run on (some devices have very little SDRAM);
+-	The hardware devices it may need to run on (some devices have smaller amounts of SDRAM);
 -	The largest video raster expected;
 -	The frame buffer (pixel) format to be used.
 
 
-@subsection	autocirculatemon	Monitoring AutoCirculate Activity with “NTV2Watcher” Tool
+@subsection	autocirculatemon	Monitoring AutoCirculate Activity with \ref usingntv2watcher Tool
 
 \ref usingntv2watcher has an \ref inspectorac that shows AutoCirculate activity in near-real-time for all possible channels
 on any AJA device attached to the host.
