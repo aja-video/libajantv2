@@ -16,23 +16,23 @@
 
 using namespace std;
 
-#define	LOGMYERROR(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Error,		__FUNCTION__ << ":  " << __x__)
-#define	LOGMYWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
-#define	LOGMYNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Notice,		__FUNCTION__ << ":  " << __x__)
-#define	LOGMYINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
-#define	LOGMYDEBUG(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
+#define	LOGMYERROR(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Error,		AJAFUNC << ":  " << __x__)
+#define	LOGMYWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Warning,	AJAFUNC << ":  " << __x__)
+#define	LOGMYNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Notice,		AJAFUNC << ":  " << __x__)
+#define	LOGMYINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Info,		AJAFUNC << ":  " << __x__)
+#define	LOGMYDEBUG(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Debug,		AJAFUNC << ":  " << __x__)
 
-#define	RCV2110ERR(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Error,		__FUNCTION__ << ":  " << __x__)
-#define	RCV2110WARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
-#define	RCV2110NOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Notice,		__FUNCTION__ << ":  " << __x__)
-#define	RCV2110INFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
-#define	RCV2110DBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
+#define	RCV2110ERR(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Error,		AJAFUNC << ":  " << __x__)
+#define	RCV2110WARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Warning,	AJAFUNC << ":  " << __x__)
+#define	RCV2110NOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Notice,		AJAFUNC << ":  " << __x__)
+#define	RCV2110INFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Info,		AJAFUNC << ":  " << __x__)
+#define	RCV2110DBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Debug,		AJAFUNC << ":  " << __x__)
 
-#define	XMT2110ERR(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Error,		__FUNCTION__ << ":  " << __x__)
-#define	XMT2110WARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
-#define	XMT2110NOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":  " << __x__)
-#define	XMT2110INFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
-#define	XMT2110DBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
+#define	XMT2110ERR(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Error,		AJAFUNC << ":  " << __x__)
+#define	XMT2110WARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Warning,	AJAFUNC << ":  " << __x__)
+#define	XMT2110NOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Notice,	AJAFUNC << ":  " << __x__)
+#define	XMT2110INFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Info,		AJAFUNC << ":  " << __x__)
+#define	XMT2110DBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Debug,		AJAFUNC << ":  " << __x__)
 
 //	RCV2110DDBG & XMT2110DDBG are for EXTREMELY detailed debug logging:
 #if 0	// DetailedDebugging
@@ -1565,9 +1565,9 @@ bool AJAAncillaryData::GetAncPacketsFromVANCLine (const UWordSequence &				inYUV
 	outWordOffsets.clear();
 
 	if (!IS_VALID_AncChannelSearchSelect(inChanSelect))
-		return false;	//	bad search select
+		{LOGMYERROR("Bad search select value " << DEC(inChanSelect)); return false;}	//	bad search select
 	if (wordCountMax < 12)
-		return false;	//	too small
+		{LOGMYERROR("UWordSequence size " << DEC(wordCountMax) << " too small"); return false;}	//	too small
 
 	for (UWord wordNum = searchOffset;  wordNum < (wordCountMax - 12);  wordNum += searchIncr)
 	{
@@ -1633,35 +1633,33 @@ bool AJAAncillaryData::Unpack8BitYCbCrToU16sVANCLine (const void * pInYUV8Line,
 		outU16YUVLine.push_back(0);
 
 	if (!pInYUV8Buffer)
-		return false;	//	NULL pointer
+		{LOGMYERROR("NULL/empty YUV8 buffer");  return false;}	//	NULL pointer
 	if (inNumPixels < 12)
-		return false;	//	Invalid width
+		{LOGMYERROR("width in pixels " << DEC(inNumPixels) << " too small (< 12)"); return false;}	//	Invalid width
 	if (inNumPixels % 4)	//	6)?
-		return false;	//	Width not evenly divisible by 4
+		{LOGMYERROR("width in pixels " << DEC(inNumPixels) << " not multiple of 4"); return false;}	//	Width not evenly divisible by 4
 
 	//	Since Y and C may have separate/independent ANC data going on, we're going to split the task and do all
 	//	the even (C) samples first, the come back and repeat it for all of the odd (Y) samples...
 	for (ULWord comp = 0;  comp < 2;  comp++)
 	{
 		bool	bNoMoreAnc	(false);	//	Assume all ANC packets (if any) begin at the first pixel and are contiguous
-										//	(i.e. no gaps between Anc packets). Once we see a "gap" we set this flag and the
-										//	rest of the line turns into a copy.
+										//	(i.e. no gaps between Anc packets). Once a "gap" is seen, this flag is set,
+										//	and the rest of the line turns into a copy.
 
 		ULWord	ancCount	(0);		//	Number of bytes to shift and copy (once an ANC packet is found).
 										//	0 == at the start of a potential new Anc packet.
 
-		ULWord	pixNum		(0);		//	The current pixel we are currently serving (note: NOT the component or sample number!)
+		ULWord	pixNum		(0);		//	The current pixel being inspected (note: NOT the component or sample number!)
 		UWord	checksum	(0);		//	Accumulator for checksum calculations
-
 
 		while (pixNum < inNumPixels)
 		{
-			//	We've found a gap in the Anc data - which we interpret to mean there is no more on this line.
-			//	Just do a simple 8-bit -> 10-bit expansion with the remaining data on the line...
 			if (bNoMoreAnc)
-			{
+			{	//	NoMoreAnc -- there's a gap in the Anc data -- which is assumed to mean there are no more packets on this line.
+				//	Just do a simple 8-bit -> 10-bit expansion with the remaining data on the line...
 				const ULWord	index		(2 * pixNum  +  comp);
-				const UWord		dataValue	(static_cast <UWord> (pInYUV8Buffer [index] << 2));	//	Pad 2 LSBs with zeros
+				const UWord		dataValue	(UWord(UWord(pInYUV8Buffer[index]) << 2));	//	Pad 2 LSBs with zeros
 				NTV2_ASSERT (index <= ULWord(outU16YUVLine.size()));
 				if (index < ULWord(outU16YUVLine.size()))
 					outU16YUVLine [index] = dataValue;
@@ -1670,25 +1668,22 @@ bool AJAAncillaryData::Unpack8BitYCbCrToU16sVANCLine (const void * pInYUV8Line,
 				pixNum++;
 			}
 			else
-			{
-				//	Still processing (possible) Anc data...
+			{	//	Still processing (possible) Anc data...
 				if (ancCount == 0)
-				{
-					//	AncCount == 0 means we're at the beginning of an Anc packet - or not...
+				{	//	AncCount == 0 means we're at the beginning of an Anc packet -- or not...
 					if ((pixNum + 7) < inNumPixels)
-					{
-						//	An Anc packet has to be at least 7 pixels long to be real...
-						if (   pInYUV8Buffer [(2 * (pixNum+0)) + comp] == 0x00
-							&& pInYUV8Buffer [(2 * (pixNum+1)) + comp] == 0xFF
-							&& pInYUV8Buffer [(2 * (pixNum+2)) + comp] == 0xFF)
-						{
-							//	"00-FF-FF" means a new Anc packet is being started...
-							outU16YUVLine [(2 * pixNum++) + comp] = 0x000;
-							outU16YUVLine [(2 * pixNum++) + comp] = 0x3ff;
-							outU16YUVLine [(2 * pixNum++) + comp] = 0x3ff;		//	Stuff a 10-bit "00-FF-FF" into the output buffer
+					{	//	An Anc packet has to be at least 7 pixels long to be real...
+						if (   pInYUV8Buffer [2*(pixNum+0) + comp] == 0x00
+							&& pInYUV8Buffer [2*(pixNum+1) + comp] == 0xFF
+							&& pInYUV8Buffer [2*(pixNum+2) + comp] == 0xFF)
+						{	//	"00-FF-FF" means a new Anc packet is being started...
+							//	Stuff "000-3FF-3FF" into the output buffer...
+							outU16YUVLine [2*pixNum++  + comp] = 0x000;
+							outU16YUVLine [2*pixNum++  + comp] = 0x3ff;
+							outU16YUVLine [2*pixNum++  + comp] = 0x3ff;
 
-							ancCount = pInYUV8Buffer[(2 * (pixNum+2)) + comp] + 3 + 1;	//	Grab the number of data words + DID + SID + DC + checksum words
-							checksum = 0;												//	Reset checksum accumulator
+							ancCount = pInYUV8Buffer[2*(pixNum+2) + comp] + 3 + 1;	//	Number of data words + DID + SID + DC + checksum
+							checksum = 0;											//	Reset checksum accumulator
 						}
 						else
 							bNoMoreAnc = true;	//	No anc here -- assume there's no more for the rest of the line
@@ -1697,23 +1692,21 @@ bool AJAAncillaryData::Unpack8BitYCbCrToU16sVANCLine (const void * pInYUV8Line,
 						bNoMoreAnc = true;	//	Not enough room for another anc packet here -- assume no more for the rest of the line
 				}	//	if ancCount == 0
 				else if (ancCount == 1)
-				{
-					//	This is the last byte of an anc packet -- the checksum. Since the original conversion to 8 bits
+				{	//	This is the last byte of an anc packet -- the checksum. Since the original conversion to 8 bits
 					//	wiped out part of the original checksum, we've been recalculating it all along until now...
-					outU16YUVLine [(2 * pixNum) + comp]  = checksum & 0x1ff;			//	LS 9 bits of checksum
-					outU16YUVLine [(2 * pixNum) + comp] |= (~checksum & 0x100) << 1;	//	bit 9 = ~bit 8;
+					outU16YUVLine [2*pixNum + comp]  = checksum & 0x1ff;			//	LS 9 bits of checksum
+					outU16YUVLine [2*pixNum + comp] |= (~checksum & 0x100) << 1;	//	bit 9 = ~bit 8;
 
 					pixNum++;
 					ancCount--;
 				}	//	else if end of valid Anc packet
 				else
-				{
-					//	ancCount > 0 means an Anc packet is being processed.
+				{	//	ancCount > 0 means an Anc packet is being processed.
 					//	Copy 8-bit data into LS 8 bits, add even parity to bit 8, and ~bit 8 to bit 9...
-					const UByte	ancByte	(pInYUV8Buffer [(2 * pixNum) + comp]);
+					const UByte	ancByte	(pInYUV8Buffer [2*pixNum + comp]);
 					const UWord	ancWord	(AddEvenParity (ancByte));
 
-					outU16YUVLine [(2 * pixNum) + comp] = ancWord;
+					outU16YUVLine [2*pixNum + comp] = ancWord;
 
 					checksum += (ancWord & 0x1ff);	//	Add LS 9 bits to checksum
 
