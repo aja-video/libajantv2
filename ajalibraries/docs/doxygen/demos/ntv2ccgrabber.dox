@@ -117,5 +117,10 @@ Displays captured CEA608 captions from incoming video.
 	--frames {spec}                                      Specifies which device frame buffers to use for AutoCirculate capture:
                                                              numFrames[@startFrame]    Specifies frame count (and optional start frame).
 	                                                         startFrame-endFrame       Explicitly specifies start and end frame numbers.
+
+	EXIT STATUS       DESCRIPTION
+	0                 Success.
+	1                 Parameter error.
+	2                 Runtime error.
 @endcode
 **/

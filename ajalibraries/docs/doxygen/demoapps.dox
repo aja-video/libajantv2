@@ -48,14 +48,20 @@
 		-#	Change the current directory to inside the unzipped SDK folder (that contains ‘ajalibrariesʼ, ‘binʼ, ‘libʼ, etc.).
 		-#	Enter the relative path to the demo (e.g. <tt>./bin/ntv2player</tt>) … plus any arguments.
 	-	Most demos use the same command line arguments for specifying…
-		-	<b>device</b> (<tt>-d|--device</tt>) — Obviously, this is important if more than one device is connected to the host.
-			-	(Some demos also used <tt>-b|--board</tt>, which is functionally identical, but itʼs been deprecated.)
-		-	<b>video format</b>  (<tt>-v|--videoFormat</tt>) — specifies the video format to use
-		-	<b>frame buffer pixel format</b> (<tt>-p|--pixelFormat</tt>) — specifies the frame buffer pixel format
+		-	<b>device</b> (<tt>-d|--device</tt>) — Specifies which device to use.
+			Obviously, this is important when more than one device is connected to the host.
+			(Some demos also used <tt>-b|--board</tt>, which is functionally identical, but itʼs been deprecated.)
+		-	<b>video format</b>  (<tt>-v|--videoFormat</tt>) — Specifies the video format to use
+		-	<b>frame buffer pixel format</b> (<tt>-p|--pixelFormat</tt>) — Specifies the frame buffer pixel format
 		-	<b>multiformat mode</b> (<tt>-m</tt>) — If specified, the demo will operate as if it must share the device
 			with other programs; otherwise it will operate as if itʼs the only program using the device. If you intend
 			to simultaneously run more than one demo app using the same device, we recommend starting the first demo
 			<i>without</i> the <tt>-m</tt> option, then run all subsequent demos using the <tt>-m</tt> option.
+		-	<b>frames</b> — Specifies the frame range to use (for demos that use \ref aboutautocirculate). For example…
+			-	<tt>-f8@10</tt> — Use 8 frames, starting at frame 10.
+			-	<tt>-f8-18</tt> — Use frames 8 thru 18 (inclusive).
+			-	<tt>-f12</tt> — Use 12 frames, but lets CNTV2Card::FindUnallocatedFrames determine the actual start and end frame numbers.
+				@note	Due to a long-standing bug, this <i>frame-count-only</i> method doesnʼt work when UHD/4K/UHD2/8K is being used on the device.
 	-	It can be fruitful to run the demos under a debugger while monitoring device state with the \ref usingntv2watcher tool.
 
 

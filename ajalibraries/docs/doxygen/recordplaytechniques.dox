@@ -2,8 +2,8 @@
 @page	recordplaytechniques		Capture and Playout Techniques
 
 This page describes the basics of capturing and playing real-time video, then describes the two most popular methods:
--	<b>Ping-Pong</b>
--	<b>AutoCirculate</b>
+-	\ref aboutpingpong
+-	\ref aboutautocirculate
 
 @section	playoutbasics	Playout Basics
 
