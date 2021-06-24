@@ -7109,6 +7109,10 @@ public:
 	AJA_VIRTUAL bool Load3DLUTTable ();
 	AJA_VIRTUAL bool Set1DLUTTableLocation (const NTV2Channel inChannel, const ULWord inFrameNumber, ULWord inLUTIndex = 0);
 	AJA_VIRTUAL bool Load1DLUTTable (const NTV2Channel inChannel);
+	
+	AJA_VIRTUAL bool HasMultiRasterWidget();
+	AJA_VIRTUAL bool SetMultiRasterBypassEnable (const bool inEnable);	
+	AJA_VIRTUAL bool GetMultiRasterBypassEnable (bool & outEnabled);
 
 	///@}
 

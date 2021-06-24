@@ -7244,6 +7244,28 @@ bool CNTV2Card::GetVPIDRGBRange (NTV2VPIDRGBRange & outValue, const NTV2Channel 
 	return true;
 }
 
+bool CNTV2Card::HasMultiRasterWidget()
+{
+	ULWord hasMultiRasterWidget(0);
+	return ReadRegister(kRegMRSupport, hasMultiRasterWidget, kRegMaskMRSupport, kRegShiftMRSupport)  &&  (hasMultiRasterWidget ? true : false);
+}
+
+bool CNTV2Card::SetMultiRasterBypassEnable (const bool inEnable)
+{
+	if (!HasMultiRasterWidget())
+		return false;
+	return WriteRegister(kRegMROutControl, inEnable, kRegMaskMRBypass, kRegShiftMRBypass);
+}
+
+bool CNTV2Card::GetMultiRasterBypassEnable (bool & outEnabled)
+{
+	ULWord	tempVal (0);
+	if (!ReadRegister(kRegMROutControl, tempVal, kRegMaskMRBypass, kRegShiftMRBypass))
+		return false;
+	outEnabled = static_cast <bool> (tempVal);
+	return true;
+}
+
 
 #if !defined (NTV2_DEPRECATE)
 // deprecated - does not support progressivePicture, 3G, 2K

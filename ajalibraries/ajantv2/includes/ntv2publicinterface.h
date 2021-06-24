@@ -965,11 +965,12 @@ typedef enum _NTV2HDMIRegisters
 
 typedef enum _NTV2MultiRasterRegisters
 {
-	kRegMRQ1Control = 0xF00,
+	kRegMRQ1Control = 0x3C00,
 	kRegMRQ2Control,
 	kRegMRQ3Control,
 	kRegMRQ4Control,
-	kRegMROutControl
+	kRegMROutControl,
+	kRegMRSupport = 0x3C07
 } NTV2MultiRasterRegisters;
 
 typedef enum
@@ -2368,6 +2369,7 @@ typedef enum
 	kRegMaskMRStandard = BIT(0) + BIT(1) + BIT(2) + BIT(3),
 	kRegMaskMRBypass = BIT(20),
 	kRegMaskMREnable = BIT(24),
+	kRegMaskMRSupport = BIT(7),
 
 #if !defined (NTV2_DEPRECATE)
 	,
@@ -3546,6 +3548,7 @@ typedef enum
 	kRegShiftMRStandard = 0,
 	kRegShiftMRBypass = 20,
 	kRegShiftMREnable = 24,
+	kRegShiftMRSupport = 7,
 
 #if !defined (NTV2_DEPRECATE)
 	// kRegSDIInput3GStatus
