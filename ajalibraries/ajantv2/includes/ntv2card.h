@@ -4049,7 +4049,11 @@ public:
 		@param[in]	inFrameCount			Specifies the desired number of contiguous device frame buffers. Must exceed zero.
 		@param[out]	outStartFrameNumber		Receives the starting device frame buffer number.
 		@param[out]	outEndFrameNumber		Receives the ending device frame buffer number.
-		@return		True if successful; otherwise false.
+		@return		True if successful; otherwise false. In SDK 16.1 or later, this function now fails if any AutoCirculate channel
+					is operating in UHD/4K/UHD2/8K mode.
+		@bug		This function was never implemented properly for UHD/4K or UHD2/8K operation. It returns bad data if any
+					AutoCirculate channels are actively inputting or outputting UHD/4K or UHD2/8K. Do not use this function if
+					there's any possibility of UHD/4K/UHD2/8K being streamed on this device.
 		@see		See \ref aboutautocirculate
 	**/
 	AJA_VIRTUAL bool	FindUnallocatedFrames (const UWord inFrameCount, LWord & outStartFrameNumber, LWord & outEndFrameNumber);

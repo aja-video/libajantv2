@@ -528,31 +528,25 @@ bool CNTV2Card::FindUnallocatedFrames (const UWord inFrameCount, LWord & outStar
 	typedef	std::set <uint16_t>		U16Set;
 	typedef U16Set::const_iterator	U16SetConstIter;
 	U16Set							allocatedFrameNumbers;
-	bool							isQuadMode1	(0);
-	bool							isQuadMode5	(0);
+	bool							isQuadMode(false);
 
 	//	Look for a contiguous group of available frame buffers...
 	outStartFrame = outEndFrame = 0;
-	if (!_boardOpened)
-		return false;
+	if (!IsOpen())
+		{ACFAIL("Not open");  return false;}
 	if (!inFrameCount)
-		return false;
-
-	GetQuadFrameEnable (isQuadMode1, NTV2_CHANNEL1);
-	GetQuadFrameEnable (isQuadMode5, NTV2_CHANNEL5);
+		{ACFAIL("Requested zero frames");  return false;}
 
 	//	Inventory all allocated frames...
 	for (NTV2Channel chan(NTV2_CHANNEL1);  chan < NTV2_MAX_NUM_CHANNELS;  chan = NTV2Channel(chan+1))
 		if (AutoCirculateGetStatus(chan, acStatus)  &&  !acStatus.IsStopped())
 		{
+			//	This function has long been broken for UHD/4K/UHD2/8K (see issue #412)
+			if (GetQuadFrameEnable(isQuadMode, chan)  &&  isQuadMode)
+				{ACFAIL("UHD/4K in operation on Ch" << DEC(chan+1) << " -- caller must manage frames manually"); return false;}	//	New in SDK 16.1
+			if (GetQuadQuadFrameEnable(isQuadMode, chan)  &&  isQuadMode)
+				{ACFAIL("UHD2/8K in operation on Ch" << DEC(chan+1) << " -- caller must manage frames manually"); return false;}	//	New in SDK 16.1
 			uint16_t	endFrameNum	(acStatus.GetEndFrame());
-
-			//	Quadruple the number of allocated frame buffers if quad mode is enabled and this is channel 1 or 5...
-			if (isQuadMode1  &&  chan == NTV2_CHANNEL1)
-				endFrameNum = UWord(acStatus.GetFrameCount()) * 4  +  acStatus.GetStartFrame()  -  1;
-			else if (isQuadMode5  &&  chan == NTV2_CHANNEL5)
-				endFrameNum = UWord(acStatus.GetFrameCount()) * 4  +  acStatus.GetStartFrame()  -  1;
-
 			for (uint16_t num(acStatus.GetStartFrame());  num <= endFrameNum;  num++)
 				allocatedFrameNumbers.insert(num);
 		}	//	if A/C active
@@ -581,10 +575,7 @@ bool CNTV2Card::FindUnallocatedFrames (const UWord inFrameCount, LWord & outStar
 	}
 
 	if (startFrameNumber > finalFrameNumber || endFrameNumber > finalFrameNumber)
-	{
-		ACFAIL("Cannot find " << DEC(inFrameCount) << " unallocated frames");
-		return false;
-	}
+		{ACFAIL("Cannot find " << DEC(inFrameCount) << " unallocated frames");	return false;}
 
 	outStartFrame = LWord(startFrameNumber);
 	outEndFrame = LWord(endFrameNumber);
@@ -940,7 +931,7 @@ bool CNTV2Card::AutoCirculateGetStatus (const NTV2Channel inChannel, AUTOCIRCULA
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	const bool result(NTV2Message(reinterpret_cast<NTV2_HEADER *>(&outStatus)));
 	if (result)
-		ACDBG("GetStatus successful on channel " << DEC(inChannel+1));
+		;//ACDBG("GetStatus successful on channel " << DEC(inChannel+1));
 	else
 		ACFAIL("Failed to get status on channel " << DEC(inChannel+1));
 	return result;

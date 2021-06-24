@@ -1093,6 +1093,9 @@ public:
 		@note		If SMPTE ancillary data is detected in the video, this routine "intelligently" stretches it by copying the 8-bits to
 					the LS 8-bits of the 10-bit output, recalculating parity and checksums as needed. (This emulates what NTV2 device
 					firmware does during playout of ::NTV2_FBF_8BIT_YCBCR frame buffers with ::NTV2_VANCDATA_8BITSHIFT_ENABLE.)
+		@note		NTV2 firmware is expected to start the first anc packet at the first pixel position in the VANC line, and place
+					subsequent packets, if any, in immediate succession, without any gaps. Therefore, a line that does not start with
+					the 0x00/0xFF/0xFF packet header is assumed to not contain any packets. This saves a substantial amount of CPU time.
 	**/
 	static bool								Unpack8BitYCbCrToU16sVANCLine (const void * pInYUV8Line,
 																			U16Packet & outU16YUVLine,

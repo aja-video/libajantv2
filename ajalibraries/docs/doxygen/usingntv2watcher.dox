@@ -555,66 +555,141 @@ Use the \ref tonegenerator to fill the audio output buffer, either statically (o
 
 @image	html	watcher-inspector-anc.png
 
-The <b>Anc</b> inspector monitors the ancillary data areas of a frame buffer, and the state registers of the device’s Anc inserter/extractor widgets (if any).
+The <b>Anc</b> inspector monitors the ancillary data areas of a frame buffer, and the state registers of the device’s SDI Anc inserter/extractor widgets (if any).
 
 @note	Because this inspector reads (via DMA) the entire contents of a frame buffer at NTV2Watcher’s currently selected polling rate,
 		it can interfere with any currently running application, particularly if the additional DMAs exceed the available
 		device or host data transfer budget. Thus, this inspector is not immune from “Heisenbugs” (the Heisenburg Uncertainty Principle)
 		in which the act of monitoring an AJA device affects it and the application(s) under test.
 
+When device polling is enabled, this inspector repeatedly monitors the device frame buffer at every VBI of the selected Channel/FrameStore,
+ignoring the <b>Interval</b> slider setting. It reads the portions of the buffer that contain ancillary data into host memory, and compares
+it with what was read last time. Changed values are highlighted with a brighter color.
+
 The Anc inspector has four main sections:
-	-	<b>Channel/FrameStore and Frame Selection</b> — Selects a FrameStore (Channel) and frame to inspect.
+	-	<b>Channel/FrameStore and Frame Controls</b> — Selects a FrameStore (Channel) and frame to inspect.
 		-	<b>FrameStore/Channel</b> — Selects the FrameStore/Channel of interest. On devices that have Anc Inserters/Extractors:
 			-	In <b>Capture Mode</b>, this indicates the SDI Input associated with the firmware Anc Extractor being inspected/controlled.
 			-	In <b>Playout Mode</b>, this indicates the SDI Output associated with the firmware Anc Inserter being inspected/controlled.
+		-	<b>Frame:</b>  When available, controls which frame to view. When unavailable, indicates the frame being viewed.
 		-	<b>Auto</b> — If checked, the frame number being monitored will automatically follow the input or output
-			(depending on frame-store mode) “current frame” register, and the frame number spin control will be disabled.
-			If this is unchecked, the frame number spin control will be available, and the frame being watched can be manually controlled.
-		-	<b>Frame Number</b> spin control:  When available, controls which frame to view.
-			When unavailable, indicates the frame being viewed.
+			(depending on FrameStore ::NTV2Mode) “current frame” register, and the frame number spin control will be disabled.
+			If not checked, the frame number is manually controlled.
+		-	<b>Show Absent Packets</b> — If checked, every \ref inspectoranc-pkt will show missing packets (those that appeared at least once
+			and then not seen).
 		-	<b>Video Format Indicator</b> — Indicates the Channel/FrameStore’s current video standard, frame rate and geometry.
-	-	<b>Line 21</b> — This section is visible only when the Channel/FrameStore is configured for 525i SD,
-		and shows the byte pairs decoded from line 21 (if any).
-	-	<b>Line 284</b> — This section is visible only when the Channel/FrameStore is configured for 525i SD,
-		and shows the byte pairs decoded from line 284 (if any).
-	-	<b>VANC</b> — The VANC section shows the Channel/FrameStore’s current VANC configuration (“Off”, “Tall” or “Taller”) and VANC buffer data.
-		-	<b>Mode</b> — This menu/combobox is provided to indicate the current <b>VANC Mode</b>, and change it, if desired.
-	-	<b>Anc Registers</b> — This area is visible only for devices that have Anc inserters/extractors. When visible,
-		it shows the content of the inserter/extractor configuration registers. The register values are editable.
-		-	<b>Anc Exclusions:</b> — This menu/combobox is provided to indicate which Anc packet types (Data IDs)
-			are currently being excluded by the Anc Extractor. It can be used to add or remove Anc packet types from the exclusion set.
-			-	<b>None (Show All Packets)</b> — Checked if the Anc Extractor is not filtering any packets.
-				Choose this item to stop all packet filtering (i.e. to extract all packet types).
-			-	<b>SD Defaults</b> — Checked if the Anc Extractor is not filtering SD audio packets.
-				Choose this item to filter all SD audio packets.
-			-	<b>HD Defaults</b> — Checked if the Anc Extractor is not filtering HD audio packets.
-				Choose this item to filter all HD audio packets.
-			-	<i>all other items</i> — The menu has dozens of pre-defined Anc packet types available for filtering.
-				For each Anc packet type (i.e. Data ID, or DID)…
-				-	If checked, the Anc Extractor is currently filtering that packet type (Data ID).
-					Selecting the item will toggle its state and remove the DID from the Extractor’s filter set.
-				-	If unchecked, the Anc Extractor is <i>not</i> currently filtering that packet type (Data ID).
-					Selecting the item will toggle its state and add the DID to the Extractor’s filter set.
-	-	<b>F1 Anc</b> — This area is visible only for devices that have Anc inserters/extractors. When visible, it displays the contents
-		of the 0x12000-byte region that starts -0x24000 bytes from the end of the frame buffer. This buffer is where the extractor
-		places packet data extracted from Field 1 of interlaced video or from progressive video. It’s also where the inserter fetches packets for
-		output (for progressive video or interlaced Field 1).
-	-	<b>F2 Anc</b> — This area is visible only for devices that have Anc inserters/extractors, and only when the channel is running interlaced video.
-		When visible, it displays the contents of the 0x12000-byte region that starts -0x12000 bytes from the end of the frame buffer.
-		This is where the extractor places packets captured from Field 2. It’s also where the inserter fetches packets for output into interlaced Field 2.
+	-	<b>Frame Buffer Line 21 Region</b>
+		@image	html	watcher-inspector-anc-line21.png
+		-	This section is visible only when the Channel/FrameStore is configured for 525i SD.
+		-	<b>Line 21 (F1):</b>  Shows the byte pairs decoded from line 21 (if any).
+		-	<b>Line 284 (F2):</b> Shows the byte pairs decoded from line 284 (if any).
+	-	<b>Frame Buffer VANC Region</b>
+		@image	html	watcher-inspector-anc-vanc.png
+		-	This section displays the VANC region of the frame buffer (if any).
+		-	<b>VANC:</b> — This menu controls the Anc data display:
+			-	<b>Hide</b> — Hides the buffer data display.
+			-	<b>Raw</b> — Displays the VANC region (if any) data as raw data. (See \ref inspectoranc-raw.)
+			-	<b>Packets</b> — Decodes the VANC region (if any) data, and lists the decoded ancillary data packets. (See \ref inspectoranc-pkt.)
+		-	<b>Mode</b> — Indicates/controls the current <b>VANC Mode</b> of the FrameStore:
+			-	<b>Off</b> — Turns off ::NTV2VANCMode (setting it to ::NTV2_VANCMODE_OFF).
+			-	<b>Tall</b> — Enables VANC mode, setting it to ::NTV2_VANCMODE_TALL.
+			-	<b>Taller</b> — Enables VANC mode, setting it to ::NTV2_VANCMODE_TALLER.
+		-	<b>Vanc Shift</b> — Indicates/controls the FrameStore’s <b>VANC Data Shift Mode</b>.
+			-	This setting only affects how data in the VANC region is written/read to/from the frame buffer for \ref fbformat8bitycbcr.
+			-	<b>Capture Mode (Input):</b>  When enabled, the firmware automatically right-shifts incoming 10-bit data words in the VANC
+				lines by 2 bits, making it easy to read ancillary data packets from the frame buffer.
+			-	<b>Playback Mode (Output):</b>  When enabled, the firmware automatically left-shifts outgoing data words by 2 bits from the
+				VANC lines, making it easy to write ancillary data packets into the frame buffer.
+			-	When checked, the FrameStore’s ::NTV2VANCDataShiftMode is set to ::NTV2_VANCDATA_8BITSHIFT_ENABLE.
+			-	When unchecked, the FrameStore’s ::NTV2VANCDataShiftMode is set to ::NTV2_VANCDATA_NORMAL.
+			-	See also:  CNTV2Card::GetVANCShiftMode , CNTV2Card::SetVANCShiftMode , \ref vidop-fs , \ref vancframegeometries
+	-	<b>SDI Anc Extractor/Inserter</b>
+		@image	html	watcher-inspector-anc-sdi.png
+		-	This area is visible only for devices that have Anc inserter/extractor firmware associated with its SDI connectors.
+			It has three major sections laid out vertically:
+			-	<b>Control Area & Register Display</b>
+				-	<b>Registers:</b> — This menu controls the inserter/extractor register display:
+					-	<b>Hide</b> — Hides the register display.
+					-	<b>Show</b> — Displays the registers.
+				-	<b>Run</b> button — Click to start the inserter/extractor. Displays <i>“Running”</i> when running.
+				-	<b>Stop</b> button — Click to stop the inserter/extractor. Displays <i>“Stopped”</i> when stopped.
+				-	<b>Clear</b> button — Click to clear/zero the Anc region of frame buffer memory.
+					-	If <b>Auto</b> is enabled, this will clear/zero the Anc region of all relevant frame buffers on the device
+						(i.e. those being accessed by the FrameStore).
+					-	if <b>Auto</b> is disabbled, only the current frame’s Anc region is cleared/zeroed.
+				-	<b>Anc Exclusions:</b> menu <i>(capture mode only)</i> — Indicates which Anc packet types (Data IDs)
+					are currently being excluded by the Anc Extractor. It can be used to add or remove Anc packet types from the exclusion set.
+					-	<b>None (Show All Packets)</b> — Checked if the Anc Extractor is not filtering any packets.
+						Choose this item to stop all packet filtering (i.e. to extract all packet types).
+					-	<b>SD Defaults</b> — Checked if the Anc Extractor is not filtering SD audio packets.
+						Choose this item to filter all SD audio packets.
+					-	<b>HD Defaults</b> — Checked if the Anc Extractor is not filtering HD audio packets.
+						Choose this item to filter all HD audio packets.
+					-	<i>all other items</i> — The menu has dozens of pre-defined Anc packet types available for filtering.
+						For each Anc packet type (i.e. Data ID, or DID)…
+						-	If checked, the Anc Extractor is currently filtering that packet type (Data ID).
+							Selecting the item will toggle its state and remove the DID from the Extractor’s filter set.
+						-	If unchecked, the Anc Extractor is <i>not</i> currently filtering that packet type (Data ID).
+							Selecting the item will toggle its state and add the DID to the Extractor’s filter set.
+				-	<b>Anc Register Display</b>
+					@image	html	watcher-inspector-anc-regs.png
+					-	Visible only when the <b>Registers</b> menu is set to <b>Show</b>.
+					-	It shows each of the inserter/extractor configuration registers.
+					-	The register values are editable.
+			-	<b>F1</b>
+				-	<b>F1 Anc:</b> — This menu controls the F1 Anc data display:
+					-	<b>Hide</b> — Hides the F1 buffer data display.
+					-	<b>Raw</b> — Displays the F1 Anc region data as raw data. (See \ref inspectoranc-raw.)
+					-	<b>Packets</b> — Decodes the F1 Anc region data, and lists the decoded ancillary data packets. (See \ref inspectoranc-pkt.)
+				-	<b>Max Capacity:</b> — This indicates the current maximum capacity of the F1 Anc region, in bytes.
+				-	<b>Overrun Indicator</b> <i>(capture mode only)</i> — This indicator will be visible and bright red if
+					the F1 extractor is attempting to write past the end of its allotted buffer space.
+					@image	html	watcher-inspector-anc-ovfl.png
+				-	<b>Data Display Area</b>
+					-	When shown, displays the “raw" F1 data buffer or the list of packets that were decoded from the buffer area.
+			-	<b>F2</b>
+				-	<b>F1 Anc:</b> — This menu controls the F2 Anc data display:
+					-	<b>Hide</b> — Hides the F2 buffer data display.
+					-	<b>Raw</b> — Displays the F2 Anc region data as raw data. (See \ref inspectoranc-raw.)
+					-	<b>Packets</b> — Decodes the F2 Anc region data, and lists the decoded ancillary data packets. (See \ref inspectoranc-pkt.)
+				-	<b>Max Capacity:</b> — This indicates the current maximum capacity of the F2 Anc region, in bytes.
+				-	<b>Overrun Indicator</b> <i>(capture mode only)</i> — This indicator will be visible and bright red if
+					the F2 extractor is attempting to write past the end of its allotted buffer space.
+				-	<b>Data Display Area</b>
+					-	When shown, displays the “raw" F1 data buffer or the list of packets that were decoded from the buffer area.
 
-A menu/combobox is provided for each of the <b>VANC</b>, <b>F1 Anc</b> and <b>F2 Anc</b> display areas, to control how each area’s Anc data is displayed:
-	-	<b>Hide</b> — Hides the buffer display. This has secondary benefits:
-		-	It makes room for other buffer displays you may be interested in.
-		-	It uses less CPU, allowing it to update other inspectors faster (e.g. CEA-608 Caption Viewer).
-	-	<b>Raw</b> — Displays the buffer as raw data. By right-clicking in the content area, you can change the data display’s grouping
-		(1, 2, 4 or 8 bytes) and radix (binary, octal, decimal or hex). The bytes-per-row count of the VANC display is fixed by the channel’s frame
-		geometry, but the F1 and F2 Anc buffer displays can be changed from 8, 16, 32, … up to 4096 bytes per line. You can also change the
-		scale reference and/or radix by right-clicking in the column and/or row headings.
-	-	<b>Packets</b> — Displays a list of Anc data packets parsed from the byte stream found in the buffer. For each packet found, it shows:
+@subsubsection	inspectoranc-raw	Raw Data Display
+
+	-	Displays the contents of the buffer as raw numeric data.
+	-	Available in the <b>VANC</b>, <b>F1 Anc</b> and <b>F2 Anc</b> sections by choosing <b>Raw</b> in the menu.
+	-	Data that changed from the previous buffer sample is highlighted with a brighter color.
+	-	Right-click in the data content area to change how the data is formatted:
+		-	<b>Grouping</b> — Choose byte grouping from <b>1</b>, <b>2</b>, <b>4</b> or <b>8</b> bytes.
+		-	<b>Radix</b> — Choose from <b>binary</b>, <b>octal</b>, <b>decimal</b> or <b>hex</b>adecimal.
+		-	<b>Bytes/Line</b> — Choose from <b>8</b>, <b>16</b>, <b>32</b>, … up to <b>4096</b> bytes per line.
+			@note	The bytes-per-row count of the VANC display is fixed by the channel’s frame geometry.
+	-	Right-click in the column heading area to change the horizontal scale:
+		-	<b>Reference</b> — Choose <b>Byte Offset From Start</b> or <b>Byte Offset From End</b>.
+		-	<b>Radix</b> — Choose <b>Dec (Base 10)</b> or <b>Hex (Base 16)</b>.
+	-	Right-click in the row heading area to change the vertical scale:
+		-	<b>Reference</b> — Choose <b>Byte Offset From Start</b> or <b>Byte Offset From End</b>.
+		-	<b>Radix</b> — Choose <b>Dec (Base 10)</b> or <b>Hex (Base 16)</b>.
+
+@subsubsection	inspectoranc-pkt	Packet Display
+
+	-	Displays a list of ancillary data packets parsed from the buffer.
+		@note	For buffers written into by the Anc Extractor firmware, the parser simply attempts to decode whatever
+				packets it finds in the buffer. It’s generally not possible for NTV2Watcher to frame-accurately obtain
+				the Inserter’s bytes-written counter. Thus it’s possible for invalid or stale packets to appear in the
+				packet list. It can help to clear the Anc buffer (use the <b>Clear</b> button) and see if the suspected
+				bad packets disappear.
+	-	Available for the <b>VANC</b>, <b>F1 Anc</b> and <b>F2 Anc</b> buffers by choosing <b>Packets</b> from the
+		display control menu.
+	-	For each packet, it shows, in columns:
+		-	<b>Pkt</b> — The index number in the list.
 		-	<b>Cod</b> — Coding – <b>Ana</b>log or <b>Dig</b>ital.
 		-	<b>Fmt</b> — Originating Buffer Format: <b>SDI</b>, <b>RTP</b> or <b>VANC</b>.
-		-	<b>Timestamp</b> — Capture from RTP source: the timestamp from the RTP header.
+		-	<b>Timestamp</b> — For RTP, the timestamp from the RTP header;  otherwise, a frame sequence number.
 		-	<b>Lnk</b> — The data link (A or B).
 		-	<b>DS</b> — The data stream (DS1 … DS4).
 		-	<b>Line</b> — On capture, the SMPTE line number where the data was found;  on playout, the SMPTE line number where the data is to be inserted.
@@ -623,25 +698,29 @@ A menu/combobox is provided for each of the <b>VANC</b>, <b>F1 Anc</b> and <b>F2
 		-	<b>DID</b> — The DID of the packet.
 		-	<b>SDID</b> — The SDID of the packet.
 		-	<b>Description</b> — Packet description.
-		-	<b>DC</b> — Data Count of the payload data, in bytes.
-		-	<b>CS</b> — The checksum of the payload data. Note that on playout, this value is irrelevant, since the inserter/embedder performs the checksum computation.
-		-	<b>Data</b> — The payload data bytes.
+		-	<b>DC</b> — Data Count of the payload data, in bytes (decimal and hex).
+		-	<b>CS</b> — The checksum of the payload data, in hexadecimal. On playout, this value is irrelevant,
+			since the inserter/embedder performs the checksum computation.
+		-	<b>Data</b> — A dump of the first several bytes of payload data.
+	-	Data values that changed from the previous buffer sample are highlighted with a brighter color.
+	-	Packets missing from the prior buffer sample are shown in red (as “missing”).
+		-	This behavior can be disabled by unchecking <b>Show Absent Packets</b> (near the top of the inspector).
 
-When device polling is enabled, this inspector repeatedly monitors the device frame buffer at every VBI of the selected Channel/FrameStore,
-ignoring the <b>Interval</b> slider setting.
-It reads the portions of the buffer that contain anc data into host memory and compares it to what was read the last time.
-Changed values are drawn with a brighter color.
-Old packets that were detected earlier but are now currently absent are shown in a very dim color.
-To clear the old packets from the display, right-click in the packet list and choose “Clear Old Packets” from the menu that appears.
 
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot of the displayed information to the Clipboard.
 
-This inspector can be used to drive the \ref anc608viewer for monitoring closed-captions. To prevent duplicate or multiple caption byte streams
-from being sent to the \ref anc608viewer , it’s best to have only one of the Anc buffer regions visible and set to display “Packets”, and also,
-if only one caption packet is in the monitored buffer.
+@subsubsection	inspectoranc-caption	Closed-Caption Display
+-	This inspector can be used to drive the \ref anc608viewer for monitoring closed-captions.
+-	To prevent duplicate or multiple caption byte streams from being sent to the \ref anc608viewer …
+	-	Only one of the Anc buffer regions should be visible, and it must be set to display “Packets”.
+	-	Only one caption packet should be listed in the packet list.
 
-<b>Drag and Drop</b> support:
-	-	Dropping a single file from outside the inspector window is supported only if <b>Auto</b> mode is disabled.
+@note	Hiding unneeded buffer displays uses far less CPU resources, helping the inspector update at frame rate
+		(which increases the fidelity of the \ref anc608viewer, if needed).
+
+@subsubsection	inspectoranc-dragdrop	Drag and Drop Support
+	-	<b>Auto</b> mode must be disabled (un-checked).
+	-	Dropping a single file from outside the inspector window is supported.
 	-	Dropping the file into the <b>F1 Anc</b> or <b>F2 Anc</b> data areas (if visible, in either <b>Raw</b>
 		or <b>Packets</b> view) will write the binary contents of the file into the Anc region of the frame buffer.
 	-	Dropping the file into the <b>VANC Anc</b> data area (if visible, in either <b>Raw</b> or <b>Packets</b>
@@ -659,14 +738,62 @@ The <b>AutoCirculate</b> inspector monitors the \ref aboutautocirculate state fo
 
 The inspector shows the following:
 	-	<b>Streaming Application</b> — Shows the process ID and four-CC “signature” of the application that called CNTV2Card::SetStreamingApplication.
+		See \ref devicesharing for more information.
 	-	<b>AutoCirculate Status</b> — Formats and displays ::AUTOCIRCULATE_STATUS information pulled from the CNTV2Card::AutoCirculateGetStatus function
 		call for each ::NTV2Channel.
 	-	<b>Timecodes</b> — This area shows the contents of the ::NTV2TimeCodeList returned from CNTV2Card::AutoCirculateGetFrameStamp
 		for each AutoCirculate frame buffer. Use the <b>Timecodes</b> popup menu to control which channel to display (or “Hide” to not display timecodes).
-		-	<b>NOTE:</b> This area doesn’t appear on S2110 devices (i.e. \ref konaip \ref ioip running S2110 firmware).
-			This is because the driver’s internal AutoCirculate structures are tied to the hardware timecode registers,
-			which are uninvolved in S2110. In S2110, timecodes are obtained (capture) or produced (playout) in ATC-LTC
-			or ATC-VITC packets embedded in RTP packet(s).
+		@note	This area doesn’t appear on S2110 devices (i.e. \ref konaip \ref ioip running S2110 firmware).
+				This is because the driver’s internal AutoCirculate structures are tied to the hardware timecode registers,
+				which are uninvolved in S2110. In S2110, timecodes are obtained (capture) or produced (playout) in ATC-LTC
+				or ATC-VITC packets embedded in RTP packet(s).
+
+The inspector also provides the ability to control \ref aboutautocirculate.
+	-	<b>Force Release</b> — Click to force the release of a streaming application that had previously reserved the device for exclusive use.
+		See \ref devicesharing for more information.
+	-	Right-clicking anywhere in a channel column will pop up a menu with these commands:
+		-	<b>Start…</b> (or <b>Restart…</b>): Pops up the \ref inspectoracstart (see below).
+		-	<b>Stop:</b>  Gracefully stops the \ref aboutautocirculate channel (by passing <b>false</b> to CNTV2Card::AutoCirculateStop).
+		-	<b>Abort:</b>  Ungracefully stops the \ref aboutautocirculate channel (by passing <b>true</b> to CNTV2Card::AutoCirculateStop).
+		-	<b>Pause:</b>  Pauses the running \ref aboutautocirculate channel (by calling CNTV2Card::AutoCirculatePause).
+		-	<b>Resume:</b>  Resumes the paused \ref aboutautocirculate channel (by calling CNTV2Card::AutoCirculateResume).
+		-	<b>Flush:</b>  Flushes the \ref aboutautocirculate channel (by calling CNTV2Card::AutoCirculateFlush).
+
+@subsubsection	inspectoracstart	AutoCirculate Configuration Dialog
+
+The <b>AutoCirculate</b> configuration dialog is used to configure a stopped \ref aboutautocirculate channel that is to be started,
+or to reconfigure a running \ref aboutautocirculate channel (by restarting it with new operating parameters).
+
+@image	html	watcher-autocirculate-config.png
+	-	For a <b><i>Running</i></b> channel, clicking the <b>Restart</b> button will restart the AutoCirculate channel with the new settings
+		specified in the dialog.
+	-	For a <b><i>Stopped</i></b> channel, clicking the <b>Start</b> button will start the AutoCirculate channel with the settings
+		specified in the dialog.
+	-	<b>Mode:</b>  Selects \ref autocirculatecapture or \ref autocirculateplayout.
+		(This menu will be disabled if the channel is <b><i>Running</i></b>.)
+	-	<b>Frame Range:</b>  This group controls which frame buffers on the device will be used for buffering frames.
+		-	<b>Start Frame:</b>  Chooses the starting frame number. (This will be disabled if <b>Automatic</b> is checked.)
+		-	<b>End Frame:</b>  Chooses the ending frame number. (This will be disabled if <b>Automatic</b> is checked.)
+		-	<b>Frame Count:</b>  Chooses the number of frames to be used.
+		-	<b>Automatic:</b>  Given the desired <b>Frame Count</b>, lets AutoCirculate automatically choose which frames are to be used.
+	-	<b>Options:</b>  This group controls the AutoCirculate options.
+		-	<b>Audio:</b> Controls if audio will also be streamed, and if so, which ::NTV2AudioSystem to use.
+		-	<b>RP188/VITC:</b> If checked, capture/play RP188/VITC timecode.
+		-	<b>FBF Change:</b> If checked, tells AutoCirculate to anticipate changes to ::NTV2FrameBufferFormat while streaming.
+		-	<b>Color Correction:</b> If checked, tells AutoCirculate to anticipate LUT changes while streaming.
+		-	<b>Ancillary Data:</b> If checked, tells AutoCirculate to also capture/play custom ancillary data while streaming.
+		-	<b>HDMI Aux Data:</b> If checked, tells AutoCirculate to also capture/play custom HDMI auxiliary data while streaming.
+		-	<b>LTC:</b> If checked, tells AutoCirculate to also capture/play LTC while streaming.
+		-	<b>FBO Change:</b> If checked, tells AutoCirculate to anticipate ::NTV2FBOrientation changes while streaming.
+		-	<b>Video Processing:</b> If checked, tells AutoCirculate to anticipate Mixer/Keyer configuration changes while streaming.
+		-	<b>Audio Control:</b> If checked, tells AutoCirculate to anticipate Audio Control changes while streaming.
+		-	<b>Field Mode:</b> If checked, tells AutoCirculate to stream in <b>Field Mode</b> rather than the default <b>Frame Mode</b>.
+	-	<b>Start Options:</b>  This group controls how AutoCirculate will be initialized/started:
+		-	<b>Init Only:</b> If chosen, only CNTV2Card::AutoCirculateInit will be called. (CNTV2Card::AutoCirculateStart will <i>not</i> be called.)
+		-	<b>Normal:</b> If chosen, AutoCirculate will be initialized and started normally (CNTV2Card::AutoCirculateStart is called with default parameters).
+		-	<b>Delayed:</b> If chosen, AutoCirculate will be initialized (see CNTV2Card::AutoCirculateInit) and started (via CNTV2Card::AutoCirculateStart)
+			with a non-zero <i>start time</i> value:
+			-	<b>Milliseconds:</b>  Specifies the number of milliseconds to delay the start.
 
 Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable frame-accurate snapshot of the AutoCirculate state of the device to the Clipboard.
 
