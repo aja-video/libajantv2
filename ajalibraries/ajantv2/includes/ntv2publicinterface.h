@@ -2369,7 +2369,7 @@ typedef enum
 	kRegMaskMRStandard = BIT(0) + BIT(1) + BIT(2) + BIT(3),
 	kRegMaskMRBypass = BIT(20),
 	kRegMaskMREnable = BIT(24),
-	kRegMaskMRSupport = BIT(7),
+	kRegMaskMRSupport = BIT(7)
 
 #if !defined (NTV2_DEPRECATE)
 	,
@@ -3548,11 +3548,12 @@ typedef enum
 	kRegShiftMRStandard = 0,
 	kRegShiftMRBypass = 20,
 	kRegShiftMREnable = 24,
-	kRegShiftMRSupport = 7,
+	kRegShiftMRSupport = 7
 
 #if !defined (NTV2_DEPRECATE)
+	,
 	// kRegSDIInput3GStatus
-	,kLHIRegShiftSDIIn3GbpsMode 			= 0,
+	kLHIRegShiftSDIIn3GbpsMode				= 0,
 	kLHIRegShiftSDIIn3GbpsSMPTELevelBMode 	= 1,
 	kLHIRegShiftSDIInVPIDLinkAValid 		= 4,
 	kLHIRegShiftSDIInVPIDLinkBValid 		= 5,
