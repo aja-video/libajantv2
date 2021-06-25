@@ -264,10 +264,12 @@ bool CNTV2DriverInterface::CloseLocalPhysical (void)
 #endif	//	defined(AJA_WINDOWS)
 		NTV2_ASSERT(!IsOpen());	//	Must be closed!
 
-		string urlspec(inURLSpec);
-		aja::lower(aja::strip(urlspec));
-		if (urlspec.empty())
+		string cleanURL(inURLSpec);
+		aja::strip(cleanURL);
+		if (cleanURL.empty())
 			{DIFAIL("Empty URLSpec");  return false;}
+		string urlspec(cleanURL);
+		aja::lower(urlspec);
 
 		/*
 			Parse the URLSpec and figure out what to open...
@@ -280,9 +282,15 @@ bool CNTV2DriverInterface::CloseLocalPhysical (void)
 				...where...		{ipv4}		A dotted quad or 'localhost' that designates the host IP address.
 								port		Optional unsigned decimal integer that designates the port number to use.
 								query		Optionally specifies which device to open on the remote host.
-			'ntv2://'{name}['/'{query}
+			'ntv2://'{name}['/'[query]
 				...where...		{name}		Alphanumeric name that designates a software device to open (e.g. dylib/DLL name).
-								query		Optionally specifies other parameters passed to dylib/DLL's Connect method.
+											This is typically case-insensitve, and should not contain characters that require URL-encoding.
+								query		Optionally specifies any number of parameters passed to dylib/DLL's Connect method.
+											[? {param}[={value}] [&...]]
+												...where...		{param}		The query parameter to be specified.
+																			Query parameter names are normally not case-sensitive,
+																			and should not require URL-encoding.
+																{value}		Optionally specifies a URL-encoded value for the parameter.
 			'ntv2local://'{model}|{hexnum}|{serial}|{indexnum}
 				...where...		{model}		NTV2 device model name (e.g. 'corvid44').
 								{hexnum}	NTV2DeviceID: '0x'|'0X' followed by at least 2 and up to 8 hex digits.
@@ -386,17 +394,20 @@ bool CNTV2DriverInterface::CloseLocalPhysical (void)
 			}
 			else if (scheme == "ntv2")
 			{	//	Software device:  dylib/DLL name is in "hostname"
-				string params;	//	Reconstruct arguments/parameters
-				do
-				{
-					if (!delims.empty())
-						{params += delims.front();	delims.erase(delims.begin());}
-					if (!tokens.empty())
-						{params += tokens.front();  tokens.erase(tokens.begin());}
-				} while (!delims.empty() || !tokens.empty());
-				if (!params.empty()  &&  params.at(0) == '?')
-					params.erase(params.begin());	//	Lop off any leading '?' character
-				_pRPCAPI = NTV2RPCAPI::FindNTV2SoftwareDevice(hostname, params);
+				NTV2StringList halves(aja::split(cleanURL, "://"));
+				if (halves.size() != 2)
+					{DIFAIL("'ntv2://' scheme has another '://' in the URL (should be URLencoded)"); return false;}
+				const string hostQuery (halves.at(1));	//	e.g. "ntv2swdevice/etc"
+				halves = aja::split(hostQuery, "/");
+				string checkHost(halves.empty() ? hostQuery : halves.at(0));
+				aja::lower(checkHost);
+				if (checkHost != hostname)
+					{DIFAIL("'ntv2://' scheme has mismatched name: '" << checkHost << "' != '" << hostname << "'"); return false;}
+				string query(halves.size() < 2 ? "" : halves.at(1));
+				if (!query.empty()  &&  query.at(0) == '?')
+					query.erase(0,1);	//	Remove leading '?'
+				DIDBG("scheme='ntv2' host='" << hostname << "' query='" << query << "'");
+				_pRPCAPI = NTV2RPCAPI::FindNTV2SoftwareDevice(hostname, query);
 			}
 			else
 				{DIFAIL("Invalid URL scheme '" << scheme << "' in '" << urlspec << "'");  return false;}

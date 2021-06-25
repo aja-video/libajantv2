@@ -8872,3 +8872,61 @@ bool GetChangedRegisters (const NTV2RegisterReads & inBefore, const NTV2Register
 	}
 	return !outChanged.empty();
 }
+
+
+string PercentEncode (const string & inStr)
+{	ostringstream oss;
+	for (size_t ndx(0);  ndx < inStr.size();  ndx++)
+	{
+		const char chr(inStr.at(size_t(ndx)));
+		if (::isalnum(chr)  ||  chr == '-'  ||  chr == '_'  ||  chr == '.'  ||  chr == '~')
+			oss << chr;
+		else
+			oss << "%" << HEX0N(unsigned(chr),2);
+	}
+	return oss.str();
+}
+
+string PercentDecode (const string & inStr)
+{	ostringstream oss;
+	unsigned hexNum(0), state(0);	//	0=unreserved expected,   1=1st hex digit expected,  2=2nd hex digit expected
+	for (size_t ndx(0);  ndx < inStr.size();  ndx++)
+	{
+		const char chr(inStr.at(size_t(ndx)));
+		switch (state)
+		{
+			case 0:
+				if (::isalnum(chr)  ||  chr == '-'  ||  chr == '_'  ||  chr == '.'  ||  chr == '~')
+					oss << chr;
+				if (chr == '%')
+					{state++;  break;}
+				break;
+			case 1:
+				if (chr >= 'A'  &&  chr <= 'F')
+					hexNum = unsigned(chr + 10 - 'A') << 4;
+				else if (chr >= 'a'  && chr <= 'f')
+					hexNum = unsigned(chr + 10 - 'a') << 4;
+				else if (chr >= '0'  &&  chr <= '9')
+					hexNum = unsigned(chr - '0') << 4;
+				else
+					hexNum = 0;
+				state++;
+				break;
+			case 2:
+				if (chr >= 'A'  &&  chr <= 'F')
+					hexNum += unsigned(chr + 10 - 'A');
+				else if (chr >= 'a'  && chr <= 'f')
+					hexNum += unsigned(chr + 10 - 'a');
+				else if (chr >= '0'  &&  chr <= '9')
+					hexNum += unsigned(chr - '0');
+				else
+					;
+				oss << char(hexNum);
+				hexNum = 0;
+				state = 0;
+				break;
+			default:	NTV2_ASSERT(false);	break;
+		}
+	}
+	return oss.str();
+}

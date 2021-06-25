@@ -1536,7 +1536,7 @@ ostream &	NTV2NubRPCAPI::Print (ostream & oss) const
 }
 
 
-NTV2RPCAPI * NTV2RPCAPI::FindNTV2SoftwareDevice (const string & inName, const std::string & inParams)
+NTV2RPCAPI * NTV2RPCAPI::FindNTV2SoftwareDevice (const string & inName, const std::string & inQueryParams)
 {
 	//	Look for a dylib/DLL named inName...
 	//	Look for dylibs/DLLs in user persistence store:
@@ -1575,7 +1575,7 @@ NTV2RPCAPI * NTV2RPCAPI::FindNTV2SoftwareDevice (const string & inName, const st
 	//	Call its CreateNTV2SoftwareDevice function to instantiate the NTV2RPCAPI object...
 	fpCreateNTV2SoftwareDevice pCreateFunc = reinterpret_cast<fpCreateNTV2SoftwareDevice>(pFunc);
 	NTV2_ASSERT(pCreateFunc);
-	NTV2RPCAPI * pRPCObject = (*pCreateFunc) (pHandle, inParams, AJA_NTV2_SDK_VERSION);
+	NTV2RPCAPI * pRPCObject = (*pCreateFunc) (pHandle, inQueryParams, AJA_NTV2_SDK_VERSION);
 	//	It's now someone else's responsibility to call ::dlclose
 	if (!pRPCObject)
 	{

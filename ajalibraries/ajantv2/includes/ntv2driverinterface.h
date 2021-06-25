@@ -88,7 +88,6 @@ class AJAExport CNTV2DriverInterface
 		static void				SetOverlappedMode (const bool inOverlapMode);
 		static bool				GetOverlappedMode (void);	///< @return	True if local devices will be opened in overlapped mode; otherwise false. (New in SDK 16.0)
 
-
 	/**
 		@name	Construction, destruction, assignment
 	**/
