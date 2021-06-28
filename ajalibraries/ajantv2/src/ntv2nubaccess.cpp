@@ -1590,10 +1590,10 @@ NTV2RPCAPI * NTV2RPCAPI::FindNTV2SoftwareDevice (const string & inName, const st
 	(void) inParams;
 #elif defined(AJALinux)
 	(void) inName;
-	(void) inParams;
+	(void) inQueryParams;
 #else
 	(void) inName;
-	(void) inParams;
+	(void) inQueryParams;
 #endif
 	return AJA_NULL;
 }	//	FindNTV2SoftwareDevice
