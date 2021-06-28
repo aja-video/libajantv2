@@ -659,7 +659,6 @@ The Anc inspector has four main sections:
 					-	When shown, displays the “raw" F1 data buffer or the list of packets that were decoded from the buffer area.
 
 @subsubsection	inspectoranc-raw	Raw Data Display
-
 	-	Displays the contents of the buffer as raw numeric data.
 	-	Available in the <b>VANC</b>, <b>F1 Anc</b> and <b>F2 Anc</b> sections by choosing <b>Raw</b> in the menu.
 	-	Data that changed from the previous buffer sample is highlighted with a brighter color.
@@ -676,7 +675,6 @@ The Anc inspector has four main sections:
 		-	<b>Radix</b> — Choose <b>Dec (Base 10)</b> or <b>Hex (Base 16)</b>.
 
 @subsubsection	inspectoranc-pkt	Packet Display
-
 	-	Displays a list of ancillary data packets parsed from the buffer.
 		@note	For buffers written into by the Anc Extractor firmware, the parser simply attempts to decode whatever
 				packets it finds in the buffer. It’s generally not possible for NTV2Watcher to frame-accurately obtain
