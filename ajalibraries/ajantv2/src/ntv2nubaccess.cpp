@@ -1587,7 +1587,7 @@ NTV2RPCAPI * NTV2RPCAPI::FindNTV2SoftwareDevice (const string & inName, const st
 	return pRPCObject;	//	It's caller's responsibility to delete pRPCObject
 #elif defined(MSWindows)
 	(void) inName;
-	(void) inParams;
+	(void) inQueryParams;
 #elif defined(AJALinux)
 	(void) inName;
 	(void) inQueryParams;
