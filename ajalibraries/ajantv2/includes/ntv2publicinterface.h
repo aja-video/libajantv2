@@ -2369,7 +2369,7 @@ typedef enum
 	kRegMaskMRStandard = BIT(0) + BIT(1) + BIT(2) + BIT(3),
 	kRegMaskMRBypass = BIT(20),
 	kRegMaskMREnable = BIT(24),
-	kRegMaskMRSupport = BIT(7)
+	kRegMaskMRSupport = BIT(0) + BIT(1) + BIT(2)
 
 #if !defined (NTV2_DEPRECATE)
 	,
@@ -3548,7 +3548,7 @@ typedef enum
 	kRegShiftMRStandard = 0,
 	kRegShiftMRBypass = 20,
 	kRegShiftMREnable = 24,
-	kRegShiftMRSupport = 7
+	kRegShiftMRSupport = 0
 
 #if !defined (NTV2_DEPRECATE)
 	,
