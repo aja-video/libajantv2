@@ -58,8 +58,9 @@ typedef struct
 	uint32_t				ssrc;
 	uint32_t				payloadType;
 	NTV2VideoFormat			videoFormat;
+	VPIDSampling			sampling;
 	uint32_t				enable;
-	uint8_t					unused[16];
+	uint8_t					unused[12];
 } TxVideoChData2110;
 
 typedef struct
