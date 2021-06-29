@@ -138,7 +138,6 @@ NTV2DeviceCanDoAudio96K
 NTV2DeviceCanDoAudioDelay
 NTV2DeviceCanDoBreakoutBox
 NTV2DeviceCanDoCapture
-NTV2DeviceCanDoColorCorrection
 NTV2DeviceCanDoCustomAnc
 NTV2DeviceCanDoDSKOpacity
 NTV2DeviceCanDoDualLink
@@ -152,7 +151,6 @@ NTV2DeviceCanDoLTC
 NTV2DeviceCanDoMSI
 NTV2DeviceCanDoPCMControl
 NTV2DeviceCanDoPlayback
-NTV2DeviceCanDoProgrammableCSC
 NTV2DeviceCanDoProgrammableRS422
 NTV2DeviceCanDoQuarterExpand
 NTV2DeviceCanDoRGBPlusAlphaOut

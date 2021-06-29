@@ -68,6 +68,18 @@ AJAExport bool NTV2DeviceCanDoOutputDestination (const NTV2DeviceID inDeviceID, 
 **/
 AJAExport UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBufferFormat inFBF);
 
+/**
+	@return		True if the device having the given ID has at least one programmable LUT.
+	@param[in]	inDeviceID		Specifies the NTV2DeviceID of interest.
+**/
+AJAExport bool NTV2DeviceCanDoColorCorrection (const NTV2DeviceID inDeviceID);
+
+/**
+	@return		True if the device having the given ID has at least one color space converter widget - all CSCs are programable.
+	@param[in]	inDeviceID		Specifies the NTV2DeviceID of interest.
+**/
+AJAExport bool NTV2DeviceCanDoProgrammableCSC (const NTV2DeviceID inDeviceID);
+
 
 // Overloading not supported by the ANSI C compiler used for Linux drivers.
 // 

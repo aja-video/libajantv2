@@ -150,7 +150,6 @@ NTV2DeviceCanDoAudio8Channels
 NTV2DeviceCanDoAudioDelay
 NTV2DeviceCanDoBreakoutBox
 NTV2DeviceCanDoCapture
-NTV2DeviceCanDoColorCorrection
 NTV2DeviceCanDoCustomAnc
 NTV2DeviceCanDoDualLink
 NTV2DeviceCanDoEnhancedCSC
@@ -161,7 +160,6 @@ NTV2DeviceCanDoMultiFormat
 NTV2DeviceCanDoPCMControl
 NTV2DeviceCanDoPCMDetection
 NTV2DeviceCanDoPlayback
-NTV2DeviceCanDoProgrammableCSC
 NTV2DeviceCanDoQuarterExpand
 NTV2DeviceCanDoRGBPlusAlphaOut
 NTV2DeviceCanDoRP188

@@ -31,7 +31,6 @@ NTV2DeviceCanDoAudio192K					True if audio system(s) on the device having the gi
 NTV2DeviceCanDoAudioDelay					True if audio system(s) on the device having the given ID have an adjustable delay.
 NTV2DeviceCanDoBreakoutBox					True if the device having the given ID can be connected to an AJA breakout box.
 NTV2DeviceCanDoCapture						True if the device having the given ID can capture (ingest) video.
-NTV2DeviceCanDoColorCorrection				True if the device having the given ID has at least one programmable LUT.
 NTV2DeviceCanDoCustomAnc					True if the device having the given ID supports ANC insertion/extraction.
 NTV2DeviceCanDoDSKOpacity					True if the device having the given ID has a mixer/keyer whose opacity is adjustable.
 NTV2DeviceCanDoDualLink						True if the device having the given ID can input/output 10-bit RGB over 2-wire SDI.
@@ -48,7 +47,6 @@ NTV2DeviceCanDoPCMControl					True if the audio system(s) on the device having t
 NTV2DeviceCanDoPCMDetection					True if the device having the given ID has per-audio-channel-pair PCM detection capabilities.
 NTV2DeviceCanDoPIO							True if the device having the given ID supports Programmed I/O.
 NTV2DeviceCanDoPlayback						True if the device having the given ID can output (play) video.
-NTV2DeviceCanDoProgrammableCSC				True if the device having the given ID has at least one programmable color space converter widget.
 NTV2DeviceCanDoProgrammableRS422			True if the device having the given ID has at least one RS-422 serial port, and it (they) can be programmed (for baud rate, parity, etc.).
 NTV2DeviceCanDoProRes						True if the device having the given ID can can accommodate Apple ProRes-compressed video in its frame buffers.
 NTV2DeviceCanDoQuarterExpand				True if the device having the given ID can handle quarter-sized frames (pixel-halving and line-halving during input, pixel-double and line-double during output).

@@ -101,7 +101,6 @@ NTV2DeviceCanChangeFrameBufferSize
 NTV2DeviceCanDoAESAudioIn
 NTV2DeviceCanDoAudio8Channels
 NTV2DeviceCanDoAudioDelay
-NTV2DeviceCanDoColorCorrection
 NTV2DeviceCanDoDSKOpacity
 NTV2DeviceCanDoFrameStore1Display
 NTV2DeviceCanDoHDMIOutStereo
@@ -111,7 +110,6 @@ NTV2DeviceCanDoLTCInOnRefPort
 NTV2DeviceCanDoMSI
 NTV2DeviceCanDoMultiFormat
 NTV2DeviceCanDoPlayback
-NTV2DeviceCanDoProgrammableCSC
 NTV2DeviceCanDoQuarterExpand
 NTV2DeviceCanDoRGBPlusAlphaOut
 NTV2DeviceCanDoRP188

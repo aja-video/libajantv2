@@ -104,7 +104,6 @@ NTV2DeviceCanDoFrameStore1Display
 NTV2DeviceCanDoHDVideo
 NTV2DeviceCanDoLTC
 NTV2DeviceCanDoPlayback
-NTV2DeviceCanDoProgrammableCSC
 NTV2DeviceCanDoRGBPlusAlphaOut
 NTV2DeviceCanDoRP188
 NTV2DeviceCanDoSDVideo

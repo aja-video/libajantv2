@@ -1093,14 +1093,14 @@ bool NTV2DeviceCanDoRS422N (const NTV2DeviceID inDeviceID, const NTV2Channel inC
 NTV2AudioSystem NTV2DeviceGetAudioMixerSystem(const NTV2DeviceID inDeviceID)
 {
 	if (NTV2DeviceGetNumAudioSystems(inDeviceID))
-	    return (NTV2AudioSystem)(NTV2DeviceGetNumAudioSystems(inDeviceID) + 1);
+	    return static_cast<NTV2AudioSystem>(NTV2DeviceGetNumAudioSystems(inDeviceID) + 1);
 	return NTV2_AUDIOSYSTEM_INVALID;
 }
 
 NTV2AudioSystem NTV2DeviceGetHostAudioSystem(const NTV2DeviceID inDeviceID)
 {
 	if (NTV2DeviceGetNumAudioSystems(inDeviceID))
-		return (NTV2AudioSystem)(NTV2DeviceGetNumAudioSystems(inDeviceID));
+		return static_cast<NTV2AudioSystem>(NTV2DeviceGetNumAudioSystems(inDeviceID));
 	else
 		return NTV2_AUDIOSYSTEM_INVALID;
 }
@@ -1111,6 +1111,20 @@ bool NTV2DeviceROMHasBankSelect (const NTV2DeviceID inDeviceID)
 		return true;
 	else
 		return false;
+}
+
+bool NTV2DeviceCanDoColorCorrection (const NTV2DeviceID inDeviceID)
+{
+	if (NTV2DeviceGetNumLUTs(inDeviceID) > 0)
+		return true;
+	return false;
+}
+
+bool NTV2DeviceCanDoProgrammableCSC (const NTV2DeviceID inDeviceID)
+{
+	if (NTV2DeviceGetNumCSCs(inDeviceID) > 0)
+		return true;
+	return false;
 }
 
 #if !defined (NTV2_DEPRECATE_14_3)
