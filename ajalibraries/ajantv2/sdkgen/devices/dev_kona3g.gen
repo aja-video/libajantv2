@@ -143,7 +143,6 @@ NTV2DeviceCanDoAudio8Channels
 NTV2DeviceCanDoAudio96K
 NTV2DeviceCanDoBreakoutBox
 NTV2DeviceCanDoCapture
-NTV2DeviceCanDoColorCorrection
 NTV2DeviceCanDoDSKOpacity
 NTV2DeviceCanDoDualLink
 NTV2DeviceCanDoDVCProHD
@@ -154,7 +153,6 @@ NTV2DeviceCanDoHDVideo
 NTV2DeviceCanDoIsoConvert
 NTV2DeviceCanDoLTC
 NTV2DeviceCanDoPlayback
-NTV2DeviceCanDoProgrammableCSC
 NTV2DeviceCanDoQuarterExpand
 NTV2DeviceCanDoRGBPlusAlphaOut
 NTV2DeviceCanDoRP188

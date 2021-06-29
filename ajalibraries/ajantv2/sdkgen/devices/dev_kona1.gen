@@ -102,8 +102,7 @@ NTV2DeviceCanDo3GLevelConversion
 NTV2DeviceCanDoRGBLevelAConversion
 NTV2DeviceCanDoAudio8Channels
 NTV2DeviceCanDoAudioDelay		
-NTV2DeviceCanDoCapture				
-NTV2DeviceCanDoColorCorrection
+NTV2DeviceCanDoCapture
 NTV2DeviceCanDoCustomAnc
 NTV2DeviceCanDoDSKOpacity
 NTV2DeviceCanDoDualLink
@@ -115,7 +114,6 @@ NTV2DeviceCanDoMSI
 NTV2DeviceCanDoPCMControl
 NTV2DeviceCanDoPCMDetection
 NTV2DeviceCanDoPlayback
-NTV2DeviceCanDoProgrammableCSC	
 NTV2DeviceCanDoQuarterExpand
 NTV2DeviceCanDoRGBPlusAlphaOut
 NTV2DeviceCanDoRP188

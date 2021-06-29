@@ -125,10 +125,8 @@ NTV2DeviceCanDoAESAudioIn
 NTV2DeviceCanDoAudio8Channels
 NTV2DeviceCanDoAudio96K
 NTV2DeviceCanDoCapture
-NTV2DeviceCanDoColorCorrection
 NTV2DeviceCanDoHDVideo
 NTV2DeviceCanDoMSI
-NTV2DeviceCanDoProgrammableCSC
 NTV2DeviceCanDoSDVideo
 NTV2DeviceCanDoStackedAudio
 NTV2DeviceCanMeasureTemperature

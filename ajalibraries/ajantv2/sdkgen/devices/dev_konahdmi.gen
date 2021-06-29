@@ -131,11 +131,9 @@ NTV2DeviceCanDo425Mux
 NTV2DeviceCanDo4KVideo
 NTV2DeviceCanDoAudio8Channels
 NTV2DeviceCanDoCapture
-NTV2DeviceCanDoColorCorrection
 NTV2DeviceCanDoHDVideo
 NTV2DeviceCanDoMSI
 NTV2DeviceCanDoMultiFormat
-NTV2DeviceCanDoProgrammableCSC
 NTV2DeviceCanDoRGBPlusAlphaOut
 NTV2DeviceCanDoSDVideo
 NTV2DeviceCanDoStackedAudio
