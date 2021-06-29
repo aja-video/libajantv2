@@ -843,7 +843,7 @@ bool CKonaIpJsonSetup::setupBoard2110(std::string deviceSpec)
         txChannelConfig.ssrc            = transmitVideo2110.txVideoCh[i].ssrc;
         txChannelConfig.ttl             = transmitVideo2110.txVideoCh[i].ttl;
         txChannelConfig.videoFormat     = transmitVideo2110.txVideoCh[i].videoFormat;
-        txChannelConfig.videoSamples    = VPIDSampling_YUV_422;
+		txChannelConfig.videoSamples    = transmitVideo2110.txVideoCh[i].sampling;
 
         rv = config2110.SetTxStreamConfiguration(transmitVideo2110.txVideoCh[i].stream,
                                                  txChannelConfig);

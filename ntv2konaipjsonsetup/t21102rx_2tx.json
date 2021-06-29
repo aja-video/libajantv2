@@ -159,6 +159,7 @@
             "sfp2RemotePort":6100,
             "videoFormat":"1080p5994",
             "payloadType":96,
+			"sampling":"YCbCr-4:2:2",
             "ssrc":1000,
             "ttl":64,
 			"enable":"true"
@@ -175,7 +176,8 @@
             "sfp2RemotePort":6110,
             "videoFormat":"1080p5994",
             "payloadType":96,
-            "ssrc":1000,
+			"sampling":"YCbCr-4:2:2",
+			"ssrc":1000,
             "ttl":64,
 			"enable":"true"
 		}

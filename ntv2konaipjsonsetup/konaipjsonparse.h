@@ -72,6 +72,8 @@ public:
 
     bool GetEnable(const std::string enableBoolString);
     QString GetEnable(const bool enabled);
+	VPIDSampling GetSampling(const std::string samplingString);
+	QString GetSampling(const VPIDSampling sampling);
     NTV2Channel GetChannel(const std::string channelString);
     QString GetChannel(const NTV2Channel channel);
     eSFP GetSfp(const std::string sfpString);

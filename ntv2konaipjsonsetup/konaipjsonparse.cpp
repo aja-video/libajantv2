@@ -21,7 +21,7 @@ const int kStrMax			= IP_STRSIZE-1;
 
 CKonaIpJsonParse2110::CKonaIpJsonParse2110()
 {
-    m_verbose = false;
+	m_verbose = false;
 }
 
 CKonaIpJsonParse2110::~CKonaIpJsonParse2110()
@@ -224,6 +224,32 @@ QString CKonaIpJsonParse2110::GetEnable(const bool enabled)
         return "true";
     else
         return "false";
+}
+
+VPIDSampling CKonaIpJsonParse2110::GetSampling(const std::string samplingString)
+{
+	VPIDSampling sampling;
+
+	if (samplingString == "RGB")
+		sampling = VPIDSampling_GBR_444;
+	else
+		sampling = VPIDSampling_YUV_422;
+
+	return sampling;
+}
+
+QString CKonaIpJsonParse2110::GetSampling(const VPIDSampling sampling)
+{
+	QString str;
+
+	if (sampling == VPIDSampling_YUV_422)
+		str = "YCbCr-4:2:2";
+	else if (sampling == VPIDSampling_GBR_444)
+		str = "RGB";
+	else
+		str = "invalid";
+
+	return str;
 }
 
 NTV2Channel CKonaIpJsonParse2110::GetChannel(const std::string channelString)
@@ -899,6 +925,11 @@ bool CKonaIpJsonParse2110::JsonToStructTransmitVideo(const QJsonArray& vArray, T
         if (m_verbose) std::cout << " ssrc " << tVideo2110.txVideoCh[i].ssrc << std::endl;
         tVideo2110.txVideoCh[i].payloadType     = vObj["payloadType"].toInt();
         if (m_verbose) std::cout << " payloadType " << tVideo2110.txVideoCh[i].payloadType << std::endl;
+
+		str = vObj["sampling"].toString().toStdString();
+		if (m_verbose) std::cout << " sampling " << str.c_str() << std::endl;
+		tVideo2110.txVideoCh[i].sampling = GetSampling(str);
+
         str = vObj["videoFormat"].toString().toStdString();
         if (m_verbose) std::cout << " videoFormat " << str.c_str() << std::endl;
 #ifdef BUILD_DEMO
@@ -935,9 +966,11 @@ bool CKonaIpJsonParse2110::StructToJsonTransmitVideo(const TransmitVideoData2110
 		obj.insert("ttl",                   QJsonValue(static_cast<int>(tVideo2110.txVideoCh[i].ttl)));
 		obj.insert("ssrc",                  QJsonValue(static_cast<int>(tVideo2110.txVideoCh[i].ssrc)));
 		obj.insert("payloadType",           QJsonValue(static_cast<int>(tVideo2110.txVideoCh[i].payloadType)));
+		obj.insert("sampling",				QJsonValue(QString(GetSampling(tVideo2110.txVideoCh[i].sampling))));
 
         obj.insert("enable",                QJsonValue(QString(GetEnable(tVideo2110.txVideoCh[i].enable))));
         obj.insert("stream",                QJsonValue(QString(GetVideoStream(tVideo2110.txVideoCh[i].stream))));
+
         vArray += QJsonValue(obj);
     }
 
