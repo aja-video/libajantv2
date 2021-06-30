@@ -151,6 +151,7 @@ NTV2DeviceCanDoAudio8Channels
 NTV2DeviceCanDoAudioDelay
 NTV2DeviceCanDoCustomAnc
 NTV2DeviceCanDoDSKOpacity
+NTV2DeviceCanDoDualLink
 NTV2DeviceCanDoEnhancedCSC
 NTV2DeviceCanDoFrameStore1Display
 NTV2DeviceCanDoHDMIOutStereo
