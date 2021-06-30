@@ -626,7 +626,7 @@ bool CNTV2Card::GetHDMIOutStatus (NTV2HDMIOutputStatus & outStatus)
     if (::NTV2DeviceGetHDMIVersion(_boardID) < 4)
         return false;
 
-    bool ret = CNTV2DriverInterface::ReadRegister(kVRegHDMIOutStatus1, data);
+    bool ret = ReadRegister(kVRegHDMIOutStatus1, data);
     if (!ret)
         return false;
 
