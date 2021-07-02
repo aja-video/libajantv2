@@ -675,6 +675,10 @@ private:
 		DefineRegister (kRegHDMIHDRMasteringLuminence,				"",	mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
 		DefineRegister (kRegHDMIHDRLightLevel,						"",	mDecodeHDMIOutHDRPrimary,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
 		DefineRegister (kRegHDMIHDRControl,							"",	mDecodeHDMIOutHDRControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_HDR);
+		DefineRegister (kRegMRQ1Control,							"",	mDecodeHDMIOutMRControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (kRegMRQ2Control,							"",	mDecodeHDMIOutMRControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (kRegMRQ3Control,							"",	mDecodeHDMIOutMRControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
+		DefineRegister (kRegMRQ4Control,							"",	mDecodeHDMIOutMRControl,	READWRITE,	kRegClass_HDMI,		kRegClass_Output,	kRegClass_Channel1);
 		DefineRegister (kRegHDMIV2I2C1Control,						"",	mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_NULL);
 		DefineRegister (kRegHDMIV2I2C1Data,							"",	mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_NULL);
 		DefineRegister (kRegHDMIV2VideoSetup,						"",	mDefaultRegDecoder,			READWRITE,	kRegClass_HDMI,		kRegClass_Input,	kRegClass_NULL);
@@ -1620,6 +1624,8 @@ public:
 			for (ULWord regNum = 0x1d00; regNum <= 0x1d1f; regNum++)
 				result.insert(regNum);
 			for (ULWord regNum = 0x1d40; regNum <= 0x1d5f; regNum++)
+				result.insert(regNum);
+			for (ULWord regNum = 0x3C00; regNum <= 0x3C0A; regNum++)
 				result.insert(regNum);
 		}
 
@@ -3287,6 +3293,26 @@ private:
 		}
 		virtual	~DecodeHDMIOutHDRControl()	{}
 	}	mDecodeHDMIOutHDRControl;
+	
+	struct DecodeHDMIOutMRControl : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			ostringstream	oss;
+            static const string	sMRStandard[]	=	{	"1080i",	"720p",	"480i",	"576i",	"1080p",	"1556i",	"2Kx1080p",	"2Kx1080i",	"UHD",	"4K", "", "", "", "", "", "" };
+			const ULWord	rawVideoStd		(inRegValue & kRegMaskMRStandard);
+			const string	hdmiVidStdStr	(sMRStandard[rawVideoStd]);
+			const string	vidStdStr		(::NTV2StandardToString (NTV2Standard(rawVideoStd), true));
+			oss << "Video Standard: " << hdmiVidStdStr;
+			if (hdmiVidStdStr != vidStdStr)
+				oss << " (" << vidStdStr << ")";
+			oss	<< endl
+				<< "Capture Mode: "				<< ((inRegValue & kRegMaskMREnable)	? "Enabled"			: "Disabled");
+			return oss.str();
+		}
+		virtual	~DecodeHDMIOutMRControl()	{}
+	}	mDecodeHDMIOutMRControl;
 
 	struct DecodeSDIOutputControl : public Decoder
 	{
