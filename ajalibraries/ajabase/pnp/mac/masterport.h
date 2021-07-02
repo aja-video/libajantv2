@@ -9,7 +9,7 @@
 	#define __MASTERPORT_H__
 
 	//	Includes
-	#include "ajarefptr.h"
+    #include "ajabase/common/ajarefptr.h"
 	#include <IOKit/IOKitLib.h>
 	#include <assert.h>
 
