@@ -1,7 +1,6 @@
 project(ntv2konaipjsonsetup)
 
-find_package(Qt5 COMPONENTS Core REQUIRED)
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 set(QT_LIBRARIES Qt5::Core Qt5::Widgets)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
