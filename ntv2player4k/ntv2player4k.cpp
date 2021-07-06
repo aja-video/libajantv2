@@ -312,9 +312,7 @@ AJAStatus NTV2Player4K::SetUpVideo (void)
 		}
 	}
 
-	if(mDeviceID == DEVICE_ID_KONAIP_1RX_1TX_2110 ||
-		mDeviceID == DEVICE_ID_KONAIP_2110 ||
-		mDeviceID == DEVICE_ID_KONAIP_2110)
+	if (NTV2DeviceCanDo2110(mDeviceID))
 	{
 		mDevice.SetReference(NTV2_REFERENCE_SFP1_PTP);
 	}
