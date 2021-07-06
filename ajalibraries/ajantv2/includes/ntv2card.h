@@ -4039,6 +4039,9 @@ public:
 		@note		For <b>capture</b> from IP devices running S2110 firmware, this method will automatically extract <b>VPID</b> and
 					<b>RP188</b> timecode packets from the incoming RTP Anc streams, even if not ::AUTOCIRCULATE_WITH_ANC, or without
 					Anc buffers in the "transferInfo".
+		@bug		For IP devices running S2110 firmware, this method performs many heap allocations in order to transparently
+					support normal (<b>VPID</b> and <b>RP188</b>) and custom ancillary data. This feature should be re-implemented
+					to use separate, per-channel, private, pre-allocated heaps for the STL objects and other buffers it uses.
 		@see		CNTV2Card::DMAReadFrame, CNTV2Card::DMAWriteFrame, \ref aboutautocirculate
 	**/
 	AJA_VIRTUAL bool	AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULATE_TRANSFER & transferInfo);
