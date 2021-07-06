@@ -1017,7 +1017,7 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 			else
 				F1SizeInBytes = size_t(F2OffsetFromBottom - F1OffsetFromBottom);
 		}
-		if (_boardID == DEVICE_ID_IOIP_2110)
+		if ((_boardID == DEVICE_ID_IOIP_2110) || (_boardID == DEVICE_ID_IOIP_2110_RGB12))
 		{	//	IoIP 2110 Playout requires room for RTP+GUMP per anc buffer, to also operate SDI5 Mon output
 			ULWord	F1MonOffsetFromBottom(0),  F2MonOffsetFromBottom(0);
 			const bool good (GetAncRegionOffsetFromBottom(F1MonOffsetFromBottom, NTV2_AncRgn_MonField1)
@@ -1424,7 +1424,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 	bool				isProgressive	(false);
 	bool				generateRTP		(false);
 	const bool			isMonitoring	(AJADebug::IsActive(AJA_DebugUnit_Anc2110Xmit));
-	const bool			isIoIP2110		(_boardID == DEVICE_ID_IOIP_2110);
+	const bool			isIoIP2110		((_boardID == DEVICE_ID_IOIP_2110) || (_boardID == DEVICE_ID_IOIP_2110_RGB12));
 	NTV2Standard		standard		(NTV2_STANDARD_INVALID);
 	NTV2_POINTER &		ancF1			(inOutXferInfo.acANCBuffer);
 	NTV2_POINTER &		ancF2			(inOutXferInfo.acANCField2Buffer);

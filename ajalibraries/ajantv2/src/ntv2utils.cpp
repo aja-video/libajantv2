@@ -4836,7 +4836,8 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_CORVIDHBR:               return inForRetailDisplay ? "Corvid HB-R"               : "CorvidHBR";
         case DEVICE_ID_IO4KPLUS:				return inForRetailDisplay ? "Avid DNxIV"                : "Io4KPlus";
         case DEVICE_ID_IOIP_2022:				return inForRetailDisplay ? "Avid DNxIP s2022"          : "IoIP-s2022";
-        case DEVICE_ID_IOIP_2110:				return inForRetailDisplay ? "Avid DNxIP s2110"          : "IoIP-s2110";
+		case DEVICE_ID_IOIP_2110:				return inForRetailDisplay ? "Avid DNxIP s2110"          : "IoIP-s2110";
+		case DEVICE_ID_IOIP_2110_RGB12:			return inForRetailDisplay ? "Avid DNxIP s2110_RGB12"	: "IoIP-s2110_RGB12";
 		case DEVICE_ID_KONAIP_2110:             return "KonaIP s2110";
 		case DEVICE_ID_KONAIP_2110_RGB12:		return "KonaIP s2110 RGB12";
 		case DEVICE_ID_KONA1:					return inForRetailDisplay ? "Kona 1"					: "Kona1";

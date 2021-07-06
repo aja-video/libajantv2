@@ -168,8 +168,14 @@ typedef enum
 	} NTV2BoardSubType;			///< @deprecated	This is obsolete.
 #endif	//	!defined (NTV2_DEPRECATE)
 
-#define	NTV2_DEVICE_SUPPORTS_SMPTE2110(__d__)			((__d__) == DEVICE_ID_KONAIP_2110 || (__d__) == DEVICE_ID_IOIP_2110)
-#define	NTV2_DEVICE_SUPPORTS_SMPTE2022(__d__)			((__d__) == DEVICE_ID_KONAIP_2022 || (__d__) == DEVICE_ID_IOIP_2022)
+#define NTV2_DEVICE_SUPPORTS_SMPTE2110(__d__)	(		(__d__) == DEVICE_ID_KONAIP_2110			\
+													||	(__d__) == DEVICE_ID_KONAIP_2110_RGB12		\
+													||	(__d__) == DEVICE_ID_KONAIP_1RX_1TX_2110	\
+													||	(__d__) == DEVICE_ID_IOIP_2110				\
+													||	(__d__) == DEVICE_ID_IOIP_2110_RGB12	)
+
+#define	NTV2_DEVICE_SUPPORTS_SMPTE2022(__d__)	(		(__d__) == DEVICE_ID_KONAIP_2022			\
+													||	(__d__) == DEVICE_ID_IOIP_2022	)
 
 
 /**
@@ -3667,7 +3673,8 @@ typedef enum
 	NTV2_BITFILE_KONA5_OE10_MAIN	= 76,
 	NTV2_BITFILE_KONA5_OE11_MAIN	= 77,
 	NTV2_BITFILE_KONA5_OE12_MAIN	= 78,
-	NTV2_BITFILE_KONAIP_2110_RGB12	= 68,
+	NTV2_BITFILE_KONAIP_2110_RGB12	= 79,
+	NTV2_BITFILE_IOIP_2110_RGB12	= 80,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
 

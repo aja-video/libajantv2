@@ -773,6 +773,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 		case DEVICE_ID_IOEXPRESS:					bitFileInfo.bitFileType = NTV2_BITFILE_IOEXPRESS_MAIN;				break;
 		case DEVICE_ID_IOIP_2022:					bitFileInfo.bitFileType = NTV2_BITFILE_IOIP_2022;					break;
 		case DEVICE_ID_IOIP_2110:					bitFileInfo.bitFileType = NTV2_BITFILE_IOIP_2110;					break;
+		case DEVICE_ID_IOIP_2110_RGB12:				bitFileInfo.bitFileType = NTV2_BITFILE_IOIP_2110_RGB12;				break;
 		case DEVICE_ID_IOXT:						bitFileInfo.bitFileType = NTV2_BITFILE_IOXT_MAIN;					break;
 		case DEVICE_ID_KONA1:						bitFileInfo.bitFileType = NTV2_BITFILE_KONA1;						break;
 		case DEVICE_ID_KONA3G:						bitFileInfo.bitFileType = NTV2_BITFILE_KONA3G_MAIN;					break;
