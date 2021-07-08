@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 /**
     @file		mac/infoimpl.cpp
     @brief		Implements the AJASystemInfoImpl class on the Mac platform.
