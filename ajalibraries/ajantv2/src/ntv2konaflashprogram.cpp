@@ -137,7 +137,9 @@ void CNTV2KonaFlashProgram::SetMBReset()
     if (IsIPDevice())
     {
         //Hold MB in reset
-        if(GetDeviceID() == DEVICE_ID_IOIP_2022 || GetDeviceID() == DEVICE_ID_IOIP_2110)
+		if ((GetDeviceID() == DEVICE_ID_IOIP_2022) ||
+			(GetDeviceID() == DEVICE_ID_IOIP_2110) ||
+			(GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12))
         {
             WriteRegister(SAREK_REGS + kRegSarekControl, 0x02);
         }

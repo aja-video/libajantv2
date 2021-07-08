@@ -237,8 +237,9 @@ CNTV2AxiSpiFlash::~CNTV2AxiSpiFlash()
 
 bool CNTV2AxiSpiFlash::DeviceSupported(NTV2DeviceID deviceId)
 {
-    if (deviceId == DEVICE_ID_IOIP_2022 ||
-        deviceId == DEVICE_ID_IOIP_2110)
+	if ((deviceId == DEVICE_ID_IOIP_2022) ||
+		(deviceId == DEVICE_ID_IOIP_2110) ||
+		(deviceId == DEVICE_ID_IOIP_2110_RGB12))
     {
         return true;
     }

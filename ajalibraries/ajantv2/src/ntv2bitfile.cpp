@@ -497,8 +497,8 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 													|| _designName == "ZARTAN";
 		case DEVICE_ID_IO4KPLUS:			return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IO4KPLUS) == _designName;
 		case DEVICE_ID_IOIP_2022:			return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2022) == _designName;
-		case DEVICE_ID_KONAIP_2110:			return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2110) == _designName;
-		case DEVICE_ID_KONAIP_2110_RGB12:	return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2110) == _designName;
+		case DEVICE_ID_KONAIP_2110:			return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2110) == _designName;
+		case DEVICE_ID_KONAIP_2110_RGB12:	return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2110_RGB12) == _designName;
 		case DEVICE_ID_IOIP_2110:			return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2110) == _designName;
 		case DEVICE_ID_IOIP_2110_RGB12:		return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2110_RGB12) == _designName;
 		case DEVICE_ID_KONAHDMI:			return ::NTV2GetPrimaryHardwareDesignName(DEVICE_ID_KONAHDMI) == _designName

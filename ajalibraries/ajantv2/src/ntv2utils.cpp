@@ -8377,6 +8377,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_IO4KPLUS:					return useWindowsName ? "io4kplus_pcie.bit"         : "io4kp.bit";
 	case DEVICE_ID_IOIP_2022:					return useWindowsName ? "ioip_s2022.mcs"            : "ioip_s2022.mcs";
 	case DEVICE_ID_IOIP_2110:					return useWindowsName ? "ioip_s2110.mcs"            : "ioip_s2110.mcs";
+	case DEVICE_ID_IOIP_2110_RGB12:				return useWindowsName ? "ioip_s2110_rgb.mcs"		: "ioip_s2110_rgb.mcs";
 	case DEVICE_ID_KONAIP_2110:					return useWindowsName ? "kip_s2110.mcs"             : "kip_s2110.mcs";
 	case DEVICE_ID_KONAIP_2110_RGB12:			return useWindowsName ? "kip_s2110_rgb.mcs"			: "kip_s2110_rgb.mcs";
 	case DEVICE_ID_KONAHDMI:					return useWindowsName ? "kona_hdmi_4rx.bit"         : "kona_hdmi_4rx.bit";
@@ -8490,7 +8491,8 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_IO4KUFC,
 														DEVICE_ID_IO4KPLUS,
                                                         DEVICE_ID_IOIP_2022,
-                                                        DEVICE_ID_IOIP_2110,
+														DEVICE_ID_IOIP_2110,
+														DEVICE_ID_IOIP_2110_RGB12,
 														DEVICE_ID_IOEXPRESS,
 														DEVICE_ID_IOXT,
 														DEVICE_ID_KONA1,

@@ -651,7 +651,8 @@ bool CNTV2Card::GetAncRegionOffsetFromBottom (ULWord & bytesFromBottom, const NT
 	if (ReadRegister(kVRegAncField2Offset, temp)  &&  temp > bytesFromBottom)
 		bytesFromBottom = temp;
 
-	if (is153OrLater  &&  GetDeviceID() == DEVICE_ID_IOIP_2110)
+	if (is153OrLater  &&  ((GetDeviceID() == DEVICE_ID_IOIP_2110) ||
+						   (GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12)))
 	{
 		if (ReadRegister(kVRegMonAncField1Offset, temp)  &&  temp > bytesFromBottom)
 			bytesFromBottom = temp;
