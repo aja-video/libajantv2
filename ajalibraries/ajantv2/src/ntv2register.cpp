@@ -6142,8 +6142,12 @@ bool CNTV2Card::SetLTCInputEnable(bool value)
 bool CNTV2Card::SetLTCOnReference(bool value)
 {
 
-	if(value && (GetDeviceID() == DEVICE_ID_IO4K || GetDeviceID() == DEVICE_ID_IO4KUFC
-                 || GetDeviceID() == DEVICE_ID_IO4KPLUS || GetDeviceID() == DEVICE_ID_IOIP_2022 || GetDeviceID() == DEVICE_ID_IOIP_2110))
+	if(value && ((GetDeviceID() == DEVICE_ID_IO4K)		||
+				 (GetDeviceID() == DEVICE_ID_IO4KUFC)	||
+				 (GetDeviceID() == DEVICE_ID_IO4KPLUS)	||
+				 (GetDeviceID() == DEVICE_ID_IOIP_2022) ||
+				 (GetDeviceID() == DEVICE_ID_IOIP_2110) ||
+				 (GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12)))
 	{
 		NTV2ReferenceSource source;
 		GetReference(source);
