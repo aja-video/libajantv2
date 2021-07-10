@@ -94,51 +94,57 @@ ostream & NTV2SDIInputStatus::Print (ostream & inOutStream) const
 }
 
 
-NTV2HDMIOutputStatus::NTV2HDMIOutputStatus ()
-{
-    Clear ();
-}
-
-
 void NTV2HDMIOutputStatus::Clear (void)
 {
-    mEnabled			= false;
-    mPixelRGB    		= false;
-    mRangeFull  		= false;
-    mPixel420           = false;
-    mProtocol           = NTV2_INVALID_HDMI_PROTOCOL;
-    mVideoStandard  	= NTV2_STANDARD_INVALID;
-    mVideoRate          = NTV2_FRAMERATE_UNKNOWN;
-    mVideoBitDepth      = NTV2_INVALID_HDMIBitDepth;
-    mAudioFormat		= NTV2_AUDIO_FORMAT_INVALID;
-    mAudioRate          = NTV2_AUDIO_RATE_INVALID;
-    mAudioChannels      = NTV2_INVALID_HDMI_AUDIO_CHANNELS;
+	mEnabled		= false;
+	mPixel420		= false;
+	mColorSpace		= NTV2_INVALID_HDMI_COLORSPACE;
+	mRGBRange		= NTV2_INVALID_HDMI_RANGE;
+	mProtocol		= NTV2_INVALID_HDMI_PROTOCOL;
+	mVideoStandard	= NTV2_STANDARD_INVALID;
+	mVideoRate		= NTV2_FRAMERATE_UNKNOWN;
+	mVideoBitDepth	= NTV2_INVALID_HDMIBitDepth;
+	mAudioFormat	= NTV2_AUDIO_FORMAT_INVALID;
+	mAudioRate		= NTV2_AUDIO_RATE_INVALID;
+	mAudioChannels	= NTV2_INVALID_HDMI_AUDIO_CHANNELS;
 }
 
+bool NTV2HDMIOutputStatus::SetFromRegValue (const ULWord inData)
+{
+	Clear();
+	mVideoRate		= NTV2FrameRate((inData & kVRegMaskHDMOutVideoFrameRate) >> kVRegShiftHDMOutVideoFrameRate);
+	if (mVideoRate == NTV2_FRAMERATE_UNKNOWN)
+		return true;	//	Not enabled -- success
+	mEnabled		= true;
+	mPixel420		= ((inData & kVRegMaskHDMOutPixel420) >> kVRegShiftHDMOutPixel420) == 1;
+	mColorSpace		= NTV2HDMIColorSpace(((inData & kVRegMaskHDMOutColorRGB) >> kVRegShiftHDMOutColorRGB) ? NTV2_HDMIColorSpaceRGB : NTV2_HDMIColorSpaceYCbCr);
+	mRGBRange		= NTV2HDMIRange((inData & kVRegMaskHDMOutRangeFull) >> kVRegShiftHDMOutRangeFull);
+	mProtocol		= NTV2HDMIProtocol((inData & kVRegMaskHDMOutProtocol) >> kVRegShiftHDMOutProtocol);
+	mVideoStandard	= NTV2Standard((inData & kVRegMaskHDMOutVideoStandard) >> kVRegShiftHDMOutVideoStandard);
+	mVideoBitDepth	= NTV2HDMIBitDepth((inData & kVRegMaskHDMOutBitDepth) >> kVRegShiftHDMOutBitDepth);
+	mAudioFormat	= NTV2AudioFormat((inData & kVRegMaskHDMOutAudioFormat) >> kVRegShiftHDMOutAudioFormat);
+	mAudioRate		= NTV2AudioRate((inData & kVRegMaskHDMOutAudioRate) >> kVRegShiftHDMOutAudioRate);
+	mAudioChannels	= NTV2HDMIAudioChannels((inData & kVRegMaskHDMOutAudioChannels) >> kVRegShiftHDMOutAudioChannels);
+	return true;
+}
 
 ostream & NTV2HDMIOutputStatus::Print (ostream & inOutStream) const
 {
-    if (mVideoRate == NTV2_FRAMERATE_UNKNOWN)
-    {
-        inOutStream	<< "[Enabled="		<< YesNo(false)
-                    << "]";
-    }
-    else
-    {
-        inOutStream	<< "[Enabled="		<< YesNo(true)
-                    << " PixelRGB="		<< YesNo(mPixelRGB)
-                    << " RangeFull="    << YesNo(mRangeFull)
-                    << " Pixel420="     << YesNo(mPixel420)
-                    << " Protocol="     << xHEX0N(mProtocol,16)
-                    << " VidStd="       << xHEX0N(mVideoStandard,16)
-                    << " VidRate="		<< xHEX0N(mVideoRate,16)
-                    << " VidBits="		<< xHEX0N(mVideoBitDepth,16)
-                    << " AudFmt="		<< xHEX0N(mAudioFormat,16)
-                    << " AudRate="		<< xHEX0N(mAudioRate,16)
-                    << " AudChn="		<< xHEX0N(mAudioChannels,16)
-                    << "]";
-    }
-    return inOutStream;
+	inOutStream	<< "Enabled: "			<< YesNo(mEnabled);
+	if (mEnabled)
+		inOutStream	<< endl
+					<< "Is 4:2:0: "			<< YesNo(mPixel420)									<< endl
+					<< "Color Space: "		<< ::NTV2HDMIColorSpaceToString(mColorSpace,true)	<< endl;
+	if (mColorSpace == NTV2_HDMIColorSpaceRGB)
+		inOutStream	<< "RGB Range: "		<< ::NTV2HDMIRangeToString(mRGBRange,true)			<< endl;
+	inOutStream		<< "Protocol: "			<< ::NTV2HDMIProtocolToString(mProtocol,true)		<< endl
+					<< "Video Standard: "	<< ::NTV2StandardToString(mVideoStandard,true)		<< endl
+					<< "Frame Rate: "		<< ::NTV2FrameRateToString(mVideoRate,true)			<< endl
+					<< "Bit Depth: "		<< ::NTV2HDMIBitDepthToString(mVideoBitDepth,true)	<< endl
+					<< "Audio Format: "		<< ::NTV2AudioFormatToString(mAudioFormat,true)		<< endl
+					<< "Audio Rate: "		<< ::NTV2AudioRateToString(mAudioRate,true)			<< endl
+					<< "Audio Channels: "	<< ::NTV2HDMIAudioChannelsToString(mAudioChannels,true);
+	return inOutStream;
 }
 
 

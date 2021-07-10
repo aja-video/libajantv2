@@ -1066,6 +1066,14 @@ AJAExport std::string NTV2AncDataRgnToStr				(const NTV2AncDataRgn			inValue,	co
 AJAExport std::string NTV2UpConvertModeToString			(const NTV2UpConvertMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
 AJAExport std::string NTV2DownConvertModeToString		(const NTV2DownConvertMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
 AJAExport std::string NTV2IsoConvertModeToString		(const NTV2IsoConvertMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
+
+AJAExport std::string NTV2HDMIBitDepthToString			(const NTV2HDMIBitDepth			inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
+AJAExport std::string NTV2HDMIAudioChannelsToString		(const NTV2HDMIAudioChannels	inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
+AJAExport std::string NTV2HDMIProtocolToString			(const NTV2HDMIProtocol			inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
+AJAExport std::string NTV2HDMIRangeToString				(const NTV2HDMIRange			inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
+AJAExport std::string NTV2HDMIColorSpaceToString		(const NTV2HDMIColorSpace		inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
+AJAExport std::string NTV2AudioFormatToString			(const NTV2AudioFormat			inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
+
 AJAExport bool	convertHDRFloatToRegisterValues			(const HDRFloatValues & inFloatValues,		HDRRegValues & outRegisterValues);
 AJAExport bool	convertHDRRegisterToFloatValues			(const HDRRegValues & inRegisterValues,		HDRFloatValues & outFloatValues);
 AJAExport void  setHDRDefaultsForBT2020                 (HDRRegValues & outRegisterValues);

@@ -3857,13 +3857,13 @@ typedef enum
 
 
 /**
-	@brief	This specifies HDMI Color Space I/O
+	@brief	Indicates or specifies HDMI Color Space
 **/
 typedef enum
 {
-	NTV2_HDMIColorSpaceAuto,	//	Auto Select
-	NTV2_HDMIColorSpaceRGB,		//	RGB
-	NTV2_HDMIColorSpaceYCbCr,	//	YCbCr
+	NTV2_HDMIColorSpaceAuto,	///< @brief	Automatic (not for OEM use)
+	NTV2_HDMIColorSpaceRGB,		///< @brief	RGB color space
+	NTV2_HDMIColorSpaceYCbCr,	///< @brief	YCbCr color space
 	NTV2_MAX_NUM_HDMIColorSpaces,
 	NTV2_INVALID_HDMI_COLORSPACE	= NTV2_MAX_NUM_HDMIColorSpaces
 } NTV2HDMIColorSpace;
@@ -3872,12 +3872,12 @@ typedef enum
 
 
 /**
-	@brief	This specifies the HDMI protocol to be used.
+	@brief	Indicates or specifies the HDMI protocol
 **/
 typedef enum
 {
-	NTV2_HDMIProtocolHDMI,		//	HDMI Protocol
-	NTV2_HDMIProtocolDVI,		//	DVI Protocol
+	NTV2_HDMIProtocolHDMI,		///< @brief	HDMI protocol
+	NTV2_HDMIProtocolDVI,		///< @brief	DVI protocol
 	NTV2_MAX_NUM_HDMIProtocols,
 	NTV2_INVALID_HDMI_PROTOCOL	= NTV2_MAX_NUM_HDMIProtocols
 } NTV2HDMIProtocol;
@@ -3886,12 +3886,12 @@ typedef enum
 
 
 /**
-	@brief	This specifies the range of HDMI
+	@brief	Indicates or specifies the HDMI RGB range
 **/
 typedef enum
 {
-	NTV2_HDMIRangeSMPTE,		//	Levels are 16 - 235 (SMPTE)
-	NTV2_HDMIRangeFull,			//	Levels are  0 - 255 (Full)
+	NTV2_HDMIRangeSMPTE,		///< @brief	Levels are 16 - 235 (SMPTE)
+	NTV2_HDMIRangeFull,			///< @brief	Levels are  0 - 255 (Full)
 	NTV2_MAX_NUM_HDMIRanges,
 	NTV2_INVALID_HDMI_RANGE	= NTV2_MAX_NUM_HDMIRanges
 } NTV2HDMIRange;
@@ -3900,7 +3900,7 @@ typedef enum
 
 
 /**
-	@brief	This specifies the colorimetry of HDMI
+	@brief	Indicates or specifies the HDMI colorimetry
 **/
 typedef enum
 {
@@ -3918,12 +3918,12 @@ typedef enum
 
 
 /**
-	@brief	This specifies the number of audio channels on output for HDMI
+	@brief	Indicates or specifies the HDMI audio channel count
 **/
 typedef enum
 {
-	NTV2_HDMIAudio2Channels,	//	2 Channel output
-	NTV2_HDMIAudio8Channels,	//	8 Channel output
+	NTV2_HDMIAudio2Channels,	///< @brief	2 audio channels
+	NTV2_HDMIAudio8Channels,	///< @brief	8 audio channels
 	NTV2_MAX_NUM_HDMIAudioChannelEnums,
 	NTV2_INVALID_HDMI_AUDIO_CHANNELS	=	NTV2_MAX_NUM_HDMIAudioChannelEnums
 } NTV2HDMIAudioChannels;
@@ -3942,12 +3942,14 @@ typedef enum
 #define	NTV2_IS_VALID_LHI_HDMI_COLORSPACE(__x__)	((__x__) < NTV2_MAX_NUM_LHIHDMIColorSpaces)
 
 
-// Bit depth on HDMI interface
+/**
+	@brief	Indicates or specifies the HDMI video bit depth
+**/
 typedef enum
 {
-	NTV2_HDMI8Bit,				//	8 bit
-	NTV2_HDMI10Bit,				//	10 bit
-	NTV2_HDMI12Bit,				//	12 bit
+	NTV2_HDMI8Bit,				///< @brief	8 bit
+	NTV2_HDMI10Bit,				///< @brief	10 bit
+	NTV2_HDMI12Bit,				///< @brief	12 bit
 	NTV2_MAX_NUM_HDMIBitDepths,
 	NTV2_INVALID_HDMIBitDepth = NTV2_MAX_NUM_HDMIBitDepths
 } NTV2HDMIBitDepth;

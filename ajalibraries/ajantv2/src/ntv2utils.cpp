@@ -6785,10 +6785,10 @@ string NTV2AudioRateToString (const NTV2AudioRate inValue, const bool inForRetai
 {
 	switch (inValue)
 	{
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "48kHz", NTV2_AUDIO_48K);
-        NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "96kHz", NTV2_AUDIO_96K);
-        NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "192kHz", NTV2_AUDIO_192K);
-        NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "???", NTV2_AUDIO_RATE_INVALID);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "48 kHz",	NTV2_AUDIO_48K);
+        NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "96 kHz",	NTV2_AUDIO_96K);
+        NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "192 kHz",	NTV2_AUDIO_192K);
+        NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "???",		NTV2_AUDIO_RATE_INVALID);
 	}
 	return "";
 }
@@ -7639,6 +7639,74 @@ string NTV2IsoConvertModeToString (const NTV2IsoConvertMode inValue, const bool 
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "14" "\xC3\x97" "9",				NTV2_Iso14x9);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Pass-Through",					NTV2_IsoPassThrough);
 		case NTV2_MAX_NUM_IsoConvertModes:			break;  //special case
+	}
+	return "";
+}
+
+string NTV2HDMIBitDepthToString (const NTV2HDMIBitDepth inValue, const bool inCompact)
+{
+	switch(inValue)
+	{
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "8-bit",		NTV2_HDMI8Bit);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "10-bit",		NTV2_HDMI10Bit);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "12-bit",		NTV2_HDMI12Bit);
+		case NTV2_INVALID_HDMIBitDepth:		break;
+	}
+	return "";
+}
+
+string NTV2HDMIAudioChannelsToString (const NTV2HDMIAudioChannels inValue, const bool inCompact)
+{
+	switch(inValue)
+	{
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "2-chl",		NTV2_HDMIAudio2Channels);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "8-chl",		NTV2_HDMIAudio8Channels);
+		case NTV2_INVALID_HDMI_AUDIO_CHANNELS:		break;
+	}
+	return "";
+}
+
+string NTV2HDMIProtocolToString (const NTV2HDMIProtocol inValue, const bool inCompact)
+{
+	switch(inValue)
+	{
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "HDMI",		NTV2_HDMIProtocolHDMI);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "DVI",		NTV2_HDMIProtocolDVI);
+		case NTV2_INVALID_HDMI_PROTOCOL:		break;
+	}
+	return "";
+}
+
+string NTV2HDMIRangeToString (const NTV2HDMIRange inValue, const bool inCompact)
+{
+	switch(inValue)
+	{
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "SMPTE",		NTV2_HDMIRangeSMPTE);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Full",		NTV2_HDMIRangeFull);
+		case NTV2_INVALID_HDMI_RANGE:		break;
+	}
+	return "";
+}
+
+string NTV2HDMIColorSpaceToString (const NTV2HDMIColorSpace inValue, const bool inCompact)
+{
+	switch(inValue)
+	{
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Auto",		NTV2_HDMIColorSpaceAuto);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "RGB",		NTV2_HDMIColorSpaceRGB);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "YCbCr",		NTV2_HDMIColorSpaceYCbCr);
+		case NTV2_INVALID_HDMI_COLORSPACE:		break;
+	}
+	return "";
+}
+
+string NTV2AudioFormatToString (const NTV2AudioFormat inValue, const bool inCompact)
+{
+	switch(inValue)
+	{
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "LPCM",		NTV2_AUDIO_FORMAT_LPCM);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Dolby",		NTV2_AUDIO_FORMAT_DOLBY);
+		case NTV2_AUDIO_FORMAT_INVALID:		break;
 	}
 	return "";
 }

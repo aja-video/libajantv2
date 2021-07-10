@@ -620,34 +620,15 @@ bool CNTV2Card::GetHDMIV2Mode (NTV2HDMIV2Mode & outMode)
 
 bool CNTV2Card::GetHDMIOutStatus (NTV2HDMIOutputStatus & outStatus)
 {
-    ULWord data;
-    NTV2FrameRate rate;
+	outStatus.Clear();
+	if (::NTV2DeviceGetHDMIVersion(_boardID) < 4)
+		return false;	//	must have HDMI version 4 or higher
 
-    if (::NTV2DeviceGetHDMIVersion(_boardID) < 4)
-        return false;
+	ULWord data(0);
+	if (!ReadRegister(kVRegHDMIOutStatus1, data))
+		return false;	//	ReadRegister failed
 
-    bool ret = ReadRegister(kVRegHDMIOutStatus1, data);
-    if (!ret)
-        return false;
-
-    outStatus.Clear();
-    rate = (NTV2FrameRate)((data & kVRegMaskHDMOutVideoFrameRate) >> kVRegShiftHDMOutVideoFrameRate);
-    if (rate == NTV2_FRAMERATE_UNKNOWN)
-        return true;
-
-    outStatus.mEnabled          = true;
-    outStatus.mPixelRGB    		= ((data & kVRegMaskHDMOutColorRGB) >> kVRegShiftHDMOutColorRGB) == 1;
-    outStatus.mRangeFull  		= ((data & kVRegMaskHDMOutRangeFull) >> kVRegShiftHDMOutRangeFull) == 1;
-    outStatus.mPixel420         = ((data & kVRegMaskHDMOutPixel420) >> kVRegShiftHDMOutPixel420) == 1;
-    outStatus.mProtocol         = (NTV2HDMIProtocol)((data & kVRegMaskHDMOutProtocol) >> kVRegShiftHDMOutProtocol);
-    outStatus.mVideoStandard  	= (NTV2Standard)((data & kVRegMaskHDMOutVideoStandard) >> kVRegShiftHDMOutVideoStandard);
-    outStatus.mVideoRate        = (NTV2FrameRate)((data & kVRegMaskHDMOutVideoFrameRate) >> kVRegShiftHDMOutVideoFrameRate);
-    outStatus.mVideoBitDepth    = (NTV2HDMIBitDepth)((data & kVRegMaskHDMOutBitDepth) >> kVRegShiftHDMOutBitDepth);
-    outStatus.mAudioFormat		= (NTV2AudioFormat)((data & kVRegMaskHDMOutAudioFormat) >> kVRegShiftHDMOutAudioFormat);
-    outStatus.mAudioRate        = (NTV2AudioRate)((data & kVRegMaskHDMOutAudioRate) >> kVRegShiftHDMOutAudioRate);
-    outStatus.mAudioChannels    = (NTV2HDMIAudioChannels)((data & kVRegMaskHDMOutAudioChannels) >> kVRegShiftHDMOutAudioChannels);
-
-    return true;
+	return outStatus.SetFromRegValue(data);
 }
 
 

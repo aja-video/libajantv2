@@ -638,7 +638,6 @@ typedef enum
 	kVRegBaseFirmwareDeviceID				= VIRTUALREG_START+640,
 
     kVRegHDMIOutStatus1                     = VIRTUALREG_START+641,
-
     kVRegMaskHDMOutVideoStandard			= BIT(3)+BIT(2)+BIT(1)+BIT(0),
     kVRegShiftHDMOutVideoStandard			= 0,
     kVRegMaskHDMOutVideoFrameRate			= BIT(7)+BIT(6)+BIT(5)+BIT(4),

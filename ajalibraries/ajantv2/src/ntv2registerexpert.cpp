@@ -1363,6 +1363,7 @@ private:
 		DefineRegName	(kVRegHdrMaxCLLCh1,						"kVRegHdrMaxCLLCh1");
 		DefineRegName	(kVRegHdrMaxFALLCh1,					"kVRegHdrMaxFALLCh1");
 		DefineRegName	(kVRegHDROverrideState,					"kVRegHDROverrideState");
+        DefineRegName	(kVRegPCIMaxReadRequestSize,			"kVRegPCIMaxReadRequestSize");
 		DefineRegName	(kVRegUserInColorimetry,				"kVRegUserInColorimetry");					
 		DefineRegName	(kVRegUserInTransfer,					"kVRegUserInTransfer");
 		DefineRegName	(kVRegUserInLuminance,					"kVRegUserInLuminance");
@@ -1425,7 +1426,8 @@ private:
 		DefineRegName	(kVRegHDMIInDrmMasteringLuminence2,		"kVRegHDMIInDrmMasteringLuminence2");
 		DefineRegName	(kVRegHDMIInDrmLightLevel2,				"kVRegHDMIInDrmLightLevel2");
 
-        DefineRegName	(kVRegPCIMaxReadRequestSize,			"kVRegPCIMaxReadRequestSize");
+		DefineRegister	(kVRegHDMIOutStatus1,					"kVRegHDMIOutStatus1",	mDecodeHDMIOutputStatus,	READWRITE,	kRegClass_HDMI,	kRegClass_Output, kRegClass_NULL);
+
 		DefineRegName	(kVRegLastAJA,							"kVRegLastAJA");
 		DefineRegName	(kVRegFirstOEM,							"kVRegFirstOEM");
 
@@ -3210,6 +3212,18 @@ private:
 		}
 		virtual	~DecodeHDMIInputControl()	{}
 	}	mDecodeHDMIInputControl;
+
+	struct DecodeHDMIOutputStatus : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{	(void) inRegNum;
+			const NTV2HDMIOutputStatus stat (inRegValue);
+			ostringstream	oss;
+			stat.Print(oss);
+			return oss.str();
+		}
+		virtual	~DecodeHDMIOutputStatus()	{}
+	}	mDecodeHDMIOutputStatus;
 
 	struct DecodeHDMIOutHDRPrimary : public Decoder
 	{
