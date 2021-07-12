@@ -296,8 +296,8 @@ bool  CNTV2Config2110::DisableNetworkInterface(const eSFP sfp)
 
 bool CNTV2Config2110::SetRxStreamConfiguration(const eSFP sfp, const NTV2Stream stream, const rx_2110Config & rxConfig)
 {
-	if ((mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12) ||
-		(mDevice.GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12))
+	if (mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12 ||
+		mDevice.GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12)
 	{
 		mIpErrorCode = NTV2IpErrNotSupported;
 		return false;
@@ -577,8 +577,8 @@ void CNTV2Config2110::GetVideoFormatForRxTx(const NTV2Stream stream, NTV2VideoFo
 
 bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP sfp, const NTV2Stream stream, rx_2110Config & rxConfig)
 {
-	if ((mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12) ||
-		(mDevice.GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12))
+	if (mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12 ||
+		mDevice.GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12)
 	{
 		mIpErrorCode = NTV2IpErrNotSupported;
 		return false;
@@ -656,8 +656,8 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP sfp, const NTV2Stream
 
 bool CNTV2Config2110::SetRxStreamEnable(const eSFP sfp, const NTV2Stream stream, bool enable)
 {
-	if ((mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12) ||
-		(mDevice.GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12))
+	if (mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12 ||
+		mDevice.GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12)
 	{
 		mIpErrorCode = NTV2IpErrNotSupported;
 		return false;
@@ -721,8 +721,8 @@ bool CNTV2Config2110::SetRxStreamEnable(const eSFP sfp, const NTV2Stream stream,
 
 bool CNTV2Config2110::GetRxStreamEnable(const eSFP sfp, const NTV2Stream stream, bool & enabled)
 {
-	if ((mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12) ||
-		(mDevice.GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12))
+	if (mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12 ||
+		mDevice.GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12)
 	{
 		mIpErrorCode = NTV2IpErrNotSupported;
 		return false;
@@ -953,8 +953,8 @@ bool CNTV2Config2110::SetTxStreamConfiguration(const NTV2Stream stream, const tx
 		int ppp = (payloadLength/pixelGroupSize) * 2;   // as per JeffL
 
 		if ((sampling == VPIDSampling_GBR_444) &&
-			((mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12) ||
-			 (mDevice.GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12)))
+			(mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12 ||
+			 mDevice.GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12))
 		{
 			if (NTV2_IS_2K_1080_VIDEO_FORMAT(txConfig.videoFormat))
 			{
@@ -1611,8 +1611,8 @@ uint32_t CNTV2Config2110::GetPacketizerAddress(const NTV2Stream stream, const VP
     if (StreamType(stream) == VIDEO_STREAM)
     {
 		if ((sampling == VPIDSampling_GBR_444) &&
-			((mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12) ||
-			 (mDevice.GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12)))
+			(mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12 ||
+			 mDevice.GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12))
 			basePacketizer = videoRGB12Packetizers[stream-NTV2_VIDEO1_STREAM];
 		else
 			basePacketizer = videoPacketizers[stream-NTV2_VIDEO1_STREAM];
@@ -3279,8 +3279,8 @@ void CNTV2Config2110::SetArbiter(const eSFP sfp, const NTV2Stream stream, bool e
 
     uint32_t bit = (1 << Get2110TxStreamIndex(stream)) << (int(sfp) * 16);
 	if ((GetSampling(sfp, stream) == VPIDSampling_GBR_444) &&
-		((mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12) ||
-		 (mDevice.GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12)))
+		(mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12 ||
+		 mDevice.GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12))
 		bit = bit << 4;
 
     if (enable)
@@ -3307,8 +3307,8 @@ void CNTV2Config2110::GetArbiter(const eSFP sfp, NTV2Stream stream, bool & enabl
 
     uint32_t bit = (1 << Get2110TxStreamIndex(stream)) << (int(sfp) * 16);
 	if ((GetSampling(sfp, stream) == VPIDSampling_GBR_444) &&
-		((mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12) ||
-		 (mDevice.GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12)))
+		(mDevice.GetDeviceID() == DEVICE_ID_KONAIP_2110_RGB12 ||
+		 mDevice.GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12))
 		bit = bit << 4;
 
     enable = (val & bit);

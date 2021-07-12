@@ -297,9 +297,9 @@ bool CNTV2Card::GetSerialNumberString (string & outSerialNumberString)
 	const NTV2DeviceID deviceID(GetDeviceID());
 	if (deviceID == DEVICE_ID_IO4KPLUS)							//	Io4K+/DNxIV?
 		outSerialNumberString = "5" + outSerialNumberString;	//		prepend with "5"
-	else if ((deviceID == DEVICE_ID_IOIP_2022) ||
-			 (deviceID == DEVICE_ID_IOIP_2110) ||
-			 (deviceID == DEVICE_ID_IOIP_2110_RGB12))			//	IoIP/DNxIP?
+	else if (deviceID == DEVICE_ID_IOIP_2022 ||
+			 deviceID == DEVICE_ID_IOIP_2110 ||
+			 deviceID == DEVICE_ID_IOIP_2110_RGB12)				//	IoIP/DNxIP?
 		outSerialNumberString = "6" + outSerialNumberString;	//		prepend with "6"
 	return true;
 
