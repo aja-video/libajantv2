@@ -581,9 +581,11 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate (const NTV2DeviceID inDeviceID, 
 				designName == "s2022_56_4ch_rxtx_fec" ||
                 designName == "s2110_1rx_1tx"); 
     case DEVICE_ID_IOIP_2022:
-    case DEVICE_ID_IOIP_2110:
-        return (designName == GetPrimaryDesignName(DEVICE_ID_IOIP_2022) ||
-                designName == GetPrimaryDesignName(DEVICE_ID_IOIP_2110));
+	case DEVICE_ID_IOIP_2110:
+	case DEVICE_ID_IOIP_2110_RGB12:
+		return (designName == GetPrimaryDesignName(DEVICE_ID_IOIP_2022) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_IOIP_2110) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_IOIP_2110_RGB12));
 	case DEVICE_ID_TTAP_PRO:
 		return designName == GetPrimaryDesignName(DEVICE_ID_TTAP_PRO);
 	default: break;
@@ -620,7 +622,8 @@ string CNTV2FirmwareInstallerThread::GetPrimaryDesignName (const NTV2DeviceID in
         case DEVICE_ID_KONAIP_1RX_1TX_2110:         return "s2110_1rx_1tx";
         case DEVICE_ID_IO4KPLUS:					return "IO_XT_4K_PLUS";
         case DEVICE_ID_IOIP_2022:                   return "ioip_s2022";
-        case DEVICE_ID_IOIP_2110:                   return "ioip_s2110";
+		case DEVICE_ID_IOIP_2110:                   return "ioip_s2110";
+		case DEVICE_ID_IOIP_2110_RGB12:				return "ioip_s2110_tx_rgb";
 		case DEVICE_ID_KONAIP_2110:                 return "s2110_4tx";
 		case DEVICE_ID_KONAIP_2110_RGB12:			return "s2110_tx_rgb";
 		case DEVICE_ID_KONA1:                       return "kona_alpha";
