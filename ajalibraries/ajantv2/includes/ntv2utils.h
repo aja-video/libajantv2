@@ -1121,5 +1121,8 @@ AJAExport std::string		PercentDecode (const std::string & inStr);	///< @return	T
 	AJAExport NTV2_DEPRECATED_f(void			GetNTV2RetailBoardString	(NTV2BoardID inBoardID, std::string & outString));	///< @deprecated	Use NTV2DeviceIDToString(NTV2DeviceID,bool) instead.
 	AJAExport NTV2_DEPRECATED_f(NTV2BoardType	GetNTV2BoardTypeForBoardID	(NTV2BoardID inBoardID));							///< @deprecated	This function is obsolete because NTV2BoardType is obsolete.
 #endif	//	!defined (NTV2_DEPRECATE)
+#if defined (AJAMac)
+	AJAExport bool GetInstalledMacDriverVersion (UWord & outMaj, UWord & outMin, UWord & outPt, UWord & outBld);
+#endif	//	AJAMac
 
 #endif	//	NTV2UTILS_H

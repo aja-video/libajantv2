@@ -9001,3 +9001,64 @@ string PercentDecode (const string & inStr)
 	}
 	return oss.str();
 }
+
+#if defined (AJAMac)
+	#include <fstream>
+	#include "ajabase/common/common.h"
+	//	Poor man's plist reader
+	//	Fetches version components out of CFBundleShortVersionString
+	//	Returns true if the Info.plist exists;  otherwise false
+	//	NOTE:  This will fail for binary plist files!
+	bool GetInstalledMacDriverVersion (UWord & outMaj, UWord & outMin, UWord & outPt, UWord & outBld)
+	{
+		outMaj = outMin = outPt = outBld = 0;
+		ifstream ifs;
+		ifs.open("/Library/Extensions/AJANTV2.kext/Contents/Info.plist", std::ios::in);
+		if (!ifs.is_open())
+			return false;
+		if (!ifs.good())
+			return false;
+		const string key("<key>CFBundleShortVersionString</key>");
+		for (string line;  std::getline(ifs, line);  )
+		{
+			size_t keyPos(line.find(key));
+			if (keyPos == string::npos)
+				continue;
+			if (!std::getline(ifs, line))
+				break;
+			//"<string>16.1.0b58</string>" or "<string>16.0.1</string>"
+			size_t startPos(line.find("<string>")), endPos(line.find("</string>"));
+			if (startPos == string::npos  ||  endPos == string::npos)
+				continue;
+			startPos += 8;
+			if (endPos < startPos)
+				continue;
+			string versStr(line.substr(startPos, endPos-startPos));		//	"16.1.0b58"  or  "16.0.1"
+			NTV2StringList versComps;
+			aja::split(versStr, '.', versComps);
+			if (versComps.size() != 3)
+				continue;
+			if (versComps.at(2).find("b") != string::npos)
+			{	NTV2StringList lastComps;
+				aja::split(versComps.at(2), 'b', lastComps);
+				versComps.erase(versComps.begin()+2);
+				versComps.push_back(lastComps.at(0));
+				outBld = UWord(aja::stoul(lastComps.at(1)));
+			}
+			for (size_t ndx(0);  ndx < 3;  ndx++)
+			{
+				if (versComps.at(ndx).empty())
+					continue;
+				UWord val(UWord(aja::stoul(versComps.at(ndx))));
+				if (ndx == 0)
+					outMaj = val;
+				else if (ndx == 1)
+					outMin = val;
+				else
+					outPt = val;
+			}
+			break;
+		}
+		return true;
+	}
+#endif	//	AJAMac
