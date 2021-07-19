@@ -227,6 +227,8 @@ NTV2DeviceIsDirectAddressable
 NTV2DeviceIsSupported
 NTV2DeviceNeedsRoutingSetup
 NTV2DeviceSoftwareCanChangeFrameBufferSize
+NTV2DeviceCanDoHDMIMultiView
+NTV2DeviceCanDoMultiLinkAudio
 
 // NTV2ConversionModes
 

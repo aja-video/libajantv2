@@ -658,6 +658,12 @@ bool CNTV2Card::AutoCirculateInitForInput (	const NTV2Channel		inChannel,
 	autoCircData.lVal1 = startFrameNumber;
 	autoCircData.lVal2 = endFrameNumber;
 	autoCircData.lVal3 = inAudioSystem;
+	if ((inOptionFlags & AUTOCIRCULATE_WITH_MULTILINK_AUDIO1) != 0)
+		autoCircData.lVal3 |= NTV2_AUDIOSYSTEM_Plus1;
+	if ((inOptionFlags & AUTOCIRCULATE_WITH_MULTILINK_AUDIO2) != 0)
+		autoCircData.lVal3 |= NTV2_AUDIOSYSTEM_Plus2;
+	if ((inOptionFlags & AUTOCIRCULATE_WITH_MULTILINK_AUDIO3) != 0)
+		autoCircData.lVal3 |= NTV2_AUDIOSYSTEM_Plus3;
 	autoCircData.lVal4 = inNumChannels;
 	if ((inOptionFlags & AUTOCIRCULATE_WITH_FIELDS) != 0)
 		autoCircData.lVal6 |= AUTOCIRCULATE_WITH_FIELDS;
@@ -746,6 +752,12 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 	autoCircData.lVal1 = startFrameNumber;
 	autoCircData.lVal2 = endFrameNumber;
 	autoCircData.lVal3 = inAudioSystem;
+	if ((inOptionFlags & AUTOCIRCULATE_WITH_MULTILINK_AUDIO1) != 0)
+		autoCircData.lVal3 |= NTV2_AUDIOSYSTEM_Plus1;
+	if ((inOptionFlags & AUTOCIRCULATE_WITH_MULTILINK_AUDIO2) != 0)
+		autoCircData.lVal3 |= NTV2_AUDIOSYSTEM_Plus2;
+	if ((inOptionFlags & AUTOCIRCULATE_WITH_MULTILINK_AUDIO3) != 0)
+		autoCircData.lVal3 |= NTV2_AUDIOSYSTEM_Plus3;
 	autoCircData.lVal4 = inNumChannels;
 	if ((inOptionFlags & AUTOCIRCULATE_WITH_FIELDS) != 0)
 		autoCircData.lVal6 |= AUTOCIRCULATE_WITH_FIELDS;

@@ -1772,6 +1772,26 @@ bool CNTV2Card::GetAnalogAudioTransmitEnable (const NTV2Audio4ChannelSelect inCh
 	return true;
 }
 
+bool CNTV2Card::SetMultiLinkAudioMode (const NTV2AudioSystem inAudioSystem, bool inEnable)
+{
+	if (!NTV2DeviceCanDoMultiLinkAudio(_boardID))
+		return false;
+	
+	return WriteRegister(gAudioSystemToAudioControlRegNum[inAudioSystem], inEnable ? 1 : 0, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio);
+}
+
+bool CNTV2Card::GetMultiLinkAudioMode (const NTV2AudioSystem inAudioSystem, bool & outEnabled)
+{
+	if (!NTV2DeviceCanDoMultiLinkAudio(_boardID))
+		return false;
+	ULWord regValue(0);
+	outEnabled = false;
+	if(!ReadRegister(gAudioSystemToAudioControlRegNum[inAudioSystem], regValue, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio))
+		return false;
+	outEnabled = regValue ? true : false;
+	return true;
+}
+
 #if !defined(NTV2_DEPRECATE_16_1)
 	bool CNTV2Card::SetAnalogAudioIOConfiguration (const NTV2AnalogAudioIO inConfig)
 	{

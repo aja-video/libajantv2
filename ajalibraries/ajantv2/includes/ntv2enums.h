@@ -4176,10 +4176,15 @@ typedef enum
 	NTV2_AUDIOSYSTEM_8,	///< @brief	This identifies the 8th Audio System.
 	NTV2_MAX_NUM_AudioSystemEnums,
 	NTV2_NUM_AUDIOSYSTEMS		= NTV2_MAX_NUM_AudioSystemEnums,
-	NTV2_AUDIOSYSTEM_INVALID	= NTV2_NUM_AUDIOSYSTEMS
+	NTV2_AUDIOSYSTEM_INVALID	= NTV2_NUM_AUDIOSYSTEMS,
+	NTV2_AUDIOSYSTEM_Plus1		= BIT(16),
+	NTV2_AUDIOSYSTEM_Plus2		= BIT(17),
+	NTV2_AUDIOSYSTEM_Plus3		= BIT(18)
 } NTV2AudioSystem;
 
-#define	NTV2_IS_VALID_AUDIO_SYSTEM(__x__)			((__x__) >= NTV2_AUDIOSYSTEM_1 && (__x__) < NTV2_MAX_NUM_AudioSystemEnums)
+#define NTV2AudioSystemRemoveValues (~(NTV2_AUDIOSYSTEM_Plus1 | NTV2_AUDIOSYSTEM_Plus2 | NTV2_AUDIOSYSTEM_Plus3))
+#define	NTV2_IS_VALID_AUDIO_SYSTEM(__x__)			((__x__ & NTV2AudioSystemRemoveValues) >= NTV2_AUDIOSYSTEM_1 && \
+													(__x__ & NTV2AudioSystemRemoveValues) < NTV2_MAX_NUM_AudioSystemEnums)
 
 
 typedef enum

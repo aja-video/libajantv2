@@ -2406,6 +2406,9 @@ public:
     AJA_VIRTUAL bool		GetRawAudioTimer (ULWord & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	AJA_VIRTUAL bool		CanDoAudioWaitForVBI (void);	///< @return	True if the device firmware supports audio start delay-til-VBI.
+	
+	AJA_VIRTUAL bool		SetMultiLinkAudioMode (const NTV2AudioSystem inAudioSystem, bool inEnable);	///< @brief	Sets the specified audio systems multi-link mode bit
+	AJA_VIRTUAL bool		GetMultiLinkAudioMode (const NTV2AudioSystem inAudioSystem, bool & outEnabled);
 
 #if !defined(NTV2_DEPRECATE_16_0)
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool WriteAudioSource (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1));	///< @deprecated	This function is obsolete.

@@ -1476,7 +1476,8 @@ typedef enum
 	kRegMaskAudioRate				= BIT(18),
 	kRegMaskEncodedAudioMode		= BIT(19), // addded for FS1 but available on other boards
 	kRegMaskAudio16Channel			= BIT(20),
-	kRegMaskAudio8Channel			= BIT(23),
+	kRegMaskMultiLinkAudio			= BIT(23),
+	kRegMaskAudio8Channel			= kRegMaskMultiLinkAudio,
 	kK2RegMaskKBoxAnalogMonitor		= BIT(24) + BIT(25),
 	kK2RegMaskKBoxAudioInputSelect	= BIT(26),
 	kK2RegMaskKBoxDetect			= BIT(27),
@@ -2682,7 +2683,8 @@ typedef enum
 	kRegShiftAudioRate					= 18,
 	kRegShiftEncodedAudioMode			= 19,
 	kRegShiftAudio16Channel				= 20,
-	kRegShiftAudio8Channel				= 23,
+	kRegShiftMultiLinkAudio				= 23,
+	kRegShiftAudio8Channel				= kRegShiftMultiLinkAudio,
 	kK2RegShiftKBoxAnalogMonitor		= 24,
 	kK2RegShiftKBoxAudioInputSelect		= 26,
 	kK2RegShiftKBoxDetect				= 27,
@@ -5931,6 +5933,9 @@ typedef enum
 		#define	AUTOCIRCULATE_WITH_AUDIO_CONTROL	BIT(7)		///< @brief	Use this to AutoCirculate with no audio but with audio control
 		#define	AUTOCIRCULATE_WITH_FIELDS			BIT(8)		///< @brief	Use this to AutoCirculate with fields as frames for interlaced formats
 		#define AUTOCIRCULATE_WITH_HDMIAUX			BIT(9)		///< @brief	Use this to AutoCirculate with HDMI auxiliary data
+		#define AUTOCIRCULATE_WITH_MULTILINK_AUDIO1	BIT(10)		///< @brief	Use this to AutoCirculate with base audiosystem contolling base audiosystem plus 1 
+		#define AUTOCIRCULATE_WITH_MULTILINK_AUDIO2	BIT(11)		///< @brief	Use this to AutoCirculate with base audiosystem contolling base audiosystem plus 2
+		#define AUTOCIRCULATE_WITH_MULTILINK_AUDIO3	BIT(12)		///< @brief	Use this to AutoCirculate with base audiosystem contolling base audiosystem plus 3
 
 		#define AUTOCIRCULATE_FRAME_FULL			BIT(20)		///< @brief Frame contains a full image
 		#define AUTOCIRCULATE_FRAME_FIELD0			BIT(21)		///< @brief Frame contains field 0 of an interlaced image (first field in time)
