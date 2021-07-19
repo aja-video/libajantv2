@@ -19,7 +19,7 @@ using namespace std;
 
 
 NTV2Capture4K::NTV2Capture4K (const string			inDeviceSpecifier,
-							  const bool			withAudio,
+							  const int				inNumAudioLinks,
 							  const NTV2Channel		channel,
 							  const NTV2PixelFormat	pixelFormat,
 							  const bool			inLevelConversion,
@@ -31,7 +31,7 @@ NTV2Capture4K::NTV2Capture4K (const string			inDeviceSpecifier,
 		mProducerThread		(AJAThread()),
 		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mDeviceSpecifier	(inDeviceSpecifier),
-		mWithAudio			(withAudio),
+		mWithAudio			(inNumAudioLinks > 0),
 		mInputChannel		(channel),
 		mInputSource		(::NTV2ChannelToInputSource (mInputChannel)),
 		mVideoFormat		(NTV2_FORMAT_UNKNOWN),
@@ -45,7 +45,8 @@ NTV2Capture4K::NTV2Capture4K (const string			inDeviceSpecifier,
 		mVideoBufferSize	(0),
 		mAudioBufferSize	(0),
 		mAncBufferSize		(0),
-		mDoTsiRouting		(inDoTsiRouting)
+		mDoTsiRouting		(inDoTsiRouting),
+		mNumAudioLinks		(inNumAudioLinks)
 
 {
 	::memset (mAVHostBuffer, 0x0, sizeof (mAVHostBuffer));
@@ -343,17 +344,56 @@ AJAStatus NTV2Capture4K::SetupAudio (void)
 	//	In multiformat mode, base the audio system on the channel...
 	if (mDoMultiFormat && ::NTV2DeviceGetNumAudioSystems (mDeviceID) > 1 && UWord (mInputChannel) < ::NTV2DeviceGetNumAudioSystems (mDeviceID))
 		mAudioSystem = ::NTV2ChannelToAudioSystem (mInputChannel);
-
-	//	Have the audio system capture audio from the designated device input (i.e., ch1 uses SDIIn1, ch2 uses SDIIn2, etc.)...
-	mDevice.SetAudioSystemInputSource (mAudioSystem, NTV2_AUDIO_EMBEDDED, ::NTV2InputSourceToEmbeddedAudioInput (mInputSource));
-
-	mDevice.SetNumberAudioChannels (::NTV2DeviceGetMaxAudioChannels (mDeviceID), mAudioSystem);
-	mDevice.SetAudioRate (NTV2_AUDIO_48K, mAudioSystem);
-
-	//	The on-device audio buffer should be 4MB to work best across all devices & platforms...
-	mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, mAudioSystem);
-
-	mDevice.SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_OFF, mAudioSystem);
+	
+	if (mNumAudioLinks > 1)
+	{
+		switch(mNumAudioLinks)
+		{
+		default:
+		case NTV2_AUDIOSYSTEM_1:
+			mDevice.SetAudioSystemInputSource (NTV2_AUDIOSYSTEM_1, NTV2_AUDIO_EMBEDDED, NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1);
+			mDevice.SetNumberAudioChannels (::NTV2DeviceGetMaxAudioChannels (mDeviceID), NTV2_AUDIOSYSTEM_1);
+			mDevice.SetAudioRate (NTV2_AUDIO_48K, NTV2_AUDIOSYSTEM_1);
+			mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, NTV2_AUDIOSYSTEM_1);
+			mDevice.SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_OFF, NTV2_AUDIOSYSTEM_1);
+			
+			mDevice.SetAudioSystemInputSource (NTV2_AUDIOSYSTEM_2, NTV2_AUDIO_EMBEDDED, NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_2);
+			mDevice.SetNumberAudioChannels (::NTV2DeviceGetMaxAudioChannels (mDeviceID), NTV2_AUDIOSYSTEM_2);
+			mDevice.SetAudioRate (NTV2_AUDIO_48K, NTV2_AUDIOSYSTEM_2);
+			mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, NTV2_AUDIOSYSTEM_2);
+			mDevice.SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_OFF, NTV2_AUDIOSYSTEM_2);
+			
+			if (NTV2_IS_4K_HFR_VIDEO_FORMAT(mVideoFormat))
+			{
+				mDevice.SetAudioSystemInputSource (NTV2_AUDIOSYSTEM_3, NTV2_AUDIO_EMBEDDED, NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_3);
+				mDevice.SetNumberAudioChannels (::NTV2DeviceGetMaxAudioChannels (mDeviceID), NTV2_AUDIOSYSTEM_3);
+				mDevice.SetAudioRate (NTV2_AUDIO_48K, NTV2_AUDIOSYSTEM_3);
+				mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, NTV2_AUDIOSYSTEM_3);
+				mDevice.SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_OFF, NTV2_AUDIOSYSTEM_3);
+				
+				mDevice.SetAudioSystemInputSource (NTV2_AUDIOSYSTEM_4, NTV2_AUDIO_EMBEDDED, NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_4);
+				mDevice.SetNumberAudioChannels (::NTV2DeviceGetMaxAudioChannels (mDeviceID), NTV2_AUDIOSYSTEM_4);
+				mDevice.SetAudioRate (NTV2_AUDIO_48K, NTV2_AUDIOSYSTEM_4);
+				mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, NTV2_AUDIOSYSTEM_4);
+				mDevice.SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_OFF, NTV2_AUDIOSYSTEM_4);
+			}
+		}
+		
+		
+	}
+	else
+	{	
+		//	Have the audio system capture audio from the designated device input (i.e., ch1 uses SDIIn1, ch2 uses SDIIn2, etc.)...
+		mDevice.SetAudioSystemInputSource (mAudioSystem, NTV2_AUDIO_EMBEDDED, ::NTV2InputSourceToEmbeddedAudioInput (mInputSource));
+	
+		mDevice.SetNumberAudioChannels (::NTV2DeviceGetMaxAudioChannels (mDeviceID), mAudioSystem);
+		mDevice.SetAudioRate (NTV2_AUDIO_48K, mAudioSystem);
+	
+		//	The on-device audio buffer should be 4MB to work best across all devices & platforms...
+		mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, mAudioSystem);
+	
+		mDevice.SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_OFF, mAudioSystem);
+	}
 
 	return AJA_STATUS_SUCCESS;
 
@@ -369,6 +409,8 @@ void NTV2Capture4K::SetupHostBuffers (void)
 	printf("video size = %d\n", mVideoBufferSize);
 	mAudioBufferSize = NTV2_AUDIOSIZE_MAX;
 	mAncBufferSize = NTV2_ANCSIZE_MAX;
+	if(mNumAudioLinks > 1)
+		mAudioBufferSize = NTV2_AUDIOSIZE_MAX * mNumAudioLinks;
 
 	//	Allocate and add each in-host AVDataBuffer to my circular buffer member variable...
 	for (unsigned bufferNdx = 0; bufferNdx < CIRCULAR_BUFFER_SIZE; bufferNdx++ )
@@ -598,6 +640,9 @@ void NTV2Capture4K::SetupInputAutoCirculate (void)
 {
 	//	Tell capture AutoCirculate to use 7 frame buffers on the device...
 	UWord startFrame(0), endFrame(7);
+	//	Include timecode & custom Anc
+	ULWord acOptions(AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC);
+	
 	if (::NTV2DeviceCanDo12gRouting(mDeviceID))
 	{
 		if (mInputChannel == NTV2_CHANNEL2)
@@ -625,61 +670,82 @@ void NTV2Capture4K::SetupInputAutoCirculate (void)
 			endFrame = 6;
 		}
 	}
-	else if (mDoTsiRouting)
-	{
-		if (mInputChannel < NTV2_CHANNEL3)
-		{
-			mDevice.AutoCirculateStop(NTV2_CHANNEL1);
-			mDevice.AutoCirculateStop(NTV2_CHANNEL2);
-			startFrame = 0;
-			endFrame = 6;
-		}
-		else if (mInputChannel < NTV2_CHANNEL5)
-		{
-			mDevice.AutoCirculateStop(NTV2_CHANNEL3);
-			mDevice.AutoCirculateStop(NTV2_CHANNEL4);
-			startFrame = 7;
-			endFrame = 13;
-		}
-		else if (mInputChannel < NTV2_CHANNEL7)
-		{
-			mDevice.AutoCirculateStop(NTV2_CHANNEL5);
-			mDevice.AutoCirculateStop(NTV2_CHANNEL6);
-			startFrame = 14;
-			endFrame = 20;
-		}
-		else
-		{
-			mDevice.AutoCirculateStop(NTV2_CHANNEL7);
-			mDevice.AutoCirculateStop(NTV2_CHANNEL8);
-			startFrame = 21;
-			endFrame = 27;
-		}
-	}
 	else
 	{
-		if (mInputChannel == NTV2_CHANNEL1)
+		if (mNumAudioLinks > 1)
 		{
-			mDevice.AutoCirculateStop(NTV2_CHANNEL1);
-			mDevice.AutoCirculateStop(NTV2_CHANNEL2);
-			mDevice.AutoCirculateStop(NTV2_CHANNEL3);
-			mDevice.AutoCirculateStop(NTV2_CHANNEL4);
-			startFrame = 0;
-			endFrame = 6;
+			if (mInputChannel == NTV2_CHANNEL1)
+			{
+				acOptions |= AUTOCIRCULATE_WITH_MULTILINK_AUDIO1;
+				if (NTV2_IS_4K_HFR_VIDEO_FORMAT(mVideoFormat))
+				{
+					acOptions |= AUTOCIRCULATE_WITH_MULTILINK_AUDIO2;
+					acOptions |= AUTOCIRCULATE_WITH_MULTILINK_AUDIO3;
+				}
+			}
+			else
+			{
+				//Only demo multi-link audio for input 1
+			}
+		}
+		
+		if (mDoTsiRouting)
+		{
+			if (mInputChannel < NTV2_CHANNEL3)
+			{
+				mDevice.AutoCirculateStop(NTV2_CHANNEL1);
+				mDevice.AutoCirculateStop(NTV2_CHANNEL2);
+				startFrame = 0;
+				endFrame = 6;
+			}
+			else if (mInputChannel < NTV2_CHANNEL5)
+			{
+				mDevice.AutoCirculateStop(NTV2_CHANNEL3);
+				mDevice.AutoCirculateStop(NTV2_CHANNEL4);
+				startFrame = 7;
+				endFrame = 13;
+			}
+			else if (mInputChannel < NTV2_CHANNEL7)
+			{
+				mDevice.AutoCirculateStop(NTV2_CHANNEL5);
+				mDevice.AutoCirculateStop(NTV2_CHANNEL6);
+				startFrame = 14;
+				endFrame = 20;
+			}
+			else
+			{
+				mDevice.AutoCirculateStop(NTV2_CHANNEL7);
+				mDevice.AutoCirculateStop(NTV2_CHANNEL8);
+				startFrame = 21;
+				endFrame = 27;
+			}
 		}
 		else
 		{
-			mDevice.AutoCirculateStop(NTV2_CHANNEL5);
-			mDevice.AutoCirculateStop(NTV2_CHANNEL6);
-			mDevice.AutoCirculateStop(NTV2_CHANNEL7);
-			mDevice.AutoCirculateStop(NTV2_CHANNEL8);
-			startFrame = 14;
-			endFrame = 20;
+			if (mInputChannel == NTV2_CHANNEL1)
+			{
+				mDevice.AutoCirculateStop(NTV2_CHANNEL1);
+				mDevice.AutoCirculateStop(NTV2_CHANNEL2);
+				mDevice.AutoCirculateStop(NTV2_CHANNEL3);
+				mDevice.AutoCirculateStop(NTV2_CHANNEL4);
+				startFrame = 0;
+				endFrame = 6;
+			}
+			else
+			{
+				mDevice.AutoCirculateStop(NTV2_CHANNEL5);
+				mDevice.AutoCirculateStop(NTV2_CHANNEL6);
+				mDevice.AutoCirculateStop(NTV2_CHANNEL7);
+				mDevice.AutoCirculateStop(NTV2_CHANNEL8);
+				startFrame = 14;
+				endFrame = 20;
+			}
 		}
 	}
+	
 	mDevice.AutoCirculateInitForInput (mInputChannel,	0,	//	0 frames == explicitly set start & end frames
 										mWithAudio ? mAudioSystem : NTV2_AUDIOSYSTEM_INVALID,	//	Which audio system (if any)?
-										AUTOCIRCULATE_WITH_RP188 | AUTOCIRCULATE_WITH_ANC,		//	Include timecode & custom Anc
+										acOptions,
 										1, startFrame, endFrame);
 }	//	SetupInputAutoCirculate
 
@@ -721,10 +787,17 @@ void NTV2Capture4K::ConsumerThreadStatic (AJAThread * pThread, void * pContext)	
 
 }	//	ConsumerThreadStatic
 
-
+#include <fstream>
 void NTV2Capture4K::ConsumeFrames (void)
 {
 	CAPNOTE("Thread started");
+	
+	ofstream ofs1;
+	ofs1.open("D:\\temp\\temp1.raw", ios::out | ios::trunc | ios::binary);
+	
+	ofstream ofs2;
+	ofs2.open("D:\\temp\\temp2.raw", ios::out | ios::trunc | ios::binary);
+	
 	while (!mGlobalQuit)
 	{
 		//	Wait for the next frame to become ready to "consume"...
@@ -735,11 +808,15 @@ void NTV2Capture4K::ConsumeFrames (void)
 			//	. . .		. . .		. . .		. . .
 			//		. . .		. . .		. . .		. . .
 			//			. . .		. . .		. . .		. . .
+			ofs1.write(reinterpret_cast<const char*>(pFrameData->fAudioBuffer), pFrameData->fAudioRecordSize/2);
+			ofs2.write(reinterpret_cast<const char*>(pFrameData->fAudioBuffer + ((pFrameData->fAudioRecordSize/2)/4)), pFrameData->fAudioRecordSize/2);
 
 			//	Now release and recycle the buffer...
 			mAVCircularBuffer.EndConsumeNextBuffer ();
 		}
 	}	//	loop til quit signaled
+	ofs1.close();
+	ofs2.close();
 	CAPNOTE("Thread completed, will exit");
 
 }	//	ConsumeFrames
@@ -810,6 +887,7 @@ void NTV2Capture4K::CaptureFrames (void)
 			NTV2_RP188	timecode;
 			mInputTransfer.GetInputTimeCode (timecode);
 			captureData->fRP188Data = timecode;
+			captureData->fAudioRecordSize = mInputTransfer.GetCapturedAudioByteCount ();
 
 			//	Signal that we're done "producing" the frame, making it available for future "consumption"...
 			mAVCircularBuffer.EndProduceNextBuffer ();

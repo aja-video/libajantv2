@@ -35,9 +35,9 @@ int main (int argc, const char ** argv)
 	char *			pPixelFormat	(AJA_NULL);				//	Pixel format argument
 	char *			pDeviceSpec		(AJA_NULL);				//	Device specifier string, if any
 	uint32_t		channelNumber	(1);					//	Number of the channel to use
-	int				noAudio			(0);					//	Disable audio tone?
+	int				numAudioLinks	(1);		//	Number of audio systems for multi-link audio
 	int				doMultiFormat	(0);					//	Multi-format mode?
-	int				doTsiRouting	(0);					//	TSI routing?
+	int				doSquareRouting	(0);					//	Square routing?
 	poptContext		optionsContext; 						//	Context for parsing command line arguments
 	AJADebug::Open();
 
@@ -47,11 +47,12 @@ int main (int argc, const char ** argv)
 		#if !defined(NTV2_DEPRECATE_16_0)	//	--board option is deprecated!
 		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"(deprecated)"	},
 		#endif
+		{"audioLinks",	'a',	POPT_ARG_INT,		&numAudioLinks,		0,	"how many audio systems to control for multi-link audio",	"0=silence or 1-4"},
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"index#, serial#, or model"		},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"which pixel format to use",	"'?' or 'list' to list"			},
 		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,	0,	"which channel to use",			"1 thru 8"						},
-		{"multiFormat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"Configure multi-format",		AJA_NULL						},
-		{"tsi",			't',	POPT_ARG_NONE,		&doTsiRouting,	0,	"use Tsi routing?",				AJA_NULL						},
+		{"multiFomat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"Configure multi-format",		AJA_NULL						},
+		{"squares",		's',	POPT_ARG_NONE,		&doSquareRouting,	0,	"use Square routing?",				AJA_NULL						},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -72,13 +73,17 @@ int main (int argc, const char ** argv)
 				<< CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;
 		return 2;
 	}
+	
+	int	doTsiRouting	(1);		//  default route the output through the Tsi Muxes
+	if (doSquareRouting)
+		doTsiRouting = 0;
 
 	if (channelNumber < 1 || channelNumber > 8)
 		{cerr << "## ERROR:  Invalid channel number " << channelNumber << " -- expected 1 thru 8" << endl;  return 2;}
 
 	//	Instantiate the NTV2Capture object, using the specified AJA device...
 	NTV2Capture4K	capturer (pDeviceSpec ? string (pDeviceSpec) : "0",
-							  (noAudio ? false : true),			//	With Audio?
+							  numAudioLinks,					//	Multi-link, 1 channel or 0 channels
 							  ::GetNTV2ChannelForIndex(channelNumber - 1),	//	Channel
 							  pixelFormat,						//	FB pixel format
 							  false,							//	A/B conversion?

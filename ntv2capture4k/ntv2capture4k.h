@@ -30,7 +30,7 @@ class NTV2Capture4K
 			@brief	Constructs me using the given settings.
 			@note	I'm not completely initialized and ready to use until after my Init method has been called.
 			@param[in]	inDeviceSpecifier	Specifies the AJA device to use.  Defaults to "0" (first device found).
-			@param[in]	inWithAudio			If true (the default), capture audio in addition to video;  otherwise, don't capture audio.
+			@param[in]	inNumAudioLinks		Specifies the number of audio links to capture.
 			@param[in]	inChannel			Specifies the channel to use. Defaults to NTV2_CHANNEL1.
 			@param[in]	inPixelFormat		Specifies the pixel format to use for the device's frame buffers. Defaults to 8-bit YUV.
 			@param[in]	inDoLvlABConversion	Specifies if level-A/B conversion should be done or not.  Defaults to false (no conversion).
@@ -41,7 +41,7 @@ class NTV2Capture4K
 			@param[in]	inDoTsiRouting		If true, routes in Tsi Muxer widgets for Tsi instead of quads/squares. Defaults to false (quads).
 		**/
 		NTV2Capture4K (	const std::string		inDeviceSpecifier	= "0",
-						const bool				inWithAudio			= true,
+						const int				inNumAudioLinks		= 1,
 						const NTV2Channel		inChannel			= NTV2_CHANNEL1,
 						const NTV2PixelFormat	inPixelFormat		= NTV2_FBF_8BIT_YCBCR,
 						const bool				inDoLvlABConversion	= false,
@@ -169,6 +169,7 @@ class NTV2Capture4K
 		uint32_t				mAudioBufferSize;		///< @brief	My audio buffer size, in bytes
 		uint32_t				mAncBufferSize;
 		bool					mDoTsiRouting;
+		int						mNumAudioLinks;
 		AVDataBuffer			mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
 		MyCircularBuffer		mAVCircularBuffer;		///< @brief	My ring buffer object
 

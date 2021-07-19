@@ -38,6 +38,7 @@ typedef struct Player4KConfig
 		bool					fDoTsiRouting;		///< @brief	If true, enables two sample interleave routing, else squares.
 		bool					fDoRGBOnWire;		///< @brief	If true, enables RGB on the wire, else CSCs convert to YCbCr.
 		bool					fDoLinkGrouping;	///< @brief If true, enables 6/12G output mode
+		int						fNumAudioLinks;		///< @brief Specifies the number of audio systems to control for multi-link audio
 
 		/**
 			@brief	Constructs a default generator configuration.
@@ -53,7 +54,8 @@ typedef struct Player4KConfig
 				fDoMultiChannel		(false),
 				fDoTsiRouting		(false),
 				fDoRGBOnWire		(false),
-				fDoLinkGrouping		(false)
+				fDoLinkGrouping		(false),
+				fNumAudioLinks		(1)
 		{
 		}
 

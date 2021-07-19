@@ -154,9 +154,6 @@ AJAStatus NTV2Player4K::Init (void)
 	else
 		mConfig.fOutputChannel = NTV2_CHANNEL5;
 
-	if (mConfig.WithAudio())
-		mConfig.fAudioSystem = ::NTV2ChannelToAudioSystem(mConfig.fOutputChannel);
-
 	if (!mConfig.fDoMultiChannel)
 	{
 		if (!mDevice.AcquireStreamForApplication (APP_SIGNATURE, APP_PROCESS_ID))
@@ -336,39 +333,78 @@ AJAStatus NTV2Player4K::SetUpAudio (void)
 	{
 		numberOfAudioChannels = 8;
 	}
-
-	mDevice.SetNumberAudioChannels (numberOfAudioChannels, mConfig.fAudioSystem);
-	mDevice.SetAudioRate (NTV2_AUDIO_48K, mConfig.fAudioSystem);
-
-	//	How big should the on-device audio buffer be?   1MB? 2MB? 4MB? 8MB?
-	//	For this demo, 4MB will work best across all platforms (Windows, Mac & Linux)...
-	mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, mConfig.fAudioSystem);
-	if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+	
+	if (mConfig.WithAudio())
+		mConfig.fAudioSystem = ::NTV2ChannelToAudioSystem(mConfig.fOutputChannel);
+	
+	if (mConfig.fNumAudioLinks > 1)
 	{
-		mDevice.SetSDIOutputAudioSystem (mConfig.fOutputChannel, mConfig.fAudioSystem);
+		//This is for users that want to send 32 or 64 channels of audio on 2 or 4 SDI links
+		switch(mConfig.fAudioSystem)
+		{
+		default:
+		case NTV2_AUDIOSYSTEM_1:
+			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL1, NTV2_AUDIOSYSTEM_1);
+			mDevice.SetNumberAudioChannels (numberOfAudioChannels, NTV2_AUDIOSYSTEM_1);
+			mDevice.SetAudioRate (NTV2_AUDIO_48K, NTV2_AUDIOSYSTEM_1);
+			mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, NTV2_AUDIOSYSTEM_1);
+			mDevice.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_OFF, NTV2_AUDIOSYSTEM_1);
+			
+			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL2, NTV2_AUDIOSYSTEM_2);
+			mDevice.SetNumberAudioChannels (numberOfAudioChannels, NTV2_AUDIOSYSTEM_2);
+			mDevice.SetAudioRate (NTV2_AUDIO_48K, NTV2_AUDIOSYSTEM_2);
+			mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, NTV2_AUDIOSYSTEM_2);
+			mDevice.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_OFF, NTV2_AUDIOSYSTEM_2);
+			if (NTV2_IS_4K_HFR_VIDEO_FORMAT(mConfig.fVideoFormat))
+			{
+				mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL3, NTV2_AUDIOSYSTEM_3);
+				mDevice.SetNumberAudioChannels (numberOfAudioChannels, NTV2_AUDIOSYSTEM_3);
+				mDevice.SetAudioRate (NTV2_AUDIO_48K, NTV2_AUDIOSYSTEM_3);
+				mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, NTV2_AUDIOSYSTEM_3);
+				mDevice.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_OFF, NTV2_AUDIOSYSTEM_3);
+				
+				mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL4, NTV2_AUDIOSYSTEM_4);
+				mDevice.SetNumberAudioChannels (numberOfAudioChannels, NTV2_AUDIOSYSTEM_4);
+				mDevice.SetAudioRate (NTV2_AUDIO_48K, NTV2_AUDIOSYSTEM_4);
+				mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, NTV2_AUDIOSYSTEM_4);
+				mDevice.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_OFF, NTV2_AUDIOSYSTEM_4);
+			}
+			break;
+		case NTV2_AUDIOSYSTEM_3:
+			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL3, NTV2_AUDIOSYSTEM_3);
+			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL4, NTV2_AUDIOSYSTEM_4);
+			break;
+		}
 	}
 	else
 	{
-		if((mConfig.fAudioSystem == NTV2_AUDIOSYSTEM_1) ||
-		   (mConfig.fAudioSystem == NTV2_AUDIOSYSTEM_3))
+		if (::NTV2DeviceCanDo12gRouting(mDeviceID))
 		{
-			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL1, mConfig.fAudioSystem);
-			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL2, mConfig.fAudioSystem);
-			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL3, mConfig.fAudioSystem);
-			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL4, mConfig.fAudioSystem);
+			mDevice.SetSDIOutputAudioSystem (mConfig.fOutputChannel, mConfig.fAudioSystem);
 		}
-		else
+		else 
 		{
-			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL5, mConfig.fAudioSystem);
-			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL6, mConfig.fAudioSystem);
-			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL7, mConfig.fAudioSystem);
-			mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL8, mConfig.fAudioSystem);
+			if((mConfig.fAudioSystem == NTV2_AUDIOSYSTEM_1) ||
+			   (mConfig.fAudioSystem == NTV2_AUDIOSYSTEM_3))
+			{
+					mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL1, mConfig.fAudioSystem);
+					mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL2, mConfig.fAudioSystem);
+					mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL3, mConfig.fAudioSystem);
+					mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL4, mConfig.fAudioSystem);
+			}
+			else
+			{
+				mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL5, mConfig.fAudioSystem);
+				mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL6, mConfig.fAudioSystem);
+				mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL7, mConfig.fAudioSystem);
+				mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL8, mConfig.fAudioSystem);
+			}
 		}
+		mDevice.SetNumberAudioChannels (numberOfAudioChannels, mConfig.fAudioSystem);
+		mDevice.SetAudioRate (NTV2_AUDIO_48K, mConfig.fAudioSystem);
+		mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, mConfig.fAudioSystem);
+		mDevice.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_OFF, mConfig.fAudioSystem);
 	}
-
-	//	Disable loopback, in case it was left enabled (from E-E configuration).
-	//	Otherwise the output audio won't have our generated tone...
-	mDevice.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_OFF, mConfig.fAudioSystem);
 
 	return AJA_STATUS_SUCCESS;
 
@@ -382,7 +418,10 @@ void NTV2Player4K::SetUpHostBuffers (void)
 
 	//	Calculate the size of the video buffer, which depends on video format, pixel format, and whether VANC is included or not...
 	mVideoBufferSize = ::GetVideoWriteSize (mConfig.fVideoFormat, mConfig.fPixelFormat);
-	mAudioBufferSize = AUDIOBYTES_MAX_48K;
+	
+	//	Multi-link audio uses stacked buffers for transferring to the board,
+	//	the first byte after the end of the first audio link buffer is the start of the second audio link buffer.
+	mAudioBufferSize = AUDIOBYTES_MAX_48K*(static_cast<uint32_t>(mConfig.fNumAudioLinks));
 
 	//	Allocate my buffers...
 	for (uint32_t ndx(0);  ndx < CIRCULAR_BUFFER_SIZE;  ndx++)
@@ -1213,15 +1252,30 @@ void NTV2Player4K::ConsumeFrames (void)
 		switch(mConfig.fOutputChannel)
 		{	default:
 			case NTV2_CHANNEL1:
+									if(mConfig.fNumAudioLinks > 1)
+									{
+										acOptions |= AUTOCIRCULATE_WITH_MULTILINK_AUDIO1;
+										if (NTV2_IS_4K_HFR_VIDEO_FORMAT(mConfig.fVideoFormat))
+										{
+											acOptions |= AUTOCIRCULATE_WITH_MULTILINK_AUDIO2;
+											acOptions |= AUTOCIRCULATE_WITH_MULTILINK_AUDIO3;
+										}
+									}
+									AJA_FALL_THRU;
 			case NTV2_CHANNEL2:		startNum = numACFramesPerChannel * 0;		break;
 
 			case NTV2_CHANNEL3:
+									if(mConfig.fNumAudioLinks > 1)
+									{
+										acOptions |= AUTOCIRCULATE_WITH_MULTILINK_AUDIO1;
+									}
+									AJA_FALL_THRU;
 			case NTV2_CHANNEL4:		startNum = numACFramesPerChannel * 1;		break;
 
-			case NTV2_CHANNEL5:
+			case NTV2_CHANNEL5:		AJA_FALL_THRU;
 			case NTV2_CHANNEL6:		startNum = numACFramesPerChannel * 2;		break;
 
-			case NTV2_CHANNEL7:
+			case NTV2_CHANNEL7:		AJA_FALL_THRU;
 			case NTV2_CHANNEL8:		startNum = numACFramesPerChannel * 3;		break;
 		}
 		endNum = startNum + numACFramesPerChannel - 1;
@@ -1420,16 +1474,38 @@ uint32_t NTV2Player4K::AddTone (ULWord * audioBuffer)
 	**/
 	const ULWord	numSamples		(::GetAudioSamplesPerFrame (frameRate, audioRate, mCurrentFrame));
 	const double	audioSampleRate	(audioRate == NTV2_AUDIO_96K ? 96000.0 : 48000.0);
-
-	return ::AddAudioTone (audioBuffer,			//	audio buffer to fill
-							mCurrentSample,		//	which sample for continuing the waveform
-							numSamples,			//	number of samples to generate
-							audioSampleRate,	//	sample rate [Hz]
-							0.1,				//	amplitude
-							mToneFrequency,		//	tone frequency [Hz]
-							31,					//	bits per sample
-							false,				//	don't byte swap
-							numChannels);		//	number of audio channels to generate
+	
+	if(mConfig.fNumAudioLinks > 1)
+	{
+		ULWord bytesWritten = 0;
+		ULWord startSample = mCurrentSample;
+		for (int i = 0; i < mConfig.fNumAudioLinks; i++)
+		{
+			mCurrentSample = startSample;
+			bytesWritten += ::AddAudioTone (audioBuffer + (bytesWritten/4),					//	audio buffer to fill
+										   mCurrentSample,					//	which sample for continuing the waveform
+										   numSamples,						//	number of samples to generate
+										   audioSampleRate,					//	sample rate [Hz]
+										   0.1,								//	amplitude
+										   mToneFrequency,					//	tone frequency [Hz]
+										   31,								//	bits per sample
+										   false,							//	don't byte swap
+										   numChannels);					//	number of audio channels to generate
+		}
+		return bytesWritten;
+	}
+	else
+	{
+		return ::AddAudioTone (audioBuffer,			//	audio buffer to fill
+							   mCurrentSample,		//	which sample for continuing the waveform
+							   numSamples,			//	number of samples to generate
+							   audioSampleRate,		//	sample rate [Hz]
+							   0.1,					//	amplitude
+							   mToneFrequency,		//	tone frequency [Hz]
+							   31,					//	bits per sample
+							   false,				//	don't byte swap
+							   numChannels);		//	number of audio channels to generate
+	}
 }	//	AddTone
 
 

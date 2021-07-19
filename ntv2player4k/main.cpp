@@ -33,13 +33,13 @@ int main (int argc, const char ** argv)
 {
 	char *			pVideoFormat	(AJA_NULL);	//	Video format argument
 	char *			pPixelFormat	(AJA_NULL);	//	Pixel format argument
-    char *			pDeviceSpec 	(AJA_NULL);	//	Device argument
+	char *			pDeviceSpec 	(AJA_NULL);	//	Device argument
 	uint32_t		channelNumber	(1);		//	Number of the channel to use
-	int				noAudio			(0);		//	Disable audio tone?
+	int				numAudioLinks	(1);		//	Number of audio systems for multi-link audio
 	int				useHDMIOut		(0);		//	Enable HDMI output?
 	int				doMultiChannel	(0);		//  More than one instance of player 4k
 	int				doRGBOnWire		(0);		//  Route the output to put RGB on the wire
-	int				doTsiRouting	(0);		//  Route the output through the Tsi Muxes
+	int				doSquareRouting	(0);		//  Route the output through the Tsi Muxes
 	int				hdrType			(0);		//	Insert HDR anc packet? If so, what kind?
 	int				doLinkGrouping	(0);		//	Use 6/12G output mode - IoXT+ and Kona5 Retail
 	poptContext		optionsContext; 			//	Context for parsing command line arguments
@@ -53,10 +53,10 @@ int main (int argc, const char ** argv)
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,		0,	"which pixel format to use",	"e.g. 'yuv8' or ? to list"},
 		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,		0,	"which channel to use",			"number of the channel"},
 		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,	0,	"use multi-channel/format",		AJA_NULL},
-		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,			0,	"disable audio tone",			AJA_NULL},
+		{"audioLinks",	'a',	POPT_ARG_INT,		&numAudioLinks,		0,	"how many audio systems to control for multi-link audio",	"0=silence or 1-4"},
 		{"hdmi",		'h',	POPT_ARG_NONE,		&useHDMIOut,		0,	"enable HDMI output?",			AJA_NULL},
 		{"rgb",			'r',	POPT_ARG_NONE,		&doRGBOnWire,		0,	"RGB on SDI?",					AJA_NULL},
-		{"tsi",			't',	POPT_ARG_NONE,		&doTsiRouting,		0,	"use Tsi routing?",				AJA_NULL},
+		{"squares",		's',	POPT_ARG_NONE,		&doSquareRouting,	0,	"use square routing?",			AJA_NULL},
 		{"hdrType",		'x',	POPT_ARG_INT,		&hdrType,			1,	"which HDR Packet to send",		"1:SDR,2:HDR10,3:HLG"},
 		{"6G/12G",		'g',	POPT_ARG_NONE,		&doLinkGrouping,	0,	"use 6G/12G output mode",		AJA_NULL},
 		POPT_AUTOHELP
@@ -83,12 +83,16 @@ int main (int argc, const char ** argv)
 	else if (!pixelFormatStr.empty () && !NTV2_IS_VALID_FRAME_BUFFER_FORMAT (pixelFormat))
 		{cerr << "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl << CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 2;}
 
+	int	doTsiRouting	(1);		//  default route the output through the Tsi Muxes
+	if (doSquareRouting)
+		doTsiRouting = 0;
+	
 	if (channelNumber < 1 || channelNumber > 8)
 		{cerr << "## ERROR:  Invalid channel number '" << channelNumber << "' -- use 1 thru 8" << endl;  return 2;}
 
 	Player4KConfig	config;
 	config.fDeviceSpecifier	= deviceSpec;
-	config.fAudioSystem		= noAudio ? NTV2_AUDIOSYSTEM_INVALID : NTV2_AUDIOSYSTEM_1;
+	config.fAudioSystem		= (numAudioLinks==0) ? NTV2_AUDIOSYSTEM_INVALID : NTV2_AUDIOSYSTEM_1;
 	config.fOutputChannel	= NTV2Channel(channelNumber ? channelNumber - 1 : 0);
 	config.fPixelFormat		= pixelFormat;
 	config.fVideoFormat		= videoFormat;
@@ -97,6 +101,7 @@ int main (int argc, const char ** argv)
 	config.fDoTsiRouting	= doTsiRouting ? true : false;
 	config.fDoRGBOnWire		= doRGBOnWire ? true : false;
 	config.fDoLinkGrouping	= doLinkGrouping ? true : false;
+	config.fNumAudioLinks	= numAudioLinks;
 	switch (hdrType)
 	{
 		case 1:		config.fSendAncType = AJAAncillaryDataType_HDR_SDR;		break;
