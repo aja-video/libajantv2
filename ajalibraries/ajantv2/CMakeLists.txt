@@ -387,6 +387,8 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${AJABASE_ROOT}/system/linux/lockimpl.cpp
         ${AJABASE_ROOT}/system/linux/processimpl.cpp
         ${AJABASE_ROOT}/system/linux/threadimpl.cpp)
+    set(EXTRA_LIBRARIES
+        rt)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     add_definitions(
         -DAJAMac
