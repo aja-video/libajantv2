@@ -282,14 +282,10 @@ set(AJABASE_SOURCES
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_definitions(
-        -DMSWindows
-        -DAJA_WINDOWS
         -D_MBCS
-        -D_CRT_SECURE_NO_WARNINGS
         -DCRT_NONSTDC_DEPRECATE
         -D_WINSOCK_DEPRECATED_NO_WARNINGS
-        -DAJA_NO_AUTOIMPORT
-        -DWIN32_LEAN_AND_MEAN)
+        -DAJA_NO_AUTOIMPORT)
 
     set(EXTRA_STATIC_DEFINES
         -DAJASTATIC)
@@ -338,15 +334,11 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         odbc32 psapi rpcrt4 setupapi shell32
         shlwapi user32 winmm ws2_32 wsock32)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    add_definitions(
-        -DAJALinux
-        -DAJA_LINUX)
     set(EXTRA_STATIC_DEFINES
         -DAJASTATIC)
     set(EXTRA_DYNAMIC_DEFINES
         -DAJADLL_BUILD
         -DAJADLL_BUILD)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
     set(AJANTV2_TARGET_INCLUDE_DIRS
         ${AJANTV2_TARGET_INCLUDE_DIRS}
@@ -383,10 +375,6 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(EXTRA_LIBRARIES
         rt)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    add_definitions(
-        -DAJAMac
-        -DAJA_MAC)
-
     set(EXTRA_STATIC_DEFINES
         -DAJASTATIC)
 
