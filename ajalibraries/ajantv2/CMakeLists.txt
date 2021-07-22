@@ -183,7 +183,7 @@ if (AJA_BUILD_DRIVER STREQUAL ON)
 endif()
 
 if (AJA_BUILD_OPENSOURCE STREQUAL OFF)
-    message("Added ajantv2 HEVC/M31 codec")
+    message("added ajantv2 HEVC/M31 codec")
     set(AJANTV2_HEADERS
         ${AJANTV2_HEADERS}
         codecs/hevc/m31/ntv2m31.h
