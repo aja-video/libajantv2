@@ -1,11 +1,6 @@
 project(ntv2encodehevcvif)
 
-set(NTV2ENCODEHEVCVIF_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
-
-set(AJALIBRARIES_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../../../ajalibraries)
-set(DEMO_COMMON_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../)
-set(AJANTV2_ROOT ${AJALIBRARIES_ROOT}/ajantv2)
-set(HEVC_M31_CODEC_ROOT ${AJANTV2_ROOT}/codecs/hevc/m31)
+set(HEVC_M31_CODEC_ROOT ${AJA_LIB_NTV2_ROOT}/codecs/hevc/m31)
 
 set(HEVC_M31_HEADERS
 	${HEVC_M31_CODEC_ROOT}/ntv2m31.h
@@ -24,21 +19,21 @@ set(HEVC_M31_SOURCES
 	${HEVC_M31_CODEC_ROOT}/ntv2m31viparam.cpp)
 
 set(NTV2ENCODEHEVCVIF_TARGET_INCLUDE_DIRS
-	${CMAKE_CURRENT_SOURCE_DIR}/../
-	${AJALIBRARIES_ROOT}
-	${AJANTV2_ROOT}/includes
-	${HEVC_M31_CODEC_ROOT}
-	${CMAKE_CURRENT_SOURCE_DIR}/../../../ajalibraries/ajaretail/includes
-	${CMAKE_CURRENT_SOURCE_DIR}/../../../ajalibraries/ajaretail/services)
+	${AJA_LIBRARIES_ROOT}
+	${AJA_APPS_ROOT}/crossplatform/demoapps
+	${AJA_LIB_NTV2_ROOT}/includes
+	${AJA_LIB_RETAIL_ROOT}/includes
+	${AJA_LIB_RETAIL_ROOT}/services
+	${HEVC_M31_CODEC_ROOT})
 
 set(NTV2ENCODEHEVCVIF_HEADERS
 	${HEVC_M31_HEADERS}
-	${DEMO_COMMON_ROOT}/ntv2demohevccommon.h
+	${CMAKE_CURRENT_SOURCE_DIR}/../ntv2demohevccommon.h
 	ntv2encodehevcvifac.h
 	ntv2encodehevcvif.h)
 set(NTV2ENCODEHEVCVIF_SOURCES
 	${HEVC_M31_SOURCES}
-	${DEMO_COMMON_ROOT}/ntv2demohevccommon.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../ntv2demohevccommon.cpp
 	ntv2encodehevcvifac.cpp
 	ntv2encodehevcvif.cpp
 	main.cpp)
@@ -47,11 +42,10 @@ set(DEMO_APPS_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/../ntv2democommon.cpp)
 set(DEMO_APPS_HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/../ntv2democommon.h)
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	add_definitions(-DMSWindows -DAJA_WINDOWS)
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	add_definitions(-DAJAMac -DAJA_MAC)
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	# noop
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	find_library(CORE_SERVICES_FRAMEWORK CoreServices)
     find_library(APPLICATION_SERVICES_FRAMEWORK ApplicationServices)
     find_library(FOUNDATION_FRAMEWORK Foundation)
@@ -63,9 +57,9 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 		${FOUNDATION_FRAMEWORK}
 		${IOKIT_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	add_definitions(-DAJALinux -DAJA_LINUX)
 	set(EXTRA_LIBRARIES dl pthread rt)
 endif()
+
 set(NTV2ENCODEHEVCVIF_TARGET_SOURCES
 	${NTV2ENCODEHEVCVIF_SOURCES}
 	${NTV2ENCODEHEVCVIF_HEADERS}
