@@ -1,25 +1,15 @@
 project(ajantv2)
 
-include(CommonPaths)
-
 if(CMAKE_CXX_STANDARD LESS 11)
     remove_definitions(
         -DAJA_USE_CPLUSPLUS11
         -DNTV2_USE_CPLUSPLUS11)
 endif()
 
-# TODO(paulh): Re-enable when we start using the CMake version.h.in file
-# add_definitions(-DBUILDING_CMAKE)
-
 remove_definitions(
     -DUNICODE
     -D_UNICODE
     -DQT_LARGEFILE_SUPPORT)
-
-# set(NTV2_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
-# set(AJA_LIBRARIES_ROOT ${NTV2_ROOT}/ajalibraries)
-# set(AJA_LIB_ANC_ROOT ${AJA_LIBRARIES_ROOT}/ajaanc)
-# set(AJA_LIB_BASE_ROOT ${AJA_LIBRARIES_ROOT}/ajabase)
 
 set(AJANTV2_TARGET_INCLUDE_DIRS
     includes
@@ -27,8 +17,8 @@ set(AJANTV2_TARGET_INCLUDE_DIRS
     ${AJA_LIBRARIES_ROOT}
     ${AJA_LIB_BASE_ROOT})
 
-# TODO(paulh): Re-enable this if we decide to define version number inside of CMake
-# version defines in ntv2enums.h populated with version.h values
+# TODO(paulh): Re-enable when we start using the CMake version.h.in file to set the SDK version
+# add_definitions(-DBUILDING_CMAKE)
 # configure_file(includes/version.h.in includes/version.h @ONLY)
 
 set(AJANTV2_HEADERS
