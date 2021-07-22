@@ -19,7 +19,11 @@ CNTV2GpuCircularBuffer::~CNTV2GpuCircularBuffer()
 		for ( ULWord i=0; i<mNumFrames; i++ )
 		{
 #ifdef AJA_RDMA
+#ifdef AJA_IGPU
+			checkCudaErrors(cudaFreeHost(mAVTextureBuffers[i].videoBufferRDMA));
+#else
 			checkCudaErrors(cudaFree(mAVTextureBuffers[i].videoBufferRDMA));
+#endif
 #else
 			if(mAVTextureBuffers[i].videoBuffer)
 			{
@@ -92,7 +96,11 @@ void CNTV2GpuCircularBuffer::Allocate(ULWord numFrames,
 		
 		mAVTextureBuffers[i].videoBufferSize = videoWriteSize;
 #ifdef AJA_RDMA
+#ifdef AJA_IGPU
+		checkCudaErrors(cudaHostAlloc((void**)&mAVTextureBuffers[i].videoBufferRDMA, mAVTextureBuffers[i].videoBufferSize, cudaHostAllocDefault));
+#else
 		checkCudaErrors(cudaMalloc(&mAVTextureBuffers[i].videoBufferRDMA, mAVTextureBuffers[i].videoBufferSize));
+#endif
 #else
 		mAVTextureBuffers[i].videoBufferUnaligned = new UByte[videoWriteSize + alignment - 1];
 		uint64_t val = (uint64_t)(mAVTextureBuffers[i].videoBufferUnaligned);
