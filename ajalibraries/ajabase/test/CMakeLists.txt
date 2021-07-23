@@ -15,18 +15,17 @@ set(APP_HEADERS ${AJA_DOCTEST_ROOT}/doctest.h)
 set(APP_SOURCES ${APP_ROOT}/main.cpp)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	add_definitions(-DMSWindows -DAJA_WINDOWS)
+	# noop
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	add_definitions(-DAJAMac -DAJA_MAC)
 	find_library(CORE_FOUNDATION_FRAMEWORK CoreFoundation)
 	find_library(CORE_SERVICES_FRAMEWORK CoreServices)
 	find_library(FOUNDATION_FRAMEWORK Foundation)
+	
 	set(EXTRA_LIBRARIES
 		${CORE_FOUNDATION_FRAMEWORK}
 		${CORE_SERVICES_FRAMEWORK}
 		${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	add_definitions(-DAJALinux -DAJA_LINUX)
 	set(EXTRA_LIBRARIES dl pthread rt)
 endif()
 

@@ -6,26 +6,19 @@ if(CMAKE_CXX_STANDARD LESS 11)
         -DNTV2_USE_CPLUSPLUS11)
 endif()
 
-# TODO(paulh): Re-enable when we start using the CMake version.h.in file
-# add_definitions(-DBUILDING_CMAKE)
 remove_definitions(
     -DUNICODE
     -D_UNICODE
     -DQT_LARGEFILE_SUPPORT)
 
-set(NTV2_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../..)
-set(AJALIBRARIES_ROOT ${NTV2_ROOT}/ajalibraries)
-set(AJAANC_ROOT ${AJALIBRARIES_ROOT}/ajaanc)
-set(AJABASE_ROOT ${AJALIBRARIES_ROOT}/ajabase)
-
 set(AJANTV2_TARGET_INCLUDE_DIRS
-includes
-${AJAANC_ROOT}/includes
-${AJALIBRARIES_ROOT}
-${AJABASE_ROOT})
+    includes
+    ${AJA_LIB_ANC_ROOT}/includes
+    ${AJA_LIBRARIES_ROOT}
+    ${AJA_LIB_BASE_ROOT})
 
-# TODO(paulh): Re-enable this if we decide to define version number inside of CMake
-# version defines in ntv2enums.h populated with version.h values
+# TODO(paulh): Re-enable when we start using the CMake version.h.in file to set the SDK version
+# add_definitions(-DBUILDING_CMAKE)
 # configure_file(includes/version.h.in includes/version.h @ONLY)
 
 set(AJANTV2_HEADERS
@@ -90,21 +83,21 @@ set(AJANTV2_HEADERS
     includes/ntv2vpidfromspec.h
     # TODO(paulh): Re-enable when we start using the CMake version.h.in file
     # includes/version.h
-    ${AJAANC_ROOT}/includes/ancillarydata.h
-    ${AJAANC_ROOT}/includes/ancillarydatafactory.h
-    ${AJAANC_ROOT}/includes/ancillarydata_cea608.h
-    ${AJAANC_ROOT}/includes/ancillarydata_cea608_line21.h
-    ${AJAANC_ROOT}/includes/ancillarydata_cea608_vanc.h
-    ${AJAANC_ROOT}/includes/ancillarydata_cea708.h
-    ${AJAANC_ROOT}/includes/ancillarydata_framestatusinfo524D.h
-    ${AJAANC_ROOT}/includes/ancillarydata_framestatusinfo5251.h
-    ${AJAANC_ROOT}/includes/ancillarydata_hdr_hdr10.h
-    ${AJAANC_ROOT}/includes/ancillarydata_hdr_hlg.h
-    ${AJAANC_ROOT}/includes/ancillarydata_hdr_sdr.h
-    ${AJAANC_ROOT}/includes/ancillarydata_timecode.h
-    ${AJAANC_ROOT}/includes/ancillarydata_timecode_atc.h
-    ${AJAANC_ROOT}/includes/ancillarydata_timecode_vitc.h
-    ${AJAANC_ROOT}/includes/ancillarylist.h)
+    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata.h
+    ${AJA_LIB_ANC_ROOT}/includes/ancillarydatafactory.h
+    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_cea608.h
+    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_cea608_line21.h
+    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_cea608_vanc.h
+    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_cea708.h
+    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_framestatusinfo524D.h
+    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_framestatusinfo5251.h
+    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_hdr_hdr10.h
+    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_hdr_hlg.h
+    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_hdr_sdr.h
+    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_timecode.h
+    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_timecode_atc.h
+    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_timecode_vitc.h
+    ${AJA_LIB_ANC_ROOT}/includes/ancillarylist.h)
 
 set(AJANTV2_SOURCES
     src/ntv2anc.cpp
@@ -156,21 +149,21 @@ set(AJANTV2_SOURCES
     src/ntv2verticalfilter.cpp
     src/ntv2vpid.cpp
     src/ntv2vpidfromspec.cpp
-    ${AJAANC_ROOT}/src/ancillarydata.cpp
-    ${AJAANC_ROOT}/src/ancillarydatafactory.cpp
-    ${AJAANC_ROOT}/src/ancillarydata_cea608.cpp
-    ${AJAANC_ROOT}/src/ancillarydata_cea608_line21.cpp
-    ${AJAANC_ROOT}/src/ancillarydata_cea608_vanc.cpp
-    ${AJAANC_ROOT}/src/ancillarydata_cea708.cpp
-    ${AJAANC_ROOT}/src/ancillarydata_framestatusinfo524D.cpp
-    ${AJAANC_ROOT}/src/ancillarydata_framestatusinfo5251.cpp
-    ${AJAANC_ROOT}/src/ancillarydata_hdr_hdr10.cpp
-    ${AJAANC_ROOT}/src/ancillarydata_hdr_hlg.cpp
-    ${AJAANC_ROOT}/src/ancillarydata_hdr_sdr.cpp
-    ${AJAANC_ROOT}/src/ancillarydata_timecode.cpp
-    ${AJAANC_ROOT}/src/ancillarydata_timecode_atc.cpp
-    ${AJAANC_ROOT}/src/ancillarydata_timecode_vitc.cpp
-    ${AJAANC_ROOT}/src/ancillarylist.cpp)
+    ${AJA_LIB_ANC_ROOT}/src/ancillarydata.cpp
+    ${AJA_LIB_ANC_ROOT}/src/ancillarydatafactory.cpp
+    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_cea608.cpp
+    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_cea608_line21.cpp
+    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_cea608_vanc.cpp
+    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_cea708.cpp
+    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_framestatusinfo524D.cpp
+    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_framestatusinfo5251.cpp
+    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_hdr_hdr10.cpp
+    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_hdr_hlg.cpp
+    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_hdr_sdr.cpp
+    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_timecode.cpp
+    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_timecode_atc.cpp
+    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_timecode_vitc.cpp
+    ${AJA_LIB_ANC_ROOT}/src/ancillarylist.cpp)
 
 if (AJA_BUILD_DRIVER STREQUAL ON)
     add_definitions(-DNTV2_BUILDING_DRIVER)
@@ -183,7 +176,7 @@ if (AJA_BUILD_DRIVER STREQUAL ON)
 endif()
 
 if (AJA_BUILD_OPENSOURCE STREQUAL OFF)
-    message("Added ajantv2 HEVC/M31 codec")
+    message("added ajantv2 HEVC/M31 codec")
     set(AJANTV2_HEADERS
         ${AJANTV2_HEADERS}
         codecs/hevc/m31/ntv2m31.h
@@ -203,100 +196,98 @@ if (AJA_BUILD_OPENSOURCE STREQUAL OFF)
 endif()
 
 set(AJABASE_HEADERS
-    ${AJABASE_ROOT}/common/ajarefptr.h
-    ${AJABASE_ROOT}/common/audioutilities.h
-    ${AJABASE_ROOT}/common/buffer.h
-    ${AJABASE_ROOT}/common/bytestream.h
-    ${AJABASE_ROOT}/common/circularbuffer.h
-    ${AJABASE_ROOT}/common/cli_utils.h
-    ${AJABASE_ROOT}/common/common.h
-    ${AJABASE_ROOT}/common/dpxfileio.h
-    ${AJABASE_ROOT}/common/dpx_hdr.h
-    ${AJABASE_ROOT}/common/export.h
-    ${AJABASE_ROOT}/common/guid.h
-    ${AJABASE_ROOT}/common/options_popt.h
-    ${AJABASE_ROOT}/common/performance.h
-    ${AJABASE_ROOT}/common/pixelformat.h
-    ${AJABASE_ROOT}/common/public.h
-    ${AJABASE_ROOT}/common/rawfile.h
-    ${AJABASE_ROOT}/common/testpatterngen.h
-    ${AJABASE_ROOT}/common/timebase.h
-    ${AJABASE_ROOT}/common/timecode.h
-    ${AJABASE_ROOT}/common/timecodeburn.h
-    ${AJABASE_ROOT}/common/timer.h
-    ${AJABASE_ROOT}/common/types.h
-    ${AJABASE_ROOT}/common/videotypes.h
-    ${AJABASE_ROOT}/common/videoutilities.h
-    ${AJABASE_ROOT}/common/wavewriter.h
-    ${AJABASE_ROOT}/network/ip_socket.h
-    ${AJABASE_ROOT}/network/tcp_socket.h
-    ${AJABASE_ROOT}/network/udp_socket.h
-    ${AJABASE_ROOT}/persistence/persistence.h
-    ${AJABASE_ROOT}/persistence/sqlite3.h
-    ${AJABASE_ROOT}/pnp/pnp.h
-    ${AJABASE_ROOT}/system/atomic.h
-    ${AJABASE_ROOT}/system/debug.h
-    ${AJABASE_ROOT}/system/debugshare.h
-    ${AJABASE_ROOT}/system/diskstatus.h
-    ${AJABASE_ROOT}/system/event.h
-    ${AJABASE_ROOT}/system/file_io.h
-    ${AJABASE_ROOT}/system/info.h
-    ${AJABASE_ROOT}/system/lock.h
-    ${AJABASE_ROOT}/system/log.h
-    ${AJABASE_ROOT}/system/make_unique_shim.h
-    ${AJABASE_ROOT}/system/memory.h
-    ${AJABASE_ROOT}/system/process.h
-    ${AJABASE_ROOT}/system/system.h
-    ${AJABASE_ROOT}/system/systemtime.h
-    ${AJABASE_ROOT}/system/thread.h)
+    ${AJA_LIB_BASE_ROOT}/common/ajarefptr.h
+    ${AJA_LIB_BASE_ROOT}/common/audioutilities.h
+    ${AJA_LIB_BASE_ROOT}/common/buffer.h
+    ${AJA_LIB_BASE_ROOT}/common/bytestream.h
+    ${AJA_LIB_BASE_ROOT}/common/circularbuffer.h
+    ${AJA_LIB_BASE_ROOT}/common/cli_utils.h
+    ${AJA_LIB_BASE_ROOT}/common/common.h
+    ${AJA_LIB_BASE_ROOT}/common/dpxfileio.h
+    ${AJA_LIB_BASE_ROOT}/common/dpx_hdr.h
+    ${AJA_LIB_BASE_ROOT}/common/export.h
+    ${AJA_LIB_BASE_ROOT}/common/guid.h
+    ${AJA_LIB_BASE_ROOT}/common/options_popt.h
+    ${AJA_LIB_BASE_ROOT}/common/performance.h
+    ${AJA_LIB_BASE_ROOT}/common/pixelformat.h
+    ${AJA_LIB_BASE_ROOT}/common/public.h
+    ${AJA_LIB_BASE_ROOT}/common/rawfile.h
+    ${AJA_LIB_BASE_ROOT}/common/testpatterngen.h
+    ${AJA_LIB_BASE_ROOT}/common/timebase.h
+    ${AJA_LIB_BASE_ROOT}/common/timecode.h
+    ${AJA_LIB_BASE_ROOT}/common/timecodeburn.h
+    ${AJA_LIB_BASE_ROOT}/common/timer.h
+    ${AJA_LIB_BASE_ROOT}/common/types.h
+    ${AJA_LIB_BASE_ROOT}/common/videotypes.h
+    ${AJA_LIB_BASE_ROOT}/common/videoutilities.h
+    ${AJA_LIB_BASE_ROOT}/common/wavewriter.h
+    ${AJA_LIB_BASE_ROOT}/network/ip_socket.h
+    ${AJA_LIB_BASE_ROOT}/network/tcp_socket.h
+    ${AJA_LIB_BASE_ROOT}/network/udp_socket.h
+    ${AJA_LIB_BASE_ROOT}/persistence/persistence.h
+    ${AJA_LIB_BASE_ROOT}/persistence/sqlite3.h
+    ${AJA_LIB_BASE_ROOT}/pnp/pnp.h
+    ${AJA_LIB_BASE_ROOT}/system/atomic.h
+    ${AJA_LIB_BASE_ROOT}/system/debug.h
+    ${AJA_LIB_BASE_ROOT}/system/debugshare.h
+    ${AJA_LIB_BASE_ROOT}/system/diskstatus.h
+    ${AJA_LIB_BASE_ROOT}/system/event.h
+    ${AJA_LIB_BASE_ROOT}/system/file_io.h
+    ${AJA_LIB_BASE_ROOT}/system/info.h
+    ${AJA_LIB_BASE_ROOT}/system/lock.h
+    ${AJA_LIB_BASE_ROOT}/system/log.h
+    ${AJA_LIB_BASE_ROOT}/system/make_unique_shim.h
+    ${AJA_LIB_BASE_ROOT}/system/memory.h
+    ${AJA_LIB_BASE_ROOT}/system/process.h
+    ${AJA_LIB_BASE_ROOT}/system/system.h
+    ${AJA_LIB_BASE_ROOT}/system/systemtime.h
+    ${AJA_LIB_BASE_ROOT}/system/thread.h)
 
 set(AJABASE_SOURCES
-    ${AJABASE_ROOT}/common/audioutilities.cpp
-    ${AJABASE_ROOT}/common/buffer.cpp
-    ${AJABASE_ROOT}/common/common.cpp
-    ${AJABASE_ROOT}/common/dpxfileio.cpp
-    ${AJABASE_ROOT}/common/dpx_hdr.cpp
-    ${AJABASE_ROOT}/common/guid.cpp
-    ${AJABASE_ROOT}/common/options_popt.cpp
-    ${AJABASE_ROOT}/common/performance.cpp
-    ${AJABASE_ROOT}/common/pixelformat.cpp
-    ${AJABASE_ROOT}/common/testpatterngen.cpp
-    ${AJABASE_ROOT}/common/timebase.cpp
-    ${AJABASE_ROOT}/common/timecode.cpp
-    ${AJABASE_ROOT}/common/timecodeburn.cpp
-    ${AJABASE_ROOT}/common/timer.cpp
-    ${AJABASE_ROOT}/common/videoutilities.cpp
-    ${AJABASE_ROOT}/common/wavewriter.cpp
-    ${AJABASE_ROOT}/network/ip_socket.cpp
-    ${AJABASE_ROOT}/network/tcp_socket.cpp
-    ${AJABASE_ROOT}/network/udp_socket.cpp
-    ${AJABASE_ROOT}/persistence/persistence.cpp
-    ${AJABASE_ROOT}/persistence/sqlite3.c
-    ${AJABASE_ROOT}/pnp/pnp.cpp
-    ${AJABASE_ROOT}/system/atomic.cpp
-    ${AJABASE_ROOT}/system/debug.cpp
-    ${AJABASE_ROOT}/system/diskstatus.cpp
-    ${AJABASE_ROOT}/system/event.cpp
-    ${AJABASE_ROOT}/system/file_io.cpp
-    ${AJABASE_ROOT}/system/info.cpp
-    ${AJABASE_ROOT}/system/lock.cpp
-    ${AJABASE_ROOT}/system/log.cpp
-    ${AJABASE_ROOT}/system/memory.cpp
-    ${AJABASE_ROOT}/system/process.cpp
-    ${AJABASE_ROOT}/system/system.cpp
-    ${AJABASE_ROOT}/system/systemtime.cpp
-    ${AJABASE_ROOT}/system/thread.cpp)
+    ${AJA_LIB_BASE_ROOT}/common/audioutilities.cpp
+    ${AJA_LIB_BASE_ROOT}/common/buffer.cpp
+    ${AJA_LIB_BASE_ROOT}/common/common.cpp
+    ${AJA_LIB_BASE_ROOT}/common/dpxfileio.cpp
+    ${AJA_LIB_BASE_ROOT}/common/dpx_hdr.cpp
+    ${AJA_LIB_BASE_ROOT}/common/guid.cpp
+    ${AJA_LIB_BASE_ROOT}/common/options_popt.cpp
+    ${AJA_LIB_BASE_ROOT}/common/performance.cpp
+    ${AJA_LIB_BASE_ROOT}/common/pixelformat.cpp
+    ${AJA_LIB_BASE_ROOT}/common/testpatterngen.cpp
+    ${AJA_LIB_BASE_ROOT}/common/timebase.cpp
+    ${AJA_LIB_BASE_ROOT}/common/timecode.cpp
+    ${AJA_LIB_BASE_ROOT}/common/timecodeburn.cpp
+    ${AJA_LIB_BASE_ROOT}/common/timer.cpp
+    ${AJA_LIB_BASE_ROOT}/common/videoutilities.cpp
+    ${AJA_LIB_BASE_ROOT}/common/wavewriter.cpp
+    ${AJA_LIB_BASE_ROOT}/network/ip_socket.cpp
+    ${AJA_LIB_BASE_ROOT}/network/tcp_socket.cpp
+    ${AJA_LIB_BASE_ROOT}/network/udp_socket.cpp
+    ${AJA_LIB_BASE_ROOT}/persistence/persistence.cpp
+    ${AJA_LIB_BASE_ROOT}/persistence/sqlite3.c
+    ${AJA_LIB_BASE_ROOT}/pnp/pnp.cpp
+    ${AJA_LIB_BASE_ROOT}/system/atomic.cpp
+    ${AJA_LIB_BASE_ROOT}/system/debug.cpp
+    ${AJA_LIB_BASE_ROOT}/system/diskstatus.cpp
+    ${AJA_LIB_BASE_ROOT}/system/event.cpp
+    ${AJA_LIB_BASE_ROOT}/system/file_io.cpp
+    ${AJA_LIB_BASE_ROOT}/system/info.cpp
+    ${AJA_LIB_BASE_ROOT}/system/lock.cpp
+    ${AJA_LIB_BASE_ROOT}/system/log.cpp
+    ${AJA_LIB_BASE_ROOT}/system/memory.cpp
+    ${AJA_LIB_BASE_ROOT}/system/process.cpp
+    ${AJA_LIB_BASE_ROOT}/system/system.cpp
+    ${AJA_LIB_BASE_ROOT}/system/systemtime.cpp
+    ${AJA_LIB_BASE_ROOT}/system/thread.cpp)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_definitions(
-        -DMSWindows
-        -DAJA_WINDOWS
         -D_MBCS
-        -D_CRT_SECURE_NO_WARNINGS
         -DCRT_NONSTDC_DEPRECATE
         -D_WINSOCK_DEPRECATED_NO_WARNINGS
-        -DAJA_NO_AUTOIMPORT
-        -DWIN32_LEAN_AND_MEAN)
+        -DAJA_NO_AUTOIMPORT)
+
+    remove_definitions(-DUNICODE -D_UNICODE)
 
     set(EXTRA_STATIC_DEFINES
         -DAJASTATIC)
@@ -309,8 +300,8 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(AJANTV2_TARGET_INCLUDE_DIRS
         ${AJANTV2_TARGET_INCLUDE_DIRS}
         src/win
-        ${AJABASE_ROOT}/pnp/windows
-        ${AJABASE_ROOT}/system/windows)
+        ${AJA_LIB_BASE_ROOT}/pnp/windows
+        ${AJA_LIB_BASE_ROOT}/system/windows)
 
     set(AJANTV2_HEADERS
         ${AJANTV2_HEADERS}
@@ -324,42 +315,38 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 
     set(AJABASE_HEADERS
         ${AJABASE_HEADERS}
-        ${AJABASE_ROOT}/pnp/windows/pnpimpl.h
-        ${AJABASE_ROOT}/system/windows/eventimpl.h
-        ${AJABASE_ROOT}/system/windows/infoimpl.h
-        ${AJABASE_ROOT}/system/windows/lockimpl.h
-        ${AJABASE_ROOT}/system/windows/processimpl.h
-        ${AJABASE_ROOT}/system/windows/threadimpl.h)
+        ${AJA_LIB_BASE_ROOT}/pnp/windows/pnpimpl.h
+        ${AJA_LIB_BASE_ROOT}/system/windows/eventimpl.h
+        ${AJA_LIB_BASE_ROOT}/system/windows/infoimpl.h
+        ${AJA_LIB_BASE_ROOT}/system/windows/lockimpl.h
+        ${AJA_LIB_BASE_ROOT}/system/windows/processimpl.h
+        ${AJA_LIB_BASE_ROOT}/system/windows/threadimpl.h)
 
     set(AJABASE_SOURCES
         ${AJABASE_SOURCES}
-        ${AJABASE_ROOT}/pnp/windows/pnpimpl.cpp
-        ${AJABASE_ROOT}/system/windows/eventimpl.cpp
-        ${AJABASE_ROOT}/system/windows/infoimpl.cpp
-        ${AJABASE_ROOT}/system/windows/lockimpl.cpp
-        ${AJABASE_ROOT}/system/windows/processimpl.cpp
-        ${AJABASE_ROOT}/system/windows/threadimpl.cpp)
+        ${AJA_LIB_BASE_ROOT}/pnp/windows/pnpimpl.cpp
+        ${AJA_LIB_BASE_ROOT}/system/windows/eventimpl.cpp
+        ${AJA_LIB_BASE_ROOT}/system/windows/infoimpl.cpp
+        ${AJA_LIB_BASE_ROOT}/system/windows/lockimpl.cpp
+        ${AJA_LIB_BASE_ROOT}/system/windows/processimpl.cpp
+        ${AJA_LIB_BASE_ROOT}/system/windows/threadimpl.cpp)
 
     set(EXTRA_LIBRARIES
         advapi32 comctl32 netapi32
         odbc32 psapi rpcrt4 setupapi shell32
         shlwapi user32 winmm ws2_32 wsock32)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    add_definitions(
-        -DAJALinux
-        -DAJA_LINUX)
     set(EXTRA_STATIC_DEFINES
         -DAJASTATIC)
     set(EXTRA_DYNAMIC_DEFINES
         -DAJADLL_BUILD
         -DAJADLL_BUILD)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
     set(AJANTV2_TARGET_INCLUDE_DIRS
         ${AJANTV2_TARGET_INCLUDE_DIRS}
         src/lin
-        ${AJABASE_ROOT}/pnp/linux
-        ${AJABASE_ROOT}/system/linux)
+        ${AJA_LIB_BASE_ROOT}/pnp/linux
+        ${AJA_LIB_BASE_ROOT}/system/linux)
 
     set(AJANTV2_HEADERS
         ${AJANTV2_HEADERS}
@@ -372,28 +359,24 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
     set(AJABASE_HEADERS
         ${AJABASE_HEADERS}
-        ${AJABASE_ROOT}/pnp/linux/pnpimpl.h
-        ${AJABASE_ROOT}/system/linux/eventimpl.h
-        ${AJABASE_ROOT}/system/linux/infoimpl.h
-        ${AJABASE_ROOT}/system/linux/lockimpl.h
-        ${AJABASE_ROOT}/system/linux/processimpl.h
-        ${AJABASE_ROOT}/system/linux/threadimpl.h)
+        ${AJA_LIB_BASE_ROOT}/pnp/linux/pnpimpl.h
+        ${AJA_LIB_BASE_ROOT}/system/linux/eventimpl.h
+        ${AJA_LIB_BASE_ROOT}/system/linux/infoimpl.h
+        ${AJA_LIB_BASE_ROOT}/system/linux/lockimpl.h
+        ${AJA_LIB_BASE_ROOT}/system/linux/processimpl.h
+        ${AJA_LIB_BASE_ROOT}/system/linux/threadimpl.h)
 
     set(AJABASE_SOURCES
         ${AJABASE_SOURCES}
-        ${AJABASE_ROOT}/pnp/linux/pnpimpl.cpp
-        ${AJABASE_ROOT}/system/linux/eventimpl.cpp
-        ${AJABASE_ROOT}/system/linux/infoimpl.cpp
-        ${AJABASE_ROOT}/system/linux/lockimpl.cpp
-        ${AJABASE_ROOT}/system/linux/processimpl.cpp
-        ${AJABASE_ROOT}/system/linux/threadimpl.cpp)
+        ${AJA_LIB_BASE_ROOT}/pnp/linux/pnpimpl.cpp
+        ${AJA_LIB_BASE_ROOT}/system/linux/eventimpl.cpp
+        ${AJA_LIB_BASE_ROOT}/system/linux/infoimpl.cpp
+        ${AJA_LIB_BASE_ROOT}/system/linux/lockimpl.cpp
+        ${AJA_LIB_BASE_ROOT}/system/linux/processimpl.cpp
+        ${AJA_LIB_BASE_ROOT}/system/linux/threadimpl.cpp)
     set(EXTRA_LIBRARIES
         rt)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    add_definitions(
-        -DAJAMac
-        -DAJA_MAC)
-
     set(EXTRA_STATIC_DEFINES
         -DAJASTATIC)
 
@@ -404,8 +387,8 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(AJANTV2_TARGET_INCLUDE_DIRS
         ${AJANTV2_TARGET_INCLUDE_DIRS}
         src/mac
-        ${AJABASE_ROOT}/pnp/mac
-        ${AJABASE_ROOT}/system/mac
+        ${AJA_LIB_BASE_ROOT}/pnp/mac
+        ${AJA_LIB_BASE_ROOT}/system/mac
         /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include)
 
     set(AJANTV2_HEADERS
@@ -419,27 +402,27 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 
     set(AJABASE_HEADERS
         ${AJABASE_HEADERS}
-        ${AJABASE_ROOT}/pnp/mac/devicenotifier.h
-        ${AJABASE_ROOT}/pnp/mac/masterport.h
-        ${AJABASE_ROOT}/pnp/mac/pnpimpl.h
-        ${AJABASE_ROOT}/system/mac/eventimpl.h
-        ${AJABASE_ROOT}/system/mac/infoimpl.h
-        ${AJABASE_ROOT}/system/mac/lockimpl.h
-        ${AJABASE_ROOT}/system/mac/processimpl.h
-        ${AJABASE_ROOT}/system/mac/pthreadsextra.h
-        ${AJABASE_ROOT}/system/mac/threadimpl.h)
+        ${AJA_LIB_BASE_ROOT}/pnp/mac/devicenotifier.h
+        ${AJA_LIB_BASE_ROOT}/pnp/mac/masterport.h
+        ${AJA_LIB_BASE_ROOT}/pnp/mac/pnpimpl.h
+        ${AJA_LIB_BASE_ROOT}/system/mac/eventimpl.h
+        ${AJA_LIB_BASE_ROOT}/system/mac/infoimpl.h
+        ${AJA_LIB_BASE_ROOT}/system/mac/lockimpl.h
+        ${AJA_LIB_BASE_ROOT}/system/mac/processimpl.h
+        ${AJA_LIB_BASE_ROOT}/system/mac/pthreadsextra.h
+        ${AJA_LIB_BASE_ROOT}/system/mac/threadimpl.h)
 
     set(AJABASE_SOURCES
         ${AJABASE_SOURCES}
-        ${AJABASE_ROOT}/pnp/mac/devicenotifier.cpp
-        ${AJABASE_ROOT}/pnp/mac/masterport.cpp
-        ${AJABASE_ROOT}/pnp/mac/pnpimpl.cpp
-        ${AJABASE_ROOT}/system/mac/eventimpl.cpp
-        ${AJABASE_ROOT}/system/mac/infoimpl.mm
-        ${AJABASE_ROOT}/system/mac/lockimpl.cpp
-        ${AJABASE_ROOT}/system/mac/processimpl.cpp
-        ${AJABASE_ROOT}/system/mac/pthreadsextra.cpp
-        ${AJABASE_ROOT}/system/mac/threadimpl.cpp)
+        ${AJA_LIB_BASE_ROOT}/pnp/mac/devicenotifier.cpp
+        ${AJA_LIB_BASE_ROOT}/pnp/mac/masterport.cpp
+        ${AJA_LIB_BASE_ROOT}/pnp/mac/pnpimpl.cpp
+        ${AJA_LIB_BASE_ROOT}/system/mac/eventimpl.cpp
+        ${AJA_LIB_BASE_ROOT}/system/mac/infoimpl.mm
+        ${AJA_LIB_BASE_ROOT}/system/mac/lockimpl.cpp
+        ${AJA_LIB_BASE_ROOT}/system/mac/processimpl.cpp
+        ${AJA_LIB_BASE_ROOT}/system/mac/pthreadsextra.cpp
+        ${AJA_LIB_BASE_ROOT}/system/mac/threadimpl.cpp)
 
     find_library(CORE_FOUNDATION_FRAMEWORK CoreFoundation)
     find_library(FOUNDATION_FRAMEWORK Foundation)
