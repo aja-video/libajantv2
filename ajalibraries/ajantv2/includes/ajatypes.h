@@ -23,7 +23,7 @@
 	-	To deactivate/exclude the symbols/APIs that were deprecated in a particular SDK, leave the
 		SDK's corresponding macro defined.
 
-	WARNING:	Do not sparesely mix-and-match across SDK versions.
+	WARNING:	Do not sparsely mix-and-match across SDK versions.
 				It's best to activate/include symbols/APIs contiguously from the latest SDK
 				(starting at the bottom), and continue activating/including to the SDK at which
 				symbols/APIs should start to be deactivated/excluded.
@@ -38,7 +38,7 @@
 #define NTV2_DEPRECATE_14_1		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.1 (never released)
 #define NTV2_DEPRECATE_14_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.2
 #define NTV2_DEPRECATE_14_3		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.3
-//#define NTV2_DEPRECATE_15_0		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.0
+#define NTV2_DEPRECATE_15_0		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.0
 //#define NTV2_DEPRECATE_15_1		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.1
 //#define NTV2_DEPRECATE_15_2		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.2
 //#define NTV2_DEPRECATE_15_3		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.3 (never released)
