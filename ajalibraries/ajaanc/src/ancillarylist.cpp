@@ -547,7 +547,7 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
 			newAncType = AJAAncillaryDataFactory::GuessAncillaryDataType(&newAncData);
 			bInsertNew = true;		//	Add it to the list
 		}	// digital anc data
-		else if (newAncData.IsAnalog())
+		else if (newAncData.IsRaw())
 		{	//	"Analog" packets are trickier...
 			//	1)	Digitized analog lines are broken into multiple packets by the hardware,
 			//		which need to be recombined into a single AJAAncillaryData object.
