@@ -36,7 +36,7 @@ using namespace std;
 AJALabelValuePairs PlayerConfig::Get(const bool inCompact) const
 {
 	AJALabelValuePairs result;
-	AJASystemInfo::append(result, "CCPlayer Config");
+	AJASystemInfo::append(result, "NTV2Player Config");
 	AJASystemInfo::append(result, "Device Specifier",	fDeviceSpecifier);
 	AJASystemInfo::append(result, "Output Channel",		::NTV2ChannelToString(fOutputChannel, inCompact));
 	AJASystemInfo::append(result, "Output Connector",	::NTV2OutputDestinationToString(fOutputDestination, inCompact));

@@ -31,7 +31,7 @@ typedef struct PlayerConfig
 		NTV2VideoFormat					fVideoFormat;		///< @brief	The video format to use
 		NTV2FrameBufferFormat			fPixelFormat;		///< @brief	The pixel format to use
 		CNTV2DemoCommon::ACFrameRange	fFrames;			///< @brief	AutoCirculate frame count or range
-		AJAAncillaryDataType			fTransmitHDRType;	///< @brief	If true, route dual-link RGB output;  otherwise normal YCbCr
+		AJAAncillaryDataType			fTransmitHDRType;	///< @brief	HDR packet type (AJAAncillaryDataType_HDR_SDR, AJAAncillaryDataType_HDR_HDR10, etc.)
 		bool							fDoMultiFormat;		///< @brief	If true, use multi-format/multi-channel mode, if device supports it; otherwise normal mode
 		bool							fSuppressAudio;		///< @brief	If true, suppress audio;  otherwise generate audio tones
 		bool							fTransmitLTC;		///< @brief	If true, embed LTC;  otherwise embed VITC

@@ -6,15 +6,12 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(NTV2KONAIPJSONSETUP_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
-
-set(AJANTV2_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../../ajalibraries/ajantv2)
 set(NTV2KONAIPJSONSETUP_TARGET_INCLUDE_DIRS
-	${CMAKE_CURRENT_SOURCE_DIR}/../
-	${CMAKE_CURRENT_SOURCE_DIR}/../../../ajalibraries
-	${CMAKE_CURRENT_SOURCE_DIR}/../../../ajalibraries/ajantv2/includes
-	${CMAKE_CURRENT_SOURCE_DIR}/../../../ajalibraries/ajaretail/includes
-	${CMAKE_CURRENT_SOURCE_DIR}/../../../ajalibraries/ajaretail/services)
+	${AJA_LIBRARIES_ROOT}
+	${AJA_APPS_ROOT}/crossplatform/demoapps
+	${AJA_LIB_NTV2_ROOT}/includes
+	${AJA_LIB_RETAIL_ROOT}/includes
+	${AJA_LIB_RETAIL_ROOT}/services)
 
 set(NTV2KONAIPJSONSETUP_HEADERS
 	konaipjsonparse.h
@@ -29,14 +26,13 @@ set(DEMO_APPS_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/../ntv2democommon.cpp)
 set(DEMO_APPS_HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/../ntv2democommon.h)
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	add_definitions(-DMSWindows -DAJA_WINDOWS)
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-	add_definitions(-DAJAMac -DAJA_MAC)
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	# noop
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	if (CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64)$")
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -msse3 -msse4.1 -msse4.2")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -msse3 -msse4.1 -msse4.2")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse3 -msse4.1 -msse4.2")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse3 -msse4.1 -msse4.2")
 	endif()
 
 	set_source_files_properties(Info.plist PROPERTIES MACOSX_PACKAGE_LOCATION Contents)
@@ -52,9 +48,9 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 		${FOUNDATION_FRAMEWORK}
         ${IOKIT_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	add_definitions(-DAJALinux -DAJA_LINUX)
 	set(EXTRA_LIBRARIES dl pthread rt)
 endif()
+
 set(NTV2KONAIPJSONSETUP_TARGET_SOURCES
 	${NTV2KONAIPJSONSETUP_SOURCES}
 	${NTV2KONAIPJSONSETUP_HEADERS}
