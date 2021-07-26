@@ -792,11 +792,14 @@ void NTV2Capture4K::ConsumeFrames (void)
 {
 	CAPNOTE("Thread started");
 	
-	ofstream ofs1;
-	ofs1.open("D:\\temp\\temp1.raw", ios::out | ios::trunc | ios::binary);
+	if(mNumAudioLinks > 1)
+	{
+		//ofstream ofs1;
+		//ofs1.open("temp1.raw", ios::out | ios::trunc | ios::binary);
 	
-	ofstream ofs2;
-	ofs2.open("D:\\temp\\temp2.raw", ios::out | ios::trunc | ios::binary);
+		//ofstream ofs2;
+		//ofs2.open("temp2.raw", ios::out | ios::trunc | ios::binary);
+	}
 	
 	while (!mGlobalQuit)
 	{
@@ -808,15 +811,23 @@ void NTV2Capture4K::ConsumeFrames (void)
 			//	. . .		. . .		. . .		. . .
 			//		. . .		. . .		. . .		. . .
 			//			. . .		. . .		. . .		. . .
-			ofs1.write(reinterpret_cast<const char*>(pFrameData->fAudioBuffer), pFrameData->fAudioRecordSize/2);
-			ofs2.write(reinterpret_cast<const char*>(pFrameData->fAudioBuffer + ((pFrameData->fAudioRecordSize/2)/4)), pFrameData->fAudioRecordSize/2);
+			if(mNumAudioLinks > 1)
+			{
+				//ofs1.write(reinterpret_cast<const char*>(pFrameData->fAudioBuffer), pFrameData->fAudioRecordSize/2);
+				//ofs2.write(reinterpret_cast<const char*>(pFrameData->fAudioBuffer + ((pFrameData->fAudioRecordSize/2)/4)), pFrameData->fAudioRecordSize/2);
+			}
 
 			//	Now release and recycle the buffer...
 			mAVCircularBuffer.EndConsumeNextBuffer ();
 		}
 	}	//	loop til quit signaled
-	ofs1.close();
-	ofs2.close();
+
+	if(mNumAudioLinks > 1)
+	{
+		//ofs1.close();
+		//ofs2.close();
+	}
+
 	CAPNOTE("Thread completed, will exit");
 
 }	//	ConsumeFrames
