@@ -8990,8 +8990,6 @@ string PercentDecode (const string & inStr)
 					hexNum += unsigned(chr + 10 - 'a');
 				else if (chr >= '0'  &&  chr <= '9')
 					hexNum += unsigned(chr - '0');
-				else
-					;
 				oss << char(hexNum);
 				hexNum = 0;
 				state = 0;

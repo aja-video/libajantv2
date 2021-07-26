@@ -1851,22 +1851,20 @@ public:
 	AJA_VIRTUAL bool		IsAudioOutputRunning (const NTV2AudioSystem inAudioSystem, bool & outIsRunning);
 
 	/**
-		@brief		Enables or disables the output of audio samples and advancement of the audio buffer
-					pointer ("play head") of the given Audio System.
+		@brief		Pauses or resumes output of audio samples and advancement of the audio buffer pointer
+					("play head") of the given Audio System.
 		@return		True if successful; otherwise false.
-		@param[in]	inAudioSystem		Specifies the Audio System on the device to be affected.
-		@param[in]	inEnablePlayout		Specify 'true' to resume producing audio samples ("running").
-										Specify 'false' to stop producing audio samples ("stopped").
+		@param[in]	inAudioSystem		Specifies the Audio System of interest.
+		@param[in]	inPausePlayout		Specify 'true' to pause producing audio samples ("paused").
+										Specify 'false' to resume producing audio samples ("running").
 		@note		This function doesn't alter the Audio Output Buffer Pointer ("play head") position.
 					To reset the "play head" back to the beginning of the buffer, use CNTV2Card::SetAudioOutputReset instead.
 		@see		CNTV2Card::GetAudioOutputPause, CNTV2Card::StartAudioOutput, CNTV2Card::StopAudioOutput, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		SetAudioOutputPause (const NTV2AudioSystem inAudioSystem, const bool inEnablePlayout);
+	AJA_VIRTUAL bool		SetAudioOutputPause (const NTV2AudioSystem inAudioSystem, const bool inPausePlayout);
 
 	/**
-		@brief		Answers whether or not the device's Audio System is currently operating in the mode
-					in which it is not producing audio output samples and the audio buffer pointer
-					is not advancing.
+		@brief		Answers if the device's Audio System is currently paused or not.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem		Specifies the Audio System of interest.
 		@param[out]	outIsPaused			Receives 'true' if audio output is paused, or 'false' if audio
