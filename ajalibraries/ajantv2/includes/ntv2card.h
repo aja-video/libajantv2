@@ -741,7 +741,7 @@ public:
 		@param[in]	inAncRegion				Optionally specifies the ancillary data region to clear (e.g.
 											NTV2_AncRgn_Field1, NTV2_AncRgn_Field2, etc.).  Defaults to all regions.
 		@param[in]	inChannel				Optionally specifies the channel associated with the frame numbers.
-											Defaults to NTV2_CHANNEL1.
+											Defaults to NTV2_CHANNEL1. (New in SDK 16.1)
 		@return		True if successful; otherwise false.
 	**/
 	AJA_VIRTUAL bool	DMAClearAncRegion (	const UWord inStartFrameNumber,
@@ -2875,11 +2875,9 @@ public:
         @brief		Reports the UserID number of the currently-running firmware.
         @param[out]	outUserID		Receives the UserID.
         @return		True if successful;  otherwise false.
-        @note		This may differ from the revision number of the installed firmware if, after
-                    erasing or reflashing, the device was not power-cycled to force its FPGA to reload.
         @see		CNTV2Card::GetRunningFirmwareDate, CNTV2Card::GetRunningFirmwareTime, \ref devicefirmware.
     **/
-    AJA_VIRTUAL bool    GetRunningFirmwareUserID (ULWord & outUserID);
+    AJA_VIRTUAL bool    GetRunningFirmwareUserID (ULWord & outUserID);	//	 New in SDK 16.1
 
 #if !defined(NTV2_DEPRECATE_14_2)
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetFirmwareRev (ULWord * pOutRevisionNumber));	///< @deprecated	Use GetRunningFirmwareRevision instead.
@@ -5661,10 +5659,10 @@ public:
 
 	/**
 		@brief		Answers with the current HDMI output status.
-        	@return		True if successful; otherwise false.
-        	@param[out]	outMode	Receives the current status of the HDMI output.
+       	@return		True if successful; otherwise false.
+       	@param[out]	outStatus	Receives the current status of the HDMI output.
 	**/
-	AJA_VIRTUAL bool		GetHDMIOutStatus (NTV2HDMIOutputStatus & outStatus);
+	AJA_VIRTUAL bool		GetHDMIOutStatus (NTV2HDMIOutputStatus & outStatus);	//	New in SDK 16.1
 
     //protected:	SHOULD BE PROTECTED/PRIVATE:
 		AJA_VIRTUAL bool	GetHDMIInputStatus (ULWord & outValue,  const NTV2Channel inChannel = NTV2_CHANNEL1, const bool in12BitDetection = false);	///< @brief	Answers with the contents of the HDMI Input status register for the given HDMI input.
@@ -6659,7 +6657,7 @@ public:
 									otherwise false if it didn't.
 		@param[in]	inField			Optionally specifies the field of interest. Specify 0 for the "total" buffer
 									overflow between the F1 and F2 buffers;  specify 1 for Field 1;  specify 2 for Field 2.
-									Defaults to zero (the "total").
+									Defaults to zero (the "total"). (Added in SDK 16.1)
 		@note		The extractor will not actually write any Anc bytes past its "stop" address, but it will
 					report that it was about to via this "overrun" flag.
 	**/
@@ -7115,9 +7113,9 @@ public:
 	AJA_VIRTUAL bool Set1DLUTTableLocation (const NTV2Channel inChannel, const ULWord inFrameNumber, ULWord inLUTIndex = 0);
 	AJA_VIRTUAL bool Load1DLUTTable (const NTV2Channel inChannel);
 	
-	AJA_VIRTUAL bool HasMultiRasterWidget();
-	AJA_VIRTUAL bool SetMultiRasterBypassEnable (const bool inEnable);	
-	AJA_VIRTUAL bool GetMultiRasterBypassEnable (bool & outEnabled);
+	AJA_VIRTUAL bool HasMultiRasterWidget (void);						//	New in SDK 16.1
+	AJA_VIRTUAL bool SetMultiRasterBypassEnable (const bool inEnable);	//	New in SDK 16.1
+	AJA_VIRTUAL bool GetMultiRasterBypassEnable (bool & outEnabled);	//	New in SDK 16.1
 
 	///@}
 
