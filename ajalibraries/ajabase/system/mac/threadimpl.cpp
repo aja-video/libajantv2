@@ -407,6 +407,8 @@ AJAThreadImpl::GetPriority(AJAThreadPriority* pThreadPriority)
 AJAStatus
 AJAThreadImpl::SetRealTime(AJAThreadRealTimePolicy policy, int priority)
 {
+	AJA_UNUSED(policy);
+	AJA_UNUSED(priority);
     return AJA_STATUS_FAIL;
 }
 
