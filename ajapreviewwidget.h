@@ -12,6 +12,7 @@
 #include <QThread>
 #include <QList>
 #include <QRectF>
+#include "ajatypes.h"
 #if defined (INCLUDE_AJACC)
 	#include "ajacc/includes/ntv2caption608types.h"
 #endif	//	defined (INCLUDE_AJACC)
@@ -37,10 +38,9 @@ class AJAPreviewWidget : public QFrame
 	Q_OBJECT
 
 	public:
-		AJAPreviewWidget (QWidget * parent = 0);
+		AJAPreviewWidget (QWidget * parent = AJA_NULL);
 
 	signals:
-		void wheelDelta (int delta);
 		void droppedFile (QString fileName);
 
 	public slots:
@@ -58,7 +58,6 @@ class AJAPreviewWidget : public QFrame
 
 	protected:
 		void paintEvent (QPaintEvent * event);
-		void wheelEvent (QWheelEvent * event);
 
 		void dragEnterEvent (QDragEnterEvent *event);
 		void dropEvent (QDropEvent *event);

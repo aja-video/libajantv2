@@ -35,7 +35,7 @@ class NTV2QtMultiInput : public QDialog
 
 	//	Instance Methods
 	public:
-        NTV2QtMultiInput (QWidget * parent = 0, Qt::WindowFlags flags = 0);
+        NTV2QtMultiInput (QWidget * parent = 0, Qt::WindowFlags flags = Qt::WindowFlags());
 		~NTV2QtMultiInput ();
 
 	public slots:
