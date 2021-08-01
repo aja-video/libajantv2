@@ -2,7 +2,7 @@
 /**
 	@file		ntv2bitfilemanager.cpp
 	@brief		Implementation of CNTV2BitfileManager class.
-	@copyright	(C) 2019-2021 AJA Video Systems, Inc.    All rights reserved.
+	@copyright	(C) 2019-2021 AJA Video Systems, Inc.	 All rights reserved.
 **/
 #include "ntv2bitfilemanager.h"
 #include "ntv2bitfile.h"
@@ -35,11 +35,11 @@ bool CNTV2BitfileManager::AddFile (const string & inBitfilePath)
 	NTV2BitfileInfo Info;
 
 	//	Open bitfile...
-    if (!Fio.FileExists(inBitfilePath)) {
-        return false;
+	if (!Fio.FileExists(inBitfilePath)) {
+		return false;
 	}
-    if (!Bitfile.Open(inBitfilePath)) {
-        return false;
+	if (!Bitfile.Open(inBitfilePath)) {
+		return false;
 	}
 
 	// get bitfile information
@@ -48,39 +48,39 @@ bool CNTV2BitfileManager::AddFile (const string & inBitfilePath)
 	Info.designID		= Bitfile.GetDesignID();
 	Info.designVersion	= Bitfile.GetDesignVersion();
 	Info.bitfileID		= Bitfile.GetBitfileID();
-	Info.bitfileVersion	= Bitfile.GetBitfileVersion();
-    if (Bitfile.IsTandem()) {
-        Info.bitfileFlags = NTV2_BITFILE_FLAG_TANDEM;
+	Info.bitfileVersion = Bitfile.GetBitfileVersion();
+	if (Bitfile.IsTandem()) {
+		Info.bitfileFlags = NTV2_BITFILE_FLAG_TANDEM;
 	}
-    else if (Bitfile.IsClear()) {
-        Info.bitfileFlags = NTV2_BITFILE_FLAG_CLEAR;
+	else if (Bitfile.IsClear()) {
+		Info.bitfileFlags = NTV2_BITFILE_FLAG_CLEAR;
 	}
-    else if (Bitfile.IsPartial()) {
-        Info.bitfileFlags = NTV2_BITFILE_FLAG_PARTIAL;
+	else if (Bitfile.IsPartial()) {
+		Info.bitfileFlags = NTV2_BITFILE_FLAG_PARTIAL;
 	}
-    else {
-        Info.bitfileFlags = 0;
+	else {
+		Info.bitfileFlags = 0;
 	}
 	Info.deviceID		= Bitfile.GetDeviceID();
 
 	//	Check for reconfigurable bitfile...
-    if ((Info.designID == 0) || (Info.designID > 0xfe)) {
-        return false;
+	if ((Info.designID == 0) || (Info.designID > 0xfe)) {
+		return false;
 	}
-    if (Info.designVersion > 0xfe) {
-        return false;
+	if (Info.designVersion > 0xfe) {
+		return false;
 	}
 	if ((Info.bitfileID > 0xfe)) {
-        return false;
+		return false;
 	}
-    if (Info.bitfileVersion > 0xfe) {
-        return false;
+	if (Info.bitfileVersion > 0xfe) {
+		return false;
 	}
-    if (Info.bitfileFlags == 0) {
-        return false;
+	if (Info.bitfileFlags == 0) {
+		return false;
 	}
-    if (Info.deviceID == 0) {
-        return false;
+	if (Info.deviceID == 0) {
+		return false;
 	}
 
 	//	Add to list...
@@ -93,8 +93,8 @@ bool CNTV2BitfileManager::AddDirectory (const string & inDirectory)
 	AJAFileIO Fio;
 
 	//	Check if good directory...
-    if (AJA_FAILURE(Fio.DoesDirectoryExist(inDirectory))) {
-        return false;
+	if (AJA_FAILURE(Fio.DoesDirectoryExist(inDirectory))) {
+		return false;
 	}
 
 	//	Get bitfiles...
@@ -102,8 +102,8 @@ bool CNTV2BitfileManager::AddDirectory (const string & inDirectory)
 	Fio.ReadDirectory(inDirectory, "*.bit", fileContainer);
 
 	// add bitfiles
-	for (NTV2StringListConstIter fcIter(fileContainer.begin());  fcIter != fileContainer.end();  ++fcIter)
-        AddFile(*fcIter);
+	for (NTV2StringListConstIter fcIter(fileContainer.begin());	 fcIter != fileContainer.end();	 ++fcIter)
+		AddFile(*fcIter);
 	
 	return true;
 }
@@ -137,8 +137,8 @@ bool CNTV2BitfileManager::GetBitStream (NTV2_POINTER & outBitstream,
 
 	for (ndx = 0;  ndx < numBitfiles;  ndx++)
 	{	//	Search for bitstream...
-        const NTV2BitfileInfo & info (_bitfileList.at(ndx));
-        if (inDesignID == info.designID)
+		const NTV2BitfileInfo & info (_bitfileList.at(ndx));
+		if (inDesignID == info.designID)
 			if (inDesignVersion == info.designVersion)
 				if (inBitfileID == info.bitfileID)
 					if (inBitfileFlags & info.bitfileFlags)
@@ -151,7 +151,7 @@ bool CNTV2BitfileManager::GetBitStream (NTV2_POINTER & outBitstream,
 	}
 
 	//	Looking for latest version?
-	if ((inBitfileVersion == 0xff)  &&  (maxNdx < numBitfiles))
+	if ((inBitfileVersion == 0xff)	&&	(maxNdx < numBitfiles))
 		ndx = maxNdx;
 
 	//	Find something?
@@ -169,23 +169,23 @@ bool CNTV2BitfileManager::GetBitStream (NTV2_POINTER & outBitstream,
 bool CNTV2BitfileManager::ReadBitstream (const size_t inIndex)
 {
 	//	Already in cache?
-    if ((inIndex < _bitstreamList.size())  &&  !_bitstreamList.at(inIndex).IsNULL()) {
-        return true;	//	Yes
+	if ((inIndex < _bitstreamList.size())  &&  !_bitstreamList.at(inIndex).IsNULL()) {
+		return true;	//	Yes
 	}
 
 	//	Open bitfile to get bitstream...
 	CNTV2Bitfile Bitfile;
-    if (!Bitfile.Open(_bitfileList.at(inIndex).bitfilePath))
-        return false;
+	if (!Bitfile.Open(_bitfileList.at(inIndex).bitfilePath))
+		return false;
 
 	//	Read bitstream from bitfile (will automatically Allocate it)...
-    NTV2_POINTER Bitstream;
+	NTV2_POINTER Bitstream;
 	if (!Bitfile.GetProgramByteStream(Bitstream))
 		return false;
 
-    if (inIndex >= _bitstreamList.size())
-        _bitstreamList.resize(inIndex + 1);
+	if (inIndex >= _bitstreamList.size())
+		_bitstreamList.resize(inIndex + 1);
 
-    _bitstreamList[inIndex] = Bitstream;
+	_bitstreamList[inIndex] = Bitstream;
 	return true;
 }

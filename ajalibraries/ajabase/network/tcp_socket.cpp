@@ -23,8 +23,8 @@ using std::string;
 /////////////////////////////
 // Defines
 /////////////////////////////
-#define DEBUG_TCP_OPERATION   0
-#define MAX_PENDING           10
+#define DEBUG_TCP_OPERATION	  0
+#define MAX_PENDING			  10
 
 
 /////////////////////////////
@@ -66,7 +66,7 @@ AJATCPSocket::Open(const string& ipAddress, uint16_t port)
 			}
 
 			mSocketAddress.sin_family = AF_INET;
-			mSocketAddress.sin_port   = htons(port);
+			mSocketAddress.sin_port	  = htons(port);
 
 			if (0 == bind(
 						mSocket,
@@ -116,9 +116,9 @@ AJATCPSocket::Connect(const string& ipAddress, uint16_t port)
 	if ((-1 != mSocket) && (0 != ipAddress.length()))
 	{
 		memset(&serverAddress, 0, sizeof(struct sockaddr_in));
-		serverAddress.sin_family      = AF_INET;
+		serverAddress.sin_family	  = AF_INET;
 		serverAddress.sin_addr.s_addr = inet_addr(ipAddress.c_str());
-		serverAddress.sin_port        = htons(port);
+		serverAddress.sin_port		  = htons(port);
 
 		if (0 == connect(
 					mSocket,
@@ -158,12 +158,12 @@ AJATCPSocket::Accept(void)
 	if (-1 != mSocket)
 	{
 		struct sockaddr_in client;
-		socklen_t          length = sizeof(struct sockaddr_in);
-		int                sock;
+		socklen_t		   length = sizeof(struct sockaddr_in);
+		int				   sock;
 
 		memset(&client, 0, sizeof(struct sockaddr_in));
 
-        if ((sock = (int)accept(mSocket, (struct sockaddr*) &client, &length)) < 0)
+		if ((sock = (int)accept(mSocket, (struct sockaddr*) &client, &length)) < 0)
 		{
 			// If we have an EINVAL error, then either the address length
 			// is invalid, or we are not listening to connections -- which
@@ -269,15 +269,15 @@ AJATCPSocket::Write(const uint8_t* pData, uint32_t dataLength)
 uint32_t
 AJATCPSocket::Read(uint8_t* pData, uint32_t dataLength, struct sockaddr_in& client)
 {
-    AJA_UNUSED(client);
-    return Read(pData, dataLength);
+	AJA_UNUSED(client);
+	return Read(pData, dataLength);
 }
 
 uint32_t
 AJATCPSocket::Write(const uint8_t* pData, uint32_t dataLength, struct sockaddr_in& targetAddress)
 {
-    AJA_UNUSED(targetAddress);
-    return Write(pData, dataLength);
+	AJA_UNUSED(targetAddress);
+	return Write(pData, dataLength);
 }
 
 //////////////////////// End of tcp_socket.cpp //////////////////////

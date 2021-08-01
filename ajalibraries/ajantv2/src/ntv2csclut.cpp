@@ -19,19 +19,19 @@
 #endif
 #include <deque>
 
-#define	HEX16(__x__)		"0x" << hex << setw(16) << setfill('0') <<               uint64_t(__x__)  << dec
+#define HEX16(__x__)		"0x" << hex << setw(16) << setfill('0') <<				 uint64_t(__x__)  << dec
 #define INSTP(_p_)			HEX16(uint64_t(_p_))
-#define	CSCFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_CSC, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	CSCWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_CSC, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	CSCNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_CSC, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	CSCINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_CSC, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	CSCDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_CSC, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define CSCFAIL(__x__)		AJA_sERROR	(AJA_DebugUnit_CSC, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define CSCWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_CSC, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define CSCNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_CSC, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define CSCINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_CSC, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define CSCDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_CSC, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 
-#define	LUTFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_LUT, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	LUTWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_LUT, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	LUTNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_LUT, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	LUTINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_LUT, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	LUTDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_LUT, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define LUTFAIL(__x__)		AJA_sERROR	(AJA_DebugUnit_LUT, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define LUTWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_LUT, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define LUTNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_LUT, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define LUTINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_LUT, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define LUTDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_LUT, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 
 using namespace std;
 
@@ -40,25 +40,25 @@ using namespace std;
 //	These static tables eliminate a lot of switch statements.
 //	CAUTION:	These are predicated on NTV2Channel being ordinal (NTV2_CHANNEL1==0, NTV2_CHANNEL2==1, etc.)
 
-static const ULWord	gChannelToEnhancedCSCRegNum []		= {	kRegEnhancedCSC1Mode,	kRegEnhancedCSC2Mode,	kRegEnhancedCSC3Mode,	kRegEnhancedCSC4Mode,
+static const ULWord gChannelToEnhancedCSCRegNum []		= { kRegEnhancedCSC1Mode,	kRegEnhancedCSC2Mode,	kRegEnhancedCSC3Mode,	kRegEnhancedCSC4Mode,
 															kRegEnhancedCSC5Mode,	kRegEnhancedCSC6Mode,	kRegEnhancedCSC7Mode,	kRegEnhancedCSC8Mode,	0};
 
-static const ULWord	gChannelToCSCoeff12RegNum []		= {	kRegCSCoefficients1_2,	kRegCS2Coefficients1_2,	kRegCS3Coefficients1_2,	kRegCS4Coefficients1_2,
-															kRegCS5Coefficients1_2,	kRegCS6Coefficients1_2,	kRegCS7Coefficients1_2,	kRegCS8Coefficients1_2,	0};
+static const ULWord gChannelToCSCoeff12RegNum []		= { kRegCSCoefficients1_2,	kRegCS2Coefficients1_2, kRegCS3Coefficients1_2, kRegCS4Coefficients1_2,
+															kRegCS5Coefficients1_2, kRegCS6Coefficients1_2, kRegCS7Coefficients1_2, kRegCS8Coefficients1_2, 0};
 
-static const ULWord	gChannelToCSCoeff34RegNum []		= {	kRegCSCoefficients3_4,	kRegCS2Coefficients3_4,	kRegCS3Coefficients3_4,	kRegCS4Coefficients3_4,
-															kRegCS5Coefficients3_4,	kRegCS6Coefficients3_4,	kRegCS7Coefficients3_4,	kRegCS8Coefficients3_4,	0};
+static const ULWord gChannelToCSCoeff34RegNum []		= { kRegCSCoefficients3_4,	kRegCS2Coefficients3_4, kRegCS3Coefficients3_4, kRegCS4Coefficients3_4,
+															kRegCS5Coefficients3_4, kRegCS6Coefficients3_4, kRegCS7Coefficients3_4, kRegCS8Coefficients3_4, 0};
 
-static const ULWord	gChannelToCSCoeff56RegNum []		= {	kRegCSCoefficients5_6,	kRegCS2Coefficients5_6,	kRegCS3Coefficients5_6,	kRegCS4Coefficients5_6,
-															kRegCS5Coefficients5_6,	kRegCS6Coefficients5_6,	kRegCS7Coefficients5_6,	kRegCS8Coefficients5_6,	0};
+static const ULWord gChannelToCSCoeff56RegNum []		= { kRegCSCoefficients5_6,	kRegCS2Coefficients5_6, kRegCS3Coefficients5_6, kRegCS4Coefficients5_6,
+															kRegCS5Coefficients5_6, kRegCS6Coefficients5_6, kRegCS7Coefficients5_6, kRegCS8Coefficients5_6, 0};
 
-static const ULWord	gChannelToCSCoeff78RegNum []		= {	kRegCSCoefficients7_8,	kRegCS2Coefficients7_8,	kRegCS3Coefficients7_8,	kRegCS4Coefficients7_8,
-															kRegCS5Coefficients7_8,	kRegCS6Coefficients7_8,	kRegCS7Coefficients7_8,	kRegCS8Coefficients7_8,	0};
+static const ULWord gChannelToCSCoeff78RegNum []		= { kRegCSCoefficients7_8,	kRegCS2Coefficients7_8, kRegCS3Coefficients7_8, kRegCS4Coefficients7_8,
+															kRegCS5Coefficients7_8, kRegCS6Coefficients7_8, kRegCS7Coefficients7_8, kRegCS8Coefficients7_8, 0};
 
-static const ULWord	gChannelToCSCoeff910RegNum []		= {	kRegCSCoefficients9_10,	kRegCS2Coefficients9_10,	kRegCS3Coefficients9_10,	kRegCS4Coefficients9_10,
+static const ULWord gChannelToCSCoeff910RegNum []		= { kRegCSCoefficients9_10, kRegCS2Coefficients9_10,	kRegCS3Coefficients9_10,	kRegCS4Coefficients9_10,
 															kRegCS5Coefficients9_10,	kRegCS6Coefficients9_10,	kRegCS7Coefficients9_10,	kRegCS8Coefficients9_10,	0};
 
-static const ULWord	gChannelTo1DLutControlRegNum []		= {	kReg1DLUTLoadControl1,	kReg1DLUTLoadControl2,	kReg1DLUTLoadControl3,	kReg1DLUTLoadControl4,
+static const ULWord gChannelTo1DLutControlRegNum []		= { kReg1DLUTLoadControl1,	kReg1DLUTLoadControl2,	kReg1DLUTLoadControl3,	kReg1DLUTLoadControl4,
 															kReg1DLUTLoadControl5,	kReg1DLUTLoadControl6,	kReg1DLUTLoadControl7,	kReg1DLUTLoadControl8,	0};
 
 
@@ -69,8 +69,8 @@ bool  CNTV2Card::SetColorCorrectionMode(const NTV2Channel inChannel, const NTV2C
 {
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	return WriteRegister (inChannel == NTV2_CHANNEL1  ?  kRegCh1ColorCorrectionControl  :  kRegCh2ColorCorrectionControl,
-							inMode,  kRegMaskCCMode,  kRegShiftCCMode);
+	return WriteRegister (inChannel == NTV2_CHANNEL1  ?	 kRegCh1ColorCorrectionControl	:  kRegCh2ColorCorrectionControl,
+							inMode,	 kRegMaskCCMode,  kRegShiftCCMode);
 
 }
 
@@ -105,12 +105,12 @@ bool CNTV2Card::SetLUTV2OutputBank (const NTV2Channel inChannel, const ULWord in
 		return false;
 	switch (inChannel)
 	{
-		case NTV2_CHANNEL1:		return WriteRegister (kRegLUTV2Control,	inBank, kRegMaskLUT1OutputBankSelect, kRegShiftLUT1OutputBankSelect);
-		case NTV2_CHANNEL2:		return WriteRegister (kRegLUTV2Control,	inBank, kRegMaskLUT2OutputBankSelect,	kRegShiftLUT2OutputBankSelect);
-		case NTV2_CHANNEL3:		return WriteRegister (kRegLUTV2Control,	inBank, kRegMaskLUT3OutputBankSelect,	kRegShiftLUT3OutputBankSelect);
-		case NTV2_CHANNEL4:		return WriteRegister (kRegLUTV2Control,	inBank, kRegMaskLUT4OutputBankSelect,	kRegShiftLUT4OutputBankSelect);
-		case NTV2_CHANNEL5:		return WriteRegister (kRegLUTV2Control,	inBank, kRegMaskLUT5OutputBankSelect,	kRegShiftLUT5OutputBankSelect);
-		case NTV2_CHANNEL6:		return WriteRegister (kRegLUTV2Control,	inBank, kRegMaskLUT6OutputBankSelect, kRegShiftLUT6OutputBankSelect);
+		case NTV2_CHANNEL1:		return WriteRegister (kRegLUTV2Control, inBank, kRegMaskLUT1OutputBankSelect, kRegShiftLUT1OutputBankSelect);
+		case NTV2_CHANNEL2:		return WriteRegister (kRegLUTV2Control, inBank, kRegMaskLUT2OutputBankSelect,	kRegShiftLUT2OutputBankSelect);
+		case NTV2_CHANNEL3:		return WriteRegister (kRegLUTV2Control, inBank, kRegMaskLUT3OutputBankSelect,	kRegShiftLUT3OutputBankSelect);
+		case NTV2_CHANNEL4:		return WriteRegister (kRegLUTV2Control, inBank, kRegMaskLUT4OutputBankSelect,	kRegShiftLUT4OutputBankSelect);
+		case NTV2_CHANNEL5:		return WriteRegister (kRegLUTV2Control, inBank, kRegMaskLUT5OutputBankSelect,	kRegShiftLUT5OutputBankSelect);
+		case NTV2_CHANNEL6:		return WriteRegister (kRegLUTV2Control, inBank, kRegMaskLUT6OutputBankSelect, kRegShiftLUT6OutputBankSelect);
 		case NTV2_CHANNEL7:		return WriteRegister (kRegLUTV2Control, inBank, kRegMaskLUT7OutputBankSelect, kRegShiftLUT7OutputBankSelect);
 		case NTV2_CHANNEL8:		return WriteRegister (kRegLUTV2Control, inBank, kRegMaskLUT8OutputBankSelect, kRegShiftLUT8OutputBankSelect);
 		default:				return false;
@@ -125,11 +125,11 @@ bool CNTV2Card::GetColorCorrectionOutputBank (const NTV2Channel inChannel, ULWor
 		return GetLUTV2OutputBank(inChannel, outBank);
 	switch(inChannel)
 	{
-		case NTV2_CHANNEL1:		return ReadRegister (kRegCh1ColorCorrectionControl,	outBank,	kRegMaskCCOutputBankSelect,		kRegShiftCCOutputBankSelect);
-		case NTV2_CHANNEL2:		return ReadRegister (kRegCh2ColorCorrectionControl,	outBank,	kRegMaskCCOutputBankSelect,		kRegShiftCCOutputBankSelect);
-		case NTV2_CHANNEL3:		return ReadRegister (kRegCh2ColorCorrectionControl,	outBank,	kRegMaskCC3OutputBankSelect,	kRegShiftCC3OutputBankSelect);
-		case NTV2_CHANNEL4:		return ReadRegister (kRegCh2ColorCorrectionControl,	outBank,	kRegMaskCC4OutputBankSelect,	kRegShiftCC4OutputBankSelect);
-		case NTV2_CHANNEL5:		return ReadRegister (kRegCh1ColorCorrectionControl,	outBank,	kRegMaskCC5OutputBankSelect,	kRegShiftCC5OutputBankSelect);
+		case NTV2_CHANNEL1:		return ReadRegister (kRegCh1ColorCorrectionControl, outBank,	kRegMaskCCOutputBankSelect,		kRegShiftCCOutputBankSelect);
+		case NTV2_CHANNEL2:		return ReadRegister (kRegCh2ColorCorrectionControl, outBank,	kRegMaskCCOutputBankSelect,		kRegShiftCCOutputBankSelect);
+		case NTV2_CHANNEL3:		return ReadRegister (kRegCh2ColorCorrectionControl, outBank,	kRegMaskCC3OutputBankSelect,	kRegShiftCC3OutputBankSelect);
+		case NTV2_CHANNEL4:		return ReadRegister (kRegCh2ColorCorrectionControl, outBank,	kRegMaskCC4OutputBankSelect,	kRegShiftCC4OutputBankSelect);
+		case NTV2_CHANNEL5:		return ReadRegister (kRegCh1ColorCorrectionControl, outBank,	kRegMaskCC5OutputBankSelect,	kRegShiftCC5OutputBankSelect);
 		default:				return false;
 	}
 }
@@ -197,28 +197,28 @@ bool CNTV2Card::SetLUTV2HostAccessBank (const NTV2ColorCorrectionHostAccessBank 
 	switch(inValue)
 	{
 		case NTV2_CCHOSTACCESS_CH1BANK0:
-		case NTV2_CCHOSTACCESS_CH1BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH1BANK0),	kRegMaskLUT1HostAccessBankSelect,	kRegShiftLUT1HostAccessBankSelect);
+		case NTV2_CCHOSTACCESS_CH1BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH1BANK0), kRegMaskLUT1HostAccessBankSelect,	kRegShiftLUT1HostAccessBankSelect);
 
 		case NTV2_CCHOSTACCESS_CH2BANK0:
-		case NTV2_CCHOSTACCESS_CH2BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH2BANK0),	kRegMaskLUT2HostAccessBankSelect,	kRegShiftLUT2HostAccessBankSelect);
+		case NTV2_CCHOSTACCESS_CH2BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH2BANK0), kRegMaskLUT2HostAccessBankSelect,	kRegShiftLUT2HostAccessBankSelect);
 
 		case NTV2_CCHOSTACCESS_CH3BANK0:
-		case NTV2_CCHOSTACCESS_CH3BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH3BANK0),	kRegMaskLUT3HostAccessBankSelect,	kRegShiftLUT3HostAccessBankSelect);
+		case NTV2_CCHOSTACCESS_CH3BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH3BANK0), kRegMaskLUT3HostAccessBankSelect,	kRegShiftLUT3HostAccessBankSelect);
 
 		case NTV2_CCHOSTACCESS_CH4BANK0:
-		case NTV2_CCHOSTACCESS_CH4BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH4BANK0),	kRegMaskLUT4HostAccessBankSelect,	kRegShiftLUT4HostAccessBankSelect);
+		case NTV2_CCHOSTACCESS_CH4BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH4BANK0), kRegMaskLUT4HostAccessBankSelect,	kRegShiftLUT4HostAccessBankSelect);
 
 		case NTV2_CCHOSTACCESS_CH5BANK0:
-		case NTV2_CCHOSTACCESS_CH5BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH5BANK0),	kRegMaskLUT5HostAccessBankSelect,	kRegShiftLUT5HostAccessBankSelect);
+		case NTV2_CCHOSTACCESS_CH5BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH5BANK0), kRegMaskLUT5HostAccessBankSelect,	kRegShiftLUT5HostAccessBankSelect);
 
 		case NTV2_CCHOSTACCESS_CH6BANK0:
-		case NTV2_CCHOSTACCESS_CH6BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH6BANK0),	kRegMaskLUT6HostAccessBankSelect,	kRegShiftLUT6HostAccessBankSelect);
+		case NTV2_CCHOSTACCESS_CH6BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH6BANK0), kRegMaskLUT6HostAccessBankSelect,	kRegShiftLUT6HostAccessBankSelect);
 
 		case NTV2_CCHOSTACCESS_CH7BANK0:
-		case NTV2_CCHOSTACCESS_CH7BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH7BANK0),	kRegMaskLUT7HostAccessBankSelect,	kRegShiftLUT7HostAccessBankSelect);
+		case NTV2_CCHOSTACCESS_CH7BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH7BANK0), kRegMaskLUT7HostAccessBankSelect,	kRegShiftLUT7HostAccessBankSelect);
 
 		case NTV2_CCHOSTACCESS_CH8BANK0:
-		case NTV2_CCHOSTACCESS_CH8BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH8BANK0),	kRegMaskLUT8HostAccessBankSelect,	kRegShiftLUT8HostAccessBankSelect);
+		case NTV2_CCHOSTACCESS_CH8BANK1:	return WriteRegister(kRegLUTV2Control,	(inValue - NTV2_CCHOSTACCESS_CH8BANK0), kRegMaskLUT8HostAccessBankSelect,	kRegShiftLUT8HostAccessBankSelect);
 
 		default:							return false;
 	}
@@ -260,12 +260,12 @@ bool CNTV2Card::GetLUTV2HostAccessBank (NTV2ColorCorrectionHostAccessBank & outV
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
 
-	ULWord	tempVal	(0);
+	ULWord	tempVal (0);
 	bool	result	(false);
 	switch(inChannel)
 	{
 		case NTV2_CHANNEL1:
-			result = CNTV2DriverInterface::ReadRegister (kRegLUTV2Control, outValue,  kRegMaskLUT1HostAccessBankSelect,  kRegShiftLUT1HostAccessBankSelect);
+			result = CNTV2DriverInterface::ReadRegister (kRegLUTV2Control, outValue,  kRegMaskLUT1HostAccessBankSelect,	 kRegShiftLUT1HostAccessBankSelect);
 			break;
 
 		case NTV2_CHANNEL2:
@@ -274,32 +274,32 @@ bool CNTV2Card::GetLUTV2HostAccessBank (NTV2ColorCorrectionHostAccessBank & outV
 			break;
 
 		case NTV2_CHANNEL3:
-			result = ReadRegister (kRegLUTV2Control,  tempVal,  kRegMaskLUT3HostAccessBankSelect,  kRegShiftLUT3HostAccessBankSelect);
+			result = ReadRegister (kRegLUTV2Control,  tempVal,	kRegMaskLUT3HostAccessBankSelect,  kRegShiftLUT3HostAccessBankSelect);
 			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH3BANK0);
 			break;
 
 		case NTV2_CHANNEL4:
-			result = ReadRegister (kRegLUTV2Control,  tempVal,  kRegMaskLUT4HostAccessBankSelect,  kRegShiftLUT4HostAccessBankSelect);
+			result = ReadRegister (kRegLUTV2Control,  tempVal,	kRegMaskLUT4HostAccessBankSelect,  kRegShiftLUT4HostAccessBankSelect);
 			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH4BANK0);
 			break;
 
 		case NTV2_CHANNEL5:
-			result = ReadRegister (kRegLUTV2Control,  tempVal,  kRegMaskLUT5HostAccessBankSelect,  kRegShiftLUT5HostAccessBankSelect);
+			result = ReadRegister (kRegLUTV2Control,  tempVal,	kRegMaskLUT5HostAccessBankSelect,  kRegShiftLUT5HostAccessBankSelect);
 			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH5BANK0);
 			break;
 
 		case NTV2_CHANNEL6:
-			result = ReadRegister (kRegLUTV2Control,  tempVal,  kRegMaskLUT6HostAccessBankSelect,  kRegShiftLUT6HostAccessBankSelect);
+			result = ReadRegister (kRegLUTV2Control,  tempVal,	kRegMaskLUT6HostAccessBankSelect,  kRegShiftLUT6HostAccessBankSelect);
 			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH6BANK0);
 			break;
 
 		case NTV2_CHANNEL7:
-			result = ReadRegister (kRegLUTV2Control,  tempVal,  kRegMaskLUT7HostAccessBankSelect,  kRegShiftLUT7HostAccessBankSelect);
+			result = ReadRegister (kRegLUTV2Control,  tempVal,	kRegMaskLUT7HostAccessBankSelect,  kRegShiftLUT7HostAccessBankSelect);
 			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH7BANK0);
 			break;
 
 		case NTV2_CHANNEL8:
-			result = ReadRegister (kRegLUTV2Control,  tempVal,  kRegMaskLUT8HostAccessBankSelect,  kRegShiftLUT8HostAccessBankSelect);
+			result = ReadRegister (kRegLUTV2Control,  tempVal,	kRegMaskLUT8HostAccessBankSelect,  kRegShiftLUT8HostAccessBankSelect);
 			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH8BANK0);
 			break;
 
@@ -313,8 +313,8 @@ bool CNTV2Card::SetColorCorrectionSaturation (const NTV2Channel inChannel, const
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
 
-	return WriteRegister (inChannel == NTV2_CHANNEL1  ?  kRegCh1ColorCorrectionControl  :  kRegCh2ColorCorrectionControl,
-							inValue,  kRegMaskSaturationValue,  kRegShiftSaturationValue);
+	return WriteRegister (inChannel == NTV2_CHANNEL1  ?	 kRegCh1ColorCorrectionControl	:  kRegCh2ColorCorrectionControl,
+							inValue,  kRegMaskSaturationValue,	kRegShiftSaturationValue);
 }
 
 bool CNTV2Card::GetColorCorrectionSaturation (const NTV2Channel inChannel, ULWord & outValue)
@@ -322,13 +322,13 @@ bool CNTV2Card::GetColorCorrectionSaturation (const NTV2Channel inChannel, ULWor
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
 
-	return ReadRegister (inChannel == NTV2_CHANNEL1  ?  kRegCh1ColorCorrectionControl  :  kRegCh2ColorCorrectionControl,
-						outValue,  kRegMaskSaturationValue,  kRegShiftSaturationValue);
+	return ReadRegister (inChannel == NTV2_CHANNEL1	 ?	kRegCh1ColorCorrectionControl  :  kRegCh2ColorCorrectionControl,
+						outValue,  kRegMaskSaturationValue,	 kRegShiftSaturationValue);
 }
 
 bool CNTV2Card::SetLUTControlSelect(NTV2LUTControlSelect lutSelect)
 {
-	return WriteRegister(kRegCh1ColorCorrectionControl,	(ULWord)lutSelect,	kRegMaskLUTSelect,	kRegShiftLUTSelect);
+	return WriteRegister(kRegCh1ColorCorrectionControl, (ULWord)lutSelect,	kRegMaskLUTSelect,	kRegShiftLUTSelect);
 }
 
 bool CNTV2Card::GetLUTControlSelect(NTV2LUTControlSelect & outLUTSelect)
@@ -422,7 +422,7 @@ bool CNTV2Card::GetColorSpaceMethod (NTV2ColorSpaceMethod & outMethod, const NTV
 	ULWord tempVal (0);
 
 	//	Check the group leader first, since that's where the 4K status bit is for all...
-	if (!ReadRegister (gChannelToEnhancedCSCRegNum[inChannel < NTV2_CHANNEL5 ? NTV2_CHANNEL1 : NTV2_CHANNEL5],  tempVal,  kK2RegMaskEnhancedCSCEnable | kK2RegMaskEnhancedCSC4KMode))
+	if (!ReadRegister (gChannelToEnhancedCSCRegNum[inChannel < NTV2_CHANNEL5 ? NTV2_CHANNEL1 : NTV2_CHANNEL5],	tempVal,  kK2RegMaskEnhancedCSCEnable | kK2RegMaskEnhancedCSC4KMode))
 		return false;
 
 	if (tempVal == (kK2RegMaskEnhancedCSCEnable | kK2RegMaskEnhancedCSC4KMode))
@@ -474,13 +474,13 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 	
 	// 10 Bit Notes
 	//	1020 / 0x3FC is full-range white on the wire since 0x3FF/1023 is illegal
-	//	   4 /   0x4 is full-range black on the wire since 0x0/0 is illegal
+	//	   4 /	 0x4 is full-range black on the wire since 0x0/0 is illegal
 	//	 940 / 0x3AC is smpte-range white
-	//	  64 /  0x40 is smpte-range black
+	//	  64 /	0x40 is smpte-range black
 	
 	// 12 Bit Notes
 	//	4080 / 0xFF0 is full-range white on the wire since 0xFFC/4092 is illegal
-	//	  16 /  0x10 is full-range black on the wire since 0x0/0 is illegal
+	//	  16 /	0x10 is full-range black on the wire since 0x0/0 is illegal
 	//	3760 / 0xEB0 is smpte-range white
 	//	 256 / 0x100 is smpte-range black
 	
@@ -519,7 +519,7 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 		case NTV2_LUTUnknown:	// huh?
 		case NTV2_LUTCustom:
 		default:
-			for (size_t ndx = 0;  ndx < tableSize;  ndx++)
+			for (size_t ndx = 0;  ndx < tableSize;	ndx++)
 				outTable[ndx] = double(ndx);
 			break;
 
@@ -529,7 +529,7 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 			{
 				scale = (smpteWhite - smpteBlack) / (fullWhite - fullBlack);
 				
-				for (size_t ndx = 0;  ndx < tableSize;  ndx++)
+				for (size_t ndx = 0;  ndx < tableSize;	ndx++)
 					outTable[ndx] = (double(ndx) * scale) + (smpteBlack - (scale * fullBlack));
 			}
 			else  // inBank == kLUTBank_SMPTE2FULL
@@ -539,10 +539,10 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 				for (size_t ndx = 0;  ndx < (uint32_t)smpteBlack;  ndx++)
 					outTable[ndx] = fullBlack;
 				
-				for (size_t ndx = (uint32_t)smpteBlack;  ndx < (uint32_t)smpteWhite;  ndx++)
+				for (size_t ndx = (uint32_t)smpteBlack;	 ndx < (uint32_t)smpteWhite;  ndx++)
 					outTable[ndx] = (double(ndx) * scale) + ((uint32_t)fullBlack - (scale * (uint32_t)smpteBlack));
 					
-				for (size_t ndx = (uint32_t)smpteWhite;  ndx < tableSize;  ndx++)
+				for (size_t ndx = (uint32_t)smpteWhite;	 ndx < tableSize;  ndx++)
 					outTable[ndx] = fullWhite;
 			}
 			break;	//	NTV2_LUTRGBRangeFull_SMPTE
@@ -551,7 +551,7 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 		case NTV2_LUTGamma18_Rec601:
 			// "gamma" (the exponent) = srcGamma / dstGamma
 			gamma1 = (inBank == kLUTBank_RGB2YUV ? (kGammaMac / 2.2) : (2.2 / kGammaMac) );
-			for (size_t ndx = 0;  ndx < tableSize;  ndx++)
+			for (size_t ndx = 0;  ndx < tableSize;	ndx++)
 				outTable[ndx] = fullWhite * ::pow(double(ndx) / fullWhite, gamma1);
 			break;
 		
@@ -559,9 +559,9 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 		case NTV2_LUTGamma18_Rec601_SMPTE:
 			// "gamma" (the exponent) = srcGamma / dstGamma
 			gamma1 = (inBank == kLUTBank_RGB2YUV ? (kGammaMac / 2.2) : (2.2 / kGammaMac) );
-			for (size_t ndx = 0;  ndx < tableSize;  ndx++)
+			for (size_t ndx = 0;  ndx < tableSize;	ndx++)
 			{
-				if (ndx <= (uint32_t)smpteBlack  ||  ndx >= (uint32_t)smpteWhite)
+				if (ndx <= (uint32_t)smpteBlack	 ||	 ndx >= (uint32_t)smpteWhite)
 					outTable[ndx] = double(ndx);
 				else
 					outTable[ndx] = smpteScale * ::pow((double(ndx) - smpteBlack) / smpteScale, gamma1) + smpteBlack;
@@ -574,7 +574,7 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 			{
 				gamma1 = kGammaMac;
 				gamma2 = 0.45;
-				for (size_t ndx = 0;  ndx < tableSize;  ndx++)
+				for (size_t ndx = 0;  ndx < tableSize;	ndx++)
 				{	// remove the kGammaMac power gamma
 					double f(::pow(double(ndx) / fullWhite, gamma1));
 
@@ -589,7 +589,7 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 			{
 				gamma1 = 1.0 / 0.45;
 				gamma2 = 1.0 / kGammaMac;
-				for (size_t ndx = 0;  ndx < tableSize;  ndx++)
+				for (size_t ndx = 0;  ndx < tableSize;	ndx++)
 				{
 					double f(double(ndx) / fullWhite);
 					// remove the Rec 709 gamma
@@ -610,9 +610,9 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 			{
 				gamma1 = kGammaMac;
 				gamma2 = 0.45;
-				for (size_t ndx = 0;  ndx < tableSize;  ndx++)
+				for (size_t ndx = 0;  ndx < tableSize;	ndx++)
 				{
-					if (ndx <= (uint32_t)smpteBlack  ||  ndx >= (uint32_t)smpteWhite)
+					if (ndx <= (uint32_t)smpteBlack	 ||	 ndx >= (uint32_t)smpteWhite)
 						outTable[ndx] = double(ndx);	// linear portion - outside SMPTE range
 					else
 					{	// remove the kGammaMac power gamma
@@ -630,9 +630,9 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 			{
 				gamma1 = 1.0 / 0.45;
 				gamma2 = 1.0 / kGammaMac;
-				for (size_t ndx = 0;  ndx < tableSize;  ndx++)
+				for (size_t ndx = 0;  ndx < tableSize;	ndx++)
 				{
-					if (ndx <= (uint32_t)smpteBlack  ||  ndx >= (uint32_t)smpteWhite)
+					if (ndx <= (uint32_t)smpteBlack	 ||	 ndx >= (uint32_t)smpteWhite)
 						outTable[ndx] = double(ndx);	// linear portion - outside SMPTE range
 					else
 					{
@@ -655,7 +655,7 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 
 static inline ULWord intClamp (const int inMin, const int inValue, const int inMax)
 {
-	return ULWord(inValue < inMin  ?  inMin  :  (inValue > inMax ? inMax : inValue));
+	return ULWord(inValue < inMin  ?  inMin	 :	(inValue > inMax ? inMax : inValue));
 }
 
 bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, UWordSequence & outTable, const NTV2LutBitDepth inBitDepth)
@@ -670,7 +670,7 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 	outTable.reserve(tableSize);
 	while (outTable.size() < tableSize)
 		outTable.push_back(0);
-	for (size_t ndx(0);  ndx < tableSize;  ndx++)
+	for (size_t ndx(0);	 ndx < tableSize;  ndx++)
 	{
 		if ((outTable.at(ndx) = UWord(intClamp(0, int(dblTable.at(ndx) + 0.5), tableSize-1))))
 			nonzeroes++;
@@ -681,13 +681,13 @@ bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBan
 }
 
 static const NTV2ColorCorrectionHostAccessBank	gLUTBank0[] =
-{	NTV2_CCHOSTACCESS_CH1BANK0,	NTV2_CCHOSTACCESS_CH2BANK0,		//	[0]	0		[1]	2
-	NTV2_CCHOSTACCESS_CH3BANK0,	NTV2_CCHOSTACCESS_CH4BANK0,		//	[2]	4		[3]	6
-	NTV2_CCHOSTACCESS_CH5BANK0,	NTV2_CCHOSTACCESS_CH6BANK0,		//	[4]	8		[5]	10
-	NTV2_CCHOSTACCESS_CH7BANK0,	NTV2_CCHOSTACCESS_CH8BANK0	};	//	[6]	12		[7]	14
+{	NTV2_CCHOSTACCESS_CH1BANK0, NTV2_CCHOSTACCESS_CH2BANK0,		//	[0] 0		[1] 2
+	NTV2_CCHOSTACCESS_CH3BANK0, NTV2_CCHOSTACCESS_CH4BANK0,		//	[2] 4		[3] 6
+	NTV2_CCHOSTACCESS_CH5BANK0, NTV2_CCHOSTACCESS_CH6BANK0,		//	[4] 8		[5] 10
+	NTV2_CCHOSTACCESS_CH7BANK0, NTV2_CCHOSTACCESS_CH8BANK0	};	//	[6] 12		[7] 14
 
-static const size_t	kLUTArraySize (NTV2_COLORCORRECTOR_WORDSPERTABLE * 2);
-static const size_t	k12BitLUTArraySize (NTV2_12BIT_COLORCORRECTOR_WORDSPERTABLE * 2);
+static const size_t kLUTArraySize (NTV2_COLORCORRECTOR_WORDSPERTABLE * 2);
+static const size_t k12BitLUTArraySize (NTV2_12BIT_COLORCORRECTOR_WORDSPERTABLE * 2);
 
 
 
@@ -695,7 +695,7 @@ static const size_t	k12BitLUTArraySize (NTV2_12BIT_COLORCORRECTOR_WORDSPERTABLE 
 bool CNTV2Card::DownloadLUTToHW (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT,
 								 const NTV2Channel inLUT, const int inBank)
 {
-	if (inRedLUT.size() < kLUTArraySize  ||  inGreenLUT.size() < kLUTArraySize  ||  inBlueLUT.size() < kLUTArraySize)
+	if (inRedLUT.size() < kLUTArraySize	 ||	 inGreenLUT.size() < kLUTArraySize	||	inBlueLUT.size() < kLUTArraySize)
 		{LUTFAIL("Size error (< 1024): R=" << DEC(inRedLUT.size()) << " G=" << DEC(inGreenLUT.size()) << " B=" << DEC(inBlueLUT.size())); return false;}
 
 	if (IS_CHANNEL_INVALID(inLUT))
@@ -752,7 +752,7 @@ bool CNTV2Card::Download12BitLUTToHW (const NTV2DoubleArray & inRedLUT, const NT
 bool CNTV2Card::DownloadLUTToHW (const UWordSequence & inRedLUT, const UWordSequence & inGreenLUT, const UWordSequence & inBlueLUT,
 								const NTV2Channel inLUT, const int inBank)
 {
-	if (inRedLUT.size() < kLUTArraySize  ||  inGreenLUT.size() < kLUTArraySize  ||  inBlueLUT.size() < kLUTArraySize)
+	if (inRedLUT.size() < kLUTArraySize	 ||	 inGreenLUT.size() < kLUTArraySize	||	inBlueLUT.size() < kLUTArraySize)
 		{LUTFAIL("Size error (< 1024): R=" << DEC(inRedLUT.size()) << " G=" << DEC(inGreenLUT.size()) << " B=" << DEC(inBlueLUT.size())); return false;}
 
 	if (IS_CHANNEL_INVALID(inLUT))
@@ -808,16 +808,16 @@ bool CNTV2Card::Download12BitLUTToHW (const UWordSequence & inRedLUT, const UWor
 
 bool CNTV2Card::LoadLUTTables (const NTV2DoubleArray & inRedLUT, const NTV2DoubleArray & inGreenLUT, const NTV2DoubleArray & inBlueLUT)
 {
-	if (inRedLUT.size() < kLUTArraySize  ||  inGreenLUT.size() < kLUTArraySize  ||  inBlueLUT.size() < kLUTArraySize)
+	if (inRedLUT.size() < kLUTArraySize	 ||	 inGreenLUT.size() < kLUTArraySize	||	inBlueLUT.size() < kLUTArraySize)
 		{LUTFAIL("Size error (< 1024): R=" << DEC(inRedLUT.size()) << " G=" << DEC(inGreenLUT.size()) << " B=" << DEC(inBlueLUT.size())); return false;}
 
 	UWordSequence redLUT, greenLUT, blueLUT;
 	redLUT.resize(kLUTArraySize);
 	greenLUT.resize(kLUTArraySize);
 	blueLUT.resize(kLUTArraySize);
-	for (size_t ndx(0);  ndx < kLUTArraySize;  ndx++)
+	for (size_t ndx(0);	 ndx < kLUTArraySize;  ndx++)
 	{
-		redLUT  .at(ndx) = UWord(intClamp(0, int(inRedLUT  [ndx] + 0.5), 1023));
+		redLUT	.at(ndx) = UWord(intClamp(0, int(inRedLUT  [ndx] + 0.5), 1023));
 		greenLUT.at(ndx) = UWord(intClamp(0, int(inGreenLUT[ndx] + 0.5), 1023));
 		blueLUT .at(ndx) = UWord(intClamp(0, int(inBlueLUT [ndx] + 0.5), 1023));
 	}
@@ -833,9 +833,9 @@ bool CNTV2Card::Load12BitLUTTables (const NTV2DoubleArray & inRedLUT, const NTV2
 	redLUT.resize(k12BitLUTArraySize);
 	greenLUT.resize(k12BitLUTArraySize);
 	blueLUT.resize(k12BitLUTArraySize);
-	for (size_t ndx(0);  ndx < k12BitLUTArraySize;  ndx++)
+	for (size_t ndx(0);	 ndx < k12BitLUTArraySize;	ndx++)
 	{
-		redLUT  .at(ndx) = UWord(intClamp(0, int(inRedLUT  [ndx] + 0.5), 4095));
+		redLUT	.at(ndx) = UWord(intClamp(0, int(inRedLUT  [ndx] + 0.5), 4095));
 		greenLUT.at(ndx) = UWord(intClamp(0, int(inGreenLUT[ndx] + 0.5), 4095));
 		blueLUT .at(ndx) = UWord(intClamp(0, int(inBlueLUT [ndx] + 0.5), 4095));
 	}
@@ -844,15 +844,15 @@ bool CNTV2Card::Load12BitLUTTables (const NTV2DoubleArray & inRedLUT, const NTV2
 
 bool CNTV2Card::WriteLUTTables (const UWordSequence & inRedLUT, const UWordSequence & inGreenLUT, const UWordSequence & inBlueLUT)
 {
-	if (inRedLUT.size() < kLUTArraySize  ||  inGreenLUT.size() < kLUTArraySize  ||  inBlueLUT.size() < kLUTArraySize)
+	if (inRedLUT.size() < kLUTArraySize	 ||	 inGreenLUT.size() < kLUTArraySize	||	inBlueLUT.size() < kLUTArraySize)
 		{LUTFAIL("Size error (< 1024): R=" << DEC(inRedLUT.size()) << " G=" << DEC(inGreenLUT.size()) << " B=" << DEC(inBlueLUT.size())); return false;}
 
 	size_t	errorCount(0), nonzeroes(0);
-	ULWord	RTableReg = (Has12BitLUTSupport() ? kColorCorrection12BitLUTOffset_Base : kColorCorrectionLUTOffset_Red) / 4;	//	Byte offset to LUT in register bar;  divide by sizeof (ULWord) to get register number
+	ULWord	RTableReg = (Has12BitLUTSupport() ? kColorCorrection12BitLUTOffset_Base : kColorCorrectionLUTOffset_Red) / 4;	//	Byte offset to LUT in register bar;	 divide by sizeof (ULWord) to get register number
 	ULWord	GTableReg = (Has12BitLUTSupport() ? kColorCorrection12BitLUTOffset_Base : kColorCorrectionLUTOffset_Green) / 4;
 	ULWord	BTableReg = (Has12BitLUTSupport() ? kColorCorrection12BitLUTOffset_Base : kColorCorrectionLUTOffset_Blue) / 4;
 
-	for (size_t ndx(0);  ndx < NTV2_COLORCORRECTOR_WORDSPERTABLE;  ndx++)
+	for (size_t ndx(0);	 ndx < NTV2_COLORCORRECTOR_WORDSPERTABLE;  ndx++)
 	{
 		ULWord	loRed(ULWord(inRedLUT[2 * ndx + 0]) & 0x3FF);
 		ULWord	hiRed(ULWord(inRedLUT[2 * ndx + 1]) & 0x3FF);
@@ -922,7 +922,7 @@ bool CNTV2Card::WriteLUTTables (const UWordSequence & inRedLUT, const UWordSeque
 				errorCount++;
 		}
 	}
-	if (errorCount)	LUTFAIL(GetDisplayName() << " " << DEC(errorCount) << " WriteRegister calls failed");
+	if (errorCount) LUTFAIL(GetDisplayName() << " " << DEC(errorCount) << " WriteRegister calls failed");
 	else if (!nonzeroes) LUTWARN(GetDisplayName() << " All zero LUT table values!");
 	return !errorCount;
 }
@@ -936,11 +936,11 @@ bool CNTV2Card::Write12BitLUTTables (const UWordSequence & inRedLUT, const UWord
 		return false;
 	
 	size_t	errorCount(0), nonzeroes(0);
-	ULWord	RTableReg(kColorCorrection12BitLUTOffset_Base / 4);	//	Byte offset to LUT in register bar;  divide by sizeof (ULWord) to get register number
+	ULWord	RTableReg(kColorCorrection12BitLUTOffset_Base / 4); //	Byte offset to LUT in register bar;	 divide by sizeof (ULWord) to get register number
 	ULWord	GTableReg(kColorCorrection12BitLUTOffset_Base / 4);
 	ULWord	BTableReg(kColorCorrection12BitLUTOffset_Base / 4);
 
-	for (size_t ndx(0);  ndx < NTV2_12BIT_COLORCORRECTOR_WORDSPERTABLE;  ndx++)
+	for (size_t ndx(0);	 ndx < NTV2_12BIT_COLORCORRECTOR_WORDSPERTABLE;	 ndx++)
 	{
 		ULWord	loRed(ULWord(inRedLUT[2 * ndx + 0]) & 0xFFF);
 		ULWord	hiRed(ULWord(inRedLUT[2 * ndx + 1]) & 0xFFF);
@@ -969,7 +969,7 @@ bool CNTV2Card::Write12BitLUTTables (const UWordSequence & inRedLUT, const UWord
 		if (!WriteRegister(BTableReg++, tmpBlue))
 			errorCount++;
 	}
-	if (errorCount)	LUTFAIL(GetDisplayName() << " " << DEC(errorCount) << " WriteRegister calls failed");
+	if (errorCount) LUTFAIL(GetDisplayName() << " " << DEC(errorCount) << " WriteRegister calls failed");
 	else if (!nonzeroes) LUTWARN(GetDisplayName() << " All zero LUT table values!");
 	return !errorCount;
 }
@@ -991,7 +991,7 @@ bool CNTV2Card::GetLUTTables (NTV2DoubleArray & outRedLUT, NTV2DoubleArray & out
 				<< ") B(" << DEC(blue.size()) << ")!=oB(" << DEC(outBlueLUT.size())
 				<< ")"); return false;}
 
-	for (size_t ndx(0);  ndx < kLUTArraySize;  ndx++)
+	for (size_t ndx(0);	 ndx < kLUTArraySize;  ndx++)
 	{
 		outRedLUT  [ndx] = red[ndx];
 		outGreenLUT[ndx] = green[ndx];
@@ -1020,7 +1020,7 @@ bool CNTV2Card::Get12BitLUTTables (NTV2DoubleArray & outRedLUT, NTV2DoubleArray 
 				<< ") B(" << DEC(blue.size()) << ")!=oB(" << DEC(outBlueLUT.size())
 				<< ")"); return false;}
 
-	for (size_t ndx(0);  ndx < k12BitLUTArraySize;  ndx++)
+	for (size_t ndx(0);	 ndx < k12BitLUTArraySize;	ndx++)
 	{
 		outRedLUT  [ndx] = red[ndx];
 		outGreenLUT[ndx] = green[ndx];
@@ -1031,7 +1031,7 @@ bool CNTV2Card::Get12BitLUTTables (NTV2DoubleArray & outRedLUT, NTV2DoubleArray 
 
 bool CNTV2Card::ReadLUTTables (UWordSequence & outRedLUT, UWordSequence & outGreenLUT, UWordSequence & outBlueLUT)
 {
-	ULWord	RTableReg	(kColorCorrectionLUTOffset_Red / 4);	//	Byte offset to LUT in register bar;  divide by sizeof (ULWord) to get register number
+	ULWord	RTableReg	(kColorCorrectionLUTOffset_Red / 4);	//	Byte offset to LUT in register bar;	 divide by sizeof (ULWord) to get register number
 	ULWord	GTableReg	(kColorCorrectionLUTOffset_Green / 4);
 	ULWord	BTableReg	(kColorCorrectionLUTOffset_Blue / 4);
 	size_t	errors(0), nonzeroes(0);
@@ -1040,7 +1040,7 @@ bool CNTV2Card::ReadLUTTables (UWordSequence & outRedLUT, UWordSequence & outGre
 	outGreenLUT.clear();	outGreenLUT.resize(kLUTArraySize);
 	outBlueLUT.clear();		outBlueLUT.resize(kLUTArraySize);
 
-	for (size_t ndx(0);  ndx < kLUTArraySize;  ndx += 2)
+	for (size_t ndx(0);	 ndx < kLUTArraySize;  ndx += 2)
 	{
 		ULWord	temp(0);
 		if (!ReadRegister(RTableReg++, temp))
@@ -1061,14 +1061,14 @@ bool CNTV2Card::ReadLUTTables (UWordSequence & outRedLUT, UWordSequence & outGre
 		outBlueLUT[ndx + 1] = (temp >> kRegColorCorrectionLUTOddShift ) & 0x3FF;
 		if (temp) nonzeroes++;
 	}
-	if (errors)	LUTFAIL(GetDisplayName() << " " << DEC(errors) << " ReadRegister calls failed");
+	if (errors) LUTFAIL(GetDisplayName() << " " << DEC(errors) << " ReadRegister calls failed");
 	else if (!nonzeroes) LUTWARN(GetDisplayName() << " All zero LUT table values!");
 	return !errors;
 }
 
 bool CNTV2Card::Read12BitLUTTables (UWordSequence & outRedLUT, UWordSequence & outGreenLUT, UWordSequence & outBlueLUT)
 {
-	ULWord	RTableReg	(kColorCorrection12BitLUTOffset_Base / 4);	//	Byte offset to LUT in register bar;  divide by sizeof (ULWord) to get register number
+	ULWord	RTableReg	(kColorCorrection12BitLUTOffset_Base / 4);	//	Byte offset to LUT in register bar;	 divide by sizeof (ULWord) to get register number
 	ULWord	GTableReg	(kColorCorrection12BitLUTOffset_Base / 4);
 	ULWord	BTableReg	(kColorCorrection12BitLUTOffset_Base / 4);
 	size_t	errors(0), nonzeroes(0);
@@ -1080,7 +1080,7 @@ bool CNTV2Card::Read12BitLUTTables (UWordSequence & outRedLUT, UWordSequence & o
 	outGreenLUT.clear();	outGreenLUT.resize(k12BitLUTArraySize);
 	outBlueLUT.clear();		outBlueLUT.resize(k12BitLUTArraySize);
 
-	for (size_t ndx(0);  ndx < k12BitLUTArraySize;  ndx += 2)
+	for (size_t ndx(0);	 ndx < k12BitLUTArraySize;	ndx += 2)
 	{
 		ULWord	temp(0);
 		Set12BitLUTPlaneSelect(NTV2_REDPLANE);
@@ -1104,18 +1104,18 @@ bool CNTV2Card::Read12BitLUTTables (UWordSequence & outRedLUT, UWordSequence & o
 		outBlueLUT[ndx + 1] = (temp >> kRegColorCorrection12BitLUTOddShift ) & 0xFFF;
 		if (temp) nonzeroes++;
 	}
-	if (errors)	LUTFAIL(GetDisplayName() << " " << DEC(errors) << " ReadRegister calls failed");
+	if (errors) LUTFAIL(GetDisplayName() << " " << DEC(errors) << " ReadRegister calls failed");
 	else if (!nonzeroes) LUTWARN(GetDisplayName() << " All zero LUT table values!");
 	return !errors;
 }
 
 bool CNTV2Card::SetLUTEnable (const bool inEnable, const NTV2Channel inLUT)
 {
-	static const ULWord	LUTEnableMasks []	= {	kRegMaskLUT1Enable,		kRegMaskLUT2Enable,		kRegMaskLUT3Enable,		kRegMaskLUT4Enable,
+	static const ULWord LUTEnableMasks []	= { kRegMaskLUT1Enable,		kRegMaskLUT2Enable,		kRegMaskLUT3Enable,		kRegMaskLUT4Enable,
 												kRegMaskLUT5Enable,		kRegMaskLUT6Enable,		kRegMaskLUT7Enable,		kRegMaskLUT8Enable	};
-	static const ULWord	LUTEnableShifts []	= {	kRegShiftLUT1Enable,	kRegShiftLUT2Enable,	kRegShiftLUT3Enable,	kRegShiftLUT4Enable,
-												kRegShiftLUT5Enable,	kRegShiftLUT6Enable,	kRegShiftLUT7Enable,	kRegShiftLUT8Enable	};
-	static const UWord	BitCountNibble[]	= {	0,	1,	1,	2,	1,	2,	2,	3,	1,	2,	2,	3,	2,	3,	3,	4};
+	static const ULWord LUTEnableShifts []	= { kRegShiftLUT1Enable,	kRegShiftLUT2Enable,	kRegShiftLUT3Enable,	kRegShiftLUT4Enable,
+												kRegShiftLUT5Enable,	kRegShiftLUT6Enable,	kRegShiftLUT7Enable,	kRegShiftLUT8Enable };
+	static const UWord	BitCountNibble[]	= { 0,	1,	1,	2,	1,	2,	2,	3,	1,	2,	2,	3,	2,	3,	3,	4};
 
 	if (IS_CHANNEL_INVALID(inLUT))
 		{LUTFAIL("Bad LUT number (> 7): " << DEC(inLUT)); return false;}
@@ -1152,7 +1152,7 @@ bool CNTV2Card::SetColorSpaceRGBBlackRange (const NTV2_CSC_RGB_Range inRange,	co
 		return false;
 	if (!NTV2_IS_VALID_CSCRGBRANGE(inRange))
 		return false;
-	return WriteRegister (gChannelToCSCoeff34RegNum[inChannel],  inRange,  kK2RegMaskXena2RGBRange,  kK2RegShiftXena2RGBRange);
+	return WriteRegister (gChannelToCSCoeff34RegNum[inChannel],	 inRange,  kK2RegMaskXena2RGBRange,	 kK2RegShiftXena2RGBRange);
 }
 
 bool CNTV2Card::GetColorSpaceRGBBlackRange (NTV2_CSC_RGB_Range & outRange,	const NTV2Channel inChannel)
@@ -1161,7 +1161,7 @@ bool CNTV2Card::GetColorSpaceRGBBlackRange (NTV2_CSC_RGB_Range & outRange,	const
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 	ULWord	regValue	(0);
-	if (!ReadRegister  (gChannelToCSCoeff34RegNum[inChannel],  regValue,  kK2RegMaskXena2RGBRange,  kK2RegShiftXena2RGBRange))
+	if (!ReadRegister  (gChannelToCSCoeff34RegNum[inChannel],  regValue,  kK2RegMaskXena2RGBRange,	kK2RegShiftXena2RGBRange))
 		return false;
 	outRange = NTV2_CSC_RGB_Range(regValue);
 	return true;	
@@ -1177,19 +1177,19 @@ bool CNTV2Card::SetColorSpaceUseCustomCoefficient (ULWord useCustomCoefficient, 
 bool CNTV2Card::GetColorSpaceUseCustomCoefficient (ULWord & outUseCustomCoefficient, const NTV2Channel inChannel)
 {
 	return !IS_CHANNEL_INVALID(inChannel)
-			&&  ReadRegister (gChannelToCSCoeff12RegNum[inChannel], outUseCustomCoefficient,  kK2RegMaskUseCustomCoefSelect,  kK2RegShiftUseCustomCoefSelect);
+			&&	ReadRegister (gChannelToCSCoeff12RegNum[inChannel], outUseCustomCoefficient,  kK2RegMaskUseCustomCoefSelect,  kK2RegShiftUseCustomCoefSelect);
 }
 
 bool CNTV2Card::SetColorSpaceMakeAlphaFromKey (const bool inMakeAlphaFromKey, const NTV2Channel inChannel)
 {
 	return !IS_CHANNEL_INVALID(inChannel)
-			&&  WriteRegister (gChannelToCSCoeff12RegNum[inChannel], inMakeAlphaFromKey?1:0, kK2RegMaskMakeAlphaFromKeySelect, kK2RegShiftMakeAlphaFromKeySelect);
+			&&	WriteRegister (gChannelToCSCoeff12RegNum[inChannel], inMakeAlphaFromKey?1:0, kK2RegMaskMakeAlphaFromKeySelect, kK2RegShiftMakeAlphaFromKeySelect);
 }
 
 bool CNTV2Card::GetColorSpaceMakeAlphaFromKey (ULWord & outMakeAlphaFromKey, const NTV2Channel inChannel)
 {
 	return !IS_CHANNEL_INVALID(inChannel)
-			&&  ReadRegister (gChannelToCSCoeff12RegNum[inChannel], outMakeAlphaFromKey, kK2RegMaskMakeAlphaFromKeySelect, kK2RegShiftMakeAlphaFromKeySelect);
+			&&	ReadRegister (gChannelToCSCoeff12RegNum[inChannel], outMakeAlphaFromKey, kK2RegMaskMakeAlphaFromKeySelect, kK2RegShiftMakeAlphaFromKeySelect);
 }
 
 bool CNTV2Card::SetColorSpaceCustomCoefficients (const NTV2CSCCustomCoeffs & inCoefficients, const NTV2Channel inChannel)
@@ -1231,7 +1231,7 @@ bool CNTV2Card::GetColorSpaceCustomCoefficients(NTV2CSCCustomCoeffs & outCoeffic
 //				bit).  So as not to break existing, compiled code, we added new API calls for use with
 //				these wider coefficients.  The values had to be munged a bit to fit in the register, since
 //				the low coefficient ended on the 0 bit ... the hi coefficient was simply widened to 13 bits
-//				total.  The 2 LSBs of the low coefficient are written *in front* of the 11 MSBs, hence the
+//				total.	The 2 LSBs of the low coefficient are written *in front* of the 11 MSBs, hence the
 //				shifting and masking below. - jac
 bool CNTV2Card::SetColorSpaceCustomCoefficients12Bit (const NTV2CSCCustomCoeffs & inCoefficients, const NTV2Channel inChannel)
 {
@@ -1241,31 +1241,31 @@ bool CNTV2Card::SetColorSpaceCustomCoefficients12Bit (const NTV2CSCCustomCoeffs 
 	ULWord MSBs(inCoefficients.Coefficient1 >> 2);
 	ULWord LSBs(inCoefficients.Coefficient1 & 0x00000003);
 	if (!WriteRegister (gChannelToCSCoeff12RegNum[inChannel],	MSBs | (LSBs << 11),			kK2RegMaskCustomCoefficient12BitLow,	kK2RegShiftCustomCoefficient12BitLow)
-		||  !WriteRegister (gChannelToCSCoeff12RegNum[inChannel],	inCoefficients.Coefficient2,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh))
+		||	!WriteRegister (gChannelToCSCoeff12RegNum[inChannel],	inCoefficients.Coefficient2,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh))
 			return false;
 
 	MSBs = inCoefficients.Coefficient3 >> 2;
 	LSBs = inCoefficients.Coefficient3 & 0x00000003;
 	if (!WriteRegister (gChannelToCSCoeff34RegNum[inChannel],	MSBs | (LSBs << 11),			kK2RegMaskCustomCoefficient12BitLow,	kK2RegShiftCustomCoefficient12BitLow)
-		||  !WriteRegister (gChannelToCSCoeff34RegNum[inChannel],	inCoefficients.Coefficient4,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh))
+		||	!WriteRegister (gChannelToCSCoeff34RegNum[inChannel],	inCoefficients.Coefficient4,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh))
 			return false;
 
 	MSBs = inCoefficients.Coefficient5 >> 2;
 	LSBs = inCoefficients.Coefficient5 & 0x00000003;
 	if (!WriteRegister (gChannelToCSCoeff56RegNum[inChannel],	MSBs | (LSBs << 11),			kK2RegMaskCustomCoefficient12BitLow,	kK2RegShiftCustomCoefficient12BitLow)
-		||  !WriteRegister (gChannelToCSCoeff56RegNum[inChannel],	inCoefficients.Coefficient6,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh))
+		||	!WriteRegister (gChannelToCSCoeff56RegNum[inChannel],	inCoefficients.Coefficient6,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh))
 			return false;
 
 	MSBs = inCoefficients.Coefficient7 >> 2;
 	LSBs = inCoefficients.Coefficient7 & 0x00000003;
 	if (!WriteRegister (gChannelToCSCoeff78RegNum[inChannel],	MSBs | (LSBs << 11),			kK2RegMaskCustomCoefficient12BitLow,	kK2RegShiftCustomCoefficient12BitLow)
-		||  !WriteRegister (gChannelToCSCoeff78RegNum[inChannel],	inCoefficients.Coefficient8,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh))
+		||	!WriteRegister (gChannelToCSCoeff78RegNum[inChannel],	inCoefficients.Coefficient8,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh))
 			return false;
 
 	MSBs = inCoefficients.Coefficient9 >> 2;
 	LSBs = inCoefficients.Coefficient9 & 0x00000003;
 	return WriteRegister (gChannelToCSCoeff910RegNum[inChannel],	MSBs | (LSBs << 11),			kK2RegMaskCustomCoefficient12BitLow,	kK2RegShiftCustomCoefficient12BitLow)
-		&&  WriteRegister (gChannelToCSCoeff910RegNum[inChannel],	inCoefficients.Coefficient10,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh);
+		&&	WriteRegister (gChannelToCSCoeff910RegNum[inChannel],	inCoefficients.Coefficient10,	kK2RegMaskCustomCoefficient12BitHigh,	kK2RegShiftCustomCoefficient12BitHigh);
 }
 
 // 12/7/2006	To increase accuracy and decrease generational degredation, the width of the coefficients
@@ -1273,14 +1273,14 @@ bool CNTV2Card::SetColorSpaceCustomCoefficients12Bit (const NTV2CSCCustomCoeffs 
 //				bit).  So as not to break existing, compiled code, we added new API calls for use with
 //				these wider coefficients.  The values had to be munged a bit to fit in the register, since
 //				the low coefficient ended on the 0 bit ... the hi coefficient was simply widened to 13 bits
-//				total.  The 2 LSBs of the low coefficient are written *in front* of the 11 MSBs, hence the
+//				total.	The 2 LSBs of the low coefficient are written *in front* of the 11 MSBs, hence the
 //				shifting and masking below. - jac
 bool CNTV2Card::GetColorSpaceCustomCoefficients12Bit (NTV2CSCCustomCoeffs & outCoefficients, const NTV2Channel inChannel)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 
-	ULWord regVal(0),  MSBs(0),  LSBs(0);
+	ULWord regVal(0),  MSBs(0),	 LSBs(0);
 
 	if (!ReadRegister (gChannelToCSCoeff12RegNum[inChannel], regVal,  kK2RegMaskCustomCoefficient12BitLow, kK2RegShiftCustomCoefficient12BitLow))
 		return false;
@@ -1288,34 +1288,34 @@ bool CNTV2Card::GetColorSpaceCustomCoefficients12Bit (NTV2CSCCustomCoeffs & outC
 	MSBs = regVal & 0x000007FF;
 	outCoefficients.Coefficient1 = MSBs | LSBs;
 
-	if (!ReadRegister (gChannelToCSCoeff12RegNum[inChannel], outCoefficients.Coefficient2,  kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh)
-		||  !ReadRegister (gChannelToCSCoeff34RegNum[inChannel], regVal,  kK2RegMaskCustomCoefficient12BitLow, kK2RegShiftCustomCoefficient12BitLow))
+	if (!ReadRegister (gChannelToCSCoeff12RegNum[inChannel], outCoefficients.Coefficient2,	kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh)
+		||	!ReadRegister (gChannelToCSCoeff34RegNum[inChannel], regVal,  kK2RegMaskCustomCoefficient12BitLow, kK2RegShiftCustomCoefficient12BitLow))
 			return false;
 	LSBs = (regVal >> 11) & 0x00000003;
 	MSBs = regVal & 0x000007FF;
 	outCoefficients.Coefficient3 = MSBs | LSBs;
 
-	if (!ReadRegister (gChannelToCSCoeff34RegNum[inChannel], outCoefficients.Coefficient4,  kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh)
-		||  !ReadRegister (gChannelToCSCoeff56RegNum[inChannel], regVal,  kK2RegMaskCustomCoefficient12BitLow, kK2RegShiftCustomCoefficient12BitLow))
+	if (!ReadRegister (gChannelToCSCoeff34RegNum[inChannel], outCoefficients.Coefficient4,	kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh)
+		||	!ReadRegister (gChannelToCSCoeff56RegNum[inChannel], regVal,  kK2RegMaskCustomCoefficient12BitLow, kK2RegShiftCustomCoefficient12BitLow))
 			return false;
 	LSBs = (regVal >> 11) & 0x00000003;
 	MSBs = regVal & 0x000007FF;
 	outCoefficients.Coefficient5 = MSBs | LSBs;
 
-	if (!ReadRegister (gChannelToCSCoeff56RegNum[inChannel], outCoefficients.Coefficient6,  kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh)
-		||  !ReadRegister (gChannelToCSCoeff78RegNum[inChannel], regVal,  kK2RegMaskCustomCoefficient12BitLow, kK2RegShiftCustomCoefficient12BitLow))
+	if (!ReadRegister (gChannelToCSCoeff56RegNum[inChannel], outCoefficients.Coefficient6,	kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh)
+		||	!ReadRegister (gChannelToCSCoeff78RegNum[inChannel], regVal,  kK2RegMaskCustomCoefficient12BitLow, kK2RegShiftCustomCoefficient12BitLow))
 			return false;
 	LSBs = (regVal >> 11) & 0x00000003;
 	MSBs = regVal & 0x000007FF;
 	outCoefficients.Coefficient7 = MSBs | LSBs;
 
-	if (!ReadRegister (gChannelToCSCoeff78RegNum[inChannel], outCoefficients.Coefficient8,  kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh)
-		||  !ReadRegister (gChannelToCSCoeff910RegNum[inChannel], regVal,  kK2RegMaskCustomCoefficient12BitLow, kK2RegShiftCustomCoefficient12BitLow))
+	if (!ReadRegister (gChannelToCSCoeff78RegNum[inChannel], outCoefficients.Coefficient8,	kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh)
+		||	!ReadRegister (gChannelToCSCoeff910RegNum[inChannel], regVal,  kK2RegMaskCustomCoefficient12BitLow, kK2RegShiftCustomCoefficient12BitLow))
 			return false;
 	LSBs = (regVal >> 11) & 0x00000003;
 	MSBs = regVal & 0x000007FF;
 	outCoefficients.Coefficient9 = MSBs | LSBs;
-	return ReadRegister (gChannelToCSCoeff910RegNum[inChannel], outCoefficients.Coefficient10,  kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh);
+	return ReadRegister (gChannelToCSCoeff910RegNum[inChannel], outCoefficients.Coefficient10,	kK2RegMaskCustomCoefficient12BitHigh, kK2RegShiftCustomCoefficient12BitHigh);
 }
 
 
@@ -1327,14 +1327,14 @@ bool CNTV2Card::GetColorSpaceVideoKeySyncFail (bool & outVideoKeySyncFail, const
 	return status;
 }
 
-//////////////////////////////////////////////////////////////  OLD APIs
+//////////////////////////////////////////////////////////////	OLD APIs
 
 
 bool CNTV2Card::GenerateGammaTable (const NTV2LutType inLUTType, const int inBank, double * pOutTable)
 {
 	if (!pOutTable)
 		return false;
-	NTV2DoubleArray	table;
+	NTV2DoubleArray table;
 	if (!GenerateGammaTable(inLUTType, inBank, table))
 		return false;
 	::memcpy(pOutTable, &table[0], table.size() * sizeof(double));
@@ -1350,7 +1350,7 @@ bool CNTV2Card::DownloadLUTToHW (const double * pInTable, const NTV2Channel inCh
 	if (!pInTable)
 		return false;	//	NULL table pointer
 
-	if (inBank != 0  && inBank != 1)
+	if (inBank != 0	 && inBank != 1)
 		return false;	//	Bad bank value (must be 0 or 1)
 
 	if (::NTV2DeviceGetNumLUTs (_boardID) == 0)
@@ -1376,7 +1376,7 @@ bool CNTV2Card::LoadLUTTable (const double * pInTable)
 
 	//	Hope and pray that the caller's array has at least 1024 elements...
 	NTV2DoubleArray rgbLUT;
-	for (size_t ndx(0);  ndx < kLUTArraySize;  ndx++)
+	for (size_t ndx(0);	 ndx < kLUTArraySize;  ndx++)
 		rgbLUT.push_back(pInTable[ndx]);
 
 	//	Call the function that accepts NTV2DoubleArrays...
@@ -1403,8 +1403,8 @@ bool CNTV2Card::Set1DLUTTableLocation (const NTV2Channel inChannel, const ULWord
 	NTV2Framesize theFrameSize;
 	ULWord LUTTableIndexOffset = LUTTablePartitionSize * inLUTIndex;
 	GetFrameBufferSize(NTV2_CHANNEL1, theFrameSize);
-    ULWord lutTableLocation ((((::NTV2FramesizeToByteCount(theFrameSize) * inFrameNumber)) + LUTTableIndexOffset)/4);
-    return WriteRegister(gChannelTo1DLutControlRegNum[inChannel], lutTableLocation, kRegMaskLUTAddress, kRegShiftLUTAddress);
+	ULWord lutTableLocation ((((::NTV2FramesizeToByteCount(theFrameSize) * inFrameNumber)) + LUTTableIndexOffset)/4);
+	return WriteRegister(gChannelTo1DLutControlRegNum[inChannel], lutTableLocation, kRegMaskLUTAddress, kRegShiftLUTAddress);
 }
 
 bool CNTV2Card::Load1DLUTTable (const NTV2Channel inChannel)
@@ -1420,7 +1420,7 @@ bool CNTV2Card::Load1DLUTTable (const NTV2Channel inChannel)
 	// set the ColorSpaceMatrixSelect
 	bool CNTV2Card::UpdateK2ColorSpaceMatrixSelect(NTV2VideoFormat currFormat, bool ajaRetail)
 	{
-	#ifdef  MSWindows
+	#ifdef	MSWindows
 		NTV2EveryFrameTaskMode mode;
 		GetEveryFrameServices(&mode);
 		if(mode == NTV2_STANDARD_TASKS)
@@ -1488,7 +1488,7 @@ bool CNTV2Card::Load1DLUTTable (const NTV2Channel inChannel)
 			// get csc rgb range
 			ULWord cscRange = NTV2_RGBRangeFull;
 			ReadRegister(kVRegRGBRangeMode, &cscRange);
-			NTV2RGBBlackRange blackRange =  cscRange == NTV2_RGBRangeFull ? 
+			NTV2RGBBlackRange blackRange =	cscRange == NTV2_RGBRangeFull ? 
 											NTV2_CSC_RGB_RANGE_FULL : NTV2_CSC_RGB_RANGE_SMPTE;
 			
 			// set csc rgb range
@@ -1514,7 +1514,7 @@ bool CNTV2Card::Load1DLUTTable (const NTV2Channel inChannel)
 	// load the LUTs with an appropriate gamma translation
 	bool CNTV2Card::UpdateK2LUTSelect(NTV2VideoFormat currFormat, bool ajaRetail)
 	{
-	#ifdef  MSWindows
+	#ifdef	MSWindows
 		NTV2EveryFrameTaskMode mode;
 		GetEveryFrameServices(&mode);
 		if(mode == NTV2_STANDARD_TASKS)
@@ -1595,7 +1595,7 @@ bool CNTV2Card::Load1DLUTTable (const NTV2Channel inChannel)
 			if (wantedLUT != NTV2_LUTCustom && currLUT != wantedLUT)
 			{
 				// generate and download new LUTs
-				//printf (" Changing from LUT %d to LUT %d  \n", currLUT, wantedLUT);
+				//printf (" Changing from LUT %d to LUT %d	\n", currLUT, wantedLUT);
 			
 				double table[1024];
 			

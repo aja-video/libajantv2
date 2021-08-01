@@ -23,17 +23,17 @@ class AJA_EXPORT AJAUDPSocket : public AJAIPSocket
 		AJAUDPSocket(void);
 		virtual ~AJAUDPSocket(void);
 
-        AJAStatus Open(const std::string& ipAddress, uint16_t port);
+		AJAStatus Open(const std::string& ipAddress, uint16_t port);
 
 		uint32_t Poll(
-					uint8_t*            pData,
-					uint32_t            dataLength,
+					uint8_t*			pData,
+					uint32_t			dataLength,
 					struct sockaddr_in& client,
-					int                 timeout);
+					int					timeout);
 		uint32_t Read(uint8_t* pData, uint32_t dataLength, struct sockaddr_in& client);
 		uint32_t Write(
-					const uint8_t*      pData,
-					uint32_t            dataLength,
+					const uint8_t*		pData,
+					uint32_t			dataLength,
 					struct sockaddr_in& targetAddress);
 
 

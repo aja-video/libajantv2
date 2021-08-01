@@ -92,7 +92,7 @@ AJAStatus AJAAncillaryData_Cea608_Vanc::SetLine (const bool inIsF2, const uint8_
 AJAStatus AJAAncillaryData_Cea608_Vanc::GetLine (uint8_t & fieldNum, uint8_t & lineNum) const
 {
 	fieldNum = IsField2()  ?  0x01/*NTV2_FIELD1*/  :  0x00/*NTV2_FIELD0*/;
-	lineNum  = uint8_t(GetLineNumber());
+	lineNum	 = uint8_t(GetLineNumber());
 	return AJA_STATUS_SUCCESS;
 }
 
@@ -109,9 +109,9 @@ AJAStatus AJAAncillaryData_Cea608_Vanc::ParsePayloadData (void)
 	//	Parse the payload data...
 	m_isF2 = ((m_payload[0] >> 7) & 0x01) ? false : true;	//	Field number (flag) is bit 7 of the 1st payload word
 															//	SDKs prior to 16.0 had the sense of this bit wrong.
-	m_lineNum  = (m_payload[0] & 0x1F);						//	Line number is bits [4:0] of the 1st payload word
-	m_char1	   = m_payload[1];		// the 1st character
-	m_char2    = m_payload[2];		// the 2nd character
+	m_lineNum	= (m_payload[0] & 0x1F);						//	Line number is bits [4:0] of the 1st payload word
+	m_char1		= m_payload[1];		// the 1st character
+	m_char2		= m_payload[2];		// the 2nd character
 	m_rcvDataValid = true;
 	return AJA_STATUS_SUCCESS;
 }

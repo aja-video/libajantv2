@@ -15,20 +15,20 @@ const int kTCDigSemicolon	= 11;			// index of ';' character
 //const int kTCDigDash		= 12;			// index of '-' character		UNUSED
 const int kTCDigSpace		= 13;			// index of ' ' character
 //const int kTCDigAsterisk	= 14;			// index of '*' character		UNUSED
-const int kTCMaxTCChars	= 15;				// number of characters we know how to make
+const int kTCMaxTCChars = 15;				// number of characters we know how to make
 
 
 AJATimeCodeBurn::AJATimeCodeBurn(void) :
-    _bRendered(false),
-    _pCharRenderMap(NULL),
-    _charRenderPixelFormat(AJA_PixelFormat_Unknown),
-    _charRenderHeight(0),
-    _charRenderWidth(0),
-    _charWidthBytes(0),
-    _charHeightLines(0),
-    _charPositionX(0),
-    _charPositionY(0),
-    _rowBytes(0)
+	_bRendered(false),
+	_pCharRenderMap(NULL),
+	_charRenderPixelFormat(AJA_PixelFormat_Unknown),
+	_charRenderHeight(0),
+	_charRenderWidth(0),
+	_charWidthBytes(0),
+	_charHeightLines(0),
+	_charPositionX(0),
+	_charPositionY(0),
+	_rowBytes(0)
 {
 }
 
@@ -54,7 +54,7 @@ bool AJATimeCodeBurn::BurnTimeCode (void * pBaseVideoAddress, const std::string 
 		return false;	//	String too long
 
 	if (percentY > 100)
-		percentY = 100;	//	Limit to 100%
+		percentY = 100; //	Limit to 100%
 	else if (!percentY)
 		percentY = 80;	//	0% ==> 80%
 
@@ -66,7 +66,7 @@ bool AJATimeCodeBurn::BurnTimeCode (void * pBaseVideoAddress, const std::string 
 
 	char *pFrameBuff = reinterpret_cast<char*>(pBaseVideoAddress) + (_charPositionY * _rowBytes) + _charPositionX;
 
-	for (size_t charNdx(0);  charNdx < timeCodeLength;  charNdx++)
+	for (size_t charNdx(0);	 charNdx < timeCodeLength;	charNdx++)
 	{
 		const char currentChar (inTimeCodeStr[charNdx]);
 		uint32_t digitOffset (kTCDigSpace);
@@ -106,7 +106,7 @@ void AJATimeCodeBurn::CopyDigit (int digitOffset,char *pFrameBuff)
 
 const int kTCNumBurnInChars = 11;			// number of characters in burn-in display (assume "xx:xx:xx:xx")
 
-const int kTCDigitDotWidth  = 24;			// width of dot map for each character (NOTE: kDigitDotWidth must be evenly divisible by 6 if you want this to work for 10-bit YUV!)
+const int kTCDigitDotWidth	= 24;			// width of dot map for each character (NOTE: kDigitDotWidth must be evenly divisible by 6 if you want this to work for 10-bit YUV!)
 const int kTCDigitDotHeight = 18;			// height of dot map for each character
 
 
@@ -533,12 +533,12 @@ bool AJATimeCodeBurn::RenderTimeCodeFont( AJA_PixelFormat pixelFormat, uint32_t 
 			//			else if (numLines > 650 && numPixels < 1100)
 			//				dotWidth = 1;			// 960x720
 
-			int charWidthBytes  = kTCDigitDotWidth  * dotWidth * bytesPerPixel;
+			int charWidthBytes	= kTCDigitDotWidth	* dotWidth * bytesPerPixel;
 			if (pixelFormat == AJA_PixelFormat_YCbCr10)
-				charWidthBytes  = (kTCDigitDotWidth * dotWidth * 16) / 6;		// note: assumes kDigitDotWidth is evenly divisible by 6!
+				charWidthBytes	= (kTCDigitDotWidth * dotWidth * 16) / 6;		// note: assumes kDigitDotWidth is evenly divisible by 6!
 			if ((pixelFormat == AJA_PixelFormat_YCBCR10_420PL) ||
 				(pixelFormat == AJA_PixelFormat_YCBCR10_422PL))
-				charWidthBytes  = (kTCDigitDotWidth * dotWidth * 5) / 4;		// note: assumes kDigitDotWidth is evenly divisible by 4!
+				charWidthBytes	= (kTCDigitDotWidth * dotWidth * 5) / 4;		// note: assumes kDigitDotWidth is evenly divisible by 4!
 
 			int charHeightLines = kTCDigitDotHeight * dotHeight;
 
@@ -574,16 +574,16 @@ bool AJATimeCodeBurn::RenderTimeCodeFont( AJA_PixelFormat pixelFormat, uint32_t 
 									char val = 0;
 									switch (dot)
 									{
-										case 0:		val = char(0x040 >> 2);	break;	//	16
-										case 1:		val = char(0x164 >> 2);	break;	//	89
-										case 2:		val = char(0x288 >> 2);	break;	//	162
-										case 3:		val = char(0x3AC >> 2);	break;	//	235
+										case 0:		val = char(0x040 >> 2); break;	//	16
+										case 1:		val = char(0x164 >> 2); break;	//	89
+										case 2:		val = char(0x288 >> 2); break;	//	162
+										case 3:		val = char(0x3AC >> 2); break;	//	235
 									}
 
 									// each rendered pixel is duplicated N times
 									for (int xdup = 0; xdup < dotWidth; xdup++)
 									{
-										*pRenderMap++ = char(0x80);	// C
+										*pRenderMap++ = char(0x80); // C
 										*pRenderMap++ = val;		// Y
 									}
 								}
@@ -701,7 +701,7 @@ bool AJATimeCodeBurn::RenderTimeCodeFont( AJA_PixelFormat pixelFormat, uint32_t 
 									// each rendered pixel is duplicated N times
 									for (int xdup = 0; xdup < dotWidth; xdup++)
 									{
-										*pRenderMap++ =                        ((val & 0x3fc) >> 2);
+										*pRenderMap++ =						   ((val & 0x3fc) >> 2);
 										*pRenderMap++ = ((val & 0x003) << 6) | ((val & 0x3f0) >> 4);
 										*pRenderMap++ = ((val & 0x00f) << 4) | ((val & 0x3c0) >> 6);
 										*pRenderMap++ = ((val & 0x03f) << 2);
@@ -721,9 +721,9 @@ bool AJATimeCodeBurn::RenderTimeCodeFont( AJA_PixelFormat pixelFormat, uint32_t 
 									// each rendered pixel is duplicated N times
 									for (int xdup = 0; xdup < dotWidth; xdup++)
 									{
-										*pRenderMap++ =                         ((val & 0x0ff));
-										*pRenderMap++ = ((val & 0x03f) << 2) |  ((val & 0x300) >> 8);
-										*pRenderMap++ = ((val & 0x00f) << 4) |  ((val & 0x3c0) >> 6);
+										*pRenderMap++ =							((val & 0x0ff));
+										*pRenderMap++ = ((val & 0x03f) << 2) |	((val & 0x300) >> 8);
+										*pRenderMap++ = ((val & 0x00f) << 4) |	((val & 0x3c0) >> 6);
 										*pRenderMap++ = ((val & 0x3f0) >> 4) | 0x300;
 									}
 								}
@@ -772,12 +772,12 @@ bool AJATimeCodeBurn::RenderTimeCodeFont( AJA_PixelFormat pixelFormat, uint32_t 
 				}
 
 				_bRendered = true;
-				_charRenderPixelFormat    = pixelFormat;
+				_charRenderPixelFormat	  = pixelFormat;
 				_charRenderHeight = numLines;
 				_charRenderWidth  = numPixels;
 
 				// character sizes
-				_charWidthBytes   = charWidthBytes;
+				_charWidthBytes	  = charWidthBytes;
 				_charHeightLines  = charHeightLines;
 
 				// burn-in offset
@@ -809,31 +809,31 @@ void AJATimeCodeBurn::writeV210Pixel (char **pBytePtr, int x, int c, int y)
 
 	// the components in each v210 6-pixel block are laid out like this (note that the UInt32s are swixelled!):
 	//
-	// Addr: |  3    2    1    0  |  7    6    5    4  | 11   10    9    8  | 15   14   13   12 |
-	//       { 00 Cr0   Y0   Cb0    00 Y2   Cb2    Y1    00 Cb4   Y3   Cr2    00 Y5   Cr4   Y4  }
+	// Addr: |	3	 2	  1	   0  |	 7	  6	   5	4  | 11	  10	9	 8	| 15   14	13	 12 |
+	//		 { 00 Cr0	Y0	 Cb0	00 Y2	Cb2	   Y1	 00 Cb4	  Y3   Cr2	  00 Y5	  Cr4	Y4	}
 	//
 	int cadence = x % 3;
 
 	switch (cadence)
 	{
 	case 0:		// Cb0/Y0 or Cr2/Y3: we assume that p points to byte 0/8. When we are finished, it will still point to byte 0/8
-		p[0] =      c & 0x0FF;									//  c<7:0>
-		p[1] = ((   y & 0x03F) << 2) + ((   c & 0x300) >> 8);	//  y<5:0> +  c<9:8>
-		p[2] =  (p[2] & 0x0F0)       + ((   y & 0x3C0) >> 6);	// (merge) +  y<9:6>
+		p[0] =		c & 0x0FF;									//	c<7:0>
+		p[1] = ((	y & 0x03F) << 2) + ((	c & 0x300) >> 8);	//	y<5:0> +  c<9:8>
+		p[2] =	(p[2] & 0x0F0)		 + ((	y & 0x3C0) >> 6);	// (merge) +  y<9:6>
 		break;
 
 	case 1:		// Cr0/Y1 or Cb4/Y4: we assume that p points to byte 0/8. When we are finished, it will point to byte 4/12
-		p[2] = ((   c & 0x00F) << 4) +  (p[2] & 0x00F);			//  c<3:0> + (merge)
-		p[3] =                         ((   c & 0x3F0) >> 4);	//   '00'  +  c<9:4>
-		p[4] =      y & 0x0FF;									//  y<7:0>
-		p[5] =  (p[5] & 0x0FC)       + ((   y & 0x300) >> 8);	// (merge) +  y<9:8>
+		p[2] = ((	c & 0x00F) << 4) +	(p[2] & 0x00F);			//	c<3:0> + (merge)
+		p[3] =						   ((	c & 0x3F0) >> 4);	//	 '00'  +  c<9:4>
+		p[4] =		y & 0x0FF;									//	y<7:0>
+		p[5] =	(p[5] & 0x0FC)		 + ((	y & 0x300) >> 8);	// (merge) +  y<9:8>
 		*pBytePtr += 4;
 		break;
 
 	case 2:		// Cb2/Y2 or Cr4/Y5: we assume that p points to byte 4/12. When we are finished, it will point to byte 8/16
-		p[1] = ((   c & 0x03F) << 2) +  (p[1] & 0x003);			//  c<5:0> + (merge)
-		p[2] = ((   y & 0x00F) << 4) + ((   c & 0x3C0) >> 6);	//  y<3:0> +  c<9:6>
-		p[3] =                         ((   y & 0x3F0) >> 4);	//   '00'  +  y<9:4>
+		p[1] = ((	c & 0x03F) << 2) +	(p[1] & 0x003);			//	c<5:0> + (merge)
+		p[2] = ((	y & 0x00F) << 4) + ((	c & 0x3C0) >> 6);	//	y<3:0> +  c<9:6>
+		p[3] =						   ((	y & 0x3F0) >> 4);	//	 '00'  +  y<9:4>
 		*pBytePtr += 4;
 		break;
 	}

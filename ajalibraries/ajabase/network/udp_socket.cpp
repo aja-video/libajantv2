@@ -23,7 +23,7 @@ using std::string;
 /////////////////////////////
 // Defines
 /////////////////////////////
-#define DEBUG_UDP_OPERATION   0
+#define DEBUG_UDP_OPERATION	  0
 
 
 /////////////////////////////
@@ -65,7 +65,7 @@ AJAUDPSocket::Open(const string& ipAddress, uint16_t port)
 			}
 
 			mSocketAddress.sin_family = AF_INET;
-			mSocketAddress.sin_port   = htons(port);
+			mSocketAddress.sin_port	  = htons(port);
 
 			if (0 == bind(
 						mSocket,
@@ -77,7 +77,7 @@ AJAUDPSocket::Open(const string& ipAddress, uint16_t port)
 					<< ": Socket created and bound"
 					<< endl;
 #endif
-                return AJA_STATUS_SUCCESS;
+				return AJA_STATUS_SUCCESS;
 			}
 
 #if DEBUG_UDP_OPERATION
@@ -100,7 +100,7 @@ AJAUDPSocket::Open(const string& ipAddress, uint16_t port)
 #endif
 		}
 	}
-    return AJA_STATUS_FAIL;
+	return AJA_STATUS_FAIL;
 }
 
 
@@ -109,10 +109,10 @@ AJAUDPSocket::Open(const string& ipAddress, uint16_t port)
 ///////////////////////////////////////////////////////////
 uint32_t
 AJAUDPSocket::Poll(
-				uint8_t*            pData,
-				uint32_t            dataLength,
+				uint8_t*			pData,
+				uint32_t			dataLength,
 				struct sockaddr_in& client,
-				int                 timeout)
+				int					timeout)
 {
 	int retVal = 0;
 
@@ -121,7 +121,7 @@ AJAUDPSocket::Poll(
 #if defined(AJA_LINUX) || defined(AJA_MAC)
 		struct pollfd fds[1];
 
-		fds[0].fd     = mSocket;
+		fds[0].fd	  = mSocket;
 		fds[0].events = POLLIN;
 
 		if (0 < (retVal = poll(fds, 1, timeout)))
@@ -184,7 +184,7 @@ uint32_t
 AJAUDPSocket::Read(uint8_t* pData, uint32_t dataLength, struct sockaddr_in& client)
 {
 	socklen_t socketLength = sizeof(struct sockaddr_in);
-	int       bytesReceived = 0;
+	int		  bytesReceived = 0;
 
 	if (-1 != mSocket)
 	{
@@ -222,8 +222,8 @@ AJAUDPSocket::Read(uint8_t* pData, uint32_t dataLength, struct sockaddr_in& clie
 ///////////////////////////////////////////////////////////
 uint32_t
 AJAUDPSocket::Write(
-					const uint8_t*      pData,
-					uint32_t            dataLength,
+					const uint8_t*		pData,
+					uint32_t			dataLength,
 					struct sockaddr_in& targetAddress)
 {
 	int bytesSent = 0;

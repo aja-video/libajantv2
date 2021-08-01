@@ -128,9 +128,9 @@ AJAStatus AJAAncillaryData_Timecode_VITC::SetVITCDataType (const AJAAncillaryDat
 AJAAncillaryDataType AJAAncillaryData_Timecode_VITC::RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData)
 {
 	// note: BIG ASSUMPTION! If the user deliberately captured analog line 19 on either field,
-	//       we're assuming it was for the sake of getting captioning data (NTSC/525-line).
-	//       The only way we could know "for sure" would be to run ParsePayloadData() on
-	//       the payload data, but that's not a static method so you'd have to recast the
+	//		 we're assuming it was for the sake of getting captioning data (NTSC/525-line).
+	//		 The only way we could know "for sure" would be to run ParsePayloadData() on
+	//		 the payload data, but that's not a static method so you'd have to recast the
 	//		 AJAAncillaryData object anyway!
 	if (pInAncData->GetDataCoding() == AJAAncillaryDataCoding_Analog)
 		if (pInAncData->GetLocationLineNumber() == 14 || pInAncData->GetLocationLineNumber() == 277)
@@ -151,10 +151,10 @@ AJAAncillaryDataType AJAAncillaryData_Timecode_VITC::RecognizeThisAncillaryData 
 	// from the leading edge of sync, or 19 pixels from the beginning of active video. Just to be
 	// on the safe side, we're going to start looking for the first leading edge at pixel 10, and
 	// stop looking (if we haven't found it) at pixel 30.
-const uint32_t VITC_DECODE_START_WINDOW	= 10;
-const uint32_t VITC_DECODE_END_WINDOW   = 30;
+const uint32_t VITC_DECODE_START_WINDOW = 10;
+const uint32_t VITC_DECODE_END_WINDOW	= 30;
 
-const uint8_t VITC_Y_CLIP = 102;		//  8-bit YCbCr threshold (assumes black = 16)
+const uint8_t VITC_Y_CLIP = 102;		//	8-bit YCbCr threshold (assumes black = 16)
 
 	// levels
 const uint8_t VITC_YUV8_LO	= 0x10;		// '0'
@@ -173,7 +173,7 @@ static bool getVITCLevel (uint32_t pixelNum, const uint8_t * pLine)
 
 // Implements one bit of the SMPTE-12M CRC polynomial: x^8 + 1
 // Pretty simple: if the current ms bit of the shift register is 0, shift left, adding the new bit to the ls position.
-//                if the current ms bit of the shift register is 1, shift left, adding the inverse of the new bit to the ls position.
+//				  if the current ms bit of the shift register is 1, shift left, adding the inverse of the new bit to the ls position.
 static void addToCRC (const bool inBit, uint8_t & inOutCRC)
 {
 	uint8_t newBit = 0;
@@ -204,7 +204,7 @@ bool AJAAncillaryData_Timecode_VITC::DecodeLine (const uint8_t *pLine)
 	bool bResult = false;
 
 	uint8_t CRC = 0;		// accumulate the CRC here
-	uint8_t tcData[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };	// accumulate the data bits here
+	uint8_t tcData[8] = { 0, 0, 0, 0, 0, 0, 0, 0 }; // accumulate the data bits here
 
 	/**
 		The VITC waveform consists of 90 bits, arranged as 9 groups of 10 bits. Each 10-bit
@@ -270,7 +270,7 @@ bool AJAAncillaryData_Timecode_VITC::DecodeLine (const uint8_t *pLine)
 			currIndex += i;		// currIndex now sits at the beginning of the 2nd ('0' start bit) of the group
 		
 		// all ten bits are used to calculate the CRC, so add the two start bits now
-		addToCRC(true,  CRC);
+		addToCRC(true,	CRC);
 		addToCRC(false, CRC);
 		
 		// position index in the middle of the first data bit (i.e. 1.5 bitcells from here)
@@ -292,7 +292,7 @@ bool AJAAncillaryData_Timecode_VITC::DecodeLine (const uint8_t *pLine)
 			tcData[group] = data;
 
 		else							// this is the last (CRC) group: after it's finished, the CRC register should be
-		{								//    one of the magic numbers or we had an error
+		{								//	  one of the magic numbers or we had an error
 			if (CRC == 0x00)
 			{
 				m_vitcType = AJAAncillaryData_Timecode_VITC_Type_Timecode;		// we've got valid "timecode" data
@@ -327,14 +327,14 @@ bool AJAAncillaryData_Timecode_VITC::DecodeLine (const uint8_t *pLine)
 	{
 		// the "time" digits are in the ls nibbles of each received byte
 		// (note: SetTimeHexValue() performs the needed masking)
-		SetTimeHexValue(kTcFrameUnits,  tcData[0]);		// frame units);
-		SetTimeHexValue(kTcFrameTens,   tcData[1]);		// frame tens
+		SetTimeHexValue(kTcFrameUnits,	tcData[0]);		// frame units);
+		SetTimeHexValue(kTcFrameTens,	tcData[1]);		// frame tens
 		SetTimeHexValue(kTcSecondUnits, tcData[2]);		// second units
-		SetTimeHexValue(kTcSecondTens,  tcData[3]);		// second tens
+		SetTimeHexValue(kTcSecondTens,	tcData[3]);		// second tens
 		SetTimeHexValue(kTcMinuteUnits, tcData[4]);		// minute units
-		SetTimeHexValue(kTcMinuteTens,  tcData[5]);		// minute tens
-		SetTimeHexValue(kTcHourUnits,   tcData[6]);		// hour units
-		SetTimeHexValue(kTcHourTens,    tcData[7]);		// hour tens
+		SetTimeHexValue(kTcMinuteTens,	tcData[5]);		// minute tens
+		SetTimeHexValue(kTcHourUnits,	tcData[6]);		// hour units
+		SetTimeHexValue(kTcHourTens,	tcData[7]);		// hour tens
 
 		// the Binary Group "digits" are in the ms nibbles of each received byte
 		// (note: SetBinaryGroupHexValue() performs the needed masking)
@@ -479,7 +479,7 @@ AJAStatus AJAAncillaryData_Timecode_VITC::EncodeLine(uint8_t *pLine) const
 	// VITC consists of 9 "groups" of 10 bits each (or 5 bit-pairs). Each group starts with a '1' bit and a '0' bit,
 	// followed by 8 data bits. The first 8 groups carry the 64 bits of VITC data, and the last group carries an 8-bit
 	// CRC calculated from the preceding 82 bits.
-	for (uint8_t group(0);  group < kNumTimeDigits;  group++)
+	for (uint8_t group(0);	group < kNumTimeDigits;	 group++)
 	{
 		uint8_t tcData, bgData;
 		GetTimeHexValue(group, tcData);
@@ -541,7 +541,7 @@ AJAStatus AJAAncillaryData_Timecode_VITC::EncodeLine(uint8_t *pLine) const
 	DoNormalTransition(pLine, pixelIndex, bPrevBit, 0);
 
 	// fill the remainder of the line with Black (note that we're assuming 720 active pixels!)
-	const uint32_t	remainingPixels	(GetDC() > pixelIndex  ?  GetDC() - pixelIndex  :  0);
+	const uint32_t	remainingPixels (GetDC() > pixelIndex  ?  GetDC() - pixelIndex	:  0);
 	if (remainingPixels)
 		for (i = 0; i < (uint32_t)remainingPixels; i++)
 			DoVITCPixel (pLine, pixelIndex++, VITC_YUV8_LO);
@@ -558,7 +558,7 @@ AJAStatus AJAAncillaryData_Timecode_VITC::EncodeLine(uint8_t *pLine) const
 static void DoVITCPixel (uint8_t *pLine, uint32_t pixelNum, float level)
 {
 	uint8_t luma;
-	if      (level <= 0.0)	luma = VITC_YUV8_LO;
+	if		(level <= 0.0)	luma = VITC_YUV8_LO;
 	else if (level >= 1.0)	luma = VITC_YUV8_HI;
 	else					luma = (uint8_t)((float)(VITC_YUV8_HI - VITC_YUV8_LO) * level) + VITC_YUV8_LO;
 

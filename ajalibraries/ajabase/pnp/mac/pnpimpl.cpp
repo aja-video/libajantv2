@@ -16,15 +16,15 @@ using namespace std;
 
 //	Logging Macros
 
-#define	HEX2(__x__)				"0x" << hex << setw(2)  << setfill('0') << (0x00FF     & uint16_t(__x__)) << dec
-#define	HEX4(__x__)				"0x" << hex << setw(4)  << setfill('0') << (0xFFFF     & uint16_t(__x__)) << dec
-#define	HEX8(__x__)				"0x" << hex << setw(8)  << setfill('0') << (0xFFFFFFFF & uint32_t(__x__)) << dec
-#define	HEX16(__x__)			"0x" << hex << setw(16) << setfill('0') <<               uint64_t(__x__)  << dec
+#define HEX2(__x__)				"0x" << hex << setw(2)	<< setfill('0') << (0x00FF	   & uint16_t(__x__)) << dec
+#define HEX4(__x__)				"0x" << hex << setw(4)	<< setfill('0') << (0xFFFF	   & uint16_t(__x__)) << dec
+#define HEX8(__x__)				"0x" << hex << setw(8)	<< setfill('0') << (0xFFFFFFFF & uint32_t(__x__)) << dec
+#define HEX16(__x__)			"0x" << hex << setw(16) << setfill('0') <<				 uint64_t(__x__)  << dec
 #define KR(_kr_)				"kernErr=" << HEX8(_kr_) << "(" << ::GetKernErrStr(_kr_) << ")"
 #define INST(__p__)				"Ins-" << hex << setw(16) << setfill('0') << uint64_t(__p__) << dec
 #define THRD(__t__)				"Thr-" << hex << setw(16) << setfill('0') << uint64_t(__t__) << dec
 
-#define	PNPLOGS(__lvl__, __x__)	AJA_sREPORT(AJA_DebugUnit_PnP, (__lvl__),	__func__ << ": " << __x__)
+#define PNPLOGS(__lvl__, __x__) AJA_sREPORT(AJA_DebugUnit_PnP, (__lvl__),	__func__ << ": " << __x__)
 
 
 // static
@@ -73,7 +73,7 @@ AJAStatus AJAPnpImpl::Uninstall(void)
 
 
 // static - translate a PCIDeviceNotifierCallback/message to a AJAPnpCallback/message
-void PCIDeviceNotifierCallback  (unsigned long message, void *refcon)
+void PCIDeviceNotifierCallback	(unsigned long message, void *refcon)
 {
 	PNPLOGS(AJA_DebugSeverity_Debug, "msg=" << HEX8(message));
 

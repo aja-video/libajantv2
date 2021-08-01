@@ -194,7 +194,7 @@ AJAThreadImpl::SetPriority(AJAThreadPriority threadPriority)
 			break;
 		case AJA_ThreadPriority_Unknown:
 		default:
-			AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetPriority:  bad thread priority %d", mpThread, threadPriority);
+			AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetPriority:	 bad thread priority %d", mpThread, threadPriority);
 			return AJA_STATUS_RANGE;
 		}
 	}
@@ -220,7 +220,7 @@ AJAThreadImpl::GetPriority(AJAThreadPriority* pTheadPPriority)
 AJAStatus
 AJAThreadImpl::SetRealTime(AJAThreadRealTimePolicy policy, int priority)
 {
-    return AJA_STATUS_FAIL;
+	return AJA_STATUS_FAIL;
 }
 
 
@@ -276,5 +276,5 @@ AJAStatus AJAThreadImpl::SetThreadName(const char *) {
 
 uint64_t AJAThreadImpl::GetThreadId()
 {
-    return uint64_t(GetCurrentThreadId());
+	return uint64_t(GetCurrentThreadId());
 }

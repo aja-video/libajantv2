@@ -257,7 +257,7 @@ AJABuffer::ComputeAlignment()
 	if (mpBuffer != NULL)
 	{
 		mBufferAlignment = 1;
-        for (int32_t i = 0; i < 12; i++)
+		for (int32_t i = 0; i < 12; i++)
 		{
 			if (((uintptr_t)mpBuffer & ((uintptr_t)0x1 << i)) != 0)
 			{

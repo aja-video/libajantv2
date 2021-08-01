@@ -19,7 +19,7 @@ using namespace std;
 #endif
 
 const int kDigColon		= 10;			// index of ':' character
-const int kDigSemicolon	= 11;			// index of ';' character
+const int kDigSemicolon = 11;			// index of ';' character
 const int kDigDash		= 12;			// index of '-' character
 const int kDigSpace		= 13;			// index of ' ' character
 const int kDigAsterisk	= 14;			// index of '*' character
@@ -364,46 +364,8 @@ static const char CharMap [kMaxTCChars] [kDigitDotHeight] [kDigitDotWidth]	=
 	},
 };
 
-
-static char bcd[] =
-{
-	'0',
-	'1',
-	'2',
-	'3',
-	'4',
-	'5',
-	'6',
-	'7',
-	'8',
-	'9',
-    '0',
-    '0',
-    '0',
-    '0',
-    '0',
-    '0'
-};
-
-static char hexChar[] =
-{
-	'0',
-	'1',
-	'2',
-	'3',
-	'4',
-	'5',
-	'6',
-	'7',
-	'8',
-	'9',
-    'A',
-    'B',
-    'C',
-    'D',
-    'E',
-    'F'
-};
+static char bcd[]		=	{'0','1','2','3','4','5','6','7','8','9','0','0','0','0','0','0'};
+static char hexChar[]	=	{'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 
 //--------------------------------------------------------------------------------------------------------------------
 // Constructors
@@ -412,13 +374,13 @@ static char hexChar[] =
 CRP188::CRP188()
 {
 	Init();
-    _bInitialized = false;
+	_bInitialized = false;
 }
 
 CRP188::CRP188 (ULWord ulFrms, ULWord ulSecs, ULWord ulMins, ULWord ulHrs, const TimecodeFormat tcFormat)
 {
 	Init();
-    SetRP188 (ulFrms, ulSecs, ulMins, ulHrs, tcFormat);
+	SetRP188 (ulFrms, ulSecs, ulMins, ulHrs, tcFormat);
 }
 
 CRP188::CRP188 (const RP188_STRUCT & rp188, const TimecodeFormat tcFormat)
@@ -436,7 +398,7 @@ CRP188::CRP188 (const NTV2_RP188 & inRP188, const TimecodeFormat tcFormat)
 CRP188::CRP188 (const string & sRP188, const TimecodeFormat tcFormat)
 {
 	Init();
-    SetRP188(sRP188, tcFormat);
+	SetRP188(sRP188, tcFormat);
 }
 
 CRP188::CRP188 (ULWord frames, const TimecodeFormat tcFormat)
@@ -456,8 +418,8 @@ CRP188::~CRP188()
 void CRP188::Init()
 {
 	_pCharRenderMap = NULL;
-	_bRendered      = false;
-	_bInitialized   = false;
+	_bRendered		= false;
+	_bInitialized	= false;
 	_bFresh			= false;
 	_tcFormat		= kTCFormatUnknown;
 }
@@ -478,7 +440,7 @@ bool CRP188::operator==( const CRP188& s)
 
 	if (bResult)
 	{
-		if ( (_ulVal[0] == sVal[0])	&& (_ulVal[1] == sVal[1]) && (_ulVal[2] == sVal[2])	&& (_ulVal[3] == sVal[3]) )
+		if ( (_ulVal[0] == sVal[0]) && (_ulVal[1] == sVal[1]) && (_ulVal[2] == sVal[2]) && (_ulVal[3] == sVal[3]) )
 			bResult = true;
 		else
 			bResult = false;
@@ -508,9 +470,9 @@ void CRP188::SetRP188 (const RP188_STRUCT & rp188, const TimecodeFormat tcFormat
 	if (rp188.DBB == 0xffffffff)
 		return;
 
-    ULWord TC0_31  = rp188.Low;
-    ULWord TC32_63 = rp188.High;
-	_bDropFrameFlag  = (TC0_31 >> 10) & 0x01;	// Drop Frame:  timecode bit 10
+	ULWord TC0_31  = rp188.Low;
+	ULWord TC32_63 = rp188.High;
+	_bDropFrameFlag	 = (TC0_31 >> 10) & 0x01;	// Drop Frame:	timecode bit 10
 
 	if ( FormatIs60_50fps(_tcFormat) )
 	{
@@ -525,66 +487,66 @@ void CRP188::SetRP188 (const RP188_STRUCT & rp188, const TimecodeFormat tcFormat
 		unitFrames = bcd[(TC0_31   )&0xF];
 		tensFrames = bcd[(TC0_31>>8)&0x3];
 	}
-    unitSeconds = bcd[(TC0_31>>16)&0xF];
-    tensSeconds = bcd[(TC0_31>>24)&0x7];
+	unitSeconds = bcd[(TC0_31>>16)&0xF];
+	tensSeconds = bcd[(TC0_31>>24)&0x7];
 
-    unitMinutes = bcd[(TC32_63    )&0xF];
-    tensMinutes = bcd[(TC32_63>> 8)&0x7];
-    unitHours   = bcd[(TC32_63>>16)&0xF];
-    tensHours   = bcd[(TC32_63>>24)&0x3];
+	unitMinutes = bcd[(TC32_63	  )&0xF];
+	tensMinutes = bcd[(TC32_63>> 8)&0x7];
+	unitHours	= bcd[(TC32_63>>16)&0xF];
+	tensHours	= bcd[(TC32_63>>24)&0x3];
 
 	_ulVal[0] = (unitFrames-0x30)+((tensFrames-0x30)*10);
 	_ulVal[1] = (unitSeconds-0x30)+((tensSeconds-0x30)*10);
 	_ulVal[2] = (unitMinutes-0x30)+((tensMinutes-0x30)*10);
 	_ulVal[3] = (unitHours-0x30)+((tensHours-0x30)*10);
 
-    char timecodeString[12];
-    timecodeString[0] =  tensHours;
-    timecodeString[1] =  unitHours;
-    timecodeString[2] = ':';
-    timecodeString[3] =  tensMinutes;
-    timecodeString[4] =  unitMinutes;
-    timecodeString[5] = ':';
-    timecodeString[6] =  tensSeconds;
-    timecodeString[7] =  unitSeconds;
-    if (_bDropFrameFlag)
-    {
-        timecodeString[8] = ';';
-    }
-    else
-    {
-    	timecodeString[8] = ':';
-    }
-    timecodeString[9] =  tensFrames;
-    timecodeString[10] = unitFrames;
-    timecodeString[11] = '\0';
+	char timecodeString[12];
+	timecodeString[0] =	 tensHours;
+	timecodeString[1] =	 unitHours;
+	timecodeString[2] = ':';
+	timecodeString[3] =	 tensMinutes;
+	timecodeString[4] =	 unitMinutes;
+	timecodeString[5] = ':';
+	timecodeString[6] =	 tensSeconds;
+	timecodeString[7] =	 unitSeconds;
+	if (_bDropFrameFlag)
+	{
+		timecodeString[8] = ';';
+	}
+	else
+	{
+		timecodeString[8] = ':';
+	}
+	timecodeString[9] =	 tensFrames;
+	timecodeString[10] = unitFrames;
+	timecodeString[11] = '\0';
 
-    _sHMSF = timecodeString;
+	_sHMSF = timecodeString;
 
-    ConvertTcStrToVal();
+	ConvertTcStrToVal();
 
 
-    _rp188        = rp188;
-    _bInitialized = true;
+	_rp188		  = rp188;
+	_bInitialized = true;
 	_bFresh = ((rp188.DBB & NEW_SELECT_RP188_RCVD) || (rp188.DBB & BIT(18)) || (rp188.DBB & BIT(19)));
 
 	// User bits
 
-	_bVaricamActiveF0 = (TC0_31 >> 5) & 0x01;   // Varicam "Active Frame 1": timecode bit 5
-	_bVaricamActiveF1 = (TC0_31 >> 4) & 0x01;   // Varicam "Active Frame 2": timecode bit 4
+	_bVaricamActiveF0 = (TC0_31 >> 5) & 0x01;	// Varicam "Active Frame 1": timecode bit 5
+	_bVaricamActiveF1 = (TC0_31 >> 4) & 0x01;	// Varicam "Active Frame 2": timecode bit 4
 
-	_bDropFrameFlag  = (TC0_31 >> 10) & 0x01;	// Drop Frame:  timecode bit 10
+	_bDropFrameFlag	 = (TC0_31 >> 10) & 0x01;	// Drop Frame:	timecode bit 10
 	_bColorFrameFlag = (TC0_31 >> 11) & 0x01;	// Color Frame: timecode bit 11
 
 	_varicamRate = (_ulUserBits[3] * 10) + _ulUserBits[2];
 
 	if ( FormatIsPAL(_tcFormat) )
 	{
-		_fieldID = (TC32_63 >> 27) & 0x01;  // Field ID: timecode bit 59 (25 fps spec)
+		_fieldID = (TC32_63 >> 27) & 0x01;	// Field ID: timecode bit 59 (25 fps spec)
 	}
 	else
 	{
-		_fieldID = (TC0_31  >> 27) & 0x01;  // Field ID: timecode bit 27 (30 fps spec)
+		_fieldID = (TC0_31	>> 27) & 0x01;	// Field ID: timecode bit 27 (30 fps spec)
 	}
 }
 
@@ -602,8 +564,8 @@ void CRP188::SetRP188 (const string &sRP188, const TimecodeFormat tcFormat)
 		_tcFormat = tcFormat;
 
 
-    _sHMSF = sRP188;
-    ConvertTcStrToVal();
+	_sHMSF = sRP188;
+	ConvertTcStrToVal();
 
 	SetRP188(_ulVal[0], _ulVal[1], _ulVal[2], _ulVal[3], _tcFormat);
 }
@@ -675,26 +637,26 @@ void CRP188::SetRP188 (ULWord ulFrms, ULWord ulSecs, ULWord ulMins, ULWord ulHrs
 
 	ULWord framesPerSecond = FramesPerSecond(_tcFormat);
 
-    // insure that TC elements are valid
-    if (ulFrms >= framesPerSecond)
-    {
-        ulSecs += ulFrms / framesPerSecond;
-        ulFrms %= framesPerSecond;
-    }
+	// insure that TC elements are valid
+	if (ulFrms >= framesPerSecond)
+	{
+		ulSecs += ulFrms / framesPerSecond;
+		ulFrms %= framesPerSecond;
+	}
 
-    if (ulSecs > 59)
-    {
-        ulMins += ulSecs / 60;
-        ulSecs %= 60;
-    }
+	if (ulSecs > 59)
+	{
+		ulMins += ulSecs / 60;
+		ulSecs %= 60;
+	}
 
-    if (ulMins > 59)
-    {
-        ulHrs += ulMins / 60;
-        ulMins %= 60;
-    }
+	if (ulMins > 59)
+	{
+		ulHrs += ulMins / 60;
+		ulMins %= 60;
+	}
 
-    if (ulHrs >= 24)
+	if (ulHrs >= 24)
 		ulHrs %= 24;
 
 		// error check: if this is a DropFrame mode, chop off any frames that should have been dropped
@@ -732,22 +694,22 @@ void CRP188::SetRP188 (ULWord ulFrms, ULWord ulSecs, ULWord ulMins, ULWord ulHrs
 		}
 	}
 
-    _ulVal[0] = ulFrms;
-    _ulVal[1] = ulSecs;
-    _ulVal[2] = ulMins;
-    _ulVal[3] = ulHrs;
+	_ulVal[0] = ulFrms;
+	_ulVal[1] = ulSecs;
+	_ulVal[2] = ulMins;
+	_ulVal[3] = ulHrs;
 
-    // format TC
-    char timeCodeString[80];
+	// format TC
+	char timeCodeString[80];
 	if (bDropFrame)
 		sprintf(timeCodeString,"%02d:%02d:%02d;%02d", ulHrs, ulMins, ulSecs, ulFrms);	// drop frame uses ';'
 	else
 		sprintf(timeCodeString,"%02d:%02d:%02d:%02d", ulHrs, ulMins, ulSecs, ulFrms);	// non-drop uses ':'
 
-    _sHMSF = timeCodeString;
+	_sHMSF = timeCodeString;
 
 	// Initialize the rp188 struct with TC and set all other fields to zero
-    ConvertTcStrToReg();
+	ConvertTcStrToReg();
 
 	_bInitialized = true;
 	_bFresh		  = false;			// we need to see the DBB reg to know...
@@ -863,7 +825,7 @@ void CRP188::SetFieldID(ULWord fieldID)
 	if ( FormatIsPAL(_tcFormat) )
 	{
 		if (fieldID)
-			_rp188.High |=  BIT_27;				// Note: PAL is bit 27 of HIGH word
+			_rp188.High |=	BIT_27;				// Note: PAL is bit 27 of HIGH word
 		else
 			_rp188.High &= ~BIT_27;
 	}
@@ -905,19 +867,19 @@ void CRP188::SetBFGBits(bool bBFG0, bool bBFG1, bool bBFG2)
 			_rp188.Low &= ~BIT_27;
 
 		if (bBFG2)
-			_rp188.High |=  BIT_11;
+			_rp188.High |=	BIT_11;
 		else
 			_rp188.High &= ~BIT_11;
 	}
 	else
 	{
 		if (bBFG0)
-			_rp188.High |=  BIT_11;
+			_rp188.High |=	BIT_11;
 		else
 			_rp188.High &= ~BIT_11;
 
 		if (bBFG2)
-			_rp188.High |=  BIT_27;
+			_rp188.High |=	BIT_27;
 		else
 			_rp188.High &= ~BIT_27;
 	}
@@ -955,37 +917,37 @@ UByte CRP188::GetOutputFilter () const
 //--------------------------------------------------------------------------------------------------------------------
 bool CRP188::GetRP188Str (string & sRP188) const
 {
-    sRP188 = _sHMSF;
-    return _bInitialized;
+	sRP188 = _sHMSF;
+	return _bInitialized;
 }
 
 const char *CRP188::GetRP188CString () const
 {
-    return ( _sHMSF.c_str() );
+	return ( _sHMSF.c_str() );
 }
 
 bool CRP188::GetRP188Frms (ULWord & ulFrms) const
 {
-    ulFrms = _ulVal[0];
-    return _bInitialized;
+	ulFrms = _ulVal[0];
+	return _bInitialized;
 }
 
 bool CRP188::GetRP188Secs (ULWord & ulSecs) const
 {
-    ulSecs = _ulVal[1];
-    return _bInitialized;
+	ulSecs = _ulVal[1];
+	return _bInitialized;
 }
 
 bool CRP188::GetRP188Mins (ULWord & ulMins) const
 {
-    ulMins = _ulVal[2];
-    return _bInitialized;
+	ulMins = _ulVal[2];
+	return _bInitialized;
 }
 
 bool CRP188::GetRP188Hrs  (ULWord & ulHrs) const
 {
-    ulHrs = _ulVal[3];
-    return _bInitialized;
+	ulHrs = _ulVal[3];
+	return _bInitialized;
 }
 
 bool CRP188::GetFrameCount (ULWord & frameCount)
@@ -1004,8 +966,8 @@ void CRP188::ConvertTimecode (ULWord & frameCount, TimecodeFormat format, ULWord
 	{
 		// non-drop
 		int mins = (60 * hours) + minutes;					// 60 minutes / hour
-		int secs = (60 * mins)  + seconds;					// 60 seconds / minute
-		frms  = (FramesPerSecond(format) * secs) + frames;	//    frames  / second
+		int secs = (60 * mins)	+ seconds;					// 60 seconds / minute
+		frms  = (FramesPerSecond(format) * secs) + frames;	//	  frames  / second
 	}
 
 	else
@@ -1015,9 +977,9 @@ void CRP188::ConvertTimecode (ULWord & frameCount, TimecodeFormat format, ULWord
 
 		ULWord droppedFrames	   = (format == kTCFormat60fpsDF ? 4 : 2);			// number of frames dropped in a "drop second"
 		ULWord dropFramesPerSec	   = framesPerSec - droppedFrames;					// "drop-seconds" have all frames but two (or 4)...
-		ULWord dropframesPerMin    = (59 * framesPerSec) + dropFramesPerSec;		// "drop-minutes" have 1 drop and 59 regular seconds
+		ULWord dropframesPerMin	   = (59 * framesPerSec) + dropFramesPerSec;		// "drop-minutes" have 1 drop and 59 regular seconds
 		ULWord dropframesPerTenMin = (9 * dropframesPerMin) + framesPerMin;			// every ten minutes we get 1 regular and 9 drop minutes
-		ULWord dropframesPerHr     = dropframesPerTenMin * 6;						// 60 minutes/hr.
+		ULWord dropframesPerHr	   = dropframesPerTenMin * 6;						// 60 minutes/hr.
 
 		frms = hours * dropframesPerHr;				// convert hours
 
@@ -1066,7 +1028,7 @@ void CRP188::ConvertFrameCount (ULWord frameCount, TimecodeFormat format, ULWord
 		// non-dropframe
 	ULWord framesPerSec = FramesPerSecond(format);
 	ULWord framesPerMin = framesPerSec * 60;		// 60 seconds/minute
-	ULWord framesPerHr  = framesPerMin * 60;		// 60 minutes/hr.
+	ULWord framesPerHr	= framesPerMin * 60;		// 60 minutes/hr.
 	ULWord framesPerDay = framesPerHr  * 24;		// 24 hours/day
 
 	if ( !FormatIsDropFrame(format) )
@@ -1095,10 +1057,10 @@ void CRP188::ConvertFrameCount (ULWord frameCount, TimecodeFormat format, ULWord
 		// dropframe
 		ULWord droppedFrames	   = (_tcFormat == kTCFormat60fpsDF ? 4 : 2);	// number of frames dropped in a "drop second"
 		ULWord dropFramesPerSec	   = framesPerSec - droppedFrames;
-		ULWord dropframesPerMin    = (59 * framesPerSec) + dropFramesPerSec;	// every minute we get 1 drop and 59 regular seconds
+		ULWord dropframesPerMin	   = (59 * framesPerSec) + dropFramesPerSec;	// every minute we get 1 drop and 59 regular seconds
 		ULWord dropframesPerTenMin = (9 * dropframesPerMin) + framesPerMin;		// every ten minutes we get 1 regular and 9 drop minutes
-		ULWord dropframesPerHr     = dropframesPerTenMin * 6;					// 60 minutes/hr.
-		ULWord dropframesPerDay    = dropframesPerHr * 24;						// 24 hours/day
+		ULWord dropframesPerHr	   = dropframesPerTenMin * 6;					// 60 minutes/hr.
+		ULWord dropframesPerDay	   = dropframesPerHr * 24;						// 24 hours/day
 
 			// make sure we don't have more than 24 hours worth of frames
 		frameCount = frameCount % dropframesPerDay;
@@ -1115,11 +1077,11 @@ void CRP188::ConvertFrameCount (ULWord frameCount, TimecodeFormat format, ULWord
 		if (frameCount >= framesPerMin)
 		{
 			minutes += 1;	// got at least one minute (the first one is a non-drop minute)
-			frameCount  = frameCount - framesPerMin;
+			frameCount	= frameCount - framesPerMin;
 
 				// any remaining minutes are drop-minutes
 			minutes += frameCount / dropframesPerMin;
-			frameCount  = frameCount % dropframesPerMin;
+			frameCount	= frameCount % dropframesPerMin;
 		}
 
 			// how many seconds? depends on whether this was a regular or a drop minute...
@@ -1210,15 +1172,15 @@ ULWord CRP188::MaxFramesPerDay(TimecodeFormat format) const
 	if ( !FormatIsDropFrame(format) )
 	{
 			// non-drop frame
-		ULWord framesPerHr  = framesPerMin * 60;		// 60 minutes/hr.
+		ULWord framesPerHr	= framesPerMin * 60;		// 60 minutes/hr.
 		result				= framesPerHr  * 24;		// 24 hours/day
 	}
 	else
 	{
 		ULWord droppedFrames	   = (_tcFormat == kTCFormat60fpsDF ? 4 : 2);	// number of frames dropped in a "drop second"
-		ULWord dropframesPerMin    = framesPerMin - droppedFrames;				// "drop-minutes" have all of the frames but two...
+		ULWord dropframesPerMin	   = framesPerMin - droppedFrames;				// "drop-minutes" have all of the frames but two...
 		ULWord dropframesPerTenMin = (9 * dropframesPerMin) + framesPerMin;		// every ten minutes we get 1 regular and 9 drop minutes
-		ULWord dropframesPerHr     = dropframesPerTenMin * 6;					// 60 minutes/hr.
+		ULWord dropframesPerHr	   = dropframesPerTenMin * 6;					// 60 minutes/hr.
 		result					   = dropframesPerHr * 24;						// 24 hours/day
 	}
 
@@ -1227,7 +1189,7 @@ ULWord CRP188::MaxFramesPerDay(TimecodeFormat format) const
 
 
 	// FormatIsDropFrame()
-	//    returns 'true' if the designated time code format is one of the "drop frame" formats
+	//	  returns 'true' if the designated time code format is one of the "drop frame" formats
 bool CRP188::FormatIsDropFrame(TimecodeFormat format) const
 {
 	bool bResult = false;
@@ -1235,15 +1197,15 @@ bool CRP188::FormatIsDropFrame(TimecodeFormat format) const
 	if (format == kTCFormatUnknown)
 		format = _tcFormat;
 
-    if (format == kTCFormat30fpsDF || format == kTCFormat60fpsDF)
+	if (format == kTCFormat30fpsDF || format == kTCFormat60fpsDF)
 		bResult = true;
 
-    return bResult;
+	return bResult;
 }
 
 	// FormatIs60_50fps()
-	//    returns 'true' if the designated time code format is greater than 39 fps
-	//    (requires using FieldID bit to store ls bit of frame "10s" count)
+	//	  returns 'true' if the designated time code format is greater than 39 fps
+	//	  (requires using FieldID bit to store ls bit of frame "10s" count)
 bool CRP188::FormatIs60_50fps(TimecodeFormat format) const
 {
 	bool bResult = false;
@@ -1251,18 +1213,18 @@ bool CRP188::FormatIs60_50fps(TimecodeFormat format) const
 	if (format == kTCFormatUnknown)
 		format = _tcFormat;
 
-    if (format == kTCFormat60fps ||
+	if (format == kTCFormat60fps ||
 		format == kTCFormat60fpsDF ||
 		format == kTCFormat48fps ||
 		format == kTCFormat50fps)
 		bResult = true;
 
-    return bResult;
+	return bResult;
 }
 
 	// FormatIsPAL()
-	//    returns 'true' if the designated time code format is one of the "PAL" formats
-	//    (uses different bit allocations for timecode status "flags")
+	//	  returns 'true' if the designated time code format is one of the "PAL" formats
+	//	  (uses different bit allocations for timecode status "flags")
 bool CRP188::FormatIsPAL(TimecodeFormat format) const
 {
 	bool bResult = false;
@@ -1270,16 +1232,16 @@ bool CRP188::FormatIsPAL(TimecodeFormat format) const
 	if (format == kTCFormatUnknown)
 		format = _tcFormat;
 
-    if (format == kTCFormat25fps || format == kTCFormat50fps)
+	if (format == kTCFormat25fps || format == kTCFormat50fps)
 		bResult = true;
 
-    return bResult;
+	return bResult;
 }
 
 bool CRP188::GetRP188Reg  (RP188_STRUCT & rp188) const
 {
-    rp188 = _rp188;
-    return _bInitialized;
+	rp188 = _rp188;
+	return _bInitialized;
 }
 
 bool CRP188::GetRP188Reg  (NTV2_RP188 & outRP188) const
@@ -1293,8 +1255,8 @@ bool CRP188::GetRP188UserBitsStr (string & sRP188UB)
 	// Derive the userbits and userbits string from the rp188 struct
 	RP188ToUserBits();
 
-    sRP188UB = _sUserBits;
-    return _bInitialized;
+	sRP188UB = _sUserBits;
+	return _bInitialized;
 }
 
 const char *CRP188::GetRP188UserBitsCString ()
@@ -1302,7 +1264,7 @@ const char *CRP188::GetRP188UserBitsCString ()
 	// Derive the userbits and userbits string from the rp188 struct
 	RP188ToUserBits();
 
-    return ( _sUserBits.c_str() );
+	return ( _sUserBits.c_str() );
 }
 
 ULWord CRP188::BinaryGroup (ULWord smpteNum)
@@ -1361,19 +1323,19 @@ bool CRP188::SetUserBits (ULWord bits)
 	_ulUserBits[0] = (bits >>  0) & 0xF;				// Binary Group 1
 
 	ULWord newHigh = _rp188.High & 0x0F0F0F0F;
-	ULWord newLow  = _rp188.Low  & 0x0F0F0F0F;
+	ULWord newLow  = _rp188.Low	 & 0x0F0F0F0F;
 
-	newHigh |= ((bits & 0xF0000000) >>  0) |
-			   ((bits & 0x0F000000) >>  4) |
-			   ((bits & 0x00F00000) >>  8) |
+	newHigh |= ((bits & 0xF0000000) >>	0) |
+			   ((bits & 0x0F000000) >>	4) |
+			   ((bits & 0x00F00000) >>	8) |
 			   ((bits & 0x000F0000) >> 12);
-	newLow  |= ((bits & 0x0000F000) << 16) |
+	newLow	|= ((bits & 0x0000F000) << 16) |
 			   ((bits & 0x00000F00) << 12) |
-			   ((bits & 0x000000F0) <<  8) |
-			   ((bits & 0x0000000F) <<  4);
+			   ((bits & 0x000000F0) <<	8) |
+			   ((bits & 0x0000000F) <<	4);
 
 	_rp188.High = newHigh;
-	_rp188.Low  = newLow;
+	_rp188.Low	= newLow;
 
 	return true;
 }
@@ -1390,7 +1352,7 @@ ULWord CRP188::UDW (ULWord smpteUDW)
 		if (index < 8)
 			result = (_rp188.Low  >> (4 * index)) & 0x0F;		// 0 - 7 come from bits 0 - 31
 		else
-			result = (_rp188.High >> (4 * (index-8))) & 0x0F;   // 8 - 15 come from bits 32 - 63
+			result = (_rp188.High >> (4 * (index-8))) & 0x0F;	// 8 - 15 come from bits 32 - 63
 	}
 
 	return result;
@@ -1414,14 +1376,14 @@ ULWord CRP188::FramesPerSecond (TimecodeFormat format) const
 
 	switch (format)
 	{
-		case kTCFormat24fps:	fps = 24;   break;
-		case kTCFormat25fps:	fps = 25;   break;
+		case kTCFormat24fps:	fps = 24;	break;
+		case kTCFormat25fps:	fps = 25;	break;
 		case kTCFormat30fps:
-		case kTCFormat30fpsDF:	fps = 30;   break;
-		case kTCFormat48fps:	fps = 48;   break;
-		case kTCFormat50fps:	fps = 50;   break;
+		case kTCFormat30fpsDF:	fps = 30;	break;
+		case kTCFormat48fps:	fps = 48;	break;
+		case kTCFormat50fps:	fps = 50;	break;
 		case kTCFormat60fps:
-		case kTCFormat60fpsDF:	fps = 60;   break;
+		case kTCFormat60fpsDF:	fps = 60;	break;
 
 		default:				fps = 30;	break;
 	}
@@ -1465,59 +1427,59 @@ NTV2FrameRate CRP188::DefaultFrameRateForTimecodeFormat (TimecodeFormat format) 
 // Convert Timecode string to integer value
 void CRP188::ConvertTcStrToVal (void)
 {
-    int iOff;
-    for (int i = 0; i < 4; i++)
-    {
-        iOff = i * 3;               // 2 spaces for 'xx' + 1 space for ':'
-        string s(_sHMSF, iOff, 2);  // s starts at iOff and goes 2 spaces
+	int iOff;
+	for (int i = 0; i < 4; i++)
+	{
+		iOff = i * 3;				// 2 spaces for 'xx' + 1 space for ':'
+		string s(_sHMSF, iOff, 2);	// s starts at iOff and goes 2 spaces
 
-        istringstream ist(s);       // turn s into ist, a string stream
+		istringstream ist(s);		// turn s into ist, a string stream
 
-        ist >> _ulVal[3 - i];       // convert from string to number
-    }
+		ist >> _ulVal[3 - i];		// convert from string to number
+	}
 }
 
 void  CRP188::ConvertTcStrToReg (void)
 {
-    memset ((void *) &_rp188, 0, sizeof(_rp188));
-    char pcBuf[2];
+	memset ((void *) &_rp188, 0, sizeof(_rp188));
+	char pcBuf[2];
 
-    // Tens of hours
-    int iOff = 0, iSingle;
-    pcBuf[0] = _sHMSF[iOff];
-    pcBuf[1] = 0;
-    sscanf (pcBuf, "%d", &iSingle);
-    _rp188.High |= (iSingle & 0x3) << 24;
+	// Tens of hours
+	int iOff = 0, iSingle;
+	pcBuf[0] = _sHMSF[iOff];
+	pcBuf[1] = 0;
+	sscanf (pcBuf, "%d", &iSingle);
+	_rp188.High |= (iSingle & 0x3) << 24;
 
-    // Units of hours
-    iOff = 1;
-    pcBuf[0] = _sHMSF[iOff];
-    sscanf (pcBuf, "%d", &iSingle);
-    _rp188.High |= (iSingle & 0xF) << 16;
+	// Units of hours
+	iOff = 1;
+	pcBuf[0] = _sHMSF[iOff];
+	sscanf (pcBuf, "%d", &iSingle);
+	_rp188.High |= (iSingle & 0xF) << 16;
 
-    // Tens of minutes
-    iOff = 3;
-    pcBuf[0] = _sHMSF[iOff];
-    sscanf (pcBuf, "%d", &iSingle);
-    _rp188.High |= (iSingle & 0x7) << 8;
+	// Tens of minutes
+	iOff = 3;
+	pcBuf[0] = _sHMSF[iOff];
+	sscanf (pcBuf, "%d", &iSingle);
+	_rp188.High |= (iSingle & 0x7) << 8;
 
-    // Units of minutes
-    iOff = 4;
-    pcBuf[0] = _sHMSF[iOff];
-    sscanf (pcBuf, "%d", &iSingle);
-    _rp188.High |= (iSingle & 0xF);
+	// Units of minutes
+	iOff = 4;
+	pcBuf[0] = _sHMSF[iOff];
+	sscanf (pcBuf, "%d", &iSingle);
+	_rp188.High |= (iSingle & 0xF);
 
-    // Tens of seconds
-    iOff = 6;
-    pcBuf[0] = _sHMSF[iOff];
-    sscanf (pcBuf, "%d", &iSingle);
-    _rp188.Low |= (iSingle & 0x7) << 24;
+	// Tens of seconds
+	iOff = 6;
+	pcBuf[0] = _sHMSF[iOff];
+	sscanf (pcBuf, "%d", &iSingle);
+	_rp188.Low |= (iSingle & 0x7) << 24;
 
-    // Units of seconds
-    iOff = 7;
-    pcBuf[0] = _sHMSF[iOff];
-    sscanf (pcBuf, "%d", &iSingle);
-    _rp188.Low |= (iSingle & 0xF) << 16;
+	// Units of seconds
+	iOff = 7;
+	pcBuf[0] = _sHMSF[iOff];
+	sscanf (pcBuf, "%d", &iSingle);
+	_rp188.Low |= (iSingle & 0xF) << 16;
 
 	if ( !FormatIs60_50fps() )
 	{
@@ -1558,43 +1520,43 @@ void  CRP188::ConvertTcStrToReg (void)
 		frameCount /= 2;
 
 		_rp188.Low |=  ((frameCount / 10) & 0x3) << 8;	// Tens of frames (ms 2 bits)
-		_rp188.Low |=  ((frameCount % 10) & 0xF)     ;	// Units of frames
+		_rp188.Low |=  ((frameCount % 10) & 0xF)	 ;	// Units of frames
 	}
 }
 
 void  CRP188::RP188ToUserBits (void)
 {
-    char userBitsString[12];
+	char userBitsString[12];
 
 	_ulUserBits[7] = (_rp188.High >> 28) & 0xF;				// Binary Group 8
-    userBitsString[0] = hexChar[_ulUserBits[7]];
+	userBitsString[0] = hexChar[_ulUserBits[7]];
 
 	_ulUserBits[6] = (_rp188.High >> 20) & 0xF;				// Binary Group 7
-    userBitsString[1] = hexChar[_ulUserBits[6]];
-    userBitsString[2] = ' ';
+	userBitsString[1] = hexChar[_ulUserBits[6]];
+	userBitsString[2] = ' ';
 
 	_ulUserBits[5] = (_rp188.High >> 12) & 0xF;				// Binary Group 6
-    userBitsString[3] = hexChar[_ulUserBits[5]];
+	userBitsString[3] = hexChar[_ulUserBits[5]];
 
 	_ulUserBits[4] = (_rp188.High >>  4) & 0xF;				// Binary Group 5
-    userBitsString[4] = hexChar[_ulUserBits[4]];
-    userBitsString[5] = ' ';
+	userBitsString[4] = hexChar[_ulUserBits[4]];
+	userBitsString[5] = ' ';
 
 	_ulUserBits[3] = (_rp188.Low  >> 28) & 0xF;				// Binary Group 4
-    userBitsString[6] = hexChar[_ulUserBits[3]];
+	userBitsString[6] = hexChar[_ulUserBits[3]];
 
 	_ulUserBits[2] = (_rp188.Low  >> 20) & 0xF;				// Binary Group 3
-    userBitsString[7] = hexChar[_ulUserBits[2]];
-    userBitsString[8] = ' ';
+	userBitsString[7] = hexChar[_ulUserBits[2]];
+	userBitsString[8] = ' ';
 
 	_ulUserBits[1] = (_rp188.Low  >> 12) & 0xF;				// Binary Group 2
-    userBitsString[9] = hexChar[_ulUserBits[1]];
+	userBitsString[9] = hexChar[_ulUserBits[1]];
 
 	_ulUserBits[0] = (_rp188.Low  >>  4) & 0xF;				// Binary Group 1
-    userBitsString[10] = hexChar[_ulUserBits[0]];
-    userBitsString[11] = '\0';
+	userBitsString[10] = hexChar[_ulUserBits[0]];
+	userBitsString[11] = '\0';
 
-    _sUserBits = userBitsString;
+	_sUserBits = userBitsString;
 }
 
 
@@ -1659,9 +1621,9 @@ bool CRP188::InitBurnIn (NTV2FrameBufferFormat frameBufferFormat, NTV2FrameDimen
 //			else if (frameDimensions.Height() > 650 && frameDimensions.Width() < 1100)
 //				dotWidth = 1;			// 960x720
 
-			int charWidthBytes  = kDigitDotWidth  * dotWidth * bytesPerPixel;
+			int charWidthBytes	= kDigitDotWidth  * dotWidth * bytesPerPixel;
 			if (frameBufferFormat == NTV2_FBF_10BIT_YCBCR)
-				charWidthBytes  = (kDigitDotWidth * dotWidth * 16) / 6;		// note: assumes kDigitDotWidth is evenly divisible by 6!
+				charWidthBytes	= (kDigitDotWidth * dotWidth * 16) / 6;		// note: assumes kDigitDotWidth is evenly divisible by 6!
 
 			int charHeightLines = kDigitDotHeight * dotHeight;
 
@@ -1697,16 +1659,16 @@ bool CRP188::InitBurnIn (NTV2FrameBufferFormat frameBufferFormat, NTV2FrameDimen
 									char val = 0;
 									switch (dot)
 									{
-										case 0:		val = char(0x040 >> 2);	break;	//	16
-										case 1:		val = char(0x164 >> 2);	break;	//	89
-										case 2:		val = char(0x288 >> 2);	break;	//	162
-										case 3:		val = char(0x3AC >> 2);	break;	//	235
+										case 0:		val = char(0x040 >> 2); break;	//	16
+										case 1:		val = char(0x164 >> 2); break;	//	89
+										case 2:		val = char(0x288 >> 2); break;	//	162
+										case 3:		val = char(0x3AC >> 2); break;	//	235
 									}
 
 										// each rendered pixel is duplicated N times
 									for (int xdup = 0; xdup < dotWidth; xdup++)
 									{
-										*pRenderMap++ = char(0x80);	// C
+										*pRenderMap++ = char(0x80); // C
 										*pRenderMap++ = val;		// Y
 									}
 								}
@@ -1785,7 +1747,7 @@ bool CRP188::InitBurnIn (NTV2FrameBufferFormat frameBufferFormat, NTV2FrameDimen
 										// each rendered pixel is duplicated N times
 									for (int xdup = 0; xdup < dotWidth; xdup++)
 									{
-										*pRenderMap++ =                        ((val & 0x3fc) >> 2);
+										*pRenderMap++ =						   ((val & 0x3fc) >> 2);
 										*pRenderMap++ = ((val & 0x003) << 6) | ((val & 0x3f0) >> 4);
 										*pRenderMap++ = ((val & 0x00f) << 4) | ((val & 0x3c0) >> 6);
 										*pRenderMap++ = ((val & 0x03f) << 2);
@@ -1797,12 +1759,12 @@ bool CRP188::InitBurnIn (NTV2FrameBufferFormat frameBufferFormat, NTV2FrameDimen
 				}
 
 				_bRendered = true;
-				_charRenderFBF    = frameBufferFormat;
+				_charRenderFBF	  = frameBufferFormat;
 				_charRenderHeight = frameDimensions.Height();
 				_charRenderWidth  = frameDimensions.Width();
 
 					// character sizes
-				_charWidthBytes   = charWidthBytes;
+				_charWidthBytes	  = charWidthBytes;
 				_charHeightLines  = charHeightLines;
 
 					// burn-in offset
@@ -1843,31 +1805,31 @@ void CRP188::writeV210Pixel (char **pBytePtr, int x, int c, int y)
 
 		// the components in each v210 6-pixel block are laid out like this (note that the UInt32s are swixelled!):
 		//
-		// Addr: |  3    2    1    0  |  7    6    5    4  | 11   10    9    8  | 15   14   13   12 |
-		//       { 00 Cr0   Y0   Cb0    00 Y2   Cb2    Y1    00 Cb4   Y3   Cr2    00 Y5   Cr4   Y4  }
+		// Addr: |	3	 2	  1	   0  |	 7	  6	   5	4  | 11	  10	9	 8	| 15   14	13	 12 |
+		//		 { 00 Cr0	Y0	 Cb0	00 Y2	Cb2	   Y1	 00 Cb4	  Y3   Cr2	  00 Y5	  Cr4	Y4	}
 		//
 	int cadence = x % 3;
 
 	switch (cadence)
 	{
 		case 0:		// Cb0/Y0 or Cr2/Y3: we assume that p points to byte 0/8. When we are finished, it will still point to byte 0/8
-				p[0] =      c & 0x0FF;									//  c<7:0>
-				p[1] = ((   y & 0x03F) << 2) + ((   c & 0x300) >> 8);	//  y<5:0> +  c<9:8>
-				p[2] =  (p[2] & 0x0F0)       + ((   y & 0x3C0) >> 6);	// (merge) +  y<9:6>
+				p[0] =		c & 0x0FF;									//	c<7:0>
+				p[1] = ((	y & 0x03F) << 2) + ((	c & 0x300) >> 8);	//	y<5:0> +  c<9:8>
+				p[2] =	(p[2] & 0x0F0)		 + ((	y & 0x3C0) >> 6);	// (merge) +  y<9:6>
 				break;
 
 		case 1:		// Cr0/Y1 or Cb4/Y4: we assume that p points to byte 0/8. When we are finished, it will point to byte 4/12
-				p[2] = ((   c & 0x00F) << 4) +  (p[2] & 0x00F);			//  c<3:0> + (merge)
-				p[3] =                         ((   c & 0x3F0) >> 4);	//   '00'  +  c<9:4>
-				p[4] =      y & 0x0FF;									//  y<7:0>
-				p[5] =  (p[5] & 0x0FC)       + ((   y & 0x300) >> 8);	// (merge) +  y<9:8>
+				p[2] = ((	c & 0x00F) << 4) +	(p[2] & 0x00F);			//	c<3:0> + (merge)
+				p[3] =						   ((	c & 0x3F0) >> 4);	//	 '00'  +  c<9:4>
+				p[4] =		y & 0x0FF;									//	y<7:0>
+				p[5] =	(p[5] & 0x0FC)		 + ((	y & 0x300) >> 8);	// (merge) +  y<9:8>
 				*pBytePtr += 4;
 				break;
 
 		case 2:		// Cb2/Y2 or Cr4/Y5: we assume that p points to byte 4/12. When we are finished, it will point to byte 8/16
-				p[1] = ((   c & 0x03F) << 2) +  (p[1] & 0x003);			//  c<5:0> + (merge)
-				p[2] = ((   y & 0x00F) << 4) + ((   c & 0x3C0) >> 6);	//  y<3:0> +  c<9:6>
-				p[3] =                         ((   y & 0x3F0) >> 4);	//   '00'  +  y<9:4>
+				p[1] = ((	c & 0x03F) << 2) +	(p[1] & 0x003);			//	c<5:0> + (merge)
+				p[2] = ((	y & 0x00F) << 4) + ((	c & 0x3C0) >> 6);	//	y<3:0> +  c<9:6>
+				p[3] =						   ((	y & 0x3F0) >> 4);	//	 '00'  +  y<9:4>
 				*pBytePtr += 4;
 				break;
 	}

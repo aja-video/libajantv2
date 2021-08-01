@@ -19,11 +19,11 @@
 #include "ajabase/common/common.h"
 #include "math.h"
 
-#define	TPGFAIL(__x__)	AJA_sERROR  (AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
-#define	TPGWARN(__x__)	AJA_sWARNING(AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
-#define	TPGNOTE(__x__)	AJA_sNOTICE (AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
-#define	TPGINFO(__x__)	AJA_sINFO   (AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
-#define	TPGDBUG(__x__)	AJA_sDEBUG  (AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
+#define TPGFAIL(__x__)	AJA_sERROR	(AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
+#define TPGWARN(__x__)	AJA_sWARNING(AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
+#define TPGNOTE(__x__)	AJA_sNOTICE (AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
+#define TPGINFO(__x__)	AJA_sINFO	(AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
+#define TPGDBUG(__x__)	AJA_sDEBUG	(AJA_DebugUnit_VideoGeneric, AJAFUNC << ": " << __x__)
 
 
 using namespace std;
@@ -1532,9 +1532,9 @@ static const uint32_t FlatField_Pluge_576_0[] =
 
 typedef struct
 {
-    uint16_t	Blue;
-    uint16_t	Green;
-    uint16_t	Red;
+	uint16_t	Blue;
+	uint16_t	Green;
+	uint16_t	Red;
 } AJA_RGB16BitPixel;
 
 
@@ -1594,7 +1594,7 @@ static const AJA_RGB16BitPixel NarrowRed58_709			= { 256*4,350*4,530*4 };
 static const AJA_RGB16BitPixel NarrowBlue58_709			= { 562*4,236*4,317*4 };
 
 static const AJA_RGB16BitPixel NarrowBlack				= { 64*4,64*4,64*4 };
-static const AJA_RGB16BitPixel NarrowMinus2PercentBlack	= { 48*4,48*4,48*4 };
+static const AJA_RGB16BitPixel NarrowMinus2PercentBlack = { 48*4,48*4,48*4 };
 static const AJA_RGB16BitPixel Narrow2PercentBlack		= { 80*4,80*4, 80*4 };
 static const AJA_RGB16BitPixel Narrow4PercentBlack		= { 99*4,99*4,99*4 };
 
@@ -1643,7 +1643,7 @@ static const AJA_RGB16BitPixel Wide2PercentBlack		= { 82,82, 82 };
 static const AJA_RGB16BitPixel Wide4PercentBlack		= { 164,164,164 };
 
 #ifndef HD_NUMACTIVELINES_2K
-	#define HD_NUMACTIVELINES_2K      1556  
+	#define HD_NUMACTIVELINES_2K	1556  
 #endif
 
 static const SegmentTestPatternData NTV2TestPatternSegments[] = 
@@ -2115,7 +2115,7 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 			 {0,215, ColorBars100_1080_0} ,
 			 {216,431, ColorBars75_1080_0} ,
 			 {432,647, Ramp_1080_0} ,
-			 {648,863,  Multiburst_1080_0} ,
+			 {648,863,	Multiburst_1080_0} ,
 			 {864,1079, FlatField_Pluge_1080_0} ,
 			 {0,0, AJA_NULL} ,
 			 {0,0, AJA_NULL} ,
@@ -2135,7 +2135,7 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 			 {0,97, ColorBars100_486_0} ,
 			 {98,195, ColorBars75_486_0} ,
 			 {196,293, Ramp_486_0} ,
-			 {294,389,  Multiburst_486_0} ,
+			 {294,389,	Multiburst_486_0} ,
 			 {390,485, FlatField_Pluge_486_0} ,
 			 {0,0, AJA_NULL} ,
 			 {0,0, AJA_NULL} ,
@@ -2155,7 +2155,7 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 			 {0,215, ColorBars100_1080_0} ,
 			 {216,431, ColorBars75_1080_0} ,
 			 {432,647, Ramp_1080_0} ,
-			 {648,863,  Multiburst_1080_0} ,
+			 {648,863,	Multiburst_1080_0} ,
 			 {864,1079, FlatField_Pluge_1080_0} ,
 			 {0,0, AJA_NULL} ,
 			 {0,0, AJA_NULL} ,
@@ -2165,7 +2165,7 @@ static const SegmentTestPatternData NTV2TestPatternSegments[] =
 			 {0,310, ColorBars100_1080_0} ,
 			 {311,621, ColorBars75_1080_0} ,
 			 {622,932, Ramp_1080_0} ,
-			 {933,1243,  Multiburst_1080_0} ,
+			 {933,1243,	 Multiburst_1080_0} ,
 			 {1244,1555, FlatField_Pluge_1080_0} ,
 			 {0,0, AJA_NULL} ,
 			 {0,0, AJA_NULL} ,
@@ -2205,7 +2205,7 @@ class HDRTPGeometry
 };
 
 HDRTPGeometry & HDRTPGeometry::Init (uint32_t & inOutNumPixels, uint32_t & outNumLines)
-{    // Only these 2 geometries supported(8k also but ignoring).
+{	// Only these 2 geometries supported(8k also but ignoring).
 	if (inOutNumPixels == 7680)
 	{
 		outNumLines = 4320;
@@ -2276,12 +2276,12 @@ HDRTPGeometry & HDRTPGeometry::Init (uint32_t & inOutNumPixels, uint32_t & outNu
 	return *this;
 }
 
-#define	AsUBytePtr(__p__)	reinterpret_cast<UByte*>(__p__)
-#define	AsWordPtr(__p__)	reinterpret_cast<int16_t*>(__p__)
-#define	AsRGB16Ptr(__p__)	reinterpret_cast<AJA_RGB16BitPixel*>(__p__)
-#define	AsULWordPtr(__p__)	reinterpret_cast<ULWord*>(__p__)
-#define	AsUInt8Ptr(__p__)	reinterpret_cast<uint8_t*>(__p__)
-#define	AsUInt16Ptr(__p__)	reinterpret_cast<uint16_t*>(__p__)
+#define AsUBytePtr(__p__)	reinterpret_cast<UByte*>(__p__)
+#define AsWordPtr(__p__)	reinterpret_cast<int16_t*>(__p__)
+#define AsRGB16Ptr(__p__)	reinterpret_cast<AJA_RGB16BitPixel*>(__p__)
+#define AsULWordPtr(__p__)	reinterpret_cast<ULWord*>(__p__)
+#define AsUInt8Ptr(__p__)	reinterpret_cast<uint8_t*>(__p__)
+#define AsUInt16Ptr(__p__)	reinterpret_cast<uint16_t*>(__p__)
 
 
 bool NTV2TestPatternGen::canDrawTestPattern (const NTV2TestPatternSelect inPattern, const NTV2FormatDescriptor & inDesc)
@@ -2302,20 +2302,20 @@ bool NTV2TestPatternGen::canDrawTestPattern (const NTV2TestPatternSelect inPatte
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 typedef map<NTV2TestPatternSelect, string>	TPStringMap;
-typedef pair<NTV2TestPatternSelect, string>	TPStringPair;
+typedef pair<NTV2TestPatternSelect, string> TPStringPair;
 typedef TPStringMap::const_iterator			TPStringMapConstIter;
 
 typedef map<string, NTV2TestPatternSelect>	StringTPMap;
-typedef pair<string, NTV2TestPatternSelect>	StringTPPair;
+typedef pair<string, NTV2TestPatternSelect> StringTPPair;
 typedef StringTPMap::const_iterator			StringTPMapConstIter;
 
 typedef map<ULWord, string>					RGBStringMap;
-typedef	pair<ULWord, string>				RGBStringPair;
-typedef	RGBStringMap::const_iterator		RGBStringMapConstIter;
+typedef pair<ULWord, string>				RGBStringPair;
+typedef RGBStringMap::const_iterator		RGBStringMapConstIter;
 
 typedef map<string, ULWord>					StringRGBMap;
 typedef pair<string, ULWord>				StringRGBPair;
-typedef	StringRGBMap::const_iterator		StringRGBMapConstIter;
+typedef StringRGBMap::const_iterator		StringRGBMapConstIter;
 
 /**
 	Currently, we're not cache'ing the results of these several functions.
@@ -2330,7 +2330,7 @@ static TPStringMap & CreateTPStringMap (TPStringMap & outMap)
 	if (!outMap.empty())
 		return outMap;
 	NTV2_ASSERT(sNumPatterns == NTV2_TestPatt_Black);
-	for (NTV2TestPatternSelect tpSelect(NTV2_TestPatt_FIRST);  tpSelect < sNumPatterns;  tpSelect = NTV2TestPatternSelect(tpSelect+1))
+	for (NTV2TestPatternSelect tpSelect(NTV2_TestPatt_FIRST);  tpSelect < sNumPatterns;	 tpSelect = NTV2TestPatternSelect(tpSelect+1))
 		outMap.insert(TPStringPair(tpSelect, string(NTV2TestPatternSegments[tpSelect].name)));
 	outMap.insert(TPStringPair(NTV2_TestPatt_Black,					string("Black")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_White,					string("White")));
@@ -2355,10 +2355,10 @@ static StringTPMap & CreateStringTPMap (StringTPMap & outMap)
 	if (!outMap.empty())
 		return outMap;
 
-	TPStringMap	TPNames;
+	TPStringMap TPNames;
 	::CreateTPStringMap(TPNames);
 	//	Invert the TPStringMap...
-	for (TPStringMapConstIter it(TPNames.begin());  it != TPNames.end();  ++it)
+	for (TPStringMapConstIter it(TPNames.begin());	it != TPNames.end();  ++it)
 	{	string name(it->second);
 		outMap[aja::lower(name)] = it->first;
 	}
@@ -2369,147 +2369,147 @@ static RGBStringMap & CreateRGBStringMap (RGBStringMap & outMap)
 {
 	if (!outMap.empty())
 		return outMap;
-	outMap.insert(RGBStringPair(0x00F0F8FF,	"AliceBlue"));
-	outMap.insert(RGBStringPair(0x00FAEBD7,	"AntiqueWhite"));
-	outMap.insert(RGBStringPair(0x0000FFFF,	"Aqua"));
-	outMap.insert(RGBStringPair(0x007FFFD4,	"Aquamarine"));
-	outMap.insert(RGBStringPair(0x00F0FFFF,	"Azure"));
-	outMap.insert(RGBStringPair(0x00F5F5DC,	"Beige"));
-	outMap.insert(RGBStringPair(0x00FFE4C4,	"Bisque"));
-//	outMap.insert(RGBStringPair(0x00000000,	"Black"));
-	outMap.insert(RGBStringPair(0x00FFEBCD,	"BlanchedAlmond"));
-	outMap.insert(RGBStringPair(0x000000FF,	"Blue"));
-	outMap.insert(RGBStringPair(0x008A2BE2,	"BlueViolet"));
-	outMap.insert(RGBStringPair(0x00A52A2A,	"Brown"));
-	outMap.insert(RGBStringPair(0x00DEB887,	"BurlyWood"));
-	outMap.insert(RGBStringPair(0x005F9EA0,	"CadetBlue"));
-	outMap.insert(RGBStringPair(0x007FFF00,	"Chartreuse"));
-	outMap.insert(RGBStringPair(0x00D2691E,	"Chocolate"));
-	outMap.insert(RGBStringPair(0x00FF7F50,	"Coral"));
-	outMap.insert(RGBStringPair(0x006495ED,	"CornflowerBlue"));
-	outMap.insert(RGBStringPair(0x00FFF8DC,	"Cornsilk"));
-	outMap.insert(RGBStringPair(0x00DC143C,	"Crimson"));
-	outMap.insert(RGBStringPair(0x0000FFFF,	"Cyan"));
-	outMap.insert(RGBStringPair(0x0000008B,	"DarkBlue"));
-	outMap.insert(RGBStringPair(0x00008B8B,	"DarkCyan"));
-	outMap.insert(RGBStringPair(0x00B8860B,	"DarkGoldenRod"));
-	outMap.insert(RGBStringPair(0x00A9A9A9,	"DarkGray"));
-	outMap.insert(RGBStringPair(0x00006400,	"DarkGreen"));
-	outMap.insert(RGBStringPair(0x00BDB76B,	"DarkKhaki"));
-	outMap.insert(RGBStringPair(0x008B008B,	"DarkMagenta"));
-	outMap.insert(RGBStringPair(0x00556B2F,	"DarkOliveGreen"));
-	outMap.insert(RGBStringPair(0x00FF8C00,	"DarkOrange"));
-	outMap.insert(RGBStringPair(0x009932CC,	"DarkOrchid"));
-	outMap.insert(RGBStringPair(0x008B0000,	"DarkRed"));
-	outMap.insert(RGBStringPair(0x00E9967A,	"DarkSalmon"));
-	outMap.insert(RGBStringPair(0x008FBC8F,	"DarkSeaGreen"));
-	outMap.insert(RGBStringPair(0x00483D8B,	"DarkSlateBlue"));
-	outMap.insert(RGBStringPair(0x002F4F4F,	"DarkSlateGray"));
-	outMap.insert(RGBStringPair(0x0000CED1,	"DarkTurquoise"));
-	outMap.insert(RGBStringPair(0x009400D3,	"DarkViolet"));
-	outMap.insert(RGBStringPair(0x00FF1493,	"DeepPink"));
-	outMap.insert(RGBStringPair(0x0000BFFF,	"DeepSkyBlue"));
-	outMap.insert(RGBStringPair(0x00696969,	"DimGray"));
-	outMap.insert(RGBStringPair(0x001E90FF,	"DodgerBlue"));
-	outMap.insert(RGBStringPair(0x00B22222,	"FireBrick"));
-	outMap.insert(RGBStringPair(0x00FFFAF0,	"FloralWhite"));
-	outMap.insert(RGBStringPair(0x00228B22,	"ForestGreen"));
-	outMap.insert(RGBStringPair(0x00FF00FF,	"Fuchsia"));
-	outMap.insert(RGBStringPair(0x00DCDCDC,	"Gainsboro"));
-	outMap.insert(RGBStringPair(0x00F8F8FF,	"GhostWhite"));
-	outMap.insert(RGBStringPair(0x00FFD700,	"Gold"));
-	outMap.insert(RGBStringPair(0x00DAA520,	"GoldenRod"));
-	outMap.insert(RGBStringPair(0x00808080,	"Gray"));
-	outMap.insert(RGBStringPair(0x00008000,	"Green"));
-	outMap.insert(RGBStringPair(0x00ADFF2F,	"GreenYellow"));
-	outMap.insert(RGBStringPair(0x00F0FFF0,	"HoneyDew"));
-	outMap.insert(RGBStringPair(0x00FF69B4,	"HotPink"));
-	outMap.insert(RGBStringPair(0x00CD5C5C,	"IndianRed"));
-	outMap.insert(RGBStringPair(0x004B0082,	"Indigo"));
-	outMap.insert(RGBStringPair(0x00FFFFF0,	"Ivory"));
-	outMap.insert(RGBStringPair(0x00F0E68C,	"Khaki"));
-	outMap.insert(RGBStringPair(0x00E6E6FA,	"Lavender"));
-	outMap.insert(RGBStringPair(0x00FFF0F5,	"LavenderBlush"));
-	outMap.insert(RGBStringPair(0x007CFC00,	"LawnGreen"));
-	outMap.insert(RGBStringPair(0x00FFFACD,	"LemonChiffon"));
-	outMap.insert(RGBStringPair(0x00ADD8E6,	"LightBlue"));
-	outMap.insert(RGBStringPair(0x00F08080,	"LightCoral"));
-	outMap.insert(RGBStringPair(0x00E0FFFF,	"LightCyan"));
-	outMap.insert(RGBStringPair(0x00FAFAD2,	"LightGoldenRodYellow"));
-	outMap.insert(RGBStringPair(0x00D3D3D3,	"LightGray"));
-	outMap.insert(RGBStringPair(0x0090EE90,	"LightGreen"));
-	outMap.insert(RGBStringPair(0x00FFB6C1,	"LightPink"));
-	outMap.insert(RGBStringPair(0x00FFA07A,	"LightSalmon"));
-	outMap.insert(RGBStringPair(0x0020B2AA,	"LightSeaGreen"));
-	outMap.insert(RGBStringPair(0x0087CEFA,	"LightSkyBlue"));
-	outMap.insert(RGBStringPair(0x00778899,	"LightSlateGray"));
-	outMap.insert(RGBStringPair(0x00B0C4DE,	"LightSteelBlue"));
-	outMap.insert(RGBStringPair(0x00FFFFE0,	"LightYellow"));
-	outMap.insert(RGBStringPair(0x0000FF00,	"Lime"));
-	outMap.insert(RGBStringPair(0x0032CD32,	"LimeGreen"));
-	outMap.insert(RGBStringPair(0x00FAF0E6,	"Linen"));
-	outMap.insert(RGBStringPair(0x00FF00FF,	"Magenta"));
-	outMap.insert(RGBStringPair(0x00800000,	"Maroon"));
-	outMap.insert(RGBStringPair(0x0066CDAA,	"MediumAquaMarine"));
-	outMap.insert(RGBStringPair(0x000000CD,	"MediumBlue"));
-	outMap.insert(RGBStringPair(0x00BA55D3,	"MediumOrchid"));
-	outMap.insert(RGBStringPair(0x009370DB,	"MediumPurple"));
-	outMap.insert(RGBStringPair(0x003CB371,	"MediumSeaGreen"));
-	outMap.insert(RGBStringPair(0x007B68EE,	"MediumSlateBlue"));
-	outMap.insert(RGBStringPair(0x0000FA9A,	"MediumSpringGreen"));
-	outMap.insert(RGBStringPair(0x0048D1CC,	"MediumTurquoise"));
-	outMap.insert(RGBStringPair(0x00C71585,	"MediumVioletRed"));
-	outMap.insert(RGBStringPair(0x00191970,	"MidnightBlue"));
-	outMap.insert(RGBStringPair(0x00F5FFFA,	"MintCream"));
-	outMap.insert(RGBStringPair(0x00FFE4E1,	"MistyRose"));
-	outMap.insert(RGBStringPair(0x00FFE4B5,	"Moccasin"));
-	outMap.insert(RGBStringPair(0x00FFDEAD,	"NavajoWhite"));
-	outMap.insert(RGBStringPair(0x00000080,	"Navy"));
-	outMap.insert(RGBStringPair(0x00FDF5E6,	"OldLace"));
-	outMap.insert(RGBStringPair(0x00808000,	"Olive"));
-	outMap.insert(RGBStringPair(0x006B8E23,	"OliveDrab"));
-	outMap.insert(RGBStringPair(0x00FFA500,	"Orange"));
-	outMap.insert(RGBStringPair(0x00FF4500,	"OrangeRed"));
-	outMap.insert(RGBStringPair(0x00DA70D6,	"Orchid"));
-	outMap.insert(RGBStringPair(0x00EEE8AA,	"PaleGoldenRod"));
-	outMap.insert(RGBStringPair(0x0098FB98,	"PaleGreen"));
-	outMap.insert(RGBStringPair(0x00AFEEEE,	"PaleTurquoise"));
-	outMap.insert(RGBStringPair(0x00DB7093,	"PaleVioletRed"));
-	outMap.insert(RGBStringPair(0x00FFEFD5,	"PapayaWhip"));
-	outMap.insert(RGBStringPair(0x00FFDAB9,	"PeachPuff"));
-	outMap.insert(RGBStringPair(0x00CD853F,	"Peru"));
-	outMap.insert(RGBStringPair(0x00FFC0CB,	"Pink"));
-	outMap.insert(RGBStringPair(0x00DDA0DD,	"Plum"));
-	outMap.insert(RGBStringPair(0x00B0E0E6,	"PowderBlue"));
-	outMap.insert(RGBStringPair(0x00800080,	"Purple"));
-	outMap.insert(RGBStringPair(0x00663399,	"RebeccaPurple"));
-	outMap.insert(RGBStringPair(0x00FF0000,	"Red"));
-	outMap.insert(RGBStringPair(0x00BC8F8F,	"RosyBrown"));
-	outMap.insert(RGBStringPair(0x004169E1,	"RoyalBlue"));
-	outMap.insert(RGBStringPair(0x008B4513,	"SaddleBrown"));
-	outMap.insert(RGBStringPair(0x00FA8072,	"Salmon"));
-	outMap.insert(RGBStringPair(0x00F4A460,	"SandyBrown"));
-	outMap.insert(RGBStringPair(0x002E8B57,	"SeaGreen"));
-	outMap.insert(RGBStringPair(0x00FFF5EE,	"SeaShell"));
-	outMap.insert(RGBStringPair(0x00A0522D,	"Sienna"));
-	outMap.insert(RGBStringPair(0x00C0C0C0,	"Silver"));
-	outMap.insert(RGBStringPair(0x0087CEEB,	"SkyBlue"));
-	outMap.insert(RGBStringPair(0x006A5ACD,	"SlateBlue"));
-	outMap.insert(RGBStringPair(0x00708090,	"SlateGray"));
-	outMap.insert(RGBStringPair(0x00FFFAFA,	"Snow"));
-	outMap.insert(RGBStringPair(0x0000FF7F,	"SpringGreen"));
-	outMap.insert(RGBStringPair(0x004682B4,	"SteelBlue"));
-	outMap.insert(RGBStringPair(0x00D2B48C,	"Tan"));
-	outMap.insert(RGBStringPair(0x00008080,	"Teal"));
-	outMap.insert(RGBStringPair(0x00D8BFD8,	"Thistle"));
-	outMap.insert(RGBStringPair(0x00FF6347,	"Tomato"));
-	outMap.insert(RGBStringPair(0x0040E0D0,	"Turquoise"));
-	outMap.insert(RGBStringPair(0x00EE82EE,	"Violet"));
-	outMap.insert(RGBStringPair(0x00F5DEB3,	"Wheat"));
-//	outMap.insert(RGBStringPair(0x00FFFFFF,	"White"));
-	outMap.insert(RGBStringPair(0x00F5F5F5,	"WhiteSmoke"));
-	outMap.insert(RGBStringPair(0x00FFFF00,	"Yellow"));
-	outMap.insert(RGBStringPair(0x009ACD32,	"YellowGreen"));
+	outMap.insert(RGBStringPair(0x00F0F8FF, "AliceBlue"));
+	outMap.insert(RGBStringPair(0x00FAEBD7, "AntiqueWhite"));
+	outMap.insert(RGBStringPair(0x0000FFFF, "Aqua"));
+	outMap.insert(RGBStringPair(0x007FFFD4, "Aquamarine"));
+	outMap.insert(RGBStringPair(0x00F0FFFF, "Azure"));
+	outMap.insert(RGBStringPair(0x00F5F5DC, "Beige"));
+	outMap.insert(RGBStringPair(0x00FFE4C4, "Bisque"));
+//	outMap.insert(RGBStringPair(0x00000000, "Black"));
+	outMap.insert(RGBStringPair(0x00FFEBCD, "BlanchedAlmond"));
+	outMap.insert(RGBStringPair(0x000000FF, "Blue"));
+	outMap.insert(RGBStringPair(0x008A2BE2, "BlueViolet"));
+	outMap.insert(RGBStringPair(0x00A52A2A, "Brown"));
+	outMap.insert(RGBStringPair(0x00DEB887, "BurlyWood"));
+	outMap.insert(RGBStringPair(0x005F9EA0, "CadetBlue"));
+	outMap.insert(RGBStringPair(0x007FFF00, "Chartreuse"));
+	outMap.insert(RGBStringPair(0x00D2691E, "Chocolate"));
+	outMap.insert(RGBStringPair(0x00FF7F50, "Coral"));
+	outMap.insert(RGBStringPair(0x006495ED, "CornflowerBlue"));
+	outMap.insert(RGBStringPair(0x00FFF8DC, "Cornsilk"));
+	outMap.insert(RGBStringPair(0x00DC143C, "Crimson"));
+	outMap.insert(RGBStringPair(0x0000FFFF, "Cyan"));
+	outMap.insert(RGBStringPair(0x0000008B, "DarkBlue"));
+	outMap.insert(RGBStringPair(0x00008B8B, "DarkCyan"));
+	outMap.insert(RGBStringPair(0x00B8860B, "DarkGoldenRod"));
+	outMap.insert(RGBStringPair(0x00A9A9A9, "DarkGray"));
+	outMap.insert(RGBStringPair(0x00006400, "DarkGreen"));
+	outMap.insert(RGBStringPair(0x00BDB76B, "DarkKhaki"));
+	outMap.insert(RGBStringPair(0x008B008B, "DarkMagenta"));
+	outMap.insert(RGBStringPair(0x00556B2F, "DarkOliveGreen"));
+	outMap.insert(RGBStringPair(0x00FF8C00, "DarkOrange"));
+	outMap.insert(RGBStringPair(0x009932CC, "DarkOrchid"));
+	outMap.insert(RGBStringPair(0x008B0000, "DarkRed"));
+	outMap.insert(RGBStringPair(0x00E9967A, "DarkSalmon"));
+	outMap.insert(RGBStringPair(0x008FBC8F, "DarkSeaGreen"));
+	outMap.insert(RGBStringPair(0x00483D8B, "DarkSlateBlue"));
+	outMap.insert(RGBStringPair(0x002F4F4F, "DarkSlateGray"));
+	outMap.insert(RGBStringPair(0x0000CED1, "DarkTurquoise"));
+	outMap.insert(RGBStringPair(0x009400D3, "DarkViolet"));
+	outMap.insert(RGBStringPair(0x00FF1493, "DeepPink"));
+	outMap.insert(RGBStringPair(0x0000BFFF, "DeepSkyBlue"));
+	outMap.insert(RGBStringPair(0x00696969, "DimGray"));
+	outMap.insert(RGBStringPair(0x001E90FF, "DodgerBlue"));
+	outMap.insert(RGBStringPair(0x00B22222, "FireBrick"));
+	outMap.insert(RGBStringPair(0x00FFFAF0, "FloralWhite"));
+	outMap.insert(RGBStringPair(0x00228B22, "ForestGreen"));
+	outMap.insert(RGBStringPair(0x00FF00FF, "Fuchsia"));
+	outMap.insert(RGBStringPair(0x00DCDCDC, "Gainsboro"));
+	outMap.insert(RGBStringPair(0x00F8F8FF, "GhostWhite"));
+	outMap.insert(RGBStringPair(0x00FFD700, "Gold"));
+	outMap.insert(RGBStringPair(0x00DAA520, "GoldenRod"));
+	outMap.insert(RGBStringPair(0x00808080, "Gray"));
+	outMap.insert(RGBStringPair(0x00008000, "Green"));
+	outMap.insert(RGBStringPair(0x00ADFF2F, "GreenYellow"));
+	outMap.insert(RGBStringPair(0x00F0FFF0, "HoneyDew"));
+	outMap.insert(RGBStringPair(0x00FF69B4, "HotPink"));
+	outMap.insert(RGBStringPair(0x00CD5C5C, "IndianRed"));
+	outMap.insert(RGBStringPair(0x004B0082, "Indigo"));
+	outMap.insert(RGBStringPair(0x00FFFFF0, "Ivory"));
+	outMap.insert(RGBStringPair(0x00F0E68C, "Khaki"));
+	outMap.insert(RGBStringPair(0x00E6E6FA, "Lavender"));
+	outMap.insert(RGBStringPair(0x00FFF0F5, "LavenderBlush"));
+	outMap.insert(RGBStringPair(0x007CFC00, "LawnGreen"));
+	outMap.insert(RGBStringPair(0x00FFFACD, "LemonChiffon"));
+	outMap.insert(RGBStringPair(0x00ADD8E6, "LightBlue"));
+	outMap.insert(RGBStringPair(0x00F08080, "LightCoral"));
+	outMap.insert(RGBStringPair(0x00E0FFFF, "LightCyan"));
+	outMap.insert(RGBStringPair(0x00FAFAD2, "LightGoldenRodYellow"));
+	outMap.insert(RGBStringPair(0x00D3D3D3, "LightGray"));
+	outMap.insert(RGBStringPair(0x0090EE90, "LightGreen"));
+	outMap.insert(RGBStringPair(0x00FFB6C1, "LightPink"));
+	outMap.insert(RGBStringPair(0x00FFA07A, "LightSalmon"));
+	outMap.insert(RGBStringPair(0x0020B2AA, "LightSeaGreen"));
+	outMap.insert(RGBStringPair(0x0087CEFA, "LightSkyBlue"));
+	outMap.insert(RGBStringPair(0x00778899, "LightSlateGray"));
+	outMap.insert(RGBStringPair(0x00B0C4DE, "LightSteelBlue"));
+	outMap.insert(RGBStringPair(0x00FFFFE0, "LightYellow"));
+	outMap.insert(RGBStringPair(0x0000FF00, "Lime"));
+	outMap.insert(RGBStringPair(0x0032CD32, "LimeGreen"));
+	outMap.insert(RGBStringPair(0x00FAF0E6, "Linen"));
+	outMap.insert(RGBStringPair(0x00FF00FF, "Magenta"));
+	outMap.insert(RGBStringPair(0x00800000, "Maroon"));
+	outMap.insert(RGBStringPair(0x0066CDAA, "MediumAquaMarine"));
+	outMap.insert(RGBStringPair(0x000000CD, "MediumBlue"));
+	outMap.insert(RGBStringPair(0x00BA55D3, "MediumOrchid"));
+	outMap.insert(RGBStringPair(0x009370DB, "MediumPurple"));
+	outMap.insert(RGBStringPair(0x003CB371, "MediumSeaGreen"));
+	outMap.insert(RGBStringPair(0x007B68EE, "MediumSlateBlue"));
+	outMap.insert(RGBStringPair(0x0000FA9A, "MediumSpringGreen"));
+	outMap.insert(RGBStringPair(0x0048D1CC, "MediumTurquoise"));
+	outMap.insert(RGBStringPair(0x00C71585, "MediumVioletRed"));
+	outMap.insert(RGBStringPair(0x00191970, "MidnightBlue"));
+	outMap.insert(RGBStringPair(0x00F5FFFA, "MintCream"));
+	outMap.insert(RGBStringPair(0x00FFE4E1, "MistyRose"));
+	outMap.insert(RGBStringPair(0x00FFE4B5, "Moccasin"));
+	outMap.insert(RGBStringPair(0x00FFDEAD, "NavajoWhite"));
+	outMap.insert(RGBStringPair(0x00000080, "Navy"));
+	outMap.insert(RGBStringPair(0x00FDF5E6, "OldLace"));
+	outMap.insert(RGBStringPair(0x00808000, "Olive"));
+	outMap.insert(RGBStringPair(0x006B8E23, "OliveDrab"));
+	outMap.insert(RGBStringPair(0x00FFA500, "Orange"));
+	outMap.insert(RGBStringPair(0x00FF4500, "OrangeRed"));
+	outMap.insert(RGBStringPair(0x00DA70D6, "Orchid"));
+	outMap.insert(RGBStringPair(0x00EEE8AA, "PaleGoldenRod"));
+	outMap.insert(RGBStringPair(0x0098FB98, "PaleGreen"));
+	outMap.insert(RGBStringPair(0x00AFEEEE, "PaleTurquoise"));
+	outMap.insert(RGBStringPair(0x00DB7093, "PaleVioletRed"));
+	outMap.insert(RGBStringPair(0x00FFEFD5, "PapayaWhip"));
+	outMap.insert(RGBStringPair(0x00FFDAB9, "PeachPuff"));
+	outMap.insert(RGBStringPair(0x00CD853F, "Peru"));
+	outMap.insert(RGBStringPair(0x00FFC0CB, "Pink"));
+	outMap.insert(RGBStringPair(0x00DDA0DD, "Plum"));
+	outMap.insert(RGBStringPair(0x00B0E0E6, "PowderBlue"));
+	outMap.insert(RGBStringPair(0x00800080, "Purple"));
+	outMap.insert(RGBStringPair(0x00663399, "RebeccaPurple"));
+	outMap.insert(RGBStringPair(0x00FF0000, "Red"));
+	outMap.insert(RGBStringPair(0x00BC8F8F, "RosyBrown"));
+	outMap.insert(RGBStringPair(0x004169E1, "RoyalBlue"));
+	outMap.insert(RGBStringPair(0x008B4513, "SaddleBrown"));
+	outMap.insert(RGBStringPair(0x00FA8072, "Salmon"));
+	outMap.insert(RGBStringPair(0x00F4A460, "SandyBrown"));
+	outMap.insert(RGBStringPair(0x002E8B57, "SeaGreen"));
+	outMap.insert(RGBStringPair(0x00FFF5EE, "SeaShell"));
+	outMap.insert(RGBStringPair(0x00A0522D, "Sienna"));
+	outMap.insert(RGBStringPair(0x00C0C0C0, "Silver"));
+	outMap.insert(RGBStringPair(0x0087CEEB, "SkyBlue"));
+	outMap.insert(RGBStringPair(0x006A5ACD, "SlateBlue"));
+	outMap.insert(RGBStringPair(0x00708090, "SlateGray"));
+	outMap.insert(RGBStringPair(0x00FFFAFA, "Snow"));
+	outMap.insert(RGBStringPair(0x0000FF7F, "SpringGreen"));
+	outMap.insert(RGBStringPair(0x004682B4, "SteelBlue"));
+	outMap.insert(RGBStringPair(0x00D2B48C, "Tan"));
+	outMap.insert(RGBStringPair(0x00008080, "Teal"));
+	outMap.insert(RGBStringPair(0x00D8BFD8, "Thistle"));
+	outMap.insert(RGBStringPair(0x00FF6347, "Tomato"));
+	outMap.insert(RGBStringPair(0x0040E0D0, "Turquoise"));
+	outMap.insert(RGBStringPair(0x00EE82EE, "Violet"));
+	outMap.insert(RGBStringPair(0x00F5DEB3, "Wheat"));
+//	outMap.insert(RGBStringPair(0x00FFFFFF, "White"));
+	outMap.insert(RGBStringPair(0x00F5F5F5, "WhiteSmoke"));
+	outMap.insert(RGBStringPair(0x00FFFF00, "Yellow"));
+	outMap.insert(RGBStringPair(0x009ACD32, "YellowGreen"));
 	return outMap;
 }
 
@@ -2537,9 +2537,9 @@ static StringRGBMap & CreateStringRGBMap (StringRGBMap & outMap)
 NTV2TestPatternNames NTV2TestPatternGen::getTestPatternNames (void)
 {
 	NTV2TestPatternNames result;
-	TPStringMap	TPNames;
+	TPStringMap TPNames;
 	::CreateTPStringMap(TPNames);
-	for (TPStringMapConstIter it(TPNames.begin());  it != TPNames.end();  ++it)
+	for (TPStringMapConstIter it(TPNames.begin());	it != TPNames.end();  ++it)
 		result.push_back(it->second);
 	return result;
 }	//	getTestPatternNames
@@ -2554,7 +2554,7 @@ NTV2TestPatternNames NTV2TestPatternGen::getTestPatternNames (void)
 		{
 			AJAAutoLock locker(&resultGuard);
 			const NTV2TestPatternNames & names(getTestPatternNames());
-			for (size_t ndx(0);  ndx < names.size();  ndx++)
+			for (size_t ndx(0);	 ndx < names.size();  ndx++)
 				result.push_back(names[ndx].c_str());
 		}
 		return result;
@@ -2569,7 +2569,7 @@ NTV2StringList NTV2TestPatternGen::getColorNames (void)
 	::CreateRGBStringMap(rgbStringMap);
 	::CreateStringRGBMap(strToWebColors);
 	//	Accumulate mixed-case names...
-	for (StringRGBMapConstIter iter(strToWebColors.begin());  iter != strToWebColors.end();  ++iter)
+	for (StringRGBMapConstIter iter(strToWebColors.begin());  iter != strToWebColors.end();	 ++iter)
 	{	RGBStringMapConstIter it(rgbStringMap.find(findRGBColorByName(iter->first)));
 		if (it != rgbStringMap.end())
 			result.push_back(it->second);
@@ -2583,7 +2583,7 @@ NTV2TestPatternSelect NTV2TestPatternGen::findTestPatternByName (const string & 
 	StringTPMap strToTP;
 	::CreateStringTPMap(strToTP);
 	StringTPMapConstIter iter(strToTP.find(aja::lower(name)));
-	return iter != strToTP.end()  ?  iter->second  :  NTV2_TestPatt_INVALID;
+	return iter != strToTP.end()  ?	 iter->second  :  NTV2_TestPatt_INVALID;
 }
 
 ULWord NTV2TestPatternGen::findRGBColorByName (const string & inName)
@@ -2592,7 +2592,7 @@ ULWord NTV2TestPatternGen::findRGBColorByName (const string & inName)
 	StringRGBMap strToWebColors;
 	::CreateStringRGBMap(strToWebColors);
 	StringRGBMapConstIter iter(strToWebColors.find(aja::lower(name)));
-	return iter != strToWebColors.end()  ?  iter->second  :  0UL;
+	return iter != strToWebColors.end()	 ?	iter->second  :	 0UL;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2653,7 +2653,7 @@ bool NTV2TestPatternGen::drawIt (void)
 		case NTV2_TestPatt_SlantRamp:			result = DrawSlantRampFrame();			break;
 		case NTV2_TestPatt_ZonePlate:			result = DrawZonePlateFrame();			break;
 		case NTV2_TestPatt_ColorQuadrant:		result = DrawColorQuadrantFrame();		break;
-		case NTV2_TestPatt_ColorQuadrantBorder:	result = DrawQuadrantBorderFrame();		break;
+		case NTV2_TestPatt_ColorQuadrantBorder: result = DrawQuadrantBorderFrame();		break;
 		case NTV2_TestPatt_LinearRamp:			result = DrawLinearRampFrame();			break;
 		case NTV2_TestPatt_ColorQuadrantTsi:	result = DrawColorQuadrantFrameTsi();	break;
 		case NTV2_TestPatt_TsiAlignment:	result = DrawColorQuadrantFrameTsi2();	break;
@@ -2686,7 +2686,7 @@ bool NTV2TestPatternGen::drawIt (void)
 	{
 		// Save this away for worker methods.
 		mPatternID = inPattern;
-		mDstFrameWidth  = frameWidth;
+		mDstFrameWidth	= frameWidth;
 		mDstFrameHeight = frameHeight;
 		mDstPixelFormat = pixelFormat;
 		mNumPixels = frameWidth;
@@ -2740,7 +2740,7 @@ bool NTV2TestPatternGen::DrawTestPattern (const NTV2TestPatternSelect inPattern,
 
 	// Save this away for worker methods.
 	mPatternID = inPattern;
-	mDstFrameWidth  = inFormatDesc.GetRasterWidth();
+	mDstFrameWidth	= inFormatDesc.GetRasterWidth();
 	mDstFrameHeight = inFormatDesc.GetVisibleRasterHeight();
 	mDstPixelFormat = inFormatDesc.GetPixelFormat();
 	mNumPixels = mDstFrameWidth;
@@ -2784,7 +2784,7 @@ bool NTV2TestPatternGen::DrawTestPattern (const NTV2TestPatternSelect inPattern,
 		HDRTPGeometry geom(mNumPixels, mNumLines);	//	setupHDRTestPatternGeometries();
 
 	bool ok(drawIt());
-	if (ok  &&  setVANCToLegalBlack()  &&  inFormatDesc.IsVANC())
+	if (ok	&&	setVANCToLegalBlack()  &&  inFormatDesc.IsVANC())
 	{	//	Set the VANC area, if any, to legal black...
 		if (!::SetRasterLinesBlack(inFormatDesc.GetPixelFormat(), AsUBytePtr(buffer.GetHostPointer()),
 									UWord(inFormatDesc.GetBytesPerRow()), UWord(inFormatDesc.firstActiveLine)))
@@ -2821,7 +2821,7 @@ bool NTV2TestPatternGen::DrawTestPattern (const string & inStartsWith,
 
 	// Save this away for worker methods.
 	mPatternID = NTV2_TestPatt_INVALID;
-	mDstFrameWidth  = inFormatDesc.GetRasterWidth();
+	mDstFrameWidth	= inFormatDesc.GetRasterWidth();
 	mDstFrameHeight = inFormatDesc.GetVisibleRasterHeight();
 	mDstPixelFormat = inFormatDesc.GetPixelFormat();
 	mNumPixels = mDstFrameWidth;
@@ -2865,7 +2865,7 @@ bool NTV2TestPatternGen::DrawTestPattern (const string & inStartsWith,
 		HDConvertRGBAlphatoYCbCr(&rgbaPixel, &yCbCrPixel);
 	MakeUnPacked10BitYCbCrBuffer(mpUnpackedLineBuffer, yCbCrPixel.y, yCbCrPixel.cb, yCbCrPixel.cr, mDstFrameWidth);
 	ConvertUnpacked10BitYCbCrToPixelFormat(mpUnpackedLineBuffer, mpPackedLineBuffer, mDstFrameWidth, mDstPixelFormat, mSetRGBSmpteRange, mSetAlphaFromLuma);
-	for (uint32_t line(0);  line < mDstFrameHeight;  line++)
+	for (uint32_t line(0);	line < mDstFrameHeight;	 line++)
 	{
 		memcpy(mpDstBuffer, mpPackedLineBuffer, mDstLinePitch);
 		mpDstBuffer += mDstLinePitch;
@@ -2913,13 +2913,13 @@ bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 			numLines *= 2;
 
 			// stretch line by copying pixels.
-			uint16_t* pLineSrc  = &mpUnpackedLineBuffer[mDstFrameWidth-1];
+			uint16_t* pLineSrc	= &mpUnpackedLineBuffer[mDstFrameWidth-1];
 			uint16_t* pLineDest = &mpUnpackedLineBuffer[mDstFrameWidth*2-1];
 			for ( uint32_t count = 0; count < mDstFrameWidth/4; count ++)
 			{
-				uint16_t y2  = *pLineSrc--;
+				uint16_t y2	 = *pLineSrc--;
 				uint16_t cr1 = *pLineSrc--;
-				uint16_t y1  = *pLineSrc--;
+				uint16_t y1	 = *pLineSrc--;
 				uint16_t cb1 = *pLineSrc--;
 				*pLineDest-- = y2;	
 				*pLineDest-- = cr1; 
@@ -2981,7 +2981,7 @@ bool NTV2TestPatternGen::DrawSegmentedTestPattern()
 		uint8_t *pBuffer = mpDstBuffer + (uint32_t(startLine) * mDstLinePitch);
 
 		// copy and repeat for as many lines as called for in segment
-		for (int line(0);  line < numLines;  line++)
+		for (int line(0);  line < numLines;	 line++)
 		{
 			memcpy(pBuffer, mpPackedLineBuffer, mDstLinePitch);
 			pBuffer += mDstLinePitch;
@@ -3125,11 +3125,11 @@ bool NTV2TestPatternGen::DrawZonePlateFrame()
 	static const double kPi(3.1415926535898);
 	double pattScale = (kPi*.5 ) / (mDstFrameWidth + 1);
 
-	for (uint32_t line(0);  line < mDstFrameHeight;  line++)
+	for (uint32_t line(0);	line < mDstFrameHeight;	 line++)
 	{
-		for (uint16_t pixel(0);  pixel < mDstFrameWidth;  pixel++)
+		for (uint16_t pixel(0);	 pixel < mDstFrameWidth;  pixel++)
 		{
-			double xDist = double(pixel) - (double(mDstFrameWidth)  / 2.0);
+			double xDist = double(pixel) - (double(mDstFrameWidth)	/ 2.0);
 			double yDist = double(line) - (double(mDstFrameHeight) / 2.0);
 			double r = ((xDist * xDist) + (yDist * yDist)) * pattScale;
 
@@ -3153,8 +3153,8 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrame()
 
 	// Colors for the quadrants are from SMPTE 435-1-2009 section 6.4.2
 	static const unsigned char fullRange = 235;
-	static const unsigned char midRange  = 187;
-	static const unsigned char lowRange  = 140;
+	static const unsigned char midRange	 = 187;
+	static const unsigned char lowRange	 = 140;
 	RGBAlphaPixel rgbaPixel;
 	YCbCr10BitPixel yCbCrPixel;
 	rgbaPixel.Alpha = 0;  // Upper left - yellow
@@ -3269,7 +3269,7 @@ bool NTV2TestPatternGen::DrawQuadrantBorderFrame()
 	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedBlueLineBuffer, pPackedBlueLineBuffer, mDstFrameWidth, mDstPixelFormat, mSetRGBSmpteRange, mSetAlphaFromLuma);
 	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedMagentaGreenLineBuffer, pPackedMagentaGreenLineBuffer, mDstFrameWidth, mDstPixelFormat, mSetRGBSmpteRange, mSetAlphaFromLuma);
 
-	for (uint32_t line(0);  line < mDstFrameHeight;  line++)
+	for (uint32_t line(0);	line < mDstFrameHeight;	 line++)
 	{
 		switch (line)
 		{
@@ -3315,8 +3315,8 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi()
 
 	// Colors for the quadrants are from SMPTE 435-1-2009 section 6.4.2
 	static const unsigned char fullRange = 235;
-	static const unsigned char midRange  = 187;
-	static const unsigned char lowRange  = 140;
+	static const unsigned char midRange	 = 187;
+	static const unsigned char lowRange	 = 140;
 	RGBAlphaPixel rgbaPixel;
 	rgbaPixel.Alpha = 0;  // Upper left - yellow
 	rgbaPixel.Red = fullRange;
@@ -3342,7 +3342,7 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi()
 	rgbaPixel.Blue = midRange;
 	HDConvertRGBAlphatoYCbCr(&rgbaPixel, &yCbCrPixelPink);
 
-	for (uint32_t i(0);  i < mDstFrameWidth*2;  i += 8)
+	for (uint32_t i(0);	 i < mDstFrameWidth*2;	i += 8)
 	{
 		pUnPackedUpperLineBuffer [i + 0] = yCbCrPixelYellow.cb;
 		pUnPackedUpperLineBuffer [i + 1] = yCbCrPixelYellow.y;
@@ -3355,7 +3355,7 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi()
 		pUnPackedUpperLineBuffer [i + 7] = yCbCrPixelBlue.y;
 	}
 
-	for (uint32_t i(0);  i < mDstFrameWidth*2;  i += 8)
+	for (uint32_t i(0);	 i < mDstFrameWidth*2;	i += 8)
 	{
 		pUnPackedLowerLineBuffer [i + 0] = yCbCrPixelGreen.cb;
 		pUnPackedLowerLineBuffer [i + 1] = yCbCrPixelGreen.y;
@@ -3371,7 +3371,7 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi()
 	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedUpperLineBuffer, pPackedUpperLineBuffer, mDstFrameWidth, mDstPixelFormat);
 	ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedLowerLineBuffer, pPackedLowerLineBuffer, mDstFrameWidth, mDstPixelFormat);
 
-	for (uint32_t line(0);  line < mDstFrameHeight;  line += 2)
+	for (uint32_t line(0);	line < mDstFrameHeight;	 line += 2)
 	{
 		::memcpy(mpDstBuffer, pPackedUpperLineBuffer, mDstLinePitch);
 		mpDstBuffer += mDstLinePitch;
@@ -3390,7 +3390,7 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi()
 
 bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi2()
 {
-	const uint32_t innerDim 	= mDstFrameHeight / 12;
+	const uint32_t innerDim		= mDstFrameHeight / 12;
 	const uint32_t outerDim		= mDstFrameHeight / 6;
 	const uint32_t lineWidth	= 3;
 
@@ -3485,7 +3485,7 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi2()
 		pUnPackedPillarInBuffer[h*2]		= yCbCrPixelBlack.cb;
 		pUnPackedPillarInBuffer[h*2 + 1]	= yCbCrPixelBlack.y;
 	}
-	for (h=innerRight - lineWidth; h < innerRight; h++)	// overwrite
+	for (h=innerRight - lineWidth; h < innerRight; h++) // overwrite
 	{
 		pUnPackedPillarInBuffer[h*2]		= yCbCrPixelBlack.cb;
 		pUnPackedPillarInBuffer[h*2 + 1]	= yCbCrPixelBlack.y;
@@ -3496,12 +3496,12 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi2()
 	for (h=outerLeft; h < outerLeft + lineWidth; h++)	// overwrite
 	{
 		pUnPackedPillarInOutBuffer[h*2]		= yCbCrPixelBlack.cb;
-		pUnPackedPillarInOutBuffer[h*2 + 1]	= yCbCrPixelBlack.y;
+		pUnPackedPillarInOutBuffer[h*2 + 1] = yCbCrPixelBlack.y;
 	}
-	for (h=outerRight - lineWidth; h < outerRight; h++)	// overwrite
+	for (h=outerRight - lineWidth; h < outerRight; h++) // overwrite
 	{
 		pUnPackedPillarInOutBuffer[h*2]		= yCbCrPixelBlack.cb;
-		pUnPackedPillarInOutBuffer[h*2 + 1]	= yCbCrPixelBlack.y;
+		pUnPackedPillarInOutBuffer[h*2 + 1] = yCbCrPixelBlack.y;
 	}
 	
 	// image top
@@ -3509,7 +3509,7 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi2()
 	uint32_t diagLeftIdx	= marginWidth * 2;
 	uint32_t diagRightIdx	= (mDstFrameWidth - marginWidth) * 2;
 	
-	for (uint32_t v(0);  v < mDstFrameHeight;  v ++)
+	for (uint32_t v(0);	 v < mDstFrameHeight;  v ++)
 	{
 		// fill in background line for center square
 		if (v < outerTop)
@@ -3534,8 +3534,8 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi2()
 		// overlay one-pixel diagonal cross
 		pUnPackedTempBuffer[diagLeftIdx++]	= yCbCrPixelBlack.cb;
 		pUnPackedTempBuffer[diagLeftIdx++]	= yCbCrPixelBlack.y;
-		pUnPackedTempBuffer[diagRightIdx--]	= yCbCrPixelBlack.cb;
-		pUnPackedTempBuffer[diagRightIdx--]	= yCbCrPixelBlack.y;
+		pUnPackedTempBuffer[diagRightIdx--] = yCbCrPixelBlack.cb;
+		pUnPackedTempBuffer[diagRightIdx--] = yCbCrPixelBlack.y;
 		
 		// copy to output buffer
 		ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedTempBuffer, (uint32_t*)mpDstBuffer, mDstFrameWidth, mDstPixelFormat);
@@ -3604,7 +3604,7 @@ bool NTV2TestPatternGen::IsSDStandard(void) const
 
 static AJA_RGB16BitPixel*  addToBuffer (AJA_RGB16BitPixel* buffer, const AJA_RGB16BitPixel & value, const uint32_t length)
 {
-	for (uint32_t i(0);  i < length;  i++)
+	for (uint32_t i(0);	 i < length;  i++)
 		*buffer++ = value;
 	return buffer;
 }
@@ -3613,7 +3613,7 @@ static AJA_RGB16BitPixel*  addRampToBuffer (AJA_RGB16BitPixel* buffer, const AJA
 {
 	AJA_RGB16BitPixel pixel(value);
 
-	for (uint32_t i(0);  i < length;  i++)
+	for (uint32_t i(0);	 i < length;  i++)
 	{
 		*buffer++ = pixel;
 		pixel.Red += incrementValue;
@@ -3638,22 +3638,22 @@ static void ConvertRGBLineTo10BitYCbCr422 (AJA_RGB16BitPixel* lineBuffer, const 
 	cr = int16_t((r-64.0)*(0.511414) + (g-64.0)*(-0.470284) + (b-64.0)*(-0.04113) + 512.0);
 	//dbg << endl << "Y=" << y << " Cb=" << cb << " Cr=" << cr << endl;
 
-	for (uint32_t pixel(0);  pixel < lineLength;  pixel++)
+	for (uint32_t pixel(0);	 pixel < lineLength;  pixel++)
 	{
 		AJA_RGB16BitPixel pixelValue = lineBuffer[pixel];
 		//Make 10 bit Value
-		r = pixelValue.Red   >> 2;
+		r = pixelValue.Red	 >> 2;
 		g = pixelValue.Green >> 2;
-		b = pixelValue.Blue  >> 2;
-		y  = int16_t((r-64.0)*( 0.262700)  +  (g-64.0)*( 0.678000)  +  (b-64.0)*( 0.059300)  +   64.0);
-		cb = int16_t((r-64.0)*(-0.142820)  +  (g-64.0)*(-0.368594)  +  (b-64.0)*( 0.511414)  +  512.0);
-		cr = int16_t((r-64.0)*( 0.511414)  +  (g-64.0)*(-0.470284)  +  (b-64.0)*(-0.041130)  +  512.0);
+		b = pixelValue.Blue	 >> 2;
+		y  = int16_t((r-64.0)*( 0.262700)  +  (g-64.0)*( 0.678000)	+  (b-64.0)*( 0.059300)	 +	 64.0);
+		cb = int16_t((r-64.0)*(-0.142820)  +  (g-64.0)*(-0.368594)	+  (b-64.0)*( 0.511414)	 +	512.0);
+		cr = int16_t((r-64.0)*( 0.511414)  +  (g-64.0)*(-0.470284)	+  (b-64.0)*(-0.041130)	 +	512.0);
 		if ( y > 1020)	y  = 1020;
-		if ( y <    4)	y  = 4;
+		if ( y <	4)	y  = 4;
 		if (cb > 1020)	cb = 1020;
-		if (cb <    4)	cb = 4;
+		if (cb <	4)	cb = 4;
 		if (cr > 1020)	cr = 1020;
-		if (cr <    4)	cr = 4;
+		if (cr <	4)	cr = 4;
 		#if 0
 			if (pixel & 0x1)
 				dbg << DEC(y) << ",";
@@ -3671,12 +3671,12 @@ void NTV2TestPatternGen::PrepareForOutput()
 	uint16_t* rgb16BitBuffer = new uint16_t[mNumPixels*mNumLines * 3];
 	uint16_t* rgb12Buffer = mRGBBuffer.data();
 	ULWord* buffer = AsULWordPtr(rgb16BitBuffer);
-	for (uint32_t i(0);  i < mNumPixels*mNumLines;  i++)
+	for (uint32_t i(0);	 i < mNumPixels*mNumLines;	i++)
 	{
 		uint16_t r = uint16_t((*rgb12Buffer++) << 4);
 		uint16_t g = uint16_t((*rgb12Buffer++) << 4);
 		uint16_t b = uint16_t((*rgb12Buffer++) << 4);
-		*rgb16BitBuffer++ = b;  // b
+		*rgb16BitBuffer++ = b;	// b
 		*rgb16BitBuffer++ = g; //g
 		*rgb16BitBuffer++ = r;
 	}
@@ -3686,338 +3686,338 @@ void NTV2TestPatternGen::PrepareForOutput()
 
 bool NTV2TestPatternGen::DrawTestPatternNarrowHLG()
 {
-    mBitsPerComponent = 16;
+	mBitsPerComponent = 16;
 	const HDRTPGeometry geom(mNumPixels, mNumLines);
 
-    AJA_RGB16BitPixel* rgbBuffer = AsRGB16Ptr(mRGBBuffer.data());
+	AJA_RGB16BitPixel* rgbBuffer = AsRGB16Ptr(mRGBBuffer.data());
 
-    AJA_RGB16BitPixel* tempBuffer = new AJA_RGB16BitPixel[geom.a*2];
-    AJA_RGB16BitPixel* lineBuffer = tempBuffer;
+	AJA_RGB16BitPixel* tempBuffer = new AJA_RGB16BitPixel[geom.a*2];
+	AJA_RGB16BitPixel* lineBuffer = tempBuffer;
 
-    // build  line of 1st segment
-    lineBuffer = addToBuffer(lineBuffer, NarrowGrey40, geom.c);
-    lineBuffer = addToBuffer(lineBuffer, NarrowWhite100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowYellow100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowCyan100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowGreen100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowMagenta100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowRed100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowBlue100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowGrey40, geom.c);
+	// build  line of 1st segment
+	lineBuffer = addToBuffer(lineBuffer, NarrowGrey40, geom.c);
+	lineBuffer = addToBuffer(lineBuffer, NarrowWhite100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowYellow100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowCyan100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowGreen100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowMagenta100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowRed100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowBlue100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowGrey40, geom.c);
 
-    uint32_t line = 0;
-    for (line = 0;  line < geom.b/12;  line++)
-    {
-        memcpy(rgbBuffer,tempBuffer,geom.a*sizeof(AJA_RGB16BitPixel));
-        rgbBuffer += geom.a;
+	uint32_t line = 0;
+	for (line = 0;	line < geom.b/12;  line++)
+	{
+		memcpy(rgbBuffer,tempBuffer,geom.a*sizeof(AJA_RGB16BitPixel));
+		rgbBuffer += geom.a;
 
-    }
-    // build  line of 2nd segment
-    lineBuffer = tempBuffer;
-    lineBuffer = addToBuffer(lineBuffer, NarrowGrey40, geom.c);
-    lineBuffer = addToBuffer(lineBuffer, NarrowWhite75, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowYellow75, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowCyan75, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowGreen75, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowMagenta75, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowRed75, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowBlue75, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowGrey40, geom.c);
+	}
+	// build  line of 2nd segment
+	lineBuffer = tempBuffer;
+	lineBuffer = addToBuffer(lineBuffer, NarrowGrey40, geom.c);
+	lineBuffer = addToBuffer(lineBuffer, NarrowWhite75, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowYellow75, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowCyan75, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowGreen75, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowMagenta75, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowRed75, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowBlue75, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowGrey40, geom.c);
 
-    for ( ;  line < (geom.b/12+geom.b/2);  line++)
-    {
-        memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
-        rgbBuffer += geom.a;
+	for ( ;	 line < (geom.b/12+geom.b/2);  line++)
+	{
+		memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
+		rgbBuffer += geom.a;
 
-    }
+	}
 
-    // build  line of 3rd segment
-    lineBuffer = tempBuffer;
-    lineBuffer = addToBuffer(lineBuffer, NarrowWhite75, geom.c);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStepMinus7, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep0, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep10, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep20, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep30, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep40, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep50, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep60, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep70, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep80, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep90, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep100, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep109, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowWhite75, geom.c);
+	// build  line of 3rd segment
+	lineBuffer = tempBuffer;
+	lineBuffer = addToBuffer(lineBuffer, NarrowWhite75, geom.c);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStepMinus7, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep0, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep10, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep20, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep30, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep40, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep50, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep60, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep70, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep80, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep90, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep100, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep109, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowWhite75, geom.c);
 
-    for ( ;  line < (geom.b/12 + geom.b/2 + geom.b/12);  line++)
-    {
-        memcpy(rgbBuffer,tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
-        rgbBuffer += geom.a;
-    }
+	for ( ;	 line < (geom.b/12 + geom.b/2 + geom.b/12);	 line++)
+	{
+		memcpy(rgbBuffer,tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
+		rgbBuffer += geom.a;
+	}
 
-    // build  line of 4th segment
-    lineBuffer = tempBuffer;
-    lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.c);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStepMinus7, geom.rampB);
-    lineBuffer = addRampToBuffer(lineBuffer, NarrowStepMinus7, geom.rampC, geom.incrementValue);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep109, geom.rampD);
+	// build  line of 4th segment
+	lineBuffer = tempBuffer;
+	lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.c);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStepMinus7, geom.rampB);
+	lineBuffer = addRampToBuffer(lineBuffer, NarrowStepMinus7, geom.rampC, geom.incrementValue);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep109, geom.rampD);
 
-    for ( ;  line < (geom.b/12 + geom.b/2 + geom.b/12 + geom.b/12);  line++)
-    {
-        memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
-        rgbBuffer += geom.a;
-    }
+	for ( ;	 line < (geom.b/12 + geom.b/2 + geom.b/12 + geom.b/12);	 line++)
+	{
+		memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
+		rgbBuffer += geom.a;
+	}
 
-    // build  line of 5th segment
-    lineBuffer = tempBuffer;
-    lineBuffer = addToBuffer(lineBuffer, NarrowYellow75_709, geom.c/3);
-    lineBuffer = addToBuffer(lineBuffer, NarrowCyan75_709, geom.c/3);
-    lineBuffer = addToBuffer(lineBuffer, NarrowGreen75_709, geom.c/3);
-    lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.f);
-    lineBuffer = addToBuffer(lineBuffer, NarrowMinus2PercentBlack, geom.g);
-    lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.h);
-    lineBuffer = addToBuffer(lineBuffer, Narrow2PercentBlack, geom.g);
-    lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.h);
-    lineBuffer = addToBuffer(lineBuffer, Narrow4PercentBlack, geom.g);
-    lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.i);
-    lineBuffer = addToBuffer(lineBuffer, NarrowWhite75, geom.j);
-    lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.k);
-    lineBuffer = addToBuffer(lineBuffer, NarrowMagenta75_709, geom.c/3);
-    lineBuffer = addToBuffer(lineBuffer, NarrowRed75_709, geom.c/3);
-    lineBuffer = addToBuffer(lineBuffer, NarrowBlue75_709, geom.c/3);
+	// build  line of 5th segment
+	lineBuffer = tempBuffer;
+	lineBuffer = addToBuffer(lineBuffer, NarrowYellow75_709, geom.c/3);
+	lineBuffer = addToBuffer(lineBuffer, NarrowCyan75_709, geom.c/3);
+	lineBuffer = addToBuffer(lineBuffer, NarrowGreen75_709, geom.c/3);
+	lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.f);
+	lineBuffer = addToBuffer(lineBuffer, NarrowMinus2PercentBlack, geom.g);
+	lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.h);
+	lineBuffer = addToBuffer(lineBuffer, Narrow2PercentBlack, geom.g);
+	lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.h);
+	lineBuffer = addToBuffer(lineBuffer, Narrow4PercentBlack, geom.g);
+	lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.i);
+	lineBuffer = addToBuffer(lineBuffer, NarrowWhite75, geom.j);
+	lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.k);
+	lineBuffer = addToBuffer(lineBuffer, NarrowMagenta75_709, geom.c/3);
+	lineBuffer = addToBuffer(lineBuffer, NarrowRed75_709, geom.c/3);
+	lineBuffer = addToBuffer(lineBuffer, NarrowBlue75_709, geom.c/3);
 
-    for ( ;  line < (geom.b/12 + geom.b/2 + geom.b/12 + geom.b/12 + geom.b/4);  line++)
-    {
-        memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
-        rgbBuffer += geom.a;
-    }
+	for ( ;	 line < (geom.b/12 + geom.b/2 + geom.b/12 + geom.b/12 + geom.b/4);	line++)
+	{
+		memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
+		rgbBuffer += geom.a;
+	}
 	PrepareForOutput();
-    delete [] tempBuffer;
+	delete [] tempBuffer;
 	return true;
 }
 
 bool NTV2TestPatternGen::DrawTestPatternNarrowPQ()
 {
-    mBitsPerComponent = 16;
+	mBitsPerComponent = 16;
 	const HDRTPGeometry geom(mNumPixels, mNumLines);
 
-    AJA_RGB16BitPixel* rgbBuffer = AsRGB16Ptr(mRGBBuffer.data());
+	AJA_RGB16BitPixel* rgbBuffer = AsRGB16Ptr(mRGBBuffer.data());
 
-    AJA_RGB16BitPixel* tempBuffer = new AJA_RGB16BitPixel[geom.a*2];
-    AJA_RGB16BitPixel* lineBuffer = tempBuffer;
+	AJA_RGB16BitPixel* tempBuffer = new AJA_RGB16BitPixel[geom.a*2];
+	AJA_RGB16BitPixel* lineBuffer = tempBuffer;
 
-    lineBuffer = addToBuffer(lineBuffer, NarrowGrey40, geom.c);
-    lineBuffer = addToBuffer(lineBuffer, NarrowWhite100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowYellow100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowCyan100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowGreen100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowMagenta100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowRed100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowBlue100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowGrey40, geom.c);
-    ConvertRGBLineTo10BitYCbCr422(tempBuffer, mNumPixels);
-    //qDebug() << "between the lines";
+	lineBuffer = addToBuffer(lineBuffer, NarrowGrey40, geom.c);
+	lineBuffer = addToBuffer(lineBuffer, NarrowWhite100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowYellow100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowCyan100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowGreen100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowMagenta100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowRed100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowBlue100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowGrey40, geom.c);
+	ConvertRGBLineTo10BitYCbCr422(tempBuffer, mNumPixels);
+	//qDebug() << "between the lines";
 
-    // build  line of 1st segment
-    uint32_t line;
-    for (line = 0;  line < geom.b/12;  line++ )
-    {
-        memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
-        rgbBuffer += geom.a;
+	// build  line of 1st segment
+	uint32_t line;
+	for (line = 0;	line < geom.b/12;  line++ )
+	{
+		memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
+		rgbBuffer += geom.a;
 
-    }
-    // build  line of 2nd segment
-    lineBuffer = tempBuffer;
-    lineBuffer = addToBuffer(lineBuffer, NarrowGrey40, geom.c);
-    lineBuffer = addToBuffer(lineBuffer, NarrowWhite58, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowYellow58, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowCyan58, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowGreen58, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowMagenta58, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowRed58, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowBlue58, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowGrey40, geom.c);
-    for ( ;  line < (geom.b/12 + geom.b/2);  line++)
-    {
-        memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
-        rgbBuffer += geom.a;
+	}
+	// build  line of 2nd segment
+	lineBuffer = tempBuffer;
+	lineBuffer = addToBuffer(lineBuffer, NarrowGrey40, geom.c);
+	lineBuffer = addToBuffer(lineBuffer, NarrowWhite58, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowYellow58, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowCyan58, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowGreen58, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowMagenta58, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowRed58, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowBlue58, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowGrey40, geom.c);
+	for ( ;	 line < (geom.b/12 + geom.b/2);	 line++)
+	{
+		memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
+		rgbBuffer += geom.a;
 
-    }
+	}
 
-    // build  line of 3rd segment
-    lineBuffer = tempBuffer;
-    lineBuffer = addToBuffer(lineBuffer, NarrowWhite58, geom.c);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStepMinus7, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep0, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep10, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep20, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep30, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep40, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep50, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep60, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep70, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep80, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep90, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep100, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep109, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, NarrowWhite58, geom.c);
-    for ( ;  line < (geom.b/12 + geom.b/2 + geom.b/12);  line++)
-    {
-        memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
-        rgbBuffer += geom.a;
-    }
+	// build  line of 3rd segment
+	lineBuffer = tempBuffer;
+	lineBuffer = addToBuffer(lineBuffer, NarrowWhite58, geom.c);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStepMinus7, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep0, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep10, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep20, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep30, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep40, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep50, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep60, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep70, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep80, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep90, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep100, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep109, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, NarrowWhite58, geom.c);
+	for ( ;	 line < (geom.b/12 + geom.b/2 + geom.b/12);	 line++)
+	{
+		memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
+		rgbBuffer += geom.a;
+	}
 
-    // build  line of 4th segment
-    lineBuffer = tempBuffer;
-    lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.c);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStepMinus7, geom.rampB);
-    lineBuffer = addRampToBuffer(lineBuffer, NarrowStepMinus7, geom.rampC, geom.incrementValue);
-    lineBuffer = addToBuffer(lineBuffer, NarrowStep109, geom.rampD);
-    for ( ;  line < (geom.b/12 + geom.b/2 + geom.b/12 + geom.b/12);  line++)
-    {
-        memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
-        rgbBuffer += geom.a;
-    }
+	// build  line of 4th segment
+	lineBuffer = tempBuffer;
+	lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.c);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStepMinus7, geom.rampB);
+	lineBuffer = addRampToBuffer(lineBuffer, NarrowStepMinus7, geom.rampC, geom.incrementValue);
+	lineBuffer = addToBuffer(lineBuffer, NarrowStep109, geom.rampD);
+	for ( ;	 line < (geom.b/12 + geom.b/2 + geom.b/12 + geom.b/12);	 line++)
+	{
+		memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
+		rgbBuffer += geom.a;
+	}
 
-    // build  line of 5th segment
-    lineBuffer = tempBuffer;
-    lineBuffer = addToBuffer(lineBuffer, NarrowYellow58_709, geom.c/3);
-    lineBuffer = addToBuffer(lineBuffer, NarrowCyan58_709, geom.c/3);
-    lineBuffer = addToBuffer(lineBuffer, NarrowGreen58_709, geom.c/3);
-    lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.f);
-    lineBuffer = addToBuffer(lineBuffer, NarrowMinus2PercentBlack, geom.g);
-    lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.h);
-    lineBuffer = addToBuffer(lineBuffer, Narrow2PercentBlack, geom.g);
-    lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.h);
-    lineBuffer = addToBuffer(lineBuffer, Narrow4PercentBlack, geom.g);
-    lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.i);
-    lineBuffer = addToBuffer(lineBuffer, NarrowWhite75, geom.j);
-    lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.k);
-    lineBuffer = addToBuffer(lineBuffer, NarrowMagenta58_709, geom.c/3);
-    lineBuffer = addToBuffer(lineBuffer, NarrowRed58_709, geom.c/3);
-    lineBuffer = addToBuffer(lineBuffer, NarrowBlue58_709, geom.c/3);
-    for ( ;  line < (geom.b/12 + geom.b/2 + geom.b/12 + geom.b/12 + geom.b/4);  line++)
-    {
-        memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
-        rgbBuffer += geom.a;
-    }
+	// build  line of 5th segment
+	lineBuffer = tempBuffer;
+	lineBuffer = addToBuffer(lineBuffer, NarrowYellow58_709, geom.c/3);
+	lineBuffer = addToBuffer(lineBuffer, NarrowCyan58_709, geom.c/3);
+	lineBuffer = addToBuffer(lineBuffer, NarrowGreen58_709, geom.c/3);
+	lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.f);
+	lineBuffer = addToBuffer(lineBuffer, NarrowMinus2PercentBlack, geom.g);
+	lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.h);
+	lineBuffer = addToBuffer(lineBuffer, Narrow2PercentBlack, geom.g);
+	lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.h);
+	lineBuffer = addToBuffer(lineBuffer, Narrow4PercentBlack, geom.g);
+	lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.i);
+	lineBuffer = addToBuffer(lineBuffer, NarrowWhite75, geom.j);
+	lineBuffer = addToBuffer(lineBuffer, NarrowBlack, geom.k);
+	lineBuffer = addToBuffer(lineBuffer, NarrowMagenta58_709, geom.c/3);
+	lineBuffer = addToBuffer(lineBuffer, NarrowRed58_709, geom.c/3);
+	lineBuffer = addToBuffer(lineBuffer, NarrowBlue58_709, geom.c/3);
+	for ( ;	 line < (geom.b/12 + geom.b/2 + geom.b/12 + geom.b/12 + geom.b/4);	line++)
+	{
+		memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
+		rgbBuffer += geom.a;
+	}
 	PrepareForOutput();
-    delete [] tempBuffer;
+	delete [] tempBuffer;
 	return true;
 }
 
 
 bool NTV2TestPatternGen::DrawTestPatternWidePQ()
 {
-    mBitsPerComponent = 16;
+	mBitsPerComponent = 16;
 	const HDRTPGeometry geom(mNumPixels, mNumLines);
-    AJA_RGB16BitPixel* rgbBuffer = AsRGB16Ptr(mRGBBuffer.data());
-    AJA_RGB16BitPixel* tempBuffer = new AJA_RGB16BitPixel[geom.a*2];
-    AJA_RGB16BitPixel* lineBuffer = tempBuffer;
+	AJA_RGB16BitPixel* rgbBuffer = AsRGB16Ptr(mRGBBuffer.data());
+	AJA_RGB16BitPixel* tempBuffer = new AJA_RGB16BitPixel[geom.a*2];
+	AJA_RGB16BitPixel* lineBuffer = tempBuffer;
 
-    lineBuffer = addToBuffer(lineBuffer, WideGrey40, geom.c);
-    lineBuffer = addToBuffer(lineBuffer, WideWhite100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, WideYellow100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, WideCyan100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, WideGreen100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, WideMagenta100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, WideRed100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, WideBlue100, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, WideGrey40, geom.c);
-    ConvertRGBLineTo10BitYCbCr422(tempBuffer, mNumPixels);
-    //qDebug() << "between the lines 0";
-    // build  line of 1st segment
-    uint32_t line;
-    for (line = 0;  line < geom.b/12;  line++)
-    {
-        memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
-        rgbBuffer += geom.a;
-    }
-    // build  line of 2nd segment
-    lineBuffer = tempBuffer;
-    lineBuffer = addToBuffer(lineBuffer, WideGrey40, geom.c);
-    lineBuffer = addToBuffer(lineBuffer, WideWhite58, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, WideYellow58, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, WideCyan58, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, WideGreen58, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, WideMagenta58, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, WideRed58, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, WideBlue58, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, WideGrey40, geom.c);
-    ConvertRGBLineTo10BitYCbCr422(tempBuffer, mNumPixels);
-    //qDebug() << "between the lines 1";
-    for ( ;  line < (geom.b/12 + geom.b/2);  line++)
-    {
-        memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
-        rgbBuffer += geom.a;
+	lineBuffer = addToBuffer(lineBuffer, WideGrey40, geom.c);
+	lineBuffer = addToBuffer(lineBuffer, WideWhite100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, WideYellow100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, WideCyan100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, WideGreen100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, WideMagenta100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, WideRed100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, WideBlue100, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, WideGrey40, geom.c);
+	ConvertRGBLineTo10BitYCbCr422(tempBuffer, mNumPixels);
+	//qDebug() << "between the lines 0";
+	// build  line of 1st segment
+	uint32_t line;
+	for (line = 0;	line < geom.b/12;  line++)
+	{
+		memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
+		rgbBuffer += geom.a;
+	}
+	// build  line of 2nd segment
+	lineBuffer = tempBuffer;
+	lineBuffer = addToBuffer(lineBuffer, WideGrey40, geom.c);
+	lineBuffer = addToBuffer(lineBuffer, WideWhite58, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, WideYellow58, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, WideCyan58, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, WideGreen58, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, WideMagenta58, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, WideRed58, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, WideBlue58, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, WideGrey40, geom.c);
+	ConvertRGBLineTo10BitYCbCr422(tempBuffer, mNumPixels);
+	//qDebug() << "between the lines 1";
+	for ( ;	 line < (geom.b/12 + geom.b/2);	 line++)
+	{
+		memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
+		rgbBuffer += geom.a;
 
-    }
+	}
 
-    // build  line of 3rd segment
-    lineBuffer = tempBuffer;
-    lineBuffer = addToBuffer(lineBuffer, WideWhite58, geom.c);
-    lineBuffer = addToBuffer(lineBuffer, WideStep0, geom.d);
-    lineBuffer = addToBuffer(lineBuffer, WideStep0, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, WideStep10, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, WideStep20, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, WideStep30, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, WideStep40, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, WideStep50, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, WideStep60, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, WideStep70, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, WideStep80, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, WideStep90, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, WideStep100, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, WideStep100, geom.d/2);
-    lineBuffer = addToBuffer(lineBuffer, WideWhite58, geom.c);
-    ConvertRGBLineTo10BitYCbCr422(tempBuffer, mNumPixels);
-    //qDebug() << "between the lines 2";
-    for ( ;  line < (geom.b/12 + geom.b/2 + geom.b/12);  line++)
-    {
-        memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
-        rgbBuffer += geom.a;
-    }
+	// build  line of 3rd segment
+	lineBuffer = tempBuffer;
+	lineBuffer = addToBuffer(lineBuffer, WideWhite58, geom.c);
+	lineBuffer = addToBuffer(lineBuffer, WideStep0, geom.d);
+	lineBuffer = addToBuffer(lineBuffer, WideStep0, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, WideStep10, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, WideStep20, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, WideStep30, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, WideStep40, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, WideStep50, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, WideStep60, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, WideStep70, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, WideStep80, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, WideStep90, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, WideStep100, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, WideStep100, geom.d/2);
+	lineBuffer = addToBuffer(lineBuffer, WideWhite58, geom.c);
+	ConvertRGBLineTo10BitYCbCr422(tempBuffer, mNumPixels);
+	//qDebug() << "between the lines 2";
+	for ( ;	 line < (geom.b/12 + geom.b/2 + geom.b/12);	 line++)
+	{
+		memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
+		rgbBuffer += geom.a;
+	}
 
-    // build  line of 4th segment
-    lineBuffer = tempBuffer;
-    lineBuffer = addToBuffer(lineBuffer, WideBlack, geom.c);
-    lineBuffer = addToBuffer(lineBuffer, WideBlack, geom.rampB);
-    lineBuffer = addRampToBuffer(lineBuffer, WideBlack, geom.rampC, geom.incrementValue);
-    lineBuffer = addToBuffer(lineBuffer, WideStep100, geom.rampD);
-    ConvertRGBLineTo10BitYCbCr422(tempBuffer, mNumPixels);
-    //qDebug() << "between the lines 3";
-    for ( ;  line < (geom.b/12 + geom.b/2 + geom.b/12 + geom.b/12);  line++)
-    {
-        memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
-        rgbBuffer += geom.a;
-    }
+	// build  line of 4th segment
+	lineBuffer = tempBuffer;
+	lineBuffer = addToBuffer(lineBuffer, WideBlack, geom.c);
+	lineBuffer = addToBuffer(lineBuffer, WideBlack, geom.rampB);
+	lineBuffer = addRampToBuffer(lineBuffer, WideBlack, geom.rampC, geom.incrementValue);
+	lineBuffer = addToBuffer(lineBuffer, WideStep100, geom.rampD);
+	ConvertRGBLineTo10BitYCbCr422(tempBuffer, mNumPixels);
+	//qDebug() << "between the lines 3";
+	for ( ;	 line < (geom.b/12 + geom.b/2 + geom.b/12 + geom.b/12);	 line++)
+	{
+		memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
+		rgbBuffer += geom.a;
+	}
 
-    // build  line of 5th segment
-    lineBuffer = tempBuffer;
-    lineBuffer = addToBuffer(lineBuffer, WideYellow58_709, geom.c/3);
-    lineBuffer = addToBuffer(lineBuffer, WideCyan58_709, geom.c/3);
-    lineBuffer = addToBuffer(lineBuffer, WideGreen58_709, geom.c/3);
-    lineBuffer = addToBuffer(lineBuffer, WideBlack, geom.f);
-    lineBuffer = addToBuffer(lineBuffer, WideBlack, geom.g);
-    lineBuffer = addToBuffer(lineBuffer, WideBlack, geom.h);
-    lineBuffer = addToBuffer(lineBuffer, Wide2PercentBlack, geom.g);
-    lineBuffer = addToBuffer(lineBuffer, WideBlack, geom.h);
-    lineBuffer = addToBuffer(lineBuffer, Wide4PercentBlack, geom.g);
-    lineBuffer = addToBuffer(lineBuffer, WideBlack, geom.i);
-    lineBuffer = addToBuffer(lineBuffer, WideWhite58, geom.j);
-    lineBuffer = addToBuffer(lineBuffer, WideBlack, geom.k);
-    lineBuffer = addToBuffer(lineBuffer, WideMagenta58_709, geom.c/3);
-    lineBuffer = addToBuffer(lineBuffer, WideRed58_709, geom.c/3);
-    lineBuffer = addToBuffer(lineBuffer, WideBlue58_709, geom.c/3);
-    ConvertRGBLineTo10BitYCbCr422(tempBuffer, mNumPixels);
-    //qDebug() << "between the lines 4";
-    for ( ;  line < (geom.b/12 + geom.b/2 + geom.b/12 + geom.b/12 + geom.b/4);  line++)
-    {
-        memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
-        rgbBuffer += geom.a;
-    }
+	// build  line of 5th segment
+	lineBuffer = tempBuffer;
+	lineBuffer = addToBuffer(lineBuffer, WideYellow58_709, geom.c/3);
+	lineBuffer = addToBuffer(lineBuffer, WideCyan58_709, geom.c/3);
+	lineBuffer = addToBuffer(lineBuffer, WideGreen58_709, geom.c/3);
+	lineBuffer = addToBuffer(lineBuffer, WideBlack, geom.f);
+	lineBuffer = addToBuffer(lineBuffer, WideBlack, geom.g);
+	lineBuffer = addToBuffer(lineBuffer, WideBlack, geom.h);
+	lineBuffer = addToBuffer(lineBuffer, Wide2PercentBlack, geom.g);
+	lineBuffer = addToBuffer(lineBuffer, WideBlack, geom.h);
+	lineBuffer = addToBuffer(lineBuffer, Wide4PercentBlack, geom.g);
+	lineBuffer = addToBuffer(lineBuffer, WideBlack, geom.i);
+	lineBuffer = addToBuffer(lineBuffer, WideWhite58, geom.j);
+	lineBuffer = addToBuffer(lineBuffer, WideBlack, geom.k);
+	lineBuffer = addToBuffer(lineBuffer, WideMagenta58_709, geom.c/3);
+	lineBuffer = addToBuffer(lineBuffer, WideRed58_709, geom.c/3);
+	lineBuffer = addToBuffer(lineBuffer, WideBlue58_709, geom.c/3);
+	ConvertRGBLineTo10BitYCbCr422(tempBuffer, mNumPixels);
+	//qDebug() << "between the lines 4";
+	for ( ;	 line < (geom.b/12 + geom.b/2 + geom.b/12 + geom.b/12 + geom.b/4);	line++)
+	{
+		memcpy(rgbBuffer, tempBuffer, geom.a*sizeof(AJA_RGB16BitPixel));
+		rgbBuffer += geom.a;
+	}
 	PrepareForOutput();
-    delete [] tempBuffer;
+	delete [] tempBuffer;
 	return true;
 }
 
@@ -4026,8 +4026,8 @@ bool NTV2TestPatternGen::Draw12BitRamp()
 	mBitsPerComponent = 16;
 	size_t ndx(0);//uint16_t* rgbBuffer (&mRGBBuffer.at(0));
 	NTV2_ASSERT(mRGBBuffer.size() >= size_t(3*mNumPixels*mNumLines));
-	for (uint32_t lineCount(0);  lineCount < mNumLines;  lineCount++)
-		for (uint32_t pixelCount(0);  pixelCount < mNumPixels;  pixelCount++)
+	for (uint32_t lineCount(0);	 lineCount < mNumLines;	 lineCount++)
+		for (uint32_t pixelCount(0);  pixelCount < mNumPixels;	pixelCount++)
 		{
 			const double dvalue (double(pixelCount)*(4095.0/double(mNumPixels-1)));
 			const uint16_t ivalue = uint16_t(dvalue);
@@ -4042,8 +4042,8 @@ bool NTV2TestPatternGen::Draw12BitRamp()
 
 static const int	kRGBMinChroma12		(0x10);
 static const int	kRGBMaxChroma12		(0xFEF);
-static const double	kRGBSpanChroma12	(double(kRGBMaxChroma12) - double(kRGBMinChroma12));
-static const double	kRGBTotalChroma12	(double(kRGBMaxChroma12) + double(kRGBMinChroma12));
+static const double kRGBSpanChroma12	(double(kRGBMaxChroma12) - double(kRGBMinChroma12));
+static const double kRGBTotalChroma12	(double(kRGBMaxChroma12) + double(kRGBMinChroma12));
 static const double kPi(3.1415926535898);
 //const int kYUVZeroChroma10 = 512;
 
@@ -4060,8 +4060,8 @@ bool NTV2TestPatternGen::Draw12BitZonePlate()
 	const double pattScale ((kPi * 0.5 ) / double(mNumPixels + 1));
 	size_t ndx(0);//uint16_t * pRGBBuffer (&mRGBBuffer.at(0));
 	NTV2_ASSERT(mRGBBuffer.size() >= size_t(3*mNumPixels*mNumLines));
-    for (uint32_t lineCount(0);  lineCount < mNumLines;  lineCount++)
-		for (uint32_t pixelCount(0);  pixelCount < mNumPixels;  pixelCount++)
+	for (uint32_t lineCount(0);	 lineCount < mNumLines;	 lineCount++)
+		for (uint32_t pixelCount(0);  pixelCount < mNumPixels;	pixelCount++)
 		{
 			const double xDist(double(pixelCount) - (double(mNumPixels) / 2.0));
 			const double yDist(double(lineCount) - (double(mNumLines) / 2.0));

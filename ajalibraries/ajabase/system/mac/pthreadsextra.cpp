@@ -11,8 +11,8 @@
 
 int clock_gettime(clockid_t clk_id, struct timespec *tp)
 {
-    AJA_UNUSED(clk_id);
-    
+	AJA_UNUSED(clk_id);
+	
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	tp->tv_sec = tv.tv_sec;

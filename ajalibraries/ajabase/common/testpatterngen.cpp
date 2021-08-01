@@ -1516,7 +1516,7 @@ static uint32_t FlatField_Pluge_576_0[] =
 };
 
 #ifndef HD_NUMACTIVELINES_2K
-#define HD_NUMACTIVELINES_2K          1556  
+#define HD_NUMACTIVELINES_2K		  1556	
 #endif
 static SegmentTestPatternData NTV2TestPatternSegments[] = 
 {
@@ -1987,7 +1987,7 @@ static SegmentTestPatternData NTV2TestPatternSegments[] =
 			 {0,215, ColarBars100_1080_0} ,
 			 {216,431, ColorBars75_1080_0} ,
 			 {432,647, Ramp_1080_0} ,
-			 {648,863,  Multiburst_1080_0} ,
+			 {648,863,	Multiburst_1080_0} ,
 			 {864,1079, FlatField_Pluge_1080_0} ,
 			 {0,0, NULL} ,
 			 {0,0, NULL} ,
@@ -2007,7 +2007,7 @@ static SegmentTestPatternData NTV2TestPatternSegments[] =
 			 {0,97, ColorBars100_486_0} ,
 			 {98,195, ColorBars75_486_0} ,
 			 {196,293, Ramp_486_0} ,
-			 {294,389,  Multiburst_486_0} ,
+			 {294,389,	Multiburst_486_0} ,
 			 {390,485, FlatField_Pluge_486_0} ,
 			 {0,0, NULL} ,
 			 {0,0, NULL} ,
@@ -2027,7 +2027,7 @@ static SegmentTestPatternData NTV2TestPatternSegments[] =
 			 {0,215, ColarBars100_1080_0} ,
 			 {216,431, ColorBars75_1080_0} ,
 			 {432,647, Ramp_1080_0} ,
-			 {648,863,  Multiburst_1080_0} ,
+			 {648,863,	Multiburst_1080_0} ,
 			 {864,1079, FlatField_Pluge_1080_0} ,
 			 {0,0, NULL} ,
 			 {0,0, NULL} ,
@@ -2037,7 +2037,7 @@ static SegmentTestPatternData NTV2TestPatternSegments[] =
 			 {0,310, ColarBars100_1080_0} ,
 			 {311,621, ColorBars75_1080_0} ,
 			 {622,932, Ramp_1080_0} ,
-			 {933,1243,  Multiburst_1080_0} ,
+			 {933,1243,	 Multiburst_1080_0} ,
 			 {1244,1555, FlatField_Pluge_1080_0} ,
 			 {0,0, NULL} ,
 			 {0,0, NULL} ,
@@ -2058,19 +2058,19 @@ uint32_t MakeSineWaveVideo(double radians, bool bChroma,double Gain);
 // CTestPattern
 
 AJATestPatternGen::AJATestPatternGen() :
-    _patternNumber(AJA_TestPatt_ColorBars100),
-    _frameWidth(0),
-    _frameHeight(0),
-    _linePitch(0),
-    _dataLinePitch(0),
-    _bufferSize(0),
-    _pTestPatternBuffer(NULL),
-    _pPackedLineBuffer(NULL),
-    _pUnPackedLineBuffer(NULL),
+	_patternNumber(AJA_TestPatt_ColorBars100),
+	_frameWidth(0),
+	_frameHeight(0),
+	_linePitch(0),
+	_dataLinePitch(0),
+	_bufferSize(0),
+	_pTestPatternBuffer(NULL),
+	_pPackedLineBuffer(NULL),
+	_pUnPackedLineBuffer(NULL),
 	_sliderValue(DEFAULT_PATT_GAIN),
-    _signalMask(AJA_SIGNALMASK_ALL),
-    _pixelFormat(AJA_PixelFormat_Unknown),
-    _bayerPhase(AJA_BayerColorPhase_RedGreen)
+	_signalMask(AJA_SIGNALMASK_ALL),
+	_pixelFormat(AJA_PixelFormat_Unknown),
+	_bayerPhase(AJA_BayerColorPhase_RedGreen)
 {
 }
 
@@ -2090,11 +2090,11 @@ bool AJATestPatternGen::DrawTestPattern( AJATestPatternSelect pattNum, uint32_t 
 
 	// Save this away for worker methods.
 	_patternNumber = pattNum;
-	_frameWidth  = frameWidth;
+	_frameWidth	 = frameWidth;
 	_frameHeight = frameHeight;
 	_pixelFormat = pixelFormat;
 
-	_linePitch     = AJA_CalcRowBytesForFormat(_pixelFormat, _frameWidth);		// number of BYTES per line of frame buffer format
+	_linePitch	   = AJA_CalcRowBytesForFormat(_pixelFormat, _frameWidth);		// number of BYTES per line of frame buffer format
 	_dataLinePitch = AJA_CalcRowBytesForFormat(AJA_PixelFormat_YCbCr10, _frameWidth);			// number of BYTES per line of test pattern data (always stored as 10-bit YCbCr)
 	_bufferSize = _linePitch*_frameHeight;
 	if(_bufferSize == 0)
@@ -2152,10 +2152,10 @@ bool AJATestPatternGen::DrawTestPattern( AJATestPatternSelect pattNum, uint32_t 
 			DrawQuandrantBorderFrame();
 			bResult = true;
 			break;
-        case AJA_TestPatt_ColorQuadrantTSI:
-            DrawColorQuandrantTSIFrame();
-            bResult = true;
-            break;
+		case AJA_TestPatt_ColorQuadrantTSI:
+			DrawColorQuandrantTSIFrame();
+			bResult = true;
+			break;
 		default:	// unknown test pattern ID?
 			break;
 	}
@@ -2248,13 +2248,13 @@ bool AJATestPatternGen::DrawSegmentedTestPattern()
 				numLines *= 2;
 				
 				// stretch line by copying pixels.
-				uint16_t* pLineSrc  = &_pUnPackedLineBuffer[_frameWidth-1];
+				uint16_t* pLineSrc	= &_pUnPackedLineBuffer[_frameWidth-1];
 				uint16_t* pLineDest = &_pUnPackedLineBuffer[_frameWidth*2-1];
 				for ( uint32_t count = 0; count < _frameWidth/4; count ++)
 				{
-					uint16_t y2  = *pLineSrc--;
+					uint16_t y2	 = *pLineSrc--;
 					uint16_t cr1 = *pLineSrc--;
-					uint16_t y1  = *pLineSrc--;
+					uint16_t y1	 = *pLineSrc--;
 					uint16_t cb1 = *pLineSrc--;
 					*pLineDest-- = y2;	
 					*pLineDest-- = cr1; 
@@ -2408,7 +2408,7 @@ bool AJATestPatternGen::DrawZonePlateFrame()
 
 		for ( uint16_t pixel = 0; pixel < _frameWidth; pixel++ )
 		{
-			double xDist = (double)pixel - ((double)_frameWidth  / 2.0);
+			double xDist = (double)pixel - ((double)_frameWidth	 / 2.0);
 			double yDist = (double)line - ((double)_frameHeight / 2.0);
 			double r = ((xDist * xDist) + (yDist * yDist)) * pattScale;
 
@@ -2436,8 +2436,8 @@ bool AJATestPatternGen::DrawColorQuandrantFrame()
 
 	// Colors for the quadrants are from SMPTE 435-1-2009 section 6.4.2
 	static const unsigned char fullRange = 235;
-	static const unsigned char midRange  = 187;
-	static const unsigned char lowRange  = 140;
+	static const unsigned char midRange	 = 187;
+	static const unsigned char lowRange	 = 140;
 	AJA_RGBAlphaPixel rgbaPixel;
 	AJA_YCbCr10BitPixel yCbCrPixel;
 	rgbaPixel.Alpha = 0;  // Upper left - yellow
@@ -2489,98 +2489,98 @@ bool AJATestPatternGen::DrawColorQuandrantFrame()
 
 bool AJATestPatternGen::DrawColorQuandrantTSIFrame()
 {
-    uint32_t* pPackedEvenLineBuffer= new uint32_t[_frameWidth*2];
-    uint16_t* pUnPackedEvenLineBuffer= new uint16_t[_frameWidth*2];
-    uint32_t* pPackedOddLineBuffer= new uint32_t[_frameWidth*2];
-    uint16_t* pUnPackedOddLineBuffer= new uint16_t[_frameWidth*2];
+	uint32_t* pPackedEvenLineBuffer= new uint32_t[_frameWidth*2];
+	uint16_t* pUnPackedEvenLineBuffer= new uint16_t[_frameWidth*2];
+	uint32_t* pPackedOddLineBuffer= new uint32_t[_frameWidth*2];
+	uint16_t* pUnPackedOddLineBuffer= new uint16_t[_frameWidth*2];
 
-    // Colors for the quadrants are from SMPTE 435-1-2009 section 6.4.2
-    static const unsigned char fullRange = 235;
-    static const unsigned char midRange  = 187;
-    static const unsigned char lowRange  = 140;
-    AJA_RGBAlphaPixel rgbaPixelYellow, rgbaPixelBlue, rgbaPixelGreen, rgbaPixelPink;
-    AJA_YCbCr10BitPixel yCbCrPixelYellow, yCbCrPixelBlue, yCbCrPixelGreen, yCbCrPixelPink;
-    rgbaPixelYellow.Alpha = 0;  // Upper left - yellow
-    rgbaPixelYellow.Red = fullRange;
-    rgbaPixelYellow.Green = fullRange;
-    rgbaPixelYellow.Blue = lowRange;
-    AJA_HDConvertRGBAlphatoYCbCr(&rgbaPixelYellow, &yCbCrPixelYellow);
-    rgbaPixelBlue.Alpha = 0;  // Upper right - blue
-    rgbaPixelBlue.Red = midRange;
-    rgbaPixelBlue.Green = fullRange;
-    rgbaPixelBlue.Blue = fullRange;
-    AJA_HDConvertRGBAlphatoYCbCr(&rgbaPixelBlue, &yCbCrPixelBlue);
-    rgbaPixelGreen.Alpha = 0;  // Lower left - green
-    rgbaPixelGreen.Red = lowRange;
-    rgbaPixelGreen.Green = fullRange;
-    rgbaPixelGreen.Blue = lowRange;
-    AJA_HDConvertRGBAlphatoYCbCr(&rgbaPixelGreen, &yCbCrPixelGreen);
-    rgbaPixelPink.Alpha = 0;  // Lower right - pink
-    rgbaPixelPink.Red = fullRange;
-    rgbaPixelPink.Green = lowRange;
-    rgbaPixelPink.Blue = midRange;
-    AJA_HDConvertRGBAlphatoYCbCr(&rgbaPixelPink, &yCbCrPixelPink);
+	// Colors for the quadrants are from SMPTE 435-1-2009 section 6.4.2
+	static const unsigned char fullRange = 235;
+	static const unsigned char midRange	 = 187;
+	static const unsigned char lowRange	 = 140;
+	AJA_RGBAlphaPixel rgbaPixelYellow, rgbaPixelBlue, rgbaPixelGreen, rgbaPixelPink;
+	AJA_YCbCr10BitPixel yCbCrPixelYellow, yCbCrPixelBlue, yCbCrPixelGreen, yCbCrPixelPink;
+	rgbaPixelYellow.Alpha = 0;	// Upper left - yellow
+	rgbaPixelYellow.Red = fullRange;
+	rgbaPixelYellow.Green = fullRange;
+	rgbaPixelYellow.Blue = lowRange;
+	AJA_HDConvertRGBAlphatoYCbCr(&rgbaPixelYellow, &yCbCrPixelYellow);
+	rgbaPixelBlue.Alpha = 0;  // Upper right - blue
+	rgbaPixelBlue.Red = midRange;
+	rgbaPixelBlue.Green = fullRange;
+	rgbaPixelBlue.Blue = fullRange;
+	AJA_HDConvertRGBAlphatoYCbCr(&rgbaPixelBlue, &yCbCrPixelBlue);
+	rgbaPixelGreen.Alpha = 0;  // Lower left - green
+	rgbaPixelGreen.Red = lowRange;
+	rgbaPixelGreen.Green = fullRange;
+	rgbaPixelGreen.Blue = lowRange;
+	AJA_HDConvertRGBAlphatoYCbCr(&rgbaPixelGreen, &yCbCrPixelGreen);
+	rgbaPixelPink.Alpha = 0;  // Lower right - pink
+	rgbaPixelPink.Red = fullRange;
+	rgbaPixelPink.Green = lowRange;
+	rgbaPixelPink.Blue = midRange;
+	AJA_HDConvertRGBAlphatoYCbCr(&rgbaPixelPink, &yCbCrPixelPink);
 
-    for ( uint32_t count = 0; count < _frameWidth; count+=16 )
-    {
-        pUnPackedEvenLineBuffer[count] = yCbCrPixelYellow.cb;
-        pUnPackedEvenLineBuffer[count+1] = yCbCrPixelYellow.y;
-        pUnPackedEvenLineBuffer[count+2] = yCbCrPixelYellow.cr;
-        pUnPackedEvenLineBuffer[count+3] = yCbCrPixelYellow.y;
+	for ( uint32_t count = 0; count < _frameWidth; count+=16 )
+	{
+		pUnPackedEvenLineBuffer[count] = yCbCrPixelYellow.cb;
+		pUnPackedEvenLineBuffer[count+1] = yCbCrPixelYellow.y;
+		pUnPackedEvenLineBuffer[count+2] = yCbCrPixelYellow.cr;
+		pUnPackedEvenLineBuffer[count+3] = yCbCrPixelYellow.y;
 
-        pUnPackedEvenLineBuffer[count+4] = yCbCrPixelYellow.cb;
-        pUnPackedEvenLineBuffer[count+5] = yCbCrPixelYellow.y;
-        pUnPackedEvenLineBuffer[count+6] = yCbCrPixelYellow.cr;
-        pUnPackedEvenLineBuffer[count+7] = yCbCrPixelYellow.y;
+		pUnPackedEvenLineBuffer[count+4] = yCbCrPixelYellow.cb;
+		pUnPackedEvenLineBuffer[count+5] = yCbCrPixelYellow.y;
+		pUnPackedEvenLineBuffer[count+6] = yCbCrPixelYellow.cr;
+		pUnPackedEvenLineBuffer[count+7] = yCbCrPixelYellow.y;
 
-        pUnPackedEvenLineBuffer[count+8] = yCbCrPixelBlue.cb;
-        pUnPackedEvenLineBuffer[count+9] = yCbCrPixelBlue.y;
-        pUnPackedEvenLineBuffer[count+10] = yCbCrPixelBlue.cr;
-        pUnPackedEvenLineBuffer[count+11] = yCbCrPixelBlue.y;
+		pUnPackedEvenLineBuffer[count+8] = yCbCrPixelBlue.cb;
+		pUnPackedEvenLineBuffer[count+9] = yCbCrPixelBlue.y;
+		pUnPackedEvenLineBuffer[count+10] = yCbCrPixelBlue.cr;
+		pUnPackedEvenLineBuffer[count+11] = yCbCrPixelBlue.y;
 
-        pUnPackedEvenLineBuffer[count+12] = yCbCrPixelBlue.cb;
-        pUnPackedEvenLineBuffer[count+13] = yCbCrPixelBlue.y;
-        pUnPackedEvenLineBuffer[count+14] = yCbCrPixelBlue.cr;
-        pUnPackedEvenLineBuffer[count+15] = yCbCrPixelBlue.y;
-    }
+		pUnPackedEvenLineBuffer[count+12] = yCbCrPixelBlue.cb;
+		pUnPackedEvenLineBuffer[count+13] = yCbCrPixelBlue.y;
+		pUnPackedEvenLineBuffer[count+14] = yCbCrPixelBlue.cr;
+		pUnPackedEvenLineBuffer[count+15] = yCbCrPixelBlue.y;
+	}
 
-    for ( uint32_t count = 0; count < _frameWidth; count+=16 )
-    {
-        pUnPackedOddLineBuffer[count] = yCbCrPixelGreen.cb;
-        pUnPackedOddLineBuffer[count+1] = yCbCrPixelGreen.y;
-        pUnPackedOddLineBuffer[count+2] = yCbCrPixelGreen.cr;
-        pUnPackedOddLineBuffer[count+3] = yCbCrPixelGreen.y;
+	for ( uint32_t count = 0; count < _frameWidth; count+=16 )
+	{
+		pUnPackedOddLineBuffer[count] = yCbCrPixelGreen.cb;
+		pUnPackedOddLineBuffer[count+1] = yCbCrPixelGreen.y;
+		pUnPackedOddLineBuffer[count+2] = yCbCrPixelGreen.cr;
+		pUnPackedOddLineBuffer[count+3] = yCbCrPixelGreen.y;
 
-        pUnPackedOddLineBuffer[count+4] = yCbCrPixelGreen.cb;
-        pUnPackedOddLineBuffer[count+5] = yCbCrPixelGreen.y;
-        pUnPackedOddLineBuffer[count+6] = yCbCrPixelGreen.cr;
-        pUnPackedOddLineBuffer[count+7] = yCbCrPixelGreen.y;
+		pUnPackedOddLineBuffer[count+4] = yCbCrPixelGreen.cb;
+		pUnPackedOddLineBuffer[count+5] = yCbCrPixelGreen.y;
+		pUnPackedOddLineBuffer[count+6] = yCbCrPixelGreen.cr;
+		pUnPackedOddLineBuffer[count+7] = yCbCrPixelGreen.y;
 
-        pUnPackedOddLineBuffer[count+8] = yCbCrPixelPink.cb;
-        pUnPackedOddLineBuffer[count+9] = yCbCrPixelPink.y;
-        pUnPackedOddLineBuffer[count+10] = yCbCrPixelPink.cr;
-        pUnPackedOddLineBuffer[count+11] = yCbCrPixelPink.y;
+		pUnPackedOddLineBuffer[count+8] = yCbCrPixelPink.cb;
+		pUnPackedOddLineBuffer[count+9] = yCbCrPixelPink.y;
+		pUnPackedOddLineBuffer[count+10] = yCbCrPixelPink.cr;
+		pUnPackedOddLineBuffer[count+11] = yCbCrPixelPink.y;
 
-        pUnPackedOddLineBuffer[count+12] = yCbCrPixelPink.cb;
-        pUnPackedOddLineBuffer[count+13] = yCbCrPixelPink.y;
-        pUnPackedOddLineBuffer[count+14] = yCbCrPixelPink.cr;
-        pUnPackedOddLineBuffer[count+15] = yCbCrPixelPink.y;
-    }
-    AJA_ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedEvenLineBuffer, pPackedEvenLineBuffer,_frameWidth,_pixelFormat);
-    AJA_ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedOddLineBuffer, pPackedOddLineBuffer,_frameWidth,_pixelFormat);
+		pUnPackedOddLineBuffer[count+12] = yCbCrPixelPink.cb;
+		pUnPackedOddLineBuffer[count+13] = yCbCrPixelPink.y;
+		pUnPackedOddLineBuffer[count+14] = yCbCrPixelPink.cr;
+		pUnPackedOddLineBuffer[count+15] = yCbCrPixelPink.y;
+	}
+	AJA_ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedEvenLineBuffer, pPackedEvenLineBuffer,_frameWidth,_pixelFormat);
+	AJA_ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedOddLineBuffer, pPackedOddLineBuffer,_frameWidth,_pixelFormat);
 
-    for(uint32_t line = 0; line < _frameHeight; line+=2)
-    {
-        WriteLineToBuffer( _pixelFormat, _bayerPhase, line,_frameWidth, _linePitch, _pTestPatternBuffer,pPackedEvenLineBuffer);
-        WriteLineToBuffer( _pixelFormat, _bayerPhase, line + 1,_frameWidth, _linePitch, _pTestPatternBuffer,pPackedOddLineBuffer);
-    }
+	for(uint32_t line = 0; line < _frameHeight; line+=2)
+	{
+		WriteLineToBuffer( _pixelFormat, _bayerPhase, line,_frameWidth, _linePitch, _pTestPatternBuffer,pPackedEvenLineBuffer);
+		WriteLineToBuffer( _pixelFormat, _bayerPhase, line + 1,_frameWidth, _linePitch, _pTestPatternBuffer,pPackedOddLineBuffer);
+	}
 
-    delete [] pUnPackedEvenLineBuffer;
-    delete [] pPackedEvenLineBuffer;
-    delete [] pUnPackedOddLineBuffer;
-    delete [] pPackedOddLineBuffer;
+	delete [] pUnPackedEvenLineBuffer;
+	delete [] pPackedEvenLineBuffer;
+	delete [] pUnPackedOddLineBuffer;
+	delete [] pPackedOddLineBuffer;
 
-    return true;
+	return true;
 
 }
 

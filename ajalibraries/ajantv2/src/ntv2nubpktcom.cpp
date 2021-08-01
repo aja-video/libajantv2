@@ -31,7 +31,7 @@ typedef int socklen_t;
 #include <endian.h>
 #endif
 
-// Silly original protocol strings.  Replaced with smaller ones in V2.
+// Silly original protocol strings.	 Replaced with smaller ones in V2.
 // These MUST be in the same order as the members of NTV2NubPktType
 const char * NTV2NubQueryRespStrProtVer1[eNumNTV2NubPktTypes] =
 {
@@ -210,7 +210,7 @@ void * GetNubPktPayloadPtr (NTV2NubPkt * pPkt)
 
 
 // Build a nub packet and fill in all the common stuff for the given protocol and type.
-NTV2NubPkt * BuildNubBasePacket (NTV2NubProtocolVersion	protocolVersion,
+NTV2NubPkt * BuildNubBasePacket (NTV2NubProtocolVersion protocolVersion,
 								NTV2NubPktType			pktType,
 								ULWord					payloadSize,
 								char **					pPayload)
@@ -245,7 +245,7 @@ NTV2NubPkt * BuildNubBasePacket (NTV2NubProtocolVersion	protocolVersion,
 
 	char *p (reinterpret_cast<char*>(pPkt->data));	// Work around ISO C++ forbids zero-size array
 	ULWord len (ULWord(::strlen(queryRespStr)) + 1);
-	::strncpy(p, queryRespStr, len); 	// Copy in query/resp string incl. terminating null
+	::strncpy(p, queryRespStr, len);	// Copy in query/resp string incl. terminating null
 	p += len;
 	*pPayload = p;
 	return pPkt;
@@ -278,91 +278,91 @@ bool deNBOifyNTV2NubPkt (NTV2NubPkt * pPkt, ULWord size)
 
 int sendall (AJASocket s, char * buf, int * len)
 {
-    int total = 0;        // how many bytes we've sent
-    int bytesleft = *len; // how many we have left to send
-    int n = -1;
+	int total = 0;		  // how many bytes we've sent
+	int bytesleft = *len; // how many we have left to send
+	int n = -1;
 
-    while (total < *len)
-    {
-        n = int(::send(s, buf+total, size_t(bytesleft), 0));
-        if (n == -1) break;
-        total += n;
-        bytesleft -= n;
-    }
+	while (total < *len)
+	{
+		n = int(::send(s, buf+total, size_t(bytesleft), 0));
+		if (n == -1) break;
+		total += n;
+		bytesleft -= n;
+	}
 	*len = total; // return number actually sent here
-    return n == -1 ? -1 : 0; // return -1 on failure, 0 on success
+	return n == -1 ? -1 : 0; // return -1 on failure, 0 on success
 } 
 
 
 int recvtimeout_sec (AJASocket s, char * buf, int len, int timeout)
 {
-    fd_set fds;
-    int n;
-    struct timeval tv;
+	fd_set fds;
+	int n;
+	struct timeval tv;
 
-    // set up the file descriptor set
-    FD_ZERO(&fds);
-    FD_SET(s, &fds);
+	// set up the file descriptor set
+	FD_ZERO(&fds);
+	FD_SET(s, &fds);
 
-    // set up the struct timeval for the timeout
-    tv.tv_sec = timeout;
-    tv.tv_usec = 0;
+	// set up the struct timeval for the timeout
+	tv.tv_sec = timeout;
+	tv.tv_usec = 0;
 
-    // wait until timeout or data received
-    n = select(int(s+1), &fds, AJA_NULL, AJA_NULL, &tv);
-    if (n == 0) return -2; // timeout!
-    if (n == -1) return -1; // error
+	// wait until timeout or data received
+	n = select(int(s+1), &fds, AJA_NULL, AJA_NULL, &tv);
+	if (n == 0) return -2; // timeout!
+	if (n == -1) return -1; // error
 
-    // data must be here, so do a normal recv()
-    return int(::recv(s, buf, size_t(len), 0));
+	// data must be here, so do a normal recv()
+	return int(::recv(s, buf, size_t(len), 0));
 }
 
 
 int recvtimeout_usec (AJASocket s, char * buf, int len, int timeout)
 {
-    fd_set fds;
-    int n;
-    struct timeval tv;
+	fd_set fds;
+	int n;
+	struct timeval tv;
 
-    // set up the file descriptor set
-    FD_ZERO(&fds);
-    FD_SET(s, &fds);
+	// set up the file descriptor set
+	FD_ZERO(&fds);
+	FD_SET(s, &fds);
 
-    // set up the struct timeval for the timeout
-    tv.tv_sec = 0;
-    tv.tv_usec = timeout;
+	// set up the struct timeval for the timeout
+	tv.tv_sec = 0;
+	tv.tv_usec = timeout;
 
-    // wait until timeout or data received
-    n = select(int(s+1), &fds, AJA_NULL, AJA_NULL, &tv);
-    if (n == 0) return -2; // timeout!
-    if (n == -1) return -1; // error
+	// wait until timeout or data received
+	n = select(int(s+1), &fds, AJA_NULL, AJA_NULL, &tv);
+	if (n == 0) return -2; // timeout!
+	if (n == -1) return -1; // error
 
-    // data must be here, so do a normal recv()
-    return int(::recv(s, buf, size_t(len), 0));
+	// data must be here, so do a normal recv()
+	return int(::recv(s, buf, size_t(len), 0));
 }
 
 
 int recvfromtimeout (AJASocket s, char *buf, int len, int timeout,
 					struct sockaddr *their_addr, socklen_t *addr_len)
 {
-    fd_set fds;
-    int n;
-    struct timeval tv;
+	fd_set fds;
+	int n;
+	struct timeval tv;
 
-    // set up the file descriptor set
-    FD_ZERO(&fds);
-    FD_SET(s, &fds);
+	// set up the file descriptor set
+	FD_ZERO(&fds);
+	FD_SET(s, &fds);
 
-    // set up the struct timeval for the timeout
-    tv.tv_sec = timeout;
-    tv.tv_usec = 0;
+	// set up the struct timeval for the timeout
+	tv.tv_sec = timeout;
+	tv.tv_usec = 0;
 
-    // wait until timeout or data received
-    n = select(int(s+1), &fds, AJA_NULL, AJA_NULL, &tv);
-    if (n == 0) return -2; // timeout!
-    if (n == -1) return -1; // error
+	// wait until timeout or data received
+	n = select(int(s+1), &fds, AJA_NULL, AJA_NULL, &tv);
+	if (n == 0) return -2; // timeout!
+	if (n == -1) return -1; // error
 
-    // data must be here, so do a normal recvfrom()
+	// data must be here, so do a normal recvfrom()
 	return int(::recvfrom(s, buf, size_t(len), 0, their_addr, addr_len));
 }
 
@@ -419,7 +419,7 @@ bool isNTV2NubPacketType (NTV2NubPkt * pPkt, NTV2NubPktType nubPktType)
 				fixedPktType = nubPktType;
 
 			return fixedPktType == pPkt->hdr.pktType
-					&&  !::strncmp(reinterpret_cast<const char*>(pPkt->data), NTV2NubQueryRespStrProtVer1[nubPktType], pPkt->hdr.dataLength);
+					&&	!::strncmp(reinterpret_cast<const char*>(pPkt->data), NTV2NubQueryRespStrProtVer1[nubPktType], pPkt->hdr.dataLength);
 
 		case ntv2NubProtocolVersion2:
 			return pPkt->hdr.pktType == nubPktType

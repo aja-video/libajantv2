@@ -28,20 +28,20 @@ void ReSampleLine(RGBAlphaPixel *Input,
 // Word Version
 AJAExport
 void ReSampleLine(Word *Input, 
-			      Word *Output,
-			      UWord startPixel,
-			      UWord endPixel,
-			      LWord numInputPixels,
-			      LWord numOutputPixels);
+				  Word *Output,
+				  UWord startPixel,
+				  UWord endPixel,
+				  LWord numInputPixels,
+				  LWord numOutputPixels);
 					  
 
 // ReSampleLine
 // Word Version
 AJAExport
 void ReSampleYCbCrSampleLine(Word *Input, 
-			                 Word *Output,
-			                 LWord numInputPixels,
-			                 LWord numOutputPixels);
+							 Word *Output,
+							 LWord numInputPixels,
+							 LWord numOutputPixels);
 
 // ReSampleLine
 // Word Version

@@ -20,7 +20,7 @@ extern void __cdecl log_odprintf(const char *format, ...);
 
 // use this the select alternate platform specific loggers, 0 is used for no-log
 #ifndef AJA_LOGTYPE
-#define AJA_LOGTYPE    2
+#define AJA_LOGTYPE	   2
 #endif
 
 // define AJA_LOG here
@@ -44,7 +44,7 @@ extern void __cdecl log_odprintf(const char *format, ...);
 			#define AJA_ULOG(_unit_,...)	\
 				do {if (AJADebug::IsActive(_unit_)) AJA_REPORT(_unit_, AJA_DebugSeverity_Info, __VA_ARGS__);} while(0);
 
-        #else
+		#else
 			//catch all, so builds won't break
 			#define AJA_LOG(...)
 			#define AJA_ULOG(_unit_,...)
@@ -61,34 +61,34 @@ extern void __cdecl log_odprintf(const char *format, ...);
 	#if defined(AJA_DEBUG)
 
 		#if (AJA_LOGTYPE==0)
-            // no log
+			// no log
 			#define AJA_LOG(_format_...)
 			#define AJA_ULOG(_unit_, _format_...)
-        
-        #elif (AJA_LOGTYPE==1)
-            // printf
+		
+		#elif (AJA_LOGTYPE==1)
+			// printf
 			#include <stdio.h>
 			#define AJA_LOG(_format_...) printf(_format_)
 			#define AJA_ULOG(_unit_, _format_...)	\
 				do {if (AJADebug::IsActive(_unit_)) printf(_format_);} while(0);
 
-        #elif (AJA_LOGTYPE==2)
-            #define AJA_LOG(_format_...) AJA_REPORT(AJA_DebugUnit_Critical, AJA_DebugSeverity_Info, _format_)
+		#elif (AJA_LOGTYPE==2)
+			#define AJA_LOG(_format_...) AJA_REPORT(AJA_DebugUnit_Critical, AJA_DebugSeverity_Info, _format_)
 			#define AJA_ULOG(_unit_, _format_...)	\
 				do {if (AJADebug::IsActive(_unit_)) AJA_REPORT(_unit_, AJA_DebugSeverity_Info, _format_);} while(0);
 		
 		#endif
 			
 	#else
-        // no log
-        #define AJA_LOG(_format_...)
+		// no log
+		#define AJA_LOG(_format_...)
 		#define AJA_ULOG(_unit_, _format_...)
 	#endif
 
 #endif
 
 #ifndef Make4CC
-#define Make4CC(my4CC)  ((my4CC < 0x40) ?  ' '						 : ((char*)(&my4CC))[3]), \
+#define Make4CC(my4CC)	((my4CC < 0x40) ?  ' '						 : ((char*)(&my4CC))[3]), \
 						((my4CC < 0x40) ?  ' '						 : ((char*)(&my4CC))[2]), \
 						((my4CC < 0x40) ? ('0' + (char)(my4CC / 10)) : ((char*)(&my4CC))[1]), \
 						((my4CC < 0x40) ? ('0' + (char)(my4CC % 10)) : ((char*)(&my4CC))[0])
@@ -102,18 +102,18 @@ class AJA_EXPORT AJALog
 {
 public:
 
-    /**
+	/**
 	 *	Singleton initialization of logging service.
 	 */
 	AJALog();
-    
-    /**
+	
+	/**
 	 *	Singleton release of logging service.
 	 */
 	virtual ~AJALog();
-    
+	
 private:
-    static bool bInitialized;
+	static bool bInitialized;
 };
 
 
@@ -125,7 +125,7 @@ extern AJALog gLogInit;
  *	@ingroup AJAGroupDebug
  */
 
-#define TAG_SIZE    64
+#define TAG_SIZE	64
 
 
 
@@ -154,8 +154,8 @@ public:
 	int64_t LastValue();
 	int64_t MarkAverage(int64_t val);
 	int64_t Average();
-	uint64_t Total()	 	{ return _samplesTotal; } 
-	uint64_t SampleSize() 	{ return _sampleSize; }
+	uint64_t Total()		{ return _samplesTotal; } 
+	uint64_t SampleSize()	{ return _sampleSize; }
 };
 
 
@@ -184,7 +184,7 @@ public:
 
 
 //---------------------------------------------------------------------------------------------------------------------
-//  class AJARunAverage
+//	class AJARunAverage
 //	caculates timelogs
 //---------------------------------------------------------------------------------------------------------------------
 class AJA_EXPORT AJATimeLog
@@ -194,51 +194,51 @@ public:
 	AJATimeLog(const char* tag, int unit=AJA_DebugUnit_Critical);
 	AJATimeLog(const std::string& tag, int unit=AJA_DebugUnit_Critical);
 	virtual ~AJATimeLog();
-    
-    /**
+	
+	/**
 	 *	reset timer.
 	 */
 	void Reset();
 	
-    /**
+	/**
 	 *	Print does reset along with print
 	 */
-    void PrintReset();
+	void PrintReset();
 	inline void PrintResetIf(bool bEnable=true)
 		{ if (bEnable) PrintReset(); }
 	
-    /**
+	/**
 	 *	Print tag, appended tag, and delta-time since last reset.
-	 *  @param[in]	bReset          true if time is reset after print
+	 *	@param[in]	bReset			true if time is reset after print
 	 */
-    void PrintDelta(bool bReset=true);
-    void PrintDelta(const char* addedTag, bool bReset=true);
+	void PrintDelta(bool bReset=true);
+	void PrintDelta(const char* addedTag, bool bReset=true);
 	void PrintDelta(uint64_t threashold, const char* addedTag, bool bReset);
 
-    inline void PrintDelta(const std::string& addedTag, bool bReset=true)
+	inline void PrintDelta(const std::string& addedTag, bool bReset=true)
 		{ PrintDelta(addedTag.c_str(), bReset); }
 	
-    /**
+	/**
 	 *	Optional print tag, appended tag, and delta-time since last reset.
-	 *  @param[in]	bEnable         true to print, false inhibits printing
-	 *  @param[in]	bReset          true if time is reset after print
+	 *	@param[in]	bEnable			true to print, false inhibits printing
+	 *	@param[in]	bReset			true if time is reset after print
 	 */
 	inline void PrintDeltaIf(bool bEnable, bool bReset=true)
 		{ if (bEnable) PrintDelta(bReset); }
-    inline void PrintDeltaIf(bool bEnable, const char* addedTag, bool bReset=true)
+	inline void PrintDeltaIf(bool bEnable, const char* addedTag, bool bReset=true)
 		{ if (bEnable) PrintDelta(addedTag, bReset); }
-    inline void PrintDeltaIf(bool bEnable, const std::string& addedTag, bool bReset=true)
+	inline void PrintDeltaIf(bool bEnable, const std::string& addedTag, bool bReset=true)
 		{ PrintDeltaIf(bEnable, addedTag.c_str(), bReset); }
 		
-    /**
+	/**
 	 *	Get delta-time since last reset.
-	 *  @param[in]	bReset          true if time is reset after get
+	 *	@param[in]	bReset			true if time is reset after get
 	 */
-    int32_t GetDelta(bool bReset=true);
+	int32_t GetDelta(bool bReset=true);
 	
-    /**
+	/**
 	 *	Optional print tag, appended tag, and delta-time since last reset.
-	 *  @param[in]	val        		value to print
+	 *	@param[in]	val				value to print
 	 */
 	void PrintValue(int64_t val);
 	void PrintValue(int64_t val, const char* addedTag);
@@ -260,9 +260,9 @@ public:
 		{ _tag = tag; }
 	
 protected:
-    std::string 	_tag;
-    int         	_unit;
-    uint64_t    	_time;
+	std::string		_tag;
+	int				_unit;
+	uint64_t		_time;
 };
 
 

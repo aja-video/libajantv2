@@ -65,7 +65,7 @@ AJAFileIO::AJAFileIO()
 #if defined(AJA_WINDOWS)
 	mFileDescriptor = INVALID_HANDLE_VALUE;
 #else
-	mpFile          = NULL;
+	mpFile			= NULL;
 #endif
 }
 
@@ -106,37 +106,37 @@ AJAFileIO::FileExists(const std::string& fileName)
 
 AJAStatus
 AJAFileIO::Open(
-	const std::wstring&	fileName,
+	const std::wstring& fileName,
 	const int			flags,
 	const int			properties)
 {
 #if defined(AJA_WINDOWS)
-	DWORD     desiredAccess       = 0;
-	DWORD     creationDisposition = 0;
-	DWORD     flagsAndAttributes  = 0;
+	DWORD	  desiredAccess		  = 0;
+	DWORD	  creationDisposition = 0;
+	DWORD	  flagsAndAttributes  = 0;
 	DWORD	  shareMode			  = 0;
-	AJAStatus status              = AJA_STATUS_FAIL;
+	AJAStatus status			  = AJA_STATUS_FAIL;
 
 	if ((INVALID_HANDLE_VALUE == mFileDescriptor) &&
 		(0 != fileName.length()))
 	{
 		// If the flags are not compatable, we will let
 		// Windows provide the error checking.
-		if ((eAJAReadOnly & flags) || (eAJAReadWrite & flags))  //  O_RDONLY, O_RDWR
+		if ((eAJAReadOnly & flags) || (eAJAReadWrite & flags))	//	O_RDONLY, O_RDWR
 		{
 			desiredAccess |= GENERIC_READ;
 			shareMode = FILE_SHARE_READ;
 		}
-		if ((eAJAWriteOnly & flags) || (eAJAReadWrite & flags)) //  O_WRONLY
-        {
+		if ((eAJAWriteOnly & flags) || (eAJAReadWrite & flags)) //	O_WRONLY
+		{
 			desiredAccess |= GENERIC_WRITE;
-            shareMode = FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
-        }
+			shareMode = FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
+		}
 
 		if (eAJACreateAlways & flags)
-			creationDisposition |= CREATE_ALWAYS;     //  O_CREAT
+			creationDisposition |= CREATE_ALWAYS;	  //  O_CREAT
 		if (eAJACreateNew & flags)
-			creationDisposition |= CREATE_NEW;        // (O_CREAT || O_EXCL)
+			creationDisposition |= CREATE_NEW;		  // (O_CREAT || O_EXCL)
 		if (eAJATruncateExisting & flags)
 			creationDisposition |= TRUNCATE_EXISTING; //  O_TRUNC
 		if (eAJAReadOnly & flags)
@@ -185,7 +185,7 @@ AJAFileIO::Open(
 	return status;
 #else
 	AJAStatus status = AJA_STATUS_FAIL;
-	string    flagsAndAttributes;
+	string	  flagsAndAttributes;
 
 	if ((mpFile == NULL) && (0 != fileName.length()))
 	{
@@ -491,8 +491,8 @@ AJAStatus
 AJAFileIO::Seek(const int64_t distance, const AJAFileSetFlag flag) const
 {
 #if defined(AJA_WINDOWS)
-	DWORD     moveMethod;
-	DWORD     retVal;
+	DWORD	  moveMethod;
+	DWORD	  retVal;
 	AJAStatus status = AJA_STATUS_FAIL;
 
 	if (INVALID_HANDLE_VALUE != mFileDescriptor)
@@ -519,7 +519,7 @@ AJAFileIO::Seek(const int64_t distance, const AJAFileSetFlag flag) const
 		liDistanceToMove.LowPart = (DWORD)distance;
 
 		retVal = SetFilePointerEx(mFileDescriptor, liDistanceToMove, NULL, moveMethod);
-		if ( retVal	== TRUE )
+		if ( retVal == TRUE )
 		{
 			status = AJA_STATUS_SUCCESS;
 		}
@@ -528,7 +528,7 @@ AJAFileIO::Seek(const int64_t distance, const AJAFileSetFlag flag) const
 	return status;
 #else
 	AJAStatus status = AJA_STATUS_FAIL;
-	int       whence;
+	int		  whence;
 	long int  retVal;
 
 	if (NULL != mpFile)
@@ -739,9 +739,9 @@ AJAFileIO::ReadDirectory(
 {
 #if defined(AJA_WINDOWS)
 	WIN32_FIND_DATAA fileData;
-	HANDLE           hSearch;
-	string           qualifiedName;
-	AJAStatus        status = AJA_STATUS_FAIL;
+	HANDLE			 hSearch;
+	string			 qualifiedName;
+	AJAStatus		 status = AJA_STATUS_FAIL;
 
 	fileContainer.clear();
 
@@ -771,13 +771,13 @@ AJAFileIO::ReadDirectory(
 	}
 	return status;
 #else
-	AJAStatus       status = AJA_STATUS_FAIL;
+	AJAStatus		status = AJA_STATUS_FAIL;
 	struct dirent** ppNamelist;
-	int             nEntries;
-	string          fileEntry;
-	string          convertedPath;
+	int				nEntries;
+	string			fileEntry;
+	string			convertedPath;
 	string			upperPattern;
-	char            resolvedPath[PATH_MAX];
+	char			resolvedPath[PATH_MAX];
 
 	if ((0 != directory.length()) && (0 != filePattern.length()))
 	{
@@ -797,7 +797,7 @@ AJAFileIO::ReadDirectory(
 
 		// Make sure directory path is cleaned up
 		if (!realpath(convertedPath.c_str(), resolvedPath))
-			return status;  // Path is bad
+			return status;	// Path is bad
 
 		nEntries = scandir(resolvedPath, &ppNamelist, 0, alphasort);
 
@@ -843,9 +843,9 @@ AJAFileIO::ReadDirectory(
 {
 #if defined(AJA_WINDOWS)
 	WIN32_FIND_DATAW fileData;
-	HANDLE           hSearch;
-	wstring          qualifiedName;
-	AJAStatus        status = AJA_STATUS_FAIL;
+	HANDLE			 hSearch;
+	wstring			 qualifiedName;
+	AJAStatus		 status = AJA_STATUS_FAIL;
 
 	fileContainer.clear();
 
@@ -901,9 +901,9 @@ AJAFileIO::DoesDirectoryContain(
 {
 #if defined(AJA_WINDOWS)
 	WIN32_FIND_DATAA fileData;
-	HANDLE           hSearch;
-	char             savePath[MAX_PATH+1];
-	AJAStatus        status = AJA_STATUS_FAIL;
+	HANDLE			 hSearch;
+	char			 savePath[MAX_PATH+1];
+	AJAStatus		 status = AJA_STATUS_FAIL;
 
 	if ((0 != directory.length()) && (0 != filePattern.length()))
 	{
@@ -925,8 +925,8 @@ AJAFileIO::DoesDirectoryContain(
 	}
 	return status;
 #else
-	AJAStatus       status = AJA_STATUS_FAIL;
-	vector<string>  fileList;
+	AJAStatus		status = AJA_STATUS_FAIL;
+	vector<string>	fileList;
 
 	if ((0 != directory.length()) && (0 != filePattern.length()))
 	{
@@ -949,9 +949,9 @@ AJAFileIO::DoesDirectoryContain(
 {
 #if defined(AJA_WINDOWS)
 	WIN32_FIND_DATAW fileData;
-	HANDLE           hSearch;
-	wchar_t          savePath[MAX_PATH+1];
-	AJAStatus        status = AJA_STATUS_FAIL;
+	HANDLE			 hSearch;
+	wchar_t			 savePath[MAX_PATH+1];
+	AJAStatus		 status = AJA_STATUS_FAIL;
 
 	if ((0 != directory.length()) && (0 != filePattern.length()))
 	{

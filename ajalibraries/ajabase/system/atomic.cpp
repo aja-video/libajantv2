@@ -84,18 +84,18 @@ AJAAtomic::Exchange(uint32_t volatile* pTarget, uint32_t value)
 int64_t
 AJAAtomic::Exchange(int64_t volatile* pTarget, int64_t value)
 {
-    // exchange integer value with target
+	// exchange integer value with target
 #if defined(AJA_WINDOWS)
-    return (int64_t)InterlockedExchange64((LONGLONG volatile*)pTarget, (LONGLONG)value);
+	return (int64_t)InterlockedExchange64((LONGLONG volatile*)pTarget, (LONGLONG)value);
 #endif
 
 #if defined(AJA_LINUX)
-    return __sync_lock_test_and_set(pTarget, value);
+	return __sync_lock_test_and_set(pTarget, value);
 #endif
 
 #if defined(AJA_MAC)
-    OSAtomicCompareAndSwap64Barrier( *pTarget, value, pTarget );
-    return *pTarget;
+	OSAtomicCompareAndSwap64Barrier( *pTarget, value, pTarget );
+	return *pTarget;
 #endif
 }
 
@@ -103,13 +103,13 @@ AJAAtomic::Exchange(int64_t volatile* pTarget, int64_t value)
 uint64_t
 AJAAtomic::Exchange(uint64_t volatile* pTarget, uint64_t value)
 {
-    // exchange unsigned integer value with target
+	// exchange unsigned integer value with target
 #if defined(AJA_WINDOWS)
-    return (uint64_t)InterlockedExchange64((LONGLONG volatile*)pTarget, (LONGLONG)value);
+	return (uint64_t)InterlockedExchange64((LONGLONG volatile*)pTarget, (LONGLONG)value);
 #endif
 
 #if defined(AJA_LINUX) || defined(AJA_MAC)
-    return __sync_lock_test_and_set(pTarget, value);
+	return __sync_lock_test_and_set(pTarget, value);
 #endif
 }
 
@@ -127,7 +127,7 @@ AJAAtomic::Increment(int32_t volatile* pTarget)
 #endif
 
 #if defined(AJA_MAC)
-    return OSAtomicAdd32Barrier(1, pTarget);
+	return OSAtomicAdd32Barrier(1, pTarget);
 #endif
 }
 
@@ -145,7 +145,7 @@ AJAAtomic::Decrement(int32_t volatile* pTarget)
 #endif
 
 #if defined(AJA_MAC)
-    return OSAtomicAdd32Barrier(-1, pTarget);
+	return OSAtomicAdd32Barrier(-1, pTarget);
 #endif
 }
 
@@ -163,7 +163,7 @@ AJAAtomic::Increment(uint32_t volatile* pTarget)
 #endif
 
 #if defined(AJA_MAC)
-    return (uint32_t) OSAtomicAdd32Barrier(1, (int32_t *)pTarget);
+	return (uint32_t) OSAtomicAdd32Barrier(1, (int32_t *)pTarget);
 #endif
 }
 
@@ -181,8 +181,8 @@ AJAAtomic::Decrement(uint32_t volatile* pTarget)
 #endif
 
 #if defined(AJA_MAC)
-    int32_t v = OSAtomicAdd32Barrier(-1, (int32_t *)pTarget);
-    return v < 0 ? 0 : (uint32_t)v;
+	int32_t v = OSAtomicAdd32Barrier(-1, (int32_t *)pTarget);
+	return v < 0 ? 0 : (uint32_t)v;
 #endif
 }
 
@@ -190,17 +190,17 @@ AJAAtomic::Decrement(uint32_t volatile* pTarget)
 int64_t
 AJAAtomic::Increment(int64_t volatile* pTarget)
 {
-    // increment target
+	// increment target
 #if defined(AJA_WINDOWS)
-    return (int64_t)InterlockedIncrement64((LONGLONG volatile*)pTarget);
+	return (int64_t)InterlockedIncrement64((LONGLONG volatile*)pTarget);
 #endif
 
 #if defined(AJA_LINUX)
-    return __sync_add_and_fetch(pTarget, 1);
+	return __sync_add_and_fetch(pTarget, 1);
 #endif
 
 #if defined(AJA_MAC)
-    return OSAtomicAdd64Barrier(1, pTarget);
+	return OSAtomicAdd64Barrier(1, pTarget);
 #endif
 }
 
@@ -208,17 +208,17 @@ AJAAtomic::Increment(int64_t volatile* pTarget)
 int64_t
 AJAAtomic::Decrement(int64_t volatile* pTarget)
 {
-    // decrement target
+	// decrement target
 #if defined(AJA_WINDOWS)
-    return (int64_t)InterlockedDecrement64((LONGLONG volatile*)pTarget);
+	return (int64_t)InterlockedDecrement64((LONGLONG volatile*)pTarget);
 #endif
 
 #if defined(AJA_LINUX)
-    return __sync_sub_and_fetch(pTarget, 1);
+	return __sync_sub_and_fetch(pTarget, 1);
 #endif
 
 #if defined(AJA_MAC)
-    return OSAtomicAdd64Barrier(-1, pTarget);
+	return OSAtomicAdd64Barrier(-1, pTarget);
 #endif
 }
 
@@ -226,17 +226,17 @@ AJAAtomic::Decrement(int64_t volatile* pTarget)
 uint64_t
 AJAAtomic::Increment(uint64_t volatile* pTarget)
 {
-    // increment target
+	// increment target
 #if defined(AJA_WINDOWS)
-    return (uint64_t)InterlockedIncrement64((LONGLONG volatile*)pTarget);
+	return (uint64_t)InterlockedIncrement64((LONGLONG volatile*)pTarget);
 #endif
 
 #if defined(AJA_LINUX)
-    return __sync_add_and_fetch(pTarget, 1);
+	return __sync_add_and_fetch(pTarget, 1);
 #endif
 
 #if defined(AJA_MAC)
-    return (uint64_t)OSAtomicAdd64Barrier(1, (int64_t *)pTarget);
+	return (uint64_t)OSAtomicAdd64Barrier(1, (int64_t *)pTarget);
 #endif
 }
 
@@ -244,17 +244,17 @@ AJAAtomic::Increment(uint64_t volatile* pTarget)
 uint64_t
 AJAAtomic::Decrement(uint64_t volatile* pTarget)
 {
-    // decrement target
+	// decrement target
 #if defined(AJA_WINDOWS)
-    return (uint64_t)InterlockedDecrement64((LONGLONG volatile*)pTarget);
+	return (uint64_t)InterlockedDecrement64((LONGLONG volatile*)pTarget);
 #endif
 
 #if defined(AJA_LINUX)
-    return __sync_sub_and_fetch(pTarget, 1);
+	return __sync_sub_and_fetch(pTarget, 1);
 #endif
 
 #if defined(AJA_MAC)
-    int64_t v = OSAtomicAdd64Barrier(-1, (int64_t *)pTarget);
-    return v < 0 ? 0 : (uint64_t)v;
+	int64_t v = OSAtomicAdd64Barrier(-1, (int64_t *)pTarget);
+	return v < 0 ? 0 : (uint64_t)v;
 #endif
 }

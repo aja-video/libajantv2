@@ -34,12 +34,12 @@ public:
 	AJAStatus		SetPriority(AJAThreadPriority threadPriority);
 	AJAStatus		GetPriority(AJAThreadPriority* pThreadPriority);
 
-    AJAStatus       SetRealTime(AJAThreadRealTimePolicy policy, int priority);
+	AJAStatus		SetRealTime(AJAThreadRealTimePolicy policy, int priority);
 
 	AJAStatus		Attach(AJAThreadFunction* pThreadFunction, void* pUserContext);
 	AJAStatus		SetThreadName(const char *name);
 
-    static uint64_t	GetThreadId();
+	static uint64_t GetThreadId();
 	static void*	ThreadProcStatic(void* pThreadImplContext);
 
 public:

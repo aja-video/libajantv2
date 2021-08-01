@@ -143,14 +143,14 @@ AJAStatus AJAAncillaryData_Timecode_ATC::ParsePayloadData (void)
 		// we have some kind of payload data - try to parse it
 		// extract the time digits from the even payload words, bits[7:4]
 		// (note: SetTimeHexValue() does the needed masking)
-		SetTimeHexValue(kTcFrameUnits,  (m_payload[ 0] >> 4));		// frame units);
-		SetTimeHexValue(kTcFrameTens,   (m_payload[ 2] >> 4));		// frame tens
+		SetTimeHexValue(kTcFrameUnits,	(m_payload[ 0] >> 4));		// frame units);
+		SetTimeHexValue(kTcFrameTens,	(m_payload[ 2] >> 4));		// frame tens
 		SetTimeHexValue(kTcSecondUnits, (m_payload[ 4] >> 4));		// second units
-		SetTimeHexValue(kTcSecondTens,  (m_payload[ 6] >> 4));		// second tens
+		SetTimeHexValue(kTcSecondTens,	(m_payload[ 6] >> 4));		// second tens
 		SetTimeHexValue(kTcMinuteUnits, (m_payload[ 8] >> 4));		// minute units
-		SetTimeHexValue(kTcMinuteTens,  (m_payload[10] >> 4));		// minute tens
-		SetTimeHexValue(kTcHourUnits,   (m_payload[12] >> 4));		// hour units
-		SetTimeHexValue(kTcHourTens,    (m_payload[14] >> 4));		// hour tens
+		SetTimeHexValue(kTcMinuteTens,	(m_payload[10] >> 4));		// minute tens
+		SetTimeHexValue(kTcHourUnits,	(m_payload[12] >> 4));		// hour units
+		SetTimeHexValue(kTcHourTens,	(m_payload[14] >> 4));		// hour tens
 
 		// extract the binary group values from the odd payload words, bits[7:4]
 		// (note: SetBinaryGroupHexValue() does the needed masking)
@@ -199,13 +199,13 @@ AJAStatus AJAAncillaryData_Timecode_ATC::GeneratePayloadData (void)
 
 	// time digits in the even payload words
 	m_payload[ 0] = (m_timeDigits[kTcFrameUnits]  & 0x0F) << 4;
-	m_payload[ 2] = (m_timeDigits[kTcFrameTens]   & 0x0F) << 4;
+	m_payload[ 2] = (m_timeDigits[kTcFrameTens]	  & 0x0F) << 4;
 	m_payload[ 4] = (m_timeDigits[kTcSecondUnits] & 0x0F) << 4;
 	m_payload[ 6] = (m_timeDigits[kTcSecondTens]  & 0x0F) << 4;
 	m_payload[ 8] = (m_timeDigits[kTcMinuteUnits] & 0x0F) << 4;
 	m_payload[10] = (m_timeDigits[kTcMinuteTens]  & 0x0F) << 4;
-	m_payload[12] = (m_timeDigits[kTcHourUnits]   & 0x0F) << 4;
-	m_payload[14] = (m_timeDigits[kTcHourTens]    & 0x0F) << 4;
+	m_payload[12] = (m_timeDigits[kTcHourUnits]	  & 0x0F) << 4;
+	m_payload[14] = (m_timeDigits[kTcHourTens]	  & 0x0F) << 4;
 
 	// binary group data in the odd payload words
 	m_payload[ 1] = (m_binaryGroup[kBg1] & 0x0F) << 4;	

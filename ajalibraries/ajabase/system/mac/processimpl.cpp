@@ -30,17 +30,17 @@ AJAProcessImpl::GetPid()
 bool
 AJAProcessImpl::IsValid(uint64_t pid)
 {
-    if(kill(pid_t(pid),0)==0)
-        return true;
-    else
-        return false;
+	if(kill(pid_t(pid),0)==0)
+		return true;
+	else
+		return false;
 }
 
 bool
 AJAProcessImpl::Activate(const char* pWindow)
 {
-    AJA_UNUSED(pWindow);
-    
+	AJA_UNUSED(pWindow);
+	
 	//Dummy place holder
 	return false;
 }
@@ -48,8 +48,8 @@ AJAProcessImpl::Activate(const char* pWindow)
 bool
 AJAProcessImpl::Activate(uint64_t handle)
 {
-    AJA_UNUSED(handle);
-    
+	AJA_UNUSED(handle);
+	
 	//Dummy place holder
 	return false;
 }

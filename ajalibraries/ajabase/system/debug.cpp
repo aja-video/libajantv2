@@ -31,11 +31,11 @@ static bool sDebug = false;
 
 #define addDebugGroupToLabelVector(x) sGroupLabelVector.push_back(#x)
 
-#define	STAT_BIT_SHIFT		(1ULL<<(inKey%64))
-#define	STAT_BIT_TEST		(spShare->statAllocMask[inKey/(AJA_DEBUG_MAX_NUM_STATS/64)] & STAT_BIT_SHIFT)
-#define	IS_STAT_BAD			!STAT_BIT_TEST
-#define	STAT_BIT_SET		spShare->statAllocMask[inKey/(AJA_DEBUG_MAX_NUM_STATS/64)] |= STAT_BIT_SHIFT
-#define	STAT_BIT_CLEAR		spShare->statAllocMask[inKey/(AJA_DEBUG_MAX_NUM_STATS/64)] &= 0xFFFFFFFFFFFFFFFF - STAT_BIT_SHIFT
+#define STAT_BIT_SHIFT		(1ULL<<(inKey%64))
+#define STAT_BIT_TEST		(spShare->statAllocMask[inKey/(AJA_DEBUG_MAX_NUM_STATS/64)] & STAT_BIT_SHIFT)
+#define IS_STAT_BAD			!STAT_BIT_TEST
+#define STAT_BIT_SET		spShare->statAllocMask[inKey/(AJA_DEBUG_MAX_NUM_STATS/64)] |= STAT_BIT_SHIFT
+#define STAT_BIT_CLEAR		spShare->statAllocMask[inKey/(AJA_DEBUG_MAX_NUM_STATS/64)] &= 0xFFFFFFFFFFFFFFFF - STAT_BIT_SHIFT
 
 
 AJAStatus AJADebug::Open (bool incrementRefCount)
@@ -76,19 +76,19 @@ AJAStatus AJADebug::Open (bool incrementRefCount)
 			if (spShare->version == 0)
 			{	//	Initialize shared memory region...
 				memset((void*)spShare, 0, sizeof(AJADebugShare));
-                spShare->magicId					= AJA_DEBUG_MAGIC_ID;
-                spShare->version					= AJA_DEBUG_VERSION;
-                spShare->writeIndex					= 0;
-                spShare->clientRefCount				= 0;
-                spShare->messageRingCapacity		= AJA_DEBUG_MESSAGE_RING_SIZE;
-                spShare->messageTextCapacity		= AJA_DEBUG_MESSAGE_MAX_SIZE;
-                spShare->messageFileNameCapacity	= AJA_DEBUG_FILE_NAME_MAX_SIZE;
-                spShare->unitArraySize				= AJA_DEBUG_UNIT_ARRAY_SIZE;
-                spShare->statsMessagesAccepted		= 0;
-                spShare->statsMessagesIgnored		= 0;
+				spShare->magicId					= AJA_DEBUG_MAGIC_ID;
+				spShare->version					= AJA_DEBUG_VERSION;
+				spShare->writeIndex					= 0;
+				spShare->clientRefCount				= 0;
+				spShare->messageRingCapacity		= AJA_DEBUG_MESSAGE_RING_SIZE;
+				spShare->messageTextCapacity		= AJA_DEBUG_MESSAGE_MAX_SIZE;
+				spShare->messageFileNameCapacity	= AJA_DEBUG_FILE_NAME_MAX_SIZE;
+				spShare->unitArraySize				= AJA_DEBUG_UNIT_ARRAY_SIZE;
+				spShare->statsMessagesAccepted		= 0;
+				spShare->statsMessagesIgnored		= 0;
 				spShare->statCapacity				= AJA_DEBUG_MAX_NUM_STATS;
 				spShare->statAllocChanges			= 0;
-				for (size_t num(0);  num < size_t(AJA_DEBUG_MAX_NUM_STATS/64);  num++)
+				for (size_t num(0);	 num < size_t(AJA_DEBUG_MAX_NUM_STATS/64);	num++)
 					spShare->statAllocMask[num]		= 0;
 				spShare->unitArray[AJA_DebugUnit_Critical] = AJA_DEBUG_DESTINATION_CONSOLE;
 			}
@@ -100,81 +100,81 @@ AJAStatus AJADebug::Open (bool incrementRefCount)
 				return AJA_STATUS_FAIL;
 			}
 
-            if (incrementRefCount)
-            {
-                // increment reference count;
-                spShare->clientRefCount++;
-            }
+			if (incrementRefCount)
+			{
+				// increment reference count;
+				spShare->clientRefCount++;
+			}
 
-            // Create the Unit Label Vector
-            sGroupLabelVector.clear();
-            addDebugGroupToLabelVector(AJA_DebugUnit_Unknown);
-            addDebugGroupToLabelVector(AJA_DebugUnit_Critical);
-            addDebugGroupToLabelVector(AJA_DebugUnit_DriverGeneric);
-            addDebugGroupToLabelVector(AJA_DebugUnit_ServiceGeneric);
-            addDebugGroupToLabelVector(AJA_DebugUnit_UserGeneric);
-            addDebugGroupToLabelVector(AJA_DebugUnit_VideoGeneric);
-            addDebugGroupToLabelVector(AJA_DebugUnit_AudioGeneric);
-            addDebugGroupToLabelVector(AJA_DebugUnit_TimecodeGeneric);
-            addDebugGroupToLabelVector(AJA_DebugUnit_AncGeneric);
-            addDebugGroupToLabelVector(AJA_DebugUnit_RoutingGeneric);
-            addDebugGroupToLabelVector(AJA_DebugUnit_StatsGeneric);
-            addDebugGroupToLabelVector(AJA_DebugUnit_Enumeration);
-            addDebugGroupToLabelVector(AJA_DebugUnit_Application);
-            addDebugGroupToLabelVector(AJA_DebugUnit_QuickTime);
-            addDebugGroupToLabelVector(AJA_DebugUnit_ControlPanel);
-            addDebugGroupToLabelVector(AJA_DebugUnit_Watcher);
-            addDebugGroupToLabelVector(AJA_DebugUnit_Plugins);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CCLine21Decode);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CCLine21Encode);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC608DataQueue);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC608MsgQueue);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC608Decode);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC608DecodeChannel);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC608DecodeScreen);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC608Encode);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Decode);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Service);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC708ServiceBlockQueue);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Window);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CC708Encode);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CCFont);
-            addDebugGroupToLabelVector(AJA_DebugUnit_SMPTEAnc);
-            addDebugGroupToLabelVector(AJA_DebugUnit_AJAAncData);
-            addDebugGroupToLabelVector(AJA_DebugUnit_AJAAncList);
-            addDebugGroupToLabelVector(AJA_DebugUnit_BFT);
-            addDebugGroupToLabelVector(AJA_DebugUnit_PnP);
-            addDebugGroupToLabelVector(AJA_DebugUnit_Persistence);
-            addDebugGroupToLabelVector(AJA_DebugUnit_Avid);
-            addDebugGroupToLabelVector(AJA_DebugUnit_DriverInterface);
-            addDebugGroupToLabelVector(AJA_DebugUnit_AutoCirculate);
-            addDebugGroupToLabelVector(AJA_DebugUnit_NMOS);
-            addDebugGroupToLabelVector(AJA_DebugUnit_App_DiskRead);
-            addDebugGroupToLabelVector(AJA_DebugUnit_App_DiskWrite);
-            addDebugGroupToLabelVector(AJA_DebugUnit_App_Decode);
-            addDebugGroupToLabelVector(AJA_DebugUnit_App_Encode);
-            addDebugGroupToLabelVector(AJA_DebugUnit_App_DMA);
-            addDebugGroupToLabelVector(AJA_DebugUnit_App_Screen);
-            addDebugGroupToLabelVector(AJA_DebugUnit_App_User1);
-            addDebugGroupToLabelVector(AJA_DebugUnit_App_User2);
-            addDebugGroupToLabelVector(AJA_DebugUnit_Anc2110Xmit);
-            addDebugGroupToLabelVector(AJA_DebugUnit_Anc2110Rcv);
-            addDebugGroupToLabelVector(AJA_DebugUnit_DemoPlayout);
-            addDebugGroupToLabelVector(AJA_DebugUnit_DemoCapture);
-            addDebugGroupToLabelVector(AJA_DebugUnit_CSC);
-            addDebugGroupToLabelVector(AJA_DebugUnit_LUT);
-            addDebugGroupToLabelVector(AJA_DebugUnit_Cables);
-            addDebugGroupToLabelVector(AJA_DebugUnit_RPCServer);
-            addDebugGroupToLabelVector(AJA_DebugUnit_RPCClient);
+			// Create the Unit Label Vector
+			sGroupLabelVector.clear();
+			addDebugGroupToLabelVector(AJA_DebugUnit_Unknown);
+			addDebugGroupToLabelVector(AJA_DebugUnit_Critical);
+			addDebugGroupToLabelVector(AJA_DebugUnit_DriverGeneric);
+			addDebugGroupToLabelVector(AJA_DebugUnit_ServiceGeneric);
+			addDebugGroupToLabelVector(AJA_DebugUnit_UserGeneric);
+			addDebugGroupToLabelVector(AJA_DebugUnit_VideoGeneric);
+			addDebugGroupToLabelVector(AJA_DebugUnit_AudioGeneric);
+			addDebugGroupToLabelVector(AJA_DebugUnit_TimecodeGeneric);
+			addDebugGroupToLabelVector(AJA_DebugUnit_AncGeneric);
+			addDebugGroupToLabelVector(AJA_DebugUnit_RoutingGeneric);
+			addDebugGroupToLabelVector(AJA_DebugUnit_StatsGeneric);
+			addDebugGroupToLabelVector(AJA_DebugUnit_Enumeration);
+			addDebugGroupToLabelVector(AJA_DebugUnit_Application);
+			addDebugGroupToLabelVector(AJA_DebugUnit_QuickTime);
+			addDebugGroupToLabelVector(AJA_DebugUnit_ControlPanel);
+			addDebugGroupToLabelVector(AJA_DebugUnit_Watcher);
+			addDebugGroupToLabelVector(AJA_DebugUnit_Plugins);
+			addDebugGroupToLabelVector(AJA_DebugUnit_CCLine21Decode);
+			addDebugGroupToLabelVector(AJA_DebugUnit_CCLine21Encode);
+			addDebugGroupToLabelVector(AJA_DebugUnit_CC608DataQueue);
+			addDebugGroupToLabelVector(AJA_DebugUnit_CC608MsgQueue);
+			addDebugGroupToLabelVector(AJA_DebugUnit_CC608Decode);
+			addDebugGroupToLabelVector(AJA_DebugUnit_CC608DecodeChannel);
+			addDebugGroupToLabelVector(AJA_DebugUnit_CC608DecodeScreen);
+			addDebugGroupToLabelVector(AJA_DebugUnit_CC608Encode);
+			addDebugGroupToLabelVector(AJA_DebugUnit_CC708Decode);
+			addDebugGroupToLabelVector(AJA_DebugUnit_CC708Service);
+			addDebugGroupToLabelVector(AJA_DebugUnit_CC708ServiceBlockQueue);
+			addDebugGroupToLabelVector(AJA_DebugUnit_CC708Window);
+			addDebugGroupToLabelVector(AJA_DebugUnit_CC708Encode);
+			addDebugGroupToLabelVector(AJA_DebugUnit_CCFont);
+			addDebugGroupToLabelVector(AJA_DebugUnit_SMPTEAnc);
+			addDebugGroupToLabelVector(AJA_DebugUnit_AJAAncData);
+			addDebugGroupToLabelVector(AJA_DebugUnit_AJAAncList);
+			addDebugGroupToLabelVector(AJA_DebugUnit_BFT);
+			addDebugGroupToLabelVector(AJA_DebugUnit_PnP);
+			addDebugGroupToLabelVector(AJA_DebugUnit_Persistence);
+			addDebugGroupToLabelVector(AJA_DebugUnit_Avid);
+			addDebugGroupToLabelVector(AJA_DebugUnit_DriverInterface);
+			addDebugGroupToLabelVector(AJA_DebugUnit_AutoCirculate);
+			addDebugGroupToLabelVector(AJA_DebugUnit_NMOS);
+			addDebugGroupToLabelVector(AJA_DebugUnit_App_DiskRead);
+			addDebugGroupToLabelVector(AJA_DebugUnit_App_DiskWrite);
+			addDebugGroupToLabelVector(AJA_DebugUnit_App_Decode);
+			addDebugGroupToLabelVector(AJA_DebugUnit_App_Encode);
+			addDebugGroupToLabelVector(AJA_DebugUnit_App_DMA);
+			addDebugGroupToLabelVector(AJA_DebugUnit_App_Screen);
+			addDebugGroupToLabelVector(AJA_DebugUnit_App_User1);
+			addDebugGroupToLabelVector(AJA_DebugUnit_App_User2);
+			addDebugGroupToLabelVector(AJA_DebugUnit_Anc2110Xmit);
+			addDebugGroupToLabelVector(AJA_DebugUnit_Anc2110Rcv);
+			addDebugGroupToLabelVector(AJA_DebugUnit_DemoPlayout);
+			addDebugGroupToLabelVector(AJA_DebugUnit_DemoCapture);
+			addDebugGroupToLabelVector(AJA_DebugUnit_CSC);
+			addDebugGroupToLabelVector(AJA_DebugUnit_LUT);
+			addDebugGroupToLabelVector(AJA_DebugUnit_Cables);
+			addDebugGroupToLabelVector(AJA_DebugUnit_RPCServer);
+			addDebugGroupToLabelVector(AJA_DebugUnit_RPCClient);
 
-            for (int i(AJA_DebugUnit_FirstUnused);  i < AJA_DebugUnit_Size;  i++)
-            {
-                std::string name("AJA_DebugUnit_Unused_");
-                name += aja::to_string(i);
-                sGroupLabelVector.push_back(name);
-            }
+			for (int i(AJA_DebugUnit_FirstUnused);	i < AJA_DebugUnit_Size;	 i++)
+			{
+				std::string name("AJA_DebugUnit_Unused_");
+				name += aja::to_string(i);
+				sGroupLabelVector.push_back(name);
+			}
 
-            assert(sGroupLabelVector.size() == AJA_DebugUnit_Size);
+			assert(sGroupLabelVector.size() == AJA_DebugUnit_Size);
 		}
 	}
 	catch(...)
@@ -301,7 +301,7 @@ uint32_t AJADebug::TotalBytes (void)
 		return 0;	//	Not open
 	if (HasStats())
 		return uint32_t(sizeof(AJADebugShare));
-	return uint32_t(sizeof(AJADebugShare))  -  AJA_DEBUG_MAX_NUM_STATS * uint32_t(sizeof(AJADebugStat)); 
+	return uint32_t(sizeof(AJADebugShare))	-  AJA_DEBUG_MAX_NUM_STATS * uint32_t(sizeof(AJADebugStat)); 
 }
 
 bool AJADebug::IsOpen (void)
@@ -312,16 +312,16 @@ bool AJADebug::IsOpen (void)
 
 bool AJADebug::IsDebugBuild (void)
 {
-    return sDebug;
+	return sDebug;
 }
 
 inline int64_t debug_time (void)
 {
-    int64_t ticks = AJATime::GetSystemCounter();
-    int64_t rate = AJATime::GetSystemFrequency();
-    int64_t time = ticks / rate * AJA_DEBUG_TICK_RATE;
-    time += (ticks % rate) * AJA_DEBUG_TICK_RATE / rate;
-    return time;
+	int64_t ticks = AJATime::GetSystemCounter();
+	int64_t rate = AJATime::GetSystemFrequency();
+	int64_t time = ticks / rate * AJA_DEBUG_TICK_RATE;
+	time += (ticks % rate) * AJA_DEBUG_TICK_RATE / rate;
+	return time;
 }
 
 inline uint64_t report_common(int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, uint64_t& writeIndex, int32_t& messageIndex)
@@ -383,7 +383,7 @@ inline uint64_t report_common(int32_t index, int32_t severity, const char* pFile
 void AJADebug::Report (int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, ...)
 {
 	if (!spShare)
-		return;	//	Not open
+		return; //	Not open
 	try
 	{
 		uint64_t writeIndex = 0;
@@ -418,7 +418,7 @@ void AJADebug::Report (int32_t index, int32_t severity, const char* pFileName, i
 void AJADebug::Report (int32_t index, int32_t severity, const char* pFileName, int32_t lineNumber, const std::string& message)
 {
 	if (!spShare)
-		return;	//	Not open
+		return; //	Not open
 	try
 	{
 		uint64_t writeIndex = 0;
@@ -566,7 +566,7 @@ AJAStatus AJADebug::GetMessageSequenceNumber (const uint64_t sequenceNumber, uin
 	if (sequenceNumber > spShare->writeIndex)
 		return AJA_STATUS_RANGE;
 	try
-	{        
+	{		 
 		outSequenceNumber = spShare->messageRing[sequenceNumber%AJA_DEBUG_MESSAGE_RING_SIZE].sequenceNumber;
 	}
 	catch(...)
@@ -884,10 +884,10 @@ AJAStatus AJADebug::SaveState (char* pFileName)
 			// write groups with destinations enabled
 			if (spShare->unitArray[i])
 			{
-                if (i < AJA_DebugUnit_Size)
-                    fprintf(pFile, "GroupDestination: %6d : %08x\n", i, spShare->unitArray[i]);
-                else
-                    fprintf(pFile, "CustomGroupDestination: %6d : %08x\n", i, spShare->unitArray[i]);
+				if (i < AJA_DebugUnit_Size)
+					fprintf(pFile, "GroupDestination: %6d : %08x\n", i, spShare->unitArray[i]);
+				else
+					fprintf(pFile, "CustomGroupDestination: %6d : %08x\n", i, spShare->unitArray[i]);
 			}
 		}
 	}
@@ -924,14 +924,14 @@ AJAStatus AJADebug::RestoreState (char* pFileName)
 		version = intVersion;
 		if((count != 1) || (version != spShare->version))
 		{
-            fclose(pFile);
+			fclose(pFile);
 			return AJA_STATUS_FAIL;
 		}
 		count = fscanf(pFile, " AJADebugStateFileVersion: %d", &intVersion);
 		version = intVersion;
 		if((count != 1) || (version != AJA_DEBUG_STATE_FILE_VERSION))
 		{
-            fclose(pFile);
+			fclose(pFile);
 			return AJA_STATUS_FAIL;
 		}
 
@@ -941,12 +941,12 @@ AJAStatus AJADebug::RestoreState (char* pFileName)
 			count = fscanf(pFile, " GroupDestination: %d : %x", &index, &destination);
 			if(count != 2)
 			{
-                count = fscanf(pFile, " CustomGroupDestination: %d : %x", &index, &destination);
-                if(count != 2)
-                {
-                    break;
-                }
-			}          
+				count = fscanf(pFile, " CustomGroupDestination: %d : %x", &index, &destination);
+				if(count != 2)
+				{
+					break;
+				}
+			}		   
 
 			// index must be in range
 			if((index < 0) || (index >= AJA_DEBUG_UNIT_ARRAY_SIZE))
@@ -960,7 +960,7 @@ AJAStatus AJADebug::RestoreState (char* pFileName)
 	}
 	catch(...)
 	{
-        fclose(pFile);
+		fclose(pFile);
 		return AJA_STATUS_FAIL;
 	}
 
@@ -972,8 +972,8 @@ AJAStatus AJADebug::RestoreState (char* pFileName)
 
 int64_t AJADebug::DebugTime (void)
 {
-    // wrapper around the inlined local version
-    return debug_time();
+	// wrapper around the inlined local version
+	return debug_time();
 }
 
 
@@ -1013,10 +1013,10 @@ std::string AJAStatusToString (const AJAStatus inStatus)
 		case AJA_STATUS_STREAMCONFLICT:		return "AJA_STATUS_STREAMCONFLICT";
 		case AJA_STATUS_NOTINITIALIZED:		return "AJA_STATUS_NOTINITIALIZED";
 		case AJA_STATUS_STREAMRUNNING:		return "AJA_STATUS_STREAMRUNNING";
-        case AJA_STATUS_REBOOT:             return "AJA_STATUS_REBOOT";
-        case AJA_STATUS_POWER_CYCLE:        return "AJA_STATUS_POWER_CYCLE";
+		case AJA_STATUS_REBOOT:				return "AJA_STATUS_REBOOT";
+		case AJA_STATUS_POWER_CYCLE:		return "AJA_STATUS_POWER_CYCLE";
 #if !defined(_DEBUG)
-        default:	break;
+		default:	break;
 #endif
 	}
 	return "<bad AJAStatus>";
@@ -1240,7 +1240,7 @@ AJAStatus AJADebug::StatGetKeys (std::vector<uint32_t> & outKeys, uint32_t & out
 		return AJA_STATUS_FEATURE;
 	try
 	{
-		for (uint32_t inKey(0);  inKey < spShare->statCapacity;  inKey++)
+		for (uint32_t inKey(0);	 inKey < spShare->statCapacity;	 inKey++)
 			if (STAT_BIT_TEST)
 				outKeys.push_back(inKey);
 		outSeqNum = spShare->statAllocChanges;
@@ -1255,7 +1255,7 @@ AJAStatus AJADebug::StatGetKeys (std::vector<uint32_t> & outKeys, uint32_t & out
 uint64_t AJADebugStat::Sum (size_t inNum) const
 {
 	uint64_t result(0);
-	if (!inNum  ||  inNum > AJA_DEBUG_STAT_DEQUE_SIZE)
+	if (!inNum	||	inNum > AJA_DEBUG_STAT_DEQUE_SIZE)
 		inNum = AJA_DEBUG_STAT_DEQUE_SIZE;
 	for (size_t n(0);  n < inNum;  n++)
 		result += fValues[n];
@@ -1283,7 +1283,7 @@ void AJADebugStat::Stop (void)
 
 void AJADebugStat::Increment (uint32_t inIncrement, const bool inRollOver)
 {
-	if (inRollOver  ||  fCount != 0xFFFFFFFF)
+	if (inRollOver	||	fCount != 0xFFFFFFFF)
 		while (inIncrement--)
 			AJAAtomic::Increment(&fCount);
 	fLastTimeStamp = AJATime::GetSystemMicroseconds();
@@ -1291,7 +1291,7 @@ void AJADebugStat::Increment (uint32_t inIncrement, const bool inRollOver)
 
 void AJADebugStat::Decrement (uint32_t inDecrement, const bool inRollUnder)
 {
-	if (inRollUnder  ||  fCount != 0xFFFFFFFF)
+	if (inRollUnder	 ||	 fCount != 0xFFFFFFFF)
 		while (inDecrement--)
 			AJAAtomic::Decrement(&fCount);
 	fLastTimeStamp = AJATime::GetSystemMicroseconds();

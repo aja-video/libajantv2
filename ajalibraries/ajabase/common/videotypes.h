@@ -14,8 +14,8 @@ enum AJA_VideoFormat
 	AJA_VideoFormat_525i_2997,				// 1 525
 	AJA_VideoFormat_525p_5994,
 	AJA_VideoFormat_525i_2398,
-    AJA_VideoFormat_525_2400,
-    AJA_VideoFormat_525psf_2997,
+	AJA_VideoFormat_525_2400,
+	AJA_VideoFormat_525psf_2997,
 	AJA_VideoFormat_625psf_2500,			// 6 625
 	AJA_VideoFormat_625i_2500,
 	AJA_VideoFormat_720p_2398,				// 8 HD - 720
@@ -39,9 +39,9 @@ enum AJA_VideoFormat
 	AJA_VideoFormat_1080p_2500,				
 	AJA_VideoFormat_1080p_2997,
 	AJA_VideoFormat_1080p_3000,
-    AJA_VideoFormat_1080p_5000,
-    AJA_VideoFormat_1080p_5994,
-    AJA_VideoFormat_1080p_6000,
+	AJA_VideoFormat_1080p_5000,
+	AJA_VideoFormat_1080p_5994,
+	AJA_VideoFormat_1080p_6000,
 	AJA_VideoFormat_2K_1080psf_2398,		// 32 2Kx1080psf
 	AJA_VideoFormat_2K_1080psf_2400,
 	AJA_VideoFormat_2K_1080psf_2500,
@@ -163,25 +163,25 @@ enum AJA_PixelFormat
 	AJA_PixelFormat_YCBCR10_420PL3LE,	/**< Pixel format YCbCr 10 bit 420 little-endian planar */
 	AJA_PixelFormat_YCBCR10_422PL3LE,	/**< Pixel format YCbCr 10 bit 422 little-endian planar */
 
-    /// SMPTE 2022-6/211/OpenCL related....not actually pixel formats on any board...
-            AJA_PixelFormat_S0226_720p50,
-            AJA_PixelFormat_S0226_720p60,
-            AJA_PixelFormat_S0226_1080i30,
-            AJA_PixelFormat_S0226_1080i25,
-            AJA_PixelFormat_S0226_1080p30,
-            AJA_PixelFormat_S0226_1080p25,
-            AJA_PixelFormat_S0226_1080p24,
-            AJA_PixelFormat_S0226_525i30,
-            AJA_PixelFormat_S0226_625i25,
+	/// SMPTE 2022-6/211/OpenCL related....not actually pixel formats on any board...
+			AJA_PixelFormat_S0226_720p50,
+			AJA_PixelFormat_S0226_720p60,
+			AJA_PixelFormat_S0226_1080i30,
+			AJA_PixelFormat_S0226_1080i25,
+			AJA_PixelFormat_S0226_1080p30,
+			AJA_PixelFormat_S0226_1080p25,
+			AJA_PixelFormat_S0226_1080p24,
+			AJA_PixelFormat_S0226_525i30,
+			AJA_PixelFormat_S0226_625i25,
 
-            AJA_PixelFormat_RFC4175_720p,
-            AJA_PixelFormat_RFC4175_1080i,
-            AJA_PixelFormat_RFC4175_1080p,
-            AJA_PixelFormat_RFC4175_525i30,
-            AJA_PixelFormat_RFC4175_625i25,
-            AJA_PixelFormat_RFC4175_2160p,
+			AJA_PixelFormat_RFC4175_720p,
+			AJA_PixelFormat_RFC4175_1080i,
+			AJA_PixelFormat_RFC4175_1080p,
+			AJA_PixelFormat_RFC4175_525i30,
+			AJA_PixelFormat_RFC4175_625i25,
+			AJA_PixelFormat_RFC4175_2160p,
 
-            AJA_PixelFormat_RGB10_3DLUT,
+			AJA_PixelFormat_RGB10_3DLUT,
 	AJA_PixelFormat_Size
 };
 

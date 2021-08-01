@@ -50,8 +50,8 @@ class AJA_EXPORT AJAIPSocket
 		bool Initialize(void);
 		bool Deinitialize(void);
 
-        virtual AJAStatus Open(const std::string& ipAddress, uint16_t port);
-		bool              IsOpen(void);
+		virtual AJAStatus Open(const std::string& ipAddress, uint16_t port);
+		bool			  IsOpen(void);
 
 		bool Shutdown(int how);
 		bool Close(void);
@@ -62,30 +62,30 @@ class AJA_EXPORT AJAIPSocket
 				IPAddressContainerType& ipv6AddressContainer);
 
 		virtual uint32_t Poll(
-							uint8_t*            pData,
-							uint32_t            dataLength,
+							uint8_t*			pData,
+							uint32_t			dataLength,
 							struct sockaddr_in& client,
-							int                 timeout);
+							int					timeout);
 		virtual uint32_t Read(
-							uint8_t*            pData,
-							uint32_t            dataLength,
+							uint8_t*			pData,
+							uint32_t			dataLength,
 							struct sockaddr_in& client);
 		virtual uint32_t Write(
-							const uint8_t*      pData,
-							uint32_t            dataLength,
+							const uint8_t*		pData,
+							uint32_t			dataLength,
 							struct sockaddr_in& targetAddress);
 
 
 	protected:
 		struct sockaddr_in mSocketAddress;
-		socklen_t          mSocketLength;
-		int                mSocket; 
+		socklen_t		   mSocketLength;
+		int				   mSocket; 
 
 		bool IsInstantiated(void);
 
 	private:
-		static AJALock     mMutex;
-		static uint32_t    mInstantiationCount;
+		static AJALock	   mMutex;
+		static uint32_t	   mInstantiationCount;
 };
 
 

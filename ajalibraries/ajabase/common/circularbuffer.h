@@ -56,7 +56,7 @@ public:
 
 	/**
 		@brief	Retrieves the size count of the circular buffer, i.e. how far the tail pointer is behind the head pointer.
-		@return	The number of frames that I contain.
+		@return The number of frames that I contain.
 	*/
 	inline unsigned int GetCircBufferCount (void) const
 	{
@@ -66,7 +66,7 @@ public:
 
 	/**
 		@brief	Returns "true" if I'm empty -- i.e., if my tail and head are in the same place.
-		@return	True if I contain no frames.
+		@return True if I contain no frames.
 	**/
 	inline bool IsEmpty (void) const
 	{
@@ -75,7 +75,7 @@ public:
 
 	/**
 		@brief	Returns my frame storage capacity, which reflects how many times my Add method has been called.
-		@return	My frame capacity.
+		@return My frame capacity.
 	**/
 	inline unsigned int GetNumFrames (void) const
 	{
@@ -103,7 +103,7 @@ public:
 	/**
 		@brief	The thread that's responsible for providing frames -- the producer -- calls this function
 				to populate the the returned FrameDataPtr.
-		@return	A pointer (of the type in the template argument) to the next frame to be filled by the
+		@return A pointer (of the type in the template argument) to the next frame to be filled by the
 				producer thread.
 	**/
 	FrameDataPtr StartProduceNextBuffer (void)
@@ -147,7 +147,7 @@ public:
 	/** 
 		@brief	The thread that's responsible for processing incoming frames -- the consumer -- calls this
 				function to obtain the next available frame.
-		@return	A pointer (of the type in the template argument) to the next frame to be processed by the
+		@return A pointer (of the type in the template argument) to the next frame to be processed by the
 				consumer thread.
 	**/
 	FrameDataPtr StartConsumeNextBuffer (void)
@@ -199,27 +199,27 @@ public:
 
 
 private:
-	typedef std::vector <AJALock *>	AJALockVector;
+	typedef std::vector <AJALock *> AJALockVector;
 
-	std::vector <FrameDataPtr>	mFrames;			///< @brief	My ordered frame collection
-	AJALockVector				mLocks;				///< @brief	My per-frame locks, to control access to each frame
+	std::vector <FrameDataPtr>	mFrames;			///< @brief My ordered frame collection
+	AJALockVector				mLocks;				///< @brief My per-frame locks, to control access to each frame
 	
-	unsigned int				mHead;				///< @brief	My current "head" pointer, an index into my frame collection
-	unsigned int				mTail;				///< @brief	My current "tail" pointer, an index into my frame collection
-	unsigned int				mCircBufferCount;	///< @brief	My current size, the distance between my "head" and "tail"
-	AJAEvent					mNotFullEvent;		///< @brief	An event that signals when I transition from being full to not full
-	AJAEvent					mNotEmptyEvent;		///< @brief	An event that signals when I transition from empty to having at least one frame
-	AJALock						mDataBufferLock;	///< @brief	Protects my "head" and "tail" members
+	unsigned int				mHead;				///< @brief My current "head" pointer, an index into my frame collection
+	unsigned int				mTail;				///< @brief My current "tail" pointer, an index into my frame collection
+	unsigned int				mCircBufferCount;	///< @brief My current size, the distance between my "head" and "tail"
+	AJAEvent					mNotFullEvent;		///< @brief An event that signals when I transition from being full to not full
+	AJAEvent					mNotEmptyEvent;		///< @brief An event that signals when I transition from empty to having at least one frame
+	AJALock						mDataBufferLock;	///< @brief Protects my "head" and "tail" members
 
-	unsigned int				mFillIndex;			///< @brief	Index where frames are added to me
-	unsigned int				mEmptyIndex;		///< @brief	Index where frames are removed from me
+	unsigned int				mFillIndex;			///< @brief Index where frames are added to me
+	unsigned int				mEmptyIndex;		///< @brief Index where frames are removed from me
 
-	const bool *				mAbortFlag;			///< @brief	Optional pointer to a boolean that clients can set to break threads waiting on me
+	const bool *				mAbortFlag;			///< @brief Optional pointer to a boolean that clients can set to break threads waiting on me
 	
 	/**
 		@brief		Waits for the given event with a timeout, and abort the wait if mAbortFlag is set.
 		@param[in]	ajaEvent	Specifies a valid, non-NULL AJAEvent object to trigger on.
-    	@return		True if the event triggers successfully; false otherwise.
+		@return		True if the event triggers successfully; false otherwise.
 	**/
 	bool WaitForEventOrAbort (AJAEvent * ajaEvent);
 
@@ -313,13 +313,13 @@ bool AJACircularBuffer<FrameDataPtr>::WaitForLockOrAbort(AJALock* ajaLock)
 template<typename FrameDataPtr>
 void AJACircularBuffer<FrameDataPtr>::Clear (void)
 {
-	for (AJALockVector::iterator iter (mLocks.begin());  iter != mLocks.end();  ++iter)
+	for (AJALockVector::iterator iter (mLocks.begin());	 iter != mLocks.end();	++iter)
 		delete *iter;
 
 	mLocks.clear();
 	mFrames.clear();
 
-	mHead = mTail =	mFillIndex = mEmptyIndex = mCircBufferCount = 0;
+	mHead = mTail = mFillIndex = mEmptyIndex = mCircBufferCount = 0;
 	mAbortFlag = NULL;
 }
 

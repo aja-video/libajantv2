@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef MSWindows
-    #pragma warning(disable:4996)
+	#pragma warning(disable:4996)
 	#include "winsock2.h"
 	#include "Ws2tcpip.h"
 	#define snprintf _snprintf
@@ -16,8 +16,8 @@
 	#define close closesocket
 #else
 	#include <unistd.h>
-	#include <errno.h>  	 
-	#include <string.h> 	 
+	#include <errno.h>		 
+	#include <string.h>		 
 	#include <netdb.h>
 	#include <sys/types.h>
 	#include <sys/socket.h>
@@ -84,7 +84,7 @@ extractBoardInventory(NTV2NubPkt *pPkt, NTV2DiscoverRespPayload *boardInventory,
 		// Prepend peername to description.
 		strncpy(tmp, dbi->description, NTV2_DISCOVER_BOARDINFO_DESC_STRMAX);
 
-		int peernameLen = snprintf(	dbi->description, 
+		int peernameLen = snprintf( dbi->description, 
 									NTV2_DISCOVER_BOARDINFO_DESC_STRMAX, 
 									"%s: ", peername);
 
@@ -110,13 +110,13 @@ ntv2DiscoverNubs(	int maxNubs, // Maximum number of nubs (size of sockaddr_in an
 	INTERFACE_INFO interfaceList[20]; //relates to ifconf below
 	unsigned long nBytesReturned = 0;
 #else
-	char          buf[1024];
+	char		  buf[1024];
 	struct ifconf ifc;
 	struct ifreq *ifr;
 #endif
-	int           sck;
-	int           nInterfaces;
-	int           i;
+	int			  sck;
+	int			  nInterfaces;
+	int			  i;
 
 	nubsFound = 0;
 
@@ -175,7 +175,7 @@ ntv2DiscoverNubs(	int maxNubs, // Maximum number of nubs (size of sockaddr_in an
 	}
 
 	// Iterate through the list of interfaces.
-	ifr         = ifc.ifc_req;
+	ifr			= ifc.ifc_req;
 	nInterfaces = ifc.ifc_len / sizeof(struct ifreq);
 
 	int retcode = DISCOVER_FOUND_NOBODY;
@@ -238,7 +238,7 @@ ntv2DiscoverNubs(	const char *hostname,
 	int retcode = DISCOVER_FOUND_NOBODY;
 	static unsigned long ignoredNTV2pkts;
 
-	if ((he=gethostbyname(hostname)) == NULL) {  // get the host info
+	if ((he=gethostbyname(hostname)) == NULL) {	 // get the host info
 		// Lookup failed, probably unknown hostname
 		if (!appendNubs)
 		{
@@ -269,7 +269,7 @@ ntv2DiscoverNubs(	const char *hostname,
 	their_addr[nubsFound].sin_family = AF_INET;	 // host byte order
 	their_addr[nubsFound].sin_port = htons(NTV2DISCOVERYPORT); // short, network byte order
 	their_addr[nubsFound].sin_addr = *((struct in_addr *)he->h_addr);
-	memset(&(their_addr[nubsFound].sin_zero), '\0', 8);  // zero the rest of the struct
+	memset(&(their_addr[nubsFound].sin_zero), '\0', 8);	 // zero the rest of the struct
 
 	NTV2NubPkt *pPkt = BuildDiscoverQueryPacket();
 
@@ -286,7 +286,7 @@ ntv2DiscoverNubs(	const char *hostname,
 		}
 	}
 	if(pPkt)
-		delete  pPkt;
+		delete	pPkt;
 
 	char buf[sizeof(NTV2NubPkt)];
 	socklen_t addr_len;

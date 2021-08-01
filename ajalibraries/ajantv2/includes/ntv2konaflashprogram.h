@@ -21,13 +21,13 @@
 #include "ntv2spiinterface.h"
 
 #if defined(AJALinux) || defined(AJAMac)
-#include <netinet/in.h>	// htons and friends
+#include <netinet/in.h> // htons and friends
 #endif
 
 #define MAXBITFILE_HEADERSIZE 512
 #define MAXMCSINFOSIZE 256
 #define MAXMCSLICENSESIZE 256
-#define MCS_STEPS      6
+#define MCS_STEPS	   6
 
 typedef enum 
 {
@@ -59,7 +59,7 @@ struct MacAddr
 class AJAExport CNTV2FlashProgress
 {
 	public:
-		static CNTV2FlashProgress &	nullUpdater;
+		static CNTV2FlashProgress & nullUpdater;
 
 						CNTV2FlashProgress()	{}
 		virtual			~CNTV2FlashProgress()	{}
@@ -83,8 +83,8 @@ public:
 	bool			SetBitFile (const std::string & inBitfileName, const FlashBlockID blockNumber = AUTO_FLASHBLOCK);	//	New in SDK 16.0
 	bool			SetMCSFile (const char *sMCSFileName);
 	void			Program (bool fullVerify = false);
-	bool            ProgramFromMCS(bool verify);
-	bool            ProgramSOC(bool verify = true);
+	bool			ProgramFromMCS(bool verify);
+	bool			ProgramSOC(bool verify = true);
 	void			ProgramCustom ( const char *sCustomFileName, const uint32_t addr);
 	void			EraseBlock (FlashBlockID blockNumber);
 	bool			EraseChip (UWord chip = 0);
@@ -95,9 +95,9 @@ public:
 	bool			ReadFlash (NTV2_POINTER & outBuffer, const FlashBlockID flashID, CNTV2FlashProgress & inFlashProgress = CNTV2FlashProgress::nullUpdater);	//	New in SDK 16.0
 	bool			SetBankSelect (BankSelect bankNumber);
 	bool			SetFlashBlockIDBank(FlashBlockID blockID);
-	bool            ROMHasBankSelect();
+	bool			ROMHasBankSelect();
 	uint32_t		ReadBankSelect ();
-	void            SetMBReset();
+	void			SetMBReset();
 
 	std::string & GetDesignName()
 	{
@@ -135,7 +135,7 @@ public:
 	bool ProgramInfoFromString(std::string infoString);
 	void FullProgram(std::vector<uint8_t> & dataBuffer);
 
-    int32_t  NextMcsStep() {return ++_mcsStep;}
+	int32_t	 NextMcsStep() {return ++_mcsStep;}
 
 	bool ParseHeader(char* headerAddress);
 	bool WaitForFlashNOTBusy();
@@ -205,10 +205,10 @@ protected:
 	uint32_t		_mainOffset;
 	uint32_t		_failSafeOffset;
 	uint32_t		_macOffset;
-    uint32_t		_mcsInfoOffset;
+	uint32_t		_mcsInfoOffset;
 	uint32_t		_licenseOffset;
-    uint32_t		_soc1Offset;
-    uint32_t		_soc2Offset;
+	uint32_t		_soc1Offset;
+	uint32_t		_soc2Offset;
 	uint32_t		_numSectorsMain;
 	uint32_t		_numSectorsSOC1;
 	uint32_t		_numSectorsSOC2;
@@ -217,11 +217,11 @@ protected:
 	FlashBlockID	_flashID;
 	uint32_t		_deviceID;
 	bool			_bQuiet;
-    int32_t			_mcsStep;
-    CNTV2MCSfile	_mcsFile;
+	int32_t			_mcsStep;
+	CNTV2MCSfile	_mcsFile;
 	std::vector<uint8_t> _partitionBuffer;
-    uint32_t		_failSafePadding;
-    CNTV2SpiFlash *	_spiFlash;
+	uint32_t		_failSafePadding;
+	CNTV2SpiFlash * _spiFlash;
 
 	typedef enum {
 		READID_COMMAND			= 0x9F,

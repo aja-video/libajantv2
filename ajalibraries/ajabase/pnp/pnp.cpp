@@ -71,7 +71,7 @@ AJAPnp::GetPnpDevices() const
 
 AJAPnp::AJAPnp (const AJAPnp & inObjToCopy)
 {
-    AJA_UNUSED(inObjToCopy); assert (false && "hidden copy constructor");	//	mpImpl=inObjToCopy.mpImpl;
+	AJA_UNUSED(inObjToCopy); assert (false && "hidden copy constructor");	//	mpImpl=inObjToCopy.mpImpl;
 }
 
 
@@ -79,7 +79,7 @@ AJAPnp &
 AJAPnp::operator= (const AJAPnp & inObjToCopy)
 {
 	if (&inObjToCopy != this)
-		assert (false && "hidden assignment operator");	//	mpImpl = inObjToCopy.mpImpl;
+		assert (false && "hidden assignment operator"); //	mpImpl = inObjToCopy.mpImpl;
 
 	return *this;
 

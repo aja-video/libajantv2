@@ -17,7 +17,7 @@
 #endif
 
 /**
-    @brief	A convenience class that simplifies encoding or decoding the 4-byte VPID payload
+	@brief	A convenience class that simplifies encoding or decoding the 4-byte VPID payload
 			that can be read or written from/to VPID registers.
 **/
 class AJAExport CNTV2VPID
@@ -53,7 +53,7 @@ public:
 	virtual VPIDChannel				GetChannel (void) const;
 	virtual VPIDChannel				GetDualLinkChannel (void) const;
 	virtual VPIDBitDepth			GetBitDepth (void) const;
-	virtual inline bool				IsValid (void) const			{return GetVersion() == VPIDVersion_1;}	///< @return	True if valid;  otherwise false.
+	virtual inline bool				IsValid (void) const			{return GetVersion() == VPIDVersion_1;} ///< @return	True if valid;	otherwise false.
 	virtual AJALabelValuePairs &	GetInfo (AJALabelValuePairs & outInfo) const;
 	virtual NTV2VPIDXferChars		GetTransferCharacteristics (void) const;
 	virtual NTV2VPIDColorimetry		GetColorimetry (void) const;
@@ -61,17 +61,17 @@ public:
 	virtual NTV2VPIDRGBRange		GetRGBRange (void) const;						//	New in SDK 16.0
 	virtual std::ostream &			Print (std::ostream & ostrm) const;
 	virtual std::ostream &			PrintPretty (std::ostream & ostrm) const;		//	New in SDK 16.0
-    virtual std::string				AsString (const bool inTabular = false) const;	//	New in SDK 16.0
+	virtual std::string				AsString (const bool inTabular = false) const;	//	New in SDK 16.0
 	///@}
 
 	/**
 		@name	Changing
 	**/
 	///@{
-	virtual inline CNTV2VPID &	SetVPID (const ULWord inData)		{m_uVPID = inData;  return *this;}
+	virtual inline CNTV2VPID &	SetVPID (const ULWord inData)		{m_uVPID = inData;	return *this;}
 
 	virtual bool				SetVPID (const NTV2VideoFormat		inVideoFormat,
-										const NTV2FrameBufferFormat	inFrameBufferFormat,
+										const NTV2FrameBufferFormat inFrameBufferFormat,
 										const bool					inIsProgressive,
 										const bool					inIs16x9Aspect,
 										const VPIDChannel			inVPIDChannel);
@@ -110,7 +110,7 @@ public:
 	///@{
 	static bool					SetVPIDData (ULWord &					outVPID,
 											const NTV2VideoFormat		inOutputFormat,
-											const NTV2FrameBufferFormat	inFrameBufferFormat,
+											const NTV2FrameBufferFormat inFrameBufferFormat,
 											const bool					inIsProgressive,
 											const bool					inIs16x9Aspect,
 											const VPIDChannel			inVPIDChannel,
@@ -126,9 +126,9 @@ public:
 											const bool				inUseVPIDChannel = true,
 											const bool				inOutputIs6G = false,
 											const bool				inOutputIs12G = false,
-											const NTV2VPIDXferChars	inXferChars = NTV2_VPID_TC_SDR_TV,
+											const NTV2VPIDXferChars inXferChars = NTV2_VPID_TC_SDR_TV,
 											const NTV2VPIDColorimetry	inColorimetry = NTV2_VPID_Color_Rec709,
-											const NTV2VPIDLuminance	inLuminance = NTV2_VPID_Luminance_YCbCr,
+											const NTV2VPIDLuminance inLuminance = NTV2_VPID_Luminance_YCbCr,
 											const NTV2VPIDRGBRange	inRGBRange = NTV2_VPID_Range_Narrow);	//	New in SDK 16.0
 
 	static const std::string	VersionString				(const VPIDVersion version);	//	New in SDK 15.5
@@ -136,12 +136,12 @@ public:
 	static const std::string	PictureRateString			(const VPIDPictureRate rate);	//	New in SDK 15.5
 	static const std::string	SamplingString				(const VPIDSampling sample);	//	New in SDK 15.5
 	static const std::string	ChannelString				(const VPIDChannel chan);		//	New in SDK 15.5
-	static const std::string	DynamicRangeString			(const VPIDDynamicRange range);	//	New in SDK 15.5
+	static const std::string	DynamicRangeString			(const VPIDDynamicRange range); //	New in SDK 15.5
 	static const std::string	BitDepthString				(const VPIDBitDepth depth);		//	New in SDK 15.5
 	static const std::string	LinkString					(const VPIDLink link);			//	New in SDK 15.5
 	static const std::string	AudioString					(const VPIDAudio audio);		//	New in SDK 15.5
-	static const std::string	VPIDVersionToString			(const VPIDVersion inVers);		//  New in SDK 16.0.1
-	static const std::string	VPIDStandardToString		(const VPIDStandard inStd);		//  New in SDK 16.0.1
+	static const std::string	VPIDVersionToString			(const VPIDVersion inVers);		//	New in SDK 16.0.1
+	static const std::string	VPIDStandardToString		(const VPIDStandard inStd);		//	New in SDK 16.0.1
 	static bool					VPIDStandardIsSingleLink	(const VPIDStandard inStd);		//	New in SDK 16.0
 	static bool					VPIDStandardIsDualLink		(const VPIDStandard inStd);		//	New in SDK 16.0
 	static bool					VPIDStandardIsQuadLink		(const VPIDStandard inStd);		//	New in SDK 16.0
@@ -151,7 +151,7 @@ public:
 		virtual void NTV2_DEPRECATED_f(SetDynamicRange (const VPIDDynamicRange inDynamicRange));	
 		static inline NTV2_DEPRECATED_f(bool	SetVPIDData (ULWord *				pOutVPID,
 														const NTV2VideoFormat		inOutputFormat,
-														const NTV2FrameBufferFormat	inFrameBufferFormat,
+														const NTV2FrameBufferFormat inFrameBufferFormat,
 														const bool					inIsProgressive,
 														const bool					inIs16x9Aspect,
 														const VPIDChannel			inVPIDChannel,
@@ -173,7 +173,7 @@ public:
 	///@}
 
 private:
-	ULWord	m_uVPID;	///< @brief	My 32-bit VPID data value
+	ULWord	m_uVPID;	///< @brief My 32-bit VPID data value
 
 };	//	CNTV2VPID
 

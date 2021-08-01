@@ -20,8 +20,8 @@ public:
 	AJAProcessImpl();
 	virtual ~AJAProcessImpl();
 
-static		uint64_t	GetPid();    
-static      bool        IsValid(uint64_t pid);
+static		uint64_t	GetPid();	 
+static		bool		IsValid(uint64_t pid);
 	
 static		bool		Activate(const char* pWindow);
 static		bool		Activate(uint64_t handle);	

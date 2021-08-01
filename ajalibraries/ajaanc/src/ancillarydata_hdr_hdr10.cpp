@@ -53,10 +53,10 @@ AJAAncillaryData_HDR_HDR10::~AJAAncillaryData_HDR_HDR10 ()
 
 void AJAAncillaryData_HDR_HDR10::Init (void)
 {
-	m_ancType      = AJAAncillaryDataType_HDR_HDR10;
-	m_coding       = AJAAncillaryDataCoding_Digital;
-	m_DID          = AJAAncillaryData_HDR_HDR10_DID;
-	m_SID          = AJAAncillaryData_HDR_HDR10_SID;
+	m_ancType	   = AJAAncillaryDataType_HDR_HDR10;
+	m_coding	   = AJAAncillaryDataCoding_Digital;
+	m_DID		   = AJAAncillaryData_HDR_HDR10_DID;
+	m_SID		   = AJAAncillaryData_HDR_HDR10_SID;
 	m_location.SetDataLink(AJAAncillaryDataLink_A).SetDataChannel(AJAAncillaryDataChannel_Y).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc).SetLineNumber(16);
 	uint8_t payload[29] = {0x08,0x02,0x00,0xC2,0x33,0xC4,0x86,0x4C,0x1D,0xB8,0x0B,0xD0,0x84,0x80,0x3E,0x13,0x3D,0x42,0x40,0xE8,0x03,0x05,0x00,0xE8,0x03,0x90,0x01,0x00,0x00};
 	SetPayloadData(payload, 29);
@@ -103,7 +103,7 @@ AJAAncillaryDataType AJAAncillaryData_HDR_HDR10::RecognizeThisAncillaryData (con
 	if (pInAncData->GetDataCoding() == AJAAncillaryDataCoding_Digital)
 		if (pInAncData->GetDID() == AJAAncillaryData_HDR_HDR10_DID)
 			if (pInAncData->GetSID() == AJAAncillaryData_HDR_HDR10_SID)
-				if (pInAncData->GetDC()  == AJAAncillaryData_HDR_HDR10_PayloadSize)
+				if (pInAncData->GetDC()	 == AJAAncillaryData_HDR_HDR10_PayloadSize)
 					return AJAAncillaryDataType_HDR_HDR10;
 	return AJAAncillaryDataType_Unknown;
 }

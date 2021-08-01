@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 /**
-    @file		main.cpp
+	@file		main.cpp
 	@brief		Unittests for the AJA NTV2 Library (using doctest).
 	@copyright	(C) 2019-2021 AJA Video Systems, Inc. All rights reserved.
 **/
@@ -30,9 +30,9 @@ template
 void filename_marker() {} //this is used to easily just around in a GUI with a symbols list
 TEST_SUITE("filename" * doctest::description("functions in streams/common/filename.h")) {
 
-    TEST_CASE("constructor")
-    {
-    }
+	TEST_CASE("constructor")
+	{
+	}
 
 } //filename
 #endif
@@ -41,7 +41,7 @@ void ntv2debug_marker() {}
 TEST_SUITE("ntv2debug" * doctest::description("ntv2 debug string functions")) {
 
 	TEST_CASE("DeviceIDString")
-    {
+	{
 		// spot check a few
 		CHECK(std::string(NTV2DeviceIDString(DEVICE_ID_NOTFOUND)) == "DEVICE_ID_NOTFOUND");
 		CHECK(std::string(NTV2DeviceIDString(DEVICE_ID_CORVID1)) == "DEVICE_ID_CORVID1");
@@ -54,7 +54,7 @@ TEST_SUITE("ntv2debug" * doctest::description("ntv2 debug string functions")) {
 		CHECK(std::string(NTV2DeviceIDString(DEVICE_ID_CORVID44_8KMK)) == "DEVICE_ID_CORVID44_8KMK");
 		CHECK(std::string(NTV2DeviceIDString(DEVICE_ID_KONAIP_2110)) == "DEVICE_ID_KONAIP_2110");
 		CHECK(std::string(NTV2DeviceIDString(DEVICE_ID_IOIP_2110)) == "DEVICE_ID_IOIP_2110");
-    }
+	}
 
 	TEST_CASE("DeviceString")
 	{
@@ -829,8 +829,8 @@ TEST_SUITE("CNTV2VPID" * doctest::description("CNTV2VPID functions")) {
 
 void bft_marker() {}
 TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
-    TEST_CASE("NTV2SegmentedXferInfo")
-    {
+	TEST_CASE("NTV2SegmentedXferInfo")
+	{
 		SUBCASE("NTV2SegmentedXferInfo Basic Test")
 		{
 			const NTV2SegmentedXferInfo nfo;
@@ -850,17 +850,17 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 
 		// TEST_CASE("NTV2SegmentedXfrInfo 1920x1080 YUV8")
 		// {
-		// 	NTV2SegmentedXferInfo nfo;
-		// 	nfo.setSegmentCount(64);
-		// 	nfo.setSegmentLength(1024);	// bytes
-		// 	nfo.setSourcePitch(3840);	// bytes
+		//	NTV2SegmentedXferInfo nfo;
+		//	nfo.setSegmentCount(64);
+		//	nfo.setSegmentLength(1024); // bytes
+		//	nfo.setSourcePitch(3840);	// bytes
 		// }
 
 		SUBCASE("NTV2SegmentedXfrInfo 1920x1080 NTV2_FBF_RGBA")
 		{
 			NTV2SegmentedXferInfo nfo;
 			nfo.setSegmentCount(64);
-			nfo.setSegmentLength(1024);	// bytes
+			nfo.setSegmentLength(1024); // bytes
 			nfo.setSourcePitch(7680);	// 0x1E00 bytes
 			CHECK(nfo.isValid() == true);
 			CHECK(nfo.getTotalBytes() == 0x00010000);	//	64K
@@ -869,7 +869,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		{	//	1920x1080 ARGB8 src buffer, 256x64 selection at upper-right corner 1664,0
 			NTV2SegmentedXferInfo segInfo;
 			segInfo.setSegmentCount(64);
-			segInfo.setSegmentLength(1024);	// bytes
+			segInfo.setSegmentLength(1024); // bytes
 			segInfo.setSourceOffset(6656);	// 0x1A00 bytes
 			segInfo.setSourcePitch(7680);	// 0x1E00 bytes
 			CHECK(segInfo.isValid() == true);
@@ -905,11 +905,11 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 			CHECK(segInfo.isValid() == true);
 			CHECK(segInfo.getTotalBytes() == 0x00010000);	//	64K
 		}
-    }
+	}
 
 	TEST_CASE("NTV2Bitfile")
 	{
-		static unsigned char sTTapPro[] = {	//	.............a.Et_tap_pro;COMPRESS=TRUE;UserID=0XFFFFFFFF;TANDEM=TRUE;Version=2019.1.b..xcku035-fbva676-1LV-i.c..2020/11/04.d..14:58:54.e..'......................................................................".D..........Uf ... ...0. .....0.......0......
+		static unsigned char sTTapPro[] = { //	.............a.Et_tap_pro;COMPRESS=TRUE;UserID=0XFFFFFFFF;TANDEM=TRUE;Version=2019.1.b..xcku035-fbva676-1LV-i.c..2020/11/04.d..14:58:54.e..'......................................................................".D..........Uf ... ...0. .....0.......0......
 			0x00, 0x09, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x00, 0x00, 0x01, 0x61, 0x00, 0x45, 0x74, 0x5f, 0x74, 0x61, 0x70, 0x5f, 0x70, 0x72, 0x6f, 0x3b, 0x43, 0x4f, 0x4d, 0x50, 0x52, 0x45, 0x53, 0x53, 0x3d, 0x54, 0x52, 0x55, 0x45, 0x3b, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x3d, 0x30, 0x58, 0x46, 0x46, 0x46, 0x46, 0x46, 0x46, 0x46, 0x46, 0x3b, 0x54, 0x41, 0x4e, 0x44, 0x45, 0x4d,
 			0x3d, 0x54, 0x52, 0x55, 0x45, 0x3b, 0x56, 0x65, 0x72, 0x73, 0x69, 0x6f, 0x6e, 0x3d, 0x32, 0x30, 0x31, 0x39, 0x2e, 0x31, 0x00, 0x62, 0x00, 0x16, 0x78, 0x63, 0x6b, 0x75, 0x30, 0x33, 0x35, 0x2d, 0x66, 0x62, 0x76, 0x61, 0x36, 0x37, 0x36, 0x2d, 0x31, 0x4c, 0x56, 0x2d, 0x69, 0x00, 0x63, 0x00, 0x0b, 0x32, 0x30, 0x32, 0x30, 0x2f, 0x31, 0x31, 0x2f, 0x30, 0x34, 0x00, 0x64, 0x00, 0x09, 0x31,
 			0x34, 0x3a, 0x35, 0x38, 0x3a, 0x35, 0x34, 0x00, 0x65, 0x00, 0xd2, 0x27, 0xd4, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
@@ -954,7 +954,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 			NTV2_POINTER bSectionBad(TTapPro);
 			NTV2_POINTER cSectionBad(TTapPro);
 			NTV2_POINTER dSectionBad(TTapPro);
-			for (uint16_t fnLen(0);  fnLen < 0xFFFF;  fnLen++) {
+			for (uint16_t fnLen(0);	 fnLen < 0xFFFF;  fnLen++) {
 
 				// A Section -- bad FileName length test
 				aSectionBad.U16(7) = NTV2EndianSwap16HtoB(fnLen);
