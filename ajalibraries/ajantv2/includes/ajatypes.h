@@ -39,13 +39,14 @@
 #define NTV2_DEPRECATE_14_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.2
 #define NTV2_DEPRECATE_14_3		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.3
 #define NTV2_DEPRECATE_15_0		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.0
-//#define NTV2_DEPRECATE_15_1		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.1
-//#define NTV2_DEPRECATE_15_2		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.2
-//#define NTV2_DEPRECATE_15_3		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.3 (never released)
-//#define NTV2_DEPRECATE_15_5		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.5
-//#define NTV2_DEPRECATE_15_6		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.6 (never released)
-//#define NTV2_DEPRECATE_16_0		//	If defined, excludes all symbols/APIs to be deprecated in SDK 16.0
-//#define NTV2_DEPRECATE_16_1		//	If defined, excludes all symbols/APIs to be deprecated in SDK 16.1
+//#define NTV2_DEPRECATE_15_1		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.1
+//#define NTV2_DEPRECATE_15_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.2
+//#define NTV2_DEPRECATE_15_3		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.3 (never released)
+//#define NTV2_DEPRECATE_15_5		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.5
+//#define NTV2_DEPRECATE_15_6		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.6 (never released)
+//#define NTV2_DEPRECATE_16_0		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.0
+//#define NTV2_DEPRECATE_16_1		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.1
+//#define NTV2_DEPRECATE_16_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.2
 #define NTV2_NUB_CLIENT_SUPPORT		//	If defined, includes nub client support;  otherwise, excludes it
 #define AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
 #define AJA_STATIC		static		//	Do not change this.
@@ -422,16 +423,19 @@
 		#define NTV2_DEPRECATE_15_3
 	#endif
 	#if !defined(NTV2_DEPRECATE_15_5)
-		#define NTV2_DEPRECATE_15_5		//	(future ready)
+		#define NTV2_DEPRECATE_15_5
 	#endif
 	#if !defined(NTV2_DEPRECATE_15_6)
-		#define NTV2_DEPRECATE_15_6		//	(future ready)
+		#define NTV2_DEPRECATE_15_6
 	#endif
 	#if !defined(NTV2_DEPRECATE_16_0)
-		#define NTV2_DEPRECATE_16_0		//	(future ready)
+		#define NTV2_DEPRECATE_16_0
 	#endif
 	#if !defined(NTV2_DEPRECATE_16_1)
-		#define NTV2_DEPRECATE_16_1		//	(future ready)
+		#define NTV2_DEPRECATE_16_1
+	#endif
+	#if !defined(NTV2_DEPRECATE_16_2)
+		#define NTV2_DEPRECATE_16_2
 	#endif
 #endif
 
