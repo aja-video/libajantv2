@@ -445,8 +445,11 @@ void NTV2FrameGrabber::run (void)
 			QImage *			currentImage	(images [framesCaptured % NTV2_NUM_IMAGES]);
 			NTV2TimeCodeList	tcValues;
 
-			mTransferStruct.SetVideoBuffer (reinterpret_cast<PULWord>(currentImage->bits()), ULWord(currentImage->sizeInBytes()));
-
+			#if (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
+				mTransferStruct.SetVideoBuffer (reinterpret_cast<PULWord>(currentImage->bits()), ULWord(currentImage->sizeInBytes()));
+			#else
+				mTransferStruct.SetVideoBuffer (reinterpret_cast<PULWord>(currentImage->bits()), ULWord(currentImage->byteCount()));
+			#endif
 			mNTV2Card.AutoCirculateTransfer (mChannel, mTransferStruct);
 			if (!mFormatIsProgressive && mDeinterlace)
 			{
