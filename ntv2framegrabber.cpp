@@ -290,10 +290,10 @@ void NTV2FrameGrabber::run (void)
 	// Make sure all Bidirectionals are set to Inputs.
 	if (mNTV2Card.Open(mBoardNumber))
 	{
-		if (!mDoMultiChannel && !mNTV2Card.AcquireStreamForApplicationWithReference (kDemoAppSignature, (uint32_t) AJAProcess::GetPid ()))
+		if (!mDoMultiChannel && !mNTV2Card.AcquireStreamForApplicationWithReference (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
 		{
 			//	We have not acquired the board continue until something changes...
-			qDebug ("Could not acquire board number %d", GetDeviceIndex ());
+			qDebug ("Could not acquire board number %d", GetDeviceIndex());
 			mNTV2Card.Close ();
 			mDeviceID = DEVICE_ID_NOTFOUND;
 		}
@@ -302,7 +302,7 @@ void NTV2FrameGrabber::run (void)
 			mNTV2Card.GetEveryFrameServices (mSavedTaskMode);	//	Save the current state before we change it
 			mNTV2Card.SetEveryFrameServices (NTV2_OEM_TASKS);	//	Since this is an OEM demo we will set the OEM service level
 
-			if (::NTV2DeviceHasBiDirectionalSDI (mNTV2Card.GetDeviceID ()))		//	If device has bidirectional SDI connectors...
+			if (::NTV2DeviceHasBiDirectionalSDI (mNTV2Card.GetDeviceID()))		//	If device has bidirectional SDI connectors...
 			{
 				bool waitForInput = false;
 				for (unsigned offset (0);  offset < 8;  offset++)
@@ -361,7 +361,7 @@ void NTV2FrameGrabber::run (void)
 
 			if (mNTV2Card.Open(mBoardNumber))
 			{
-				if (!mDoMultiChannel && !mNTV2Card.AcquireStreamForApplicationWithReference (kDemoAppSignature, (uint32_t) AJAProcess::GetPid ()))
+				if (!mDoMultiChannel && !mNTV2Card.AcquireStreamForApplicationWithReference (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
 				{
 					//We have not acquired the board continue until something changes
 					qDebug() << "Could not acquire board number " << GetDeviceIndex();
@@ -431,10 +431,9 @@ void NTV2FrameGrabber::run (void)
 			QImage *	currentImage	(images [framesCaptured % NTV2_NUM_IMAGES]);
 			currentImage->fill (qRgba (40, 40, 40, 255));
 
-			QString		status			(QString ("%1: No Detected Input").arg (::NTV2InputSourceToString (mInputSource, true).c_str()));
+			QString	status	(QString("%1: No Detected Input").arg(::NTV2InputSourceToString(mInputSource, true).c_str()));
 			emit newStatusString (status);
 			emit newFrame (*currentImage, true);
-
 			msleep (200);
 			continue;
 		}
@@ -446,23 +445,23 @@ void NTV2FrameGrabber::run (void)
 			QImage *			currentImage	(images [framesCaptured % NTV2_NUM_IMAGES]);
 			NTV2TimeCodeList	tcValues;
 
-			mTransferStruct.SetVideoBuffer ((PULWord) currentImage->bits (), currentImage->byteCount ());
+			mTransferStruct.SetVideoBuffer (reinterpret_cast<PULWord>(currentImage->bits()), ULWord(currentImage->sizeInBytes()));
 
 			mNTV2Card.AutoCirculateTransfer (mChannel, mTransferStruct);
 			if (!mFormatIsProgressive && mDeinterlace)
 			{
 				//	Eliminate field flicker by copying even lines to odd lines...
 				//	(a very lame de-interlace technique)
-				if (currentImage->height () == int (mFrameDimensions.Height())  &&  currentImage->width () == int (mFrameDimensions.Width()))
+				if (currentImage->height() == int(mFrameDimensions.Height())  &&  currentImage->width() == int(mFrameDimensions.Width()))
 					for (ULWord line (0);  line < mFrameDimensions.Height();  line += 2)
-						::memcpy (currentImage->scanLine (line + 1),  currentImage->scanLine (line),  mFrameDimensions.Width() * 4);
+						::memcpy (currentImage->scanLine (int(line) + 1),  currentImage->scanLine(int(line)),  mFrameDimensions.Width() * 4);
 			}
-			GrabCaptions ();
+			GrabCaptions();
 			mTimeCode.clear ();
-			if (mTransferStruct.acTransferStatus.acFrameStamp.GetInputTimeCodes (tcValues) && (size_t) mTimeCodeSource < tcValues.size ())
+			if (mTransferStruct.acTransferStatus.acFrameStamp.GetInputTimeCodes(tcValues) && size_t(mTimeCodeSource) < tcValues.size())
 			{
-				CRP188	tc	(tcValues.at (mTimeCodeSource));
-				if (!tcValues.at (mTimeCodeSource).IsValid ())
+				CRP188	tc	(tcValues.at(mTimeCodeSource));
+				if (!tcValues.at (mTimeCodeSource).IsValid())
 				{
 					//	If the requested timecode was invalid, check for embedded LTC
 					if (NTV2_IS_VALID_INPUT_SOURCE(mInputSource))
@@ -480,8 +479,8 @@ void NTV2FrameGrabber::run (void)
 			emit newStatusString (outString);
 
 			emit newFrame (*currentImage, (framesCaptured == 0) ? true : false);
-			if (mbWithAudio && mTransferStruct.acAudioBuffer.GetHostPointer ())
-				OutputAudio ((ULWord *) mTransferStruct.acAudioBuffer.GetHostPointer (), mTransferStruct.acTransferStatus.acAudioTransferSize);
+			if (mbWithAudio && mTransferStruct.acAudioBuffer)
+				OutputAudio (mTransferStruct.acAudioBuffer, mTransferStruct.acTransferStatus.acAudioTransferSize);
 
 			framesCaptured++;
 		}	//	if running and at least one frame ready to transfer

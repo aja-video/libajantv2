@@ -39,10 +39,10 @@ void AJAPreviewWidget::paintEvent (QPaintEvent * /* event */)
 			currentPen.setWidth (4);
 			painter.setPen (currentPen);
 			QRectF currentRect;	//(roiRectInfo.roiRect);
-			currentRect.setLeft   ((double) offsetX  +  roiRectInfo.roiRect.left()   * hScale);
-			currentRect.setRight  ((double) offsetX  +  roiRectInfo.roiRect.right()  * hScale);
-			currentRect.setTop    ((double) offsetY  +  roiRectInfo.roiRect.top()    * vScale);
-			currentRect.setBottom ((double) offsetY  +  roiRectInfo.roiRect.bottom() * vScale);
+			currentRect.setLeft   (double(offsetX)  +  roiRectInfo.roiRect.left()   * hScale);
+			currentRect.setRight  (double(offsetX)  +  roiRectInfo.roiRect.right()  * hScale);
+			currentRect.setTop    (double(offsetY)  +  roiRectInfo.roiRect.top()    * vScale);
+			currentRect.setBottom (double(offsetY)  +  roiRectInfo.roiRect.bottom() * vScale);
 			//qDebug() << "ROI2:" << currentRect.left() << currentRect.right() << currentRect.top() << currentRect.bottom();
 			painter.drawRect (currentRect);
 		}
@@ -140,24 +140,17 @@ void AJAPreviewWidget::updateStatusString(const QString statusString)
 void AJAPreviewWidget::renderFrame ()
 {
 //	qDebug() << "Render Frame";
-
 	if (_image.width() > this->width())
-		_pixmap = QPixmap::fromImage(_image.scaledToWidth(this->width(), Qt::SmoothTransformation), 0);
+		_pixmap = QPixmap::fromImage(_image.scaledToWidth(this->width(), Qt::SmoothTransformation), Qt::ImageConversionFlags());
 	else if (_image.height() > this->height())
-		_pixmap = QPixmap::fromImage(_image.scaledToHeight(this->height() ,Qt::SmoothTransformation), 0);
+		_pixmap = QPixmap::fromImage(_image.scaledToHeight(this->height(), Qt::SmoothTransformation), Qt::ImageConversionFlags());
 	else
-		_pixmap = QPixmap::fromImage(_image, 0);
+		_pixmap = QPixmap::fromImage(_image, Qt::ImageConversionFlags());
 
 	setAttribute(Qt::WA_OpaquePaintEvent, _clear ? false : true);
 	repaint();
 }
 
-void AJAPreviewWidget::wheelEvent ( QWheelEvent * event )
-{
-	int delta = event->delta();
-//	qDebug("wheel delta = %d",delta);
-	emit wheelDelta(delta);
-}
 
 void AJAPreviewWidget::dragEnterEvent( QDragEnterEvent *ev )
 {
@@ -168,7 +161,7 @@ void AJAPreviewWidget::dragEnterEvent( QDragEnterEvent *ev )
 }
 
 
-void AJAPreviewWidget::dropEvent ( QDropEvent * ev )
+void AJAPreviewWidget::dropEvent (QDropEvent * ev)
 {
 	QList<QUrl> urls = ev->mimeData()->urls();
 	if (urls.isEmpty())
@@ -185,69 +178,4 @@ void AJAPreviewWidget::dropEvent ( QDropEvent * ev )
 		return;
 	}
 	emit droppedFile(fileName);
-
-#if 0
-	QFile rmfFile(fileName);
-	rmfFile.open(QIODevice::ReadOnly);
-	unsigned int num32BitWordsInImage = (1930*8*1089*2)/(3*4);
-	unsigned int* rawBuffer = new unsigned int[num32BitWordsInImage];
-	//bool s = rmfFile.seek(0x10000);
-	rmfFile.read((char*)rawBuffer,num32BitWordsInImage*4);
-	rmfFile.close();
-	QTime t;
-	t.start();
-
-	//QString rawFileName = fileName + ".canonraw";
-	//QFile canonRawFile(rawFileName);
-	//canonRawFile.open(QIODevice::WriteOnly);
-	//canonRawFile.write((const char*)rawBuffer,num32BitWordsInImage*4);
-	//canonRawFile.close();
-
-	// first make byte array 
-	unsigned char* rgbBuffer = new unsigned char[3860*2178];
-
-	// 1930 RG Pairs per line * 8 bytes per 3 RG Pairs * 1089 RG Pair Lines
-	// Plus
-	// 1930 BG Pairs per line * 8 bytes per 3 BG Pairs * 1089 BG Pair Lines
-	unsigned char* buffer = rgbBuffer;
-	for (unsigned int rawCount = 0; rawCount < (num32BitWordsInImage); rawCount++ )
-	{
-		unsigned int currentValue = rawBuffer[rawCount];
-		*buffer++ = (currentValue >> 4);
-		*buffer++ = (currentValue >> 14);
-		*buffer++ = (currentValue >> 24);
-	}
-
- 
-
-	// now we have an 8 bit array with 1930 RG 8 bit pairs followed by 1930 BG 8 bit pairs for 2178 lines.
-	// we will now grab 1920x1080 RGB32 out of this array
-	// start by just taking upper left out of array
-	QImage previewImage(1920,1080,QImage::Format_RGB32); 
-	unsigned char* pBits = (unsigned char*) previewImage.bits();
-	for ( unsigned int lineCount = 0; lineCount < 1080; lineCount++ )
-	{
-		unsigned char* lineBuffer = &rgbBuffer[lineCount*3860*2];
-		for ( unsigned int pixelCount = 0; pixelCount < 1920; pixelCount++ )
-		{
-			unsigned char r = lineBuffer[pixelCount*2];
-			unsigned char g = lineBuffer[pixelCount*2+1];
-			unsigned char b = lineBuffer[1930*2+(pixelCount*2)+1];
-			//uint8_t a = 0xFF;
-			*pBits++ = b; //Blue
-			*pBits++ = g; //Green
-			*pBits++ = r; //Red
-			*pBits++ = 0xFF; // Alpha
-
-		}
-	}
-
-
-	updateFrame(previewImage,true);
-//	qDebug("Time elapsed: %d ms", t.elapsed());
-
-	delete [] rgbBuffer; rgbBuffer = 0;
-	delete [] rawBuffer; rawBuffer = 0;
-#endif
 }
-

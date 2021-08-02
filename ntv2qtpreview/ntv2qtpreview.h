@@ -24,8 +24,8 @@
 
 
 /**
-	@brief	I am a QDialog that displays, in a two-up layout, whatever stereo video is present on the
-			SDI inputs of an AJA device. I also have a popup menu for choosing a different capture device.
+	@brief	I am a QDialog that displays whatever video is present on the SDI inputs of an AJA device.
+			I also have a popup menu for choosing a different device, and a button group for choosing a different SDI input.
 **/
 class NTV2QtPreview : public QDialog
 {
@@ -33,7 +33,7 @@ class NTV2QtPreview : public QDialog
 
 	//	Instance Methods
 	public:
-        NTV2QtPreview (QWidget * parent = NULL, Qt::WindowFlags flags = 0);
+        NTV2QtPreview (QWidget * parent = AJA_NULL, Qt::WindowFlags flags = Qt::WindowFlags());
 		~NTV2QtPreview ();
 
 	//	Private Instance Methods
