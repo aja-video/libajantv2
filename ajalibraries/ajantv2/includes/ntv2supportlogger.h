@@ -1,8 +1,8 @@
 /* SPDX-License-Identifier: MIT */
 /**
-    @file		ntv2supportlogger.h
-    @brief		Declares the CNTV2SupportLogger class.
-    @copyright	(C) 2017-2021 AJA Video Systems, Inc.    All rights reserved.
+	@file		ntv2supportlogger.h
+	@brief		Declares the CNTV2SupportLogger class.
+	@copyright	(C) 2017-2021 AJA Video Systems, Inc.	 All rights reserved.
 **/
 
 #ifndef NTV2SUPPORTLOGGER_H
@@ -15,12 +15,12 @@
 
 typedef enum
 {
-    NTV2_SupportLoggerSectionInfo           = 0x00000001 << 0,
-    NTV2_SupportLoggerSectionAutoCirculate  = 0x00000001 << 1,
-    NTV2_SupportLoggerSectionAudio          = 0x00000001 << 2,
-    NTV2_SupportLoggerSectionRouting        = 0x00000001 << 3,
-    NTV2_SupportLoggerSectionRegisters      = 0x00000001 << 4,
-    NTV2_SupportLoggerSectionsAll           = 0xFFFFFFFF
+	NTV2_SupportLoggerSectionInfo			= 0x00000001 << 0,
+	NTV2_SupportLoggerSectionAutoCirculate	= 0x00000001 << 1,
+	NTV2_SupportLoggerSectionAudio			= 0x00000001 << 2,
+	NTV2_SupportLoggerSectionRouting		= 0x00000001 << 3,
+	NTV2_SupportLoggerSectionRegisters		= 0x00000001 << 4,
+	NTV2_SupportLoggerSectionsAll			= 0xFFFFFFFF
 } NTV2SupportLoggerSections;
 
 /**
@@ -47,9 +47,9 @@ public:
 	CNTV2SupportLogger (UWord cardIndex = 0,
 						NTV2SupportLoggerSections sections = NTV2_SupportLoggerSectionsAll);
 
-	virtual				~CNTV2SupportLogger	();	///< @brief	My default destructor
+	virtual				~CNTV2SupportLogger (); ///< @brief My default destructor
 
-	static int			Version				(void);	///< @return	The log file version I will produce.
+	static int			Version				(void); ///< @return	The log file version I will produce.
 
 	/**
 		@brief		Prepends arbitrary string data to my support log, ahead of a given section.
@@ -79,11 +79,11 @@ public:
 	**/
 	virtual void		AddFooter			(const std::string & sectionName, const std::string & sectionData);
 
-	virtual std::string	ToString			(void) const;	///< @return	My entire support log as a standard string.
+	virtual std::string ToString			(void) const;	///< @return	My entire support log as a standard string.
 
 	/**
 		@brief		Writes my support log into a string object.
-		@param[out]	outString	Receives my entire support log as a standard string, replacing its contents.
+		@param[out] outString	Receives my entire support log as a standard string, replacing its contents.
 	**/
 	virtual void		ToString			(std::string & outString) const;
 
@@ -103,8 +103,8 @@ private:
 	NTV2SupportLoggerSections		mSections;
 	std::string						mHeaderStr;
 	std::string						mFooterStr;
-	std::map<uint32_t, std::string>	mPrependMap;
-	std::map<uint32_t, std::string>	mAppendMap;
+	std::map<uint32_t, std::string> mPrependMap;
+	std::map<uint32_t, std::string> mAppendMap;
 
 public:
 	static std::string	InventLogFilePathAndName (CNTV2Card & inDevice,

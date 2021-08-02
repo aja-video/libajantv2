@@ -310,7 +310,7 @@ Deprecation history:
 		-	Deprecated these overloaded functions: CNTV2CaptionRenderer::GetRenderer, CNTV2CaptionRenderer::BurnChar,
 			CNTV2CaptionRenderer::BurnString, CNTV2CaptionRenderer::BurnStringAtXY
 -	<b>SDK 16.1:</b> Defined macro ::NTV2_DEPRECATE_16_1 in <b>ajatypes.h</b>.
-	Here are the functions that have newly been marked for deprecation in SDK 16.0:
+	Here are the functions that have newly been marked for deprecation in SDK 16.1:
 	-	In CNTV2Card:
 		-	Deprecated CNTV2Card::WriteAudioLastOut, CNTV2Card::ReadAudioLastOut, and CNTV2Card::ReadAudioLastIn functions that accept an ::NTV2Channel
 			value, replacing them with identical functions that accept an ::NTV2AudioSystem.
@@ -319,6 +319,8 @@ Deprecation history:
 			::NTV2AudioSystem values.
 		-	Deprecated CNTV2Card::SetAnalogAudioIOConfiguration, CNTV2Card::GetAnalogAudioIOConfiguration functions, replacing them with
 			CNTV2Card::SetAnalogAudioTransmitEnable and CNTV2Card::GetAnalogAudioTransmitEnable, respectively.
+		-	Deprecated obsolete CNTV2Card::GetSecondConverterOutStandard, CNTV2Card::SetSecondConverterOutStandard, CNTV2Card::GetSecondDownConvert,
+			and CNTV2Card::GetSecondDownConvert functions.
 	-	Deprecated NTV2AnalogAudioIO and NTV2AudioMonitorSelect enum types.
 	-	Deprecated NTV2_AudioMonitor1_2 thru NTV2_AudioMonitor15_16 in favor of ::NTV2_AudioChannel1_2 thru ::NTV2_AudioChannel17_18.
 	-	Deprecated ::NTV2AudioMonitorSelectToString utility.

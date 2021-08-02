@@ -48,10 +48,10 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	bool	isMultiLink				= false;
 	VPIDChannel vpidChannel			= VPIDChannel_1;
 
-	uint8_t	byte1 = 0;
-	uint8_t	byte2 = 0;
-	uint8_t	byte3 = 0;
-	uint8_t	byte4 = 0;
+	uint8_t byte1 = 0;
+	uint8_t byte2 = 0;
+	uint8_t byte3 = 0;
+	uint8_t byte4 = 0;
 	
 	uint8_t highBit = 0;
 	uint8_t lowBit = 0;
@@ -105,7 +105,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 		isProgressiveTransport = false;										//	PSF is never a progressive transport
 	}
 	
-	if (!isRGB && isDualLink &&  !isTSI)
+	if (!isRGB && isDualLink &&	 !isTSI)
 	{
 		isProgressiveTransport = false;										//	Dual link YCbCr is not a progressive transport
 	}
@@ -125,7 +125,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	case NTV2_FORMAT_625_5000:
 	case NTV2_FORMAT_525psf_2997:
 	case NTV2_FORMAT_625psf_2500:
-		byte1 = is3G ? (uint8_t) VPIDStandard_483_576_3Gb : (uint8_t) VPIDStandard_483_576;	//	0x8D : 0x81
+		byte1 = is3G ? (uint8_t) VPIDStandard_483_576_3Gb : (uint8_t) VPIDStandard_483_576; //	0x8D : 0x81
 		break;
 
 	case NTV2_FORMAT_720p_2398:
@@ -251,36 +251,36 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 			if (is3G)
 			{
 				if (isLevelB)
-					byte1 = isDualLink? (uint8_t) VPIDStandard_1080_DualLink_3Gb : (uint8_t) VPIDStandard_1080_3Gb;  //  8A : 8C
+					byte1 = isDualLink? (uint8_t) VPIDStandard_1080_DualLink_3Gb : (uint8_t) VPIDStandard_1080_3Gb;	 //	 8A : 8C
 				else
 					byte1 = (uint8_t) VPIDStandard_1080_3Ga;   // 89
 			}
 			else
 			{
-				byte1 = isDualLink ? (uint8_t)VPIDStandard_1080_DualLink : (uint8_t)VPIDStandard_1080;  //  0x87 : 0x85
+				byte1 = isDualLink ? (uint8_t)VPIDStandard_1080_DualLink : (uint8_t)VPIDStandard_1080;	//	0x87 : 0x85
 			}
 		}
 		break;
-    case NTV2_FORMAT_3840x2160psf_2398:
-    case NTV2_FORMAT_3840x2160psf_2400:
-    case NTV2_FORMAT_3840x2160psf_2500:
-    case NTV2_FORMAT_3840x2160p_2398:
-    case NTV2_FORMAT_3840x2160p_2400:
-    case NTV2_FORMAT_3840x2160p_2500:
-    case NTV2_FORMAT_3840x2160p_2997:
-    case NTV2_FORMAT_3840x2160p_3000:
-    case NTV2_FORMAT_3840x2160psf_2997:
-    case NTV2_FORMAT_3840x2160psf_3000:
-    case NTV2_FORMAT_4096x2160psf_2398:
-    case NTV2_FORMAT_4096x2160psf_2400:
-    case NTV2_FORMAT_4096x2160psf_2500:
-    case NTV2_FORMAT_4096x2160p_2398:
-    case NTV2_FORMAT_4096x2160p_2400:
-    case NTV2_FORMAT_4096x2160p_2500:
-    case NTV2_FORMAT_4096x2160p_2997:
-    case NTV2_FORMAT_4096x2160p_3000:
-    case NTV2_FORMAT_4096x2160psf_2997:
-    case NTV2_FORMAT_4096x2160psf_3000:
+	case NTV2_FORMAT_3840x2160psf_2398:
+	case NTV2_FORMAT_3840x2160psf_2400:
+	case NTV2_FORMAT_3840x2160psf_2500:
+	case NTV2_FORMAT_3840x2160p_2398:
+	case NTV2_FORMAT_3840x2160p_2400:
+	case NTV2_FORMAT_3840x2160p_2500:
+	case NTV2_FORMAT_3840x2160p_2997:
+	case NTV2_FORMAT_3840x2160p_3000:
+	case NTV2_FORMAT_3840x2160psf_2997:
+	case NTV2_FORMAT_3840x2160psf_3000:
+	case NTV2_FORMAT_4096x2160psf_2398:
+	case NTV2_FORMAT_4096x2160psf_2400:
+	case NTV2_FORMAT_4096x2160psf_2500:
+	case NTV2_FORMAT_4096x2160p_2398:
+	case NTV2_FORMAT_4096x2160p_2400:
+	case NTV2_FORMAT_4096x2160p_2500:
+	case NTV2_FORMAT_4096x2160p_2997:
+	case NTV2_FORMAT_4096x2160p_3000:
+	case NTV2_FORMAT_4096x2160psf_2997:
+	case NTV2_FORMAT_4096x2160psf_3000:
 		if(isMultiLink)
 		{
 			if (isLevelB)
@@ -309,26 +309,26 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 			else if(is6G)
 				byte1 = VPIDStandard_2160_Single_6Gb; // 0xC0
 			else
-				byte1 = isLevelB ? (uint8_t) VPIDStandard_2160_QuadDualLink_3Gb : (uint8_t) VPIDStandard_2160_QuadLink_3Ga;	//	0x98 : 0x97
+				byte1 = isLevelB ? (uint8_t) VPIDStandard_2160_QuadDualLink_3Gb : (uint8_t) VPIDStandard_2160_QuadLink_3Ga; //	0x98 : 0x97
 		}
 		else
 		{
 			byte1 = isLevelB ? (uint8_t) VPIDStandard_1080_DualLink_3Gb : (uint8_t) VPIDStandard_1080_3Ga;		//	0x8A : 0x89
 		}
 		break;
-    case NTV2_FORMAT_3840x2160p_5000:
-    case NTV2_FORMAT_3840x2160p_5994:
-    case NTV2_FORMAT_3840x2160p_6000:
-    case NTV2_FORMAT_4096x2160p_4795:
-    case NTV2_FORMAT_4096x2160p_4800:
-    case NTV2_FORMAT_4096x2160p_5000:
-    case NTV2_FORMAT_4096x2160p_5994:
-    case NTV2_FORMAT_4096x2160p_6000:
-    case NTV2_FORMAT_4096x2160p_11988:
-    case NTV2_FORMAT_4096x2160p_12000:
+	case NTV2_FORMAT_3840x2160p_5000:
+	case NTV2_FORMAT_3840x2160p_5994:
+	case NTV2_FORMAT_3840x2160p_6000:
+	case NTV2_FORMAT_4096x2160p_4795:
+	case NTV2_FORMAT_4096x2160p_4800:
+	case NTV2_FORMAT_4096x2160p_5000:
+	case NTV2_FORMAT_4096x2160p_5994:
+	case NTV2_FORMAT_4096x2160p_6000:
+	case NTV2_FORMAT_4096x2160p_11988:
+	case NTV2_FORMAT_4096x2160p_12000:
 		if(isMultiLink)
 		{
-			byte1 = isLevelB ? (uint8_t) VPIDStandard_2160_QuadDualLink_3Gb : (uint8_t) VPIDStandard_2160_QuadLink_3Ga;	//	0x98 : 0x97
+			byte1 = isLevelB ? (uint8_t) VPIDStandard_2160_QuadDualLink_3Gb : (uint8_t) VPIDStandard_2160_QuadLink_3Ga; //	0x98 : 0x97
 		}
 		else
 		{
@@ -366,8 +366,8 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	case NTV2_FORMAT_4x4096x2160p_5994_B:
 	case NTV2_FORMAT_4x4096x2160p_6000_B:
 		byte1 = VPIDStandard_4320_QuadLink_12Gb; // 0xD2
-        break;
-            
+		break;
+			
 	default:
 		*pOutVPID = 0;
 		return true;
@@ -418,7 +418,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	byte2 |= (transferCharacteristics << 4);
 
 	//	Progressive picture
-	byte2 |= isProgressivePicture ? (1UL << 6) : 0;	//	0x40
+	byte2 |= isProgressivePicture ? (1UL << 6) : 0; //	0x40
 
 	//	Progressive transport
 	byte2 |= isProgressiveTransport ? (1UL << 7) : 0;	//	0x80
@@ -435,13 +435,13 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	{
 		byte3 |= NTV2_IS_2K_1080_VIDEO_FORMAT (outputFormat) ? (1UL << 6) : 0;	//	0x40
 		byte3 |= NTV2_IS_4K_4096_VIDEO_FORMAT (outputFormat) ? (1UL << 6) : 0;	//	0x40
-        byte3 |= NTV2_IS_UHD2_FULL_VIDEO_FORMAT (outputFormat) ? (1UL << 6) : 0;    //    0x40
+		byte3 |= NTV2_IS_UHD2_FULL_VIDEO_FORMAT (outputFormat) ? (1UL << 6) : 0;	//	  0x40
 	}
 
 	//	Aspect ratio
 	if ( NTV2_IS_HD_VIDEO_FORMAT		(outputFormat) &&
 		 ! NTV2_IS_720P_VIDEO_FORMAT	(outputFormat) &&
-		 ! NTV2_IS_2K_1080_VIDEO_FORMAT	(outputFormat))
+		 ! NTV2_IS_2K_1080_VIDEO_FORMAT (outputFormat))
 	{
 		if (isLevelA)
 			byte3 |= (1UL << 7);			//	0x80
@@ -461,14 +461,14 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 			byte3 |= (1UL << 5);			//	0x20
 		}
 	}
-    
-    if ( NTV2_IS_UHD2_VIDEO_FORMAT (outputFormat))
-    {
-        if (isLevelB && isDualLink)
-            byte3 |= (1UL << 5);            //    0x20
-        else
-            byte3 |= (1UL << 7);            //    0x80
-    }
+	
+	if ( NTV2_IS_UHD2_VIDEO_FORMAT (outputFormat))
+	{
+		if (isLevelB && isDualLink)
+			byte3 |= (1UL << 5);			//	  0x20
+		else
+			byte3 |= (1UL << 7);			//	  0x80
+	}
 	
 	//Colorimetry
 	highBit = (colorimetry&0x2)>>1;
@@ -583,7 +583,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	if (isStereo)
 	{
 		byte4 |= pInVPIDSpec->isRightEye	<< 6;		//	0x40
-		byte4 |= pInVPIDSpec->audioCarriage	<< 2;		//	0x0C
+		byte4 |= pInVPIDSpec->audioCarriage << 2;		//	0x0C
 	}
 
 	//Luminance and color difference signal

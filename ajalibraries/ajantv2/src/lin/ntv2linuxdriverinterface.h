@@ -68,18 +68,18 @@ class CNTV2LinuxDriverInterface : public CNTV2DriverInterface
 										const ULWord				inNumSegments,
 										const ULWord				inSegmentHostPitch,
 										const ULWord				inSegmentCardPitch,
-										const PCHANNEL_P2P_STRUCT &	inP2PData);
+										const PCHANNEL_P2P_STRUCT & inP2PData);
 
 	AJA_VIRTUAL bool ConfigureSubscription (const bool bSubscribe, const INTERRUPT_ENUMS eInterruptType, PULWord & hSubcription)
 											{(void)bSubscribe; (void)eInterruptType; (void)hSubcription; return true;}
 	AJA_VIRTUAL bool ConfigureInterrupt (const bool bEnable, const INTERRUPT_ENUMS eInterruptType);
 	AJA_VIRTUAL bool GetInterruptCount (const INTERRUPT_ENUMS eInterrupt, ULWord & outCount);
-    AJA_VIRTUAL bool WaitForInterrupt (INTERRUPT_ENUMS eInterrupt, ULWord timeOutMs = 68);	// default of 68 ms timeout is enough time for 2K at 14.98 HZ
+	AJA_VIRTUAL bool WaitForInterrupt (INTERRUPT_ENUMS eInterrupt, ULWord timeOutMs = 68);	// default of 68 ms timeout is enough time for 2K at 14.98 HZ
 
 	AJA_VIRTUAL bool AutoCirculate (AUTOCIRCULATE_DATA &autoCircData);
 	AJA_VIRTUAL bool NTV2Message (NTV2_HEADER * pInOutMessage);
 	AJA_VIRTUAL bool ControlDriverDebugMessages(NTV2_DriverDebugMessageSet msgSet,
-		  							bool enable);
+									bool enable);
 	AJA_VIRTUAL bool HevcSendMessage(HevcMessageHeader* pMessage);
 
 	AJA_VIRTUAL bool SetupBoard(void);
@@ -89,13 +89,13 @@ class CNTV2LinuxDriverInterface : public CNTV2DriverInterface
 	AJA_VIRTUAL bool MapDMADriverBuffer();
 	AJA_VIRTUAL bool UnmapDMADriverBuffer();
 
-	AJA_VIRTUAL bool DmaReadFrameDriverBuffer (	NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame,
+	AJA_VIRTUAL bool DmaReadFrameDriverBuffer ( NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame,
 												ULWord bytes,
 												ULWord downSample,
 												ULWord linePitch,
 												ULWord poll);
 
-	AJA_VIRTUAL bool DmaReadFrameDriverBuffer (	NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame,
+	AJA_VIRTUAL bool DmaReadFrameDriverBuffer ( NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame,
 												ULWord offsetSrc,
 												ULWord offsetDest,
 												ULWord bytes,
@@ -111,13 +111,13 @@ class CNTV2LinuxDriverInterface : public CNTV2DriverInterface
 	// User allocated buffer methods.  Not as fast as driverbuffer methods, but no kernel patch required.
 	AJA_VIRTUAL bool DmaWriteWithOffsets (NTV2DMAEngine DMAEngine, ULWord frameNumber, ULWord * pFrameBuffer,
 											ULWord offsetSrc, ULWord offsetDest, ULWord bytes);
-    AJA_VIRTUAL bool DmaReadWithOffsets (NTV2DMAEngine DMAEngine, ULWord frameNumber, ULWord * pFrameBuffer,
+	AJA_VIRTUAL bool DmaReadWithOffsets (NTV2DMAEngine DMAEngine, ULWord frameNumber, ULWord * pFrameBuffer,
 											ULWord offsetSrc, ULWord offsetDest, ULWord bytes);
 
 public:
 #if !defined(NTV2_DEPRECATE_13_0)
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetRelativeVideoPlaybackDelay (ULWord frmDelay))	{(void)frmDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetRelativeVideoPlaybackDelay (ULWord* frmDelay)){(void)frmDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetRelativeVideoPlaybackDelay (ULWord frmDelay)) {(void)frmDelay; return false;} ///< @deprecated	Obsolete starting in SDK 13.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetRelativeVideoPlaybackDelay (ULWord* frmDelay)){(void)frmDelay; return false;} ///< @deprecated	Obsolete starting in SDK 13.0.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetAudioPlaybackPinDelay (ULWord msDelay))	{(void)msDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetAudioPlaybackPinDelay (ULWord* msDelay))	{(void)msDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetAudioRecordPinDelay (ULWord msDelay))		{(void)msDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
@@ -125,7 +125,7 @@ public:
 #endif	//	!defined(NTV2_DEPRECATE_13_0)
 #if !defined(NTV2_DEPRECATE_16_0)
 	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetStreamingApplication(ULWord & outAppType, int32_t & outPID))	{return CNTV2DriverInterface::GetStreamingApplication(outAppType,outPID);}	///< @deprecated	Deprecated starting in SDK 16.0.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetStreamingApplication(ULWord * pAppType, int32_t * pPID))		{return pAppType && pPID ? CNTV2DriverInterface::GetStreamingApplication(*pAppType,*pPID) : false;}	///< @deprecated	Deprecated starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetStreamingApplication(ULWord * pAppType, int32_t * pPID))		{return pAppType && pPID ? CNTV2DriverInterface::GetStreamingApplication(*pAppType,*pPID) : false;} ///< @deprecated	Deprecated starting in SDK 16.0.
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool MapFrameBuffers(void));		///< @deprecated	Obsolete starting in SDK 16.0.
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool UnmapFrameBuffers(void));	///< @deprecated	Obsolete starting in SDK 16.0.
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool MapRegisters(void));			///< @deprecated	Obsolete starting in SDK 16.0.
@@ -142,23 +142,23 @@ public:
 	AJA_VIRTUAL bool GetDMADriverBufferPhysicalAddress(ULWord* physAddr);	// Supported!
 	AJA_VIRTUAL bool GetDMADriverBufferAddress(ULWord** pDMADriverBuffer);	// Supported!
 	AJA_VIRTUAL bool GetDMANumDriverBuffers(ULWord* pNumDmaDriverBuffers);	// Supported!
-	AJA_VIRTUAL bool SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode);	// Supported!
+	AJA_VIRTUAL bool SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode); // Supported!
 	AJA_VIRTUAL bool GetAudioOutputMode(NTV2_GlobalAudioPlaybackMode* mode);// Supported!
 
 
 protected:	//	PRIVATE METHODS
-	AJA_VIRTUAL bool	OpenLocalPhysical (const UWord inDeviceIndex);	///< @brief	Opens the local/physical device connection.
+	AJA_VIRTUAL bool	OpenLocalPhysical (const UWord inDeviceIndex);	///< @brief Opens the local/physical device connection.
 	AJA_VIRTUAL bool	CloseLocalPhysical	(void);
 
 protected:	//	INSTANCE DATA
- 	std::string		_bitfileDirectory;
+	std::string		_bitfileDirectory;
 	HANDLE			_hDevice;
 #if !defined(NTV2_DEPRECATE_16_0)
 	ULWord *		_pDMADriverBufferAddress;
 	ULWord			_BA0MemorySize;
 	ULWord *		_pDNXRegisterBaseAddress;
 	ULWord			_BA2MemorySize;
-	ULWord			_BA4MemorySize;	         //	XENA2 only
+	ULWord			_BA4MemorySize;			 // XENA2 only
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 };	//	CNTV2LinuxDriverInterface
 

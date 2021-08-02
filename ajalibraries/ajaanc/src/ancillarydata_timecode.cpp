@@ -90,7 +90,7 @@ AJAStatus AJAAncillaryData_Timecode::ParsePayloadData (void)
 
 AJAAncillaryDataType AJAAncillaryData_Timecode::RecognizeThisAncillaryData (const AJAAncillaryData * pAncData)
 {
-    (void) pAncData;
+	(void) pAncData;
 	// Since I have no "concrete" transport of my own, this must be done by my derived classes.
 	return AJAAncillaryDataType_Unknown;
 }
@@ -131,14 +131,14 @@ AJAStatus AJAAncillaryData_Timecode::SetTimeDigits (uint8_t hourTens, uint8_t ho
 	// hex values that are out of BCD range and/or not appropriate for the digit (e.g. "38 hours...").
 	// This allows "clever" users to use the bits for other nefarious purposes, but also allows for "bad"
 	// timecode. In other words, if you (the Caller) care about correct range-checking of time values, do it yourself!
-	SetTimeHexValue(kTcHourTens,    hourTens,   0x03);		// retain 2 ls bits
-	SetTimeHexValue(kTcHourUnits,   hourUnits       );		// retain 4 ls bits
-	SetTimeHexValue(kTcMinuteTens,  minuteTens, 0x07);		// retain 3 ls bits
-	SetTimeHexValue(kTcMinuteUnits, minuteUnits     );		// retain 4 ls bits
-	SetTimeHexValue(kTcSecondTens,  secondTens, 0x07);		// retain 3 ls bits
-	SetTimeHexValue(kTcSecondUnits, secondUnits     );		// retain 4 ls bits
-	SetTimeHexValue(kTcFrameTens,   frameTens,  0x03);		// retain 2 ls bits
-	SetTimeHexValue(kTcFrameUnits,  frameUnits      );		// retain 4 ls bits
+	SetTimeHexValue(kTcHourTens,	hourTens,	0x03);		// retain 2 ls bits
+	SetTimeHexValue(kTcHourUnits,	hourUnits		);		// retain 4 ls bits
+	SetTimeHexValue(kTcMinuteTens,	minuteTens, 0x07);		// retain 3 ls bits
+	SetTimeHexValue(kTcMinuteUnits, minuteUnits		);		// retain 4 ls bits
+	SetTimeHexValue(kTcSecondTens,	secondTens, 0x07);		// retain 3 ls bits
+	SetTimeHexValue(kTcSecondUnits, secondUnits		);		// retain 4 ls bits
+	SetTimeHexValue(kTcFrameTens,	frameTens,	0x03);		// retain 2 ls bits
+	SetTimeHexValue(kTcFrameUnits,	frameUnits		);		// retain 4 ls bits
 	return AJA_STATUS_SUCCESS;
 }
 
@@ -147,14 +147,14 @@ AJAStatus AJAAncillaryData_Timecode::SetTimeDigits (uint8_t hourTens, uint8_t ho
 // Note that the parameter order is the REVERSE of that used by GetTimeHexValue(): this order proceeds from ms digit (hour tens) to ls digit (frame units).
 AJAStatus AJAAncillaryData_Timecode::GetTimeDigits (uint8_t& hourTens, uint8_t& hourUnits, uint8_t& minuteTens, uint8_t& minuteUnits, uint8_t& secondTens, uint8_t& secondUnits, uint8_t& frameTens, uint8_t& frameUnits) const
 {
-	GetTimeHexValue(kTcHourTens,    hourTens,    0x03);		// retain 2 ls bits
-	GetTimeHexValue(kTcHourUnits,   hourUnits        );		// retain 4 ls bits
-	GetTimeHexValue(kTcMinuteTens,  minuteTens,  0x07);		// retain 3 ls bits
-	GetTimeHexValue(kTcMinuteUnits, minuteUnits      );		// retain 4 ls bits
-	GetTimeHexValue(kTcSecondTens,  secondTens,  0x07);		// retain 3 ls bits
-	GetTimeHexValue(kTcSecondUnits, secondUnits      );		// retain 4 ls bits
-	GetTimeHexValue(kTcFrameTens,   frameTens,   0x03);		// retain 2 ls bits
-	GetTimeHexValue(kTcFrameUnits,  frameUnits       );		// retain 4 ls bits
+	GetTimeHexValue(kTcHourTens,	hourTens,	 0x03);		// retain 2 ls bits
+	GetTimeHexValue(kTcHourUnits,	hourUnits		 );		// retain 4 ls bits
+	GetTimeHexValue(kTcMinuteTens,	minuteTens,	 0x07);		// retain 3 ls bits
+	GetTimeHexValue(kTcMinuteUnits, minuteUnits		 );		// retain 4 ls bits
+	GetTimeHexValue(kTcSecondTens,	secondTens,	 0x07);		// retain 3 ls bits
+	GetTimeHexValue(kTcSecondUnits, secondUnits		 );		// retain 4 ls bits
+	GetTimeHexValue(kTcFrameTens,	frameTens,	 0x03);		// retain 2 ls bits
+	GetTimeHexValue(kTcFrameUnits,	frameUnits		 );		// retain 4 ls bits
 	return AJA_STATUS_SUCCESS;
 }
 
@@ -189,7 +189,7 @@ AJAStatus AJAAncillaryData_Timecode::SetTime (AJAAncillaryData_Timecode_Format t
 		SetFieldIdFlag(bOddFrame, tcFmt);		// note that FieldID does NOT get changed for "low" frame rates!
 	}
 
-	SetTimeDigits(	(uint8_t)(hours   / 10), (uint8_t)(hours   % 10),		// hour digits
+	SetTimeDigits(	(uint8_t)(hours	  / 10), (uint8_t)(hours   % 10),		// hour digits
 					(uint8_t)(minutes / 10), (uint8_t)(minutes % 10),		// minute digits
 					(uint8_t)(seconds / 10), (uint8_t)(seconds % 10),		// second digits
 					(uint8_t)(frames  / 10), (uint8_t)(frames  % 10) );		// frame digits
@@ -203,10 +203,10 @@ AJAStatus AJAAncillaryData_Timecode::GetTime (AJAAncillaryData_Timecode_Format t
 	uint8_t hourTens, hourUnits, minuteTens, minuteUnits, secondTens, secondUnits, frameTens, frameUnits;
 	GetTimeDigits(hourTens, hourUnits, minuteTens, minuteUnits, secondTens, secondUnits, frameTens, frameUnits);
 
-	hours   = (hourTens   * 10) + hourUnits;
+	hours	= (hourTens	  * 10) + hourUnits;
 	minutes = (minuteTens * 10) + minuteUnits;
 	seconds = (secondTens * 10) + secondUnits;
-	frames  = (frameTens  * 10) + frameUnits;
+	frames	= (frameTens  * 10) + frameUnits;
 
 	// for "high" frame rates we need to include the "field ID" bit as an added ls bit to extend the frame digit range
 	if (tcFmt == AJAAncillaryData_Timecode_Format_60fps || tcFmt == AJAAncillaryData_Timecode_Format_50fps || tcFmt == AJAAncillaryData_Timecode_Format_48fps)
@@ -665,7 +665,7 @@ ostream & AJAAncillaryData_Timecode::Print (ostream & debugStream, const bool bS
 				<< "Time: " << dec << setw(1) << (uint32_t)timeDigits[kTcHourTens] << setw(1) << (uint32_t)timeDigits[kTcHourUnits]
 				<< ":" << setw(1) << (uint32_t)timeDigits[kTcMinuteTens] << setw(1) << (uint32_t)timeDigits[kTcMinuteUnits]
 				<< ":" << setw(1) << (uint32_t)timeDigits[kTcSecondTens] << setw(1) << (uint32_t)timeDigits[kTcSecondUnits]
-				<< ":" << setw(1) << (uint32_t)timeDigits[kTcFrameTens]  << setw(1) << (uint32_t)timeDigits[kTcFrameUnits] << endl
+				<< ":" << setw(1) << (uint32_t)timeDigits[kTcFrameTens]	 << setw(1) << (uint32_t)timeDigits[kTcFrameUnits] << endl
 				<< "Field ID Flag: " << (bFieldIdFlag ? "f1" : "f0") << endl
 				<< "Drop Frame Flag: " << (bDropFrameFlag ? "Drop" : "Non-drop") << endl
 				<< "Color Frame: " << (bColorFrameFlag ? "On" : "Off") << endl
@@ -682,9 +682,9 @@ string AJAAncillaryData_Timecode::TimecodeString (void) const
 	ostringstream	oss;
 	uint8_t			timeDigits[kNumTimeDigits];
 	GetTimeDigits (timeDigits[kTcHourTens], timeDigits[kTcHourUnits], timeDigits[kTcMinuteTens], timeDigits[kTcMinuteUnits], timeDigits[kTcSecondTens], timeDigits[kTcSecondUnits], timeDigits[kTcFrameTens], timeDigits[kTcFrameUnits]);
-	oss	<< dec << setw(1) << uint32_t(timeDigits[kTcHourTens])   << setw(1) << uint32_t(timeDigits[kTcHourUnits])
+	oss << dec << setw(1) << uint32_t(timeDigits[kTcHourTens])	 << setw(1) << uint32_t(timeDigits[kTcHourUnits])
 		<< ":" << setw(1) << uint32_t(timeDigits[kTcMinuteTens]) << setw(1) << uint32_t(timeDigits[kTcMinuteUnits])
 		<< ":" << setw(1) << uint32_t(timeDigits[kTcSecondTens]) << setw(1) << uint32_t(timeDigits[kTcSecondUnits])
-		<< ":" << setw(1) << uint32_t(timeDigits[kTcFrameTens])  << setw(1) << uint32_t(timeDigits[kTcFrameUnits]);
+		<< ":" << setw(1) << uint32_t(timeDigits[kTcFrameTens])	 << setw(1) << uint32_t(timeDigits[kTcFrameUnits]);
 	return oss.str();
 }

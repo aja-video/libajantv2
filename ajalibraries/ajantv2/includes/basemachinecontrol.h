@@ -39,7 +39,7 @@ class AJAExport CBaseMachineControl
 
 	public:
 		virtual bool				Open (void)		= 0;
-		virtual void    			Close (void)	= 0;
+		virtual void				Close (void)	= 0;
 
 		//	These return true, false or CONTROL_UNIMPLEMENTED
 		virtual inline ULWord		Play (void)																	{return CONTROL_UNIMPLEMENTED;}

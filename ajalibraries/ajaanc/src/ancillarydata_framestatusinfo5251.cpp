@@ -53,10 +53,10 @@ AJAAncillaryData_FrameStatusInfo5251::~AJAAncillaryData_FrameStatusInfo5251 ()
 
 void AJAAncillaryData_FrameStatusInfo5251::Init (void)
 {
-	m_ancType      = AJAAncillaryDataType_FrameStatusInfo5251;
-	m_coding       = AJAAncillaryDataCoding_Digital;
-	m_DID          = AJAAncillaryData_FrameStatusInfo5251_DID;
-	m_SID          = AJAAncillaryData_FrameStatusInfo5251_SID;
+	m_ancType	   = AJAAncillaryDataType_FrameStatusInfo5251;
+	m_coding	   = AJAAncillaryDataCoding_Digital;
+	m_DID		   = AJAAncillaryData_FrameStatusInfo5251_DID;
+	m_SID		   = AJAAncillaryData_FrameStatusInfo5251_SID;
 	m_IsRecording  = false;
 	m_IsValidFrame = true;
 }
@@ -114,7 +114,7 @@ AJAAncillaryDataType AJAAncillaryData_FrameStatusInfo5251::RecognizeThisAncillar
 	if (pInAncData->GetDataCoding() == AJAAncillaryDataCoding_Digital)
 		if (pInAncData->GetDID() == AJAAncillaryData_FrameStatusInfo5251_DID)
 			if (pInAncData->GetSID() == AJAAncillaryData_FrameStatusInfo5251_SID)
-				if (pInAncData->GetDC()  == AJAAncillaryData_FrameStatusInfo5251_PayloadSize)
+				if (pInAncData->GetDC()	 == AJAAncillaryData_FrameStatusInfo5251_PayloadSize)
 					return AJAAncillaryDataType_FrameStatusInfo5251;
 	return AJAAncillaryDataType_Unknown;
 }
@@ -124,6 +124,6 @@ ostream & AJAAncillaryData_FrameStatusInfo5251::Print (ostream & debugStream, co
 {
 	AJAAncillaryData::Print (debugStream, bShowDetail);
 	debugStream << endl
-				<< "Recording: " <<  (m_IsRecording  ?  "Active"  :  "Inactive");
+				<< "Recording: " <<	 (m_IsRecording	 ?	"Active"  :	 "Inactive");
 	return debugStream;
 }

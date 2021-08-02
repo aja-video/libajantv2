@@ -20,17 +20,17 @@ CNTV2Card::CNTV2Card ()
 {
 	_boardOpened = false;
 
-    #if defined (NTV2_DEPRECATE)
-        //InitNTV2ColorCorrection ();
+	#if defined (NTV2_DEPRECATE)
+		//InitNTV2ColorCorrection ();
 	#endif	//	defined (NTV2_DEPRECATE)
 }
 
-CNTV2Card::CNTV2Card (const UWord inDeviceIndex, const string &	inHostName)
+CNTV2Card::CNTV2Card (const UWord inDeviceIndex, const string & inHostName)
 {
 	string hostName(inHostName);
 	aja::strip(hostName);
 	_boardOpened = false;
-	bool openOK = hostName.empty()  ?  CNTV2DriverInterface::Open(inDeviceIndex) :  CNTV2DriverInterface::Open(hostName);
+	bool openOK = hostName.empty()	?  CNTV2DriverInterface::Open(inDeviceIndex) :	CNTV2DriverInterface::Open(hostName);
 	if (openOK)
 	{
 		if (IsBufferSizeSetBySW())
@@ -61,7 +61,7 @@ CNTV2Card::CNTV2Card (const UWord boardNumber, const bool displayErrorMessage, c
 	string hostName(hostname ? hostname : "");
 	aja::strip(hostName);
 	_boardOpened = false;
-	bool openOK = hostName.empty()  ?  CNTV2DriverInterface::Open(boardNumber) :  CNTV2DriverInterface::Open(hostName);
+	bool openOK = hostName.empty()	?  CNTV2DriverInterface::Open(boardNumber) :  CNTV2DriverInterface::Open(hostName);
 	if (openOK)
 	{
 		if (IsBufferSizeSetBySW())
@@ -148,7 +148,7 @@ Word CNTV2Card::GetPCIFPGAVersion (void)
 
 string CNTV2Card::GetPCIFPGAVersionString (void)
 {
-	const UWord		version	(static_cast<UWord>(GetPCIFPGAVersion()));
+	const UWord		version (static_cast<UWord>(GetPCIFPGAVersion()));
 	ostringstream	oss;
 	oss << hex << version;
 	return oss.str ();
@@ -157,7 +157,7 @@ string CNTV2Card::GetPCIFPGAVersionString (void)
 
 string CNTV2Card::GetDriverVersionString (void)
 {
-	static const string	sDriverBuildTypes []	= {"", "b", "a", "d"};
+	static const string sDriverBuildTypes []	= {"", "b", "a", "d"};
 	UWord				versions[4]				= {0, 0, 0, 0};
 	ULWord				versBits(0);
 	if (!GetDriverVersionComponents (versions[0], versions[1], versions[2], versions[3]))
@@ -183,7 +183,7 @@ string CNTV2Card::GetDriverVersionString (void)
 bool CNTV2Card::GetDriverVersionComponents (UWord & outMajor, UWord & outMinor, UWord & outPoint, UWord & outBuild)
 {
 	outMajor = outMinor = outPoint = outBuild = 0;
-	ULWord	driverVersionULWord	(0);
+	ULWord	driverVersionULWord (0);
 	if (!ReadRegister (kVRegDriverVersion, driverVersionULWord))
 		return false;
 	if (!driverVersionULWord)	//	If zero --- pre-15.0 driver?
@@ -242,7 +242,7 @@ bool CNTV2Card::IS_INPUT_SPIGOT_INVALID (const UWord inInputSpigot) const
 
 uint64_t CNTV2Card::GetSerialNumber (void)
 {
-	const uint64_t	lo (GetSerialNumberLow ()),  hi (GetSerialNumberHigh ());
+	const uint64_t	lo (GetSerialNumberLow ()),	 hi (GetSerialNumberHigh ());
 	uint64_t		result	((hi << 32) | lo);
 	return result;
 }
@@ -252,30 +252,30 @@ string CNTV2Card::SerialNum64ToString (const uint64_t inSerialNumber)	//	Class m
 {
 	const ULWord	serialNumHigh	(inSerialNumber >> 32);
 	const ULWord	serialNumLow	(inSerialNumber & 0x00000000FFFFFFFF);
-    char			serialNum [9];
+	char			serialNum [9];
 
-	serialNum[0] = char((serialNumLow  & 0x000000FF)      );
-	serialNum[1] = char((serialNumLow  & 0x0000FF00) >>  8);
+	serialNum[0] = char((serialNumLow  & 0x000000FF)	  );
+	serialNum[1] = char((serialNumLow  & 0x0000FF00) >>	 8);
 	serialNum[2] = char((serialNumLow  & 0x00FF0000) >> 16);
 	serialNum[3] = char((serialNumLow  & 0xFF000000) >> 24);
-	serialNum[4] = char((serialNumHigh & 0x000000FF)      );
-	serialNum[5] = char((serialNumHigh & 0x0000FF00) >>  8);
+	serialNum[4] = char((serialNumHigh & 0x000000FF)	  );
+	serialNum[5] = char((serialNumHigh & 0x0000FF00) >>	 8);
 	serialNum[6] = char((serialNumHigh & 0x00FF0000) >> 16);
 	serialNum[7] = char((serialNumHigh & 0xFF000000) >> 24);
 	serialNum[8] = '\0';
 
-	for (unsigned ndx(0);  ndx < 8;  ndx++)
+	for (unsigned ndx(0);  ndx < 8;	 ndx++)
 	{
 		if (serialNum[ndx] == 0)
 		{
 			if (ndx == 0)
 				return "";		//	No characters: no serial number
 			break;	//	End of string -- stop scanning
-        }
+		}
 
 		//	Allow only 0-9, A-Z, a-z, blank, and dash only.
 		if ( ! ( ( (serialNum[ndx] >= '0') && (serialNum[ndx] <= '9') ) ||
- 				 ( (serialNum[ndx] >= 'A') && (serialNum[ndx] <= 'Z') ) ||
+				 ( (serialNum[ndx] >= 'A') && (serialNum[ndx] <= 'Z') ) ||
 				 ( (serialNum[ndx] >= 'a') && (serialNum[ndx] <= 'z') ) ||
 				   (serialNum[ndx] == ' ') || (serialNum[ndx] == '-') ) )
 			return "";		//	Invalid character -- assume no Serial Number programmed...
@@ -387,7 +387,7 @@ string CNTV2Card::GetBitfileInfoString (const BITFILE_INFO_STRUCT & inBitFileInf
 		case NTV2_BITFILE_CORVID44_8KMK_MAIN:	oss << "Corvid44 8KMK";			break;
 		case NTV2_BITFILE_TTAP_PRO_MAIN:		oss << "T-Tap Pro Main";		break;
 		case NTV2_BITFILE_IOX3_MAIN:			oss << "IoX3 Main";				break;
-		default:								oss << "(bad bitfile type!!!)";	break;
+		default:								oss << "(bad bitfile type!!!)"; break;
 	}
 	return oss.str();
 }
@@ -403,7 +403,7 @@ bool CNTV2Card::IsFailSafeBitfileLoaded (bool & outIsSafeBoot)
 
 bool CNTV2Card::CanWarmBootFPGA (bool & outCanWarmBoot)
 {
-	outCanWarmBoot = false;	//	Definitely can't
+	outCanWarmBoot = false; //	Definitely can't
 	if (!::NTV2DeviceCanDoWarmBootFPGA(_boardID))
 		return false;
 
@@ -419,7 +419,7 @@ bool CNTV2Card::CanWarmBootFPGA (bool & outCanWarmBoot)
 NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 {
 	NTV2BreakoutType	result		(NTV2_BreakoutNone);
-	ULWord				audioCtlReg	(0);	//	The Audio Control Register tells us what's connected
+	ULWord				audioCtlReg (0);	//	The Audio Control Register tells us what's connected
 
 	if (IsOpen ()  &&  ReadRegister (kRegAud1Control, audioCtlReg))
 	{
@@ -433,7 +433,7 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 			case DEVICE_ID_KONA4:
 			case DEVICE_ID_KONA4UFC:
 			case DEVICE_ID_KONA5:
-            case DEVICE_ID_KONA5_8KMK:
+			case DEVICE_ID_KONA5_8KMK:
 			case DEVICE_ID_KONA5_8K:
 			case DEVICE_ID_KONA5_2X4K:
 			case DEVICE_ID_KONA5_3DLUT:
@@ -507,7 +507,7 @@ ULWord	CNTV2Card::DeviceGetAudioFrameBuffer2 (void)
 
 ULWord	CNTV2Card::DeviceGetFrameBufferSize (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat)
 {
-	return ::NTV2DeviceGetFrameBufferSize (GetDeviceID(), inFrameGeometry, inFBFormat);	//	Revisit for 2MB granularity
+	return ::NTV2DeviceGetFrameBufferSize (GetDeviceID(), inFrameGeometry, inFBFormat); //	Revisit for 2MB granularity
 }
 
 ULWord	CNTV2Card::DeviceGetNumberFrameBuffers (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat)
@@ -603,7 +603,7 @@ bool CNTV2Card::DeviceHasMicInput ()
 bool CNTV2Card::GetBoolParam (const NTV2BoolParamID inParamID, bool & outValue)
 {
 	uint32_t	regValue	(0);
-	NTV2RegInfo	regInfo;
+	NTV2RegInfo regInfo;
 
 	outValue = false;
 	if (GetRegInfoForBoolParam (inParamID, regInfo))
@@ -630,23 +630,23 @@ bool CNTV2Card::GetBoolParam (const NTV2BoolParamID inParamID, bool & outValue)
 		case kDeviceCanDoAnalogVideoIn:					outValue = ::NTV2DeviceCanDoAnalogVideoIn				(GetDeviceID());	break;
 		case kDeviceCanDoAnalogVideoOut:				outValue = ::NTV2DeviceCanDoAnalogVideoOut				(GetDeviceID());	break;
 //		case kDeviceCanDoAudio2Channels:				outValue = ::NTV2DeviceCanDoAudio2Channels				(GetDeviceID());	break;
-// 		case kDeviceCanDoAudio6Channels:				outValue = ::NTV2DeviceCanDoAudio6Channels				(GetDeviceID());	break;
-// 		case kDeviceCanDoAudio8Channels:				outValue = ::NTV2DeviceCanDoAudio8Channels				(GetDeviceID());	break;
-// 		case kDeviceCanDoAudio96K:						outValue = ::NTV2DeviceCanDoAudio96K					(GetDeviceID());	break;
-// 		case kDeviceCanDoAudioDelay:					outValue = ::NTV2DeviceCanDoAudioDelay					(GetDeviceID());	break;
+//		case kDeviceCanDoAudio6Channels:				outValue = ::NTV2DeviceCanDoAudio6Channels				(GetDeviceID());	break;
+//		case kDeviceCanDoAudio8Channels:				outValue = ::NTV2DeviceCanDoAudio8Channels				(GetDeviceID());	break;
+//		case kDeviceCanDoAudio96K:						outValue = ::NTV2DeviceCanDoAudio96K					(GetDeviceID());	break;
+//		case kDeviceCanDoAudioDelay:					outValue = ::NTV2DeviceCanDoAudioDelay					(GetDeviceID());	break;
 		case kDeviceCanDoBreakoutBox:					outValue = ::NTV2DeviceCanDoBreakoutBox					(GetDeviceID());	break;
 		case kDeviceCanDoCapture:						outValue = ::NTV2DeviceCanDoCapture						(GetDeviceID());	break;
-// 		case kDeviceCanDoColorCorrection:				outValue = ::NTV2DeviceCanDoColorCorrection				(GetDeviceID());	break;
-// 		case kDeviceCanDoCustomAnc:						outValue = ::NTV2DeviceCanDoCustomAnc					(GetDeviceID());	break;
-// 		case kDeviceCanDoDSKOpacity:					outValue = ::NTV2DeviceCanDoDSKOpacity					(GetDeviceID());	break;
-// 		case kDeviceCanDoDualLink:						outValue = ::NTV2DeviceCanDoDualLink					(GetDeviceID());	break;
-// 		case kDeviceCanDoDVCProHD:						outValue = ::NTV2DeviceCanDoDVCProHD					(GetDeviceID());	break;
-// 		case kDeviceCanDoEnhancedCSC:					outValue = ::NTV2DeviceCanDoEnhancedCSC					(GetDeviceID());	break;
-// 		case kDeviceCanDoFrameStore1Display:			outValue = ::NTV2DeviceCanDoFrameStore1Display			(GetDeviceID());	break;
-// 		case kDeviceCanDoFreezeOutput:					outValue = ::NTV2DeviceCanDoFreezeOutput				(GetDeviceID());	break;
-// 		case kDeviceCanDoHDMIOutStereo:					outValue = ::NTV2DeviceCanDoHDMIOutStereo				(GetDeviceID());	break;
-// 		case kDeviceCanDoHDV:							outValue = ::NTV2DeviceCanDoHDV							(GetDeviceID());	break;
-// 		case kDeviceCanDoHDVideo:						outValue = ::NTV2DeviceCanDoHDVideo						(GetDeviceID());	break;
+//		case kDeviceCanDoColorCorrection:				outValue = ::NTV2DeviceCanDoColorCorrection				(GetDeviceID());	break;
+//		case kDeviceCanDoCustomAnc:						outValue = ::NTV2DeviceCanDoCustomAnc					(GetDeviceID());	break;
+//		case kDeviceCanDoDSKOpacity:					outValue = ::NTV2DeviceCanDoDSKOpacity					(GetDeviceID());	break;
+//		case kDeviceCanDoDualLink:						outValue = ::NTV2DeviceCanDoDualLink					(GetDeviceID());	break;
+//		case kDeviceCanDoDVCProHD:						outValue = ::NTV2DeviceCanDoDVCProHD					(GetDeviceID());	break;
+//		case kDeviceCanDoEnhancedCSC:					outValue = ::NTV2DeviceCanDoEnhancedCSC					(GetDeviceID());	break;
+//		case kDeviceCanDoFrameStore1Display:			outValue = ::NTV2DeviceCanDoFrameStore1Display			(GetDeviceID());	break;
+//		case kDeviceCanDoFreezeOutput:					outValue = ::NTV2DeviceCanDoFreezeOutput				(GetDeviceID());	break;
+//		case kDeviceCanDoHDMIOutStereo:					outValue = ::NTV2DeviceCanDoHDMIOutStereo				(GetDeviceID());	break;
+//		case kDeviceCanDoHDV:							outValue = ::NTV2DeviceCanDoHDV							(GetDeviceID());	break;
+//		case kDeviceCanDoHDVideo:						outValue = ::NTV2DeviceCanDoHDVideo						(GetDeviceID());	break;
 		case kDeviceCanDoIsoConvert:					outValue = ::NTV2DeviceCanDoIsoConvert					(GetDeviceID());	break;
 		case kDeviceCanDoLTC:							outValue = ::NTV2DeviceCanDoLTC							(GetDeviceID());	break;
 		case kDeviceCanDoLTCInOnRefPort:				outValue = ::NTV2DeviceCanDoLTCInOnRefPort				(GetDeviceID());	break;
@@ -661,35 +661,35 @@ bool CNTV2Card::GetBoolParam (const NTV2BoolParamID inParamID, bool & outValue)
 		case kDeviceCanDoProRes:						outValue = ::NTV2DeviceCanDoProRes						(GetDeviceID());	break;
 		case kDeviceCanDoQREZ:							outValue = ::NTV2DeviceCanDoQREZ						(GetDeviceID());	break;
 		case kDeviceCanDoQuarterExpand:					outValue = ::NTV2DeviceCanDoQuarterExpand				(GetDeviceID());	break;
-// 		case kDeviceCanDoRateConvert:					outValue = ::NTV2DeviceCanDoRateConvert					(GetDeviceID());	break;
-// 		case kDeviceCanDoRGBPlusAlphaOut:				outValue = ::NTV2DeviceCanDoRGBPlusAlphaOut				(GetDeviceID());	break;
-// 		case kDeviceCanDoRP188:							outValue = ::NTV2DeviceCanDoRP188						(GetDeviceID());	break;
-// 		case kDeviceCanDoSDVideo:						outValue = ::NTV2DeviceCanDoSDVideo						(GetDeviceID());	break;
+//		case kDeviceCanDoRateConvert:					outValue = ::NTV2DeviceCanDoRateConvert					(GetDeviceID());	break;
+//		case kDeviceCanDoRGBPlusAlphaOut:				outValue = ::NTV2DeviceCanDoRGBPlusAlphaOut				(GetDeviceID());	break;
+//		case kDeviceCanDoRP188:							outValue = ::NTV2DeviceCanDoRP188						(GetDeviceID());	break;
+//		case kDeviceCanDoSDVideo:						outValue = ::NTV2DeviceCanDoSDVideo						(GetDeviceID());	break;
 		case kDeviceCanDoSDIErrorChecks:				outValue = ::NTV2DeviceCanDoSDIErrorChecks				(GetDeviceID());	break;
-// 		case kDeviceCanDoStackedAudio:					outValue = ::NTV2DeviceCanDoStackedAudio				(GetDeviceID());	break;
-// 		case kDeviceCanDoStereoIn:						outValue = ::NTV2DeviceCanDoStereoIn					(GetDeviceID());	break;
-// 		case kDeviceCanDoStereoOut:						outValue = ::NTV2DeviceCanDoStereoOut					(GetDeviceID());	break;
+//		case kDeviceCanDoStackedAudio:					outValue = ::NTV2DeviceCanDoStackedAudio				(GetDeviceID());	break;
+//		case kDeviceCanDoStereoIn:						outValue = ::NTV2DeviceCanDoStereoIn					(GetDeviceID());	break;
+//		case kDeviceCanDoStereoOut:						outValue = ::NTV2DeviceCanDoStereoOut					(GetDeviceID());	break;
 		case kDeviceCanDoThunderbolt:					outValue = ::NTV2DeviceCanDoThunderbolt					(GetDeviceID());	break;
 		case kDeviceCanDoVideoProcessing:				outValue = ::NTV2DeviceCanDoVideoProcessing				(GetDeviceID());	break;
 		case kDeviceCanMeasureTemperature:				outValue = ::NTV2DeviceCanMeasureTemperature			(GetDeviceID());	break;
 		case kDeviceCanReportFrameSize:					outValue = ::NTV2DeviceCanReportFrameSize				(GetDeviceID());	break;
 		case kDeviceHasBiDirectionalSDI:				outValue = ::NTV2DeviceHasBiDirectionalSDI				(GetDeviceID());	break;
-//		case kDeviceHasColorSpaceConverterOnChannel2:	outValue = ::NTV2DeviceHasColorSpaceConverterOnChannel2	(GetDeviceID());	break;
+//		case kDeviceHasColorSpaceConverterOnChannel2:	outValue = ::NTV2DeviceHasColorSpaceConverterOnChannel2 (GetDeviceID());	break;
 		case kDeviceHasNWL:								outValue = ::NTV2DeviceHasNWL							(GetDeviceID());	break;
 		case kDeviceHasPCIeGen2:						outValue = ::NTV2DeviceHasPCIeGen2						(GetDeviceID());	break;
 		case kDeviceHasRetailSupport:					outValue = ::NTV2DeviceHasRetailSupport					(GetDeviceID());	break;
 		case kDeviceHasSDIRelays:						outValue = ::NTV2DeviceHasSDIRelays						(GetDeviceID());	break;
-// 		case kDeviceHasSPIFlash:						outValue = ::NTV2DeviceHasSPIFlash						(GetDeviceID());	break;
-// 		case kDeviceHasSPIFlashSerial:					outValue = ::NTV2DeviceHasSPIFlashSerial				(GetDeviceID());	break;
+//		case kDeviceHasSPIFlash:						outValue = ::NTV2DeviceHasSPIFlash						(GetDeviceID());	break;
+//		case kDeviceHasSPIFlashSerial:					outValue = ::NTV2DeviceHasSPIFlashSerial				(GetDeviceID());	break;
 		case kDeviceHasSPIv2:							outValue = ::NTV2DeviceHasSPIv2							(GetDeviceID());	break;
 		case kDeviceHasSPIv3:							outValue = ::NTV2DeviceHasSPIv3							(GetDeviceID());	break;
 		case kDeviceHasSPIv4:							outValue = ::NTV2DeviceHasSPIv4							(GetDeviceID());	break;
-// 		case kDeviceIs64Bit:							outValue = ::NTV2DeviceIs64Bit							(GetDeviceID());	break;
-// 		case kDeviceIsDirectAddressable:				outValue = ::NTV2DeviceIsDirectAddressable				(GetDeviceID());	break;
+//		case kDeviceIs64Bit:							outValue = ::NTV2DeviceIs64Bit							(GetDeviceID());	break;
+//		case kDeviceIsDirectAddressable:				outValue = ::NTV2DeviceIsDirectAddressable				(GetDeviceID());	break;
 		case kDeviceIsExternalToHost:					outValue = ::NTV2DeviceIsExternalToHost					(GetDeviceID());	break;
 		case kDeviceIsSupported:						outValue = ::NTV2DeviceIsSupported						(GetDeviceID());	break;
 //		case kDeviceNeedsRoutingSetup:					outValue = ::NTV2DeviceNeedsRoutingSetup				(GetDeviceID());	break;
-		case kDeviceSoftwareCanChangeFrameBufferSize:	outValue = ::NTV2DeviceSoftwareCanChangeFrameBufferSize	(GetDeviceID());	break;
+		case kDeviceSoftwareCanChangeFrameBufferSize:	outValue = ::NTV2DeviceSoftwareCanChangeFrameBufferSize (GetDeviceID());	break;
 		case kDeviceCanThermostat:						outValue = ::NTV2DeviceCanThermostat					(GetDeviceID());	break;
 		case kDeviceHasHEVCM31:							outValue = ::NTV2DeviceHasHEVCM31						(GetDeviceID());	break;
 		case kDeviceHasHEVCM30:							outValue = ::NTV2DeviceHasHEVCM30						(GetDeviceID());	break;
@@ -706,7 +706,7 @@ bool CNTV2Card::GetBoolParam (const NTV2BoolParamID inParamID, bool & outValue)
 bool CNTV2Card::GetNumericParam (const NTV2NumericParamID inParamID, uint32_t & outValue)
 {
 	uint32_t	regValue	(0);
-	NTV2RegInfo	regInfo;
+	NTV2RegInfo regInfo;
 
 	outValue = false;
 	if (GetRegInfoForNumericParam (inParamID, regInfo))
@@ -787,14 +787,14 @@ bool CNTV2Card::GetRegInfoForNumericParam (const NTV2NumericParamID inParamID, N
 }
 
 
-///////////	Stream Operators
+/////////// Stream Operators
 
 ostream & operator << (ostream & inOutStr, const NTV2AudioChannelPairs & inSet)
 {
 	if (inSet.empty())
 		inOutStr << "(none)";
 	else
-		for (NTV2AudioChannelPairsConstIter iter (inSet.begin ());  iter != inSet.end ();  ++iter)
+		for (NTV2AudioChannelPairsConstIter iter (inSet.begin ());	iter != inSet.end ();  ++iter)
 			inOutStr << (iter != inSet.begin() ? ", " : "") << ::NTV2AudioChannelPairToString (*iter, true);
 	return inOutStr;
 }
@@ -802,7 +802,7 @@ ostream & operator << (ostream & inOutStr, const NTV2AudioChannelPairs & inSet)
 
 ostream &	operator << (ostream & inOutStr, const NTV2AudioChannelQuads & inSet)
 {
-	for (NTV2AudioChannelQuadsConstIter iter (inSet.begin ());  iter != inSet.end ();  ++iter)
+	for (NTV2AudioChannelQuadsConstIter iter (inSet.begin ());	iter != inSet.end ();  ++iter)
 		inOutStr << (iter != inSet.begin () ? ", " : "") << ::NTV2AudioChannelQuadToString (*iter, true);
 	return inOutStr;
 }
@@ -810,7 +810,7 @@ ostream &	operator << (ostream & inOutStr, const NTV2AudioChannelQuads & inSet)
 
 ostream &	operator << (ostream & inOutStr, const NTV2AudioChannelOctets & inSet)
 {
-	for (NTV2AudioChannelOctetsConstIter iter (inSet.begin ());  iter != inSet.end ();  ++iter)
+	for (NTV2AudioChannelOctetsConstIter iter (inSet.begin ());	 iter != inSet.end ();	++iter)
 		inOutStr << (iter != inSet.begin () ? ", " : "") << ::NTV2AudioChannelOctetToString (*iter, true);
 	return inOutStr;
 }
@@ -818,7 +818,7 @@ ostream &	operator << (ostream & inOutStr, const NTV2AudioChannelOctets & inSet)
 
 ostream &	operator << (ostream & inOutStr, const NTV2DoubleArray & inVector)
 {
-	for (NTV2DoubleArrayConstIter iter (inVector.begin ());  iter != inVector.end ();  ++iter)
+	for (NTV2DoubleArrayConstIter iter (inVector.begin ());	 iter != inVector.end ();  ++iter)
 		inOutStr << *iter << endl;
 	return inOutStr;
 }
@@ -826,7 +826,7 @@ ostream &	operator << (ostream & inOutStr, const NTV2DoubleArray & inVector)
 
 ostream &	operator << (ostream & inOutStr, const NTV2DIDSet & inDIDs)
 {
-	for (NTV2DIDSetConstIter it (inDIDs.begin());  it != inDIDs.end();  )
+	for (NTV2DIDSetConstIter it (inDIDs.begin());  it != inDIDs.end();	)
 	{
 		inOutStr << xHEX0N(uint16_t(*it),2);
 		if (++it != inDIDs.end())
@@ -837,7 +837,7 @@ ostream &	operator << (ostream & inOutStr, const NTV2DIDSet & inDIDs)
 
 
 #if !defined (NTV2_DEPRECATE)
-	bool CNTV2Card::GetBitFileInformation (ULWord &	outNumBytes, string & outDateStr, string & outTimeStr, const NTV2XilinxFPGA inFPGA)
+	bool CNTV2Card::GetBitFileInformation (ULWord & outNumBytes, string & outDateStr, string & outTimeStr, const NTV2XilinxFPGA inFPGA)
 	{
 		return inFPGA == eFPGAVideoProc ? GetInstalledBitfileInfo (outNumBytes, outDateStr, outTimeStr) : false;
 	}
@@ -852,7 +852,7 @@ ostream &	operator << (ostream & inOutStr, const NTV2DIDSet & inDIDs)
 	{
 		ULWord numBoards(0);
 		CNTV2Card ntv2Card;
-		for (ULWord boardCount(0);  boardCount < NTV2_MAXBOARDS;  boardCount++)
+		for (ULWord boardCount(0);	boardCount < NTV2_MAXBOARDS;  boardCount++)
 		{
 			if (AsNTV2DriverInterfaceRef(ntv2Card).Open(boardCount))
 				numBoards++;	//	Opened, keep going
@@ -879,7 +879,7 @@ ostream &	operator << (ostream & inOutStr, const NTV2DIDSet & inDIDs)
 
 	string CNTV2Card::GetBoardIDString (void)
 	{
-		const ULWord	boardID	(static_cast <ULWord> (GetDeviceID ()));
+		const ULWord	boardID (static_cast <ULWord> (GetDeviceID ()));
 		ostringstream	oss;
 		oss << hex << boardID;
 		return oss.str ();

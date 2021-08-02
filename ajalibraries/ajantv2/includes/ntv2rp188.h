@@ -56,24 +56,24 @@ const int64_t kDefaultFrameCount = 0x80000000;
 class AJAExport CRP188
 {
 public:
-    // Constructors
+	// Constructors
 						CRP188 ();
 						CRP188 (const RP188_STRUCT & rp188, const TimecodeFormat tcFormat = kTCFormat30fps);
 						CRP188 (const NTV2_RP188 & rp188, const TimecodeFormat tcFormat = kTCFormat30fps);
 						CRP188 (const std::string & sRP188, const TimecodeFormat tcFormat = kTCFormat30fps);
 						CRP188 (ULWord ulFrms, ULWord ulSecs, ULWord ulMins, ULWord ulHrs, const TimecodeFormat tcFormat = kTCFormat30fps);
 						CRP188 (ULWord frames, const TimecodeFormat tcFormat = kTCFormat30fps);
-	virtual 			~CRP188();
+	virtual				~CRP188();
 	void				Init ();
 	bool				operator==( const CRP188& s);
 
-    // Setters
+	// Setters
 	void				SetRP188 (ULWord ulFrms, ULWord ulSecs, ULWord ulMins, ULWord ulHrs,
 									NTV2FrameRate frameRate, const bool bDropFrame = false, const bool bSMPTE372 = false);
-    void				SetRP188 (const RP188_STRUCT & rp188, const TimecodeFormat tcFormat = kTCFormatUnknown);
-    void				SetRP188 (const NTV2_RP188 & rp188, const TimecodeFormat tcFormat = kTCFormatUnknown);
-    void				SetRP188 (const std::string &sRP188, const TimecodeFormat tcFormat = kTCFormatUnknown);
-    void				SetRP188 (ULWord ulFrms, ULWord ulSecs, ULWord ulMins, ULWord ulHrs, const TimecodeFormat tcFormat = kTCFormatUnknown);
+	void				SetRP188 (const RP188_STRUCT & rp188, const TimecodeFormat tcFormat = kTCFormatUnknown);
+	void				SetRP188 (const NTV2_RP188 & rp188, const TimecodeFormat tcFormat = kTCFormatUnknown);
+	void				SetRP188 (const std::string &sRP188, const TimecodeFormat tcFormat = kTCFormatUnknown);
+	void				SetRP188 (ULWord ulFrms, ULWord ulSecs, ULWord ulMins, ULWord ulHrs, const TimecodeFormat tcFormat = kTCFormatUnknown);
 	void				SetRP188 (ULWord frames, const TimecodeFormat tcFormat = kTCFormatUnknown);
 
 	void				SetDropFrame (bool bDropFrameFlag);
@@ -86,15 +86,15 @@ public:
 	void				SetSource (UByte src);
 	void				SetOutputFilter (UByte src);
 
-    // Getters
-    bool				GetRP188Str  (std::string & sRP188) const;
+	// Getters
+	bool				GetRP188Str	 (std::string & sRP188) const;
 	const char *		GetRP188CString () const;
-    bool				GetRP188Secs (ULWord & ulSecs) const;
-    bool				GetRP188Frms (ULWord & ulFrms) const;
-    bool				GetRP188Mins (ULWord & ulMins) const;
-    bool				GetRP188Hrs  (ULWord & ulHrs) const;
-    bool				GetRP188Reg  (RP188_STRUCT & outRP188) const;
-    bool				GetRP188Reg  (NTV2_RP188 & outRP188) const;
+	bool				GetRP188Secs (ULWord & ulSecs) const;
+	bool				GetRP188Frms (ULWord & ulFrms) const;
+	bool				GetRP188Mins (ULWord & ulMins) const;
+	bool				GetRP188Hrs	 (ULWord & ulHrs) const;
+	bool				GetRP188Reg	 (RP188_STRUCT & outRP188) const;
+	bool				GetRP188Reg	 (NTV2_RP188 & outRP188) const;
 	bool				GetFrameCount (ULWord & frameCount);
 	ULWord				MaxFramesPerDay (TimecodeFormat format = kTCFormatUnknown) const;
 	void				ConvertTimecode (ULWord & frameCount, TimecodeFormat format, ULWord hours, ULWord minutes, ULWord seconds, ULWord frames);
@@ -123,7 +123,7 @@ public:
 	ULWord				FieldID (void)
 							{ return(_fieldID); }					// fieldID bit
 	bool				DropFrame (void)
-							{ return(_bDropFrameFlag);  }			// drop frame bit
+							{ return(_bDropFrameFlag);	}			// drop frame bit
 	bool				ColorFrame (void)
 							{ return(_bColorFrameFlag); }			// color frame bit
 	ULWord				BinaryGroup (ULWord smpteNum);
@@ -137,7 +137,7 @@ public:
 	ULWord				FramesPerSecond (TimecodeFormat format = kTCFormatUnknown) const;
 	NTV2FrameRate		DefaultFrameRateForTimecodeFormat (TimecodeFormat format = kTCFormatUnknown) const;
 
-    // Modifiers
+	// Modifiers
 	bool				InitBurnIn (NTV2FrameBufferFormat frameBufferFormat, NTV2FrameDimensions frameDimensions, LWord percentY = 0);
 	void				writeV210Pixel (char **pBytePtr, int x, int c, int y);
 	bool				BurnTC (char *pBaseVideoAddress, int rowBytes, TimecodeBurnMode burnMode, int64_t frameCount = kDefaultFrameCount, bool bDisplay60_50fpsAs30_25 = false);
@@ -145,31 +145,31 @@ public:
 	std::string			GetTimeCodeString(bool bDisplay60_50fpsAs30_25 = false);
 	
 private:
-    void				ConvertTcStrToVal (void);   // converts _sHMSF to _ulVal
-    void				ConvertTcStrToReg (void);   // converts _sHMSF to _rp188
+	void				ConvertTcStrToVal (void);	// converts _sHMSF to _ulVal
+	void				ConvertTcStrToReg (void);	// converts _sHMSF to _rp188
 	void				RP188ToUserBits (void);		// derives _ulUserBits and _sUserBits from RP188 struct
 
 
 private:
 	TimecodeFormat		_tcFormat;			// fps, drop- or non-drop frame
-    bool				_bInitialized;		// if constructed with no args, set to false
+	bool				_bInitialized;		// if constructed with no args, set to false
 	bool				_bFresh;			// true if hardware told us this was new ANC data (not just what was lying around in the registers)
 	//bool				_bDropFrame;		// we have to be told whether we are df or ndf
 	//bool				_b50Hz;				// if true, interpret FieldID and Binary Group Flags per 50 Hz spec
 
 	// RP188 user bits
-	bool				_bVaricamActiveF0;  // Varicam "Active Frame 0" user bit flag
-	bool				_bVaricamActiveF1;  // Varicam "Active Frame 1" user bit flag
+	bool				_bVaricamActiveF0;	// Varicam "Active Frame 0" user bit flag
+	bool				_bVaricamActiveF1;	// Varicam "Active Frame 1" user bit flag
 	ULWord				_fieldID;			// FieldID bit: '0' or '1'
 	bool				_bDropFrameFlag;	// Drop Frame bit: '0' or '1'
-	bool				_bColorFrameFlag;   // Color Frame bit: '0' or '1'
+	bool				_bColorFrameFlag;	// Color Frame bit: '0' or '1'
 	ULWord				_varicamRate;		// Varicam rate expressed as bits [0..3] 1 units, bits [4..7] tens unit.
 
-    std::string			_sHMSF;				// hour:minute:second:frame in string format
+	std::string			_sHMSF;				// hour:minute:second:frame in string format
 	std::string			_sUserBits;			// Binary Groups 8-1 in string format
-    ULWord				_ulVal[4];			// [0]=frame, [1]=seconds, etc.
+	ULWord				_ulVal[4];			// [0]=frame, [1]=seconds, etc.
 	ULWord				_ulUserBits[8];		// [0] = Binary Group 1, [1] = Binary Group 2, etc. (note: SMPTE labels them 1 - 8)
-    RP188_STRUCT		_rp188;				// AJA native format
+	RP188_STRUCT		_rp188;				// AJA native format
 
 	bool				_bRendered;			// set 'true' when Burn-In character map has been rendered
 	char *				_pCharRenderMap;	// ptr to rendered Burn-In character set

@@ -17,13 +17,13 @@
 const IOReturn	kNTV2DriverBadDMA		= 0x04430011;	// Bad dmaEngine number
 const IOReturn	kNTV2DriverDMABusy		= 0x04430012;	// Selected DMA busy or none available
 const IOReturn	kNTV2DriverParamErr		= 0x04430013;	// Bad parameter (out of range)
-const IOReturn	kNTV2DriverPgmXilinxErr	= 0x04430014;	// Xilinx programming error - see system log for details
+const IOReturn	kNTV2DriverPgmXilinxErr = 0x04430014;	// Xilinx programming error - see system log for details
 const IOReturn	kNTV2DriverNotReadyErr	= 0x04430015;	// Xilinx not programmed yet
 const IOReturn	kNTV2DriverPrepMemErr	= 0x04430016;	// Error preparing memory (no room),
 const IOReturn	kNTV2DriverPgmPPCErr	= 0x04430017;	// PPC programming error - see system log for details
 const IOReturn	kNTV2DriverDMATooLarge	= 0x04430018;	// DMA transfer is too large, or completing (dataPtr not found),
 														// or attempt to use outside of range
-const IOReturn	kNTV2DriverBadHeaderTag	= 0x04430019;	//	Bad header tag
+const IOReturn	kNTV2DriverBadHeaderTag = 0x04430019;	//	Bad header tag
 const IOReturn	kNTV2UnknownStructType	= 0x0443001A;	//	Unknown struct type
 const IOReturn	kNTV2HeaderVersionErr	= 0x0443001B;	//	Bad or unsupported header version
 const IOReturn	kNTV2DriverBadTrailerTag= 0x0443001C;	//	Bad trailer tag
@@ -54,14 +54,14 @@ typedef enum
 	kDriverRestoreProcAmpRegisters						= 16,
 	kDriverSetBitFileInformation						= 17,	//	Unsupported starting in 12.4
 	kDriverGetBitFileInformation						= 18,	//	Unsupported starting in 12.4
- 	kDriverSetDebugFilterStrings						= 19,
+	kDriverSetDebugFilterStrings						= 19,
 	kDriverGetDebugFilterStrings						= 20,
-    kDriverAutoCirculateControl							= 21,
+	kDriverAutoCirculateControl							= 21,
 	kDriverAutoCirculateStatus							= 22,
-    kDriverAutoCirculateTransfer						= 23,
-    kDriverAutoCirculateFramestamp						= 24,
-    kDriverSetDefaultDeviceForPID						= 25,
-    kDriverIsDefaultDeviceForPID						= 26,
+	kDriverAutoCirculateTransfer						= 23,
+	kDriverAutoCirculateFramestamp						= 24,
+	kDriverSetDefaultDeviceForPID						= 25,
+	kDriverIsDefaultDeviceForPID						= 26,
 	kDriverSystemControl								= 27,
 	kDriverSystemStatus									= 28,
 	kDriverDMATransferEx								= 29,
@@ -155,7 +155,7 @@ enum
 
 	// firmware updates
 	kRegUpdateControl			= 2112,				// Update control register
-	//kRegUpdateSoftwareVersion	= 2113,				// Software version
+	//kRegUpdateSoftwareVersion = 2113,				// Software version
 	//kRegUpdateProductVersion	= 2114,				// Product version
 	kRegUpdateBitFileCommand	= 2115,				// Which bitfile will be updated (write only)
 	kRegUpdateCRC				= 2116,				// CRC register

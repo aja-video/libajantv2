@@ -13,10 +13,10 @@ std::string CreateGuid (void)
 		UUID	uuid;
 		UuidCreate (&uuid);
 
-		unsigned char *	str	(NULL);
+		unsigned char * str (NULL);
 		UuidToStringA (&uuid, &str);
 
-		std::string	result (reinterpret_cast <char *> (str));
+		std::string result (reinterpret_cast <char *> (str));
 		RpcStringFreeA (&str);
 	#elif defined (AJA_LINUX)
 		#include <stdio.h>
@@ -43,5 +43,5 @@ std::string CreateGuid (void)
 		char	result [37];
 		uuid_unparse (uuid, result);
 	#endif
-    return result;
+	return result;
 }

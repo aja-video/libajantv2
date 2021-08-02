@@ -22,24 +22,24 @@ public:
 	AJAThreadImpl(AJAThread* pThreadContext);
 	virtual ~AJAThreadImpl();
 
-    AJAStatus       Start();
-    AJAStatus       Stop(uint32_t timeout = 0xffffffff);
+	AJAStatus		Start();
+	AJAStatus		Stop(uint32_t timeout = 0xffffffff);
 
-    AJAStatus       Kill(uint32_t exitCode);
+	AJAStatus		Kill(uint32_t exitCode);
 
-    bool            Active();
-    bool            IsCurrentThread();
+	bool			Active();
+	bool			IsCurrentThread();
 
-    AJAStatus       SetPriority(AJAThreadPriority threadPriority);
-    AJAStatus       GetPriority(AJAThreadPriority* pThreadPriority);
+	AJAStatus		SetPriority(AJAThreadPriority threadPriority);
+	AJAStatus		GetPriority(AJAThreadPriority* pThreadPriority);
 
-    AJAStatus       SetRealTime(AJAThreadRealTimePolicy policy, int priority);
+	AJAStatus		SetRealTime(AJAThreadRealTimePolicy policy, int priority);
 
-    AJAStatus       Attach(AJAThreadFunction* pThreadFunction, void* pUserContext);
+	AJAStatus		Attach(AJAThreadFunction* pThreadFunction, void* pUserContext);
 
-    static uint64_t	GetThreadId();
-    static void*    ThreadProcStatic(void* pThreadImplContext);
-    AJAStatus       SetThreadName(const char *name);
+	static uint64_t GetThreadId();
+	static void*	ThreadProcStatic(void* pThreadImplContext);
+	AJAStatus		SetThreadName(const char *name);
 
 	AJAThread* mpThreadContext;
 	pthread_t mThread;
@@ -48,7 +48,7 @@ public:
 	void* mpUserContext;
 	AJALock mLock;
 	bool mTerminate;
-    bool mExiting;
+	bool mExiting;
 	pthread_mutex_t mExitMutex;
 	pthread_cond_t mExitCond;
 };

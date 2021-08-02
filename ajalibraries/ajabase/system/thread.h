@@ -23,13 +23,13 @@ typedef void AJAThreadFunction(AJAThread* pThread, void* pContext);
 
 /**
  *	Enumerate State of theads used to implemente state in run function.
- *  Not actually used by the thread class.
+ *	Not actually used by the thread class.
  */
 enum AJAThreadState
 {
-    AJA_ThreadState_Running,
-    AJA_ThreadState_Idle,
-    AJA_ThreadState_Shutdown
+	AJA_ThreadState_Running,
+	AJA_ThreadState_Idle,
+	AJA_ThreadState_Shutdown
 };
 
 
@@ -43,14 +43,14 @@ enum AJAThreadPriority
 	AJA_ThreadPriority_Normal,			/**< Normal system priority. */
 	AJA_ThreadPriority_High,			/**< Above normal priority. */
 	AJA_ThreadPriority_TimeCritical,	/**< Priority designate for time critical tasks */
-	AJA_ThreadPriority_AboveNormal      /**< Priority between normal and high           */
+	AJA_ThreadPriority_AboveNormal		/**< Priority between normal and high			*/
 };
 
 
 enum AJAThreadRealTimePolicy
 {
-    AJA_ThreadRealTimePolicyFIFO,
-    AJA_ThreadRealTimePolicyRoundRobin
+	AJA_ThreadRealTimePolicyFIFO,
+	AJA_ThreadRealTimePolicyRoundRobin
 };
 
 
@@ -58,10 +58,10 @@ enum AJAThreadRealTimePolicy
  *	System independent class for creating and controlling threads.
  *	@ingroup AJAGroupSystem
  *
- *	This class can be used 2 ways.  If an external thread function is attached, the Start() method creates 
- *	a thread and invokes the attached function.  It is up to the attached function to query the Terminate()
- *	method to determine when the a Stop() has been issued.  If no external thread function is attached, the 
- *	Start() method creates a thread and invokes the ThreadRun() method.  ThreadRun() calls ThreadInit() and then 
+ *	This class can be used 2 ways.	If an external thread function is attached, the Start() method creates 
+ *	a thread and invokes the attached function.	 It is up to the attached function to query the Terminate()
+ *	method to determine when the a Stop() has been issued.	If no external thread function is attached, the 
+ *	Start() method creates a thread and invokes the ThreadRun() method.	 ThreadRun() calls ThreadInit() and then 
  *	calls ThreadLoop() continuously until a Stop is issued at which time if calls ThreadFlush().  A subclass
  *	can override any of the functions it requires but should at least override ThreadLoop() to do some work
  *	then wait an appropriate amount of time.
@@ -135,22 +135,22 @@ public:
 	 */
 	virtual AJAStatus GetPriority(AJAThreadPriority* pPriority);
 
-    /**
-     *	Set the thread to be realtime.
-     *
-     *	@param[in]	AJAThreadRealTimePolicy	Thread policy
-     *              int                     Realtime  priority
-     *	@return		AJA_STATUS_SUCCESS		Thread priority set
-     *				AJA_STATUS_RANGE		Unknown priority
-     *				AJA_STATUS_FAIL			Priority not set
-     */
-    virtual AJAStatus SetRealTime(AJAThreadRealTimePolicy policy, int priority);
+	/**
+	 *	Set the thread to be realtime.
+	 *
+	 *	@param[in]	AJAThreadRealTimePolicy Thread policy
+	 *				int						Realtime  priority
+	 *	@return		AJA_STATUS_SUCCESS		Thread priority set
+	 *				AJA_STATUS_RANGE		Unknown priority
+	 *				AJA_STATUS_FAIL			Priority not set
+	 */
+	virtual AJAStatus SetRealTime(AJAThreadRealTimePolicy policy, int priority);
 
 	/**
 	 *	Controlling function for the new thread.
 	 *
 	 *	This function calls ThreadInit() once then continuously call ThreadLoop until Terminate() is
-	 *	true or ThreadLoop() returns false.  ThreadFlush() is called last.  Override this function
+	 *	true or ThreadLoop() returns false.	 ThreadFlush() is called last.	Override this function
 	 *	for complete control of the thread.
 	 *
 	 *	@return		AJA_STATUS_SUCCESS	No thread errors
@@ -212,20 +212,20 @@ public:
 
 	/**
 	 *
-	 * 	Sets the thread name
+	 *	Sets the thread name
 	 *
-	 * 	NOTE: This call must be made from within the thread.
+	 *	NOTE: This call must be made from within the thread.
 	 *
-	 * 	@param[in]	name			Name to assign to the thread
+	 *	@param[in]	name			Name to assign to the thread
 	 */
 	virtual AJAStatus SetThreadName(const char *name);
 
-    /**
-     *	Get the Thread Id of the current running thread
-     *
-     *	@return The thread Id of the current thread, expressed as a 64 bit unsigned integer
-     */
-    static uint64_t	GetThreadId();
+	/**
+	 *	Get the Thread Id of the current running thread
+	 *
+	 *	@return The thread Id of the current thread, expressed as a 64 bit unsigned integer
+	 */
+	static uint64_t GetThreadId();
 
 private:
 

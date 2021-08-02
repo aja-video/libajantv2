@@ -12,8 +12,8 @@
 struct AJAFrameRateEntry
 {
 	AJA_FrameRate ajaFrameRate;
-	int64_t       frameTimeScale;
-	int64_t       frameDuration;
+	int64_t		  frameTimeScale;
+	int64_t		  frameDuration;
 };
 const AJAFrameRateEntry AJAFrameRateTable[] =
 {
@@ -45,27 +45,27 @@ const int64_t AJATimeBaseDefaultAudioRate = 48000;
 
 AJATimeBase::AJATimeBase()
 {
-    SetToDefault();
+	SetToDefault();
 }
 
 AJATimeBase::AJATimeBase(AJA_FrameRate ajaFrameRate)
 {
-    SetToDefault();
-    // this will set the correct timeScale and duration
-    SetAJAFrameRatePrivate(ajaFrameRate);
+	SetToDefault();
+	// this will set the correct timeScale and duration
+	SetAJAFrameRatePrivate(ajaFrameRate);
 }
 
 AJATimeBase::AJATimeBase(int64_t frameTimeScale, int64_t frameDuration)
 {
-    SetToDefault();
-    mFrameTimeScale = frameTimeScale;
-    mFrameDuration  = frameDuration;
+	SetToDefault();
+	mFrameTimeScale = frameTimeScale;
+	mFrameDuration	= frameDuration;
 }
 
 AJATimeBase::AJATimeBase(int64_t frameTimeScale, int64_t frameDuration, int64_t audioRate)
 {
-    SetToDefault();
-	mFrameTimeScale	= frameTimeScale;
+	SetToDefault();
+	mFrameTimeScale = frameTimeScale;
 	mFrameDuration	= frameDuration;
 	mAudioRate		= audioRate;
 }
@@ -84,10 +84,10 @@ AJATimeBase::~AJATimeBase()
 
 void AJATimeBase::SetToDefault(void)
 {
-    mFrameTimeScale = AJATimeBaseDefaultTimeScale;
-    mFrameDuration  = AJATimeBaseDefaultDuration;
-    mAudioRate      = AJATimeBaseDefaultAudioRate;
-	mTickRate       = AJATime::GetSystemFrequency();
+	mFrameTimeScale = AJATimeBaseDefaultTimeScale;
+	mFrameDuration	= AJATimeBaseDefaultDuration;
+	mAudioRate		= AJATimeBaseDefaultAudioRate;
+	mTickRate		= AJATime::GetSystemFrequency();
 }
 
 AJATimeBase& AJATimeBase::operator=(const AJATimeBase &t)
@@ -95,9 +95,9 @@ AJATimeBase& AJATimeBase::operator=(const AJATimeBase &t)
 	if (this != &t)
 	{
 		mFrameTimeScale		= t.mFrameTimeScale;
-	    mFrameDuration		= t.mFrameDuration;
-	    mAudioRate			= t.mAudioRate;
-	    mTickRate			= t.mTickRate;
+		mFrameDuration		= t.mFrameDuration;
+		mAudioRate			= t.mAudioRate;
+		mTickRate			= t.mTickRate;
 	}
 
 	return *this;
@@ -109,11 +109,11 @@ bool AJATimeBase::operator==(const AJATimeBase &b) const
 
 	if (mFrameTimeScale != b.mFrameTimeScale)
 		bIsSame = false;
-	if (mFrameDuration  != b.mFrameDuration)
+	if (mFrameDuration	!= b.mFrameDuration)
 		bIsSame = false;
-	if (mAudioRate      != b.mAudioRate)
+	if (mAudioRate		!= b.mAudioRate)
 		bIsSame = false;
-	if (mTickRate       != b.mTickRate)
+	if (mTickRate		!= b.mTickRate)
 		bIsSame = false;
 
 	return bIsSame;
@@ -310,7 +310,7 @@ bool AJATimeBase::IsCloseTo(const AJATimeBase &timeBase) const
 	bool bIsClose = false;
 	double rate1  = FramesToSeconds(1);
 	double rate2  = timeBase.FramesToSeconds(1);
-	double dif    = rate1 / rate2;
+	double dif	  = rate1 / rate2;
 
 			// this is just a guess at what is considered close enough
 			// it will differentiate between 30000/1001 and 30000/1000,
@@ -351,7 +351,7 @@ int64_t AJATimeBase::Convert(int64_t inValue, int64_t inRate, int64_t outRate, b
 	if (round)
 	{
 		// convert half the out rate to the in rate and increase the in value
-        int64_t roundValue = inRate / (outRate * 2);
+		int64_t roundValue = inRate / (outRate * 2);
 		if (inValue > 0)
 		{
 			inValue += roundValue;
@@ -417,29 +417,29 @@ int64_t AJATimeBase::Convert(int64_t inValue, int64_t inScale, int64_t inDuratio
 AJA_FrameRate AJATimeBase::GetAJAFrameRate(void) const
 {
 	AJA_FrameRate fr = AJA_FrameRate_Unknown;
-    for (size_t i = 0; i < AJAFrameRateTableSize; i++)
-    {
-        if (IsCloseTo(AJAFrameRateTable[i].frameTimeScale,AJAFrameRateTable[i].frameDuration))
-        {
-            fr = AJAFrameRateTable[i].ajaFrameRate;
-            break;
-        }
+	for (size_t i = 0; i < AJAFrameRateTableSize; i++)
+	{
+		if (IsCloseTo(AJAFrameRateTable[i].frameTimeScale,AJAFrameRateTable[i].frameDuration))
+		{
+			fr = AJAFrameRateTable[i].ajaFrameRate;
+			break;
+		}
 	}
-     
+	 
 	return fr;
 }
 
 void AJATimeBase::SetAJAFrameRatePrivate(AJA_FrameRate ajaFrameRate)
 {
-    mFrameTimeScale = AJATimeBaseDefaultTimeScale;
-    mFrameDuration  = AJATimeBaseDefaultDuration;
+	mFrameTimeScale = AJATimeBaseDefaultTimeScale;
+	mFrameDuration	= AJATimeBaseDefaultDuration;
 
 	for (size_t i = 0; i < AJAFrameRateTableSize; i++)
 	{
 		if (AJAFrameRateTable[i].ajaFrameRate == ajaFrameRate)
 		{
 			mFrameTimeScale = AJAFrameRateTable[i].frameTimeScale;
-			mFrameDuration  = AJAFrameRateTable[i].frameDuration;
+			mFrameDuration	= AJAFrameRateTable[i].frameDuration;
 			break;
 		}
 	}

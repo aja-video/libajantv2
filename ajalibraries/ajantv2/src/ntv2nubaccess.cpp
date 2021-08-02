@@ -538,7 +538,7 @@ int NTV2NubRPCAPI::NTV2Connect (const string & inHostName, const UWord inDeviceI
 	}
 
 	struct sockaddr_in their_addr;
-	their_addr.sin_family = AF_INET;    // host byte order 
+	their_addr.sin_family = AF_INET;	// host byte order 
 	their_addr.sin_port = htons(NTV2NUBPORT);  // short, network byte order 
 	their_addr.sin_addr = *((struct in_addr *)he->h_addr);
 	::memset(&(their_addr.sin_zero), '\0', 8);  // zero the rest of the struct 

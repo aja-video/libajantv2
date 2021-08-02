@@ -1,8 +1,8 @@
 /* SPDX-License-Identifier: MIT */
 /**
-    @file		ntv2config2022.h
-    @brief		Declares the NTV2ChoosableBoard struct used for "nub" discovery.
-    @copyright	(C) 2005-2021 AJA Video Systems, Inc.
+	@file		ntv2choosableboard.h
+	@brief		Declares the NTV2ChoosableBoard struct used for "nub" discovery.
+	@copyright	(C) 2005-2021 AJA Video Systems, Inc.
 **/
 
 #ifndef NTV2CHOOSABLEBOARD_H

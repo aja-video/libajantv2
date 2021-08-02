@@ -23,7 +23,7 @@
 	#include <stdint.h>
 #endif
 
-#define Enum2Str(e)  {e, #e},
+#define Enum2Str(e)	 {e, #e},
 //////////////////////////////////////////////////////
 //	BEGIN SECTION MOVED FROM 'videoutilities.h'
 //////////////////////////////////////////////////////
@@ -67,10 +67,10 @@ AJAExport void CopyToQuadrant (uint8_t* srcBuffer, uint32_t srcHeight, uint32_t 
 	@brief		Unpacks a line of NTV2_FBF_10BIT_YCBCR video into 16-bit-per-component YUV data.
 	@param[in]	pIn10BitYUVLine		A valid, non-NULL pointer to the start of the line that contains the NTV2_FBF_10BIT_YCBCR data
 									to be converted.
-	@param[out]	out16BitYUVLine		Receives the unpacked 16-bit-per-component YUV data. The sequence is cleared before filling.
+	@param[out] out16BitYUVLine		Receives the unpacked 16-bit-per-component YUV data. The sequence is cleared before filling.
 									The UWord sequence will be Cb0, Y0, Cr0, Y1, Cb1, Y2, Cr1, Y3, Cb2, Y4, Cr2, Y5, . . .
 	@param[in]	inNumPixels			Specifies the width of the line to be converted, in pixels.
-	@return		True if successful;  otherwise false.
+	@return		True if successful;	 otherwise false.
 **/
 AJAExport bool		UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, UWordSequence & out16BitYUVLine, ULWord inNumPixels);
 
@@ -78,9 +78,9 @@ AJAExport bool		UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine
 	@brief		Packs a line of 16-bit-per-component YCbCr (NTV2_FBF_10BIT_YCBCR) video into 10-bit-per-component YCbCr data.
 	@param[in]	in16BitYUVLine		The UWordSequence that contains the 16-bit-per-component YUV data to be converted into
 									10-bit-per-component YUV.
-	@param[out]	pOut10BitYUVLine	A valid, non-NULL pointer to the output buffer to receive the packed 10-bit-per-component YUV data.
+	@param[out] pOut10BitYUVLine	A valid, non-NULL pointer to the output buffer to receive the packed 10-bit-per-component YUV data.
 	@param[in]	inNumPixels			Specifies the width of the line to be converted, in pixels.
-	@return		True if successful;  otherwise false.
+	@return		True if successful;	 otherwise false.
 **/
 AJAExport bool		PackLine_UWordSequenceTo10BitYUV (const UWordSequence & in16BitYUVLine, ULWord * pOut10BitYUVLine, const ULWord inNumPixels);
 
@@ -90,7 +90,7 @@ AJAExport bool		PackLine_UWordSequenceTo10BitYUV (const UWordSequence & in16BitY
 	@param		inFrameBuffer	The frame buffer in host memory that is to be modified.
 	@param[in]	inDescriptor	The NTV2FormatDescriptor that describes the frame buffer.
 	@param[in]	inLineOffset	The zero-based line offset into the frame buffer where the packed components will be written.
-	@return		True if successful;  otherwise false.
+	@return		True if successful;	 otherwise false.
 	@note		Neighboring components in the packed output will be corrupted if input component values exceed 0x3FF.
 	@note		This is a safer version of the ::PackLine_UWordSequenceTo10BitYUV function.
 **/
@@ -100,12 +100,12 @@ AJAExport bool YUVComponentsTo10BitYUVPackedBuffer (const std::vector<uint16_t> 
 /**
 	@brief		Unpacks up to one raster line of an NTV2_FBF_10BIT_YCBCR frame buffer into an array of uint16_t values
 				containing the 10-bit YUV data.
-	@param[out]	outYCbCrLine	The YUV components unpacked from the frame buffer. This will be cleared upon entry, and
+	@param[out] outYCbCrLine	The YUV components unpacked from the frame buffer. This will be cleared upon entry, and
 								if successful, will contain at least 12 values upon exit.
 	@param		inFrameBuffer	The frame buffer in host memory that is to be read.
 	@param[in]	inDescriptor	The NTV2FormatDescriptor that describes the frame buffer.
 	@param[in]	inLineOffset	The zero-based line offset into the frame buffer.
-	@return		True if successful;  otherwise false.
+	@return		True if successful;	 otherwise false.
 	@note		This is a safer version of the ::UnpackLine_10BitYUVtoUWordSequence function.
 **/
 AJAExport bool UnpackLine_10BitYUVtoU16s (std::vector<uint16_t> & outYCbCrLine, const NTV2_POINTER & inFrameBuffer,
@@ -121,7 +121,7 @@ AJAExport bool UnpackLine_10BitYUVtoU16s (std::vector<uint16_t> & outYCbCrLine, 
 	@brief	Unpacks a line of 10-bit-per-component YCbCr video into 16-bit-per-component YCbCr (NTV2_FBF_10BIT_YCBCR) data.
 	@param[in]	pIn10BitYUVLine		A valid, non-NULL pointer to the input buffer that contains the packed 10-bit-per-component YUV data
 									to be converted into 16-bit-per-component YUV.
-	@param[out]	pOut16BitYUVLine	A valid, non-NULL pointer to the output buffer to receive the unpacked 16-bit-per-component YUV data.
+	@param[out] pOut16BitYUVLine	A valid, non-NULL pointer to the output buffer to receive the unpacked 16-bit-per-component YUV data.
 	@param[in]	inNumPixels			Specifies the width of the line to be converted, in pixels.
 **/
 AJAExport void UnpackLine_10BitYUVto16BitYUV (const ULWord * pIn10BitYUVLine, UWord * pOut16BitYUVLine, const ULWord inNumPixels);
@@ -130,7 +130,7 @@ AJAExport void UnpackLine_10BitYUVto16BitYUV (const ULWord * pIn10BitYUVLine, UW
 	@brief	Packs a line of 16-bit-per-component YCbCr (NTV2_FBF_10BIT_YCBCR) video into 10-bit-per-component YCbCr data.
 	@param[in]	pIn16BitYUVLine		A valid, non-NULL pointer to the input buffer that contains the 16-bit-per-component YUV data to be
 									converted into 10-bit-per-component YUV.
-	@param[out]	pOut10BitYUVLine	A valid, non-NULL pointer to the output buffer to receive the packed 10-bit-per-component YUV data.
+	@param[out] pOut10BitYUVLine	A valid, non-NULL pointer to the output buffer to receive the packed 10-bit-per-component YUV data.
 	@param[in]	inNumPixels			Specifies the width of the line to be converted, in pixels.
 **/
 AJAExport void PackLine_16BitYUVto10BitYUV (const UWord * pIn16BitYUVLine, ULWord * pOut10BitYUVLine, const ULWord inNumPixels);
@@ -161,7 +161,7 @@ AJAExport void Make10BitWhiteLine(UWord* pOutLineData, const ULWord numPixels=19
 																const bool inWideVANC = false));	///< @deprecated	Use the identical function that accepts an ::NTV2VANCMode parameter instead of two booleans.
 #endif	//	!defined(NTV2_DEPRECATE_13_0)
 /**
-	@return		True if successful;  otherwise false.
+	@return		True if successful;	 otherwise false.
 **/
 AJAExport bool Fill10BitYCbCrVideoFrame (void * pBaseVideoAddress,
 										 const NTV2Standard inStandard,
@@ -183,7 +183,7 @@ AJAExport void Make8BitLine(UByte* lineData, UByte Y , UByte Cb , UByte Cr,ULWor
 																const bool inWideVanc = false));	///< @deprecated	Use the identical function that accepts an ::NTV2VANCMode parameter instead of two booleans.
 #endif	//	!defined(NTV2_DEPRECATE_13_0)
 AJAExport bool Fill8BitYCbCrVideoFrame (void * pBaseVideoAddress,  const NTV2Standard inStandard,  const NTV2FrameBufferFormat inFBF,
-										const YCbCrPixel inPixelColor,  const NTV2VANCMode inVancMode = NTV2_VANCMODE_OFF);
+										const YCbCrPixel inPixelColor,	const NTV2VANCMode inVancMode = NTV2_VANCMODE_OFF);
 AJAExport void Fill4k8BitYCbCrVideoFrame(PULWord _baseVideoAddress,
 									   NTV2FrameBufferFormat frameBufferFormat,
 									   YCbCrPixel color,
@@ -210,7 +210,7 @@ AJAExport void CopyRGBAImageToFrame(ULWord* pSrcBuffer, ULWord srcHeight, ULWord
 				NTV2_FBF_8BIT_YCBCR_422PL3, NTV2_FBF_10BIT_YCBCR_420PL3_LE, and NTV2_FBF_10BIT_YCBCR_422PL3_LE, plus the 2-plane
 				planar formats NTV2_FBF_10BIT_YCBCR_420PL2, NTV2_FBF_10BIT_YCBCR_422PL2, NTV2_FBF_8BIT_YCBCR_420PL2, and
 				NTV2_FBF_8BIT_YCBCR_422PL2.
-	@return		True if successful;  otherwise false.
+	@return		True if successful;	 otherwise false.
 **/
 AJAExport bool	SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
 										UByte *						pDstBuffer,
@@ -260,7 +260,7 @@ AJAExport bool	SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
 										will be copied. Note that some pixel formats set constraints on this value(e.g.,
 										NTV2_FBF_10BIT_YCBCR requires this be a multiple of 6, while NTV2_FBF_8BIT_YCBCR requires
 										this to be even).
-	@return		True if successful;  otherwise false.
+	@return		True if successful;	 otherwise false.
 	@note		The source and destination buffers MUST have the same pixel format.
 	@note		The source and destination buffers must NOT point to the same buffer.
 	@note		The use of unsigned values precludes positioning the source raster above the top line of the destination raster,
@@ -270,7 +270,7 @@ AJAExport bool	SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
 	@bug		Needs implementations for NTV2_FBF_10BIT_YCBCRA, NTV2_FBF_10BIT_RGB_PACKED, NTV2_FBF_10BIT_ARGB,
 				NTV2_FBF_16BIT_ARGB.
 **/
-AJAExport bool	CopyRaster (const NTV2FrameBufferFormat	inPixelFormat,
+AJAExport bool	CopyRaster (const NTV2FrameBufferFormat inPixelFormat,
 							UByte *						pDstBuffer,
 							const ULWord				inDstBytesPerLine,
 							const UWord					inDstTotalLines,
@@ -307,7 +307,7 @@ AJAExport NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inV
 AJAExport NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat (const NTV2VideoFormat inVideoFormat);
 
 #if defined (NTV2_DEPRECATE)
-	#define	GetHdmiV2StandardFromVideoFormat(__vf__)	::GetNTV2StandardFromVideoFormat (__vf__)
+	#define GetHdmiV2StandardFromVideoFormat(__vf__)	::GetNTV2StandardFromVideoFormat (__vf__)
 #else
 	AJAExport NTV2V2Standard	GetHdmiV2StandardFromVideoFormat (NTV2VideoFormat videoFormat);
 #endif
@@ -367,7 +367,7 @@ inline double GetFrameTime (const NTV2FrameRate inFrameRate)	{return double(1.0)
 	@param[in]	inHeightLines	Specifies the raster height, in lines of visible video.
 	@param[in]	inWidthPixels	Specifies the raster width, in pixels.
 	@param[in]	inIsInterlaced	Specify true for interlaced/psf video, or false for progressive.
-	@param[in]	inIsLevelB    	Specify true for level B, or false for everything else.
+	@param[in]	inIsLevelB		Specify true for level B, or false for everything else.
 	@param[in]	inIsPSF			Specify true for segmented format false for everything else.
 
 **/
@@ -382,12 +382,12 @@ AJAExport NTV2VideoFormat	GetFirstMatchingVideoFormat (const NTV2FrameRate inFra
 	@brief		Answers with the given frame rate, in frames per second, as two components:
 				the numerator and denominator of the fractional rate.
 	@param[in]	inFrameRate				Specifies the frame rate of interest.
-	@param[out]	outFractionNumerator	Receives the numerator of the fractional frame rate.
+	@param[out] outFractionNumerator	Receives the numerator of the fractional frame rate.
 										This will be zero if the function returns false.
-	@param[out]	outFractionDenominator	Receives the denominator of the fractional frame rate.
+	@param[out] outFractionDenominator	Receives the denominator of the fractional frame rate.
 										If the function is successful, this will be either 1000 or 1001.
 										This will be zero if the function returns false.
-	@return		True if successful;  otherwise false.
+	@return		True if successful;	 otherwise false.
 **/
 AJAExport bool GetFramesPerSecond (const NTV2FrameRate inFrameRate, ULWord & outFractionNumerator, ULWord & outFractionDenominator);
 
@@ -396,7 +396,7 @@ AJAExport bool GetFramesPerSecond (const NTV2FrameRate inFrameRate, ULWord & out
 	@param[in]	inFR		Specifies the ::NTV2FrameRate of interest.
 	@param[in]	inFG		Specifies the ::NTV2FrameGeometry of interest.
 	@param[in]	inStd		Specifies the ::NTV2Standard of interest.
-	@deprecated	This function is deprecated.
+	@deprecated This function is deprecated.
 	@note		The implementation of this function is very inefficient. Do not call it every frame.
 	@return		True if the device having the given NTV2DeviceID supports the given frame rate, geometry and standard.
 **/
@@ -411,10 +411,10 @@ AJAExport NTV2_SHOULD_BE_DEPRECATED(bool NTV2DeviceCanDoFormat (const NTV2Device
 	@param[in]	inCadenceFrame		Optionally specifies a frame number for maintaining proper cadence in a frame sequence,
 									for those video frame rates that don't accommodate an even number of audio samples.
 									Defaults to zero.
-	@param[in]	inIsSMPTE372Enabled	Specifies that 1080p60, 1080p5994 or 1080p50 is being used. In this mode, the device's
+	@param[in]	inIsSMPTE372Enabled Specifies that 1080p60, 1080p5994 or 1080p50 is being used. In this mode, the device's
 									framerate might be NTV2_FRAMERATE_3000, but since 2 links are coming out, the video rate
 									is effectively NTV2_FRAMERATE_6000. Defaults to false.
-	@return	The number of audio samples.
+	@return The number of audio samples.
 	@see	See \ref audiosamplecount
 **/
 AJAExport ULWord				GetAudioSamplesPerFrame (const NTV2FrameRate inFrameRate, const NTV2AudioRate inAudioRate, ULWord inCadenceFrame = 0, bool inIsSMPTE372Enabled = false);
@@ -436,14 +436,14 @@ AJAExport NTV2FrameRate			GetNTV2FrameRateFromVideoFormat (const NTV2VideoFormat
 
 /**
 	@return		The equivalent non-VANC ::NTV2FrameGeometry value for a given ::NTV2FrameGeometry.
-	@param[in]	inFrameGeometry	Specifies the ::NTV2FrameGeometry to be normalized into its non-VANC equivalent.
+	@param[in]	inFrameGeometry Specifies the ::NTV2FrameGeometry to be normalized into its non-VANC equivalent.
 	@see		::GetVANCFrameGeometry
 **/
 AJAExport NTV2FrameGeometry		GetNormalizedFrameGeometry (const NTV2FrameGeometry inFrameGeometry);
 
 /**
 	@return		The equivalent VANC ::NTV2FrameGeometry value for a given ::NTV2VANCMode.
-	@param[in]	inFrameGeometry	Specifies the ::NTV2FrameGeometry to be converted into its VANC equivalent.
+	@param[in]	inFrameGeometry Specifies the ::NTV2FrameGeometry to be converted into its VANC equivalent.
 	@param[in]	inVancMode		Specifies the desired ::NTV2VANCMode.
 	@see		::GetNormalizedFrameGeometry
 **/
@@ -459,14 +459,14 @@ AJAExport NTV2FrameGeometry		GetGeometryFromFrameDimensions (const NTV2FrameDime
 /**
 	@return		True if the given ::NTV2FrameGeometry has tall or taller geometries associated with it;
 				otherwise false.
-	@param[in]	inFrameGeometry	Specifies the ::NTV2FrameGeometry.
+	@param[in]	inFrameGeometry Specifies the ::NTV2FrameGeometry.
 	@see		::GetVANCFrameGeometry
 **/
 AJAExport bool					HasVANCGeometries (const NTV2FrameGeometry inFrameGeometry);
 
 /**
 	@return		An ::NTV2GeometrySet containing normal, tall and (possibly) taller frame geometries
-				that are associated with the given ::NTV2FrameGeometry;  or an empty set if passed
+				that are associated with the given ::NTV2FrameGeometry;	 or an empty set if passed
 				an invalid geometry.
 	@param[in]	inFrameGeometry		Specifies the ::NTV2FrameGeometry. (Need not be normalized.)
 	@note		The resulting set will, at the least, contain the given geometry (if valid).
@@ -476,21 +476,21 @@ AJAExport NTV2GeometrySet		GetRelatedGeometries (const NTV2FrameGeometry inFrame
 
 /**
 	@return		The equivalent NTV2VANCMode for a given ::NTV2FrameGeometry.
-	@param[in]	inFrameGeometry	Specifies the ::NTV2FrameGeometry.
+	@param[in]	inFrameGeometry Specifies the ::NTV2FrameGeometry.
 	@see		::GetVANCFrameGeometry
 **/
 AJAExport NTV2VANCMode			GetVANCModeForGeometry (const NTV2FrameGeometry inFrameGeometry);
 
 /**
 	@return		The pixel width of the given ::NTV2FrameGeometry.
-	@param[in]	inFrameGeometry	Specifies the ::NTV2FrameGeometry of interest.
+	@param[in]	inFrameGeometry Specifies the ::NTV2FrameGeometry of interest.
 	@see		::GetVANCFrameGeometry
 **/
 AJAExport ULWord				GetNTV2FrameGeometryWidth (const NTV2FrameGeometry inFrameGeometry);
 
 /**
 	@return		The height, in lines, of the given ::NTV2FrameGeometry.
-	@param[in]	inFrameGeometry	Specifies the ::NTV2FrameGeometry of interest.
+	@param[in]	inFrameGeometry Specifies the ::NTV2FrameGeometry of interest.
 	@see		::GetVANCFrameGeometry
 **/
 AJAExport ULWord				GetNTV2FrameGeometryHeight (const NTV2FrameGeometry inFrameGeometry);
@@ -504,7 +504,7 @@ AJAExport NTV2FrameGeometry		GetGeometryFromStandard (const NTV2Standard inStand
 /**
 	@return		The equivalent ::NTV2Standard for the given ::NTV2FrameGeometry.
 	@param[in]	inGeometry		Specifies the ::NTV2FrameGeometry to be converted into a ::NTV2Standard.
-	@param[in]	inIsProgressive	Specifies if the resulting Standard should have a progressive transport or not.
+	@param[in]	inIsProgressive Specifies if the resulting Standard should have a progressive transport or not.
 								Defaults to true.
 **/
 AJAExport NTV2Standard			GetStandardFromGeometry (const NTV2FrameGeometry inGeometry, const bool inIsProgressive = true);
@@ -530,7 +530,7 @@ AJAExport NTV2_SHOULD_BE_DEPRECATED(std::string		NTV2CrosspointToString (const N
 AJAExport NTV2_SHOULD_BE_DEPRECATED(NTV2Channel		NTV2CrosspointToNTV2Channel (const NTV2Crosspoint inCrosspointChannel));
 AJAExport NTV2_SHOULD_BE_DEPRECATED(NTV2Crosspoint	NTV2ChannelToInputCrosspoint (const NTV2Channel inChannel));
 AJAExport NTV2_SHOULD_BE_DEPRECATED(NTV2Crosspoint	NTV2ChannelToOutputCrosspoint (const NTV2Channel inChannel));
-AJAExport NTV2_SHOULD_BE_DEPRECATED(NTV2InputSource	GetNTV2HDMIInputSourceForIndex (const ULWord inIndex0));
+AJAExport NTV2_SHOULD_BE_DEPRECATED(NTV2InputSource GetNTV2HDMIInputSourceForIndex (const ULWord inIndex0));
 
 AJAExport NTV2VideoFormat		GetTransportCompatibleFormat (const NTV2VideoFormat inFormat, const NTV2VideoFormat inTargetFormat);
 AJAExport bool					IsTransportCompatibleFormat (const NTV2VideoFormat inFormat1, const NTV2VideoFormat inFormat2);
@@ -588,12 +588,12 @@ AJAExport NTV2Channel			NTV2TimecodeIndexToChannel (const NTV2TCIndex inTCIndex)
 AJAExport NTV2InputSource		NTV2TimecodeIndexToInputSource (const NTV2TCIndex inTCIndex);
 
 
-#define	GetTCIndexesForSDIInput			GetTCIndexesForSDIConnector
-#define	NTV2ChannelToCaptureCrosspoint	NTV2ChannelToInputCrosspoint
-#define	NTV2ChannelToIngestCrosspoint	NTV2ChannelToInputCrosspoint
-#define	NTV2ChannelToInputChannelSpec	NTV2ChannelToInputCrosspoint
-#define	NTV2ChannelToPlayoutCrosspoint	NTV2ChannelToOutputCrosspoint
-#define	NTV2ChannelToOutputChannelSpec	NTV2ChannelToOutputCrosspoint
+#define GetTCIndexesForSDIInput			GetTCIndexesForSDIConnector
+#define NTV2ChannelToCaptureCrosspoint	NTV2ChannelToInputCrosspoint
+#define NTV2ChannelToIngestCrosspoint	NTV2ChannelToInputCrosspoint
+#define NTV2ChannelToInputChannelSpec	NTV2ChannelToInputCrosspoint
+#define NTV2ChannelToPlayoutCrosspoint	NTV2ChannelToOutputCrosspoint
+#define NTV2ChannelToOutputChannelSpec	NTV2ChannelToOutputCrosspoint
 
 
 /**
@@ -632,7 +632,7 @@ AJAExport NTV2AudioSource NTV2InputSourceToAudioSource (const NTV2InputSource in
 
 /**
  @brief		Converts a given NTV2InputSource to its equivalent NTV2Crosspoint value.
- @param[in]	inInputSource	Specifies the NTV2InputSource to be converted.
+ @param[in] inInputSource	Specifies the NTV2InputSource to be converted.
  @return		The equivalent NTV2Crosspoint value.
  **/
 AJAExport NTV2Crosspoint NTV2InputSourceToChannelSpec (const NTV2InputSource inInputSource);
@@ -739,7 +739,7 @@ AJAExport int  RecordCopyAudio (PULWord pAja, PULWord pSR, int iStartSample, int
 /**
 	@brief	Fills the given buffer with 32-bit (ULWord) audio tone samples.
 	@param		pAudioBuffer		If non-NULL, must be a valid pointer to the buffer to be filled with audio samples,
-									and must be at least  4 x numSamples x numChannels  bytes in size.
+									and must be at least  4 x numSamples x numChannels	bytes in size.
 									Callers may specify NULL to have the function return the required size of the buffer.
 	@param		inOutCurrentSample	On entry, specifies the sample where waveform generation is to resume.
 									If audioBuffer is non-NULL, on exit, receives the sample number where waveform generation left off.
@@ -767,7 +767,7 @@ AJAExport ULWord	AddAudioTone (	ULWord *		pAudioBuffer,
 /**
 	@brief	Fills the given buffer with 32-bit (ULWord) audio tone samples with a different frequency in each audio channel.
 	@param		pAudioBuffer		If non-NULL, must be a valid pointer to the buffer to be filled with audio samples,
-									and must be at least  4 x numSamples x numChannels  bytes in size.
+									and must be at least  4 x numSamples x numChannels	bytes in size.
 									Callers may specify NULL to have the function return the required size of the buffer.
 	@param		inOutCurrentSample	On entry, specifies the sample where waveform generation is to resume.
 									If audioBuffer is non-NULL, on exit, receives the sample number where waveform generation left off.
@@ -875,7 +875,7 @@ AJAExport ULWord	AddAudioTestPattern (ULWord *		pAudioBuffer,
 	@brief		Writes the given NTV2FrameDimensions to the specified output stream.
 	@param		inOutStream			Specifies the output stream to receive the human-readable representation of the NTV2FrameDimensions.
 	@param[in]	inFrameDimensions	Specifies the NTV2FrameDimensions to print to the output stream.
-	@return	A non-constant reference to the specified output stream.
+	@return A non-constant reference to the specified output stream.
 **/
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2FrameDimensions inFrameDimensions);
 
@@ -886,11 +886,11 @@ AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2Fram
 **/
 typedef struct AJAExport NTV2SmpteLineNumber
 {
-	ULWord			smpteFirstActiveLine;	///< @brief	SMPTE line number of first (top-most) active line of video
-	ULWord			smpteSecondActiveLine;	///< @brief	SMPTE line number of second active line of video
-	bool			firstFieldTop;			///< @brief	True if the first field on the wire is the top-most field in the raster (field dominance)
+	ULWord			smpteFirstActiveLine;	///< @brief SMPTE line number of first (top-most) active line of video
+	ULWord			smpteSecondActiveLine;	///< @brief SMPTE line number of second active line of video
+	bool			firstFieldTop;			///< @brief True if the first field on the wire is the top-most field in the raster (field dominance)
 private:
-	NTV2Standard	mStandard;				///< @brief	The NTV2Standard I was constructed from
+	NTV2Standard	mStandard;				///< @brief The NTV2Standard I was constructed from
 
 public:
 	/**
@@ -900,7 +900,7 @@ public:
 	explicit		NTV2SmpteLineNumber (const NTV2Standard inStandard = NTV2_STANDARD_INVALID);
 
 	/**
-		@return		True if valid;  otherwise false.
+		@return		True if valid;	otherwise false.
 	**/
 	inline bool		IsValid (void) const	{return NTV2_IS_VALID_STANDARD (mStandard) && smpteFirstActiveLine;}
 
@@ -921,7 +921,7 @@ public:
 	ULWord			GetLastLine (const NTV2FieldID inRasterFieldID = NTV2_FIELD0) const;
 
 	/**
-		@return	True if I'm equal to the given NTV2SmpteLineNumber.
+		@return True if I'm equal to the given NTV2SmpteLineNumber.
 		@param[in]	inRHS	The right-hand-side operand that I'll be compared with.
 	**/
 	bool			operator == (const NTV2SmpteLineNumber & inRHS) const;
@@ -943,7 +943,7 @@ public:
 	std::string		PrintLineNumber (const ULWord inLineOffset = 0, const NTV2FieldID inRasterFieldID = NTV2_FIELD0) const;
 
 private:
-	explicit inline	NTV2SmpteLineNumber (const ULWord inFirstActiveLine,
+	explicit inline NTV2SmpteLineNumber (const ULWord inFirstActiveLine,
 										const ULWord inSecondActiveLine,
 										const bool inFirstFieldTop,
 										const NTV2Standard inStandard)
@@ -959,7 +959,7 @@ private:
 	@brief		Writes the given NTV2SmpteLineNumber to the specified output stream.
 	@param		inOutStream			Specifies the output stream to receive the human-readable representation of the NTV2SmpteLineNumber.
 	@param[in]	inSmpteLineNumber	Specifies the NTV2SmpteLineNumber instance to print to the output stream.
-	@return	A non-constant reference to the specified output stream.
+	@return A non-constant reference to the specified output stream.
 **/
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2SmpteLineNumber & inSmpteLineNumber);
 
@@ -973,16 +973,16 @@ AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2Smpt
 inline NTV2SmpteLineNumber GetSmpteLineNumber (const NTV2Standard inStandard)	{return NTV2SmpteLineNumber (inStandard);}
 
 
-typedef std::vector <NTV2DeviceID>			NTV2DeviceIDList;			///< @brief	An ordered list of NTV2DeviceIDs.
-typedef NTV2DeviceIDList::iterator			NTV2DeviceIDListIter;		///< @brief	A convenient non-const iterator for NTV2DeviceIDList.
-typedef NTV2DeviceIDList::const_iterator	NTV2DeviceIDListConstIter;	///< @brief	A convenient const iterator for NTV2DeviceIDList.
+typedef std::vector <NTV2DeviceID>			NTV2DeviceIDList;			///< @brief An ordered list of NTV2DeviceIDs.
+typedef NTV2DeviceIDList::iterator			NTV2DeviceIDListIter;		///< @brief A convenient non-const iterator for NTV2DeviceIDList.
+typedef NTV2DeviceIDList::const_iterator	NTV2DeviceIDListConstIter;	///< @brief A convenient const iterator for NTV2DeviceIDList.
 
 AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DeviceIDList & inSet);		///<	@brief	Handy ostream writer for NTV2DeviceIDList.
 
 
-typedef std::set <NTV2DeviceID>			NTV2DeviceIDSet;			///< @brief	A set of NTV2DeviceIDs.
-typedef NTV2DeviceIDSet::iterator		NTV2DeviceIDSetIter;		///< @brief	A convenient non-const iterator for NTV2DeviceIDSet.
-typedef NTV2DeviceIDSet::const_iterator	NTV2DeviceIDSetConstIter;	///< @brief	A convenient const iterator for NTV2DeviceIDSet.
+typedef std::set <NTV2DeviceID>			NTV2DeviceIDSet;			///< @brief A set of NTV2DeviceIDs.
+typedef NTV2DeviceIDSet::iterator		NTV2DeviceIDSetIter;		///< @brief A convenient non-const iterator for NTV2DeviceIDSet.
+typedef NTV2DeviceIDSet::const_iterator NTV2DeviceIDSetConstIter;	///< @brief A convenient const iterator for NTV2DeviceIDSet.
 
 /**
 	@brief		Returns an NTV2DeviceIDSet of devices supported by the SDK.
@@ -1003,41 +1003,41 @@ AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DeviceI
 AJAExport UWord NTV2GetSDKVersionComponent (const int inVersionComponent = 0);	//	New in SDK 16.1
 
 
-typedef std::vector <NTV2OutputCrosspointID>		NTV2OutputCrosspointIDs;			///< @brief	An ordered sequence of NTV2OutputCrosspointID values.
-typedef NTV2OutputCrosspointIDs::iterator			NTV2OutputCrosspointIDsIter;		///< @brief	A convenient non-const iterator for NTV2OutputCrosspointIDs.
-typedef NTV2OutputCrosspointIDs::const_iterator		NTV2OutputCrosspointIDsConstIter;	///< @brief	A convenient const iterator for NTV2OutputCrosspointIDs.
+typedef std::vector <NTV2OutputCrosspointID>		NTV2OutputCrosspointIDs;			///< @brief An ordered sequence of NTV2OutputCrosspointID values.
+typedef NTV2OutputCrosspointIDs::iterator			NTV2OutputCrosspointIDsIter;		///< @brief A convenient non-const iterator for NTV2OutputCrosspointIDs.
+typedef NTV2OutputCrosspointIDs::const_iterator		NTV2OutputCrosspointIDsConstIter;	///< @brief A convenient const iterator for NTV2OutputCrosspointIDs.
 
 AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2OutputCrosspointIDs & inList);	///<	@brief	Handy ostream writer for NTV2OutputCrosspointIDs.
 
 
-typedef std::vector <NTV2InputCrosspointID>			NTV2InputCrosspointIDs;				///< @brief	An ordered sequence of NTV2InputCrosspointID values.
-typedef NTV2InputCrosspointIDs::iterator			NTV2InputCrosspointIDsIter;			///< @brief	A convenient non-const iterator for NTV2InputCrosspointIDs.
-typedef NTV2InputCrosspointIDs::const_iterator		NTV2InputCrosspointIDsConstIter;	///< @brief	A convenient const iterator for NTV2InputCrosspointIDs.
+typedef std::vector <NTV2InputCrosspointID>			NTV2InputCrosspointIDs;				///< @brief An ordered sequence of NTV2InputCrosspointID values.
+typedef NTV2InputCrosspointIDs::iterator			NTV2InputCrosspointIDsIter;			///< @brief A convenient non-const iterator for NTV2InputCrosspointIDs.
+typedef NTV2InputCrosspointIDs::const_iterator		NTV2InputCrosspointIDsConstIter;	///< @brief A convenient const iterator for NTV2InputCrosspointIDs.
 
 AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2OutputCrosspointIDs & inList);	///<	@brief	Handy ostream writer for NTV2OutputCrosspointIDs.
 
 
-AJAExport std::string NTV2DeviceIDToString				(const NTV2DeviceID				inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
-AJAExport std::string NTV2VideoFormatToString			(const NTV2VideoFormat			inValue,	const bool inUseFrameRate = false);	//	New in SDK 12.0
-AJAExport std::string NTV2StandardToString				(const NTV2Standard				inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
-AJAExport std::string NTV2FrameBufferFormatToString		(const NTV2FrameBufferFormat	inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
-AJAExport std::string NTV2M31VideoPresetToString		(const M31VideoPreset			inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
-AJAExport std::string NTV2FrameGeometryToString			(const NTV2FrameGeometry		inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
-AJAExport std::string NTV2FrameRateToString				(const NTV2FrameRate			inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
-AJAExport std::string NTV2InputSourceToString			(const NTV2InputSource			inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
-AJAExport std::string NTV2OutputDestinationToString		(const NTV2OutputDestination	inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
-AJAExport std::string NTV2ReferenceSourceToString		(const NTV2ReferenceSource		inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
-AJAExport std::string NTV2RegisterWriteModeToString		(const NTV2RegisterWriteMode	inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2DeviceIDToString				(const NTV2DeviceID				inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
+AJAExport std::string NTV2VideoFormatToString			(const NTV2VideoFormat			inValue,	const bool inUseFrameRate = false); //	New in SDK 12.0
+AJAExport std::string NTV2StandardToString				(const NTV2Standard				inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
+AJAExport std::string NTV2FrameBufferFormatToString		(const NTV2FrameBufferFormat	inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
+AJAExport std::string NTV2M31VideoPresetToString		(const M31VideoPreset			inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
+AJAExport std::string NTV2FrameGeometryToString			(const NTV2FrameGeometry		inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
+AJAExport std::string NTV2FrameRateToString				(const NTV2FrameRate			inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
+AJAExport std::string NTV2InputSourceToString			(const NTV2InputSource			inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
+AJAExport std::string NTV2OutputDestinationToString		(const NTV2OutputDestination	inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
+AJAExport std::string NTV2ReferenceSourceToString		(const NTV2ReferenceSource		inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
+AJAExport std::string NTV2RegisterWriteModeToString		(const NTV2RegisterWriteMode	inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
 AJAExport std::string NTV2InterruptEnumToString			(const INTERRUPT_ENUMS			inInterruptEnumValue);
-AJAExport std::string NTV2IpErrorEnumToString           (const NTV2IpError              inIpErrorEnumValue);
-AJAExport std::string NTV2ChannelToString				(const NTV2Channel				inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2IpErrorEnumToString			(const NTV2IpError				inIpErrorEnumValue);
+AJAExport std::string NTV2ChannelToString				(const NTV2Channel				inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
 AJAExport std::string NTV2AudioSystemToString			(const NTV2AudioSystem			inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
-AJAExport std::string NTV2AudioRateToString				(const NTV2AudioRate			inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
-AJAExport std::string NTV2AudioBufferSizeToString		(const NTV2AudioBufferSize		inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
-AJAExport std::string NTV2AudioLoopBackToString			(const NTV2AudioLoopBack		inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
-AJAExport std::string NTV2EmbeddedAudioClockToString	(const NTV2EmbeddedAudioClock	inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2AudioRateToString				(const NTV2AudioRate			inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
+AJAExport std::string NTV2AudioBufferSizeToString		(const NTV2AudioBufferSize		inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
+AJAExport std::string NTV2AudioLoopBackToString			(const NTV2AudioLoopBack		inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
+AJAExport std::string NTV2EmbeddedAudioClockToString	(const NTV2EmbeddedAudioClock	inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
 AJAExport std::string NTV2GetBitfileName				(const NTV2DeviceID				inValue,	const bool useOemNameOnWindows = false);
-AJAExport bool        NTV2IsCompatibleBitfileName		(const std::string & inBitfileName, const NTV2DeviceID inDeviceID);
+AJAExport bool		  NTV2IsCompatibleBitfileName		(const std::string & inBitfileName, const NTV2DeviceID inDeviceID);
 AJAExport NTV2DeviceID NTV2GetDeviceIDFromBitfileName	(const std::string & inBitfileName);
 AJAExport std::string NTV2GetFirmwareFolderPath			(void);
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const RP188_STRUCT & inObj);
@@ -1045,8 +1045,8 @@ AJAExport std::string NTV2GetVersionString				(const bool inDetailed = false);
 AJAExport std::string NTV2RegisterNumberToString		(const NTV2RegisterNumber		inValue);	//	New in SDK 12.0
 AJAExport std::string AutoCircVidProcModeToString		(const AutoCircVidProcMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
 AJAExport std::string NTV2ColorCorrectionModeToString	(const NTV2ColorCorrectionMode	inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
-AJAExport std::string NTV2InputCrosspointIDToString		(const NTV2InputCrosspointID	inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
-AJAExport std::string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID	inValue,	const bool inForRetailDisplay = false);	//	New in SDK 12.0
+AJAExport std::string NTV2InputCrosspointIDToString		(const NTV2InputCrosspointID	inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
+AJAExport std::string NTV2OutputCrosspointIDToString	(const NTV2OutputCrosspointID	inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
 AJAExport std::string NTV2WidgetIDToString				(const NTV2WidgetID				inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
 AJAExport std::string NTV2WidgetTypeToString			(const NTV2WidgetType			inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
 AJAExport std::string NTV2TaskModeToString				(const NTV2EveryFrameTaskMode	inValue,	const bool inCompactDisplay = false);	//	New in SDK 12.0
@@ -1076,17 +1076,17 @@ AJAExport std::string NTV2AudioFormatToString			(const NTV2AudioFormat			inValue
 
 AJAExport bool	convertHDRFloatToRegisterValues			(const HDRFloatValues & inFloatValues,		HDRRegValues & outRegisterValues);
 AJAExport bool	convertHDRRegisterToFloatValues			(const HDRRegValues & inRegisterValues,		HDRFloatValues & outFloatValues);
-AJAExport void  setHDRDefaultsForBT2020                 (HDRRegValues & outRegisterValues);
-AJAExport void  setHDRDefaultsForDCIP3                  (HDRRegValues & outRegisterValues);
+AJAExport void	setHDRDefaultsForBT2020					(HDRRegValues & outRegisterValues);
+AJAExport void	setHDRDefaultsForDCIP3					(HDRRegValues & outRegisterValues);
 #if !defined(NTV2_DEPRECATE_16_1)
-	inline std::string NTV2AudioMonitorSelectToString (const NTV2AudioMonitorSelect inValue, const bool inForRetailDisplay = false)	{return NTV2AudioChannelPairToString(inValue, inForRetailDisplay);}	///< @deprecated	Use ::NTV2AudioChannelPairToString instead.
+	inline std::string NTV2AudioMonitorSelectToString (const NTV2AudioMonitorSelect inValue, const bool inForRetailDisplay = false) {return NTV2AudioChannelPairToString(inValue, inForRetailDisplay);} ///< @deprecated	Use ::NTV2AudioChannelPairToString instead.
 #endif	//	!defined(NTV2_DEPRECATE_16_1)
 
 typedef std::vector <std::string>		NTV2StringList;			//	New in SDK 12.5
 typedef NTV2StringList::iterator		NTV2StringListIter;		//	New in SDK 16.0
 typedef NTV2StringList::const_iterator	NTV2StringListConstIter;//	New in SDK 12.5
 typedef std::set <std::string>			NTV2StringSet;			//	New in SDK 12.5
-typedef NTV2StringSet::const_iterator	NTV2StringSetConstIter;	//	New in SDK 12.5
+typedef NTV2StringSet::const_iterator	NTV2StringSetConstIter; //	New in SDK 12.5
 
 AJAExport std::string NTV2EmbeddedAudioInputToString	(const NTV2EmbeddedAudioInput	inValue,	const bool inCompactDisplay = false);	//	New in SDK 13.0
 AJAExport std::string NTV2AudioSourceToString			(const NTV2AudioSource			inValue,	const bool inCompactDisplay = false);	//	New in SDK 13.0
@@ -1095,7 +1095,7 @@ AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2Stri
 AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2StringSet & inData);
 
 
-AJAExport NTV2RegisterReads	FromRegNumSet	(const NTV2RegNumSet &		inRegNumSet);
+AJAExport NTV2RegisterReads FromRegNumSet	(const NTV2RegNumSet &		inRegNumSet);
 AJAExport NTV2RegNumSet		ToRegNumSet		(const NTV2RegisterReads &	inRegReads);
 AJAExport bool				GetRegNumChanges (const NTV2RegNumSet & inBefore, const NTV2RegNumSet & inAfter, NTV2RegNumSet & outGone, NTV2RegNumSet & outSame, NTV2RegNumSet & outAdded);
 AJAExport bool				GetChangedRegisters (const NTV2RegisterReads & inBefore, const NTV2RegisterReads & inAfter, NTV2RegNumSet & outChanged);	//	New in SDK 16.0
@@ -1105,14 +1105,14 @@ AJAExport std::string		PercentDecode (const std::string & inStr);	///< @return	T
 
 
 //	FUTURE	** THESE WILL BE DISAPPEARING **		Deprecate in favor of the new "NTV2xxxxxxToString" functions...
-#define	NTV2CrosspointIDToString	NTV2OutputCrosspointIDToString	///< @deprecated	Use NTV2OutputCrosspointIDToString
+#define NTV2CrosspointIDToString	NTV2OutputCrosspointIDToString	///< @deprecated	Use NTV2OutputCrosspointIDToString
 #if !defined (NTV2_DEPRECATE)
 	AJAExport NTV2_DEPRECATED_f(std::string NTV2V2StandardToString	(const NTV2V2Standard inValue,	const bool inForRetailDisplay = false));
-	extern AJAExport NTV2_DEPRECATED_v(const char *	NTV2VideoFormatStrings[]);		///< @deprecated	Use NTV2VideoFormatToString instead.
-	extern AJAExport NTV2_DEPRECATED_v(const char *	NTV2VideoStandardStrings[]);	///< @deprecated	Use NTV2StandardToString instead.
-	extern AJAExport NTV2_DEPRECATED_v(const char *	NTV2PixelFormatStrings[]);		///< @deprecated	Use NTV2FrameBufferFormatToString instead.
-	extern AJAExport NTV2_DEPRECATED_v(const char *	NTV2FrameRateStrings[]);		///< @deprecated	Use NTV2FrameRateToString instead.
-	extern AJAExport NTV2_DEPRECATED_v(const char *	frameBufferFormats[]);			///< @deprecated	Use NTV2FrameBufferFormatToString instead.
+	extern AJAExport NTV2_DEPRECATED_v(const char * NTV2VideoFormatStrings[]);		///< @deprecated	Use NTV2VideoFormatToString instead.
+	extern AJAExport NTV2_DEPRECATED_v(const char * NTV2VideoStandardStrings[]);	///< @deprecated	Use NTV2StandardToString instead.
+	extern AJAExport NTV2_DEPRECATED_v(const char * NTV2PixelFormatStrings[]);		///< @deprecated	Use NTV2FrameBufferFormatToString instead.
+	extern AJAExport NTV2_DEPRECATED_v(const char * NTV2FrameRateStrings[]);		///< @deprecated	Use NTV2FrameRateToString instead.
+	extern AJAExport NTV2_DEPRECATED_v(const char * frameBufferFormats[]);			///< @deprecated	Use NTV2FrameBufferFormatToString instead.
 
 	AJAExport NTV2_DEPRECATED_f(std::string		frameBufferFormatString		(NTV2FrameBufferFormat inFrameBufferFormat));		///< @deprecated	Use NTV2FrameBufferFormatToString and pass 'true' for 'inForRetailDisplay'
 	AJAExport NTV2_DEPRECATED_f(void			GetNTV2BoardString			(NTV2BoardID inBoardID, std::string & outString));	///< @deprecated	Use NTV2DeviceIDToString and concatenate a space instead

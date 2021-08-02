@@ -68,10 +68,10 @@ string AJADPXFileIO::GetPath () const
 
 AJAStatus AJADPXFileIO::Read (const uint32_t index)
 {
-    AJA_UNUSED(index);
+	AJA_UNUSED(index);
 
 	AJAFileIO	file;
-	AJAStatus 	status = AJA_STATUS_SUCCESS;
+	AJAStatus	status = AJA_STATUS_SUCCESS;
 
 	//	Check that we've been initialzed
 	if (!mPathSet)
@@ -104,10 +104,10 @@ AJAStatus AJADPXFileIO::Read (uint8_t  &		buffer,
 							  const uint32_t	bufferSize,
 							  uint32_t &		index)
 {
-    AJA_UNUSED(bufferSize);
+	AJA_UNUSED(bufferSize);
 
 	AJAFileIO	file;
-	AJAStatus 	status = AJA_STATUS_SUCCESS;
+	AJAStatus	status = AJA_STATUS_SUCCESS;
 
 	//	Check that we've been initialzed
 	if (!mPathSet)
@@ -206,7 +206,7 @@ void AJADPXFileIO::SetPauseMode (bool mode)
 }	//	SetPauseMode
 
 
-AJAStatus AJADPXFileIO::SetPath (const string &	path)
+AJAStatus AJADPXFileIO::SetPath (const string & path)
 {
 	AJAFileIO	file;
 
@@ -230,13 +230,13 @@ AJAStatus AJADPXFileIO::SetPath (const string &	path)
 }	//	SetPath
 
 
-AJAStatus AJADPXFileIO::Write (const uint8_t  &	buffer,
+AJAStatus AJADPXFileIO::Write (const uint8_t  & buffer,
 							   const uint32_t	bufferSize,
-							   const uint32_t &	index) const
+							   const uint32_t & index) const
 {
 	string	fileName;
 	AJAFileIO	file;
-	AJAStatus 	status = AJA_STATUS_SUCCESS;
+	AJAStatus	status = AJA_STATUS_SUCCESS;
 
 	//	Check that we've been initialzed
 	if (!mPathSet)

@@ -11,9 +11,9 @@
 	#include <iostream>
 	#include <assert.h>
 
-    #if defined (_DEBUG)  &&  defined (MSWindows)
-        #include <Windows.h>
-    #endif
+	#if defined (_DEBUG)  &&  defined (MSWindows)
+		#include <Windows.h>
+	#endif
 
 	#define	STDOUT	std::cout
 	#define	STDERR	std::cerr

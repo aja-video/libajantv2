@@ -40,19 +40,19 @@ public:
 		@brief		Returns the current value of the host's high-resolution clock, in milliseconds.
 		@return		Current value of the host's clock, in milliseconds, based on GetSystemCounter() and GetSystemFrequency().
 	**/
-	static uint64_t	GetSystemMilliseconds (void);
+	static uint64_t GetSystemMilliseconds (void);
 
 	/**
 		@brief		Returns the current value of the host's high-resolution clock, in microseconds.
 		@return		Current value of the host's clock, in microseconds, based on GetSystemCounter() and GetSystemFrequency().
 	**/
-	static uint64_t	GetSystemMicroseconds (void);
+	static uint64_t GetSystemMicroseconds (void);
 
-    /**
-        @brief		Returns the current value of the host's high-resolution clock, in nanoseconds.
-        @return		Current value of the host's clock, in nanoseconds, based on GetSystemCounter() and GetSystemFrequency().
-    **/
-    static uint64_t	GetSystemNanoseconds (void);
+	/**
+		@brief		Returns the current value of the host's high-resolution clock, in nanoseconds.
+		@return		Current value of the host's clock, in nanoseconds, based on GetSystemCounter() and GetSystemFrequency().
+	**/
+	static uint64_t GetSystemNanoseconds (void);
 
 	/**
 		@brief		Suspends execution of the current thread for a given number of milliseconds.

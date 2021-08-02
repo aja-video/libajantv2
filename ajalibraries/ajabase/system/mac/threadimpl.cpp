@@ -134,7 +134,7 @@ AJAThreadImpl::Stop(uint32_t timeout)
 	else
 	{
 		// Calculates the non-second portion of the timeout
-		// to nanoseconds.  
+		// to nanoseconds.	
 		uint32_t nsec = ((timeout % 1000) * 1000000);
 
 		// Add the current nanosecond count to the result
@@ -227,8 +227,8 @@ AJAThreadImpl::Stop(uint32_t timeout)
 AJAStatus
 AJAThreadImpl::Kill(uint32_t exitCode)
 {
-    AJA_UNUSED(exitCode);
-    
+	AJA_UNUSED(exitCode);
+	
 	AJAAutoLock lock(&mLock);
 	AJAStatus returnStatus = AJA_STATUS_SUCCESS;
 
@@ -367,13 +367,13 @@ AJAThreadImpl::SetPriority(AJAThreadPriority threadPriority)
 	if (threadPriority == AJA_ThreadPriority_TimeCritical)
 	{
 		mach_timebase_info_data_t info;
-		IOReturn ioReturn =  mach_timebase_info(&info);
+		IOReturn ioReturn =	 mach_timebase_info(&info);
 	
 		uint32_t period			= 60000000;
 		uint32_t computation	=  2000000;
 		
 		thread_time_constraint_policy timeConstraint;
-		timeConstraint.period		= uint32_t(static_cast<long long>(period)      * info.denom / info.numer);
+		timeConstraint.period		= uint32_t(static_cast<long long>(period)	   * info.denom / info.numer);
 		timeConstraint.computation	= uint32_t(static_cast<long long>(computation) * info.denom / info.numer);
 		timeConstraint.constraint	= timeConstraint.computation * 2;
 		timeConstraint.preemptible	= true;
@@ -407,7 +407,9 @@ AJAThreadImpl::GetPriority(AJAThreadPriority* pThreadPriority)
 AJAStatus
 AJAThreadImpl::SetRealTime(AJAThreadRealTimePolicy policy, int priority)
 {
-    return AJA_STATUS_FAIL;
+	AJA_UNUSED(policy);
+	AJA_UNUSED(priority);
+	return AJA_STATUS_FAIL;
 }
 
 
@@ -451,7 +453,7 @@ AJAThreadImpl::ThreadProcStatic(void* pThreadImplContext)
 	{
 		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::ThreadProcStatic exception in thread function", pThreadImpl->mpThreadContext);
 		return (void*)0;
-    }
+	}
 	// signal parent we're exiting
 	pThreadImpl->mExiting = true;
 
@@ -478,17 +480,17 @@ AJAThreadImpl::ThreadProcStatic(void* pThreadImplContext)
 }
 
 AJAStatus AJAThreadImpl::SetThreadName(const char *name) {
-    int ret = pthread_setname_np(name);
-    if (ret != 0)
-    {
-        return AJA_STATUS_FAIL;
-    }
-    return AJA_STATUS_SUCCESS;
+	int ret = pthread_setname_np(name);
+	if (ret != 0)
+	{
+		return AJA_STATUS_FAIL;
+	}
+	return AJA_STATUS_SUCCESS;
 }
 
 uint64_t AJAThreadImpl::GetThreadId()
 {
-    uint64_t tid=0;
-    pthread_threadid_np(NULL, &tid);
-    return tid;
+	uint64_t tid=0;
+	pthread_threadid_np(NULL, &tid);
+	return tid;
 }

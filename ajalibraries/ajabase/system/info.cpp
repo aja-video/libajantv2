@@ -1,19 +1,19 @@
 /* SPDX-License-Identifier: MIT */
 /**
-    @file		info.cpp
-    @brief		Implements the AJASystemInfo class.
+	@file		info.cpp
+	@brief		Implements the AJASystemInfo class.
 	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 // include the system dependent implementation class
 #if defined(AJA_WINDOWS)
-    #include "ajabase/system/windows/infoimpl.h"
+	#include "ajabase/system/windows/infoimpl.h"
 #endif
 #if defined(AJA_LINUX)
-    #include "ajabase/system/linux/infoimpl.h"
+	#include "ajabase/system/linux/infoimpl.h"
 #endif
 #if defined(AJA_MAC)
-    #include "ajabase/system/mac/infoimpl.h"
+	#include "ajabase/system/mac/infoimpl.h"
 #endif
 
 #include "ajabase/system/info.h"
@@ -33,25 +33,25 @@ string AJASystemInfo::ToString (const AJALabelValuePairs & inLabelValuePairs, co
 
 	//	Measure longest label length...
 	//	BUGBUGBUG	Multi-byte UTF8 characters should only be counted as one character
-    size_t longestLabelLen(0);
-    for (AJALabelValuePairsConstIter it(inLabelValuePairs.begin());  it != inLabelValuePairs.end();  ++it)
-        if (it->first.length() > longestLabelLen)
-            longestLabelLen = it->first.length();
-    longestLabelLen++;	//	Plus the ':'
+	size_t longestLabelLen(0);
+	for (AJALabelValuePairsConstIter it(inLabelValuePairs.begin());	 it != inLabelValuePairs.end();	 ++it)
+		if (it->first.length() > longestLabelLen)
+			longestLabelLen = it->first.length();
+	longestLabelLen++;	//	Plus the ':'
 
 	//	Iterate over everything again, this time "printing" the map's contents...
-    ostringstream oss;
-    for (AJALabelValuePairsConstIter it(inLabelValuePairs.begin());  it != inLabelValuePairs.end();  ++it)
-    {
-		static const string	lineBreakChars("\r\n");
-        string label(it->first), value(it->second);
-        const bool	hasLineBreaks (value.find_first_of(lineBreakChars) != string::npos);
-		if (value.empty()  &&  it != inLabelValuePairs.begin())	//	Empty value string is a special case...
+	ostringstream oss;
+	for (AJALabelValuePairsConstIter it(inLabelValuePairs.begin());	 it != inLabelValuePairs.end();	 ++it)
+	{
+		static const string lineBreakChars("\r\n");
+		string label(it->first), value(it->second);
+		const bool	hasLineBreaks (value.find_first_of(lineBreakChars) != string::npos);
+		if (value.empty()  &&  it != inLabelValuePairs.begin()) //	Empty value string is a special case...
 			oss << endl;	//	...don't append ':' and prepend an extra blank line
 		else
 			label += ":";
 
-		if (!hasLineBreaks  &&  !inMaxValWidth)
+		if (!hasLineBreaks	&&	!inMaxValWidth)
 		{	//	No wrapping or line-breaks -- just output the line...
 			oss << setw(int(longestLabelLen)) << left << label << gutterStr << value << endl;
 			continue;	//	...and move on to the next
@@ -61,7 +61,7 @@ string AJASystemInfo::ToString (const AJALabelValuePairs & inLabelValuePairs, co
 		ValueLines	valueLines, finalLines;
 		if (hasLineBreaks)
 		{
-			static const string	lineBreakDelims[]	=	{"\r\n", "\r", "\n"};
+			static const string lineBreakDelims[]	=	{"\r\n", "\r", "\n"};
 			aja::replace(value, lineBreakDelims[0], lineBreakDelims[2]);	//	CRLF => LF
 			aja::replace(value, lineBreakDelims[1], lineBreakDelims[2]);	//	CR => LF
 			valueLines = aja::split(value, lineBreakDelims[2][0]);	//	Split on LF
@@ -69,7 +69,7 @@ string AJASystemInfo::ToString (const AJALabelValuePairs & inLabelValuePairs, co
 		else
 			valueLines.push_back(value);
 		if (inMaxValWidth)
-			for (ValueLinesConstIter iter(valueLines.begin());  iter != valueLines.end();  ++iter)
+			for (ValueLinesConstIter iter(valueLines.begin());	iter != valueLines.end();  ++iter)
 			{
 				const string &	lineStr(*iter);
 				size_t	pos(0);
@@ -83,7 +83,7 @@ string AJASystemInfo::ToString (const AJALabelValuePairs & inLabelValuePairs, co
 			finalLines = valueLines;
 
 		const string	wrapIndentStr	(longestLabelLen + inGutterWidth,  ' ');
-		for (size_t ndx(0);  ndx < finalLines.size();  ndx++)
+		for (size_t ndx(0);	 ndx < finalLines.size();  ndx++)
 		{
 			const string &	valStr(finalLines.at(ndx));
 			if (ndx)
@@ -91,61 +91,61 @@ string AJASystemInfo::ToString (const AJALabelValuePairs & inLabelValuePairs, co
 			else
 				oss << setw(int(longestLabelLen)) << left << label << gutterStr << valStr << endl;
 		}
-    }	//	for each label/value pair
+	}	//	for each label/value pair
 
-    return oss.str();
+	return oss.str();
 }
 
 
 AJASystemInfo::AJASystemInfo(AJASystemInfoMemoryUnit units, AJASystemInfoSections sections)
 {
 	// create the implementation class
-    mpImpl = new AJASystemInfoImpl(units);
+	mpImpl = new AJASystemInfoImpl(units);
 
-    Rescan(sections);
+	Rescan(sections);
 }
 
 AJASystemInfo::~AJASystemInfo()
 {
-    if(mpImpl)
+	if(mpImpl)
 	{
-        delete mpImpl;
-        mpImpl = NULL;
+		delete mpImpl;
+		mpImpl = NULL;
 	}
 }
 
 AJAStatus AJASystemInfo::Rescan (AJASystemInfoSections sections)
 {
-    AJAStatus ret = AJA_STATUS_FAIL;
-    if(mpImpl)
-    {
-        // labels
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_Model)] = "System Model";
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_Bios)] = "System BIOS";
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_Name)] = "System Name";
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_BootTime)] = "System Boot Time";
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_ProductName)] = "OS Product Name";
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_Version)] = "OS Version";
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_VersionBuild)] = "OS Build";
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_KernelVersion)] = "OS Kernel Version";
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_CPU_Type)] = "CPU Type";
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_CPU_NumCores)] = "CPU Num Cores";
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Total)] = "Memory Total";
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Used)] = "Memory Used";
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Free)] = "Memory Free";
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_GPU_Type)] = "GPU Type";
+	AJAStatus ret = AJA_STATUS_FAIL;
+	if(mpImpl)
+	{
+		// labels
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_Model)] = "System Model";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_Bios)] = "System BIOS";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_Name)] = "System Name";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_System_BootTime)] = "System Boot Time";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_ProductName)] = "OS Product Name";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_Version)] = "OS Version";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_VersionBuild)] = "OS Build";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_OS_KernelVersion)] = "OS Kernel Version";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_CPU_Type)] = "CPU Type";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_CPU_NumCores)] = "CPU Num Cores";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Total)] = "Memory Total";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Used)] = "Memory Used";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Mem_Free)] = "Memory Free";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_GPU_Type)] = "GPU Type";
 
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_UserHome)] = "User Home Path";
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = "User Persistence Store Path";
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)] = "System Persistence Store Path";
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_Applications)] = "AJA Applications Path";
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_Utilities)] = "AJA Utilities Path";
-        mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_Firmware)] = "AJA Firmware Path";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_UserHome)] = "User Home Path";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_PersistenceStoreUser)] = "User Persistence Store Path";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_PersistenceStoreSystem)] = "System Persistence Store Path";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_Applications)] = "AJA Applications Path";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_Utilities)] = "AJA Utilities Path";
+		mpImpl->mLabelMap[int(AJA_SystemInfoTag_Path_Firmware)] = "AJA Firmware Path";
 
-        ret = mpImpl->Rescan(sections);
-    }
+		ret = mpImpl->Rescan(sections);
+	}
 
-    return ret;
+	return ret;
 }
 
 AJAStatus AJASystemInfo::GetValue (const AJASystemInfoTag tag, string & outValue) const
@@ -174,25 +174,25 @@ string AJASystemInfo::ToString (const size_t inValueWrapLen, const size_t inGutt
 {
 	AJALabelValuePairs	infoTable;
 	append(infoTable, "HOST INFO");
-    for (AJASystemInfoTag tag(AJASystemInfoTag(0));  tag < AJA_SystemInfoTag_LAST;  tag = AJASystemInfoTag(tag+1))
-    {
-        string label, value;
-        if (AJA_SUCCESS(GetLabel(tag, label)) && AJA_SUCCESS(GetValue(tag, value)))
+	for (AJASystemInfoTag tag(AJASystemInfoTag(0));	 tag < AJA_SystemInfoTag_LAST;	tag = AJASystemInfoTag(tag+1))
+	{
+		string label, value;
+		if (AJA_SUCCESS(GetLabel(tag, label)) && AJA_SUCCESS(GetValue(tag, value)))
 			if (!label.empty())
 				append(infoTable, label, value);
-    }
+	}
 	return ToString(infoTable, inValueWrapLen, inGutterWidth);
 }
 
 void AJASystemInfo::ToString(string& allLabelsAndValues) const
 {
-    allLabelsAndValues = ToString();
+	allLabelsAndValues = ToString();
 }
 
 ostream & operator << (ostream & outStream, const AJASystemInfo & inData)
 {
-    outStream << inData.ToString();
-    return outStream;
+	outStream << inData.ToString();
+	return outStream;
 }
 
 ostream & operator << (ostream & outStream, const AJALabelValuePair & inData)

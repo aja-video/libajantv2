@@ -11,12 +11,12 @@
 using namespace std;
 
 
-bool ConvertLine_2vuy_to_v210 (const UByte * pSrc2vuyLine,  ULWord * pDstv210Line,  const ULWord inNumPixels)
+bool ConvertLine_2vuy_to_v210 (const UByte * pSrc2vuyLine,	ULWord * pDstv210Line,	const ULWord inNumPixels)
 {
 	if (!pSrc2vuyLine || !pDstv210Line || !inNumPixels)
 		return false;
 
-	for (UWord inputCount = 0, outputCount = 0;   inputCount < (inNumPixels * 2);   outputCount += 4, inputCount += 12)
+	for (UWord inputCount = 0, outputCount = 0;	  inputCount < (inNumPixels * 2);	outputCount += 4, inputCount += 12)
 	{
 		pDstv210Line[outputCount+0] = NTV2EndianSwap32HtoL((ULWord(pSrc2vuyLine[inputCount+0]) << 2) + (ULWord(pSrc2vuyLine[inputCount+ 1]) << 12) + (ULWord(pSrc2vuyLine[inputCount+ 2]) << 22));
 		pDstv210Line[outputCount+1] = NTV2EndianSwap32HtoL((ULWord(pSrc2vuyLine[inputCount+3]) << 2) + (ULWord(pSrc2vuyLine[inputCount+ 4]) << 12) + (ULWord(pSrc2vuyLine[inputCount+ 5]) << 22));
@@ -35,12 +35,12 @@ bool ConvertLine_2vuy_to_yuy2 (const UByte * pInSrcLine_2vuy, UWord * pOutDstLin
 		return false;
 
 	const UWord* pSrc = reinterpret_cast<const UWord*>(pInSrcLine_2vuy);
-	UWord*       pDst = pOutDstLine_yuy2;
+	UWord*		 pDst = pOutDstLine_yuy2;
 
-	for (UWord pixIndex(0);   pixIndex < inNumPixels;   pixIndex++)
+	for (UWord pixIndex(0);	  pixIndex < inNumPixels;	pixIndex++)
 	{
 		*pDst = NTV2EndianSwap16(*pSrc);
-		pDst++;  pSrc++;
+		pDst++;	 pSrc++;
 	}
 	return true;
 }
@@ -51,12 +51,12 @@ bool ConvertLine_v210_to_2vuy (const ULWord * pSrcv210Line, UByte * pDst2vuyLine
 	if (!pSrcv210Line || !pDst2vuyLine || !inNumPixels)
 		return false;
 
-	for (ULWord sampleCount = 0, dataCount = 0;   sampleCount < (inNumPixels * 2);   sampleCount += 3, dataCount++)
+	for (ULWord sampleCount = 0, dataCount = 0;	  sampleCount < (inNumPixels * 2);	 sampleCount += 3, dataCount++)
 	{
 		const UByte *	pByte	(reinterpret_cast <const UByte *> (&pSrcv210Line [dataCount]));
 
 		//	Endian-agnostic bit shifting...
-		pDst2vuyLine [sampleCount    ] = ((pByte [1] & 0x03) << 6) + (pByte [0] >> 2);		//	High-order 8 bits
+		pDst2vuyLine [sampleCount	 ] = ((pByte [1] & 0x03) << 6) + (pByte [0] >> 2);		//	High-order 8 bits
 		pDst2vuyLine [sampleCount + 1] = ((pByte [2] & 0x0F) << 4) + (pByte [1] >> 4);
 		pDst2vuyLine [sampleCount + 2] = ((pByte [3] & 0x3F) << 2) + (pByte [2] >> 6);
 	}
@@ -74,7 +74,7 @@ bool ConvertLine_v210_to_2vuy (const void * pInSrcLine_v210, std::vector<uint8_t
 		return false;
 
 	outDstLine2vuy.reserve(inNumPixels * 2);
-	for (ULWord sampleCount = 0, dataCount = 0;   sampleCount < (inNumPixels * 2);   sampleCount += 3, dataCount++)
+	for (ULWord sampleCount = 0, dataCount = 0;	  sampleCount < (inNumPixels * 2);	 sampleCount += 3, dataCount++)
 	{
 		const UByte *	pByte	(reinterpret_cast <const UByte*>(&pInSrcLine[dataCount]));
 
@@ -87,20 +87,20 @@ bool ConvertLine_v210_to_2vuy (const void * pInSrcLine_v210, std::vector<uint8_t
 }
 
 
-bool ConvertLine_8bitABGR_to_10bitABGR (const UByte * pInSrcLine_8bitABGR,  ULWord * pOutDstLine_10BitABGR, const ULWord inNumPixels)
+bool ConvertLine_8bitABGR_to_10bitABGR (const UByte * pInSrcLine_8bitABGR,	ULWord * pOutDstLine_10BitABGR, const ULWord inNumPixels)
 {
 	if (!pInSrcLine_8bitABGR || !pOutDstLine_10BitABGR || !inNumPixels)
 		return false;
 
 	const ULWord* pSrc	= reinterpret_cast<const ULWord*>(pInSrcLine_8bitABGR);
-	ULWord* pDst		= reinterpret_cast<      ULWord*>(pOutDstLine_10BitABGR);
+	ULWord* pDst		= reinterpret_cast<		 ULWord*>(pOutDstLine_10BitABGR);
 
-	for (ULWord pixCount = 0;   pixCount < inNumPixels;   pixCount++)
+	for (ULWord pixCount = 0;	pixCount < inNumPixels;	  pixCount++)
 	{
 		*pDst = ((*pSrc & 0x000000FF) <<  2) |	//	Red (move to MS 8 bits of Red component)
 				((*pSrc & 0x0000FF00) <<  4) |	//	Green (move to MS 8 bits of Green component)
 				((*pSrc & 0x00FF0000) <<  6) |	//	Blue (move to MS 8 bits of Blue component)
-				((*pSrc & 0xC0000000)      );	//	Alpha (drop LS 6 bits)
+				((*pSrc & 0xC0000000)	   );	//	Alpha (drop LS 6 bits)
 		pDst++; pSrc++;
 	}
 	return true;
@@ -113,33 +113,33 @@ bool ConvertLine_8bitABGR_to_10bitRGBDPX (const UByte * pInSrcLine_8bitABGR,  UL
 		return false;
 
 	const ULWord* pSrc	= reinterpret_cast<const ULWord*>(pInSrcLine_8bitABGR);
-	ULWord* pDst		= reinterpret_cast<      ULWord*>(pOutDstLine_10BitDPX);
+	ULWord* pDst		= reinterpret_cast<		 ULWord*>(pOutDstLine_10BitDPX);
 
-	for (ULWord pixCount = 0;   pixCount < inNumPixels;   pixCount++)
+	for (ULWord pixCount = 0;	pixCount < inNumPixels;	  pixCount++)
 	{
-		*pDst = ((*pSrc & 0x000000FF)     ) +									//	Red
+		*pDst = ((*pSrc & 0x000000FF)	  ) +									//	Red
 				((*pSrc & 0x0000FC00) >> 2) + ((*pSrc & 0x00000300) << 14) +	//	Green
 				((*pSrc & 0x00F00000) >> 4) + ((*pSrc & 0x000F0000) << 12);		//	Blue
-		pDst++; pSrc++;	//	Next line
+		pDst++; pSrc++; //	Next line
 	}
 	return true;
 }
 
 
-bool ConvertLine_8bitABGR_to_10bitRGBDPXLE (const UByte * pInSrcLine_8bitABGR,  ULWord * pOutDstLine_10BitDPXLE, const ULWord inNumPixels)
+bool ConvertLine_8bitABGR_to_10bitRGBDPXLE (const UByte * pInSrcLine_8bitABGR,	ULWord * pOutDstLine_10BitDPXLE, const ULWord inNumPixels)
 {
 	if (!pInSrcLine_8bitABGR || !pOutDstLine_10BitDPXLE || !inNumPixels)
 		return false;
 
 	const ULWord* pSrc	= reinterpret_cast<const ULWord*>(pInSrcLine_8bitABGR);
-	ULWord* pDst		= reinterpret_cast<      ULWord*>(pOutDstLine_10BitDPXLE);
+	ULWord* pDst		= reinterpret_cast<		 ULWord*>(pOutDstLine_10BitDPXLE);
 
-	for (ULWord pixCount = 0;   pixCount < inNumPixels;   pixCount++)
+	for (ULWord pixCount = 0;	pixCount < inNumPixels;	  pixCount++)
 	{
 		*pDst = ((*pSrc & 0x000000FF) << 24) |		//	Red
 				((*pSrc & 0x0000FF00) <<  6) |		//	Green
 				((*pSrc & 0x00FF0000) >> 12);		//	Blue
-		pDst++; pSrc++;	//	Next line
+		pDst++; pSrc++; //	Next line
 	}
 	return true;
 }
@@ -153,7 +153,7 @@ bool ConvertLine_8bitABGR_to_24bitRGB (const UByte * pInSrcLine_8bitABGR,  UByte
 	const UByte* pSrc = reinterpret_cast<const UByte*>(pInSrcLine_8bitABGR);
 	UByte* pDst = reinterpret_cast<UByte*>(pOutDstLine_24BitRGB);
 	
-	for (ULWord pixCount = 0;   pixCount < inNumPixels;   pixCount++)
+	for (ULWord pixCount = 0;	pixCount < inNumPixels;	  pixCount++)
 	{
 		*pDst++ = *pSrc++;	//	Red
 		*pDst++ = *pSrc++;	//	Green
@@ -172,9 +172,9 @@ bool ConvertLine_8bitABGR_to_24bitBGR (const UByte * pInSrcLine_8bitABGR,  UByte
 	const UByte* pSrc = reinterpret_cast<const UByte*>(pInSrcLine_8bitABGR);
 	UByte* pDst = reinterpret_cast<UByte*>(pOutDstLine_24BitBGR);
 	
-	for (ULWord pixCount = 0;   pixCount < inNumPixels;   pixCount++)
+	for (ULWord pixCount = 0;	pixCount < inNumPixels;	  pixCount++)
 	{
-		UByte	r(*pSrc++),  g(*pSrc++),  b(*pSrc++);
+		UByte	r(*pSrc++),	 g(*pSrc++),  b(*pSrc++);
 		*pDst++ = b;	//	Blue
 		*pDst++ = g;	//	Green
 		*pDst++ = r;	//	Red
@@ -192,12 +192,12 @@ bool ConvertLine_8bitABGR_to_48bitRGB (const UByte * pInSrcLine_8bitABGR,  ULWor
 	const UByte* pSrc = reinterpret_cast<const UByte*>(pInSrcLine_8bitABGR);
 	UByte* pDst = reinterpret_cast<UByte*>(pOutDstLine_48BitRGB);
 	
-	for (ULWord pixCount = 0;   pixCount < inNumPixels;   pixCount++)
+	for (ULWord pixCount = 0;	pixCount < inNumPixels;	  pixCount++)
 	{
-		UByte	r(*pSrc++),  g(*pSrc++),  b(*pSrc++);	//	UByte	a(*pSrc++);
-		++pDst;  *pDst++ = r;
-		++pDst;  *pDst++ = g;
-		++pDst;  *pDst++ = b;
+		UByte	r(*pSrc++),	 g(*pSrc++),  b(*pSrc++);	//	UByte	a(*pSrc++);
+		++pDst;	 *pDst++ = r;
+		++pDst;	 *pDst++ = g;
+		++pDst;	 *pDst++ = b;
 		pSrc++;
 	}
 	return true;
@@ -213,7 +213,7 @@ void ConvertLineToYCbCr422(RGBAlphaPixel * RGBLine,
 						   bool fUseSDMatrix)
 {
 	YCbCrPixel YCbCr;
-	UByte *pYCbCr = &YCbCrLine[(startPixel&~1)*2];   // startPixel needs to be even
+	UByte *pYCbCr = &YCbCrLine[(startPixel&~1)*2];	 // startPixel needs to be even
 
 	for ( LWord pixel = 0; pixel < numPixels; pixel++ )
 	{
@@ -247,7 +247,7 @@ void ConvertLineToYCbCr422(RGBAlphaPixel * RGBLine,
 						   bool fUseSDMatrix)
 {
 	YCbCr10BitPixel YCbCr;
-	UWord *pYCbCr = &YCbCrLine[(startPixel&~1)*2];   // startPixel needs to be even
+	UWord *pYCbCr = &YCbCrLine[(startPixel&~1)*2];	 // startPixel needs to be even
 
 	for ( LWord pixel = 0; pixel < numPixels; pixel++ )
 	{
@@ -426,7 +426,7 @@ void ConvertLinetoRGB(UWord * ycbcrBuffer,
 // 8 bit RGBA to 8 bit RGB (RGB24)
 AJAExport
 void ConvertRGBALineToRGB(RGBAlphaPixel * rgbaBuffer,
-                          ULWord numPixels)
+						  ULWord numPixels)
 {
 	RGBPixel* rgbLineBuffer = (RGBPixel*) rgbaBuffer;
 
@@ -450,7 +450,7 @@ void ConvertRGBALineToRGB(RGBAlphaPixel * rgbaBuffer,
 // Conversion is done into the same buffer
 AJAExport
 void ConvertRGBALineToBGR(RGBAlphaPixel * rgbaBuffer,
-                          ULWord numPixels)
+						  ULWord numPixels)
 {
 	BGRPixel* bgrLineBuffer = (BGRPixel*) rgbaBuffer;
 
@@ -551,7 +551,7 @@ void ConvertLineto10BitYCbCrA (const UWord *	pInYCbCrBuffer,
 								ULWord *		pOutYCbCrABuffer,
 								const ULWord	inNumPixels)
 {
-	for (ULWord count(0);  count < inNumPixels;  count++)
+	for (ULWord count(0);  count < inNumPixels;	 count++)
 	{
 		ULWord value = CCIR601_10BIT_WHITE<<20;		// Set Alpha to '1';
 		value |= (ULWord(*pInYCbCrBuffer++)<<10);	// Cb or Cr
@@ -567,10 +567,10 @@ void ConvertLineto10BitRGB (const RGBAlphaPixel *	pInRGBA8Buffer,
 							const ULWord			inNumPixels)
 
 {
-	for (ULWord count(0);  count < inNumPixels;  count++)
+	for (ULWord count(0);  count < inNumPixels;	 count++)
 	{
 		*pOutRGB10Buffer = (ULWord(pInRGBA8Buffer->Blue)<<22) +
-					      (ULWord(pInRGBA8Buffer->Green)<<12) +
+						  (ULWord(pInRGBA8Buffer->Green)<<12) +
 						  (ULWord(pInRGBA8Buffer->Red)<<2);
 		pOutRGB10Buffer++;
 		pInRGBA8Buffer++;
@@ -583,11 +583,11 @@ void ConvertRGBLineto10BitRGB (const RGBAlphaPixel *	pInRGBA8Buffer,
 								RGBAlpha10BitPixel *	pOutRGBA10Buffer,
 								const ULWord			inNumPixels)
 {
-	for (ULWord i(0);  i < inNumPixels;  i++)
+	for (ULWord i(0);  i < inNumPixels;	 i++)
 	{
 		pOutRGBA10Buffer[i].Blue  = (pInRGBA8Buffer[i].Blue<<2);
 		pOutRGBA10Buffer[i].Green = (pInRGBA8Buffer[i].Green<<2);
-		pOutRGBA10Buffer[i].Red   = (pInRGBA8Buffer[i].Red<<2);
+		pOutRGBA10Buffer[i].Red	  = (pInRGBA8Buffer[i].Red<<2);
 		pOutRGBA10Buffer[i].Alpha = (pInRGBA8Buffer[i].Alpha<<2);
 	}
  
@@ -729,7 +729,7 @@ void Convert16BitARGBTo12BitRGBPacked(RGBAlpha16BitPixel *rgbaLineBuffer ,UByte 
 // Convert 8 Bit ARGB to 8 bit BGR
 void ConvertARGBToBGR (const UByte * pInRGBALineBuffer, UByte * pOutRGBLineBuffer, const ULWord inNumPixels)
 {
-	for (ULWord pixel = 0;  pixel < inNumPixels * 4;  pixel += 4)
+	for (ULWord pixel = 0;	pixel < inNumPixels * 4;  pixel += 4)
 	{
 		UByte B = pInRGBALineBuffer[pixel];
 		UByte G = pInRGBALineBuffer[pixel+1];
@@ -745,7 +745,7 @@ void ConvertARGBToBGR (const UByte * pInRGBALineBuffer, UByte * pOutRGBLineBuffe
 void PackRGB10BitFor10BitRGB (RGBAlpha10BitPixel* pBuffer, const ULWord inNumPixels)
 {
 	ULWord* outputBuffer(reinterpret_cast<ULWord*>(pBuffer));
-	for (ULWord pixel(0);  pixel < inNumPixels;  pixel++)
+	for (ULWord pixel(0);  pixel < inNumPixels;	 pixel++)
 	{
 		const ULWord Red	(pBuffer[pixel].Red);
 		const ULWord Green	(pBuffer[pixel].Green);
@@ -760,7 +760,7 @@ void PackRGB10BitFor10BitRGB (RGBAlpha10BitPixel* pBuffer, const ULWord inNumPix
 void PackRGB10BitFor10BitDPX (RGBAlpha10BitPixel * pBuffer, const ULWord inNumPixels, const bool inBigEndian)
 {
 	ULWord * pOutputBuffer (reinterpret_cast<ULWord*>(pBuffer));
-	for (ULWord pixel(0);  pixel < inNumPixels;  pixel++)
+	for (ULWord pixel(0);  pixel < inNumPixels;	 pixel++)
 	{
 		const ULWord Red	(pBuffer[pixel].Red);
 		const ULWord Green	(pBuffer[pixel].Green);
@@ -779,7 +779,7 @@ void PackRGB10BitFor10BitDPX (RGBAlpha10BitPixel * pBuffer, const ULWord inNumPi
 void PackRGB10BitFor10BitRGBPacked (RGBAlpha10BitPixel * pBuffer, const ULWord inNumPixels)
 {
 	ULWord *	pOutputBuffer (reinterpret_cast<ULWord*>(pBuffer));
-	for (ULWord pixel(0);  pixel < inNumPixels;  pixel++)
+	for (ULWord pixel(0);  pixel < inNumPixels;	 pixel++)
 	{
 		const ULWord Red	(pBuffer[pixel].Red);
 		const ULWord Green	(pBuffer[pixel].Green);

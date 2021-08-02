@@ -27,14 +27,14 @@ class AJA_EXPORT AJATCPSocket : public AJAIPSocket
 
 		AJAStatus Connect(const std::string& ipAddress, uint16_t port);
 		AJAStatus Listen(void);
-		int       Accept(void);
+		int		  Accept(void);
 
-        uint32_t Read(uint8_t* pData, uint32_t dataLength);
-        uint32_t Write(const uint8_t* pData, uint32_t dataLength);
+		uint32_t Read(uint8_t* pData, uint32_t dataLength);
+		uint32_t Write(const uint8_t* pData, uint32_t dataLength);
 
 	private:
-        uint32_t Read(uint8_t* pData, uint32_t dataLength, struct sockaddr_in& client);
-        uint32_t Write(const uint8_t* pData, uint32_t dataLength, struct sockaddr_in& targetAddress);
+		uint32_t Read(uint8_t* pData, uint32_t dataLength, struct sockaddr_in& client);
+		uint32_t Write(const uint8_t* pData, uint32_t dataLength, struct sockaddr_in& targetAddress);
 };
 
 

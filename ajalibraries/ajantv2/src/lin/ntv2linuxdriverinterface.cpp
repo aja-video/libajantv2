@@ -18,7 +18,7 @@
 
 #include "ntv2linuxdriverinterface.h"
 #include "ntv2linuxpublicinterface.h"
-#include "ntv2devicefeatures.h" 			// For multiple bitfile support for XenaHS
+#include "ntv2devicefeatures.h"				// For multiple bitfile support for XenaHS
 #include "ntv2nubtypes.h"
 #include "ntv2utils.h"
 #include "ajabase/system/debug.h"
@@ -30,17 +30,17 @@ using namespace std;
 
 
 //	LinuxDriverInterface Logging Macros
-#define	HEX2(__x__)			"0x" << hex << setw(2)  << setfill('0') << (0xFF       & uint8_t (__x__)) << dec
-#define	HEX4(__x__)			"0x" << hex << setw(4)  << setfill('0') << (0xFFFF     & uint16_t(__x__)) << dec
-#define	HEX8(__x__)			"0x" << hex << setw(8)  << setfill('0') << (0xFFFFFFFF & uint32_t(__x__)) << dec
-#define	HEX16(__x__)		"0x" << hex << setw(16) << setfill('0') <<               uint64_t(__x__)  << dec
+#define HEX2(__x__)			"0x" << hex << setw(2)	<< setfill('0') << (0xFF	   & uint8_t (__x__)) << dec
+#define HEX4(__x__)			"0x" << hex << setw(4)	<< setfill('0') << (0xFFFF	   & uint16_t(__x__)) << dec
+#define HEX8(__x__)			"0x" << hex << setw(8)	<< setfill('0') << (0xFFFFFFFF & uint32_t(__x__)) << dec
+#define HEX16(__x__)		"0x" << hex << setw(16) << setfill('0') <<				 uint64_t(__x__)  << dec
 #define INSTP(_p_)			HEX16(uint64_t(_p_))
 
-#define	LDIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	LDIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	LDINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	LDIINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	LDIDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define LDIFAIL(__x__)		AJA_sERROR	(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define LDIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define LDINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define LDIINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define LDIDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 
 
 CNTV2LinuxDriverInterface::CNTV2LinuxDriverInterface()
@@ -68,11 +68,11 @@ CNTV2LinuxDriverInterface::~CNTV2LinuxDriverInterface()
 /////////////////////////////////////////////////////////////////////////////////////
 bool CNTV2LinuxDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 {
-	static const string	kAJANTV2("ajantv2");
+	static const string kAJANTV2("ajantv2");
 	NTV2_ASSERT(!IsRemote());
 	NTV2_ASSERT(!IsOpen());
 
-	ostringstream oss;  oss << "/dev/" << kAJANTV2 << DEC(inDeviceIndex);
+	ostringstream oss;	oss << "/dev/" << kAJANTV2 << DEC(inDeviceIndex);
 	string boardStr(oss.str());
 	_hDevice = HANDLE(open(boardStr.c_str(), O_RDWR));
 	if (_hDevice == INVALID_HANDLE_VALUE)
@@ -128,7 +128,7 @@ bool CNTV2LinuxDriverInterface::CloseLocalPhysical (void)
 ///////////////////////////////////////////////////////////////////////////////////
 
 
-bool CNTV2LinuxDriverInterface::ReadRegister (const ULWord inRegNum,  ULWord & outValue,  const ULWord inMask,  const ULWord inShift)
+bool CNTV2LinuxDriverInterface::ReadRegister (const ULWord inRegNum,  ULWord & outValue,  const ULWord inMask,	const ULWord inShift)
 {
 	if (inShift >= 32)
 	{
@@ -166,7 +166,7 @@ bool CNTV2LinuxDriverInterface::WriteRegister (const ULWord inRegNum,  const ULW
 #if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
 	if (mRecordRegWrites)
 	{
-		AJAAutoLock	autoLock(&mRegWritesLock);
+		AJAAutoLock autoLock(&mRegWritesLock);
 		mRegWrites.push_back(NTV2RegInfo(inRegNum, inValue, inMask, inShift));
 		if (mSkipRegWrites)
 			return true;
@@ -204,7 +204,7 @@ bool CNTV2LinuxDriverInterface::RestoreHardwareProcampRegisters (void)
 // Method:	ConfigureInterrupt
 // Input:	bool bEnable (turn on/off interrupt), INTERRUPT_ENUMS eInterruptType
 // Output:	bool status
-// Purpose:	Provides a 1 point connection to driver for interrupt calls
+// Purpose: Provides a 1 point connection to driver for interrupt calls
 bool CNTV2LinuxDriverInterface::ConfigureInterrupt (const bool bEnable, const INTERRUPT_ENUMS eInterruptType)
 {
 	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
@@ -221,29 +221,29 @@ bool CNTV2LinuxDriverInterface::ConfigureInterrupt (const bool bEnable, const IN
 }
 
 // Method: getInterruptCount
-// Input:  INTERRUPT_ENUMS	eInterruptType.  Currently only output vertical interrupts are supported.
+// Input:  INTERRUPT_ENUMS	eInterruptType.	 Currently only output vertical interrupts are supported.
 // Output: ULWord or equivalent(i.e. ULWord).
 bool CNTV2LinuxDriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterruptType, ULWord & outCount)
 {
 	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
-	if (     eInterruptType != eVerticalInterrupt
-		  && eInterruptType != eInput1
-          && eInterruptType != eInput2
-          && eInterruptType != eInput3
-          && eInterruptType != eInput4
-          && eInterruptType != eInput5
-          && eInterruptType != eInput6
-          && eInterruptType != eInput7
-          && eInterruptType != eInput8
-          && eInterruptType != eOutput2
-          && eInterruptType != eOutput3
-          && eInterruptType != eOutput4
-          && eInterruptType != eOutput5
-          && eInterruptType != eOutput6
-          && eInterruptType != eOutput7
-          && eInterruptType != eOutput8
-          && eInterruptType != eAuxVerticalInterrupt
-		  )
+	if (   eInterruptType != eVerticalInterrupt
+		&& eInterruptType != eInput1
+		&& eInterruptType != eInput2
+		&& eInterruptType != eInput3
+		&& eInterruptType != eInput4
+		&& eInterruptType != eInput5
+		&& eInterruptType != eInput6
+		&& eInterruptType != eInput7
+		&& eInterruptType != eInput8
+		&& eInterruptType != eOutput2
+		&& eInterruptType != eOutput3
+		&& eInterruptType != eOutput4
+		&& eInterruptType != eOutput5
+		&& eInterruptType != eOutput6
+		&& eInterruptType != eOutput7
+		&& eInterruptType != eOutput8
+		&& eInterruptType != eAuxVerticalInterrupt
+	   )
 	{
 		LDIFAIL("Unsupported interrupt count request. Only vertical input interrupts counted.");
 		return false;
@@ -260,13 +260,13 @@ bool CNTV2LinuxDriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterr
 		return false;
 	}
 
-    outCount = intrControlStruct.interruptCount;
+	outCount = intrControlStruct.interruptCount;
 	return true;
 }
 
 // Method: WaitForInterrupt
 // Output: True on successs, false on failure (ioctl failed or interrupt didn't happen)
-bool CNTV2LinuxDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS	eInterrupt, const ULWord timeOutMs)
+bool CNTV2LinuxDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs)
 {
 	if (IsRemote())
 	{
@@ -278,7 +278,7 @@ bool CNTV2LinuxDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS	eInterru
 	NTV2_WAITFOR_INTERRUPT_STRUCT waitIntrStruct;
 	waitIntrStruct.eInterruptType = eInterrupt;
 	waitIntrStruct.timeOutMs = timeOutMs;
-	waitIntrStruct.success = 0;	// Assume failure
+	waitIntrStruct.success = 0; // Assume failure
 
 	if (ioctl(int(_hDevice), IOCTL_NTV2_WAITFOR_INTERRUPT, &waitIntrStruct))
 	{
@@ -351,8 +351,8 @@ bool CNTV2LinuxDriverInterface::SetupBoard (void)
 			// If BA1MemorySize is 0, then the module was loaded with MapFrameBuffers=0
 			// and PIO mode is not available.
 	
-			// Map the memory.  For Xena(da) boards, the window will be the same size as the amount of
-			// memory on the Xena card.  For Xena(mm) cards, it will be a window which is selected using
+			// Map the memory.	For Xena(da) boards, the window will be the same size as the amount of
+			// memory on the Xena card.	 For Xena(mm) cards, it will be a window which is selected using
 			// SetPCIAccessFrame().
 			//
 			// the offset of 0 in the call to mmap tells mmap to map BAR1 which is the framebuffers.
@@ -366,7 +366,7 @@ bool CNTV2LinuxDriverInterface::SetupBoard (void)
 	
 			// Set the CH1 and CH2 frame base addresses for cards that require them.
 			ULWord boardIDRegister;
-			ReadRegister(kRegBoardID, boardIDRegister);	//unfortunately GetBoardID is in ntv2card...ooops.
+			ReadRegister(kRegBoardID, boardIDRegister); //unfortunately GetBoardID is in ntv2card...ooops.
 			if ( ! ::NTV2DeviceIsDirectAddressable(NTV2DeviceID(boardIDRegister)))
 				_pCh1FrameBaseAddress = _pFrameBaseAddress;
 		}
@@ -544,7 +544,7 @@ bool CNTV2LinuxDriverInterface::SetupBoard (void)
 			if (_pDNXRegisterBaseAddress == MAP_FAILED)
 			{
 				_pDNXRegisterBaseAddress = AJA_NULL;
-				_BA2MemorySize           = 0;
+				_BA2MemorySize			 = 0;
 				LDIFAIL ("MapDNXRegisters failed - couldn't map BAR2");
 				return false;
 			}
@@ -574,7 +574,7 @@ bool CNTV2LinuxDriverInterface::SetupBoard (void)
 //
 // Note: Asynchronous DMA only available with driver-allocated buffers.
 
-bool CNTV2LinuxDriverInterface::DmaTransfer	(	const NTV2DMAEngine	inDMAEngine,
+bool CNTV2LinuxDriverInterface::DmaTransfer (	const NTV2DMAEngine inDMAEngine,
 												const bool			inIsRead,
 												const ULWord		inFrameNumber,
 												ULWord *			pFrameBuffer,
@@ -588,14 +588,14 @@ bool CNTV2LinuxDriverInterface::DmaTransfer	(	const NTV2DMAEngine	inDMAEngine,
 	if (!IsOpen())
 		return false;
 
-    NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
-    dmaControlBuf.engine			= inDMAEngine;
+	NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
+	dmaControlBuf.engine			= inDMAEngine;
 	dmaControlBuf.dmaChannel		= NTV2_CHANNEL1;
-    dmaControlBuf.frameNumber		= inFrameNumber;
+	dmaControlBuf.frameNumber		= inFrameNumber;
 	dmaControlBuf.frameBuffer		= pFrameBuffer;
 	dmaControlBuf.frameOffsetSrc	= inIsRead ? inOffsetBytes : 0;
 	dmaControlBuf.frameOffsetDest	= inIsRead ? 0 : inOffsetBytes;
-    dmaControlBuf.numBytes			= inByteCount;
+	dmaControlBuf.numBytes			= inByteCount;
 
 	// The following are used only for driver-created buffers.
 	// Set them to known values.
@@ -669,16 +669,16 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 	LDIDBG("FRM=" << inFrameNumber << " ENG=" << inDMAEngine << " NB=" << inByteCount << (inIsRead?" Rd":" Wr"));
 
 	// NOTE: Linux driver assumes driver buffers to be used if pFrameBuffer < numDmaDriverBuffers
-    NTV2_DMA_SEGMENT_CONTROL_STRUCT dmaControlBuf;
-    dmaControlBuf.engine				= inDMAEngine;
-    dmaControlBuf.frameNumber			= inFrameNumber;
+	NTV2_DMA_SEGMENT_CONTROL_STRUCT dmaControlBuf;
+	dmaControlBuf.engine				= inDMAEngine;
+	dmaControlBuf.frameNumber			= inFrameNumber;
 	dmaControlBuf.frameBuffer			= pFrameBuffer;
 	dmaControlBuf.frameOffsetSrc		= inIsRead ? inOffsetBytes : 0;
 	dmaControlBuf.frameOffsetDest		= inIsRead ? 0 : inOffsetBytes;
-    dmaControlBuf.numBytes				= inByteCount;
-    dmaControlBuf.videoNumSegments		= inNumSegments;
-    dmaControlBuf.videoSegmentHostPitch	= inHostPitch;
-    dmaControlBuf.videoSegmentCardPitch	= inCardPitch;
+	dmaControlBuf.numBytes				= inByteCount;
+	dmaControlBuf.videoNumSegments		= inNumSegments;
+	dmaControlBuf.videoSegmentHostPitch = inHostPitch;
+	dmaControlBuf.videoSegmentCardPitch = inCardPitch;
 	dmaControlBuf.poll					= 0;
 
 	ULWord numDmaDriverBuffers(0);
@@ -742,7 +742,7 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (	const NTV2DMAEngine			inDMAEngine,
 												const ULWord				inNumSegments,
 												const ULWord				inSegmentHostPitch,
 												const ULWord				inSegmentCardPitch,
-												const PCHANNEL_P2P_STRUCT &	inP2PData)
+												const PCHANNEL_P2P_STRUCT & inP2PData)
 {
 	if (!IsOpen())
 		return false;
@@ -803,7 +803,7 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (	const NTV2DMAEngine			inDMAEngine,
 
 #define AsFrameStampStructPtr(_p_)	reinterpret_cast<FRAME_STAMP_STRUCT*>(_p_)
 #define AsStatusStructPtr(_p_)		reinterpret_cast<AUTOCIRCULATE_STATUS_STRUCT*>(_p_)
-#define AsTransferStatusStruct(_p_)	reinterpret_cast<PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT>(_p_)
+#define AsTransferStatusStruct(_p_) reinterpret_cast<PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT>(_p_)
 #define AsRoutingTablePtr(_p_)		reinterpret_cast<NTV2RoutingTable*>(_p_)
 #define AsPTaskStruct(_p_)			reinterpret_cast<PAUTOCIRCULATE_TASK_STRUCT>(_p_)
 #define AsPTransferStruct(_p_)		reinterpret_cast<PAUTOCIRCULATE_TRANSFER_STRUCT>(_p_)
@@ -854,7 +854,7 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 			FRAME_STAMP_STRUCT* pFrameStamp = AsFrameStampStructPtr(autoCircData.pvVal1);
 			acFrameStampCombo.acFrameStamp = *pFrameStamp;
 			if (ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP, &acFrameStampCombo))
-				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP failed");  return false;}
+				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP failed");	 return false;}
 			*pFrameStamp = acFrameStampCombo.acFrameStamp;
 			return true;
 		}
@@ -873,7 +873,7 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 			if (pTask)
 				acFrameStampCombo.acTask = *pTask;
 			if (ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP, &acFrameStampCombo))
-				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP failed");  return false;}
+				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP failed");	 return false;}
 			*pFrameStamp = acFrameStampCombo.acFrameStamp;
 			if (pTask)
 				*pTask = acFrameStampCombo.acTask;
@@ -890,8 +890,8 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 					{LDIFAIL ("TransferAutoCirculate failed - audio buffer size not mod 4");  return false;}
 				ULWord numDmaDriverBuffers;
 				GetDMANumDriverBuffers(&numDmaDriverBuffers);
-				if ((unsigned long)acTransfer->audioBuffer >=  numDmaDriverBuffers  &&  (unsigned long)acTransfer->audioBuffer % 4)
-					{LDIFAIL ("TransferAutoCirculate failed - audio buffer address not mod 4");  return false;}
+				if ((unsigned long)acTransfer->audioBuffer >=  numDmaDriverBuffers	&&	(unsigned long)acTransfer->audioBuffer % 4)
+					{LDIFAIL ("TransferAutoCirculate failed - audio buffer address not mod 4");	 return false;}
 			}
 
 			// Can't pass multiple pointers in a single ioctl, so combine
@@ -927,8 +927,8 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 
 				ULWord numDmaDriverBuffers;
 				GetDMANumDriverBuffers(&numDmaDriverBuffers);
-				if ((unsigned long)acTransfer->audioBuffer >=  numDmaDriverBuffers  &&  (unsigned long)acTransfer->audioBuffer % 4)
-					{LDIFAIL ("TransferAutoCirculate failed - audio buffer address not mod 4");  return false;}
+				if ((unsigned long)acTransfer->audioBuffer >=  numDmaDriverBuffers	&&	(unsigned long)acTransfer->audioBuffer % 4)
+					{LDIFAIL ("TransferAutoCirculate failed - audio buffer address not mod 4");	 return false;}
 			}
 
 			// Can't pass multiple pointers in a single ioctl, so combine
@@ -964,8 +964,8 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 
 				ULWord numDmaDriverBuffers;
 				GetDMANumDriverBuffers(&numDmaDriverBuffers);
-				if ((unsigned long)acTransfer->audioBuffer >=  numDmaDriverBuffers  &&  (unsigned long)acTransfer->audioBuffer % 4)
-					{LDIFAIL ("TransferAutoCirculate failed - audio buffer address not mod 4");  return false;}
+				if ((unsigned long)acTransfer->audioBuffer >=  numDmaDriverBuffers	&&	(unsigned long)acTransfer->audioBuffer % 4)
+					{LDIFAIL ("TransferAutoCirculate failed - audio buffer address not mod 4");	 return false;}
 			}
 
 			// Can't pass multiple pointers in a single ioctl, so combine
@@ -1131,7 +1131,7 @@ bool CNTV2LinuxDriverInterface::UnmapDMADriverBuffer (void)
 // ULWord dmaBufferFrame(0 .. numDmaDriverBuffers-1)
 // ULWord bytes - number of bytes to dma
 // ULWord poll - 0=block 1=return immediately and poll
-//              via register 48
+//				via register 48
 // When the board is opened the driver allocates
 // a user-definable number of frames for dmaing
 // This allows dma's to be done without scatter/gather
@@ -1143,19 +1143,19 @@ bool CNTV2LinuxDriverInterface::DmaWriteFrameDriverBuffer (NTV2DMAEngine DMAEngi
 	if (!IsOpen())
 		return false;
 
-    NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
-    dmaControlBuf.engine = DMAEngine;
+	NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
+	dmaControlBuf.engine = DMAEngine;
 	dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
-    dmaControlBuf.frameNumber = frameNumber;
-    dmaControlBuf.frameBuffer = PULWord(dmaBufferFrame);
-    dmaControlBuf.frameOffsetSrc = 0;
-    dmaControlBuf.frameOffsetDest = 0;
-    dmaControlBuf.numBytes = bytes;
+	dmaControlBuf.frameNumber = frameNumber;
+	dmaControlBuf.frameBuffer = PULWord(dmaBufferFrame);
+	dmaControlBuf.frameOffsetSrc = 0;
+	dmaControlBuf.frameOffsetDest = 0;
+	dmaControlBuf.numBytes = bytes;
 	dmaControlBuf.downSample = 0;
 	dmaControlBuf.linePitch = 0;
 	dmaControlBuf.poll = poll;
 	if (ioctl(int(_hDevice), IOCTL_NTV2_DMA_WRITE_FRAME, &dmaControlBuf))
-		{LDIFAIL("IOCTL_NTV2_DMA_WRITE_FRAME failed");  return false;}
+		{LDIFAIL("IOCTL_NTV2_DMA_WRITE_FRAME failed");	return false;}
 	return true;
 }
 
@@ -1167,7 +1167,7 @@ bool CNTV2LinuxDriverInterface::DmaWriteFrameDriverBuffer (NTV2DMAEngine DMAEngi
 // ULWord dmaBufferFrame(0 .. numDmaDriverBuffers-1)
 // ULWord bytes - number of bytes to dma
 // ULWord poll - 0=block 1=return immediately and poll
-//              via register 48
+//				via register 48
 // When the board is opened the driver allocates
 // a user-definable number of frames for dmaing
 // This allows dma's to be done without scatter/gather
@@ -1179,19 +1179,19 @@ bool CNTV2LinuxDriverInterface::DmaWriteFrameDriverBuffer (NTV2DMAEngine DMAEngi
 	if (!IsOpen())
 		return false;
 
-    NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
-    dmaControlBuf.engine = DMAEngine;
+	NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
+	dmaControlBuf.engine = DMAEngine;
 	dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
-    dmaControlBuf.frameNumber = frameNumber;
+	dmaControlBuf.frameNumber = frameNumber;
 	dmaControlBuf.frameBuffer = (PULWord)dmaBufferFrame;
-    dmaControlBuf.frameOffsetSrc = offsetSrc;
-    dmaControlBuf.frameOffsetDest = offsetDest;
-    dmaControlBuf.numBytes = bytes;
+	dmaControlBuf.frameOffsetSrc = offsetSrc;
+	dmaControlBuf.frameOffsetDest = offsetDest;
+	dmaControlBuf.numBytes = bytes;
 	dmaControlBuf.downSample = 0;
 	dmaControlBuf.linePitch = 0;
 	dmaControlBuf.poll = poll;
 	if (ioctl(int(_hDevice), IOCTL_NTV2_DMA_WRITE_FRAME, &dmaControlBuf))
-		{LDIFAIL("IOCTL_NTV2_DMA_WRITE_FRAME failed");  return false;}
+		{LDIFAIL("IOCTL_NTV2_DMA_WRITE_FRAME failed");	return false;}
 	return true;
 }
 
@@ -1202,7 +1202,7 @@ bool CNTV2LinuxDriverInterface::DmaWriteFrameDriverBuffer (NTV2DMAEngine DMAEngi
 // ULWord dmaBufferFrame(0 .. numDmaDriverBuffers-1)
 // ULWord bytes - number of bytes to dma
 // ULWord poll - 0=block 1=return immediately and poll
-//              via register 48
+//				via register 48
 // When the board is opened the driver allocates
 // a user-definable number of frames for dmaing
 // This allows dma's to be done without scatter/gather
@@ -1214,14 +1214,14 @@ bool CNTV2LinuxDriverInterface::DmaReadFrameDriverBuffer (NTV2DMAEngine DMAEngin
 	if (!IsOpen())
 		return false;
 
-    NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
-    dmaControlBuf.engine = DMAEngine;
+	NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
+	dmaControlBuf.engine = DMAEngine;
 	dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
-    dmaControlBuf.frameNumber = frameNumber;
+	dmaControlBuf.frameNumber = frameNumber;
 	dmaControlBuf.frameBuffer = PULWord(dmaBufferFrame);
-    dmaControlBuf.frameOffsetSrc = 0;
-    dmaControlBuf.frameOffsetDest = 0;
-    dmaControlBuf.numBytes = bytes;
+	dmaControlBuf.frameOffsetSrc = 0;
+	dmaControlBuf.frameOffsetDest = 0;
+	dmaControlBuf.numBytes = bytes;
 	dmaControlBuf.downSample = downSample;
 	if (linePitch == 0) linePitch = 1;
 	dmaControlBuf.linePitch = linePitch;
@@ -1242,7 +1242,7 @@ bool CNTV2LinuxDriverInterface::DmaReadFrameDriverBuffer (NTV2DMAEngine DMAEngin
 // ULWord dmaBufferFrame(0 .. numDmaDriverBuffers-1)
 // ULWord bytes - number of bytes to dma
 // ULWord poll - 0=block 1=return immediately and poll
-//              via register 48
+//				via register 48
 // When the board is opened the driver allocates
 // a user-definable number of frames for dmaing
 // This allows dma's to be done without scatter/gather
@@ -1256,14 +1256,14 @@ bool CNTV2LinuxDriverInterface::DmaReadFrameDriverBuffer (NTV2DMAEngine DMAEngin
 	if (!IsOpen())
 		return false;
 
-    NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
-    dmaControlBuf.engine = DMAEngine;
+	NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
+	dmaControlBuf.engine = DMAEngine;
 	dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
-    dmaControlBuf.frameNumber = frameNumber;
+	dmaControlBuf.frameNumber = frameNumber;
 	dmaControlBuf.frameBuffer = PULWord(dmaBufferFrame);
-    dmaControlBuf.frameOffsetSrc = offsetSrc;
-    dmaControlBuf.frameOffsetDest = offsetDest;
-    dmaControlBuf.numBytes = bytes;
+	dmaControlBuf.frameOffsetSrc = offsetSrc;
+	dmaControlBuf.frameOffsetDest = offsetDest;
+	dmaControlBuf.numBytes = bytes;
 	dmaControlBuf.downSample = downSample;
 	if( linePitch == 0 ) linePitch = 1;
 	dmaControlBuf.linePitch = linePitch;
@@ -1288,20 +1288,20 @@ bool CNTV2LinuxDriverInterface::DmaWriteWithOffsets (NTV2DMAEngine DMAEngine, UL
 		return false;
 	// NOTE: Linux driver assumes driver buffers to be used if
 	// pFrameBuffer < numDmaDriverBuffers
-    NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
-    dmaControlBuf.engine = DMAEngine;
+	NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
+	dmaControlBuf.engine = DMAEngine;
 	dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
-    dmaControlBuf.frameNumber = frameNumber;
+	dmaControlBuf.frameNumber = frameNumber;
 	dmaControlBuf.frameBuffer = pFrameBuffer;
-    dmaControlBuf.frameOffsetSrc = offsetSrc;
-    dmaControlBuf.frameOffsetDest = offsetDest;
-    dmaControlBuf.numBytes = bytes;
+	dmaControlBuf.frameOffsetSrc = offsetSrc;
+	dmaControlBuf.frameOffsetDest = offsetDest;
+	dmaControlBuf.numBytes = bytes;
 
 	// The following are used only for driver-created buffers.
 	// Set them to known values.
-	dmaControlBuf.downSample = 0;       // Not applicable to this mode
-	dmaControlBuf.linePitch = 1;        // Not applicable to this mode
-	dmaControlBuf.poll = 0;             // currently can't poll with a usermode allocated dma buffer
+	dmaControlBuf.downSample = 0;		// Not applicable to this mode
+	dmaControlBuf.linePitch = 1;		// Not applicable to this mode
+	dmaControlBuf.poll = 0;				// currently can't poll with a usermode allocated dma buffer
 
 	ULWord request;
 	const char *errMsg = AJA_NULL;
@@ -1335,20 +1335,20 @@ bool CNTV2LinuxDriverInterface::DmaReadWithOffsets (NTV2DMAEngine DMAEngine, ULW
 
 	// NOTE: Linux driver assumes driver buffers to be used if
 	// pFrameBuffer < numDmaDriverBuffers
-    NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
-    dmaControlBuf.engine = DMAEngine;
+	NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
+	dmaControlBuf.engine = DMAEngine;
 	dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
-    dmaControlBuf.frameNumber = frameNumber;
+	dmaControlBuf.frameNumber = frameNumber;
 	dmaControlBuf.frameBuffer = pFrameBuffer;
-    dmaControlBuf.frameOffsetSrc = offsetSrc;
-    dmaControlBuf.frameOffsetDest = offsetDest;
-    dmaControlBuf.numBytes = bytes;
+	dmaControlBuf.frameOffsetSrc = offsetSrc;
+	dmaControlBuf.frameOffsetDest = offsetDest;
+	dmaControlBuf.numBytes = bytes;
 
 	// The following are used only for driver-created buffers.
 	// Set them to known values.
-	dmaControlBuf.downSample = 0;       // Not applicable to this mode
-	dmaControlBuf.linePitch = 1;        // Not applicable to this mode
-	dmaControlBuf.poll = 0;             // currently can't poll with a usermode allocated dma buffer
+	dmaControlBuf.downSample = 0;		// Not applicable to this mode
+	dmaControlBuf.linePitch = 1;		// Not applicable to this mode
+	dmaControlBuf.poll = 0;				// currently can't poll with a usermode allocated dma buffer
 	ULWord request;
 	const char *errMsg = AJA_NULL;
 #define ERRMSG(s) #s " failed"

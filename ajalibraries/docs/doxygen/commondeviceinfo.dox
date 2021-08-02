@@ -309,8 +309,9 @@
 
 	@subsection	vidop-fs		Frame Store Operation
 
-	A <b>Frame Store</b> is a device widget implemented in FPGA firmware that uses several
-	registers to monitor and control its principal properties:
+	A <b>Frame Store</b> is a device widget implemented in FPGA firmware that writes or reads video data
+	to or from SDRAM, depending upon its mode (capture or playback), and uses several registers to control
+	its operation. Each <b>Frame Store</b> has the following properties:
 	-	<b>Enable/Disable State</b> — When <b>Disabled</b>, the widget will not access SDRAM.
 		Call CNTV2Card::IsChannelEnabled to determine if a Frame Store is enabled or not.
 		Calling CNTV2Card::EnableChannel or CNTV2Card::DisableChannel will change it.
@@ -320,15 +321,15 @@
 		in ::NTV2_MODE_CAPTURE, it will <b>write</b> video data into SDRAM. Call CNTV2Card::GetMode
 		to obtain the Frame Store’s current mode;  calling CNTV2Card::SetMode will set it.
 		Note that AutoCirculate sets this for you, but doesn’t “un-set” it.
-	-	<b>Frame Buffer Format</b> — This coincides with the ::NTV2FrameBufferFormat enumeration
-		in the SDK. Call CNTV2Card::GetFrameBufferFormat to determine the current format;
+	-	<b>Frame Buffer Format</b> — This determines the format of the pixel data being written or read
+		to or from device SDRAM, and coincides with the ::NTV2FrameBufferFormat enumeration in the SDK.
+		Call CNTV2Card::GetFrameBufferFormat to determine the current format;
 		calling CNTV2Card::SetFrameBufferFormat will change it. See \ref devicefbformats for details.
 		AutoCirculate users must set this.
-	-	<b>Video Format</b> — This correlates to the ::NTV2VideoFormat enumeration in the SDK,
-		and implies a ::NTV2FrameGeometry, ::NTV2Standard and ::NTV2FrameRate.
-		Call CNTV2Card::GetVideoFormat to determine the current format;
-		call CNTV2Card::SetVideoFormat to change it.
-		AutoCirculate users must set this.
+	-	<b>Video Format</b> — This determines the video format being received or transmitted, which
+		correlates to the ::NTV2VideoFormat enumeration in the SDK, and implies a ::NTV2FrameGeometry,
+		::NTV2Standard and ::NTV2FrameRate.  Call CNTV2Card::GetVideoFormat to determine the current format;
+		call CNTV2Card::SetVideoFormat to change it.  AutoCirculate users must set this.
 	-	<b>Input Frame</b> — This is a zero-based index number that identifies the specific Frame
 		Buffer in SDRAM that will be continually written with video frame data <b>if</b>…
 		-	the Frame Store is Enabled;
@@ -337,7 +338,7 @@
 	
 		Call CNTV2Card::GetInputFrame to determine the current <b>Input Frame</b> buffer number.
 		Call CNTV2Card::SetInputFrame to change it.
-		Note that AutoCirculate manages this for you.
+		AutoCirculate manages this automatically when capturing video.
 	-	<b>Output Frame</b> — This is a zero-based index number that identifies the specific Frame
 		Buffer in SDRAM that will continuously be read from <b>if</b>…
 		-	the Frame Store is Enabled;
@@ -347,7 +348,7 @@
 		
 		Call CNTV2Card::GetOutputFrame to determine the current <b>Output Frame</b> buffer number.
 		Call CNTV2Card::SetOutputFrame to change it.
-		Note that AutoCirculate manages this for you.
+		AutoCirculate manages this automatically when playing video.
 	-	<b>VANC Mode</b> — The ::NTV2VANCMode setting determines if a “tall” or “taller” frame geometry
 		is in effect. The ::NTV2_VANCMODE_TALL geometry incorporates several extra lines of video that
 		precede the first visible line in the raster into the Frame Store’s frame buffer memory.
@@ -364,7 +365,7 @@
 	-	<b>Frame Buffer Orientation</b> — The ::NTV2FBOrientation (a.k.a. ::NTV2FrameBufferOrientation
 		a.k.a. ::NTV2VideoFrameBufferOrientation) determines the direction that firmware will write or
 		read video lines into or out of SDRAM, either normal ::NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN,
-		or ::NTV2_FRAMEBUFFER_ORIENTATION_BOTTOMUP (reverse). 
+		or ::NTV2_FRAMEBUFFER_ORIENTATION_BOTTOMUP (reverse, which flips the image vertically). 
 		Call CNTV2Card::GetFrameBufferOrientation to determine the current <b>Frame Buffer Orientation</b>
 		setting. Call CNTV2Card::SetFrameBufferOrientation to change it.
 

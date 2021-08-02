@@ -44,7 +44,7 @@ AJAThread::ThreadRun()
 	// initialize the thread
 	status = ThreadInit();
 
-    if (AJA_SUCCESS(status))
+	if (AJA_SUCCESS(status))
 	{
 		// call the loop until done
 		while (loop && !Terminate())
@@ -72,7 +72,7 @@ bool
 AJAThread::ThreadLoop()
 {
 	// default wait a bit
-	AJA_REPORT(0, AJA_DebugSeverity_Warning, "AJAThread::ThreadLoop  looping doing nothing");
+	AJA_REPORT(0, AJA_DebugSeverity_Warning, "AJAThread::ThreadLoop	 looping doing nothing");
 	AJATime::Sleep(1000);
 	return AJA_STATUS_TRUE;
 }
@@ -151,9 +151,9 @@ AJAThread::GetPriority(AJAThreadPriority* pThreadPriority)
 AJAStatus
 AJAThread::SetRealTime(AJAThreadRealTimePolicy policy, int priority)
 {
-    if(mpImpl)
-        return mpImpl->SetRealTime(policy, priority);
-    return AJA_STATUS_FAIL;
+	if(mpImpl)
+		return mpImpl->SetRealTime(policy, priority);
+	return AJA_STATUS_FAIL;
 }
 
 
@@ -180,5 +180,5 @@ AJAStatus AJAThread::SetThreadName(const char *name) {
 
 uint64_t AJAThread::GetThreadId()
 {
-    return AJAThreadImpl::GetThreadId();
+	return AJAThreadImpl::GetThreadId();
 }

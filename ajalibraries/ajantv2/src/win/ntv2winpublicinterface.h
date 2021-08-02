@@ -17,7 +17,7 @@
 #ifdef KSD
 //{3280A641-5159-4f43-B55D-E05ABB47C350}
 #define STATIC_AJAVIDEO_PROPSET\
-    0x3280A641L, 0x5159, 0x4f43, 0xB5, 0x5D, 0xE0, 0x5A, 0xBB, 0x47, 0xC3, 0x50
+	0x3280A641L, 0x5159, 0x4f43, 0xB5, 0x5D, 0xE0, 0x5A, 0xBB, 0x47, 0xC3, 0x50
 DEFINE_GUIDSTRUCT("3280A641-5159-4f43-B55D-E05ABB47C350", AJAVIDEO_PROPSET);
 #define AJAVIDEO_PROPSET DEFINE_GUIDNAMED(AJAVIDEO_PROPSET)
 
@@ -27,7 +27,7 @@ DEFINE_GUIDSTRUCT("3280A641-5159-4f43-B55D-E05ABB47C350", AJAVIDEO_PROPSET);
 
 //{84963F56-67FC-461c-8040-CC891B87195B}
 #define STATIC_AJAVIDEO_PROPSET\
-    0x84963f56, 0x67fc, 0x461c,  0x80, 0x40, 0xcc, 0x89, 0x1b, 0x87, 0x19, 0x5b
+	0x84963f56, 0x67fc, 0x461c,	 0x80, 0x40, 0xcc, 0x89, 0x1b, 0x87, 0x19, 0x5b
 DEFINE_GUIDSTRUCT("84963F56-67FC-461c-8040-CC891B87195B", AJAVIDEO_PROPSET);
 #define AJAVIDEO_PROPSET DEFINE_GUIDNAMED(AJAVIDEO_PROPSET)
 
@@ -67,11 +67,11 @@ DEFINE_GUIDSTRUCT("2BFA1669-17F7-4cf9-8E05-500B8CB81497", AJAVIDEO_PROPSET);
 
 
 	// Explicit values are attached to these values,
-        // to try to prevent anyone inadvertently changing old members (risking incompatibility with older apps)
-        // when adding new members!
+		// to try to prevent anyone inadvertently changing old members (risking incompatibility with older apps)
+		// when adding new members!
 typedef enum {
-    KSPROPERTY_AJAPROPS_GETSETREGISTER = 0x0, // RW
-	KSPROPERTY_AJAPROPS_GETSETLOGLEVEL = 0x01,  // RW
+	KSPROPERTY_AJAPROPS_GETSETREGISTER = 0x0, // RW
+	KSPROPERTY_AJAPROPS_GETSETLOGLEVEL = 0x01,	// RW
 	KSPROPERTY_AJAPROPS_MAPMEMORY = 0x02,	
 	KSPROPERTY_AJAPROPS_INTERRUPTS = 0x03,
 	KSPROPERTY_AJAPROPS_SUBSCRIPTIONS = 0x04,
@@ -87,11 +87,11 @@ typedef enum {
 	KSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_EX2 = 0x0E,
 	KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_EX2 = 0x0F,
 	KSPROPERTY_AJAPROPS_AUTOCIRC_CAPTURE_TASK = 0x10,
-	KSPROPERTY_AJAPROPS_GETSETBITFILEINFO = 0x011,      // attempt to maintain compatibility between application and driver versions.
+	KSPROPERTY_AJAPROPS_GETSETBITFILEINFO = 0x011,		// attempt to maintain compatibility between application and driver versions.
 	KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_EX = 0x12,
 	KSPROPERTY_AJAPROPS_DMA_P2P = 0x13,
 
-        // DURIAN
+		// DURIAN
 	KSPROPERTY_AJAPROPS_DT_GET_XENA_DXT_FIRMWARE_DESIRED = 0x20,
 	KSPROPERTY_AJAPROPS_DT_ESTABLISH_XENA_DXT_FIRMWARE_HD = 0x021,
 	KSPROPERTY_AJAPROPS_DT_ESTABLISH_XENA_DXT_FIRMWARE_SD = 0x022,
@@ -103,11 +103,11 @@ typedef enum {
 } KSPROPERTY_AJAPROPS;
 
 typedef struct { //this is the structure used for the KSPROPERTY_AJAPROPS_GETSETREGISTER property.
-    KSPROPERTY Property;
-    ULONG      RegisterID;		// ID of the targeted register.
-    ULONG      ulRegisterValue; // For Read, set by the driver on the way out, for Write set by the requestor on the way in!
-    ULONG      ulRegisterMask;	// For post AND
-	ULONG	   ulRegisterShift; // For pre  OR
+	KSPROPERTY Property;
+	ULONG	   RegisterID;		// ID of the targeted register.
+	ULONG	   ulRegisterValue; // For Read, set by the driver on the way out, for Write set by the requestor on the way in!
+	ULONG	   ulRegisterMask;	// For post AND
+	ULONG	   ulRegisterShift; // For pre	OR
 } KSPROPERTY_AJAPROPS_GETSETREGISTER_S, *PKSPROPERTY_AJAPROPS_GETSETREGISTER_S;
 
 //add any other required structures for other properties here!
@@ -119,14 +119,14 @@ typedef enum _MAP_MEMORY_TYPE {
 	NTV2_MAPMEMORY_PCIFLASHPROGRAM = 2,
 } MAP_MEMORY_TYPE, *PMAP_MEMORY_TYPE;
 
-typedef struct  {
-    void*   Address;
-    ULONG   Length;
+typedef struct	{
+	void*	Address;
+	ULONG	Length;
 } MAP_MEMORY, *PMAP_MEMORY;
 
 typedef struct {
-    void*   POINTER_32 Address;
-    ULONG   Length;
+	void*	POINTER_32 Address;
+	ULONG	Length;
 } MAP_MEMORY_32, *PMAP_MEMORY_32;
 
 // Memory map property structure - includes MAP_MEMORY structure
@@ -147,41 +147,41 @@ typedef struct {
 typedef struct {
 	KSPROPERTY		Property;	// boilerplate Properties stuff
 	ULONG			ulMask;		// used only by GetCurrentInterruptMask()
-	INTERRUPT_ENUMS eInterrupt;	// specifies the interrupt type
+	INTERRUPT_ENUMS eInterrupt; // specifies the interrupt type
 } KSPROPERTY_AJAPROPS_INTERRUPTS_S, *PKSPROPERTY_AJAPROPS_INTERRUPTS_S;
 
 
 //////////////////////////////////////////////////////////////////////////////////////
 // Subscription property structure - includes INTERRUPT_ENUMS
 typedef struct {
-	KSPROPERTY		Property;	// boilerplate Properties stuff	
+	KSPROPERTY		Property;	// boilerplate Properties stuff 
 	HANDLE *		pHandle;	// address of userspace created notification event
-	INTERRUPT_ENUMS eInterrupt;	// specifies subscription type
-	ULONG			ulIntCount;	// set by kernel in method getInterruptCount()
+	INTERRUPT_ENUMS eInterrupt; // specifies subscription type
+	ULONG			ulIntCount; // set by kernel in method getInterruptCount()
 } KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S, *PKSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S;
 
 typedef struct {
-	KSPROPERTY		Property;	// boilerplate Properties stuff	
+	KSPROPERTY		Property;	// boilerplate Properties stuff 
 	HANDLE * POINTER_32		pHandle;	// address of userspace created notification event
-	INTERRUPT_ENUMS eInterrupt;	// specifies subscription type
-	ULONG			ulIntCount;	// set by kernel in method getInterruptCount()
+	INTERRUPT_ENUMS eInterrupt; // specifies subscription type
+	ULONG			ulIntCount; // set by kernel in method getInterruptCount()
 } KSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S_32, *PKSPROPERTY_AJAPROPS_SUBSCRIPTIONS_S_32;
 
 //////////////////////////////////////////////////////////////////////////////////////
-//  New Subscription property structure - includes INTERRUPT_ENUMS
+//	New Subscription property structure - includes INTERRUPT_ENUMS
 /// Added to support 64 bit driver.
 typedef struct {
-	KSPROPERTY		Property;	// boilerplate Properties stuff	
-	HANDLE			Handle;	// address of userspace created notification event
-	INTERRUPT_ENUMS eInterrupt;	// specifies subscription type
-	ULONG			ulIntCount;	// set by kernel in method getInterruptCount()
+	KSPROPERTY		Property;	// boilerplate Properties stuff 
+	HANDLE			Handle; // address of userspace created notification event
+	INTERRUPT_ENUMS eInterrupt; // specifies subscription type
+	ULONG			ulIntCount; // set by kernel in method getInterruptCount()
 } KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S, *PKSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S;
 
 typedef struct {
-	KSPROPERTY		Property;	// boilerplate Properties stuff	
-	VOID * POINTER_32		Handle;	// address of userspace created notification event
-	INTERRUPT_ENUMS eInterrupt;	// specifies subscription type
-	ULONG			ulIntCount;	// set by kernel in method getInterruptCount()
+	KSPROPERTY		Property;	// boilerplate Properties stuff 
+	VOID * POINTER_32		Handle; // address of userspace created notification event
+	INTERRUPT_ENUMS eInterrupt; // specifies subscription type
+	ULONG			ulIntCount; // set by kernel in method getInterruptCount()
 } KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S_32, *PKSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S_32;
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -273,15 +273,15 @@ typedef struct {
 	NTV2Crosspoint		channelSpec;
 	LWord				lVal1;
 	LWord				lVal2;
-    LWord               lVal3;
+	LWord				lVal3;
 	bool				bVal1;
 	bool				bVal2;
-    bool                bVal3;
-    bool                bVal4;
-    bool                bVal5;
-    bool                bVal6;
-    bool                bVal7;
-    bool                bVal8;
+	bool				bVal3;
+	bool				bVal4;
+	bool				bVal5;
+	bool				bVal6;
+	bool				bVal7;
+	bool				bVal8;
 } KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S, *PKSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S;
 
 typedef struct {
@@ -290,7 +290,7 @@ typedef struct {
 	NTV2Crosspoint		channelSpec;
 	LWord				lVal1;
 	LWord				lVal2;
-	LWord               lVal3;
+	LWord				lVal3;
 	LWord				lVal4;
 	LWord				lVal5;
 	LWord				lVal6;
@@ -300,18 +300,18 @@ typedef struct {
 	LWord				lVal10;
 	bool				bVal1;
 	bool				bVal2;
-	bool                bVal3;
-	bool                bVal4;
-	bool                bVal5;
-	bool                bVal6;
-	bool                bVal7;
-	bool                bVal8;
-	bool                bVal9;
-	bool                bVal10;
-	bool                bVal11;
-	bool                bVal12;
-	bool                bVal13;
-	bool                bVal14;
+	bool				bVal3;
+	bool				bVal4;
+	bool				bVal5;
+	bool				bVal6;
+	bool				bVal7;
+	bool				bVal8;
+	bool				bVal9;
+	bool				bVal10;
+	bool				bVal11;
+	bool				bVal12;
+	bool				bVal13;
+	bool				bVal14;
 } KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_EX_S, *PKSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_EX_S;
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -330,7 +330,7 @@ typedef struct {
 	AUTO_CIRC_COMMAND	eCommand;
 	NTV2Crosspoint		channelSpec;
 	LWord				lFrameNum;
-	FRAME_STAMP_STRUCT  frameStamp;
+	FRAME_STAMP_STRUCT	frameStamp;
 } KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_S, *PKSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_S;
 
 typedef struct {
@@ -352,7 +352,7 @@ typedef struct {
 } KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_EX2_S_32, *PKSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_EX2_S_32;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-//  Transfer
+//	Transfer
 typedef struct {
 	KSPROPERTY			Property;
 	AUTO_CIRC_COMMAND	eCommand;
@@ -368,7 +368,7 @@ typedef struct {
 } KSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_S_32, *PKSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_S_32;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-//  TransferEx  - Extended version for Xena2....
+//	TransferEx	- Extended version for Xena2....
 typedef struct {
 	KSPROPERTY			Property;
 	AUTO_CIRC_COMMAND	eCommand;
@@ -386,7 +386,7 @@ typedef struct {
 } KSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_EX_S_32, *PKSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_EX_S_32;
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-//  TransferEx2  - Extended version for autocirculate tasks....
+//	TransferEx2	 - Extended version for autocirculate tasks....
 typedef struct {
 	KSPROPERTY			Property;
 	AUTO_CIRC_COMMAND	eCommand;
@@ -407,7 +407,7 @@ typedef struct {
 
 // Get/SetBitFileInformation
 typedef struct { 
-    KSPROPERTY Property;
+	KSPROPERTY Property;
 	BITFILE_INFO_STRUCT bitFileInfoStruct;
 } KSPROPERTY_AJAPROPS_GETSETBITFILEINFO_S, *PKSPROPERTY_AJAPROPS_GETSETBITFILEINFO_S;
 

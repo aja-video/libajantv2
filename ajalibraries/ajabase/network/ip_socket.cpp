@@ -27,21 +27,21 @@ using std::string;
 // Defines
 /////////////////////////////
 #if defined(AJA_WINDOWS)
-#	define CLOSE_SOCKET(x)       closesocket(x)
+#	define CLOSE_SOCKET(x)		 closesocket(x)
 #else
-#	define CLOSE_SOCKET(x)       close(x)
+#	define CLOSE_SOCKET(x)		 close(x)
 #endif
 
-#define DEBUG_IP_INSTANTIATION   0
-#define DEBUG_SOCKET_OPERATION   0
-#define DEBUG_SOCKET_OPTION      0
-#define DEBUG_GET_IP_ADDRESSES   0
+#define DEBUG_IP_INSTANTIATION	 0
+#define DEBUG_SOCKET_OPERATION	 0
+#define DEBUG_SOCKET_OPTION		 0
+#define DEBUG_GET_IP_ADDRESSES	 0
 
 
 /////////////////////////////
 // Statics
 /////////////////////////////
-AJA_EXPORT AJALock  AJAIPSocket::mMutex("");
+AJA_EXPORT AJALock	AJAIPSocket::mMutex("");
 AJA_EXPORT uint32_t AJAIPSocket::mInstantiationCount = 0;
 
 
@@ -54,7 +54,7 @@ AJA_EXPORT uint32_t AJAIPSocket::mInstantiationCount = 0;
 AJAIPSocket::AJAIPSocket(void)
 {
 	mSocketLength = sizeof(struct sockaddr_in);
-	mSocket       = -1;
+	mSocket		  = -1;
 	Initialize();
 }
 
@@ -78,9 +78,9 @@ AJAIPSocket::Initialize(void)
 	mMutex.Lock();
 
 #if defined(AJA_WINDOWS)
-	WORD    versionRequested;
+	WORD	versionRequested;
 	WSADATA wsaData;
-	int     err;
+	int		err;
 
 	versionRequested = MAKEWORD(2, 2);
 
@@ -161,9 +161,9 @@ AJAIPSocket::Deinitialize(void)
 ///////////////////////////////////////////////////////////
 AJAStatus AJAIPSocket::Open(const string& ipAddress, uint16_t port)
 {
-    AJA_UNUSED(ipAddress);
-    AJA_UNUSED(port);
-    return AJA_STATUS_FAIL;
+	AJA_UNUSED(ipAddress);
+	AJA_UNUSED(port);
+	return AJA_STATUS_FAIL;
 }
 
 
@@ -178,9 +178,9 @@ bool AJAIPSocket::IsOpen(void)
 
 ///////////////////////////////////////////////////////////
 // The arguments are one of:
-//   SHUT_RD
-//   SHUT_WR
-//   SHUT_RDWR
+//	 SHUT_RD
+//	 SHUT_WR
+//	 SHUT_RDWR
 ///////////////////////////////////////////////////////////
 bool
 AJAIPSocket::Shutdown(int how)
@@ -331,9 +331,9 @@ AJAIPSocket::GetHostIPAddresses(
 	// ToDo
 #else
 	struct ifaddrs* pIFAddrContainer = NULL;
-	struct ifaddrs* pIFAddr          = NULL;
-	void*           pAddrPtr         = NULL;
-	char            addressBuffer[INET6_ADDRSTRLEN];
+	struct ifaddrs* pIFAddr			 = NULL;
+	void*			pAddrPtr		 = NULL;
+	char			addressBuffer[INET6_ADDRSTRLEN];
 
 	getifaddrs(&pIFAddrContainer);
 
@@ -391,15 +391,15 @@ AJAIPSocket::GetHostIPAddresses(
 ///////////////////////////////////////////////////////////
 uint32_t
 AJAIPSocket::Poll(
-				uint8_t*            pData,
-				uint32_t            dataLength,
+				uint8_t*			pData,
+				uint32_t			dataLength,
 				struct sockaddr_in& client,
-				int                 timeout)
+				int					timeout)
 {
-    AJA_UNUSED(pData);
-    AJA_UNUSED(dataLength);
-    AJA_UNUSED(client);
-    AJA_UNUSED(timeout);
+	AJA_UNUSED(pData);
+	AJA_UNUSED(dataLength);
+	AJA_UNUSED(client);
+	AJA_UNUSED(timeout);
 
 	return (0);
 }
@@ -411,9 +411,9 @@ AJAIPSocket::Poll(
 uint32_t
 AJAIPSocket::Read(uint8_t* pData, uint32_t dataLength, struct sockaddr_in& client)
 {
-    AJA_UNUSED(pData);
-    AJA_UNUSED(dataLength);
-    AJA_UNUSED(client);
+	AJA_UNUSED(pData);
+	AJA_UNUSED(dataLength);
+	AJA_UNUSED(client);
 	return (0);
 }
 
@@ -423,13 +423,13 @@ AJAIPSocket::Read(uint8_t* pData, uint32_t dataLength, struct sockaddr_in& clien
 ///////////////////////////////////////////////////////////
 uint32_t
 AJAIPSocket::Write(
-				const uint8_t*      pData,
-				uint32_t            dataLength,
+				const uint8_t*		pData,
+				uint32_t			dataLength,
 				struct sockaddr_in& targetAddress)
 {
-    AJA_UNUSED(pData);
-    AJA_UNUSED(dataLength);
-    AJA_UNUSED(targetAddress);
+	AJA_UNUSED(pData);
+	AJA_UNUSED(dataLength);
+	AJA_UNUSED(targetAddress);
 	return (0);
 }
 

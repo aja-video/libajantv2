@@ -16,7 +16,7 @@ AJATimer::AJATimer(AJATimerPrecision precision)
 	mStartTime = 0;
 	mStopTime = 0;
 	mRun = false;
-    mPrecision = precision;
+	mPrecision = precision;
 }
 
 
@@ -29,21 +29,21 @@ void
 AJATimer::Start()
 {
 	// save the time at start
-    switch(mPrecision)
-    {
-        default:
-        case AJATimerPrecisionMilliseconds:
-            mStartTime = AJATime::GetSystemMilliseconds();
-            break;
+	switch(mPrecision)
+	{
+		default:
+		case AJATimerPrecisionMilliseconds:
+			mStartTime = AJATime::GetSystemMilliseconds();
+			break;
 
-        case AJATimerPrecisionMicroseconds:
-            mStartTime = AJATime::GetSystemMicroseconds();
-            break;
+		case AJATimerPrecisionMicroseconds:
+			mStartTime = AJATime::GetSystemMicroseconds();
+			break;
 
-        case AJATimerPrecisionNanoseconds:
-            mStartTime = AJATime::GetSystemNanoseconds();
-            break;
-    }
+		case AJATimerPrecisionNanoseconds:
+			mStartTime = AJATime::GetSystemNanoseconds();
+			break;
+	}
 
 	mRun = true;
 }
@@ -53,21 +53,21 @@ void
 AJATimer::Stop()
 {
 	// save the time at stop
-    switch(mPrecision)
-    {
-        default:
-        case AJATimerPrecisionMilliseconds:
-            mStopTime = AJATime::GetSystemMilliseconds();
-            break;
+	switch(mPrecision)
+	{
+		default:
+		case AJATimerPrecisionMilliseconds:
+			mStopTime = AJATime::GetSystemMilliseconds();
+			break;
 
-        case AJATimerPrecisionMicroseconds:
-            mStopTime = AJATime::GetSystemMicroseconds();
-            break;
+		case AJATimerPrecisionMicroseconds:
+			mStopTime = AJATime::GetSystemMicroseconds();
+			break;
 
-        case AJATimerPrecisionNanoseconds:
-            mStopTime = AJATime::GetSystemNanoseconds();
-            break;
-    }
+		case AJATimerPrecisionNanoseconds:
+			mStopTime = AJATime::GetSystemNanoseconds();
+			break;
+	}
 
 	mRun = false;
 }
@@ -91,21 +91,21 @@ AJATimer::ElapsedTime()
 	// compute the elapsed time when running
 	if (mRun)
 	{
-        switch(mPrecision)
-        {
-            default:
-            case AJATimerPrecisionMilliseconds:
-                elapsedTime = (uint32_t)(AJATime::GetSystemMilliseconds() - mStartTime);
-                break;
+		switch(mPrecision)
+		{
+			default:
+			case AJATimerPrecisionMilliseconds:
+				elapsedTime = (uint32_t)(AJATime::GetSystemMilliseconds() - mStartTime);
+				break;
 
-            case AJATimerPrecisionMicroseconds:
-                elapsedTime = (uint32_t)(AJATime::GetSystemMicroseconds() - mStartTime);
-                break;
+			case AJATimerPrecisionMicroseconds:
+				elapsedTime = (uint32_t)(AJATime::GetSystemMicroseconds() - mStartTime);
+				break;
 
-            case AJATimerPrecisionNanoseconds:
-                elapsedTime = (uint32_t)(AJATime::GetSystemNanoseconds() - mStartTime);
-                break;
-        }
+			case AJATimerPrecisionNanoseconds:
+				elapsedTime = (uint32_t)(AJATime::GetSystemNanoseconds() - mStartTime);
+				break;
+		}
 	}
 	// compute the elapsed time when stopped
 	else
@@ -139,32 +139,32 @@ AJATimer::IsRunning(void)
 AJATimerPrecision
 AJATimer::Precision(void)
 {
-    return mPrecision;
+	return mPrecision;
 }
 
 std::string
 AJATimer::PrecisionName(AJATimerPrecision precision, bool longName)
 {
-    std::string retStr;
-    if (longName)
-    {
-        switch(precision)
-        {
-            default:
-            case AJATimerPrecisionMilliseconds: retStr = "milliseconds"; break;
-            case AJATimerPrecisionMicroseconds: retStr = "microseconds"; break;
-            case AJATimerPrecisionNanoseconds:  retStr = "nanoseconds";  break;
-        }
-    }
-    else
-    {
-        switch(precision)
-        {
-            default:
-            case AJATimerPrecisionMilliseconds: retStr = "ms"; break;
-            case AJATimerPrecisionMicroseconds: retStr = "us"; break;
-            case AJATimerPrecisionNanoseconds:  retStr = "ns"; break;
-        }
-    }
-    return retStr;
+	std::string retStr;
+	if (longName)
+	{
+		switch(precision)
+		{
+			default:
+			case AJATimerPrecisionMilliseconds: retStr = "milliseconds"; break;
+			case AJATimerPrecisionMicroseconds: retStr = "microseconds"; break;
+			case AJATimerPrecisionNanoseconds:	retStr = "nanoseconds";	 break;
+		}
+	}
+	else
+	{
+		switch(precision)
+		{
+			default:
+			case AJATimerPrecisionMilliseconds: retStr = "ms"; break;
+			case AJATimerPrecisionMicroseconds: retStr = "us"; break;
+			case AJATimerPrecisionNanoseconds:	retStr = "ns"; break;
+		}
+	}
+	return retStr;
 }

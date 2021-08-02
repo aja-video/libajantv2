@@ -18,7 +18,7 @@
 
 
 #if defined(AJA_WINDOWS)
-    #include "timeapi.h"
+	#include "timeapi.h"
 	static LARGE_INTEGER s_PerformanceFrequency;
 	static bool s_bPerformanceInit = false;
 #endif
@@ -51,19 +51,19 @@ AJATime::GetSystemTime()
 #endif
 
 #if defined(AJA_MAC)
-    static mach_timebase_info_data_t    sTimebaseInfo;
+	static mach_timebase_info_data_t	sTimebaseInfo;
 	uint64_t ticks = mach_absolute_time();
-    
-    if ( sTimebaseInfo.denom == 0 )
-    {
-        (void) mach_timebase_info(&sTimebaseInfo);
-    }
-    
-    // Do the maths. We hope that the multiplication doesn't
-    // overflow; the price you pay for working in fixed point.
-    int64_t nanoSeconds = ticks * sTimebaseInfo.numer / sTimebaseInfo.denom;
-    
-    return nanoSeconds;
+	
+	if ( sTimebaseInfo.denom == 0 )
+	{
+		(void) mach_timebase_info(&sTimebaseInfo);
+	}
+	
+	// Do the maths. We hope that the multiplication doesn't
+	// overflow; the price you pay for working in fixed point.
+	int64_t nanoSeconds = ticks * sTimebaseInfo.numer / sTimebaseInfo.denom;
+	
+	return nanoSeconds;
 #endif
 
 #if defined(AJA_LINUX)
@@ -105,7 +105,7 @@ AJATime::GetSystemCounter()
 #ifdef AJA_USE_CLOCK_GETTIME
 	struct timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (ts.tv_sec * ((int64_t)1000000000)) + (ts.tv_nsec);
+	return (ts.tv_sec * ((int64_t)1000000000)) + (ts.tv_nsec);
 #else
 	struct timeval tv;
 	struct timezone tz;
@@ -134,18 +134,18 @@ AJATime::GetSystemFrequency()
 	if (!s_bPerformanceInit)
 	{
 		// 1 billion ticks approximately equals 1 sec on a Mac
-        static mach_timebase_info_data_t    sTimebaseInfo;
-        uint64_t ticks = 1000000000;
-        
-        if ( sTimebaseInfo.denom == 0 )
-        {
-            (void) mach_timebase_info(&sTimebaseInfo);
-        }
-        
-        // Do the maths. We hope that the multiplication doesn't
-        // overflow; the price you pay for working in fixed point.
-        int64_t nanoSeconds = ticks * sTimebaseInfo.numer / sTimebaseInfo.denom;
-       
+		static mach_timebase_info_data_t	sTimebaseInfo;
+		uint64_t ticks = 1000000000;
+		
+		if ( sTimebaseInfo.denom == 0 )
+		{
+			(void) mach_timebase_info(&sTimebaseInfo);
+		}
+		
+		// Do the maths. We hope that the multiplication doesn't
+		// overflow; the price you pay for working in fixed point.
+		int64_t nanoSeconds = ticks * sTimebaseInfo.numer / sTimebaseInfo.denom;
+	   
 		// system frequency - ticks per second units
 		s_PerformanceFrequency = ticks * 1000000000 / nanoSeconds;	
 		s_bPerformanceInit = true;
@@ -156,9 +156,9 @@ AJATime::GetSystemFrequency()
 
 #if defined(AJA_LINUX)
 #ifdef AJA_USE_CLOCK_GETTIME
-    return 1000000000;
+	return 1000000000;
 #else
-    return 1000000;
+	return 1000000;
 #endif
 #endif
 }
@@ -166,9 +166,9 @@ AJATime::GetSystemFrequency()
 uint64_t 
 AJATime::GetSystemMilliseconds()
 {				
-	uint64_t ticks          = GetSystemCounter();
+	uint64_t ticks			= GetSystemCounter();
 	uint64_t ticksPerSecond = GetSystemFrequency();
-	uint64_t ms             = 0;
+	uint64_t ms				= 0;
 	if (ticksPerSecond)
 	{
 		// floats are being used here to avoid the issue of overflow
@@ -181,14 +181,14 @@ AJATime::GetSystemMilliseconds()
 uint64_t 
 AJATime::GetSystemMicroseconds()
 {
-	uint64_t ticks          = GetSystemCounter();
+	uint64_t ticks			= GetSystemCounter();
 	uint64_t ticksPerSecond = GetSystemFrequency();
-	uint64_t us             = 0;
+	uint64_t us				= 0;
 	if (ticksPerSecond)
 	{
 		// floats are being used here to avoid the issue of overflow
 		// or inaccuracy when chosing where to apply the '1000000' correction
-        us = uint64_t((double(ticks) / double(ticksPerSecond)) * 1000000.);
+		us = uint64_t((double(ticks) / double(ticksPerSecond)) * 1000000.);
 	}
 	return us;
 }
@@ -196,16 +196,16 @@ AJATime::GetSystemMicroseconds()
 uint64_t
 AJATime::GetSystemNanoseconds()
 {
-    uint64_t ticks          = GetSystemCounter();
-    uint64_t ticksPerSecond = GetSystemFrequency();
-    uint64_t us             = 0;
-    if (ticksPerSecond)
-    {
-        // floats are being used here to avoid the issue of overflow
-        // or inaccuracy when chosing where to apply the '1000000000' correction
-        us = uint64_t((double(ticks) / double(ticksPerSecond)) * 1000000000.);
-    }
-    return us;
+	uint64_t ticks			= GetSystemCounter();
+	uint64_t ticksPerSecond = GetSystemFrequency();
+	uint64_t us				= 0;
+	if (ticksPerSecond)
+	{
+		// floats are being used here to avoid the issue of overflow
+		// or inaccuracy when chosing where to apply the '1000000000' correction
+		us = uint64_t((double(ticks) / double(ticksPerSecond)) * 1000000000.);
+	}
+	return us;
 }
 
 // sleep time in milliseconds

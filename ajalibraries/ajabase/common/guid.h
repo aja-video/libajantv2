@@ -14,7 +14,7 @@
 extern "C"
 {
 	#if defined(AJA_WINDOWS)
-        #include <rpc.h>
+		#include <rpc.h>
 	#elif defined(AJA_LINUX)
 		#include <stdio.h>
 	#else

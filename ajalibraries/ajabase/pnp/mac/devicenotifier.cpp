@@ -23,20 +23,20 @@ static const char * GetKernErrStr (const kern_return_t inError);
 
 //	DeviceNotifier-specific Logging Macros
 
-#define	HEX2(__x__)				"0x" << hex << setw(2)  << setfill('0') << (0x00FF     & uint16_t(__x__)) << dec
-#define	HEX4(__x__)				"0x" << hex << setw(4)  << setfill('0') << (0xFFFF     & uint16_t(__x__)) << dec
-#define	HEX8(__x__)				"0x" << hex << setw(8)  << setfill('0') << (0xFFFFFFFF & uint32_t(__x__)) << dec
-#define	HEX16(__x__)			"0x" << hex << setw(16) << setfill('0') <<               uint64_t(__x__)  << dec
+#define HEX2(__x__)				"0x" << hex << setw(2)	<< setfill('0') << (0x00FF	   & uint16_t(__x__)) << dec
+#define HEX4(__x__)				"0x" << hex << setw(4)	<< setfill('0') << (0xFFFF	   & uint16_t(__x__)) << dec
+#define HEX8(__x__)				"0x" << hex << setw(8)	<< setfill('0') << (0xFFFFFFFF & uint32_t(__x__)) << dec
+#define HEX16(__x__)			"0x" << hex << setw(16) << setfill('0') <<				 uint64_t(__x__)  << dec
 #define KR(_kr_)				"kernErr=" << HEX8(_kr_) << "(" << ::GetKernErrStr(_kr_) << ")"
 #define INST(__p__)				"Ins-" << hex << setw(16) << setfill('0') << uint64_t(__p__) << dec
 #define THRD(__t__)				"Thr-" << hex << setw(16) << setfill('0') << uint64_t(__t__) << dec
 
-#define	DNDB(__lvl__, __x__)	AJA_sREPORT(AJA_DebugUnit_PnP, (__lvl__),	INST(this) << ": " << AJAFUNC << ": " << __x__)
-#define	DNFAIL(__x__)			DNDB(AJA_DebugSeverity_Error,	__x__)
-#define	DNWARN(__x__)			DNDB(AJA_DebugSeverity_Warning,	__x__)
-#define	DNNOTE(__x__)			DNDB(AJA_DebugSeverity_Notice,	__x__)
-#define	DNINFO(__x__)			DNDB(AJA_DebugSeverity_Info,	__x__)
-#define	DNDBG(__x__)			DNDB(AJA_DebugSeverity_Debug,	__x__)
+#define DNDB(__lvl__, __x__)	AJA_sREPORT(AJA_DebugUnit_PnP, (__lvl__),	INST(this) << ": " << AJAFUNC << ": " << __x__)
+#define DNFAIL(__x__)			DNDB(AJA_DebugSeverity_Error,	__x__)
+#define DNWARN(__x__)			DNDB(AJA_DebugSeverity_Warning, __x__)
+#define DNNOTE(__x__)			DNDB(AJA_DebugSeverity_Notice,	__x__)
+#define DNINFO(__x__)			DNDB(AJA_DebugSeverity_Info,	__x__)
+#define DNDBG(__x__)			DNDB(AJA_DebugSeverity_Debug,	__x__)
 
 
 // MARK: DeviceNotifier
@@ -158,12 +158,12 @@ void DeviceNotifier::Uninstall ()
 			<< ", m_deviceMatchList.size()=" << m_deviceMatchList.size());
 	//	Release device-matching list...
 	list<io_object_t>::iterator p;
-    for (p = m_deviceMatchList.begin(); p != m_deviceMatchList.end(); ++p)
+	for (p = m_deviceMatchList.begin(); p != m_deviceMatchList.end(); ++p)
 		IOObjectRelease (*p);
 	m_deviceMatchList.clear();
 
 	//	Release device-interest list...
-    for (p = m_deviceInterestList.begin(); p != m_deviceInterestList.end(); ++p)
+	for (p = m_deviceInterestList.begin(); p != m_deviceInterestList.end(); ++p)
 		IOObjectRelease (*p);
 	m_deviceInterestList.clear();
 
@@ -191,7 +191,7 @@ void DeviceNotifier::Uninstall ()
 CFMutableDictionaryRef DeviceNotifier::CreateMatchingDictionary (CFStringRef deviceDriverName)
 {
 	// This high level callbacks only when driver is loaded, goes offline
-	CFMutableDictionaryRef matchingDictionary = CFDictionaryCreateMutable (	kCFAllocatorDefault,
+	CFMutableDictionaryRef matchingDictionary = CFDictionaryCreateMutable ( kCFAllocatorDefault,
 																			0,
 																			&kCFTypeDictionaryKeyCallBacks,
 																			&kCFTypeDictionaryValueCallBacks);
@@ -219,7 +219,7 @@ void DeviceNotifier::DeviceAddedCallback (DeviceNotifier* thisObject, io_iterato
 //--------------------------------------------------------------------------------------------------------------------
 void DeviceNotifier::DeviceAdded (io_iterator_t iterator)
 {
-	io_object_t	service;
+	io_object_t service;
 	bool deviceFound = false;
 	
 	//	This iteration is essential to keep this callback working...
@@ -252,7 +252,7 @@ void DeviceNotifier::DeviceRemovedCallback (DeviceNotifier* thisObject, io_itera
 //--------------------------------------------------------------------------------------------------------------------
 void DeviceNotifier::DeviceRemoved (io_iterator_t iterator)
 {
-	io_object_t	service;
+	io_object_t service;
 	bool deviceFound = false;
 	
 	//	This iteration is essential to keep this callback working...
@@ -293,7 +293,7 @@ void DeviceNotifier::AddGeneralInterest (io_object_t service)
 
 
 //--------------------------------------------------------------------------------------------------------------------
-//  DeviceChangedCallback()
+//	DeviceChangedCallback()
 //	notifier messages sent by the driver
 //--------------------------------------------------------------------------------------------------------------------
 void DeviceNotifier::DeviceChangedCallback (DeviceNotifier* thisObject, io_service_t unitService, natural_t messageType, void* message)
@@ -303,12 +303,12 @@ void DeviceNotifier::DeviceChangedCallback (DeviceNotifier* thisObject, io_servi
 
 
 //--------------------------------------------------------------------------------------------------------------------
-//  DeviceChanged()
+//	DeviceChanged()
 //--------------------------------------------------------------------------------------------------------------------
 void DeviceNotifier::DeviceChanged (io_service_t unitService, natural_t messageType, void* message)
 {
-    (void) unitService;
-    (void) message;
+	(void) unitService;
+	(void) message;
 	DNINFO(MessageTypeToStr(messageType) << ", calling DeviceClientCallback " << INST(m_clientCallback));
 	if (m_clientCallback)
 		(*(m_clientCallback))(messageType, m_refcon);	// notify client
@@ -317,7 +317,7 @@ void DeviceNotifier::DeviceChanged (io_service_t unitService, natural_t messageT
 
 
 //--------------------------------------------------------------------------------------------------------------------
-//  MessageTypeToStr()
+//	MessageTypeToStr()
 //	decode message type
 //--------------------------------------------------------------------------------------------------------------------
 string DeviceNotifier::MessageTypeToStr (const natural_t messageType)
@@ -386,7 +386,7 @@ bool KonaNotifier::Install (CFMutableDictionaryRef matchingDictionary)
 	io_iterator_t notifyIterator_matched, notifyIterator_terminated;
 		
 	// Device Added
-	ioReturn = ::IOServiceAddMatchingNotification (	m_notificationPort,
+	ioReturn = ::IOServiceAddMatchingNotification ( m_notificationPort,
 													kIOMatchedNotification,
 													IOServiceMatching(driverName.c_str ()),
 													reinterpret_cast<IOServiceMatchingCallback>(DeviceAddedCallback), 
@@ -400,7 +400,7 @@ bool KonaNotifier::Install (CFMutableDictionaryRef matchingDictionary)
 	}
 
 	// Device Terminated
-	ioReturn = ::IOServiceAddMatchingNotification (	m_notificationPort,
+	ioReturn = ::IOServiceAddMatchingNotification ( m_notificationPort,
 													kIOTerminatedNotification,
 													IOServiceMatching(driverName.c_str ()),
 													reinterpret_cast<IOServiceMatchingCallback>(DeviceRemovedCallback), 
@@ -419,7 +419,7 @@ bool KonaNotifier::Install (CFMutableDictionaryRef matchingDictionary)
 	m_deviceMatchList.push_back (notifyIterator_terminated);
 
 	DNINFO("On exit: callback installed, deviceInterestList.size=" << m_deviceInterestList.size() << ", deviceMatchList.size=" << m_deviceMatchList.size());
-	return m_deviceInterestList.size() > 0;	//	**MrBill**	SHOULDN'T THIS RETURN m_deviceMatchList.size() > 0	????
+	return m_deviceInterestList.size() > 0; //	**MrBill**	SHOULDN'T THIS RETURN m_deviceMatchList.size() > 0	????
 
 }	//	KonaNotifier::Install
 
@@ -467,7 +467,7 @@ static const char * GetKernErrStr (const kern_return_t inError)
 		case kIOReturnNotPermitted:		return "kIOReturnNotPermitted";
 		case kIOReturnNoPower:			return "kIOReturnNoPower";
 		case kIOReturnNoMedia:			return "kIOReturnNoMedia";
-		case kIOReturnUnformattedMedia:	return "kIOReturnUnformattedMedia";
+		case kIOReturnUnformattedMedia: return "kIOReturnUnformattedMedia";
 		case kIOReturnUnsupportedMode:	return "kIOReturnUnsupportedMode";
 		case kIOReturnUnderrun:			return "kIOReturnUnderrun";
 		case kIOReturnOverrun:			return "kIOReturnOverrun";

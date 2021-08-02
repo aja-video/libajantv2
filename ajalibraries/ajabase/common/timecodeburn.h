@@ -23,7 +23,7 @@ public:
 	AJA_EXPORT virtual ~AJATimeCodeBurn(void);
 	/**
 	 *	Render a small set of characters for timecode ahead of time...This needs to be called before
-	 *  BurnTimeCode or BurnTimeCode will fail.
+	 *	BurnTimeCode or BurnTimeCode will fail.
 	 *
 	 *	@param[in]	pixelFormat		Specifies the pixel format of the rendering buffer.
 	 *	@param[in]	numPixels		Specifies the raster bitmap width.
@@ -37,8 +37,8 @@ public:
 	 *
 	 *	@param[in]	pBaseVideoAddress	Base address of Raster
 	 *	@param[in]	inTimeCodeStr		A string containing something like "00:00:00:00"
-	 *	@param[in]	inYPercent		    Percent down the screen. If 0, will make it 80.
-	 *	@returns    True if successful;  otherwise false.
+	 *	@param[in]	inYPercent			Percent down the screen. If 0, will make it 80.
+	 *	@returns	True if successful;	 otherwise false.
 	 */
 	AJA_EXPORT bool BurnTimeCode (void * pBaseVideoAddress, const std::string & inTimeCodeStr, const uint32_t inYPercent);
 
@@ -56,7 +56,7 @@ protected:
 private:
 	bool				_bRendered;			// set 'true' when Burn-In character map has been rendered
 	char *				_pCharRenderMap;	// ptr to rendered Burn-In character set
-	AJA_PixelFormat		_charRenderPixelFormat;	// frame buffer format of rendered characters
+	AJA_PixelFormat		_charRenderPixelFormat; // frame buffer format of rendered characters
 	int					_charRenderHeight;	// frame height for which rendered characters were rendered
 	int					_charRenderWidth;	// frame width for which rendered characters were rendered
 	int					_charWidthBytes;	// rendered character width in bytes

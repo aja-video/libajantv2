@@ -383,7 +383,7 @@ class AJAExport CNTV2DriverInterface
 			@param	pMessage	Points to the HevcMessageHeader that contains the HEVC message.
 			@return	False. This must be implemented by the platform-specific subclass.
 		**/
-	    AJA_VIRTUAL inline bool	HevcSendMessage (HevcMessageHeader * pMessage)		{(void) pMessage; return false;}
+		AJA_VIRTUAL inline bool	HevcSendMessage (HevcMessageHeader * pMessage)		{(void) pMessage; return false;}
 
 		AJA_VIRTUAL bool	ControlDriverDebugMessages (NTV2_DriverDebugMessageSet msgSet,  bool enable) = 0;
 	///@}

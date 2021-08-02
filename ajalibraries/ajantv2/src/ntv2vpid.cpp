@@ -9,7 +9,7 @@
 #include "ntv2vpidfromspec.h"
 #include "ntv2debug.h"
 #include "ntv2utils.h"
-#include "ntv2registerexpert.h"	//	For YesNo macro
+#include "ntv2registerexpert.h" //	For YesNo macro
 #include <string.h>
 
 using namespace std;
@@ -33,16 +33,16 @@ static NTV2VideoFormat	stTable3840pTSI		[VPIDPictureRate_ReservedF + 1];
 static NTV2VideoFormat	stTable4096pTSI		[VPIDPictureRate_ReservedF + 1];
 static NTV2VideoFormat	stTable7680p		[VPIDPictureRate_ReservedF + 1];
 static NTV2VideoFormat	stTable8192p		[VPIDPictureRate_ReservedF + 1];
-static bool				stTablesInitialized	(false);
+static bool				stTablesInitialized (false);
 
 class VPIDTableInitializer
 {
 	public:
 		VPIDTableInitializer ()
 		{
-			for (int i = 0;  i < VPIDPictureRate_ReservedF + 1;  i++)
+			for (int i = 0;	 i < VPIDPictureRate_ReservedF + 1;	 i++)
 			{
-				stTable720p[i]  = NTV2_FORMAT_UNKNOWN;
+				stTable720p[i]	= NTV2_FORMAT_UNKNOWN;
 				stTable2048p[i] = NTV2_FORMAT_UNKNOWN;
 				stTable2048p[i] = NTV2_FORMAT_UNKNOWN;
 				stTable2048p[i] = NTV2_FORMAT_UNKNOWN;
@@ -154,45 +154,45 @@ class VPIDTableInitializer
 			stTable4096psfSID[VPIDPictureRate_5994] = NTV2_FORMAT_4x2048x1080p_5994;
 			stTable4096psfSID[VPIDPictureRate_6000] = NTV2_FORMAT_4x2048x1080p_6000;
 
-            stTable3840pTSI[VPIDPictureRate_2398] = NTV2_FORMAT_3840x2160p_2398;
-            stTable3840pTSI[VPIDPictureRate_2400] = NTV2_FORMAT_3840x2160p_2400;
-            stTable3840pTSI[VPIDPictureRate_2500] = NTV2_FORMAT_3840x2160p_2500;
-            stTable3840pTSI[VPIDPictureRate_2997] = NTV2_FORMAT_3840x2160p_2997;
-            stTable3840pTSI[VPIDPictureRate_3000] = NTV2_FORMAT_3840x2160p_3000;
-            stTable3840pTSI[VPIDPictureRate_5000] = NTV2_FORMAT_3840x2160p_5000;
-            stTable3840pTSI[VPIDPictureRate_5994] = NTV2_FORMAT_3840x2160p_5994;
-            stTable3840pTSI[VPIDPictureRate_6000] = NTV2_FORMAT_3840x2160p_6000;
+			stTable3840pTSI[VPIDPictureRate_2398] = NTV2_FORMAT_3840x2160p_2398;
+			stTable3840pTSI[VPIDPictureRate_2400] = NTV2_FORMAT_3840x2160p_2400;
+			stTable3840pTSI[VPIDPictureRate_2500] = NTV2_FORMAT_3840x2160p_2500;
+			stTable3840pTSI[VPIDPictureRate_2997] = NTV2_FORMAT_3840x2160p_2997;
+			stTable3840pTSI[VPIDPictureRate_3000] = NTV2_FORMAT_3840x2160p_3000;
+			stTable3840pTSI[VPIDPictureRate_5000] = NTV2_FORMAT_3840x2160p_5000;
+			stTable3840pTSI[VPIDPictureRate_5994] = NTV2_FORMAT_3840x2160p_5994;
+			stTable3840pTSI[VPIDPictureRate_6000] = NTV2_FORMAT_3840x2160p_6000;
 
-            stTable4096pTSI[VPIDPictureRate_2398] = NTV2_FORMAT_4096x2160p_2398;
-            stTable4096pTSI[VPIDPictureRate_2400] = NTV2_FORMAT_4096x2160p_2400;
-            stTable4096pTSI[VPIDPictureRate_2500] = NTV2_FORMAT_4096x2160p_2500;
-            stTable4096pTSI[VPIDPictureRate_2997] = NTV2_FORMAT_4096x2160p_2997;
-            stTable4096pTSI[VPIDPictureRate_3000] = NTV2_FORMAT_4096x2160p_3000;
-            stTable4096pTSI[VPIDPictureRate_4795] = NTV2_FORMAT_4096x2160p_4795;
-            stTable4096pTSI[VPIDPictureRate_4800] = NTV2_FORMAT_4096x2160p_4800;
-            stTable4096pTSI[VPIDPictureRate_5000] = NTV2_FORMAT_4096x2160p_5000;
-            stTable4096pTSI[VPIDPictureRate_5994] = NTV2_FORMAT_4096x2160p_5994;
-            stTable4096pTSI[VPIDPictureRate_6000] = NTV2_FORMAT_4096x2160p_6000;
+			stTable4096pTSI[VPIDPictureRate_2398] = NTV2_FORMAT_4096x2160p_2398;
+			stTable4096pTSI[VPIDPictureRate_2400] = NTV2_FORMAT_4096x2160p_2400;
+			stTable4096pTSI[VPIDPictureRate_2500] = NTV2_FORMAT_4096x2160p_2500;
+			stTable4096pTSI[VPIDPictureRate_2997] = NTV2_FORMAT_4096x2160p_2997;
+			stTable4096pTSI[VPIDPictureRate_3000] = NTV2_FORMAT_4096x2160p_3000;
+			stTable4096pTSI[VPIDPictureRate_4795] = NTV2_FORMAT_4096x2160p_4795;
+			stTable4096pTSI[VPIDPictureRate_4800] = NTV2_FORMAT_4096x2160p_4800;
+			stTable4096pTSI[VPIDPictureRate_5000] = NTV2_FORMAT_4096x2160p_5000;
+			stTable4096pTSI[VPIDPictureRate_5994] = NTV2_FORMAT_4096x2160p_5994;
+			stTable4096pTSI[VPIDPictureRate_6000] = NTV2_FORMAT_4096x2160p_6000;
 			
 			stTable7680p[VPIDPictureRate_2398] = NTV2_FORMAT_4x3840x2160p_2398;
-            stTable7680p[VPIDPictureRate_2400] = NTV2_FORMAT_4x3840x2160p_2400;
-            stTable7680p[VPIDPictureRate_2500] = NTV2_FORMAT_4x3840x2160p_2500;
-            stTable7680p[VPIDPictureRate_2997] = NTV2_FORMAT_4x3840x2160p_2997;
-            stTable7680p[VPIDPictureRate_3000] = NTV2_FORMAT_4x3840x2160p_3000;
-            stTable7680p[VPIDPictureRate_5000] = NTV2_FORMAT_4x3840x2160p_5000;
-            stTable7680p[VPIDPictureRate_5994] = NTV2_FORMAT_4x3840x2160p_5994;
-            stTable7680p[VPIDPictureRate_6000] = NTV2_FORMAT_4x3840x2160p_6000;
+			stTable7680p[VPIDPictureRate_2400] = NTV2_FORMAT_4x3840x2160p_2400;
+			stTable7680p[VPIDPictureRate_2500] = NTV2_FORMAT_4x3840x2160p_2500;
+			stTable7680p[VPIDPictureRate_2997] = NTV2_FORMAT_4x3840x2160p_2997;
+			stTable7680p[VPIDPictureRate_3000] = NTV2_FORMAT_4x3840x2160p_3000;
+			stTable7680p[VPIDPictureRate_5000] = NTV2_FORMAT_4x3840x2160p_5000;
+			stTable7680p[VPIDPictureRate_5994] = NTV2_FORMAT_4x3840x2160p_5994;
+			stTable7680p[VPIDPictureRate_6000] = NTV2_FORMAT_4x3840x2160p_6000;
 
-            stTable8192p[VPIDPictureRate_2398] = NTV2_FORMAT_4x4096x2160p_2398;
-            stTable8192p[VPIDPictureRate_2400] = NTV2_FORMAT_4x4096x2160p_2400;
-            stTable8192p[VPIDPictureRate_2500] = NTV2_FORMAT_4x4096x2160p_2500;
-            stTable8192p[VPIDPictureRate_2997] = NTV2_FORMAT_4x4096x2160p_2997;
-            stTable8192p[VPIDPictureRate_3000] = NTV2_FORMAT_4x4096x2160p_3000;
-            stTable8192p[VPIDPictureRate_4795] = NTV2_FORMAT_4x4096x2160p_4795;
-            stTable8192p[VPIDPictureRate_4800] = NTV2_FORMAT_4x4096x2160p_4800;
-            stTable8192p[VPIDPictureRate_5000] = NTV2_FORMAT_4x4096x2160p_5000;
-            stTable8192p[VPIDPictureRate_5994] = NTV2_FORMAT_4x4096x2160p_5994;
-            stTable8192p[VPIDPictureRate_6000] = NTV2_FORMAT_4x4096x2160p_6000;
+			stTable8192p[VPIDPictureRate_2398] = NTV2_FORMAT_4x4096x2160p_2398;
+			stTable8192p[VPIDPictureRate_2400] = NTV2_FORMAT_4x4096x2160p_2400;
+			stTable8192p[VPIDPictureRate_2500] = NTV2_FORMAT_4x4096x2160p_2500;
+			stTable8192p[VPIDPictureRate_2997] = NTV2_FORMAT_4x4096x2160p_2997;
+			stTable8192p[VPIDPictureRate_3000] = NTV2_FORMAT_4x4096x2160p_3000;
+			stTable8192p[VPIDPictureRate_4795] = NTV2_FORMAT_4x4096x2160p_4795;
+			stTable8192p[VPIDPictureRate_4800] = NTV2_FORMAT_4x4096x2160p_4800;
+			stTable8192p[VPIDPictureRate_5000] = NTV2_FORMAT_4x4096x2160p_5000;
+			stTable8192p[VPIDPictureRate_5994] = NTV2_FORMAT_4x4096x2160p_5994;
+			stTable8192p[VPIDPictureRate_6000] = NTV2_FORMAT_4x4096x2160p_6000;
 			
 			stTablesInitialized = true;
 		}	//	constructor
@@ -200,7 +200,7 @@ class VPIDTableInitializer
 };	//	VPIDTableInitializer
 
 
-static VPIDTableInitializer	gVPIDTableInitializer;
+static VPIDTableInitializer gVPIDTableInitializer;
 
 
 CNTV2VPID::CNTV2VPID(const ULWord inData)
@@ -591,7 +591,7 @@ VPIDDynamicRange CNTV2VPID::GetDynamicRange (void) const
 //	static - this one doesn't support 3Gb
 bool CNTV2VPID::SetVPIDData (ULWord &					outVPID,
 							const NTV2VideoFormat		inOutputFormat,
-							const NTV2FrameBufferFormat	inFrameBufferFormat,
+							const NTV2FrameBufferFormat inFrameBufferFormat,
 							const bool					inIsProgressive,
 							const bool					inIs16x9Aspect,
 							const VPIDChannel			inChannel,
@@ -617,7 +617,7 @@ bool CNTV2VPID::SetVPIDData (ULWord &					outVPID,
 	case NTV2_FBF_10BIT_DPX:
 	case NTV2_FBF_24BIT_RGB:
 	case NTV2_FBF_24BIT_BGR:
-    case NTV2_FBF_10BIT_DPX_LE:
+	case NTV2_FBF_10BIT_DPX_LE:
 	case NTV2_FBF_10BIT_RGB_PACKED:
 	case NTV2_FBF_10BIT_ARGB:
 	case NTV2_FBF_16BIT_ARGB:
@@ -652,9 +652,9 @@ bool CNTV2VPID::SetVPIDData (ULWord &				outVPID,
 							const bool				inUseChannel,
 							const bool				inOutputIs6G,
 							const bool				inOutputIs12G,
-							const NTV2VPIDXferChars	inXferChars,
+							const NTV2VPIDXferChars inXferChars,
 							const NTV2VPIDColorimetry	inColorimetry,
-							const NTV2VPIDLuminance	inLuminance,
+							const NTV2VPIDLuminance inLuminance,
 							const NTV2VPIDRGBRange	inRGBRange)
 {
 	VPIDSpec vpidSpec;
@@ -687,11 +687,11 @@ bool CNTV2VPID::SetVPIDData (ULWord &				outVPID,
 
 NTV2VideoFormat CNTV2VPID::GetVideoFormat (void) const
 {
-	NTV2VideoFormat  videoFormat = NTV2_FORMAT_UNKNOWN;
+	NTV2VideoFormat	 videoFormat = NTV2_FORMAT_UNKNOWN;
 	VPIDStandard vpidStandard	 = GetStandard();
-	bool vpidProgPicture         = GetProgressivePicture();
-	bool vpidProgTransport       = GetProgressiveTransport();
-	bool vpidHorizontal2048      = ((m_uVPID & kRegMaskVPIDHorizontalSampling) != 0);
+	bool vpidProgPicture		 = GetProgressivePicture();
+	bool vpidProgTransport		 = GetProgressiveTransport();
+	bool vpidHorizontal2048		 = ((m_uVPID & kRegMaskVPIDHorizontalSampling) != 0);
 
 	VPIDPictureRate vpidFrameRate = GetPictureRate();
 
@@ -1034,8 +1034,8 @@ const string CNTV2VPID::VPIDVersionToString (const VPIDVersion inVers)
 {
 	switch (inVers)
 	{
-		case VPIDVersion_0:	return "0";
-		case VPIDVersion_1:	return "1";
+		case VPIDVersion_0: return "0";
+		case VPIDVersion_1: return "1";
 	#if !defined(_DEBUG)
 		default:	break;
 	#endif
@@ -1330,20 +1330,20 @@ bool CNTV2VPID::VPIDStandardIsOctLink (const VPIDStandard inStd)
 }
 
 
-static const string sVPIDPictureRate[]	= {	"None", "Reserved1", "23.98", "24.00", "47.95", "25.00", "29.97", "30.00", "48.00", "50.00", "59.94", "60.00",
-											"ReservedC",    "ReservedD",    "ReservedE",    "ReservedF"	};
-static const string sVPIDSampling[]		= {	"YCbCr 4:2:2",	"YCbCr 4:4:4",	"GBR 4:4:4",	"YCbCr 4:2:0",	"YCbCrA 4:2:2:4",	"YCbCrA 4:4:4:4",
-											"GBRA 4:4:4:4",	"Reserved7",	"YCbCrD 4:2:2:4",	"YCbCrD 4:4:4:4",	"GBRD 4:4:4:4",	"ReservedB",
-											"ReservedC",	"ReservedD",	"ReservedE",	"XYZ 4:4:4"	};
-static const string sVPIDChannel[]		= {	"1", "2", "3", "4", "5", "6", "7", "8"	};
-static const string sVPIDDynamicRange[]	= {	"100", "200", "400", "Reserved3"	};
-static const string sVPIDBitDepth[]		= {	"10 Full", "10", "12", "12 Full"	};
-static const string sVPIDLink[]			= {	"1", "2", "3", "4", "5", "6", "7", "8"	};
-static const string	sVPIDAudio[]		= {	"Unknown", "Copied", "Additional", "Reserved" };
+static const string sVPIDPictureRate[]	= { "None", "Reserved1", "23.98", "24.00", "47.95", "25.00", "29.97", "30.00", "48.00", "50.00", "59.94", "60.00",
+											"ReservedC",	"ReservedD",	"ReservedE",	"ReservedF" };
+static const string sVPIDSampling[]		= { "YCbCr 4:2:2",	"YCbCr 4:4:4",	"GBR 4:4:4",	"YCbCr 4:2:0",	"YCbCrA 4:2:2:4",	"YCbCrA 4:4:4:4",
+											"GBRA 4:4:4:4", "Reserved7",	"YCbCrD 4:2:2:4",	"YCbCrD 4:4:4:4",	"GBRD 4:4:4:4", "ReservedB",
+											"ReservedC",	"ReservedD",	"ReservedE",	"XYZ 4:4:4" };
+static const string sVPIDChannel[]		= { "1", "2", "3", "4", "5", "6", "7", "8"	};
+static const string sVPIDDynamicRange[] = { "100", "200", "400", "Reserved3"	};
+static const string sVPIDBitDepth[]		= { "10 Full", "10", "12", "12 Full"	};
+static const string sVPIDLink[]			= { "1", "2", "3", "4", "5", "6", "7", "8"	};
+static const string sVPIDAudio[]		= { "Unknown", "Copied", "Additional", "Reserved" };
 static const string sVPIDTransfer[]		= { "SDR", "HLG", "PQ", "Unspecified" };
 static const string sVPIDColorimetry[]	= { "Rec709", "Reserved", "UHDTV", "Unknown" };
 static const string sVPIDLuminance[]	= { "YCbCr", "ICtCp" };
-static const string sVPIDRGBRange[]	= { "Narrow", "Full" };
+static const string sVPIDRGBRange[] = { "Narrow", "Full" };
 
 
 
@@ -1375,25 +1375,25 @@ ostream & CNTV2VPID::PrintPretty (ostream & ostrm) const
 	ostrm	<< "VPID " << xHEX0N(m_uVPID,8) << endl
 			<< "Version = " << CNTV2VPID::VPIDVersionToString(GetVersion()) << endl;
 	if (IsValid())
-		ostrm	<< "Standard =  " << CNTV2VPID::VPIDStandardToString(GetStandard()) << endl
+		ostrm	<< "Standard =	" << CNTV2VPID::VPIDStandardToString(GetStandard()) << endl
 				<< "Format =  " << ::NTV2VideoFormatToString(GetVideoFormat()) << endl
 				<< "Frame Rate = " << sVPIDPictureRate[GetPictureRate()] << endl
 				<< "Sampling = " << sVPIDSampling[GetSampling()] << endl
 				<< "Channel = " << sVPIDChannel[GetChannel()] << endl
 				<< "Links = " << (VPIDStandardIsSingleLink(GetStandard()) ? "1" : "mult") << endl
-            //	<< " dynRange=" << sVPIDDynamicRange[GetDynamicRange()] << endl
+			//	<< " dynRange=" << sVPIDDynamicRange[GetDynamicRange()] << endl
 				<< "Bit Depth =" << sVPIDBitDepth[GetBitDepth()] << endl
 				<< "3Ga= " << YesNo(IsStandard3Ga()) << endl
 				<< "TSI = " << YesNo(IsStandardTwoSampleInterleave()) << endl
 				<< "16x9 = " << YesNo(GetImageAspect16x9()) << endl
 				<< "Xfer Char = " << sVPIDTransfer[GetTransferCharacteristics()] << endl
-				<< "Colorimetry ="  << sVPIDColorimetry[GetColorimetry()] << endl
+				<< "Colorimetry ="	<< sVPIDColorimetry[GetColorimetry()] << endl
 				<< "Luminance = " << sVPIDLuminance[GetLuminance()] << endl
 				<< "RGB Range = " << sVPIDRGBRange[GetRGBRange()] << endl;
 	return ostrm;
 }
 
-#define	YesOrNo(__x__)		((__x__) ? "Yes" : "No")
+#define YesOrNo(__x__)		((__x__) ? "Yes" : "No")
 
 AJALabelValuePairs & CNTV2VPID::GetInfo (AJALabelValuePairs & outInfo) const
 {
@@ -1404,7 +1404,7 @@ AJALabelValuePairs & CNTV2VPID::GetInfo (AJALabelValuePairs & outInfo) const
 		return outInfo;
 	AJASystemInfo::append(outInfo, "Standard",				CNTV2VPID::VPIDStandardToString(GetStandard()));
 	AJASystemInfo::append(outInfo, "Video Format",			::NTV2VideoFormatToString(GetVideoFormat()));
-	AJASystemInfo::append(outInfo, "Progressive Transport",	YesOrNo(GetProgressiveTransport()));
+	AJASystemInfo::append(outInfo, "Progressive Transport", YesOrNo(GetProgressiveTransport()));
 	AJASystemInfo::append(outInfo, "Progressive Picture",	YesOrNo(GetProgressivePicture()));
 	AJASystemInfo::append(outInfo, "Frame Rate",			sVPIDPictureRate[GetPictureRate()]);
 	AJASystemInfo::append(outInfo, "Sampling",				sVPIDSampling[GetSampling()]);
@@ -1413,7 +1413,7 @@ AJALabelValuePairs & CNTV2VPID::GetInfo (AJALabelValuePairs & outInfo) const
 //	AJASystemInfo::append(outInfo, "Dynamic Range",			sVPIDDynamicRange[GetDynamicRange()]);
 	AJASystemInfo::append(outInfo, "Bit Depth",				sVPIDBitDepth[GetBitDepth()]);
 	AJASystemInfo::append(outInfo, "3Ga",					YesOrNo(IsStandard3Ga()));
-	AJASystemInfo::append(outInfo, "Two Sample Interleave",	YesOrNo(IsStandardTwoSampleInterleave()));
+	AJASystemInfo::append(outInfo, "Two Sample Interleave", YesOrNo(IsStandardTwoSampleInterleave()));
 	AJASystemInfo::append(outInfo, "Aspect Ratio",			GetImageAspect16x9() ? "16x9" : "4x3");
 	AJASystemInfo::append(outInfo, "Xfer Characteristics",	sVPIDTransfer[GetTransferCharacteristics()]);
 	AJASystemInfo::append(outInfo, "Colorimetry",			sVPIDColorimetry[GetColorimetry()]);

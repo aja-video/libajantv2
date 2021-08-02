@@ -21,21 +21,21 @@ typedef WINSETUPAPI
 HDEVINFO
 (WINAPI *
 pfcnSetupDiGetClassDevsA)(
-    IN CONST GUID *ClassGuid,  OPTIONAL
-    IN PCSTR       Enumerator, OPTIONAL
-    IN HWND        hwndParent, OPTIONAL
-    IN DWORD       Flags
-    );
+	IN CONST GUID *ClassGuid,  OPTIONAL
+	IN PCSTR	   Enumerator, OPTIONAL
+	IN HWND		   hwndParent, OPTIONAL
+	IN DWORD	   Flags
+	);
 
 typedef WINSETUPAPI
 HDEVINFO
 (WINAPI *
 pfcnSetupDiGetClassDevsW)(
-    IN CONST GUID *ClassGuid,  OPTIONAL
-    IN PCWSTR      Enumerator, OPTIONAL
-    IN HWND        hwndParent, OPTIONAL
-    IN DWORD       Flags
-    );
+	IN CONST GUID *ClassGuid,  OPTIONAL
+	IN PCWSTR	   Enumerator, OPTIONAL
+	IN HWND		   hwndParent, OPTIONAL
+	IN DWORD	   Flags
+	);
 #ifdef UNICODE
 #define pfcnSetupDiGetClassDevs pfcnSetupDiGetClassDevsW
 #else
@@ -46,36 +46,36 @@ typedef WINSETUPAPI
 BOOL
 (WINAPI *
 pfcnSetupDiEnumDeviceInterfaces)(
-    IN  HDEVINFO                   DeviceInfoSet,
-    IN  PSP_DEVINFO_DATA           DeviceInfoData,     OPTIONAL
-    IN  CONST GUID                *InterfaceClassGuid,
-    IN  DWORD                      MemberIndex,
-    OUT PSP_DEVICE_INTERFACE_DATA  DeviceInterfaceData
-    );
+	IN	HDEVINFO				   DeviceInfoSet,
+	IN	PSP_DEVINFO_DATA		   DeviceInfoData,	   OPTIONAL
+	IN	CONST GUID				  *InterfaceClassGuid,
+	IN	DWORD					   MemberIndex,
+	OUT PSP_DEVICE_INTERFACE_DATA  DeviceInterfaceData
+	);
 
 
 typedef WINSETUPAPI
 BOOL
 (WINAPI *
 pfcnSetupDiGetDeviceInterfaceDetailA)(
-    IN  HDEVINFO                           DeviceInfoSet,
-    IN  PSP_DEVICE_INTERFACE_DATA          DeviceInterfaceData,
-    OUT PSP_DEVICE_INTERFACE_DETAIL_DATA_A DeviceInterfaceDetailData,     OPTIONAL
-    IN  DWORD                              DeviceInterfaceDetailDataSize,
-    OUT PDWORD                             RequiredSize,                  OPTIONAL
-    OUT PSP_DEVINFO_DATA                   DeviceInfoData                 OPTIONAL
-    );
+	IN	HDEVINFO						   DeviceInfoSet,
+	IN	PSP_DEVICE_INTERFACE_DATA		   DeviceInterfaceData,
+	OUT PSP_DEVICE_INTERFACE_DETAIL_DATA_A DeviceInterfaceDetailData,	  OPTIONAL
+	IN	DWORD							   DeviceInterfaceDetailDataSize,
+	OUT PDWORD							   RequiredSize,				  OPTIONAL
+	OUT PSP_DEVINFO_DATA				   DeviceInfoData				  OPTIONAL
+	);
 
 typedef WINSETUPAPI
 BOOL
 (WINAPI *
 pfcnSetupDiGetDeviceInterfaceDetailW)(
-    IN  HDEVINFO                           DeviceInfoSet,
-    IN  PSP_DEVICE_INTERFACE_DATA          DeviceInterfaceData,
-    OUT PSP_DEVICE_INTERFACE_DETAIL_DATA_W DeviceInterfaceDetailData,     OPTIONAL
-    IN  DWORD                              DeviceInterfaceDetailDataSize,
-    OUT PDWORD                             RequiredSize,                  OPTIONAL
-    OUT PSP_DEVINFO_DATA                   DeviceInfoData                 OPTIONAL
+	IN	HDEVINFO						   DeviceInfoSet,
+	IN	PSP_DEVICE_INTERFACE_DATA		   DeviceInterfaceData,
+	OUT PSP_DEVICE_INTERFACE_DETAIL_DATA_W DeviceInterfaceDetailData,	  OPTIONAL
+	IN	DWORD							   DeviceInterfaceDetailDataSize,
+	OUT PDWORD							   RequiredSize,				  OPTIONAL
+	OUT PSP_DEVINFO_DATA				   DeviceInfoData				  OPTIONAL
 	);
 #ifdef UNICODE
 #define pfcnSetupDiGetDeviceInterfaceDetail pfcnSetupDiGetDeviceInterfaceDetailW
@@ -94,9 +94,9 @@ typedef WINSETUPAPI
 BOOL
 (WINAPI *
  pfcnSetupDiDestroyDriverInfoList)(
- IN HDEVINFO         DeviceInfoSet,
+ IN HDEVINFO		 DeviceInfoSet,
  IN PSP_DEVINFO_DATA DeviceInfoData, OPTIONAL
- IN DWORD            DriverType
+ IN DWORD			 DriverType
  );
 
 static pfcnSetupDiGetClassDevs pSetupDiGetClassDevs = NULL;
@@ -112,7 +112,7 @@ HINSTANCE hSetupAPI = NULL;
 static std::string GetKernErrStr (const DWORD inError)
 {
 	LPVOID lpMsgBuf(NULL);
-	FormatMessage (	FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+	FormatMessage ( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 					NULL,
 					inError,
 					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
@@ -130,18 +130,18 @@ static std::string GetKernErrStr (const DWORD inError)
 
 
 //	WinDriverInterface Logging Macros
-#define	HEX2(__x__)			"0x" << hex << setw(2)  << setfill('0') << (0xFF       & uint8_t (__x__)) << dec
-#define	HEX4(__x__)			"0x" << hex << setw(4)  << setfill('0') << (0xFFFF     & uint16_t(__x__)) << dec
-#define	HEX8(__x__)			"0x" << hex << setw(8)  << setfill('0') << (0xFFFFFFFF & uint32_t(__x__)) << dec
-#define	HEX16(__x__)		"0x" << hex << setw(16) << setfill('0') <<               uint64_t(__x__)  << dec
+#define HEX2(__x__)			"0x" << hex << setw(2)	<< setfill('0') << (0xFF	   & uint8_t (__x__)) << dec
+#define HEX4(__x__)			"0x" << hex << setw(4)	<< setfill('0') << (0xFFFF	   & uint16_t(__x__)) << dec
+#define HEX8(__x__)			"0x" << hex << setw(8)	<< setfill('0') << (0xFFFFFFFF & uint32_t(__x__)) << dec
+#define HEX16(__x__)		"0x" << hex << setw(16) << setfill('0') <<				 uint64_t(__x__)  << dec
 #define KR(_kr_)			"kernResult=" << HEX8(_kr_) << "(" << GetKernErrStr(_kr_) << ")"
 #define INSTP(_p_)			HEX16(uint64_t(_p_))
 
-#define	WDIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface,  INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	WDIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface,  INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	WDINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface,  INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	WDIINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_DriverInterface,  INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	WDIDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_DriverInterface,  INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define WDIFAIL(__x__)		AJA_sERROR	(AJA_DebugUnit_DriverInterface,	 INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define WDIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface,	 INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define WDINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface,	 INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define WDIINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_DriverInterface,	 INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define WDIDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_DriverInterface,	 INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 
 
 CNTV2WinDriverInterface::CNTV2WinDriverInterface()
@@ -190,7 +190,7 @@ bool CNTV2WinDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 	DWORD dwReqSize=0;
 	SP_DEVICE_INTERFACE_DATA spDevIFaceData;
 	memset(&spDevIFaceData, 0, sizeof(SP_DEVICE_INTERFACE_DATA));
-	GUID myguid = refguid;  // an un-const guid for compiling with new Platform SDK!
+	GUID myguid = refguid;	// an un-const guid for compiling with new Platform SDK!
 	_hDevInfoSet = SetupDiGetClassDevs(&myguid, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 	if (_hDevInfoSet == INVALID_HANDLE_VALUE)
 		return false;
@@ -294,7 +294,7 @@ bool CNTV2WinDriverInterface::CloseLocalPhysical (void)
 // Read and Write Register methods
 ///////////////////////////////////////////////////////////////////////////////////
 
-bool CNTV2WinDriverInterface::ReadRegister (const ULWord inRegNum,  ULWord & outValue,  const ULWord inMask,  const ULWord inShift)
+bool CNTV2WinDriverInterface::ReadRegister (const ULWord inRegNum,	ULWord & outValue,	const ULWord inMask,  const ULWord inShift)
 {
 	if (!IsOpen())
 		return false;
@@ -329,7 +329,7 @@ bool CNTV2WinDriverInterface::ReadRegister (const ULWord inRegNum,  ULWord & out
 }
 
 
-bool CNTV2WinDriverInterface::WriteRegister (const ULWord inRegNum,  const ULWord inValue,  const ULWord inMask, const ULWord inShift)
+bool CNTV2WinDriverInterface::WriteRegister (const ULWord inRegNum,	 const ULWord inValue,	const ULWord inMask, const ULWord inShift)
 {
 	if (!IsOpen())
 		return false;
@@ -341,7 +341,7 @@ bool CNTV2WinDriverInterface::WriteRegister (const ULWord inRegNum,  const ULWor
 #if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
 	if (mRecordRegWrites)
 	{
-		AJAAutoLock	autoLock(&mRegWritesLock);
+		AJAAutoLock autoLock(&mRegWritesLock);
 		mRegWrites.push_back(NTV2RegInfo(inRegNum, inValue, inMask, inShift));
 		if (mSkipRegWrites)
 			return true;
@@ -379,7 +379,7 @@ bool CNTV2WinDriverInterface::WriteRegister (const ULWord inRegNum,  const ULWor
 // Method:	ConfigureInterrupt
 // Input:	bool bEnable (turn on/off interrupt), INTERRUPT_ENUMS eInterruptType
 // Output:	bool status
-// Purpose:	Provides a 1 point connection to driver for interrupt calls
+// Purpose: Provides a 1 point connection to driver for interrupt calls
 bool CNTV2WinDriverInterface::ConfigureInterrupt (const bool bEnable, const INTERRUPT_ENUMS eInterruptType)
 {
 	if (!IsOpen())
@@ -394,8 +394,8 @@ bool CNTV2WinDriverInterface::ConfigureInterrupt (const bool bEnable, const INTE
 	propStruct.Property.Flags	= bEnable ? KSPROPERTY_TYPE_GET : KSPROPERTY_TYPE_SET;
 	propStruct.eInterrupt		= eInterruptType;
 
-	if (!DeviceIoControl (_hDevice,  IOCTL_AJAPROPS_INTERRUPTS,  &propStruct,  sizeof(KSPROPERTY_AJAPROPS_INTERRUPTS_S),
-							&propStruct,  sizeof(KSPROPERTY_AJAPROPS_INTERRUPTS_S),  &dwBytesReturned,  NULL))
+	if (!DeviceIoControl (_hDevice,	 IOCTL_AJAPROPS_INTERRUPTS,	 &propStruct,  sizeof(KSPROPERTY_AJAPROPS_INTERRUPTS_S),
+							&propStruct,  sizeof(KSPROPERTY_AJAPROPS_INTERRUPTS_S),	 &dwBytesReturned,	NULL))
 	{
 		WDIFAIL("interruptType=" << DEC(eInterruptType) << " enable=" << (bEnable?"Y":"N") << " failed: " << ::GetKernErrStr(GetLastError()));
 		return false;
@@ -417,11 +417,11 @@ bool CNTV2WinDriverInterface::ConfigureSubscription (const bool bSubscribe, cons
 		return res;
 
 	// Check for previouse call to subscribe
-	if (bSubscribe  &&  outSubscriptionHdl)
+	if (bSubscribe	&&	outSubscriptionHdl)
 		return true;	//	Already subscribed
 
 	// Check for valid handle to unsubscribe
-	if (!bSubscribe  &&  !outSubscriptionHdl)
+	if (!bSubscribe	 &&	 !outSubscriptionHdl)
 		return true;	//	Already unsubscribed
 
 	// Assure that the avCard has been properly opened
@@ -436,7 +436,7 @@ bool CNTV2WinDriverInterface::ConfigureSubscription (const bool bSubscribe, cons
 	propStruct.Handle			= hSubscription;
 	propStruct.eInterrupt		= eInterruptType;
 
-	BOOL bRet = DeviceIoControl (_hDevice,  IOCTL_AJAPROPS_NEWSUBSCRIPTIONS,  &propStruct,  sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
+	BOOL bRet = DeviceIoControl (_hDevice,	IOCTL_AJAPROPS_NEWSUBSCRIPTIONS,  &propStruct,	sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
 								&propStruct,  sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),  &dwBytesReturned,  NULL);
 	if ((!bSubscribe && bRet)  ||  (bSubscribe && !bRet))
 	{
@@ -447,8 +447,8 @@ bool CNTV2WinDriverInterface::ConfigureSubscription (const bool bSubscribe, cons
 	if (!bRet)
 	{
 		WDIFAIL("interruptType=" << DEC(eInterruptType) << " subscribe=" << (bSubscribe?"Y":"N") << " failed: " << ::GetKernErrStr(GetLastError()));
-	    return false;
-    }
+		return false;
+	}
 	if (bSubscribe)
 		outSubscriptionHdl = PULWord(hSubscription);
 	return true;
@@ -473,7 +473,7 @@ bool CNTV2WinDriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterrup
 	propStruct.Property.Flags	= KSPROPERTY_TYPE_GET;
 	propStruct.eInterrupt		= eGetIntCount;
 	propStruct.ulIntCount		= ULONG(eInterruptType);
-	if (!DeviceIoControl (_hDevice,  IOCTL_AJAPROPS_NEWSUBSCRIPTIONS,  &propStruct,  sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
+	if (!DeviceIoControl (_hDevice,	 IOCTL_AJAPROPS_NEWSUBSCRIPTIONS,  &propStruct,	 sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
 							&propStruct,  sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),  &dwBytesReturned,  NULL))
 	{
 		WDIFAIL("interruptType=" << DEC(eInterruptType) << " failed: " << ::GetKernErrStr(GetLastError()));
@@ -491,7 +491,7 @@ bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt
 	if (IsRemote())
 		return CNTV2DriverInterface::WaitForInterrupt(eInterruptType,timeOutMs);
 #endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
-    bool bInterruptHappened = false;    // return value
+	bool bInterruptHappened = false;	// return value
 
 	HANDLE hEvent (GetInterruptEvent(eInterruptType));
 	if (NULL == hEvent)
@@ -500,20 +500,20 @@ bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt
 		Sleep (timeOutMs);
 	}
 	else
-    {
-        // interrupt hooked up. Wait
-        DWORD status = WaitForSingleObject(hEvent, timeOutMs);
-        if ( status == WAIT_OBJECT_0 )
-        {
-            bInterruptHappened = true;
-            BumpEventCount (eInterruptType);
-        }
+	{
+		// interrupt hooked up. Wait
+		DWORD status = WaitForSingleObject(hEvent, timeOutMs);
+		if ( status == WAIT_OBJECT_0 )
+		{
+			bInterruptHappened = true;
+			BumpEventCount (eInterruptType);
+		}
 		else
 		{
 			;//MessageBox (0, "WaitForInterrupt timed out", "CNTV2WinDriverInterface", MB_ICONERROR | MB_OK);
 		}
-    }
-    return bInterruptHappened;
+	}
+	return bInterruptHappened;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -538,14 +538,14 @@ bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt
 		propStruct.Property.Flags	= KSPROPERTY_TYPE_GET;
 		propStruct.bMapType			= NTV2_MAPMEMORY_FRAMEBUFFER;
 
-		if (!DeviceIoControl(_hDevice,  IOCTL_AJAPROPS_MAPMEMORY,  &propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-								&propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),  &dwBytesReturned,  NULL))
+		if (!DeviceIoControl(_hDevice,	IOCTL_AJAPROPS_MAPMEMORY,  &propStruct,	 sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
+								&propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),	&dwBytesReturned,  NULL))
 		{
 			WDIFAIL("failed: " << ::GetKernErrStr(GetLastError()));
 			return false;
 		}
 		ULWord boardIDRegister;
-		ReadRegister(kRegBoardID, boardIDRegister);	//unfortunately GetBoardID is in ntv2card...ooops.
+		ReadRegister(kRegBoardID, boardIDRegister); //unfortunately GetBoardID is in ntv2card...ooops.
 		_pFrameBaseAddress = (ULWord *) propStruct.mapMemory.Address;
 		_pCh1FrameBaseAddress = _pFrameBaseAddress;
 		_pCh2FrameBaseAddress = _pFrameBaseAddress;
@@ -560,7 +560,7 @@ bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt
 		if (!IsOpen())
 			return false;
 		ULWord boardIDRegister;
-		ReadRegister(kRegBoardID, boardIDRegister);	//unfortunately GetBoardID is in ntv2card...ooops.
+		ReadRegister(kRegBoardID, boardIDRegister); //unfortunately GetBoardID is in ntv2card...ooops.
 		ULWord * pFrameBaseAddress;
 		pFrameBaseAddress = _pFrameBaseAddress;
 		if (!pFrameBaseAddress)
@@ -574,8 +574,8 @@ bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt
 		propStruct.Property.Flags		= KSPROPERTY_TYPE_SET;
 		propStruct.bMapType				= NTV2_MAPMEMORY_FRAMEBUFFER;
 		propStruct.mapMemory.Address	= pFrameBaseAddress;
-		BOOL fRet = DeviceIoControl (_hDevice,  IOCTL_AJAPROPS_MAPMEMORY,  &propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-									&propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),  &dwBytesReturned,  NULL);
+		BOOL fRet = DeviceIoControl (_hDevice,	IOCTL_AJAPROPS_MAPMEMORY,  &propStruct,	 sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
+									&propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),	&dwBytesReturned,  NULL);
 		_pFrameBaseAddress = 0;
 		_pCh1FrameBaseAddress = 0;
 		_pCh2FrameBaseAddress = 0;
@@ -602,8 +602,8 @@ bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt
 		propStruct.Property.Id =KSPROPERTY_AJAPROPS_MAPMEMORY;
 		propStruct.Property.Flags = KSPROPERTY_TYPE_GET;
 		propStruct.bMapType = NTV2_MAPMEMORY_REGISTER;
-		if (!DeviceIoControl (_hDevice,  IOCTL_AJAPROPS_MAPMEMORY,  &propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-								&propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),  &dwBytesReturned,  NULL))
+		if (!DeviceIoControl (_hDevice,	 IOCTL_AJAPROPS_MAPMEMORY,	&propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
+								&propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),	&dwBytesReturned,  NULL))
 		{
 			WDIFAIL("failed: " << ::GetKernErrStr(GetLastError()));
 			return false;
@@ -632,8 +632,8 @@ bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt
 		propStruct.Property.Flags		= KSPROPERTY_TYPE_SET;
 		propStruct.bMapType				= NTV2_MAPMEMORY_REGISTER;
 		propStruct.mapMemory.Address	= _pRegisterBaseAddress;
-		BOOL fRet = DeviceIoControl(_hDevice,  IOCTL_AJAPROPS_MAPMEMORY,  &propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-									&propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),  &dwBytesReturned,  NULL);
+		BOOL fRet = DeviceIoControl(_hDevice,  IOCTL_AJAPROPS_MAPMEMORY,  &propStruct,	sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
+									&propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),	&dwBytesReturned,  NULL);
 		_pRegisterBaseAddress = 0;
 		_pRegisterBaseAddressLength = 0;
 		if (fRet)
@@ -658,8 +658,8 @@ bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt
 		propStruct.Property.Id		= KSPROPERTY_AJAPROPS_MAPMEMORY;
 		propStruct.Property.Flags	= KSPROPERTY_TYPE_GET;
 		propStruct.bMapType			= NTV2_MAPMEMORY_PCIFLASHPROGRAM;
-		if (!DeviceIoControl (_hDevice,  IOCTL_AJAPROPS_MAPMEMORY,  &propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-								&propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),  &dwBytesReturned,  NULL))
+		if (!DeviceIoControl (_hDevice,	 IOCTL_AJAPROPS_MAPMEMORY,	&propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
+								&propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),	&dwBytesReturned,  NULL))
 		{
 			WDIFAIL("failed: " << ::GetKernErrStr(GetLastError()));
 			return false;
@@ -687,8 +687,8 @@ bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt
 		propStruct.Property.Flags		= KSPROPERTY_TYPE_SET;
 		propStruct.bMapType				= NTV2_MAPMEMORY_PCIFLASHPROGRAM;
 		propStruct.mapMemory.Address	= _pRegisterBaseAddress;
-		BOOL fRet = DeviceIoControl (_hDevice,  IOCTL_AJAPROPS_MAPMEMORY,  &propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
-									&propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),  &dwBytesReturned,  NULL);
+		BOOL fRet = DeviceIoControl (_hDevice,	IOCTL_AJAPROPS_MAPMEMORY,  &propStruct,	 sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),
+									&propStruct,  sizeof(KSPROPERTY_AJAPROPS_MAPMEMORY_S),	&dwBytesReturned,  NULL);
 		_pRegisterBaseAddress = 0;
 		_pRegisterBaseAddressLength = 0;
 		if (fRet)
@@ -713,8 +713,8 @@ bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt
 		propStruct.dmaEngine		= NTV2_PIO;
 		propStruct.pvVidUserVa		= pvUserVa;
 		propStruct.ulVidNumBytes	= ulNumBytes;
-		if (!DeviceIoControl (_hDevice,  IOCTL_AJAPROPS_DMA,  &propStruct,  sizeof(KSPROPERTY_AJAPROPS_DMA_S),
-								&propStruct,  sizeof(KSPROPERTY_AJAPROPS_DMA_S),  &dwBytesReturned,  NULL))
+		if (!DeviceIoControl (_hDevice,	 IOCTL_AJAPROPS_DMA,  &propStruct,	sizeof(KSPROPERTY_AJAPROPS_DMA_S),
+								&propStruct,  sizeof(KSPROPERTY_AJAPROPS_DMA_S),  &dwBytesReturned,	 NULL))
 		{
 			WDIFAIL (KR(GetLastError()) << " -- numBytes=" << ulNumBytes << " map=" << (bMap?"Y":"N"));
 			return false;
@@ -732,7 +732,7 @@ bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt
 		if (!IsOpen())
 			return false;
 		// For every locked entry, try to free it
-		for (size_t ndx(0);  ndx < _vecDmaLocked.size();  ndx++)
+		for (size_t ndx(0);	 ndx < _vecDmaLocked.size();  ndx++)
 			CompleteMemoryForDMA(_vecDmaLocked.at(ndx));
 
 		NTV2_ASSERT(_vecDmaLocked.empty()  &&  "_vecDmaLocked should be empty");
@@ -766,7 +766,7 @@ bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 	// CompleteMemoryForDMA: unlock and free resources
-	// The inverse of PrepareMemoryForDMA.  It passes the framebuffer address to the kernel, where
+	// The inverse of PrepareMemoryForDMA.	It passes the framebuffer address to the kernel, where
 	//	the kernel looks up this address and unlocks the memory, unmaps the memory, and deletes the
 	//	MDL.
 	// NOTE: this method does not cleanup the call to new() which created the memory.  It is the new()
@@ -780,7 +780,7 @@ bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt
 			return false;
 		// Succeeded -- remove pFrameBuffer from the avclasses' vector of locked memory
 		// Find the entry in the avclasses vector that holds this framebuffer's address
-		for (DMA_LOCKED_VEC::iterator vecIter(_vecDmaLocked.begin());  vecIter != _vecDmaLocked.end();  ++vecIter)
+		for (DMA_LOCKED_VEC::iterator vecIter(_vecDmaLocked.begin());  vecIter != _vecDmaLocked.end();	++vecIter)
 			// If we've found one, erase (delete) it
 			if (*vecIter == pFrameBuffer)
 			{
@@ -795,7 +795,7 @@ bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt
 //////////////////////////////////////////////////////////////////////////////////////
 // DMA
 
-bool CNTV2WinDriverInterface::DmaTransfer (	const NTV2DMAEngine	inDMAEngine,
+bool CNTV2WinDriverInterface::DmaTransfer ( const NTV2DMAEngine inDMAEngine,
 											const bool			inIsRead,
 											const ULWord		inFrameNumber,
 											ULWord *			pFrameBuffer,
@@ -832,7 +832,7 @@ bool CNTV2WinDriverInterface::DmaTransfer (	const NTV2DMAEngine	inDMAEngine,
 }
 
 
-bool CNTV2WinDriverInterface::DmaTransfer (	const NTV2DMAEngine	inDMAEngine,
+bool CNTV2WinDriverInterface::DmaTransfer ( const NTV2DMAEngine inDMAEngine,
 											const bool			inIsRead,
 											const ULWord		inFrameNumber,
 											ULWord *			pFrameBuffer,
@@ -864,7 +864,7 @@ bool CNTV2WinDriverInterface::DmaTransfer (	const NTV2DMAEngine	inDMAEngine,
 	propStruct.ulVidSegmentHostPitch	= inHostPitch;
 	propStruct.ulVidSegmentCardPitch	= inCardPitch;
 	propStruct.bSync					= inSynchronous;
-  	if (!DeviceIoControl(_hDevice, IOCTL_AJAPROPS_DMA_EX, &propStruct, sizeof(KSPROPERTY_AJAPROPS_DMA_EX_S),
+	if (!DeviceIoControl(_hDevice, IOCTL_AJAPROPS_DMA_EX, &propStruct, sizeof(KSPROPERTY_AJAPROPS_DMA_EX_S),
 								&propStruct, sizeof(KSPROPERTY_AJAPROPS_DMA_EX_S), &dwBytesReturned, NULL))
 	{
 		WDIFAIL ("failed: " << ::GetKernErrStr(GetLastError()) << ": eng=" << inDMAEngine << " frm=" << inFrameNumber
@@ -874,7 +874,7 @@ bool CNTV2WinDriverInterface::DmaTransfer (	const NTV2DMAEngine	inDMAEngine,
 	return true;
 }
 
-bool CNTV2WinDriverInterface::DmaTransfer (	const NTV2DMAEngine			inDMAEngine,
+bool CNTV2WinDriverInterface::DmaTransfer ( const NTV2DMAEngine			inDMAEngine,
 											const NTV2Channel			inDMAChannel,
 											const bool					inIsTarget,
 											const ULWord				inFrameNumber,
@@ -883,7 +883,7 @@ bool CNTV2WinDriverInterface::DmaTransfer (	const NTV2DMAEngine			inDMAEngine,
 											const ULWord				inNumSegments,
 											const ULWord				inHostPitch,
 											const ULWord				inCardPitch,
-											const PCHANNEL_P2P_STRUCT &	inP2PData)
+											const PCHANNEL_P2P_STRUCT & inP2PData)
 {
 	if (IsRemote())
 		return false;
@@ -974,7 +974,7 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 	{
 		case eInitAutoCirc:
 		{
-			if (autoCircData.lVal4 <= 1  &&  autoCircData.lVal5 == 0  &&  autoCircData.lVal6 == 0)
+			if (autoCircData.lVal4 <= 1	 &&	 autoCircData.lVal5 == 0  &&  autoCircData.lVal6 == 0)
 			{
 				KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S autoCircControl;
 				memset(&autoCircControl, 0, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S));
@@ -1092,7 +1092,7 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 					WDIFAIL("GetAC failed: " << ::GetKernErrStr(GetLastError()));
 			}
 			else
-				{bRes = false;  WDIFAIL("GetAC failed: NULL pvVal1");}
+				{bRes = false;	WDIFAIL("GetAC failed: NULL pvVal1");}
 			break;
 		}	//	eGetAutoCirc
 
@@ -1118,7 +1118,7 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 					WDIFAIL("GetFrameStamp failed: " << ::GetKernErrStr(GetLastError()));
 			}
 			else
-				{bRes = false;  WDIFAIL("GetFrameStamp failed: NULL pvVal1");}
+				{bRes = false;	WDIFAIL("GetFrameStamp failed: NULL pvVal1");}
 			break;
 		}	//	eGetFrameStamp
 
@@ -1151,7 +1151,7 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 					WDIFAIL("GetFrameStampEx2 failed: " << ::GetKernErrStr(GetLastError()));
 			}
 			else
-				{bRes = false;  WDIFAIL("GetFrameStampEx2 failed: NULL pvVal1");}
+				{bRes = false;	WDIFAIL("GetFrameStampEx2 failed: NULL pvVal1");}
 			break;
 		}
 
@@ -1346,7 +1346,7 @@ bool CNTV2WinDriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT &
 bool CNTV2WinDriverInterface::DriverSetBitFileInformation (const BITFILE_INFO_STRUCT & inBitfileInfo)
 {
 	DWORD dwBytesReturned(0);
- 	KSPROPERTY_AJAPROPS_GETSETBITFILEINFO_S propStruct;
+	KSPROPERTY_AJAPROPS_GETSETBITFILEINFO_S propStruct;
 	ZeroMemory(&propStruct, sizeof(KSPROPERTY_AJAPROPS_GETSETBITFILEINFO_S));
 	propStruct.Property.Set			= _GUID_PROPSET;
 	propStruct.Property.Id			= KSPROPERTY_AJAPROPS_GETSETBITFILEINFO;

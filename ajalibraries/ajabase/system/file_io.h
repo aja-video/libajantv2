@@ -25,13 +25,13 @@
 
 typedef enum
 {
-	eAJACreateAlways     = 1,
-	eAJACreateNew        = 2,
+	eAJACreateAlways	 = 1,
+	eAJACreateNew		 = 2,
 	eAJATruncateExisting = 4,
 
-	eAJAReadOnly         = 8,
-	eAJAWriteOnly        = 16,
-	eAJAReadWrite        = 32
+	eAJAReadOnly		 = 8,
+	eAJAWriteOnly		 = 16,
+	eAJAReadWrite		 = 32
 } AJAFileCreationFlags;
 
 
@@ -99,7 +99,7 @@ public:
 	/**
 	 *	Read the contents of the file.
 	 *
-	 *	@param[out]	pBuffer				The buffer to be written to
+	 *	@param[out] pBuffer				The buffer to be written to
 	 *	@param[in]	length				The number of bytes to be read
 	 *
 	 *	@return		uint32_t			The number of bytes actually read
@@ -109,7 +109,7 @@ public:
 	/**
 	 *	Read the contents of the file.
 	 *
-	 *	@param[out]	buffer				The buffer to be written to
+	 *	@param[out] buffer				The buffer to be written to
 	 *	@param[in]	length				The number of bytes to be read
 	 *
 	 *	@return		uint32_t			The number of bytes actually read
@@ -123,7 +123,7 @@ public:
 	 *	@param[in]	length				The number of bytes to be written
 	 *
 	 *	@return		uint32_t			The number of bytes actually written
-	 */	
+	 */ 
 	uint32_t Write(const uint8_t* pBuffer, const uint32_t length) const;
 
 	/**
@@ -139,7 +139,7 @@ public:
 	 *	Flush the cache 
 	 *
 	 *	@return		AJA_STATUS_SUCCESS	Was able to sync file
-	 */	
+	 */ 
 	AJAStatus Sync();
 
 	/**
@@ -171,24 +171,24 @@ public:
 	/**
 	 *	Get some basic file info
 	 *
-	 *	@param[out]	createTime			Time of file creation, measured in seconds since 1970
-	 *	@param[out]	modTime				Last time file was modified, measured in seconds since 1970
-	 *	@param[out]	size				Size of the file in bytes
+	 *	@param[out] createTime			Time of file creation, measured in seconds since 1970
+	 *	@param[out] modTime				Last time file was modified, measured in seconds since 1970
+	 *	@param[out] size				Size of the file in bytes
 	 *
 	 *	@return		AJA_STATUS_SUCCESS	Was able to get info from the file
 	 */
 	AJAStatus FileInfo(int64_t& createTime, int64_t& modTime, int64_t& size);
 	AJAStatus FileInfo(int64_t& createTime, int64_t& modTime, int64_t& size, std::string& filePath);
 
-    /**
-     *	Test file to see if it exists
-     *
-     *	@param[in]	fileName			The fully qualified file name
-     *
-     *	@return		bool				true if file exists
-     */
-    static bool FileExists(const std::wstring& fileName);
-    static bool FileExists(const std::string& fileName);
+	/**
+	 *	Test file to see if it exists
+	 *
+	 *	@param[in]	fileName			The fully qualified file name
+	 *
+	 *	@return		bool				true if file exists
+	 */
+	static bool FileExists(const std::wstring& fileName);
+	static bool FileExists(const std::string& fileName);
 
 	/**
 	 *	Remove the file for the system
@@ -198,8 +198,8 @@ public:
 	 *	@return		AJA_STATUS_SUCCESS	The file was successfully deleteed
 	 *				AJA_STATUS_FAIL		The file could not be deleted
 	 */
-    static AJAStatus Delete(const std::string& fileName);
-    static AJAStatus Delete(const std::wstring& fileName);
+	static AJAStatus Delete(const std::string& fileName);
+	static AJAStatus Delete(const std::wstring& fileName);
 
 	/**
 	 *	Retrieves a set of files from a directory.
@@ -207,18 +207,18 @@ public:
 	 *
 	 *	@param[in]	directory			The path to the directory
 	 *	@param[in]	filePattern			The pattern within the directory to match
-	 *	@param[out]	fileContainer		The files that match the file pattern
+	 *	@param[out] fileContainer		The files that match the file pattern
 	 *
 	 *	@return		AJA_STATUS_SUCCESS	The returned container has a size > 0 
 	 */
-    static AJAStatus ReadDirectory(
-				const std::string&   directory,
-				const std::string&   filePattern,
+	static AJAStatus ReadDirectory(
+				const std::string&	 directory,
+				const std::string&	 filePattern,
 				std::vector<std::string>& fileContainer);
 
-    static AJAStatus ReadDirectory(
-				const std::wstring&   directory,
-				const std::wstring&   filePattern,
+	static AJAStatus ReadDirectory(
+				const std::wstring&	  directory,
+				const std::wstring&	  filePattern,
 				std::vector<std::wstring>& fileContainer);
 
 	/**
@@ -230,11 +230,11 @@ public:
 	 *
 	 *	@return		AJA_STATUS_SUCCESS	If the directory has at least one matching file
 	 */
-    static AJAStatus DoesDirectoryContain(
+	static AJAStatus DoesDirectoryContain(
 				const std::string& directory,
 				const std::string& filePattern);
 
-    static AJAStatus DoesDirectoryContain(
+	static AJAStatus DoesDirectoryContain(
 				const std::wstring& directory,
 				const std::wstring& filePattern);
 
@@ -246,8 +246,8 @@ public:
 	 *
 	 *	@return		AJA_STATUS_SUCCESS	If and only if the directory exists
 	 */
-    static AJAStatus DoesDirectoryExist(const std::string& directory);
-    static AJAStatus DoesDirectoryExist(const std::wstring& directory);
+	static AJAStatus DoesDirectoryExist(const std::string& directory);
+	static AJAStatus DoesDirectoryExist(const std::wstring& directory);
 
 	/**
 	 *	Tests if a directory is empty.
@@ -257,13 +257,13 @@ public:
 	 *
 	 *	@return		AJA_STATUS_SUCCESS	If and only if the directory contains no files
 	 */
-    static AJAStatus IsDirectoryEmpty(const std::string& directory);
-    static AJAStatus IsDirectoryEmpty(const std::wstring& directory);
+	static AJAStatus IsDirectoryEmpty(const std::string& directory);
+	static AJAStatus IsDirectoryEmpty(const std::wstring& directory);
 
 	/**
 	 *	Retrieves a path to the temp directory
 	 *
-	 *	@param[out]	directory	The path to the temp directory
+	 *	@param[out] directory	The path to the temp directory
 	 *
 	 *	@return		AJA_STATUS_SUCCESS	If and only if a temp directory found
 	 */
@@ -283,9 +283,9 @@ public:
 	/**
 	 * Retrieves the directory name from the specified path.
 	 *
-	 * @param[in] 	path	Path from which to extract the directory name
+	 * @param[in]	path	Path from which to extract the directory name
 	 * 
-	 * @param[out]  directory	Path of the directory extracted from specified path
+	 * @param[out]	directory	Path of the directory extracted from specified path
 	 * 
 	 * @return		AJA_STATUS_SUCCESS If and only if the directory name is extracted
 	 */
@@ -295,27 +295,27 @@ public:
 	/**
 	 * Retrieves the filename (with extension) from the specified path.
 	 *
-	 * @param[in] 	path	Path from which to extract the filename
+	 * @param[in]	path	Path from which to extract the filename
 	 * 
-	 * @param[out]  filename	Filename extracted from specified path
+	 * @param[out]	filename	Filename extracted from specified path
 	 * 
 	 * @return		AJA_STATUS_SUCCESS If and only if the filename is extracted
 	 */
 	static AJAStatus GetFileName(const std::string& path, std::string& filename);	//	New in SDK 16.0
-	static AJAStatus GetFileName(const std::wstring& path, std::wstring& filename);	//	New in SDK 16.0
+	static AJAStatus GetFileName(const std::wstring& path, std::wstring& filename); //	New in SDK 16.0
 
 #if defined(AJA_WINDOWS)
-	void     *GetHandle(void) {return mFileDescriptor;}
+	void	 *GetHandle(void) {return mFileDescriptor;}
 #else
-	void     *GetHandle(void) {return NULL;}
+	void	 *GetHandle(void) {return NULL;}
 #endif
 
 private:
 
 #if defined(AJA_WINDOWS)
-    HANDLE       mFileDescriptor;
+	HANDLE		 mFileDescriptor;
 #else
-	FILE*        mpFile;
+	FILE*		 mpFile;
 #endif
 };
 

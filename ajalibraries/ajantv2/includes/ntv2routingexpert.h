@@ -23,8 +23,8 @@ class RoutingExpert
 		friend class CNTV2SignalRouter;
 
 		static RoutingExpertPtr		GetInstance(const bool inCreateIfNecessary = true);
-		static bool			        DisposeInstance(void);
-		static uint32_t             NumInstances(void);
+		static bool					DisposeInstance(void);
+		static uint32_t				NumInstances(void);
 
 	private:
 		RoutingExpert();
@@ -98,7 +98,7 @@ class RoutingExpert
 
 };	//	RoutingExpert
 
-static RoutingExpertPtr	gpRoutingExpert;	//	RoutingExpert singleton
-static AJALock			gRoutingExpertLock;	//	Singleton guard mutex
+static RoutingExpertPtr gpRoutingExpert;	//	RoutingExpert singleton
+static AJALock			gRoutingExpertLock; //	Singleton guard mutex
 
 #endif

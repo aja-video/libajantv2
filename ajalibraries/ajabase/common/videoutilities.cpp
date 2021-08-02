@@ -22,135 +22,135 @@ inline int16_t CubicInterPolateAudioWord( int16_t *Input, int32_t Index);
 
 // Cubic Coefficient Table for resampling
 uint32_t CubicCoef[129] = {
-	0x00000000  , /* 0 */
-	0xFFFFFFE1  , /* 1 */
-	0xFFFFFF88  , /* 2 */
-	0xFFFFFEFB  , /* 3 */
-	0xFFFFFE40  , /* 4 */
-	0xFFFFFD5D  , /* 5 */
-	0xFFFFFC58  , /* 6 */
-	0xFFFFFB37  , /* 7 */
-	0xFFFFFA00  , /* 8 */
-	0xFFFFF8B9  , /* 9 */
-	0xFFFFF768  , /* 10 */
-	0xFFFFF613  , /* 11 */
-	0xFFFFF4C0  , /* 12 */
-	0xFFFFF375  , /* 13 */
-	0xFFFFF238  , /* 14 */
-	0xFFFFF10F  , /* 15 */
-	0xFFFFF000  , /* 16 */
-	0xFFFFEF11  , /* 17 */
-	0xFFFFEE48  , /* 18 */
-	0xFFFFEDAB  , /* 19 */
-	0xFFFFED40  , /* 20 */
-	0xFFFFED0D  , /* 21 */
-	0xFFFFED18  , /* 22 */
-	0xFFFFED67  , /* 23 */
-	0xFFFFEE00  , /* 24 */
-	0xFFFFEEE9  , /* 25 */
-	0xFFFFF028  , /* 26 */
-	0xFFFFF1C3  , /* 27 */
-	0xFFFFF3C0  , /* 28 */
-	0xFFFFF625  , /* 29 */
-	0xFFFFF8F8  , /* 30 */
-	0xFFFFFC3F  , /* 31 */
-	0x00000000  , /* 32 */
-	0x0000047D  , /* 33 */
-	0x000009E8  , /* 34 */
-	0x0000102F  , /* 35 */
-	0x00001740  , /* 36 */
-	0x00001F09  , /* 37 */
-	0x00002778  , /* 38 */
-	0x0000307B  , /* 39 */
-	0x00003A00  , /* 40 */
-	0x000043F5  , /* 41 */
-	0x00004E48  , /* 42 */
-	0x000058E7  , /* 43 */
-	0x000063C0  , /* 44 */
-	0x00006EC1  , /* 45 */
-	0x000079D8  , /* 46 */
-	0x000084F3  , /* 47 */
-	0x00009000  , /* 48 */
-	0x00009AED  , /* 49 */
-	0x0000A5A8  , /* 50 */
-	0x0000B01F  , /* 51 */
-	0x0000BA40  , /* 52 */
-	0x0000C3F9  , /* 53 */
-	0x0000CD38  , /* 54 */
-	0x0000D5EB  , /* 55 */
-	0x0000DE00  , /* 56 */
-	0x0000E565  , /* 57 */
-	0x0000EC08  , /* 58 */
-	0x0000F1D7  , /* 59 */
-	0x0000F6C0  , /* 60 */
-	0x0000FAB1  , /* 61 */
-	0x0000FD98  , /* 62 */
-	0x0000FF63  , /* 63 */
-	0x00010000  , /* 64 */
-	0x0000FF63  , /* 65 */
-	0x0000FD98  , /* 66 */
-	0x0000FAB1  , /* 67 */
-	0x0000F6C0  , /* 68 */
-	0x0000F1D7  , /* 69 */
-	0x0000EC08  , /* 70 */
-	0x0000E565  , /* 71 */
-	0x0000DE00  , /* 72 */
-	0x0000D5EB  , /* 73 */
-	0x0000CD38  , /* 74 */
-	0x0000C3F9  , /* 75 */
-	0x0000BA40  , /* 76 */
-	0x0000B01F  , /* 77 */
-	0x0000A5A8  , /* 78 */
-	0x00009AED  , /* 79 */
-	0x00009000  , /* 80 */
-	0x000084F3  , /* 81 */
-	0x000079D8  , /* 82 */
-	0x00006EC1  , /* 83 */
-	0x000063C0  , /* 84 */
-	0x000058E7  , /* 85 */
-	0x00004E48  , /* 86 */
-	0x000043F5  , /* 87 */
-	0x00003A00  , /* 88 */
-	0x0000307B  , /* 89 */
-	0x00002778  , /* 90 */
-	0x00001F09  , /* 91 */
-	0x00001740  , /* 92 */
-	0x0000102F  , /* 93 */
-	0x000009E8  , /* 94 */
-	0x0000047D  , /* 95 */
-	0x00000000  , /* 96 */
-	0xFFFFFC3F  , /* 97 */
-	0xFFFFF8F8  , /* 98 */
-	0xFFFFF625  , /* 99 */
-	0xFFFFF3C0  , /* 100 */
-	0xFFFFF1C3  , /* 101 */
-	0xFFFFF028  , /* 102 */
-	0xFFFFEEE9  , /* 103 */
-	0xFFFFEE00  , /* 104 */
-	0xFFFFED67  , /* 105 */
-	0xFFFFED18  , /* 106 */
-	0xFFFFED0D  , /* 107 */
-	0xFFFFED40  , /* 108 */
-	0xFFFFEDAB  , /* 109 */
-	0xFFFFEE48  , /* 110 */
-	0xFFFFEF11  , /* 111 */
-	0xFFFFF000  , /* 112 */
-	0xFFFFF10F  , /* 113 */
-	0xFFFFF238  , /* 114 */
-	0xFFFFF375  , /* 115 */
-	0xFFFFF4C0  , /* 116 */
-	0xFFFFF613  , /* 117 */
-	0xFFFFF768  , /* 118 */
-	0xFFFFF8B9  , /* 119 */
-	0xFFFFFA00  , /* 120 */
-	0xFFFFFB37  , /* 121 */
-	0xFFFFFC58  , /* 122 */
-	0xFFFFFD5D  , /* 123 */
-	0xFFFFFE40  , /* 124 */
-	0xFFFFFEFB  , /* 125 */
-	0xFFFFFF88  , /* 126 */
-	0xFFFFFFE1  , /* 127 */
-	0x00000000  , /* 128 */
+	0x00000000	, /* 0 */
+	0xFFFFFFE1	, /* 1 */
+	0xFFFFFF88	, /* 2 */
+	0xFFFFFEFB	, /* 3 */
+	0xFFFFFE40	, /* 4 */
+	0xFFFFFD5D	, /* 5 */
+	0xFFFFFC58	, /* 6 */
+	0xFFFFFB37	, /* 7 */
+	0xFFFFFA00	, /* 8 */
+	0xFFFFF8B9	, /* 9 */
+	0xFFFFF768	, /* 10 */
+	0xFFFFF613	, /* 11 */
+	0xFFFFF4C0	, /* 12 */
+	0xFFFFF375	, /* 13 */
+	0xFFFFF238	, /* 14 */
+	0xFFFFF10F	, /* 15 */
+	0xFFFFF000	, /* 16 */
+	0xFFFFEF11	, /* 17 */
+	0xFFFFEE48	, /* 18 */
+	0xFFFFEDAB	, /* 19 */
+	0xFFFFED40	, /* 20 */
+	0xFFFFED0D	, /* 21 */
+	0xFFFFED18	, /* 22 */
+	0xFFFFED67	, /* 23 */
+	0xFFFFEE00	, /* 24 */
+	0xFFFFEEE9	, /* 25 */
+	0xFFFFF028	, /* 26 */
+	0xFFFFF1C3	, /* 27 */
+	0xFFFFF3C0	, /* 28 */
+	0xFFFFF625	, /* 29 */
+	0xFFFFF8F8	, /* 30 */
+	0xFFFFFC3F	, /* 31 */
+	0x00000000	, /* 32 */
+	0x0000047D	, /* 33 */
+	0x000009E8	, /* 34 */
+	0x0000102F	, /* 35 */
+	0x00001740	, /* 36 */
+	0x00001F09	, /* 37 */
+	0x00002778	, /* 38 */
+	0x0000307B	, /* 39 */
+	0x00003A00	, /* 40 */
+	0x000043F5	, /* 41 */
+	0x00004E48	, /* 42 */
+	0x000058E7	, /* 43 */
+	0x000063C0	, /* 44 */
+	0x00006EC1	, /* 45 */
+	0x000079D8	, /* 46 */
+	0x000084F3	, /* 47 */
+	0x00009000	, /* 48 */
+	0x00009AED	, /* 49 */
+	0x0000A5A8	, /* 50 */
+	0x0000B01F	, /* 51 */
+	0x0000BA40	, /* 52 */
+	0x0000C3F9	, /* 53 */
+	0x0000CD38	, /* 54 */
+	0x0000D5EB	, /* 55 */
+	0x0000DE00	, /* 56 */
+	0x0000E565	, /* 57 */
+	0x0000EC08	, /* 58 */
+	0x0000F1D7	, /* 59 */
+	0x0000F6C0	, /* 60 */
+	0x0000FAB1	, /* 61 */
+	0x0000FD98	, /* 62 */
+	0x0000FF63	, /* 63 */
+	0x00010000	, /* 64 */
+	0x0000FF63	, /* 65 */
+	0x0000FD98	, /* 66 */
+	0x0000FAB1	, /* 67 */
+	0x0000F6C0	, /* 68 */
+	0x0000F1D7	, /* 69 */
+	0x0000EC08	, /* 70 */
+	0x0000E565	, /* 71 */
+	0x0000DE00	, /* 72 */
+	0x0000D5EB	, /* 73 */
+	0x0000CD38	, /* 74 */
+	0x0000C3F9	, /* 75 */
+	0x0000BA40	, /* 76 */
+	0x0000B01F	, /* 77 */
+	0x0000A5A8	, /* 78 */
+	0x00009AED	, /* 79 */
+	0x00009000	, /* 80 */
+	0x000084F3	, /* 81 */
+	0x000079D8	, /* 82 */
+	0x00006EC1	, /* 83 */
+	0x000063C0	, /* 84 */
+	0x000058E7	, /* 85 */
+	0x00004E48	, /* 86 */
+	0x000043F5	, /* 87 */
+	0x00003A00	, /* 88 */
+	0x0000307B	, /* 89 */
+	0x00002778	, /* 90 */
+	0x00001F09	, /* 91 */
+	0x00001740	, /* 92 */
+	0x0000102F	, /* 93 */
+	0x000009E8	, /* 94 */
+	0x0000047D	, /* 95 */
+	0x00000000	, /* 96 */
+	0xFFFFFC3F	, /* 97 */
+	0xFFFFF8F8	, /* 98 */
+	0xFFFFF625	, /* 99 */
+	0xFFFFF3C0	, /* 100 */
+	0xFFFFF1C3	, /* 101 */
+	0xFFFFF028	, /* 102 */
+	0xFFFFEEE9	, /* 103 */
+	0xFFFFEE00	, /* 104 */
+	0xFFFFED67	, /* 105 */
+	0xFFFFED18	, /* 106 */
+	0xFFFFED0D	, /* 107 */
+	0xFFFFED40	, /* 108 */
+	0xFFFFEDAB	, /* 109 */
+	0xFFFFEE48	, /* 110 */
+	0xFFFFEF11	, /* 111 */
+	0xFFFFF000	, /* 112 */
+	0xFFFFF10F	, /* 113 */
+	0xFFFFF238	, /* 114 */
+	0xFFFFF375	, /* 115 */
+	0xFFFFF4C0	, /* 116 */
+	0xFFFFF613	, /* 117 */
+	0xFFFFF768	, /* 118 */
+	0xFFFFF8B9	, /* 119 */
+	0xFFFFFA00	, /* 120 */
+	0xFFFFFB37	, /* 121 */
+	0xFFFFFC58	, /* 122 */
+	0xFFFFFD5D	, /* 123 */
+	0xFFFFFE40	, /* 124 */
+	0xFFFFFEFB	, /* 125 */
+	0xFFFFFF88	, /* 126 */
+	0xFFFFFFE1	, /* 127 */
+	0x00000000	, /* 128 */
 };
 
 
@@ -159,15 +159,15 @@ void createVideoFrame( uint32_t *buffer , uint64_t frameNumber,
 					   AJA_PixelFormat pixFmt, uint32_t lines, uint32_t pixels, uint32_t linepitch, 
 					   uint16_t y, uint16_t cb, uint16_t cr )
 {
-    AJA_UNUSED(buffer);
-    AJA_UNUSED(frameNumber);
-    AJA_UNUSED(pixFmt);
-    AJA_UNUSED(lines);
-    AJA_UNUSED(pixels);
-    AJA_UNUSED(linepitch);
-    AJA_UNUSED(y);
-    AJA_UNUSED(cb);
-    AJA_UNUSED(cr);
+	AJA_UNUSED(buffer);
+	AJA_UNUSED(frameNumber);
+	AJA_UNUSED(pixFmt);
+	AJA_UNUSED(lines);
+	AJA_UNUSED(pixels);
+	AJA_UNUSED(linepitch);
+	AJA_UNUSED(y);
+	AJA_UNUSED(cb);
+	AJA_UNUSED(cr);
 }
 
 
@@ -178,7 +178,7 @@ uint32_t AJA_CalcRowBytesForFormat(AJA_PixelFormat format, uint32_t width)
 	switch (format)
 	{
 	case AJA_PixelFormat_YCbCr8:
-	case AJA_PixelFormat_YUY28:	
+	case AJA_PixelFormat_YUY28: 
 		rowBytes = width * 2;
 		break;
 
@@ -192,7 +192,7 @@ uint32_t AJA_CalcRowBytesForFormat(AJA_PixelFormat format, uint32_t width)
 		rowBytes = width * 3;
 		break;
 
-	case AJA_PixelFormat_ARGB8:	
+	case AJA_PixelFormat_ARGB8: 
 	case AJA_PixelFormat_RGBA8:
 	case AJA_PixelFormat_ABGR8:
 	case AJA_PixelFormat_RGB10:
@@ -275,7 +275,7 @@ void AJA_PackTo10BitYCbCrBuffer( uint16_t *ycbcrBuffer, uint32_t *packedBuffer,u
 		inputCount < (numPixels*2);
 		outputCount += 4,inputCount += 12 )
 	{
-		packedBuffer[outputCount]   = ycbcrBuffer[inputCount+0] + (ycbcrBuffer[inputCount+1]<<10) + (ycbcrBuffer[inputCount+2]<<20);
+		packedBuffer[outputCount]	= ycbcrBuffer[inputCount+0] + (ycbcrBuffer[inputCount+1]<<10) + (ycbcrBuffer[inputCount+2]<<20);
 		packedBuffer[outputCount+1] = ycbcrBuffer[inputCount+3] + (ycbcrBuffer[inputCount+4]<<10) + (ycbcrBuffer[inputCount+5]<<20);
 		packedBuffer[outputCount+2] = ycbcrBuffer[inputCount+6] + (ycbcrBuffer[inputCount+7]<<10) + (ycbcrBuffer[inputCount+8]<<20);
 		packedBuffer[outputCount+3] = ycbcrBuffer[inputCount+9] + (ycbcrBuffer[inputCount+10]<<10) + (ycbcrBuffer[inputCount+11]<<20);
@@ -292,14 +292,14 @@ void AJA_PackTo10BitYCbCrDPXBuffer( uint16_t *ycbcrBuffer, uint32_t *packedBuffe
 	{
 		if ( bigEndian )
 		{
-			packedBuffer[outputCount]   = AJA_ENDIAN_SWAP32(((ycbcrBuffer[inputCount+0]<<20) + (ycbcrBuffer[inputCount+1]<<10) + (ycbcrBuffer[inputCount+2]))<<2);
+			packedBuffer[outputCount]	= AJA_ENDIAN_SWAP32(((ycbcrBuffer[inputCount+0]<<20) + (ycbcrBuffer[inputCount+1]<<10) + (ycbcrBuffer[inputCount+2]))<<2);
 			packedBuffer[outputCount+1] = AJA_ENDIAN_SWAP32(((ycbcrBuffer[inputCount+3]<<20) + (ycbcrBuffer[inputCount+4]<<10) + (ycbcrBuffer[inputCount+5]))<<2);
 			packedBuffer[outputCount+2] = AJA_ENDIAN_SWAP32(((ycbcrBuffer[inputCount+6]<<20) + (ycbcrBuffer[inputCount+7]<<10) + (ycbcrBuffer[inputCount+8]))<<2);
 			packedBuffer[outputCount+3] = AJA_ENDIAN_SWAP32(((ycbcrBuffer[inputCount+9]<<20) + (ycbcrBuffer[inputCount+10]<<10) + (ycbcrBuffer[inputCount+11]))<<2);
 		}
 		else
 		{
-			packedBuffer[outputCount]   = (((ycbcrBuffer[inputCount+0]<<20) + (ycbcrBuffer[inputCount+1]<<10) + (ycbcrBuffer[inputCount+2]))<<2);
+			packedBuffer[outputCount]	= (((ycbcrBuffer[inputCount+0]<<20) + (ycbcrBuffer[inputCount+1]<<10) + (ycbcrBuffer[inputCount+2]))<<2);
 			packedBuffer[outputCount+1] = (((ycbcrBuffer[inputCount+3]<<20) + (ycbcrBuffer[inputCount+4]<<10) + (ycbcrBuffer[inputCount+5]))<<2);
 			packedBuffer[outputCount+2] = (((ycbcrBuffer[inputCount+6]<<20) + (ycbcrBuffer[inputCount+7]<<10) + (ycbcrBuffer[inputCount+8]))<<2);
 			packedBuffer[outputCount+3] = (((ycbcrBuffer[inputCount+9]<<20) + (ycbcrBuffer[inputCount+10]<<10) + (ycbcrBuffer[inputCount+11]))<<2);
@@ -388,9 +388,9 @@ void AJA_UnPack10BitDPXtoRGBAlphaBitPixel(uint8_t* rgbaBuffer,uint32_t* DPXLineb
 		}
 		else
 		{
-			B =  (value>>22)&0x3FF;
-			G =  (value>>12)&0x3FF;
-			R =   (value>>2)&0x3FF;
+			B =	 (value>>22)&0x3FF;
+			G =	 (value>>12)&0x3FF;
+			R =	  (value>>2)&0x3FF;
 		}
 		*rgbaBuffer++ = B;
 		*rgbaBuffer++ = G;
@@ -425,7 +425,7 @@ void AJA_MakeUnPacked8BitYCbCrBuffer( uint8_t* buffer, uint8_t Y , uint8_t Cb , 
 
 // ConvertLineto8BitYCbCr
 // 10 Bit YCbCr to 8 Bit YCbCr
-void AJA_ConvertLineto8BitYCbCr(uint16_t * ycbcr10BitBuffer, uint8_t * ycbcr8BitBuffer,	uint32_t numPixels)
+void AJA_ConvertLineto8BitYCbCr(uint16_t * ycbcr10BitBuffer, uint8_t * ycbcr8BitBuffer, uint32_t numPixels)
 {
 	for ( uint32_t pixel=0;pixel<numPixels*2;pixel++)
 	{
@@ -443,7 +443,7 @@ void AJA_ConvertLineToYCbCr422(AJA_RGBAlphaPixel * RGBLine,
 						   bool fUseSDMatrix)
 {
 	AJA_YCbCr10BitPixel YCbCr;
-	uint16_t *pYCbCr = &YCbCrLine[(startPixel&~1)*2];   // startPixel needs to be even
+	uint16_t *pYCbCr = &YCbCrLine[(startPixel&~1)*2];	// startPixel needs to be even
 
 	AJA_ConvertRGBAlphatoYCbCr convertRGBAlphatoYCbCr;
 	if ( fUseSDMatrix )
@@ -483,7 +483,7 @@ void AJA_ConvertRGBAlpha10LineToYCbCr422(AJA_RGBAlpha10BitPixel * RGBLine,
 							   bool fUseRGBFullRange)
 {
 	AJA_YCbCr10BitPixel YCbCr;
-	uint16_t *pYCbCr = &YCbCrLine[(startPixel&~1)*2];   // startPixel needs to be even
+	uint16_t *pYCbCr = &YCbCrLine[(startPixel&~1)*2];	// startPixel needs to be even
 
 	//AJA_ConvertRGBAlphatoYCbCr convertRGBAlphatoYCbCr;
 	//if ( fUseSDMatrix )
@@ -1152,7 +1152,7 @@ void AJA_ConvertARGBToRGBA(uint8_t* rgbaBuffer,uint32_t numPixels)
 		uint8_t G = rgbaBuffer[pixel+1];
 		uint8_t R = rgbaBuffer[pixel+2];
 		uint8_t A = rgbaBuffer[pixel+3];
-		rgbaBuffer[pixel]   = A;
+		rgbaBuffer[pixel]	= A;
 		rgbaBuffer[pixel+1] = R;
 		rgbaBuffer[pixel+2] = G;
 		rgbaBuffer[pixel+3] = B;
@@ -1168,7 +1168,7 @@ void AJA_ConvertARGBToABGR(uint8_t* rgbaBuffer,uint32_t numPixels)
 		uint8_t G = rgbaBuffer[pixel+1];
 		uint8_t R = rgbaBuffer[pixel+2];
 		uint8_t A = rgbaBuffer[pixel+3];
-		rgbaBuffer[pixel]   = R;
+		rgbaBuffer[pixel]	= R;
 		rgbaBuffer[pixel+1] = G;
 		rgbaBuffer[pixel+2] = B;
 		rgbaBuffer[pixel+3] = A;
@@ -1254,7 +1254,7 @@ void AJA_Convert8BitYCbCrToYUY2(uint8_t * ycbcrBuffer, uint32_t numPixels)
 		uint8_t Y1 = ycbcrBuffer[pixel+1];
 		uint8_t Cr = ycbcrBuffer[pixel+2];
 		uint8_t Y2 = ycbcrBuffer[pixel+3];
-		ycbcrBuffer[pixel]   = Y1;
+		ycbcrBuffer[pixel]	 = Y1;
 		ycbcrBuffer[pixel+1] = Cb;
 		ycbcrBuffer[pixel+2] = Y2;
 		ycbcrBuffer[pixel+3] = Cr;
@@ -1383,7 +1383,7 @@ void AJA_ConvertUnpacked10BitYCbCrToPixelFormat(uint16_t *unPackedBuffer, uint32
 // ConvertUnpacked10BitYCbCrToPixelFormat()
 //		Converts a line of "unpacked" 10-bit Y/Cb/Cr pixels into a "packed" line in the pixel format
 //	for the current frame buffer format.
-void AJA_ConvertPixelFormatToRGBA(uint32_t *buffer, AJA_RGBAlphaPixel* rgbBuffer, uint32_t numPixels, AJA_PixelFormat pixelFormat,bool  bIsSD)
+void AJA_ConvertPixelFormatToRGBA(uint32_t *buffer, AJA_RGBAlphaPixel* rgbBuffer, uint32_t numPixels, AJA_PixelFormat pixelFormat,bool	bIsSD)
 {
 
 	switch(pixelFormat) 
@@ -1464,36 +1464,36 @@ void AJA_MaskUnPacked10BitYCbCrBuffer( uint16_t* ycbcrUnPackedBuffer, uint16_t s
 	// Not elegant but fairly fast.
 	switch ( signalMask )
 	{
-	case AJA_SIGNALMASK_NONE:          // Output Black
+	case AJA_SIGNALMASK_NONE:		   // Output Black
 		for ( pixelCount = 0; pixelCount < (numPixels*2); pixelCount += 4 )
 		{
-			ycbcrUnPackedBuffer[pixelCount]   = CCIR601_10BIT_CHROMAOFFSET;     // Cb
-			ycbcrUnPackedBuffer[pixelCount+1] = CCIR601_10BIT_BLACK;            // Y
-			ycbcrUnPackedBuffer[pixelCount+2] = CCIR601_10BIT_CHROMAOFFSET;     // Cr
-			ycbcrUnPackedBuffer[pixelCount+3] = CCIR601_10BIT_BLACK;            // Y
+			ycbcrUnPackedBuffer[pixelCount]	  = CCIR601_10BIT_CHROMAOFFSET;		// Cb
+			ycbcrUnPackedBuffer[pixelCount+1] = CCIR601_10BIT_BLACK;			// Y
+			ycbcrUnPackedBuffer[pixelCount+2] = CCIR601_10BIT_CHROMAOFFSET;		// Cr
+			ycbcrUnPackedBuffer[pixelCount+3] = CCIR601_10BIT_BLACK;			// Y
 		}
 		break;
 	case AJA_SIGNALMASK_Y:
 		for ( pixelCount = 0; pixelCount < (numPixels*2); pixelCount += 4 )
 		{
-			ycbcrUnPackedBuffer[pixelCount]   = CCIR601_10BIT_CHROMAOFFSET;     // Cb
-			ycbcrUnPackedBuffer[pixelCount+2] = CCIR601_10BIT_CHROMAOFFSET;     // Cr
+			ycbcrUnPackedBuffer[pixelCount]	  = CCIR601_10BIT_CHROMAOFFSET;		// Cb
+			ycbcrUnPackedBuffer[pixelCount+2] = CCIR601_10BIT_CHROMAOFFSET;		// Cr
 		}
 
 		break;
 	case AJA_SIGNALMASK_Cb:
 		for ( pixelCount = 0; pixelCount < (numPixels*2); pixelCount += 4 )
 		{
-			ycbcrUnPackedBuffer[pixelCount+1] = CCIR601_10BIT_BLACK;            // Y
-			ycbcrUnPackedBuffer[pixelCount+2] = CCIR601_10BIT_CHROMAOFFSET;     // Cr
-			ycbcrUnPackedBuffer[pixelCount+3] = CCIR601_10BIT_BLACK;            // Y
+			ycbcrUnPackedBuffer[pixelCount+1] = CCIR601_10BIT_BLACK;			// Y
+			ycbcrUnPackedBuffer[pixelCount+2] = CCIR601_10BIT_CHROMAOFFSET;		// Cr
+			ycbcrUnPackedBuffer[pixelCount+3] = CCIR601_10BIT_BLACK;			// Y
 		}
 
 		break;
 	case AJA_SIGNALMASK_Y + AJA_SIGNALMASK_Cb:
 		for ( pixelCount = 0; pixelCount < (numPixels*2); pixelCount += 4 )
 		{
-			ycbcrUnPackedBuffer[pixelCount+2] = CCIR601_10BIT_CHROMAOFFSET;     // Cr
+			ycbcrUnPackedBuffer[pixelCount+2] = CCIR601_10BIT_CHROMAOFFSET;		// Cr
 		}
 
 		break; 
@@ -1501,9 +1501,9 @@ void AJA_MaskUnPacked10BitYCbCrBuffer( uint16_t* ycbcrUnPackedBuffer, uint16_t s
 	case AJA_SIGNALMASK_Cr:
 		for ( pixelCount = 0; pixelCount < (numPixels*2); pixelCount += 4 )
 		{
-			ycbcrUnPackedBuffer[pixelCount]   = CCIR601_10BIT_CHROMAOFFSET;     // Cb
-			ycbcrUnPackedBuffer[pixelCount+1] = CCIR601_10BIT_BLACK;            // Y
-			ycbcrUnPackedBuffer[pixelCount+3] = CCIR601_10BIT_BLACK;            // Y
+			ycbcrUnPackedBuffer[pixelCount]	  = CCIR601_10BIT_CHROMAOFFSET;		// Cb
+			ycbcrUnPackedBuffer[pixelCount+1] = CCIR601_10BIT_BLACK;			// Y
+			ycbcrUnPackedBuffer[pixelCount+3] = CCIR601_10BIT_BLACK;			// Y
 		}
 
 
@@ -1511,7 +1511,7 @@ void AJA_MaskUnPacked10BitYCbCrBuffer( uint16_t* ycbcrUnPackedBuffer, uint16_t s
 	case AJA_SIGNALMASK_Y + AJA_SIGNALMASK_Cr:
 		for ( pixelCount = 0; pixelCount < (numPixels*2); pixelCount += 4 )
 		{
-			ycbcrUnPackedBuffer[pixelCount]   = CCIR601_10BIT_CHROMAOFFSET;     // Cb
+			ycbcrUnPackedBuffer[pixelCount]	  = CCIR601_10BIT_CHROMAOFFSET;		// Cb
 		}
 
 
@@ -1519,8 +1519,8 @@ void AJA_MaskUnPacked10BitYCbCrBuffer( uint16_t* ycbcrUnPackedBuffer, uint16_t s
 	case AJA_SIGNALMASK_Cb + AJA_SIGNALMASK_Cr:
 		for ( pixelCount = 0; pixelCount < (numPixels*2); pixelCount += 4 )
 		{
-			ycbcrUnPackedBuffer[pixelCount+1] = CCIR601_10BIT_BLACK;            // Y
-			ycbcrUnPackedBuffer[pixelCount+3] = CCIR601_10BIT_BLACK;            // Y
+			ycbcrUnPackedBuffer[pixelCount+1] = CCIR601_10BIT_BLACK;			// Y
+			ycbcrUnPackedBuffer[pixelCount+3] = CCIR601_10BIT_BLACK;			// Y
 		}
 
 
@@ -1562,7 +1562,7 @@ void WriteLineToBuffer(AJA_PixelFormat pixelFormat, uint32_t currentLine, uint32
 		break;
 	case AJA_PixelFormat_BAYER12_HS:
 		{
-			uint32_t bayerLinePitch = linePitch/3;  
+			uint32_t bayerLinePitch = linePitch/3;	
 			uint8_t *pBuffer = pOutputBuffer + (currentLine * bayerLinePitch);
 			AJA_Convert16BitRGBtoBayer12BitDPXPacked((AJA_RGBAlpha16BitPixel*)pPackedLineBuffer ,(uint8_t*)pBuffer, numPixels, currentLine);
 
@@ -1609,7 +1609,7 @@ void WriteLineToBuffer(AJA_PixelFormat pixelFormat, AJA_BayerColorPhase bayerPha
 		break;
 	case AJA_PixelFormat_BAYER12_HS:
 		{
-			uint32_t bayerLinePitch = linePitch/4;  
+			uint32_t bayerLinePitch = linePitch/4;	
 			uint8_t *pBuffer = pOutputBuffer + (currentLine * bayerLinePitch);
 			AJA_Convert16BitRGBtoBayer12BitDPXPacked((AJA_RGBAlpha16BitPixel*)pPackedLineBuffer ,(uint8_t*)pBuffer, numPixels, currentLine, bayerPhase);
 
@@ -1825,7 +1825,7 @@ inline int16_t CubicInterPolateWord( int16_t *Input, int32_t Index)
 		Input[1]*CubicCoef[96-Index] + 
 		Input[2]*CubicCoef[128-Index]);
 
-	//    return (Word)(InterPolatedValue&0x3FF);
+	//	  return (Word)(InterPolatedValue&0x3FF);
 	return (int16_t)ClipYCbCr_10BIT(InterPolatedValue);
 }
 

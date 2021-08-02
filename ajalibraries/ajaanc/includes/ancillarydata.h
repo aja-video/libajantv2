@@ -18,10 +18,10 @@
 
 
 // Default Packet IDs used when building "analog" packets
-// NOTE: there is NO guarantee that the Anc Extractor hardware will use these codes - nor does the
-//       Anc Inserter hardware care. If you want to know whether a given packet is "analog" or
-//		 "digital", you should look at the appropriate flag in the packet header. I just wanted to
-//		 have all the locally (software) built "analog" IDs come from a single location.
+// NOTE:	There's NO guarantee that the Anc Extractor hardware will use these codes - nor does the
+//			Anc Inserter hardware care. To determine if a given packet is "analog" or "digital", check
+//			the appropriate flag in the packet header. This is just to have all the locally (software)
+//			built "analog" IDs come from a single location.
 const uint8_t AJAAncillaryData_AnalogDID = 0x00;
 const uint8_t AJAAncillaryData_AnalogSID = 0x00;
 
@@ -80,7 +80,7 @@ AJAExport const std::string & AJAAncillaryDataTypeToString (const AJAAncillaryDa
 **/
 enum AJAAncillaryDataLink
 {
-    AJAAncillaryDataLink_A,			///< @brief	The ancillary data is associated with Link A of the video stream.
+	AJAAncillaryDataLink_A,			///< @brief	The ancillary data is associated with Link A of the video stream.
 	AJAAncillaryDataLink_B,			///< @brief	The ancillary data is associated with Link B of the video stream.
 	AJAAncillaryDataLink_LeftEye	= AJAAncillaryDataLink_A,	///< @brief	The ancillary data is associated with the Left Eye stereoscopic video stream.
 	AJAAncillaryDataLink_RightEye	= AJAAncillaryDataLink_B,	///< @brief	The ancillary data is associated with the Right Eye stereoscopic video stream.

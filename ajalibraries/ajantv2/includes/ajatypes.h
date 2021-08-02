@@ -9,7 +9,7 @@
 #define AJATYPES_H
 
 #if defined (AJAMac)
-	#define	NTV2_USE_STDINT
+	#define NTV2_USE_STDINT
 #endif	//	if not MSWindows
 
 /**
@@ -39,18 +39,19 @@
 #define NTV2_DEPRECATE_14_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.2
 #define NTV2_DEPRECATE_14_3		//	If defined, excludes all symbols/APIs first deprecated in SDK 14.3
 #define NTV2_DEPRECATE_15_0		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.0
-//#define NTV2_DEPRECATE_15_1		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.1
-//#define NTV2_DEPRECATE_15_2		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.2
-//#define NTV2_DEPRECATE_15_3		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.3 (never released)
-//#define NTV2_DEPRECATE_15_5		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.5
-//#define NTV2_DEPRECATE_15_6		//	If defined, excludes all symbols/APIs to be deprecated in SDK 15.6 (never released)
-//#define NTV2_DEPRECATE_16_0		//	If defined, excludes all symbols/APIs to be deprecated in SDK 16.0
-//#define NTV2_DEPRECATE_16_1		//	If defined, excludes all symbols/APIs to be deprecated in SDK 16.1
+//#define NTV2_DEPRECATE_15_1		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.1
+//#define NTV2_DEPRECATE_15_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.2
+//#define NTV2_DEPRECATE_15_3		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.3 (never released)
+//#define NTV2_DEPRECATE_15_5		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.5
+//#define NTV2_DEPRECATE_15_6		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.6 (never released)
+//#define NTV2_DEPRECATE_16_0		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.0
+//#define NTV2_DEPRECATE_16_1		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.1
+//#define NTV2_DEPRECATE_16_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.2
 #define NTV2_NUB_CLIENT_SUPPORT		//	If defined, includes nub client support;  otherwise, excludes it
-#define	AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
-#define	AJA_STATIC		static		//	Do not change this.
+#define AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
+#define AJA_STATIC		static		//	Do not change this.
 #define NTV2_WRITEREG_PROFILING		//	If defined, enables register write profiling
-#define	NTV2_UNUSED(__p__)			(void)__p__
+#define NTV2_UNUSED(__p__)			(void)__p__
 #define NTV2_USE_CPLUSPLUS11		//	New in SDK 16.0. If defined (now default), 'ajalibraries/ajantv2' will use C++11 features (requires C++11 compiler)
 
 #if defined(__CPLUSPLUS__) || defined(__cplusplus)
@@ -112,7 +113,7 @@
 
 #if defined (NTV2_USE_STDINT)
 	#if defined (MSWindows)
-		#define	_WINSOCK_DEPRECATED_NO_WARNINGS		1
+		#define _WINSOCK_DEPRECATED_NO_WARNINGS		1
 		#if (_MSC_VER < 1300)
 			typedef signed char				int8_t;
 			typedef signed short			int16_t;
@@ -159,9 +160,9 @@
 
 // Platform dependent
 									//////////////////////////////////////////////////////////////////
-#if defined (MSWindows)				////////////////////////	WINDOWS	//////////////////////////////
+#if defined (MSWindows)				////////////////////////	WINDOWS //////////////////////////////
 									//////////////////////////////////////////////////////////////////
-    #define	_WINSOCK_DEPRECATED_NO_WARNINGS		1
+	#define _WINSOCK_DEPRECATED_NO_WARNINGS		1
 
 	#if !defined (NTV2_BUILDING_DRIVER)
 		#ifndef WIN32_LEAN_AND_MEAN
@@ -175,23 +176,23 @@
 	typedef __int64 LWord64;
 	typedef unsigned __int64 ULWord64;
 	typedef unsigned __int64 Pointer64;
-	typedef LWord 				Fixed_;
+	typedef LWord				Fixed_;
 	typedef bool				BOOL_;
 	typedef UWord				UWord_;
 
-	typedef signed __int8    int8_t;
-	typedef signed __int16   int16_t;
-	typedef signed __int32   int32_t;
-	typedef signed __int64   int64_t;
-	typedef unsigned __int8  uint8_t;
+	typedef signed __int8	 int8_t;
+	typedef signed __int16	 int16_t;
+	typedef signed __int32	 int32_t;
+	typedef signed __int64	 int64_t;
+	typedef unsigned __int8	 uint8_t;
 	typedef unsigned __int16 uint16_t;
 	typedef unsigned __int32 uint32_t;
 	typedef unsigned __int64 uint64_t;
 
 	typedef UINT_PTR	AJASocket;
 
-	#define AJATargetBigEndian  0
-	#define	AJAFUNC		__FUNCTION__
+	#define AJATargetBigEndian	0
+	#define AJAFUNC		__FUNCTION__
 	#define NTV2_CPP_MIN(__x__,__y__)		min((__x__),(__y__))
 	#define NTV2_CPP_MAX(__x__,__y__)		max((__x__),(__y__))
 
@@ -206,8 +207,8 @@
 	typedef int						Fixed_;
 	typedef int						AJASocket;
 
-	#define AJATargetBigEndian  0
-	#define	AJAFUNC		__func__
+	#define AJATargetBigEndian	0
+	#define AJAFUNC		__func__
 	#define NTV2_CPP_MIN(__x__,__y__)		std::min((__x__),(__y__))
 	#define NTV2_CPP_MAX(__x__,__y__)		std::max((__x__),(__y__))
 
@@ -228,7 +229,7 @@
 #elif defined (AJALinux)				////////////////////////	LINUX	//////////////////////////////
 										//////////////////////////////////////////////////////////////////
 	/* As of kernel 2.6.19, the C type _Bool is typedefed to bool to allow
-	 * generic booleans in the kernel.  Unfortunately, we #define bool
+	 * generic booleans in the kernel.	Unfortunately, we #define bool
 	 * here and true and false there, so this fixes it ... until next time
 	 * -JAC 3/6/2007 */
 	#ifdef __KERNEL__
@@ -237,116 +238,116 @@
 		#if defined (RHEL5) || (LINUX_VERSION_CODE > KERNEL_VERSION(2,6,19))
 			#include "linux/types.h"
 		#else/* LINUX_VERSION_CODE */
-			typedef unsigned char       bool;
+			typedef unsigned char		bool;
 		#endif /* LINUX_VERSION_CODE */
 	#endif /* __KERNEL__ */
 
 	#if defined(NTV2_USE_CPLUSPLUS11)
-		#undef NTV2_USE_CPLUSPLUS11	//	Linux c++11-in-SDK TBD
+		#undef NTV2_USE_CPLUSPLUS11 //	Linux c++11-in-SDK TBD
 	#endif
 
-    #if defined (MODULE)
-        #define NTV2_BUILDING_DRIVER
+	#if defined (MODULE)
+		#define NTV2_BUILDING_DRIVER
 		#undef NTV2_USE_CPLUSPLUS11
-    #endif
+	#endif
 
-    #if !defined (NTV2_BUILDING_DRIVER)
-        #include <stdint.h>
-        typedef int64_t				HANDLE;
-        typedef uint64_t            ULWord64;
-        typedef uint64_t            Pointer64;
-        typedef int64_t             LWord64;
-        typedef void * 				PVOID;
-        typedef void * 				LPVOID;
-        typedef int32_t				Fixed_;
-        typedef bool				BOOL_;
-        typedef bool			    BOOL;
-        typedef UWord				UWord_;
-        typedef uint32_t            DWORD; /* 32 bits on 32 or 64 bit CPUS */
+	#if !defined (NTV2_BUILDING_DRIVER)
+		#include <stdint.h>
+		typedef int64_t				HANDLE;
+		typedef uint64_t			ULWord64;
+		typedef uint64_t			Pointer64;
+		typedef int64_t				LWord64;
+		typedef void *				PVOID;
+		typedef void *				LPVOID;
+		typedef int32_t				Fixed_;
+		typedef bool				BOOL_;
+		typedef bool				BOOL;
+		typedef UWord				UWord_;
+		typedef uint32_t			DWORD; /* 32 bits on 32 or 64 bit CPUS */
 
-        typedef int32_t				AJASocket;
+		typedef int32_t				AJASocket;
 		#define NTV2_CPP_MIN(__x__,__y__)		std::min((__x__),(__y__))
 		#define NTV2_CPP_MAX(__x__,__y__)		std::max((__x__),(__y__))
-    #else
+	#else
 		#if defined (AJAVirtual)
 			#include <stdbool.h>
-        	#include <stdint.h>
+			#include <stdint.h>
 		#endif
-        typedef long				HANDLE;
-        // this is what is is in Windows:
-        // typedef void *				HANDLE;
-        typedef unsigned long long	ULWord64;
-        typedef unsigned long long	Pointer64;
-        typedef signed long long	LWord64;
-        typedef void * 				PVOID;
-        typedef void * 				LPVOID;
-        typedef LWord				Fixed_;
-        typedef bool				BOOL_;
-        typedef bool			    BOOL;
-        typedef UWord				UWord_;
-        typedef unsigned int        DWORD; /* 32 bits on 32 or 64 bit CPUS */
+		typedef long				HANDLE;
+		// this is what is is in Windows:
+		// typedef void *				HANDLE;
+		typedef unsigned long long	ULWord64;
+		typedef unsigned long long	Pointer64;
+		typedef signed long long	LWord64;
+		typedef void *				PVOID;
+		typedef void *				LPVOID;
+		typedef LWord				Fixed_;
+		typedef bool				BOOL_;
+		typedef bool				BOOL;
+		typedef UWord				UWord_;
+		typedef unsigned int		DWORD; /* 32 bits on 32 or 64 bit CPUS */
 
-        typedef int					AJASocket;
-    #endif
+		typedef int					AJASocket;
+	#endif
 
-	#define AJATargetBigEndian  0
-	#define	AJAFUNC		__func__
+	#define AJATargetBigEndian	0
+	#define AJAFUNC		__func__
 
 	#if !defined (NTV2_BUILDING_DRIVER)
 		#if defined (NTV2_DEPRECATE)
 			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
-			#define	NTV2_DEPRECATED		//	Disable deprecate warnings (for now)
+			#define NTV2_DEPRECATED		//	Disable deprecate warnings (for now)
 		#else
-			#define	NTV2_DEPRECATED
+			#define NTV2_DEPRECATED
 		#endif
 
 		#if defined (NTV2_DEPRECATE_12_5)
 			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
-			#define	NTV2_DEPRECATED_12_5		//	Disable deprecate warnings (for now)
+			#define NTV2_DEPRECATED_12_5		//	Disable deprecate warnings (for now)
 		#else
-			#define	NTV2_DEPRECATED_12_5
+			#define NTV2_DEPRECATED_12_5
 		#endif
 
 		#if defined (NTV2_DEPRECATE_12_6)
 			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
-			#define	NTV2_DEPRECATED_12_6		//	Disable deprecate warnings (for now)
+			#define NTV2_DEPRECATED_12_6		//	Disable deprecate warnings (for now)
 		#else
-			#define	NTV2_DEPRECATED_12_6
+			#define NTV2_DEPRECATED_12_6
 		#endif
 
 		#if defined (NTV2_DEPRECATE_12_7)
 			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
-			#define	NTV2_DEPRECATED_12_7		//	Disable deprecate warnings (for now)
+			#define NTV2_DEPRECATED_12_7		//	Disable deprecate warnings (for now)
 		#else
-			#define	NTV2_DEPRECATED_12_7
+			#define NTV2_DEPRECATED_12_7
 		#endif
 
 		#if defined (NTV2_DEPRECATE_13_0)
 			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
-			#define	NTV2_DEPRECATED_13_0		//	Disable deprecate warnings (for now)
+			#define NTV2_DEPRECATED_13_0		//	Disable deprecate warnings (for now)
 		#else
-			#define	NTV2_DEPRECATED_13_0
+			#define NTV2_DEPRECATED_13_0
 		#endif
 
 		#if defined (NTV2_DEPRECATE_13_1)
 			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
-			#define	NTV2_DEPRECATED_13_1		//	Disable deprecate warnings (for now)
+			#define NTV2_DEPRECATED_13_1		//	Disable deprecate warnings (for now)
 		#else
-			#define	NTV2_DEPRECATED_13_1
+			#define NTV2_DEPRECATED_13_1
 		#endif
 
 		#if defined (NTV2_DEPRECATE_14_0)
 			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
-			#define	NTV2_DEPRECATED_14_0		//	Disable deprecate warnings (for now)
+			#define NTV2_DEPRECATED_14_0		//	Disable deprecate warnings (for now)
 		#else
-			#define	NTV2_DEPRECATED_14_0
+			#define NTV2_DEPRECATED_14_0
 		#endif
 
 		#if defined (NTV2_DEPRECATE_14_1)
 			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
-			#define	NTV2_DEPRECATED_14_1		//	Disable deprecate warnings (for now)
+			#define NTV2_DEPRECATED_14_1		//	Disable deprecate warnings (for now)
 		#else
-			#define	NTV2_DEPRECATED_14_1
+			#define NTV2_DEPRECATED_14_1
 		#endif
 	#endif
 
@@ -354,7 +355,7 @@
 		typedef struct {
 		  int cx;
 		  int cy;
-		} SIZE;	///< @deprecated	Use NTV2FrameDimensions instead.
+		} SIZE; ///< @deprecated	Use NTV2FrameDimensions instead.
 	#endif	//	!defined (NTV2_DEPRECATE)
 
 	typedef struct {
@@ -422,16 +423,19 @@
 		#define NTV2_DEPRECATE_15_3
 	#endif
 	#if !defined(NTV2_DEPRECATE_15_5)
-		#define NTV2_DEPRECATE_15_5		//	(future ready)
+		#define NTV2_DEPRECATE_15_5
 	#endif
 	#if !defined(NTV2_DEPRECATE_15_6)
-		#define NTV2_DEPRECATE_15_6		//	(future ready)
+		#define NTV2_DEPRECATE_15_6
 	#endif
 	#if !defined(NTV2_DEPRECATE_16_0)
-		#define NTV2_DEPRECATE_16_0		//	(future ready)
+		#define NTV2_DEPRECATE_16_0
 	#endif
 	#if !defined(NTV2_DEPRECATE_16_1)
-		#define NTV2_DEPRECATE_16_1		//	(future ready)
+		#define NTV2_DEPRECATE_16_1
+	#endif
+	#if !defined(NTV2_DEPRECATE_16_2)
+		#define NTV2_DEPRECATE_16_2
 	#endif
 #endif
 
@@ -444,27 +448,27 @@
 		//	Kernel space NTV2_ASSERTs
 		#if defined (AJA_DEBUG) || defined (_DEBUG)
 			#if defined (MSWindows)
-				#define	NTV2_ASSERT(_expr_)		ASSERT (#_expr_)
+				#define NTV2_ASSERT(_expr_)		ASSERT (#_expr_)
 			#elif defined (AJAMac)
-				#define	NTV2_ASSERT(_expr_)		assert (_expr_)
+				#define NTV2_ASSERT(_expr_)		assert (_expr_)
 			#elif defined (AJALinux)
 				#define NTV2_ASSERT(_expr_)		do {if (#_expr_) break;														\
 													printk (KERN_EMERG "### NTV2_ASSERT '%s': %s: line %d: %s\n", \
 															__FILE__, __func__, __LINE__, #_expr_); dump_stack(); \
 												} while (0)
 			#else
-				#define	NTV2_ASSERT(_expr_)
+				#define NTV2_ASSERT(_expr_)
 			#endif
 		#else
-			#define	NTV2_ASSERT(_expr_)
+			#define NTV2_ASSERT(_expr_)
 		#endif
 	#else
 		//	User space NTV2_ASSERTs
 		#if defined (AJA_DEBUG) || defined (_DEBUG)
 			#include <assert.h>
-			#define	NTV2_ASSERT(_expr_)		assert (_expr_)
+			#define NTV2_ASSERT(_expr_)		assert (_expr_)
 		#else
-			#define	NTV2_ASSERT(_expr_)		(void) (_expr_)
+			#define NTV2_ASSERT(_expr_)		(void) (_expr_)
 		#endif
 	#endif	//	else !defined (NTV2_BUILDING_DRIVER)
 #endif	//	if NTV2_ASSERT undefined
@@ -474,10 +478,10 @@
 ////////////////////////	NTV2_DEPRECATED_ Macros		//////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 //	These implement compile-time warnings for use of deprecated variables and functions
-#define	NTV2_DEPRECATED_INLINE						//	Just a marker/reminder
-#define	NTV2_DEPRECATED_FIELD						//	Just a marker/reminder
-#define	NTV2_DEPRECATED_VARIABLE					//	Just a marker/reminder
-#define	NTV2_DEPRECATED_TYPEDEF						//	Just a marker/reminder
+#define NTV2_DEPRECATED_INLINE						//	Just a marker/reminder
+#define NTV2_DEPRECATED_FIELD						//	Just a marker/reminder
+#define NTV2_DEPRECATED_VARIABLE					//	Just a marker/reminder
+#define NTV2_DEPRECATED_TYPEDEF						//	Just a marker/reminder
 #define NTV2_DEPRECATED_CLASS						//	Just a marker/reminder
 #define NTV2_SHOULD_BE_DEPRECATED(__f__)			__f__
 #if defined(NTV2_BUILDING_DRIVER)
@@ -487,7 +491,7 @@
 	#define NTV2_DEPRECATED_vi(__v__, __i__)		__v__  = (__i__)
 #elif defined(_MSC_VER) && _MSC_VER >= 1600
 	//	Use __declspec(deprecated) for MSVC
-	#define	NTV2_DEPRECATED_f(__f__)				__declspec(deprecated) __f__
+	#define NTV2_DEPRECATED_f(__f__)				__declspec(deprecated) __f__
 	#define NTV2_DEPRECATED_v(__v__)				__v__
 	#define NTV2_DEPRECATED_vi(__v__, __i__)		__v__  = (__i__)
 #elif defined(__clang__)
@@ -496,7 +500,7 @@
 	#define NTV2_DEPRECATED_v(__v__)				__v__
 	#define NTV2_DEPRECATED_vi(__v__, __i__)		__v__  = (__i__)
 #elif defined(__GNUC__)
-    #if __GNUC__ >= 4
+	#if __GNUC__ >= 4
 		//	Use __attribute__((deprecated)) for GCC 4 or later
 		#define NTV2_DEPRECATED_f(__f__)			__f__ __attribute__ ((deprecated))
 		#define NTV2_DEPRECATED_v(__v__)			__v__
@@ -506,7 +510,7 @@
 		#define NTV2_DEPRECATED_f(__f__)			__f__
 		#define NTV2_DEPRECATED_v(__v__)			__v__
 		#define NTV2_DEPRECATED_vi(__v__, __i__)	__v__  = (__i__)
-    #endif
+	#endif
 #else
 	//	Disable deprecation warnings
 	#define NTV2_DEPRECATED_f(__f__)				__f__
@@ -566,8 +570,8 @@ typedef struct NTV2FrameDimensions
 		private:	//	Private member data only if not building driver
 	#endif	//	!defined (NTV2_BUILDING_DRIVER)
 	//	Member Variables
-	ULWord	mWidth;		///< @brief	The horizontal dimension, in pixels.
-	ULWord	mHeight;	///< @brief	The vertical dimension, in lines.
+	ULWord	mWidth;		///< @brief The horizontal dimension, in pixels.
+	ULWord	mHeight;	///< @brief The vertical dimension, in lines.
 } NTV2FrameDimensions;
 
 
@@ -578,7 +582,7 @@ typedef struct NTV2FrameDimensions
 		//	As of kernel 2.6.24, BIT is defined in the kernel source (linux/bitops.h).
 		//	By making that definition match the one in the kernel source *exactly*
 		//	we supress compiler warnings (thanks Shaun)
-		#define BIT(nr)	(1UL << (nr))
+		#define BIT(nr) (1UL << (nr))
 	#endif	// AJALinux
 #endif
 #if 1
@@ -619,55 +623,55 @@ typedef struct NTV2FrameDimensions
 #if 0
 // Check at compile time if all the defined types are the correct size
 // must support C++11 for this to work
-static_assert(sizeof(bool) == 1,      "bool: size is not correct");
-static_assert(sizeof(int8_t) == 1,    "int8_t: size is not correct");
-static_assert(sizeof(int16_t) == 2,   "int16_t: size is not correct");
-static_assert(sizeof(int32_t) == 4,   "int32_t: size is not correct");
-static_assert(sizeof(int64_t) == 8,   "int64_t: size is not correct");
-static_assert(sizeof(uint8_t) == 1,   "uint8_t: size is not correct");
+static_assert(sizeof(bool) == 1,	  "bool: size is not correct");
+static_assert(sizeof(int8_t) == 1,	  "int8_t: size is not correct");
+static_assert(sizeof(int16_t) == 2,	  "int16_t: size is not correct");
+static_assert(sizeof(int32_t) == 4,	  "int32_t: size is not correct");
+static_assert(sizeof(int64_t) == 8,	  "int64_t: size is not correct");
+static_assert(sizeof(uint8_t) == 1,	  "uint8_t: size is not correct");
 static_assert(sizeof(uint16_t) == 2,  "uint16_t: size is not correct");
 static_assert(sizeof(uint32_t) == 4,  "uint32_t: size is not correct");
 static_assert(sizeof(uint64_t) == 8,  "uint64_t: size is not correct");
 
-static_assert(sizeof(LWord) == 4,     "LWord: size is not correct");
-static_assert(sizeof(ULWord) == 4,    "ULWord: size is not correct");
-static_assert(sizeof(PULWord) == 8,   "PULWord: size is not correct");
-static_assert(sizeof(Word) == 2,      "Word: size is not correct");
-static_assert(sizeof(UWord) == 2,     "UWord: size is not correct");
-static_assert(sizeof(UByte) == 1,     "UByte: size is not correct");
-static_assert(sizeof(SByte) == 1,     "SByte: size is not correct");
+static_assert(sizeof(LWord) == 4,	  "LWord: size is not correct");
+static_assert(sizeof(ULWord) == 4,	  "ULWord: size is not correct");
+static_assert(sizeof(PULWord) == 8,	  "PULWord: size is not correct");
+static_assert(sizeof(Word) == 2,	  "Word: size is not correct");
+static_assert(sizeof(UWord) == 2,	  "UWord: size is not correct");
+static_assert(sizeof(UByte) == 1,	  "UByte: size is not correct");
+static_assert(sizeof(SByte) == 1,	  "SByte: size is not correct");
 
 static_assert(sizeof(ULWord64) == 8,  "ULWord64: size is not correct");
 static_assert(sizeof(Pointer64) == 8, "Pointer64: size is not correct");
-static_assert(sizeof(LWord64) == 8,   "LWord64: size is not correct");
-static_assert(sizeof(PVOID) == 8,     "PVOID: size is not correct");
-static_assert(sizeof(Fixed_) == 4,    "Fixed_: size is not correct");
+static_assert(sizeof(LWord64) == 8,	  "LWord64: size is not correct");
+static_assert(sizeof(PVOID) == 8,	  "PVOID: size is not correct");
+static_assert(sizeof(Fixed_) == 4,	  "Fixed_: size is not correct");
 
 // ideally these whould be the same across the platforms but historically they have not been
 #if defined(MSWindows)
-static_assert(sizeof(HANDLE) == 8,    "HANDLE: size is not correct");
-static_assert(sizeof(BOOL) == 4,      "BOOL: size is not correct");
-static_assert(sizeof(BOOL_) == 1,     "BOOL_: size is not correct");
+static_assert(sizeof(HANDLE) == 8,	  "HANDLE: size is not correct");
+static_assert(sizeof(BOOL) == 4,	  "BOOL: size is not correct");
+static_assert(sizeof(BOOL_) == 1,	  "BOOL_: size is not correct");
 static_assert(sizeof(AJASocket) == 8, "AJASocket: size is not correct");
-static_assert(sizeof(UWord_) == 2,    "UWord_: size is not correct");
-static_assert(sizeof(LPVOID) == 8,    "LPVOID: size is not correct");
-static_assert(sizeof(DWORD) == 4,     "DWORD: size is not correct");
+static_assert(sizeof(UWord_) == 2,	  "UWord_: size is not correct");
+static_assert(sizeof(LPVOID) == 8,	  "LPVOID: size is not correct");
+static_assert(sizeof(DWORD) == 4,	  "DWORD: size is not correct");
 #elif defined(AJAMac)
-static_assert(sizeof(HANDLE) == 2,    "HANDLE: size is not correct");
-//static_assert(sizeof(BOOL) == 1,      "BOOL: size is not correct");
-static_assert(sizeof(BOOL_) == 4,     "BOOL_: size is not correct");
+static_assert(sizeof(HANDLE) == 2,	  "HANDLE: size is not correct");
+//static_assert(sizeof(BOOL) == 1,		"BOOL: size is not correct");
+static_assert(sizeof(BOOL_) == 4,	  "BOOL_: size is not correct");
 static_assert(sizeof(AJASocket) == 4, "AJASocket: size is not correct");
-static_assert(sizeof(UWord_) == 4,    "UWord_: size is not correct");
-//static_assert(sizeof(LPVOID) == 8,    "LPVOID: size is not correct");
-//static_assert(sizeof(DWORD) == 4,     "DWORD: size is not correct");
+static_assert(sizeof(UWord_) == 4,	  "UWord_: size is not correct");
+//static_assert(sizeof(LPVOID) == 8,	"LPVOID: size is not correct");
+//static_assert(sizeof(DWORD) == 4,		"DWORD: size is not correct");
 #elif defined(AJALinux)
-static_assert(sizeof(HANDLE) == 8,    "HANDLE: size is not correct");
-static_assert(sizeof(BOOL) == 1,      "BOOL: size is not correct");
-static_assert(sizeof(BOOL_) == 1,     "BOOL_: size is not correct");
+static_assert(sizeof(HANDLE) == 8,	  "HANDLE: size is not correct");
+static_assert(sizeof(BOOL) == 1,	  "BOOL: size is not correct");
+static_assert(sizeof(BOOL_) == 1,	  "BOOL_: size is not correct");
 static_assert(sizeof(AJASocket) == 4, "AJASocket: size is not correct");
-static_assert(sizeof(UWord_) == 2,    "UWord_: size is not correct");
-static_assert(sizeof(LPVOID) == 8,    "LPVOID: size is not correct");
-static_assert(sizeof(DWORD) == 4,     "DWORD: size is not correct");
+static_assert(sizeof(UWord_) == 2,	  "UWord_: size is not correct");
+static_assert(sizeof(LPVOID) == 8,	  "LPVOID: size is not correct");
+static_assert(sizeof(DWORD) == 4,	  "DWORD: size is not correct");
 #endif
 
 #endif

@@ -21,12 +21,12 @@ public:
 
 	AJATimeBase();
 
-    /**
-     *	Construct the time base class.
-     *
-     *	@param[in]	ajaFrameRate		Frame rate define found in videotypes.h
-     */
-    AJATimeBase(AJA_FrameRate ajaFrameRate);
+	/**
+	 *	Construct the time base class.
+	 *
+	 *	@param[in]	ajaFrameRate		Frame rate define found in videotypes.h
+	 */
+	AJATimeBase(AJA_FrameRate ajaFrameRate);
 
 	/**
 	 *	Construct the time base class.
@@ -46,9 +46,9 @@ public:
 	AJATimeBase(int64_t frameTimeScale, int64_t frameDuration, int64_t audioRate);
 
 	/**
-	 *  Copy constructor
+	 *	Copy constructor
 	 *
-	 *  @param[in]	other				AJATimeBase to copy
+	 *	@param[in]	other				AJATimeBase to copy
 	 */
 	AJATimeBase(const AJATimeBase &other);
 
@@ -83,8 +83,8 @@ public:
 	 *
 	 *	The frame rate is specified as frameTimeScale/frameDuration = frames/seconds.
 	 *
-	 *	@param[out]	frameTimeScale	Time units per second (units/second)
-	 *	@param[out]	frameDuration	Time units per frame (units/frame)
+	 *	@param[out] frameTimeScale	Time units per second (units/second)
+	 *	@param[out] frameDuration	Time units per frame (units/frame)
 	 */
 	void GetFrameRate(int64_t& frameTimeScale, int64_t& frameDuration) const;
 	void GetFrameRate(uint32_t& frameTimeScale, uint32_t& frameDuration) const;
@@ -192,7 +192,7 @@ public:
 	/**
 	 *	Convert audio samples to video frames.
 	 *
-	 *	@param[in]	samples	Audio sample count to convert.
+	 *	@param[in]	samples Audio sample count to convert.
 	 *	@param[in]	round	Round the result.
 	 *	@return				Video frame count.
 	 */
@@ -201,7 +201,7 @@ public:
 	/**
 	 *	Convert audio samples to system ticks.
 	 *
-	 *	@param[in]	samples	Audio sample count to convert.
+	 *	@param[in]	samples Audio sample count to convert.
 	 *	@param[in]	round	Round the result.
 	 *	@return				System tick count.
 	 */
@@ -210,7 +210,7 @@ public:
 	/**
 	 *	Convert audio samples to time in seconds.
 	 *
-	 *	@param[in]	samples	Sample count to convert.
+	 *	@param[in]	samples Sample count to convert.
 	 *	@return				Time in seconds.
 	 */
 	double SamplesToSeconds(int64_t samples);
@@ -218,7 +218,7 @@ public:
 	/**
 	 *	Convert audio samples to time in microseconds.
 	 *
-	 *	@param[in]	samples	Sample count to convert.
+	 *	@param[in]	samples Sample count to convert.
 	 *	@param[in]	round	Round the result.
 	 *	@return				Time in microseconds.
 	 */
@@ -262,7 +262,7 @@ public:
 	/**
 	 *	Convert time in seconds to video frames.
 	 *
-	 *	@param[in]	seconds	Time in seconds.
+	 *	@param[in]	seconds Time in seconds.
 	 *	@param[in]	round	Round the result.
 	 *	@return				Video frame count.
 	 */
@@ -271,7 +271,7 @@ public:
 	/**
 	 *	Convert time in seconds to audio samples.
 	 *
-	 *	@param[in]	seconds	Time in seconds.
+	 *	@param[in]	seconds Time in seconds.
 	 *	@param[in]	round	Round the result.
 	 *	@return				Audio sample count.
 	 */
@@ -280,7 +280,7 @@ public:
 	/**
 	 *	Convert time in seconds to system ticks.
 	 *
-	 *	@param[in]	seconds	Time in seconds.
+	 *	@param[in]	seconds Time in seconds.
 	 *	@param[in]	round	Round the result.
 	 *	@return				System tick count.
 	 */
@@ -323,7 +323,7 @@ public:
 	/**
 	 *	Returns if timebases are reasonably close
 	 *
-	 *	@param[in]	timeBase	    Time base to compare.
+	 *	@param[in]	timeBase		Time base to compare.
 	 *	@return						True if the same or close (returns false if either duration is zero).
 	 */
 	bool IsCloseTo(const AJATimeBase &timeBase) const;
@@ -362,7 +362,7 @@ public:
 	/**
 	 *	Convert time in seconds to microseconds.
 	 *
-	 *	@param[in]	seconds	Time in seconds.
+	 *	@param[in]	seconds Time in seconds.
 	 *	@param[in]	round	Round the result.
 	 *	@return				Time in microseconds.
 	 */
@@ -381,7 +381,7 @@ public:
 						   int64_t outScale, int64_t outDuration, bool round, bool large);
 
 private:
-	void    SetAJAFrameRatePrivate(AJA_FrameRate ajaFrameRate);
+	void	SetAJAFrameRatePrivate(AJA_FrameRate ajaFrameRate);
 
 	int64_t mFrameTimeScale;
 	int64_t mFrameDuration;

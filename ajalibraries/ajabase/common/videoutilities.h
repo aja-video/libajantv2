@@ -14,13 +14,13 @@
 #define DEFAULT_PATT_GAIN  0.9		// some patterns pay attention to this...
 #define HD_NUMCOMPONENTPIXELS_2K  2048
 #define HD_NUMCOMPONENTPIXELS_1080_2K  2048
-#define HD_NUMCOMPONENTPIXELS_1080  1920
-#define CCIR601_10BIT_BLACK  64
-#define CCIR601_10BIT_WHITE  940
-#define CCIR601_10BIT_CHROMAOFFSET  512
+#define HD_NUMCOMPONENTPIXELS_1080	1920
+#define CCIR601_10BIT_BLACK	 64
+#define CCIR601_10BIT_WHITE	 940
+#define CCIR601_10BIT_CHROMAOFFSET	512
 
-#define CCIR601_8BIT_BLACK  16
-#define CCIR601_8BIT_WHITE  235
+#define CCIR601_8BIT_BLACK	16
+#define CCIR601_8BIT_WHITE	235
 #define CCIR601_8BIT_CHROMAOFFSET  128
 
 #define MIN_RGB_8BIT 0
@@ -42,14 +42,14 @@
 //			in the following three macros to eliminate gcc "comparison always true" warnings
 //			when __x__ is an unsigned value.
 #if !defined(ClipRGB_8BIT)
-	#define ClipRGB_8BIT(__x__)			((__x__) > MAX_RGB_8BIT   ?  (MAX_RGB_8BIT)									\
-										                          :  ((__x__) <= MIN_RGB_8BIT   ?  (MIN_RGB_8BIT)	\
-										                                                        :  (__x__)))
+	#define ClipRGB_8BIT(__x__)			((__x__) > MAX_RGB_8BIT	  ?	 (MAX_RGB_8BIT)									\
+																  :	 ((__x__) <= MIN_RGB_8BIT	?  (MIN_RGB_8BIT)	\
+																								:  (__x__)))
 #endif
 #if !defined(ClipRGB_10BIT)
-	#define ClipRGB_10BIT(__x__)		((__x__) > MAX_RGB_10BIT  ?  (MAX_RGB_10BIT)								\
-										                          :  ((__x__) <= MIN_RGB_10BIT  ?  (MIN_RGB_10BIT)	\
-										                                                        :  (__x__)))
+	#define ClipRGB_10BIT(__x__)		((__x__) > MAX_RGB_10BIT  ?	 (MAX_RGB_10BIT)								\
+																  :	 ((__x__) <= MIN_RGB_10BIT	?  (MIN_RGB_10BIT)	\
+																								:  (__x__)))
 #endif
 
 #define MIN_YCBCR_10BIT 4
@@ -58,10 +58,10 @@
 
 
 typedef enum { 
-	AJA_SIGNALMASK_NONE=0,     // Output Black.
-	AJA_SIGNALMASK_Y=1 ,       // Output Y if set, else Output Y=0x40
-	AJA_SIGNALMASK_Cb=2 ,      // Output Cb if set, elso Output Cb to 0x200
-	AJA_SIGNALMASK_Cr=4 ,       // Output Cr if set, elso Output Cr to 0x200
+	AJA_SIGNALMASK_NONE=0,	   // Output Black.
+	AJA_SIGNALMASK_Y=1 ,	   // Output Y if set, else Output Y=0x40
+	AJA_SIGNALMASK_Cb=2 ,	   // Output Cb if set, elso Output Cb to 0x200
+	AJA_SIGNALMASK_Cr=4 ,		// Output Cr if set, elso Output Cr to 0x200
 	AJA_SIGNALMASK_ALL=1+2+4   // Output Cr if set, elso Output Cr to 0x200
 } AJASignalMask;
 
@@ -122,7 +122,7 @@ void AJA_EXPORT AJA_RePackLineDataForYCbCrDPX(uint32_t *packedycbcrLine, uint32_
 void AJA_EXPORT AJA_MakeUnPacked8BitYCbCrBuffer( uint8_t* buffer, uint8_t Y , uint8_t Cb , uint8_t Cr,uint32_t numPixels );
 void AJA_EXPORT AJA_MakeUnPacked10BitYCbCrBuffer(uint16_t* buffer, uint16_t Y , uint16_t Cb , uint16_t Cr,uint32_t numPixels);
 void AJA_EXPORT AJA_ConvertLineto8BitYCbCr(uint16_t * ycbcr10BitBuffer, uint8_t * ycbcr8BitBuffer,	uint32_t numPixels);
-void AJA_EXPORT AJA_ConvertLineToYCbCr422(AJA_RGBAlphaPixel * RGBLine, uint16_t* YCbCrLine, int32_t numPixels , int32_t startPixel,  bool fUseSDMatrix);
+void AJA_EXPORT AJA_ConvertLineToYCbCr422(AJA_RGBAlphaPixel * RGBLine, uint16_t* YCbCrLine, int32_t numPixels , int32_t startPixel,	 bool fUseSDMatrix);
 void AJA_EXPORT AJA_ConvertLineto10BitRGB(uint16_t * ycbcrBuffer, AJA_RGBAlpha10BitPixel * rgbaBuffer,uint32_t numPixels,bool fUseSDMatrix);
 void AJA_EXPORT AJA_ConvertLinetoRGB(uint8_t * ycbcrBuffer, AJA_RGBAlphaPixel * rgbaBuffer, uint32_t numPixels, bool fUseSDMatrix);
 void AJA_EXPORT AJA_ConvertLinetoRGB(uint16_t * ycbcrBuffer, AJA_RGBAlphaPixel * rgbaBuffer, uint32_t numPixels, bool fUseSDMatrix);
@@ -157,12 +157,12 @@ void AJA_EXPORT WriteLineToBuffer(AJA_PixelFormat pixelFormat, AJA_BayerColorPha
 								  uint32_t numPixels, uint32_t linePitch, uint8_t* pOutputBuffer,uint32_t* pPackedLineBuffer);
 
 void AJA_EXPORT AJA_ConvertRGBAlpha10LineToYCbCr422(AJA_RGBAlpha10BitPixel * RGBLine,
-                                                                                 uint16_t* YCbCrLine,
-                                                                                 int32_t numPixels ,
-                                                                                 int32_t startPixel,
-                                                                                 bool fUseRGBFullRange=false);
+																				 uint16_t* YCbCrLine,
+																				 int32_t numPixels ,
+																				 int32_t startPixel,
+																				 bool fUseRGBFullRange=false);
 
-inline	int16_t	AJA_FixedRound(int32_t inFix)
+inline	int16_t AJA_FixedRound(int32_t inFix)
 { 
   int16_t retValue;
   
@@ -177,7 +177,7 @@ inline	int16_t	AJA_FixedRound(int32_t inFix)
   return retValue;
 }
 
-inline 	void AJA_SDConvert10BitYCbCrto10BitRGB(AJA_YCbCr10BitAlphaPixel *pSource,
+inline	void AJA_SDConvert10BitYCbCrto10BitRGB(AJA_YCbCr10BitAlphaPixel *pSource,
 										   AJA_RGBAlpha10BitPixel *pTarget)
 {
   int32_t Red,Green,Blue;
@@ -191,20 +191,20 @@ inline 	void AJA_SDConvert10BitYCbCrto10BitRGB(AJA_YCbCr10BitAlphaPixel *pSource
   pTarget->Red = (uint16_t)ClipRGB_10BIT(Red);
 
   Blue = AJA_FixedRound(ConvertedY +
-		    0x20469*((int32_t)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ));
+			0x20469*((int32_t)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ));
 
   pTarget->Blue = (uint16_t)ClipRGB_10BIT(Blue);
 
   Green = AJA_FixedRound(ConvertedY - 
-		     0x644A*((int32_t)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ) -
-		     0xD01F*((int32_t)(pSource->cr-CCIR601_10BIT_CHROMAOFFSET) ));
+			 0x644A*((int32_t)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ) -
+			 0xD01F*((int32_t)(pSource->cr-CCIR601_10BIT_CHROMAOFFSET) ));
 
   pTarget->Green = (uint16_t)ClipRGB_10BIT(Green);
 
   pTarget->Alpha = pSource->Alpha;
 }
 
-inline 	void AJA_HDConvert10BitYCbCrto10BitRGB(AJA_YCbCr10BitAlphaPixel *pSource,
+inline	void AJA_HDConvert10BitYCbCrto10BitRGB(AJA_YCbCr10BitAlphaPixel *pSource,
 										   AJA_RGBAlpha10BitPixel *pTarget)
 {
   int32_t Red,Green,Blue;
@@ -218,21 +218,21 @@ inline 	void AJA_HDConvert10BitYCbCrto10BitRGB(AJA_YCbCr10BitAlphaPixel *pSource
   pTarget->Red = (uint16_t)ClipRGB_10BIT(Red);
 
   Blue = AJA_FixedRound(ConvertedY +
-		    0x22A86*((int32_t)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ));
+			0x22A86*((int32_t)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ));
 
   pTarget->Blue = (uint16_t)ClipRGB_10BIT(Blue);
 
   Green = AJA_FixedRound(ConvertedY - 
-		     0x3806*((int32_t)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ) -
-		     0x8C32*((int32_t)(pSource->cr-CCIR601_10BIT_CHROMAOFFSET) ));
+			 0x3806*((int32_t)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ) -
+			 0x8C32*((int32_t)(pSource->cr-CCIR601_10BIT_CHROMAOFFSET) ));
 
   pTarget->Green = (uint16_t)ClipRGB_10BIT(Green);
 
   pTarget->Alpha = pSource->Alpha;
 }
 
-inline 	void AJA_SDConvert10BitYCbCrtoRGB(AJA_YCbCr10BitAlphaPixel *pSource,
-								      AJA_RGBAlphaPixel *pTarget)
+inline	void AJA_SDConvert10BitYCbCrtoRGB(AJA_YCbCr10BitAlphaPixel *pSource,
+									  AJA_RGBAlphaPixel *pTarget)
 {
   int32_t Red,Green,Blue;
   int32_t ConvertedY;
@@ -245,20 +245,20 @@ inline 	void AJA_SDConvert10BitYCbCrtoRGB(AJA_YCbCr10BitAlphaPixel *pSource,
   pTarget->Red = (uint8_t)ClipRGB_8BIT(Red);
 
   Blue = AJA_FixedRound(ConvertedY +
-		    0x811B*((int32_t)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ));
+			0x811B*((int32_t)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ));
 
   pTarget->Blue = (uint8_t)ClipRGB_8BIT(Blue);
 
   Green = AJA_FixedRound(ConvertedY - 
-		     0x1913*((int32_t)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ) -
-		     0x3408*((int32_t)(pSource->cr-CCIR601_10BIT_CHROMAOFFSET) ));
+			 0x1913*((int32_t)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ) -
+			 0x3408*((int32_t)(pSource->cr-CCIR601_10BIT_CHROMAOFFSET) ));
 
   pTarget->Green = (uint8_t)ClipRGB_8BIT(Green);
 
   pTarget->Alpha = (uint8_t)pSource->Alpha;
 }
 
-inline 	void AJA_HDConvert10BitYCbCrtoRGB(AJA_YCbCr10BitAlphaPixel *pSource,
+inline	void AJA_HDConvert10BitYCbCrtoRGB(AJA_YCbCr10BitAlphaPixel *pSource,
 									  AJA_RGBAlphaPixel *pTarget)
 {
   int32_t Red,Green,Blue;
@@ -272,13 +272,13 @@ inline 	void AJA_HDConvert10BitYCbCrtoRGB(AJA_YCbCr10BitAlphaPixel *pSource,
   pTarget->Red = (uint8_t)ClipRGB_8BIT(Red);
 
   Blue = AJA_FixedRound(ConvertedY +
-		    (0x22A86>>2)*((int32_t)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ));
+			(0x22A86>>2)*((int32_t)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ));
 
   pTarget->Blue = (uint8_t)ClipRGB_8BIT(Blue);
 
   Green = AJA_FixedRound(ConvertedY - 
-		     (0x3806>>2)*((int32_t)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ) -
-		     (0x8C32>>2)*((int32_t)(pSource->cr-CCIR601_10BIT_CHROMAOFFSET) ));
+			 (0x3806>>2)*((int32_t)(pSource->cb-CCIR601_10BIT_CHROMAOFFSET) ) -
+			 (0x8C32>>2)*((int32_t)(pSource->cr-CCIR601_10BIT_CHROMAOFFSET) ));
 
   pTarget->Green = (uint8_t)ClipRGB_8BIT(Green);
 

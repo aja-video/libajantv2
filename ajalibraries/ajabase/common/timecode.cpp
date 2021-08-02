@@ -6,7 +6,7 @@
 **/
 
 //---------------------------------------------------------------------------------------------------------------------
-//  Includes
+//	Includes
 //---------------------------------------------------------------------------------------------------------------------
 #include "ajabase/common/common.h"
 #include "ajabase/common/timecode.h"
@@ -23,22 +23,22 @@ using namespace std;
 #endif
 
 //---------------------------------------------------------------------------------------------------------------------
-//  Defines and structures
+//	Defines and structures
 //---------------------------------------------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------------------------------------------------
-//  Utility Functions
+//	Utility Functions
 //---------------------------------------------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------------------------------------------------
-//  Public Functions and Class Methods
+//	Public Functions and Class Methods
 //---------------------------------------------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------------------------------------------------
-//  Name:   AJATimeCode
-// Notes:   http://www.andrewduncan.ws/Timecodes/Timecodes.html
-//          http://en.wikipedia.org/wiki/SMPTE_time_code
-//          Drop frame is lifted from http://www.davidheidelberger.com/blog/?p=29
+//	Name:	AJATimeCode
+// Notes:	http://www.andrewduncan.ws/Timecodes/Timecodes.html
+//			http://en.wikipedia.org/wiki/SMPTE_time_code
+//			Drop frame is lifted from http://www.davidheidelberger.com/blog/?p=29
 //---------------------------------------------------------------------------------------------------------------------
 AJATimeCode::AJATimeCode() :
 	m_frame(0),
@@ -53,15 +53,15 @@ AJATimeCode::AJATimeCode(uint32_t frame) :
 }
 
 AJATimeCode::AJATimeCode(const std::string &str, const AJATimeBase& timeBase, bool bDropFrame, bool bStdTc)
-    : m_stdTimecodeForHfr(bStdTc)
+	: m_stdTimecodeForHfr(bStdTc)
 {
-    Set(str.c_str(), timeBase, bDropFrame);
+	Set(str.c_str(), timeBase, bDropFrame);
 }
 
 AJATimeCode::AJATimeCode(const std::string &str, const AJATimeBase& timeBase)
-    : m_stdTimecodeForHfr(true)
+	: m_stdTimecodeForHfr(true)
 {
-    Set(str.c_str(), timeBase);
+	Set(str.c_str(), timeBase);
 }
 
 AJATimeCode::AJATimeCode(const AJATimeCode& other)
@@ -71,7 +71,7 @@ AJATimeCode::AJATimeCode(const AJATimeCode& other)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-//  Name:   ~AJATimeCode
+//	Name:	~AJATimeCode
 //---------------------------------------------------------------------------------------------------------------------
 AJATimeCode::~AJATimeCode()
 {
@@ -80,7 +80,7 @@ AJATimeCode::~AJATimeCode()
 bool AJATimeCode::QueryIsDropFrame(const string &str)
 {
 	bool bHasSemicolon = false;
-    if (str.find(";", 0) != string::npos)
+	if (str.find(";", 0) != string::npos)
 		bHasSemicolon = true;
 	return bHasSemicolon;
 }
@@ -102,7 +102,7 @@ inline uint32_t AJATimeCodeRound(double f)
 
 inline int64_t AJATimeCodeAbs(int64_t x)
 {
-    return (((x)>=0)?(x):-(x));
+	return (((x)>=0)?(x):-(x));
 }
 
 void AJATimeCode::QueryHmsf(uint32_t &h, uint32_t &m, uint32_t &s, uint32_t &f, const AJATimeBase& timeBase, bool bDropFrame) const
@@ -136,7 +136,7 @@ void AJATimeCode::QueryHmsf(uint32_t &h, uint32_t &m, uint32_t &s, uint32_t &f, 
 		uint32_t framesPerSec = AJATimeCodeRound(dFrameRate);
 		uint32_t framesPerMin = framesPerSec * 60;				// 60 seconds/minute
 		uint32_t framesPerHr  = framesPerMin * 60;				// 60 minutes/hr.
-		uint32_t framesPerDay = framesPerHr  * 24;				// 24 hours/day
+		uint32_t framesPerDay = framesPerHr	 * 24;				// 24 hours/day
 		
 		if (! bDropFrame)
 		{
@@ -181,7 +181,7 @@ void AJATimeCode::QueryHmsf(uint32_t &h, uint32_t &m, uint32_t &s, uint32_t &f, 
 			// how many units of minutes?
 			if (frame >= framesPerMin)
 			{
-				m += 1;	// got at least one minute (the first one is a non-drop minute)
+				m += 1; // got at least one minute (the first one is a non-drop minute)
 				frame  = frame - framesPerMin;
 				
 				// any remaining minutes are drop-minutes
@@ -202,7 +202,7 @@ void AJATimeCode::QueryHmsf(uint32_t &h, uint32_t &m, uint32_t &s, uint32_t &f, 
 				// drop minute: the first second is a drop second
 				if (frame >= dropFramesPerSec)
 				{
-					s += 1;	// got at least one (the first one is a drop second)
+					s += 1; // got at least one (the first one is a drop second)
 					frame = frame - dropFramesPerSec;
 					
 					// any remaining seconds are full-length
@@ -223,33 +223,33 @@ void AJATimeCode::QueryHmsf(uint32_t &h, uint32_t &m, uint32_t &s, uint32_t &f, 
 
 void AJATimeCode::QueryString(std::string &str, const AJATimeBase& timeBase, bool bDropFrame)
 {
-    uint32_t h = 0,m = 0,s = 0,f = 0;
-    QueryHmsf(h,m,s,f,timeBase,bDropFrame);
+	uint32_t h = 0,m = 0,s = 0,f = 0;
+	QueryHmsf(h,m,s,f,timeBase,bDropFrame);
 
-    std::ostringstream oss;
-    if (bDropFrame)
-    {
-        oss << setfill('0') << setw(2) << h << ":"
-            << setfill('0') << setw(2) << m << ":"
-            << setfill('0') << setw(2) << s << ";"
-            << setfill('0') << setw(2) << f;
-    }
-    else
-    {
-        oss << setfill('0') << setw(2) << h << ":"
-            << setfill('0') << setw(2) << m << ":"
-            << setfill('0') << setw(2) << s << ":"
-            << setfill('0') << setw(2) << f;
-    }
-    str.assign(oss.str());
+	std::ostringstream oss;
+	if (bDropFrame)
+	{
+		oss << setfill('0') << setw(2) << h << ":"
+			<< setfill('0') << setw(2) << m << ":"
+			<< setfill('0') << setw(2) << s << ";"
+			<< setfill('0') << setw(2) << f;
+	}
+	else
+	{
+		oss << setfill('0') << setw(2) << h << ":"
+			<< setfill('0') << setw(2) << m << ":"
+			<< setfill('0') << setw(2) << s << ":"
+			<< setfill('0') << setw(2) << f;
+	}
+	str.assign(oss.str());
 }
 
 void AJATimeCode::QueryString(char *pString, const AJATimeBase& timeBase, bool bDropFrame)
 {
-    string s;
-    QueryString(s, timeBase, bDropFrame);
-    strncpy(pString, s.c_str(), s.length());
-    pString[11] = '\0';
+	string s;
+	QueryString(s, timeBase, bDropFrame);
+	strncpy(pString, s.c_str(), s.length());
+	pString[11] = '\0';
 }
 
 int AJATimeCode::QuerySMPTEStringSize(void)
@@ -260,7 +260,7 @@ int AJATimeCode::QuerySMPTEStringSize(void)
 void AJATimeCode::QuerySMPTEString(char *pBufr,const AJATimeBase& timeBase,bool bDrop)
 {
 	uint32_t h=0, m=0, s=0, f=0;
-    QueryHmsf(h,m,s,f,timeBase,bDrop);
+	QueryHmsf(h,m,s,f,timeBase,bDrop);
 	
 	pBufr[0] = ((f/10) << 4) + (f % 10);
 	pBufr[1] = ((s/10) << 4) + (s % 10);
@@ -271,9 +271,9 @@ void AJATimeCode::QuerySMPTEString(char *pBufr,const AJATimeBase& timeBase,bool 
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-//  Name:   Set
-//  Notes:  If we need to either clamp or roll over the frame number, the uint32_t version of Set() is a good place
-//          to do it.
+//	Name:	Set
+//	Notes:	If we need to either clamp or roll over the frame number, the uint32_t version of Set() is a good place
+//			to do it.
 //---------------------------------------------------------------------------------------------------------------------
 void AJATimeCode::Set(uint32_t frame)
 {
@@ -300,9 +300,9 @@ void AJATimeCode::SetHmsf(uint32_t h, uint32_t m, uint32_t s, uint32_t f, const 
 	else if (bDropFrame)
 	{
 		// this is just good for 29.97, 59.94, 23.976
-		double dFrameRate   = double(frameRate2) / double(frameDuration);
+		double dFrameRate	= double(frameRate2) / double(frameDuration);
 		uint32_t dropFrames = AJATimeCodeRound(dFrameRate*.066666);		//Number of drop frames is 6% of framerate rounded to nearest integer
-		uint32_t tb         = AJATimeCodeRound(dFrameRate);				//We don't need the exact framerate anymore, we just need it rounded to nearest integer
+		uint32_t tb			= AJATimeCodeRound(dFrameRate);				//We don't need the exact framerate anymore, we just need it rounded to nearest integer
 		
 		uint32_t hourFrames		= tb*60*60;								//Number of frames per hour (non-drop)
 		uint32_t minuteFrames	= tb*60;								//Number of frames per minute (non-drop)
@@ -316,10 +316,10 @@ void AJATimeCode::SetHmsf(uint32_t h, uint32_t m, uint32_t s, uint32_t f, const 
 	}
 	else
 	{
-		double dFrameRate   = double(frameRate2) / double(frameDuration);
-		uint32_t tb         = AJATimeCodeRound(dFrameRate);         //We don't need the exact framerate anymore, we just need it rounded to nearest integer
+		double dFrameRate	= double(frameRate2) / double(frameDuration);
+		uint32_t tb			= AJATimeCodeRound(dFrameRate);			//We don't need the exact framerate anymore, we just need it rounded to nearest integer
 		
-		uint32_t hourFrames   = tb*60*60;							//Number of frames per hour (non-drop)
+		uint32_t hourFrames	  = tb*60*60;							//Number of frames per hour (non-drop)
 		uint32_t minuteFrames = tb*60;								//Number of frames per minute (non-drop)
 		//uint32_t totalMinutes = (60*h) + m;						//Total number of minutes
 		frame = ((hourFrames * h) + (minuteFrames * m) + (tb * s) + f);
@@ -335,100 +335,100 @@ void AJATimeCode::SetHmsf(uint32_t h, uint32_t m, uint32_t s, uint32_t f, const 
 
 void AJATimeCode::Set(const std::string &str, const AJATimeBase& timeBase, bool bDropFrame)
 {
-    const int valCount = 4;
-    uint32_t val[valCount];
-    ::memset(val,0,sizeof(val));
+	const int valCount = 4;
+	uint32_t val[valCount];
+	::memset(val,0,sizeof(val));
 
-    // work from bottom up so that partial time code
-    // (ie. something like 10:02 rather than 00:00:10:02)
-    // is handled
-    size_t len = str.length();
-    int valOffset = 0;
-    int valMult   = 1;
-    for (size_t i = 0; i < len; i++)
-    {
-        char theChar = str[len - i - 1];
-        if (::isdigit(theChar))
-        {
-            val[valOffset] = val[valOffset] + ((theChar - '0') * valMult);
-            valMult *= 10;
-        }
-        else
-        {
-            valOffset++;
-            valMult = 1;
-        }
+	// work from bottom up so that partial time code
+	// (ie. something like 10:02 rather than 00:00:10:02)
+	// is handled
+	size_t len = str.length();
+	int valOffset = 0;
+	int valMult	  = 1;
+	for (size_t i = 0; i < len; i++)
+	{
+		char theChar = str[len - i - 1];
+		if (::isdigit(theChar))
+		{
+			val[valOffset] = val[valOffset] + ((theChar - '0') * valMult);
+			valMult *= 10;
+		}
+		else
+		{
+			valOffset++;
+			valMult = 1;
+		}
 
-        if (valOffset >= 4)
-            break;
-    }
+		if (valOffset >= 4)
+			break;
+	}
 
-    SetHmsf(val[3], val[2], val[1], val[0], timeBase, bDropFrame);
+	SetHmsf(val[3], val[2], val[1], val[0], timeBase, bDropFrame);
 }
 
 void AJATimeCode::Set(const std::string &str, const AJATimeBase& timeBase)
 {
-    bool bDropFrame = false;
-    std::string::const_iterator it = str.begin();
-    while(it != str.end())
-    {
-        if ((*it == ';') || (*it == '.'))
-        {
-            bDropFrame = true;
-            break;
-        }
-        ++it;
-    }
-    Set(str, timeBase, bDropFrame);
+	bool bDropFrame = false;
+	std::string::const_iterator it = str.begin();
+	while(it != str.end())
+	{
+		if ((*it == ';') || (*it == '.'))
+		{
+			bDropFrame = true;
+			break;
+		}
+		++it;
+	}
+	Set(str, timeBase, bDropFrame);
 }
 
 void AJATimeCode::SetWithCleanup(const std::string &str, const AJATimeBase& timeBase, bool bDrop)
 {
-    if (str.empty())
-        return;
+	if (str.empty())
+		return;
 
-    bool bHasMark = false;
-    if ( (str.find(";", 0) != string::npos) || (str.find(":", 0) != string::npos) )
-    {
-        bHasMark = true;
-    }
+	bool bHasMark = false;
+	if ( (str.find(";", 0) != string::npos) || (str.find(":", 0) != string::npos) )
+	{
+		bHasMark = true;
+	}
 
-    if (bHasMark)
-    {
-        std::string tmp(str);
-        aja::strip(tmp);
+	if (bHasMark)
+	{
+		std::string tmp(str);
+		aja::strip(tmp);
 
-        if (tmp.length() > 11)
-            tmp.resize(11);
+		if (tmp.length() > 11)
+			tmp.resize(11);
 
-        Set(tmp, timeBase);
-    }
-    else
-    {
-        std::string tmp;
-        if (bDrop)
-            tmp = "00:00:00;00";
-        else
-            tmp = "00:00:00:00";
+		Set(tmp, timeBase);
+	}
+	else
+	{
+		std::string tmp;
+		if (bDrop)
+			tmp = "00:00:00;00";
+		else
+			tmp = "00:00:00:00";
 
-        size_t len = str.length();
-        int tgtOffset = 10;
-        for (size_t i = 0; i < len; i++)
-        {
-            size_t srcOffset = len - i - 1;
-            if ((str[srcOffset] >= '0') && (str[srcOffset] <= '9'))
-            {
-                tmp[tgtOffset] = str[srcOffset];
-                tgtOffset--;
-                if ((tgtOffset == 8) || (tgtOffset == 5) || (tgtOffset == 2))
-                    tgtOffset--;
+		size_t len = str.length();
+		int tgtOffset = 10;
+		for (size_t i = 0; i < len; i++)
+		{
+			size_t srcOffset = len - i - 1;
+			if ((str[srcOffset] >= '0') && (str[srcOffset] <= '9'))
+			{
+				tmp[tgtOffset] = str[srcOffset];
+				tgtOffset--;
+				if ((tgtOffset == 8) || (tgtOffset == 5) || (tgtOffset == 2))
+					tgtOffset--;
 
-                if (tgtOffset < 0)
-                    break;
-            }
-        }
-        Set(tmp, timeBase);
-    }
+				if (tgtOffset < 0)
+					break;
+			}
+		}
+		Set(tmp, timeBase);
+	}
 }
 
 void AJATimeCode::SetSMPTEString(const char *pBufr, const AJATimeBase& timeBase)
@@ -437,18 +437,18 @@ void AJATimeCode::SetSMPTEString(const char *pBufr, const AJATimeBase& timeBase)
 	if (pBufr[0] & 0x40)
 		bDrop = true;
 	
-    uint32_t f = (((pBufr[0] & 0x30) >> 4) * 10) + (pBufr[0] & 0x0f);
-    uint32_t s = (((pBufr[1] & 0x70) >> 4) * 10) + (pBufr[1] & 0x0f);
-    uint32_t m = (((pBufr[2] & 0x70) >> 4) * 10) + (pBufr[2] & 0x0f);
-    uint32_t h = (((pBufr[3] & 0x30) >> 4) * 10) + (pBufr[3] & 0x0f);
+	uint32_t f = (((pBufr[0] & 0x30) >> 4) * 10) + (pBufr[0] & 0x0f);
+	uint32_t s = (((pBufr[1] & 0x70) >> 4) * 10) + (pBufr[1] & 0x0f);
+	uint32_t m = (((pBufr[2] & 0x70) >> 4) * 10) + (pBufr[2] & 0x0f);
+	uint32_t h = (((pBufr[3] & 0x30) >> 4) * 10) + (pBufr[3] & 0x0f);
 	
-    SetHmsf(h,m,s,f,timeBase,bDrop);
+	SetHmsf(h,m,s,f,timeBase,bDrop);
 }
 
 bool AJATimeCode::QueryIsRP188DropFrame (const uint32_t inDBB, const uint32_t inLo, const uint32_t inHi)		//	STATIC
 {
-    AJA_UNUSED(inDBB);
-    AJA_UNUSED(inHi);
+	AJA_UNUSED(inDBB);
+	AJA_UNUSED(inHi);
 	return (inLo >> 10) & 0x01;
 }
 
@@ -456,18 +456,18 @@ bool AJATimeCode::QueryIsRP188DropFrame (const uint32_t inDBB, const uint32_t in
 void AJATimeCode::SetRP188 (const uint32_t inDBB, const uint32_t inLo, const uint32_t inHi, const AJATimeBase & inTimeBase)
 {
 	AJATimeBase tb25(25000,1000);
-	AJATimeBase	tb50(50000,1000);
+	AJATimeBase tb50(50000,1000);
 	AJATimeBase tb60(60000,1000);
 	AJATimeBase tb5994(60000,1001);
 
 	//	HRS
-	const uint32_t h0 (((inHi >> 16) & 0xF)     );
+	const uint32_t h0 (((inHi >> 16) & 0xF)		);
 	const uint32_t h1 (((inHi >> 24) & 0x3) * 10);
 	//	MINS
-	const uint32_t m0 (((inHi      ) & 0xF)     );
+	const uint32_t m0 (((inHi	   ) & 0xF)		);
 	const uint32_t m1 (((inHi >>  8) & 0x7) * 10);
 	//	SECS
-	const uint32_t s0 (((inLo >> 16) & 0xF)     );
+	const uint32_t s0 (((inLo >> 16) & 0xF)		);
 	const uint32_t s1 (((inLo >> 24) & 0x7) * 10);
 	//	FRAMES
 	uint32_t f0(0);
@@ -486,17 +486,17 @@ void AJATimeCode::SetRP188 (const uint32_t inDBB, const uint32_t inLo, const uin
 			fieldID = ((inLo & (1u<<27)) != 0);
 
 		//	Double the regular frame count and add fieldID...
-		const uint32_t numFrames = (((((inLo >> 8) & 0x3) * 10)  +  (inLo & 0xF)) * 2)  +  uint32_t(fieldID);
+		const uint32_t numFrames = (((((inLo >> 8) & 0x3) * 10)	 +	(inLo & 0xF)) * 2)	+  uint32_t(fieldID);
 		f0 = numFrames % 10;
 		f1 = (numFrames / 10) * 10;
 	}
 	else
 	{
-		f0 = ((inLo     ) & 0xF);
+		f0 = ((inLo		) & 0xF);
 		f1 = ((inLo >> 8) & 0x3) * 10;
 	}
 
-    SetHmsf (h0+h1, m0+m1, s0+s1, f0+f1, inTimeBase, AJATimeCode::QueryIsRP188DropFrame(inDBB, inLo, inHi));
+	SetHmsf (h0+h1, m0+m1, s0+s1, f0+f1, inTimeBase, AJATimeCode::QueryIsRP188DropFrame(inDBB, inLo, inHi));
 }
 
 
@@ -504,16 +504,16 @@ void AJATimeCode::QueryRP188(uint32_t *pDbb, uint32_t *pLow, uint32_t *pHigh, co
 {
 	uint32_t dbb(0), low(0), high(0);
 	QueryRP188(dbb, low, high, timeBase, bDrop);
-	if (*pDbb)  *pDbb = dbb;
-	if (*pLow)  *pLow = low;
+	if (*pDbb)	*pDbb = dbb;
+	if (*pLow)	*pLow = low;
 	if (*pHigh) *pHigh = high;
 }
 
 void AJATimeCode::QueryRP188(uint32_t & outDBB, uint32_t & outLo, uint32_t & outHi, const AJATimeBase & timeBase, const bool bDrop)
 {
-    AJA_UNUSED(timeBase);
-    AJA_UNUSED(bDrop);
-    
+	AJA_UNUSED(timeBase);
+	AJA_UNUSED(bDrop);
+	
 	uint32_t dbb  = 0;
 	uint32_t low  = 0;
 	uint32_t high = 0;
@@ -525,7 +525,7 @@ void AJATimeCode::QueryRP188(uint32_t & outDBB, uint32_t & outLo, uint32_t & out
 
 
 //---------------------------------------------------------------------------------------------------------------------
-//  Name:   = operator
+//	Name:	= operator
 //---------------------------------------------------------------------------------------------------------------------
 AJATimeCode& AJATimeCode::operator=(const AJATimeCode &val)
 {
@@ -538,20 +538,20 @@ AJATimeCode& AJATimeCode::operator=(const AJATimeCode &val)
 } //end '='
 
 //---------------------------------------------------------------------------------------------------------------------
-//  Name:   == operator
+//	Name:	== operator
 //---------------------------------------------------------------------------------------------------------------------
 bool AJATimeCode::operator==(const AJATimeCode &val) const
 {
 	bool bIsSame = false;
 	if (m_frame == val.m_frame)
 	{
-	    bIsSame = true;
+		bIsSame = true;
 	}
 	return bIsSame;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-//  Name:   < operator
+//	Name:	< operator
 //---------------------------------------------------------------------------------------------------------------------
 bool AJATimeCode::operator<(const AJATimeCode &val) const
 {
@@ -567,7 +567,7 @@ bool AJATimeCode::operator<(const int32_t val) const
 
 
 //---------------------------------------------------------------------------------------------------------------------
-//  Name:   > operator
+//	Name:	> operator
 //---------------------------------------------------------------------------------------------------------------------
 bool AJATimeCode::operator>(const AJATimeCode &val) const
 {
@@ -583,7 +583,7 @@ bool AJATimeCode::operator>(const int32_t val) const
 
 
 //---------------------------------------------------------------------------------------------------------------------
-//  Name:   != operator
+//	Name:	!= operator
 //---------------------------------------------------------------------------------------------------------------------
 bool AJATimeCode::operator!=(const AJATimeCode &val) const
 {
@@ -591,11 +591,11 @@ bool AJATimeCode::operator!=(const AJATimeCode &val) const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-//  Name:   += operator
+//	Name:	+= operator
 //---------------------------------------------------------------------------------------------------------------------
 AJATimeCode& AJATimeCode::operator+=(const AJATimeCode &val)
 {
-    m_frame += val.m_frame;
+	m_frame += val.m_frame;
 	return *this;
 }
 
@@ -606,7 +606,7 @@ AJATimeCode& AJATimeCode::operator+=(const int32_t val)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-//  Name:   -= operator
+//	Name:	-= operator
 //---------------------------------------------------------------------------------------------------------------------
 AJATimeCode& AJATimeCode::operator-=(const AJATimeCode &val)
 {
@@ -629,7 +629,7 @@ AJATimeCode& AJATimeCode::operator-=(const int32_t val)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-//  Name:   + operator
+//	Name:	+ operator
 //---------------------------------------------------------------------------------------------------------------------
 const AJATimeCode AJATimeCode::operator+(const AJATimeCode &val) const
 {
@@ -642,7 +642,7 @@ const AJATimeCode AJATimeCode::operator+(const int32_t val) const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-//  Name:   - operator
+//	Name:	- operator
 //---------------------------------------------------------------------------------------------------------------------
 const AJATimeCode AJATimeCode::operator-(const AJATimeCode &val) const
 {

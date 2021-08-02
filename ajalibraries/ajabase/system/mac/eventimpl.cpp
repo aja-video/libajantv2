@@ -15,7 +15,7 @@
 // event implementation class (mac)
 AJAEventImpl::AJAEventImpl(bool manualReset, const std::string& name) : mManualReset(manualReset)
 {
-    AJA_UNUSED(name);
+	AJA_UNUSED(name);
 	pthread_mutex_init(&mMutex, NULL);
 	pthread_cond_init(&mCondVar, NULL);
 	Clear();
@@ -82,7 +82,7 @@ AJAEventImpl::SetState(bool signaled)
 AJAStatus
 AJAEventImpl::GetState(bool* pSignaled)
 {
-    AJA_UNUSED(pSignaled);
+	AJA_UNUSED(pSignaled);
 	// wait with timeout 0 returns immediately
 	return WaitForSignal(0);
 }
@@ -99,7 +99,7 @@ AJAEventImpl::SetManualReset(bool manualReset)
 AJAStatus
 AJAEventImpl::GetManualReset(bool* pManualReset)
 {
-    if (pManualReset)
+	if (pManualReset)
 	{
 		*pManualReset = mManualReset;
 		return AJA_STATUS_SUCCESS;
@@ -120,12 +120,12 @@ AJAEventImpl::WaitForSignal(uint32_t timeout)
 	nanos *= 1000000;
 
 	struct timespec ts;
-	int32_t         result;
-	AJAStatus       status = AJA_STATUS_SUCCESS;
+	int32_t			result;
+	AJAStatus		status = AJA_STATUS_SUCCESS;
 	
 	clock_gettime(CLOCK_REALTIME, &ts);
 
-	nanos     += ts.tv_nsec;
+	nanos	  += ts.tv_nsec;
 	ts.tv_sec += (nanos / NS_PER_SEC);
 	ts.tv_nsec = (nanos % NS_PER_SEC);
 
@@ -164,7 +164,7 @@ AJAEventImpl::WaitForSignal(uint32_t timeout)
 AJAStatus
 AJAEventImpl::GetEventObject(uint64_t* pEventObject)
 {
-    AJA_UNUSED(pEventObject);
+	AJA_UNUSED(pEventObject);
 	return AJA_STATUS_SUCCESS;
 }
 

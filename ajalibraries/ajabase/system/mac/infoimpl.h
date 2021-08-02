@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: MIT */
 /**
-    @file		ajabase/system/mac/infoimpl.h
-    @brief		Declares the AJASystemInfoImpl class.
+	@file		ajabase/system/mac/infoimpl.h
+	@brief		Declares the AJASystemInfoImpl class.
 	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
 
@@ -15,15 +15,15 @@ class AJASystemInfoImpl
 {
 public:
 
-    AJASystemInfoImpl(int units);
-    virtual ~AJASystemInfoImpl();
+	AJASystemInfoImpl(int units);
+	virtual ~AJASystemInfoImpl();
 
-    virtual AJAStatus Rescan(AJASystemInfoSections sections);
+	virtual AJAStatus Rescan(AJASystemInfoSections sections);
 
-    std::map<int, std::string> mLabelMap;
-    std::map<int, std::string> mValueMap;
+	std::map<int, std::string> mLabelMap;
+	std::map<int, std::string> mValueMap;
 
-    int mMemoryUnits;
+	int mMemoryUnits;
 };
 
 #endif	//	AJA_INFO_IMPL_H

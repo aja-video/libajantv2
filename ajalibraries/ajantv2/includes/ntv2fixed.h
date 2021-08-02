@@ -12,7 +12,7 @@
 
 #define FIXED_ONE (1<<16)
 
-#ifdef  MSWindows
+#ifdef	MSWindows
 	//Visual Studio 2008 or lower
 	#if (_MSC_VER <= 1500)
 		#define inline __inline
@@ -31,14 +31,14 @@
 		#undef FixedToFloat
 	#endif
 	#if !defined (FixedTrunc)
-        //	Conflicts with FixedTrunc function in AJABase's videoutilities.h
+		//	Conflicts with FixedTrunc function in AJABase's videoutilities.h
 		#define FixedTrunc(__x__) ((__x__)>>16)
 	#endif
 	#define FixedRound(__x__)					(((__x__) < 0) ? (-((-(__x__)+0x8000)>>16)) :  (((__x__) + 0x8000)>>16))
 	#define FixedMix(__min__,__max__,__mixer__) (FixedRound(((__max__)-(__min__))*(__mixer__)+(__min__)))
 	#define FloatToFixed(__x__)					((Fixed_)((__x__) * (float)FIXED_ONE))
 	#define FixedToFloat(__x__)					(((float)(__x__) / (float) 65536.0))
-	#define FixedFrac(__x__)					(((__x__) < 0) ? (-(__x__) & 0xFFFF)) :  ((__x__) & 0xFFFF)
+	#define FixedFrac(__x__)					(((__x__) < 0) ? (-(__x__) & 0xFFFF)) :	 ((__x__) & 0xFFFF)
 
 #else	//	not AJAMac
 

@@ -36,7 +36,7 @@ ostream & operator << (ostream & inOutStream, const UWordSequence & inData)
 ostream & operator << (ostream & inOutStream, const ULWordSequence & inData)
 {
 	inOutStream << DEC(inData.size()) << " ULWords: ";
-	for (ULWordSequenceConstIter iter(inData.begin());  iter != inData.end();  )
+	for (ULWordSequenceConstIter iter(inData.begin());	iter != inData.end();  )
 	{
 		inOutStream << HEX0N(*iter,8);
 		if (++iter != inData.end())
@@ -48,7 +48,7 @@ ostream & operator << (ostream & inOutStream, const ULWordSequence & inData)
 ostream & operator << (ostream & inOutStream, const ULWord64Sequence & inData)
 {
 	inOutStream << DEC(inData.size()) << " ULWord64s: ";
-	for (ULWord64SequenceConstIter iter(inData.begin());  iter != inData.end();  )
+	for (ULWord64SequenceConstIter iter(inData.begin());  iter != inData.end();	 )
 	{
 		inOutStream << HEX0N(*iter,16);
 		if (++iter != inData.end())
@@ -69,7 +69,7 @@ void NTV2SDIInputStatus::Clear (void)
 	mCRCTallyA			= 0;
 	mCRCTallyB			= 0;
 	mUnlockTally		= 0;
-	mFrameRefClockCount	= 0;
+	mFrameRefClockCount = 0;
 	mGlobalClockCount	= 0;
 	mFrameTRSError		= false;
 	mLocked				= false;
@@ -80,11 +80,11 @@ void NTV2SDIInputStatus::Clear (void)
 
 ostream & NTV2SDIInputStatus::Print (ostream & inOutStream) const
 {
-	inOutStream	<< "[CRCA="			<< DEC(mCRCTallyA)
+	inOutStream << "[CRCA="			<< DEC(mCRCTallyA)
 				<< " CRCB="			<< DEC(mCRCTallyB)
 				<< " unlk="			<< xHEX0N(mUnlockTally,8)
-				<< " frmRefClkCnt="	<< xHEX0N(mFrameRefClockCount,16)
-				<< " globalClkCnt="	<< xHEX0N(mGlobalClockCount,16)
+				<< " frmRefClkCnt=" << xHEX0N(mFrameRefClockCount,16)
+				<< " globalClkCnt=" << xHEX0N(mGlobalClockCount,16)
 				<< " frmTRS="		<< YesNo(mFrameTRSError)
 				<< " locked="		<< YesNo(mLocked)
 				<< " VPIDA="		<< YesNo(mVPIDValidA)
@@ -130,13 +130,13 @@ bool NTV2HDMIOutputStatus::SetFromRegValue (const ULWord inData)
 
 ostream & NTV2HDMIOutputStatus::Print (ostream & inOutStream) const
 {
-	inOutStream	<< "Enabled: "			<< YesNo(mEnabled);
+	inOutStream << "Enabled: "			<< YesNo(mEnabled);
 	if (mEnabled)
-		inOutStream	<< endl
+		inOutStream << endl
 					<< "Is 4:2:0: "			<< YesNo(mPixel420)									<< endl
 					<< "Color Space: "		<< ::NTV2HDMIColorSpaceToString(mColorSpace,true)	<< endl;
 	if (mColorSpace == NTV2_HDMIColorSpaceRGB)
-		inOutStream	<< "RGB Range: "		<< ::NTV2HDMIRangeToString(mRGBRange,true)			<< endl;
+		inOutStream << "RGB Range: "		<< ::NTV2HDMIRangeToString(mRGBRange,true)			<< endl;
 	inOutStream		<< "Protocol: "			<< ::NTV2HDMIProtocolToString(mProtocol,true)		<< endl
 					<< "Video Standard: "	<< ::NTV2StandardToString(mVideoStandard,true)		<< endl
 					<< "Frame Rate: "		<< ::NTV2FrameRateToString(mVideoRate,true)			<< endl
@@ -162,7 +162,7 @@ AutoCircVidProcInfo::AutoCircVidProcInfo ()
 
 AUTOCIRCULATE_DATA::AUTOCIRCULATE_DATA (const AUTO_CIRC_COMMAND inCommand, const NTV2Crosspoint inCrosspoint)
 	:	eCommand	(inCommand),
-		channelSpec	(inCrosspoint),
+		channelSpec (inCrosspoint),
 		lVal1		(0),
 		lVal2		(0),
 		lVal3		(0),
@@ -252,7 +252,7 @@ string NTV2_POINTER::AsString (UWord inDumpMaxBytes) const
 {
 	ostringstream	oss;
 	oss << xHEX0N(GetRawHostPointer(),16) << ":" << DEC(GetByteCount()) << " bytes";
-	if (inDumpMaxBytes  &&  GetHostPointer())
+	if (inDumpMaxBytes	&&	GetHostPointer())
 	{
 		oss << ":";
 		if (inDumpMaxBytes > 64)
@@ -260,7 +260,7 @@ string NTV2_POINTER::AsString (UWord inDumpMaxBytes) const
 		if (ULWord(inDumpMaxBytes) > GetByteCount())
 			inDumpMaxBytes = UWord(GetByteCount());
 		const UByte *	pBytes	(reinterpret_cast<const UByte *>(GetHostPointer()));
-		for (UWord ndx(0);  ndx < inDumpMaxBytes;  ndx++)
+		for (UWord ndx(0);	ndx < inDumpMaxBytes;  ndx++)
 			oss << HEX0N(uint16_t(pBytes[ndx]),2);
 	}
 	return oss.str();
@@ -412,10 +412,10 @@ bool NTV2_POINTER::GetU64s (ULWord64Sequence & outUint64s, const size_t inU64Off
 	if (IsNULL())
 		return false;
 
-	size_t				maxSize	(size_t(GetByteCount()) / sizeof(uint64_t));
+	size_t				maxSize (size_t(GetByteCount()) / sizeof(uint64_t));
 	if (maxSize < inU64Offset)
 		return false;	//	Past end
-	maxSize -= inU64Offset;	//	Remove starting offset
+	maxSize -= inU64Offset; //	Remove starting offset
 
 	const uint64_t *	pU64	(reinterpret_cast <const uint64_t *> (GetHostAddress(ULWord(inU64Offset * sizeof(uint64_t)))));
 	if (!pU64)
@@ -427,9 +427,9 @@ bool NTV2_POINTER::GetU64s (ULWord64Sequence & outUint64s, const size_t inU64Off
 	try
 	{
 		outUint64s.reserve(maxSize);
-		for (size_t ndx(0);  ndx < maxSize;  ndx++)
+		for (size_t ndx(0);	 ndx < maxSize;	 ndx++)
 		{
-			const uint64_t	u64	(*pU64++);
+			const uint64_t	u64 (*pU64++);
 			outUint64s.push_back(inByteSwap ? NTV2EndianSwap64(u64) : u64);
 		}
 	}
@@ -464,9 +464,9 @@ bool NTV2_POINTER::GetU32s (ULWordSequence & outUint32s, const size_t inU32Offse
 	try
 	{
 		outUint32s.reserve(maxNumU32s);
-		for (size_t ndx(0);  ndx < maxNumU32s;  ndx++)
+		for (size_t ndx(0);	 ndx < maxNumU32s;	ndx++)
 		{
-			const uint32_t	u32	(*pU32++);
+			const uint32_t	u32 (*pU32++);
 			outUint32s.push_back(inByteSwap ? NTV2EndianSwap32(u32) : u32);
 		}
 	}
@@ -486,10 +486,10 @@ bool NTV2_POINTER::GetU16s (UWordSequence & outUint16s, const size_t inU16Offset
 	if (IsNULL())
 		return false;
 
-	size_t				maxSize	(size_t(GetByteCount()) / sizeof(uint16_t));
+	size_t				maxSize (size_t(GetByteCount()) / sizeof(uint16_t));
 	if (maxSize < inU16Offset)
 		return false;	//	Past end
-	maxSize -= inU16Offset;	//	Remove starting offset
+	maxSize -= inU16Offset; //	Remove starting offset
 
 	const uint16_t *	pU16	(reinterpret_cast <const uint16_t *> (GetHostAddress(ULWord(inU16Offset * sizeof(uint16_t)))));
 	if (!pU16)
@@ -501,9 +501,9 @@ bool NTV2_POINTER::GetU16s (UWordSequence & outUint16s, const size_t inU16Offset
 	try
 	{
 		outUint16s.reserve(maxSize);
-		for (size_t ndx(0);  ndx < maxSize;  ndx++)
+		for (size_t ndx(0);	 ndx < maxSize;	 ndx++)
 		{
-			const uint16_t	u16	(*pU16++);
+			const uint16_t	u16 (*pU16++);
 			outUint16s.push_back(inByteSwap ? NTV2EndianSwap16(u16) : u16);
 		}
 	}
@@ -523,12 +523,12 @@ bool NTV2_POINTER::GetU8s (UByteSequence & outUint8s, const size_t inU8Offset, c
 	if (IsNULL())
 		return false;
 
-	size_t	maxSize	(GetByteCount());
+	size_t	maxSize (GetByteCount());
 	if (maxSize < inU8Offset)
 		return false;	//	Past end
 	maxSize -= inU8Offset;	//	Remove starting offset
 
-	const uint8_t *	pU8	(reinterpret_cast <const uint8_t *> (GetHostAddress(ULWord(inU8Offset))));
+	const uint8_t * pU8 (reinterpret_cast <const uint8_t *> (GetHostAddress(ULWord(inU8Offset))));
 	if (!pU8)
 		return false;	//	Past end
 
@@ -538,7 +538,7 @@ bool NTV2_POINTER::GetU8s (UByteSequence & outUint8s, const size_t inU8Offset, c
 	try
 	{
 		outUint8s.reserve(maxSize);
-		for (size_t ndx(0);  ndx < maxSize;  ndx++)
+		for (size_t ndx(0);	 ndx < maxSize;	 ndx++)
 		{
 			outUint8s.push_back(*pU8++);
 		}
@@ -564,7 +564,7 @@ bool NTV2_POINTER::GetString (std::string & outString, const size_t inU8Offset, 
 		return false;		//	Past end
 	maxSize -= inU8Offset;	//	Remove starting offset
 
-	const uint8_t *	pU8	(reinterpret_cast <const uint8_t *> (GetHostAddress(ULWord(inU8Offset))));
+	const uint8_t * pU8 (reinterpret_cast <const uint8_t *> (GetHostAddress(ULWord(inU8Offset))));
 	if (!pU8)
 		return false;	//	Past end
 
@@ -574,7 +574,7 @@ bool NTV2_POINTER::GetString (std::string & outString, const size_t inU8Offset, 
 	try
 	{
 		outString.reserve(maxSize);
-		for (size_t ndx(0);  ndx < maxSize;  ndx++)
+		for (size_t ndx(0);	 ndx < maxSize;	 ndx++)
 			outString += char(*pU8++);
 	}
 	catch (...)
@@ -594,12 +594,12 @@ bool NTV2_POINTER::PutU64s (const ULWord64Sequence & inU64s, const size_t inU64O
 	if (inU64s.empty())
 		return true;	//	Nothing to copy
 
-	size_t		maxU64s	(GetByteCount() / sizeof(uint64_t));
+	size_t		maxU64s (GetByteCount() / sizeof(uint64_t));
 	uint64_t *	pU64	(reinterpret_cast<uint64_t*>(GetHostAddress(ULWord(inU64Offset * sizeof(uint64_t)))));
 	if (!pU64)
 		return false;	//	Start offset is past end
 	if (maxU64s > inU64Offset)
-		maxU64s -= inU64Offset;	//	Don't go past end
+		maxU64s -= inU64Offset; //	Don't go past end
 	if (maxU64s > inU64s.size())
 		maxU64s = inU64s.size();	//	Truncate incoming vector to not go past my end
 	if (inU64s.size() > maxU64s)
@@ -622,12 +622,12 @@ bool NTV2_POINTER::PutU32s (const ULWordSequence & inU32s, const size_t inU32Off
 	if (inU32s.empty())
 		return true;	//	Nothing to copy
 
-	size_t		maxU32s	(GetByteCount() / sizeof(uint32_t));
+	size_t		maxU32s (GetByteCount() / sizeof(uint32_t));
 	uint32_t *	pU32	(reinterpret_cast<uint32_t*>(GetHostAddress(ULWord(inU32Offset * sizeof(uint32_t)))));
 	if (!pU32)
 		return false;	//	Start offset is past end
 	if (maxU32s > inU32Offset)
-		maxU32s -= inU32Offset;	//	Don't go past end
+		maxU32s -= inU32Offset; //	Don't go past end
 	if (maxU32s > inU32s.size())
 		maxU32s = inU32s.size();	//	Truncate incoming vector to not go past my end
 	if (inU32s.size() > maxU32s)
@@ -650,12 +650,12 @@ bool NTV2_POINTER::PutU16s (const UWordSequence & inU16s, const size_t inU16Offs
 	if (inU16s.empty())
 		return true;	//	Nothing to copy
 
-	size_t		maxU16s	(GetByteCount() / sizeof(uint16_t));
+	size_t		maxU16s (GetByteCount() / sizeof(uint16_t));
 	uint16_t *	pU16	(reinterpret_cast<uint16_t*>(GetHostAddress(ULWord(inU16Offset * sizeof(uint16_t)))));
 	if (!pU16)
 		return false;	//	Start offset is past end
 	if (maxU16s > inU16Offset)
-		maxU16s -= inU16Offset;	//	Don't go past end
+		maxU16s -= inU16Offset; //	Don't go past end
 	if (maxU16s > inU16s.size())
 		maxU16s = inU16s.size();	//	Truncate incoming vector to not go past my end
 	if (inU16s.size() > maxU16s)
@@ -734,7 +734,7 @@ ostream & operator << (ostream & inOutStream, const NTV2TimeCodeList & inObj)
 ostream & operator << (std::ostream & inOutStream, const NTV2TimeCodes & inObj)
 {
 	inOutStream << inObj.size () << ":[";
-	for (NTV2TimeCodesConstIter iter (inObj.begin ());  iter != inObj.end ();  )
+	for (NTV2TimeCodesConstIter iter (inObj.begin ());	iter != inObj.end ();  )
 	{
 		inOutStream << ::NTV2TCIndexToString (iter->first,true) << "=" << iter->second;
 		if (++iter != inObj.end ())
@@ -746,7 +746,7 @@ ostream & operator << (std::ostream & inOutStream, const NTV2TimeCodes & inObj)
 
 ostream & operator << (std::ostream & inOutStream, const NTV2TCIndexes & inObj)
 {
-	for (NTV2TCIndexesConstIter iter (inObj.begin ());  iter != inObj.end ();  )
+	for (NTV2TCIndexesConstIter iter (inObj.begin ());	iter != inObj.end ();  )
 	{
 		inOutStream << ::NTV2TCIndexToString (*iter);
 		if (++iter != inObj.end ())
@@ -758,7 +758,7 @@ ostream & operator << (std::ostream & inOutStream, const NTV2TCIndexes & inObj)
 
 NTV2TCIndexes & operator += (NTV2TCIndexes & inOutSet, const NTV2TCIndexes & inSet)
 {
-	for (NTV2TCIndexesConstIter iter (inSet.begin ());  iter != inSet.end ();  ++iter)
+	for (NTV2TCIndexesConstIter iter (inSet.begin ());	iter != inSet.end ();  ++iter)
 		inOutSet.insert (*iter);
 	return inOutSet;
 }
@@ -809,7 +809,7 @@ ostream & operator << (ostream & inOutStream, const AUTOCIRCULATE_TRANSFER & inO
 	#if defined (_DEBUG)
 		NTV2_ASSERT (inObj.NTV2_IS_STRUCT_VALID ());
 	#endif
-	string	str	(::NTV2FrameBufferFormatToString (inObj.acFrameBufferFormat, true));
+	string	str (::NTV2FrameBufferFormatToString (inObj.acFrameBufferFormat, true));
 	while (str.find (' ') != string::npos)
 		str.erase (str.find (' '), 1);
 	inOutStream << inObj.acHeader << " vid=" << inObj.acVideoBuffer
@@ -838,7 +838,7 @@ ostream & operator << (ostream & inOutStream, const AUTOCIRCULATE_TRANSFER & inO
 
 ostream & operator << (ostream & inOutStream, const AUTOCIRCULATE_TRANSFER_STATUS & inObj)
 {
-	inOutStream	<< inObj.acHeader << " state=" << ::NTV2AutoCirculateStateToString (inObj.acState)
+	inOutStream << inObj.acHeader << " state=" << ::NTV2AutoCirculateStateToString (inObj.acState)
 				<< " xferFrm=" << inObj.acTransferFrame
 				<< " bufLvl=" << inObj.acBufferLevel
 				<< " frms=" << inObj.acFramesProcessed
@@ -861,7 +861,7 @@ ostream & operator << (ostream & inOutStream, const NTV2RegisterValueMap & inObj
 	{
 		const NTV2RegisterNumber	registerNumber	(static_cast <const NTV2RegisterNumber> (iter->first));
 		const ULWord				registerValue	(iter->second);
-		inOutStream	<< ::NTV2RegisterNumberToString (registerNumber) << "=0x" << hex << registerValue << dec;
+		inOutStream << ::NTV2RegisterNumberToString (registerNumber) << "=0x" << hex << registerValue << dec;
 		if (++iter != inObj.end ())
 			inOutStream << ",";
 	}
@@ -914,12 +914,12 @@ ostream & operator << (ostream & inOStream, const NTV2FrameBufferFormatSet & inF
 	NTV2FrameBufferFormatSetConstIter	iter	(inFormats.begin ());
 
 	inOStream	<< inFormats.size ()
-				<< (inFormats.size () == 1 ? " pixel format:  " : " pixel formats:  ");
+				<< (inFormats.size () == 1 ? " pixel format:  " : " pixel formats:	");
 
 	while (iter != inFormats.end ())
 	{
 		inOStream << ::NTV2FrameBufferFormatToString (*iter);
-		inOStream << (++iter == inFormats.end ()  ?  ""  :  ", ");
+		inOStream << (++iter == inFormats.end ()  ?	 ""	 :	", ");
 	}
 
 	return inOStream;
@@ -929,7 +929,7 @@ ostream & operator << (ostream & inOStream, const NTV2FrameBufferFormatSet & inF
 
 NTV2FrameBufferFormatSet & operator += (NTV2FrameBufferFormatSet & inOutSet, const NTV2FrameBufferFormatSet inFBFs)
 {
-	for (NTV2FrameBufferFormatSetConstIter iter (inFBFs.begin ());  iter != inFBFs.end ();  ++iter)
+	for (NTV2FrameBufferFormatSetConstIter iter (inFBFs.begin ());	iter != inFBFs.end ();	++iter)
 		inOutSet.insert (*iter);
 	return inOutSet;
 }
@@ -941,12 +941,12 @@ ostream & operator << (ostream & inOStream, const NTV2StandardSet & inStandards)
 	NTV2StandardSetConstIter	iter	(inStandards.begin ());
 
 	inOStream	<< inStandards.size ()
-				<< (inStandards.size () == 1 ? " standard:  " : " standards:  ");
+				<< (inStandards.size () == 1 ? " standard:	" : " standards:  ");
 
 	while (iter != inStandards.end ())
 	{
 		inOStream << ::NTV2StandardToString(*iter);
-		inOStream << (++iter == inStandards.end ()  ?  ""  :  ", ");
+		inOStream << (++iter == inStandards.end ()	?  ""  :  ", ");
 	}
 
 	return inOStream;
@@ -955,7 +955,7 @@ ostream & operator << (ostream & inOStream, const NTV2StandardSet & inStandards)
 
 NTV2StandardSet & operator += (NTV2StandardSet & inOutSet, const NTV2StandardSet inSet)
 {
-	for (NTV2StandardSetConstIter iter(inSet.begin ());  iter != inSet.end();  ++iter)
+	for (NTV2StandardSetConstIter iter(inSet.begin ());	 iter != inSet.end();  ++iter)
 		inOutSet.insert(*iter);
 	return inOutSet;
 }
@@ -966,11 +966,11 @@ ostream & operator << (ostream & inOStream, const NTV2GeometrySet & inGeometries
 {
 	NTV2GeometrySetConstIter	iter	(inGeometries.begin ());
 	inOStream	<< inGeometries.size ()
-				<< (inGeometries.size () == 1 ? " geometry:  " : " geometries:  ");
+				<< (inGeometries.size () == 1 ? " geometry:	 " : " geometries:	");
 	while (iter != inGeometries.end ())
 	{
 		inOStream << ::NTV2FrameGeometryToString(*iter);
-		inOStream << (++iter == inGeometries.end ()  ?  ""  :  ", ");
+		inOStream << (++iter == inGeometries.end ()	 ?	""	:  ", ");
 	}
 	return inOStream;
 }
@@ -978,7 +978,7 @@ ostream & operator << (ostream & inOStream, const NTV2GeometrySet & inGeometries
 
 NTV2GeometrySet & operator += (NTV2GeometrySet & inOutSet, const NTV2GeometrySet inSet)
 {
-	for (NTV2GeometrySetConstIter iter(inSet.begin ());  iter != inSet.end();  ++iter)
+	for (NTV2GeometrySetConstIter iter(inSet.begin ());	 iter != inSet.end();  ++iter)
 		inOutSet.insert(*iter);
 	return inOutSet;
 }
@@ -987,13 +987,13 @@ NTV2GeometrySet & operator += (NTV2GeometrySet & inOutSet, const NTV2GeometrySet
 //	Implementation of NTV2FrameBufferFormatSet's ostream writer...
 ostream & operator << (ostream & inOStream, const NTV2InputSourceSet & inSet)
 {
-	NTV2InputSourceSetConstIter	iter(inSet.begin());
+	NTV2InputSourceSetConstIter iter(inSet.begin());
 	inOStream	<< inSet.size()
-				<< (inSet.size() == 1 ? " input:  " : " inputs:  ");
+				<< (inSet.size() == 1 ? " input:  " : " inputs:	 ");
 	while (iter != inSet.end())
 	{
 		inOStream << ::NTV2InputSourceToString (*iter);
-		inOStream << (++iter == inSet.end()  ?  ""  :  ", ");
+		inOStream << (++iter == inSet.end()	 ?	""	:  ", ");
 	}
 	return inOStream;
 }	//	operator <<
@@ -1001,7 +1001,7 @@ ostream & operator << (ostream & inOStream, const NTV2InputSourceSet & inSet)
 
 NTV2InputSourceSet & operator += (NTV2InputSourceSet & inOutSet, const NTV2InputSourceSet & inSet)
 {
-	for (NTV2InputSourceSetConstIter iter (inSet.begin ());  iter != inSet.end ();  ++iter)
+	for (NTV2InputSourceSetConstIter iter (inSet.begin ());	 iter != inSet.end ();	++iter)
 		inOutSet.insert (*iter);
 	return inOutSet;
 }
@@ -1009,13 +1009,13 @@ NTV2InputSourceSet & operator += (NTV2InputSourceSet & inOutSet, const NTV2Input
 
 ostream & operator << (ostream & inOStream, const NTV2OutputDestinations & inSet)
 {
-	NTV2OutputDestinationsConstIter	iter(inSet.begin());
+	NTV2OutputDestinationsConstIter iter(inSet.begin());
 	inOStream	<< inSet.size()
 				<< (inSet.size() == 1 ? " output:  " : " outputs:  ");
 	while (iter != inSet.end())
 	{
 		inOStream << ::NTV2OutputDestinationToString(*iter);
-		inOStream << (++iter == inSet.end()  ?  ""  :  ", ");
+		inOStream << (++iter == inSet.end()	 ?	""	:  ", ");
 	}
 	return inOStream;
 }
@@ -1023,7 +1023,7 @@ ostream & operator << (ostream & inOStream, const NTV2OutputDestinations & inSet
 
 NTV2OutputDestinations & operator += (NTV2OutputDestinations & inOutSet, const NTV2OutputDestinations & inSet)
 {
-	for (NTV2OutputDestinationsConstIter iter(inSet.begin());  iter != inSet.end();  ++iter)
+	for (NTV2OutputDestinationsConstIter iter(inSet.begin());  iter != inSet.end();	 ++iter)
 		inOutSet.insert(*iter);
 	return inOutSet;
 }
@@ -1038,7 +1038,7 @@ ostream & operator << (ostream & inOutStrm, const NTV2SegmentedXferInfo & inRun)
 //	Implementation of NTV2AutoCirculateStateToString...
 string NTV2AutoCirculateStateToString (const NTV2AutoCirculateState inState)
 {
-	static const char *	sStateStrings []	= {	"Disabled", "Initializing", "Starting", "Paused", "Stopping", "Running", "StartingAtTime", AJA_NULL};
+	static const char * sStateStrings []	= { "Disabled", "Initializing", "Starting", "Paused", "Stopping", "Running", "StartingAtTime", AJA_NULL};
 	if (inState >= NTV2_AUTOCIRCULATE_DISABLED && inState <= NTV2_AUTOCIRCULATE_STARTING_AT_TIME)
 		return string (sStateStrings [inState]);
 	else
@@ -1123,13 +1123,13 @@ bool NTV2SegmentedXferInfo::containsElementAtOffset (const ULWord inElementOffse
 		return false;
 	}
 	ULWord offset(getSourceOffset());
-	for (ULWord seg(0);  seg < getSegmentCount();  seg++)
+	for (ULWord seg(0);	 seg < getSegmentCount();  seg++)
 	{
 		if (inElementOffset < offset)
 			return false;	//	past element of interest already
 		if (inElementOffset < offset+getSegmentLength())
 			return true;	//	must be within this segment
-		offset += getSourcePitch();	//	skip to next segment
+		offset += getSourcePitch(); //	skip to next segment
 	}
 	return false;
 }
@@ -1137,7 +1137,7 @@ bool NTV2SegmentedXferInfo::containsElementAtOffset (const ULWord inElementOffse
 bool NTV2SegmentedXferInfo::operator != (const NTV2SegmentedXferInfo & inRHS) const
 {
 	if (getElementLength() != inRHS.getElementLength())
-		//	FUTURE TBD:  Need to transform RHS to match ElementLength so as to make apples-to-apples comparison
+		//	FUTURE TBD:	 Need to transform RHS to match ElementLength so as to make apples-to-apples comparison
 		return true;	//	For now, fail
 	if (getSegmentCount() != inRHS.getSegmentCount())
 		return true;
@@ -1154,11 +1154,11 @@ bool NTV2SegmentedXferInfo::operator != (const NTV2SegmentedXferInfo & inRHS) co
 	return false;
 }
 
-NTV2SegmentedXferInfo &	NTV2SegmentedXferInfo::reset (void)
+NTV2SegmentedXferInfo & NTV2SegmentedXferInfo::reset (void)
 {
 	mFlags				= 0;
 	mNumSegments		= 0;
-	mElementsPerSegment	= 0;
+	mElementsPerSegment = 0;
 	mInitialSrcOffset	= 0;
 	mInitialDstOffset	= 0;
 	mSrcElementsPerRow	= 0;
@@ -1236,7 +1236,7 @@ NTV2_POINTER & NTV2_POINTER::operator = (const NTV2_POINTER & inRHS)
 		else if (Allocate(inRHS.GetByteCount()))
 			SetFrom(inRHS);
 		else
-			{;}	//	Error
+			{;} //	Error
 	}
 	return *this;
 }
@@ -1254,7 +1254,7 @@ bool NTV2_POINTER::ByteSwap64 (void)
 	const size_t loopCount(GetByteCount() / sizeof(uint64_t));
 	if (IsNULL())
 		return false;
-	for (size_t ndx(0);  ndx < loopCount;  ndx++)
+	for (size_t ndx(0);	 ndx < loopCount;  ndx++)
 		pU64s[ndx] = NTV2EndianSwap64(pU64s[ndx]);
 	return true;
 }
@@ -1266,7 +1266,7 @@ bool NTV2_POINTER::ByteSwap32 (void)
 	const size_t loopCount(GetByteCount() / sizeof(uint32_t));
 	if (IsNULL())
 		return false;
-	for (size_t ndx(0);  ndx < loopCount;  ndx++)
+	for (size_t ndx(0);	 ndx < loopCount;  ndx++)
 		pU32s[ndx] = NTV2EndianSwap32(pU32s[ndx]);
 	return true;
 }
@@ -1278,7 +1278,7 @@ bool NTV2_POINTER::ByteSwap16 (void)
 	const size_t loopCount(GetByteCount() / sizeof(uint16_t));
 	if (IsNULL())
 		return false;
-	for (size_t ndx(0);  ndx < loopCount;  ndx++)
+	for (size_t ndx(0);	 ndx < loopCount;  ndx++)
 		pU16s[ndx] = NTV2EndianSwap16(pU16s[ndx]);
 	return true;
 }
@@ -1290,19 +1290,19 @@ bool NTV2_POINTER::Set (const void * pInUserPointer, const size_t inByteCount)
 	fUserSpacePtr = inByteCount ? NTV2_POINTER_TO_ULWORD64(pInUserPointer) : 0;
 	fByteCount = static_cast<ULWord>(pInUserPointer ? inByteCount : 0);
 	//	Return true only if both UserPointer and ByteCount are non-zero, or both are zero.
-	return (pInUserPointer && inByteCount)  ||  (!pInUserPointer && !inByteCount);
+	return (pInUserPointer && inByteCount)	||	(!pInUserPointer && !inByteCount);
 }
 
 
 bool NTV2_POINTER::SetAndFill (const void * pInUserPointer, const size_t inByteCount, const UByte inValue)
 {
-	return Set(pInUserPointer, inByteCount)  &&  Fill(inValue);
+	return Set(pInUserPointer, inByteCount)	 &&	 Fill(inValue);
 }
 
 
 bool NTV2_POINTER::Allocate (const size_t inByteCount, const bool inPageAligned)
 {
-	if (GetByteCount()  &&  fFlags & NTV2_POINTER_ALLOCATED)	//	If already was Allocated
+	if (GetByteCount()	&&	fFlags & NTV2_POINTER_ALLOCATED)	//	If already was Allocated
 		if (inByteCount == GetByteCount())						//	If same byte count
 		{
 			::memset (GetHostPointer(), 0, GetByteCount());		//	Zero it...
@@ -1321,7 +1321,7 @@ bool NTV2_POINTER::Allocate (const size_t inByteCount, const bool inPageAligned)
 				{pBuffer = new UByte[inByteCount];}
 			catch (const std::bad_alloc &)
 				{pBuffer = AJA_NULL;}
-		if (pBuffer  &&  Set(pBuffer, inByteCount))
+		if (pBuffer	 &&	 Set(pBuffer, inByteCount))
 		{	//	SDK owns this memory -- set NTV2_POINTER_ALLOCATED bit -- I'm responsible for deleting
 			result = true;
 			fFlags |= NTV2_POINTER_ALLOCATED;
@@ -1362,7 +1362,7 @@ void * NTV2_POINTER::GetHostAddress (const ULWord inByteOffset, const bool inFro
 		return AJA_NULL;
 	if (inByteOffset >= GetByteCount())
 		return AJA_NULL;
-	UByte *	pBytes	(reinterpret_cast<UByte*>(GetHostPointer()));
+	UByte * pBytes	(reinterpret_cast<UByte*>(GetHostPointer()));
 	if (inFromEnd)
 		pBytes += GetByteCount() - inByteOffset;
 	else
@@ -1424,7 +1424,7 @@ bool NTV2_POINTER::CopyFrom (const NTV2_POINTER & inBuffer,
 
 bool NTV2_POINTER::CopyFrom (const NTV2_POINTER & inSrcBuffer, const NTV2SegmentedXferInfo & inXferInfo)
 {
-	if (!inXferInfo.isValid()  ||  inSrcBuffer.IsNULL()  ||  IsNULL())
+	if (!inXferInfo.isValid()  ||  inSrcBuffer.IsNULL()	 ||	 IsNULL())
 		return false;
 
 	//	Copy every segment...
@@ -1432,8 +1432,8 @@ bool NTV2_POINTER::CopyFrom (const NTV2_POINTER & inSrcBuffer, const NTV2Segment
 	ULWord			dstOffset	(inXferInfo.getDestOffset() * inXferInfo.getElementLength());
 	const ULWord	srcPitch	(inXferInfo.getSourcePitch() * inXferInfo.getElementLength());
 	const ULWord	dstPitch	(inXferInfo.getDestPitch() * inXferInfo.getElementLength());
-	const ULWord	bytesPerSeg	(inXferInfo.getSegmentLength() * inXferInfo.getElementLength());
-	for (ULWord segNdx(0);  segNdx < inXferInfo.getSegmentCount();  segNdx++)
+	const ULWord	bytesPerSeg (inXferInfo.getSegmentLength() * inXferInfo.getElementLength());
+	for (ULWord segNdx(0);	segNdx < inXferInfo.getSegmentCount();	segNdx++)
 	{
 		const void *	pSrc (inSrcBuffer.GetHostAddress(srcOffset));
 		void *			pDst (GetHostAddress(dstOffset));
@@ -1443,7 +1443,7 @@ bool NTV2_POINTER::CopyFrom (const NTV2_POINTER & inSrcBuffer, const NTV2Segment
 			return false;	//	memcpy will read past end of srcBuffer
 		if (dstOffset + bytesPerSeg > GetByteCount())
 			return false;	//	memcpy will write past end of me
-		::memcpy (pDst,  pSrc,  bytesPerSeg);
+		::memcpy (pDst,	 pSrc,	bytesPerSeg);
 		srcOffset += srcPitch;	//	Bump src offset
 		dstOffset += dstPitch;	//	Bump dst offset
 	}	//	for each segment
@@ -1565,12 +1565,12 @@ bool NTV2_POINTER::GetRingChangedByteRange (const NTV2_POINTER & inBuffer, ULWor
 		if (outByteOffsetLast < GetByteCount())
 			outByteOffsetLast++;
 		if (outByteOffsetLast <= outByteOffsetFirst)
-			cerr << "## WARNING:  GetRingChangedByteRange:  last " << outByteOffsetLast << " <= first " << outByteOffsetFirst << " in wrap condition" << endl;
-		const ULWord	tmp	(outByteOffsetLast);
+			cerr << "## WARNING:  GetRingChangedByteRange:	last " << outByteOffsetLast << " <= first " << outByteOffsetFirst << " in wrap condition" << endl;
+		const ULWord	tmp (outByteOffsetLast);
 		outByteOffsetLast = outByteOffsetFirst;
 		outByteOffsetFirst = tmp;
 		if (outByteOffsetLast >= outByteOffsetFirst)
-			cerr << "## WARNING:  GetRingChangedByteRange:  last " << outByteOffsetLast << " >= first " << outByteOffsetFirst << " in wrap condition" << endl;
+			cerr << "## WARNING:  GetRingChangedByteRange:	last " << outByteOffsetLast << " >= first " << outByteOffsetFirst << " in wrap condition" << endl;
 	}
 	return true;
 
@@ -1670,7 +1670,7 @@ bool FRAME_STAMP::GetInputTimeCodes (NTV2TimeCodeList & outValues) const
 	if (numRP188s > NTV2_MAX_NUM_TIMECODE_INDEXES)
 		numRP188s = NTV2_MAX_NUM_TIMECODE_INDEXES;	//	clamp to this max number
 
-	for (ULWord ndx (0);  ndx < numRP188s;  ndx++)
+	for (ULWord ndx (0);  ndx < numRP188s;	ndx++)
 		outValues << pArray [ndx];
 
 	return true;
@@ -1682,7 +1682,7 @@ bool FRAME_STAMP::GetInputTimeCode (NTV2_RP188 & outTimeCode, const NTV2TCIndex 
 	NTV2_ASSERT_STRUCT_VALID;
 	ULWord				numRP188s	(acTimeCodes.GetByteCount () / sizeof (NTV2_RP188));
 	const NTV2_RP188 *	pArray		(reinterpret_cast <const NTV2_RP188 *> (acTimeCodes.GetHostPointer ()));
-	outTimeCode.Set ();	//	invalidate
+	outTimeCode.Set (); //	invalidate
 	if (!pArray)
 		return false;		//	No 'acTimeCodes' array!
 	if (numRP188s > NTV2_MAX_NUM_TIMECODE_INDEXES)
@@ -1707,8 +1707,8 @@ bool FRAME_STAMP::GetInputTimeCodes (NTV2TimeCodes & outTimeCodes, const NTV2Cha
 	if (!GetInputTimeCodes(allTCs))
 		return false;	//	GetInputTimeCodes failed
 
-	const NTV2TCIndexes	tcIndexes (GetTCIndexesForSDIInput(inSDIInput));
-	for (NTV2TCIndexesConstIter iter(tcIndexes.begin());  iter != tcIndexes.end();  ++iter)
+	const NTV2TCIndexes tcIndexes (GetTCIndexesForSDIInput(inSDIInput));
+	for (NTV2TCIndexesConstIter iter(tcIndexes.begin());  iter != tcIndexes.end();	++iter)
 	{
 		const NTV2TCIndex tcIndex(*iter);
 		NTV2_ASSERT(NTV2_IS_VALID_TIMECODE_INDEX(tcIndex));
@@ -1734,7 +1734,7 @@ bool FRAME_STAMP::SetInputTimecode (const NTV2TCIndex inTCNdx, const NTV2_RP188 
 {
 	ULWord			numRP188s	(acTimeCodes.GetByteCount() / sizeof(NTV2_RP188));
 	NTV2_RP188 *	pArray		(reinterpret_cast<NTV2_RP188*>(acTimeCodes.GetHostPointer()));
-	if (!pArray  ||  !numRP188s)
+	if (!pArray	 ||	 !numRP188s)
 		return false;		//	No 'acTimeCodes' array!
 
 	if (numRP188s > NTV2_MAX_NUM_TIMECODE_INDEXES)
@@ -1839,7 +1839,7 @@ bool FRAME_STAMP::CopyTo (FRAME_STAMP_STRUCT & outOldStruct) const
 	outOldStruct.currentFieldCount				= acCurrentFieldCount;
 	outOldStruct.currentLineCount				= acCurrentLineCount;
 	outOldStruct.currentReps					= acCurrentReps;
-    outOldStruct.currenthUser					= (ULWord)acCurrentUserCookie;
+	outOldStruct.currenthUser					= (ULWord)acCurrentUserCookie;
 	outOldStruct.currentRP188					= acRP188;
 	//	Ticket 3367 -- Mark Gilbert of Gallery UK reports that after updating from AJA Retail Software 10.5 to 14.0,
 	//	their QuickTime app stopped receiving timecode during capture. Turns out the QuickTime components use the new
@@ -1853,7 +1853,7 @@ bool FRAME_STAMP::CopyTo (FRAME_STAMP_STRUCT & outOldStruct) const
 		{
 			const NTV2_RP188 *	pDefaultTC	(reinterpret_cast<const NTV2_RP188*>(acTimeCodes.GetHostPointer()));
 			if (pDefaultTC)
-				outOldStruct.currentRP188		= pDefaultTC[NTV2_TCINDEX_DEFAULT];	//	Stuff the "default" (retail) timecode into "currentRP188".
+				outOldStruct.currentRP188		= pDefaultTC[NTV2_TCINDEX_DEFAULT]; //	Stuff the "default" (retail) timecode into "currentRP188".
 		}
 	return true;
 }
@@ -1963,7 +1963,7 @@ AUTOCIRCULATE_STATUS::AUTOCIRCULATE_STATUS (const NTV2Crosspoint inCrosspoint)
 		acRDTSCStartTime		(0),
 		acAudioClockStartTime	(0),
 		acRDTSCCurrentTime		(0),
-		acAudioClockCurrentTime	(0),
+		acAudioClockCurrentTime (0),
 		acFramesProcessed		(0),
 		acFramesDropped			(0),
 		acBufferLevel			(0),
@@ -2011,11 +2011,11 @@ bool AUTOCIRCULATE_STATUS::CopyFrom (const AUTOCIRCULATE_STATUS_STRUCT & inOldSt
 	acRDTSCStartTime		= inOldStruct.rdtscStartTime;
 	acAudioClockStartTime	= inOldStruct.audioClockStartTime;
 	acRDTSCCurrentTime		= inOldStruct.rdtscCurrentTime;
-	acAudioClockCurrentTime	= inOldStruct.audioClockCurrentTime;
+	acAudioClockCurrentTime = inOldStruct.audioClockCurrentTime;
 	acFramesProcessed		= inOldStruct.framesProcessed;
 	acFramesDropped			= inOldStruct.framesDropped;
 	acBufferLevel			= inOldStruct.bufferLevel;
-	acAudioSystem			= NTV2_AUDIOSYSTEM_INVALID;	//	NTV2_AUDIOSYSTEM_1;
+	acAudioSystem			= NTV2_AUDIOSYSTEM_INVALID; //	NTV2_AUDIOSYSTEM_1;
 	acOptionFlags			=	inOldStruct.bWithRP188				? AUTOCIRCULATE_WITH_RP188			: 0		|
 								inOldStruct.bFbfChange				? AUTOCIRCULATE_WITH_FBFCHANGE		: 0		|
 								inOldStruct.bFboChange				? AUTOCIRCULATE_WITH_FBOCHANGE		: 0		|
@@ -2037,7 +2037,7 @@ void AUTOCIRCULATE_STATUS::Clear (void)
 	acRDTSCStartTime		= 0;
 	acAudioClockStartTime	= 0;
 	acRDTSCCurrentTime		= 0;
-	acAudioClockCurrentTime	= 0;
+	acAudioClockCurrentTime = 0;
 	acFramesProcessed		= 0;
 	acFramesDropped			= 0;
 	acBufferLevel			= 0;
@@ -2062,7 +2062,7 @@ struct ThousandsSeparator : std::numpunct <char>
 template <class T> string CommaStr (const T & inNum)
 {
 	ostringstream	oss;
-	const locale	loc	(oss.getloc(), new ThousandsSeparator);
+	const locale	loc (oss.getloc(), new ThousandsSeparator);
 	oss.imbue (loc);
 	oss << inNum;
 	return oss.str();
@@ -2111,7 +2111,7 @@ ostream & operator << (ostream & oss, const AUTOCIRCULATE_STATUS & inObj)
 	if (!inObj.IsStopped())
 		oss << ::NTV2ChannelToString(inObj.GetChannel(), true) << ": "
 			<< (inObj.IsInput() ? "Input " : "Output")
-			<< setw(12) << ::NTV2AutoCirculateStateToString(inObj.acState) << "  "
+			<< setw(12) << ::NTV2AutoCirculateStateToString(inObj.acState) << "	 "
 			<< setw( 5) << inObj.GetStartFrame()
 			<< setw( 6) << inObj.GetEndFrame()
 			<< setw( 6) << inObj.GetActiveFrame()
@@ -2312,11 +2312,11 @@ bool AUTOCIRCULATE_TRANSFER::SetOutputTimeCodes (const NTV2TimeCodes & inValues)
 	if (maxNumValues > NTV2_MAX_NUM_TIMECODE_INDEXES)
 		maxNumValues = NTV2_MAX_NUM_TIMECODE_INDEXES;
 
-	for (UWord ndx (0);  ndx < UWord(maxNumValues);  ndx++)
+	for (UWord ndx (0);	 ndx < UWord(maxNumValues);	 ndx++)
 	{
-		const NTV2TCIndex		tcIndex	(static_cast<const NTV2TCIndex>(ndx));
+		const NTV2TCIndex		tcIndex (static_cast<const NTV2TCIndex>(ndx));
 		NTV2TimeCodesConstIter	iter	(inValues.find(tcIndex));
-		pArray[ndx] = (iter != inValues.end())  ?  iter->second  :  INVALID_TIMECODE_VALUE;
+		pArray[ndx] = (iter != inValues.end())	?  iter->second	 :	INVALID_TIMECODE_VALUE;
 	}	//	for each possible NTV2TCSource value
 	return true;
 }
@@ -2348,7 +2348,7 @@ bool AUTOCIRCULATE_TRANSFER::SetAllOutputTimeCodes (const NTV2_RP188 & inTimeCod
 	if (maxNumValues > NTV2_MAX_NUM_TIMECODE_INDEXES)
 		maxNumValues = NTV2_MAX_NUM_TIMECODE_INDEXES;
 
-	for (ULWord tcIndex(0);  tcIndex < maxNumValues;  tcIndex++)
+	for (ULWord tcIndex(0);	 tcIndex < maxNumValues;  tcIndex++)
 		if (NTV2_IS_ATC_VITC2_TIMECODE_INDEX(tcIndex))
 			pArray[tcIndex] = inIncludeF2 ? inTimeCode : INVALID_TIMECODE_VALUE;
 		else
@@ -2432,22 +2432,22 @@ NTV2DebugLogging::NTV2DebugLogging(const bool inEnable)
 ostream & NTV2DebugLogging::Print (ostream & inOutStream) const
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	inOutStream	<< mHeader << " shMem=" << mSharedMemory << " " << mTrailer;
+	inOutStream << mHeader << " shMem=" << mSharedMemory << " " << mTrailer;
 	return inOutStream;
 }
 
 
 
 NTV2BufferLock::NTV2BufferLock()
-	:	mHeader	(NTV2_TYPE_AJABUFFERLOCK, sizeof(NTV2BufferLock))
+	:	mHeader (NTV2_TYPE_AJABUFFERLOCK, sizeof(NTV2BufferLock))
 {
 	NTV2_ASSERT_STRUCT_VALID;
-    SetFlags(0);
+	SetFlags(0);
 	SetMaxLockSize(0);
 }
 
 NTV2BufferLock::NTV2BufferLock (const NTV2_POINTER & inBuffer, const ULWord inFlags)
-	:	mHeader	(NTV2_TYPE_AJABUFFERLOCK, sizeof(NTV2BufferLock))
+	:	mHeader (NTV2_TYPE_AJABUFFERLOCK, sizeof(NTV2BufferLock))
 {
 	NTV2_ASSERT_STRUCT_VALID;
 	SetBuffer(inBuffer);
@@ -2456,7 +2456,7 @@ NTV2BufferLock::NTV2BufferLock (const NTV2_POINTER & inBuffer, const ULWord inFl
 }
 
 NTV2BufferLock::NTV2BufferLock(const ULWord * pInBuffer, const ULWord inByteCount, const ULWord inFlags)
-	:	mHeader	(NTV2_TYPE_AJABUFFERLOCK, sizeof(NTV2BufferLock))
+	:	mHeader (NTV2_TYPE_AJABUFFERLOCK, sizeof(NTV2BufferLock))
 {
 	NTV2_ASSERT_STRUCT_VALID;
 	SetBuffer (NTV2_POINTER(pInBuffer, inByteCount));
@@ -2465,7 +2465,7 @@ NTV2BufferLock::NTV2BufferLock(const ULWord * pInBuffer, const ULWord inByteCoun
 }
 
 NTV2BufferLock::NTV2BufferLock(const ULWord64 inMaxLockSize, const ULWord inFlags)
-	:	mHeader	(NTV2_TYPE_AJABUFFERLOCK, sizeof(NTV2BufferLock))
+	:	mHeader (NTV2_TYPE_AJABUFFERLOCK, sizeof(NTV2BufferLock))
 {
 	NTV2_ASSERT_STRUCT_VALID;
 	SetBuffer (NTV2_POINTER());
@@ -2482,19 +2482,19 @@ bool NTV2BufferLock::SetBuffer (const NTV2_POINTER & inBuffer)
 ostream & NTV2BufferLock::Print (ostream & inOutStream) const
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	inOutStream	<< mHeader << mBuffer << " flags=" << xHEX0N(mFlags,8) << " " << mTrailer;
+	inOutStream << mHeader << mBuffer << " flags=" << xHEX0N(mFlags,8) << " " << mTrailer;
 	return inOutStream;
 }
 
 
 NTV2Bitstream::NTV2Bitstream()
-	:	mHeader	(NTV2_TYPE_AJABITSTREAM, sizeof(NTV2Bitstream))
+	:	mHeader (NTV2_TYPE_AJABITSTREAM, sizeof(NTV2Bitstream))
 {
 	NTV2_ASSERT_STRUCT_VALID;
 }
 
 NTV2Bitstream::NTV2Bitstream (const NTV2_POINTER & inBuffer, const ULWord inFlags)
-	:	mHeader	(NTV2_TYPE_AJABITSTREAM, sizeof(NTV2Bitstream))
+	:	mHeader (NTV2_TYPE_AJABITSTREAM, sizeof(NTV2Bitstream))
 {
 	NTV2_ASSERT_STRUCT_VALID;
 	SetBuffer(inBuffer);
@@ -2502,7 +2502,7 @@ NTV2Bitstream::NTV2Bitstream (const NTV2_POINTER & inBuffer, const ULWord inFlag
 }
 
 NTV2Bitstream::NTV2Bitstream(const ULWord * pInBuffer, const ULWord inByteCount, const ULWord inFlags)
-	:	mHeader	(NTV2_TYPE_AJABITSTREAM, sizeof(NTV2Bitstream))
+	:	mHeader (NTV2_TYPE_AJABITSTREAM, sizeof(NTV2Bitstream))
 {
 	NTV2_ASSERT_STRUCT_VALID;
 	SetBuffer (NTV2_POINTER(pInBuffer, inByteCount));
@@ -2518,7 +2518,7 @@ bool NTV2Bitstream::SetBuffer (const NTV2_POINTER & inBuffer)
 ostream & NTV2Bitstream::Print (ostream & inOutStream) const
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	inOutStream	<< mHeader << mBuffer << " flags=" << xHEX0N(mFlags,8) << " " << mTrailer;
+	inOutStream << mHeader << mBuffer << " flags=" << xHEX0N(mFlags,8) << " " << mTrailer;
 	return inOutStream;
 }
 
@@ -2556,7 +2556,7 @@ bool NTV2GetRegisters::ResetUsing (const NTV2RegisterReads & inRegReads)
 		ULWord		ndx			(0);
 		ULWord *	pRegArray	(reinterpret_cast <ULWord *> (mInRegisters.GetHostPointer ()));
 		assert (pRegArray);
-		for (NTV2RegisterReadsConstIter iter (inRegReads.begin ());  iter != inRegReads.end ();  ++iter)
+		for (NTV2RegisterReadsConstIter iter (inRegReads.begin ());	 iter != inRegReads.end ();	 ++iter)
 			pRegArray [ndx++] = iter->registerNumber;
 		assert ((ndx * sizeof (ULWord)) == mInRegisters.GetByteCount ());
 	}
@@ -2577,7 +2577,7 @@ bool NTV2GetRegisters::ResetUsing (const NTV2RegNumSet & inRegisterNumbers)
 		ULWord		ndx			(0);
 		ULWord *	pRegArray	(reinterpret_cast <ULWord *> (mInRegisters.GetHostPointer ()));
 		assert (pRegArray);
-		for (NTV2RegNumSetConstIter iter (inRegisterNumbers.begin ());  iter != inRegisterNumbers.end ();  ++iter)
+		for (NTV2RegNumSetConstIter iter (inRegisterNumbers.begin ());	iter != inRegisterNumbers.end ();  ++iter)
 			pRegArray [ndx++] = *iter;
 		assert ((ndx * sizeof (ULWord)) == mInRegisters.GetByteCount ());
 	}
@@ -2594,12 +2594,12 @@ bool NTV2GetRegisters::GetGoodRegisters (NTV2RegNumSet & outGoodRegNums) const
 	if (mOutGoodRegisters.GetByteCount () == 0)
 		return false;		//	No good registers!
 	if (mOutNumRegisters == 0)
-		return false;		//	No good registers!  (The driver sets this field.)
+		return false;		//	No good registers!	(The driver sets this field.)
 	if (mOutNumRegisters > mInNumRegisters)
 		return false;		//	mOutNumRegisters must be less than or equal to mInNumRegisters!
 
 	const ULWord *	pRegArray	(reinterpret_cast <const ULWord *> (mOutGoodRegisters.GetHostPointer ()));
-	for (ULWord ndx (0);  ndx < mOutGoodRegisters.GetByteCount ();  ndx++)
+	for (ULWord ndx (0);  ndx < mOutGoodRegisters.GetByteCount ();	ndx++)
 		outGoodRegNums << pRegArray [ndx];
 
 	return true;
@@ -2615,7 +2615,7 @@ bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterValueMap & outValues) cons
 	if (mOutGoodRegisters.GetByteCount () == 0)
 		return false;		//	No good registers!
 	if (mOutNumRegisters == 0)
-		return false;		//	No good registers!  (The driver sets this field.)
+		return false;		//	No good registers!	(The driver sets this field.)
 	if (mOutNumRegisters > mInNumRegisters)
 		return false;		//	mOutNumRegisters must be less than or equal to mInNumRegisters!
 	if (mOutValues.GetHostPointer () == 0)
@@ -2640,11 +2640,11 @@ bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterReads & outValues) const
 	uint32_t				missingTally (0);
 	if (!GetRegisterValues (regValues))
 		return false;
-	for (NTV2RegisterReadsIter it (outValues.begin());  it != outValues.end();  ++it)
+	for (NTV2RegisterReadsIter it (outValues.begin());	it != outValues.end();	++it)
 	{
-		NTV2RegValueMapConstIter	mapIter	(regValues.find (it->registerNumber));
+		NTV2RegValueMapConstIter	mapIter (regValues.find (it->registerNumber));
 		if (mapIter == regValues.end())
-			missingTally++;	//	Missing register
+			missingTally++; //	Missing register
 		it->registerValue = mapIter->second;
 	}
 	return missingTally == 0;
@@ -2654,7 +2654,7 @@ bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterReads & outValues) const
 ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	inOutStream	<< mHeader << ", numRegs=" << mInNumRegisters << ", inRegs=" << mInRegisters << ", outNumGoodRegs=" << mOutNumRegisters
+	inOutStream << mHeader << ", numRegs=" << mInNumRegisters << ", inRegs=" << mInRegisters << ", outNumGoodRegs=" << mOutNumRegisters
 				<< ", outGoodRegs=" << mOutGoodRegisters << ", outValues=" << mOutValues << ", " << mTrailer;
 	return inOutStream;
 }
@@ -2672,8 +2672,8 @@ NTV2SetRegisters::NTV2SetRegisters (const NTV2RegisterWrites & inRegWrites)
 bool NTV2SetRegisters::ResetUsing (const NTV2RegisterWrites & inRegWrites)
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	mInNumRegisters	= ULWord (inRegWrites.size ());
-	mOutNumFailures	= 0;
+	mInNumRegisters = ULWord (inRegWrites.size ());
+	mOutNumFailures = 0;
 	const bool	result	(mInRegInfos.Allocate (mInNumRegisters * sizeof (NTV2RegInfo)) && mOutBadRegIndexes.Allocate (mInNumRegisters * sizeof (UWord)));
 	if (result)
 	{
@@ -2681,7 +2681,7 @@ bool NTV2SetRegisters::ResetUsing (const NTV2RegisterWrites & inRegWrites)
 		NTV2RegInfo *	pRegInfoArray	(reinterpret_cast <NTV2RegInfo *> (mInRegInfos.GetHostPointer ()));
 		UWord *			pBadRegIndexes	(reinterpret_cast <UWord *> (mOutBadRegIndexes.GetHostPointer ()));
 
-		for (NTV2RegisterWritesConstIter iter (inRegWrites.begin ());  iter != inRegWrites.end ();  ++iter)
+		for (NTV2RegisterWritesConstIter iter (inRegWrites.begin ());  iter != inRegWrites.end ();	++iter)
 		{
 			if (pBadRegIndexes)
 				pBadRegIndexes [ndx] = 0;
@@ -2706,22 +2706,22 @@ bool NTV2SetRegisters::GetFailedRegisterWrites (NTV2RegisterWrites & outFailedRe
 ostream & NTV2SetRegisters::Print (ostream & inOutStream) const
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	inOutStream	<< mHeader << ", numRegs=" << mInNumRegisters << ", inRegInfos=" << mInRegInfos << ", outNumFailures=" << mOutNumFailures
+	inOutStream << mHeader << ", numRegs=" << mInNumRegisters << ", inRegInfos=" << mInRegInfos << ", outNumFailures=" << mOutNumFailures
 				<< ", outBadRegIndexes=" << mOutBadRegIndexes << ", " << mTrailer;
 	const UWord *		pBadRegIndexes		(reinterpret_cast <UWord *> (mOutBadRegIndexes.GetHostPointer ()));
 	const UWord			numBadRegIndexes	(UWord (mOutBadRegIndexes.GetByteCount () / sizeof (UWord)));
-	const NTV2RegInfo *	pRegInfoArray		(reinterpret_cast <NTV2RegInfo *> (mInRegInfos.GetHostPointer ()));
+	const NTV2RegInfo * pRegInfoArray		(reinterpret_cast <NTV2RegInfo *> (mInRegInfos.GetHostPointer ()));
 	const UWord			numRegInfos			(UWord (mInRegInfos.GetByteCount () / sizeof (NTV2RegInfo)));
 	if (pBadRegIndexes && numBadRegIndexes && pRegInfoArray && numRegInfos)
 	{
 		inOutStream << endl;
-		for (UWord num (0);  num < numBadRegIndexes;  num++)
+		for (UWord num (0);	 num < numBadRegIndexes;  num++)
 		{
-			const UWord	badRegIndex	(pBadRegIndexes [num]);
+			const UWord badRegIndex (pBadRegIndexes [num]);
 			if (badRegIndex < numRegInfos)
 			{
-				const NTV2RegInfo &	badRegInfo	(pRegInfoArray [badRegIndex]);
-				inOutStream << "Bad " << num << ":  " << badRegInfo << endl;
+				const NTV2RegInfo & badRegInfo	(pRegInfoArray [badRegIndex]);
+				inOutStream << "Bad " << num << ":	" << badRegInfo << endl;
 			}
 		}
 	}
@@ -2733,7 +2733,7 @@ bool NTV2RegInfo::operator < (const NTV2RegInfo & inRHS) const
 {
 	typedef std::pair <ULWord, ULWord>			ULWordPair;
 	typedef std::pair <ULWordPair, ULWordPair>	ULWordPairs;
-	const ULWordPairs	rhs	(ULWordPair (inRHS.registerNumber, inRHS.registerValue), ULWordPair (inRHS.registerMask, inRHS.registerShift));
+	const ULWordPairs	rhs (ULWordPair (inRHS.registerNumber, inRHS.registerValue), ULWordPair (inRHS.registerMask, inRHS.registerShift));
 	const ULWordPairs	mine(ULWordPair (registerNumber, registerValue), ULWordPair (registerMask, registerShift));
 	return mine < rhs;
 }
@@ -2765,7 +2765,7 @@ ostream & NTV2RegInfo::PrintCode (ostream & oss, const int inRadix) const
 		case 2:		oss << ", " << BIN032(registerValue);	break;
 		case 8:		oss << ", " << OCT(registerValue);		break;
 		case 10:	oss << ", " << DEC(registerValue);		break;
-		default:	oss << ", " << xHEX0N(registerValue,8);	break;
+		default:	oss << ", " << xHEX0N(registerValue,8); break;
 	}
 	if (registerMask != 0xFFFFFFFF)
 		switch (inRadix)
@@ -2777,7 +2777,7 @@ ostream & NTV2RegInfo::PrintCode (ostream & oss, const int inRadix) const
 		}
 	if (registerShift)
 		oss << ", " << DEC(registerShift);
-	oss << ");  // ";
+	oss << ");	// ";
 	if (badName)
 		oss << regName;
 	else
@@ -2822,7 +2822,7 @@ string NTV2ChannelListToStr (const NTV2ChannelList & inObj, const bool inCompact
 ostream & NTV2PrintChannelSet (const NTV2ChannelSet & inObj, const bool inCompact, ostream & inOutStream)
 {
 	inOutStream << (inCompact ? "Ch{" : "{");
-	for (NTV2ChannelSetConstIter it(inObj.begin());  it != inObj.end();  )
+	for (NTV2ChannelSetConstIter it(inObj.begin());	 it != inObj.end();	 )
 	{
 		if (inCompact)
 			inOutStream << DEC(*it+1);
@@ -2852,7 +2852,7 @@ NTV2ChannelSet NTV2MakeChannelSet (const NTV2Channel inFirstChannel, const UWord
 NTV2ChannelSet NTV2MakeChannelSet (const NTV2ChannelList inChannels)
 {
 	NTV2ChannelSet result;
-	for (NTV2ChannelListConstIter it(inChannels.begin());  it != inChannels.end();  ++it)
+	for (NTV2ChannelListConstIter it(inChannels.begin());  it != inChannels.end();	++it)
 		result.insert(*it);
 	return result;
 }
@@ -2876,7 +2876,7 @@ NTV2ChannelList NTV2MakeChannelList (const NTV2ChannelSet inChannels)
 
 NTV2RegisterReadsConstIter FindFirstMatchingRegisterNumber (const uint32_t inRegNum, const NTV2RegisterReads & inRegInfos)
 {
-	for (NTV2RegisterReadsConstIter	iter(inRegInfos.begin());  iter != inRegInfos.end();  ++iter)	//	Ugh -- linear search
+	for (NTV2RegisterReadsConstIter iter(inRegInfos.begin());  iter != inRegInfos.end();  ++iter)	//	Ugh -- linear search
 		if (iter->registerNumber == inRegNum)
 			return iter;
 	return inRegInfos.end();
@@ -2892,7 +2892,7 @@ ostream & operator << (std::ostream & inOutStream, const NTV2RegInfo & inObj)
 ostream & operator << (ostream & inOutStream, const NTV2RegisterWrites & inObj)
 {
 	inOutStream << inObj.size () << " regs:" << endl;
-	for (NTV2RegisterWritesConstIter iter (inObj.begin ());  iter != inObj.end ();  ++iter)
+	for (NTV2RegisterWritesConstIter iter (inObj.begin ());	 iter != inObj.end ();	++iter)
 		inOutStream << *iter << endl;
 	return inOutStream;
 }
@@ -2901,7 +2901,7 @@ ostream & operator << (ostream & inOutStream, const NTV2RegisterWrites & inObj)
 NTV2BankSelGetSetRegs::NTV2BankSelGetSetRegs (const NTV2RegInfo & inBankSelect, const NTV2RegInfo & inOutRegInfo, const bool inDoWrite)
 	:	mHeader			(NTV2_TYPE_BANKGETSET, sizeof (NTV2BankSelGetSetRegs)),
 		mIsWriting		(inDoWrite),			//	Default to reading
-		mInBankInfos	(sizeof (NTV2RegInfo)),	//	Room for one bank select
+		mInBankInfos	(sizeof (NTV2RegInfo)), //	Room for one bank select
 		mInRegInfos		(sizeof (NTV2RegInfo))	//	Room for one register read or write
 {
 	NTV2RegInfo *	pRegInfo		(reinterpret_cast <NTV2RegInfo *> (mInBankInfos.GetHostPointer ()));
@@ -2917,13 +2917,13 @@ NTV2BankSelGetSetRegs::NTV2BankSelGetSetRegs (const NTV2RegInfo & inBankSelect, 
 NTV2RegInfo NTV2BankSelGetSetRegs::GetRegInfo (const UWord inIndex0) const
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	NTV2RegInfo	result;
+	NTV2RegInfo result;
 	if (!mInRegInfos.IsNULL())
 	{
-        const ULWord	maxNum	(mInRegInfos.GetByteCount() / ULWord(sizeof(NTV2RegInfo)));
+		const ULWord	maxNum	(mInRegInfos.GetByteCount() / ULWord(sizeof(NTV2RegInfo)));
 		if (ULWord(inIndex0) < maxNum)
 		{
-			const NTV2RegInfo *	pRegInfo (reinterpret_cast<const NTV2RegInfo*>(mInRegInfos.GetHostPointer()));
+			const NTV2RegInfo * pRegInfo (reinterpret_cast<const NTV2RegInfo*>(mInRegInfos.GetHostPointer()));
 			result = pRegInfo[inIndex0];
 		}
 	}
@@ -2934,8 +2934,8 @@ NTV2RegInfo NTV2BankSelGetSetRegs::GetRegInfo (const UWord inIndex0) const
 ostream & NTV2BankSelGetSetRegs::Print (ostream & inOutStream) const
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	const NTV2RegInfo *	pBankRegInfo	(reinterpret_cast <const NTV2RegInfo *> (mInBankInfos.GetHostPointer ()));
-	const NTV2RegInfo *	pRegInfo		(reinterpret_cast <const NTV2RegInfo *> (mInRegInfos.GetHostPointer ()));
+	const NTV2RegInfo * pBankRegInfo	(reinterpret_cast <const NTV2RegInfo *> (mInBankInfos.GetHostPointer ()));
+	const NTV2RegInfo * pRegInfo		(reinterpret_cast <const NTV2RegInfo *> (mInRegInfos.GetHostPointer ()));
 	inOutStream << mHeader << " " << (mIsWriting ? "W" : "R") << " bankRegInfo=";
 	if (mInBankInfos.IsNULL ())
 		inOutStream << "-";
@@ -2951,18 +2951,18 @@ ostream & NTV2BankSelGetSetRegs::Print (ostream & inOutStream) const
 
 
 NTV2VirtualData::NTV2VirtualData (const ULWord inTag, const void* inVirtualData, const size_t inVirtualDataSize, const bool inDoWrite)
-    :	mHeader			(NTV2_TYPE_VIRTUAL_DATA_RW, sizeof (NTV2VirtualData)),
-        mTag            (inTag),                                //  setup tag
-        mIsWriting		(inDoWrite),                            //	setup write/read
-        mVirtualData	(inVirtualData, inVirtualDataSize)      //	setup virtual data
+	:	mHeader			(NTV2_TYPE_VIRTUAL_DATA_RW, sizeof (NTV2VirtualData)),
+		mTag			(inTag),								//	setup tag
+		mIsWriting		(inDoWrite),							//	setup write/read
+		mVirtualData	(inVirtualData, inVirtualDataSize)		//	setup virtual data
 {
-    NTV2_ASSERT_STRUCT_VALID;
+	NTV2_ASSERT_STRUCT_VALID;
 }
 
 
 ostream & NTV2VirtualData::Print (ostream & inOutStream) const
 {
-    NTV2_ASSERT_STRUCT_VALID;
-    inOutStream	<< mHeader << ", mTag=" << mTag << ", mIsWriting=" << mIsWriting;
-    return inOutStream;
+	NTV2_ASSERT_STRUCT_VALID;
+	inOutStream << mHeader << ", mTag=" << mTag << ", mIsWriting=" << mIsWriting;
+	return inOutStream;
 }

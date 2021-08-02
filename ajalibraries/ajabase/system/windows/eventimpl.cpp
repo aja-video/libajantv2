@@ -119,7 +119,7 @@ AJAEventImpl::SetManualReset(bool manualReset)
 AJAStatus
 AJAEventImpl::GetManualReset(bool* pManualReset)
 {
-    if (pManualReset)
+	if (pManualReset)
 	{
 		*pManualReset = mManualReset;
 		return AJA_STATUS_SUCCESS;

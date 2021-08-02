@@ -9,7 +9,7 @@
 #define NTV2VIRTUALREGISTERS_H
 
 #define VIRTUALREG_START			10000	//	Virtual registers start at register number 10000
-#define	MAX_NUM_VIRTUAL_REGISTERS	1024	//	Starting in SDK 12.6, there's room for 1024 virtual registers
+#define MAX_NUM_VIRTUAL_REGISTERS	1024	//	Starting in SDK 12.6, there's room for 1024 virtual registers
 
 /**
 	@brief	Virtual registers are used to pass 32-bit values to/from the device driver, and aren't always
@@ -36,7 +36,7 @@ typedef enum
 
 	// COMMON_VIRTUAL_REGS_KONA2
 	kVRegInputSelect						= VIRTUALREG_START+20,		// Input 1, Input 2, DualLink
-	kVRegSecondaryFormatSelect				= VIRTUALREG_START+21,		// NTV2VideoFormats	
+	kVRegSecondaryFormatSelect				= VIRTUALREG_START+21,		// NTV2VideoFormats 
 	kVRegDigitalOutput1Select				= VIRTUALREG_START+22,		// Primary, Secondary	
 	kVRegDigitalOutput2Select				= VIRTUALREG_START+23,		// Primary, Secondary, DualLink
 	kVRegAnalogOutputSelect					= VIRTUALREG_START+24,		// Primary, Secondary
@@ -118,7 +118,7 @@ typedef enum
 	kVRegDSKForegroundFade					= VIRTUALREG_START+127,
 	kVRegCaptureReferenceSelect				= VIRTUALREG_START+128,		// deprecated
 
-	kVReg2XTransferMode						= VIRTUALREG_START+130, 	// deprecated
+	kVReg2XTransferMode						= VIRTUALREG_START+130,		// deprecated
 	kVRegSDIOutput1RGBRange					= VIRTUALREG_START+131,
 	kVRegSDIInput1FormatSelect				= VIRTUALREG_START+132,
 	kVRegSDIInput2FormatSelect				= VIRTUALREG_START+133,
@@ -304,7 +304,7 @@ typedef enum
 	
 	kVRegEFTNeedsUpdating					= VIRTUALREG_START+373,		// set when any retail virtual register has been changed
 	
-	kVRegSuspendSystemAudio					= VIRTUALREG_START+374,     // set when app wants to use AC audio and disable host audio (e.g., CoreAudio on MacOS)
+	kVRegSuspendSystemAudio					= VIRTUALREG_START+374,		// set when app wants to use AC audio and disable host audio (e.g., CoreAudio on MacOS)
 	kVRegAcquireReferenceCounter			= VIRTUALREG_START+375,
 
 	kVRegTimeStampLastOutput8VerticalHi		= VIRTUALREG_START+376,
@@ -315,22 +315,22 @@ typedef enum
 	kVRegFrameBufferGangCount				= VIRTUALREG_START+379,
 
 	kVRegChannelCrosspointFirst				= VIRTUALREG_START+380,
-                                                                        //	kVRegChannelCrosspointFirst+1
-                                                                        //	kVRegChannelCrosspointFirst+2
-                                                                        //	kVRegChannelCrosspointFirst+3
-                                                                        //	kVRegChannelCrosspointFirst+4
-                                                                        //	kVRegChannelCrosspointFirst+5
-                                                                        //	kVRegChannelCrosspointFirst+6
+																		//	kVRegChannelCrosspointFirst+1
+																		//	kVRegChannelCrosspointFirst+2
+																		//	kVRegChannelCrosspointFirst+3
+																		//	kVRegChannelCrosspointFirst+4
+																		//	kVRegChannelCrosspointFirst+5
+																		//	kVRegChannelCrosspointFirst+6
 	kVRegChannelCrosspointLast				= VIRTUALREG_START+387,		//	kVRegChannelCrosspointFirst+7
 
 	//	Starting in SDK 13.0, kVRegDriverVersionMajor, kVRegDriverVersionMinor and kVRegDriverVersionPoint
 	//	were all replaced by a single virtual register kVRegDriverVersion.
-	kVRegMonAncField1Offset					= VIRTUALREG_START+389,		///< @brief	Monitor Anc Field1 byte offset from end of frame buffer (IoIP only, GUMP)
-	kVRegMonAncField2Offset					= VIRTUALREG_START+390,		///< @brief	Monitor Anc Field2 byte offset from end of frame buffer (IoIP only, GUMP)
+	kVRegMonAncField1Offset					= VIRTUALREG_START+389,		///< @brief Monitor Anc Field1 byte offset from end of frame buffer (IoIP only, GUMP)
+	kVRegMonAncField2Offset					= VIRTUALREG_START+390,		///< @brief Monitor Anc Field2 byte offset from end of frame buffer (IoIP only, GUMP)
 	kVRegFollowInputFormat					= VIRTUALREG_START+391,
 
-	kVRegAncField1Offset					= VIRTUALREG_START+392,		///< @brief	Anc Field1 byte offset from end of frame buffer (GUMP on all boards except RTP for SMPTE2022/IP)
-	kVRegAncField2Offset					= VIRTUALREG_START+393,		///< @brief	Anc Field2 byte offset from end of frame buffer (GUMP on all boards except RTP for SMPTE2022/IP)
+	kVRegAncField1Offset					= VIRTUALREG_START+392,		///< @brief Anc Field1 byte offset from end of frame buffer (GUMP on all boards except RTP for SMPTE2022/IP)
+	kVRegAncField2Offset					= VIRTUALREG_START+393,		///< @brief Anc Field2 byte offset from end of frame buffer (GUMP on all boards except RTP for SMPTE2022/IP)
 	kVRegAgentCheck							= VIRTUALREG_START+394,
 	kVRegUnused_2							= VIRTUALREG_START+395,
 	
@@ -359,123 +359,123 @@ typedef enum
 	kVRegGatewayEth1						= VIRTUALREG_START+414,
 	
 	kVRegRxcEnable1							= VIRTUALREG_START+415,
-    kVRegRxcSfp1RxMatch1					= VIRTUALREG_START+416,
-    kVRegRxcSfp1SourceIp1                   = VIRTUALREG_START+417,
-    kVRegRxcSfp1DestIp1                     = VIRTUALREG_START+418,
-    kVRegRxcSfp1SourcePort1                 = VIRTUALREG_START+419,
-    kVRegRxcSfp1DestPort1                   = VIRTUALREG_START+420,
-    kVRegRxcSfp1Vlan1                       = VIRTUALREG_START+421,
-    kVRegRxcSfp2RxMatch1                    = VIRTUALREG_START+422,
-    kVRegRxcSfp2SourceIp1                   = VIRTUALREG_START+423,
-    kVRegRxcSfp2DestIp1                     = VIRTUALREG_START+424,
-    kVRegRxcSfp2SourcePort1                 = VIRTUALREG_START+425,
-    kVRegRxcSfp2DestPort1                   = VIRTUALREG_START+426,
-    kVRegRxcSfp2Vlan1                       = VIRTUALREG_START+427,
+	kVRegRxcSfp1RxMatch1					= VIRTUALREG_START+416,
+	kVRegRxcSfp1SourceIp1					= VIRTUALREG_START+417,
+	kVRegRxcSfp1DestIp1						= VIRTUALREG_START+418,
+	kVRegRxcSfp1SourcePort1					= VIRTUALREG_START+419,
+	kVRegRxcSfp1DestPort1					= VIRTUALREG_START+420,
+	kVRegRxcSfp1Vlan1						= VIRTUALREG_START+421,
+	kVRegRxcSfp2RxMatch1					= VIRTUALREG_START+422,
+	kVRegRxcSfp2SourceIp1					= VIRTUALREG_START+423,
+	kVRegRxcSfp2DestIp1						= VIRTUALREG_START+424,
+	kVRegRxcSfp2SourcePort1					= VIRTUALREG_START+425,
+	kVRegRxcSfp2DestPort1					= VIRTUALREG_START+426,
+	kVRegRxcSfp2Vlan1						= VIRTUALREG_START+427,
 	kVRegRxcSsrc1							= VIRTUALREG_START+428,
 	kVRegRxcPlayoutDelay1					= VIRTUALREG_START+429,
 
 	kVRegRxcEnable2							= VIRTUALREG_START+430,
-    kVRegRxcSfp1RxMatch2					= VIRTUALREG_START+431,
-    kVRegRxcSfp1SourceIp2                   = VIRTUALREG_START+432,
-    kVRegRxcSfp1DestIp2                     = VIRTUALREG_START+433,
-    kVRegRxcSfp1SourcePort2                 = VIRTUALREG_START+434,
-    kVRegRxcSfp1DestPort2                   = VIRTUALREG_START+435,
-    kVRegRxcSfp1Vlan2                       = VIRTUALREG_START+436,
-    kVRegRxcSfp2RxMatch2                    = VIRTUALREG_START+437,
-    kVRegRxcSfp2SourceIp2                   = VIRTUALREG_START+438,
-    kVRegRxcSfp2DestIp2                     = VIRTUALREG_START+439,
-    kVRegRxcSfp2SourcePort2                 = VIRTUALREG_START+440,
-    kVRegRxcSfp2DestPort2                   = VIRTUALREG_START+441,
-    kVRegRxcSfp2Vlan2                       = VIRTUALREG_START+442,
+	kVRegRxcSfp1RxMatch2					= VIRTUALREG_START+431,
+	kVRegRxcSfp1SourceIp2					= VIRTUALREG_START+432,
+	kVRegRxcSfp1DestIp2						= VIRTUALREG_START+433,
+	kVRegRxcSfp1SourcePort2					= VIRTUALREG_START+434,
+	kVRegRxcSfp1DestPort2					= VIRTUALREG_START+435,
+	kVRegRxcSfp1Vlan2						= VIRTUALREG_START+436,
+	kVRegRxcSfp2RxMatch2					= VIRTUALREG_START+437,
+	kVRegRxcSfp2SourceIp2					= VIRTUALREG_START+438,
+	kVRegRxcSfp2DestIp2						= VIRTUALREG_START+439,
+	kVRegRxcSfp2SourcePort2					= VIRTUALREG_START+440,
+	kVRegRxcSfp2DestPort2					= VIRTUALREG_START+441,
+	kVRegRxcSfp2Vlan2						= VIRTUALREG_START+442,
 	kVRegRxcSsrc2							= VIRTUALREG_START+443,
 	kVRegRxcPlayoutDelay2					= VIRTUALREG_START+444,
 
 	kVRegTxcEnable3							= VIRTUALREG_START+445,
-    kVRegTxcSfp1LocalPort3                  = VIRTUALREG_START+446,
-    kVRegTxcSfp1RemoteIp3                   = VIRTUALREG_START+447,
-    kVRegTxcSfp1RemotePort3                 = VIRTUALREG_START+448,
-    kVRegTxcSfp2LocalPort3                  = VIRTUALREG_START+449,
-    kVRegTxcSfp2RemoteIp3                   = VIRTUALREG_START+450,
-    kVRegTxcSfp2RemotePort3                 = VIRTUALREG_START+451,
+	kVRegTxcSfp1LocalPort3					= VIRTUALREG_START+446,
+	kVRegTxcSfp1RemoteIp3					= VIRTUALREG_START+447,
+	kVRegTxcSfp1RemotePort3					= VIRTUALREG_START+448,
+	kVRegTxcSfp2LocalPort3					= VIRTUALREG_START+449,
+	kVRegTxcSfp2RemoteIp3					= VIRTUALREG_START+450,
+	kVRegTxcSfp2RemotePort3					= VIRTUALREG_START+451,
 
 	kVRegTxcEnable4							= VIRTUALREG_START+452,
-    kVRegTxcSfp1LocalPort4                  = VIRTUALREG_START+453,
-    kVRegTxcSfp1RemoteIp4                   = VIRTUALREG_START+454,
-    kVRegTxcSfp1RemotePort4                 = VIRTUALREG_START+455,
-    kVRegTxcSfp2LocalPort4                  = VIRTUALREG_START+456,
-    kVRegTxcSfp2RemoteIp4                   = VIRTUALREG_START+457,
-    kVRegTxcSfp2RemotePort4                 = VIRTUALREG_START+458,
+	kVRegTxcSfp1LocalPort4					= VIRTUALREG_START+453,
+	kVRegTxcSfp1RemoteIp4					= VIRTUALREG_START+454,
+	kVRegTxcSfp1RemotePort4					= VIRTUALREG_START+455,
+	kVRegTxcSfp2LocalPort4					= VIRTUALREG_START+456,
+	kVRegTxcSfp2RemoteIp4					= VIRTUALREG_START+457,
+	kVRegTxcSfp2RemotePort4					= VIRTUALREG_START+458,
 	
 	kVRegMailBoxAcquire						= VIRTUALREG_START+459,
 	kVRegMailBoxRelease						= VIRTUALREG_START+460,
 	kVRegMailBoxAbort						= VIRTUALREG_START+461,
 	kVRegMailBoxTimeoutNS					= VIRTUALREG_START+462,		//	Units are 100 ns, not nanoseconds!
 
-    kVRegRxc_2DecodeSelectionMode1          = VIRTUALREG_START+463,
-    kVRegRxc_2DecodeProgramNumber1          = VIRTUALREG_START+464,
-    kVRegRxc_2DecodeProgramPID1             = VIRTUALREG_START+465,
-    kVRegRxc_2DecodeAudioNumber1            = VIRTUALREG_START+466,
+	kVRegRxc_2DecodeSelectionMode1			= VIRTUALREG_START+463,
+	kVRegRxc_2DecodeProgramNumber1			= VIRTUALREG_START+464,
+	kVRegRxc_2DecodeProgramPID1				= VIRTUALREG_START+465,
+	kVRegRxc_2DecodeAudioNumber1			= VIRTUALREG_START+466,
 
-    kVRegRxc_2DecodeSelectionMode2          = VIRTUALREG_START+467,
-    kVRegRxc_2DecodeProgramNumber2          = VIRTUALREG_START+468,
-    kVRegRxc_2DecodeProgramPID2             = VIRTUALREG_START+469,
-    kVRegRxc_2DecodeAudioNumber2            = VIRTUALREG_START+470,
+	kVRegRxc_2DecodeSelectionMode2			= VIRTUALREG_START+467,
+	kVRegRxc_2DecodeProgramNumber2			= VIRTUALREG_START+468,
+	kVRegRxc_2DecodeProgramPID2				= VIRTUALREG_START+469,
+	kVRegRxc_2DecodeAudioNumber2			= VIRTUALREG_START+470,
 
-    kVRegTxc_2EncodeVideoFormat1            = VIRTUALREG_START+471,
-    kVRegTxc_2EncodeUllMode1				= VIRTUALREG_START+472,
-    kVRegTxc_2EncodeBitDepth1               = VIRTUALREG_START+473,
-    kVRegTxc_2EncodeChromaSubSamp1          = VIRTUALREG_START+474,
-    kVRegTxc_2EncodeMbps1                   = VIRTUALREG_START+475,
+	kVRegTxc_2EncodeVideoFormat1			= VIRTUALREG_START+471,
+	kVRegTxc_2EncodeUllMode1				= VIRTUALREG_START+472,
+	kVRegTxc_2EncodeBitDepth1				= VIRTUALREG_START+473,
+	kVRegTxc_2EncodeChromaSubSamp1			= VIRTUALREG_START+474,
+	kVRegTxc_2EncodeMbps1					= VIRTUALREG_START+475,
 	kVRegTxc_2EncodeAudioChannels1			= VIRTUALREG_START+476,
-	kVRegTxc_2EncodeStreamType1             = VIRTUALREG_START+477,
-    kVRegTxc_2EncodeProgramPid1             = VIRTUALREG_START+478,
-    kVRegTxc_2EncodeVideoPid1               = VIRTUALREG_START+479,
-    kVRegTxc_2EncodePcrPid1					= VIRTUALREG_START+480,
-    kVRegTxc_2EncodeAudio1Pid1              = VIRTUALREG_START+481,
-    
-    kVRegTxc_2EncodeVideoFormat2            = VIRTUALREG_START+482,
-    kVRegTxc_2EncodeUllMode2				= VIRTUALREG_START+483,
-    kVRegTxc_2EncodeBitDepth2               = VIRTUALREG_START+484,
-    kVRegTxc_2EncodeChromaSubSamp2          = VIRTUALREG_START+485,
-    kVRegTxc_2EncodeMbps2                   = VIRTUALREG_START+486,
+	kVRegTxc_2EncodeStreamType1				= VIRTUALREG_START+477,
+	kVRegTxc_2EncodeProgramPid1				= VIRTUALREG_START+478,
+	kVRegTxc_2EncodeVideoPid1				= VIRTUALREG_START+479,
+	kVRegTxc_2EncodePcrPid1					= VIRTUALREG_START+480,
+	kVRegTxc_2EncodeAudio1Pid1				= VIRTUALREG_START+481,
+	
+	kVRegTxc_2EncodeVideoFormat2			= VIRTUALREG_START+482,
+	kVRegTxc_2EncodeUllMode2				= VIRTUALREG_START+483,
+	kVRegTxc_2EncodeBitDepth2				= VIRTUALREG_START+484,
+	kVRegTxc_2EncodeChromaSubSamp2			= VIRTUALREG_START+485,
+	kVRegTxc_2EncodeMbps2					= VIRTUALREG_START+486,
 	kVRegTxc_2EncodeAudioChannels2			= VIRTUALREG_START+487,
-    kVRegTxc_2EncodeStreamType2             = VIRTUALREG_START+488,
-    kVRegTxc_2EncodeProgramPid2             = VIRTUALREG_START+489,
-    kVRegTxc_2EncodeVideoPid2               = VIRTUALREG_START+490,
-    kVRegTxc_2EncodePcrPid2					= VIRTUALREG_START+491,
-    kVRegTxc_2EncodeAudio1Pid2              = VIRTUALREG_START+492,
+	kVRegTxc_2EncodeStreamType2				= VIRTUALREG_START+488,
+	kVRegTxc_2EncodeProgramPid2				= VIRTUALREG_START+489,
+	kVRegTxc_2EncodeVideoPid2				= VIRTUALREG_START+490,
+	kVRegTxc_2EncodePcrPid2					= VIRTUALREG_START+491,
+	kVRegTxc_2EncodeAudio1Pid2				= VIRTUALREG_START+492,
 
-    kVReg2022_7Enable						= VIRTUALREG_START+493,
-    kVReg2022_7NetworkPathDiff              = VIRTUALREG_START+494,
-    
-    kVRegKIPRxCfgError                      = VIRTUALREG_START+495,
-    kVRegKIPTxCfgError                      = VIRTUALREG_START+496,
-    kVRegKIPEncCfgError                     = VIRTUALREG_START+497,
-    kVRegKIPDecCfgError                     = VIRTUALREG_START+498,
-    kVRegKIPNetCfgError                     = VIRTUALREG_START+499,
-    kVRegUseHDMI420Mode                     = VIRTUALREG_START+500,
-    kVRegUnused501                          = VIRTUALREG_START+501,
-    
-    kVRegUserDefinedDBB						= VIRTUALREG_START+502,
-    
-    kVRegHDMIOutAudioChannels				= VIRTUALREG_START+503,
+	kVReg2022_7Enable						= VIRTUALREG_START+493,
+	kVReg2022_7NetworkPathDiff				= VIRTUALREG_START+494,
+	
+	kVRegKIPRxCfgError						= VIRTUALREG_START+495,
+	kVRegKIPTxCfgError						= VIRTUALREG_START+496,
+	kVRegKIPEncCfgError						= VIRTUALREG_START+497,
+	kVRegKIPDecCfgError						= VIRTUALREG_START+498,
+	kVRegKIPNetCfgError						= VIRTUALREG_START+499,
+	kVRegUseHDMI420Mode						= VIRTUALREG_START+500,
+	kVRegUnused501							= VIRTUALREG_START+501,
+	
+	kVRegUserDefinedDBB						= VIRTUALREG_START+502,
+	
+	kVRegHDMIOutAudioChannels				= VIRTUALREG_START+503,
 	kVRegUnused504							= VIRTUALREG_START+504,
-    kVRegZeroHostAncPostCapture				= VIRTUALREG_START+505,
-    kVRegZeroDeviceAncPostCapture			= VIRTUALREG_START+506,
-    kVRegAudioMonitorChannelSelect          = VIRTUALREG_START+507,
-	kVRegAudioMixerOverrideState            = VIRTUALREG_START+508,
-    kVRegAudioMixerSourceMainEnable         = VIRTUALREG_START+509,
-    kVRegAudioMixerSourceAux1Enable         = VIRTUALREG_START+510,
-    kVRegAudioMixerSourceAux2Enable         = VIRTUALREG_START+511,
-    kVRegAudioMixerSourceMainGain           = VIRTUALREG_START+512,
-    kVRegAudioMixerSourceAux1Gain           = VIRTUALREG_START+513,
-    kVRegAudioMixerSourceAux2Gain           = VIRTUALREG_START+514,
-    kVRegAudioCapMixerSourceMainEnable      = VIRTUALREG_START+515,
-    kVRegAudioCapMixerSourceAux1Enable      = VIRTUALREG_START+516,
-    kVRegAudioCapMixerSourceAux2Enable      = VIRTUALREG_START+517,
-    kVRegAudioCapMixerSourceMainGain        = VIRTUALREG_START+518,
-    kVRegAudioCapMixerSourceAux1Gain        = VIRTUALREG_START+519,
-    kVRegAudioCapMixerSourceAux2Gain        = VIRTUALREG_START+520,
+	kVRegZeroHostAncPostCapture				= VIRTUALREG_START+505,
+	kVRegZeroDeviceAncPostCapture			= VIRTUALREG_START+506,
+	kVRegAudioMonitorChannelSelect			= VIRTUALREG_START+507,
+	kVRegAudioMixerOverrideState			= VIRTUALREG_START+508,
+	kVRegAudioMixerSourceMainEnable			= VIRTUALREG_START+509,
+	kVRegAudioMixerSourceAux1Enable			= VIRTUALREG_START+510,
+	kVRegAudioMixerSourceAux2Enable			= VIRTUALREG_START+511,
+	kVRegAudioMixerSourceMainGain			= VIRTUALREG_START+512,
+	kVRegAudioMixerSourceAux1Gain			= VIRTUALREG_START+513,
+	kVRegAudioMixerSourceAux2Gain			= VIRTUALREG_START+514,
+	kVRegAudioCapMixerSourceMainEnable		= VIRTUALREG_START+515,
+	kVRegAudioCapMixerSourceAux1Enable		= VIRTUALREG_START+516,
+	kVRegAudioCapMixerSourceAux2Enable		= VIRTUALREG_START+517,
+	kVRegAudioCapMixerSourceMainGain		= VIRTUALREG_START+518,
+	kVRegAudioCapMixerSourceAux1Gain		= VIRTUALREG_START+519,
+	kVRegAudioCapMixerSourceAux2Gain		= VIRTUALREG_START+520,
 	
 	kVRegSwizzle4kInput						= VIRTUALREG_START+521,
 	kVRegSwizzle4kOutput					= VIRTUALREG_START+522,
@@ -487,8 +487,8 @@ typedef enum
 	kVRegEnableBT2020						= VIRTUALREG_START+526,
 	kVRegHdmiHdrOutMode						= VIRTUALREG_START+527,
 
-    kVRegServicesForceInit                  = VIRTUALREG_START+528,		// set true when power state changes
-    kVRegServicesModeFinal               	= VIRTUALREG_START+529,
+	kVRegServicesForceInit					= VIRTUALREG_START+528,		// set true when power state changes
+	kVRegServicesModeFinal					= VIRTUALREG_START+529,
 	
 	kVRegNTV2VPIDTransferCharacteristics1	= VIRTUALREG_START+530,
 	kVRegNTV2VPIDColorimetry1				= VIRTUALREG_START+531,
@@ -637,305 +637,305 @@ typedef enum
 	
 	kVRegBaseFirmwareDeviceID				= VIRTUALREG_START+640,
 
-    kVRegHDMIOutStatus1                     = VIRTUALREG_START+641,
-    kVRegMaskHDMOutVideoStandard			= BIT(3)+BIT(2)+BIT(1)+BIT(0),
-    kVRegShiftHDMOutVideoStandard			= 0,
-    kVRegMaskHDMOutVideoFrameRate			= BIT(7)+BIT(6)+BIT(5)+BIT(4),
-    kVRegShiftHDMOutVideoFrameRate			= 4,
-    kVRegMaskHDMOutBitDepth 	     		= BIT(11)+BIT(10)+BIT(9)+BIT(8),
-    kVRegShiftHDMOutBitDepth    	  		= 8,
-    kVRegMaskHDMOutColorRGB     			= BIT(12),
-    kVRegShiftHDMOutColorRGB     			= 12,
-    kVRegMaskHDMOutRangeFull     			= BIT(13),
-    kVRegShiftHDMOutRangeFull     			= 13,
-    kVRegMaskHDMOutPixel420     			= BIT(14),
-    kVRegShiftHDMOutPixel420     			= 14,
-    kVRegMaskHDMOutProtocol        			= BIT(15),
-    kVRegShiftHDMOutProtocol           		= 15,
-    kVRegMaskHDMOutAudioFormat      		= BIT(19)+BIT(18)+BIT(17)+BIT(16),
-    kVRegShiftHDMOutAudioFormat      		= 16,
-    kVRegMaskHDMOutAudioRate        		= BIT(23)+BIT(22)+BIT(21)+BIT(20),
-    kVRegShiftHDMOutAudioRate        		= 20,
-    kVRegMaskHDMOutAudioChannels			= BIT(27)+BIT(26)+BIT(25)+BIT(24),
-    kVRegShiftHDMOutAudioChannels			= 24,
+	kVRegHDMIOutStatus1						= VIRTUALREG_START+641,
+	kVRegMaskHDMOutVideoStandard			= BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kVRegShiftHDMOutVideoStandard			= 0,
+	kVRegMaskHDMOutVideoFrameRate			= BIT(7)+BIT(6)+BIT(5)+BIT(4),
+	kVRegShiftHDMOutVideoFrameRate			= 4,
+	kVRegMaskHDMOutBitDepth					= BIT(11)+BIT(10)+BIT(9)+BIT(8),
+	kVRegShiftHDMOutBitDepth				= 8,
+	kVRegMaskHDMOutColorRGB					= BIT(12),
+	kVRegShiftHDMOutColorRGB				= 12,
+	kVRegMaskHDMOutRangeFull				= BIT(13),
+	kVRegShiftHDMOutRangeFull				= 13,
+	kVRegMaskHDMOutPixel420					= BIT(14),
+	kVRegShiftHDMOutPixel420				= 14,
+	kVRegMaskHDMOutProtocol					= BIT(15),
+	kVRegShiftHDMOutProtocol				= 15,
+	kVRegMaskHDMOutAudioFormat				= BIT(19)+BIT(18)+BIT(17)+BIT(16),
+	kVRegShiftHDMOutAudioFormat				= 16,
+	kVRegMaskHDMOutAudioRate				= BIT(23)+BIT(22)+BIT(21)+BIT(20),
+	kVRegShiftHDMOutAudioRate				= 20,
+	kVRegMaskHDMOutAudioChannels			= BIT(27)+BIT(26)+BIT(25)+BIT(24),
+	kVRegShiftHDMOutAudioChannels			= 24,
 
-    kVRegLastAJA							= VIRTUALREG_START+642,		///< @brief	The last AJA virtual register slot
-	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief	The first virtual register slot available for general use
-	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief	Last virtual register slot
+	kVRegLastAJA							= VIRTUALREG_START+642,		///< @brief The last AJA virtual register slot
+	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief The first virtual register slot available for general use
+	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief Last virtual register slot
 
 } VirtualRegisterNum;
 
 
 #if !defined(NTV2_DEPRECATE_15_0)
-	#define	kVRegLinuxDriverVersion				VIRTUALREG_START		///< @deprecated	Obsolete in SDK 15.0, use kVRegDriverVersion instead
+	#define kVRegLinuxDriverVersion				VIRTUALREG_START		///< @deprecated	Obsolete in SDK 15.0, use kVRegDriverVersion instead
 #endif
 #if !defined(NTV2_DEPRECATE_15_2)
-	#define	kVRegHDMIOutRGBRange				(VIRTUALREG_START+504)	///< @deprecated	Appears to be unused, but easily confused with kVRegHDMIOutRgbRange
+	#define kVRegHDMIOutRGBRange				(VIRTUALREG_START+504)	///< @deprecated	Appears to be unused, but easily confused with kVRegHDMIOutRgbRange
 #endif
 #if !defined (NTV2_DEPRECATE_12_7)
 	//	The old virtual register names will be deprecated sometime after SDK 13.0.0
-	#define	kRegLinuxDriverVersion				kVRegLinuxDriverVersion
-	#define	kRegRelativeVideoPlaybackDelay		kVRegRelativeVideoPlaybackDelay
-	#define	kRegAudioRecordPinDelay				kVRegAudioRecordPinDelay
-	#define	kRegDriverVersion					kVRegDriverVersion
-	#define	kRegGlobalAudioPlaybackMode			kVRegGlobalAudioPlaybackMode
-	#define	kRegFlashProgramKey					kVRegFlashProgramKey
-	#define	kRegStrictTiming					kVRegStrictTiming
-	#define	kK2RegInputSelect					kVRegInputSelect
-	#define	kK2RegSecondaryFormatSelect			kVRegSecondaryFormatSelect
-	#define	kK2RegDigitalOutput1Select			kVRegDigitalOutput1Select
-	#define	kK2RegDigitalOutput2Select			kVRegDigitalOutput2Select
-	#define	kK2RegAnalogOutputSelect			kVRegAnalogOutputSelect
-	#define	kK2RegAnalogOutputType				kVRegAnalogOutputType
-	#define	kK2RegAnalogOutBlackLevel			kVRegAnalogOutBlackLevel
-	#define	kVideoOutPauseMode					kVRegVideoOutPauseMode
-	#define	kPulldownPattern					kVRegPulldownPattern
-	#define	kColorSpaceMode						kVRegColorSpaceMode
-	#define	kGammaMode							kVRegGammaMode
-	#define	kLUTType							kVRegLUTType
-	#define	kRGB10Range							kVRegRGB10Range
-	#define	kRGB10Endian						kVRegRGB10Endian
-	#define	kRegBitFileDownload					kVRegBitFileDownload
-	#define	kRegSaveRegistersToRegistry			kVRegSaveRegistersToRegistry
-	#define	kRegRecallRegistersFromRegistry		kVRegRecallRegistersFromRegistry
-	#define	kRegClearAllSubscriptions			kVRegClearAllSubscriptions
-	#define	kRegRestoreHardwareProcampRegisters	kVRegRestoreHardwareProcampRegisters
-	#define	kRegAcquireReferenceCount			kVRegAcquireReferenceCount
-	#define	kRegReleaseReferenceCount			kVRegReleaseReferenceCount
-	#define	kRegDTAudioMux0						kVRegDTAudioMux0
-	#define	kRegDTAudioMux1						kVRegDTAudioMux1
-	#define	kRegDTAudioMux2						kVRegDTAudioMux2
-	#define	kRegDTFirmware						kVRegDTFirmware
-	#define	kRegDTVersionAja					kVRegDTVersionAja
-	#define	kRegDTVersionDurian					kVRegDTVersionDurian
-	#define	kRegDTAudioCapturePinConnected		kVRegDTAudioCapturePinConnected
-	#define	kRegTimeStampMode					kVRegTimeStampMode
-	#define	kRegTimeStampLastOutputVerticalLo	kVRegTimeStampLastOutputVerticalLo
-	#define	kRegTimeStampLastOutputVerticalHi	kVRegTimeStampLastOutputVerticalHi
-	#define	kRegTimeStampLastInput1VerticalLo	kVRegTimeStampLastInput1VerticalLo
-	#define	kRegTimeStampLastInput1VerticalHi	kVRegTimeStampLastInput1VerticalHi
-	#define	kRegTimeStampLastInput2VerticalLo	kVRegTimeStampLastInput2VerticalLo
-	#define	kRegTimeStampLastInput2VerticalHi	kVRegTimeStampLastInput2VerticalHi
-	#define	kRegNumberVideoMappingRegisters		kVRegNumberVideoMappingRegisters
-	#define	kRegNumberAudioMappingRegisters		kVRegNumberAudioMappingRegisters
-	#define	kRegAudioSyncTolerance				kVRegAudioSyncTolerance
-	#define	kRegDmaSerialize					kVRegDmaSerialize
-	#define	kRegSyncChannel						kVRegSyncChannel
-	#define	kRegSyncChannels					kVRegSyncChannels
-	#define	kRegSoftwareUartFifo				kVRegSoftwareUartFifo
-	#define	kRegTimeCodeCh1Delay				kVRegTimeCodeCh1Delay
-	#define	kRegTimeCodeCh2Delay				kVRegTimeCodeCh2Delay
-	#define	kRegTimeCodeIn1Delay				kVRegTimeCodeIn1Delay
-	#define	kRegTimeCodeIn2Delay				kVRegTimeCodeIn2Delay
-	#define	kRegTimeCodeCh3Delay				kVRegTimeCodeCh3Delay
-	#define	kRegTimeCodeCh4Delay				kVRegTimeCodeCh4Delay
-	#define	kRegTimeCodeIn3Delay				kVRegTimeCodeIn3Delay
-	#define	kRegTimeCodeIn4Delay				kVRegTimeCodeIn4Delay
-	#define	kRegTimeCodeCh5Delay				kVRegTimeCodeCh5Delay
-	#define	kRegTimeCodeIn5Delay				kVRegTimeCodeIn5Delay
-	#define	kRegTimeCodeCh6Delay				kVRegTimeCodeCh6Delay
-	#define	kRegTimeCodeIn6Delay				kVRegTimeCodeIn6Delay
-	#define	kRegTimeCodeCh7Delay				kVRegTimeCodeCh7Delay
-	#define	kRegTimeCodeIn7Delay				kVRegTimeCodeIn7Delay
-	#define	kRegTimeCodeCh8Delay				kVRegTimeCodeCh8Delay
-	#define	kRegTimeCodeIn8Delay				kVRegTimeCodeIn8Delay
-	#define	kRegDebug1							kVRegDebug1
-	#define	kDisplayReferenceSelect				kVRegDisplayReferenceSelect
-	#define	kVANCMode							kVRegVANCMode
-	#define	kRegDualStreamTransportType			kVRegDualStreamTransportType
-	#define	kSDIOut1TransportType				kVRegSDIOut1TransportType
-	#define	kDSKMode							kVRegDSKMode
-	#define	kIsoConvertEnable					kVRegIsoConvertEnable
-	#define	kDSKAudioMode						kVRegDSKAudioMode
-	#define	kDSKForegroundMode					kVRegDSKForegroundMode
-	#define	kDSKForegroundFade					kVRegDSKForegroundFade
-	#define	kCaptureReferenceSelect				kVRegCaptureReferenceSelect
-	#define	kPanMode							kVRegPanMode
-	#define	kReg2XTransferMode					kVReg2XTransferMode
-	#define	kRegSDIOutput1RGBRange				kVRegSDIOutput1RGBRange
-	#define	kRegSDIInput1FormatSelect			kVRegSDIInput1FormatSelect
-	#define	kRegSDIInput2FormatSelect			kVRegSDIInput2FormatSelect
-	#define	kRegSDIInput1RGBRange				kVRegSDIInput1RGBRange
-	#define	kRegSDIInput2RGBRange				kVRegSDIInput2RGBRange
-	#define	kRegSDIInput1Stereo3DMode			kVRegSDIInput1Stereo3DMode
-	#define	kRegSDIInput2Stereo3DMode			kVRegSDIInput2Stereo3DMode
-	#define	kRegFrameBuffer1RGBRange			kVRegFrameBuffer1RGBRange
-	#define	kRegFrameBuffer1Stereo3DMode		kVRegFrameBuffer1Stereo3DMode
-	#define	kPanModeOffsetH						kVRegPanModeOffsetH
-	#define	kPanModeOffsetV						kVRegPanModeOffsetV
-	#define	kK2RegAnalogInBlackLevel			kVRegAnalogInBlackLevel
-	#define	kK2RegAnalogInputType				kVRegAnalogInputType
-	#define	kRegHDMIOutColorSpaceModeCtrl		kVRegHDMIOutColorSpaceModeCtrl
-	#define	kHDMIOutProtocolMode				kVRegHDMIOutProtocolMode
-	#define	kRegHDMIOutStereoSelect				kVRegHDMIOutStereoSelect
-	#define	kRegHDMIOutStereoCodecSelect		kVRegHDMIOutStereoCodecSelect
-	#define	kRegSDIInput1ColorSpaceMode			kVRegSDIInput1ColorSpaceMode
-	#define	kRegSDIInput2ColorSpaceMode			kVRegSDIInput2ColorSpaceMode
-	#define	kRegSDIOutput2RGBRange				kVRegSDIOutput2RGBRange
-	#define	kRegSDIOutput1Stereo3DMode			kVRegSDIOutput1Stereo3DMode
-	#define	kRegSDIOutput2Stereo3DMode			kVRegSDIOutput2Stereo3DMode
-	#define	kRegFrameBuffer2RGBRange			kVRegFrameBuffer2RGBRange
-	#define	kRegFrameBuffer2Stereo3DMode		kVRegFrameBuffer2Stereo3DMode
-	#define	kRegAudioGainDisable				kVRegAudioGainDisable
-	#define	kDBLAudioEnable						kVRegLTCOnRefInSelect
-	#define	kActiveVideoOutFilter				kVRegActiveVideoOutFilter
-	#define	kRegAudioInputMapSelect				kVRegAudioInputMapSelect
-	#define	kAudioInputDelay					kVRegAudioInputDelay
-	#define	kDSKGraphicFileIndex				kVRegDSKGraphicFileIndex
-	#define	kTimecodeBurnInMode					kVRegTimecodeBurnInMode
-	#define	kUseQTTimecode						kVRegUseQTTimecode
-	#define	kRegAvailable164					kVRegAvailable164
-	#define	kRP188SourceSelect					kVRegRP188SourceSelect
-	#define	kQTCodecModeDebug					kVRegQTCodecModeDebug
-	#define	kRegHDMIOutColorSpaceModeStatus		kVRegHDMIOutColorSpaceModeStatus
-	#define	kDeviceOnline						kVRegDeviceOnline
-	#define	kIsDefaultDevice					kVRegIsDefaultDevice
-	#define	kRegDesktopFrameBufferStatus		kVRegDesktopFrameBufferStatus
-	#define	kRegSDIOutput1ColorSpaceMode		kVRegSDIOutput1ColorSpaceMode
-	#define	kRegSDIOutput2ColorSpaceMode		kVRegSDIOutput2ColorSpaceMode
-	#define	kAudioOutputDelay					kVRegAudioOutputDelay
-	#define	kTimelapseEnable					kVRegTimelapseEnable
-	#define	kTimelapseCaptureValue				kVRegTimelapseCaptureValue
-	#define	kTimelapseCaptureUnits				kVRegTimelapseCaptureUnits
-	#define	kTimelapseIntervalValue				kVRegTimelapseIntervalValue
-	#define	kTimelapseIntervalUnits				kVRegTimelapseIntervalUnits
-	#define	kFrameBufferInstalled				kVRegFrameBufferInstalled
-	#define	kK2RegAnalogInStandard				kVRegAnalogInStandard
-	#define	kRegOutputTimecodeOffset			kVRegOutputTimecodeOffset
-	#define	kRegOutputTimecodeType				kVRegOutputTimecodeType
-	#define	kRegQuicktimeUsingBoard				kVRegQuicktimeUsingBoard
-	#define	kRegApplicationPID					kVRegApplicationPID
-	#define	kRegApplicationCode					kVRegApplicationCode
-	#define	kRegReleaseApplication				kVRegReleaseApplication
-	#define	kRegForceApplicationPID				kVRegForceApplicationPID
-	#define	kRegForceApplicationCode			kVRegForceApplicationCode
-	#define	kRegProcAmpSDRegsInitialized		kVRegProcAmpSDRegsInitialized
-	#define	kRegProcAmpStandardDefBrightness	kVRegProcAmpStandardDefBrightness
-	#define	kRegProcAmpStandardDefContrast		kVRegProcAmpStandardDefContrast
-	#define	kRegProcAmpStandardDefSaturation	kVRegProcAmpStandardDefSaturation
-	#define	kRegProcAmpStandardDefHue			kVRegProcAmpStandardDefHue
-	#define	kRegProcAmpStandardDefCbOffset		kVRegProcAmpStandardDefCbOffset
-	#define	kRegProcAmpStandardDefCrOffset		kVRegProcAmpStandardDefCrOffset
-	#define	kRegProcAmpEndStandardDefRange		kVRegProcAmpEndStandardDefRange
-	#define	kRegProcAmpHDRegsInitialized		kVRegProcAmpHDRegsInitialized
-	#define	kRegProcAmpHighDefBrightness		kVRegProcAmpHighDefBrightness
-	#define	kRegProcAmpHighDefContrast			kVRegProcAmpHighDefContrast
-	#define	kRegProcAmpHighDefSaturationCb		kVRegProcAmpHighDefSaturationCb
-	#define	kRegProcAmpHighDefSaturationCr		kVRegProcAmpHighDefSaturationCr
-	#define	kRegProcAmpHighDefHue				kVRegProcAmpHighDefHue
-	#define	kRegProcAmpHighDefCbOffset			kVRegProcAmpHighDefCbOffset
-	#define	kRegProcAmpHighDefCrOffset			kVRegProcAmpHighDefCrOffset
-	#define	kRegProcAmpEndHighDefRange			kVRegProcAmpEndHighDefRange
-	#define	kRegChannel1UserBufferLevel			kVRegChannel1UserBufferLevel
-	#define	kRegChannel2UserBufferLevel			kVRegChannel2UserBufferLevel
-	#define	kRegInput1UserBufferLevel			kVRegInput1UserBufferLevel
-	#define	kRegInput2UserBufferLevel			kVRegInput2UserBufferLevel
-	#define	kRegProgressivePicture				kVRegProgressivePicture
-	#define	kRegLUT2Type						kVRegLUT2Type
-	#define	kRegLUT3Type						kVRegLUT3Type
-	#define	kRegLUT4Type						kVRegLUT4Type
-	#define	kK2RegDigitalOutput3Select			kVRegDigitalOutput3Select
-	#define	kK2RegDigitalOutput4Select			kVRegDigitalOutput4Select
-	#define	kK2RegHDMIOutputSelect				kVRegHDMIOutputSelect
-	#define	kK2RegRGBRangeConverterLUTType		kVRegRGBRangeConverterLUTType
-	#define	kRegTestPatternChoice				kVRegTestPatternChoice
-	#define	kRegTestPatternFormat				kVRegTestPatternFormat
-	#define	kRegEveryFrameTaskFilter			kVRegEveryFrameTaskFilter
-	#define	kRegDefaultInput					kVRegDefaultInput
-	#define	kRegDefaultVideoOutMode				kVRegDefaultVideoOutMode
-	#define	kRegDefaultVideoFormat				kVRegDefaultVideoFormat
-	#define	kK2RegDigitalOutput5Select			kVRegDigitalOutput5Select
-	#define	kRegLUT5Type						kVRegLUT5Type
-	#define	kRegMacUserModeDebugLevel			kVRegMacUserModeDebugLevel
-	#define	kRegMacKernelModeDebugLevel			kVRegMacKernelModeDebugLevel
-	#define	kRegMacUserModePingLevel			kVRegMacUserModePingLevel
-	#define	kRegMacKernelModePingLevel			kVRegMacKernelModePingLevel
-	#define	kRegLatencyTimerValue				kVRegLatencyTimerValue
-	#define	kRegAudioInputSelect				kVRegAudioInputSelect
-	#define	kSerialSuspended					kVRegSerialSuspended
-	#define	kXilinxProgramming					kVRegXilinxProgramming
-	#define	kETTDiagLastSerialTimestamp			kVRegETTDiagLastSerialTimestamp
-	#define	kETTDiagLastSerialTimecode			kVRegETTDiagLastSerialTimecode
-	#define	kStartupStatusFlags					kVRegStartupStatusFlags
-	#define	kRegRGBRangeMode					kVRegRGBRangeMode
-	#define	kRegEnableQueuedDMAs				kVRegEnableQueuedDMAs
-	#define	kRegBA0MemorySize					kVRegBA0MemorySize
-	#define	kRegBA1MemorySize					kVRegBA1MemorySize
-	#define	kRegBA4MemorySize					kVRegBA4MemorySize
-	#define	kRegNumDmaDriverBuffers				kVRegNumDmaDriverBuffers
-	#define	kRegDMADriverBufferPhysicalAddress	kVRegDMADriverBufferPhysicalAddress
-	#define	kRegBA2MemorySize					kVRegBA2MemorySize
-	#define	kRegAcquireLinuxReferenceCount		kVRegAcquireLinuxReferenceCount
-	#define	kRegReleaseLinuxReferenceCount		kVRegReleaseLinuxReferenceCount
-	#define	kRegAdvancedIndexing				kVRegAdvancedIndexing
-	#define	kRegTimeStampLastInput3VerticalLo	kVRegTimeStampLastInput3VerticalLo
-	#define	kRegTimeStampLastInput3VerticalHi	kVRegTimeStampLastInput3VerticalHi
-	#define	kRegTimeStampLastInput4VerticalLo	kVRegTimeStampLastInput4VerticalLo
-	#define	kRegTimeStampLastInput4VerticalHi	kVRegTimeStampLastInput4VerticalHi
-	#define	kRegTimeStampLastInput5VerticalLo	kVRegTimeStampLastInput5VerticalLo
-	#define	kRegTimeStampLastInput5VerticalHi	kVRegTimeStampLastInput5VerticalHi
-	#define	kRegTimeStampLastInput6VerticalLo	kVRegTimeStampLastInput6VerticalLo
-	#define	kRegTimeStampLastInput6VerticalHi	kVRegTimeStampLastInput6VerticalHi
-	#define	kRegTimeStampLastInput7VerticalLo	kVRegTimeStampLastInput7VerticalLo
-	#define	kRegTimeStampLastInput7VerticalHi	kVRegTimeStampLastInput7VerticalHi
-	#define	kRegTimeStampLastInput8VerticalLo	kVRegTimeStampLastInput8VerticalLo
-	#define	kRegTimeStampLastInput8VerticalHi	kVRegTimeStampLastInput8VerticalHi
-	#define	kRegTimeStampLastOutput2VerticalLo	kVRegTimeStampLastOutput2VerticalLo
-	#define	kRegTimeStampLastOutput2VerticalHi	kVRegTimeStampLastOutput2VerticalHi
-	#define	kRegTimeStampLastOutput3VerticalLo	kVRegTimeStampLastOutput3VerticalLo
-	#define	kRegTimeStampLastOutput3VerticalHi	kVRegTimeStampLastOutput3VerticalHi
-	#define	kRegTimeStampLastOutput4VerticalLo	kVRegTimeStampLastOutput4VerticalLo
-	#define	kRegTimeStampLastOutput4VerticalHi	kVRegTimeStampLastOutput4VerticalHi
-	#define	kRegTimeStampLastOutput5VerticalLo	kVRegTimeStampLastOutput5VerticalLo
-	#define	kRegTimeStampLastOutput5VerticalHi	kVRegTimeStampLastOutput5VerticalHi
-	#define	kRegTimeStampLastOutput6VerticalLo	kVRegTimeStampLastOutput6VerticalLo
-	#define	kRegTimeStampLastOutput6VerticalHi	kVRegTimeStampLastOutput6VerticalHi
-	#define	kRegTimeStampLastOutput7VerticalLo	kVRegTimeStampLastOutput7VerticalLo
-	#define	kRegTimeStampLastOutput7VerticalHi	kVRegTimeStampLastOutput7VerticalHi
-	#define	kRegTimeStampLastOutput8VerticalLo	kVRegTimeStampLastOutput8VerticalLo
-	#define	kRegResetCycleCount					kVRegResetCycleCount
-	#define	kRegUseProgressive					kVRegUseProgressive
-	#define	kRegFlashSize						kVRegFlashSize
-	#define	kRegFlashStatus						kVRegFlashStatus
-	#define	kRegFlashState						kVRegFlashState
-	#define	kRegPCIDeviceID						kVRegPCIDeviceID
-	#define	kRegUartRxFifoSize					kVRegUartRxFifoSize
-	#define	kRegEFTNeedsUpdating				kVRegEFTNeedsUpdating
-	#define	kRegSuspendSystemAudio				kVRegSuspendSystemAudio
-	#define	kRegAcquireReferenceCounter			kVRegAcquireReferenceCounter
-	#define	kRegTimeStampLastOutput8VerticalHi	kVRegTimeStampLastOutput8VerticalHi
-	#define	kRegFramesPerVertical				kVRegFramesPerVertical
-	#define	kRegServicesInitialized				kVRegServicesInitialized
-	#define	kRegFrameBufferGangCount			kVRegFrameBufferGangCount
-	#define	kRegChannelCrosspointFirst			kVRegChannelCrosspointFirst
-	#define	kRegChannelCrosspointLast			kVRegChannelCrosspointLast
-	#define	kRegDriverVersionMajor				kVRegDriverVersionMajor
-	#define	kRegDriverVersionMinor				kVRegDriverVersionMinor
-	#define	kRegDriverVersionPoint				kVRegDriverVersionPoint
-	#define	kRegFollowInputFormat				kVRegFollowInputFormat
-	#define	kRegAncField1Offset					kVRegAncField1Offset
-	#define	kRegAncField2Offset					kVRegAncField2Offset
-	#define	kRegUnused_1						kVRegUnused_1
-	#define	kRegUnused_2						kVRegUnused_2
-	#define	kReg4kOutputTransportSelection		kVReg4kOutputTransportSelection
-	#define	kRegCustomAncInputSelect			kVRegCustomAncInputSelect
-	#define	kRegUseThermostat					kVRegUseThermostat
-	#define	kRegThermalSamplingRate				kVRegThermalSamplingRate
-	#define	kRegFanSpeed						kVRegFanSpeed
-	#define	kRegVideoFormatCh1					kVRegVideoFormatCh1
-	#define	kRegVideoFormatCh2					kVRegVideoFormatCh2
-	#define	kRegVideoFormatCh3					kVRegVideoFormatCh3
-	#define	kRegVideoFormatCh4					kVRegVideoFormatCh4
-	#define	kRegVideoFormatCh5					kVRegVideoFormatCh5
-	#define	kRegVideoFormatCh6					kVRegVideoFormatCh6
-	#define	kRegVideoFormatCh7					kVRegVideoFormatCh7
-	#define	kRegVideoFormatCh8					kVRegVideoFormatCh8
-	#define	kRegUserDefinedDBB					kVRegUserDefinedDBB
-	#define	kRegHDMIOutAudioChannels			kVRegHDMIOutAudioChannels
-	#define	kRegHDMIOutRGBRange					kVRegHDMIOutRGBRange
-	#define	kRegLastAJA							kVRegLastAJA
-	#define	kRegFirstOEM						kVRegFirstOEM
-	#define	kRegLast							kVRegLast
+	#define kRegLinuxDriverVersion				kVRegLinuxDriverVersion
+	#define kRegRelativeVideoPlaybackDelay		kVRegRelativeVideoPlaybackDelay
+	#define kRegAudioRecordPinDelay				kVRegAudioRecordPinDelay
+	#define kRegDriverVersion					kVRegDriverVersion
+	#define kRegGlobalAudioPlaybackMode			kVRegGlobalAudioPlaybackMode
+	#define kRegFlashProgramKey					kVRegFlashProgramKey
+	#define kRegStrictTiming					kVRegStrictTiming
+	#define kK2RegInputSelect					kVRegInputSelect
+	#define kK2RegSecondaryFormatSelect			kVRegSecondaryFormatSelect
+	#define kK2RegDigitalOutput1Select			kVRegDigitalOutput1Select
+	#define kK2RegDigitalOutput2Select			kVRegDigitalOutput2Select
+	#define kK2RegAnalogOutputSelect			kVRegAnalogOutputSelect
+	#define kK2RegAnalogOutputType				kVRegAnalogOutputType
+	#define kK2RegAnalogOutBlackLevel			kVRegAnalogOutBlackLevel
+	#define kVideoOutPauseMode					kVRegVideoOutPauseMode
+	#define kPulldownPattern					kVRegPulldownPattern
+	#define kColorSpaceMode						kVRegColorSpaceMode
+	#define kGammaMode							kVRegGammaMode
+	#define kLUTType							kVRegLUTType
+	#define kRGB10Range							kVRegRGB10Range
+	#define kRGB10Endian						kVRegRGB10Endian
+	#define kRegBitFileDownload					kVRegBitFileDownload
+	#define kRegSaveRegistersToRegistry			kVRegSaveRegistersToRegistry
+	#define kRegRecallRegistersFromRegistry		kVRegRecallRegistersFromRegistry
+	#define kRegClearAllSubscriptions			kVRegClearAllSubscriptions
+	#define kRegRestoreHardwareProcampRegisters kVRegRestoreHardwareProcampRegisters
+	#define kRegAcquireReferenceCount			kVRegAcquireReferenceCount
+	#define kRegReleaseReferenceCount			kVRegReleaseReferenceCount
+	#define kRegDTAudioMux0						kVRegDTAudioMux0
+	#define kRegDTAudioMux1						kVRegDTAudioMux1
+	#define kRegDTAudioMux2						kVRegDTAudioMux2
+	#define kRegDTFirmware						kVRegDTFirmware
+	#define kRegDTVersionAja					kVRegDTVersionAja
+	#define kRegDTVersionDurian					kVRegDTVersionDurian
+	#define kRegDTAudioCapturePinConnected		kVRegDTAudioCapturePinConnected
+	#define kRegTimeStampMode					kVRegTimeStampMode
+	#define kRegTimeStampLastOutputVerticalLo	kVRegTimeStampLastOutputVerticalLo
+	#define kRegTimeStampLastOutputVerticalHi	kVRegTimeStampLastOutputVerticalHi
+	#define kRegTimeStampLastInput1VerticalLo	kVRegTimeStampLastInput1VerticalLo
+	#define kRegTimeStampLastInput1VerticalHi	kVRegTimeStampLastInput1VerticalHi
+	#define kRegTimeStampLastInput2VerticalLo	kVRegTimeStampLastInput2VerticalLo
+	#define kRegTimeStampLastInput2VerticalHi	kVRegTimeStampLastInput2VerticalHi
+	#define kRegNumberVideoMappingRegisters		kVRegNumberVideoMappingRegisters
+	#define kRegNumberAudioMappingRegisters		kVRegNumberAudioMappingRegisters
+	#define kRegAudioSyncTolerance				kVRegAudioSyncTolerance
+	#define kRegDmaSerialize					kVRegDmaSerialize
+	#define kRegSyncChannel						kVRegSyncChannel
+	#define kRegSyncChannels					kVRegSyncChannels
+	#define kRegSoftwareUartFifo				kVRegSoftwareUartFifo
+	#define kRegTimeCodeCh1Delay				kVRegTimeCodeCh1Delay
+	#define kRegTimeCodeCh2Delay				kVRegTimeCodeCh2Delay
+	#define kRegTimeCodeIn1Delay				kVRegTimeCodeIn1Delay
+	#define kRegTimeCodeIn2Delay				kVRegTimeCodeIn2Delay
+	#define kRegTimeCodeCh3Delay				kVRegTimeCodeCh3Delay
+	#define kRegTimeCodeCh4Delay				kVRegTimeCodeCh4Delay
+	#define kRegTimeCodeIn3Delay				kVRegTimeCodeIn3Delay
+	#define kRegTimeCodeIn4Delay				kVRegTimeCodeIn4Delay
+	#define kRegTimeCodeCh5Delay				kVRegTimeCodeCh5Delay
+	#define kRegTimeCodeIn5Delay				kVRegTimeCodeIn5Delay
+	#define kRegTimeCodeCh6Delay				kVRegTimeCodeCh6Delay
+	#define kRegTimeCodeIn6Delay				kVRegTimeCodeIn6Delay
+	#define kRegTimeCodeCh7Delay				kVRegTimeCodeCh7Delay
+	#define kRegTimeCodeIn7Delay				kVRegTimeCodeIn7Delay
+	#define kRegTimeCodeCh8Delay				kVRegTimeCodeCh8Delay
+	#define kRegTimeCodeIn8Delay				kVRegTimeCodeIn8Delay
+	#define kRegDebug1							kVRegDebug1
+	#define kDisplayReferenceSelect				kVRegDisplayReferenceSelect
+	#define kVANCMode							kVRegVANCMode
+	#define kRegDualStreamTransportType			kVRegDualStreamTransportType
+	#define kSDIOut1TransportType				kVRegSDIOut1TransportType
+	#define kDSKMode							kVRegDSKMode
+	#define kIsoConvertEnable					kVRegIsoConvertEnable
+	#define kDSKAudioMode						kVRegDSKAudioMode
+	#define kDSKForegroundMode					kVRegDSKForegroundMode
+	#define kDSKForegroundFade					kVRegDSKForegroundFade
+	#define kCaptureReferenceSelect				kVRegCaptureReferenceSelect
+	#define kPanMode							kVRegPanMode
+	#define kReg2XTransferMode					kVReg2XTransferMode
+	#define kRegSDIOutput1RGBRange				kVRegSDIOutput1RGBRange
+	#define kRegSDIInput1FormatSelect			kVRegSDIInput1FormatSelect
+	#define kRegSDIInput2FormatSelect			kVRegSDIInput2FormatSelect
+	#define kRegSDIInput1RGBRange				kVRegSDIInput1RGBRange
+	#define kRegSDIInput2RGBRange				kVRegSDIInput2RGBRange
+	#define kRegSDIInput1Stereo3DMode			kVRegSDIInput1Stereo3DMode
+	#define kRegSDIInput2Stereo3DMode			kVRegSDIInput2Stereo3DMode
+	#define kRegFrameBuffer1RGBRange			kVRegFrameBuffer1RGBRange
+	#define kRegFrameBuffer1Stereo3DMode		kVRegFrameBuffer1Stereo3DMode
+	#define kPanModeOffsetH						kVRegPanModeOffsetH
+	#define kPanModeOffsetV						kVRegPanModeOffsetV
+	#define kK2RegAnalogInBlackLevel			kVRegAnalogInBlackLevel
+	#define kK2RegAnalogInputType				kVRegAnalogInputType
+	#define kRegHDMIOutColorSpaceModeCtrl		kVRegHDMIOutColorSpaceModeCtrl
+	#define kHDMIOutProtocolMode				kVRegHDMIOutProtocolMode
+	#define kRegHDMIOutStereoSelect				kVRegHDMIOutStereoSelect
+	#define kRegHDMIOutStereoCodecSelect		kVRegHDMIOutStereoCodecSelect
+	#define kRegSDIInput1ColorSpaceMode			kVRegSDIInput1ColorSpaceMode
+	#define kRegSDIInput2ColorSpaceMode			kVRegSDIInput2ColorSpaceMode
+	#define kRegSDIOutput2RGBRange				kVRegSDIOutput2RGBRange
+	#define kRegSDIOutput1Stereo3DMode			kVRegSDIOutput1Stereo3DMode
+	#define kRegSDIOutput2Stereo3DMode			kVRegSDIOutput2Stereo3DMode
+	#define kRegFrameBuffer2RGBRange			kVRegFrameBuffer2RGBRange
+	#define kRegFrameBuffer2Stereo3DMode		kVRegFrameBuffer2Stereo3DMode
+	#define kRegAudioGainDisable				kVRegAudioGainDisable
+	#define kDBLAudioEnable						kVRegLTCOnRefInSelect
+	#define kActiveVideoOutFilter				kVRegActiveVideoOutFilter
+	#define kRegAudioInputMapSelect				kVRegAudioInputMapSelect
+	#define kAudioInputDelay					kVRegAudioInputDelay
+	#define kDSKGraphicFileIndex				kVRegDSKGraphicFileIndex
+	#define kTimecodeBurnInMode					kVRegTimecodeBurnInMode
+	#define kUseQTTimecode						kVRegUseQTTimecode
+	#define kRegAvailable164					kVRegAvailable164
+	#define kRP188SourceSelect					kVRegRP188SourceSelect
+	#define kQTCodecModeDebug					kVRegQTCodecModeDebug
+	#define kRegHDMIOutColorSpaceModeStatus		kVRegHDMIOutColorSpaceModeStatus
+	#define kDeviceOnline						kVRegDeviceOnline
+	#define kIsDefaultDevice					kVRegIsDefaultDevice
+	#define kRegDesktopFrameBufferStatus		kVRegDesktopFrameBufferStatus
+	#define kRegSDIOutput1ColorSpaceMode		kVRegSDIOutput1ColorSpaceMode
+	#define kRegSDIOutput2ColorSpaceMode		kVRegSDIOutput2ColorSpaceMode
+	#define kAudioOutputDelay					kVRegAudioOutputDelay
+	#define kTimelapseEnable					kVRegTimelapseEnable
+	#define kTimelapseCaptureValue				kVRegTimelapseCaptureValue
+	#define kTimelapseCaptureUnits				kVRegTimelapseCaptureUnits
+	#define kTimelapseIntervalValue				kVRegTimelapseIntervalValue
+	#define kTimelapseIntervalUnits				kVRegTimelapseIntervalUnits
+	#define kFrameBufferInstalled				kVRegFrameBufferInstalled
+	#define kK2RegAnalogInStandard				kVRegAnalogInStandard
+	#define kRegOutputTimecodeOffset			kVRegOutputTimecodeOffset
+	#define kRegOutputTimecodeType				kVRegOutputTimecodeType
+	#define kRegQuicktimeUsingBoard				kVRegQuicktimeUsingBoard
+	#define kRegApplicationPID					kVRegApplicationPID
+	#define kRegApplicationCode					kVRegApplicationCode
+	#define kRegReleaseApplication				kVRegReleaseApplication
+	#define kRegForceApplicationPID				kVRegForceApplicationPID
+	#define kRegForceApplicationCode			kVRegForceApplicationCode
+	#define kRegProcAmpSDRegsInitialized		kVRegProcAmpSDRegsInitialized
+	#define kRegProcAmpStandardDefBrightness	kVRegProcAmpStandardDefBrightness
+	#define kRegProcAmpStandardDefContrast		kVRegProcAmpStandardDefContrast
+	#define kRegProcAmpStandardDefSaturation	kVRegProcAmpStandardDefSaturation
+	#define kRegProcAmpStandardDefHue			kVRegProcAmpStandardDefHue
+	#define kRegProcAmpStandardDefCbOffset		kVRegProcAmpStandardDefCbOffset
+	#define kRegProcAmpStandardDefCrOffset		kVRegProcAmpStandardDefCrOffset
+	#define kRegProcAmpEndStandardDefRange		kVRegProcAmpEndStandardDefRange
+	#define kRegProcAmpHDRegsInitialized		kVRegProcAmpHDRegsInitialized
+	#define kRegProcAmpHighDefBrightness		kVRegProcAmpHighDefBrightness
+	#define kRegProcAmpHighDefContrast			kVRegProcAmpHighDefContrast
+	#define kRegProcAmpHighDefSaturationCb		kVRegProcAmpHighDefSaturationCb
+	#define kRegProcAmpHighDefSaturationCr		kVRegProcAmpHighDefSaturationCr
+	#define kRegProcAmpHighDefHue				kVRegProcAmpHighDefHue
+	#define kRegProcAmpHighDefCbOffset			kVRegProcAmpHighDefCbOffset
+	#define kRegProcAmpHighDefCrOffset			kVRegProcAmpHighDefCrOffset
+	#define kRegProcAmpEndHighDefRange			kVRegProcAmpEndHighDefRange
+	#define kRegChannel1UserBufferLevel			kVRegChannel1UserBufferLevel
+	#define kRegChannel2UserBufferLevel			kVRegChannel2UserBufferLevel
+	#define kRegInput1UserBufferLevel			kVRegInput1UserBufferLevel
+	#define kRegInput2UserBufferLevel			kVRegInput2UserBufferLevel
+	#define kRegProgressivePicture				kVRegProgressivePicture
+	#define kRegLUT2Type						kVRegLUT2Type
+	#define kRegLUT3Type						kVRegLUT3Type
+	#define kRegLUT4Type						kVRegLUT4Type
+	#define kK2RegDigitalOutput3Select			kVRegDigitalOutput3Select
+	#define kK2RegDigitalOutput4Select			kVRegDigitalOutput4Select
+	#define kK2RegHDMIOutputSelect				kVRegHDMIOutputSelect
+	#define kK2RegRGBRangeConverterLUTType		kVRegRGBRangeConverterLUTType
+	#define kRegTestPatternChoice				kVRegTestPatternChoice
+	#define kRegTestPatternFormat				kVRegTestPatternFormat
+	#define kRegEveryFrameTaskFilter			kVRegEveryFrameTaskFilter
+	#define kRegDefaultInput					kVRegDefaultInput
+	#define kRegDefaultVideoOutMode				kVRegDefaultVideoOutMode
+	#define kRegDefaultVideoFormat				kVRegDefaultVideoFormat
+	#define kK2RegDigitalOutput5Select			kVRegDigitalOutput5Select
+	#define kRegLUT5Type						kVRegLUT5Type
+	#define kRegMacUserModeDebugLevel			kVRegMacUserModeDebugLevel
+	#define kRegMacKernelModeDebugLevel			kVRegMacKernelModeDebugLevel
+	#define kRegMacUserModePingLevel			kVRegMacUserModePingLevel
+	#define kRegMacKernelModePingLevel			kVRegMacKernelModePingLevel
+	#define kRegLatencyTimerValue				kVRegLatencyTimerValue
+	#define kRegAudioInputSelect				kVRegAudioInputSelect
+	#define kSerialSuspended					kVRegSerialSuspended
+	#define kXilinxProgramming					kVRegXilinxProgramming
+	#define kETTDiagLastSerialTimestamp			kVRegETTDiagLastSerialTimestamp
+	#define kETTDiagLastSerialTimecode			kVRegETTDiagLastSerialTimecode
+	#define kStartupStatusFlags					kVRegStartupStatusFlags
+	#define kRegRGBRangeMode					kVRegRGBRangeMode
+	#define kRegEnableQueuedDMAs				kVRegEnableQueuedDMAs
+	#define kRegBA0MemorySize					kVRegBA0MemorySize
+	#define kRegBA1MemorySize					kVRegBA1MemorySize
+	#define kRegBA4MemorySize					kVRegBA4MemorySize
+	#define kRegNumDmaDriverBuffers				kVRegNumDmaDriverBuffers
+	#define kRegDMADriverBufferPhysicalAddress	kVRegDMADriverBufferPhysicalAddress
+	#define kRegBA2MemorySize					kVRegBA2MemorySize
+	#define kRegAcquireLinuxReferenceCount		kVRegAcquireLinuxReferenceCount
+	#define kRegReleaseLinuxReferenceCount		kVRegReleaseLinuxReferenceCount
+	#define kRegAdvancedIndexing				kVRegAdvancedIndexing
+	#define kRegTimeStampLastInput3VerticalLo	kVRegTimeStampLastInput3VerticalLo
+	#define kRegTimeStampLastInput3VerticalHi	kVRegTimeStampLastInput3VerticalHi
+	#define kRegTimeStampLastInput4VerticalLo	kVRegTimeStampLastInput4VerticalLo
+	#define kRegTimeStampLastInput4VerticalHi	kVRegTimeStampLastInput4VerticalHi
+	#define kRegTimeStampLastInput5VerticalLo	kVRegTimeStampLastInput5VerticalLo
+	#define kRegTimeStampLastInput5VerticalHi	kVRegTimeStampLastInput5VerticalHi
+	#define kRegTimeStampLastInput6VerticalLo	kVRegTimeStampLastInput6VerticalLo
+	#define kRegTimeStampLastInput6VerticalHi	kVRegTimeStampLastInput6VerticalHi
+	#define kRegTimeStampLastInput7VerticalLo	kVRegTimeStampLastInput7VerticalLo
+	#define kRegTimeStampLastInput7VerticalHi	kVRegTimeStampLastInput7VerticalHi
+	#define kRegTimeStampLastInput8VerticalLo	kVRegTimeStampLastInput8VerticalLo
+	#define kRegTimeStampLastInput8VerticalHi	kVRegTimeStampLastInput8VerticalHi
+	#define kRegTimeStampLastOutput2VerticalLo	kVRegTimeStampLastOutput2VerticalLo
+	#define kRegTimeStampLastOutput2VerticalHi	kVRegTimeStampLastOutput2VerticalHi
+	#define kRegTimeStampLastOutput3VerticalLo	kVRegTimeStampLastOutput3VerticalLo
+	#define kRegTimeStampLastOutput3VerticalHi	kVRegTimeStampLastOutput3VerticalHi
+	#define kRegTimeStampLastOutput4VerticalLo	kVRegTimeStampLastOutput4VerticalLo
+	#define kRegTimeStampLastOutput4VerticalHi	kVRegTimeStampLastOutput4VerticalHi
+	#define kRegTimeStampLastOutput5VerticalLo	kVRegTimeStampLastOutput5VerticalLo
+	#define kRegTimeStampLastOutput5VerticalHi	kVRegTimeStampLastOutput5VerticalHi
+	#define kRegTimeStampLastOutput6VerticalLo	kVRegTimeStampLastOutput6VerticalLo
+	#define kRegTimeStampLastOutput6VerticalHi	kVRegTimeStampLastOutput6VerticalHi
+	#define kRegTimeStampLastOutput7VerticalLo	kVRegTimeStampLastOutput7VerticalLo
+	#define kRegTimeStampLastOutput7VerticalHi	kVRegTimeStampLastOutput7VerticalHi
+	#define kRegTimeStampLastOutput8VerticalLo	kVRegTimeStampLastOutput8VerticalLo
+	#define kRegResetCycleCount					kVRegResetCycleCount
+	#define kRegUseProgressive					kVRegUseProgressive
+	#define kRegFlashSize						kVRegFlashSize
+	#define kRegFlashStatus						kVRegFlashStatus
+	#define kRegFlashState						kVRegFlashState
+	#define kRegPCIDeviceID						kVRegPCIDeviceID
+	#define kRegUartRxFifoSize					kVRegUartRxFifoSize
+	#define kRegEFTNeedsUpdating				kVRegEFTNeedsUpdating
+	#define kRegSuspendSystemAudio				kVRegSuspendSystemAudio
+	#define kRegAcquireReferenceCounter			kVRegAcquireReferenceCounter
+	#define kRegTimeStampLastOutput8VerticalHi	kVRegTimeStampLastOutput8VerticalHi
+	#define kRegFramesPerVertical				kVRegFramesPerVertical
+	#define kRegServicesInitialized				kVRegServicesInitialized
+	#define kRegFrameBufferGangCount			kVRegFrameBufferGangCount
+	#define kRegChannelCrosspointFirst			kVRegChannelCrosspointFirst
+	#define kRegChannelCrosspointLast			kVRegChannelCrosspointLast
+	#define kRegDriverVersionMajor				kVRegDriverVersionMajor
+	#define kRegDriverVersionMinor				kVRegDriverVersionMinor
+	#define kRegDriverVersionPoint				kVRegDriverVersionPoint
+	#define kRegFollowInputFormat				kVRegFollowInputFormat
+	#define kRegAncField1Offset					kVRegAncField1Offset
+	#define kRegAncField2Offset					kVRegAncField2Offset
+	#define kRegUnused_1						kVRegUnused_1
+	#define kRegUnused_2						kVRegUnused_2
+	#define kReg4kOutputTransportSelection		kVReg4kOutputTransportSelection
+	#define kRegCustomAncInputSelect			kVRegCustomAncInputSelect
+	#define kRegUseThermostat					kVRegUseThermostat
+	#define kRegThermalSamplingRate				kVRegThermalSamplingRate
+	#define kRegFanSpeed						kVRegFanSpeed
+	#define kRegVideoFormatCh1					kVRegVideoFormatCh1
+	#define kRegVideoFormatCh2					kVRegVideoFormatCh2
+	#define kRegVideoFormatCh3					kVRegVideoFormatCh3
+	#define kRegVideoFormatCh4					kVRegVideoFormatCh4
+	#define kRegVideoFormatCh5					kVRegVideoFormatCh5
+	#define kRegVideoFormatCh6					kVRegVideoFormatCh6
+	#define kRegVideoFormatCh7					kVRegVideoFormatCh7
+	#define kRegVideoFormatCh8					kVRegVideoFormatCh8
+	#define kRegUserDefinedDBB					kVRegUserDefinedDBB
+	#define kRegHDMIOutAudioChannels			kVRegHDMIOutAudioChannels
+	#define kRegHDMIOutRGBRange					kVRegHDMIOutRGBRange
+	#define kRegLastAJA							kVRegLastAJA
+	#define kRegFirstOEM						kVRegFirstOEM
+	#define kRegLast							kVRegLast
 #endif	//	NTV2_DEPRECATE_12_7
 
 #endif// NTV2VIRTUALREGISTERS_H

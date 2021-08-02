@@ -14,7 +14,7 @@
 	#include <sys/stat.h>
 	#include <sys/types.h>
 	#include <unistd.h>
-	#include <string.h>	//	for strerror
+	#include <string.h> //	for strerror
 #endif
 
 #include "ajabase/system/system.h"
@@ -25,8 +25,8 @@
 
 // structure to track shared memory allocations
 struct SharedData
-{    
-	std::string	shareName;
+{	 
+	std::string shareName;
 	void*		pMemory;
 	size_t		memorySize;
 	int32_t		refCount;
@@ -36,18 +36,18 @@ struct SharedData
 	int			fileDescriptor;
 #endif
 
-    SharedData()
-    {
-        shareName = "";
-        pMemory = NULL;
-        memorySize = 0;
-        refCount = 0;
+	SharedData()
+	{
+		shareName = "";
+		pMemory = NULL;
+		memorySize = 0;
+		refCount = 0;
 #if defined(AJA_WINDOWS)
-        fileMapHandle = NULL;
+		fileMapHandle = NULL;
 #else
-        fileDescriptor = 0;
+		fileDescriptor = 0;
 #endif
-    }
+	}
 };
 
 // lock for shared memory allocation/free
@@ -71,11 +71,11 @@ AJAMemory::Allocate(size_t memorySize)
 {
 	if (memorySize == 0)
 	{
-		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::Allocate  size is 0");
+		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::Allocate	 size is 0");
 		return NULL;
 	}
 
-    void* pMemory;
+	void* pMemory;
 	
 	// allocate memory with no specific alignment
 #if defined(AJA_WINDOWS)
@@ -86,7 +86,7 @@ AJAMemory::Allocate(size_t memorySize)
 
 	if(pMemory == NULL)
 	{
-		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::Allocate  allocation failed");
+		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::Allocate	 allocation failed");
 	}
 
 	return pMemory;
@@ -97,7 +97,7 @@ void AJAMemory::Free(void* pMemory)
 {
 	if (pMemory == NULL)
 	{
-		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::Free  memory address is NULL");
+		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::Free	 memory address is NULL");
 		return;
 	}
 
@@ -115,7 +115,7 @@ AJAMemory::AllocateAligned(size_t size, size_t alignment)
 {
 	if (size == 0)
 	{
-		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::AllocateAligned  size is 0");
+		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::AllocateAligned	size is 0");
 		return NULL;
 	}
 
@@ -131,7 +131,7 @@ AJAMemory::AllocateAligned(size_t size, size_t alignment)
 
 	if(pMemory == NULL)
 	{
-		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::AllocateAligned  allocation failed size=%d alignment=%d", (int)size, (int)alignment);
+		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::AllocateAligned	allocation failed size=%d alignment=%d", (int)size, (int)alignment);
 	}
 
 	return pMemory;
@@ -143,7 +143,7 @@ AJAMemory::FreeAligned(void* pMemory)
 {
 	if (pMemory == NULL)
 	{
-		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::FreeAligned  memory address is NULL");
+		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::FreeAligned	memory address is NULL");
 		return;
 	}
 
@@ -190,25 +190,25 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
 	{
 		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::AllocateShared  share name is empty");
 		return NULL;
-    }
+	}
 
 	// look for share with the same name
 	size_t sizeInBytes = (*pMemorySize + AJA_PAGE_SIZE - 1) / AJA_PAGE_SIZE * AJA_PAGE_SIZE;
 
-    std::string name;
+	std::string name;
 #if defined(AJA_WINDOWS)
-    name = "Global\\";
+	name = "Global\\";
 	name += pShareName;
 #elif defined(AJA_LINUX)
-    // Docs say to start name with a slash
-    name = "/";
-    name += pShareName;
+	// Docs say to start name with a slash
+	name = "/";
+	name += pShareName;
 #else //Mac
-    name = pShareName;
+	name = pShareName;
 #endif
 
 	std::list<SharedData>::iterator shareIter;
-    for (shareIter = sSharedList.begin();  shareIter != sSharedList.end();  ++shareIter)
+	for (shareIter = sSharedList.begin();  shareIter != sSharedList.end();	++shareIter)
 	{
 		// if share name match return this share
 		if (name == shareIter->shareName)
@@ -238,9 +238,9 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
 
 	// Add the ACL to the security descriptor. 
 	rv = SetSecurityDescriptorDacl(pSD, 
-		TRUE,     // bDaclPresent flag   
+		TRUE,	  // bDaclPresent flag	 
 		NULL,	  // this makes it completely open
-		FALSE);   // not a default DACL 
+		FALSE);	  // not a default DACL 
 
 	if (rv == FALSE)
 	{
@@ -270,7 +270,7 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
 
 	// In User Mode: Global\somename
 	// In Kernel Mode: \BaseNamedObjects\somename
-#else    
+#else	 
 	// Mac and Linux
 	{
 		newData.fileDescriptor = shm_open (name.c_str(),  O_CREAT|O_RDWR,  S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
@@ -284,7 +284,7 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
 #if defined(AJA_LINUX)
 		needsTruncate = true;
 		// on Linux shm_open() doesn't set S_IROTH|S_IWOTH, so use fchmod()
-		fchmod (newData.fileDescriptor,  S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
+		fchmod (newData.fileDescriptor,	 S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
 #else
 		// need this on Mac, see:
 		// http://stackoverflow.com/questions/25502229/ftruncate-not-working-on-posix-shared-memory-in-mac-os-x#25510361
@@ -310,7 +310,7 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
 				syslog(LOG_ERR, "AJAMemory::AllocateShared -- ftruncate failed\n");
 		}
 
-		newData.pMemory = mmap (NULL,  sizeInBytes,  PROT_READ | PROT_WRITE,  MAP_SHARED,  newData.fileDescriptor,  0);
+		newData.pMemory = mmap (NULL,  sizeInBytes,	 PROT_READ | PROT_WRITE,  MAP_SHARED,  newData.fileDescriptor,	0);
 		if (newData.pMemory == MAP_FAILED)
 		{
 			std::ostringstream oss; oss << "AJAMemory::AllocateShared: 'mmap' failed, '" << name << "' fd=" << newData.fileDescriptor
@@ -322,7 +322,7 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
 			return NULL;
 		}
 	}
-#endif  // AJA_LINUX || AJA_MAC
+#endif	// AJA_LINUX || AJA_MAC
 
 	// save details
 	newData.shareName = name;
@@ -345,7 +345,7 @@ AJAMemory::FreeShared(void* pMemory)
 
 	// look for memory at the same address
 	std::list<SharedData>::iterator shareIter;
-    for (shareIter = sSharedList.begin(); shareIter != sSharedList.end(); ++shareIter)
+	for (shareIter = sSharedList.begin(); shareIter != sSharedList.end(); ++shareIter)
 	{
 		if (pMemory == shareIter->pMemory)
 		{
@@ -360,9 +360,9 @@ AJAMemory::FreeShared(void* pMemory)
 				close(shareIter->fileDescriptor);
 				// This is ugly. If we call shm_unlink, then the shared file name will
 				// be removed from /dev/shm, and future calls to shm_open will create a
-				// different memory share.  Will there be a problem with multiple calls
-				// to shm_open with no intervening calls to shm_unlink?  Time will tell.
-//              shm_unlink(shareIter->shareName.c_str());
+				// different memory share.	Will there be a problem with multiple calls
+				// to shm_open with no intervening calls to shm_unlink?	 Time will tell.
+//				shm_unlink(shareIter->shareName.c_str());
 #endif
 				sSharedList.erase(shareIter);
 			}

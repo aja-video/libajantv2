@@ -1,8 +1,8 @@
 /* SPDX-License-Identifier: MIT */
 /**
-    @file		ntv2config2110.h
-    @brief		Declares the CNTV2Config2110 class.
-    @copyright	(C) 2014-2021 AJA Video Systems, Inc.
+	@file		ntv2config2110.h
+	@brief		Declares the CNTV2Config2110 class.
+	@copyright	(C) 2014-2021 AJA Video Systems, Inc.
 **/
 
 #ifndef NTV2_2110CONFIG_H
@@ -18,7 +18,7 @@
 #include <sstream>
 
 /**
-    @brief	Structs and enums that hold the virtual config data used by services the ControlPanel application and JSON parsers
+	@brief	Structs and enums that hold the virtual config data used by services the ControlPanel application and JSON parsers
 **/
 
 #define RX_USE_SFP_IP		BIT(31)
@@ -34,7 +34,7 @@ typedef enum
 	kReceiveVideoData2110	= NTV2_FOURCC('r','v','1','3'), // 4CC of video receive config data
 	kReceiveAudioData2110	= NTV2_FOURCC('r','a','1','3'), // 4CC of audio receive config data
 	kReceiveAncData2110		= NTV2_FOURCC('r','n','1','3'), // 4CC of anc receive config data
-	kChStatusData2110		= NTV2_FOURCC('s','t','1','3')  // 4CC of channel status config data
+	kChStatusData2110		= NTV2_FOURCC('s','t','1','3')	// 4CC of channel status config data
 } VirtualDataTag2110;
 
 typedef enum
@@ -163,50 +163,50 @@ typedef struct
 
 typedef struct
 {
-	bool                    setup4k;
-	uint32_t                ptpDomain;
-	uint8_t                 ptpPreferredGMID[8];
-	uint32_t                numSFPs;
-	SFPData2110             sfp[2];
+	bool					setup4k;
+	uint32_t				ptpDomain;
+	uint8_t					ptpPreferredGMID[8];
+	uint32_t				numSFPs;
+	SFPData2110				sfp[2];
 	bool					multiSDP;
 	bool					audioCombine;
-	uint32_t                rxMatchOverride;
+	uint32_t				rxMatchOverride;
 	uint8_t					unused[10];
 } NetworkData2110;
 
 typedef struct
 {
-    uint32_t                numTxVideoChannels;
-    TxVideoChData2110       txVideoCh[4];
+	uint32_t				numTxVideoChannels;
+	TxVideoChData2110		txVideoCh[4];
 } TransmitVideoData2110;
 
 typedef struct
 {
-    uint32_t                numTxAudioChannels;
-    TxAudioChData2110       txAudioCh[4];
+	uint32_t				numTxAudioChannels;
+	TxAudioChData2110		txAudioCh[4];
 } TransmitAudioData2110;
 
 typedef struct
 {
-	uint32_t                numTxAncChannels;
+	uint32_t				numTxAncChannels;
 	TxAncChData2110			txAncCh[4];
 } TransmitAncData2110;
 
 typedef struct
 {
-    uint32_t                numRxVideoChannels;
-    RxVideoChData2110       rxVideoCh[4];
+	uint32_t				numRxVideoChannels;
+	RxVideoChData2110		rxVideoCh[4];
 } ReceiveVideoData2110;
 
 typedef struct
 {
-    uint32_t                numRxAudioChannels;
-    RxAudioChData2110       rxAudioCh[4];
+	uint32_t				numRxAudioChannels;
+	RxAudioChData2110		rxAudioCh[4];
 } ReceiveAudioData2110;
 
 typedef struct
 {
-	uint32_t                numRxAncChannels;
+	uint32_t				numRxAncChannels;
 	RxAncChData2110			rxAncCh[4];
 } ReceiveAncData2110;
 
@@ -228,7 +228,7 @@ inline int AncStreamToCh(NTV2Stream s)
 	{ return (int)(s >= NTV2_ANC1_STREAM ? s-NTV2_ANC1_STREAM : 0); }
 
 /**
-    @brief	Configures a SMPTE 2110 Transmit Channel.
+	@brief	Configures a SMPTE 2110 Transmit Channel.
 **/
 
 class AJAExport tx_2110Config
@@ -242,23 +242,23 @@ class AJAExport tx_2110Config
 		bool operator == ( const tx_2110Config &other );
 
 	public:
-		std::string         remoteIP[2];        ///< @brief	Specifies remote (destination) IP address.
-		uint32_t            localPort[2];		///< @brief	Specifies the local (source) port number.
-		uint32_t            remotePort[2];		///< @brief	Specifies the remote (destination) port number.
-		uint16_t            payloadType;
-		uint8_t             tos;                // type of service
-		uint8_t             ttl;                // time to live
-		uint32_t            ssrc;
-		NTV2Channel         channel;
-		NTV2VideoFormat     videoFormat;
-		VPIDSampling        videoSamples;
-		uint8_t             numAudioChannels;
-		uint8_t             firstAudioChannel;
+		std::string			remoteIP[2];		///< @brief Specifies remote (destination) IP address.
+		uint32_t			localPort[2];		///< @brief Specifies the local (source) port number.
+		uint32_t			remotePort[2];		///< @brief Specifies the remote (destination) port number.
+		uint16_t			payloadType;
+		uint8_t				tos;				// type of service
+		uint8_t				ttl;				// time to live
+		uint32_t			ssrc;
+		NTV2Channel			channel;
+		NTV2VideoFormat		videoFormat;
+		VPIDSampling		videoSamples;
+		uint8_t				numAudioChannels;
+		uint8_t				firstAudioChannel;
 		eNTV2PacketInterval audioPktInterval;
 };
 
 /**
-    @brief	Configures a SMPTE 2110 Receive Channel.
+	@brief	Configures a SMPTE 2110 Receive Channel.
 **/
 
 class AJAExport rx_2110Config
@@ -272,18 +272,18 @@ class AJAExport rx_2110Config
 		bool operator == ( const rx_2110Config &other );
 
 	public:
-		uint32_t            rxMatch;            ///< @brief	Bitmap of rxMatch criteria used
-		std::string         sourceIP;           ///< @brief	Specifies the source (sender) IP address (if RX_MATCH_2110_SOURCE_IP set). If it's in the multiclass range, then
+		uint32_t			rxMatch;			///< @brief Bitmap of rxMatch criteria used
+		std::string			sourceIP;			///< @brief Specifies the source (sender) IP address (if RX_MATCH_2110_SOURCE_IP set). If it's in the multiclass range, then
 												///			by default, the IGMP multicast group will be joined (see CNTV2Config2110::SetIGMPDisable).
-		std::string         destIP;             ///< @brief	Specifies the destination (target) IP address (if RX_MATCH_2110_DEST_IP set)
-		uint32_t            sourcePort;         ///< @brief	Specifies the source (sender) port number (if RX_MATCH_2110_SOURCE_PORT set)
-		uint32_t            destPort;           ///< @brief	Specifies the destination (target) port number (if RX_MATCH_2110_DEST_PORT set)
-		uint32_t            ssrc;               ///< @brief	Specifies the SSRC identifier (if RX_MATCH_2110_SSRC set)
-		uint16_t            vlan;               ///< @brief	Specifies the VLAN TCI (if RX_MATCH_2110_VLAN set)
-		uint16_t            payloadType;
-		NTV2VideoFormat     videoFormat;
-		VPIDSampling        videoSamples;
-		uint32_t            numAudioChannels;
+		std::string			destIP;				///< @brief Specifies the destination (target) IP address (if RX_MATCH_2110_DEST_IP set)
+		uint32_t			sourcePort;			///< @brief Specifies the source (sender) port number (if RX_MATCH_2110_SOURCE_PORT set)
+		uint32_t			destPort;			///< @brief Specifies the destination (target) port number (if RX_MATCH_2110_DEST_PORT set)
+		uint32_t			ssrc;				///< @brief Specifies the SSRC identifier (if RX_MATCH_2110_SSRC set)
+		uint16_t			vlan;				///< @brief Specifies the VLAN TCI (if RX_MATCH_2110_VLAN set)
+		uint16_t			payloadType;
+		NTV2VideoFormat		videoFormat;
+		VPIDSampling		videoSamples;
+		uint32_t			numAudioChannels;
 		eNTV2PacketInterval audioPktInterval;
 };
 
@@ -335,8 +335,8 @@ public:
 
 	/**
 		@brief		Enables or disables the audio combiner.
-		@param[in]	enable	Specify true to enable the audio combiner;  specify false to disable it.
-		@return		True if successful;  otherwise false.
+		@param[in]	enable	Specify true to enable the audio combiner;	specify false to disable it.
+		@return		True if successful;	 otherwise false.
 		@note		This only affects 4K RX mode.
 		@note		This parameter can be set in the \ref ntv2konaipjsonsetup. Both JSON examples specify it in the "network2110" area.
 		@detail		Normally the audio combiner is disabled when transmitting 16 audio channels over a single flow.
@@ -348,8 +348,8 @@ public:
 
 	/**
 		@brief		Answers with the enable/disable state of the audio combiner.
-		@param[in]	enable	Receives true if the audio combiner is enabled;  otherwise false if it's disabled.
-		@return		True if successful;  otherwise false.
+		@param[in]	enable	Receives true if the audio combiner is enabled;	 otherwise false if it's disabled.
+		@return		True if successful;	 otherwise false.
 		@note		This only affects 4K RX mode.
 		@detail		Normally the audio combiner is off when transmitting 16 audio channels over a single flow.
 					However, it is possible to divide the audio into multiple flows of 4 channels each, so in this case, on the RX side,
@@ -373,7 +373,7 @@ public:
 		@brief		Disables the automatic (default) joining of multicast groups using IGMP, based on remote IP address for Rx Channels
 		@param[in]	sfp			Specifies SFP connector used.
 		@param[in]	disable		If true, IGMP messages will not be sent to join multicast groups
-		@note       When Rx channels are enabled for multicast IP addresses, by default the multicast group is joined. When Rx Channels
+		@note		When Rx channels are enabled for multicast IP addresses, by default the multicast group is joined. When Rx Channels
 					are disabled, if the channel is the last user of the group, then the subscription to the multicast group will be ended.
 					When IGMP is disabled, the above actions are not performed,
 	**/
@@ -383,7 +383,7 @@ public:
 	bool		SetIGMPVersion (const eIGMPVersion_t version);
 	bool		GetIGMPVersion (eIGMPVersion_t & version);
 
-	void		SetBiDirectionalChannels (const bool bidirectional)	{ _biDirectionalChannels = bidirectional;}
+	void		SetBiDirectionalChannels (const bool bidirectional) { _biDirectionalChannels = bidirectional;}
 	bool		GetBiDirectionalChannels (void)						{return _biDirectionalChannels;}
 
 	bool		GetMACAddress (const eSFP port, const NTV2Stream stream, std::string remoteIP, uint32_t & hi, uint32_t & lo);
@@ -393,8 +393,8 @@ public:
 
 	bool		GenSDP (bool enableSfp1, bool enableSfp2, const NTV2Stream stream, bool pushit=true);
 
-	static uint32_t	Get2110TxStreamIndex (NTV2Stream stream );
-	static uint32_t	GetDecapsulatorAddress (eSFP sfp, NTV2Stream stream);
+	static uint32_t Get2110TxStreamIndex (NTV2Stream stream );
+	static uint32_t GetDecapsulatorAddress (eSFP sfp, NTV2Stream stream);
 
 	bool		SetLLDPInfo (std::string sysname);
 	bool		GetLLDPInfo (std::string &chassisId0, std::string &portId0,
@@ -402,15 +402,15 @@ public:
 	uint64_t	GetNTPTimestamp (void);
 
 	// If method returns false call this to get details
-	std::string	getLastError (void);
-	NTV2IpError	getLastErrorCode (void);
+	std::string getLastError (void);
+	NTV2IpError getLastErrorCode (void);
 
-	static uint32_t	videoPacketizers[4];
-	static uint32_t	videoRGB12Packetizers[4];
-	static uint32_t	audioPacketizers[4];
+	static uint32_t videoPacketizers[4];
+	static uint32_t videoRGB12Packetizers[4];
+	static uint32_t audioPacketizers[4];
 
-	static uint32_t	videoDepacketizers[4];
-	static uint32_t	audioDepacketizers[4];
+	static uint32_t videoDepacketizers[4];
+	static uint32_t audioDepacketizers[4];
 
 protected:
 	uint32_t	GetDepacketizerAddress (const NTV2Stream stream);
@@ -422,7 +422,7 @@ protected:
 
 	void		EnableFramerStream (const eSFP sfp, const NTV2Stream stream, bool enable);
 	bool		SetFramerStream (const eSFP sfp, const NTV2Stream stream, const tx_2110Config & txConfig);
-	void		GetFramerStream (const eSFP sfp, const NTV2Stream stream, tx_2110Config  & txConfig);
+	void		GetFramerStream (const eSFP sfp, const NTV2Stream stream, tx_2110Config	 & txConfig);
 	void		SetArbiter (const eSFP sfp, const NTV2Stream stream, bool enable);
 	void		GetArbiter (const eSFP sfp, const NTV2Stream stream, bool & enable);
 
@@ -461,7 +461,7 @@ protected:
 	NTV2Channel		VideoStreamToChannel (const NTV2Stream stream);
 
 private:
-	std::string	To_String (int val);
+	std::string To_String (int val);
 
 	std::vector<std::string> split (const char *str, char delim);
 
@@ -470,7 +470,7 @@ private:
 
 	int			LeastCommonMultiple (int a,int b);
 	int			getDescriptionValue (int startLine, std::string type, std::string & value);
-	std::string	getVideoDescriptionValue (std::string type);
+	std::string getVideoDescriptionValue (std::string type);
 
 	std::stringstream	txsdp;
 
@@ -480,7 +480,7 @@ private:
 	uint32_t	_numTx1Chans;
 	uint32_t	_numRxChans;
 	uint32_t	_numTxChans;
-	bool		_biDirectionalChannels;	// logically bi-directional channels
+	bool		_biDirectionalChannels; // logically bi-directional channels
 
 	std::vector<std::string>	sdpLines;
 	std::vector<std::string>	tokens;

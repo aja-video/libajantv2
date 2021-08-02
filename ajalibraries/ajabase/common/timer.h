@@ -12,9 +12,9 @@
 
 enum AJATimerPrecision
 {
-    AJATimerPrecisionMilliseconds,
-    AJATimerPrecisionMicroseconds,
-    AJATimerPrecisionNanoseconds
+	AJATimerPrecisionMilliseconds,
+	AJATimerPrecisionMicroseconds,
+	AJATimerPrecisionNanoseconds
 };
 
 /**
@@ -25,7 +25,7 @@ class AJA_EXPORT AJATimer
 {
 public:
 
-    AJATimer(AJATimerPrecision precision = AJATimerPrecisionMilliseconds);
+	AJATimer(AJATimerPrecision precision = AJATimerPrecisionMilliseconds);
 	virtual ~AJATimer();
 
 	/**
@@ -46,10 +46,10 @@ public:
 	/**
 	 *	Get the elapsed time.
 	 *
-	 *	If the timer is running, return the elapsed time since Start() was called.  If Stop() 
+	 *	If the timer is running, return the elapsed time since Start() was called.	If Stop() 
 	 *	has been called, return the time between Start() and Stop().
 	 *
-     *	@return		The elapsed time in selected timer precision units
+	 *	@return		The elapsed time in selected timer precision units
 	 */
 	uint32_t ElapsedTime();
 
@@ -58,7 +58,7 @@ public:
 	 *
 	 *	Timeout checks the ElapsedTime() and returns true if it is greater than interval.
 	 *
-     *	@param	interval	Timeout interval in selected timer precision units.
+	 *	@param	interval	Timeout interval in selected timer precision units.
 	 *	@return				true if elapsed time greater than interval.
 	 */
 	bool Timeout(uint32_t interval);
@@ -70,28 +70,28 @@ public:
 	 */
 	bool IsRunning(void);
 
-    /**
-     *	Return the timer precision enum.
-     *
-     *	@return				precision enum that was used in the constructor.
-     */
-    AJATimerPrecision Precision(void);
+	/**
+	 *	Return the timer precision enum.
+	 *
+	 *	@return				precision enum that was used in the constructor.
+	 */
+	AJATimerPrecision Precision(void);
 
-    /**
-     *	Return the display string for the given timer precision enum.
-     *
-     *  @param	precision	The precision enum to get the display string for.
-     *  @param	longName	If true the string is set to a long description, otherwise an abbreviation.
-     *	@return				string description
-     */
-    static std::string PrecisionName(AJATimerPrecision precision, bool longName = true);
+	/**
+	 *	Return the display string for the given timer precision enum.
+	 *
+	 *	@param	precision	The precision enum to get the display string for.
+	 *	@param	longName	If true the string is set to a long description, otherwise an abbreviation.
+	 *	@return				string description
+	 */
+	static std::string PrecisionName(AJATimerPrecision precision, bool longName = true);
 
 private:
 
-    uint64_t            mStartTime;
-    uint64_t            mStopTime;
-    bool                mRun;
-    AJATimerPrecision   mPrecision;
+	uint64_t			mStartTime;
+	uint64_t			mStopTime;
+	bool				mRun;
+	AJATimerPrecision	mPrecision;
 };
 
 #endif	//	AJA_TIMER_H

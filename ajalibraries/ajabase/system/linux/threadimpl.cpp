@@ -161,7 +161,7 @@ AJAThreadImpl::Start()
 
 
 #if 0 // This should be set within the running thread itself if a dynamic change
-      // in priority is desired.  This will fail in a daemon invocation.
+	  // in priority is desired.  This will fail in a daemon invocation.
 
 	// Now that the new thread is up and running and has reported its
 	// thread ID, set the thread priority
@@ -204,7 +204,7 @@ AJAThreadImpl::Stop(uint32_t timeout)
 	else
 	{
 		// Calculates the non-second portion of the timeout
-		// to nanoseconds.  
+		// to nanoseconds.	
 		uint32_t nsec = ((timeout % 1000) * 1000000);
 
 		// Add the current nanosecond count to the result
@@ -296,7 +296,7 @@ AJAThreadImpl::Stop(uint32_t timeout)
 AJAStatus
 AJAThreadImpl::Kill(uint32_t exitCode)
 {
-    AJA_UNUSED(exitCode);
+	AJA_UNUSED(exitCode);
 
 	AJAAutoLock lock(&mLock);
 	AJAStatus returnStatus = AJA_STATUS_SUCCESS;
@@ -401,7 +401,7 @@ AJAThreadImpl::SetPriority(AJAThreadPriority threadPriority)
 	// We're going to mix Realtime priorities (policy == SCHED_FIFO/SCHED_RR) and "standard" round-robin priorities
 	// (policy == SCHED_OTHER) in one API...
 	bool bRTPriority = false;				//
-	int  newPriority = 0;					// "nice" priority used by setpriority() when bRTPriority = false, or RT priority used by sched_setscheduler() when bRTPriority = true
+	int	 newPriority = 0;					// "nice" priority used by setpriority() when bRTPriority = false, or RT priority used by sched_setscheduler() when bRTPriority = true
 
 	switch (threadPriority)
 	{
@@ -423,7 +423,7 @@ AJAThreadImpl::SetPriority(AJAThreadPriority threadPriority)
 			break;
 		case AJA_ThreadPriority_TimeCritical:
 			bRTPriority = true;				// use sched_setscheduler()
-            newPriority = 90;				// 1 - 99 (higher values = higher priority)
+			newPriority = 90;				// 1 - 99 (higher values = higher priority)
 			break;
 		case AJA_ThreadPriority_Unknown:
 		default:
@@ -438,8 +438,8 @@ AJAThreadImpl::SetPriority(AJAThreadPriority threadPriority)
 	int rc = pthread_setschedparam(mThread, newPolicy, &newParam);
 	if (rc != 0)
 	{
-        AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetPriority: error %d setting sched param: policy = %d, priority = %d\n", mpThreadContext, rc, newPolicy, newParam.sched_priority);
-        return AJA_STATUS_FAIL;
+		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetPriority: error %d setting sched param: policy = %d, priority = %d\n", mpThreadContext, rc, newPolicy, newParam.sched_priority);
+		return AJA_STATUS_FAIL;
 	}
 
 	// now set the standard ("nice") priority
@@ -447,8 +447,8 @@ AJAThreadImpl::SetPriority(AJAThreadPriority threadPriority)
 	rc = setpriority(PRIO_PROCESS, mTid, newNice);
 	if (errno != 0)
 	{
-        AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetPriority: error %d setting nice level: %d\n", mpThreadContext, rc, newNice);
-        return AJA_STATUS_FAIL;
+		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetPriority: error %d setting nice level: %d\n", mpThreadContext, rc, newNice);
+		return AJA_STATUS_FAIL;
 	}
 
 	return AJA_STATUS_SUCCESS;
@@ -472,40 +472,40 @@ AJAThreadImpl::GetPriority(AJAThreadPriority* pThreadPriority)
 AJAStatus
 AJAThreadImpl::SetRealTime(AJAThreadRealTimePolicy policy, int priority)
 {
-    int pval = 0;
-    switch(policy)
-    {
-        case AJA_ThreadRealTimePolicyFIFO:
-            pval = SCHED_FIFO;
-            break;
-        case AJA_ThreadRealTimePolicyRoundRobin:
-            pval = SCHED_RR;
-            break;
-        default:
-            AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetRealTime: bad thread policy %d", mpThreadContext, policy);
-            return AJA_STATUS_RANGE;
-    }
+	int pval = 0;
+	switch(policy)
+	{
+		case AJA_ThreadRealTimePolicyFIFO:
+			pval = SCHED_FIFO;
+			break;
+		case AJA_ThreadRealTimePolicyRoundRobin:
+			pval = SCHED_RR;
+			break;
+		default:
+			AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetRealTime: bad thread policy %d", mpThreadContext, policy);
+			return AJA_STATUS_RANGE;
+	}
 
-    for(int i = 0; i < 30; i++)
-    {
-        if(!Active())
-        {
-            usleep(1000);
-            continue;
-        }
-        struct sched_param newParam;
-        memset(&newParam, 0, sizeof(newParam));
-        newParam.sched_priority = priority;
-        int rc = pthread_setschedparam(mThread, pval, &newParam);
-        if (rc != 0)
-        {
-            AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetRealTime: error %d setting sched param: policy = %d, priority = %d\n", mpThreadContext, rc, pval, newParam.sched_priority);
-            return AJA_STATUS_FAIL;
-        }
-        return AJA_STATUS_SUCCESS;
-    }
-    AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetRealTime: Failed to set realtime thread is not running\n", mpThreadContext);
-    return AJA_STATUS_FAIL;
+	for(int i = 0; i < 30; i++)
+	{
+		if(!Active())
+		{
+			usleep(1000);
+			continue;
+		}
+		struct sched_param newParam;
+		memset(&newParam, 0, sizeof(newParam));
+		newParam.sched_priority = priority;
+		int rc = pthread_setschedparam(mThread, pval, &newParam);
+		if (rc != 0)
+		{
+			AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetRealTime: error %d setting sched param: policy = %d, priority = %d\n", mpThreadContext, rc, pval, newParam.sched_priority);
+			return AJA_STATUS_FAIL;
+		}
+		return AJA_STATUS_SUCCESS;
+	}
+	AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::SetRealTime: Failed to set realtime thread is not running\n", mpThreadContext);
+	return AJA_STATUS_FAIL;
 }
 
 
@@ -581,7 +581,7 @@ AJAThreadImpl::ThreadProcStatic(void* pThreadImplContext)
 	{
 		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAThread(%p)::ThreadProcStatic exception in thread function", pThreadImpl->mpThreadContext);
 		return (void*)0;
-    }
+	}
 
 	// signal parent we're exiting
 	pThreadImpl->mExiting = true;
@@ -619,10 +619,10 @@ AJAStatus AJAThreadImpl::SetThreadName(const char *name) {
 
 uint64_t AJAThreadImpl::GetThreadId()
 {
-    errno = 0;
-    pid_t tid = syscall(SYS_gettid);
-    if (errno == 0)
-        return uint64_t(tid);
-    else
-        return 0;
+	errno = 0;
+	pid_t tid = syscall(SYS_gettid);
+	if (errno == 0)
+		return uint64_t(tid);
+	else
+		return 0;
 }

@@ -9,7 +9,7 @@
 	#define __MASTERPORT_H__
 
 	//	Includes
-    #include "ajabase/common/ajarefptr.h"
+	#include "ajabase/common/ajarefptr.h"
 	#include <IOKit/IOKitLib.h>
 	#include <assert.h>
 
@@ -43,7 +43,7 @@
 
 		//	Instance Data
 		private:
-			IONotificationPortRef					mpMasterPort;	///	My master port reference
+			IONotificationPortRef					mpMasterPort;	/// My master port reference
 
 	};	//	MasterPort
 
