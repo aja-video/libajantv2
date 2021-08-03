@@ -35,7 +35,7 @@ int main (int argc, const char ** argv)
 	char *			pPixelFormat	(AJA_NULL);	//	Pixel format argument
     char *			pDeviceSpec 	(AJA_NULL);	//	Device argument
 	uint32_t		channelNumber	(1);		//	Number of the channel to use
-	int				noAudio			(0);		//	Disable audio tone?
+	int				numAudioLinks	(1);		//	Number of audio systems for multi-link audio
 	int				useHDMIOut		(0);		//	Enable HDMI output?
 	int				doMultiChannel	(0);		//  More than one instance of player 4k
 	int				doRGBOnWire		(0);		//  Route the output to put RGB on the wire
@@ -55,7 +55,7 @@ int main (int argc, const char ** argv)
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,		0,	"which pixel format to use",	"e.g. 'yuv8' or ? to list"},
 		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,		0,	"which channel to use",			"number of the channel"},
 		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,	0,	"use multi-channel/format",		AJA_NULL},
-		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,			0,	"disable audio tone",			AJA_NULL},
+		{"audioLinks",	'a',	POPT_ARG_INT,		&numAudioLinks,		0,	"how many audio systems to control for multi-link audio",	"0=silence or 1-4"},
 		{"hdmi",		'h',	POPT_ARG_NONE,		&useHDMIOut,		0,	"enable HDMI output?",			AJA_NULL},
 		{"rgb",			'r',	POPT_ARG_NONE,		&doRGBOnWire,		0,	"emit RGB over SDI?",			AJA_NULL},
 		{"tsi",			't',	POPT_ARG_NONE,		&doTsiRouting,		0,	"use Tsi routing?",				AJA_NULL},
@@ -87,7 +87,7 @@ int main (int argc, const char ** argv)
 	Player8KConfig	config;
 
 	config.fDeviceSpecifier	= deviceSpec;
-	config.fWithAudio		= noAudio ? false : true;
+	config.fWithAudio		= (numAudioLinks > 0) ? true : false;
 	config.fChannel			= NTV2Channel (channelNumber - 1);
 	config.fPixelFormat		= pixelFormat;
 	config.fVideoFormat		= videoFormat;
@@ -95,6 +95,7 @@ int main (int argc, const char ** argv)
 	config.fDoMultiChannel	= doMultiChannel ? true : false;
 	config.fDoTsiRouting	= doTsiRouting ? true : false;
 	config.fDoRGBOnWire		= doRGBOnWire ? true : false;
+	config.fNumAudioLinks	= numAudioLinks;
 	switch (hdrType)
 	{
 		case 1:		config.fSendAncType = AJAAncillaryDataType_HDR_SDR;		break;

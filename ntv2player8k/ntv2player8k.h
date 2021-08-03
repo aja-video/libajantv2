@@ -36,6 +36,7 @@ typedef struct Player8KConfig
 		bool					fDoMultiChannel;		///<	If true, enables multiple player 4k instances to share a board.
 		bool					fDoTsiRouting;			///<	If true, enables two sample interleave routing, else squares.
 		bool					fDoRGBOnWire;			///<	If true, enables RGB on the wire, else CSCs convert to YCbCr.
+		int						fNumAudioLinks;			///< @brief Specifies the number of audio systems to control for multi-link audio
 		AJAAncillaryDataType	fSendAncType;
 
 		/**
@@ -51,6 +52,7 @@ typedef struct Player8KConfig
 				fDoMultiChannel		(false),
 				fDoTsiRouting		(false),
 				fDoRGBOnWire		(false),
+				fNumAudioLinks		(1),
 				fSendAncType		(AJAAncillaryDataType_Unknown)
 		{
 		}
@@ -242,6 +244,8 @@ class NTV2Player8K
 		void *						mInstance;					///< @brief	Instance information for the callback function
 		NTV2Player8KCallback *		mPlayerCallback;			///< @brief	Address of callback function
 		AJAAncillaryDataType		mAncType;
+		
+		int							mNumAudioLinks;
 
 };	//	NTV2Player4K
 
