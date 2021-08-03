@@ -1924,19 +1924,15 @@ bool CNTV2Card::GetFramePulseReference (NTV2ReferenceSource & outValue)
 // Method: SetMode
 // Input:  NTV2Channel,	 NTV2Mode
 // Output: NONE
-bool CNTV2Card::SetMode (const NTV2Channel inChannel, const NTV2Mode inValue,  bool inIsRetail)
+bool CNTV2Card::SetMode (const NTV2Channel inChannel, const NTV2Mode inValue,  const bool inIsRetail)
 {
+	(void) inIsRetail;
 	#if !defined (NTV2_DEPRECATE)
 		#ifdef	MSWindows
 			NTV2EveryFrameTaskMode mode;
 			GetEveryFrameServices(&mode);
-			if(mode == NTV2_STANDARD_TASKS)
-				inIsRetail = true;
 		#endif
-	#else
-		(void) inIsRetail;
 	#endif	//	!defined (NTV2_DEPRECATE)
-
 	return WriteRegister (gChannelToControlRegNum [inChannel], inValue, kRegMaskMode, kRegShiftMode);
 }
 

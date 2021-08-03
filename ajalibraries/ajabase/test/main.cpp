@@ -394,7 +394,7 @@ TEST_SUITE("common" * doctest::description("functions in ajabase/common/common.h
 
 	TEST_CASE("aja::strip variants")
 	{
-		std::string test("	\tA test string\n");
+		std::string test("  \tA test string\n");
 		SUBCASE("lstrip")
 		{
 			CHECK(aja::lstrip(test) == "A test string\n");
