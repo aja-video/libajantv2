@@ -313,57 +313,64 @@
 	to or from SDRAM, depending upon its mode (capture or playback), and uses several registers to control
 	its operation. Each <b>FrameStore</b> has the following properties:
 	-	<b>Enable/Disable State</b> — When <b>Disabled</b>, the widget cannot access SDRAM.
+		Disabling unnecessary SDRAM access reduces memory accesses and can thereby improve performance.
 		-	Call CNTV2Card::IsChannelEnabled to determine if a <b>FrameStore</b> is enabled or not.
 		-	Call CNTV2Card::EnableChannel or CNTV2Card::DisableChannel to change it.
-		-	\ref aboutautocirculate automatically enables the <b>FrameStore</b> when needed, but doesn’t disable
-			it after use.
+		-	If \ref aboutautocirculate is used, the <b>FrameStore</b> is automatically enabled when needed
+			(but it’s not automatically disabled after use).
 	-	<b>Mode</b> — This correlates to the ::NTV2Mode enumeration in the SDK.
-		In ::NTV2_MODE_DISPLAY, it will <b>read</b> video data for playout from SDRAM;
-		in ::NTV2_MODE_CAPTURE, it will <b>write</b> video data into SDRAM.
-		-	Call CNTV2Card::GetMode to obtain the <b>FrameStore</b>’s current mode.
-		-	Call CNTV2Card::SetMode to set it.
-		-	\ref aboutautocirculate automatically sets the <b>Mode</b>, but doesn’t “un-set” it after use.
+		-	In ::NTV2_MODE_DISPLAY mode, video data is <b>read</b> from SDRAM for playout.
+		-	In ::NTV2_MODE_CAPTURE mode, video data is <b>written</b> into SDRAM.
+		-	Call CNTV2Card::GetMode to obtain the <b>FrameStore</b>’s current ::NTV2Mode.
+		-	Call CNTV2Card::SetMode to set the ::NTV2Mode.
+		-	If \ref aboutautocirculate is used, the ::NTV2Mode is automatically set (but it’s not automatically
+			“un-set” after use).
 	-	<b>Frame Buffer Format</b> — This determines the format of the pixel data being written or read
-		to or from device SDRAM (when <b>Enabled</b>), and coincides with the ::NTV2FrameBufferFormat
-		enumeration in the SDK.
-		-	Call CNTV2Card::GetFrameBufferFormat to determine the current format.
-		-	Call CNTV2Card::SetFrameBufferFormat to change it.
-		-	See \ref devicefbformats for details.
-		AutoCirculate users must set this.
-	-	<b>Video Format</b> — This determines the video format being received or transmitted, which
-		correlates to the ::NTV2VideoFormat enumeration in the SDK, and implies a ::NTV2FrameGeometry,
-		::NTV2Standard and ::NTV2FrameRate.  Call CNTV2Card::GetVideoFormat to determine the current format;
-		call CNTV2Card::SetVideoFormat to change it.  AutoCirculate users must set this.
+		to or from device SDRAM (when <b>Enabled</b>), and coincides with the ::NTV2PixelFormat
+		(aka ::NTV2FrameBufferFormat) enumeration in the SDK. (See \ref devicefbformats for a description of
+		the various formats.)
+		-	Call ::NTV2DeviceCanDoFrameBufferFormat to determine if a specific ::NTV2PixelFormat is supported
+			by the device.
+		-	Call CNTV2Card::GetFrameBufferFormat to determine the current ::NTV2PixelFormat setting.
+		-	Call CNTV2Card::SetFrameBufferFormat to change the ::NTV2PixelFormat setting.
+		-	\ref aboutautocirculate  users should configure this before calling CNTV2Card::AutoCirculateStart.
+	-	<b>Video Format</b> — This determines the format of the video being received by, or transmitted to, the
+		<b>FrameStore</b>. This correlates to the ::NTV2VideoFormat enumeration in the SDK, which implies a
+		::NTV2FrameGeometry, ::NTV2Standard and ::NTV2FrameRate.
+		-	Call ::NTV2DeviceCanDoVideoFormat to determine if a specific ::NTV2VideoFormat is supported by
+			the device.
+		-	Call CNTV2Card::GetVideoFormat to determine the current ::NTV2VideoFormat setting.
+		-	Call CNTV2Card::SetVideoFormat to change the ::NTV2VideoFormat setting.
+		-	\ref aboutautocirculate  users should configure this before calling CNTV2Card::AutoCirculateStart.
 	-	<b>Input Frame</b> — A register whose value designates the specific Frame Buffer in SDRAM that
-		will be written with video frame data (assuming the <b>FrameStore</b> is <b>Enabled</b>, its <b>Mode</b>
-		is Capture, and a signal is routed to its input crosspoint).
+		will be written with video frame data (assuming the <b>FrameStore</b> is <b>Enabled</b> and its ::NTV2Mode
+		is NTV2_MODE_CAPTURE, and a valid signal is being received at the <b>FrameStore</b>’s input crosspoint).
 		-	Call CNTV2Card::GetInputFrame to determine the current <b>Input Frame</b> buffer number.
 		-	Call CNTV2Card::SetInputFrame to change it.
-		-	This is managed automatically during \ref autocirculatecapture.
-	-	<b>Output Frame</b> — A register whose value designates the specific Frame Buffer in SDRAM that
-		will be read from (assuming the <b>FrameStore</b> is <b>Enabled</b>, its <b>Mode</b> is Display
+		-	\ref autocirculatecapture users should ignore this value, as it’s managed automatically.
+	-	<b>Output Frame</b> — A register whose value designates the specific Frame Buffer in SDRAM that will be
+		read from (assuming the <b>FrameStore</b> is <b>Enabled</b> and its ::NTV2Mode is ::NTV2_MODE_DISPLAY).
 		-	The output video can be monitored <b>if</b> the <b>FrameStore</b>’s output signal is routed to a
 			video output widget, and a monitor is connected to its output connector.)
 		-	Call CNTV2Card::GetOutputFrame to determine the current <b>Output Frame</b> buffer number.
 		-	Call CNTV2Card::SetOutputFrame to change it.
-		-	This is managed automatically during \ref autocirculateplayout.
+		-	\ref autocirculatecapture users should ignore this value, as it’s managed automatically.
 	-	<b>VANC Mode</b> — The ::NTV2VANCMode setting determines if a “tall” or “taller” frame geometry
 		is in effect. The ::NTV2_VANCMODE_TALL geometry incorporates several extra lines of video that
 		precede the first visible line in the raster into the <b>FrameStore</b>’s frame buffer memory.
 		::NTV2_VANCMODE_TALLER was added to firmware when it was found that additional useful ancillary
 		data was found on additional lines ahead of the first line in ::NTV2_VANCMODE_TALL mode.
-		-	Call CNTV2Card::GetVANCMode to determine the current <b>VANC Mode</b> setting.
+		-	Call CNTV2Card::GetVANCMode to determine the current ::NTV2VANCMode setting.
 		-	Call CNTV2Card::SetVANCMode to change it.
 	-	<b>VANC Data Shift Mode</b> — The ::NTV2VANCDataShiftMode determines if the firmware will automatically
-		right-shift incoming (or left-shift outgoing) data words by 2 bits in the VANC lines in 8-bit YCbCr
-		frame buffers (e.g. ::NTV2_FBF_8BIT_YCBCR ), making it easy to parse (or write) ancillary data
-		packets in the frame buffer.
-		-	Call CNTV2Card::GetVANCShiftMode to determine the current <b>VANC Data Shift Mode</b> setting.
+		right-shift incoming (or left-shift outgoing) data words by 2 bits in the VANC lines in \ref fbformat8bitycbcr
+		frame buffers, making it easy to read (or write) ancillary data packets in the frame buffer.
+		-	Call CNTV2Card::GetVANCShiftMode to determine the current ::NTV2VANCDataShiftMode setting.
 		-	Call CNTV2Card::SetVANCShiftMode to change it.
 	-	<b>Frame Buffer Orientation</b> — The ::NTV2FBOrientation (a.k.a. ::NTV2FrameBufferOrientation
 		a.k.a. ::NTV2VideoFrameBufferOrientation) determines the direction that firmware will write or
 		read video lines into or out of SDRAM, either normal ::NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN,
-		or ::NTV2_FRAMEBUFFER_ORIENTATION_BOTTOMUP (reverse, which flips the image vertically). 
+		or ::NTV2_FRAMEBUFFER_ORIENTATION_BOTTOMUP (reverse, which flips the image vertically).
 		-	Call CNTV2Card::GetFrameBufferOrientation to determine the current setting.
 		-	Call CNTV2Card::SetFrameBufferOrientation to change it.
 
@@ -374,8 +381,8 @@
 	-	Devices having only one <b>FrameStore</b> are limited to Capturing or Playing a single stream of video at a time.
 	-	Devices with more than one <b>FrameStore</b> can independently ingest or playout more than one video stream
 		simultaneously, with each <b>FrameStore</b> accessing SDRAM.
-	-	Some very old AJA devices with two FrameStores dedicate the first to ::NTV2_MODE_CAPTURE and the other
-		to ::NTV2_MODE_DISPLAY.
+	-	A few older AJA devices (\ref corvid1corvid3g) had two <b>FrameStore</b>s, but <b>FrameStore 1</b>
+		was dedicated to ::NTV2_MODE_CAPTURE, and <b>FrameStore 2</b> to ::NTV2_MODE_DISPLAY.
 
 	@note	In NTV2 parlance, the terms <b>Channel</b> and <b>FrameStore</b> are often used interchangeably.
 
