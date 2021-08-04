@@ -171,7 +171,6 @@ NTV2DeviceCanDoStereoOut
 NTV2DeviceCanDoVideoProcessing
 NTV2DeviceCanMeasureTemperature
 NTV2DeviceCanReportFrameSize
-NTV2DeviceHasNWL
 NTV2DeviceHasPCIeGen2
 NTV2DeviceHasRetailSupport
 NTV2DeviceHasSPIFlash
