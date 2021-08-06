@@ -1023,19 +1023,6 @@ public:
 	AJA_VIRTUAL bool				GetActiveFrameDimensions (NTV2FrameDimensions & outFrameDimensions, const NTV2Channel inChannel = NTV2_CHANNEL1);
 	AJA_VIRTUAL NTV2FrameDimensions GetActiveFrameDimensions (const NTV2Channel inChannel = NTV2_CHANNEL1);
 
-	/**
-		@brief		Sets the frame buffer size on those boards that allow software to select a video buffer size.
-		@return		True if successful; otherwise false.
-		@param[in]	size			Specifies the size of frame buffer the hardware should use.
-		@details	The firmware will use a frame buffer size big enough to accommodate the largest possible frame
-					for the frame buffer format and frame buffer geometry in use.  This can be wasteful, for example,
-					when using an 8 bit YCbCr format with a "tall" frame geometry so that VANC can be processed.
-					These frames will fit in 8MB, but the firmware will use a size of 16MB just in case the pixel
-					format is changed to 48 bit RGB.  This function provides a way to force a given frame buffer size.
-					Selecting a smaller size than that actually needed by the hardware will compromise video integrity.
-	**/
-	AJA_VIRTUAL bool		SetFrameBufferSize (NTV2Framesize size);
-
 	AJA_VIRTUAL bool		GetNumberActiveLines (ULWord & outNumActiveLines);
 
 	AJA_VIRTUAL bool		SetStandard (NTV2Standard inValue, NTV2Channel inChannel = NTV2_CHANNEL1);
@@ -1045,8 +1032,6 @@ public:
 
 	AJA_VIRTUAL bool		IsSDStandard (bool & outIsStandardDef, NTV2Channel inChannel = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool		IsBufferSizeSetBySW();
-
 	/**
 		@brief		Sets the AJA device's frame rate.
 		@return		True if successful; otherwise false.
@@ -1055,7 +1040,7 @@ public:
 		@note		The frame rate setting for ::NTV2_CHANNEL1 dictates the device reference clock for both single
 					and multi-format mode (see \ref deviceclockingandsync).
 	**/
-	AJA_VIRTUAL bool	SetFrameRate (NTV2FrameRate inNewValue, NTV2Channel inChannel = NTV2_CHANNEL1);
+	AJA_VIRTUAL bool		SetFrameRate (NTV2FrameRate inNewValue, NTV2Channel inChannel = NTV2_CHANNEL1);
 
 	/**
 		@brief		Returns the AJA device's currently configured frame rate via its "value" parameter.
@@ -4128,17 +4113,20 @@ public:
 	AJA_VIRTUAL bool	ReadSDIStatistics (NTV2SDIInStatistics & outStats);
 
 	/**
-		@brief		Sets the frame size used on the device.
+		@brief		Sets the device's intrinsic frame buffer size.
+		@param[in]	inSize		Specifies the intrinsic frame size the hardware should use.
+		@return		True if successful; otherwise false. Failure usually indicates the intrinsic frame size is not
+					software-changeable.
+		@see		\ref vidop-fbindexing, CNTV2Card::GetFrameBufferSize
+	**/
+	AJA_VIRTUAL bool	SetFrameBufferSize (const NTV2Framesize inSize);
+
+	/**
+		@brief		Sets the device's intrinsic frame buffer size.
 		@param[in]	inChannel	Specifies the FrameStore to be affected. (Currently ignored -- see note below.)
 		@param[in]	inValue		Specifies the new frame size. Must be NTV2_FRAMESIZE_8MB or NTV2_FRAMESIZE_16MB.
 		@return		True if successful;	 otherwise false.
-		@note		Currently, all NTV2 devices globally use an 8MB or 16MB frame size across any/all FrameStores.
-					When a FrameStore is told to use a particular frame buffer format and frame geometry, the device will
-					automatically switch to the smallest size that will safely accommodate the frame data. You can use this function
-					to override the default. For example, channel 1 may be capturing 525i2997 '2vuy' video with AutoCirculate, which only
-					requires 8MB frames by default. Starting a second channel to playback 2K1080p RGB10 video would automatically bump
-					the device to 16MB frames, which would result in the capture of several "glitched" frames in Channel 1. To prevent
-					the glitch, call this function to set 16MB frames before starting capture in Channel 1.
+		@see		\ref vidop-fbindexing, CNTV2Card::GetFrameBufferSize
 	**/
 	AJA_VIRTUAL bool	SetFrameBufferSize (const NTV2Channel inChannel, const NTV2Framesize inValue);
 
@@ -4147,12 +4135,20 @@ public:
 		@param[in]	inChannel	Currently ignored. Use ::NTV2_CHANNEL1.
 		@param[out] outValue	Receives the device's current frame size.
 		@return		True if successful;	 otherwise false.
+		@see		\ref vidop-fbindexing, CNTV2Card::SetFrameBufferSize
 	**/
 	AJA_VIRTUAL bool	GetFrameBufferSize (const NTV2Channel inChannel, NTV2Framesize & outValue);
 #if !defined(NTV2_DEPRECATE_14_3)
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	GetFrameBufferSize (NTV2Channel inChannel, NTV2Framesize * pOutValue))	{return pOutValue ? GetFrameBufferSize (inChannel, *pOutValue) : false;}	///< @deprecated	Use the alternate function that has the non-constant reference output parameter instead.
 #endif	//	NTV2_DEPRECATE_14_3
 	using CNTV2DriverInterface::GetFrameBufferSize;		//	Keep CNTV2DriverInterface::GetFrameBufferSize visible after being shadowed by CNTV2Card::GetFrameBufferSize
+
+	/**
+		@return		True if the device intrinsic frame buffer size is currently settable and set by software
+					(overriding the firmware);  otherwise false.
+		@see		\ref vidop-fbindexing
+	**/
+	AJA_VIRTUAL bool			IsBufferSizeSetBySW (void);
 
 	/**
 		@brief		Disables the given FrameStore.

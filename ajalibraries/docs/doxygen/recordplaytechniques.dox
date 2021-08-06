@@ -4,6 +4,9 @@
 This page describes the basics of capturing and playing real-time video, then describes the two most popular methods:
 -	\ref aboutpingpong
 -	\ref aboutautocirculate
+	-	\ref autocirculatecapture
+		-	\ref autocirctimebudget
+	-	\ref autocirculateplayout
 
 @section	playoutbasics	Playout Basics
 
@@ -385,19 +388,27 @@ by calling CNTV2Card::AutoCirculateTransfer every time through the loop (without
 See the NTV2FieldBurn demonstration application for more details.
 
 
-@subsection  autocirculatelowlatency  Latency and Field-Based Operation Considerations
+@subsection  autocirculatefieldmode		Field-Based Operation
 
-The NTV2 firmware and AutoCirculate have always been frame-based. Field mode hasn’t been added to AutoCirculate, since the
-kernel queuing model it uses doesn’t really support low-latency well. It is very good at reliably capturing and playing
-frames without dropping, as long as the queue is large enough to absorb user-mode latency. The kernel queue is managed
+Historically, AutoCirculate was always frame-based, but many customers requested the ability to operate in <b>Field Mode</b>.
+<b>Field Mode</b> was added in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/ntv2sdk152official">SDK 15.2</a>.
+-	In <b>Field Mode</b>, all the <i>frame</i> counters in the ::AUTOCIRCULATE_STATUS object are interpreted as <i>fields</i>.
+-	Use the <tt>AUTOCIRCULATE_WITH_FIELDS</tt> option when calling CNTV2Card::AutoCirculateInitForInput or NTV2Card::AutoCirculateInitForOutput.
+-	Also in <a href="https://sdksupport.aja.com/index.php?/Knowledgebase/Article/View/ntv2sdk152official">SDK 15.2</a>,
+	the \ref ntv2fieldburn was changed to use <b>Field Mode</b>.
+
+@subsection  autocirculatelowlatency  Latency Considerations
+
+AutoCirculate’s kernel queuing model doesn’t support low-latency very well. It’s very good at reliably capturing and playing
+frames without dropping, as long as the frame queue is large enough to absorb user-mode latency. The kernel queue is managed
 once per frame just after the video VBI. This gives the client software an entire frame-time to program the hardware for
 the next frame.
 
 For capture, the frame written to the device frame buffer during the previous frame time is available for transfer after
 the vertical interrupt is received. However, audio can’t be transferred immediately, since audio is captured continuously,
 and all audio for the previous frame may not have been flushed to the device frame buffer yet. For this reason, AJA usually
-recommends transferring video and audio when there’s at least two frames in the queue — which obviously isn’t good for
-low-latency applications.
+recommends transferring video and audio when there’s at least two frames in the queue — which may be unacceptable for low
+latency applications.
 
 For playback, when the frame interrupt is received, the frame to display after the next VBI must be set in the hardware.
 Since this is a whole frame early, you essentially end up with two frames in the queue for playback as well. This is why
@@ -406,9 +417,11 @@ we wrote the \ref ntv2llburn, a low-latency demo that works without AutoCirculat
 <b>How many frames to circulate?</b> This choice can depend on a number of factors that each affect how many frames are
 available for buffering on the device:
 -	The application’s frame-dropping tolerance;
+-	The application’s latency requirement (always at odds with frame-dropping tolerance);
 -	The hardware devices it may need to run on (some devices have smaller amounts of SDRAM);
 -	The largest video raster expected;
 -	The frame buffer (pixel) format to be used.
+See \ref vidop-fbindexing for more information.
 
 
 @subsection	autocirculatemon	Monitoring AutoCirculate Activity with \ref usingntv2watcher Tool

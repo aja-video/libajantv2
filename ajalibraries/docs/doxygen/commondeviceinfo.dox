@@ -320,7 +320,9 @@
 			(but it’s not automatically disabled after use).
 	-	<b>Mode</b> — This correlates to the ::NTV2Mode enumeration in the SDK.
 		-	In ::NTV2_MODE_DISPLAY mode, video data is <b>read</b> from SDRAM for playout.
+			-	Call ::NTV2DeviceCanDoPlayback to determine if the device is capable of playing video from SDRAM.
 		-	In ::NTV2_MODE_CAPTURE mode, video data is <b>written</b> into SDRAM.
+			-	Call ::NTV2DeviceCanDoCapture to determine if the device is capable of recording video into SDRAM.
 		-	Call CNTV2Card::GetMode to obtain the <b>FrameStore</b>’s current ::NTV2Mode.
 		-	Call CNTV2Card::SetMode to set the ::NTV2Mode.
 		-	If \ref aboutautocirculate is used, the ::NTV2Mode is automatically set (but it’s not automatically
@@ -342,14 +344,14 @@
 		-	Call CNTV2Card::GetVideoFormat to determine the current ::NTV2VideoFormat setting.
 		-	Call CNTV2Card::SetVideoFormat to change the ::NTV2VideoFormat setting.
 		-	\ref aboutautocirculate  users should configure this before calling CNTV2Card::AutoCirculateStart.
-	-	<b>Input Frame</b> — A register whose value designates the specific Frame Buffer in SDRAM that
-		will be written with video frame data (assuming the <b>FrameStore</b> is <b>Enabled</b> and its ::NTV2Mode
+	-	<b>Input Frame</b> — A register whose unsigned integer value designates the specific Frame Buffer in SDRAM
+		that will be written with video frame data (assuming the <b>FrameStore</b> is <b>Enabled</b> and its ::NTV2Mode
 		is NTV2_MODE_CAPTURE, and a valid signal is being received at the <b>FrameStore</b>’s input crosspoint).
 		-	Call CNTV2Card::GetInputFrame to determine the current <b>Input Frame</b> buffer number.
 		-	Call CNTV2Card::SetInputFrame to change it.
 		-	\ref autocirculatecapture users should ignore this value, as it’s managed automatically.
-	-	<b>Output Frame</b> — A register whose value designates the specific Frame Buffer in SDRAM that will be
-		read from (assuming the <b>FrameStore</b> is <b>Enabled</b> and its ::NTV2Mode is ::NTV2_MODE_DISPLAY).
+	-	<b>Output Frame</b> — A register whose unsigned integer value designates the specific Frame Buffer in SDRAM
+		that will be read (assuming the <b>FrameStore</b> is <b>Enabled</b> and its ::NTV2Mode is ::NTV2_MODE_DISPLAY).
 		-	The output video can be monitored <b>if</b> the <b>FrameStore</b>’s output signal is routed to a
 			video output widget, and a monitor is connected to its output connector.)
 		-	Call CNTV2Card::GetOutputFrame to determine the current <b>Output Frame</b> buffer number.
@@ -428,21 +430,31 @@
 
 	@subsection	vidop-fbaccess		Frame Buffer Access
 
-	Data can be transferred to or from the device at any time using the DMA API in the CNTV2Card class.
+	Data can be transferred to or from the device at any time using the DMA API in the CNTV2Card class, or
+	CNTV2Card::AutoCirculateTransfer if using \ref aboutautocirculate.
 
-	Remember that <b>the host computer always has access to frame memory</b>. Therefore
-	it’s important to synchronize or gate transfers to/from the host using the vertical blanking
-	interrupt (e.g., CNTV2Card::WaitForOutputVerticalInterrupt, CNTV2Card::WaitForOutputFieldID,
-	CNTV2Card::WaitForInputVerticalInterrupt, CNTV2Card::WaitForInputFieldID, etc.).
+	Since the host computer <b>always has unrestricted access to frame memory at any time</b>, it’s critical
+	to synchronize or gate transfers to/from the host using the vertical blanking interrupt
+	(e.g., CNTV2Card::WaitForOutputVerticalInterrupt, CNTV2Card::WaitForOutputFieldID,
+	CNTV2Card::WaitForInputVerticalInterrupt, CNTV2Card::WaitForInputFieldID, etc.). The transfer functions
+	don't wait — they immediately perform the transfer, and wonʼt return until they finish (or fail).
 
-	The device’s current line counter could also be used (i.e., by monitoring the ::kRegLineCount register
-	via CNTV2Card::ReadLineCount), but that value reflects the read/write line position of <b>FrameStore 1</b>.
-	Other FrameStores do not have Line Counters.
+	@warning	Calling CNTV2Card::DMAWriteFrame at a fraction of frame time <i>after</i> the VBI to write
+				the same frame on the device that’s being read for the currently-playing video frame will
+				likely look torn or distorted.
+				Likewise for the opposite — i.e., calling CNTV2Card::DMAReadFrame at a fraction of frame time
+				after or before the VBI to read the same frame being written by the <b>FrameStore</b> from the
+				incoming video frame would result in some lines having pixel data from the new, incoming frame,
+				while the remaining lines would contain old pixel data.
+
+	For extremely tight latency, <b>FrameStore 1</b> has a ::kRegLineCount register that can be monitored (via
+	CNTV2Card::ReadLineCount ), so that small bands of raster lines can be transferred “ahead of” the line counter
+	(for playback) or “behind” it (for capture).  However, other FrameStores (2 or higher) do not have
+	<b>Line Counter</b> registers.
 
 	There are several DMA API functions for transferring data between host memory and device SDRAM.
-	They are <b>frame-centric</b> in that they all require a zero-based frame number to calculate
-	where to start reading or writing in device SDRAM. The actual byte offset into device SDRAM
-	depends on the device’s current <b>Frame Size</b> — whether 8MB, 16MB, or larger.
+	They are <b>frame-centric</b> in that they all require a zero-based index number or <b>Frame Offset</b> to
+	calculate where to start reading or writing in device SDRAM.
 
 	-	Call CNTV2Card::DMAReadFrame or CNTV2Card::DMAWriteFrame to transfer frame data from or to
 		device SDRAM (respectively).
@@ -463,15 +475,6 @@
 		-	<b>Hint:</b> All device SDRAM can be accessed by using a zero <b>Frame Number</b> and
 			using any offset value needed (up to 4GB minus the <b>Byte Count</b>).
 
-	@warning	Calling CNTV2Card::DMAWriteFrame at a fraction of frame time <i>after</i>
-				the VBI to write the same frame on the device that’s being read for the currently-playing
-				video frame will likely look torn or distorted.
-				Likewise for the opposite — i.e., calling CNTV2Card::DMAReadFrame at a
-				fraction of frame time after or before the VBI to read the same frame being written
-				by the <b>FrameStore</b> from the currently incoming video frame would result in some lines
-				having pixel data from the new, incoming frame, while the remaining lines would contain
-				old pixel data.
-
 	@note	DMA transfer speeds may be affected by the amount of video data being accessed by
 			the device to transmit video. If a channel is in display mode, it is always playing
 			video, and therefore reading from SDRAM, consuming SDRAM bandwidth… the amount consumed
@@ -487,28 +490,106 @@
 				and will result in unexpected behavior — e.g. wrapping around and continuing from the
 				start of device SDRAM.
 
-	@subsubsection  vidop-fblocking		Buffer Locking
+	@subsubsection	vidop-fbindexing	Frame Buffer Indexing
+
+	<b>FrameStore</b>s access frame data in SDRAM starting at <b>Frame Offset</b>s measured from the start of
+	SDRAM (at address zero).
+	-	The first byte of the first raster line of the first frame coincides with SDRAM address <tt>0x00000000</tt>.
+	-	<b>Frame Offset</b>s are always multiples of the “intrinsic” frame size of the device, which defaults to
+		::NTV2_FRAMESIZE_8MB (8MB).
+	-	The intrinsic frame size applies globally to all FrameStores on the device.
+	-	Call CNTV2Card::GetFramesize to discover the current 
+	-	When any FrameStoreʼs ::NTV2FrameGeometry or ::NTV2PixelFormat changes, the intrinsic frame size can change.
+		Since Frame Offsets are always multiples of the deviceʼs intrinsic frame size, this means that the Frame
+		Offsets for <i>all</i> FrameStores can change whenever <i>any</i> FrameStoreʼs ::NTV2FrameGeometry or
+		::NTV2PixelFormat changes.
+	-	The following table shows a sampling of actual raster sizes for three pixel formats:  \ref fbformat10bitycbcr,
+		\ref fbformats8bitrgb, and \ref fbformats48bitrgb.<br />
+		<table>
+			<tr><td>::NTV2FrameGeometry		<td>::NTV2Standard		<td>::NTV2VANCMode	<td><b>Raster</b>	<td>\ref fbformat10bitycbcr	<td>\ref fbformats8bitrgb	<td>\ref fbformats48bitrgb
+			<tr><td>::NTV2_FG_720x486		<td>SD 525i				<td>Off				<td>720×486			<td>0.89 MB					<td>1.33 MB					<td>2.00 MB
+			<tr><td>::NTV2_FG_720x508		<td>SD 525i				<td>Tall			<td>720×508			<td>0.93 MB					<td>1.40 MB					<td>2.09 MB
+			<tr><td>::NTV2_FG_720x514		<td>SD 525i				<td>Taller			<td>720×514			<td>0.94 MB					<td>1.41 MB					<td>2.12 MB
+			<tr><td>::NTV2_FG_720x576		<td>SD 625i				<td>Off				<td>720×576			<td>1.05 MB					<td>1.58 MB					<td>2.37 MB
+			<tr><td>::NTV2_FG_720x598		<td>SD 625i				<td>Tall			<td>720×598			<td>1.09 MB					<td>1.64 MB					<td>2.46 MB
+			<tr><td>::NTV2_FG_720x612		<td>SD 625i				<td>Tall			<td>720×612			<td>1.12 MB					<td>1.68 MB					<td>2.52 MB
+			<tr><td>::NTV2_FG_1280x720		<td>HD 720p				<td>Off				<td>1280×720		<td>2.37 MB					<td>3.52 MB					<td>5.27 MB
+			<tr><td>::NTV2_FG_1280x740		<td>HD 720p				<td>Tall			<td>1280×740		<td>2.44 MB					<td>3.61 MB					<td>5.42 MB
+			<tr><td>::NTV2_FG_1920x1080		<td>HD 1080				<td>Off				<td>1920×1080		<td>5.27 MB					<td>7.91 MB					<td>11.9 MB
+			<tr><td>::NTV2_FG_1920x1112		<td>HD 1080				<td>Taller			<td>1920×1112		<td>5.43 MB					<td>8.14 MB					<td>12.2 MB
+			<tr><td>::NTV2_FG_1920x1114		<td>HD 1080				<td>Tall			<td>1920×1114		<td>5.44 MB					<td>8.16 MB					<td>12.2 MB
+			<tr><td>::NTV2_FG_2048x1080		<td>HD 2K×1080			<td>Off				<td>2048×1080		<td>5.67 MB					<td>8.44 MB					<td>12.7 MB
+			<tr><td>::NTV2_FG_2048x1112		<td>HD 2K×1080			<td>Tall			<td>2048×1112		<td>5.84 MB					<td>8.69 MB					<td>13.0 MB
+			<tr><td>::NTV2_FG_2048x1114		<td>HD 2K×1080			<td>Taller			<td>2048×1114		<td>5.85 MB					<td>8.70 MB					<td>13.1 MB
+		</table>
+	-	After a geometry and/or pixel format change, when the required raster size of <i>any</i> FrameStore exceeds 8MB,
+		the firmware automatically increases the intrinsic frame size to 16MB.
+		-	After switching to 16MB, note that the frame buffer capacity of the device is cut in half.
+			For example, if a device could store 100 × 8MB frames, after the bump to 16MB, it will only hold 50 frames.
+			-	<b>WARNING:</b> This can adversely affect \ref aboutautocirculate streaming. For example, if frame buffers
+				45 thru 55 were used for \ref autocirculatecapture using 8MB offsets, after the switch to 16MB, frames 50
+				thru 55 would be invalid, and “out of bounds”, resulting in undefined behavior.
+	-	Conversely, when no FrameStores require 16MB frame sizes, the firmware automatically reverts the intrinsic frame
+		size to 8MB. (However, on some devices, this behavior can be changed. See below.)
+	-	Most devices automatically switch to the larger 16MB size whenever ::NTV2VANCMode is enabled (i.e. “tall” or “taller”)
+		on any FrameStore.
+	-	<b>WARNING:</b> On devices with more than one FrameStore, if any other FrameStores are streaming video in their
+		respective frame buffer ranges when the instrinsic frame size changed, there will be a noticeable glitch in their
+		captured or outgoing video streams.
+		-	Most devices can be pre-set and locked to 16MB to avoid Frame Size switching (and prevent video glitching).
+		-	Call ::NTV2DeviceSoftwareCanChangeFrameBufferSize to determine if the device supports this 16MB pre-set/lock
+			feature.
+		-	Call <tt>CNTV2Card::SetFrameBufferSize(NTV2_CHANNEL1, ::NTV2_FRAMESIZE_16MB);</tt> to set the larger size in
+			advance.
+	-	<b>UHD/4K and UHD2/8K Frame Offsets</b>
+		-	<b>UHD/4K</b> — Frame Offsets are 4 times the 8MB/16MB intrinsic frame size. This means that, from the
+			FrameStoreʼs point of view, the deviceʼs frame capacity drops by ¼ when configured for UHD/4K video.
+		-	<b>UHD2/8K</b> — Frame Offsets are 16 times the 8MB/16MB intrinsic frame size. This means that, from the
+			FrameStoreʼs point of view, the deviceʼs frame capacity drops by a factor of 16 when configured for UHD2/8K video.
+	-	<b>Frame Range Considerations When Streaming Both SD/HD and UHD/4K/8K</b>
+		-	It can be tricky to determine frame ranges for SD/HD, UHD/4K, and/or UHD2/8K streams that won't interfere with each other.
+		-	UHD/4K frame offsets are 4 times larger than the intrinsic SD/HD offsets.
+		-	UHD2/8K frame offsets are 16 times larger than the intrinsic SD/HD offsets.
+		-	<b>Example:</b> A device with SDRAM for up to 120 × 8MB frames must operate three streams, each with a 9-frame latency:
+			-	<b>Channel 1:</b> continuous playout of UHDp60 from 8-bit ARGB;
+			-	<b>Channel 2:</b> Capture various, intermittent video signals up to 1080p as 48-bit RGBA;  the signals come and go;
+			-	<b>Channel 3:</b> Non-stop capture of continuous 525i SD signal as 10-bit YCbCr;
+			-	<b>Solution:</b>
+				-	The intrinsic frame size of 8MB is too small to accommodate 1080p rasters at 48-bit RGB (11.9MB).
+					Therefore, to avoid glitches, the device will be pre-set to 16MB before starting any streams.
+					The deviceʼs frame capacity is now only 60 × 16MB frames.
+				-	On <b>Channel 1</b>, autocirculateplayout UHD frames 0 thru 9.
+					Because each UHD frame uses 4 intrinsic frames, the first available 16MB frame after this channelʼs
+					buffers is frame 40.
+				-	On <b>Channel 2</b>, when a valid signal is received, \ref autocirculatecapture frames 40 thru 49.
+				-	On <b>Channel 3</b>, \ref autocirculatecapture frames 50 thru 59.
+		-	\ref usingntv2watcher has a \ref memmapdlog that helps visualize device memory utilization.
+
+
+	@subsubsection  vidop-fblocking		Host Buffer Locking
 
 	A DMA transfer using CNTV2Card::AutoCirculateTransfer, CNTV2Card::DMAReadFrame, CNTV2Card::DMAWriteFrame, etc.
-	requires the NTV2 device driver to perform these important operations in preparation for the transfer (with
-	some OS-dependent variations):
+	requires the NTV2 device driver to perform these operations (ignoring some OS-dependent variations):
 	-#	map the host buffer into kernel memory address space;
 	-#	map and lock those pages into physical memory, where they must remain for the duration of the transfer;
-	-#	build the segment list (or scatter-gather list) of memory segments for the DMA transfer.
+	-#	build the segment list (or scatter-gather list) of memory segments for the DMA transfer (which also must remain
+		in physical memory for the duration of the transfer);
+	-#	perform the DMA transfer;
+	-#	unmap/unlock all pages from physical (and kernel) memory.
 
-	These steps can consume a substantial portion of the \ref autocirctimebudget, especially with larger rasters
-	and/or pixel formats, which can contribute to frame-dropping.
+	The mapping, locking and segment list construction steps can consume a substantial portion of the \ref autocirctimebudget,
+	especially with larger rasters and/or pixel formats, which can contribute to frame-drops.
 
-	In most use cases, client applications re-use the same buffers over and over again. A substantial time savings can be
-	realized if the host buffers are pre-locked and wired down into physical memory before entering the frame-processing
+	In most use cases, client applications re-use the same host buffers over and over again. A substantial time savings can be
+	realized if those host buffers are pre-locked and wired down into physical memory before entering the frame-processing
 	loop (where CNTV2Card::AutoCirculateTransfer or CNTV2Card::DMAReadFrame or CNTV2Card::DMAWriteFrame are called).
 
 	Starting in SDK 16.0, new DMA API functions were added for this purpose:
 	-	CNTV2Card::DMABufferLock — maps and locks down a host buffer into physical memory.
 		-	Starting with SDK 16.0.1, an optional parameter was added to also have the driver pre-build
-			and cache the segment map from the pre-locked buffer.
+			and cache the segment map (SGL) from the pre-locked buffer.
 	-	CNTV2Card::DMABufferUnlock — unlocks and unmaps a host buffer that was previously locked.
-		-	Starting in SDK 16.0.1, this also frees any previously cached segment map.
+		-	Starting in SDK 16.0.1, this also frees any previously cached segment map (SGL).
 
 
 	@subsection	deviceclockingandsync		Device Clocking and Synchronization
