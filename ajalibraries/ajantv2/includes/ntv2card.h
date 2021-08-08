@@ -414,7 +414,8 @@ public:
 	///@{
 	/**
 		@brief		Transfers data from the AJA device to the host.
-		@param[in]	inFrameNumber	Specifies the zero-based frame number of the starting frame to be read from the device.
+		@param[in]	inFrameNumber	Specifies the zero-based frame index number of the starting frame to be read from the device.
+									For \ref vidop-fbindexing purposes, this function assumes the intrinsic frame size of the device.
 		@param[in]	pFrameBuffer	Specifies the non-NULL address of the host buffer that is to receive the frame data.
 									The memory it points to must be writeable.
 		@param[in]	inOffsetBytes	Specifies the byte offset into the device frame buffer.
@@ -429,6 +430,7 @@ public:
 	/**
 		@brief		Transfers data from the host to the AJA device.
 		@param[in]	inFrameNumber	Specifies the zero-based frame number of the frame to be written on the device.
+									For \ref vidop-fbindexing purposes, this function assumes the intrinsic frame size of the device.
 		@param[in]	pFrameBuffer	Specifies the non-NULL address of the host buffer that is to supply the frame data.
 									The memory it points to must be readable.
 		@param[in]	inOffsetBytes	Specifies the byte offset into the device frame buffer.
@@ -444,6 +446,7 @@ public:
 	/**
 		@brief		Transfers a single frame from the AJA device to the host.
 		@param[in]	inFrameNumber	Specifies the zero-based frame number of the frame to be read from the device.
+									For \ref vidop-fbindexing purposes, this function assumes the intrinsic frame size of the device.
 		@param[in]	pOutFrameBuffer Specifies the non-NULL address of the host buffer that is to receive the frame data.
 									The memory it points to must be writeable.
 		@param[in]	inByteCount		Specifies the total number of bytes to transfer.
@@ -457,20 +460,26 @@ public:
 	/**
 		@brief		Transfers a single frame from the AJA device to the host. This call is multi-format compatible.
 		@param[in]	inFrameNumber	Specifies the zero-based frame number of the frame to be read from the device.
-		@param[in]	pFrameBuffer	Specifies the non-NULL address of the host buffer that is to receive the frame data.
+									For \ref vidop-fbindexing purposes, this function assumes frame offsets/sizes
+									based on the FrameStore identified by the \c inChannel parameter (below).
+		@param[in]	pHostBuffer		Specifies the non-NULL address of the host buffer that is to receive the frame data.
 									The memory it points to must be writeable.
 		@param[in]	inByteCount		Specifies the total number of bytes to transfer.
-		@param[in]	inChannel		Specified for multi-format
+		@param[in]	inChannel		Specifies the FrameStore to supply the \ref vidop-fbindexing context to use with the
+									\c inFrameNumber parameter. If the FrameStore, for example, is configured for UHD/4K,
+									the intrinsic frame size (8MB or 16MB) will be quadrupled when calculating the starting
+									source address in device SDRAM.
 		@return		True if successful; otherwise false.
 		@note		The host buffer must be at least inByteCount in size, or a host memory access violation may occur.
 		@note		This function will block and not return until the transfer has finished or failed.
 		@see		CNTV2Card::DMAWriteFrame, CNTV2Card::DMARead, CNTV2Card::DMAReadSegments, \ref vidop-fbaccess
 	**/
-	AJA_VIRTUAL bool	DMAReadFrame (const ULWord inFrameNumber, ULWord * pFrameBuffer, const ULWord inByteCount, const NTV2Channel inChannel);
+	AJA_VIRTUAL bool	DMAReadFrame (const ULWord inFrameNumber, ULWord * pHostBuffer, const ULWord inByteCount, const NTV2Channel inChannel);
 
 	/**
 		@brief		Transfers a single frame from the host to the AJA device.
 		@param[in]	inFrameNumber	Specifies the zero-based frame number of the frame to be written to the device.
+									For \ref vidop-fbindexing purposes, this function assumes the intrinsic frame size of the device.
 		@param[in]	pInFrameBuffer	Specifies the non-NULL address of the host buffer that is to supply the frame data.
 									The memory it points to must be readable.
 		@param[in]	inByteCount		Specifies the total number of bytes to transfer.
@@ -482,12 +491,17 @@ public:
 	AJA_VIRTUAL bool	DMAWriteFrame (const ULWord inFrameNumber, const ULWord * pInFrameBuffer, const ULWord inByteCount);
 
 	/**
-		@brief		Transfers a single frame from the host to the AJA device. This call is multi-format compatible.
+		@brief		Transfers a single frame from the host to the AJA device. This function is multi-format compatible.
 		@param[in]	inFrameNumber	Specifies the zero-based frame number of the frame to be written to the device.
+									For \ref vidop-fbindexing purposes, this function assumes frame offsets/sizes
+									based on the FrameStore identified by the \c inChannel parameter (below).
 		@param[in]	pInFrameBuffer	Specifies the non-NULL address of the host buffer that is to supply the frame data.
 									The memory it points to must be readable.
 		@param[in]	inByteCount		Specifies the total number of bytes to transfer.
-		@param[in]	inChannel		Specified for multi-format
+		@param[in]	inChannel		Specifies the FrameStore to supply the \ref vidop-fbindexing context to use with the
+									\c inFrameNumber parameter. If the FrameStore, for example, is configured for UHD/4K,
+									the intrinsic frame size (8MB or 16MB) will be quadrupled when calculating the starting
+									destination address in device SDRAM.
 		@return		True if successful; otherwise false.
 		@note		The host buffer must be at least inByteCount in size, or a host memory access violation may occur.
 		@note		This function will block and not return until the transfer has finished or failed.
@@ -1235,14 +1249,14 @@ public:
 	AJA_VIRTUAL bool		GetPCIAccessFrame (const NTV2Channel inChannel, ULWord & outValue);
 
 	/**
-		@brief		Sets the output frame number for the given channel. This identifies which particular frame
-					in device SDRAM will be used for playout after the next frame interrupt.
+		@brief		Sets the output frame index number for the given FrameStore. This identifies which frame in device
+					SDRAM will be used for playout after the next VBI.
 		@param[in]	inChannel	Specifies the FrameStore of interest as an ::NTV2Channel, a zero-based index number.
-		@param[in]	inValue		Specifies the new desired output frame number. This number is a zero-based index into each
-								8MB or 16MB block of SDRAM on the device.
+		@param[in]	inValue		Specifies the desired output frame index number in device memory. See \ref vidop-fbindexing
+								for more information.
 		@return		True if successful;	 otherwise false.
 		@note		For the effect to be noticeable, the FrameStore should be enabled (see CNTV2Card::EnableChannel)
-					and in playout mode (see CNTV2Card::GetMode and CNTV2Card::SetMode).
+					and in ::NTV2_MODE_DISPLAY mode.
 		@note		Normally, if the device ::NTV2RegisterWriteMode is ::NTV2_REGWRITE_SYNCTOFRAME, the new value takes
 					effect at the next output <b>frame</b> interrupt. For example, if line 300 of frame 5 is currently
 					going "out the jack" at the instant this function is called with frame 6, frame 6 won't go "out the jack"
@@ -1251,10 +1265,10 @@ public:
 					at the next output <b>field</b> interrupt, which makes it possible to playout lines for ::NTV2_FIELD0
 					and ::NTV2_FIELD1 from separate frame buffers, if desired. See CNTV2Card::SetRegisterWriteMode and/or
 					\ref fieldframeinterrupts for more information.
-		@warning	If the designated FrameStore/channel is enabled and in playout mode, and the given frame is within
+		@warning	If the designated FrameStore is enabled and in ::NTV2_MODE_DISPLAY mode, and the given frame is within
 					the frame range being used by another FrameStore/channel, this will likely result in wrong/torn/bad
 					output video. See \ref vidop-fbconflict
-		@warning	If the designated FrameStore/channel is enabled and in playout mode, and the given frame is in
+		@warning	If the designated FrameStore is enabled and in ::NTV2_MODE_DISPLAY mode, and the given frame is in
 					Audio Buffer memory that's in use by a running Audio System, this will likely result in wrong/torn/bad
 					output video. See \ref audioclobber
 		@see		CNTV2Card::GetOutputFrame, \ref vidop-fs
@@ -1272,42 +1286,42 @@ public:
 	AJA_VIRTUAL bool		GetOutputFrame (const NTV2Channel inChannel, ULWord & outValue);
 
 	/**
-		@brief		Sets the current input frame number for the given FrameStore.
-					This identifies which particular frame in device SDRAM will be written after the next frame interrupt.
+		@brief		Sets the input frame index number for the given FrameStore. This identifies which frame in device
+					SDRAM will be written after the next VBI.
 		@param[in]	inChannel	Specifies the FrameStore of interest as an ::NTV2Channel, a zero-based index number.
-		@param[in]	inValue		Specifies the frame number in device memory to be written, which is a zero-based index
-								into each 8/16/32MB block of SDRAM on the device.
+		@param[in]	inValue		Specifies the desired frame index number in device memory to be written. See \ref vidop-fbindexing
+								for more information.
 		@return		True if successful;	 otherwise false.
 		@note		For the effect to be noticeable, the FrameStore should be enabled (see CNTV2Card::EnableChannel)
-					and in ::NTV2_MODE_CAPTURE mode (see CNTV2Card::GetMode and CNTV2Card::SetMode).
+					and in ::NTV2_MODE_CAPTURE mode.
 		@note		Normally, if the device ::NTV2RegisterWriteMode is ::NTV2_REGWRITE_SYNCTOFRAME, the new value takes
 					effect at the next input <b>frame</b> interrupt. For example, if line 300 of frame 5 is currently
 					being written in device memory at the instant this function is called with frame 6, video won't be
 					written into frame 6 in device memory until the input VBI fires after the last line of frame 5 has
 					been written.
 		@note		If the FrameStore's ::NTV2RegisterWriteMode is ::NTV2_REGWRITE_SYNCTOFIELD, the new value takes effect
-					at the next input <b>field</b> interrupt. This makes it possible to capture lines from ::NTV2_FIELD0
+					at the next input <b>field</b> interrupt. This makes it possible to record lines from ::NTV2_FIELD0
 					and ::NTV2_FIELD1 in separate frame buffers, if desired. See CNTV2Card::SetRegisterWriteMode and/or
 					\ref fieldframeinterrupts for more information.
-		@warning	If the designated FrameStore/channel is enabled and in capture mode, and the given frame is within
-					the frame range being used by another FrameStore/channel, this will likely result in torn/bad video
-					in either or both channels. See \ref vidop-fbconflict
-		@warning	If the designated FrameStore/channel is enabled and in capture mode, and the given frame is in
-					Audio Buffer memory that's in use by a running Audio System, this will likely result in torn/bad video
+		@warning	If the designated FrameStore/channel is enabled and in ::NTV2_MODE_CAPTURE mode, and the given frame
+					is within the frame range being used by another FrameStore/channel, this will likely result in torn/bad
+					video in either or both channels. See \ref vidop-fbconflict
+		@warning	If the designated FrameStore/channel is enabled and in ::NTV2_MODE_CAPTURE mode, and the given frame is
+					in Audio Buffer memory that's in use by a running Audio System, this will likely result in torn/bad video
 					and/or bad audio. See \ref audioclobber
 		@see		CNTV2Card::GetInputFrame, \ref vidop-fs
 	**/
 	AJA_VIRTUAL bool		SetInputFrame (const NTV2Channel inChannel, const ULWord inValue);
 
 	/**
-		@brief		Answers with the current input frame number for the given FrameStore.
+		@brief		Answers with the current input frame index number for the given FrameStore.
 					This identifies which particular frame in device SDRAM will be written after the next frame interrupt.
 		@param[in]	inChannel	Specifies the FrameStore of interest as an ::NTV2Channel, a zero-based index number.
 								(The FrameStore should be enabled and set for capture mode.)
-		@param[out] outValue	Receives the input frame number of the frame in device memory to be written, which is a
-								zero-based index into each 8/16/32MB block of SDRAM on the device.
+		@param[out] outValue	Receives the current input frame index number of the frame in device memory being written.
+								See \ref vidop-fbindexing for more information.
 		@return		True if successful;	 otherwise false.
-		@see		CNTV2Card::SetOutputFrame, \ref vidop-fs
+		@see		CNTV2Card::SetInputFrame, \ref vidop-fs
 	**/
 	AJA_VIRTUAL bool		GetInputFrame (const NTV2Channel inChannel, ULWord & outValue);
 
@@ -3748,12 +3762,14 @@ public:
 										::AUTOCIRCULATE_WITH_LTC, ::AUTOCIRCULATE_WITH_ANC, etc.). Defaults to zero (no options).
 		@param[in]	inNumChannels		Optionally specifies the number of channels to operate on when CNTV2Card::AutoCirculateStart or
 										CNTV2Card::AutoCirculateStop are called. Defaults to 1. Must be greater than zero.
-		@param[in]	inStartFrameNumber	Specifies the starting frame number as a zero-based unsigned decimal integer. Defaults to zero.
+		@param[in]	inStartFrameNumber	Specifies the starting frame index number as a zero-based unsigned decimal integer. Defaults to zero.
 										This parameter always overrides \c inFrameCount if, when specified with \c inEndFrameNumber,
-										are both non-zero. If specified, must be less than \c inEndFrameNumber.
+										are both non-zero. If specified, must be less than \c inEndFrameNumber -- see \ref vidop-fbindexing
+										for more information.
 		@param[in]	inEndFrameNumber	Specifies the ending frame number as a zero-based unsigned decimal integer. Defaults to zero.
 										This parameter always overrides \c inFrameCount if, when specified with \c inEndFrameNumber,
-										are both non-zero. If specified, must be less than \c inStartFrameNumber.
+										are both non-zero. If specified, must be larger than \c inStartFrameNumber -- see \ref vidop-fbindexing
+										for more information.
 		@note		For Multi-Channel or 4K/8K applications (i.e. where more than one channel is used for streaming video), AJA
 					recommends specifying zero for \c inFrameCount, and explicitly specifying a frame range using \c inStartFrameNumber
 					and \c inEndFrameNumber parameters.
@@ -3798,12 +3814,14 @@ public:
 										::AUTOCIRCULATE_WITH_LTC, ::AUTOCIRCULATE_WITH_ANC, etc.). Defaults to zero (no options).
 		@param[in]	inNumChannels		Optionally specifies the number of channels to operate on when CNTV2Card::AutoCirculateStart or
 										CNTV2Card::AutoCirculateStop are called. Defaults to 1. Must be greater than zero.
-		@param[in]	inStartFrameNumber	Specifies the starting frame number as a zero-based unsigned decimal integer. Defaults to zero.
+		@param[in]	inStartFrameNumber	Specifies the starting frame index number as a zero-based unsigned decimal integer. Defaults to zero.
 										This parameter always overrides \c inFrameCount if, when specified with \c inEndFrameNumber,
-										are both non-zero. If specified, must be less than \c inEndFrameNumber.
-		@param[in]	inEndFrameNumber	Specifies the ending frame number as a zero-based unsigned decimal integer. Defaults to zero.
+										are both non-zero. If specified, must be less than \c inEndFrameNumber -- see \ref vidop-fbindexing
+										for more information.
+		@param[in]	inEndFrameNumber	Specifies the ending frame index number as a zero-based unsigned decimal integer. Defaults to zero.
 										This parameter always overrides \c inFrameCount if, when specified with \c inEndFrameNumber,
-										are both non-zero. If specified, must be less than \c inStartFrameNumber.
+										are both non-zero. If specified, must be larger than \c inStartFrameNumber -- see \ref vidop-fbindexing
+										for more information.
 		@note		For Multi-Channel or 4K/8K applications (i.e. where more than one channel is used for streaming video), AJA
 					recommends specifying zero for \c inFrameCount, and explicitly specifying a frame range using \c inStartFrameNumber
 					and \c inEndFrameNumber parameters.
