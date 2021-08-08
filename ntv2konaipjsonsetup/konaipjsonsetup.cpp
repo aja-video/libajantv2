@@ -47,7 +47,7 @@ bool CKonaIpJsonSetup::openJson(QString fileName)
     if (err.error != QJsonParseError::NoError)
     {
         qDebug() << "JSON ERROR" << err.errorString() << "offset=" << err.offset;
-        saveData[err.offset = 0];
+        //saveData[err.offset = 0];
         qDebug() << saveData;
         return false;
     }
