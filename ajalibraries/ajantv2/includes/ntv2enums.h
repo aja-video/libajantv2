@@ -1236,15 +1236,15 @@ typedef enum _NTV2VideoFormat
 	)
 
 /**
-	@brief		Identifies the mode of a frame store, either Capture (Input) or Display (Output).
+	@brief		Identifies the mode of a FrameStore, either Capture (Input) or Display (Output).
 	@see		CNTV2Card::SetMode, CNTV2Card::GetMode, \ref vidop-fs
 **/
 typedef enum
 {
-	NTV2_MODE_DISPLAY,							///< @brief Playout (output) mode
-	NTV2_MODE_OUTPUT	= NTV2_MODE_DISPLAY,	///< @brief Output (playout, display) mode
-	NTV2_MODE_CAPTURE,							///< @brief Capture (input) mode
-	NTV2_MODE_INPUT		= NTV2_MODE_CAPTURE,	///< @brief Input (capture) mode
+	NTV2_MODE_DISPLAY,							///< @brief Playout (output) mode, which reads from device SDRAM
+	NTV2_MODE_OUTPUT	= NTV2_MODE_DISPLAY,	///< @brief Output (playout, display) mode, which reads from device SDRAM
+	NTV2_MODE_CAPTURE,							///< @brief Capture (input) mode, which writes into device SDRAM
+	NTV2_MODE_INPUT		= NTV2_MODE_CAPTURE,	///< @brief Input (capture) mode, which writes into device SDRAM
 	NTV2_MODE_INVALID							///< @brief The invalid mode
 } NTV2Mode;
 

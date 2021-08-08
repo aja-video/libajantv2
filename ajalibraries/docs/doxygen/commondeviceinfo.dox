@@ -228,13 +228,13 @@
 
 	@par		PCI Interface
 
-	All NTV2 devices utilize Peripheral Component Interconnect (PCI) or Peripheral Component Interconnect Express (PCIe) to communicate with the host
-	computer system (or with other PCI/PCIe peers on the same host).
+	All NTV2 devices utilize Peripheral Component Interconnect (PCI) or Peripheral Component Interconnect
+	Express (PCIe) to communicate with the host computer system (or with other PCI/PCIe peers on the same host).
 
 	@par		PCI Vendor ID
 
 	All AJA NTV2 devices have the same PCI vendor ID.
-	-	PCI vendor ID:  <b>0xF1D0</b>
+	-	PCI vendor ID:  <b><tt>0xF1D0</tt></b>
 
 	@par		Data Transfer
 
@@ -246,49 +246,23 @@
 	@par		Device Frame Buffer
 
 	All NTV2 devices have a fixed amount of Synchronous Dynamic Random Access Memory (SDRAM).
-	The FPGA is the SDRAM controller, which controls the output of video (and audio and anc)
-	from RAM, the input of video (and audio and anc) into RAM, the PCI interface to/from RAM,
-	and RAM refresh.
+	The FPGA is the SDRAM controller, which controls the output of video (and metadata, such as
+	audio and anc) from RAM, the input of video (and metadata) into RAM, the PCI interface
+	to/from RAM, and RAM refresh.
 
 	@par		Frame Buffer Layout
 
-	The device’s SDRAM is partitioned into a number of equal-sized video <b>frames</b>. The video
-	<b>frame size</b> is always a multiple of 8MB — i.e. 8MB, 16MB or 32MB. On older devices, it’s
-	automatically set by the firmware based on ::NTV2VideoFormat, ::NTV2FrameBufferFormat and
-	::NTV2VANCMode. This legacy behavior is retained in newer devices, but can be overridden
-	programmatically.
-	-	To determine if the ::NTV2Framesize can be changed programmatically,
-		call ::NTV2DeviceSoftwareCanChangeFrameBufferSize.
-	-	To determine the SDRAM that the device has for storing video and audio data,
-		call ::NTV2DeviceGetActiveMemorySize.
-	-	To determine the current ::NTV2Framesize for the device,
-		call CNTV2Card::GetFrameBufferSize. The returned ::NTV2Framesize can be converted
-		into a byte count using ::NTV2FramesizeToByteCount.
-	-	To change (override) the current ::NTV2Framesize for the device,
-		call CNTV2Card::SetFrameBufferSize.
+	The FPGA is programmed with firmware that implements a number of video I/O and signal-processing
+	“widgets”, plus other programming to handle other signal and data I/O.
+	-	The device’s SDRAM is logically partitioned into a number of equal-sized <b>frames</b>.
+	-	The intrinsic <b>frame size</b> used for frame indexing defaults to 8MB, and can be doubled
+		when necessary.
+	-	Call ::NTV2DeviceGetActiveMemorySize to discover a device’s SDRAM complement.
 
 	@image	html	hwref-fig1-sdramfblayout.png
 
-	Video frames are indexed using a zero-based index number. The first byte of the first frame
-	(frame zero) starts at the lowest SDRAM address, and subsequent frames are located at higher
-	addresses from there, as a byte-multiple of the current ::NTV2Framesize. Obviously, larger
-	rasters (e.g. ::NTV2_FG_1920x1080 versus ::NTV2_FG_720x486) and/or deeper frame buffer formats
-	(e.g. ::NTV2_FBF_48BIT_RGB versus ::NTV2_FBF_8BIT_YCBCR) will necessarily result in half as many
-	available frame buffers … while 4K/UHD frames will result in a fourth as many frames.
-	-	To determine the minimum number of 8MB chunks to safely accommodate a given ::NTV2FrameGeometry
-		and ::NTV2FrameBufferFormat, call ::Get8MBFrameSizeFactor.
-
-	@warning	On multi-channel devices, changing a <b>FrameStore</b>’s ::NTV2FrameBufferFormat and/or
-				::NTV2VideoFormat (and/or ::NTV2VANCMode) that results in a 8MB/16MB frame size
-				change (or vice-versa) while another channel is ingesting or playing video will
-				result in at least one bad frame of video in the stream once the device’s memory
-				layout is changed. It can even cause the “start” and “end” frames being
-				AutoCirculated to refer to frames that no longer exist on the device. To prevent
-				this, call CNTV2Card::SetFrameBufferSize to pre-configure the device to use the
-				largest expected ::NTV2Framesize when your application starts.
-
-	@note		The \ref usingntv2watcher tool has a helpful \ref memmapdlog that visually displays
-				how device SDRAM is being used.
+	The vast majority of the SDRAM frames are used for storing video raster data. Audio ring buffer
+	storage is located at the very top of SDRAM, thus the uppermost frame(s) should be avoided for video.
 
 	Video data in the device frame buffer is always stored full-frame. Interlaced video is
 	always stored in the frame buffer with the first line of Field 1 (F1L1) at the top of the
@@ -299,6 +273,11 @@
 	@note	A very <i>very</i> long time ago, AJA had devices that stored all of F1’s lines in
 			the top half of the buffer, and all of F2’s lines in the bottom half. These devices
 			and buffer formats are no longer supported.
+
+	For more information on how SDRAM is used, see:
+	-	\ref vidop-fs
+	-	\ref vidop-fbindexing
+	-	\ref audiooperation
 
 
 
@@ -346,12 +325,14 @@
 		-	\ref aboutautocirculate  users should configure this before calling CNTV2Card::AutoCirculateStart.
 	-	<b>Input Frame</b> — A register whose unsigned integer value designates the specific Frame Buffer in SDRAM
 		that will be written with video frame data (assuming the <b>FrameStore</b> is <b>Enabled</b> and its ::NTV2Mode
-		is NTV2_MODE_CAPTURE, and a valid signal is being received at the <b>FrameStore</b>’s input crosspoint).
+		is ::NTV2_MODE_CAPTURE, and a valid signal is being received at the <b>FrameStore</b>’s input crosspoint).
+		See \ref vidop-fbindexing for more information.
 		-	Call CNTV2Card::GetInputFrame to determine the current <b>Input Frame</b> buffer number.
 		-	Call CNTV2Card::SetInputFrame to change it.
 		-	\ref autocirculatecapture users should ignore this value, as it’s managed automatically.
 	-	<b>Output Frame</b> — A register whose unsigned integer value designates the specific Frame Buffer in SDRAM
 		that will be read (assuming the <b>FrameStore</b> is <b>Enabled</b> and its ::NTV2Mode is ::NTV2_MODE_DISPLAY).
+		See \ref vidop-fbindexing for more information.
 		-	The output video can be monitored <b>if</b> the <b>FrameStore</b>’s output signal is routed to a
 			video output widget, and a monitor is connected to its output connector.)
 		-	Call CNTV2Card::GetOutputFrame to determine the current <b>Output Frame</b> buffer number.
@@ -379,11 +360,11 @@
 	In the SDK, FrameStores are identified by an ::NTV2Channel enumeration and sometimes by a zero-based
 	unsigned integer value, where zero corresponds to ::NTV2_CHANNEL1.
 	-	Call ::NTV2DeviceGetNumFrameStores to determine the number of FrameStores on a given device.
-		This will tell you how many Channels are available for simultaneous Capture and/or Playout streams.
+		This will tell you how many Channels are available for simultaneous Capture and/or Output streams.
 	-	Devices having only one <b>FrameStore</b> are limited to Capturing or Playing a single stream of video at a time.
-	-	Devices with more than one <b>FrameStore</b> can independently ingest or playout more than one video stream
+	-	Devices with more than one <b>FrameStore</b> can independently input or output more than one video stream
 		simultaneously, with each <b>FrameStore</b> accessing SDRAM.
-	-	A few older AJA devices (\ref corvid1corvid3g) had two <b>FrameStore</b>s, but <b>FrameStore 1</b>
+	-	A few older AJA devices (e.g. \ref corvid1corvid3g) had two <b>FrameStore</b>s, but <b>FrameStore 1</b>
 		was dedicated to ::NTV2_MODE_CAPTURE, and <b>FrameStore 2</b> to ::NTV2_MODE_DISPLAY.
 
 	@note	In NTV2 parlance, the terms <b>Channel</b> and <b>FrameStore</b> are often used interchangeably.
@@ -498,7 +479,7 @@
 	-	<b>Frame Offset</b>s are always multiples of the “intrinsic” frame size of the device, which defaults to
 		::NTV2_FRAMESIZE_8MB (8MB).
 	-	The intrinsic frame size applies globally to all FrameStores on the device.
-	-	Call CNTV2Card::GetFramesize to discover the current 
+	-	Call CNTV2Card::GetFrameBufferSize to discover the current intrinsic frame size.
 	-	When any FrameStoreʼs ::NTV2FrameGeometry or ::NTV2PixelFormat changes, the intrinsic frame size can change.
 		Since Frame Offsets are always multiples of the deviceʼs intrinsic frame size, this means that the Frame
 		Offsets for <i>all</i> FrameStores can change whenever <i>any</i> FrameStoreʼs ::NTV2FrameGeometry or
@@ -506,21 +487,21 @@
 	-	The following table shows a sampling of actual raster sizes for three pixel formats:  \ref fbformat10bitycbcr,
 		\ref fbformats8bitrgb, and \ref fbformats48bitrgb.<br />
 		<table>
-			<tr><td>::NTV2FrameGeometry		<td>::NTV2Standard		<td>::NTV2VANCMode	<td><b>Raster</b>	<td>\ref fbformat10bitycbcr	<td>\ref fbformats8bitrgb	<td>\ref fbformats48bitrgb
-			<tr><td>::NTV2_FG_720x486		<td>SD 525i				<td>Off				<td>720×486			<td>0.89 MB					<td>1.33 MB					<td>2.00 MB
-			<tr><td>::NTV2_FG_720x508		<td>SD 525i				<td>Tall			<td>720×508			<td>0.93 MB					<td>1.40 MB					<td>2.09 MB
-			<tr><td>::NTV2_FG_720x514		<td>SD 525i				<td>Taller			<td>720×514			<td>0.94 MB					<td>1.41 MB					<td>2.12 MB
-			<tr><td>::NTV2_FG_720x576		<td>SD 625i				<td>Off				<td>720×576			<td>1.05 MB					<td>1.58 MB					<td>2.37 MB
-			<tr><td>::NTV2_FG_720x598		<td>SD 625i				<td>Tall			<td>720×598			<td>1.09 MB					<td>1.64 MB					<td>2.46 MB
-			<tr><td>::NTV2_FG_720x612		<td>SD 625i				<td>Tall			<td>720×612			<td>1.12 MB					<td>1.68 MB					<td>2.52 MB
-			<tr><td>::NTV2_FG_1280x720		<td>HD 720p				<td>Off				<td>1280×720		<td>2.37 MB					<td>3.52 MB					<td>5.27 MB
-			<tr><td>::NTV2_FG_1280x740		<td>HD 720p				<td>Tall			<td>1280×740		<td>2.44 MB					<td>3.61 MB					<td>5.42 MB
-			<tr><td>::NTV2_FG_1920x1080		<td>HD 1080				<td>Off				<td>1920×1080		<td>5.27 MB					<td>7.91 MB					<td>11.9 MB
-			<tr><td>::NTV2_FG_1920x1112		<td>HD 1080				<td>Taller			<td>1920×1112		<td>5.43 MB					<td>8.14 MB					<td>12.2 MB
-			<tr><td>::NTV2_FG_1920x1114		<td>HD 1080				<td>Tall			<td>1920×1114		<td>5.44 MB					<td>8.16 MB					<td>12.2 MB
-			<tr><td>::NTV2_FG_2048x1080		<td>HD 2K×1080			<td>Off				<td>2048×1080		<td>5.67 MB					<td>8.44 MB					<td>12.7 MB
-			<tr><td>::NTV2_FG_2048x1112		<td>HD 2K×1080			<td>Tall			<td>2048×1112		<td>5.84 MB					<td>8.69 MB					<td>13.0 MB
-			<tr><td>::NTV2_FG_2048x1114		<td>HD 2K×1080			<td>Taller			<td>2048×1114		<td>5.85 MB					<td>8.70 MB					<td>13.1 MB
+			<tr><td>::NTV2FrameGeometry		<td>::NTV2Standard		<td>::NTV2VANCMode	<td><b>Raster</b>	<td><b>10-bit YUV</b>	<td><b>8-bit RGBA</b>	<td><b>48-bit RGB</b>
+			<tr><td>::NTV2_FG_720x486		<td>SD 525i				<td>Off				<td>720×486			<td>0.89 MB				<td>1.33 MB				<td>2.00 MB
+			<tr><td>::NTV2_FG_720x508		<td>SD 525i				<td>Tall			<td>720×508			<td>0.93 MB				<td>1.40 MB				<td>2.09 MB
+			<tr><td>::NTV2_FG_720x514		<td>SD 525i				<td>Taller			<td>720×514			<td>0.94 MB				<td>1.41 MB				<td>2.12 MB
+			<tr><td>::NTV2_FG_720x576		<td>SD 625i				<td>Off				<td>720×576			<td>1.05 MB				<td>1.58 MB				<td>2.37 MB
+			<tr><td>::NTV2_FG_720x598		<td>SD 625i				<td>Tall			<td>720×598			<td>1.09 MB				<td>1.64 MB				<td>2.46 MB
+			<tr><td>::NTV2_FG_720x612		<td>SD 625i				<td>Tall			<td>720×612			<td>1.12 MB				<td>1.68 MB				<td>2.52 MB
+			<tr><td>::NTV2_FG_1280x720		<td>HD 720p				<td>Off				<td>1280×720		<td>2.37 MB				<td>3.52 MB				<td>5.27 MB
+			<tr><td>::NTV2_FG_1280x740		<td>HD 720p				<td>Tall			<td>1280×740		<td>2.44 MB				<td>3.61 MB				<td>5.42 MB
+			<tr><td>::NTV2_FG_1920x1080		<td>HD 1080				<td>Off				<td>1920×1080		<td>5.27 MB				<td>7.91 MB				<td>11.9 MB
+			<tr><td>::NTV2_FG_1920x1112		<td>HD 1080				<td>Taller			<td>1920×1112		<td>5.43 MB				<td>8.14 MB				<td>12.2 MB
+			<tr><td>::NTV2_FG_1920x1114		<td>HD 1080				<td>Tall			<td>1920×1114		<td>5.44 MB				<td>8.16 MB				<td>12.2 MB
+			<tr><td>::NTV2_FG_2048x1080		<td>HD 2K×1080			<td>Off				<td>2048×1080		<td>5.67 MB				<td>8.44 MB				<td>12.7 MB
+			<tr><td>::NTV2_FG_2048x1112		<td>HD 2K×1080			<td>Tall			<td>2048×1112		<td>5.84 MB				<td>8.69 MB				<td>13.0 MB
+			<tr><td>::NTV2_FG_2048x1114		<td>HD 2K×1080			<td>Taller			<td>2048×1114		<td>5.85 MB				<td>8.70 MB				<td>13.1 MB
 		</table>
 	-	After a geometry and/or pixel format change, when the required raster size of <i>any</i> FrameStore exceeds 8MB,
 		the firmware automatically increases the intrinsic frame size to 16MB.
