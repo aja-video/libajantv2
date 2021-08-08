@@ -517,11 +517,11 @@ bool CNTV2MacDriverInterface::CloseLocalPhysical (void)
 			return 0;		//	FINISH THIS
 
 			//	Ask our driver for the "AJAPCISlot" property...
-			pDataObj = OS_IORegistryEntryCreateCFProperty (ioRegistryEntry, CFSTR("AJAPCISlot"), AJA_NULL, 0);
+			pDataObj = OS_IORegistryEntryCreateCFProperty (ioRegistryEntry, CFStringRef("AJAPCISlot"), AJA_NULL, 0);
 			if (pDataObj)
 			{
 				//	Cast the property data to a standard "C" string...
-				pSlotName = ::CFStringGetCStringPtr(static_cast<CFStringRef>(pDataObj), kCFStringEncodingMacRoman);
+				pSlotName = ::CFStringGetCStringPtr(CFStringRef(pDataObj), kCFStringEncodingMacRoman);
 				if (pSlotName)
 				{
 					//	Extract the slot number from the name...
@@ -530,7 +530,7 @@ bool CNTV2MacDriverInterface::CloseLocalPhysical (void)
 					{
 						const char	lastChar (slotName.at (slotName.length () - 1));
 						if (lastChar >= '0' && lastChar <= '9')
-							result = static_cast<ULWord>(lastChar) - static_cast<ULWord>('0');
+							result = ULWord(lastChar) - ULWord('0');
 					}	//	if slotName starts with "Slot"
 				}	//	if pSlotName non-NULL
 				::CFRelease (pDataObj);
