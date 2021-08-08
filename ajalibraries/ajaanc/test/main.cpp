@@ -2348,7 +2348,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			NTV2_POINTER	buff(2048), nullbuff(2048);	buff.Fill(uint64_t(0)); nullbuff.Fill(uint64_t(0));
 			::memcpy(buff.GetHostAddress(0), jeff_data, sizeof(jeff_data));
 			AJAAncillaryList	pkts;
-			AJAAncillaryList::SetFromIPAncData(buff, nullbuff, pkts);
+			AJAAncillaryList::SetFromDeviceAncBuffers(buff, nullbuff, pkts);
 			LOGMYNOTE("JEFFL: " << pkts);
 			if (false)
 				RTPTimingTest();
