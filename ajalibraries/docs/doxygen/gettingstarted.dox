@@ -158,7 +158,8 @@ to 4:4:4 4Kp60 and beyond. As the SDK expanded over the years to support newer, 
 data types and constants remained, which resulted in a very unwieldy and confusing SDK that made it difficult
 for OEM developers to quickly get up to speed.
 
-@subsection	gs-deprecatemacro	The ‘NTV2_DEPRECATE’ Macros
+
+@subsection	gs-deprecationhistory	Deprecation History
 
 Starting with the 11.3 SDK, AJA introduced the first <b>NTV2_DEPRECATE</b> macro, and gathered many of the
 obsolete SDK functions, data types and constants under preprocessor \c #ifdef blocks:
@@ -174,7 +175,7 @@ This means that if the ::NTV2_DEPRECATE macro is undefined, then existing code t
 will continue to compile, link and run.  If the ::NTV2_DEPRECATE macro is defined, then the obsolete APIs
 disappear from the compilation, and build errors will result if they’re used.
 
-Deprecation history:
+
 -	<b>SDK 11.3:</b> ::NTV2_DEPRECATE macro introduced (but not defined anywhere).
 -	<b>SDKs 11.3 - 12.3:</b> Shipped libraries built with old APIs intact (i.e. ::NTV2_DEPRECATE undefined, by default).
 -	<b>SDK 12.4:</b> ::NTV2_DEPRECATE macro first defined in <b>ajatypes.h</b> header file. This was the first SDK
