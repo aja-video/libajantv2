@@ -386,10 +386,11 @@ bool CNTV2Bitfile::SetDesignUserID (const string & inBuffer)
 	ULWord userID (0xffffffff);
 	size_t pos (inBuffer.find("UserID=0X"));
 	if (pos != string::npos	 &&	 pos <= (inBuffer.length() - 17))
+    {
 		//	FUTURE: _userID = aja::stoull(inBuffer.substr(pos+9, 8), AJA_NULL, 16);
 		::sscanf(inBuffer.substr(pos+9, 8).c_str(), "%x", &userID); //	FOR NOW
-
-	if (userID == 0xffffffff)
+    }
+    else
 	{
 		pos = inBuffer.find("UserID=");
 		if (pos != string::npos	 &&	 pos <= (inBuffer.length() - 15))
