@@ -255,14 +255,16 @@
 	The FPGA is programmed with firmware that implements a number of video I/O and signal-processing
 	“widgets”, plus other programming to handle other signal and data I/O.
 	-	The device’s SDRAM is logically partitioned into a number of equal-sized <b>frames</b>.
-	-	The intrinsic <b>frame size</b> used for frame indexing defaults to 8MB, and can be doubled
-		when necessary.
+	-	The intrinsic <b>frame size</b> used for \ref vidop-fbindexing defaults to 8MB (and is doubled
+		when necessary).
 	-	Call ::NTV2DeviceGetActiveMemorySize to discover a device’s SDRAM complement.
 
 	@image	html	hwref-fig1-sdramfblayout.png
 
-	The vast majority of the SDRAM frames are used for storing video raster data. Audio ring buffer
-	storage is located at the very top of SDRAM, thus the uppermost frame(s) should be avoided for video.
+	The vast majority of the SDRAM frames are used for storing video raster data.
+
+	Audio ring buffer storage is located at the very top of SDRAM. As such, the uppermost frame(s)
+	should be avoided for video. See \ref audiooperation for more information.
 
 	Video data in the device frame buffer is always stored full-frame. Interlaced video is
 	always stored in the frame buffer with the first line of Field 1 (F1L1) at the top of the
@@ -274,10 +276,7 @@
 			the top half of the buffer, and all of F2’s lines in the bottom half. These devices
 			and buffer formats are no longer supported.
 
-	For more information on how SDRAM is used, see:
-	-	\ref vidop-fs
-	-	\ref vidop-fbindexing
-	-	\ref audiooperation
+	See \ref videooperation for more details.
 
 
 
@@ -531,7 +530,7 @@
 		-	It can be tricky to determine frame ranges for SD/HD, UHD/4K, and/or UHD2/8K streams that won't interfere with each other.
 		-	UHD/4K frame offsets are 4 times larger than the intrinsic SD/HD offsets.
 		-	UHD2/8K frame offsets are 16 times larger than the intrinsic SD/HD offsets.
-		-	<b>Example:</b> A device with SDRAM for up to 120 × 8MB frames must operate three streams, each with a 9-frame latency:
+		-	<b>Example:</b> A device with SDRAM for up to 120 × 8MB frames must operate three streams, each with a 10-frame latency:
 			-	<b>Channel 1:</b> continuous playout of UHDp60 from 8-bit ARGB;
 			-	<b>Channel 2:</b> Capture various, intermittent video signals up to 1080p as 48-bit RGBA;  the signals come and go;
 			-	<b>Channel 3:</b> Non-stop capture of continuous 525i SD signal as 10-bit YCbCr;
@@ -539,12 +538,13 @@
 				-	The intrinsic frame size of 8MB is too small to accommodate 1080p rasters at 48-bit RGB (11.9MB).
 					Therefore, to avoid glitches, the device will be pre-set to 16MB before starting any streams.
 					The deviceʼs frame capacity is now only 60 × 16MB frames.
-				-	On <b>Channel 1</b>, autocirculateplayout UHD frames 0 thru 9.
+				-	On <b>Channel 1</b>, \ref autocirculateplayout UHD frames 0 thru 9.
 					Because each UHD frame uses 4 intrinsic frames, the first available 16MB frame after this channelʼs
 					buffers is frame 40.
 				-	On <b>Channel 2</b>, when a valid signal is received, \ref autocirculatecapture frames 40 thru 49.
 				-	On <b>Channel 3</b>, \ref autocirculatecapture frames 50 thru 59.
-		-	\ref usingntv2watcher has a \ref memmapdlog that helps visualize device memory utilization.
+		-	\ref usingntv2watcher has a \ref memmapdlog that helps visualize device memory utilization.<br />
+			@image	html	watcher-tool-memmap.png
 
 
 	@subsubsection  vidop-fblocking		Host Buffer Locking
