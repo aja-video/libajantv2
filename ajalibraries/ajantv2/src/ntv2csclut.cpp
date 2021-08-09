@@ -1010,7 +1010,7 @@ bool CNTV2Card::Get12BitLUTTables (NTV2DoubleArray & outRedLUT, NTV2DoubleArray 
 		return false;
 
 	UWordSequence red, green, blue;
-	if (!ReadLUTTables(red, green, blue))
+	if (!Read12BitLUTTables(red, green, blue))
 		return false;
 	if (red.size() != green.size() || green.size() != blue.size())
 		{LUTFAIL("Unexpected size mismatch: R(" << DEC(red.size()) << ")!=G(" << DEC(green.size()) << ")!=B(" << DEC(blue.size()) << ")"); return false;}
