@@ -84,20 +84,18 @@ NTV2_FBF_48BIT_RGB
 // NTV2WidgetIDs
 NTV2_WgtFrameBuffer1
 NTV2_WgtFrameBuffer2
-NTV2_WgtFrameBuffer3
-NTV2_WgtFrameBuffer4
 NTV2_WgtCSC1
 NTV2_WgtCSC2
 NTV2_WgtCSC3
 NTV2_WgtCSC4
+NTV2_WgtCSC5
 NTV2_WgtLUT1
 NTV2_WgtLUT2
 NTV2_WgtLUT3
 NTV2_WgtLUT4
+NTV2_WgtLUT5
 NTV2_Wgt425Mux1
 NTV2_Wgt425Mux2
-NTV2_Wgt425Mux3
-NTV2_Wgt425Mux4
 NTV2_Wgt3GSDIOut1
 NTV2_Wgt3GSDIOut2
 NTV2_Wgt3GSDIOut3
@@ -106,11 +104,11 @@ NTV2_WgtDualLinkV2Out1
 NTV2_WgtDualLinkV2Out2
 NTV2_WgtDualLinkV2Out3
 NTV2_WgtDualLinkV2Out4
-NTV2_WgtMixer1
-NTV2_WgtMixer2
-NTV2_Wgt4KDownConverter
+NTV2_WgtDualLinkV2Out5
 NTV2_WgtHDMIOut1v4
 NTV2_WgtGenLock
+NTV2_WgtSDIMonOut1
+
 
 
 // GetNums		(see 'getnum_canon.gen' for legal values)
@@ -127,17 +125,17 @@ NTV2DeviceGetNum4kQuarterSizeConverters		1
 NTV2DeviceGetNumAnalogAudioInputChannels	0
 NTV2DeviceGetNumAnalogAudioOutputChannels	8
 NTV2DeviceGetNumAudioSystems				4
-NTV2DeviceGetNumCSCs						4
+NTV2DeviceGetNumCSCs						5
 NTV2DeviceGetNumEmbeddedAudioInputChannels	0
 NTV2DeviceGetNumEmbeddedAudioOutputChannels	16
-NTV2DeviceGetNumFrameStores					4
+NTV2DeviceGetNumFrameStores					2
 NTV2DeviceGetNumHDMIAudioOutputChannels		8
 NTV2DeviceGetNumHDMIVideoOutputs			1
-NTV2DeviceGetNumLUTs						4
-NTV2DeviceGetNumMixers						2
+NTV2DeviceGetNumLUTs						5
+NTV2DeviceGetNumMixers						0
 NTV2DeviceGetNumReferenceVideoInputs		0
 NTV2DeviceGetNumVideoInputs					0
-NTV2DeviceGetNumVideoOutputs				4
+NTV2DeviceGetNumVideoOutputs				5
 NTV2DeviceGetNum2022ChannelsSFP1			4
 NTV2DeviceGetNumLTCInputs					1
 
