@@ -86,8 +86,6 @@ NTV2_FBF_10BIT_RAW_YCBCR
 // NTV2WidgetIDs
 NTV2_WgtFrameBuffer1
 NTV2_WgtFrameBuffer2
-NTV2_WgtFrameBuffer3
-NTV2_WgtFrameBuffer4
 NTV2_WgtCSC1
 NTV2_WgtCSC2
 NTV2_WgtCSC3
@@ -108,9 +106,6 @@ NTV2_WgtDualLinkV2Out1
 NTV2_WgtDualLinkV2Out2
 NTV2_WgtDualLinkV2Out3
 NTV2_WgtDualLinkV2Out4
-NTV2_WgtMixer1
-NTV2_WgtMixer2
-NTV2_Wgt4KDownConverter
 NTV2_WgtHDMIOut1v2
 NTV2_WgtGenLock
 
