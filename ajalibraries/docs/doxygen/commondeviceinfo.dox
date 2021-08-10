@@ -438,9 +438,7 @@
 
 	-	Call CNTV2Card::DMAReadFrame or CNTV2Card::DMAWriteFrame to transfer frame data from or to
 		device SDRAM (respectively).
-	-	<b>Frame Number</b> — If non-zero, it will index into device SDRAM by ::NTV2Framesize frames.
-		See the <b>Frame Buffer Layout</b> discussion in the \ref hardwarecharacteristics
-		section for more information.
+	-	<b>Frame Number</b> — See \ref vidop-fbindexing (below) for details.
 	-	<b>Byte Count:</b>
 		-	Should be even, or evenly divisible by 4, or ideally a power of two.
 		-	Small transfers can sometimes be problematic for certain DMA engine firmware in combination
@@ -469,6 +467,11 @@
 	@warning	Accessing memory addresses that are beyond the end of device SDRAM is not recommended,
 				and will result in unexpected behavior — e.g. wrapping around and continuing from the
 				start of device SDRAM.
+
+	\ref aboutautocirculate users should call CNTV2Card::AutoCirculateTransfer to transfer video, audio,
+	and/or ancillary data. By default, it knows the correct frame in device SDRAM to source (for capture)
+	or target (for playback).
+
 
 	@subsubsection	vidop-fbindexing	Frame Buffer Indexing
 
