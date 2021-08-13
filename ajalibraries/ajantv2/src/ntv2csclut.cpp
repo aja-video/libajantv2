@@ -940,35 +940,42 @@ bool CNTV2Card::Write12BitLUTTables (const UWordSequence & inRedLUT, const UWord
 	ULWord	GTableReg(kColorCorrection12BitLUTOffset_Base / 4);
 	ULWord	BTableReg(kColorCorrection12BitLUTOffset_Base / 4);
 
+	Set12BitLUTPlaneSelect(NTV2_REDPLANE);
 	for (size_t ndx(0);	 ndx < NTV2_12BIT_COLORCORRECTOR_WORDSPERTABLE;	 ndx++)
 	{
 		ULWord	loRed(ULWord(inRedLUT[2 * ndx + 0]) & 0xFFF);
 		ULWord	hiRed(ULWord(inRedLUT[2 * ndx + 1]) & 0xFFF);
 
-		ULWord	loGreen = ULWord(inGreenLUT[2 * ndx + 0]) & 0xFFF;
-		ULWord	hiGreen = ULWord(inGreenLUT[2 * ndx + 1]) & 0xFFF;
-
-		ULWord	loBlue = ULWord(inBlueLUT[2 * ndx + 0]) & 0xFFF;
-		ULWord	hiBlue = ULWord(inBlueLUT[2 * ndx + 1]) & 0xFFF;
-
 		ULWord	tmpRed((hiRed << kRegColorCorrection12BitLUTOddShift) + (loRed << kRegColorCorrection12BitLUTEvenShift));
 		if (tmpRed) nonzeroes++;
-		Set12BitLUTPlaneSelect(NTV2_REDPLANE);
 		if (!WriteRegister(RTableReg++, tmpRed))
 			errorCount++;
+	}
+	
+	Set12BitLUTPlaneSelect(NTV2_GREENPLANE);
+	for (size_t ndx(0);	 ndx < NTV2_12BIT_COLORCORRECTOR_WORDSPERTABLE;	 ndx++)
+	{
+		ULWord	loGreen = ULWord(inGreenLUT[2 * ndx + 0]) & 0xFFF;
+		ULWord	hiGreen = ULWord(inGreenLUT[2 * ndx + 1]) & 0xFFF;
 		
 		ULWord	tmpGreen = (hiGreen << kRegColorCorrection12BitLUTOddShift) + (loGreen << kRegColorCorrection12BitLUTEvenShift);
 		if (tmpGreen) nonzeroes++;
-		Set12BitLUTPlaneSelect(NTV2_GREENPLANE);
 		if (!WriteRegister(GTableReg++, tmpGreen))
 			errorCount++;
-		
+	}
+	
+	Set12BitLUTPlaneSelect(NTV2_BLUEPLANE);
+	for (size_t ndx(0);	 ndx < NTV2_12BIT_COLORCORRECTOR_WORDSPERTABLE;	 ndx++)
+	{
+		ULWord	loBlue = ULWord(inBlueLUT[2 * ndx + 0]) & 0xFFF;
+		ULWord	hiBlue = ULWord(inBlueLUT[2 * ndx + 1]) & 0xFFF;
+
 		ULWord	tmpBlue = (hiBlue << kRegColorCorrection12BitLUTOddShift) + (loBlue << kRegColorCorrection12BitLUTEvenShift);
 		if (tmpBlue) nonzeroes++;
-		Set12BitLUTPlaneSelect(NTV2_BLUEPLANE);
 		if (!WriteRegister(BTableReg++, tmpBlue))
 			errorCount++;
 	}
+	
 	if (errorCount) LUTFAIL(GetDisplayName() << " " << DEC(errorCount) << " WriteRegister calls failed");
 	else if (!nonzeroes) LUTWARN(GetDisplayName() << " All zero LUT table values!");
 	return !errorCount;
@@ -1080,30 +1087,39 @@ bool CNTV2Card::Read12BitLUTTables (UWordSequence & outRedLUT, UWordSequence & o
 	outGreenLUT.clear();	outGreenLUT.resize(k12BitLUTArraySize);
 	outBlueLUT.clear();		outBlueLUT.resize(k12BitLUTArraySize);
 
+	Set12BitLUTPlaneSelect(NTV2_REDPLANE);
 	for (size_t ndx(0);	 ndx < k12BitLUTArraySize;	ndx += 2)
 	{
 		ULWord	temp(0);
-		Set12BitLUTPlaneSelect(NTV2_REDPLANE);
 		if (!ReadRegister(RTableReg++, temp))
 			errors++;
 		outRedLUT[ndx + 0] = (temp >> kRegColorCorrection12BitLUTEvenShift) & 0xFFF;
 		outRedLUT[ndx + 1] = (temp >> kRegColorCorrection12BitLUTOddShift ) & 0xFFF;
 		if (temp) nonzeroes++;
-
-		Set12BitLUTPlaneSelect(NTV2_GREENPLANE);
+	}
+	
+	Set12BitLUTPlaneSelect(NTV2_GREENPLANE);
+	for (size_t ndx(0);	 ndx < k12BitLUTArraySize;	ndx += 2)
+	{
+		ULWord	temp(0);
 		if (!ReadRegister(GTableReg++, temp))
 			errors++;
 		outGreenLUT[ndx + 0] = (temp >> kRegColorCorrection12BitLUTEvenShift) & 0xFFF;
 		outGreenLUT[ndx + 1] = (temp >> kRegColorCorrection12BitLUTOddShift ) & 0xFFF;
 		if (temp) nonzeroes++;
+	}
 
-		Set12BitLUTPlaneSelect(NTV2_BLUEPLANE);
+	Set12BitLUTPlaneSelect(NTV2_BLUEPLANE);
+	for (size_t ndx(0);	 ndx < k12BitLUTArraySize;	ndx += 2)
+	{
+		ULWord	temp(0);
 		if (!ReadRegister(BTableReg++, temp))
 			errors++;
 		outBlueLUT[ndx + 0] = (temp >> kRegColorCorrection12BitLUTEvenShift) & 0xFFF;
 		outBlueLUT[ndx + 1] = (temp >> kRegColorCorrection12BitLUTOddShift ) & 0xFFF;
 		if (temp) nonzeroes++;
 	}
+	
 	if (errors) LUTFAIL(GetDisplayName() << " " << DEC(errors) << " ReadRegister calls failed");
 	else if (!nonzeroes) LUTWARN(GetDisplayName() << " All zero LUT table values!");
 	return !errors;
