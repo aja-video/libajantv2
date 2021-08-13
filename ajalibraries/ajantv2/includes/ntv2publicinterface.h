@@ -965,12 +965,14 @@ typedef enum _NTV2HDMIRegisters
 
 typedef enum _NTV2MultiRasterRegisters
 {
-	kRegMRQ1Control = 0x10000,
+	//kRegMRQ1Control = 0x10000,
+	kRegMRQ1Control = 0x3C00,
 	kRegMRQ2Control,
 	kRegMRQ3Control,
 	kRegMRQ4Control,
 	kRegMROutControl,
-	kRegMRSupport = 0x10007
+	//kRegMRSupport = 0x10007
+	kRegMRSupport = 0x3C07
 } NTV2MultiRasterRegisters;
 
 typedef enum
