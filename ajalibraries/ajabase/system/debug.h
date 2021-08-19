@@ -588,7 +588,7 @@ public:
 	 *				AJA_STATUS_OPEN				Debug system not open
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-	static AJAStatus SaveState (char* pFileName);
+	static AJAStatus SaveState (const char * pFileName);
 
 	/**
 	 *	Read group state from a file.
@@ -598,7 +598,7 @@ public:
 	 *				AJA_STATUS_OPEN				Debug system not open
 	 *				AJA_STATUS_NULL				Null output pointer
 	 */
-	static AJAStatus RestoreState (char* pFileName);
+	static AJAStatus RestoreState (const char * pFileName);
 
 	/**
 	 *	@return		The capacity of the debug facility's stats buffer.
