@@ -296,8 +296,6 @@ bool CNTV2WinDriverInterface::CloseLocalPhysical (void)
 
 bool CNTV2WinDriverInterface::ReadRegister (const ULWord inRegNum,	ULWord & outValue,	const ULWord inMask,  const ULWord inShift)
 {
-	if (!IsOpen())
-		return false;
 	if (inShift >= 32)
 	{
 		WDIFAIL("Shift " << DEC(inShift) << " > 31, reg=" << DEC(inRegNum) << " msk=" << xHEX0N(inMask,8));
@@ -307,6 +305,9 @@ bool CNTV2WinDriverInterface::ReadRegister (const ULWord inRegNum,	ULWord & outV
 	if (IsRemote())
 		return CNTV2DriverInterface::ReadRegister (inRegNum, outValue, inMask, inShift);
 #endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (!IsOpen())
+		return false;
+
 	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0));
 
 	KSPROPERTY_AJAPROPS_GETSETREGISTER_S propStruct;
@@ -331,8 +332,6 @@ bool CNTV2WinDriverInterface::ReadRegister (const ULWord inRegNum,	ULWord & outV
 
 bool CNTV2WinDriverInterface::WriteRegister (const ULWord inRegNum,	 const ULWord inValue,	const ULWord inMask, const ULWord inShift)
 {
-	if (!IsOpen())
-		return false;
 	if (inShift >= 32)
 	{
 		WDIFAIL("Shift " << DEC(inShift) << " > 31, reg=" << DEC(inRegNum) << " msk=" << xHEX0N(inMask,8));
@@ -351,6 +350,8 @@ bool CNTV2WinDriverInterface::WriteRegister (const ULWord inRegNum,	 const ULWor
 	if (IsRemote())
 		return CNTV2DriverInterface::WriteRegister(inRegNum, inValue, inMask, inShift);
 #endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (!IsOpen())
+		return false;
 	KSPROPERTY_AJAPROPS_GETSETREGISTER_S propStruct;
 	DWORD dwBytesReturned = 0;
 	NTV2_ASSERT(inShift < 32);
@@ -382,10 +383,10 @@ bool CNTV2WinDriverInterface::WriteRegister (const ULWord inRegNum,	 const ULWor
 // Purpose: Provides a 1 point connection to driver for interrupt calls
 bool CNTV2WinDriverInterface::ConfigureInterrupt (const bool bEnable, const INTERRUPT_ENUMS eInterruptType)
 {
-	if (!IsOpen())
-		return false;
 	if (IsRemote())
 		return CNTV2DriverInterface::ConfigureInterrupt(bEnable, eInterruptType);
+	if (!IsOpen())
+		return false;
 	KSPROPERTY_AJAPROPS_INTERRUPTS_S propStruct;	// boilerplate AVStream Property structure
 	DWORD dwBytesReturned = 0;
 	ZeroMemory (&propStruct,sizeof(KSPROPERTY_AJAPROPS_INTERRUPTS_S));
@@ -410,12 +411,11 @@ bool CNTV2WinDriverInterface::ConfigureInterrupt (const bool bEnable, const INTE
 // Notes:  collects all driver calls for subscriptions in one place
 bool CNTV2WinDriverInterface::ConfigureSubscription (const bool bSubscribe, const INTERRUPT_ENUMS eInterruptType, PULWord & outSubscriptionHdl)
 {
-	if (!IsOpen())
+	if (!IsOpen() && !IsRemote())
 		return false;
 	bool res(CNTV2DriverInterface::ConfigureSubscription (bSubscribe, eInterruptType, outSubscriptionHdl));
 	if (IsRemote())
 		return res;
-
 	// Check for previouse call to subscribe
 	if (bSubscribe	&&	outSubscriptionHdl)
 		return true;	//	Already subscribed
@@ -459,12 +459,12 @@ bool CNTV2WinDriverInterface::ConfigureSubscription (const bool bSubscribe, cons
 // Output: ULONG or equivalent(i.e. ULWord).
 bool CNTV2WinDriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterruptType, ULWord & outCount)
 {
-	if (!IsOpen())
-		return false;
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
 		return CNTV2DriverInterface::GetInterruptCount(eInterruptType, outCount);
 #endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (!IsOpen())
+		return false;
 	KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S propStruct;
 	DWORD dwBytesReturned = 0;
 	ZeroMemory (&propStruct,sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S));
@@ -485,12 +485,12 @@ bool CNTV2WinDriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterrup
 
 bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterruptType, const ULWord timeOutMs)
 {
-	if (!IsOpen())
-		return false;
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
 		return CNTV2DriverInterface::WaitForInterrupt(eInterruptType,timeOutMs);
 #endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (!IsOpen())
+		return false;
 	bool bInterruptHappened = false;	// return value
 
 	HANDLE hEvent (GetInterruptEvent(eInterruptType));
