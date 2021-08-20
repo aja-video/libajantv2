@@ -9,7 +9,7 @@
 
 	-	\ref usingntv2watcher -- A handy debugging utility that shows the inner workings of NTV2 devices.
 
-	-	\ref usingajalogger — A handy viewer for displaying and/or logging messages from the ::AJADebug facility.
+	-	\ref usingajalogger — A handy viewer for displaying and/or recording messages from the ::AJADebug facility.
 
 	-	\ref usingsystemtest -- Measures the DMA performance of any AJA device attached to the host,
 		as well as the read/write performance of local host storage.
@@ -34,7 +34,9 @@
 
 	-	<b>ntv2konaipjsonsetup</b> -- A command-line tool used to configure the \ref konaip from a JSON configuration file.
 
-	-	\ref usinglogreader — A command-line tool for displaying messages from the ::AJADebug facility.
+	-	\ref usinglogreader — A command-line tool that prints messages from the ::AJADebug facility.
+
+	-	\ref usinglogjammer — A command-line tool that generates messages for the ::AJADebug facility.
 
 	-	\ref ntv2thermo -- Interrogates and/or controls temperature-related parameters of connected AJA devices.
 
