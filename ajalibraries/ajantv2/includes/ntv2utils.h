@@ -1074,6 +1074,7 @@ AJAExport std::string NTV2HDMIRangeToString				(const NTV2HDMIRange			inValue,	c
 AJAExport std::string NTV2HDMIColorSpaceToString		(const NTV2HDMIColorSpace		inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
 AJAExport std::string NTV2AudioFormatToString			(const NTV2AudioFormat			inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
 
+AJAExport std::string NTV2BitfileTypeToString			(const NTV2BitfileType			inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.2
 AJAExport bool	convertHDRFloatToRegisterValues			(const HDRFloatValues & inFloatValues,		HDRRegValues & outRegisterValues);
 AJAExport bool	convertHDRRegisterToFloatValues			(const HDRRegValues & inRegisterValues,		HDRFloatValues & outFloatValues);
 AJAExport void	setHDRDefaultsForBT2020					(HDRRegValues & outRegisterValues);
