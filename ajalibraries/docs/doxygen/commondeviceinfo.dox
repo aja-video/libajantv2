@@ -1394,8 +1394,11 @@
 			hardware’s <b>Record Head</b>. Just compare its new position with its old position from the previous frame.
 		-	<b>With AutoCirculate</b> — Use the AUTOCIRCULATE_TRANSFER::GetCapturedAudioByteCount function.
 	-	<b>Playout</b>
-		-	<b>With or Without AutoCirculate</b> — Use ::GetAudioSamplesPerFrame to calculate the number of audio samples to write for
-			the current frame.
+		-	<b>Without AutoCirculate</b> — ::GetAudioSamplesPerFrame will return the <i>recommended</i> number of samples to write
+			for the current frame. It’s important to transfer samples ahead of the <b>Play Head</b> (yet not so far or so many as
+			to overrun it).
+		-	<b>With AutoCirculate</b> — Use ::GetAudioSamplesPerFrame to calculate the number of audio samples to write for
+			the current frame. Transferring more or fewer samples than this number may impel AutoCirculate to reset the audio.
 
 
 	<hr size="50px">
