@@ -11,6 +11,8 @@
 #include "ntv2endian.h"
 #include "ntv2registers2022.h"
 #include "ajabase/system/systemtime.h"
+#include "ajabase/common/common.h"
+#include <ctime>
 #ifdef MSWindows
 	#pragma warning(disable: 4305) // Initialization warnings.
 	#pragma warning(disable: 4309)
@@ -150,6 +152,52 @@ void CNTV2KonaFlashProgram::SetMBReset()
 		//Take SPI bus control
 		WriteRegister(SAREK_REGS + kRegSarekSpiSelect, 0x01);
 	}
+}
+
+bool CNTV2KonaFlashProgram::IsInstalledFWRunning (bool & outIsRunning, ostream & outMsgs)
+{
+	UWord	runningYear(0), runningMonth(0), runningDay(0);
+	outIsRunning = false;
+
+	//	Get running FW date...
+	if (!GetRunningFirmwareDate (runningYear, runningMonth, runningDay))
+		{outMsgs << "## WARNING:  Failed to get running firmware date/time" << endl;  return false;}
+
+	//	Convert running FW date to time_t...
+	std::tm tm;  ::memset(&tm, 0, sizeof(tm));	//	zero
+	tm.tm_year	= int(runningYear) - 1900;		//	Year
+	tm.tm_mon	= int(runningMonth) - 1;		//	Month
+	tm.tm_mday	= int(runningDay);				//	Day
+	tm.tm_hour	= 11;	//	near mid-day
+	tm.tm_isdst	= 0;	//	Standard time (not DST)
+	std::time_t tRunning (std::mktime(&tm));
+
+	//	Read & parse Main installed FW header...
+	if (!ReadHeader(MAIN_FLASHBLOCK))
+		{outMsgs << "## WARNING:  Failed to ReadHeader or ParseHeader" << endl; return false;}
+
+	string installedBuildDate(GetDate());
+	//	TEST: same as running FW date:		ostringstream oss;  oss << DEC(runningYear) << "/" << DEC0N(runningMonth,2) << "/" << DEC0N(runningDay+0,2); installedBuildDate = oss.str();
+	//	TEST: 1 day past running FW date:	ostringstream oss;  oss << DEC(runningYear) << "/" << DEC0N(runningMonth,2) << "/" << DEC0N(runningDay+1,2); installedBuildDate = oss.str();
+	//	TEST: 2 days past running FW date:	ostringstream oss;  oss << DEC(runningYear) << "/" << DEC0N(runningMonth,2) << "/" << DEC0N(runningDay+2,2); installedBuildDate = oss.str();
+	if (installedBuildDate.empty()  ||  installedBuildDate.length() < 10  ||  installedBuildDate.at(4) != '/')
+		{outMsgs << "## WARNING:  Bad installed firmware date '" << installedBuildDate << "'" << endl;  return false;}
+
+	//	Convert installed FW date to time_t...
+	tm.tm_year	= int(aja::stol(installedBuildDate.substr(0, 4))) - 1900;	//	Year
+	tm.tm_mon	= int(aja::stol(installedBuildDate.substr(5, 2))) - 1;		//	Month
+	tm.tm_mday	= int(aja::stol(installedBuildDate.substr(8, 2)));			//	Day
+	tm.tm_hour	= 11;	//	near mid-day
+	tm.tm_isdst	= 0;	//	Standard time (not DST)
+	std::time_t tInstalled (std::mktime(&tm));
+
+	//	Calculate seconds between the two dates...
+	ULWord secsApart (ULWord(::difftime(tInstalled, tRunning)));
+	if (secsApart == 0)
+		outIsRunning = true;		//	Same date
+	else if (secsApart <= 86400)	//	Call them equal even within a day apart
+		{outMsgs << "## WARNING:  Installed firmware date is 1 day past running firmware date" << endl;  outIsRunning = true;}
+	return true;
 }
 
 bool CNTV2KonaFlashProgram::SetBoard(UWord boardNumber, uint32_t index)
@@ -556,23 +604,19 @@ bool CNTV2KonaFlashProgram::ParseHeader(char* headerAddress)
 
 bool CNTV2KonaFlashProgram::ReadHeader(FlashBlockID blockID)
 {
-	uint32_t baseAddress = GetBaseAddressForProgramming(blockID);
+	uint32_t baseAddress (GetBaseAddressForProgramming(blockID));
 	SetFlashBlockIDBank(blockID);
-
-	uint32_t* bitFilePtr =	new uint32_t[MAXBITFILE_HEADERSIZE/4];
-	uint32_t dwordSizeCount = MAXBITFILE_HEADERSIZE/4;
-	for ( uint32_t count = 0; count < dwordSizeCount; count++, baseAddress += 4 )
+	NTV2_POINTER bitFileHeader(MAXBITFILE_HEADERSIZE);
+	const uint32_t dwordSizeCount (bitFileHeader.GetByteCount() / 4);
+	for (uint32_t count(0);  count < dwordSizeCount;  count++, baseAddress += 4)
 	{
 		WriteRegister(kRegXenaxFlashAddress, baseAddress);
 		WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
 		WaitForFlashNOTBusy();
-		ReadRegister(kRegXenaxFlashDOUT, bitFilePtr[count]);
+		ReadRegister(kRegXenaxFlashDOUT, bitFileHeader.U32(count));
 	}
-	bool status = ParseHeader((char*)bitFilePtr);
-	delete [] bitFilePtr;
-	//Make sure to reset bank to lower
-	SetBankSelect(BANK_0);
-
+	const bool status (ParseHeader(bitFileHeader));
+	SetBankSelect(BANK_0);	//	Make sure to reset bank to lower
 	return status;
 }
 

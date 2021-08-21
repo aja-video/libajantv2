@@ -98,6 +98,7 @@ public:
 	bool			ROMHasBankSelect();
 	uint32_t		ReadBankSelect ();
 	void			SetMBReset();
+	bool			IsInstalledFWRunning (bool & outIsRunning, std::ostream & outErrorMsgs);
 
 	std::string & GetDesignName()
 	{
