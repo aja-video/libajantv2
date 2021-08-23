@@ -1195,7 +1195,7 @@ typedef enum _NTV2VideoFormat
 
 #define NTV2_IS_TSI_FORMAT(__f__)									\
 	(	((__f__) >= NTV2_FORMAT_FIRST_UHD_TSI_DEF_FORMAT	&&		\
-		(__f__) < NTV2_FORMAT_FIRST_4K_TSI_DEF_FORMAT	)	)
+		(__f__) < NTV2_FORMAT_END_4K_TSI_DEF_FORMATS	)	)
 
 
 #define NTV2_IS_SQUARE_DIVISION_FORMAT(__f__)						\
