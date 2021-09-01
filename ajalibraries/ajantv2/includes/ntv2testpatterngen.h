@@ -163,26 +163,16 @@ class AJAExport NTV2TestPatternGen
 												const NTV2FormatDescriptor & inFormatDesc,
 												NTV2_POINTER & inBuffer);	//	New in SDK 16.0
 
-		/**
-			@deprecated	Use the DrawTestPattern method that requires an NTV2_POINTER to specify the buffer to fill.
-		**/
-		virtual inline bool		DrawTestPattern (const NTV2TestPatternSelect inPattern,
-												const NTV2FormatDescriptor & inDesc,
-												NTV2TestPatBuffer & outBuffer)
-																				{return DrawTestPattern(inPattern,
-																										inDesc.GetRasterWidth(),
-																										inDesc.GetVisibleRasterHeight(),
-																										inDesc.GetPixelFormat(),
-																										outBuffer);}
 #if !defined(NTV2_DEPRECATE_16_0)
 		/**
 			@deprecated	Use the DrawTestPattern method that requires an NTV2_POINTER to specify the buffer to fill.
 		**/
-		virtual bool			DrawTestPattern (const NTV2TestPatternSelect inPattern,
-												const uint32_t inFrameWidth,
-												const uint32_t inFrameHeight,
-												const NTV2FrameBufferFormat inPixelFormat,
-												NTV2TestPatBuffer & outBuffer);
+		virtual inline NTV2_DEPRECATED_f(bool DrawTestPattern (const NTV2TestPatternSelect inPattern, const NTV2FormatDescriptor & inDesc, NTV2TestPatBuffer & outBuffer))
+										{return DrawTestPattern(inPattern, inDesc.GetRasterWidth(), inDesc.GetVisibleRasterHeight(), inDesc.GetPixelFormat(), outBuffer);}
+		/**
+			@deprecated	Use the DrawTestPattern method that requires an NTV2_POINTER to specify the buffer to fill.
+		**/
+		virtual NTV2_DEPRECATED_f(bool DrawTestPattern (const NTV2TestPatternSelect inPat, const uint32_t inWdth, const uint32_t inHght, const NTV2FrameBufferFormat inPF, NTV2TestPatBuffer & outBuf));
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 		///@}
 

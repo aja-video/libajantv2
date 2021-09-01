@@ -849,8 +849,8 @@ NTV2InputXptID GetFrameBufferInputXptFromChannel (const NTV2Channel inChannel, c
 {
 	static const NTV2InputXptID gFrameBufferInputs []	=	{	NTV2_XptFrameBuffer1Input,	NTV2_XptFrameBuffer2Input,	NTV2_XptFrameBuffer3Input,	NTV2_XptFrameBuffer4Input,
 																NTV2_XptFrameBuffer5Input,	NTV2_XptFrameBuffer6Input,	NTV2_XptFrameBuffer7Input,	NTV2_XptFrameBuffer8Input};
-	static const NTV2InputXptID gFrameBufferBInputs []	=	{	NTV2_XptFrameBuffer1BInput, NTV2_XptFrameBuffer2BInput, NTV2_XptFrameBuffer3BInput, NTV2_XptFrameBuffer4BInput,
-																NTV2_XptFrameBuffer5BInput, NTV2_XptFrameBuffer6BInput, NTV2_XptFrameBuffer7BInput, NTV2_XptFrameBuffer8BInput};
+	static const NTV2InputXptID gFrameBufferBInputs []	=	{	NTV2_XptFrameBuffer1DS2Input, NTV2_XptFrameBuffer2DS2Input, NTV2_XptFrameBuffer3DS2Input, NTV2_XptFrameBuffer4DS2Input,
+																NTV2_XptFrameBuffer5DS2Input, NTV2_XptFrameBuffer6DS2Input, NTV2_XptFrameBuffer7DS2Input, NTV2_XptFrameBuffer8DS2Input};
 	if (NTV2_IS_VALID_CHANNEL (inChannel))
 		return inIsBInput ? gFrameBufferBInputs [inChannel] : gFrameBufferInputs [inChannel];
 	else

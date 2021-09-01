@@ -19,7 +19,7 @@ static const double kTwo24th (double(1 << 24));
 
 static ULWord ConvertCoeffDoubleToULWord (const double inCoefficient)
 {
-	return ULWord(inCoefficient * kTwo24th);
+	return (ULWord)LWord(inCoefficient * kTwo24th);
 }
 
 

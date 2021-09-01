@@ -91,10 +91,10 @@ static const ULWord gChannelToOutputFrameRegNum []		= { kRegCh1OutputFrame, kReg
 
 static const ULWord gChannelToInputFrameRegNum []		= { kRegCh1InputFrame, kRegCh2InputFrame, kRegCh3InputFrame, kRegCh4InputFrame,
 															kRegCh5InputFrame, kRegCh6InputFrame, kRegCh7InputFrame, kRegCh8InputFrame, 0};
-
+#if !defined(NTV2_DEPRECATE_16_2)
 static const ULWord gChannelToPCIAccessFrameRegNum []	= { kRegCh1PCIAccessFrame, kRegCh2PCIAccessFrame, kRegCh3PCIAccessFrame, kRegCh4PCIAccessFrame,
 															kRegCh5PCIAccessFrame, kRegCh6PCIAccessFrame, kRegCh7PCIAccessFrame, kRegCh8PCIAccessFrame, 0};
-
+#endif	//	!defined(NTV2_DEPRECATE_16_2)
 static const ULWord gChannelToRS422ControlRegNum []		= { kRegRS422Control, kRegRS4222Control, 0};
 
 static const ULWord gChannelToSDIOutVPIDARegNum []		= { kRegSDIOut1VPIDA, kRegSDIOut2VPIDA, kRegSDIOut3VPIDA, kRegSDIOut4VPIDA,
@@ -242,7 +242,7 @@ bool CNTV2Card::GetDefaultVideoOutMode(ULWord & outMode)
 // Input:  NTV2VideoFormat
 // Output: NONE
 bool CNTV2Card::SetVideoFormat (const NTV2VideoFormat value, const bool inIsRetail, const bool keepVancSettings, const NTV2Channel inChannel)
-{	AJA_UNUSED(keepVancSettings);
+{	AJA_UNUSED(keepVancSettings)
 	bool ajaRetail(inIsRetail);
 #ifdef	MSWindows
 	NTV2EveryFrameTaskMode mode;
@@ -2486,49 +2486,28 @@ bool CNTV2Card::IsChannelEnabled (const NTV2Channel inChannel, bool & outEnabled
 		return retVal;
 	}
 #endif	//	!defined (NTV2_DEPRECATE)
+#if !defined(NTV2_DEPRECATE_16_2)
+	bool CNTV2Card::SetPCIAccessFrame (const NTV2Channel inChannel, const ULWord inValue, const bool inWaitForVBI)
+	{
+		if (IS_CHANNEL_INVALID(inChannel))
+			return false;
+		const bool result (WriteRegister (gChannelToPCIAccessFrameRegNum[inChannel], inValue));
+		if (inWaitForVBI)
+			WaitForOutputVerticalInterrupt (inChannel);
+		return result;
+	}
 
+	bool CNTV2Card::GetPCIAccessFrame (const NTV2Channel inChannel, ULWord & outValue)
+	{
+		return !IS_CHANNEL_INVALID(inChannel)  &&  ReadRegister (gChannelToPCIAccessFrameRegNum[inChannel], outValue);
+	}
 
-// Method: SetPCIAccessFrame
-// Input:  NTV2Channel,	 ULWord or equivalent(i.e. ULWord).
-// Output: NONE
-bool CNTV2Card::SetPCIAccessFrame (NTV2Channel channel, ULWord value, bool waitForVertical)
-{
-	if (IS_CHANNEL_INVALID (channel))
-		return false;
-	bool result = WriteRegister (gChannelToPCIAccessFrameRegNum [channel], value);
-	if (waitForVertical)
-		WaitForOutputVerticalInterrupt (channel);
-
-	return result;
-}
-
-
-// Method: FlopFlopPage
-// Input:  NTV2Channel
-// Output: NONE
-bool CNTV2Card::FlipFlopPage (const NTV2Channel inChannel)
-{
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
-
-	ULWord pciAccessFrame(0);
-	ULWord outputFrame(0);
-
-	if (GetPCIAccessFrame (inChannel, pciAccessFrame))
-		if (GetOutputFrame (inChannel, outputFrame))
-			if (SetOutputFrame (inChannel, pciAccessFrame))
-				if (SetPCIAccessFrame (inChannel, outputFrame))
-					return true;
-	return false;
-}
-
-
-bool CNTV2Card::GetPCIAccessFrame (const NTV2Channel inChannel, ULWord & outValue)
-{
-	if (IS_CHANNEL_INVALID (inChannel))
-		return false;
-	return ReadRegister (gChannelToPCIAccessFrameRegNum [inChannel], outValue);
-}
+	bool CNTV2Card::FlipFlopPage (const NTV2Channel inCh)
+	{
+		ULWord nextFrm(0), outFrm(0);
+		return !IS_CHANNEL_INVALID(inCh)  &&  GetPCIAccessFrame(inCh, nextFrm)  &&  GetOutputFrame(inCh, outFrm)  &&  SetOutputFrame(inCh, nextFrm)  &&  SetPCIAccessFrame(inCh, outFrm);
+	}
+#endif	//	!defined (NTV2_DEPRECATE_16_2)
 
 bool CNTV2Card::SetOutputFrame (const NTV2Channel inChannel, const ULWord value)
 {
@@ -4709,7 +4688,7 @@ NTV2FrameRate CNTV2Card::GetSDIInputRate (const NTV2Channel channel)
 	NTV2FrameRate currentRate (NTV2_FRAMERATE_INVALID);
 	bool result = ReadRegister(gChannelToSDIInputStatusRegNum[channel], rateLow, gChannelToSDIInputRateMask[channel], gChannelToSDIInputRateShift[channel]);
 	result = ReadRegister(gChannelToSDIInputStatusRegNum[channel], rateHigh, gChannelToSDIInputRateHighMask[channel], gChannelToSDIInputRateHighShift[channel]);
-	AJA_UNUSED(result);
+	AJA_UNUSED(result)
 	currentRate = NTV2FrameRate(((rateHigh << 3) & BIT_3) | rateLow);
 	if(NTV2_IS_VALID_NTV2FrameRate(currentRate))
 		return currentRate;
@@ -4725,7 +4704,7 @@ NTV2FrameGeometry CNTV2Card::GetSDIInputGeometry (const NTV2Channel channel)
 	NTV2FrameGeometry currentGeometry (NTV2_FG_INVALID);
 	bool result = ReadRegister(gChannelToSDIInputStatusRegNum[channel], geometryLow, gChannelToSDIInputGeometryMask[channel], gChannelToSDIInputGeometryShift[channel]);
 	result = ReadRegister(gChannelToSDIInputStatusRegNum[channel], geometryHigh, gChannelToSDIInputGeometryHighMask[channel], gChannelToSDIInputGeometryHighShift[channel]);
-	AJA_UNUSED(result);
+	AJA_UNUSED(result)
 	currentGeometry = NTV2FrameGeometry(((geometryHigh << 3) & BIT_3) | geometryLow);
 	if(NTV2_IS_VALID_NTV2FrameGeometry(currentGeometry))
 		return currentGeometry;

@@ -124,16 +124,16 @@ typedef enum
 	DEVICE_ID_TTAP						= 0x10416000,	///< @brief See \ref ttap
 	DEVICE_ID_TTAP_PRO					= 0x10879000,	///< @brief See \ref ttappro
 #if !defined (NTV2_DEPRECATE_12_6)
-	DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		//	Will deprecate in 12.6
+	DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		 ///< @deprecated	Use ::DEVICE_ID_CORVIDHBR instead.
 #endif	//	NTV2_DEPRECATE_12_6
 #if !defined (NTV2_DEPRECATE_14_0)
-	DEVICE_ID_LHE_PLUS				= DEVICE_ID_KONALHEPLUS,	//	Will deprecate eventually
-	DEVICE_ID_LHI					= DEVICE_ID_KONALHI,		//	Will deprecate eventually
-	DEVICE_ID_LHI_DVI				= DEVICE_ID_KONALHIDVI,		//	Will deprecate eventually
-	DEVICE_ID_KONAIP22				= DEVICE_ID_KONAIP_2022,	//	Will deprecate eventually
-	DEVICE_ID_KONAIP4I				= DEVICE_ID_KONAIP_4CH_2SFP,//	Will deprecate eventually
-	DEVICE_ID_KONAIP_2IN_2OUT		= DEVICE_ID_KONAIP_2022,	//	Will deprecate eventually
-	DEVICE_ID_KONAIP_4I				= DEVICE_ID_KONAIP_4CH_2SFP,//	Will deprecate eventually
+	DEVICE_ID_LHE_PLUS				= DEVICE_ID_KONALHEPLUS,	 ///< @deprecated	Use ::DEVICE_ID_KONALHEPLUS instead.
+	DEVICE_ID_LHI					= DEVICE_ID_KONALHI,		 ///< @deprecated	Use ::DEVICE_ID_KONALHI instead.
+	DEVICE_ID_LHI_DVI				= DEVICE_ID_KONALHIDVI,		 ///< @deprecated	Use ::DEVICE_ID_KONALHIDVI instead.
+	DEVICE_ID_KONAIP22				= DEVICE_ID_KONAIP_2022,	 ///< @deprecated	Use ::DEVICE_ID_KONAIP_2022 instead.
+	DEVICE_ID_KONAIP4I				= DEVICE_ID_KONAIP_4CH_2SFP, ///< @deprecated	Use ::DEVICE_ID_KONAIP_4CH_2SFP instead.
+	DEVICE_ID_KONAIP_2IN_2OUT		= DEVICE_ID_KONAIP_2022,	 ///< @deprecated	Use ::DEVICE_ID_KONAIP_2022 instead.
+	DEVICE_ID_KONAIP_4I				= DEVICE_ID_KONAIP_4CH_2SFP, ///< @deprecated	Use ::DEVICE_ID_KONAIP_4CH_2SFP instead.
 #endif	//	NTV2_DEPRECATE_14_0
 	DEVICE_ID_NOTFOUND				= 0xFFFFFFFF,		///< @brief Invalid or "not found"
 	DEVICE_ID_INVALID				= DEVICE_ID_NOTFOUND

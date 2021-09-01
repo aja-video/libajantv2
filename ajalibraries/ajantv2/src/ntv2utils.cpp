@@ -6838,21 +6838,21 @@ string NTV2InputCrosspointIDToString (const NTV2InputCrosspointID inValue, const
 	switch (inValue)
 	{
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 1", NTV2_XptFrameBuffer1Input);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 1 B", NTV2_XptFrameBuffer1BInput);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 1 B", NTV2_XptFrameBuffer1DS2Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 2", NTV2_XptFrameBuffer2Input);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 2 B", NTV2_XptFrameBuffer2BInput);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 2 B", NTV2_XptFrameBuffer2DS2Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 3", NTV2_XptFrameBuffer3Input);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 3 B", NTV2_XptFrameBuffer3BInput);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 3 B", NTV2_XptFrameBuffer3DS2Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 4", NTV2_XptFrameBuffer4Input);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 4 B", NTV2_XptFrameBuffer4BInput);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 4 B", NTV2_XptFrameBuffer4DS2Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 5", NTV2_XptFrameBuffer5Input);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 5 B", NTV2_XptFrameBuffer5BInput);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 5 B", NTV2_XptFrameBuffer5DS2Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 6", NTV2_XptFrameBuffer6Input);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 6 B", NTV2_XptFrameBuffer6BInput);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 6 B", NTV2_XptFrameBuffer6DS2Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 7", NTV2_XptFrameBuffer7Input);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 7 B", NTV2_XptFrameBuffer7BInput);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 7 B", NTV2_XptFrameBuffer7DS2Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 8", NTV2_XptFrameBuffer8Input);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 8 B", NTV2_XptFrameBuffer8BInput);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "FB 8 B", NTV2_XptFrameBuffer8DS2Input);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "CSC 1 Vid", NTV2_XptCSC1VidInput);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "CSC 1 Key", NTV2_XptCSC1KeyInput);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "CSC 2 Vid", NTV2_XptCSC2VidInput);
