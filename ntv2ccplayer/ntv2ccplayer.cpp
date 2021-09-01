@@ -1032,18 +1032,17 @@ AJAStatus NTV2CCPlayer::SetUpBackgroundPatternBuffer (void)
 		return AJA_STATUS_FAIL;
 	}
 
-	//	Add info to the display...
+	//	Burn static info into the test pattern...
 	const string	strVideoFormat	(CNTV2DemoCommon::StripFormatString (::NTV2VideoFormatToString(mConfig.fVideoFormat)));
-	{ostringstream	oss;	oss << setw(32) << left << string("CCPlayer ") + strVideoFormat + string(formatDesc.IsVANC() ? " VANC" : "");
-	CNTV2CaptionRenderer::BurnString (oss.str (), NTV2Line21Attributes (NTV2_CC608_White, NTV2_CC608_Cyan),
-										formatDesc.GetTopVisibleRowAddress(AsUBytePtr(mVideoBuffer.GetHostPointer())),
-										formatDesc.GetVisibleRasterDimensions(), mConfig.fPixelFormat,
-										UWord(formatDesc.GetBytesPerRow()),  1, 1);	}	//	row 1, col 1
-	{ostringstream	oss;	oss << formatDesc.GetRasterWidth() << "Wx" << formatDesc.GetFullRasterHeight() << "H  " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, true) << string (20, ' ');
-	CNTV2CaptionRenderer::BurnString (oss.str (), NTV2Line21Attributes (NTV2_CC608_White, NTV2_CC608_Cyan),
-										formatDesc.GetTopVisibleRowAddress(AsUBytePtr(mVideoBuffer.GetHostPointer())),
-										formatDesc.GetVisibleRasterDimensions(), mConfig.fPixelFormat,
-										UWord(formatDesc.GetBytesPerRow()),  2, 1);	}	//	row 2, col 1
+	{	ostringstream oss;
+		oss	<< setw(32) << left << string("CCPlayer ") + strVideoFormat + string(formatDesc.IsVANC() ? " VANC" : "");
+		CNTV2CaptionRenderer::BurnString (oss.str(), NTV2Line21Attributes(NTV2_CC608_White, NTV2_CC608_Cyan), mVideoBuffer, formatDesc, 1, 1);	//	R1C1
+	}
+	{	ostringstream oss;
+		oss	<< formatDesc.GetRasterWidth() << "Wx" << formatDesc.GetFullRasterHeight() << "H  "
+			<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, true) << string(20, ' ');
+		CNTV2CaptionRenderer::BurnString (oss.str(), NTV2Line21Attributes(NTV2_CC608_White, NTV2_CC608_Cyan), mVideoBuffer, formatDesc, 2, 1);	//	R2C1
+	}
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetUpBackgroundPatternBuffer
@@ -1777,9 +1776,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 				tcOK = xferInfo.SetOutputTimeCodes(timecodes);
 			}
 			::memcpy (tcString + colShift, rp188.GetRP188CString(), 11);
-			CNTV2CaptionRenderer::BurnString (tcString, tcOK ? kBlueOnWhite : kRedOnYellow,
-											formatDesc.GetTopVisibleRowAddress(reinterpret_cast<UByte*>(mVideoBuffer.GetHostPointer())),
-											formatDesc.GetVisibleRasterDimensions(), mConfig.fPixelFormat, UWord(bytesPerRow), 3, 1);
+			CNTV2CaptionRenderer::BurnString (tcString, tcOK ? kBlueOnWhite : kRedOnYellow, mVideoBuffer, formatDesc, 3, 1);	//	R3C1
 		}	//	if not suppressing timecode injection
 
 		if (!pAudioBuffer.IsNULL())

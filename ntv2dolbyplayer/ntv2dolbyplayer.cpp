@@ -501,26 +501,15 @@ AJAStatus NTV2DolbyPlayer::SetUpTestPatternVideoBuffers (void)
 		mTestPatternVideoBuffers [testPatternIndex] = new uint8_t[mVideoBufferSize];
 
 		//	Use the test pattern generator to fill an NTV2TestPatternBuffer...
-		NTV2TestPatternBuffer	testPatternBuffer;
 		NTV2TestPatternGen		testPatternGen;
         NTV2FormatDescriptor	formatDesc	(mVideoFormat, mPixelFormat, NTV2_VANCMODE_OFF);
+        NTV2_POINTER			vidBuffer	(mTestPatternVideoBuffers [testPatternIndex], mVideoBufferSize);
 
-		if (!testPatternGen.DrawTestPattern (testPatternTypes[testPatternIndex],
-											formatDesc.numPixels,
-											formatDesc.numLines - formatDesc.firstActiveLine,
-											mPixelFormat,
-											testPatternBuffer))
+		if (!testPatternGen.DrawTestPattern (testPatternTypes[testPatternIndex],  formatDesc, vidBuffer))
 		{
 			cerr << "## ERROR:  DrawTestPattern failed, formatDesc: " << formatDesc << endl;
 			return AJA_STATUS_FAIL;
 		}
-
-		const size_t	testPatternSize	(testPatternBuffer.size ());
-
-		//	Copy the contents of the test pattern buffer into my video buffer...
-		uint8_t *	pVideoBuffer	(mTestPatternVideoBuffers[testPatternIndex] + formatDesc.firstActiveLine * formatDesc.linePitch * 4);
-		for (size_t ndx(0);  ndx < testPatternSize;  ndx++)
-			pVideoBuffer[ndx] = testPatternBuffer[ndx];
 
 	}	//	for each test pattern
 
