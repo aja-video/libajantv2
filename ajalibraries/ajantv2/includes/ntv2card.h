@@ -1245,9 +1245,6 @@ public:
 	AJA_VIRTUAL bool		SetAlphaFromInput2Bit (ULWord inValue);
 	AJA_VIRTUAL bool		GetAlphaFromInput2Bit (ULWord & outValue);
 
-	AJA_VIRTUAL bool		SetPCIAccessFrame (const NTV2Channel inChannel, const ULWord inValue, const bool inWaitForVertical = true);
-	AJA_VIRTUAL bool		GetPCIAccessFrame (const NTV2Channel inChannel, ULWord & outValue);
-
 	/**
 		@brief		Sets the output frame index number for the given FrameStore. This identifies which frame in device
 					SDRAM will be used for playout after the next VBI.
@@ -1399,32 +1396,29 @@ public:
 	AJA_VIRTUAL bool		GetPulldownMode (NTV2Channel inChannel, bool & outValue);
 
 	/**
-		@brief		Swaps the values stored in the PCI access frame and output frame registers for the given FrameStore (channel).
-		@param[in]	inChannel	Specifies the channel (FrameStore) of interest.
-		@return		True if successful;	 otherwise false.
-	**/
-	AJA_VIRTUAL bool		FlipFlopPage (const NTV2Channel inChannel);
-
-	/**
-		@brief		Answers with the line offset into the frame currently being read (playout) or written
-					(capture) for FrameStore 1.
-		@param[out] outValue	Receives the line number being read or written for ::NTV2_CHANNEL1.
+		@brief		Answers with the line offset into the frame currently being read (::NTV2_MODE_DISPLAY) or written
+					(::NTV2_MODE_CAPTURE) for FrameStore 1.
+		@param[out] outValue	Receives the line number currently being read or written.
 		@return		True if successful;	 otherwise false.
 	**/
 	AJA_VIRTUAL bool		ReadLineCount (ULWord & outValue);
 
-
+#if !defined(NTV2_DEPRECATE_16_2)
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool FlipFlopPage (const NTV2Channel inChannel)); ///< @deprecated	Declared obsolete starting in SDK 16.2. Swapped the PCI access frame and output frame registers at the next output VBI.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetPCIAccessFrame (const NTV2Channel inChannel, const ULWord inValue, const bool inWaitForVBI = true)); ///< @deprecated	Declared obsolete starting in SDK 16.2. The "PCI Access Frame" register had no effect on the hardware, but was used to store the next/pending output frame.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetPCIAccessFrame (const NTV2Channel inChannel, ULWord & outValue)); ///< @deprecated	Declared obsolete starting in SDK 16.2. The "PCI Access Frame" register had no effect on the hardware, but was used to store the next/pending output frame.
+#endif	//	!defined(NTV2_DEPRECATE_16_2)
 #if !defined(NTV2_DEPRECATE_16_0)
 	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetEnableVANCData (const NTV2ChannelSet & inChannels, const bool inVANCenable, const bool inTallerVANC = false))	{return SetVANCMode(inChannels, NTV2VANCModeFromBools(inVANCenable, inTallerVANC));}
 	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Standard st, const NTV2FrameGeometry fg,
 																	const NTV2Channel inChannel = NTV2_CHANNEL1))	{(void) st; (void) fg; return SetVANCMode(inVancMode, inChannel);}
+	#define Set425FrameEnable	SetTsiFrameEnable	//	Replace calls to Set425FrameEnable with calls to SetTsiFrameEnable instead
+	#define Get425FrameEnable	GetTsiFrameEnable	//	Replace calls to Get425FrameEnable with calls to GetTsiFrameEnable instead
 #endif	//	NTV2_DEPRECATE_16_0
 #if !defined(NTV2_DEPRECATE_15_2)
-	AJA_VIRTUAL inline bool NTV2_DEPRECATED_f(GetQuadFrameEnable (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1))	{ bool enb(false); if(!GetQuadFrameEnable(enb, inChannel)) return false; outValue = enb?1:0; return true; }		///< @deprecated	Call the 'bool &' flavor of this function instead.
-	AJA_VIRTUAL inline bool NTV2_DEPRECATED_f(GetQuadQuadFrameEnable (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1))	{ bool enb(false); if(!GetQuadQuadFrameEnable(enb, inChannel)) return false; outValue = enb?1:0; return true; } ///< @deprecated	Call the 'bool &' flavor of this function instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetQuadFrameEnable (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1))	{ bool enb(false); if(!GetQuadFrameEnable(enb, inChannel)) return false; outValue = enb?1:0; return true; }		///< @deprecated	Call the 'bool &' flavor of this function instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetQuadQuadFrameEnable (ULWord & outValue, const NTV2Channel inChannel = NTV2_CHANNEL1))	{ bool enb(false); if(!GetQuadQuadFrameEnable(enb, inChannel)) return false; outValue = enb?1:0; return true; } ///< @deprecated	Call the 'bool &' flavor of this function instead.
 #endif	//	NTV2_DEPRECATE_15_2
-#define Set425FrameEnable	SetTsiFrameEnable
-#define Get425FrameEnable	GetTsiFrameEnable
 
 
 	/**
@@ -2884,14 +2878,12 @@ public:
 #endif
 	///@}
 
-	//
-	//	OEM Mapping to Userspace Functions
-	//
 #if !defined(NTV2_DEPRECATE_16_0)
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool GetBaseAddress(NTV2Channel channel, ULWord **pBaseAddress));
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool GetBaseAddress(ULWord **pBaseAddress));
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool GetRegisterBaseAddress(ULWord regNumber, ULWord ** pRegAddress));	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool GetXena2FlashBaseAddress(ULWord ** pXena2FlashAddress));
+	//	OEM Mapping to Userspace Functions
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetBaseAddress(NTV2Channel channel, ULWord **pBaseAddress));	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetBaseAddress(ULWord **pBaseAddress));	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetRegisterBaseAddress(ULWord regNumber, ULWord ** pRegAddress));	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetXena2FlashBaseAddress(ULWord ** pXena2FlashAddress));	///< @deprecated	Obsolete starting in SDK 16.0.
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 
 	//

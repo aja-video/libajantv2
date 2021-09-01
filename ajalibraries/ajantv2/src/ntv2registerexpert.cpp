@@ -549,8 +549,8 @@ private:
 		DefineXptReg	(kRegXptSelectGroup30,	NTV2_XptSDIOut8Input,			NTV2_XptSDIOut8InputDS2,		NTV2_XptCSC6VidInput,			NTV2_XptCSC6KeyInput);
 		DefineXptReg	(kRegXptSelectGroup32,	NTV2_Xpt425Mux1AInput,			NTV2_Xpt425Mux1BInput,			NTV2_Xpt425Mux2AInput,			NTV2_Xpt425Mux2BInput);
 		DefineXptReg	(kRegXptSelectGroup33,	NTV2_Xpt425Mux3AInput,			NTV2_Xpt425Mux3BInput,			NTV2_Xpt425Mux4AInput,			NTV2_Xpt425Mux4BInput);
-		DefineXptReg	(kRegXptSelectGroup34,	NTV2_XptFrameBuffer1BInput,		NTV2_XptFrameBuffer2BInput,		NTV2_XptFrameBuffer3BInput,		NTV2_XptFrameBuffer4BInput);
-		DefineXptReg	(kRegXptSelectGroup35,	NTV2_XptFrameBuffer5BInput,		NTV2_XptFrameBuffer6BInput,		NTV2_XptFrameBuffer7BInput,		NTV2_XptFrameBuffer8BInput);
+		DefineXptReg	(kRegXptSelectGroup34,	NTV2_XptFrameBuffer1DS2Input,	NTV2_XptFrameBuffer2DS2Input,	NTV2_XptFrameBuffer3DS2Input,	NTV2_XptFrameBuffer4DS2Input);
+		DefineXptReg	(kRegXptSelectGroup35,	NTV2_XptFrameBuffer5DS2Input,	NTV2_XptFrameBuffer6DS2Input,	NTV2_XptFrameBuffer7DS2Input,	NTV2_XptFrameBuffer8DS2Input);
 		DefineXptReg	(kRegXptSelectGroup36,	NTV2_XptMultiLinkOut1Input,		NTV2_XptMultiLinkOut1InputDS2,	NTV2_INPUT_CROSSPOINT_INVALID,	NTV2_INPUT_CROSSPOINT_INVALID);
 		
 
