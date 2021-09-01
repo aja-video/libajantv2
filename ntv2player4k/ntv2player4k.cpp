@@ -1378,21 +1378,11 @@ void NTV2Player4K::SetUpTestPatternVideoBuffers (void)
 		mTestPatternBuffers[tpIndex] = reinterpret_cast<uint8_t*>(AJAMemory::AllocateAligned (mVideoBufferSize, BUFFER_ALIGNMENT));
 
 		//	Use the test pattern generator to fill an NTV2TestPatternBuffer...
-		NTV2TestPatternBuffer	testPatternBuffer;
 		NTV2TestPatternGen		testPatternGen;
 		NTV2FormatDescriptor	formatDesc	(mConfig.fVideoFormat, mConfig.fPixelFormat);
+		NTV2_POINTER			vidBuffer	(mTestPatternBuffers[tpIndex],  mVideoBufferSize);
 
-		testPatternGen.DrawTestPattern (testPatternTypes [tpIndex],
-										formatDesc.numPixels,
-										formatDesc.numLines,
-										mConfig.fPixelFormat,
-										testPatternBuffer);
-
-		//	Copy the contents of the test pattern buffer into my 'C' array, for quick "memcpy" into each frame...
-		const size_t	testPatternSize	(testPatternBuffer.size());
-		uint8_t * const	pVideoBuffer	(mTestPatternBuffers[tpIndex]);
-		for (size_t ndx(0);  ndx < testPatternSize;  ndx++)
-			pVideoBuffer[ndx] = testPatternBuffer[ndx];
+		testPatternGen.DrawTestPattern (testPatternTypes [tpIndex], formatDesc,	vidBuffer);
 
 #ifdef NTV2_BUFFER_LOCK
 		if (mTestPatternBuffers[tpIndex] != AJA_NULL)
