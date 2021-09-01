@@ -2640,36 +2640,32 @@ bool CNTV2Card::GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct)
 	return true;
 }
 
-bool CNTV2Card::ProgramMainFlash(const char *fileName, bool bForceUpdate, bool bQuiet)
+bool CNTV2Card::ProgramMainFlash (const string & inFileName, const bool bInForceUpdate, const bool bInQuiet)
 {
-	CNTV2KonaFlashProgram thisDevice;
-	thisDevice.SetBoard(GetIndexNumber());
-	try
-	{
-		if (bQuiet)
-			thisDevice.SetQuietMode();
-		thisDevice.SetBitFile(fileName, MAIN_FLASHBLOCK);
-		if(bForceUpdate)
-			thisDevice.SetMBReset();
-		thisDevice.Program(false);
-	}
-	catch (const char* Message)
-	{
-		(void)Message;
-		return false;
-	}
-	return true;
+	CNTV2KonaFlashProgram devFlasher(GetIndexNumber());
+	if (bInQuiet)
+		devFlasher.SetQuietMode();
+	ostringstream msgs;
+	string	progResults;
+	const bool ok(devFlasher.SetBitFile(inFileName, msgs, MAIN_FLASHBLOCK));
+	if (bInForceUpdate)
+		devFlasher.SetMBReset();
+	if (ok)
+		progResults = devFlasher.Program(false);
+	else
+		{AJA_sERROR(AJA_DebugUnit_UserGeneric, INSTP(this) << "::" << AJAFUNC << ": " << msgs.str());  return false;}
+	if (!progResults.empty())
+		AJA_sERROR(AJA_DebugUnit_UserGeneric, INSTP(this) << "::" << AJAFUNC << ": " << progResults);
+	return progResults.empty();
 }
 
 bool CNTV2Card::GetRunningFirmwarePackageRevision (ULWord & outRevision)
 {
 	outRevision = 0;
 	if (!IsOpen())
-		return false;
-
+		return false;	//	Not open
 	if (!IsIPDevice())
-		return false;
-
+		return false;	//	No MicroBlaze
 	return ReadRegister(kRegSarekPackageVersion + SAREK_REGS, outRevision);
 }
 

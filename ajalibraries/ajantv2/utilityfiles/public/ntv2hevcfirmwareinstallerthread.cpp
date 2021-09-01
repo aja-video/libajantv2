@@ -2080,5 +2080,3 @@ bool CNTV2HEVCFirmwareInstallerThread::WriteRegisterBar4(ULWord address, ULWord 
 
 	return result;
 }
-
-

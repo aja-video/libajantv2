@@ -19,10 +19,7 @@
 #include "ntv2debug.h"
 #include "ntv2mcsfile.h"
 #include "ntv2spiinterface.h"
-
-#if defined(AJALinux) || defined(AJAMac)
-#include <netinet/in.h> // htons and friends
-#endif
+#include "ntv2bitfile.h"
 
 #define MAXBITFILE_HEADERSIZE 512
 #define MAXMCSINFOSIZE 256
@@ -79,14 +76,13 @@ public:
 	virtual bool	SetBoard (UWord boardNumber, uint32_t index = 0);
 	bool			ReadHeader (FlashBlockID flashBlock);
 	bool			ReadInfoString();
-	void			SetBitFile (const char *bitFileName, FlashBlockID blockNumber = AUTO_FLASHBLOCK);
-	bool			SetBitFile (const std::string & inBitfileName, const FlashBlockID blockNumber = AUTO_FLASHBLOCK);	//	New in SDK 16.0
-	bool			SetMCSFile (const char *sMCSFileName);
-	void			Program (bool fullVerify = false);
+	bool			SetBitFile (const std::string & inBitfileName, std::ostream & outMsgs, const FlashBlockID blockNumber = AUTO_FLASHBLOCK);	//	New in SDK 16.0
+	bool			SetMCSFile (const std::string & sMCSFileName);
+	std::string		Program (bool fullVerify = false);
 	bool			ProgramFromMCS(bool verify);
 	bool			ProgramSOC(bool verify = true);
-	void			ProgramCustom ( const char *sCustomFileName, const uint32_t addr);
-	void			EraseBlock (FlashBlockID blockNumber);
+	bool			ProgramCustom (const std::string & sCustomFileName, const uint32_t addr, std::ostream & outMsgs);
+	bool			EraseBlock (FlashBlockID blockNumber);
 	bool			EraseChip (UWord chip = 0);
 	bool			CreateSRecord (bool bChangeEndian);
 	bool			CreateEDIDIntelRecord ();
@@ -97,48 +93,28 @@ public:
 	bool			SetFlashBlockIDBank(FlashBlockID blockID);
 	bool			ROMHasBankSelect();
 	uint32_t		ReadBankSelect ();
-	void			SetMBReset();
+	bool			SetMBReset();
 	bool			IsInstalledFWRunning (bool & outIsRunning, std::ostream & outErrorMsgs);
 
-	std::string & GetDesignName()
-	{
-		size_t index = _designName.find("HW_TIMEOUT");
-		if(index != std::string::npos)
-		{
-			_designName.erase(index - 1, _designName.length()-1);
-		}
-		index = _designName.find("UserID");
-		if(index != std::string::npos)
-		{
-			_designName.erase(index - 1, _designName.length() - 1);
-		}
-		return _designName;
-	}
-	const std::string & GetPartName (void) const	{return _partName;}
-	const std::string & GetDate (void) const		{return _date;}
-	const std::string & GetTime (void) const		{return _time;}
-	uint32_t GetNumBytes(void) const				{return _numBytes;}
-	std::string & GetMCSInfo(void)
-	{
-		std::string::size_type f = _mcsInfo.find("\xFF\xFF");
-		_mcsInfo = _mcsInfo.substr(0, f);
-		return _mcsInfo;
-	}
-
+	std::string		GetDesignName (void) const	{return _parser.DesignName();}
+	std::string		GetPartName (void) const	{return _parser.PartName();}
+	std::string		GetDate (void) const		{return _parser.Date();}
+	std::string		GetTime (void) const		{return _parser.Time();}
+	uint32_t		GetNumBytes(void) const		{return _numBytes;}
+	const std::string &	GetMCSInfo (void) const	{return _mcsInfo;}
 	void ParsePartitionFromFileLines(uint32_t address, uint16_t & partitionOffset);
 	bool CreateBankRecord(BankSelect bankID);
 
 	bool ProgramMACAddresses(MacAddr * mac1, MacAddr * mac2);
 	bool ReadMACAddresses(MacAddr & mac1, MacAddr & mac2);
-	bool ProgramLicenseInfo(std::string licenseString);
-	bool ReadLicenseInfo(std::string& licenseString);
+	bool ProgramLicenseInfo(const std::string & licenseString);
+	bool ReadLicenseInfo(std::string & licenseString);
 	void DisplayData(uint32_t address, uint32_t len);
 	bool ProgramInfoFromString(std::string infoString);
-	void FullProgram(std::vector<uint8_t> & dataBuffer);
+	bool FullProgram(std::vector<uint8_t> & dataBuffer);
 
 	int32_t	 NextMcsStep() {return ++_mcsStep;}
 
-	bool ParseHeader(char* headerAddress);
 	bool WaitForFlashNOTBusy();
 	bool ProgramFlashValue(uint32_t address, uint32_t value);
 	bool FastProgramFlash256(uint32_t address, uint32_t* buffer);
@@ -147,7 +123,7 @@ public:
 	uint32_t ReadDeviceID();
 	bool SetDeviceProperties();
 	void DetermineFlashTypeAndBlockNumberFromFileName(const std::string & bitFileName);
-	void SRecordOutput (const char *pSRecord);
+	static void SRecordOutput (const char *pSRecord);
 
 	uint32_t GetSectorAddressForSector(FlashBlockID flashBlockNumber,uint32_t sectorNumber)
 	{
@@ -190,14 +166,11 @@ public:
 	bool MakeMACsFromSerial( const char *sSerialNumber, MacAddr *pMac1, MacAddr *pMac2 );
 
 protected:
-	uint8_t *		_bitFileBuffer;
+	NTV2_POINTER	_bitFileBuffer;
 	uint8_t *		_customFileBuffer;
 	uint32_t		_bitFileSize;
+	NTV2BitfileHeaderParser	_parser;
 	std::string		_bitFileName;
-	std::string		_date;
-	std::string		_time;
-	std::string		_designName;
-	std::string		_partName;
 	std::string		_mcsInfo;
 	uint32_t		_spiDeviceID;
 	uint32_t		_flashSize;

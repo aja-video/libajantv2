@@ -65,8 +65,7 @@ int NeedsFirmwareUpdate (const NTV2DeviceInfo & inDeviceInfo, string & outReason
 	if (firmwarePath.find(".mcs") != std::string::npos)
 	{
 		//	We have an mcs file?
-		CNTV2KonaFlashProgram kfp;
-		kfp.SetBoard(device.GetIndexNumber());
+		CNTV2KonaFlashProgram kfp (device.GetIndexNumber());
 		kfp.GetMCSInfo();
 		if (!mcsFile.GetMCSHeaderInfo(firmwarePath))
 			{outReason = "MCS File open failed";	return kFirmwareUpdateCheckFailed;}
@@ -200,18 +199,13 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 			return AJA_STATUS_FAIL;
 		}
 
+		CNTV2MCSfile mcsFile;
+		mcsFile.GetMCSHeaderInfo(m_bitfilePath);
+		if (!m_forceUpdate  &&  !ShouldUpdateIPDevice(m_deviceInfo.deviceID, mcsFile.GetBitfileDesignString()))
 		{
-			CNTV2MCSfile mcsFile;
-			mcsFile.GetMCSHeaderInfo(m_bitfilePath);
-			if (!m_forceUpdate)
-			{
-				if (!ShouldUpdate(m_deviceInfo.deviceID, mcsFile.GetBitfileDesignString()))
-				{
-					cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Invalid MCS update" << endl;
-					m_updateSuccessful = false;
-					return AJA_STATUS_BAD_PARAM;
-				}
-			}
+			cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Invalid MCS update" << endl;
+			m_updateSuccessful = false;
+			return AJA_STATUS_BAD_PARAM;
 		}
 
 		m_device. WriteRegister(kVRegFlashStatus, ULWord(kfp.NextMcsStep()));
@@ -223,79 +217,70 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 			return AJA_STATUS_FAIL;
 		}
 
-		if(m_forceUpdate)
+		if (m_forceUpdate)
 			kfp.SetMBReset();
-		rv = kfp.ProgramFromMCS(true);
-		if (!rv)
+		m_updateSuccessful = kfp.ProgramFromMCS(true);
+		if (!m_updateSuccessful)
 		{
 			cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  ProgramFromMCS failed" << endl;
-			m_updateSuccessful = false;
 			return AJA_STATUS_FAIL;
 		}
 
-		m_updateSuccessful = true;
 		m_device.WriteRegister(kVRegFlashState,kProgramStateFinished);
 		m_device.WriteRegister(kVRegFlashSize,MCS_STEPS);
 		m_device.WriteRegister(kVRegFlashStatus,MCS_STEPS);
 
 		cout << "## NOTE:  CNTV2FirmwareInstallerThread:  MCS update succeeded" << endl;
 		return AJA_STATUS_SUCCESS;
-	}
-	else
+	}	//	if MCS
+
+	if (m_useDynamicReconfig)
 	{
-		if(m_useDynamicReconfig)
+		m_device.AddDynamicDirectory(::NTV2GetFirmwareFolderPath());
+		if (!m_device.CanLoadDynamicDevice(m_desiredID))
 		{
-			m_device.AddDynamicDirectory(::NTV2GetFirmwareFolderPath());
-			if(!m_device.CanLoadDynamicDevice(m_desiredID))
-			{
-				cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread: '" << m_desiredID << "' is not compatible with device '"
-						<< m_deviceInfo.deviceIdentifier << "'" << endl;
-				return AJA_STATUS_FAIL;
-			}
+			cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread: '" << m_desiredID << "' is not compatible with device '"
+					<< m_deviceInfo.deviceIdentifier << "'" << endl;
+			return AJA_STATUS_FAIL;
 		}
-		else
-		{
-			CNTV2Bitfile	bitfile;
-	
-			if (!bitfile.Open (m_bitfilePath))
-			{
-				const string	extraInfo	(bitfile.GetLastError());
-				cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Bitfile '" << m_bitfilePath << "' open/parse error";
-				if (!extraInfo.empty())
-					cerr << ": " << extraInfo;
-				cerr << endl;
-				return AJA_STATUS_OPEN;
-			}
-	
-			const size_t	bitfileLength	(bitfile.GetFileStreamLength());
-			unsigned char * bitfileBuffer	(new unsigned char [bitfileLength + 512]);
-			if (bitfileBuffer == AJA_NULL)
-			{
-				cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Unable to allocate bitfile buffer" << endl;
-				return AJA_STATUS_MEMORY;
-			}
-	
-			::memset (bitfileBuffer, 0xFF, bitfileLength + 512);
-			const size_t	readBytes	(bitfile.GetFileByteStream (bitfileBuffer, bitfileLength));
-			const string	designName	(bitfile.GetDesignName ());
-			newFirmwareDescription = m_bitfilePath + " - " + bitfile.GetDate () + " " + bitfile.GetTime ();
-			if (readBytes != bitfileLength)
-			{
-				delete [] bitfileBuffer;
-				cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Invalid bitfile length, read " << readBytes << " bytes, expected " << bitfileLength << endl;
-				return AJA_STATUS_FAIL;
-			}
-	
-			if (!m_forceUpdate)
-			{
-				if (!bitfile.CanFlashDevice (m_deviceInfo.deviceID))
-				{
-					cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread:  Bitfile design '" << designName << "' is not compatible with device '"
-							<< m_deviceInfo.deviceIdentifier << "'" << endl;
-					return AJA_STATUS_FAIL;
-				}
-			}
-		}
+	}
+
+	//	Open bitfile & parse its header...
+	CNTV2Bitfile bitfile;
+	if (!bitfile.Open(m_bitfilePath))
+	{
+		const string	extraInfo	(bitfile.GetLastError());
+		cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Bitfile '" << m_bitfilePath << "' open/parse error";
+		if (!extraInfo.empty())
+			cerr << ": " << extraInfo;
+		cerr << endl;
+		return AJA_STATUS_OPEN;
+	}
+
+	//	Sanity-check bitfile length...
+	const size_t	bitfileLength	(bitfile.GetFileStreamLength());
+	NTV2_POINTER	bitfileBuffer(bitfileLength + 512);
+	if (!bitfileBuffer)
+	{
+		cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Unable to allocate bitfile buffer" << endl;
+		return AJA_STATUS_MEMORY;
+	}
+	bitfileBuffer.Fill(0xFFFFFFFF);
+	const size_t	readBytes	(bitfile.GetFileByteStream(bitfileBuffer));
+	const string	designName	(bitfile.GetDesignName());
+	newFirmwareDescription = m_bitfilePath + " - " + bitfile.GetDate() + " " + bitfile.GetTime();
+	if (readBytes != bitfileLength)
+	{
+		cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Invalid bitfile length, read " << readBytes << " bytes, expected " << bitfileLength << endl;
+		return AJA_STATUS_FAIL;
+	}
+
+	//	Verify that this bitfile is compatible with this device...
+	if (!m_forceUpdate  &&  !bitfile.CanFlashDevice(m_deviceInfo.deviceID))
+	{
+		cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread:  Bitfile design '" << designName << "' is not compatible with device '"
+				<< m_deviceInfo.deviceIdentifier << "'" << endl;
+		return AJA_STATUS_FAIL;
 	}
 
 	//	Update firmware...
@@ -307,29 +292,23 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 
 	if (REALLY_UPDATE)
 	{
-		if(m_useDynamicReconfig)
+		if (m_useDynamicReconfig)
 		{
 			m_updateSuccessful = m_device.LoadDynamicDevice(m_desiredID);
 			if (!m_updateSuccessful)
-			{
 				cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread:  'Dynamic Reconfig' failed" << endl
 						<< "	 desired: " << m_desiredID << endl;
-				m_updateSuccessful = false;
-			}
 		}
 		else
 		{
 			//	ProgramMainFlash used to be able to throw (because XilinxBitfile could throw), but with 12.1 SDK, this is no longer the case.
 			m_updateSuccessful = m_device.ProgramMainFlash (m_bitfilePath.c_str (), m_forceUpdate, !m_verbose);
 			if (!m_updateSuccessful)
-			{
 				cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread:  'ProgramMainFlash' failed" << endl
 						<< "	 bitfile: " << m_bitfilePath << endl
 						<< "	  device: " << m_deviceInfo.deviceIdentifier << ", S/N " << serialNumStr << endl
 						<< "   serialNum: " << serialNumStr << endl
 						<< "	firmware: " << newFirmwareDescription << endl;
-				m_updateSuccessful = false;
-			}
 		}
 	}	//	if REALLY_UPDATE
 	else
@@ -449,48 +428,21 @@ CNTV2FirmwareInstallerThread::CNTV2FirmwareInstallerThread (const CNTV2FirmwareI
 }
 
 CNTV2FirmwareInstallerThread & CNTV2FirmwareInstallerThread::operator = (const CNTV2FirmwareInstallerThread & inObj)
-{
-	(void)inObj;
-
+{	(void)inObj;
 	NTV2_ASSERT (false);
 	return *this;
 }
 
-bool CNTV2FirmwareInstallerThread::ShouldUpdate (const NTV2DeviceID inDeviceID, const string & designName) const
+bool CNTV2FirmwareInstallerThread::ShouldUpdateIPDevice (const NTV2DeviceID inDeviceID, const string & designName) const
 {
-	string name;
-
-#if 0
-	name = GetPrimaryDesignName(DEVICE_ID_KONAIP_2022);
-	printf("DEVICE_ID_KONAIP_2022 name %s\n", name.c_str());
-
-	name = GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_2SFP);
-	printf("DEVICE_ID_KONAIP_4CH_2SFP name %s\n", name.c_str());
-
-	name = GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K);
-	printf("DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K name %s\n", name.c_str());
-
-	name = GetPrimaryDesignName(DEVICE_ID_KONAIP_2TX_1SFP_J2K);
-	printf("DEVICE_ID_KONAIP_2TX_1SFP_J2K name %s\n", name.c_str());
-
-	name = GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_2110);
-	printf("DEVICE_ID_KONAIP_1RX_1TX_2110 name %s\n", name.c_str());
-
-	name = GetPrimaryDesignName(DEVICE_ID_KONAIP_2110);
-	printf("DEVICE_ID_KONAIP_2110 name %s\n", name.c_str());
-
-	name = GetPrimaryDesignName(DEVICE_ID_IOIP_2022);
-	printf("DEVICE_ID_IOIP_2022 name %s\n", name.c_str());
-
-	name = GetPrimaryDesignName(DEVICE_ID_IOIP_2110);
-	printf("DEVICE_ID_IOIP_2110 name %s\n", name.c_str());
-
-	name = GetPrimaryDesignName(inDeviceID);
-	printf("inDeviceID name %s\n", name.c_str());
-	printf("designName name %s\n", designName.c_str());
+#if 1
+	static const NTV2DeviceID devIDs[] = {	DEVICE_ID_KONAIP_2022,			DEVICE_ID_KONAIP_4CH_2SFP,		DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K,
+											DEVICE_ID_KONAIP_2TX_1SFP_J2K,	DEVICE_ID_KONAIP_1RX_1TX_2110,	DEVICE_ID_KONAIP_2110,
+											DEVICE_ID_IOIP_2022,			DEVICE_ID_IOIP_2110,			inDeviceID};
+	for (int ndx(0);  ndx < 9;  ndx++)
+		cout << ::NTV2DeviceIDToString(devIDs[ndx]) << " name " << CNTV2Bitfile::GetPrimaryHardwareDesignName(devIDs[ndx]) << endl;
 #endif
-
-	name = GetPrimaryDesignName(inDeviceID);
+	string name (CNTV2Bitfile::GetPrimaryHardwareDesignName(inDeviceID));
 
 	// Can always install over self
 	if (designName == name)
@@ -499,56 +451,57 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate (const NTV2DeviceID inDeviceID, 
 	cout << "Be sure we can install '" << designName.c_str() << "', replacing '" << name.c_str() << "'" << endl;
 
 	//	Special cases -- e.g. bitfile flipping, P2P, etc...
+	//	**MrBill**	DUPLICITOUS		See CNTV2Bitfile::CanFlashDevice in ntv2bitfile.cpp
 	switch (inDeviceID)
 	{
-	case DEVICE_ID_CORVID44:
-		return (designName == GetPrimaryDesignName(DEVICE_ID_CORVID44) ||
+/*	case DEVICE_ID_CORVID44:
+		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44) ||
 				designName == "corvid_446");	//	Corvid 446
 	case DEVICE_ID_KONA3GQUAD:
-		return (designName == GetPrimaryDesignName(DEVICE_ID_KONA3G) ||
+		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA3G) ||
 				designName == "K3G_quad_p2p");	//	K3G_quad_p2p.ncd
 	case DEVICE_ID_KONA3G:
-		return (designName == GetPrimaryDesignName(DEVICE_ID_KONA3GQUAD) ||
+		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA3GQUAD) ||
 				designName == "K3G_p2p");		//	K3G_p2p.ncd
 	case DEVICE_ID_KONA4UFC:
-		return (designName == GetPrimaryDesignName(DEVICE_ID_KONA4));
+		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA4));
 	case DEVICE_ID_KONA5:
 	case DEVICE_ID_KONA5_2X4K:
 	case DEVICE_ID_KONA5_3DLUT:
 	case DEVICE_ID_KONA5_8KMK:
 	case DEVICE_ID_KONA5_8K:
 	case DEVICE_ID_KONA5_OE1:
-		return (designName == GetPrimaryDesignName(DEVICE_ID_KONA5) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_2X4K) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_3DLUT) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_8KMK) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_8K) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE1));
+		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA5) ||
+				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA5_2X4K) ||
+				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA5_3DLUT) ||
+				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA5_8KMK) ||
+				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA5_8K) ||
+				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA5_OE1));
 	case DEVICE_ID_CORVID44_8KMK:
 	case DEVICE_ID_CORVID44_8K:
 	case DEVICE_ID_CORVID44_2X4K:
 	case DEVICE_ID_CORVID44_PLNR:
-		return (designName == GetPrimaryDesignName(DEVICE_ID_CORVID44_8KMK) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_CORVID44_8K) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_CORVID44_2X4K) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_CORVID44_PLNR));
+		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_8KMK) ||
+				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_8K) ||
+				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_2X4K) ||
+				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_CORVID44_PLNR));
 	case DEVICE_ID_IO4K:
-		return (designName == GetPrimaryDesignName(DEVICE_ID_IO4KUFC));
+		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_IO4KUFC));
 	case DEVICE_ID_IO4KUFC:
-		return (designName == GetPrimaryDesignName(DEVICE_ID_IO4K));
+		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_IO4K));
 	case DEVICE_ID_CORVID88:
-		return (designName == GetPrimaryDesignName(DEVICE_ID_CORVID88) ||
+		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_CORVID88) ||
 				designName == "CORVID88");		//	older design name
 	case DEVICE_ID_KONA4:
 	{
 		if (m_device.IsIPDevice())
-			return (designName == GetPrimaryDesignName(DEVICE_ID_KONA4UFC) ||
-					designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2022) ||
-					designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_2SFP) ||
-					designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
-					designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2TX_1SFP_J2K) ||
-					designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_2110) ||
-					designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2110) ||
+			return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA4UFC) ||
+					designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2022) ||
+					designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_4CH_2SFP) ||
+					designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
+					designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2TX_1SFP_J2K) ||
+					designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_1RX_1TX_2110) ||
+					designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2110) ||
 					designName == "s2022_56_2p2ch_rxtx_mb" ||
 					designName == "s2022_12_2ch_tx_spoof" ||
 					designName == "s2022_12_2ch_tx" ||
@@ -558,22 +511,24 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate (const NTV2DeviceID inDeviceID, 
 					designName == "s2110_4tx" ||
 					designName == "s2022_56_1rx_1tx_2110");
 		else
-			return (designName == GetPrimaryDesignName(DEVICE_ID_KONA4UFC));
+			return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA4UFC));
 	}
-	case DEVICE_ID_KONAIP_2022:
+	case DEVICE_ID_TTAP_PRO:
+		return designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_TTAP_PRO);
+*/	case DEVICE_ID_KONAIP_2022:
 	case DEVICE_ID_KONAIP_4CH_2SFP:
 	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
 	case DEVICE_ID_KONAIP_1RX_1TX_2110:
 	case DEVICE_ID_KONAIP_2110:
 	case DEVICE_ID_KONAIP_2110_RGB12:
-		return (designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2022) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_4CH_2SFP) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2TX_1SFP_J2K) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_1RX_1TX_2110) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2110) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONAIP_2110_RGB12) ||
+		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2022) ||
+				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_4CH_2SFP) ||
+				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K) ||
+				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2TX_1SFP_J2K) ||
+				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_1RX_1TX_2110) ||
+				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2110) ||
+				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONAIP_2110_RGB12) ||
 				designName == "s2022_56_2p2ch_rxtx_mb" ||
 				designName == "s2022_12_2ch_tx_spoof" ||
 				designName == "s2022_12_2ch_tx" ||
@@ -583,63 +538,10 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate (const NTV2DeviceID inDeviceID, 
 	case DEVICE_ID_IOIP_2022:
 	case DEVICE_ID_IOIP_2110:
 	case DEVICE_ID_IOIP_2110_RGB12:
-		return (designName == GetPrimaryDesignName(DEVICE_ID_IOIP_2022) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_IOIP_2110) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_IOIP_2110_RGB12));
-	case DEVICE_ID_TTAP_PRO:
-		return designName == GetPrimaryDesignName(DEVICE_ID_TTAP_PRO);
+		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2022) ||
+				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2110) ||
+				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_IOIP_2110_RGB12));
 	default: break;
 	}
 	return false;
-}
-
-string CNTV2FirmwareInstallerThread::GetPrimaryDesignName (const NTV2DeviceID inDeviceID) const
-{
-	switch (inDeviceID)
-	{
-		case DEVICE_ID_CORVID1:						return "corvid1pcie";				//	top.ncd
-		case DEVICE_ID_CORVID3G:					return "corvid1_3Gpcie";			//	corvid1_3Gpcie
-		case DEVICE_ID_CORVID22:					return "top_c22";					//	top_c22.ncd
-		case DEVICE_ID_CORVID24:					return "corvid24_quad";				//	corvid24_quad.ncd
-		case DEVICE_ID_CORVID44:					return "corvid_44";					//	corvid_44
-		case DEVICE_ID_CORVID88:					return "corvid_88";					//	CORVID88
-		case DEVICE_ID_CORVIDHEVC:					return "corvid_hevc";				//	CORVIDHEVC
-		case DEVICE_ID_KONA3G:						return "K3G_top";					//	K3G_top.ncd
-		case DEVICE_ID_KONA3GQUAD:					return "K3G_quad";					//	K3G_quad.ncd
-		case DEVICE_ID_KONA4:						return "kona_4_quad";				//	kona_4_quad
-		case DEVICE_ID_KONA4UFC:					return "kona_4_ufc";				//	kona_4_ufc
-		case DEVICE_ID_IO4K:						return "IO_XT_4K";					//	IO_XT_4K
-		case DEVICE_ID_IO4KUFC:						return "IO_XT_4K_UFC";				//	IO_XT_4K_UFC
-		case DEVICE_ID_IOEXPRESS:					return "chekov_00_pcie";			//	chekov_00_pcie.ncd
-		case DEVICE_ID_IOXT:						return "top_IO_TX";					//	top_IO_TX.ncd
-		case DEVICE_ID_KONALHEPLUS:					return "lhe_12_pcie";				//	lhe_12_pcie.ncd
-		case DEVICE_ID_KONALHI:						return "top_pike";					//	top_pike.ncd
-		case DEVICE_ID_TTAP:						return "t_tap_top";					//	t_tap_top.ncd
-		case DEVICE_ID_KONAIP_2022:					return "s2022_56_4ch_rxtx";			//	konaip22
-		case DEVICE_ID_KONAIP_4CH_2SFP:				return "s2022_56_2p2ch_rxtx";
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "s2022_12_1rx_1tx";
-		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "s2022_12_2ch_tx_mb";
-		case DEVICE_ID_KONAIP_1RX_1TX_2110:			return "s2110_1rx_1tx";
-		case DEVICE_ID_IO4KPLUS:					return "IO_XT_4K_PLUS";
-		case DEVICE_ID_IOIP_2022:					return "ioip_s2022";
-		case DEVICE_ID_IOIP_2110:					return "ioip_s2110";
-		case DEVICE_ID_IOIP_2110_RGB12:				return "ioip_s2110_tx_rgb";
-		case DEVICE_ID_KONAIP_2110:					return "s2110_4tx";
-		case DEVICE_ID_KONAIP_2110_RGB12:			return "s2110_tx_rgb";
-		case DEVICE_ID_KONA1:						return "kona_alpha";
-		case DEVICE_ID_KONAHDMI:					return "kona_hdmi";
-		case DEVICE_ID_KONA5:						return "kona_5";
-		case DEVICE_ID_KONA5_2X4K:					return "kona_5_2";
-		case DEVICE_ID_KONA5_3DLUT:					return "kona_5_3d_lut";
-		case DEVICE_ID_KONA5_8KMK:					return "kona5_8k_mk";
-		case DEVICE_ID_KONA5_OE1:					return "kona5_oe_cfg1";
-		case DEVICE_ID_CORVID44_8KMK:				return "c44_12g_8k_mk";
-		case DEVICE_ID_KONA5_8K:					return "kona5_8k";
-		case DEVICE_ID_CORVID44_8K:					return "c44_12g_8k";
-		case DEVICE_ID_CORVID44_2X4K:				return "c44_12g_2X4K";
-		case DEVICE_ID_CORVID44_PLNR:				return "c44_12g_plnr";
-		case DEVICE_ID_TTAP_PRO:					return "t_tap_pro";
-		case DEVICE_ID_IOX3:						return "iox3";
-		default: return "";
-	}
 }

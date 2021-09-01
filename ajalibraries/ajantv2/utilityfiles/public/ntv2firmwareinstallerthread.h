@@ -113,10 +113,9 @@ class CNTV2FirmwareInstallerThread : public AJAThread
 	protected:
 		virtual void								InternalUpdateStatus (void) const;
 		/**
-			@return		True if the bitfile can be flashed onto the device; otherwise false.
+			@return		True if the MCS bitfile can be flashed onto the IP device; otherwise false.
 		**/
-		virtual bool								ShouldUpdate (const NTV2DeviceID inDeviceID, const std::string & designName) const;
-		virtual std::string							GetPrimaryDesignName (const NTV2DeviceID inDeviceID) const;
+		virtual bool								ShouldUpdateIPDevice (const NTV2DeviceID inDeviceID, const std::string & designName) const;
 
 	private:
 													CNTV2FirmwareInstallerThread ();											//	hidden
@@ -135,9 +134,7 @@ class CNTV2FirmwareInstallerThread : public AJAThread
 		const bool									m_useDynamicReconfig;	///< @brief Use dyanmic reconfig
 		mutable CNTV2Card							m_device;				///< @brief	Talks to the AJA device
 		mutable SSC_GET_FIRMWARE_PROGRESS_STRUCT	m_statusStruct;			///< @brief	Firmware update progress
-		
 
 };	//	CNTV2FirmwareInstallerThread
-
 
 #endif	//	__NTV2FIRMWAREINSTALLERTHREAD_H__
