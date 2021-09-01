@@ -162,8 +162,8 @@ int main(int argc, const char ** argv)
 			//	Get current design ID and version...
 			NTV2ULWordVector reg;
 			device.BitstreamStatus(reg);
-			ULWord designID (CNTV2Bitfile::GetDesignID(reg[BITSTREAM_VERSION]));
-			ULWord designVersion (CNTV2Bitfile::GetDesignVersion(reg[BITSTREAM_VERSION]));
+			ULWord designID (NTV2BitfileHeaderParser::GetDesignID(reg[BITSTREAM_VERSION]));
+			ULWord designVersion (NTV2BitfileHeaderParser::GetDesignVersion(reg[BITSTREAM_VERSION]));
 			NTV2DeviceID currentDeviceID (device.GetDeviceID());
 			ULWord bitfileID (CNTV2Bitfile::ConvertToBitfileID(currentDeviceID));
 			UWord bitfileVersion(0);
