@@ -938,7 +938,7 @@ private:
 	void SetupVRegs(void)
 	{
 		AJAAutoLock lock(&mGuardMutex);
-		DefineRegName	(kVRegDriverVersion,					"kVRegDriverVersion");
+		DefineRegister	(kVRegDriverVersion, "kVRegDriverVersion", mDriverVersionDecoder,	READWRITE,	kRegClass_Virtual,	kRegClass_NULL, kRegClass_NULL);
 		DefineRegName	(kVRegRelativeVideoPlaybackDelay,		"kVRegRelativeVideoPlaybackDelay");
 		DefineRegName	(kVRegAudioRecordPinDelay,				"kVRegAudioRecordPinDelay");
 		DefineRegName	(kVRegGlobalAudioPlaybackMode,			"kVRegGlobalAudioPlaybackMode");
@@ -1431,19 +1431,16 @@ private:
 		DefineRegName	(kVRegLastAJA,							"kVRegLastAJA");
 		DefineRegName	(kVRegFirstOEM,							"kVRegFirstOEM");
 
-		for (ULWord ndx (0);  ndx < 1024;  ndx++)
+		for (ULWord ndx(1);  ndx < 1024;  ndx++)	//	<== Start at 1, kVRegDriverVersion already done
 		{
-			ostringstream	oss;
-			string			foo;
-			oss << "VIRTUALREG_START+" << ndx;
+			ostringstream oss;	oss << "VIRTUALREG_START+" << ndx;
+			const string	regName (oss.str());
 			const ULWord	regNum	(VIRTUALREG_START + ndx);
-			const string regName (oss.str());
-			if (!regName.empty())
-				if (mRegNumToStringMap.find (regNum) == mRegNumToStringMap.end())
-				{
-					mRegNumToStringMap.insert (RegNumToStringPair (regNum, regName));
-					mStringToRegNumMMap.insert (StringToRegNumPair (ToLower (regName), regNum));
-				}
+			if (mRegNumToStringMap.find(regNum) == mRegNumToStringMap.end())
+			{
+				mRegNumToStringMap.insert (RegNumToStringPair(regNum, regName));
+				mStringToRegNumMMap.insert (StringToRegNumPair(ToLower(regName), regNum));
+			}
 			DefineRegDecoder (regNum, mDefaultRegDecoder);
 			DefineRegReadWrite (regNum, READWRITE);
 			DefineRegClass (regNum, kRegClass_Virtual);
@@ -3821,7 +3818,31 @@ private:
 		}
 		virtual ~DecodeSDIErrorCount()	{}
 	}	mSDIErrorCountRegDecoder;
-	
+
+	struct DecodeDriverVersion : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{	(void) inDeviceID;
+			NTV2_ASSERT(inRegNum == kVRegDriverVersion);
+			ULWord	vMaj(NTV2DriverVersionDecode_Major(inRegValue)), vMin(NTV2DriverVersionDecode_Minor(inRegValue));
+			ULWord	vDot(NTV2DriverVersionDecode_Point(inRegValue)), vBld(NTV2DriverVersionDecode_Build(inRegValue));
+			ULWord	buildType((inRegValue >> 30) & 0x00000003);
+			static const string sBuildTypes[]	= {	"Release", "Beta", "Alpha", "Development"};
+			static const string sBldTypes[]		= {	"", "b", "a", "d"};
+			ostringstream	oss;
+			oss << "Driver Version: "	<< DEC(vMaj) << "." << DEC(vMin) << "." << DEC(vDot);
+			if (buildType)	oss	<< sBldTypes[buildType] << DEC(vBld);
+			oss	<< endl
+				<< "Major Version: "	<< DEC(vMaj)				<< endl
+				<< "Minor Version: "	<< DEC(vMin)				<< endl
+				<< "Point Version: "	<< DEC(vDot)				<< endl
+				<< "Build Type: "		<< sBuildTypes[buildType]	<< endl
+				<< "Build Number: "		<< DEC(vBld);
+			return oss.str();
+		}
+		virtual ~DecodeDriverVersion() {}
+	}	mDriverVersionDecoder;
+
 	static const int	NOREADWRITE =	0;
 	static const int	READONLY	=	1;
 	static const int	WRITEONLY	=	2;
