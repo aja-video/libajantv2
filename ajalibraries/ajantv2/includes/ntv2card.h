@@ -2795,7 +2795,7 @@ public:
 	///@{
 	AJA_VIRTUAL bool	ReadFlashProgramControl(ULWord & outValue);
 	AJA_VIRTUAL bool	IsXilinxProgrammed();
-	AJA_VIRTUAL bool	ProgramMainFlash(const string & inFileName, const bool bInForceUpdate = false, const bool bInQuiet = false);	//	inFileName became const std::string& in SDK 16.2
+	AJA_VIRTUAL bool	ProgramMainFlash(const std::string & inFileName, const bool bInForceUpdate = false, const bool bInQuiet = false);	//	inFileName became const std::string& in SDK 16.2
 	AJA_VIRTUAL bool	GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct);
 
 	/**
