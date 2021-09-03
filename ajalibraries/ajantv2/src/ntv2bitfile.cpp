@@ -395,7 +395,7 @@ size_t CNTV2Bitfile::GetProgramByteStream (NTV2_POINTER & outBuffer)
 	if (!mFileStream.read(outBuffer, streamsize(programStreamLength)))
 		{oss << "## ERROR:  Read failed, byte count requested: " << DEC(programStreamLength);  mLastError = oss.str();  return 0;}
 	ifstream::pos_type curOffset(mFileStream.tellg());
-	if (curOffset == -1)
+	if (int(curOffset) == -1)
 		{mLastError = "## ERROR:  'tellg' failed";  return 0;}
 	return size_t(curOffset) - programOffset;
 }

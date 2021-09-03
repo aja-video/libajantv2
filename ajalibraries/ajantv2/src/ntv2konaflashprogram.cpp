@@ -1947,7 +1947,7 @@ static bool getFileSize (const string & fileName, size_t & outSizeBytes)
 	if (!ifs.seekg (0, ios::end))
 		return false;	//	seek failed
 	ifstream::pos_type curOffset(ifs.tellg());
-	if (curOffset == -1)
+	if (int(curOffset) == -1)
 		return false;
 	outSizeBytes = size_t(curOffset);
 	return true;
