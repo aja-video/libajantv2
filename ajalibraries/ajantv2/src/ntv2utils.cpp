@@ -9098,11 +9098,12 @@ string PercentDecode (const string & inStr)
 	//	Fetches version components out of CFBundleShortVersionString
 	//	Returns true if the Info.plist exists;	otherwise false
 	//	NOTE:  This will fail for binary plist files!
-	bool GetInstalledMacDriverVersion (UWord & outMaj, UWord & outMin, UWord & outPt, UWord & outBld)
+	static const string AJAMacDriverInfoPlistPath ("/Library/Extensions/AJANTV2.kext/Contents/Info.plist");
+	bool GetInstalledMacDriverVersion (UWord & outMaj, UWord & outMin, UWord & outPt, UWord & outBld, UWord & outType)
 	{
-		outMaj = outMin = outPt = outBld = 0;
+		outMaj = outMin = outPt = outBld = outType = 0;
 		ifstream ifs;
-		ifs.open("/Library/Extensions/AJANTV2.kext/Contents/Info.plist", std::ios::in);
+		ifs.open(AJAMacDriverInfoPlistPath.c_str(), std::ios::in);
 		if (!ifs.is_open())
 			return false;
 		if (!ifs.good())
@@ -9127,13 +9128,17 @@ string PercentDecode (const string & inStr)
 			aja::split(versStr, '.', versComps);
 			if (versComps.size() != 3)
 				continue;
-			if (versComps.at(2).find("b") != string::npos)
-			{	NTV2StringList lastComps;
-				aja::split(versComps.at(2), 'b', lastComps);
-				versComps.erase(versComps.begin()+2);
-				versComps.push_back(lastComps.at(0));
-				outBld = UWord(aja::stoul(lastComps.at(1)));
-			}
+			const string sBuildTypes("_bad");	//	1=beta 2=alpha 3=dev
+			for (size_t bt(1);  bt < 4;  bt++)
+				if (versComps.at(2).find(sBuildTypes[bt]) != string::npos)
+				{	NTV2StringList lastComps;
+					aja::split(versComps.at(2), sBuildTypes[bt], lastComps);
+					versComps.erase(versComps.begin()+2);
+					versComps.push_back(lastComps.at(0));
+					outBld = UWord(aja::stoul(lastComps.at(1)));
+					outType = bt;
+					break;
+				}
 			for (size_t ndx(0);	 ndx < 3;  ndx++)
 			{
 				if (versComps.at(ndx).empty())
