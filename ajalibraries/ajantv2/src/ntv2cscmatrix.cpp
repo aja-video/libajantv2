@@ -148,16 +148,17 @@ void CNTV2CSCMatrix::InitMatrix (const NTV2ColorSpaceMatrixType inPreset)
 
 
 		// RGB SMPTE range -> YCbCr Rec 2020
-	case NTV2_GBRSMPTE_to_YCbCr_Rec2020_Matrix:
-		mA0 =  0.67800;		// G -> Y
-		mA1 =  0.05930;		// B -> Y
-		mA2 =  0.26270;		// R -> Y
-		mB0 = -0.368594;		// G -> Cb
-		mB1 =  0.511414;		// B -> Cb
-		mB2 = -0.14282;		// R -> Cb
-		mC0 = -0.470284;		// G -> Cr
-		mC1 = -0.04113;		// B -> Cr
-		mC2 =  0.511414;		// R -> Cr
+    case NTV2_GBRSMPTE_to_YCbCr_Rec2020_Matrix:
+        mA0 =  0.678009;		// G -> Y
+        mA1 =  0.059296;		// B -> Y
+        mA2 =  0.262695;		// R -> Y
+        mB0 = -0.368591;		// G -> Cb
+        mB1 =  0.511414;		// B -> Cb
+        mB2 = -0.142822;		// R -> Cb
+        mC0 = -0.470276;		// G -> Cr
+        mC1 = -0.041138;		// B -> Cr
+        mC2 =  0.511414;		// R -> Cr
+
 
 		mPreOffset0 = NTV2_CSCMatrix_SMPTEYOffset;
 		mPreOffset1 = NTV2_CSCMatrix_SMPTEYOffset;
@@ -276,16 +277,17 @@ void CNTV2CSCMatrix::InitMatrix (const NTV2ColorSpaceMatrixType inPreset)
 		break;
 
 		// YCbCr -> RGB SMPTE range Rec 2020
-	case NTV2_YCbCr_to_GBRSMPTE_Rec2020_Matrix:
-		mA0 =  1.000000;		// Y  -> G
-		mA1 = -0.160880066;		// Cb -> G
-		mA2 = -0.5585997088;		// Cr -> G
-		mB0 =  1.000000;		// Y  -> B
-		mB1 =  1.839404464;		// Cb -> B
-		mB2 =  0.000000;		// Cr -> B
-		mC0 =  1.000000;		// Y  -> R
-		mC1 =  0.000000;		// Cb -> R
-		mC2 =  1.441684821;		// Cr -> R
+    case NTV2_YCbCr_to_GBRSMPTE_Rec2020_Matrix:
+        mA0 =  1.000000;		// Y  -> G
+        mA1 = -0.160889;		// Cb -> G
+        mA2 = -0.558594;		// Cr -> G
+        mB0 =  1.000000;		// Y  -> B
+        mB1 =  1.839386;		// Cb -> B
+        mB2 =  0.000000;		// Cr -> B
+        mC0 =  1.000000;		// Y  -> R
+        mC1 =  0.000000;		// Cb -> R
+        mC2 =  1.441681;		// Cr -> R
+
 
 		mPreOffset0 = NTV2_CSCMatrix_SMPTEYOffset;
 		mPreOffset1 = NTV2_CSCMatrix_SMPTECOffset;
