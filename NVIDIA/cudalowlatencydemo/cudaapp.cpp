@@ -867,7 +867,7 @@ int main(int argc, const char *argv[])
 		CudaProcessRGB10(inputSurfObj, outputSurfObj, gWidth, gHeight);
 
 		// Execute CUDA kernel here to copy result to OpenGL view texture.
-		CopyVideoInputToOuput(outputSurfObj, outputSurfObj2, gWidth, gHeight);
+		CopyVideoInputToOuput(inputSurfObj, outputSurfObj2, gWidth, gHeight);
 
 		cudaEventRecord(stop, 0);
 		cudaEventSynchronize(stop);
