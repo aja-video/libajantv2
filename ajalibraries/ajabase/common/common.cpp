@@ -384,6 +384,18 @@ std::string join (const std::vector<std::string> & parts, const std::string & de
 	return oss.str();
 }
 
+std::string join (const std::set<std::string> & parts, const std::string & delim)
+{
+	std::ostringstream oss;
+	for (std::set<std::string>::const_iterator it(parts.begin());  it != parts.end();  )
+	{
+		oss << *it;
+		if (++it != parts.end())
+			oss << delim;
+	}
+	return oss.str();
+}
+
 char* safer_strncpy(char* target, const char* source, size_t num, size_t maxSize)
 {
 	int32_t lastIndex = (int32_t)maxSize-1;
