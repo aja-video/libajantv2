@@ -27,29 +27,30 @@
 typedef struct Player4KConfig
 {
 	public:
-		std::string				fDeviceSpecifier;	///< @brief	Specifies the AJA device to use.
-		NTV2AudioSystem			fAudioSystem;		///< @brief	Specifies the audio system to use (use NTV2_AUDIOSYSTEM_INVALID for no audio).
-		NTV2Channel				fOutputChannel;		///< @brief	Specifies the channel to use.
-		NTV2FrameBufferFormat	fPixelFormat;		///< @brief	Specifies the pixel format to use for the device's frame buffers.
-		NTV2VideoFormat			fVideoFormat;		///< @brief	Specifies the video format to use.
-		AJAAncillaryDataType	fSendAncType;		///< @brief	Specifies the HDR anc data packet to transmit, if any.
-		bool					fDoHDMIOutput;		///< @brief	If true, enables HDMI output;  otherwise, disables it.
-		bool					fDoMultiChannel;	///< @brief	If true, enables device-sharing;  otherwise takes exclusive control of the device.
-		bool					fDoTsiRouting;		///< @brief	If true, enables two sample interleave routing, else squares.
-		bool					fDoRGBOnWire;		///< @brief	If true, enables RGB on the wire, else CSCs convert to YCbCr.
-		bool					fDoLinkGrouping;	///< @brief If true, enables 6/12G output mode
-		int						fNumAudioLinks;		///< @brief Specifies the number of audio systems to control for multi-link audio
+		std::string						fDeviceSpecifier;	///< @brief	Specifies the AJA device to use.
+		NTV2AudioSystem					fAudioSystem;		///< @brief	Specifies the audio system to use (use NTV2_AUDIOSYSTEM_INVALID for no audio).
+		NTV2Channel						fOutputChannel;		///< @brief	Specifies the channel to use.
+		NTV2VideoFormat					fVideoFormat;		///< @brief	Specifies the video format to use.
+		NTV2FrameBufferFormat			fPixelFormat;		///< @brief	Specifies the pixel format to use for the device's frame buffers.
+		CNTV2DemoCommon::ACFrameRange	fFrames;			///< @brief	AutoCirculate frame count or range
+		AJAAncillaryDataType			fTransmitHDRType;	///< @brief	Specifies the HDR anc data packet to transmit, if any.
+		bool							fDoHDMIOutput;		///< @brief	If true, enables HDMI output;  otherwise, disables it.
+		bool							fDoMultiChannel;	///< @brief	If true, enables device-sharing;  otherwise takes exclusive control of the device.
+		bool							fDoTsiRouting;		///< @brief	If true, enables two sample interleave routing, else squares.
+		bool							fDoRGBOnWire;		///< @brief	If true, enables RGB on the wire, else CSCs convert to YCbCr.
+		bool							fDoLinkGrouping;	///< @brief If true, enables 6/12G output mode
+		int								fNumAudioLinks;		///< @brief Specifies the number of audio systems to control for multi-link audio
 
 		/**
 			@brief	Constructs a default generator configuration.
 		**/
-		inline explicit	Player4KConfig ()
-			:	fDeviceSpecifier	("0"),
+		inline explicit	Player4KConfig (const std::string & inDeviceSpecifier	= "0")
+			:	fDeviceSpecifier	(inDeviceSpecifier),
 				fAudioSystem		(NTV2_AUDIOSYSTEM_1),
 				fOutputChannel		(NTV2_CHANNEL1),
-				fPixelFormat		(NTV2_FBF_8BIT_YCBCR),
 				fVideoFormat		(NTV2_FORMAT_4x1920x1080p_2997),
-				fSendAncType		(AJAAncillaryDataType_Unknown),
+				fPixelFormat		(NTV2_FBF_8BIT_YCBCR),
+				fTransmitHDRType	(AJAAncillaryDataType_Unknown),
 				fDoHDMIOutput		(false),
 				fDoMultiChannel		(false),
 				fDoTsiRouting		(false),
@@ -113,6 +114,11 @@ class NTV2Player4K
 			@brief	Gracefully stops me from running.
 		**/
 		void			Quit (void);
+
+		/**
+			@return	True if I'm running;  otherwise false.
+		**/
+		virtual bool	IsRunning (void) const				{return !mGlobalQuit;}
 
 		/**
 			@brief	Provides status information about my input (capture) and output (playout) processes.
@@ -282,23 +288,23 @@ class NTV2Player4K
 
 	//	Private Member Data
 	private:
-		Player4KConfig			mConfig;				///< @brief	My configuration.
-		AJAThread				mConsumerThread;		///< @brief	My playout (consumer) thread object
-		AJAThread				mProducerThread;		///< @brief	My generator (producer) thread object
-		uint32_t				mCurrentFrame;			///< @brief	My current frame number (used to generate timecode)
-		ULWord					mCurrentSample;			///< @brief	My current audio sample (maintains audio tone generator state)
-		double					mToneFrequency;			///< @brief	My current audio tone frequency, in Hertz
-		CNTV2Card				mDevice;				///< @brief	My CNTV2Card instance
-		NTV2DeviceID			mDeviceID;				///< @brief	My device (model) identifier
-		NTV2EveryFrameTaskMode	mSavedTaskMode;			///< @brief	Used to restore the previous task mode
-		bool					mGlobalQuit;			///< @brief	Set "true" to gracefully stop
-		AJATimeCodeBurn			mTCBurner;				///< @brief	My timecode burner
-		uint32_t				mVideoBufferSize;		///< @brief	My video buffer size, in bytes
-		uint32_t				mAudioBufferSize;		///< @brief	My audio buffer size, in bytes
-		uint8_t **				mTestPatternBuffers;	///< @brief	My array of test pattern buffers
-		uint32_t				mNumTestPatterns;		///< @brief	Number of test patterns to cycle through
-		AVDataBuffer			mHostBuffers[CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
-		AJACircularBuffer <AVDataBuffer *>	mAVCircularBuffer;		///< @brief	My ring buffer
+		Player4KConfig		mConfig;				///< @brief	My configuration.
+		AJAThread			mConsumerThread;		///< @brief	My playout (consumer) thread object
+		AJAThread			mProducerThread;		///< @brief	My generator (producer) thread object
+		uint32_t			mCurrentFrame;			///< @brief	My current frame number (used to generate timecode)
+		ULWord				mCurrentSample;			///< @brief	My current audio sample (maintains audio tone generator state)
+		double				mToneFrequency;			///< @brief	My current audio tone frequency, in Hertz
+		CNTV2Card			mDevice;				///< @brief	My CNTV2Card instance
+		NTV2DeviceID		mDeviceID;				///< @brief	My device (model) identifier
+		NTV2TaskMode		mSavedTaskMode;			///< @brief	Used to restore the previous task mode
+		bool				mGlobalQuit;			///< @brief	Set "true" to gracefully stop
+		AJATimeCodeBurn		mTCBurner;				///< @brief	My timecode burner
+		uint32_t			mVideoBufferSize;		///< @brief	My video buffer size, in bytes
+		uint32_t			mAudioBufferSize;		///< @brief	My audio buffer size, in bytes
+		uint8_t **			mTestPatternBuffers;	///< @brief	My array of test pattern buffers
+		uint32_t			mNumTestPatterns;		///< @brief	Number of test patterns to cycle through
+		AVDataBuffer		mHostBuffers[CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
+		AJACircularBuffer <AVDataBuffer *>	mAVCircularBuffer;	///< @brief	My ring buffer
 
 };	//	NTV2Player4K
 

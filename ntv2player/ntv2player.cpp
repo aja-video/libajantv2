@@ -171,7 +171,9 @@ AJAStatus NTV2Player::Init (void)
 									mFormatDesc.numPixels, mFormatDesc.numLines);
 	#if defined(_DEBUG)
 		cerr << mConfig << endl;
-	#endif//	defined(_DEBUG)
+	#else
+		PLINFO("Configuration: " << mConfig);
+	#endif	//	not _DEBUG
 	return AJA_STATUS_SUCCESS;
 
 }	//	Init
@@ -680,13 +682,9 @@ void NTV2Player::ProduceFrames (void)
 }	//	ProduceFrames
 
 
-void NTV2Player::GetACStatus (ULWord & outGoodFrames, ULWord & outDroppedFrames, ULWord & outBufferLevel)
+void NTV2Player::GetACStatus (AUTOCIRCULATE_STATUS & outStatus)
 {
-	AUTOCIRCULATE_STATUS	status;
-	mDevice.AutoCirculateGetStatus (mConfig.fOutputChannel, status);
-	outGoodFrames = status.acFramesProcessed;
-	outDroppedFrames = status.acFramesDropped;
-	outBufferLevel = status.acBufferLevel;
+	mDevice.AutoCirculateGetStatus (mConfig.fOutputChannel, outStatus);
 }
 
 
