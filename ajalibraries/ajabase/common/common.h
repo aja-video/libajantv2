@@ -16,6 +16,7 @@
 #include "ajabase/common/export.h"
 #include "ajabase/common/public.h"
 #include "ajabase/system/debug.h"
+#include <set>
 
 namespace aja
 {
@@ -250,13 +251,22 @@ AJA_EXPORT std::string & rstrip (std::string & str, const std::string & ws = aja
 AJA_EXPORT std::string & strip (std::string & str, const std::string & ws = aja::WHITESPACE);
 
 /**
- *	Join a vector of strings separated by a string delimeter
+ *	Join a vector of strings separated by a string delimiter
  *
  *	@param[in]	parts  The vector of strings to join together
- *	@param[in]	delim  The string delimeter that will separate the strings
- *	@return		The joined string made up of the parts concatinated with delimeter string
+ *	@param[in]	delim  The string delimiter that will separate the strings
+ *	@return		The joined string made up of the parts concatinated with delimiter string
  */
 AJA_EXPORT std::string join (const std::vector<std::string> & parts, const std::string & delim=" ");
+
+/**
+ *	Join a set of strings separated by a string delimiter
+ *
+ *	@param[in]	parts  The set of strings to join together
+ *	@param[in]	delim  The string delimiter that will separate the strings
+ *	@return		The joined string made up of the parts concatinated with delimiter string
+ */
+AJA_EXPORT std::string join (const std::set<std::string> & parts, const std::string & delim=" ");
 
 /**
  *	Like strncpy() but always adds a null-character at last index of target string

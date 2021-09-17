@@ -766,14 +766,19 @@ public:
 	/**
 		@brief		Answers with the address and size of the given frame.
 		@param[in]	inFrameNumber	Specifies the zero-based frame number of the frame of interest.
-		@param[in]	inChannel		Specifies the channel of interest (for multi-format).
-									Specify NTV2_CHANNEL1 for uni-format.
+		@param[in]	inChannel		Specifies the ::NTV2Channel of interest (for multi-format mode).
+									Ignored and assumes ::NTV2_CHANNEL1 if device is not in multi-format mode.
 		@param[out] outAddress		Receives the device memory address of the first byte of the given frame.
 		@param[out] outLength		Receives the frame size, in bytes.
+		@note		The ::NTV2Channel parameter must not refer to a FrameStore that is slaved to a quad or quad-quad master.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetDeviceFrameInfo (	const UWord inFrameNumber,	const NTV2Channel inChannel,
-												uint64_t & outAddress,	uint64_t & outLength);
+	AJA_VIRTUAL bool	GetDeviceFrameInfo (const UWord inFrameNumber,	const NTV2Channel inChannel,
+											uint64_t & outAddress,	uint64_t & outLength);
+
+	AJA_VIRTUAL bool	GetDeviceFrameInfo (const UWord inFrameNumber,	const NTV2Channel inChannel, ULWord & outIntrinsicSize,
+											bool & outMultiFmt, bool & outQuad, bool & outQuadQuad, bool & outSquares, bool & outTSI,
+											uint64_t & outAddress,	uint64_t & outLength);	//	New in SDK 16.2
 
 	/**
 		@brief		Answers with the frame number that contains the given address.
@@ -1752,8 +1757,7 @@ public:
 	AJA_VIRTUAL bool		GetAudioReadOffset (ULWord & outReadOffset, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
-		@brief		Answers with the byte offset in device memory to the given audio buffer offset for the specified
-					Audio System.
+		@brief		Answers with the byte offset in device SDRAM into the specified Audio System's audio buffer.
 		@return		True if successful; otherwise false.
 		@param[in]	inOffsetBytes		Specifies a byte offset as measured from the top of the Audio System's audio buffer memory.
 										If "inCaptureBuffer" is set to 'true', this value represents the offset as measured from
@@ -3897,11 +3901,12 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inChannel		Specifies the ::NTV2Channel to use. Call ::NTV2DeviceGetNumFrameStores to discover how many
 									FrameStores (and therefore channels) are available on the device.
-		@details	When pausing, if the channel is in the ::NTV2_AUTOCIRCULATE_RUNNING state, it will be set to ::NTV2_AUTOCIRCULATE_PAUSED, and at the next VBI, the driver
-					will explicitly stop audio circulating.
+		@param[in]	inAtFrameNum	Reserved for future use.  (Added to API in SDK 16.2)
+		@details	When pausing, if the channel is in the ::NTV2_AUTOCIRCULATE_RUNNING state, it will be set to ::NTV2_AUTOCIRCULATE_PAUSED,
+					and at the next VBI, the driver will explicitly stop audio circulating.
 		@see		CNTV2Card::AutoCirculateResume, \ref aboutautocirculate
 	**/
-	AJA_VIRTUAL bool	AutoCirculatePause (const NTV2Channel inChannel);
+	AJA_VIRTUAL bool	AutoCirculatePause (const NTV2Channel inChannel,  const UWord inAtFrameNum = 0xFFFF);	//	Added inAtFrameNum in SDK 16.2
 
 	/**
 		@brief		Resumes AutoCirculate for the given channel, picking up at the next frame without loss of audio synchronization.
@@ -4040,18 +4045,24 @@ public:
 
 	/**
 		@brief		Returns the device frame buffer numbers of the first unallocated contiguous band of frame buffers having the given
-					size that are available for use with AutoCirculate.
-		@param[in]	inFrameCount			Specifies the desired number of contiguous device frame buffers. Must exceed zero.
-		@param[out] outStartFrameNumber		Receives the starting device frame buffer number.
-		@param[out] outEndFrameNumber		Receives the ending device frame buffer number.
-		@return		True if successful; otherwise false. In SDK 16.1 or later, this function now fails if any AutoCirculate channel
-					is operating in UHD/4K/UHD2/8K mode.
-		@bug		This function was never implemented properly for UHD/4K or UHD2/8K operation. It returns bad data if any
-					AutoCirculate channels are actively inputting or outputting UHD/4K or UHD2/8K. Do not use this function if
-					there's any possibility of UHD/4K/UHD2/8K being streamed on this device.
+					size that are available for use. This function is called by CNTV2Card::AutoCirculateInitForInput and
+					CNTV2Card::AutoCirculateInitForOutput whenever a frame count is specified in lieu of explicit frame ranges.
+		@param[in]	inFrameCount		Specifies the desired number of contiguous device frame buffers. Must exceed zero.
+		@param[out]	outStartFrame		Receives the starting device frame buffer number (or -1 upon failure).
+		@param[out]	outEndFrame			Receives the ending device frame buffer number (or -1 upon failure).
+		@param[in]	inFrameStore		Optionally specifies the FrameStore of interest for the desired frame count. Any memory
+										being read or written by this FrameStore will be excluded when collecting unallocated
+										regions of device SDRAM, and also its ::NTV2VideoFormat will determine if the frames are
+										quad-sized or quad-quad-sized. Defaults to ::NTV2_CHANNEL_INVALID for backward compatibility.
+		@return		True if successful; otherwise false.
+		@note		Prior to SDK 16.1, this function returned invalid frame numbers if any AutoCirculate channels were actively
+					processing UHD/4K or UHD2/8K. In SDK 16.2, this function failed (returned false) if any AutoCirculate channels
+					were actively processing UHD/4K or UHD2/8K. In SDK 16.3, the function was corrected to work with UHD/4K and UHD2/8K,
+					but requires specifying a FrameStore of interest.
 		@see		See \ref aboutautocirculate
 	**/
-	AJA_VIRTUAL bool	FindUnallocatedFrames (const UWord inFrameCount, LWord & outStartFrameNumber, LWord & outEndFrameNumber);
+	AJA_VIRTUAL bool	FindUnallocatedFrames (const UWord inFrameCount, LWord & outStartFrame, LWord & outEndFrame,
+												const NTV2Channel inFrameStore = NTV2_CHANNEL_INVALID);
 	///@}
 
 #if defined(READREGMULTICHANGE)
@@ -7580,5 +7591,150 @@ typedef CNTV2Card	CXena2VidProc;			///< @deprecated	Use CNTV2Card instead.
 	#define SetXptXptLUT2InputSelect				SetXptLUT2InputSelect					///< @deprecated		Use SetXptLUT2InputSelect instead.
 	#define GetXptXptLUT2InputSelect				GetXptLUT2InputSelect					///< @deprecated		Use GetXptLUT2InputSelect instead.
 #endif	//	!defined (NTV2_DEPRECATE)
+
+
+/**
+	@brief	Audits an NTV2 device's SDRAM utilization, and can report contiguous regions of SDRAM, whether unused/free,
+			those being read/written by AutoCirculate, those being read/written by non-AutoCirculating FrameStores,
+			those that are in conflict (AutoCirculate, FrameStore and/or Audio collisions), plus invalid/out-of-bounds
+			regions being accessed.
+**/
+class SDRAMAuditor
+{
+	public:
+		explicit SDRAMAuditor ()
+			:	mDeviceID		(DEVICE_ID_INVALID),
+				mFrameTags		(),
+				m8MB			(0x00800000),
+				mNumFrames		(0),
+				mIntrinsicSize	(0)
+		{
+		}
+
+		explicit SDRAMAuditor (CNTV2Card & inDevice)
+			:	mDeviceID		(DEVICE_ID_INVALID),
+				mFrameTags		(),
+				m8MB			(0x00800000),
+				mNumFrames		(0),
+				mIntrinsicSize	(0)
+		{
+			AssessDevice(inDevice);
+		}
+
+		/**
+			@brief	Assesses the given device.
+			@param[in]	inDevice	The device of interest.
+			@param[in]	inMarkStoppedAudioBuffersFree	Optionally treats the audio buffer regions as free (unused)
+														if the corresponding audio system is neither reading nor writing.
+														Defaults to false, which always marks the audio buffers as in-use,
+														even if the audio system is not recording or playing audio.
+		**/
+		bool AssessDevice (CNTV2Card & inDevice, const bool inMarkStoppedAudioBuffersFree = false);
+
+		std::ostream & RawDump (std::ostream & oss) const;
+
+		std::ostream & DumpBlocks (std::ostream & oss) const;
+
+		/**
+			@brief	Answers with the lists of free, in-use and conflicting 8MB memory blocks.
+					Each ULWord represents a region -- an 8MB block offset in the most-significant 16 bits,
+					and the number of 8MB blocks in the least-significant 16 bits.
+			@param[out]	outFree		Receives the list of free (unused) memory regions.
+			@param[out]	outUsed		Receives the list of used memory regions.
+			@param[out]	outBad		Receives the list of colliding and illegal memory regions.
+			@return	True if successful;  otherwise false.
+		**/
+		bool GetRegions (ULWordSequence & outFree, ULWordSequence & outUsed, ULWordSequence & outBad) const;
+
+		/**
+			@brief	Answers with the list of free memory regions.
+			@param[out]	outBlks		Receives the region list.
+		**/
+		inline bool GetFreeRegions (ULWordSequence & outBlks) const
+		{
+			ULWordSequence	used, bad;
+			return GetRegions (outBlks, used, bad);
+		}
+
+		/**
+			@brief	Answers with the list of colliding and illegal memory regions.
+			@param[out]	outBlks		Receives the region list.
+		**/
+		inline bool GetBadRegions (ULWordSequence & outBlks) const
+		{
+			ULWordSequence	used, free;
+			return GetRegions (free, used, outBlks);
+		}
+
+		/**
+			@brief	Answers with the list of used memory regions.
+			@param[out]	outBlks		Receives the region list.
+		**/
+		inline bool GetUsedRegions (ULWordSequence & outBlks) const
+		{
+			ULWordSequence	bad, free;
+			return GetRegions (free, outBlks, bad);
+		}
+
+		/**
+			@brief	Answers with the list of tags for the given frame number.
+			@param[in]	inIndex		Specifies the zero-based frame index number of the frame of interest.
+			@param[out]	outTags		Receives the list of tag strings (if any).
+			@return		True if successful;  otherwise false.
+		**/
+		bool GetTagsForFrameIndex (const UWord inIndex, NTV2StringSet & outTags) const;
+
+		bool HasFrameIndex (const UWord inIndex) const;		///< @return	True if the given frame number is valid.
+
+		size_t GetTagCount (const UWord inIndex) const;		///< @return	The number of tags associated with the given frame number.
+
+		inline bool HasTag (const UWord inIndex) const				{return GetTagCount(inIndex) > 0;}		///< @return	True if the given frame number has a tag associated with it.
+		inline bool HasConflicts (const UWord inIndex) const		{return GetTagCount(inIndex) > 1;}		///< @return	True if the given frame number has problems (i.e. more than one tag associated with it).
+		inline ULWord GetIntrinsicFrameByteCount (void) const		{return mIntrinsicSize;}				///< @return	The size, in bytes, of the intrinsic frame size;  or zero if not known.
+
+		/**
+			@brief		Translates an 8MB-chunked list of regions into another list of regions with frame indexes and sizes
+						expressed in frame units specified by the intrinsic frame size and whether or not quad or quad-quad
+						mode is active.
+			@param[out]	outRgns			Receives the translated region list.
+			@param[in]	inRgns			Specifies the 8MB-based region list to be translated.
+			@param[in]	inIsQuad		Specify true if translated regions should be Quad-sized.
+			@param[in]	inIsQuadQuad	Specify true if translated regions should be Quad-Quad-sized.
+			@return		True if successful;  otherwise false.
+		**/
+		bool TranslateRegions (ULWordSequence & outRgns, const ULWordSequence & inRgns, const bool inIsQuad, const bool inIsQuadQuad) const;
+
+	//	Static/Class Methods
+	public:
+		typedef std::set<ULWord>			ULWordSet;
+		typedef ULWordSet::const_iterator	ULWordSetConstIter;
+
+		/**
+			@return	The unique set of regions resulting from the union of the given three lists of regions.
+		**/
+		static ULWordSet CoalesceRegions (const ULWordSequence & inRgn1, const ULWordSequence & inRgn2, const ULWordSequence & inRgn3);
+
+	protected:
+		bool TagAudioBuffers (CNTV2Card & inDevice, const bool inMarkStoppedAudioBuffersFree);
+
+		bool TagVideoFrames (CNTV2Card & inDevice);
+
+		bool TagMemoryBlock (const uint64_t inStartAddr, const uint64_t inByteLength, const std::string & inTag)
+		{
+			return TagMemoryBlock (ULWord(inStartAddr), ULWord(inByteLength), inTag);
+		}
+
+		bool TagMemoryBlock (const ULWord inStartAddr, const ULWord inByteLength, const std::string & inTag);
+
+	private:
+		typedef	std::pair<UWord, NTV2StringSet>	FrameTag;
+		typedef	std::map<UWord, NTV2StringSet>	FrameTags;
+		typedef FrameTags::const_iterator		FrameTagsConstIter;
+		NTV2DeviceID	mDeviceID;
+		FrameTags		mFrameTags;
+		const ULWord	m8MB;
+		UWord			mNumFrames;
+		ULWord			mIntrinsicSize;
+};	//	SDRAMAuditor
 
 #endif	//	NTV2CARD_H
