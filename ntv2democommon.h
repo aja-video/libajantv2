@@ -544,17 +544,17 @@ class CNTV2DemoCommon
 	class ACFrameRange
 	{
 		public:
-			explicit inline	ACFrameRange (const UWord inFrameCount)
-						:	mIsCountOnly(true),
-							mFrameCount(inFrameCount),
-							mFirstFrame(0),
-							mLastFrame(0)
+			explicit inline	ACFrameRange (const UWord inFrameCount = 0)
+						:	mIsCountOnly	(true),
+							mFrameCount		(inFrameCount),
+							mFirstFrame		(0),
+							mLastFrame		(0)
 						{}
 			explicit inline	ACFrameRange (const UWord inFirstFrame, const UWord inLastFrame)
-						:	mIsCountOnly(true),
-							mFrameCount(0),
-							mFirstFrame(inFirstFrame),
-							mLastFrame(inLastFrame)
+						:	mIsCountOnly	(true),
+							mFrameCount		(0),
+							mFirstFrame		(inFirstFrame),
+							mLastFrame		(inLastFrame)
 						{}
 			inline bool		isCount(void) const			{return mIsCountOnly;}
 			inline bool		isFrameRange(void) const	{return !isCount();}

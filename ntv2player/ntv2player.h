@@ -105,11 +105,9 @@ class NTV2Player
 
 		/**
 			@brief	Provides status information about my output (playout) process.
-			@param[out]	outGoodFrames		Receives the number of successfully played frames.
-			@param[out]	outDroppedFrames	Receives the number of dropped frames.
-			@param[out]	outBufferLevel		Receives the driver's current buffer level.
+			@param[out]	outStatus	Receives the ::AUTOCIRCULATE_STATUS information.
 		**/
-		virtual void			GetACStatus (ULWord & outGoodFrames, ULWord & outDroppedFrames, ULWord & outBufferLevel);
+		virtual void			GetACStatus (AUTOCIRCULATE_STATUS & outputStatus);
 
 
 	//	Protected Instance Methods

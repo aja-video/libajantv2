@@ -191,8 +191,11 @@ AJAStatus NTV2Player4K::Init (void)
 	//	Lastly, prepare my AJATimeCodeBurn instance...
 	NTV2FormatDescriptor fd (mConfig.fVideoFormat, mConfig.fPixelFormat);
 	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat(mConfig.fPixelFormat), fd.numPixels, fd.numLines);
-	PLINFO("Configuration: " << mConfig);
-
+	#if defined(_DEBUG)
+		cerr << mConfig << endl;
+	#else
+		PLINFO("Configuration: " << mConfig);
+	#endif	//	not _DEBUG
 	return AJA_STATUS_SUCCESS;
 
 }	//	Init
@@ -211,6 +214,7 @@ AJAStatus NTV2Player4K::SetUpVideo (void)
 	if (!::NTV2DeviceCanDo12gRouting(mDeviceID))
 	{
 		const NTV2Channel	startChannel	(mConfig.fOutputChannel);
+		//	BUG:  endChannel only needs to extend to startChannel+1 for LFR
 		const NTV2Channel	endChannel		(mConfig.fOutputChannel == NTV2_CHANNEL1 ? NTV2_CHANNEL4 : NTV2_CHANNEL8);
 
 		for (NTV2Channel chan (startChannel); chan < endChannel; chan = NTV2Channel (chan + 1))
@@ -281,8 +285,8 @@ AJAStatus NTV2Player4K::SetUpVideo (void)
 			mDevice.SubscribeOutputVerticalEvent (NTV2_CHANNEL7);
 		}
 	}
-	else
-	{
+	else	//	"squares"
+	{		//	Requires 4 FrameStores/Channels
 		if (mConfig.fOutputChannel == NTV2_CHANNEL1)
 		{
 			mDevice.SetFrameBufferFormat (NTV2_CHANNEL1, mConfig.fPixelFormat);
@@ -1197,7 +1201,7 @@ void NTV2Player4K::PlayThreadStatic (AJAThread * pThread, void * pContext)		//	s
 
 void NTV2Player4K::ConsumeFrames (void)
 {
-	uint8_t					numACFramesPerChannel(7);
+	UWord					numACFramesPerChannel(7);
 	ULWord					acOptions (AUTOCIRCULATE_WITH_RP188);
 	uint32_t				hdrPktSize	(0);
 	AUTOCIRCULATE_TRANSFER	outputXferInfo;
@@ -1209,13 +1213,13 @@ void NTV2Player4K::ConsumeFrames (void)
 	mDevice.WaitForOutputVerticalInterrupt(mConfig.fOutputChannel, 4);	//	Let it stop
 	PLNOTE("Thread started");
 
-	if (IS_KNOWN_AJAAncillaryDataType(mConfig.fSendAncType))
+	if (IS_KNOWN_AJAAncillaryDataType(mConfig.fTransmitHDRType))
 	{	//	Insert one of these HDR anc packets...
 		static AJAAncillaryData_HDR_SDR		sdrPkt;
 		static AJAAncillaryData_HDR_HDR10	hdr10Pkt;
 		static AJAAncillaryData_HDR_HLG		hlgPkt;
 
-		switch (mConfig.fSendAncType)
+		switch (mConfig.fTransmitHDRType)
 		{
 			case AJAAncillaryDataType_HDR_SDR:		pPkt = &sdrPkt;		break;
 			case AJAAncillaryDataType_HDR_HDR10:	pPkt = &hdr10Pkt;	break;
@@ -1243,9 +1247,6 @@ void NTV2Player4K::ConsumeFrames (void)
     {
 		startNum = numACFramesPerChannel * mConfig.fOutputChannel;
 		endNum = startNum + numACFramesPerChannel - 1;
-        mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  0,	//	0 frameCount: we'll specify start & end frame numbers
-											mConfig.fAudioSystem,  acOptions,
-                                            1 /*numChannels*/,  startNum,  endNum);
     }
     else
     {
@@ -1279,11 +1280,20 @@ void NTV2Player4K::ConsumeFrames (void)
 			case NTV2_CHANNEL8:		startNum = numACFramesPerChannel * 3;		break;
 		}
 		endNum = startNum + numACFramesPerChannel - 1;
-        mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  0,	//	0 frameCount: we'll specify start & end frame numbers
-											mConfig.fAudioSystem,  acOptions,
-											1 /*numChannels*/,  startNum,  endNum);
 	}
-	mDevice.AutoCirculateStart(mConfig.fOutputChannel);
+	bool initOK(false);
+	if (!mConfig.fFrames.valid())	//	--frames option not used -- explicitly specify start & end frame numbers (as calculated above)
+		initOK = mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  0,	//	0 frameCount: we'll specify start & end frame numbers
+													mConfig.fAudioSystem,  acOptions,
+													1 /*numChannels*/,  startNum,  endNum);
+	else	//	--frames option controls everything:
+		initOK = mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  mConfig.fFrames.count(),
+													mConfig.fAudioSystem,  acOptions,
+													1 /*numChannels*/,  mConfig.fFrames.firstFrame(), mConfig.fFrames.lastFrame());
+	if (initOK)
+		mDevice.AutoCirculateStart(mConfig.fOutputChannel);
+	else
+		{PLFAIL("AutoCirculateInitForOutput failed");  mGlobalQuit = true;}
 
 	while (!mGlobalQuit)
 	{
@@ -1515,17 +1525,21 @@ ULWord NTV2Player4K::GetRP188RegisterForOutput (const NTV2OutputDestination inOu
 
 ostream & Player4KConfig::Print (std::ostream & strm) const
 {
-	AJALabelValuePairs table;
-	AJASystemInfo::append (table, "Device",			fDeviceSpecifier);
-	AJASystemInfo::append (table, "Video Format",	::NTV2VideoFormatToString(fVideoFormat));
-	AJASystemInfo::append (table, "Pixel Format",	::NTV2FrameBufferFormatToString(fPixelFormat));
-	AJASystemInfo::append (table, "Channel",		::NTV2ChannelToString(fOutputChannel));
-	AJASystemInfo::append (table, "Audio",			NTV2_IS_VALID_AUDIO_SYSTEM(fAudioSystem) ? "Yes" : "No");
-	AJASystemInfo::append (table, "MultiChannel",	fDoMultiChannel ? "Yes" : "No");
-	AJASystemInfo::append (table, "HDR Anc Type",	::AJAAncillaryDataTypeToString(fSendAncType));
-	AJASystemInfo::append (table, "HDMI Output",	fDoHDMIOutput ? "Yes" : "No");
-	AJASystemInfo::append (table, "Tsi",			fDoTsiRouting ? "Yes" : "No");
-	AJASystemInfo::append (table, "RGB Output",		fDoRGBOnWire ? "Yes" : "No");
-	strm << AJASystemInfo::ToString(table);
+	AJALabelValuePairs result;
+	AJASystemInfo::append (result, "Device",			fDeviceSpecifier);
+	AJASystemInfo::append (result, "Video Format",		::NTV2VideoFormatToString(fVideoFormat));
+	AJASystemInfo::append (result, "Pixel Format",		::NTV2FrameBufferFormatToString(fPixelFormat));
+	AJASystemInfo::append (result, "Channel",			::NTV2ChannelToString(fOutputChannel));
+	AJASystemInfo::append (result, "AutoCirc Frames",	fFrames.toString());
+	AJASystemInfo::append (result, "Audio",				NTV2_IS_VALID_AUDIO_SYSTEM(fAudioSystem) ? "Yes" : "No");
+	AJASystemInfo::append (result, "MultiChannel",		fDoMultiChannel ? "Yes" : "No");
+	AJASystemInfo::append (result, "HDR Anc Type",		::AJAAncillaryDataTypeToString(fTransmitHDRType));
+	AJASystemInfo::append (result, "HDMI Output",		fDoHDMIOutput ? "Yes" : "No");
+	AJASystemInfo::append (result, "Tsi",				fDoTsiRouting ? "Yes" : "No");
+	AJASystemInfo::append (result, "RGB On SDI",		fDoRGBOnWire ? "Yes" : "No");
+	AJASystemInfo::append (result, "6G/12G Output",		fDoLinkGrouping ? "Yes" : "No");
+	ostringstream numLinks;  numLinks << DEC(fNumAudioLinks);
+	AJASystemInfo::append (result, "Num Audio Links",	numLinks.str());
+	strm << AJASystemInfo::ToString(result);
 	return strm;
 }
