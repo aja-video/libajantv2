@@ -12,6 +12,7 @@
 #include "ntv2registersmb.h"
 #include "ntv2rp188.h"
 #include "ajabase/system/info.h"
+#include "ajabase/common/common.h"
 #include <algorithm>
 #include <sstream>
 #include <vector>
@@ -25,6 +26,7 @@
 
 using namespace std;
 
+
 typedef map <NTV2Channel, AUTOCIRCULATE_STATUS>		ChannelToACStatus;
 typedef ChannelToACStatus::const_iterator			ChannelToACStatusConstIter;
 typedef pair <NTV2Channel, AUTOCIRCULATE_STATUS>	ChannelToACStatusPair;
@@ -35,13 +37,13 @@ typedef map <NTV2Channel, FrameToTCList>			ChannelToPerFrameTCList;
 typedef ChannelToPerFrameTCList::const_iterator		ChannelToPerFrameTCListConstIter;
 typedef pair <NTV2Channel, FrameToTCList>			ChannelToPerFrameTCListPair;
 
-static std::string makeHeader(std::ostringstream& oss, const std::string& name)
+static string makeHeader(ostringstream & oss, const string & inName)
 {
-	oss << setfill('=') << setw(96) << " " << name << ":" << setfill(' ') << endl << endl;
+	oss << setfill('=') << setw(96) << " " << inName << ":" << setfill(' ') << endl << endl;
 	return oss.str();
 }
 
-static std::string timecodeToString(const NTV2_RP188 & inRP188)
+static string timecodeToString (const NTV2_RP188 & inRP188)
 {
 	ostringstream oss;
 	if (inRP188.IsValid())
@@ -50,14 +52,11 @@ static std::string timecodeToString(const NTV2_RP188 & inRP188)
 		oss << foo;
 	}
 	else
-	{
 		oss << "---";
-	}
-
 	return oss.str();
 }
 
-static std::string appSignatureToString(const ULWord inAppSignature)
+static string appSignatureToString (const ULWord inAppSignature)
 {
 	ostringstream oss;
 	const string sigStr(NTV2_4CC_AS_STRING(inAppSignature));
@@ -70,7 +69,7 @@ static std::string appSignatureToString(const ULWord inAppSignature)
 	return oss.str();
 }
 
-static std::string pidToString(const uint32_t inPID)
+static string pidToString (const uint32_t inPID)
 {
 	ostringstream	oss;
 	#if defined (MSWindows)
@@ -146,17 +145,22 @@ static bool isEnabled (CNTV2Card & device, const NTV2Channel inChannel)
 	return result;
 }
 
-static string getActiveFrameStr (CNTV2Card & device, const NTV2Channel inChannel)
+static ULWord getActiveFrame (CNTV2Card & device, const NTV2Channel inChannel)
 {
-	if (!isEnabled(device, inChannel))
-		return "---";
 	ULWord frameNum(0);
 	if (NTV2_IS_INPUT_MODE(::getMode(device, inChannel)))
 		device.GetInputFrame(inChannel, frameNum);
 	else
 		device.GetOutputFrame(inChannel, frameNum);
+	return frameNum;
+}
+
+static string getActiveFrameStr (CNTV2Card & device, const NTV2Channel inChannel)
+{
+	if (!isEnabled(device, inChannel))
+		return "---";
 	ostringstream oss;
-	oss << DEC(frameNum);
+	oss << DEC(::getActiveFrame(device, inChannel));
 	return oss.str();
 }
 
@@ -249,45 +253,43 @@ static bool detectInputChannelPairs (CNTV2Card & device, const NTV2AudioSource i
 	return false;
 }
 
-static bool getBitfileDate (CNTV2Card & device, std::string &bitFileDateString, NTV2XilinxFPGA whichFPGA)
+static bool getBitfileDate (CNTV2Card & device, string & outDateString, NTV2XilinxFPGA whichFPGA)
 {
 	BITFILE_INFO_STRUCT bitFileInfo;
 	memset(&bitFileInfo, 0, sizeof(BITFILE_INFO_STRUCT));
 	bitFileInfo.whichFPGA = whichFPGA;
 	bool bBitFileInfoAvailable = false;		// BitFileInfo is implemented only on 5.2 and later drivers.
-	if (true)	//	boardID != BOARD_ID_XENAX &&  boardID != BOARD_ID_XENAX2 )
-		bBitFileInfoAvailable = device.DriverGetBitFileInformation(bitFileInfo);
+	bBitFileInfoAvailable = device.DriverGetBitFileInformation(bitFileInfo);
 	if( bBitFileInfoAvailable )
 	{
-		bitFileDateString = bitFileInfo.designNameStr;
-		if (bitFileDateString.find(".ncd") > 0)
+		outDateString = bitFileInfo.designNameStr;
+		if (outDateString.find(".ncd") != string::npos)
 		{
-			bitFileDateString = bitFileDateString.substr(0, bitFileDateString.find(".ncd"));
-			bitFileDateString += ".bit ";
-			bitFileDateString += bitFileInfo.dateStr;
-			bitFileDateString += " ";
-			bitFileDateString += bitFileInfo.timeStr;
+			outDateString = outDateString.substr(0, outDateString.find(".ncd"));
+			outDateString += ".bit ";
+			outDateString += bitFileInfo.dateStr;
+			outDateString += " ";
+			outDateString += bitFileInfo.timeStr;
 		}
-		else if (bitFileDateString.find(";") != string::npos)
+		else if (outDateString.find(";") != string::npos)
 		{
-			bitFileDateString = bitFileDateString.substr(0, bitFileDateString.find(";"));
-			bitFileDateString += ".bit ";
-			bitFileDateString += bitFileInfo.dateStr;
-			bitFileDateString += " ";
-			bitFileDateString += bitFileInfo.timeStr;
+			outDateString = outDateString.substr(0, outDateString.find(";"));
+			outDateString += ".bit ";
+			outDateString += bitFileInfo.dateStr;
+			outDateString += " ";
+			outDateString += bitFileInfo.timeStr;
 		}
-		else if (bitFileDateString.find(".bit") != string::npos &&
-				 bitFileDateString != ".bit")
+		else if (outDateString.find(".bit") != string::npos  &&  outDateString != ".bit")
 		{
-			bitFileDateString = bitFileInfo.designNameStr;
-			bitFileDateString += " ";
-			bitFileDateString += bitFileInfo.dateStr;
-			bitFileDateString += " ";
-			bitFileDateString += bitFileInfo.timeStr;
+			outDateString = bitFileInfo.designNameStr;
+			outDateString += " ";
+			outDateString += bitFileInfo.dateStr;
+			outDateString += " ";
+			outDateString += bitFileInfo.timeStr;
 		}
 		else
 		{
-			bitFileDateString = "bad bitfile date string";
+			outDateString = "bad bitfile date string";
 			return false;
 		}
 	}
@@ -296,7 +298,7 @@ static bool getBitfileDate (CNTV2Card & device, std::string &bitFileDateString, 
 	return true;
 }
 
-AJAExport std::ostream & operator << (std::ostream & outStream, const CNTV2SupportLogger & inData)
+AJAExport ostream & operator << (ostream & outStream, const CNTV2SupportLogger & inData)
 {
 	outStream << inData.ToString();
 	return outStream;
@@ -390,7 +392,7 @@ void CNTV2SupportLogger::AddFooter (const string & sectionName, const string & s
 			oss << mAppendMap.at(_SectionEnum_); \
 	}
 
-std::string CNTV2SupportLogger::ToString (void) const
+string CNTV2SupportLogger::ToString (void) const
 {
 	ostringstream oss;
 	vector<char> dateBufferLocal(128, 0);
@@ -440,9 +442,9 @@ void CNTV2SupportLogger::ToString (string & outString) const
 	outString = ToString();
 }
 
-static inline std::string HEX0NStr(const uint32_t inNum, const uint16_t inWidth)	{ostringstream	oss;  oss << HEX0N(inNum,inWidth);	return oss.str();}
-static inline std::string xHEX0NStr(const uint32_t inNum, const uint16_t inWidth)	{ostringstream	oss;  oss << xHEX0N(inNum,inWidth);	 return oss.str();}
-template <class T> std::string DECStr (const T & inT)								{ostringstream	oss;  oss << DEC(inT);	return oss.str();}
+static inline string HEX0NStr (const uint32_t inNum, const uint16_t inWidth)	{ostringstream	oss;  oss << HEX0N(inNum,inWidth);	return oss.str();}
+static inline string xHEX0NStr(const uint32_t inNum, const uint16_t inWidth)	{ostringstream	oss;  oss << xHEX0N(inNum,inWidth);	 return oss.str();}
+template <class T> string DECStr (const T & inT)								{ostringstream	oss;  oss << DEC(inT);	return oss.str();}
 
 void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 {
@@ -450,7 +452,7 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 	AJALabelValuePairs	infoTable;
 	AJASystemInfo::append(infoTable, "SDK/DRIVER INFO", "");
 	AJASystemInfo::append(infoTable, "NTV2 SDK Version",	::NTV2GetVersionString(true));
-	AJASystemInfo::append(infoTable, "supportlog Built",	std::string(__DATE__ " at " __TIME__));
+	AJASystemInfo::append(infoTable, "supportlog Built",	string(__DATE__ " at " __TIME__));
 	AJASystemInfo::append(infoTable, "Driver Version",		mDevice.GetDriverVersionString());
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	const ULWord negotiatedProtocolVersion (mDevice.GetNubProtocolVersion());
@@ -578,6 +580,7 @@ void CNTV2SupportLogger::FetchRegisterLog (ostringstream & oss) const
 	}
 }
 
+
 void CNTV2SupportLogger::FetchAutoCirculateLog (ostringstream & oss) const
 {
 	ULWord					appSignature	(0);
@@ -617,9 +620,9 @@ void CNTV2SupportLogger::FetchAutoCirculateLog (ostringstream & oss) const
 		}	//	if not stopped
 	}	//	for each channel
 
-	oss << "Task mode:	" << ::NTV2TaskModeToString(taskMode) << ", PID=" << pidToString(uint32_t(appPID)) << ", signature=" << appSignatureToString(appSignature) << endl
+	oss << "Task mode:  " << ::NTV2TaskModeToString(taskMode) << ", PID=" << pidToString(uint32_t(appPID)) << ", signature=" << appSignatureToString(appSignature) << endl
 		<< endl
-		<< "Chan/FrameStore	  State	 Start	 End   Act	 FrmProc   FrmDrop BufLvl	 Audio	 RP188	   LTC	 FBFch	 FBOch	 Color	 VidPr	   Anc	 HDMIx	 Field		VidFmt		 PixFmt" << endl
+		<< "Chan/FrameStore   State  Start   End   Act   FrmProc   FrmDrop BufLvl    Audio   RP188     LTC   FBFch   FBOch   Color   VidPr     Anc   HDMIx   Field      VidFmt       PixFmt" << endl
 		<< "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------" << endl;
 	for (ChannelToACStatusConstIter iter (perChannelStatus.begin());  iter != perChannelStatus.end();  ++iter)
 	{
@@ -655,19 +658,26 @@ void CNTV2SupportLogger::FetchAutoCirculateLog (ostringstream & oss) const
 				<< endl;
 	}	//	for each channel
 
+	SDRAMAuditor ramMapper;
+	oss << endl << "Device SDRAM Map (8MB frms):" << endl;
+	ramMapper.AssessDevice(mDevice,   /* ignore unused audio buffers */ true);
+	ramMapper.DumpBlocks(oss);
+	oss << endl;
+
+	//	Dump the A/C timecodes...
 	for (ChannelToACStatusConstIter iter (perChannelStatus.begin());  iter != perChannelStatus.end();  ++iter)
 	{
 		const NTV2Channel				chan(iter->first);
 		const AUTOCIRCULATE_STATUS &	status(iter->second);
 		if (status.IsStopped())
-			continue;	//	Stopped -- skip this channel
+			continue;	//	Not initialized/started/paused/running -- skip this channel
 
 		ChannelToPerFrameTCListConstIter it(perChannelTCs.find(chan));
 		if (it == perChannelTCs.end())
 			continue;	//	Channel not in perChannelTCs
 
 		const FrameToTCList perFrameTCs(it->second);
-		oss << endl << dashes << " " << (NTV2_IS_INPUT_CROSSPOINT(status.acCrosspoint) ? "Input " : "Output ") << (chan+1) << " Per-Frame Timecodes:" << endl;
+		oss << endl << dashes << " " << (NTV2_IS_INPUT_CROSSPOINT(status.acCrosspoint) ? "Input " : "Output ") << DEC(chan+1) << " Per-Frame Valid Timecodes:" << endl;
 		for (FrameToTCListConstIter i(perFrameTCs.begin());	 i != perFrameTCs.end();  ++i)
 		{
 			const uint16_t				frameNum(i->first);
@@ -675,43 +685,43 @@ void CNTV2SupportLogger::FetchAutoCirculateLog (ostringstream & oss) const
 			oss << "Frame " << frameNum << ":" << endl;
 			for (uint16_t tcNdx(0);	 tcNdx < timecodes.size();	tcNdx++)
 			{
-				const NTV2TimecodeIndex tcIndex (static_cast<NTV2TimecodeIndex>(tcNdx));
-				oss << "\t" << setw(10) << ::NTV2TCIndexToString(tcIndex, true) << setw(0) << ":\t"
-					<< setw(12) << timecodeToString(timecodes[tcNdx]) << setw(0) << "\t" << timecodes[tcNdx] << endl;
+				const NTV2_RP188 tcVal(timecodes[tcNdx]);
+				if (!tcVal.IsValid())
+					continue;	//	skip invalid timecodes
+				const string tcStr (timecodeToString(tcVal));
+				oss << "\t" << setw(10) << ::NTV2TCIndexToString(NTV2TimecodeIndex(tcNdx), true) << setw(0) << ":\t"
+					<< setw(12) << tcStr << setw(0) << "\t" << tcVal << endl;
 			}	//	for each timecode
 		}	//	for each frame
 	}	//	for each channel
 }	//	FetchAutoCirculateLog
 
+
 void CNTV2SupportLogger::FetchAudioLog (ostringstream & oss) const
 {
-
-	const UWord		maxNumChannels		(::NTV2DeviceGetMaxAudioChannels(mDevice.GetDeviceID()));
-	oss		<< "			 Device:\t" << mDevice.GetDisplayName ()											<< endl;
+	const NTV2DeviceID	devID			(mDevice.GetDeviceID());
+	const UWord			maxNumChannels	(::NTV2DeviceGetMaxAudioChannels(devID));
+	const UWord			numAudSys		(::NTV2DeviceGetNumAudioSystems(devID));
+	oss << "			 Device:\t" << mDevice.GetDisplayName()	<< endl;
 
 	// loop over all the audio systems
-	for (int i=0; i<NTV2DeviceGetNumAudioSystems(mDevice.GetDeviceID()); i++)
+	for (NTV2AudioSystem audSys(NTV2_AUDIOSYSTEM_1);  audSys < NTV2AudioSystem(numAudSys);  audSys = NTV2AudioSystem(audSys+1))
 	{
-		//temp stubs
-		// need to determin channel and audio system still
-		//
-		NTV2AudioSystem audioSystem = NTV2AudioSystem(i);
-
 		AUTOCIRCULATE_STATUS acStatus;
-		NTV2Channel channel = findActiveACChannel(mDevice, audioSystem, acStatus);
-		if (channel != NTV2_CHANNEL_INVALID)
+		NTV2Channel acChan (findActiveACChannel(mDevice, audSys, acStatus));
+		if (acChan != NTV2_CHANNEL_INVALID)
 		{
-			NTV2AudioSource audioSource = NTV2_AUDIO_EMBEDDED;
-			NTV2EmbeddedAudioInput embeddedSource = NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1;
-			mDevice.GetAudioSystemInputSource(audioSystem, audioSource, embeddedSource);
-			NTV2Mode mode = NTV2_MODE_DISPLAY;
-			mDevice.GetMode(channel, mode);
-			NTV2AudioRate audioRate = NTV2_AUDIO_48K;
-			mDevice.GetAudioRate(audioRate, audioSystem);
+			NTV2AudioSource audioSource	(NTV2_AUDIO_EMBEDDED);
+			NTV2EmbeddedAudioInput embeddedSource	(NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1);
+			mDevice.GetAudioSystemInputSource(audSys, audioSource, embeddedSource);
+			NTV2Mode mode (NTV2_MODE_DISPLAY);
+			mDevice.GetMode(acChan, mode);
+			NTV2AudioRate audioRate (NTV2_AUDIO_48K);
+			mDevice.GetAudioRate(audioRate, audSys);
 			NTV2AudioBufferSize audioBufferSize;
-			mDevice.GetAudioBufferSize(audioBufferSize, audioSystem);
-			NTV2AudioLoopBack loopbackMode = NTV2_AUDIO_LOOPBACK_OFF;
-			mDevice.GetAudioLoopBack(loopbackMode, audioSystem);
+			mDevice.GetAudioBufferSize(audioBufferSize, audSys);
+			NTV2AudioLoopBack loopbackMode (NTV2_AUDIO_LOOPBACK_OFF);
+			mDevice.GetAudioLoopBack(loopbackMode, audSys);
 
 			NTV2AudioChannelPairs channelPairsPresent;
 			if (NTV2_IS_INPUT_MODE(mode))
@@ -721,7 +731,7 @@ void CNTV2SupportLogger::FetchAudioLog (ostringstream & oss) const
 			else if (NTV2_IS_OUTPUT_MODE(mode))
 			{
 				bool isEmbedderEnabled = false;
-				mDevice.GetAudioOutputEmbedderState(NTV2Channel(audioSystem), isEmbedderEnabled);
+				mDevice.GetAudioOutputEmbedderState(NTV2Channel(audSys), isEmbedderEnabled);
 				UWord inChannelCount = isEmbedderEnabled ? maxNumChannels : 0;
 
 				//	Generates a NTV2AudioChannelPairs set for the given number of audio channels...
@@ -733,49 +743,46 @@ void CNTV2SupportLogger::FetchAudioLog (ostringstream & oss) const
 				}
 			}
 
-			if (::NTV2DeviceCanDoPCMDetection(mDevice.GetDeviceID()))
-				mDevice.GetInputAudioChannelPairsWithPCM(channel, channelPairsPresent);
+			if (::NTV2DeviceCanDoPCMDetection(devID))
+				mDevice.GetInputAudioChannelPairsWithPCM(acChan, channelPairsPresent);
 
 			NTV2AudioChannelPairs nonPCMChannelPairs;
-			mDevice.GetInputAudioChannelPairsWithoutPCM(channel, nonPCMChannelPairs);
-			bool isNonPCM = true;
+			mDevice.GetInputAudioChannelPairsWithoutPCM(acChan, nonPCMChannelPairs);
+			bool isNonPCM (true);
 			//end temp
 
-			const ULWord	currentPosSampleNdx (getCurrentPositionSamples(mDevice, audioSystem, mode));
-			const ULWord	maxSamples			(getMaxNumSamples(mDevice, audioSystem));
-
-			oss																										<< endl
-			//		  << "			   Device:\t" << mDevice.GetDisplayName ()											<< endl
-					<< "	   Audio system:\t" << ::NTV2AudioSystemToString (audioSystem, true)						<< endl
-					<< "		Sample Rate:\t" << ::NTV2AudioRateToString (audioRate, true)							<< endl
-					<< "		Buffer Size:\t" << ::NTV2AudioBufferSizeToString (audioBufferSize, true)				<< endl
-					<< "	 Audio Channels:\t" << getNumAudioChannels(mDevice, audioSystem);
-					if (getNumAudioChannels(mDevice, audioSystem) == maxNumChannels)
+			const ULWord	currentPosSampleNdx (getCurrentPositionSamples(mDevice, audSys, mode));
+			const ULWord	maxSamples			(getMaxNumSamples(mDevice, audSys));
+			oss																								<< endl
+					<< "	   Audio system:\t" << ::NTV2AudioSystemToString (audSys, true)					<< endl
+					<< "		Sample Rate:\t" << ::NTV2AudioRateToString (audioRate, true)				<< endl
+					<< "		Buffer Size:\t" << ::NTV2AudioBufferSizeToString (audioBufferSize, true)	<< endl
+					<< "	 Audio Channels:\t" << getNumAudioChannels(mDevice, audSys);
+					if (getNumAudioChannels(mDevice, audSys) == maxNumChannels)
 						oss << " (max)"										<< endl;
 					else
 						oss << " (" << maxNumChannels << " (max))"			<< endl;
-			oss << "	  Total Samples:\t[" << DEC0N(maxSamples,6) << "]"											<< endl
-					<< "		  Direction:\t" << ::NTV2ModeToString (mode, true)									<< endl
-	//				  << "		 Engine State:\t" << (isAudioEngineRunning() ? (isAudioEnginePaused() ? "Paused" : "Running") : "Stopped") << endl
-					<< "	  AutoCirculate:\t" << ::NTV2ChannelToString (channel, true)								<< endl
-					<< "	  Loopback Mode:\t" << ::NTV2AudioLoopBackToString (loopbackMode, true)					<< endl;
+			oss << "	  Total Samples:\t[" << DEC0N(maxSamples,6) << "]"									<< endl
+					<< "		  Direction:\t" << ::NTV2ModeToString (mode, true)							<< endl
+					<< "	  AutoCirculate:\t" << ::NTV2ChannelToString (acChan, true)						<< endl
+					<< "	  Loopback Mode:\t" << ::NTV2AudioLoopBackToString (loopbackMode, true)			<< endl;
 			if (NTV2_IS_INPUT_MODE(mode))
 			{
-				oss << "Write Head Position:\t["	<< DEC0N(currentPosSampleNdx,6) << "]"				<< endl
+				oss << "Write Head Position:\t["	<< DEC0N(currentPosSampleNdx,6) << "]"					<< endl
 						<< "	   Audio source:\t"		<< ::NTV2AudioSourceToString(audioSource, true);
 				if (NTV2_AUDIO_SOURCE_IS_EMBEDDED(audioSource))
 					oss << " (" << ::NTV2EmbeddedAudioInputToString(embeddedSource, true) << ")";
-				oss																						<< endl
+				oss																							<< endl
 						<< "   Channels Present:\t"		<< channelPairsPresent								<< endl
 						<< "   Non-PCM Channels:\t"		<< nonPCMChannelPairs								<< endl;
 			}
 			else if (NTV2_IS_OUTPUT_MODE(mode))
 			{
-				oss << " Read Head Position:\t[" << DEC0N(currentPosSampleNdx,6) << "]"					<< endl;
+				oss << " Read Head Position:\t[" << DEC0N(currentPosSampleNdx,6) << "]"						<< endl;
 				if (::NTV2DeviceCanDoPCMControl(mDevice.GetDeviceID()))
-					oss << "   Non-PCM Channels:\t" << nonPCMChannelPairs								<< endl;
+					oss << "   Non-PCM Channels:\t" << nonPCMChannelPairs									<< endl;
 				else
-					oss << "   Non-PCM Channels:\t" << (isNonPCM ? "All Channel Pairs" : "Normal")		<< endl;
+					oss << "   Non-PCM Channels:\t" << (isNonPCM ? "All Channel Pairs" : "Normal")			<< endl;
 			}
 		}
 	}
@@ -805,7 +812,7 @@ void CNTV2SupportLogger::FetchRoutingLog (ostringstream & oss) const
 struct registerToLoadString
 {
 	NTV2RegisterNumber registerNum;
-	std::string registerStr;
+	string registerStr;
 };
 const registerToLoadString registerToLoadStrings[] =
 {
@@ -909,12 +916,12 @@ const registerToLoadString registerToLoadStrings[] =
 	Enum2Str(kRegXptSelectGroup35)
 };
 
-bool CNTV2SupportLogger::LoadFromLog (const std::string & inLogFilePath, const bool bForceLoad)
+bool CNTV2SupportLogger::LoadFromLog (const string & inLogFilePath, const bool bForceLoad)
 {
 	ifstream fileInput;
 	fileInput.open(inLogFilePath.c_str());
 	string lineContents;
-	int i = 0, numLines = 0;;
+	int i = 0, numLines = 0;
 	int size = sizeof(registerToLoadStrings)/sizeof(registerToLoadString);
 	string searchString;
 	bool isCompatible = false;
@@ -962,10 +969,10 @@ bool CNTV2SupportLogger::LoadFromLog (const std::string & inLogFilePath, const b
 			getline(fileInput, lineContents);
 			getline(fileInput, lineContents);
 			searchString = "Register Value: ";
-			std::size_t start = lineContents.find(searchString);
+			size_t start = lineContents.find(searchString);
 			if(start != string::npos)
 			{
-				std::size_t end = lineContents.find(" : ");
+				size_t end = lineContents.find(" : ");
 				stringstream registerValueString(lineContents.substr(start + searchString.length(), end));
 				uint32_t registerValue = 0;
 				registerValueString >> registerValue;
@@ -1015,7 +1022,7 @@ bool CNTV2SupportLogger::DumpDeviceSDRAM (CNTV2Card & inDevice, const string & i
 	const ULWord byteCount(::NTV2FramesizeToByteCount(frmsz)), megs(byteCount/1024/1024), numFrames(maxBytes / byteCount);
 	NTV2_POINTER buffer(byteCount);
 	NTV2ULWordVector goodFrames, badDMAs, badWrites;
-	ofstream ofs(inFilePath.c_str(), std::ofstream::out | std::ofstream::binary);
+	ofstream ofs(inFilePath.c_str(), ofstream::out | ofstream::binary);
 	if (!ofs)
 		{msgStrm << "## ERROR: Unable to open '" << inFilePath << "' for writing" << endl;	return false;}
 

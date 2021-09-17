@@ -841,3 +841,277 @@ ostream &	operator << (ostream & inOutStr, const NTV2DIDSet & inDIDs)
 
 
 NTV2_POINTER CNTV2Card::NULL_POINTER (AJA_NULL, 0);
+
+
+bool SDRAMAuditor::AssessDevice (CNTV2Card & inDevice, const bool inMarkStoppedAudioBuffersFree)
+{
+	mFrameTags.clear();
+	mDeviceID = DEVICE_ID_INVALID;
+	mNumFrames = 0;
+	mIntrinsicSize = 0;
+	if (!inDevice.IsOpen())
+		return false;
+
+	mDeviceID = inDevice.GetDeviceID();
+	const ULWord totalBytes(::NTV2DeviceGetActiveMemorySize(mDeviceID));
+	mNumFrames = UWord(totalBytes / m8MB);
+	if (totalBytes % m8MB)
+		{mNumFrames++;  cerr << DEC(totalBytes % m8MB) << " leftover/spare bytes -- last frame is partial frame" << endl;}
+	for (UWord frm(0);  frm < mNumFrames;  frm++)
+		mFrameTags.insert(FrameTag(frm, NTV2StringSet()));
+
+	return TagAudioBuffers(inDevice, inMarkStoppedAudioBuffersFree) && TagVideoFrames(inDevice);
+}
+
+ostream & SDRAMAuditor::RawDump (ostream & oss) const
+{
+	for (FrameTagsConstIter it(mFrameTags.begin());  it != mFrameTags.end();  ++it)
+	{
+		const NTV2StringSet & tags(it->second);
+		oss << DEC0N(it->first,3) << ": " << aja::join(tags, ", ") << endl;
+	}
+	return oss;
+}
+
+SDRAMAuditor::ULWordSet SDRAMAuditor::CoalesceRegions (const ULWordSequence & inRgn1, const ULWordSequence & inRgn2, const ULWordSequence & inRgn3)
+{
+	ULWordSet result;	//	Coalesce all regions into this one sorted set
+	for (size_t ndx(0);  ndx < inRgn1.size();  ndx++)
+		if (result.find(inRgn1.at(ndx)) == result.end())
+			result.insert(inRgn1.at(ndx));
+	for (size_t ndx(0);  ndx < inRgn2.size();  ndx++)
+		if (result.find(inRgn2.at(ndx)) == result.end())
+			result.insert(inRgn2.at(ndx));
+	for (size_t ndx(0);  ndx < inRgn3.size();  ndx++)
+		if (result.find(inRgn3.at(ndx)) == result.end())
+			result.insert(inRgn3.at(ndx));
+	return result;
+}
+
+ostream & SDRAMAuditor::DumpBlocks (ostream & oss) const
+{
+	ULWordSequence badBlks, freeBlks, goodBlks;
+	GetRegions (freeBlks, goodBlks, badBlks);
+	ULWordSet rgns (CoalesceRegions(freeBlks, goodBlks, badBlks));	//	Coalesce all regions into this one sorted set
+
+	for (ULWordSetConstIter it(rgns.begin());  it != rgns.end();  ++it)
+	{
+		const ULWord rgnInfo(*it);
+		const UWord startBlk(rgnInfo >> 16), numBlks(UWord(rgnInfo & 0x0000FFFF));
+		NTV2StringSet tags;
+		GetTagsForFrameIndex (startBlk, tags);
+		if (numBlks > 1)
+			oss << "Frms " << DEC0N(startBlk,3) << "-" << DEC0N(startBlk+numBlks-1,3) << " : ";
+		else
+			oss << "Frm  " << DEC0N(startBlk,3) << "     : ";
+		if (tags.empty())
+			oss << "{free}";
+		else
+			oss << aja::join(tags, ", ");
+		oss << endl;
+	}
+	return oss;
+}
+
+bool SDRAMAuditor::GetRegions (ULWordSequence & outFree, ULWordSequence & outUsed, ULWordSequence & outBad) const
+{
+	outFree.clear();  outUsed.clear();  outBad.clear();
+	FrameTagsConstIter it(mFrameTags.begin());
+	if (it == mFrameTags.end())
+		return true;
+	UWord frmStart(it->first), lastFrm(frmStart);
+	NTV2StringSet runTags(it->second);
+	while (++it != mFrameTags.end())
+	{
+		const NTV2StringSet & tags(it->second);
+		if (tags != runTags)
+		{	//	End of current run, start of new run
+			if (runTags.empty())
+			{
+				if (frmStart != lastFrm)
+					outFree.push_back((ULWord(frmStart) << 16) | ULWord(lastFrm-frmStart+1));
+				else
+					outFree.push_back((ULWord(frmStart) << 16) | ULWord(1));
+			}
+			else if (runTags.size() > 1)
+			{
+				if (frmStart != lastFrm)
+					outBad.push_back((ULWord(frmStart) << 16) | ULWord(lastFrm-frmStart+1));
+				else
+					outBad.push_back((ULWord(frmStart) << 16) | ULWord(1));
+			}
+			else
+			{
+				if (frmStart != lastFrm)
+					outUsed.push_back((ULWord(frmStart) << 16) | ULWord(lastFrm-frmStart+1));
+				else
+					outUsed.push_back((ULWord(frmStart) << 16) | ULWord(1));
+			}
+			frmStart = lastFrm = it->first;
+			runTags = tags;
+		}
+		else
+			lastFrm = it->first;	//	Continue current run
+	}
+	if (runTags.empty())
+	{
+		if (frmStart != lastFrm)
+			outFree.push_back((ULWord(frmStart) << 16) | ULWord(lastFrm-frmStart+1));
+		else
+			outFree.push_back((ULWord(frmStart) << 16) | ULWord(1));
+	}
+	else if (runTags.size() > 1)
+	{
+		if (frmStart != lastFrm)
+			outBad.push_back((ULWord(frmStart) << 16) | ULWord(lastFrm-frmStart+1));
+		else
+			outBad.push_back((ULWord(frmStart) << 16) | ULWord(1));
+	}
+	else
+	{
+		if (frmStart != lastFrm)
+			outUsed.push_back((ULWord(frmStart) << 16) | ULWord(lastFrm-frmStart+1));
+		else
+			outUsed.push_back((ULWord(frmStart) << 16) | ULWord(1));
+	}
+	return true;
+}
+
+bool SDRAMAuditor::GetTagsForFrameIndex (const UWord inIndex, NTV2StringSet & outTags) const
+{
+	outTags.clear();
+	FrameTagsConstIter it(mFrameTags.find(inIndex));
+	if (it == mFrameTags.end())
+		return false;
+	outTags = it->second;
+	return true;
+}
+
+size_t SDRAMAuditor::GetTagCount (const UWord inIndex) const
+{
+	FrameTagsConstIter it(mFrameTags.find(inIndex));
+	if (it == mFrameTags.end())
+		return 0;
+	return it->second.size();
+}
+
+bool SDRAMAuditor::TranslateRegions (ULWordSequence & outDestRgns, const ULWordSequence & inSrcRgns, const bool inIsQuad, const bool inIsQuadQuad) const
+{
+	outDestRgns.clear();
+	if (inIsQuad && inIsQuadQuad)
+		return false;	//	Can't be both
+	if (inSrcRgns.empty())
+		return true;	//	Empty list, not an error
+	const UWord	_8MB_frames_per_dest_frame(UWord(GetIntrinsicFrameByteCount() / m8MB) * (inIsQuad?4:1) * (inIsQuadQuad?16:1));	//	Should result in 1/4/16 or 2/8/32
+	if (_8MB_frames_per_dest_frame == 1)
+		{outDestRgns = inSrcRgns;	return true;}	//	Same
+
+	//	For each region...
+	for (size_t ndx(0);  ndx < inSrcRgns.size();  ndx++)
+	{	const ULWord val(inSrcRgns.at(ndx));
+		UWord startBlkOffset(val >> 16), lengthBlks(UWord(val & 0x0000FFFF));	//	<== These are in 8MB block units
+		startBlkOffset = startBlkOffset / _8MB_frames_per_dest_frame  +  (startBlkOffset % _8MB_frames_per_dest_frame ? 1 : 0);
+		lengthBlks = lengthBlks / _8MB_frames_per_dest_frame;
+		outDestRgns.push_back((ULWord(startBlkOffset) << 16) | ULWord(lengthBlks));
+	}
+	return true;
+}
+
+bool SDRAMAuditor::TagAudioBuffers (CNTV2Card & inDevice, const bool inMarkStoppedAudioBuffersFree)
+{
+	ULWord addr(0);
+	bool isReading(false), isWriting(false);
+	const UWord	maxNumAudioSystems(::NTV2DeviceGetNumAudioSystems(mDeviceID) + (inDevice.DeviceCanDoAudioMixer() ? 1 : 0));
+	for (NTV2AudioSystem audSys(NTV2_AUDIOSYSTEM_1);  audSys < NTV2AudioSystem(maxNumAudioSystems);  audSys = NTV2AudioSystem(audSys+1))
+		if (inDevice.GetAudioMemoryOffset (0,  addr,  audSys))
+		{	ostringstream tag;
+			tag << "Aud" << DEC(audSys+1);
+			if (inDevice.IsAudioOutputRunning(audSys, isReading)  &&  isReading)
+				tag << " Read";
+			if (inDevice.IsAudioInputRunning(audSys, isWriting)  &&  isWriting)
+				tag << " Write";
+			TagMemoryBlock(addr, m8MB, inMarkStoppedAudioBuffersFree && !isReading && !isWriting ? string() : tag.str());
+		}
+	return true;
+}
+
+bool SDRAMAuditor::TagVideoFrames (CNTV2Card & inDevice)
+{
+	const UWord numChannels	(UWord(::NTV2DeviceGetNumVideoChannels(mDeviceID)));
+	NTV2ChannelSet skipChannels;
+	for (NTV2Channel chan(NTV2_CHANNEL1);  chan < NTV2Channel(numChannels);  chan = NTV2Channel(chan+1))
+	{
+		AUTOCIRCULATE_STATUS acStatus;
+		bool isEnabled(false), isMultiFormat(false), isQuad(false), isQuadQuad(false), isSquares(false), isTSI(false);
+		ostringstream tag;
+		uint64_t addr(0), len(0);
+		if (skipChannels.find(chan) != skipChannels.end())
+			continue;	//	Skip this channel/framestore
+		if (inDevice.AutoCirculateGetStatus (chan, acStatus)  &&  !acStatus.IsStopped())
+		{
+			uint64_t tmp(0);
+			inDevice.GetDeviceFrameInfo(acStatus.GetStartFrame(), chan, mIntrinsicSize, isMultiFormat, isQuad, isQuadQuad, isSquares, isTSI, addr, tmp);
+			inDevice.GetDeviceFrameInfo(acStatus.GetEndFrame(), chan, tmp, len);
+			tag << "AC" << DEC(chan+1) << (acStatus.IsInput() ? " Write" : " Read");
+			TagMemoryBlock(addr, tmp + len - addr, tag.str());
+		}	//	if GetStatus succeeded
+		else if (inDevice.IsChannelEnabled(chan, isEnabled)  &&  isEnabled)
+		{
+			NTV2Mode mode(NTV2_MODE_INVALID);
+			inDevice.GetMode(chan, mode);
+			ULWord frameNum(0);
+			if (NTV2_IS_INPUT_MODE(mode))
+				inDevice.GetInputFrame(chan, frameNum);
+			else
+				inDevice.GetOutputFrame(chan, frameNum);
+			inDevice.GetDeviceFrameInfo (UWord(frameNum),  chan,  mIntrinsicSize, isMultiFormat, isQuad, isQuadQuad, isSquares, isTSI, addr,  len);
+			tag << "Ch" << DEC(chan+1) << (acStatus.IsInput() ? " Write" : " Read");
+			TagMemoryBlock(addr, len, tag.str());
+		}
+		if (isSquares && chan == NTV2_CHANNEL1)
+			{skipChannels.insert(NTV2_CHANNEL2); skipChannels.insert(NTV2_CHANNEL3); skipChannels.insert(NTV2_CHANNEL4);}
+		else if (isSquares && chan == NTV2_CHANNEL5)
+			{skipChannels.insert(NTV2_CHANNEL6); skipChannels.insert(NTV2_CHANNEL7); skipChannels.insert(NTV2_CHANNEL8);}
+		else if (isQuad  &&  !isQuadQuad  &&  isTSI)
+		{
+			if (chan == NTV2_CHANNEL1)
+				skipChannels.insert(NTV2_CHANNEL2);
+			else if (chan == NTV2_CHANNEL3)
+				skipChannels.insert(NTV2_CHANNEL4);
+			else if (chan == NTV2_CHANNEL5)
+				skipChannels.insert(NTV2_CHANNEL6);
+			else if (chan == NTV2_CHANNEL7)
+				skipChannels.insert(NTV2_CHANNEL8);
+		}
+	}	//	for each device channel
+	if (!mIntrinsicSize)
+	{
+		NTV2Framesize frmsz(NTV2_FRAMESIZE_8MB);
+		inDevice.GetFrameBufferSize(NTV2_CHANNEL1, frmsz);
+		mIntrinsicSize = ::NTV2FramesizeToByteCount(frmsz);
+	}
+	return true;
+}
+
+bool SDRAMAuditor::TagMemoryBlock (const ULWord inStartAddr, const ULWord inByteLength, const string & inTag)
+{
+	if (inStartAddr % m8MB)
+		return false;
+	if (inByteLength % m8MB)
+		return false;
+	if (inTag.empty())
+		return false;
+	const UWord startFrm(UWord(inStartAddr / m8MB)),  frmCnt(UWord(inByteLength / m8MB));
+	for (UWord frm(0);  frm < frmCnt;  frm++)
+	{
+		UWord frameNum(startFrm + frm);
+		NTV2StringSet & tags(mFrameTags[frameNum]);
+		if (tags.find(inTag) == tags.end())
+		{
+			tags.insert(inTag);
+			if (frameNum >= mNumFrames)
+				tags.insert("Invalid");
+		}
+	}
+	return true;
+}

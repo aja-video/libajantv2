@@ -2077,27 +2077,27 @@ string AUTOCIRCULATE_STATUS::operator [] (const unsigned inIndexNum) const
 	else if (!IsStopped())
 		switch (inIndexNum)
 		{
-			case 1:		oss << DEC(GetStartFrame());					break;
-			case 2:		oss << DEC(GetEndFrame());						break;
-			case 3:		oss << DEC(GetFrameCount());					break;
-			case 4:		oss << DEC(GetActiveFrame());					break;
-			case 5:		oss << xHEX0N(acRDTSCStartTime,16);				break;
-			case 6:		oss << xHEX0N(acAudioClockStartTime,16);		break;
-			case 7:		oss << DEC(acRDTSCCurrentTime);					break;
-			case 8:		oss << DEC(acAudioClockCurrentTime);			break;
-			case 9:		oss << CommaStr(GetProcessedFrameCount());		break;
-			case 10:	oss << CommaStr(GetDroppedFrameCount());		break;
-			case 11:	oss << DEC(GetBufferLevel());					break;
+			case 1:		oss << DEC(GetStartFrame());							break;
+			case 2:		oss << DEC(GetEndFrame());								break;
+			case 3:		oss << DEC(GetFrameCount());							break;
+			case 4:		oss << DEC(GetActiveFrame());							break;
+			case 5:		oss << xHEX0N(acRDTSCStartTime,16);						break;
+			case 6:		oss << xHEX0N(acAudioClockStartTime,16);				break;
+			case 7:		oss << DEC(acRDTSCCurrentTime);							break;
+			case 8:		oss << DEC(acAudioClockCurrentTime);					break;
+			case 9:		oss << CommaStr(GetProcessedFrameCount());				break;
+			case 10:	oss << CommaStr(GetDroppedFrameCount());				break;
+			case 11:	oss << DEC(GetBufferLevel());							break;
 			case 12:	oss << ::NTV2AudioSystemToString(acAudioSystem, true);	break;
-			case 13:	oss << (WithRP188()			? "Yes" : "No");	break;
-			case 14:	oss << (WithLTC()			? "Yes" : "No");	break;
-			case 15:	oss << (WithFBFChange()		? "Yes" : "No");	break;
-			case 16:	oss << (WithFBOChange()		? "Yes" : "No");	break;
-			case 17:	oss << (WithColorCorrect()	? "Yes" : "No");	break;
-			case 18:	oss << (WithVidProc()		? "Yes" : "No");	break;
-			case 19:	oss << (WithCustomAnc()		? "Yes" : "No");	break;
-			case 20:	oss << (WithHDMIAuxData()	? "Yes" : "No");	break;
-			case 21:	oss << (IsFieldMode()		? "Yes" : "No");	break;
+			case 13:	oss << (WithRP188()			? "Yes" : "No");			break;
+			case 14:	oss << (WithLTC()			? "Yes" : "No");			break;
+			case 15:	oss << (WithFBFChange()		? "Yes" : "No");			break;
+			case 16:	oss << (WithFBOChange()		? "Yes" : "No");			break;
+			case 17:	oss << (WithColorCorrect()	? "Yes" : "No");			break;
+			case 18:	oss << (WithVidProc()		? "Yes" : "No");			break;
+			case 19:	oss << (WithCustomAnc()		? "Yes" : "No");			break;
+			case 20:	oss << (WithHDMIAuxData()	? "Yes" : "No");			break;
+			case 21:	oss << (IsFieldMode()		? "Yes" : "No");			break;
 			default:	break;
 		}
 	else if (inIndexNum < 22)
@@ -2126,8 +2126,8 @@ ostream & operator << (ostream & oss, const AUTOCIRCULATE_STATUS & inObj)
 			<< setw(10) << (inObj.WithColorCorrect()	? "+ColCor"		: "-ColCor")
 			<< setw(10) << (inObj.WithVidProc()			? "+VidProc"	: "-VidProc")
 			<< setw(10) << (inObj.WithCustomAnc()		? "+AncData"	: "-AncData")
-			<< setw(10) << (inObj.IsFieldMode()			? "+FldMode"	: "-FldMode")
-			<< setw(10) << (inObj.WithHDMIAuxData()		? "+HDMIAux"	: "-HDMIAux");
+			<< setw(10) << (inObj.WithHDMIAuxData()		? "+HDMIAux"	: "-HDMIAux")
+			<< setw(10) << (inObj.IsFieldMode()			? "+FldMode"	: "-FldMode");
 	return oss;
 }
 

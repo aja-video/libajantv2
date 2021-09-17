@@ -8,6 +8,8 @@
 #include "ntv2card.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
+#include "ajabase/common/common.h"
+#include "ajabase/system/debug.h"
 #ifdef AJALinux
 	#include "ntv2linuxpublicinterface.h"
 	#include <math.h>
@@ -19,6 +21,14 @@
 #endif	//	MSWindows
 
 using namespace std;
+
+
+#define AUDFAIL(__x__)		AJA_sERROR	(AJA_DebugUnit_AudioGeneric,	" " << HEX0N(uint64_t(this),16) << "::" << AJAFUNC << ": " << __x__)
+#define AUDWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_AudioGeneric,	" " << HEX0N(uint64_t(this),16) << "::" << AJAFUNC << ": " << __x__)
+#define AUDNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_AudioGeneric,	" " << HEX0N(uint64_t(this),16) << "::" << AJAFUNC << ": " << __x__)
+#define AUDINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_AudioGeneric,	" " << HEX0N(uint64_t(this),16) << "::" << AJAFUNC << ": " << __x__)
+#define AUDDBUG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_AudioGeneric,	" " << HEX0N(uint64_t(this),16) << "::" << AJAFUNC << ": " << __x__)
+
 
 static const ULWord gChannelToSDIOutControlRegNum []	= { kRegSDIOut1Control, kRegSDIOut2Control, kRegSDIOut3Control, kRegSDIOut4Control,
 															kRegSDIOut5Control, kRegSDIOut6Control, kRegSDIOut7Control, kRegSDIOut8Control, 0};
@@ -1211,8 +1221,33 @@ bool CNTV2Card::StartAudioOutput (const NTV2AudioSystem inAudioSystem, const boo
 		if (!WriteRegister(audioCtrlRegNum, inWaitForVBI ? 1UL : 0UL,  kRegMaskOutputStartAtVBI, kRegShiftOutputStartAtVBI))
 			return false;
 	}
-	return WriteRegister (audioCtrlRegNum, 0, kRegMaskResetAudioOutput, kRegShiftResetAudioOutput);
-}
+	if (!WriteRegister (audioCtrlRegNum, 0, kRegMaskResetAudioOutput, kRegShiftResetAudioOutput))
+		return false;
+#if 1
+	//	Now that this audio system is reading from SDRAM, see if its buffer is colliding with other device SDRAM activity...
+	ULWordSequence badRgns;
+	SDRAMAuditor auditor;
+	auditor.AssessDevice(*this, /*ignoreStoppedAudioSystemBuffers*/true);	//	Only care about running audio systems
+	auditor.GetBadRegions(badRgns);	//	Receive the interfering memory regions
+	for (size_t ndx(0);  ndx < badRgns.size();  ndx++)
+	{	const ULWord rgnInfo(badRgns.at(ndx));
+		const UWord startBlk(rgnInfo >> 16), numBlks(UWord(rgnInfo & 0x0000FFFF));
+		NTV2StringSet tags;
+		auditor.GetTagsForFrameIndex (startBlk, tags);
+		const string infoStr (aja::join(tags, ", "));
+		ostringstream acLabel;  acLabel << "Aud" << DEC(inAudioSystem+1);	//	Search for label e.g. "Aud2"
+		if (infoStr.find(acLabel.str()) != string::npos)
+		{	ostringstream warning;
+			if (numBlks > 1)
+				warning << "8MB Frms " << DEC0N(startBlk,3) << "-" << DEC0N(startBlk+numBlks-1,3);
+			else
+				warning << "8MB Frm  " << DEC0N(startBlk,3);
+			AUDWARN("Aud" << DEC(inAudioSystem+1) << " memory overlap/interference: " << warning.str() << ": " << infoStr);
+		}
+	}	//	for each "bad" region
+#endif
+	return true;
+}	//	StartAudioOutput
 
 bool CNTV2Card::StopAudioOutput (const NTV2AudioSystem inAudioSystem)
 {
@@ -1275,8 +1310,33 @@ bool CNTV2Card::StartAudioInput (const NTV2AudioSystem inAudioSystem, const bool
 		if (!WriteRegister(audioCtrlRegNum, inWaitForVBI ? 1UL : 0UL,  kRegMaskInputStartAtVBI, kRegShiftInputStartAtVBI))
 			return false;
 	}
-	return WriteRegister (audioCtrlRegNum, 0, kRegMaskResetAudioInput, kRegShiftResetAudioInput);
-}
+	if (!WriteRegister (audioCtrlRegNum, 0, kRegMaskResetAudioInput, kRegShiftResetAudioInput))
+		return false;
+#if 1
+	//	Now that this audio system is writing into SDRAM, see if its buffer is colliding with other device SDRAM activity...
+	ULWordSequence badRgns;
+	SDRAMAuditor auditor;
+	auditor.AssessDevice(*this, /*ignoreStoppedAudioSystemBuffers*/true);	//	Only care about running audio systems
+	auditor.GetBadRegions(badRgns);	//	Receive the interfering memory regions
+	for (size_t ndx(0);  ndx < badRgns.size();  ndx++)
+	{	const ULWord rgnInfo(badRgns.at(ndx));
+		const UWord startBlk(rgnInfo >> 16), numBlks(UWord(rgnInfo & 0x0000FFFF));
+		NTV2StringSet tags;
+		auditor.GetTagsForFrameIndex (startBlk, tags);
+		const string infoStr (aja::join(tags, ", "));
+		ostringstream acLabel;  acLabel << "Aud" << DEC(inAudioSystem+1);	//	Search for label e.g. "Aud2"
+		if (infoStr.find(acLabel.str()) != string::npos)
+		{	ostringstream warning;
+			if (numBlks > 1)
+				warning << "8MB Frms " << DEC0N(startBlk,3) << "-" << DEC0N(startBlk+numBlks-1,3);
+			else
+				warning << "8MB Frm  " << DEC0N(startBlk,3);
+			AUDWARN("Aud" << DEC(inAudioSystem+1) << " memory overlap/interference: " << warning.str() << ": " << infoStr);
+		}
+	}	//	for each "bad" region
+#endif
+	return true;
+}	//	StartAudioInput
 
 
 bool CNTV2Card::StopAudioInput (const NTV2AudioSystem inAudioSystem)
