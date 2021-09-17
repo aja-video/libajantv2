@@ -76,13 +76,15 @@ set(AJANTV2_HEADERS
     includes/ntv2tshelper.h
     includes/ntv2utf8.h
     includes/ntv2utils.h
+    # TODO(paulh): Re-enable when we start using the CMake version.h.in file
+    # includes/version.h
     includes/ntv2verticalfilter.h
     includes/ntv2videodefines.h
     includes/ntv2virtualregisters.h
     includes/ntv2vpid.h
-    includes/ntv2vpidfromspec.h
-    # TODO(paulh): Re-enable when we start using the CMake version.h.in file
-    # includes/version.h
+    includes/ntv2vpidfromspec.h)
+
+set(AJAANC_HEADERS
     ${AJA_LIB_ANC_ROOT}/includes/ancillarydata.h
     ${AJA_LIB_ANC_ROOT}/includes/ancillarydatafactory.h
     ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_cea608.h
@@ -148,7 +150,9 @@ set(AJANTV2_SOURCES
     src/ntv2utils.cpp
     src/ntv2verticalfilter.cpp
     src/ntv2vpid.cpp
-    src/ntv2vpidfromspec.cpp
+    src/ntv2vpidfromspec.cpp)
+
+set (AJAANC_SOURCES
     ${AJA_LIB_ANC_ROOT}/src/ancillarydata.cpp
     ${AJA_LIB_ANC_ROOT}/src/ancillarydatafactory.cpp
     ${AJA_LIB_ANC_ROOT}/src/ancillarydata_cea608.cpp
@@ -435,10 +439,12 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 endif()
 
 set(AJANTV2_TARGET_SOURCES
-    ${AJANTV2_SOURCES}
-    ${AJANTV2_HEADERS}
+    ${AJAANC_HEADERS}
+    ${AJAANC_SOURCES}
     ${AJABASE_SOURCES}
-    ${AJABASE_HEADERS})
+    ${AJABASE_HEADERS}
+    ${AJANTV2_SOURCES}
+    ${AJANTV2_HEADERS})
 
 add_library(ajantv2shared SHARED ${AJANTV2_TARGET_SOURCES})
 add_library(ajantv2 STATIC ${AJANTV2_TARGET_SOURCES})
@@ -451,3 +457,31 @@ target_link_libraries(ajantv2 PUBLIC ${EXTRA_LIBRARIES})
 
 target_compile_definitions(ajantv2shared PUBLIC ${EXTRA_DYNAMIC_DEFINES})
 target_compile_definitions(ajantv2 PUBLIC ${EXTRA_STATIC_DEFINES})
+
+if (AJA_DEPLOY_HEADERS)
+    # deploy ajabase headers to build directory
+    foreach (header_file ${AJABASE_HEADERS})
+        get_filename_component(header_base_name ${header_file} NAME)
+        string(REGEX REPLACE "(${AJA_LIB_BASE_ROOT}/)+" "" header_replace ${header_file})
+        message("ajabase basename: ${header_replace}")
+        add_custom_command(TARGET ajantv2
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND}
+            ARGS -E copy "${header_file}" "../ajabase/${header_replace}")
+    endforeach(header_file)
+    # deploy ajantv2 headers to build directory
+    foreach (header_file ${AJANTV2_HEADERS})
+        add_custom_command(TARGET ajantv2
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND}
+            ARGS -E copy "${AJA_LIB_NTV2_ROOT}/${header_file}" "${header_file}")
+    endforeach(header_file)
+    # deploy ajaanc headers headers to build directory
+    foreach (header_file ${AJAANC_HEADERS})
+        get_filename_component(header_base_name ${header_file} NAME)
+        add_custom_command(TARGET ajantv2
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND}
+            ARGS -E copy "${AJA_LIB_ANC_ROOT}/includes/${header_base_name}" "../ajaanc/includes/${header_base_name}")
+    endforeach(header_file)
+endif()
