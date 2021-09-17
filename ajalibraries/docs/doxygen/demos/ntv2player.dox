@@ -28,7 +28,7 @@ The NTV2Player class demonstrates…
 	                                Defaults to first device (index 0).
 	                                If model name specified, uses lowest-numbered matching device.
 
-	-c|--channel {channelSpec}      Specifies the framestore/channel as an unsigned integer number 1 thru 8.
+	-c|--channel {channelNum}       Specifies the framestore/channel as an unsigned integer number 1 thru 8.
 
 	-v|--videoFormat {vidFormat}    Specifies the video format to use. Use '?' or 'list' to list available formats.
 
@@ -37,11 +37,21 @@ The NTV2Player class demonstrates…
 	-a|--anc {filePath}             Optionally emits ancillary data as read from the specified binary data file.
 	                                These files can be recorded using ntv2capture using its ‘--ancʼ option.
 
-	-t|--hdrType {hdrSpec}          Emits HDR ancillary data packets. Use 'SDR', 'HDR10' or 'HLG'.
+	-t|--hdrType {hdrSpec}          If specified and non-zero, emits HDR anc packets, where 0=none 1=SDR 2=HDR10 3=HLG.
 
-	-m|--multiChannel               Enables multichannel/multiformat mode, and shares the device with other processes.
+	-m|--multiChannel               Enables multiformat mode, and tries to share the device with other processes.
 
 	--noaudio                       Omits audio.
+
+	--frames {spec}                 Optionally specifies device frame buffers to use, where {spec} is:
+	                                    numFrames[@startFrame]    Specifies frame count (and optional start frame):
+	                                                              e.g.      7      -- First free 7 frames
+	                                                              e.g.      7@5    -- 7 frames starting at frame 5
+	                                    startFrame-endFrame       Explicitly specifies start and end frame numbers:
+	                                                              e.g.      0-6    -- frames 0 thru 6 (inclusive)
+	                                Defaults to the lowest-numbered unused 7 frames.
+
+	-l|--ltc                        Transmit LTC instead of VITC.
 
 	-?|--help|--usage               Shows how to use this command.
 @endcode

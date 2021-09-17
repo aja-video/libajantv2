@@ -364,22 +364,36 @@ bool CNTV2Card::DMAWriteLUTTable (const ULWord inFrameNumber, const ULWord * pIn
 }
 
 
-bool CNTV2Card::GetDeviceFrameInfo (const UWord inFrameNumber, const NTV2Channel inChannel, uint64_t & outAddress, uint64_t & outLength)
+bool CNTV2Card::GetDeviceFrameInfo (const UWord inFrameNumber, const NTV2Channel inChannel, ULWord & outIntrinsicSize,
+									bool & outMultiFormat, bool & outQuad, bool & outQuadQuad, bool & outSquares, bool & outTSI,
+									uint64_t & outAddress, uint64_t & outLength)
 {
 	outAddress = outLength = 0;
 	static const ULWord frameSizes[] = {2, 4, 8, 16};	//	'00'=2MB	'01'=4MB	'10'=8MB	'11'=16MB
 	UWord				frameSizeNdx(0);
-	bool				quadEnabled(false);
+	outIntrinsicSize = 0;
+	outMultiFormat = outQuad = outQuadQuad = outSquares = outTSI = false;
+	NTV2Channel	chan (inChannel);
+	if (!::NTV2DeviceCanDoMultiFormat(GetDeviceID()))
+		chan = NTV2_CHANNEL1;	//	Older uniformat-only device:  use Ch1
+	else if (GetMultiFormatMode(outMultiFormat) && !outMultiFormat)
+		chan = NTV2_CHANNEL1;	//	Uniformat mode:  Use Ch1
 
 	CNTV2DriverInterface::ReadRegister (kRegCh1Control, frameSizeNdx,	  kK2RegMaskFrameSize,		kK2RegShiftFrameSize);
+	outIntrinsicSize = frameSizes[frameSizeNdx] * 1024 * 1024;
 	if (::NTV2DeviceCanReportFrameSize(GetDeviceID()))
 	{	//	All modern devices
 		ULWord quadMultiplier(1);
-		if (GetQuadFrameEnable(quadEnabled, inChannel) && quadEnabled)
-			quadMultiplier = 8; //	4!
-		if (GetQuadQuadFrameEnable(quadEnabled, inChannel) && quadEnabled)
-			quadMultiplier = 32;//	16!
-		outLength = frameSizes[frameSizeNdx] * 1024 * 1024 * quadMultiplier;
+		if (GetQuadFrameEnable(outQuad, chan) && outQuad)
+			quadMultiplier = 4; //	4!
+		if (GetQuadQuadFrameEnable(outQuadQuad, chan) && outQuadQuad)
+			quadMultiplier = 16;//	16!
+		outLength = outIntrinsicSize * quadMultiplier;
+		if (quadMultiplier > 1)
+		{
+			Get4kSquaresEnable (outSquares, chan);
+			GetTsiFrameEnable(outTSI, chan);
+		}
 	}
 	else
 	{	//	Corvid1, Corvid22, Corvid3G, IoExpress, Kona3G, Kona3GQuad, KonaLHe+, KonaLHi, TTap
@@ -387,9 +401,11 @@ bool CNTV2Card::GetDeviceFrameInfo (const UWord inFrameNumber, const NTV2Channel
 		{	//	Kona3G only at this point
 			bool frameSizeSetBySW(false);
 			CNTV2DriverInterface::ReadRegister (kRegCh1Control, frameSizeSetBySW, kRegMaskFrameSizeSetBySW, kRegShiftFrameSizeSetBySW);
-			if (!GetQuadFrameEnable(quadEnabled, inChannel) || !quadEnabled)
+			if (!GetQuadFrameEnable(outQuad, chan) || !outQuad)
 				if (frameSizeSetBySW)
-					outLength = frameSizes[frameSizeNdx] * 1024 * 1024;
+					outLength = outIntrinsicSize;
+			if (outQuad)
+				Get4kSquaresEnable (outSquares, chan);
 		}
 	}
 	if (!outLength)
@@ -404,21 +420,34 @@ bool CNTV2Card::GetDeviceFrameInfo (const UWord inFrameNumber, const NTV2Channel
 	return true;
 }
 
+
+bool CNTV2Card::GetDeviceFrameInfo (const UWord inFrameNumber, const NTV2Channel inChannel, uint64_t & outAddr, uint64_t & outLgth)
+{
+	bool isMultiFormat(false), isQuad(false), isQuadQuad(false), isSquares(false), isTSI(false);
+	ULWord intrinsicSize(0);
+	return GetDeviceFrameInfo (inFrameNumber, inChannel, intrinsicSize, isMultiFormat, isQuad, isQuadQuad, isSquares, isTSI, outAddr, outLgth);
+}
+
 bool CNTV2Card::DeviceAddressToFrameNumber (const uint64_t inAddress,  UWord & outFrameNumber,	const NTV2Channel inChannel)
 {
 	static const ULWord frameSizes[] = {2, 4, 8, 16};	//	'00'=2MB	'01'=4MB	'10'=8MB	'11'=16MB
 	UWord				frameSizeNdx(0);
-	bool				quadEnabled(false);
+	bool				quadEnabled(false), isMultiFormatMode(false);
 	uint64_t			frameBytes(0);
+	NTV2Channel	chan (inChannel);
+	if (!::NTV2DeviceCanDoMultiFormat(GetDeviceID()))
+		chan = NTV2_CHANNEL1;	//	Older uniformat-only device:  use Ch1
+	else if (GetMultiFormatMode(isMultiFormatMode) && !isMultiFormatMode)
+		chan = NTV2_CHANNEL1;	//	Uniformat mode:  Use Ch1
 
 	outFrameNumber = 0;
 	CNTV2DriverInterface::ReadRegister (kRegCh1Control, frameSizeNdx,	  kK2RegMaskFrameSize,		kK2RegShiftFrameSize);
 	if (::NTV2DeviceCanReportFrameSize(GetDeviceID()))
 	{	//	All modern devices
 		ULWord quadMultiplier(1);
-		if (GetQuadFrameEnable(quadEnabled, inChannel) && quadEnabled)
+		if (GetQuadFrameEnable(quadEnabled, chan) && quadEnabled)
 			quadMultiplier = 8; //	4!
-		if (GetQuadQuadFrameEnable(quadEnabled, inChannel) && quadEnabled)
+		if (GetQuadQuadFrameEnable(quadEnabled, chan) && quadEnabled)
 			quadMultiplier = 32;//	16!
 		frameBytes = frameSizes[frameSizeNdx] * 1024 * 1024 * quadMultiplier;
 	}
@@ -428,7 +457,7 @@ bool CNTV2Card::DeviceAddressToFrameNumber (const uint64_t inAddress,  UWord & o
 		{	//	Kona3G only at this point
 			bool frameSizeSetBySW(false);
 			CNTV2DriverInterface::ReadRegister (kRegCh1Control, frameSizeSetBySW, kRegMaskFrameSizeSetBySW, kRegShiftFrameSizeSetBySW);
-			if (!GetQuadFrameEnable(quadEnabled, inChannel) || !quadEnabled)
+			if (!GetQuadFrameEnable(quadEnabled, chan) || !quadEnabled)
 				if (frameSizeSetBySW)
 					frameBytes = frameSizes[frameSizeNdx] * 1024 * 1024;
 		}
