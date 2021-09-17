@@ -41,7 +41,7 @@ Plays video containing closed-caption data sourced from...
 	--rgb                                    Configure to emit dual-link RGB over SDI.
 
 	--square                                 For 4K/UHD formats, configure for “squares” (quadrants) instead of the
-	                                         default (two-sample interleave, aka Tsi).
+	                                         TSI default (two-sample interleave).
 
 	-p formatSpec                            FrameStore pixel format to use.
 	--pixelFormat=formatSpec                 Defaults to v210 (10-bit YCbCr).
@@ -51,9 +51,7 @@ Plays video containing closed-caption data sourced from...
 
 	--notimecode                             Don't generate/embed timecode.
 
-	-m                                       Shares the device with other programs, performs minimal routing changes, and if the
-	--multiChannel                           device is capable of it, configures it to allow the use of different video formats
-	                                         on other device channels.
+	-m|--multiChannel                        Enables multiformat mode, and tries to share the device with other processes.
 
 	-s, --stats                              Emits statistics to stdout.
 	                                         By default, ntv2ccplayer emits caption text to stdout.
@@ -61,9 +59,13 @@ Plays video containing closed-caption data sourced from...
 	-v, --vanc                               Uses a (tall) VANC frame geometry for the frame buffer.
 	                                         By default, ntv2ccplayer uses normal frame geometry.
 	
-	--frames {spec}                          Specifies which device frame buffers to use for AutoCirculate capture:
-                                                 numFrames[@startFrame]    Specifies frame count (and optional start frame).
-	                                             startFrame-endFrame       Explicitly specifies start and end frame numbers.
+	--frames {spec}                          Optionally specifies device frame buffers to use, where {spec} is:
+	                                             numFrames[@startFrame]    Specifies frame count (and optional start frame):
+	                                                                       e.g.      7      -- First free 7 frames
+	                                                                       e.g.      7@5    -- 7 frames starting at frame 5
+	                                             startFrame-endFrame       Explicitly specifies start and end frame numbers:
+	                                                                       e.g.      0-6    -- frames 0 thru 6 (inclusive)
+	                                         Defaults to the lowest-numbered unused 7 frames.
 
 	-n, --noline21                           Don't encode/embed "analog" caption data into line 21 (SD only).
 	                                         By default, for SD output, ntv2ccplayer will encode "analog" CC data into line 21.
