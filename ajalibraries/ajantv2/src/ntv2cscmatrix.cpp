@@ -365,15 +365,15 @@ void CNTV2CSCMatrix::InitMatrix (const NTV2ColorSpaceMatrixType inPreset)
 
 		// RGB Full range -> RGB SMPTE
 	case NTV2_GBRFull_to_GBRSMPTE_Matrix:
-		mA0 =  0.855469;		// Gf -> Gs
+        mA0 =  0.856321;		// Gf -> Gs
 		mA1 =  0.000000;		// Bf -> Gs
 		mA2 =  0.000000;		// Rf -> Gs
 		mB0 =  0.000000;		// Gf -> Bs
-		mB1 =  0.855469;		// Bf -> Bs
+        mB1 =  0.856321;		// Bf -> Bs
 		mB2 =  0.000000;		// Rf -> Bs
 		mC0 =  0.000000;		// Gf -> Rs
 		mC1 =  0.000000;		// Bf -> Rs
-		mC2 =  0.855469;		// Rf -> Rs
+        mC2 =  0.856321;		// Rf -> Rs
 
 		mPreOffset0 = NTV2_CSCMatrix_ZeroOffset;
 		mPreOffset1 = NTV2_CSCMatrix_ZeroOffset;
@@ -386,15 +386,15 @@ void CNTV2CSCMatrix::InitMatrix (const NTV2ColorSpaceMatrixType inPreset)
 
 		// RGB SMPTE range -> RGB Full
 	case NTV2_GBRSMPTE_to_GBRFull_Matrix:
-		mA0 =  1.168950;		// Gs -> Gf
+        mA0 =  1.167786;		// Gs -> Gf
 		mA1 =  0.000000;		// Bs -> Gf
 		mA2 =  0.000000;		// Rs -> Gf
 		mB0 =  0.000000;		// Gs -> Bf
-		mB1 =  1.168950;		// Bs -> Bf
+        mB1 =  1.167786;		// Bs -> Bf
 		mB2 =  0.000000;		// Rs -> Bf
 		mC0 =  0.000000;		// Gs -> Rf
 		mC1 =  0.000000;		// Bs -> Rf
-		mC2 =  1.168950;		// Rs -> Rf
+        mC2 =  1.167786;		// Rs -> Rf
 
 		mPreOffset0 = NTV2_CSCMatrix_SMPTEYOffset;
 		mPreOffset1 = NTV2_CSCMatrix_SMPTEYOffset;
