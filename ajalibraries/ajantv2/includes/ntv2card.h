@@ -6533,6 +6533,15 @@ public:
 	**/
 	AJA_VIRTUAL bool	AncInsertSetIPParams (const UWord inSDIOutput, const UWord ancChannel, const ULWord payloadID, const ULWord ssrc);
 
+	/**
+		@brief		Answers where, in device SDRAM, the given SDI connector's Anc inserter is currently reading Anc data for playout.
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIOutput		Specifies the SDI output of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
+		@param[out]	outF1StartAddr	Receives the Anc inserter's current F1 starting address.
+		@param[out]	outF2StartAddr	Receives the Anc inserter's current F2 starting address.
+	**/
+	AJA_VIRTUAL bool	AncInsertGetReadInfo (const UWord inSDIOutput, uint64_t & outF1StartAddr, uint64_t & outF2StartAddr);
+
 
 	/**
 		@brief		Initializes the given SDI input's Anc extractor for custom Anc packet detection and de-embedding.
@@ -6629,6 +6638,22 @@ public:
 	AJA_VIRTUAL bool	AncExtractSetField2WriteParams (const UWord inSDIInput, const ULWord inFrameNumber,
 														const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
 														const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);
+
+	/**
+		@brief		Answers with the given SDI input's current Anc extractor info.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
+		@param[out]	outF1StartAddr	Receives the device SDRAM offset where the extractor starts writing F1 anc data.
+		@param[out]	outF1EndAddr	Receives the device SDRAM offset where the extractor will stop writing F1 anc data.
+		@param[out]	outF2StartAddr	Receives the device SDRAM offset where the extractor starts writing F2 anc data.
+		@param[out]	outF2EndAddr	Receives the device SDRAM offset where the extractor will stop writing F2 anc data.
+		@see		\ref anccapture
+	**/
+	AJA_VIRTUAL bool	AncExtractGetWriteInfo	(const UWord inSDIInput,
+												uint64_t & outF1StartAddr, uint64_t & outF1EndAddr,
+												uint64_t & outF2StartAddr, uint64_t & outF2EndAddr);
+
 	/**
 		@brief		Answers with the DIDs currently being excluded (filtered) by the SDI input's Anc extractor.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
