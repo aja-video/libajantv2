@@ -388,7 +388,7 @@ See the Knowledgebase article <https://sdksupport.aja.com/index.php?/Knowledgeba
 CION data using NTV2 devices.
 
 
-@subsubsection		fbformats8bitycbcrplanar3	3-Plane 8-Bit YCbCr 4:2:0 ('I420')
+@subsubsection		fbformats8bitycbcrplanar3	3-Plane 8-Bit YCbCr 4:2:0 ('I420' a.k.a. 'YUV-P420')
 
 This format, identified by the ::NTV2_FBF_8BIT_YCBCR_420PL3 enumeration constant, is a popular planar video encoding format.
 
@@ -406,7 +406,7 @@ the Cb plane preceding the Cr plane. Chroma values are 8-bit (0-255) values, one
 Since all values are byte values, there are no endianness issues.
 
 
-@subsubsection		fbformats8bitycbcr422pl3	3-Plane 8-Bit YCbCr 4:2:2 (Weitek 'Y42B')
+@subsubsection		fbformats8bitycbcr422pl3	3-Plane 8-Bit YCbCr 4:2:2 (Weitek 'Y42B' a.k.a. 'YUV-P8')
 
 This format, identified by the ::NTV2_FBF_8BIT_YCBCR_422PL3 enumeration constant, is a popular planar video encoding format.
 
@@ -424,7 +424,7 @@ Chroma values are 8-bit (0-255) values, one per horizontal pixel pair (horizonta
 Since all values are byte values, there are no endianness issues.
 
 
-@subsubsection		fbformats10bitycbcr420pl3	3-Plane 10-Bit YCbCr 4:2:0 ('I420_10LE')
+@subsubsection		fbformats10bitycbcr420pl3	3-Plane 10-Bit YCbCr 4:2:0 ('I420_10LE' a.k.a. 'YUV-P420-L10')
 
 This format, identified by the ::NTV2_FBF_10BIT_YCBCR_420PL3_LE enumeration constant, is a popular planar video encoding format.
 
@@ -441,7 +441,7 @@ the Cr plane. Chroma values are 10-bit (0-1023) values, stored identically to th
 (horizontal and vertical subsampling).
 
 
-@subsubsection		fbformats10bitycbcr422pl3	3-Plane 10-Bit YCbCr 4:2:2 ('I422_10LE')
+@subsubsection		fbformats10bitycbcr422pl3	3-Plane 10-Bit YCbCr 4:2:2 ('I422_10LE' a.k.a. 'YUV-P-L10')
 
 This format, identified by the ::NTV2_FBF_10BIT_YCBCR_422PL3_LE enumeration constant, is a popular planar video encoding format.
 
@@ -458,7 +458,7 @@ Chroma values are 10-bit (0-1023) values, stored identically to the luma values,
 (horizontal-only subsampling).
 
 
-@subsubsection		fbformats10bitycbcr420pl2	2-Plane 10-Bit YCbCr 4:2:0
+@subsubsection		fbformats10bitycbcr420pl2	2-Plane 10-Bit YCbCr 4:2:0 ('YUV-P420-10')
 
 This format, identified by the ::NTV2_FBF_10BIT_YCBCR_420PL2 enumeration constant, is a two-plane format commonly used with video encoders.
 
@@ -481,7 +481,7 @@ Chroma values are 10-bit (0-1023) values, one <b>Cb</b>/<b>Cr</b> pair per 2×2 
 
 
 
-@subsubsection		fbformats10bitycbcr422pl2	2-Plane 10-Bit YCbCr 4:2:2
+@subsubsection		fbformats10bitycbcr422pl2	2-Plane 10-Bit YCbCr 4:2:2 ('YUV-P-10')
 
 This format, identified by the ::NTV2_FBF_10BIT_YCBCR_422PL2 enumeration constant, is a two-plane format commonly used with video encoders.
 It’s identical to its 4:2:0 sibling (above) except the Chroma plane is full-height, not half-height:

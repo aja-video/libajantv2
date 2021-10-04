@@ -6533,6 +6533,15 @@ public:
 	**/
 	AJA_VIRTUAL bool	AncInsertSetIPParams (const UWord inSDIOutput, const UWord ancChannel, const ULWord payloadID, const ULWord ssrc);
 
+	/**
+		@brief		Answers where, in device SDRAM, the given SDI connector's Anc inserter is currently reading Anc data for playout.
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIOutput		Specifies the SDI output of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
+		@param[out]	outF1StartAddr	Receives the Anc inserter's current F1 starting address.
+		@param[out]	outF2StartAddr	Receives the Anc inserter's current F2 starting address.
+	**/
+	AJA_VIRTUAL bool	AncInsertGetReadInfo (const UWord inSDIOutput, uint64_t & outF1StartAddr, uint64_t & outF2StartAddr);
+
 
 	/**
 		@brief		Initializes the given SDI input's Anc extractor for custom Anc packet detection and de-embedding.
@@ -6629,6 +6638,22 @@ public:
 	AJA_VIRTUAL bool	AncExtractSetField2WriteParams (const UWord inSDIInput, const ULWord inFrameNumber,
 														const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
 														const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);
+
+	/**
+		@brief		Answers with the given SDI input's current Anc extractor info.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
+		@param[out]	outF1StartAddr	Receives the device SDRAM offset where the extractor starts writing F1 anc data.
+		@param[out]	outF1EndAddr	Receives the device SDRAM offset where the extractor will stop writing F1 anc data.
+		@param[out]	outF2StartAddr	Receives the device SDRAM offset where the extractor starts writing F2 anc data.
+		@param[out]	outF2EndAddr	Receives the device SDRAM offset where the extractor will stop writing F2 anc data.
+		@see		\ref anccapture
+	**/
+	AJA_VIRTUAL bool	AncExtractGetWriteInfo	(const UWord inSDIInput,
+												uint64_t & outF1StartAddr, uint64_t & outF1EndAddr,
+												uint64_t & outF2StartAddr, uint64_t & outF2EndAddr);
+
 	/**
 		@brief		Answers with the DIDs currently being excluded (filtered) by the SDI input's Anc extractor.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
@@ -7594,14 +7619,34 @@ typedef CNTV2Card	CXena2VidProc;			///< @deprecated	Use CNTV2Card instead.
 
 
 /**
-	@brief	Audits an NTV2 device's SDRAM utilization, and can report contiguous regions of SDRAM, whether unused/free,
-			those being read/written by AutoCirculate, those being read/written by non-AutoCirculating FrameStores,
-			those that are in conflict (AutoCirculate, FrameStore and/or Audio collisions), plus invalid/out-of-bounds
-			regions being accessed.
+	@brief		Audits an NTV2 device's SDRAM utilization, and can report contiguous regions of SDRAM, whether unused/free,
+				those being read/written by AutoCirculate, those being read/written by non-AutoCirculating FrameStores,
+				those that are in conflict (AutoCirculate, FrameStore and/or Audio collisions), plus invalid/out-of-bounds
+				regions being accessed.
+	@details	This implementation currently employs a least-common-denominator 8MB frame size. This was chosen because
+				the SDRAM complement across all currently-supported devices is evenly divisible by (at most) 8MB. Any 8MB
+				block can be translated into larger denominations as needed (e.g. 16MB, 32MB, 64MB, etc.).
+				A memory region is described by an offset and length, both unsigned 16-bit values encoded into a 32-bit ULWord.
+				Region lists are specified or provided by the ::ULWordSequence data type (a std::vector of ULWord values).
+				Memory regions can be tagged with one or more std::string tags in an ::NTV2StringList (a std::vector of
+				std::string values). A region with no tags (an empty list) is considered unallocated/free/unused. A tag string
+				describes a region that is considered in-use (or potentially in-use).
+				-	<b>Audio System:</b> "Aud1 Write" indicates Audio System 1 is actively capturing;  "Aud2 Read" indicates
+					Audio System 2 is actively playing;  "Aud3" indicates the memory region that would be used by Audio System 3
+					if it were actively capturing or playing.
+				-	<b>FrameStore:</b>  "Ch2 Read" indicates FrameStore 2 is enabled in playback mode;  "Ch3 Write" indicates
+					FrameStore 3 is enabled and configured for capture/ingest.
+				-	<b>AutoCirculate:</b>  "AC1 Write" indicates AutoCirculate channel 1 is initialized for capture.
+				-	A region with only one tag is considered "in-use", or, in the case of an "Aud" tag without "Read" or "Write"
+					is <i>potentially</i> in use.
+				-	A region having more than one tag may be "in-conflict" and considered "bad" or potentially "problematic".
 **/
 class SDRAMAuditor
 {
 	public:
+		/**
+			@brief	My default constructor.  I am not ready for use until my SDRAMAuditor::Assess method has been called.
+		**/
 		explicit SDRAMAuditor ()
 			:	mDeviceID		(DEVICE_ID_INVALID),
 				mFrameTags		(),
@@ -7611,6 +7656,10 @@ class SDRAMAuditor
 		{
 		}
 
+		/**
+			@brief	Constructs me and automatically assesses the given device.
+			@param[in]	inDevice	The device of interest, which must be open and ready.
+		**/
 		explicit SDRAMAuditor (CNTV2Card & inDevice)
 			:	mDeviceID		(DEVICE_ID_INVALID),
 				mFrameTags		(),
@@ -7624,16 +7673,13 @@ class SDRAMAuditor
 		/**
 			@brief	Assesses the given device.
 			@param[in]	inDevice	The device of interest.
-			@param[in]	inMarkStoppedAudioBuffersFree	Optionally treats the audio buffer regions as free (unused)
-														if the corresponding audio system is neither reading nor writing.
-														Defaults to false, which always marks the audio buffers as in-use,
-														even if the audio system is not recording or playing audio.
+			@param[in]	inIgnoreStoppedAudioBuffers		Optionally specifies how to treat stopped audio system buffer regions.
+														False means "do not ignore non-running audio engine buffers", which will
+														tag their buffer regions, making them potentially or likely to be in-use.
+														True means non-running audio buffers will not be tagged.
+														Defaults to false (erring on the safe side, to avoid potential conflicts).
 		**/
-		bool AssessDevice (CNTV2Card & inDevice, const bool inMarkStoppedAudioBuffersFree = false);
-
-		std::ostream & RawDump (std::ostream & oss) const;
-
-		std::ostream & DumpBlocks (std::ostream & oss) const;
+		bool AssessDevice (CNTV2Card & inDevice, const bool inIgnoreStoppedAudioBuffers = false);
 
 		/**
 			@brief	Answers with the lists of free, in-use and conflicting 8MB memory blocks.
@@ -7684,7 +7730,7 @@ class SDRAMAuditor
 		**/
 		bool GetTagsForFrameIndex (const UWord inIndex, NTV2StringSet & outTags) const;
 
-		bool HasFrameIndex (const UWord inIndex) const;		///< @return	True if the given frame number is valid.
+		bool HasFrameIndex (const UWord inIndex) const	{return mFrameTags.find(inIndex) != mFrameTags.end();}	///< @return	True if the given frame number is valid.
 
 		size_t GetTagCount (const UWord inIndex) const;		///< @return	The number of tags associated with the given frame number.
 
@@ -7694,8 +7740,8 @@ class SDRAMAuditor
 
 		/**
 			@brief		Translates an 8MB-chunked list of regions into another list of regions with frame indexes and sizes
-						expressed in frame units specified by the intrinsic frame size and whether or not quad or quad-quad
-						mode is active.
+						expressed in frame units determined by the device's intrinsic frame size (measured when AssessDevice
+						was called) and also based on if the given quad or quad-quad mode is active.
 			@param[out]	outRgns			Receives the translated region list.
 			@param[in]	inRgns			Specifies the 8MB-based region list to be translated.
 			@param[in]	inIsQuad		Specify true if translated regions should be Quad-sized.
@@ -7703,6 +7749,20 @@ class SDRAMAuditor
 			@return		True if successful;  otherwise false.
 		**/
 		bool TranslateRegions (ULWordSequence & outRgns, const ULWordSequence & inRgns, const bool inIsQuad, const bool inIsQuadQuad) const;
+
+		/**
+			@brief	Dumps a human-readable list of regions into the given stream.
+			@param	oss		Specifies the output stream to receives the report.
+			@return	A reference to the given output stream.
+		**/
+		std::ostream & RawDump (std::ostream & oss) const;
+
+		/**
+			@brief	Dumps all 8MB blocks/frames and their tags, if any, into the given stream.
+			@param	oss		Specifies the output stream to receives the report.
+			@return	A reference to the given output stream.
+		**/
+		std::ostream & DumpBlocks (std::ostream & oss) const;
 
 	//	Static/Class Methods
 	public:
@@ -7716,25 +7776,23 @@ class SDRAMAuditor
 
 	protected:
 		bool TagAudioBuffers (CNTV2Card & inDevice, const bool inMarkStoppedAudioBuffersFree);
-
 		bool TagVideoFrames (CNTV2Card & inDevice);
-
+		bool TagMemoryBlock (const ULWord inStartAddr, const ULWord inByteLength, const std::string & inTag);
 		bool TagMemoryBlock (const uint64_t inStartAddr, const uint64_t inByteLength, const std::string & inTag)
 		{
 			return TagMemoryBlock (ULWord(inStartAddr), ULWord(inByteLength), inTag);
 		}
 
-		bool TagMemoryBlock (const ULWord inStartAddr, const ULWord inByteLength, const std::string & inTag);
-
 	private:
 		typedef	std::pair<UWord, NTV2StringSet>	FrameTag;
 		typedef	std::map<UWord, NTV2StringSet>	FrameTags;
 		typedef FrameTags::const_iterator		FrameTagsConstIter;
-		NTV2DeviceID	mDeviceID;
-		FrameTags		mFrameTags;
-		const ULWord	m8MB;
-		UWord			mNumFrames;
-		ULWord			mIntrinsicSize;
+
+		NTV2DeviceID	mDeviceID;		///< @brief	The device ID of the device being assessed.
+		FrameTags		mFrameTags;		///< @brief	Stores tag(s) for each 8MB frame.
+		const ULWord	m8MB;			///< @brief	1024 x 1024 x 8
+		UWord			mNumFrames;		///< @brief	Total maximum number of 8MB frames on this device.
+		ULWord			mIntrinsicSize;	///< @brief	Intrinsic frame size of device at time of assessment, in bytes (8MB or 16MB).
 };	//	SDRAMAuditor
 
 #endif	//	NTV2CARD_H

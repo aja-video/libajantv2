@@ -209,6 +209,16 @@ static bool SetAncInsSDPacketSplit (CNTV2Card & inDevice, const UWord inSDIOutpu
 	return inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsControl),	inEnable ? 1 : 0,  ULWord(maskInsEnablePktSplitSD), shiftInsEnablePktSplitSD);
 }
 
+static bool GetAncInsStartAddrs (CNTV2Card & inDevice, const UWord inSDIOutput, uint64_t & outStartAddrF1, uint64_t & outStartAddrF2)
+{
+	uint32_t startAddrF1(0), startAddrF2(0);
+	bool ok = inDevice.ReadRegister(AncInsRegNum(inSDIOutput, regAncInsField1StartAddr), startAddrF1)
+			&&  inDevice.ReadRegister(AncInsRegNum(inSDIOutput, regAncInsField2StartAddr), startAddrF2);
+	outStartAddrF1 = ok ? uint64_t(startAddrF1) : 0;
+	outStartAddrF2 = ok ? uint64_t(startAddrF2) : 0;
+	return ok;
+}
+
 static bool SetAncInsField1StartAddr (CNTV2Card & inDevice, const UWord inSDIOutput, uint32_t startAddr)
 {
 	return inDevice.WriteRegister(AncInsRegNum(inSDIOutput, regAncInsField1StartAddr), startAddr);
@@ -498,6 +508,18 @@ bool CNTV2Card::AncInsertSetIPParams (const UWord inSDIOutput, const UWord ancCh
 	return ok;
 }
 
+bool CNTV2Card::AncInsertGetReadInfo (const UWord inSDIOutput, uint64_t & outF1StartAddr, uint64_t & outF2StartAddr)
+{
+	outF1StartAddr = outF2StartAddr = 0;
+	if (!::NTV2DeviceCanDoPlayback(_boardID))
+		return false;
+	if (!::NTV2DeviceCanDoCustomAnc(_boardID))
+		return false;
+	if (IS_OUTPUT_SPIGOT_INVALID(inSDIOutput))
+		return false;
+	return GetAncInsStartAddrs (*this, inSDIOutput, outF1StartAddr, outF2StartAddr);
+}
+
 
 /////////////////////////////////////////////
 /////////////	ANC EXTRACTOR	/////////////
@@ -545,9 +567,19 @@ static bool SetAncExtLSBEnable (CNTV2Card & inDevice, const UWord inSDIInput, bo
 }
 */
 
+static bool GetAncExtField1StartAddr (CNTV2Card & inDevice, const UWord inSDIInput, uint32_t & outAddr)
+{
+	return inDevice.ReadRegister(AncExtRegNum(inSDIInput, regAncExtField1StartAddress), outAddr);
+}
+
 static bool SetAncExtField1StartAddr (CNTV2Card & inDevice, const UWord inSDIInput, uint32_t addr)
 {
 	return inDevice.WriteRegister(AncExtRegNum(inSDIInput, regAncExtField1StartAddress), addr);
+}
+
+static bool GetAncExtField1EndAddr (CNTV2Card & inDevice, const UWord inSDIInput, uint32_t & outAddr)
+{
+	return inDevice.ReadRegister(AncExtRegNum(inSDIInput, regAncExtField1EndAddress), outAddr);
 }
 
 static bool SetAncExtField1EndAddr (CNTV2Card & inDevice, const UWord inSDIInput, uint32_t addr)
@@ -555,9 +587,19 @@ static bool SetAncExtField1EndAddr (CNTV2Card & inDevice, const UWord inSDIInput
 	return inDevice.WriteRegister(AncExtRegNum(inSDIInput, regAncExtField1EndAddress), addr);
 }
 
+static bool GetAncExtField2StartAddr (CNTV2Card & inDevice, const UWord inSDIInput, uint32_t & outAddr)
+{
+	return inDevice.ReadRegister(AncExtRegNum(inSDIInput, regAncExtField2StartAddress), outAddr);
+}
+
 static bool SetAncExtField2StartAddr (CNTV2Card & inDevice, const UWord inSDIInput, uint32_t addr)
 {
 	return inDevice.WriteRegister(AncExtRegNum(inSDIInput, regAncExtField2StartAddress), addr);
+}
+
+static bool GetAncExtField2EndAddr (CNTV2Card & inDevice, const UWord inSDIInput, uint32_t & outAddr)
+{
+	return inDevice.ReadRegister(AncExtRegNum(inSDIInput, regAncExtField2EndAddress), outAddr);
 }
 
 static bool SetAncExtField2EndAddr (CNTV2Card & inDevice, const UWord inSDIInput, uint32_t addr)
@@ -850,6 +892,28 @@ bool CNTV2Card::AncExtractSetField2WriteParams (const UWord inSDIInput, const UL
 	if (ok) ok = SetAncExtField2StartAddr (*this, inSDIInput, ANCStartMemory);
 	if (ok) ok = SetAncExtField2EndAddr (*this, inSDIInput, ANCStopMemory);
 	return true;
+}
+
+bool CNTV2Card::AncExtractGetWriteInfo (const UWord inSDIInput,
+										uint64_t & outF1StartAddr, uint64_t & outF1EndAddr,
+										uint64_t & outF2StartAddr, uint64_t & outF2EndAddr)
+{
+	outF1StartAddr = outF1EndAddr = outF2StartAddr = outF2EndAddr = 0;
+	if (!::NTV2DeviceCanDoCapture(_boardID))
+		return false;
+	if (!::NTV2DeviceCanDoCustomAnc(_boardID))
+		return false;
+	if (IS_INPUT_SPIGOT_INVALID(inSDIInput))
+		return false;
+
+	ULWord	startAddr(0), endAddr(0);
+	bool ok = GetAncExtField1StartAddr(*this, inSDIInput, startAddr) && GetAncExtField1EndAddr(*this, inSDIInput, endAddr);
+	outF1StartAddr = uint64_t(startAddr);
+	outF1EndAddr = uint64_t(endAddr);
+	ok = ok  &&  GetAncExtField2StartAddr(*this, inSDIInput, startAddr) && GetAncExtField2EndAddr(*this, inSDIInput, endAddr);
+	outF2StartAddr = uint64_t(startAddr);
+	outF2EndAddr = uint64_t(endAddr);
+	return ok;
 }
 
 bool CNTV2Card::AncExtractGetFilterDIDs (const UWord inSDIInput, NTV2DIDSet & outDIDs)
