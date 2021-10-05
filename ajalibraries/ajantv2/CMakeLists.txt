@@ -15,11 +15,13 @@ set(AJANTV2_TARGET_INCLUDE_DIRS
     includes
     ${AJA_LIB_ANC_ROOT}/includes
     ${AJA_LIBRARIES_ROOT}
-    ${AJA_LIB_BASE_ROOT})
+    ${AJA_LIB_BASE_ROOT}
+    ${CMAKE_CURRENT_BINARY_DIR})
 
-# TODO(paulh): Re-enable when we start using the CMake version.h.in file to set the SDK version
-# add_definitions(-DBUILDING_CMAKE)
-# configure_file(includes/version.h.in includes/version.h @ONLY)
+if (AJA_BUILDING_CMAKE)
+    add_definitions(-DAJA_NTV2_BUILDING_CMAKE)
+    configure_file(includes/version.h.in includes/version.h @ONLY)
+endif()
 
 set(AJANTV2_HEADERS
     includes/ajaexport.h
@@ -78,8 +80,6 @@ set(AJANTV2_HEADERS
     includes/ntv2tshelper.h
     includes/ntv2utf8.h
     includes/ntv2utils.h
-    # TODO(paulh): Re-enable when we start using the CMake version.h.in file
-    # includes/version.h
     includes/ntv2verticalfilter.h
     includes/ntv2videodefines.h
     includes/ntv2virtualregisters.h
