@@ -17,15 +17,28 @@ The NTV2Player8K class demonstrates everything NTV2Player does, plus…
 	-d|--device {spec}              Specifies the device to use by index number, serial number or generic model name.
 	                                Defaults to first device (index 0).
 	                                If model name specified, uses lowest-numbered matching device.
-	-c|--channel {channelSpec}      Specifies the framestore/channel as an unsigned integer number 1 or 5.
-	-v|--videoFormat {vidFormat}    Specifies the video format to use. Use '?' or 'list' to list available formats.
-	-p|--pixelFormat {pixFormat}    Specifies the pixel format to use. Use '?' or 'list' to list available formats.
+
+	-c|--channel {number}           Specifies the framestore/channel as a 1-based unsigned integer.  Defaults to 1.
+
+	-v|--videoFormat {fmt}          Specifies the video format to use. Use '?' or 'list' to list available formats.
+
+	-p|--pixelFormat {fmt}          Specifies the pixel format to use. Use '?' or 'list' to list available formats.
+
 	-x|--hdrType {hdrSpec}          Emits HDR ancillary data packets. Use 'SDR', 'HDR10' or 'HLG'.
-	-m|--multiChannel               Enables multichannel/multiformat mode, and shares the device with other processes.
+
+	-m|--multiChannel               Enables multichannel/multiformat mode, to share device with other processes.
+
 	-h|--hdmi                       Enables HDMI playout.
-	-t|--tsi                        Uses Two Sample Interleave (Tsi) instead of quadrants (“squares”).
-	--rgb                           Specifies “RGB on the wire” i.e. RGB over SDI (instead of YCbCr).
-	--noaudio                       Omits audio.
+
+	-t|--tsi                        Uses Two Sample Interleave routing instead of quadrants (“squares”).
+
+	--rgb                           Uses “RGB on the wire” (i.e. RGB-over-SDI instead of YCbCr).
+
+	-a|--audioLinks {spec}          Optional multi-link audio, for more than 16 audio channels, where {spec} is:
+	                                    0      Silence
+	                                    1-4    Number of audio systems to simultaneously operate
+	                                           (Defaults to 1)
+
 	-?|--help|--usage               Shows how to use this command.
 @endcode
 **/

@@ -9,7 +9,7 @@
 	-	\ref corvid88
 	-	\ref corvidhevc
 
-	@section	ntv2hwio		Io Thunderbolt and PCMCIA Devices
+	@section	ntv2hwio		Io (Thunderbolt) Devices
 
 	-	\ref io4kplus
 	-	\ref ioip

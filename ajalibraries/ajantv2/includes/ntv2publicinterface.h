@@ -5935,9 +5935,9 @@ typedef enum
 		#define	AUTOCIRCULATE_WITH_AUDIO_CONTROL	BIT(7)		///< @brief	Use this to AutoCirculate with no audio but with audio control
 		#define	AUTOCIRCULATE_WITH_FIELDS			BIT(8)		///< @brief	Use this to AutoCirculate with fields as frames for interlaced formats
 		#define AUTOCIRCULATE_WITH_HDMIAUX			BIT(9)		///< @brief	Use this to AutoCirculate with HDMI auxiliary data
-		#define AUTOCIRCULATE_WITH_MULTILINK_AUDIO1	BIT(10)		///< @brief	Use this to AutoCirculate with base audiosystem contolling base audiosystem plus 1 
-		#define AUTOCIRCULATE_WITH_MULTILINK_AUDIO2	BIT(11)		///< @brief	Use this to AutoCirculate with base audiosystem contolling base audiosystem plus 2
-		#define AUTOCIRCULATE_WITH_MULTILINK_AUDIO3	BIT(12)		///< @brief	Use this to AutoCirculate with base audiosystem contolling base audiosystem plus 3
+		#define AUTOCIRCULATE_WITH_MULTILINK_AUDIO1	BIT(10)		///< @brief	Use this to AutoCirculate with base audiosystem controlling base AudioSystem + 1 
+		#define AUTOCIRCULATE_WITH_MULTILINK_AUDIO2	BIT(11)		///< @brief	Use this to AutoCirculate with base audiosystem controlling base AudioSystem + 2
+		#define AUTOCIRCULATE_WITH_MULTILINK_AUDIO3	BIT(12)		///< @brief	Use this to AutoCirculate with base audiosystem controlling base AudioSystem + 3
 
 		#define AUTOCIRCULATE_FRAME_FULL			BIT(20)		///< @brief Frame contains a full image
 		#define AUTOCIRCULATE_FRAME_FIELD0			BIT(21)		///< @brief Frame contains field 0 of an interlaced image (first field in time)
