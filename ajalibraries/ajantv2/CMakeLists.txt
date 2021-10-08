@@ -460,6 +460,33 @@ target_link_libraries(ajantv2 PUBLIC ${EXTRA_LIBRARIES})
 target_compile_definitions(ajantv2shared PUBLIC ${EXTRA_DYNAMIC_DEFINES})
 target_compile_definitions(ajantv2 PUBLIC ${EXTRA_STATIC_DEFINES})
 
+if (AJA_DEPLOY_SOURCES)
+    # deploy ajabase sources to build directory
+    foreach (source_file ${AJABASE_SOURCES})
+        get_filename_component(source_base_name ${source_file} NAME)
+        string(REGEX REPLACE "(${AJA_LIB_BASE_ROOT}/)+" "" source_replace ${source_file})
+        message("ajabase basename: ${source_replace}")
+        add_custom_command(TARGET ajantv2
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND}
+            ARGS -E copy "${source_file}" "../ajabase/${source_replace}")
+    endforeach(source_file)
+    # deploy ajantv2 sources to build directory
+    foreach (source_file ${AJANTV2_SOURCES})
+        add_custom_command(TARGET ajantv2
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND}
+            ARGS -E copy "${AJA_LIB_NTV2_ROOT}/${source_file}" "${source_file}")
+    endforeach(source_file)
+    # deploy ajaanc sources to build directory
+    foreach (source_file ${AJAANC_SOURCES})
+        get_filename_component(source_base_name ${source_file} NAME)
+        add_custom_command(TARGET ajantv2
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND}
+            ARGS -E copy "${AJA_LIB_ANC_ROOT}/src/${source_base_name}" "../ajaanc/src/${source_base_name}")
+    endforeach(source_file)
+endif()
 if (AJA_DEPLOY_HEADERS)
     # deploy ajabase headers to build directory
     foreach (header_file ${AJABASE_HEADERS})
