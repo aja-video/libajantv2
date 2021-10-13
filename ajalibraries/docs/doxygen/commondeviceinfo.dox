@@ -1137,6 +1137,15 @@
 	@note	The \ref usingntv2watcher tool’s \ref inspectoraudio allows you to monitor each Audio System’s
 			capture or playout buffer, as well as inspect or change its current configuration.
 
+	@warning	A fixed 4MB audio buffer necessarily places a maximum time limit … and therefore an upper limit on the number of 
+				frames of audio that can be buffered.  For example, 4MB will hold up to 1.37 seconds of 16-channel audio, or
+				2.73 seconds of 8-channel audio. At 60 fps, that’s 82 or 164 frames, respectively;  or at 29.97 fps, that’s
+				41 or 82 frames. Modern NTV2 devices have a large enough SDRAM complement such that it’s easy to buffer hundreds
+				of video frames on the device, which can readily exceed the maximum frames of audio that can be buffered.
+				CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput will emit a warning in
+				\ref usingajalogger or the \ref usinglogreader if the requested number of video frames to buffer exceeds the
+				audio buffering capacity. (Be sure to enable the <tt>AutoCirculate_39</tt> message group to see these messages.)
+
 
 	<hr size="50px">
 	@subsection	audiocapture		Audio Capture
@@ -1412,11 +1421,15 @@
 	-	For dual-link 3G, 6G or 12G configurations, up to 32 audio channels are supported.
 	-	For quad-link 3G, 6G or 12G (UHD2/8K) configurations, 32, 48 or 64 audio channels are supported.
 
-	This feature requires newer firmware and driver changes to essentially gang together and operate 2, 3 or 4 audio systems by the
-	lowest-numbered one, to simultaneously record (or play) samples across all four Audio Systems.
+	@note	This feature requires newer firmware and driver version 16.2 or later.
 
-	Each controlled Audio System uses the same 4MB of device memory for buffering audio samples. The driver automatically handles
+	Essentially, it gangs together 2 to 4 Audio Systems, and operates the higher-numbered ones as “slaves” by the lowest-numbered one –
+	i.e. the “master” – to record (or play) samples through them all simultaneously.
+
+	Each controlled Audio System uses its same 4MB of device memory for buffering audio samples. The driver automatically handles
 	redirecting each link’s samples during the DMA (CNTV2Card::AutoCirculateTransfer).
+
+	@note	This capability currently only works with AutoCirculate channels ::NTV2_CHANNEL1 or ::NTV2_CHANNEL3.
 
 	To enable and use this feature:
 	-	Be sure the device being used has the firmware capability by calling ::NTV2DeviceCanDoMultiLinkAudio.

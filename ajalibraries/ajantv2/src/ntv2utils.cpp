@@ -3223,6 +3223,14 @@ LWord64 GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr (const NTV2FrameRate in
 	return numTotalAudioSamples;
 }
 
+double GetAudioSamplesPerSecond (const NTV2AudioRate inAudioRate)
+{
+	static const ULWord sSamplesPerSecond [] = {48000, 96000, 192000, 0};
+	if (!NTV2_IS_VALID_AUDIO_RATE(inAudioRate))
+		return 0.00;
+	return double(sSamplesPerSecond[inAudioRate]);
+}
+
 
 // For a given sequenceRate and playRate, given the cadenceFrame it returns how many times we
 // repeate the frame to output varicam.	 If the result is zero then this is an unsupported varicam

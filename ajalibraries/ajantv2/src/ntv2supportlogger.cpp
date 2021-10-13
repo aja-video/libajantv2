@@ -656,6 +656,27 @@ void CNTV2SupportLogger::FetchAutoCirculateLog (ostringstream & oss) const
 			oss << setw(12) << "---"
 				<< setw(13) << "---"
 				<< endl;
+		if (!status.IsStopped()  &&  status.WithAudio())
+		{	//	Not stopped and AutoCirculating audio -- check if audio buffer capacity will be exceeded...
+			ULWord audChlsPerSample(0);
+			NTV2FrameRate fr(NTV2_FRAMERATE_INVALID);
+			NTV2AudioRate ar(NTV2_AUDIO_RATE_INVALID);
+			mDevice.GetNumberAudioChannels (audChlsPerSample, status.GetAudioSystem());
+			if (mDevice.GetFrameRate (fr, status.GetChannel())  &&  NTV2_IS_SUPPORTED_NTV2FrameRate(fr))
+				if (mDevice.GetAudioRate (ar, status.GetAudioSystem())  &&  NTV2_IS_VALID_AUDIO_RATE(ar))
+				{
+					const double framesPerSecond (double(::GetScaleFromFrameRate(fr)) / 100.00);
+					const double samplesPerSecond (double(::GetAudioSamplesPerSecond(ar)));
+					const double bytesPerChannel (4.0);
+					const double channelsPerSample (double(audChlsPerSample+0));
+					const double bytesPerFrame (samplesPerSecond * bytesPerChannel * channelsPerSample / framesPerSecond);
+					const ULWord maxVideoFrames (4UL * 1024UL * 1024UL / ULWord(bytesPerFrame));
+					if (status.GetFrameCount() > maxVideoFrames)
+						oss << "## WARNING: " << DEC(status.GetFrameCount()) << " frames (" << DEC(status.GetStartFrame())
+							<< " thru " << DEC(status.GetEndFrame()) << ") exceeds " << DEC(maxVideoFrames)
+							<< "-frame max audio buffer capacity" << endl;
+				}
+		}
 	}	//	for each channel
 
 	SDRAMAuditor ramMapper;

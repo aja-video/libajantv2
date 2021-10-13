@@ -512,7 +512,7 @@ bool   CNTV2Card::GetAutoCirculate(NTV2Crosspoint channelSpec, AUTOCIRCULATE_STA
 	
 	// Fill in our OS independent data structure 
 	AUTOCIRCULATE_DATA autoCircData;
-	memset((void*)&autoCircData, 0, sizeof(AUTOCIRCULATE_DATA));
+	memset(&autoCircData, 0, sizeof(AUTOCIRCULATE_DATA));
 	autoCircData.eCommand	 = eGetAutoCirc;
 	autoCircData.channelSpec = channelSpec;
 	autoCircData.pvVal1		 = PVOID(autoCirculateStatus);
@@ -662,26 +662,28 @@ bool CNTV2Card::AutoCirculateInitForInput ( const NTV2Channel		inChannel,
 		{ACFAIL("EndFrame(" << DEC(endFrameNumber) << ") precedes StartFrame(" << DEC(startFrameNumber) << ")");  return false;}
 	if ((endFrameNumber - startFrameNumber + 1) < 2)	//	must be at least 2 frames
 		{ACFAIL("Frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber) << " < 2 frames"); return false;}
+	if (inOptionFlags & (AUTOCIRCULATE_WITH_MULTILINK_AUDIO1 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO2 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO3)  &&  !::NTV2DeviceCanDoMultiLinkAudio(GetDeviceID()))
+		ACWARN("Input Ch" << DEC(inChannel+1) << " MultiLink Audio requested, but device doesn't support it");
 
 	//	Fill in our OS independent data structure...
-	AUTOCIRCULATE_DATA	autoCircData	(eInitAutoCirc);
+	AUTOCIRCULATE_DATA	autoCircData(eInitAutoCirc);
 	autoCircData.channelSpec = ::NTV2ChannelToInputChannelSpec (inChannel);
 	autoCircData.lVal1 = startFrameNumber;
 	autoCircData.lVal2 = endFrameNumber;
 	autoCircData.lVal3 = inAudioSystem;
-	if ((inOptionFlags & AUTOCIRCULATE_WITH_MULTILINK_AUDIO1) != 0)
+	if (inOptionFlags & AUTOCIRCULATE_WITH_MULTILINK_AUDIO1)
 		autoCircData.lVal3 |= NTV2_AUDIOSYSTEM_Plus1;
-	if ((inOptionFlags & AUTOCIRCULATE_WITH_MULTILINK_AUDIO2) != 0)
+	if (inOptionFlags & AUTOCIRCULATE_WITH_MULTILINK_AUDIO2)
 		autoCircData.lVal3 |= NTV2_AUDIOSYSTEM_Plus2;
-	if ((inOptionFlags & AUTOCIRCULATE_WITH_MULTILINK_AUDIO3) != 0)
+	if (inOptionFlags & AUTOCIRCULATE_WITH_MULTILINK_AUDIO3)
 		autoCircData.lVal3 |= NTV2_AUDIOSYSTEM_Plus3;
 	autoCircData.lVal4 = inNumChannels;
-	if ((inOptionFlags & AUTOCIRCULATE_WITH_FIELDS) != 0)
+	if (inOptionFlags & AUTOCIRCULATE_WITH_FIELDS)
 		autoCircData.lVal6 |= AUTOCIRCULATE_WITH_FIELDS;
-	if ((inOptionFlags & AUTOCIRCULATE_WITH_AUDIO_CONTROL) != 0)
+	if (inOptionFlags & AUTOCIRCULATE_WITH_AUDIO_CONTROL)
 		autoCircData.bVal1 = false;
 	else
-		autoCircData.bVal1 = NTV2_IS_VALID_AUDIO_SYSTEM (inAudioSystem) ? true : false;
+		autoCircData.bVal1 = NTV2_IS_VALID_AUDIO_SYSTEM(inAudioSystem) ? true : false;
 	autoCircData.bVal2 = inOptionFlags & AUTOCIRCULATE_WITH_RP188			? true : false;
 	autoCircData.bVal3 = inOptionFlags & AUTOCIRCULATE_WITH_FBFCHANGE		? true : false;
 	autoCircData.bVal4 = inOptionFlags & AUTOCIRCULATE_WITH_FBOCHANGE		? true : false;
@@ -714,6 +716,31 @@ bool CNTV2Card::AutoCirculateInitForInput ( const NTV2Channel		inChannel,
 					ACWARN("Ch" << DEC(inChannel+1) << " memory overlap/interference: " << warning.str() << ": " << infoStr);
 				}
 			}	//	for each "bad" region
+		#endif
+		#if 1
+		{	AUTOCIRCULATE_STATUS stat;
+			if (AutoCirculateGetStatus (inChannel, stat)  &&  !stat.IsStopped()  &&  stat.WithAudio())
+			{	//	Not stopped and AutoCirculating audio -- check if audio buffer capacity will be exceeded...
+				ULWord audChlsPerSample(0);
+				NTV2FrameRate fr(NTV2_FRAMERATE_INVALID);
+				NTV2AudioRate ar(NTV2_AUDIO_RATE_INVALID);
+				GetNumberAudioChannels (audChlsPerSample, stat.GetAudioSystem());
+				if (GetFrameRate (fr, inChannel)  &&  NTV2_IS_SUPPORTED_NTV2FrameRate(fr))
+					if (GetAudioRate (ar, stat.GetAudioSystem())  &&  NTV2_IS_VALID_AUDIO_RATE(ar))
+					{
+						const double framesPerSecond (double(::GetScaleFromFrameRate(fr)) / 100.00);
+						const double samplesPerSecond (double(::GetAudioSamplesPerSecond(ar)));
+						const double bytesPerChannel (4.0);
+						const double channelsPerSample (double(audChlsPerSample+0));
+						const double bytesPerFrame (samplesPerSecond * bytesPerChannel * channelsPerSample / framesPerSecond);
+						const ULWord maxVideoFrames (4UL * 1024UL * 1024UL / ULWord(bytesPerFrame));
+						if (stat.GetFrameCount() > maxVideoFrames)
+							ACWARN("AutoCirculate channel " << DEC(inChannel+1) << ":  " << DEC(stat.GetFrameCount()) << " frames ("
+									<< DEC(stat.GetStartFrame()) << " thru " << DEC(stat.GetEndFrame()) << ") exceeds " << DEC(maxVideoFrames)
+									<< "-frame max audio buffer capacity");
+					}
+			}
+		}
 		#endif
 		ACINFO("Ch" << DEC(inChannel+1) << " initialized using frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber));
 	}
@@ -756,6 +783,8 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 		{ACFAIL("EndFrame(" << DEC(endFrameNumber) << ") precedes StartFrame(" << DEC(startFrameNumber) << ")");  return false;}
 	if ((endFrameNumber - startFrameNumber + 1) < 2)	//	must be at least 2 frames
 		{ACFAIL("Frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber) << " < 2 frames"); return false;}
+	if (inOptionFlags & (AUTOCIRCULATE_WITH_MULTILINK_AUDIO1 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO2 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO3)  &&  !::NTV2DeviceCanDoMultiLinkAudio(GetDeviceID()))
+		ACWARN("Output Ch" << DEC(inChannel+1) << " MultiLink Audio requested, but device doesn't support it");
 
 	//	Warn about "with anc" and VANC mode...
 	if (inOptionFlags & AUTOCIRCULATE_WITH_ANC)
@@ -772,28 +801,28 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 	autoCircData.lVal1 = startFrameNumber;
 	autoCircData.lVal2 = endFrameNumber;
 	autoCircData.lVal3 = inAudioSystem;
-	if ((inOptionFlags & AUTOCIRCULATE_WITH_MULTILINK_AUDIO1) != 0)
+	if (inOptionFlags & AUTOCIRCULATE_WITH_MULTILINK_AUDIO1)
 		autoCircData.lVal3 |= NTV2_AUDIOSYSTEM_Plus1;
-	if ((inOptionFlags & AUTOCIRCULATE_WITH_MULTILINK_AUDIO2) != 0)
+	if (inOptionFlags & AUTOCIRCULATE_WITH_MULTILINK_AUDIO2)
 		autoCircData.lVal3 |= NTV2_AUDIOSYSTEM_Plus2;
-	if ((inOptionFlags & AUTOCIRCULATE_WITH_MULTILINK_AUDIO3) != 0)
+	if (inOptionFlags & AUTOCIRCULATE_WITH_MULTILINK_AUDIO3)
 		autoCircData.lVal3 |= NTV2_AUDIOSYSTEM_Plus3;
 	autoCircData.lVal4 = inNumChannels;
-	if ((inOptionFlags & AUTOCIRCULATE_WITH_FIELDS) != 0)
+	if (inOptionFlags & AUTOCIRCULATE_WITH_FIELDS)
 		autoCircData.lVal6 |= AUTOCIRCULATE_WITH_FIELDS;
-	if ((inOptionFlags & AUTOCIRCULATE_WITH_HDMIAUX) != 0)
+	if (inOptionFlags & AUTOCIRCULATE_WITH_HDMIAUX)
 		autoCircData.lVal6 |= AUTOCIRCULATE_WITH_HDMIAUX;
-	if ((inOptionFlags & AUTOCIRCULATE_WITH_AUDIO_CONTROL) != 0)
+	if (inOptionFlags & AUTOCIRCULATE_WITH_AUDIO_CONTROL)
 		autoCircData.bVal1 = false;
 	else
-		autoCircData.bVal1 = NTV2_IS_VALID_AUDIO_SYSTEM (inAudioSystem) ? true : false;
-	autoCircData.bVal2 = ((inOptionFlags & AUTOCIRCULATE_WITH_RP188) != 0) ? true : false;
-	autoCircData.bVal3 = ((inOptionFlags & AUTOCIRCULATE_WITH_FBFCHANGE) != 0) ? true : false;
-	autoCircData.bVal4 = ((inOptionFlags & AUTOCIRCULATE_WITH_FBOCHANGE) != 0) ? true : false;
-	autoCircData.bVal5 = ((inOptionFlags & AUTOCIRCULATE_WITH_COLORCORRECT) != 0) ? true : false;
-	autoCircData.bVal6 = ((inOptionFlags & AUTOCIRCULATE_WITH_VIDPROC) != 0) ? true : false;
-	autoCircData.bVal7 = ((inOptionFlags & AUTOCIRCULATE_WITH_ANC) != 0) ? true : false;
-	autoCircData.bVal8 = ((inOptionFlags & AUTOCIRCULATE_WITH_LTC) != 0) ? true : false;
+		autoCircData.bVal1 = NTV2_IS_VALID_AUDIO_SYSTEM(inAudioSystem)		? true : false;
+	autoCircData.bVal2 = (inOptionFlags & AUTOCIRCULATE_WITH_RP188)			? true : false;
+	autoCircData.bVal3 = (inOptionFlags & AUTOCIRCULATE_WITH_FBFCHANGE)		? true : false;
+	autoCircData.bVal4 = (inOptionFlags & AUTOCIRCULATE_WITH_FBOCHANGE)		? true : false;
+	autoCircData.bVal5 = (inOptionFlags & AUTOCIRCULATE_WITH_COLORCORRECT)	? true : false;
+	autoCircData.bVal6 = (inOptionFlags & AUTOCIRCULATE_WITH_VIDPROC)		? true : false;
+	autoCircData.bVal7 = (inOptionFlags & AUTOCIRCULATE_WITH_ANC)			? true : false;
+	autoCircData.bVal8 = (inOptionFlags & AUTOCIRCULATE_WITH_LTC)			? true : false;
 	if (::NTV2DeviceCanDo2110(_boardID))					//	If S2110 IP device...
 		if (inOptionFlags & AUTOCIRCULATE_WITH_RP188)		//	and caller wants RP188
 			if (!(inOptionFlags & AUTOCIRCULATE_WITH_ANC))	//	but caller failed to enable Anc playout
@@ -816,7 +845,7 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 				NTV2StringSet tags;
 				auditor.GetTagsForFrameIndex (startBlk, tags);
 				const string infoStr (aja::join(tags, ", "));
-				ostringstream acLabel;  acLabel << "AC" << DEC(inChannel+1);
+				ostringstream acLabel;  acLabel << "AC" << DEC(inChannel+1);	//	Search for label e.g. "AC2"
 				if (infoStr.find(acLabel.str()) != string::npos)
 				{	ostringstream warning;
 					if (numBlks > 1)
@@ -826,6 +855,31 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 					ACWARN("Ch" << DEC(inChannel+1) << " memory overlap/interference: " << warning.str() << ": " << infoStr);
 				}
 			}	//	for each "bad" region
+		#endif
+		#if 1
+		{	AUTOCIRCULATE_STATUS stat;
+			if (AutoCirculateGetStatus (inChannel, stat)  &&  !stat.IsStopped()  &&  stat.WithAudio())
+			{	//	Not stopped and AutoCirculating audio -- check if audio buffer capacity will be exceeded...
+				ULWord audChlsPerSample(0);
+				NTV2FrameRate fr(NTV2_FRAMERATE_INVALID);
+				NTV2AudioRate ar(NTV2_AUDIO_RATE_INVALID);
+				GetNumberAudioChannels (audChlsPerSample, stat.GetAudioSystem());
+				if (GetFrameRate (fr, inChannel)  &&  NTV2_IS_SUPPORTED_NTV2FrameRate(fr))
+					if (GetAudioRate (ar, stat.GetAudioSystem())  &&  NTV2_IS_VALID_AUDIO_RATE(ar))
+					{
+						const double framesPerSecond (double(::GetScaleFromFrameRate(fr)) / 100.00);
+						const double samplesPerSecond (double(::GetAudioSamplesPerSecond(ar)));
+						const double bytesPerChannel (4.0);
+						const double channelsPerSample (double(audChlsPerSample+0));
+						const double bytesPerFrame (samplesPerSecond * bytesPerChannel * channelsPerSample / framesPerSecond);
+						const ULWord maxVideoFrames (4UL * 1024UL * 1024UL / ULWord(bytesPerFrame));
+						if (stat.GetFrameCount() > maxVideoFrames)
+							ACWARN("AutoCirculate channel " << DEC(inChannel+1) << ":  " << DEC(stat.GetFrameCount()) << " frames ("
+									<< DEC(stat.GetStartFrame()) << " thru " << DEC(stat.GetEndFrame()) << ") exceeds " << DEC(maxVideoFrames)
+									<< "-frame max audio buffer capacity");
+					}
+			}
+		}
 		#endif
 		ACINFO("Ch" << DEC(inChannel+1) << " initialized using frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber));
 	}
@@ -895,7 +949,7 @@ bool CNTV2Card::AutoCirculateStop (const NTV2Channel inChannel, const bool inAbo
 
 
 bool CNTV2Card::AutoCirculatePause (const NTV2Channel inChannel,  const UWord inAtFrameNum)
-{
+{	(void) inAtFrameNum;
 	//	Use the old A/C driver call...
 	AUTOCIRCULATE_DATA	autoCircData (ePauseAutoCirc);
 	autoCircData.bVal1	= false;
