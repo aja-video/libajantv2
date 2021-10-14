@@ -1,5 +1,7 @@
 project(ut_ajantv2)
 
+message("added ajantv2 unit tests")
+
 set(APP_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(AJALIBRARIES_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../../ajalibraries)
@@ -34,5 +36,6 @@ set(APP_TARGET_SOURCES
 	${APP_SOURCES})
 
 add_executable(ut_ajantv2 ${APP_TARGET_SOURCES})
+add_dependencies(ut_ajantv2 ajantv2)
 target_include_directories(ut_ajantv2 PUBLIC ${APP_TARGET_INCLUDE_DIRS})
 target_link_libraries(ut_ajantv2 PUBLIC ajantv2 ${EXTRA_LIBRARIES})
