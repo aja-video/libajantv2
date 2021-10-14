@@ -1,5 +1,7 @@
 project(ntv2testOGL)
 
+message("added ntv2testOGL")
+
 set(NTV2TESTOGL_TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
@@ -30,5 +32,6 @@ set(NTV2TESTOGL_TARGET_SOURCES
 	${DEMO_APPS_HEADERS})
 
 add_executable(ntv2testOGL ${NTV2TESTOGL_TARGET_SOURCES})
+add_dependencies(ntv2testOGL ajantv2)
 target_include_directories(ntv2testOGL PUBLIC ${NTV2TESTOGL_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2testOGL PUBLIC ajantv2 ${EXTRA_LIBRARIES})

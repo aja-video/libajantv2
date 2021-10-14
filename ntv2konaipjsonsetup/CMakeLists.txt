@@ -1,5 +1,7 @@
 project(ntv2konaipjsonsetup)
 
+message("added ntv2konaipjsonsetup")
+
 find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
 set(QT_LIBRARIES Qt5::Core Qt5::Widgets)
 set(CMAKE_AUTOMOC ON)
@@ -58,5 +60,11 @@ set(NTV2KONAIPJSONSETUP_TARGET_SOURCES
 	${DEMO_APPS_HEADERS})
 
 add_executable(ntv2konaipjsonsetup ${NTV2KONAIPJSONSETUP_TARGET_SOURCES})
+add_dependencies(ntv2konaipjsonsetup ajantv2)
 target_include_directories(ntv2konaipjsonsetup PUBLIC ${NTV2KONAIPJSONSETUP_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2konaipjsonsetup PUBLIC ajantv2 ${EXTRA_LIBRARIES} ${QT_LIBRARIES})
+
+if (AJA_DEPLOY_LIBS)
+    include(QtHelpers)
+    deploy_qt_libs(ntv2konaipjsonsetup)
+endif()

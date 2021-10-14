@@ -1,5 +1,7 @@
 project(ntv2hdrsetup)
 
+message("added ntv2hdrsetup")
+
 set(NTV2HDRSETUP_TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
@@ -30,5 +32,6 @@ set(NTV2HDRSETUP_TARGET_SOURCES
 	${DEMO_APPS_HEADERS})
 
 add_executable(ntv2hdrsetup ${NTV2HDRSETUP_TARGET_SOURCES})
+add_dependencies(ntv2hdrsetup ajantv2)
 target_include_directories(ntv2hdrsetup PUBLIC ${NTV2HDRSETUP_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2hdrsetup PUBLIC ajantv2 ${EXTRA_LIBRARIES})

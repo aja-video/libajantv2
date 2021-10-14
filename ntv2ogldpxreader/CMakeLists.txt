@@ -1,5 +1,7 @@
 project(ntv2ogldpxreader)
 
+message("added ntv2ogldpxreader")
+
 set(NTV2OGLDPXREADER_TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
@@ -33,5 +35,6 @@ set(NTV2OGLDPXREADER_TARGET_SOURCES
 	${DEMO_APPS_HEADERS})
 
 add_executable(ntv2ogldpxreader ${NTV2OGLDPXREADER_TARGET_SOURCES})
+add_dependencies(ntv2ogldpxreader ajantv2)
 target_include_directories(ntv2ogldpxreader PUBLIC ${NTV2OGLDPXREADER_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2ogldpxreader PUBLIC ajantv2 ${EXTRA_LIBRARIES})

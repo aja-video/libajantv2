@@ -1,5 +1,7 @@
 project(ntv2recorddpx)
 
+message("added ntv2recorddpx")
+
 set(NTV2RECORDDPX_TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
@@ -33,5 +35,6 @@ set(NTV2RECORDDPX_TARGET_SOURCES
 	${DEMO_APPS_HEADERS})
 
 add_executable(ntv2recorddpx ${NTV2RECORDDPX_TARGET_SOURCES})
+add_dependencies(ntv2recorddpx ajantv2)
 target_include_directories(ntv2recorddpx PUBLIC ${NTV2RECORDDPX_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2recorddpx PUBLIC ajantv2 ${EXTRA_LIBRARIES})

@@ -1,5 +1,7 @@
 project(ntv2player8k)
 
+message("added ntv2player8k")
+
 set(NTV2PLAYER8K_TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
@@ -34,5 +36,6 @@ set(NTV2PLAYER8K_TARGET_SOURCES
 	${DEMO_APPS_HEADERS})
 
 add_executable(ntv2player8k ${NTV2PLAYER8K_TARGET_SOURCES})
+add_dependencies(ntv2player8k ajantv2)
 target_include_directories(ntv2player8k PUBLIC ${NTV2PLAYER8K_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2player8k PUBLIC ajantv2 ${EXTRA_LIBRARIES})

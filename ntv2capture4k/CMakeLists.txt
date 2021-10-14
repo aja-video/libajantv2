@@ -1,5 +1,7 @@
 project(ntv2capture4k)
 
+message("added ntv2capture4k")
+
 set(NTV2CAPTURE4K_TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
@@ -34,5 +36,6 @@ set(NTV2CAPTURE4K_TARGET_SOURCES
 	${DEMO_APPS_HEADERS})
 
 add_executable(ntv2capture4k ${NTV2CAPTURE4K_TARGET_SOURCES})
+add_dependencies(ntv2capture4k ajantv2)
 target_include_directories(ntv2capture4k PUBLIC ${NTV2CAPTURE4K_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2capture4k PUBLIC ajantv2 ${EXTRA_LIBRARIES})

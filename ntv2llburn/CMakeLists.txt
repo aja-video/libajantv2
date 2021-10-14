@@ -1,5 +1,7 @@
 project(ntv2llburn)
 
+message("added ntv2llburn")
+
 set(NTV2LLBURN_TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
@@ -34,5 +36,6 @@ set(NTV2LLBURN_TARGET_SOURCES
 	${DEMO_APPS_HEADERS})
 
 add_executable(ntv2llburn ${NTV2LLBURN_TARGET_SOURCES})
+add_dependencies(ntv2llburn ajantv2)
 target_include_directories(ntv2llburn PUBLIC ${NTV2LLBURN_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2llburn PUBLIC ajantv2 ${EXTRA_LIBRARIES})

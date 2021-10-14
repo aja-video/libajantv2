@@ -1,5 +1,7 @@
 project(ntv2stereocapture)
 
+message("added ntv2stereocapture")
+
 set(NTV2STEREOCAPTURE_TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
@@ -33,5 +35,6 @@ set(NTV2STEREOCAPTURE_TARGET_SOURCES
 	${DEMO_APPS_HEADERS})
 
 add_executable(ntv2stereocapture ${NTV2STEREOCAPTURE_TARGET_SOURCES})
+add_dependencies(ntv2stereocapture ajantv2)
 target_include_directories(ntv2stereocapture PUBLIC ${NTV2STEREOCAPTURE_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2stereocapture PUBLIC ajantv2 ${EXTRA_LIBRARIES})
