@@ -2920,7 +2920,7 @@ ULWord GetAudioSamplesPerFrame (const NTV2FrameRate inFrameRate, const NTV2Audio
 					case 0:
 					case 1:
 					case 2:
-					case 3: audioSamplesPerFrame = 901; break;
+					case 3: audioSamplesPerFrame = 801; break;	//	Fixed in SDK 16.2, was incorrect (901) before 16.2
 	
 					case 4: audioSamplesPerFrame = 800; break;
 				}
