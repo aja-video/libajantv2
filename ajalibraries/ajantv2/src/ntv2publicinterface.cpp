@@ -1235,8 +1235,7 @@ NTV2_POINTER & NTV2_POINTER::operator = (const NTV2_POINTER & inRHS)
 			SetFrom(inRHS);
 		else if (Allocate(inRHS.GetByteCount()))
 			SetFrom(inRHS);
-		else
-			{;} //	Error
+		//else; //	Error
 	}
 	return *this;
 }
@@ -1839,7 +1838,7 @@ bool FRAME_STAMP::CopyTo (FRAME_STAMP_STRUCT & outOldStruct) const
 	outOldStruct.currentFieldCount				= acCurrentFieldCount;
 	outOldStruct.currentLineCount				= acCurrentLineCount;
 	outOldStruct.currentReps					= acCurrentReps;
-	outOldStruct.currenthUser					= (ULWord)acCurrentUserCookie;
+	outOldStruct.currenthUser					= ULWord(acCurrentUserCookie);
 	outOldStruct.currentRP188					= acRP188;
 	//	Ticket 3367 -- Mark Gilbert of Gallery UK reports that after updating from AJA Retail Software 10.5 to 14.0,
 	//	their QuickTime app stopped receiving timecode during capture. Turns out the QuickTime components use the new
@@ -2181,23 +2180,19 @@ void NTV2ColorCorrectionData::Clear (void)
 {
 	ccMode = NTV2_CCMODE_INVALID;
 	ccSaturationValue = 0;
-	if (ccLookupTables.GetHostPointer ())
-		delete [] (UByte *) ccLookupTables.GetHostPointer ();
-	ccLookupTables.Set (AJA_NULL, 0);
+	ccLookupTables.Deallocate();
 }
 
 
 bool NTV2ColorCorrectionData::Set (const NTV2ColorCorrectionMode inMode, const ULWord inSaturation, const void * pInTableData)
 {
-	Clear ();
+	Clear();
 	if (!NTV2_IS_VALID_COLOR_CORRECTION_MODE (inMode))
 		return false;
 
 	if (pInTableData)
-	{
-		if (!ccLookupTables.Set (new UByte [NTV2_COLORCORRECTOR_TABLESIZE], NTV2_COLORCORRECTOR_TABLESIZE))
+		if (!ccLookupTables.CopyFrom(pInTableData, ULWord(NTV2_COLORCORRECTOR_TABLESIZE)))
 			return false;
-	}
 	ccMode = inMode;
 	ccSaturationValue = (inMode == NTV2_CCMODE_3WAY) ? inSaturation : 0;
 	return true;
@@ -2589,9 +2584,9 @@ bool NTV2GetRegisters::GetGoodRegisters (NTV2RegNumSet & outGoodRegNums) const
 {
 	NTV2_ASSERT_STRUCT_VALID;
 	outGoodRegNums.clear ();
-	if (mOutGoodRegisters.GetHostPointer () == 0)
+	if (mOutGoodRegisters.GetHostPointer() == AJA_NULL)
 		return false;		//	No 'mOutGoodRegisters' array!
-	if (mOutGoodRegisters.GetByteCount () == 0)
+	if (mOutGoodRegisters.GetByteCount() == 0)
 		return false;		//	No good registers!
 	if (mOutNumRegisters == 0)
 		return false;		//	No good registers!	(The driver sets this field.)
@@ -2871,6 +2866,36 @@ NTV2ChannelList NTV2MakeChannelList (const NTV2ChannelSet inChannels)
 	NTV2ChannelList result;
 	for (NTV2ChannelSetConstIter it(inChannels.begin());  it != inChannels.end();  ++it)
 		result.push_back(*it);
+	return result;
+}
+
+ostream & NTV2PrintAudioSystemSet (const NTV2AudioSystemSet & inObj, const bool inCompact, std::ostream & inOutStream)
+{
+	inOutStream << (inCompact ? "AudSys{" : "{");
+	for (NTV2AudioSystemSetConstIter it(inObj.begin());	 it != inObj.end();	 )
+	{
+		if (inCompact)
+			inOutStream << DEC(*it+1);
+		else
+			inOutStream << ::NTV2AudioSystemToString(*it);
+		if (++it != inObj.end())
+			inOutStream << (inCompact ? "|" : ",");
+	}
+	return inOutStream << "}";
+}
+
+string NTV2AudioSystemSetToStr (const NTV2AudioSystemSet & inObj, const bool inCompact)
+{	ostringstream oss;
+	::NTV2PrintAudioSystemSet (inObj, inCompact, oss);
+	return oss.str();
+}
+
+NTV2AudioSystemSet NTV2MakeAudioSystemSet (const NTV2AudioSystem inFirstAudioSystem, const UWord inCount)
+{
+	NTV2AudioSystemSet result;
+	for (NTV2AudioSystem audSys(inFirstAudioSystem);  audSys < NTV2AudioSystem(inFirstAudioSystem+inCount);  audSys = NTV2AudioSystem(audSys+1))
+		if (NTV2_IS_VALID_AUDIO_SYSTEM(audSys))
+			result.insert(audSys);
 	return result;
 }
 

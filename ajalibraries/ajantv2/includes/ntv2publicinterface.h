@@ -4412,6 +4412,33 @@ typedef enum
 		@return		An NTV2ChannelList having the same channels as contained in the specified set.
 	**/
 	AJAExport NTV2ChannelList NTV2MakeChannelList (const NTV2ChannelSet inChannels);	//	New in SDK 16.0
+
+
+	typedef std::set <NTV2AudioSystem>				NTV2AudioSystemSet;				///< @brief A set of distinct NTV2AudioSystem values.  New in SDK 16.2.
+	typedef NTV2AudioSystemSet::const_iterator		NTV2AudioSystemSetConstIter;	///< @brief A handy const iterator into an NTV2AudioSystemSet.  New in SDK 16.2.
+
+	/**
+		@brief		Streams a human-readable dump of the given NTV2AudioSystemSet into the specified output stream.
+		@param[in]	inObj			Specifies the NTV2AudioSystemSet to be streamed to the output stream.
+		@param		inCompact		Use 'true' for a compact display (the default);	 otherwise use 'false' for a long-format.
+		@param		inOutStream		Specifies the output stream to receive the dump. Defaults to std::cout.
+		@return		A non-constant reference to the given output stream.
+	**/
+	AJAExport std::ostream & NTV2PrintAudioSystemSet (const NTV2AudioSystemSet & inObj, const bool inCompact = true, std::ostream & inOutStream = std::cout);	//	New in SDK 16.2
+
+	/**
+		@return		A human-readable string containing a dump of the NTV2AudioSystemSet.
+		@param[in]	inObj			Specifies the NTV2AudioSystemSet to be render.
+		@param		inCompact		Use 'true' for a compact display (the default);	 otherwise use 'false' for a long-format.
+	**/
+	AJAExport std::string NTV2AudioSystemSetToStr (const NTV2AudioSystemSet & inObj, const bool inCompact = true);	//	New in SDK 16.2
+
+	/**
+		@param[in]	inFirstAudioSystem	Specifies the first NTV2AudioSystem.
+		@param		inCount				Specifies the number of audio systems.
+		@return		An NTV2AudioSystemSet having the specified contiguous range of NTV2AudioSystems.
+	**/
+	AJAExport NTV2AudioSystemSet NTV2MakeAudioSystemSet (const NTV2AudioSystem inFirstAudioSystem, const UWord inCount = 1);	//	New in SDK 16.2
 #endif	//	!defined (NTV2_BUILDING_DRIVER)
 
 
