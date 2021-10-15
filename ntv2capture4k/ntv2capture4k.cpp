@@ -378,8 +378,6 @@ AJAStatus NTV2Capture4K::SetupAudio (void)
 				mDevice.SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_OFF, NTV2_AUDIOSYSTEM_4);
 			}
 		}
-		
-		
 	}
 	else
 	{	
@@ -866,6 +864,7 @@ void NTV2Capture4K::ProducerThreadStatic (AJAThread * pThread, void * pContext)	
 void NTV2Capture4K::CaptureFrames (void)
 {
 	NTV2AudioChannelPairs	nonPcmPairs, oldNonPcmPairs;
+	AUTOCIRCULATE_TRANSFER	inputXfer;	//	A/C input transfer info
 	CAPNOTE("Thread started");
 
 	//	Start AutoCirculate running...
@@ -883,22 +882,21 @@ void NTV2Capture4K::CaptureFrames (void)
 			//	use it in the next transfer from the device...
 			AVDataBuffer *	captureData	(mAVCircularBuffer.StartProduceNextBuffer ());
 
-			mInputTransfer.SetBuffers (captureData->fVideoBuffer, captureData->fVideoBufferSize,
-										captureData->fAudioBuffer, captureData->fAudioBufferSize,
-										captureData->fAncBuffer, captureData->fAncBufferSize);
+			inputXfer.SetBuffers (captureData->fVideoBuffer, captureData->fVideoBufferSize,
+								captureData->fAudioBuffer, captureData->fAudioBufferSize,
+								captureData->fAncBuffer, captureData->fAncBufferSize);
 
 			//	Do the transfer from the device into our host AVDataBuffer...
-			mDevice.AutoCirculateTransfer (mInputChannel, mInputTransfer);
-			// mInputTransfer.acTransferStatus.acAudioTransferSize;   // this is the amount of audio captured
+			mDevice.AutoCirculateTransfer (mInputChannel, inputXfer);
 
 			NTV2SDIInStatistics	sdiStats;
 			mDevice.ReadSDIStatistics (sdiStats);
 
 			//	"Capture" timecode into the host AVDataBuffer while we have full access to it...
 			NTV2_RP188	timecode;
-			mInputTransfer.GetInputTimeCode (timecode);
+			inputXfer.GetInputTimeCode (timecode);
 			captureData->fRP188Data = timecode;
-			captureData->fAudioRecordSize = mInputTransfer.GetCapturedAudioByteCount ();
+			captureData->fAudioRecordSize = inputXfer.GetCapturedAudioByteCount();
 
 			//	Signal that we're done "producing" the frame, making it available for future "consumption"...
 			mAVCircularBuffer.EndProduceNextBuffer ();
