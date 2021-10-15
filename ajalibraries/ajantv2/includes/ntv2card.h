@@ -1383,6 +1383,20 @@ public:
 	AJA_VIRTUAL bool		SetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode inMode);
 
 	/**
+		@brief		Sets the "VANC Shift Mode" for the given channel(s).
+		@param[in]	inChannels	Specifies the FrameStore(s) of interest as ::NTV2Channel values (zero-based index numbers).
+		@param[in]	inMode		Specifies the new data shift mode.
+								Use ::NTV2_VANCDATA_NORMAL to disable;	use ::NTV2_VANCDATA_8BITSHIFT_ENABLE to enable.
+		@return		True if successful;	 otherwise false.
+		@note		The bit shift feature only affects VANC lines (not visible raster lines) and only when the device FrameStore is configured as follows:
+					-	video format is set for an HD format (see ::NTV2_IS_HD_VIDEO_FORMAT macro) -- not SD or 4K/UHD;
+					-	pixel format is set for ::NTV2_FBF_8BIT_YCBCR;
+					-	VANC mode is set to ::NTV2_VANCMODE_TALL or ::NTV2_VANCMODE_TALLER (see CNTV2Card::SetVANCMode).
+		@see		CNTV2Card::GetVANCShiftMode, CNTV2Card::GetVANCMode, CNTV2Card::SetVANCMode, \ref vancframegeometries
+	**/
+	AJA_VIRTUAL bool		SetVANCShiftMode (NTV2ChannelSet & inChannels, const NTV2VANCDataShiftMode inMode);	//	New in SDK 16.2
+
+	/**
 		@brief		Retrieves the current "VANC Shift Mode" feature for the given channel.
 		@param[in]	inChannel	Specifies the FrameStore of interest as an ::NTV2Channel, a zero-based index number.
 		@param[out] outValue	Receives the current ::NTV2VANCDataShiftMode setting.

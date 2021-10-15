@@ -3326,6 +3326,16 @@ bool CNTV2Card::SetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode i
 }
 
 
+bool CNTV2Card::SetVANCShiftMode (NTV2ChannelSet & inChannels, const NTV2VANCDataShiftMode inMode)
+{
+	size_t errors(0);
+	for (NTV2ChannelSetConstIter it(inChannels.begin());	it != inChannels.end();  ++it)
+		if (!SetVANCShiftMode(*it, inMode))
+			errors++;
+	return !errors;
+}
+
+
 bool CNTV2Card::GetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode & outValue)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
