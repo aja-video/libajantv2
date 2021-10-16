@@ -10,7 +10,6 @@
 #include "ntv2formatdescriptor.h"
 #include "ntv2debug.h"
 #include "ntv2testpatterngen.h"
-#include "ajabase/system/debug.h"
 #include "ajabase/common/timecode.h"
 #include "ajabase/system/memory.h"
 #include "ajabase/system/systemtime.h"
@@ -23,6 +22,8 @@
 
 using namespace std;
 
+//#define NTV2_BUFFER_LOCKING		//	Define this to pre-lock video/audio buffers in kernel
+
 //	Convenience macros for EZ logging:
 #define	TCFAIL(_expr_)	AJA_sERROR  (AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
 #define	TCWARN(_expr_)	AJA_sWARNING(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
@@ -30,50 +31,58 @@ using namespace std;
 #define	TCINFO(_expr_)	AJA_sINFO	(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
 #define	TCDBG(_expr_)	AJA_sDEBUG	(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
 
-//#define NTV2_BUFFER_LOCK		//	Define this to pre-lock video/audio buffers in kernel
+/**
+	@brief	The maximum number of bytes of ancillary data that can be transferred for a single field.
+			Each driver instance sets this maximum to the 8K default at startup.
+			It can be changed at runtime, so it's sampled and reset in SetUpVideo.
+**/
+static ULWord	gAncMaxSizeBytes (NTV2_ANCSIZE_MAX);	//	Max per-frame anc buffer size, in bytes
 
+/**
+	@brief	The maximum number of bytes of 48KHz audio that can be transferred for a single frame.
+			Worst case, assuming 16 channels of audio (max), 4 bytes per sample, and 67 msec per frame
+			(assuming the lowest possible frame rate of 14.98 fps)...
+			48,000 samples per second requires 3,204 samples x 4 bytes/sample x 16 = 205,056 bytes
+			201K min will suffice, with 768 bytes to spare
+			But it could be more efficient for page-aligned (and page-locked) memory to round to 256K.
+**/
+static const uint32_t	gAudMaxSizeBytes (256 * 1024);	//	Max per-frame audio buffer size, in bytes
 
-AJALabelValuePairs PlayerConfig::Get(const bool inCompact) const
-{
-	AJALabelValuePairs result;
-	AJASystemInfo::append(result, "NTV2Player Config");
-	AJASystemInfo::append(result, "Device Specifier",	fDeviceSpecifier);
-	AJASystemInfo::append(result, "Output Channel",		::NTV2ChannelToString(fOutputChannel, inCompact));
-	AJASystemInfo::append(result, "Output Connector",	::NTV2OutputDestinationToString(fOutputDestination, inCompact));
-	AJASystemInfo::append(result, "Video Format",		::NTV2VideoFormatToString(fVideoFormat));
-	AJASystemInfo::append(result, "Pixel Format",		::NTV2FrameBufferFormatToString(fPixelFormat, inCompact));
-	AJASystemInfo::append(result, "AutoCirc Frames",	fFrames.toString());
-	AJASystemInfo::append(result, "Anc Data",			::AJAAncillaryDataTypeToString(fTransmitHDRType));
-	AJASystemInfo::append(result, "MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
-	AJASystemInfo::append(result, "Suppress Audio",		fSuppressAudio ? "Y" : "N");
-	AJASystemInfo::append(result, "Embedded Timecode",	fTransmitLTC ? "LTC" : "VITC");
-	AJASystemInfo::append(result, "Anc Data File",		fAncDataFilePath);
-//	AJASystemInfo::append(result, "Level Conversion",	fDoLevelConversion ? "Y" : "N");
-	return result;
-}
+/**
+	@brief	The alignment of the video and audio buffers has a big impact on the efficiency of
+			DMA transfers. When aligned to the page size of the architecture, only one DMA
+			descriptor is needed per page. Misalignment will double the number of descriptors
+			that need to be fetched and processed, thus reducing bandwidth.
+**/
+static const uint32_t	BUFFER_ALIGNMENT	(4096);		//	The optimal size for most systems
+static const bool		BUFFER_PAGE_ALIGNED	(true);
 
-ostream & operator << (ostream & ioStrm, const PlayerConfig & inObj)
-{
-	return ioStrm << AJASystemInfo::ToString(inObj.Get());
-}
+//	Audio tone generator data
+static const double		gFrequencies []	=	{250.0, 500.0, 1000.0, 2000.0};
+static const ULWord		gNumFrequencies		(sizeof(gFrequencies) / sizeof(double));
+static const double		gAmplitudes []	=	{	0.10, 0.15,		0.20, 0.25,		0.30, 0.35,		0.40, 0.45,		0.50, 0.55,		0.60, 0.65,		0.70, 0.75,		0.80, 0.85,
+												0.85, 0.80,		0.75, 0.70,		0.65, 0.60,		0.55, 0.50,		0.45, 0.40,		0.35, 0.30,		0.25, 0.20,		0.15, 0.10};
+
 
 NTV2Player::NTV2Player (const PlayerConfig & inConfig)
 
-	:	mConsumerThread		(),
+	:	mConfig				(inConfig),
+		mConsumerThread		(),
 		mProducerThread		(),
-		mDeviceID			(DEVICE_ID_NOTFOUND),
-		mConfig				(inConfig),
-		mSavedTaskMode		(NTV2_DISABLE_TASKS),
-		mAudioSystem		(NTV2_AUDIOSYSTEM_1),
-		mGlobalQuit			(false),
-		mHostBuffers		(),
-		mAVCircularBuffer	(),
+		mDevice				(),
+		mDeviceID			(DEVICE_ID_INVALID),
+		mSavedTaskMode		(NTV2_TASK_MODE_INVALID),
 		mCurrentFrame		(0),
 		mCurrentSample		(0),
 		mToneFrequency		(440.0),
-		mTCBurner			(),
+		mAudioSystem		(NTV2_AUDIOSYSTEM_INVALID),
+		mFormatDesc			(),
 		mTCIndexes			(),
-		mTestPatVidBuffers	()
+		mGlobalQuit			(false),
+		mTCBurner			(),
+		mHostBuffers		(),
+		mFrameDataRing		(),
+		mTestPatRasters		()
 {
 }
 
@@ -83,7 +92,7 @@ NTV2Player::~NTV2Player (void)
 	//	Stop my playout and producer threads, then destroy them...
 	Quit();
 
-	mDevice.UnsubscribeOutputVerticalEvent(mConfig.fOutputChannel);
+	mDevice.UnsubscribeOutputVerticalEvent(mConfig.fOutputChannel);	//	Unsubscribe from output VBI event
 }	//	destructor
 
 
@@ -98,12 +107,15 @@ void NTV2Player::Quit (void)
 	while (mConsumerThread.Active())
 		AJATime::Sleep(10);
 
+#if defined(NTV2_BUFFER_LOCKING)
+	mDevice.DMABufferUnlockAll();
+#endif	//	NTV2_BUFFER_LOCKING
 	if (!mConfig.fDoMultiFormat  &&  mDevice.IsOpen())
 	{
-		mDevice.ReleaseStreamForApplication (kDemoAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));
-		mDevice.SetEveryFrameServices(mSavedTaskMode);		//	Restore prior task mode
+		mDevice.ReleaseStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid()));
+		if (NTV2_IS_VALID_TASK_MODE(mSavedTaskMode))
+			mDevice.SetEveryFrameServices(mSavedTaskMode);		//	Restore prior task mode
 	}
-
 }	//	Quit
 
 
@@ -113,62 +125,61 @@ AJAStatus NTV2Player::Init (void)
 
 	//	Open the device...
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpecifier, mDevice))
-		{if (mConfig.fDeviceSpecifier != "list" && mConfig.fDeviceSpecifier != "?")
-			cerr << "## ERROR:  Device '" << mConfig.fDeviceSpecifier << "' not found" << endl;
-				return AJA_STATUS_OPEN;}
+		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpecifier << "' not found" << endl;  return AJA_STATUS_OPEN;}
+	mDeviceID = mDevice.GetDeviceID();	//	Keep this ID handy -- it's used frequently
 
     if (!mDevice.IsDeviceReady(false))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpecifier << "' not ready" << endl;
-			return AJA_STATUS_INITIALIZE;}
+		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpecifier << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
-	if (!mConfig.fDoMultiFormat)
-	{
-		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
-			return AJA_STATUS_BUSY;		//	Device is in use by another app -- fail
+	const UWord maxNumChannels (::NTV2DeviceGetNumFrameStores(mDeviceID));
 
-		mDevice.GetEveryFrameServices(mSavedTaskMode);		//	Save the current service level
-	}
-
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Set OEM service level
-
-	mDeviceID = mDevice.GetDeviceID();						//	Keep this ID handy -- it's used frequently
-
-	if (::NTV2DeviceCanDoMultiFormat(mDeviceID) && mConfig.fDoMultiFormat)
-		mDevice.SetMultiFormatMode(true);
-	else if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
-		mDevice.SetMultiFormatMode(false);
-
-	//	Beware -- some devices (e.g. Corvid1) can only output from FrameStore 2...
+	//	Beware -- some older devices (e.g. Corvid1) can only output from FrameStore 2...
 	if ((mConfig.fOutputChannel == NTV2_CHANNEL1) && (!::NTV2DeviceCanDoFrameStore1Display(mDeviceID)))
 		mConfig.fOutputChannel = NTV2_CHANNEL2;
-	if (UWord(mConfig.fOutputChannel) >= ::NTV2DeviceGetNumFrameStores(mDeviceID))
+	if (UWord(mConfig.fOutputChannel) >= maxNumChannels)
 	{
 		cerr	<< "## ERROR:  Cannot use channel '" << DEC(mConfig.fOutputChannel+1) << "' -- device only supports channel 1"
-				<< (::NTV2DeviceGetNumFrameStores(mDeviceID) > 1  ?  string(" thru ") + string(1, char(::NTV2DeviceGetNumFrameStores(mDeviceID)+'0'))  :  "") << endl;
+				<< (maxNumChannels > 1  ?  string(" thru ") + string(1, char(maxNumChannels+'0'))  :  "") << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
 
+	if (!mConfig.fDoMultiFormat)
+	{
+		mDevice.GetEveryFrameServices(mSavedTaskMode);		//	Save the current task mode
+		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
+			return AJA_STATUS_BUSY;		//	Device is in use by another app -- fail
+	}
+	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Set OEM service level
+
+	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
+		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
+	else
+		mConfig.fDoMultiFormat = false;
+
 	//	Set up the video and audio...
 	status = SetUpVideo();
-	if (AJA_FAILURE (status))
+	if (AJA_FAILURE(status))
 		return status;
-
-	status = SetUpAudio();
-	if (AJA_FAILURE (status))
+	status = mConfig.WithAudio() ? SetUpAudio() : AJA_STATUS_SUCCESS;
+	if (AJA_FAILURE(status))
 		return status;
 
 	//	Set up the circular buffers, and the test pattern buffers...
-	SetUpHostBuffers();
-	status = SetUpTestPatternVideoBuffers ();
-	if (AJA_FAILURE (status))
+	status = SetUpHostBuffers();
+	if (AJA_FAILURE(status))
+		return status;
+	status = SetUpTestPatternBuffers();
+	if (AJA_FAILURE(status))
 		return status;
 
-	//	Set up the device signal routing, and playout AutoCirculate...
+	//	Set up the device signal routing...
 	RouteOutputSignal();
 
 	//	Lastly, prepare my AJATimeCodeBurn instance...
-	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat(mConfig.fPixelFormat),
-									mFormatDesc.numPixels, mFormatDesc.numLines);
+	if (!mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat(mConfig.fPixelFormat), mFormatDesc.numPixels, mFormatDesc.numLines))
+		{cerr << "## ERROR:  RenderTimeCodeFont failed for:  " << mFormatDesc << endl;  return AJA_STATUS_UNSUPPORTED;}
+
+	//	Ready to go...
 	#if defined(_DEBUG)
 		cerr << mConfig << endl;
 	#else
@@ -182,21 +193,15 @@ AJAStatus NTV2Player::Init (void)
 AJAStatus NTV2Player::SetUpVideo (void)
 {
 	//	Configure the device to output the requested video format...
+ 	if (mConfig.fVideoFormat == NTV2_FORMAT_UNKNOWN)
+		return AJA_STATUS_BAD_PARAM;
+
 	if (!::NTV2DeviceCanDoVideoFormat (mDeviceID, mConfig.fVideoFormat))
-		{cerr << "## ERROR:  Video format '" << ::NTV2VideoFormatToString(mConfig.fVideoFormat) << "' not supported on this device" << endl;
-			return AJA_STATUS_UNSUPPORTED;}
-	mDevice.SetVideoFormat (mConfig.fVideoFormat, false, false, mConfig.fOutputChannel);
+		{cerr << "## ERROR:  Device can't do " << ::NTV2VideoFormatToString(mConfig.fVideoFormat) << endl;  return AJA_STATUS_UNSUPPORTED;}
 
-	if (!::NTV2DeviceCanDo3GLevelConversion(mDeviceID) && mConfig.fDoLevelConversion && ::IsVideoFormatA(mConfig.fVideoFormat))
-		mConfig.fDoLevelConversion = false;
-	if (mConfig.fDoLevelConversion)
-		mDevice.SetSDIOutLevelAtoLevelBConversion (mConfig.fOutputChannel, mConfig.fDoLevelConversion);
-
-	//	Set the frame buffer pixel format for the device FrameStore...
 	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
 		{cerr << "## ERROR: Pixel format '" << ::NTV2FrameBufferFormatString(mConfig.fPixelFormat) << "' not supported on this device" << endl;
 			return AJA_STATUS_UNSUPPORTED;}
-	mDevice.SetFrameBufferFormat (mConfig.fOutputChannel, mConfig.fPixelFormat);
 
 	//	This demo doesn't playout dual-link RGB over SDI -- only YCbCr.
 	//	Check that this device has a CSC to convert RGB to YUV...
@@ -205,32 +210,44 @@ AJAStatus NTV2Player::SetUpVideo (void)
 			{cerr << "## ERROR: No CSC for channel " << DEC(mConfig.fOutputChannel+1) << " to convert RGB pixel format" << endl;
 				return AJA_STATUS_UNSUPPORTED;}
 
+	if (!::NTV2DeviceCanDo3GLevelConversion(mDeviceID) && mConfig.fDoLevelConversion && ::IsVideoFormatA(mConfig.fVideoFormat))
+		mConfig.fDoLevelConversion = false;
+	if (mConfig.fDoLevelConversion)
+		mDevice.SetSDIOutLevelAtoLevelBConversion (mConfig.fOutputChannel, mConfig.fDoLevelConversion);
+
+	//	Keep the raster description handy...
 	mFormatDesc = NTV2FormatDescriptor(mConfig.fVideoFormat, mConfig.fPixelFormat);
 	if (!mFormatDesc.IsValid())
 		return AJA_STATUS_FAIL;
 
-	//	Set output clock reference...
-	if (NTV2DeviceCanDo2110(mDeviceID))
-		mDevice.SetReference(NTV2_REFERENCE_SFP1_PTP);
-	else
-		mDevice.SetReference(NTV2_REFERENCE_FREERUN);
+	//	Turn on the FrameStore (to read frame buffer memory and transmit video)...
 	mDevice.EnableChannel(mConfig.fOutputChannel);
 
 	//	This demo assumes VANC is disabled...
-	NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
-	mDevice.GetVANCMode(vancMode, mConfig.fOutputChannel);
-	if (NTV2_IS_VANCMODE_ON(vancMode))
-		mDevice.SetVANCMode(NTV2_VANCMODE_OFF, mConfig.fOutputChannel);
-	if (::Is8BitFrameBufferFormat(mConfig.fPixelFormat))
-		mDevice.SetVANCShiftMode(mConfig.fOutputChannel, NTV2_VANCDATA_NORMAL);
+	mDevice.SetVANCMode(NTV2_VANCMODE_OFF, mConfig.fOutputChannel);
+	mDevice.SetVANCShiftMode(mConfig.fOutputChannel, NTV2_VANCDATA_NORMAL);
 
-	//	The output interrupt is Enabled by default, but on some platforms, you must subscribe to it...
-	mDevice.SubscribeOutputVerticalEvent(mConfig.fOutputChannel);
+	//	Set the FrameStore video format...
+	mDevice.SetVideoFormat (mConfig.fVideoFormat, false, false, mConfig.fOutputChannel);
+
+	//	Set the frame buffer pixel format for the device FrameStore...
+	mDevice.SetFrameBufferFormat (mConfig.fOutputChannel, mConfig.fPixelFormat);
+
+	//	The output interrupt is Enabled by default, but on some platforms, you must subscribe to it
+	//	in order to be able to wait on its event/semaphore...
+	mDevice.SubscribeOutputVerticalEvent (mConfig.fOutputChannel);
 
 	//	Check if HDR anc is permissible...
-	if (mConfig.fTransmitHDRType != AJAAncillaryDataType_Unknown  &&  !::NTV2DeviceCanDoCustomAnc(mDeviceID))
+	if (IS_KNOWN_AJAAncillaryDataType(mConfig.fTransmitHDRType)  &&  !::NTV2DeviceCanDoCustomAnc(mDeviceID))
 		{cerr << "## WARNING:  HDR Anc requested, but device can't do custom anc" << endl;
 			mConfig.fTransmitHDRType = AJAAncillaryDataType_Unknown;}
+
+	//	Get current per-field maximum Anc buffer size...
+	if (!mDevice.GetAncRegionOffsetFromBottom (gAncMaxSizeBytes, NTV2_AncRgn_Field2))
+		gAncMaxSizeBytes = NTV2_ANCSIZE_MAX;
+
+	//	Set output clock reference...
+	mDevice.SetReference(::NTV2DeviceCanDo2110(mDeviceID) ? NTV2_REFERENCE_SFP1_PTP : NTV2_REFERENCE_FREERUN);
 
 	//	At this point, video setup is complete (except for widget signal routing).
 	return AJA_STATUS_SUCCESS;
@@ -240,17 +257,16 @@ AJAStatus NTV2Player::SetUpVideo (void)
 
 AJAStatus NTV2Player::SetUpAudio (void)
 {
-	const uint16_t numAudioChannels (::NTV2DeviceGetMaxAudioChannels(mDeviceID));
+	uint16_t numAudioChannels (::NTV2DeviceGetMaxAudioChannels(mDeviceID));
 
-	if (mConfig.fSuppressAudio)
-	{
-		mAudioSystem = NTV2_AUDIOSYSTEM_INVALID;
-		return AJA_STATUS_SUCCESS;
-	}
+	//	If there are 2048 pixels on a line instead of 1920, reduce the number of audio channels
+	//	This is because HANC is narrower, and has space for only 8 channels
+	if (NTV2_IS_2K_1080_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  numAudioChannels > 8)
+		numAudioChannels = 8;
 
-	//	Use NTV2_AUDIOSYSTEM_1, unless the device has more than one audio system...
-	if (::NTV2DeviceGetNumAudioSystems(mDeviceID) > 1)
-		mAudioSystem = ::NTV2ChannelToAudioSystem(mConfig.fOutputChannel);	//	...and base it on the channel
+	mAudioSystem = NTV2_AUDIOSYSTEM_1;										//	Use NTV2_AUDIOSYSTEM_1...
+	if (::NTV2DeviceGetNumAudioSystems(mDeviceID) > 1)						//	...but if the device has more than one audio system...
+		mAudioSystem = ::NTV2ChannelToAudioSystem(mConfig.fOutputChannel);	//	...base it on the channel
 	//	However, there are a few older devices that have only 1 audio system,
 	//	yet 2 frame stores (or must use channel 2 for playout)...
 	if (!::NTV2DeviceCanDoFrameStore1Display(mDeviceID))
@@ -271,47 +287,28 @@ AJAStatus NTV2Player::SetUpAudio (void)
 	//	must be disabled --- otherwise the output audio will be pass-thru SDI input audio...
 	mDevice.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_OFF, mAudioSystem);
 
-    if (::NTV2DeviceGetNumHDMIVideoOutputs(mDeviceID))
-    {
-        mDevice.SetHDMIOutAudioRate(NTV2_AUDIO_48K);
+	if (!mConfig.fDoMultiFormat  &&  ::NTV2DeviceGetNumHDMIVideoOutputs(mDeviceID))
+	{
+		mDevice.SetHDMIOutAudioRate(NTV2_AUDIO_48K);
 		mDevice.SetHDMIOutAudioFormat(NTV2_AUDIO_FORMAT_LPCM);
-        mDevice.SetHDMIOutAudioSource8Channel(NTV2_AudioChannel1_8, mAudioSystem);
-    }
+		mDevice.SetHDMIOutAudioSource8Channel(NTV2_AudioChannel1_8, mAudioSystem);
+	}
 
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetUpAudio
 
-#define	AJAAncDataType_HDR_SDR		AJAAncillaryDataType_HDR_SDR
-#define	AJAAncDataType_HDR_HDR10	AJAAncillaryDataType_HDR_HDR10
-#define	AJAAncDataType_HDR_HLG		AJAAncillaryDataType_HDR_HLG
 
-
-void NTV2Player::SetUpHostBuffers (void)
+AJAStatus NTV2Player::SetUpHostBuffers (void)
 {
-	//	Let my circular buffer know when it's time to quit...
-	mAVCircularBuffer.SetAbortFlag (&mGlobalQuit);
-
-	//	HDR anc, if requested, doesn't change per-frame, so make one buffer with the packet data...
-	NTV2_POINTER ancBuf;
-	if (mConfig.fTransmitHDRType != AJAAncillaryDataType_Unknown)
+	if (NTV2_POINTER::DefaultPageSize() != BUFFER_ALIGNMENT)
 	{
-		AJAAncillaryData_HDR_SDR	sdrPkt;
-		AJAAncillaryData_HDR_HDR10	hdr10Pkt;
-		AJAAncillaryData_HDR_HLG	hlgPkt;
-		ancBuf.Allocate(NTV2_ANCSIZE_MAX);
-		uint32_t pktSize(0);
-		switch (mConfig.fTransmitHDRType)
-		{
-			case AJAAncDataType_HDR_SDR:	sdrPkt.GenerateTransmitData(ancBuf,		ancBuf, pktSize);	break;
-			case AJAAncDataType_HDR_HDR10:	hdr10Pkt.GenerateTransmitData(ancBuf,	ancBuf, pktSize);	break;
-			case AJAAncDataType_HDR_HLG:	hlgPkt.GenerateTransmitData(ancBuf,		ancBuf, pktSize);	break;
-			default:						break;
-		}
-		#ifdef NTV2_BUFFER_LOCK
-		mDevice.DMABufferLock(ancBuf, false);
-		#endif
+		PLNOTE("Buffer alignment changed from " << xHEX0N(NTV2_POINTER::DefaultPageSize(),8) << " to " << xHEX0N(BUFFER_ALIGNMENT,8));
+		NTV2_POINTER::SetDefaultPageSize(BUFFER_ALIGNMENT);
 	}
+
+	//	Let my circular buffer know when it's time to quit...
+	mFrameDataRing.SetAbortFlag (&mGlobalQuit);
 
 	//	Allocate and add each in-host NTV2FrameData to my circular buffer member variable...
 	mHostBuffers.reserve(CIRCULAR_BUFFER_SIZE);
@@ -319,30 +316,89 @@ void NTV2Player::SetUpHostBuffers (void)
 	{
 		mHostBuffers.push_back(NTV2FrameData());		//	Make a new NTV2FrameData...
 		NTV2FrameData & frameData(mHostBuffers.back());	//	...and get a reference to it
+
 		//	Allocate a page-aligned video buffer
-		frameData.fVideoBuffer.Allocate(mFormatDesc.GetTotalBytes(), /*pageAlign?*/true);
-		#ifdef NTV2_BUFFER_LOCK
+		if (!frameData.fVideoBuffer.Allocate(mFormatDesc.GetTotalBytes(), BUFFER_PAGE_ALIGNED))
+		{
+			PLFAIL("Failed to allocate " << xHEX0N(mFormatDesc.GetTotalBytes(),8) << "-byte video buffer");
+			return AJA_STATUS_MEMORY;
+		}
+		#ifdef NTV2_BUFFER_LOCKING
 		if (frameData.fVideoBuffer)
 			mDevice.DMABufferLock(frameData.fVideoBuffer, true);
 		#endif
-		if (NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem))
-			frameData.fAudioBuffer.Allocate(1UL*1024UL*1024UL);	//	Allocate audio buffer
-		#ifdef NTV2_BUFFER_LOCK
+
+		//	Allocate a page-aligned audio buffer (if transmitting audio)
+		if (mConfig.WithAudio())
+			if (!frameData.fAudioBuffer.Allocate (gAudMaxSizeBytes, BUFFER_PAGE_ALIGNED))
+			{
+				PLFAIL("Failed to allocate " << xHEX0N(gAudMaxSizeBytes,8) << "-byte audio buffer");
+				return AJA_STATUS_MEMORY;
+			}
 		if (frameData.fAudioBuffer)
-			mDevice.DMABufferLock(frameData.fAudioBuffer, true);
-		#endif
-		if (ancBuf  &&  mHostBuffers.size() == 1)	//	Only first has Anc buffer
-			frameData.fAncBuffer.CopyFrom(ancBuf.GetHostPointer(), ancBuf.GetByteCount());
-		else if (!mConfig.fAncDataFilePath.empty())
 		{
-			frameData.fAncBuffer.Allocate(NTV2_ANCSIZE_MAX, /*pageAlign*/true);
-			if (NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mConfig.fVideoFormat))
-				frameData.fAncBuffer2.Allocate(NTV2_ANCSIZE_MAX, /*pageAlign*/true);
+			frameData.fAudioBuffer.Fill(ULWord(0));
+			#ifdef NTV2_BUFFER_LOCKING
+				mDevice.DMABufferLock(frameData.fAudioBuffer, /*alsoPreLockSGL*/true);
+			#endif
 		}
-		mAVCircularBuffer.Add(&frameData);
+		mFrameDataRing.Add (&frameData);
 	}	//	for each NTV2FrameData
 
+	return AJA_STATUS_SUCCESS;
+
 }	//	SetUpHostBuffers
+
+
+AJAStatus NTV2Player::SetUpTestPatternBuffers (void)
+{
+	vector<NTV2TestPatternSelect>	testPatIDs;
+		testPatIDs.push_back(NTV2_TestPatt_ColorBars100);
+		testPatIDs.push_back(NTV2_TestPatt_ColorBars75);
+		testPatIDs.push_back(NTV2_TestPatt_Ramp);
+		testPatIDs.push_back(NTV2_TestPatt_MultiBurst);
+		testPatIDs.push_back(NTV2_TestPatt_LineSweep);
+		testPatIDs.push_back(NTV2_TestPatt_CheckField);
+		testPatIDs.push_back(NTV2_TestPatt_FlatField);
+		testPatIDs.push_back(NTV2_TestPatt_MultiPattern);
+
+	mTestPatRasters.clear();
+	for (size_t tpNdx(0);  tpNdx < testPatIDs.size();  tpNdx++)
+		mTestPatRasters.push_back(NTV2_POINTER());
+
+	if (!mFormatDesc.IsValid())
+		{PLFAIL("Bad format descriptor");  return AJA_STATUS_FAIL;}
+	if (mFormatDesc.IsVANC())
+		{PLFAIL("VANC should have been disabled: " << mFormatDesc);  return AJA_STATUS_FAIL;}
+
+	//	Set up one video buffer for each test pattern...
+	for (size_t tpNdx(0);  tpNdx < testPatIDs.size();  tpNdx++)
+	{
+		//	Allocate the buffer memory...
+		if (!mTestPatRasters.at(tpNdx).Allocate (mFormatDesc.GetTotalBytes(), BUFFER_PAGE_ALIGNED))
+		{	PLFAIL("Test pattern buffer " << DEC(tpNdx+1) << " of " << DEC(testPatIDs.size()) << ": "
+					<< xHEX0N(mFormatDesc.GetTotalBytes(),8) << "-byte page-aligned alloc failed");
+			return AJA_STATUS_MEMORY;
+		}
+
+		//	Fill the buffer with test pattern...
+		NTV2TestPatternGen	testPatternGen;
+		if (!testPatternGen.DrawTestPattern (testPatIDs.at(tpNdx),  mFormatDesc,  mTestPatRasters.at(tpNdx)))
+		{
+			cerr << "## ERROR:  DrawTestPattern " << DEC(tpNdx) << " failed: " << mFormatDesc << endl;
+			return AJA_STATUS_FAIL;
+		}
+
+		#ifdef NTV2_BUFFER_LOCKING
+			//	Try to prelock the memory, including its scatter-gather list...
+			if (!mDevice.DMABufferLock(mTestPatRasters.at(tpNdx), /*alsoLockSegmentMap=*/true))
+				PLWARN("Test pattern buffer " << DEC(tpNdx+1) << " of " << DEC(testPatIDs.size()) << ": failed to pre-lock");
+		#endif
+	}	//	loop for each predefined pattern
+
+	return AJA_STATUS_SUCCESS;
+
+}	//	SetUpTestPatternBuffers
 
 
 void NTV2Player::RouteOutputSignal (void)
@@ -437,90 +493,128 @@ void NTV2Player::StartConsumerThread (void)
 
 //	The playout thread function
 void NTV2Player::ConsumerThreadStatic (AJAThread * pThread, void * pContext)		//	static
-{
-	(void) pThread;
-
+{	(void) pThread;
 	//	Grab the NTV2Player instance pointer from the pContext parameter,
 	//	then call its PlayFrames method...
 	NTV2Player * pApp (reinterpret_cast<NTV2Player*>(pContext));
 	if (pApp)
-		pApp->PlayFrames();
+		pApp->ConsumeFrames();
 
 }	//	ConsumerThreadStatic
 
 
-void NTV2Player::PlayFrames (void)
+void NTV2Player::ConsumeFrames (void)
 {
-	ULWord	acOptions(AUTOCIRCULATE_WITH_RP188), goodXfers(0), badXfers(0), prodWaits(0), noRoomWaits(0);
-	AUTOCIRCULATE_TRANSFER	xferInfo;
-	ifstream * pAncistrm(AJA_NULL);
+	ULWord					acOptions (AUTOCIRCULATE_WITH_RP188);
+	AUTOCIRCULATE_TRANSFER	outputXfer;
+	AUTOCIRCULATE_STATUS	outputStatus;
+	AJAAncillaryData *		pPkt (AJA_NULL);
+	ULWord					goodXfers(0), badXfers(0), prodWaits(0), noRoomWaits(0);
+	ifstream *				pAncStrm (AJA_NULL);
 
+	//	Stop AutoCirculate, just in case someone else left it running...
+	mDevice.AutoCirculateStop(mConfig.fOutputChannel);
+	mDevice.WaitForOutputVerticalInterrupt(mConfig.fOutputChannel, 4);	//	Let it stop
 	PLNOTE("Thread started");
-	if (!mConfig.fAncDataFilePath.empty())
-	{
-		pAncistrm = new ifstream(mConfig.fAncDataFilePath.c_str(), ios::binary);
-		if (pAncistrm->good())
+
+	if (IS_KNOWN_AJAAncillaryDataType(mConfig.fTransmitHDRType))
+	{	//	HDR anc doesn't change per-frame, so fill outputXfer.acANCBuffer with the packet data...
+		static AJAAncillaryData_HDR_SDR		sdrPkt;
+		static AJAAncillaryData_HDR_HDR10	hdr10Pkt;
+		static AJAAncillaryData_HDR_HLG		hlgPkt;
+
+		switch (mConfig.fTransmitHDRType)
+		{
+			case AJAAncillaryDataType_HDR_SDR:		pPkt = &sdrPkt;		break;
+			case AJAAncillaryDataType_HDR_HDR10:	pPkt = &hdr10Pkt;	break;
+			case AJAAncillaryDataType_HDR_HLG:		pPkt = &hlgPkt;		break;
+			default:								break;
+		}
+	}
+	if (pPkt)
+	{	//	Allocate page-aligned host Anc buffer...
+		uint32_t hdrPktSize	(0);
+		if (!outputXfer.acANCBuffer.Allocate(gAncMaxSizeBytes, BUFFER_PAGE_ALIGNED)  ||  !outputXfer.acANCBuffer.Fill(0LL))
+			PLWARN("Anc buffer " << xHEX0N(gAncMaxSizeBytes,8) << "(" << DEC(gAncMaxSizeBytes) << ")-byte allocate failed -- HDR anc insertion disabled");
+		else if (AJA_FAILURE(pPkt->GenerateTransmitData (outputXfer.acANCBuffer, outputXfer.acANCBuffer,  hdrPktSize)))
+		{
+			PLWARN("HDR anc insertion disabled -- GenerateTransmitData failed");
+			outputXfer.acANCBuffer.Deallocate();
+		}
+		else
 			acOptions |= AUTOCIRCULATE_WITH_ANC;
+	}
+	else if (!mConfig.fAncDataFilePath.empty())
+	{	//	Open raw anc file for reading...
+		pAncStrm = new ifstream(mConfig.fAncDataFilePath.c_str(), ios::binary);
+		if (pAncStrm->good())
+		{
+			bool ancOK = outputXfer.acANCBuffer.Allocate(gAncMaxSizeBytes, BUFFER_PAGE_ALIGNED);
+			if (NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mConfig.fVideoFormat)  &&  ancOK)
+				ancOK = outputXfer.acANCField2Buffer.Allocate(gAncMaxSizeBytes, BUFFER_PAGE_ALIGNED);
+			if (ancOK)
+				acOptions |= AUTOCIRCULATE_WITH_ANC;
+			else
+			{
+				PLWARN("Anc buffer " << xHEX0N(gAncMaxSizeBytes,8) << "(" << DEC(gAncMaxSizeBytes) << ")-byte allocate failed -- anc insertion from file disabled");
+				outputXfer.acANCBuffer.Deallocate();
+				outputXfer.acANCField2Buffer.Deallocate();
+			}
+		}
 		else
 			PLWARN("Unable to open anc data file '" << mConfig.fAncDataFilePath << "' -- anc insertion disabled");
 	}
-	else if (mConfig.fTransmitHDRType  &&  mHostBuffers.at(0).fAncBuffer)	//	HDR anc in 1st NTV2FrameData's anc buffer (see SetUpHostBuffers)
-	{	//	Since HDR anc packet data doesn't change per-frame, set it once here...
-		NTV2_POINTER & ancBuf(mHostBuffers.at(0).fAncBuffer);
-		xferInfo.acANCBuffer.CopyFrom(ancBuf.GetHostPointer(), ancBuf.GetByteCount());
-		acOptions |= AUTOCIRCULATE_WITH_ANC;
-	}
+#ifdef NTV2_BUFFER_LOCKING
+	if (outputXferInfo.acANCBuffer)
+		mDevice.DMABufferLock(outputXfer.acANCBuffer, /*alsoLockSGL*/true);
+	if (outputXferInfo.acANCField2Buffer)
+		mDevice.DMABufferLock(outputXfer.acANCField2Buffer, /*alsoLockSGL*/true);
+#endif
 
-	//	Initialize AutoCirculate...
-	mDevice.AutoCirculateStop(mConfig.fOutputChannel);
-	mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,
-										mConfig.fFrames.count(),
-										mAudioSystem,
-										acOptions,
-										1,	// numChannels to gang
-										mConfig.fFrames.firstFrame(), mConfig.fFrames.lastFrame());
-	//	Start AutoCirculate...
-	mDevice.AutoCirculateStart(mConfig.fOutputChannel);
+	//	Initialize & start AutoCirculate...
+	bool initOK = mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  mConfig.fFrames.count(),  mAudioSystem,  acOptions,
+														1 /*numChannels*/,  mConfig.fFrames.firstFrame(),  mConfig.fFrames.lastFrame());
+	if (initOK)
+		mDevice.AutoCirculateStart(mConfig.fOutputChannel);
+	else
+		{PLFAIL("AutoCirculateInitForOutput failed");  mGlobalQuit = true;}
 
 	while (!mGlobalQuit)
 	{
-		AUTOCIRCULATE_STATUS	outputStatus;
 		mDevice.AutoCirculateGetStatus (mConfig.fOutputChannel, outputStatus);
 
 		//	Check if there's room for another frame on the card...
-		if (outputStatus.GetNumAvailableOutputFrames() > 1)
+		if (outputStatus.CanAcceptMoreOutputFrames())
 		{
-			//	Device has one or more free frame buffers that can be filled for playout.
+			//	Device has at least one free frame buffer that can be filled.
 			//	Wait for the next frame in our ring to become ready to "consume"...
-			NTV2FrameData *	pFrameData (mAVCircularBuffer.StartConsumeNextBuffer());
+			NTV2FrameData *	pFrameData (mFrameDataRing.StartConsumeNextBuffer());
 			if (!pFrameData)
 				{prodWaits++;  continue;}
 
-			xferInfo.SetOutputTimeCodes(pFrameData->fTimecodes);
+			outputXfer.SetOutputTimeCodes(pFrameData->fTimecodes);
 
 			//	Transfer the timecode-burned frame to the device for playout...
-			xferInfo.SetVideoBuffer (pFrameData->VideoBuffer(), pFrameData->VideoBufferSize());
+			outputXfer.SetVideoBuffer (pFrameData->VideoBuffer(), pFrameData->VideoBufferSize());
 			//	If also playing audio...
 			if (pFrameData->AudioBuffer())	//	...also xfer this frame's audio samples...
-				xferInfo.SetAudioBuffer (pFrameData->AudioBuffer(), pFrameData->fNumAudioBytes);
+				outputXfer.SetAudioBuffer (pFrameData->AudioBuffer(), pFrameData->fNumAudioBytes);
 
-			if (pAncistrm  &&  pAncistrm->good()  &&  pFrameData->AncBuffer())	//	Injecting pre-recorded anc from binary data file?
-			{
-				pAncistrm->read(pFrameData->AncBuffer(), streamsize(pFrameData->AncBufferSize()));
-				if (pFrameData->AncBuffer2())
-					pAncistrm->read(pFrameData->AncBuffer2(), streamsize(pFrameData->AncBuffer2Size()));
-				xferInfo.SetAncBuffers (pFrameData->AncBuffer(), pFrameData->AncBufferSize(),
-										pFrameData->AncBuffer2(), pFrameData->AncBuffer2Size());
+			if (pAncStrm  &&  pAncStrm->good()  &&  outputXfer.acANCBuffer)
+			{	//	Read pre-recorded anc from binary data file, and inject it into this frame...
+				pAncStrm->read(outputXfer.acANCBuffer, streamsize(outputXfer.acANCBuffer.GetByteCount()));
+				if (pAncStrm->good()  &&  outputXfer.acANCField2Buffer)
+					pAncStrm->read(outputXfer.acANCField2Buffer, streamsize(outputXfer.acANCField2Buffer.GetByteCount()));
 			}
 
 			//	Perform the DMA transfer to the device...
-			if (mDevice.AutoCirculateTransfer (mConfig.fOutputChannel, xferInfo))
+			if (mDevice.AutoCirculateTransfer (mConfig.fOutputChannel, outputXfer))
 				goodXfers++;
 			else
 				badXfers++;
 
 			//	Signal that the frame has been "consumed"...
-			mAVCircularBuffer.EndConsumeNextBuffer();
+			mFrameDataRing.EndConsumeNextBuffer();
 			continue;	//	Back to top of while loop
 		}
 
@@ -533,10 +627,10 @@ void NTV2Player::PlayFrames (void)
 	mDevice.AutoCirculateStop(mConfig.fOutputChannel);
 	PLNOTE("Thread completed: " << DEC(goodXfers) << " xfers, " << DEC(badXfers) << " failed, "
 			<< DEC(prodWaits) << " starves, " << DEC(noRoomWaits) << " VBI waits");
-	if (pAncistrm)
-		delete pAncistrm;
+	if (pAncStrm)
+		delete pAncStrm;
 
-}	//	PlayFrames
+}	//	ConsumeFrames
 
 
 
@@ -546,7 +640,7 @@ void NTV2Player::PlayFrames (void)
 void NTV2Player::StartProducerThread (void)
 {
 	//	Create and start the producer thread...
-	mProducerThread.Attach (ProducerThreadStatic, this);
+	mProducerThread.Attach(ProducerThreadStatic, this);
 	mProducerThread.SetPriority(AJA_ThreadPriority_High);
 	mProducerThread.Start();
 
@@ -564,56 +658,13 @@ void NTV2Player::ProducerThreadStatic (AJAThread * pThread, void * pContext)		//
 }	//	ProducerThreadStatic
 
 
-AJAStatus NTV2Player::SetUpTestPatternVideoBuffers (void)
-{
-	static const NTV2TestPatternSelect	sTestPatternTypes[] = {	NTV2_TestPatt_ColorBars100,
-																NTV2_TestPatt_ColorBars75,
-																NTV2_TestPatt_Ramp,
-																NTV2_TestPatt_MultiBurst,
-																NTV2_TestPatt_LineSweep,
-																NTV2_TestPatt_CheckField,
-																NTV2_TestPatt_FlatField,
-																NTV2_TestPatt_MultiPattern,
-																NTV2_TestPatt_INVALID};
-	if (!mFormatDesc.IsValid())
-		return AJA_STATUS_FAIL;
-	if (mFormatDesc.firstActiveLine)
-		{cerr << "## ERROR:  VANC should have been disabled: " << mFormatDesc << endl;
-			return AJA_STATUS_FAIL;}	//	if VANC somehow enabled
-
-	//	Set up one video buffer for each of the several predefined patterns...
-	for (uint32_t ndx(0);  sTestPatternTypes[ndx] != NTV2_TestPatt_INVALID;  ndx++)
-	{
-		//	Allocate the buffer memory...
-		mTestPatVidBuffers.push_back(NTV2_POINTER(mFormatDesc.GetTotalBytes()));
-		NTV2_POINTER & theBuffer(mTestPatVidBuffers.at(mTestPatVidBuffers.size()-1));
-
-		//	Use the test pattern generator to fill the buffer...
-		NTV2TestPatternGen	testPatternGen;
-		if (!testPatternGen.DrawTestPattern (sTestPatternTypes[ndx], mFormatDesc, theBuffer))
-		{
-			cerr << "## ERROR:  DrawTestPattern failed, formatDesc: " << mFormatDesc << endl;
-			return AJA_STATUS_FAIL;
-		}
-	}	//	for each test pattern
-	return AJA_STATUS_SUCCESS;
-
-}	//	SetUpTestPatternVideoBuffers
-
-
-static const double	gFrequencies []	=	{250.0, 500.0, 1000.0, 2000.0};
-static const ULWord	gNumFrequencies		(sizeof (gFrequencies) / sizeof (double));
-static const double	gAmplitudes []	=	{	0.10, 0.15,		0.20, 0.25,		0.30, 0.35,		0.40, 0.45,		0.50, 0.55,		0.60, 0.65,		0.70, 0.75,		0.80, 0.85,
-											0.85, 0.80,		0.75, 0.70,		0.65, 0.60,		0.55, 0.50,		0.45, 0.40,		0.35, 0.30,		0.25, 0.20,		0.15, 0.10};
-
-
 void NTV2Player::ProduceFrames (void)
 {
-	ULWord	frequencyIndex(0), testPatternIndex(0), badTally(0);
+	ULWord	freqNdx(0), testPatNdx(0), badTally(0);
 	double	timeOfLastSwitch	(0.0);
 
-	const AJATimeBase			timeBase		(CNTV2DemoCommon::GetAJAFrameRate(::GetNTV2FrameRateFromVideoFormat(mConfig.fVideoFormat)));
-	const NTV2TestPatternNames	tpNames			(NTV2TestPatternGen::getTestPatternNames());
+	const AJATimeBase			timeBase	(CNTV2DemoCommon::GetAJAFrameRate(::GetNTV2FrameRateFromVideoFormat(mConfig.fVideoFormat)));
+	const NTV2TestPatternNames	tpNames		(NTV2TestPatternGen::getTestPatternNames());
 	const bool					isInterlace		(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mConfig.fVideoFormat));
 	const bool					isPAL			(NTV2_IS_PAL_VIDEO_FORMAT(mConfig.fVideoFormat));
 	const NTV2FrameRate			ntv2FrameRate	(::GetNTV2FrameRateFromVideoFormat(mConfig.fVideoFormat));
@@ -622,15 +673,15 @@ void NTV2Player::ProduceFrames (void)
 	PLNOTE("Thread started");
 	while (!mGlobalQuit)
 	{
-		NTV2FrameData *	pFrameData(mAVCircularBuffer.StartProduceNextBuffer());
+		NTV2FrameData *	pFrameData (mFrameDataRing.StartProduceNextBuffer());
 		if (!pFrameData)
 		{	badTally++;			//	No frame available!
-			AJATime::Sleep(10);	//	Wait a bit...
-			continue;			//	...try again later
+			AJATime::Sleep(10);	//	Wait a bit for the consumer thread to free one up for me...
+			continue;			//	...then try again
 		}
 
-		//	Copy pre-made test pattern into this frame's video buffer...
-		pFrameData->fVideoBuffer.CopyFrom (mTestPatVidBuffers.at(testPatternIndex),
+		//	Copy fresh, unmodified, pre-rendered test pattern into this frame's video buffer...
+		pFrameData->fVideoBuffer.CopyFrom (mTestPatRasters.at(testPatNdx),
 											/*srcOffset*/ 0,
 											/*dstOffset*/ 0,
 											/*byteCount*/ pFrameData->fVideoBuffer.GetByteCount());
@@ -658,34 +709,27 @@ void NTV2Player::ProduceFrames (void)
 		TCDBG("F" << DEC0N(mCurrentFrame-1,6) << ": " << tcF1 << ": " << tcString);
 
 		//	If also playing audio...
-		if (pFrameData->fAudioBuffer)	//	...generate audio tone data for this frame...
+		if (pFrameData->AudioBuffer())	//	...then generate audio tone data for this frame...
 			pFrameData->fNumAudioBytes = AddTone(*pFrameData);	//	...and remember number of audio bytes to xfer
 
 		//	Every few seconds, change the test pattern and tone frequency...
 		const double currentTime (timeBase.FramesToSeconds(mCurrentFrame));
 		if (currentTime > timeOfLastSwitch + 4.0)
 		{
-			frequencyIndex = (frequencyIndex + 1) % gNumFrequencies;
-			testPatternIndex = (testPatternIndex + 1) % mTestPatVidBuffers.size();
-			mToneFrequency = gFrequencies[frequencyIndex];
+			freqNdx = (freqNdx + 1) % gNumFrequencies;
+			testPatNdx = (testPatNdx + 1) % ULWord(mTestPatRasters.size());
+			mToneFrequency = gFrequencies[freqNdx];
 			timeOfLastSwitch = currentTime;
-			PLINFO("F" << DEC0N(mCurrentFrame,6) << ": " << tcString << ": tone=" << mToneFrequency
-					<< "Hz, pattern='" << tpNames.at(testPatternIndex) << "'");
+			PLINFO("F" << DEC0N(mCurrentFrame,6) << ": " << tcString << ": tone=" << mToneFrequency << "Hz, pattern='" << tpNames.at(testPatNdx) << "'");
 		}	//	if time to switch test pattern & tone frequency
 
-		//	Signal that I'm done producing the buffer, making it immediately available for transfer/playout...
-		mAVCircularBuffer.EndProduceNextBuffer ();
+		//	Signal that I'm done producing this FrameData, making it immediately available for transfer/playout...
+		mFrameDataRing.EndProduceNextBuffer();
 
 	}	//	loop til mGlobalQuit goes true
 	PLNOTE("Thread completed: " << DEC(mCurrentFrame) << " frame(s) produced, " << DEC(badTally) << " failed");
 
 }	//	ProduceFrames
-
-
-void NTV2Player::GetACStatus (AUTOCIRCULATE_STATUS & outStatus)
-{
-	mDevice.AutoCirculateGetStatus (mConfig.fOutputChannel, outStatus);
-}
 
 
 uint32_t NTV2Player::AddTone (NTV2FrameData & inFrameData)
@@ -710,7 +754,7 @@ uint32_t NTV2Player::AddTone (NTV2FrameData & inFrameData)
 	//	necessarily result in some frames having more audio samples than others. GetAudioSamplesPerFrame is
 	//	called to calculate the correct sample count for the current frame...
 	const ULWord	numSamples		(::GetAudioSamplesPerFrame (frameRate, audioRate, mCurrentFrame));
-	const double	sampleRateHertz	(audioRate == NTV2_AUDIO_96K ? 96000.0 : 48000.0);
+	const double	sampleRateHertz	(::GetAudioSamplesPerSecond(audioRate));
 
 	return ::AddAudioTone (	inFrameData.AudioBuffer(),	//	buffer to fill
 							mCurrentSample,				//	which sample for continuing the waveform
@@ -722,6 +766,12 @@ uint32_t NTV2Player::AddTone (NTV2FrameData & inFrameData)
 							false,						//	don't do byte swapping
 							numChannels);				//	number of audio channels to generate
 }	//	AddTone
+
+
+void NTV2Player::GetACStatus (AUTOCIRCULATE_STATUS & outStatus)
+{
+	mDevice.AutoCirculateGetStatus (mConfig.fOutputChannel, outStatus);
+}
 
 
 ULWord NTV2Player::GetRP188RegisterForOutput (const NTV2OutputDestination inOutputDest)		//	static
@@ -766,3 +816,23 @@ void NTV2Player::DisableRP188Bypass (const NTV2OutputDestination inOutputDest)
 		mDevice.WriteRegister (regNum, 0, BIT(23), 23);
 
 }	//	DisableRP188Bypass
+
+
+AJALabelValuePairs PlayerConfig::Get (const bool inCompact) const
+{
+	AJALabelValuePairs result;
+	AJASystemInfo::append (result, "NTV2Player Config");
+	AJASystemInfo::append (result, "Device Specifier",	fDeviceSpecifier);
+	AJASystemInfo::append (result, "Video Format",		::NTV2VideoFormatToString(fVideoFormat));
+	AJASystemInfo::append (result, "Pixel Format",		::NTV2FrameBufferFormatToString(fPixelFormat, inCompact));
+	AJASystemInfo::append (result, "AutoCirc Frames",	fFrames.toString());
+	AJASystemInfo::append (result, "MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
+	AJASystemInfo::append (result, "HDR Anc Type",		::AJAAncillaryDataTypeToString(fTransmitHDRType));
+	AJASystemInfo::append (result, "Output Channel",	::NTV2ChannelToString(fOutputChannel, inCompact));
+	AJASystemInfo::append (result, "Output Connector",	::NTV2OutputDestinationToString(fOutputDestination, inCompact));
+	AJASystemInfo::append (result, "Suppress Audio",	fSuppressAudio ? "Y" : "N");
+	AJASystemInfo::append (result, "Embedded Timecode",	fTransmitLTC ? "LTC" : "VITC");
+	AJASystemInfo::append (result, "Anc Data File",		fAncDataFilePath);
+	AJASystemInfo::append (result, "Level Conversion",	fDoLevelConversion ? "Y" : "N");
+	return result;
+}

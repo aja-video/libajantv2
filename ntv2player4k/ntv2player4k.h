@@ -14,45 +14,41 @@
 #include "ntv2devicescanner.h"
 #include "ntv2democommon.h"
 #include "ajabase/common/circularbuffer.h"
-#include "ajaanc/includes/ancillarydata.h"
-#include "ajaanc/includes/ancillarydata_hdr_sdr.h"
-#include "ajaanc/includes/ancillarydata_hdr_hdr10.h"
-#include "ajaanc/includes/ancillarydata_hdr_hlg.h"
 #include "ajabase/system/thread.h"
+#include "ajaanc/includes/ancillarydata.h"
 
 
 /**
-	@brief	This class is used to configure the device for 4K playback.
+	@brief	Configures an NTV2Player4K instance.
 **/
 typedef struct Player4KConfig
 {
 	public:
-		std::string						fDeviceSpecifier;	///< @brief	Specifies the AJA device to use.
-		NTV2AudioSystem					fAudioSystem;		///< @brief	Specifies the audio system to use (use NTV2_AUDIOSYSTEM_INVALID for no audio).
-		NTV2Channel						fOutputChannel;		///< @brief	Specifies the channel to use.
-		NTV2VideoFormat					fVideoFormat;		///< @brief	Specifies the video format to use.
-		NTV2FrameBufferFormat			fPixelFormat;		///< @brief	Specifies the pixel format to use for the device's frame buffers.
+		std::string						fDeviceSpecifier;	///< @brief	The AJA device to use
+		NTV2Channel						fOutputChannel;		///< @brief	The device channel to use
+		NTV2VideoFormat					fVideoFormat;		///< @brief	The video format to use
+		NTV2PixelFormat					fPixelFormat;		///< @brief	The pixel format to use
 		CNTV2DemoCommon::ACFrameRange	fFrames;			///< @brief	AutoCirculate frame count or range
 		AJAAncillaryDataType			fTransmitHDRType;	///< @brief	Specifies the HDR anc data packet to transmit, if any.
+		bool							fDoMultiFormat;		///< @brief	If true, enables device-sharing;  otherwise takes exclusive control of the device.
 		bool							fDoHDMIOutput;		///< @brief	If true, enables HDMI output;  otherwise, disables it.
-		bool							fDoMultiChannel;	///< @brief	If true, enables device-sharing;  otherwise takes exclusive control of the device.
 		bool							fDoTsiRouting;		///< @brief	If true, enables two sample interleave routing, else squares.
 		bool							fDoRGBOnWire;		///< @brief	If true, enables RGB on the wire, else CSCs convert to YCbCr.
-		bool							fDoLinkGrouping;	///< @brief If true, enables 6/12G output mode
-		int								fNumAudioLinks;		///< @brief Specifies the number of audio systems to control for multi-link audio
+		bool							fDoLinkGrouping;	///< @brief	If true, enables 6/12G output mode
+		UWord							fNumAudioLinks;		///< @brief	Specifies the number of audio systems to control for multi-link audio
 
 		/**
-			@brief	Constructs a default generator configuration.
+			@brief	Constructs a default Player4K configuration.
 		**/
 		inline explicit	Player4KConfig (const std::string & inDeviceSpecifier	= "0")
 			:	fDeviceSpecifier	(inDeviceSpecifier),
-				fAudioSystem		(NTV2_AUDIOSYSTEM_1),
 				fOutputChannel		(NTV2_CHANNEL1),
 				fVideoFormat		(NTV2_FORMAT_4x1920x1080p_2997),
 				fPixelFormat		(NTV2_FBF_8BIT_YCBCR),
+				fFrames				(),
 				fTransmitHDRType	(AJAAncillaryDataType_Unknown),
+				fDoMultiFormat		(false),
 				fDoHDMIOutput		(false),
-				fDoMultiChannel		(false),
 				fDoTsiRouting		(false),
 				fDoRGBOnWire		(false),
 				fDoLinkGrouping		(false),
@@ -60,14 +56,16 @@ typedef struct Player4KConfig
 		{
 		}
 
-		inline bool	WithAudio(void) const	{return NTV2_IS_VALID_AUDIO_SYSTEM(fAudioSystem);}	///< @return	True if playing audio, false if not.
+		inline bool	WithAudio(void) const	{return fNumAudioLinks > 0;}	///< @return	True if playing audio, false if not.
 
 		/**
 			@brief		Renders a human-readable representation of me into the given output stream.
-			@param		strm	The output stream.
+			@param		strm		The output stream.
+			@param[in]	inCompact	If true, setting values are printed in a more compact form. Defaults to false.
 			@return		A reference to the output stream.
 		**/
-		std::ostream &	Print (std::ostream & strm) const;
+		std::ostream &	Print (std::ostream & strm, const bool inCompact = false) const;
+
 }	Player4KConfig;
 
 /**
@@ -80,13 +78,12 @@ inline std::ostream &	operator << (std::ostream & strm, const Player4KConfig & i
 
 
 /**
-	@brief	I am an object that can play out a test pattern (with timecode) to an output of an AJA device
-			with or without audio tone in real time. I make use of the AJACircularBuffer, which simplifies
+	@brief	I am an object that can play out a 4K or UHD test pattern (with timecode) to an output of an AJA
+			device with or without audio tone in real time. I make use of the AJACircularBuffer, which simplifies
 			implementing a producer/consumer model, in which a "producer" thread generates the test pattern
 			frames, and a "consumer" thread (i.e., the "play" thread) sends those frames to the AJA device.
-			I demonstrate how to embed timecode into an SDI output signal using AutoCirculate during playout.
+			I show how to configure 12G-capable devices, or for two-sample-interleave or "squares" (quadrants).
 **/
-
 class NTV2Player4K
 {
 	//	Public Instance Methods
@@ -94,217 +91,119 @@ class NTV2Player4K
 		/**
 			@brief	Constructs me using the given configuration settings.
 			@note	I'm not completely initialized and ready for use until after my Init method has been called.
+			@param[in]	inConfig	Specifies all configuration parameters.
 		**/
-						NTV2Player4K (const Player4KConfig & inConfiguration);
+							NTV2Player4K (const Player4KConfig & inConfig);
 
-		virtual			~NTV2Player4K (void);
+		virtual				~NTV2Player4K (void);
 
-		/**
-			@brief	Initializes me and prepares me to Run.
-		**/
-		AJAStatus		Init (void);
+		virtual AJAStatus	Init (void);					///< @brief	Initializes me and prepares me to Run.
 
 		/**
 			@brief	Runs me.
 			@note	Do not call this method without first calling my Init method.
 		**/
-		AJAStatus		Run (void);
+		virtual AJAStatus	Run (void);
+
+		virtual void		Quit (void);					///< @brief	Gracefully stops me from running.
+
+		virtual bool		IsRunning (void) const	{return !mGlobalQuit;}	///< @return	True if I'm running;  otherwise false.
 
 		/**
-			@brief	Gracefully stops me from running.
+			@brief	Provides status information about my output (playout) process.
+			@param[out]	outStatus	Receives the ::AUTOCIRCULATE_STATUS information.
 		**/
-		void			Quit (void);
-
-		/**
-			@return	True if I'm running;  otherwise false.
-		**/
-		virtual bool	IsRunning (void) const				{return !mGlobalQuit;}
-
-		/**
-			@brief	Provides status information about my input (capture) and output (playout) processes.
-			@param[out]	outOutputStatus		Receives status information about my output (playout) process.
-		**/
-		void			GetACStatus (AUTOCIRCULATE_STATUS & outOutputStatus);
+		virtual void		GetACStatus (AUTOCIRCULATE_STATUS & outStatus);
 
 
 	//	Protected Instance Methods
 	protected:
-		/**
-			@brief	Sets up everything I need to play video.
-		**/
-		AJAStatus		SetUpVideo (void);
+		virtual AJAStatus	SetUpVideo (void);				///< @brief	Performs all video setup.
+		virtual AJAStatus	SetUpAudio (void);				///< @brief	Performs all audio setup.
+		virtual void		RouteOutputSignal (void);		///< @brief	Performs all widget/signal routing for playout.
+		virtual AJAStatus	SetUpHostBuffers (void);		///< @brief	Sets up my host video & audio buffers.
+		virtual AJAStatus	SetUpTestPatternBuffers (void);	///< @brief	Creates my test pattern buffers.
+		virtual void		StartConsumerThread (void);		///< @brief	Starts my consumer thread.
+		virtual void		ConsumeFrames (void);			///< @brief	My consumer thread that repeatedly plays frames using AutoCirculate (until quit).
+		virtual void		StartProducerThread (void);		///< @brief	Starts my producer thread.
+		virtual void		ProduceFrames (void);			///< @brief	My producer thread that repeatedly produces video frames.
 
 		/**
-			@brief	Sets up everything I need to play audio.
-		**/
-		AJAStatus		SetUpAudio (void);
-
-		/**
-			@brief	Sets up board routing for playout.
-		**/
-		void			RouteOutputSignal (void);
-		
-		/**
-			@brief	Sets up bi-directional SDI transmitters
-		**/
-		void			SetupSDITransmitters(const NTV2Channel startChannel, const uint32_t numChannels);
-
-		/**
-			@brief	Sets up board routing for the 4K Down Converter to the SDI Monitor (if available).
-		**/
-		void			Route4KDownConverter (void);
-
-		/**
-			@brief	Sets up board routing output via the HDMI (if available).
-		**/
-		void			RouteHDMIOutput (void);
-
-		/**
-			@brief	Sets up board routing from the Frame Stores to the Dual Link out.
-		**/
-		void			RouteFsToDLOut (void);
-
-		/**
-			@brief	Sets up board routing from the Frame Stores to the Color Space Converters.
-		**/
-		void			RouteFsToCsc (void);
-
-		/**
-			@brief	Sets up board routing from the Frame Stores to the SDI outputs.
-		**/
-		void			RouteFsToSDIOut (void);
-
-		/**
-			@brief	Sets up board routing from the Frame Stores to the Two Sample Interleave muxes.
-		**/
-		void			RouteFsToTsiMux (void);
-
-		/**
-			@brief	Sets up board routing from the Dual Link outputs to the SDI outputs.
-		**/
-		void			RouteDLOutToSDIOut (void);
-
-		/**
-            @brief	Sets up board routing from the Color Space Converters to the 2xSDI outputs.
-		**/
-        void			RouteCscTo2xSDIOut (void);
-
-        /**
-            @brief	Sets up board routing from the Color Space Converters to the 4xSDI outputs.
-        **/
-        void			RouteCscTo4xSDIOut (void);
-
-		/**
-			@brief	Sets up board routing from the Color Space Converters to the Dual Link outputs.
-		**/
-		void			RouteCscToDLOut (void);
-
-		/**
-			@brief	Sets up board routing from the Two Sample Interleave muxes to the Dual Link outputs.
-		**/
-		void			RouteTsiMuxToDLOut (void);
-
-		/**
-			@brief	Sets up board routing from the Two Sample Interleave muxes to the color Space Convertetrs.
-		**/
-		void			RouteTsiMuxToCsc (void);
-
-		/**
-            @brief	Sets up board routing from the Two Sample Interleave muxes to the 2xSDI outputs.
-		**/
-        void			RouteTsiMuxTo2xSDIOut (void);
-
-        /**
-            @brief	Sets up board routing from the Two Sample Interleave muxes to the 4xSDI outputs.
-        **/
-        void			RouteTsiMuxTo4xSDIOut (void);
-
-		/**
-			@brief	Sets up my circular buffers.
-		**/
-		void			SetUpHostBuffers (void);
-
-		/**
-			@brief	Creates my test pattern buffers.
-		**/
-		void			SetUpTestPatternVideoBuffers (void);
-
-		/**
-			@brief	Starts my playout thread.
-		**/
-		void			StartConsumerThread (void);
-
-		/**
-			@brief	Repeatedly plays out frames using AutoCirculate (until global quit flag set).
-		**/
-		void			ConsumeFrames (void);
-
-		/**
-			@brief	Starts my test pattern producer thread.
-		**/
-		void			StartProducerThread (void);
-
-		/**
-			@brief	Repeatedly produces test pattern frames (until global quit flag set).
-		**/
-		void			ProduceFrames (void);
-
-		/**
-			@brief	Inserts audio tone (based on my current tone frequency) into the given audio buffer.
+			@brief		Inserts audio tone (based on my current tone frequency) into the given audio buffer.
 			@param[out]	audioBuffer		Specifies a valid, non-NULL pointer to the buffer that is to receive
 										the audio tone data.
-			@return	Total number of bytes written into the buffer.
+			@return		Total number of bytes written into the buffer.
 		**/
-		uint32_t		AddTone (ULWord * audioBuffer);
+		virtual uint32_t	AddTone (ULWord * audioBuffer);
+
+		/**
+			@brief	Sets up bi-directional SDI transmitters.
+			@param[in]	inFirstSDI	Specifies the first SDI connector of a possible group,
+									expressed as an NTV2Channel (a zero-based index number).
+			@param[in]	inNumSDIs	Specifies the number of SDI connectors to set up.
+		**/
+		virtual void		SetupSDITransmitters (const NTV2Channel inFirstSDI, const UWord inNumSDIs);
+
+		//	Widget Routing
+		virtual void		Route4KDownConverter (void);	///< @brief	Sets up board routing for the 4K DownConverter to SDI Monitor (if available).
+		virtual void		RouteHDMIOutput (void);			///< @brief	Sets up board routing output via the HDMI (if available).
+		virtual void		RouteFsToDLOut (void);			///< @brief	Sets up board routing from the Frame Stores to the Dual Link out.
+		virtual void		RouteFsToCsc (void);			///< @brief	Sets up board routing from the Frame Stores to the Color Space Converters.
+		virtual void		RouteFsToSDIOut (void);			///< @brief	Sets up board routing from the Frame Stores to the SDI outputs.
+		virtual void		RouteFsToTsiMux (void);			///< @brief	Sets up board routing from the Frame Stores to the Two Sample Interleave muxes.
+		virtual void		RouteDLOutToSDIOut (void);		///< @brief	Sets up board routing from the Dual Link outputs to the SDI outputs.
+        virtual void		RouteCscTo2xSDIOut (void);		///< @brief	Sets up board routing from the Color Space Converters to the 2xSDI outputs.
+        virtual void		RouteCscTo4xSDIOut (void);		///< @brief	Sets up board routing from the Color Space Converters to the 4xSDI outputs.
+		virtual void		RouteCscToDLOut (void);			///< @brief	Sets up board routing from the Color Space Converters to the Dual Link outputs.
+		virtual void		RouteTsiMuxToDLOut (void);		///< @brief	Sets up board routing from the Two Sample Interleave muxes to the Dual Link outputs.
+		virtual void		RouteTsiMuxToCsc (void);		///< @brief	Sets up board routing from the Two Sample Interleave muxes to the color Space Converters.
+        virtual void		RouteTsiMuxTo2xSDIOut (void);	///< @brief	Sets up board routing from the Two Sample Interleave muxes to the 2xSDI outputs.
+        virtual void		RouteTsiMuxTo4xSDIOut (void);	///< @brief	Sets up board routing from the Two Sample Interleave muxes to the 4xSDI outputs.
 
 
 	//	Protected Class Methods
 	protected:
 		/**
-			@brief	This is the playout thread's static callback function that gets called when the playout thread runs.
-					This function gets "Attached" to the playout thread's AJAThread instance.
-			@param[in]	pThread		A valid pointer to the playout thread's AJAThread instance.
+			@brief	This is the consumer thread's static callback function that gets called when the consumer thread starts.
+					This function gets "Attached" to the consumer thread's AJAThread instance.
+			@param[in]	pThread		A valid pointer to the consumer thread's AJAThread instance.
 			@param[in]	pContext	Context information to pass to the thread.
 									(For this application, this will be set to point to the NTV2Player4K instance.)
 		**/
-		static void		PlayThreadStatic (AJAThread * pThread, void * pContext);
+		static void			ConsumerThreadStatic (AJAThread * pThread, void * pContext);
 
 		/**
-			@brief	This is the test pattern producer thread's static callback function that gets called when the producer thread runs.
+			@brief	This is the producer thread's static callback function that gets called when the producer thread starts.
 					This function gets "Attached" to the producer thread's AJAThread instance.
 			@param[in]	pThread		A valid pointer to the producer thread's AJAThread instance.
 			@param[in]	pContext	Context information to pass to the thread.
 									(For this application, this will be set to point to the NTV2Player4K instance.)
 		**/
-		static void		ProduceFrameThreadStatic (AJAThread * pThread, void * pContext);
-
-		/**
-			@brief	Returns the RP188 DBB register number to use for the given NTV2OutputDestination.
-			@param[in]	inOutputSource	Specifies the NTV2OutputDestination of interest.
-			@return	The number of the RP188 DBB register to use for the given output destination.
-		**/
-		static ULWord	GetRP188RegisterForOutput (const NTV2OutputDestination inOutputSource);
+		static void			ProducerThreadStatic (AJAThread * pThread, void * pContext);
 
 
 	//	Private Member Data
 	private:
-		Player4KConfig		mConfig;				///< @brief	My configuration.
-		AJAThread			mConsumerThread;		///< @brief	My playout (consumer) thread object
-		AJAThread			mProducerThread;		///< @brief	My generator (producer) thread object
-		uint32_t			mCurrentFrame;			///< @brief	My current frame number (used to generate timecode)
-		ULWord				mCurrentSample;			///< @brief	My current audio sample (maintains audio tone generator state)
-		double				mToneFrequency;			///< @brief	My current audio tone frequency, in Hertz
-		CNTV2Card			mDevice;				///< @brief	My CNTV2Card instance
-		NTV2DeviceID		mDeviceID;				///< @brief	My device (model) identifier
-		NTV2TaskMode		mSavedTaskMode;			///< @brief	Used to restore the previous task mode
-		bool				mGlobalQuit;			///< @brief	Set "true" to gracefully stop
-		AJATimeCodeBurn		mTCBurner;				///< @brief	My timecode burner
-		uint32_t			mVideoBufferSize;		///< @brief	My video buffer size, in bytes
-		uint32_t			mAudioBufferSize;		///< @brief	My audio buffer size, in bytes
-		uint8_t **			mTestPatternBuffers;	///< @brief	My array of test pattern buffers
-		uint32_t			mNumTestPatterns;		///< @brief	Number of test patterns to cycle through
-		AVDataBuffer		mHostBuffers[CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
-		AJACircularBuffer <AVDataBuffer *>	mAVCircularBuffer;	///< @brief	My ring buffer
+		typedef AJACircularBuffer<NTV2FrameData*>	CircularBuffer;
+		typedef std::vector<NTV2_POINTER>			NTV2Buffers;
+
+		Player4KConfig		mConfig;			///< @brief	My operating configuration.
+		AJAThread			mConsumerThread;	///< @brief	My playout (consumer) thread object
+		AJAThread			mProducerThread;	///< @brief	My generator (producer) thread object
+		CNTV2Card			mDevice;			///< @brief	My CNTV2Card instance
+		NTV2DeviceID		mDeviceID;			///< @brief	My device (model) identifier
+		NTV2TaskMode		mSavedTaskMode;		///< @brief	Used to restore the previous task mode
+		uint32_t			mCurrentFrame;		///< @brief	My current frame number (for generating timecode)
+		ULWord				mCurrentSample;		///< @brief	My current audio sample (maintains audio tone generator state)
+		double				mToneFrequency;		///< @brief	My current audio tone frequency [Hz]
+		NTV2AudioSystem		mAudioSystem;		///< @brief	The audio system I'm using (if any)
+		NTV2FormatDesc		mFormatDesc;		///< @brief	Describes my video/pixel format
+
+		bool				mGlobalQuit;		///< @brief	Set "true" to gracefully stop
+		AJATimeCodeBurn		mTCBurner;			///< @brief	My timecode burner
+		NTV2FrameDataArray	mHostBuffers;		///< @brief	My host buffers
+		CircularBuffer		mFrameDataRing;		///< @brief	AJACircularBuffer that controls frame data access by producer/consumer threads
+		NTV2Buffers			mTestPatRasters;	///< @brief	Pre-rendered test pattern rasters
 
 };	//	NTV2Player4K
 
