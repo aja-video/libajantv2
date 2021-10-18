@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: MIT */
 /**
-	@file		ntv2player4k.h
-	@brief		Header file for NTV2Player4K demonstration class
+	@file		ntv2player8k.h
+	@brief		Header file for NTV2Player8K demonstration class
 	@copyright	(C) 2013-2021 AJA Video Systems, Inc.  All rights reserved.
 **/
 
@@ -14,239 +14,169 @@
 #include "ntv2devicescanner.h"
 #include "ntv2democommon.h"
 #include "ajabase/common/circularbuffer.h"
-#include "ajaanc/includes/ancillarydata.h"
-#include "ajaanc/includes/ancillarydata_hdr_sdr.h"
-#include "ajaanc/includes/ancillarydata_hdr_hdr10.h"
-#include "ajaanc/includes/ancillarydata_hdr_hlg.h"
 #include "ajabase/system/thread.h"
+#include "ajaanc/includes/ancillarydata.h"
 
 
 /**
-	@brief	This class is used to configure the device for 4K playback.
+	@brief	Configures an NTV2Player8K instance.
 **/
 typedef struct Player8KConfig
 {
 	public:
-		std::string				fDeviceSpecifier;		///<	Specifies the AJA device to use.
-		bool					fWithAudio;				///<	If true, include audio tone in the output signal;  otherwise, omit it.
-		NTV2Channel				fChannel;				///<	Specifies the channel to use.
-		NTV2FrameBufferFormat	fPixelFormat;			///<	Specifies the pixel format to use for the device's frame buffers.
-		NTV2VideoFormat			fVideoFormat;			///<	Specifies the video format to use.
-		bool					fUseHDMIOut;			///<	If true, enables an HDMI output signal;  otherwise, disables it.
-		bool					fDoMultiChannel;		///<	If true, enables multiple player 4k instances to share a board.
-		bool					fDoTsiRouting;			///<	If true, enables two sample interleave routing, else squares.
-		bool					fDoRGBOnWire;			///<	If true, enables RGB on the wire, else CSCs convert to YCbCr.
-		int						fNumAudioLinks;			///< @brief Specifies the number of audio systems to control for multi-link audio
-		AJAAncillaryDataType	fSendAncType;
+		std::string						fDeviceSpecifier;	///< @brief	The AJA device to use
+		NTV2Channel						fOutputChannel;		///< @brief	The device channel to use
+		NTV2VideoFormat					fVideoFormat;		///< @brief	The video format to use
+		NTV2PixelFormat					fPixelFormat;		///< @brief	The pixel format to use
+		AJAAncillaryDataType			fTransmitHDRType;	///< @brief	Specifies the HDR anc data packet to transmit, if any.
+		bool							fDoMultiFormat;		///< @brief	If true, enables device-sharing;  otherwise takes exclusive control of the device.
+		bool							fDoHDMIOutput;		///< @brief	If true, enables HDMI output;  otherwise, disables it.
+		bool							fDoTsiRouting;		///< @brief	If true, enables two sample interleave routing, else squares.
+		bool							fDoRGBOnWire;		///< @brief	If true, enables RGB on the wire, else CSCs convert to YCbCr.
+		UWord							fNumAudioLinks;		///< @brief	Specifies the number of audio systems to control for multi-link audio
 
 		/**
-			@brief	Constructs a default generator configuration.
+			@brief	Constructs a default Player8K configuration.
 		**/
-		inline explicit	Player8KConfig ()
-			:	fDeviceSpecifier	("0"),
-				fWithAudio			(true),
-				fChannel			(NTV2_CHANNEL1),
-				fPixelFormat		(NTV2_FBF_8BIT_YCBCR),
+		inline explicit	Player8KConfig (const std::string & inDeviceSpecifier	= "0")
+			:	fDeviceSpecifier	(inDeviceSpecifier),
+				fOutputChannel		(NTV2_CHANNEL1),
 				fVideoFormat		(NTV2_FORMAT_4x1920x1080p_2997),
-				fUseHDMIOut			(false),
-				fDoMultiChannel		(false),
+				fPixelFormat		(NTV2_FBF_8BIT_YCBCR),
+				fTransmitHDRType	(AJAAncillaryDataType_Unknown),
+				fDoMultiFormat		(false),
+				fDoHDMIOutput		(false),
 				fDoTsiRouting		(false),
 				fDoRGBOnWire		(false),
-				fNumAudioLinks		(1),
-				fSendAncType		(AJAAncillaryDataType_Unknown)
+				fNumAudioLinks		(1)
 		{
 		}
-}	Player8KConfigConfig;
+
+		inline bool	WithAudio(void) const	{return fNumAudioLinks > 0;}	///< @return	True if playing audio, false if not.
+
+		/**
+			@brief		Renders a human-readable representation of me into the given output stream.
+			@param		strm		The output stream.
+			@param[in]	inCompact	If true, setting values are printed in a more compact form. Defaults to false.
+			@return		A reference to the output stream.
+		**/
+		std::ostream &	Print (std::ostream & strm, const bool inCompact = false) const;
+
+}	Player8KConfig;
+
+/**
+	@brief		Renders a human-readable representation of a Player8KConfig into an output stream.
+	@param		strm	The output stream.
+	@param[in]	inObj	The configuration to be rendered into the output stream.
+	@return		A reference to the specified output stream.
+**/
+inline std::ostream &	operator << (std::ostream & strm, const Player8KConfig & inObj)		{return inObj.Print(strm);}
 
 
 /**
-	@brief	I am an object that can play out a test pattern (with timecode) to an output of an AJA device
-			with or without audio tone in real time. I make use of the AJACircularBuffer, which simplifies
-			implementing a producer/consumer model, in which a "producer" thread generates the test pattern
+	@brief	I am an object that can play out an 8K or UHD2 test pattern (with timecode) to 4 x 12G SDI outputs
+			of an AJA device with or without audio tone in real time. I make use of the AJACircularBuffer, to
+			implement a producer/consumer model, in which a "producer" thread generates the test pattern
 			frames, and a "consumer" thread (i.e., the "play" thread) sends those frames to the AJA device.
-			I demonstrate how to embed timecode into an SDI output signal using AutoCirculate during playout.
+			I show how to configure for two-sample interleave or "squares" (quadrants).
 **/
-
 class NTV2Player8K
 {
-	public:
-		/**
-			@brief Signature of a function call for requesting frames to be played.
-		**/
-		typedef AJAStatus (NTV2Player8KCallback)(void * pInstance, const AVDataBuffer * const playData);
-
 	//	Public Instance Methods
 	public:
 		/**
 			@brief	Constructs me using the given configuration settings.
 			@note	I'm not completely initialized and ready for use until after my Init method has been called.
+			@param[in]	inConfig	Specifies all configuration parameters.
 		**/
-						NTV2Player8K (const Player8KConfig & inConfiguration);
+							NTV2Player8K (const Player8KConfig & inConfig);
 
-		virtual			~NTV2Player8K (void);
+		virtual				~NTV2Player8K (void);
 
-		/**
-			@brief	Initializes me and prepares me to Run.
-		**/
-		AJAStatus		Init (void);
+		virtual AJAStatus	Init (void);					///< @brief	Initializes me and prepares me to Run.
 
 		/**
 			@brief	Runs me.
 			@note	Do not call this method without first calling my Init method.
 		**/
-		AJAStatus		Run (void);
+		virtual AJAStatus	Run (void);
+
+		virtual void		Quit (void);					///< @brief	Gracefully stops me from running.
+
+		virtual bool		IsRunning (void) const	{return !mGlobalQuit;}	///< @return	True if I'm running;  otherwise false.
 
 		/**
-			@brief	Gracefully stops me from running.
+			@brief	Provides status information about my output (playout) process.
+			@param[out]	outStatus	Receives the ::AUTOCIRCULATE_STATUS information.
 		**/
-		void			Quit (void);
-
-		/**
-			@brief	Provides status information about my input (capture) and output (playout) processes.
-			@param[out]	outOutputStatus		Receives status information about my output (playout) process.
-		**/
-		void			GetACStatus (AUTOCIRCULATE_STATUS & outOutputStatus);
-
-		/**
-			@brief	Returns the current callback function for requesting frames to be played.
-		**/
-		virtual void	GetCallback (void ** const pInstance, NTV2Player8KCallback ** const callback);
-
-		/**
-			@brief	Sets a callback function for requesting frames to be played.
-		**/
-		virtual bool	SetCallback (void * const pInstance, NTV2Player8KCallback * const callback);
+		virtual void		GetACStatus (AUTOCIRCULATE_STATUS & outStatus);
 
 
 	//	Protected Instance Methods
 	protected:
-		/**
-			@brief	Sets up everything I need to play video.
-		**/
-		AJAStatus		SetUpVideo (void);
+		virtual AJAStatus	SetUpVideo (void);				///< @brief	Performs all video setup.
+		virtual AJAStatus	SetUpAudio (void);				///< @brief	Performs all audio setup.
+		virtual void		RouteOutputSignal (void);		///< @brief	Performs all widget/signal routing for playout.
+		virtual AJAStatus	SetUpHostBuffers (void);		///< @brief	Sets up my host video & audio buffers.
+		virtual AJAStatus	SetUpTestPatternBuffers (void);	///< @brief	Creates my test pattern buffers.
+		virtual void		StartConsumerThread (void);		///< @brief	Starts my consumer thread.
+		virtual void		ConsumeFrames (void);			///< @brief	My consumer thread that repeatedly plays frames using AutoCirculate (until quit).
+		virtual void		StartProducerThread (void);		///< @brief	Starts my producer thread.
+		virtual void		ProduceFrames (void);			///< @brief	My producer thread that repeatedly produces video frames.
 
 		/**
-			@brief	Sets up everything I need to play audio.
-		**/
-		AJAStatus		SetUpAudio (void);
-
-		/**
-			@brief	Sets up board routing for playout.
-		**/
-		void			RouteOutputSignal (void);
-
-		/**
-			@brief	Sets up my circular buffers.
-		**/
-		void			SetUpHostBuffers (void);
-
-		/**
-			@brief	Creates my test pattern buffers.
-		**/
-		void			SetUpTestPatternVideoBuffers (void);
-
-		/**
-			@brief	Starts my playout thread.
-		**/
-		void			StartPlayThread (void);
-
-		/**
-			@brief	Repeatedly plays out frames using AutoCirculate (until global quit flag set).
-		**/
-		void			PlayFrames (void);
-
-		/**
-			@brief	Starts my test pattern producer thread.
-		**/
-		void			StartProduceFrameThread (void);
-
-		/**
-			@brief	Repeatedly produces test pattern frames (until global quit flag set).
-		**/
-		void			ProduceFrames (void);
-
-		/**
-			@brief	Inserts audio tone (based on my current tone frequency) into the given audio buffer.
+			@brief		Inserts audio tone (based on my current tone frequency) into the given audio buffer.
 			@param[out]	audioBuffer		Specifies a valid, non-NULL pointer to the buffer that is to receive
 										the audio tone data.
-			@return	Total number of bytes written into the buffer.
+			@return		Total number of bytes written into the buffer.
 		**/
-		uint32_t		AddTone (ULWord * audioBuffer);
+		virtual uint32_t	AddTone (ULWord * audioBuffer);
 
 
 	//	Protected Class Methods
 	protected:
 		/**
-			@brief	This is the playout thread's static callback function that gets called when the playout thread runs.
-					This function gets "Attached" to the playout thread's AJAThread instance.
-			@param[in]	pThread		A valid pointer to the playout thread's AJAThread instance.
+			@brief	This is the consumer thread's static callback function that gets called when the consumer thread starts.
+					This function gets "Attached" to the consumer thread's AJAThread instance.
+			@param[in]	pThread		A valid pointer to the consumer thread's AJAThread instance.
 			@param[in]	pContext	Context information to pass to the thread.
-									(For this application, this will be set to point to the NTV2Player4K instance.)
+									(For this application, this will be set to point to the NTV2Player8K instance.)
 		**/
-		static void		PlayThreadStatic (AJAThread * pThread, void * pContext);
+		static void			ConsumerThreadStatic (AJAThread * pThread, void * pContext);
 
 		/**
-			@brief	This is the test pattern producer thread's static callback function that gets called when the producer thread runs.
+			@brief	This is the producer thread's static callback function that gets called when the producer thread starts.
 					This function gets "Attached" to the producer thread's AJAThread instance.
 			@param[in]	pThread		A valid pointer to the producer thread's AJAThread instance.
 			@param[in]	pContext	Context information to pass to the thread.
-									(For this application, this will be set to point to the NTV2Player4K instance.)
+									(For this application, this will be set to point to the NTV2Player8K instance.)
 		**/
-		static void		ProduceFrameThreadStatic (AJAThread * pThread, void * pContext);
-
-		/**
-			@brief	Returns the RP188 DBB register number to use for the given NTV2OutputDestination.
-			@param[in]	inOutputSource	Specifies the NTV2OutputDestination of interest.
-			@return	The number of the RP188 DBB register to use for the given output destination.
-		**/
-		static ULWord	GetRP188RegisterForOutput (const NTV2OutputDestination inOutputSource);
+		static void			ProducerThreadStatic (AJAThread * pThread, void * pContext);
 
 
 	//	Private Member Data
 	private:
-		AJAThread					mPlayThread;				///< @brief	My playout (consumer) thread object
-		AJAThread					mProduceFrameThread;		///< @brief	My generator (producer) thread object
+		typedef AJACircularBuffer<NTV2FrameData*>	CircularBuffer;
+		typedef std::vector<NTV2_POINTER>			NTV2Buffers;
 
-		uint32_t					mCurrentFrame;				///< @brief	My current frame number (used to generate timecode)
-		ULWord						mCurrentSample;				///< @brief	My current audio sample (maintains audio tone generator state)
-		double						mToneFrequency;				///< @brief	My current audio tone frequency, in Hertz
+		Player8KConfig		mConfig;			///< @brief	My operating configuration.
+		AJAThread			mConsumerThread;	///< @brief	My playout (consumer) thread object
+		AJAThread			mProducerThread;	///< @brief	My generator (producer) thread object
+		CNTV2Card			mDevice;			///< @brief	My CNTV2Card instance
+		NTV2DeviceID		mDeviceID;			///< @brief	My device (model) identifier
+		NTV2TaskMode		mSavedTaskMode;		///< @brief	Used to restore the previous task mode
+		uint32_t			mCurrentFrame;		///< @brief	My current frame number (for generating timecode)
+		ULWord				mCurrentSample;		///< @brief	My current audio sample (maintains audio tone generator state)
+		double				mToneFrequency;		///< @brief	My current audio tone frequency [Hz]
+		NTV2AudioSystem		mAudioSystem;		///< @brief	The audio system I'm using (if any)
+		NTV2FormatDesc		mFormatDesc;		///< @brief	Describes my video/pixel format
 
-		CNTV2Card					mDevice;					///< @brief	My CNTV2Card instance
-		NTV2DeviceID				mDeviceID;					///< @brief	My board (model) identifier
-		const std::string			mDeviceSpecifier;			///< @brief	Specifies the device I should use
-		const bool					mWithAudio;					///< @brief	Capture and playout audio?
-		const bool					mUseHDMIOut;				///< @brief	Enable HDMI output?
-		NTV2Channel					mChannel;					///< @brief	The channel I'm using
-		NTV2Crosspoint				mChannelSpec;				///< @brief	The AutoCirculate channel spec I'm using
-		NTV2VideoFormat				mVideoFormat;				///< @brief	My video format
-		NTV2FrameBufferFormat		mPixelFormat;				///< @brief	My pixel format
-		NTV2EveryFrameTaskMode		mPreviousFrameServices;		///< @brief	Used to restore the previous task mode
-		NTV2VANCMode				mVancMode;					///< @brief	VANC mode
-		NTV2AudioSystem				mAudioSystem;				///< @brief	The audio system I'm using
-		bool						mDoMultiChannel;			///< @brief	Allow more than one player 4k to play
-		bool						mDoRGBOnWire;				///< @brief	Route the output through the Dual Link to put RGB on the wire
-		bool						mDoTsiRouting;				///< @brief Route TSI instread of SQD
+		bool				mGlobalQuit;		///< @brief	Set "true" to gracefully stop
+		AJATimeCodeBurn		mTCBurner;			///< @brief	My timecode burner
+		NTV2FrameDataArray	mHostBuffers;		///< @brief	My host buffers
+		CircularBuffer		mFrameDataRing;		///< @brief	AJACircularBuffer that controls frame data access by producer/consumer threads
+		NTV2Buffers			mTestPatRasters;	///< @brief	Pre-rendered test pattern rasters
 
-		bool						mGlobalQuit;				///< @brief	Set "true" to gracefully stop
-		AJATimeCodeBurn				mTCBurner;					///< @brief	My timecode burner
-		uint32_t					mVideoBufferSize;			///< @brief	My video buffer size, in bytes
-		uint32_t					mAudioBufferSize;			///< @brief	My audio buffer size, in bytes
+};	//	NTV2Player8K
 
-		uint8_t **					mTestPatternVideoBuffers;	///< @brief	My test pattern buffers
-		int32_t						mNumTestPatterns;			///< @brief	Number of test patterns to cycle through
-
-		AVDataBuffer							mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
-		AJACircularBuffer <AVDataBuffer *>		mAVCircularBuffer;						///< @brief	My ring buffer
-
-		AUTOCIRCULATE_TRANSFER           mOutputTransferStruct;					///< @brief	My A/C output transfer info
-		AUTOCIRCULATE_TRANSFER_STATUS    mOutputTransferStatusStruct;			///< @brief	My A/C output status
-
-		void *						mInstance;					///< @brief	Instance information for the callback function
-		NTV2Player8KCallback *		mPlayerCallback;			///< @brief	Address of callback function
-		AJAAncillaryDataType		mAncType;
-		
-		int							mNumAudioLinks;
-
-};	//	NTV2Player4K
-
-#endif	//	_NTV2PLAYER4K_H
+#endif	//	_NTV2PLAYER8K_H

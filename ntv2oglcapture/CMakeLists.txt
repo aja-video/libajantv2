@@ -1,5 +1,7 @@
 project(ntv2oglcapture)
 
+message("added ntv2oglcapture")
+
 # include(FindOpenGL)
 find_package(OpenGL REQUIRED)
 set(OPENGL_LIBRARIES OpenGL::GLU)
@@ -45,5 +47,6 @@ set(NTV2OGLCAPTURE_TARGET_SOURCES
 	${DEMO_APPS_HEADERS})
 
 add_executable(ntv2oglcapture ${NTV2OGLCAPTURE_TARGET_SOURCES})
+add_dependencies(ntv2oglcapture ajantv2)
 target_include_directories(ntv2oglcapture PUBLIC ${NTV2OGLCAPTURE_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2oglcapture PUBLIC ajantv2 ${QT_LIBRARIES} ${OPENGL_LIBRARIES} ${EXTRA_LIBRARIES})

@@ -39,7 +39,7 @@ int main (int argc, const char ** argv)
 	int				useHDMIOut		(0);		//	Enable HDMI output?
 	int				doMultiChannel	(0);		//  More than one instance of player 4k
 	int				doRGBOnWire		(0);		//  Route the output to put RGB on the wire
-	int				doSquareRouting	(0);		//  Route the output through the Tsi Muxes
+	int				doSquareRouting	(0);		//  Don't route output thru Tsi Muxes
 	int				hdrType			(0);		//	Insert HDR anc packet? If so, what kind?
 	int				doLinkGrouping	(0);		//	Use 6/12G output mode - IoXT+ and Kona5 Retail
 	AJADebug::Open();
@@ -53,12 +53,12 @@ int main (int argc, const char ** argv)
 		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,		0,	"which channel to use",			"number of the channel"},
 		{"frames",		0,		POPT_ARG_STRING,	&pFramesSpec,		0,	"frames to AutoCirculate",		"num[@min] or min-max"},
 		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,	0,	"use multi-channel/format",		AJA_NULL},
-		{"audioLinks",	'a',	POPT_ARG_INT,		&numAudioLinks,		0,	"# audio systems to ctrl for multi-link audio",	"1-4 (0=silence)"},
+		{"audioLinks",	'a',	POPT_ARG_INT,		&numAudioLinks,		0,	"# audio systems to link",		"1-4 (0=silence)"},
 		{"hdmi",		'h',	POPT_ARG_NONE,		&useHDMIOut,		0,	"enable HDMI output?",			AJA_NULL},
 		{"rgb",			'r',	POPT_ARG_NONE,		&doRGBOnWire,		0,	"RGB on SDI?",					AJA_NULL},
 		{"squares",		's',	POPT_ARG_NONE,		&doSquareRouting,	0,	"use square routing?",			AJA_NULL},
 		{"hdrType",		't',	POPT_ARG_INT,		&hdrType,			0,	"HDR pkt to send",				"0=none 1=SDR 2=HDR10 3=HLG"},
-		{"6G/12G",		'g',	POPT_ARG_NONE,		&doLinkGrouping,	0,	"use 6G/12G output mode",		AJA_NULL},
+		{"6g/12g",		'g',	POPT_ARG_NONE,		&doLinkGrouping,	0,	"use 6G/12G output mode",		AJA_NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -116,13 +116,12 @@ int main (int argc, const char ** argv)
 		}
 	}
 
-	playerConfig.fAudioSystem		= (numAudioLinks==0) ? NTV2_AUDIOSYSTEM_INVALID : NTV2_AUDIOSYSTEM_1;
 	playerConfig.fDoHDMIOutput		= useHDMIOut ? true : false;
-	playerConfig.fDoMultiChannel	= doMultiChannel ? true : false;
+	playerConfig.fDoMultiFormat		= doMultiChannel ? true : false;
 	playerConfig.fDoTsiRouting		= doSquareRouting ? false : true;
 	playerConfig.fDoRGBOnWire		= doRGBOnWire ? true : false;
 	playerConfig.fDoLinkGrouping	= doLinkGrouping ? true : false;
-	playerConfig.fNumAudioLinks		= numAudioLinks;
+	playerConfig.fNumAudioLinks		= UWord(numAudioLinks);
 
 	//	Anc / HDRType
 	playerConfig.fTransmitHDRType	= hdrType == 1	? AJAAncillaryDataType_HDR_SDR

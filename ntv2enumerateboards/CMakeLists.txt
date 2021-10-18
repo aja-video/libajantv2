@@ -1,5 +1,7 @@
 project(ntv2enumerateboards)
 
+message("added ntv2enumerateboards")
+
 set(NTV2ENUMERATEBOARDS_TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
@@ -34,5 +36,6 @@ set(NTV2ENUMERATEBOARDS_TARGET_SOURCES
 	${DEMO_APPS_HEADERS})
 
 add_executable(ntv2enumerateboards ${NTV2ENUMERATEBOARDS_TARGET_SOURCES})
+add_dependencies(ntv2enumerateboards ajantv2)
 target_include_directories(ntv2enumerateboards PUBLIC ${NTV2ENUMERATEBOARDS_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2enumerateboards PUBLIC ajantv2 ${EXTRA_LIBRARIES})

@@ -1,5 +1,7 @@
 project(ntv2encodehevc)
 
+message("added ntv2encodehevc")
+
 set(HEVC_M31_CODEC_ROOT ${AJA_LIB_NTV2_ROOT}/codecs/hevc/m31)
 
 set(HEVC_M31_HEADERS
@@ -65,5 +67,6 @@ set(NTV2ENCODEHEVC_TARGET_SOURCES
 	${DEMO_APPS_HEADERS})
 
 add_executable(ntv2encodehevc ${NTV2ENCODEHEVC_TARGET_SOURCES})
+add_dependencies(ntv2encodehevc ajantv2)
 target_include_directories(ntv2encodehevc PUBLIC ${NTV2ENCODEHEVC_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2encodehevc PUBLIC ajantv2 ${EXTRA_LIBRARIES})

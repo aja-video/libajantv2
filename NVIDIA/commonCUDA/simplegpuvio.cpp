@@ -123,6 +123,7 @@ CGpuVideoIO::CGpuVideoIO(vioDesc *desc) :
 
 CGpuVideoIO::~CGpuVideoIO()
 {
+	mBoard->DMABufferUnlockAll();
 	mBoard->Close();
 }
 
@@ -170,7 +171,7 @@ CGpuVideoIO::SetGpuCircularBuffer(CNTV2GpuCircularBuffer* gpuCircularBuffer)
 #ifdef AJA_RDMA		
 		if (!mBoard->DMABufferLock((ULWord*)gpuCircularBuffer->mAVTextureBuffers[i].videoBufferRDMA,
 								   gpuCircularBuffer->mAVTextureBuffers[i].videoBufferSize,
-								   false, true))
+								   true, true))
 		{
 			printf("error: RDMA buffer index %d size %d lock failed\n",
 				   i, gpuCircularBuffer->mAVTextureBuffers[i].videoBufferSize);

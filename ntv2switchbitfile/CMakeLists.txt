@@ -1,5 +1,7 @@
 project(ntv2switchbitfile)
 
+message("added ntv2switchbitfile")
+
 set(NTV2SWITCHBITFILE_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(NTV2SWITCHBITFILE_TARGET_INCLUDE_DIRS
@@ -31,5 +33,6 @@ set(NTV2SWITCHBITFILE_TARGET_SOURCES
 	${DEMO_APPS_HEADERS})
 
 add_executable(ntv2switchbitfile ${NTV2SWITCHBITFILE_TARGET_SOURCES})
+add_dependencies(ntv2switchbitfile ajantv2)
 target_include_directories(ntv2switchbitfile PUBLIC ${NTV2SWITCHBITFILE_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2switchbitfile PUBLIC ajantv2 ${EXTRA_LIBRARIES})

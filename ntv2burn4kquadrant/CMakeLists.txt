@@ -1,5 +1,7 @@
 project(ntv2burn4kquadrant)
 
+message("added ntv2burn4kquadrant")
+
 set(NTV2BURN4KQUADRANT_TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
@@ -34,5 +36,6 @@ set(NTV2BURN4KQUADRANT_TARGET_SOURCES
 	${DEMO_APPS_HEADERS})
 
 add_executable(ntv2burn4kquadrant ${NTV2BURN4KQUADRANT_TARGET_SOURCES})
+add_dependencies(ntv2burn4kquadrant ajantv2)
 target_include_directories(ntv2burn4kquadrant PUBLIC ${NTV2BURN4KQUADRANT_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2burn4kquadrant PUBLIC ajantv2 ${EXTRA_LIBRARIES})

@@ -1,5 +1,7 @@
 project(ntv2cudacapture)
 
+message("added ntv2cudacapture")
+
 set(NTV2CUDACAPTURE_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(NTV2CUDACAPTURE_TARGET_INCLUDE_DIRS
@@ -35,5 +37,6 @@ set(NTV2CUDACAPTURE_TARGET_SOURCES
 	${DEMO_APPS_HEADERS})
 
 add_executable(ntv2cudacapture ${NTV2CUDACAPTURE_TARGET_SOURCES})
+add_dependencies(ntv2cudacapture ajantv2)
 target_include_directories(ntv2cudacapture PUBLIC ${NTV2CUDACAPTURE_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2cudacapture PUBLIC ajantv2 ${EXTRA_LIBRARIES})

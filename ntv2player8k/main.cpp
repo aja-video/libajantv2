@@ -41,11 +41,10 @@ int main (int argc, const char ** argv)
 	int				doRGBOnWire		(0);		//  Route the output to put RGB on the wire
 	int				doTsiRouting	(0);		//  Route the output through the Tsi Muxes
 	int				hdrType			(0);		//	Custom anc type?
-	poptContext		optionsContext; 			//	Context for parsing command line arguments
 	AJADebug::Open();
 
 	//	Command line option descriptions:
-	const struct poptOption userOptionsTable [] =
+	const struct poptOption optionsTable [] =
 	{
 		#if !defined(NTV2_DEPRECATE_16_0)	//	--board option is deprecated!
 		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device to use",			"(deprecated)"},
@@ -55,7 +54,7 @@ int main (int argc, const char ** argv)
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,		0,	"which pixel format to use",	"e.g. 'yuv8' or ? to list"},
 		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,		0,	"which channel to use",			"number of the channel"},
 		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,	0,	"use multi-channel/format",		AJA_NULL},
-		{"audioLinks",	'a',	POPT_ARG_INT,		&numAudioLinks,		0,	"how many audio systems to control for multi-link audio",	"0=silence or 1-4"},
+		{"audioLinks",	'a',	POPT_ARG_INT,		&numAudioLinks,		0,	"# audio systems to link",		"1-4 (0=silence)"},
 		{"hdmi",		'h',	POPT_ARG_NONE,		&useHDMIOut,		0,	"enable HDMI output?",			AJA_NULL},
 		{"rgb",			'r',	POPT_ARG_NONE,		&doRGBOnWire,		0,	"emit RGB over SDI?",			AJA_NULL},
 		{"tsi",			't',	POPT_ARG_NONE,		&doTsiRouting,		0,	"use Tsi routing?",				AJA_NULL},
@@ -64,75 +63,84 @@ int main (int argc, const char ** argv)
 		POPT_TABLEEND
 	};
 
-	//	Read command line arguments...
-	optionsContext = ::poptGetContext (AJA_NULL, argc, argv, userOptionsTable, 0);
-	::poptGetNextOpt (optionsContext);
-	optionsContext = ::poptFreeContext (optionsContext);
+	CNTV2DemoCommon::Popt popt(argc, argv, optionsTable);
+	if (!popt)
+		{cerr << "## ERROR: " << popt.errorStr() << endl;  return 2;}
 
-	const string			deviceSpec		(pDeviceSpec ? pDeviceSpec : "0");
-	const string			videoFormatStr	(pVideoFormat  ?  pVideoFormat  :  "");
-	const NTV2VideoFormat	videoFormat		(videoFormatStr.empty () ? NTV2_FORMAT_4x1920x1080p_2398 : CNTV2DemoCommon::GetVideoFormatFromString (videoFormatStr, VIDEO_FORMATS_8KUHD2));
-	if (videoFormatStr == "?" || videoFormatStr == "list")
-		{cerr << "## NOTE:  List of valid '--videoFormat' parameter values:\n" << CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_8KUHD2, deviceSpec) << endl;  return 0;}
-	else if (!videoFormatStr.empty () && !NTV2_IS_QUAD_QUAD_FORMAT (videoFormat))
-		{cerr << "## ERROR:  Invalid '--videoFormat' value '" << videoFormatStr << "' -- expected values:" << endl << CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_8KUHD2, deviceSpec) << endl;  return 2;}
+	//	Device
+	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "0");
+	Player8KConfig playerConfig(deviceSpec);
 
-	const string				pixelFormatStr	(pPixelFormat  ?  pPixelFormat  :  "");
-	const NTV2FrameBufferFormat	pixelFormat		(pixelFormatStr.empty () ? NTV2_FBF_8BIT_YCBCR : CNTV2DemoCommon::GetPixelFormatFromString (pixelFormatStr));
-	if (pixelFormatStr == "?" || pixelFormatStr == "list")
-		{cerr << "## NOTE:  List of valid '--pixelFormat' parameter values:" << endl << CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 0;}
-	else if (!pixelFormatStr.empty () && !NTV2_IS_VALID_FRAME_BUFFER_FORMAT (pixelFormat))
-		{cerr << "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl << CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 2;}
-
-	Player8KConfig	config;
-
-	config.fDeviceSpecifier	= deviceSpec;
-	config.fWithAudio		= (numAudioLinks > 0) ? true : false;
-	config.fChannel			= NTV2Channel (channelNumber - 1);
-	config.fPixelFormat		= pixelFormat;
-	config.fVideoFormat		= videoFormat;
-	config.fUseHDMIOut		= useHDMIOut ? true : false;
-	config.fDoMultiChannel	= doMultiChannel ? true : false;
-	config.fDoTsiRouting	= doTsiRouting ? true : false;
-	config.fDoRGBOnWire		= doRGBOnWire ? true : false;
-	config.fNumAudioLinks	= numAudioLinks;
-	switch (hdrType)
-	{
-		case 1:		config.fSendAncType = AJAAncillaryDataType_HDR_SDR;		break;
-		case 2:		config.fSendAncType = AJAAncillaryDataType_HDR_HDR10;	break;
-		case 3:		config.fSendAncType = AJAAncillaryDataType_HDR_HLG;		break;
-		default:	config.fSendAncType = AJAAncillaryDataType_Unknown;		break;
+	//	VideoFormat
+	const string videoFormatStr (pVideoFormat  ?  pVideoFormat  :  "");
+	playerConfig.fVideoFormat = videoFormatStr.empty() ? NTV2_FORMAT_4x3840x2160p_2398 : CNTV2DemoCommon::GetVideoFormatFromString(videoFormatStr, VIDEO_FORMATS_8KUHD2);
+	if (videoFormatStr == "?"  ||  videoFormatStr == "list")
+	{	cout	<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_8KUHD2, deviceSpec) << endl;
+		return 0;
+	}
+	else if (!videoFormatStr.empty()  &&  !NTV2_IS_8K_VIDEO_FORMAT(playerConfig.fVideoFormat))
+	{	cerr	<< "## ERROR:  Invalid '--videoFormat' value '" << videoFormatStr << "' -- expected values:" << endl
+				<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_8KUHD2, deviceSpec) << endl;
+		return 2;
 	}
 
-	NTV2Player8K player (config);
+	//	PixelFormat
+	const string pixelFormatStr (pPixelFormat  ?  pPixelFormat  :  "");
+	playerConfig.fPixelFormat = pixelFormatStr.empty() ? NTV2_FBF_8BIT_YCBCR : CNTV2DemoCommon::GetPixelFormatFromString(pixelFormatStr);
+	if (pixelFormatStr == "?"  ||  pixelFormatStr == "list")
+	{	cout	<< CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec) << endl;
+		return 0;
+	}
+	else if (!pixelFormatStr.empty()  &&  !NTV2_IS_VALID_FRAME_BUFFER_FORMAT(playerConfig.fPixelFormat))
+	{	cerr	<< "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl
+				<< CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec) << endl;
+		return 2;
+	}
 
+	//	OutputChannel
+	if (channelNumber < 1  ||  channelNumber > 8)
+	{	cerr	<< "## ERROR:  Invalid channel number '" << channelNumber << "' -- expected 1 thru 8" << endl;
+		return 2;
+	}
+	playerConfig.fOutputChannel = NTV2Channel(channelNumber ? channelNumber - 1 : 0);
+
+	playerConfig.fDoHDMIOutput		= useHDMIOut ? true : false;
+	playerConfig.fDoMultiFormat		= doMultiChannel ? true : false;
+	playerConfig.fDoTsiRouting		= doTsiRouting ? true : false;
+	playerConfig.fDoRGBOnWire		= doRGBOnWire ? true : false;
+	playerConfig.fNumAudioLinks		= UWord(numAudioLinks);
+
+	//	Anc / HDRType
+	playerConfig.fTransmitHDRType	= hdrType == 1	? AJAAncillaryDataType_HDR_SDR
+													: (hdrType == 2	? AJAAncillaryDataType_HDR_HDR10
+																	: (hdrType == 3	? AJAAncillaryDataType_HDR_HLG
+																					: AJAAncillaryDataType_Unknown));
 	::signal (SIGINT, SignalHandler);
 	#if defined (AJAMac)
 		::signal (SIGHUP, SignalHandler);
 		::signal (SIGQUIT, SignalHandler);
 	#endif
 
+	NTV2Player8K player (playerConfig);
+
 	//	Initialize the player...
 	if (AJA_FAILURE(player.Init()))
-		{cerr << "## ERROR: Initialization failed" << endl;  return 1;}
+		{cerr << "## ERROR: Initialization failed" << endl;  return 3;}
 
 	//	Run the player...
-	player.Run ();
+	player.Run();
 
 	cout	<< "  Playout  Playout   Frames" << endl
 			<< "   Frames   Buffer  Dropped" << endl;
-
-	//	Loop until told to stop...
 	do
 	{	//	Poll the player's status...
 		AUTOCIRCULATE_STATUS outputStatus;
 		player.GetACStatus(outputStatus);
-		cout	<<	setw(9) << outputStatus.acFramesProcessed
-				<<	setw(9) << outputStatus.acBufferLevel
-				<<  setw(9) << outputStatus.acFramesDropped
-				<< "\r" << flush;
+		cout	<<	DECN(outputStatus.GetProcessedFrameCount(), 9)
+				<<	DECN(outputStatus.GetBufferLevel(), 9)
+				<<  DECN(outputStatus.GetDroppedFrameCount(), 9) << "\r" << flush;
 		AJATime::Sleep(2000);
-	} while (!gGlobalQuit);	//	loop til done
+	} while (player.IsRunning() && !gGlobalQuit);	//	loop til done
 
 	//  Ask the player to stop
 	player.Quit();

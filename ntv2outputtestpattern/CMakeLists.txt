@@ -1,5 +1,7 @@
 project(ntv2outputtestpattern)
 
+message("added ntv2outputtestpattern")
+
 set(NTV2OUTPUTTESTPATTERN_TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
@@ -34,5 +36,6 @@ set(NTV2OUTPUTTESTPATTERN_TARGET_SOURCES
 	${DEMO_APPS_HEADERS})
 
 add_executable(ntv2outputtestpattern ${NTV2OUTPUTTESTPATTERN_TARGET_SOURCES})
+add_dependencies(ntv2outputtestpattern ajantv2)
 target_include_directories(ntv2outputtestpattern PUBLIC ${NTV2OUTPUTTESTPATTERN_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2outputtestpattern PUBLIC ajantv2 ${EXTRA_LIBRARIES})

@@ -1,5 +1,7 @@
 project(ntv2ccplayer)
 
+message("added ntv2ccplayer")
+
 set(NTV2CCPLAYER_TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
@@ -34,5 +36,6 @@ set(NTV2CCPLAYER_TARGET_SOURCES
 	${DEMO_APPS_HEADERS})
 
 add_executable(ntv2ccplayer ${NTV2CCPLAYER_TARGET_SOURCES})
+add_dependencies(ntv2ccplayer ajacc ajantv2)
 target_include_directories(ntv2ccplayer PUBLIC ${NTV2CCPLAYER_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2ccplayer PUBLIC ajacc ajantv2 ${EXTRA_LIBRARIES})

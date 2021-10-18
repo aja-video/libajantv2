@@ -172,9 +172,6 @@ class NTV2Capture4K
 		int						mNumAudioLinks;
 		AVDataBuffer			mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
 		MyCircularBuffer		mAVCircularBuffer;		///< @brief	My ring buffer object
-
-		AUTOCIRCULATE_TRANSFER	mInputTransfer;			///< @brief	My A/C input transfer info
-
 };	//	NTV2Capture
 
 #endif	//	_NTV2CAPTURE_H

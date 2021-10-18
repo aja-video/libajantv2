@@ -1,5 +1,7 @@
 project(ntv2playcorder)
 
+message("added ntv2playcorder")
+
 set(NTV2PLAYCORDER_TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
@@ -34,5 +36,6 @@ set(NTV2PLAYCORDER_TARGET_SOURCES
 	${DEMO_APPS_HEADERS})
 
 add_executable(ntv2playcorder ${NTV2PLAYCORDER_TARGET_SOURCES})
+add_dependencies(ntv2playcorder ajantv2)
 target_include_directories(ntv2playcorder PUBLIC ${NTV2PLAYCORDER_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2playcorder PUBLIC ajantv2 ${EXTRA_LIBRARIES})

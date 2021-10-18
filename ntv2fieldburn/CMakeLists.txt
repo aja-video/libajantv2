@@ -1,5 +1,7 @@
 project(ntv2fieldburn)
 
+message("added ntv2fieldburn")
+
 set(NTV2FIELDBURN_TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
@@ -34,5 +36,6 @@ set(NTV2FIELDBURN_TARGET_SOURCES
 	${DEMO_APPS_HEADERS})
 
 add_executable(ntv2fieldburn ${NTV2FIELDBURN_TARGET_SOURCES})
+add_dependencies(ntv2fieldburn ajantv2)
 target_include_directories(ntv2fieldburn PUBLIC ${NTV2FIELDBURN_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2fieldburn PUBLIC ajantv2 ${EXTRA_LIBRARIES})

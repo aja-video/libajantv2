@@ -452,16 +452,16 @@ void NTV2Capture::CaptureFrames (void)
 				if (overrun)
 					{overruns++;  CAPWARN(overruns << " anc overrun(s)");}
 				pCaptureData->fNumAncBytes = inputXfer.GetCapturedAncByteCount(/*isF2*/false);
-				NTV2_POINTER stale (pCaptureData->fAncBuffer.GetHostAddress(pCaptureData->fNumAncBytes, /*fromEnd*/true),
-									pCaptureData->fNumAncBytes);
+				NTV2_POINTER stale (pCaptureData->fAncBuffer.GetHostAddress(pCaptureData->fNumAncBytes),
+									pCaptureData->fAncBuffer.GetByteCount() - pCaptureData->fNumAncBytes);
 				stale.Fill(uint8_t(0));
 			}
 			if (acStatus.WithCustomAnc()  &&  pCaptureData->AncBuffer2())
 			{
 				pCaptureData->fNumAnc2Bytes = inputXfer.GetCapturedAncByteCount(/*isF2*/true);
-				NTV2_POINTER excess(pCaptureData->fAncBuffer2.GetHostAddress(pCaptureData->fNumAnc2Bytes, /*fromEnd*/true),
-									pCaptureData->fNumAnc2Bytes);
-				excess.Fill(uint8_t(0));
+				NTV2_POINTER stale (pCaptureData->fAncBuffer2.GetHostAddress(pCaptureData->fNumAnc2Bytes),
+									pCaptureData->fAncBuffer2.GetByteCount() - pCaptureData->fNumAnc2Bytes);
+				stale.Fill(uint8_t(0));
 			}
 
 			//	Grab all valid timecodes that were captured...
