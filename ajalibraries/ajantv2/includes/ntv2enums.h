@@ -22,8 +22,13 @@
 	SDK VERSION
 	The next several macro values are patched when the SDK is built by AJA.
 **/
-#if defined (BUILDING_CMAKE)
-#include "version.h" // version.h.in defines are filled out by cmake
+#if defined (AJA_NTV2_BUILDING_CMAKE)
+// NOTE: Enabling the CMake variable "AJA_BUILDING_CMAKE" will generate an
+// include file "includes/version.h" in the CMake build directory for ajantv2.
+// The contents of this file are populated by CMake, using the ajantv2/includes/version.h.in
+// file as a template. CMake will enable the preprocessor define "BUILDING_CMAKE" so that
+// version.h is included here at build time.
+#include "includes/version.h"
 #else
 #define AJA_NTV2_SDK_VERSION_MAJOR		AJA_DECIMAL_PLACEHOLDER			///< @brief The SDK major version number, an unsigned decimal integer.
 #define AJA_NTV2_SDK_VERSION_MINOR		AJA_DECIMAL_PLACEHOLDER			///< @brief The SDK minor version number, an unsigned decimal integer.

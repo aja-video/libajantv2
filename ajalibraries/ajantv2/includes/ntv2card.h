@@ -1383,6 +1383,20 @@ public:
 	AJA_VIRTUAL bool		SetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode inMode);
 
 	/**
+		@brief		Sets the "VANC Shift Mode" for the given channel(s).
+		@param[in]	inChannels	Specifies the FrameStore(s) of interest as ::NTV2Channel values (zero-based index numbers).
+		@param[in]	inMode		Specifies the new data shift mode.
+								Use ::NTV2_VANCDATA_NORMAL to disable;	use ::NTV2_VANCDATA_8BITSHIFT_ENABLE to enable.
+		@return		True if successful;	 otherwise false.
+		@note		The bit shift feature only affects VANC lines (not visible raster lines) and only when the device FrameStore is configured as follows:
+					-	video format is set for an HD format (see ::NTV2_IS_HD_VIDEO_FORMAT macro) -- not SD or 4K/UHD;
+					-	pixel format is set for ::NTV2_FBF_8BIT_YCBCR;
+					-	VANC mode is set to ::NTV2_VANCMODE_TALL or ::NTV2_VANCMODE_TALLER (see CNTV2Card::SetVANCMode).
+		@see		CNTV2Card::GetVANCShiftMode, CNTV2Card::GetVANCMode, CNTV2Card::SetVANCMode, \ref vancframegeometries
+	**/
+	AJA_VIRTUAL bool		SetVANCShiftMode (NTV2ChannelSet & inChannels, const NTV2VANCDataShiftMode inMode);	//	New in SDK 16.2
+
+	/**
 		@brief		Retrieves the current "VANC Shift Mode" feature for the given channel.
 		@param[in]	inChannel	Specifies the FrameStore of interest as an ::NTV2Channel, a zero-based index number.
 		@param[out] outValue	Receives the current ::NTV2VANCDataShiftMode setting.
@@ -1624,13 +1638,23 @@ public:
 	/**
 		@brief		Sets the number of audio channels to be concurrently captured or played for a given Audio System on the AJA device.
 		@return		True if successful; otherwise false.
-		@param[in]	inNumChannels		Specifies the number of audio channels the device will record or play to/from a
-										given Audio System. For most applications, this should always be set to the maximum
-										number of audio channels the device is capable of capturing or playing, which can
-										be obtained by calling the ::NTV2DeviceGetMaxAudioChannels function.
+		@param[in]	inNumChannels	Specifies the number of audio channels the device will record or play to/from a
+									given Audio System. For most applications, this should always be set to the maximum
+									number of audio channels the device is capable of capturing or playing, which can
+									be obtained by calling the ::NTV2DeviceGetMaxAudioChannels function.
 		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
 	**/
 	AJA_VIRTUAL bool		SetNumberAudioChannels (const ULWord inNumChannels, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+
+	/**
+		@brief		Sets the number of audio channels to be concurrently captured or played for the given Audio System(s).
+		@return		True if successful; otherwise false.
+		@param[in]	inNumChannels	Specifies the number of audio channels the device will record or play.
+									For most applications, this should always be set to the maximum number of audio channels
+									the device is capable of capturing or playing (see ::NTV2DeviceGetMaxAudioChannels ).
+		@param[in]	inAudioSystems	Specifies the Audio System(s) of interest.
+	**/
+	AJA_VIRTUAL bool		SetNumberAudioChannels (const ULWord inNumChannels, const NTV2AudioSystemSet & inAudioSystems);	//	New in SDK 16.2
 
 	/**
 		@brief		Returns the current number of audio channels being captured or played by a given Audio System on the AJA device.
@@ -1644,8 +1668,23 @@ public:
 	**/
 	AJA_VIRTUAL bool		GetNumberAudioChannels (ULWord & outNumChannels, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
-	AJA_VIRTUAL bool		SetAudioRate (const NTV2AudioRate inRate, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);	///< @deprecated	Current generation NTV2 devices only support a fixed 48 kHz sample rate.
-	AJA_VIRTUAL bool		GetAudioRate (NTV2AudioRate & outRate, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);	///< @deprecated	Current generation NTV2 devices only support a fixed 48 kHz sample rate.
+	/**
+		@brief		Sets the NTV2AudioRate for the given Audio System.
+		@return		True if successful; otherwise false.
+		@param[in]	inRate			Specifies the new NTV2AudioRate.
+		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
+		@note		Current generation NTV2 devices only support a fixed 48 kHz sample rate.
+	**/
+	AJA_VIRTUAL bool		SetAudioRate (const NTV2AudioRate inRate, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+
+	/**
+		@brief		Returns the current NTV2AudioRate for the given Audio System.
+		@return		True if successful; otherwise false.
+		@param[out] outRate			Receives the current NTV2AudioRate.
+		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
+		@note		Current generation NTV2 devices only support a fixed 48 kHz sample rate.
+	**/
+	AJA_VIRTUAL bool		GetAudioRate (NTV2AudioRate & outRate, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
 		@brief		Changes the size of the audio buffer that is used for a given Audio System in the AJA device.
@@ -1655,6 +1694,15 @@ public:
 		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
 	**/
 	AJA_VIRTUAL bool		SetAudioBufferSize (const NTV2AudioBufferSize inValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+
+	/**
+		@brief		Changes the size of the audio buffer used for the given Audio System(s).
+		@return		True if successful; otherwise false.
+		@param[in]	inValue			Specifies the desired size of the capture/playout audio buffer to be used on the AJA device.
+									All modern AJA devices use ::NTV2_AUDIO_BUFFER_BIG (4 MB).
+		@param[in]	inAudioSystems	Specifies the Audio System(s) of interest.
+	**/
+	AJA_VIRTUAL bool		SetAudioBufferSize (const NTV2AudioBufferSize inMode, const NTV2AudioSystemSet & inAudioSystems);	//	New in SDK 16.2
 
 	/**
 		@brief		Retrieves the size of the input or output audio buffer being used for a given Audio System on the AJA device.
@@ -1694,6 +1742,16 @@ public:
 		@see		CNTV2Card::GetAudioLoopBack, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		SetAudioLoopBack (const NTV2AudioLoopBack inMode, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+
+	/**
+		@brief		Enables or disables ::NTV2AudioLoopBack mode for the given Audio Systems.
+		@return		True if successful; otherwise false.
+		@param[in]	inMode			Specify ::NTV2_AUDIO_LOOPBACK_ON to force each Audio System's output embedder to pull audio samples
+									from its corresponding SDI input de-embedder;  otherwise specify ::NTV2_AUDIO_LOOPBACK_OFF.
+		@param[in]	inAudioSystems	Specifies the Audio System(s) on the device to be affected.
+		@see		CNTV2Card::GetAudioLoopBack, \ref audioplayout
+	**/
+	AJA_VIRTUAL bool		SetAudioLoopBack (const NTV2AudioLoopBack inMode, const NTV2AudioSystemSet & inAudioSystems);	//	New in SDK 16.2
 
 	/**
 		@brief		Answers if ::NTV2AudioLoopBack mode is currently on or off for the given ::NTV2AudioSystem.
@@ -2181,6 +2239,19 @@ public:
 		@see		CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		SetSDIOutputAudioSystem (const NTV2Channel inSDIOutputConnector, const NTV2AudioSystem inAudioSystem);
+
+	/**
+		@brief		Sets the device's ::NTV2AudioSystem that will provide audio for the given SDI outputs' audio embedders.
+					For 3G-capable SDI outputs, this affects Data Stream 1 (or Link A).
+		@param[in]	inSDIOutputs	Specifies the SDI output connectors of interest as an ::NTV2ChannelSet (a set of zero-based index numbers).
+		@param[in]	inAudioSystem	Specifies the Audio System to be used (e.g., ::NTV2_AUDIOSYSTEM_1).
+		@param[in]	inDS2			Optionally specifies if Data Stream 2 should be configured. Defaults to false (DS1).
+		@return		True if successful; otherwise false.
+		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
+		@note		Use the ::NTV2DeviceGetNumVideoOutputs function to determine the number of SDI output jacks the device has.
+		@see		CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, \ref audioplayout
+	**/
+	AJA_VIRTUAL bool		SetSDIOutputAudioSystem (const NTV2ChannelSet & inSDIOutputs, const NTV2AudioSystem inAudioSystem, const bool inDS2 = false);	//	New in SDK 16.2
 
 	/**
 		@brief		Answers with the device's ::NTV2AudioSystem that is currently providing audio for the given SDI output's audio embedder.

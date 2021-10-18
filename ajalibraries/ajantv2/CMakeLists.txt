@@ -1,5 +1,7 @@
 project(ajantv2)
 
+message ("added ajantv2")
+
 if(CMAKE_CXX_STANDARD LESS 11)
     remove_definitions(
         -DAJA_USE_CPLUSPLUS11
@@ -15,11 +17,13 @@ set(AJANTV2_TARGET_INCLUDE_DIRS
     includes
     ${AJA_LIB_ANC_ROOT}/includes
     ${AJA_LIBRARIES_ROOT}
-    ${AJA_LIB_BASE_ROOT})
+    ${AJA_LIB_BASE_ROOT}
+    ${CMAKE_CURRENT_BINARY_DIR})
 
-# TODO(paulh): Re-enable when we start using the CMake version.h.in file to set the SDK version
-# add_definitions(-DBUILDING_CMAKE)
-# configure_file(includes/version.h.in includes/version.h @ONLY)
+if (AJA_BUILDING_CMAKE)
+    add_definitions(-DAJA_NTV2_BUILDING_CMAKE)
+    configure_file(includes/version.h.in includes/version.h @ONLY)
+endif()
 
 set(AJANTV2_HEADERS
     includes/ajaexport.h
@@ -78,8 +82,6 @@ set(AJANTV2_HEADERS
     includes/ntv2tshelper.h
     includes/ntv2utf8.h
     includes/ntv2utils.h
-    # TODO(paulh): Re-enable when we start using the CMake version.h.in file
-    # includes/version.h
     includes/ntv2verticalfilter.h
     includes/ntv2videodefines.h
     includes/ntv2virtualregisters.h
@@ -173,26 +175,22 @@ set (AJAANC_SOURCES
 
 if (AJA_BUILD_DRIVER STREQUAL ON)
     add_definitions(-DNTV2_BUILDING_DRIVER)
-    set(AJANTV2_HEADERS
-        ${AJANTV2_HEADERS}
+    list(APPEND AJANTV2_HEADERS
         includes/ntv2driverprocamp.h)
-    set(AJANTV2_SOURCES
-        ${AJANTV2_SOURCES}
+    list(APPEND AJANTV2_SOURCES
         src/ntv2driverprocamp.cpp)
 endif()
 
 if (AJA_BUILD_OPENSOURCE STREQUAL OFF)
     message("added ajantv2 HEVC/M31 codec")
-    set(AJANTV2_HEADERS
-        ${AJANTV2_HEADERS}
+    list(APPEND AJANTV2_HEADERS
         codecs/hevc/m31/ntv2m31.h
         codecs/hevc/m31/ntv2m31cparam.h
         codecs/hevc/m31/ntv2m31ehparam.h
         codecs/hevc/m31/ntv2m31vaparam.h
         codecs/hevc/m31/ntv2m31vinparam.h
         codecs/hevc/m31/ntv2m31viparam.h)
-    set(AJANTV2_SOURCES
-        ${AJANTV2_SOURCES}
+    list(APPEND AJANTV2_SOURCES
         codecs/hevc/m31/ntv2m31.cpp
         codecs/hevc/m31/ntv2m31cparam.cpp
         codecs/hevc/m31/ntv2m31ehparam.cpp
@@ -303,24 +301,20 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         -DAJA_WINDLL
         -DAJADLL_BUILD)
 
-    set(AJANTV2_TARGET_INCLUDE_DIRS
-        ${AJANTV2_TARGET_INCLUDE_DIRS}
+    list(APPEND AJANTV2_TARGET_INCLUDE_DIRS
         src/win
         ${AJA_LIB_BASE_ROOT}/pnp/windows
         ${AJA_LIB_BASE_ROOT}/system/windows)
 
-    set(AJANTV2_HEADERS
-        ${AJANTV2_HEADERS}
+    list(APPEND AJANTV2_HEADERS
         src/win/ntv2windriverinterface.h
         src/win/ntv2winpublicinterface.h)
 
-    set(AJANTV2_SOURCES
-        ${AJANTV2_SOURCES}
+    list(APPEND AJANTV2_SOURCES
         # src/win/dllmain.cpp
         src/win/ntv2windriverinterface.cpp)
 
-    set(AJABASE_HEADERS
-        ${AJABASE_HEADERS}
+    list(APPEND AJABASE_HEADERS
         ${AJA_LIB_BASE_ROOT}/pnp/windows/pnpimpl.h
         ${AJA_LIB_BASE_ROOT}/system/windows/eventimpl.h
         ${AJA_LIB_BASE_ROOT}/system/windows/infoimpl.h
@@ -328,8 +322,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         ${AJA_LIB_BASE_ROOT}/system/windows/processimpl.h
         ${AJA_LIB_BASE_ROOT}/system/windows/threadimpl.h)
 
-    set(AJABASE_SOURCES
-        ${AJABASE_SOURCES}
+    list(APPEND AJABASE_SOURCES
         ${AJA_LIB_BASE_ROOT}/pnp/windows/pnpimpl.cpp
         ${AJA_LIB_BASE_ROOT}/system/windows/eventimpl.cpp
         ${AJA_LIB_BASE_ROOT}/system/windows/infoimpl.cpp
@@ -348,23 +341,19 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         -DAJADLL_BUILD
         -DAJADLL_BUILD)
 
-    set(AJANTV2_TARGET_INCLUDE_DIRS
-        ${AJANTV2_TARGET_INCLUDE_DIRS}
+    list(APPEND AJANTV2_TARGET_INCLUDE_DIRS
         src/lin
         ${AJA_LIB_BASE_ROOT}/pnp/linux
         ${AJA_LIB_BASE_ROOT}/system/linux)
 
-    set(AJANTV2_HEADERS
-        ${AJANTV2_HEADERS}
+    list(APPEND AJANTV2_HEADERS
         src/lin/ntv2linuxdriverinterface.h
         src/lin/ntv2linuxpublicinterface.h)
 
-    set(AJANTV2_SOURCES
-        ${AJANTV2_SOURCES}
+    list(APPEND AJANTV2_SOURCES
         src/lin/ntv2linuxdriverinterface.cpp)
 
-    set(AJABASE_HEADERS
-        ${AJABASE_HEADERS}
+    list(APPEND AJABASE_HEADERS
         ${AJA_LIB_BASE_ROOT}/pnp/linux/pnpimpl.h
         ${AJA_LIB_BASE_ROOT}/system/linux/eventimpl.h
         ${AJA_LIB_BASE_ROOT}/system/linux/infoimpl.h
@@ -372,14 +361,14 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${AJA_LIB_BASE_ROOT}/system/linux/processimpl.h
         ${AJA_LIB_BASE_ROOT}/system/linux/threadimpl.h)
 
-    set(AJABASE_SOURCES
-        ${AJABASE_SOURCES}
+    list(APPEND AJABASE_SOURCES
         ${AJA_LIB_BASE_ROOT}/pnp/linux/pnpimpl.cpp
         ${AJA_LIB_BASE_ROOT}/system/linux/eventimpl.cpp
         ${AJA_LIB_BASE_ROOT}/system/linux/infoimpl.cpp
         ${AJA_LIB_BASE_ROOT}/system/linux/lockimpl.cpp
         ${AJA_LIB_BASE_ROOT}/system/linux/processimpl.cpp
         ${AJA_LIB_BASE_ROOT}/system/linux/threadimpl.cpp)
+    
     set(EXTRA_LIBRARIES
         rt)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
@@ -390,24 +379,20 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         -DAJADLL_BUILD
         -DAJADLL_BUILD)
 
-    set(AJANTV2_TARGET_INCLUDE_DIRS
-        ${AJANTV2_TARGET_INCLUDE_DIRS}
+    list(APPEND AJANTV2_TARGET_INCLUDE_DIRS
         src/mac
         ${AJA_LIB_BASE_ROOT}/pnp/mac
         ${AJA_LIB_BASE_ROOT}/system/mac
         /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include)
 
-    set(AJANTV2_HEADERS
-        ${AJANTV2_HEADERS}
+    list(APPEND AJANTV2_HEADERS
         src/mac/ntv2macdriverinterface.h
         src/mac/ntv2macpublicinterface.h)
 
-    set(AJANTV2_SOURCES
-        ${AJANTV2_SOURCES}
+    list(APPEND AJANTV2_SOURCES
         src/mac/ntv2macdriverinterface.cpp)
 
-    set(AJABASE_HEADERS
-        ${AJABASE_HEADERS}
+    list(APPEND AJABASE_HEADERS
         ${AJA_LIB_BASE_ROOT}/pnp/mac/devicenotifier.h
         ${AJA_LIB_BASE_ROOT}/pnp/mac/masterport.h
         ${AJA_LIB_BASE_ROOT}/pnp/mac/pnpimpl.h
@@ -418,8 +403,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         ${AJA_LIB_BASE_ROOT}/system/mac/pthreadsextra.h
         ${AJA_LIB_BASE_ROOT}/system/mac/threadimpl.h)
 
-    set(AJABASE_SOURCES
-        ${AJABASE_SOURCES}
+    list(APPEND AJABASE_SOURCES
         ${AJA_LIB_BASE_ROOT}/pnp/mac/devicenotifier.cpp
         ${AJA_LIB_BASE_ROOT}/pnp/mac/masterport.cpp
         ${AJA_LIB_BASE_ROOT}/pnp/mac/pnpimpl.cpp
@@ -448,18 +432,45 @@ set(AJANTV2_TARGET_SOURCES
     ${AJANTV2_SOURCES}
     ${AJANTV2_HEADERS})
 
-add_library(ajantv2shared SHARED ${AJANTV2_TARGET_SOURCES})
 add_library(ajantv2 STATIC ${AJANTV2_TARGET_SOURCES})
-
-target_include_directories(ajantv2shared PUBLIC ${AJANTV2_TARGET_INCLUDE_DIRS})
 target_include_directories(ajantv2 PUBLIC ${AJANTV2_TARGET_INCLUDE_DIRS})
-
-target_link_libraries(ajantv2shared PUBLIC ${EXTRA_LIBRARIES} ${EXTRA_DYNAMIC_LIBRARIES})
 target_link_libraries(ajantv2 PUBLIC ${EXTRA_LIBRARIES})
-
-target_compile_definitions(ajantv2shared PUBLIC ${EXTRA_DYNAMIC_DEFINES})
 target_compile_definitions(ajantv2 PUBLIC ${EXTRA_STATIC_DEFINES})
 
+if (AJA_BUILD_SHARED)
+    add_library(ajantv2shared SHARED ${AJANTV2_TARGET_SOURCES})
+    target_include_directories(ajantv2shared PUBLIC ${AJANTV2_TARGET_INCLUDE_DIRS})
+    target_link_libraries(ajantv2shared PUBLIC ${EXTRA_LIBRARIES} ${EXTRA_DYNAMIC_LIBRARIES})
+    target_compile_definitions(ajantv2shared PUBLIC ${EXTRA_DYNAMIC_DEFINES})
+endif()
+
+if (AJA_DEPLOY_SOURCES)
+    # deploy ajabase sources to build directory
+    foreach (source_file ${AJABASE_SOURCES})
+        get_filename_component(source_base_name ${source_file} NAME)
+        string(REGEX REPLACE "(${AJA_LIB_BASE_ROOT}/)+" "" source_replace ${source_file})
+        message("ajabase basename: ${source_replace}")
+        add_custom_command(TARGET ajantv2
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND}
+            ARGS -E copy "${source_file}" "../ajabase/${source_replace}")
+    endforeach(source_file)
+    # deploy ajantv2 sources to build directory
+    foreach (source_file ${AJANTV2_SOURCES})
+        add_custom_command(TARGET ajantv2
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND}
+            ARGS -E copy "${AJA_LIB_NTV2_ROOT}/${source_file}" "${source_file}")
+    endforeach(source_file)
+    # deploy ajaanc sources to build directory
+    foreach (source_file ${AJAANC_SOURCES})
+        get_filename_component(source_base_name ${source_file} NAME)
+        add_custom_command(TARGET ajantv2
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND}
+            ARGS -E copy "${AJA_LIB_ANC_ROOT}/src/${source_base_name}" "../ajaanc/src/${source_base_name}")
+    endforeach(source_file)
+endif()
 if (AJA_DEPLOY_HEADERS)
     # deploy ajabase headers to build directory
     foreach (header_file ${AJABASE_HEADERS})

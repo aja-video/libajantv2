@@ -2367,10 +2367,11 @@ typedef enum
 							BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29),
 	kRegMaskLUTLoad = BIT(31),
 
-	kRegMaskMRStandard = BIT(0) + BIT(1) + BIT(2) + BIT(3),
+	kRegMaskMRStandard = BIT(3) + BIT(2) + BIT(1) + BIT(0),
+	kRegMaskMRFrameLocation = BIT(15) + BIT(14) + BIT(13) + BIT(12) + BIT(11) + BIT(10) + BIT(9) + BIT(8),
 	kRegMaskMRBypass = BIT(20),
 	kRegMaskMREnable = BIT(24),
-	kRegMaskMRSupport = BIT(0) + BIT(1) + BIT(2)
+	kRegMaskMRSupport = BIT(2) + BIT(1) + BIT(0)
 
 #if !defined (NTV2_DEPRECATE)
 	,
@@ -3548,6 +3549,7 @@ typedef enum
 	kRegShiftLUTLoad = 31,
 
 	kRegShiftMRStandard = 0,
+	kRegShiftMRFrameLocation = 8,
 	kRegShiftMRBypass = 20,
 	kRegShiftMREnable = 24,
 	kRegShiftMRSupport = 0
@@ -4412,6 +4414,33 @@ typedef enum
 		@return		An NTV2ChannelList having the same channels as contained in the specified set.
 	**/
 	AJAExport NTV2ChannelList NTV2MakeChannelList (const NTV2ChannelSet inChannels);	//	New in SDK 16.0
+
+
+	typedef std::set <NTV2AudioSystem>				NTV2AudioSystemSet;				///< @brief A set of distinct NTV2AudioSystem values.  New in SDK 16.2.
+	typedef NTV2AudioSystemSet::const_iterator		NTV2AudioSystemSetConstIter;	///< @brief A handy const iterator into an NTV2AudioSystemSet.  New in SDK 16.2.
+
+	/**
+		@brief		Streams a human-readable dump of the given NTV2AudioSystemSet into the specified output stream.
+		@param[in]	inObj			Specifies the NTV2AudioSystemSet to be streamed to the output stream.
+		@param		inCompact		Use 'true' for a compact display (the default);	 otherwise use 'false' for a long-format.
+		@param		inOutStream		Specifies the output stream to receive the dump. Defaults to std::cout.
+		@return		A non-constant reference to the given output stream.
+	**/
+	AJAExport std::ostream & NTV2PrintAudioSystemSet (const NTV2AudioSystemSet & inObj, const bool inCompact = true, std::ostream & inOutStream = std::cout);	//	New in SDK 16.2
+
+	/**
+		@return		A human-readable string containing a dump of the NTV2AudioSystemSet.
+		@param[in]	inObj			Specifies the NTV2AudioSystemSet to be render.
+		@param		inCompact		Use 'true' for a compact display (the default);	 otherwise use 'false' for a long-format.
+	**/
+	AJAExport std::string NTV2AudioSystemSetToStr (const NTV2AudioSystemSet & inObj, const bool inCompact = true);	//	New in SDK 16.2
+
+	/**
+		@param[in]	inFirstAudioSystem	Specifies the first NTV2AudioSystem.
+		@param		inCount				Specifies the number of audio systems.
+		@return		An NTV2AudioSystemSet having the specified contiguous range of NTV2AudioSystems.
+	**/
+	AJAExport NTV2AudioSystemSet NTV2MakeAudioSystemSet (const NTV2AudioSystem inFirstAudioSystem, const UWord inCount = 1);	//	New in SDK 16.2
 #endif	//	!defined (NTV2_BUILDING_DRIVER)
 
 
@@ -5935,9 +5964,9 @@ typedef enum
 		#define	AUTOCIRCULATE_WITH_AUDIO_CONTROL	BIT(7)		///< @brief	Use this to AutoCirculate with no audio but with audio control
 		#define	AUTOCIRCULATE_WITH_FIELDS			BIT(8)		///< @brief	Use this to AutoCirculate with fields as frames for interlaced formats
 		#define AUTOCIRCULATE_WITH_HDMIAUX			BIT(9)		///< @brief	Use this to AutoCirculate with HDMI auxiliary data
-		#define AUTOCIRCULATE_WITH_MULTILINK_AUDIO1	BIT(10)		///< @brief	Use this to AutoCirculate with base audiosystem contolling base audiosystem plus 1 
-		#define AUTOCIRCULATE_WITH_MULTILINK_AUDIO2	BIT(11)		///< @brief	Use this to AutoCirculate with base audiosystem contolling base audiosystem plus 2
-		#define AUTOCIRCULATE_WITH_MULTILINK_AUDIO3	BIT(12)		///< @brief	Use this to AutoCirculate with base audiosystem contolling base audiosystem plus 3
+		#define AUTOCIRCULATE_WITH_MULTILINK_AUDIO1	BIT(10)		///< @brief	Use this to AutoCirculate with base audiosystem controlling base AudioSystem + 1 
+		#define AUTOCIRCULATE_WITH_MULTILINK_AUDIO2	BIT(11)		///< @brief	Use this to AutoCirculate with base audiosystem controlling base AudioSystem + 2
+		#define AUTOCIRCULATE_WITH_MULTILINK_AUDIO3	BIT(12)		///< @brief	Use this to AutoCirculate with base audiosystem controlling base AudioSystem + 3
 
 		#define AUTOCIRCULATE_FRAME_FULL			BIT(20)		///< @brief Frame contains a full image
 		#define AUTOCIRCULATE_FRAME_FIELD0			BIT(21)		///< @brief Frame contains field 0 of an interlaced image (first field in time)

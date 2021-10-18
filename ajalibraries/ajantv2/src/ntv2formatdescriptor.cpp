@@ -953,6 +953,25 @@ ULWord NTV2FormatDescriptor::GetTotalBytes (void) const
 	return bytes;
 }
 
+ULWord NTV2FormatDescriptor::GetVideoWriteSize (ULWord inPageSizeBytes) const
+{
+	static const ULWord s4K(0x00001000), s64K(0x00010000);
+	ULWord result(GetTotalBytes()), pageSizeBytes(inPageSizeBytes);
+	if (inPageSizeBytes != s4K)
+	{	//	Ensure power-of-2...
+		pageSizeBytes = s64K;	//	start at 64K
+		do
+		{
+			if (pageSizeBytes & inPageSizeBytes)
+				break;	//	exit at MSB
+			pageSizeBytes >>= 1;
+		} while (pageSizeBytes > s4K);	//	4K minimum
+	}
+	if (result % pageSizeBytes)
+		result = ((result / pageSizeBytes) + 1) * pageSizeBytes;
+	return result;
+}
+
 ULWord NTV2FormatDescriptor::GetVerticalSampleRatio (const UWord inPlaneIndex0) const
 {
 	if (inPlaneIndex0 >= mNumPlanes)

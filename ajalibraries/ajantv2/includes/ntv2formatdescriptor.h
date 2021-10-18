@@ -129,6 +129,12 @@ public:
 	ULWord			GetTotalBytes (void) const;	//	New in SDK 16.0
 
 	/**
+		@return		The result of GetTotalBytes rounded up to the nearest page size.
+		@param[in]	inPageSize		Optionally specifies the page size to use. Defaults to 4096 (4K) bytes.
+	**/
+	ULWord			GetVideoWriteSize (ULWord inPageSize = 4096UL) const;	//	New in SDK 16.2
+
+	/**
 		@return		The total number of bytes required to hold the visible raster (i.e. active lines after any VANC lines).
 		@param[in]	inPlaneIndex0	Specifies the plane of interest. Defaults to zero, the first plane.
 	**/

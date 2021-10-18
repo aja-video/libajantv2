@@ -483,13 +483,9 @@ bool CNTV2Card::DMABufferLock (const NTV2_POINTER & inBuffer, bool inMap, bool i
 	if (!inBuffer)
 		return false;
 
-	if (inRDMA)
-	{
-		NTV2BufferLock lockMsg (inBuffer, (DMABUFFERLOCK_LOCK | DMABUFFERLOCK_RDMA));
-		return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&lockMsg));
-	}
-
-	NTV2BufferLock lockMsg (inBuffer, (DMABUFFERLOCK_LOCK | (inMap? DMABUFFERLOCK_MAP : 0)));
+	NTV2BufferLock lockMsg (inBuffer, (DMABUFFERLOCK_LOCK |
+									   (inRDMA? DMABUFFERLOCK_RDMA : 0) |
+									   (inMap? DMABUFFERLOCK_MAP : 0)));
 	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&lockMsg));
 }
 

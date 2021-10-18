@@ -423,6 +423,13 @@ available for buffering on the device:
 -	The frame buffer (pixel) format to be used.
 See \ref vidop-fbindexing for more information.
 
+@note Modern NTV2 devices have a large enough SDRAM complement such that it’s possible to buffer several seconds of video
+frames on the device, which can readily exceed the maximum 1.37 seconds of audio that’s typically buffered on the device.
+When CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput are called, and the requested number of
+video frames to buffer exceeds the maximum frames buffered for audio, a warning message will be logged in \ref usingajalogger
+or the \ref usinglogreader (assuming the <tt>AutoCirculate_39</tt> message group is enabled). For example:<br>
+<tt>AutoCirculate channel 3:  85 frames (10 thru 94) exceeds 40-frame max audio buffer capacity</tt>
+
 
 @subsection	autocirculatemon	Monitoring AutoCirculate Activity with \ref usingntv2watcher Tool
 

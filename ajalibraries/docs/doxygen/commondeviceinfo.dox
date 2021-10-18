@@ -1137,6 +1137,15 @@
 	@note	The \ref usingntv2watcher tool’s \ref inspectoraudio allows you to monitor each Audio System’s
 			capture or playout buffer, as well as inspect or change its current configuration.
 
+	@warning	A fixed 4MB audio buffer necessarily places a maximum time limit … and therefore an upper limit on the number of 
+				frames of audio that can be buffered.  For example, 4MB will hold up to 1.37 seconds of 16-channel audio, or
+				2.73 seconds of 8-channel audio. At 60 fps, that’s 82 or 164 frames, respectively;  or at 29.97 fps, that’s
+				41 or 82 frames. Modern NTV2 devices have a large enough SDRAM complement such that it’s easy to buffer hundreds
+				of video frames on the device, which can readily exceed the maximum frames of audio that can be buffered.
+				CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput will emit a warning in
+				\ref usingajalogger or the \ref usinglogreader if the requested number of video frames to buffer exceeds the
+				audio buffering capacity. (Be sure to enable the <tt>AutoCirculate_39</tt> message group to see these messages.)
+
 
 	<hr size="50px">
 	@subsection	audiocapture		Audio Capture
@@ -1402,16 +1411,80 @@
 
 
 	<hr size="50px">
-	@subsection	audiohidden		Other “Hidden” Audio Systems
+	@subsection	audiomultilink	Multi-Link Audio (32, 48, 64 Audio Channels)
 
-	Modern AJA devices intended for “retail” markets, particularly newer “KONA” and “Io” series devices, may have firmware that
+	By default, per SMPTE standard, up to 16 independent audio channels are supported by a single 3G SDI signal (except for 2K
+	and 4K formats, which only support up to 8 channels, as previously noted, due to reduced HANC space).
+
+	SDK 16.2 introduced the capability of adding an additional bank of 16 audio channels with each additional SDI link of multi-link
+	video input or output:
+	-	For dual-link 3G, 6G or 12G configurations, up to 32 audio channels are supported.
+	-	For quad-link 3G, 6G or 12G (UHD2/8K) configurations, 32, 48 or 64 audio channels are supported.
+
+	@note	This feature requires newer firmware and driver version 16.2 or later.
+
+	Essentially, it gangs together 2 to 4 Audio Systems, and operates the higher-numbered ones as “slaves” by the lowest-numbered one –
+	i.e. the “master” – to record (or play) samples through them all simultaneously.
+
+	Each controlled Audio System uses its same 4MB of device memory for buffering audio samples. The driver automatically handles
+	redirecting each link’s samples during the DMA (CNTV2Card::AutoCirculateTransfer).
+
+	@note	This capability currently only works with AutoCirculate channels ::NTV2_CHANNEL1 or ::NTV2_CHANNEL3.
+
+	To enable and use this feature:
+	-	Be sure the device being used has the firmware capability by calling ::NTV2DeviceCanDoMultiLinkAudio.
+		@code{.cpp}
+			if (::NTV2DeviceCanDoMultiLinkAudio(device.GetDeviceID()))
+			{
+				//	Has multi-link audio feature
+			}
+		@endcode
+	-	During set-up:
+		-	In the call to CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput, bitwise-OR into the
+			<i>inOptionFlags</i> parameter the appropriate <tt>AUTOCIRCULATE_WITH_MULTILINK_AUDIO</tt> constant(s) for each
+			additional SDI link (and therefore additional bank of 16 audio channels) that are desired.
+			-	For example, in a quad-link (UHD or 4K) configuration, to capture 48 channels of audio from the first three SDI links:
+				@code{.cpp}
+					device.AutoCirculateInitForInput (NTV2_CHANNEL1,  7,  NTV2_AUDIOSYSTEM1,
+							AUTOCIRCULATE_WITH_AUDIO | AUTOCIRCULATE_WITH_MULTILINK_AUDIO1 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO2);
+				@endcode
+		-	For each ::NTV2AudioSystem associated with each SDI link:
+			-	Call CNTV2Card::SetAudioSystemInputSource with <tt>::NTV2_AUDIO_EMBEDDED</tt> and the appropriate <tt>NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_n</tt>.
+			-	Call CNTV2Card::SetNumberAudioChannels with the maximum (16).
+			-	Call CNTV2Card::SetAudioRate (normally with <tt>NTV2_AUDIO_48K</tt>).
+			-	Call CNTV2Card::SetAudioBufferSize (with <tt>NTV2_AUDIO_BUFFER_BIG</tt>).
+			-	Call CNTV2Card::SetAudioLoopBack with <tt>NTV2_AUDIO_LOOPBACK_OFF</tt>.
+		-	The per-frame audio buffer used in AUTOCIRCULATE_TRANSFER::SetBuffers or AUTOCIRCULATE_TRANSFER::SetAudioBuffer should be a
+			multiple of the size of a normal buffer used for a single link with 16-channels. The multiplier should be 2 for dual-link SDI
+			(32 channels),  3 for three links (48 channels), or 4 for quad-link (64 channels).
+	-	While running:
+		-	For playback, before CNTV2Card::AutoCirculateTransfer is called, be sure the audio buffer contains all of the audio samples
+			intended for each SDI link in ascending link order in the buffer, with each link’s data matching that shown in \ref audfmt-16chan.
+			That is, put the first link’s samples in the host buffer first, followed by the second link’s, and so on, with no gaps between
+			each link’s samples. The 32, 48 or 64 channel samples are not interleaved — only the 16-channel samples are interleaved per-link.
+		-	For capture, after CNTV2Card::AutoCirculateTransfer returns, the host audio buffer will have all of the audio samples for each SDI
+			link in ascending order in the buffer, with each link’s data matching that shown in \ref audfmt-16chan.
+			That is, the first link’s samples will be in the host buffer first, followed by the second link’s, and so on, with no gaps between
+			each link’s samples. The 32, 48 or 64 channel samples are not interleaved — only the 16-channel samples are interleaved per-link.
+	-	Examples — a new <tt>--audioLinks</tt> option was added to these \ref demoapps …
+		-	\ref ntv2capture4k
+		-	\ref ntv2player4k
+		-	\ref ntv2player8k
+
+	@bug	At this time, there is no API to support multi-link audio for low-latency (non-AutoCirculate) applications.
+
+
+	<hr size="50px">
+	@subsection	audiohidden		“Hidden” Audio Systems
+
+	Modern AJA devices intended for “retail” markets, particularly newer \ref ntv2hwkona and \ref ntv2hwio, may have firmware that
 	implements additional “hidden” <b>Audio System</b>s that aren’t reported by the ::NTV2DeviceGetNumAudioSystems function:
 	-	A <b>Host Audio System</b> for audio input/output to/from the host operating system (see ::NTV2DeviceGetHostAudioSystem);
 	-	A “phantom” <b>Mixer Audio System</b> that uses only FIFOs (no audio buffer memory) in order to implement an \ref audiomixer
 		(see CNTV2Card::DeviceCanDoAudioMixer and ::NTV2DeviceGetAudioMixerSystem).
 
-	These additional <b>Audio System</b>s help support AJA’s “retail” software (i.e. Adobe, Avid, Apple, Telestream, etc.
-	plug-ins, AJA ControlRoom, etc).
+	These additional <b>Audio System</b>s help support AJA’s “retail” software (i.e. Adobe, Avid, Apple, Telestream, etc. plug-ins,
+	AJA ControlRoom, etc).
 
 	The <b>Host Audio System</b> is used to continuously deliver…
 	-	SDI/HDMI/AES audio from the AJA KONA/Io device as input to the host computer’s primary audio system.

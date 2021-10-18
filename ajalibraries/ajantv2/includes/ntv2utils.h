@@ -420,6 +420,14 @@ AJAExport NTV2_SHOULD_BE_DEPRECATED(bool NTV2DeviceCanDoFormat (const NTV2Device
 AJAExport ULWord				GetAudioSamplesPerFrame (const NTV2FrameRate inFrameRate, const NTV2AudioRate inAudioRate, ULWord inCadenceFrame = 0, bool inIsSMPTE372Enabled = false);
 AJAExport LWord64				GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr (NTV2FrameRate frameRate, NTV2AudioRate audioRate, ULWord frameNbrNonInclusive);
 
+/**
+	@brief	Returns the audio sample rate as a number of audio samples per second.
+	@param[in]	inAudioRate		Specifies the audio sample rate.
+	@return The number of audio samples per second, or zero upon failure.
+	@see	See \ref audiosamplecount
+**/
+AJAExport double				GetAudioSamplesPerSecond (const NTV2AudioRate inAudioRate);	//	New in SDK 16.2
+
 AJAExport NTV2_SHOULD_BE_DEPRECATED(ULWord GetVaricamRepeatCount (const NTV2FrameRate inSequenceRate, const NTV2FrameRate inPlayRate, const ULWord inCadenceFrame = 0));
 AJAExport ULWord				GetScaleFromFrameRate (const NTV2FrameRate inFrameRate);
 AJAExport NTV2FrameRate			GetFrameRateFromScale (long scale, long duration, NTV2FrameRate playFrameRate);

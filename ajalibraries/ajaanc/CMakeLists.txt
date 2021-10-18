@@ -1,5 +1,7 @@
 project(ajaanc)
 
+message("added ajaanc")
+
 set(AJAANC_TARGET_INCLUDE_DIRS
     ${AJA_LIBRARIES_ROOT}
     ${AJA_LIB_ANC_ROOT}/includes
@@ -44,11 +46,12 @@ set(AJAANC_SOURCES
 
 set(AJAANC_TARGET_SOURCES ${AJAANC_SOURCES} ${AJAANC_HEADERS})
 
-add_library(ajaancshared SHARED ${AJAANC_TARGET_SOURCES})
 add_library(ajaanc STATIC ${AJAANC_TARGET_SOURCES})
-
-target_include_directories(ajaancshared PUBLIC ${AJAANC_TARGET_INCLUDE_DIRS})
 target_include_directories(ajaanc PUBLIC ${AJAANC_TARGET_INCLUDE_DIRS})
-
-target_link_libraries(ajaancshared PUBLIC ajantv2shared)
 target_link_libraries(ajaanc PUBLIC ajantv2)
+
+if (AJA_BUILD_SHARED)
+    add_library(ajaancshared SHARED ${AJAANC_TARGET_SOURCES})
+    target_include_directories(ajaancshared PUBLIC ${AJAANC_TARGET_INCLUDE_DIRS})
+    target_link_libraries(ajaancshared PUBLIC ajantv2shared)
+endif()

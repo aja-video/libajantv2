@@ -2920,7 +2920,7 @@ ULWord GetAudioSamplesPerFrame (const NTV2FrameRate inFrameRate, const NTV2Audio
 					case 0:
 					case 1:
 					case 2:
-					case 3: audioSamplesPerFrame = 901; break;
+					case 3: audioSamplesPerFrame = 801; break;	//	Fixed in SDK 16.2, was incorrect (901) before 16.2
 	
 					case 4: audioSamplesPerFrame = 800; break;
 				}
@@ -3221,6 +3221,14 @@ LWord64 GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr (const NTV2FrameRate in
 	}
 
 	return numTotalAudioSamples;
+}
+
+double GetAudioSamplesPerSecond (const NTV2AudioRate inAudioRate)
+{
+	static const ULWord sSamplesPerSecond [] = {48000, 96000, 192000, 0};
+	if (!NTV2_IS_VALID_AUDIO_RATE(inAudioRate))
+		return 0.00;
+	return double(sSamplesPerSecond[inAudioRate]);
 }
 
 

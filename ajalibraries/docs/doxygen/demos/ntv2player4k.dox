@@ -57,6 +57,7 @@ The NTV2Player4K class demonstrates everything the \ref ntv2player does, plus…
 	-a|--audioLinks {spec}          Optional multi-link audio, for more than 16 audio channels, where {spec} is:
 	                                    0      Silence
 	                                    1-4    Number of audio systems to simultaneously operate
+	                                           (Defaults to 1)
 
 	-?|--help|--usage               Shows how to use this command.
 @endcode

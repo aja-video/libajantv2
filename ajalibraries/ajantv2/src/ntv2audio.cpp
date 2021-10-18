@@ -180,6 +180,16 @@ bool CNTV2Card::SetNumberAudioChannels (const ULWord inNumChannels, const NTV2Au
 }
 
 
+bool CNTV2Card::SetNumberAudioChannels (const ULWord inNumChannels, const NTV2AudioSystemSet & inAudioSystems)
+{
+	size_t numFailures(0);
+	for (NTV2AudioSystemSetConstIter it(inAudioSystems.begin());  it != inAudioSystems.end();  ++it)
+		if (!SetNumberAudioChannels (inNumChannels, *it))
+			numFailures++;
+	return numFailures == 0;
+}
+
+
 bool CNTV2Card::GetNumberAudioChannels (ULWord & outNumChannels, const NTV2AudioSystem inAudioSystem)
 {
 	const ULWord	regAudControl	(NTV2_IS_VALID_AUDIO_SYSTEM (inAudioSystem) ? gAudioSystemToAudioControlRegNum [inAudioSystem] : 0);
@@ -258,6 +268,15 @@ bool CNTV2Card::SetAudioBufferSize (const NTV2AudioBufferSize inValue, const NTV
 	return WriteRegister (gAudioSystemToAudioControlRegNum[inAudioSystem], inValue, kK2RegMaskAudioBufferSize, kK2RegShiftAudioBufferSize);
 }
 
+bool CNTV2Card::SetAudioBufferSize (const NTV2AudioBufferSize inMode, const NTV2AudioSystemSet & inAudioSystems)
+{
+	size_t numFailures(0);
+	for (NTV2AudioSystemSetConstIter it(inAudioSystems.begin());  it != inAudioSystems.end();  ++it)
+		if (!SetAudioBufferSize (inMode, *it))
+			numFailures++;
+	return numFailures == 0;
+}
+
 
 bool CNTV2Card::GetAudioBufferSize (NTV2AudioBufferSize & outSize, const NTV2AudioSystem inAudioSystem)
 {
@@ -300,6 +319,15 @@ bool CNTV2Card::SetAudioLoopBack (const NTV2AudioLoopBack inValue, const NTV2Aud
 	if (inValue == NTV2_AUDIO_LOOPBACK_ON)
 		SetEmbeddedAudioClock (NTV2_EMBEDDED_AUDIO_CLOCK_REFERENCE, inAudioSystem); //	Use board reference as audio clock
 	return WriteRegister (gAudioSystemToAudioControlRegNum [inAudioSystem], inValue, kRegMaskLoopBack, kRegShiftLoopBack);
+}
+
+bool CNTV2Card::SetAudioLoopBack (const NTV2AudioLoopBack inMode, const NTV2AudioSystemSet & inAudioSystems)
+{
+	size_t numFailures(0);
+	for (NTV2AudioSystemSetConstIter it(inAudioSystems.begin());  it != inAudioSystems.end();  ++it)
+		if (!SetAudioLoopBack (inMode, *it))
+			numFailures++;
+	return numFailures == 0;
 }
 
 
@@ -566,12 +594,19 @@ bool CNTV2Card::SetSDIOutputAudioSystem (const NTV2Channel inChannel, const NTV2
 	if (!WriteRegister (gChannelToSDIOutControlRegNum [inChannel], b0, BIT(30), 30))	//	bit 30 is LSB
 		return false;
 
-	//NTV2AudioSystem	compareA;
-	//GetSDIOutputAudioSystem (inChannel, compareA);
-	//NTV2_ASSERT(compareA == inAudioSystem);
 	return true;
 
 }	//	SetSDIOutputAudioSystem
+
+
+bool CNTV2Card::SetSDIOutputAudioSystem (const NTV2ChannelSet & inSDIOutputs, const NTV2AudioSystem inAudioSystem, const bool inDS2)
+{
+	size_t numFailures(0);
+	for (NTV2ChannelSet::const_iterator it(inSDIOutputs.begin());  it != inSDIOutputs.end();  ++it)
+		if (!(inDS2 ? SetSDIOutputDS2AudioSystem(*it, inAudioSystem) : SetSDIOutputAudioSystem(*it, inAudioSystem)))
+			numFailures++;
+	return numFailures == 0;
+}
 
 
 bool CNTV2Card::GetSDIOutputDS2AudioSystem (const NTV2Channel inChannel, NTV2AudioSystem & outAudioSystem)
@@ -1842,14 +1877,10 @@ bool CNTV2Card::SetMultiLinkAudioMode (const NTV2AudioSystem inAudioSystem, bool
 
 bool CNTV2Card::GetMultiLinkAudioMode (const NTV2AudioSystem inAudioSystem, bool & outEnabled)
 {
+	outEnabled = false;
 	if (!NTV2DeviceCanDoMultiLinkAudio(_boardID))
 		return false;
-	ULWord regValue(0);
-	outEnabled = false;
-	if(!ReadRegister(gAudioSystemToAudioControlRegNum[inAudioSystem], regValue, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio))
-		return false;
-	outEnabled = regValue ? true : false;
-	return true;
+	return CNTV2DriverInterface::ReadRegister(gAudioSystemToAudioControlRegNum[inAudioSystem], outEnabled, kRegMaskMultiLinkAudio, kRegShiftMultiLinkAudio);
 }
 
 #if !defined(NTV2_DEPRECATE_16_1)
