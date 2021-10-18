@@ -2367,10 +2367,11 @@ typedef enum
 							BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29),
 	kRegMaskLUTLoad = BIT(31),
 
-	kRegMaskMRStandard = BIT(0) + BIT(1) + BIT(2) + BIT(3),
+	kRegMaskMRStandard = BIT(3) + BIT(2) + BIT(1) + BIT(0),
+	kRegMaskMRFrameLocation = BIT(15) + BIT(14) + BIT(13) + BIT(12) + BIT(11) + BIT(10) + BIT(9) + BIT(8),
 	kRegMaskMRBypass = BIT(20),
 	kRegMaskMREnable = BIT(24),
-	kRegMaskMRSupport = BIT(0) + BIT(1) + BIT(2)
+	kRegMaskMRSupport = BIT(2) + BIT(1) + BIT(0)
 
 #if !defined (NTV2_DEPRECATE)
 	,
@@ -3548,6 +3549,7 @@ typedef enum
 	kRegShiftLUTLoad = 31,
 
 	kRegShiftMRStandard = 0,
+	kRegShiftMRFrameLocation = 8,
 	kRegShiftMRBypass = 20,
 	kRegShiftMREnable = 24,
 	kRegShiftMRSupport = 0
