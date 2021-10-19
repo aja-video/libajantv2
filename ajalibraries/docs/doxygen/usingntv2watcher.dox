@@ -1065,6 +1065,7 @@ Standard behaviors:
 		-	<b>4K Mode</b> — Changes the Framestore’s “quad” mode to “squares” or “TSI” (if device is 4K-capable).
 		-	<b>Inspect</b> — Opens the Framestore’s \ref inspectorframebuffer.
 		-	<b>Fill…</b> — Opens the \ref fillbufferdlog .
+		-	<b>Write Test Pattern</b> — Writes the chosen test pattern into the Framestore’s current Output Frame (playback mode only).
 	-	On <b>CSC</b>s:
 		-	<b>Colorspace Matrix</b> — Choose “Rec601” or “Rec709”.
 		-	<b>RGB Range</b> — Choose “Full” or “SMPTE”.
