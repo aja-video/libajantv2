@@ -357,7 +357,7 @@ There are two ways to output analog LTC:
 
 @subsection		ancvpid		VPID
 
-<b>Input</b>
+<b>Input / Record</b>
 
 On AJA devices with one or more SDI inputs (3G or faster), when a signal is present, the firmware automatically looks for and detects
 VPID (Video Payload IDentifier) packets on link A (and link B, if present), and stores the extracted VPID data value(s) into separate
@@ -371,22 +371,28 @@ There are two methods to read input VPID:
 -	Devices that have <b>Anc Extractor</b> firmware described in \ref anccapture (below) can capture the “raw” HANC VPID
 	packet data … then decode it per SMPTE specifications.
 
+Once the 4-byte VPID value has been read, it can be decoded, per SMPTE specifications. The ::CNTV2VPID class can be used
+as a convenience to query all the various metadata that describes the input signal.
 
-<b>Output</b>
+
+<b>Output / Playback</b>
 
 On AJA devices with one or more SDI outputs (3G or faster), there are two VPID output payload registers for each SDI output
 (one for Link A, another for Link B). When the driver is running in ::NTV2EveryFrameTaskMode ::NTV2_STANDARD_TASKS (retail)
 or ::NTV2_OEM_TASKS, it will automatically write the proper VPID payload value(s) into these registers when the output video
 standard is set. The SDI output’s Anc embedder, upon seeing a valid VPID payload in the respective payload register, will
 automatically insert a VPID packet in the outgoing SDI data stream.
+-	The most common augmentation to the output VPID is for <b>HDR signaling</b>. This can be done when setting
+	the output FrameStore’s pixel format using CNTV2Card::SetFrameBufferFormat by setting the ::NTV2HDRXferChars,
+	::NTV2HDRColorimetry and/or ::NTV2HDRLuminance parameters.
 -	To read the output VPID payload value(s) that are currently being used, call CNTV2Card::GetSDIOutVPID.
--	Call CNTV2Card::SetSDIOutVPID to set the output VPID payload value(s) to be transmitted — but be forewarned:
-	-	The calling application will “fight” with the driver as to which values will actually get transmitted.
-	-	To safely override the default output VPID payload values, …
-		-	Write a non-zero value to the ::kVRegDisableAutoVPID virtual register (using CNTV2Card::WriteRegister)
-			once when your program starts.
-		-	Call CNTV2Card::SetSDIOutVPID to set the outgoing VPID payload value as needed.
-		-	Don’t forget to set ::kVRegDisableAutoVPID back to zero when your program exits.
+-	Note that calling CNTV2Card::SetSDIOutVPID to override the default output VPID payload value(s) to be transmitted won’t
+	work, because the calling application will be “fighting” with the driver as to which VPID value will actually be transmitted.
+	In the rare case when it’s necessary to override the default output VPID payload values, …
+	-	Write a non-zero value to the ::kVRegDisableAutoVPID virtual register (using CNTV2Card::WriteRegister)
+		once when your program starts.
+	-	Call CNTV2Card::SetSDIOutVPID to set the outgoing VPID payload value as needed.
+	-	Don’t forget to reset ::kVRegDisableAutoVPID to zero when your program exits.
 
 <hr size="50px">
 
