@@ -7237,8 +7237,8 @@ bool CNTV2Card::GetVPIDRGBRange (NTV2VPIDRGBRange & outValue, const NTV2Channel 
 
 bool CNTV2Card::HasMultiRasterWidget()
 {
-	ULWord hasMultiRasterWidget(0);
-	return ReadRegister(kRegMRSupport, hasMultiRasterWidget, kRegMaskMRSupport, kRegShiftMRSupport)	 &&	 (hasMultiRasterWidget ? true : false);
+	bool hasMultiRasterWidget(false);
+	return CNTV2DriverInterface::ReadRegister(kRegMRSupport, hasMultiRasterWidget, kRegMaskMRSupport, kRegShiftMRSupport)  &&  hasMultiRasterWidget;
 }
 
 bool CNTV2Card::SetMultiRasterBypassEnable (const bool inEnable)
