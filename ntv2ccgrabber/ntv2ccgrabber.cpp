@@ -383,9 +383,10 @@ void NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 	const NTV2ChannelList	frameStores		(::NTV2MakeChannelList(mInputFrameStores));
 	NTV2ChannelList			sdiInputs		(::NTV2MakeChannelList(mActiveSDIInputs));
 	const NTV2ChannelList	activeCSCs		(::NTV2MakeChannelList(mActiveCSCs));
+	static const bool		ShowRoutingProgress(false);
 
 	mInputConnections.clear();
-//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ClearRouting();
+	if (ShowRoutingProgress) mDevice.ClearRouting();
 
 	//	Route frameStore's input to sdiInput's output (possibly through CSC, if required)
 	if (isRGBFBF && isRGBWire)
@@ -400,7 +401,7 @@ void NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 															::GetSDIInputOutputXptFromChannel(sdiIn, /*DS2?*/true)));
 				mInputConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(sdiIn),
 															::GetDLInOutputXptFromChannel(frmSt)));
-//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mInputConnections);
+				if (ShowRoutingProgress) mDevice.ApplySignalRoute(mInputConnections);
 			}
 		}
 		else	// TSI	//	2x SDIIn ==> 2x DLIn ==> 425MUX ==> RGBFrameStore
@@ -422,7 +423,7 @@ void NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 															::GetTSIMuxOutputXptFromChannel(tsiMux,/*lnkB?*/false, /*rgb?*/true)));
 				mInputConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(frmSt, /*lnkB?*/true),
 															::GetTSIMuxOutputXptFromChannel(tsiMux,/*lnkB?*/true, /*rgb?*/true)));
-//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mInputConnections);
+				if (ShowRoutingProgress) mDevice.ApplySignalRoute(mInputConnections);
 			}
 		}
 	}
@@ -459,7 +460,7 @@ void NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 															::GetSDIInputOutputXptFromChannel(sdiIn, /*DS2?*/ndx & 1)));
 			}
 		}
-//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mInputConnections);
+		if (ShowRoutingProgress) mDevice.ApplySignalRoute(mInputConnections);
 	}
 	else if (!isRGBFBF && isRGBWire)
 	{
@@ -475,7 +476,7 @@ void NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 															::GetSDIInputOutputXptFromChannel(sdi, /*DS2?*/false)));
 				mInputConnections.insert(NTV2XptConnection(::GetDLInInputXptFromChannel(sdi, /*lnkB?*/true),
 															::GetSDIInputOutputXptFromChannel(sdi, /*DS2?*/true)));
-//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mInputConnections);
+				if (ShowRoutingProgress) mDevice.ApplySignalRoute(mInputConnections);
 			}
 		}
 		else	// TSI	//	SDIIn ==> DLIn ==> CSC ==> TSIMux ==> FrameStore
@@ -491,7 +492,7 @@ void NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 			{	NTV2Channel frmSt(frameStores.at(ndx)), sdiIn(sdiInputs.at(ndx));
 				mInputConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(frmSt),
 															::GetSDIInputOutputXptFromChannel(sdiIn)));
-//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mInputConnections);
+				if (ShowRoutingProgress) mDevice.ApplySignalRoute(mInputConnections);
 			}
 		}
 		else	// TSI	//	SDIIn (LFR: 2 x DS1&DS2, 4KHFR: 4 x DS1) ==> 425MUX ==> YUVFrameStore
@@ -516,10 +517,10 @@ void NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 				if (!is4KHFR)
 					mConnections.insert(NTV2XptConnection(::GetFrameBufferInputXptFromChannel(frmSt, /*inputB?*/true),
 										::GetTSIMuxOutputXptFromChannel(tsiMux,/*linkB?*/true)));
-//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mInputConnections);
+				if (ShowRoutingProgress) mDevice.ApplySignalRoute(mInputConnections);
 			}
 		}
-//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mInputConnections);
+		if (ShowRoutingProgress) mDevice.ApplySignalRoute(mInputConnections);
 	}
 	//	At this point, sdiInputs is authoritative, so update mActiveSDIInputs...
 	mActiveSDIInputs = ::NTV2MakeChannelSet(sdiInputs);
@@ -536,17 +537,17 @@ void NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 							mActiveSDIInputs.begin(), mActiveSDIInputs.end(),	//		- mActiveSDIInputs
 							inserter(sdiOuts, sdiOuts.begin()));				//			==> sdiOuts
 			sdiOutputs = ::NTV2MakeChannelList(sdiOuts);
-cerr << "allSDIs: " << ::NTV2ChannelSetToStr(allSDIs) << endl << "actSDIIns: " << ::NTV2ChannelSetToStr(mActiveSDIInputs) << endl;
+			cerr << "allSDIs: " << ::NTV2ChannelSetToStr(allSDIs) << endl << "actSDIIns: " << ::NTV2ChannelSetToStr(mActiveSDIInputs) << endl;	//	DEBUG
 		}
 		else
 			sdiOutputs = ::NTV2MakeChannelList(NTV2_CHANNEL1, ::NTV2DeviceGetNumVideoOutputs(mDeviceID));
-cerr << "SDIOuts: " << ::NTV2ChannelListToStr(sdiOutputs) << endl << "SDIIns: " << ::NTV2ChannelListToStr(sdiInputs) << endl;
+		cerr << "SDIOuts: " << ::NTV2ChannelListToStr(sdiOutputs) << endl << "SDIIns: " << ::NTV2ChannelListToStr(sdiInputs) << endl;	//	DEBUG
 		for (size_t sdiNdx(0);  sdiNdx < sdiOutputs.size();  sdiNdx++)
 		{	const NTV2Channel sdiOut(sdiOutputs.at(sdiNdx));
 			const NTV2Channel sdiIn(sdiInputs.at(sdiNdx < sdiInputs.size() ? sdiNdx : sdiInputs.size()-1));
 			if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID)  &&  mActiveSDIInputs.find(sdiOut) == mActiveSDIInputs.end())
 			{
-cerr << "Switching SDI " << (sdiOut+1) << " to output" << endl;
+				cerr << "Switching SDI " << (sdiOut+1) << " to output" << endl;	//	DEBUG
 				mDevice.SetSDITransmitEnable(sdiOut, true);
 			}
 			if (isRGBWire)
@@ -561,7 +562,7 @@ cerr << "Switching SDI " << (sdiOut+1) << " to output" << endl;
 			else
 				mInputConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut),
 															::GetSDIInputOutputXptFromChannel(sdiIn)));
-//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ApplySignalRoute(mInputConnections);
+			if (ShowRoutingProgress) mDevice.ApplySignalRoute(mInputConnections);
 		}	//	for each output spigot
 	}	//	if not burning captions and not multiFormat
 
@@ -775,11 +776,13 @@ void NTV2CCGrabber::CaptureFrames (void)
 				{
 					++noVideoTally;
 					if (vfChanged)
-						cerr << endl << "## WARNING:  Input video format changed" << endl;
+						CAPWARN("Input video format changed from '" << ::NTV2VideoFormatToString(currentVF)
+								<< "' to '" << ::NTV2VideoFormatToString(newVF) << "'");
 					else if (vpidChgd)
-						cerr << endl << "## WARNING:  Input VPID changed" << endl;
+						CAPWARN("Input VPID changed: DS1 (" << xHEX0N(mVPIDInfoDS1.GetVPID(),8) << " to " << xHEX0N(vpidDS1,8)
+								<< "), DS2 (" << xHEX0N(mVPIDInfoDS2.GetVPID(),8) << " to " << xHEX0N(vpidDS2,8) << ")");
 					else if (squares != mSquares)
-						cerr << endl << "## WARNING:  SqDiv/Tsi changed" << endl;
+						CAPWARN("Input changed from " << (mSquares?"SqDiv":"TSI") << " to " << (squares?"SqDiv":"TSI"));
 
 					//	These next 2 calls terminate the playout thread...
 					mCircularBuffer.StartProduceNextBuffer();
@@ -789,9 +792,9 @@ void NTV2CCGrabber::CaptureFrames (void)
 			}	//	else not running or no frames available
 			if (mConfig.fPixelFormat != currentPF)
 			{
-				cerr << endl << "## WARNING:  FrameStore pixel format changed from '"
+				CAPWARN("FrameStore pixel format changed from '"
 					<< ::NTV2FrameBufferFormatToString(currentPF,true) << "' to '"
-					<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat,true) << "'" << endl;
+					<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat,true) << "'");
 				break;	//	exit frame processing loop -- restart AutoCirculate
 			}
 		}	//	normal frame processing loop -- loop until signal or pixel format change
