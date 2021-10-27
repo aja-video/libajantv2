@@ -886,9 +886,9 @@ public:
 									This must be a valid ::NTV2FrameBufferFormat value.
 		@param[in]	inIsAJARetail	Specifies if the AJA retail configuration settings are to be respected or not.
 									Defaults to false on all platforms other than MacOS, which defaults to true.
-		@param[in]	inXferChars		Specifies the HDR tranfer characteristc description.
-		@param[in]	inColorimetry	Specifies the HDR colorimetry description.
-		@param[in]	inLuminance		Specifies the HDR luminance description.
+		@param[in]	inXferChars		Specifies the HDR tranfer characteristc description (affects output VPID).
+		@param[in]	inColorimetry	Specifies the HDR colorimetry description (affects output VPID).
+		@param[in]	inLuminance		Specifies the HDR luminance description (affects output VPID).
 		@details	This function allows client applications to control the format of frame data stored
 					in the FrameStores on an AJA device. This is important, because when frames are transferred
 					between the host and the AJA device, the frame data format is presumed to be identical.
@@ -908,9 +908,9 @@ public:
 									This must be a valid ::NTV2FrameBufferFormat value.
 		@param[in]	inIsAJARetail	Specifies if the AJA retail configuration settings are to be respected or not.
 									Defaults to false on all platforms other than MacOS, which defaults to true.
-		@param[in]	inXferChars		Specifies the HDR tranfer characteristc description.
-		@param[in]	inColorimetry	Specifies the HDR colorimetry description.
-		@param[in]	inLuminance		Specifies the HDR luminance description.
+		@param[in]	inXferChars		Specifies the HDR tranfer characteristc description (affects output VPID).
+		@param[in]	inColorimetry	Specifies the HDR colorimetry description (affects output VPID).
+		@param[in]	inLuminance		Specifies the HDR luminance description (affects output VPID).
 		@details	This function allows client applications to control the format of frame data read or written
 					by the FrameStore(s) on an AJA device. This is important, because when frames are transferred
 					between the host and the AJA device, the frame data format is presumed to be identical.
