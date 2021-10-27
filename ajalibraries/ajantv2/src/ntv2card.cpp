@@ -198,14 +198,14 @@ bool CNTV2Card::GetDriverVersionComponents (UWord & outMajor, UWord & outMinor, 
 ULWord CNTV2Card::GetSerialNumberLow (void)
 {
 	ULWord	serialNum	(0);
-	return ReadRegister (54, serialNum) ? serialNum : 0;	//	Read EEPROM shadow of Serial Number
+	return ReadRegister (kRegReserved54, serialNum) ? serialNum : 0;	//	Read EEPROM shadow of Serial Number
 }
 
 
 ULWord CNTV2Card::GetSerialNumberHigh (void)
 {
 	ULWord	serialNum	(0);
-	return ReadRegister (55, serialNum) ? serialNum : 0;	//	Read EEPROM shadow of Serial Number
+	return ReadRegister (kRegReserved55, serialNum) ? serialNum : 0;	//	Read EEPROM shadow of Serial Number
 }
 
 
@@ -239,8 +239,8 @@ bool CNTV2Card::IS_INPUT_SPIGOT_INVALID (const UWord inInputSpigot) const
 
 uint64_t CNTV2Card::GetSerialNumber (void)
 {
-	const uint64_t	lo (GetSerialNumberLow ()),	 hi (GetSerialNumberHigh ());
-	uint64_t		result	((hi << 32) | lo);
+	const uint64_t	lo(GetSerialNumberLow()),	hi(GetSerialNumberHigh());
+	const uint64_t	result((hi << 32) | lo);
 	return result;
 }
 
