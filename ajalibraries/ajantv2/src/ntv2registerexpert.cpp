@@ -1934,13 +1934,13 @@ private:
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 		{
 			(void) inRegNum;
+			const UWord		numInputs	(::NTV2DeviceGetNumVideoInputs(inDeviceID));
+			const UWord		numOutputs	(::NTV2DeviceGetNumVideoOutputs(inDeviceID));
+			const UWord		numSpigots	(numInputs > numOutputs	 ?	numInputs  :  numOutputs);
 			ostringstream	oss;
 			if (::NTV2DeviceHasBiDirectionalSDI(inDeviceID))
 			{
 				const uint32_t	txEnableBits	(((inRegValue & 0x0F000000) >> 20) | ((inRegValue & 0xF0000000) >> 28));
-				const UWord		numInputs		(::NTV2DeviceGetNumVideoInputs(inDeviceID));
-				const UWord		numOutputs		(::NTV2DeviceGetNumVideoOutputs(inDeviceID));
-				const UWord		numSpigots		(numInputs > numOutputs	 ?	numInputs  :  numOutputs);
 				if (numSpigots)
 					for (UWord spigot(0);  spigot < numSpigots;	 )
 					{
@@ -1954,6 +1954,18 @@ private:
 			}
 			else
 				oss << "(Bi-directional SDI not supported)";
+			if (numInputs)
+			{	if (!oss.str().empty()) oss << endl;
+				const uint32_t	rxDisableCRCChkBits	(inRegValue & 0x000000FF);
+				for (UWord spigot(0);  spigot < numInputs;	 )
+				{
+					const uint32_t	disabled (rxDisableCRCChkBits & BIT(spigot));
+					oss << "SDIIn" << DEC(++spigot) << " CRC Check: " << (disabled ? "Disabled" : "Normal");
+					if (spigot < numInputs)
+						oss << endl;
+				}
+			}
+			//	CRC checking
 			return oss.str();
 		}
 		virtual ~DecodeSDITransmitCtrl()	{}

@@ -6391,6 +6391,26 @@ public:
 		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
 	**/
 	AJA_VIRTUAL ULWord		GetCRCErrorCountB (const NTV2Channel inChannel);
+
+	/**
+		@brief		Controls CRC error checking for the given SDI input.
+		@param[in]	inChannel		Specifies the SDI input of interest as an ::NTV2Channel value (an unsigned zero-based integer).
+		@param[in]	inEnabled		Specify 'true' to enable CRC error checking (i.e. normal);  otherwise false to disable.
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetSDIInputCRCChecking, <b>SDI Connectors</b> in \ref devicesignalinputsoutputs
+		@note		Rarely, some devices emit non-compliant SDI with bad CRC values. This function is provided to disable CRC checking
+					to enable the device to lock to, and capture such signals.
+	**/
+	AJA_VIRTUAL bool		SetSDIInputCRCChecking (const NTV2Channel inSDIInput, const bool inEnabled);	//	New in SDK 16.2
+
+	/**
+		@brief		Answers if CRC error checking is enabled for the given SDI input.
+		@param[in]	inChannel		Specifies the SDI input of interest as an ::NTV2Channel value (an unsigned zero-based integer).
+		@param[out]	outEnabled		Receives 'true' if CRC error checking is enabled (i.e. normal);  otherwise false if disabled.
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetSDIInputCRCChecking, <b>SDI Connectors</b> in \ref devicesignalinputsoutputs
+	**/
+	AJA_VIRTUAL bool		GetSDIInputCRCChecking (const NTV2Channel inSDIInput, bool & outEnabled);	//	New in SDK 16.2
 	///@}
 
 	/**
@@ -6400,7 +6420,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inEnable	If true, sets the device in multi-format mode.
 								If false, sets the device in uni-format mode.
-		@see		::NTV2DeviceCanDoMultiFormat, \ref deviceclockingandsync
+		@see		::NTV2DeviceCanDoMultiFormat, CNTV2Card::GetMultiFormatMode, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool	   SetMultiFormatMode (const bool inEnable);
 
@@ -6411,7 +6431,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[out] outIsEnabled	Receives true if the device is currently in multi-format mode,
 									or false if it's in uni-format mode.
-		@see		::NTV2DeviceCanDoMultiFormat, \ref deviceclockingandsync
+		@see		::NTV2DeviceCanDoMultiFormat, CNTV2Card::SetMultiFormatMode, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool		GetMultiFormatMode (bool & outIsEnabled);
 
