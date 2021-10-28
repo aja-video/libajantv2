@@ -2746,7 +2746,7 @@ ostream & NTV2RegInfo::Print (ostream & oss, const bool inAsCode) const
 	return oss << "]";
 }
 
-ostream & NTV2RegInfo::PrintCode (ostream & oss, const int inRadix) const
+ostream & NTV2RegInfo::PrintCode (ostream & oss, const int inRadix, const NTV2DeviceID inDeviceID) const
 {
 	const string regName (::NTV2RegisterNumberToString(NTV2RegisterNumber(registerNumber)));
 	const bool badName (regName.find(' ') != string::npos);
@@ -2778,7 +2778,7 @@ ostream & NTV2RegInfo::PrintCode (ostream & oss, const int inRadix) const
 	else
 		oss << "Reg " << DEC(registerNumber);
 	//	Decode the reg value...
-	string info(CNTV2RegisterExpert::GetDisplayValue(registerNumber, registerValue));
+	string info(CNTV2RegisterExpert::GetDisplayValue(registerNumber, registerValue, inDeviceID));
 	if (!info.empty())	//	and add to end of comment
 		oss << "  // " << aja::replace(info, "\n", ", ");
 	return oss;
