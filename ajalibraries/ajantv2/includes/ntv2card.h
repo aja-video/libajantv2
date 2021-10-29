@@ -6398,8 +6398,8 @@ public:
 		@param[in]	inEnabled		Specify 'true' to enable CRC error checking (i.e. normal);  otherwise false to disable.
 		@return		True if successful;  otherwise false.
 		@see		CNTV2Card::GetSDIInputCRCChecking, <b>SDI Connectors</b> in \ref devicesignalinputsoutputs
-		@note		Rarely, some devices emit non-compliant SDI with bad CRC values. This function is provided to disable CRC checking
-					to enable the device to lock to, and capture such signals.
+		@note		Rarely, some SDI devices emit non-compliant SDI with bad CRC values. This function is provided to disable CRC
+					checking to enable the AJA device to lock to, and capture such signals.
 	**/
 	AJA_VIRTUAL bool		SetSDIInputCRCChecking (const NTV2Channel inSDIInput, const bool inEnabled);	//	New in SDK 16.2
 
