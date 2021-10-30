@@ -639,11 +639,11 @@ bool CNTV2Card::AutoCirculateInitForInput ( const NTV2Channel		inChannel,
 											const UWord				inEndFrameNumber)
 {
 	if (!NTV2_IS_VALID_CHANNEL(inChannel))
-		{ACFAIL("Invalid channel value specified '" << DEC(inChannel) << "'");  return false;}	//	Must be valid channel
-	if (inNumChannels == 0)
-		{ACFAIL("'inNumChannels' is zero -- expected 1 or more");  return false;}	//	At least one channel
+		{ACFAIL("Ch" << DEC(inChannel+1) << " is illegal channel value");  return false;}	//	Must be valid channel
+	if (!inNumChannels  ||  inNumChannels > 8)
+		{ACFAIL("Input Ch" << DEC(inChannel+1) << ": illegal 'inNumChannels' value '" << DEC(inNumChannels) << "' -- must be 1-8");  return false;}	//	At least one channel
 	if (!gFBAllocLock.IsValid())
-		{ACFAIL("FBAllocLock mutex not ready");  return false;}	//	Mutex not ready
+		{ACFAIL("Input Ch" << DEC(inChannel+1) << ": FBAllocLock mutex not ready");  return false;}	//	Mutex not ready
 
 	AJAAutoLock autoLock (&gFBAllocLock);	//	Avoid AutoCirculate buffer collisions
 	LWord	startFrameNumber(LWord(inStartFrameNumber+0));
@@ -651,19 +651,19 @@ bool CNTV2Card::AutoCirculateInitForInput ( const NTV2Channel		inChannel,
 	if (!endFrameNumber	 &&	 !startFrameNumber)
 	{
 		if (!inFrameCount)
-			{ACFAIL("Zero frames requested");  return false;}
+			{ACFAIL("Input Ch" << DEC(inChannel+1) << ": Zero frames requested");  return false;}
 		if (!FindUnallocatedFrames (inFrameCount, startFrameNumber, endFrameNumber, inChannel))
 			return false;
 	}
 	else if (inFrameCount)
-		ACWARN ("FrameCount " << DEC(inFrameCount) << " ignored -- using start/end " << DEC(inStartFrameNumber)
+		ACWARN ("Input Ch" << DEC(inChannel+1) << ": FrameCount " << DEC(inFrameCount) << " ignored -- using start/end " << DEC(inStartFrameNumber)
 				<< "/" << DEC(inEndFrameNumber) << " frame numbers");
 	if (endFrameNumber < startFrameNumber)	//	endFrame must be > startFrame
-		{ACFAIL("EndFrame(" << DEC(endFrameNumber) << ") precedes StartFrame(" << DEC(startFrameNumber) << ")");  return false;}
+		{ACFAIL("Input Ch" << DEC(inChannel+1) << ": EndFrame(" << DEC(endFrameNumber) << ") precedes StartFrame(" << DEC(startFrameNumber) << ")");  return false;}
 	if ((endFrameNumber - startFrameNumber + 1) < 2)	//	must be at least 2 frames
-		{ACFAIL("Frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber) << " < 2 frames"); return false;}
+		{ACFAIL("Input Ch" << DEC(inChannel+1) << ": Frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber) << " < 2 frames"); return false;}
 	if (inOptionFlags & (AUTOCIRCULATE_WITH_MULTILINK_AUDIO1 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO2 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO3)  &&  !::NTV2DeviceCanDoMultiLinkAudio(GetDeviceID()))
-		ACWARN("Input Ch" << DEC(inChannel+1) << " MultiLink Audio requested, but device doesn't support it");
+		ACWARN("Input Ch" << DEC(inChannel+1) << ": MultiLink Audio requested, but device doesn't support it");
 
 	//	Fill in our OS independent data structure...
 	AUTOCIRCULATE_DATA	autoCircData(eInitAutoCirc);
@@ -713,7 +713,7 @@ bool CNTV2Card::AutoCirculateInitForInput ( const NTV2Channel		inChannel,
 						warning << "Frms " << DEC0N(startBlk,3) << "-" << DEC0N(startBlk+numBlks-1,3);
 					else
 						warning << "Frm  " << DEC0N(startBlk,3);
-					ACWARN("Ch" << DEC(inChannel+1) << " memory overlap/interference: " << warning.str() << ": " << infoStr);
+					ACWARN("Input Ch" << DEC(inChannel+1) << ": memory overlap/interference: " << warning.str() << ": " << infoStr);
 				}
 			}	//	for each "bad" region
 		#endif
@@ -735,17 +735,17 @@ bool CNTV2Card::AutoCirculateInitForInput ( const NTV2Channel		inChannel,
 						const double bytesPerFrame (samplesPerSecond * bytesPerChannel * channelsPerSample / framesPerSecond);
 						const ULWord maxVideoFrames (4UL * 1024UL * 1024UL / ULWord(bytesPerFrame));
 						if (stat.GetFrameCount() > maxVideoFrames)
-							ACWARN("AutoCirculate channel " << DEC(inChannel+1) << ":  " << DEC(stat.GetFrameCount()) << " frames ("
-									<< DEC(stat.GetStartFrame()) << " thru " << DEC(stat.GetEndFrame()) << ") exceeds " << DEC(maxVideoFrames)
-									<< "-frame max audio buffer capacity");
+							ACWARN("Input Ch" << DEC(inChannel+1) << ":  " << DEC(stat.GetFrameCount()) << " frames ("
+									<< DEC(stat.GetStartFrame()) << "-" << DEC(stat.GetEndFrame()) << ") exceeds "
+									<< DEC(maxVideoFrames) << "-frame max audio buffer capacity");
 					}
 			}
 		}
 		#endif
-		ACINFO("Ch" << DEC(inChannel+1) << " initialized using frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber));
+		ACINFO("Input Ch" << DEC(inChannel+1) << " initialized using frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber));
 	}
 	else
-		ACFAIL("Ch" << DEC(inChannel+1) << " initialization failed");
+		ACFAIL("Input Ch" << DEC(inChannel+1) << " initialization failed");
 	return result;
 
 }	//	AutoCirculateInitForInput
@@ -760,11 +760,11 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 											const UWord				inEndFrameNumber)
 {
 	if (!NTV2_IS_VALID_CHANNEL(inChannel))
-		{ACFAIL("Invalid channel value specified '" << DEC(inChannel) << "'");  return false;}	//	Must be valid channel
-	if (inNumChannels == 0)
-		{ACFAIL("'inNumChannels' is zero -- expected 1 or more");  return false;}	//	At least one channel
+		{ACFAIL("Ch" << DEC(inChannel+1) << " is illegal channel value");  return false;}	//	Must be valid channel
+	if (!inNumChannels  ||  inNumChannels > 8)
+		{ACFAIL("Output Ch" << DEC(inChannel+1) << ": illegal 'inNumChannels' value '" << DEC(inNumChannels) << "' -- must be 1-8");  return false;}	//	At least one channel
 	if (!gFBAllocLock.IsValid())
-		{ACFAIL("FBAllocLock mutex not ready");  return false;}	//	Mutex not ready
+		{ACFAIL("Output Ch" << DEC(inChannel+1) << ": FBAllocLock mutex not ready");  return false;}	//	Mutex not ready
 
 	AJAAutoLock autoLock (&gFBAllocLock);	//	Avoid AutoCirculate buffer collisions
 	LWord	startFrameNumber(LWord(inStartFrameNumber+0));
@@ -772,26 +772,27 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 	if (!endFrameNumber	 &&	 !startFrameNumber)
 	{
 		if (!inFrameCount)
-			{ACFAIL("Zero frames requested");  return false;}
+			{ACFAIL("Output Ch" << DEC(inChannel+1) << ": Zero frames requested");  return false;}
 		if (!FindUnallocatedFrames (inFrameCount, startFrameNumber, endFrameNumber, inChannel))
 			return false;
 	}
 	else if (inFrameCount)
-		ACWARN ("FrameCount " << DEC(inFrameCount) << " ignored -- using start/end " << DEC(inStartFrameNumber)
-				<< "/" << DEC(inEndFrameNumber) << " frame numbers");
+		ACWARN ("Output Ch" << DEC(inChannel+1) << ": FrameCount " << DEC(inFrameCount) << " ignored -- using start/end "
+				<< DEC(inStartFrameNumber) << "/" << DEC(inEndFrameNumber) << " frame numbers");
 	if (endFrameNumber < startFrameNumber)	//	endFrame must be > startFrame
-		{ACFAIL("EndFrame(" << DEC(endFrameNumber) << ") precedes StartFrame(" << DEC(startFrameNumber) << ")");  return false;}
+		{ACFAIL("Output Ch" << DEC(inChannel+1) << ": EndFrame(" << DEC(endFrameNumber) << ") precedes StartFrame("
+				<< DEC(startFrameNumber) << ")");  return false;}
 	if ((endFrameNumber - startFrameNumber + 1) < 2)	//	must be at least 2 frames
-		{ACFAIL("Frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber) << " < 2 frames"); return false;}
+		{ACFAIL("Output Ch" << DEC(inChannel+1) << ": Frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber) << " < 2 frames"); return false;}
 	if (inOptionFlags & (AUTOCIRCULATE_WITH_MULTILINK_AUDIO1 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO2 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO3)  &&  !::NTV2DeviceCanDoMultiLinkAudio(GetDeviceID()))
-		ACWARN("Output Ch" << DEC(inChannel+1) << " MultiLink Audio requested, but device doesn't support it");
+		ACWARN("Output Ch" << DEC(inChannel+1) << ": MultiLink Audio requested, but device doesn't support it");
 
 	//	Warn about "with anc" and VANC mode...
 	if (inOptionFlags & AUTOCIRCULATE_WITH_ANC)
 	{
 		NTV2VANCMode vancMode(NTV2_VANCMODE_INVALID);
 		if (GetVANCMode(vancMode, inChannel)  &&  NTV2_IS_VANCMODE_ON(vancMode))
-			ACWARN("FrameStore " << DEC(inChannel+1) << " has AUTOCIRCULATE_WITH_ANC set, but also has "
+			ACWARN("Output Ch" << DEC(inChannel+1) << "AUTOCIRCULATE_WITH_ANC set, but also has "
 					<< ::NTV2VANCModeToString(vancMode) << " set -- this may cause anc insertion problems");
 	}
 
@@ -828,7 +829,8 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 			if (!(inOptionFlags & AUTOCIRCULATE_WITH_ANC))	//	but caller failed to enable Anc playout
 			{
 				autoCircData.bVal7 = true;					//	Enable Anc insertion anyway
-				ACDBG("Ch" << DEC(inChannel+1) << ": caller requested RP188 but not Anc -- enabled Anc inserter anyway");
+				ACWARN("Output Ch" << DEC(inChannel+1)
+						<< ": AUTOCIRCULATE_WITH_RP188 requested without AUTOCIRCULATE_WITH_ANC -- enabled AUTOCIRCULATE_WITH_ANC anyway");
 			}
 
 	const bool result (AutoCirculate(autoCircData));	//	Call the OS-specific method
@@ -852,7 +854,7 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 						warning << "Frms " << DEC0N(startBlk,3) << "-" << DEC0N(startBlk+numBlks-1,3);
 					else
 						warning << "Frm  " << DEC0N(startBlk,3);
-					ACWARN("Ch" << DEC(inChannel+1) << " memory overlap/interference: " << warning.str() << ": " << infoStr);
+					ACWARN("Output Ch" << DEC(inChannel+1) << ": memory overlap/interference: " << warning.str() << ": " << infoStr);
 				}
 			}	//	for each "bad" region
 		#endif
@@ -874,17 +876,17 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 						const double bytesPerFrame (samplesPerSecond * bytesPerChannel * channelsPerSample / framesPerSecond);
 						const ULWord maxVideoFrames (4UL * 1024UL * 1024UL / ULWord(bytesPerFrame));
 						if (stat.GetFrameCount() > maxVideoFrames)
-							ACWARN("AutoCirculate channel " << DEC(inChannel+1) << ":  " << DEC(stat.GetFrameCount()) << " frames ("
-									<< DEC(stat.GetStartFrame()) << " thru " << DEC(stat.GetEndFrame()) << ") exceeds " << DEC(maxVideoFrames)
-									<< "-frame max audio buffer capacity");
+							ACWARN("Output Ch" << DEC(inChannel+1) << ":  " << DEC(stat.GetFrameCount()) << " frames ("
+									<< DEC(stat.GetStartFrame()) << "-" << DEC(stat.GetEndFrame()) << ") exceeds "
+									<< DEC(maxVideoFrames) << "-frame max audio buffer capacity");
 					}
 			}
 		}
 		#endif
-		ACINFO("Ch" << DEC(inChannel+1) << " initialized using frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber));
+		ACINFO("Output Ch" << DEC(inChannel+1) << " initialized using frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber));
 	}
 	else
-		ACFAIL("Ch" << DEC(inChannel+1) << " initialization failed");
+		ACFAIL("Output Ch" << DEC(inChannel+1) << " initialization failed");
 	return result;
 
 }	//	AutoCirculateInitForOutput

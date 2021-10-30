@@ -4515,10 +4515,11 @@ typedef struct NTV2RegInfo
 		/**
 			@brief		Renders me to the given output stream as source code using a "WriteRegister" function call.
 			@param		outputStream	Specifies the output stream to write into.
-			@param[in]	inRadix			Specifies the radix to use for the my register value. Defaults to hexadecimal (base 16).
+			@param[in]	inRadix			Optionally specifies the radix to use for the my register value. Defaults to hexadecimal (base 16).
+			@param[in]	inDeviceID		Optionally specifies the ::NTV2DeviceID for properly interpreting my register values.
 			@return		The output stream.
 		**/
-		AJAExport std::ostream & PrintCode (std::ostream & outputStream, const int inRadix = 16) const; //	New in SDK 16.0
+		AJAExport std::ostream & PrintCode (std::ostream & outputStream, const int inRadix = 16, const NTV2DeviceID inDeviceID = DEVICE_ID_INVALID) const; //	New in SDK 16.0, added inDeviceID in 16.2
 	#endif	//	not NTV2_BUILDING_DRIVER
 } NTV2RegInfo;
 

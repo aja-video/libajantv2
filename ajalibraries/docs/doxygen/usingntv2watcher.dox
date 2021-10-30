@@ -1079,6 +1079,7 @@ Standard behaviors:
 	-	On <b>SDI Input</b>s:
 		-	<b>Disable Input</b> or <b>Enable Input</b> — For bidirectional SDI connectors, immediately changes its direction.
 		-	<b>3Gb->3Ga Conversion</b> — (3G/6G/12G only) Enables or disables the input’s 3Gb-to-3Ga converter.
+		-	<b>CRC Checking</b> — (3G/6G/12G only) Enables or disables the input’s CRC error checking.
 	-	On <b>SDI Output</b>s:
 		-	<b>Disable Output</b> or <b>Enable Output</b> — For bidirectional SDI connectors, immediately changes its direction.
 		-	<b>SDI Output Standard</b> — Sets the output’s video standard.

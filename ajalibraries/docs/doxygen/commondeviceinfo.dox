@@ -101,6 +101,11 @@
 	-	Or call CNTV2Card::GetSDIInputVideoFormat, specifying the SDI input connector as an ::NTV2Channel value.
 	-	Whichever function you use, if you are expecting <b>psf</b> video, pass ‘true’ for the ‘<i>inIsProgressive</i>’ parameter.
 
+	@note	On rare occasion, some SDI devices emit non-compliant SDI containing bad CRC values. Some AJA NTV2 devices have the
+			ability to disable CRC checking, to enable such signals to be captured. Call CNTV2Card::GetSDIInputCRCChecking to
+			determine if CRC checking is enabled on a particular SDI input connector.  Call CNTV2Card::SetSDIInputCRCChecking
+			to change the setting. (Don’t forget to re-enable it when finished, as this is expected for normal operation.)
+
 	@par	HDMI Connectors
 
 	Many AJA devices have HDMI connectors, some for capture, most for playout.

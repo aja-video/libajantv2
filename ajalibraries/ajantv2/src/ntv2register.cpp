@@ -6800,6 +6800,24 @@ bool CNTV2Card::GetSDIOutRGBLevelAConversion(const UWord inOutputSpigot, bool & 
 	return retVal;
 }
 
+bool CNTV2Card::SetSDIInputCRCChecking (const NTV2Channel inSDIInput, const bool inEnabled)
+{
+	//	The bit sense is "disabled":  clear = CRC checking enabled;   set = CRC checking disabled
+	return UWord(inSDIInput) < 8 ? WriteRegister(kRegSDITransmitControl, inEnabled ? 0 : 1, BIT(inSDIInput)) : false;
+}
+
+bool CNTV2Card::GetSDIInputCRCChecking (const NTV2Channel inSDIInput, bool & outEnabled)
+{
+	outEnabled = true;	//	Default
+	if (UWord(inSDIInput) >= 8)
+		return false;
+	bool enb(true);
+	if (!CNTV2DriverInterface::ReadRegister(kRegSDITransmitControl, enb, BIT(inSDIInput)))
+		return false;
+	outEnabled = !enb;	//	Reverse bit sense:  clear = CRC checking enabled;   set = CRC checking disabled
+	return true;
+}
+
 bool CNTV2Card::SetMultiFormatMode (const bool inEnable)
 {
 	if (!::NTV2DeviceCanDoMultiFormat (_boardID))

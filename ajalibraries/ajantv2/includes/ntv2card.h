@@ -3840,8 +3840,10 @@ public:
 		@note		For Multi-Channel or 4K/8K applications (i.e. where more than one channel is used for streaming video), AJA
 					recommends specifying zero for \c inFrameCount, and explicitly specifying a frame range using \c inStartFrameNumber
 					and \c inEndFrameNumber parameters.
-		@note		Fewer frames reduces latency, but increases the likelihood of frame drops.
-		@note		All widget routing should be completed prior to calling this function (see \ref ntv2signalrouting ).
+		@note		Fewer frames reduces latency, but increases the likelihood of frame drops. See \ref autocirculatelowlatency.
+		@note		All \ref ntv2signalrouting should be completed prior to calling this function.
+		@note		This function logs \ref autocirculatemsgs to \ref usingajalogger or the \ref usinglogreader.
+					Be sure the <tt>AutoCirculate_39</tt> message group is enabled, and the client application has called AJADebug::Open.
 		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers to be written by
 					the FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for
 					a subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
@@ -3849,10 +3851,6 @@ public:
 					will perform most of the device setup, including configuring the FrameStore, etc.;
 					otherwise (if ::NTV2_DISABLE_TASKS ), the caller must manage <i>all</i> aspects of the FrameStore ( ::NTV2Mode,
 					::NTV2VideoFormat, etc.) before calling this function.
-		@warning	If the frame range overlaps or includes other frames used by any other enabled FrameStore/channel, this will likely
-					result in torn/bad video (see \ref vidop-fbconflict ).
-		@warning	If the frame range runs into Audio Buffer memory that's used by a running Audio System, this will likely result in
-					torn/bad video and/or bad audio (see \ref audioclobber ).
 		@see		CNTV2Card::AutoCirculateStop, CNTV2Card::AutoCirculateInitForOutput, \ref autocirculatecapture
 	**/
 
@@ -3892,12 +3890,10 @@ public:
 		@note		For Multi-Channel or 4K/8K applications (i.e. where more than one channel is used for streaming video), AJA
 					recommends specifying zero for \c inFrameCount, and explicitly specifying a frame range using \c inStartFrameNumber
 					and \c inEndFrameNumber parameters.
-		@note		Fewer frames reduces latency, but increases the likelihood of frame drops.
-		@note		All widget routing should be completed prior to calling this function (see \ref ntv2signalrouting ).
-		@warning	If the frame range overlaps or includes other frames used by any other enabled FrameStore/channel, this will likely
-					result in torn/bad video (see \ref vidop-fbconflict ).
-		@warning	If the frame range runs into Audio Buffer memory that's used by a running Audio System, this will likely result in
-					torn/bad video (see \ref audioclobber ).
+		@note		Fewer frames reduces latency, but increases the likelihood of frame drops. See \ref autocirculatelowlatency.
+		@note		All \ref ntv2signalrouting should be completed prior to calling this function.
+		@note		This function logs \ref autocirculatemsgs to \ref usingajalogger or the \ref usinglogreader.
+					Be sure the <tt>AutoCirculate_39</tt> message group is enabled, and the client application has called AJADebug::Open.
 		@details	If this function succeeds, the driver will have designated a contiguous set of device frame buffers to be read by
 					the FrameStore, and placed the channel into the ::NTV2_AUTOCIRCULATE_INIT state. The channel will then be ready for
 					a subsequent call to CNTV2Card::AutoCirculateStart or CNTV2Card::AutoCirculateTransfer.
@@ -6391,6 +6387,26 @@ public:
 		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
 	**/
 	AJA_VIRTUAL ULWord		GetCRCErrorCountB (const NTV2Channel inChannel);
+
+	/**
+		@brief		Controls CRC error checking for the given SDI input.
+		@param[in]	inChannel		Specifies the SDI input of interest as an ::NTV2Channel value (an unsigned zero-based integer).
+		@param[in]	inEnabled		Specify 'true' to enable CRC error checking (i.e. normal);  otherwise false to disable.
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::GetSDIInputCRCChecking, <b>SDI Connectors</b> in \ref devicesignalinputsoutputs
+		@note		Rarely, some SDI devices emit non-compliant SDI with bad CRC values. This function is provided to disable CRC
+					checking to enable the AJA device to lock to, and capture such signals.
+	**/
+	AJA_VIRTUAL bool		SetSDIInputCRCChecking (const NTV2Channel inSDIInput, const bool inEnabled);	//	New in SDK 16.2
+
+	/**
+		@brief		Answers if CRC error checking is enabled for the given SDI input.
+		@param[in]	inChannel		Specifies the SDI input of interest as an ::NTV2Channel value (an unsigned zero-based integer).
+		@param[out]	outEnabled		Receives 'true' if CRC error checking is enabled (i.e. normal);  otherwise false if disabled.
+		@return		True if successful;  otherwise false.
+		@see		CNTV2Card::SetSDIInputCRCChecking, <b>SDI Connectors</b> in \ref devicesignalinputsoutputs
+	**/
+	AJA_VIRTUAL bool		GetSDIInputCRCChecking (const NTV2Channel inSDIInput, bool & outEnabled);	//	New in SDK 16.2
 	///@}
 
 	/**
@@ -6400,7 +6416,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inEnable	If true, sets the device in multi-format mode.
 								If false, sets the device in uni-format mode.
-		@see		::NTV2DeviceCanDoMultiFormat, \ref deviceclockingandsync
+		@see		::NTV2DeviceCanDoMultiFormat, CNTV2Card::GetMultiFormatMode, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool	   SetMultiFormatMode (const bool inEnable);
 
@@ -6411,7 +6427,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[out] outIsEnabled	Receives true if the device is currently in multi-format mode,
 									or false if it's in uni-format mode.
-		@see		::NTV2DeviceCanDoMultiFormat, \ref deviceclockingandsync
+		@see		::NTV2DeviceCanDoMultiFormat, CNTV2Card::SetMultiFormatMode, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool		GetMultiFormatMode (bool & outIsEnabled);
 
