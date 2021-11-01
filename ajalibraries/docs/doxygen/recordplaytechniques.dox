@@ -457,16 +457,22 @@ enabled, and the client application has opened the AJADebug facility by calling 
 
 -	<b>Information Messages</b><br />
 	These messages are informational, and indicate success.
-	-	<b><tt>Input Ch3 initialized using frames 0-6</tt></b><br />
-		<b><tt>Output Ch4 initialized using frames 7-12</tt></b><br />
-		AutoCirculate is initialized for the given Channel/FrameStore, and is ready to be started.
+	-	<i>mode</i><b><tt> </tt></b><i>channel</i><b><tt> initialized using frames </tt></b><i>range</i><br />
+		Example: <b><tt>Input Ch3 initialized using frames 0-6</tt></b><br />
+		…where…
+		-	<i>mode</i>: Indicates the ::NTV2Mode – <b><tt>Input</tt></b> or <b><tt>Output</tt></b>.
+		-	<i>channel</i>: Indicates the ::NTV2Channel – <b><tt>Ch1</tt></b> … <b><tt>Ch8</tt></b>.
+		-	<i>range</i>: Indicates the AutoCirculate frame range – two unsigned decimal numbers separated by a hyphen.
+		<b>Meaning: </b>AutoCirculate has been initialized for the given ::NTV2Channel and is ready to be started with a subsequent
+		call to CNTV2Card::AutoCirculateStart.
 -	<b>Warning Messages</b><br />
 	These messages are warnings. AutoCirculate will operate, but there may be problems.
 	-	<b><tt>Input Ch3: FrameCount 7 ignored -- using start/end 7/13 frame numbers</tt></b><br />
 		<b><tt>Output Ch2: FrameCount 20 ignored -- using start/end 12/45 frame numbers</tt></b><br />
-		The function was called with both a non-zero FrameCount parameter and valid Start/End Frame values.<br />
-		<b>Solution: </b>Set the FrameCount to zero when specifying valid Start/End Frame values;
-		or specify zero for both Start/End Frame values with a non-zero FrameCount value.
+		CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput was called with both a non-zero <i>FrameCount</i>
+		parameter and valid <i>StartFrame</i>/<i>EndFrame</i> values.<br />
+		<b>Solution: </b>Set the <i>FrameCount</i> parameter to zero when specifying valid <i>StartFrame</i> &amp; <i>EndFrame</i> values;
+		or specify zero for both <i>StartFrame</i> &amp; <i>EndFrame</i> with a non-zero <i>FrameCount</i> value.
 	-	<b><tt>Input Ch3: MultiLink Audio requested, but device doesn't support it</tt></b><br />
 		<b><tt>Output Ch1: MultiLink Audio requested, but device doesn't support it</tt></b><br />
 		One of the <tt>AUTOCIRCULATE_WITH_MULTILINK_AUDIO</tt> options was used, but the AJA device doesn’t support MultiLink Audio.<br />
@@ -483,7 +489,7 @@ enabled, and the client application has opened the AJADebug facility by calling 
 		CNTV2Card::AutoCirculateInitForOutput was called with the AUTOCIRCULATE_WITH_ANC option, but the FrameStore’s ::NTV2VANCMode was not <tt>NTV2_VANCMODE_OFF</tt> (disabled).<br />
 		<b>Solution: </b>Either disable VANC (by calling CNTV2Card::SetVANCMode with <tt>NTV2_VANCMODE_OFF</tt>), or don’t use
 		the <tt>AUTOCIRCULATE_WITH_ANC</tt> option.
-	-	<b><tt>Output Ch1: AUTOCIRCULATE_WITH_RP188 requested without AUTOCIRCULATE_WITH_ANC -- enabled AUTOCIRCULATE_WITH_ANC anyway<br />
+	-	<b><tt>Output Ch1: AUTOCIRCULATE_WITH_RP188 requested without AUTOCIRCULATE_WITH_ANC -- enabled AUTOCIRCULATE_WITH_ANC anyway</tt></b><br />
 		CNTV2Card::AutoCirculateInitForOutput was called for a \ref konaip or \ref ioip device with SMPTE ST-2110 firmware with the
 		<tt>AUTOCIRCULATE_WITH_RP188</tt> option, but without the <tt>AUTOCIRCULATE_WITH_ANC</tt> option. Without the SMPTE ST-2110 ancillary
 		data stream, RP188 timecode won’t be transmitted.<br />
@@ -511,7 +517,7 @@ enabled, and the client application has opened the AJADebug facility by calling 
 	-	<b><tt>Input Ch3: Frames 1-1 < 2 frames</tt></b><br />
 		A Start/End Frame range was specified, but they both had the same value, making a single-frame AutoCirculate range.<br />
 		<b>Solution: </b>When specifying Start/End frame values, be sure the range is at least 2 frames in length.
-	-	<b><tt>Input Ch3 initialization failed</tt></b>
+	-	<b><tt>Input Ch3 initialization failed</tt></b><br />
 		AutoCirculate initialization failed for another reason.<br />
 		<b>Solution: </b>Check the host computer’s kernel log for any failure messages from the driver.
 
