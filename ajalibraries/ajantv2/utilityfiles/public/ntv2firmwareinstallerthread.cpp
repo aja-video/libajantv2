@@ -518,12 +518,52 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate (const NTV2DeviceID inDeviceID, 
 	case DEVICE_ID_KONA5_8KMK:
 	case DEVICE_ID_KONA5_8K:
 	case DEVICE_ID_KONA5_OE1:
+	case DEVICE_ID_KONA5_OE2:
+	case DEVICE_ID_KONA5_OE3:
+	case DEVICE_ID_KONA5_OE4:
+	case DEVICE_ID_KONA5_OE5:
+	case DEVICE_ID_KONA5_OE6:
+	case DEVICE_ID_KONA5_OE7:
+	case DEVICE_ID_KONA5_OE8:
+	case DEVICE_ID_KONA5_OE9:
+	case DEVICE_ID_KONA5_OE10:
+	case DEVICE_ID_KONA5_OE11:
+	case DEVICE_ID_KONA5_OE12:
+	case DEVICE_ID_SOJI_OE1:
+	case DEVICE_ID_SOJI_OE2:
+	case DEVICE_ID_SOJI_OE3:
+	case DEVICE_ID_SOJI_OE4:
+	case DEVICE_ID_SOJI_OE5:
+	case DEVICE_ID_SOJI_OE6:
+	case DEVICE_ID_SOJI_OE7:
+	case DEVICE_ID_SOJI_OE8:
+	case DEVICE_ID_KONA5_8K_MV_TX:
 		return (designName == GetPrimaryDesignName(DEVICE_ID_KONA5) ||
 				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_2X4K) ||
 				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_3DLUT) ||
 				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_8KMK) ||
 				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_8K) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE1));
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE1) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE2) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE3) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE4) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE5) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE6) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE7) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE8) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE9) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE10) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE11) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE12) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE1) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE2) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE3) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE4) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE5) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE6) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE7) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE8) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_8K_MV_TX));
 	case DEVICE_ID_CORVID44_8KMK:
 	case DEVICE_ID_CORVID44_8K:
 	case DEVICE_ID_CORVID44_2X4K:
@@ -633,6 +673,26 @@ string CNTV2FirmwareInstallerThread::GetPrimaryDesignName (const NTV2DeviceID in
 		case DEVICE_ID_KONA5_3DLUT:					return "kona_5_3d_lut";
 		case DEVICE_ID_KONA5_8KMK:					return "kona5_8k_mk";
 		case DEVICE_ID_KONA5_OE1:					return "kona5_oe_cfg1";
+		case DEVICE_ID_KONA5_OE2:					return "kona5_oe_cfg2";
+		case DEVICE_ID_KONA5_OE3:					return "kona5_oe_cfg3";
+		case DEVICE_ID_KONA5_OE4:					return "kona5_oe_cfg4";
+		case DEVICE_ID_KONA5_OE5:					return "kona5_oe_cfg5";
+		case DEVICE_ID_KONA5_OE6:					return "kona5_oe_cfg6";
+		case DEVICE_ID_KONA5_OE7:					return "kona5_oe_cfg7";
+		case DEVICE_ID_KONA5_OE8:					return "kona5_oe_cfg8";
+		case DEVICE_ID_KONA5_OE9:					return "kona5_oe_cfg9";
+		case DEVICE_ID_KONA5_OE10:					return "kona5_oe_cfg10";
+		case DEVICE_ID_KONA5_OE11:					return "kona5_oe_cfg11";
+		case DEVICE_ID_KONA5_OE12:					return "kona5_oe_cfg12";
+		case DEVICE_ID_SOJI_OE1:					return "soji_oe_cfg1";
+		case DEVICE_ID_SOJI_OE2:					return "soji_oe_cfg2";
+		case DEVICE_ID_SOJI_OE3:					return "soji_oe_cfg3";
+		case DEVICE_ID_SOJI_OE4:					return "soji_oe_cfg4";
+		case DEVICE_ID_SOJI_OE5:					return "soji_oe_cfg5";
+		case DEVICE_ID_SOJI_OE6:					return "soji_oe_cfg6";
+		case DEVICE_ID_SOJI_OE7:					return "soji_oe_cfg7";
+		case DEVICE_ID_SOJI_OE8:					return "soji_oe_cfg8";
+		case DEVICE_ID_KONA5_8K_MV_TX:				return "kona5_8k_mv_tx";
 		case DEVICE_ID_CORVID44_8KMK:				return "c44_12g_8k_mk";
 		case DEVICE_ID_KONA5_8K:					return "kona5_8k";
 		case DEVICE_ID_CORVID44_8K:					return "c44_12g_8k";
