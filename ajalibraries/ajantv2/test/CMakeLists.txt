@@ -39,3 +39,8 @@ add_executable(ut_ajantv2 ${APP_TARGET_SOURCES})
 add_dependencies(ut_ajantv2 ajantv2)
 target_include_directories(ut_ajantv2 PUBLIC ${APP_TARGET_INCLUDE_DIRS})
 target_link_libraries(ut_ajantv2 PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+
+add_executable(ut_ntv2card ntv2card_test.cpp)
+add_dependencies(ut_ntv2card ajantv2)
+target_include_directories(ut_ntv2card PUBLIC ${APP_TARGET_INCLUDE_DIRS})
+target_link_libraries(ut_ntv2card PUBLIC ajantv2 ${EXTRA_LIBRARIES})
