@@ -529,14 +529,6 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate (const NTV2DeviceID inDeviceID, 
 	case DEVICE_ID_KONA5_OE10:
 	case DEVICE_ID_KONA5_OE11:
 	case DEVICE_ID_KONA5_OE12:
-	case DEVICE_ID_SOJI_OE1:
-	case DEVICE_ID_SOJI_OE2:
-	case DEVICE_ID_SOJI_OE3:
-	case DEVICE_ID_SOJI_OE4:
-	case DEVICE_ID_SOJI_OE5:
-	case DEVICE_ID_SOJI_OE6:
-	case DEVICE_ID_SOJI_OE7:
-	case DEVICE_ID_SOJI_OE8:
 	case DEVICE_ID_KONA5_8K_MV_TX:
 		return (designName == GetPrimaryDesignName(DEVICE_ID_KONA5) ||
 				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_2X4K) ||
@@ -555,14 +547,6 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdate (const NTV2DeviceID inDeviceID, 
 				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE10) ||
 				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE11) ||
 				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE12) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE1) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE2) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE3) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE4) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE5) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE6) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE7) ||
-				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE8) ||
 				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_8K_MV_TX));
 	case DEVICE_ID_CORVID44_8KMK:
 	case DEVICE_ID_CORVID44_8K:
@@ -691,7 +675,7 @@ string CNTV2FirmwareInstallerThread::GetPrimaryDesignName (const NTV2DeviceID in
 		case DEVICE_ID_SOJI_OE5:					return "soji_oe_cfg5";
 		case DEVICE_ID_SOJI_OE6:					return "soji_oe_cfg6";
 		case DEVICE_ID_SOJI_OE7:					return "soji_oe_cfg7";
-		case DEVICE_ID_SOJI_OE8:					return "soji_oe_cfg8";
+		case DEVICE_ID_SOJI_3DLUT:					return "soji_3dlut";
 		case DEVICE_ID_KONA5_8K_MV_TX:				return "kona5_8k_mv_tx";
 		case DEVICE_ID_CORVID44_8KMK:				return "c44_12g_8k_mk";
 		case DEVICE_ID_KONA5_8K:					return "kona5_8k";

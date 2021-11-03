@@ -804,7 +804,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 		case DEVICE_ID_SOJI_OE5:					bitFileInfo.bitFileType = NTV2_BITFILE_SOJI_OE5_MAIN;				break;
 		case DEVICE_ID_SOJI_OE6:					bitFileInfo.bitFileType = NTV2_BITFILE_SOJI_OE6_MAIN;				break;
 		case DEVICE_ID_SOJI_OE7:					bitFileInfo.bitFileType = NTV2_BITFILE_SOJI_OE7_MAIN;				break;
-		case DEVICE_ID_SOJI_OE8:					bitFileInfo.bitFileType = NTV2_BITFILE_SOJI_OE8_MAIN;				break;
+		case DEVICE_ID_SOJI_3DLUT:					bitFileInfo.bitFileType = NTV2_BITFILE_SOJI_3DLUT_MAIN;				break;
 		case DEVICE_ID_KONA5_8K_MV_TX:				bitFileInfo.bitFileType = NTV2_BITFILE_KONA5_8K_MV_TX_MAIN;			break;
 		case DEVICE_ID_KONAHDMI:					bitFileInfo.bitFileType = NTV2_BITFILE_KONAHDMI;					break;
 		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_1RX_1TX_1SFP_J2K;		break;

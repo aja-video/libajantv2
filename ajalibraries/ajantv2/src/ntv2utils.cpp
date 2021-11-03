@@ -4873,8 +4873,8 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_SOJI_OE5:				return "SOJI-OE5";
 		case DEVICE_ID_SOJI_OE6:				return "SOJI-OE6";
 		case DEVICE_ID_SOJI_OE7:				return "SOJI-OE7";
-		case DEVICE_ID_SOJI_OE8:				return "SOJI-OE8";
-		case DEVICE_ID_KONA5_8K_MV_TX:				return inForRetailDisplay ? "KONA 5 8K MV TX"					: "Kona5-8K-MV-TX";
+		case DEVICE_ID_SOJI_3DLUT:				return "SOJI-3DLUT";
+		case DEVICE_ID_KONA5_8K_MV_TX:			return inForRetailDisplay ? "KONA 5 8K MV TX"					: "Kona5-8K-MV-TX";
 		case DEVICE_ID_CORVID44_8KMK:			return inForRetailDisplay ? "Corvid 44 8KMK"			: "Corvid44-8KMK";
 		case DEVICE_ID_CORVID44_PLNR:			return inForRetailDisplay ? "Corvid 44 PLNR"			: "Corvid44-PLNR";
 		case DEVICE_ID_KONA5_8K:				return inForRetailDisplay ? "KONA 5 8K"					: "Kona5-8K";
@@ -8491,7 +8491,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_SOJI_OE5:					return "soji_oe_cfg5_tprom.bit";
 	case DEVICE_ID_SOJI_OE6:					return "soji_oe_cfg6_tprom.bit";
 	case DEVICE_ID_SOJI_OE7:					return "soji_oe_cfg7_tprom.bit";
-	case DEVICE_ID_SOJI_OE8:					return "soji_oe_cfg8_tprom.bit";
+	case DEVICE_ID_SOJI_3DLUT:					return "soji_3dlut_tprom.bit";
 	case DEVICE_ID_KONA5_8K_MV_TX:				return "kona5_8k_mv_tx_tprom.bit";
 	case DEVICE_ID_CORVID44_8KMK:				return "c44_12g_8k_mk_tprom.bit";
 	case DEVICE_ID_CORVID44_8K:					return "c44_12g_8k_tprom.bit";
@@ -8616,7 +8616,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_SOJI_OE5,
 														DEVICE_ID_SOJI_OE6,
 														DEVICE_ID_SOJI_OE7,
-														DEVICE_ID_SOJI_OE8,
+														DEVICE_ID_SOJI_3DLUT,
 														DEVICE_ID_KONA5_8K_MV_TX,
 														DEVICE_ID_KONAHDMI,
 														DEVICE_ID_KONAIP_2022,
@@ -8851,7 +8851,7 @@ string NTV2BitfileTypeToString (const NTV2BitfileType inValue, const bool inComp
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"SOJI OE5 Main",			NTV2_BITFILE_SOJI_OE5_MAIN);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"SOJI OE6 Main",			NTV2_BITFILE_SOJI_OE6_MAIN);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"SOJI OE7 Main",			NTV2_BITFILE_SOJI_OE7_MAIN);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"SOJI OE8 Main",			NTV2_BITFILE_SOJI_OE8_MAIN);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"SOJI 3DLUT Main",			NTV2_BITFILE_SOJI_3DLUT_MAIN);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Kona5 8K MV TX",			NTV2_BITFILE_KONA5_8K_MV_TX_MAIN);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaIP 2110 RGB12",		NTV2_BITFILE_KONAIP_2110_RGB12);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"IoIP 2110 RGB12",			NTV2_BITFILE_IOIP_2110_RGB12);
