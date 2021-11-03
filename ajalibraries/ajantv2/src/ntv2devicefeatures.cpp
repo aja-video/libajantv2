@@ -424,6 +424,8 @@ ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
 	{
 		ULWord totalFrames = NTV2DeviceGetActiveMemorySize(boardID)/0x800000;
 		totalFrames -= NTV2DeviceGetNumAudioSystems(boardID)*(NTV2DeviceCanDo12gRouting(boardID) ? 4 : 1);
+		if(boardID == DEVICE_ID_IOX3 || boardID == DEVICE_ID_KONA5_8K_MV_TX)
+			totalFrames -= 6;
 		return totalFrames;
 	}
 	else

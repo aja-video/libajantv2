@@ -298,6 +298,8 @@ bool CNTV2Card::GetSerialNumberString (string & outSerialNumberString)
 			 deviceID == DEVICE_ID_IOIP_2110 ||
 			 deviceID == DEVICE_ID_IOIP_2110_RGB12)				//	IoIP/DNxIP?
 		outSerialNumberString = "6" + outSerialNumberString;	//		prepend with "6"
+	else if (deviceID == DEVICE_ID_IOX3)
+		outSerialNumberString = "7" + outSerialNumberString;	//		prepend with "7"
 	return true;
 
 }	//	GetSerialNumberString
