@@ -371,12 +371,13 @@ bool CNTV2Card::GetDeviceFrameInfo (const UWord inFrameNumber, const NTV2Channel
 	outAddress = outLength = 0;
 	static const ULWord frameSizes[] = {2, 4, 8, 16};	//	'00'=2MB	'01'=4MB	'10'=8MB	'11'=16MB
 	UWord				frameSizeNdx(0);
+	const bool			isMRWidgetChannel(IsMultiRasterWidgetChannel(inChannel));
 	outIntrinsicSize = 0;
 	outMultiFormat = outQuad = outQuadQuad = outSquares = outTSI = false;
 	NTV2Channel	chan (inChannel);
 	if (!::NTV2DeviceCanDoMultiFormat(GetDeviceID()))
 		chan = NTV2_CHANNEL1;	//	Older uniformat-only device:  use Ch1
-	else if (GetMultiFormatMode(outMultiFormat) && !outMultiFormat)
+	else if (GetMultiFormatMode(outMultiFormat) && !outMultiFormat  &&  !isMRWidgetChannel)
 		chan = NTV2_CHANNEL1;	//	Uniformat mode:  Use Ch1
 
 	CNTV2DriverInterface::ReadRegister (kRegCh1Control, frameSizeNdx,	  kK2RegMaskFrameSize,		kK2RegShiftFrameSize);
