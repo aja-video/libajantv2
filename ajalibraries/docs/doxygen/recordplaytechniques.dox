@@ -486,7 +486,7 @@ enabled, and the client application has opened the AJADebug facility by calling 
 	-	<i>{mode}</i><b><tt> </tt></b><i>{channel}</i><b><tt>: MultiLink Audio requested, but device doesn't support it</tt></b>
 		-	…where…<br />
 			<i>mode</i>: Indicates the ::NTV2Mode (<b><tt>Input</tt></b> or <b><tt>Output</tt></b>).<br />
-			<i>channel</i>: Indicates the ::NTV2Channel – <b><tt>Ch1</tt></b> … <b><tt>Ch8</tt></b>.
+			<i>channel</i>: Indicates the ::NTV2Channel (<b><tt>Ch1</tt></b> … <b><tt>Ch8</tt>)</b>.
 		-	<b>Example: </b><i>{mode}</i><b><tt> </tt></b><i>{channel}</i><b><tt>: MultiLink Audio requested, but device doesn't support it</tt></b>
 		-	<b>Problem: </b>One of the <tt>AUTOCIRCULATE_WITH_MULTILINK_AUDIO</tt>… options was used, but the AJA device doesn’t support \ref audiomultilink.
 		-	<b>Solution: </b>Check if the device supports \ref audiomultilink before specifying the <tt>AUTOCIRCULATE_WITH_MULTILINK_AUDIO</tt> option.<br />
@@ -495,8 +495,14 @@ enabled, and the client application has opened the AJADebug facility by calling 
 		-	…where…<br />
 			<i>mode</i>: Indicates the ::NTV2Mode (<b><tt>Input</tt></b> or <b><tt>Output</tt></b>).<br />
 			<i>channel</i>: Indicates the ::NTV2Channel (<b><tt>Ch1</tt></b> … <b><tt>Ch8</tt></b>).<br />
-			<i>activities</i>: One or more activities that touch device memory, each indicating the firmware entity (<b><tt>Ch</tt></b>,
-			<b><tt>AC</tt></b> or <b><tt>Aud</tt></b>) and mode (<b><tt>Read</tt></b> or <b><tt>Write</tt></b>).
+			<i>activities</i>: One or more activities that touch device memory, each indicating the <b><i>firmware entity</i></b> and <b><i>mode</i></b>:
+			-	<b><i>firmware entity</i>:</b>
+				-	<b><tt>AC</tt></b> indicates an active AutoCirculate Channel
+				-	<b><tt>Ch</tt></b> indicates an enabled FrameStore
+				-	<b><tt>Aud</tt></b> indicates a running ::NTV2AudioSystem
+			-	<b><i>mode</i>:</b>
+				-	<b><tt>Read</tt></b> indicates the memory is being read from;
+				-	<b><tt>Write</tt></b> indicates the memory is being written to.
 		-	<b>Example: </b><tt>Input Ch3: memory overlap/interference: Frms 5-6: AC3 Write, AC2 Read</tt>
 		-	<b>Problem: </b>One or more of the frames being used for the \ref autocirculatechannels are also being used for other purposes.
 		-	<b>Solution: </b>See \ref vidop-fbconflict and \ref audioclobber.<br />
@@ -511,25 +517,24 @@ enabled, and the client application has opened the AJADebug facility by calling 
 			<i>maxCount</i>: Indicates the maximum number of frames the audio system can buffer.<br />
 			<i>audioSystem</i>: Indicates the ::NTV2AudioSystem being used – <b><tt>AudSys1</tt></b> … <b><tt>AudSys8</tt></b>.
 		-	<b>Example: </b><tt>Input Ch3: 51 frames (0-50) exceeds 41-frame max audio buffer capacity</tt>
-		-	<b>Problem: </b>A valid ::NTV2AudioSystem was specified, and based on the number of audio channels the Audio System is currently configured
+		-	<b>Problem: </b>A valid ::NTV2AudioSystem was specified, and based on the number of audio channels the ::NTV2AudioSystem is currently configured
 			for, and given the ::NTV2FrameRate for the Channel/FrameStore, the number of video frames reserved for AutoCirculate exceeds
-			the maximum number of frames of audio that the Audio System can buffer. This will likely cause corrupted and/or missing audio.
+			the maximum number of frames of audio that the ::NTV2AudioSystem can buffer. This will likely cause corrupted and/or missing audio.
 		-	<b>Solution: </b>Reduce the number of frames being used for this \ref autocirculatechannels.<br />
 	 		
 	-	<i>{mode}</i><b><tt> </tt></b><i>{channel}</i><b><tt> has AUTOCIRCULATE_WITH_ANC set, but also has NTV2_VANCMODE_TALL set -- 
 		this may cause anc insertion problems</tt></b>
 		-	…where…<br />
 			<i>mode</i>: Indicates the ::NTV2Mode (<b><tt>Input</tt></b> or <b><tt>Output</tt></b>).<br />
-			<i>channel</i>: Indicates the ::NTV2Channel – <b><tt>Ch1</tt></b> … <b><tt>Ch8</tt></b>.
+			<i>channel</i>: Indicates the ::NTV2Channel (<b><tt>Ch1</tt></b> … <b><tt>Ch8</tt>)</b>.
 		-	<b>Example: </b><tt>Output Ch4 has AUTOCIRCULATE_WITH_ANC set, but also has NTV2_VANCMODE_TALL set -- this may cause anc insertion problems</tt>
-		-	<b>Problem: </b>CNTV2Card::AutoCirculateInitForOutput was called with the AUTOCIRCULATE_WITH_ANC option, but the FrameStore’s ::NTV2VANCMode was not <tt>NTV2_VANCMODE_OFF</tt> (disabled).<br />
-		-	<b>Solution: </b>Either disable VANC (by calling CNTV2Card::SetVANCMode with <tt>NTV2_VANCMODE_OFF</tt>), or don’t use
-			the <tt>AUTOCIRCULATE_WITH_ANC</tt> option.<br />
+		-	<b>Problem: </b>CNTV2Card::AutoCirculateInitForOutput was called with the AUTOCIRCULATE_WITH_ANC option, but the FrameStore’s ::NTV2VANCMode was not ::NTV2_VANCMODE_OFF (disabled).<br />
+		-	<b>Solution: </b>Either disable VANC (by calling CNTV2Card::SetVANCMode with ::NTV2_VANCMODE_OFF ), or don’t use the <tt>AUTOCIRCULATE_WITH_ANC</tt> option.<br />
 	 		
 	-	<i>{mode}</i><b><tt> </tt></b><i>{channel}</i><b><tt>: AUTOCIRCULATE_WITH_RP188 requested without AUTOCIRCULATE_WITH_ANC -- enabled AUTOCIRCULATE_WITH_ANC anyway</tt></b>
 		-	…where…<br />
 			<i>mode</i>: Indicates the ::NTV2Mode (<b><tt>Input</tt></b> or <b><tt>Output</tt></b>).<br />
-			<i>channel</i>: Indicates the ::NTV2Channel – <b><tt>Ch1</tt></b> … <b><tt>Ch8</tt></b>.
+			<i>channel</i>: Indicates the ::NTV2Channel (<b><tt>Ch1</tt></b> … <b><tt>Ch8</tt>)</b>.
 		-	<b>Example: </b><tt>Output Ch2: AUTOCIRCULATE_WITH_RP188 requested without AUTOCIRCULATE_WITH_ANC -- enabled AUTOCIRCULATE_WITH_ANC anyway</tt>
 		-	<b>Problem: </b>CNTV2Card::AutoCirculateInitForOutput was called for a \ref konaip or \ref ioip device with SMPTE ST-2110 firmware with the
 			<tt>AUTOCIRCULATE_WITH_RP188</tt> option, but without the <tt>AUTOCIRCULATE_WITH_ANC</tt> option. Without the SMPTE ST-2110 ancillary
@@ -546,7 +551,7 @@ enabled, and the client application has opened the AJADebug facility by calling 
 			Note that the actual zero-based index number of the channel will be one less than the indicated “Ch” decimal value.
 		-	<b>Example: </b><tt>Ch9 is illegal channel value</tt>
 		-	<b>Problem: </b>An invalid ::NTV2Channel value was used.
-		-	<b>Solution: </b>Specify a valid ::NTV2Channel value (<tt>NTV2_CHANNEL1</tt> thru <tt>NTV2_CHANNEL8</tt>).<br />
+		-	<b>Solution: </b>Specify a valid ::NTV2Channel value (::NTV2_CHANNEL1 thru ::NTV2_CHANNEL8).<br />
 			 
 	-	<i>{mode}</i><b><tt> </tt></b><i>{channel}</i><b><tt>: illegal 'inNumChannels' value '</tt></b><i>{count}</i><b><tt>' -- must be 1-8</tt></b>
 		-	…where…<br />
@@ -560,7 +565,7 @@ enabled, and the client application has opened the AJADebug facility by calling 
 	-	<i>{mode}</i><b><tt> </tt></b><i>{channel}</i><b><tt>: FBAllocLock mutex not ready</tt></b>
 		-	…where…<br />
 			<i>mode</i>: Indicates the ::NTV2Mode (<b><tt>Input</tt></b> or <b><tt>Output</tt></b>).<br />
-			<i>channel</i>: Indicates the ::NTV2Channel – <b><tt>Ch1</tt></b> … <b><tt>Ch8</tt></b>.
+			<i>channel</i>: Indicates the ::NTV2Channel (<b><tt>Ch1</tt></b> … <b><tt>Ch8</tt>)</b>.
 		-	<b>Example: </b><tt>Output Ch2: FBAllocLock mutex not ready</tt>
 		-	<b>Problem: </b>Somehow CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput were called before
 			static initialization completed (i.e. before <b>main()</b> was called).
@@ -569,7 +574,7 @@ enabled, and the client application has opened the AJADebug facility by calling 
 	-	<i>{mode}</i><b><tt> </tt></b><i>{channel}</i><b><tt>: Zero frames requested</tt></b>
 		-	…where…<br />
 			<i>mode</i>: Indicates the ::NTV2Mode (<b><tt>Input</tt></b> or <b><tt>Output</tt></b>).<br />
-			<i>channel</i>: Indicates the ::NTV2Channel – <b><tt>Ch1</tt></b> … <b><tt>Ch8</tt></b>.
+			<i>channel</i>: Indicates the ::NTV2Channel (<b><tt>Ch1</tt></b> … <b><tt>Ch8</tt>)</b>.
 		-	<b>Example: </b><tt>Output Ch2: Zero frames requested</tt>
 		-	<b>Problem: </b>Both the specified FrameCount and Start/End Frame parameter values resulted in a zero-length frame range.
 		-	<b>Solution: </b>Specify a valid, non-empty frame range.<br />
@@ -577,7 +582,7 @@ enabled, and the client application has opened the AJADebug facility by calling 
 	-	<i>{mode}</i><b><tt> </tt></b><i>{channel}</i><b><tt>: EndFrame (</tt></b><i>{endFrame}</i><b><tt>) precedes StartFrame (</tt></b><i>{startFrame}</i><b><tt>)</tt></b>
 		-	…where…<br />
 			<i>mode</i>: Indicates the ::NTV2Mode (<b><tt>Input</tt></b> or <b><tt>Output</tt></b>).<br />
-			<i>channel</i>: Indicates the ::NTV2Channel – <b><tt>Ch1</tt></b> … <b><tt>Ch8</tt></b>.
+			<i>channel</i>: Indicates the ::NTV2Channel (<b><tt>Ch1</tt></b> … <b><tt>Ch8</tt>)</b>.
 		-	<b>Example: </b><tt>Input Ch3: EndFrame(0) precedes StartFrame(6)</tt>
 		-	<b>Problem: </b>A Start/End Frame range was specified, but the Start frame number’s magnitude exceeded the End frame number’s magnitude.
 		-	<b>Solution: </b>When specifying Start/End frame values, be sure the Start frame value ordinally precedes the End frame value.<br />
@@ -594,7 +599,7 @@ enabled, and the client application has opened the AJADebug facility by calling 
 	-	<i>{mode}</i><b><tt> </tt></b><i>{channel}</i><b><tt> initialization failed</tt></b>
 		-	…where…<br />
 			<i>mode</i>: Indicates the ::NTV2Mode (<b><tt>Input</tt></b> or <b><tt>Output</tt></b>).<br />
-			<i>channel</i>: Indicates the ::NTV2Channel – <b><tt>Ch1</tt></b> … <b><tt>Ch8</tt></b>.
+			<i>channel</i>: Indicates the ::NTV2Channel (<b><tt>Ch1</tt></b> … <b><tt>Ch8</tt>)</b>.
 		-	<b>Example: </b><tt>Input Ch3 initialization failed</tt>
 		-	<b>Problem: </b>AutoCirculate initialization failed for another reason.
 		-	<b>Solution: </b>Check the host computer’s kernel log for any failure messages originating from the AJA NTV2 kernel driver.<br />
