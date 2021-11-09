@@ -115,15 +115,15 @@ typedef enum
 	DEVICE_ID_KONA5_OE10				= 0x1079840E,	///< @brief See \ref kona5
 	DEVICE_ID_KONA5_OE11				= 0x1079840F,	///< @brief See \ref kona5
 	DEVICE_ID_KONA5_OE12				= 0x10798410,	///< @brief See \ref kona5
-	DEVICE_ID_SOJI_OE1					= 0x10798411,	///< @brief See \ref kona5
-	DEVICE_ID_SOJI_OE2					= 0x10798412,	///< @brief See \ref kona5
-	DEVICE_ID_SOJI_OE3					= 0x10798413,	///< @brief See \ref kona5
-	DEVICE_ID_SOJI_OE4					= 0x10798414,	///< @brief See \ref kona5
-	DEVICE_ID_SOJI_OE5					= 0x10798415,	///< @brief See \ref kona5
-	DEVICE_ID_SOJI_OE6					= 0x10798416,	///< @brief See \ref kona5
-	DEVICE_ID_SOJI_OE7					= 0x10798417,	///< @brief See \ref kona5
-	DEVICE_ID_SOJI_OE8					= 0x10798418,	///< @brief See \ref kona5
 	DEVICE_ID_KONA5_8K_MV_TX			= 0x10798420,	///< @brief See \ref kona5
+	DEVICE_ID_SOJI_3DLUT				= 0x10922400,
+	DEVICE_ID_SOJI_OE1					= 0x10922401,
+	DEVICE_ID_SOJI_OE2					= 0x10922402,
+	DEVICE_ID_SOJI_OE3					= 0x10922403,
+	DEVICE_ID_SOJI_OE4					= 0x10922404,
+	DEVICE_ID_SOJI_OE5					= 0x10922405,
+	DEVICE_ID_SOJI_OE6					= 0x10922406,
+	DEVICE_ID_SOJI_OE7					= 0x10922407,
 	DEVICE_ID_KONAHDMI					= 0x10767400,	///< @brief See \ref konahdmi
 	DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K	= 0x10646702,	///< @brief See \ref konaip
 	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,	///< @brief See \ref konaip
@@ -170,6 +170,16 @@ typedef enum
 		(__d__) == DEVICE_ID_KONA5_OE10 ||						\
 		(__d__) == DEVICE_ID_KONA5_OE11 ||						\
 		(__d__) == DEVICE_ID_KONA5_OE12)
+
+#define DEVICE_IS_SOJI(__d__)								\
+	(	(__d__) == DEVICE_ID_SOJI_3DLUT||						\
+		(__d__) == DEVICE_ID_SOJI_OE1	||						\
+		(__d__) == DEVICE_ID_SOJI_OE2	||						\
+		(__d__) == DEVICE_ID_SOJI_OE3	||						\
+		(__d__) == DEVICE_ID_SOJI_OE4	||						\
+		(__d__) == DEVICE_ID_SOJI_OE5	||						\
+		(__d__) == DEVICE_ID_SOJI_OE6	||						\
+		(__d__) == DEVICE_ID_SOJI_OE7)
 
 #if !defined (NTV2_DEPRECATE)
 	typedef NTV2DeviceID	NTV2BoardID;	///< @deprecated	Use NTV2DeviceID instead. Identifiers with "board" in them are being phased out.
@@ -3696,7 +3706,7 @@ typedef enum
 	NTV2_BITFILE_SOJI_OE5_MAIN		= 85,
 	NTV2_BITFILE_SOJI_OE6_MAIN		= 86,
 	NTV2_BITFILE_SOJI_OE7_MAIN		= 87,
-	NTV2_BITFILE_SOJI_OE8_MAIN		= 88,
+	NTV2_BITFILE_SOJI_3DLUT_MAIN	= 88,
 	NTV2_BITFILE_KONA5_8K_MV_TX_MAIN		= 89,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
