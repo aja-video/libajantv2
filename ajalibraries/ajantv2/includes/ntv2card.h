@@ -7246,10 +7246,12 @@ public:
 	AJA_VIRTUAL bool Load3DLUTTable ();
 	AJA_VIRTUAL bool Set1DLUTTableLocation (const NTV2Channel inChannel, const ULWord inFrameNumber, ULWord inLUTIndex = 0);
 	AJA_VIRTUAL bool Load1DLUTTable (const NTV2Channel inChannel);
-	
+
+	//	MultiViewer/MultiRasterizer
 	AJA_VIRTUAL bool HasMultiRasterWidget (void);						//	New in SDK 16.1
 	AJA_VIRTUAL bool SetMultiRasterBypassEnable (const bool inEnable);	//	New in SDK 16.1
 	AJA_VIRTUAL bool GetMultiRasterBypassEnable (bool & outEnabled);	//	New in SDK 16.1
+	AJA_VIRTUAL bool IsMultiRasterWidgetChannel (const NTV2Channel inChannel);	//	New in SDK 16.2
 
 	///@}
 
@@ -7424,6 +7426,7 @@ public:
 protected:
 	AJA_VIRTUAL ULWord			GetSerialNumberLow (void);			//	From CNTV2Status
 	AJA_VIRTUAL ULWord			GetSerialNumberHigh (void);			//	From CNTV2Status
+	AJA_VIRTUAL inline bool		IS_CHANNEL_VALID (const NTV2Channel inChannel) const	{return !IS_CHANNEL_INVALID(inChannel);}	//	New in SDK 16.2
 	AJA_VIRTUAL bool			IS_CHANNEL_INVALID (const NTV2Channel inChannel) const;
 	AJA_VIRTUAL bool			IS_OUTPUT_SPIGOT_INVALID (const UWord inOutputSpigot) const;
 	AJA_VIRTUAL bool			IS_INPUT_SPIGOT_INVALID (const UWord inInputSpigot) const;

@@ -737,7 +737,7 @@ bool CNTV2Card::AutoCirculateInitForInput ( const NTV2Channel		inChannel,
 						if (stat.GetFrameCount() > maxVideoFrames)
 							ACWARN("Input Ch" << DEC(inChannel+1) << ":  " << DEC(stat.GetFrameCount()) << " frames ("
 									<< DEC(stat.GetStartFrame()) << "-" << DEC(stat.GetEndFrame()) << ") exceeds "
-									<< DEC(maxVideoFrames) << "-frame max audio buffer capacity");
+									<< DEC(maxVideoFrames) << "-frame max buffer capacity of AudSys" << DEC(stat.GetAudioSystem()+1));
 					}
 			}
 		}
@@ -878,7 +878,7 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 						if (stat.GetFrameCount() > maxVideoFrames)
 							ACWARN("Output Ch" << DEC(inChannel+1) << ":  " << DEC(stat.GetFrameCount()) << " frames ("
 									<< DEC(stat.GetStartFrame()) << "-" << DEC(stat.GetEndFrame()) << ") exceeds "
-									<< DEC(maxVideoFrames) << "-frame max audio buffer capacity");
+									<< DEC(maxVideoFrames) << "-frame max buffer capacity of AudSys" << DEC(stat.GetAudioSystem()+1));
 					}
 			}
 		}

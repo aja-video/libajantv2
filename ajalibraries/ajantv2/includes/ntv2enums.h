@@ -1260,7 +1260,8 @@ typedef enum _NTV2VideoFormat
 	)
 
 /**
-	@brief		Identifies the mode of a FrameStore, either Capture (Input) or Display (Output).
+	@brief		Used to identify the mode of a \ref widget_framestore, or the direction of an \ref aboutautocirculate stream:
+				either Capture (Input) or Display (Output).
 	@see		CNTV2Card::SetMode, CNTV2Card::GetMode, \ref vidop-fs
 **/
 typedef enum
@@ -1436,9 +1437,9 @@ typedef enum
 
 
 /**
-	@brief		These enum values are mostly used to identify a specific \ref widget_framestore widget.
-				They're also typically used to identify a particular channel (or video input/output stream).
-				They can also be used anywhere a zero-based index value is expected.
+	@brief		These enum values are mostly used to identify a specific \ref widget_framestore.
+				They're also commonly used to identify an \ref autocirculatechannels for video streaming.
+				Finally, they can also be used anywhere a zero-based index value is expected.
 	@note		In NTV2 parlance, the terms <b>Channel</b> and <b>Frame Store</b> are used interchangeably.
 	@see		::NTV2DeviceGetNumFrameStores, \ref vidop-fs
 **/
@@ -4194,8 +4195,8 @@ typedef enum
 
 
 /**
-	@brief	These enum values identify the available NTV2 Audio Systems.
-	@see	See \ref audiooperation
+	@brief	Used to identify an Audio System on an NTV2 device.
+			See \ref audiooperation for more information.
 **/
 typedef enum
 {

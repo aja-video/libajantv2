@@ -377,7 +377,7 @@ bool CNTV2Card::SetVideoFormat (const NTV2ChannelSet & inFrameStores, const NTV2
 // Output: NTV2VideoFormat
 bool CNTV2Card::GetVideoFormat (NTV2VideoFormat & outValue, NTV2Channel inChannel)
 {
-	if (!IsMultiFormatActive ())
+	if (!IsMultiFormatActive ()  &&  !IsMultiRasterWidgetChannel(inChannel))
 		inChannel = NTV2_CHANNEL1;
 
 	NTV2Standard	standard;
@@ -941,28 +941,22 @@ NTV2FrameDimensions CNTV2Card::GetActiveFrameDimensions (const NTV2Channel inCha
 // Method: SetStandard
 // Input:  NTV2Standard
 // Output: NONE
-bool CNTV2Card::SetStandard (NTV2Standard value, NTV2Channel channel)
+bool CNTV2Card::SetStandard (NTV2Standard value, NTV2Channel inChannel)
 {
-	if (!IsMultiFormatActive ())
-		channel = NTV2_CHANNEL1;
-	NTV2Standard newStandard = value;
-	if (NTV2_IS_QUAD_QUAD_STANDARD(newStandard))
-	{
-		newStandard = GetQuarterSizedStandard(newStandard);
-	}
-	if (NTV2_IS_QUAD_STANDARD(newStandard))
-	{
-		newStandard = GetQuarterSizedStandard(newStandard);
-	}
-	if (NTV2_IS_2K1080_STANDARD(newStandard))
-	{
-		newStandard = NTV2_IS_PROGRESSIVE_STANDARD(newStandard) ? NTV2_STANDARD_1080p : NTV2_STANDARD_1080;
-	}
+	if (IsMultiRasterWidgetChannel(inChannel))
+		return WriteRegister (kRegMROutControl, value, kRegMaskStandard, kRegShiftStandard);
+	if (!IsMultiFormatActive())
+		inChannel = NTV2_CHANNEL1;
 
-	return WriteRegister (gChannelToGlobalControlRegNum [channel],
-						  newStandard,
-						  kRegMaskStandard,
-						  kRegShiftStandard);
+	NTV2Standard newStandard (value);
+	if (NTV2_IS_QUAD_QUAD_STANDARD(newStandard))
+		newStandard = GetQuarterSizedStandard(newStandard);
+	if (NTV2_IS_QUAD_STANDARD(newStandard))
+		newStandard = GetQuarterSizedStandard(newStandard);
+	if (NTV2_IS_2K1080_STANDARD(newStandard))
+		newStandard = NTV2_IS_PROGRESSIVE_STANDARD(newStandard) ? NTV2_STANDARD_1080p : NTV2_STANDARD_1080;
+
+	return WriteRegister (gChannelToGlobalControlRegNum[inChannel], newStandard, kRegMaskStandard, kRegShiftStandard);
 }
 
 // Method: GetStandard	  
@@ -970,7 +964,9 @@ bool CNTV2Card::SetStandard (NTV2Standard value, NTV2Channel channel)
 // Output: NTV2Standard
 bool CNTV2Card::GetStandard (NTV2Standard & outValue, NTV2Channel inChannel)
 {
-	if (!IsMultiFormatActive ())
+	if (IsMultiRasterWidgetChannel(inChannel))
+		return CNTV2DriverInterface::ReadRegister(kRegMROutControl, outValue, kRegMaskMRStandard, kRegShiftMRStandard);
+	if (!IsMultiFormatActive())
 		inChannel = NTV2_CHANNEL1;
 	bool status = CNTV2DriverInterface::ReadRegister (gChannelToGlobalControlRegNum[inChannel], outValue, kRegMaskStandard, kRegShiftStandard);
 	if (status && ::NTV2DeviceCanDo4KVideo(_boardID))// || NTV2DeviceCanDo425Mux(_boardID)))
@@ -1081,8 +1077,12 @@ bool CNTV2Card::SetFrameGeometry (NTV2FrameGeometry value, bool ajaRetail, NTV2C
 #else
 	(void) ajaRetail;
 #endif
-	if (!IsMultiFormatActive ())
+	if (IsMultiRasterWidgetChannel(channel))
+		return false;
+	if (!IsMultiFormatActive())
 		channel = NTV2_CHANNEL1;
+	else if (IS_CHANNEL_INVALID(channel))
+		return false;
 
 	const ULWord			regNum		(gChannelToGlobalControlRegNum [channel]);
 	const NTV2FrameGeometry newGeometry (value);
@@ -1143,6 +1143,8 @@ bool CNTV2Card::SetFrameGeometry (NTV2FrameGeometry value, bool ajaRetail, NTV2C
 bool CNTV2Card::GetFrameGeometry (NTV2FrameGeometry & outValue, NTV2Channel inChannel)
 {
 	outValue = NTV2_FG_INVALID;
+	if (IsMultiRasterWidgetChannel(inChannel))
+		{outValue = 1 ? NTV2_FG_4x1920x1080 : NTV2_FG_4x2048x1080;  return true;}
 	if (!IsMultiFormatActive())
 		inChannel = NTV2_CHANNEL1;
 	else if (IS_CHANNEL_INVALID(inChannel))
@@ -1170,16 +1172,18 @@ bool CNTV2Card::GetFrameGeometry (NTV2FrameGeometry & outValue, NTV2Channel inCh
 // Method: SetFramerate
 // Input:  NTV2FrameRate
 // Output: NONE
-bool CNTV2Card::SetFrameRate (NTV2FrameRate value, NTV2Channel channel)
+bool CNTV2Card::SetFrameRate (NTV2FrameRate value, NTV2Channel inChannel)
 {
-	const ULWord	loValue (value & 0x7);
-	const ULWord	hiValue ((value & 0x8) >> 3);
+	const ULWord loValue (value & 0x7);
+	const ULWord hiValue ((value & 0x8) >> 3);
 
+	if (IsMultiRasterWidgetChannel(inChannel))
+		return false;
 	if (!IsMultiFormatActive ())
-		channel = NTV2_CHANNEL1;
+		inChannel = NTV2_CHANNEL1;
 
-	return WriteRegister (gChannelToGlobalControlRegNum [channel], loValue, kRegMaskFrameRate, kRegShiftFrameRate) &&
-			WriteRegister (gChannelToGlobalControlRegNum [channel], hiValue, kRegMaskFrameRateHiBit, kRegShiftFrameRateHiBit);
+	return WriteRegister (gChannelToGlobalControlRegNum[inChannel], loValue, kRegMaskFrameRate, kRegShiftFrameRate) &&
+			WriteRegister (gChannelToGlobalControlRegNum[inChannel], hiValue, kRegMaskFrameRateHiBit, kRegShiftFrameRateHiBit);
 }
 
 // Method: GetFrameRate
@@ -1189,6 +1193,8 @@ bool CNTV2Card::GetFrameRate (NTV2FrameRate & outValue, NTV2Channel inChannel)
 {
 	ULWord	returnVal1 (0), returnVal2 (0);
 	outValue = NTV2_FRAMERATE_UNKNOWN;
+	if (IsMultiRasterWidgetChannel(inChannel))
+		return CNTV2DriverInterface::ReadRegister(kRegMROutControl, outValue, /*mask*/0x00000070, /*shift*/4);
 	if (!IsMultiFormatActive())
 		inChannel = NTV2_CHANNEL1;
 	else if (IS_CHANNEL_INVALID(inChannel))
@@ -1197,8 +1203,8 @@ bool CNTV2Card::GetFrameRate (NTV2FrameRate & outValue, NTV2Channel inChannel)
 	if (ReadRegister (gChannelToGlobalControlRegNum[inChannel], returnVal1, kRegMaskFrameRate, kRegShiftFrameRate) &&
 		ReadRegister (gChannelToGlobalControlRegNum[inChannel], returnVal2, kRegMaskFrameRateHiBit, kRegShiftFrameRateHiBit))
 	{
-			outValue = static_cast <NTV2FrameRate> ((returnVal1 & 0x7) | ((returnVal2 & 0x1) << 3));
-			return true;
+		outValue = NTV2FrameRate((returnVal1 & 0x7) | ((returnVal2 & 0x1) << 3));
+		return true;
 	}
 	return false;
 }
@@ -1208,7 +1214,8 @@ bool CNTV2Card::SetSmpte372 (ULWord inValue, NTV2Channel inChannel)
 {
 	// Set true (1) to put card in SMPTE 372 dual-link mode (used for 1080p60, 1080p5994, 1080p50)
 	// Set false (0) to disable this mode
-
+	if (IsMultiRasterWidgetChannel(inChannel))
+		return inValue == 0;
 	if (!IsMultiFormatActive())
 		inChannel = NTV2_CHANNEL1;
 
@@ -1220,6 +1227,8 @@ bool CNTV2Card::GetSmpte372 (ULWord & outValue, NTV2Channel inChannel)
 {
 	// Return true (1) if card in SMPTE 372 dual-link mode (used for 1080p60, 1080p5994, 1080p50)
 	// Return false (0) if this mode is disabled
+	if (IsMultiRasterWidgetChannel(inChannel))
+		{outValue = 0;  return true;}
 	if (!IsMultiFormatActive())
 		inChannel = NTV2_CHANNEL1;
 
@@ -1252,7 +1261,11 @@ bool CNTV2Card::GetProgressivePicture (ULWord & outValue)
 // Output: NONE
 bool CNTV2Card::SetQuadFrameEnable (const bool inEnable, const NTV2Channel inChannel)
 {
-	bool ok(NTV2_IS_VALID_CHANNEL(inChannel) && ::NTV2DeviceCanDo4KVideo(_boardID));
+	if (!::NTV2DeviceCanDo4KVideo(_boardID))
+		return false;
+	if (IsMultiRasterWidgetChannel(inChannel))
+		return inEnable == true;
+	bool ok(NTV2_IS_VALID_CHANNEL(inChannel));
 
 	// Set true (1) to enable a Quad Frame Geometry
 	// Set false (0) to disable this mode
@@ -1281,7 +1294,11 @@ bool CNTV2Card::SetQuadFrameEnable (const bool inEnable, const NTV2Channel inCha
 
 bool CNTV2Card::SetQuadQuadFrameEnable (const bool inEnable, const NTV2Channel inChannel)
 {
-	bool ok(NTV2_IS_VALID_CHANNEL(inChannel) && ::NTV2DeviceCanDo8KVideo(_boardID));
+	if (!::NTV2DeviceCanDo8KVideo(_boardID))
+		return false;
+	if (IsMultiRasterWidgetChannel(inChannel))
+		return false;
+	bool ok(NTV2_IS_VALID_CHANNEL(inChannel));
 	if (inEnable)
 	{
 		if (!IsMultiFormatActive())
@@ -1307,7 +1324,7 @@ bool CNTV2Card::SetQuadQuadFrameEnable (const bool inEnable, const NTV2Channel i
 		if(ok)	ok = SetQuadQuadSquaresEnable(false, inChannel);
 	}
 
-	if(!IsMultiFormatActive())
+	if (!IsMultiFormatActive())
 	{
 		WriteRegister(kRegGlobalControl3, ULWord(inEnable ? 1 : 0), kRegMaskQuadQuadMode, kRegShiftQuadQuadMode);
 		WriteRegister(kRegGlobalControl3, ULWord(inEnable ? 1 : 0), kRegMaskQuadQuadMode2, kRegShiftQuadQuadMode2);		
@@ -1376,8 +1393,8 @@ bool CNTV2Card::GetQuadFrameEnable (bool & outValue, const NTV2Channel inChannel
 
 bool CNTV2Card::GetQuadQuadFrameEnable (bool & outValue, const NTV2Channel inChannel)
 {
-	(void)inChannel;
-	outValue = 0;
+	(void) inChannel;	//	Channel ignored for now
+	outValue = false;
 	if (::NTV2DeviceCanDo8KVideo(_boardID))
 	{
 		if (inChannel < NTV2_CHANNEL3)
@@ -1394,6 +1411,8 @@ bool CNTV2Card::Set4kSquaresEnable (const bool inEnable, NTV2Channel inChannel)
 
 	if(!::NTV2DeviceCanDo4KVideo(_boardID))
 		return false;
+	if (IsMultiRasterWidgetChannel(inChannel))
+		return inEnable == true;
 	if (!NTV2_IS_VALID_CHANNEL(inChannel))
 		return false;
 
@@ -1452,6 +1471,8 @@ bool CNTV2Card::Set4kSquaresEnable (const bool inEnable, NTV2Channel inChannel)
 bool CNTV2Card::Get4kSquaresEnable (bool & outIsEnabled, const NTV2Channel inChannel)
 {
 	outIsEnabled = false;
+	if (IsMultiRasterWidgetChannel(inChannel))
+		{outIsEnabled = true;  return true;}
 	if (!NTV2_IS_VALID_CHANNEL(inChannel))
 		return false;
 	ULWord	squaresEnabled	(0);
@@ -1475,10 +1496,12 @@ bool CNTV2Card::SetTsiFrameEnable (const bool enable, const NTV2Channel inChanne
 
 	if(!::NTV2DeviceCanDo425Mux(_boardID) && !::NTV2DeviceCanDo12gRouting(_boardID))
 		return false;
+	if (IsMultiRasterWidgetChannel(inChannel))
+		return enable == true;
 	if (!NTV2_IS_VALID_CHANNEL(inChannel))
 		return false;
 
-	if(enable)
+	if (enable)
 	{
 		if (::NTV2DeviceCanDo12gRouting(_boardID))
 		{
@@ -1593,6 +1616,8 @@ bool CNTV2Card::GetTsiFrameEnable (bool & outIsEnabled, const NTV2Channel inChan
 	outIsEnabled = false;
 	if (!::NTV2DeviceCanDo425Mux (_boardID) && !::NTV2DeviceCanDo12gRouting(_boardID))
 		return false;
+	if (IsMultiRasterWidgetChannel(inChannel))
+		{outIsEnabled = true;  return true;}
 	if (!NTV2_IS_VALID_CHANNEL(inChannel))
 		return false;
 	// Return true (1) Quad Frame Geometry is enabled
@@ -1925,20 +1950,25 @@ bool CNTV2Card::GetFramePulseReference (NTV2ReferenceSource & outValue)
 // Input:  NTV2Channel,	 NTV2Mode
 // Output: NONE
 bool CNTV2Card::SetMode (const NTV2Channel inChannel, const NTV2Mode inValue,  const bool inIsRetail)
-{
-	(void) inIsRetail;
+{	(void) inIsRetail;
 	#if !defined (NTV2_DEPRECATE)
 		#ifdef	MSWindows
 			NTV2EveryFrameTaskMode mode;
 			GetEveryFrameServices(&mode);
 		#endif
 	#endif	//	!defined (NTV2_DEPRECATE)
-	return WriteRegister (gChannelToControlRegNum [inChannel], inValue, kRegMaskMode, kRegShiftMode);
+	if (IsMultiRasterWidgetChannel(inChannel))
+		return inValue == NTV2_MODE_INPUT;
+	if (IS_CHANNEL_INVALID(inChannel))
+		return false;
+	return WriteRegister (gChannelToControlRegNum[inChannel], inValue, kRegMaskMode, kRegShiftMode);
 }
 
 bool CNTV2Card::GetMode (const NTV2Channel inChannel, NTV2Mode & outValue)
 {
-	if (!NTV2_IS_VALID_CHANNEL (inChannel))
+	if (IsMultiRasterWidgetChannel(inChannel))
+		{outValue = NTV2_MODE_INPUT;  return true;}
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
 	return CNTV2DriverInterface::ReadRegister (gChannelToControlRegNum[inChannel], outValue, kRegMaskMode, kRegShiftMode);
 }
@@ -2137,7 +2167,7 @@ bool CNTV2Card::GetPossibleConnections (NTV2PossibleConnections & outConnections
 // Method: SetFrameBufferFormat
 // Input:  NTV2Channel, NTV2FrameBufferFormat
 // Output: NONE
-bool CNTV2Card::SetFrameBufferFormat(NTV2Channel channel, NTV2FrameBufferFormat newFormat, bool inIsRetailMode,
+bool CNTV2Card::SetFrameBufferFormat (NTV2Channel inChannel, NTV2FrameBufferFormat inNewFormat, bool inIsRetailMode,
 									 NTV2HDRXferChars inXferChars, NTV2HDRColorimetry inColorimetry, NTV2HDRLuminance inLuminance)
 {
 	#if !defined (NTV2_DEPRECATE)
@@ -2151,15 +2181,17 @@ bool CNTV2Card::SetFrameBufferFormat(NTV2Channel channel, NTV2FrameBufferFormat 
 		(void) inIsRetailMode;
 	#endif	//	!defined (NTV2_DEPRECATE)
 
-	if (IS_CHANNEL_INVALID (channel))
+	if (IsMultiRasterWidgetChannel(inChannel))
+		return inNewFormat == NTV2_FBF_8BIT_YCBCR;
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
 
-	const ULWord	regNum	(gChannelToControlRegNum[channel]);
-	const ULWord	loValue (newFormat & 0x0f);
-	const ULWord	hiValue ((newFormat & 0x10) >> 4);
+	const ULWord	regNum	(gChannelToControlRegNum[inChannel]);
+	const ULWord	loValue (inNewFormat & 0x0f);
+	const ULWord	hiValue ((inNewFormat & 0x10) >> 4);
 	NTV2FrameGeometry		currentGeometry (NTV2_FG_INVALID);
 	NTV2FrameBufferFormat	currentFormat	(NTV2_FBF_INVALID); // save for call to IsBufferSizeChangeRequired below
-	bool status = GetFrameInfo(channel, currentGeometry, currentFormat);
+	bool status = GetFrameInfo(inChannel, currentGeometry, currentFormat);
 	if (!status)
 		return status;
 
@@ -2175,25 +2207,25 @@ bool CNTV2Card::SetFrameBufferFormat(NTV2Channel channel, NTV2FrameBufferFormat 
 
 	// If software set the frame buffer size, read the values from hardware
 	if ( !GetFBSizeAndCountFromHW(&_ulFrameBufferSize, &_ulNumFrameBuffers) &&
-		  IsBufferSizeChangeRequired(channel,currentGeometry,currentFormat,newFormat) )
+		  IsBufferSizeChangeRequired(inChannel, currentGeometry, currentFormat, inNewFormat) )
 	{
-		_ulFrameBufferSize = ::NTV2DeviceGetFrameBufferSize(_boardID,currentGeometry,newFormat);
-		_ulNumFrameBuffers = ::NTV2DeviceGetNumberFrameBuffers(_boardID,currentGeometry,newFormat);
+		_ulFrameBufferSize = ::NTV2DeviceGetFrameBufferSize(_boardID,currentGeometry, inNewFormat);
+		_ulNumFrameBuffers = ::NTV2DeviceGetNumberFrameBuffers(_boardID,currentGeometry, inNewFormat);
 	}
 
 	if (status)
-		{if (newFormat != currentFormat)
-			CVIDINFO("'" << GetDisplayName() << "': Channel " << DEC(UWord(channel)+1) << " FBF changed from "
+		{if (inNewFormat != currentFormat)
+			CVIDINFO("'" << GetDisplayName() << "': Channel " << DEC(UWord(inChannel)+1) << " FBF changed from "
 					<< ::NTV2FrameBufferFormatToString(currentFormat) << " to "
-					<< ::NTV2FrameBufferFormatToString(newFormat) << " (FBSize=" << xHEX0N(_ulFrameBufferSize,8)
+					<< ::NTV2FrameBufferFormatToString(inNewFormat) << " (FBSize=" << xHEX0N(_ulFrameBufferSize,8)
 					<< " numFBs=" << DEC(_ulNumFrameBuffers) << ")");}
 	else
-		CVIDFAIL("'" << GetDisplayName() << "': Failed to change channel " << DEC(UWord(channel)+1) << " FBF from "
-				<< ::NTV2FrameBufferFormatToString(currentFormat) << " to " << ::NTV2FrameBufferFormatToString(newFormat));
+		CVIDFAIL("'" << GetDisplayName() << "': Failed to change channel " << DEC(UWord(inChannel)+1) << " FBF from "
+				<< ::NTV2FrameBufferFormatToString(currentFormat) << " to " << ::NTV2FrameBufferFormatToString(inNewFormat));
 
-	SetVPIDTransferCharacteristics(inXferChars, channel);
-	SetVPIDColorimetry(inColorimetry, channel);
-	SetVPIDLuminance(inLuminance, channel);
+	SetVPIDTransferCharacteristics(inXferChars, inChannel);
+	SetVPIDColorimetry(inColorimetry, inChannel);
+	SetVPIDLuminance(inLuminance, inChannel);
 	return status;
 }
 
@@ -2214,8 +2246,10 @@ bool CNTV2Card::SetFrameBufferFormat (const NTV2ChannelSet & inFrameStores,
 // Method: GetFrameBufferFormat
 // Input:  NTV2Channel
 // Output: NTV2FrameBufferFormat
-bool CNTV2Card::GetFrameBufferFormat(NTV2Channel inChannel, NTV2FrameBufferFormat & outValue)
+bool CNTV2Card::GetFrameBufferFormat (NTV2Channel inChannel, NTV2FrameBufferFormat & outValue)
 {
+	if (IsMultiRasterWidgetChannel(inChannel))
+		{outValue = NTV2_FBF_8BIT_YCBCR;  return true;}
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 
@@ -2223,14 +2257,14 @@ bool CNTV2Card::GetFrameBufferFormat(NTV2Channel inChannel, NTV2FrameBufferForma
 	bool	result1 = ReadRegister (gChannelToControlRegNum[inChannel], returnVal1, kRegMaskFrameFormat,	  kRegShiftFrameFormat);
 	bool	result2 = ReadRegister (gChannelToControlRegNum[inChannel], returnVal2, kRegMaskFrameFormatHiBit, kRegShiftFrameFormatHiBit);
 
-	outValue = static_cast <NTV2FrameBufferFormat> ((returnVal1 & 0x0f) | ((returnVal2 & 0x1) << 4));
-	return (result1 && result2);
+	outValue = NTV2FrameBufferFormat((returnVal1 & 0x0f) | ((returnVal2 & 0x1) << 4));
+	return result1 && result2;
 }
 
 // Method: SetFrameBufferQuarterSizeMode
 // Input:  NTV2Channel, NTV2K2QuarterSizeExpandMode
 // Output: NONE
-bool CNTV2Card::SetFrameBufferQuarterSizeMode(NTV2Channel channel, NTV2QuarterSizeExpandMode value)
+bool CNTV2Card::SetFrameBufferQuarterSizeMode (NTV2Channel channel, NTV2QuarterSizeExpandMode value)
 {
 	if (IS_CHANNEL_INVALID (channel))
 		return false;
@@ -2250,7 +2284,7 @@ bool CNTV2Card::GetFrameBufferQuarterSizeMode (NTV2Channel inChannel, NTV2Quarte
 // Method: SetFrameBufferQuality - currently used for ProRes compressed buffers
 // Input:  NTV2Channel, NTV2K2FrameBufferQuality
 // Output: NONE
-bool CNTV2Card::SetFrameBufferQuality(NTV2Channel channel, NTV2FrameBufferQuality quality)
+bool CNTV2Card::SetFrameBufferQuality (NTV2Channel channel, NTV2FrameBufferQuality quality)
 {
 	if (IS_CHANNEL_INVALID (channel))
 		return false;
@@ -2304,11 +2338,13 @@ bool CNTV2Card::GetEncodeAsPSF (NTV2Channel inChannel, NTV2EncodeAsPSF & outValu
 // Method: SetFrameBufferOrientation
 // Input:  NTV2Channel,	 NTV2VideoFrameBufferOrientation
 // Output: NONE
-bool CNTV2Card::SetFrameBufferOrientation (const NTV2Channel inChannel, const NTV2FBOrientation value)
+bool CNTV2Card::SetFrameBufferOrientation (const NTV2Channel inChannel, const NTV2FBOrientation inValue)
 {
-	if (IS_CHANNEL_INVALID (inChannel))
+	if (IsMultiRasterWidgetChannel(inChannel))
+		return inValue == NTV2_FRAMEBUFFER_ORIENTATION_NORMAL;
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	return WriteRegister (gChannelToControlRegNum [inChannel], value, kRegMaskFrameOrientation, kRegShiftFrameOrientation);
+	return WriteRegister (gChannelToControlRegNum[inChannel], inValue, kRegMaskFrameOrientation, kRegShiftFrameOrientation);
 }
 
 // Method: GetFrameBufferOrientation
@@ -2316,6 +2352,8 @@ bool CNTV2Card::SetFrameBufferOrientation (const NTV2Channel inChannel, const NT
 // Output: NTV2VideoFrameBufferOrientation
 bool CNTV2Card::GetFrameBufferOrientation (const NTV2Channel inChannel, NTV2FBOrientation & outValue)
 {
+	if (IsMultiRasterWidgetChannel(inChannel))
+		{outValue = NTV2_FRAMEBUFFER_ORIENTATION_NORMAL;  return true;}
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 	return CNTV2DriverInterface::ReadRegister (gChannelToControlRegNum[inChannel], outValue, kRegMaskFrameOrientation, kRegShiftFrameOrientation);
@@ -2412,7 +2450,10 @@ bool CNTV2Card::GetFrameBufferSize (const NTV2Channel inChannel, NTV2Framesize &
 
 bool CNTV2Card::DisableChannel (const NTV2Channel inChannel)
 {
-	return WriteRegister (gChannelToControlRegNum [inChannel], ULWord (true), kRegMaskChannelDisable, kRegShiftChannelDisable);
+	if (IsMultiRasterWidgetChannel(inChannel))
+		return SetMultiRasterBypassEnable(false);
+	return NTV2_IS_VALID_CHANNEL(inChannel)
+		&&  WriteRegister (gChannelToControlRegNum [inChannel], ULWord (true), kRegMaskChannelDisable, kRegShiftChannelDisable);
 
 }	//	DisableChannel
 
@@ -2429,6 +2470,8 @@ bool CNTV2Card::DisableChannels (const NTV2ChannelSet & inChannels)
 
 bool CNTV2Card::EnableChannel (const NTV2Channel inChannel)
 {
+	if (IsMultiRasterWidgetChannel(inChannel))
+		return SetMultiRasterBypassEnable(true);
 	return NTV2_IS_VALID_CHANNEL(inChannel)
 			&&	WriteRegister (gChannelToControlRegNum[inChannel], ULWord(false), kRegMaskChannelDisable, kRegShiftChannelDisable);
 
@@ -2450,10 +2493,14 @@ bool CNTV2Card::EnableChannels (const NTV2ChannelSet & inChannels, const bool in
 
 bool CNTV2Card::IsChannelEnabled (const NTV2Channel inChannel, bool & outEnabled)
 {
-	ULWord	value (0);
-	if (!ReadRegister (gChannelToControlRegNum[inChannel], value, kRegMaskChannelDisable, kRegShiftChannelDisable))
+	bool	disabled (false);
+	if (IsMultiRasterWidgetChannel(inChannel))
+		return GetMultiRasterBypassEnable(outEnabled);
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	outEnabled = value ? false : true;
+	if (!CNTV2DriverInterface::ReadRegister (gChannelToControlRegNum[inChannel], disabled, kRegMaskChannelDisable, kRegShiftChannelDisable))
+		return false;
+	outEnabled = disabled ? false : true;
 	return true;
 }	//	IsChannelEnabled
 
@@ -2511,30 +2558,38 @@ bool CNTV2Card::IsChannelEnabled (const NTV2Channel inChannel, bool & outEnabled
 
 bool CNTV2Card::SetOutputFrame (const NTV2Channel inChannel, const ULWord value)
 {
-	if (IS_CHANNEL_INVALID (inChannel))
+	if (IsMultiRasterWidgetChannel(inChannel))
+		return false;
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
 	return WriteRegister (gChannelToOutputFrameRegNum [inChannel], value);
 }
 
 bool CNTV2Card::GetOutputFrame (const NTV2Channel inChannel, ULWord & outValue)
 {
-	if (IS_CHANNEL_INVALID (inChannel))
+	if (IsMultiRasterWidgetChannel(inChannel))
+		{outValue = 0;  return false;}
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
 	return ReadRegister (gChannelToOutputFrameRegNum [inChannel], outValue);
 }
 
 bool CNTV2Card::SetInputFrame (const NTV2Channel inChannel, const ULWord value)
 {
-	if (IS_CHANNEL_INVALID (inChannel))
+	if (IsMultiRasterWidgetChannel(inChannel))
+		return WriteRegister(kRegMROutControl, value, kRegMaskMRFrameLocation, kRegShiftMRFrameLocation);
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
 	return WriteRegister (gChannelToInputFrameRegNum [inChannel], value);
 }
 
 bool CNTV2Card::GetInputFrame (const NTV2Channel inChannel, ULWord & outValue)
 {
-	if (IS_CHANNEL_INVALID (inChannel))
+	if (IsMultiRasterWidgetChannel(inChannel))
+		return ReadRegister(kRegMROutControl, outValue, kRegMaskMRFrameLocation, kRegShiftMRFrameLocation);
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	return ReadRegister (gChannelToInputFrameRegNum [inChannel], outValue);
+	return ReadRegister (gChannelToInputFrameRegNum[inChannel], outValue);
 }
 
 bool CNTV2Card::SetAlphaFromInput2Bit (ULWord value)							{return WriteRegister (kRegCh1Control, value, kRegMaskAlphaFromInput2, kRegShiftAlphaFromInput2);}
@@ -3129,6 +3184,8 @@ bool CNTV2Card::SetVANCMode (const NTV2ChannelSet & inChannels, const NTV2VANCMo
 bool CNTV2Card::SetVANCMode (const NTV2VANCMode inVancMode, const NTV2Channel inChannel)
 {
 	const NTV2Channel ch (IsMultiFormatActive() ? inChannel : NTV2_CHANNEL1);
+	if (IsMultiRasterWidgetChannel(ch))
+		return inVancMode == NTV2_VANCMODE_OFF;
 	if (IS_CHANNEL_INVALID(ch))
 		return false;
 	if (!NTV2_IS_VALID_VANCMODE(inVancMode))
@@ -3219,6 +3276,9 @@ bool CNTV2Card::GetVANCMode (NTV2VANCMode & outVancMode, const NTV2Channel inCha
 	const NTV2Channel	channel			(IsMultiFormatActive() ? inChannel : NTV2_CHANNEL1);
 	NTV2Standard		standard		(NTV2_STANDARD_INVALID);
 	NTV2FrameGeometry	frameGeometry	(NTV2_FG_INVALID);
+
+	if (IsMultiRasterWidgetChannel(channel))
+		{outVancMode = NTV2_VANCMODE_OFF;  return true;}
 
 	outVancMode = NTV2_VANCMODE_INVALID;
 	if (IS_CHANNEL_INVALID (channel))
@@ -3315,6 +3375,8 @@ bool CNTV2Card::GetVANCMode (NTV2VANCMode & outVancMode, const NTV2Channel inCha
 
 bool CNTV2Card::SetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode inValue)
 {
+	if (IsMultiRasterWidgetChannel(inChannel))
+		return inValue == NTV2_VANCDATA_NORMAL;
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 	CVIDINFO("'" << GetDisplayName() << "' Ch" << DEC(inChannel+1) << ": Vanc data shift " << (inValue ? "enabled" : "disabled"));
@@ -3334,6 +3396,8 @@ bool CNTV2Card::SetVANCShiftMode (NTV2ChannelSet & inChannels, const NTV2VANCDat
 
 bool CNTV2Card::GetVANCShiftMode (NTV2Channel inChannel, NTV2VANCDataShiftMode & outValue)
 {
+	if (IsMultiRasterWidgetChannel(inChannel))
+		{outValue = NTV2_VANCDATA_NORMAL;  return true;}
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 	return CNTV2DriverInterface::ReadRegister (gChannelToControlRegNum[inChannel], outValue, kRegMaskVidProcVANCShift, kRegShiftVidProcVANCShift);
@@ -7195,61 +7259,45 @@ bool CNTV2Card::ReadSDIStatistics (NTV2SDIInStatistics & outStats)
 
 bool CNTV2Card::SetVPIDTransferCharacteristics (const NTV2VPIDTransferCharacteristics inValue, const NTV2Channel inChannel)
 {
-	return WriteRegister(gChannelToVPIDTransferCharacteristics[inChannel], inValue);
+	return IS_CHANNEL_VALID(inChannel) && WriteRegister(gChannelToVPIDTransferCharacteristics[inChannel], inValue);
 }
 
 bool CNTV2Card::GetVPIDTransferCharacteristics (NTV2VPIDTransferCharacteristics & outValue, const NTV2Channel inChannel)
 {
-	ULWord	tempVal (0);
-	if (!ReadRegister(gChannelToVPIDTransferCharacteristics[inChannel], tempVal))
-		return false;
-	outValue = static_cast <NTV2VPIDTransferCharacteristics> (tempVal);
-	return true;
+	return IS_CHANNEL_VALID(inChannel) && CNTV2DriverInterface::ReadRegister(gChannelToVPIDTransferCharacteristics[inChannel], outValue);
 }
 
 bool CNTV2Card::SetVPIDColorimetry (const NTV2VPIDColorimetry inValue, const NTV2Channel inChannel)
 {
-	return WriteRegister(gChannelToVPIDColorimetry[inChannel], inValue);
+	return IS_CHANNEL_VALID(inChannel) && WriteRegister(gChannelToVPIDColorimetry[inChannel], inValue);
 }
 
 bool CNTV2Card::GetVPIDColorimetry (NTV2VPIDColorimetry & outValue, const NTV2Channel inChannel)
 {
-	ULWord	tempVal (0);
-	if (!ReadRegister(gChannelToVPIDColorimetry[inChannel], tempVal))
-		return false;
-	outValue = static_cast <NTV2VPIDColorimetry> (tempVal);
-	return true;
+	return IS_CHANNEL_VALID(inChannel) && CNTV2DriverInterface::ReadRegister(gChannelToVPIDColorimetry[inChannel], outValue);
 }
 
 bool CNTV2Card::SetVPIDLuminance (const NTV2VPIDLuminance inValue, const NTV2Channel inChannel)
 {
-	return WriteRegister(gChannelToVPIDLuminance[inChannel], inValue);
+	return IS_CHANNEL_VALID(inChannel) && WriteRegister(gChannelToVPIDLuminance[inChannel], inValue);
 }
 
 bool CNTV2Card::GetVPIDLuminance (NTV2VPIDLuminance & outValue, const NTV2Channel inChannel)
 {
-	ULWord	tempVal (0);
-	if (!ReadRegister(gChannelToVPIDLuminance[inChannel], tempVal))
-		return false;
-	outValue = static_cast <NTV2VPIDLuminance> (tempVal);
-	return true;
+	return IS_CHANNEL_VALID(inChannel) && CNTV2DriverInterface::ReadRegister(gChannelToVPIDLuminance[inChannel], outValue);
 }
 
 bool CNTV2Card::SetVPIDRGBRange (const NTV2VPIDRGBRange inValue, const NTV2Channel inChannel)
 {
-	return WriteRegister(gChannelToVPIDRGBRange[inChannel], inValue);
+	return IS_CHANNEL_VALID(inChannel) && WriteRegister(gChannelToVPIDRGBRange[inChannel], inValue);
 }
 
 bool CNTV2Card::GetVPIDRGBRange (NTV2VPIDRGBRange & outValue, const NTV2Channel inChannel)
 {
-	ULWord	tempVal (0);
-	if (!ReadRegister(gChannelToVPIDRGBRange[inChannel], tempVal))
-		return false;
-	outValue = static_cast <NTV2VPIDRGBRange> (tempVal);
-	return true;
+	return IS_CHANNEL_VALID(inChannel) && CNTV2DriverInterface::ReadRegister(gChannelToVPIDRGBRange[inChannel], outValue);
 }
 
-bool CNTV2Card::HasMultiRasterWidget()
+bool CNTV2Card::HasMultiRasterWidget (void)
 {
 	bool hasMultiRasterWidget(false);
 	return CNTV2DriverInterface::ReadRegister(kRegMRSupport, hasMultiRasterWidget, kRegMaskMRSupport, kRegShiftMRSupport)  &&  hasMultiRasterWidget;
@@ -7257,18 +7305,31 @@ bool CNTV2Card::HasMultiRasterWidget()
 
 bool CNTV2Card::SetMultiRasterBypassEnable (const bool inEnable)
 {
-	if (!HasMultiRasterWidget())
-		return false;
-	return WriteRegister(kRegMROutControl, inEnable, kRegMaskMRBypass, kRegShiftMRBypass);
+	return HasMultiRasterWidget() && WriteRegister(kRegMROutControl, inEnable, kRegMaskMRBypass, kRegShiftMRBypass);
 }
 
 bool CNTV2Card::GetMultiRasterBypassEnable (bool & outEnabled)
 {
-	ULWord	tempVal (0);
-	if (!ReadRegister(kRegMROutControl, tempVal, kRegMaskMRBypass, kRegShiftMRBypass))
+	if (!HasMultiRasterWidget())
 		return false;
-	outEnabled = static_cast <bool> (tempVal);
+	NTV2ULWordVector regs; regs.push_back(0); regs.push_back(0); regs.push_back(0); regs.push_back(0);
+	if (!ReadRegister(kRegMRQ1Control, regs.at(0))
+		||  !ReadRegister(kRegMRQ2Control, regs.at(1))
+		||  !ReadRegister(kRegMRQ3Control, regs.at(2))
+		||  !ReadRegister(kRegMRQ4Control, regs.at(3)))
+			return false;
+	//	Any enabled quadrant means the 4K frame is being written by the hardware
+	outEnabled = (regs.at(0) & kRegMaskMREnable)
+				||	(regs.at(1) & kRegMaskMREnable)
+				||	(regs.at(2) & kRegMaskMREnable)
+				||	(regs.at(3) & kRegMaskMREnable);
+//	CNTV2DriverInterface::ReadRegister(kRegMROutControl, outEnabled, kRegMaskMRBypass, kRegShiftMRBypass);
 	return true;
+}
+
+bool CNTV2Card::IsMultiRasterWidgetChannel (const NTV2Channel inChannel)
+{
+	return HasMultiRasterWidget() && inChannel == NTV2Channel(::NTV2DeviceGetNumVideoChannels(GetDeviceID()));
 }
 
 
