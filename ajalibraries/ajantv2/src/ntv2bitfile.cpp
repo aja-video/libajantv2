@@ -480,6 +480,7 @@ string CNTV2Bitfile::GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID
 		case DEVICE_ID_KONA5_3DLUT:				return "kona5_3d_lut";
 		case DEVICE_ID_KONA5_8K:				return "kona5_8k";			//	Formerly kona5_12g
 		case DEVICE_ID_KONA5_8KMK:				return "kona5_8k_mk";
+		case DEVICE_ID_KONA5_8K_MV_TX:			return "kona5_8k_mv_tx";
 		case DEVICE_ID_KONA5_OE1:				return "kona5_oe_cfg1";
 		case DEVICE_ID_KONA5_OE10:				return "kona5_oe_cfg10";
 		case DEVICE_ID_KONA5_OE11:				return "kona5_oe_cfg11";
@@ -503,6 +504,14 @@ string CNTV2Bitfile::GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID
 		case DEVICE_ID_KONALHEPLUS:				return "lhe_12_pcie";		//	lhe_12_pcie.ncd
 		case DEVICE_ID_KONALHI:					return "top_pike";			//	top_pike.ncd
 		case DEVICE_ID_KONALHIDVI:				break;
+		case DEVICE_ID_SOJI_OE1:				return "soji_oe_cfg1";
+		case DEVICE_ID_SOJI_OE2:				return "soji_oe_cfg2";
+		case DEVICE_ID_SOJI_OE3:				return "soji_oe_cfg3";
+		case DEVICE_ID_SOJI_OE4:				return "soji_oe_cfg4";
+		case DEVICE_ID_SOJI_OE5:				return "soji_oe_cfg5";
+		case DEVICE_ID_SOJI_OE6:				return "soji_oe_cfg6";
+		case DEVICE_ID_SOJI_OE7:				return "soji_oe_cfg7";
+		case DEVICE_ID_SOJI_OE8:				return "soji_oe_cfg8";
 		case DEVICE_ID_TTAP:					return "t_tap_top";			//	t_tap_top.ncd
 		case DEVICE_ID_TTAP_PRO:				return "t_tap_pro";
 		case DEVICE_ID_NOTFOUND:				break;
@@ -563,10 +572,20 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 		case DEVICE_ID_KONA5_OE10:
 		case DEVICE_ID_KONA5_OE11:
 		case DEVICE_ID_KONA5_OE12:
+		case DEVICE_ID_SOJI_OE1:
+		case DEVICE_ID_SOJI_OE2:
+		case DEVICE_ID_SOJI_OE3:
+		case DEVICE_ID_SOJI_OE4:
+		case DEVICE_ID_SOJI_OE5:
+		case DEVICE_ID_SOJI_OE6:
+		case DEVICE_ID_SOJI_OE7:
+		case DEVICE_ID_SOJI_OE8:
 		case DEVICE_ID_KONA5_3DLUT:
 		case DEVICE_ID_KONA5_2X4K:
 		case DEVICE_ID_KONA5_8KMK:
 		case DEVICE_ID_KONA5_8K:
+		case DEVICE_ID_KONA5_8K_MV_TX:
+
 		case DEVICE_ID_KONA5:		return GetPrimaryHardwareDesignName (DEVICE_ID_KONA5) == designName
 											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_8KMK)
 											|| designName == "kona5"
@@ -588,10 +607,20 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_OE12).append("_tprom")
 											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_KONA5).append("_tprom")
 											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_8KMK).append("_tprom")
+											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_8K_MV_TX).append("_tprom")
 											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_8K).append("_tprom")
 											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_3DLUT).append("_tprom")
 											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_2X4K).append("_tprom")
-											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_OE1).append("_tprom");
+											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_KONA5_OE1).append("_tprom")
+											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_SOJI_OE1).append("_tprom")
+											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_SOJI_OE2).append("_tprom")
+											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_SOJI_OE3).append("_tprom")
+											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_SOJI_OE4).append("_tprom")
+											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_SOJI_OE5).append("_tprom")
+											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_SOJI_OE6).append("_tprom")
+											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_SOJI_OE7).append("_tprom")
+											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_SOJI_OE8).append("_tprom");
+
 		case DEVICE_ID_CORVID44_8KMK:
 		case DEVICE_ID_CORVID44_8K:
 		case DEVICE_ID_CORVID44_PLNR:
@@ -707,6 +736,15 @@ class CDesignPairToIDMapMaker
 			sDesignPairToIDMap[make_pair(0x03, 0x0E)] = DEVICE_ID_KONA5_OE10;
 			sDesignPairToIDMap[make_pair(0x03, 0x0F)] = DEVICE_ID_KONA5_OE11;
 			sDesignPairToIDMap[make_pair(0x03, 0x10)] = DEVICE_ID_KONA5_OE12;
+			sDesignPairToIDMap[make_pair(0x03, 0x11)] = DEVICE_ID_SOJI_OE1;
+			sDesignPairToIDMap[make_pair(0x03, 0x12)] = DEVICE_ID_SOJI_OE2;
+			sDesignPairToIDMap[make_pair(0x03, 0x13)] = DEVICE_ID_SOJI_OE3;
+			sDesignPairToIDMap[make_pair(0x03, 0x14)] = DEVICE_ID_SOJI_OE4;
+			sDesignPairToIDMap[make_pair(0x03, 0x15)] = DEVICE_ID_SOJI_OE5;
+			sDesignPairToIDMap[make_pair(0x03, 0x16)] = DEVICE_ID_SOJI_OE6;
+			sDesignPairToIDMap[make_pair(0x03, 0x17)] = DEVICE_ID_SOJI_OE7;
+			sDesignPairToIDMap[make_pair(0x03, 0x18)] = DEVICE_ID_SOJI_OE8;
+			sDesignPairToIDMap[make_pair(0x01, 0x20)] = DEVICE_ID_KONA5_8K_MV_TX;
 		}
 };	//	CDesignPairToIDMapMaker
 

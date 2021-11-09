@@ -471,12 +471,52 @@ bool CNTV2FirmwareInstallerThread::ShouldUpdateIPDevice (const NTV2DeviceID inDe
 	case DEVICE_ID_KONA5_8KMK:
 	case DEVICE_ID_KONA5_8K:
 	case DEVICE_ID_KONA5_OE1:
-		return (designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA5) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA5_2X4K) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA5_3DLUT) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA5_8KMK) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA5_8K) ||
-				designName == CNTV2Bitfile::GetPrimaryHardwareDesignName(DEVICE_ID_KONA5_OE1));
+	case DEVICE_ID_KONA5_OE2:
+	case DEVICE_ID_KONA5_OE3:
+	case DEVICE_ID_KONA5_OE4:
+	case DEVICE_ID_KONA5_OE5:
+	case DEVICE_ID_KONA5_OE6:
+	case DEVICE_ID_KONA5_OE7:
+	case DEVICE_ID_KONA5_OE8:
+	case DEVICE_ID_KONA5_OE9:
+	case DEVICE_ID_KONA5_OE10:
+	case DEVICE_ID_KONA5_OE11:
+	case DEVICE_ID_KONA5_OE12:
+	case DEVICE_ID_SOJI_OE1:
+	case DEVICE_ID_SOJI_OE2:
+	case DEVICE_ID_SOJI_OE3:
+	case DEVICE_ID_SOJI_OE4:
+	case DEVICE_ID_SOJI_OE5:
+	case DEVICE_ID_SOJI_OE6:
+	case DEVICE_ID_SOJI_OE7:
+	case DEVICE_ID_SOJI_OE8:
+	case DEVICE_ID_KONA5_8K_MV_TX:
+		return (designName == GetPrimaryDesignName(DEVICE_ID_KONA5) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_2X4K) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_3DLUT) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_8KMK) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_8K) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE1) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE2) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE3) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE4) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE5) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE6) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE7) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE8) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE9) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE10) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE11) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_OE12) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE1) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE2) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE3) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE4) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE5) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE6) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE7) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_SOJI_OE8) ||
+				designName == GetPrimaryDesignName(DEVICE_ID_KONA5_8K_MV_TX));
 	case DEVICE_ID_CORVID44_8KMK:
 	case DEVICE_ID_CORVID44_8K:
 	case DEVICE_ID_CORVID44_2X4K:
