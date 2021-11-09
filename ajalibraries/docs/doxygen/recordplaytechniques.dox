@@ -457,34 +457,42 @@ enabled, and the client application has opened the AJADebug facility by calling 
 
 -	<b>Information Messages</b><br />
 	These messages are informational, and indicate success.
-	-	<b><tt>Input Ch3 initialized using frames 0-6</tt></b><br />
-		<b><tt>Output Ch4 initialized using frames 7-12</tt></b><br />
-		AutoCirculate is initialized for the given Channel/FrameStore, and is ready to be started.
+	-	<i>{mode}</i><b><tt> </tt></b><i>{channel}</i><b><tt> initialized using frames </tt></b><i>range</i><br />
+		Example: <tt>Input Ch3 initialized using frames 0-6</tt><br />
+		<b>Meaning: </b>AutoCirculate streaming in the given direction has been initialized for the given ::NTV2Channel and
+		is ready to be started with a subsequent call to CNTV2Card::AutoCirculateStart.
+		-	<i>mode</i>: Indicates the ::NTV2Mode – <b><tt>Input</tt></b> or <b><tt>Output</tt></b>.
+		-	<i>channel</i>: Indicates the ::NTV2Channel – <b><tt>Ch1</tt></b> … <b><tt>Ch8</tt></b>.
+		-	<i>range</i>: Indicates the AutoCirculate frame range – two unsigned decimal numbers separated by a hyphen.
 -	<b>Warning Messages</b><br />
 	These messages are warnings. AutoCirculate will operate, but there may be problems.
-	-	<b><tt>Input Ch3: FrameCount 7 ignored -- using start/end 7/13 frame numbers</tt></b><br />
-		<b><tt>Output Ch2: FrameCount 20 ignored -- using start/end 12/45 frame numbers</tt></b><br />
-		The function was called with both a non-zero FrameCount parameter and valid Start/End Frame values.<br />
-		<b>Solution: </b>Set the FrameCount to zero when specifying valid Start/End Frame values;
-		or specify zero for both Start/End Frame values with a non-zero FrameCount value.
+	-	<i>{mode}</i><b><tt> </tt></b><i>{channel}</i><b><tt>: FrameCount </tt></b><i>{count}</i><b><tt> ignored -- using start/end </tt></b><i>range</i>><b><tt> frame numbers</tt></b><br />
+		Example: <tt>Output Ch2: FrameCount 20 ignored -- using start/end 12/45 frame numbers</tt><br />
+		<b>Problem: </b>CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput was called with both a non-zero <i>FrameCount</i>
+		parameter and valid <i>StartFrame</i> &amp; <i>EndFrame</i> values.<br />
+		<b>Solution: </b>Set the <i>FrameCount</i> parameter to zero when specifying valid <i>StartFrame</i> &amp; <i>EndFrame</i> values;
+		or specify zero for both <i>StartFrame</i> &amp; <i>EndFrame</i> with a non-zero <i>FrameCount</i> value.
+		-	<i>mode</i>: Indicates the ::NTV2Mode – <b><tt>Input</tt></b> or <b><tt>Output</tt></b>.
+		-	<i>channel</i>: Indicates the ::NTV2Channel – <b><tt>Ch1</tt></b> … <b><tt>Ch8</tt></b>.
+		-	<i>count</i>: Indicates the <i>FrameCount</i> parameter – an unsigned decimal value.
+		-	<i>range</i>: Indicates the AutoCirculate frame range – two unsigned decimal numbers separated by a forward-slash (‘/’).
 	-	<b><tt>Input Ch3: MultiLink Audio requested, but device doesn't support it</tt></b><br />
-		<b><tt>Output Ch1: MultiLink Audio requested, but device doesn't support it</tt></b><br />
-		One of the <tt>AUTOCIRCULATE_WITH_MULTILINK_AUDIO</tt> options was used, but the AJA device doesn’t support MultiLink Audio.<br />
+		<b>Problem: </b>One of the <tt>AUTOCIRCULATE_WITH_MULTILINK_AUDIO</tt>… options was used, but the AJA device doesn’t support MultiLink Audio.<br />
 		<b>Solution: </b>Check if the device supports MultiLink Audio before specifying the <tt>AUTOCIRCULATE_WITH_MULTILINK_AUDIO</tt> option.
 	-	<b><tt>Input Ch3: memory overlap/interference: Frms 5-6: AC3 Write, AC2 Read</tt></b><br />
-		One or more of the frames being used for this AutoCirculate channel are being used for other purposes, as indicated.<br />
+		<b>Problem: </b>One or more of the frames being used for this AutoCirculate channel are being used for other purposes, as indicated.<br />
 		<b>Solution: </b>See \ref vidop-fbconflict and \ref audioclobber for more information.
 	-	<b><tt>Input Ch3: 47 frames (0-46) exceeds 41-frame max audio buffer capacity</tt></b><br />
-		A valid ::NTV2AudioSystem was specified, and based on the number of audio channels the Audio System is currently configured
-		for, and given the video frame rate for the Channel/FrameStore, the number of video frames reserved for AutoCirculate exceeds
-		the maximum number of frames of audio that the Audio System can buffer. This will cause audio problems.
+		<b>Problem: </b>A valid ::NTV2AudioSystem was specified, and based on the number of audio channels the Audio System is currently configured
+		for, and given the ::NTV2FrameRate for the Channel/FrameStore, the number of video frames reserved for AutoCirculate exceeds
+		the maximum number of frames of audio that the Audio System can buffer. This will likely cause corrupted and/or missing audio.
 		<b>Solution: </b>Reduce the number of frames being used for this AutoCirculate channel.
 	-	<b><tt>Output Ch4 has AUTOCIRCULATE_WITH_ANC set, but also has NTV2_VANCMODE_TALL set -- this may cause anc insertion problems</tt></b><br />
-		CNTV2Card::AutoCirculateInitForOutput was called with the AUTOCIRCULATE_WITH_ANC option, but the FrameStore’s ::NTV2VANCMode was not <tt>NTV2_VANCMODE_OFF</tt> (disabled).<br />
+		<b>Problem: </b>CNTV2Card::AutoCirculateInitForOutput was called with the AUTOCIRCULATE_WITH_ANC option, but the FrameStore’s ::NTV2VANCMode was not <tt>NTV2_VANCMODE_OFF</tt> (disabled).<br />
 		<b>Solution: </b>Either disable VANC (by calling CNTV2Card::SetVANCMode with <tt>NTV2_VANCMODE_OFF</tt>), or don’t use
 		the <tt>AUTOCIRCULATE_WITH_ANC</tt> option.
-	-	<b><tt>Output Ch1: AUTOCIRCULATE_WITH_RP188 requested without AUTOCIRCULATE_WITH_ANC -- enabled AUTOCIRCULATE_WITH_ANC anyway<br />
-		CNTV2Card::AutoCirculateInitForOutput was called for a \ref konaip or \ref ioip device with SMPTE ST-2110 firmware with the
+	-	<b><tt>Output Ch1: AUTOCIRCULATE_WITH_RP188 requested without AUTOCIRCULATE_WITH_ANC -- enabled AUTOCIRCULATE_WITH_ANC anyway</tt></b><br />
+		<b>Problem: </b>CNTV2Card::AutoCirculateInitForOutput was called for a \ref konaip or \ref ioip device with SMPTE ST-2110 firmware with the
 		<tt>AUTOCIRCULATE_WITH_RP188</tt> option, but without the <tt>AUTOCIRCULATE_WITH_ANC</tt> option. Without the SMPTE ST-2110 ancillary
 		data stream, RP188 timecode won’t be transmitted.<br />
 		<b>Solution: </b>To include RP188 timecode in the outgoing SMPTE ST-2110 ancillary data stream, be sure to specify both <tt>AUTOCIRCULATE_WITH_ANC</tt>
@@ -492,27 +500,25 @@ enabled, and the client application has opened the AJADebug facility by calling 
 -	<b>Error Messages</b><br />
 	AutoCirculate was not initialized because of the indicated failure.
 	-	<b><tt>Ch9 is illegal channel value</tt></b><br />
-		An invalid ::NTV2Channel value was used.<br />
+		<b>Problem: </b>An invalid ::NTV2Channel value was used.<br />
 		<b>Solution: </b>Specify a valid ::NTV2Channel value (<tt>NTV2_CHANNEL1</tt> thru <tt>NTV2_CHANNEL8</tt>).
-	-	<b><tt>Input Ch3: illegal 'inNumChannels' value '0' -- must be 1-8</tt></b><br />
-		<b><tt>Output Ch4: illegal 'inNumChannels' value '9' -- must be 1-8</tt></b><br />
-		The number of ganged channels must be at least 1, and no more than 8.<br />
+	-	<b><tt>Output Ch4: illegal 'inNumChannels' value '9' -- must be 1-8</tt></b><br />
+		<b>Problem: </b>The number of ganged channels must be at least 1, and no more than 8.<br />
 		<b>Solution: </b>Specify a channel count value in the range 1 thru 8.
 	-	<b><tt>Input Ch3: FBAllocLock mutex not ready</tt></b><br />
-		<b><tt>Output Ch1: FBAllocLock mutex not ready</tt></b><br />
-		Somehow CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput was called before static initialization completed.<br />
+		<b>Problem: </b>Somehow CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput was called before static initialization completed.<br />
 		<b>Solution: </b>Determine how this happened, then make the necessary corrections.
 	-	<b><tt>Input Ch3: Zero frames requested</tt></b><br />
-		Both the specified FrameCount and Start/End Frame values resulted in a zero-length frame range.<br />
+		<b>Problem: </b>Both the specified FrameCount and Start/End Frame values resulted in a zero-length frame range.<br />
 		<b>Solution: </b>Specify a valid, non-empty frame range.
 	-	<b><tt>Input Ch3: EndFrame(0) precedes StartFrame(6)</tt></b><br />
-		A Start/End Frame range was specified, but the Start frame number ordinally followed the End frame number.<br />
+		<b>Problem: </b>A Start/End Frame range was specified, but the Start frame number ordinally followed the End frame number.<br />
 		<b>Solution: </b>When specifying Start/End frame values, be sure the Start frame value ordinally precedes the End frame value.
 	-	<b><tt>Input Ch3: Frames 1-1 < 2 frames</tt></b><br />
-		A Start/End Frame range was specified, but they both had the same value, making a single-frame AutoCirculate range.<br />
+		<b>Problem: </b>A Start/End Frame range was specified, but they both had the same value, making a single-frame AutoCirculate range.<br />
 		<b>Solution: </b>When specifying Start/End frame values, be sure the range is at least 2 frames in length.
-	-	<b><tt>Input Ch3 initialization failed</tt></b>
-		AutoCirculate initialization failed for another reason.<br />
+	-	<b><tt>Input Ch3 initialization failed</tt></b><br />
+		<b>Problem: </b>AutoCirculate initialization failed for another reason.<br />
 		<b>Solution: </b>Check the host computer’s kernel log for any failure messages from the driver.
 
 **/
