@@ -115,6 +115,15 @@ typedef enum
 	DEVICE_ID_KONA5_OE10				= 0x1079840E,	///< @brief See \ref kona5
 	DEVICE_ID_KONA5_OE11				= 0x1079840F,	///< @brief See \ref kona5
 	DEVICE_ID_KONA5_OE12				= 0x10798410,	///< @brief See \ref kona5
+	DEVICE_ID_SOJI_OE1					= 0x10798411,	///< @brief See \ref kona5
+	DEVICE_ID_SOJI_OE2					= 0x10798412,	///< @brief See \ref kona5
+	DEVICE_ID_SOJI_OE3					= 0x10798413,	///< @brief See \ref kona5
+	DEVICE_ID_SOJI_OE4					= 0x10798414,	///< @brief See \ref kona5
+	DEVICE_ID_SOJI_OE5					= 0x10798415,	///< @brief See \ref kona5
+	DEVICE_ID_SOJI_OE6					= 0x10798416,	///< @brief See \ref kona5
+	DEVICE_ID_SOJI_OE7					= 0x10798417,	///< @brief See \ref kona5
+	DEVICE_ID_SOJI_OE8					= 0x10798418,	///< @brief See \ref kona5
+	DEVICE_ID_KONA5_8K_MV_TX			= 0x10798420,	///< @brief See \ref kona5
 	DEVICE_ID_KONAHDMI					= 0x10767400,	///< @brief See \ref konahdmi
 	DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K	= 0x10646702,	///< @brief See \ref konaip
 	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,	///< @brief See \ref konaip
