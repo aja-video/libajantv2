@@ -7,7 +7,7 @@ This command-line program is identical to the \ref ntv2capture except that it ca
 
 The NTV2Capture8K class demonstrates…
 - how to properly acquire and release an AJA device in order to use it exclusively;
-- how to use AutoCirculate to efficiently stream video and audio (using the old or new APIs based on a macro definition);
+- how to use AutoCirculate to efficiently stream video and audio;
 - how to use an AJACircularBuffer and the producer/consumer model with AutoCirculate.
 - how to capture 8K/UHD2 video.
 
