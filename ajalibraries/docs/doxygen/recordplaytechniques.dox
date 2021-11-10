@@ -505,8 +505,8 @@ enabled, and the client application has opened the AJADebug facility by calling 
 				-	<b><tt>Write</tt></b> indicates the memory is being written.
 		-	<b>Example: </b><tt>Input Ch3: memory overlap/interference: Frms 5-6: AC3 Write, AC2 Read</tt>
 		-	<b>Problem: </b>One or more of the frames being used for the \ref autocirculatechannels are also being used for other purposes.
-		-	<b>Solution: Be sure to choose a frame range that won’t interfere with other activity on the device.
-			</b>See \ref vidop-fbconflict and \ref audioclobber for more information.<br />
+		-	<b>Solution: </b>Be sure to choose a frame range that won’t interfere with other activity on the device.
+			See \ref vidop-fbconflict and \ref audioclobber for more information.<br />
 	 		
 	-	<i>{mode}</i><b><tt> </tt></b><i>{channel}</i><b><tt>: </tt></b><i>{count}</i><b><tt> frames (</tt></b><i>{range}</i><b><tt>) exceeds </tt></b>
 		<i>{maxCount}</i><b><tt>-frame max buffer capacity of </tt></b><i>audioSystem</i>
