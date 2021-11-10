@@ -558,15 +558,15 @@ bool CNTV2Card::GetSDIOutputAudioSystem (const NTV2Channel inChannel, NTV2AudioS
 	if (ULWord (inChannel) >= ::NTV2DeviceGetNumVideoOutputs(_boardID))
 		return false;	//	illegal channel
 
-	ULWord			b2(0),	b1(0),	b0(0);		//	The three bits that determine which audio system feeds the SDI output
-	const ULWord	regNum	(gChannelToSDIOutControlRegNum [inChannel]);
+	ULWord	b2(0),	b1(0),	b0(0);	//	The three bits that determine which audio system feeds the SDI output
+	const ULWord regNum (gChannelToSDIOutControlRegNum[inChannel]);
 	if (!ReadRegister (regNum, b2, BIT(18), 18))	//	bit 18 is MSB
 		return false;
 	if (!ReadRegister (regNum, b1, BIT(28), 28))
 		return false;
 	if (!ReadRegister (regNum, b0, BIT(30), 30))	//	bit 30 is LSB
 		return false;
-	outAudioSystem = static_cast <NTV2AudioSystem> (b2 * 4	+  b1 * 2  +  b0);
+	outAudioSystem = NTV2AudioSystem(b2 * 4	+  b1 * 2  +  b0);
 	return true;
 
 }	//	GetSDIOutputAudioSystem

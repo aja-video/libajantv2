@@ -1954,17 +1954,6 @@ private:
 			}
 			else
 				oss << "(Bi-directional SDI not supported)";
-			if (numInputs)
-			{	if (!oss.str().empty()) oss << endl;
-				const uint32_t	rxDisableCRCChkBits	(inRegValue & 0x000000FF);
-				for (UWord spigot(0);  spigot < numInputs;	 )
-				{
-					const uint32_t	disabled (rxDisableCRCChkBits & BIT(spigot));
-					oss << "SDIIn" << DEC(++spigot) << " CRC Check: " << (disabled ? "Disabled" : "Normal");
-					if (spigot < numInputs)
-						oss << endl;
-				}
-			}
 			//	CRC checking
 			return oss.str();
 		}
@@ -3354,7 +3343,7 @@ private:
 				<< "3G mode: "					<< (inRegValue & BIT(25) ? "b" : "a")					<< endl
 				<< "VPID insert enable: "		<< YesNo(inRegValue & BIT(26))							<< endl
 				<< "VPID overwrite enable: "	<< YesNo(inRegValue & BIT(27))							<< endl
-				<< "DS 1 audio source: Subsystem ";
+				<< "DS 1 audio source: "		"AudSys";
 			switch ((inRegValue & (BIT(28)|BIT(30))) >> 28)
 			{
 				case 0: oss << (inRegValue & BIT(18) ? 5 : 1);	break;
@@ -3362,7 +3351,7 @@ private:
 				case 4: oss << (inRegValue & BIT(18) ? 6 : 2);	break;
 				case 5: oss << (inRegValue & BIT(18) ? 8 : 4);	break;
 			}
-			oss << endl << "DS 2 audio source: Subsystem ";
+			oss << endl << "DS 2 audio source: AudSys";
 			switch ((inRegValue & (BIT(29)|BIT(31))) >> 29)
 			{
 				case 0: oss << (inRegValue & BIT(19) ? 5 : 1);	break;
