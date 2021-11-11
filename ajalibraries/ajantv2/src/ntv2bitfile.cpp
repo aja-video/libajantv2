@@ -368,9 +368,9 @@ string CNTV2Bitfile::ParseHeaderFromBuffer (const NTV2_POINTER & inBitfileBuffer
 size_t CNTV2Bitfile::GetProgramByteStream (NTV2_POINTER & outBuffer)
 {
 	if (!mHeaderParser.IsValid())
-		{mLastError = "No header info";  return 0;}
+		{mLastError = "## ERROR:  No header info";  return 0;}
 	if (!mReady)
-		{mLastError = "File not ready";  return 0;}
+		{mLastError = "## ERROR:  File not open/ready";  return 0;}
 
 	size_t			programStreamLength (mHeaderParser.ProgramSizeBytes());
 	const size_t	programOffset		(mHeaderParser.ProgramOffsetBytes());
@@ -380,24 +380,32 @@ size_t CNTV2Bitfile::GetProgramByteStream (NTV2_POINTER & outBuffer)
 	{	//	Buffer IsNULL or too small!
 		if (outBuffer.IsProvidedByClient())
 		{	//	Client-provided buffer too small
-			oss << "## ERROR:  Provided buffer size " << DEC(outBuffer.GetByteCount()) << " < " << DEC(programStreamLength);
+			oss << "## ERROR:  Provided buffer size " << DEC(outBuffer.GetByteCount()) << " < " << DEC(programStreamLength) << " prog bytes";
 			mLastError = oss.str();
 			return 0;
 		}
 		if (!outBuffer.Allocate(programStreamLength))	//	Resize it
-		{	oss << "## ERROR:  Buffer reallocation failed, requested size = " << DEC(programStreamLength) << " bytes";
+		{	oss << "## ERROR:  Buffer reallocation failed, requested size = " << DEC(programStreamLength) << " prog bytes";
 			mLastError = oss.str();
 			return 0;
 		}
 	}
 	if (!mFileStream.seekg (ios::off_type(programOffset), ios::beg))
-		{oss << "## ERROR:  Seek failed to offset " << DEC(programOffset);  mLastError = oss.str();  return 0;}
-	if (!mFileStream.read(outBuffer, streamsize(programStreamLength)))
-		{oss << "## ERROR:  Read failed, byte count requested: " << DEC(programStreamLength);  mLastError = oss.str();  return 0;}
-	ifstream::pos_type curOffset(mFileStream.tellg());
-	if (int(curOffset) == -1)
-		{mLastError = "## ERROR:  'tellg' failed";  return 0;}
-	return size_t(curOffset) - programOffset;
+		{oss << "## ERROR:  Seek failed to offset " << xHEX0N(programOffset,8) << DEC(programOffset);  mLastError = oss.str();  return 0;}
+	mFileStream.read(outBuffer, streamsize(programStreamLength));
+	if (mFileStream.eof())
+	{	//	Unexpected EOF
+		oss << "## ERROR:  Unexpected EOF reading prog " << xHEX0N(programStreamLength,8) << " (" << DEC(programStreamLength) << ") bytes";
+		mLastError = oss.str();
+		return 0;
+	}
+	else if (mFileStream.bad())
+	{	//	I/O error?
+		oss << "## ERROR:  I/O error reading prog " << xHEX0N(programStreamLength,8) << " (" << DEC(programStreamLength) << ") bytes";
+		mLastError = oss.str();
+		return 0;
+	}
+	return programStreamLength;
 }
 
 
@@ -405,9 +413,9 @@ size_t CNTV2Bitfile::GetFileByteStream (NTV2_POINTER & outBuffer)
 {
 	const size_t fileStreamLength(GetFileStreamLength());
 	if (!fileStreamLength)
-		return 0;
+		{mLastError = "## ERROR:  fileStreamLength is zero";  return 0;}
 	if (!mReady)
-		return 0;
+		{mLastError = "## ERROR:  File not open/ready";  return 0;}
 
 	ostringstream oss;
 	if (outBuffer.GetByteCount() < fileStreamLength)
@@ -425,23 +433,22 @@ size_t CNTV2Bitfile::GetFileByteStream (NTV2_POINTER & outBuffer)
 		}
 	}
 
-	size_t	posInBuffer	(0);
-	mFileStream.seekg (0, std::ios::beg);
-	while (mFileStreamPos < fileStreamLength)
-	{
-		if (mFileStream.eof())
-		{	//	Unexpected end of file!
-			oss << "Unexpected EOF at " << mProgramOffset << "bytes";
-			mLastError = oss.str();
-			return 0;
-		}
-
-		outBuffer.U8(posInBuffer++) = static_cast<unsigned char>(mFileStream.get());
-		mProgramOffset++;
-		if (posInBuffer == outBuffer.GetByteCount())
-			break;
+	if (!mFileStream.seekg (0, std::ios::beg))
+		{mLastError = "## ERROR:  Seek failed to offset 0";  return 0;}
+	mFileStream.read(outBuffer, streamsize(fileStreamLength));
+	if (mFileStream.eof())
+	{	//	Unexpected end of file!
+		oss << "## ERROR:  Unexpected EOF reading " << xHEX0N(fileStreamLength,8) << " (" << DEC(fileStreamLength) << ") bytes";
+		mLastError = oss.str();
+		return 0;
 	}
-	return posInBuffer;
+	else if (mFileStream.bad())
+	{	//	I/O error?
+		oss << "## ERROR:  I/O error reading " << xHEX0N(fileStreamLength,8) << " (" << DEC(fileStreamLength) << ") bytes";
+		mLastError = oss.str();
+		return 0;
+	}
+	return fileStreamLength;
 }
 
 

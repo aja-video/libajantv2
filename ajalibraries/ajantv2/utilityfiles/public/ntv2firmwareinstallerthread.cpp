@@ -271,7 +271,10 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 	newFirmwareDescription = m_bitfilePath + " - " + bitfile.GetDate() + " " + bitfile.GetTime();
 	if (readBytes != bitfileLength)
 	{
+		const string err(bitfile.GetLastError());
 		cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Invalid bitfile length, read " << readBytes << " bytes, expected " << bitfileLength << endl;
+		if (!err.empty())
+			cerr << err << endl;
 		return AJA_STATUS_FAIL;
 	}
 

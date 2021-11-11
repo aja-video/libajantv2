@@ -211,7 +211,7 @@ class AJAExport CNTV2Bitfile
 		/**
 			@return		Program stream length in bytes, or zero if error/invalid.
 		**/
-		virtual inline size_t	GetProgramStreamLength (void) const		{return mReady ? mHeaderParser.ProgramSizeBytes() : 0;}
+		virtual inline size_t	GetProgramStreamLength (void) const		{return mReady ? size_t(mHeaderParser.ProgramSizeBytes()) : 0;}
 
 		/**
 			@return		File stream length in bytes, or zero if error/invalid.
@@ -247,8 +247,6 @@ class AJAExport CNTV2Bitfile
 		NTV2BitfileHeaderParser	mHeaderParser;	//	Header parser (and state info)
 		std::string				mLastError;		//	Last error message
 		size_t					mFileSize;		//	Bitfile size, in bytes
-		size_t					mProgramOffset;	//	Bitfile byte offset, in bytes, to where FPGA program starts
-		size_t					mFileStreamPos;	//	Stream position, in bytes from start of file
 		bool					mReady;			//	Ready?
 };	//	CNTV2Bitfile
 
