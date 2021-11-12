@@ -76,7 +76,7 @@ bool NTV2BitfileHeaderParser::SetRawDesign (const string & inStr,  ostream & oss
 		mRawDesignName.resize(inStr.length()-1);	//	Lop it off
 
 	ULWord userID (0xFFFFFFFF);
-	string lowerStr(aja::lower(mRawDesignName));
+	string lowerStr(mRawDesignName);  aja::lower(lowerStr);	//	Keep mRawDesignName in original case
 	const NTV2StringList segments(aja::split(lowerStr, ";"));
 	string userIDSegment;
 	for (NTV2StringListConstIter it(segments.begin());  it != segments.end();  ++it)

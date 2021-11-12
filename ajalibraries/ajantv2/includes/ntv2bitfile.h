@@ -68,7 +68,7 @@ class AJAExport NTV2BitfileHeaderParser
 		std::string		mDate;				//	Compile/build date
 		std::string		mTime;				//	Compile/build time
 		std::string		mPartName;			//	Part name
-		std::string		mRawDesignName;		//	Untruncated design string
+		std::string		mRawDesignName;		//	Untruncated, unmodified design string
 		ULWord			mUserID;			//	User ID
 		ULWord			mProgOffsetBytes;	//	Program offset, in bytes
 		ULWord			mProgSizeBytes;		//	Program length, in bytes
