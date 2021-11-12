@@ -702,6 +702,8 @@ public:
 		@param[in]	inMap			Also lock the segment map.
 		@param[in]	inRDMA			Lock a GPUDirect buffer for p2p DMA.
 		@return		True if successful; otherwise false.
+		@note		On the Windows platform, buffers allocated using VirtualAlloc often won't map properly.
+					We recommend allocating buffers using _aligned_malloc instead of VirtualAlloc.
 		@see		CNTV2Card::DMABufferUnlock, CNTV2Card::DMABufferAutoLock, CNTV2Card::DMABufferUnlockAll, \ref vidop-fblocking
 	**/
 	AJA_VIRTUAL inline bool DMABufferLock (const ULWord * pInBuffer, const ULWord inByteCount, bool inMap = false, bool inRDMA = false)
