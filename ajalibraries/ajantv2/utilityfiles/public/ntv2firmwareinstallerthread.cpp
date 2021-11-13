@@ -243,55 +243,62 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 					<< m_deviceInfo.deviceIdentifier << "'" << endl;
 			return AJA_STATUS_FAIL;
 		}
+		if (m_verbose)
+			cerr	<< "## NOTE:  CNTV2FirmwareInstallerThread:	 Dynamic Reconfig started" << endl
+					<< "     device: " << m_deviceInfo.deviceIdentifier << ", S/N " << serialNumStr << endl
+					<< "  new devID: " << xHEX0N(m_desiredID,8) << endl;
 	}
-
-	//	Open bitfile & parse its header...
-	CNTV2Bitfile bitfile;
-	if (!bitfile.Open(m_bitfilePath))
+	else	//	NOT DYNAMIC RECONFIG
 	{
-		const string	extraInfo	(bitfile.GetLastError());
-		cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Bitfile '" << m_bitfilePath << "' open/parse error";
-		if (!extraInfo.empty())
-			cerr << ": " << extraInfo;
-		cerr << endl;
-		return AJA_STATUS_OPEN;
-	}
+		//	Open bitfile & parse its header...
+		CNTV2Bitfile bitfile;
+		if (!bitfile.Open(m_bitfilePath))
+		{
+			const string	extraInfo	(bitfile.GetLastError());
+			cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Bitfile '" << m_bitfilePath << "' open/parse error";
+			if (!extraInfo.empty())
+				cerr << ": " << extraInfo;
+			cerr << endl;
+			return AJA_STATUS_OPEN;
+		}
 
-	//	Sanity-check bitfile length...
-	const size_t	bitfileLength	(bitfile.GetFileStreamLength());
-	NTV2_POINTER	bitfileBuffer(bitfileLength + 512);
-	if (!bitfileBuffer)
-	{
-		cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Unable to allocate bitfile buffer" << endl;
-		return AJA_STATUS_MEMORY;
-	}
-	bitfileBuffer.Fill(0xFFFFFFFF);
-	const size_t	readBytes	(bitfile.GetFileByteStream(bitfileBuffer));
-	const string	designName	(bitfile.GetDesignName());
-	newFirmwareDescription = m_bitfilePath + " - " + bitfile.GetDate() + " " + bitfile.GetTime();
-	if (readBytes != bitfileLength)
-	{
-		const string err(bitfile.GetLastError());
-		cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Invalid bitfile length, read " << readBytes << " bytes, expected " << bitfileLength << endl;
-		if (!err.empty())
-			cerr << err << endl;
-		return AJA_STATUS_FAIL;
-	}
+		//	Sanity-check bitfile length...
+		const size_t	bitfileLength	(bitfile.GetFileStreamLength());
+		NTV2_POINTER	bitfileBuffer(bitfileLength + 512);
+		if (!bitfileBuffer)
+		{
+			cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Unable to allocate bitfile buffer" << endl;
+			return AJA_STATUS_MEMORY;
+		}
 
-	//	Verify that this bitfile is compatible with this device...
-	if (!m_forceUpdate  &&  !bitfile.CanFlashDevice(m_deviceInfo.deviceID))
-	{
-		cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread:  Bitfile design '" << designName << "' is not compatible with device '"
-				<< m_deviceInfo.deviceIdentifier << "'" << endl;
-		return AJA_STATUS_FAIL;
-	}
+		bitfileBuffer.Fill(0xFFFFFFFF);
+		const size_t	readBytes	(bitfile.GetFileByteStream(bitfileBuffer));
+		const string	designName	(bitfile.GetDesignName());
+		newFirmwareDescription = m_bitfilePath + " - " + bitfile.GetDate() + " " + bitfile.GetTime();
+		if (readBytes != bitfileLength)
+		{
+			const string err(bitfile.GetLastError());
+			cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Invalid bitfile length, read " << readBytes << " bytes, expected " << bitfileLength << endl;
+			if (!err.empty())
+				cerr << err << endl;
+			return AJA_STATUS_FAIL;
+		}
 
-	//	Update firmware...
-	if (m_verbose)
-		cerr	<< "## NOTE:  CNTV2FirmwareInstallerThread:	 Firmware update started" << endl
-				<< "	bitfile: " << m_bitfilePath << endl
-				<< "	 device: " << m_deviceInfo.deviceIdentifier << ", S/N " << serialNumStr << endl
-				<< "   firmware: " << newFirmwareDescription << endl;
+		//	Verify that this bitfile is compatible with this device...
+		if (!m_forceUpdate  &&  !bitfile.CanFlashDevice(m_deviceInfo.deviceID))
+		{
+			cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread:  Bitfile design '" << designName << "' is not compatible with device '"
+					<< m_deviceInfo.deviceIdentifier << "'" << endl;
+			return AJA_STATUS_FAIL;
+		}
+
+		//	Update firmware...
+		if (m_verbose)
+			cerr	<< "## NOTE:  CNTV2FirmwareInstallerThread:	 Firmware update started" << endl
+					<< "    bitfile: " << m_bitfilePath << endl
+					<< "     device: " << m_deviceInfo.deviceIdentifier << ", S/N " << serialNumStr << endl
+					<< "   firmware: " << newFirmwareDescription << endl;
+	}	//	not dynamic reconfig
 
 	if (REALLY_UPDATE)
 	{
@@ -299,8 +306,8 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 		{
 			m_updateSuccessful = m_device.LoadDynamicDevice(m_desiredID);
 			if (!m_updateSuccessful)
-				cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread:  'Dynamic Reconfig' failed" << endl
-						<< "	 desired: " << m_desiredID << endl;
+				cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread:  'Dynamic Reconfig' failed, desired deviceID: "
+						<< xHEX0N(m_desiredID,8) << endl;
 		}
 		else
 		{
