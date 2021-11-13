@@ -52,6 +52,7 @@ void NTV2BitfileHeaderParser::Clear (void)
 {
 	mDate = mTime = mPartName = mRawDesignName = "";
 	mUserID = mDesignID = mDesignVersion = mBitfileID = mBitfileVersion = mProgSizeBytes = 0;
+	mValid = false;
 }
 
 string NTV2BitfileHeaderParser::DesignName (void) const
@@ -284,7 +285,9 @@ bool NTV2BitfileHeaderParser::ParseHeader (const NTV2_POINTER & inHdrBuffer, ost
 			if (!bFound)
 				{ndx++;	 pos++;}
 		}
-		if (!bFound)
+		if (bFound)
+			mValid = true;
+		else
 			{oss << "Failed at byte offset " << DEC(pos) << ", missing signature"; break;}
 	} while (false);
 
@@ -378,7 +381,7 @@ size_t CNTV2Bitfile::GetProgramByteStream (NTV2_POINTER & outBuffer)
 
 	if (outBuffer.GetByteCount() < programStreamLength)
 	{	//	Buffer IsNULL or too small!
-		if (outBuffer.IsProvidedByClient())
+		if (outBuffer.GetByteCount()  &&  outBuffer.IsProvidedByClient())
 		{	//	Client-provided buffer too small
 			oss << "## ERROR:  Provided buffer size " << DEC(outBuffer.GetByteCount()) << " < " << DEC(programStreamLength) << " prog bytes";
 			mLastError = oss.str();
@@ -420,7 +423,7 @@ size_t CNTV2Bitfile::GetFileByteStream (NTV2_POINTER & outBuffer)
 	ostringstream oss;
 	if (outBuffer.GetByteCount() < fileStreamLength)
 	{	//	Buffer IsNULL or too small!
-		if (outBuffer.IsProvidedByClient())
+		if (outBuffer.GetByteCount()  &&  outBuffer.IsProvidedByClient())
 		{	//	Client-provided buffer too small
 			oss << "## ERROR:  Provided buffer size " << DEC(outBuffer.GetByteCount()) << " < " << DEC(fileStreamLength);
 			mLastError = oss.str();
