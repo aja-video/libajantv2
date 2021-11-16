@@ -4673,14 +4673,14 @@ ULWord	AddAudioTone (	ULWord *		pAudioBuffer,
 		for (ULWord i = 0;	i < inNumSamples;  i++)
 		{
 			const double	nextFloat	= double(::sin (j / cycleLength * (M_PI * 2.0)) * inAmplitude);
-			ULWord		value		= static_cast <ULWord> ((nextFloat * scale) + double(0.5));
+			LWord		value		= static_cast <LWord> ((nextFloat * scale) + double(0.5));
 
 			if (inByteSwap)
 				value = NTV2EndianSwap32 (value);
 			//odprintf("%f",(float)(LWord)value/(float)0x7FFFFFFF);
 
 			for (ULWord channel = 0;  channel < inNumChannels;	channel++)
-				*pAudioBuffer++ = value;
+				*pAudioBuffer++ = (ULWord)value;
 
 			j += 1.0;
 			if (j > cycleLength)
@@ -4713,13 +4713,13 @@ ULWord	AddAudioTone (	UWord *			pAudioBuffer,
 		for (ULWord i = 0;	i < inNumSamples;  i++)
 		{
 			const double	nextFloat	= double(::sin (j / cycleLength * (M_PI * 2.0)) * inAmplitude);
-			UWord		value		= static_cast <UWord> ((nextFloat * scale) + double(0.5));
+			Word		value		= static_cast <Word> ((nextFloat * scale) + double(0.5));
 
 			if (inByteSwap)
 				value = NTV2EndianSwap16(value);
 
 			for (ULWord channel = 0;  channel < inNumChannels;	channel++)
-				*pAudioBuffer++ = value;
+				*pAudioBuffer++ = (UWord)value;
 
 			j += 1.0;
 			if (j > cycleLength)
@@ -4760,12 +4760,12 @@ ULWord	AddAudioTone (	ULWord *		pAudioBuffer,
 			for (ULWord channel (0);  channel < inNumChannels;	channel++)
 			{
 				const double	nextFloat	= double(::sin (j[channel] / cycleLength[channel] * (M_PI * 2.0)) * pInAmplitudes[channel]);
-				ULWord		value		= static_cast <ULWord> ((nextFloat * scale) + double(0.5));
+				LWord		value		= static_cast <LWord> ((nextFloat * scale) + double(0.5));
 
 				if (inByteSwap)
 					value = NTV2EndianSwap32(value);
 
-				*pAudioBuffer++ = value;
+				*pAudioBuffer++ = (ULWord)value;
 
 				j[channel] += 1.0;
 				if (j[channel] > cycleLength[channel])
