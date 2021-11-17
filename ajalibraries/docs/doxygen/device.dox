@@ -12,7 +12,6 @@
 	@section	ntv2hwio		Io (Thunderbolt) Devices
 
 	-	\ref io4kplus
-	-	\ref ioip
 	-	\ref iox3
 	-	\ref ttappro
 
@@ -22,7 +21,6 @@
 	-	\ref kona4quad and \ref kona4ufc
 	-	\ref kona5
 	-	\ref konahdmi
-	-	\ref konaip
 	-	\ref konalheplus
 	-	\ref konalhi
 
@@ -33,8 +31,10 @@
 	-	\ref corvidhbr
 	-	\ref io4kquad and \ref io4kufc
 	-	\ref ioexpress
+	-	\ref ioip
 	-	\ref ioxt
 	-	\ref kona3gquad and \ref kona3gufc
+	-	\ref konaip
 	-	\ref ttap
 
 	@section	ntv2hwaccessories	Breakout Boxes and Cables
