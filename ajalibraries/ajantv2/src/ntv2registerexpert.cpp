@@ -243,6 +243,7 @@ private:
 		DefineRegister (kRegSDIOut8Control,		"", mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel8, kRegClass_NULL);
 		DefineRegister (kRegCh1ControlExtended, "", mDecodeChannelControlExt,	READWRITE,	kRegClass_NULL,		kRegClass_Channel1, kRegClass_NULL);
 		DefineRegister (kRegCh2ControlExtended, "", mDecodeChannelControlExt,	READWRITE,	kRegClass_NULL,		kRegClass_Channel2, kRegClass_NULL);
+		DefineRegister (kRegBoardID,			"", mDecodeBoardID,				READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 
 		DefineRegister (kRegCanDoStatus,		"", mDecodeCanDoStatus,			READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegBitfileDate,		"", mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
@@ -2132,6 +2133,23 @@ private:
 		}
 		virtual ~DecodeBitfileDateTime()	{}
 	}	mDecodeBitfileDateTime;
+
+	struct DecodeBoardID : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{	(void) inRegNum;	(void) inDeviceID;
+			const string str1 (::NTV2DeviceIDToString(NTV2DeviceID(inRegValue), false));
+			const string str2 (::NTV2DeviceIDToString(NTV2DeviceID(inRegValue), true));
+			ostringstream	oss;
+			oss	<< "NTV2DeviceID: " << ::NTV2DeviceIDString(NTV2DeviceID(inRegValue))	<< endl
+				<< "Device Name: '"	<< str1 << "'";
+			if (str1 != str2)
+				oss << endl
+					<< "Retail Device Name: '" << str2 << "'";
+			return oss.str();
+		}
+		virtual ~DecodeBoardID()	{}
+	}	mDecodeBoardID;
 
 	struct DecodeCanDoStatus : public Decoder
 	{
