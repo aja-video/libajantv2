@@ -4106,7 +4106,7 @@ bool NTV2DeviceCanDoFormat (const NTV2DeviceID		inDeviceID,
 
 ULWord GetNTV2FrameGeometryHeight (const NTV2FrameGeometry inGeometry)
 {
-	const NTV2FormatDescriptor fd (::GetStandardFromGeometry(inGeometry), NTV2_FBF_8BIT_YCBCR);
+	const NTV2FormatDescriptor fd (::GetStandardFromGeometry(inGeometry), NTV2_FBF_8BIT_YCBCR, ::GetVANCModeForGeometry(inGeometry));
 	return fd.GetRasterHeight(/*visOnly?*/false);	//	Include VANC
 }
 
