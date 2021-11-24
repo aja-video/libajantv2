@@ -5519,7 +5519,7 @@ ULWord GetIndexForNTV2InputSource (const NTV2InputSource inValue)
 
 ULWord NTV2FramesizeToByteCount (const NTV2Framesize inFrameSize)
 {
-	static ULWord	gFrameSizeToByteCount []	= { 2 /* NTV2_FRAMESIZE_2MB */,		4 /* NTV2_FRAMESIZE_4MB */,		8 /* NTV2_FRAMESIZE_8MB */,		16 /* NTV2_FRAMESIZE_16MB */,
+	static const ULWord	gFrameSizeToByteCount[]	= { 2 /* NTV2_FRAMESIZE_2MB */,		4 /* NTV2_FRAMESIZE_4MB */,		8 /* NTV2_FRAMESIZE_8MB */,		16 /* NTV2_FRAMESIZE_16MB */,
 													6 /* NTV2_FRAMESIZE_6MB */,		10 /* NTV2_FRAMESIZE_10MB */,	12 /* NTV2_FRAMESIZE_12MB */,	14 /* NTV2_FRAMESIZE_14MB */,
 													18 /* NTV2_FRAMESIZE_18MB */,	20 /* NTV2_FRAMESIZE_20MB */,	22 /* NTV2_FRAMESIZE_22MB */,	24 /* NTV2_FRAMESIZE_24MB */,
 													26 /* NTV2_FRAMESIZE_26MB */,	28 /* NTV2_FRAMESIZE_28MB */,	30 /* NTV2_FRAMESIZE_30MB */,	32 /* NTV2_FRAMESIZE_32MB */,
@@ -5533,10 +5533,10 @@ ULWord NTV2FramesizeToByteCount (const NTV2Framesize inFrameSize)
 
 
 ULWord NTV2AudioBufferSizeToByteCount (const NTV2AudioBufferSize inBufferSize)
-{													//	NTV2_AUDIO_BUFFER_STANDARD	NTV2_AUDIO_BUFFER_BIG	NTV2_AUDIO_BUFFER_MEDIUM	NTV2_AUDIO_BUFFER_BIGGER	NTV2_AUDIO_BUFFER_INVALID
-	static ULWord	gBufferSizeToByteCount []	=	{	1 * 1024 * 1024,			4 * 1024 * 1024,		2 * 1024 * 1024,			3 * 1024 * 1024,			0	};
-	if (NTV2_IS_VALID_AUDIO_BUFFER_SIZE (inBufferSize))
-		return gBufferSizeToByteCount [inBufferSize];
+{														//	STANDARD		BIG				MEDIUM			BIGGER			INVALID
+	static const ULWord gBufferSizeToByteCount[]	=	{	1 * 1024*1024,	4 * 1024*1024,	2 * 1024*1024,	3 * 1024*1024,	0	};
+	if (NTV2_IS_VALID_AUDIO_BUFFER_SIZE(inBufferSize))
+		return gBufferSizeToByteCount[inBufferSize];
 	return 0;
 }
 

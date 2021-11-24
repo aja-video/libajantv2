@@ -152,8 +152,12 @@ bool CNTV2Card::GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outA
 		const ULWord	audioFrameBuffer	(::NTV2DeviceGetNumberFrameBuffers(deviceID, fg, fbf) - 1);
 		outAbsByteOffset = inOffsetBytes  +	 audioFrameBuffer * ::NTV2DeviceGetFrameBufferSize(deviceID, fg, fbf);
 	}
-	if (inCaptureBuffer)
-		outAbsByteOffset += 0x400000;	//	Add 4MB offset to point to capture buffer
+
+	if (inCaptureBuffer)	//	Capture mode?
+	{	ULWord rdBufOffset(0x400000);	//	4MB
+		GetAudioReadOffset (rdBufOffset, inAudioSystem);
+		outAbsByteOffset += rdBufOffset;	//	Add offset to point to capture buffer
+	}
 	return true;
 }
 
