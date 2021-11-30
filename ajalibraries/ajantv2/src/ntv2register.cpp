@@ -899,20 +899,40 @@ NTV2FrameDimensions CNTV2Card::GetActiveFrameDimensions (const NTV2Channel inCha
 						else if (NTV2_IS_QUAD_QUAD_FRAME_GEOMETRY(geometry))
 							result.Set(result.Width()*4,  FD_NUMLINES_8K);
 						break;
-					case NTV2_STANDARD_720:			result.Set(HD_NUMCOMPONENTPIXELS_720,		HD_NUMACTIVELINES_720);		break;
-					case NTV2_STANDARD_525:			result.Set(NUMCOMPONENTPIXELS,				NUMACTIVELINES_525);		break;
-					case NTV2_STANDARD_625:			result.Set(NUMCOMPONENTPIXELS,				NUMACTIVELINES_625);		break;
-					case NTV2_STANDARD_2K:			result.Set(HD_NUMCOMPONENTPIXELS_2K,		HD_NUMLINES_2K);			break;
-					case NTV2_STANDARD_2Kx1080p:	result.Set(HD_NUMCOMPONENTPIXELS_1080_2K,	HD_NUMACTIVELINES_1080);	break;
-					case NTV2_STANDARD_2Kx1080i:	result.Set(HD_NUMCOMPONENTPIXELS_1080_2K,	HD_NUMACTIVELINES_1080);	break;
-					case NTV2_STANDARD_3840x2160p:	result.Set(HD_NUMCOMPONENTPIXELS_1080*2,	HD_NUMLINES_4K);			break;
-					case NTV2_STANDARD_4096x2160p:	result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*2, HD_NUMLINES_4K);			break;
-					case NTV2_STANDARD_3840HFR:		result.Set(HD_NUMCOMPONENTPIXELS_1080*2,	HD_NUMLINES_4K);			break;
-					case NTV2_STANDARD_4096HFR:		result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*2, HD_NUMLINES_4K);			break;
-					case NTV2_STANDARD_7680:		result.Set(HD_NUMCOMPONENTPIXELS_1080*4,	FD_NUMLINES_8K);			break;
-					case NTV2_STANDARD_8192:		result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*4, FD_NUMLINES_8K);			break;
-					case NTV2_STANDARD_3840i:		result.Set(HD_NUMCOMPONENTPIXELS_1080*2,	HD_NUMLINES_4K);			break;
-					case NTV2_STANDARD_4096i:		result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*2, HD_NUMLINES_4K);			break;
+                    case NTV2_STANDARD_720:
+                        result.Set(HD_NUMCOMPONENTPIXELS_720,		HD_NUMACTIVELINES_720);
+                        break;
+                    case NTV2_STANDARD_525:
+                        result.Set(NUMCOMPONENTPIXELS,				NUMACTIVELINES_525);
+                        break;
+                    case NTV2_STANDARD_625:
+                        result.Set(NUMCOMPONENTPIXELS,				NUMACTIVELINES_625);
+                        break;
+                    case NTV2_STANDARD_2K:
+                        result.Set(HD_NUMCOMPONENTPIXELS_2K,		HD_NUMLINES_2K);
+                        break;
+                    case NTV2_STANDARD_2Kx1080p:
+                    case NTV2_STANDARD_2Kx1080i:
+                        result.Set(HD_NUMCOMPONENTPIXELS_1080_2K,	HD_NUMACTIVELINES_1080);
+                        break;
+                    case NTV2_STANDARD_3840x2160p:
+                    case NTV2_STANDARD_3840HFR:
+                    case NTV2_STANDARD_3840i:
+                        result.SetWidth(geometry == NTV2_FG_4x2048x1080  ? HD_NUMCOMPONENTPIXELS_1080_2K*2 : HD_NUMCOMPONENTPIXELS_1080*2);
+                        result.SetHeight(HD_NUMLINES_4K);
+                        break;
+                    case NTV2_STANDARD_4096x2160p:
+                    case NTV2_STANDARD_4096HFR:
+                    case NTV2_STANDARD_4096i:
+                        result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*2, HD_NUMLINES_4K);
+                        break;
+                    case NTV2_STANDARD_7680:
+                        result.SetWidth(geometry == NTV2_FG_4x4096x2160  ? HD_NUMCOMPONENTPIXELS_1080_2K*4 : HD_NUMCOMPONENTPIXELS_1080*4);
+                        result.SetHeight(FD_NUMLINES_8K);
+                        break;
+                    case NTV2_STANDARD_8192:
+                        result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*4, FD_NUMLINES_8K);
+                        break;
 				#if defined(_DEBUG)
 					case NTV2_NUM_STANDARDS:																				break;
 				#else
@@ -3793,21 +3813,47 @@ bool CNTV2Card::SetSDIOutputStandard (const UWord inOutputSpigot, const NTV2Stan
 	if (IS_OUTPUT_SPIGOT_INVALID(inOutputSpigot))
 		return false;
 
+    NTV2Standard standard(inValue);
 	bool is2Kx1080(false);
-	switch(inValue)
-	{
-		case NTV2_STANDARD_2Kx1080p:
-		case NTV2_STANDARD_2Kx1080i:
-		case NTV2_STANDARD_4096x2160p:
-		case NTV2_STANDARD_4096HFR:
-		case NTV2_STANDARD_4096i:
-			is2Kx1080 = true;
-			break;
-		default:
-			break;
-	}
+    switch(inValue)
+    {
+    case NTV2_STANDARD_2Kx1080p:
+        standard = NTV2_STANDARD_1080p;
+        is2Kx1080 = true;
+        break;
+    case NTV2_STANDARD_2Kx1080i:
+        standard = NTV2_STANDARD_1080;
+        is2Kx1080 = true;
+        break;
+    case NTV2_STANDARD_3840x2160p:
+        standard = NTV2_STANDARD_1080p;
+        is2Kx1080 = false;
+        break;
+    case NTV2_STANDARD_3840HFR:
+        standard = NTV2_STANDARD_1080p;
+        is2Kx1080 = false;
+        break;
+    case NTV2_STANDARD_3840i:
+        standard = NTV2_STANDARD_1080;
+        is2Kx1080 = false;
+        break;
+    case NTV2_STANDARD_4096x2160p:
+        standard = NTV2_STANDARD_1080p;
+        is2Kx1080 = true;
+        break;
+    case NTV2_STANDARD_4096HFR:
+        standard = NTV2_STANDARD_1080p;
+        is2Kx1080 = true;
+        break;
+    case NTV2_STANDARD_4096i:
+        standard = NTV2_STANDARD_1080;
+        is2Kx1080 = true;
+        break;
+    default:
+        break;
+    }
 
-	return WriteRegister (gChannelToSDIOutControlRegNum[inOutputSpigot], inValue, kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard)
+    return WriteRegister (gChannelToSDIOutControlRegNum[inOutputSpigot], standard, kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard)
 			&&	SetSDIOut2Kx1080Enable(NTV2Channel(inOutputSpigot), is2Kx1080);
 }
 
@@ -3825,18 +3871,34 @@ bool CNTV2Card::GetSDIOutputStandard (const UWord inOutputSpigot, NTV2Standard &
 	if (IS_OUTPUT_SPIGOT_INVALID(inOutputSpigot))
 		return false;
 	bool is2kx1080(false);
+    bool is6G(false);
+    bool is12G(false);
 	NTV2Standard newStd(NTV2_STANDARD_INVALID);
 	const bool result (CNTV2DriverInterface::ReadRegister (gChannelToSDIOutControlRegNum[inOutputSpigot], newStd, kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard)
-						&& GetSDIOut2Kx1080Enable(NTV2Channel(inOutputSpigot), is2kx1080));
+                        && GetSDIOut2Kx1080Enable(NTV2Channel(inOutputSpigot), is2kx1080)
+                        && GetSDIOut6GEnable(NTV2Channel(inOutputSpigot), is6G)
+                        && GetSDIOut12GEnable(NTV2Channel(inOutputSpigot), is12G));
 	outValue = newStd;
 	switch (newStd)
 	{
-		case NTV2_STANDARD_1080:	if (is2kx1080)
-										outValue = NTV2_STANDARD_2Kx1080i;
-									break;
-		case NTV2_STANDARD_1080p:	if (is2kx1080)
-										outValue = NTV2_STANDARD_2Kx1080p;
-									break;
+        case NTV2_STANDARD_1080:
+            if (is2kx1080)
+                outValue = NTV2_STANDARD_2Kx1080i;
+            if (is6G || is12G)
+                if (is2kx1080)
+                    outValue = NTV2_STANDARD_4096i;
+                else
+                    outValue = NTV2_STANDARD_3840i;
+            break;
+        case NTV2_STANDARD_1080p:
+            if (is2kx1080)
+                outValue = NTV2_STANDARD_2Kx1080p;
+            if (is6G || is12G)
+                if (is2kx1080)
+                    outValue = NTV2_STANDARD_4096x2160p;
+                else
+                    outValue = NTV2_STANDARD_3840x2160p;
+            break;
 		default:
 			break;
 	}
