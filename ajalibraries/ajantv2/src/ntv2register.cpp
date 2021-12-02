@@ -3728,21 +3728,47 @@ bool CNTV2Card::SetSDIOutputStandard (const UWord inOutputSpigot, const NTV2Stan
 	if (IS_OUTPUT_SPIGOT_INVALID(inOutputSpigot))
 		return false;
 
+    NTV2Standard standard(inValue);
 	bool is2Kx1080(false);
-	switch(inValue)
-	{
-		case NTV2_STANDARD_2Kx1080p:
-		case NTV2_STANDARD_2Kx1080i:
-		case NTV2_STANDARD_4096x2160p:
-		case NTV2_STANDARD_4096HFR:
-		case NTV2_STANDARD_4096i:
-			is2Kx1080 = true;
-			break;
-		default:
-			break;
-	}
+    switch(inValue)
+    {
+    case NTV2_STANDARD_2Kx1080p:
+        standard = NTV2_STANDARD_1080p;
+        is2Kx1080 = true;
+        break;
+    case NTV2_STANDARD_2Kx1080i:
+        standard = NTV2_STANDARD_1080;
+        is2Kx1080 = true;
+        break;
+    case NTV2_STANDARD_3840x2160p:
+        standard = NTV2_STANDARD_1080p;
+        is2Kx1080 = false;
+        break;
+    case NTV2_STANDARD_3840HFR:
+        standard = NTV2_STANDARD_1080p;
+        is2Kx1080 = false;
+        break;
+    case NTV2_STANDARD_3840i:
+        standard = NTV2_STANDARD_1080;
+        is2Kx1080 = false;
+        break;
+    case NTV2_STANDARD_4096x2160p:
+        standard = NTV2_STANDARD_1080p;
+        is2Kx1080 = true;
+        break;
+    case NTV2_STANDARD_4096HFR:
+        standard = NTV2_STANDARD_1080p;
+        is2Kx1080 = true;
+        break;
+    case NTV2_STANDARD_4096i:
+        standard = NTV2_STANDARD_1080;
+        is2Kx1080 = true;
+        break;
+    default:
+        break;
+    }
 
-	return WriteRegister (gChannelToSDIOutControlRegNum[inOutputSpigot], inValue, kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard)
+    return WriteRegister (gChannelToSDIOutControlRegNum[inOutputSpigot], standard, kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard)
 			&&	SetSDIOut2Kx1080Enable(NTV2Channel(inOutputSpigot), is2Kx1080);
 }
 
@@ -3760,18 +3786,34 @@ bool CNTV2Card::GetSDIOutputStandard (const UWord inOutputSpigot, NTV2Standard &
 	if (IS_OUTPUT_SPIGOT_INVALID(inOutputSpigot))
 		return false;
 	bool is2kx1080(false);
+    bool is6G(false);
+    bool is12G(false);
 	NTV2Standard newStd(NTV2_STANDARD_INVALID);
 	const bool result (CNTV2DriverInterface::ReadRegister (gChannelToSDIOutControlRegNum[inOutputSpigot], newStd, kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard)
-						&& GetSDIOut2Kx1080Enable(NTV2Channel(inOutputSpigot), is2kx1080));
+                        && GetSDIOut2Kx1080Enable(NTV2Channel(inOutputSpigot), is2kx1080)
+                        && GetSDIOut6GEnable(NTV2Channel(inOutputSpigot), is6G)
+                        && GetSDIOut12GEnable(NTV2Channel(inOutputSpigot), is12G));
 	outValue = newStd;
 	switch (newStd)
 	{
-		case NTV2_STANDARD_1080:	if (is2kx1080)
-										outValue = NTV2_STANDARD_2Kx1080i;
-									break;
-		case NTV2_STANDARD_1080p:	if (is2kx1080)
-										outValue = NTV2_STANDARD_2Kx1080p;
-									break;
+        case NTV2_STANDARD_1080:
+            if (is2kx1080)
+                outValue = NTV2_STANDARD_2Kx1080i;
+            if (is6G || is12G)
+                if (is2kx1080)
+                    outValue = NTV2_STANDARD_4096i;
+                else
+                    outValue = NTV2_STANDARD_3840i;
+            break;
+        case NTV2_STANDARD_1080p:
+            if (is2kx1080)
+                outValue = NTV2_STANDARD_2Kx1080p;
+            if (is6G || is12G)
+                if (is2kx1080)
+                    outValue = NTV2_STANDARD_4096x2160p;
+                else
+                    outValue = NTV2_STANDARD_3840x2160p;
+            break;
 		default:
 			break;
 	}
