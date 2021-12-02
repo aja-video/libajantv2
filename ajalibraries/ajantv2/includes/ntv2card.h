@@ -1042,10 +1042,11 @@ public:
 	// The rest of the routines
 	AJA_VIRTUAL bool		GetVideoFormat (NTV2VideoFormat & outValue, NTV2Channel inChannel = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool				GetActiveFrameDimensions (NTV2FrameDimensions & outFrameDimensions, const NTV2Channel inChannel = NTV2_CHANNEL1);
-	AJA_VIRTUAL NTV2FrameDimensions GetActiveFrameDimensions (const NTV2Channel inChannel = NTV2_CHANNEL1);
-
-	AJA_VIRTUAL bool		GetNumberActiveLines (ULWord & outNumActiveLines);
+#if !defined(NTV2_DEPRECATE_16_2)
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetActiveFrameDimensions (NTV2FrameDimensions & outFrameDimensions, const NTV2Channel inChannel = NTV2_CHANNEL1)); ///< @deprecated	Obsolete starting in SDK 16.2.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(NTV2FrameDimensions GetActiveFrameDimensions (const NTV2Channel inChannel = NTV2_CHANNEL1)); ///< @deprecated	Obsolete starting in SDK 16.2.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetNumberActiveLines (ULWord & outNumActiveLines)); ///< @deprecated	Obsolete starting in SDK 16.2.
+#endif	//	defined(NTV2_DEPRECATE_16_2)
 
 	AJA_VIRTUAL bool		SetStandard (NTV2Standard inValue, NTV2Channel inChannel = NTV2_CHANNEL1);
 	AJA_VIRTUAL bool		GetStandard (NTV2Standard & outValue, NTV2Channel inChannel = NTV2_CHANNEL1);

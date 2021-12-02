@@ -830,98 +830,33 @@ bool CNTV2Card::GetVideoVOffset (int & outVOffset, const UWord inOutputSpigot)
 	bool CNTV2Card::GetVideoFinePhase (int* fOffset)	{return ReadRegister (kRegOutputTimingFinePhase, (ULWord*) fOffset, kRegMaskOutputTimingFinePhase, kRegShiftOutputTimingFinePhase);}
 #endif	//	!defined (NTV2_DEPRECATE)
 
-
-bool CNTV2Card::GetNumberActiveLines (ULWord & outNumActiveLines)
-{	
-	NTV2Standard	standard	(NTV2_STANDARD_INVALID);
-
-	outNumActiveLines = 0;
-	if (!GetStandard(standard))
-		return false;
-
-	switch (standard)
+#if !defined(NTV2_DEPRECATE_16_2)
+	bool CNTV2Card::GetNumberActiveLines (ULWord & outNumActiveLines)
 	{
-		case NTV2_STANDARD_525:			outNumActiveLines = NUMACTIVELINES_525;			break;
-
-		case NTV2_STANDARD_625:			outNumActiveLines = NUMACTIVELINES_625;			break;
-
-		case NTV2_STANDARD_720:			outNumActiveLines = HD_NUMACTIVELINES_720;		break;
-
-		case NTV2_STANDARD_2K:			outNumActiveLines = HD_NUMACTIVELINES_2K;		break;
-
-		case NTV2_STANDARD_1080:
-		case NTV2_STANDARD_1080p:
-		case NTV2_STANDARD_2Kx1080p:
-		case NTV2_STANDARD_2Kx1080i:	outNumActiveLines = HD_NUMACTIVELINES_1080;		break;
-
-		case NTV2_STANDARD_3840x2160p:
-		case NTV2_STANDARD_4096x2160p:
-		case NTV2_STANDARD_3840HFR:
-		case NTV2_STANDARD_4096HFR:
-		case NTV2_STANDARD_3840i:
-		case NTV2_STANDARD_4096i:		outNumActiveLines = HD_NUMLINES_4K;				break;
-
-		case NTV2_STANDARD_7680:
-		case NTV2_STANDARD_8192:		outNumActiveLines = FD_NUMLINES_8K;				break;
-	#if defined(_DEBUG)
-		case NTV2_NUM_STANDARDS:		outNumActiveLines = 0;							break;
-	#else
-		default:						outNumActiveLines = 0;							break;
-	#endif
+		outNumActiveLines = 0;
+		NTV2Standard st;	NTV2VANCMode vm;
+		if (!GetStandard(st)  ||  !GetVANCMode(vm))
+			return false;
+		const NTV2FormatDescriptor fd(st, NTV2_FBF_10BIT_YCBCR, vm);
+		return fd.GetRasterHeight();
 	}
-	return outNumActiveLines != 0;
-}
-
-bool CNTV2Card::GetActiveFrameDimensions (NTV2FrameDimensions & outFrameDimensions, const NTV2Channel inChannel)
-{
-	outFrameDimensions = GetActiveFrameDimensions (inChannel);
-	return outFrameDimensions.IsValid ();
-}
-
-
-NTV2FrameDimensions CNTV2Card::GetActiveFrameDimensions (const NTV2Channel inChannel)
-{
-	NTV2Standard		standard	(NTV2_STANDARD_INVALID);
-	NTV2FrameGeometry	geometry	(NTV2_FG_INVALID);
-	NTV2FrameDimensions result;
-
-	if (IsXilinxProgrammed()	//	If Xilinx not programmed, prevent returned size from being 4096 x 4096
-		&& GetStandard(standard, inChannel)
-			&& GetFrameGeometry(geometry, inChannel))
-				switch (standard)
-				{
-					case NTV2_STANDARD_1080:
-					case NTV2_STANDARD_1080p:
-						result.SetWidth(geometry == NTV2_FG_2048x1080 || geometry == NTV2_FG_4x2048x1080  ?	 HD_NUMCOMPONENTPIXELS_1080_2K	:  HD_NUMCOMPONENTPIXELS_1080);
-						result.SetHeight(HD_NUMACTIVELINES_1080);
-						if (NTV2_IS_QUAD_FRAME_GEOMETRY(geometry))
-							result.Set(result.Width()*2,  HD_NUMLINES_4K);
-						else if (NTV2_IS_QUAD_QUAD_FRAME_GEOMETRY(geometry))
-							result.Set(result.Width()*4,  FD_NUMLINES_8K);
-						break;
-					case NTV2_STANDARD_720:			result.Set(HD_NUMCOMPONENTPIXELS_720,		HD_NUMACTIVELINES_720);		break;
-					case NTV2_STANDARD_525:			result.Set(NUMCOMPONENTPIXELS,				NUMACTIVELINES_525);		break;
-					case NTV2_STANDARD_625:			result.Set(NUMCOMPONENTPIXELS,				NUMACTIVELINES_625);		break;
-					case NTV2_STANDARD_2K:			result.Set(HD_NUMCOMPONENTPIXELS_2K,		HD_NUMLINES_2K);			break;
-					case NTV2_STANDARD_2Kx1080p:	result.Set(HD_NUMCOMPONENTPIXELS_1080_2K,	HD_NUMACTIVELINES_1080);	break;
-					case NTV2_STANDARD_2Kx1080i:	result.Set(HD_NUMCOMPONENTPIXELS_1080_2K,	HD_NUMACTIVELINES_1080);	break;
-					case NTV2_STANDARD_3840x2160p:	result.Set(HD_NUMCOMPONENTPIXELS_1080*2,	HD_NUMLINES_4K);			break;
-					case NTV2_STANDARD_4096x2160p:	result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*2, HD_NUMLINES_4K);			break;
-					case NTV2_STANDARD_3840HFR:		result.Set(HD_NUMCOMPONENTPIXELS_1080*2,	HD_NUMLINES_4K);			break;
-					case NTV2_STANDARD_4096HFR:		result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*2, HD_NUMLINES_4K);			break;
-					case NTV2_STANDARD_7680:		result.Set(HD_NUMCOMPONENTPIXELS_1080*4,	FD_NUMLINES_8K);			break;
-					case NTV2_STANDARD_8192:		result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*4, FD_NUMLINES_8K);			break;
-					case NTV2_STANDARD_3840i:		result.Set(HD_NUMCOMPONENTPIXELS_1080*2,	HD_NUMLINES_4K);			break;
-					case NTV2_STANDARD_4096i:		result.Set(HD_NUMCOMPONENTPIXELS_1080_2K*2, HD_NUMLINES_4K);			break;
-				#if defined(_DEBUG)
-					case NTV2_NUM_STANDARDS:																				break;
-				#else
-					default:																								break;
-				#endif
-				}
-
-	return result;
-}
+	
+	bool CNTV2Card::GetActiveFrameDimensions (NTV2FrameDimensions & outFrameDimensions, const NTV2Channel inChannel)
+	{
+		outFrameDimensions = GetActiveFrameDimensions(inChannel);
+		return outFrameDimensions.IsValid();
+	}
+	
+	
+	NTV2FrameDimensions CNTV2Card::GetActiveFrameDimensions (const NTV2Channel inChannel)
+	{
+		NTV2Standard st;	NTV2VANCMode vm;	NTV2FrameDimensions result;
+		if (!IsXilinxProgrammed()  ||  !GetStandard(st, inChannel)  ||  !GetVANCMode(vm, inChannel))
+			return result;
+		const NTV2FormatDescriptor fd (st, NTV2_FBF_10BIT_YCBCR, vm);
+		return result.Set (fd.GetRasterWidth(), fd.GetRasterHeight());
+	}
+#endif	//	defined(NTV2_DEPRECATE_16_2)
 
 #if !defined (NTV2_DEPRECATE)
 	bool CNTV2Card::GetActiveFramebufferSize (SIZE * pOutFrameDimensions, const NTV2Channel inChannel)
