@@ -523,28 +523,23 @@ bool NTV2FrameGrabber::SetupInput (void)
 		mChannel = NTV2_CHANNEL1;
 	mTimeCodeSource = ::NTV2InputSourceToTimecodeIndex (mInputSource);
 
-	bool waitForInput= false;
-	if (::NTV2DeviceHasBiDirectionalSDI (mNTV2Card.GetDeviceID()))		//	If device has bidirectional SDI connectors...
-	{
+	bool waitForInput(false);
+	if (::NTV2DeviceHasBiDirectionalSDI (mNTV2Card.GetDeviceID()))	//	If device has bidirectional SDIs...
 		for (unsigned offset (0);  offset < 4;  offset++)
 		{
-			mNTV2Card.EnableChannel (NTV2Channel (mChannel + offset));
+			mNTV2Card.EnableChannel (NTV2Channel(mChannel+offset));
 			bool outputEnabled;
-			mNTV2Card.GetSDITransmitEnable(NTV2Channel (mChannel + offset), outputEnabled);
-			if (outputEnabled == true)
+			mNTV2Card.GetSDITransmitEnable (NTV2Channel(mChannel+offset), outputEnabled);
+			if (outputEnabled)
 			{
 				waitForInput = true;
-				mNTV2Card.SetSDITransmitEnable (NTV2Channel (mChannel + offset),false);
+				mNTV2Card.SetSDITransmitEnable (NTV2Channel(mChannel+offset), false);
 			}
 		}
-	}
 
 	// Only if we had to change an output to input do we need to wait.
 	if (waitForInput)
-	{
-		for (unsigned ndx (0);  ndx < 10;  ndx++)
-			mNTV2Card.WaitForInputVerticalInterrupt (mChannel);	//	...and give the device some time to lock to a signal
-	}
+		mNTV2Card.WaitForInputVerticalInterrupt (mChannel, 10);	//	Give the device ~10 fields/frames to lock to a signal
 
 	mCurrentVideoFormat = GetVideoFormatFromInputSource ();
     mCurrentColorSpace = GetColorSpaceFromInputSource ();
@@ -554,8 +549,10 @@ bool NTV2FrameGrabber::SetupInput (void)
 	{
 		validInput = true;
 		mNTV2Card.SetVideoFormat (mCurrentVideoFormat, false, false, mChannel);
-
-		mFrameDimensions = mNTV2Card.GetActiveFrameDimensions (mChannel);
+		NTV2VANCMode vm(NTV2_VANCMODE_INVALID);
+		mNTV2Card.GetVANCMode(vm, mChannel);
+		const NTV2FormatDescriptor fd(mCurrentVideoFormat, mFrameBufferFormat, vm);
+		mFrameDimensions.Set (fd.GetRasterWidth(), fd.GetRasterHeight());
 		const QString vfString (::NTV2VideoFormatToString (mCurrentVideoFormat).c_str ());
 		qDebug() << "## DEBUG:  mInputSource=" << mChannel << ", mCurrentVideoFormat=" << vfString << ", width=" << mFrameDimensions.Width() << ", height=" << mFrameDimensions.Height();
 
