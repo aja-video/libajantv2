@@ -6,6 +6,7 @@
 **/
 #include "ntv2mcsfile.h"
 #include "ntv2bitfile.h"
+#include "ajabase/system/debug.h"
 #include <iostream>
 #include <sys/stat.h>
 #include <assert.h>
@@ -54,6 +55,19 @@ bool CNTV2MCSfile::isReady (void) const
 //		return true;
 //	else
 //		return false;
+}
+
+void CNTV2MCSfile::SetLastError (const string & inStr, const bool inAppend)
+{
+	AJA_sERROR(AJA_DebugUnit_Firmware, inStr);
+	if (inAppend)
+	{
+		if (!mLastError.empty())
+			mLastError += "\n";
+		mLastError += inStr;
+	}
+	else
+		mLastError = inStr;
 }
 
 bool CNTV2MCSfile::Open (const string & inMCSFileName)
@@ -142,6 +156,7 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 {
 	CNTV2Bitfile	bitfile;
 	CNTV2MCSfile	mcsFile;
+	ostringstream	oss;
 	char iRecord[100];
 	uint64_t recordSize = 0;
 	UWord baseAddress = 0x0000;
@@ -151,14 +166,16 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 
 	if (!Open(inMCSFileName))
 	{
-		cerr << "## ERROR:	CNTV2MCSfile::InsertBitFile	 mcsFile '" << inMCSFileName << "' not found" << endl;
+		oss << "CNTV2MCSfile::InsertBitFile: mcsFile '" << inMCSFileName << "' not found";
+		SetLastError(oss.str());
 		return false;
 	}
 
 	//Read in the bitfile
 	if (!bitfile.Open(inBitFileName))
 	{
-		cerr << "## ERROR:	CNTV2MCSfile::InsertBitFile	 Bitfile '" << inBitFileName << "' not found" << endl;
+		oss << "CNTV2MCSfile::InsertBitFile: Bitfile '" << inBitFileName << "' not found";
+		SetLastError(oss.str());
 		return false;
 	}
 
@@ -166,7 +183,8 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 	NTV2_POINTER bitfileBuffer(bitfileLength + 512);
 	if (!bitfileBuffer)
 	{
-		cerr << "## ERROR:	CNTV2MCSfile::InsertBitFile	 Unable to allocate " << DEC(bitfileLength+512) << "-byte bitfile buffer" << endl;
+		oss << "CNTV2MCSfile::InsertBitFile: Unable to allocate " << DEC(bitfileLength+512) << "-byte bitfile buffer";
+		SetLastError(oss.str());
 		return false;
 	}
 
@@ -175,7 +193,8 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 	const string	designName(bitfile.GetDesignName());
 	if (readBytes != bitfileLength)
 	{
-		cerr << "## ERROR:	CNTV2MCSfile::InsertBitFile:  Invalid bitfile length, read " << readBytes << " bytes, expected " << bitfileLength << endl;
+		oss << "CNTV2MCSfile::InsertBitFile:  Invalid bitfile length, read " << readBytes << " bytes, expected " << bitfileLength;
+		SetLastError(oss.str());
 		return false;
 	}
 
@@ -305,7 +324,10 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 	//Finished with bitfile now just read a line and output a line from the mcs file
 	//32M offset is assumed to be the start of SOC stuff
 	if (!FindExtendedLinearAddressRecord(0x0200))
+	{
+		SetLastError("FindExtendedLinearAddressRecord failed");
 		return false;
+	}
 	mCurrentLocation = mBaseELARLocation;
 	while (mCurrentLocation != mFileLines.end())
 	{

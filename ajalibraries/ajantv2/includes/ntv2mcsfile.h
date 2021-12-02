@@ -87,6 +87,10 @@ public:
 	virtual std::string					GetMCSPackageVersionString (void) const;
 	virtual std::string					GetMCSPackageDateString (void) const;
 	virtual bool						GetMCSHeaderInfo (const std::string & inMCSFileName);
+	virtual inline const std::string &	GetLastError (void) const					{return mLastError;}	///< @return	A string containing the error message, if any, from the last function that failed.
+
+protected:	//	Protected Methods
+	virtual void						SetLastError (const std::string & inStr, const bool inAppend = false);
 
 private:
 	virtual bool						ParseCurrentRecord (IntelRecordInfo &recordInfo);
@@ -106,6 +110,7 @@ private:
 	std::string				mBitfileTime;
 	std::string				mBitfileDesignName;
 	std::string				mBitfilePartName;
+	std::string				mLastError;		//	Last error message
 
 };	//	CNTV2MCSfile
 

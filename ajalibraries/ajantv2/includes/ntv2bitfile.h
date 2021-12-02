@@ -241,6 +241,9 @@ class AJAExport CNTV2Bitfile
 		static std::string		GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID);
 		static NTV2DeviceID		GetDeviceIDFromHardwareDesignName (const std::string & inDesignName);
 
+	protected:	//	Protected Methods
+		virtual void			SetLastError (const std::string & inStr, const bool inAppend = false);
+
 	private:	//	Private Member Data
 		std::ifstream			mFileStream;	//	Binary input filestream
 		NTV2_POINTER			mHeaderBuffer;	//	Header buffer in use

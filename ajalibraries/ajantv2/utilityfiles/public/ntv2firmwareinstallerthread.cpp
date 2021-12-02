@@ -8,6 +8,7 @@
 #include "ntv2firmwareinstallerthread.h"
 #include "ntv2bitfile.h"
 #include "ntv2utils.h"
+#include "ajabase/system/debug.h"
 #include "ajabase/system/file_io.h"
 #include "ajabase/system/systemtime.h"
 #include "ntv2konaflashprogram.h"
@@ -22,10 +23,14 @@ using namespace std;
 #endif
 
 
-#define REALLY_UPDATE		true		///<	Set this to false to simulate flashing a device
+static const bool		SIMULATE_UPDATE			(false);	//	Set this to true to simulate flashing a device
+static const bool		SIMULATE_FAILURE		(false);	//	Set this to true to simulate a flash failure
+static const uint32_t	kMilliSecondsPerSecond	(1000);
 
-
-static const uint32_t		kMilliSecondsPerSecond	(1000);
+#define FITDBUG(__x__)	do {ostringstream oss;  oss << __x__;  cerr << "## DEBUG:    " << oss.str() << endl;  AJA_sDEBUG  (AJA_DebugUnit_Firmware, oss.str());} while(false)
+#define FITWARN(__x__)	do {ostringstream oss;  oss << __x__;  cerr << "## WARNING:  " << oss.str() << endl;  AJA_sWARNING(AJA_DebugUnit_Firmware, oss.str());} while(false)
+#define FITERR(__x__)	do {ostringstream oss;  oss << __x__;  cerr << "## ERROR:    " << oss.str() << endl;  AJA_sERROR  (AJA_DebugUnit_Firmware, oss.str());} while(false)
+#define FITNOTE(__x__)	do {ostringstream oss;  oss << __x__;  cerr << "## NOTE:  "    << oss.str() << endl;  AJA_sNOTICE (AJA_DebugUnit_Firmware, oss.str());} while(false)
 
 
 static string GetFirmwarePath (const NTV2DeviceID inDeviceID)
@@ -158,18 +163,18 @@ CNTV2FirmwareInstallerThread::CNTV2FirmwareInstallerThread (const NTV2DeviceInfo
 }
 
 
-
 AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 {
+	ostringstream ossNote, ossWarn, ossErr;
 	m_device.Open(UWord(m_deviceInfo.deviceIndex));
 	if (!m_device.IsOpen())
 	{
-		cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Device not open" << endl;
+		FITERR("CNTV2FirmwareInstallerThread:  Device '" << DEC(m_deviceInfo.deviceIndex) << "' not open");
 		return AJA_STATUS_OPEN;
 	}
 	if (m_bitfilePath.empty() && !m_useDynamicReconfig)
 	{
-		cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Bitfile path is empty!" << endl;
+		FITERR("CNTV2FirmwareInstallerThread:  Empty bitfile path!");
 		return AJA_STATUS_BAD_PARAM;
 	}
 
@@ -179,10 +184,10 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 	ULWord	numBytes	(0);
 	string	installedDate, installedTime, serialNumStr, newFirmwareDescription;
 	if (!m_device.GetInstalledBitfileInfo (numBytes, installedDate, installedTime))
-		cerr << "## WARNING:  CNTV2FirmwareInstallerThread:	 Unable to obtain installed bitfile info" << endl;
-	m_device.GetSerialNumberString (serialNumStr);
+		FITWARN("CNTV2FirmwareInstallerThread:  Unable to obtain installed bitfile info");
+	m_device.GetSerialNumberString(serialNumStr);
 
-	if (m_bitfilePath.find(".mcs") != std::string::npos)
+	if (m_bitfilePath.find(".mcs") != string::npos)
 	{
 		CNTV2KonaFlashProgram kfp;
 		if (!m_verbose)
@@ -195,6 +200,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 		bool rv = kfp.SetBoard(m_device.GetIndexNumber());
 		if (!rv)
 		{
+			FITERR("CNTV2KonaFlashProgram::SetBoard(" << DEC(m_device.GetIndexNumber()) << ") failed");
 			m_updateSuccessful = false;
 			return AJA_STATUS_FAIL;
 		}
@@ -203,16 +209,16 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 		mcsFile.GetMCSHeaderInfo(m_bitfilePath);
 		if (!m_forceUpdate  &&  !ShouldUpdateIPDevice(m_deviceInfo.deviceID, mcsFile.GetBitfileDesignString()))
 		{
-			cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Invalid MCS update" << endl;
+			FITERR("CNTV2FirmwareInstallerThread:  Invalid MCS update");
 			m_updateSuccessful = false;
 			return AJA_STATUS_BAD_PARAM;
 		}
 
-		m_device. WriteRegister(kVRegFlashStatus, ULWord(kfp.NextMcsStep()));
+		m_device.WriteRegister(kVRegFlashStatus, ULWord(kfp.NextMcsStep()));
 		rv = kfp.SetMCSFile(m_bitfilePath.c_str());
 		if (!rv)
 		{
-			cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  SetMCSFile failed" << endl;
+			FITERR("CNTV2FirmwareInstallerThread:  SetMCSFile failed");
 			m_updateSuccessful = false;
 			return AJA_STATUS_FAIL;
 		}
@@ -222,7 +228,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 		m_updateSuccessful = kfp.ProgramFromMCS(true);
 		if (!m_updateSuccessful)
 		{
-			cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  ProgramFromMCS failed" << endl;
+			FITERR("CNTV2FirmwareInstallerThread:  ProgramFromMCS failed");
 			return AJA_STATUS_FAIL;
 		}
 
@@ -230,7 +236,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 		m_device.WriteRegister(kVRegFlashSize,MCS_STEPS);
 		m_device.WriteRegister(kVRegFlashStatus,MCS_STEPS);
 
-		cout << "## NOTE:  CNTV2FirmwareInstallerThread:  MCS update succeeded" << endl;
+		FITNOTE("CNTV2FirmwareInstallerThread:  MCS update succeeded");
 		return AJA_STATUS_SUCCESS;
 	}	//	if MCS
 
@@ -239,14 +245,14 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 		m_device.AddDynamicDirectory(::NTV2GetFirmwareFolderPath());
 		if (!m_device.CanLoadDynamicDevice(m_desiredID))
 		{
-			cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread: '" << m_desiredID << "' is not compatible with device '"
-					<< m_deviceInfo.deviceIdentifier << "'" << endl;
+			FITERR("CNTV2FirmwareInstallerThread: '" << m_desiredID << "' is not compatible with device '"
+					<< m_deviceInfo.deviceIdentifier << "'");
 			return AJA_STATUS_FAIL;
 		}
 		if (m_verbose)
-			cerr	<< "## NOTE:  CNTV2FirmwareInstallerThread:	 Dynamic Reconfig started" << endl
+			FITNOTE("CNTV2FirmwareInstallerThread:  Dynamic Reconfig started" << endl
 					<< "     device: " << m_deviceInfo.deviceIdentifier << ", S/N " << serialNumStr << endl
-					<< "  new devID: " << xHEX0N(m_desiredID,8) << endl;
+					<< "  new devID: " << xHEX0N(m_desiredID,8));
 	}
 	else	//	NOT DYNAMIC RECONFIG
 	{
@@ -255,10 +261,9 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 		if (!bitfile.Open(m_bitfilePath))
 		{
 			const string	extraInfo	(bitfile.GetLastError());
-			cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Bitfile '" << m_bitfilePath << "' open/parse error";
+			FITERR("CNTV2FirmwareInstallerThread:  Bitfile '" << m_bitfilePath << "' open/parse error");
 			if (!extraInfo.empty())
-				cerr << ": " << extraInfo;
-			cerr << endl;
+				cerr << extraInfo << endl;
 			return AJA_STATUS_OPEN;
 		}
 
@@ -267,7 +272,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 		NTV2_POINTER	bitfileBuffer(bitfileLength + 512);
 		if (!bitfileBuffer)
 		{
-			cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Unable to allocate bitfile buffer" << endl;
+			FITERR("CNTV2FirmwareInstallerThread:  Unable to allocate " << DEC(bitfileLength+512) << "-byte bitfile buffer");
 			return AJA_STATUS_MEMORY;
 		}
 
@@ -278,7 +283,8 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 		if (readBytes != bitfileLength)
 		{
 			const string err(bitfile.GetLastError());
-			cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Invalid bitfile length, read " << readBytes << " bytes, expected " << bitfileLength << endl;
+			FITERR("CNTV2FirmwareInstallerThread:  Invalid bitfile length, read " << DEC(readBytes)
+					<< " bytes, expected " << DEC(bitfileLength));
 			if (!err.empty())
 				cerr << err << endl;
 			return AJA_STATUS_FAIL;
@@ -287,45 +293,41 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 		//	Verify that this bitfile is compatible with this device...
 		if (!m_forceUpdate  &&  !bitfile.CanFlashDevice(m_deviceInfo.deviceID))
 		{
-			cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread:  Bitfile design '" << designName << "' is not compatible with device '"
-					<< m_deviceInfo.deviceIdentifier << "'" << endl;
+			FITERR("CNTV2FirmwareInstallerThread:  Bitfile design '" << designName << "' is not compatible with device '"
+					<< m_deviceInfo.deviceIdentifier << "'");
 			return AJA_STATUS_FAIL;
 		}
 
 		//	Update firmware...
 		if (m_verbose)
-			cerr	<< "## NOTE:  CNTV2FirmwareInstallerThread:	 Firmware update started" << endl
+			FITNOTE("CNTV2FirmwareInstallerThread:  Firmware update started" << endl
 					<< "    bitfile: " << m_bitfilePath << endl
 					<< "     device: " << m_deviceInfo.deviceIdentifier << ", S/N " << serialNumStr << endl
-					<< "   firmware: " << newFirmwareDescription << endl;
+					<< "   firmware: " << newFirmwareDescription);
 	}	//	not dynamic reconfig
 
-	if (REALLY_UPDATE)
+	if (!SIMULATE_UPDATE)
 	{
 		if (m_useDynamicReconfig)
 		{
 			m_updateSuccessful = m_device.LoadDynamicDevice(m_desiredID);
 			if (!m_updateSuccessful)
-				cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread:  'Dynamic Reconfig' failed, desired deviceID: "
-						<< xHEX0N(m_desiredID,8) << endl;
+				FITERR("CNTV2FirmwareInstallerThread:  'Dynamic Reconfig' failed, desired deviceID: " << xHEX0N(m_desiredID,8));
 		}
 		else
 		{
 			//	ProgramMainFlash used to be able to throw (because XilinxBitfile could throw), but with 12.1 SDK, this is no longer the case.
-			m_updateSuccessful = m_device.ProgramMainFlash (m_bitfilePath.c_str (), m_forceUpdate, !m_verbose);
+			m_updateSuccessful = m_device.ProgramMainFlash (m_bitfilePath.c_str(), m_forceUpdate, !m_verbose);
 			if (!m_updateSuccessful)
-				cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread:  'ProgramMainFlash' failed" << endl
+				FITNOTE("CNTV2FirmwareInstallerThread:  'ProgramMainFlash' failed" << endl
 						<< "	 bitfile: " << m_bitfilePath << endl
 						<< "	  device: " << m_deviceInfo.deviceIdentifier << ", S/N " << serialNumStr << endl
 						<< "   serialNum: " << serialNumStr << endl
-						<< "	firmware: " << newFirmwareDescription << endl;
+						<< "	firmware: " << newFirmwareDescription);
 		}
-	}	//	if REALLY_UPDATE
+	}	//	if real update
 	else
-	{
-		//	PHONEY PROGRESS FOR TESTING
-		static unsigned sTestCount (0);		//	Used to alternate success/failure with successive updates
-
+	{	//	SIMULATE_UPDATE FOR TESTING
 		m_statusStruct.programState = kProgramStateEraseMainFlashBlock;
 		m_statusStruct.programProgress = 0;
 		m_statusStruct.programTotalSize = 50;
@@ -335,7 +337,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 		m_statusStruct.programState = kProgramStateEraseFailSafeFlashBlock;
 
 		//	Alternate failure/success with each successive update
-		if ((sTestCount++ & 1) != 0)
+		if (!SIMULATE_FAILURE)
 		{
 			while (m_statusStruct.programProgress < 15) {AJATime::Sleep (kMilliSecondsPerSecond);	m_statusStruct.programProgress++;}
 			m_statusStruct.programState = kProgramStateProgramFlash;
@@ -344,21 +346,21 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 			while (m_statusStruct.programProgress < 50) {AJATime::Sleep (kMilliSecondsPerSecond);	m_statusStruct.programProgress++;}
 			m_updateSuccessful = true;
 		}
-	}	//	else phony update
+	}	//	else SIMULATE_UPDATE
 
 	if (!m_updateSuccessful)
 	{
-		cerr	<< "## ERROR:  CNTV2FirmwareInstallerThread:  Firmware update failed" << endl
+		FITERR("CNTV2FirmwareInstallerThread:  " << (SIMULATE_UPDATE?"SIMULATED ":"") << "Firmware update failed" << endl
 				<< "	bitfile: " << m_bitfilePath << endl
 				<< "	 device: " << m_deviceInfo.deviceIdentifier << ", S/N " << serialNumStr << endl
-				<< "   firmware: " << newFirmwareDescription << endl;
+				<< "   firmware: " << newFirmwareDescription);
 		return AJA_STATUS_FAIL;
 	}
 	if (m_verbose)
-		cout	<< "## NOTE:  CNTV2FirmwareInstallerThread:	 Firmware update completed" << endl
+		FITNOTE("CNTV2FirmwareInstallerThread:  " << (SIMULATE_UPDATE?"SIMULATED ":"") << "Firmware update completed" << endl
 				<< "	bitfile: " << m_bitfilePath << endl
 				<< "	 device: " << m_deviceInfo.deviceIdentifier << ", S/N " << serialNumStr << endl
-				<< "   firmware: " << newFirmwareDescription << endl;
+				<< "   firmware: " << newFirmwareDescription);
 
 	return AJA_STATUS_SUCCESS;
 
@@ -409,7 +411,7 @@ uint32_t CNTV2FirmwareInstallerThread::GetProgressMax (void) const
 
 void CNTV2FirmwareInstallerThread::InternalUpdateStatus (void) const
 {
-	if (REALLY_UPDATE && m_device.IsOpen ())
+	if (!SIMULATE_UPDATE  &&  m_device.IsOpen ())
 		m_device.GetProgramStatus (&m_statusStruct);
 }
 
