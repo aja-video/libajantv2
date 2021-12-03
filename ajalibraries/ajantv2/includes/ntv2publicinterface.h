@@ -8820,7 +8820,7 @@ typedef enum
 				NTV2_POINTER	mBuffer;			///< @brief Virtual address of a bitstream buffer and its length.
 				ULWord			mFlags;				///< @brief Action flags (lock, unlock, etc)
 				ULWord			mStatus;			///< @brief Action status
-				ULWord			mRegisters[16];		///< @brief Resister data
+				ULWord			mRegisters[16];		///< @brief Register data
 				ULWord			mReserved[32];		///< @brief Reserved for future expansion.
 			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
 
