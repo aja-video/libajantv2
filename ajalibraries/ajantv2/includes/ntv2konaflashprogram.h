@@ -100,6 +100,7 @@ public:
 	std::string		GetPartName (void) const	{return _parser.PartName();}
 	std::string		GetDate (void) const		{return _parser.Date();}
 	std::string		GetTime (void) const		{return _parser.Time();}
+	const NTV2BitfileHeaderParser & Parser (void) const	{return _parser;}
 	uint32_t		GetNumBytes(void) const		{return _numBytes;}
 	const std::string &	GetMCSInfo (void) const	{return _mcsInfo;}
 	void ParsePartitionFromFileLines(uint32_t address, uint16_t & partitionOffset);
