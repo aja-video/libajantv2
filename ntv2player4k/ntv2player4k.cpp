@@ -1266,9 +1266,7 @@ void NTV2Player4K::ConsumeFrames (void)
 	else	//	--frames option not used -- explicitly specify start & end frame numbers (as calculated above)
 		initOK = mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  0,  mAudioSystem,  acOptions,
 														1 /*numChannels*/,  startNum,  endNum);
-	if (initOK)
-		mDevice.AutoCirculateStart(mConfig.fOutputChannel);
-	else
+	if (!initOK)
 		{PLFAIL("AutoCirculateInitForOutput failed");  mGlobalQuit = true;}
 
 	while (!mGlobalQuit)
@@ -1298,7 +1296,7 @@ void NTV2Player4K::ConsumeFrames (void)
 
 			//	Transfer the timecode-burned frame (plus audio) to the device for playout...
 			outputXfer.acVideoBuffer.Set (pFrameData->fVideoBuffer, pFrameData->fVideoBuffer);
-			outputXfer.acAudioBuffer.Set (pFrameData->fAudioBuffer, pFrameData->fAudioBuffer);
+			outputXfer.acAudioBuffer.Set (pFrameData->fAudioBuffer, pFrameData->fNumAudioBytes);
 			outputXfer.SetOutputTimeCode (tcData, ::NTV2ChannelToTimecodeIndex(mConfig.fOutputChannel, /*LTC=*/false, /*F2=*/false));
 			outputXfer.SetOutputTimeCode (tcData, ::NTV2ChannelToTimecodeIndex(mConfig.fOutputChannel, /*LTC=*/true,  /*F2=*/false));
 
@@ -1307,6 +1305,9 @@ void NTV2Player4K::ConsumeFrames (void)
 				goodXfers++;
 			else
 				badXfers++;
+
+			if (goodXfers == 3)
+				mDevice.AutoCirculateStart(mConfig.fOutputChannel);
 
 			//	Signal that the frame has been "consumed"...
 			mFrameDataRing.EndConsumeNextBuffer();

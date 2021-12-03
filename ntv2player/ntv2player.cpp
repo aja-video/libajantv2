@@ -574,9 +574,7 @@ void NTV2Player::ConsumeFrames (void)
 	//	Initialize & start AutoCirculate...
 	bool initOK = mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  mConfig.fFrames.count(),  mAudioSystem,  acOptions,
 														1 /*numChannels*/,  mConfig.fFrames.firstFrame(),  mConfig.fFrames.lastFrame());
-	if (initOK)
-		mDevice.AutoCirculateStart(mConfig.fOutputChannel);
-	else
+	if (!initOK)
 		{PLFAIL("AutoCirculateInitForOutput failed");  mGlobalQuit = true;}
 
 	while (!mGlobalQuit)
@@ -612,6 +610,9 @@ void NTV2Player::ConsumeFrames (void)
 				goodXfers++;
 			else
 				badXfers++;
+
+			if (goodXfers == 3)
+				mDevice.AutoCirculateStart(mConfig.fOutputChannel);
 
 			//	Signal that the frame has been "consumed"...
 			mFrameDataRing.EndConsumeNextBuffer();
