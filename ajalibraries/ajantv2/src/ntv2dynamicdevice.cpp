@@ -10,8 +10,15 @@
 #include "ntv2utils.h"
 #include "ntv2bitfile.h"
 #include "ntv2bitfilemanager.h"
+#include "ajabase/system/debug.h"
 
 using namespace std;
+
+#define DDFAIL(__x__)	AJA_sERROR	(AJA_DebugUnit_Firmware,	AJAFUNC << ": " << __x__)
+#define DDWARN(__x__)	AJA_sWARNING(AJA_DebugUnit_Firmware,	AJAFUNC << ": " << __x__)
+#define DDNOTE(__x__)	AJA_sNOTICE (AJA_DebugUnit_Firmware,	AJAFUNC << ": " << __x__)
+#define DDINFO(__x__)	AJA_sINFO	(AJA_DebugUnit_Firmware,	AJAFUNC << ": " << __x__)
+#define DDDBG(__x__)	AJA_sDEBUG	(AJA_DebugUnit_Firmware,	AJAFUNC << ": " << __x__)
 
 
 static CNTV2BitfileManager s_BitfileManager;
@@ -22,40 +29,37 @@ bool CNTV2Card::IsDynamicDevice (void)
 	NTV2ULWordVector reg;
 
 	if (!IsOpen())
-		return false;
+		return false;	//	device not open
 
-	// see if we can get bitstream status
 	if (!BitstreamStatus(reg))
-		return false;
+		return false;	//	can't get bitstream status
 
-	// the bitstream version cannot be 0
-	if (reg[BITSTREAM_VERSION] == 0)
-		return false;
+	if (!reg[BITSTREAM_VERSION])
+		return false;	//	Bitstream version is zero
 
 	return true;
 }
 
-bool CNTV2Card::IsDynamicFirmwareLoaded()
+bool CNTV2Card::IsDynamicFirmwareLoaded (void)
 {
-	if(!IsDynamicDevice())
+	if (!IsDynamicDevice())
 		return false;
 	
 	ULWord value(0);
-	ReadRegister(kVRegBaseFirmwareDeviceID, value);
-	if(GetDeviceID() == static_cast<NTV2DeviceID>(value))
+	if (!ReadRegister(kVRegBaseFirmwareDeviceID, value))
 		return false;
-	else
-		return true;
+	return GetDeviceID() == NTV2DeviceID(value)  ?  false  :  true;
 }
 
-NTV2DeviceID CNTV2Card::GetBaseDeviceID()
+NTV2DeviceID CNTV2Card::GetBaseDeviceID (void)
 {
-	if(!IsDynamicDevice())
+	if (!IsDynamicDevice())
 		return DEVICE_ID_INVALID;
 	
 	ULWord value(0);
-	ReadRegister(kVRegBaseFirmwareDeviceID, value);
-	return static_cast<NTV2DeviceID>(value);
+	if (!ReadRegister(kVRegBaseFirmwareDeviceID, value))
+		return DEVICE_ID_INVALID;
+	return NTV2DeviceID(value);
 }
 
 NTV2DeviceIDList CNTV2Card::GetDynamicDeviceList (void)
@@ -116,7 +120,7 @@ NTV2DeviceIDSet CNTV2Card::GetDynamicDeviceIDs (void)
 		return result;
 
 	//	Build the deviceID set...
-	const NTV2BitfileInfoList infoList(s_BitfileManager.GetBitfileInfoList());
+	const NTV2BitfileInfoList & infoList (s_BitfileManager.GetBitfileInfoList());
 	for (NTV2BitfileInfoListConstIter it(infoList.begin());	 it != infoList.end();	++it)
 		if (it->designID == currentDesignID)
 			if (it->designVersion == currentDesignVersion)
@@ -138,69 +142,70 @@ bool CNTV2Card::CanLoadDynamicDevice (const NTV2DeviceID inDeviceID)
 bool CNTV2Card::LoadDynamicDevice (const NTV2DeviceID inDeviceID)
 {
 	if (!IsOpen())
-		return false;
+		{DDFAIL("Device not open");  return false;}
 
 	const NTV2DeviceID currentDeviceID (GetDeviceID());
-	if (currentDeviceID == 0)
-		return false;
+	if (!currentDeviceID)
+		{DDFAIL("Current device ID is zero");  return false;}
+
+	const string oldDevName (GetDisplayName());
 
 	//	Get current design ID and version...
-	NTV2ULWordVector reg;
-	if (!BitstreamStatus(reg))
-		return false;
+	NTV2ULWordVector regs;
+	if (!BitstreamStatus(regs))
+		{DDFAIL("Unable to read current bitstream status for " << oldDevName);  return false;}
 
-	if (reg[BITSTREAM_VERSION] == 0)
-		return false;
+	if (!regs[BITSTREAM_VERSION])
+		{DDFAIL("Bitstream version is zero for " << oldDevName);  return false;}
 
 	ULWord currentUserID(0), currentDesignID(0), currentDesignVersion(0), currentBitfileID(0), currentBitfileVersion(0);
 
-	if (GetRunningFirmwareUserID(currentUserID) && (currentUserID != 0))
-	{
-		// the new way
-		currentDesignID = NTV2BitfileHeaderParser::GetDesignID(currentUserID);
-		currentDesignVersion = NTV2BitfileHeaderParser::GetDesignVersion(currentUserID);
-		currentBitfileID = NTV2BitfileHeaderParser::GetBitfileID(currentUserID);
-		currentBitfileVersion = NTV2BitfileHeaderParser::GetBitfileVersion(currentUserID);
+	if (GetRunningFirmwareUserID(currentUserID)  &&  currentUserID)
+	{	// the new way:
+		currentDesignID			= NTV2BitfileHeaderParser::GetDesignID(currentUserID);
+		currentDesignVersion	= NTV2BitfileHeaderParser::GetDesignVersion(currentUserID);
+		currentBitfileID		= NTV2BitfileHeaderParser::GetBitfileID(currentUserID);
+		currentBitfileVersion	= NTV2BitfileHeaderParser::GetBitfileVersion(currentUserID);
 	}
 	else
-	{
-		// the old way
-		currentDesignID = NTV2BitfileHeaderParser::GetDesignID(reg[BITSTREAM_VERSION]);
-		currentDesignVersion = NTV2BitfileHeaderParser::GetDesignVersion(reg[BITSTREAM_VERSION]);
-		currentBitfileID = CNTV2Bitfile::ConvertToBitfileID(currentDeviceID);
-		currentBitfileVersion = 0xff; // ignores bitfile version
+	{	// the old way:
+		currentDesignID			= NTV2BitfileHeaderParser::GetDesignID(regs[BITSTREAM_VERSION]);
+		currentDesignVersion	= NTV2BitfileHeaderParser::GetDesignVersion(regs[BITSTREAM_VERSION]);
+		currentBitfileID		= CNTV2Bitfile::ConvertToBitfileID(currentDeviceID);
+		currentBitfileVersion	= 0xff; // ignores bitfile version
 	}
 
-	if (currentDesignID == 0)
-		return false;
+	if (!currentDesignID)
+		{DDFAIL("Current design ID is zero for " << oldDevName);  return false;}
 
 	//	Get the clear file matching current bitfile...
 	NTV2_POINTER clearStream;
 	if (!s_BitfileManager.GetBitStream (clearStream,
-									currentDesignID,
-									currentDesignVersion,
-									currentBitfileID,
-									currentBitfileVersion,
-									NTV2_BITFILE_FLAG_CLEAR) || !clearStream)
-		return false;
+										currentDesignID,
+										currentDesignVersion,
+										currentBitfileID,
+										currentBitfileVersion,
+										NTV2_BITFILE_FLAG_CLEAR) || !clearStream)
+		{DDFAIL("GetBitStream 'clear' failed for " << oldDevName);  return false;}
 
 	//	Get the partial file matching the inDeviceID...
 	NTV2_POINTER partialStream;
 	if (!s_BitfileManager.GetBitStream (partialStream,
-									currentDesignID,
-									currentDesignVersion,
-									CNTV2Bitfile::ConvertToBitfileID(inDeviceID),
-									0xff,
-									NTV2_BITFILE_FLAG_PARTIAL) || !partialStream)
-		return false;
+										currentDesignID,
+										currentDesignVersion,
+										CNTV2Bitfile::ConvertToBitfileID(inDeviceID),
+										0xff,
+										NTV2_BITFILE_FLAG_PARTIAL) || !partialStream)
+		{DDFAIL("GetBitStream 'partial' failed for " << oldDevName);  return false;}
 
 	//	Load the clear bitstream...
 	if (!BitstreamWrite (clearStream, true, true))
-		return false;
+		{DDFAIL("BitstreamWrite failed writing 'clear' bitstream for " << oldDevName);  return false;}
 	//	Load the partial bitstream...
 	if (!BitstreamWrite (partialStream, false, true))
-		return false;
+		{DDFAIL("BitstreamWrite failed writing 'partial' bitstream for " << oldDevName);  return false;}
 
+	DDNOTE(oldDevName << " dynamically changed to '" << ::NTV2DeviceIDToString(inDeviceID) << "' (" << xHEX0N(inDeviceID,8) << ")");
 	return true;
 }	//	LoadDynamicDevice
 

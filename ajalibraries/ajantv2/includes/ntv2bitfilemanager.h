@@ -47,6 +47,7 @@ typedef NTV2BitfileInfoList::const_iterator	NTV2BitfileInfoListConstIter;
 
 /**
 	@brief	I manage and cache any number of bitfiles for any number of NTV2 devices/designs.
+	@note	This class is not thread-safe.
 **/
 class AJAExport CNTV2BitfileManager
 {
@@ -90,7 +91,7 @@ public:
 		@brief	Returns an NTV2BitfileInfoList standard C++ vector.
 		@return	A reference to my NTV2BitfileInfoList.
 	**/
-	virtual NTV2BitfileInfoList &		GetBitfileInfoList (void);
+	virtual inline const NTV2BitfileInfoList &	GetBitfileInfoList (void) const		{return _bitfileList;}
 
 	/**
 		@brief		Retrieves the bitstream specified by design ID & version, and bitfile ID & version.
@@ -119,11 +120,11 @@ private:
 	**/
 	bool ReadBitstream (const size_t inIndex);
 		
-	typedef std::vector <NTV2_POINTER>		NTV2BitstreamList;
-	typedef NTV2BitstreamList::iterator		NTV2BitstreamListIter;
+	typedef std::vector <NTV2_POINTER>	NTV2BitstreamList;
+	typedef NTV2BitstreamList::iterator	NTV2BitstreamListIter;
 
-	NTV2BitfileInfoList		_bitfileList;
-	NTV2BitstreamList		_bitstreamList;
+	NTV2BitfileInfoList		_bitfileList;	///< @brief	List of bitfiles that I'm managing
+	NTV2BitstreamList		_bitstreamList;	///< @brief	My cached bitstreams
 };	//	CNTV2BitfileManager
 
 #endif	//	NTV2BITMANAGER_H
