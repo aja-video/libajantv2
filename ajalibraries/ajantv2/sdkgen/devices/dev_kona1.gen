@@ -75,26 +75,27 @@ NTV2_WgtDualLinkV2Out1
 NTV2_INPUTSOURCE_SDI1
 
 // GetNums		(see 'getnum_canon.gen' for legal values)
-NTV2DeviceGetActiveMemorySize	0x40000000
-NTV2DeviceGetLUTVersion	2
-NTV2DeviceGetMaxAudioChannels	16
-NTV2DeviceGetMaxRegisterNumber	kRegReserved511
-NTV2DeviceGetMaxTransferCount	BIT(21)-1
-NTV2DeviceGetNumDMAEngines	2
-NTV2DeviceGetNumVideoChannels	2
-NTV2DeviceGetPingLED	BIT(19)
-NTV2DeviceGetNumAudioSystems	2
-NTV2DeviceGetNumCSCs	2
+NTV2DeviceGetActiveMemorySize				0x40000000
+NTV2DeviceGetLUTVersion						2
+NTV2DeviceGetMaxAudioChannels				16
+NTV2DeviceGetMaxRegisterNumber				kRegReserved511
+NTV2DeviceGetMaxTransferCount				BIT(21)-1
+NTV2DeviceGetNumDMAEngines					2
+NTV2DeviceGetNumVideoChannels				2
+NTV2DeviceGetPingLED						BIT(19)
+NTV2DeviceGetNumAudioSystems				2
+NTV2DeviceGetNumCSCs						2
 NTV2DeviceGetNumEmbeddedAudioInputChannels	16
 NTV2DeviceGetNumEmbeddedAudioOutputChannels	16
-NTV2DeviceGetNumFrameStores	2
-NTV2DeviceGetNumLUTs	2
-NTV2DeviceGetNumMixers	1
-NTV2DeviceGetNumReferenceVideoInputs	1
-NTV2DeviceGetNumSerialPorts	1
-NTV2DeviceGetNumVideoInputs	1
-NTV2DeviceGetNumVideoOutputs	1
-NTV2DeviceGetNumLTCInputs		1
+NTV2DeviceGetNumFrameStores					2
+NTV2DeviceGetNumLUTs						2
+NTV2DeviceGetNumLUTBanks					2
+NTV2DeviceGetNumMixers						1
+NTV2DeviceGetNumReferenceVideoInputs		1
+NTV2DeviceGetNumSerialPorts					1
+NTV2DeviceGetNumVideoInputs					1
+NTV2DeviceGetNumVideoOutputs				1
+NTV2DeviceGetNumLTCInputs					1
 
 // CanDo's		(see 'cando_canon.gen' for legal values)
 NTV2DeviceCanChangeFrameBufferSize

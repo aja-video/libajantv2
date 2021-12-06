@@ -122,6 +122,7 @@ NTV2DeviceGetNumFrameStores				4
 NTV2DeviceGetNumHDMIAudioInputChannels	8
 NTV2DeviceGetNumHDMIVideoInputs			4
 NTV2DeviceGetNumLUTs					8
+NTV2DeviceGetNumLUTBanks				2
 NTV2DeviceGetNumVideoChannels			4
 
 // CanDo's		(see 'cando_canon.gen' for legal values)

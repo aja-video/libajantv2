@@ -134,6 +134,7 @@ NTV2DeviceGetNumFrameStores						2
 NTV2DeviceGetNumHDMIAudioOutputChannels			8
 NTV2DeviceGetNumHDMIVideoOutputs				1
 NTV2DeviceGetNumLUTs							4
+NTV2DeviceGetNumLUTBanks						1
 NTV2DeviceGetNumMixers							1
 NTV2DeviceGetNumReferenceVideoInputs			0
 NTV2DeviceGetNumSerialPorts						0

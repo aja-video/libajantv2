@@ -92,6 +92,7 @@ NTV2DeviceGetNumEmbeddedAudioOutputChannels	8
 NTV2DeviceGetNumFrameStores					2
 NTV2DeviceGetNumInputConverters				1
 NTV2DeviceGetNumLUTs						1
+NTV2DeviceGetNumLUTBanks					2
 NTV2DeviceGetNumMixers						1
 NTV2DeviceGetNumOutputConverters			1
 NTV2DeviceGetNumReferenceVideoInputs		1
