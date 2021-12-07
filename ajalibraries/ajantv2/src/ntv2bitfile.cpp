@@ -498,7 +498,7 @@ string CNTV2Bitfile::GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID
 		case DEVICE_ID_KONA4:					return "kona_4_quad";		//	kona_4_quad
 		case DEVICE_ID_KONA4UFC:				return "kona_4_ufc";		//	kona_4_ufc
 		case DEVICE_ID_KONA5:					return "kona5";				//	kona5_retail
-		case DEVICE_ID_KONA5_2X4K:				return "kona5_2x4k";
+		case DEVICE_ID_KONA5_2X4K:				return "kona5_12bit";
 		case DEVICE_ID_KONA5_3DLUT:				return "kona5_3d_lut";
 		case DEVICE_ID_KONA5_8K:				return "kona5_8k";			//	Formerly kona5_12g
 		case DEVICE_ID_KONA5_8KMK:				return "kona5_8k_mk";

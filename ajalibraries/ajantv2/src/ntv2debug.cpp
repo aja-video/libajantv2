@@ -145,7 +145,7 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
 		case DEVICE_ID_KONA5:						return "Kona5";
 		case DEVICE_ID_KONA5_8KMK:					return "Kona5_8KMK";
 		case DEVICE_ID_KONA5_8K:					return "Kona5_8K";
-		case DEVICE_ID_KONA5_2X4K:					return "Kona5_2X4K";
+		case DEVICE_ID_KONA5_2X4K:					return "Kona5_12Bit";
 		case DEVICE_ID_KONA5_3DLUT:					return "Kona5_3DLUT";
 		case DEVICE_ID_KONA5_OE1:					return "Kona5_OE1";
 		case DEVICE_ID_KONA5_OE2:					return "Kona5_OE2";

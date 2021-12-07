@@ -4832,7 +4832,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONA4:					return inForRetailDisplay ? "KONA 4"					: "Kona4";
 		case DEVICE_ID_KONA4UFC:				return inForRetailDisplay ? "KONA 4 UFC"				: "Kona4Ufc";
 		case DEVICE_ID_KONA5:					return inForRetailDisplay ? "KONA 5"					: "Kona5";
-		case DEVICE_ID_KONA5_2X4K:				return inForRetailDisplay ? "KONA 5 2x4K"				: "Kona5-2x4K";
+		case DEVICE_ID_KONA5_2X4K:				return inForRetailDisplay ? "KONA 5 12 Bit"				: "Kona5-12Bit";
 		case DEVICE_ID_KONA5_3DLUT:				return inForRetailDisplay ? "KONA 5 3DLUT"				: "Kona5-3DLUT";
 		case DEVICE_ID_KONA5_8K:				return inForRetailDisplay ? "KONA 5 8K"					: "Kona5-8K";
 		case DEVICE_ID_KONA5_8KMK:				return inForRetailDisplay ? "KONA 5 8KMK"				: "Kona5-8KMK";
