@@ -3786,34 +3786,28 @@ bool CNTV2Card::GetSDIOutputStandard (const UWord inOutputSpigot, NTV2Standard &
 	if (IS_OUTPUT_SPIGOT_INVALID(inOutputSpigot))
 		return false;
 	bool is2kx1080(false);
-    bool is6G(false);
-    bool is12G(false);
+	bool is6G(false);
+	bool is12G(false);
 	NTV2Standard newStd(NTV2_STANDARD_INVALID);
 	const bool result (CNTV2DriverInterface::ReadRegister (gChannelToSDIOutControlRegNum[inOutputSpigot], newStd, kK2RegMaskSDIOutStandard, kK2RegShiftSDIOutStandard)
-                        && GetSDIOut2Kx1080Enable(NTV2Channel(inOutputSpigot), is2kx1080)
-                        && GetSDIOut6GEnable(NTV2Channel(inOutputSpigot), is6G)
-                        && GetSDIOut12GEnable(NTV2Channel(inOutputSpigot), is12G));
+						&& GetSDIOut2Kx1080Enable(NTV2Channel(inOutputSpigot), is2kx1080)
+						&& GetSDIOut6GEnable(NTV2Channel(inOutputSpigot), is6G)
+						&& GetSDIOut12GEnable(NTV2Channel(inOutputSpigot), is12G));
 	outValue = newStd;
 	switch (newStd)
 	{
-        case NTV2_STANDARD_1080:
-            if (is2kx1080)
-                outValue = NTV2_STANDARD_2Kx1080i;
-            if (is6G || is12G)
-                if (is2kx1080)
-                    outValue = NTV2_STANDARD_4096i;
-                else
-                    outValue = NTV2_STANDARD_3840i;
-            break;
-        case NTV2_STANDARD_1080p:
-            if (is2kx1080)
-                outValue = NTV2_STANDARD_2Kx1080p;
-            if (is6G || is12G)
-                if (is2kx1080)
-                    outValue = NTV2_STANDARD_4096x2160p;
-                else
-                    outValue = NTV2_STANDARD_3840x2160p;
-            break;
+		case NTV2_STANDARD_1080:
+			if (is2kx1080)
+				outValue = NTV2_STANDARD_2Kx1080i;
+			if (is6G || is12G)
+				outValue = is2kx1080 ? NTV2_STANDARD_4096i : NTV2_STANDARD_3840i;
+			break;
+		case NTV2_STANDARD_1080p:
+			if (is2kx1080)
+				outValue = NTV2_STANDARD_2Kx1080p;
+			if (is6G || is12G)
+				outValue = is2kx1080 ? NTV2_STANDARD_4096x2160p : NTV2_STANDARD_3840x2160p;
+			break;
 		default:
 			break;
 	}
