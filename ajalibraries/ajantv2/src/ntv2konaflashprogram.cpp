@@ -25,6 +25,12 @@
 
 using namespace std;
 
+#define KFPDBUG(__x__)	do {ostringstream oss;  oss << AJAFUNC << ": " << __x__;  cerr << "## DEBUG:    " << oss.str() << endl;  AJA_sDEBUG  (AJA_DebugUnit_Firmware, oss.str());} while(false)
+#define KFPWARN(__x__)	do {ostringstream oss;  oss << AJAFUNC << ": " << __x__;  cerr << "## WARNING:  " << oss.str() << endl;  AJA_sWARNING(AJA_DebugUnit_Firmware, oss.str());} while(false)
+#define KFPERR(__x__)	do {ostringstream oss;  oss << AJAFUNC << ": " << __x__;  cerr << "## ERROR:    " << oss.str() << endl;  AJA_sERROR  (AJA_DebugUnit_Firmware, oss.str());} while(false)
+#define KFPNOTE(__x__)	do {ostringstream oss;  oss << AJAFUNC << ": " << __x__;  cout << "## NOTE:  "    << oss.str() << endl;  AJA_sNOTICE (AJA_DebugUnit_Firmware, oss.str());} while(false)
+
+
 string MacAddr::AsString(void) const
 {
 	ostringstream	oss;
@@ -626,7 +632,7 @@ uint32_t CNTV2KonaFlashProgram::ReadDeviceID()
 	return (deviceID & 0xFFFFFF);
 }
 
-bool CNTV2KonaFlashProgram::EraseBlock(FlashBlockID blockID)
+bool CNTV2KonaFlashProgram::EraseBlock (FlashBlockID blockID)
 {
 	if (!IsOpen())
 		return false;
@@ -674,7 +680,7 @@ bool CNTV2KonaFlashProgram::EraseBlock(FlashBlockID blockID)
 	return SetBankSelect(BANK_0);
 }
 
-bool CNTV2KonaFlashProgram::EraseSector(uint32_t sectorAddress)
+bool CNTV2KonaFlashProgram::EraseSector (uint32_t sectorAddress)
 {
 	WriteRegister(kRegXenaxFlashAddress, sectorAddress);
 	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
@@ -683,7 +689,7 @@ bool CNTV2KonaFlashProgram::EraseSector(uint32_t sectorAddress)
 	return WaitForFlashNOTBusy();
 }
 
-bool CNTV2KonaFlashProgram::EraseChip(UWord chip)
+bool CNTV2KonaFlashProgram::EraseChip (UWord chip)
 {	(void) chip;	//	unused
 	WriteRegister(kRegXenaxFlashControlStatus,0);
 	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
@@ -697,7 +703,7 @@ bool CNTV2KonaFlashProgram::EraseChip(UWord chip)
 	return WaitForFlashNOTBusy();
 }
 
-bool CNTV2KonaFlashProgram::VerifyFlash(FlashBlockID flashID, bool fullVerify)
+bool CNTV2KonaFlashProgram::VerifyFlash (FlashBlockID flashID, bool fullVerify)
 {
 	uint32_t errorCount = 0;
 	uint32_t baseAddress = GetBaseAddressForProgramming(flashID);
@@ -721,11 +727,11 @@ bool CNTV2KonaFlashProgram::VerifyFlash(FlashBlockID flashID, bool fullVerify)
 		uint32_t flashValue;
 		ReadRegister(kRegXenaxFlashDOUT, flashValue);
 		uint32_t bitFileValue = *bitFilePtr;//*bitFilePtr++;
-		if ( flashValue != bitFileValue)
+		if (flashValue != bitFileValue)
 		{
 			cerr << "Error " << DEC(count) << " E(" << HEX0N(bitFileValue,8) << "),R(" << HEX0N(flashValue,8) << ")" << endl;
 			errorCount++;
-			if ( errorCount > 1 )
+			if (errorCount > 1)
 				break;
 		}
 		percentComplete = (count*100)/dwordSizeCount;
@@ -761,10 +767,14 @@ bool CNTV2KonaFlashProgram::ReadFlash (NTV2_POINTER & outBuffer, const FlashBloc
 	uint32_t baseAddress(GetBaseAddressForProgramming(inFlashID));
 	const uint32_t numDWords((_bitFileSize+4)/4);
 	if (outBuffer.GetByteCount() < numDWords*4)
+	{
+		if (outBuffer.GetByteCount()  &&  !outBuffer.IsAllocatedBySDK())
+			{KFPERR("Unable to resize target buffer (not alloc'd by SDK)");  return false;}
 		if (!outBuffer.Allocate(numDWords * 4))
-			return false;
+			{KFPERR("Failed to allocate " << DEC(numDWords*4) << "-byte target buffer");  return false;}
+	}
 
-	size_t lastPercent(0);
+	size_t lastPercent(0), percent(0);
 	inFlashProgress.UpdatePercentage(lastPercent);
 	switch (_flashID)
 	{
@@ -778,6 +788,7 @@ bool CNTV2KonaFlashProgram::ReadFlash (NTV2_POINTER & outBuffer, const FlashBloc
 	}
 	WriteRegister(kVRegFlashState, kProgramStateVerifyFlash);
 	WriteRegister(kVRegFlashSize, numDWords);
+	KFPDBUG("About to read " << xHEX0N(numDWords*4,8) << "(" << DEC(numDWords*4) << ") bytes from '" << FlashBlockIDToString(inFlashID, /*compact*/true) << "' address " << xHEX0N(baseAddress,8));
 	for (uint32_t dword(0);	 dword < numDWords;	 )
 	{
 		if (NTV2DeviceHasSPIv5(_boardID)  &&  baseAddress == _bankSize)
@@ -803,16 +814,17 @@ bool CNTV2KonaFlashProgram::ReadFlash (NTV2_POINTER & outBuffer, const FlashBloc
 		WriteRegister(kVRegFlashStatus, dword);
 
 		dword += 1;
-		size_t percent(dword * 100 / numDWords);
+		percent = dword * 100 / numDWords;
 		if (percent != lastPercent)
 			if (!inFlashProgress.UpdatePercentage(percent))
-				{SetBankSelect(BANK_0);	 return false;}
+				{SetBankSelect(BANK_0);	 KFPERR("Cancelled at " << DEC(percent) << "% addr=" << xHEX0N(baseAddress,8) << " dword=" << DEC(dword));  return false;}
 		lastPercent = percent;
 		if ((dword % 0x10000) == 0) cerr << xHEX0N(dword,8) << " of " << xHEX0N(numDWords,8) << endl;
 		baseAddress += 4;
 	}
 	SetBankSelect(BANK_0);
 	inFlashProgress.UpdatePercentage(100);
+	KFPNOTE("Successfully read " << xHEX0N(numDWords*4,8) << "(" << DEC(numDWords*4) << ") bytes from '" << FlashBlockIDToString(inFlashID, /*compact*/true) << "' address " << xHEX0N(baseAddress,8));
 	return true;
 }
 
@@ -821,7 +833,7 @@ bool CNTV2KonaFlashProgram::WaitForFlashNOTBusy()
 	bool busy  = true;
 	int i = 0;
 	uint32_t regValue;
-	while(i<1)
+	while (i < 1)
 	{
 		ReadRegister(kRegBoardID, regValue);
 		i++;
@@ -830,17 +842,17 @@ bool CNTV2KonaFlashProgram::WaitForFlashNOTBusy()
 	do
 	{
 		ReadRegister(kRegXenaxFlashControlStatus, regValue);
-		if( !(regValue & BIT(8)) )
+		if (!(regValue & BIT(8)))
 		{
 			busy = false;
 			break;
 		}
-	} while(busy == true);//( (busy == true) && (count < 100) );
+	} while (busy);//( (busy == true) && (count < 100) );
 
 	return !busy;  // Return true if wait was successful
 }
 
-bool CNTV2KonaFlashProgram::CheckFlashErasedWithBlockID(FlashBlockID flashID)
+bool CNTV2KonaFlashProgram::CheckFlashErasedWithBlockID (FlashBlockID flashID)
 {
 	bool status = true;
 	uint32_t baseAddress = GetBaseAddressForProgramming(flashID);
@@ -849,7 +861,7 @@ bool CNTV2KonaFlashProgram::CheckFlashErasedWithBlockID(FlashBlockID flashID)
 	uint32_t percentComplete = 0;
 	SetFlashBlockIDBank(flashID);
 
-	for ( uint32_t count = 0; count < dwordSizeCount; count++, baseAddress += 4 )
+	for (uint32_t count = 0;  count < dwordSizeCount;  count++, baseAddress += 4)
 	{
 		WriteRegister(kRegXenaxFlashAddress, baseAddress);
 		WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
