@@ -47,6 +47,7 @@ NTV2DeviceGetNumHDMIAudioOutputChannels		UWord	Returns the number of HDMI audio 
 NTV2DeviceGetNumHDMIVideoInputs				UWord	Returns the number of HDMI video inputs on the device having the given ID.
 NTV2DeviceGetNumHDMIVideoOutputs			UWord	Returns the number of HDMI video outputs on the device having the given ID.
 NTV2DeviceGetNumInputConverters				UWord	Returns the number of input converter widgets on the device having the given ID.
+NTV2DeviceGetNumLUTBanks					UWord	Returns the number of LUT banks on the device having the given ID.
 NTV2DeviceGetNumLUTs						UWord	Returns the number of LUT widgets on the device having the given ID.
 NTV2DeviceGetNumMixers						UWord	Returns the number of mixer/keyer widgets on the device having the given ID.
 NTV2DeviceGetNumOutputConverters			UWord	Returns the number of output converter widgets on the device having the given ID.
