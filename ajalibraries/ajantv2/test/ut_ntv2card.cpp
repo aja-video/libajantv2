@@ -3,7 +3,9 @@
 // ie xcode 6, 7
 #define DOCTEST_THREAD_LOCAL
 
-#include "doctest.h"
+#include <argparse/argparse.h>
+#include <doctest/doctest.h>
+
 #include "test_support.h"
 
 #include "ajantv2/includes/ntv2card.h"
