@@ -28,7 +28,7 @@ using namespace std;
 #define REALLY_UPDATE		true		///<	Set this to false to simulate flashing a device
 
 
-M31FlashParams m_flashTable[] =
+static const M31FlashParams m_flashTable[] =
 {
 	{ "S29GL128S",	 { 0x7E0001, 0x010021 },  16 << 20 },
 	{ "S29GL256S",	 { 0x7E0001, 0x010022 },  32 << 20 },
@@ -45,7 +45,7 @@ CNTV2HEVCFirmwareInstallerThread::CNTV2HEVCFirmwareInstallerThread (const NTV2De
 		m_updateSuccessful	(false),
 		m_verbose			(inVerbose)
 {
-	printf("CNTV2HEVCFirmwareInstallerThread verbose = %d\n", inVerbose);
+	cout << "CNTV2HEVCFirmwareInstallerThread verbose=" << (inVerbose?'T':'F') << endl;
 	::memset (&m_statusStruct, 0, sizeof (m_statusStruct));
 }
 
@@ -60,9 +60,10 @@ AJAStatus CNTV2HEVCFirmwareInstallerThread::ThreadInit()
 	
 	m_device.HevcGetDeviceInfo(&m_hevcInfo);
 		
-	printf("HEVC PCIe vendor %08x device %08x subVendor %08x subDevice %08x\n",
-		   m_hevcInfo.pciId.vendor, m_hevcInfo.pciId.device, m_hevcInfo.pciId.subVendor, m_hevcInfo.pciId.subDevice);
-
+	cout	<< "HEVC PCIe vendor " << HEX0N(m_hevcInfo.pciId.vendor,8)
+			<< " device " << HEX0N(m_hevcInfo.pciId.device,8)
+			<< " subVendor " << HEX0N(m_hevcInfo.pciId.subVendor,8)
+			<< " subDevice " << HEX0N(m_hevcInfo.pciId.subDevice,8) << endl;
 	
 	return AJA_STATUS_SUCCESS;
 }
@@ -403,8 +404,7 @@ uint32_t CNTV2HEVCFirmwareInstallerThread::StatusCheck(uint32_t address, uint32_
 			currentTime = AJATime::GetSystemMilliseconds();
 			if (dotUpdate && (currentTime > m_updateTime + 1000))
 			{
-				printf(".");
-				fflush(stdout);
+				cout << '.' << flush;
 				m_updateTime = currentTime;
 			}
 		} while (value == checkValue && (currentTime-startTime <  timeout));
@@ -418,8 +418,7 @@ uint32_t CNTV2HEVCFirmwareInstallerThread::StatusCheck(uint32_t address, uint32_
 			currentTime = AJATime::GetSystemMilliseconds();
 			if (dotUpdate && (currentTime > m_updateTime + 1000))
 			{
-				printf(".");
-				fflush(stdout);
+				cout << '.' << flush;
 				m_updateTime = currentTime;
 			}
 		} while (value != checkValue && (currentTime-startTime <  timeout));
@@ -440,8 +439,8 @@ void CNTV2HEVCFirmwareInstallerThread::IdentifyFlash(uint32_t barOffset, M31Flas
 	id[0] &= 0x00FF00FF;
 	id[1] &= 0x00FF00FF;
 	
-	//printf("flash (%08x %08x)\n", id[0], id[1]);
-	
+	//cout << "flash (" << HEX0N(id[0],8) << " " << HEX0N(id[1],8) << ")" << endl;
+
 	for (i = 0; m_flashTable[i].device_id[0] != 0; i++)
 	{
 		if ((m_flashTable[i].device_id[0] == id[0]) && (m_flashTable[i].device_id[1] == id[1]))
@@ -475,16 +474,16 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::Check()
 	HEVCError	result = HEVC_ERR_NONE;
 	uint32_t	val = 0;
 	
-	printf("Check\n");
+	cout << "Check" << endl;
 
 	// check boot status
 	if (m_hevcInfo.pciId.subVendor == 0x00000000)
 	{
-		printf("Maintenance mode subVendor=%08x\n", m_hevcInfo.pciId.subVendor);
+		cout << "Maintenance mode subVendor=" << HEX0N(m_hevcInfo.pciId.subVendor,8) << endl;
 	}
 	else
 	{
-		printf("Normal mode subVendor=%08x\n", m_hevcInfo.pciId.subVendor);
+		cout << "Normal mode subVendor=" << HEX0N(m_hevcInfo.pciId.subVendor,8) << endl;
 		// Make sure we are booted
 		m_device.HevcReadRegister((BAR5_OFFSET + PCIE_BOOT_FLAG), &val);
 		if (val == 0x00000000)
@@ -514,7 +513,7 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::Boot()
 	uint32_t		i;
 	uint32_t		dataSize;
 	
-	printf("Boot\n");
+	cout << "Boot" << endl;
 
 	if (m_hevcInfo.pciId.subVendor == 0x00000000)
 	{
@@ -570,7 +569,7 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::Boot()
 				result = HEVC_ERR_BOOT;
 				goto bootexit;
 			}
-			printf("Boot success\n");
+			cout << "Boot success" << endl;
 		}
 		else
 		{
@@ -581,12 +580,12 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::Boot()
 				result = HEVC_ERR_BOOT;
 				goto bootexit;
 			}
-			printf("Already booted\n");
+			cout << "Already booted" << endl;
 		}
 	}
 	
 bootexit:
-	if (fp != NULL)
+	if (fp)
 	{
 		fclose(fp);
 	}
@@ -600,7 +599,7 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::Stop()
 	uint32_t		val;
 	uint32_t		pos;
 	
-	printf("Stop\n");
+	cout << "Stop" << endl;
 
 	m_device.HevcReadRegister((SRAM_BASE_ADDR + SRAM_MODE_FLAG), &mode);
 	if (mode == 0x00000048)
@@ -611,7 +610,7 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::Stop()
 	// If we are already stopped do nothing
 	if (mode == 0x000000FF)
 	{
-		printf("Already stopped\n");
+		cout << "Already stopped" << endl;
 		return HEVC_ERR_NONE;
 	}
 	
@@ -688,7 +687,7 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::Stop()
 		return HEVC_ERR_RECOVERED;
 	}
 	
-	printf("Stop success\n");
+	cout << "Stop success" << endl;
 	return HEVC_ERR_NONE;
 }
 
@@ -702,7 +701,7 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::LoadFlash()
 	uint32_t		pos, i;
 	uint32_t		dataSize;
 	
-	printf("LoadFlash\n");
+	cout << "LoadFlash" << endl;
 	
 	m_device.HevcReadRegister((SRAM_BASE_ADDR + SRAM_MODE_FLAG), &mode);
 	if (mode == 0x00000048)
@@ -789,10 +788,10 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::LoadFlash()
 	// Identify the Spansion flash
 	IdentifyFlash(SRAM_BASE_ADDR + SRAM_DATA_OFFSET, &m_flash);
 	
-	printf("Load success (memcs ID[%06X:%06X] %s)\n", m_flash.device_id[0], m_flash.device_id[1], m_flash.device_name);
+	cout << "Load success (memcs ID[" << HEX0N(m_flash.device_id[0],6) << ":" << HEX0N(m_flash.device_id[1],6) << "] " << m_flash.device_name << ")" << endl;
 	
 loadflashexit:
-	if (fp != NULL)
+	if (fp)
 	{
 		fclose(fp);
 	}
@@ -807,7 +806,7 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::ChipErase()
 	uint32_t		pos;
 	AJATimer		timer;
 	
-	printf("ChipErase\n");
+	cout << "ChipErase" << endl;
 
 	m_device.HevcReadRegister((SRAM_BASE_ADDR + SRAM_MODE_FLAG), &mode);
 	if (mode == 0x00000048)
@@ -874,15 +873,15 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::ChipErase()
 	// status check with update
 	m_updateTime = AJATime::GetSystemMilliseconds();
 	val = StatusCheck(SRAM_BASE_ADDR + SRAM_CMND_FLAG, 0x000000FF, 500*1000, true, true);
-	printf("\n");
+	cout << endl;
 	if (val != 0)
 	{
 		return HEVC_ERR_ERASE;
 	}
 	
 	timer.Stop();
-	printf("ChipErase success\n");
-	printf("Elapsed time for chip erase: %4.3f seconds\n", (double)timer.ElapsedTime()/1000);
+	cout << "ChipErase success" << endl
+		<< "Elapsed time for chip erase: " << fDEC(double(timer.ElapsedTime())/1000.0, 4, 3) << " seconds" << endl;
 	return HEVC_ERR_NONE;
 }
 
@@ -893,7 +892,7 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::SectorErase(uint32_t offset, uint32_
 	uint32_t		pos, offsetEnd;
 	AJATimer		timer;
 	
-	printf("SectorErase\n");
+	cout << "SectorErase" << endl;
 	
 	m_device.HevcReadRegister((SRAM_BASE_ADDR + SRAM_MODE_FLAG), &mode);
 	if (mode == 0x00000048)
@@ -989,11 +988,11 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::SectorErase(uint32_t offset, uint32_
 		offset += SECTOR_SIZE;
 	}
 	
-	printf("\n");
+	cout << endl;
 	
 	timer.Stop();
-	printf("SectorErase success\n");
-	printf("Elapsed time for sector erase: %4.3f seconds\n", (double)timer.ElapsedTime()/1000);
+	cout << "SectorErase success" << endl
+		<< "Elapsed time for sector erase: " << fDEC(double(timer.ElapsedTime())/1000.0, 4, 3) << " seconds" << endl;
 	return HEVC_ERR_NONE;
 }
 
@@ -1010,7 +1009,7 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::Program(char* fileName, uint32_t fla
 	uint32_t		loopCount;
 	AJATimer		timer;
 	
-	printf("Program (%s - flashOffset=0x%08X, fileOffset=0x%08X length=0x%08X)\n", fileName, flashOffset, fileOffset, length);
+	cout << "Program: '" << fileName << "' flashOffset=" << xHEX0N(flashOffset,8) << " fileOffset=" << xHEX0N(fileOffset,8) << " length=" << xHEX0N(length,8) << endl;
 	
 	m_device.HevcReadRegister((SRAM_BASE_ADDR + SRAM_MODE_FLAG), &mode);
 	if (mode == 0x00000048)
@@ -1218,16 +1217,10 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::Program(char* fileName, uint32_t fla
 		// verify flash data
 		if (memcmp(m_tempBuf, m_dataBuf, size) != 0)
 		{
-			fprintf(stderr, "flash verify error\n");
+			cerr << "flash verify error" << endl;
 			for (i = 0; i < ((size + 3) & ~3) / 4; i++)
-			{
-				if (m_tempBuf[i] != m_dataBuf[i])
-				{
-					fprintf(stderr, "error: 0x%08X W:0x%08X R:0x%08X\n", flashOffset + i * 4, m_dataBuf[i], m_tempBuf[i]);
-				} else {
-					fprintf(stderr, "	  : 0x%08X W:0x%08X R:0x%08X\n", flashOffset + i * 4, m_dataBuf[i], m_tempBuf[i]);
-				}
-			}
+				cerr << (m_tempBuf[i] != m_dataBuf[i]?"error":"     ") << ": " << xHEX0N(flashOffset + i * 4,8)
+						<< " W:" << xHEX0N(m_dataBuf[i],8) << " R:" << xHEX0N(m_tempBuf[i],8) << endl;
 			result = HEVC_ERR_VERIFY;
 			goto programexit;
 		}
@@ -1241,8 +1234,8 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::Program(char* fileName, uint32_t fla
 	PERCENT_PROGRESS_END();
 	
 	timer.Stop();
-	printf("Program success\n");
-	printf("Elapsed time for program: %4.3f seconds\n", (double)timer.ElapsedTime()/1000);
+	cout << "Program success" << endl
+			<< "Elapsed time for program: " << fDEC(double(timer.ElapsedTime())/1000.0, 4, 3) << " seconds" << endl;
 	
 programexit:
 	if (fp != NULL)
@@ -1265,10 +1258,10 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::FlashDump(char* fileName, uint32_t o
 	uint32_t		loopCount;
 	AJATimer		timer;
 	
-	printf("FlashDump\n");
+	cout << "FlashDump" << endl;
 	
 	m_device.HevcReadRegister((SRAM_BASE_ADDR + SRAM_MODE_FLAG), &mode);
-	printf("mode = %0x\n", mode);
+	cout << "mode = " << xHEX(mode) << endl;
 	if (mode == 0x00000048)
 	{
 		result = HEVC_ERR_BOOT;
@@ -1300,7 +1293,7 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::FlashDump(char* fileName, uint32_t o
 	
 	// open data file
 	fp = fopen(fileName, "wb");
-	if (fp == NULL)
+	if (!fp)
 	{
 		result = HEVC_ERR_OPEN;
 		goto flashdumpexit;
@@ -1421,11 +1414,11 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::FlashDump(char* fileName, uint32_t o
 	PERCENT_PROGRESS_END();
 	
 	timer.Stop();
-	printf("FlashDump success\n");
-	printf("Elapsed time for flash dump: %4.3f seconds\n", (double)timer.ElapsedTime()/1000);
+	cout << "FlashDump success" << endl
+		<< "Elapsed time for flash dump: " << fDEC(double(timer.ElapsedTime())/1000.0, 4, 3) << " seconds" << endl;
 	
 flashdumpexit:
-	if (fp != NULL)
+	if (fp)
 	{
 		fclose(fp);
 	}
@@ -1442,7 +1435,7 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::LoadDram()
 	uint32_t		val, i;
 	uint32_t		dataSize;
 	
-	printf("LoadDram\n");
+	cout << "LoadDram" << endl;
 	
 	m_device.HevcReadRegister((SRAM_BASE_ADDR + SRAM_MODE_FLAG), &mode);
 	if (mode == 0x00000048)
@@ -1553,31 +1546,31 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::LoadDram()
 		goto loaddramexit;
 	}
 	
-	printf("----- area ---------------- [write lv][gate tr][rd fifo][rd data][wr data]\n");
+	cout << "----- area ---------------- [write lv][gate tr][rd fifo][rd data][wr data]" << endl;
 	
 	for (i = 0; i < 4; i++)
 	{
 		m_device.HevcReadRegister((SRAM_BASE_ADDR + 0x0001EF00) + (i * 4), &val);
 		if (i == 0)
-			printf("ch.A: 0x20000000-0x3FFFFFFF	  ");
+			cout << "ch.A: 0x20000000-0x3FFFFFFF  ";
 		else if (i == 1)
-			printf("ch.B: 0x40000000-0x7FFFFFFF	  ");
+			cout << "ch.B: 0x40000000-0x7FFFFFFF  ";
 		else if (i == 2)
-			printf("ch.C: 0x80000000-0xBFFFFFFF	  ");
+			cout << "ch.C: 0x80000000-0xBFFFFFFF  ";
 		else
-			printf("ch.D: 0xC0000000-0xDFFFFFFF	  ");
+			cout << "ch.D: 0xC0000000-0xDFFFFFFF  ";
 		
-		printf("%s		", val & 0x01 ? "pass" : "fail");
-		printf("%s	   ",  val & 0x02 ? "pass" : "fail");
-		printf("%s	   ",  val & 0x04 ? "pass" : "fail");
-		printf("%s	   ",  val & 0x08 ? "pass" : "fail");
-		printf("%s\n",	   val & 0x10 ? "pass" : "fail");
+		cout	<< (val & 0x01 ? "pass" : "fail") << "      "
+				<< (val & 0x02 ? "pass" : "fail") << "      "
+				<< (val & 0x04 ? "pass" : "fail") << "      "
+				<< (val & 0x08 ? "pass" : "fail") << "      "
+				<< (val & 0x10 ? "pass" : "fail") << endl;
 	}
 	
-	printf("LoadDram success\n");
+	cout << "LoadDram success" << endl;
 	
 loaddramexit:
-	if (fp != NULL)
+	if (fp)
 	{
 		fclose(fp);
 	}
@@ -1594,7 +1587,7 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::DramTest(uint32_t offset, uint32_t s
 	uint32_t		dataSize, remainSize;
 	AJATimer		timer;
 	
-	printf("DramTest\n");
+	cout << "DramTest" << endl;
 	
 	m_device.HevcReadRegister((SRAM_BASE_ADDR + SRAM_MODE_FLAG), &mode);
 	if (mode == 0x00000048)
@@ -1661,7 +1654,7 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::DramTest(uint32_t offset, uint32_t s
 	
 	offsetEnd = offset + size;
 	
-	printf("dram test start 0x%08X-0x%08X\n", offset, offset + size - 1);
+	cout << "dram test start " << xHEX0N(offset,8) << "-" << xHEX0N(offset + size - 1,8) << endl;
 	
 	timer.Start();
 	
@@ -1695,7 +1688,7 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::DramTest(uint32_t offset, uint32_t s
 		m_device.HevcReadRegister((SRAM_BASE_ADDR + 0x00004024), &val);
 		m_device.HevcReadRegister((SRAM_BASE_ADDR + 0x00004028), &val2);
 		m_device.HevcReadRegister((SRAM_BASE_ADDR + 0x0000402C), &val3);
-		fprintf(stderr, "dram test fail: 0x%08X W:0x%08X R:0x%08X\n", val, val2, val3);
+		cerr << "dram test fail: " << xHEX0N(val,8) << " W:" << xHEX0N(val2,8) << " R:" << xHEX0N(val3,8) << endl;
 		
 		m_device.HevcReadRegister((SRAM_BASE_ADDR + 0x00004024), &offsetEnd);
 		offset = offsetEnd & ~(blockSize - 1);
@@ -1723,10 +1716,10 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::DramTest(uint32_t offset, uint32_t s
 			m_device.HevcReadRegister((SRAM_BASE_ADDR + 0x00004024), &val);
 			m_device.HevcReadRegister((SRAM_BASE_ADDR + 0x00004028), &val2);
 			m_device.HevcReadRegister((SRAM_BASE_ADDR + 0x0000402C), &val3);
-			fprintf(stderr, "retry dram test fail: 0x%08X W:0x%08X R:0x%08X\n", val, val2, val3);
+			cerr << "retry dram test fail: " << xHEX0N(val,8) << " W:" << xHEX0N(val2,8) << " R:" << xHEX0N(val3,8) << endl;
 		}
 		else
-			fprintf(stderr, "retry dram test pass: 0x%08X-0x%08X\n", offset, offset + blockSize - 1);
+			cerr << "retry dram test pass: " << xHEX0N(offset,8) << "-" << xHEX0N(offset + blockSize - 1,8) << endl;
 		
 		offset = offsetEnd - 16;
 		if (offset < 0x20000000)
@@ -1761,23 +1754,23 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::DramTest(uint32_t offset, uint32_t s
 				m_device.HevcReadRegister((SRAM_BASE_ADDR + 0x00004024), &val);
 				m_device.HevcReadRegister((SRAM_BASE_ADDR + 0x00004028), &val2);
 				m_device.HevcReadRegister((SRAM_BASE_ADDR + 0x0000402C), &val3);
-				fprintf(stderr, "retry dram test fail: 0x%08X W:0x%08X R:0x%08X\n", val, val2, val3);
+				cerr << "retry dram test fail: " << xHEX0N(val,8) << " W:" << xHEX0N(val2,8) << " R:" << xHEX0N(val3,8) << endl;
 			}
 			else
-				fprintf(stderr, "retry dram test pass: 0x%08X\n", offset);
+				cerr << "retry dram test pass: " << xHEX0N(offset,8) << endl;
 			
 			offset += 4;
 		}
 		
-		fprintf(stderr, "not completed\n");
+		cerr << "not completed" << endl;
 		return HEVC_ERR_VERIFY;
 	}
 	
 	PERCENT_PROGRESS_END();
 	
 	timer.Stop();
-	printf("DramTest success\n");
-	printf("Elapsed time for dram test: %4.3f seconds\n", (double)timer.ElapsedTime()/1000);
+	cout << "DramTest success" << endl
+		<< "Elapsed time for dram test: " << fDEC(double(timer.ElapsedTime())/1000.0, 4, 3) << " seconds" << endl;
 	return HEVC_ERR_NONE;
 }
 
@@ -1789,11 +1782,11 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::BinVerify(char* fileName, uint32_t f
 	uint32_t	size, dataSize, regoffset;
 	uint64_t	startTime, currentTime;
 	
-	printf("Bin Verify\n");
+	cout << "Bin Verify" << endl;
 	
 	// open data file
 	fp = fopen(fileName, "rb");
-	if (fp == NULL)
+	if (!fp)
 	{
 		result = HEVC_ERR_OPEN;
 		goto bvexit;
@@ -1848,8 +1841,8 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::BinVerify(char* fileName, uint32_t f
 		
 		if (val != tmp)
 		{
-			fprintf(stderr, "binary verify error\n");
-			fprintf(stderr, "error: 0x%08X F:0x%08X R:0x%08X\n", offset, tmp, val);
+			cerr << "binary verify error" << endl
+					<< "error: " << xHEX0N(offset,8) << " F:" << xHEX0N(tmp,8) << " R:" << xHEX0N(val,8) << endl;
 			break;
 		}
 		
@@ -1869,10 +1862,10 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::BinVerify(char* fileName, uint32_t f
 		goto bvexit;
 	}
 	
-	printf("Bin verify success\n");
+	cout << "Bin verify success" << endl;
 	
 bvexit:
-	if (fp != NULL)
+	if (fp)
 	{
 		fclose(fp);
 	}
@@ -1989,7 +1982,7 @@ HEVCError CNTV2HEVCFirmwareInstallerThread::FlashMCPU(char* fileName, uint32_t r
 		}
 		else
 		{
-			printf("Reboot success\n");
+			cout << "Reboot success" << endl;
 		}
 	}
 	return result;
@@ -2080,5 +2073,3 @@ bool CNTV2HEVCFirmwareInstallerThread::WriteRegisterBar4(ULWord address, ULWord 
 
 	return result;
 }
-
-

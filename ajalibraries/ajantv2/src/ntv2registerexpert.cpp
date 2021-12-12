@@ -243,6 +243,7 @@ private:
 		DefineRegister (kRegSDIOut8Control,		"", mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel8, kRegClass_NULL);
 		DefineRegister (kRegCh1ControlExtended, "", mDecodeChannelControlExt,	READWRITE,	kRegClass_NULL,		kRegClass_Channel1, kRegClass_NULL);
 		DefineRegister (kRegCh2ControlExtended, "", mDecodeChannelControlExt,	READWRITE,	kRegClass_NULL,		kRegClass_Channel2, kRegClass_NULL);
+		DefineRegister (kRegBoardID,			"", mDecodeBoardID,				READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 
 		DefineRegister (kRegCanDoStatus,		"", mDecodeCanDoStatus,			READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegBitfileDate,		"", mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
@@ -617,48 +618,48 @@ private:
 		}
 		for (ULWord ndx (0);  ndx < 8;	ndx++)
 		{
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtControl,						"", mDecodeAncExtControlReg,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtField1StartAddress,			"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtField1EndAddress,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtField2StartAddress,			"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtField2EndAddress,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtFieldCutoffLine,				"", mDecodeAncExtFieldLines,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtTotalStatus,					"", mDecodeAncExtStatus,			READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtField1Status,					"", mDecodeAncExtStatus,			READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtField2Status,					"", mDecodeAncExtStatus,			READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtFieldVBLStartLine,				"", mDecodeAncExtFieldLines,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtTotalFrameLines,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtFID,							"", mDecodeAncExtFieldLines,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtIgnorePacketReg_1_2_3_4,		"", mDecodeAncExtIgnoreDIDs,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtIgnorePacketReg_5_6_7_8,		"", mDecodeAncExtIgnoreDIDs,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtIgnorePacketReg_9_10_11_12,	"", mDecodeAncExtIgnoreDIDs,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtIgnorePacketReg_13_14_15_16,	"", mDecodeAncExtIgnoreDIDs,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtIgnorePacketReg_17_18_19_20,	"", mDecodeAncExtIgnoreDIDs,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtAnalogStartLine,				"", mDecodeAncExtFieldLines,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtField1AnalogYFilter,			"", mDecodeAncExtAnalogFilter,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtField2AnalogYFilter,			"", mDecodeAncExtAnalogFilter,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtField1AnalogCFilter,			"", mDecodeAncExtAnalogFilter,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtField2AnalogCFilter,			"", mDecodeAncExtAnalogFilter,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
-			DefineRegister (AncExtPerChlRegBase [ndx] + regAncExtAnalogActiveLineLength,		"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtControl,						"", mDecodeAncExtControlReg,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtField1StartAddress,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtField1EndAddress,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtField2StartAddress,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtField2EndAddress,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtFieldCutoffLine,				"", mDecodeAncExtFieldLines,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtTotalStatus,					"", mDecodeAncExtStatus,			READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtField1Status,					"", mDecodeAncExtStatus,			READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtField2Status,					"", mDecodeAncExtStatus,			READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtFieldVBLStartLine,				"", mDecodeAncExtFieldLines,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtTotalFrameLines,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtFID,							"", mDecodeAncExtFieldLines,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtIgnorePacketReg_1_2_3_4,		"", mDecodeAncExtIgnoreDIDs,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtIgnorePacketReg_5_6_7_8,		"", mDecodeAncExtIgnoreDIDs,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtIgnorePacketReg_9_10_11_12,		"", mDecodeAncExtIgnoreDIDs,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtIgnorePacketReg_13_14_15_16,	"", mDecodeAncExtIgnoreDIDs,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtIgnorePacketReg_17_18_19_20,	"", mDecodeAncExtIgnoreDIDs,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtAnalogStartLine,				"", mDecodeAncExtFieldLines,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtField1AnalogYFilter,			"", mDecodeAncExtAnalogFilter,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtField2AnalogYFilter,			"", mDecodeAncExtAnalogFilter,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtField1AnalogCFilter,			"", mDecodeAncExtAnalogFilter,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtField2AnalogCFilter,			"", mDecodeAncExtAnalogFilter,		READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AncExtPerChlRegBase[ndx] + regAncExtAnalogActiveLineLength,			"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Input,	gChlClasses[ndx]);
 			
-			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsFieldBytes,					"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
-			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsControl,						"", mDecodeAncInsControlReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
-			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsField1StartAddr,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
-			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsField2StartAddr,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
-			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsPixelDelay,					"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
-			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsActiveStart,					"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
-			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsLinePixels,					"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
-			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsFrameLines,					"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
-			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsFieldIDLines,					"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
-			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsPayloadIDControl,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
-			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsPayloadID,						"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
-			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsBlankCStartLine,				"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
-			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsBlankField1CLines,				"", mDecodeAncInsChromaBlankReg,	READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
-			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsBlankField2CLines,				"", mDecodeAncInsChromaBlankReg,	READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
-			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsFieldBytesHigh,				"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
-			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsRtpPayloadID,					"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
-			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsRtpSSRC,						"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
-			DefineRegister (AncInsPerChlRegBase [ndx] + regAncInsIpChannel,						"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsFieldBytes,						"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsControl,						"", mDecodeAncInsControlReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsField1StartAddr,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsField2StartAddr,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsPixelDelay,						"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsActiveStart,					"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsLinePixels,						"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsFrameLines,						"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsFieldIDLines,					"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsPayloadIDControl,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsPayloadID,						"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsBlankCStartLine,				"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsBlankField1CLines,				"", mDecodeAncInsChromaBlankReg,	READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsBlankField2CLines,				"", mDecodeAncInsChromaBlankReg,	READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsFieldBytesHigh,					"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsRtpPayloadID,					"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsRtpSSRC,						"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsIpChannel,						"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 		}
 	}	//	SetupAncInsExt
 
@@ -1560,9 +1561,11 @@ public:
 		if (::NTV2DeviceCanDoCustomAnc(inDeviceID))
 		{
 			const NTV2RegNumSet ancRegs			(GetRegistersForClass(kRegClass_Anc));
+			const UWord			numVideoInputs (::NTV2DeviceGetNumVideoInputs(inDeviceID));
 			const UWord			numVideoOutputs (::NTV2DeviceGetNumVideoOutputs(inDeviceID));
+			const UWord			numSpigots(numVideoInputs > numVideoOutputs ? numVideoInputs : numVideoOutputs);
 			NTV2RegNumSet		allChanRegs;	//	For just those channels it supports
-			for (UWord num(0);	num < numVideoOutputs;	num++)
+			for (UWord num(0);	num < numSpigots;	num++)
 			{
 				const NTV2RegNumSet chRegs (GetRegistersForClass(chanClasses[num]));
 				allChanRegs.insert(chRegs.begin(), chRegs.end());
@@ -1954,17 +1957,6 @@ private:
 			}
 			else
 				oss << "(Bi-directional SDI not supported)";
-			if (numInputs)
-			{	if (!oss.str().empty()) oss << endl;
-				const uint32_t	rxDisableCRCChkBits	(inRegValue & 0x000000FF);
-				for (UWord spigot(0);  spigot < numInputs;	 )
-				{
-					const uint32_t	disabled (rxDisableCRCChkBits & BIT(spigot));
-					oss << "SDIIn" << DEC(++spigot) << " CRC Check: " << (disabled ? "Disabled" : "Normal");
-					if (spigot < numInputs)
-						oss << endl;
-				}
-			}
 			//	CRC checking
 			return oss.str();
 		}
@@ -2141,6 +2133,23 @@ private:
 		}
 		virtual ~DecodeBitfileDateTime()	{}
 	}	mDecodeBitfileDateTime;
+
+	struct DecodeBoardID : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{	(void) inRegNum;	(void) inDeviceID;
+			const string str1 (::NTV2DeviceIDToString(NTV2DeviceID(inRegValue), false));
+			const string str2 (::NTV2DeviceIDToString(NTV2DeviceID(inRegValue), true));
+			ostringstream	oss;
+			oss	<< "NTV2DeviceID: " << ::NTV2DeviceIDString(NTV2DeviceID(inRegValue))	<< endl
+				<< "Device Name: '"	<< str1 << "'";
+			if (str1 != str2)
+				oss << endl
+					<< "Retail Device Name: '" << str2 << "'";
+			return oss.str();
+		}
+		virtual ~DecodeBoardID()	{}
+	}	mDecodeBoardID;
 
 	struct DecodeCanDoStatus : public Decoder
 	{
@@ -2610,7 +2619,7 @@ private:
 					<< "Audio Buffer Format: "	<< (BIT(20) & inRegValue ? "16-Channel " : (BIT(16) & inRegValue ? "8-Channel " : "6-Channel "))	<< endl
 					<< (BIT(18) & inRegValue ? "96kHz" : "48kHz")									<< endl
 					<< (BIT(18) & inRegValue ? "96kHz Support" : "48kHz Support")					<< endl
-					<< (BIT(22) & inRegValue ? "Embedded Support" : "No Embedded Support")			<< endl
+				//	<< (BIT(22) & inRegValue ? "Embedded Support" : "No Embedded Support")			<< endl	//	JeffL says this bit is obsolete
 					<< (BIT(23) & inRegValue ? "8-Channel Support" : "6-Channel Support")			<< endl
 					<< "K-box, Monitor: "		<< ChStrs [(BIT(24) & BIT(25) & inRegValue) >> 24]	<< endl
 					<< "K-Box Input: "			<< (BIT(26) & inRegValue ? "XLR" : "BNC")			<< endl
@@ -3354,7 +3363,7 @@ private:
 				<< "3G mode: "					<< (inRegValue & BIT(25) ? "b" : "a")					<< endl
 				<< "VPID insert enable: "		<< YesNo(inRegValue & BIT(26))							<< endl
 				<< "VPID overwrite enable: "	<< YesNo(inRegValue & BIT(27))							<< endl
-				<< "DS 1 audio source: Subsystem ";
+				<< "DS 1 audio source: "		"AudSys";
 			switch ((inRegValue & (BIT(28)|BIT(30))) >> 28)
 			{
 				case 0: oss << (inRegValue & BIT(18) ? 5 : 1);	break;
@@ -3362,7 +3371,7 @@ private:
 				case 4: oss << (inRegValue & BIT(18) ? 6 : 2);	break;
 				case 5: oss << (inRegValue & BIT(18) ? 8 : 4);	break;
 			}
-			oss << endl << "DS 2 audio source: Subsystem ";
+			oss << endl << "DS 2 audio source: AudSys";
 			switch ((inRegValue & (BIT(29)|BIT(31))) >> 29)
 			{
 				case 0: oss << (inRegValue & BIT(19) ? 5 : 1);	break;

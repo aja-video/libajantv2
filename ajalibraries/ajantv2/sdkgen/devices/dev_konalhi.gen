@@ -116,6 +116,7 @@ NTV2DeviceGetNumHDMIVideoInputs				1
 NTV2DeviceGetNumHDMIVideoOutputs			1
 NTV2DeviceGetNumInputConverters				1
 NTV2DeviceGetNumLUTs						2
+NTV2DeviceGetNumLUTBanks					2
 NTV2DeviceGetNumMixers						1
 NTV2DeviceGetNumOutputConverters			1
 NTV2DeviceGetNumReferenceVideoInputs		1

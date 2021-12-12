@@ -91,7 +91,7 @@ const char * NTV2DeviceIDString (const NTV2DeviceID id)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_SOJI_OE5);
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_SOJI_OE6);
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_SOJI_OE7);
-		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_SOJI_OE8);
+		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_SOJI_3DLUT);
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_KONA5_8K_MV_TX);
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_CORVID44_8KMK);
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_CORVID44_8K);
@@ -145,7 +145,7 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
 		case DEVICE_ID_KONA5:						return "Kona5";
 		case DEVICE_ID_KONA5_8KMK:					return "Kona5_8KMK";
 		case DEVICE_ID_KONA5_8K:					return "Kona5_8K";
-		case DEVICE_ID_KONA5_2X4K:					return "Kona5_2X4K";
+		case DEVICE_ID_KONA5_2X4K:					return "Kona5_12Bit";
 		case DEVICE_ID_KONA5_3DLUT:					return "Kona5_3DLUT";
 		case DEVICE_ID_KONA5_OE1:					return "Kona5_OE1";
 		case DEVICE_ID_KONA5_OE2:					return "Kona5_OE2";
@@ -166,7 +166,7 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
 		case DEVICE_ID_SOJI_OE5:					return "SOJI_OE5";
 		case DEVICE_ID_SOJI_OE6:					return "SOJI_OE6";
 		case DEVICE_ID_SOJI_OE7:					return "SOJI_OE7";
-		case DEVICE_ID_SOJI_OE8:					return "SOJI_OE8";
+		case DEVICE_ID_SOJI_3DLUT:					return "SOJI_3DLUT";
 		case DEVICE_ID_KONA5_8K_MV_TX:				return "Kona5_8K_MV_TX";
 		case DEVICE_ID_CORVID44_8KMK:				return "Corvid44_8KMK";
 		case DEVICE_ID_CORVID44_8K:					return "Corvid44_8K";

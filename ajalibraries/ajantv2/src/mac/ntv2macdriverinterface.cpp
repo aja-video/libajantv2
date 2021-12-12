@@ -405,7 +405,9 @@ const string & CNTV2MacDriverInterface::GetIOServiceName (void)
 	return sNTV2PCIDriverName;
 }
 
-
+#if defined(_DEBUG)
+////////#define	AJA_MULTIRASTER_TEST
+#endif
 
 //--------------------------------------------------------------------------------------------------------------------
 //	CNTV2MacDriverInterface
@@ -650,6 +652,10 @@ bool CNTV2MacDriverInterface::CloseLocalPhysical (void)
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 
 #pragma mark - New Driver Calls
+#if defined(AJA_MULTIRASTER_TEST)
+	//							kRegMRQ1Control	kRegMRQ2Control	kRegMRQ3Control	kRegMRQ4Control	kRegMROutControl							kRegMRSupport
+	static ULWord gMRRegs[] = {	0x01000004,		0x01000004,		0x01000004,		0x01000004,		0x01101D48,			0x00444400,	0x00000000,	0x00000001};
+#endif
 
 //--------------------------------------------------------------------------------------------------------------------
 //	ReadRegister
@@ -667,6 +673,10 @@ bool CNTV2MacDriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outV
 	if (IsRemote())
 		return CNTV2DriverInterface::ReadRegister(inRegNum, outValue, inMask, inShift);
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
+#if defined(AJA_MULTIRASTER_TEST)
+	if (inRegNum >= kRegMRQ1Control  &&  inRegNum <= kRegMRSupport)
+		{outValue = (gMRRegs[inRegNum - kRegMRQ1Control] & inMask) >> inShift;	return true;}
+#endif
 	kern_return_t kernResult(KERN_FAILURE);
 	uint64_t	scalarI_64[2] = {inRegNum, inMask};
 	uint64_t	scalarO_64 = outValue;
@@ -717,6 +727,10 @@ bool CNTV2MacDriverInterface::WriteRegister (const ULWord inRegNum, const ULWord
 	if (IsRemote())
 		return CNTV2DriverInterface::WriteRegister(inRegNum, inValue, inMask, inShift);
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
+#if defined(AJA_MULTIRASTER_TEST)
+	if (inRegNum >= kRegMRQ1Control  &&  inRegNum <= kRegMRSupport)
+		{gMRRegs[inRegNum - kRegMRQ1Control] = ((inValue << inShift) & inMask) | ((~inMask) & gMRRegs[inRegNum - kRegMRQ1Control]);	return true;}
+#endif
 	kern_return_t kernResult(KERN_FAILURE);
 	uint64_t	scalarI_64[3] = {inRegNum, inValue, inMask};
 	uint32_t	outputCount = 0;

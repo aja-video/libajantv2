@@ -4106,7 +4106,7 @@ bool NTV2DeviceCanDoFormat (const NTV2DeviceID		inDeviceID,
 
 ULWord GetNTV2FrameGeometryHeight (const NTV2FrameGeometry inGeometry)
 {
-	const NTV2FormatDescriptor fd (::GetStandardFromGeometry(inGeometry), NTV2_FBF_8BIT_YCBCR);
+	const NTV2FormatDescriptor fd (::GetStandardFromGeometry(inGeometry), NTV2_FBF_8BIT_YCBCR, ::GetVANCModeForGeometry(inGeometry));
 	return fd.GetRasterHeight(/*visOnly?*/false);	//	Include VANC
 }
 
@@ -4673,14 +4673,13 @@ ULWord	AddAudioTone (	ULWord *		pAudioBuffer,
 		for (ULWord i = 0;	i < inNumSamples;  i++)
 		{
 			const double	nextFloat	= double(::sin (j / cycleLength * (M_PI * 2.0)) * inAmplitude);
-			ULWord		value		= static_cast <ULWord> ((nextFloat * scale) + double(0.5));
+			LWord			value		= LWord((nextFloat * scale) + double(0.5));
 
 			if (inByteSwap)
-				value = NTV2EndianSwap32 (value);
-			//odprintf("%f",(float)(LWord)value/(float)0x7FFFFFFF);
+				value = LWord(NTV2EndianSwap32(value));	//odprintf("%f",(float)(LWord)value/(float)0x7FFFFFFF);
 
 			for (ULWord channel = 0;  channel < inNumChannels;	channel++)
-				*pAudioBuffer++ = value;
+				*pAudioBuffer++ = ULWord(value);
 
 			j += 1.0;
 			if (j > cycleLength)
@@ -4713,13 +4712,13 @@ ULWord	AddAudioTone (	UWord *			pAudioBuffer,
 		for (ULWord i = 0;	i < inNumSamples;  i++)
 		{
 			const double	nextFloat	= double(::sin (j / cycleLength * (M_PI * 2.0)) * inAmplitude);
-			UWord		value		= static_cast <UWord> ((nextFloat * scale) + double(0.5));
+			Word			value		= Word((nextFloat * scale) + double(0.5));
 
 			if (inByteSwap)
-				value = NTV2EndianSwap16(value);
+				value = Word(NTV2EndianSwap16(value));
 
 			for (ULWord channel = 0;  channel < inNumChannels;	channel++)
-				*pAudioBuffer++ = value;
+				*pAudioBuffer++ = UWord(value);
 
 			j += 1.0;
 			if (j > cycleLength)
@@ -4760,12 +4759,12 @@ ULWord	AddAudioTone (	ULWord *		pAudioBuffer,
 			for (ULWord channel (0);  channel < inNumChannels;	channel++)
 			{
 				const double	nextFloat	= double(::sin (j[channel] / cycleLength[channel] * (M_PI * 2.0)) * pInAmplitudes[channel]);
-				ULWord		value		= static_cast <ULWord> ((nextFloat * scale) + double(0.5));
+				LWord			value		= LWord((nextFloat * scale) + double(0.5));
 
 				if (inByteSwap)
 					value = NTV2EndianSwap32(value);
 
-				*pAudioBuffer++ = value;
+				*pAudioBuffer++ = ULWord(value);
 
 				j[channel] += 1.0;
 				if (j[channel] > cycleLength[channel])
@@ -4805,56 +4804,43 @@ ULWord AddAudioTestPattern (ULWord *		pAudioBuffer,
 std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRetailDisplay)
 {
 	switch (inValue)
-	{
-	#if defined (AJAMac) || defined (MSWindows)
-		case DEVICE_ID_KONALHI:					return inForRetailDisplay ? "KONA LHi"					: "KonaLHi";
-		case DEVICE_ID_KONALHIDVI:				return inForRetailDisplay ? "KONA LHi DVI"				: "KonaLHiDVI";
-	#endif
-	#if defined (AJAMac)
-		case DEVICE_ID_IOEXPRESS:				return inForRetailDisplay ? "IoExpress"					: "IoExpress";
-	#elif defined (MSWindows)
-		case DEVICE_ID_IOEXPRESS:				return inForRetailDisplay ? "KONA IoExpress"			: "IoExpress";
-	#else
-		case DEVICE_ID_KONALHI:					return inForRetailDisplay ? "KONA LHi"					: "OEM LHi";
-		case DEVICE_ID_KONALHIDVI:				return inForRetailDisplay ? "KONA LHi DVI"				: "OEM LHi DVI";
-		case DEVICE_ID_IOEXPRESS:				return inForRetailDisplay ? "IoExpress"					: "OEM IoExpress";
-	#endif
-		case DEVICE_ID_NOTFOUND:				return inForRetailDisplay ? "AJA Device"				: "(Not Found)";
+	{	//////////	!!! PLEASE MAINTAIN ALPHABETIC ORDER !!!	//////////
 		case DEVICE_ID_CORVID1:					return inForRetailDisplay ? "Corvid 1"					: "Corvid";
 		case DEVICE_ID_CORVID22:				return inForRetailDisplay ? "Corvid 22"					: "Corvid22";
-		case DEVICE_ID_CORVID3G:				return inForRetailDisplay ? "Corvid 3G"					: "Corvid3G";
-		case DEVICE_ID_KONA3G:					return inForRetailDisplay ? "KONA 3G"					: "Kona3G";
-		case DEVICE_ID_KONA3GQUAD:				return inForRetailDisplay ? "KONA 3G QUAD"				: "Kona3GQuad"; //	Used to be "KONA 3G" for retail display
-		case DEVICE_ID_KONALHEPLUS:				return inForRetailDisplay ? "KONA LHe+"					: "KonaLHe+";
-		case DEVICE_ID_IOXT:					return inForRetailDisplay ? "IoXT"						: "IoXT";
 		case DEVICE_ID_CORVID24:				return inForRetailDisplay ? "Corvid 24"					: "Corvid24";
-		case DEVICE_ID_TTAP:					return inForRetailDisplay ? "T-TAP"						: "TTap";
-		case DEVICE_ID_IO4K:					return inForRetailDisplay ? "Io4K"						: "Io4K";
-		case DEVICE_ID_IO4KUFC:					return inForRetailDisplay ? "Io4K UFC"					: "Io4KUfc";
-		case DEVICE_ID_KONA4:					return inForRetailDisplay ? "KONA 4"					: "Kona4";
-		case DEVICE_ID_KONA4UFC:				return inForRetailDisplay ? "KONA 4 UFC"				: "Kona4Ufc";
-		case DEVICE_ID_CORVID88:				return inForRetailDisplay ? "Corvid 88"					: "Corvid88";
+		case DEVICE_ID_CORVID3G:				return inForRetailDisplay ? "Corvid 3G"					: "Corvid3G";
 		case DEVICE_ID_CORVID44:				return inForRetailDisplay ? "Corvid 44"					: "Corvid44";
-		case DEVICE_ID_CORVIDHEVC:				return inForRetailDisplay ? "Corvid HEVC"				: "CorvidHEVC";
-		case DEVICE_ID_KONAIP_2022:				return "KonaIP s2022";
-		case DEVICE_ID_KONAIP_4CH_2SFP:			return "KonaIP s2022 2+2";
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K: return "KonaIP J2K 1I 1O";
-		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:		return "KonaIP J2K 2O";
-		case DEVICE_ID_KONAIP_1RX_1TX_2110:		return "KonaIP s2110 1I 1O";
+		case DEVICE_ID_CORVID44_2X4K:			return inForRetailDisplay ? "Corvid 44 2x4K"			: "Corvid44-2x4K";
+		case DEVICE_ID_CORVID44_8K:				return inForRetailDisplay ? "Corvid 44 8K"				: "Corvid44-8K";
+		case DEVICE_ID_CORVID44_8KMK:			return inForRetailDisplay ? "Corvid 44 8KMK"			: "Corvid44-8KMK";
+		case DEVICE_ID_CORVID44_PLNR:			return inForRetailDisplay ? "Corvid 44 PLNR"			: "Corvid44-PLNR";
+		case DEVICE_ID_CORVID88:				return inForRetailDisplay ? "Corvid 88"					: "Corvid88";
 		case DEVICE_ID_CORVIDHBR:				return inForRetailDisplay ? "Corvid HB-R"				: "CorvidHBR";
+		case DEVICE_ID_CORVIDHEVC:				return inForRetailDisplay ? "Corvid HEVC"				: "CorvidHEVC";
+		case DEVICE_ID_IO4K:					return "Io4K";
 		case DEVICE_ID_IO4KPLUS:				return inForRetailDisplay ? "Avid DNxIV"				: "Io4KPlus";
+		case DEVICE_ID_IO4KUFC:					return inForRetailDisplay ? "Io4K UFC"					: "Io4KUfc";
+		case DEVICE_ID_IOEXPRESS:				return inForRetailDisplay ? "IoExpress"					: "IoExpress";
 		case DEVICE_ID_IOIP_2022:				return inForRetailDisplay ? "Avid DNxIP s2022"			: "IoIP-s2022";
 		case DEVICE_ID_IOIP_2110:				return inForRetailDisplay ? "Avid DNxIP s2110"			: "IoIP-s2110";
 		case DEVICE_ID_IOIP_2110_RGB12:			return inForRetailDisplay ? "Avid DNxIP s2110_RGB12"	: "IoIP-s2110_RGB12";
-		case DEVICE_ID_KONAIP_2110:				return "KonaIP s2110";
-		case DEVICE_ID_KONAIP_2110_RGB12:		return "KonaIP s2110 RGB12";
+		case DEVICE_ID_IOX3:					return "IoX3";
+		case DEVICE_ID_IOXT:					return "IoXT";
 		case DEVICE_ID_KONA1:					return inForRetailDisplay ? "Kona 1"					: "Kona1";
-		case DEVICE_ID_KONAHDMI:				return inForRetailDisplay ? "Kona HDMI"					: "KonaHDMI";
+		case DEVICE_ID_KONA3G:					return inForRetailDisplay ? "KONA 3G"					: "Kona3G";
+		case DEVICE_ID_KONA3GQUAD:				return inForRetailDisplay ? "KONA 3G QUAD"				: "Kona3GQuad"; //	Used to be "KONA 3G" for retail display
+		case DEVICE_ID_KONA4:					return inForRetailDisplay ? "KONA 4"					: "Kona4";
+		case DEVICE_ID_KONA4UFC:				return inForRetailDisplay ? "KONA 4 UFC"				: "Kona4Ufc";
 		case DEVICE_ID_KONA5:					return inForRetailDisplay ? "KONA 5"					: "Kona5";
-		case DEVICE_ID_KONA5_2X4K:				return inForRetailDisplay ? "KONA 5 2x4K"				: "Kona5-2x4K";
+		case DEVICE_ID_KONA5_2X4K:				return inForRetailDisplay ? "KONA 5 (12-Bit)"			: "Kona5-12Bit";
 		case DEVICE_ID_KONA5_3DLUT:				return inForRetailDisplay ? "KONA 5 3DLUT"				: "Kona5-3DLUT";
+		case DEVICE_ID_KONA5_8K:				return inForRetailDisplay ? "KONA 5 8K"					: "Kona5-8K";
 		case DEVICE_ID_KONA5_8KMK:				return inForRetailDisplay ? "KONA 5 8KMK"				: "Kona5-8KMK";
+		case DEVICE_ID_KONA5_8K_MV_TX:			return inForRetailDisplay ? "KONA 5 8K MV TX"			: "Kona5-8K-MV-TX";
 		case DEVICE_ID_KONA5_OE1:				return "Kona5-OE1";
+		case DEVICE_ID_KONA5_OE10:				return "Kona5-OE10";
+		case DEVICE_ID_KONA5_OE11:				return "Kona5-OE11";
+		case DEVICE_ID_KONA5_OE12:				return "Kona5-OE12";
 		case DEVICE_ID_KONA5_OE2:				return "Kona5-OE2";
 		case DEVICE_ID_KONA5_OE3:				return "Kona5-OE3";
 		case DEVICE_ID_KONA5_OE4:				return "Kona5-OE4";
@@ -4863,9 +4849,18 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONA5_OE7:				return "Kona5-OE7";
 		case DEVICE_ID_KONA5_OE8:				return "Kona5-OE8";
 		case DEVICE_ID_KONA5_OE9:				return "Kona5-OE9";
-		case DEVICE_ID_KONA5_OE10:				return "Kona5-OE10";
-		case DEVICE_ID_KONA5_OE11:				return "Kona5-OE11";
-		case DEVICE_ID_KONA5_OE12:				return "Kona5-OE12";
+		case DEVICE_ID_KONAHDMI:				return inForRetailDisplay ? "Kona HDMI"					: "KonaHDMI";
+		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K: return "KonaIP J2K 1I 1O";
+		case DEVICE_ID_KONAIP_1RX_1TX_2110:		return "KonaIP s2110 1I 1O";
+		case DEVICE_ID_KONAIP_2022:				return "KonaIP s2022";
+		case DEVICE_ID_KONAIP_2110:				return "KonaIP s2110";
+		case DEVICE_ID_KONAIP_2110_RGB12:		return "KonaIP s2110 RGB12";
+		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:		return "KonaIP J2K 2O";
+		case DEVICE_ID_KONAIP_4CH_2SFP:			return "KonaIP s2022 2+2";
+		case DEVICE_ID_KONALHEPLUS:				return inForRetailDisplay ? "KONA LHe+"					: "KonaLHe+";
+		case DEVICE_ID_KONALHI:					return inForRetailDisplay ? "KONA LHi"					: "KonaLHi";
+		case DEVICE_ID_KONALHIDVI:				return inForRetailDisplay ? "KONA LHi DVI"				: "KonaLHiDVI";
+		case DEVICE_ID_SOJI_3DLUT:				return "SOJI-3DLUT";
 		case DEVICE_ID_SOJI_OE1:				return "SOJI-OE1";
 		case DEVICE_ID_SOJI_OE2:				return "SOJI-OE2";
 		case DEVICE_ID_SOJI_OE3:				return "SOJI-OE3";
@@ -4873,15 +4868,9 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_SOJI_OE5:				return "SOJI-OE5";
 		case DEVICE_ID_SOJI_OE6:				return "SOJI-OE6";
 		case DEVICE_ID_SOJI_OE7:				return "SOJI-OE7";
-		case DEVICE_ID_SOJI_OE8:				return "SOJI-OE8";
-		case DEVICE_ID_KONA5_8K_MV_TX:				return inForRetailDisplay ? "KONA 5 8K MV TX"					: "Kona5-8K-MV-TX";
-		case DEVICE_ID_CORVID44_8KMK:			return inForRetailDisplay ? "Corvid 44 8KMK"			: "Corvid44-8KMK";
-		case DEVICE_ID_CORVID44_PLNR:			return inForRetailDisplay ? "Corvid 44 PLNR"			: "Corvid44-PLNR";
-		case DEVICE_ID_KONA5_8K:				return inForRetailDisplay ? "KONA 5 8K"					: "Kona5-8K";
-		case DEVICE_ID_CORVID44_8K:				return inForRetailDisplay ? "Corvid 44 8K"				: "Corvid44-8K";
-		case DEVICE_ID_CORVID44_2X4K:			return inForRetailDisplay ? "Corvid 44 2x4K"			: "Corvid44-2x4K";
+		case DEVICE_ID_TTAP:					return inForRetailDisplay ? "T-TAP"						: "TTap";
 		case DEVICE_ID_TTAP_PRO:				return inForRetailDisplay ? "T-TAP Pro"					: "TTapPro";
-		case DEVICE_ID_IOX3:					return "IoX3";
+		case DEVICE_ID_NOTFOUND:				return inForRetailDisplay ? "AJA Device"				: "(Not Found)";
 #if defined(_DEBUG)
 #else
 		default:					break;
@@ -5529,7 +5518,7 @@ ULWord GetIndexForNTV2InputSource (const NTV2InputSource inValue)
 
 ULWord NTV2FramesizeToByteCount (const NTV2Framesize inFrameSize)
 {
-	static ULWord	gFrameSizeToByteCount []	= { 2 /* NTV2_FRAMESIZE_2MB */,		4 /* NTV2_FRAMESIZE_4MB */,		8 /* NTV2_FRAMESIZE_8MB */,		16 /* NTV2_FRAMESIZE_16MB */,
+	static const ULWord	gFrameSizeToByteCount[]	= { 2 /* NTV2_FRAMESIZE_2MB */,		4 /* NTV2_FRAMESIZE_4MB */,		8 /* NTV2_FRAMESIZE_8MB */,		16 /* NTV2_FRAMESIZE_16MB */,
 													6 /* NTV2_FRAMESIZE_6MB */,		10 /* NTV2_FRAMESIZE_10MB */,	12 /* NTV2_FRAMESIZE_12MB */,	14 /* NTV2_FRAMESIZE_14MB */,
 													18 /* NTV2_FRAMESIZE_18MB */,	20 /* NTV2_FRAMESIZE_20MB */,	22 /* NTV2_FRAMESIZE_22MB */,	24 /* NTV2_FRAMESIZE_24MB */,
 													26 /* NTV2_FRAMESIZE_26MB */,	28 /* NTV2_FRAMESIZE_28MB */,	30 /* NTV2_FRAMESIZE_30MB */,	32 /* NTV2_FRAMESIZE_32MB */,
@@ -5543,10 +5532,10 @@ ULWord NTV2FramesizeToByteCount (const NTV2Framesize inFrameSize)
 
 
 ULWord NTV2AudioBufferSizeToByteCount (const NTV2AudioBufferSize inBufferSize)
-{													//	NTV2_AUDIO_BUFFER_STANDARD	NTV2_AUDIO_BUFFER_BIG	NTV2_AUDIO_BUFFER_MEDIUM	NTV2_AUDIO_BUFFER_BIGGER	NTV2_AUDIO_BUFFER_INVALID
-	static ULWord	gBufferSizeToByteCount []	=	{	1 * 1024 * 1024,			4 * 1024 * 1024,		2 * 1024 * 1024,			3 * 1024 * 1024,			0	};
-	if (NTV2_IS_VALID_AUDIO_BUFFER_SIZE (inBufferSize))
-		return gBufferSizeToByteCount [inBufferSize];
+{														//	STANDARD		BIG				MEDIUM			BIGGER			INVALID
+	static const ULWord gBufferSizeToByteCount[]	=	{	1 * 1024*1024,	4 * 1024*1024,	2 * 1024*1024,	3 * 1024*1024,	0	};
+	if (NTV2_IS_VALID_AUDIO_BUFFER_SIZE(inBufferSize))
+		return gBufferSizeToByteCount[inBufferSize];
 	return 0;
 }
 
@@ -8491,7 +8480,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_SOJI_OE5:					return "soji_oe_cfg5_tprom.bit";
 	case DEVICE_ID_SOJI_OE6:					return "soji_oe_cfg6_tprom.bit";
 	case DEVICE_ID_SOJI_OE7:					return "soji_oe_cfg7_tprom.bit";
-	case DEVICE_ID_SOJI_OE8:					return "soji_oe_cfg8_tprom.bit";
+	case DEVICE_ID_SOJI_3DLUT:					return "soji_3dlut_tprom.bit";
 	case DEVICE_ID_KONA5_8K_MV_TX:				return "kona5_8k_mv_tx_tprom.bit";
 	case DEVICE_ID_CORVID44_8KMK:				return "c44_12g_8k_mk_tprom.bit";
 	case DEVICE_ID_CORVID44_8K:					return "c44_12g_8k_tprom.bit";
@@ -8572,22 +8561,27 @@ string NTV2GetFirmwareFolderPath (void)
 
 
 NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
-{
-	static const NTV2DeviceID	sValidDeviceIDs []	= { DEVICE_ID_CORVID1,
+{										//////////	!!! PLEASE MAINTAIN ALPHABETIC ORDER !!!	//////////
+	static const NTV2DeviceID	sValidDeviceIDs []	= {	DEVICE_ID_CORVID1,
 														DEVICE_ID_CORVID22,
 														DEVICE_ID_CORVID24,
 														DEVICE_ID_CORVID3G,
+														DEVICE_ID_CORVID44_2X4K,
+														DEVICE_ID_CORVID44_8K,
+														DEVICE_ID_CORVID44_8KMK,
+														DEVICE_ID_CORVID44_PLNR,
 														DEVICE_ID_CORVID44,
 														DEVICE_ID_CORVID88,
 														DEVICE_ID_CORVIDHBR,
 														DEVICE_ID_CORVIDHEVC,
 														DEVICE_ID_IO4K,
-														DEVICE_ID_IO4KUFC,
 														DEVICE_ID_IO4KPLUS,
-														DEVICE_ID_IOIP_2022,
-														DEVICE_ID_IOIP_2110,
-														DEVICE_ID_IOIP_2110_RGB12,
+														DEVICE_ID_IO4KUFC,
 														DEVICE_ID_IOEXPRESS,
+														DEVICE_ID_IOIP_2022,
+														DEVICE_ID_IOIP_2110_RGB12,
+														DEVICE_ID_IOIP_2110,
+														DEVICE_ID_IOX3,
 														DEVICE_ID_IOXT,
 														DEVICE_ID_KONA1,
 														DEVICE_ID_KONA3G,
@@ -8597,7 +8591,13 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_KONA5,
 														DEVICE_ID_KONA5_2X4K,
 														DEVICE_ID_KONA5_3DLUT,
+														DEVICE_ID_KONA5_8K,
+														DEVICE_ID_KONA5_8KMK,
+														DEVICE_ID_KONA5_8K_MV_TX,
 														DEVICE_ID_KONA5_OE1,
+														DEVICE_ID_KONA5_OE10,
+														DEVICE_ID_KONA5_OE11,
+														DEVICE_ID_KONA5_OE12,
 														DEVICE_ID_KONA5_OE2,
 														DEVICE_ID_KONA5_OE3,
 														DEVICE_ID_KONA5_OE4,
@@ -8606,9 +8606,17 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_KONA5_OE7,
 														DEVICE_ID_KONA5_OE8,
 														DEVICE_ID_KONA5_OE9,
-														DEVICE_ID_KONA5_OE10,
-														DEVICE_ID_KONA5_OE11,
-														DEVICE_ID_KONA5_OE12,
+														DEVICE_ID_KONAHDMI,
+														DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K,
+														DEVICE_ID_KONAIP_1RX_1TX_2110,
+														DEVICE_ID_KONAIP_2022,
+														DEVICE_ID_KONAIP_2110_RGB12,
+														DEVICE_ID_KONAIP_2110,
+														DEVICE_ID_KONAIP_2TX_1SFP_J2K,
+														DEVICE_ID_KONAIP_4CH_2SFP,
+														DEVICE_ID_KONALHEPLUS,
+														DEVICE_ID_KONALHI,
+														DEVICE_ID_KONALHIDVI,
 														DEVICE_ID_SOJI_OE1,
 														DEVICE_ID_SOJI_OE2,
 														DEVICE_ID_SOJI_OE3,
@@ -8616,70 +8624,49 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_SOJI_OE5,
 														DEVICE_ID_SOJI_OE6,
 														DEVICE_ID_SOJI_OE7,
-														DEVICE_ID_SOJI_OE8,
-														DEVICE_ID_KONA5_8K_MV_TX,
-														DEVICE_ID_KONAHDMI,
-														DEVICE_ID_KONAIP_2022,
-														DEVICE_ID_KONAIP_4CH_2SFP,
-														DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K,
-														DEVICE_ID_KONAIP_2TX_1SFP_J2K,
-														DEVICE_ID_KONAIP_1RX_1TX_2110,
-														DEVICE_ID_KONAIP_2110,
-														DEVICE_ID_KONAIP_2110_RGB12,
-														DEVICE_ID_KONALHEPLUS,
-														DEVICE_ID_KONALHI,
-														DEVICE_ID_KONALHIDVI,
-														DEVICE_ID_TTAP,
-														DEVICE_ID_KONA5_8KMK,
-														DEVICE_ID_CORVID44_8KMK,
-														DEVICE_ID_KONA5_8K,
-														DEVICE_ID_CORVID44_8K,
-														DEVICE_ID_CORVID44_2X4K,
-														DEVICE_ID_CORVID44_PLNR,
+														DEVICE_ID_SOJI_3DLUT,
 														DEVICE_ID_TTAP_PRO,
-														DEVICE_ID_IOX3,
+														DEVICE_ID_TTAP,
 														DEVICE_ID_NOTFOUND	};
+	if (inKinds == NTV2_DEVICEKIND_NONE)
+		return NTV2DeviceIDSet();
+
 	NTV2DeviceIDSet result;
-	if (inKinds != NTV2_DEVICEKIND_NONE)
-		for (unsigned ndx(0);  ndx < sizeof(sValidDeviceIDs) / sizeof(NTV2DeviceID);  ndx++)
-		{
-			const NTV2DeviceID	deviceID(sValidDeviceIDs[ndx]);
-			if (deviceID != DEVICE_ID_NOTFOUND)
-			{
-				if (inKinds == NTV2_DEVICEKIND_ALL)
-					{result.insert (deviceID);	continue;}
-				//	else ...
-				bool insertIt (false);
-				if (insertIt)
-					;
-				else if (inKinds & NTV2_DEVICEKIND_INPUT  &&  ::NTV2DeviceCanDoCapture(deviceID))
-					insertIt = true;
-				else if (inKinds & NTV2_DEVICEKIND_OUTPUT  &&  ::NTV2DeviceCanDoPlayback(deviceID))
-					insertIt = true;
-				else if (inKinds & NTV2_DEVICEKIND_SDI	&&	(::NTV2DeviceGetNumVideoInputs(deviceID)+::NTV2DeviceGetNumVideoOutputs(deviceID)) > 0)
-					insertIt = true;
-				else if (inKinds & NTV2_DEVICEKIND_HDMI	 &&	 (::NTV2DeviceGetNumHDMIVideoInputs(deviceID)+::NTV2DeviceGetNumHDMIVideoOutputs(deviceID)) > 0)
-					insertIt = true;
-				else if (inKinds & NTV2_DEVICEKIND_ANALOG  &&  (::NTV2DeviceGetNumAnalogVideoInputs(deviceID)+::NTV2DeviceGetNumAnalogVideoOutputs(deviceID)) > 0)
-					insertIt = true;
-				else if (inKinds & NTV2_DEVICEKIND_SFP	&&	::NTV2DeviceCanDoIP(deviceID))
-					insertIt = true;
-				else if (inKinds & NTV2_DEVICEKIND_EXTERNAL	 &&	 ::NTV2DeviceIsExternalToHost(deviceID))
-					insertIt = true;
-				else if (inKinds & NTV2_DEVICEKIND_4K  &&  ::NTV2DeviceCanDo4KVideo(deviceID))
-					insertIt = true;
-				else if (inKinds & NTV2_DEVICEKIND_12G	&&	::NTV2DeviceCanDo12GSDI(deviceID))
-					insertIt = true;
-				else if (inKinds & NTV2_DEVICEKIND_6G  &&  ::NTV2DeviceCanDo12GSDI(deviceID))
-					insertIt = true;
-				else if (inKinds & NTV2_DEVICEKIND_CUSTOM_ANC  &&  ::NTV2DeviceCanDoCustomAnc(deviceID))
-					insertIt = true;
-				else if (inKinds & NTV2_DEVICEKIND_RELAYS  &&  ::NTV2DeviceHasSDIRelays(deviceID))
-					insertIt = true;
-				if (insertIt)
-					result.insert (deviceID);
-			}
-		}	//	for each supported device
+	for (unsigned ndx(0);  ndx < sizeof(sValidDeviceIDs) / sizeof(NTV2DeviceID);  ndx++)
+	{
+		const NTV2DeviceID	deviceID(sValidDeviceIDs[ndx]);
+		if (deviceID == DEVICE_ID_NOTFOUND)
+			continue;
+		bool insertIt (false);
+		if (inKinds == NTV2_DEVICEKIND_ALL)
+			insertIt = true;
+		else if (inKinds & NTV2_DEVICEKIND_INPUT  &&  ::NTV2DeviceCanDoCapture(deviceID))
+			insertIt = true;
+		else if (inKinds & NTV2_DEVICEKIND_OUTPUT  &&  ::NTV2DeviceCanDoPlayback(deviceID))
+			insertIt = true;
+		else if (inKinds & NTV2_DEVICEKIND_SDI	&&	(::NTV2DeviceGetNumVideoInputs(deviceID)+::NTV2DeviceGetNumVideoOutputs(deviceID)) > 0)
+			insertIt = true;
+		else if (inKinds & NTV2_DEVICEKIND_HDMI	 &&	 (::NTV2DeviceGetNumHDMIVideoInputs(deviceID)+::NTV2DeviceGetNumHDMIVideoOutputs(deviceID)) > 0)
+			insertIt = true;
+		else if (inKinds & NTV2_DEVICEKIND_ANALOG  &&  (::NTV2DeviceGetNumAnalogVideoInputs(deviceID)+::NTV2DeviceGetNumAnalogVideoOutputs(deviceID)) > 0)
+			insertIt = true;
+		else if (inKinds & NTV2_DEVICEKIND_SFP	&&	::NTV2DeviceCanDoIP(deviceID))
+			insertIt = true;
+		else if (inKinds & NTV2_DEVICEKIND_EXTERNAL	 &&	 ::NTV2DeviceIsExternalToHost(deviceID))
+			insertIt = true;
+		else if (inKinds & NTV2_DEVICEKIND_4K  &&  ::NTV2DeviceCanDo4KVideo(deviceID))
+			insertIt = true;
+		else if (inKinds & NTV2_DEVICEKIND_12G	&&	::NTV2DeviceCanDo12GSDI(deviceID))
+			insertIt = true;
+		else if (inKinds & NTV2_DEVICEKIND_6G  &&  ::NTV2DeviceCanDo12GSDI(deviceID))
+			insertIt = true;
+		else if (inKinds & NTV2_DEVICEKIND_CUSTOM_ANC  &&  ::NTV2DeviceCanDoCustomAnc(deviceID))
+			insertIt = true;
+		else if (inKinds & NTV2_DEVICEKIND_RELAYS  &&  ::NTV2DeviceHasSDIRelays(deviceID))
+			insertIt = true;
+		if (insertIt)
+			result.insert (deviceID);
+	}	//	for each supported device
 	return result;
 }
 
@@ -8851,7 +8838,7 @@ string NTV2BitfileTypeToString (const NTV2BitfileType inValue, const bool inComp
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"SOJI OE5 Main",			NTV2_BITFILE_SOJI_OE5_MAIN);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"SOJI OE6 Main",			NTV2_BITFILE_SOJI_OE6_MAIN);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"SOJI OE7 Main",			NTV2_BITFILE_SOJI_OE7_MAIN);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"SOJI OE8 Main",			NTV2_BITFILE_SOJI_OE8_MAIN);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"SOJI 3DLUT Main",			NTV2_BITFILE_SOJI_3DLUT_MAIN);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Kona5 8K MV TX",			NTV2_BITFILE_KONA5_8K_MV_TX_MAIN);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaIP 2110 RGB12",		NTV2_BITFILE_KONAIP_2110_RGB12);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"IoIP 2110 RGB12",			NTV2_BITFILE_IOIP_2110_RGB12);

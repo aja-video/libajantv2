@@ -38,7 +38,7 @@ The<b>AJA Logger</b>’s user interface consists of one main window, the main wi
 
 The <b>Main View</b> shows log messages in tabular fashion, one log entry per table row, with the log entry data shown in columns.
 The tool bar at the top has the following controls:
--	<b>Message Groups…</b>: Click to open the configuration dialog box. \see logger-config for details.
+-	<b>Message Groups…</b>: Click to open the configuration dialog box. See \ref loggerconfig for details.
 -	<b>Log to File</b>: Enables or disables recording incoming messages to a log file.
 -	<b>Save As…</b>: Saves the contents of the message display to a file of the user’s choosing.
 -	<b>Font…</b>: Opens a font dialog to change the font and size of the log display.
@@ -224,7 +224,7 @@ Scroll down to view the AJA Debug facility version and its other technical detai
 
 
 
-@subsection	logger-config	Enable/Disable Message Groups Dialog
+@subsection	loggerconfig	Enable/Disable Message Groups Dialog
 
 @image	html	logger-enables.png
 
@@ -246,7 +246,7 @@ Click <b>OK</b> to dismiss (hide) the dialog box.
 
 
 
-@subsection	logger-custom	How to Post Messages
+@subsection	loggercustom	How to Post Messages
 
 SDK clients can post their own messages with the ::AJADebug facility.
 

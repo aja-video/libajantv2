@@ -152,8 +152,12 @@ bool CNTV2Card::GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outA
 		const ULWord	audioFrameBuffer	(::NTV2DeviceGetNumberFrameBuffers(deviceID, fg, fbf) - 1);
 		outAbsByteOffset = inOffsetBytes  +	 audioFrameBuffer * ::NTV2DeviceGetFrameBufferSize(deviceID, fg, fbf);
 	}
-	if (inCaptureBuffer)
-		outAbsByteOffset += 0x400000;	//	Add 4MB offset to point to capture buffer
+
+	if (inCaptureBuffer)	//	Capture mode?
+	{	ULWord rdBufOffset(0x400000);	//	4MB
+		GetAudioReadOffset (rdBufOffset, inAudioSystem);
+		outAbsByteOffset += rdBufOffset;	//	Add offset to point to capture buffer
+	}
 	return true;
 }
 
@@ -371,12 +375,13 @@ bool CNTV2Card::GetDeviceFrameInfo (const UWord inFrameNumber, const NTV2Channel
 	outAddress = outLength = 0;
 	static const ULWord frameSizes[] = {2, 4, 8, 16};	//	'00'=2MB	'01'=4MB	'10'=8MB	'11'=16MB
 	UWord				frameSizeNdx(0);
+	const bool			isMRWidgetChannel(IsMultiRasterWidgetChannel(inChannel));
 	outIntrinsicSize = 0;
 	outMultiFormat = outQuad = outQuadQuad = outSquares = outTSI = false;
 	NTV2Channel	chan (inChannel);
 	if (!::NTV2DeviceCanDoMultiFormat(GetDeviceID()))
 		chan = NTV2_CHANNEL1;	//	Older uniformat-only device:  use Ch1
-	else if (GetMultiFormatMode(outMultiFormat) && !outMultiFormat)
+	else if (GetMultiFormatMode(outMultiFormat) && !outMultiFormat  &&  !isMRWidgetChannel)
 		chan = NTV2_CHANNEL1;	//	Uniformat mode:  Use Ch1
 
 	CNTV2DriverInterface::ReadRegister (kRegCh1Control, frameSizeNdx,	  kK2RegMaskFrameSize,		kK2RegShiftFrameSize);

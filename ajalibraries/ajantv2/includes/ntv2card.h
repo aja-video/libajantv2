@@ -702,6 +702,9 @@ public:
 		@param[in]	inMap			Also lock the segment map.
 		@param[in]	inRDMA			Lock a GPUDirect buffer for p2p DMA.
 		@return		True if successful; otherwise false.
+		@note		On the Windows platform, buffers allocated using GlobalAlloc or VirtualAlloc often won't map properly because
+					these functions allocate the virtual address space but not the memory pages, which only get allocated and committed
+					when the memory gets written (touched). Instead, we recommend using _aligned_malloc for mapped host memory.
 		@see		CNTV2Card::DMABufferUnlock, CNTV2Card::DMABufferAutoLock, CNTV2Card::DMABufferUnlockAll, \ref vidop-fblocking
 	**/
 	AJA_VIRTUAL inline bool DMABufferLock (const ULWord * pInBuffer, const ULWord inByteCount, bool inMap = false, bool inRDMA = false)
@@ -1039,10 +1042,11 @@ public:
 	// The rest of the routines
 	AJA_VIRTUAL bool		GetVideoFormat (NTV2VideoFormat & outValue, NTV2Channel inChannel = NTV2_CHANNEL1);
 
-	AJA_VIRTUAL bool				GetActiveFrameDimensions (NTV2FrameDimensions & outFrameDimensions, const NTV2Channel inChannel = NTV2_CHANNEL1);
-	AJA_VIRTUAL NTV2FrameDimensions GetActiveFrameDimensions (const NTV2Channel inChannel = NTV2_CHANNEL1);
-
-	AJA_VIRTUAL bool		GetNumberActiveLines (ULWord & outNumActiveLines);
+#if !defined(NTV2_DEPRECATE_16_2)
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetActiveFrameDimensions (NTV2FrameDimensions & outFrameDimensions, const NTV2Channel inChannel = NTV2_CHANNEL1)); ///< @deprecated	Obsolete starting in SDK 16.2.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(NTV2FrameDimensions GetActiveFrameDimensions (const NTV2Channel inChannel = NTV2_CHANNEL1)); ///< @deprecated	Obsolete starting in SDK 16.2.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetNumberActiveLines (ULWord & outNumActiveLines)); ///< @deprecated	Obsolete starting in SDK 16.2.
+#endif	//	defined(NTV2_DEPRECATE_16_2)
 
 	AJA_VIRTUAL bool		SetStandard (NTV2Standard inValue, NTV2Channel inChannel = NTV2_CHANNEL1);
 	AJA_VIRTUAL bool		GetStandard (NTV2Standard & outValue, NTV2Channel inChannel = NTV2_CHANNEL1);
@@ -2870,7 +2874,7 @@ public:
 	///@{
 	AJA_VIRTUAL bool	ReadFlashProgramControl(ULWord & outValue);
 	AJA_VIRTUAL bool	IsXilinxProgrammed();
-	AJA_VIRTUAL bool	ProgramMainFlash(const char *fileName, bool bForceUpdate = false, bool bQuiet = false);
+	AJA_VIRTUAL bool	ProgramMainFlash(const std::string & inFileName, const bool bInForceUpdate = false, const bool bInQuiet = false);	//	inFileName became const std::string& in SDK 16.2
 	AJA_VIRTUAL bool	GetProgramStatus(SSC_GET_FIRMWARE_PROGRESS_STRUCT *statusStruct);
 
 	/**
@@ -6387,26 +6391,6 @@ public:
 		@note		This function returns valid information only for devices for which ::NTV2DeviceCanDoSDIErrorChecks returns 'true'.
 	**/
 	AJA_VIRTUAL ULWord		GetCRCErrorCountB (const NTV2Channel inChannel);
-
-	/**
-		@brief		Controls CRC error checking for the given SDI input.
-		@param[in]	inChannel		Specifies the SDI input of interest as an ::NTV2Channel value (an unsigned zero-based integer).
-		@param[in]	inEnabled		Specify 'true' to enable CRC error checking (i.e. normal);  otherwise false to disable.
-		@return		True if successful;  otherwise false.
-		@see		CNTV2Card::GetSDIInputCRCChecking, <b>SDI Connectors</b> in \ref devicesignalinputsoutputs
-		@note		Rarely, some SDI devices emit non-compliant SDI with bad CRC values. This function is provided to disable CRC
-					checking to enable the AJA device to lock to, and capture such signals.
-	**/
-	AJA_VIRTUAL bool		SetSDIInputCRCChecking (const NTV2Channel inSDIInput, const bool inEnabled);	//	New in SDK 16.2
-
-	/**
-		@brief		Answers if CRC error checking is enabled for the given SDI input.
-		@param[in]	inChannel		Specifies the SDI input of interest as an ::NTV2Channel value (an unsigned zero-based integer).
-		@param[out]	outEnabled		Receives 'true' if CRC error checking is enabled (i.e. normal);  otherwise false if disabled.
-		@return		True if successful;  otherwise false.
-		@see		CNTV2Card::SetSDIInputCRCChecking, <b>SDI Connectors</b> in \ref devicesignalinputsoutputs
-	**/
-	AJA_VIRTUAL bool		GetSDIInputCRCChecking (const NTV2Channel inSDIInput, bool & outEnabled);	//	New in SDK 16.2
 	///@}
 
 	/**
@@ -7246,10 +7230,12 @@ public:
 	AJA_VIRTUAL bool Load3DLUTTable ();
 	AJA_VIRTUAL bool Set1DLUTTableLocation (const NTV2Channel inChannel, const ULWord inFrameNumber, ULWord inLUTIndex = 0);
 	AJA_VIRTUAL bool Load1DLUTTable (const NTV2Channel inChannel);
-	
+
+	//	MultiViewer/MultiRasterizer
 	AJA_VIRTUAL bool HasMultiRasterWidget (void);						//	New in SDK 16.1
 	AJA_VIRTUAL bool SetMultiRasterBypassEnable (const bool inEnable);	//	New in SDK 16.1
 	AJA_VIRTUAL bool GetMultiRasterBypassEnable (bool & outEnabled);	//	New in SDK 16.1
+	AJA_VIRTUAL bool IsMultiRasterWidgetChannel (const NTV2Channel inChannel);	//	New in SDK 16.2
 
 	///@}
 
@@ -7424,6 +7410,7 @@ public:
 protected:
 	AJA_VIRTUAL ULWord			GetSerialNumberLow (void);			//	From CNTV2Status
 	AJA_VIRTUAL ULWord			GetSerialNumberHigh (void);			//	From CNTV2Status
+	AJA_VIRTUAL inline bool		IS_CHANNEL_VALID (const NTV2Channel inChannel) const	{return !IS_CHANNEL_INVALID(inChannel);}	//	New in SDK 16.2
 	AJA_VIRTUAL bool			IS_CHANNEL_INVALID (const NTV2Channel inChannel) const;
 	AJA_VIRTUAL bool			IS_OUTPUT_SPIGOT_INVALID (const UWord inOutputSpigot) const;
 	AJA_VIRTUAL bool			IS_INPUT_SPIGOT_INVALID (const UWord inInputSpigot) const;

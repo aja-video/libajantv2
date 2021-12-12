@@ -298,6 +298,8 @@ bool CNTV2Card::GetSerialNumberString (string & outSerialNumberString)
 			 deviceID == DEVICE_ID_IOIP_2110 ||
 			 deviceID == DEVICE_ID_IOIP_2110_RGB12)				//	IoIP/DNxIP?
 		outSerialNumberString = "6" + outSerialNumberString;	//		prepend with "6"
+	else if (deviceID == DEVICE_ID_IOX3)
+		outSerialNumberString = "7" + outSerialNumberString;	//		prepend with "7"
 	return true;
 
 }	//	GetSerialNumberString
@@ -1038,7 +1040,7 @@ bool SDRAMAuditor::TagAudioBuffers (CNTV2Card & inDevice, const bool inMarkStopp
 
 bool SDRAMAuditor::TagVideoFrames (CNTV2Card & inDevice)
 {
-	const UWord numChannels	(UWord(::NTV2DeviceGetNumVideoChannels(mDeviceID)));
+	const UWord numChannels	(UWord(::NTV2DeviceGetNumVideoChannels(mDeviceID)) + (inDevice.HasMultiRasterWidget() ? 1 : 0));
 	NTV2ChannelSet skipChannels;
 	for (NTV2Channel chan(NTV2_CHANNEL1);  chan < NTV2Channel(numChannels);  chan = NTV2Channel(chan+1))
 	{
@@ -1066,7 +1068,11 @@ bool SDRAMAuditor::TagVideoFrames (CNTV2Card & inDevice)
 			else
 				inDevice.GetOutputFrame(chan, frameNum);
 			inDevice.GetDeviceFrameInfo (UWord(frameNum),  chan,  mIntrinsicSize, isMultiFormat, isQuad, isQuadQuad, isSquares, isTSI, addr,  len);
-			tag << "Ch" << DEC(chan+1) << (acStatus.IsInput() ? " Write" : " Read");
+			if (inDevice.IsMultiRasterWidgetChannel(chan))
+				tag << "MR" << DEC(chan+1);	//	MultiRaster Viewer
+			else
+				tag << "Ch" << DEC(chan+1);
+			tag << (NTV2_IS_INPUT_MODE(mode) ? " Write" : " Read");
 			TagMemoryBlock(addr, len, tag.str());
 		}
 		if (isSquares && chan == NTV2_CHANNEL1)

@@ -320,7 +320,7 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 	case DEVICE_ID_SOJI_OE5:
 	case DEVICE_ID_SOJI_OE6:
 	case DEVICE_ID_SOJI_OE7:
-	case DEVICE_ID_SOJI_OE8:
+	case DEVICE_ID_SOJI_3DLUT:
 	case DEVICE_ID_KONA5_8K_MV_TX:
 	case DEVICE_ID_CORVID44_8KMK:
 	case DEVICE_ID_CORVID44_8K:
@@ -424,6 +424,8 @@ ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
 	{
 		ULWord totalFrames = NTV2DeviceGetActiveMemorySize(boardID)/0x800000;
 		totalFrames -= NTV2DeviceGetNumAudioSystems(boardID)*(NTV2DeviceCanDo12gRouting(boardID) ? 4 : 1);
+		if(boardID == DEVICE_ID_IOX3 || boardID == DEVICE_ID_KONA5_8K_MV_TX)
+			totalFrames -= 6;
 		return totalFrames;
 	}
 	else
@@ -555,7 +557,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
 	case DEVICE_ID_SOJI_OE5:
 	case DEVICE_ID_SOJI_OE6:
 	case DEVICE_ID_SOJI_OE7:
-	case DEVICE_ID_SOJI_OE8:
+	case DEVICE_ID_SOJI_3DLUT:
 	case DEVICE_ID_KONA5_8K_MV_TX:
 	case DEVICE_ID_CORVID44_8KMK:
 	case DEVICE_ID_CORVID44_8K:

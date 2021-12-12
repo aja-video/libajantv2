@@ -166,6 +166,7 @@ AJAStatus AJADebug::Open (bool incrementRefCount)
 			addDebugGroupToLabelVector(AJA_DebugUnit_Cables);
 			addDebugGroupToLabelVector(AJA_DebugUnit_RPCServer);
 			addDebugGroupToLabelVector(AJA_DebugUnit_RPCClient);
+			addDebugGroupToLabelVector(AJA_DebugUnit_Firmware);
 
 			for (int i(AJA_DebugUnit_FirstUnused);	i < AJA_DebugUnit_Size;	 i++)
 			{

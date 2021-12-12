@@ -93,4 +93,4 @@ private:
 	uint32_t	mSpiGlobalIntReg;
 };
 
-#endif
+#endif	//	NTV2SPIINTERFACE_H

@@ -7,7 +7,7 @@ This simple command-line program shows how to capture video frames provided to a
 
 The NTV2Capture class demonstrates…
 - how to properly acquire and release an AJA device in order to use it exclusively;
-- how to use AutoCirculate to efficiently stream video and audio (using the old or new APIs based on a macro definition);
+- how to use AutoCirculate to efficiently stream video and audio;
 - how to use an AJACircularBuffer and the producer/consumer model with AutoCirculate.
 
 <b>Command line usage:</b>
@@ -30,11 +30,9 @@ The NTV2Capture class demonstrates…
 	
 	-a                         Enables capture of ancillary data using deviceʼs Anc extractor firmware.
 	
-	--anc {filePath}           Enables capture of ancillary data using deviceʼs Anc extractor firmware, and records
-	                           the captured raw anc buffer data into the specified binary data file. If {filePath}
-	                           is an empty string, a file name will be created for you.
-	                           
-	                           This file can be played back using ntv2player via its ‘--ancʼ option.
+	--anc {filePath}           Enables recording of captured raw anc buffer data into the specified binary data file.
+	                           If {filePath} is an empty string, a default file name will be used.
+	                           This file can be played back using ntv2player‘s ‘--ancʼ option.
 	
 	--noaudio                  Disables audio capture.
 	
@@ -44,5 +42,24 @@ The NTV2Capture class demonstrates…
 
 	-?|--help|--usage          Shows command usage and options.
 @endcode
+
+@subsection		ntv2captureanc	Ancillary Data Recording
+
+The “--anc” command-line option records NTV2Captureʼs ancillary data buffers into a binary data file during
+\ref autocirculatecapture.
+
+NTV2Capture::ConsumeFrames simply writes the fixed-size contents (typically 8K) of the frameʼs ancillary data buffer
+into a binary data file. If the incoming video is interlaced, then the “field 2” buffer is also written into the file.
+
+The packet data in each per-field chunk in the file (typically 8K) will be in the \ref ancgumpformat. For \ref konaip
+or \ref ioip devices running ST-2110 firmware, the data will automatically be converted from the \ref ancrtpformat by
+CNTV2Card::AutoCirculateTransfer immediately after a successful transfer.
+
+In the binary data file, packet data starts at the first byte of each chunk, while subsequent bytes in the chunk after
+the last packet are zeroed.
+
+@note	The data fileʼs per-field chunk size is determined by the per-field Anc buffer region size, which is controlled
+		by the driver, and can be queried using CNTV2Card::GetAncRegionOffsetAndSize or changed using
+		CNTV2Card::AncSetFrameBufferSize.
 
 **/

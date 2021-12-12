@@ -17,7 +17,7 @@ The NTV2Player class demonstrates…
 -	how to embed timecode into an AJA deviceʼs SDI output signal;
 -	how to generate a buffer of audio, and embed it into an AJA deviceʼs output signal;
 -	how to properly acquire and release an AJA device in order to use it exclusively;
--	how to use AutoCirculate to efficiently stream video and audio (using the old or new APIs based on a macro definition);
+-	how to use \ref aboutautocirculate to efficiently stream video and audio;
 -	how to use an AJACircularBuffer and the producer/consumer model with AutoCirculate.
 
 <b>Command line usage:</b>
@@ -34,10 +34,10 @@ The NTV2Player class demonstrates…
 
 	-p|--pixelFormat {pixFormat}    Specifies the pixel format to use. Use '?' or 'list' to list available formats.
 
-	-a|--anc {filePath}             Optionally emits ancillary data as read from the specified binary data file.
-	                                These files can be recorded using ntv2capture using its ‘--ancʼ option.
+	-a|--anc {filePath}             Optionally injects ancillary data as read from the specified binary data file.
+	                                These files can be recorded using ntv2capture‘s ‘--ancʼ option.
 
-	-t|--hdrType {hdrSpec}          If specified and non-zero, emits HDR anc packets, where 0=none 1=SDR 2=HDR10 3=HLG.
+	-t|--hdrType {hdrSpec}          If specified and non-zero, emits HDR anc packets, where 1=SDR 2=HDR10 3=HLG.
 
 	-m|--multiChannel               Enables multiformat mode, and tries to share the device with other processes.
 
@@ -55,4 +55,27 @@ The NTV2Player class demonstrates…
 
 	-?|--help|--usage               Shows how to use this command.
 @endcode
+
+@subsection		ntv2playeranc	Ancillary Data Injection
+
+The “--anc” command-line option allows a path to a binary data file to be specified, whose contents will be used to
+fill NTV2Playerʼs ancillary data buffers during \ref autocirculateplayout.
+
+NTV2Player::PlayFrames simply reads a fixed-size chunk of data (8K by default) into the anc buffer of the
+AUTOCIRCULATE_TRANSFER object. If playing interlaced video, then another chunk of data is read from the file into
+the “field 2” ancillary data buffer. This all happens before CNTV2Card::AutoCirculateTransfer gets called, at which
+time it all gets transferred to the device (via DMA).
+
+The packet data in each per-field chunk in the file (typically 8K) is expected to be in the \ref ancgumpformat.
+For \ref konaip or \ref ioip devices running ST-2110 firmware, the data can also be in the \ref ancrtpformat, and
+CNTV2Card::AutoCirculateTransfer will automatically convert the data into RTP if needed before transferring to the
+hardware.
+
+In the binary data file, packet data is expected to start at the front of each chunk, and subsequent bytes in the
+chunk should be zero.
+
+@note	If the per-field Anc buffer region size differs from the data fileʼs per-field chunk size, then
+		ancillary data injection wonʼt work. The size of the Anc buffer region is controlled by the driver,
+		and can be queried using CNTV2Card::GetAncRegionOffsetAndSize or changed using CNTV2Card::AncSetFrameBufferSize.
+
 **/

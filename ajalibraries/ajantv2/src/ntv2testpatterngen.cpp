@@ -2656,7 +2656,7 @@ bool NTV2TestPatternGen::drawIt (void)
 		case NTV2_TestPatt_ColorQuadrantBorder: result = DrawQuadrantBorderFrame();		break;
 		case NTV2_TestPatt_LinearRamp:			result = DrawLinearRampFrame();			break;
 		case NTV2_TestPatt_ColorQuadrantTsi:	result = DrawColorQuadrantFrameTsi();	break;
-		case NTV2_TestPatt_TsiAlignment:	result = DrawColorQuadrantFrameTsi2();	break;
+		case NTV2_TestPatt_TsiAlignment:		result = DrawColorQuadrantFrameTsi2();	break;
 		case NTV2_TestPatt_ZonePlate_12b_RGB:	result = Draw12BitZonePlate();			break;
 		case NTV2_TestPatt_LinearRamp_12b_RGB:	result = Draw12BitRamp();				break;
 		case NTV2_TestPatt_HLG_Narrow_12b_RGB:	result = DrawTestPatternNarrowHLG();	break;
@@ -3401,6 +3401,7 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi2()
 	uint16_t* pUnPackedPillarInBuffer= new uint16_t[unpackBufferSize];
 	uint16_t* pUnPackedPillarInOutBuffer= new uint16_t[unpackBufferSize];
 	uint16_t* pUnPackedTempBuffer= new uint16_t[unpackBufferSize];
+	uint32_t* pPackedTempBuffer = new uint32_t[unpackBufferSize];
 
 	YCbCr10BitPixel yCbCrPixelBlack;
 	YCbCr10BitPixel yCbCrPixelWhite;
@@ -3538,7 +3539,8 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi2()
 		pUnPackedTempBuffer[diagRightIdx--] = yCbCrPixelBlack.y;
 		
 		// copy to output buffer
-		ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedTempBuffer, (uint32_t*)mpDstBuffer, mDstFrameWidth, mDstPixelFormat);
+		ConvertUnpacked10BitYCbCrToPixelFormat(pUnPackedTempBuffer, (uint32_t*)pPackedTempBuffer, mDstFrameWidth, mDstPixelFormat);
+		memcpy(mpDstBuffer, pPackedTempBuffer, mDstLinePitch);
 		mpDstBuffer += mDstLinePitch;
 	}
 
@@ -3548,6 +3550,7 @@ bool NTV2TestPatternGen::DrawColorQuadrantFrameTsi2()
 	delete [] pUnPackedPillarInBuffer;
 	delete [] pUnPackedPillarInOutBuffer;
 	delete [] pUnPackedTempBuffer;
+	delete [] pPackedTempBuffer;
 	return true;
 }
 

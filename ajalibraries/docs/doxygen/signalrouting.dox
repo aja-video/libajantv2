@@ -475,4 +475,28 @@
 
 	TBD
 
+	@section		aja4khist	4K and 8K Background
+
+	There is quite a history with 4K/Quad.  Since the introduction of 1.5G HD signaling, the SDI image size has quadrupled twice.
+
+	The first time from HD to UHD we called it “Quad“, since it required 4 × HD connections.  Initially, each link was a square division
+	of the quad image –– so “quad squares”.
+
+	Then SMPTE devised TSI (a.k.a. 2SI or two-sample-interleaved), with each link carrying a subsample of the whole image, which we
+	then called “Quad TSI”.  To make TSI from a planar image requires a simple kind of muxing, so mux widgets were added to the firmware,
+	which had to be routed before the FrameStore (for capture). For playback, demux widgets were added and must be routed after the FrameStore.
+	We call this “TSI routing”.
+
+	The firmware could now do SD up to 4K of all the various SD, HD, and 3G SDI formats.  The \ref kona4, \ref corvid44 and \ref corvid88 are
+	good examples of devices that supported these 3G crosspoints and the full complement of TSI muxers/demuxers.
+
+	When 12G came along, we designed the \ref kona5 and this same quadrupling started all over again.  The 8K/UHD2 firmware now has a 12G
+	crosspoint, so we can route UHD signals like HD ones on the \ref kona4.  Initially UHD2 was square division too, and of course, SMPTE
+	added TSI.  These formats became “Quad-Quad Squares” and “Quad-Quad TSI” … only this time we built the muxers/demuxers into the FrameStores,
+	which greatly simplifies the routing, and can be inferred from the format.
+
+	There is still a difference in the way FrameStores are routed to make “squares” and TSI work on the \ref kona5 and \ref corvid4412g.
+	Square division requires 4 FrameStores, since the “squares” are simultaneously read from different places in the image.
+	TSI only requires 2 FrameStores, since it only reads from 2 lines at a time.
+
 **/
