@@ -27,6 +27,8 @@ endif()
 set(UT_AJANTV2_SOURCES
 	main.cpp)
 set(UT_NTV2CARD_SOURCES
+	${NON_AJA_ROOT}/argparse/argparse.h
+	${NON_AJA_ROOT}/argparse/argparse.c
 	ut_ntv2card.cpp)
 
 add_executable(ut_ajantv2 ${UT_AJANTV2_SOURCES})
