@@ -10,6 +10,19 @@
 
 #include "ajantv2/includes/ntv2card.h"
 #include "ajantv2/includes/ntv2devicefeatures.h"
+#include <malloc.h>
+
+static int
+argparse_help(struct argparse *self, const struct argparse_option *option)
+{
+    (void)option;
+    argparse_usage(self);
+    return 0;
+}
+
+#define OPT_ARGPARSE_HELP()       OPT_BOOLEAN('h', "help", NULL,        \
+                                     "show this help message and exit", \
+                                     argparse_help, 0, OPT_NONEG)
 
 static constexpr size_t kAudioSize1MiB = 0xff000;
 static constexpr size_t kAudioSize2MiB = kAudioSize1MiB * 2;
@@ -23,6 +36,12 @@ static constexpr uint16_t kSDILegalMax10Bit = 0x3fb;
 static constexpr uint32_t kSDILegalMax12Bit = 0xffc;
 
 static CNTV2Card* gCardInstance = NULL;
+
+struct TestOptions {
+    uint32_t card_index;
+};
+
+static TestOptions* kGlobalOpts = NULL;
 
 void ntv2card_general_marker() {}
 TEST_SUITE("CNTV2Card General" * doctest::description("CNTV2Card general tests")) {
@@ -143,12 +162,54 @@ TEST_SUITE("Framestore Formats" * doctest::description("Framestore widget format
 }
 
 int main(int argc, const char** argv) {
-    doctest::Context ctx(argc, argv);
-    gCardInstance = new CNTV2Card(0, "");
+    kGlobalOpts = new TestOptions();
+    kGlobalOpts->card_index = 0;
+
+    // copy argv list
+    char** new_argv = (char**)malloc((argc+1) * sizeof *new_argv);
+    for(int i = 0; i < argc; ++i)
+    {
+        size_t length = strlen(argv[i])+1;
+        new_argv[i] = (char*)malloc(length);
+        memcpy(new_argv[i], argv[i], length);
+    }
+    new_argv[argc] = NULL;
+
+    // handle global test args
+    static const char *const usage[] = {
+        "ut_ntv2card [options] [[--] args]",
+        "ut_ntv2card [options]",
+        NULL,
+    };
+    struct argparse_option options[] = {
+        OPT_ARGPARSE_HELP(),
+        OPT_GROUP("ut_ntv2card options"),
+        OPT_INTEGER('\0', "card", &kGlobalOpts->card_index, "card_index"),
+        OPT_END(),
+    };
+    struct argparse argparse;
+    argparse_init(&argparse, options, usage, 0);
+    argparse_describe(&argparse, "\nntv2 card unit tests",
+        "\nPerform CNTV2Card tests against physical hardware.");
+    argparse_parse(&argparse, argc, (const char**)argv);
+
+    // initialize doctest and handle args
+    doctest::Context ctx(argc, new_argv);
+    gCardInstance = new CNTV2Card(kGlobalOpts->card_index, "");
     int res = ctx.run();
     if (gCardInstance) {
         delete gCardInstance;
         gCardInstance = NULL;
     }
+
+    // free memory
+    for(int i = 0; i < argc; ++i)
+    {
+        free(new_argv[i]);
+    }
+    free(new_argv);
+
+    delete kGlobalOpts;
+
     return ctx.shouldExit() ? res : EXIT_SUCCESS;
 }
