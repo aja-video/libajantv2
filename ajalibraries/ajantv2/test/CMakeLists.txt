@@ -29,6 +29,9 @@ set(UT_AJANTV2_SOURCES
 set(UT_NTV2CARD_SOURCES
 	${NON_AJA_ROOT}/argparse/argparse.h
 	${NON_AJA_ROOT}/argparse/argparse.c
+	auto_router.h
+	auto_router.cpp
+	test_support.h
 	ut_ntv2card.cpp)
 
 add_executable(ut_ajantv2 ${UT_AJANTV2_SOURCES})
@@ -37,6 +40,8 @@ target_include_directories(ut_ajantv2 PUBLIC ${APP_TARGET_INCLUDE_DIRS})
 target_link_libraries(ut_ajantv2 PUBLIC ajantv2 ${EXTRA_LIBRARIES})
 
 add_executable(ut_ntv2card ${UT_NTV2CARD_SOURCES})
-add_dependencies(ut_ntv2card ajantv2)
-target_include_directories(ut_ntv2card PUBLIC ${APP_TARGET_INCLUDE_DIRS})
-target_link_libraries(ut_ntv2card PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+add_dependencies(ut_ntv2card ajantv2 ntv2qa)
+target_include_directories(ut_ntv2card PUBLIC
+	${APP_TARGET_INCLUDE_DIRS}
+	${AJA_QA_ROOT}/libs)
+target_link_libraries(ut_ntv2card PUBLIC ajantv2 ntv2qa ${EXTRA_LIBRARIES})

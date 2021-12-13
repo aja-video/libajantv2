@@ -7,13 +7,13 @@
 
 #include "ajabase/common/bytestream.h"
 
+namespace qa {
+
 enum class ByteOrder {
     LittleEndian = 0,
     BigEndian = 1,
     Network = BigEndian,
 };
-
-namespace qa {
 
 template<class T>
 inline T clamp(const T& v, const T& lo, const T& hi) {
