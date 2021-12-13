@@ -158,4 +158,71 @@ Generate12Bit(
     }
 }
 
+template <typename T>
+struct CompareResult {
+    uint64_t offset;
+    T masterVal;
+    T compareVal;
+    T diffVal;
+};
+
+//
+// TODO: parameter to specify endianness to use when reading, and use AJAByteStream
+//
+template <typename T>
+int CompareTestPatterns(const void* s1, const void* s2, const std::size_t size, std::vector<CompareResult<T>>& res)
+{
+    int status = 0;
+
+    T* s1Buf = (T*)s1;
+    T* s2Buf = (T*)s2;
+
+    if (s1Buf && s2Buf) {
+        for (uint64_t pos = 0; pos < (size / sizeof(T)); pos++) {
+            T s1Val = s1Buf[pos];
+            T s2Val = s2Buf[pos];
+            if (s1Val != s2Val) {
+                CompareResult<T> cmp = { pos, s1Val, s2Val, static_cast<T>(s1Val^s2Val) };
+                res.push_back(cmp);
+                status = 1;
+            }
+        }
+    }
+
+    return status;
+}
+
+template <typename T>
+void AlternatingPattern(
+    const std::vector<uint64_t>& values,
+    uint32_t repeat_count,
+    std::vector<uint8_t>& buffer,
+    const ByteOrder& byte_order=ByteOrder::LittleEndian)
+{
+    if (values.empty() || buffer.empty())
+        return;
+
+    AJAByteStream bs(buffer.data());
+
+    const std::size_t num_values = values.size();
+
+    uint32_t num_repeats = repeat_count == 0 ? repeat_count + 1 : repeat_count;
+    std::size_t num_elems = (buffer.size() / sizeof(T)) / num_values / num_repeats;
+
+    if (num_values == 1) {
+        for(std::size_t elem = 0; elem < num_elems; elem++) {
+            WriteBytestream<T>(bs, values[0], byte_order);
+        }
+    }
+    else {
+        for(std::size_t elem = 0; elem < num_elems; elem++) {
+            for (uint32_t vdx = 0; vdx < num_values; vdx++) {
+                for (uint32_t r = 0; r < num_repeats; r++) {
+                    WriteBytestream<T>(bs, static_cast<T>(values[vdx]), byte_order);
+                }
+            }
+        }
+    }
+}
+
 } // qa
