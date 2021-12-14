@@ -51,6 +51,12 @@ static constexpr uint32_t kSDILegalMax12Bit = 0xffc;
 struct TestOptions {
     uint32_t card_a_index;
     uint32_t card_b_index;
+    uint32_t out_channel;
+    uint32_t inp_channel;
+    uint32_t out_framestore;
+    uint32_t inp_framestore;
+    uint32_t out_frame;
+    uint32_t inp_frame;
 };
 static TestOptions* gOpts = NULL;
 static CNTV2Card* gCard = NULL;
@@ -170,7 +176,7 @@ TEST_SUITE("framestore_formats" * doctest::description("Framestore widget format
 
 void ntv2card_sdi_loopback_marker() {}
 TEST_SUITE("sdi_loopback" * doctest::description("SDI loopback tests")) {
-    TEST_CASE("NTSC YUV 8-bit") {
+    TEST_CASE("SDI Loopback 1-wire") {
         CNTV2DeviceScanner scanner;
         const size_t num_devices = scanner.GetNumDevices();
         if (num_devices < 2)
@@ -180,17 +186,17 @@ TEST_SUITE("sdi_loopback" * doctest::description("SDI loopback tests")) {
         NTV2VideoFormat vf = NTV2_FORMAT_525_5994;
         NTV2PixelFormat pf = NTV2_FBF_8BIT_YCBCR;
         VPIDStandard vpid_standard = VPIDStandard_483_576;
-        uint32_t chan_index = 0;
-        uint32_t fs_index = 0;
-        uint32_t frame_num = 0;
+        // uint32_t chan_index = 0;
+        // uint32_t fs_index = 0;
+        // uint32_t frame_num = 0;
         NTV2VANCMode vanc_mode = NTV2_VANCMODE_OFF;
         NTV2ReferenceSource ref_src = NTV2_REFERENCE_FREERUN;
         NTV2FormatDescriptor fd(vf, pf, vanc_mode);
-        auto src_router = AutoRouter(gOpts->card_a_index, chan_index, fs_index,
+        auto src_router = AutoRouter(gOpts->card_a_index, gOpts->out_channel, gOpts->out_framestore,
             NTV2_MODE_DISPLAY, vf, pf,
             ref_src, vanc_mode, vpid_standard, kConnectionKindSDI);
         src_router.ApplyRouting(true, true);
-        auto dst_router = AutoRouter(gOpts->card_b_index, chan_index, fs_index,
+        auto dst_router = AutoRouter(gOpts->card_b_index, gOpts->inp_channel, gOpts->inp_framestore,
             NTV2_MODE_CAPTURE, vf, pf,
             ref_src, vanc_mode, vpid_standard, kConnectionKindSDI);
         dst_router.ApplyRouting(true, true);
@@ -206,62 +212,15 @@ TEST_SUITE("sdi_loopback" * doctest::description("SDI loopback tests")) {
 
         auto src_card = src_router.GetCard();
         auto dst_card = dst_router.GetCard();
-        NTV2Channel channel = GetNTV2ChannelForIndex(chan_index);
-        CHECK_EQ(src_card->SetMode(channel, NTV2_MODE_DISPLAY), true);
-        CHECK_EQ(src_card->SetOutputFrame(channel, frame_num), true);
-        CHECK_EQ(src_card->DMAWriteFrame(frame_num, reinterpret_cast<const ULWord*>(buffer.data()), (ULWord)kFrameSize8MiB), true);
+        NTV2Channel out_channel = GetNTV2ChannelForIndex(gOpts->out_channel);
+        NTV2Channel inp_channel = GetNTV2ChannelForIndex(gOpts->inp_channel);
+        CHECK_EQ(src_card->SetMode(out_channel, NTV2_MODE_DISPLAY), true);
+        CHECK_EQ(src_card->SetOutputFrame(out_channel, gOpts->out_frame), true);
+        CHECK_EQ(src_card->DMAWriteFrame(gOpts->out_frame, reinterpret_cast<const ULWord*>(buffer.data()), (ULWord)kFrameSize8MiB), true);
         AJATime::Sleep(300);
-        CHECK_EQ(dst_card->SetMode(channel, NTV2_MODE_CAPTURE, false), true);
-        CHECK_EQ(dst_card->SetInputFrame(channel, frame_num), true);
-        CHECK_EQ(dst_card->DMAReadFrame(frame_num, reinterpret_cast<ULWord*>(&readback[0]), (ULWord)kFrameSize8MiB), true);
-
-        size_t raster_bytes = fd.GetTotalBytes();
-        std::vector<qa::CompareResult<uint8_t>> cmp_results;
-        CHECK_EQ(qa::CompareTestPatterns<uint8_t>(readback.data(), buffer.data(), raster_bytes, cmp_results), 0);
-        CHECK_EQ(memcmp(readback.data(), buffer.data(), raster_bytes), 0);
-    }
-    TEST_CASE("720p YUV 8-bit") {
-        CNTV2DeviceScanner scanner;
-        const size_t num_devices = scanner.GetNumDevices();
-        if (num_devices < 2)
-            LOGERR("SDI Loopback tests require two boards connected to the host system!");
-        CHECK_GE(num_devices, 2);
-
-        NTV2VideoFormat vf = NTV2_FORMAT_720p_5994;
-        NTV2PixelFormat pf = NTV2_FBF_8BIT_YCBCR;
-        VPIDStandard vpid_standard = VPIDStandard_720;
-        uint32_t chan_index = 0;
-        uint32_t fs_index = 0;
-        uint32_t frame_num = 0;
-        NTV2VANCMode vanc_mode = NTV2_VANCMODE_OFF;
-        NTV2ReferenceSource ref_src = NTV2_REFERENCE_FREERUN;
-        NTV2FormatDescriptor fd(vf, pf, vanc_mode);
-        auto src_router = AutoRouter(gOpts->card_a_index, chan_index, fs_index,
-            NTV2_MODE_DISPLAY, vf, pf,
-            ref_src, vanc_mode, vpid_standard, kConnectionKindSDI);
-        src_router.ApplyRouting(true, true);
-        auto dst_router = AutoRouter(gOpts->card_b_index, chan_index, fs_index,
-            NTV2_MODE_CAPTURE, vf, pf,
-            ref_src, vanc_mode, vpid_standard, kConnectionKindSDI);
-        dst_router.ApplyRouting(true, true);
-
-        std::vector<uint8_t> buffer(kFrameSize8MiB);
-        std::vector<uint8_t> readback(kFrameSize8MiB);
-
-        // qa::RandomPattern<uint32_t>(0xDECAFBAD, 0x1337c0d3, 0xdecafbad, buffer, qa::ByteOrder::LittleEndian);
-        qa::AlternatingPattern<uint32_t>({ 0x4f01d135, 0xb00b1355 }, 1, buffer);
-        qa::RandomPattern<uint32_t>(0xAB4D533D, 0, UINT32_MAX, readback, qa::ByteOrder::LittleEndian);
-
-        auto src_card = src_router.GetCard();
-        auto dst_card = dst_router.GetCard();
-        NTV2Channel channel = GetNTV2ChannelForIndex(chan_index);
-        CHECK_EQ(src_card->SetMode(channel, NTV2_MODE_DISPLAY), true);
-        CHECK_EQ(src_card->SetOutputFrame(channel, frame_num), true);
-        CHECK_EQ(src_card->DMAWriteFrame(frame_num, reinterpret_cast<const ULWord*>(buffer.data()), (ULWord)kFrameSize8MiB), true);
-        AJATime::Sleep(300);
-        CHECK_EQ(dst_card->SetMode(channel, NTV2_MODE_CAPTURE, false), true);
-        CHECK_EQ(dst_card->SetInputFrame(channel, frame_num), true);
-        CHECK_EQ(dst_card->DMAReadFrame(frame_num, reinterpret_cast<ULWord*>(&readback[0]), (ULWord)kFrameSize8MiB), true);
+        CHECK_EQ(dst_card->SetMode(inp_channel, NTV2_MODE_CAPTURE, false), true);
+        CHECK_EQ(dst_card->SetInputFrame(inp_channel, gOpts->inp_frame), true);
+        CHECK_EQ(dst_card->DMAReadFrame(gOpts->inp_frame, reinterpret_cast<ULWord*>(&readback[0]), (ULWord)kFrameSize8MiB), true);
 
         size_t raster_bytes = fd.GetTotalBytes();
         std::vector<qa::CompareResult<uint8_t>> cmp_results;
@@ -302,6 +261,13 @@ int main(int argc, const char** argv) {
         OPT_ARGPARSE_HELP(),
         OPT_GROUP("ut_ntv2card options"),
         OPT_INTEGER('\0', "card", &gOpts->card_a_index, "card_a"),
+        OPT_INTEGER('\0', "card_b", &gOpts->card_b_index, "card_b"),
+        OPT_INTEGER('\0', "out_channel", &gOpts->out_channel, "output channel for board-to-board/loopback testing"),
+        OPT_INTEGER('\0', "inp_channel", &gOpts->inp_channel, "input channel for board-to-board/loopback testing"),
+        OPT_INTEGER('\0', "out_framestore", &gOpts->out_framestore, "output framestore for board-to-board/loopback testing"),
+        OPT_INTEGER('\0', "inp_framestore", &gOpts->inp_framestore, "input framestore for board-to-board/loopback testing"),
+        OPT_INTEGER('\0', "out_frame", &gOpts->out_frame, "output frame number for board-to-board/loopback testing"),
+        OPT_INTEGER('\0', "inp_frame", &gOpts->inp_frame, "input frame number for board-to-board/loopback testing"),
         OPT_END(),
     };
     struct argparse argparse;
