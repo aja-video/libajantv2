@@ -117,7 +117,7 @@ typedef enum _AJADebugUnit
 	//
 	AJA_DebugUnit_FirstUnused				= 59,
 	AJA_DebugUnit_Unused_59					= AJA_DebugUnit_FirstUnused,
-	AJA_DebugUnit_Unused_61					= 60,
+	AJA_DebugUnit_Unused_60					= 60,
 	AJA_DebugUnit_Unused_61					= 61,
 	AJA_DebugUnit_Unused_62					= 62,
 	AJA_DebugUnit_Unused_63					= 63,
