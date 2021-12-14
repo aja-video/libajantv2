@@ -235,8 +235,6 @@ TEST_SUITE("sdi_loopback" * doctest::description("SDI loopback tests")) {
         CHECK_EQ(src_card->SetMode(out_channel, NTV2_MODE_DISPLAY), true);
         CHECK_EQ(src_card->SetOutputFrame(out_channel, gOpts->out_frame), true);
         CHECK_EQ(src_card->DMAWriteFrame(gOpts->out_frame, reinterpret_cast<const ULWord*>(buffer.data()), (ULWord)kFrameSize8MiB), true);
-        NTV2_POINTER f1_anc, f2_anc;
-        src_card->DMAWriteAnc(gOpts->out_frame, f1_anc, f2_anc, out_channel);
         AJATime::Sleep(350);
         CHECK_EQ(dst_card->SetMode(inp_channel, NTV2_MODE_CAPTURE, false), true);
         CHECK_EQ(dst_card->SetInputFrame(inp_channel, gOpts->inp_frame), true);
