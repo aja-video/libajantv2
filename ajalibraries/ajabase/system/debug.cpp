@@ -142,7 +142,7 @@ AJAStatus AJADebug::Open (bool incrementRefCount)
 			addDebugGroupToLabelVector(AJA_DebugUnit_SMPTEAnc);
 			addDebugGroupToLabelVector(AJA_DebugUnit_AJAAncData);
 			addDebugGroupToLabelVector(AJA_DebugUnit_AJAAncList);
-			addDebugGroupToLabelVector(AJA_DebugUnit_BFT);
+			addDebugGroupToLabelVector(AJA_DebugUnit_Testing);
 			addDebugGroupToLabelVector(AJA_DebugUnit_PnP);
 			addDebugGroupToLabelVector(AJA_DebugUnit_Persistence);
 			addDebugGroupToLabelVector(AJA_DebugUnit_Avid);
@@ -167,7 +167,7 @@ AJAStatus AJADebug::Open (bool incrementRefCount)
 			addDebugGroupToLabelVector(AJA_DebugUnit_RPCServer);
 			addDebugGroupToLabelVector(AJA_DebugUnit_RPCClient);
 			addDebugGroupToLabelVector(AJA_DebugUnit_Firmware);
-			addDebugGroupToLabelVector(AJA_DebugUnit_UnitTest);
+			addDebugGroupToLabelVector(AJA_DebugUnit_Testing);
 
 			for (int i(AJA_DebugUnit_FirstUnused);	i < AJA_DebugUnit_Size;	 i++)
 			{

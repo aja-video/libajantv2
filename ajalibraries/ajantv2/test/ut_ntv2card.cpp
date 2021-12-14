@@ -18,11 +18,11 @@
 
 #include <malloc.h>
 
-#define	LOGERR(__x__)	AJA_sREPORT(AJA_DebugUnit_UnitTest, AJA_DebugSeverity_Error,	__FUNCTION__ << ":  " << __x__)
-#define	LOGWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_UnitTest, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
-#define	LOGNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_UnitTest, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":  " << __x__)
-#define	LOGINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_UnitTest, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
-#define	LOGDBG(__x__)	AJA_sREPORT(AJA_DebugUnit_UnitTest, AJA_DebugSeverity_Debug,	__FUNCTION__ << ":  " << __x__)
+#define	LOGERR(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Error,	__FUNCTION__ << ":  " << __x__)
+#define	LOGWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
+#define	LOGNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":  " << __x__)
+#define	LOGINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
+#define	LOGDBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Debug,	__FUNCTION__ << ":  " << __x__)
 
 // The default argparse behavior is to exit after displaying usage text.
 // We want to display usage text for both our args, and those of doctest.
