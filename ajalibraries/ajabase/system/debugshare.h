@@ -72,7 +72,7 @@ typedef enum _AJADebugUnit
 	AJA_DebugUnit_SMPTEAnc					= 31,
 	AJA_DebugUnit_AJAAncData				= 32,
 	AJA_DebugUnit_AJAAncList				= 33,
-	AJA_DebugUnit_BFT						= 34,
+	AJA_DebugUnit_Testing					= 34,
 	AJA_DebugUnit_PnP						= 35,
 	AJA_DebugUnit_Persistence				= 36,
 	AJA_DebugUnit_Avid						= 37,
@@ -117,7 +117,7 @@ typedef enum _AJADebugUnit
 	//
 	AJA_DebugUnit_FirstUnused				= 59,
 	AJA_DebugUnit_Unused_59					= AJA_DebugUnit_FirstUnused,
-	AJA_DebugUnit_Unused_60					= 60,
+	AJA_DebugUnit_Unused_61					= 60,
 	AJA_DebugUnit_Unused_61					= 61,
 	AJA_DebugUnit_Unused_62					= 62,
 	AJA_DebugUnit_Unused_63					= 63,
