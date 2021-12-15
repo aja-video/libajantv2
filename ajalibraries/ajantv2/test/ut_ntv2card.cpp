@@ -233,9 +233,10 @@ TEST_SUITE("sdi_loopback" * doctest::description("SDI loopback tests")) {
             auto vpid_db_id = csv_doc.GetCell<std::string>(vpid_db_id_idx, i);
             auto vf = (NTV2VideoFormat)csv_doc.GetCell<int>(vid_fmt_idx, i);
             auto pf = (NTV2PixelFormat)csv_doc.GetCell<int>(pix_fmt_idx, i);
-            auto vpid_standard = (VPIDStandard)std::stoul(csv_doc.GetCell<std::string>(smpte_id_idx, i), nullptr, 16);
+            auto vpid_standard_str = csv_doc.GetCell<std::string>(smpte_id_idx, i);
+            auto vpid_standard = (VPIDStandard)std::stoul(vpid_standard_str, nullptr, 16);
 
-            LOGINFO("id: " << vpid_db_id);
+            LOGINFO("csv id: " << vpid_db_id << " | vpid std: 0x" << vpid_standard_str << " | pf: " << NTV2FrameBufferFormatToString(pf, true) << " | vf: " << NTV2VideoFormatToString(vf));
             // NTV2VideoFormat vf = NTV2_FORMAT_1080i_5994;
             // NTV2PixelFormat pf = NTV2_FBF_8BIT_YCBCR;
             // VPIDStandard vpid_standard = VPIDStandard_1080;
@@ -301,7 +302,7 @@ TEST_SUITE("sdi_loopback" * doctest::description("SDI loopback tests")) {
             CHECK_EQ(src_card->SetMode(out_channel, NTV2_MODE_DISPLAY), true);
             CHECK_EQ(src_card->SetOutputFrame(out_channel, gOpts->out_frame), true);
             CHECK_EQ(src_card->DMAWriteFrame(gOpts->out_frame, reinterpret_cast<const ULWord*>(buffer.data()), (ULWord)kFrameSize8MiB), true);
-            AJATime::Sleep(750);
+            AJATime::Sleep(750); // TODO (paulh): Maybe we need to build a histogram of results and check for consistency over multiple readbacks?
             size_t raster_bytes = fd.GetTotalBytes();
             CHECK_EQ(dst_card->SetMode(inp_channel, NTV2_MODE_CAPTURE, false), true);
             CHECK_EQ(dst_card->SetInputFrame(inp_channel, gOpts->inp_frame), true);
