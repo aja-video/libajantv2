@@ -75,10 +75,13 @@ bool AutoRouter::check_wire_and_framestore_bounds(
     return true;
 }
 
+AJAStatus AutoRouter::Init()
+{
+    return m_card_ctrl->InitializeCard();
+}
+
 AJAStatus AutoRouter::ApplyRouting(bool clear, bool force)
 {
-    AJA_RETURN_STATUS(m_card_ctrl->InitializeCard());
-
     CNTV2Card* card = m_card_ctrl->GetCard();
     if (!card)
         return AJA_STATUS_NULL;

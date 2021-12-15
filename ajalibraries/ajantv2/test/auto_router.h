@@ -23,7 +23,7 @@ public:
         NTV2VANCMode vanc_mode,
         VPIDStandard vpid_std,
         ConnectionKind cnx_kind);
-
+    AJAStatus Init();
     AJAStatus ApplyRouting(bool clear, bool force);
     CNTV2Card* GetCard();
 
