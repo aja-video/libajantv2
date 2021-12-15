@@ -6,7 +6,7 @@ message("added ntv2oglcapture")
 find_package(OpenGL REQUIRED)
 set(OPENGL_LIBRARIES OpenGL::GLU)
 
-find_package(Qt5 COMPONENTS Core OpenGL Widgets REQUIRED)
+find_package(Qt5 HINTS ${AJA_QT_DIR} COMPONENTS Core OpenGL Widgets REQUIRED)
 set(QT_LIBRARIES Qt5::Core Qt5::OpenGL Qt5::Widgets)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)

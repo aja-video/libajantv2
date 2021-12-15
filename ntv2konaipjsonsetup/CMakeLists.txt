@@ -2,7 +2,7 @@ project(ntv2konaipjsonsetup)
 
 message("added ntv2konaipjsonsetup")
 
-find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
+find_package(Qt5 HINTS ${AJA_QT_DIR} COMPONENTS Core Widgets REQUIRED)
 set(QT_LIBRARIES Qt5::Core Qt5::Widgets)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
