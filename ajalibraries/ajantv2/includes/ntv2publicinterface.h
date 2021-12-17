@@ -6144,80 +6144,26 @@ typedef enum
 					@name	Inquiry -- Essentials
 				**/
 				///@{
-				/**
-					@return True if valid (i.e. a non-zero segment count and segment length);  otherwise false.
-				**/
-				inline bool		isValid (void) const	{return getSegmentCount() && getSegmentLength() ? true : false;}
-
-				/**
-					@return The number of segments.
-				**/
-				inline ULWord	getSegmentCount (void) const		{return mNumSegments;}
-
-				/**
-					@return The segment length, in elements.
-				**/
-				inline ULWord	getSegmentLength (void) const		{return mElementsPerSegment;}
-
-				/**
-					@return The offset, in elements, to the start of the first source segment.
-				**/
-				inline ULWord	getSourceOffset (void) const		{return mInitialSrcOffset;}
-
-				/**
-					@return The offset, in elements, to the start of the first destination segment.
-				**/
-				inline ULWord	getDestOffset (void) const			{return mInitialDstOffset;}
-
-				/**
-					@return The number of elements between each source row.
-				**/
-				inline ULWord	getSourcePitch (void) const			{return mSrcElementsPerRow;}
-
-				/**
-					@return The number of elements between each destination row.
-				**/
-				inline ULWord	getDestPitch (void) const			{return mDstElementsPerRow;}
+				inline bool		isValid (void) const			{return getSegmentCount() && getSegmentLength() ? true : false;}	///< @return True if valid (i.e. a non-zero segment count and segment length);  otherwise false.
+				inline ULWord	getSegmentCount (void) const	{return mNumSegments;}			///< @return The number of segments.
+				inline ULWord	getSegmentLength (void) const	{return mElementsPerSegment;}	///< @return The segment length, in elements.
+				inline ULWord	getSourceOffset (void) const	{return mInitialSrcOffset;}		///< @return The offset, in elements, to the start of the first source segment.
+				inline ULWord	getDestOffset (void) const		{return mInitialDstOffset;}		///< @return The offset, in elements, to the start of the first destination segment.
+				inline ULWord	getSourcePitch (void) const		{return mSrcElementsPerRow;}	///< @return The number of elements between each source row.
+				inline ULWord	getDestPitch (void) const		{return mDstElementsPerRow;}	///< @return The number of elements between each destination row.
 				///@}
 
 				/**
 					@name	Inquiry
 				**/
 				///@{
-				/**
-					@return The size of each element, in bytes.
-				**/
-				inline ULWord	getElementLength (void) const		{return ULWord(1 << (mFlags & 3));}
-
-				/**
-					@return True if source rows should be traversed bottom-to-top;	otherwise false.
-				**/
-				inline bool		isSourceBottomUp (void) const		{return mFlags & BIT(8) ? true : false;}
-
-				/**
-					@return True if source rows should be traversed top-to-bottom;	otherwise false.
-				**/
-				inline bool		isSourceTopDown (void) const		{return mFlags & BIT(8) ? false : true;}
-
-				/**
-					@return True if destination rows should be traversed bottom-to-top;	 otherwise false.
-				**/
-				inline bool		isDestBottomUp (void) const			{return mFlags & BIT(9) ? true : false;}
-
-				/**
-					@return True if destination rows should be traversed top-to-bottom;	 otherwise false.
-				**/
-				inline bool		isDestTopDown (void) const			{return mFlags & BIT(9) ? false : true;}
-
-				/**
-					@return The total number of elements (i.e. the product of the segment count and length).
-				**/
-				ULWord			getTotalElements (void) const		{return getSegmentCount() * getSegmentLength();}
-
-				/**
-					@return The total number of bytes.
-				**/
-				ULWord			getTotalBytes (void) const			{return getTotalElements() * getElementLength();}
+				inline ULWord	getElementLength (void) const	{return ULWord(1 << (mFlags & 3));}					///< @return The size of each element, in bytes.
+				inline bool		isSourceBottomUp (void) const	{return mFlags & BIT(8) ? true : false;}			///< @return True if source rows should be traversed bottom-to-top;	otherwise false.
+				inline bool		isSourceTopDown (void) const	{return mFlags & BIT(8) ? false : true;}			///< @return True if source rows should be traversed top-to-bottom;	otherwise false.
+				inline bool		isDestBottomUp (void) const		{return mFlags & BIT(9) ? true : false;}			///< @return True if destination rows should be traversed bottom-to-top;	 otherwise false.
+				inline bool		isDestTopDown (void) const		{return mFlags & BIT(9) ? false : true;}			///< @return True if destination rows should be traversed top-to-bottom;	 otherwise false.
+				inline ULWord	getTotalElements (void) const	{return getSegmentCount() * getSegmentLength();}	///< @return The total number of elements (i.e. the product of the segment count and length).
+				inline ULWord	getTotalBytes (void) const		{return getTotalElements() * getElementLength();}	///< @return The total number of bytes.
 
 				/**
 					@return The offset to the first element immediately past the last source segment.
