@@ -22,7 +22,7 @@ set(AJANTV2_TARGET_INCLUDE_DIRS
     ${CMAKE_CURRENT_BINARY_DIR})
 
 if (AJA_BUILDING_CMAKE)
-    add_definitions(-DAJA_NTV2_BUILDING_CMAKE)
+    add_definitions(-DAJA_BUILDING_CMAKE)
     configure_file(includes/version.h.in includes/version.h @ONLY)
 endif()
 

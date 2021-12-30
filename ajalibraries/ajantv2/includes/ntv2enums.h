@@ -22,7 +22,7 @@
 	SDK VERSION
 	The next several macro values are patched when the SDK is built by AJA.
 **/
-#if defined (AJA_NTV2_BUILDING_CMAKE)
+#if defined (AJA_BUILDING_CMAKE)
 // NOTE: Enabling the CMake variable "AJA_BUILDING_CMAKE" will generate an
 // include file "includes/version.h" in the CMake build directory for ajantv2.
 // The contents of this file are populated by CMake, using the ajantv2/includes/version.h.in
