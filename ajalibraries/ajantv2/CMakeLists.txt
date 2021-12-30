@@ -362,10 +362,12 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 
     if (AJA_BUILD_OPENSOURCE)
         if (AJA_DEPLOY_HEADERS)
+            install(FILES ${AJANTV2_OS_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/src/win)
             install(FILES ${AJABASE_OS_SYSTEM_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system/windows)
             install(FILES ${AJABASE_OS_PNP_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/windows)
         endif()
         if (AJA_DEPLOY_SOURCES)
+            install(FILES ${AJANTV2_OS_SOURCES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/src/win)
             install(FILES ${AJABASE_OS_SYSTEM_SOURCES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system/windows)
             install(FILES ${AJABASE_OS_PNP_SOURCES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/windows)
         endif()
@@ -619,4 +621,9 @@ else()
         install(FILES ${AJAANC_SOURCES} DESTINATION ${CMAKE_SOURCE_DIR}/ntv2sdk/ajalibraries/ajaanc/src)
         install(FILES ${AJANTV2_SOURCES} DESTINATION ${CMAKE_SOURCE_DIR}/ntv2sdk/ajalibraries/ajantv2/src)
     endif()
+    install(TARGETS ajantv2
+        ARCHIVE DESTINATION ${CMAKE_SOURCE_DIR}/ntv2sdk/lib
+        LIBRARY DESTINATION ${CMAKE_SOURCE_DIR}/ntv2sdk/lib
+        RUNTIME DESTINATION ${CMAKE_SOURCE_DIR}/ntv2sdk/bin
+        FRAMEWORK DESTINATION ${CMAKE_SOURCE_DIR}/ntv2sdk/lib)
 endif()
