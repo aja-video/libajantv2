@@ -925,7 +925,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 
 			while (true) {
 				err = bf.ParseHeaderFromBuffer(sub);
-				if (sub.GetByteCount() < 226) {
+				if (sub.GetByteCount() < 225) {
 					CHECK_NE(err, "");
 				}
 				else {
