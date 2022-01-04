@@ -399,7 +399,7 @@ NTV2_POINTER & NTV2_POINTER::Segment (NTV2_POINTER & outPtr, const ULWord inByte
 	outPtr.Set(AJA_NULL, 0);	//	Make invalid
 	if (inByteOffset >= GetByteCount())
 		return outPtr;	//	Offset past end
-	if (inByteOffset+inByteCount >= GetByteCount())
+	if (inByteOffset+inByteCount > GetByteCount())
 		return outPtr;	//	Segment too long
 	outPtr.Set(GetHostAddress(inByteOffset), inByteCount);
 	return outPtr;
