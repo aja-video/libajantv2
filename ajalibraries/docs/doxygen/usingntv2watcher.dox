@@ -1446,9 +1446,14 @@ buffer (aka “clipboard” or “paste buffer”). It can also display the cont
 			Choose from 8 bytes up to 8K bytes by powers of 2.
 			Note that larger values make for fewer lines and many more columns.
 			Smaller values show many more lines with fewer columns.
+		-	<b>Endianness</b> — Changes the display byte-ordering for 2/4/8-byte grouping. Choose “Big Endian” or “Little Endian”.
+			One of the two options will indicate the host processor’s native endianness.
+		-	<b>Select All</b> — When available, selects (highlights) all of the data being viewed.
+		-	<b>Show Rulers</b> — When available, un-hides any rulers that are hidden.
 	-	<b>Row & Column Label Options</b> — (Right-Click Operations)
 		-	<b>Reference</b> — Choose “Byte Offset From Start” or “Byte Offset From End”.
 		-	<b>Radix</b> — Choose “Binary”, “Octal”, “Decimal” or “Hexadecimal”.
+		-	<b>Hide</b> — Hides the ruler. (To show the ruler again, right-click in the data and choose “Show Rulers”.
 -	<b>Drag and Drop</b> — Dropping a single file or text clipping from outside the tool window is supported.
 	-	The file’s raw contents are displayed in the window.
 	-	Viewing a file or clipping stops host scrap/clipboard monitoring.
