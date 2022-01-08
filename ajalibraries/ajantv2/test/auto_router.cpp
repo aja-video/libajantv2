@@ -168,9 +168,9 @@ AJAStatus AutoRouter::ApplyRouting(bool clear, bool force)
             if (is_4k || is_8k) {
                 card->SetTsiFrameEnable(rp.flags & kEnable4KTSI, channel);
                 if (is_4k && !is_8k) {
-                    card->Set4kSquaresEnable(rp.flags & kEnable4KQuads, channel);
+                    card->Set4kSquaresEnable(rp.flags & kEnable4KSquares, channel);
                 } else if (!is_4k && is_8k) {
-                    card->SetQuadQuadSquaresEnable(rp.flags & kEnable4KQuads, channel);
+                    card->SetQuadQuadSquaresEnable(rp.flags & kEnable4KSquares, channel);
                 }
             } else {
                 card->SetTsiFrameEnable(false, channel);
