@@ -2348,59 +2348,59 @@ private:
 				<< "Input 1 Geometry: ";
 			if (BIT(30) & inRegValue)
 				switch (((BIT(4)|BIT(5)|BIT(6)) & inRegValue) >> 4)
-			{
-				case 0:		oss << "2K x 1080";		break;
-				case 1:		oss << "2K x 1556";		break;
-				default:	oss << "Invalid HI";	break;
-			}
+				{
+					case 0:		oss << "2K x 1080";		break;
+					case 1:		oss << "2K x 1556";		break;
+					default:	oss << "Invalid HI";	break;
+				}
 			else
 				switch (((BIT(4)|BIT(5)|BIT(6)) & inRegValue) >> 4)
-			{
-				case 0:				oss << "Unknown";		break;
-				case 1:				oss << "525";			break;
-				case 2:				oss << "625";			break;
-				case 3:				oss << "750";			break;
-				case 4:				oss << "1125";			break;
-				case 5:				oss << "1250";			break;
-				case 6: case 7:		oss << "Reserved";		break;
-				default:			oss << "Invalid LO";	break;
-			}
+				{
+					case 0:				oss << "Unknown";		break;
+					case 1:				oss << "525";			break;
+					case 2:				oss << "625";			break;
+					case 3:				oss << "750";			break;
+					case 4:				oss << "1125";			break;
+					case 5:				oss << "1250";			break;
+					case 6: case 7:		oss << "Reserved";		break;
+					default:			oss << "Invalid LO";	break;
+				}
 			oss << endl
 				<< "Input 1 Scan Mode: "	<< ((BIT(7) & inRegValue) ? "Progressive" : "Interlaced") << endl
 				<< "Input 2 Frame Rate: " << ::NTV2FrameRateToString(fRate2, true) << endl
 				<< "Input 2 Geometry: ";
 			if (BIT(31) & inRegValue)
 				switch (((BIT(12)|BIT(13)|BIT(14)) & inRegValue) >> 12)
-			{
-				case 0:		oss << "2K x 1080";		break;
-				case 1:		oss << "2K x 1556";		break;
-				default:	oss << "Invalid HI";	break;
-			}
+				{
+					case 0:		oss << "2K x 1080";		break;
+					case 1:		oss << "2K x 1556";		break;
+					default:	oss << "Invalid HI";	break;
+				}
 			else
 				switch (((BIT(12)|BIT(13)|BIT(14)) & inRegValue) >> 12)
-			{
-				case 0:				oss << "Unknown";		break;
-				case 1:				oss << "525";			break;
-				case 2:				oss << "625";			break;
-				case 3:				oss << "750";			break;
-				case 4:				oss << "1125";			break;
-				case 5:				oss << "1250";			break;
-				case 6: case 7:		oss << "Reserved";		break;
-				default:			oss << "Invalid LO";	break;
-			}
+				{
+					case 0:				oss << "Unknown";		break;
+					case 1:				oss << "525";			break;
+					case 2:				oss << "625";			break;
+					case 3:				oss << "750";			break;
+					case 4:				oss << "1125";			break;
+					case 5:				oss << "1250";			break;
+					case 6: case 7:		oss << "Reserved";		break;
+					default:			oss << "Invalid LO";	break;
+				}
 			oss << endl
 				<< "Input 2 Scan Mode: "	<< ((BIT(15) & inRegValue) ? "Progressive" : "Interlaced") << endl
 				<< "Reference Frame Rate: " << ::NTV2FrameRateToString(fRateRf, true) << endl
 				<< "Reference Geometry: ";
-			switch (((BIT(20)|BIT(21)|BIT(22)|BIT(23)) & inRegValue) >> 20)
+			switch (((BIT(20)|BIT(21)|BIT(22)) & inRegValue) >> 20)	//	Ref scan geometry
 			{
-				case 0:					oss << "Unknown";		break;
-				case 1:					oss << "525";			break;
-				case 2:					oss << "625";			break;
-				case 3:					oss << "750";			break;
-				case 4:					oss << "1125";			break;
-				case 5: case 6: case 7: oss << "N/A";			break;
-				default:				oss << "Invalid";		break;
+				case 0:		oss << "NTV2_SG_UNKNOWN";	break;
+				case 1:		oss << "NTV2_SG_525";		break;
+				case 2:		oss << "NTV2_SG_625";		break;
+				case 3:		oss << "NTV2_SG_750";		break;
+				case 4:		oss << "NTV2_SG_1125";		break;
+				case 5:		oss << "NTV2_SG_1250";		break;
+				default:	oss << "Invalid";			break;
 			}
 			oss << endl
 				<< "Reference Scan Mode: " << ((BIT(23) & inRegValue) ? "Progressive" : "Interlaced") << endl

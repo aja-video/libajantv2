@@ -588,8 +588,9 @@ void CNTV2SupportLogger::FetchAutoCirculateLog (ostringstream & oss) const
 	ChannelToACStatus		perChannelStatus;	//	Per-channel AUTOCIRCULATE_STATUS
 	ChannelToPerFrameTCList perChannelTCs;		//	Per-channel collection of per-frame TCs
 	NTV2EveryFrameTaskMode	taskMode	(NTV2_DISABLE_TASKS);
+	const NTV2DeviceID		deviceID	(mDevice.GetDeviceID());
+	const ULWord			numChannels (::NTV2DeviceGetNumVideoChannels(deviceID));
 	static const string		dashes		(25, '-');
-	const ULWord			numChannels (::NTV2DeviceGetNumVideoChannels(mDevice.GetDeviceID()));
 
 	//	This code block takes a snapshot of the current AutoCirculate state of the device...
 	mDevice.GetEveryFrameServices(taskMode);
@@ -619,6 +620,17 @@ void CNTV2SupportLogger::FetchAutoCirculateLog (ostringstream & oss) const
 			perChannelTCs.insert(ChannelToPerFrameTCListPair(chan, perFrameTCs));
 		}	//	if not stopped
 	}	//	for each channel
+
+	bool multiFormatMode(false);
+	if (::NTV2DeviceCanDoMultiFormat(deviceID) && mDevice.GetMultiFormatMode(multiFormatMode))
+	{
+		if (!multiFormatMode)
+			oss	<< "UniFormat: " << ::NTV2VideoFormatToString(::getVideoFormat(mDevice, NTV2_CHANNEL1)) << endl;
+		else
+			oss << "MultiFormat Mode" << endl;
+	}
+	else
+		oss	<< "Board Format: " << ::NTV2VideoFormatToString(::getVideoFormat(mDevice, NTV2_CHANNEL1)) << endl;
 
 	oss << "Task mode:  " << ::NTV2TaskModeToString(taskMode) << ", PID=" << pidToString(uint32_t(appPID)) << ", signature=" << appSignatureToString(appSignature) << endl
 		<< endl
