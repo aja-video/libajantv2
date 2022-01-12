@@ -182,22 +182,29 @@ if (AJA_BUILD_DRIVER STREQUAL ON)
         src/ntv2driverprocamp.cpp)
 endif()
 
-if (AJA_BUILD_OPENSOURCE STREQUAL OFF)
+if (NOT AJA_BUILD_OPENSOURCE)
     message("added ajantv2 HEVC/M31 codec")
-    list(APPEND AJANTV2_HEADERS
+    set(AJANTV2_HEVC_HEADERS
         codecs/hevc/m31/ntv2m31.h
         codecs/hevc/m31/ntv2m31cparam.h
         codecs/hevc/m31/ntv2m31ehparam.h
         codecs/hevc/m31/ntv2m31vaparam.h
         codecs/hevc/m31/ntv2m31vinparam.h
         codecs/hevc/m31/ntv2m31viparam.h)
-    list(APPEND AJANTV2_SOURCES
+    set(AJANTV2_HEVC_SOURCES
         codecs/hevc/m31/ntv2m31.cpp
         codecs/hevc/m31/ntv2m31cparam.cpp
         codecs/hevc/m31/ntv2m31ehparam.cpp
         codecs/hevc/m31/ntv2m31vaparam.cpp
         codecs/hevc/m31/ntv2m31vinparam.cpp
         codecs/hevc/m31/ntv2m31viparam.cpp)
+    # `cmake --install` deployments
+    if (AJA_INSTALL_HEADERS)
+        install(FILES ${AJANTV2_HEVC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/codecs/hevc/m31)
+    endif()
+    if (AJA_INSTALL_SOURCES)
+        install(FILES ${AJANTV2_HEVC_SOURCES} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/codecs/hevc/m31)
+    endif()
 endif()
 
 # ajabase
@@ -527,6 +534,12 @@ set(AJANTV2_TARGET_SOURCES
     ${AJABASE_HEADERS}
     ${AJANTV2_SOURCES}
     ${AJANTV2_HEADERS})
+if (NOT AJA_BUILD_OPENSOURCE)
+    set(AJANTV2_TARGET_SOURCES
+        ${AJANTV2_TARGET_SOURCES}
+        ${AJANTV2_HEVC_HEADERS}
+        ${AJANTV2_HEVC_SOURCES})
+endif()
 
 # libajantv2
 add_library(ajantv2 STATIC ${AJANTV2_TARGET_SOURCES})
