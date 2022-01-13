@@ -21,11 +21,6 @@ set(AJANTV2_TARGET_INCLUDE_DIRS
     ${AJA_LIB_BASE_ROOT}
     ${CMAKE_CURRENT_BINARY_DIR})
 
-if (AJA_BUILDING_CMAKE)
-    add_definitions(-DAJA_BUILDING_CMAKE)
-    configure_file(includes/version.h.in includes/version.h @ONLY)
-endif()
-
 # ajantv2
 set(AJANTV2_HEADERS
     includes/ajaexport.h
@@ -139,6 +134,12 @@ set(AJANTV2_SOURCES
     src/ntv2verticalfilter.cpp
     src/ntv2vpid.cpp
     src/ntv2vpidfromspec.cpp)
+
+if (AJA_BUILDING_CMAKE)
+    add_definitions(-DAJA_BUILDING_CMAKE)
+    configure_file(includes/version.h.in includes/version.h @ONLY)
+    install(FILES ${CMAKE_BINARY_DIR}/ajalibraries/ajantv2/includes/version.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/includes)
+endif()
 
 # ajaanc
 set(AJAANC_HEADERS
