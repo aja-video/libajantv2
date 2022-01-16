@@ -124,7 +124,7 @@ AJAStatus AutoRouter::ApplyRouting(bool clear, bool force)
         // zero-out the register settings for all channels
         for (uint32_t i = 0; i < NTV2_MAX_NUM_CHANNELS; i++) {
             NTV2Channel channel = (NTV2Channel)i;
-            if (m_connection_kind == kConnectionKindSDI) {
+            if (m_connection_kind == ConnectionKind::SDI) {
                 card->SetSDIOut3GEnable(channel, false);
                 card->SetSDIOut3GbEnable(channel, false);
                 card->SetSDIOut6GEnable(channel, false);
@@ -142,7 +142,7 @@ AJAStatus AutoRouter::ApplyRouting(bool clear, bool force)
         for (uint32_t i = m_channel_index; i < (m_channel_index + rp.num_channels); i++) {
             NTV2Channel channel = (NTV2Channel)i;
 
-            if (m_connection_kind == kConnectionKindSDI) {
+            if (m_connection_kind == ConnectionKind::SDI) {
                 if (::NTV2DeviceHasBiDirectionalSDI(device_id))
                     card->SetSDITransmitEnable(channel, rp.mode == NTV2_MODE_DISPLAY);
                 card->SetSDIOut3GEnable(channel, rp.flags & kEnable3GOut);
@@ -184,10 +184,10 @@ AJAStatus AutoRouter::ApplyRouting(bool clear, bool force)
             NTV2Channel channel = GetNTV2ChannelForIndex(m_channel_index);
             NTV2AudioSystem audio_sys = NTV2ChannelToAudioSystem(channel);
             card->SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_OFF, audio_sys);
-            if (m_connection_kind == kConnectionKindSDI) {
+            if (m_connection_kind == ConnectionKind::SDI) {
                 card->SetSDIOutputAudioSystem(channel, audio_sys);
                 card->SetSDIOutputDS2AudioSystem(channel, audio_sys);
-            } else if (m_connection_kind == kConnectionKindHDMI && NTV2DeviceGetNumHDMIVideoOutputs(device_id) > 0) {
+            } else if (m_connection_kind == ConnectionKind::HDMI && NTV2DeviceGetNumHDMIVideoOutputs(device_id) > 0) {
                 card->SetHDMIOutAudioChannels(NTV2_HDMIAudio8Channels);
                 card->SetHDMIOutAudioSource2Channel(NTV2_AudioChannel1_2, audio_sys);
                 card->SetHDMIOutAudioSource8Channel(NTV2_AudioChannel1_8, audio_sys);

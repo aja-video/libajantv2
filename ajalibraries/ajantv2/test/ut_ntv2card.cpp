@@ -246,10 +246,10 @@ TEST_SUITE("sdi_loopback" * doctest::description("SDI loopback tests")) {
 
             auto src_router = AutoRouter(gOpts->card_a_index, gOpts->out_channel, gOpts->out_framestore,
                 NTV2_MODE_DISPLAY, vf, pf,
-                ref_src, vanc_mode, vpid_standard, kConnectionKindSDI);
+                ref_src, vanc_mode, vpid_standard, ConnectionKind::SDI);
             auto dst_router = AutoRouter(gOpts->card_b_index, gOpts->inp_channel, gOpts->inp_framestore,
                 NTV2_MODE_CAPTURE, vf, pf,
-                ref_src, vanc_mode, vpid_standard, kConnectionKindSDI);
+                ref_src, vanc_mode, vpid_standard, ConnectionKind::SDI);
             CHECK_EQ(src_router.Init(), AJA_STATUS_SUCCESS);
             auto src_card = src_router.GetCard();
             CHECK_EQ(dst_router.Init(), AJA_STATUS_SUCCESS);
