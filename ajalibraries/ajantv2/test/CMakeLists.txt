@@ -29,8 +29,6 @@ set(UT_AJANTV2_SOURCES
 set(UT_NTV2CARD_SOURCES
 	${NON_AJA_ROOT}/argparse/argparse.h
 	${NON_AJA_ROOT}/argparse/argparse.c
-	auto_router.h
-	auto_router.cpp
 	ut_ntv2card.cpp)
 
 add_executable(ut_ajantv2 ${UT_AJANTV2_SOURCES})

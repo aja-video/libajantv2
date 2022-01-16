@@ -7,7 +7,6 @@
 #include <doctest/doctest.h>
 #include <rapidcsv/rapidcsv.h>
 
-#include "auto_router.h"
 // #include "vpid_testcases.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/system/debug.h"
@@ -18,6 +17,7 @@
 #include "ntv2qa/binary_pattern_cmp.h"
 #include "ntv2qa/counting_pattern_cmp.h"
 #include "ntv2qa/component_reader.h"
+#include "ntv2qa/routing/preset_router.h"
 
 #define LOG_QUIET 1
 
@@ -69,6 +69,7 @@ struct TestOptions {
 };
 static TestOptions* gOpts = NULL;
 static CNTV2Card* gCard = NULL;
+static CNTV2Card* gCard2 = NULL;
 static NTV2EveryFrameTaskMode gTaskMode = NTV2_TASK_MODE_INVALID;
 
 static void SetCardBaseline(CNTV2Card* card, bool clear=false)
@@ -244,23 +245,28 @@ TEST_SUITE("sdi_loopback" * doctest::description("SDI loopback tests")) {
             NTV2ReferenceSource ref_src = NTV2_REFERENCE_FREERUN;
             NTV2FormatDescriptor fd(vf, pf, vanc_mode);
 
-            auto src_router = AutoRouter(gOpts->card_a_index, gOpts->out_channel, gOpts->out_framestore,
+            CNTV2Card* src_card = gCard;
+            CNTV2Card* dst_card = new CNTV2Card(gOpts->card_b_index);
+            qa::PresetRouterConfig cfg_a {
+                gOpts->out_channel, gOpts->out_framestore,
                 NTV2_MODE_DISPLAY, vf, pf,
-                ref_src, vanc_mode, vpid_standard, ConnectionKind::SDI);
-            auto dst_router = AutoRouter(gOpts->card_b_index, gOpts->inp_channel, gOpts->inp_framestore,
+                ref_src, vanc_mode, vpid_standard, ConnectionKind::SDI
+            };
+            auto src_router = qa::PresetRouter(cfg_a, src_card);
+            qa::PresetRouterConfig cfg_b {
+                gOpts->inp_channel, gOpts->inp_framestore,
                 NTV2_MODE_CAPTURE, vf, pf,
-                ref_src, vanc_mode, vpid_standard, ConnectionKind::SDI);
-            CHECK_EQ(src_router.Init(), AJA_STATUS_SUCCESS);
-            auto src_card = src_router.GetCard();
-            CHECK_EQ(dst_router.Init(), AJA_STATUS_SUCCESS);
-            auto dst_card = dst_router.GetCard();
+                ref_src, vanc_mode, vpid_standard, ConnectionKind::SDI
+            };
+            auto dst_router = qa::PresetRouter(cfg_b, dst_card);
             NTV2DeviceID src_card_id = src_card->GetDeviceID();
             NTV2DeviceID dst_card_id = dst_card->GetDeviceID();
             if (!NTV2DeviceCanDoVideoFormat(src_card_id, vf) ||
                 !NTV2DeviceCanDoFrameBufferFormat(src_card_id, pf) ||
                 !NTV2DeviceCanDoVideoFormat(dst_card_id, vf) ||
-                !NTV2DeviceCanDoFrameBufferFormat(dst_card_id, pf))
+                !NTV2DeviceCanDoFrameBufferFormat(dst_card_id, pf)) {
                 continue;
+            }
 
             SetCardBaseline(src_card, !routed);
             SetCardBaseline(dst_card, !routed);
@@ -367,6 +373,7 @@ int main(int argc, const char** argv) {
     argparse_parse(&argparse, argc, (const char**)argv);
 
     gCard = new CNTV2Card(gOpts->card_a_index, "");
+    gCard2 = new CNTV2Card(gOpts->card_b_index, "");
     int res = ctx.run();
     if (gCard) {
         gCard->SetEveryFrameServices(gTaskMode);
