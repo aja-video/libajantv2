@@ -315,40 +315,38 @@ public:
 	void set_ii_lines(uint32_t lines );
 	size_t get_ii_lines(void ) const;
 
-	size_t get_ii_image_size()
-	{
-	  // Note: Incorrect for some configs
-		uint32_t expectedSize = -1;
-		if (get_ie_descriptor() == 50)
-		{
-						if ( get_ie_bit_size() == 10 )
-							expectedSize = (uint32_t)(get_ii_pixels() * get_ii_lines() * 4);
-						else
-							expectedSize = (uint32_t)(get_ii_pixels() * get_ii_lines() * 6); // 16 bit
-				}
-		else if (get_ie_descriptor() == 100)
-		{
-						if (get_ii_pixels()	 % 48 == 0)
-							expectedSize = (uint32_t)(get_ii_pixels() * get_ii_lines() * 8 / 3);
-						else
-							expectedSize = (uint32_t)(((get_ii_pixels()/48+1)*48) * get_ii_lines() * 8 / 3);
-				}
-//				  rowBytes = (( width % 48 == 0 ) ? width : (((width / 48 ) + 1) * 48)) * 8 / 3;
+    size_t get_ii_image_size()
+    {
+        // Note: Incorrect for some configs
+        uint32_t expectedSize = -1;
+        if (get_ie_descriptor() == 50)
+        {
+            if ( get_ie_bit_size() == 10 )
+                expectedSize = (uint32_t)(get_ii_pixels() * get_ii_lines() * 4);
+            else
+                expectedSize = (uint32_t)(get_ii_pixels() * get_ii_lines() * 6); // 12 bit unpacked or 16 bit
+        }
+        else if (get_ie_descriptor() == 100)
+        {
+            if (get_ii_pixels()	 % 48 == 0)
+                expectedSize = (uint32_t)(get_ii_pixels() * get_ii_lines() * 8 / 3);
+            else
+                expectedSize = (uint32_t)(((get_ii_pixels()/48+1)*48) * get_ii_lines() * 8 / 3);
+        }
 
-   
-	  if (0 == get_fi_file_size())
-	  {
-		return (0);
-	  }
- 
-	  uint32_t sizeInFile = (uint32_t)(get_fi_file_size() - get_fi_image_offset());
+        // Turns out some writers(NUKE for example) don't write correct size to   (get_fi_file_size()...so check elsewhere
+//        if (0 == get_fi_file_size())
+//        {
+//            return (0);
+//        }
 
-	  if ( sizeInFile < expectedSize)
-		  return sizeInFile;
-	  else
-		  return expectedSize;
+        //	  uint32_t sizeInFile = (uint32_t)(get_fi_file_size() - get_fi_image_offset());
+        //	  if ( sizeInFile < expectedSize)
+        //		  return sizeInFile;
+        //	  else
+        return expectedSize;
 
-	}
+    }
 
 	// Image Element
 	void set_ie_data_sign (uint32_t sign, int i=0);
