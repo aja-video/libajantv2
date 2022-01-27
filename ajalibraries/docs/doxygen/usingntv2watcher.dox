@@ -1439,26 +1439,49 @@ the window.
 
 -	Each buffer is represented by a tab in the window.
 -	The <b>Clipboard</b> tab is monitored and automatically udpates as it changes. (Files, however, are not monitored.)
--	Click inside the tab title to reveal its data content.
-	-	<b>Data View Options</b> — (Right-Click Operations)
-		-	<b>Grouping</b> — Changes the data grouping to 8-bit (1-byte), 16-bit (2-byte), 32-bit (4-byte) or 64-bit (8-byte).
-		-	<b>Radix</b> — Changes the radix of the data to Binary, Octal, Decimal or Hexadecimal.
-		-	<b>Bytes/Line</b> — Changes the number of bytes to display in each line of the data view.
-			Choose from 8 bytes up to 8K bytes by powers of 2.
-			Note that larger values make for fewer lines and many more columns.
-			Smaller values show many more lines with fewer columns.
-		-	<b>Endianness</b> — Changes the display byte-ordering for 2/4/8-byte grouping. Choose “Big Endian” or “Little Endian”.
-			One of the two options will indicate the host processor’s native endianness.
-		-	<b>Select All</b> — When available, selects (highlights) all of the data being viewed.
-		-	<b>Show Rulers</b> — When available, un-hides any rulers that are hidden.
+-	The window title indicates the data set, its byte count, and if it’s been modified.
+-	Left-click the tab title to reveal its data content, bringing it to the front.
+	-	Right-click inside the tab content for a context menu.
+		-	<b>Data Editing:</b>
+			-	<b>Undo</b> — Un-does the last operation that was done.
+			-	<b>Redo</b> — Re-does the last undone operation.
+			-	<b>Cut</b> — Copies the selected data to the clipboard/scrap buffer, then removes it.
+			-	<b>Copy</b> — Copies the selected data to the clipboard/scrap buffer.
+			-	<b>Paste</b> — Pastes the clipboard/scrap data over the selected data, or, if there’s nothing selected,
+				inserts the data at the right-click location.
+			-	<b>Clear</b> — Removes the selected data.
+			-	<b>Select All</b> — Selects (highlights) all data.
+		-	<b>Data View Options:</b>
+			-	<b>Grouping</b> — Changes the data grouping to 8-bit (1-byte), 16-bit (2-byte), 32-bit (4-byte) or 64-bit (8-byte).
+			-	<b>Radix</b> — Changes the radix of the data to Binary, Octal, Decimal or Hexadecimal.
+			-	<b>Bytes/Line</b> — Changes the number of bytes to display in each line of the data view.
+				Choose from 8 bytes up to 8K bytes by powers of 2.
+				Note that larger values make for fewer lines and many more columns.
+				Smaller values show many more lines with fewer columns.
+			-	<b>Endianness</b> — Changes the display byte-ordering for 2/4/8-byte grouping. Choose “Big Endian” or “Little Endian”.
+				One of the two options will indicate the host processor’s native endianness.
+			-	<b>Show Rulers</b> — When available, shows whichever rulers were previously hidden.
+			-	<b>Show/Hide ASCII</b> — Reveals or hides a side panel that displays the same row data as printable ASCII.
 	-	<b>Row & Column Label Options</b> — (Right-Click Operations)
 		-	<b>Reference</b> — Choose “Byte Offset From Start” or “Byte Offset From End”.
 		-	<b>Radix</b> — Choose “Binary”, “Octal”, “Decimal” or “Hexadecimal”.
 		-	<b>Hide</b> — Hides the ruler. (To show the ruler again, right-click in the data and choose “Show Rulers”.
+-	Right-click the tab title to pop-up a context menu of <b>File Operations</b>:
+	-	<b>New (Dupe)</b> — Duplicates the tab content in another new tab.
+	-	<b>Open…</b> — Brings up a file picker dialog box for choosing a data file to open a new tab on.
+	-	<b>Close</b> — Requests the tab be closed. If there are unsaved changes, you’ll be asked if you wish to save them or not.
+	-	<b>Compare</b> — Compares the tab contents with another tab’s contents, highlighting the differences with a brighter color.
+	-	<b>Revert</b> — Prompts if changes should be discarded and the tab content reloaded from the file as saved on disk.
+	-	<b>Save</b> — Writes the tab contents to the file on disk.
+	-	<b>Save As…</b> — Brings up the standard Save As… dialog box for choosing the name of a file to be written with the tab data content.
+	-	<b>Page Setup…</b> — Brings up the standard Print Setup… dialog box for choosing the print page layout.
+	-	<b>Print…</b> — Brings up the standard Print… dialog box for printing the tab data content.
 
 To close the <b>Scrap Buffer</b> tool window:
 	-	click its close box;
 	-	or un-check the <b>View</b> menu’s <b>Scrap Buffer</b> command.
+	-	If there are unsaved changes in any of the open tabs, you’ll be given an opportunity to save them all, discard them all,
+		or cancel the close request.
 
 
 <hr size="50px">

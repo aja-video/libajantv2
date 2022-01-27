@@ -1410,10 +1410,10 @@ bool NTV2_POINTER::CopyFrom (const NTV2_POINTER & inBuffer,
 	if (inDstByteOffset + inByteCount > GetByteCount())
 		return false;	//	Past end of me
 
-	const UByte *	pSrc	(reinterpret_cast<const UByte*>(inBuffer.GetHostPointer()));
+	const UByte * pSrc (inBuffer);
 	pSrc += inSrcByteOffset;
 
-	UByte *			pDst	(reinterpret_cast<UByte*>(GetHostPointer()));
+	UByte * pDst (*this);
 	pDst += inDstByteOffset;
 
 	::memcpy (pDst, pSrc, inByteCount);
