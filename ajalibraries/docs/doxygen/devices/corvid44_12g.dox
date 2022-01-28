@@ -85,7 +85,7 @@
 	-	Safe Storage Temperature (Power OFF): -40°C to +70°C (-40° to +158°F)
 
 	@note	The fanless (passively-cooled) version of this device requires airflow of 100LFM @30°C or lower.
-			Most nost systems have enough circulating airflow, neighboring vent holes, and/or ability to increase
+			Most host systems have enough circulating airflow, neighboring vent holes, and/or ability to increase
 			the case fan speed as necessary, such that additional steps or precautions are not required.
 			However, if adequate cooling is not being achieved, then removal of the adjacent PCIe bracket
 			next to the heatsink (adjacent to the CRV44-12G) is an option.
