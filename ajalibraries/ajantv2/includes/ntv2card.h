@@ -6611,7 +6611,7 @@ public:
 		@param[out]	outF1StartAddr	Receives the Anc inserter's current F1 starting address.
 		@param[out]	outF2StartAddr	Receives the Anc inserter's current F2 starting address.
 	**/
-	AJA_VIRTUAL bool	AncInsertGetReadInfo (const UWord inSDIOutput, uint64_t & outF1StartAddr, uint64_t & outF2StartAddr);
+	AJA_VIRTUAL bool	AncInsertGetReadInfo (const UWord inSDIOutput, uint64_t & outF1StartAddr, uint64_t & outF2StartAddr);	//	New in SDK v16.2
 
 
 	/**
@@ -6723,7 +6723,7 @@ public:
 	**/
 	AJA_VIRTUAL bool	AncExtractGetWriteInfo	(const UWord inSDIInput,
 												uint64_t & outF1StartAddr, uint64_t & outF1EndAddr,
-												uint64_t & outF2StartAddr, uint64_t & outF2EndAddr);
+												uint64_t & outF2StartAddr, uint64_t & outF2EndAddr);	//	New in SDK v16.2
 
 	/**
 		@brief		Answers with the DIDs currently being excluded (filtered) by the SDI input's Anc extractor.
