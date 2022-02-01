@@ -6506,7 +6506,7 @@ typedef enum
 												is the last T in the buffer (with the highest physical memory address).
 					@return		True if successfully found; otherwise false.
 				**/
-				template<typename T> bool	Find (const T & inValue, int & inOutIndex)	//	New in SDK 16.0
+				template<typename T> bool	Find (const T & inValue, int & inOutIndex) const	//	New in SDK 16.0
 				{
 					const bool isAscending(inOutIndex >= 0);
 					if (isAscending	 &&	 inOutIndex >= int(GetByteCount()))
