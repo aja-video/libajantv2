@@ -1401,10 +1401,18 @@ bool CNTV2Card::LoadLUTTable (const double * pInTable)
 
 bool CNTV2Card::Set3DLUTTableLocation (const ULWord inFrameNumber, ULWord inLUTIndex)
 { 
-	NTV2Framesize theFrameSize;
 	ULWord LUTTableIndexOffset = LUTTablePartitionSize * inLUTIndex;
-	GetFrameBufferSize(NTV2_CHANNEL1, theFrameSize);
-	ULWord lutTableLocation (((::NTV2FramesizeToByteCount(theFrameSize) * inFrameNumber)/4) + LUTTableIndexOffset);
+	NTV2Framesize hwFrameSize;
+	GetFrameBufferSize(NTV2_CHANNEL1, hwFrameSize);
+	ULWord actualFrameSize (::NTV2FramesizeToByteCount(hwFrameSize));
+	bool quadEnabled(false), quadQuadEnabled(false);
+	GetQuadFrameEnable(quadEnabled, NTV2_CHANNEL1);
+	GetQuadQuadFrameEnable(quadQuadEnabled, NTV2_CHANNEL1);
+	if (quadEnabled)
+		actualFrameSize *= 4;
+	if (quadQuadEnabled)
+		actualFrameSize *= 4;
+	ULWord lutTableLocation (((actualFrameSize * inFrameNumber)/4) + LUTTableIndexOffset);
 	return WriteRegister(kReg3DLUTLoadControl, lutTableLocation, 0x3FFFFFFF, 0);
 }
 
