@@ -363,8 +363,19 @@ bool CNTV2Card::DMAWriteLUTTable (const ULWord inFrameNumber, const ULWord * pIn
 		return false;	//	NULL buffer
 
 	ULWord LUTIndexByteOffset = LUTTablePartitionSize * inLUTIndex;
-
-	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, inFrameNumber, const_cast <ULWord *> (pInLUTBuffer), LUTIndexByteOffset, inByteCount, true);
+	
+	NTV2Framesize hwFrameSize(NTV2_FRAMESIZE_INVALID);
+	GetFrameBufferSize(NTV2_CHANNEL1, hwFrameSize);
+	ULWord actualFrameSize (::NTV2FramesizeToByteCount(hwFrameSize));
+	bool quadEnabled(false), quadQuadEnabled(false);
+	GetQuadFrameEnable(quadEnabled, NTV2_CHANNEL1);
+	GetQuadQuadFrameEnable(quadQuadEnabled, NTV2_CHANNEL1);
+	if (quadEnabled)
+		actualFrameSize *= 4;
+	if (quadQuadEnabled)
+		actualFrameSize *= 4;
+	return DmaTransfer (NTV2_DMA_FIRST_AVAILABLE, false, 0, const_cast<ULWord*>(pInLUTBuffer),
+						(inFrameNumber * actualFrameSize) + LUTIndexByteOffset, inByteCount, true);
 }
 
 
