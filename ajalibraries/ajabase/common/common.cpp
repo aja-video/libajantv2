@@ -100,12 +100,12 @@ unsigned long stoul (const std::string & str, std::size_t * idx, int base)
 	}
 	return retVal;
 }
-/*
+
 unsigned long long stoull (const std::string & str, std::size_t * idx, int base)
 {
 	return (unsigned long long)aja::stoul(str, idx, base);
 }
-*/
+
 float stof (const std::string & str, std::size_t * idx)
 {
 	return (float)aja::stod(str, idx);

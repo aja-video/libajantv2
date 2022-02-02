@@ -6533,6 +6533,13 @@ typedef enum
 				}
 
 				/**
+					@return		A non-const reference to the outOffsets parameter.
+					@param[out]	outOffsets	Receives the byte offsets to every occurrence in my buffer.
+					@param[in]	inValue		Specifies the data to search for.
+				**/
+				std::set<ULWord> &	FindAll (std::set<ULWord> & outOffsets, const NTV2_POINTER & inValue) const;	//	New in SDK 16.3
+
+				/**
 					@return		True if the given memory buffer's contents are identical to my own.
 					@param[in]	inBuffer		Specifies the memory buffer whose contents are to be compared with mine.
 					@param[in]	inByteOffset	Specifies the byte offset to start comparing. Defaults to the first byte.

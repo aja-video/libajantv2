@@ -1469,6 +1469,30 @@ bool NTV2_POINTER::SwapWith (NTV2_POINTER & inBuffer)
 	return true;
 }
 
+set<ULWord> & NTV2_POINTER::FindAll (set<ULWord> & outOffsets, const NTV2_POINTER & inValue) const
+{
+	outOffsets.clear();
+	if (IsNULL())
+		return outOffsets;	//	NULL buffer, return "no matches"
+	if (inValue.IsNULL())
+		return outOffsets;	//	NULL buffer, return "no matches"
+	const ULWord srchByteCount(inValue.GetByteCount());
+	if (GetByteCount() < srchByteCount)
+		return outOffsets;	//	I'm smaller than the search data, return "no matches"
+
+	const ULWord maxOffset(GetByteCount() - srchByteCount);	//	Don't search past here
+	const uint8_t * pSrchData (inValue);	//	Pointer to search data
+	const uint8_t * pMyData (*this);		//	Pointer to where search starts in me
+	ULWord offset(0);						//	Search starts at this byte offset
+	do
+	{
+		if (!::memcmp(pMyData, pSrchData, srchByteCount))
+			outOffsets.insert(offset);	//	Record byte offset of match
+		pMyData++;	//	Bump search pointer
+		offset++;	//	Bump search byte offset
+	} while (offset < maxOffset);
+	return outOffsets;
+}
 
 bool NTV2_POINTER::IsContentEqual (const NTV2_POINTER & inBuffer, const ULWord inByteOffset, const ULWord inByteCount) const
 {
