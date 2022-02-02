@@ -1412,7 +1412,7 @@ bool CNTV2Card::Set3DLUTTableLocation (const ULWord inFrameNumber, ULWord inLUTI
 		actualFrameSize *= 4;
 	if (quadQuadEnabled)
 		actualFrameSize *= 4;
-	ULWord lutTableLocation (((actualFrameSize * inFrameNumber)/4) + LUTTableIndexOffset);
+    ULWord lutTableLocation (((actualFrameSize * inFrameNumber)/4) + LUTTableIndexOffset/4);
 	return WriteRegister(kReg3DLUTLoadControl, lutTableLocation, 0x3FFFFFFF, 0);
 }
 
