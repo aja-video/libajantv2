@@ -1435,7 +1435,7 @@ bool CNTV2Card::Set1DLUTTableLocation (const NTV2Channel inChannel, const ULWord
 		actualFrameSize *= 4;
 	if (quadQuadEnabled)
 		actualFrameSize *= 4;
-	ULWord lutTableLocation (((actualFrameSize * inFrameNumber)/4) + LUTTableIndexOffset);
+    ULWord lutTableLocation (((actualFrameSize * inFrameNumber)/4) + LUTTableIndexOffset/4);
 	return WriteRegister(gChannelTo1DLutControlRegNum[inChannel], lutTableLocation, kRegMaskLUTAddress, kRegShiftLUTAddress);
 }
 
