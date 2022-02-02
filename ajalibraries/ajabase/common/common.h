@@ -100,7 +100,7 @@ AJA_EXPORT unsigned long stoul(const std::string& str, std::size_t* idx=0, int b
  *						 If this is 0, the base is determined by the format (like strtol).
  *	@return			The unsigned long long value of the input str
  */
-//AJA_EXPORT unsigned long long stoull(const std::string& str, std::size_t* idx=0, int base = 10);
+AJA_EXPORT unsigned long long stoull(const std::string& str, std::size_t* idx=0, int base = 10);
 
 /**
  *	Convert string to float
