@@ -9157,7 +9157,7 @@ string PercentDecode (const string & inStr)
 			string versStr(line.substr(startPos, endPos-startPos));		//	"16.1.0b58"	 or	 "16.0.1"
 			NTV2StringList versComps;
 			aja::split(versStr, '.', versComps);
-			if (versComps.size() != 3)
+			if (versComps.size() < 3  ||  versComps.size() > 4)
 				continue;
 			const string sBuildTypes("_bad");	//	1=beta 2=alpha 3=dev
 			for (size_t bt(1);  bt < 4;  bt++)
@@ -9167,10 +9167,10 @@ string PercentDecode (const string & inStr)
 					versComps.erase(versComps.begin()+2);
 					versComps.push_back(lastComps.at(0));
 					outBld = UWord(aja::stoul(lastComps.at(1)));
-					outType = bt;
+					outType = UWord(bt);
 					break;
 				}
-			for (size_t ndx(0);	 ndx < 3;  ndx++)
+			for (size_t ndx(0);	 ndx < versComps.size();  ndx++)
 			{
 				if (versComps.at(ndx).empty())
 					continue;
@@ -9179,8 +9179,12 @@ string PercentDecode (const string & inStr)
 					outMaj = val;
 				else if (ndx == 1)
 					outMin = val;
-				else
+				else if (ndx == 2)
 					outPt = val;
+				else if (ndx == 3  &&  outType == 0)
+					outBld = val;
+				else
+					break;
 			}
 			break;
 		}
