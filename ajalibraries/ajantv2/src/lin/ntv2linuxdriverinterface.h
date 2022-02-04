@@ -44,7 +44,7 @@ class CNTV2LinuxDriverInterface : public CNTV2DriverInterface
 										const bool				inIsRead,
 										const ULWord			inFrameNumber,
 										ULWord *				pFrameBuffer,
-										const ULWord			inOffsetBytes,
+										const ULWord			inCardOffsetBytes,
 										const ULWord			inTotalByteCount,
 										const bool				inSynchronous = true);
 

@@ -258,7 +258,7 @@ class AJAExport CNTV2DriverInterface
 			@param[in]	inFrameNumber		Specifies the zero-based frame number of the starting frame to be transferred to/from the device.
 			@param		pFrameBuffer		Specifies a valid, non-NULL address of the host buffer. If reading (device-to-host), this memory
 											will be written into. If writing (host-to-device), this memory will be read from.
-			@param[in]	inOffsetBytes		Specifies the byte offset into the device frame buffer where the data transfer will start.
+			@param[in]	inCardOffsetBytes	Specifies the byte offset into the device frame buffer where the data transfer will start.
 			@param[in]	inTotalByteCount	Specifies the total number of bytes to be transferred.
 			@param[in]	inSynchronous		This parameter is obsolete, and ignored.
 			@return		True if successful; otherwise false.
@@ -269,7 +269,7 @@ class AJAExport CNTV2DriverInterface
 										const bool				inIsRead,
 										const ULWord			inFrameNumber,
 										ULWord *				pFrameBuffer,
-										const ULWord			inOffsetBytes,
+										const ULWord			inCardOffsetBytes,
 										const ULWord			inTotalByteCount,
 										const bool				inSynchronous = true);
 

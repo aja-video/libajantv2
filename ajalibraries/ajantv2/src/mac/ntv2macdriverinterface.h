@@ -51,7 +51,7 @@ class CNTV2MacDriverInterface : public CNTV2DriverInterface
 									const bool		inIsRead,
 									const ULWord	inFrameNumber,
 									ULWord *		pFrameBuffer,
-									const ULWord	inOffsetBytes,
+									const ULWord	inCardOffsetBytes,
 									const ULWord	inByteCount,
 									const bool		inSynchronous = true);
 
