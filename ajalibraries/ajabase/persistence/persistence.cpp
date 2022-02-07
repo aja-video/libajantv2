@@ -472,35 +472,35 @@ public:
 			return isGood;
 		}
 
-		static bool ConvertValueTypeToString(void *inputValue, AJAPersistenceType type, std::string& outputString)
+		static bool ConvertValueTypeToString(const void *inputValue, AJAPersistenceType type, std::string& outputString)
 		{
 			bool isGood = false;
 			switch(type)
 			{
 				case AJAPersistenceTypeInt:
 				{
-					outputString = aja::to_string(*((int*)inputValue));
+					outputString = aja::to_string(*((const int*)inputValue));
 					isGood = true;
 				}
 				break;
 
 				case AJAPersistenceTypeBool:
 				{
-					outputString = (*((bool*)inputValue) == true) ? "1" : "0";
+					outputString = (*((const bool*)inputValue) == true) ? "1" : "0";
 					isGood = true;
 				}
 				break;
 
 				case AJAPersistenceTypeDouble:
 				{
-					outputString = aja::to_string(*((double*)inputValue));
+					outputString = aja::to_string(*((const double*)inputValue));
 					isGood = true;
 				}
 				break;
 
 				case AJAPersistenceTypeString:
 				{
-					outputString = *((std::string *)inputValue);
+					outputString = *((const std::string *)inputValue);
 					isGood = true;
 				}
 				break;
@@ -577,7 +577,7 @@ public:
 			return isGood;
 		}
 
-		bool SetValue(std::string keyQuery, void *value, AJAPersistenceType type, int blobSizeInBytes, std::string devName = "", std::string devNum = "")
+		bool SetValue(std::string keyQuery, const void *value, AJAPersistenceType type, int blobSizeInBytes, std::string devName = "", std::string devNum = "")
 		{
 			bool isGood = false;
 			if (mDb.IsDBOpen())
@@ -758,7 +758,7 @@ void AJAPersistence::GetParams(std::string& appID, std::string& deviceType, std:
 	bSharePrefFile = mSharedPrefFile;
 }
 
-bool AJAPersistence::SetValue(const std::string& key, void *value, AJAPersistenceType type, size_t blobSize)
+bool AJAPersistence::SetValue(const std::string& key, const void *value, AJAPersistenceType type, size_t blobSize)
 {
 	bool shouldLog = should_we_log();
 	if (shouldLog)

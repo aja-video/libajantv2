@@ -39,7 +39,7 @@ public:
 	void SetParams(const std::string& appID="", const std::string& deviceType="", const std::string& deviceNumber="", bool bSharePrefFile=false);
 	void GetParams(std::string& appID, std::string& deviceType, std::string& deviceNumber, bool& bSharePrefFile);
 
-	bool SetValue(const std::string& key, void *value, AJAPersistenceType type, size_t blobBytes = 0);
+	bool SetValue(const std::string& key, const void *value, AJAPersistenceType type, size_t blobBytes = 0);
 	bool GetValue(const std::string& key, void *value, AJAPersistenceType type, size_t blobBytes = 0);
 	bool FileExists();
 	bool ClearPrefFile();
