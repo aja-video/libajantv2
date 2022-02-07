@@ -5994,6 +5994,8 @@ typedef enum
 		#define BITSTREAM_RESET_CONFIG				BIT(3)		///< @brief Used in ::NTV2Bitstream to reset config
 		#define BITSTREAM_RESET_MODULE				BIT(4)		///< @brief Used in ::NTV2Bitstream to reset module
 		#define BITSTREAM_READ_REGISTERS			BIT(5)		///< @brief Used in ::NTV2Bitstream to get status registers
+		#define BITSTREAM_SUSPEND       			BIT(6)		///< @brief Used in peta to suspend board before bitstream load
+		#define BITSTREAM_RESUME           			BIT(7)		///< @brief Used in peta to resume board after bitstream load
 
 		// Bitstream registers
 		#define BITSTREAM_EXT_CAP					0			///< @brief Extended capability register

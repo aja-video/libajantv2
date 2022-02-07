@@ -984,6 +984,15 @@ bool CNTV2DriverInterface::BitstreamStatus (NTV2ULWordVector & outRegValues)
 	return true;
 }
 
+bool CNTV2DriverInterface::BitstreamLoad (const bool inSuspend, const bool inResume)
+{
+	NTV2_POINTER inBuffer;
+	NTV2Bitstream bsMsg (inBuffer,
+				(inSuspend? BITSTREAM_SUSPEND : 0) |
+				(inResume? BITSTREAM_RESUME : 0));
+	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&bsMsg));
+}
+
 
 // FinishOpen
 // NOTE _boardID must be set before calling this routine.

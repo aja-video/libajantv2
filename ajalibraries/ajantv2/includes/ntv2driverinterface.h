@@ -416,7 +416,7 @@ class AJAExport CNTV2DriverInterface
 		AJA_VIRTUAL bool BitstreamWrite (const NTV2_POINTER & inBuffer, const bool inFragment, const bool inSwap);
 		AJA_VIRTUAL bool BitstreamReset (const bool inConfiguration, const bool inInterface);
 		AJA_VIRTUAL bool BitstreamStatus (NTV2ULWordVector & outRegValues);
-
+		AJA_VIRTUAL bool BitstreamLoad (const bool inSuspend, const bool inResume);
 	/**
 		@name	Device Ownership
 	**/
