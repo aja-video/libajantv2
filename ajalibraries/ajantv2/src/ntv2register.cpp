@@ -5141,7 +5141,7 @@ bool CNTV2Card::ApplySignalRoute (const NTV2XptConnections & inConnections, cons
 
 	unsigned failures(0);
 	for (NTV2XptConnectionsConstIter iter(inConnections.begin());  iter != inConnections.end();	 ++iter)
-		if (!Connect(iter->first, iter->second))
+		if (!Connect(iter->first, iter->second, HasCanConnectROM()))
 			failures++;
 	return failures == 0;
 }
