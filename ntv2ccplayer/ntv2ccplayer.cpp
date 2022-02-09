@@ -1342,8 +1342,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 			}
 		}
 	}
-	mDevice.ApplySignalRoute(mConnections, /*replaceExistingRouting?*/!mConfig.fDoMultiFormat);
-	return AJA_STATUS_SUCCESS;
+	return mDevice.ApplySignalRoute(mConnections, /*replaceExistingRouting?*/!mConfig.fDoMultiFormat) ? AJA_STATUS_SUCCESS : AJA_STATUS_UNSUPPORTED;
 
 }	//	RouteOutputSignal
 

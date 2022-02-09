@@ -373,7 +373,7 @@ static const NTV2WidgetID	g3GSDIOutputs[]	= {	NTV2_Wgt3GSDIOut1,	NTV2_Wgt3GSDIOu
 												NTV2_Wgt3GSDIOut5,	NTV2_Wgt3GSDIOut6,	NTV2_Wgt3GSDIOut7,	NTV2_Wgt3GSDIOut8	};
 
 
-void NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
+bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 {
 	const bool				isRGBFBF		(::IsRGBFormat(mConfig.fPixelFormat));
 	const bool				isRGBWire		(mVPIDInfoDS1.IsRGBSampling());
@@ -566,7 +566,7 @@ void NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 		}	//	for each output spigot
 	}	//	if not burning captions and not multiFormat
 
-	mDevice.ApplySignalRoute(mInputConnections, /*replaceExistingRouting?*/!mConfig.fDoMultiFormat);
+	return mDevice.ApplySignalRoute(mInputConnections, /*replaceExistingRouting?*/!mConfig.fDoMultiFormat);
 
 }	//	RouteInputSignal
 
@@ -1348,7 +1348,7 @@ AJAStatus NTV2CCGrabber::SetupOutputVideo (const NTV2VideoFormat inVideoFormat)
 }	//	SetupOutputVideo
 
 
-void NTV2CCGrabber::RouteOutputSignal (const NTV2VideoFormat inVideoFormat)
+bool NTV2CCGrabber::RouteOutputSignal (const NTV2VideoFormat inVideoFormat)
 {
 	NTV2_ASSERT (mConfig.fBurnCaptions);	//	Must be burning captions
 	const NTV2OutputCrosspointID	frameStoreOutputRGB	(::GetFrameBufferOutputXptFromChannel (mOutputChannel, true));	//	true=RGB
@@ -1357,6 +1357,8 @@ void NTV2CCGrabber::RouteOutputSignal (const NTV2VideoFormat inVideoFormat)
 	const NTV2OutputCrosspointID	mixerOutputYUV		(::GetMixerOutputXptFromChannel (mOutputChannel));
 	const NTV2OutputCrosspointID	signalInput			(::GetSDIInputOutputXptFromChannel (mConfig.fInputChannel));
 	const NTV2Standard				outputStandard		(::GetNTV2StandardFromVideoFormat (inVideoFormat));
+	const bool						canVerify			(mDevice.HasCanConnectROM());
+	UWord							connectFailures		(0);
 
 	if (mConfig.fDoMultiFormat)
 	{
@@ -1365,7 +1367,7 @@ void NTV2CCGrabber::RouteOutputSignal (const NTV2VideoFormat inVideoFormat)
 			mDevice.SetSDITransmitEnable (mOutputChannel, true);
 		if (::NTV2DeviceCanDoWidget(mDeviceID, g3GSDIOutputs[mOutputChannel]) || ::NTV2DeviceCanDoWidget(mDeviceID, gSDIOutputs[mOutputChannel]))
 		{
-			mDevice.Connect (::GetSDIOutputInputXpt(mOutputChannel), mixerOutputYUV);
+			if (!mDevice.Connect (::GetSDIOutputInputXpt(mOutputChannel), mixerOutputYUV, canVerify)) connectFailures++;
 			mDevice.SetSDIOutputStandard (mOutputChannel, outputStandard);
 		}
 	}
@@ -1389,20 +1391,24 @@ void NTV2CCGrabber::RouteOutputSignal (const NTV2VideoFormat inVideoFormat)
 			}
 			if (::NTV2DeviceCanDoWidget(mDeviceID, g3GSDIOutputs[chan]) || ::NTV2DeviceCanDoWidget(mDeviceID, gSDIOutputs[chan]))
 			{
-				mDevice.Connect (::GetSDIOutputInputXpt(chan), mixerOutputYUV);
+				if (!mDevice.Connect (::GetSDIOutputInputXpt(chan), mixerOutputYUV, canVerify)) connectFailures++;
 				mDevice.SetSDIOutputStandard (chan, outputStandard);
 			}
 		}	//	for each output spigot
 	}
 
-	mDevice.Connect (::GetCSCInputXptFromChannel(mOutputChannel),	frameStoreOutputRGB);	//	Connect CSC video input to frame buffer's RGB output
-	mDevice.Connect (::GetMixerFGInputXpt(mOutputChannel),			cscOutputYUV);			//	Connect mixer's foreground video input to the CSC's YUV video output
-	mDevice.Connect (::GetMixerFGInputXpt(mOutputChannel, true),	cscOutputKey);			//	Connect mixer's foreground key input to the CSC's YUV key output
-	mDevice.Connect (::GetMixerBGInputXpt(mOutputChannel),			signalInput);			//	Connect mixer's background video input to the SDI input
+	//	Connect CSC video input to frame buffer's RGB output:
+	if (!mDevice.Connect (::GetCSCInputXptFromChannel(mOutputChannel),	frameStoreOutputRGB,	canVerify)) connectFailures++;
+	//	Connect mixer's foreground video input to the CSC's YUV video output:
+	if (!mDevice.Connect (::GetMixerFGInputXpt(mOutputChannel),			cscOutputYUV,			canVerify)) connectFailures++;
+	//	Connect mixer's foreground key input to the CSC's YUV key output:
+	if (!mDevice.Connect (::GetMixerFGInputXpt(mOutputChannel, true),	cscOutputKey,			canVerify)) connectFailures++;
+	//	Connect mixer's background video input to the SDI input:
+	if (!mDevice.Connect (::GetMixerBGInputXpt(mOutputChannel),			signalInput,			canVerify)) connectFailures++;
 
 	if (!mConfig.fDoMultiFormat)
 	{
-		//	Connect more outputs -- HDMI, analog, SDI monitor, etc...
+		//	Connect more outputs -- HDMI, analog, SDI monitor, etc...	(Don't bother to verify these connections)
 		if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1))
 			mDevice.Connect (NTV2_XptHDMIOutInput, mixerOutputYUV);
 		if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v2))
@@ -1412,6 +1418,7 @@ void NTV2CCGrabber::RouteOutputSignal (const NTV2VideoFormat inVideoFormat)
 		if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtSDIMonOut1))
 			mDevice.Connect (::GetSDIOutputInputXpt (NTV2_CHANNEL5), mixerOutputYUV);
 	}
+	return connectFailures == 0;
 
 }	//	RouteOutputSignal
 

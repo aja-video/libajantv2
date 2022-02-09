@@ -120,7 +120,7 @@ class NTV2Player4K
 	protected:
 		virtual AJAStatus	SetUpVideo (void);				///< @brief	Performs all video setup.
 		virtual AJAStatus	SetUpAudio (void);				///< @brief	Performs all audio setup.
-		virtual void		RouteOutputSignal (void);		///< @brief	Performs all widget/signal routing for playout.
+		virtual bool		RouteOutputSignal (void);		///< @brief	Performs all widget/signal routing for playout.
 		virtual AJAStatus	SetUpHostBuffers (void);		///< @brief	Sets up my host video & audio buffers.
 		virtual AJAStatus	SetUpTestPatternBuffers (void);	///< @brief	Creates my test pattern buffers.
 		virtual void		StartConsumerThread (void);		///< @brief	Starts my consumer thread.
@@ -145,20 +145,20 @@ class NTV2Player4K
 		virtual void		SetupSDITransmitters (const NTV2Channel inFirstSDI, const UWord inNumSDIs);
 
 		//	Widget Routing
-		virtual void		Route4KDownConverter (void);	///< @brief	Sets up board routing for the 4K DownConverter to SDI Monitor (if available).
-		virtual void		RouteHDMIOutput (void);			///< @brief	Sets up board routing output via the HDMI (if available).
-		virtual void		RouteFsToDLOut (void);			///< @brief	Sets up board routing from the Frame Stores to the Dual Link out.
-		virtual void		RouteFsToCsc (void);			///< @brief	Sets up board routing from the Frame Stores to the Color Space Converters.
-		virtual void		RouteFsToSDIOut (void);			///< @brief	Sets up board routing from the Frame Stores to the SDI outputs.
-		virtual void		RouteFsToTsiMux (void);			///< @brief	Sets up board routing from the Frame Stores to the Two Sample Interleave muxes.
-		virtual void		RouteDLOutToSDIOut (void);		///< @brief	Sets up board routing from the Dual Link outputs to the SDI outputs.
-        virtual void		RouteCscTo2xSDIOut (void);		///< @brief	Sets up board routing from the Color Space Converters to the 2xSDI outputs.
-        virtual void		RouteCscTo4xSDIOut (void);		///< @brief	Sets up board routing from the Color Space Converters to the 4xSDI outputs.
-		virtual void		RouteCscToDLOut (void);			///< @brief	Sets up board routing from the Color Space Converters to the Dual Link outputs.
-		virtual void		RouteTsiMuxToDLOut (void);		///< @brief	Sets up board routing from the Two Sample Interleave muxes to the Dual Link outputs.
-		virtual void		RouteTsiMuxToCsc (void);		///< @brief	Sets up board routing from the Two Sample Interleave muxes to the color Space Converters.
-        virtual void		RouteTsiMuxTo2xSDIOut (void);	///< @brief	Sets up board routing from the Two Sample Interleave muxes to the 2xSDI outputs.
-        virtual void		RouteTsiMuxTo4xSDIOut (void);	///< @brief	Sets up board routing from the Two Sample Interleave muxes to the 4xSDI outputs.
+		virtual bool		Route4KDownConverter (void);	///< @brief	Sets up board routing for the 4K DownConverter to SDI Monitor (if available).
+		virtual bool		RouteHDMIOutput (void);			///< @brief	Sets up board routing output via the HDMI (if available).
+		virtual bool		RouteFsToDLOut (void);			///< @brief	Sets up board routing from the Frame Stores to the Dual Link out.
+		virtual bool		RouteFsToCsc (void);			///< @brief	Sets up board routing from the Frame Stores to the Color Space Converters.
+		virtual bool		RouteFsToSDIOut (void);			///< @brief	Sets up board routing from the Frame Stores to the SDI outputs.
+		virtual bool		RouteFsToTsiMux (void);			///< @brief	Sets up board routing from the Frame Stores to the Two Sample Interleave muxes.
+		virtual bool		RouteDLOutToSDIOut (void);		///< @brief	Sets up board routing from the Dual Link outputs to the SDI outputs.
+        virtual bool		RouteCscTo2xSDIOut (void);		///< @brief	Sets up board routing from the Color Space Converters to the 2xSDI outputs.
+        virtual bool		RouteCscTo4xSDIOut (void);		///< @brief	Sets up board routing from the Color Space Converters to the 4xSDI outputs.
+		virtual bool		RouteCscToDLOut (void);			///< @brief	Sets up board routing from the Color Space Converters to the Dual Link outputs.
+		virtual bool		RouteTsiMuxToDLOut (void);		///< @brief	Sets up board routing from the Two Sample Interleave muxes to the Dual Link outputs.
+		virtual bool		RouteTsiMuxToCsc (void);		///< @brief	Sets up board routing from the Two Sample Interleave muxes to the color Space Converters.
+        virtual bool		RouteTsiMuxTo2xSDIOut (void);	///< @brief	Sets up board routing from the Two Sample Interleave muxes to the 2xSDI outputs.
+        virtual bool		RouteTsiMuxTo4xSDIOut (void);	///< @brief	Sets up board routing from the Two Sample Interleave muxes to the 4xSDI outputs.
 
 
 	//	Protected Class Methods

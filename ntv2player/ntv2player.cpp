@@ -401,11 +401,13 @@ AJAStatus NTV2Player::SetUpTestPatternBuffers (void)
 }	//	SetUpTestPatternBuffers
 
 
-void NTV2Player::RouteOutputSignal (void)
+bool NTV2Player::RouteOutputSignal (void)
 {
 	const NTV2Standard	outputStandard	(::GetNTV2StandardFromVideoFormat(mConfig.fVideoFormat));
 	const UWord			numSDIOutputs	(::NTV2DeviceGetNumVideoOutputs (mDeviceID));
 	const bool			isRGB			(::IsRGBFormat(mConfig.fPixelFormat));
+	const bool			canVerify		(mDevice.HasCanConnectROM());
+	UWord				connectFailures	(0);
 
 	//	Since this function figures out which SDI spigots will be set up for output,
 	//	it also sets the "mTCIndexes" member, which determines which timecodes will
@@ -415,7 +417,8 @@ void NTV2Player::RouteOutputSignal (void)
 	const NTV2OutputCrosspointID cscVidOutXpt(::GetCSCOutputXptFromChannel(mConfig.fOutputChannel,  false/*isKey*/,  !isRGB/*isRGB*/));
 	const NTV2OutputCrosspointID fsVidOutXpt (::GetFrameBufferOutputXptFromChannel(mConfig.fOutputChannel,  isRGB/*isRGB*/,  false/*is425*/));
 	if (isRGB)
-		mDevice.Connect (::GetCSCInputXptFromChannel(mConfig.fOutputChannel, false/*isKeyInput*/),  fsVidOutXpt);
+		if (!mDevice.Connect (::GetCSCInputXptFromChannel(mConfig.fOutputChannel, false/*isKeyInput*/),  fsVidOutXpt,  canVerify))
+			connectFailures++;
 
 	if (mConfig.fDoMultiFormat)
 	{
@@ -423,7 +426,8 @@ void NTV2Player::RouteOutputSignal (void)
 		if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID))
 			mDevice.SetSDITransmitEnable(mConfig.fOutputChannel, true);
 
-		mDevice.Connect (::GetSDIOutputInputXpt (mConfig.fOutputChannel, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt);
+		if (!mDevice.Connect (::GetSDIOutputInputXpt (mConfig.fOutputChannel, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
+			connectFailures++;
 		mTCIndexes.insert (::NTV2ChannelToTimecodeIndex(mConfig.fOutputChannel, /*inEmbeddedLTC=*/mConfig.fTransmitLTC));
 		//	NOTE: No need to send VITC2 with VITC1 (for "i" formats) -- firmware does this automatically
 		mDevice.SetSDIOutputStandard (mConfig.fOutputChannel, outputStandard);
@@ -435,7 +439,8 @@ void NTV2Player::RouteOutputSignal (void)
 		mDevice.ClearRouting();		//	Start with clean slate
 
 		if (isRGB)
-			mDevice.Connect (::GetCSCInputXptFromChannel (mConfig.fOutputChannel, false/*isKeyInput*/),  fsVidOutXpt);
+			if (!mDevice.Connect (::GetCSCInputXptFromChannel (mConfig.fOutputChannel, false/*isKeyInput*/),  fsVidOutXpt,  canVerify))
+				connectFailures++;
 
 		for (NTV2Channel chan(NTV2_CHANNEL1);  ULWord(chan) < numSDIOutputs;  chan = NTV2Channel(chan+1))
 		{
@@ -448,7 +453,8 @@ void NTV2Player::RouteOutputSignal (void)
 			if (NTV2_OUTPUT_DEST_IS_SDI(sdiOutput))
 				if (OutputDestHasRP188BypassEnabled(sdiOutput))
 					DisableRP188Bypass(sdiOutput);
-			mDevice.Connect (::GetSDIOutputInputXpt (chan, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt);
+			if (!mDevice.Connect (::GetSDIOutputInputXpt (chan, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
+				connectFailures++;
 			mDevice.SetSDIOutputStandard (chan, outputStandard);
 			mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (chan, /*inEmbeddedLTC=*/mConfig.fTransmitLTC));	//	Add SDI spigot's TC index
 			//	NOTE: No need to send VITC2 with VITC1 (for "i" formats) -- firmware does this automatically
@@ -456,13 +462,18 @@ void NTV2Player::RouteOutputSignal (void)
 
 		//	And connect analog video output, if the device has one...
 		if (::NTV2DeviceGetNumAnalogVideoOutputs(mDeviceID))
-			mDevice.Connect (::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_ANALOG),  isRGB ? cscVidOutXpt : fsVidOutXpt);
+			if (!mDevice.Connect (::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_ANALOG),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
+				connectFailures++;
 
 		//	And connect HDMI video output, if the device has one...
 		if (::NTV2DeviceGetNumHDMIVideoOutputs(mDeviceID))
-			mDevice.Connect (::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_HDMI),  isRGB ? cscVidOutXpt : fsVidOutXpt);
+			if (!mDevice.Connect (::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_HDMI),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
+				connectFailures++;
 	}
 	TCNOTE(mTCIndexes);
+	if (connectFailures)
+		PLWARN(DEC(connectFailures) << " 'Connect' call(s) failed");
+	return connectFailures == 0;
 
 }	//	RouteOutputSignal
 

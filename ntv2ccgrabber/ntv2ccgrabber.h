@@ -203,10 +203,11 @@ class NTV2CCGrabber
 		virtual AJAStatus		SetupAudio (void);
 
 		/**
-			@brief	Sets up board routing for capture (and sets the output standard based on the given video format).
+			@return		True if device widget routing successfully configured for capture;  otherwise false.
+			@note		This function also sets the output standard based on the given video format.
 			@param[in]	inVideoFormat	Specifies the video format in use.
 		**/
-		virtual void			RouteInputSignal (const NTV2VideoFormat inVideoFormat);
+		virtual bool			RouteInputSignal (const NTV2VideoFormat inVideoFormat);
 
 		/**
 			@brief	Sets the device output standard based on the given video format.
@@ -267,10 +268,10 @@ class NTV2CCGrabber
 		virtual void			DoCCOutput (const uint32_t inFrameNum, const CaptionData & inCCData, const NTV2VideoFormat inVideoFormat);
 
 		/**
-			@brief	Sets up board routing for playout.
+			@return		True if device widget routing successfully set up for playout;  otherwise false.
 			@param[in]	inVideoFormat	Specifies the desired output video format.
 		**/
-		virtual void			RouteOutputSignal (const NTV2VideoFormat inVideoFormat);
+		virtual bool			RouteOutputSignal (const NTV2VideoFormat inVideoFormat);
 
 		/**
 			@brief	Repeatedly updates captions (until global quit flag set).

@@ -271,6 +271,7 @@ void NTV2Capture::RouteInputSignal (void)
 	if (NTV2_INPUT_SOURCE_IS_HDMI(mConfig.fInputSource))
 		mDevice.GetHDMIInputColor (inputColor, mConfig.fInputChannel);
 
+	const bool						canVerify				(mDevice.HasCanConnectROM());
 	const bool						isInputRGB				(inputColor == NTV2_LHIHDMIColorSpaceRGB);
 	const bool						isFrameRGB				(::IsRGBFormat(mConfig.fPixelFormat));
 	const NTV2OutputCrosspointID	inputWidgetOutputXpt	(::GetInputSourceOutputXpt(mConfig.fInputSource, false, isInputRGB, 0));
@@ -281,20 +282,20 @@ void NTV2Capture::RouteInputSignal (void)
 
 
 	if (!mConfig.fDoMultiFormat)
-		mDevice.ClearRouting ();
+		mDevice.ClearRouting();
 
 	if (isInputRGB && !isFrameRGB)
 	{
-		mDevice.Connect (frameBufferInputXpt,		cscWidgetYUVOutputXpt);	//	Frame store input to CSC widget's YUV output
-		mDevice.Connect (cscWidgetVideoInputXpt,	inputWidgetOutputXpt);	//	CSC widget's RGB input to input widget's output
+		mDevice.Connect (frameBufferInputXpt,		cscWidgetYUVOutputXpt,	canVerify);	//	Frame store input to CSC widget's YUV output
+		mDevice.Connect (cscWidgetVideoInputXpt,	inputWidgetOutputXpt,	canVerify);	//	CSC widget's RGB input to input widget's output
 	}
 	else if (!isInputRGB && isFrameRGB)
 	{
-		mDevice.Connect (frameBufferInputXpt,		cscWidgetRGBOutputXpt);	//	Frame store input to CSC widget's RGB output
-		mDevice.Connect (cscWidgetVideoInputXpt,	inputWidgetOutputXpt);	//	CSC widget's YUV input to input widget's output
+		mDevice.Connect (frameBufferInputXpt,		cscWidgetRGBOutputXpt,	canVerify);	//	Frame store input to CSC widget's RGB output
+		mDevice.Connect (cscWidgetVideoInputXpt,	inputWidgetOutputXpt,	canVerify);	//	CSC widget's YUV input to input widget's output
 	}
 	else
-		mDevice.Connect (frameBufferInputXpt,		inputWidgetOutputXpt);	//	Frame store input to input widget's output
+		mDevice.Connect (frameBufferInputXpt,		inputWidgetOutputXpt,	canVerify);	//	Frame store input to input widget's output
 
 }	//	RouteInputSignal
 

@@ -199,8 +199,8 @@ AJAStatus NTV2Player8K::SetUpVideo (void)
  	if (mConfig.fVideoFormat == NTV2_FORMAT_UNKNOWN)
 		return AJA_STATUS_BAD_PARAM;
 
-if(false)///////////////////////////////////////////////////////////////////////	if (!::NTV2DeviceCanDoVideoFormat (mDeviceID, mConfig.fVideoFormat))
-		{cerr << "## ERROR:  Device can't do " << ::NTV2VideoFormatToString(mConfig.fVideoFormat) << endl;  return AJA_STATUS_UNSUPPORTED;}
+	if (!::NTV2DeviceCanDoVideoFormat (mDeviceID, mConfig.fVideoFormat))
+		cerr << "## NOTE:  NTV2DeviceCanDoVideoFormat says device can't do " << ::NTV2VideoFormatToString(mConfig.fVideoFormat) << endl;
 
 	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
 		{cerr << "## ERROR: Pixel format '" << ::NTV2FrameBufferFormatString(mConfig.fPixelFormat) << "' not supported on this device" << endl;
@@ -423,10 +423,9 @@ AJAStatus NTV2Player8K::SetUpTestPatternBuffers (void)
 }	//	SetUpTestPatternBuffers
 
 
-void NTV2Player8K::RouteOutputSignal (void)
+bool NTV2Player8K::RouteOutputSignal (void)
 {
-	if (!mConfig.fDoMultiFormat)
-		mDevice.ClearRouting();	//	Replace current signal routing
+	NTV2XptConnections	connections;	//	Routing connections to make
 
 	if (mConfig.fDoTsiRouting)
 	{
@@ -434,30 +433,30 @@ void NTV2Player8K::RouteOutputSignal (void)
 		{
 			if (mConfig.fOutputChannel < NTV2_CHANNEL3)
 			{
-				mDevice.Connect (NTV2_XptDualLinkOut1Input,	NTV2_XptFrameBuffer1RGB);
-				mDevice.Connect (NTV2_XptDualLinkOut2Input,	NTV2_XptFrameBuffer1_DS2RGB);
-				mDevice.Connect (NTV2_XptDualLinkOut3Input,	NTV2_XptFrameBuffer2RGB);
-				mDevice.Connect (NTV2_XptDualLinkOut4Input,	NTV2_XptFrameBuffer2_DS2RGB);
+				connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut1Input,	NTV2_XptFrameBuffer1RGB));
+				connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut2Input,	NTV2_XptFrameBuffer1_DS2RGB));
+				connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut3Input,	NTV2_XptFrameBuffer2RGB));
+				connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut4Input,	NTV2_XptFrameBuffer2_DS2RGB));
 				if (mConfig.fDoHDMIOutput)
-					mDevice.Connect (NTV2_XptHDMIOutInput,	NTV2_XptFrameBuffer1RGB);
+					connections.insert(NTV2XptConnection(NTV2_XptHDMIOutInput,	NTV2_XptFrameBuffer1RGB));
 			}
 			else
 			{
-				mDevice.Connect (NTV2_XptDualLinkOut1Input,	NTV2_XptFrameBuffer3RGB);
-				mDevice.Connect (NTV2_XptDualLinkOut2Input,	NTV2_XptFrameBuffer3_DS2RGB);
-				mDevice.Connect (NTV2_XptDualLinkOut3Input,	NTV2_XptFrameBuffer4RGB);
-				mDevice.Connect (NTV2_XptDualLinkOut4Input,	NTV2_XptFrameBuffer4_DS2RGB);
+				connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut1Input,	NTV2_XptFrameBuffer3RGB));
+				connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut2Input,	NTV2_XptFrameBuffer3_DS2RGB));
+				connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut3Input,	NTV2_XptFrameBuffer4RGB));
+				connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut4Input,	NTV2_XptFrameBuffer4_DS2RGB));
 				if (mConfig.fDoHDMIOutput)
-					mDevice.Connect (NTV2_XptHDMIOutInput,	NTV2_XptFrameBuffer3RGB);
+					connections.insert(NTV2XptConnection(NTV2_XptHDMIOutInput,	NTV2_XptFrameBuffer3RGB));
 			}
-			mDevice.Connect (NTV2_XptSDIOut1Input,		NTV2_XptDuallinkOut1);
-			mDevice.Connect (NTV2_XptSDIOut1InputDS2,	NTV2_XptDuallinkOut1DS2);
-			mDevice.Connect (NTV2_XptSDIOut2Input,		NTV2_XptDuallinkOut2);
-			mDevice.Connect (NTV2_XptSDIOut2InputDS2,	NTV2_XptDuallinkOut2DS2);
-			mDevice.Connect (NTV2_XptSDIOut3Input,		NTV2_XptDuallinkOut3);
-			mDevice.Connect (NTV2_XptSDIOut3InputDS2,	NTV2_XptDuallinkOut3DS2);
-			mDevice.Connect (NTV2_XptSDIOut4Input,		NTV2_XptDuallinkOut4);
-			mDevice.Connect (NTV2_XptSDIOut4InputDS2,	NTV2_XptDuallinkOut4DS2);
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut1Input,		NTV2_XptDuallinkOut1));
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut1InputDS2,	NTV2_XptDuallinkOut1DS2));
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut2Input,		NTV2_XptDuallinkOut2));
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut2InputDS2,	NTV2_XptDuallinkOut2DS2));
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut3Input,		NTV2_XptDuallinkOut3));
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut3InputDS2,	NTV2_XptDuallinkOut3DS2));
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut4Input,		NTV2_XptDuallinkOut4));
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut4InputDS2,	NTV2_XptDuallinkOut4DS2));
 			mDevice.SetSDITransmitEnable (NTV2_CHANNEL1, true);
 			mDevice.SetSDITransmitEnable (NTV2_CHANNEL2, true);
 			mDevice.SetSDITransmitEnable (NTV2_CHANNEL3, true);
@@ -477,10 +476,10 @@ void NTV2Player8K::RouteOutputSignal (void)
 			{
 				if (NTV2_IS_QUAD_QUAD_HFR_VIDEO_FORMAT(mConfig.fVideoFormat))
 				{
-					mDevice.Connect (NTV2_XptSDIOut1Input,	NTV2_XptFrameBuffer1YUV);
-					mDevice.Connect (NTV2_XptSDIOut2Input,	NTV2_XptFrameBuffer1_DS2YUV);
-					mDevice.Connect (NTV2_XptSDIOut3Input,	NTV2_XptFrameBuffer2YUV);
-					mDevice.Connect (NTV2_XptSDIOut4Input,	NTV2_XptFrameBuffer2_DS2YUV);
+					connections.insert(NTV2XptConnection(NTV2_XptSDIOut1Input,	NTV2_XptFrameBuffer1YUV));
+					connections.insert(NTV2XptConnection(NTV2_XptSDIOut2Input,	NTV2_XptFrameBuffer1_DS2YUV));
+					connections.insert(NTV2XptConnection(NTV2_XptSDIOut3Input,	NTV2_XptFrameBuffer2YUV));
+					connections.insert(NTV2XptConnection(NTV2_XptSDIOut4Input,	NTV2_XptFrameBuffer2_DS2YUV));
 					mDevice.SetSDITransmitEnable (NTV2_CHANNEL1, true);
 					mDevice.SetSDITransmitEnable (NTV2_CHANNEL2, true);
 					mDevice.SetSDITransmitEnable (NTV2_CHANNEL3, true);
@@ -494,14 +493,14 @@ void NTV2Player8K::RouteOutputSignal (void)
 					mDevice.SetSDIOutLevelAtoLevelBConversion (NTV2_CHANNEL4, false);
 					mDevice.SetSDIOutRGBLevelAConversion (NTV2_CHANNEL4, false);
 					if (mConfig.fDoHDMIOutput)
-						mDevice.Connect (NTV2_XptHDMIOutInput,	NTV2_XptFrameBuffer1YUV);
+						connections.insert(NTV2XptConnection(NTV2_XptHDMIOutInput,	NTV2_XptFrameBuffer1YUV));
 				}
 				else
 				{
-					mDevice.Connect (NTV2_XptSDIOut1Input,		NTV2_XptFrameBuffer1YUV);
-					mDevice.Connect (NTV2_XptSDIOut1InputDS2,	NTV2_XptFrameBuffer1_DS2YUV);
-					mDevice.Connect (NTV2_XptSDIOut2Input,		NTV2_XptFrameBuffer2YUV);
-					mDevice.Connect (NTV2_XptSDIOut2InputDS2,	NTV2_XptFrameBuffer2_DS2YUV);
+					connections.insert(NTV2XptConnection(NTV2_XptSDIOut1Input,		NTV2_XptFrameBuffer1YUV));
+					connections.insert(NTV2XptConnection(NTV2_XptSDIOut1InputDS2,	NTV2_XptFrameBuffer1_DS2YUV));
+					connections.insert(NTV2XptConnection(NTV2_XptSDIOut2Input,		NTV2_XptFrameBuffer2YUV));
+					connections.insert(NTV2XptConnection(NTV2_XptSDIOut2InputDS2,	NTV2_XptFrameBuffer2_DS2YUV));
 					mDevice.SetSDITransmitEnable (NTV2_CHANNEL1, true);
 					mDevice.SetSDITransmitEnable (NTV2_CHANNEL2, true);
 					mDevice.SetSDIOutLevelAtoLevelBConversion (NTV2_CHANNEL1, false);
@@ -509,17 +508,17 @@ void NTV2Player8K::RouteOutputSignal (void)
 					mDevice.SetSDIOutLevelAtoLevelBConversion (NTV2_CHANNEL2, false);
 					mDevice.SetSDIOutRGBLevelAConversion (NTV2_CHANNEL2, false);
 					if (mConfig.fDoHDMIOutput)
-						mDevice.Connect (NTV2_XptHDMIOutInput,	NTV2_XptFrameBuffer1YUV);
+						connections.insert(NTV2XptConnection(NTV2_XptHDMIOutInput,	NTV2_XptFrameBuffer1YUV));
 				}
 			}
 			else
 			{
 				if (NTV2_IS_QUAD_QUAD_HFR_VIDEO_FORMAT(mConfig.fVideoFormat))
 				{
-					mDevice.Connect (NTV2_XptSDIOut1Input,	NTV2_XptFrameBuffer3YUV);
-					mDevice.Connect (NTV2_XptSDIOut2Input,	NTV2_XptFrameBuffer3_DS2YUV);
-					mDevice.Connect (NTV2_XptSDIOut3Input,	NTV2_XptFrameBuffer4YUV);
-					mDevice.Connect (NTV2_XptSDIOut4Input,	NTV2_XptFrameBuffer4_DS2YUV);
+					connections.insert(NTV2XptConnection(NTV2_XptSDIOut1Input,	NTV2_XptFrameBuffer3YUV));
+					connections.insert(NTV2XptConnection(NTV2_XptSDIOut2Input,	NTV2_XptFrameBuffer3_DS2YUV));
+					connections.insert(NTV2XptConnection(NTV2_XptSDIOut3Input,	NTV2_XptFrameBuffer4YUV));
+					connections.insert(NTV2XptConnection(NTV2_XptSDIOut4Input,	NTV2_XptFrameBuffer4_DS2YUV));
 					mDevice.SetSDITransmitEnable (NTV2_CHANNEL1, true);
 					mDevice.SetSDITransmitEnable (NTV2_CHANNEL2, true);
 					mDevice.SetSDITransmitEnable (NTV2_CHANNEL3, true);
@@ -533,14 +532,14 @@ void NTV2Player8K::RouteOutputSignal (void)
 					mDevice.SetSDIOutLevelAtoLevelBConversion (NTV2_CHANNEL4, false);
 					mDevice.SetSDIOutRGBLevelAConversion (NTV2_CHANNEL4, false);
 					if (mConfig.fDoHDMIOutput)
-						mDevice.Connect (NTV2_XptHDMIOutInput,	NTV2_XptFrameBuffer3YUV);
+						connections.insert(NTV2XptConnection(NTV2_XptHDMIOutInput,	NTV2_XptFrameBuffer3YUV));
 				}
 				else
 				{
-					mDevice.Connect (NTV2_XptSDIOut3Input,		NTV2_XptFrameBuffer3YUV);
-					mDevice.Connect (NTV2_XptSDIOut3InputDS2,	NTV2_XptFrameBuffer3_DS2YUV);
-					mDevice.Connect (NTV2_XptSDIOut4Input,		NTV2_XptFrameBuffer4YUV);
-					mDevice.Connect (NTV2_XptSDIOut4InputDS2,	NTV2_XptFrameBuffer4_DS2YUV);
+					connections.insert(NTV2XptConnection(NTV2_XptSDIOut3Input,		NTV2_XptFrameBuffer3YUV));
+					connections.insert(NTV2XptConnection(NTV2_XptSDIOut3InputDS2,	NTV2_XptFrameBuffer3_DS2YUV));
+					connections.insert(NTV2XptConnection(NTV2_XptSDIOut4Input,		NTV2_XptFrameBuffer4YUV));
+					connections.insert(NTV2XptConnection(NTV2_XptSDIOut4InputDS2,	NTV2_XptFrameBuffer4_DS2YUV));
 					mDevice.SetSDITransmitEnable (NTV2_CHANNEL3, true);
 					mDevice.SetSDITransmitEnable (NTV2_CHANNEL4, true);
 					mDevice.SetSDIOutLevelAtoLevelBConversion (NTV2_CHANNEL3, false);
@@ -548,7 +547,7 @@ void NTV2Player8K::RouteOutputSignal (void)
 					mDevice.SetSDIOutLevelAtoLevelBConversion (NTV2_CHANNEL4, false);
 					mDevice.SetSDIOutRGBLevelAConversion (NTV2_CHANNEL4, false);
 					if (mConfig.fDoHDMIOutput)
-						mDevice.Connect (NTV2_XptHDMIOutInput,	NTV2_XptFrameBuffer3YUV);
+						connections.insert(NTV2XptConnection(NTV2_XptHDMIOutInput,	NTV2_XptFrameBuffer3YUV));
 				}
 			}
 		}
@@ -557,18 +556,18 @@ void NTV2Player8K::RouteOutputSignal (void)
 	{
 		if (::IsRGBFormat(mConfig.fPixelFormat))
 		{
-			mDevice.Connect (NTV2_XptDualLinkOut1Input,	NTV2_XptFrameBuffer1RGB);
-			mDevice.Connect (NTV2_XptDualLinkOut2Input,	NTV2_XptFrameBuffer2RGB);
-			mDevice.Connect (NTV2_XptDualLinkOut3Input,	NTV2_XptFrameBuffer3RGB);
-			mDevice.Connect (NTV2_XptDualLinkOut4Input,	NTV2_XptFrameBuffer4RGB);
-			mDevice.Connect (NTV2_XptSDIOut1Input,		NTV2_XptDuallinkOut1);
-			mDevice.Connect (NTV2_XptSDIOut1InputDS2,	NTV2_XptDuallinkOut1DS2);
-			mDevice.Connect (NTV2_XptSDIOut2Input,		NTV2_XptDuallinkOut2);
-			mDevice.Connect (NTV2_XptSDIOut2InputDS2,	NTV2_XptDuallinkOut2DS2);
-			mDevice.Connect (NTV2_XptSDIOut3Input,		NTV2_XptDuallinkOut3);
-			mDevice.Connect (NTV2_XptSDIOut3InputDS2,	NTV2_XptDuallinkOut3DS2);
-			mDevice.Connect (NTV2_XptSDIOut4Input,		NTV2_XptDuallinkOut4);
-			mDevice.Connect (NTV2_XptSDIOut4InputDS2,	NTV2_XptDuallinkOut4DS2);
+			connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut1Input,	NTV2_XptFrameBuffer1RGB));
+			connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut2Input,	NTV2_XptFrameBuffer2RGB));
+			connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut3Input,	NTV2_XptFrameBuffer3RGB));
+			connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut4Input,	NTV2_XptFrameBuffer4RGB));
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut1Input,		NTV2_XptDuallinkOut1));
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut1InputDS2,	NTV2_XptDuallinkOut1DS2));
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut2Input,		NTV2_XptDuallinkOut2));
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut2InputDS2,	NTV2_XptDuallinkOut2DS2));
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut3Input,		NTV2_XptDuallinkOut3));
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut3InputDS2,	NTV2_XptDuallinkOut3DS2));
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut4Input,		NTV2_XptDuallinkOut4));
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut4InputDS2,	NTV2_XptDuallinkOut4DS2));
 			mDevice.SetSDITransmitEnable (NTV2_CHANNEL1, true);
 			mDevice.SetSDITransmitEnable (NTV2_CHANNEL2, true);
 			mDevice.SetSDITransmitEnable (NTV2_CHANNEL3, true);
@@ -584,10 +583,10 @@ void NTV2Player8K::RouteOutputSignal (void)
 		}
 		else
 		{
-			mDevice.Connect (NTV2_XptSDIOut1Input,	NTV2_XptFrameBuffer1YUV);
-			mDevice.Connect (NTV2_XptSDIOut2Input,	NTV2_XptFrameBuffer2YUV);
-			mDevice.Connect (NTV2_XptSDIOut3Input,	NTV2_XptFrameBuffer3YUV);
-			mDevice.Connect (NTV2_XptSDIOut4Input,	NTV2_XptFrameBuffer4YUV);
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut1Input,	NTV2_XptFrameBuffer1YUV));
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut2Input,	NTV2_XptFrameBuffer2YUV));
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut3Input,	NTV2_XptFrameBuffer3YUV));
+			connections.insert(NTV2XptConnection(NTV2_XptSDIOut4Input,	NTV2_XptFrameBuffer4YUV));
 			mDevice.SetSDITransmitEnable (NTV2_CHANNEL1, true);
 			mDevice.SetSDITransmitEnable (NTV2_CHANNEL2, true);
 			mDevice.SetSDITransmitEnable (NTV2_CHANNEL3, true);
@@ -602,6 +601,7 @@ void NTV2Player8K::RouteOutputSignal (void)
 			mDevice.SetSDIOutRGBLevelAConversion (NTV2_CHANNEL4, false);
 		}
 	}
+	return mDevice.ApplySignalRoute(connections, /*replaceExistingRouting?*/!mConfig.fDoMultiFormat);
 
 }	//	RouteOutputSignal
 
