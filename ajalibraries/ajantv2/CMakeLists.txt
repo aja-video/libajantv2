@@ -175,14 +175,6 @@ set(AJAANC_SOURCES
     ${AJA_LIB_ANC_ROOT}/src/ancillarydata_timecode_vitc.cpp
     ${AJA_LIB_ANC_ROOT}/src/ancillarylist.cpp)
 
-if (AJA_BUILD_DRIVER STREQUAL ON)
-    add_definitions(-DNTV2_BUILDING_DRIVER)
-    list(APPEND AJANTV2_HEADERS
-        includes/ntv2driverprocamp.h)
-    list(APPEND AJANTV2_SOURCES
-        src/ntv2driverprocamp.cpp)
-endif()
-
 if (NOT AJA_BUILD_OPENSOURCE)
     message("added ajantv2 HEVC/M31 codec")
     set(AJANTV2_HEVC_HEADERS
