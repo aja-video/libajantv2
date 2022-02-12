@@ -22,6 +22,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
+#include <iostream>
+#include <iomanip>
 
 static std::vector<std::string> sGroupLabelVector;
 static const std::string sSeverityString[] = {"emergency", "alert", "assert", "error", "warning", "notice", "info", "debug"};
@@ -75,7 +77,7 @@ AJAStatus AJADebug::Open (bool incrementRefCount)
 			// check version
 			if (spShare->version == 0)
 			{	//	Initialize shared memory region...
-				memset((void*)spShare, 0, sizeof(AJADebugShare));
+				::memset(reinterpret_cast<void*>(spShare), 0, sizeof(AJADebugShare));
 				spShare->magicId					= AJA_DEBUG_MAGIC_ID;
 				spShare->version					= AJA_DEBUG_VERSION;
 				spShare->writeIndex					= 0;
@@ -865,14 +867,14 @@ const std::string & AJADebug::GroupName (const int32_t group)
 }
 
 
-AJAStatus AJADebug::SaveState (const char * pFileName)
+AJAStatus AJADebug::SaveState (const string & inFilePath)
 {
-	FILE* pFile(NULL);
+	FILE* pFile(nullptr);
 	if (!spShare)
 		return AJA_STATUS_INITIALIZE;
 
 	// open a new state file
-	pFile = fopen(pFileName, "w");
+	pFile = ::fopen(inFilePath.c_str(), "w");
 	if (!pFile)
 		return AJA_STATUS_FAIL;
 
@@ -880,7 +882,7 @@ AJAStatus AJADebug::SaveState (const char * pFileName)
 	{	// write the header
 		fprintf(pFile, "AJADebugVersion: %d\n", spShare->version);
 		fprintf(pFile, "AJADebugStateFileVersion: %d\n", AJA_DEBUG_STATE_FILE_VERSION);
-		for (int i = 0; i < AJA_DEBUG_UNIT_ARRAY_SIZE; i++)
+		for (int i = 0;  i < AJA_DEBUG_UNIT_ARRAY_SIZE;  i++)
 		{
 			// write groups with destinations enabled
 			if (spShare->unitArray[i])
@@ -901,14 +903,14 @@ AJAStatus AJADebug::SaveState (const char * pFileName)
 }
 
 
-AJAStatus AJADebug::RestoreState (const char * pFileName)
+AJAStatus AJADebug::RestoreState (const string & inFilePath)
 {
-	FILE* pFile(NULL);
+	FILE* pFile(nullptr);
 	if (!spShare)
 		return AJA_STATUS_INITIALIZE;
 
 	// open existing file
-	pFile = fopen(pFileName, "r");
+	pFile = ::fopen(inFilePath.c_str(), "r");
 	if (!pFile)
 		return AJA_STATUS_FAIL;
 
@@ -940,20 +942,16 @@ AJAStatus AJADebug::RestoreState (const char * pFileName)
 		{
 			// read groups that have destinations
 			count = fscanf(pFile, " GroupDestination: %d : %x", &index, &destination);
-			if(count != 2)
+			if (count != 2)
 			{
 				count = fscanf(pFile, " CustomGroupDestination: %d : %x", &index, &destination);
-				if(count != 2)
-				{
+				if (count != 2)
 					break;
-				}
 			}		   
 
 			// index must be in range
-			if((index < 0) || (index >= AJA_DEBUG_UNIT_ARRAY_SIZE))
-			{
+			if ((index < 0) || (index >= AJA_DEBUG_UNIT_ARRAY_SIZE))
 				continue;
-			}
 
 			// update the destination
 			spShare->unitArray[index] = destination;
@@ -961,12 +959,11 @@ AJAStatus AJADebug::RestoreState (const char * pFileName)
 	}
 	catch(...)
 	{
-		fclose(pFile);
+		::fclose(pFile);
 		return AJA_STATUS_FAIL;
 	}
 
-	fclose(pFile);
-
+	::fclose(pFile);
 	return AJA_STATUS_SUCCESS;
 }
 
@@ -1172,6 +1169,8 @@ AJAStatus AJADebug::StatTimerStop (const uint32_t inKey)
 	return AJA_STATUS_SUCCESS;
 }
 
+#define HEX0N(__x__,__n__)		std::hex << std::uppercase << std::setw(int(__n__)) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ') << std::nouppercase
+
 AJAStatus AJADebug::StatCounterIncrement (const uint32_t inKey, const uint32_t inIncrement)
 {
 	if (!spShare)
@@ -1183,7 +1182,13 @@ AJAStatus AJADebug::StatCounterIncrement (const uint32_t inKey, const uint32_t i
 		if (IS_STAT_BAD)
 			return AJA_STATUS_FAIL;
 		AJADebugStat & stat(spShare->stats[inKey]);
-		stat.Increment(inIncrement);
+		stat.IncrementCount(inIncrement);
+if (inKey == 11)
+{	const uint32_t * pU32(&stat.fMin);
+	for (size_t num(0); num < 16;  num++)
+		std::cerr << " " << HEX0N(*pU32++,8);
+	std::cerr << std::endl;
+}
 	}
 	catch(...)
 	{
@@ -1253,13 +1258,74 @@ AJAStatus AJADebug::StatGetKeys (std::vector<uint32_t> & outKeys, uint32_t & out
 	return AJA_STATUS_SUCCESS;
 }
 
+AJAStatus AJADebug::StatGetKeys (std::set<uint32_t> & outKeys, uint32_t & outSeqNum)
+{
+	outKeys.clear();
+	outSeqNum = 0;
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	if (!spShare->statCapacity)
+		return AJA_STATUS_FEATURE;
+	try
+	{
+		for (uint32_t inKey(0);	 inKey < spShare->statCapacity;	 inKey++)
+			if (STAT_BIT_TEST)
+				outKeys.insert(inKey);
+		outSeqNum = spShare->statAllocChanges;
+	}
+	catch(...)
+	{
+		return AJA_STATUS_FAIL;
+	}
+	return AJA_STATUS_SUCCESS;
+}
+
+AJAStatus AJADebug::StatGetSequenceNum (uint32_t & outSeqNum)
+{
+	outSeqNum = 0;
+	if (!spShare)
+		return AJA_STATUS_INITIALIZE;
+	if (!spShare->statCapacity)
+		return AJA_STATUS_FEATURE;
+	outSeqNum = spShare->statAllocChanges;
+	return AJA_STATUS_SUCCESS;
+}
+
 uint64_t AJADebugStat::Sum (size_t inNum) const
 {
 	uint64_t result(0);
-	if (!inNum	||	inNum > AJA_DEBUG_STAT_DEQUE_SIZE)
+	if (!inNum)
+		return result;
+	if (inNum > AJA_DEBUG_STAT_DEQUE_SIZE)
 		inNum = AJA_DEBUG_STAT_DEQUE_SIZE;
 	for (size_t n(0);  n < inNum;  n++)
 		result += fValues[n];
+	return result;
+}
+
+uint32_t AJADebugStat::Minimum (size_t inNum) const
+{
+	uint32_t result(0xFFFFFFFF);
+	if (!inNum)
+		return result;
+	if (inNum > AJA_DEBUG_STAT_DEQUE_SIZE)
+		inNum = AJA_DEBUG_STAT_DEQUE_SIZE;
+	for (size_t n(0);  n < inNum;  n++)
+		if (fValues[n] < result)
+			result = fValues[n];
+	return result;
+}
+
+uint32_t AJADebugStat::Maximum (size_t inNum) const
+{
+	uint32_t result(0);
+	if (!inNum)
+		return result;
+	if (inNum > AJA_DEBUG_STAT_DEQUE_SIZE)
+		inNum = AJA_DEBUG_STAT_DEQUE_SIZE;
+	for (size_t n(0);  n < inNum;  n++)
+		if (fValues[n] > result)
+			result = fValues[n];
 	return result;
 }
 
@@ -1269,7 +1335,7 @@ double AJADebugStat::Average(void) const
 		return 0.00;
 	if (fCount < 2)
 		return double(fValues[0]);
-	return double(Sum(fCount)) / double(fCount);
+	return double(Sum(fCount)) / double(fCount > AJA_DEBUG_STAT_DEQUE_SIZE ? AJA_DEBUG_STAT_DEQUE_SIZE : fCount);
 }
 
 void AJADebugStat::Start (void)
@@ -1277,36 +1343,67 @@ void AJADebugStat::Start (void)
 	fLastTimeStamp = AJATime::GetSystemMicroseconds();
 }
 
-void AJADebugStat::Stop (void)
+bool AJADebugStat::Stop (void)
 {
-	SetValue(uint32_t(AJATime::GetSystemMicroseconds() - fLastTimeStamp), /*zero timestamp*/false);
+	if (!fLastTimeStamp)
+		return false;	//	Not started
+	SetValue(uint32_t(AJATime::GetSystemMicroseconds() - fLastTimeStamp));
+	fLastTimeStamp = 0;	//	Zero timestamp to indicate "timer not running"
+	return true;
 }
 
-void AJADebugStat::Increment (uint32_t inIncrement, const bool inRollOver)
+bool AJADebugStat::IncrementCount (uint32_t inIncrement, const bool inRollOver)
 {
-	if (inRollOver	||	fCount != 0xFFFFFFFF)
-		while (inIncrement--)
-			AJAAtomic::Increment(&fCount);
+	if (!inIncrement)
+		return false;	//	Increment value must be non-zero
+	if (!inRollOver  &&  fCount == 0xFFFFFFFF)
+		return false;	//	At rollover point, but not allowed
+
+	while (inIncrement--)
+		AJAAtomic::Increment(&fCount);
 	fLastTimeStamp = AJATime::GetSystemMicroseconds();
+	return true;
 }
 
-void AJADebugStat::Decrement (uint32_t inDecrement, const bool inRollUnder)
+bool AJADebugStat::DecrementCount (uint32_t inDecrement, const bool inRollUnder)
 {
-	if (inRollUnder	 ||	 fCount != 0xFFFFFFFF)
-		while (inDecrement--)
-			AJAAtomic::Decrement(&fCount);
+	if (!inDecrement)
+		return false;	//	Decrement value must be non-zero
+	if (!inRollUnder  &&  !fCount)
+		return false;	//	At rollunder point, but not allowed
+
+	while (inDecrement--)
+		AJAAtomic::Decrement(&fCount);
 	fLastTimeStamp = AJATime::GetSystemMicroseconds();
+	return true;
 }
 
-void AJADebugStat::SetValue (const uint32_t inValue, const bool inStamp)
+void AJADebugStat::SetValue (const uint32_t inValue)
 {
 	fValues[fCount % AJA_DEBUG_STAT_DEQUE_SIZE] = inValue;
-	AJAAtomic::Increment(&fCount);
 	if (inValue < fMin)
 		fMin = inValue;
 	if (inValue > fMax)
 		fMax = inValue;
-	fLastTimeStamp = inStamp ? AJATime::GetSystemMicroseconds() : 0;
+	IncrementCount();
+}
+
+bool AJADebugStat::operator == (const AJADebugStat & inRHS) const
+{
+	if (this == &inRHS)
+		return true;	//	Same object, identical
+	if (fCount != inRHS.fCount)
+		return false;
+	if (fLastTimeStamp != inRHS.fLastTimeStamp)
+		return false;
+	for (size_t n(0);  n < AJA_DEBUG_STAT_DEQUE_SIZE;  n++)
+		if (fValues[n] != inRHS.fValues[n])
+			return false;
+	if (fMin != inRHS.fMin)
+		return false;
+	if (fMax != inRHS.fMax)
+		return false;
+	return true;
 }
 
 std::ostream & operator << (std::ostream & oss, const AJADebugStat & inStat)

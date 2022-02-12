@@ -9,6 +9,7 @@
 
 #ifndef AJA_DEBUGSHARE_H
 #define AJA_DEBUGSHARE_H
+#include <stddef.h>
 
 /**
  *	The list of debug message severity codes.
@@ -219,54 +220,53 @@ typedef struct _AJADebugMessage
 class AJADebugStat
 {
 	public:
-	uint32_t	fMin;								/**< Smallest value yet seen. (Fixed at 0xFFFFFFFF and unused for counters.) */
-	uint32_t	fMax;								/**< Largest value yet seen. (Fixed at zero and unused for counters.) */
-	uint32_t	fCount;								/**< Update/change count */
-	uint64_t	fLastTimeStamp;						/**< Timestamp (start time for timer, zero if not running;	last update time for counter or data value) */
-	uint32_t	fValues[AJA_DEBUG_STAT_DEQUE_SIZE]; /**< Deque that provides an 11-sample moving average. (Unused for counters.) */
+		uint32_t			fMin;								/**< Smallest value yet seen. (Fixed at 0xFFFFFFFF and unused for counters.) */
+		uint32_t			fMax;								/**< Largest value yet seen. (Fixed at zero and unused for counters.) */
+		uint32_t volatile	fCount;								/**< Update/change count */
+		uint64_t			fLastTimeStamp;						/**< Timestamp (start time for timer, zero if not running;	last update time for counter or data value) */
+		uint32_t			fValues[AJA_DEBUG_STAT_DEQUE_SIZE]; /**< Deque that provides an 11-sample moving average. (Unused for counters.) */
 
-	AJADebugStat()		{Reset();}
+	public:
+		inline AJADebugStat()		{Reset();}
 
-	void Reset (void)
-	{
-		fMin = 0xFFFFFFFF;
-		fMax = fCount = 0;
-		fLastTimeStamp = 0;
-		for (size_t n(0);  n < AJA_DEBUG_STAT_DEQUE_SIZE;  n++)
-			fValues[n] = 0;
-	}
+		inline void Reset (void)
+		{
+			fMin = 0xFFFFFFFF;
+			fMax = fCount = 0;
+			fLastTimeStamp = 0;
+			for (size_t n(0);  n < AJA_DEBUG_STAT_DEQUE_SIZE;  n++)
+				fValues[n] = 0;
+		}
+		bool operator == (const AJADebugStat & inRHS) const;		/**< Returns true if equal to RHS */
+		inline bool operator != (const AJADebugStat & inRHS) const	{return !(*this == inRHS);}	/**< Returns true if not equal to RHS */
 
-	double Average(void) const; /**< Returns the average of the stored values */
-	uint64_t Sum (const size_t inNum = 0) const;	/**< Returns the sum of the first "inNum" stored values */
-	void Start (void);	/**< Starts a timer by setting fLastTimeStamp to the high-resolution host OS system timestamp */
+		double Average(void) const; /**< Returns the average of the stored values */
+		uint64_t Sum (size_t inNum = AJA_DEBUG_STAT_DEQUE_SIZE) const;		/**< Returns the sum of the first "inNum" stored values */
+		uint32_t Minimum (size_t inNum = AJA_DEBUG_STAT_DEQUE_SIZE) const;	/**< Returns the minimum of the first "inNum" stored values */
+		uint32_t Maximum (size_t inNum = AJA_DEBUG_STAT_DEQUE_SIZE) const;	/**< Returns the maximum of the first "inNum" stored values */
+		void Start (void);	/**< Starts a timer by setting fLastTimeStamp to the high-resolution host OS system timestamp */
+		bool Stop (void);	/**< Stops timer, stores elapsed time in the deque, bumps fCount, clears fLastTimeStamp, and updates fMin/fMax if needed. */
 
-	/**
-	 *	Stops the timer, stores the elapsed time in the deque, bumps fCount, and clears fLastTimeStamp.
-	 *	Also updates fMin and/or fMax if necessary.
-	 */
-	void Stop (void);
+		/**
+		 *	Increments fCount by the given amount, and sets fLastTimeStamp if successful.
+		 *	@param[in]	inIncrement		Optionally specifies a different increment value. Defaults to 1.
+		 *	@param[in]	inRollOver		Optionally controls if overflow is permitted. Defaults to true.
+		 */
+		bool IncrementCount (const uint32_t inIncrement = 1, const bool inRollOver = true);
 
-	/**
-	 *	Increments fCount by the given amount, and sets fLastTimeStamp.
-	 *	@param[in]	inIncrement		Optionally specifies a different increment value. Defaults to 1.
-	 *	@param[in]	inRollOver		Optionally controls if overflow is permitted. Defaults to true.
-	 */
-	void Increment (const uint32_t inIncrement = 1, const bool inRollOver = true);
+		/**
+		 *	Decrements fCount by the given amount, and sets fLastTimeStamp if successful.
+		 *	@param[in]	inDecrement		Optionally specifies a different increment value. Defaults to 1.
+		 *	@param[in]	inRollUnder		Optionally controls if underflow is permitted. Defaults to true.
+		 */
+		bool DecrementCount (const uint32_t inDecrement = 1, const bool inRollUnder = true);
 
-	/**
-	 *	Decrements fCount by the given amount, and sets fLastTimeStamp.
-	 *	@param[in]	inDecrement		Optionally specifies a different increment value. Defaults to 1.
-	 *	@param[in]	inRollUnder		Optionally controls if underflow is permitted. Defaults to true.
-	 */
-	void Decrement (const uint32_t inDecrement = 1, const bool inRollUnder = true);
-
-	/**
-	 *	Inserts the given value into the deque, bumps fCount, and sets fLastTimeStamp to the current time.
-	 *	@param[in]	inValue		Specifies the value to store.
-	 *	@param[in]	inStamp		Optionally specifies whether to set the timestamp or not. Defaults to true.
-	 */
-	void SetValue (const uint32_t inValue, const bool inStamp = true);
-};
+		inline bool IsSimpleCounter (void) const	{return fMin == 0xFFFFFFFF  &&  !fMax;}	/**< Returns true if I'm a simple counter */
+		void SetValue (const uint32_t inValue);	/**< Stores the given value in the deque, bumps fCount, and sets fLastTimeStamp. */
+		inline uint32_t GetCurrentValue (void) const	{return fCount ? fValues[CurrentValueIndex()] : 0;}	/**< Returns the latest stored value */
+		inline int CurrentValueIndex (void) const	{return fCount ? int((fCount - 1) % AJA_DEBUG_STAT_DEQUE_SIZE) : 9999;}	/**< Returns last valid index into fValues */
+		inline uint32_t GetValue (void) const	{return IsSimpleCounter()  ?  fCount  :  GetCurrentValue();}	/**< If simple counter, returns my current count; otherwise returns latest stored value */
+};	//	AJADebugStat
 
 
 /**
