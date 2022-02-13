@@ -548,6 +548,13 @@ endif()
 
 add_library(ajabase INTERFACE)
 
+set(AJANTV2_UTILITY_PUBLIC_HEADERS
+    utilityfiles/public/ntv2firmwareinstallerthread.h
+    utilityfiles/public/ntv2hevcfirmwareinstallerthread.h)
+set(AJANTV2_UTILITY_PUBLIC_SOURCES
+    utilityfiles/public/ntv2firmwareinstallerthread.cpp
+    utilityfiles/public/ntv2hevcfirmwareinstallerthread.cpp)
+
 # `cmake --install` deployments
 if (AJA_INSTALL_HEADERS)
     install(FILES ${AJABASE_COMMON_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/common)
@@ -557,6 +564,7 @@ if (AJA_INSTALL_HEADERS)
     install(FILES ${AJABASE_SYSTEM_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system)
     install(FILES ${AJAANC_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajaanc/includes)
     install(FILES ${AJANTV2_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/includes)
+    install(FILES ${AJANTV2_UTILITY_PUBLIC_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/utilityfiles/public)
 endif()
 if (AJA_INSTALL_SOURCES)
     install(FILES ${AJABASE_COMMON_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/common)
@@ -566,6 +574,7 @@ if (AJA_INSTALL_SOURCES)
     install(FILES ${AJABASE_SYSTEM_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system)
     install(FILES ${AJAANC_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajaanc/src)
     install(FILES ${AJANTV2_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/src)
+    install(FILES ${AJANTV2_UTILITY_PUBLIC_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/utilityfiles/public)
 endif()
 install(TARGETS ajantv2
     ARCHIVE DESTINATION ${AJA_INSTALL_LIBDIR}
