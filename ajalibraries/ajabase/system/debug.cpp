@@ -867,7 +867,7 @@ const std::string & AJADebug::GroupName (const int32_t group)
 }
 
 
-AJAStatus AJADebug::SaveState (const string & inFilePath)
+AJAStatus AJADebug::SaveState (const std::string & inFilePath)
 {
 	FILE* pFile(nullptr);
 	if (!spShare)
@@ -903,7 +903,7 @@ AJAStatus AJADebug::SaveState (const string & inFilePath)
 }
 
 
-AJAStatus AJADebug::RestoreState (const string & inFilePath)
+AJAStatus AJADebug::RestoreState (const std::string & inFilePath)
 {
 	FILE* pFile(nullptr);
 	if (!spShare)
