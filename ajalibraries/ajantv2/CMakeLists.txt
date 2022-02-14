@@ -557,6 +557,18 @@ set(AJANTV2_UTILITY_PUBLIC_SOURCES
 
 # `cmake --install` deployments
 if (AJA_INSTALL_HEADERS)
+    # Driver interface headers will be deployed to ajantv2/src/<platform>.
+    # We remove them from the AJANTV2_HEADERS list before cmake install is run.
+    if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        list(REMOVE_ITEM AJANTV2_HEADERS src/win/ntv2windriverinterface.h)
+        list(REMOVE_ITEM AJANTV2_HEADERS src/win/ntv2winpublicinterface.h)
+    elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        list(REMOVE_ITEM AJANTV2_HEADERS src/lin/ntv2linuxdriverinterface.h)
+        list(REMOVE_ITEM AJANTV2_HEADERS src/lin/ntv2linuxpublicinterface.h)
+    elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        list(REMOVE_ITEM AJANTV2_HEADERS src/mac/ntv2macdriverinterface.h)
+        list(REMOVE_ITEM AJANTV2_HEADERS src/mac/ntv2macpublicinterface.h)
+    endif()
     install(FILES ${AJABASE_COMMON_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/common)
     install(FILES ${AJABASE_NETWORK_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/network)
     install(FILES ${AJABASE_PERSISTENCE_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/persistence)
