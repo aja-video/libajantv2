@@ -396,7 +396,7 @@ bool CNTV2Card::GetEmbeddedAudioInput (NTV2EmbeddedAudioInput & outAudioInput, c
 		status = ReadRegister (srcSelectReg, value, kRegMaskEmbeddedAudioInput, kRegShiftEmbeddedAudioInput);
 	else
 	{
-		ULWord	sparse1 (0), sparse2 (0);	//	Sparse bits
+		ULWord	sparse1(0), sparse2(0);	//	Sparse bits
 		status = ReadRegister (srcSelectReg, sparse1, kRegMaskEmbeddedAudioInput, kRegShiftEmbeddedAudioInput)
 				&& ReadRegister (srcSelectReg, sparse2, kRegMaskEmbeddedAudioInput2, kRegShiftEmbeddedAudioInput2);
 		if (!sparse1 && !sparse2)
@@ -540,8 +540,8 @@ bool CNTV2Card::GetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, 
 	outAudioSource		= NTV2_AUDIO_SOURCE_INVALID;
 	outEmbeddedSource	= NTV2_EMBEDDED_AUDIO_INPUT_INVALID;
 
-	if (static_cast <UWord> (inAudioSystem) >= (::NTV2DeviceGetNumAudioSystems (_boardID) + (DeviceCanDoAudioMixer() ? 2 : 0)))
-		return false;
+	if (UWord(inAudioSystem) >= (::NTV2DeviceGetNumAudioSystems (_boardID) + (DeviceCanDoAudioMixer() ? 2 : 0)))
+		return false;	//	Invalid audio system
 	if (!ReadRegister (gAudioSystemToSrcSelectRegNum [inAudioSystem], regValue, kRegMaskAudioSource, kRegShiftAudioSource))
 		return false;
 	switch (regValue & 0x0000000F)

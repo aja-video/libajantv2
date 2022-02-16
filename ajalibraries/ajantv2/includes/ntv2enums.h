@@ -3136,7 +3136,7 @@ typedef enum NTV2InputCrosspointID
 		,NTV2_XptSDIOut3Standard	= NTV2_XptMultiLinkOut2Input	///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptMultiLinkOut2Input
 		,NTV2_XptSDIOut4Standard	= NTV2_XptMultiLinkOut2InputDS2 ///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptMultiLinkOut2InputDS2
 		,NTV2_XptIICT2Input			= NTV2_Xpt3DLUT1Input			///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_Xpt3DLUT1Input
-	#endif
+	#endif	//	!defined(NTV2_DEPRECATE_16_0)
 	#if !defined(NTV2_DEPRECATE_15_3)
 		,NTV2_XptFrameBuffer1BInput = NTV2_XptFrameBuffer1DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer1DS2Input
 		,NTV2_XptFrameBuffer2BInput = NTV2_XptFrameBuffer2DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer2DS2Input
@@ -3146,7 +3146,7 @@ typedef enum NTV2InputCrosspointID
 		,NTV2_XptFrameBuffer6BInput = NTV2_XptFrameBuffer6DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer6DS2Input
 		,NTV2_XptFrameBuffer7BInput = NTV2_XptFrameBuffer7DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer7DS2Input
 		,NTV2_XptFrameBuffer8BInput = NTV2_XptFrameBuffer8DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer8DS2Input
-	#endif
+	#endif	//	!defined(NTV2_DEPRECATE_15_3)
 } NTV2InputCrosspointID, NTV2InputXptID;
 
 #define NTV2_IS_VALID_InputCrosspointID(__s__)			((__s__) >= NTV2_FIRST_INPUT_CROSSPOINT && (__s__) <= NTV2_LAST_INPUT_CROSSPOINT)
