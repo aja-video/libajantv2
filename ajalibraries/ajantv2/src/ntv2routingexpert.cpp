@@ -1230,7 +1230,7 @@ void RoutingExpert::InitWidgetIDToChannels(void)
 	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtCSC4, NTV2_CHANNEL4));
 	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtHDMIIn1v2, NTV2_CHANNEL1));
 	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtHDMIOut1v2, NTV2_CHANNEL1));
-	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtSDIMonOut1, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtSDIMonOut1, NTV2_CHANNEL5));
 	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtCSC5, NTV2_CHANNEL5));
 	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtLUT5, NTV2_CHANNEL5));
 	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtDualLinkV2Out5, NTV2_CHANNEL5));
