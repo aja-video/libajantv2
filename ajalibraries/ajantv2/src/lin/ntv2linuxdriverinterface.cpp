@@ -932,9 +932,9 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 				acXferCombo.acXena2RoutingTable = *pXena2RoutingTable;
 
 			// Do the transfer
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
 			result = ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_TRANSFER, &acXferCombo);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 			if (result)
 				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_TRANSFER failed");  return false;}
 			// Copy the results back into the status buffer we were given
@@ -973,9 +973,9 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 				acXferCombo.acXena2RoutingTable = *pXena2RoutingTable;
 
 			// Do the transfer
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
 			result = ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_TRANSFER, &acXferCombo);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 			if (result)
 				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_TRANSFER failed");  return false;}
 			// Copy the results back into the status buffer we were given
@@ -1015,9 +1015,9 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 				acXferCombo.acTask = *pTask;
 
 			// Do the transfer
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
 			result = ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_TRANSFER, &acXferCombo);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 			if (result)
 				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_TRANSFER failed");  return false;}
 			// Copy the results back into the status buffer we were given

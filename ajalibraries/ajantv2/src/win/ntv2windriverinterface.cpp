@@ -1206,10 +1206,10 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 			if (acXfer.acTransfer.audioBuffer  &&  (ULWord64(acXfer.acTransfer.audioBuffer) % 4))
 				{bRes = false; WDIFAIL("ACXfer failed: audio buffer addr " << xHEX0N(acXfer.acTransfer.audioBuffer,16) << " not DWORD-aligned"); break;}
 
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
 			bRes = DeviceIoControl(_hDevice, IOCTL_AJAPROPS_AUTOCIRC_TRANSFER, &acXfer, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_S),
 									&acStatus, sizeof (AUTOCIRCULATE_TRANSFER_STATUS_STRUCT), &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 			if (bRes)
 				*(PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT)autoCircData.pvVal2 = acStatus;
 			else
@@ -1239,10 +1239,10 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 			if (acXfer.acTransfer.audioBuffer  &&  (ULWord64(acXfer.acTransfer.audioBuffer) % 4))
 				{bRes = false; WDIFAIL("ACXferEx failed: audio buffer addr " << xHEX0N(acXfer.acTransfer.audioBuffer,16) << " not DWORD-aligned"); break;}
 
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
 			bRes = DeviceIoControl(_hDevice, IOCTL_AJAPROPS_AUTOCIRC_TRANSFER_EX, &acXfer, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_EX_S),
 									&acStatus, sizeof (AUTOCIRCULATE_TRANSFER_STATUS_STRUCT), &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 			if (bRes)
 				*(PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT)autoCircData.pvVal2 = acStatus;
 			else
@@ -1275,10 +1275,10 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 			if (acXfer.acTransfer.audioBuffer  &&  (ULWord64(acXfer.acTransfer.audioBuffer) % 4))
 				{bRes = false; WDIFAIL("ACXferEx2 failed: audio buffer addr " << xHEX0N(acXfer.acTransfer.audioBuffer,16) << " not DWORD-aligned"); break;}
 
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
 			bRes = DeviceIoControl(_hDevice, IOCTL_AJAPROPS_AUTOCIRC_TRANSFER_EX2, &acXfer, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_EX2_S),
 									&acStatus, sizeof (AUTOCIRCULATE_TRANSFER_STATUS_STRUCT), &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 			if (bRes)
 				*(PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT)autoCircData.pvVal2 = acStatus;
 			else

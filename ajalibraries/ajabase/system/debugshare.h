@@ -225,8 +225,9 @@ typedef enum _AJADebugStats
 	AJA_DebugStat_DMATransferEx				= 5,
 	AJA_DebugStat_DMATransferP2P			= 6,
 	AJA_DebugStat_AutoCirculate				= 7,
-	AJA_DebugStat_NTV2Message				= 8,
-	AJA_DebugStat_HEVCSendMessage			= 9
+	AJA_DebugStat_AutoCirculateXfer			= 8,
+	AJA_DebugStat_NTV2Message				= 9,
+	AJA_DebugStat_HEVCSendMessage			= 10
 } AJADebugStats;
 ///@}
 
