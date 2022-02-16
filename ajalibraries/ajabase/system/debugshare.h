@@ -211,6 +211,27 @@ typedef struct _AJADebugMessage
 
 
 /**
+ *	Predefined debug (telemetry) statistics.
+ *	@ingroup AJAGroupStat
+ */
+///@{
+typedef enum _AJADebugStats
+{
+	AJA_DebugStat_ReadRegister				= 0,
+	AJA_DebugStat_WriteRegister				= 1,
+	AJA_DebugStat_WaitForInterrupt			= 2,
+	AJA_DebugStat_GetInterruptCount			= 3,
+	AJA_DebugStat_DMATransfer				= 4,
+	AJA_DebugStat_DMATransferEx				= 5,
+	AJA_DebugStat_DMATransferP2P			= 6,
+	AJA_DebugStat_AutoCirculate				= 7,
+	AJA_DebugStat_NTV2Message				= 8,
+	AJA_DebugStat_HEVCSendMessage			= 9
+} AJADebugStats;
+///@}
+
+
+/**
 	64-byte structure representing an unsigned 32-bit measurement (timer, counter or data value).
 	As a timer, it stores minimum, maximum and average elapsed time in microseconds.
 	As a data value, it stores minimum, maximum, moving average value, and last update usec timestamp.
