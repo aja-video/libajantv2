@@ -10,7 +10,12 @@
 #define NTV2DEVICEFEATURES_H
 
 #if defined(AJALinux) || defined(AJA_LINUX)
-	#include <stddef.h>		// For size_t
+	// For size_t
+	#ifdef __KERNEL__
+	#include <linux/stddef.h>
+	#else
+	#include <stddef.h>
+	#endif
 #endif
 
 #include "ajaexport.h"
