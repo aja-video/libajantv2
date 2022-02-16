@@ -639,9 +639,9 @@ bool NTV2FrameGrabber::SetupInput (void)
                 }
 
                 mNTV2Card.Connect (NTV2_XptFrameBuffer1Input, NTV2_Xpt425Mux1AYUV);
-                mNTV2Card.Connect (NTV2_XptFrameBuffer1BInput, NTV2_Xpt425Mux1BYUV);
+                mNTV2Card.Connect (NTV2_XptFrameBuffer1DS2Input, NTV2_Xpt425Mux1BYUV);
                 mNTV2Card.Connect (NTV2_XptFrameBuffer2Input, NTV2_Xpt425Mux2AYUV);
-                mNTV2Card.Connect (NTV2_XptFrameBuffer2BInput, NTV2_Xpt425Mux2BYUV);
+                mNTV2Card.Connect (NTV2_XptFrameBuffer2DS2Input, NTV2_Xpt425Mux2BYUV);
 
                 mNumChannels = 2;
                 mTsi = true;

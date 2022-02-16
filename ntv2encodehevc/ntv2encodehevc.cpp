@@ -728,9 +728,9 @@ void NTV2EncodeHEVC::RouteInputSignal (void)
 			router.AddConnection(NTV2_Xpt425Mux2BInput, NTV2_XptSDIIn2DS2);
 		}
 		router.AddConnection(NTV2_XptFrameBuffer1Input, NTV2_Xpt425Mux1AYUV);
-		router.AddConnection(NTV2_XptFrameBuffer1BInput, NTV2_Xpt425Mux1BYUV);
+		router.AddConnection(NTV2_XptFrameBuffer1DS2Input, NTV2_Xpt425Mux1BYUV);
 		router.AddConnection(NTV2_XptFrameBuffer2Input, NTV2_Xpt425Mux2AYUV);
-		router.AddConnection(NTV2_XptFrameBuffer2BInput, NTV2_Xpt425Mux2BYUV);
+		router.AddConnection(NTV2_XptFrameBuffer2DS2Input, NTV2_Xpt425Mux2BYUV);
 	}
 	else
 	{
