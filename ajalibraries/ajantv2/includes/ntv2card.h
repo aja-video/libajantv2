@@ -1696,6 +1696,7 @@ public:
 		@param[in]	inValue			Specifies the desired size of the capture/playout audio buffer to be used on the AJA device.
 									All modern AJA devices use ::NTV2_AUDIO_BUFFER_BIG (4 MB).
 		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
+		@see		CNTV2Card::GetAudioBufferSize
 	**/
 	AJA_VIRTUAL bool		SetAudioBufferSize (const NTV2AudioBufferSize inValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
@@ -1705,6 +1706,7 @@ public:
 		@param[in]	inValue			Specifies the desired size of the capture/playout audio buffer to be used on the AJA device.
 									All modern AJA devices use ::NTV2_AUDIO_BUFFER_BIG (4 MB).
 		@param[in]	inAudioSystems	Specifies the Audio System(s) of interest.
+		@see		CNTV2Card::GetAudioBufferSize
 	**/
 	AJA_VIRTUAL bool		SetAudioBufferSize (const NTV2AudioBufferSize inMode, const NTV2AudioSystemSet & inAudioSystems);	//	New in SDK 16.2
 
@@ -1713,6 +1715,7 @@ public:
 		@return		True if successful; otherwise false.
 		@param[out] outSize			Receives the size of the capture/playout audio buffer for the given Audio System on the AJA device.
 		@param[in]	inAudioSystem	Optionally specifies the Audio System of interest. Defaults to ::NTV2_AUDIOSYSTEM_1.
+		@see		CNTV2Card::SetAudioBufferSize
 	**/
 	AJA_VIRTUAL bool		GetAudioBufferSize (NTV2AudioBufferSize & outSize, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 

@@ -1133,6 +1133,13 @@
 			written/read to/from this memory, regardless of whether all 8 or 16 channels are used.
 	-	See \ref audioformats for details on the format of the audio data in the buffer.
 
+	@note	Older non-stacked audio devices (e.g. Kona LHi) had audio systems that can operate with 1MB or 4MB buffers, and
+			typically started (at power-up) in 1MB mode. This design was abandoned in favor of fixed 4MB buffers. The NTV2 SDK
+			generally assumes 4MB audio buffers will be used. Applications using non-stacked devices are strongly recommended
+			to first call CNTV2Card::GetAudioBufferSize to save the current buffer size, then set 4MB operation by calling
+			CNTV2Card::SetAudioBufferSize with ::NTV2_AUDIO_BUFFER_SIZE_4MB. Before exiting, be sure to restore the prior
+			(saved) buffer size.
+
 	@warning	It is easy to write video data into an audio buffer and vice-versa, which leads to noisy,
 				garbled audio and/or bad video frame(s). SDK clients must take precautions to ensure that frame
 				buffers used by your application never coincide with any of the audio buffers.
