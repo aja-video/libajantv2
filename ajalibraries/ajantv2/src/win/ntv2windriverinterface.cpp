@@ -319,10 +319,10 @@ bool CNTV2WinDriverInterface::ReadRegister (const ULWord inRegNum,	ULWord & outV
 	propStruct.RegisterID		= inRegNum;
 	propStruct.ulRegisterMask	= inMask;
 	propStruct.ulRegisterShift	= inShift;
-AJADebug::StatTimerStart(AJA_DebugStat_ReadRegister);
+	AJADebug::StatTimerStart(AJA_DebugStat_ReadRegister);
 	const bool ok = DeviceIoControl(_hDevice, IOCTL_AJAPROPS_GETSETREGISTER, &propStruct, sizeof(KSPROPERTY_AJAPROPS_GETSETREGISTER_S),
 						&propStruct, sizeof(KSPROPERTY_AJAPROPS_GETSETREGISTER_S), &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_ReadRegister);
+	AJADebug::StatTimerStop(AJA_DebugStat_ReadRegister);
 	if (ok)
 	{
 		outValue = propStruct.ulRegisterValue;
@@ -367,10 +367,10 @@ bool CNTV2WinDriverInterface::WriteRegister (const ULWord inRegNum,	 const ULWor
 	propStruct.ulRegisterValue	= inValue;
 	propStruct.ulRegisterMask	= inMask;
 	propStruct.ulRegisterShift	= inShift;
-AJADebug::StatTimerStart(AJA_DebugStat_WriteRegister);
+	AJADebug::StatTimerStart(AJA_DebugStat_WriteRegister);
 	const bool ok = DeviceIoControl(_hDevice, IOCTL_AJAPROPS_GETSETREGISTER, &propStruct, sizeof(KSPROPERTY_AJAPROPS_GETSETREGISTER_S),
 							&propStruct, sizeof(KSPROPERTY_AJAPROPS_GETSETREGISTER_S), &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_WriteRegister);
+	AJADebug::StatTimerStop(AJA_DebugStat_WriteRegister);
 	if (!ok)
 	{
 		WDIFAIL("reg=" << DEC(inRegNum) << " val=" << xHEX0N(inValue,8) << " msk=" << xHEX0N(inMask,8) << " shf=" << DEC(inShift) << " failed: " << ::GetKernErrStr(GetLastError()));
@@ -479,10 +479,10 @@ bool CNTV2WinDriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterrup
 	propStruct.Property.Flags	= KSPROPERTY_TYPE_GET;
 	propStruct.eInterrupt		= eGetIntCount;
 	propStruct.ulIntCount		= ULONG(eInterruptType);
-AJADebug::StatTimerStart(AJA_DebugStat_GetInterruptCount);
+	AJADebug::StatTimerStart(AJA_DebugStat_GetInterruptCount);
 	const bool ok = DeviceIoControl (_hDevice,	 IOCTL_AJAPROPS_NEWSUBSCRIPTIONS,  &propStruct,	 sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),
 							&propStruct,  sizeof(KSPROPERTY_AJAPROPS_NEWSUBSCRIPTIONS_S),  &dwBytesReturned,  NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_GetInterruptCount);
+	AJADebug::StatTimerStop(AJA_DebugStat_GetInterruptCount);
 	if (!ok)
 	{
 		WDIFAIL("interruptType=" << DEC(eInterruptType) << " failed: " << ::GetKernErrStr(GetLastError()));
@@ -492,6 +492,25 @@ AJADebug::StatTimerStop(AJA_DebugStat_GetInterruptCount);
 	return true;
 }
 
+static const uint32_t sIntEnumToStatKeys[] = {	AJA_DebugStat_WaitForInterruptOut1,		//	eOutput1	//	0
+												AJA_DebugStat_WaitForInterruptOthers,					//	1
+												AJA_DebugStat_WaitForInterruptIn1,		//	eInput1		//	2
+												AJA_DebugStat_WaitForInterruptIn2,		//	eInput2		//	3
+												AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers,	//	4 thru 13
+												AJA_DebugStat_WaitForInterruptUartTx1,	//	eUart1Tx	//	14
+												AJA_DebugStat_WaitForInterruptUartRx1,	//	eUart1Rx	//	15
+												AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers,	//	16 thru 23
+												AJA_DebugStat_WaitForInterruptIn3,		//	eInput3		//	24
+												AJA_DebugStat_WaitForInterruptIn4,		//	eInput4		//	25
+												AJA_DebugStat_WaitForInterruptUartTx2,	//	eUartTx2	//	26
+												AJA_DebugStat_WaitForInterruptUartRx2,	//	eUartRx2	//	27
+												AJA_DebugStat_WaitForInterruptOthers,					//	28
+												AJA_DebugStat_WaitForInterruptIn5,		//	eInput5		//	29
+												AJA_DebugStat_WaitForInterruptIn6,		//	eInput6		//	30
+												AJA_DebugStat_WaitForInterruptIn7,		//	eInput7		//	31
+												AJA_DebugStat_WaitForInterruptIn8,		//	eInput8		//	32
+												AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers};	//	33 thru 41
+
 bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterruptType, const ULWord timeOutMs)
 {
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
@@ -499,6 +518,8 @@ bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt
 		return CNTV2DriverInterface::WaitForInterrupt(eInterruptType,timeOutMs);
 #endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (!IsOpen())
+		return false;
+	if (!NTV2_IS_VALID_INTERRUPT_ENUM(eInterruptType))
 		return false;
 	bool bInterruptHappened = false;	// return value
 
@@ -511,9 +532,9 @@ bool CNTV2WinDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt
 	else
 	{
 		// interrupt hooked up. Wait
-AJADebug::StatTimerStart(AJA_DebugStat_WaitForInterrupt);
+		AJADebug::StatTimerStart(sIntEnumToStatKeys[eInterruptType]);
 		DWORD status = WaitForSingleObject(hEvent, timeOutMs);
-AJADebug::StatTimerStop(AJA_DebugStat_WaitForInterrupt);
+		AJADebug::StatTimerStop(sIntEnumToStatKeys[eInterruptType]);
 		if ( status == WAIT_OBJECT_0 )
 		{
 			bInterruptHappened = true;
@@ -832,10 +853,10 @@ bool CNTV2WinDriverInterface::DmaTransfer ( const NTV2DMAEngine inDMAEngine,
 	propStruct.ulVidNumBytes	= inByteCount;
 	propStruct.ulAudNumBytes	= 0;
 	propStruct.bSync			= inSynchronous;
-AJADebug::StatTimerStart(AJA_DebugStat_DMATransfer);
+	AJADebug::StatTimerStart(AJA_DebugStat_DMATransfer);
 	const bool ok = DeviceIoControl(_hDevice, IOCTL_AJAPROPS_DMA, &propStruct, sizeof(KSPROPERTY_AJAPROPS_DMA_S),
 						&propStruct, sizeof(KSPROPERTY_AJAPROPS_DMA_S), &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_DMATransfer);
+	AJADebug::StatTimerStop(AJA_DebugStat_DMATransfer);
 	if (!ok)
 	{
 		WDIFAIL ("failed: " << ::GetKernErrStr(GetLastError()) << ": eng=" << inDMAEngine << " frm=" << inFrameNumber
@@ -878,10 +899,10 @@ bool CNTV2WinDriverInterface::DmaTransfer ( const NTV2DMAEngine inDMAEngine,
 	propStruct.ulVidSegmentHostPitch	= inHostPitch;
 	propStruct.ulVidSegmentCardPitch	= inCardPitch;
 	propStruct.bSync					= inSynchronous;
-AJADebug::StatTimerStart(AJA_DebugStat_DMATransferEx);
+	AJADebug::StatTimerStart(AJA_DebugStat_DMATransferEx);
 	const bool ok = DeviceIoControl(_hDevice, IOCTL_AJAPROPS_DMA_EX, &propStruct, sizeof(KSPROPERTY_AJAPROPS_DMA_EX_S),
 								&propStruct, sizeof(KSPROPERTY_AJAPROPS_DMA_EX_S), &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_DMATransferEx);
+	AJADebug::StatTimerStop(AJA_DebugStat_DMATransferEx);
 	if (!ok)
 	{
 		WDIFAIL ("failed: " << ::GetKernErrStr(GetLastError()) << ": eng=" << inDMAEngine << " frm=" << inFrameNumber
@@ -946,10 +967,10 @@ bool CNTV2WinDriverInterface::DmaTransfer ( const NTV2DMAEngine			inDMAEngine,
 	propStruct.ullMessageBusAddress		= inP2PData->messageBusAddress;
 	propStruct.ulVideoBusSize			= inP2PData->videoBusSize;
 	propStruct.ulMessageData			= inP2PData->messageData;
-AJADebug::StatTimerStart(AJA_DebugStat_DMATransferP2P);
+	AJADebug::StatTimerStart(AJA_DebugStat_DMATransferP2P);
 	const bool ok = DeviceIoControl(_hDevice, IOCTL_AJAPROPS_DMA_P2P, &propStruct, sizeof(KSPROPERTY_AJAPROPS_DMA_P2P_S),
 						&propStruct, sizeof(KSPROPERTY_AJAPROPS_DMA_P2P_S), &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_DMATransferP2P);
+	AJADebug::StatTimerStop(AJA_DebugStat_DMATransferP2P);
 	if (!ok)
 	{
 		WDIFAIL ("Failed: " << ::GetKernErrStr(GetLastError()) << ": eng=" << inDMAEngine << " ch=" << inDMAChannel
@@ -1015,10 +1036,10 @@ bool CNTV2WinDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA &autoCircData)
 				autoCircControl.bVal6 = autoCircData.bVal6;
 				autoCircControl.bVal7 = autoCircData.bVal7;
 				autoCircControl.bVal8 = autoCircData.bVal8;
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+				AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
 				bRes = DeviceIoControl(_hDevice, IOCTL_AJAPROPS_AUTOCIRC_CONTROL, &autoCircControl, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S),
 										&autoCircControl, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S), &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+				AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 				if (!bRes)
 					WDIFAIL("ACInit failed: " << ::GetKernErrStr(GetLastError()));
 			}
@@ -1046,10 +1067,10 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 				autoCircControl.bVal6 = autoCircData.bVal6;
 				autoCircControl.bVal7 = autoCircData.bVal7;
 				autoCircControl.bVal8 = autoCircData.bVal8;
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+				AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
 				bRes = DeviceIoControl(_hDevice, IOCTL_AJAPROPS_AUTOCIRC_CONTROL_EX, &autoCircControl, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_EX_S),
 										&autoCircControl, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_EX_S), &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+				AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 				if (!bRes)
 					WDIFAIL("ACInitEx failed: " << ::GetKernErrStr(GetLastError()));
 			}
@@ -1089,10 +1110,10 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 
 				default:	break; //NTV2_ASSERT(false && "Bad eCommand");
 			}
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
 			bRes = DeviceIoControl(_hDevice, IOCTL_AJAPROPS_AUTOCIRC_CONTROL, &autoCircControl, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S),
 									&autoCircControl, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_CONTROL_S), &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 			if (!bRes)
 				WDIFAIL("ACInitEx failed: " << ::GetKernErrStr(GetLastError()));
 			break;
@@ -1109,10 +1130,10 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 			autoCircStatus.eCommand			= autoCircData.eCommand;
 			if (autoCircData.pvVal1)
 			{
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+				AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
 				bRes = DeviceIoControl(_hDevice, IOCTL_AJAPROPS_AUTOCIRC_STATUS, &autoCircStatus, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_STATUS_S),
 										&autoCircStatus, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_STATUS_S), &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+				AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 				if (bRes)
 					*(AUTOCIRCULATE_STATUS_STRUCT *)autoCircData.pvVal1 = autoCircStatus.autoCircStatus;
 				else
@@ -1137,10 +1158,10 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 			if (autoCircData.pvVal1)
 			{
 				autoCircFrame.frameStamp	= *(FRAME_STAMP_STRUCT *) autoCircData.pvVal1;
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+				AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
 				bRes = DeviceIoControl(_hDevice, IOCTL_AJAPROPS_AUTOCIRC_FRAME, &autoCircFrame, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_S),
 										&autoCircFrame, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_S), &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+				AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 				if (bRes)
 					*(FRAME_STAMP_STRUCT *)autoCircData.pvVal1 = autoCircFrame.frameStamp;
 				else
@@ -1168,10 +1189,10 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 				if (autoCircData.pvVal2)
 					autoCircFrame.acTask	= *(AUTOCIRCULATE_TASK_STRUCT *) autoCircData.pvVal2;
 
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+				AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
 				bRes = DeviceIoControl(_hDevice, IOCTL_AJAPROPS_AUTOCIRC_FRAME_EX2, &autoCircFrame, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_EX2_S),
 										&autoCircFrame, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_EX2_S), &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+				AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 				if (bRes)
 				{
 					*(FRAME_STAMP_STRUCT *)autoCircData.pvVal1 = autoCircFrame.frameStamp;
@@ -1206,10 +1227,10 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 			if (acXfer.acTransfer.audioBuffer  &&  (ULWord64(acXfer.acTransfer.audioBuffer) % 4))
 				{bRes = false; WDIFAIL("ACXfer failed: audio buffer addr " << xHEX0N(acXfer.acTransfer.audioBuffer,16) << " not DWORD-aligned"); break;}
 
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
 			bRes = DeviceIoControl(_hDevice, IOCTL_AJAPROPS_AUTOCIRC_TRANSFER, &acXfer, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_S),
 									&acStatus, sizeof (AUTOCIRCULATE_TRANSFER_STATUS_STRUCT), &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 			if (bRes)
 				*(PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT)autoCircData.pvVal2 = acStatus;
 			else
@@ -1239,10 +1260,10 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 			if (acXfer.acTransfer.audioBuffer  &&  (ULWord64(acXfer.acTransfer.audioBuffer) % 4))
 				{bRes = false; WDIFAIL("ACXferEx failed: audio buffer addr " << xHEX0N(acXfer.acTransfer.audioBuffer,16) << " not DWORD-aligned"); break;}
 
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
 			bRes = DeviceIoControl(_hDevice, IOCTL_AJAPROPS_AUTOCIRC_TRANSFER_EX, &acXfer, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_EX_S),
 									&acStatus, sizeof (AUTOCIRCULATE_TRANSFER_STATUS_STRUCT), &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 			if (bRes)
 				*(PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT)autoCircData.pvVal2 = acStatus;
 			else
@@ -1275,10 +1296,10 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 			if (acXfer.acTransfer.audioBuffer  &&  (ULWord64(acXfer.acTransfer.audioBuffer) % 4))
 				{bRes = false; WDIFAIL("ACXferEx2 failed: audio buffer addr " << xHEX0N(acXfer.acTransfer.audioBuffer,16) << " not DWORD-aligned"); break;}
 
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
+				AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
 			bRes = DeviceIoControl(_hDevice, IOCTL_AJAPROPS_AUTOCIRC_TRANSFER_EX2, &acXfer, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_TRANSFER_EX2_S),
 									&acStatus, sizeof (AUTOCIRCULATE_TRANSFER_STATUS_STRUCT), &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 			if (bRes)
 				*(PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT)autoCircData.pvVal2 = acStatus;
 			else
@@ -1301,10 +1322,10 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 				{bRes = false; WDIFAIL("ACSetCaptureTask failed: NULL TaskStruct"); break;}
 			autoCircFrame.acTask = *(AUTOCIRCULATE_TASK_STRUCT *) autoCircData.pvVal1;			//	Reqd TaskStruct
 
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
 			bRes = DeviceIoControl(_hDevice, IOCTL_AJAPROPS_AUTOCIRC_CAPTURE_TASK, &autoCircFrame, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_EX2_S),
 									&autoCircFrame, sizeof(KSPROPERTY_AJAPROPS_AUTOCIRC_FRAME_EX2_S), &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 			if (!bRes)
 				WDIFAIL("ACSetCaptureTask failed: " << ::GetKernErrStr(GetLastError()));
 			break;
@@ -1326,9 +1347,9 @@ bool CNTV2WinDriverInterface::NTV2Message (NTV2_HEADER * pInMessage)
 	if (!pInMessage)
 		{WDIFAIL("Failed: NULL pointer"); return false;}
 	DWORD dwBytesReturned(0);
-AJADebug::StatTimerStart(AJA_DebugStat_NTV2Message);
+	AJADebug::StatTimerStart(AJA_DebugStat_NTV2Message);
 	const bool ok = DeviceIoControl(_hDevice, IOCTL_AJANTV2_MESSAGE, pInMessage, pInMessage->GetSizeInBytes (), pInMessage, pInMessage->GetSizeInBytes(), &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_NTV2Message);
+	AJADebug::StatTimerStop(AJA_DebugStat_NTV2Message);
 	if (!ok)
 		{WDIFAIL("Failed: " << ::GetKernErrStr(GetLastError()));  return false;}
 	return true;
@@ -1340,9 +1361,9 @@ bool CNTV2WinDriverInterface::HevcSendMessage (HevcMessageHeader* pInMessage)
 	if (!pInMessage)
 		{WDIFAIL("Failed: NULL pointer"); return false;}
 	DWORD dwBytesReturned(0);
-AJADebug::StatTimerStart(AJA_DebugStat_HEVCSendMessage);
+	AJADebug::StatTimerStart(AJA_DebugStat_HEVCSendMessage);
 	const bool ok = DeviceIoControl(_hDevice, IOCTL_AJAHEVC_MESSAGE, pInMessage, pInMessage->size, pInMessage, pInMessage->size, &dwBytesReturned, NULL);
-AJADebug::StatTimerStop(AJA_DebugStat_HEVCSendMessage);
+	AJADebug::StatTimerStop(AJA_DebugStat_HEVCSendMessage);
 	if (!ok)
 		{WDIFAIL("Failed: " << ::GetKernErrStr(GetLastError()));  return false;}
 	return true;

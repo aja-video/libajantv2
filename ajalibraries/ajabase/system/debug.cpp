@@ -24,6 +24,7 @@
 #include <time.h>
 #include <iostream>
 #include <iomanip>
+#include <map>
 
 static std::vector<std::string> sGroupLabelVector;
 static const std::string sSeverityString[] = {"emergency", "alert", "assert", "error", "warning", "notice", "info", "debug"};
@@ -1346,9 +1347,11 @@ void AJADebugStat::Start (void)
 bool AJADebugStat::Stop (void)
 {
 	if (!fLastTimeStamp)
-		return false;	//	Not started
-	SetValue(uint32_t(AJATime::GetSystemMicroseconds() - fLastTimeStamp));
-	fLastTimeStamp = 0;	//	Zero timestamp to indicate "timer not running"
+		return false;	//	Never started
+	const uint64_t now(AJATime::GetSystemMicroseconds());
+	if (now <= fLastTimeStamp)
+		return false;	//	Should never happen
+	SetValue(uint32_t(now - fLastTimeStamp));
 	return true;
 }
 
@@ -1404,6 +1407,85 @@ bool AJADebugStat::operator == (const AJADebugStat & inRHS) const
 	if (fMax != inRHS.fMax)
 		return false;
 	return true;
+}
+
+using namespace std;
+
+//	Dictionary of Well-Known Stats:
+typedef map<int,string>		StatKeyNameMap;
+typedef pair<int,string>	StatKeyNamePair;
+typedef StatKeyNameMap::iterator		StatKeyNameMapIter;
+typedef StatKeyNameMap::const_iterator	StatKeyNameMapConstIter;
+static StatKeyNameMap	gStatKeyToStr;
+static bool				gStatKeyToStrReady(false);
+static AJALock			gStatKeyToStrLock;
+
+static void InitStatKeyNames (void)
+{
+	gStatKeyToStr[AJA_DebugStat_ReadRegister]				= "RdReg";
+	gStatKeyToStr[AJA_DebugStat_WriteRegister]				= "WrReg";
+	gStatKeyToStr[AJA_DebugStat_WaitForInterruptIn1]		= "WaitForInt1";
+	gStatKeyToStr[AJA_DebugStat_WaitForInterruptIn2]		= "WaitForInt2";
+	gStatKeyToStr[AJA_DebugStat_WaitForInterruptIn3]		= "WaitForInt3";
+	gStatKeyToStr[AJA_DebugStat_WaitForInterruptIn4]		= "WaitForInt4";
+	gStatKeyToStr[AJA_DebugStat_WaitForInterruptIn5]		= "WaitForInt5";
+	gStatKeyToStr[AJA_DebugStat_WaitForInterruptIn6]		= "WaitForInt6";
+	gStatKeyToStr[AJA_DebugStat_WaitForInterruptIn7]		= "WaitForInt7";
+	gStatKeyToStr[AJA_DebugStat_WaitForInterruptIn8]		= "WaitForInt8";
+	gStatKeyToStr[AJA_DebugStat_WaitForInterruptOut1]		= "WaitForIntOut";
+	gStatKeyToStr[AJA_DebugStat_WaitForInterruptUartRx1]	= "WaitForIntUartRx1";
+	gStatKeyToStr[AJA_DebugStat_WaitForInterruptUartTx1]	= "WaitForIntUartTx1";
+	gStatKeyToStr[AJA_DebugStat_WaitForInterruptUartRx2]	= "WaitForIntUartRx2";
+	gStatKeyToStr[AJA_DebugStat_WaitForInterruptUartTx2]	= "WaitForIntUartTx2";
+	gStatKeyToStr[AJA_DebugStat_WaitForInterruptOthers]		= "WaitForInt";
+	gStatKeyToStr[AJA_DebugStat_GetInterruptCount]			= "GetIntCount";
+	gStatKeyToStr[AJA_DebugStat_DMATransfer]				= "DMAXfer";
+	gStatKeyToStr[AJA_DebugStat_DMATransferEx]				= "DMAXferEx";
+	gStatKeyToStr[AJA_DebugStat_DMATransferP2P]				= "DMAXferP2P";
+	gStatKeyToStr[AJA_DebugStat_AutoCirculate]				= "AutoCirc";
+	gStatKeyToStr[AJA_DebugStat_AutoCirculateXfer]			= "AutoCircXfer";
+	gStatKeyToStr[AJA_DebugStat_NTV2Message]				= "NTV2Msg";
+	gStatKeyToStr[AJA_DebugStat_HEVCSendMessage]			= "HEVCMsg";
+	gStatKeyToStrReady = true;
+	assert(gStatKeyToStr.size() == size_t(AJA_DebugStat_NUM_STATS));	//	Be sure all are here
+}
+
+string AJADebugStat::StatKeyName (const int inKey)
+{
+	AJAAutoLock lock(&gStatKeyToStrLock);
+	if (!gStatKeyToStrReady)
+		InitStatKeyNames();
+	const StatKeyNameMapConstIter it(gStatKeyToStr.find(inKey));
+	return it != gStatKeyToStr.end()  ?  it->second  :  string();
+}
+
+bool AJADebugStat::SetStatKeyName (const int inKey, const string & inName)
+{
+	AJAAutoLock lock(&gStatKeyToStrLock);
+	if (!gStatKeyToStrReady)
+		InitStatKeyNames();
+
+	const StatKeyNameMapIter it(gStatKeyToStr.find(inKey));
+	if (inName.empty())	//	Empty name === remove the defined name
+	{
+		if (it != gStatKeyToStr.end())
+			gStatKeyToStr.erase(it);
+		return true;
+	}
+	if (it != gStatKeyToStr.end())
+		it->second = inName;	//	Replace existing name
+	else
+		gStatKeyToStr.insert(StatKeyNamePair(inKey, inName));
+	return true;
+}
+
+vector<int> AJADebugStat::NamedStatKeys (void)
+{
+	AJAAutoLock lock(&gStatKeyToStrLock);
+	vector<int> result;
+	for (StatKeyNameMapConstIter it(gStatKeyToStr.begin());  it != gStatKeyToStr.end();  ++it)
+		result.push_back(it->first);
+	return result;
 }
 
 std::ostream & operator << (std::ostream & oss, const AJADebugStat & inStat)

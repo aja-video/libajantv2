@@ -218,16 +218,30 @@ typedef struct _AJADebugMessage
 typedef enum _AJADebugStats
 {
 	AJA_DebugStat_ReadRegister				= 0,
-	AJA_DebugStat_WriteRegister				= 1,
-	AJA_DebugStat_WaitForInterrupt			= 2,
-	AJA_DebugStat_GetInterruptCount			= 3,
-	AJA_DebugStat_DMATransfer				= 4,
-	AJA_DebugStat_DMATransferEx				= 5,
-	AJA_DebugStat_DMATransferP2P			= 6,
-	AJA_DebugStat_AutoCirculate				= 7,
-	AJA_DebugStat_AutoCirculateXfer			= 8,
-	AJA_DebugStat_NTV2Message				= 9,
-	AJA_DebugStat_HEVCSendMessage			= 10
+	AJA_DebugStat_WriteRegister,
+	AJA_DebugStat_WaitForInterruptIn1,
+	AJA_DebugStat_WaitForInterruptIn2,
+	AJA_DebugStat_WaitForInterruptIn3,
+	AJA_DebugStat_WaitForInterruptIn4,
+	AJA_DebugStat_WaitForInterruptIn5,
+	AJA_DebugStat_WaitForInterruptIn6,
+	AJA_DebugStat_WaitForInterruptIn7,
+	AJA_DebugStat_WaitForInterruptIn8,
+	AJA_DebugStat_WaitForInterruptOut1,
+	AJA_DebugStat_WaitForInterruptUartRx1,
+	AJA_DebugStat_WaitForInterruptUartTx1,
+	AJA_DebugStat_WaitForInterruptUartRx2,
+	AJA_DebugStat_WaitForInterruptUartTx2,
+	AJA_DebugStat_WaitForInterruptOthers,
+	AJA_DebugStat_GetInterruptCount,
+	AJA_DebugStat_DMATransfer,
+	AJA_DebugStat_DMATransferEx,
+	AJA_DebugStat_DMATransferP2P,
+	AJA_DebugStat_AutoCirculate,
+	AJA_DebugStat_AutoCirculateXfer,
+	AJA_DebugStat_NTV2Message,
+	AJA_DebugStat_HEVCSendMessage,
+	AJA_DebugStat_NUM_STATS
 } AJADebugStats;
 ///@}
 
@@ -239,7 +253,7 @@ typedef enum _AJADebugStats
 	As a counter, it can increment or decrement, with or without rollover/rollunder.
 	@ingroup	AJAGroupDebug
 **/
-class AJADebugStat
+class AJA_EXPORT AJADebugStat
 {
 	public:
 		uint32_t			fMin;								/**< Smallest value yet seen. (Fixed at 0xFFFFFFFF and unused for counters.) */
@@ -248,6 +262,7 @@ class AJADebugStat
 		uint64_t			fLastTimeStamp;						/**< Timestamp (start time for timer, zero if not running;	last update time for counter or data value) */
 		uint32_t			fValues[AJA_DEBUG_STAT_DEQUE_SIZE]; /**< Deque that provides an 11-sample moving average. (Unused for counters.) */
 
+	//	Instance Methods
 	public:
 		inline AJADebugStat()		{Reset();}
 
@@ -288,6 +303,13 @@ class AJADebugStat
 		inline uint32_t GetCurrentValue (void) const	{return fCount ? fValues[CurrentValueIndex()] : 0;}	/**< Returns the latest stored value */
 		inline int CurrentValueIndex (void) const	{return fCount ? int((fCount - 1) % AJA_DEBUG_STAT_DEQUE_SIZE) : 9999;}	/**< Returns last valid index into fValues */
 		inline uint32_t GetValue (void) const	{return IsSimpleCounter()  ?  fCount  :  GetCurrentValue();}	/**< If simple counter, returns my current count; otherwise returns latest stored value */
+
+	//	Class Methods
+	public:
+		static std::string StatKeyName (const int inKey);
+		static inline bool StatKeyHasName (const int inKey)		{return !StatKeyName(inKey).empty();}
+		static bool SetStatKeyName (const int inKey, const std::string & inName);
+		static std::vector<int> NamedStatKeys (void);
 };	//	AJADebugStat
 
 

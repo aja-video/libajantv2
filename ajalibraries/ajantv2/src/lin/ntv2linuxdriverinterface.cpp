@@ -154,9 +154,9 @@ bool CNTV2LinuxDriverInterface::ReadRegister (const ULWord inRegNum,  ULWord & o
 	ra.RegisterMask	  = inMask;
 	ra.RegisterShift  = inShift;
 	ra.RegisterValue  = 0xDEADBEEF;
-AJADebug::StatTimerStart(AJA_DebugStat_ReadRegister);
+	AJADebug::StatTimerStart(AJA_DebugStat_ReadRegister);
 	const int result (ioctl(int(_hDevice), IOCTL_NTV2_READ_REGISTER, &ra));
-AJADebug::StatTimerStop(AJA_DebugStat_ReadRegister);
+	AJADebug::StatTimerStop(AJA_DebugStat_ReadRegister);
 	if (result)
 		{LDIFAIL("IOCTL_NTV2_READ_REGISTER failed");	return false;}
 	outValue = ra.RegisterValue;
@@ -190,9 +190,9 @@ bool CNTV2LinuxDriverInterface::WriteRegister (const ULWord inRegNum,  const ULW
 	ra.RegisterValue	= inValue;
 	ra.RegisterMask		= inMask;
 	ra.RegisterShift	= inShift;
-AJADebug::StatTimerStart(AJA_DebugStat_WriteRegister);
+	AJADebug::StatTimerStart(AJA_DebugStat_WriteRegister);
 	const int result (ioctl(int(_hDevice), IOCTL_NTV2_WRITE_REGISTER, &ra));
-AJADebug::StatTimerStop(AJA_DebugStat_WriteRegister);
+	AJADebug::StatTimerStop(AJA_DebugStat_WriteRegister);
 	if (result)
 		{LDIFAIL("IOCTL_NTV2_WRITE_REGISTER failed");  return false;}
 	return true;
@@ -265,15 +265,34 @@ bool CNTV2LinuxDriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterr
 	intrControlStruct.eInterruptType = eGetIntCount;
 	intrControlStruct.interruptCount = eInterruptType;
 
-AJADebug::StatTimerStart(AJA_DebugStat_GetInterruptCount);
+	AJADebug::StatTimerStart(AJA_DebugStat_GetInterruptCount);
 	const int result (ioctl(int(_hDevice), IOCTL_NTV2_INTERRUPT_CONTROL, &intrControlStruct));
-AJADebug::StatTimerStop(AJA_DebugStat_GetInterruptCount);
+	AJADebug::StatTimerStop(AJA_DebugStat_GetInterruptCount);
 	if (result)
 		{LDIFAIL("IOCTL_NTV2_INTERRUPT_CONTROL failed");	return false;}
 
 	outCount = intrControlStruct.interruptCount;
 	return true;
 }
+
+static const uint32_t sIntEnumToStatKeys[] = {	AJA_DebugStat_WaitForInterruptOut1,		//	eOutput1	//	0
+												AJA_DebugStat_WaitForInterruptOthers,					//	1
+												AJA_DebugStat_WaitForInterruptIn1,		//	eInput1		//	2
+												AJA_DebugStat_WaitForInterruptIn2,		//	eInput2		//	3
+												AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers,	//	4 thru 13
+												AJA_DebugStat_WaitForInterruptUartTx1,	//	eUart1Tx	//	14
+												AJA_DebugStat_WaitForInterruptUartRx1,	//	eUart1Rx	//	15
+												AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers,	//	16 thru 23
+												AJA_DebugStat_WaitForInterruptIn3,		//	eInput3		//	24
+												AJA_DebugStat_WaitForInterruptIn4,		//	eInput4		//	25
+												AJA_DebugStat_WaitForInterruptUartTx2,	//	eUartTx2	//	26
+												AJA_DebugStat_WaitForInterruptUartRx2,	//	eUartRx2	//	27
+												AJA_DebugStat_WaitForInterruptOthers,					//	28
+												AJA_DebugStat_WaitForInterruptIn5,		//	eInput5		//	29
+												AJA_DebugStat_WaitForInterruptIn6,		//	eInput6		//	30
+												AJA_DebugStat_WaitForInterruptIn7,		//	eInput7		//	31
+												AJA_DebugStat_WaitForInterruptIn8,		//	eInput8		//	32
+												AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers};	//	33 thru 41
 
 // Method: WaitForInterrupt
 // Output: True on successs, false on failure (ioctl failed or interrupt didn't happen)
@@ -289,9 +308,9 @@ bool CNTV2LinuxDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterru
 	waitIntrStruct.timeOutMs = timeOutMs;
 	waitIntrStruct.success = 0; // Assume failure
 
-AJADebug::StatTimerStart(AJA_DebugStat_WaitForInterrupt);
+	AJADebug::StatTimerStart(sIntEnumToStatKeys[eInterrupt]);
 	const int result (ioctl(int(_hDevice), IOCTL_NTV2_WAITFOR_INTERRUPT, &waitIntrStruct));
-AJADebug::StatTimerStop(AJA_DebugStat_WaitForInterrupt);
+	AJADebug::StatTimerStop(sIntEnumToStatKeys[eInterrupt]);
 	if (result)
 		{LDIFAIL("IOCTL_NTV2_WAITFOR_INTERRUPT failed");	return false;}
 	BumpEventCount (eInterrupt);
@@ -655,9 +674,9 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (	const NTV2DMAEngine inDMAEngine,
 	}
 
 	// TODO: Stick the IOCTL code inside the dmaControlBuf and collapse 4 IOCTLs into one.
-AJADebug::StatTimerStart(AJA_DebugStat_DMATransfer);
+	AJADebug::StatTimerStart(AJA_DebugStat_DMATransfer);
 	const int result (ioctl(int(_hDevice), request, &dmaControlBuf));
-AJADebug::StatTimerStop(AJA_DebugStat_DMATransfer);
+	AJADebug::StatTimerStop(AJA_DebugStat_DMATransfer);
 	if (result)
 	{
 		LDIFAIL(errMsg);
@@ -737,9 +756,9 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 		}
 	}
 
-AJADebug::StatTimerStart(AJA_DebugStat_DMATransferEx);
+	AJADebug::StatTimerStart(AJA_DebugStat_DMATransferEx);
 	const int result (ioctl(int(_hDevice), request, &dmaControlBuf));
-AJADebug::StatTimerStop(AJA_DebugStat_DMATransferEx);
+	AJADebug::StatTimerStop(AJA_DebugStat_DMATransferEx);
 	if (result)
 	{
 		LDIFAIL(errMsg);
@@ -803,9 +822,9 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (	const NTV2DMAEngine			inDMAEngine,
 	dmaP2PStruct.ullMessageBusAddress	= inP2PData->messageBusAddress;
 	dmaP2PStruct.ulVideoBusSize			= inP2PData->videoBusSize;
 	dmaP2PStruct.ulMessageData			= inP2PData->messageData;
-AJADebug::StatTimerStart(AJA_DebugStat_DMATransferP2P);
+	AJADebug::StatTimerStart(AJA_DebugStat_DMATransferP2P);
 	const int result (ioctl(int(_hDevice), IOCTL_NTV2_DMA_P2P, &dmaP2PStruct));
-AJADebug::StatTimerStop(AJA_DebugStat_DMATransferP2P);
+	AJADebug::StatTimerStop(AJA_DebugStat_DMATransferP2P);
 	if (result)
 		{LDIFAIL("IOCTL error");	return false;}
 
@@ -840,9 +859,9 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 			// The driver knows the implicit meanings of the
 			// members of the structure based on the the
 			// command contained within it.
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
 			result = ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_CONTROL, &autoCircData);
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
 			if (result)
 				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_CONTROL failed");  return false;}
 			return true;
@@ -851,9 +870,9 @@ AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
 			// Pass the autoCircStatus structure to the driver.
 			// It will read the channel spec contained within and
 			// fill out the status structure accordingly.
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
 			result = ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_STATUS, AsStatusStructPtr(autoCircData.pvVal1));
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 			if (result)
 				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_STATUS, failed");  return false;}
 			return true;
@@ -868,9 +887,9 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 			memset(&acFrameStampCombo, 0, sizeof acFrameStampCombo);
 			FRAME_STAMP_STRUCT* pFrameStamp = AsFrameStampStructPtr(autoCircData.pvVal1);
 			acFrameStampCombo.acFrameStamp = *pFrameStamp;
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
 			result = ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP, &acFrameStampCombo);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 			if (result)
 				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP failed");	 return false;}
 			*pFrameStamp = acFrameStampCombo.acFrameStamp;
@@ -890,9 +909,9 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 			acFrameStampCombo.acFrameStamp = *pFrameStamp;
 			if (pTask)
 				acFrameStampCombo.acTask = *pTask;
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
 			result = ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP, &acFrameStampCombo);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 			if (result)
 				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP failed");	 return false;}
 			*pFrameStamp = acFrameStampCombo.acFrameStamp;
@@ -932,9 +951,9 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 				acXferCombo.acXena2RoutingTable = *pXena2RoutingTable;
 
 			// Do the transfer
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
 			result = ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_TRANSFER, &acXferCombo);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 			if (result)
 				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_TRANSFER failed");  return false;}
 			// Copy the results back into the status buffer we were given
@@ -973,9 +992,9 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 				acXferCombo.acXena2RoutingTable = *pXena2RoutingTable;
 
 			// Do the transfer
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
 			result = ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_TRANSFER, &acXferCombo);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 			if (result)
 				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_TRANSFER failed");  return false;}
 			// Copy the results back into the status buffer we were given
@@ -1015,9 +1034,9 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 				acXferCombo.acTask = *pTask;
 
 			// Do the transfer
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
 			result = ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_TRANSFER, &acXferCombo);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 			if (result)
 				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_TRANSFER failed");  return false;}
 			// Copy the results back into the status buffer we were given
@@ -1032,9 +1051,9 @@ AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 			PAUTOCIRCULATE_TASK_STRUCT pTask = AsPTaskStruct(autoCircData.pvVal1);
 			acFrameStampCombo.acFrameStamp.channelSpec = autoCircData.channelSpec;
 			acFrameStampCombo.acTask = *pTask;
-AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
 			result = ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_CAPTURETASK, &acFrameStampCombo);
-AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 			if (result)
 				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_CAPTURETASK failed");  return false;}
 			return true;
@@ -1057,9 +1076,9 @@ bool CNTV2LinuxDriverInterface::NTV2Message (NTV2_HEADER * pInMessage)
 		return CNTV2DriverInterface::NTV2Message(pInMessage);	//	Implement NTV2Message on nub
 
 	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
-AJADebug::StatTimerStart(AJA_DebugStat_NTV2Message);
+	AJADebug::StatTimerStart(AJA_DebugStat_NTV2Message);
 	const int result (ioctl(int(_hDevice), IOCTL_AJANTV2_MESSAGE, pInMessage));
-AJADebug::StatTimerStop(AJA_DebugStat_NTV2Message);
+	AJADebug::StatTimerStop(AJA_DebugStat_NTV2Message);
 	if (result)
 		{LDIFAIL("IOCTL_AJANTV2_MESSAGE failed");	return false;}
 	return true;
@@ -1073,9 +1092,9 @@ bool CNTV2LinuxDriverInterface::HevcSendMessage (HevcMessageHeader* pMessage)
 		return false;
 	if (_hDevice == 0)
 		return false;
-AJADebug::StatTimerStart(AJA_DebugStat_HEVCSendMessage);
+	AJADebug::StatTimerStart(AJA_DebugStat_HEVCSendMessage);
 	const int result = ioctl(int(_hDevice), IOCTL_HEVC_MESSAGE, pMessage);
-AJADebug::StatTimerStop(AJA_DebugStat_HEVCSendMessage);
+	AJADebug::StatTimerStop(AJA_DebugStat_HEVCSendMessage);
 	if (result)
 		{LDIFAIL("IOCTL_AJANTV2_MESSAGE failed");	return false;}
 	return true;

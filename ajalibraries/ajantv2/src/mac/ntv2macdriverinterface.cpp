@@ -1023,6 +1023,25 @@ bool CNTV2MacDriverInterface::KernelLog (void * dataPtr, UInt32 dataSize)
 }
 
 
+static const uint32_t sIntEnumToStatKeys[] = {	AJA_DebugStat_WaitForInterruptOut1,		//	eOutput1	//	0
+												AJA_DebugStat_WaitForInterruptOthers,					//	1
+												AJA_DebugStat_WaitForInterruptIn1,		//	eInput1		//	2
+												AJA_DebugStat_WaitForInterruptIn2,		//	eInput2		//	3
+												AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers,	//	4 thru 13
+												AJA_DebugStat_WaitForInterruptUartTx1,	//	eUart1Tx	//	14
+												AJA_DebugStat_WaitForInterruptUartRx1,	//	eUart1Rx	//	15
+												AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers,	//	16 thru 23
+												AJA_DebugStat_WaitForInterruptIn3,		//	eInput3		//	24
+												AJA_DebugStat_WaitForInterruptIn4,		//	eInput4		//	25
+												AJA_DebugStat_WaitForInterruptUartTx2,	//	eUartTx2	//	26
+												AJA_DebugStat_WaitForInterruptUartRx2,	//	eUartRx2	//	27
+												AJA_DebugStat_WaitForInterruptOthers,					//	28
+												AJA_DebugStat_WaitForInterruptIn5,		//	eInput5		//	29
+												AJA_DebugStat_WaitForInterruptIn6,		//	eInput6		//	30
+												AJA_DebugStat_WaitForInterruptIn7,		//	eInput7		//	31
+												AJA_DebugStat_WaitForInterruptIn8,		//	eInput8		//	32
+												AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers};	//	33 thru 41
+
 //--------------------------------------------------------------------------------------------------------------------
 //	WaitForInterrupt
 //
@@ -1046,14 +1065,14 @@ bool CNTV2MacDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS type, cons
 		kernResult = KERN_INVALID_VALUE;
 	else if (GetIOConnect())
 	{
-		AJADebug::StatTimerStart(AJA_DebugStat_WaitForInterrupt);
+		AJADebug::StatTimerStart(sIntEnumToStatKeys[type]);
 		kernResult = IOConnectCallScalarMethod(GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 											   kDriverWaitForInterrupt, // selector of the function to be called via the user client.
 											   scalarI_64,				// array of scalar (64-bit) input values.
 											   2,						// the number of scalar input values.
 											   &scalarO_64,				// array of scalar (64-bit) output values.
 											   &outputCount);				// pointer to the number of scalar output values.
-		AJADebug::StatTimerStop(AJA_DebugStat_WaitForInterrupt);
+		AJADebug::StatTimerStop(sIntEnumToStatKeys[type]);
 	}
 	UInt32 interruptOccurred = uint32_t(scalarO_64);
 	if (kernResult != KERN_SUCCESS)
@@ -1465,14 +1484,14 @@ bool CNTV2MacDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 				autoCircData64.pvVal4 = Pointer64(&autoCircTask64);
 			}
 
-			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
 			kernResult = IOConnectCallStructMethod(conn,							// an io_connect_t returned from IOServiceOpen().
 												   kDriverAutoCirculateTransfer,	// selector of the function to be called via the user client.
 												   &autoCircData64,					// pointer to the input structure
 												   sizeof(AUTOCIRCULATE_DATA_64),	// size of input structure
 												   autoCircData.pvVal2,				// pointer to the output structure
 												   &outputStructSize);				// size of output structure
-			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 			break;
 		}	//	eTransferAutoCirculate, eTransferAutoCirculateEx, eTransferAutoCirculateEx2
 
