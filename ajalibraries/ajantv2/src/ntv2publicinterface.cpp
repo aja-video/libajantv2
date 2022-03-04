@@ -17,6 +17,7 @@
 #include <locale>		//	For std::locale, std::numpunct, std::use_facet
 #include <assert.h>
 #include <string.h>		//	For memset, et al.
+#include <algorithm>	//	For set_difference
 #include "ntv2rp188.h"
 using namespace std;
 
@@ -547,6 +548,24 @@ bool NTV2_POINTER::GetU8s (UByteSequence & outUint8s, const size_t inU8Offset, c
 	{
 		outUint8s.clear();
 		outUint8s.reserve(0);
+		return false;
+	}
+	return true;
+}
+
+bool NTV2_POINTER::AppendU8s (UByteSequence & outU8s) const
+{
+	const uint8_t * pU8 (reinterpret_cast<const uint8_t*> (GetHostPointer()));
+	if (!pU8)
+		return false;	//	Past end
+	const size_t maxSize (GetByteCount());
+	try
+	{
+		for (size_t ndx(0);	 ndx < maxSize;	 ndx++)
+			outU8s.push_back(*pU8++);
+	}
+	catch (...)
+	{
 		return false;
 	}
 	return true;
@@ -2562,65 +2581,79 @@ NTV2GetRegisters::NTV2GetRegisters (NTV2RegisterReads & inRegReads)
 }
 
 
-bool NTV2GetRegisters::ResetUsing (const NTV2RegisterReads & inRegReads)
-{
-	NTV2_ASSERT_STRUCT_VALID;
-	mInNumRegisters = ULWord (inRegReads.size ());
-	mOutNumRegisters = 0;
-	const bool	result	(	mInRegisters.Allocate (mInNumRegisters * sizeof (ULWord))
-						&&	mOutGoodRegisters.Allocate (mInNumRegisters * sizeof (ULWord))
-						&&	mOutValues.Allocate (mInNumRegisters * sizeof (ULWord)));
-	if (result)
-	{
-		ULWord		ndx			(0);
-		ULWord *	pRegArray	(reinterpret_cast <ULWord *> (mInRegisters.GetHostPointer ()));
-		assert (pRegArray);
-		for (NTV2RegisterReadsConstIter iter (inRegReads.begin ());	 iter != inRegReads.end ();	 ++iter)
-			pRegArray [ndx++] = iter->registerNumber;
-		assert ((ndx * sizeof (ULWord)) == mInRegisters.GetByteCount ());
-	}
-	return result;
-}
-
-
 bool NTV2GetRegisters::ResetUsing (const NTV2RegNumSet & inRegisterNumbers)
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	mInNumRegisters = ULWord (inRegisterNumbers.size ());
+	mInNumRegisters = ULWord(inRegisterNumbers.size());
 	mOutNumRegisters = 0;
-	const bool	result	(	mInRegisters.Allocate (mInNumRegisters * sizeof (ULWord))
-						&&	mOutGoodRegisters.Allocate (mInNumRegisters * sizeof (ULWord))
-						&&	mOutValues.Allocate (mInNumRegisters * sizeof (ULWord)));
-	if (result)
-	{
-		ULWord		ndx			(0);
-		ULWord *	pRegArray	(reinterpret_cast <ULWord *> (mInRegisters.GetHostPointer ()));
-		assert (pRegArray);
-		for (NTV2RegNumSetConstIter iter (inRegisterNumbers.begin ());	iter != inRegisterNumbers.end ();  ++iter)
-			pRegArray [ndx++] = *iter;
-		assert ((ndx * sizeof (ULWord)) == mInRegisters.GetByteCount ());
-	}
-	return result;
+	bool result	(	mInRegisters.Allocate(mInNumRegisters * sizeof(ULWord))
+					&&	mOutGoodRegisters.Allocate(mInNumRegisters * sizeof(ULWord))
+					&&	mOutValues.Allocate(mInNumRegisters * sizeof(ULWord)));
+	if (!result)
+		return false;
+	mInRegisters.Fill(ULWord(0));	mOutGoodRegisters.Fill(ULWord(0));	mOutValues.Fill(ULWord(0));
+
+	ULWord * pRegArray(mInRegisters);
+	if (!pRegArray)
+		return false;
+
+	ULWord ndx(0);
+	for (NTV2RegNumSetConstIter iter(inRegisterNumbers.begin());  iter != inRegisterNumbers.end();  ++iter)
+		pRegArray[ndx++] = *iter;
+	return (ndx * sizeof(ULWord)) == mInRegisters.GetByteCount();
+}
+
+bool NTV2GetRegisters::GetRequestedRegisterNumbers (NTV2RegNumSet & outRegNums) const
+{
+	outRegNums.clear();
+	if (!mInNumRegisters)
+		return true;	//	None requested
+	if (!mInRegisters)
+		return false;	//	Empty/NULL reg num buffer
+	if (mInRegisters.GetByteCount()/4 < mInNumRegisters)
+		return false;	//	Sanity check failed:  Reg num buffer too small
+
+	const ULWord *	pRegNums(mInRegisters);
+	for (ULWord ndx(0);  ndx < mInNumRegisters;  ndx++)
+		if (outRegNums.find(pRegNums[ndx]) == outRegNums.end())
+			outRegNums.insert(pRegNums[ndx]);
+	return true;
 }
 
 
 bool NTV2GetRegisters::GetGoodRegisters (NTV2RegNumSet & outGoodRegNums) const
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	outGoodRegNums.clear ();
-	if (mOutGoodRegisters.GetHostPointer() == AJA_NULL)
-		return false;		//	No 'mOutGoodRegisters' array!
-	if (mOutGoodRegisters.GetByteCount() == 0)
-		return false;		//	No good registers!
-	if (mOutNumRegisters == 0)
-		return false;		//	No good registers!	(The driver sets this field.)
+	outGoodRegNums.clear();
+	if (!mOutGoodRegisters)
+		return false;		//	Empty/NULL 'mOutGoodRegisters' array!
+	if (!mOutNumRegisters)
+		return false;		//	The driver says zero successfully read!
 	if (mOutNumRegisters > mInNumRegisters)
-		return false;		//	mOutNumRegisters must be less than or equal to mInNumRegisters!
+		return false;		//	Sanity check failed:  mOutNumRegisters must be less than or equal to mInNumRegisters!
 
-	const ULWord *	pRegArray	(reinterpret_cast <const ULWord *> (mOutGoodRegisters.GetHostPointer ()));
-	for (ULWord ndx (0);  ndx < mOutGoodRegisters.GetByteCount ();	ndx++)
-		outGoodRegNums << pRegArray [ndx];
+	const ULWord *	pRegArray (mOutGoodRegisters);
+	for (ULWord ndx(0);  ndx < mOutNumRegisters;  ndx++)
+		outGoodRegNums.insert(pRegArray[ndx]);
+	return true;
+}
 
+bool NTV2GetRegisters::GetBadRegisters (NTV2RegNumSet & outBadRegNums) const
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	outBadRegNums.clear();
+	NTV2RegNumSet reqRegNums, goodRegNums;
+	if (!GetRequestedRegisterNumbers(reqRegNums))
+		return false;
+	if (!GetGoodRegisters(goodRegNums))
+		return false;
+	if (reqRegNums == goodRegNums)
+		return true;	//	Requested reg nums identical to those that were read successfully
+
+	//	Subtract goodRegNums from reqRegNums...
+	std::set_difference (reqRegNums.begin(), reqRegNums.end(),
+						goodRegNums.begin(), goodRegNums.end(),
+						std::inserter(outBadRegNums, outBadRegNums.begin()));
 	return true;
 }
 
@@ -2629,54 +2662,207 @@ bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterValueMap & outValues) cons
 {
 	NTV2_ASSERT_STRUCT_VALID;
 	outValues.clear ();
-	if (mOutGoodRegisters.GetHostPointer () == 0)
-		return false;		//	No 'mOutGoodRegisters' array!
-	if (mOutGoodRegisters.GetByteCount () == 0)
-		return false;		//	No good registers!
-	if (mOutNumRegisters == 0)
-		return false;		//	No good registers!	(The driver sets this field.)
+	if (!mOutGoodRegisters)
+		return false;		//	Empty/null 'mOutGoodRegisters' array!
+	if (!mOutNumRegisters)
+		return false;		//	Driver says zero successfully read!
 	if (mOutNumRegisters > mInNumRegisters)
-		return false;		//	mOutNumRegisters must be less than or equal to mInNumRegisters!
-	if (mOutValues.GetHostPointer () == 0)
-		return false;		//	No 'mOutValues' array!
-	if (mOutValues.GetByteCount () == 0)
-		return false;		//	No values!
-	if (mOutGoodRegisters.GetByteCount () != mOutValues.GetByteCount ())
-		return false;		//	These sizes should match
+		return false;		//	Sanity check failed:  mOutNumRegisters must be less than or equal to mInNumRegisters!
+	if (!mOutValues)
+		return false;		//	Empty/null 'mOutValues' array!
+	if (mOutGoodRegisters.GetByteCount() != mOutValues.GetByteCount())
+		return false;		//	Sanity check failed:  These sizes should match
 
-	const ULWord *	pRegArray	(reinterpret_cast <const ULWord *> (mOutGoodRegisters.GetHostPointer ()));
-	const ULWord *	pValArray	(reinterpret_cast <const ULWord *> (mOutValues.GetHostPointer ()));
-	for (ULWord ndx (0);  ndx < mOutNumRegisters;  ndx++)
-		outValues [pRegArray [ndx]] = pValArray [ndx];
-
+	const ULWord *	pRegArray	(mOutGoodRegisters);
+	const ULWord *	pValArray	(mOutValues);
+	for (ULWord ndx(0);  ndx < mOutNumRegisters;  ndx++)
+		outValues [pRegArray[ndx]] = pValArray[ndx];
 	return true;
 }
 
 
 bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterReads & outValues) const
 {
-	NTV2RegisterValueMap	regValues;
-	uint32_t				missingTally (0);
-	if (!GetRegisterValues (regValues))
+	NTV2RegisterValueMap regValMap;
+	if (!GetRegisterValues(regValMap))
 		return false;
-	for (NTV2RegisterReadsIter it (outValues.begin());	it != outValues.end();	++it)
+
+	if (outValues.empty())
 	{
-		NTV2RegValueMapConstIter	mapIter (regValues.find (it->registerNumber));
-		if (mapIter == regValues.end())
-			missingTally++; //	Missing register
-		it->registerValue = mapIter->second;
+		for (NTV2RegValueMapConstIter it(regValMap.begin());  it != regValMap.end();  ++it)
+			outValues.push_back(NTV2RegInfo(/*regNum*/it->first, /*regVal*/it->second));
+		return true;
 	}
-	return missingTally == 0;
+	else
+	{
+		uint32_t missingTally(0);
+		for (NTV2RegisterReadsIter it (outValues.begin());	it != outValues.end();	++it)
+		{
+			NTV2RegValueMapConstIter mapIter(regValMap.find(it->registerNumber));
+			if (mapIter == regValMap.end())
+				missingTally++; //	Missing register
+			it->registerValue = mapIter->second;
+		}
+		return !missingTally;
+	}
 }
 
 
 ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 {
-	NTV2_ASSERT_STRUCT_VALID;
 	inOutStream << mHeader << ", numRegs=" << mInNumRegisters << ", inRegs=" << mInRegisters << ", outNumGoodRegs=" << mOutNumRegisters
 				<< ", outGoodRegs=" << mOutGoodRegisters << ", outValues=" << mOutValues << ", " << mTrailer;
 	return inOutStream;
 }
+
+#if defined(NTV2_RPC_SUPPORT)
+
+	#define	PUSHU16(__v__,__b__)	{	const uint16_t u16(NTV2HostIsBigEndian ? (__v__) : NTV2EndianSwap32HtoB(__v__));	\
+										const UByte * pU16(reinterpret_cast<const UByte*>(&u16));							\
+										__b__.push_back(pU16[0]); __b__.push_back(pU16[1]);									\
+									}
+
+	#define	PUSHU32(__v__,__b__)	{	const uint32_t u32(NTV2HostIsBigEndian ? (__v__) : NTV2EndianSwap32HtoB(__v__));	\
+										const UByte * pU32(reinterpret_cast<const UByte*>(&u32));							\
+										__b__.push_back(pU32[0]); __b__.push_back(pU32[1]);									\
+										__b__.push_back(pU32[2]); __b__.push_back(pU32[3]);									\
+									}
+
+	#define	PUSHU64(__v__,__b__)	{	const uint64_t u64(NTV2HostIsBigEndian ? (__v__) : NTV2EndianSwap64HtoB(__v__));	\
+										const UByte * pU64(reinterpret_cast<const UByte*>(&u64));							\
+										__b__.push_back(pU64[0]); __b__.push_back(pU64[1]);									\
+										__b__.push_back(pU64[2]); __b__.push_back(pU64[3]);									\
+										__b__.push_back(pU64[4]); __b__.push_back(pU64[5]);									\
+										__b__.push_back(pU64[6]); __b__.push_back(pU64[7]);									\
+									}
+
+	#define	POPU16(__v__,__b__,__n__)	{	uint16_t u16(0);	UByte * pU8(reinterpret_cast<UByte*>(&u16));				\
+											pU8[0] = (__b__).at((__n__)++); pU8[1] = (__b__).at((__n__)++);					\
+											(__v__) = NTV2HostIsBigEndian ? u16 : NTV2EndianSwap16BtoH(u16);				\
+										}
+
+	#define	POPU32(__v__,__b__,__n__)	{	uint32_t u32(0);	UByte * pU8(reinterpret_cast<UByte*>(&u32));				\
+											pU8[0] = (__b__).at((__n__)++); pU8[1] = (__b__).at((__n__)++);					\
+											pU8[2] = (__b__).at((__n__)++); pU8[3] = (__b__).at((__n__)++);					\
+											(__v__) = NTV2HostIsBigEndian ? u32 : NTV2EndianSwap32BtoH(u32);				\
+										}
+
+	#define	POPU64(__v__,__b__,__n__)	{	uint64_t u64(0);	UByte * pU8(reinterpret_cast<UByte*>(&u64));				\
+											pU8[0] = (__b__).at((__n__)++); pU8[1] = (__b__).at((__n__)++);					\
+											pU8[2] = (__b__).at((__n__)++); pU8[3] = (__b__).at((__n__)++);					\
+											pU8[4] = (__b__).at((__n__)++); pU8[5] = (__b__).at((__n__)++);					\
+											pU8[6] = (__b__).at((__n__)++); pU8[7] = (__b__).at((__n__)++);					\
+											(__v__) = NTV2HostIsBigEndian ? u64 : NTV2EndianSwap64BtoH(u64);				\
+										}
+
+	bool NTV2_HEADER::RPCEncode (UByteSequence & outBlob)
+	{
+		PUSHU32(fHeaderTag, outBlob);							//	ULWord		fHeaderTag
+		PUSHU32(fType, outBlob);								//	ULWord		fType
+		PUSHU32(fHeaderVersion, outBlob);						//	ULWord		fHeaderVersion
+		PUSHU32(fVersion, outBlob);								//	ULWord		fVersion
+		PUSHU32(fSizeInBytes, outBlob);							//	ULWord		fSizeInBytes
+		PUSHU32(fPointerSize, outBlob);							//	ULWord		fPointerSize
+		PUSHU32(fOperation, outBlob);							//	ULWord		fOperation
+		PUSHU32(fResultStatus, outBlob);						//	ULWord		fResultStatus
+		return true;
+	}
+
+	bool NTV2_HEADER::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	{
+		POPU32(fHeaderTag, inBlob, inOutIndex);					//	ULWord		fHeaderTag
+		POPU32(fType, inBlob, inOutIndex);						//	ULWord		fType
+		POPU32(fHeaderVersion, inBlob, inOutIndex);				//	ULWord		fHeaderVersion
+		POPU32(fVersion, inBlob, inOutIndex);					//	ULWord		fVersion
+		POPU32(fSizeInBytes, inBlob, inOutIndex);				//	ULWord		fSizeInBytes
+		POPU32(fPointerSize, inBlob, inOutIndex);				//	ULWord		fPointerSize
+		POPU32(fOperation, inBlob, inOutIndex);					//	ULWord		fOperation
+		POPU32(fResultStatus, inBlob, inOutIndex);				//	ULWord		fResultStatus
+		return true;
+	}
+
+	bool NTV2_TRAILER::RPCEncode (UByteSequence & outBlob)
+	{
+		PUSHU32(fTrailerVersion, outBlob);						//	ULWord		fTrailerVersion
+		PUSHU32(fTrailerTag, outBlob);							//	ULWord		fTrailerTag
+		return true;
+	}
+
+	bool NTV2_TRAILER::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	{
+		POPU32(fTrailerVersion, inBlob, inOutIndex);			//	ULWord		fTrailerVersion
+		POPU32(fTrailerTag, inBlob, inOutIndex);				//	ULWord		fTrailerTag
+		return true;
+	}
+
+
+	bool NTV2_POINTER::RPCEncode (UByteSequence & outBlob)
+	{
+		PUSHU32(fByteCount, outBlob);							//	ULWord		fByteCount
+		PUSHU32(fFlags, outBlob);								//	ULWord		fFlags
+		return AppendU8s(outBlob);	//	NOTE: My buffer content should already have been made BigEndian, if necessary
+	}
+
+	bool NTV2_POINTER::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	{
+		ULWord byteCount(0), flags(0);
+		POPU32(byteCount, inBlob, inOutIndex);					//	ULWord		fByteCount
+		POPU32(flags, inBlob, inOutIndex);						//	ULWord		fFlags
+		if (!Allocate(byteCount, flags & NTV2_POINTER_PAGE_ALIGNED))
+			return false;
+		if ((inOutIndex + byteCount) >= inBlob.size())
+			return false;	//	past end of inBlob
+		for (ULWord cnt(0);  cnt < byteCount;  cnt++)
+			U8(int(cnt)) = inBlob.at(inOutIndex++);	//	Caller is responsible for byte-swapping if needed
+		return true;
+	}
+
+	bool NTV2GetRegisters::RPCEncode (UByteSequence & outBlob)
+	{
+		const size_t totBytes	(mHeader.GetSizeInBytes()	//	Header + natural size of all structs/fields inbetween + Trailer
+								+ mInRegisters.GetByteCount() + mOutGoodRegisters.GetByteCount() + mOutValues.GetByteCount());	//	NTV2_POINTER fields
+		if (outBlob.capacity() < totBytes)
+			outBlob.reserve(totBytes);
+		if (!NTV2HostIsBigEndian)
+		{	//	All of my NTV2_POINTERs store arrays of ULWords that must be BigEndian BEFORE encoding into outBlob...
+			mInRegisters.ByteSwap32();
+			mOutGoodRegisters.ByteSwap32();
+			mOutValues.ByteSwap32();
+		}
+		bool ok = mHeader.RPCEncode(outBlob);					//	NTV2_HEADER		mHeader
+		PUSHU32(mInNumRegisters, outBlob);						//		ULWord			mInNumRegisters
+		ok &= mInRegisters.RPCEncode(outBlob);					//		NTV2_POINTER	mInRegisters
+		PUSHU32(mOutNumRegisters, outBlob)						//		ULWord			mOutNumRegisters
+		ok &= mOutGoodRegisters.RPCEncode(outBlob)				//		NTV2_POINTER	mOutGoodRegisters
+			&& mOutValues.RPCEncode(outBlob)					//		NTV2_POINTER	mOutValues
+			&& mTrailer.RPCEncode(outBlob);						//	NTV2_TRAILER	mTrailer
+		if (!NTV2HostIsBigEndian  &&  !ok)
+		{	//	FAILED:  Un-byteswap NTV2_POINTER data...
+			mInRegisters.ByteSwap32();
+			mOutGoodRegisters.ByteSwap32();
+			mOutValues.ByteSwap32();
+		}
+		return ok;
+	}
+
+	bool NTV2GetRegisters::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
+	{
+		bool ok = mHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER		mHeader
+		POPU32(mInNumRegisters, inBlob, inOutIndex);			//		ULWord			mInNumRegisters
+		ok &= mInRegisters.RPCDecode(inBlob, inOutIndex);		//		NTV2_POINTER	mInRegisters
+		POPU32(mOutNumRegisters, inBlob, inOutIndex);			//		ULWord			mOutNumRegisters
+		ok &= mOutGoodRegisters.RPCDecode(inBlob, inOutIndex);	//		NTV2_POINTER	mOutGoodRegisters
+		ok &= mOutValues.RPCDecode(inBlob, inOutIndex);			//		NTV2_POINTER	mOutValues
+		ok &= mTrailer.RPCDecode(inBlob, inOutIndex);			//	NTV2_TRAILER	mTrailer
+		if (!NTV2HostIsBigEndian)
+		{	//	Re-byteswap NTV2_POINTER data after decoding...
+			mInRegisters.ByteSwap32();
+			mOutGoodRegisters.ByteSwap32();
+			mOutValues.ByteSwap32();
+		}
+		return ok;
+	}
+#endif	//	NTV2_RPC_SUPPORT
 
 
 NTV2SetRegisters::NTV2SetRegisters (const NTV2RegisterWrites & inRegWrites)
@@ -2920,6 +3106,15 @@ NTV2AudioSystemSet NTV2MakeAudioSystemSet (const NTV2AudioSystem inFirstAudioSys
 	for (NTV2AudioSystem audSys(inFirstAudioSystem);  audSys < NTV2AudioSystem(inFirstAudioSystem+inCount);  audSys = NTV2AudioSystem(audSys+1))
 		if (NTV2_IS_VALID_AUDIO_SYSTEM(audSys))
 			result.insert(audSys);
+	return result;
+}
+
+NTV2RegNumSet GetRegisterNumbers (const NTV2RegReads & inRegInfos)
+{
+	NTV2RegNumSet result;
+	for (NTV2RegisterReadsConstIter it(inRegInfos.begin());  it != inRegInfos.end();  ++it)
+		if (result.find(it->registerNumber) == result.end())
+			result.insert(it->registerNumber);
 	return result;
 }
 

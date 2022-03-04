@@ -876,7 +876,7 @@ ostream & SDRAMAuditor::RawDump (ostream & oss) const
 	return oss;
 }
 
-SDRAMAuditor::ULWordSet SDRAMAuditor::CoalesceRegions (const ULWordSequence & inRgn1, const ULWordSequence & inRgn2, const ULWordSequence & inRgn3)
+ULWordSet SDRAMAuditor::CoalesceRegions (const ULWordSequence & inRgn1, const ULWordSequence & inRgn2, const ULWordSequence & inRgn3)
 {
 	ULWordSet result;	//	Coalesce all regions into this one sorted set
 	for (size_t ndx(0);  ndx < inRgn1.size();  ndx++)

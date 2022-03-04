@@ -6099,6 +6099,22 @@ typedef enum
 			typedef std::vector<uint64_t>				ULWord64Sequence;			///< @brief An ordered sequence of ULWord64 (uint64_t) values.
 			typedef ULWord64Sequence::const_iterator	ULWord64SequenceConstIter;	///< @brief A handy const iterator for iterating over a ULWord64Sequence.
 			typedef ULWord64Sequence::iterator			ULWord64SequenceIter;		///< @brief A handy non-const iterator for iterating over a ULWord64Sequence.
+
+			typedef std::set<ULWord>					ULWordSet;					///< @brief A collection of unique ULWord (uint32_t) values.
+			typedef ULWordSet::const_iterator			ULWordSetConstIter;
+			typedef ULWordSet::iterator					ULWordSetIter;
+		#endif	//	NTV2_BUILDING_DRIVER
+
+
+		#if !defined (NTV2_BUILDING_DRIVER)  &&  defined(NTV2_RPC_SUPPORT)
+			typedef	UByteSequence	NTV2_RPC_BLOB_TYPE;
+			#define	NTV2_RPC_ENCODE_DECL	bool RPCEncode (NTV2_RPC_BLOB_TYPE & outBlob);
+			#define	NTV2_RPC_DECODE_DECL	bool RPCDecode (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
+
+			#define NTV2_RPC_CODEC_DECLS	NTV2_RPC_ENCODE_DECL	\
+											NTV2_RPC_DECODE_DECL
+		#else
+			#define NTV2_RPC_CODEC_DECLS
 		#endif	//	NTV2_BUILDING_DRIVER
 
 
@@ -6539,7 +6555,7 @@ typedef enum
 					@param[out]	outOffsets	Receives the byte offsets to every occurrence in my buffer.
 					@param[in]	inValue		Specifies the data to search for.
 				**/
-				std::set<ULWord> &	FindAll (std::set<ULWord> & outOffsets, const NTV2_POINTER & inValue) const;	//	New in SDK 16.3
+				ULWordSet &		FindAll (ULWordSet & outOffsets, const NTV2_POINTER & inValue) const;	//	New in SDK 16.3
 
 				/**
 					@return		True if the given memory buffer's contents are identical to my own.
@@ -7002,6 +7018,13 @@ typedef enum
 				inline UByteSequence		GetU8s (const size_t inU8Offset = 0, const size_t inMaxSize = 128) const	{UByteSequence result; GetU8s(result, inU8Offset, inMaxSize); return result;}
 
 				/**
+					@brief		Appends my contents to an existing UByteSequence.
+					@param[out]	outU8s			The vector to be appended to.
+					@return						True if successful;	 otherwise false.
+				**/
+				bool						AppendU8s (UByteSequence & outU8s) const;
+
+				/**
 					@brief		Answers with my contents as a character string.
 					@param[out] outString		Receives the character string copied verbatim from my contents.
 					@param[in]	inU8Offset		The starting offset, in bytes, where copying will commence.
@@ -7084,6 +7107,8 @@ typedef enum
 				**/
 				static bool					SetDefaultPageSize (const size_t inNewSize);
 				///@}
+
+				NTV2_RPC_CODEC_DECLS
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_POINTER)
 
@@ -7303,11 +7328,11 @@ typedef enum
 					**/
 					explicit		NTV2_HEADER (const ULWord inStructureType, const ULWord inSizeInBytes);
 
-					/**
-						@brief		Returns my total size, in bytes, including header, body, and trailer.
-						@return		My size, in bytes.
-					**/
-					inline ULWord	GetSizeInBytes (void) const			{return fSizeInBytes;}
+					inline ULWord	GetSizeInBytes (void) const			{return fSizeInBytes;}	///< @brief My total size, in bytes, including header, body and trailer (but excluding embedded NTV2_POINTER data)
+					inline ULWord	GetTag (void) const					{return fHeaderTag;}	//	New in SDK 16.3
+					inline ULWord	GetType (void) const				{return fType;}			//	New in SDK 16.3
+					inline ULWord	GetVersion (void) const				{return fVersion;}		//	New in SDK 16.3
+					inline ULWord	GetPointerSize (void) const			{return fPointerSize;}	//	New in SDK 16.3
 
 					/**
 						@brief	Prints a human-readable representation of me into the given output stream.
@@ -7319,7 +7344,9 @@ typedef enum
 					/**
 						@return		True if my tag and type fields are valid;  otherwise false.
 					**/
-					inline bool		IsValid (void) const				{return NTV2_IS_VALID_HEADER_TAG (fHeaderTag) && NTV2_IS_VALID_STRUCT_TYPE (fType);}
+					inline bool		IsValid (void) const	{return NTV2_IS_VALID_HEADER_TAG(fHeaderTag) && NTV2_IS_VALID_STRUCT_TYPE(fType);}
+
+					NTV2_RPC_CODEC_DECLS
 				#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_HEADER)
 
@@ -7339,6 +7366,8 @@ typedef enum
 						@return		True if my tag is valid;  otherwise false.
 					**/
 					inline bool		IsValid (void) const	{return NTV2_IS_VALID_TRAILER_TAG (fTrailerTag);}
+
+					NTV2_RPC_CODEC_DECLS
 				#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_TRAILER)
 
@@ -7691,10 +7720,16 @@ typedef enum
 
 
 		#if !defined (NTV2_BUILDING_DRIVER)
-			typedef std::set <ULWord>						NTV2RegisterNumberSet;	///< @brief A set of distinct ULWord values.
+			typedef ULWordSet								NTV2RegisterNumberSet;	///< @brief A set of distinct ULWord values.
 			typedef NTV2RegisterNumberSet					NTV2RegNumSet;			///< @brief A set of distinct NTV2RegisterNumbers.
-			typedef NTV2RegNumSet::const_iterator			NTV2RegNumSetConstIter; ///< @brief A const iterator that iterates over a set of distinct NTV2RegisterNumbers.
-			typedef NTV2RegNumSet::iterator					NTV2RegNumSetIter;		///< @brief A non-constant iterator that iterates over a set of distinct NTV2RegisterNumbers.
+			typedef ULWordSetConstIter						NTV2RegNumSetConstIter; ///< @brief A const iterator that iterates over a set of distinct NTV2RegisterNumbers.
+			typedef ULWordSetIter							NTV2RegNumSetIter;		///< @brief A non-constant iterator that iterates over a set of distinct NTV2RegisterNumbers.
+
+			/**
+				@param[in]	inRegInfos	Specifies the NTV2RegInfo collection.
+				@return		A set of unique register numbers contained in the NTV2RegInfo collection.
+			**/
+			AJAExport NTV2RegNumSet GetRegisterNumbers (const NTV2RegReads & inRegInfos);
 
 			/**
 				@brief	Adds the given register number to the specified NTV2RegisterNumberSet.
@@ -7728,12 +7763,16 @@ typedef enum
 
 			#if !defined (NTV2_BUILDING_DRIVER)
 				/**
-					@brief	Constructs an NTV2GetRegisters struct from the given NTV2RegisterNumberSet.
+					@brief	Constructs an NTV2GetRegisters struct from the given set of register numbers.
 					@param[in]	inRegisterNumbers	A set of distinct NTV2RegisterNumbers to copy into the mRegisters field.
 													If omitted, defaults to an empty set.
 				**/
-				explicit	NTV2GetRegisters (const NTV2RegNumSet & inRegisterNumbers = NTV2RegNumSet ());
+				explicit	NTV2GetRegisters (const NTV2RegNumSet & inRegisterNumbers = NTV2RegNumSet());
 
+				/**
+					@brief	Constructs me from the given NTV2RegInfo sequence.
+					@param[in]	inRegReads	An NTV2RegInfo sequence that identifies the register numbers to be read.
+				**/
 				explicit	NTV2GetRegisters (NTV2RegisterReads & inRegReads);
 
 				/**
@@ -7747,7 +7786,7 @@ typedef enum
 					@param[in]	inRegReads			A vector of NTV2RegInfo values to use for my mInRegisters field.
 					@note		The mask and shift fields of the NTV2RegInfo values are ignored.
 				**/
-				bool		ResetUsing (const NTV2RegisterReads & inRegReads);
+				inline bool	ResetUsing (const NTV2RegisterReads & inRegReads)	{return ResetUsing(::GetRegisterNumbers(inRegReads));}
 
 				/**
 					@brief		Returns an NTV2RegNumSet built from my mOutGoodRegisters field.
@@ -7764,11 +7803,27 @@ typedef enum
 				bool		GetRegisterValues (NTV2RegisterValueMap & outValues) const;
 
 				/**
-					@brief	Returns a vector of NTV2RegInfo values built from my mOutGoodRegisters and mOutValues fields.
-					@param[out] outValues	Receives the register values.
+					@brief	Returns a NTV2RegInfo sequence built from my mOutGoodRegisters and mOutValues fields.
+					@param[out] inOutValues		If empty upon entry, receives all successfully-read register values;
+												otherwise updates only the register values it already contains
+												(if they were requested and successfully read).
 					@return True if successful;	 otherwise false.
 				**/
-				bool		GetRegisterValues (NTV2RegisterReads & outValues) const;
+				bool		GetRegisterValues (NTV2RegisterReads & inOutValues) const;
+
+				/**
+					@brief	Answers with the set of register numbers that were requested.
+					@param[out]	outRegNums		Receives the set of unique register numbers.
+					@return	True if successful;  otherwise false.
+				**/
+				bool		GetRequestedRegisterNumbers (NTV2RegNumSet & outRegNums) const;		//	New in SDK 16.3
+
+				/**
+					@brief		Returns the set of register numbers that were not read successfully.
+					@param[out] outBadRegNums	Receives the set of "bad" registers.
+					@return		True if successful;	 otherwise false.
+				**/
+				bool		GetBadRegisters (NTV2RegNumSet & outBadRegNums) const;	//	New in SDK 16.3
 
 				/**
 					@brief	Prints a human-readable representation of me to the given output stream.
@@ -7777,6 +7832,7 @@ typedef enum
 				**/
 				std::ostream &	Print (std::ostream & inOutStream) const;
 
+				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
 
 				NTV2_BEGIN_PRIVATE
