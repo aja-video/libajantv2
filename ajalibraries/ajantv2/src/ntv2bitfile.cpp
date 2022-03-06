@@ -2,7 +2,7 @@
 /**
 	@file		ntv2bitfile.cpp
 	@brief		Implementation of CNTV2Bitfile class.
-	@copyright	(C) 2010-2021 AJA Video Systems, Inc.	 All rights reserved.
+	@copyright	(C) 2010-2022 AJA Video Systems, Inc.	 All rights reserved.
 **/
 #include "ntv2bitfile.h"
 #include "ntv2card.h"

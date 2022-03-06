@@ -2,7 +2,7 @@
 /**
 	@file		ntv2bitfile.h
 	@brief		Declares the CNTV2Bitfile class.
-	@copyright	(C) 2010-2021 AJA Video Systems, Inc.    All rights reserved.
+	@copyright	(C) 2010-2022 AJA Video Systems, Inc.    All rights reserved.
 **/
 
 #ifndef NTV2BITFILE_H

@@ -2,7 +2,7 @@
 /**
 	@file		videotypes.h
 	@brief		Declares the enumeration constants used in the ajabase library.
-	@copyright	(C) 2010-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2010-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_VIDEODEFINES

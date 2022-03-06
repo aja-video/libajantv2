@@ -2,7 +2,7 @@
 /**
 	@file		ntv2utf8.h
 	@brief		Declares the bare-bones UTF8 support functions (for the nub).
-	@copyright	(C) 2008-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2008-2022 AJA Video Systems, Inc.
 **/
 
 #ifndef __NTV2UTF8_H

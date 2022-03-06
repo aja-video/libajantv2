@@ -2,7 +2,7 @@
 /**
 	@file		ntv2winpublicinterface.h
 	@brief		Defines & structs shared between user-space and Windows kernel driver.
-	@copyright	(C) 2003-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2003-2022 AJA Video Systems, Inc.
 **/
 #ifndef NTV2WINPUBLICINTERFACE_H
 #define NTV2WINPUBLICINTERFACE_H

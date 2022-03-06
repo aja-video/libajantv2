@@ -2,7 +2,7 @@
 /**
 	@file		windows/threadimpl.cpp
 	@brief		Implements the AJAThreadImpl class for the Windows platform.
-	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ajabase/system/windows/threadimpl.h"

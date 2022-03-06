@@ -2,7 +2,7 @@
 /**
 	@file		ntv2registers2110.h
 	@brief		Defines the KonaIP/IoIP S2110 registers.
-	@copyright	(C) 2014-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2014-2022 AJA Video Systems, Inc.
 **/
 
 #ifndef REGISTERS_2110_H

@@ -3,7 +3,7 @@
 	@file		ntv2devicefeatures.h
 	@brief		Declares device capability functions.
 	@note		Although this is a .cpp file, it must be compilable for Lin/Mac/Win kernel device drivers.
-	@copyright	(C) 2004-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2004-2022 AJA Video Systems, Inc.
 **/
 
 #ifndef NTV2DEVICEFEATURES_H

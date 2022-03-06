@@ -2,7 +2,7 @@
 /**
 	@file		ip_socket.h
 	@brief		Declares the AJAIPSocket class.
-	@copyright	(C) 2011-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2011-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_IP_SOCKET_H

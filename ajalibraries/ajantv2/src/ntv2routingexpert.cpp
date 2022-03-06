@@ -2,7 +2,7 @@
 /**
 	@file		ntv2routingexpert.cpp
 	@brief		RoutingExpert implementation used within CNTV2SignalRouter.
-	@copyright	(C) 2004-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2004-2022 AJA Video Systems, Inc.
 **/
 
 #include "ntv2routingexpert.h"

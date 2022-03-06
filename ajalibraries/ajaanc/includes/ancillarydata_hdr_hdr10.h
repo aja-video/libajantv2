@@ -2,7 +2,7 @@
 /**
 	@file		ancillarydata_hdr_hdr10.h
 	@brief		Declares the AJAAncillaryData_HDR_HDR10 class.
-	@copyright	(C) 2012-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2012-2022 AJA Video Systems, Inc.
 **/
 
 #ifndef AJA_ANCILLARYDATA_HDR_HDR10_H

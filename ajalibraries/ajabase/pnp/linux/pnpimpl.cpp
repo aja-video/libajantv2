@@ -2,7 +2,7 @@
 /**
 	@file		pnp/linux/pnpimpl.cpp
 	@brief		Implements the AJAPnpImpl class on the Linux platform.
-	@copyright	(C) 2011-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2011-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ajabase/pnp/linux/pnpimpl.h"

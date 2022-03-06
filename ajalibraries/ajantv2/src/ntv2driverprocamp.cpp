@@ -2,7 +2,7 @@
 /**
 	@file		ntv2driverprocamp.cpp
 	@brief		Implementation of driver procamp utility functions.
-	@copyright	(C) 2003-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2003-2022 AJA Video Systems, Inc.
 	@note		Because this module is compiled into the driver, it must remain straight ANSI 'C' -- no C++ or STL.
 				Since the Linux driver is not C++ based, a devicenumber is required in some functions in place of "this" pointer.
 **/

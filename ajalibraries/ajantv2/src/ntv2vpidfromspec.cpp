@@ -2,7 +2,7 @@
 /**
 	@file		ntv2vpidfromspec.cpp
 	@brief		Generates a VPID based on a specification struct. See the SMPTE 352 standard for details.
-	@copyright	(C) 2012-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2012-2022 AJA Video Systems, Inc.
 	@note		This file is included in driver builds. It must not contain any c++.
 **/
 

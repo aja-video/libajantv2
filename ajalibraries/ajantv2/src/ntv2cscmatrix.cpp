@@ -2,7 +2,7 @@
 /**
 	@file		ntv2cscmatrix.cpp
 	@brief		Implementation of the CNTV2CSCMatrix class for abstract color space matrix operations.
-	@copyright	(C) 2004-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2004-2022 AJA Video Systems, Inc.
 **/
 
 #include "ntv2cscmatrix.h"

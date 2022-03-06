@@ -2,7 +2,7 @@
 /**
 	@file		mac/pthreadsextra.h
 	@brief		Declares extra symbols to make the Mac threads implementation look more like Unix.
-	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_PTREAD_EXTRA_H

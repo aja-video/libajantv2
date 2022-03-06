@@ -2,7 +2,7 @@
 /**
 	@file		ntv2publicinterface.h
 	@brief		Declares enums and structs used by all platform drivers and the SDK.
-	@copyright	(C) 2012-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2012-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef NTV2PUBLICINTERFACE_H

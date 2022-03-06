@@ -2,7 +2,7 @@
 /**
 	@file		ancillarydata_hdr_hlg.h
 	@brief		Declares the AJAAncillaryData_HDR_HLG class.
-	@copyright	(C) 2012-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2012-2022 AJA Video Systems, Inc.
 **/
 
 #ifndef AJA_ANCILLARYDATA_HDR_HLG_H

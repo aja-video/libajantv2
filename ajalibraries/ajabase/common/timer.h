@@ -2,7 +2,7 @@
 /**
 	@file		timer.h
 	@brief		Declares the AJATimer class.
-	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_TIMER_H

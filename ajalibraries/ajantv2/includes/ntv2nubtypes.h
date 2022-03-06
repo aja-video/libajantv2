@@ -2,7 +2,7 @@
 /**
 	@file		ntv2nubtypes.h
 	@brief		Declares data types and structures used in NTV2 "nub" packets.
-	@copyright	(C) 2006-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2006-2022 AJA Video Systems, Inc.
 **/
 
 #ifndef __NTV2NUBTYPES_H

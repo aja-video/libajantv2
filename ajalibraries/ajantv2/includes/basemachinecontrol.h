@@ -2,7 +2,7 @@
 /**
 	@file		basemachinecontrol.h
 	@deprecated	Declares the CBaseMachineControl class.
-	@copyright	(C) 2004-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2004-2022 AJA Video Systems, Inc.
 **/
 
 #ifndef _BASEMACHINECONTROL_H

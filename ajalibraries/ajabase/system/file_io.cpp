@@ -2,7 +2,7 @@
 /**
 	@file		file_io.cpp
 	@brief		Implements the AJAFileIO class based on platform, Windows/Posix.
-	@copyright	(C) 2011-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2011-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ajabase/common/common.h"

@@ -2,7 +2,7 @@
 /**
 	@file		ntv2konaflashprogram.h
 	@brief		Declares the CNTV2KonaFlashProgram class.
-	@copyright	(C) 2010-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2010-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef NTV2KONAFLASHPROGRAM_H

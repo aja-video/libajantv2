@@ -2,7 +2,7 @@
 /**
 	@file		pnp/windows/pnpimpl.h
 	@brief		Declares the AJAPnpImpl class.
-	@copyright	(C) 2011-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2011-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_PNP_IMPL_H
