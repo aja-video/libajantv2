@@ -956,7 +956,7 @@ bool CNTV2DriverInterface::BitstreamWrite (const NTV2_POINTER & inBuffer, const 
 						 BITSTREAM_WRITE |
 						 (inFragment? BITSTREAM_FRAGMENT : 0) |
 						 (inSwap? BITSTREAM_SWAP : 0));
-	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&bsMsg));
+	return NTV2Message(bsMsg);
 }
 
 bool CNTV2DriverInterface::BitstreamReset (const bool inConfiguration, const bool inInterface)
@@ -965,7 +965,7 @@ bool CNTV2DriverInterface::BitstreamReset (const bool inConfiguration, const boo
 	NTV2Bitstream bsMsg (inBuffer,
 						 (inConfiguration? BITSTREAM_RESET_CONFIG : 0) |
 						 (inInterface? BITSTREAM_RESET_MODULE : 0));
-	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&bsMsg));
+	return NTV2Message(bsMsg);
 }
 
 bool CNTV2DriverInterface::BitstreamStatus (NTV2ULWordVector & outRegValues)
@@ -975,7 +975,7 @@ bool CNTV2DriverInterface::BitstreamStatus (NTV2ULWordVector & outRegValues)
 
 	NTV2_POINTER inBuffer;
 	NTV2Bitstream bsMsg (inBuffer, BITSTREAM_READ_REGISTERS);
-	if (!NTV2Message (reinterpret_cast<NTV2_HEADER*>(&bsMsg)))
+	if (!NTV2Message(bsMsg))
 		return false;
 
 	for (UWord ndx(0);	ndx < BITSTREAM_MCAP_DATA;	ndx++)
@@ -990,7 +990,7 @@ bool CNTV2DriverInterface::BitstreamLoad (const bool inSuspend, const bool inRes
 	NTV2Bitstream bsMsg (inBuffer,
 				(inSuspend? BITSTREAM_SUSPEND : 0) |
 				(inResume? BITSTREAM_RESUME : 0));
-	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&bsMsg));
+	return NTV2Message(bsMsg);
 }
 
 

@@ -6901,7 +6901,7 @@ bool CNTV2Card::SetWarmBootFirmwareReload(bool enable)
 			return false;		//	Nothing to do!
 	
 		NTV2GetRegisters getRegsParams (inRegisters);
-		if (NTV2Message(reinterpret_cast <NTV2_HEADER*>(&getRegsParams)))
+		if (NTV2Message(getRegsParams))
 		{
 			if (!getRegsParams.GetRegisterValues(outValues))
 				return false;
@@ -6929,17 +6929,15 @@ bool CNTV2Card::WriteRegisters (const NTV2RegisterWrites & inRegWrites)
 	bool				result(false);
 	NTV2SetRegisters	setRegsParams(inRegWrites);
 	//cerr << "## DEBUG:  CNTV2Card::WriteRegisters:  setRegsParams:  " << setRegsParams << endl;
-	result = NTV2Message(reinterpret_cast <NTV2_HEADER *> (&setRegsParams));
+	result = NTV2Message(setRegsParams);
 	if (!result)
 	{
 		//	Non-atomic user-space workaround until SETREGS implemented in driver...
-		const NTV2RegInfo * pRegInfos = reinterpret_cast<const NTV2RegInfo*>(setRegsParams.mInRegInfos.GetHostPointer());
-		UWord *				pBadNdxs = reinterpret_cast<UWord*>(setRegsParams.mOutBadRegIndexes.GetHostPointer());
-		for (ULWord ndx(0); ndx < setRegsParams.mInNumRegisters; ndx++)
-		{
+		const NTV2RegInfo * pRegInfos = setRegsParams.mInRegInfos;
+		UWord *				pBadNdxs = setRegsParams.mOutBadRegIndexes;
+		for (ULWord ndx(0);  ndx < setRegsParams.mInNumRegisters;  ndx++)
 			if (!WriteRegister(pRegInfos[ndx].registerNumber, pRegInfos[ndx].registerValue, pRegInfos[ndx].registerMask, pRegInfos[ndx].registerShift))
 				pBadNdxs[setRegsParams.mOutNumFailures++] = UWord(ndx);
-		}
 		result = true;
 	}
 	if (result	&&	setRegsParams.mInNumRegisters  &&  setRegsParams.mOutNumFailures)
@@ -6968,7 +6966,7 @@ bool CNTV2Card::BankSelectWriteRegister (const NTV2RegInfo & inBankSelect, const
 	{
 		NTV2BankSelGetSetRegs	bankSelGetSetMsg	(inBankSelect, inRegInfo, true);
 		//cerr << "## DEBUG:  CNTV2Card::BankSelectWriteRegister:  " << bankSelGetSetMsg << endl;
-		result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&bankSelGetSetMsg));
+		result = NTV2Message(bankSelGetSetMsg);
 		return result;
 	}
 }
@@ -6994,7 +6992,7 @@ bool CNTV2Card::BankSelectReadRegister (const NTV2RegInfo & inBankSelect, NTV2Re
 	{
 		NTV2BankSelGetSetRegs	bankSelGetSetMsg	(inBankSelect, inOutRegInfo);
 		//cerr << "## DEBUG:  CNTV2Card::BankSelectReadRegister:  " << bankSelGetSetMsg << endl;
-		result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&bankSelGetSetMsg));
+		result = NTV2Message(bankSelGetSetMsg);
 		if (result && !bankSelGetSetMsg.mInRegInfos.IsNULL ())
 			inOutRegInfo = bankSelGetSetMsg.GetRegInfo ();
 		return result;
@@ -7015,7 +7013,7 @@ bool CNTV2Card::WriteVirtualData (const ULWord inTag, const void* inVirtualData,
 	{
 		NTV2VirtualData virtualDataMsg	(inTag, inVirtualData, inVirtualDataSize, true);
 		//cerr << "## DEBUG:  CNTV2Card::WriteVirtualData:	" << virtualDataMsg << endl;
-		result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&virtualDataMsg));
+		result = NTV2Message(virtualDataMsg);
 	}
 	return result;
 }
@@ -7034,7 +7032,7 @@ bool CNTV2Card::ReadVirtualData (const ULWord inTag, void* outVirtualData, const
 	{
 		NTV2VirtualData virtualDataMsg	(inTag, outVirtualData, inVirtualDataSize, false);
 		//cerr << "## DEBUG:  CNTV2Card::ReadVirtualData:  " << virtualDataMsg << endl;
-		result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&virtualDataMsg));
+		result = NTV2Message(virtualDataMsg);
 	}
 	return result;
 }
