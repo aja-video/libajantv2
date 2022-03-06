@@ -2,7 +2,7 @@
 /**
 	@file		ntv2m31enums.h
 	@brief		Enumerations for controlling NTV2 devices with m31 HEVC encoders.
-	@copyright	(C) 2015-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2015-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 

@@ -2,7 +2,7 @@
 /**
 	@file		pnp/mac/pnpimpl.cpp
 	@brief		Implements the AJAPnpImpl class on the Mac platform.
-	@copyright	(C) 2011-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2011-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 #include "ajabase/pnp/mac/pnpimpl.h"
 #include "ajabase/common/common.h"

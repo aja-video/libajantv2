@@ -2,7 +2,7 @@
 /**
 	@file		ntv2driverprocamp.h
 	@brief		Declares functions used in the NTV2 device driver.
-	@copyright	(C) 2004-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2004-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 // ntv2driverprocamp.h
 #ifndef NTV2DRIVERPROCAMP_H

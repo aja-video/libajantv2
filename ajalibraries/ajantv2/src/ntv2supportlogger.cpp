@@ -2,7 +2,7 @@
 /**
 	@file		ntv2supportlogger.cpp
 	@brief		Implementation of CNTV2SupportLogger class.
-	@copyright	(C) 2017-2021 AJA Video Systems, Inc.	 All rights reserved.
+	@copyright	(C) 2017-2022 AJA Video Systems, Inc.	 All rights reserved.
 **/
 #include "ntv2supportlogger.h"
 #include "ntv2devicescanner.h"

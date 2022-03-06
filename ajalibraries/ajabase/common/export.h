@@ -2,7 +2,7 @@
 /**
 	@file		export.h
 	@brief		Declares system-dependent import/export macros and libraries.
-	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_EXPORT_H

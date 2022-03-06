@@ -2,7 +2,7 @@
 /**
 	@file		persistence/persistence.cpp
 	@brief		Implements the AJAPersistence class.
-	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "persistence.h"

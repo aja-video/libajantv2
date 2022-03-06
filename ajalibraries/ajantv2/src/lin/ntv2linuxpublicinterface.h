@@ -2,7 +2,7 @@
 /**
 	@file		ntv2linuxpublicinterface.h
 	@brief		Types and defines shared between NTV2 user application interface and Linux device driver.
-	@copyright	(C) 2004-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2004-2022 AJA Video Systems, Inc.
 **/
 #ifndef NTV2LINUXPUBLICINTERFACE_H
 #define NTV2LINUXPUBLICINTERFACE_H

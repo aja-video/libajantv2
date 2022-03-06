@@ -2,7 +2,7 @@
 /**
 	@file		guid.h
 	@brief		Generates a new, unique UUID as an STL string.
-	@copyright	(C) 2015-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2015-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_GUID_H

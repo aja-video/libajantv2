@@ -2,7 +2,7 @@
 /**
 	@file		ntv2hdmi.cpp
 	@brief		Implements most of CNTV2Card's HDMI-related functions.
-	@copyright	(C) 2004-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2004-2022 AJA Video Systems, Inc.
 **/
 
 #include "ntv2card.h"

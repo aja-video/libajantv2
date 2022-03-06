@@ -2,7 +2,7 @@
 /**
 	@file		systemtime.cpp
 	@brief		Implements the AJATime class.
-	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ajabase/system/system.h"

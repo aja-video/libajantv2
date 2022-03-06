@@ -2,7 +2,7 @@
 /**
 	@file		ntv2vpidfromspec.h
 	@brief		Declares functions for the C implementations of VPID generation from a VPIDSpec.
-	@copyright	(C) 2004-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2004-2022 AJA Video Systems, Inc.
 	@note		This file is included in driver builds. It must not contain any C++.
 **/
 

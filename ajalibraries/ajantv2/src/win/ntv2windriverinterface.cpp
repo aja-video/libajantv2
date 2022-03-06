@@ -2,7 +2,7 @@
 /**
 	@file		ntv2windriverinterface.cpp
 	@brief		Implementation of CNTV2WinDriverInterface.
-	@copyright	(C) 2003-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2003-2022 AJA Video Systems, Inc.
 **/
 
 #include "ntv2windriverinterface.h"

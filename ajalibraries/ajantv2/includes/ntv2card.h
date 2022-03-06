@@ -2,7 +2,7 @@
 /**
 	@file		ntv2card.h
 	@brief		Declares the CNTV2Card class.
-	@copyright	(C) 2004-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2004-2022 AJA Video Systems, Inc.
 **/
 
 #ifndef NTV2CARD_H

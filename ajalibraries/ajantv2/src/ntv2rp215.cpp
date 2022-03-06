@@ -2,7 +2,7 @@
 /**
 	@file		ntv2rp215.cpp
 	@brief		Implements the CNTV2RP215Decoder class. See SMPTE RP215 standard for details.
-	@copyright	(C) 2006-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2006-2022 AJA Video Systems, Inc.
 **/
 
 #include "ntv2rp215.h"

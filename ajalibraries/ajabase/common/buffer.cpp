@@ -2,7 +2,7 @@
 /**
 	@file		buffer.cpp
 	@brief		Implementation of AJABuffer class.
-	@copyright	(C) 2010-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2010-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "common.h"

@@ -4,7 +4,7 @@
 	@brief		Declares the constants used for sharing debug messages. These structures are used
 				to gather debug messages and share them with the applications that report and log.
 	@note		This file is shared with drivers written in c.
-	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_DEBUGSHARE_H

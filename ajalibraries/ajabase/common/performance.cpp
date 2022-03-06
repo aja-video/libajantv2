@@ -2,7 +2,7 @@
 /**
 	@file		performance.cpp
 	@brief		Monitors the operational performance, timing, and stats of an arbitrary module.
-	@copyright	(C) 2011-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2011-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 /////////////////////////////

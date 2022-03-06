@@ -2,7 +2,7 @@
 /**
 	@file		ntv2hevcfirmwareinstallerthread.cpp
 	@brief		Implementation of CNTV2HEVCFirmwareInstallerThread class.
-	@copyright	(C) 2015-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2015-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ntv2hevcfirmwareinstallerthread.h"

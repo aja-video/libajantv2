@@ -2,7 +2,7 @@
 /**
 	@file		ntv2driverinterface.cpp
 	@brief		Implements the CNTV2DriverInterface class.
-	@copyright	(C) 2003-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2003-2022 AJA Video Systems, Inc.
 **/
 
 #include "ajatypes.h"

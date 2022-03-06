@@ -2,7 +2,7 @@
 /**
 	@file		dpxfileio.cpp
 	@brief		Implementation of the AJADPXFileIO class, for low level file I/O.
-	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include <stdio.h>

@@ -2,7 +2,7 @@
 /**
 	@file		ancillarydata_cea608_line21.cpp
 	@brief		Implements the AJAAncillaryData_Cea608_line21 class.
-	@copyright	(C) 2010-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2010-2022 AJA Video Systems, Inc.
 **/
 
 #include "ancillarydata_cea608_line21.h"

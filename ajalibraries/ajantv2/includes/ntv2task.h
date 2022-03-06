@@ -2,7 +2,7 @@
 /**
 	@file		ntv2task.h
 	@brief		Declares the CNTV2Task class (deprecated).
-	@copyright	(C) 2008-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2008-2022 AJA Video Systems, Inc.
 **/
 
 #ifndef NTV2TASK_H

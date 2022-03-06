@@ -2,7 +2,7 @@
 /**
 	@file		timecodeburn.h
 	@brief		Declares the AJATimeCodeBurn class.
-	@copyright	(C) 2012-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2012-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_TIMECODEBURN_H
