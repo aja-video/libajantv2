@@ -2,7 +2,7 @@
 /**
 	@file		ntv2burn4kquadrant.h
 	@brief		Header file for the NTV2Burn4KQuadrant demonstration class.
-	@copyright	(C) 2012-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2012-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef _NTV2BURN4KQUADRANT_H

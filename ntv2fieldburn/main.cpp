@@ -4,7 +4,7 @@
 	@brief		Demonstration application to capture frames from the SDI input as two distinct fields
 				in separate, non-contiguous memory locations, "burn" a timecode window into each field,
 				and recombine the modified fields for SDI playout.
-	@copyright	(C) 2013-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2013-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 

@@ -2,7 +2,7 @@
 /**
 @file		AMDSDIOutput/main.cpp
 @brief		Demonstration application to playback frames from GPU to SDI using GMA.
-@copyright	(C) 2012-2021 AJA Video Systems, Inc.  All rights reserved.
+@copyright	(C) 2012-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include <string>

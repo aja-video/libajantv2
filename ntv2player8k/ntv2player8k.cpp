@@ -2,7 +2,7 @@
 /**
 	@file		ntv2player8k.cpp
 	@brief		Implementation of ntv2player8k class.
-	@copyright	(C) 2013-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2013-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ntv2player8k.h"

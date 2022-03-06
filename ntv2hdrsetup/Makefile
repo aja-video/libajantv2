@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 #
-# Copyright (C) 2004 - 2021 AJA Video Systems, Inc.
+# Copyright (C) 2004 - 2022 AJA Video Systems, Inc.
 #
 
 DIR := $(strip $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST)))))

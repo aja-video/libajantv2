@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2004-2021 AJA Video Systems, Inc.
+# Copyright (C) 2004-2022 AJA Video Systems, Inc.
 # Proprietary and Confidential information.
 # All righs reserved
 #

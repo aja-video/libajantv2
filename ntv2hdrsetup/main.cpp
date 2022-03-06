@@ -3,7 +3,7 @@
     @file       ntv2hdrsetup/main.cpp
     @brief      Demonstration application that shows how to enable HDR capabilities of 
                 HDMI out.
-    @copyright  Copyright (C) 2012-2021 AJA Video Systems, Inc.  All rights reserved.
+    @copyright  Copyright (C) 2012-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 

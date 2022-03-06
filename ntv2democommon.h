@@ -3,7 +3,7 @@
 	@file		ntv2democommon.h
 	@brief		This file contains some structures, constants, classes and functions that are used in some of the demo applications.
 				There is nothing magical about anything in this file. What's in here simply works well with the demos.
-	@copyright	(C) 2013-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2013-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef _NTV2DEMOCOMMON_H
