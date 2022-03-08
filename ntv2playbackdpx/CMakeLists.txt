@@ -38,3 +38,9 @@ add_executable(ntv2playbackdpx ${NTV2PLAYBACKDPX_TARGET_SOURCES})
 add_dependencies(ntv2playbackdpx ajantv2)
 target_include_directories(ntv2playbackdpx PUBLIC ${NTV2PLAYBACKDPX_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2playbackdpx PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+
+install(TARGETS ntv2playbackdpx
+	ARCHIVE DESTINATION ${AJA_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${AJA_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${AJA_INSTALL_BINDIR}
+	FRAMEWORK DESTINATION ${AJA_INSTALL_FRAMEWORKDIR})

@@ -39,3 +39,9 @@ add_executable(ntv2ccgrabber ${NTV2CCGRABBER_TARGET_SOURCES})
 add_dependencies(ntv2ccgrabber ajacc ajantv2)
 target_include_directories(ntv2ccgrabber PUBLIC ${NTV2CCGRABBER_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2ccgrabber PUBLIC ajacc ajantv2 ${EXTRA_LIBRARIES})
+
+install(TARGETS ntv2ccgrabber
+	ARCHIVE DESTINATION ${AJA_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${AJA_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${AJA_INSTALL_BINDIR}
+	FRAMEWORK DESTINATION ${AJA_INSTALL_FRAMEWORKDIR})

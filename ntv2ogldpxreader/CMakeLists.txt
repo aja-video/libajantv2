@@ -38,3 +38,9 @@ add_executable(ntv2ogldpxreader ${NTV2OGLDPXREADER_TARGET_SOURCES})
 add_dependencies(ntv2ogldpxreader ajantv2)
 target_include_directories(ntv2ogldpxreader PUBLIC ${NTV2OGLDPXREADER_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2ogldpxreader PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+
+install(TARGETS ntv2ogldpxreader
+	ARCHIVE DESTINATION ${AJA_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${AJA_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${AJA_INSTALL_BINDIR}
+	FRAMEWORK DESTINATION ${AJA_INSTALL_FRAMEWORKDIR})

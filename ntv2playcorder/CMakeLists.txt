@@ -39,3 +39,9 @@ add_executable(ntv2playcorder ${NTV2PLAYCORDER_TARGET_SOURCES})
 add_dependencies(ntv2playcorder ajantv2)
 target_include_directories(ntv2playcorder PUBLIC ${NTV2PLAYCORDER_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2playcorder PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+
+install(TARGETS ntv2playcorder
+	ARCHIVE DESTINATION ${AJA_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${AJA_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${AJA_INSTALL_BINDIR}
+	FRAMEWORK DESTINATION ${AJA_INSTALL_FRAMEWORKDIR})

@@ -1,4 +1,4 @@
-
+/* SPDX-License-Identifier: MIT */
 #ifndef _CNTV2CNTV2RenderToTexture_
 #define _CNTV2CNTV2RenderToTexture_
 

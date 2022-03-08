@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: MIT */
 // Video I/O Helper Class Definition
 
 #ifndef SIMPLE_OGL_VIO_
