@@ -39,3 +39,9 @@ add_executable(ntv2dpxplayer ${NTV2DPXPLAYER_TARGET_SOURCES})
 add_dependencies(ntv2dpxplayer ajantv2)
 target_include_directories(ntv2dpxplayer PUBLIC ${NTV2DPXPLAYER_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2dpxplayer PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+
+install(TARGETS ntv2dpxplayer
+	ARCHIVE DESTINATION ${AJA_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${AJA_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${AJA_INSTALL_BINDIR}
+	FRAMEWORK DESTINATION ${AJA_INSTALL_FRAMEWORKDIR})

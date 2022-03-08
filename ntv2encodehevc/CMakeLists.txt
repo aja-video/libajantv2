@@ -70,3 +70,9 @@ add_executable(ntv2encodehevc ${NTV2ENCODEHEVC_TARGET_SOURCES})
 add_dependencies(ntv2encodehevc ajantv2)
 target_include_directories(ntv2encodehevc PUBLIC ${NTV2ENCODEHEVC_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2encodehevc PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+
+install(TARGETS ntv2encodehevc
+	ARCHIVE DESTINATION ${AJA_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${AJA_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${AJA_INSTALL_BINDIR}
+	FRAMEWORK DESTINATION ${AJA_INSTALL_FRAMEWORKDIR})

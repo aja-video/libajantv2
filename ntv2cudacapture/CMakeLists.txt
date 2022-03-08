@@ -2,6 +2,13 @@ project(ntv2cudacapture)
 
 message("added ntv2cudacapture")
 
+find_package(Qt5 HINTS ${AJA_QT_DIR} COMPONENTS
+    Core
+    REQUIRED)
+
+set(QT_LIBRARIES
+    Qt5::Core)
+
 set(NTV2CUDACAPTURE_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(NTV2CUDACAPTURE_TARGET_INCLUDE_DIRS
@@ -27,7 +34,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	find_library(FOUNDATION_FRAMEWORK Foundation)
 	set(EXTRA_LIBRARIES ${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(EXTRA_LIBRARIES dl pthread rt)
+	set(EXTRA_LIBRARIES cuda cudart dl pthread rt)
 endif()
 
 set(NTV2CUDACAPTURE_TARGET_SOURCES
@@ -39,4 +46,10 @@ set(NTV2CUDACAPTURE_TARGET_SOURCES
 add_executable(ntv2cudacapture ${NTV2CUDACAPTURE_TARGET_SOURCES})
 add_dependencies(ntv2cudacapture ajantv2)
 target_include_directories(ntv2cudacapture PUBLIC ${NTV2CUDACAPTURE_TARGET_INCLUDE_DIRS})
-target_link_libraries(ntv2cudacapture PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+target_link_libraries(ntv2cudacapture PUBLIC ajantv2 ${EXTRA_LIBRARIES} ${QT_LIBRARIES})
+
+install(TARGETS ntv2cudacapture
+	ARCHIVE DESTINATION ${AJA_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${AJA_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${AJA_INSTALL_BINDIR}
+	FRAMEWORK DESTINATION ${AJA_INSTALL_FRAMEWORKDIR})

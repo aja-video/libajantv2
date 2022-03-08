@@ -39,3 +39,9 @@ add_executable(ntv2ccplayer ${NTV2CCPLAYER_TARGET_SOURCES})
 add_dependencies(ntv2ccplayer ajacc ajantv2)
 target_include_directories(ntv2ccplayer PUBLIC ${NTV2CCPLAYER_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2ccplayer PUBLIC ajacc ajantv2 ${EXTRA_LIBRARIES})
+
+install(TARGETS ntv2ccplayer
+	ARCHIVE DESTINATION ${AJA_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${AJA_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${AJA_INSTALL_BINDIR}
+	FRAMEWORK DESTINATION ${AJA_INSTALL_FRAMEWORKDIR})

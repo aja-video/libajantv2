@@ -39,3 +39,9 @@ add_executable(ntv2burnboardtoboard ${NTV2BURNBOARDTOBOARD_TARGET_SOURCES})
 add_dependencies(ntv2burnboardtoboard ajantv2)
 target_include_directories(ntv2burnboardtoboard PUBLIC ${NTV2BURNBOARDTOBOARD_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2burnboardtoboard PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+
+install(TARGETS ntv2burnboardtoboard
+	ARCHIVE DESTINATION ${AJA_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${AJA_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${AJA_INSTALL_BINDIR}
+	FRAMEWORK DESTINATION ${AJA_INSTALL_FRAMEWORKDIR})
