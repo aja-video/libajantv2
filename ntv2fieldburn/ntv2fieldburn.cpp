@@ -2,7 +2,7 @@
 /**
 	@file		ntv2fieldburn.cpp
 	@brief		Implementation of NTV2FieldBurn demonstration class.
-	@copyright	(C) 2013-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2013-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ntv2fieldburn.h"

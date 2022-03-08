@@ -2,7 +2,7 @@
 /**
 	@file		ntv2switchbitfile/main.cpp
 	@brief		Demonstration application to change the active bitfile
-	@copyright	(C) 2012-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2012-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 //	Includes

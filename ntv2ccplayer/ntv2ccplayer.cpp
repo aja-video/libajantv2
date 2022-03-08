@@ -2,7 +2,7 @@
 /**
 	@file		ntv2ccplayer.cpp
 	@brief		Implementation of NTV2CCPlayer class.
-	@copyright	(C) 2012-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2012-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ntv2ccplayer.h"

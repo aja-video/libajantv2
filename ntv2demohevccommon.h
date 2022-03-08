@@ -5,7 +5,7 @@
 				There is nothing magical about anything in this file. In your applications you may use a different
 				number of circular buffers, or store different data in the AVDataBuffer. What's listed below
 				are simply values that work well with the demos.
-	@copyright	(C) 2016-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2016-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef _NTV2DEMOHEVCCOMMON_H

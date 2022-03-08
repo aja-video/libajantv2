@@ -2,7 +2,7 @@
 /**
 	@file		ntv2dolbyplayer.cpp
 	@brief		Implementation of NTV2DolbyPlayer class.
-	@copyright	(C) 2013-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2013-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ntv2dolbyplayer.h"
