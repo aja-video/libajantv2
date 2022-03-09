@@ -367,6 +367,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         install(FILES ${AJABASE_OS_PNP_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/windows)
     endif()
     if (AJA_INSTALL_SOURCES)
+        set(AJANTV2_OS_SOURCES
+            ${AJANTV2_OS_SOURCES}
+            src/win/dllmain.cpp)
         install(FILES ${AJANTV2_OS_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/src/win)
         install(FILES ${AJABASE_OS_SYSTEM_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system/windows)
         install(FILES ${AJABASE_OS_PNP_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/windows)
