@@ -432,6 +432,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         install(FILES ${AJANTV2_OS_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/src/lin)
         install(FILES ${AJABASE_OS_SYSTEM_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system/linux)
         install(FILES ${AJABASE_OS_PNP_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/linux)
+        install(FILES ${AJA_CMAKE_DIR}/../ajalibraries/ajantv2/build/Makefile DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/build)
     endif()
 
     set(EXTRA_LIBRARIES
