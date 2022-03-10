@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2nubaccess.h
-	@brief		Declares functions to connect/open/close/send/receive data via the NTV2 "nub".
+	@brief		Declares NTV2 "nub" client functions.
 	@copyright	(C) 2006-2022 AJA Video Systems, Inc.
 **/
 

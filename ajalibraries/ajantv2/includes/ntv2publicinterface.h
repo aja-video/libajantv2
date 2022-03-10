@@ -32,6 +32,40 @@
 	#pragma GCC diagnostic ignored "-Wunused-private-field"
 #endif
 
+#if !defined (NTV2_BUILDING_DRIVER)
+	typedef std::vector<uint8_t>				UByteSequence;				///< @brief An ordered sequence of UByte (uint8_t) values.
+	typedef UByteSequence::const_iterator		UByteSequenceConstIter;		///< @brief A handy const iterator for iterating over a UByteSequence.
+	typedef UByteSequence::iterator				UByteSequenceIter;			///< @brief A handy non-const iterator for iterating over a UByteSequence.
+
+	typedef std::vector<uint16_t>				UWordSequence;				///< @brief An ordered sequence of UWord (uint16_t) values.
+	typedef UWordSequence::const_iterator		UWordSequenceConstIter;		///< @brief A handy const iterator for iterating over a UWordSequence.
+	typedef UWordSequence::iterator				UWordSequenceIter;			///< @brief A handy non-const iterator for iterating over a UWordSequence.
+
+	typedef std::vector<uint32_t>				ULWordSequence;				///< @brief An ordered sequence of ULWord (uint32_t) values.
+	typedef ULWordSequence::const_iterator		ULWordSequenceConstIter;	///< @brief A handy const iterator for iterating over a ULWordSequence.
+	typedef ULWordSequence::iterator			ULWordSequenceIter;			///< @brief A handy non-const iterator for iterating over a ULWordSequence.
+
+	typedef std::vector<uint64_t>				ULWord64Sequence;			///< @brief An ordered sequence of ULWord64 (uint64_t) values.
+	typedef ULWord64Sequence::const_iterator	ULWord64SequenceConstIter;	///< @brief A handy const iterator for iterating over a ULWord64Sequence.
+	typedef ULWord64Sequence::iterator			ULWord64SequenceIter;		///< @brief A handy non-const iterator for iterating over a ULWord64Sequence.
+
+	typedef std::set<ULWord>					ULWordSet;					///< @brief A collection of unique ULWord (uint32_t) values.
+	typedef ULWordSet::const_iterator			ULWordSetConstIter;
+	typedef ULWordSet::iterator					ULWordSetIter;
+#endif	//	NTV2_BUILDING_DRIVER
+
+
+#if !defined (NTV2_BUILDING_DRIVER)  &&  defined(NTV2_RPC_SUPPORT)
+	typedef	UByteSequence	NTV2_RPC_BLOB_TYPE;
+	#define	NTV2_RPC_ENCODE_DECL	bool RPCEncode (NTV2_RPC_BLOB_TYPE & outBlob);
+	#define	NTV2_RPC_DECODE_DECL	bool RPCDecode (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
+
+	#define NTV2_RPC_CODEC_DECLS	NTV2_RPC_ENCODE_DECL	\
+									NTV2_RPC_DECODE_DECL
+#else
+	#define NTV2_RPC_CODEC_DECLS
+#endif	//	NTV2_BUILDING_DRIVER
+
 
 typedef enum
 {
@@ -4608,6 +4642,10 @@ typedef struct RP188_STRUCT {
 	ULWord	DBB;
 	ULWord	Low;		//	|  BG 4	 | Secs10 |	 BG 3  | Secs 1 |  BG 2	 | Frms10 |	 BG 1  | Frms 1 |
 	ULWord	High;		//	|  BG 8	 | Hrs 10 |	 BG 7  | Hrs  1 |  BG 6	 | Mins10 |	 BG 5  | Mins 1 |
+	#if !defined(NTV2_BUILDING_DRIVER)
+		public:
+			NTV2_RPC_CODEC_DECLS
+	#endif	//	user-space clients only
 } RP188_STRUCT;
 
 
@@ -4736,6 +4774,7 @@ typedef struct AutoCircVidProcInfo
 	#if !defined (NTV2_BUILDING_DRIVER)
 		public:
 			AJAExport explicit AutoCircVidProcInfo ();
+			NTV2_RPC_CODEC_DECLS
 	#endif	//	user-space clients only
 } AutoCircVidProcInfo;
 
@@ -4779,6 +4818,8 @@ typedef enum _AutoCircCommand_
 	AUTO_CIRC_NUM_COMMANDS,
 	AUTO_CIRC_COMMAND_INVALID	= AUTO_CIRC_NUM_COMMANDS
 } NTV2AutoCirculateCommand, NTV2AutoCircCmd, AUTO_CIRC_COMMAND;
+
+#define NTV2_IS_AUTO_CIRC_XFER_CMD(__m__)		((__m__) == eTransferAutoCirculate	 &&	 (__m__) == eTransferAutoCirculateEx	 &&	 (__m__) == eTransferAutoCirculateEx2)
 
 
 /**
@@ -4846,8 +4887,11 @@ typedef struct
 	BOOL_					bFbfChange;
 	BOOL_					bFboChange ;
 	BOOL_					bWithColorCorrection;
-	BOOL_					bWithVidProc;		   
-	BOOL_					bWithCustomAncData;			 
+	BOOL_					bWithVidProc;
+	BOOL_					bWithCustomAncData;
+	#if !defined (NTV2_BUILDING_DRIVER)
+		NTV2_RPC_CODEC_DECLS
+	#endif	//	!defined (NTV2_BUILDING_DRIVER)
 } AUTOCIRCULATE_STATUS_STRUCT;
 
 
@@ -4909,6 +4953,7 @@ typedef struct AUTOCIRCULATE_DATA
 	#if !defined (NTV2_BUILDING_DRIVER)
 		public:
 			AJAExport explicit AUTOCIRCULATE_DATA (const AUTO_CIRC_COMMAND inCommand = AUTO_CIRC_COMMAND_INVALID, const NTV2Crosspoint inCrosspoint = NTV2CROSSPOINT_INVALID);
+			NTV2_RPC_CODEC_DECLS
 	#endif	//	user-space clients only
 } AUTOCIRCULATE_DATA;
 
@@ -5025,6 +5070,10 @@ typedef struct
 	ULWord				currentLineCount;			//! At Call Line# _currently_ being OUTPUT (at the time of the IOCTL_NTV2_GET_FRAMESTAMP)
 	ULWord				currentReps;				//! Contains validCount (Play - reps remaining, Record - drops on frame)
 	ULWord				currenthUser;				//! User cookie at last vblank
+	#if !defined (NTV2_BUILDING_DRIVER)
+		public:
+			NTV2_RPC_CODEC_DECLS
+	#endif	//	user-space clients only
 } FRAME_STAMP_STRUCT;
 
 
@@ -5076,10 +5125,6 @@ typedef struct
 	ULWord							videoSegmentHostPitch;	//	Offset (in bytes) between the beginning of one host segment and the beginning of the next host segment (i.e. host rowBytes)
 	ULWord							videoSegmentCardPitch;	//	Offset (in bytes) between the beginning of one board segment and the beginning of the next board segment (i.e. board memory rowBytes)
 	NTV2QuarterSizeExpandMode		videoQuarterSizeExpand; //	Turns on the "quarter-size expand" (2x H + 2x V) hardware
-	//ULWord *						ancBuffer;				//	Host ANC data buffer. If NULL, none transferred.
-	//ULWord						ancBufferSize;			//	Capture:  before xfer: specifies max size of host ancBuffer; after xfer: actual number of ANC data bytes xferred
-															//	Playout:  specifies number of ANC data bytes to xfer from host ancBuffer to device
-															//	If zero, none transferred.
 } AUTOCIRCULATE_TRANSFER_STRUCT_64, *PAUTOCIRCULATE_TRANSFER_STRUCT_64;
 
 
@@ -5117,11 +5162,11 @@ typedef struct
 	ULWord							videoSegmentHostPitch;	//	Offset (in bytes) between the beginning of one host segment and the beginning of the next host segment (i.e. host rowBytes)
 	ULWord							videoSegmentCardPitch;	//	Offset (in bytes) between the beginning of one board segment and the beginning of the next board segment (i.e. board memory rowBytes)
 	NTV2QuarterSizeExpandMode		videoQuarterSizeExpand; //	Turns on the "quarter-size expand" (2x H + 2x V) hardware
-	//ULWord *						ancBuffer;				//	Host ANC data buffer. If NULL, none transferred.
-	//ULWord						ancBufferSize;			//	Capture:  before xfer: specifies max size of host ancBuffer; after xfer: actual number of ANC data bytes xferred
-															//	Playout:  specifies number of ANC data bytes to xfer from host ancBuffer to device
-															//	If zero, none transferred.
 
+	#if !defined (NTV2_BUILDING_DRIVER)
+		public:
+			NTV2_RPC_CODEC_DECLS
+	#endif	//	user-space clients only
 } AUTOCIRCULATE_TRANSFER_STRUCT, *PAUTOCIRCULATE_TRANSFER_STRUCT;
 
 
@@ -5159,10 +5204,6 @@ typedef struct
 	ULWord							videoSegmentHostPitch;	//	Offset (in bytes) between the beginning of one host segment and the beginning of the next host segment (i.e. host rowBytes)
 	ULWord							videoSegmentCardPitch;	//	Offset (in bytes) between the beginning of one board segment and the beginning of the next board segment (i.e. board memory rowBytes)
 	NTV2QuarterSizeExpandMode		videoQuarterSizeExpand; //	Turns on the "quarter-size expand" (2x H + 2x V) hardware
-	//ULWord * POINTER_32			ancBuffer;				//	Host ANC data buffer. If NULL, none transferred.
-	//ULWord						ancBufferSize;			//	Capture:  before xfer: specifies max size of host ancBuffer; after xfer: actual number of ANC data bytes xferred
-															//	Playout:  specifies number of ANC data bytes to xfer from host ancBuffer to device
-															//	If zero, none transferred.
 } AUTOCIRCULATE_TRANSFER_STRUCT_32, *PAUTOCIRCULATE_TRANSFER_STRUCT_32;
 
 
@@ -5252,6 +5293,7 @@ typedef struct AutoCircGenericTask
 	#if !defined (NTV2_BUILDING_DRIVER)
 		public:
 			AJAExport explicit AutoCircGenericTask ()	{u.registerTask.regNum = u.registerTask.mask = u.registerTask.shift = u.registerTask.value = 0;}
+			NTV2_RPC_CODEC_DECLS
 	#endif	//	user-space clients only
 } AutoCircGenericTask;
 
@@ -5279,6 +5321,10 @@ typedef struct
 	ULWord reserved1;
 	ULWord reserved2;
 	ULWord reserved3;
+	#if !defined (NTV2_BUILDING_DRIVER)
+		public:
+			NTV2_RPC_CODEC_DECLS
+	#endif	//	user-space clients only
 } AUTOCIRCULATE_TASK_STRUCT, *PAUTOCIRCULATE_TASK_STRUCT;
 
 typedef struct
@@ -6092,40 +6138,6 @@ typedef enum
 			#define NTV2_IS_STRUCT_VALID_IMPL(__hr__,__tr__)
 			#define NTV2_ASSERT_STRUCT_VALID
 		#endif
-
-		#if !defined (NTV2_BUILDING_DRIVER)
-			typedef std::vector<uint8_t>				UByteSequence;				///< @brief An ordered sequence of UByte (uint8_t) values.
-			typedef UByteSequence::const_iterator		UByteSequenceConstIter;		///< @brief A handy const iterator for iterating over a UByteSequence.
-			typedef UByteSequence::iterator				UByteSequenceIter;			///< @brief A handy non-const iterator for iterating over a UByteSequence.
-
-			typedef std::vector<uint16_t>				UWordSequence;				///< @brief An ordered sequence of UWord (uint16_t) values.
-			typedef UWordSequence::const_iterator		UWordSequenceConstIter;		///< @brief A handy const iterator for iterating over a UWordSequence.
-			typedef UWordSequence::iterator				UWordSequenceIter;			///< @brief A handy non-const iterator for iterating over a UWordSequence.
-
-			typedef std::vector<uint32_t>				ULWordSequence;				///< @brief An ordered sequence of ULWord (uint32_t) values.
-			typedef ULWordSequence::const_iterator		ULWordSequenceConstIter;	///< @brief A handy const iterator for iterating over a ULWordSequence.
-			typedef ULWordSequence::iterator			ULWordSequenceIter;			///< @brief A handy non-const iterator for iterating over a ULWordSequence.
-
-			typedef std::vector<uint64_t>				ULWord64Sequence;			///< @brief An ordered sequence of ULWord64 (uint64_t) values.
-			typedef ULWord64Sequence::const_iterator	ULWord64SequenceConstIter;	///< @brief A handy const iterator for iterating over a ULWord64Sequence.
-			typedef ULWord64Sequence::iterator			ULWord64SequenceIter;		///< @brief A handy non-const iterator for iterating over a ULWord64Sequence.
-
-			typedef std::set<ULWord>					ULWordSet;					///< @brief A collection of unique ULWord (uint32_t) values.
-			typedef ULWordSet::const_iterator			ULWordSetConstIter;
-			typedef ULWordSet::iterator					ULWordSetIter;
-		#endif	//	NTV2_BUILDING_DRIVER
-
-
-		#if !defined (NTV2_BUILDING_DRIVER)  &&  defined(NTV2_RPC_SUPPORT)
-			typedef	UByteSequence	NTV2_RPC_BLOB_TYPE;
-			#define	NTV2_RPC_ENCODE_DECL	bool RPCEncode (NTV2_RPC_BLOB_TYPE & outBlob);
-			#define	NTV2_RPC_DECODE_DECL	bool RPCDecode (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
-
-			#define NTV2_RPC_CODEC_DECLS	NTV2_RPC_ENCODE_DECL	\
-											NTV2_RPC_DECODE_DECL
-		#else
-			#define NTV2_RPC_CODEC_DECLS
-		#endif	//	NTV2_BUILDING_DRIVER
 
 
 		#if defined (AJAMac)
@@ -7202,6 +7214,8 @@ typedef enum
 					@return		True if I'm valid.
 				**/
 				inline operator		bool () const									{return IsValid();}
+
+				NTV2_RPC_CODEC_DECLS
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_RP188)
 
@@ -7357,6 +7371,8 @@ typedef enum
 					**/
 					inline bool		IsValid (void) const	{return NTV2_IS_VALID_HEADER_TAG(fHeaderTag) && NTV2_IS_VALID_STRUCT_TYPE(fType);}
 
+					static std::string FourCCToString (const ULWord in4CC);
+
 					NTV2_RPC_CODEC_DECLS
 				#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_HEADER)
@@ -7454,6 +7470,8 @@ typedef enum
 					@return True if I'm currently active (i.e., I have more than one segment;  otherwise false.
 				**/
 				inline bool		IsSegmented (void) const					{return GetSegmentCount() > 1;}
+
+				NTV2_RPC_CODEC_DECLS
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2SegmentedDMAInfo)
 
@@ -7503,6 +7521,8 @@ typedef enum
 					@return True if successful;	 otherwise false.
 				**/
 				bool		Set (const NTV2ColorCorrectionMode inMode, const ULWord inSaturation, const void * pInTableData);
+
+				NTV2_RPC_CODEC_DECLS
 
 				NTV2_BEGIN_PRIVATE
 					inline explicit						NTV2ColorCorrectionData (const NTV2ColorCorrectionData & inObj) : ccLookupTables (0) {(void) inObj;}	///< @brief You can't construct an NTV2ColorCorrectionData from another.
@@ -8065,6 +8085,7 @@ typedef enum
 				**/
 				std::ostream &	Print (std::ostream & inOutStream) const;
 
+				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
 		NTV2_STRUCT_END (NTV2SDIInStatistics)
@@ -8290,6 +8311,7 @@ typedef enum
 				**/
 				inline ULWord					GetCapturedAncByteCount (const bool inField2 = false) const {return inField2 ? acAncField2TransferSize : acAncTransferSize;}
 
+				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(acHeader,acTrailer)
 
 				NTV2_BEGIN_PRIVATE
@@ -8302,11 +8324,10 @@ typedef enum
 
 		/**
 			@brief	This object specifies the information that will be transferred to or from the AJA device in the CNTV2Card::AutoCirculateTransfer
-					function call. It will be used by the device driver only if the AUTOCIRCULATE_WITH_ANC option was used in the call to
-					CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput.
+					function call.
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
-		NTV2_STRUCT_BEGIN (AUTOCIRCULATE_TRANSFER)
+		NTV2_STRUCT_BEGIN (AUTOCIRCULATE_TRANSFER)	//	NTV2_TYPE_ACXFER
 				NTV2_HEADER						acHeader;					///< @brief The common structure header -- ALWAYS FIRST!
 
 					/**
@@ -8378,7 +8399,7 @@ typedef enum
 					NTV2SegmentedDMAInfo			acInSegmentedDMAInfo;		///< @brief Optional segmented DMA info, for use with specialized data transfers.
 					NTV2ColorCorrectionData			acColorCorrection;			///< @brief Color correction data. This field is ignored if AUTOCIRCULATE_WITH_COLORCORRECT option is not set.
 					NTV2FrameBufferFormat			acFrameBufferFormat;		///< @brief Specifies the frame buffer format to change to. Ignored if AUTOCIRCULATE_WITH_FBFCHANGE option is not set.
-					NTV2VideoFrameBufferOrientation acFrameBufferOrientation;	///< @brief Specifies the frame buffer orientation to change to. Ignored if AUTOCIRCULATE_WITH_FBOCHANGE option is not set.
+					NTV2FBOrientation				acFrameBufferOrientation;	///< @brief Specifies the frame buffer orientation to change to. Ignored if AUTOCIRCULATE_WITH_FBOCHANGE option is not set.
 					AutoCircVidProcInfo				acVidProcInfo;				///< @brief Specifies the mixer/keyer transition to make.  Ignored if AUTOCIRCULATE_WITH_VIDPROC option is not set.
 					NTV2QuarterSizeExpandMode		acVideoQuarterSizeExpand;	///< @brief Turns on the "quarter-size expand" (2x H + 2x V) hardware. Defaults to off (1:1).
 

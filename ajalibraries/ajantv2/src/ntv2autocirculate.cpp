@@ -1086,7 +1086,7 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 {
 	if (!_boardOpened)
 		return false;
-	#if defined (_DEBUG)
+	#if defined(_DEBUG)
 		NTV2_ASSERT (inOutXferInfo.NTV2_IS_STRUCT_VALID ());
 	#endif
 

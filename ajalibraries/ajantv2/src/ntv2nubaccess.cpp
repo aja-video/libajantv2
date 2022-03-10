@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2nubaccess.cpp
-	@brief		Implementation of NTV2 "nub" functions that connect/open/close/send/receive data.
+	@brief		Implementation of NTV2 "nub" client functions.
 	@copyright	(C) 2006-2022 AJA Video Systems, Inc.
 **/
 
@@ -71,7 +71,7 @@ NTV2RPCAPI::~NTV2RPCAPI ()
 }
 
 bool NTV2RPCAPI::IsConnected (void) const			{return false;}
-string NTV2RPCAPI::Name (void) const					{return _hostname;}
+string NTV2RPCAPI::Name (void) const				{return _hostname;}
 ostream & NTV2RPCAPI::Print (ostream & oss) const
 {	oss << (IsConnected()?"Connected":"Disconnected");
 	if (IsConnected() && !Name().empty())
