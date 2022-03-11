@@ -486,13 +486,6 @@ bool CNTV2Card::ReadAudioLastIn (ULWord & outValue, const NTV2AudioSystem inAudi
 	return ReadRegister (gChannelToAudioInLastAddrRegNum[inAudioSystem], outValue);
 }
 
-bool CNTV2Card::WriteAudioLastOut (const ULWord inValue, const NTV2AudioSystem inAudioSystem)
-{
-	if (!NTV2_IS_VALID_AUDIO_SYSTEM(inAudioSystem))
-		return false;
-	return WriteRegister (gChannelToAudioOutLastAddrRegNum[inAudioSystem], inValue);
-}
-
 bool CNTV2Card::ReadAudioLastOut (ULWord & outValue, const NTV2AudioSystem inAudioSystem)
 {
 	if (!NTV2_IS_VALID_AUDIO_SYSTEM(inAudioSystem))
