@@ -189,6 +189,15 @@ public:
 	 */
 	int64_t FramesToMicroseconds(int64_t frames, bool round = false) const;
 
+    /**
+     *	Convert video frames to time in 100 nanoseconds.
+     *
+     *	@param[in]	frames	Video frame count to convert.
+     *	@param[in]	round	Round the result.
+     *	@return				Time in microseconds.
+     */
+    int64_t FramesTo100Nanoseconds(int64_t frames, bool round = false) const;
+
 	/**
 	 *	Convert audio samples to video frames.
 	 *
