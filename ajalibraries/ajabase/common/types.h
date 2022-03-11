@@ -2,7 +2,7 @@
 /**
 	@file		types.h
 	@brief		Declares common types used in the ajabase library.
-	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_TYPES_H

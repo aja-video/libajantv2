@@ -2,7 +2,7 @@
 /**
 	@file		ntv2videodefines.h
 	@brief		Declares common video macros and structs used in the SDK.
-	@copyright	(C) 2004-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2004-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 #ifndef VIDEODEFINES_H
 #define VIDEODEFINES_H

@@ -2,7 +2,7 @@
 /**
 	@file		mac/processimpl.h
 	@brief		Declares the AJAProcessImpl class.
-	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_PROCESS_IMPL_H

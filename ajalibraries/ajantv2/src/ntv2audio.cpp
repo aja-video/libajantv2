@@ -2,7 +2,7 @@
 /**
 	@file	ntv2audio.cpp
 	@brief	Implementations of audio-centric CNTV2Card methods.
-	@copyright	(C) 2004-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2004-2022 AJA Video Systems, Inc.
 **/
 
 #include "ntv2card.h"
@@ -484,13 +484,6 @@ bool CNTV2Card::ReadAudioLastIn (ULWord & outValue, const NTV2AudioSystem inAudi
 	if (!NTV2_IS_VALID_AUDIO_SYSTEM(inAudioSystem))
 		return false;
 	return ReadRegister (gChannelToAudioInLastAddrRegNum[inAudioSystem], outValue);
-}
-
-bool CNTV2Card::WriteAudioLastOut (const ULWord inValue, const NTV2AudioSystem inAudioSystem)
-{
-	if (!NTV2_IS_VALID_AUDIO_SYSTEM(inAudioSystem))
-		return false;
-	return WriteRegister (gChannelToAudioOutLastAddrRegNum[inAudioSystem], inValue);
 }
 
 bool CNTV2Card::ReadAudioLastOut (ULWord & outValue, const NTV2AudioSystem inAudioSystem)

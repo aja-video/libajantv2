@@ -2,7 +2,7 @@
 /**
 	@file		ancillarydata_framestatusinfo524D.h
 	@brief		Declares the AJAAncillaryData_FrameStatusInfo524D class.
-	@copyright	(C) 2012-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2012-2022 AJA Video Systems, Inc.
 **/
 
 #ifndef AJA_ANCILLARYDATA_FRAMESTATUSINFO524D_H

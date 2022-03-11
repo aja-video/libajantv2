@@ -2,7 +2,7 @@
 /**
 	@file		ntv2nubpktcom.cpp
 	@brief		Implementation of shared NTV2 "nub" packet handling functions.
-	@copyright	(C) 2006-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2006-2022 AJA Video Systems, Inc.
 **/
 
 #include <stdio.h>

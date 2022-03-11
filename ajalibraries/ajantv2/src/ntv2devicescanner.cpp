@@ -2,7 +2,7 @@
 /**
 	@file		ntv2devicescanner.cpp
 	@brief		Implementation of CNTV2DeviceScanner class.
-	@copyright	(C) 2004-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2004-2022 AJA Video Systems, Inc.
 **/
 
 #include "ntv2devicescanner.h"

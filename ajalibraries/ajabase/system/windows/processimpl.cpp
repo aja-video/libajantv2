@@ -2,7 +2,7 @@
 /**
 	@file		windows/processimpl.cpp
 	@brief		Implements the AJAProcessImpl class on the Windows platform.
-	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ajabase/system/windows/processimpl.h"

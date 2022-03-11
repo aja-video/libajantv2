@@ -2,7 +2,7 @@
 /**
 	@file		windows/eventimpl.cpp
 	@brief		Implements the AJAEventImpl class on the Windows platform.
-	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ajabase/system/event.h"

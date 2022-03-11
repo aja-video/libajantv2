@@ -2,7 +2,7 @@
 /**
 	@file		ancillarydata.cpp
 	@brief		Implementation of the AJAAncillaryData class.
-	@copyright	(C) 2010-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2010-2022 AJA Video Systems, Inc.
 **/
 
 #include "ntv2publicinterface.h"

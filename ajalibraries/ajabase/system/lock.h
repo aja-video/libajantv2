@@ -2,7 +2,7 @@
 /**
 	@file		lock.h
 	@brief		Declares the AJALock class.
-	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_LOCK_H

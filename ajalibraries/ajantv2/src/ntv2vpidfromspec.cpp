@@ -2,7 +2,7 @@
 /**
 	@file		ntv2vpidfromspec.cpp
 	@brief		Generates a VPID based on a specification struct. See the SMPTE 352 standard for details.
-	@copyright	(C) 2012-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2012-2022 AJA Video Systems, Inc.
 	@note		This file is included in driver builds. It must not contain any c++.
 **/
 
@@ -91,7 +91,7 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	if (!NTV2_IS_QUAD_QUAD_FORMAT(outputFormat) && (is6G || is12G))
 		vpidChannel = VPIDChannel_1;
 
-	frameRate				= GetNTV2FrameRateFromVideoFormat			(outputFormat);
+    frameRate				= GetNTV2FrameRateFromVideoFormat (outputFormat);
 	isProgressivePicture	= NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE (outputFormat);
 	isProgressiveTransport	= isProgressivePicture;							//	Must be a progressive format to start
 
@@ -114,6 +114,23 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 	{
 		isProgressiveTransport = false;										//	Only TSI Quad Link 3.0 HFR Level B is not progressive
 	}
+
+    // correct whacky format vpids
+    if (outputFormat == NTV2_FORMAT_1080p_5000_B)
+    {
+        frameRate = NTV2_FRAMERATE_5000;
+        isProgressiveTransport = false;
+    }
+    else if (outputFormat == NTV2_FORMAT_1080p_5994_B)
+    {
+        frameRate = NTV2_FRAMERATE_5994;
+        isProgressiveTransport = false;
+    }
+    else if (outputFormat == NTV2_FORMAT_1080p_6000_B)
+    {
+        frameRate = NTV2_FRAMERATE_6000;
+        isProgressiveTransport = false;
+    }
 
 	//
 	//	Byte 1

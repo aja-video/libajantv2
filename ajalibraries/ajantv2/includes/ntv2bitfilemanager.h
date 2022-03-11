@@ -2,7 +2,7 @@
 /**
 	@file		ntv2bitfilemanager.h
 	@brief		Declares the CNTV2BitfileManager class that manages Xilinx bitfiles.
-	@copyright	(C) 2019-2021 AJA Video Systems, Inc.    All rights reserved.
+	@copyright	(C) 2019-2022 AJA Video Systems, Inc.    All rights reserved.
 **/
 
 #ifndef NTV2BITMANAGER_H

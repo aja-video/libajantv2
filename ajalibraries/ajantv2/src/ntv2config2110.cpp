@@ -2,7 +2,7 @@
 /**
 	@file		ntv2config2110.cpp
 	@brief		Implements the CNTV2Config2110 class.
-	@copyright	(C) 2014-2021 AJA Video Systems, Inc.	
+	@copyright	(C) 2014-2022 AJA Video Systems, Inc.	
 **/
 
 #include "ntv2config2110.h"

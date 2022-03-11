@@ -2,7 +2,7 @@
 /**
 	@file		ancillarydata_framestatusinfo5251.cpp
 	@brief		Implements the AJAAncillaryData_FrameStatusInfo5251 class.
-	@copyright	(C) 2012-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2012-2022 AJA Video Systems, Inc.
 **/
 
 #include "ancillarydata_framestatusinfo5251.h"

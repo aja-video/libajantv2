@@ -2,7 +2,7 @@
 /**
 	@file		ancillarydata_cea608_vanc.h
 	@brief		Declares the AJAAncillaryData_Cea608_Vanc class.
-	@copyright	(C) 2010-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2010-2022 AJA Video Systems, Inc.
 **/
 
 #ifndef AJA_ANCILLARYDATA_CEA608_VANC_H

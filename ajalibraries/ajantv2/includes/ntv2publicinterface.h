@@ -2,7 +2,7 @@
 /**
 	@file		ntv2publicinterface.h
 	@brief		Declares enums and structs used by all platform drivers and the SDK.
-	@copyright	(C) 2012-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2012-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef NTV2PUBLICINTERFACE_H
@@ -6846,6 +6846,7 @@ typedef enum
 					@param[in]	inByteCount		Specifies the segment length, in bytes.
 					@return		The specified NTV2_POINTER.	 It will be set to null/empty upon failure.
 					@note		The offset and byte count are both checked against my buffer size.
+					@warning	Using the "outPtr" instance after my destruction will likely cause access violations, heap corruption, etc.
 				**/
 				NTV2_POINTER &			Segment (NTV2_POINTER & outPtr, const ULWord inByteOffset, const ULWord inByteCount) const;
 

@@ -2,7 +2,7 @@
 /**
 	@file		cli_utils.h
 	@brief		Declaration of GetNumber, GetString and GetCharAsInt functions.
-	@copyright	(C) 2011-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2011-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJA_CLI_UTILS_H

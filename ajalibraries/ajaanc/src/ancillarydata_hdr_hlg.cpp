@@ -2,7 +2,7 @@
 /**
 	@file		ancillarydata_hdr_hlg.cpp
 	@brief		Implements the AJAAncillaryData_HDR_HLG class.
-	@copyright	(C) 2012-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2012-2022 AJA Video Systems, Inc.
 **/
 
 #include "ancillarydata_hdr_hlg.h"

@@ -1133,6 +1133,13 @@
 			written/read to/from this memory, regardless of whether all 8 or 16 channels are used.
 	-	See \ref audioformats for details on the format of the audio data in the buffer.
 
+	@note	Older “Non-stacked” audio devices (e.g. \ref konalhi) had audio systems that could operate with 1MB or 4MB buffers,
+			and typically started (at power-up) in 1MB mode. This design was abandoned in favor of fixed 4MB buffers, which the
+			NTV2 SDK generally assumes are in use. Applications that use “Non-stacked” devices are strongly recommended,
+			when first configuring the device, to first call CNTV2Card::GetAudioBufferSize to determine the current buffer
+			size, and if it’s not 4MB, set it to 4MB mode by calling CNTV2Card::SetAudioBufferSize with ::NTV2_AUDIO_BUFFER_SIZE_4MB.
+			Before relinquishing control of the device, its prior (saved) buffer size should be restored.
+
 	@warning	It is easy to write video data into an audio buffer and vice-versa, which leads to noisy,
 				garbled audio and/or bad video frame(s). SDK clients must take precautions to ensure that frame
 				buffers used by your application never coincide with any of the audio buffers.
@@ -1297,6 +1304,12 @@
 	CNTV2Card::DMAWriteAudio. The last address written into the <b>Audio Output Buffer</b> (via DMA) is latched and
 	available for readback at <b>Audio Output Last Address</b> (within 256 bytes). If the output hardware <b>Play Head</b>
 	pointer catches up to the <b>Audio Output Last Address</b>, the buffer will wrap, and audio/video synchronization will be lost.
+
+	There is no provision for changing the <b>Play Head</b> position while <b>Audio System</b> playback is running … except
+	perhaps to reset playback to the start of the audio buffer (by calling both CNTV2Card::StopAudioOutput and then
+	CNTV2Card::StartAudioOutput). Of course, applications have full control over the number of samples written, and where
+	they get written into the <b>Audio Output Buffer</b>. Applications are free to drop samples or add silence as needed,
+	while always ensuring these transfers stay ahead of the <b>Play Head</b>.
 
 	If \ref autocirculateplayout is being used, AutoCirculate completely and automatically runs the <b>Audio System</b>.
 	When CNTV2Card::AutoCirculateInitForOutput is called with a valid ::NTV2AudioSystem, and then CNTV2Card::AutoCirculateStart

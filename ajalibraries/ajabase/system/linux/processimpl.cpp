@@ -2,7 +2,7 @@
 /**
 	@file		linux/processimpl.cpp
 	@brief		Implements the AJAProcessImpl class on the Linux platform.
-	@copyright	(C) 2011-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2011-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include <sys/types.h>

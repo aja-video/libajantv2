@@ -2,7 +2,7 @@
 /**
 	@file		main.cpp
 	@brief		Unittests for the AJA NTV2 Library (using doctest).
-	@copyright	(C) 2019-2021 AJA Video Systems, Inc. All rights reserved.
+	@copyright	(C) 2019-2022 AJA Video Systems, Inc. All rights reserved.
 **/
 // for doctest usage see: https://github.com/onqtam/doctest/blob/1.1.4/doc/markdown/tutorial.md
 

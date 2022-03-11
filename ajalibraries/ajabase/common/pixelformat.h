@@ -2,7 +2,7 @@
 /**
 	@file		pixelformat.h
 	@brief		Contains the declaration of the AJAPixelFormat class.
-	@copyright	(C) 2010-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2010-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef _PixelFormat_Defined_

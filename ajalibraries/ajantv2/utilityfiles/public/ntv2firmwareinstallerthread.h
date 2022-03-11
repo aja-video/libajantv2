@@ -2,7 +2,7 @@
 /**
 	@file		ntv2firmwareinstallerthread.h
 	@brief		Declaration of CNTV2FirmwareInstallerThread class.
-	@copyright	(C) 2014-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2014-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 #ifndef __NTV2FIRMWAREINSTALLERTHREAD_H__
 #define __NTV2FIRMWAREINSTALLERTHREAD_H__

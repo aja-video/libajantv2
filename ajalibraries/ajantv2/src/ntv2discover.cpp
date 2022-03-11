@@ -2,7 +2,7 @@
 /**
 	@file		ntv2discover.cpp
 	@brief		Implementation for NTV nub discovery functions.
-	@copyright	(C) 2006-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2006-2022 AJA Video Systems, Inc.
 **/
 
 #include <stdio.h>

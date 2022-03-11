@@ -2,7 +2,7 @@
 /**
 	@file		timer.cpp
 	@brief		Implements the AJATimer class.
-	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ajabase/common/common.h"

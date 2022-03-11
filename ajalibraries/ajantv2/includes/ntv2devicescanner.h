@@ -2,7 +2,7 @@
 /**
 	@file		ntv2devicescanner.h
 	@brief		Declares the CNTV2DeviceScanner class.
-	@copyright	(C) 2004-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2004-2022 AJA Video Systems, Inc.
 **/
 
 #ifndef NTV2DEVICESCANNER_H

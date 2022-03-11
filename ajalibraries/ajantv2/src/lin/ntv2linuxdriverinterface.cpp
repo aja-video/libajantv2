@@ -2,7 +2,7 @@
 /**
 	@file		ntv2linuxdriverinterface.cpp
 	@brief		Implementation of the CNTV2LinuxDriverInterface class.
-	@copyright	(C) 2003-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2003-2022 AJA Video Systems, Inc.
 **/
 
 #include <errno.h>
@@ -41,6 +41,14 @@ using namespace std;
 #define LDINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #define LDIINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #define LDIDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+
+#define AsFrameStampStructPtr(_p_)	reinterpret_cast<FRAME_STAMP_STRUCT*>(_p_)
+#define AsStatusStructPtr(_p_)		reinterpret_cast<AUTOCIRCULATE_STATUS_STRUCT*>(_p_)
+#define AsTransferStatusStruct(_p_) reinterpret_cast<PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT>(_p_)
+#define AsRoutingTablePtr(_p_)		reinterpret_cast<NTV2RoutingTable*>(_p_)
+#define AsPTaskStruct(_p_)			reinterpret_cast<PAUTOCIRCULATE_TASK_STRUCT>(_p_)
+#define AsPTransferStruct(_p_)		reinterpret_cast<PAUTOCIRCULATE_TRANSFER_STRUCT>(_p_)
+#define AsVoidPtr(_p_)				reinterpret_cast<void*>(_p_)
 
 
 CNTV2LinuxDriverInterface::CNTV2LinuxDriverInterface()
@@ -146,11 +154,11 @@ bool CNTV2LinuxDriverInterface::ReadRegister (const ULWord inRegNum,  ULWord & o
 	ra.RegisterMask	  = inMask;
 	ra.RegisterShift  = inShift;
 	ra.RegisterValue  = 0xDEADBEEF;
-	if (ioctl(int(_hDevice), IOCTL_NTV2_READ_REGISTER, &ra))
-	{
-		LDIFAIL("IOCTL_NTV2_READ_REGISTER failed");
-		return false;
-	}
+	AJADebug::StatTimerStart(AJA_DebugStat_ReadRegister);
+	const int result (ioctl(int(_hDevice), IOCTL_NTV2_READ_REGISTER, &ra));
+	AJADebug::StatTimerStop(AJA_DebugStat_ReadRegister);
+	if (result)
+		{LDIFAIL("IOCTL_NTV2_READ_REGISTER failed");	return false;}
 	outValue = ra.RegisterValue;
 	return true;
 }
@@ -182,7 +190,10 @@ bool CNTV2LinuxDriverInterface::WriteRegister (const ULWord inRegNum,  const ULW
 	ra.RegisterValue	= inValue;
 	ra.RegisterMask		= inMask;
 	ra.RegisterShift	= inShift;
-	if (ioctl(int(_hDevice), IOCTL_NTV2_WRITE_REGISTER, &ra))
+	AJADebug::StatTimerStart(AJA_DebugStat_WriteRegister);
+	const int result (ioctl(int(_hDevice), IOCTL_NTV2_WRITE_REGISTER, &ra));
+	AJADebug::StatTimerStop(AJA_DebugStat_WriteRegister);
+	if (result)
 		{LDIFAIL("IOCTL_NTV2_WRITE_REGISTER failed");  return false;}
 	return true;
 }
@@ -254,24 +265,41 @@ bool CNTV2LinuxDriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterr
 	intrControlStruct.eInterruptType = eGetIntCount;
 	intrControlStruct.interruptCount = eInterruptType;
 
-	if (ioctl(int(_hDevice), IOCTL_NTV2_INTERRUPT_CONTROL, &intrControlStruct))
-	{
-		LDIFAIL("IOCTL_NTV2_INTERRUPT_CONTROL failed");
-		return false;
-	}
+	AJADebug::StatTimerStart(AJA_DebugStat_GetInterruptCount);
+	const int result (ioctl(int(_hDevice), IOCTL_NTV2_INTERRUPT_CONTROL, &intrControlStruct));
+	AJADebug::StatTimerStop(AJA_DebugStat_GetInterruptCount);
+	if (result)
+		{LDIFAIL("IOCTL_NTV2_INTERRUPT_CONTROL failed");	return false;}
 
 	outCount = intrControlStruct.interruptCount;
 	return true;
 }
+
+static const uint32_t sIntEnumToStatKeys[] = {	AJA_DebugStat_WaitForInterruptOut1,		//	eOutput1	//	0
+												AJA_DebugStat_WaitForInterruptOthers,					//	1
+												AJA_DebugStat_WaitForInterruptIn1,		//	eInput1		//	2
+												AJA_DebugStat_WaitForInterruptIn2,		//	eInput2		//	3
+												AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers,	//	4 thru 13
+												AJA_DebugStat_WaitForInterruptUartTx1,	//	eUart1Tx	//	14
+												AJA_DebugStat_WaitForInterruptUartRx1,	//	eUart1Rx	//	15
+												AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers,	//	16 thru 23
+												AJA_DebugStat_WaitForInterruptIn3,		//	eInput3		//	24
+												AJA_DebugStat_WaitForInterruptIn4,		//	eInput4		//	25
+												AJA_DebugStat_WaitForInterruptUartTx2,	//	eUartTx2	//	26
+												AJA_DebugStat_WaitForInterruptUartRx2,	//	eUartRx2	//	27
+												AJA_DebugStat_WaitForInterruptOthers,					//	28
+												AJA_DebugStat_WaitForInterruptIn5,		//	eInput5		//	29
+												AJA_DebugStat_WaitForInterruptIn6,		//	eInput6		//	30
+												AJA_DebugStat_WaitForInterruptIn7,		//	eInput7		//	31
+												AJA_DebugStat_WaitForInterruptIn8,		//	eInput8		//	32
+												AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers, AJA_DebugStat_WaitForInterruptOthers};	//	33 thru 41
 
 // Method: WaitForInterrupt
 // Output: True on successs, false on failure (ioctl failed or interrupt didn't happen)
 bool CNTV2LinuxDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs)
 {
 	if (IsRemote())
-	{
 		return CNTV2DriverInterface::WaitForInterrupt(eInterrupt, timeOutMs);
-	}
 
 	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 
@@ -280,13 +308,12 @@ bool CNTV2LinuxDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterru
 	waitIntrStruct.timeOutMs = timeOutMs;
 	waitIntrStruct.success = 0; // Assume failure
 
-	if (ioctl(int(_hDevice), IOCTL_NTV2_WAITFOR_INTERRUPT, &waitIntrStruct))
-	{
-		LDIFAIL("IOCTL_NTV2_WAITFOR_INTERRUPT failed");
-		return false;
-	}
+	AJADebug::StatTimerStart(sIntEnumToStatKeys[eInterrupt]);
+	const int result (ioctl(int(_hDevice), IOCTL_NTV2_WAITFOR_INTERRUPT, &waitIntrStruct));
+	AJADebug::StatTimerStop(sIntEnumToStatKeys[eInterrupt]);
+	if (result)
+		{LDIFAIL("IOCTL_NTV2_WAITFOR_INTERRUPT failed");	return false;}
 	BumpEventCount (eInterrupt);
-
 	return waitIntrStruct.success != 0;
 }
 
@@ -423,7 +450,7 @@ bool CNTV2LinuxDriverInterface::SetupBoard (void)
 			// the offset of 0x1000 in the call to mmap tells mmap to map BAR0 which is the registers.
 			// 2.4 kernel interprets offset as number of pages, so 0x1000 works. This won't work on a 2.2
 			// kernel
-			_pRegisterBaseAddress = (ULWord *) mmap(AJA_NULL,_BA0MemorySize,PROT_READ | PROT_WRITE,MAP_SHARED,_hDevice,0x1000);
+			_pRegisterBaseAddress = reinterpret_cast<ULWord*>(mmap(AJA_NULL,_BA0MemorySize,PROT_READ | PROT_WRITE,MAP_SHARED,_hDevice,0x1000));
 			if (_pRegisterBaseAddress == MAP_FAILED)
 			{
 				_pRegisterBaseAddress = AJA_NULL;
@@ -601,17 +628,18 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (	const NTV2DMAEngine inDMAEngine,
 	// Set them to known values.
 	dmaControlBuf.downSample		= 0;	// Not applicable to this mode
 	dmaControlBuf.linePitch			= 1;	// Not applicable to this mode
+	dmaControlBuf.poll				= 0;
+#if defined(NTV2_DRIVER_ALLOCATED_BUFFERS)
 	ULWord numDmaDriverBuffers;
 	GetDMANumDriverBuffers(&numDmaDriverBuffers);
-	if ((unsigned long)pFrameBuffer >= numDmaDriverBuffers)
+	if (ULWord64(pFrameBuffer) >= ULWord64(numDmaDriverBuffers))
 	{
 		// Can't poll with usermode allocated buffer
 		if (!inSynchronous)
 			return false;
 		dmaControlBuf.poll = 0;
 	}
-	else
-		dmaControlBuf.poll = inSynchronous;		// True == app must wait for DMA completion interrupt
+#endif	//	defined(NTV2_DRIVER_ALLOCATED_BUFFERS)
 
 	int request;
 	const char *errMsg(AJA_NULL);
@@ -646,10 +674,15 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (	const NTV2DMAEngine inDMAEngine,
 	}
 
 	// TODO: Stick the IOCTL code inside the dmaControlBuf and collapse 4 IOCTLs into one.
-	if (!ioctl(int(_hDevice), request, &dmaControlBuf))
-		return true;
-	LDIFAIL(errMsg);
-	return false;
+	AJADebug::StatTimerStart(AJA_DebugStat_DMATransfer);
+	const int result (ioctl(int(_hDevice), request, &dmaControlBuf));
+	AJADebug::StatTimerStop(AJA_DebugStat_DMATransfer);
+	if (result)
+	{
+		LDIFAIL(errMsg);
+		return false;
+	}
+	return true;
 }
 
 bool CNTV2LinuxDriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
@@ -680,7 +713,7 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 	dmaControlBuf.videoSegmentHostPitch = inHostPitch;
 	dmaControlBuf.videoSegmentCardPitch = inCardPitch;
 	dmaControlBuf.poll					= 0;
-
+#if defined(NTV2_DRIVER_ALLOCATED_BUFFERS)
 	ULWord numDmaDriverBuffers(0);
 	GetDMANumDriverBuffers(&numDmaDriverBuffers);
 	if (ULWord(ULWord64(pFrameBuffer)) >= numDmaDriverBuffers)
@@ -688,8 +721,7 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 		if (!inIsSynchronous)
 			return false;	//	Async mode requires kernel-allocated buffer
 	}
-	else
-		dmaControlBuf.poll = inIsSynchronous;	// True == app must wait for DMA completion interrupt
+#endif	//	defined(NTV2_DRIVER_ALLOCATED_BUFFERS)
 
 	int request(0);
 	const char *errMsg(AJA_NULL);
@@ -724,7 +756,10 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 		}
 	}
 
-	if (ioctl(int(_hDevice), request, &dmaControlBuf))
+	AJADebug::StatTimerStart(AJA_DebugStat_DMATransferEx);
+	const int result (ioctl(int(_hDevice), request, &dmaControlBuf));
+	AJADebug::StatTimerStop(AJA_DebugStat_DMATransferEx);
+	if (result)
 	{
 		LDIFAIL(errMsg);
 		return false;
@@ -757,11 +792,11 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (	const NTV2DMAEngine			inDMAEngine,
 
 	// Information to be sent to the driver
 	NTV2_DMA_P2P_CONTROL_STRUCT dmaP2PStruct;
-	memset ((void*)&dmaP2PStruct, 0, sizeof(dmaP2PStruct));
+	::memset (AsVoidPtr(&dmaP2PStruct), 0, sizeof(dmaP2PStruct));
 	if (inIsTarget)
 	{
 		// reset info to be passed back to the user
-		memset ((void*)inP2PData, 0, sizeof(CHANNEL_P2P_STRUCT));
+		::memset (AsVoidPtr(inP2PData), 0, sizeof(CHANNEL_P2P_STRUCT));
 		inP2PData->p2pSize = sizeof(CHANNEL_P2P_STRUCT);
 	}
 	else
@@ -787,11 +822,11 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (	const NTV2DMAEngine			inDMAEngine,
 	dmaP2PStruct.ullMessageBusAddress	= inP2PData->messageBusAddress;
 	dmaP2PStruct.ulVideoBusSize			= inP2PData->videoBusSize;
 	dmaP2PStruct.ulMessageData			= inP2PData->messageData;
-	if (ioctl(int(_hDevice), IOCTL_NTV2_DMA_P2P, &dmaP2PStruct))
-	{
-		LDIFAIL("IOCTL error");
-		return false;
-	}
+	AJADebug::StatTimerStart(AJA_DebugStat_DMATransferP2P);
+	const int result (ioctl(int(_hDevice), IOCTL_NTV2_DMA_P2P, &dmaP2PStruct));
+	AJADebug::StatTimerStop(AJA_DebugStat_DMATransferP2P);
+	if (result)
+		{LDIFAIL("IOCTL error");	return false;}
 
 	// fill in p2p data
 	inP2PData->videoBusAddress		= dmaP2PStruct.ullVideoBusAddress;
@@ -800,14 +835,6 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (	const NTV2DMAEngine			inDMAEngine,
 	inP2PData->messageData			= dmaP2PStruct.ulMessageData;
 	return true;
 }
-
-#define AsFrameStampStructPtr(_p_)	reinterpret_cast<FRAME_STAMP_STRUCT*>(_p_)
-#define AsStatusStructPtr(_p_)		reinterpret_cast<AUTOCIRCULATE_STATUS_STRUCT*>(_p_)
-#define AsTransferStatusStruct(_p_) reinterpret_cast<PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT>(_p_)
-#define AsRoutingTablePtr(_p_)		reinterpret_cast<NTV2RoutingTable*>(_p_)
-#define AsPTaskStruct(_p_)			reinterpret_cast<PAUTOCIRCULATE_TASK_STRUCT>(_p_)
-#define AsPTransferStruct(_p_)		reinterpret_cast<PAUTOCIRCULATE_TRANSFER_STRUCT>(_p_)
-
 
 ///////////////////////////////////////////////////////////////////////////
 // AutoCirculate
@@ -818,6 +845,7 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 	if (!IsOpen())
 		return false;
 
+	int result(1);
 	switch (autoCircData.eCommand)
 	{
 		case eInitAutoCirc:
@@ -831,7 +859,10 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 			// The driver knows the implicit meanings of the
 			// members of the structure based on the the
 			// command contained within it.
-			if(ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_CONTROL, &autoCircData))
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+			result = ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_CONTROL, &autoCircData);
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+			if (result)
 				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_CONTROL failed");  return false;}
 			return true;
 
@@ -839,7 +870,10 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 			// Pass the autoCircStatus structure to the driver.
 			// It will read the channel spec contained within and
 			// fill out the status structure accordingly.
-			if (ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_STATUS, AsStatusStructPtr(autoCircData.pvVal1)))
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+			result = ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_STATUS, AsStatusStructPtr(autoCircData.pvVal1));
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+			if (result)
 				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_STATUS, failed");  return false;}
 			return true;
 
@@ -853,7 +887,10 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 			memset(&acFrameStampCombo, 0, sizeof acFrameStampCombo);
 			FRAME_STAMP_STRUCT* pFrameStamp = AsFrameStampStructPtr(autoCircData.pvVal1);
 			acFrameStampCombo.acFrameStamp = *pFrameStamp;
-			if (ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP, &acFrameStampCombo))
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+			result = ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP, &acFrameStampCombo);
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+			if (result)
 				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP failed");	 return false;}
 			*pFrameStamp = acFrameStampCombo.acFrameStamp;
 			return true;
@@ -872,7 +909,10 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 			acFrameStampCombo.acFrameStamp = *pFrameStamp;
 			if (pTask)
 				acFrameStampCombo.acTask = *pTask;
-			if (ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP, &acFrameStampCombo))
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+			result = ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP, &acFrameStampCombo);
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+			if (result)
 				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_FRAMESTAMP failed");	 return false;}
 			*pFrameStamp = acFrameStampCombo.acFrameStamp;
 			if (pTask)
@@ -888,10 +928,12 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 			{
 				if (acTransfer->audioBufferSize % 4)
 					{LDIFAIL ("TransferAutoCirculate failed - audio buffer size not mod 4");  return false;}
+#if defined(NTV2_DRIVER_ALLOCATED_BUFFERS)
 				ULWord numDmaDriverBuffers;
 				GetDMANumDriverBuffers(&numDmaDriverBuffers);
-				if ((unsigned long)acTransfer->audioBuffer >=  numDmaDriverBuffers	&&	(unsigned long)acTransfer->audioBuffer % 4)
+				if (ULWord64(acTransfer->audioBuffer) >= ULWord64(numDmaDriverBuffers)	&&	ULWord64(acTransfer->audioBuffer) % 4)
 					{LDIFAIL ("TransferAutoCirculate failed - audio buffer address not mod 4");	 return false;}
+#endif	//	defined(NTV2_DRIVER_ALLOCATED_BUFFERS)
 			}
 
 			// Can't pass multiple pointers in a single ioctl, so combine
@@ -909,7 +951,10 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 				acXferCombo.acXena2RoutingTable = *pXena2RoutingTable;
 
 			// Do the transfer
-			if (ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_TRANSFER, &acXferCombo))
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
+			result = ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_TRANSFER, &acXferCombo);
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
+			if (result)
 				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_TRANSFER failed");  return false;}
 			// Copy the results back into the status buffer we were given
 			*acStatus = acXferCombo.acStatus;
@@ -924,11 +969,12 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 			{
 				if (acTransfer->audioBufferSize % 4)
 					{LDIFAIL ("TransferAutoCirculate failed - audio buffer size not mod 4");  return false;}
-
+#if defined(NTV2_DRIVER_ALLOCATED_BUFFERS)
 				ULWord numDmaDriverBuffers;
 				GetDMANumDriverBuffers(&numDmaDriverBuffers);
 				if ((unsigned long)acTransfer->audioBuffer >=  numDmaDriverBuffers	&&	(unsigned long)acTransfer->audioBuffer % 4)
 					{LDIFAIL ("TransferAutoCirculate failed - audio buffer address not mod 4");	 return false;}
+#endif	//	defined(NTV2_DRIVER_ALLOCATED_BUFFERS)
 			}
 
 			// Can't pass multiple pointers in a single ioctl, so combine
@@ -946,7 +992,10 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 				acXferCombo.acXena2RoutingTable = *pXena2RoutingTable;
 
 			// Do the transfer
-			if (ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_TRANSFER, &acXferCombo))
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
+			result = ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_TRANSFER, &acXferCombo);
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
+			if (result)
 				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_TRANSFER failed");  return false;}
 			// Copy the results back into the status buffer we were given
 			*acStatus = acXferCombo.acStatus;
@@ -961,17 +1010,18 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 			{
 				if (acTransfer->audioBufferSize % 4)
 					{LDIFAIL ("TransferAutoCirculate failed - audio buffer size not mod 4");  return false;}
-
+#if defined(NTV2_DRIVER_ALLOCATED_BUFFERS)
 				ULWord numDmaDriverBuffers;
 				GetDMANumDriverBuffers(&numDmaDriverBuffers);
-				if ((unsigned long)acTransfer->audioBuffer >=  numDmaDriverBuffers	&&	(unsigned long)acTransfer->audioBuffer % 4)
+				if (ULWord64(acTransfer->audioBuffer) >= ULWord64(numDmaDriverBuffers)	&&	ULWord(acTransfer->audioBuffer) % 4)
 					{LDIFAIL ("TransferAutoCirculate failed - audio buffer address not mod 4");	 return false;}
+#endif	//	defined(NTV2_DRIVER_ALLOCATED_BUFFERS)
 			}
 
 			// Can't pass multiple pointers in a single ioctl, so combine
 			// them into a single structure and include channel spec too.
 			AUTOCIRCULATE_TRANSFER_COMBO_STRUCT acXferCombo;
-			memset((void*)&acXferCombo, 0, sizeof acXferCombo);
+			::memset(AsVoidPtr(&acXferCombo), 0, sizeof(acXferCombo));
 			PAUTOCIRCULATE_TRANSFER_STATUS_STRUCT acStatus = AsTransferStatusStruct(autoCircData.pvVal2);
 			NTV2RoutingTable *	pXena2RoutingTable = AsRoutingTablePtr(autoCircData.pvVal3);
 			PAUTOCIRCULATE_TASK_STRUCT pTask = AsPTaskStruct(autoCircData.pvVal4);
@@ -984,7 +1034,10 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 				acXferCombo.acTask = *pTask;
 
 			// Do the transfer
-			if (ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_TRANSFER, &acXferCombo))
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculateXfer);
+			result = ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_TRANSFER, &acXferCombo);
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
+			if (result)
 				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_TRANSFER failed");  return false;}
 			// Copy the results back into the status buffer we were given
 			*acStatus = acXferCombo.acStatus;
@@ -998,7 +1051,10 @@ bool CNTV2LinuxDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData
 			PAUTOCIRCULATE_TASK_STRUCT pTask = AsPTaskStruct(autoCircData.pvVal1);
 			acFrameStampCombo.acFrameStamp.channelSpec = autoCircData.channelSpec;
 			acFrameStampCombo.acTask = *pTask;
-			if (ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_CAPTURETASK, &acFrameStampCombo))
+			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
+			result = ioctl(int(_hDevice), IOCTL_NTV2_AUTOCIRCULATE_CAPTURETASK, &acFrameStampCombo);
+			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
+			if (result)
 				{LDIFAIL("IOCTL_NTV2_AUTOCIRCULATE_CAPTURETASK failed");  return false;}
 			return true;
 		}
@@ -1020,30 +1076,111 @@ bool CNTV2LinuxDriverInterface::NTV2Message (NTV2_HEADER * pInMessage)
 		return CNTV2DriverInterface::NTV2Message(pInMessage);	//	Implement NTV2Message on nub
 
 	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
-	if (ioctl(int(_hDevice), IOCTL_AJANTV2_MESSAGE, pInMessage))
-	{
-		LDIFAIL("IOCTL_AJANTV2_MESSAGE failed");
-		return false;
-	}
+	AJADebug::StatTimerStart(AJA_DebugStat_NTV2Message);
+	const int result (ioctl(int(_hDevice), IOCTL_AJANTV2_MESSAGE, pInMessage));
+	AJADebug::StatTimerStop(AJA_DebugStat_NTV2Message);
+	if (result)
+		{LDIFAIL("IOCTL_AJANTV2_MESSAGE failed");	return false;}
 	return true;
 }
 
 bool CNTV2LinuxDriverInterface::HevcSendMessage (HevcMessageHeader* pMessage)
 {
-	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
-	return ioctl(int(_hDevice), IOCTL_HEVC_MESSAGE, pMessage) ? false : true;
+	if (!pMessage)
+		return false;	//	NULL message pointer
+	if (_hDevice == INVALID_HANDLE_VALUE)
+		return false;
+	if (_hDevice == 0)
+		return false;
+	AJADebug::StatTimerStart(AJA_DebugStat_HEVCSendMessage);
+	const int result = ioctl(int(_hDevice), IOCTL_HEVC_MESSAGE, pMessage);
+	AJADebug::StatTimerStop(AJA_DebugStat_HEVCSendMessage);
+	if (result)
+		{LDIFAIL("IOCTL_AJANTV2_MESSAGE failed");	return false;}
+	return true;
 }
 
 
-bool CNTV2LinuxDriverInterface::GetDMADriverBufferPhysicalAddress (ULWord* physAddr)
-{
-	return physAddr ? ReadRegister (kVRegDMADriverBufferPhysicalAddress, *physAddr) : false;
-}
+#if !defined(NTV2_DEPRECATE_16_0)
+	bool CNTV2LinuxDriverInterface::GetDMADriverBufferPhysicalAddress (ULWord* physAddr)
+	{
+		return physAddr ? ReadRegister (kVRegDMADriverBufferPhysicalAddress, *physAddr) : false;
+	}
 
-bool CNTV2LinuxDriverInterface::GetDMANumDriverBuffers (ULWord* pNumDmaDriverBuffers)
-{
-	return pNumDmaDriverBuffers ? ReadRegister (kVRegNumDmaDriverBuffers, *pNumDmaDriverBuffers) : false;
-}
+	bool CNTV2LinuxDriverInterface::GetDMANumDriverBuffers (ULWord* pNumDmaDriverBuffers)
+	{
+		return pNumDmaDriverBuffers ? ReadRegister (kVRegNumDmaDriverBuffers, *pNumDmaDriverBuffers) : false;
+	}
+
+	// Method: MapDMADriverBuffer(Maps 8 Frames worth of memory from kernel space to user space.
+	// Input:
+	// Output:
+	bool CNTV2LinuxDriverInterface::MapDMADriverBuffer (void)
+	{
+		if (!_pDMADriverBufferAddress)
+		{
+			ULWord numDmaDriverBuffers;
+			if (!GetDMANumDriverBuffers(&numDmaDriverBuffers))
+			{
+				LDIFAIL("GetDMANumDriverBuffers() failed");
+				return false;
+			}
+
+			if (!numDmaDriverBuffers)
+			{
+				LDIFAIL("numDmaDriverBuffers == 0");
+				return false;
+			}
+
+			// the offset of 0x2000 in the call to mmap tells mmap to map the DMA Buffer into user space
+			// 2.4 kernel interprets offset as number of pages, so 0x2000 works. This won't work on a 2.2
+			// kernel
+			_pDMADriverBufferAddress = reinterpret_cast<ULWord*>(mmap (AJA_NULL, GetFrameBufferSize() * numDmaDriverBuffers,
+																		PROT_READ | PROT_WRITE,MAP_SHARED,
+																		_hDevice, 0x2000));
+			if (_pDMADriverBufferAddress == MAP_FAILED)
+			{
+				_pDMADriverBufferAddress = AJA_NULL;
+				return false;
+			}
+		}
+		return true;
+	}
+
+	bool CNTV2LinuxDriverInterface::GetDMADriverBufferAddress (ULWord** pDMADriverBufferAddress)
+	{
+		if (!_pDMADriverBufferAddress)
+			if (!MapDMADriverBuffer())
+				return false;
+		*pDMADriverBufferAddress = _pDMADriverBufferAddress;
+		return true;
+	}
+
+	// Method: UnmapDMADriverBuffer
+	// Input:  NONE
+	// Output: NONE
+	bool CNTV2LinuxDriverInterface::UnmapDMADriverBuffer (void)
+	{
+		if (_pDMADriverBufferAddress)
+		{
+			ULWord numDmaDriverBuffers;
+			if (!GetDMANumDriverBuffers(&numDmaDriverBuffers))
+			{
+				LDIFAIL("GetDMANumDriverBuffers() failed");
+				return false;
+			}
+			if (!numDmaDriverBuffers)
+			{
+	
+				LDIFAIL("numDmaDriverBuffers == 0");
+				return false;
+			}
+			munmap(_pDMADriverBufferAddress, GetFrameBufferSize() * numDmaDriverBuffers);
+		}
+		_pDMADriverBufferAddress = AJA_NULL;
+		return true;
+	}
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
 
 bool CNTV2LinuxDriverInterface::SetAudioOutputMode (NTV2_GlobalAudioPlaybackMode mode)
 {
@@ -1055,228 +1192,157 @@ bool CNTV2LinuxDriverInterface::GetAudioOutputMode (NTV2_GlobalAudioPlaybackMode
 	return mode ? CNTV2DriverInterface::ReadRegister(kVRegGlobalAudioPlaybackMode, *mode) : false;
 }
 
-// Method: MapDMADriverBuffer(Maps 8 Frames worth of memory from kernel space to user space.
-// Input:
-// Output:
-bool CNTV2LinuxDriverInterface::MapDMADriverBuffer (void)
-{
-	if (!_pDMADriverBufferAddress)
+#if !defined(NTV2_DEPRECATE_16_0)
+	// Method: DmaBufferWriteFrameDriverBuffer
+	// NTV2DMAEngine - DMAEngine
+	// ULWord frameNumber(0 .. NUM_FRAMEBUFFERS-1)
+	// ULWord dmaBufferFrame(0 .. numDmaDriverBuffers-1)
+	// ULWord bytes - number of bytes to dma
+	// ULWord poll - 0=block 1=return immediately and poll
+	//				via register 48
+	// When the board is opened the driver allocates
+	// a user-definable number of frames for dmaing
+	// This allows dma's to be done without scatter/gather
+	// which should help performance.
+	bool CNTV2LinuxDriverInterface::DmaWriteFrameDriverBuffer (NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame, ULWord bytes, ULWord poll)
 	{
-		ULWord numDmaDriverBuffers;
-		if (!GetDMANumDriverBuffers(&numDmaDriverBuffers))
-		{
-			LDIFAIL("GetDMANumDriverBuffers() failed");
+		if (IsRemote())
 			return false;
-		}
+		if (!IsOpen())
+			return false;
 
-		if (!numDmaDriverBuffers)
-		{
-			LDIFAIL("numDmaDriverBuffers == 0");
-			return false;
-		}
-
-		// the offset of 0x2000 in the call to mmap tells mmap to map the DMA Buffer into user space
-		// 2.4 kernel interprets offset as number of pages, so 0x2000 works. This won't work on a 2.2
-		// kernel
-		_pDMADriverBufferAddress = reinterpret_cast<ULWord*>(mmap (AJA_NULL, GetFrameBufferSize() * numDmaDriverBuffers,
-																	PROT_READ | PROT_WRITE,MAP_SHARED,
-																	_hDevice, 0x2000));
-		if (_pDMADriverBufferAddress == MAP_FAILED)
-		{
-			_pDMADriverBufferAddress = AJA_NULL;
-			return false;
-		}
+		NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
+		dmaControlBuf.engine = DMAEngine;
+		dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
+		dmaControlBuf.frameNumber = frameNumber;
+		dmaControlBuf.frameBuffer = PULWord(dmaBufferFrame);
+		dmaControlBuf.frameOffsetSrc = 0;
+		dmaControlBuf.frameOffsetDest = 0;
+		dmaControlBuf.numBytes = bytes;
+		dmaControlBuf.downSample = 0;
+		dmaControlBuf.linePitch = 0;
+		dmaControlBuf.poll = poll;
+		if (ioctl(int(_hDevice), IOCTL_NTV2_DMA_WRITE_FRAME, &dmaControlBuf))
+			{LDIFAIL("IOCTL_NTV2_DMA_WRITE_FRAME failed");	return false;}
+		return true;
 	}
-	return true;
-}
 
-bool CNTV2LinuxDriverInterface::GetDMADriverBufferAddress (ULWord** pDMADriverBufferAddress)
-{
-	if (!_pDMADriverBufferAddress)
-		if (!MapDMADriverBuffer())
-			return false;
-	*pDMADriverBufferAddress = _pDMADriverBufferAddress;
-	return true;
-}
-
-// Method: UnmapDMADriverBuffer
-// Input:  NONE
-// Output: NONE
-bool CNTV2LinuxDriverInterface::UnmapDMADriverBuffer (void)
-{
-	if (_pDMADriverBufferAddress)
+	// Method: DmaBufferWriteFrameDriverBuffer
+	// NTV2DMAEngine - DMAEngine
+	// ULWord frameNumber(0-NUM_FRAMEBUFFERS-1)
+	// ULWord dmaBufferFrame(0 .. numDmaDriverBuffers-1)
+	// ULWord bytes - number of bytes to dma
+	// ULWord poll - 0=block 1=return immediately and poll
+	//				via register 48
+	// When the board is opened the driver allocates
+	// a user-definable number of frames for dmaing
+	// This allows dma's to be done without scatter/gather
+	// which should help performance.
+	bool CNTV2LinuxDriverInterface::DmaWriteFrameDriverBuffer (NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame, ULWord offsetSrc, ULWord offsetDest, ULWord bytes, ULWord poll)
 	{
-		ULWord numDmaDriverBuffers;
-		if (!GetDMANumDriverBuffers(&numDmaDriverBuffers))
-		{
-			LDIFAIL("GetDMANumDriverBuffers() failed");
+		if (IsRemote())
 			return false;
-		}
-		if (!numDmaDriverBuffers)
-		{
+		if (!IsOpen())
+			return false;
 
-			LDIFAIL("numDmaDriverBuffers == 0");
-			return false;
-		}
-		munmap(_pDMADriverBufferAddress, GetFrameBufferSize() * numDmaDriverBuffers);
+		NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
+		dmaControlBuf.engine = DMAEngine;
+		dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
+		dmaControlBuf.frameNumber = frameNumber;
+		dmaControlBuf.frameBuffer = PULWord(dmaBufferFrame);
+		dmaControlBuf.frameOffsetSrc = offsetSrc;
+		dmaControlBuf.frameOffsetDest = offsetDest;
+		dmaControlBuf.numBytes = bytes;
+		dmaControlBuf.downSample = 0;
+		dmaControlBuf.linePitch = 0;
+		dmaControlBuf.poll = poll;
+		if (ioctl(int(_hDevice), IOCTL_NTV2_DMA_WRITE_FRAME, &dmaControlBuf))
+			{LDIFAIL("IOCTL_NTV2_DMA_WRITE_FRAME failed");	return false;}
+		return true;
 	}
-	_pDMADriverBufferAddress = AJA_NULL;
-	return true;
-}
-
-///////
-// Method: DmaBufferWriteFrameDriverBuffer
-// NTV2DMAEngine - DMAEngine
-// ULWord frameNumber(0 .. NUM_FRAMEBUFFERS-1)
-// ULWord dmaBufferFrame(0 .. numDmaDriverBuffers-1)
-// ULWord bytes - number of bytes to dma
-// ULWord poll - 0=block 1=return immediately and poll
-//				via register 48
-// When the board is opened the driver allocates
-// a user-definable number of frames for dmaing
-// This allows dma's to be done without scatter/gather
-// which should help performance.
-bool CNTV2LinuxDriverInterface::DmaWriteFrameDriverBuffer (NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame, ULWord bytes, ULWord poll)
-{
-	if (IsRemote())
-		return false;
-	if (!IsOpen())
-		return false;
-
-	NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
-	dmaControlBuf.engine = DMAEngine;
-	dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
-	dmaControlBuf.frameNumber = frameNumber;
-	dmaControlBuf.frameBuffer = PULWord(dmaBufferFrame);
-	dmaControlBuf.frameOffsetSrc = 0;
-	dmaControlBuf.frameOffsetDest = 0;
-	dmaControlBuf.numBytes = bytes;
-	dmaControlBuf.downSample = 0;
-	dmaControlBuf.linePitch = 0;
-	dmaControlBuf.poll = poll;
-	if (ioctl(int(_hDevice), IOCTL_NTV2_DMA_WRITE_FRAME, &dmaControlBuf))
-		{LDIFAIL("IOCTL_NTV2_DMA_WRITE_FRAME failed");	return false;}
-	return true;
-}
-
-//
-///////
-// Method: DmaBufferWriteFrameDriverBuffer
-// NTV2DMAEngine - DMAEngine
-// ULWord frameNumber(0-NUM_FRAMEBUFFERS-1)
-// ULWord dmaBufferFrame(0 .. numDmaDriverBuffers-1)
-// ULWord bytes - number of bytes to dma
-// ULWord poll - 0=block 1=return immediately and poll
-//				via register 48
-// When the board is opened the driver allocates
-// a user-definable number of frames for dmaing
-// This allows dma's to be done without scatter/gather
-// which should help performance.
-bool CNTV2LinuxDriverInterface::DmaWriteFrameDriverBuffer (NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame, ULWord offsetSrc, ULWord offsetDest, ULWord bytes, ULWord poll)
-{
-	if (IsRemote())
-		return false;
-	if (!IsOpen())
-		return false;
-
-	NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
-	dmaControlBuf.engine = DMAEngine;
-	dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
-	dmaControlBuf.frameNumber = frameNumber;
-	dmaControlBuf.frameBuffer = (PULWord)dmaBufferFrame;
-	dmaControlBuf.frameOffsetSrc = offsetSrc;
-	dmaControlBuf.frameOffsetDest = offsetDest;
-	dmaControlBuf.numBytes = bytes;
-	dmaControlBuf.downSample = 0;
-	dmaControlBuf.linePitch = 0;
-	dmaControlBuf.poll = poll;
-	if (ioctl(int(_hDevice), IOCTL_NTV2_DMA_WRITE_FRAME, &dmaControlBuf))
-		{LDIFAIL("IOCTL_NTV2_DMA_WRITE_FRAME failed");	return false;}
-	return true;
-}
 
 
-// Method: DmaBufferReadFrameDriverBuffer
-// NTV2DMAEngine - DMAEngine
-// ULWord frameNumber(0-NUM_FRAMEBUFFERS-1)
-// ULWord dmaBufferFrame(0 .. numDmaDriverBuffers-1)
-// ULWord bytes - number of bytes to dma
-// ULWord poll - 0=block 1=return immediately and poll
-//				via register 48
-// When the board is opened the driver allocates
-// a user-definable number of frames for dmaing
-// This allows dma's to be done without scatter/gather
-// which should help performance.
-bool CNTV2LinuxDriverInterface::DmaReadFrameDriverBuffer (NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame, ULWord bytes, ULWord downSample, ULWord linePitch, ULWord poll)
-{
-	if (IsRemote())
-		return false;
-	if (!IsOpen())
-		return false;
+	// Method: DmaBufferReadFrameDriverBuffer
+	// NTV2DMAEngine - DMAEngine
+	// ULWord frameNumber(0-NUM_FRAMEBUFFERS-1)
+	// ULWord dmaBufferFrame(0 .. numDmaDriverBuffers-1)
+	// ULWord bytes - number of bytes to dma
+	// ULWord poll - 0=block 1=return immediately and poll
+	//				via register 48
+	// When the board is opened the driver allocates
+	// a user-definable number of frames for dmaing
+	// This allows dma's to be done without scatter/gather
+	// which should help performance.
+	bool CNTV2LinuxDriverInterface::DmaReadFrameDriverBuffer (NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame, ULWord bytes, ULWord downSample, ULWord linePitch, ULWord poll)
+	{
+		if (IsRemote())
+			return false;
+		if (!IsOpen())
+			return false;
 
-	NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
-	dmaControlBuf.engine = DMAEngine;
-	dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
-	dmaControlBuf.frameNumber = frameNumber;
-	dmaControlBuf.frameBuffer = PULWord(dmaBufferFrame);
-	dmaControlBuf.frameOffsetSrc = 0;
-	dmaControlBuf.frameOffsetDest = 0;
-	dmaControlBuf.numBytes = bytes;
-	dmaControlBuf.downSample = downSample;
-	if (linePitch == 0) linePitch = 1;
-	dmaControlBuf.linePitch = linePitch;
-	dmaControlBuf.poll = poll;
+		NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
+		dmaControlBuf.engine = DMAEngine;
+		dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
+		dmaControlBuf.frameNumber = frameNumber;
+		dmaControlBuf.frameBuffer = PULWord(dmaBufferFrame);
+		dmaControlBuf.frameOffsetSrc = 0;
+		dmaControlBuf.frameOffsetDest = 0;
+		dmaControlBuf.numBytes = bytes;
+		dmaControlBuf.downSample = downSample;
+		dmaControlBuf.linePitch = linePitch == 0 ? 1 : linePitch;
+		dmaControlBuf.poll = poll;
 
-	static bool bPrintedDownsampleDeprecatedMsg = false;
-	if (downSample && !bPrintedDownsampleDeprecatedMsg)
-		{LDIWARN("downSample is deprecated"); bPrintedDownsampleDeprecatedMsg = true;}
+		static bool bPrintedDownsampleDeprecatedMsg = false;
+		if (downSample && !bPrintedDownsampleDeprecatedMsg)
+			{LDIWARN("downSample is deprecated"); bPrintedDownsampleDeprecatedMsg = true;}
 
-	if (ioctl(int(_hDevice), IOCTL_NTV2_DMA_READ_FRAME, &dmaControlBuf))
-		{LDIFAIL("IOCTL_NTV2_DMA_READ_FRAME failed");  return false;}
-	return true;
-}
+		if (ioctl(int(_hDevice), IOCTL_NTV2_DMA_READ_FRAME, &dmaControlBuf))
+			{LDIFAIL("IOCTL_NTV2_DMA_READ_FRAME failed");  return false;}
+		return true;
+	}
 
-// Method: DmaBufferReadFrameDriverBuffer
-// NTV2DMAEngine - DMAEngine
-// ULWord frameNumber(0-NUM_FRAMEBUFFERS-1)
-// ULWord dmaBufferFrame(0 .. numDmaDriverBuffers-1)
-// ULWord bytes - number of bytes to dma
-// ULWord poll - 0=block 1=return immediately and poll
-//				via register 48
-// When the board is opened the driver allocates
-// a user-definable number of frames for dmaing
-// This allows dma's to be done without scatter/gather
-// which should help performance.
-bool CNTV2LinuxDriverInterface::DmaReadFrameDriverBuffer (NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame,
-															ULWord offsetSrc, ULWord offsetDest, ULWord bytes,
-															ULWord downSample, ULWord linePitch, ULWord poll)
-{
-	if (IsRemote())
-		return false;
-	if (!IsOpen())
-		return false;
+	// Method: DmaBufferReadFrameDriverBuffer
+	// NTV2DMAEngine - DMAEngine
+	// ULWord frameNumber(0-NUM_FRAMEBUFFERS-1)
+	// ULWord dmaBufferFrame(0 .. numDmaDriverBuffers-1)
+	// ULWord bytes - number of bytes to dma
+	// ULWord poll - 0=block 1=return immediately and poll
+	//				via register 48
+	// When the board is opened the driver allocates
+	// a user-definable number of frames for dmaing
+	// This allows dma's to be done without scatter/gather
+	// which should help performance.
+	bool CNTV2LinuxDriverInterface::DmaReadFrameDriverBuffer (NTV2DMAEngine DMAEngine, ULWord frameNumber, unsigned long dmaBufferFrame,
+																ULWord offsetSrc, ULWord offsetDest, ULWord bytes,
+																ULWord downSample, ULWord linePitch, ULWord poll)
+	{
+		if (IsRemote())
+			return false;
+		if (!IsOpen())
+			return false;
 
-	NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
-	dmaControlBuf.engine = DMAEngine;
-	dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
-	dmaControlBuf.frameNumber = frameNumber;
-	dmaControlBuf.frameBuffer = PULWord(dmaBufferFrame);
-	dmaControlBuf.frameOffsetSrc = offsetSrc;
-	dmaControlBuf.frameOffsetDest = offsetDest;
-	dmaControlBuf.numBytes = bytes;
-	dmaControlBuf.downSample = downSample;
-	if( linePitch == 0 ) linePitch = 1;
-	dmaControlBuf.linePitch = linePitch;
-	dmaControlBuf.poll = poll;
+		NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
+		dmaControlBuf.engine = DMAEngine;
+		dmaControlBuf.dmaChannel = NTV2_CHANNEL1;
+		dmaControlBuf.frameNumber = frameNumber;
+		dmaControlBuf.frameBuffer = PULWord(dmaBufferFrame);
+		dmaControlBuf.frameOffsetSrc = offsetSrc;
+		dmaControlBuf.frameOffsetDest = offsetDest;
+		dmaControlBuf.numBytes = bytes;
+		dmaControlBuf.downSample = downSample;
+		if( linePitch == 0 ) linePitch = 1;
+		dmaControlBuf.linePitch = linePitch;
+		dmaControlBuf.poll = poll;
 
-	static bool bPrintedDownsampleDeprecatedMsg = false;
-	if (downSample && !bPrintedDownsampleDeprecatedMsg)
-		{LDIWARN("downSample is deprecated");  bPrintedDownsampleDeprecatedMsg = true;}
+		static bool bPrintedDownsampleDeprecatedMsg = false;
+		if (downSample && !bPrintedDownsampleDeprecatedMsg)
+			{LDIWARN("downSample is deprecated");  bPrintedDownsampleDeprecatedMsg = true;}
 
-	if (ioctl(int(_hDevice), IOCTL_NTV2_DMA_READ_FRAME, &dmaControlBuf))
-		{LDIFAIL("IOCTL_NTV2_DMA_READ_FRAME failed");  return false;}
-	return true;
-}
+		if (ioctl(int(_hDevice), IOCTL_NTV2_DMA_READ_FRAME, &dmaControlBuf))
+			{LDIFAIL("IOCTL_NTV2_DMA_READ_FRAME failed");  return false;}
+		return true;
+	}
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
 
 bool CNTV2LinuxDriverInterface::DmaWriteWithOffsets (NTV2DMAEngine DMAEngine, ULWord frameNumber, ULWord * pFrameBuffer,
 													ULWord offsetSrc, ULWord offsetDest, ULWord bytes)

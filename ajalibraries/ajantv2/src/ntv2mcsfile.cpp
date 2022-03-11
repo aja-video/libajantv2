@@ -2,7 +2,7 @@
 /**
 	@file		ntv2mcsfile.cpp
 	@brief		Implementation of CNTV2MCSfile class.
-	@copyright	(C) 2010-2021 AJA Video Systems, Inc.	 All rights reserved.
+	@copyright	(C) 2010-2022 AJA Video Systems, Inc.	 All rights reserved.
 **/
 #include "ntv2mcsfile.h"
 #include "ntv2bitfile.h"

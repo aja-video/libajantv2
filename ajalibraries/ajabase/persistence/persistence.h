@@ -2,7 +2,7 @@
 /**
 	@file		persistence/persistence.h
 	@brief		Declares the AJAPersistence class.
-	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #ifndef AJAPersistence_H

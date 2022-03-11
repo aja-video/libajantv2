@@ -2,7 +2,7 @@
 /**
 	@file		ntv2verticalfilter.cpp
 	@brief		Implementations of the VerticalFilterLine and FieldInterpolateLine functions.
-	@copyright	(C) 2004-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2004-2022 AJA Video Systems, Inc.
 **/
 
 #include "ntv2verticalfilter.h"

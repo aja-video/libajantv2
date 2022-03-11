@@ -2,7 +2,7 @@
 /**
 	@file		linux/eventimpl.cpp
 	@brief		Implements the AJAEventImpl class on the Linux platform.
-	@copyright	(C) 2009-2021 AJA Video Systems, Inc.  All rights reserved.
+	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 #include "ajabase/system/event.h"

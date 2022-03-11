@@ -2,7 +2,7 @@
 /**
 	@file		ntv2vpid.cpp
 	@brief		Implements the CNTV2VPID class. See the SMPTE 352 standard for details.
-	@copyright	(C) 2012-2021 AJA Video Systems, Inc.
+	@copyright	(C) 2012-2022 AJA Video Systems, Inc.
 **/
 
 #include "ntv2vpid.h"
