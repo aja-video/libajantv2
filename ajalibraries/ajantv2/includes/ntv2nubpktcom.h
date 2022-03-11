@@ -18,6 +18,8 @@
 	#include <sys/socket.h>
 #endif
 
+#if !defined(NTV2_RPC_SUPPORT)
+
 extern AJAExport const char *NTV2NubQueryRespStrProtVer1[eNumNTV2NubPktTypes];
 extern AJAExport const char *NTV2NubQueryRespStrProtVer2[eNumNTV2NubPktTypes];
 
@@ -54,5 +56,6 @@ AJAExport int recvfromtimeout (AJASocket s, char * buf, int len, int timeout,
 // Debug functions
 AJAExport void dumpDiscoveryPacket (NTV2NubPkt * pPkt, NTV2DiscoverRespPayload * boardInventory = AJA_NULL);
 AJAExport void dumpBoardInventory (NTV2DiscoverRespPayload * boardInventory);
+#endif	//	!defined(NTV2_RPC_SUPPORT)
 
 #endif	//	__NTV2NUBPKTCOM_H

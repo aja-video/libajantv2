@@ -24,11 +24,13 @@ typedef int socklen_t;
 #endif
 
 #include "ajatypes.h"
+#if !defined(NTV2_RPC_SUPPORT)
+
 #include "ntv2nubtypes.h"
 #include "ntv2nubpktcom.h"
 
 #ifdef AJALinux
-#include <endian.h>
+	#include <endian.h>
 #endif
 
 // Silly original protocol strings.	 Replaced with smaller ones in V2.
@@ -431,3 +433,4 @@ bool isNTV2NubPacketType (NTV2NubPkt * pPkt, NTV2NubPktType nubPktType)
 					&&	!::strncmp(reinterpret_cast<const char*>(pPkt->data), NTV2NubQueryRespStrProtVer3[nubPktType], pPkt->hdr.dataLength);
 	}
 }
+#endif	//	!defined(NTV2_RPC_SUPPORT)

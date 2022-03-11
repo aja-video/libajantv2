@@ -13,6 +13,9 @@
 #include "ajabase/system/debug.h"
 #include "ajabase/common/common.h"
 #include "ntv2registerexpert.h"
+#if defined(NTV2_RPC_SUPPORT)
+	#include "ntv2nubtypes.h"
+#endif	//	defined(NTV2_RPC_SUPPORT)
 #include <iomanip>
 #include <locale>		//	For std::locale, std::numpunct, std::use_facet
 #include <assert.h>
@@ -2741,44 +2744,6 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 
 #if defined(NTV2_RPC_SUPPORT)
 
-	#define	PUSHU16(__v__,__b__)	{	const uint16_t u16(NTV2HostIsBigEndian ? (__v__) : NTV2EndianSwap32HtoB(__v__));	\
-										const UByte * pU16(reinterpret_cast<const UByte*>(&u16));							\
-										__b__.push_back(pU16[0]); __b__.push_back(pU16[1]);									\
-									}
-
-	#define	PUSHU32(__v__,__b__)	{	const uint32_t u32(NTV2HostIsBigEndian ? (__v__) : NTV2EndianSwap32HtoB(__v__));	\
-										const UByte * pU32(reinterpret_cast<const UByte*>(&u32));							\
-										__b__.push_back(pU32[0]); __b__.push_back(pU32[1]);									\
-										__b__.push_back(pU32[2]); __b__.push_back(pU32[3]);									\
-									}
-
-	#define	PUSHU64(__v__,__b__)	{	const uint64_t u64(NTV2HostIsBigEndian ? (__v__) : NTV2EndianSwap64HtoB(__v__));	\
-										const UByte * pU64(reinterpret_cast<const UByte*>(&u64));							\
-										__b__.push_back(pU64[0]); __b__.push_back(pU64[1]);									\
-										__b__.push_back(pU64[2]); __b__.push_back(pU64[3]);									\
-										__b__.push_back(pU64[4]); __b__.push_back(pU64[5]);									\
-										__b__.push_back(pU64[6]); __b__.push_back(pU64[7]);									\
-									}
-
-	#define	POPU16(__v__,__b__,__n__)	{	uint16_t u16(0);	UByte * pU8(reinterpret_cast<UByte*>(&u16));				\
-											pU8[0] = (__b__).at((__n__)++); pU8[1] = (__b__).at((__n__)++);					\
-											(__v__) = NTV2HostIsBigEndian ? u16 : NTV2EndianSwap16BtoH(u16);				\
-										}
-
-	#define	POPU32(__v__,__b__,__n__)	{	uint32_t u32(0);	UByte * pU8(reinterpret_cast<UByte*>(&u32));				\
-											pU8[0] = (__b__).at((__n__)++); pU8[1] = (__b__).at((__n__)++);					\
-											pU8[2] = (__b__).at((__n__)++); pU8[3] = (__b__).at((__n__)++);					\
-											(__v__) = NTV2HostIsBigEndian ? u32 : NTV2EndianSwap32BtoH(u32);				\
-										}
-
-	#define	POPU64(__v__,__b__,__n__)	{	uint64_t u64(0);	UByte * pU8(reinterpret_cast<UByte*>(&u64));				\
-											pU8[0] = (__b__).at((__n__)++); pU8[1] = (__b__).at((__n__)++);					\
-											pU8[2] = (__b__).at((__n__)++); pU8[3] = (__b__).at((__n__)++);					\
-											pU8[4] = (__b__).at((__n__)++); pU8[5] = (__b__).at((__n__)++);					\
-											pU8[6] = (__b__).at((__n__)++); pU8[7] = (__b__).at((__n__)++);					\
-											(__v__) = NTV2HostIsBigEndian ? u64 : NTV2EndianSwap64BtoH(u64);				\
-										}
-
 	bool NTV2_HEADER::RPCEncode (UByteSequence & outBlob)
 	{
 		PUSHU32(fHeaderTag, outBlob)							//	ULWord		fHeaderTag
@@ -2975,9 +2940,9 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 		bool ok = acHeader.RPCEncode(outBlob);					//	NTV2_HEADER				acHeader
 		PUSHU16(UWord(acCrosspoint), outBlob)					//		NTV2Crosspoint			acCrosspoint
 		PUSHU16(UWord(acState), outBlob)						//		NTV2AutoCirculateState	acState
-		PUSHU32(acStartFrame, outBlob)							//		LWord					acStartFrame
-		PUSHU32(acEndFrame, outBlob)							//		LWord					acEndFrame
-		PUSHU32(acActiveFrame, outBlob)							//		LWord					acActiveFrame
+		PUSHU32(ULWord(acStartFrame), outBlob)					//		LWord					acStartFrame
+		PUSHU32(ULWord(acEndFrame), outBlob)					//		LWord					acEndFrame
+		PUSHU32(ULWord(acActiveFrame), outBlob)					//		LWord					acActiveFrame
 		PUSHU64(acRDTSCStartTime, outBlob)						//		ULWord64				acRDTSCStartTime
 		PUSHU64(acAudioClockStartTime, outBlob)					//		ULWord64				acAudioClockStartTime
 		PUSHU64(acRDTSCCurrentTime, outBlob)					//		ULWord64				acRDTSCCurrentTime
@@ -2992,15 +2957,18 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 	}
 
 	bool AUTOCIRCULATE_STATUS::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
-	{	uint16_t u16(0);
+	{	uint16_t v16(0);  uint32_t v32(0);
 		bool ok = acHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER				acHeader
-		POPU16(u16, inBlob, inOutIndex)							//		NTV2Crosspoint			acCrosspoint
-		acCrosspoint = NTV2Crosspoint(u16);
-		POPU16(u16, inBlob, inOutIndex)							//		NTV2AutoCirculateState	acState
-		acState = NTV2AutoCirculateState(u16);
-		POPU32(acStartFrame, inBlob, inOutIndex)				//		LWord					acStartFrame
-		POPU32(acEndFrame, inBlob, inOutIndex)					//		LWord					acEndFrame
-		POPU32(acActiveFrame, inBlob, inOutIndex)				//		LWord					acActiveFrame
+		POPU16(v16, inBlob, inOutIndex)							//		NTV2Crosspoint			acCrosspoint
+		acCrosspoint = NTV2Crosspoint(v16);
+		POPU16(v16, inBlob, inOutIndex)							//		NTV2AutoCirculateState	acState
+		acState = NTV2AutoCirculateState(v16);
+		POPU32(v32, inBlob, inOutIndex)							//		LWord					acStartFrame
+		acStartFrame = LWord(v32);
+		POPU32(v32, inBlob, inOutIndex)							//		LWord					acEndFrame
+		acEndFrame = LWord(v32);
+		POPU32(v32, inBlob, inOutIndex)							//		LWord					acActiveFrame
+		acActiveFrame = LWord(v32);
 		POPU64(acRDTSCStartTime, inBlob, inOutIndex)			//		ULWord64				acRDTSCStartTime
 		POPU64(acAudioClockStartTime, inBlob, inOutIndex)		//		ULWord64				acAudioClockStartTime
 		POPU64(acRDTSCCurrentTime, inBlob, inOutIndex)			//		ULWord64				acRDTSCCurrentTime
@@ -3009,8 +2977,8 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 		POPU32(acFramesDropped, inBlob, inOutIndex)				//		ULWord					acFramesDropped
 		POPU32(acBufferLevel, inBlob, inOutIndex)				//		ULWord					acBufferLevel
 		POPU32(acOptionFlags, inBlob, inOutIndex)				//		ULWord					acOptionFlags
-		POPU16(u16, inBlob, inOutIndex)							//		NTV2AudioSystem			acAudioSystem
-		acAudioSystem = NTV2AudioSystem(u16);
+		POPU16(v16, inBlob, inOutIndex)							//		NTV2AudioSystem			acAudioSystem
+		acAudioSystem = NTV2AudioSystem(v16);
 		ok &= acTrailer.RPCDecode(inBlob, inOutIndex);			//	NTV2_TRAILER			acTrailer
 		return ok;
 	}
@@ -3020,68 +2988,70 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 		const size_t totBytes	(acHeader.GetSizeInBytes());	//	Header + natural size of all structs/fields inbetween + Trailer
 		if (outBlob.capacity() < totBytes)
 			outBlob.reserve(totBytes);
-		bool ok = acHeader.RPCEncode(outBlob);					//	NTV2_HEADER				acHeader
-		PUSHU64(acFrameTime, outBlob)							//		LWord64					acFrameTime
-		PUSHU32(acRequestedFrame, outBlob)						//		ULWord					acRequestedFrame
-		PUSHU64(acAudioClockTimeStamp, outBlob)					//		ULWord64				acAudioClockTimeStamp
-		PUSHU32(acAudioExpectedAddress, outBlob)				//		ULWord					acAudioExpectedAddress
-		PUSHU32(acAudioInStartAddress, outBlob)					//		ULWord					acAudioInStartAddress
-		PUSHU32(acAudioInStopAddress, outBlob)					//		ULWord					acAudioInStopAddress
-		PUSHU32(acAudioOutStopAddress, outBlob)					//		ULWord					acAudioOutStopAddress
-		PUSHU32(acAudioOutStartAddress, outBlob)				//		ULWord					acAudioOutStartAddress
-		PUSHU32(acTotalBytesTransferred, outBlob)				//		ULWord					acTotalBytesTransferred
-		PUSHU32(acStartSample, outBlob)							//		ULWord					acStartSample
+		bool ok = acHeader.RPCEncode(outBlob);						//	NTV2_HEADER				acHeader
+		PUSHU64(ULWord64(acFrameTime), outBlob)						//		LWord64					acFrameTime
+		PUSHU32(acRequestedFrame, outBlob)							//		ULWord					acRequestedFrame
+		PUSHU64(acAudioClockTimeStamp, outBlob)						//		ULWord64				acAudioClockTimeStamp
+		PUSHU32(acAudioExpectedAddress, outBlob)					//		ULWord					acAudioExpectedAddress
+		PUSHU32(acAudioInStartAddress, outBlob)						//		ULWord					acAudioInStartAddress
+		PUSHU32(acAudioInStopAddress, outBlob)						//		ULWord					acAudioInStopAddress
+		PUSHU32(acAudioOutStopAddress, outBlob)						//		ULWord					acAudioOutStopAddress
+		PUSHU32(acAudioOutStartAddress, outBlob)					//		ULWord					acAudioOutStartAddress
+		PUSHU32(acTotalBytesTransferred, outBlob)					//		ULWord					acTotalBytesTransferred
+		PUSHU32(acStartSample, outBlob)								//		ULWord					acStartSample
 
-		ok &= acTimeCodes.RPCEncode(outBlob);					//		NTV2_POINTER			acTimeCodes
-		PUSHU64(acCurrentTime, outBlob)							//		LWord64					acCurrentTime
-		PUSHU32(acCurrentFrame, outBlob)						//		ULWord					acCurrentFrame
-		PUSHU64(acCurrentFrameTime, outBlob)					//		LWord64					acCurrentFrameTime
-		PUSHU64(acAudioClockCurrentTime, outBlob)				//		ULWord64				acAudioClockCurrentTime
-		PUSHU32(acCurrentAudioExpectedAddress, outBlob)			//		ULWord					acCurrentAudioExpectedAddress
-		PUSHU32(acCurrentAudioStartAddress, outBlob)			//		ULWord					acCurrentAudioStartAddress
-		PUSHU32(acCurrentFieldCount, outBlob)					//		ULWord					acCurrentFieldCount
-		PUSHU32(acCurrentLineCount, outBlob)					//		ULWord					acCurrentLineCount
-		PUSHU32(acCurrentReps, outBlob)							//		ULWord					acCurrentReps
-		PUSHU64(acCurrentUserCookie, outBlob)					//		ULWord64				acCurrentUserCookie
-		PUSHU32(acFrame, outBlob)								//		ULWord					acFrame
-		PUSHU32(acRP188.fDBB, outBlob)							//		ULWord					acRP188.fDBB
-		PUSHU32(acRP188.fLo, outBlob)							//		ULWord					acRP188.fLo
-		PUSHU32(acRP188.fHi, outBlob)							//		ULWord					acRP188.fHi
-		ok &= acTrailer.RPCEncode(outBlob);						//	NTV2_TRAILER			acTrailer
+		ok &= acTimeCodes.RPCEncode(outBlob);						//		NTV2_POINTER			acTimeCodes
+		PUSHU64(ULWord64(acCurrentTime), outBlob)					//		LWord64					acCurrentTime
+		PUSHU32(acCurrentFrame, outBlob)							//		ULWord					acCurrentFrame
+		PUSHU64(ULWord64(acCurrentFrameTime), outBlob)				//		LWord64					acCurrentFrameTime
+		PUSHU64(acAudioClockCurrentTime, outBlob)					//		ULWord64				acAudioClockCurrentTime
+		PUSHU32(acCurrentAudioExpectedAddress, outBlob)				//		ULWord					acCurrentAudioExpectedAddress
+		PUSHU32(acCurrentAudioStartAddress, outBlob)				//		ULWord					acCurrentAudioStartAddress
+		PUSHU32(acCurrentFieldCount, outBlob)						//		ULWord					acCurrentFieldCount
+		PUSHU32(acCurrentLineCount, outBlob)						//		ULWord					acCurrentLineCount
+		PUSHU32(acCurrentReps, outBlob)								//		ULWord					acCurrentReps
+		PUSHU64(acCurrentUserCookie, outBlob)						//		ULWord64				acCurrentUserCookie
+		PUSHU32(acFrame, outBlob)									//		ULWord					acFrame
+		PUSHU32(acRP188.fDBB, outBlob)								//		ULWord					acRP188.fDBB
+		PUSHU32(acRP188.fLo, outBlob)								//		ULWord					acRP188.fLo
+		PUSHU32(acRP188.fHi, outBlob)								//		ULWord					acRP188.fHi
+		ok &= acTrailer.RPCEncode(outBlob);							//	NTV2_TRAILER			acTrailer
 		return ok;
 	}
 
 	bool FRAME_STAMP::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
-	{
-		bool ok = acHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER				acHeader
-		POPU64(acFrameTime, inBlob, inOutIndex)					//		LWord64					acFrameTime
+	{	uint64_t v64(0);
+		bool ok = acHeader.RPCDecode(inBlob, inOutIndex);			//	NTV2_HEADER				acHeader
+		POPU64(v64, inBlob, inOutIndex)								//		LWord64					acFrameTime
+		acFrameTime = LWord64(v64);
+		POPU32(acRequestedFrame, inBlob, inOutIndex)				//		ULWord					acRequestedFrame
+		POPU64(acAudioClockTimeStamp, inBlob, inOutIndex)			//		ULWord64				acAudioClockTimeStamp
+		POPU32(acAudioExpectedAddress, inBlob, inOutIndex)			//		ULWord					acAudioExpectedAddress
+		POPU32(acAudioInStartAddress, inBlob, inOutIndex)			//		ULWord					acAudioInStartAddress
+		POPU32(acAudioInStopAddress, inBlob, inOutIndex)			//		ULWord					acAudioInStopAddress
+		POPU32(acAudioOutStopAddress, inBlob, inOutIndex)			//		ULWord					acAudioOutStopAddress
+		POPU32(acAudioOutStartAddress, inBlob, inOutIndex)			//		ULWord					acAudioOutStartAddress
+		POPU32(acTotalBytesTransferred, inBlob, inOutIndex)			//		ULWord					acTotalBytesTransferred
+		POPU32(acStartSample, inBlob, inOutIndex)					//		ULWord					acStartSample
 
-		POPU32(acRequestedFrame, inBlob, inOutIndex)			//		ULWord					acRequestedFrame
-		POPU64(acAudioClockTimeStamp, inBlob, inOutIndex)		//		ULWord64				acAudioClockTimeStamp
-		POPU32(acAudioExpectedAddress, inBlob, inOutIndex)		//		ULWord					acAudioExpectedAddress
-		POPU32(acAudioInStartAddress, inBlob, inOutIndex)		//		ULWord					acAudioInStartAddress
-		POPU32(acAudioInStopAddress, inBlob, inOutIndex)		//		ULWord					acAudioInStopAddress
-		POPU32(acAudioOutStopAddress, inBlob, inOutIndex)		//		ULWord					acAudioOutStopAddress
-		POPU32(acAudioOutStartAddress, inBlob, inOutIndex)		//		ULWord					acAudioOutStartAddress
-		POPU32(acTotalBytesTransferred, inBlob, inOutIndex)		//		ULWord					acTotalBytesTransferred
-		POPU32(acStartSample, inBlob, inOutIndex)				//		ULWord					acStartSample
-
-		ok &= acTimeCodes.RPCDecode(inBlob, inOutIndex);		//		NTV2_POINTER			acTimeCodes
-		POPU64(acCurrentTime, inBlob, inOutIndex)				//		LWord64					acCurrentTime
-		POPU32(acCurrentFrame, inBlob, inOutIndex)				//		ULWord					acCurrentFrame
-		POPU64(acCurrentFrameTime, inBlob, inOutIndex)			//		LWord64					acCurrentFrameTime
-		POPU64(acAudioClockCurrentTime, inBlob, inOutIndex)		//		ULWord64				acAudioClockCurrentTime
+		ok &= acTimeCodes.RPCDecode(inBlob, inOutIndex);			//		NTV2_POINTER			acTimeCodes
+		POPU64(v64, inBlob, inOutIndex)								//		LWord64					acCurrentTime
+		acCurrentTime = LWord64(v64);
+		POPU32(acCurrentFrame, inBlob, inOutIndex)					//		ULWord					acCurrentFrame
+		POPU64(v64, inBlob, inOutIndex)								//		LWord64					acCurrentFrameTime
+		acCurrentFrameTime = LWord64(v64);
+		POPU64(acAudioClockCurrentTime, inBlob, inOutIndex)			//		ULWord64				acAudioClockCurrentTime
 		POPU32(acCurrentAudioExpectedAddress, inBlob, inOutIndex)	//	ULWord					acCurrentAudioExpectedAddress
-		POPU32(acCurrentAudioStartAddress, inBlob, inOutIndex)	//		ULWord					acCurrentAudioStartAddress
-		POPU32(acCurrentFieldCount, inBlob, inOutIndex)			//		ULWord					acCurrentFieldCount
-		POPU32(acCurrentLineCount, inBlob, inOutIndex)			//		ULWord					acCurrentLineCount
-		POPU32(acCurrentReps, inBlob, inOutIndex)				//		ULWord					acCurrentReps
-		POPU64(acCurrentUserCookie, inBlob, inOutIndex)			//		ULWord64				acCurrentUserCookie
-		POPU32(acFrame, inBlob, inOutIndex)						//		ULWord					acFrame
-		POPU32(acRP188.fDBB, inBlob, inOutIndex)				//		ULWord					acRP188.fDBB
-		POPU32(acRP188.fLo, inBlob, inOutIndex)					//		ULWord					acRP188.fLo
-		POPU32(acRP188.fHi, inBlob, inOutIndex)					//		ULWord					acRP188.fHi
-		ok &= acTrailer.RPCDecode(inBlob, inOutIndex);			//	NTV2_TRAILER			acTrailer
+		POPU32(acCurrentAudioStartAddress, inBlob, inOutIndex)		//		ULWord					acCurrentAudioStartAddress
+		POPU32(acCurrentFieldCount, inBlob, inOutIndex)				//		ULWord					acCurrentFieldCount
+		POPU32(acCurrentLineCount, inBlob, inOutIndex)				//		ULWord					acCurrentLineCount
+		POPU32(acCurrentReps, inBlob, inOutIndex)					//		ULWord					acCurrentReps
+		POPU64(acCurrentUserCookie, inBlob, inOutIndex)				//		ULWord64				acCurrentUserCookie
+		POPU32(acFrame, inBlob, inOutIndex)							//		ULWord					acFrame
+		POPU32(acRP188.fDBB, inBlob, inOutIndex)					//		ULWord					acRP188.fDBB
+		POPU32(acRP188.fLo, inBlob, inOutIndex)						//		ULWord					acRP188.fLo
+		POPU32(acRP188.fHi, inBlob, inOutIndex)						//		ULWord					acRP188.fHi
+		ok &= acTrailer.RPCDecode(inBlob, inOutIndex);				//	NTV2_TRAILER			acTrailer
 		return ok;
 	}
 
@@ -3092,7 +3062,7 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 			outBlob.reserve(totBytes);
 		bool ok = acHeader.RPCEncode(outBlob);					//	NTV2_HEADER				acHeader
 		PUSHU16(acState, outBlob)								//		UWord					acState
-		PUSHU32(acTransferFrame, outBlob)						//		LWord					acTransferFrame
+		PUSHU32(ULWord(acTransferFrame), outBlob)				//		LWord					acTransferFrame
 		PUSHU32(acBufferLevel, outBlob)							//		ULWord					acBufferLevel
 		PUSHU32(acFramesProcessed, outBlob)						//		ULWord					acFramesProcessed
 		PUSHU32(acFramesDropped, outBlob)						//		ULWord					acFramesDropped
@@ -3106,11 +3076,12 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 	}
 
 	bool AUTOCIRCULATE_TRANSFER_STATUS::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
-	{	uint16_t u16(0);
+	{	uint16_t v16(0);  uint32_t v32(0);
 		bool ok = acHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER				acHeader
-		POPU16(u16, inBlob, inOutIndex)							//		NTV2AutoCirculateState	acState
-		acState = NTV2AutoCirculateState(u16);
-		POPU32(acTransferFrame, inBlob, inOutIndex)				//		LWord					acTransferFrame
+		POPU16(v16, inBlob, inOutIndex)							//		NTV2AutoCirculateState	acState
+		acState = NTV2AutoCirculateState(v16);
+		POPU32(v32, inBlob, inOutIndex)							//		LWord					acTransferFrame
+		acTransferFrame = LWord(v32);
 		POPU32(acBufferLevel, inBlob, inOutIndex)				//		ULWord					acBufferLevel
 		POPU32(acFramesProcessed, inBlob, inOutIndex)			//		ULWord					acFramesProcessed
 		POPU32(acFramesDropped, inBlob, inOutIndex)				//		ULWord					acFramesDropped
@@ -3163,27 +3134,27 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 		PUSHU16(backgroundVideoCrosspoint, outBlob)				//	NTV2Crosspoint			backgroundVideoCrosspoint
 		PUSHU16(foregroundKeyCrosspoint, outBlob)				//	NTV2Crosspoint			foregroundKeyCrosspoint
 		PUSHU16(backgroundKeyCrosspoint, outBlob)				//	NTV2Crosspoint			backgroundKeyCrosspoint
-		PUSHU32(transitionCoefficient, outBlob)					//	Fixed_					transitionCoefficient
-		PUSHU32(transitionSoftness, outBlob)					//	Fixed_					transitionSoftness
+		PUSHU32(ULWord(transitionCoefficient), outBlob)			//	Fixed_					transitionCoefficient
+		PUSHU32(ULWord(transitionSoftness), outBlob)			//	Fixed_					transitionSoftness
 		return true;
 	}
 
 	bool AutoCircVidProcInfo::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
-	{	uint16_t u16(0);	uint32_t u32(0);
-		POPU16(u16, inBlob, inOutIndex)							//	AutoCircVidProcMode		mode
-		mode = AutoCircVidProcMode(u16);
-		POPU16(u16, inBlob, inOutIndex)							//	NTV2Crosspoint			foregroundVideoCrosspoint
-		foregroundVideoCrosspoint = NTV2Crosspoint(u16);
-		POPU16(u16, inBlob, inOutIndex)							//	NTV2Crosspoint			backgroundVideoCrosspoint
-		backgroundVideoCrosspoint = NTV2Crosspoint(u16);
-		POPU16(u16, inBlob, inOutIndex)							//	NTV2Crosspoint			foregroundKeyCrosspoint
-		foregroundKeyCrosspoint = NTV2Crosspoint(u16);
-		POPU16(u16, inBlob, inOutIndex)							//	NTV2Crosspoint			backgroundKeyCrosspoint
-		backgroundKeyCrosspoint = NTV2Crosspoint(u16);
-		POPU32(u32, inBlob, inOutIndex)							//	Fixed_					transitionCoefficient
-		transitionCoefficient = Fixed_(u32);
-		POPU32(u32, inBlob, inOutIndex)							//	Fixed_					transitionSoftness
-		transitionSoftness = Fixed_(u32);
+	{	uint16_t v16(0);	uint32_t v32(0);
+		POPU16(v16, inBlob, inOutIndex)							//	AutoCircVidProcMode		mode
+		mode = AutoCircVidProcMode(v16);
+		POPU16(v16, inBlob, inOutIndex)							//	NTV2Crosspoint			foregroundVideoCrosspoint
+		foregroundVideoCrosspoint = NTV2Crosspoint(v16);
+		POPU16(v16, inBlob, inOutIndex)							//	NTV2Crosspoint			backgroundVideoCrosspoint
+		backgroundVideoCrosspoint = NTV2Crosspoint(v16);
+		POPU16(v16, inBlob, inOutIndex)							//	NTV2Crosspoint			foregroundKeyCrosspoint
+		foregroundKeyCrosspoint = NTV2Crosspoint(v16);
+		POPU16(v16, inBlob, inOutIndex)							//	NTV2Crosspoint			backgroundKeyCrosspoint
+		backgroundKeyCrosspoint = NTV2Crosspoint(v16);
+		POPU32(v32, inBlob, inOutIndex)							//	Fixed_					transitionCoefficient
+		transitionCoefficient = Fixed_(v32);
+		POPU32(v32, inBlob, inOutIndex)							//	Fixed_					transitionSoftness
+		transitionSoftness = Fixed_(v32);
 		return true;
 	}
 
@@ -3219,14 +3190,14 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 		PUSHU32(acInVideoDMAOffset, outBlob)					//		ULWord							acInVideoDMAOffset
 		ok &= acInSegmentedDMAInfo.RPCEncode(outBlob);			//		NTV2SegmentedDMAInfo			acInSegmentedDMAInfo
 		ok &= acColorCorrection.RPCEncode(outBlob);				//		NTV2ColorCorrectionData			acColorCorrection
-		PUSHU16(acFrameBufferFormat, outBlob)					//		NTV2FrameBufferFormat			acFrameBufferFormat
+		PUSHU16(acFrameBufferFormat, outBlob)					//		NTV2PixelFormat					acFrameBufferFormat
 		PUSHU16(acFrameBufferOrientation, outBlob)				//		NTV2FBOrientation				acFrameBufferOrientation
 		ok &= acVidProcInfo.RPCEncode(outBlob);					//		AutoCircVidProcInfo				acVidProcInfo
-		PUSHU16(acVideoQuarterSizeExpand, outBlob)				//		NTV2QuarterSizeExpandMode		acVideoQuarterSizeExpand
+		PUSHU16(acVideoQuarterSizeExpand, outBlob)				//		NTV2QtrSizeExpandMode			acVideoQuarterSizeExpand
 		ok &= acHDMIAuxData.RPCEncode(outBlob);					//		NTV2_POINTER					acHDMIAuxData
 		PUSHU32(acPeerToPeerFlags, outBlob)						//		ULWord							acPeerToPeerFlags
 		PUSHU32(acFrameRepeatCount, outBlob)					//		ULWord							acFrameRepeatCount
-		PUSHU32(acDesiredFrame, outBlob)						//		LWord							acDesiredFrame
+		PUSHU32(ULWord(acDesiredFrame), outBlob)				//		LWord							acDesiredFrame
 		ok &= acRP188.RPCEncode(outBlob);						//		NTV2_RP188						acRP188
 		PUSHU16(acCrosspoint, outBlob)							//		NTV2Crosspoint					acCrosspoint
 		ok &= acTrailer.RPCEncode(outBlob);						//	NTV2_TRAILER					acTrailer
@@ -3234,33 +3205,34 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 	}
 
 	bool AUTOCIRCULATE_TRANSFER::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
-	{	uint16_t u16(0);
-		bool ok = acHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER					acHeader
-		ok &= acVideoBuffer.RPCDecode(inBlob, inOutIndex);		//		NTV2_POINTER				acVideoBuffer
-		ok &= acAudioBuffer.RPCDecode(inBlob, inOutIndex);		//		NTV2_POINTER				acAudioBuffer
-		ok &= acANCBuffer.RPCDecode(inBlob, inOutIndex);		//		NTV2_POINTER				acANCBuffer
-		ok &= acANCField2Buffer.RPCDecode(inBlob, inOutIndex);	//		NTV2_POINTER				acANCField2Buffer
-		ok &= acOutputTimeCodes.RPCDecode(inBlob, inOutIndex);	//		NTV2_POINTER				acOutputTimeCodes
-		ok &= acTransferStatus.RPCDecode(inBlob, inOutIndex);	//		NTV2_POINTER				acTransferStatus
-		POPU64(acInUserCookie, inBlob, inOutIndex)				//		ULWord64					acInUserCookie
-		POPU32(acInVideoDMAOffset, inBlob, inOutIndex)			//		ULWord						acInVideoDMAOffset
-		ok &= acInSegmentedDMAInfo.RPCDecode(inBlob, inOutIndex);//		NTV2_POINTER				acInSegmentedDMAInfo
-		ok &= acColorCorrection.RPCDecode(inBlob, inOutIndex);	//		NTV2_POINTER				acColorCorrection
-		POPU16(u16, inBlob, inOutIndex)							//		NTV2FrameBufferFormat		acFrameBufferFormat
-		acFrameBufferFormat = NTV2FrameBufferFormat(u16);
-		POPU16(u16, inBlob, inOutIndex)							//		NTV2FBOrientation			acFrameBufferOrientation
-		acFrameBufferOrientation = NTV2FBOrientation(u16);
-		ok &= acVidProcInfo.RPCDecode(inBlob, inOutIndex);		//		AutoCircVidProcInfo			acVidProcInfo
-		POPU16(u16, inBlob, inOutIndex)							//		NTV2QuarterSizeExpandMode	acVideoQuarterSizeExpand
-		acVideoQuarterSizeExpand = NTV2QuarterSizeExpandMode(u16);
-		ok &= acHDMIAuxData.RPCDecode(inBlob, inOutIndex);		//		NTV2_POINTER				acHDMIAuxData
-		POPU32(acPeerToPeerFlags, inBlob, inOutIndex)			//		ULWord						acPeerToPeerFlags
-		POPU32(acFrameRepeatCount, inBlob, inOutIndex)			//		ULWord						acFrameRepeatCount
-		POPU32(acDesiredFrame, inBlob, inOutIndex)				//		ULWord						acDesiredFrame
-		ok &= acRP188.RPCDecode(inBlob, inOutIndex);			//		NTV2_RP188					acRP188
-		POPU16(u16, inBlob, inOutIndex)							//		NTV2Crosspoint				acCrosspoint
-		acCrosspoint = NTV2Crosspoint(u16);
-		ok &= acTrailer.RPCDecode(inBlob, inOutIndex);			//	NTV2_TRAILER				acTrailer
+	{	uint16_t v16(0);  uint32_t v32(0);
+		bool ok = acHeader.RPCDecode(inBlob, inOutIndex);		//	NTV2_HEADER						acHeader
+		ok &= acVideoBuffer.RPCDecode(inBlob, inOutIndex);		//		NTV2_POINTER					acVideoBuffer
+		ok &= acAudioBuffer.RPCDecode(inBlob, inOutIndex);		//		NTV2_POINTER					acAudioBuffer
+		ok &= acANCBuffer.RPCDecode(inBlob, inOutIndex);		//		NTV2_POINTER					acANCBuffer
+		ok &= acANCField2Buffer.RPCDecode(inBlob, inOutIndex);	//		NTV2_POINTER					acANCField2Buffer
+		ok &= acOutputTimeCodes.RPCDecode(inBlob, inOutIndex);	//		NTV2_POINTER					acOutputTimeCodes
+		ok &= acTransferStatus.RPCDecode(inBlob, inOutIndex);	//		AUTOCIRCULATE_TRANSFER_STATUS	acTransferStatus
+		POPU64(acInUserCookie, inBlob, inOutIndex)				//		ULWord64						acInUserCookie
+		POPU32(acInVideoDMAOffset, inBlob, inOutIndex)			//		ULWord							acInVideoDMAOffset
+		ok &= acInSegmentedDMAInfo.RPCDecode(inBlob, inOutIndex);//		NTV2_POINTER					acInSegmentedDMAInfo
+		ok &= acColorCorrection.RPCDecode(inBlob, inOutIndex);	//		NTV2_POINTER					acColorCorrection
+		POPU16(v16, inBlob, inOutIndex)							//		NTV2PixelFormat					acFrameBufferFormat
+		acFrameBufferFormat = NTV2FrameBufferFormat(v16);
+		POPU16(v16, inBlob, inOutIndex)							//		NTV2FBOrientation				acFrameBufferOrientation
+		acFrameBufferOrientation = NTV2FBOrientation(v16);
+		ok &= acVidProcInfo.RPCDecode(inBlob, inOutIndex);		//		AutoCircVidProcInfo				acVidProcInfo
+		POPU16(v16, inBlob, inOutIndex)							//		NTV2QtrSizeExpandMode			acVideoQuarterSizeExpand
+		acVideoQuarterSizeExpand = NTV2QtrSizeExpandMode(v16);
+		ok &= acHDMIAuxData.RPCDecode(inBlob, inOutIndex);		//		NTV2_POINTER					acHDMIAuxData
+		POPU32(acPeerToPeerFlags, inBlob, inOutIndex)			//		ULWord							acPeerToPeerFlags
+		POPU32(acFrameRepeatCount, inBlob, inOutIndex)			//		ULWord							acFrameRepeatCount
+		POPU32(v32, inBlob, inOutIndex)							//		LWord							acDesiredFrame
+		acDesiredFrame = LWord(v32);
+		ok &= acRP188.RPCDecode(inBlob, inOutIndex);			//		NTV2_RP188						acRP188
+		POPU16(v16, inBlob, inOutIndex)							//		NTV2Crosspoint					acCrosspoint
+		acCrosspoint = NTV2Crosspoint(v16);
+		ok &= acTrailer.RPCDecode(inBlob, inOutIndex);			//	NTV2_TRAILER					acTrailer
 		return ok;
 	}
 
@@ -3305,9 +3277,9 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 	}
 
 	bool AUTOCIRCULATE_TRANSFER_STRUCT::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
-	{	UWord u16(0);  ULWord u32(0);
-		POPU16(u16, inBlob, inOutIndex)							//	NTV2Crosspoint			channelSpec
-		channelSpec = NTV2Crosspoint(u16);
+	{	UWord v16(0);  ULWord v32(0);
+		POPU16(v16, inBlob, inOutIndex)							//	NTV2Crosspoint			channelSpec
+		channelSpec = NTV2Crosspoint(v16);
 //		POPU64(u64, inBlob, inOutIndex)							//	ULWord	*				videoBuffer
 //		videoBuffer = reinterpret_cast<ULWord*>(u64);
 		POPU32(videoBufferSize, inBlob, inOutIndex)				//	ULWord					videoBufferSize
@@ -3341,14 +3313,15 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 		POPU32(audioNumChannels, inBlob, inOutIndex)			//	ULWord					audioNumChannels
 		POPU32(frameRepeatCount, inBlob, inOutIndex)			//	ULWord					frameRepeatCount
 		rp188.RPCDecode(inBlob, inOutIndex);					//	RP188_STRUCT			rp188
-		POPU32(desiredFrame, inBlob, inOutIndex)				//	LWord					desiredFrame
+		POPU32(v32, inBlob, inOutIndex)							//	LWord					desiredFrame
+		desiredFrame = LWord(v32);
 		POPU32(hUser, inBlob, inOutIndex)						//	ULWord					hUser
 		POPU32(transferFlags, inBlob, inOutIndex)				//	ULWord					transferFlags
 		POPU32(bDisableExtraAudioInfo, inBlob, inOutIndex)		//	BOOL_					bDisableExtraAudioInfo
-		POPU16(u16, inBlob, inOutIndex)							//	NTV2PixelFormat			frameBufferFormat
-		frameBufferFormat = NTV2PixelFormat(u16);
-		POPU16(u16, inBlob, inOutIndex)							//	NTV2FBOrientation		frameBufferOrientation
-		frameBufferOrientation = NTV2FBOrientation(u16);
+		POPU16(v16, inBlob, inOutIndex)							//	NTV2PixelFormat			frameBufferFormat
+		frameBufferFormat = NTV2PixelFormat(v16);
+		POPU16(v16, inBlob, inOutIndex)							//	NTV2FBOrientation		frameBufferOrientation
+		frameBufferOrientation = NTV2FBOrientation(v16);
 		//	Skip color correction for now						//	NTV2ColorCorrectionInfo	colorCorrectionInfo
 		vidProcInfo.RPCDecode(inBlob, inOutIndex);				//	AutoCircVidProcInfo		vidProcInfo
 		POPU32(customAncInfo.Group1, inBlob, inOutIndex)		//	CUSTOM_ANC_STRUCT		customAncInfo
@@ -3358,8 +3331,8 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 		POPU32(videoNumSegments, inBlob, inOutIndex)			//	ULWord					videoNumSegments
 		POPU32(videoSegmentHostPitch, inBlob, inOutIndex)		//	ULWord					videoSegmentHostPitch
 		POPU32(videoSegmentCardPitch, inBlob, inOutIndex)		//	ULWord					videoSegmentCardPitch
-		POPU16(u16, inBlob, inOutIndex)							//	NTV2QtrSizeExpandMode	videoQuarterSizeExpand
-		videoQuarterSizeExpand = NTV2QtrSizeExpandMode(u16);
+		POPU16(v16, inBlob, inOutIndex)							//	NTV2QtrSizeExpandMode	videoQuarterSizeExpand
+		videoQuarterSizeExpand = NTV2QtrSizeExpandMode(v16);
 		return true;
 	}
 
@@ -3398,9 +3371,9 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 	{
 		PUSHU16(UWord(channelSpec), outBlob)					//	NTV2Crosspoint			channelSpec
 		PUSHU16(UWord(state), outBlob)							//	NTV2AutoCirculateState	state
-		PUSHU32(startFrame, outBlob)							//	LWord					startFrame
-		PUSHU32(endFrame, outBlob)								//	LWord					endFrame
-		PUSHU32(activeFrame, outBlob)							//	LWord					activeFrame
+		PUSHU32(ULWord(startFrame), outBlob)					//	LWord					startFrame
+		PUSHU32(ULWord(endFrame), outBlob)						//	LWord					endFrame
+		PUSHU32(ULWord(activeFrame), outBlob)					//	LWord					activeFrame
 		PUSHU64(rdtscStartTime, outBlob)						//	ULWord64				rdtscStartTime
 		PUSHU64(audioClockStartTime, outBlob)					//	ULWord64				audioClockStartTime
 		PUSHU64(rdtscCurrentTime, outBlob)						//	ULWord64				rdtscCurrentTime
@@ -3419,14 +3392,17 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 	}
 
 	bool AUTOCIRCULATE_STATUS_STRUCT::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
-	{	uint16_t u16(0);
-		POPU16(u16, inBlob, inOutIndex)							//	NTV2Crosspoint			channelSpec
-		channelSpec = NTV2Crosspoint(u16);
-		POPU16(u16, inBlob, inOutIndex)							//	NTV2AutoCirculateState	state
-		state = NTV2AutoCirculateState(u16);
-		POPU32(startFrame, inBlob, inOutIndex)					//	LWord					startFrame
-		POPU32(endFrame, inBlob, inOutIndex)					//	LWord					endFrame
-		POPU32(activeFrame, inBlob, inOutIndex)					//	LWord					activeFrame
+	{	uint16_t v16(0);  uint32_t v32(0);
+		POPU16(v16, inBlob, inOutIndex)							//	NTV2Crosspoint			channelSpec
+		channelSpec = NTV2Crosspoint(v16);
+		POPU16(v16, inBlob, inOutIndex)							//	NTV2AutoCirculateState	state
+		state = NTV2AutoCirculateState(v16);
+		POPU32(v32, inBlob, inOutIndex)							//	LWord					startFrame
+		startFrame = LWord(v32);
+		POPU32(v32, inBlob, inOutIndex)							//	LWord					endFrame
+		endFrame = LWord(v32);
+		POPU32(v32, inBlob, inOutIndex)							//	LWord					activeFrame
+		activeFrame = LWord(v32);
 		POPU64(rdtscStartTime, inBlob, inOutIndex)				//	ULWord64				rdtscStartTime
 		POPU64(audioClockStartTime, inBlob, inOutIndex)			//	ULWord64				audioClockStartTime
 		POPU64(rdtscCurrentTime, inBlob, inOutIndex)			//	ULWord64				rdtscCurrentTime
@@ -3514,7 +3490,7 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 	bool FRAME_STAMP_STRUCT::RPCEncode (UByteSequence & outBlob)
 	{
 		PUSHU16(UWord(channelSpec), outBlob)					//	NTV2Crosspoint		channelSpec
-		PUSHU64(frameTime, outBlob)								//	LWord64				frameTime
+		PUSHU64(ULWord64(frameTime), outBlob)					//	LWord64				frameTime
 		PUSHU32(frame, outBlob)									//	ULWord				frame
 		PUSHU64(audioClockTimeStamp, outBlob)					//	ULWord64			audioClockTimeStamp
 		PUSHU32(audioExpectedAddress, outBlob)					//	ULWord				audioExpectedAddress
@@ -3524,10 +3500,10 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 		PUSHU32(audioOutStartAddress, outBlob)					//	ULWord				audioOutStartAddress
 		PUSHU32(bytesRead, outBlob)								//	ULWord				bytesRead
 		PUSHU32(startSample, outBlob)							//	ULWord				startSample
-		PUSHU64(currentTime, outBlob)							//	LWord64				currentTime
+		PUSHU64(ULWord64(currentTime), outBlob)					//	LWord64				currentTime
 		PUSHU32(currentFrame, outBlob)							//	ULWord				currentFrame
 		currentRP188.RPCEncode(outBlob);						//	RP188_STRUCT		currentRP188
-		PUSHU64(currentFrameTime, outBlob)						//	LWord64				currentFrameTime
+		PUSHU64(ULWord64(currentFrameTime), outBlob)			//	LWord64				currentFrameTime
 		PUSHU64(audioClockCurrentTime, outBlob)					//	ULWord64			audioClockCurrentTime
 		PUSHU32(currentAudioExpectedAddress, outBlob)			//	ULWord				currentAudioExpectedAddress
 		PUSHU32(currentAudioStartAddress, outBlob)				//	ULWord				currentAudioStartAddress
@@ -3539,10 +3515,11 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 	}
 
 	bool FRAME_STAMP_STRUCT::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
-	{	uint16_t u16(0);
-		POPU16(u16, inBlob, inOutIndex)							//	NTV2Crosspoint		channelSpec
-		channelSpec = NTV2Crosspoint(u16);
-		POPU64(frameTime, inBlob, inOutIndex)					//	LWord64				frameTime
+	{	uint16_t v16(0);  uint64_t v64(0);
+		POPU16(v16, inBlob, inOutIndex)							//	NTV2Crosspoint		channelSpec
+		channelSpec = NTV2Crosspoint(v16);
+		POPU64(v64, inBlob, inOutIndex)							//	LWord64				frameTime
+		frameTime = LWord64(v64);
 		POPU32(frame, inBlob, inOutIndex)						//	ULWord				frame
 		POPU64(audioClockTimeStamp, inBlob, inOutIndex)			//	ULWord64			audioClockTimeStamp
 		POPU32(audioExpectedAddress, inBlob, inOutIndex)		//	ULWord				audioExpectedAddress
@@ -3552,10 +3529,12 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 		POPU32(audioOutStartAddress, inBlob, inOutIndex)		//	ULWord				audioOutStartAddress
 		POPU32(bytesRead, inBlob, inOutIndex)					//	ULWord				bytesRead
 		POPU32(startSample, inBlob, inOutIndex)					//	ULWord				startSample
-		POPU64(currentTime, inBlob, inOutIndex)					//	LWord64				currentTime
+		POPU64(v64, inBlob, inOutIndex)							//	LWord64				currentTime
+		currentTime = LWord64(v64);
 		POPU32(currentFrame, inBlob, inOutIndex)				//	ULWord				currentFrame
 		currentRP188.RPCDecode(inBlob, inOutIndex);				//	RP188_STRUCT		currentRP188
-		POPU64(currentFrameTime, inBlob, inOutIndex)			//	LWord64				currentFrameTime
+		POPU64(v64, inBlob, inOutIndex)							//	LWord64				currentFrameTime
+		currentFrameTime = LWord64(v64);
 		POPU64(audioClockCurrentTime, inBlob, inOutIndex)		//	ULWord64			audioClockCurrentTime
 		POPU32(currentAudioExpectedAddress, inBlob, inOutIndex)	//	ULWord				currentAudioExpectedAddress
 		POPU32(currentAudioStartAddress, inBlob, inOutIndex)	//	ULWord				currentAudioStartAddress
@@ -3570,12 +3549,12 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 	{
 		PUSHU16(UWord(eCommand), outBlob)						//	AUTO_CIRC_COMMAND		eCommand
 		PUSHU16(UWord(channelSpec), outBlob)					//	NTV2Crosspoint			channelSpec
-		PUSHU32(lVal1, outBlob)									//	LWord					lVal1
-		PUSHU32(lVal2, outBlob)									//	LWord					lVal2
-		PUSHU32(lVal3, outBlob)									//	LWord					lVal3
-		PUSHU32(lVal4, outBlob)									//	LWord					lVal4
-		PUSHU32(lVal5, outBlob)									//	LWord					lVal5
-		PUSHU32(lVal6, outBlob)									//	LWord					lVal6
+		PUSHU32(ULWord(lVal1), outBlob)							//	LWord					lVal1
+		PUSHU32(ULWord(lVal2), outBlob)							//	LWord					lVal2
+		PUSHU32(ULWord(lVal3), outBlob)							//	LWord					lVal3
+		PUSHU32(ULWord(lVal4), outBlob)							//	LWord					lVal4
+		PUSHU32(ULWord(lVal5), outBlob)							//	LWord					lVal5
+		PUSHU32(ULWord(lVal6), outBlob)							//	LWord					lVal6
 		PUSHU32(bVal1, outBlob)									//	BOOL_					bVal1
 		PUSHU32(bVal2, outBlob)									//	BOOL_					bVal2
 		PUSHU32(bVal3, outBlob)									//	BOOL_					bVal3
@@ -3600,17 +3579,17 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 	}
 
 	bool AUTOCIRCULATE_DATA::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
-	{	uint16_t u16(0);	uint64_t u64(0);
-		POPU16(u16, inBlob, inOutIndex)							//	AUTO_CIRC_COMMAND		eCommand
-		eCommand = AUTO_CIRC_COMMAND(u16);
-		POPU16(u16, inBlob, inOutIndex)							//	NTV2Crosspoint			channelSpec
-		channelSpec = NTV2Crosspoint(u16);
-		POPU32(lVal1, inBlob, inOutIndex)						//	LWord					lVal1
-		POPU32(lVal2, inBlob, inOutIndex)						//	LWord					lVal2
-		POPU32(lVal3, inBlob, inOutIndex)						//	LWord					lVal3
-		POPU32(lVal4, inBlob, inOutIndex)						//	LWord					lVal4
-		POPU32(lVal5, inBlob, inOutIndex)						//	LWord					lVal5
-		POPU32(lVal6, inBlob, inOutIndex)						//	LWord					lVal6
+	{	uint16_t v16(0);	uint32_t v32(0);	uint64_t v64(0);
+		POPU16(v16, inBlob, inOutIndex)							//	AUTO_CIRC_COMMAND		eCommand
+		eCommand = AUTO_CIRC_COMMAND(v16);
+		POPU16(v16, inBlob, inOutIndex)							//	NTV2Crosspoint			channelSpec
+		channelSpec = NTV2Crosspoint(v16);
+		POPU32(v32, inBlob, inOutIndex)	lVal1 = LWord(v32);		//	LWord					lVal1
+		POPU32(v32, inBlob, inOutIndex)	lVal2 = LWord(v32);		//	LWord					lVal2
+		POPU32(v32, inBlob, inOutIndex)	lVal3 = LWord(v32);		//	LWord					lVal3
+		POPU32(v32, inBlob, inOutIndex)	lVal4 = LWord(v32);		//	LWord					lVal4
+		POPU32(v32, inBlob, inOutIndex)	lVal5 = LWord(v32);		//	LWord					lVal5
+		POPU32(v32, inBlob, inOutIndex)	lVal6 = LWord(v32);		//	LWord					lVal6
 		POPU32(bVal1, inBlob, inOutIndex)						//	BOOL_					bVal1
 		POPU32(bVal2, inBlob, inOutIndex)						//	BOOL_					bVal2
 		POPU32(bVal3, inBlob, inOutIndex)						//	BOOL_					bVal3
@@ -3619,14 +3598,14 @@ ostream & NTV2GetRegisters::Print (ostream & inOutStream) const
 		POPU32(bVal6, inBlob, inOutIndex)						//	BOOL_					bVal6
 		POPU32(bVal7, inBlob, inOutIndex)						//	BOOL_					bVal7
 		POPU32(bVal8, inBlob, inOutIndex)						//	BOOL_					bVal8
-		POPU64(u64, inBlob, inOutIndex)							//	void*					pvVal1
-		pvVal1 = reinterpret_cast<void*>(u64);
-		POPU64(u64, inBlob, inOutIndex)							//	void*					pvVal2
-		pvVal2 = reinterpret_cast<void*>(u64);
-		POPU64(u64, inBlob, inOutIndex)							//	void*					pvVal3
-		pvVal3 = reinterpret_cast<void*>(u64);
-		POPU64(u64, inBlob, inOutIndex)							//	void*					pvVal4
-		pvVal4 = reinterpret_cast<void*>(u64);
+		POPU64(v64, inBlob, inOutIndex)							//	void*					pvVal1
+		pvVal1 = reinterpret_cast<void*>(v64);
+		POPU64(v64, inBlob, inOutIndex)							//	void*					pvVal2
+		pvVal2 = reinterpret_cast<void*>(v64);
+		POPU64(v64, inBlob, inOutIndex)							//	void*					pvVal3
+		pvVal3 = reinterpret_cast<void*>(v64);
+		POPU64(v64, inBlob, inOutIndex)							//	void*					pvVal4
+		pvVal4 = reinterpret_cast<void*>(v64);
 		if (eCommand == eGetAutoCirc  &&  pvVal1)
 			reinterpret_cast<AUTOCIRCULATE_STATUS_STRUCT*>(pvVal1)->RPCDecode(inBlob, inOutIndex);
 		if ((eCommand == eGetFrameStamp  ||  eCommand == eGetFrameStampEx2)  &&  pvVal1)

@@ -12,34 +12,36 @@
 #include "ntv2nubtypes.h"
 #include <string>
 
-#define NTV2_REMOTE_ACCESS_SUCCESS						  	 0
-#define NTV2_REMOTE_ACCESS_NOT_CONNECTED  				 	-1
-#define NTV2_REMOTE_ACCESS_OUT_OF_MEMORY				 	-2
-#define NTV2_REMOTE_ACCESS_SEND_ERR						 	-3
-#define NTV2_REMOTE_ACCESS_CONNECTION_CLOSED 			 	-4
-#define NTV2_REMOTE_ACCESS_RECV_ERR						 	-5
-#define NTV2_REMOTE_ACCESS_TIMEDOUT				  		 	-6
-#define NTV2_REMOTE_ACCESS_NO_CARD						 	-7
-#define NTV2_REMOTE_ACCESS_NOT_OPEN_RESP				 	-8
-#define NTV2_REMOTE_ACCESS_NON_NUB_PKT					 	-9
-#define NTV2_REMOTE_ACCESS_NOT_READ_REGISTER_RESP			-10
-#define NTV2_REMOTE_ACCESS_NOT_WRITE_REGISTER_RESP			-11
-#define NTV2_REMOTE_ACCESS_NOT_AUTOCIRC_RESP				-12
-#define NTV2_REMOTE_ACCESS_NOT_WAIT_FOR_INTERRUPT_RESP		-13
-#define NTV2_REMOTE_ACCESS_WAIT_FOR_INTERRUPT_FAILED		-14
-#define NTV2_REMOTE_AUTOCIRC_FAILED							-15
-#define NTV2_REMOTE_ACCESS_DRIVER_GET_BITFILE_INFO_FAILED	-16
-#define NTV2_REMOTE_ACCESS_NOT_DRIVER_GET_BITFILE_INFO		-17
-#define NTV2_REMOTE_ACCESS_NOT_DOWNLOAD_TEST_PATTERN		-18
-#define NTV2_REMOTE_ACCESS_DOWNLOAD_TEST_PATTERN_FAILED		-19
-#define NTV2_REMOTE_ACCESS_READ_REG_MULTI_FAILED			-20
-#define NTV2_REMOTE_ACCESS_NOT_READ_REG_MULTI				-21
-#define NTV2_REMOTE_ACCESS_GET_DRIVER_VERSION_FAILED		-22
-#define NTV2_REMOTE_ACCESS_NOT_GET_DRIVER_VERSION_RESP		-23
-#define NTV2_REMOTE_ACCESS_READ_REG_FAILED					-24
-#define NTV2_REMOTE_ACCESS_DRIVER_GET_BUILD_INFO_FAILED		-25
-#define NTV2_REMOTE_ACCESS_NOT_DRIVER_GET_BUILD_INFO		-26
-#define NTV2_REMOTE_ACCESS_UNIMPLEMENTED					-27
+#if !defined(NTV2_RPC_SUPPORT)
+	#define NTV2_REMOTE_ACCESS_SUCCESS						  	 0
+	#define NTV2_REMOTE_ACCESS_NOT_CONNECTED  				 	-1
+	#define NTV2_REMOTE_ACCESS_OUT_OF_MEMORY				 	-2
+	#define NTV2_REMOTE_ACCESS_SEND_ERR						 	-3
+	#define NTV2_REMOTE_ACCESS_CONNECTION_CLOSED 			 	-4
+	#define NTV2_REMOTE_ACCESS_RECV_ERR						 	-5
+	#define NTV2_REMOTE_ACCESS_TIMEDOUT				  		 	-6
+	#define NTV2_REMOTE_ACCESS_NO_CARD						 	-7
+	#define NTV2_REMOTE_ACCESS_NOT_OPEN_RESP				 	-8
+	#define NTV2_REMOTE_ACCESS_NON_NUB_PKT					 	-9
+	#define NTV2_REMOTE_ACCESS_NOT_READ_REGISTER_RESP			-10
+	#define NTV2_REMOTE_ACCESS_NOT_WRITE_REGISTER_RESP			-11
+	#define NTV2_REMOTE_ACCESS_NOT_AUTOCIRC_RESP				-12
+	#define NTV2_REMOTE_ACCESS_NOT_WAIT_FOR_INTERRUPT_RESP		-13
+	#define NTV2_REMOTE_ACCESS_WAIT_FOR_INTERRUPT_FAILED		-14
+	#define NTV2_REMOTE_AUTOCIRC_FAILED							-15
+	#define NTV2_REMOTE_ACCESS_DRIVER_GET_BITFILE_INFO_FAILED	-16
+	#define NTV2_REMOTE_ACCESS_NOT_DRIVER_GET_BITFILE_INFO		-17
+	#define NTV2_REMOTE_ACCESS_NOT_DOWNLOAD_TEST_PATTERN		-18
+	#define NTV2_REMOTE_ACCESS_DOWNLOAD_TEST_PATTERN_FAILED		-19
+	#define NTV2_REMOTE_ACCESS_READ_REG_MULTI_FAILED			-20
+	#define NTV2_REMOTE_ACCESS_NOT_READ_REG_MULTI				-21
+	#define NTV2_REMOTE_ACCESS_GET_DRIVER_VERSION_FAILED		-22
+	#define NTV2_REMOTE_ACCESS_NOT_GET_DRIVER_VERSION_RESP		-23
+	#define NTV2_REMOTE_ACCESS_READ_REG_FAILED					-24
+	#define NTV2_REMOTE_ACCESS_DRIVER_GET_BUILD_INFO_FAILED		-25
+	#define NTV2_REMOTE_ACCESS_NOT_DRIVER_GET_BUILD_INFO		-26
+	#define NTV2_REMOTE_ACCESS_UNIMPLEMENTED					-27
+#endif	//	defined(NTV2_RPC_SUPPORT)
 
 
 /**
@@ -58,7 +60,9 @@ class AJAExport NTV2RPCAPI
 		virtual bool					IsConnected	(void) const;
 		virtual std::string				Name (void) const;
 		virtual std::ostream &			Print (std::ostream & oss) const;
+		#if !defined(NTV2_RPC_SUPPORT)
 		virtual NTV2NubProtocolVersion	NubProtocolVersion (void) const;
+		#endif	//	!defined(NTV2_RPC_SUPPORT)
 		virtual uint32_t				Version (void) const;
 		virtual NTV2_POINTER &			localStorage (void);
 		virtual const NTV2_POINTER &	localStorage (void) const;
@@ -85,11 +89,11 @@ class AJAExport NTV2RPCAPI
 	
 		virtual int		NTV2GetDriverVersionRemote	(ULWord & outDriverVersion);
 	
-		virtual int		NTV2DMATransferRemote	(const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
-												const ULWord inFrameNumber,			ULWord * pFrameBuffer,
-												const ULWord inCardOffsetBytes,		const ULWord inTotalByteCount,
-												const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
-												const ULWord inSegmentCardPitch,	const bool inSynchronous);
+		virtual	int		NTV2DMATransferRemote		(const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
+													const ULWord inFrameNumber,			NTV2_POINTER & inOutBuffer,
+													const ULWord inCardOffsetBytes,		const ULWord inNumSegments,
+													const ULWord inSegmentHostPitch,	const ULWord inSegmentCardPitch,
+													const bool inSynchronous);
 	
 		virtual int		NTV2MessageRemote	(NTV2_HEADER *	pInMessage);
 

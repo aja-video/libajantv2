@@ -7,7 +7,7 @@
 
 #ifndef NTV2DISCOVER_H
 #define NTV2DISCOVER_H
-#if defined (AJALinux ) || defined (AJAMac)
+#if defined(AJALinux ) || defined(AJAMac)
 	#include <sys/socket.h>
 	#include <netinet/in.h>
 	#include <arpa/inet.h>
@@ -15,6 +15,7 @@
 #include "ajaexport.h"
 #include "ntv2nubtypes.h"
 
+#if !defined(NTV2_RPC_SUPPORT)
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 
 #define DISCOVER_SUCCESS		(0)
@@ -39,5 +40,6 @@ AJAExport int	ntv2DiscoverNubs (	const char *			hostname,
 									int						sendto_count	= 5,	//	How many UDP queries to send (can be lost)
 									bool					appendNubs	= false);	// If true, leave existing nubs in boardInventory and add new ones
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
+#endif	//	!defined(NTV2_RPC_SUPPORT)
 
 #endif	//	NTV2DISCOVER_H

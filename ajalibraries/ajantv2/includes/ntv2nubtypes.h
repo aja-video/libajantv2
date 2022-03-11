@@ -14,9 +14,52 @@
 
 #define NTV2NUBPORT			7474	// port we're listening on
 
-#define INVALID_NUB_HANDLE (-1)
-
 typedef ULWord NTV2NubProtocolVersion;
+
+#if defined(NTV2_RPC_SUPPORT)
+	#include "ntv2endian.h"
+
+	#define	PUSHU16(__v__,__b__)	{	const uint16_t _u16(NTV2HostIsBigEndian ? (__v__) : NTV2EndianSwap16HtoB(__v__));	\
+										const UByte * _pU16(reinterpret_cast<const UByte*>(&_u16));							\
+										__b__.push_back(_pU16[0]); __b__.push_back(_pU16[1]);								\
+									}
+
+	#define	PUSHU32(__v__,__b__)	{	const uint32_t _u32(NTV2HostIsBigEndian ? (__v__) : NTV2EndianSwap32HtoB(__v__));	\
+										const UByte * _pU32(reinterpret_cast<const UByte*>(&_u32));							\
+										__b__.push_back(_pU32[0]); __b__.push_back(_pU32[1]);								\
+										__b__.push_back(_pU32[2]); __b__.push_back(_pU32[3]);								\
+									}
+
+	#define	PUSHU64(__v__,__b__)	{	const uint64_t _u64(NTV2HostIsBigEndian ? (__v__) : NTV2EndianSwap64HtoB(__v__));	\
+										const UByte * _pU64(reinterpret_cast<const UByte*>(&_u64));							\
+										__b__.push_back(_pU64[0]); __b__.push_back(_pU64[1]);								\
+										__b__.push_back(_pU64[2]); __b__.push_back(_pU64[3]);								\
+										__b__.push_back(_pU64[4]); __b__.push_back(_pU64[5]);								\
+										__b__.push_back(_pU64[6]); __b__.push_back(_pU64[7]);								\
+									}
+
+	#define	POPU16(__v__,__b__,__n__)	{	uint16_t _u16(0);	UByte * _pU8(reinterpret_cast<UByte*>(&_u16));				\
+											_pU8[0] = (__b__).at((__n__)++); _pU8[1] = (__b__).at((__n__)++);				\
+											(__v__) = NTV2HostIsBigEndian ? _u16 : NTV2EndianSwap16BtoH(_u16);				\
+										}
+
+	#define	POPU32(__v__,__b__,__n__)	{	uint32_t _u32(0);	UByte * _pU8(reinterpret_cast<UByte*>(&_u32));				\
+											_pU8[0] = (__b__).at((__n__)++); _pU8[1] = (__b__).at((__n__)++);				\
+											_pU8[2] = (__b__).at((__n__)++); _pU8[3] = (__b__).at((__n__)++);				\
+											(__v__) = NTV2HostIsBigEndian ? _u32 : NTV2EndianSwap32BtoH(_u32);				\
+										}
+
+	#define	POPU64(__v__,__b__,__n__)	{	uint64_t _u64(0);	UByte * _pU8(reinterpret_cast<UByte*>(&_u64));				\
+											_pU8[0] = (__b__).at((__n__)++); _pU8[1] = (__b__).at((__n__)++);				\
+											_pU8[2] = (__b__).at((__n__)++); _pU8[3] = (__b__).at((__n__)++);				\
+											_pU8[4] = (__b__).at((__n__)++); _pU8[5] = (__b__).at((__n__)++);				\
+											_pU8[6] = (__b__).at((__n__)++); _pU8[7] = (__b__).at((__n__)++);				\
+											(__v__) = NTV2HostIsBigEndian ? _u64 : NTV2EndianSwap64BtoH(_u64);				\
+										}
+
+#else	//	!defined(NTV2_RPC_SUPPORT)
+
+#define INVALID_NUB_HANDLE (-1)
 
 const ULWord ntv2NubProtocolVersionNone = 0;
 const ULWord ntv2NubProtocolVersion1 = 1;
@@ -231,40 +274,6 @@ typedef struct
 	ULWord testPatternDMAEnable;		// Actually a bool
 	ULWord testPatternNumber;
 } NTV2DownloadTestPatternPayload;
-
-#if 0
-#define NTV2NUB_DISCOVER_QUERY	"Our chief weapons are?"
-#define NTV2NUB_DISCOVER_RESP	"Fear and surprise!"
-
-#define NTV2NUB_OPEN_QUERY		"I didn't expect a kind of Spanish Inquisition."
-#define NTV2NUB_OPEN_RESP		"NOBODY expects the Spanish Inquisition!"
-
-#define NTV2NUB_READ_REG_SINGLE_QUERY	"Cardinal Fang! Fetch...THE COMFY CHAIR!"
-#define NTV2NUB_READ_REG_SINGLE_RESP	"The...Comfy Chair?"
-
-#define NTV2NUB_WRITE_REG_QUERY "Biggles! Put her in the Comfy Chair!"
-#define NTV2NUB_WRITE_REG_RESP	"Is that really all it is?"
-
-#define NTV2NUB_GET_AUTOCIRCULATE_QUERY "Right! How do you plead?"
-#define NTV2NUB_GET_AUTOCIRCULATE_RESP	"Innocent."
-
-#define NTV2NUB_CONTROL_AUTOCIRCULATE_QUERY "Biggles! Fetch...THE SOFT CUSHIONS!"
-#define NTV2NUB_CONTROL_AUTOCIRCULATE_RESP	"Here they are, lord."
-
-#define NTV2NUB_WAIT_FOR_INTERRUPT_QUERY	"My old man said follow the..."
-#define NTV2NUB_WAIT_FOR_INTERRUPT_RESP		"That's enough."
-
-#define NTV2NUB_DRIVER_GET_BITFILE_INFO_QUERY	"Oh no - what kind of trouble?"
-#define NTV2NUB_DRIVER_GET_BITFILE_INFO_RESP	"One on't cross beams gone owt askew on treddle."
-
-#define NTV2NUB_DOWNLOAD_TEST_PATTERN_QUERY "You have three last chances, the nature of which I have divulged in my previous utterance."
-#define NTV2NUB_DOWNLOAD_TEST_PATTERN_RESP	"I don't know what you're talking about."
-
-#define NTV2NUB_READ_REG_MULTI_QUERY	"Surprise and..."
-#define NTV2NUB_READ_REG_MULTI_RESP		"Ah!... our chief weapons are surprise... blah blah blah."
-
-#define NTV2NUB_GET_DRIVER_VERSION_QUERY	"Shall I...?"
-#define NTV2NUB_GET_DRIVER_VERSION_RESP		"No, just pretend for God's sake. Ha! Ha! Ha!"
-#endif
+#endif	//	!defined(NTV2_RPC_SUPPORT)
 
 #endif	//	__NTV2NUBTYPES_H

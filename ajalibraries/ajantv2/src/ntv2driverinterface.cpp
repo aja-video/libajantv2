@@ -636,8 +636,9 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine inDMAEngine,
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT(IsRemote());
-	return !_pRPCAPI->NTV2DMATransferRemote(inDMAEngine, inIsRead, inFrameNumber, pFrameBuffer, inCardOffsetBytes,
-											inTotalByteCount, 0/*numSegs*/,	 0/*hostPitch*/,  0/*cardPitch*/, inSynchronous);
+	NTV2_POINTER buffer(pFrameBuffer, inTotalByteCount);
+	return !_pRPCAPI->NTV2DMATransferRemote(inDMAEngine, inIsRead, inFrameNumber, buffer, inCardOffsetBytes,
+											0/*numSegs*/,	 0/*hostPitch*/,  0/*cardPitch*/, inSynchronous);
 #else
 	(void) inDMAEngine; (void) inIsRead;	(void) inFrameNumber;	(void) pFrameBuffer;	(void) inCardOffsetBytes;
 	(void) inTotalByteCount;	(void) inSynchronous;
@@ -658,9 +659,9 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine inDMAEngine,
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT(IsRemote());
-	return !_pRPCAPI->NTV2DMATransferRemote(inDMAEngine, inIsRead, inFrameNumber, pFrameBuffer, inCardOffsetBytes,
-											inTotalByteCount, inNumSegments, inHostPitchPerSeg, inCardPitchPerSeg,
-											inSynchronous);
+	NTV2_POINTER buffer(pFrameBuffer, inTotalByteCount);
+	return !_pRPCAPI->NTV2DMATransferRemote(inDMAEngine, inIsRead, inFrameNumber, buffer, inCardOffsetBytes,
+											inNumSegments, inHostPitchPerSeg, inCardPitchPerSeg, inSynchronous);
 #else
 	(void) inDMAEngine; (void) inIsRead;	(void) inFrameNumber;	(void) pFrameBuffer;	(void) inCardOffsetBytes;
 	(void) inTotalByteCount;	(void) inNumSegments;	(void) inHostPitchPerSeg;	(void) inCardPitchPerSeg;	(void) inSynchronous;
@@ -1367,8 +1368,9 @@ string CNTV2DriverInterface::GetHostName (void) const
 bool CNTV2DriverInterface::IsRemote (void) const
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (_pRPCAPI)
-		return _pRPCAPI->IsConnected();
+	return _pRPCAPI ? true : false;
+//	if (_pRPCAPI)
+//		return _pRPCAPI->IsConnected();
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	return false;
 }

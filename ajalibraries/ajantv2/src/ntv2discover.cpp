@@ -5,6 +5,9 @@
 	@copyright	(C) 2006-2022 AJA Video Systems, Inc.
 **/
 
+#include "ajatypes.h"
+
+#if !defined(NTV2_RPC_SUPPORT)
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef MSWindows
@@ -27,7 +30,6 @@
 	#include <sys/ioctl.h>
 	#include <net/if.h>
 #endif
-#include "ajatypes.h"
 #include "ntv2discover.h"
 #include "ntv2nubpktcom.h"
 #include "ntv2utf8.h"
@@ -372,3 +374,4 @@ ntv2DiscoverNubs(	const char *hostname,
 }
 
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
+#endif	//	!defined(NTV2_RPC_SUPPORT)

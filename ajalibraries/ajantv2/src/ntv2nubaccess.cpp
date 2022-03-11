@@ -11,7 +11,11 @@
 #include <string.h>
 #include <sys/types.h>
 #include "ajatypes.h"
-
+#if defined(NTV2_RPC_SUPPORT)
+		#include "rpc/client.h"
+		#include "rpc/rpc_error.h"
+#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)  &&  defined(NTV2_RPC_SUPPORT)
+#if !defined(NTV2_RPC_SUPPORT)
 #if defined(AJALinux ) || defined(AJAMac)
 	#include <sys/socket.h>
 	#include <netinet/in.h>
@@ -22,12 +26,9 @@
 	//#include <WinSock.h>
 	#include <WinSock2.h>
 #endif
-#if defined(AJAMac)
-	#include <CoreFoundation/CoreFoundation.h>
-	#include <dlfcn.h>
-#endif
 #include "ntv2discover.h"
 #include "ntv2nubpktcom.h"
+#endif	//	!defined(NTV2_RPC_SUPPORT)
 #include "ntv2nubaccess.h"
 #include "ntv2endian.h"
 #include "ntv2publicinterface.h"
@@ -36,6 +37,10 @@
 #include "ajabase/common/common.h"
 #include "ajabase/system/info.h"
 #include <iomanip>
+#if defined(AJAMac)
+	#include <CoreFoundation/CoreFoundation.h>
+	#include <dlfcn.h>
+#endif
 
 using namespace std;
 
@@ -78,9 +83,22 @@ ostream & NTV2RPCAPI::Print (ostream & oss) const
 		oss << " to '" << Name() << "'";
 	return oss;
 }
+
+#if !defined(NTV2_RPC_SUPPORT)
 NTV2NubProtocolVersion NTV2RPCAPI::NubProtocolVersion (void) const	{return ntv2NubProtocolVersionNone;}
-uint32_t NTV2RPCAPI::Version (void) const			{return uint32_t(NubProtocolVersion());}
+#endif	//	!defined(NTV2_RPC_SUPPORT)
+
+uint32_t NTV2RPCAPI::Version (void) const
+{
+#if !defined(NTV2_RPC_SUPPORT)
+	return uint32_t(NubProtocolVersion());
+#else	//	!defined(NTV2_RPC_SUPPORT)
+	return 0;
+#endif	//	!defined(NTV2_RPC_SUPPORT)
+}
+
 NTV2_POINTER & NTV2RPCAPI::localStorage (void)				{return _pvt;}
+
 const NTV2_POINTER & NTV2RPCAPI::localStorage (void) const	{return _pvt;}
 
 //int NTV2RPCAPI::NTV2Connect (const std::string & inHostname, const UWord inDeviceIndex)
@@ -134,13 +152,12 @@ int	NTV2RPCAPI::NTV2GetDriverVersionRemote (ULWord & outDriverVersion)
 	return -1;
 }
 
-int	NTV2RPCAPI::NTV2DMATransferRemote (const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
-										const ULWord inFrameNumber,			ULWord * pFrameBuffer,
-										const ULWord inCardOffsetBytes,		const ULWord inTotalByteCount,
+int	NTV2RPCAPI::NTV2DMATransferRemote (	const NTV2DMAEngine inDMAEngine,	const bool inIsRead,	const ULWord inFrameNumber,
+										NTV2_POINTER & inOutFrameBuffer,	const ULWord inCardOffsetBytes,
 										const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
 										const ULWord inSegmentCardPitch,	const bool inSynchronous)
-{	(void) inDMAEngine; (void) inIsRead;	(void) inFrameNumber; (void) pFrameBuffer;
-	(void) inCardOffsetBytes; (void) inTotalByteCount; (void) inNumSegments; (void) inSegmentHostPitch;
+{	(void) inDMAEngine; (void) inIsRead;	(void) inFrameNumber; (void) inOutFrameBuffer;
+	(void) inCardOffsetBytes; (void) inNumSegments; (void) inSegmentHostPitch;
 	(void) inSegmentCardPitch; (void) inSynchronous;
 	return -1;
 }
@@ -170,21 +187,17 @@ class AJAExport NTV2NubRPCAPI : public NTV2RPCAPI
 {
 	//	Instance Methods
 	public:
-		NTV2NubRPCAPI()
-			:	_sockfd				(-1),
-				_remoteHandle		(INVALID_NUB_HANDLE),
-				_nubProtocolVersion	(ntv2NubProtocolVersionNone),
-				_remoteIndex		(0)
-		{
-		}
+													NTV2NubRPCAPI()					{}
 		AJA_VIRTUAL									~NTV2NubRPCAPI()				{NTV2Disconnect();}
-		AJA_VIRTUAL inline	bool					IsConnected	(void) const		{return SocketValid()  &&  HandleValid();}
+		AJA_VIRTUAL			bool					IsConnected	(void) const;
+		#if !defined(NTV2_RPC_SUPPORT)
 		AJA_VIRTUAL inline	AJASocket				Socket (void) const				{return _sockfd;}
 		AJA_VIRTUAL			bool					SocketValid (void) const;
 		AJA_VIRTUAL inline	LWord					Handle (void) const				{return _remoteHandle;}
 		AJA_VIRTUAL			bool					HandleValid (void) const;
 		AJA_VIRTUAL inline	NTV2NubProtocolVersion	ProtocolVersion (void) const	{return _nubProtocolVersion;}
 		AJA_VIRTUAL	inline	UWord					DeviceIndex (void) const		{return _remoteIndex;}
+		#endif
 		AJA_VIRTUAL	int		NTV2Connect (const string & inHostname, const UWord inDeviceIndexNum);
 		AJA_VIRTUAL	int		NTV2Disconnect (void);
 		AJA_VIRTUAL	int		NTV2ReadRegisterRemote	(const ULWord regNum, ULWord & outRegValue, const ULWord regMask = 0xFFFFFFFF, const ULWord regShift = 0);
@@ -198,10 +211,10 @@ class AJAExport NTV2NubRPCAPI : public NTV2RPCAPI
 		AJA_VIRTUAL	int		NTV2ReadRegisterMultiRemote	(const ULWord numRegs, ULWord & outFailedRegNum,  NTV2RegInfo aRegs[]);
 		AJA_VIRTUAL	int		NTV2GetDriverVersionRemote	(ULWord & outDriverVersion)		{(void) outDriverVersion;	return -1;}
 		AJA_VIRTUAL	int		NTV2DMATransferRemote		(const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
-														const ULWord inFrameNumber,			ULWord * pFrameBuffer,
-														const ULWord inCardOffsetBytes,		const ULWord inTotalByteCount,
-														const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
-														const ULWord inSegmentCardPitch,	const bool inSynchronous);
+														const ULWord inFrameNumber,			NTV2_POINTER & inOutBuffer,
+														const ULWord inCardOffsetBytes,		const ULWord inNumSegments,
+														const ULWord inSegmentHostPitch,	const ULWord inSegmentCardPitch,
+														const bool inSynchronous);
 		AJA_VIRTUAL	int		NTV2MessageRemote	(NTV2_HEADER *	pInMessage);
 		AJA_VIRTUAL ostream &	Print (ostream & oss) const;
 	protected:
@@ -210,10 +223,14 @@ class AJAExport NTV2NubRPCAPI : public NTV2RPCAPI
 
 	//	Instance Data
 	private:
-		AJASocket				_sockfd;				///< @brief	Socket descriptor
-		LWord					_remoteHandle;			///< @brief	Remote host handle
-		NTV2NubProtocolVersion	_nubProtocolVersion;	///< @brief	Protocol version
-		UWord					_remoteIndex;			///< @brief	Remote device index number
+		#if !defined(NTV2_RPC_SUPPORT)
+		AJASocket				_sockfd				= -1;							///< @brief	Socket descriptor
+		LWord					_remoteHandle		= INVALID_NUB_HANDLE;			///< @brief	Remote host handle
+		NTV2NubProtocolVersion	_nubProtocolVersion	= ntv2NubProtocolVersionNone;	///< @brief	Protocol version
+		UWord					_remoteIndex		= 0;							///< @brief	Remote device index number
+		#else
+		rpc::client *			mpRPCClient			= AJA_NULL;
+		#endif	//	!defined(NTV2_RPC_SUPPORT)
 };	//	NTV2NubRPCAPI
 
 
@@ -228,6 +245,12 @@ NTV2RPCAPI * NTV2RPCAPI::MakeNTV2NubRPCAPI (const std::string & inSpec, const st
 	return pResult;
 }
 
+#if !defined(NTV2_RPC_SUPPORT)
+
+bool NTV2NubRPCAPI::IsConnected	(void) const
+{
+	return SocketValid()  &&  HandleValid();
+}
 
 static bool isNubOpenRespPacket (NTV2NubPkt *pPkt)
 {
@@ -1513,12 +1536,12 @@ int NTV2NubRPCAPI::NTV2ReadRegisterMultiRemote	(const ULWord numRegs, ULWord & o
 }	//	NTV2NubRPCAPI::NTV2ReadRegisterMultiRemote
 
 int NTV2NubRPCAPI::NTV2DMATransferRemote (	const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
-											const ULWord inFrameNumber,			ULWord * pFrameBuffer,
-											const ULWord inCardOffsetBytes,		const ULWord inTotalByteCount,
-											const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
-											const ULWord inSegmentCardPitch,	const bool inSynchronous)
-{	(void) inDMAEngine; (void) inIsRead;	(void) inFrameNumber; (void) pFrameBuffer; (void) inCardOffsetBytes;
-	(void) inTotalByteCount; (void) inNumSegments; (void) inSegmentHostPitch; (void) inSegmentCardPitch; (void) inSynchronous;
+											const ULWord inFrameNumber,			NTV2_POINTER & inOutBuffer,
+											const ULWord inCardOffsetBytes,		const ULWord inNumSegments,
+											const ULWord inSegmentHostPitch,	const ULWord inSegmentCardPitch,
+											const bool inSynchronous)
+{	(void) inDMAEngine; (void) inIsRead;	(void) inFrameNumber; (void) inOutBuffer; (void) inCardOffsetBytes;
+	(void) inNumSegments; (void) inSegmentHostPitch; (void) inSegmentCardPitch; (void) inSynchronous;
 	return -1;	//	TBD
 }
 
@@ -1535,6 +1558,307 @@ ostream &	NTV2NubRPCAPI::Print (ostream & oss) const
 	return oss;
 }
 
+#else	//	else defined(NTV2_RPC_SUPPORT)
+
+bool NTV2NubRPCAPI::IsConnected	(void) const
+{
+	rpc::client::connection_state conState(rpc::client::connection_state::disconnected);
+	if (mpRPCClient)
+		conState = mpRPCClient->get_connection_state();
+	return conState == rpc::client::connection_state::connected;
+}
+
+int NTV2NubRPCAPI::NTV2Connect (const string & inHostName, const UWord inDeviceIndexNum)
+{	(void) inDeviceIndexNum;	//	For now
+	if (IsConnected())
+		NTV2Disconnect();
+	mpRPCClient = new rpc::client(inHostName, NTV2NUBPORT);
+	if (mpRPCClient)
+	{
+		vector<uint8_t> blob;	//	Data to be transmitted to server
+		PUSHU32(0xBAADF00D, blob)	//	0x0DF0ADBA
+		vector<uint8_t> result (mpRPCClient->call("ping", blob).as<vector<uint8_t> >());
+		uint32_t v32(0);	size_t ndx(0);
+		POPU32(v32, result, ndx)
+	}
+	return mpRPCClient ? 0 : -1;
+}
+
+int NTV2NubRPCAPI::NTV2Disconnect (void)
+{
+	if (!IsConnected())
+		return 1;
+
+	delete mpRPCClient;
+	mpRPCClient = AJA_NULL;
+	return 0;
+}
+
+int NTV2NubRPCAPI::NTV2OpenRemote (const UWord inDeviceIndex)
+{	(void) inDeviceIndex;	//	For now
+	return 0;	//	For now
+}
+
+int NTV2NubRPCAPI::NTV2ReadRegisterRemote (const ULWord regNum, ULWord & regValue, const ULWord regMask, const ULWord regShift)
+{
+	if (!IsConnected())
+		return -1;	//	No connection
+
+	//	Encode the blob to transmit to server...
+	vector<uint8_t> blob;	//	Data to be transmitted to server
+	const bool isRead(true);
+	ULWord v32(isRead?0x80000000:0 | regShift);
+	blob.reserve(sizeof(ULWord)*4);
+	PUSHU32(v32, blob)			//	ULWord	[31] isRead  |  [6:0] regShift
+	PUSHU32(regMask, blob)		//	ULWord	regMask
+	PUSHU32(regNum, blob)		//	ULWord	regNum
+	if (!isRead)
+		PUSHU32(regValue, blob)	//	ULWord	regValue	(write only)
+
+	//	Transmit the blob to the server, and wait for the result blob...
+	NBDBG("Sending " << DEC(blob.size()) << "-byte 'reg0' request to server...");
+	vector<uint8_t> result (mpRPCClient->call("reg0", blob).as<vector<uint8_t> >());
+	NBDBG("Received " << DEC(result.size()) << "-byte 'reg0' response from server");
+
+	//	Decode the server response blob...
+	size_t ndx(0);
+	POPU32(v32, result, ndx)		//	ULWord returnValue 1=success 0=fail
+	if (isRead)
+		POPU32(regValue, result, ndx)	//	ULWord regValue that was read
+	return v32 ? 0 : -1;
+}
+
+int NTV2NubRPCAPI::NTV2WriteRegisterRemote (const ULWord regNum, const ULWord regValue, const ULWord regMask, const ULWord regShift)
+{
+	if (!IsConnected())
+		return -1;	//	No connection
+
+	//	Encode the blob to transmit to server...
+	vector<uint8_t> blob;	//	Data to be transmitted to server
+	const bool isRead(false);
+	ULWord v32(isRead?0x80000000:0 | regShift);
+	blob.reserve(sizeof(ULWord)*4);
+	PUSHU32(v32, blob)			//	ULWord	[31] isRead  |  [6:0] regShift
+	PUSHU32(regMask, blob)		//	ULWord	regMask
+	PUSHU32(regNum, blob)		//	ULWord	regNum
+	if (!isRead)
+		PUSHU32(regValue, blob)	//	ULWord	regValue	(write only)
+
+	//	Transmit the blob to the server, and wait for the result blob...
+	NBDBG("Sending " << DEC(blob.size()) << "-byte 'reg0' request to server...");
+	vector<uint8_t> result (mpRPCClient->call("reg0", blob).as<vector<uint8_t> >());
+	NBDBG("Received " << DEC(result.size()) << "-byte 'reg0' response from server");
+
+	//	Decode the server response blob...
+	size_t ndx(0);
+	POPU32(v32, result, ndx)		//	ULWord returnValue 1=success 0=fail
+	return v32 ? 0 : -1;
+}
+
+int NTV2NubRPCAPI::NTV2AutoCirculateRemote (AUTOCIRCULATE_DATA & autoCircData)
+{
+	if (!IsConnected())
+		return -1;
+
+	//	Encode autoCircData as a blob to transmit to server...
+	vector<uint8_t> blob;	//	Data to be transmitted to server
+	if (!autoCircData.RPCEncode(blob))
+		NBFAIL("RPCEncode failed");  return -1;
+
+	//	Transmit the blob to the server, and wait for the result blob...
+	NBDBG("Sending " << DEC(blob.size()) << "-byte 'auto' request to server...");
+	vector<uint8_t> result (mpRPCClient->call("mesg", blob).as<vector<uint8_t> >());
+	NBDBG("Received " << DEC(result.size()) << "-byte 'auto' response from server");
+
+	//	Decode the server response blob...
+	size_t ndx(0);
+	if (!autoCircData.RPCDecode(result, ndx))
+		{NBFAIL("AUTOCIRCULATE_DATA::RPCDecode failed");  return -1;}	//	Fail!
+	return 0;	//	Success!
+}
+
+int NTV2NubRPCAPI::NTV2WaitForInterruptRemote (const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs)
+{
+	if (!IsConnected())
+		return -1;	//	No connection
+
+	//	Encode the blob to transmit to server...
+	vector<uint8_t> blob;	//	Data to be transmitted to server
+	PUSHU32(ULWord(eInterrupt), blob)	//	ULWord	INTERRUPT_ENUMS
+	PUSHU32(timeOutMs, blob)			//	ULWord	timeOutMs
+
+	//	Transmit the blob to the server, and wait for the result blob...
+	NBDBG("Sending " << DEC(blob.size()) << "-byte 'wfi0' request to server...");
+	vector<uint8_t> result (mpRPCClient->call("wfi0", blob).as<vector<uint8_t> >());
+	NBDBG("Received " << DEC(result.size()) << "-byte 'wfi0' response from server");
+
+	//	Decode the server response blob...
+	size_t ndx(0);
+	ULWord v32(0);
+	POPU32(v32, result, ndx)	//	ULWord returnValue 1=success 0=fail
+	return v32 ? 0 : -1;
+}
+
+int NTV2NubRPCAPI::NTV2DriverGetBitFileInformationRemote (BITFILE_INFO_STRUCT & outInfo,  const NTV2BitFileType inType)
+{	(void) outInfo;  (void) inType;
+	if (!IsConnected())
+		return -1;
+	return -1;
+}
+
+int NTV2NubRPCAPI::NTV2DriverGetBuildInformationRemote (BUILD_INFO_STRUCT & outBuildInfo)
+{	(void) outBuildInfo;
+	if (!IsConnected())
+		return -1;
+	return -1;
+}
+
+int NTV2NubRPCAPI::NTV2DownloadTestPatternRemote	(const NTV2Channel channel, const NTV2PixelFormat testPatternFBF,
+													const UWord signalMask, const bool testPatDMAEnb, const ULWord testPatNum)
+{	(void) channel;  (void) testPatternFBF;  (void) signalMask;  (void) testPatDMAEnb;  (void) testPatNum;
+	if (!IsConnected())
+		return -1;
+	return -1;
+}
+
+int NTV2NubRPCAPI::NTV2ReadRegisterMultiRemote	(const ULWord numRegs, ULWord & outFailedRegNum,  NTV2RegInfo outRegs[])
+{
+	if (!IsConnected())
+		return -1;	//	No connection
+	if (!numRegs)
+		return 0;	//	Nothing to do
+
+	//	Let's cheat and use NTV2GetRegisters message.
+	//	First, build the NTV2RegisterReads vector...
+	NTV2RegisterReads regReads;
+	regReads.reserve(numRegs);
+	for (ULWord num(0);  num < numRegs;  num++)
+		regReads.push_back(outRegs[num]);
+
+	//	Next, do the message RPC to the server...
+	NTV2GetRegisters getRegs(regReads);
+	int result(NTV2MessageRemote(getRegs));
+
+	//	Next, set the first failed register...
+	NTV2RegNumSet failedRegNums;
+	if (getRegs.GetBadRegisters(failedRegNums)  &&  !failedRegNums.empty())
+		outFailedRegNum = *(failedRegNums.begin());
+
+	//	Finally, set the register values in the outRegs array...
+	NTV2RegisterValueMap goodRegs;
+	getRegs.GetRegisterValues(goodRegs);
+	for (ULWord num(0);  num < numRegs;  num++)
+	{
+		NTV2RegInfo & regInfo(outRegs[num]);
+		NTV2RegValueMapConstIter it(goodRegs.find(regInfo.registerNumber));
+		if (it != goodRegs.end())
+			regInfo.registerValue = it->second;
+	}
+	return result;
+}
+
+int NTV2NubRPCAPI::NTV2DMATransferRemote(	const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
+											const ULWord inFrameNumber,			NTV2_POINTER & inOutBuffer,
+											const ULWord inCardOffsetBytes,		const ULWord inNumSegments,
+											const ULWord inSegmentHostPitch,	const ULWord inSegmentCardPitch,
+											const bool inSynchronous)
+{
+	if (!IsConnected())
+		return -1;	//	No connection
+
+	//	Encode the specific message as a blob to transmit to server...
+	vector<uint8_t> blob;	//	Data to be transmitted to server
+	blob.reserve(sizeof(UWord)*3  +  sizeof(ULWord)*7  +  (inIsRead ? inOutBuffer.GetByteCount() : 4));
+	const ULWord flags(inIsRead ? 0x80000000 : 0  |  inSynchronous ? 0x40000000 : 0  |  UWord(inDMAEngine));
+	PUSHU32(flags, blob)					//	inIsRead  |  inSynchronous  |  NTV2DMAEngine	inDMAEngine
+	PUSHU32(inFrameNumber, blob)			//	ULWord			inFrameNumber
+	PUSHU32(inCardOffsetBytes, blob)		//	ULWord			inCardOffsetBytes
+	PUSHU32(inNumSegments, blob)			//	ULWord			inNumSegments
+	PUSHU32(inSegmentHostPitch, blob)		//	ULWord			inSegmentHostPitch
+	PUSHU32(inSegmentCardPitch, blob)		//	ULWord			inSegmentCardPitch
+	if (inIsRead)
+		PUSHU32(inOutBuffer.GetByteCount(), blob)	//	ULWord	size of NTV2_POINTER to return after DMARead
+	else if (!inOutBuffer.RPCEncode(blob))			//	NTV2_POINTER	buffer to send to server for DMAWrite
+		return -1;
+
+	//	Transmit the blob to the server, and wait for the result blob...
+	NBDBG("Sending " << DEC(blob.size()) << "-byte 'dma0' request to server...");
+	vector<uint8_t> result (mpRPCClient->call("dma0", blob).as<vector<uint8_t> >());
+	NBDBG("Received " << DEC(result.size()) << "-byte 'dma0' response from server");
+
+	//	Decode the server response blob...
+	size_t ndx(0);	ULWord returnValue(0);
+	POPU32(returnValue, result, ndx)		//	ULWord returnValue 1=success 0=fail
+	if (inIsRead  &&  !inOutBuffer.RPCDecode(result, ndx))	//	Decode NTV2_POINTER containing DMARead data
+		{NBFAIL("NTV2_POINTER::RPCDecode of resulting DMARead data failed");  return -1;}	//	Fail!
+	return returnValue ? 0 : -1;
+}
+
+int	NTV2NubRPCAPI::NTV2MessageRemote (NTV2_HEADER *	pInMessage)
+{
+	if (!IsConnected())
+		return -1;	//	Not connected
+	if (!pInMessage)
+		return -1;	//	NULL message pointer
+
+	const ULWord msgType (pInMessage->GetType());
+	const string typeStr (pInMessage->FourCCToString(msgType));
+	vector<uint8_t> blob;	//	Data to be transmitted to server
+	bool encodeOK(false), decodedOK(false);
+
+	//	Encode the specific message as a blob to transmit to server...
+	switch (msgType)
+	{
+		case NTV2_TYPE_GETREGS:			encodeOK = reinterpret_cast<NTV2GetRegisters*>(pInMessage)->RPCEncode(blob);		break;
+		case NTV2_TYPE_SETREGS:			encodeOK = reinterpret_cast<NTV2SetRegisters*>(pInMessage)->RPCEncode(blob);		break;
+		case NTV2_TYPE_BANKGETSET:		encodeOK = reinterpret_cast<NTV2BankSelGetSetRegs*>(pInMessage)->RPCEncode(blob);	break;
+		case NTV2_TYPE_ACSTATUS:		encodeOK = reinterpret_cast<AUTOCIRCULATE_STATUS*>(pInMessage)->RPCEncode(blob);	break;
+		case NTV2_TYPE_ACFRAMESTAMP:	encodeOK = reinterpret_cast<FRAME_STAMP*>(pInMessage)->RPCEncode(blob);				break;
+		case NTV2_TYPE_ACXFER:			encodeOK = reinterpret_cast<AUTOCIRCULATE_TRANSFER*>(pInMessage)->RPCEncode(blob);	break;
+		case NTV2_TYPE_AJABITSTREAM:	encodeOK = reinterpret_cast<NTV2Bitstream*>(pInMessage)->RPCEncode(blob);			break;
+
+		case NTV2_TYPE_ACTASK:
+		case NTV2_TYPE_SDISTATS:		NBWARN("Message " << typeStr << " not implemented");  return -1;	//	Fail!
+
+		//	These are not applicable for remote:
+		case NTV2_TYPE_AJADEBUGLOGGING:
+		case NTV2_TYPE_AJABUFFERLOCK:	NBDBG("Message " << typeStr << " is a 'no-op' for remote devices");  return 0;	//	Success!
+
+		default:						NBFAIL("Message " << typeStr << " not handled");  return -1;	//	Fail!
+	}
+
+	if (!encodeOK)
+		NBFAIL("Message " << typeStr << " RPCEncode failed");  return -1;
+
+	//	Transmit the blob to the server, and wait for the result blob...
+	NBDBG("Sending " << DEC(blob.size()) << "-byte 'mesg' request " << typeStr << " to server...");
+	vector<uint8_t> result (mpRPCClient->call("mesg", blob).as<vector<uint8_t> >());
+	NBDBG("Received " << DEC(result.size()) << "-byte 'mesg' response " << typeStr << " from server");
+
+	//	Decode the server response blob...
+	size_t ndx(0);
+	switch (msgType)
+	{
+		case NTV2_TYPE_GETREGS:			decodedOK = reinterpret_cast<NTV2GetRegisters*>(pInMessage)->RPCDecode(result, ndx);		break;
+		case NTV2_TYPE_SETREGS:			decodedOK = reinterpret_cast<NTV2SetRegisters*>(pInMessage)->RPCDecode(result, ndx);		break;
+		case NTV2_TYPE_BANKGETSET:		decodedOK = reinterpret_cast<NTV2BankSelGetSetRegs*>(pInMessage)->RPCDecode(result, ndx);	break;
+		case NTV2_TYPE_ACSTATUS:		decodedOK = reinterpret_cast<AUTOCIRCULATE_STATUS*>(pInMessage)->RPCDecode(result, ndx);	break;
+		case NTV2_TYPE_ACFRAMESTAMP:	decodedOK = reinterpret_cast<FRAME_STAMP*>(pInMessage)->RPCDecode(result, ndx);				break;
+		case NTV2_TYPE_ACXFER:			decodedOK = reinterpret_cast<AUTOCIRCULATE_TRANSFER*>(pInMessage)->RPCDecode(result, ndx);	break;
+		case NTV2_TYPE_AJABITSTREAM:	decodedOK = reinterpret_cast<NTV2Bitstream*>(pInMessage)->RPCDecode(result, ndx);			break;
+		default:						NTV2_ASSERT(false && "Should never get here");
+	}
+	if (!decodedOK)
+		{NBFAIL("Message " << typeStr << " RPCDecode failed");  return -1;}	//	Fail!
+	return 0;	//	Success!
+}
+
+ostream & NTV2NubRPCAPI::Print (ostream & oss) const
+{
+	return oss;
+}
+
+#endif	//	defined(NTV2_RPC_SUPPORT)
 
 NTV2RPCAPI * NTV2RPCAPI::FindNTV2SoftwareDevice (const string & inName, const std::string & inQueryParams)
 {
@@ -1598,4 +1922,4 @@ NTV2RPCAPI * NTV2RPCAPI::FindNTV2SoftwareDevice (const string & inName, const st
 	return AJA_NULL;
 }	//	FindNTV2SoftwareDevice
 
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
+#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
