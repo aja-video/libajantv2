@@ -1305,6 +1305,12 @@
 	available for readback at <b>Audio Output Last Address</b> (within 256 bytes). If the output hardware <b>Play Head</b>
 	pointer catches up to the <b>Audio Output Last Address</b>, the buffer will wrap, and audio/video synchronization will be lost.
 
+	There is no provision for changing the <b>Play Head</b> position while <b>Audio System</b> playback is running … except
+	perhaps to reset playback to the start of the audio buffer (by calling both CNTV2Card::StopAudioOutput and then
+	CNTV2Card::StartAudioOutput). Of course, applications have full control over the number of samples written, and where
+	they get written into the <b>Audio Output Buffer</b>. Applications are free to drop samples or add silence as needed,
+	while always ensuring these transfers stay ahead of the <b>Play Head</b>.
+
 	If \ref autocirculateplayout is being used, AutoCirculate completely and automatically runs the <b>Audio System</b>.
 	When CNTV2Card::AutoCirculateInitForOutput is called with a valid ::NTV2AudioSystem, and then CNTV2Card::AutoCirculateStart
 	is called, AutoCirculate starts the <b>Audio System</b>. Youʼll need to transfer the correct number of audio samples via

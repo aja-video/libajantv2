@@ -1837,18 +1837,6 @@ public:
 												const NTV2AudioSystem	inAudioSystem, const bool inCaptureBuffer = false);
 
 	/**
-		@brief		For the given Audio System, specifies the byte offset in the device's output audio buffer
-					where its audio embedder will fetch the next chunk of audio samples. This essentially moves
-					the "Play Head" for audio output.
-		@param[in]	inValue			Specifies the new byte offset into the device's output audio buffer. The firmware
-									will truncate or round this as appropriate for proper 4-byte alignment.
-		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem (output audio de-embedder) of interest.
-		@return		True if successful;	 otherwise false.
-		@see		CNTV2Card::ReadAudioLastOut, \ref audioplayout
-	**/
-	AJA_VIRTUAL bool		WriteAudioLastOut (const ULWord inValue, NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
-
-	/**
 		@brief		For the given Audio System, answers with the byte offset of the tail end of the last chunk of
 					audio samples read by the device's output audio embedder. This is essentially the position of
 					the "Play Head" during audio output.
@@ -1856,7 +1844,7 @@ public:
 									by the device's output audio embedder in its output audio buffer.
 		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem (output audio de-embedder) of interest.
 		@return		True if successful;	 otherwise false.
-		@see		CNTV2Card::WriteAudioLastOut, \ref audioplayout
+		@see		\ref audioplayout
 	**/
 	AJA_VIRTUAL bool		ReadAudioLastOut (ULWord & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
@@ -2492,9 +2480,12 @@ public:
 #if !defined(NTV2_DEPRECATE_16_1)
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetAnalogAudioIOConfiguration (const NTV2AnalogAudioIO inConfig));	///< @deprecated	Use CNTV2Card::SetAnalogAudioTransmitEnable instead.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetAnalogAudioIOConfiguration (NTV2AnalogAudioIO & outConfig));	///< @deprecated	Use CNTV2Card::GetAnalogAudioTransmitEnable instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool WriteAudioLastOut (ULWord & outValue, const NTV2Channel inChannel))	{return WriteAudioLastOut(outValue, NTV2AudioSystem(inChannel));}	///< @deprecated	Use CNTV2Card::WriteAudioLastOut(ULWord &, const NTV2AudioSystem) instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadAudioLastOut (ULWord & outValue, const NTV2Channel inChannel))	{return ReadAudioLastOut(outValue, NTV2AudioSystem(inChannel));}	///< @deprecated	Use CNTV2Card::ReadAudioLastOut(ULWord &, const NTV2AudioSystem) instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadAudioLastIn (ULWord & outValue, const NTV2Channel inChannel)) {return ReadAudioLastIn(outValue, NTV2AudioSystem(inChannel));} ///< @deprecated	Use CNTV2Card::ReadAudioLastIn(ULWord &, const NTV2AudioSystem) instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool WriteAudioLastOut (ULWord & outValue, const NTV2Channel inChannel)) {(void)outValue;(void)inChannel; return false;}	///< @deprecated	This function is obsolete.
+#endif	//	!defined(NTV2_DEPRECATE_16_1)
+#if !defined(NTV2_DEPRECATE_16_3)
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool WriteAudioLastOut (const ULWord inValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1)) {(void)inValue;(void)inAudioSystem; return false;}	///< @deprecated	This function is obsolete.
 #endif	//	!defined(NTV2_DEPRECATE_16_1)
 	///@}
 
