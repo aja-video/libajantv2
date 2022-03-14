@@ -1,7 +1,7 @@
 # https://stackoverflow.com/questions/34878276/build-doxygen-from-cmake-script
-find_package(Doxygen REQUIRED dot)
+find_package(Doxygen COMPONENTS dot)
 if (NOT DOXYGEN_FOUND)
-    message("doxygen not found!")
+    message("skipping docs (Doxygen not found!)")
     return()
 endif()
 
@@ -30,3 +30,5 @@ add_custom_target(
     WORKING_DIRECTORY ${AJA_NTV2_ROOT}
     COMMENT "Generating NTV2 SDK documentation with Doxygen"
     VERBATIM)
+
+message("added docs")
