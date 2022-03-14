@@ -1,12 +1,9 @@
 #define DOCTEST_CONFIG_IMPLEMENT
-// need to define this so will work with compilers that don't support thread_local
-// ie xcode 6, 7
 #define DOCTEST_THREAD_LOCAL
-
 #include <argparse/argparse.h>
 #include <doctest/doctest.h>
 #include <nlohmann/json.hpp>
-
+using nlohmann::json;
 #include "ajabase/system/file_io.h"
 #include "ajabase/system/system.h"
 #include "ajabase/system/systemtime.h"
@@ -38,18 +35,22 @@ static int argparse_help(struct argparse *self, const struct argparse_option *op
                                      "show this help message and exit", \
                                      argparse_help, 0, OPT_NONEG)
 
-static constexpr auto kFirmwareJSON = "ntv2_classic_firmware.json";
+static constexpr auto kFirmwareJSON = L"ntv2_classic_firmware.json";
 
-using nlohmann::json;
+struct TestOptions {
+    const char* fw_path;
+};
 
-json read_json_file(const std::string& path)
-{ 
+static TestOptions gOpts;
+
+json read_json_file(const std::wstring& path)
+{
     AJAFileIO f;
     f.Open(path, eAJAReadOnly, 0);
     int64_t create_time, mod_time, file_size;
     f.FileInfo(create_time, mod_time, file_size);
     std::string json_str;
-    f.Read(json_str, file_size);
+    f.Read(json_str, (uint32_t)file_size);
     auto fw_json = json::parse(json_str);
     return fw_json;
 }
@@ -59,13 +60,43 @@ int main(int argc, const char** argv)
     AJADebug::Open();
     LOGINFO("Starting NTV2 bitfile unit tests...");
 
+    // copy argv
+    char** new_argv = (char**)malloc((argc+1) * sizeof *new_argv);
+    for(int i = 0; i < argc; ++i)
+    {
+        size_t length = strlen(argv[i])+1;
+        new_argv[i] = (char*)malloc(length);
+        memcpy(new_argv[i], argv[i], length);
+    }
+    new_argv[argc] = NULL;
+
     doctest::Context ctx(argc, argv);
+
+    // handle global test args
+    static const char *const usage[] = {
+        "ut_ntv2bitfile [options] [[--] args]",
+        "ut_ntv2bitfile [options]",
+        NULL,
+    };
+    struct argparse_option options[] = {
+        OPT_ARGPARSE_HELP(),
+        OPT_GROUP("ut_ntv2bitfile options"),
+        OPT_STRING('p', "path", &gOpts.fw_path, "path to ntv2 classic firmware directory or single bitfile"),
+        OPT_END(),
+    };
+    struct argparse argparse;
+    argparse_init(&argparse, options, usage, ARGPARSE_IGNORE_UNKNOWN_ARGS);
+    argparse_describe(&argparse, "\nntv2 card unit tests",
+        "\nPerform CNTV2Card tests against physical hardware.");
+    argparse_parse(&argparse, argc, (const char**)argv);
+
     int res = ctx.run();
 
-    std::string exe_path, exe_dir;
+    std::wstring exe_path;
+    std::wstring exe_dir;
     AJAFileIO::GetExecutablePath(exe_path);
     AJAFileIO::GetDirectoryName(exe_path, exe_dir);
-    auto fw_json_path = exe_dir + AJA_PATHSEP + kFirmwareJSON;   
+    auto fw_json_path = exe_dir + AJA_PATHSEP_WIDE + kFirmwareJSON;
     auto fw_json = read_json_file(fw_json_path);
     for (auto& fw : fw_json["firmware"]) {
         LOGINFO(fw);
