@@ -27,6 +27,10 @@
 	#include <unistd.h>
 #endif
 
+#if defined(AJA_MAC)
+	#include <mach-o/dyld.h>
+#endif
+
 using std::string;
 using std::wstring;
 using std::vector;
@@ -1254,7 +1258,7 @@ AJAFileIO::GetExecutablePath(std::string& path)
 #elif defined(AJA_MAC)
 	uint32_t pathLen = 0;
 	_NSGetExecutablePath(NULL, &pathLen);
-	if (_NSGetExecutablePath(&buf[0], pathLen) == 0)
+	if (_NSGetExecutablePath(&buf[0], &pathLen) == 0)
 		szPath = (size_t)pathLen;
 #endif
 	if (szPath > 0)
