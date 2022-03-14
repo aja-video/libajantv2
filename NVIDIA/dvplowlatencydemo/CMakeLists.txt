@@ -1,6 +1,9 @@
 project(dvplowlatencydemo)
 
-message("added dvplowlatencydemo")
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	message("skipping dvplowlatencydemo (requires Linux)")
+	return()
+endif()
 
 set(DVPLOWLATENCYDEMO_TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
@@ -84,3 +87,5 @@ if (AJA_INSTALL_SOURCES)
 	install(FILES ${NVIDIA_COMMON_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/NVIDIA/common)
 	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/NVIDIA/commonCUDA)
 endif()
+
+message("added dvplowlatencydemo")
