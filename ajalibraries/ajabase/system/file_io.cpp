@@ -1246,16 +1246,16 @@ AJAStatus
 AJAFileIO::GetExecutablePath(std::string& path)
 {
 	char buf[AJA_MAX_PATH];
-	ssize_t szPath = 0;
+	size_t szPath = 0;
 #if defined(AJA_WINDOWS)
-	GetModuleFileName(NULL, &buf[0], AJA_MAX_PATH);
+	szPath = ::GetModuleFileNameA(NULL, &buf[0], AJA_MAX_PATH);
 #elif defined(AJA_LINUX)
 	szPath = readlink("/proc/self/exe", &buf[0], AJA_MAX_PATH);
 #elif defined(AJA_MAC)
 	uint32_t pathLen = 0;
 	_NSGetExecutablePath(NULL, &pathLen);
 	if (_NSGetExecutablePath(&buf[0], pathLen) == 0)
-		szPath = (ssize_t)pathLen;
+		szPath = (size_t)pathLen;
 #endif
 	if (szPath > 0)
 		path = std::string(buf, szPath);
@@ -1268,8 +1268,19 @@ AJAFileIO::GetExecutablePath(std::string& path)
 AJAStatus
 AJAFileIO::GetExecutablePath(std::wstring& path)
 {
-	std::string s;
-	if (AJAFileIO::GetExecutablePath(s) != AJA_STATUS_SUCCESS)
-		return AJA_STATUS_NOT_FOUND;
-	return aja::string_to_wstring(s, path) ? AJA_STATUS_SUCCESS : AJA_STATUS_NOT_FOUND;
+#if defined(AJA_WINDOWS)
+	wchar_t buf[AJA_MAX_PATH];
+	size_t szPath = ::GetModuleFileNameW(NULL, &buf[0], AJA_MAX_PATH);
+	if (szPath > 0) {
+		path = std::wstring(buf, szPath);
+		return AJA_STATUS_SUCCESS;
+	}
+#else
+	std::string pathStr;
+	if (AJAFileIO::GetExecutablePath(pathStr) == AJA_STATUS_SUCCESS) {
+		return aja::string_to_wstring(pathStr, path)
+			? AJA_STATUS_SUCCESS : AJA_STATUS_NOT_FOUND;
+	}
+#endif
+	return AJA_STATUS_NOT_FOUND;
 }
