@@ -23,12 +23,12 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	find_library(CORE_SERVICES_FRAMEWORK CoreServices)
 	find_library(FOUNDATION_FRAMEWORK Foundation)
 	
-	set(EXTRA_LIBRARIES
+	set(TARGET_LINK_LIBS
 		${CORE_FOUNDATION_FRAMEWORK}
 		${CORE_SERVICES_FRAMEWORK}
 		${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(EXTRA_LIBRARIES dl pthread rt)
+	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
 set(APP_TARGET_SOURCES
@@ -38,4 +38,4 @@ set(APP_TARGET_SOURCES
 add_executable(ut_ajabase ${APP_TARGET_SOURCES})
 add_dependencies(ut_ajabase ajantv2)
 target_include_directories(ut_ajabase PUBLIC ${APP_TARGET_INCLUDE_DIRS})
-target_link_libraries(ut_ajabase PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+target_link_libraries(ut_ajabase PUBLIC ajantv2 ${TARGET_LINK_LIBS})
