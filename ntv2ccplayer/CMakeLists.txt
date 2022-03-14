@@ -2,7 +2,7 @@ project(ntv2ccplayer)
 
 message("added ntv2ccplayer")
 
-set(NTV2CCPLAYER_TARGET_INCLUDE_DIRS
+set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
 	${AJA_LIB_NTV2_ROOT}/includes
@@ -29,15 +29,15 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
-set(NTV2CCPLAYER_TARGET_SOURCES
+set(TARGET_SOURCES
 	${NTV2CCPLAYER_SOURCES}
 	${NTV2CCPLAYER_HEADERS}
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-add_executable(ntv2ccplayer ${NTV2CCPLAYER_TARGET_SOURCES})
+add_executable(ntv2ccplayer ${TARGET_SOURCES})
 add_dependencies(ntv2ccplayer ajacc ajantv2)
-target_include_directories(ntv2ccplayer PUBLIC ${NTV2CCPLAYER_TARGET_INCLUDE_DIRS})
+target_include_directories(ntv2ccplayer PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2ccplayer PUBLIC ajacc ajantv2 ${TARGET_LINK_LIBS})
 
 install(TARGETS ntv2ccplayer

@@ -4,7 +4,7 @@ message("added ntv2switchbitfile")
 
 set(NTV2SWITCHBITFILE_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
-set(NTV2SWITCHBITFILE_TARGET_INCLUDE_DIRS
+set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
 	${AJA_LIBRARIES_ROOT}
 	${AJA_LIB_NTV2_ROOT}/includes
@@ -27,14 +27,14 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
-set(NTV2SWITCHBITFILE_TARGET_SOURCES
+set(TARGET_SOURCES
 	${NTV2SWITCHBITFILE_SOURCES}
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-add_executable(ntv2switchbitfile ${NTV2SWITCHBITFILE_TARGET_SOURCES})
+add_executable(ntv2switchbitfile ${TARGET_SOURCES})
 add_dependencies(ntv2switchbitfile ajantv2)
-target_include_directories(ntv2switchbitfile PUBLIC ${NTV2SWITCHBITFILE_TARGET_INCLUDE_DIRS})
+target_include_directories(ntv2switchbitfile PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2switchbitfile PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)

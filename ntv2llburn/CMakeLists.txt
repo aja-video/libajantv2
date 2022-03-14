@@ -2,7 +2,7 @@ project(ntv2llburn)
 
 message("added ntv2llburn")
 
-set(NTV2LLBURN_TARGET_INCLUDE_DIRS
+set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
 	${AJA_LIB_NTV2_ROOT}/includes
@@ -29,15 +29,15 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
-set(NTV2LLBURN_TARGET_SOURCES
+set(TARGET_SOURCES
 	${NTV2LLBURN_SOURCES}
 	${NTV2LLBURN_HEADERS}
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-add_executable(ntv2llburn ${NTV2LLBURN_TARGET_SOURCES})
+add_executable(ntv2llburn ${TARGET_SOURCES})
 add_dependencies(ntv2llburn ajantv2)
-target_include_directories(ntv2llburn PUBLIC ${NTV2LLBURN_TARGET_INCLUDE_DIRS})
+target_include_directories(ntv2llburn PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2llburn PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)

@@ -2,7 +2,7 @@ project(ntv2enumerateboards)
 
 message("added ntv2enumerateboards")
 
-set(NTV2ENUMERATEBOARDS_TARGET_INCLUDE_DIRS
+set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
 	${AJA_LIB_NTV2_ROOT}/includes
@@ -29,15 +29,15 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
-set(NTV2ENUMERATEBOARDS_TARGET_SOURCES
+set(TARGET_SOURCES
 	${NTV2ENUMERATEBOARDS_SOURCES}
 	${NTV2ENUMERATEBOARDS_HEADERS}
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-add_executable(ntv2enumerateboards ${NTV2ENUMERATEBOARDS_TARGET_SOURCES})
+add_executable(ntv2enumerateboards ${TARGET_SOURCES})
 add_dependencies(ntv2enumerateboards ajantv2)
-target_include_directories(ntv2enumerateboards PUBLIC ${NTV2ENUMERATEBOARDS_TARGET_INCLUDE_DIRS})
+target_include_directories(ntv2enumerateboards PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2enumerateboards PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)

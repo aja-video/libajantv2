@@ -2,8 +2,6 @@ project(ntv2encodehevcfile)
 
 message("added ntv2encodehevcfile")
 
-set(NTV2ENCODEHEVCFILE_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
-
 set(HEVC_M31_CODEC_ROOT ${AJA_LIB_NTV2_ROOT}/codecs/hevc/m31)
 
 set(HEVC_M31_HEADERS
@@ -22,7 +20,7 @@ set(HEVC_M31_SOURCES
 	${HEVC_M31_CODEC_ROOT}/ntv2m31vinparam.cpp
 	${HEVC_M31_CODEC_ROOT}/ntv2m31viparam.cpp)
 
-set(NTV2ENCODEHEVCFILE_TARGET_INCLUDE_DIRS
+set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
 	${AJA_LIB_NTV2_ROOT}/includes
@@ -64,15 +62,15 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
-set(NTV2ENCODEHEVCFILE_TARGET_SOURCES
+set(TARGET_SOURCES
 	${NTV2ENCODEHEVCFILE_SOURCES}
 	${NTV2ENCODEHEVCFILE_HEADERS}
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-add_executable(ntv2encodehevcfile ${NTV2ENCODEHEVCFILE_TARGET_SOURCES})
+add_executable(ntv2encodehevcfile ${TARGET_SOURCES})
 add_dependencies(ntv2encodehevcfile ajantv2)
-target_include_directories(ntv2encodehevcfile PUBLIC ${NTV2ENCODEHEVCFILE_TARGET_INCLUDE_DIRS})
+target_include_directories(ntv2encodehevcfile PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2encodehevcfile PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 install(TARGETS ntv2encodehevcfile

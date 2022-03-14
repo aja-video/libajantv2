@@ -12,7 +12,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(NTV2OGLCAPTURE_TARGET_INCLUDE_DIRS
+set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
 	${AJA_GPUSTUFF_ROOT}/include
@@ -40,15 +40,15 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
-set(NTV2OGLCAPTURE_TARGET_SOURCES
+set(TARGET_SOURCES
 	${NTV2OGLCAPTURE_SOURCES}
 	${NTV2OGLCAPTURE_HEADERS}
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-add_executable(ntv2oglcapture ${NTV2OGLCAPTURE_TARGET_SOURCES})
+add_executable(ntv2oglcapture ${TARGET_SOURCES})
 add_dependencies(ntv2oglcapture ajantv2)
-target_include_directories(ntv2oglcapture PUBLIC ${NTV2OGLCAPTURE_TARGET_INCLUDE_DIRS})
+target_include_directories(ntv2oglcapture PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2oglcapture PUBLIC ajantv2 ${QT_LIBRARIES} ${OPENGL_LIBRARIES} ${TARGET_LINK_LIBS})
 
 install(TARGETS ntv2oglcapture

@@ -12,12 +12,12 @@ find_package(GLEW REQUIRED)
 find_package(X11 REQUIRED)
 project(cudalowlatencydemo LANGUAGES CUDA CXX)
 
-set(CUDALOWLATENCYDEMO_TARGET_COMPILE_DEFINES
+set(TARGET_COMPILE_DEFS
 	-DAJA_LINUX
 	-DAJALinux
 	-DAJA_RDMA=1)
 
-set(CUDALOWLATENCYDEMO_TARGET_INCLUDE_DIRS
+set(TARGET_INCLUDE_DIRS
 	${AJA_APPS_ROOT}/crossplatform/demoapps/NVIDIA/common
 	${AJA_APPS_ROOT}/crossplatform/demoapps/NVIDIA/commonCUDA
 	${AJA_APPS_ROOT}/crossplatform/demoapps
@@ -90,7 +90,7 @@ set(NVIDIA_COMMONCUDA_SOURCES
 	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simpleoglvio.h
 )
 
-set(CUDALOWLATENCYDEMO_TARGET_SOURCES
+set(TARGET_SOURCES
 	${CUDALOWLATENCYDEMO_SOURCES}
 	${NVIDIA_COMMON_SOURCES}
 	${NVIDIA_COMMONCUDA_SOURCES}
@@ -103,12 +103,12 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(TARGET_LINK_LIBS X11 OpenGL::GL OpenGL::GLU GLEW::GLEW cuda cudart dl pthread rt)
-	# cuda_include_directories(${CUDALOWLATENCYDEMO_TARGET_INCLUDE_DIRS})
+	# cuda_include_directories(${TARGET_INCLUDE_DIRS})
 	# cuda_compile(CUDA_OBJ kernel.cu)
-	add_executable(cudalowlatencydemo ${CUDALOWLATENCYDEMO_TARGET_SOURCES} kernel.cu)
+	add_executable(cudalowlatencydemo ${TARGET_SOURCES} kernel.cu)
 	add_dependencies(cudalowlatencydemo ${CUDA_OBJ} ajantv2)
-	target_compile_definitions(cudalowlatencydemo PUBLIC ${CUDALOWLATENCYDEMO_TARGET_COMPILE_DEFINES})
-	target_include_directories(cudalowlatencydemo PUBLIC ${CUDALOWLATENCYDEMO_TARGET_INCLUDE_DIRS})
+	target_compile_definitions(cudalowlatencydemo PUBLIC ${TARGET_COMPILE_DEFS})
+	target_include_directories(cudalowlatencydemo PUBLIC ${TARGET_INCLUDE_DIRS})
 	target_link_libraries(cudalowlatencydemo PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 	# add_custom_command(
 	# 	TARGET cudalowlatencydemo

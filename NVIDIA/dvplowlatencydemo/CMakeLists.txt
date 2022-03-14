@@ -5,7 +5,7 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	return()
 endif()
 
-set(DVPLOWLATENCYDEMO_TARGET_INCLUDE_DIRS
+set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
 	${AJA_LIBRARIES_ROOT}
 	${AJA_LIB_NTV2_ROOT}/includes)
@@ -71,14 +71,14 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(TARGET_LINK_LIBS cuda cudart dl pthread rt)
 endif()
 
-set(DVPLOWLATENCYDEMO_TARGET_SOURCES
+set(TARGET_SOURCES
 	${DVPLOWLATENCYDEMO_SOURCES}
 	${NVIDIA_COMMON_SOURCES}
 	${NVIDIA_COMMONCUDA_SOURCES})
 
-# add_executable(dvplowlatencydemo ${DVPLOWLATENCYDEMO_TARGET_SOURCES})
+# add_executable(dvplowlatencydemo ${TARGET_SOURCES})
 # add_dependencies(dvplowlatencydemo ajantv2)
-# target_include_directories(dvplowlatencydemo PUBLIC ${DVPLOWLATENCYDEMO_TARGET_INCLUDE_DIRS})
+# target_include_directories(dvplowlatencydemo PUBLIC ${TARGET_INCLUDE_DIRS})
 # target_link_libraries(dvplowlatencydemo PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)

@@ -2,7 +2,7 @@ project(ntv2player8k)
 
 message("added ntv2player8k")
 
-set(NTV2PLAYER8K_TARGET_INCLUDE_DIRS
+set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
 	${AJA_LIB_NTV2_ROOT}/includes
@@ -29,15 +29,15 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
-set(NTV2PLAYER8K_TARGET_SOURCES
+set(TARGET_SOURCES
 	${NTV2PLAYER8K_SOURCES}
 	${NTV2PLAYER8K_HEADERS}
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-add_executable(ntv2player8k ${NTV2PLAYER8K_TARGET_SOURCES})
+add_executable(ntv2player8k ${TARGET_SOURCES})
 add_dependencies(ntv2player8k ajantv2)
-target_include_directories(ntv2player8k PUBLIC ${NTV2PLAYER8K_TARGET_INCLUDE_DIRS})
+target_include_directories(ntv2player8k PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2player8k PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)

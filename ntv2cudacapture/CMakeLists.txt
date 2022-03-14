@@ -9,9 +9,7 @@ find_package(Qt5 HINTS ${AJA_QT_DIR} COMPONENTS
 set(QT_LIBRARIES
     Qt5::Core)
 
-set(NTV2CUDACAPTURE_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
-
-set(NTV2CUDACAPTURE_TARGET_INCLUDE_DIRS
+set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
 	${AJA_LIB_NTV2_ROOT}/includes
@@ -37,15 +35,15 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(TARGET_LINK_LIBS cuda cudart dl pthread rt)
 endif()
 
-set(NTV2CUDACAPTURE_TARGET_SOURCES
+set(TARGET_SOURCES
 	${NTV2CUDACAPTURE_SOURCES}
 	${NTV2CUDACAPTURE_HEADERS}
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-add_executable(ntv2cudacapture ${NTV2CUDACAPTURE_TARGET_SOURCES})
+add_executable(ntv2cudacapture ${TARGET_SOURCES})
 add_dependencies(ntv2cudacapture ajantv2)
-target_include_directories(ntv2cudacapture PUBLIC ${NTV2CUDACAPTURE_TARGET_INCLUDE_DIRS})
+target_include_directories(ntv2cudacapture PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2cudacapture PUBLIC ajantv2 ${TARGET_LINK_LIBS} ${QT_LIBRARIES})
 
 install(TARGETS ntv2cudacapture

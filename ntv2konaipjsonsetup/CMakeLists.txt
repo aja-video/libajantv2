@@ -8,7 +8,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(NTV2KONAIPJSONSETUP_TARGET_INCLUDE_DIRS
+set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
 	${AJA_LIB_NTV2_ROOT}/includes
@@ -53,15 +53,15 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
-set(NTV2KONAIPJSONSETUP_TARGET_SOURCES
+set(TARGET_SOURCES
 	${NTV2KONAIPJSONSETUP_SOURCES}
 	${NTV2KONAIPJSONSETUP_HEADERS}
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-add_executable(ntv2konaipjsonsetup ${NTV2KONAIPJSONSETUP_TARGET_SOURCES})
+add_executable(ntv2konaipjsonsetup ${TARGET_SOURCES})
 add_dependencies(ntv2konaipjsonsetup ajantv2)
-target_include_directories(ntv2konaipjsonsetup PUBLIC ${NTV2KONAIPJSONSETUP_TARGET_INCLUDE_DIRS})
+target_include_directories(ntv2konaipjsonsetup PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2konaipjsonsetup PUBLIC ajantv2 ${TARGET_LINK_LIBS} ${QT_LIBRARIES})
 
 if (AJA_DEPLOY_LIBS)
