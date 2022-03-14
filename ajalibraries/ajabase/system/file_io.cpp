@@ -6,6 +6,7 @@
 **/
 
 #include "ajabase/common/common.h"
+#include "ajabase/common/types.h"
 #include "ajabase/system/file_io.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -144,11 +145,11 @@ AJAFileIO::Open(
 
 		if (eAJAUnbuffered & properties)
 			flagsAndAttributes |= FILE_FLAG_NO_BUFFERING;
-		
+
 		mFileDescriptor = CreateFileW(
 							fileName.c_str(),
 							desiredAccess,
-							shareMode, 
+							shareMode,
 							NULL,
 							creationDisposition,
 							flagsAndAttributes,
@@ -238,7 +239,7 @@ AJAFileIO::Open(
 		if (NULL != mpFile)
 		{
 			int fd = fileno(mpFile);
-#if defined(AJA_MAC)			
+#if defined(AJA_MAC)
 			if (eAJANoCaching & properties)
 			{
 				fcntl(fd, F_NOCACHE, 1);
@@ -465,7 +466,7 @@ AJAFileIO::Tell()
 		LARGE_INTEGER liCurrentFilePointer;
 
 		BOOL status = SetFilePointerEx(mFileDescriptor, liDistanceToMove, &liCurrentFilePointer, FILE_CURRENT);
-		
+
 		if (status == 0)
 		{
 			retVal = (int64_t)-1;
@@ -574,14 +575,14 @@ AJAFileIO::FileInfo(int64_t& createTime, int64_t& modTime, int64_t& size)
 #endif
 }
 
-AJAStatus 
+AJAStatus
 AJAFileIO::FileInfo(int64_t& createTime, int64_t& modTime, int64_t& size, std::string& filePath)
 {
 	createTime = modTime = size = 0;
 	filePath = "";
 #if defined(AJA_WINDOWS)
 	AJAStatus status = AJA_STATUS_FAIL;
-	
+
 	createTime = modTime = size = 0;
 
 	if(IsOpen())
@@ -754,7 +755,7 @@ AJAFileIO::ReadDirectory(
 			{
 				qualifiedName = directory + "/" + fileData.cFileName;
 				fileContainer.push_back(qualifiedName);
-	
+
 				while (FindNextFileA(hSearch, &fileData) != 0)
 				{
 					qualifiedName = directory + "/" + fileData.cFileName;
@@ -858,7 +859,7 @@ AJAFileIO::ReadDirectory(
 			{
 				qualifiedName = directory + L"/" + fileData.cFileName;
 				fileContainer.push_back(qualifiedName);
-	
+
 				while (FindNextFileW(hSearch, &fileData) != 0)
 				{
 					qualifiedName = directory + L"/" + fileData.cFileName;
@@ -1238,5 +1239,48 @@ AJAFileIO::GetFileName(const std::wstring& path, std::wstring& filename)
 		return AJA_STATUS_SUCCESS;
 	}
 
+	return AJA_STATUS_NOT_FOUND;
+}
+
+AJAStatus
+AJAFileIO::GetExecutablePath(std::string& path)
+{
+	char buf[AJA_MAX_PATH];
+	size_t szPath = 0;
+#if defined(AJA_WINDOWS)
+	szPath = ::GetModuleFileNameA(NULL, &buf[0], AJA_MAX_PATH);
+#elif defined(AJA_LINUX)
+	szPath = readlink("/proc/self/exe", &buf[0], AJA_MAX_PATH);
+#elif defined(AJA_MAC)
+	uint32_t pathLen = 0;
+	_NSGetExecutablePath(NULL, &pathLen);
+	if (_NSGetExecutablePath(&buf[0], pathLen) == 0)
+		szPath = (size_t)pathLen;
+#endif
+	if (szPath > 0)
+		path = std::string(buf, szPath);
+	else
+		return AJA_STATUS_NOT_FOUND;
+
+	return AJA_STATUS_SUCCESS;
+}
+
+AJAStatus
+AJAFileIO::GetExecutablePath(std::wstring& path)
+{
+#if defined(AJA_WINDOWS)
+	wchar_t buf[AJA_MAX_PATH];
+	size_t szPath = ::GetModuleFileNameW(NULL, &buf[0], AJA_MAX_PATH);
+	if (szPath > 0) {
+		path = std::wstring(buf, szPath);
+		return AJA_STATUS_SUCCESS;
+	}
+#else
+	std::string pathStr;
+	if (AJAFileIO::GetExecutablePath(pathStr) == AJA_STATUS_SUCCESS) {
+		return aja::string_to_wstring(pathStr, path)
+			? AJA_STATUS_SUCCESS : AJA_STATUS_NOT_FOUND;
+	}
+#endif
 	return AJA_STATUS_NOT_FOUND;
 }
