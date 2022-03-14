@@ -24,9 +24,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# noop
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	find_library(FOUNDATION_FRAMEWORK Foundation)
-	set(EXTRA_LIBRARIES ${FOUNDATION_FRAMEWORK})
+	set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(EXTRA_LIBRARIES dl pthread rt)
+	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
 set(NTV2PLAYER4K_TARGET_SOURCES
@@ -38,7 +38,7 @@ set(NTV2PLAYER4K_TARGET_SOURCES
 add_executable(ntv2player4k ${NTV2PLAYER4K_TARGET_SOURCES})
 add_dependencies(ntv2player4k ajantv2)
 target_include_directories(ntv2player4k PUBLIC ${NTV2PLAYER4K_TARGET_INCLUDE_DIRS})
-target_link_libraries(ntv2player4k PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+target_link_libraries(ntv2player4k PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps)

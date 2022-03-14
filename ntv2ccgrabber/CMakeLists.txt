@@ -24,9 +24,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# noop
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_library(FOUNDATION_FRAMEWORK Foundation)
-    set(EXTRA_LIBRARIES ${FOUNDATION_FRAMEWORK})
+    set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(EXTRA_LIBRARIES dl pthread rt)
+	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
 set(NTV2CCGRABBER_TARGET_SOURCES
@@ -38,7 +38,7 @@ set(NTV2CCGRABBER_TARGET_SOURCES
 add_executable(ntv2ccgrabber ${NTV2CCGRABBER_TARGET_SOURCES})
 add_dependencies(ntv2ccgrabber ajacc ajantv2)
 target_include_directories(ntv2ccgrabber PUBLIC ${NTV2CCGRABBER_TARGET_INCLUDE_DIRS})
-target_link_libraries(ntv2ccgrabber PUBLIC ajacc ajantv2 ${EXTRA_LIBRARIES})
+target_link_libraries(ntv2ccgrabber PUBLIC ajacc ajantv2 ${TARGET_LINK_LIBS})
 
 install(TARGETS ntv2ccgrabber
 	ARCHIVE DESTINATION ${AJA_INSTALL_LIBDIR}

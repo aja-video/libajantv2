@@ -35,9 +35,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	find_library(FOUNDATION_FRAMEWORK Foundation)
 	find_library(OPENGL_FRAMEWORK OpenGL)
-	set(EXTRA_LIBRARIES ${FOUNDATION_FRAMEWORK} ${OPENGL_FRAMEWORK})
+	set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK} ${OPENGL_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(EXTRA_LIBRARIES dl pthread rt)
+	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
 set(NTV2OGLCAPTURE_TARGET_SOURCES
@@ -49,7 +49,7 @@ set(NTV2OGLCAPTURE_TARGET_SOURCES
 add_executable(ntv2oglcapture ${NTV2OGLCAPTURE_TARGET_SOURCES})
 add_dependencies(ntv2oglcapture ajantv2)
 target_include_directories(ntv2oglcapture PUBLIC ${NTV2OGLCAPTURE_TARGET_INCLUDE_DIRS})
-target_link_libraries(ntv2oglcapture PUBLIC ajantv2 ${QT_LIBRARIES} ${OPENGL_LIBRARIES} ${EXTRA_LIBRARIES})
+target_link_libraries(ntv2oglcapture PUBLIC ajantv2 ${QT_LIBRARIES} ${OPENGL_LIBRARIES} ${TARGET_LINK_LIBS})
 
 install(TARGETS ntv2oglcapture
 	ARCHIVE DESTINATION ${AJA_INSTALL_LIBDIR}

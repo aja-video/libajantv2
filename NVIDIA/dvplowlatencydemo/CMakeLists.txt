@@ -63,9 +63,9 @@ set(NVIDIA_COMMONCUDA_SOURCES
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_library(FOUNDATION_FRAMEWORK Foundation)
-    set(EXTRA_LIBRARIES ${FOUNDATION_FRAMEWORK})
+    set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(EXTRA_LIBRARIES cuda cudart dl pthread rt)
+	set(TARGET_LINK_LIBS cuda cudart dl pthread rt)
 endif()
 
 set(DVPLOWLATENCYDEMO_TARGET_SOURCES
@@ -76,7 +76,7 @@ set(DVPLOWLATENCYDEMO_TARGET_SOURCES
 # add_executable(dvplowlatencydemo ${DVPLOWLATENCYDEMO_TARGET_SOURCES})
 # add_dependencies(dvplowlatencydemo ajantv2)
 # target_include_directories(dvplowlatencydemo PUBLIC ${DVPLOWLATENCYDEMO_TARGET_INCLUDE_DIRS})
-# target_link_libraries(dvplowlatencydemo PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+# target_link_libraries(dvplowlatencydemo PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${DVPLOWLATENCYDEMO_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)

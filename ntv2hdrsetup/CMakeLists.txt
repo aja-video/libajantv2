@@ -21,9 +21,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# noop
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	find_library(FOUNDATION_FRAMEWORK Foundation)
-	set(EXTRA_LIBRARIES ${FOUNDATION_FRAMEWORK})
+	set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(EXTRA_LIBRARIES dl pthread rt)
+	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
 set(NTV2HDRSETUP_TARGET_SOURCES
@@ -34,7 +34,7 @@ set(NTV2HDRSETUP_TARGET_SOURCES
 add_executable(ntv2hdrsetup ${NTV2HDRSETUP_TARGET_SOURCES})
 add_dependencies(ntv2hdrsetup ajantv2)
 target_include_directories(ntv2hdrsetup PUBLIC ${NTV2HDRSETUP_TARGET_INCLUDE_DIRS})
-target_link_libraries(ntv2hdrsetup PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+target_link_libraries(ntv2hdrsetup PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps)

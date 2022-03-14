@@ -23,9 +23,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# noop
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	find_library(FOUNDATION_FRAMEWORK Foundation)
-	set(EXTRA_LIBRARIES ${FOUNDATION_FRAMEWORK})
+	set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(EXTRA_LIBRARIES dl pthread rt)
+	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
 set(NTV2STEREOCAPTURE_TARGET_SOURCES
@@ -37,7 +37,7 @@ set(NTV2STEREOCAPTURE_TARGET_SOURCES
 add_executable(ntv2stereocapture ${NTV2STEREOCAPTURE_TARGET_SOURCES})
 add_dependencies(ntv2stereocapture ajantv2)
 target_include_directories(ntv2stereocapture PUBLIC ${NTV2STEREOCAPTURE_TARGET_INCLUDE_DIRS})
-target_link_libraries(ntv2stereocapture PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+target_link_libraries(ntv2stereocapture PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 install(TARGETS ntv2stereocapture
 	ARCHIVE DESTINATION ${AJA_INSTALL_LIBDIR}

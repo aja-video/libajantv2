@@ -44,13 +44,13 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_library(FOUNDATION_FRAMEWORK Foundation)
     find_library(IOKIT_FRAMEWORK IoKit)
 
-    set(EXTRA_LIBRARIES
+    set(TARGET_LINK_LIBS
         ${CORE_FOUNDATION_FRAMEWORK}
 		${CORE_SERVICES_FRAMEWORK}
 		${FOUNDATION_FRAMEWORK}
         ${IOKIT_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(EXTRA_LIBRARIES dl pthread rt)
+	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
 set(NTV2KONAIPJSONSETUP_TARGET_SOURCES
@@ -62,7 +62,7 @@ set(NTV2KONAIPJSONSETUP_TARGET_SOURCES
 add_executable(ntv2konaipjsonsetup ${NTV2KONAIPJSONSETUP_TARGET_SOURCES})
 add_dependencies(ntv2konaipjsonsetup ajantv2)
 target_include_directories(ntv2konaipjsonsetup PUBLIC ${NTV2KONAIPJSONSETUP_TARGET_INCLUDE_DIRS})
-target_link_libraries(ntv2konaipjsonsetup PUBLIC ajantv2 ${EXTRA_LIBRARIES} ${QT_LIBRARIES})
+target_link_libraries(ntv2konaipjsonsetup PUBLIC ajantv2 ${TARGET_LINK_LIBS} ${QT_LIBRARIES})
 
 if (AJA_DEPLOY_LIBS)
     include(QtHelpers)

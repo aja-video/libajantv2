@@ -97,16 +97,16 @@ set(CUDALOWLATENCYDEMO_TARGET_SOURCES
 	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_library(FOUNDATION_FRAMEWORK Foundation)
-    set(EXTRA_LIBRARIES ${FOUNDATION_FRAMEWORK})
+    set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(EXTRA_LIBRARIES X11 OpenGL::GL OpenGL::GLU GLEW::GLEW cuda cudart dl pthread rt)
+	set(TARGET_LINK_LIBS X11 OpenGL::GL OpenGL::GLU GLEW::GLEW cuda cudart dl pthread rt)
 	# cuda_include_directories(${CUDALOWLATENCYDEMO_TARGET_INCLUDE_DIRS})
 	# cuda_compile(CUDA_OBJ kernel.cu)
 	add_executable(cudalowlatencydemo ${CUDALOWLATENCYDEMO_TARGET_SOURCES} kernel.cu)
 	add_dependencies(cudalowlatencydemo ${CUDA_OBJ} ajantv2)
 	target_compile_definitions(cudalowlatencydemo PUBLIC ${CUDALOWLATENCYDEMO_TARGET_COMPILE_DEFINES})
 	target_include_directories(cudalowlatencydemo PUBLIC ${CUDALOWLATENCYDEMO_TARGET_INCLUDE_DIRS})
-	target_link_libraries(cudalowlatencydemo PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+	target_link_libraries(cudalowlatencydemo PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 	# add_custom_command(
 	# 	TARGET cudalowlatencydemo
 	# 	PRE_BUILD
