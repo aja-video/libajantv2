@@ -1027,6 +1027,42 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 #endif
 		}
 
+		SUBCASE("::GetExecutablePath")
+		{
+			std::string pathStr;
+			status = AJAFileIO::GetExecutablePath(pathStr);
+			CHECK_EQ(status, AJA_STATUS_SUCCESS);
+			std::string dirNameStr, fileNameStr;
+			AJAFileIO::GetDirectoryName(pathStr, dirNameStr);
+			AJAFileIO::GetFileName(pathStr, fileNameStr);
+			if (status == AJA_STATUS_SUCCESS) {
+#if defined(AJA_WINDOWS)
+				CHECK_EQ(fileNameStr, "ut_ajabase.exe");
+#elif defined(AJA_LINUX) || defined(AJA_MAC)
+				CHECK_EQ(fileNameStr, "ut_ajabase");
+#endif
+				std::vector<std::string> dirSplit = aja::split(dirNameStr, AJA_PATHSEP);
+				int numDirsFound = 0;
+				int lastDirIndex = 0;
+				// Find dir names in order (i.e. "ajalibraries", "ajabase", "test")
+				for (size_t i = 0; i < dirSplit.size(); i++) {
+					if (dirSplit[i] == "ajalibraries") {
+						numDirsFound++;
+						lastDirIndex = i;
+					}
+					if (dirSplit[i] == "ajabase" && numDirsFound == 1 && i > lastDirIndex) {
+						numDirsFound++;
+						lastDirIndex = i;
+					}
+					if (dirSplit[i] == "test" && numDirsFound == 2 && i > lastDirIndex) {
+						numDirsFound++;
+						break;
+					}
+				}
+				CHECK_EQ(numDirsFound, 3);
+			}
+		}
+
 		SUBCASE("FileInfo")
 		{
 
