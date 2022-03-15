@@ -28,8 +28,8 @@ endif()
 add_executable(ut_ajantv2
 	ut_ajantv2.cpp)
 add_dependencies(ut_ajantv2 ajantv2)
-target_include_directories(ut_ajantv2 PRIVATE ${TARGET_INCLUDE_DIRS})
-target_link_libraries(ut_ajantv2 PRIVATE ajantv2 ${TARGET_LINK_LIBS})
+target_include_directories(ut_ajantv2 PUBLIC ${TARGET_INCLUDE_DIRS})
+target_link_libraries(ut_ajantv2 PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 add_executable(ut_ntv2card
 	${ARGPARSE_SOURCES}
