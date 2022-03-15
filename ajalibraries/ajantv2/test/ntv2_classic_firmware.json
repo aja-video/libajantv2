@@ -173,7 +173,7 @@
             "bitfile_id" : null,
             "bitfile_ver" : null,
             "firmware_type" : "fpga",
-            "base_dir" : "corvid44-12g\/legacy",
+            "base_dir" : "corvid44-12g/legacy",
             "is_dyn_bitfile" : false
         },
         {
@@ -189,7 +189,7 @@
             "bitfile_id" : null,
             "bitfile_ver" : null,
             "firmware_type" : "fpga",
-            "base_dir" : "corvid44-12g\/legacy",
+            "base_dir" : "corvid44-12g/legacy",
             "is_dyn_bitfile" : false
         },
         {
@@ -205,7 +205,7 @@
             "bitfile_id" : null,
             "bitfile_ver" : null,
             "firmware_type" : "fpga",
-            "base_dir" : "corvid44-12g\/legacy",
+            "base_dir" : "corvid44-12g/legacy",
             "is_dyn_bitfile" : false
         },
         {
@@ -221,7 +221,7 @@
             "bitfile_id" : null,
             "bitfile_ver" : null,
             "firmware_type" : "fpga",
-            "base_dir" : "corvid44-12g\/legacy",
+            "base_dir" : "corvid44-12g/legacy",
             "is_dyn_bitfile" : false
         },
         {
@@ -237,7 +237,7 @@
             "bitfile_id" : "2",
             "bitfile_ver" : "9",
             "firmware_type" : "fpga",
-            "base_dir" : "corvid44-12g\/reconfig",
+            "base_dir" : "corvid44-12g/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -253,7 +253,7 @@
             "bitfile_id" : "3",
             "bitfile_ver" : "13",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/reconfig",
+            "base_dir" : "kona5/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -269,7 +269,7 @@
             "bitfile_id" : "4",
             "bitfile_ver" : "2",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/reconfig",
+            "base_dir" : "kona5/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -285,7 +285,7 @@
             "bitfile_id" : null,
             "bitfile_ver" : null,
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/legacy",
+            "base_dir" : "kona5/legacy",
             "is_dyn_bitfile" : false
         },
         {
@@ -301,7 +301,7 @@
             "bitfile_id" : null,
             "bitfile_ver" : null,
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/legacy",
+            "base_dir" : "kona5/legacy",
             "is_dyn_bitfile" : false
         },
         {
@@ -317,7 +317,7 @@
             "bitfile_id" : null,
             "bitfile_ver" : null,
             "firmware_type" : "fpga",
-            "base_dir" : "corvid44-12g\/legacy",
+            "base_dir" : "corvid44-12g/legacy",
             "is_dyn_bitfile" : false
         },
         {
@@ -333,7 +333,7 @@
             "bitfile_id" : null,
             "bitfile_ver" : null,
             "firmware_type" : "fpga",
-            "base_dir" : "corvid44-12g\/legacy",
+            "base_dir" : "corvid44-12g/legacy",
             "is_dyn_bitfile" : false
         },
         {
@@ -349,7 +349,7 @@
             "bitfile_id" : null,
             "bitfile_ver" : null,
             "firmware_type" : "fpga",
-            "base_dir" : "corvid44-12g\/legacy",
+            "base_dir" : "corvid44-12g/legacy",
             "is_dyn_bitfile" : false
         },
         {
@@ -365,7 +365,7 @@
             "bitfile_id" : null,
             "bitfile_ver" : null,
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/legacy",
+            "base_dir" : "kona5/legacy",
             "is_dyn_bitfile" : false
         },
         {
@@ -381,7 +381,7 @@
             "bitfile_id" : "1",
             "bitfile_ver" : "19",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/reconfig",
+            "base_dir" : "kona5/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -397,7 +397,7 @@
             "bitfile_id" : "2",
             "bitfile_ver" : "23",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/reconfig",
+            "base_dir" : "kona5/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -413,7 +413,7 @@
             "bitfile_id" : "2",
             "bitfile_ver" : "23",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/reconfig",
+            "base_dir" : "kona5/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -429,7 +429,7 @@
             "bitfile_id" : "0",
             "bitfile_ver" : "17",
             "firmware_type" : "fpga",
-            "base_dir" : "corvid44-12g\/tprom",
+            "base_dir" : "corvid44-12g/tprom",
             "is_dyn_bitfile" : true
         },
         {
@@ -445,7 +445,7 @@
             "bitfile_id" : "3",
             "bitfile_ver" : "10",
             "firmware_type" : "fpga",
-            "base_dir" : "corvid44-12g\/reconfig",
+            "base_dir" : "corvid44-12g/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -557,7 +557,7 @@
             "bitfile_id" : "1",
             "bitfile_ver" : "16",
             "firmware_type" : "fpga",
-            "base_dir" : "corvid44-12g\/reconfig",
+            "base_dir" : "corvid44-12g/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -573,7 +573,7 @@
             "bitfile_id" : null,
             "bitfile_ver" : null,
             "firmware_type" : "fpga",
-            "base_dir" : "corvid88\/elemental_420",
+            "base_dir" : "corvid88/elemental_420",
             "is_dyn_bitfile" : false
         },
         {
@@ -589,7 +589,7 @@
             "bitfile_id" : null,
             "bitfile_ver" : null,
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/legacy",
+            "base_dir" : "kona5/legacy",
             "is_dyn_bitfile" : false
         },
         {
@@ -637,7 +637,7 @@
             "bitfile_id" : "1",
             "bitfile_ver" : "16",
             "firmware_type" : "fpga",
-            "base_dir" : "corvid44-12g\/tprom",
+            "base_dir" : "corvid44-12g/tprom",
             "is_dyn_bitfile" : true
         },
         {
@@ -653,7 +653,7 @@
             "bitfile_id" : "4",
             "bitfile_ver" : "2",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/tprom",
+            "base_dir" : "kona5/tprom",
             "is_dyn_bitfile" : true
         },
         {
@@ -669,7 +669,7 @@
             "bitfile_id" : "2",
             "bitfile_ver" : "9",
             "firmware_type" : "fpga",
-            "base_dir" : "corvid44-12g\/reconfig",
+            "base_dir" : "corvid44-12g/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -685,7 +685,7 @@
             "bitfile_id" : "3",
             "bitfile_ver" : "10",
             "firmware_type" : "fpga",
-            "base_dir" : "corvid44-12g\/reconfig",
+            "base_dir" : "corvid44-12g/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -701,7 +701,7 @@
             "bitfile_id" : "4",
             "bitfile_ver" : "2",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/reconfig",
+            "base_dir" : "kona5/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -717,7 +717,7 @@
             "bitfile_id" : "0",
             "bitfile_ver" : "17",
             "firmware_type" : "fpga",
-            "base_dir" : "corvid44-12g\/reconfig",
+            "base_dir" : "corvid44-12g/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -733,7 +733,7 @@
             "bitfile_id" : "0",
             "bitfile_ver" : "19",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/reconfig",
+            "base_dir" : "kona5/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -749,7 +749,7 @@
             "bitfile_id" : "2",
             "bitfile_ver" : "23",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/tprom",
+            "base_dir" : "kona5/tprom",
             "is_dyn_bitfile" : true
         },
         {
@@ -765,7 +765,7 @@
             "bitfile_id" : "3",
             "bitfile_ver" : "13",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/tprom",
+            "base_dir" : "kona5/tprom",
             "is_dyn_bitfile" : true
         },
         {
@@ -781,7 +781,7 @@
             "bitfile_id" : null,
             "bitfile_ver" : null,
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/legacy",
+            "base_dir" : "kona5/legacy",
             "is_dyn_bitfile" : false
         },
         {
@@ -797,7 +797,7 @@
             "bitfile_id" : "1",
             "bitfile_ver" : "19",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/reconfig",
+            "base_dir" : "kona5/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -813,7 +813,7 @@
             "bitfile_id" : "2",
             "bitfile_ver" : "9",
             "firmware_type" : "fpga",
-            "base_dir" : "corvid44-12g\/tprom",
+            "base_dir" : "corvid44-12g/tprom",
             "is_dyn_bitfile" : true
         },
         {
@@ -829,7 +829,7 @@
             "bitfile_id" : "1",
             "bitfile_ver" : "16",
             "firmware_type" : "fpga",
-            "base_dir" : "corvid44-12g\/reconfig",
+            "base_dir" : "corvid44-12g/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -845,7 +845,7 @@
             "bitfile_id" : "0",
             "bitfile_ver" : "17",
             "firmware_type" : "fpga",
-            "base_dir" : "corvid44-12g\/reconfig",
+            "base_dir" : "corvid44-12g/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -861,7 +861,7 @@
             "bitfile_id" : "0",
             "bitfile_ver" : "19",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/reconfig",
+            "base_dir" : "kona5/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -877,7 +877,7 @@
             "bitfile_id" : "3",
             "bitfile_ver" : "13",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/reconfig",
+            "base_dir" : "kona5/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -893,7 +893,7 @@
             "bitfile_id" : "3",
             "bitfile_ver" : "10",
             "firmware_type" : "fpga",
-            "base_dir" : "corvid44-12g\/tprom",
+            "base_dir" : "corvid44-12g/tprom",
             "is_dyn_bitfile" : true
         },
         {
@@ -909,7 +909,7 @@
             "bitfile_id" : "1",
             "bitfile_ver" : "19",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/tprom",
+            "base_dir" : "kona5/tprom",
             "is_dyn_bitfile" : true
         },
         {
@@ -925,7 +925,7 @@
             "bitfile_id" : "0",
             "bitfile_ver" : "19",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/tprom",
+            "base_dir" : "kona5/tprom",
             "is_dyn_bitfile" : true
         },
         {
@@ -941,7 +941,7 @@
             "bitfile_id" : null,
             "bitfile_ver" : null,
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/legacy",
+            "base_dir" : "kona5/legacy",
             "is_dyn_bitfile" : false
         },
         {
@@ -957,7 +957,7 @@
             "bitfile_id" : "33",
             "bitfile_ver" : "0",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/reconfig",
+            "base_dir" : "kona5/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -973,7 +973,7 @@
             "bitfile_id" : "33",
             "bitfile_ver" : "0",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/reconfig",
+            "base_dir" : "kona5/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -989,7 +989,7 @@
             "bitfile_id" : "32",
             "bitfile_ver" : "0",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/reconfig",
+            "base_dir" : "kona5/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -1005,7 +1005,7 @@
             "bitfile_id" : "32",
             "bitfile_ver" : "0",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/reconfig",
+            "base_dir" : "kona5/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -1021,7 +1021,7 @@
             "bitfile_id" : "5",
             "bitfile_ver" : "0",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/reconfig",
+            "base_dir" : "kona5/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -1037,7 +1037,7 @@
             "bitfile_id" : "5",
             "bitfile_ver" : "0",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/reconfig",
+            "base_dir" : "kona5/reconfig",
             "is_dyn_bitfile" : true
         },
         {
@@ -1053,7 +1053,7 @@
             "bitfile_id" : "33",
             "bitfile_ver" : "0",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/tprom",
+            "base_dir" : "kona5/tprom",
             "is_dyn_bitfile" : true
         },
         {
@@ -1069,7 +1069,7 @@
             "bitfile_id" : "32",
             "bitfile_ver" : "0",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/tprom",
+            "base_dir" : "kona5/tprom",
             "is_dyn_bitfile" : true
         },
         {
@@ -1085,9 +1085,8 @@
             "bitfile_id" : "5",
             "bitfile_ver" : "0",
             "firmware_type" : "fpga",
-            "base_dir" : "kona5\/tprom",
+            "base_dir" : "kona5/tprom",
             "is_dyn_bitfile" : true
         }
     ]
 }
-    
