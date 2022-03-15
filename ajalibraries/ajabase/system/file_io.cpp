@@ -1250,6 +1250,7 @@ AJAStatus
 AJAFileIO::GetExecutablePath(std::string& path)
 {
 	char buf[AJA_MAX_PATH];
+	memset((void*)buf, 0, AJA_MAX_PATH);
 	size_t bufSize = 0;
 #if defined(AJA_WINDOWS)
 	bufSize = ::GetModuleFileNameA(NULL, &buf[0], AJA_MAX_PATH);
