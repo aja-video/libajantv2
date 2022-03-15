@@ -27,6 +27,10 @@
 	#include <unistd.h>
 #endif
 
+#if defined(AJA_MAC)
+	#include <mach-o/dyld.h>
+#endif
+
 using std::string;
 using std::wstring;
 using std::vector;
@@ -1246,19 +1250,21 @@ AJAStatus
 AJAFileIO::GetExecutablePath(std::string& path)
 {
 	char buf[AJA_MAX_PATH];
-	size_t szPath = 0;
+	size_t bufSize = 0;
 #if defined(AJA_WINDOWS)
-	szPath = ::GetModuleFileNameA(NULL, &buf[0], AJA_MAX_PATH);
+	bufSize = ::GetModuleFileNameA(NULL, &buf[0], AJA_MAX_PATH);
 #elif defined(AJA_LINUX)
-	szPath = readlink("/proc/self/exe", &buf[0], AJA_MAX_PATH);
+	bufSize = readlink("/proc/self/exe", &buf[0], AJA_MAX_PATH);
 #elif defined(AJA_MAC)
 	uint32_t pathLen = 0;
+	char exe_path[AJA_MAX_PATH];
 	_NSGetExecutablePath(NULL, &pathLen);
-	if (_NSGetExecutablePath(&buf[0], pathLen) == 0)
-		szPath = (size_t)pathLen;
+	if (_NSGetExecutablePath(&exe_path[0], &pathLen) == 0 && realpath(exe_path, buf)) {
+		bufSize = (size_t)pathLen;
+	}
 #endif
-	if (szPath > 0)
-		path = std::string(buf, szPath);
+	if (bufSize > 0)
+		path = std::string(buf, strlen(buf));
 	else
 		return AJA_STATUS_NOT_FOUND;
 
@@ -1270,9 +1276,9 @@ AJAFileIO::GetExecutablePath(std::wstring& path)
 {
 #if defined(AJA_WINDOWS)
 	wchar_t buf[AJA_MAX_PATH];
-	size_t szPath = ::GetModuleFileNameW(NULL, &buf[0], AJA_MAX_PATH);
-	if (szPath > 0) {
-		path = std::wstring(buf, szPath);
+	size_t bufSize = ::GetModuleFileNameW(NULL, &buf[0], AJA_MAX_PATH);
+	if (bufSize > 0) {
+		path = std::wstring(buf, wcslen(buf));
 		return AJA_STATUS_SUCCESS;
 	}
 #else

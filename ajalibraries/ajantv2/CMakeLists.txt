@@ -375,7 +375,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         install(FILES ${AJABASE_OS_PNP_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/windows)
     endif()
 
-    set(EXTRA_LIBRARIES
+    set(TARGET_LINK_LIBS
         advapi32 comctl32 netapi32
         odbc32 psapi rpcrt4 setupapi shell32
         shlwapi user32 winmm ws2_32 wsock32)
@@ -441,7 +441,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         install(FILES ${AJA_CMAKE_DIR}/../build/targets.mk DESTINATION ${AJA_INSTALL_INCLUDEDIR}/build)
     endif()
 
-    set(EXTRA_LIBRARIES
+    set(TARGET_LINK_LIBS
         rt)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(EXTRA_STATIC_DEFINES
@@ -510,7 +510,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_library(FOUNDATION_FRAMEWORK Foundation)
     find_library(IOKIT_FRAMEWORK IoKit)
 
-    set(EXTRA_LIBRARIES
+    set(TARGET_LINK_LIBS
         ${CORE_FOUNDATION_FRAMEWORK}
         ${IOKIT_FRAMEWORK}
         ${FOUNDATION_FRAMEWORK})
@@ -547,13 +547,13 @@ endif()
 # libajantv2
 add_library(ajantv2 STATIC ${AJANTV2_TARGET_SOURCES})
 target_include_directories(ajantv2 PUBLIC ${AJANTV2_TARGET_INCLUDE_DIRS})
-target_link_libraries(ajantv2 PUBLIC ${EXTRA_LIBRARIES})
+target_link_libraries(ajantv2 PUBLIC ${TARGET_LINK_LIBS})
 target_compile_definitions(ajantv2 PUBLIC ${EXTRA_STATIC_DEFINES})
 if (AJA_BUILD_SHARED)
     add_library(ajantv2-dyn SHARED ${AJANTV2_TARGET_SOURCES})
     target_compile_definitions(ajantv2-dyn PUBLIC ${EXTRA_DYNAMIC_DEFINES})
     target_include_directories(ajantv2-dyn PUBLIC ${AJANTV2_TARGET_INCLUDE_DIRS})
-    target_link_libraries(ajantv2-dyn PUBLIC ${EXTRA_LIBRARIES} ${EXTRA_DYNAMIC_LIBRARIES})
+    target_link_libraries(ajantv2-dyn PUBLIC ${TARGET_LINK_LIBS} ${EXTRA_DYNAMIC_LIBRARIES})
     set_target_properties(ajantv2-dyn PROPERTIES OUTPUT_NAME "${PROJECT_NAME}_${AJA_NTV2_SDK_VERSION_MAJOR}")
 endif()
 
