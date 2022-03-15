@@ -328,8 +328,6 @@ TEST_SUITE("sdi_loopback" * doctest::description("SDI loopback tests")) {
 int main(int argc, const char** argv) {
     AJADebug::Open();
 
-    LOGINFO("Starting CNTV2Card unit tests...");
-
     gOpts = new TestOptions();
     gOpts->card_a_index = 0;
     gOpts->card_b_index = 1;
@@ -387,7 +385,6 @@ int main(int argc, const char** argv) {
     free(new_argv);
     delete gOpts;
 
-    LOGINFO("Completed CNTV2Card Unit Tests!");
     AJADebug::Close();
 
     return ctx.shouldExit() ? res : EXIT_SUCCESS;
