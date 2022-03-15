@@ -196,7 +196,7 @@ public:
      *	@param[in]	round	Round the result.
      *	@return				Time in microseconds.
      */
-    int64_t FramesTo100Nanoseconds(int64_t frames, bool round = false) const;
+    int64_t FramesToNanoseconds100(int64_t frames, bool round = false) const;
 
 	/**
 	 *	Convert audio samples to video frames.
@@ -303,6 +303,15 @@ public:
 	 *	@return						Video frame count.
 	 */
 	int64_t MicrosecondsToFrames(int64_t microseconds, bool round = false);
+
+    /**
+     *	Convert 100 nanoseconds to video frames.
+     *
+     *	@param[in]	nanoseconds100	100 nanosecond intervals to convert.
+     *	@param[in]	round			Round the result.
+     *	@return						Video frame count.
+     */
+    int64_t Nanoseconds100ToFrames(int64_t nanoseconds100, bool round = false);
 
 	/**
 	 *	Convert microseconds to audio samples.
