@@ -1257,9 +1257,11 @@ AJAFileIO::GetExecutablePath(std::string& path)
 	szPath = readlink("/proc/self/exe", &buf[0], AJA_MAX_PATH);
 #elif defined(AJA_MAC)
 	uint32_t pathLen = 0;
+	char exe_path[AJA_MAX_PATH];
 	_NSGetExecutablePath(NULL, &pathLen);
-	if (_NSGetExecutablePath(&buf[0], &pathLen) == 0)
+	if (_NSGetExecutablePath(&exe_path[0], &pathLen) == 0 && realpath(exe_path, buf)) {
 		szPath = (size_t)pathLen;
+	}
 #endif
 	if (szPath > 0)
 		path = std::string(buf, szPath);
