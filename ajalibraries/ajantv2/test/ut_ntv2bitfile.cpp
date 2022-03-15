@@ -19,6 +19,7 @@ using nlohmann::json;
 #include "ajabase/system/systemtime.h"
 #include "ajabase/system/debug.h"
 
+#include "ajantv2/includes/ntv2bitfile.h"
 #include "ajantv2/includes/ntv2bitfilemanager.h"
 
 #define LOG_QUIET 1
@@ -106,9 +107,21 @@ bool get_bitfile_info(const std::string& path, NTV2BitfileInfo& nfo)
 {
     CNTV2BitfileManager mgr;
     if (mgr.AddFile(path)) {
+        // dynamic bitfiles...
         const auto& nfo_list = mgr.GetBitfileInfoList();
         if (nfo_list.size() == 1) {
             nfo = nfo_list.at(0);
+            return true;
+        }
+    } else {
+        // ...classic bitfiles.
+        CNTV2Bitfile bf;
+        if (bf.Open(path)) {
+            nfo.designName		= bf.GetDesignName();
+            nfo.designID		= bf.GetDesignID();
+            nfo.designVersion	= bf.GetDesignVersion();
+            nfo.bitfileID		= bf.GetBitfileID();
+            nfo.bitfileVersion =  bf.GetBitfileVersion();
             return true;
         }
     }
@@ -129,23 +142,37 @@ bool get_bitfile_info_list(const std::string& path, NTV2BitfileInfoList& nfo)
 }
 
 void ntv2bitfile_header_marker() {}
-TEST_SUITE("bitfile_header" * doctest::description("NTV2 bitfile header tests")) {
-    TEST_CASE("bitfile_path_is_valid") {
-        const std::string& path = gOpts.fw_path;
-        bool bitfile_exists = AJAFileIO::FileExists(path);
-        CHECK_EQ(bitfile_exists, true);
-    }
-    TEST_CASE("file_is_bitfile") {
-        const std::string& path = gOpts.fw_path;
-        bool is_bitfile = false;
-        size_t dot_idx = path.rfind('.');
-        if (dot_idx > 0 && dot_idx < INT32_MAX) {
-            if (path.substr(dot_idx, 4) == ".bit")
-                is_bitfile = true;
+TEST_SUITE("bitfile_header" * doctest::description("NTV2 bitfile header tests"))
+{
+    TEST_CASE("bitfile_path_is_valid")
+    {
+        SUBCASE("bitfile_path_not_null")
+        {
+            CHECK_NE(gOpts.fw_path, nullptr);
         }
-        CHECK_EQ(is_bitfile, true);
+        SUBCASE("bitfile_exists")
+        {
+            bool bitfile_exists = false;
+            if (gOpts.fw_path != NULL) {
+                const std::string& path = gOpts.fw_path;
+                bitfile_exists = AJAFileIO::FileExists(path);
+            }
+            CHECK_EQ(bitfile_exists, true);
+        }
+        SUBCASE("path_is_bitfile") {
+            bool is_bitfile = false;
+            if (gOpts.fw_path != NULL) {
+                const std::string& path = gOpts.fw_path;
+                size_t dot_idx = path.rfind('.');
+                if (dot_idx > 0 && dot_idx < INT32_MAX) {
+                    if (path.substr(dot_idx, 4) == ".bit")
+                        is_bitfile = true;
+                }
+            }
+            CHECK_EQ(is_bitfile, true);
+        }
     }
-    TEST_CASE("check bitfile headers") {
+    TEST_CASE("bitfile_header_up_to_date") {
         // read ntv2_classic_firmware.json, containing expected values for bitfile headers
         std::string exe_path;
         std::string exe_dir;
@@ -224,7 +251,7 @@ int main(int argc, const char** argv)
     struct argparse argparse;
     argparse_init(&argparse, options, usage, ARGPARSE_IGNORE_UNKNOWN_ARGS);
     argparse_describe(&argparse, "\nntv2 bitfile unit tests",
-        "\nPerform tests against NTV2 Classic Firmware bitfiles on disk (not installed to an AJA card).");
+        "\nPerform offline tests against NTV2 Classic Firmware bitfiles (not installed to an AJA card).");
     argparse_parse(&argparse, argc, (const char**)argv);
 
     int res = ctx.run();
