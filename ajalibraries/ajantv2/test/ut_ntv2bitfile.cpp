@@ -144,33 +144,40 @@ bool get_bitfile_info_list(const std::string& path, NTV2BitfileInfoList& nfo)
 void ntv2bitfile_header_marker() {}
 TEST_SUITE("bitfile_header" * doctest::description("NTV2 bitfile header tests"))
 {
-    TEST_CASE("bitfile_path_is_valid")
+    TEST_CASE("have_ntv2_classic_firmware_json")
     {
-        SUBCASE("bitfile_path_not_null")
-        {
-            CHECK_NE(gOpts.fw_path, nullptr);
+        std::string exe_path;
+        std::string exe_dir;
+        CHECK_EQ(AJAFileIO::GetExecutablePath(exe_path), AJA_STATUS_SUCCESS);
+        CHECK_EQ(AJAFileIO::GetDirectoryName(exe_path, exe_dir), AJA_STATUS_SUCCESS);
+        auto fw_json_path = exe_dir + AJA_PATHSEP + kFirmwareJSON;
+        json fw_json;
+        CHECK_EQ(read_json_file(fw_json_path, fw_json), AJA_STATUS_SUCCESS);
+    }
+    TEST_CASE("bitfile_path_not_null")
+    {
+        CHECK_NE(gOpts.fw_path, nullptr);
+    }
+    TEST_CASE("bitfile_exists")
+    {
+        bool bitfile_exists = false;
+        if (gOpts.fw_path != NULL) {
+            const std::string& path = gOpts.fw_path;
+            bitfile_exists = AJAFileIO::FileExists(path);
         }
-        SUBCASE("bitfile_exists")
-        {
-            bool bitfile_exists = false;
-            if (gOpts.fw_path != NULL) {
-                const std::string& path = gOpts.fw_path;
-                bitfile_exists = AJAFileIO::FileExists(path);
+        CHECK_EQ(bitfile_exists, true);
+    }
+    TEST_CASE("path_is_bitfile") {
+        bool is_bitfile = false;
+        if (gOpts.fw_path != NULL) {
+            const std::string& path = gOpts.fw_path;
+            size_t dot_idx = path.rfind('.');
+            if (dot_idx > 0 && dot_idx < INT32_MAX) {
+                if (path.substr(dot_idx, 4) == ".bit")
+                    is_bitfile = true;
             }
-            CHECK_EQ(bitfile_exists, true);
         }
-        SUBCASE("path_is_bitfile") {
-            bool is_bitfile = false;
-            if (gOpts.fw_path != NULL) {
-                const std::string& path = gOpts.fw_path;
-                size_t dot_idx = path.rfind('.');
-                if (dot_idx > 0 && dot_idx < INT32_MAX) {
-                    if (path.substr(dot_idx, 4) == ".bit")
-                        is_bitfile = true;
-                }
-            }
-            CHECK_EQ(is_bitfile, true);
-        }
+        CHECK_EQ(is_bitfile, true);
     }
     TEST_CASE("bitfile_header_up_to_date") {
         // read ntv2_classic_firmware.json, containing expected values for bitfile headers
@@ -179,6 +186,8 @@ TEST_SUITE("bitfile_header" * doctest::description("NTV2 bitfile header tests"))
         AJAFileIO::GetExecutablePath(exe_path);
         AJAFileIO::GetDirectoryName(exe_path, exe_dir);
         auto fw_json_path = exe_dir + AJA_PATHSEP + kFirmwareJSON;
+        json fw_json;
+        AJAStatus status = read_json_file(fw_json_path, fw_json);
 
         const std::string& path = gOpts.fw_path;
         bool is_bitfile = false;
@@ -190,12 +199,8 @@ TEST_SUITE("bitfile_header" * doctest::description("NTV2 bitfile header tests"))
 
         bool bitfile_exists = AJAFileIO::FileExists(path);
         std::string bitfile_filename;
-        AJAStatus status = AJAFileIO::GetFileName(path, bitfile_filename);
+        status = AJAFileIO::GetFileName(path, bitfile_filename);
         if (is_bitfile && bitfile_exists && !bitfile_filename.empty()) {
-            json fw_json;
-            status = read_json_file(fw_json_path, fw_json);
-            CHECK_EQ(status, AJA_STATUS_SUCCESS);
-
             bool found_bitfile_in_json = false;
             NTV2BitfileInfo nfo;
             if (status == AJA_STATUS_SUCCESS && get_bitfile_info(path, nfo)) {
