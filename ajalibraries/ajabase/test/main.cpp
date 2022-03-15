@@ -1051,25 +1051,6 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 				CHECK_EQ(fileNameStr, "ut_ajabase");
 				CHECK_EQ(fileNameWide, L"ut_ajabase");
 #endif
-				std::vector<std::string> dirSplit = aja::split(dirNameStr, AJA_PATHSEP);
-				uint32_t numDirsFound = 0;
-				uint32_t lastDirIndex = 0;
-				// Find dir names in order (i.e. "ajalibraries", "ajabase", "test")
-				for (size_t i = 0; i < dirSplit.size(); i++) {
-					if (dirSplit[i] == "ajalibraries") {
-						numDirsFound++;
-						lastDirIndex = i;
-					}
-					if (dirSplit[i] == "ajabase" && numDirsFound == 1 && i > lastDirIndex) {
-						numDirsFound++;
-						lastDirIndex = i;
-					}
-					if (dirSplit[i] == "test" && numDirsFound == 2 && i > lastDirIndex) {
-						numDirsFound++;
-						break;
-					}
-				}
-				CHECK_EQ(numDirsFound, 3);
 			}
 		}
 
