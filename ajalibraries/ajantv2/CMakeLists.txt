@@ -60,6 +60,7 @@ set(AJANTV2_HEADERS
     includes/ntv2nubaccess.h
     includes/ntv2nubpktcom.h
     includes/ntv2nubtypes.h
+    includes/ntv2pixelcomponent.h
     includes/ntv2publicinterface.h
     includes/ntv2registerexpert.h
     includes/ntv2registers2022.h
@@ -114,6 +115,7 @@ set(AJANTV2_SOURCES
     src/ntv2mcsfile.cpp
     src/ntv2nubaccess.cpp
     src/ntv2nubpktcom.cpp
+    src/ntv2pixelcomponent.cpp
     src/ntv2publicinterface.cpp
     src/ntv2register.cpp
     src/ntv2registerexpert.cpp

@@ -7,11 +7,10 @@
  */
 #define DOCTEST_CONFIG_IMPLEMENT
 #define DOCTEST_THREAD_LOCAL
-
-#include <argparse/argparse.h>
 #include <doctest/doctest.h>
-#include <nlohmann/json.hpp>
-using nlohmann::json;
+#include <argparse/argparse.h>
+
+#include "test_support.hpp"
 
 #include "ajabase/common/common.h"
 #include "ajabase/system/file_io.h"
@@ -56,23 +55,7 @@ struct TestOptions {
     const char* fw_path;
 };
 
-static TestOptions gOpts;
-
-AJAStatus read_json_file(const std::string& path, json& j)
-{
-    AJAFileIO f;
-    if (f.Open(path, eAJAReadOnly, 0) == AJA_STATUS_SUCCESS) {
-        int64_t create_time, mod_time, file_size;
-        if (f.FileInfo(create_time, mod_time, file_size) == AJA_STATUS_SUCCESS) {
-            std::string json_str;
-            if (f.Read(json_str, (uint32_t)file_size) == file_size) {
-                j = json::parse(json_str);
-                return AJA_STATUS_SUCCESS;
-            }
-        }
-    }
-    return AJA_STATUS_FAIL;
-}
+static TestOptions gOptions;
 
 enum class BitfileType {
     Tandem,                 /* TPROM Bitfile*/
@@ -156,21 +139,21 @@ TEST_SUITE("bitfile_header" * doctest::description("NTV2 bitfile header tests"))
     }
     TEST_CASE("bitfile_path_not_null")
     {
-        CHECK_NE(gOpts.fw_path, nullptr);
+        CHECK_NE(gOptions.fw_path, nullptr);
     }
     TEST_CASE("bitfile_exists")
     {
         bool bitfile_exists = false;
-        if (gOpts.fw_path != NULL) {
-            const std::string& path = gOpts.fw_path;
+        if (gOptions.fw_path != NULL) {
+            const std::string& path = gOptions.fw_path;
             bitfile_exists = AJAFileIO::FileExists(path);
         }
         CHECK_EQ(bitfile_exists, true);
     }
     TEST_CASE("path_is_bitfile") {
         bool is_bitfile = false;
-        if (gOpts.fw_path != NULL) {
-            const std::string& path = gOpts.fw_path;
+        if (gOptions.fw_path != NULL) {
+            const std::string& path = gOptions.fw_path;
             size_t dot_idx = path.rfind('.');
             if (dot_idx > 0 && dot_idx < INT32_MAX) {
                 if (path.substr(dot_idx, 4) == ".bit")
@@ -189,7 +172,7 @@ TEST_SUITE("bitfile_header" * doctest::description("NTV2 bitfile header tests"))
         json fw_json;
         AJAStatus status = read_json_file(fw_json_path, fw_json);
 
-        const std::string& path = gOpts.fw_path;
+        const std::string& path = gOptions.fw_path;
         bool is_bitfile = false;
         size_t dot_idx = path.rfind('.');
         if (dot_idx > 0 && dot_idx < INT32_MAX) {
@@ -250,7 +233,7 @@ int main(int argc, const char** argv)
     struct argparse_option options[] = {
         OPT_ARGPARSE_HELP(),
         OPT_GROUP("ut_ntv2bitfile options"),
-        OPT_STRING('p', "path", &gOpts.fw_path, "path to a single NTV2 Classic Firmware bitfile, or to the `tprom` or `reconfig` directory for a specific AJA card."),
+        OPT_STRING('p', "path", &gOptions.fw_path, "path to a single NTV2 Classic Firmware bitfile, or to the `tprom` or `reconfig` directory for a specific AJA card."),
         OPT_END(),
     };
     struct argparse argparse;

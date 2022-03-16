@@ -33,16 +33,26 @@ target_link_libraries(ut_ajantv2 PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 add_executable(ut_ntv2card
 	${ARGPARSE_SOURCES}
-	ut_ntv2card.cpp)
+	ut_ntv2card.cpp
+	test_support.hpp)
 add_dependencies(ut_ntv2card ajantv2 ntv2qa)
 target_include_directories(ut_ntv2card PRIVATE
 	${TARGET_INCLUDE_DIRS}
 	${AJA_QA_ROOT}/libs)
 target_link_libraries(ut_ntv2card PRIVATE ajantv2 ntv2qa ${TARGET_LINK_LIBS})
+add_custom_command(TARGET ut_ntv2card POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+	${CMAKE_CURRENT_SOURCE_DIR}/ntv2_vpid_tests.json
+	$<TARGET_FILE_DIR:${PROJECT_NAME}>/ntv2_vpid_tests.json)
+add_custom_command(TARGET ut_ntv2card POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+	${CMAKE_CURRENT_SOURCE_DIR}/ntv2_vpid_debug.json
+	$<TARGET_FILE_DIR:${PROJECT_NAME}>/ntv2_vpid_debug.json)
 
 add_executable(ut_ntv2bitfile
 	${ARGPARSE_SOURCES}
-	ut_ntv2bitfile.cpp)
+	ut_ntv2bitfile.cpp
+	test_support.hpp)
 add_dependencies(ut_ntv2bitfile ajantv2)
 target_include_directories(ut_ntv2bitfile PRIVATE ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ut_ntv2bitfile PRIVATE ajantv2 ${TARGET_LINK_LIBS})
