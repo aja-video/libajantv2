@@ -304,6 +304,16 @@ public:
 	static AJAStatus GetFileName(const std::string& path, std::string& filename);	//	New in SDK 16.0
 	static AJAStatus GetFileName(const std::wstring& path, std::wstring& filename); //	New in SDK 16.0
 
+	/**
+	 * Retrieves the full path of the currently running exectuable.
+	 * 
+	 * @param[out]	path	Path of the running executable
+	 * 
+	 * @return		AJA_STATUS_SUCCESS If and only if the executable path is retrieved
+	 */
+	static AJAStatus GetExecutablePath(std::string& path); // New in SDK 16.2
+	static AJAStatus GetExecutablePath(std::wstring& path); // New in SDK 16.2
+
 #if defined(AJA_WINDOWS)
 	void	 *GetHandle(void) {return mFileDescriptor;}
 #else
