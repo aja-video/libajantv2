@@ -41,10 +41,10 @@ target_include_directories(ntv2burn PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2burn PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps)
-	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps)
-	install(FILES ${NTV2BURN_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/ntv2burn)
-	install(FILES ${NTV2BURN_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/ntv2burn)
+	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps)
+	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps)
+	install(FILES ${NTV2BURN_HEADERS} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps/ntv2burn)
+	install(FILES ${NTV2BURN_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps/ntv2burn)
 endif()
 
 install(TARGETS ntv2burn

@@ -41,10 +41,10 @@ target_include_directories(ntv2outputtestpattern PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2outputtestpattern PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps)
-	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps)
-	install(FILES ${NTV2OUTPUTTESTPATTERN_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/ntv2outputtestpattern)
-	install(FILES ${NTV2OUTPUTTESTPATTERN_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/ntv2outputtestpattern)
+	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps)
+	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps)
+	install(FILES ${NTV2OUTPUTTESTPATTERN_HEADERS} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps/ntv2outputtestpattern)
+	install(FILES ${NTV2OUTPUTTESTPATTERN_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps/ntv2outputtestpattern)
 endif()
 
 install(TARGETS ntv2outputtestpattern

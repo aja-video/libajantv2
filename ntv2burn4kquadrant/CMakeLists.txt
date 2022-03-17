@@ -41,10 +41,10 @@ target_include_directories(ntv2burn4kquadrant PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2burn4kquadrant PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps)
-	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps)
-	install(FILES ${NTV2BURN4KQUADRANT_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/ntv2burn4kquadrant)
-	install(FILES ${NTV2BURN4KQUADRANT_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/ntv2burn4kquadrant)
+	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps)
+	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps)
+	install(FILES ${NTV2BURN4KQUADRANT_HEADERS} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps/ntv2burn4kquadrant)
+	install(FILES ${NTV2BURN4KQUADRANT_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps/ntv2burn4kquadrant)
 endif()
 
 install(TARGETS ntv2burn4kquadrant

@@ -41,10 +41,10 @@ target_include_directories(ntv2capture4k PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2capture4k PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps)
-	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps)
-	install(FILES ${NTV2CAPTURE4K_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/ntv2capture4k)
-	install(FILES ${NTV2CAPTURE4K_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/ntv2capture4k)
+	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps)
+	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps)
+	install(FILES ${NTV2CAPTURE4K_HEADERS} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps/ntv2capture4k)
+	install(FILES ${NTV2CAPTURE4K_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps/ntv2capture4k)
 endif()
 
 install(TARGETS ntv2capture4k

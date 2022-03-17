@@ -82,10 +82,10 @@ set(TARGET_SOURCES
 # target_link_libraries(dvplowlatencydemo PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${DVPLOWLATENCYDEMO_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
-	install(FILES ${DVPLOWLATENCYDEMO_BUILD_FILES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
-	install(FILES ${NVIDIA_COMMON_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/NVIDIA/common)
-	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/NVIDIA/commonCUDA)
+	install(FILES ${DVPLOWLATENCYDEMO_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
+	install(FILES ${DVPLOWLATENCYDEMO_BUILD_FILES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
+	install(FILES ${NVIDIA_COMMON_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps/NVIDIA/common)
+	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps/NVIDIA/commonCUDA)
 endif()
 
 message("added dvplowlatencydemo")
