@@ -222,9 +222,9 @@ static bool gIsRouted = false;
 #define DOCTEST_PARAMETERIZE(name, func) \
         DOCTEST_SUBCASE(name.c_str()) { func(gIsRouted); }
 
-void ntv2card_sdi_loopback_marker() {}
-TEST_SUITE("sdi_loopback" * doctest::description("SDI loopback tests")) {
-    TEST_CASE("framebuffer_loopback") {
+void ntv2card_framestore_sdi_marker() {}
+TEST_SUITE("framestore_sdi" * doctest::description("SDI loopback tests")) {
+    TEST_CASE("framestore_sdi_json") {
         CNTV2DeviceScanner scanner;
         const size_t num_devices = scanner.GetNumDevices();
         if (num_devices < 2)
@@ -253,7 +253,8 @@ TEST_SUITE("sdi_loopback" * doctest::description("SDI loopback tests")) {
             NTV2FormatDescriptor fd(vf, pf, vanc_mode);
 
             std::ostringstream oss_log;
-            oss_log << "id_" << vpid_db_id << "_standard_0x" << vpid_standard_str << "_vf_" << NTV2VideoFormatToString(vf) << "_pf_" << NTV2FrameBufferFormatToString(pf, true);
+            oss_log << "framestore_sdi_test_" << vpid_db_id << "_standard_0x" << vpid_standard_str << "_vf_" << NTV2VideoFormatToString(vf) << "_pf_" << NTV2FrameBufferFormatToString(pf, true);
+            LOGINFO(oss_log.str());
 
             CNTV2Card* src_card = gCard;
             CNTV2Card* dst_card = gCard2;
@@ -306,10 +307,10 @@ TEST_SUITE("sdi_loopback" * doctest::description("SDI loopback tests")) {
 
                 CHECK_EQ(src_router.ApplyRouting(!is_routed, true), AJA_STATUS_SUCCESS);
                 CHECK_EQ(dst_router.ApplyRouting(!is_routed, true), AJA_STATUS_SUCCESS);
-                if (!is_routed) {
-                    AJATime::Sleep(500);
-                    is_routed = true;
-                }
+                AJATime::Sleep(500);
+                // if (!is_routed) {
+                //     is_routed = true;
+                // }
 
                 //TODO(paulh): If we use random numbers, we need to massage the values into SDI legal values first
                 // or the SDI readback will not compare to the original.
