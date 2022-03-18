@@ -6,9 +6,11 @@
 
 #include "test_support.hpp"
 
-#include "ajabase/system/file_io.h"
-#include "ajabase/system/systemtime.h"
+#include "ajabase/common/common.h"
 #include "ajabase/system/debug.h"
+#include "ajabase/system/file_io.h"
+#include "ajabase/system/make_unique_shim.h"
+#include "ajabase/system/systemtime.h"
 #include "ajantv2/includes/ntv2card.h"
 #include "ajantv2/includes/ntv2pixelcomponent.h"
 #include "ajantv2/includes/ntv2devicefeatures.h"
@@ -238,13 +240,32 @@ public:
         : _src_card{new CNTV2Card(cdx1)},
           _dst_card{new CNTV2Card(cdx2)},
           _test_json{},
-          _clear_routing{true} {}
+          _clear_routing{true},
+          _num_tests{0},
+          _num_done{0},
+          _num_pass{0},
+          _num_fail{0},
+          _failed_tests{} {}
     ~FramestoreSDI() {
+        LOGINFO("[ framestore_sdi ] Tests: " << _num_done << "/" << _num_tests << " Pass: " << _num_pass << " Fail: " << _num_fail);
+        std::ostringstream failed_oss;
+        for (const auto& id : _failed_tests) {
+            failed_oss << std::to_string(id) << " ";
+        }
+        std::string failed_id_str = failed_oss.str();
+        aja::rstrip(failed_id_str);
+        LOGINFO("Failed Test IDs: " << failed_id_str);
         delete _src_card;
         _src_card = nullptr;
         delete _dst_card;
         _dst_card = nullptr;
     }
+
+    uint32_t NumTests() const { return _num_tests; }
+    uint32_t NumDone() const { return _num_done; }
+    uint32_t NumPass() const { return _num_pass; }
+    uint32_t NumFail() const { return _num_fail; }
+
     AJAStatus Initialize(const std::string& json_path, std::vector<TestCase>& test_cases) {
         AJA_RETURN_STATUS(read_json_file(json_path, _test_json));
         for (auto&& vj : _test_json["vpid_tests"]) {
@@ -266,6 +287,7 @@ public:
                 vpid_standard,
                 std::bind(&FramestoreSDI::ExecuteTest, this, std::placeholders::_1)
             });
+            _num_tests++;
         }
         return AJA_STATUS_SUCCESS;
     }
@@ -279,6 +301,9 @@ public:
         LOGINFO("[ framestore_sdi ] " << tc.name);
         if (!can_do_test_case(vf, pf)) {
             LOGWARN("test not supported!");
+            _num_done++;
+            _num_fail++;
+            _failed_tests.push_back(tc.id);
             return false;
         }
 
@@ -356,8 +381,16 @@ public:
         CNTV2PixelComponentReader compare(compare_bytes, fd);
         CHECK_EQ(master.ReadComponentValues(), AJA_STATUS_SUCCESS);
         CHECK_EQ(compare.ReadComponentValues(), AJA_STATUS_SUCCESS);
-        CHECK(master == compare);
-        return master == compare;
+        bool result = (master == compare);
+        if (result == true) {
+            _num_pass++;
+        } else {
+            _num_fail++;
+            _failed_tests.push_back(tc.id);
+        }
+        _num_done++;
+        CHECK_EQ(result, true);
+        return result;
     }
 
 private:
@@ -390,12 +423,19 @@ private:
     std::vector<UByte> _readback;
     std::vector<UByte> _zeroes;
     bool _clear_routing;
+    uint32_t _num_tests;
+    uint32_t _num_done;
+    uint32_t _num_pass;
+    uint32_t _num_fail;
+    std::vector<int> _failed_tests;
 };
+
+using FramestoreSDIPtr = std::unique_ptr<FramestoreSDI>;
 
 void ntv2card_framestore_sdi_marker() {}
 TEST_SUITE("framestore_sdi" * doctest::description("SDI loopback tests")) {
     TEST_CASE("framestore_sdi_sd_hd") {
-        static FramestoreSDI* fs_sdi = nullptr;
+        static FramestoreSDIPtr fs_sdi = nullptr;
         static std::vector<TestCase> test_cases;
         if (fs_sdi == nullptr) {
             CNTV2DeviceScanner scanner;
@@ -410,14 +450,14 @@ TEST_SUITE("framestore_sdi" * doctest::description("SDI loopback tests")) {
             std::string vpid_json_path = exe_dir + AJA_PATHSEP + "json" + AJA_PATHSEP + "sdi_sd_hd.json";
             REQUIRE_EQ(AJAFileIO::FileExists(vpid_json_path), true);
 
-            fs_sdi = new FramestoreSDI(gOptions->card_a_index, gOptions->card_b_index);
+            fs_sdi = aja::make_unique<FramestoreSDI>(gOptions->card_a_index, gOptions->card_b_index);
             REQUIRE_EQ(fs_sdi->Initialize(vpid_json_path, test_cases), AJA_STATUS_SUCCESS);
         }
         // Doctest calls SUBCASE recursively per-TEST_CASE, so we have to ensure the test case data is only established once per test case.
         // This is done in order to get parameterized test results at the end.
         DOCTEST_PARAMETERIZE(test_cases);
     }
-    TEST_CASE("framestore_sdi_ycbcr10") {
+    TEST_CASE("framestore_sdi_uhd_4k") {
         static FramestoreSDI* fs_sdi = nullptr;
         static std::vector<TestCase> test_cases;
         if (fs_sdi == nullptr) {
@@ -430,7 +470,7 @@ TEST_SUITE("framestore_sdi" * doctest::description("SDI loopback tests")) {
             std::string exe_path, exe_dir;
             REQUIRE_EQ(AJAFileIO::GetExecutablePath(exe_path), AJA_STATUS_SUCCESS);
             REQUIRE_EQ(AJAFileIO::GetDirectoryName(exe_path, exe_dir), AJA_STATUS_SUCCESS);
-            std::string vpid_json_path = exe_dir + AJA_PATHSEP + "json" + AJA_PATHSEP + "sdi_ycbcr10.json";
+            std::string vpid_json_path = exe_dir + AJA_PATHSEP + "json" + AJA_PATHSEP + "sdi_uhd_4k.json";
             REQUIRE_EQ(AJAFileIO::FileExists(vpid_json_path), true);
 
             fs_sdi = new FramestoreSDI(gOptions->card_a_index, gOptions->card_b_index);
