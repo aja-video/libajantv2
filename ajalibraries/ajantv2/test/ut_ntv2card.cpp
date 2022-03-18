@@ -20,6 +20,7 @@
 #include "ntv2qa/routing/preset_router.h"
 
 #include <algorithm>
+#include <functional>
 
 #define LOG_QUIET 1
 
@@ -58,7 +59,6 @@ static constexpr UByte kSDILegalMin = 0x04;
 static constexpr UByte kSDILegalMax8Bit = 0xfb;
 static constexpr UWord kSDILegalMax10Bit = 0x3fb;
 static constexpr ULWord kSDILegalMax12Bit = 0xffc;
-static const char* kVpidJsonFilename = "ntv2_vpid_debug.json";
 
 struct TestOptions {
     ULWord card_a_index;
@@ -217,145 +217,229 @@ TEST_SUITE("framestore_formats" * doctest::description("Framestore widget format
     // }
 }
 
-static bool gIsRouted = false;
+#define DOCTEST_PARAMETERIZE(data_container)                                  \
+    static size_t _doctest_subcase_idx = 0;                                                     \
+    std::for_each(data_container.begin(), data_container.end(), [&](const auto& in) {           \
+        DOCTEST_SUBCASE(in.name.c_str()) { CHECK_EQ(in.func(in), true); }   \
+    });                                                                                         \
+    _doctest_subcase_idx = 0
 
-#define DOCTEST_PARAMETERIZE(name, func) \
-        DOCTEST_SUBCASE(name.c_str()) { func(gIsRouted); }
+class FramestoreSDI {
+public:
+    struct TestCase {
+        std::string name;
+        NTV2VideoFormat vf;
+        NTV2PixelFormat pf;
+        NTV2VANCMode vanc_mode;
+        NTV2ReferenceSource ref_src;
+        VPIDStandard standard;
+        std::function<bool(const TestCase& tc)> func;
+    };
 
-void ntv2card_framestore_sdi_marker() {}
-TEST_SUITE("framestore_sdi" * doctest::description("SDI loopback tests")) {
-    TEST_CASE("framestore_sdi_json") {
-        CNTV2DeviceScanner scanner;
-        const size_t num_devices = scanner.GetNumDevices();
-        if (num_devices < 2)
-            LOGERR("SDI Loopback tests require two boards connected to the host system!");
-        REQUIRE_GE(num_devices, 2);
-
-        std::string exe_path, exe_dir;
-        AJAFileIO::GetExecutablePath(exe_path);
-        AJAFileIO::GetDirectoryName(exe_path, exe_dir);
-        std::string vpid_json_path = exe_dir + AJA_PATHSEP + kVpidJsonFilename;
-        json vpid_json;
-        REQUIRE_EQ(read_json_file(vpid_json_path, vpid_json), AJA_STATUS_SUCCESS);
-
-        std::vector<UByte> buffer(kFrameSize8MiB);
-        std::vector<UByte> readback(kFrameSize8MiB);
-        std::vector<UByte> zeroes(kFrameSize8MiB);
-
-        for (auto&& vj : vpid_json["vpid_tests"]) {
-            auto vpid_db_id = vj["vpid_db_id"].get<int>();
+    FramestoreSDI(ULWord cdx1, ULWord cdx2)
+        : _src_card{new CNTV2Card(cdx1)},
+          _dst_card{new CNTV2Card(cdx2)},
+          _test_json{},
+          _clear_routing{true} {}
+    ~FramestoreSDI() {
+        delete _src_card;
+        _src_card = nullptr;
+        delete _dst_card;
+        _dst_card = nullptr;
+    }
+    AJAStatus Initialize(const std::string& json_path, std::vector<TestCase>& test_cases) {
+        AJA_RETURN_STATUS(read_json_file(json_path, _test_json));
+        for (auto&& vj : _test_json["vpid_tests"]) {
+            auto vpid_db_id = vj["vpid_db_id"].get<int>(); // id of the original VPID test case from the QA Database
             auto vf = (NTV2VideoFormat)vj["vid_fmt_value"].get<int>();
             auto pf = (NTV2PixelFormat)vj["pix_fmt_value"].get<int>();
             auto vpid_standard_str = vj["smpte_id"].get_ref<std::string&>();
             auto vpid_standard = (VPIDStandard)std::stoul(vpid_standard_str, nullptr, 16);
-            NTV2VANCMode vanc_mode = NTV2_VANCMODE_OFF;
-            NTV2ReferenceSource ref_src = NTV2_REFERENCE_FREERUN;
-            NTV2FormatDescriptor fd(vf, pf, vanc_mode);
 
             std::ostringstream oss_log;
-            oss_log << "framestore_sdi_test_" << vpid_db_id << "_standard_0x" << vpid_standard_str << "_vf_" << NTV2VideoFormatToString(vf) << "_pf_" << NTV2FrameBufferFormatToString(pf, true);
-            LOGINFO(oss_log.str());
+            oss_log << "id_" << vpid_db_id << "_standard_0x" << vpid_standard_str << "_vf_" << NTV2VideoFormatToString(vf) << "_pf_" << NTV2FrameBufferFormatToString(pf, true);
 
-            CNTV2Card* src_card = gCard;
-            CNTV2Card* dst_card = gCard2;
-            NTV2DeviceID src_card_id = src_card->GetDeviceID();
-            NTV2DeviceID dst_card_id = dst_card->GetDeviceID();
-            if (!NTV2DeviceCanDoVideoFormat(src_card_id, vf)) {
-                LOGWARN("Skipping test. Video format " << NTV2VideoFormatToString(vf) << " not supported by card " << NTV2DeviceIDToString(src_card_id));
-                continue;
-            }
-            if (!NTV2DeviceCanDoFrameBufferFormat(src_card_id, pf)) {
-                LOGWARN("Skipping test. Pixel format " << NTV2FrameBufferFormatToString(pf) << " not supported by card " << NTV2DeviceIDToString(src_card_id));
-                continue;
-            }
-            if (!NTV2DeviceCanDoVideoFormat(dst_card_id, vf)) {
-                LOGWARN("Skipping test. Video format " << NTV2VideoFormatToString(vf) << " not supported by card " << NTV2DeviceIDToString(dst_card_id));
-                continue;
-            }
-            if (!NTV2DeviceCanDoFrameBufferFormat(dst_card_id, pf)) {
-                LOGWARN("Skipping test. Pixel format " << NTV2FrameBufferFormatToString(pf) << " not supported by card " << NTV2DeviceIDToString(dst_card_id));
-                continue;
-            }
-
-            auto test_func = [&](bool& is_routed) -> bool {
-                qa::PresetRouterConfig cfg_a {
-                    gOptions->out_channel, gOptions->out_framestore,
-                    NTV2_MODE_DISPLAY, vf, pf,
-                    ref_src, vanc_mode, vpid_standard, ConnectionKind::SDI
-                };
-                auto src_router = qa::PresetRouter(cfg_a, src_card);
-                qa::PresetRouterConfig cfg_b {
-                    gOptions->inp_channel, gOptions->inp_framestore,
-                    NTV2_MODE_CAPTURE, vf, pf,
-                    ref_src, vanc_mode, vpid_standard, ConnectionKind::SDI
-                };
-                auto dst_router = qa::PresetRouter(cfg_b, dst_card);
-
-                SetCardBaseline(src_card, !is_routed);
-                SetCardBaseline(dst_card, !is_routed);
-
-                ULWord frame_size = fd.GetTotalBytes();
-                buffer.clear();
-                buffer.resize(frame_size);
-                readback.clear();
-                readback.resize(frame_size);
-                zeroes.clear();
-                zeroes.resize(frame_size);
-                // Zero out framebuffers
-                CHECK_EQ(src_card->DMAWriteFrame(gOptions->out_frame, reinterpret_cast<const ULWord*>(zeroes.data()), frame_size), true);
-                CHECK_EQ(dst_card->DMAWriteFrame(gOptions->inp_frame, reinterpret_cast<const ULWord*>(zeroes.data()), frame_size), true);
-
-                CHECK_EQ(src_router.ApplyRouting(!is_routed, true), AJA_STATUS_SUCCESS);
-                CHECK_EQ(dst_router.ApplyRouting(!is_routed, true), AJA_STATUS_SUCCESS);
-                AJATime::Sleep(500);
-                // if (!is_routed) {
-                //     is_routed = true;
-                // }
-
-                //TODO(paulh): If we use random numbers, we need to massage the values into SDI legal values first
-                // or the SDI readback will not compare to the original.
-                // qa::RandomPattern<ULWord>(0xDECAFBAD, 0x1337c0d3, 0xdecafbad, buffer, qa::ByteOrder::LittleEndian);
-                // qa::AlternatingPattern<ULWord>(buffer, frame_size, { 0xdecafbad, 0x1337c0d3 }, 1, qa::ByteOrder::LittleEndian);
-                auto stride = fd.linePitch;
-                if (NTV2_IS_FBF_8BIT(pf) || pf == NTV2_FBF_24BIT_RGB || pf == NTV2_FBF_24BIT_BGR) {
-                    qa::CountingPattern8Bit(buffer, fd.GetRasterHeight(), stride, kSDILegalMin, kSDILegalMax8Bit);
-                } else if (NTV2_IS_FBF_10BIT(pf)) {
-                    if (pf == NTV2_FBF_10BIT_DPX) {
-                        qa::CountingPattern10BitDPX(buffer, fd.GetRasterHeight(), stride, kSDILegalMin, kSDILegalMax10Bit, qa::ByteOrder::BigEndian);
-                    } else if (pf == NTV2_FBF_10BIT_DPX_LE) {
-                        qa::CountingPattern10BitDPX(buffer, fd.GetRasterHeight(), stride, kSDILegalMin, kSDILegalMax10Bit, qa::ByteOrder::LittleEndian);
-                    } else {
-                        qa::CountingPattern10Bit(buffer, fd.GetRasterHeight(), stride, kSDILegalMin, kSDILegalMax10Bit, qa::ByteOrder::LittleEndian);
-                    }
-                } else if (NTV2_IS_FBF_12BIT_RGB(pf)) {
-                    qa::CountingPattern12Bit(buffer, fd.GetRasterHeight(), stride, kSDILegalMin, kSDILegalMax12Bit, qa::ByteOrder::LittleEndian);
-                }
-
-                // qa::RandomPattern<ULWord>(readback, frame_size, 0xAB4D533D, 0, UINT32_MAX, qa::ByteOrder::LittleEndian);
-
-                NTV2Channel out_channel = GetNTV2ChannelForIndex(gOptions->out_channel);
-                NTV2Channel inp_channel = GetNTV2ChannelForIndex(gOptions->inp_channel);
-                CHECK_EQ(src_card->SetMode(out_channel, NTV2_MODE_DISPLAY), true);
-                CHECK_EQ(src_card->SetOutputFrame(out_channel, gOptions->out_frame), true);
-                CHECK_EQ(src_card->DMAWriteFrame(gOptions->out_frame, reinterpret_cast<const ULWord*>(buffer.data()), frame_size), true);
-                AJATime::Sleep(1000); // TODO (paulh): Maybe we need to build a histogram of results and check for consistency over multiple readbacks?
-                size_t raster_bytes = fd.GetTotalBytes();
-                CHECK_EQ(dst_card->SetMode(inp_channel, NTV2_MODE_CAPTURE, false), true);
-                CHECK_EQ(dst_card->SetInputFrame(inp_channel, gOptions->inp_frame), true);
-                CHECK_EQ(dst_card->DMAReadFrame(gOptions->inp_frame, reinterpret_cast<ULWord*>(&readback[0]), (ULWord)raster_bytes), true);
-
-                NTV2_POINTER master_bytes(buffer.data(), raster_bytes);
-                NTV2_POINTER compare_bytes(readback.data(), raster_bytes);
-                CNTV2PixelComponentReader master(master_bytes, fd);
-                CNTV2PixelComponentReader compare(compare_bytes, fd);
-                CHECK_EQ(master.ReadComponentValues(), AJA_STATUS_SUCCESS);
-                CHECK_EQ(compare.ReadComponentValues(), AJA_STATUS_SUCCESS);
-                CHECK(master == compare);
-                return true;
-            };
-
-            DOCTEST_PARAMETERIZE(oss_log.str(), test_func);
+            test_cases.push_back(FramestoreSDI::TestCase{
+                oss_log.str(),
+                vf, pf,
+                NTV2_VANCMODE_OFF,
+                NTV2_REFERENCE_FREERUN,
+                vpid_standard,
+                std::bind(&FramestoreSDI::ExecuteTest, this, std::placeholders::_1)
+            });
         }
+        return AJA_STATUS_SUCCESS;
+    }
+
+    bool ExecuteTest(const TestCase& tc) {
+        const auto& vf = tc.vf;
+        const auto& pf = tc.pf;
+        const auto& vanc_mode = tc.vanc_mode;
+        const auto& ref_src = tc.ref_src;
+        const auto& vpid_standard = tc.standard;
+        LOGINFO("Test case: vf = " << NTV2VideoFormatToString(vf) << ", pf = " << NTV2FrameBufferFormatToString(pf) << ")");
+        if (!can_do_test_case(vf, pf)) {
+            LOGWARN("Test case not supported (vf = " << NTV2VideoFormatToString(vf) << ", pf = " << NTV2FrameBufferFormatToString(pf) << ")");
+            return false;
+        }
+
+        qa::PresetRouterConfig src_cfg {
+            gOptions->out_channel, gOptions->out_framestore,
+            NTV2_MODE_DISPLAY, vf, pf,
+            ref_src, vanc_mode, vpid_standard, ConnectionKind::SDI
+        };
+        auto src_router = qa::PresetRouter(src_cfg, _src_card);
+        qa::PresetRouterConfig dst_cfg {
+            gOptions->inp_channel, gOptions->inp_framestore,
+            NTV2_MODE_CAPTURE, vf, pf,
+            ref_src, vanc_mode, vpid_standard, ConnectionKind::SDI
+        };
+        auto dst_router = qa::PresetRouter(dst_cfg, _dst_card);
+
+        SetCardBaseline(_src_card, _clear_routing);
+        SetCardBaseline(_dst_card, _clear_routing);
+
+        NTV2FormatDescriptor fd(vf, pf, vanc_mode);
+        ULWord frame_size = fd.GetTotalBytes();
+        _buffer.clear();
+        _buffer.resize(frame_size);
+        _readback.clear();
+        _readback.resize(frame_size);
+        _zeroes.clear();
+        _zeroes.resize(frame_size);
+        
+        // Zero out framebuffers on cards
+        CHECK_EQ(_src_card->DMAWriteFrame(gOptions->out_frame, reinterpret_cast<const ULWord*>(_zeroes.data()), frame_size), true);
+        CHECK_EQ(_dst_card->DMAWriteFrame(gOptions->inp_frame, reinterpret_cast<const ULWord*>(_zeroes.data()), frame_size), true);
+
+        CHECK_EQ(src_router.ApplyRouting(_clear_routing, true), AJA_STATUS_SUCCESS);
+        CHECK_EQ(dst_router.ApplyRouting(_clear_routing, true), AJA_STATUS_SUCCESS);
+        AJATime::Sleep(500);
+        // if (!is_routed) {
+        //     is_routed = true;
+        // }
+
+        //TODO(paulh): If we use random numbers, we need to massage the values into SDI legal values first
+        // or the SDI readback will not compare to the original.
+        // qa::RandomPattern<ULWord>(0xDECAFBAD, 0x1337c0d3, 0xdecafbad, buffer, qa::ByteOrder::LittleEndian);
+        // qa::AlternatingPattern<ULWord>(buffer, frame_size, { 0xdecafbad, 0x1337c0d3 }, 1, qa::ByteOrder::LittleEndian);
+        auto stride = fd.linePitch;
+        if (NTV2_IS_FBF_8BIT(pf) || pf == NTV2_FBF_24BIT_RGB || pf == NTV2_FBF_24BIT_BGR) {
+            qa::CountingPattern8Bit(_buffer, fd.GetRasterHeight(), stride, kSDILegalMin, kSDILegalMax8Bit);
+        } else if (NTV2_IS_FBF_10BIT(pf)) {
+            if (pf == NTV2_FBF_10BIT_DPX) {
+                qa::CountingPattern10BitDPX(_buffer, fd.GetRasterHeight(), stride, kSDILegalMin, kSDILegalMax10Bit, qa::ByteOrder::BigEndian);
+            } else if (pf == NTV2_FBF_10BIT_DPX_LE) {
+                qa::CountingPattern10BitDPX(_buffer, fd.GetRasterHeight(), stride, kSDILegalMin, kSDILegalMax10Bit, qa::ByteOrder::LittleEndian);
+            } else {
+                qa::CountingPattern10Bit(_buffer, fd.GetRasterHeight(), stride, kSDILegalMin, kSDILegalMax10Bit, qa::ByteOrder::LittleEndian);
+            }
+        } else if (NTV2_IS_FBF_12BIT_RGB(pf)) {
+            qa::CountingPattern12Bit(_buffer, fd.GetRasterHeight(), stride, kSDILegalMin, kSDILegalMax12Bit, qa::ByteOrder::LittleEndian);
+        }
+
+        // qa::RandomPattern<ULWord>(readback, frame_size, 0xAB4D533D, 0, UINT32_MAX, qa::ByteOrder::LittleEndian);
+
+        NTV2Channel out_channel = GetNTV2ChannelForIndex(gOptions->out_channel);
+        NTV2Channel inp_channel = GetNTV2ChannelForIndex(gOptions->inp_channel);
+        CHECK_EQ(_src_card->SetMode(out_channel, NTV2_MODE_DISPLAY), true);
+        CHECK_EQ(_src_card->SetOutputFrame(out_channel, gOptions->out_frame), true);
+        CHECK_EQ(_src_card->DMAWriteFrame(gOptions->out_frame, reinterpret_cast<const ULWord*>(_buffer.data()), frame_size), true);
+        AJATime::Sleep(1000); // TODO (paulh): Maybe we need to build a histogram of results and check for consistency over multiple readbacks?
+        size_t raster_bytes = fd.GetTotalBytes();
+        CHECK_EQ(_dst_card->SetMode(inp_channel, NTV2_MODE_CAPTURE, false), true);
+        CHECK_EQ(_dst_card->SetInputFrame(inp_channel, gOptions->inp_frame), true);
+        CHECK_EQ(_dst_card->DMAReadFrame(gOptions->inp_frame, reinterpret_cast<ULWord*>(&_readback[0]), (ULWord)raster_bytes), true);
+
+        NTV2_POINTER master_bytes(_buffer.data(), raster_bytes);
+        NTV2_POINTER compare_bytes(_readback.data(), raster_bytes);
+        CNTV2PixelComponentReader master(master_bytes, fd);
+        CNTV2PixelComponentReader compare(compare_bytes, fd);
+        CHECK_EQ(master.ReadComponentValues(), AJA_STATUS_SUCCESS);
+        CHECK_EQ(compare.ReadComponentValues(), AJA_STATUS_SUCCESS);
+        CHECK(master == compare);
+        return master == compare;
+    }
+
+private:
+    bool can_do_test_case(NTV2VideoFormat vf, NTV2PixelFormat pf) {
+        auto src_card_id = _src_card->GetDeviceID();
+        auto dst_card_id = _dst_card->GetDeviceID();
+        if (!NTV2DeviceCanDoVideoFormat(src_card_id, vf)) {
+            LOGWARN("Skipping test! Video format " << NTV2VideoFormatToString(vf) << " not supported by card " << NTV2DeviceIDToString(src_card_id));
+            return false;
+        }
+        if (!NTV2DeviceCanDoFrameBufferFormat(src_card_id, pf)) {
+            LOGWARN("Skipping test! Pixel format " << NTV2FrameBufferFormatToString(pf) << " not supported by card " << NTV2DeviceIDToString(src_card_id));
+            return false;
+        }
+        if (!NTV2DeviceCanDoVideoFormat(dst_card_id, vf)) {
+            LOGWARN("Skipping test! Video format " << NTV2VideoFormatToString(vf) << " not supported by card " << NTV2DeviceIDToString(dst_card_id));
+            return false;
+        }
+        if (!NTV2DeviceCanDoFrameBufferFormat(dst_card_id, pf)) {
+            LOGWARN("Skipping test! Pixel format " << NTV2FrameBufferFormatToString(pf) << " not supported by card " << NTV2DeviceIDToString(dst_card_id));
+            return false;
+        }
+        return true;
+    }
+
+    CNTV2Card* _src_card;
+    CNTV2Card* _dst_card;
+    json _test_json;
+    std::vector<UByte> _buffer;
+    std::vector<UByte> _readback;
+    std::vector<UByte> _zeroes;
+    bool _clear_routing;
+};
+
+void ntv2card_framestore_sdi_marker() {}
+TEST_SUITE("framestore_sdi" * doctest::description("SDI loopback tests")) {
+    TEST_CASE("framestore_sdi_ycbcr8") {
+        static FramestoreSDI* fs_sdi = nullptr;
+        static std::vector<FramestoreSDI::TestCase> test_cases;
+        if (fs_sdi == nullptr) {
+            CNTV2DeviceScanner scanner;
+            const size_t num_devices = scanner.GetNumDevices();
+            if (num_devices < 2)
+                LOGERR("SDI Loopback tests require two boards connected to the host system!");
+            REQUIRE_GE(num_devices, 2);
+
+            std::string exe_path, exe_dir;
+            REQUIRE_EQ(AJAFileIO::GetExecutablePath(exe_path), AJA_STATUS_SUCCESS);
+            REQUIRE_EQ(AJAFileIO::GetDirectoryName(exe_path, exe_dir), AJA_STATUS_SUCCESS);
+            std::string vpid_json_path = exe_dir + AJA_PATHSEP + "json" + AJA_PATHSEP + "sdi_ycbcr8.json";
+            REQUIRE_EQ(AJAFileIO::FileExists(vpid_json_path), true);
+
+            fs_sdi = new FramestoreSDI(gOptions->card_a_index, gOptions->card_b_index);
+            REQUIRE_EQ(fs_sdi->Initialize(vpid_json_path, test_cases), AJA_STATUS_SUCCESS);
+        }
+        // Doctest calls SUBCASE recursively per-TEST_CASE, so we have to ensure the test case data is only established once per test case.
+        // This is done in order to get parameterized test results at the end.
+        DOCTEST_PARAMETERIZE(test_cases);
+    }
+    TEST_CASE("framestore_sdi_ycbcr10") {
+        static FramestoreSDI* fs_sdi = nullptr;
+        static std::vector<FramestoreSDI::TestCase> test_cases;
+        if (fs_sdi == nullptr) {
+            CNTV2DeviceScanner scanner;
+            const size_t num_devices = scanner.GetNumDevices();
+            if (num_devices < 2)
+                LOGERR("SDI Loopback tests require two boards connected to the host system!");
+            REQUIRE_GE(num_devices, 2);
+
+            std::string exe_path, exe_dir;
+            REQUIRE_EQ(AJAFileIO::GetExecutablePath(exe_path), AJA_STATUS_SUCCESS);
+            REQUIRE_EQ(AJAFileIO::GetDirectoryName(exe_path, exe_dir), AJA_STATUS_SUCCESS);
+            std::string vpid_json_path = exe_dir + AJA_PATHSEP + "json" + AJA_PATHSEP + "sdi_ycbcr10.json";
+            REQUIRE_EQ(AJAFileIO::FileExists(vpid_json_path), true);
+
+            fs_sdi = new FramestoreSDI(gOptions->card_a_index, gOptions->card_b_index);
+            REQUIRE_EQ(fs_sdi->Initialize(vpid_json_path, test_cases), AJA_STATUS_SUCCESS);
+        }
+        // Doctest calls SUBCASE recursively per-TEST_CASE, so we have to ensure the test case data is only established once per test case.
+        // This is done in order to get parameterized test results at the end.
+        DOCTEST_PARAMETERIZE(test_cases);
     }
 }
 
