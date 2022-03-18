@@ -1,4 +1,4 @@
-#include "ajantv2/includes/ntv2pixelcomponent.h"
+#include "ntv2pixelcomponent.h"
 #include "ajantv2/includes/ntv2endian.h"
 #include "ajantv2/includes/ntv2utils.h"
 
@@ -94,7 +94,7 @@ bool CNTV2PixelComponentReader::operator==(const CNTV2PixelComponentReader& rhs)
             const auto& components_a = GetComponentsU16();
             const auto& components_b = rhs.GetComponentsU16();
             if (components_a.size() == components_b.size()) {
-                for (std::size_t i = 0; i < components_a.size(); i+=4) {
+                for (size_t i = 0; i < components_a.size(); i+=4) {
                     UWord r1 = components_a[i];
                     UWord g1 = components_a[i+1];
                     UWord b1 = components_a[i+2];
@@ -321,7 +321,7 @@ AJAStatus CNTV2PixelComponentReader::ReadComponentValues() {
                     case NTV2_FBF_10BIT_YCBCR:
                     case NTV2_FBF_10BIT_YCBCR_DPX:
                     {
-                        const std::size_t uint_index = static_cast<std::size_t>((components_per_elem) * elem_offset + component_index);
+                        const size_t uint_index = static_cast<size_t>((components_per_elem) * elem_offset + component_index);
                         const UWord cmp_value = line_u16[uint_index];
                         _u16_components.push_back(cmp_value);
                         _word_size = 16;
@@ -334,7 +334,7 @@ AJAStatus CNTV2PixelComponentReader::ReadComponentValues() {
                     case NTV2_FBF_RGBA:
                     case NTV2_FBF_ABGR:
                     {
-                        const std::size_t byte_index = static_cast<std::size_t>(
+                        const size_t byte_index = static_cast<size_t>(
                             (components_per_elem) * elem_offset + component_index
                         );
                         const UWord component_value = line_u8[byte_index];
@@ -387,7 +387,7 @@ AJAStatus CNTV2PixelComponentReader::ReadComponentValues() {
                     {
                         NTV2_ASSERT(component_index < 3);
                         // Component 0 is B, 1 is G, 2 is R
-                        const std::size_t byte_index = static_cast<std::size_t>(
+                        const size_t byte_index = static_cast<size_t>(
                             (components_per_elem) * elem_offset + component_index
                         );
                         const UWord component_value = line_u8[byte_index];
@@ -399,7 +399,7 @@ AJAStatus CNTV2PixelComponentReader::ReadComponentValues() {
                     case NTV2_FBF_12BIT_RGB_PACKED:
                     {
                         NTV2_ASSERT(component_index < 3);
-                        const std::size_t word_index = static_cast<std::size_t>(
+                        const size_t word_index = static_cast<size_t>(
                             (components_per_elem) * elem_offset + component_index
                         );
                         const UWord component_value = line_u16[word_index];

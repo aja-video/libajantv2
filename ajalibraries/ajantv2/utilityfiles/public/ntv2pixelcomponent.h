@@ -48,7 +48,7 @@ public:
         return _u32_components;
     }
 
-    std::size_t WordSize() const {
+    size_t WordSize() const {
         return _word_size;
     }
 
@@ -71,7 +71,7 @@ private:
     mutable std::vector<UWord> _u16_components;
     mutable std::vector<ULWord> _u32_components;
 
-    std::size_t _word_size;
+    size_t _word_size;
 };
 
 #endif

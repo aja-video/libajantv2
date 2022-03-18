@@ -35,6 +35,8 @@ target_link_libraries(ut_ajantv2 PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 add_executable(ut_ntv2card
 	${ARGPARSE_SOURCES}
+	${AJA_LIB_NTV2_ROOT}/utilityfiles/public/ntv2pixelcomponent.h
+	${AJA_LIB_NTV2_ROOT}/utilityfiles/public/ntv2pixelcomponent.cpp
 	ut_ntv2card.cpp
 	test_support.hpp)
 target_compile_features(ut_ntv2card PUBLIC cxx_std_14)

@@ -12,7 +12,7 @@
 #include "ajabase/system/make_unique_shim.h"
 #include "ajabase/system/systemtime.h"
 #include "ajantv2/includes/ntv2card.h"
-#include "ajantv2/includes/ntv2pixelcomponent.h"
+#include "ajantv2/utilityfiles/public/ntv2pixelcomponent.h"
 #include "ajantv2/includes/ntv2devicefeatures.h"
 #include "ajantv2/includes/ntv2devicescanner.h"
 #include "ntv2qa/binary_pattern_gen.h"
