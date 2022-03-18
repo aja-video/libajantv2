@@ -218,6 +218,7 @@ TEST_SUITE("framestore_formats" * doctest::description("Framestore widget format
 }
 
 struct TestCase {
+    int id;
     std::string name;
     NTV2VideoFormat vf;
     NTV2PixelFormat pf;
@@ -257,6 +258,7 @@ public:
             oss_log << "id_" << vpid_db_id << "_standard_0x" << vpid_standard_str << "_vf_" << NTV2VideoFormatToString(vf) << "_pf_" << NTV2FrameBufferFormatToString(pf, true);
 
             test_cases.push_back(TestCase{
+                vpid_db_id,
                 oss_log.str(),
                 vf, pf,
                 NTV2_VANCMODE_OFF,
@@ -274,9 +276,9 @@ public:
         const auto& vanc_mode = tc.vanc_mode;
         const auto& ref_src = tc.ref_src;
         const auto& vpid_standard = tc.standard;
-        LOGINFO("Test case: vf = " << NTV2VideoFormatToString(vf) << ", pf = " << NTV2FrameBufferFormatToString(pf) << ")");
+        LOGINFO("[ framestore_sdi ] " << tc.name);
         if (!can_do_test_case(vf, pf)) {
-            LOGWARN("Test case not supported (vf = " << NTV2VideoFormatToString(vf) << ", pf = " << NTV2FrameBufferFormatToString(pf) << ")");
+            LOGWARN("test not supported!");
             return false;
         }
 
@@ -392,7 +394,7 @@ private:
 
 void ntv2card_framestore_sdi_marker() {}
 TEST_SUITE("framestore_sdi" * doctest::description("SDI loopback tests")) {
-    TEST_CASE("framestore_sdi_ycbcr8") {
+    TEST_CASE("framestore_sdi_sd_hd") {
         static FramestoreSDI* fs_sdi = nullptr;
         static std::vector<TestCase> test_cases;
         if (fs_sdi == nullptr) {
@@ -405,7 +407,7 @@ TEST_SUITE("framestore_sdi" * doctest::description("SDI loopback tests")) {
             std::string exe_path, exe_dir;
             REQUIRE_EQ(AJAFileIO::GetExecutablePath(exe_path), AJA_STATUS_SUCCESS);
             REQUIRE_EQ(AJAFileIO::GetDirectoryName(exe_path, exe_dir), AJA_STATUS_SUCCESS);
-            std::string vpid_json_path = exe_dir + AJA_PATHSEP + "json" + AJA_PATHSEP + "sdi_ycbcr8.json";
+            std::string vpid_json_path = exe_dir + AJA_PATHSEP + "json" + AJA_PATHSEP + "sdi_sd_hd.json";
             REQUIRE_EQ(AJAFileIO::FileExists(vpid_json_path), true);
 
             fs_sdi = new FramestoreSDI(gOptions->card_a_index, gOptions->card_b_index);

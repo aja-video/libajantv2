@@ -45,8 +45,8 @@ target_include_directories(ut_ntv2card PRIVATE
 	${AJA_QA_ROOT}/libs)
 target_link_libraries(ut_ntv2card PRIVATE ajantv2 ntv2qa ${TARGET_LINK_LIBS})
 set(UT_NTV2CARD_JSON
-	json/sdi_ycbcr8.json
-	json/sdi_ycbcr10.json)
+	json/sdi_sd_hd.json
+	json/sdi_uhd_4k.json)
 foreach(j IN LISTS UT_NTV2CARD_JSON)
 	post_build_copy_file(ut_ntv2card
 		${CMAKE_CURRENT_SOURCE_DIR}/${j}
