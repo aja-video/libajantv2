@@ -1,5 +1,7 @@
 project(ut_ajantv2)
 
+include(AJAHelpers)
+
 message("added ajantv2 unit tests")
 
 set(TARGET_INCLUDE_DIRS
@@ -40,14 +42,14 @@ target_include_directories(ut_ntv2card PRIVATE
 	${TARGET_INCLUDE_DIRS}
 	${AJA_QA_ROOT}/libs)
 target_link_libraries(ut_ntv2card PRIVATE ajantv2 ntv2qa ${TARGET_LINK_LIBS})
-add_custom_command(TARGET ut_ntv2card POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy
-	${CMAKE_CURRENT_SOURCE_DIR}/ntv2_vpid_tests.json
-	$<TARGET_FILE_DIR:${PROJECT_NAME}>/ntv2_vpid_tests.json)
-add_custom_command(TARGET ut_ntv2card POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy
-	${CMAKE_CURRENT_SOURCE_DIR}/ntv2_vpid_debug.json
-	$<TARGET_FILE_DIR:${PROJECT_NAME}>/ntv2_vpid_debug.json)
+set(UT_NTV2CARD_JSON
+	json/sdi_ycbcr8.json
+	json/sdi_ycbcr10.json)
+foreach(j IN LISTS UT_NTV2CARD_JSON)
+	post_build_copy_file(ut_ntv2card
+		${CMAKE_CURRENT_SOURCE_DIR}/${j}
+		$<TARGET_FILE_DIR:${PROJECT_NAME}>/${j})
+endforeach()
 
 add_executable(ut_ntv2bitfile
 	${ARGPARSE_SOURCES}
@@ -56,7 +58,6 @@ add_executable(ut_ntv2bitfile
 add_dependencies(ut_ntv2bitfile ajantv2)
 target_include_directories(ut_ntv2bitfile PRIVATE ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ut_ntv2bitfile PRIVATE ajantv2 ${TARGET_LINK_LIBS})
-add_custom_command(TARGET ut_ntv2bitfile POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy
-	${CMAKE_CURRENT_SOURCE_DIR}/ntv2_classic_firmware.json
-	$<TARGET_FILE_DIR:${PROJECT_NAME}>/ntv2_classic_firmware.json)
+post_build_copy_file(ut_ntv2bitfile
+	${CMAKE_CURRENT_SOURCE_DIR}/json/ntv2_classic_firmware.json
+	$<TARGET_FILE_DIR:${PROJECT_NAME}>/json/ntv2_classic_firmware.json)
