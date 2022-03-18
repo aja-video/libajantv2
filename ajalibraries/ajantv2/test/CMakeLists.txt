@@ -37,6 +37,8 @@ add_executable(ut_ntv2card
 	${ARGPARSE_SOURCES}
 	ut_ntv2card.cpp
 	test_support.hpp)
+target_compile_features(ut_ntv2card PUBLIC cxx_std_14)
+set_target_properties(ut_ntv2card PROPERTIES CXX_STANDARD_REQUIRED ON)
 add_dependencies(ut_ntv2card ajantv2 ntv2qa)
 target_include_directories(ut_ntv2card PRIVATE
 	${TARGET_INCLUDE_DIRS}

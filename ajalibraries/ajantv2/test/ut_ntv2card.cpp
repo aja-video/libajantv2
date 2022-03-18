@@ -217,25 +217,22 @@ TEST_SUITE("framestore_formats" * doctest::description("Framestore widget format
     // }
 }
 
+struct TestCase {
+    std::string name;
+    NTV2VideoFormat vf;
+    NTV2PixelFormat pf;
+    NTV2VANCMode vanc_mode;
+    NTV2ReferenceSource ref_src;
+    VPIDStandard standard;
+    std::function<bool(const TestCase& tc)> func;
+};
 #define DOCTEST_PARAMETERIZE(data_container)                                  \
-    static size_t _doctest_subcase_idx = 0;                                                     \
-    std::for_each(data_container.begin(), data_container.end(), [&](const auto& in) {           \
+    std::for_each(data_container.begin(), data_container.end(), [&](const TestCase& in) {           \
         DOCTEST_SUBCASE(in.name.c_str()) { CHECK_EQ(in.func(in), true); }   \
-    });                                                                                         \
-    _doctest_subcase_idx = 0
+    });
 
 class FramestoreSDI {
 public:
-    struct TestCase {
-        std::string name;
-        NTV2VideoFormat vf;
-        NTV2PixelFormat pf;
-        NTV2VANCMode vanc_mode;
-        NTV2ReferenceSource ref_src;
-        VPIDStandard standard;
-        std::function<bool(const TestCase& tc)> func;
-    };
-
     FramestoreSDI(ULWord cdx1, ULWord cdx2)
         : _src_card{new CNTV2Card(cdx1)},
           _dst_card{new CNTV2Card(cdx2)},
@@ -259,7 +256,7 @@ public:
             std::ostringstream oss_log;
             oss_log << "id_" << vpid_db_id << "_standard_0x" << vpid_standard_str << "_vf_" << NTV2VideoFormatToString(vf) << "_pf_" << NTV2FrameBufferFormatToString(pf, true);
 
-            test_cases.push_back(FramestoreSDI::TestCase{
+            test_cases.push_back(TestCase{
                 oss_log.str(),
                 vf, pf,
                 NTV2_VANCMODE_OFF,
@@ -307,7 +304,7 @@ public:
         _readback.resize(frame_size);
         _zeroes.clear();
         _zeroes.resize(frame_size);
-        
+
         // Zero out framebuffers on cards
         CHECK_EQ(_src_card->DMAWriteFrame(gOptions->out_frame, reinterpret_cast<const ULWord*>(_zeroes.data()), frame_size), true);
         CHECK_EQ(_dst_card->DMAWriteFrame(gOptions->inp_frame, reinterpret_cast<const ULWord*>(_zeroes.data()), frame_size), true);
@@ -397,7 +394,7 @@ void ntv2card_framestore_sdi_marker() {}
 TEST_SUITE("framestore_sdi" * doctest::description("SDI loopback tests")) {
     TEST_CASE("framestore_sdi_ycbcr8") {
         static FramestoreSDI* fs_sdi = nullptr;
-        static std::vector<FramestoreSDI::TestCase> test_cases;
+        static std::vector<TestCase> test_cases;
         if (fs_sdi == nullptr) {
             CNTV2DeviceScanner scanner;
             const size_t num_devices = scanner.GetNumDevices();
@@ -420,7 +417,7 @@ TEST_SUITE("framestore_sdi" * doctest::description("SDI loopback tests")) {
     }
     TEST_CASE("framestore_sdi_ycbcr10") {
         static FramestoreSDI* fs_sdi = nullptr;
-        static std::vector<FramestoreSDI::TestCase> test_cases;
+        static std::vector<TestCase> test_cases;
         if (fs_sdi == nullptr) {
             CNTV2DeviceScanner scanner;
             const size_t num_devices = scanner.GetNumDevices();
