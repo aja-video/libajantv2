@@ -41,14 +41,14 @@ target_include_directories(ntv2enumerateboards PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2enumerateboards PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps)
-	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps)
-	install(FILES ${NTV2ENUMERATEBOARDS_HEADERS} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps/ntv2enumerateboards)
-	install(FILES ${NTV2ENUMERATEBOARDS_SOURCES} DESTINATION ${AJA_INSTALL_DIR}/ajaapps/crossplatform/demoapps/ntv2enumerateboards)
+	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
+	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
+	install(FILES ${NTV2ENUMERATEBOARDS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2enumerateboards)
+	install(FILES ${NTV2ENUMERATEBOARDS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2enumerateboards)
 endif()
 
 install(TARGETS ntv2enumerateboards
-	ARCHIVE DESTINATION ${AJA_INSTALL_LIBDIR}
-	LIBRARY DESTINATION ${AJA_INSTALL_LIBDIR}
-	RUNTIME DESTINATION ${AJA_INSTALL_BINDIR}
-	FRAMEWORK DESTINATION ${AJA_INSTALL_FRAMEWORKDIR})
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+	LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+	RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+	FRAMEWORK DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
