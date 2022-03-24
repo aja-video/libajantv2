@@ -225,6 +225,11 @@ int64_t AJATimeBase::FramesToMicroseconds(int64_t frames, bool round) const
 	return Convert(frames, mFrameTimeScale, mFrameDuration, 1000000, 1, round, true);
 }
 
+int64_t AJATimeBase::FramesToNanoseconds100(int64_t frames, bool round) const
+{
+    return Convert(frames, mFrameTimeScale, mFrameDuration, 10000000, 1, round, true);
+}
+
 int64_t AJATimeBase::SamplesToFrames(int64_t samples, bool round) const
 {
 	return Convert(samples, mAudioRate, 1, mFrameTimeScale, mFrameDuration, round, true);
@@ -283,6 +288,11 @@ int64_t AJATimeBase::SecondsToTicks(double seconds, bool round)
 int64_t AJATimeBase::MicrosecondsToFrames(int64_t microseconds, bool round)
 {
 	return Convert(microseconds, 1000000, 1, mFrameTimeScale, mFrameDuration, round, true);
+}
+
+int64_t AJATimeBase::Nanoseconds100ToFrames(int64_t nanoseconds100, bool round)
+{
+    return Convert(nanoseconds100, 10000000, 1, mFrameTimeScale, mFrameDuration, round, true);
 }
 
 int64_t AJATimeBase::MicrosecondsToSamples(int64_t microseconds, bool round)
@@ -344,7 +354,7 @@ int64_t AJATimeBase::GetSystemTicks()
 	return ticks;
 }
 
-int64_t AJATimeBase::Convert(int64_t inValue, int64_t inRate, int64_t outRate, bool round, bool large)
+int64_t AJATimeBase:: Convert(int64_t inValue, int64_t inRate, int64_t outRate, bool round, bool large)
 {
 	int64_t outValue = 0;
 
