@@ -1446,6 +1446,8 @@ static void InitStatKeyNames (void)
 	gStatKeyToStr[AJA_DebugStat_AutoCirculateXfer]			= "AutoCircXfer";
 	gStatKeyToStr[AJA_DebugStat_NTV2Message]				= "NTV2Msg";
 	gStatKeyToStr[AJA_DebugStat_HEVCSendMessage]			= "HEVCMsg";
+	gStatKeyToStr[AJA_DebugStat_ACXferRPCEncode]			= "ACXferRPCEnc";
+	gStatKeyToStr[AJA_DebugStat_ACXferRPCDecode]			= "ACXferRPCDec";
 	gStatKeyToStrReady = true;
 	assert(gStatKeyToStr.size() == size_t(AJA_DebugStat_NUM_STATS));	//	Be sure all are here
 }

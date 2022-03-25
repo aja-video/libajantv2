@@ -1006,16 +1006,18 @@ bool SDRAMAuditor::TranslateRegions (ULWordSequence & outDestRgns, const ULWordS
 	if (inSrcRgns.empty())
 		return true;	//	Empty list, not an error
 	const UWord	_8MB_frames_per_dest_frame(UWord(GetIntrinsicFrameByteCount() / m8MB) * (inIsQuad?4:1) * (inIsQuadQuad?16:1));	//	Should result in 1/4/16 or 2/8/32
+	if (!_8MB_frames_per_dest_frame)
+		return false;	//	Ordinarily won't happen, but possible with "ntv2:" (fake/software) "devices" having small SDRAM complement
 	if (_8MB_frames_per_dest_frame == 1)
 		{outDestRgns = inSrcRgns;	return true;}	//	Same
 
 	//	For each region...
 	for (size_t ndx(0);  ndx < inSrcRgns.size();  ndx++)
 	{	const ULWord val(inSrcRgns.at(ndx));
-		UWord startBlkOffset(val >> 16), lengthBlks(UWord(val & 0x0000FFFF));	//	<== These are in 8MB block units
+		ULWord startBlkOffset(val >> 16), lengthBlks(val & 0x0000FFFF);		//	<== These are in 8MB block units
 		startBlkOffset = startBlkOffset / _8MB_frames_per_dest_frame  +  (startBlkOffset % _8MB_frames_per_dest_frame ? 1 : 0);
 		lengthBlks = lengthBlks / _8MB_frames_per_dest_frame;
-		outDestRgns.push_back((ULWord(startBlkOffset) << 16) | ULWord(lengthBlks));
+		outDestRgns.push_back((startBlkOffset << 16) | lengthBlks);
 	}
 	return true;
 }

@@ -9122,6 +9122,30 @@ string PercentDecode (const string & inStr)
 	return oss.str();
 }
 
+bool StringToSerialNum64 (const string & inSerNumStr, uint64_t & outSerNum)
+{
+	outSerNum = 0;
+	if (inSerNumStr.length() < 8  ||  inSerNumStr.length() > 9)
+		return false;
+	string serNumStr(inSerNumStr);
+	if (inSerNumStr.length() == 9)	//	Special case Io4K/DNXIV
+		serNumStr.erase(0,1);		//	Lop off the first character
+	uint64_t serNum(0);
+	for (size_t ndx(0);  ndx < serNumStr.length();  ndx++)
+	{
+		const char ch (serNumStr.at(ndx));
+		//	Allow only 0-9, A-Z, a-z, blank, and dash only
+		if ( ! ( ( (ch >= '0') && (ch <= '9') ) ||
+				 ( (ch >= 'A') && (ch <= 'Z') ) ||
+				 ( (ch >= 'a') && (ch <= 'z') ) ||
+				   (ch == ' ') || (ch == '-') ) )
+			return false;	//	Invalid character -- assume no Serial Number programmed
+		serNum |= uint64_t(ch) << (ndx*8);	//	((7-ndx)*8);
+	}
+	outSerNum = serNum;
+	return true;
+}
+
 #if defined (AJAMac)
 	#include <fstream>
 	#include "ajabase/common/common.h"

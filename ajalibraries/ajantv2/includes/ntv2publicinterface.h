@@ -55,7 +55,7 @@
 #endif	//	NTV2_BUILDING_DRIVER
 
 
-#if !defined (NTV2_BUILDING_DRIVER)  &&  defined(NTV2_RPC_SUPPORT)
+#if !defined (NTV2_BUILDING_DRIVER)
 	typedef	UByteSequence	NTV2_RPC_BLOB_TYPE;
 	#define	NTV2_RPC_ENCODE_DECL	bool RPCEncode (NTV2_RPC_BLOB_TYPE & outBlob);
 	#define	NTV2_RPC_DECODE_DECL	bool RPCDecode (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
@@ -7341,7 +7341,7 @@ typedef enum
 				ULWord		fVersion;			///< @brief The version of the structure that follows this header, set when created, originally zero
 				ULWord		fSizeInBytes;		///< @brief The total size of the struct, in bytes, including header, body and trailer, set when created
 				ULWord		fPointerSize;		///< @brief The size, in bytes, of a pointer on the host, set when created
-				ULWord		fOperation;			///< @brief An operation to perform -- currently unused -- reserved for future use -- set when created
+				ULWord		fOperation;			///< @brief Starting in SDK 16.3, stores an RPC connection ID
 				ULWord		fResultStatus;		///< @brief The result status of the operation (zero if success or non-zero failure code), cleared when created, set by driver
 			NTV2_END_PRIVATE
 
@@ -7356,8 +7356,11 @@ typedef enum
 					inline ULWord	GetSizeInBytes (void) const			{return fSizeInBytes;}	///< @brief My total size, in bytes, including header, body and trailer (but excluding embedded NTV2_POINTER data)
 					inline ULWord	GetTag (void) const					{return fHeaderTag;}	//	New in SDK 16.3
 					inline ULWord	GetType (void) const				{return fType;}			//	New in SDK 16.3
+					inline ULWord	GetHeaderVersion (void) const		{return fHeaderVersion;}	//	New in SDK 16.3
 					inline ULWord	GetVersion (void) const				{return fVersion;}		//	New in SDK 16.3
 					inline ULWord	GetPointerSize (void) const			{return fPointerSize;}	//	New in SDK 16.3
+					inline ULWord	GetConnectionID (void) const			{return fOperation;}	//	New in SDK 16.3
+					inline void		SetConnectionID (const ULWord inValue)	{fOperation = inValue;}	//	New in SDK 16.3
 
 					/**
 						@brief	Prints a human-readable representation of me into the given output stream.

@@ -48,7 +48,7 @@
 //#define NTV2_DEPRECATE_16_1		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.1
 //#define NTV2_DEPRECATE_16_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.2
 //#define NTV2_DEPRECATE_16_3		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.3
-//#define NTV2_RPC_SUPPORT			//	If defined, includes RPC support (e.g. RPCEncode, RPCDecode);  otherwise, excludes it
+//#define NTV2_NULL_DEVICE			//	DO NOT DEFINE UNLESS ABSOLUTELY NECESSARY.  If defined, stubs out ioctl/IOKit/DeviceIoControl calls to AJA device driver.
 #define NTV2_NUB_CLIENT_SUPPORT		//	If defined, includes nub client support;  otherwise, excludes it
 #define AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
 #define AJA_STATIC		static		//	Do not change this.

@@ -1039,15 +1039,8 @@ bool CNTV2Card::AutoCirculateGetStatus (const NTV2Channel inChannel, AUTOCIRCULA
 		return true;	//	AutoCirculate not running on this channel
 	}
 
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	// Auto circulate status is not implemented in the NUB yet
-	if (IsRemote())
-		return false;
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	const bool result(NTV2Message(outStatus));
-	if (result)
-		;//ACDBG("GetStatus successful on Ch" << DEC(inChannel+1));
-	else
+	if (!result)
 		ACFAIL("Failed to get status on Ch" << DEC(inChannel+1));
 	return result;
 

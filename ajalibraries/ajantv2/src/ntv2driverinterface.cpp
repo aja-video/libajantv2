@@ -241,7 +241,6 @@ bool CNTV2DriverInterface::CloseLocalPhysical (void)
 	return false;
 }
 
-
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 
 	#ifdef AJA_WINDOWS
@@ -263,173 +262,40 @@ bool CNTV2DriverInterface::CloseLocalPhysical (void)
 		initWinsock();
 #endif	//	defined(AJA_WINDOWS)
 		NTV2_ASSERT(!IsOpen()); //	Must be closed!
+		NTV2DeviceSpecParser specParser (inURLSpec);
+		if (specParser.HasErrors())
+			{DIFAIL("Bad device specification '" << inURLSpec << "': " << specParser.Error()); return false;}
 
-		string cleanURL(inURLSpec);
-		aja::strip(cleanURL);
-		if (cleanURL.empty())
-			{DIFAIL("Empty URLSpec");  return false;}
-		string urlspec(cleanURL);
-		aja::lower(urlspec);
-
-		/*
-			Parse the URLSpec and figure out what to open...
-
-			{ipv4}
-				For backward compatibility. Uses the nub interface, default port, device index 0.
-				...where...		{ipv4}		A dotted quad or 'localhost' that designates the host IP address.
-			'ntv2nub://'{ipv4}[':'{port}]['/'[query]]
-				This uses the nub interface.
-				...where...		{ipv4}		A dotted quad or 'localhost' that designates the host IP address.
-								port		Optional unsigned decimal integer that designates the port number to use.
-								query		Optionally specifies which device to open on the remote host.
-			'ntv2://'{name}['/'[query]
-				...where...		{name}		Alphanumeric name that designates a software device to open (e.g. dylib/DLL name).
-											This is typically case-insensitve, and should not contain characters that require URL-encoding.
-								query		Optionally specifies any number of parameters passed to dylib/DLL's Connect method.
-											[? {param}[={value}] [&...]]
-												...where...		{param}		The query parameter to be specified.
-																			Query parameter names are normally not case-sensitive,
-																			and should not require URL-encoding.
-																{value}		Optionally specifies a URL-encoded value for the parameter.
-			'ntv2local://'{model}|{hexnum}|{serial}|{indexnum}
-				...where...		{model}		NTV2 device model name (e.g. 'corvid44').
-								{hexnum}	NTV2DeviceID: '0x'|'0X' followed by at least 2 and up to 8 hex digits.
-								{serial}	Device serial number
-								{indexnum}	Device index number:  at least 1 and up to 2 decimal digits.
-		*/
-		NTV2StringList tokens, delims;
-		{
-			string	run; bool isAlphaNumeric(false);
-			for (size_t pos(0);	 pos < urlspec.length();  pos++)
-			{
-				const char c(urlspec.at(pos));
-				if (c == '\t' || c == ' ')
-					continue;
-				if (run.empty())
-				{	//	Start a new run...
-					isAlphaNumeric = CNTV2DeviceScanner::IsAlphaNumeric(c);
-					run += c;
-					continue;
-				}
-				if (isAlphaNumeric == CNTV2DeviceScanner::IsAlphaNumeric(c))
-				{	//	Extend existing run...
-					run += c;
-					continue;
-				}
-				//	Terminate this run...
-				NTV2_ASSERT(!run.empty());
-				if (isAlphaNumeric)
-					tokens.push_back(run);
-				else
-					delims.push_back(run);
-				run.clear();
-				pos--;	//	Do this character again
-			}
-			//	Terminate this run...
-			if (!run.empty())
-			{
-				if (isAlphaNumeric)
-					tokens.push_back(run);
-				else
-					delims.push_back(run);
-			}
-			while (tokens.size() < 5)
-				tokens.push_back("");
-			while (delims.size() < 5)
-				delims.push_back("");
-			DIDBG("'" << urlspec << "':\tTOK[" << aja::join(tokens, "|") << "]\tDEL[" << aja::join(delims, "|") << "]");
+		if (specParser.IsLocalDevice())
+		{	//	Local device?
+			CNTV2Card card;
+			if (specParser.HasResult(kConnectParamDevSerial))
+				CNTV2DeviceScanner::GetDeviceWithSerial(specParser.DeviceSerial(), card);
+			else if (specParser.HasResult(kConnectParamDevModel))
+				CNTV2DeviceScanner::GetFirstDeviceWithName(specParser.DeviceModel(), card);
+			else if (specParser.HasResult(kConnectParamDevID))
+				CNTV2DeviceScanner::GetFirstDeviceWithID(specParser.DeviceID(), card);
+			else if (specParser.HasResult(kConnectParamDevIndex))
+				CNTV2DeviceScanner::GetDeviceAtIndex(specParser.DeviceIndex(), card);
+			if (!card.IsOpen())
+				{DIFAIL("Failed to open " << specParser.InfoString());  return false;}
+			return Open(card.GetIndexNumber());
 		}
-		string scheme("ntv2local"), ipv4("localhost"), hostname, port;
-		if (delims[0] == "://")
-		{	//	Pop scheme from front...
-			scheme = tokens[0];
-			tokens.erase(tokens.begin());	tokens.push_back("");
-			delims.erase(delims.begin());	delims.push_back("");
+		DIDBG("Opening " << specParser.InfoString() << "...");
+		if (specParser.IsRemoteDevice())
+		{	//	Remote device using RPC:
+			_pRPCAPI = NTV2RPCAPI::MakeNTV2NubRPCAPI(specParser.Results());
 		}
-		//if (!scheme.empty())
-		{
-			if (CNTV2DeviceScanner::IsLegalDecimalNumber(tokens[0],3) && delims[0] == "."
-				&& CNTV2DeviceScanner::IsLegalDecimalNumber(tokens[1],3) && delims[1] == "."
-				&& CNTV2DeviceScanner::IsLegalDecimalNumber(tokens[2],3) && delims[2] == "."
-				&& CNTV2DeviceScanner::IsLegalDecimalNumber(tokens[3],3))
-			{
-				ipv4 = tokens[0] + "." + tokens[1] + "." + tokens[2] + "." + tokens[3];
-				tokens.erase(tokens.begin());	tokens.erase(tokens.begin());	tokens.erase(tokens.begin());	tokens.erase(tokens.begin());
-				delims.erase(delims.begin());	delims.erase(delims.begin());	delims.erase(delims.begin());
-			}
-			else if (CNTV2DeviceScanner::IsAlphaNumeric(tokens[0]))// && delims[0] == ".")
-			{
-				while (CNTV2DeviceScanner::IsAlphaNumeric(tokens[0]) && delims[0] == ".")
-				{
-					hostname += tokens[0];	tokens.erase(tokens.begin());	tokens.push_back("");
-					hostname += delims[0];	delims.erase(delims.begin());	delims.push_back("");
-				}
-				if (CNTV2DeviceScanner::IsAlphaNumeric(tokens[0]))// && delims[0] != ".")
-					{hostname += tokens[0]; tokens.erase(tokens.begin());	tokens.push_back("");}
-			}
-			else
-				{DIFAIL("Expected IPv4 address, 'localhost', host name -- instead got '" << urlspec << "'");  return false;}
-			if (hostname == "localhost")
-				{ipv4 = hostname;  hostname = "";}
-			if (CNTV2DeviceScanner::IsLegalDecimalNumber(tokens[0],5) && delims[0] == ":")
-			{
-				port = tokens[0];	tokens.erase(tokens.begin());	tokens.push_back("");
-									delims.erase(delims.begin());	delims.push_back("");
-			}
-			if (scheme == "ntv2local")
-			{	//	Local device (yes, via urlSpec!)
-				if (!hostname.empty())
-				{	CNTV2Card card;
-					if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument(hostname, card))
-						{DIFAIL("Failed to open '" << urlspec << "'"); return false;}
-					return Open(card.GetIndexNumber());
-				}
-				else if (!ipv4.empty())
-					scheme = "ntv2nub";
-			}
-			if (scheme == "ntv2nub")
-			{
-				//cerr << "TOK: " << aja::join(tokens, "|") << endl << "DEL: " << aja::join(delims, "|") << endl;
-				_pRPCAPI = NTV2RPCAPI::MakeNTV2NubRPCAPI(ipv4, port);
-			}
-			else if (scheme == "ntv2")
-			{	//	Software device:  dylib/DLL name is in "hostname"
-				NTV2StringList halves(aja::split(cleanURL, "://"));
-				if (halves.size() != 2)
-					{DIFAIL("'ntv2://' scheme has another '://' in the URL (should be URLencoded)"); return false;}
-				const string hostQuery (halves.at(1));	//	e.g. "ntv2swdevice/etc"
-				halves = aja::split(hostQuery, "/");
-				string checkHost(halves.empty() ? hostQuery : halves.at(0));
-				aja::lower(checkHost);
-				if (checkHost != hostname)
-					{DIFAIL("'ntv2://' scheme has mismatched name: '" << checkHost << "' != '" << hostname << "'"); return false;}
-				string query(halves.size() < 2 ? "" : halves.at(1));
-				if (!query.empty()	&&	query.at(0) == '?')
-					query.erase(0,1);	//	Remove leading '?'
-				DIDBG("scheme='ntv2' host='" << hostname << "' query='" << query << "'");
-				_pRPCAPI = NTV2RPCAPI::FindNTV2SoftwareDevice(hostname, query);
-			}
-			else
-				{DIFAIL("Invalid URL scheme '" << scheme << "' in '" << urlspec << "'");  return false;}
-		}
-/*		if (delims[0] == ":")
-		{
-		}
-		else if (delims[0] == "/")
-		{
-		}
-		else if (delims[0] == "")
-		{
+		else if (specParser.IsSoftwareDevice())
+		{	//	Software device:  dylib/DLL name is in "hostname"
+			_pRPCAPI = NTV2RPCAPI::FindNTV2SoftwareDevice(specParser.Results());
 		}
 		else
-		{
-			DIFAIL("Expected URL, IPv4 address or 'localhost', instead got '" << urlspec << "'");
-			return false;
-		}*/
+			NTV2_ASSERT(false && "Bad scheme?");
 		if (IsRemote())
 			_boardOpened = ReadRegister(kRegBoardID, _boardID);
 		if (!IsRemote() || !IsOpen())
-			DIFAIL("Failed to open '" << urlspec << "'");
+			DIFAIL("Failed to open '" << inURLSpec << "'");
 		return IsRemote() && IsOpen();
 	}	//	OpenRemote
 
@@ -438,7 +304,11 @@ bool CNTV2DriverInterface::CloseLocalPhysical (void)
 	{
 		if (_pRPCAPI)
 		{
-			DIINFO("Remote closed: " << *_pRPCAPI);
+			DIDBG("Closing remote: " << *_pRPCAPI);
+			if (_pRPCAPI->NTV2Disconnect())
+				DIINFO("Remote closed: " << *_pRPCAPI);
+			else
+				DIFAIL("Remote close (NTV2Disconnect) failed: " << *_pRPCAPI);
 			delete _pRPCAPI;
 			_pRPCAPI = AJA_NULL;
 			_boardOpened = false;
@@ -535,7 +405,7 @@ bool CNTV2DriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outValu
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
-		return !_pRPCAPI->NTV2ReadRegisterRemote (inRegNum, outValue, inMask, inShift);
+		return _pRPCAPI->NTV2ReadRegisterRemote (inRegNum, outValue, inMask, inShift);
 #else
 	(void) inRegNum;	(void) outValue;	(void) inMask;	(void) inShift;
 #endif
@@ -574,7 +444,7 @@ bool CNTV2DriverInterface::ReadRegisters (NTV2RegisterReads & inOutValues)
 			return false;	//	numRegs is zero
 		#if defined (NTV2_NUB_CLIENT_SUPPORT)
 		if (IsRemote())
-			return !_pRPCAPI->NTV2ReadRegisterMultiRemote(inNumRegs, *pOutWhichRegFailed, pOutRegInfos);
+			return _pRPCAPI->NTV2ReadRegisterMultiRemote(inNumRegs, *pOutWhichRegFailed, pOutRegInfos);
 		#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 
 	#if 0	//	Original implementation
@@ -618,7 +488,7 @@ bool CNTV2DriverInterface::WriteRegister (const ULWord inRegNum, const ULWord in
 #endif	//	NTV2_WRITEREG_PROFILING
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	//	If we get here, must be a non-physical device connection...
-	return IsRemote() ? !_pRPCAPI->NTV2WriteRegisterRemote(inRegNum, inValue, inMask, inShift) : false;
+	return IsRemote() ? _pRPCAPI->NTV2WriteRegisterRemote(inRegNum, inValue, inMask, inShift) : false;
 #else
 	(void) inRegNum;	(void) inValue; (void) inMask;	(void) inShift;
 	return false;
@@ -637,7 +507,7 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine inDMAEngine,
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT(IsRemote());
 	NTV2_POINTER buffer(pFrameBuffer, inTotalByteCount);
-	return !_pRPCAPI->NTV2DMATransferRemote(inDMAEngine, inIsRead, inFrameNumber, buffer, inCardOffsetBytes,
+	return _pRPCAPI->NTV2DMATransferRemote(inDMAEngine, inIsRead, inFrameNumber, buffer, inCardOffsetBytes,
 											0/*numSegs*/,	 0/*hostPitch*/,  0/*cardPitch*/, inSynchronous);
 #else
 	(void) inDMAEngine; (void) inIsRead;	(void) inFrameNumber;	(void) pFrameBuffer;	(void) inCardOffsetBytes;
@@ -660,7 +530,7 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine inDMAEngine,
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT(IsRemote());
 	NTV2_POINTER buffer(pFrameBuffer, inTotalByteCount);
-	return !_pRPCAPI->NTV2DMATransferRemote(inDMAEngine, inIsRead, inFrameNumber, buffer, inCardOffsetBytes,
+	return _pRPCAPI->NTV2DMATransferRemote(inDMAEngine, inIsRead, inFrameNumber, buffer, inCardOffsetBytes,
 											inNumSegments, inHostPitchPerSeg, inCardPitchPerSeg, inSynchronous);
 #else
 	(void) inDMAEngine; (void) inIsRead;	(void) inFrameNumber;	(void) pFrameBuffer;	(void) inCardOffsetBytes;
@@ -694,7 +564,7 @@ bool CNTV2DriverInterface::WaitForInterrupt (INTERRUPT_ENUMS eInterrupt, ULWord 
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT(IsRemote());
-	return !_pRPCAPI->NTV2WaitForInterruptRemote(eInterrupt, timeOutMs);
+	return _pRPCAPI->NTV2WaitForInterruptRemote(eInterrupt, timeOutMs);
 #else
 	(void) eInterrupt;
 	(void) timeOutMs;
@@ -717,7 +587,8 @@ bool CNTV2DriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 		case eFlushAutoCirculate:
 		case eGetAutoCirc:
 		case eStopAutoCirc:
-			return !_pRPCAPI->NTV2AutoCirculateRemote(autoCircData);
+		case eInitAutoCirc:
+			return _pRPCAPI->NTV2AutoCirculateRemote(autoCircData);
 		default:	// Others not handled
 			return false;
 	}
@@ -732,7 +603,7 @@ bool CNTV2DriverInterface::NTV2Message (NTV2_HEADER * pInMessage)
 	(void) pInMessage;
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT(IsRemote());
-	return !_pRPCAPI->NTV2MessageRemote(pInMessage);
+	return _pRPCAPI->NTV2MessageRemote(pInMessage);
 #else
 	return false;
 #endif
@@ -745,7 +616,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 {
 	if (IsRemote())
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-		return !_pRPCAPI->NTV2DriverGetBitFileInformationRemote(bitFileInfo, bitFileType);
+		return _pRPCAPI->NTV2DriverGetBitFileInformationRemote(bitFileInfo, bitFileType);
 #else
 		return false;
 #endif
@@ -944,7 +815,7 @@ bool CNTV2DriverInterface::DriverGetBuildInformation (BUILD_INFO_STRUCT & buildI
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT (IsRemote());
-	return !_pRPCAPI->NTV2DriverGetBuildInformationRemote(buildInfo);
+	return _pRPCAPI->NTV2DriverGetBuildInformationRemote(buildInfo);
 #else
 	(void) buildInfo;
 	return false;
@@ -1369,8 +1240,6 @@ bool CNTV2DriverInterface::IsRemote (void) const
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	return _pRPCAPI ? true : false;
-//	if (_pRPCAPI)
-//		return _pRPCAPI->IsConnected();
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	return false;
 }

@@ -1111,6 +1111,7 @@ AJAExport bool				GetChangedRegisters (const NTV2RegisterReads & inBefore, const
 
 AJAExport std::string		PercentEncode (const std::string & inStr);	///< @return	The URL-encoded input string.
 AJAExport std::string		PercentDecode (const std::string & inStr);	///< @return	The URL-decoded input string.
+AJAExport bool				StringToSerialNum64 (const std::string & inSerNumStr, uint64_t & outSerNum);	//	New in SDK 16.3
 
 
 //	FUTURE	** THESE WILL BE DISAPPEARING **		Deprecate in favor of the new "NTV2xxxxxxToString" functions...
