@@ -93,26 +93,13 @@ bool SetVPIDFromSpec (ULWord * const			pOutVPID,
 
     frameRate				= GetNTV2FrameRateFromVideoFormat (outputFormat);
 	isProgressivePicture	= NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE (outputFormat);
-	isProgressiveTransport	= isProgressivePicture;							//	Must be a progressive format to start
-
-	if (NTV2_IS_720P_VIDEO_FORMAT(outputFormat) && !is3G)
+	isProgressiveTransport	= isProgressivePicture;
+	if ((NTV2_IS_720P_VIDEO_FORMAT(outputFormat) && !is3G)	||
+		(NTV2_IS_PSF_VIDEO_FORMAT(outputFormat)) ||	// PSF
+		(!isRGB && isDualLink && !isTSI) ||			// Dual link YCbCr
+		(isTSI && NTV2_IS_4K_HFR_VIDEO_FORMAT(outputFormat) && isLevelB)) // TSI Quad Link 3.0 HFR Level B
 	{
 		isProgressiveTransport = false;
-	}
-	
-	if (NTV2_IS_PSF_VIDEO_FORMAT(outputFormat))
-	{
-		isProgressiveTransport = false;										//	PSF is never a progressive transport
-	}
-	
-	if (!isRGB && isDualLink &&	 !isTSI)
-	{
-		isProgressiveTransport = false;										//	Dual link YCbCr is not a progressive transport
-	}
-	
-	if (isTSI && NTV2_IS_4K_HFR_VIDEO_FORMAT(outputFormat) && isLevelB)
-	{
-		isProgressiveTransport = false;										//	Only TSI Quad Link 3.0 HFR Level B is not progressive
 	}
 
     // correct whacky format vpids

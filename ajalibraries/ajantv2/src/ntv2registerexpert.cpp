@@ -10,6 +10,7 @@
 #include "ntv2debug.h"
 #include "ntv2endian.h"
 #include "ntv2vpid.h"
+#include "ntv2bitfile.h"
 #include "ajabase/common/common.h"
 #include "ajabase/system/lock.h"
 #include "ajabase/common/ajarefptr.h"
@@ -244,6 +245,7 @@ private:
 		DefineRegister (kRegCh1ControlExtended, "", mDecodeChannelControlExt,	READWRITE,	kRegClass_NULL,		kRegClass_Channel1, kRegClass_NULL);
 		DefineRegister (kRegCh2ControlExtended, "", mDecodeChannelControlExt,	READWRITE,	kRegClass_NULL,		kRegClass_Channel2, kRegClass_NULL);
 		DefineRegister (kRegBoardID,			"", mDecodeBoardID,				READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegFirmwareUserID,		"", mDecodeFirmwareUserID,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 
 		DefineRegister (kRegCanDoStatus,		"", mDecodeCanDoStatus,			READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 		DefineRegister (kRegBitfileDate,		"", mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
@@ -2150,6 +2152,21 @@ private:
 		}
 		virtual ~DecodeBoardID()	{}
 	}	mDecodeBoardID;
+
+	struct DecodeFWUserID : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{	(void) inRegNum;	(void) inDeviceID;
+			ostringstream	oss;
+			if (inRegValue)
+				oss	<< "Current Design ID: "		<< xHEX0N(NTV2BitfileHeaderParser::GetDesignID(inRegValue),4)		<< endl
+					<< "Current Design Version: "	<< xHEX0N(NTV2BitfileHeaderParser::GetDesignVersion(inRegValue),4)	<< endl
+					<< "Current Bitfile ID: "		<< xHEX0N(NTV2BitfileHeaderParser::GetBitfileID(inRegValue),4)		<< endl
+					<< "Current Bitfile Version: "	<< xHEX0N(NTV2BitfileHeaderParser::GetBitfileVersion(inRegValue),4);
+			return oss.str();
+		}
+		virtual ~DecodeFWUserID()	{}
+	}	mDecodeFirmwareUserID;
 
 	struct DecodeCanDoStatus : public Decoder
 	{

@@ -10,6 +10,7 @@
 // need to define this so will work with compilers that don't support thread_local
 // ie xcode 6, 7
 #define DOCTEST_THREAD_LOCAL
+
 #include "doctest.h"
 
 #include "limits.h"
@@ -1025,6 +1026,32 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 #else
 			CHECK_EQ(tempDir, tempDirCwd);
 #endif
+		}
+		SUBCASE("::GetExecutablePath")
+		{
+			std::string pathStr, dirNameStr, fileNameStr;
+			std::wstring pathWide, dirNameWide, fileNameWide;
+			status = AJAFileIO::GetExecutablePath(pathStr);
+			CHECK_EQ(status, AJA_STATUS_SUCCESS);
+			status = AJAFileIO::GetExecutablePath(pathWide);
+			CHECK_EQ(status, AJA_STATUS_SUCCESS);
+			AJAFileIO::GetDirectoryName(pathStr, dirNameStr);
+			CHECK_EQ(status, AJA_STATUS_SUCCESS);
+			AJAFileIO::GetFileName(pathStr, fileNameStr);
+			CHECK_EQ(status, AJA_STATUS_SUCCESS);
+			AJAFileIO::GetDirectoryName(pathWide, dirNameWide);
+			CHECK_EQ(status, AJA_STATUS_SUCCESS);
+			AJAFileIO::GetFileName(pathWide, fileNameWide);
+			CHECK_EQ(status, AJA_STATUS_SUCCESS);
+			if (status == AJA_STATUS_SUCCESS) {
+#if defined(AJA_WINDOWS)
+				CHECK_EQ(fileNameStr, "ut_ajabase.exe");
+				CHECK_EQ(fileNameWide, L"ut_ajabase.exe");
+#elif defined(AJA_LINUX) || defined(AJA_MAC)
+				CHECK_EQ(fileNameStr, "ut_ajabase");
+				CHECK_EQ(fileNameWide, L"ut_ajabase");
+#endif
+			}
 		}
 
 		SUBCASE("FileInfo")
