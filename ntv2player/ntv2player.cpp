@@ -318,15 +318,20 @@ AJAStatus NTV2Player::SetUpHostBuffers (void)
 		NTV2FrameData & frameData(mHostBuffers.back());	//	...and get a reference to it
 
 		//	Allocate a page-aligned video buffer
-		if (!frameData.fVideoBuffer.Allocate(mFormatDesc.GetTotalBytes(), BUFFER_PAGE_ALIGNED))
-		{
-			PLFAIL("Failed to allocate " << xHEX0N(mFormatDesc.GetTotalBytes(),8) << "-byte video buffer");
-			return AJA_STATUS_MEMORY;
-		}
-		#ifdef NTV2_BUFFER_LOCKING
+		if (mConfig.WithVideo())
+			if (!frameData.fVideoBuffer.Allocate(mFormatDesc.GetTotalBytes(), BUFFER_PAGE_ALIGNED))
+			{
+				PLFAIL("Failed to allocate " << xHEX0N(mFormatDesc.GetTotalBytes(),8) << "-byte video buffer");
+				return AJA_STATUS_MEMORY;
+			}
 		if (frameData.fVideoBuffer)
-			mDevice.DMABufferLock(frameData.fVideoBuffer, true);
-		#endif
+		{
+			frameData.fVideoBuffer.Fill(ULWord(0));
+			#ifdef NTV2_BUFFER_LOCKING
+			if (frameData.fVideoBuffer)
+				mDevice.DMABufferLock(frameData.fVideoBuffer, true);
+			#endif
+		}
 
 		//	Allocate a page-aligned audio buffer (if transmitting audio)
 		if (mConfig.WithAudio())
@@ -606,8 +611,7 @@ void NTV2Player::ConsumeFrames (void)
 			//	Transfer the timecode-burned frame to the device for playout...
 			outputXfer.SetVideoBuffer (pFrameData->VideoBuffer(), pFrameData->VideoBufferSize());
 			//	If also playing audio...
-			if (pFrameData->AudioBuffer())	//	...also xfer this frame's audio samples...
-				outputXfer.SetAudioBuffer (pFrameData->AudioBuffer(), pFrameData->fNumAudioBytes);
+			outputXfer.SetAudioBuffer (pFrameData->AudioBuffer(), pFrameData->fNumAudioBytes);
 
 			if (pAncStrm  &&  pAncStrm->good()  &&  outputXfer.acANCBuffer)
 			{	//	Read pre-recorded anc from binary data file, and inject it into this frame...
@@ -692,11 +696,11 @@ void NTV2Player::ProduceFrames (void)
 			continue;			//	...then try again
 		}
 
-		//	Copy fresh, unmodified, pre-rendered test pattern into this frame's video buffer...
-		pFrameData->fVideoBuffer.CopyFrom (mTestPatRasters.at(testPatNdx),
-											/*srcOffset*/ 0,
-											/*dstOffset*/ 0,
-											/*byteCount*/ pFrameData->fVideoBuffer.GetByteCount());
+		if (pFrameData->VideoBuffer())	//	Copy fresh, unmodified, pre-rendered test pattern into this frame's video buffer...
+			pFrameData->fVideoBuffer.CopyFrom (mTestPatRasters.at(testPatNdx),
+												/*srcOffset*/ 0,
+												/*dstOffset*/ 0,
+												/*byteCount*/ pFrameData->fVideoBuffer.GetByteCount());
 
 		const	CRP188	rp188Info (mCurrentFrame++, 0, 0, 10, tcFormat);
 		NTV2_RP188		tcF1, tcF2;
@@ -716,8 +720,8 @@ void NTV2Player::ProduceFrames (void)
 		for (NTV2TCIndexesConstIter it(mTCIndexes.begin());  it != mTCIndexes.end();  ++it)
 			pFrameData->fTimecodes[*it] = NTV2_IS_ATC_VITC2_TIMECODE_INDEX(*it) ? tcF2 : tcF1;
 
-		//	Burn current timecode into the video buffer...
-		mTCBurner.BurnTimeCode (pFrameData->VideoBuffer(), tcString.c_str(), 80);
+		if (pFrameData->VideoBuffer())	//	Burn current timecode into the video buffer...
+			mTCBurner.BurnTimeCode (pFrameData->VideoBuffer(), tcString.c_str(), 80);
 		TCDBG("F" << DEC0N(mCurrentFrame-1,6) << ": " << tcF1 << ": " << tcString);
 
 		//	If also playing audio...
@@ -843,6 +847,7 @@ AJALabelValuePairs PlayerConfig::Get (const bool inCompact) const
 	AJASystemInfo::append (result, "Output Channel",	::NTV2ChannelToString(fOutputChannel, inCompact));
 	AJASystemInfo::append (result, "Output Connector",	::NTV2OutputDestinationToString(fOutputDestination, inCompact));
 	AJASystemInfo::append (result, "Suppress Audio",	fSuppressAudio ? "Y" : "N");
+	AJASystemInfo::append (result, "Suppress Video",	fSuppressVideo ? "Y" : "N");
 	AJASystemInfo::append (result, "Embedded Timecode",	fTransmitLTC ? "LTC" : "VITC");
 	AJASystemInfo::append (result, "Anc Data File",		fAncDataFilePath);
 	AJASystemInfo::append (result, "Level Conversion",	fDoLevelConversion ? "Y" : "N");

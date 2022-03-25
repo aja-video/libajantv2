@@ -501,7 +501,7 @@ string CNTV2DemoCommon::GetDeviceStrings (const NTV2DeviceKinds inKinds)
 
 	if (!ndx)
 		return string("No devices\n");
-	hdr << DEC(ndx) << (ndx == 1 ? " device" : " devices") << " found:" << endl
+	hdr << DEC(ndx) << " local " << (ndx == 1 ? "device" : "devices") << " found:" << endl
 		<< setw(16) << left << "Legal -d Values" << endl
 		<< setw(16) << left << "----------------";
 	hdr << oss.str();

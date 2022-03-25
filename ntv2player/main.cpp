@@ -37,6 +37,7 @@ int main (int argc, const char ** argv)
 	char *			pAncFilePath	(AJA_NULL);	//	Anc data filepath
 	uint32_t		channelNumber	(1);		//	Number of the channel to use
 	int				noAudio			(0);		//	Disable audio tone?
+	int				noVideo			(0);		//	Disable video?
 	int				doMultiChannel	(0);		//	Enable multi-format?
 	int				hdrType			(0);		//	Transmit HDR anc?
 	int				xmitLTC			(0);		//	Use LTC? (Defaults to VITC)
@@ -57,6 +58,7 @@ int main (int argc, const char ** argv)
 		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,	0,	"channel to use",			"1 thru 8"},
 		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,0,	"use multi-channel/format",	AJA_NULL},
 		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio tone",		AJA_NULL},
+		{"novideo",		0,		POPT_ARG_NONE,		&noVideo,		0,	"disable video tone",		AJA_NULL},
 		{"ltc",			'l',	POPT_ARG_NONE,		&xmitLTC,		0,	"xmit LTC instead of VITC",	AJA_NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
@@ -119,9 +121,14 @@ int main (int argc, const char ** argv)
 				<< "## Expected " << legalFramesSpec << endl;
 		return 1;
 	}
+	if (noAudio  &&  noAudio)
+	{	cerr	<< "## ERROR:  'novideo' and 'noaudio' cannot both be specified" << endl;
+		return 1;
+	}
 
 	playerConfig.fOutputDestination	= ::NTV2ChannelToOutputDestination(playerConfig.fOutputChannel);
 	playerConfig.fSuppressAudio		= noAudio ? true : false;
+	playerConfig.fSuppressVideo		= noVideo ? true : false;
 	playerConfig.fDoMultiFormat		= doMultiChannel ? true : false;
 	playerConfig.fTransmitLTC		= xmitLTC ? true : false;
 

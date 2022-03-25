@@ -35,6 +35,7 @@ typedef struct PlayerConfig
 		std::string						fAncDataFilePath;	///< @brief	Optional path to Anc binary data file to playout
 		bool							fDoMultiFormat;		///< @brief	If true, enables device-sharing;  otherwise takes exclusive control of the device.
 		bool							fSuppressAudio;		///< @brief	If true, suppress audio;  otherwise generate audio tones
+		bool							fSuppressVideo;		///< @brief	If true, suppress video;  otherwise generate test pattern images
 		bool							fTransmitLTC;		///< @brief	If true, embed LTC;  otherwise embed VITC
 		bool							fDoLevelConversion;	///< @brief	If true, do A-to-B conversion;  otherwise don't
 
@@ -52,12 +53,14 @@ typedef struct PlayerConfig
 				fAncDataFilePath	(),
 				fDoMultiFormat		(false),
 				fSuppressAudio		(false),
+				fSuppressVideo		(false),
 				fTransmitLTC		(false),
 				fDoLevelConversion	(false)
 		{
 		}
 
 		inline bool	WithAudio(void) const	{return !fSuppressAudio;}	///< @return	True if playing audio, false if not.
+		inline bool	WithVideo(void) const	{return !fSuppressVideo;}	///< @return	True if playing video, false if not.
 
 		/**
 			@brief		Renders a human-readable representation of me.
