@@ -4,17 +4,17 @@
 #define _OGLVIEW_
 
 #if defined( AJAMac ) || defined( AJALinux )
-#include <gl/glew.h>
-//#include <gl/glxew.h>
-#include <gl/glut.h>
-#include <gl/gl.h>
-#include <gl/glx.h>
-//#include <gl/glu.h>
+#include <GL/glew.h>
+//#include <GL/glxew.h>
+#include <GL/glut.h>
+#include <GL/gl.h>
+#include <GL/glx.h>
+//#include <GL/glu.h>
 #else
 #include <Windows.h>
-#include <gl/glew.h>
-#include <gl/wglew.h>
-#include <gl/gl.h>
+#include <GL/glew.h>
+#include <GL/wglew.h>
+#include <GL/gl.h>
 #endif
 
 #include <ntv2debug.h>

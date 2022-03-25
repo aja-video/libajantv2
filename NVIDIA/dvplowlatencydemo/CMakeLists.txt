@@ -1,8 +1,11 @@
 project(dvplowlatencydemo)
 
-message("added dvplowlatencydemo")
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	message("skipping dvplowlatencydemo (requires Linux)")
+	return()
+endif()
 
-set(DVPLOWLATENCYDEMO_TARGET_INCLUDE_DIRS
+set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
 	${AJA_LIBRARIES_ROOT}
 	${AJA_LIB_NTV2_ROOT}/includes)
@@ -63,24 +66,26 @@ set(NVIDIA_COMMONCUDA_SOURCES
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_library(FOUNDATION_FRAMEWORK Foundation)
-    set(EXTRA_LIBRARIES ${FOUNDATION_FRAMEWORK})
+    set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(EXTRA_LIBRARIES cuda cudart dl pthread rt)
+	set(TARGET_LINK_LIBS cuda cudart dl pthread rt)
 endif()
 
-set(DVPLOWLATENCYDEMO_TARGET_SOURCES
+set(TARGET_SOURCES
 	${DVPLOWLATENCYDEMO_SOURCES}
 	${NVIDIA_COMMON_SOURCES}
 	${NVIDIA_COMMONCUDA_SOURCES})
 
-# add_executable(dvplowlatencydemo ${DVPLOWLATENCYDEMO_TARGET_SOURCES})
+# add_executable(dvplowlatencydemo ${TARGET_SOURCES})
 # add_dependencies(dvplowlatencydemo ajantv2)
-# target_include_directories(dvplowlatencydemo PUBLIC ${DVPLOWLATENCYDEMO_TARGET_INCLUDE_DIRS})
-# target_link_libraries(dvplowlatencydemo PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+# target_include_directories(dvplowlatencydemo PUBLIC ${TARGET_INCLUDE_DIRS})
+# target_link_libraries(dvplowlatencydemo PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${DVPLOWLATENCYDEMO_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
-	install(FILES ${DVPLOWLATENCYDEMO_BUILD_FILES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
-	install(FILES ${NVIDIA_COMMON_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/NVIDIA/common)
-	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/NVIDIA/commonCUDA)
+	install(FILES ${DVPLOWLATENCYDEMO_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
+	install(FILES ${DVPLOWLATENCYDEMO_BUILD_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
+	install(FILES ${NVIDIA_COMMON_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/common)
+	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/commonCUDA)
 endif()
+
+message("added dvplowlatencydemo")

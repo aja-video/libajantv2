@@ -2,7 +2,7 @@ project(ntv2player4k)
 
 message("added ntv2player4k")
 
-set(NTV2PLAYER4K_TARGET_INCLUDE_DIRS
+set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
 	${AJA_LIB_NTV2_ROOT}/includes
@@ -24,31 +24,31 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# noop
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	find_library(FOUNDATION_FRAMEWORK Foundation)
-	set(EXTRA_LIBRARIES ${FOUNDATION_FRAMEWORK})
+	set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(EXTRA_LIBRARIES dl pthread rt)
+	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
-set(NTV2PLAYER4K_TARGET_SOURCES
+set(TARGET_SOURCES
 	${NTV2PLAYER4K_SOURCES}
 	${NTV2PLAYER4K_HEADERS}
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-add_executable(ntv2player4k ${NTV2PLAYER4K_TARGET_SOURCES})
+add_executable(ntv2player4k ${TARGET_SOURCES})
 add_dependencies(ntv2player4k ajantv2)
-target_include_directories(ntv2player4k PUBLIC ${NTV2PLAYER4K_TARGET_INCLUDE_DIRS})
-target_link_libraries(ntv2player4k PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+target_include_directories(ntv2player4k PUBLIC ${TARGET_INCLUDE_DIRS})
+target_link_libraries(ntv2player4k PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps)
-	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps)
-	install(FILES ${NTV2PLAYER4K_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/ntv2player4k)
-	install(FILES ${NTV2PLAYER4K_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/ntv2player4k)
+	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
+	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
+	install(FILES ${NTV2PLAYER4K_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2player4k)
+	install(FILES ${NTV2PLAYER4K_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2player4k)
 endif()
 
 install(TARGETS ntv2player4k
-	ARCHIVE DESTINATION ${AJA_INSTALL_LIBDIR}
-	LIBRARY DESTINATION ${AJA_INSTALL_LIBDIR}
-	RUNTIME DESTINATION ${AJA_INSTALL_BINDIR}
-	FRAMEWORK DESTINATION ${AJA_INSTALL_FRAMEWORKDIR})
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+	FRAMEWORK DESTINATION ${CMAKE_INSTALL_PREFIX})

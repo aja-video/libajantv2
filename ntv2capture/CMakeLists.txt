@@ -2,7 +2,7 @@ project(ntv2capture)
 
 message("added ntv2capture")
 
-set(NTV2CAPTURE_TARGET_INCLUDE_DIRS
+set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
 	${AJA_LIB_NTV2_ROOT}/includes
@@ -24,31 +24,31 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# noop
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_library(FOUNDATION_FRAMEWORK Foundation)
-    set(EXTRA_LIBRARIES ${FOUNDATION_FRAMEWORK})
+    set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(EXTRA_LIBRARIES dl pthread rt)
+	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
-set(NTV2CAPTURE_TARGET_SOURCES
+set(TARGET_SOURCES
 	${NTV2CAPTURE_SOURCES}
 	${NTV2CAPTURE_HEADERS}
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-add_executable(ntv2capture ${NTV2CAPTURE_TARGET_SOURCES})
+add_executable(ntv2capture ${TARGET_SOURCES})
 add_dependencies(ntv2capture ajantv2)
-target_include_directories(ntv2capture PUBLIC ${NTV2CAPTURE_TARGET_INCLUDE_DIRS})
-target_link_libraries(ntv2capture PUBLIC ajantv2 ${EXTRA_LIBRARIES})
+target_include_directories(ntv2capture PUBLIC ${TARGET_INCLUDE_DIRS})
+target_link_libraries(ntv2capture PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps)
-	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps)
-	install(FILES ${NTV2CAPTURE_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/ntv2capture)
-	install(FILES ${NTV2CAPTURE_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajaapps/crossplatform/demoapps/ntv2capture)
+	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
+	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
+	install(FILES ${NTV2CAPTURE_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2capture)
+	install(FILES ${NTV2CAPTURE_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2capture)
 endif()
 
 install(TARGETS ntv2capture
-	ARCHIVE DESTINATION ${AJA_INSTALL_LIBDIR}
-	LIBRARY DESTINATION ${AJA_INSTALL_LIBDIR}
-	RUNTIME DESTINATION ${AJA_INSTALL_BINDIR}
-	FRAMEWORK DESTINATION ${AJA_INSTALL_FRAMEWORKDIR})
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+	FRAMEWORK DESTINATION ${CMAKE_INSTALL_PREFIX})
