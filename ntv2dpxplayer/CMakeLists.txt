@@ -1,6 +1,5 @@
 project(ntv2dpxplayer)
 
-message("added ntv2dpxplayer")
 
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}

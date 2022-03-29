@@ -1,6 +1,5 @@
 project(ntv2outputtestpattern)
 
-message("added ntv2outputtestpattern")
 
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}

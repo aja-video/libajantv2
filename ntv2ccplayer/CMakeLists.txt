@@ -1,6 +1,5 @@
 project(ntv2ccplayer)
 
-message("added ntv2ccplayer")
 
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}

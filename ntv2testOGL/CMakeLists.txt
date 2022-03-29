@@ -1,6 +1,5 @@
 project(ntv2testOGL)
 
-message("added ntv2testOGL")
 
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}

@@ -1,6 +1,5 @@
 project(ntv2stereocapture)
 
-message("added ntv2stereocapture")
 
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}

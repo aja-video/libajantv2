@@ -1,6 +1,5 @@
 project(ntv2recorddpx)
 
-message("added ntv2recorddpx")
 
 set(NTV2RECORDDPX_TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}

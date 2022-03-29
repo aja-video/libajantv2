@@ -1,6 +1,5 @@
 project(ntv2burn4kquadrant)
 
-message("added ntv2burn4kquadrant")
 
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}

@@ -1,6 +1,5 @@
 project(ntv2burnboardtoboard)
 
-message("added ntv2burnboardtoboard")
 
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}

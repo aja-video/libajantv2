@@ -1,6 +1,5 @@
 project(ntv2player8k)
 
-message("added ntv2player8k")
 
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}

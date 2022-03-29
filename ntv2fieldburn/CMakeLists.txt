@@ -1,6 +1,5 @@
 project(ntv2fieldburn)
 
-message("added ntv2fieldburn")
 
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}

@@ -1,6 +1,5 @@
 project(ntv2dolbyplayer)
 
-message("added ntv2dolbyplayer")
 
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}

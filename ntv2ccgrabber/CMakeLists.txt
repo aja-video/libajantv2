@@ -1,6 +1,5 @@
 project(ntv2ccgrabber)
 
-message("added ntv2ccgrabber")
 
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}

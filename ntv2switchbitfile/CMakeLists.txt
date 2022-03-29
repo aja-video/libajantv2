@@ -1,6 +1,5 @@
 project(ntv2switchbitfile)
 
-message("added ntv2switchbitfile")
 
 set(NTV2SWITCHBITFILE_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 

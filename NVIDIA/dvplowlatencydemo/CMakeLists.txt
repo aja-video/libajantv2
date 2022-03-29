@@ -1,7 +1,9 @@
 project(dvplowlatencydemo)
 
+include(AJAHelpers)
+
 if (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	message("skipping dvplowlatencydemo (requires Linux)")
+	aja_message(STATUS "skipping dvplowlatencydemo (requires Linux)")
 	return()
 endif()
 
@@ -88,4 +90,3 @@ if (AJA_INSTALL_SOURCES)
 	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/commonCUDA)
 endif()
 
-message("added dvplowlatencydemo")

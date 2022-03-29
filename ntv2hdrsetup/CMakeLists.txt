@@ -1,6 +1,5 @@
 project(ntv2hdrsetup)
 
-message("added ntv2hdrsetup")
 
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}

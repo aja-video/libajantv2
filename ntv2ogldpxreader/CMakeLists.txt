@@ -1,6 +1,5 @@
 project(ntv2ogldpxreader)
 
-message("added ntv2ogldpxreader")
 
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}

@@ -1,6 +1,5 @@
 project(ntv2playcorder)
 
-message("added ntv2playcorder")
 
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}

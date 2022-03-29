@@ -1,6 +1,5 @@
 project(ntv2encodehevcfile)
 
-message("added ntv2encodehevcfile")
 
 set(HEVC_M31_CODEC_ROOT ${AJA_LIB_NTV2_ROOT}/codecs/hevc/m31)
 

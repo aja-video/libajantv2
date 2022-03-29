@@ -1,6 +1,5 @@
 project(ntv2capture8k)
 
-message("added ntv2capture8k")
 
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}

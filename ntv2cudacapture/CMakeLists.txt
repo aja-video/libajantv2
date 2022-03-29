@@ -1,6 +1,5 @@
 project(ntv2cudacapture)
 
-message("added ntv2cudacapture")
 
 find_package(Qt5 HINTS ${AJA_QT_DIR} COMPONENTS
     Core

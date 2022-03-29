@@ -1,6 +1,5 @@
 project(ntv2oglcapture)
 
-message("added ntv2oglcapture")
 
 # include(FindOpenGL)
 find_package(OpenGL REQUIRED)

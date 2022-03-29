@@ -1,6 +1,5 @@
 project(ntv2capture)
 
-message("added ntv2capture")
 
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
