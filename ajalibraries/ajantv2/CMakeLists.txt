@@ -1,7 +1,5 @@
 project(ajantv2)
 
-message ("added ajantv2")
-
 if(CMAKE_CXX_STANDARD LESS 11)
     remove_definitions(
         -DAJA_USE_CPLUSPLUS11
@@ -183,11 +181,7 @@ if (NOT AJA_BUILD_OPENSOURCE)
     endif()
 endif()
 
-if (AJA_BUILDING_CMAKE)
-    add_definitions(-DAJA_BUILDING_CMAKE)
-    configure_file(includes/version.h.in includes/version.h @ONLY)
-    install(FILES ${CMAKE_BINARY_DIR}/ajalibraries/ajantv2/includes/version.h DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/includes)
-endif()
+configure_file(includes/ntv2version.h.in includes/ntv2version.h @ONLY)
 
 # ajaanc
 set(AJAANC_HEADERS
@@ -372,7 +366,6 @@ set(AJABASE_SYS_MAC_SOURCES
     ${AJA_LIB_BASE_ROOT}/system/mac/processimpl.cpp
     ${AJA_LIB_BASE_ROOT}/system/mac/pthreadsextra.cpp
     ${AJA_LIB_BASE_ROOT}/system/mac/threadimpl.cpp)
-
 set(AJABASE_HEADERS
     ${AJABASE_COMMON_HEADERS}
     ${AJABASE_NETWORK_HEADERS}
@@ -482,8 +475,8 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         ${AJANTV2_MAC_SOURCES})
     set(AJABASE_SOURCES
         ${AJABASE_SOURCES}
-        ${AJANTV2_PNP_MAC_SOURCES}
-        ${AJANTV2_SYSTEM_MAC_SOURCES})
+        ${AJABASE_PNP_MAC_SOURCES}
+        ${AJABASE_SYS_MAC_SOURCES})
 
     find_library(CORE_FOUNDATION_FRAMEWORK CoreFoundation)
     find_library(FOUNDATION_FRAMEWORK Foundation)
@@ -544,6 +537,8 @@ if (AJA_INSTALL_HEADERS)
     install(FILES ${AJANTV2_MAC_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/src/mac)
     install(FILES ${AJANTV2_LIN_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/src/lin)
     install(FILES ${AJANTV2_UTILITY_PUBLIC_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/utilityfiles/public)
+    install(FILES includes/ntv2version.h.in DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/includes)
+    install(FILES includes/ntv2version.h DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/includes)
 endif()
 if (AJA_INSTALL_SOURCES)
     list(APPEND AJANTV2_SOURCES src/ntv2devicefeatures.hpp)
