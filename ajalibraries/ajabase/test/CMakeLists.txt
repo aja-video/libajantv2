@@ -1,7 +1,5 @@
 project(ut_ajabase)
 
-message("added ajabase unit tests")
-
 set(APP_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(AJALIBRARIES_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../../ajalibraries)

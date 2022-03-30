@@ -1,7 +1,5 @@
 project(ajaanc)
 
-message("added ajaanc")
-
 set(AJAANC_TARGET_INCLUDE_DIRS
     ${AJA_LIBRARIES_ROOT}
     ${AJA_LIB_ANC_ROOT}/includes

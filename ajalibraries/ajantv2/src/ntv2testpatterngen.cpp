@@ -2678,6 +2678,11 @@ bool NTV2TestPatternGen::drawIt (void)
 }	//	drawIt
 
 #if !defined(NTV2_DEPRECATE_16_0)
+	bool NTV2TestPatternGen::DrawTestPattern (const NTV2TestPatternSelect inPattern, const NTV2FormatDescriptor & inDesc, NTV2TestPatBuffer & outBuffer)
+	{
+		return DrawTestPattern(inPattern, inDesc.GetRasterWidth(), inDesc.GetVisibleRasterHeight(), inDesc.GetPixelFormat(), outBuffer);
+	}
+
 	bool NTV2TestPatternGen::DrawTestPattern (const NTV2TestPatternSelect inPattern,
 												const uint32_t frameWidth,
 												const uint32_t frameHeight,

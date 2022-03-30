@@ -5,10 +5,8 @@ if (NOT DOXYGEN_FOUND)
     return()
 endif()
 
-set(NTV2_DOXYGEN_SDK_VERSION "0.0.0")
-if (AJA_BUILDING_CMAKE)
-    set(NTV2_DOXYGEN_SDK_VERSION "${AJA_NTV2_VER_STR}")
-endif()
+set(NTV2_DOXYGEN_SDK_VERSION "${AJA_NTV2_VER_STR}")
+
 # Attempt to locate qhelpgenerator for generation of Qt-related docs
 set(_qthelpgenerator_executable "qhelpgenerator")
 if (AJA_QT_DIR)

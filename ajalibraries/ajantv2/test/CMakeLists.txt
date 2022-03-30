@@ -2,8 +2,6 @@ project(ut_ajantv2)
 
 include(AJAHelpers)
 
-message("added ajantv2 unit tests")
-
 set(TARGET_INCLUDE_DIRS
 	${APP_ROOT}/..
 	${AJA_LIBRARIES_ROOT}
