@@ -282,16 +282,10 @@ bool CNTV2DriverInterface::CloseLocalPhysical (void)
 			return Open(card.GetIndexNumber());
 		}
 		DIDBG("Opening " << specParser.InfoString() << "...");
-		if (specParser.IsRemoteDevice())
-		{	//	Remote device using RPC:
-			_pRPCAPI = NTV2RPCAPI::MakeNTV2NubRPCAPI(specParser.Results());
-		}
-		else if (specParser.IsSoftwareDevice())
-		{	//	Software device:  dylib/DLL name is in "hostname"
-			_pRPCAPI = NTV2RPCAPI::FindNTV2SoftwareDevice(specParser.Results());
-		}
-		else
-			NTV2_ASSERT(false && "Bad scheme?");
+		//	Remote or software device:
+		_pRPCAPI = NTV2RPCAPI::CreateClient(specParser.Results());
+		if (!_pRPCAPI)
+			return false;	//	Failed to instantiate plugin client
 		if (IsRemote())
 			_boardOpened = ReadRegister(kRegBoardID, _boardID);
 		if (!IsRemote() || !IsOpen())
@@ -442,10 +436,6 @@ bool CNTV2DriverInterface::ReadRegisters (NTV2RegisterReads & inOutValues)
 		*pOutWhichRegFailed = 0xFFFFFFFF;
 		if (!inNumRegs)
 			return false;	//	numRegs is zero
-		#if defined (NTV2_NUB_CLIENT_SUPPORT)
-		if (IsRemote())
-			return _pRPCAPI->NTV2ReadRegisterMultiRemote(inNumRegs, *pOutWhichRegFailed, pOutRegInfos);
-		#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 
 	#if 0	//	Original implementation
 		for (ULWord ndx(0);	 ndx < inNumRegs;  ndx++)
@@ -613,10 +603,11 @@ bool CNTV2DriverInterface::NTV2Message (NTV2_HEADER * pInMessage)
 // Common remote card DriverGetBitFileInformation.	Subclasses have overloaded function
 // that does platform-specific function on local cards.
 bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bitFileInfo, const NTV2BitFileType bitFileType)
-{
+{	(void)bitFileType;
+	::memset(&bitFileInfo, 0, sizeof(bitFileInfo));
 	if (IsRemote())
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
-		return _pRPCAPI->NTV2DriverGetBitFileInformationRemote(bitFileInfo, bitFileType);
+		return false;
 #else
 		return false;
 #endif
@@ -815,7 +806,8 @@ bool CNTV2DriverInterface::DriverGetBuildInformation (BUILD_INFO_STRUCT & buildI
 {
 #if defined (NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT (IsRemote());
-	return _pRPCAPI->NTV2DriverGetBuildInformationRemote(buildInfo);
+	::memset(&buildInfo, 0, sizeof(buildInfo));
+	return false;
 #else
 	(void) buildInfo;
 	return false;
@@ -1229,7 +1221,7 @@ void CNTV2DriverInterface::BumpEventCount (const INTERRUPT_ENUMS eInterruptType)
 
 string CNTV2DriverInterface::GetHostName (void) const
 {
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (_pRPCAPI)
 		return _pRPCAPI->Name();
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
@@ -1238,10 +1230,11 @@ string CNTV2DriverInterface::GetHostName (void) const
 
 bool CNTV2DriverInterface::IsRemote (void) const
 {
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
 	return _pRPCAPI ? true : false;
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
+#else	//	NTV2_NUB_CLIENT_SUPPORT
 	return false;
+#endif	//	NTV2_NUB_CLIENT_SUPPORT
 }
 
 bool CNTV2DriverInterface::IsDeviceReady (const bool checkValid)
