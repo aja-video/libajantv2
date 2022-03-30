@@ -1,28 +1,29 @@
 # NOTE: Ensure that the CUDA Toolkit v11.4 or later is installed and in your PATH.
+include(AJAHelpers)
 
 if (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	message("skipping cudalowlatencydemo (requires Linux)")
+	aja_message(STATUS "skipping cudalowlatencydemo (requires Linux)")
 	return()
 endif()
-find_package(CUDA 11.4)
-if (NOT FOUND_CUDA)
-	message("skipping cudalowlatencydemo (CUDA not found)")
+find_package(CUDA 11.2)
+if (NOT CUDA_FOUND)
+	aja_message(STATUS "skipping cudalowlatencydemo (CUDA not found)")
 	return()
 endif()
 set(OpenGL_GL_PREFERENCE LEGACY)
 find_package(OpenGL)
 if (NOT OPENGL_FOUND)
-	message("skipping cudalowlatencydemo (OpenGL not found)")
+	aja_message(STATUS "skipping cudalowlatencydemo (OpenGL not found)")
 	return()
 endif()
 find_package(GLEW)
 if (NOT GLEW_FOUND)
-	message("skipping cudalowlatencydemo (GLEW not found)")
+	aja_message(STATUS "skipping cudalowlatencydemo (GLEW not found)")
 	return()
 endif()
 find_package(X11)
 if (NOT X11_FOUND)
-	message("skipping cudalowlatencydemo (X11 not found)")
+	aja_message(STATUS "skipping cudalowlatencydemo (X11 not found)")
 	return()
 endif()
 
@@ -43,8 +44,6 @@ set(TARGET_INCLUDE_DIRS
 	${CUDA_INCLUDE_DIRS}
 	${OPENGL_INCLUDE_DIRS}
 	${GLEW_INCLUDE_DIRS})
-
-message("GLEW INCLUDE: ${GLEW_INCLUDE_DIRS}")
 
 set(DEMO_APPS_SOURCES
 	${AJA_APPS_ROOT}/crossplatform/demoapps/ntv2democommon.cpp)
@@ -142,4 +141,3 @@ if (AJA_INSTALL_SOURCES)
 	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/commonCUDA)
 endif()
 
-message("added cudalowlatencydemo")

@@ -1,6 +1,5 @@
 project(ntv2konaipjsonsetup)
 
-message("added ntv2konaipjsonsetup")
 
 find_package(Qt5 HINTS ${AJA_QT_DIR} COMPONENTS Core Widgets REQUIRED)
 set(QT_LIBRARIES Qt5::Core Qt5::Widgets)
@@ -65,7 +64,7 @@ target_include_directories(ntv2konaipjsonsetup PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2konaipjsonsetup PUBLIC ajantv2 ${TARGET_LINK_LIBS} ${QT_LIBRARIES})
 
 if (AJA_DEPLOY_LIBS)
-    include(QtHelpers)
+    include(AJAQtHelpers)
     deploy_qt_libs(ntv2konaipjsonsetup)
 endif()
 
@@ -73,4 +72,5 @@ install(TARGETS ntv2konaipjsonsetup
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-	FRAMEWORK DESTINATION ${CMAKE_INSTALL_PREFIX})
+	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
