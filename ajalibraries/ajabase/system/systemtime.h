@@ -37,6 +37,12 @@ public:
 	static int64_t	GetSystemFrequency (void);
 
 	/**
+		@brief		Returns the current value of the host's high-resolution clock, in seconds.
+		@return		Current value of the host's clock, in seconds, based on GetSystemCounter() and GetSystemFrequency().
+	**/
+	static double 	GetSystemSeconds (void);
+
+	/**
 		@brief		Returns the current value of the host's high-resolution clock, in milliseconds.
 		@return		Current value of the host's clock, in milliseconds, based on GetSystemCounter() and GetSystemFrequency().
 	**/
