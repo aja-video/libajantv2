@@ -592,6 +592,16 @@ void NTV2Player::ConsumeFrames (void)
 														1 /*numChannels*/,  mConfig.fFrames.firstFrame(),  mConfig.fFrames.lastFrame());
 	if (!initOK)
 		{PLFAIL("AutoCirculateInitForOutput failed");  mGlobalQuit = true;}
+	else if (mConfig.fSuppressVideo)
+	{	//	Video suppressed --
+		//	Clear device frame buffers being AutoCirculated (prevent garbage output frames)
+		NTV2_POINTER tmpFrame (mFormatDesc.GetVideoWriteSize());
+		NTV2TestPatternGen blackPatternGen;
+		blackPatternGen.DrawTestPattern (NTV2_TestPatt_Black, mFormatDesc, tmpFrame);
+		mDevice.AutoCirculateGetStatus (mConfig.fOutputChannel, outputStatus);
+		for (uint16_t frmNum(outputStatus.GetStartFrame());  frmNum <= outputStatus.GetEndFrame();  frmNum++)
+			mDevice.DMAWriteFrame(ULWord(frmNum), tmpFrame, mFormatDesc.GetTotalBytes());
+	}	//	else if --novideo
 
 	while (!mGlobalQuit)
 	{
@@ -608,10 +618,10 @@ void NTV2Player::ConsumeFrames (void)
 
 			outputXfer.SetOutputTimeCodes(pFrameData->fTimecodes);
 
-			//	Transfer the timecode-burned frame to the device for playout...
-			outputXfer.SetVideoBuffer (pFrameData->VideoBuffer(), pFrameData->VideoBufferSize());
-			//	If also playing audio...
-			outputXfer.SetAudioBuffer (pFrameData->AudioBuffer(), pFrameData->fNumAudioBytes);
+			if (pFrameData->VideoBuffer())	//	Transfer the timecode-burned frame to the device for playout...
+				outputXfer.SetVideoBuffer (pFrameData->VideoBuffer(), pFrameData->VideoBufferSize());
+			if (pFrameData->AudioBuffer())	//	If also playing audio...
+				outputXfer.SetAudioBuffer (pFrameData->AudioBuffer(), pFrameData->fNumAudioBytes);
 
 			if (pAncStrm  &&  pAncStrm->good()  &&  outputXfer.acANCBuffer)
 			{	//	Read pre-recorded anc from binary data file, and inject it into this frame...
