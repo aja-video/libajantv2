@@ -41,7 +41,9 @@ The NTV2Player class demonstrates…
 
 	-m|--multiChannel               Enables multiformat mode, and tries to share the device with other processes.
 
-	--noaudio                       Omits audio.
+	--noaudio                       Omits audio, so that only video is transferred to device.
+
+	--novideo                       Omits video, so that only audio is transferred to device.
 
 	--frames {spec}                 Optionally specifies device frame buffers to use, where {spec} is:
 	                                    numFrames[@startFrame]    Specifies frame count (and optional start frame):
