@@ -35,7 +35,6 @@ set(TARGET_COMPILE_DEFS
 	-DAJA_RDMA=1)
 
 set(TARGET_INCLUDE_DIRS
-	${AJA_APPS_ROOT}/crossplatform/demoapps/NVIDIA/common
 	${AJA_APPS_ROOT}/crossplatform/demoapps/NVIDIA/commonCUDA
 	${AJA_APPS_ROOT}/crossplatform/demoapps
 	${AJA_LIBRARIES_ROOT}
@@ -55,24 +54,7 @@ set(CUDALOWLATENCYDEMO_BUILD_FILES
 	kernel.cu)
 set(CUDALOWLATENCYDEMO_SOURCES
 	cudaapp.cpp)
-set(NVIDIA_COMMON_SOURCES
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../common/ntv2errorlist.cpp
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../common/ntv2errorlist.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../common/ntv2glTextureTransfer.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../common/ntv2glTextureTransferNV.cpp
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../common/ntv2glTextureTransferNV.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../common/ntv2gpucircularbuffer.cpp
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../common/ntv2gpucircularbuffer.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../common/ntv2rendertotexture.cpp
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../common/ntv2rendertotexture.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../common/ntv2texture.cpp
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../common/ntv2texture.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../common/oglview.cpp
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../common/oglview.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../common/opengl.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../common/simplegpuvio.cpp
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../common/simplegpuvio.h
-)
+
 set(NVIDIA_COMMONCUDA_SOURCES
 	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/assertion.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/cudaUtils.h
@@ -107,7 +89,6 @@ set(NVIDIA_COMMONCUDA_SOURCES
 
 set(TARGET_SOURCES
 	${CUDALOWLATENCYDEMO_SOURCES}
-	${NVIDIA_COMMON_SOURCES}
 	${NVIDIA_COMMONCUDA_SOURCES}
 	${DEMO_APPS_HEADERS}
 	${DEMO_APPS_SOURCES})
@@ -122,9 +103,9 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	# cuda_compile(CUDA_OBJ kernel.cu)
 	add_executable(cudalowlatencydemo ${TARGET_SOURCES} kernel.cu)
 	add_dependencies(cudalowlatencydemo ${CUDA_OBJ} ajantv2)
-	target_compile_definitions(cudalowlatencydemo PUBLIC ${TARGET_COMPILE_DEFS})
-	target_include_directories(cudalowlatencydemo PUBLIC ${TARGET_INCLUDE_DIRS})
-	target_link_libraries(cudalowlatencydemo PUBLIC ajantv2 ${TARGET_LINK_LIBS})
+	target_compile_definitions(cudalowlatencydemo PRIVATE ${TARGET_COMPILE_DEFS})
+	target_include_directories(cudalowlatencydemo PRIVATE ${TARGET_INCLUDE_DIRS})
+	target_link_libraries(cudalowlatencydemo PRIVATE ajantv2 ${TARGET_LINK_LIBS})
 	# add_custom_command(
 	# 	TARGET cudalowlatencydemo
 	# 	PRE_BUILD
@@ -137,7 +118,6 @@ endif()
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${CUDALOWLATENCYDEMO_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/cudalowlatencydemo)
 	install(FILES ${CUDALOWLATENCYDEMO_BUILD_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/cudalowlatencydemo)
-	install(FILES ${NVIDIA_COMMON_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/common)
 	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/commonCUDA)
 endif()
 
