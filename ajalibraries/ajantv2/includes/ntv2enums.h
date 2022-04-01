@@ -125,6 +125,14 @@ typedef enum
 #define DEVICE_ID_CORVID44_12G	DEVICE_ID_CORVID44_8KMK
 #define DEVICE_ID_KONA5_4X12G	DEVICE_ID_KONA5_8K
 
+#define DEVICE_IS_KONA5(__d__)										\
+	(	(__d__) == DEVICE_ID_KONA5			||						\
+		(__d__) == DEVICE_ID_KONA5_8KMK		||						\
+		(__d__) == DEVICE_ID_KONA5_8K		||						\
+		(__d__) == DEVICE_ID_KONA5_2X4K		||						\
+		(__d__) == DEVICE_ID_KONA5_3DLUT	||						\
+		(__d__) == DEVICE_ID_KONA5_8K_MV_TX)
+
 #define DEVICE_IS_KONA5_OE(__d__)								\
 	(	(__d__) == DEVICE_ID_KONA5_OE1	||						\
 		(__d__) == DEVICE_ID_KONA5_OE2	||						\
