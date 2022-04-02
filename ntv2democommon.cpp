@@ -364,6 +364,14 @@ class DemoCommonInitializer
 static const DemoCommonInitializer	gInitializer;
 
 
+NTV2_RP188 NTV2FrameData::Timecode (const NTV2TCIndex inTCNdx) const
+{
+	NTV2TimeCodesConstIter it(fTimecodes.find(inTCNdx));
+	if (it != fTimecodes.end())
+		return it->second;
+	return NTV2_RP188();
+}
+
 bool NTV2FrameData::LockAll (CNTV2Card & inDevice)
 {
 	size_t errorCount(0);
