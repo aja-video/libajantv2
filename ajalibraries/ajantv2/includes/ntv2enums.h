@@ -1390,7 +1390,7 @@ typedef enum
 	#endif	//	!defined (NTV2_DEPRECATE)
 	NTV2_OUTPUTDESTINATION_INVALID,
 	NTV2_NUM_OUTPUTDESTINATIONS = NTV2_OUTPUTDESTINATION_INVALID	//	Always last!
-} NTV2OutputDestination;
+} NTV2OutputDestination, NTV2OutputDest;
 
 #if !defined (NTV2_DEPRECATE)
 	#define NTV2_OUTPUT_DEST_IS_HDMI(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_HDMI || (_dest_) == NTV2_OUTPUTDESTINATION_HDMI_14)
