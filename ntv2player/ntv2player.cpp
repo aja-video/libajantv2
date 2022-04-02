@@ -525,7 +525,7 @@ void NTV2Player::ConsumeFrames (void)
 	AUTOCIRCULATE_TRANSFER	outputXfer;
 	AUTOCIRCULATE_STATUS	outputStatus;
 	AJAAncillaryData *		pPkt (AJA_NULL);
-	ULWord					goodXfers(0), badXfers(0), prodWaits(0), noRoomWaits(0);
+	ULWord					goodXfers(0), badXfers(0), starves(0), noRoomWaits(0);
 	ifstream *				pAncStrm (AJA_NULL);
 
 	//	Stop AutoCirculate, just in case someone else left it running...
@@ -614,7 +614,7 @@ void NTV2Player::ConsumeFrames (void)
 			//	Wait for the next frame in our ring to become ready to "consume"...
 			NTV2FrameData *	pFrameData (mFrameDataRing.StartConsumeNextBuffer());
 			if (!pFrameData)
-				{prodWaits++;  continue;}
+				{starves++;  continue;}
 
 			outputXfer.SetOutputTimeCodes(pFrameData->fTimecodes);
 
@@ -642,7 +642,7 @@ void NTV2Player::ConsumeFrames (void)
 			//	Signal that the frame has been "consumed"...
 			mFrameDataRing.EndConsumeNextBuffer();
 			continue;	//	Back to top of while loop
-		}
+		}	//	if CanAcceptMoreOutputFrames
 
 		//	Wait for one or more buffers to become available on the device, which should occur at next VBI...
 		noRoomWaits++;
@@ -652,7 +652,7 @@ void NTV2Player::ConsumeFrames (void)
 	//	Stop AutoCirculate...
 	mDevice.AutoCirculateStop(mConfig.fOutputChannel);
 	PLNOTE("Thread completed: " << DEC(goodXfers) << " xfers, " << DEC(badXfers) << " failed, "
-			<< DEC(prodWaits) << " starves, " << DEC(noRoomWaits) << " VBI waits");
+			<< DEC(starves) << " starves, " << DEC(noRoomWaits) << " VBI waits");
 	if (pAncStrm)
 		delete pAncStrm;
 

@@ -38,97 +38,123 @@ static void SignalHandler (int inSignal)
 **/
 int main (int argc, const char ** argv)
 {
-	AJAStatus		status			(AJA_STATUS_SUCCESS);		//	Result status
-	char *			pDeviceSpec		(AJA_NULL);					//	Which device to use
-	char *			pVidSource		(AJA_NULL);					//	Video input source string
-	char *			pTcSource		(AJA_NULL);					//	Time code source string
-	char *			pPixelFormat	(AJA_NULL);					//	Pixel format spec
-	NTV2InputSource	vidSource		(NTV2_INPUTSOURCE_SDI1);	//	Video source
-	NTV2TCIndex		tcSource		(NTV2_TCINDEX_SDI1);		//	Time code source
-	int				noAudio			(0);						//	Disable audio?
-	int				doMultiChannel	(0);						//  Set the board up for multi-channel/format
-	int				doAnc			(0);						//	Use the Anc Extractor/Inserter
-	poptContext		optionsContext;								//	Context for parsing command line arguments
+	AJAStatus		status			(AJA_STATUS_SUCCESS);	//	Result status
+	char *			pDeviceSpec		(AJA_NULL);				//	Which device to use
+	char *			pVidSource		(AJA_NULL);				//	Video input source string
+	char *			pTcSource		(AJA_NULL);				//	Time code source string
+	char *			pPixelFormat	(AJA_NULL);				//	Pixel format spec
+	char *			pInFramesSpec	(AJA_NULL);				//	Input AutoCirculate frames spec
+	char *			pOutFramesSpec	(AJA_NULL);				//	Output AutoCirculate frames spec
+	int				noAudio			(0);					//	Disable audio?
+	int				noVideo			(0);					//	Disable video?
+	int				noAnc			(0);					//	Disable use of Anc Extractor/Inserter?
+	int				doMultiChannel	(0);					//  Set the board up for multi-channel/format
+	poptContext		optionsContext;							//	Context for parsing command line arguments
 	AJADebug::Open();
 
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
 		#if !defined(NTV2_DEPRECATE_16_0)	//	--board option is deprecated!
-		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",				"(deprecated)"	},
+		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"(deprecated)"	},
 		#endif
-		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",				"index#, serial#, or model"	},
-		{"input",		'i',	POPT_ARG_STRING,	&pVidSource,	0,	"video input",						"{'?' to list}"		},
-		{"tcsource",	't',	POPT_ARG_STRING,	&pTcSource,		0,	"time code source",					"{'?' to list}"		},
-		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio?",					AJA_NULL},
-		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format",						"'?' or 'list' to list"},
-		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,0,	"use multichannel/multiformat?",	AJA_NULL},
-		{"anc",			'a',	POPT_ARG_NONE,		&doAnc,			0,	"use Anc data extractor/inserter",	AJA_NULL },
+		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"index#, serial#, or model"	},
+		{"input",		'i',	POPT_ARG_STRING,	&pVidSource,	0,	"video input",					"{'?' to list}"		},
+		{"tcsource",	't',	POPT_ARG_STRING,	&pTcSource,		0,	"time code source",				"{'?' to list}"		},
+		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio?",				AJA_NULL},
+		{"novideo",		0,		POPT_ARG_NONE,		&noVideo,		0,	"disable video?",				AJA_NULL},
+		{"noanc",		0,		POPT_ARG_NONE,		&noAnc,			0,	"disable anc?",					AJA_NULL},
+		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format",					"'?' or 'list' to list"},
+		{"iframes",		0,		POPT_ARG_STRING,	&pInFramesSpec,	0,	"input AutoCirc frames",		"num[@min] or min-max"},
+		{"oframes",		0,		POPT_ARG_STRING,	&pOutFramesSpec,0,	"output AutoCirc frames",		"num[@min] or min-max"},
+		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,0,	"use multi-channel/format?",	AJA_NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
 
 	//	Read command line arguments...
 	optionsContext = ::poptGetContext (AJA_NULL, argc, argv, userOptionsTable, 0);
-	if (::poptGetNextOpt (optionsContext) < -1)
+	if (::poptGetNextOpt(optionsContext) < -1)
 	{
 		cerr << "## ERROR:  Bad command line argument(s)" << endl;
 		return 1;
 	}
-	optionsContext = ::poptFreeContext (optionsContext);
+	optionsContext = ::poptFreeContext(optionsContext);
 	const string	deviceSpec		(pDeviceSpec ? pDeviceSpec : "0");
 	const string	vidSourceStr	(pVidSource ? CNTV2DemoCommon::ToLower(pVidSource) : "");
 	const string	tcSourceStr		(pTcSource ? CNTV2DemoCommon::ToLower(pTcSource) : "");
+	const string	legalDevices	(CNTV2DemoCommon::GetDeviceStrings());
+	BurnConfig config(deviceSpec);
 
-	const string	legalDevices(CNTV2DemoCommon::GetDeviceStrings());
-	if (deviceSpec == "?" || deviceSpec == "list")
+	if (deviceSpec == "?"  ||  deviceSpec == "list")
 		{cout << legalDevices << endl;  return 0;}
 	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
 		{cout << "## ERROR:  No such device '" << deviceSpec << "'" << endl << legalDevices;  return 1;}
 
 	//	Select video source...
 	const string	legalSources(CNTV2DemoCommon::GetInputSourceStrings(NTV2_INPUTSOURCES_ALL, deviceSpec));
-	if (vidSourceStr == "?" || vidSourceStr == "list")
+	if (vidSourceStr == "?"  ||  vidSourceStr == "list")
 		{cout << legalSources << endl;  return 0;}
 	if (!vidSourceStr.empty())
 	{
-		vidSource = CNTV2DemoCommon::GetInputSourceFromString(vidSourceStr);
-		if (!NTV2_IS_VALID_INPUT_SOURCE(vidSource))
+		config.fInputSource = CNTV2DemoCommon::GetInputSourceFromString(vidSourceStr);
+		if (!NTV2_IS_VALID_INPUT_SOURCE(config.fInputSource))
 			{cerr << "## ERROR:  Input source '" << vidSourceStr << "' not one of these:" << endl << legalSources << endl;	return 1;}
 	}	//	if video source specified
 
 	//	Select time code source...
 	const string	legalTCSources(CNTV2DemoCommon::GetTCIndexStrings(TC_INDEXES_ALL, deviceSpec));
-	if (tcSourceStr == "?" || tcSourceStr == "list")
+	if (tcSourceStr == "?"  ||  tcSourceStr == "list")
 		{cout << legalTCSources << endl;  return 0;}
 	if (!tcSourceStr.empty())
 	{
-		tcSource = CNTV2DemoCommon::GetTCIndexFromString(tcSourceStr);
-		if (!NTV2_IS_VALID_TIMECODE_INDEX(tcSource))
+		config.fTimecodeSource = CNTV2DemoCommon::GetTCIndexFromString(tcSourceStr);
+		if (!NTV2_IS_VALID_TIMECODE_INDEX(config.fTimecodeSource))
 			{cerr << "## ERROR:  Timecode source '" << tcSourceStr << "' not one of these:" << endl << legalTCSources << endl;	return 1;}
 	}
 
 	//	Pixel format
-	NTV2PixelFormat	pixelFormat		(NTV2_FBF_8BIT_YCBCR);
-	const string	pixelFormatStr	(pPixelFormat  ? pPixelFormat :  "1");
-	const string	legalFBFs		(CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec));
+	const string pixelFormatStr (pPixelFormat  ? pPixelFormat :  "1");
+	const string legalFBFs (CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec));
 	if (pixelFormatStr == "?" || pixelFormatStr == "list")
 		{cout << CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 0;}
 	if (!pixelFormatStr.empty())
 	{
-		pixelFormat = CNTV2DemoCommon::GetPixelFormatFromString(pixelFormatStr);
-		if (!NTV2_IS_VALID_FRAME_BUFFER_FORMAT(pixelFormat))
+		config.fPixelFormat = CNTV2DemoCommon::GetPixelFormatFromString(pixelFormatStr);
+		if (!NTV2_IS_VALID_FRAME_BUFFER_FORMAT(config.fPixelFormat))
 			{cerr << "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl << legalFBFs << endl;  return 2;}
 	}
 
+	//	InputFrames
+	string framesSpec(pInFramesSpec ? pInFramesSpec : "");
+	static const string	legalFrmSpec("{frameCount}[@{firstFrameNum}]  or  {firstFrameNum}-{lastFrameNum}");
+	if (!framesSpec.empty())
+	{	const string parseResult(config.fInputFrames.setFromString(framesSpec));
+		if (!parseResult.empty())
+			{cerr << "## ERROR:  Bad '--iframes' spec '" << framesSpec << "'" << endl << "## " << parseResult << endl;  return 1;}
+	}
+	if (!config.fInputFrames.valid())
+		{cerr << "## ERROR:  Bad '--iframes' spec '" << framesSpec << "'" << endl << "## Expected " << legalFrmSpec << endl;  return 1;}
+
+	//	OutputFrames
+	framesSpec = pOutFramesSpec ? pOutFramesSpec : "";
+	if (!framesSpec.empty())
+	{	const string parseResult(config.fOutputFrames.setFromString(framesSpec));
+		if (!parseResult.empty())
+			{cerr << "## ERROR:  Bad '--oframes' spec '" << framesSpec << "'" << endl << "## " << parseResult << endl;  return 1;}
+	}
+	if (!config.fOutputFrames.valid())
+		{cerr << "## ERROR:  Bad '--oframes' spec '" << framesSpec << "'" << endl << "## Expected " << legalFrmSpec << endl;  return 1;}
+
+	if (noVideo  &&  noAudio)
+		{cerr	<< "## ERROR:  '--novideo' and '--noaudio' cannot both be specified" << endl;  return 1;}
+	config.fSuppressAudio	= noAudio ? true : false;
+	config.fSuppressVideo	= noVideo ? true : false;
+	config.fSuppressAnc		= noAnc ? true : false;
+	config.fDoMultiFormat	= doMultiChannel ? true : false;
+
 	//	Instantiate the NTV2Burn object...
-	NTV2Burn	burner (deviceSpec,						//	Which device?
-						(noAudio ? false : true),		//	Include audio?
-						pixelFormat,					//	Use RGB frame buffer format?
-						vidSource,						//	Which video input source?
-						doMultiChannel ? true : false,	//  Set the device up for multi-channel/format?
-						tcSource,						//	Which time code source?
-						doAnc ? true : false);			//	Use the Anc Extractor/Inserter
+	NTV2Burn burner (config);
 
 	::signal (SIGINT, SignalHandler);
 	#if defined (AJAMac)
@@ -137,12 +163,12 @@ int main (int argc, const char ** argv)
 	#endif
 
 	//	Initialize the NTV2Burn instance...
-	status = burner.Init ();
+	status = burner.Init();
 	if (!AJA_SUCCESS (status))
 		{cerr << "## ERROR:  Initialization failed, status=" << status << endl;  return 4;}
 
 	//	Start the burner's capture and playout threads...
-	burner.Run ();
+	burner.Run();
 
 	//	Loop until told to stop...
 	cout	<< "           Capture  Playout  Capture  Playout" << endl
@@ -150,20 +176,19 @@ int main (int argc, const char ** argv)
 			<< "Processed  Dropped  Dropped    Level    Level" << endl;
 	do
 	{
-		ULWord	totalFrames (0),  captureDrops (0),  playoutDrops (0),  captureBufferLevel (0),  playoutBufferLevel (0);
-		burner.GetStatus (totalFrames, captureDrops, playoutDrops, captureBufferLevel, playoutBufferLevel);
-
-		cout	<< setw (9) << totalFrames
-				<< setw (9) << captureDrops
-				<< setw (9) << playoutDrops
-				<< setw (9) << captureBufferLevel
-				<< setw (9) << playoutBufferLevel
+		AUTOCIRCULATE_STATUS inputStatus, outputStatus;
+		burner.GetStatus (inputStatus, outputStatus);
+		cout	<< setw(9) << inputStatus.GetProcessedFrameCount()
+				<< setw(9) << inputStatus.GetDroppedFrameCount()
+				<< setw(9) << outputStatus.GetDroppedFrameCount()
+				<< setw(9) << inputStatus.GetBufferLevel()
+				<< setw(9) << outputStatus.GetBufferLevel()
 				<< "\r" << flush;
-		AJATime::Sleep (2000);
+		AJATime::Sleep(2000);
 	} while (!gGlobalQuit);	//	loop until signaled
 
 	cout << endl;
 
-	return AJA_SUCCESS (status) ? 0 : 2;	//	Return zero upon success -- otherwise 2
+	return AJA_SUCCESS(status) ? 0 : 2;	//	Return zero upon success -- otherwise 2
 
 }	//	main

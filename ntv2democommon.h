@@ -120,6 +120,10 @@ AJAExport class NTV2FrameData
 		inline bool		IsNULL (void) const					{return fVideoBuffer.IsNULL() && fVideoBuffer2.IsNULL()
 																	&& fAudioBuffer.IsNULL() && fAncBuffer.IsNULL()
 																	&& fAncBuffer2.IsNULL();}
+		inline bool	HasTimecode (const NTV2TCIndex inTCNdx) const	{return fTimecodes.find(inTCNdx) != fTimecodes.end();}
+		NTV2_RP188	Timecode (const NTV2TCIndex inTCNdx) const;
+		inline bool	HasValidTimecode (const NTV2TCIndex inTCNdx) const	{return Timecode(inTCNdx).IsValid();}
+
 		//	Modifier Methods
 		inline void		ZeroBuffers (void)					{	if (fVideoBuffer)
 																	fVideoBuffer.Fill(ULWord(0));

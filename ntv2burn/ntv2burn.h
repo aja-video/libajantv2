@@ -16,6 +16,67 @@
 #include "ajabase/common/circularbuffer.h"
 #include "ajabase/system/thread.h"
 #include "ajabase/common/timecodeburn.h"
+#include "ajabase/system/info.h"
+
+/**
+	@brief	Configures an NTV2Player instance.
+**/
+typedef struct BurnConfig
+{
+	public:
+		std::string						fDeviceSpec;		///< @brief	The AJA device to use
+		NTV2Channel						fInputChannel;		///< @brief	The input channel to use
+		NTV2Channel						fOutputChannel;		///< @brief	The output channel to use
+		NTV2InputSource					fInputSource;		///< @brief	The device input connector to use
+		CNTV2DemoCommon::ACFrameRange	fInputFrames;		///< @brief	Ingest frame count or range
+		CNTV2DemoCommon::ACFrameRange	fOutputFrames;		///< @brief	Playout frame count or range
+		NTV2PixelFormat					fPixelFormat;		///< @brief	The pixel format to use
+		NTV2TCIndex						fTimecodeSource;	///< @brief	Timecode source to use
+		bool							fDoMultiFormat;		///< @brief	If true, enables device-sharing;  otherwise takes exclusive control of the device.
+		bool							fSuppressAudio;		///< @brief	If true, suppress audio;  otherwise include audio
+		bool							fSuppressVideo;		///< @brief	If true, suppress video;  otherwise include video
+		bool							fSuppressAnc;		///< @brief	If true, suppress anc;  otherwise include anc
+
+		/**
+			@brief	Constructs a default Player configuration.
+		**/
+		inline explicit	BurnConfig (const std::string & inDeviceSpecifier	= "0")
+			:	fDeviceSpec			(inDeviceSpecifier),
+				fInputChannel		(NTV2_CHANNEL1),
+				fOutputChannel		(NTV2_CHANNEL3),
+				fInputSource		(NTV2_INPUTSOURCE_SDI1),
+				fInputFrames		(7),
+				fOutputFrames		(7),
+				fPixelFormat		(NTV2_FBF_8BIT_YCBCR),
+				fTimecodeSource		(NTV2_TCINDEX_SDI1),
+				fDoMultiFormat		(false),
+				fSuppressAudio		(false),
+				fSuppressVideo		(false),
+				fSuppressAnc		(false)
+		{
+		}
+
+		inline bool	WithAudio(void) const		{return !fSuppressAudio;}	///< @return	True if streaming audio, false if not.
+		inline bool	WithVideo(void) const		{return !fSuppressVideo;}	///< @return	True if streaming video, false if not.
+		inline bool	WithAnc(void) const			{return !fSuppressAnc;}		///< @return	True if streaming audio, false if not.
+		inline bool WithTimecode(void) const	{return NTV2_IS_VALID_TIMECODE_INDEX(fTimecodeSource);}	///< @return	True if valid TC source
+
+		/**
+			@brief		Renders a human-readable representation of me.
+			@param[in]	inCompact	If true, setting values are printed in a more compact form. Defaults to false.
+			@return		A list of label/value pairs.
+		**/
+		AJALabelValuePairs Get (const bool inCompact = false) const;
+
+}	BurnConfig;
+
+/**
+	@brief		Renders a human-readable representation of a BurnConfig into an output stream.
+	@param		strm	The output stream.
+	@param[in]	inObj	The configuration to be rendered into the output stream.
+	@return		A reference to the specified output stream.
+**/
+inline std::ostream &	operator << (std::ostream & strm, const BurnConfig & inObj)	{return strm << AJASystemInfo::ToString(inObj.Get());}
 
 
 /**
@@ -34,24 +95,11 @@ class NTV2Burn
 	//	Public Instance Methods
 	public:
 		/**
-			@brief	Constructs me using the given configuration settings.
-			@note	I'm not completely initialized and ready for use until after my Init method has been called.
-			@param[in]	inDeviceSpecifier	Specifies the AJA device to use. Defaults to "0", the first device found.
-			@param[in]	inWithAudio			If true (the default), include audio in the output signal;  otherwise, omit it.
-			@param[in]	inPixelFormat		Specifies the pixel format to use for the device's frame buffers. Defaults to 8-bit YUV.
-			@param[in]	inInputSource		Specifies which input to capture from. Defaults to SDI1.
-			@param[in]	inMultiFormat		If true, enables multiformat/multichannel mode if the device supports it, and won't acquire
-											or release the device. If false (the default), acquires/releases exclusive use of the device.
-			@param[in]	inTCSource			Specifies the timecode source. Defaults to whatever is found embedded in the input video.
-			@param[in]	inWithAnc			If true, capture & play ancillary data. Defaults to false.
+			@brief		Constructs me using the given configuration settings.
+			@param[in]	inConfig		Specifies the configuration parameters.
+			@note		I'm not completely initialized and ready for use until after my Init method has been called.
 		**/
-							NTV2Burn (const std::string &			inDeviceSpecifier	= "0",
-										const bool					inWithAudio			= true,
-										const NTV2FrameBufferFormat	inPixelFormat		= NTV2_FBF_8BIT_YCBCR,
-										const NTV2InputSource		inInputSource		= NTV2_INPUTSOURCE_SDI1,
-										const bool					inMultiFormat		= false,
-										const NTV2TCIndex			inTCSource			= NTV2_TCINDEX_SDI1,
-										const bool					inWithAnc			= false);
+							NTV2Burn (const BurnConfig & inConfig);
 		virtual				~NTV2Burn ();
 
 		/**
@@ -72,14 +120,10 @@ class NTV2Burn
 
 		/**
 			@brief	Provides status information about my input (capture) and output (playout) processes.
-			@param[out]	outFramesProcessed		Receives the number of frames successfully processed.
-			@param[out]	outCaptureFramesDropped	Receives the number of dropped capture frames.
-			@param[out]	outPlayoutFramesDropped	Receives the number of dropped playout frames.
-			@param[out]	outCaptureBufferLevel	Receives the capture driver buffer level.
-			@param[out]	outPlayoutBufferLevel	Receives the playout driver buffer level.
+			@param[out]	outInputStatus		Receives the input status.
+			@param[out]	outOutputStatus		Receives the output status.
 		**/
-		virtual void			GetStatus (ULWord & outFramesProcessed, ULWord & outCaptureFramesDropped, ULWord & outPlayoutFramesDropped,
-											ULWord & outCaptureBufferLevel, ULWord & outPlayoutBufferLevel);
+		virtual void			GetStatus (AUTOCIRCULATE_STATUS & outInputStatus, AUTOCIRCULATE_STATUS & outOutputStatus);
 
 
 	//	Protected Instance Methods
@@ -165,30 +209,22 @@ class NTV2Burn
 
 	//	Private Member Data
 	private:
-		AJAThread					mPlayThread;		///< @brief	My playout thread object
-		AJAThread					mCaptureThread;		///< @brief	My capture thread object
-		CNTV2Card					mDevice;			///< @brief	My CNTV2Card instance
-		NTV2DeviceID				mDeviceID;			///< @brief	My device identifier
-		const std::string			mDeviceSpecifier;	///< @brief	Specifies which device I should use
-		NTV2Channel					mInputChannel;		///< @brief	The input channel I'm using
-		NTV2Channel					mOutputChannel;		///< @brief	The output channel I'm using
-		NTV2InputSource				mInputSource;		///< @brief	The input source I'm using
-		NTV2OutputDestination		mOutputDestination;	///< @brief	The output I'm using
-		NTV2VideoFormat				mVideoFormat;		///< @brief	My video format
-		NTV2FrameBufferFormat		mPixelFormat;		///< @brief	My pixel format
-		NTV2FormatDescriptor		mFormatDescriptor;	///< @brief	Description of the board's frame geometry
-		NTV2EveryFrameTaskMode		mSavedTaskMode;		///< @brief	We will restore the previous state
-		NTV2VANCMode				mVancMode;			///< @brief	VANC mode
-		NTV2AudioSystem				mAudioSystem;		///< @brief	The audio system I'm using
-		bool						mGlobalQuit;		///< @brief	Set "true" to gracefully stop
-		bool						mDoMultiChannel;	///< @brief	Set the board up for multi-format
-		AJATimeCodeBurn				mTCBurner;			///< @brief	My timecode burner
-		uint32_t					mVideoBufferSize;	///< @brief	My video buffer size, in bytes
-		NTV2TCIndexes				mTCOutputs;			///< @brief	My output timecode destinations
-		NTV2TCIndex					mTCSource;			///< @brief	The timecode source
-		bool						mWithAnc;			///< @brief	Capture and Playout packetized ANC data
-		AVDataBuffer						mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
-		AJACircularBuffer <AVDataBuffer *>	mAVCircularBuffer;						///< @brief	My ring buffer
+		typedef AJACircularBuffer<NTV2FrameData*>	CircularBuffer;
+		BurnConfig			mConfig;			///< @brief	My configuration info
+		AJAThread			mPlayThread;		///< @brief	My playout thread object
+		AJAThread			mCaptureThread;		///< @brief	My capture thread object
+		CNTV2Card			mDevice;			///< @brief	My CNTV2Card instance
+		NTV2DeviceID		mDeviceID;			///< @brief	Keep my device ID handy
+		NTV2VideoFormat		mVideoFormat;		///< @brief	Format of video being ingested & played
+		NTV2FormatDesc		mFormatDesc;		///< @brief	Describes raster images
+		NTV2TaskMode		mSavedTaskMode;		///< @brief	For restoring prior state
+		NTV2OutputDest		mOutputDest;		///< @brief	The desired output connector to use
+		NTV2AudioSystem		mAudioSystem;		///< @brief	The audio system I'm using
+		AJATimeCodeBurn		mTCBurner;			///< @brief	My timecode burner
+		NTV2TCIndexes		mTCOutputs;			///< @brief	My output timecode destinations
+		NTV2FrameDataArray	mHostBuffers;		///< @brief	My host buffers
+		CircularBuffer		mFrameDataRing;		///< @brief	AJACircularBuffer that controls frame data access by producer/consumer threads
+		bool				mGlobalQuit;		///< @brief	Set "true" to gracefully stop
 
 };	//	NTV2Burn
 
