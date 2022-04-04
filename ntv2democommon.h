@@ -624,7 +624,7 @@ class CNTV2DemoCommon
 
 	#define		AJA_NTV2_AUDIO_RECORD_DO		if (NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem))									\
 													if (pFrameData->fAudioBuffer)												\
-														_ostrm.write(pFrameData->AudioBytes(),									\
+														_ostrm.write(pFrameData->AudioBuffer(),									\
 																	streamsize(pFrameData->NumCapturedAudioBytes()));
 
 	#define		AJA_NTV2_AUDIO_RECORD_END		
@@ -647,7 +647,7 @@ class CNTV2DemoCommon
 	#define		AJA_NTV2_AUDIO_RECORD_DO		if (NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem))										\
 													if (pFrameData->fAudioBuffer)													\
 														if (_wavWriter.IsOpen())													\
-															_wavWriter.write(pFrameData->AudioBytes(), pFrameData->NumCapturedAudioBytes());
+															_wavWriter.write(pFrameData->AudioBuffer(), pFrameData->NumCapturedAudioBytes());
 
 	#define		AJA_NTV2_AUDIO_RECORD_END		if (_wavWriter.IsOpen())															\
 													_wavWriter.close();
