@@ -4868,7 +4868,7 @@ typedef enum
 #endif
 
 // Structure used for GetAutoCirculate
-typedef struct
+typedef struct AUTOCIRCULATE_STATUS_STRUCT
 {
 	NTV2Crosspoint			channelSpec;			// Not used by Windows.
 	NTV2AutoCirculateState	state;
@@ -4991,7 +4991,7 @@ typedef struct
 // GetFrameStamp
 /////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct
+typedef struct FRAME_STAMP_STRUCT
 {
 	NTV2Crosspoint		channelSpec;	// Ignored in Windows
 
@@ -5027,7 +5027,7 @@ typedef struct
 	//! Total audio and video bytes transfered
 	ULWord				bytesRead;
 
-	/** The actaul start sample when this frame was started in VBI
+    /** The actual start sample when this frame was started in VBI
 	* This may be used to check sync against audioInStartAddress (Play) or
 	* audioOutStartAddress (Record).  In record it will always be equal, but
 	* in playback if the clocks drift or the user supplies non aligned
@@ -5128,7 +5128,7 @@ typedef struct
 } AUTOCIRCULATE_TRANSFER_STRUCT_64, *PAUTOCIRCULATE_TRANSFER_STRUCT_64;
 
 
-typedef struct
+typedef struct AUTOCIRCULATE_TRANSFER_STRUCT
 {
 	NTV2Crosspoint					channelSpec;			//	specify Input or Output channel for desired Frame
 	ULWord	*						videoBuffer;			//	Keep 64 bit aligned for performance reasons
@@ -5310,7 +5310,7 @@ typedef struct
 	ULWord reserved3;
 } AUTOCIRCULATE_TASK_STRUCT_64, *PAUTOCIRCULATE_TASK_STRUCT_64;
 
-typedef struct
+typedef struct AUTOCIRCULATE_TASK_STRUCT
 {
 	ULWord taskVersion;
 	ULWord taskSize;

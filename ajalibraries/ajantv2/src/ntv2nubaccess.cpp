@@ -1098,7 +1098,7 @@ bool NTV2RPCServerAPI::SetConfigParams (const NTV2ConnectParams & inNewParams, c
 	{
 		updated = mConfigParams.UpdateFrom(inNewParams);
 		added = mConfigParams.AddFrom(inNewParams);
-		AJA_sDEBUG(AJA_DebugUnit_RPCServer, AJAFUNC << " config param(s) updated, " << DEC(added) << " added: " << mConfigParams);
+        AJA_sDEBUG(AJA_DebugUnit_RPCServer, AJAFUNC << DEC(updated) << " config param(s) updated, " << DEC(added) << " added: " << mConfigParams);
 	}
 	else
 	{

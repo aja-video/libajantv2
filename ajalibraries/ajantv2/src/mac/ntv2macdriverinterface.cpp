@@ -1361,7 +1361,6 @@ bool CNTV2MacDriverInterface::SystemStatus ( void* dataPtr, SystemStatusCode sta
 bool CNTV2MacDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 {
 	bool success = true;
-	UserClientCommandCodes	whichMethod (kNumberUserClientCommands);
 	if (IsRemote())
 		return CNTV2DriverInterface::AutoCirculate(autoCircData);
 
@@ -1385,7 +1384,6 @@ bool CNTV2MacDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 			// Pass the autoCircData structure to the driver. The driver knows the implicit meanings of the
 			// members of the structure based on the the command contained within it.
 			size_t	outputStructSize = 0;
-			whichMethod = kDriverAutoCirculateControl;
 			AUTOCIRCULATE_DATA_64 autoCircData64;
 			CopyTo_AUTOCIRCULATE_DATA_64 (&autoCircData, &autoCircData64);
 
@@ -1405,7 +1403,6 @@ bool CNTV2MacDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 			uint64_t	scalarI_64[1];
 			uint32_t	outputCount = 0;
 			size_t		outputStructSize = sizeof(AUTOCIRCULATE_STATUS_STRUCT);
-			whichMethod = kDriverAutoCirculateStatus;
 			scalarI_64[0] = autoCircData.channelSpec;
 			AJADebug::StatTimerStart(AJA_DebugStat_AutoCirculate);
 			kernResult = OS_IOConnectCallMethod (	conn,						// an io_connect_t returned from IOServiceOpen().
@@ -1425,7 +1422,6 @@ bool CNTV2MacDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 		case eGetFrameStamp:
 		case eGetFrameStampEx2:
 		{
-			whichMethod = kDriverAutoCirculateFramestamp;
 			// Make sure task structure does not get passed in with eGetFrameStamp call.
 			if ( autoCircData.eCommand == eGetFrameStamp)
 				autoCircData.pvVal2 = AJA_NULL;
@@ -1451,7 +1447,6 @@ bool CNTV2MacDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 		case eTransferAutoCirculateEx:
 		case eTransferAutoCirculateEx2:
 		{
-			whichMethod = kDriverAutoCirculateTransfer;
 			// Pass the autoCircData structure to the driver. The driver knows the implicit meanings of the
 			// members of the structure based on the the command contained within it.
 			// Make sure routing table and task structure does not get passed in with eTransferAutoCirculate call.
