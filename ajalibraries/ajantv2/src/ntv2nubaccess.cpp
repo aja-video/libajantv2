@@ -907,8 +907,8 @@ bool NTV2RPCClientAPI::NTV2CloseRemote (void)
 NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inParams)	//	CLASS METHOD
 {
 	//	Scheme dictates which plugin to try loading...
-	if (inParams.hasKey(kConnectParamScheme))
-		{NBCFAIL("Missing scheme");  return AJA_NULL;}	//	No scheme
+	if (!inParams.hasKey(kConnectParamScheme))
+		{NBCFAIL("Missing scheme -- params: " << inParams);  return AJA_NULL;}	//	No scheme
 	string scheme(inParams.valueForKey(kConnectParamScheme));
 	if (scheme.find("ntv2"))	//	scheme must start with "ntv2"
 		{NBCFAIL("Scheme '" << inParams.valueForKey(kConnectParamScheme) << "' results in empty plugin name");  return AJA_NULL;}	//	No "host"

@@ -1493,20 +1493,14 @@
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				LIBRARY_SEARCH_PATHS = (
-					../../../lib,
-					"../../../non-aja/rpclib-2.3.0/build",
-				);
+				LIBRARY_SEARCH_PATHS = ../../../lib;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OBJROOT = build;
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-Wreorder",
 				);
-				OTHER_LDFLAGS = (
-					"-lajantv2d",
-					"-lrpc",
-				);
+				OTHER_LDFLAGS = "-lajantv2d";
 				SDKROOT = macosx;
 				STRIP_INSTALLED_PRODUCT = NO;
 				SYMROOT = ../../../bin;
@@ -1559,20 +1553,14 @@
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				LIBRARY_SEARCH_PATHS = (
-					../../../lib,
-					"../../../non-aja/rpclib-2.3.0/build",
-				);
+				LIBRARY_SEARCH_PATHS = ../../../lib;
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OBJROOT = build;
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-Wreorder",
 				);
-				OTHER_LDFLAGS = (
-					"-lrpc",
-					"-lajantv2",
-				);
+				OTHER_LDFLAGS = "-lajantv2";
 				SDKROOT = macosx;
 				SYMROOT = ../../../bin;
 				USER_HEADER_SEARCH_PATHS = "../includes ../src/mac ../../../ajaapps/crossplatform/demoapps ../.. ../../ajabase";
