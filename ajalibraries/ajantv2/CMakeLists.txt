@@ -503,11 +503,13 @@ if (NOT AJA_BUILD_OPENSOURCE)
 endif()
 
 # libajantv2
+set(BUILD_TARGETS ajantv2)
 add_library(ajantv2 STATIC ${AJANTV2_TARGET_SOURCES})
 target_include_directories(ajantv2 PUBLIC ${AJANTV2_TARGET_INCLUDE_DIRS})
 target_link_libraries(ajantv2 PUBLIC ${TARGET_LINK_LIBS})
 target_compile_definitions(ajantv2 PUBLIC ${TARGET_COMPILE_DEFS_STATIC})
 if (AJA_BUILD_SHARED)
+    list(APPEND BUILD_TARGETS ajantv2-dyn)
     add_library(ajantv2-dyn SHARED ${AJANTV2_TARGET_SOURCES})
     target_compile_definitions(ajantv2-dyn PUBLIC ${TARGET_COMPILE_DEFS_DYNAMIC})
     target_include_directories(ajantv2-dyn PUBLIC ${AJANTV2_TARGET_INCLUDE_DIRS})
@@ -569,7 +571,7 @@ if (AJA_INSTALL_SOURCES)
     install(FILES ${AJA_CMAKE_DIR}/../build/sdkversion.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
     install(FILES ${AJA_CMAKE_DIR}/../build/targets.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
 endif()
-install(TARGETS ajantv2
+install(TARGETS ${BUILD_TARGETS}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
