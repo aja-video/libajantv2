@@ -285,8 +285,6 @@ const char *POPT_next_char (const char *str);
 #define D_(dom, str) str
 #define POPT_(foo) foo
 
-#define N_(foo) foo
-
 
 /* End of section from poptint.h
 */
@@ -723,7 +721,7 @@ poptInit(int argc, const char ** argv,
  * @param arg		(unused)
  * @param data		(unused)
  */
-static void displayArgs(poptContext con,
+void displayArgs(poptContext con,
 		UNUSED(enum poptCallbackReason foo),
 		struct poptOption * key, 
 		UNUSED(const char * arg),
@@ -736,34 +734,6 @@ static void displayArgs(poptContext con,
 
 	exit(0);
 }
-
-/**
- * Empty table marker to enable displaying popt alias/exec options.
- */
-struct poptOption poptAliasOptions[] = {
-	POPT_TABLEEND
-};
-
-/**
- * Auto help table options.
- */
-struct poptOption poptHelpOptions[] = {
-  { NULL, '\0', POPT_ARG_CALLBACK, (void *)displayArgs, 0, NULL, NULL },
-  { "help", '?', 0, NULL, (int)'?', N_("Show this help message"), NULL },
-  { "usage", '\0', 0, NULL, (int)'u', N_("Display brief usage message"), NULL },
-	POPT_TABLEEND
-} ;
-
-static struct poptOption poptHelpOptions2[] = {
-	{ NULL, '\0', POPT_ARG_INTL_DOMAIN, (void*)"PACKAGE", 0, NULL, NULL},
-  { NULL, '\0', POPT_ARG_CALLBACK, (void *)displayArgs, 0, NULL, NULL },
-  { "help", '?', 0, NULL, (int)'?', N_("Show this help message"), NULL },
-  { "usage", '\0', 0, NULL, (int)'u', N_("Display brief usage message"), NULL },
-  { "", '\0',	0, NULL, 0, N_("Terminate options"), NULL },
-	POPT_TABLEEND
-} ;
-
-struct poptOption * poptHelpOptionsI18N = poptHelpOptions2;
 
 #define		   _POPTHELP_MAXLINE	   ((size_t)79)
 
