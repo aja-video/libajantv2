@@ -157,7 +157,7 @@ set(AJANTV2_UTILITY_PUBLIC_SOURCES
     utilityfiles/public/ntv2hevcfirmwareinstallerthread.cpp)
 # ajantv2 hevc
 if (NOT AJA_BUILD_OPENSOURCE)
-    message("added ajantv2 HEVC/M31 codec")
+    aja_message(STATUS "added ajantv2 HEVC/M31 codec")
     set(AJANTV2_HEVC_HEADERS
         codecs/hevc/m31/ntv2m31.h
         codecs/hevc/m31/ntv2m31cparam.h
