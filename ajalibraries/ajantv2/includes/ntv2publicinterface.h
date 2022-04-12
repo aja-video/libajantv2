@@ -6145,6 +6145,61 @@ typedef enum
 		#endif	//	defined (AJAMac)
 
 
+		/**
+			@brief	Describes the horizontal and vertical size dimensions of a raster, bitmap, frame or image.
+		**/
+		NTV2_STRUCT_BEGIN(NTV2FrameDimensions)
+			#if !defined (NTV2_BUILDING_DRIVER)
+				//	Member Functions
+
+				/**
+					@brief		My constructor.
+					@param[in]	inWidth		Optionally specifies my initial width dimension, in pixels. Defaults to zero.
+					@param[in]	inHeight	Optionally specifies my initial height dimension, in lines. Defaults to zero.
+				**/
+				inline NTV2FrameDimensions (const ULWord inWidth = 0, const ULWord inHeight = 0)	{Set (inWidth, inHeight);}
+				inline ULWord					GetWidth (void) const		{return mWidth;}	///< @return	My width, in pixels.
+				inline ULWord					GetHeight (void) const		{return mHeight;}	///< @return	My height, in lines/rows.
+				inline ULWord					Width (void) const			{return mWidth;}	///< @return	My width, in pixels.
+				inline ULWord					Height (void) const			{return mHeight;}	///< @return	My height, in lines/rows.
+				inline bool						IsValid (void) const		{return Width() && Height();}	///< @return	True if both my width and height are non-zero.
+
+				/**
+					@brief		Sets my width dimension.
+					@param[in]	inValue		Specifies the new width dimension, in pixels.
+					@return		A non-constant reference to me.
+				**/
+				inline NTV2FrameDimensions &	SetWidth (const ULWord inValue)						{mWidth = inValue; return *this;}
+
+				/**
+					@brief		Sets my height dimension.
+					@param[in]	inValue		Specifies the new height dimension, in lines.
+					@return		A non-constant reference to me.
+				**/
+				inline NTV2FrameDimensions &	SetHeight (const ULWord inValue)					{mHeight = inValue; return *this;}
+
+				/**
+					@brief		Sets my dimension values.
+					@param[in]	inWidth		Specifies the new width dimension, in pixels.
+					@param[in]	inHeight	Specifies the new height dimension, in lines.
+					@return		A non-constant reference to me.
+				**/
+				inline NTV2FrameDimensions &	Set (const ULWord inWidth, const ULWord inHeight)	{return SetWidth (inWidth).SetHeight (inHeight);}
+
+				/**
+					@brief		Sets both my width and height to zero (an invalid state).
+					@return		A non-constant reference to me.
+				**/
+				inline NTV2FrameDimensions &	Reset (void)										{return Set (0, 0);}
+			#endif	//	!defined (NTV2_BUILDING_DRIVER)
+
+			NTV2_BEGIN_PRIVATE
+				ULWord	mWidth;		///< @brief The horizontal dimension, in pixels.
+				ULWord	mHeight;	///< @brief The vertical dimension, in lines.
+			NTV2_END_PRIVATE
+		NTV2_STRUCT_END(NTV2FrameDimensions)
+
+
 		#if !defined (NTV2_BUILDING_DRIVER)
 		/**
 			@brief		Describes a segmented data transfer (copy or move) from a source memory location to a destination location,

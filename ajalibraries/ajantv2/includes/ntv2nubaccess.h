@@ -189,6 +189,7 @@ class AJAExport NTV2RPCClientAPI
 		///@{
 		virtual std::string		HostName (void) const	{return ConnectParam(kConnectParamHost);}	///< @return	My host name
 		virtual std::string		Name (void) const		{return "";}	///< @return	The "user-friendly" name of the remote/fake host
+		virtual std::string		Description (void) const;	///< @return	A description of the remote/fake host
 		virtual uint32_t		ProtocolVersion (void) const	{return NTV2_RPC_PROTOCOL_VERSION;}	///< @return	The protocol version of the remote host
 		virtual std::ostream &	Print (std::ostream & oss) const;
 		///@}

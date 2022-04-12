@@ -247,44 +247,13 @@ uint64_t CNTV2Card::GetSerialNumber (void)
 
 string CNTV2Card::SerialNum64ToString (const uint64_t inSerialNumber)	//	Class method
 {
-	const ULWord	serialNumHigh	(inSerialNumber >> 32);
-	const ULWord	serialNumLow	(inSerialNumber & 0x00000000FFFFFFFF);
-	char			serialNum [9];
-
-	serialNum[0] = char((serialNumLow  & 0x000000FF)	  );
-	serialNum[1] = char((serialNumLow  & 0x0000FF00) >>	 8);
-	serialNum[2] = char((serialNumLow  & 0x00FF0000) >> 16);
-	serialNum[3] = char((serialNumLow  & 0xFF000000) >> 24);
-	serialNum[4] = char((serialNumHigh & 0x000000FF)	  );
-	serialNum[5] = char((serialNumHigh & 0x0000FF00) >>	 8);
-	serialNum[6] = char((serialNumHigh & 0x00FF0000) >> 16);
-	serialNum[7] = char((serialNumHigh & 0xFF000000) >> 24);
-	serialNum[8] = '\0';
-
-	for (unsigned ndx(0);  ndx < 8;	 ndx++)
-	{
-		if (serialNum[ndx] == 0)
-		{
-			if (ndx == 0)
-				return "";		//	No characters: no serial number
-			break;	//	End of string -- stop scanning
-		}
-
-		//	Allow only 0-9, A-Z, a-z, blank, and dash only.
-		if ( ! ( ( (serialNum[ndx] >= '0') && (serialNum[ndx] <= '9') ) ||
-				 ( (serialNum[ndx] >= 'A') && (serialNum[ndx] <= 'Z') ) ||
-				 ( (serialNum[ndx] >= 'a') && (serialNum[ndx] <= 'z') ) ||
-				   (serialNum[ndx] == ' ') || (serialNum[ndx] == '-') ) )
-			return "";		//	Invalid character -- assume no Serial Number programmed...
-	}
-	return serialNum;
-
+	return ::SerialNum64ToString(inSerialNumber);
 }	//	SerialNum64ToString
 
 
 bool CNTV2Card::GetSerialNumberString (string & outSerialNumberString)
 {
-	outSerialNumberString = SerialNum64ToString(GetSerialNumber());
+	outSerialNumberString = ::SerialNum64ToString(GetSerialNumber());
 	if (outSerialNumberString.empty())
 	{
 		outSerialNumberString = "INVALID?";

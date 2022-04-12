@@ -815,6 +815,11 @@ ostream & NTV2RPCClientAPI::Print (ostream & oss) const
 	return oss;
 }
 
+string NTV2RPCClientAPI::Description (void) const
+{
+	return "";
+}
+
 bool NTV2RPCClientAPI::NTV2Connect (void)
 {
 	if (IsConnected())

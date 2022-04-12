@@ -9146,6 +9146,41 @@ bool StringToSerialNum64 (const string & inSerNumStr, uint64_t & outSerNum)
 	return true;
 }
 
+string SerialNum64ToString (const uint64_t & inSerNum)
+{
+	const ULWord	serialNumHigh	(inSerNum >> 32);
+	const ULWord	serialNumLow	(inSerNum & 0x00000000FFFFFFFF);
+	char			serialNum [9];
+
+	serialNum[0] = char((serialNumLow  & 0x000000FF)	  );
+	serialNum[1] = char((serialNumLow  & 0x0000FF00) >>	 8);
+	serialNum[2] = char((serialNumLow  & 0x00FF0000) >> 16);
+	serialNum[3] = char((serialNumLow  & 0xFF000000) >> 24);
+	serialNum[4] = char((serialNumHigh & 0x000000FF)	  );
+	serialNum[5] = char((serialNumHigh & 0x0000FF00) >>	 8);
+	serialNum[6] = char((serialNumHigh & 0x00FF0000) >> 16);
+	serialNum[7] = char((serialNumHigh & 0xFF000000) >> 24);
+	serialNum[8] = '\0';
+
+	for (unsigned ndx(0);  ndx < 8;	 ndx++)
+	{
+		if (serialNum[ndx] == 0)
+		{
+			if (ndx == 0)
+				return "";		//	No characters: no serial number
+			break;	//	End of string -- stop scanning
+		}
+
+		//	Allow only 0-9, A-Z, a-z, blank, and dash only.
+		if ( ! ( ( (serialNum[ndx] >= '0') && (serialNum[ndx] <= '9') ) ||
+				 ( (serialNum[ndx] >= 'A') && (serialNum[ndx] <= 'Z') ) ||
+				 ( (serialNum[ndx] >= 'a') && (serialNum[ndx] <= 'z') ) ||
+				   (serialNum[ndx] == ' ') || (serialNum[ndx] == '-') ) )
+			return "";		//	Invalid character -- assume no Serial Number programmed...
+	}
+	return serialNum;
+}
+
 #if defined (AJAMac)
 	#include <fstream>
 	#include "ajabase/common/common.h"
