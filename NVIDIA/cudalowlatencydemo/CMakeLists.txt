@@ -93,31 +93,26 @@ set(TARGET_SOURCES
 	${DEMO_APPS_HEADERS}
 	${DEMO_APPS_SOURCES})
 
-	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_library(FOUNDATION_FRAMEWORK Foundation)
     set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(TARGET_LINK_LIBS X11 OpenGL::GL OpenGL::GLU GLEW::GLEW cuda dl pthread rt)
-	# cuda_include_directories(${TARGET_INCLUDE_DIRS})
-	# cuda_compile(CUDA_OBJ kernel.cu)
 	add_executable(cudalowlatencydemo ${TARGET_SOURCES} kernel.cu)
 	add_dependencies(cudalowlatencydemo ${CUDA_OBJ} ajantv2)
 	target_compile_definitions(cudalowlatencydemo PRIVATE ${TARGET_COMPILE_DEFS})
 	target_include_directories(cudalowlatencydemo PRIVATE ${TARGET_INCLUDE_DIRS})
 	target_link_libraries(cudalowlatencydemo PRIVATE ajantv2 ${TARGET_LINK_LIBS})
-	# add_custom_command(
-	# 	TARGET cudalowlatencydemo
-	# 	PRE_BUILD
-	# 	COMMAND ${CUDA_HOST_COMPILER} -c -I${AJA_APPS_ROOT}/crossplatform/demoapps/NVIDIA/common -I${AJA_APPS_ROOT}/crossplatform/demoapps/NVIDIA/commonCUDA -I${AJA_APPS_ROOT}/crossplatform/demoapps -I${AJA_LIBRARIES_ROOT} -I${AJA_LIB_NTV2_ROOT}/includes -I${CUDA_INCLUDE_DIRS} -I${OPENGL_INCLUDE_DIRS} -I${GLEW_INCLUDE_DIRS} -I${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA kernel.cu
-	# 	DEPENDS kernel.cu
-	# 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-	# 	VERBATIM)
 endif()
 
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${CUDALOWLATENCYDEMO_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/cudalowlatencydemo)
 	install(FILES ${CUDALOWLATENCYDEMO_BUILD_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/cudalowlatencydemo)
 	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/commonCUDA)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/cudalowlatencydemo)
 endif()
 
+if (AJA_CODE_SIGN)
+    aja_code_sign(cudalowlatencydemo)
+endif()
