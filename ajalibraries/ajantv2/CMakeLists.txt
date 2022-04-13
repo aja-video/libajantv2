@@ -543,6 +543,7 @@ if (AJA_INSTALL_HEADERS)
     install(FILES includes/ntv2version.h DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/includes)
 endif()
 if (AJA_INSTALL_SOURCES)
+    install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2)
     list(APPEND AJANTV2_SOURCES src/ntv2devicefeatures.hpp)
     list(APPEND AJANTV2_WIN_SOURCES src/win/dllmain.cpp)
     install(FILES ${AJABASE_COMMON_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/common)
@@ -571,12 +572,14 @@ if (AJA_INSTALL_SOURCES)
     install(FILES ${AJA_CMAKE_DIR}/../build/sdkversion.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
     install(FILES ${AJA_CMAKE_DIR}/../build/targets.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
 endif()
+
 install(TARGETS ${BUILD_TARGETS}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
 if (AJA_CODE_SIGN)
     aja_code_sign(ajantv2-dyn)
 endif()
