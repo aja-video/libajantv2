@@ -40,6 +40,11 @@ using namespace std;
 #define	NBCNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_RPCClient, AJAFUNC << ": " << __x__)
 #define	NBCINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_RPCClient, AJAFUNC << ": " << __x__)
 #define	NBCDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_RPCClient, AJAFUNC << ": " << __x__)
+#define	NBSFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_RPCServer, AJAFUNC << ": " << __x__)
+#define	NBSWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_RPCServer, AJAFUNC << ": " << __x__)
+#define	NBSNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_RPCServer, AJAFUNC << ": " << __x__)
+#define	NBSINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_RPCServer, AJAFUNC << ": " << __x__)
+#define	NBSDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_RPCServer, AJAFUNC << ": " << __x__)
 
 
 string NTV2Dictionary::valueForKey (const string & inKey) const
@@ -48,6 +53,42 @@ string NTV2Dictionary::valueForKey (const string & inKey) const
 	if (it == mDict.end())
 		return "";
 	return it->second;
+}
+
+uint16_t NTV2Dictionary::u16ValueForKey (const string & inKey, const uint16_t inDefault) const
+{
+	string str(valueForKey(inKey));
+	if (str.empty())
+		return inDefault;
+	if (str.find("0x") == 0  ||  str.find("0X") == 0)
+	{
+		str.erase(0,2);
+		if (str.empty())
+			return inDefault;
+		return aja::stoul(str, AJA_NULL, 16);
+	}
+	if (str.find("x") == 0  ||  str.find("X") == 0)
+	{
+		str.erase(0,1);
+		if (str.empty())
+			return inDefault;
+		return aja::stoul(str, AJA_NULL, 16);
+	}
+	if (str.find("o") == 0  ||  str.find("O") == 0)
+	{
+		str.erase(0,1);
+		if (str.empty())
+			return inDefault;
+		return aja::stoul(str, AJA_NULL, 8);
+	}
+	if (str.find("b") == 0  ||  str.find("B") == 0)
+	{
+		str.erase(0,1);
+		if (str.empty())
+			return inDefault;
+		return aja::stoul(str, AJA_NULL, 2);
+	}
+	return aja::stoul(str, AJA_NULL, 10);
 }
 
 ostream & NTV2Dictionary::Print (ostream & oss, const bool inCompact) const
@@ -275,10 +316,11 @@ void NTV2DeviceSpecParser::Parse (void)
 		}
 	} while (false);
 	#if defined(_DEBUG)
+		ostringstream oss;
 		if (Successful())
-			{cout << "Success: '" << DeviceSpec() << "'  --  "; Print(cout); cout << endl;}
+			{oss << "Success: '" << DeviceSpec() << "'  --  "; Print(oss); AJA_sDEBUG(AJA_DebugUnit_Application, oss.str());}
 		else
-			{cerr << "Failed: "; PrintErrors(cerr); cerr << endl;}
+			{oss << "Failed: "; PrintErrors(oss); AJA_sERROR(AJA_DebugUnit_Application, oss.str());}
 	#endif	//	defined(_DEBUG)
 }	//	Parse
 
@@ -778,6 +820,7 @@ bool NTV2DeviceSpecParser::IsLegalSerialNumChar (const char inChar)
 NTV2RPCClientAPI::NTV2RPCClientAPI (const NTV2ConnectParams & inParams)
 	:	mConnectParams	(inParams)
 {
+	AJADebug::Open();
 }
 
 NTV2RPCClientAPI::~NTV2RPCClientAPI ()
@@ -924,7 +967,7 @@ NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inP
 	AJASystemInfo sysInfo (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path);
 	if (AJA_FAILURE(sysInfo.GetValue(AJA_SystemInfoTag_Path_Firmware, pluginPath)))
 		{NBCFAIL("AJA_SystemInfoTag_Path_Firmware failed");  return AJA_NULL;}	//	Can't get firmware folder
-	NBCDBG("AJA firmware path is '" << pluginPath << "', host='" << pluginName << "'");
+	NBCDBG("AJA firmware path is '" << pluginPath << "', seeking '" << pluginName << ".dylib'");
 
 #if defined(AJAMac)
 	//	On MacOS, our plugins are dynamically-loading libraries (dylibs)
@@ -941,7 +984,7 @@ NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inP
 		NBCFAIL("Unable to open dylib '" << pluginPath << "': " << errStr);
 		return AJA_NULL;
 	}	//	dlopen failed
-	NBCINFO("Dylib '" << pluginPath << "' opened");
+	NBCDBG("Dylib '" << pluginPath << "' opened");
 
 	//	Get pointer to its CreateNTV2SoftwareDevice function...
 	uint64_t * pFunc = reinterpret_cast<uint64_t*>(::dlsym(pHandle, kFuncNameCreateClient.c_str()));
@@ -952,7 +995,7 @@ NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inP
 		::dlclose(pHandle);
 		return AJA_NULL;
 	}
-	NBCINFO("Calling '" << kFuncNameCreateClient << "' in '" << pluginPath << "'");
+	NBCDBG("Calling '" << kFuncNameCreateClient << "' in '" << pluginPath << "'");
 
 	//	Call its Create function to instantiate the NTV2RPCClientAPI object...
 	fpCreateClient pCreateFunc = reinterpret_cast<fpCreateClient>(pFunc);
@@ -965,7 +1008,7 @@ NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inP
 		return AJA_NULL;
 	}
 	//	It's now someone else's responsibility to call ::dlclose
-	AJA_sINFO(AJA_DebugUnit_RPCClient, AJAFUNC << ": Success: '" << kFuncNameCreateClient << "' returned NTV2RPCClientAPI instance " << xHEX0N(uint64_t(pRPCObject),16));
+	NBCINFO("'" << kFuncNameCreateClient << "' in '" << pluginPath << "' created instance " << xHEX0N(uint64_t(pRPCObject),16));
 	return pRPCObject;	//	It's caller's responsibility to delete pRPCObject
 #elif defined(MSWindows)
 #elif defined(AJALinux)
@@ -976,27 +1019,27 @@ NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inP
 }	//	CreateClient
 
 
-NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const NTV2ConnectParams & inParams)	//	CLASS METHOD
+NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const NTV2ConfigParams & inParams)	//	CLASS METHOD
 {
 	//	Scheme dictates which plugin to try loading...
-	if (inParams.hasKey(kConnectParamScheme))
-		{NBCFAIL("Missing scheme");  return AJA_NULL;}	//	No scheme
+	if (!inParams.hasKey(kConnectParamScheme))
+		{NBSFAIL("Missing scheme");  return AJA_NULL;}	//	No scheme
 	string scheme(inParams.valueForKey(kConnectParamScheme));
 	if (scheme.find("ntv2"))	//	scheme must start with "ntv2"
-		{NBCFAIL("Scheme '" << inParams.valueForKey(kConnectParamScheme) << "' results in empty plugin name");  return AJA_NULL;}	//	No "host"
+		{NBSFAIL("Scheme '" << inParams.valueForKey(kConnectParamScheme) << "' results in empty plugin name");  return AJA_NULL;}	//	No "host"
 	scheme.erase(0,4);	//	Remainder of scheme yields DLL/dylib/so name...
 
 	//	Look for plugins in the "AJA" folder (usually parent folder of our "firmware" folder)...
 	string pluginName(scheme), pluginPath, errStr;
 	AJASystemInfo sysInfo (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path);
 	if (AJA_FAILURE(sysInfo.GetValue(AJA_SystemInfoTag_Path_Firmware, pluginPath)))
-		{NBCFAIL("AJA_SystemInfoTag_Path_Firmware failed");  return AJA_NULL;}	//	Can't get firmware folder
-	NBCDBG("AJA firmware path is '" << pluginPath << "', host='" << pluginName << "'");
+		{NBSFAIL("AJA_SystemInfoTag_Path_Firmware failed");  return AJA_NULL;}	//	Can't get firmware folder
+	NBSDBG("AJA firmware path is '" << pluginPath << "', seeking '" << pluginName << ".dylib'");
 
 #if defined(AJAMac)
 	//	On MacOS, our plugins are dynamically-loading libraries (dylibs)
 	if (pluginPath.find("Firmware/") == string::npos)
-		{NBCFAIL("'" << pluginPath << "' doesn't end with 'Firmware/'");  return AJA_NULL;}
+		{NBSFAIL("'" << pluginPath << "' doesn't end with 'Firmware/'");  return AJA_NULL;}
 	pluginPath.erase(pluginPath.find("Firmware/"), 9);	//	Lop off trailing "Firmware/"
 	pluginPath += pluginName + ".dylib";				//	Append pluginName.dylib
 
@@ -1005,21 +1048,21 @@ NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const NTV2ConnectParams & inP
 	if (!pHandle)
 	{	const char * pErrorStr(::dlerror());
 		errStr =  pErrorStr ? pErrorStr : "";
-		NBCFAIL("Unable to open dylib '" << pluginPath << "': " << errStr);
+		NBSFAIL("Unable to open dylib '" << pluginPath << "': " << errStr);
 		return AJA_NULL;
 	}	//	dlopen failed
-	NBCINFO("Dylib '" << pluginPath << "' opened");
+	NBSDBG("Dylib '" << pluginPath << "' opened");
 
 	//	Get pointer to its CreateNTV2SoftwareDevice function...
 	uint64_t * pFunc = reinterpret_cast<uint64_t*>(::dlsym(pHandle, kFuncNameCreateServer.c_str()));
 	if (!pFunc)
 	{	const char * pErrStr(::dlerror());
 		errStr =  pErrStr ? pErrStr : "";
-		NBCFAIL("'dlsym' failed for '" << kFuncNameCreateServer << "' in '" << pluginPath << "': " << errStr);
+		NBSFAIL("'dlsym' failed for '" << kFuncNameCreateServer << "' in '" << pluginPath << "': " << errStr);
 		::dlclose(pHandle);
 		return AJA_NULL;
 	}
-	NBCINFO("Calling '" << kFuncNameCreateServer << "' in '" << pluginPath << "'");
+	NBSDBG("Calling '" << kFuncNameCreateServer << "' in '" << pluginPath << "'");
 
 	//	Call its Create function to instantiate the NTV2RPCServerAPI object...
 	fpCreateServer pCreateFunc = reinterpret_cast<fpCreateServer>(pFunc);
@@ -1027,12 +1070,12 @@ NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const NTV2ConnectParams & inP
 	NTV2RPCServerAPI * pRPCObject = (*pCreateFunc) (pHandle, inParams, AJA_NTV2_SDK_VERSION);
 	if (!pRPCObject)
 	{
-		NBCFAIL("'" << kFuncNameCreateServer << "' failed to return NTV2RPCServerAPI instance using: " << inParams);
+		NBSFAIL("'" << kFuncNameCreateServer << "' failed to return NTV2RPCServerAPI instance using: " << inParams);
 		::dlclose(pHandle);
 		return AJA_NULL;
 	}
 	//	It's now someone else's responsibility to call ::dlclose
-	AJA_sINFO(AJA_DebugUnit_RPCServer, AJAFUNC << ": Success: '" << kFuncNameCreateServer << "' returned NTV2RPCServerAPI instance " << xHEX0N(uint64_t(pRPCObject),16));
+	NBSINFO("'" << kFuncNameCreateServer << "' in '" << pluginPath << "' created instance " << xHEX0N(uint64_t(pRPCObject),16));
 	return pRPCObject;	//	It's caller's responsibility to delete pRPCObject
 #elif defined(MSWindows)
 #elif defined(AJALinux)
@@ -1042,10 +1085,20 @@ NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const NTV2ConnectParams & inP
 	return AJA_NULL;
 }	//	CreateServer
 
+NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const string & inURL)	//	CLASS METHOD
+{
+	NTV2DeviceSpecParser parser(inURL);
+	if (parser.HasErrors())
+		return AJA_NULL;
+	return CreateServer(parser.Results());
+}
+
 NTV2RPCServerAPI::NTV2RPCServerAPI (const NTV2ConnectParams & inParams)
 	:	mConfigParams	(inParams)
 {
 	NTV2_POINTER spare(&mSpare, sizeof(mSpare));  spare.Fill(0ULL);
+	AJADebug::Open();
+	mThread.Attach(ServerThreadStatic, this);
 }
 
 NTV2RPCServerAPI::~NTV2RPCServerAPI()
@@ -1055,19 +1108,21 @@ NTV2RPCServerAPI::~NTV2RPCServerAPI()
 		AJATime::Sleep(500);
 }
 
-void NTV2RPCServerAPI::Run (void)
-{
-	AJA_sNOTICE(AJA_DebugUnit_RPCServer, AJAFUNC << ": Started");
+void NTV2RPCServerAPI::RunServer (void)
+{	//	This function normally should never be called;
+	//	It's usually overridden by a subclass
+	NBSDBG("Started");
 	while (!mSpare[0])
 		AJATime::Sleep(500);
-	AJA_sNOTICE(AJA_DebugUnit_RPCServer, AJAFUNC << ": Terminated");
+	NBSDBG("Terminated");
 }	//	ServerFunction
 
 bool NTV2RPCServerAPI::Start (void)
 {
 	if (IsRunning())
 		return false;
-	AJA_sINFO(AJA_DebugUnit_RPCServer, AJAFUNC << ": Starting...");
+	NBSDBG("Starting...");
+	mThread.Start();
 	return true;
 }
 
@@ -1075,7 +1130,7 @@ bool NTV2RPCServerAPI::Stop (void)
 {
 	if (!IsRunning())
 		return false;
-	AJA_sINFO(AJA_DebugUnit_RPCServer, AJAFUNC << ": Stopping...");
+	NBSDBG("Stopping...");
 	mSpare[0] = 1;
 	return true;
 }
@@ -1085,7 +1140,7 @@ void NTV2RPCServerAPI::ServerThreadStatic (AJAThread * pThread, void * pContext)
 
 	NTV2RPCServerAPI * pSvr (reinterpret_cast<NTV2RPCServerAPI*>(pContext));
 	if (pSvr)
-		pSvr->Run();
+		pSvr->RunServer();
 }
 
 ostream & NTV2RPCServerAPI::Print (ostream & oss) const
@@ -1097,27 +1152,69 @@ ostream & NTV2RPCServerAPI::Print (ostream & oss) const
 bool NTV2RPCServerAPI::SetConfigParams (const NTV2ConnectParams & inNewParams, const bool inAugment)
 {
 	if (IsRunning())
-		{AJA_sERROR(AJA_DebugUnit_RPCServer, AJAFUNC << "Cannot change config params while running");  return false;}
+		{NBSFAIL("Cannot change config params while running");  return false;}
 	size_t oldCount(mConfigParams.size()), updated(0), added(0);
 	if (inAugment)
 	{
 		updated = mConfigParams.UpdateFrom(inNewParams);
 		added = mConfigParams.AddFrom(inNewParams);
-        AJA_sDEBUG(AJA_DebugUnit_RPCServer, AJAFUNC << DEC(updated) << " config param(s) updated, " << DEC(added) << " added: " << mConfigParams);
+        NBSDBG(DEC(updated) << " config param(s) updated, " << DEC(added) << " added: " << mConfigParams);
 	}
 	else
 	{
 		mConfigParams = inNewParams;
-		AJA_sDEBUG(AJA_DebugUnit_RPCServer, AJAFUNC << ": " << DEC(oldCount) << " config param(s) removed, replaced with " << inNewParams);
+		NBSDBG(DEC(oldCount) << " config param(s) removed, replaced with " << inNewParams);
 	}
 	if (mConfigParams.empty())
-		AJA_sWARNING(AJA_DebugUnit_RPCServer, AJAFUNC << "No config params");
+		NBSWARN("No config params");
 	return true;
 }
 
-#if defined(NTV2_NUB_CLIENT_SUPPORT)
 
-#if 0	//	NTV2NubRPCAPI
-#endif	//0	//	NTV2NubRPCAPI
+///////////////////////////////	Device Registry Implementation
 
-#endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
+NTV2RPCServerAPI::DeviceSerialNumIDMap NTV2RPCServerAPI::sSharedDevices;
+AJALock NTV2RPCServerAPI::sSharedDevLock;
+
+bool NTV2RPCServerAPI::RegisterLocalDevice (const NTV2DeviceID inID, const uint64_t inSerial)
+{
+	AJAAutoLock tmpLock(&sSharedDevLock);
+	DevSerNumIDMapIter it(sSharedDevices.find(inSerial));
+	if (it != sSharedDevices.end())
+		return it->second == inID;
+
+	sSharedDevices[inSerial] = inID;
+	return true;
+}
+
+bool NTV2RPCServerAPI::UnregisterLocalDevice (const NTV2DeviceID inID, const uint64_t inSerial)
+{
+	AJAAutoLock tmpLock(&sSharedDevLock);
+	DevSerNumIDMapIter it(sSharedDevices.find(inSerial));
+	if (it == sSharedDevices.end())
+		return false;
+	if (it->second != inID)
+		return false;
+	sSharedDevices.erase(it);
+	return true;
+}
+
+bool NTV2RPCServerAPI::IsLocalDeviceRegistered (const NTV2DeviceID inID, const uint64_t inSerial)
+{
+	AJAAutoLock tmpLock(&sSharedDevLock);
+	DevSerNumIDMapConstIter it(sSharedDevices.find(inSerial));
+	return it != sSharedDevices.end()  &&  it->second == inID;
+}
+
+bool NTV2RPCServerAPI::IsLocalDeviceRegistered (const uint64_t inSerial)
+{
+	AJAAutoLock tmpLock(&sSharedDevLock);
+	return sSharedDevices.find(inSerial) != sSharedDevices.end();
+}
+
+bool NTV2RPCServerAPI::ClearLocalDeviceRegistry (void)
+{
+	AJAAutoLock tmpLock(&sSharedDevLock);
+	sSharedDevices.clear();
+	return true;
+}

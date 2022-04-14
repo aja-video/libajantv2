@@ -283,14 +283,17 @@ bool CNTV2DriverInterface::CloseLocalPhysical (void)
 		}
 		DIDBG("Opening " << specParser.InfoString() << "...");
 		//	Remote or software device:
-		_pRPCAPI = NTV2RPCAPI::CreateClient(specParser.Results());
+		_pRPCAPI = NTV2RPCClientAPI::CreateClient(specParser.Results());
 		if (!_pRPCAPI)
 			return false;	//	Failed to instantiate plugin client
+		//	A plugin's constructor might call its NTV2Connect method right away...
+		if (IsRemote()  &&  !_pRPCAPI->IsConnected())	//	... but in case it doesn't...
+			_pRPCAPI->NTV2Connect();					//	... establish the connection
 		if (IsRemote())
-			_boardOpened = ReadRegister(kRegBoardID, _boardID);
+			_boardOpened = ReadRegister(kRegBoardID, _boardID);	//	Try reading its kRegBoardID
 		if (!IsRemote() || !IsOpen())
 			DIFAIL("Failed to open '" << inURLSpec << "'");
-		return IsRemote() && IsOpen();
+		return IsRemote() && IsOpen();	//	Fail if not remote nor open
 	}	//	OpenRemote
 
 

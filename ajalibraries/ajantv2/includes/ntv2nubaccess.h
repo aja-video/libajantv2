@@ -57,6 +57,7 @@ class AJAExport NTV2Dictionary
 		inline bool			empty (void) const	{return mDict.empty();}	///< @return	True if I'm empty
 		inline bool			hasKey (const std::string & inKey) const	{return mDict.find(inKey) != mDict.end();}	///< @return	True if I'm storing a value for the given key
 		std::string			valueForKey (const std::string & inKey) const;	///< @return	The corresponding value for the given key, or empty string if no such key
+		uint16_t			u16ValueForKey (const std::string & inKey, const uint16_t inDefault = 0) const;	///< @return	The corresponding uint16_t value for the given key, or inDefault if no such key
 		NTV2StringSet		keys (void) const;	///< @return	My keys
 		size_t				largestKeySize (void) const;	///< @return	The length of my largest key, in bytes
 		size_t				largestValueSize (void) const;	///< @return	The length of my largest value, in bytes
@@ -271,7 +272,34 @@ inline std::ostream & operator << (std::ostream & oss, const NTV2RPCClientAPI & 
 class AJAExport NTV2RPCServerAPI
 {
 	public:
+		/**
+			@brief		Factory method that instantiates a new NTV2RPCServerAPI instance using a plugin based on the
+						specified config parameters.
+			@param[in]	inParams	Specifies the server configuration.
+									The "Scheme" parameter (required) determines the plugin to load.
+			@return		If successful, a non-zero pointer to the new NTV2RPCServerAPI instance;  otherwise nullptr (zero).
+		**/
 		static NTV2RPCServerAPI *	CreateServer (const NTV2ConfigParams & inParams);
+
+		/**
+			@brief		Factory method that instantiates a new NTV2RPCServerAPI instance using a plugin based on the
+						specified URL.
+			@param[in]	inURL	Specifies the server configuration.
+								The URL scheme (required) determines the plugin to load.
+			@return		If successful, a non-zero pointer to the new NTV2RPCServerAPI instance;  otherwise nullptr (zero).
+		**/
+		static NTV2RPCServerAPI *	CreateServer (const std::string & inURL);
+
+		/**
+			@name	Local Device Registry
+		**/
+		///@{
+		static bool	RegisterLocalDevice (const NTV2DeviceID inID, const uint64_t inSerial);
+		static bool	UnregisterLocalDevice (const NTV2DeviceID inID, const uint64_t inSerial);
+		static bool	IsLocalDeviceRegistered (const NTV2DeviceID inID, const uint64_t inSerial);
+		static bool	IsLocalDeviceRegistered (const uint64_t inSerial);
+		static bool	ClearLocalDeviceRegistry (void);
+		///@}
 
 	public:
 		/**
@@ -303,7 +331,7 @@ class AJAExport NTV2RPCServerAPI
 
 	protected:
 		static void			ServerThreadStatic (AJAThread * pThread, void * pContext);
-		virtual void		Run (void);	///< @brief	Principal server thread function, subclsses should override
+		virtual void		RunServer (void);	///< @brief	Principal server thread function, subclsses should override
 
 							NTV2RPCServerAPI (const NTV2ConnectParams & inParams);	///< @brief	My constructor.
 		virtual				~NTV2RPCServerAPI();	///< @brief	My destructor, automatically calls NTV2Disconnect.
@@ -313,6 +341,15 @@ class AJAExport NTV2RPCServerAPI
 		mutable AJAThread	mThread;			///< @brief	Principal server thread
 		mutable AJALock		mLock;				///< @brief	Guard/lock
 		uint32_t			mSpare[1024];		///< @brief	Reserved
+
+	protected:
+		typedef std::map<uint64_t, NTV2DeviceID>		DeviceSerialNumIDMap;
+		typedef DeviceSerialNumIDMap::const_iterator	DevSerNumIDMapConstIter;
+		typedef DeviceSerialNumIDMap::iterator			DevSerNumIDMapIter;
+
+		//	Device Registry Class Vars
+		static DeviceSerialNumIDMap	sSharedDevices;	///< @brief	Registry of shared/served devices
+		static AJALock				sSharedDevLock;	///< @brief	Registry guard/lock
 };	//	NTV2RPCServerAPI
 
 inline std::ostream & operator << (std::ostream & oss, const NTV2RPCServerAPI & inObj)	{return inObj.Print(oss);}
@@ -336,12 +373,12 @@ extern "C"
 	/**
 		@brief	Instantiates a new server instance for talking to clients.
 				-	pDLLHandle:	A pointer to the DLL/dylib/so handle.
-				-	inParams: A const reference to the NTV2ConnectParams that specify how to configure the server.
+				-	inParams: A const reference to the NTV2ConfigParams that specify how to configure the server.
 				-	inHostSDKVersion:	Specifies the NTV2 SDK version the caller was compiled with.
 		@return	A pointer to the new server instance if successful, or nullptr (zero) upon failure.
 		@note	Do not implement this function if a server implementation is not required.
 	**/
-	typedef NTV2RPCServerAPI* (*fpCreateServer) (void * /*pInDLLHandle*/, const NTV2ConnectParams & /*inParams*/, const uint32_t /*inHostSDKVersion*/);
+	typedef NTV2RPCServerAPI* (*fpCreateServer) (void * /*pInDLLHandle*/, const NTV2ConfigParams & /*inParams*/, const uint32_t /*inHostSDKVersion*/);
 
 	#if !defined(NTV2_DEPRECATE_16_3)	//	Don't use these functions going forward
 	typedef NTV2RPCAPI* (*fpCreateNTV2SoftwareDevice) (void * /*pInDLLHandle*/, const std::string & /*inQueryStr*/, const uint32_t /*inHostSDKVersion*/);
