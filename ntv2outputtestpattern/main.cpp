@@ -55,15 +55,10 @@ int main (int argc, const char ** argv)
 	optionsContext = ::poptFreeContext(optionsContext);
 
 	//	Device
-	const string	deviceSpec	(pDeviceSpec ? pDeviceSpec : "0");
-	const string	legalDevices(CNTV2DemoCommon::GetDeviceStrings(NTV2_DEVICEKIND_ALL));
-	if (deviceSpec == "?" || deviceSpec == "list")
-		{cout << legalDevices << endl;  return 0;}
-	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
-		{cout << "## ERROR:  No such device '" << deviceSpec << "'" << endl << legalDevices;  return 1;}
+	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "0");
 
 	//	Channel
-	const NTV2Channel	channel	(::GetNTV2ChannelForIndex(channelNumber - 1));
+	const NTV2Channel channel (::GetNTV2ChannelForIndex(channelNumber - 1));
 	if (!NTV2_IS_VALID_CHANNEL(channel))
 		{cerr << "## ERROR:  Invalid channel number " << channelNumber << " -- expected 1 thru 8" << endl;  return 2;}
 

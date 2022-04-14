@@ -673,10 +673,8 @@ void NTV2Player::StartProducerThread (void)
 }	//	StartProducerThread
 
 
-void NTV2Player::ProducerThreadStatic (AJAThread * pThread, void * pContext)		//	static
-{
-	(void) pThread;
-
+void NTV2Player::ProducerThreadStatic (AJAThread * pThread, void * pContext)	//	static
+{	(void) pThread;
 	NTV2Player * pApp (reinterpret_cast<NTV2Player*>(pContext));
 	if (pApp)
 		pApp->ProduceFrames();
@@ -689,12 +687,12 @@ void NTV2Player::ProduceFrames (void)
 	ULWord	freqNdx(0), testPatNdx(0), badTally(0);
 	double	timeOfLastSwitch	(0.0);
 
-	const AJATimeBase			timeBase	(CNTV2DemoCommon::GetAJAFrameRate(::GetNTV2FrameRateFromVideoFormat(mConfig.fVideoFormat)));
-	const NTV2TestPatternNames	tpNames		(NTV2TestPatternGen::getTestPatternNames());
-	const bool					isInterlace		(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mConfig.fVideoFormat));
-	const bool					isPAL			(NTV2_IS_PAL_VIDEO_FORMAT(mConfig.fVideoFormat));
-	const NTV2FrameRate			ntv2FrameRate	(::GetNTV2FrameRateFromVideoFormat(mConfig.fVideoFormat));
-	const TimecodeFormat		tcFormat		(CNTV2DemoCommon::NTV2FrameRate2TimecodeFormat(ntv2FrameRate));
+	const AJATimeBase		timeBase		(CNTV2DemoCommon::GetAJAFrameRate(::GetNTV2FrameRateFromVideoFormat(mConfig.fVideoFormat)));
+	const NTV2StringList	tpNames			(NTV2TestPatternGen::getTestPatternNames());
+	const bool				isInterlace		(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mConfig.fVideoFormat));
+	const bool				isPAL			(NTV2_IS_PAL_VIDEO_FORMAT(mConfig.fVideoFormat));
+	const NTV2FrameRate		ntv2FrameRate	(::GetNTV2FrameRateFromVideoFormat(mConfig.fVideoFormat));
+	const TimecodeFormat	tcFormat		(CNTV2DemoCommon::NTV2FrameRate2TimecodeFormat(ntv2FrameRate));
 
 	PLNOTE("Thread started");
 	while (!mGlobalQuit)
