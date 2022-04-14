@@ -157,7 +157,7 @@ set(AJANTV2_UTILITY_PUBLIC_SOURCES
     utilityfiles/public/ntv2hevcfirmwareinstallerthread.cpp)
 # ajantv2 hevc
 if (NOT AJA_BUILD_OPENSOURCE)
-    message("added ajantv2 HEVC/M31 codec")
+    aja_message(STATUS "added ajantv2 HEVC/M31 codec")
     set(AJANTV2_HEVC_HEADERS
         codecs/hevc/m31/ntv2m31.h
         codecs/hevc/m31/ntv2m31cparam.h
@@ -503,11 +503,13 @@ if (NOT AJA_BUILD_OPENSOURCE)
 endif()
 
 # libajantv2
+set(BUILD_TARGETS ajantv2)
 add_library(ajantv2 STATIC ${AJANTV2_TARGET_SOURCES})
 target_include_directories(ajantv2 PUBLIC ${AJANTV2_TARGET_INCLUDE_DIRS})
 target_link_libraries(ajantv2 PUBLIC ${TARGET_LINK_LIBS})
 target_compile_definitions(ajantv2 PUBLIC ${TARGET_COMPILE_DEFS_STATIC})
 if (AJA_BUILD_SHARED)
+    list(APPEND BUILD_TARGETS ajantv2-dyn)
     add_library(ajantv2-dyn SHARED ${AJANTV2_TARGET_SOURCES})
     target_compile_definitions(ajantv2-dyn PUBLIC ${TARGET_COMPILE_DEFS_DYNAMIC})
     target_include_directories(ajantv2-dyn PUBLIC ${AJANTV2_TARGET_INCLUDE_DIRS})
@@ -541,6 +543,7 @@ if (AJA_INSTALL_HEADERS)
     install(FILES includes/ntv2version.h DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/includes)
 endif()
 if (AJA_INSTALL_SOURCES)
+    install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2)
     list(APPEND AJANTV2_SOURCES src/ntv2devicefeatures.hpp)
     list(APPEND AJANTV2_WIN_SOURCES src/win/dllmain.cpp)
     install(FILES ${AJABASE_COMMON_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/common)
@@ -569,9 +572,14 @@ if (AJA_INSTALL_SOURCES)
     install(FILES ${AJA_CMAKE_DIR}/../build/sdkversion.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
     install(FILES ${AJA_CMAKE_DIR}/../build/targets.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
 endif()
-install(TARGETS ajantv2
+
+install(TARGETS ${BUILD_TARGETS}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+if (AJA_CODE_SIGN)
+    aja_code_sign(ajantv2-dyn)
+endif()
