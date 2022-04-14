@@ -1,6 +1,5 @@
 project(ntv2testOGL)
 
-
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
@@ -35,9 +34,21 @@ add_dependencies(ntv2testOGL ajantv2)
 target_include_directories(ntv2testOGL PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2testOGL PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
+if (AJA_INSTALL_SOURCES)
+	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
+	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
+	install(FILES ${NTV2CUDACAPTURE_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2testOGL)
+	install(FILES ${NTV2CUDACAPTURE_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2testOGL)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2testOGL)
+endif()
+
 install(TARGETS ntv2testOGL
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+if (AJA_CODE_SIGN)
+    aja_code_sign(ntv2testOGL)
+endif()

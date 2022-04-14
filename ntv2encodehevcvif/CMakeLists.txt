@@ -1,6 +1,5 @@
 project(ntv2encodehevcvif)
 
-
 set(HEVC_M31_CODEC_ROOT ${AJA_LIB_NTV2_ROOT}/codecs/hevc/m31)
 
 set(HEVC_M31_HEADERS
@@ -72,9 +71,21 @@ add_dependencies(ntv2encodehevcvif ajantv2)
 target_include_directories(ntv2encodehevcvif PUBLIC ${NTV2ENCODEHEVCVIF_TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2encodehevcvif PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 
+if (AJA_INSTALL_SOURCES)
+	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
+	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
+	install(FILES ${NTV2CUDACAPTURE_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2encodehevcvif)
+	install(FILES ${NTV2CUDACAPTURE_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2encodehevcvif)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2encodehevcvif)
+endif()
+
 install(TARGETS ntv2encodehevcvif
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+if (AJA_CODE_SIGN)
+    aja_code_sign(ntv2encodehevcvif)
+endif()

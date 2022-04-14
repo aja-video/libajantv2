@@ -1,6 +1,5 @@
 project(ntv2ccplayer)
 
-
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
@@ -39,9 +38,21 @@ add_dependencies(ntv2ccplayer ajacc ajantv2)
 target_include_directories(ntv2ccplayer PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ntv2ccplayer PUBLIC ajacc ajantv2 ${TARGET_LINK_LIBS})
 
+if (AJA_INSTALL_SOURCES)
+	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
+	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
+	install(FILES ${NTV2CCPLAYER_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2ccplayer)
+	install(FILES ${NTV2CCPLAYER_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2ccplayer)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2ccplayer)
+endif()
+
 install(TARGETS ntv2ccplayer
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+if (AJA_CODE_SIGN)
+    aja_code_sign(ntv2ccplayer)
+endif()

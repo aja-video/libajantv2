@@ -1,6 +1,5 @@
 project(ntv2switchbitfile)
 
-
 set(NTV2SWITCHBITFILE_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(TARGET_INCLUDE_DIRS
@@ -40,6 +39,7 @@ if (AJA_INSTALL_SOURCES)
 	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
 	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
 	install(FILES ${NTV2SWITCHBITFILE_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2switchbitfile)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2switchbitfile)
 endif()
 
 install(TARGETS ntv2switchbitfile
@@ -48,3 +48,7 @@ install(TARGETS ntv2switchbitfile
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+if (AJA_CODE_SIGN)
+    aja_code_sign(ntv2switchbitfile)
+endif()
