@@ -1,6 +1,4 @@
 # NOTE: Ensure that the CUDA Toolkit v11.4 or later is installed and in your PATH.
-include(AJAHelpers)
-
 if (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	aja_message(STATUS "skipping cudalowlatencydemo (requires Linux)")
 	return()

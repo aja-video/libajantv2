@@ -1,5 +1,3 @@
-include(AJAHelpers)
-
 if (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	aja_message(STATUS "skipping dvplowlatencydemo (requires Linux)")
 	return()
