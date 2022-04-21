@@ -1481,8 +1481,10 @@ bool AJADebugStat::SetStatKeyName (const int inKey, const string & inName)
 
 vector<int> AJADebugStat::NamedStatKeys (void)
 {
-	AJAAutoLock lock(&gStatKeyToStrLock);
 	vector<int> result;
+	AJAAutoLock lock(&gStatKeyToStrLock);
+	if (!gStatKeyToStrReady)
+		InitStatKeyNames();
 	for (StatKeyNameMapConstIter it(gStatKeyToStr.begin());  it != gStatKeyToStr.end();  ++it)
 		result.push_back(it->first);
 	return result;
