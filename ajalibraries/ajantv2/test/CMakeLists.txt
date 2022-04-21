@@ -1,7 +1,5 @@
 project(ut_ajantv2)
 
-include(AJAHelpers)
-
 set(TARGET_INCLUDE_DIRS
 	${APP_ROOT}/..
 	${AJA_LIBRARIES_ROOT}
