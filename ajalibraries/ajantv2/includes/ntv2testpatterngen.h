@@ -167,8 +167,7 @@ class AJAExport NTV2TestPatternGen
 		/**
 			@deprecated	Use the DrawTestPattern method that requires an NTV2_POINTER to specify the buffer to fill.
 		**/
-		virtual inline NTV2_DEPRECATED_f(bool DrawTestPattern (const NTV2TestPatternSelect inPattern, const NTV2FormatDescriptor & inDesc, NTV2TestPatBuffer & outBuffer))
-										{return DrawTestPattern(inPattern, inDesc.GetRasterWidth(), inDesc.GetVisibleRasterHeight(), inDesc.GetPixelFormat(), outBuffer);}
+		virtual NTV2_DEPRECATED_f(bool DrawTestPattern (const NTV2TestPatternSelect inPattern, const NTV2FormatDescriptor & inDesc, NTV2TestPatBuffer & outBuffer));
 		/**
 			@deprecated	Use the DrawTestPattern method that requires an NTV2_POINTER to specify the buffer to fill.
 		**/

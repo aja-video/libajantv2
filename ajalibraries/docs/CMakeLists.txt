@@ -1,14 +1,12 @@
 # https://stackoverflow.com/questions/34878276/build-doxygen-from-cmake-script
 find_package(Doxygen COMPONENTS dot)
 if (NOT DOXYGEN_FOUND)
-    message("skipping docs (Doxygen not found!)")
+    aja_message(STATUS "skipping docs (Doxygen not found!)")
     return()
 endif()
 
-set(NTV2_DOXYGEN_SDK_VERSION "0.0.0")
-if (AJA_BUILDING_CMAKE)
-    set(NTV2_DOXYGEN_SDK_VERSION "${AJA_NTV2_VER_STR}")
-endif()
+set(NTV2_DOXYGEN_SDK_VERSION "${AJA_NTV2_VER_STR}")
+
 # Attempt to locate qhelpgenerator for generation of Qt-related docs
 set(_qthelpgenerator_executable "qhelpgenerator")
 if (AJA_QT_DIR)
@@ -30,5 +28,3 @@ add_custom_target(
     WORKING_DIRECTORY ${AJA_NTV2_ROOT}
     COMMENT "Generating NTV2 SDK documentation with Doxygen"
     VERBATIM)
-
-message("added docs")

@@ -163,6 +163,19 @@ AJATime::GetSystemFrequency()
 #endif
 }
 
+double
+AJATime::GetSystemSeconds()
+{
+	double ticks = double(GetSystemCounter());
+	double ticksPerSecond = double(GetSystemFrequency());
+	double sec = 0.0;
+	if (ticksPerSecond)
+	{
+		sec = ticks / ticksPerSecond;
+	}
+	return sec;
+}
+
 uint64_t 
 AJATime::GetSystemMilliseconds()
 {				

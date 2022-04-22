@@ -9,39 +9,7 @@
 #define NTV2ENUMS_H
 
 #include "ajatypes.h"	//	Defines NTV2_DEPRECATE (or not)
-
-//	Automated builds remove this and the following several lines		//	__AUTO_BUILD_REMOVE__
-#if !defined (AJA_PATCHED)												//	__AUTO_BUILD_REMOVE__
-	#define AJA_DECIMAL_PLACEHOLDER			0							//	__AUTO_BUILD_REMOVE__
-	#define AJA_DATETIME_PLACEHOLDER		"00/00/0000 +8:00:00:00"	//	__AUTO_BUILD_REMOVE__
-	#define AJA_STRING_PLACEHOLDER			"d"							//	__AUTO_BUILD_REMOVE__
-#endif																	//	__AUTO_BUILD_REMOVE__
-
-
-/**
-	SDK VERSION
-	The next several macro values are patched when the SDK is built by AJA.
-**/
-#if defined (AJA_BUILDING_CMAKE)
-// NOTE: Enabling the CMake variable "AJA_BUILDING_CMAKE" will generate an
-// include file "includes/version.h" in the CMake build directory for ajantv2.
-// The contents of this file are populated by CMake, using the ajantv2/includes/version.h.in
-// file as a template. CMake will enable the preprocessor define "BUILDING_CMAKE" so that
-// version.h is included here at build time.
-#include "includes/version.h"
-#else
-#define AJA_NTV2_SDK_VERSION_MAJOR		AJA_DECIMAL_PLACEHOLDER			///< @brief The SDK major version number, an unsigned decimal integer.
-#define AJA_NTV2_SDK_VERSION_MINOR		AJA_DECIMAL_PLACEHOLDER			///< @brief The SDK minor version number, an unsigned decimal integer.
-#define AJA_NTV2_SDK_VERSION_POINT		AJA_DECIMAL_PLACEHOLDER			///< @brief The SDK "point" release version, an unsigned decimal integer.
-#define AJA_NTV2_SDK_BUILD_NUMBER		AJA_DECIMAL_PLACEHOLDER			///< @brief The SDK build number, an unsigned decimal integer.
-#define AJA_NTV2_SDK_BUILD_DATETIME		AJA_DATETIME_PLACEHOLDER		///< @brief The date and time the SDK was built, in this format: "MM/DD/YYYY +8:hh:mm:ss"
-#define AJA_NTV2_SDK_BUILD_TYPE			AJA_STRING_PLACEHOLDER			///< @brief The SDK build type, where "a"=alpha, "b"=beta, "d"=development, ""=release.
-#endif
-
-#define AJA_NTV2_SDK_VERSION	((AJA_NTV2_SDK_VERSION_MAJOR << 24) | (AJA_NTV2_SDK_VERSION_MINOR << 16) | (AJA_NTV2_SDK_VERSION_POINT << 8) | (AJA_NTV2_SDK_BUILD_NUMBER))
-#define AJA_NTV2_SDK_VERSION_AT_LEAST(__a__,__b__)		(AJA_NTV2_SDK_VERSION >= (((__a__) << 24) | ((__b__) << 16)))
-#define AJA_NTV2_SDK_VERSION_BEFORE(__a__,__b__)		(AJA_NTV2_SDK_VERSION < (((__a__) << 24) | ((__b__) << 16)))
-
+#include "ntv2version.h" // Defines NTV2 SDK version number in major.minor.point.build format
 
 #if !defined(NTV2_DEPRECATE_14_3)
 typedef enum
@@ -156,6 +124,14 @@ typedef enum
 
 #define DEVICE_ID_CORVID44_12G	DEVICE_ID_CORVID44_8KMK
 #define DEVICE_ID_KONA5_4X12G	DEVICE_ID_KONA5_8K
+
+#define DEVICE_IS_KONA5(__d__)										\
+	(	(__d__) == DEVICE_ID_KONA5			||						\
+		(__d__) == DEVICE_ID_KONA5_8KMK		||						\
+		(__d__) == DEVICE_ID_KONA5_8K		||						\
+		(__d__) == DEVICE_ID_KONA5_2X4K		||						\
+		(__d__) == DEVICE_ID_KONA5_3DLUT	||						\
+		(__d__) == DEVICE_ID_KONA5_8K_MV_TX)
 
 #define DEVICE_IS_KONA5_OE(__d__)								\
 	(	(__d__) == DEVICE_ID_KONA5_OE1	||						\
@@ -1414,7 +1390,7 @@ typedef enum
 	#endif	//	!defined (NTV2_DEPRECATE)
 	NTV2_OUTPUTDESTINATION_INVALID,
 	NTV2_NUM_OUTPUTDESTINATIONS = NTV2_OUTPUTDESTINATION_INVALID	//	Always last!
-} NTV2OutputDestination;
+} NTV2OutputDestination, NTV2OutputDest;
 
 #if !defined (NTV2_DEPRECATE)
 	#define NTV2_OUTPUT_DEST_IS_HDMI(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_HDMI || (_dest_) == NTV2_OUTPUTDESTINATION_HDMI_14)

@@ -2181,6 +2181,8 @@ public:
 										to specify which ::NTV2EmbeddedAudioInput to use. This parameter is ignored if \c inAudioSource is not ::NTV2_AUDIO_EMBEDDED.
 		@return		True if successful; otherwise false.
 		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
+		@note		The \ref corvid88 has a firmware limitation where audio systems 5/6/7/8 cannot record or playback embedded audio on SDIs 1/2/3/4,
+					nor can audio systems 1/2/3/4 record or playback embedded audio on SDIs 5/6/7/8.
 		@see		CNTV2Card::GetAudioSystemInputSource, \ref audiocapture
 	**/
 	AJA_VIRTUAL bool		SetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, const NTV2AudioSource inAudioSource, const NTV2EmbeddedAudioInput inEmbeddedInput);
@@ -2207,6 +2209,8 @@ public:
 		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
 		@note		This function will have no effect if the device's current ::NTV2AudioSource is something other than ::NTV2_AUDIO_EMBEDDED.
 					Usually it's best to call CNTV2Card::SetAudioSystemInputSource instead of this function.
+		@note		The \ref corvid88 has a firmware limitation where audio systems 5/6/7/8 cannot record or playback embedded audio on SDIs 1/2/3/4,
+					nor can audio systems 1/2/3/4 record or playback embedded audio on SDIs 5/6/7/8.
 		@see		CNTV2Card::GetEmbeddedAudioInput, CNTV2Card::SetAudioSystemInputSource, \ref audiocapture
 	**/
 	AJA_VIRTUAL bool		SetEmbeddedAudioInput (const NTV2EmbeddedAudioInput inEmbeddedSource, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
@@ -2231,6 +2235,8 @@ public:
 		@return		True if successful; otherwise false.
 		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
 		@note		Use the ::NTV2DeviceGetNumVideoOutputs function to determine the number of SDI output jacks the device has.
+		@note		The \ref corvid88 has a firmware limitation where audio systems 5/6/7/8 cannot playback embedded audio on SDIs 1/2/3/4,
+					nor can audio systems 1/2/3/4 playback embedded audio on SDIs 5/6/7/8.
 		@see		CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		SetSDIOutputAudioSystem (const NTV2Channel inSDIOutputConnector, const NTV2AudioSystem inAudioSystem);
@@ -2244,6 +2250,8 @@ public:
 		@return		True if successful; otherwise false.
 		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
 		@note		Use the ::NTV2DeviceGetNumVideoOutputs function to determine the number of SDI output jacks the device has.
+		@note		The \ref corvid88 has a firmware limitation where audio systems 5/6/7/8 cannot playback embedded audio on SDIs 1/2/3/4,
+					nor can audio systems 1/2/3/4 playback embedded audio on SDIs 5/6/7/8.
 		@see		CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		SetSDIOutputAudioSystem (const NTV2ChannelSet & inSDIOutputs, const NTV2AudioSystem inAudioSystem, const bool inDS2 = false);	//	New in SDK 16.2
@@ -2267,6 +2275,8 @@ public:
 		@param[in]	inAudioSystem			Specifies the Audio System that is to be used by the SDI output's embedder (e.g., ::NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
 		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
+		@note		The \ref corvid88 has a firmware limitation where audio systems 5/6/7/8 cannot playback embedded audio on SDIs 1/2/3/4,
+					nor can audio systems 1/2/3/4 playback embedded audio on SDIs 5/6/7/8.
 		@see		CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		SetSDIOutputDS2AudioSystem (const NTV2Channel inSDIOutputConnector, const NTV2AudioSystem inAudioSystem);
@@ -2278,6 +2288,8 @@ public:
 		@param[out] outAudioSystem			Receives the Audio System that's currently being used (e.g., ::NTV2_AUDIOSYSTEM_1).
 		@return		True if successful; otherwise false.
 		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
+		@note		The \ref corvid88 has a firmware limitation where audio systems 5/6/7/8 cannot playback embedded audio on SDIs 1/2/3/4,
+					nor can audio systems 1/2/3/4 playback embedded audio on SDIs 5/6/7/8.
 		@see		CNTV2Card::SetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		GetSDIOutputDS2AudioSystem (const NTV2Channel inSDIOutputConnector, NTV2AudioSystem & outAudioSystem);

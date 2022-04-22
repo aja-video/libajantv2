@@ -1,8 +1,5 @@
 project(ajantv2)
 
-include(GNUInstallDirs)
-message ("added ajantv2")
-
 if(CMAKE_CXX_STANDARD LESS 11)
     remove_definitions(
         -DAJA_USE_CPLUSPLUS11
@@ -134,12 +131,57 @@ set(AJANTV2_SOURCES
     src/ntv2verticalfilter.cpp
     src/ntv2vpid.cpp
     src/ntv2vpidfromspec.cpp)
-
-if (AJA_BUILDING_CMAKE)
-    add_definitions(-DAJA_BUILDING_CMAKE)
-    configure_file(includes/version.h.in includes/version.h @ONLY)
-    install(FILES ${CMAKE_BINARY_DIR}/ajalibraries/ajantv2/includes/version.h DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/includes)
+# ntv2driverinterface/publicinterface
+set(AJANTV2_WIN_HEADERS
+    src/win/ntv2windriverinterface.h
+    src/win/ntv2winpublicinterface.h)
+set(AJANTV2_WIN_SOURCES
+    # src/win/dllmain.cpp
+    src/win/ntv2windriverinterface.cpp)
+set(AJANTV2_MAC_HEADERS
+    src/mac/ntv2macdriverinterface.h
+    src/mac/ntv2macpublicinterface.h)
+set(AJANTV2_MAC_SOURCES
+    src/mac/ntv2macdriverinterface.cpp)
+set(AJANTV2_LIN_HEADERS
+    src/lin/ntv2linuxdriverinterface.h
+    src/lin/ntv2linuxpublicinterface.h)
+set(AJANTV2_LIN_SOURCES
+    src/lin/ntv2linuxdriverinterface.cpp)
+# ajantv2 utilityfiles
+set(AJANTV2_UTILITY_PUBLIC_HEADERS
+    utilityfiles/public/ntv2firmwareinstallerthread.h
+    utilityfiles/public/ntv2hevcfirmwareinstallerthread.h)
+set(AJANTV2_UTILITY_PUBLIC_SOURCES
+    utilityfiles/public/ntv2firmwareinstallerthread.cpp
+    utilityfiles/public/ntv2hevcfirmwareinstallerthread.cpp)
+# ajantv2 hevc
+if (NOT AJA_BUILD_OPENSOURCE)
+    aja_message(STATUS "added ajantv2 HEVC/M31 codec")
+    set(AJANTV2_HEVC_HEADERS
+        codecs/hevc/m31/ntv2m31.h
+        codecs/hevc/m31/ntv2m31cparam.h
+        codecs/hevc/m31/ntv2m31ehparam.h
+        codecs/hevc/m31/ntv2m31vaparam.h
+        codecs/hevc/m31/ntv2m31vinparam.h
+        codecs/hevc/m31/ntv2m31viparam.h)
+    set(AJANTV2_HEVC_SOURCES
+        codecs/hevc/m31/ntv2m31.cpp
+        codecs/hevc/m31/ntv2m31cparam.cpp
+        codecs/hevc/m31/ntv2m31ehparam.cpp
+        codecs/hevc/m31/ntv2m31vaparam.cpp
+        codecs/hevc/m31/ntv2m31vinparam.cpp
+        codecs/hevc/m31/ntv2m31viparam.cpp)
+    # `cmake --install` deployments
+    if (AJA_INSTALL_HEADERS)
+        install(FILES ${AJANTV2_HEVC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/codecs/hevc/m31)
+    endif()
+    if (AJA_INSTALL_SOURCES)
+        install(FILES ${AJANTV2_HEVC_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/codecs/hevc/m31)
+    endif()
 endif()
+
+configure_file(includes/ntv2version.h.in includes/ntv2version.h @ONLY)
 
 # ajaanc
 set(AJAANC_HEADERS
@@ -174,31 +216,6 @@ set(AJAANC_SOURCES
     ${AJA_LIB_ANC_ROOT}/src/ancillarydata_timecode_atc.cpp
     ${AJA_LIB_ANC_ROOT}/src/ancillarydata_timecode_vitc.cpp
     ${AJA_LIB_ANC_ROOT}/src/ancillarylist.cpp)
-
-if (NOT AJA_BUILD_OPENSOURCE)
-    message("added ajantv2 HEVC/M31 codec")
-    set(AJANTV2_HEVC_HEADERS
-        codecs/hevc/m31/ntv2m31.h
-        codecs/hevc/m31/ntv2m31cparam.h
-        codecs/hevc/m31/ntv2m31ehparam.h
-        codecs/hevc/m31/ntv2m31vaparam.h
-        codecs/hevc/m31/ntv2m31vinparam.h
-        codecs/hevc/m31/ntv2m31viparam.h)
-    set(AJANTV2_HEVC_SOURCES
-        codecs/hevc/m31/ntv2m31.cpp
-        codecs/hevc/m31/ntv2m31cparam.cpp
-        codecs/hevc/m31/ntv2m31ehparam.cpp
-        codecs/hevc/m31/ntv2m31vaparam.cpp
-        codecs/hevc/m31/ntv2m31vinparam.cpp
-        codecs/hevc/m31/ntv2m31viparam.cpp)
-    # `cmake --install` deployments
-    if (AJA_INSTALL_HEADERS)
-        install(FILES ${AJANTV2_HEVC_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/codecs/hevc/m31)
-    endif()
-    if (AJA_INSTALL_SOURCES)
-        install(FILES ${AJANTV2_HEVC_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/codecs/hevc/m31)
-    endif()
-endif()
 
 # ajabase
 set(AJABASE_COMMON_HEADERS
@@ -236,7 +253,7 @@ set(AJABASE_PERSISTENCE_HEADERS
     ${AJA_LIB_BASE_ROOT}/persistence/sqlite3.h)
 set(AJABASE_PNP_HEADERS
     ${AJA_LIB_BASE_ROOT}/pnp/pnp.h)
-set(AJABASE_SYSTEM_HEADERS
+set(AJABASE_SYS_HEADERS
     ${AJA_LIB_BASE_ROOT}/system/atomic.h
     ${AJA_LIB_BASE_ROOT}/system/debug.h
     ${AJA_LIB_BASE_ROOT}/system/debugshare.h
@@ -278,7 +295,7 @@ set(AJABASE_PERSISTENCE_SOURCES
     ${AJA_LIB_BASE_ROOT}/persistence/sqlite3.c)
 set(AJABASE_PNP_SOURCES
     ${AJA_LIB_BASE_ROOT}/pnp/pnp.cpp)
-set(AJABASE_SYSTEM_SOURCES
+set(AJABASE_SYS_SOURCES
     ${AJA_LIB_BASE_ROOT}/system/atomic.cpp
     ${AJA_LIB_BASE_ROOT}/system/debug.cpp
     ${AJA_LIB_BASE_ROOT}/system/diskstatus.cpp
@@ -292,33 +309,89 @@ set(AJABASE_SYSTEM_SOURCES
     ${AJA_LIB_BASE_ROOT}/system/system.cpp
     ${AJA_LIB_BASE_ROOT}/system/systemtime.cpp
     ${AJA_LIB_BASE_ROOT}/system/thread.cpp)
-
+# ajabase windows
+set(AJABASE_PNP_WIN_HEADERS
+    ${AJA_LIB_BASE_ROOT}/pnp/windows/pnpimpl.h)
+set(AJABASE_PNP_WIN_SOURCES
+    ${AJA_LIB_BASE_ROOT}/pnp/windows/pnpimpl.cpp)
+set(AJABASE_SYS_WIN_HEADERS
+    ${AJA_LIB_BASE_ROOT}/system/windows/eventimpl.h
+    ${AJA_LIB_BASE_ROOT}/system/windows/infoimpl.h
+    ${AJA_LIB_BASE_ROOT}/system/windows/lockimpl.h
+    ${AJA_LIB_BASE_ROOT}/system/windows/processimpl.h
+    ${AJA_LIB_BASE_ROOT}/system/windows/threadimpl.h)
+set(AJABASE_SYS_WIN_SOURCES
+    ${AJA_LIB_BASE_ROOT}/system/windows/eventimpl.cpp
+    ${AJA_LIB_BASE_ROOT}/system/windows/infoimpl.cpp
+    ${AJA_LIB_BASE_ROOT}/system/windows/lockimpl.cpp
+    ${AJA_LIB_BASE_ROOT}/system/windows/processimpl.cpp
+    ${AJA_LIB_BASE_ROOT}/system/windows/threadimpl.cpp)
+# ajabase linux
+set(AJABASE_PNP_LIN_HEADERS
+    ${AJA_LIB_BASE_ROOT}/pnp/linux/pnpimpl.h)
+set(AJABASE_PNP_LIN_SOURCES
+    ${AJA_LIB_BASE_ROOT}/pnp/linux/pnpimpl.cpp)
+set(AJABASE_SYS_LIN_HEADERS
+    ${AJA_LIB_BASE_ROOT}/system/linux/eventimpl.h
+    ${AJA_LIB_BASE_ROOT}/system/linux/infoimpl.h
+    ${AJA_LIB_BASE_ROOT}/system/linux/lockimpl.h
+    ${AJA_LIB_BASE_ROOT}/system/linux/processimpl.h
+    ${AJA_LIB_BASE_ROOT}/system/linux/threadimpl.h)
+set(AJABASE_SYS_LIN_SOURCES
+    ${AJA_LIB_BASE_ROOT}/system/linux/eventimpl.cpp
+    ${AJA_LIB_BASE_ROOT}/system/linux/infoimpl.cpp
+    ${AJA_LIB_BASE_ROOT}/system/linux/lockimpl.cpp
+    ${AJA_LIB_BASE_ROOT}/system/linux/processimpl.cpp
+    ${AJA_LIB_BASE_ROOT}/system/linux/threadimpl.cpp)
+# ajabase mac
+set(AJABASE_PNP_MAC_HEADERS
+    ${AJA_LIB_BASE_ROOT}/pnp/mac/devicenotifier.h
+    ${AJA_LIB_BASE_ROOT}/pnp/mac/masterport.h
+    ${AJA_LIB_BASE_ROOT}/pnp/mac/pnpimpl.h)
+set(AJABASE_PNP_MAC_SOURCES
+    ${AJA_LIB_BASE_ROOT}/pnp/mac/devicenotifier.cpp
+    ${AJA_LIB_BASE_ROOT}/pnp/mac/masterport.cpp
+    ${AJA_LIB_BASE_ROOT}/pnp/mac/pnpimpl.cpp)
+set(AJABASE_SYS_MAC_HEADERS
+    ${AJA_LIB_BASE_ROOT}/system/mac/eventimpl.h
+    ${AJA_LIB_BASE_ROOT}/system/mac/infoimpl.h
+    ${AJA_LIB_BASE_ROOT}/system/mac/lockimpl.h
+    ${AJA_LIB_BASE_ROOT}/system/mac/processimpl.h
+    ${AJA_LIB_BASE_ROOT}/system/mac/pthreadsextra.h
+    ${AJA_LIB_BASE_ROOT}/system/mac/threadimpl.h)
+set(AJABASE_SYS_MAC_SOURCES
+    ${AJA_LIB_BASE_ROOT}/system/mac/eventimpl.cpp
+    ${AJA_LIB_BASE_ROOT}/system/mac/infoimpl.mm
+    ${AJA_LIB_BASE_ROOT}/system/mac/lockimpl.cpp
+    ${AJA_LIB_BASE_ROOT}/system/mac/processimpl.cpp
+    ${AJA_LIB_BASE_ROOT}/system/mac/pthreadsextra.cpp
+    ${AJA_LIB_BASE_ROOT}/system/mac/threadimpl.cpp)
 set(AJABASE_HEADERS
     ${AJABASE_COMMON_HEADERS}
     ${AJABASE_NETWORK_HEADERS}
     ${AJABASE_PERSISTENCE_HEADERS}
     ${AJABASE_PNP_HEADERS}
-    ${AJABASE_SYSTEM_HEADERS})
+    ${AJABASE_SYS_HEADERS})
 set(AJABASE_SOURCES
     ${AJABASE_COMMON_SOURCES}
     ${AJABASE_NETWORK_SOURCES}
     ${AJABASE_PERSISTENCE_SOURCES}
     ${AJABASE_PNP_SOURCES}
-    ${AJABASE_SYSTEM_SOURCES})
+    ${AJABASE_SYS_SOURCES})
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    add_definitions(
+    remove_definitions(-DUNICODE -D_UNICODE)
+
+    set(TARGET_COMPILE_DEFS
         -D_MBCS
         -DCRT_NONSTDC_DEPRECATE
         -D_WINSOCK_DEPRECATED_NO_WARNINGS
         -DAJA_NO_AUTOIMPORT)
-
-    remove_definitions(-DUNICODE -D_UNICODE)
-
-    set(EXTRA_STATIC_DEFINES
+    set(TARGET_COMPILE_DEFS_STATIC
+        ${TARGET_COMPILE_DEFS}
         -DAJASTATIC)
-
-    set(EXTRA_DYNAMIC_DEFINES
+    set(TARGET_COMPILE_DEFS_DYNAMIC
+        ${TARGET_COMPILE_DEFS}
         -DAJADLL
         -DAJA_WINDLL
         -DAJADLL_BUILD)
@@ -328,61 +401,29 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         ${AJA_LIB_BASE_ROOT}/pnp/windows
         ${AJA_LIB_BASE_ROOT}/system/windows)
 
-    set(AJANTV2_OS_HEADERS
-        src/win/ntv2windriverinterface.h
-        src/win/ntv2winpublicinterface.h)
-    set(AJANTV2_OS_SOURCES
-        # src/win/dllmain.cpp
-        src/win/ntv2windriverinterface.cpp)
-
-    set(AJABASE_OS_SYSTEM_HEADERS
-        ${AJA_LIB_BASE_ROOT}/system/windows/eventimpl.h
-        ${AJA_LIB_BASE_ROOT}/system/windows/infoimpl.h
-        ${AJA_LIB_BASE_ROOT}/system/windows/lockimpl.h
-        ${AJA_LIB_BASE_ROOT}/system/windows/processimpl.h
-        ${AJA_LIB_BASE_ROOT}/system/windows/threadimpl.h)
-    set(AJABASE_OS_SYSTEM_SOURCES
-        ${AJA_LIB_BASE_ROOT}/system/windows/eventimpl.cpp
-        ${AJA_LIB_BASE_ROOT}/system/windows/infoimpl.cpp
-        ${AJA_LIB_BASE_ROOT}/system/windows/lockimpl.cpp
-        ${AJA_LIB_BASE_ROOT}/system/windows/processimpl.cpp
-        ${AJA_LIB_BASE_ROOT}/system/windows/threadimpl.cpp)
-
-    set(AJABASE_OS_PNP_HEADERS
-        ${AJA_LIB_BASE_ROOT}/pnp/windows/pnpimpl.h)
-    set(AJABASE_OS_PNP_SOURCES
-        ${AJA_LIB_BASE_ROOT}/pnp/windows/pnpimpl.cpp)
-
-    set(AJABASE_OS_HEADERS
-        ${AJABASE_OS_SYSTEM_HEADERS}
-        ${AJABASE_OS_PNP_HEADERS})
-    set(AJABASE_OS_SOURCES
-        ${AJABASE_OS_SYSTEM_SOURCES}
-        ${AJABASE_OS_PNP_SOURCES})
-
-    # `cmake --install` deployments
-    if (AJA_INSTALL_HEADERS)
-        install(FILES ${AJANTV2_OS_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/src/win)
-        install(FILES ${AJABASE_OS_SYSTEM_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system/windows)
-        install(FILES ${AJABASE_OS_PNP_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/windows)
-    endif()
-    if (AJA_INSTALL_SOURCES)
-        set(AJANTV2_OS_SOURCES
-            ${AJANTV2_OS_SOURCES}
-            src/win/dllmain.cpp)
-        install(FILES ${AJANTV2_OS_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/src/win)
-        install(FILES ${AJABASE_OS_SYSTEM_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system/windows)
-        install(FILES ${AJABASE_OS_PNP_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/windows)
-    endif()
+    set(AJANTV2_HEADERS
+        ${AJANTV2_HEADERS}
+        ${AJANTV2_WIN_HEADERS})
+    set(AJABASE_HEADERS
+        ${AJABASE_HEADERS}
+        ${AJABASE_PNP_WIN_HEADERS}
+        ${AJABASE_SYS_WIN_HEADERS})
+    set(AJANTV2_SOURCES
+        ${AJANTV2_SOURCES}
+        ${AJANTV2_WIN_SOURCES})
+    set(AJABASE_SOURCES
+        ${AJABASE_SOURCES}
+        ${AJABASE_PNP_WIN_SOURCES}
+        ${AJABASE_SYS_WIN_SOURCES})
 
     set(TARGET_LINK_LIBS
         advapi32 comctl32 netapi32
         odbc32 psapi rpcrt4 setupapi shell32
         shlwapi user32 winmm ws2_32 wsock32)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(EXTRA_STATIC_DEFINES
+    set(TARGET_COMPILE_DEFS_STATIC
         -DAJASTATIC)
-    set(EXTRA_DYNAMIC_DEFINES
+    set(TARGET_COMPILE_DEFS_DYNAMIC
         -DAJADLL_BUILD
         -DAJADLL_BUILD)
 
@@ -391,63 +432,28 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${AJA_LIB_BASE_ROOT}/pnp/linux
         ${AJA_LIB_BASE_ROOT}/system/linux)
 
-    set(AJANTV2_OS_HEADERS
-        src/lin/ntv2linuxdriverinterface.h
-        src/lin/ntv2linuxpublicinterface.h)
-    set(AJANTV2_OS_SOURCES
-        src/lin/ntv2linuxdriverinterface.cpp)
-
-    set(AJABASE_OS_SYSTEM_HEADERS
-        ${AJA_LIB_BASE_ROOT}/system/linux/eventimpl.h
-        ${AJA_LIB_BASE_ROOT}/system/linux/infoimpl.h
-        ${AJA_LIB_BASE_ROOT}/system/linux/lockimpl.h
-        ${AJA_LIB_BASE_ROOT}/system/linux/processimpl.h
-        ${AJA_LIB_BASE_ROOT}/system/linux/threadimpl.h)
-    set(AJABASE_OS_SYSTEM_SOURCES
-        ${AJA_LIB_BASE_ROOT}/system/linux/eventimpl.cpp
-        ${AJA_LIB_BASE_ROOT}/system/linux/infoimpl.cpp
-        ${AJA_LIB_BASE_ROOT}/system/linux/lockimpl.cpp
-        ${AJA_LIB_BASE_ROOT}/system/linux/processimpl.cpp
-        ${AJA_LIB_BASE_ROOT}/system/linux/threadimpl.cpp)
-
-    set(AJABASE_OS_PNP_HEADERS
-        ${AJA_LIB_BASE_ROOT}/pnp/linux/pnpimpl.h)
-    set(AJABASE_OS_PNP_SOURCES
-        ${AJA_LIB_BASE_ROOT}/pnp/linux/pnpimpl.cpp)
-
-    set(AJABASE_OS_HEADERS
-        ${AJABASE_OS_SYSTEM_HEADERS}
-        ${AJABASE_OS_PNP_HEADERS})
-    set(AJABASE_OS_SOURCES
-        ${AJABASE_OS_SYSTEM_SOURCES}
-        ${AJABASE_OS_PNP_SOURCES})
-
-    # `cmake --install` deployments
-    if (AJA_INSTALL_HEADERS)
-        install(FILES ${AJANTV2_OS_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/src/lin)
-        install(FILES ${AJABASE_OS_SYSTEM_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system/linux)
-        install(FILES ${AJABASE_OS_PNP_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/linux)
-    endif()
-    if (AJA_INSTALL_SOURCES)
-        install(FILES ${AJANTV2_OS_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/src/lin)
-        install(FILES ${AJABASE_OS_SYSTEM_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system/linux)
-        install(FILES ${AJABASE_OS_PNP_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/linux)
-        install(FILES ${AJA_CMAKE_DIR}/../ajalibraries/ajantv2/build/Makefile DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/build)
-        install(FILES ${AJA_CMAKE_DIR}/../build/common.mk DESTINATION ${AJA_INSTALL_INCLUDEDIR}/build)
-        install(FILES ${AJA_CMAKE_DIR}/../build/configure.mk DESTINATION ${AJA_INSTALL_INCLUDEDIR}/build)
-        install(FILES ${AJA_CMAKE_DIR}/../build/internal.mk DESTINATION ${AJA_INSTALL_INCLUDEDIR}/build)
-        install(FILES ${AJA_CMAKE_DIR}/../build/qt.mk DESTINATION ${AJA_INSTALL_INCLUDEDIR}/build)
-        install(FILES ${AJA_CMAKE_DIR}/../build/sdkversion.mk DESTINATION ${AJA_INSTALL_INCLUDEDIR}/build)
-        install(FILES ${AJA_CMAKE_DIR}/../build/targets.mk DESTINATION ${AJA_INSTALL_INCLUDEDIR}/build)
-    endif()
+    set(AJANTV2_HEADERS
+        ${AJANTV2_HEADERS}
+        ${AJANTV2_LIN_HEADERS})
+    set(AJABASE_HEADERS
+        ${AJABASE_HEADERS}
+        ${AJABASE_PNP_LIN_HEADERS}
+        ${AJABASE_SYS_LIN_HEADERS})
+    set(AJANTV2_SOURCES
+        ${AJANTV2_SOURCES}
+        ${AJANTV2_LIN_SOURCES})
+    set(AJABASE_SOURCES
+        ${AJABASE_SOURCES}
+        ${AJABASE_PNP_LIN_SOURCES}
+        ${AJABASE_SYS_LIN_SOURCES})
 
     set(TARGET_LINK_LIBS
         rt)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set(EXTRA_STATIC_DEFINES
+    set(TARGET_COMPILE_DEFS_STATIC
         -DAJASTATIC)
 
-    set(EXTRA_DYNAMIC_DEFINES
+    set(TARGET_COMPILE_DEFS_DYNAMIC
         -DAJADLL_BUILD
         -DAJADLL_BUILD)
 
@@ -457,54 +463,20 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         ${AJA_LIB_BASE_ROOT}/system/mac
         /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include)
 
-    set(AJANTV2_OS_HEADERS
-        src/mac/ntv2macdriverinterface.h
-        src/mac/ntv2macpublicinterface.h)
-    set(AJANTV2_OS_SOURCES
-        src/mac/ntv2macdriverinterface.cpp)
-
-    set(AJABASE_OS_PNP_HEADERS
-        ${AJA_LIB_BASE_ROOT}/pnp/mac/devicenotifier.h
-        ${AJA_LIB_BASE_ROOT}/pnp/mac/masterport.h
-        ${AJA_LIB_BASE_ROOT}/pnp/mac/pnpimpl.h)
-    set(AJABASE_OS_PNP_SOURCES
-        ${AJA_LIB_BASE_ROOT}/pnp/mac/devicenotifier.cpp
-        ${AJA_LIB_BASE_ROOT}/pnp/mac/masterport.cpp
-        ${AJA_LIB_BASE_ROOT}/pnp/mac/pnpimpl.cpp)
-
-    set(AJABASE_OS_SYSTEM_HEADERS
-        ${AJA_LIB_BASE_ROOT}/system/mac/eventimpl.h
-        ${AJA_LIB_BASE_ROOT}/system/mac/infoimpl.h
-        ${AJA_LIB_BASE_ROOT}/system/mac/lockimpl.h
-        ${AJA_LIB_BASE_ROOT}/system/mac/processimpl.h
-        ${AJA_LIB_BASE_ROOT}/system/mac/pthreadsextra.h
-        ${AJA_LIB_BASE_ROOT}/system/mac/threadimpl.h)
-    set(AJABASE_OS_SYSTEM_SOURCES
-        ${AJA_LIB_BASE_ROOT}/system/mac/eventimpl.cpp
-        ${AJA_LIB_BASE_ROOT}/system/mac/infoimpl.mm
-        ${AJA_LIB_BASE_ROOT}/system/mac/lockimpl.cpp
-        ${AJA_LIB_BASE_ROOT}/system/mac/processimpl.cpp
-        ${AJA_LIB_BASE_ROOT}/system/mac/pthreadsextra.cpp
-        ${AJA_LIB_BASE_ROOT}/system/mac/threadimpl.cpp)
-
-    set(AJABASE_OS_HEADERS
-        ${AJABASE_OS_SYSTEM_HEADERS}
-        ${AJABASE_OS_PNP_HEADERS})
-    set(AJABASE_OS_SOURCES
-        ${AJABASE_OS_SYSTEM_SOURCES}
-        ${AJABASE_OS_PNP_SOURCES})
-
-    # `cmake --install` deployments
-    if (AJA_INSTALL_HEADERS)
-        install(FILES ${AJANTV2_OS_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/src/mac)
-        install(FILES ${AJABASE_OS_SYSTEM_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system/mac)
-        install(FILES ${AJABASE_OS_PNP_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/mac)
-    endif()
-    if (AJA_INSTALL_SOURCES)
-        install(FILES ${AJANTV2_OS_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/src/mac)
-        install(FILES ${AJABASE_OS_SYSTEM_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system/mac)
-        install(FILES ${AJABASE_OS_PNP_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/mac)
-    endif()
+    set(AJANTV2_HEADERS
+        ${AJANTV2_HEADERS}
+        ${AJANTV2_MAC_HEADERS})
+    set(AJABASE_HEADERS
+        ${AJABASE_HEADERS}
+        ${AJABASE_PNP_MAC_HEADERS}
+        ${AJABASE_SYS_MAC_HEADERS})
+    set(AJANTV2_SOURCES
+        ${AJANTV2_SOURCES}
+        ${AJANTV2_MAC_SOURCES})
+    set(AJABASE_SOURCES
+        ${AJABASE_SOURCES}
+        ${AJABASE_PNP_MAC_SOURCES}
+        ${AJABASE_SYS_MAC_SOURCES})
 
     find_library(CORE_FOUNDATION_FRAMEWORK CoreFoundation)
     find_library(FOUNDATION_FRAMEWORK Foundation)
@@ -515,20 +487,6 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         ${IOKIT_FRAMEWORK}
         ${FOUNDATION_FRAMEWORK})
 endif()
-
-# coalesce ajabase module headers and sources
-set(AJABASE_HEADERS
-    ${AJABASE_HEADERS}
-    ${AJABASE_OS_HEADERS})
-set(AJABASE_SOURCES
-    ${AJABASE_SOURCES}
-    ${AJABASE_OS_SOURCES})
-set(AJANTV2_HEADERS
-    ${AJANTV2_HEADERS}
-    ${AJANTV2_OS_HEADERS})
-set(AJANTV2_SOURCES
-    ${AJANTV2_SOURCES}
-    ${AJANTV2_OS_SOURCES})
 
 set(AJANTV2_TARGET_SOURCES
     ${AJAANC_SOURCES}
@@ -545,71 +503,89 @@ if (NOT AJA_BUILD_OPENSOURCE)
 endif()
 
 # libajantv2
+set(BUILD_TARGETS ajantv2)
 add_library(ajantv2 STATIC ${AJANTV2_TARGET_SOURCES})
 target_include_directories(ajantv2 PUBLIC ${AJANTV2_TARGET_INCLUDE_DIRS})
 target_link_libraries(ajantv2 PUBLIC ${TARGET_LINK_LIBS})
-target_compile_definitions(ajantv2 PUBLIC ${EXTRA_STATIC_DEFINES})
+target_compile_definitions(ajantv2 PUBLIC ${TARGET_COMPILE_DEFS_STATIC})
+if (AJA_NTV2_SDK_GEN)
+    aja_ntv2_sdk_gen(ajantv2)
+endif()
 if (AJA_BUILD_SHARED)
+    list(APPEND BUILD_TARGETS ajantv2-dyn)
     add_library(ajantv2-dyn SHARED ${AJANTV2_TARGET_SOURCES})
-    target_compile_definitions(ajantv2-dyn PUBLIC ${EXTRA_DYNAMIC_DEFINES})
+    target_compile_definitions(ajantv2-dyn PUBLIC ${TARGET_COMPILE_DEFS_DYNAMIC})
     target_include_directories(ajantv2-dyn PUBLIC ${AJANTV2_TARGET_INCLUDE_DIRS})
     target_link_libraries(ajantv2-dyn PUBLIC ${TARGET_LINK_LIBS} ${EXTRA_DYNAMIC_LIBRARIES})
     set_target_properties(ajantv2-dyn PROPERTIES OUTPUT_NAME "${PROJECT_NAME}_${AJA_NTV2_SDK_VERSION_MAJOR}")
+    if (AJA_NTV2_SDK_GEN)
+        aja_ntv2_sdk_gen(ajantv2-dyn)
+    endif()
 endif()
 
 add_library(ajabase INTERFACE)
 
-set(AJANTV2_UTILITY_PUBLIC_HEADERS
-    utilityfiles/public/ntv2firmwareinstallerthread.h
-    utilityfiles/public/ntv2hevcfirmwareinstallerthread.h)
-set(AJANTV2_UTILITY_PUBLIC_SOURCES
-    utilityfiles/public/ntv2firmwareinstallerthread.cpp
-    utilityfiles/public/ntv2hevcfirmwareinstallerthread.cpp)
-
 # `cmake --install` deployments
 if (AJA_INSTALL_HEADERS)
-    # Driver interface headers will be deployed to ajantv2/src/<platform>.
-    # We remove them from the AJANTV2_HEADERS list before cmake install is run.
-    if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-        list(REMOVE_ITEM AJANTV2_HEADERS src/win/ntv2windriverinterface.h)
-        list(REMOVE_ITEM AJANTV2_HEADERS src/win/ntv2winpublicinterface.h)
-    elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        list(REMOVE_ITEM AJANTV2_HEADERS src/lin/ntv2linuxdriverinterface.h)
-        list(REMOVE_ITEM AJANTV2_HEADERS src/lin/ntv2linuxpublicinterface.h)
-    elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        list(REMOVE_ITEM AJANTV2_HEADERS src/mac/ntv2macdriverinterface.h)
-        list(REMOVE_ITEM AJANTV2_HEADERS src/mac/ntv2macpublicinterface.h)
-    endif()
     list(REMOVE_ITEM AJANTV2_HEADERS src/ntv2devicefeatures.hpp)
-    install(FILES ${AJABASE_COMMON_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/common)
-    install(FILES ${AJABASE_NETWORK_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/network)
-    install(FILES ${AJABASE_PERSISTENCE_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/persistence)
-    install(FILES ${AJABASE_PNP_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp)
-    install(FILES ${AJABASE_SYSTEM_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system)
-    install(FILES ${AJAANC_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajaanc/includes)
-    install(FILES ${AJANTV2_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/includes)
-    install(FILES ${AJANTV2_UTILITY_PUBLIC_HEADERS} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/utilityfiles/public)
+    install(FILES ${AJABASE_COMMON_HEADERS}         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/common)
+    install(FILES ${AJABASE_NETWORK_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/network)
+    install(FILES ${AJABASE_PERSISTENCE_HEADERS}    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/persistence)
+    install(FILES ${AJABASE_PNP_HEADERS}            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp)
+    install(FILES ${AJABASE_PNP_WIN_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/windows)
+    install(FILES ${AJABASE_PNP_MAC_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/mac)
+    install(FILES ${AJABASE_PNP_LIN_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/linux)
+    install(FILES ${AJABASE_SYS_HEADERS}            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system)
+    install(FILES ${AJABASE_SYS_WIN_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system/windows)
+    install(FILES ${AJABASE_SYS_MAC_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system/mac)
+    install(FILES ${AJABASE_SYS_LIN_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system/linux)
+    install(FILES ${AJAANC_HEADERS}                 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajaanc/includes)
+    install(FILES ${AJANTV2_HEADERS}                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/includes)
+    install(FILES ${AJANTV2_WIN_HEADERS}            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/src/win)
+    install(FILES ${AJANTV2_MAC_HEADERS}            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/src/mac)
+    install(FILES ${AJANTV2_LIN_HEADERS}            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/src/lin)
+    install(FILES ${AJANTV2_UTILITY_PUBLIC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/utilityfiles/public)
+    install(FILES includes/ntv2version.h.in         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/includes)
+    install(FILES includes/ntv2version.h            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/includes)
 endif()
 if (AJA_INSTALL_SOURCES)
-    if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-        list(REMOVE_ITEM AJANTV2_SOURCES src/win/ntv2windriverinterface.cpp)
-    elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        list(REMOVE_ITEM AJANTV2_SOURCES src/lin/ntv2linuxdriverinterface.cpp)
-    elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        list(REMOVE_ITEM AJANTV2_SOURCES src/mac/ntv2macdriverinterface.cpp)
-    endif()
     list(APPEND AJANTV2_SOURCES src/ntv2devicefeatures.hpp)
-    install(FILES ${AJABASE_COMMON_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/common)
-    install(FILES ${AJABASE_NETWORK_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/network)
-    install(FILES ${AJABASE_PERSISTENCE_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/persistence)
-    install(FILES ${AJABASE_PNP_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp)
-    install(FILES ${AJABASE_SYSTEM_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system)
-    install(FILES ${AJAANC_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajaanc/src)
-    install(FILES ${AJANTV2_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/src)
-    install(FILES ${AJANTV2_UTILITY_PUBLIC_SOURCES} DESTINATION ${AJA_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/utilityfiles/public)
+    list(APPEND AJANTV2_WIN_SOURCES src/win/dllmain.cpp)
+    install(FILES CMakeLists.txt                    DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2)
+    install(FILES ${AJABASE_COMMON_SOURCES}         DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/common)
+    install(FILES ${AJABASE_NETWORK_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/network)
+    install(FILES ${AJABASE_PERSISTENCE_SOURCES}    DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/persistence)
+    install(FILES ${AJABASE_PNP_SOURCES}            DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/pnp)
+    install(FILES ${AJABASE_PNP_WIN_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/pnp/windows)
+    install(FILES ${AJABASE_PNP_MAC_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/pnp/mac)
+    install(FILES ${AJABASE_PNP_LIN_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/pnp/linux)
+    install(FILES ${AJABASE_SYS_SOURCES}            DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/system)
+    install(FILES ${AJABASE_SYS_WIN_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/system/windows)
+    install(FILES ${AJABASE_SYS_MAC_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/system/mac)
+    install(FILES ${AJABASE_SYS_LIN_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/system/linux)
+    install(FILES ${AJAANC_SOURCES}                 DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajaanc/src)
+    install(FILES ${AJANTV2_SOURCES}                DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/src)
+    install(FILES ${AJANTV2_WIN_SOURCES}            DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/src/win)
+    install(FILES ${AJANTV2_MAC_SOURCES}            DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/src/mac)
+    install(FILES ${AJANTV2_LIN_SOURCES}            DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/src/lin)
+    install(FILES ${AJANTV2_UTILITY_PUBLIC_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/utilityfiles/public)
+    # build stuff
+    install(FILES ${AJA_CMAKE_DIR}/../ajalibraries/ajantv2/build/Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/build)
+    install(FILES ${AJA_CMAKE_DIR}/../build/common.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
+    install(FILES ${AJA_CMAKE_DIR}/../build/configure.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
+    install(FILES ${AJA_CMAKE_DIR}/../build/internal.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
+    install(FILES ${AJA_CMAKE_DIR}/../build/qt.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
+    install(FILES ${AJA_CMAKE_DIR}/../build/sdkversion.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
+    install(FILES ${AJA_CMAKE_DIR}/../build/targets.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
 endif()
-install(TARGETS ajantv2
-    ARCHIVE DESTINATION ${AJA_INSTALL_LIBDIR}
-    LIBRARY DESTINATION ${AJA_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${AJA_INSTALL_BINDIR}
-    FRAMEWORK DESTINATION ${AJA_INSTALL_FRAMEWORKDIR})
+
+install(TARGETS ${BUILD_TARGETS}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+if (AJA_CODE_SIGN)
+    aja_code_sign(ajantv2-dyn)
+endif()
