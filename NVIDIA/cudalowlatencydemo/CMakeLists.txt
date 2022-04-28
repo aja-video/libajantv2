@@ -56,20 +56,13 @@ set(CUDALOWLATENCYDEMO_SOURCES
 	cudaapp.cpp)
 
 set(NVIDIA_COMMONCUDA_SOURCES
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/assertion.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/cudaUtils.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/gpuvio.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2cudaArrayTransfer.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2cudaArrayTransferNV.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2cudaArrayTransferNV.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2errorlist.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2errorlist.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2glTextureTransfer.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2glTextureTransferNV.cpp
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2glTextureTransferNV.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2gpucircularbuffer.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2gpucircularbuffer.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2gpuTextureTransfer.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2gpuTextureTransferNV.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2gpuTextureTransferNV.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2rendertotexture.cpp
@@ -78,13 +71,8 @@ set(NVIDIA_COMMONCUDA_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2texture.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/oglview.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/oglview.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/opengl.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simplecudavio.cpp
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simplecudavio.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simplegpuvio.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simplegpuvio.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simpleoglvio.cpp
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simpleoglvio.h
 )
 
 set(TARGET_SOURCES
