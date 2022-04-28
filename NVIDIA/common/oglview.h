@@ -5,11 +5,9 @@
 
 #if defined( AJAMac ) || defined( AJALinux )
 #include <GL/glew.h>
-//#include <GL/glxew.h>
 #include <GL/glut.h>
 #include <GL/gl.h>
 #include <GL/glx.h>
-//#include <GL/glu.h>
 #else
 #include <Windows.h>
 #include <GL/glew.h>

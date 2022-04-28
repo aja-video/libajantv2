@@ -1,11 +1,13 @@
-# NOTE: Ensure that the CUDA Toolkit v11.4 or later is installed and in your PATH.
+# NOTE: Ensure that the CUDA Toolkit v11.1 or later is installed and in your PATH.
+
 if (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	aja_message(STATUS "skipping cudalowlatencydemo (requires Linux)")
 	return()
 endif()
-find_package(CUDA 11.2)
+
+find_package(CUDA 11.1)
 if (NOT CUDA_FOUND)
-	aja_message(STATUS "skipping cudalowlatencydemo (CUDA not found)")
+	message("skipping cudalowlatencydemo (CUDA not found)")
 	return()
 endif()
 set(OpenGL_GL_PREFERENCE LEGACY)
@@ -110,6 +112,12 @@ if (AJA_INSTALL_SOURCES)
 	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/commonCUDA)
 	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/cudalowlatencydemo)
 endif()
+
+install(TARGETS cudalowlatencydemo
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if (AJA_CODE_SIGN)
     aja_code_sign(cudalowlatencydemo)
