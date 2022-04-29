@@ -142,12 +142,12 @@ def main():
         return result_code
 
     # Grab Mac SDK build numbers...
-    major      = aja.utils.get_defined_macro_value ("work/AJAMacSDK/ajalibraries/ajantv2/includes/ntv2enums.h", "AJA_NTV2_SDK_VERSION_MAJOR")
-    minor      = aja.utils.get_defined_macro_value ("work/AJAMacSDK/ajalibraries/ajantv2/includes/ntv2enums.h", "AJA_NTV2_SDK_VERSION_MINOR")
-    point      = aja.utils.get_defined_macro_value ("work/AJAMacSDK/ajalibraries/ajantv2/includes/ntv2enums.h", "AJA_NTV2_SDK_VERSION_POINT")
-    build_num  = aja.utils.get_defined_macro_value ("work/AJAMacSDK/ajalibraries/ajantv2/includes/ntv2enums.h", "AJA_NTV2_SDK_BUILD_NUMBER")
-    build_when = aja.utils.get_defined_macro_value ("work/AJAMacSDK/ajalibraries/ajantv2/includes/ntv2enums.h", "AJA_NTV2_SDK_BUILD_DATETIME")
-    build_type = aja.utils.get_defined_macro_value ("work/AJAMacSDK/ajalibraries/ajantv2/includes/ntv2enums.h", "AJA_NTV2_SDK_BUILD_TYPE")
+    major      = aja.utils.get_defined_macro_value ("work/AJAMacSDK/ajalibraries/ajantv2/includes/ntv2version.h", "AJA_NTV2_SDK_VERSION_MAJOR")
+    minor      = aja.utils.get_defined_macro_value ("work/AJAMacSDK/ajalibraries/ajantv2/includes/ntv2version.h", "AJA_NTV2_SDK_VERSION_MINOR")
+    point      = aja.utils.get_defined_macro_value ("work/AJAMacSDK/ajalibraries/ajantv2/includes/ntv2version.h", "AJA_NTV2_SDK_VERSION_POINT")
+    build_num  = aja.utils.get_defined_macro_value ("work/AJAMacSDK/ajalibraries/ajantv2/includes/ntv2version.h", "AJA_NTV2_SDK_BUILD_NUMBER")
+    build_when = aja.utils.get_defined_macro_value ("work/AJAMacSDK/ajalibraries/ajantv2/includes/ntv2version.h", "AJA_NTV2_SDK_BUILD_DATETIME")
+    build_type = aja.utils.get_defined_macro_value ("work/AJAMacSDK/ajalibraries/ajantv2/includes/ntv2version.h", "AJA_NTV2_SDK_BUILD_TYPE")
     if major != expected_major  or  minor != expected_minor  or  point != expected_point:
         print ("## ERROR:  SDK version %s.%s.%s doesn't match expected version %s.%s.%s" % (major, minor, point, expected_major, expected_minor, expected_point))
         return 502
@@ -162,23 +162,23 @@ def main():
         print ("## NOTE:  Documenting SDK %s.%s.%s build %s (beta) built on '%s' -- underscore_version='%s'" % (major, minor, point, build_num, build_when, underscore_version))
 
     # Grab Windows SDK build numbers...
-    win_major      = aja.utils.get_defined_macro_value("work/AJAWinSDK/ajalibraries/ajantv2/includes/ntv2enums.h", "AJA_NTV2_SDK_VERSION_MAJOR")
-    win_minor      = aja.utils.get_defined_macro_value("work/AJAWinSDK/ajalibraries/ajantv2/includes/ntv2enums.h", "AJA_NTV2_SDK_VERSION_MINOR")
-    win_point      = aja.utils.get_defined_macro_value("work/AJAWinSDK/ajalibraries/ajantv2/includes/ntv2enums.h", "AJA_NTV2_SDK_VERSION_POINT")
-    win_build_num  = aja.utils.get_defined_macro_value("work/AJAWinSDK/ajalibraries/ajantv2/includes/ntv2enums.h", "AJA_NTV2_SDK_BUILD_NUMBER")
-    win_build_when = aja.utils.get_defined_macro_value("work/AJAWinSDK/ajalibraries/ajantv2/includes/ntv2enums.h", "AJA_NTV2_SDK_BUILD_DATETIME")
-    win_build_type = aja.utils.get_defined_macro_value("work/AJAWinSDK/ajalibraries/ajantv2/includes/ntv2enums.h", "AJA_NTV2_SDK_BUILD_TYPE")
+    win_major      = aja.utils.get_defined_macro_value("work/AJAWinSDK/ajalibraries/ajantv2/includes/ntv2version.h", "AJA_NTV2_SDK_VERSION_MAJOR")
+    win_minor      = aja.utils.get_defined_macro_value("work/AJAWinSDK/ajalibraries/ajantv2/includes/ntv2version.h", "AJA_NTV2_SDK_VERSION_MINOR")
+    win_point      = aja.utils.get_defined_macro_value("work/AJAWinSDK/ajalibraries/ajantv2/includes/ntv2version.h", "AJA_NTV2_SDK_VERSION_POINT")
+    win_build_num  = aja.utils.get_defined_macro_value("work/AJAWinSDK/ajalibraries/ajantv2/includes/ntv2version.h", "AJA_NTV2_SDK_BUILD_NUMBER")
+    win_build_when = aja.utils.get_defined_macro_value("work/AJAWinSDK/ajalibraries/ajantv2/includes/ntv2version.h", "AJA_NTV2_SDK_BUILD_DATETIME")
+    win_build_type = aja.utils.get_defined_macro_value("work/AJAWinSDK/ajalibraries/ajantv2/includes/ntv2version.h", "AJA_NTV2_SDK_BUILD_TYPE")
     if major != win_major  or  minor != win_minor  or  point != win_point:
         print ("## ERROR:  SDK version %s.%s.%s doesn't match Windows version %s.%s.%s" % (major, minor, point, win_major, win_minor, win_point))
         return 502
 
     # Grab Linux SDK build numbers...
-    lin_major      = aja.utils.get_defined_macro_value("work/AJALinSDK/ajalibraries/ajantv2/includes/ntv2enums.h", "AJA_NTV2_SDK_VERSION_MAJOR")
-    lin_minor      = aja.utils.get_defined_macro_value("work/AJALinSDK/ajalibraries/ajantv2/includes/ntv2enums.h", "AJA_NTV2_SDK_VERSION_MINOR")
-    lin_point      = aja.utils.get_defined_macro_value("work/AJALinSDK/ajalibraries/ajantv2/includes/ntv2enums.h", "AJA_NTV2_SDK_VERSION_POINT")
-    lin_build_num  = aja.utils.get_defined_macro_value("work/AJALinSDK/ajalibraries/ajantv2/includes/ntv2enums.h", "AJA_NTV2_SDK_BUILD_NUMBER")
-    lin_build_when = aja.utils.get_defined_macro_value("work/AJALinSDK/ajalibraries/ajantv2/includes/ntv2enums.h", "AJA_NTV2_SDK_BUILD_DATETIME")
-    lin_build_type = aja.utils.get_defined_macro_value("work/AJALinSDK/ajalibraries/ajantv2/includes/ntv2enums.h", "AJA_NTV2_SDK_BUILD_TYPE")
+    lin_major      = aja.utils.get_defined_macro_value("work/AJALinSDK/ajalibraries/ajantv2/includes/ntv2version.h", "AJA_NTV2_SDK_VERSION_MAJOR")
+    lin_minor      = aja.utils.get_defined_macro_value("work/AJALinSDK/ajalibraries/ajantv2/includes/ntv2version.h", "AJA_NTV2_SDK_VERSION_MINOR")
+    lin_point      = aja.utils.get_defined_macro_value("work/AJALinSDK/ajalibraries/ajantv2/includes/ntv2version.h", "AJA_NTV2_SDK_VERSION_POINT")
+    lin_build_num  = aja.utils.get_defined_macro_value("work/AJALinSDK/ajalibraries/ajantv2/includes/ntv2version.h", "AJA_NTV2_SDK_BUILD_NUMBER")
+    lin_build_when = aja.utils.get_defined_macro_value("work/AJALinSDK/ajalibraries/ajantv2/includes/ntv2version.h", "AJA_NTV2_SDK_BUILD_DATETIME")
+    lin_build_type = aja.utils.get_defined_macro_value("work/AJALinSDK/ajalibraries/ajantv2/includes/ntv2version.h", "AJA_NTV2_SDK_BUILD_TYPE")
     if major != lin_major  or  minor != lin_minor  or  point != lin_point:
         print ("## WARNING:  SDK version %s.%s.%s doesn't match Linux version %s.%s.%s" % (major, minor, point, lin_major, lin_minor, lin_point))
         # return 502
