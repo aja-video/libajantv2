@@ -2637,7 +2637,7 @@ private:
 					<< (BIT(18) & inRegValue ? "96kHz" : "48kHz")									<< endl
 					<< (BIT(18) & inRegValue ? "96kHz Support" : "48kHz Support")					<< endl
 				//	<< (BIT(22) & inRegValue ? "Embedded Support" : "No Embedded Support")			<< endl	//	JeffL says this bit is obsolete
-					<< (BIT(23) & inRegValue ? "8-Channel Support" : "6-Channel Support")			<< endl
+					<< "Slave Mode (64-chl): "	<< EnabDisab(BIT(23) & inRegValue)					<< endl	//	Redeployed in 16.2 for 64-ch audio
 					<< "K-box, Monitor: "		<< ChStrs [(BIT(24) & BIT(25) & inRegValue) >> 24]	<< endl
 					<< "K-Box Input: "			<< (BIT(26) & inRegValue ? "XLR" : "BNC")			<< endl
 					<< "K-Box: "				<< (BIT(27) & inRegValue ? "Present" : "Absent")	<< endl
