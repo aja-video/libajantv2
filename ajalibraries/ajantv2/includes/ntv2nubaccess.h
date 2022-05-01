@@ -135,7 +135,7 @@ class AJAExport NTV2DeviceSpecParser
 		void			Parse (void);
 		bool			ParseHexNumber (size_t & pos, std::string & outToken);
 		bool			ParseDecNumber (size_t & pos, std::string & outToken);
-		bool			ParseAlphaNumeric (size_t & pos, std::string & outToken, const bool inUpperOnly = false);	//	A run of letters and/or decimal digits
+		bool			ParseAlphaNumeric (size_t & pos, std::string & outToken, const std::string & inOtherChars = "");	//	A run of letters and/or decimal digits and/or other chars
 		bool			ParseScheme (size_t & pos, std::string & outToken);	//	An alphanumeric name followed by "://"
 		bool			ParseSerialNum (size_t & pos, std::string & outToken);	//	An 8 or 9 character alphanumeric name or a 64-bit hex number
 		bool			ParseDeviceID (size_t & pos, std::string & outToken);	//	An 32-bit hex number that matches a known NTV2DeviceID
@@ -191,7 +191,6 @@ class AJAExport NTV2RPCClientAPI
 		virtual std::string		HostName (void) const	{return ConnectParam(kConnectParamHost);}	///< @return	My host name
 		virtual std::string		Name (void) const		{return "";}	///< @return	The "user-friendly" name of the remote/fake host
 		virtual std::string		Description (void) const;	///< @return	A description of the remote/fake host
-		virtual uint32_t		ProtocolVersion (void) const	{return NTV2_RPC_PROTOCOL_VERSION;}	///< @return	The protocol version of the remote host
 		virtual std::ostream &	Print (std::ostream & oss) const;
 		///@}
 
@@ -233,12 +232,18 @@ class AJAExport NTV2RPCClientAPI
 
 		/**
 			@brief		Queries the devices that are accessible on the remote host.
-			@param[out]	outDevices	Receives the list of devices (both NTV2DeviceID and device serial number are returned).
-									By default, answers with a zero-length list, and returns success.
-									Subclasses must re-implement this to return whateever is appropriate.
+			@param[out]	outDeviceInfos	Receives a list of zero or more device information strings, one string per device.
+										Each string is ':' delimited with the following information fields, in this order:
+										"host:port:deviceid:serial:index" where...
+										-	host:		server IPv4 dotted-quad address or host name;
+										-	port:		server port number (decimal, no leading zeroes);
+										-	deviceID:	NTV2DeviceID as 8-digit hex string (or device name);
+										-	serial:		device serial number as 16-digit hex string, or its character string equivalent;
+										-	index:		16-bit unsigned index number (optional;  only specified for real, connected hardware)
+										Subclasses must re-implement to return whateever is appropriate.
 			@return		True if successful;  otherwise false.
 		**/
-		virtual bool	NTV2QueryDevices (NTV2DeviceIDSerialPairs & outDevices)	{outDevices.clear(); return true;}
+		virtual bool	NTV2QueryDevices (NTV2StringList & outDeviceInfos)	{outDeviceInfos.clear(); return true;}
 
 						NTV2RPCClientAPI (const NTV2ConnectParams & inParams);	///< @brief	My constructor.
 		virtual			~NTV2RPCClientAPI();	///< @brief	My destructor, automatically calls NTV2Disconnect.
@@ -290,23 +295,11 @@ class AJAExport NTV2RPCServerAPI
 		**/
 		static NTV2RPCServerAPI *	CreateServer (const std::string & inURL);
 
-		/**
-			@name	Local Device Registry
-		**/
-		///@{
-		static bool	RegisterLocalDevice (const NTV2DeviceID inID, const uint64_t inSerial);
-		static bool	UnregisterLocalDevice (const NTV2DeviceID inID, const uint64_t inSerial);
-		static bool	IsLocalDeviceRegistered (const NTV2DeviceID inID, const uint64_t inSerial);
-		static bool	IsLocalDeviceRegistered (const uint64_t inSerial);
-		static bool	ClearLocalDeviceRegistry (void);
-		///@}
-
 	public:
 		/**
 			@name	General Inquiry
 		**/
 		///@{
-		virtual uint32_t		ProtocolVersion (void) const	{return NTV2_RPC_PROTOCOL_VERSION;}	///< @return	The protocol version of the remote host
 		virtual std::ostream &	Print (std::ostream & oss) const;
 		///@}
 
@@ -321,35 +314,19 @@ class AJAExport NTV2RPCServerAPI
 		///@}
 
 		/**
-			@name	Operation Control
+			@name	Operation/Control
 		**/
 		///@{
-		virtual bool	IsRunning	(void) const	{return mThread.Active();}	///< @return	True if server is running
-		virtual bool	Start		(void);			///< @brief	Starts server
-		virtual bool	Stop		(void);			///< @brief	Stops server
+		virtual void		RunServer	(void);	///< @brief	Principal server thread function, subclsses should override
 		///@}
 
 	protected:
-		static void			ServerThreadStatic (AJAThread * pThread, void * pContext);
-		virtual void		RunServer (void);	///< @brief	Principal server thread function, subclsses should override
-
 							NTV2RPCServerAPI (const NTV2ConnectParams & inParams);	///< @brief	My constructor.
 		virtual				~NTV2RPCServerAPI();	///< @brief	My destructor, automatically calls NTV2Disconnect.
 
 	protected:
 		NTV2ConfigParams	mConfigParams;		///< @brief	Copy of config params passed in to my constructor
-		mutable AJAThread	mThread;			///< @brief	Principal server thread
-		mutable AJALock		mLock;				///< @brief	Guard/lock
 		uint32_t			mSpare[1024];		///< @brief	Reserved
-
-	protected:
-		typedef std::map<uint64_t, NTV2DeviceID>		DeviceSerialNumIDMap;
-		typedef DeviceSerialNumIDMap::const_iterator	DevSerNumIDMapConstIter;
-		typedef DeviceSerialNumIDMap::iterator			DevSerNumIDMapIter;
-
-		//	Device Registry Class Vars
-		static DeviceSerialNumIDMap	sSharedDevices;	///< @brief	Registry of shared/served devices
-		static AJALock				sSharedDevLock;	///< @brief	Registry guard/lock
 };	//	NTV2RPCServerAPI
 
 inline std::ostream & operator << (std::ostream & oss, const NTV2RPCServerAPI & inObj)	{return inObj.Print(oss);}

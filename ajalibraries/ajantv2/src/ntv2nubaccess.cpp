@@ -445,23 +445,15 @@ bool NTV2DeviceSpecParser::ParseDecNumber (size_t & pos, string & outToken)
 	return !outToken.empty();
 }
 
-bool NTV2DeviceSpecParser::ParseAlphaNumeric (size_t & pos, string & outToken, const bool inUpperCaseOnly)
+bool NTV2DeviceSpecParser::ParseAlphaNumeric (size_t & pos, string & outToken, const std::string & inOtherChars)
 {
 	outToken.clear();
 	string tokAlphaNum;
 	while (pos < SpecLength())
 	{
 		const char ch(CharAt(pos));
-		if (inUpperCaseOnly)
-		{
-			if (!IsUpperLetter(ch) && !IsDecimalDigit(ch))
-				break;
-		}
-		else
-		{
-			if (!IsLetter(ch) && !IsDecimalDigit(ch))
-				break;
-		}
+		if (!IsLetter(ch) && !IsDecimalDigit(ch) && inOtherChars.find(ch) == string::npos)
+			break;
 		++pos;  tokAlphaNum += ch;
 	}
 	if (tokAlphaNum.length() > 1)	//	At least 2 chars
@@ -576,7 +568,7 @@ bool NTV2DeviceSpecParser::ParseDNSName (size_t & pos, string & outDNSName)
 	string dnsName, name;
 	size_t dnsPos(pos);
 	char ch(0);
-	while (ParseAlphaNumeric(dnsPos, name))
+	while (ParseAlphaNumeric(dnsPos, name, "_-"))	//	also allow '_' and '-'
 	{
 		if (!dnsName.empty())
 			dnsName += '.';
@@ -1009,7 +1001,7 @@ NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inP
 	}
 	//	It's now someone else's responsibility to call ::dlclose
 	NBCINFO("'" << kFuncNameCreateClient << "' in '" << pluginPath << "' created instance " << xHEX0N(uint64_t(pRPCObject),16));
-	return pRPCObject;	//	It's caller's responsibility to delete pRPCObject
+	return pRPCObject;
 #elif defined(MSWindows)
 #elif defined(AJALinux)
 #else
@@ -1018,6 +1010,10 @@ NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inP
 	return AJA_NULL;
 }	//	CreateClient
 
+
+/*****************************************************************************************************************************************************
+	NTV2RPCServerAPI
+*****************************************************************************************************************************************************/
 
 NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const NTV2ConfigParams & inParams)	//	CLASS METHOD
 {
@@ -1098,14 +1094,10 @@ NTV2RPCServerAPI::NTV2RPCServerAPI (const NTV2ConnectParams & inParams)
 {
 	NTV2_POINTER spare(&mSpare, sizeof(mSpare));  spare.Fill(0ULL);
 	AJADebug::Open();
-	mThread.Attach(ServerThreadStatic, this);
 }
 
 NTV2RPCServerAPI::~NTV2RPCServerAPI()
 {
-	Stop();
-	while (IsRunning())
-		AJATime::Sleep(500);
 }
 
 void NTV2RPCServerAPI::RunServer (void)
@@ -1117,42 +1109,14 @@ void NTV2RPCServerAPI::RunServer (void)
 	NBSDBG("Terminated");
 }	//	ServerFunction
 
-bool NTV2RPCServerAPI::Start (void)
-{
-	if (IsRunning())
-		return false;
-	NBSDBG("Starting...");
-	mThread.Start();
-	return true;
-}
-
-bool NTV2RPCServerAPI::Stop (void)
-{
-	if (!IsRunning())
-		return false;
-	NBSDBG("Stopping...");
-	mSpare[0] = 1;
-	return true;
-}
-
-void NTV2RPCServerAPI::ServerThreadStatic (AJAThread * pThread, void * pContext)
-{	(void) pThread;
-
-	NTV2RPCServerAPI * pSvr (reinterpret_cast<NTV2RPCServerAPI*>(pContext));
-	if (pSvr)
-		pSvr->RunServer();
-}
-
 ostream & NTV2RPCServerAPI::Print (ostream & oss) const
 {
-	oss << "state=" << (IsRunning() ? "Running: " : "Stopped: ") << mConfigParams;
+	oss << mConfigParams;
 	return oss;
 }
 
 bool NTV2RPCServerAPI::SetConfigParams (const NTV2ConnectParams & inNewParams, const bool inAugment)
 {
-	if (IsRunning())
-		{NBSFAIL("Cannot change config params while running");  return false;}
 	size_t oldCount(mConfigParams.size()), updated(0), added(0);
 	if (inAugment)
 	{
@@ -1167,54 +1131,5 @@ bool NTV2RPCServerAPI::SetConfigParams (const NTV2ConnectParams & inNewParams, c
 	}
 	if (mConfigParams.empty())
 		NBSWARN("No config params");
-	return true;
-}
-
-
-///////////////////////////////	Device Registry Implementation
-
-NTV2RPCServerAPI::DeviceSerialNumIDMap NTV2RPCServerAPI::sSharedDevices;
-AJALock NTV2RPCServerAPI::sSharedDevLock;
-
-bool NTV2RPCServerAPI::RegisterLocalDevice (const NTV2DeviceID inID, const uint64_t inSerial)
-{
-	AJAAutoLock tmpLock(&sSharedDevLock);
-	DevSerNumIDMapIter it(sSharedDevices.find(inSerial));
-	if (it != sSharedDevices.end())
-		return it->second == inID;
-
-	sSharedDevices[inSerial] = inID;
-	return true;
-}
-
-bool NTV2RPCServerAPI::UnregisterLocalDevice (const NTV2DeviceID inID, const uint64_t inSerial)
-{
-	AJAAutoLock tmpLock(&sSharedDevLock);
-	DevSerNumIDMapIter it(sSharedDevices.find(inSerial));
-	if (it == sSharedDevices.end())
-		return false;
-	if (it->second != inID)
-		return false;
-	sSharedDevices.erase(it);
-	return true;
-}
-
-bool NTV2RPCServerAPI::IsLocalDeviceRegistered (const NTV2DeviceID inID, const uint64_t inSerial)
-{
-	AJAAutoLock tmpLock(&sSharedDevLock);
-	DevSerNumIDMapConstIter it(sSharedDevices.find(inSerial));
-	return it != sSharedDevices.end()  &&  it->second == inID;
-}
-
-bool NTV2RPCServerAPI::IsLocalDeviceRegistered (const uint64_t inSerial)
-{
-	AJAAutoLock tmpLock(&sSharedDevLock);
-	return sSharedDevices.find(inSerial) != sSharedDevices.end();
-}
-
-bool NTV2RPCServerAPI::ClearLocalDeviceRegistry (void)
-{
-	AJAAutoLock tmpLock(&sSharedDevLock);
-	sSharedDevices.clear();
 	return true;
 }

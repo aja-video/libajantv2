@@ -11,10 +11,12 @@
 #include "ntv2publicinterface.h"
 #include "ntv2endian.h"
 
-#define NTV2NUBPORT						7575	//	Default port we listen on
-#define NTV2_RPC_PROTOCOL_VERSION		4		//	New RPC mechanism has protocol version 4
+#define NTV2NUBPORT		7575	//	Default port we listen on
 
-typedef ULWord NTV2NubProtocolVersion;
+#if !defined(NTV2_DEPRECATE_16_3)
+	//	In SDK 16.3 or later, client/server RPC implementations are plugins, each with their own protocols/versioning
+	typedef ULWord NTV2NubProtocolVersion;
+#endif	//	!defined(NTV2_DEPRECATE_16_3)
 
 namespace ntv2nub
 {
