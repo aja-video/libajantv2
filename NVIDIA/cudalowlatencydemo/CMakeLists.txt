@@ -1,13 +1,13 @@
-# NOTE: Ensure that the CUDA Toolkit v11.4 or later is installed and in your PATH.
-include(AJAHelpers)
+# NOTE: Ensure that the CUDA Toolkit v11.1 or later is installed and in your PATH.
 
 if (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	aja_message(STATUS "skipping cudalowlatencydemo (requires Linux)")
 	return()
 endif()
-find_package(CUDA 11.2)
+
+find_package(CUDA 11.1)
 if (NOT CUDA_FOUND)
-	aja_message(STATUS "skipping cudalowlatencydemo (CUDA not found)")
+	message("skipping cudalowlatencydemo (CUDA not found)")
 	return()
 endif()
 set(OpenGL_GL_PREFERENCE LEGACY)
@@ -56,20 +56,13 @@ set(CUDALOWLATENCYDEMO_SOURCES
 	cudaapp.cpp)
 
 set(NVIDIA_COMMONCUDA_SOURCES
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/assertion.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/cudaUtils.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/gpuvio.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2cudaArrayTransfer.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2cudaArrayTransferNV.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2cudaArrayTransferNV.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2errorlist.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2errorlist.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2glTextureTransfer.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2glTextureTransferNV.cpp
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2glTextureTransferNV.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2gpucircularbuffer.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2gpucircularbuffer.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2gpuTextureTransfer.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2gpuTextureTransferNV.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2gpuTextureTransferNV.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2rendertotexture.cpp
@@ -78,13 +71,8 @@ set(NVIDIA_COMMONCUDA_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2texture.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/oglview.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/oglview.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/opengl.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simplecudavio.cpp
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simplecudavio.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simplegpuvio.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simplegpuvio.h
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simpleoglvio.cpp
-	# ${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simpleoglvio.h
 )
 
 set(TARGET_SOURCES
@@ -112,6 +100,12 @@ if (AJA_INSTALL_SOURCES)
 	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/commonCUDA)
 	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/cudalowlatencydemo)
 endif()
+
+install(TARGETS cudalowlatencydemo
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if (AJA_CODE_SIGN)
     aja_code_sign(cudalowlatencydemo)
