@@ -23,6 +23,11 @@ namespace ntv2nub
 	const bool kDisableByteSwap (true);
 	const bool kEnableByteSwapIfNeeded (false);
 
+	inline void PUSHU8(const uint8_t inVal, std::vector<uint8_t> & inArr)
+	{
+		inArr.push_back(inVal);
+	}
+
 	inline void PUSHU16(const uint16_t inVal, std::vector<uint8_t> & inArr, const bool dontSwap = false)
 	{
 		const uint16_t _u16 ((NTV2HostIsBigEndian || dontSwap) ? inVal : NTV2EndianSwap16HtoB(inVal));
@@ -46,6 +51,11 @@ namespace ntv2nub
 		inArr.push_back(_pU64[2]); inArr.push_back(_pU64[3]);
 		inArr.push_back(_pU64[4]); inArr.push_back(_pU64[5]);
 		inArr.push_back(_pU64[6]); inArr.push_back(_pU64[7]);
+	}
+
+	inline void POPU8 (uint8_t & outVal, const std::vector<uint8_t> & inArr, size_t & inOutNdx)
+	{
+		outVal = inArr.at(inOutNdx++);
 	}
 
 	inline void POPU16 (uint16_t & outVal, const std::vector<uint8_t> & inArr, size_t & inOutNdx, const bool dontSwap = false)

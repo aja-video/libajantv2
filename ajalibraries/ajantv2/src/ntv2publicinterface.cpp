@@ -3098,6 +3098,10 @@ using namespace ntv2nub;
 	/*********************************************************************************************************************
 		RPC ENCODE/DECODE FUNCTIONS
 	*********************************************************************************************************************/
+	#define AsU8Ref(_x_)	reinterpret_cast<uint8_t&>(_x_)
+	#define AsU16Ref(_x_)	reinterpret_cast<uint16_t&>(_x_)
+	#define AsU32Ref(_x_)	reinterpret_cast<uint32_t&>(_x_)
+	#define AsU64Ref(_x_)	reinterpret_cast<uint64_t&>(_x_)
 
 	bool NTV2_HEADER::RPCEncode (UByteSequence & outBlob)
 	{
@@ -3624,7 +3628,7 @@ using namespace ntv2nub;
 		PUSHU32(ULWord(desiredFrame), outBlob);					//	LWord					desiredFrame
 		PUSHU32(hUser, outBlob);								//	ULWord					hUser
 		PUSHU32(transferFlags, outBlob);						//	ULWord					transferFlags
-		PUSHU32(bDisableExtraAudioInfo, outBlob);				//	BOOL_					bDisableExtraAudioInfo
+		PUSHU8(bDisableExtraAudioInfo, outBlob);				//	BOOL_					bDisableExtraAudioInfo
 		PUSHU16(UWord(frameBufferFormat), outBlob);				//	NTV2PixelFormat			frameBufferFormat
 		PUSHU16(UWord(frameBufferOrientation), outBlob);		//	NTV2FBOrientation		frameBufferOrientation
 		//	Skip color correction for now						//	NTV2ColorCorrectionInfo	colorCorrectionInfo
@@ -3681,7 +3685,7 @@ using namespace ntv2nub;
 		desiredFrame = LWord(v32);
 		POPU32(hUser, inBlob, inOutIndex);						//	ULWord					hUser
 		POPU32(transferFlags, inBlob, inOutIndex);				//	ULWord					transferFlags
-		POPU32(bDisableExtraAudioInfo, inBlob, inOutIndex);		//	BOOL_					bDisableExtraAudioInfo
+		POPU8(AsU8Ref(bDisableExtraAudioInfo), inBlob, inOutIndex);	//	BOOL_					bDisableExtraAudioInfo
 		POPU16(v16, inBlob, inOutIndex);						//	NTV2PixelFormat			frameBufferFormat
 		frameBufferFormat = NTV2PixelFormat(v16);
 		POPU16(v16, inBlob, inOutIndex);						//	NTV2FBOrientation		frameBufferOrientation
@@ -3745,13 +3749,13 @@ using namespace ntv2nub;
 		PUSHU32(framesProcessed, outBlob);						//	ULWord					framesProcessed
 		PUSHU32(framesDropped, outBlob);						//	ULWord					framesDropped
 		PUSHU32(bufferLevel, outBlob);							//	ULWord					bufferLevel
-		PUSHU32(bWithAudio, outBlob);							//	BOOL_					bWithAudio
-		PUSHU32(bWithRP188, outBlob);							//	BOOL_					bWithRP188
-		PUSHU32(bFbfChange, outBlob);							//	BOOL_					bFbfChange
-		PUSHU32(bFboChange, outBlob);							//	BOOL_					bFboChange
-		PUSHU32(bWithColorCorrection, outBlob);					//	BOOL_					bWithColorCorrection
-		PUSHU32(bWithVidProc, outBlob);							//	BOOL_					bWithVidProc
-		PUSHU32(bWithCustomAncData, outBlob);					//	BOOL_					bWithCustomAncData
+		PUSHU8(bWithAudio, outBlob);							//	BOOL_					bWithAudio
+		PUSHU8(bWithRP188, outBlob);							//	BOOL_					bWithRP188
+		PUSHU8(bFbfChange, outBlob);							//	BOOL_					bFbfChange
+		PUSHU8(bFboChange, outBlob);							//	BOOL_					bFboChange
+		PUSHU8(bWithColorCorrection, outBlob);					//	BOOL_					bWithColorCorrection
+		PUSHU8(bWithVidProc, outBlob);							//	BOOL_					bWithVidProc
+		PUSHU8(bWithCustomAncData, outBlob);					//	BOOL_					bWithCustomAncData
 		return true;
 	}
 
@@ -3774,13 +3778,13 @@ using namespace ntv2nub;
 		POPU32(framesProcessed, inBlob, inOutIndex);			//	ULWord					framesProcessed
 		POPU32(framesDropped, inBlob, inOutIndex);				//	ULWord					framesDropped
 		POPU32(bufferLevel, inBlob, inOutIndex);				//	ULWord					bufferLevel
-		POPU32(bWithAudio, inBlob, inOutIndex);					//	BOOL_					bWithAudio
-		POPU32(bWithRP188, inBlob, inOutIndex);					//	BOOL_					bWithRP188
-		POPU32(bFbfChange, inBlob, inOutIndex);					//	BOOL_					bFbfChange
-		POPU32(bFboChange, inBlob, inOutIndex);					//	BOOL_					bFboChange
-		POPU32(bWithColorCorrection, inBlob, inOutIndex);		//	BOOL_					bWithColorCorrection
-		POPU32(bWithVidProc, inBlob, inOutIndex);				//	BOOL_					bWithVidProc
-		POPU32(bWithCustomAncData, inBlob, inOutIndex);			//	BOOL_					bWithCustomAncData
+		POPU8(AsU8Ref(bWithAudio), inBlob, inOutIndex);			//	BOOL_					bWithAudio
+		POPU8(AsU8Ref(bWithRP188), inBlob, inOutIndex);			//	BOOL_					bWithRP188
+		POPU8(AsU8Ref(bFbfChange), inBlob, inOutIndex);			//	BOOL_					bFbfChange
+		POPU8(AsU8Ref(bFboChange), inBlob, inOutIndex);			//	BOOL_					bFboChange
+		POPU8(AsU8Ref(bWithColorCorrection), inBlob, inOutIndex);//	BOOL_					bWithColorCorrection
+		POPU8(AsU8Ref(bWithVidProc), inBlob, inOutIndex);		//	BOOL_					bWithVidProc
+		POPU8(AsU8Ref(bWithCustomAncData), inBlob, inOutIndex);	//	BOOL_					bWithCustomAncData
 		return true;
 	}
 
@@ -3919,14 +3923,14 @@ using namespace ntv2nub;
 		PUSHU32(ULWord(lVal4), outBlob);						//	LWord					lVal4
 		PUSHU32(ULWord(lVal5), outBlob);						//	LWord					lVal5
 		PUSHU32(ULWord(lVal6), outBlob);						//	LWord					lVal6
-		PUSHU32(bVal1, outBlob);								//	BOOL_					bVal1
-		PUSHU32(bVal2, outBlob);								//	BOOL_					bVal2
-		PUSHU32(bVal3, outBlob);								//	BOOL_					bVal3
-		PUSHU32(bVal4, outBlob);								//	BOOL_					bVal4
-		PUSHU32(bVal5, outBlob);								//	BOOL_					bVal5
-		PUSHU32(bVal6, outBlob);								//	BOOL_					bVal6
-		PUSHU32(bVal7, outBlob);								//	BOOL_					bVal7
-		PUSHU32(bVal8, outBlob);								//	BOOL_					bVal8
+		PUSHU8(bVal1, outBlob);									//	BOOL_					bVal1
+		PUSHU8(bVal2, outBlob);									//	BOOL_					bVal2
+		PUSHU8(bVal3, outBlob);									//	BOOL_					bVal3
+		PUSHU8(bVal4, outBlob);									//	BOOL_					bVal4
+		PUSHU8(bVal5, outBlob);									//	BOOL_					bVal5
+		PUSHU8(bVal6, outBlob);									//	BOOL_					bVal6
+		PUSHU8(bVal7, outBlob);									//	BOOL_					bVal7
+		PUSHU8(bVal8, outBlob);									//	BOOL_					bVal8
 		PUSHU64(ULWord64(pvVal1), outBlob);						//	void*					pvVal1
 		PUSHU64(ULWord64(pvVal2), outBlob);						//	void*					pvVal2
 		PUSHU64(ULWord64(pvVal3), outBlob);						//	void*					pvVal3
@@ -3943,33 +3947,29 @@ using namespace ntv2nub;
 	}
 
 	bool AUTOCIRCULATE_DATA::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
-	{	uint16_t v16(0);	uint32_t v32(0);	uint64_t v64(0);
+	{	uint16_t v16(0);	uint32_t v32(0);
 		POPU16(v16, inBlob, inOutIndex);						//	AUTO_CIRC_COMMAND		eCommand
 		eCommand = AUTO_CIRC_COMMAND(v16);
 		POPU16(v16, inBlob, inOutIndex);						//	NTV2Crosspoint			channelSpec
 		channelSpec = NTV2Crosspoint(v16);
-		POPU32(v32, inBlob, inOutIndex);	lVal1 = LWord(v32);		//	LWord					lVal1
-		POPU32(v32, inBlob, inOutIndex);	lVal2 = LWord(v32);		//	LWord					lVal2
-		POPU32(v32, inBlob, inOutIndex);	lVal3 = LWord(v32);		//	LWord					lVal3
-		POPU32(v32, inBlob, inOutIndex);	lVal4 = LWord(v32);		//	LWord					lVal4
-		POPU32(v32, inBlob, inOutIndex);	lVal5 = LWord(v32);		//	LWord					lVal5
-		POPU32(v32, inBlob, inOutIndex);	lVal6 = LWord(v32);		//	LWord					lVal6
-		POPU32(bVal1, inBlob, inOutIndex);						//	BOOL_					bVal1
-		POPU32(bVal2, inBlob, inOutIndex);						//	BOOL_					bVal2
-		POPU32(bVal3, inBlob, inOutIndex);						//	BOOL_					bVal3
-		POPU32(bVal4, inBlob, inOutIndex);						//	BOOL_					bVal4
-		POPU32(bVal5, inBlob, inOutIndex);						//	BOOL_					bVal5
-		POPU32(bVal6, inBlob, inOutIndex);						//	BOOL_					bVal6
-		POPU32(bVal7, inBlob, inOutIndex);						//	BOOL_					bVal7
-		POPU32(bVal8, inBlob, inOutIndex);						//	BOOL_					bVal8
-		POPU64(v64, inBlob, inOutIndex);						//	void*					pvVal1
-		pvVal1 = reinterpret_cast<void*>(v64);
-		POPU64(v64, inBlob, inOutIndex);						//	void*					pvVal2
-		pvVal2 = reinterpret_cast<void*>(v64);
-		POPU64(v64, inBlob, inOutIndex);						//	void*					pvVal3
-		pvVal3 = reinterpret_cast<void*>(v64);
-		POPU64(v64, inBlob, inOutIndex);						//	void*					pvVal4
-		pvVal4 = reinterpret_cast<void*>(v64);
+		POPU32(v32, inBlob, inOutIndex);	lVal1 = LWord(v32);	//	LWord					lVal1
+		POPU32(v32, inBlob, inOutIndex);	lVal2 = LWord(v32);	//	LWord					lVal2
+		POPU32(v32, inBlob, inOutIndex);	lVal3 = LWord(v32);	//	LWord					lVal3
+		POPU32(v32, inBlob, inOutIndex);	lVal4 = LWord(v32);	//	LWord					lVal4
+		POPU32(v32, inBlob, inOutIndex);	lVal5 = LWord(v32);	//	LWord					lVal5
+		POPU32(v32, inBlob, inOutIndex);	lVal6 = LWord(v32);	//	LWord					lVal6
+		POPU8(AsU8Ref(bVal1), inBlob, inOutIndex);				//	BOOL_					bVal1
+		POPU8(AsU8Ref(bVal2), inBlob, inOutIndex);				//	BOOL_					bVal2
+		POPU8(AsU8Ref(bVal3), inBlob, inOutIndex);				//	BOOL_					bVal3
+		POPU8(AsU8Ref(bVal4), inBlob, inOutIndex);				//	BOOL_					bVal4
+		POPU8(AsU8Ref(bVal5), inBlob, inOutIndex);				//	BOOL_					bVal5
+		POPU8(AsU8Ref(bVal6), inBlob, inOutIndex);				//	BOOL_					bVal6
+		POPU8(AsU8Ref(bVal7), inBlob, inOutIndex);				//	BOOL_					bVal7
+		POPU8(AsU8Ref(bVal8), inBlob, inOutIndex);				//	BOOL_					bVal8
+		POPU64(AsU64Ref(pvVal1), inBlob, inOutIndex);			//	void*					pvVal1
+		POPU64(AsU64Ref(pvVal2), inBlob, inOutIndex);			//	void*					pvVal2
+		POPU64(AsU64Ref(pvVal3), inBlob, inOutIndex);			//	void*					pvVal3
+		POPU64(AsU64Ref(pvVal4), inBlob, inOutIndex);			//	void*					pvVal4
 		if (eCommand == eGetAutoCirc  &&  pvVal1)
 			reinterpret_cast<AUTOCIRCULATE_STATUS_STRUCT*>(pvVal1)->RPCDecode(inBlob, inOutIndex);
 		if ((eCommand == eGetFrameStamp  ||  eCommand == eGetFrameStampEx2)  &&  pvVal1)
