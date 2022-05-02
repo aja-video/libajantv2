@@ -281,8 +281,8 @@ string NTV2_POINTER::AsString (UWord inDumpMaxBytes) const
 	if (inDumpMaxBytes	&&	GetHostPointer())
 	{
 		oss << ":";
-		if (inDumpMaxBytes > 64)
-			inDumpMaxBytes = 64;
+		if (inDumpMaxBytes > 256)
+			inDumpMaxBytes = 256;
 		if (ULWord(inDumpMaxBytes) > GetByteCount())
 			inDumpMaxBytes = UWord(GetByteCount());
 		const UByte *	pBytes	(reinterpret_cast<const UByte *>(GetHostPointer()));
