@@ -19,7 +19,7 @@ class AJALockImpl
 {
 public:
 
-	AJALockImpl(const char* pName);
+    AJALockImpl(const char* pName);
 	virtual ~AJALockImpl();
 
 	AJAStatus 			Lock(uint32_t uTimeout = 0xffffffff);
