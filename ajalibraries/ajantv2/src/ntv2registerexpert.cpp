@@ -1068,7 +1068,7 @@ private:
 		DefineRegName	(kVRegTimelapseCaptureUnits,			"kVRegTimelapseCaptureUnits");
 		DefineRegName	(kVRegTimelapseIntervalValue,			"kVRegTimelapseIntervalValue");
 		DefineRegName	(kVRegTimelapseIntervalUnits,			"kVRegTimelapseIntervalUnits");
-		DefineRegName	(kVRegFrameBufferInstalled,				"kVRegFrameBufferInstalled");
+		DefineRegName	(kVRegSDIOutConfig,						"kVRegSDIOutConfig");
 		DefineRegName	(kVRegAnalogInStandard,					"kVRegAnalogInStandard");
 		DefineRegName	(kVRegOutputTimecodeOffset,				"kVRegOutputTimecodeOffset");
 		DefineRegName	(kVRegOutputTimecodeType,				"kVRegOutputTimecodeType");
@@ -1079,7 +1079,7 @@ private:
 		DefineRegName	(kVRegForceApplicationPID,				"kVRegForceApplicationPID");
 		DefineRegName	(kVRegForceApplicationCode,				"kVRegForceApplicationCode");
 		DefineRegName	(kVRegIpConfigStreamRefresh,			"kVRegIpConfigStreamRefresh");
-		DefineRegName	(kVRegSDIInModel,						"kVRegSDIInModel");
+		DefineRegName	(kVRegSDIInConfig,						"kVRegSDIInConfig");
 		DefineRegName	(kVRegInputChangedCount,				"kVRegInputChangedCount");
 		DefineRegName	(kVReg8kOutputTransportSelection,		"kVReg8kOutputTransportSelection");
 		DefineRegName	(kVRegAnalogIoSelect,					"kVRegAnalogIoSelect");
