@@ -10,9 +10,17 @@
 
 #include "ancillarydata.h"
 #include "ntv2formatdescriptor.h"
-#include <list>
 #include <map>
 #include <set>
+
+//	Starting with SDK 16.3, AJAAncillaryList is implemented using std::vector,
+//	which is faster than std::list, which is what was used in SDK 16.2.x and earlier.
+#define AJAANCLISTIMPL_VECTOR	//	Comment out this line to revert to pre-16.3 behavior
+#if defined(AJAANCLISTIMPL_VECTOR)
+	#include <vector>
+#else
+	#include <list>
+#endif
 
 
 // used for "match any" searches and counts
@@ -577,7 +585,11 @@ public:	//	INSTANCE METHODS
 protected:
 	friend class CNTV2Card;	//	CNTV2Card's member functions can call AJAAncillaryList's private & protected member functions
 
-	typedef std::list <AJAAncillaryData *>			AJAAncillaryDataList;
+#if defined(AJAANCLISTIMPL_VECTOR)
+	typedef std::vector <AJAAncillaryData*>			AJAAncillaryDataList;
+#else
+	typedef std::list <AJAAncillaryData*>			AJAAncillaryDataList;
+#endif
 	typedef AJAAncillaryDataList::const_iterator	AJAAncDataListConstIter;	///< @brief	Handy const iterator for iterating over members of an AJAAncillaryDataList.
 	typedef AJAAncillaryDataList::iterator			AJAAncDataListIter;			///< @brief	Handy non-const iterator for iterating over members of an AJAAncillaryDataList.
 
