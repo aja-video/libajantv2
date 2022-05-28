@@ -171,7 +171,7 @@ typedef enum
 	kVRegTimelapseCaptureUnits				= VIRTUALREG_START+176,		// deprecated
 	kVRegTimelapseIntervalValue				= VIRTUALREG_START+177,		// deprecated
 	kVRegTimelapseIntervalUnits				= VIRTUALREG_START+178,		// deprecated
-	kVRegFrameBufferInstalled				= VIRTUALREG_START+179,		// deprecated
+	kVRegSDIOutConfig						= VIRTUALREG_START+179,
 
 	kVRegAnalogInStandard					= VIRTUALREG_START+180,		// deprecated
 	kVRegOutputTimecodeOffset				= VIRTUALREG_START+181,		// deprecated
@@ -183,7 +183,7 @@ typedef enum
 	kVRegForceApplicationPID				= VIRTUALREG_START+187,
 	kVRegForceApplicationCode				= VIRTUALREG_START+188,
 	kVRegIpConfigStreamRefresh				= VIRTUALREG_START+189,
-	kVRegSDIInModel							= VIRTUALREG_START+190,
+	kVRegSDIInConfig						= VIRTUALREG_START+190,
 	kVRegInputChangedCount					= VIRTUALREG_START+191,
 	kVReg8kOutputTransportSelection			= VIRTUALREG_START+192,
 	kVRegAnalogIoSelect						= VIRTUALREG_START+193,
@@ -799,7 +799,6 @@ typedef enum
 	#define kTimelapseCaptureUnits				kVRegTimelapseCaptureUnits
 	#define kTimelapseIntervalValue				kVRegTimelapseIntervalValue
 	#define kTimelapseIntervalUnits				kVRegTimelapseIntervalUnits
-	#define kFrameBufferInstalled				kVRegFrameBufferInstalled
 	#define kK2RegAnalogInStandard				kVRegAnalogInStandard
 	#define kRegOutputTimecodeOffset			kVRegOutputTimecodeOffset
 	#define kRegOutputTimecodeType				kVRegOutputTimecodeType

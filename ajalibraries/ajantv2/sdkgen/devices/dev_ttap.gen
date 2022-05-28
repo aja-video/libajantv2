@@ -81,6 +81,7 @@ NTV2DeviceCanDoPlayback
 NTV2DeviceCanDoQuarterExpand
 NTV2DeviceCanDoRP188
 NTV2DeviceCanDoSDVideo
+NTV2DeviceCanReportFrameSize
 NTV2DeviceCanDoThunderbolt
 NTV2DeviceHasNWL
 NTV2DeviceHasPCIeGen2

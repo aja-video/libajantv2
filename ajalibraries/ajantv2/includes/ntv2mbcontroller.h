@@ -91,6 +91,7 @@ struct PTPStatus
 {
 	uint8_t PTP_gmId[8];		// GrandMasterID
 	uint8_t PTP_masterId[8];	// MasterID
+  uint8_t PTP_domain; // domain
 	PTPLockStatus PTP_LockedState;	// locked state
 };
 

@@ -1095,6 +1095,44 @@ typedef enum _NTV2VideoFormat
 		(__f__) != NTV2_FORMAT_525_5994 &&							\
 		(__f__) != NTV2_FORMAT_625_5000		)
 
+#define NTV2_VIDEO_FORMAT_IS_DROP_FRAME(__f__)						\
+	(	(__f__) == NTV2_FORMAT_1080i_5994			||				\
+		(__f__) == NTV2_FORMAT_720p_5994			||				\
+		(__f__) == NTV2_FORMAT_1080psf_2398			||				\
+		(__f__) == NTV2_FORMAT_1080p_2997  			||				\
+		(__f__) == NTV2_FORMAT_1080p_2398  			||				\
+		(__f__) == NTV2_FORMAT_1080p_2K_2398  		||				\
+		(__f__) == NTV2_FORMAT_1080psf_2K_2398  	||				\
+		(__f__) == NTV2_FORMAT_1080p_5994_B  		||				\
+		(__f__) == NTV2_FORMAT_720p_2398	 		||				\
+		(__f__) == NTV2_FORMAT_1080p_5994_A			||				\
+		(__f__) == NTV2_FORMAT_1080psf_2997_2		||				\
+		(__f__) == NTV2_FORMAT_525_5994				||				\
+		(__f__) == NTV2_FORMAT_525_2398				||				\
+		(__f__) == NTV2_FORMAT_525psf_2997			||				\
+		(__f__) == NTV2_FORMAT_2K_1498				||				\
+		(__f__) == NTV2_FORMAT_2K_2398				||				\
+		(__f__) == NTV2_FORMAT_1080p_2K_5994_A		||				\
+		(__f__) == NTV2_FORMAT_1080p_2K_2997		||				\
+		(__f__) == NTV2_FORMAT_1080p_2K_4795_A		||				\
+		(__f__) == NTV2_FORMAT_1080p_2K_4795_B		||				\
+		(__f__) == NTV2_FORMAT_1080p_2K_5994_B		||				\
+		(__f__) == NTV2_FORMAT_3840x2160psf_2398	||				\
+		(__f__) == NTV2_FORMAT_3840x2160p_2398		||				\
+		(__f__) == NTV2_FORMAT_3840x2160p_2997		||				\
+		(__f__) == NTV2_FORMAT_3840x2160psf_2997	||				\
+		(__f__) == NTV2_FORMAT_3840x2160p_5994		||				\
+		(__f__) == NTV2_FORMAT_3840x2160p_5994_B	||				\
+		(__f__) == NTV2_FORMAT_4096x2160psf_2398	||				\
+		(__f__) == NTV2_FORMAT_4096x2160p_2398		||				\
+		(__f__) == NTV2_FORMAT_4096x2160p_2997		||				\
+		(__f__) == NTV2_FORMAT_4096x2160psf_2997	||				\
+		(__f__) == NTV2_FORMAT_4096x2160p_4795		||				\
+		(__f__) == NTV2_FORMAT_4096x2160p_5994		||				\
+		(__f__) == NTV2_FORMAT_4096x2160p_4795_B	||				\
+		(__f__) == NTV2_FORMAT_4096x2160p_5994_B					\
+	)
+
 #define NTV2_VIDEO_FORMAT_IS_A(__f__)								\
 	(	(__f__) == NTV2_FORMAT_1080p_5000_A ||						\
 		(__f__) == NTV2_FORMAT_1080p_5994_A ||						\

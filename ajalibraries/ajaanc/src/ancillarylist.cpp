@@ -14,6 +14,9 @@
 #if defined (AJALinux)
 	#include <string.h>		//	For memcpy
 #endif	//	AJALinux
+#if defined(AJAANCLISTIMPL_VECTOR)
+	#include <algorithm>
+#endif
 
 using namespace std;
 
@@ -173,7 +176,7 @@ AJAAncillaryList & AJAAncillaryList::operator = (const AJAAncillaryList & inRHS)
 		Clear();
 		for (AJAAncDataListConstIter it(inRHS.m_ancList.begin());  it != inRHS.m_ancList.end();	 ++it)
 			if (*it)
-				AddAncillaryData((*it)->Clone());
+				AddAncillaryData(*it);
 	}
 	return *this;
 }
@@ -191,7 +194,6 @@ AJAAncillaryData * AJAAncillaryList::GetAncillaryDataAtIndex (const uint32_t inI
 			++it;
 		pAncData = *it;
 	}
-
 	return pAncData;
 }
 
@@ -209,7 +211,6 @@ AJAStatus AJAAncillaryList::ParseAllAncillaryData (void)
 		if (AJA_FAILURE (status))
 			result = status;
 	}
-
 	return result;
 }
 
@@ -226,7 +227,6 @@ uint32_t AJAAncillaryList::CountAncillaryDataWithType (const AJAAncillaryDataTyp
 		if (matchType == ancType)
 			count++;
 	}
-
 	return count;
 }
 
@@ -270,7 +270,6 @@ uint32_t AJAAncillaryList::CountAncillaryDataWithID (const uint8_t DID, const ui
 				count++;
 		}
 	}
-
 	return count;
 }
 
@@ -377,8 +376,18 @@ AJAStatus AJAAncillaryList::RemoveAncillaryData (AJAAncillaryData * pAncData)
 	if (!pAncData)
 		return AJA_STATUS_NULL;
 
+#if defined(AJAANCLISTIMPL_VECTOR)
+	AJAAncDataListConstIter it;
+	for (it = m_ancList.begin();  it != m_ancList.end();  ++it)
+		if (*it == pAncData)
+			break;
+	if (it == m_ancList.end())
+		{LOGMYERROR("failed to remove packet " << pAncData->AsString(32));  return AJA_STATUS_NOT_FOUND;}
+	m_ancList.erase(it);
+#else
 	m_ancList.remove(pAncData); //	note:	there's no feedback as to whether one or more elements existed or not
 								//	note:	pAncData is NOT deleted!
+#endif
 	LOGMYDEBUG(DEC(m_ancList.size()) << " packet(s) remain after removing packet " << pAncData->AsString(32));
 	return AJA_STATUS_SUCCESS;
 }
@@ -421,20 +430,32 @@ static bool SortByLocation (AJAAncillaryData * lhs, AJAAncillaryData * rhs)
 
 AJAStatus AJAAncillaryList::SortListByDID (void)
 {
+#if defined(AJAANCLISTIMPL_VECTOR)
+	std::sort(m_ancList.begin(), m_ancList.end(), SortByDID);
+#else
 	m_ancList.sort (SortByDID);
+#endif
 	return AJA_STATUS_SUCCESS;
 }
 
 
 AJAStatus AJAAncillaryList::SortListBySID (void)
 {
+#if defined(AJAANCLISTIMPL_VECTOR)
+	std::sort(m_ancList.begin(), m_ancList.end(), SortBySID);
+#else
 	m_ancList.sort (SortBySID);
+#endif
 	return AJA_STATUS_SUCCESS;
 }
 
 AJAStatus AJAAncillaryList::SortListByLocation (void)
 {
-	m_ancList.sort (SortByLocation);
+#if defined(AJAANCLISTIMPL_VECTOR)
+	std::sort(m_ancList.begin(), m_ancList.end(), SortByLocation);
+#else
+	m_ancList.sort(SortByLocation);
+#endif
 	return AJA_STATUS_SUCCESS;
 }
 
@@ -738,27 +759,34 @@ AJAStatus AJAAncillaryList::AddVANCData (const UWordSequence & inPacketWords, co
 	if (AJA_FAILURE(status))
 		return status;
 
-	AJAAncillaryData	pkt;
-	status = pkt.InitWithReceivedData (gumpPacketData, inLocation);
-	if (AJA_FAILURE(status))
-		return status;
-	pkt.SetBufferFormat(AJAAncillaryBufferFormat_FBVANC);
+	AJAAncillaryDataType	newAncType	(AJAAncillaryDataType_Unknown);
+	AJAAncillaryData *		pData		(AJA_NULL);
+	{
+		AJAAncillaryData	pkt;
+		status = pkt.InitWithReceivedData (gumpPacketData, inLocation);
+		if (AJA_FAILURE(status))
+			return status;
+		pkt.SetBufferFormat(AJAAncillaryBufferFormat_FBVANC);
 
-	AJAAncillaryDataType	newAncType	(AJAAncillaryDataFactory::GuessAncillaryDataType(pkt));
-	AJAAncillaryData *		pData		(AJAAncillaryDataFactory::Create(newAncType, pkt));
-	if (!pData)
-		return AJA_STATUS_FAIL;
+		newAncType = AJAAncillaryDataFactory::GuessAncillaryDataType(pkt);
+		pData = AJAAncillaryDataFactory::Create(newAncType, pkt);
+		if (!pData)
+			return AJA_STATUS_FAIL;
+	}
 
 	if (IsIncludingZeroLengthPackets()	||	pData->GetDC())
 	{
-		try {m_ancList.push_back(pData);}	//	Append to my list
-		catch(...)	{return AJA_STATUS_FAIL;}
+		try {m_ancList.push_back(pData);}	//	Append to my list, I now own the instance
+		catch(...)	{delete pData;  return AJA_STATUS_FAIL;}
+
+		if (inFrameNum	&&	pData->GetDID())
+			pData->SetFrameID(inFrameNum);
 	}
-	else ::BumpZeroLengthPacketCount();
-
-	if (inFrameNum	&&	pData->GetDID())
-		pData->SetFrameID(inFrameNum);
-
+	else
+	{
+		::BumpZeroLengthPacketCount();
+		delete pData;	//	Don't leak zero-length packets
+	}
 	return AJA_STATUS_SUCCESS;
 
 }	//	AddVANCData
