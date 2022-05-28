@@ -253,6 +253,8 @@ typedef struct AJAAncillaryDataLocation
 									&&  GetHorizontalOffset() == inRHS.GetHorizontalOffset();
 		}
 
+		inline bool		operator != (const AJAAncillaryDataLocation & inRHS) const		{return !(*this == inRHS);}
+
 		inline bool		operator < (const AJAAncillaryDataLocation & inRHS) const
 		{
 			const uint64_t	lhs	(OrdinalValue());
@@ -1100,6 +1102,12 @@ public:
 	static bool								Unpack8BitYCbCrToU16sVANCLine (const void * pInYUV8Line,
 																			U16Packet & outU16YUVLine,
 																			const uint32_t inNumPixels);
+
+	static void								GetInstanceCounts (uint32_t & outConstructed, uint32_t & outDestructed);
+	static uint32_t							GetNumActiveInstances (void);
+	static uint32_t							GetNumConstructed (void);
+	static uint32_t							GetNumDestructed (void);
+	static void								ResetInstanceCounts (void);
 
 	protected:
 		typedef std::vector<uint8_t>		ByteVector;
