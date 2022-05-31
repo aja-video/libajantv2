@@ -15,7 +15,7 @@
 	-	Simplicity. This is why there is minimal error checking in the code, which would detract from its purpose.
 	-	To demonstrate a specific group of features of the hardware and/or SDK.
 
-	All of the demos are “future ready” and will build and run with the <tt>NTV2_DEPRECATE</tt> macro defined (see \ref gs-deprecatemacro).
+	All of the demos are “future ready” and will build and run with the <tt>NTV2_DEPRECATE</tt> macro defined (see \ref gs-compatibility).
 
 	@note	Demos that use third-party libraries to enable direct DMA video transfers between AJA devices and third-party graphics cards
 			(e.g., to exploit the GPU) are not supported on MacOS.
