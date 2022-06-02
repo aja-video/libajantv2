@@ -5,7 +5,7 @@
 	@copyright	(C) 2013-2022 AJA Video Systems, Inc. All rights reserved.
 **/
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include <doctest/doctest.h>
+#include "doctest.h"
 #include "ajantv2/includes/ntv2endian.h"
 #include "ajabase/common/options_popt.h"
 #include "ajabase/common/performance.h"
