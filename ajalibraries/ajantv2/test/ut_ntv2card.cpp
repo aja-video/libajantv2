@@ -1,8 +1,8 @@
 #define DOCTEST_CONFIG_IMPLEMENT
 #define DOCTEST_THREAD_LOCAL
-#include <doctest/doctest.h>
-#include <argparse/argparse.h>
-#include <rapidcsv/rapidcsv.h>
+#include "doctest.h"
+#include "argparse.h"
+#include "rapidcsv.h"
 
 #include "test_support.hpp"
 
