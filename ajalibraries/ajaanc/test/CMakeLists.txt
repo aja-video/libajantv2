@@ -3,7 +3,8 @@ project(ut_ajaanc)
 set(TARGET_INCLUDE_DIRS
 	${APP_ROOT}/..
 	${AJALIBRARIES_ROOT}
-	${NON_AJA_ROOT})
+	${NON_AJA_ROOT}
+	${NON_AJA_ROOT}/doctest)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# noop
