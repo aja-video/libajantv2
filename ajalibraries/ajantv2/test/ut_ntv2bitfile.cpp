@@ -49,9 +49,9 @@ static int argparse_help(struct argparse *self, const struct argparse_option *op
                                      "show this help message and exit", \
                                      argparse_help, 0, OPT_NONEG)
 
-void check_bitfile_header(const std::string& path, json& fw_json);
-#define CHECK_BITFILE_HEADER(__path__, __json__) \
-    check_bitfile_header(__path__, __json__)
+void check_bitfile_header(const std::string& path, json& fw_json, bool update_json = false);
+#define CHECK_BITFILE_HEADER(__path__, __json__, __update__) \
+    check_bitfile_header(__path__, __json__, __update__)
 
 struct TestOptions {
     const char* firmware_path;  /* path to an NTV2 bitfile or directory of bitfiles */
@@ -73,13 +73,14 @@ enum class BitfileType {
 
 BitfileType get_bitfile_type(uint32_t flags)
 {
+    BitfileType type = BitfileType::Unknown;
     if (flags & NTV2_BITFILE_FLAG_TANDEM)
-        return BitfileType::Tandem;
+        type = BitfileType::Tandem;
     if (flags & NTV2_BITFILE_FLAG_PARTIAL)
-        return BitfileType::Partial;
+        type = BitfileType::Partial;
     if (flags & NTV2_BITFILE_FLAG_CLEAR)
-        return BitfileType::Clear;
-    return BitfileType::Unknown;
+        type = BitfileType::Clear;
+    return type;
 }
 
 std::string get_bitfile_type_string(const BitfileType& type)
@@ -160,7 +161,6 @@ bool is_firmware_subdir(const std::string& path)
     return false;
 }
 
-
 void check_with_msg(const std::string& bitfile, int expected, int found)
 {
     std::ostringstream oss;
@@ -168,7 +168,7 @@ void check_with_msg(const std::string& bitfile, int expected, int found)
     CHECK_MESSAGE(expected == found, oss.str());
 }
 
-void check_bitfile_header(const std::string& path, json& fw_json)
+void check_bitfile_header(const std::string& path, json& fw_json, bool update_json)
 {
     AJAStatus status = AJA_STATUS_SUCCESS;
     bool is_bitfile = is_bitfile_path(path);
@@ -182,10 +182,27 @@ void check_bitfile_header(const std::string& path, json& fw_json)
             for (auto& fw : fw_json["firmware"]) {
                 std::string fw_filename = fw["filename"];
                 if (fw_filename == bitfile_filename) {
-                    auto want_bitfile_ver = std::stoi(fw["bitfile_ver"].get_ref<std::string&>());
-                    auto want_bitfile_id = std::stoi(fw["bitfile_id"].get_ref<std::string&>());
-                    auto want_design_ver = std::stoi(fw["design_ver"].get_ref<std::string&>());
-                    auto want_design_id = std::stoi(fw["design_id"].get_ref<std::string&>());
+                    int want_bitfile_ver = 0;
+                    int want_bitfile_id = 0;
+                    int want_design_ver = 0;
+                    int want_design_id = 0;
+                    if (fw["bitfile_ver"].is_number())
+                        want_bitfile_ver = fw["bitfile_ver"].get<int>();
+                    else if (fw["bitfile_ver"].is_string())
+                        want_bitfile_ver = std::stoi(fw["bitfile_ver"].get_ref<std::string&>());
+                    if (fw["bitfile_id"].is_number())
+                        want_bitfile_id = fw["bitfile_id"].get<int>();
+                    else if (fw["bitfile_id"].is_string())
+                        want_bitfile_id = std::stoi(fw["bitfile_id"].get_ref<std::string&>());
+                    if (fw["design_ver"].is_number())
+                        want_design_ver = fw["design_ver"].get<int>();
+                    else if (fw["design_ver"].is_string())
+                        want_design_ver = std::stoi(fw["design_ver"].get_ref<std::string&>());
+                    if (fw["design_id"].is_number())
+                        want_design_id = fw["design_id"].get<int>();
+                    else if (fw["design_id"].is_string())
+                        want_design_id = std::stoi(fw["design_id"].get_ref<std::string&>());
+
                     SUBCASE("Bitfile Version") {
                         check_with_msg(fw_filename, want_bitfile_ver, int(nfo.bitfileVersion));
                     }
@@ -197,6 +214,12 @@ void check_bitfile_header(const std::string& path, json& fw_json)
                     }
                     SUBCASE("Design ID") {
                         check_with_msg(fw_filename, want_design_id, int(nfo.designID));
+                    }
+                    if (update_json) {
+                        fw["bitfile_ver"] = int(nfo.bitfileVersion);
+                        fw["bitfile_id"] = int(nfo.bitfileID);
+                        fw["design_ver"] = int(nfo.designVersion);
+                        fw["design_id"] = int(nfo.designID);
                     }
                     found_bitfile_in_json = true;
                     break;
@@ -218,7 +241,7 @@ TEST_SUITE("bitfile_header" * doctest::description("NTV2 bitfile header tests"))
         CHECK_EQ(AJAFileIO::GetDirectoryName(exe_path, exe_dir), AJA_STATUS_SUCCESS);
         auto fw_json_path = exe_dir + AJA_PATHSEP + kFirmwareJSON;
         json fw_json;
-        CHECK_EQ(read_json_file(fw_json_path, fw_json), AJA_STATUS_SUCCESS);
+        CHECK_EQ(read_json_file(fw_json_path, fw_json), true);
     }
     TEST_CASE("valid_firmware_path") {
         bool valid_path = false;
@@ -238,19 +261,22 @@ TEST_SUITE("bitfile_header" * doctest::description("NTV2 bitfile header tests"))
         AJAFileIO::GetDirectoryName(exe_path, exe_dir);
         auto fw_json_path = exe_dir + AJA_PATHSEP + kFirmwareJSON;
         json fw_json;
-        AJAStatus status = read_json_file(fw_json_path, fw_json);
-        CHECK_EQ(status, AJA_STATUS_SUCCESS);
+        CHECK_EQ(read_json_file(fw_json_path, fw_json), true);
         const std::string& path = gOptions.firmware_path;
         if (is_bitfile_path(path)) {
-            std::cout << "Bitfile: " << path << std::endl;
-            CHECK_BITFILE_HEADER(path, fw_json);
+            // std::cout << "Bitfile: " << path << std::endl;
+            CHECK_BITFILE_HEADER(path, fw_json, gOptions.update_json);
+            if (gOptions.update_json)
+                write_json_file(fw_json_path, fw_json);
         } else if (is_firmware_subdir(path)) {
             NTV2StringList bitfile_list;
             if (AJAFileIO::ReadDirectory(path, "*.bit", bitfile_list) == AJA_STATUS_SUCCESS) {
                 if (bitfile_list.size() > 0) {
                     for (auto &&bf : bitfile_list) {
-                        std::cout << "Bitfile: " << bf << std::endl;
-                        CHECK_BITFILE_HEADER(bf, fw_json);
+                        // std::cout << "Bitfile: " << bf << std::endl;
+                        CHECK_BITFILE_HEADER(bf, fw_json, gOptions.update_json);
+                        if (gOptions.update_json)
+                            write_json_file(fw_json_path, fw_json);
                     }
                 }
             }
