@@ -4654,6 +4654,54 @@ int RecordCopyAudio(PULWord pAja, PULWord pSR, int iStartSample, int iNumBytes, 
 #endif
 
 
+bool AddAudioTone (	ULWord &		outNumBytesWritten,
+					NTV2_POINTER &	inAudioBuffer,
+					ULWord &		inOutCurrentSample,
+					const ULWord	inNumSamples,
+					const double	inSampleRate,
+					const double	inAmplitude,
+					const double	inFrequency,
+					const ULWord	inNumBitsPerSample,
+					const bool		inByteSwap,
+					const ULWord	inNumChannels)
+{
+	outNumBytesWritten = 0;
+	if (inAudioBuffer.IsNULL())
+		return false;	//	NULL buffer
+
+	const ULWord numBytes (4 * inNumSamples * inNumChannels);
+	if (inAudioBuffer.GetByteCount() < numBytes)
+		return false;	//	buffer too small
+
+	double			j			(inOutCurrentSample);
+	const double	cycleLength (inSampleRate / inFrequency);
+	const double	scale		(double(ULWord(1 << (inNumBitsPerSample - 1))) - 1.0);
+	ULWord *		pAudioBuffer(inAudioBuffer);
+	NTV2_ASSERT(pAudioBuffer);
+
+	for (ULWord i(0);  i < inNumSamples;  i++)
+	{
+		const double	nextFloat	= double(::sin (j / cycleLength * (M_PI * 2.0)) * inAmplitude);
+		LWord			value		= LWord((nextFloat * scale) + double(0.5));
+
+		if (inByteSwap)
+			value = LWord(NTV2EndianSwap32(value));
+
+		for (ULWord channel(0);  channel < inNumChannels;  channel++)
+			*pAudioBuffer++ = ULWord(value);
+
+		j += 1.0;
+		if (j > cycleLength)
+			j -= cycleLength;
+		inOutCurrentSample++;
+	}	//	for each sample
+
+	outNumBytesWritten = numBytes;
+	return true;
+
+}	//	AddAudioTone (NTV2_POINTER)
+
+
 ULWord	AddAudioTone (	ULWord *		pAudioBuffer,
 						ULWord &		inOutCurrentSample,
 						const ULWord	inNumSamples,
@@ -4709,7 +4757,7 @@ ULWord	AddAudioTone (	UWord *			pAudioBuffer,
 
 	if (pAudioBuffer)
 	{
-		for (ULWord i = 0;	i < inNumSamples;  i++)
+		for (ULWord i(0);  i < inNumSamples;  i++)
 		{
 			const double	nextFloat	= double(::sin (j / cycleLength * (M_PI * 2.0)) * inAmplitude);
 			Word			value		= Word((nextFloat * scale) + double(0.5));
@@ -4717,7 +4765,7 @@ ULWord	AddAudioTone (	UWord *			pAudioBuffer,
 			if (inByteSwap)
 				value = Word(NTV2EndianSwap16(value));
 
-			for (ULWord channel = 0;  channel < inNumChannels;	channel++)
+			for (ULWord channel(0);  channel < inNumChannels;  channel++)
 				*pAudioBuffer++ = UWord(value);
 
 			j += 1.0;
@@ -4744,9 +4792,9 @@ ULWord	AddAudioTone (	ULWord *		pAudioBuffer,
 {
 	double			j [kNumAudioChannelsMax];
 	double			cycleLength [kNumAudioChannelsMax];
-	const double	scale		(double (ULWord (1 << (inNumBits - 1))) - 1.0);
+	const double	scale		(double(ULWord (1 << (inNumBits - 1))) - 1.0);
 
-	for (ULWord channel (0);  channel < inNumChannels;	channel++)
+	for (ULWord channel(0);  channel < inNumChannels;	channel++)
 	{
 		cycleLength[channel] = inSampleRate / pInFrequencies[channel];
 		j [channel] = inOutCurrentSample;
@@ -4754,11 +4802,11 @@ ULWord	AddAudioTone (	ULWord *		pAudioBuffer,
 
 	if (pAudioBuffer && pInAmplitudes && pInFrequencies)
 	{
-		for (ULWord i (0);	i < inNumSamples;  i++)
+		for (ULWord i(0);  i < inNumSamples;  i++)
 		{
-			for (ULWord channel (0);  channel < inNumChannels;	channel++)
+			for (ULWord channel(0);  channel < inNumChannels;  channel++)
 			{
-				const double	nextFloat	= double(::sin (j[channel] / cycleLength[channel] * (M_PI * 2.0)) * pInAmplitudes[channel]);
+				const double	nextFloat	= double(::sin(j[channel] / cycleLength[channel] * (M_PI * 2.0)) * pInAmplitudes[channel]);
 				LWord			value		= LWord((nextFloat * scale) + double(0.5));
 
 				if (inByteSwap)

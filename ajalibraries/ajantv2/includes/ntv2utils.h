@@ -746,6 +746,34 @@ AJAExport int  RecordCopyAudio (PULWord pAja, PULWord pSR, int iStartSample, int
 
 /**
 	@brief	Fills the given buffer with 32-bit (ULWord) audio tone samples.
+	@param[out]	outNumBytesWritten	Receives the number of bytes written into the buffer.
+	@param[in]	inAudioBuffer		Specifies the buffer to be filled with audio samples.
+									Must be at least  4 x numSamples x numChannels	bytes in size.
+	@param		inOutCurrentSample	On entry, specifies the sample where waveform generation is to resume.
+									On exit, receives the sample number where waveform generation left off.
+									Zero should be specified for the first invocation of this function.
+	@param[in]	inNumSamples		Specifies the number of samples to generate.
+	@param[in]	inSampleRate		Specifies the sample rate, in samples per second.
+	@param[in]	inAmplitude			Specifies the amplitude of the generated tone.
+	@param[in]	inFrequency			Specifies the frequency of the generated tone, in cycles per second (Hertz).
+	@param[in]	inNumBits			Specifies the number of bits per sample. Should be between 8 and 32 (inclusive).
+	@param[in]	inByteSwap			If true, byte-swaps each 32-bit sample before copying it into the destination buffer.
+	@param[in]	inNumChannels		Specifies the number of audio channels to produce.
+	@return		True if successful;  otherwise false.
+**/
+AJAExport bool AddAudioTone (	ULWord &		outNumBytesWritten,
+								NTV2_POINTER &	inAudioBuffer,
+								ULWord &		inOutCurrentSample,
+								const ULWord	inNumSamples,
+								const double	inSampleRate,
+								const double	inAmplitude,
+								const double	inFrequency,
+								const ULWord	inNumBits,
+								const bool		inByteSwap,
+								const ULWord	inNumChannels);
+
+/**
+	@brief	Fills the given buffer with 32-bit (ULWord) audio tone samples.
 	@param		pAudioBuffer		If non-NULL, must be a valid pointer to the buffer to be filled with audio samples,
 									and must be at least  4 x numSamples x numChannels	bytes in size.
 									Callers may specify NULL to have the function return the required size of the buffer.
