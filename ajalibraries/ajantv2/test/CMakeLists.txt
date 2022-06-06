@@ -3,7 +3,10 @@ project(ut_ajantv2)
 set(TARGET_INCLUDE_DIRS
 	${APP_ROOT}/..
 	${AJA_LIBRARIES_ROOT}
-	${NON_AJA_ROOT})
+	${NON_AJA_ROOT}
+	${NON_AJA_ROOT}/argparse
+	${NON_AJA_ROOT}/doctest
+	${NON_AJA_ROOT}/rapidcsv)
 
 set(ARGPARSE_SOURCES
 	${NON_AJA_ROOT}/argparse/argparse.h

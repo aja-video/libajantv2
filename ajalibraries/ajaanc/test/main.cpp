@@ -6,7 +6,7 @@
 **/
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
-#include "ntv2endian.h"
+#include "ajantv2/includes/ntv2endian.h"
 #include "ajabase/common/options_popt.h"
 #include "ajabase/common/performance.h"
 #include "ancillarydata_cea608_line21.h"
@@ -586,7 +586,7 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 				CHECK_EQ (defaultPkt.GetSID(), 0x00);
 				CHECK (defaultPkt.IsEmpty());
 				CHECK_EQ (defaultPkt.GetPayloadByteCount(), 0);
-				CHECK_EQ (defaultPkt.GetPayloadData(), AJA_NULL);
+				CHECK (defaultPkt.GetPayloadData() == AJA_NULL);
 				CHECK_NE (defaultPkt.GetDataLocation(), nullLocation);
 				CHECK (defaultPkt.GetDataLocation().IsValid());
 				CHECK (defaultPkt.IsLumaChannel());
@@ -623,16 +623,15 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 				}
 
 				//	Validate new "Unknown" packet from AJAAncillaryDataFactory::Create...
-				CHECK_EQ (pDefaultPkt, AJA_NULL);
+				CHECK (pDefaultPkt == AJA_NULL);
 				pDefaultPkt = AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Unknown);	//	constr +1  ==> 2
-				CHECK_NE(pDefaultPkt, AJA_NULL);
-				CHECK (pDefaultPkt);
+				CHECK(pDefaultPkt != AJA_NULL);
 				CHECK_FALSE (pDefaultPkt->GotValidReceiveData());
 				CHECK_EQ (pDefaultPkt->GetDID(), 0x00);
 				CHECK_EQ (pDefaultPkt->GetSID(), 0x00);
 				CHECK (pDefaultPkt->IsEmpty());
 				CHECK_EQ (pDefaultPkt->GetPayloadByteCount(), 0);
-				CHECK_EQ (pDefaultPkt->GetPayloadData(), AJA_NULL);
+				CHECK (pDefaultPkt->GetPayloadData() == AJA_NULL);
 				CHECK_NE (pDefaultPkt->GetDataLocation(), nullLocation);
 				CHECK (pDefaultPkt->GetDataLocation().IsValid());
 				CHECK (pDefaultPkt->IsLumaChannel());
@@ -659,7 +658,7 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 				CHECK_EQ (pDefaultPkt->GetSID(), 0x02);
 				CHECK_FALSE (pDefaultPkt->IsEmpty());
 				CHECK_EQ (pDefaultPkt->GetPayloadByteCount(), sizeof(pTestBytes));
-				CHECK_NE(pDefaultPkt->GetPayloadData(), AJA_NULL);
+				CHECK(pDefaultPkt->GetPayloadData() != AJA_NULL);
 				CHECK_EQ (pDefaultPkt->GetDC(), sizeof(pTestBytes));
 				CHECK_FALSE (pDefaultPkt->ChecksumOK());
 				CHECK(AJA_SUCCESS(pDefaultPkt->SetChecksum(pDefaultPkt->Calculate8BitChecksum())));
@@ -737,10 +736,10 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 					{
 						const AJAAncillaryDataType	dataType (gDataTypes[ndx]);
 						AJAAncillaryData *	pDefaultPkt2 = AJAAncillaryDataFactory::Create(dataType);	//	constr +1  ==> 5, 7, 9, 11, 13
-						CHECK_NE(pDefaultPkt2, AJA_NULL);
+						CHECK(pDefaultPkt2 != AJA_NULL);
 						CHECK(AJA_SUCCESS(pDefaultPkt2->GeneratePayloadData()));
 						AJAAncillaryData *	pClonePkt	= pDefaultPkt2->Clone();	//	constr +1  ==> 6, 8, 10, 12, 14
-						CHECK_NE(pClonePkt, AJA_NULL);
+						CHECK(pClonePkt != AJA_NULL);
 						CHECK_NE(pDefaultPkt2, pClonePkt);	//	Different objects in memory
 						CHECK_EQ(*pDefaultPkt2, *pClonePkt);
 						CHECK_EQ (AJAAncillaryDataFactory::GuessAncillaryDataType(pClonePkt), dataType);
@@ -898,10 +897,10 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 			CHECK(AJA_SUCCESS(pktList.AddVANCData(u16Pkts.front(), AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 9))));	//	Make a packet list from it
 			CHECK_EQ(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
 			pPkt = pktList.GetAncillaryDataAtIndex(0);			//	Get a pointer to the 1 and only packet
-			CHECK_NE(pPkt, AJA_NULL);							//	Pointer should be non-NULL
+			CHECK(pPkt != AJA_NULL);							//	Pointer should be non-NULL
 			CHECK_EQ(AJAAncillaryDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	Guessed Anc type should be CEA708
 			p708Pkt = reinterpret_cast <AJAAncillaryData_Cea708 *> (AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Cea708, pPkt));	//	Make a 708-specific packet instance
-			CHECK_NE(p708Pkt, AJA_NULL);								//	708-specific packet instance creation should work
+			CHECK(p708Pkt != AJA_NULL);								//	708-specific packet instance creation should work
 			CHECK(AJA_SUCCESS(p708Pkt->GetPayloadData(u16s)));			//	Get its packet data as uint16_t vector (with parity)
 			CHECK_EQ(uint32_t(u16s.size()), p708Pkt->GetDC());	//	Vector element count should match packet data count
 			CHECK(size_t(u16s.size()) <= sizeof(pv210YSamples));//	Vector element count should be <= original pkt data count
@@ -928,7 +927,7 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 			CHECK(AJA_SUCCESS(pktList.AddVANCData(u16Pkts.front(), AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_C, AJAAncillaryDataSpace_VANC, 9))));	//	Make a packet list from it
 			CHECK_EQ(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
 			pPkt = pktList.GetAncillaryDataAtIndex(0);			//	Get a pointer to the 1 and only packet
-			CHECK_NE(pPkt, AJA_NULL);							//	Pointer should be non-NULL
+			CHECK(pPkt != AJA_NULL);							//	Pointer should be non-NULL
 			CHECK_EQ(AJAAncillaryDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	This used to fail because it's not in Y channel, but changed in SDK 16.1 to succeed & log warning
 			CHECK(AJA_SUCCESS(pPkt->GetPayloadData(u16s)));				//	Get its packet data as uint16_t vector (with parity)
 			CHECK_EQ(uint32_t(u16s.size()), pPkt->GetDC());		//	Vector element count should match packet data count
@@ -953,7 +952,7 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 			CHECK(AJA_SUCCESS(pktList.AddVANCData(u16Pkts.front(), AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Both, AJAAncillaryDataSpace_VANC, 9))));	//	Make a packet list from it
 			CHECK_EQ(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
 			pPkt = pktList.GetAncillaryDataAtIndex(0);			//	Get a pointer to the 1 and only packet
-			CHECK_NE(pPkt, AJA_NULL);							//	Pointer should be non-NULL
+			CHECK(pPkt != AJA_NULL);							//	Pointer should be non-NULL
 			CHECK_EQ(AJAAncillaryDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	This used to fail, but changed in SDK 16.1 to succeed as CEA708 starting to be carried in SD
 			CHECK(AJA_SUCCESS(pPkt->GetPayloadData(u16s)));		//	Get its packet data as uint16_t vector (with parity)
 			CHECK_EQ(uint32_t(u16s.size()), pPkt->GetDC());		//	Vector element count should match packet data count
@@ -1068,7 +1067,7 @@ AJA_sDEBUG(AJA_DebugUnit_SMPTEAnc, "yPackets: " << yPackets);
 AJA_sDEBUG(AJA_DebugUnit_SMPTEAnc, "compPkts: " << compPkts);
 		CHECK_EQ(compPkts.CountAncillaryDataWithID (TEST_DID, TEST_SID), 1);
 		AJAAncillaryData *	pCompPkt	(compPkts.GetAncillaryDataWithID (TEST_DID, TEST_SID));
-		CHECK_NE(pCompPkt, AJA_NULL);
+		CHECK(pCompPkt != AJA_NULL);
 		CHECK_EQ(*pCompPkt, pkt);
 	}
 
@@ -1205,7 +1204,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 						if (pktList.CountAncillaryData() != ((YUVLine.size() < 240) ? 1 : 2))	cerr << "IN ITERATION YUVLine.size=" << YUVLine.size() << " IN fbRowOffset=" << fbRowOffset << "..." << endl;
 						CHECK_EQ(pktList.CountAncillaryData(),  YUVLine.size() < 240  ?  1  :  2);
 						pPkt1 = pktList.GetAncillaryDataWithID (0x45, 0x01);
-						CHECK_NE(pPkt1, AJA_NULL);	//	Should have packet DID=0x41/SID=0x01
+						CHECK(pPkt1 != AJA_NULL);	//	Should have packet DID=0x41/SID=0x01
 						CHECK_EQ(pPkt1->GetDID(), 0x45);	//	Should have DID=0x41
 						CHECK_EQ(pPkt1->GetSID(), 0x01);	//	Should have SID=0x01
 						CHECK_EQ(pPkt1->GetDC(), 216);	//	Should have DC=216
@@ -1224,7 +1223,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 							if (pktList.CountAncillaryData() != 2)	cerr << "IN ITERATION YUVLine.size=" << YUVLine.size() << " IN fbRowOffset=" << fbRowOffset << "..." << endl;
 							CHECK_EQ(pktList.CountAncillaryData(), 2);	//	Should have two packets
 							pPkt2 = pktList.GetAncillaryDataWithID (0x45, 0x02);
-							CHECK_NE(pPkt2, AJA_NULL);	//	Should have packet DID=0x41/SID=0x02
+							CHECK(pPkt2 != AJA_NULL);	//	Should have packet DID=0x41/SID=0x02
 							CHECK_EQ(pPkt2->GetDID(), 0x45);	//	Should have DID=0x41
 							CHECK_EQ(pPkt2->GetSID(), 0x02);	//	Should have SID=0x02
 							CHECK_EQ(pPkt2->GetDC(), 2);	//	Should have DC=2
@@ -2270,7 +2269,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 
 
 			AJAAncillaryData_Cea608_Line21 * pLine21Packet = reinterpret_cast <AJAAncillaryData_Cea608_Line21 *> (AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Cea608_Line21));
-			CHECK_NE(pLine21Packet, AJA_NULL);
+			CHECK(pLine21Packet != AJA_NULL);
 			CHECK(AJA_SUCCESS(pLine21Packet->GeneratePayloadData()));
 			CHECK(AJA_SUCCESS(pLine21Packet->SetDataLocation (AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 21))));
 			CHECK(AJA_SUCCESS(pLine21Packet->SetCEA608Bytes (AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('b'))));
