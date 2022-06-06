@@ -10,7 +10,7 @@
 // need to define this so will work with compilers that don't support thread_local
 // ie xcode 6, 7
 #define DOCTEST_THREAD_LOCAL
-#include <doctest/doctest.h>
+#include "doctest.h"
 
 #include <vector>
 
