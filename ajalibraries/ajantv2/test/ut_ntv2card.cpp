@@ -267,7 +267,7 @@ public:
     uint32_t NumFail() const { return _num_fail; }
 
     AJAStatus Initialize(const std::string& json_path, std::vector<TestCase>& test_cases) {
-        AJA_RETURN_STATUS(read_json_file(json_path, _test_json));
+        AJA_RETURN_STATUS(read_json_file(json_path, _test_json)?AJA_STATUS_SUCCESS:AJA_STATUS_FAIL);
         for (auto&& vj : _test_json["vpid_tests"]) {
             auto vpid_db_id = vj["vpid_db_id"].get<int>(); // id of the original VPID test case from the QA Database
             auto vf = (NTV2VideoFormat)vj["vid_fmt_value"].get<int>();
