@@ -237,15 +237,21 @@ struct TestCase {
 class FramestoreSDI {
 public:
     FramestoreSDI(ULWord cdx1, ULWord cdx2)
-        : _src_card{new CNTV2Card(cdx1)},
-          _dst_card{new CNTV2Card(cdx2)},
+        : _src_card{nullptr},
+          _dst_card{nullptr},
           _test_json{},
           _clear_routing{true},
           _num_tests{0},
           _num_done{0},
           _num_pass{0},
           _num_fail{0},
-          _failed_tests{} {}
+          _failed_tests{} {
+            _src_card = new CNTV2Card(cdx1);
+            if (cdx1 == cdx2)
+                _dst_card = _src_card;
+            else
+                _dst_card = new CNTV2Card(cdx2);
+          }
     ~FramestoreSDI() {
         LOGINFO("[ framestore_sdi ] Tests: " << _num_done << "/" << _num_tests << " Pass: " << _num_pass << " Fail: " << _num_fail);
         std::ostringstream failed_oss;
@@ -267,7 +273,8 @@ public:
     uint32_t NumFail() const { return _num_fail; }
 
     AJAStatus Initialize(const std::string& json_path, std::vector<TestCase>& test_cases) {
-        AJA_RETURN_STATUS(read_json_file(json_path, _test_json));
+        if (!read_json_file(json_path, _test_json))
+            return AJA_STATUS_FAIL;
         for (auto&& vj : _test_json["vpid_tests"]) {
             auto vpid_db_id = vj["vpid_db_id"].get<int>(); // id of the original VPID test case from the QA Database
             auto vf = (NTV2VideoFormat)vj["vid_fmt_value"].get<int>();
@@ -293,6 +300,7 @@ public:
     }
 
     bool ExecuteTest(const TestCase& tc) {
+        bool use_single_card = _src_card == _dst_card;
         const auto& vf = tc.vf;
         const auto& pf = tc.pf;
         const auto& vanc_mode = tc.vanc_mode;
@@ -321,7 +329,8 @@ public:
         auto dst_router = qa::PresetRouter(dst_cfg, _dst_card);
 
         SetCardBaseline(_src_card, _clear_routing);
-        SetCardBaseline(_dst_card, _clear_routing);
+        if (!use_single_card)
+            SetCardBaseline(_dst_card, _clear_routing);
 
         NTV2FormatDescriptor fd(vf, pf, vanc_mode);
         ULWord frame_size = fd.GetTotalBytes();
@@ -337,7 +346,7 @@ public:
         CHECK_EQ(_dst_card->DMAWriteFrame(gOptions->inp_frame, reinterpret_cast<const ULWord*>(_zeroes.data()), frame_size), true);
 
         CHECK_EQ(src_router.ApplyRouting(_clear_routing, true), AJA_STATUS_SUCCESS);
-        CHECK_EQ(dst_router.ApplyRouting(_clear_routing, true), AJA_STATUS_SUCCESS);
+        CHECK_EQ(dst_router.ApplyRouting(_clear_routing && !use_single_card, true), AJA_STATUS_SUCCESS);
         AJATime::Sleep(500);
         // if (!is_routed) {
         //     is_routed = true;
@@ -378,9 +387,12 @@ public:
         NTV2_POINTER master_bytes(_buffer.data(), raster_bytes);
         NTV2_POINTER compare_bytes(_readback.data(), raster_bytes);
         CNTV2PixelComponentReader master(master_bytes, fd);
+        CNTV2PixelComponentReader master2(master_bytes, fd);
         CNTV2PixelComponentReader compare(compare_bytes, fd);
-        CHECK_EQ(master.ReadComponentValues(), AJA_STATUS_SUCCESS);
-        CHECK_EQ(compare.ReadComponentValues(), AJA_STATUS_SUCCESS);
+        CHECK_EQ(master.ReadComponents(), AJA_STATUS_SUCCESS);
+        master2.ReadComponentValues();
+        CHECK(master == master2);
+        CHECK_EQ(compare.ReadComponents(), AJA_STATUS_SUCCESS);
         bool result = (master == compare);
         if (result == true) {
             _num_pass++;
@@ -440,7 +452,7 @@ TEST_SUITE("framestore_sdi" * doctest::description("SDI loopback tests")) {
         if (fs_sdi == nullptr) {
             CNTV2DeviceScanner scanner;
             const size_t num_devices = scanner.GetNumDevices();
-            if (num_devices < 2)
+            if (num_devices < 2 && gOptions->card_a_index != gOptions->card_b_index)
                 LOGERR("SDI Loopback tests require two boards connected to the host system!");
             REQUIRE_GE(num_devices, 2);
 
@@ -528,7 +540,10 @@ int main(int argc, const char** argv) {
     argparse_parse(&argparse, argc, (const char**)argv);
 
     gCard = new CNTV2Card(gOptions->card_a_index, "");
-    gCard2 = new CNTV2Card(gOptions->card_b_index, "");
+    if (gOptions->card_a_index == gOptions->card_b_index)
+        gCard2 = gCard;
+    else
+        gCard2 = new CNTV2Card(gOptions->card_b_index, "");
     int res = ctx.run();
     if (gCard) {
         gCard->SetEveryFrameServices(gTaskMode);
