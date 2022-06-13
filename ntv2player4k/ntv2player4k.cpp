@@ -619,7 +619,7 @@ void NTV2Player4K::SetupSDITransmitters (const NTV2Channel inFirstSDI, const UWo
 bool NTV2Player4K::Route4KDownConverter (void)
 {
 	if (!::NTV2DeviceCanDoWidget(mDeviceID, NTV2_Wgt4KDownConverter)  ||  !::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtSDIMonOut1))
-		return false;
+		return true;
 
 	const bool	canVerify		(mDevice.HasCanConnectROM());
 	UWord		connectFailures	(0);
