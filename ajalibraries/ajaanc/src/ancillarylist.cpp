@@ -377,7 +377,7 @@ AJAStatus AJAAncillaryList::RemoveAncillaryData (AJAAncillaryData * pAncData)
 		return AJA_STATUS_NULL;
 
 #if defined(AJAANCLISTIMPL_VECTOR)
-	AJAAncDataListConstIter it;
+	AJAAncDataListIter it;
 	for (it = m_ancList.begin();  it != m_ancList.end();  ++it)
 		if (*it == pAncData)
 			break;

@@ -431,7 +431,7 @@ or the \ref usinglogreader (assuming the <tt>AutoCirculate_39</tt> message group
 <tt>AutoCirculate channel 3:  85 frames (10 thru 94) exceeds 40-frame max audio buffer capacity</tt>
 
 
-@subsection	autocirculatemon	Monitoring AutoCirculate Activity with \ref usingntv2watcher Tool
+@subsection	autocirculatemon	Monitoring AutoCirculate Activity with NTV2Watcher Tool
 
 \ref usingntv2watcher has an \ref inspectorac that shows AutoCirculate activity in near-real-time for all possible channels
 on any AJA device attached to the host.
