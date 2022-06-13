@@ -24,6 +24,17 @@ enum AJAScaleType
 };
 
 
+enum AJASubSampleType
+{
+	AJASubSampleNone,
+	AJASubSample422,
+	AJASubSample420,
+	AJASubSample444,
+	AJASubSample4444
+};
+
+
+
 /**
 	@class	AJAPixelFormat pixelformat.h "streams/common/pixelformat.h"
 	@brief	Storage and utility class for AJA_PixelFormat defines.
