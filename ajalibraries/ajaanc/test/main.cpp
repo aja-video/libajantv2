@@ -4,8 +4,9 @@
 	@brief		Basic Functionality Tests for the AJA Anc Library.
 	@copyright	(C) 2013-2022 AJA Video Systems, Inc. All rights reserved.
 **/
-#include "ntv2bft.h"
-#include "ntv2endian.h"
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
+#include "ajantv2/includes/ntv2endian.h"
 #include "ajabase/common/options_popt.h"
 #include "ajabase/common/performance.h"
 #include "ancillarydata_cea608_line21.h"
@@ -26,11 +27,16 @@
 using namespace std;
 using namespace std::rel_ops;
 
-#define	LOGMYERROR(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Error,		__FUNCTION__ << ":  " << __x__)
-#define	LOGMYWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
-#define	LOGMYNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":  " << __x__)
-#define	LOGMYINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
-#define	LOGMYDEBUG(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
+#define	LOGMYERROR(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Error,		__x__)
+#define	LOGMYWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Warning,	__x__)
+#define	LOGMYNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Notice,	__x__)
+#define	LOGMYINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Info,		__x__)
+#define	LOGMYDEBUG(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Debug,		__x__)
+#if defined(_DEBUG)
+	#define	DBG_CHECK_EQ(__x__, __y__)		CHECK_EQ((__x__), (__y__))
+#else
+	#define	DBG_CHECK_EQ(__x__, __y__)	
+#endif
 
 static int	gIsVerbose(0);	//	Verbose output?
 static NTV2_POINTER	gGumpBuffers[NTV2_MAX_NUM_VIDEO_FORMATS];
@@ -38,47 +44,6 @@ static NTV2_POINTER gRTPBuffers[NTV2_MAX_NUM_VIDEO_FORMATS];
 static NTV2_POINTER gVanc8Buffers[NTV2_MAX_NUM_VIDEO_FORMATS];
 static NTV2_POINTER gVanc10Buffers[NTV2_MAX_NUM_VIDEO_FORMATS];
 
-
-	#define	SHOULD_SUCCEED(_x_)			do																															\
-										{																															\
-											const AJAStatus __err__ (_x_);																							\
-											if (AJA_FAILURE (__err__))																								\
-											{																														\
-												STDERR	<< "## ERROR:  '" << __FUNCTION__ << "' failed at line " << __LINE__ << " of " << __FILE__ << ":" << ENDL	\
-														<< "           Expected 'AJA_STATUS_SUCCESS' or 'AJA_STATUS_TRUE' from '" << #_x_ << "'" << ENDL			\
-														<< "           Instead got '" << ::AJAStatusToString (__err__) << "'"  << ENDL;								\
-												if (STOP_AFTER_FAILURE)																								\
-												{																													\
-													if (DEBUG_BREAK_AFTER_FAILURE)																					\
-														DEBUG_BREAK ();																								\
-													return false;																									\
-												}																													\
-											}																														\
-											else if (SHOW_PASSED)																									\
-												STDOUT	<< "## NOTE:  '" << #_x_ << "' in '" << __FUNCTION__ << "' returned '" << ::AJAStatusToString (__err__)		\
-														<< "'" << ENDL;																								\
-										} while (false)
-
-
-	#define	SHOULD_FAIL(_x_)			do																															\
-										{																															\
-											const AJAStatus __err__ (_x_);																							\
-											if (AJA_SUCCESS (__err__))																								\
-											{																														\
-												STDERR	<< "## ERROR:  '" << __FUNCTION__ << "' failed at line " << __LINE__ << " of " << __FILE__ << ":" << ENDL	\
-														<< "           Expected 'AJA_FAILURE' from '" << #_x_ << "'" << ENDL										\
-														<< "           Instead got '" << ::AJAStatusToString (__err__) << "'" << ENDL;								\
-												if (STOP_AFTER_FAILURE)																								\
-												{																													\
-													if (DEBUG_BREAK_AFTER_FAILURE)																					\
-														DEBUG_BREAK ();																								\
-													return false;																									\
-												}																													\
-											}																														\
-											else if (SHOW_PASSED)																									\
-												STDOUT	<< "## NOTE:  '" << #_x_ << "' in '" << __FUNCTION__ << "' returned '" << ::AJAStatusToString (__err__)		\
-														<< "'" << ENDL;																								\
-										} while (false)
 
 static const AJA_FrameRate	sNTV2Rate2AJARate[] = {	AJA_FrameRate_Unknown	//	NTV2_FRAMERATE_UNKNOWN	= 0,
 													,AJA_FrameRate_6000		//	NTV2_FRAMERATE_6000		= 1,
@@ -101,19 +66,87 @@ static const AJA_FrameRate	sNTV2Rate2AJARate[] = {	AJA_FrameRate_Unknown	//	NTV2
 													,AJA_FrameRate_1800		//	NTV2_FRAMERATE_1800		= 17,	// Formerly 11 in older SDKs
 													,AJA_FrameRate_1798		//	NTV2_FRAMERATE_1798		= 18,	// Formerly 12 in older SDKs
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
-													};
+										};
+//	This sequence of 10-bit YUV component values contains two SD ancillary data packets,
+//	as they would appear in a NTV2_FBF_10BIT_YCBCR frame buffer.
+//		DID=0x45 SDID=0x01 DC=216 CS=0xD2
+//		DID=0x45 SDID=0x02 DC=2   CS=0x62
+//	It's used in BFT_YUVComponentsTo10BitYUVPackedBuffer,  BFT_SMPTEAncData
+static const vector<uint16_t> SD10BitYUVComponents = {	//	Cb		Y		Cr		Cb		Y		Cr		Cb		Y		Cr		Cb		Y		Cr			Cb		Y		Cr		Cb		Y		Cr		Cb		Y		Cr		Cb		Y		Cr
+															0x000,	0x3FF,	0x3FF,	0x145,	0x101,	0x2D8,	0x120,	0x221,	0x222,	0x123,	0x224,	0x125,		0x126,	0x227,	0x228,	0x129,	0x12A,	0x22B,	0x12C,	0x22D,	0x22E,	0x12F,	0x230,	0x131,
+															0x132,	0x233,	0x134,	0x235,	0x236,	0x137,	0x138,	0x239,	0x23A,	0x13B,	0x23C,	0x13D,		0x13E,	0x23F,	0x140,	0x241,	0x242,	0x143,	0x244,	0x145,	0x146,	0x247,	0x248,	0x149,
+															0x14A,	0x24B,	0x14C,	0x24D,	0x24E,	0x14F,	0x250,	0x151,	0x152,	0x253,	0x154,	0x255,		0x256,	0x157,	0x158,	0x259,	0x25A,	0x15B,	0x25C,	0x15D,	0x15E,	0x25F,	0x260,	0x161,
+															0x162,	0x263,	0x164,	0x265,	0x266,	0x167,	0x168,	0x269,	0x26A,	0x16B,	0x26C,	0x16D,		0x16E,	0x26F,	0x170,	0x271,	0x272,	0x173,	0x274,	0x175,	0x176,	0x277,	0x278,	0x179,
+															0x17A,	0x27B,	0x17C,	0x27D,	0x27E,	0x17F,	0x180,	0x281,	0x282,	0x183,	0x284,	0x185,		0x186,	0x287,	0x288,	0x189,	0x18A,	0x28B,	0x18C,	0x28D,	0x28E,	0x18F,	0x290,	0x191,
+															0x192,	0x293,	0x194,	0x295,	0x296,	0x197,	0x198,	0x299,	0x29A,	0x19B,	0x29C,	0x19D,		0x19E,	0x29F,	0x2A0,	0x1A1,	0x1A2,	0x2A3,	0x1A4,	0x2A5,	0x2A6,	0x1A7,	0x1A8,	0x2A9,
+															0x2AA,	0x1AB,	0x2AC,	0x1AD,	0x1AE,	0x2AF,	0x1B0,	0x2B1,	0x2B2,	0x1B3,	0x2B4,	0x1B5,		0x1B6,	0x2B7,	0x2B8,	0x1B9,	0x1BA,	0x2BB,	0x1BC,	0x2BD,	0x2BE,	0x1BF,	0x2C0,	0x1C1,
+															0x1C2,	0x2C3,	0x1C4,	0x2C5,	0x2C6,	0x1C7,	0x1C8,	0x2C9,	0x2CA,	0x1CB,	0x2CC,	0x1CD,		0x1CE,	0x2CF,	0x1D0,	0x2D1,	0x2D2,	0x1D3,	0x2D4,	0x1D5,	0x1D6,	0x2D7,	0x2D8,	0x1D9,
+															0x1DA,	0x2DB,	0x1DC,	0x2DD,	0x2DE,	0x1DF,	0x1E0,	0x2E1,	0x2E2,	0x1E3,	0x2E4,	0x1E5,		0x1E6,	0x2E7,	0x2E8,	0x1E9,	0x1EA,	0x2EB,	0x1EC,	0x2ED,	0x2EE,	0x1EF,	0x2F0,	0x1F1,
+															0x1F2,	0x2F3,	0x1F4,	0x2F5,	0x2F6,	0x1F7,	0x2D2,	0x000,	0x3FF,	0x3FF,	0x145,	0x102,		0x102,	0x20F,	0x20A,	0x162,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
+															0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040	};
+static const vector<uint16_t>	YUVLine (SD10BitYUVComponents);
 
-class CNTV2AncDataTester
-{
-	public:
-		static bool BFT_AncEnums (void)
+static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianSwap32HtoB(inValue);}
+
+
+		TEST_CASE("BFT_AncEnums")
 		{
+			AJADebug::Open();
 			//	AJAAncillaryDataType
 			for (unsigned ordinal(0);  ordinal < AJAAncillaryDataType_Size;  ordinal++)
 			{
 				const AJAAncillaryDataType	ancType = AJAAncillaryDataType(ordinal);
 				//cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncillaryDataTypeToString(ancType,false) << "\t" << ::AJAAncillaryDataTypeToString(ancType,true) << endl;
-				SHOULD_BE_TRUE(IS_VALID_AJAAncillaryDataType(ancType));
+				CHECK(IS_VALID_AJAAncillaryDataType(ancType));
 			}
 
 			//	AJAAncillaryDataLink
@@ -122,9 +155,9 @@ class CNTV2AncDataTester
 				const AJAAncillaryDataLink	link = AJAAncillaryDataLink(ordinal);
 				cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncillaryDataLinkToString(link,false) << "\t" << ::AJAAncillaryDataLinkToString(link,true) << endl;
 				if (link == AJAAncillaryDataLink_Unknown)
-					SHOULD_BE_FALSE(IS_VALID_AJAAncillaryDataLink(link));
+					CHECK_FALSE(IS_VALID_AJAAncillaryDataLink(link));
 				else
-					SHOULD_BE_TRUE(IS_VALID_AJAAncillaryDataLink(link));
+					CHECK(IS_VALID_AJAAncillaryDataLink(link));
 			}
 
 			//	AJAAncillaryDataStream
@@ -133,9 +166,9 @@ class CNTV2AncDataTester
 				const AJAAncillaryDataStream	stream = AJAAncillaryDataStream(ordinal);
 				cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncillaryDataStreamToString(stream,false) << "\t" << ::AJAAncillaryDataStreamToString(stream,true) << endl;
 				if (stream == AJAAncillaryDataStream_Unknown)
-					SHOULD_BE_FALSE(IS_VALID_AJAAncillaryDataStream(stream));
+					CHECK_FALSE(IS_VALID_AJAAncillaryDataStream(stream));
 				else
-					SHOULD_BE_TRUE(IS_VALID_AJAAncillaryDataStream(stream));
+					CHECK(IS_VALID_AJAAncillaryDataStream(stream));
 			}
 
 			//	AJAAncillaryDataChannel
@@ -144,9 +177,9 @@ class CNTV2AncDataTester
 				const AJAAncillaryDataChannel	chan = AJAAncillaryDataChannel(ordinal);
 				cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncillaryDataChannelToString(chan,false) << "\t" << ::AJAAncillaryDataChannelToString(chan,true) << endl;
 				if (chan == AJAAncillaryDataChannel_Unknown)
-					SHOULD_BE_FALSE(IS_VALID_AJAAncillaryDataChannel(chan));
+					CHECK_FALSE(IS_VALID_AJAAncillaryDataChannel(chan));
 				else
-					SHOULD_BE_TRUE(IS_VALID_AJAAncillaryDataChannel(chan));
+					CHECK(IS_VALID_AJAAncillaryDataChannel(chan));
 			}
 
 			//	AJAAncillaryDataSpace
@@ -155,14 +188,13 @@ class CNTV2AncDataTester
 				const AJAAncillaryDataSpace	space = AJAAncillaryDataSpace(ordinal);
 				cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncillaryDataSpaceToString(space,false) << "\t" << ::AJAAncillaryDataSpaceToString(space,true) << endl;
 				if (space == AJAAncillaryDataSpace_Unknown)
-					SHOULD_BE_FALSE(IS_VALID_AJAAncillaryDataSpace(space));
+					CHECK_FALSE(IS_VALID_AJAAncillaryDataSpace(space));
 				else
-					SHOULD_BE_TRUE(IS_VALID_AJAAncillaryDataSpace(space));
+					CHECK(IS_VALID_AJAAncillaryDataSpace(space));
 			}
-			return true;
-		}
+		}	//	TEST_CASE("BFT_AncEnums")
 
-		static bool BFT_DataLocation (void)
+		TEST_CASE("BFT_DataLocation")
 		{
 			typedef	std::set<AJAAncillaryDataLocation>	AncLocationSet;
 			//typedef	AncLocationSet::const_iterator		AncLocationSetConstIter;
@@ -175,8 +207,8 @@ class CNTV2AncDataTester
 			AJAAncillaryDataLocation	nullLoc;
 			AJAAncillaryDataLocation	aFromSets, toSetAllAtOnce, toBeSet;
 
-			SHOULD_BE_FALSE(nullLoc.IsValid());	//	Invalid, because default constructor makes everything "unknown"
-			SHOULD_BE_TRUE(nullLoc == aFromSets);
+			CHECK_FALSE(nullLoc.IsValid());	//	Invalid, because default constructor makes everything "unknown"
+			CHECK(nullLoc == aFromSets);
 
 			for (unsigned lineNdx(0);  lineNdx < sizeof(lines)/sizeof(lines[0]);  lineNdx++)
 			{
@@ -198,18 +230,18 @@ class CNTV2AncDataTester
 								toBeSet.SetDataLink(links[linkNdx]);
 								toSetAllAtOnce.SetDataLink(links[linkNdx]).SetDataChannel(channels[chanNdx]).SetLineNumber(lineNum).SetHorizontalOffset(hOffset).SetDataStream(streams[streamNdx]);
 								aFromSets.SetLineNumber(lineNum).SetHorizontalOffset(hOffsets[hOffNdx]).SetDataChannel(channels[chanNdx]).SetDataStream(streams[streamNdx]).SetDataLink(links[linkNdx]);
-								SHOULD_BE_TRUE(bFromConstructor == toBeSet);
-								SHOULD_BE_TRUE(aFromSets == bFromConstructor);
-								SHOULD_BE_TRUE(aFromSets == toSetAllAtOnce);
-								SHOULD_BE_TRUE(aFromSets.IsValid());
-								SHOULD_BE_EQUAL(aFromSets.GetDataLink(), links[linkNdx]);
-								SHOULD_BE_EQUAL(bFromConstructor.GetDataStream(), streams[streamNdx]);
-								SHOULD_BE_EQUAL(toBeSet.GetDataChannel(), channels[chanNdx]);
-								SHOULD_BE_EQUAL(aFromSets.GetLineNumber(), lineNum);
-								SHOULD_BE_EQUAL(aFromSets.GetHorizontalOffset(), hOffset);
+								CHECK(bFromConstructor == toBeSet);
+								CHECK(aFromSets == bFromConstructor);
+								CHECK(aFromSets == toSetAllAtOnce);
+								CHECK(aFromSets.IsValid());
+								CHECK_EQ(aFromSets.GetDataLink(), links[linkNdx]);
+								CHECK_EQ(bFromConstructor.GetDataStream(), streams[streamNdx]);
+								CHECK_EQ(toBeSet.GetDataChannel(), channels[chanNdx]);
+								CHECK_EQ(aFromSets.GetLineNumber(), lineNum);
+								CHECK_EQ(aFromSets.GetHorizontalOffset(), hOffset);
 								aFromSets.Reset();
-								SHOULD_BE_FALSE(aFromSets == bFromConstructor);
-								SHOULD_BE_FALSE(aFromSets.IsValid());
+								CHECK_FALSE(aFromSets == bFromConstructor);
+								CHECK_FALSE(aFromSets.IsValid());
 								ancLocations.insert(bFromConstructor);
 							}	//	for each AJAAncillaryDataLink
 						}	//	for each horizOffset
@@ -220,217 +252,53 @@ class CNTV2AncDataTester
 
 			{	//	Ordering Tests
 				AJAAncDataLoc	a, b;
-				SHOULD_BE_EQUAL(a, b);	//	AJAAncDataLoc doesn't have != -- requires rel_ops
+				CHECK_EQ(a, b);	//	AJAAncDataLoc doesn't have != -- requires rel_ops
 				//	Check Individual Component Magnitude Comparison
 				//	Line Number (highest)
 				a.Reset();  a.SetLineNumber(100);  b = a;  b.SetLineNumber(99);		//	B precedes A
-				SHOULD_BE_TRUE(b < a);
-				SHOULD_BE_FALSE(b == a);
+				CHECK(b < a);
+				CHECK_FALSE(b == a);
 				//	Horizontal Offset
 				a.Reset();  a.SetHorizontalOffset(1023);  b = a;  b.SetHorizontalOffset(1022);	//	B precedes A
-				SHOULD_BE_TRUE(b < a);
-				SHOULD_BE_FALSE(b == a);
+				CHECK(b < a);
+				CHECK_FALSE(b == a);
 				//	Horizontal Offset -- HANC anywhere versus VANC anywhere:
 				a.Reset();  a.SetHorizontalOffset(AJAAncDataHorizOffset_AnyHanc);  b = a;  b.SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);	//	B precedes A
-				SHOULD_BE_TRUE(b < a);
-				SHOULD_BE_FALSE(b == a);
+				CHECK(b < a);
+				CHECK_FALSE(b == a);
 				//	Data Channel
 				a.Reset();  a.SetDataChannel(AJAAncillaryDataChannel_Y);  b = a;  b.SetDataChannel(AJAAncillaryDataChannel_C);	//	B precedes A
-				SHOULD_BE_TRUE(b < a);
-				SHOULD_BE_FALSE(b == a);
+				CHECK(b < a);
+				CHECK_FALSE(b == a);
 				//	Data Stream
 				a.Reset();  a.SetDataStream(AJAAncillaryDataStream_3);  b = a;  b.SetDataStream(AJAAncillaryDataStream_2);	//	B precedes A
-				SHOULD_BE_TRUE(b < a);
-				SHOULD_BE_FALSE(b == a);
+				CHECK(b < a);
+				CHECK_FALSE(b == a);
 				//	Data Link
 				a.Reset();  a.SetDataLink(AJAAncillaryDataLink_B);  b = a;  b.SetDataLink(AJAAncillaryDataLink_A);	//	B precedes A
-				SHOULD_BE_TRUE(b < a);
-				SHOULD_BE_FALSE(b == a);
+				CHECK(b < a);
+				CHECK_FALSE(b == a);
 
 				//	Combo
 				a.Reset();
 				a.SetDataLink(AJAAncillaryDataLink_B).SetDataStream(AJAAncillaryDataStream_3).SetDataChannel(AJAAncillaryDataChannel_Y);
 				a.SetHorizontalOffset(1000).SetLineNumber(12);
 				b = a;  b.SetDataLink(AJAAncillaryDataLink_A);
-				SHOULD_BE_TRUE(b < a);
+				CHECK(b < a);
 				b = a;  b.SetDataStream(AJAAncillaryDataStream_2);
-				SHOULD_BE_TRUE(b < a);
+				CHECK(b < a);
 				b = a;  b.SetDataChannel(AJAAncillaryDataChannel_C);
-				SHOULD_BE_TRUE(b < a);
+				CHECK(b < a);
 				b = a;  b.SetHorizontalOffset(a.GetHorizontalOffset()-1);
-				SHOULD_BE_TRUE(b < a);
+				CHECK(b < a);
 				b = a;  b.SetLineNumber(a.GetLineNumber()-1);
-				SHOULD_BE_TRUE(b < a);
+				CHECK(b < a);
 			}
 			LOGMYNOTE("Passed");	cerr << "BFT_DataLocation passed" << endl;
-			return true;
-		}
-
-		static bool	BFT_AncDataCEA608Vanc (void)
-		{
-			static const uint8_t pGump608Vanc[]	= {	0xFF,	0xA0,	0x09,	0x61,	0x02,	0x03,
-													0x09,	0xC1,	0xC2,	0xF2,	//	end of packet
-													//	Extra bytes
-													0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,
-													0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10};
-			uint32_t						packetByteCount	(0);
-			AJAAncillaryData_Cea608_Vanc	pktRX, pktTX;
-			AJAAncillaryData				defaultPkt;
-
-			//	Test AJAAncillaryData_Cea608_Vanc  and GUMP decoding of it
-			SHOULD_SUCCEED (defaultPkt.InitWithReceivedData (pGump608Vanc, sizeof(pGump608Vanc), AJAAncillaryDataLocation(), packetByteCount));
-			SHOULD_BE_EQUAL (defaultPkt.GetDC(), 3);
-			SHOULD_BE_EQUAL (defaultPkt.GetDID(), 0x61);
-			SHOULD_BE_EQUAL (defaultPkt.GetSID(), 0x02);
-			SHOULD_BE_EQUAL (defaultPkt.GetChecksum(), 0xF2);
-			SHOULD_BE_EQUAL (defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_Unknown);
-			SHOULD_BE_EQUAL (defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
-			SHOULD_BE_EQUAL (defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
-			SHOULD_BE_EQUAL (defaultPkt.GetLocationLineNumber(), 9);
-			SHOULD_BE_EQUAL (defaultPkt.GetLocationHorizOffset(), AJAAncDataHorizOffset_AnyVanc);
-			SHOULD_BE_EQUAL (defaultPkt.GetDataCoding(), AJAAncillaryDataCoding_Digital);
-			SHOULD_BE_FALSE (defaultPkt.GotValidReceiveData());		//	False, because wasn't vetted by specific subclass
-			SHOULD_BE_EQUAL (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Unknown);
-			SHOULD_BE_UNEQUAL (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Cea608_Vanc);
-			SHOULD_BE_EQUAL (AJAAncillaryData_Cea608_Vanc::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Cea608_Vanc);
-			SHOULD_BE_EQUAL (AJAAncillaryData_Cea608_Line21::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Unknown);
-			SHOULD_BE_EQUAL (AJAAncillaryData_Cea708::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Unknown);
-			SHOULD_SUCCEED (pktRX.InitWithReceivedData (pGump608Vanc, sizeof(pGump608Vanc), AJAAncillaryDataLocation(), packetByteCount));
-			SHOULD_SUCCEED (pktRX.ParsePayloadData());
-			SHOULD_BE_TRUE (pktRX.GotValidReceiveData());
-			uint8_t	fieldNumber(0), lineNumber(0), char1(0), char2(0);	bool isValid(false);
-			SHOULD_SUCCEED (pktRX.GetLine(fieldNumber, lineNumber));
-			SHOULD_BE_EQUAL (fieldNumber, 1);	//	F2 == NTV2_FIELD1
-			SHOULD_BE_TRUE (pktRX.IsField2());	//	F2
-			SHOULD_BE_EQUAL (lineNumber, 9);			//	SMPTE line 9
-			SHOULD_BE_EQUAL (pktRX.GetLineNumber(), 9);	//	SMPTE line 9
-			SHOULD_SUCCEED (pktRX.GetCEA608Characters(char1, char2, isValid));
-			SHOULD_BE_EQUAL (char1, 'A');
-			SHOULD_BE_EQUAL (char2, 'B');
-			SHOULD_BE_TRUE (isValid);
-			return true;
-		}
-
-		static bool	BFT_AncDataCEA608Analog (void)
-		{
-			static const uint8_t			pGump608Raw[]	=	{	0xFF,	0xE0,	0x00,	0x00,	0x00,	0xFF,
-																	0x24,	0x47,	0x6a,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x11,	0x16,	0x1d,	0x26,	0x31,	0x3d,	0x4a,	0x56,	0x62,	0x6c,	0x74,
-																	0x7a,	0x7d,	0x7d,	0x7a,	0x74,	0x6c,	0x62,	0x56,	0x4a,	0x3d,	0x31,	0x26,	0x1d,	0x16,	0x11,	0x10,	0x11,	0x16,	0x1d,	0x26,	0x31,	0x3d,	0x4a,	0x56,	0x62,	0x6c,	0x74,	0x7a,	0x7d,	0x7d,	0x7a,	0x74,
-																	0x6c,	0x62,	0x56,	0x4a,	0x3d,	0x31,	0x26,	0x1d,	0x16,	0x11,	0x10,	0x11,	0x16,	0x1d,	0x26,	0x31,	0x3d,	0x4a,	0x56,	0x62,	0x6c,	0x74,	0x7a,	0x7d,	0x7d,	0x7a,	0x74,	0x6c,	0x62,	0x56,	0x4a,	0x3d,
-																	0x31,	0x26,	0x1d,	0x16,	0x11,	0x10,	0x11,	0x16,	0x1d,	0x26,	0x31,	0x3d,	0x4a,	0x56,	0x62,	0x6c,	0x74,	0x7a,	0x7d,	0x7d,	0x7a,	0x74,	0x6c,	0x62,	0x56,	0x4a,	0x3d,	0x31,	0x26,	0x1d,	0x16,	0x11,
-																	0x10,	0x11,	0x16,	0x1d,	0x26,	0x31,	0x3d,	0x4a,	0x56,	0x62,	0x6c,	0x74,	0x7a,	0x7d,	0x7d,	0x7a,	0x74,	0x6c,	0x62,	0x56,	0x4a,	0x3d,	0x31,	0x26,	0x1d,	0x16,	0x11,	0x10,	0x11,	0x16,	0x1d,	0x26,
-																	0x31,	0x3d,	0x4a,	0x56,	0x62,	0x6c,	0x74,	0x7a,	0x7d,	0x7d,	0x7a,	0x74,	0x6c,	0x62,	0x56,	0x4a,	0x3d,	0x31,	0x26,	0x1d,	0x16,	0x11,	0x10,	0x11,	0x16,	0x1d,	0x26,	0x31,	0x3d,	0x4a,	0x56,	0x62,
-																	0x6c,	0x74,	0x7a,	0x7d,	0x7d,	0x7a,	0x74,	0x6c,	0x62,	0x56,	0x4a,	0x3d,	0x31,	0x26,	0x1d,	0x16,	0x11,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,
-																	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x7e,	0x7e,
-																	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x00,	0xff,	0xe0,	0x00,	0x00,	0x00,	0xff,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x10,
-																	0x10,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x6a,	0x47,	0x24,	0x10,
-																	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,
-																	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,
-																	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,
-																	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,
-																	0x10,	0x10,	0x10,	0x24,	0x47,	0x6a,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,
-																	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x6a,	0x47,	0x24,	0x10,	0x10,	0x10,	0x10,
-																	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x00,	0xff,	0xe0,	0x00,	0x00,	0x00,	0xd2,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x24,	0x47,	0x6a,	0x7e,	0x7e,
-																	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,
-																	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,
-																	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x6a,	0x47,	0x24,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,
-																	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x24,	0x47,	0x6a,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,
-																	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x6a,	0x47,	0x24,
-																	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,
-																	0x10,	0x10,	0x10,	0x10,	0x00};
-			uint32_t						packetByteCount	(0);
-			AJAAncillaryData_Cea608_Line21	pktRX, pktTX;
-			AJAAncillaryData				defaultPkt;
-			uint8_t							char1(0), char2(0);
-			bool							isValid(false);
-
-			//	Test AJAAncillaryData_Cea608_Line21  and GUMP decoding of it
-			SHOULD_SUCCEED (defaultPkt.InitWithReceivedData (pGump608Raw, sizeof(pGump608Raw), AJAAncillaryDataLocation(), packetByteCount));
-			SHOULD_BE_EQUAL (defaultPkt.GetDC(), 720);
-			SHOULD_BE_EQUAL (defaultPkt.GetDID(), 0);
-			SHOULD_BE_EQUAL (defaultPkt.GetSID(), 0);
-			SHOULD_BE_EQUAL (defaultPkt.GetChecksum(), 0);
-			SHOULD_BE_EQUAL (defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_Unknown);
-			SHOULD_BE_EQUAL (defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
-			SHOULD_BE_EQUAL (defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
-			SHOULD_BE_EQUAL (defaultPkt.GetLocationLineNumber(), 9);
-			SHOULD_BE_EQUAL (defaultPkt.GetDataCoding(), AJAAncillaryDataCoding_Raw);
-			SHOULD_BE_FALSE (defaultPkt.GotValidReceiveData());		//	False, because wasn't vetted by specific subclass
-			SHOULD_BE_EQUAL (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Unknown);
-			SHOULD_BE_UNEQUAL (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Cea608_Line21);
-			SHOULD_BE_EQUAL (AJAAncillaryData_Cea608_Vanc::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Unknown);
-			SHOULD_BE_EQUAL (AJAAncillaryData_Cea608_Line21::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Cea608_Line21);
-			SHOULD_BE_EQUAL (AJAAncillaryData_Cea708::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Unknown);
-			SHOULD_SUCCEED (pktRX.InitWithReceivedData (pGump608Raw, sizeof(pGump608Raw), AJAAncillaryDataLocation(), packetByteCount));
-			SHOULD_SUCCEED (pktRX.ParsePayloadData());
-			SHOULD_BE_TRUE (pktRX.GotValidReceiveData());
-			SHOULD_SUCCEED (pktRX.GetCEA608Characters(char1, char2, isValid));
-			SHOULD_BE_EQUAL (char1, 'A');
-			SHOULD_BE_EQUAL (char2, 'n');
-			SHOULD_BE_TRUE (isValid);
-
-			AJAAncillaryList	packetList;
-			SHOULD_SUCCEED (packetList.AddReceivedAncillaryData (pGump608Raw, sizeof(pGump608Raw)));
-			cerr << endl << packetList << endl;
+		}	//	TEST_CASE("BFT_DataLocation")
 
 
-			AJAAncillaryData_Cea608_Line21 * pLine21Packet = reinterpret_cast <AJAAncillaryData_Cea608_Line21 *> (AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Cea608_Line21));
-			SHOULD_BE_NON_NULL (pLine21Packet);
-			SHOULD_SUCCEED (pLine21Packet->GeneratePayloadData());
-			SHOULD_SUCCEED (pLine21Packet->SetDataLocation (AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 21)));
-			SHOULD_SUCCEED (pLine21Packet->SetCEA608Bytes (AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('b')));
-			SHOULD_SUCCEED (pLine21Packet->SetDID(AJAAncillaryData_Cea608_Vanc_DID));
-			SHOULD_SUCCEED (pLine21Packet->SetSID(AJAAncillaryData_Cea608_Vanc_SID));
-			//pLine21Packet->Print (cerr, true);
-			SHOULD_BE_EQUAL (AJAAncillaryDataFactory::GuessAncillaryDataType(pLine21Packet), AJAAncillaryDataType_Cea608_Line21);
-
-			return true;
-		}	//	BFT_AncDataCEA608Analog
-
-
-		static bool	BFT_AncDataCEA708 (void)
-		{
-			static const uint8_t		pGump708	[]=	{	0xFF,	0xA0,	0x09,	0x61,	0x01,	0x52,	0x96,	0x69,	0x52,	0x4F,	0x67,	0xA7,	0x9A,	0x72,	0xF4,	0xFC,	0x80,
-															0x80,	0xF9,	0x00,	0x00,	0xFB,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,
-															0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,
-															0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,
-															0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0x73,	0x91,	0xE1,	0x00,	0x00,	0x00,
-															0xC1,	0x3F,	0xFF,	0x74,	0xA7,	0x9A,	0x2F,	0xB4,	//	end of packet
-															0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10};
-			uint32_t					packetByteCount	(0);
-			AJAAncillaryData_Cea708		pktRX, pktTX;
-			AJAAncillaryData			defaultPkt;
-
-			//	Test AJAAncillaryData_Cea708  and GUMP decoding of it
-			SHOULD_SUCCEED (defaultPkt.InitWithReceivedData (pGump708, sizeof(pGump708), AJAAncillaryDataLocation(), packetByteCount));
-			SHOULD_BE_EQUAL (defaultPkt.GetDC(), 82);
-			SHOULD_BE_EQUAL (defaultPkt.GetDID(), 0x61);
-			SHOULD_BE_EQUAL (defaultPkt.GetSID(), 0x01);
-			SHOULD_BE_EQUAL (defaultPkt.GetChecksum(), 0xB4);
-			SHOULD_BE_EQUAL (defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_Unknown);
-			SHOULD_BE_EQUAL (defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
-			SHOULD_BE_EQUAL (defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
-			SHOULD_BE_EQUAL (defaultPkt.GetLocationLineNumber(), 9);
-			SHOULD_BE_EQUAL (defaultPkt.GetDataCoding(), AJAAncillaryDataCoding_Digital);
-			SHOULD_BE_FALSE (defaultPkt.GotValidReceiveData());		//	False, because wasn't vetted by specific subclass
-			SHOULD_BE_EQUAL (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Unknown);
-			SHOULD_BE_UNEQUAL (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Cea608_Vanc);
-			SHOULD_BE_EQUAL (AJAAncillaryData_Cea608_Vanc::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Unknown);
-			SHOULD_BE_EQUAL (AJAAncillaryData_Cea608_Line21::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Unknown);
-			SHOULD_BE_EQUAL (AJAAncillaryData_Cea708::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Cea708);
-			SHOULD_SUCCEED (pktRX.InitWithReceivedData (pGump708, sizeof(pGump708), AJAAncillaryDataLocation(), packetByteCount));
-			SHOULD_SUCCEED (pktRX.ParsePayloadData());
-			SHOULD_BE_TRUE (pktRX.GotValidReceiveData());
-
-			//	Test GUMP encoding...
-			SHOULD_SUCCEED (pktTX.SetPayloadData(pktRX.GetPayloadData(), uint32_t(pktRX.GetPayloadByteCount())));
-			SHOULD_BE_EQUAL(::memcmp(pktTX.GetPayloadData(), pktRX.GetPayloadData(), pktTX.GetDC()), 0);
-			//SHOULD_BE_EQUAL(pktRX, pktTX);
-			return true;
-		}	//	BFT_AncDataCEA708
-
-
-		static bool BFT_AnalogGUMP (void)
+		TEST_CASE("BFT_AnalogGUMP")
 		{
 			static const uint8_t GumpBuffer[] = {0xFF, 0xB0, 0x0B, 0x60, 0x60, 0x10, 0x20, 0x00, 0x10, 0x00, 0x50, 0x00, 0x20, 0x30, 0x20, 0x00, 0x40, 0x00, 0x20, 0x00, 0x00, 0x00, 0x20, 0xFF, 0xE0, 0x15, 0x00, 0x00, 0xFF, 0x10, 0x10, 0x10, 0x0F, 0x10, 0x10, 0x10, 0x10, 0x10, 0x0F, 0x10, 0x10, 0x0F, 0x10, 0x0F, 0x11, 0x16, 0x1D, 0x26, 0x30, 0x3D, 0x49, 0x56, 0x62, 0x6C, 0x73, 0x7A, 0x7C, 0x7C, 0x7A, 0x73, 0x6C, 0x62, 0x56, 0x49, 
 			0x3D, 0x30, 0x26, 0x1D, 0x16, 0x11, 0x0F, 0x11, 0x16, 0x1D, 0x26, 0x31, 0x3C, 0x4A, 0x55, 0x62, 0x6C, 0x74, 0x7A, 0x7D, 0x7D, 0x7A, 0x73, 0x6C, 0x62, 0x55, 0x4A, 0x3D, 0x30, 0x26, 0x1D, 0x15, 0x11, 0x10, 0x11, 0x15, 0x1D, 0x26, 0x31, 0x3C, 0x4A, 0x56, 0x62, 0x6C, 0x74, 0x7A, 0x7C, 0x7D, 0x7A, 0x73, 0x6C, 0x62, 0x56, 0x4A, 0x3C, 0x31, 0x26, 0x1D, 0x16, 0x10, 0x10, 0x11, 0x16, 0x1D, 
@@ -688,14 +556,293 @@ class CNTV2AncDataTester
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00	};
-			AJAAncillaryList	pkts;
-			SHOULD_SUCCEED(pkts.AddReceivedAncillaryData (GumpBuffer, sizeof(GumpBuffer)));
-			cerr << pkts << endl;
-			return true;
-		}	//	BFT_AnalogGUMP
+			AJAAncillaryData::ResetInstanceCounts();
+			{
+				AJAAncillaryList pkts;
+				CHECK(AJA_SUCCESS(pkts.AddReceivedAncillaryData (GumpBuffer, sizeof(GumpBuffer))));
+				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 2);	//	2 alive
+				cerr << pkts << endl << "C" << DEC(AJAAncillaryData::GetNumConstructed()) << " D" << DEC(AJAAncillaryData::GetNumDestructed()) << endl;
+				pkts.Clear();
+				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 0);	//	0 alive
+			}
+			DBG_CHECK_EQ(AJAAncillaryData::GetNumConstructed(), 3);	//	3 created
+			DBG_CHECK_EQ(AJAAncillaryData::GetNumDestructed(), 3);	//	3 destroyed
+		}	//	TEST_CASE("BFT_AnalogGUMP")
 
-		static bool BFT_SMPTEAncData (const vector<uint16_t> & in10BitYUVReferenceLine)
+
+		TEST_CASE("BFT_AncillaryData")
 		{
+			uint32_t numConst(0), numDest(0);
+			AJAAncillaryData::ResetInstanceCounts();
+			AJAAncillaryData *pDefaultPkt(AJA_NULL), *pClone(AJA_NULL);
+			const AJAAncillaryDataLocation nullLocation;
+			vector<uint8_t> buffer4K;
+			buffer4K.resize(4096, 0x65);
+
+			{	AJAAncillaryData defaultPkt;	//	constr +1  ==> 1
+				//	Verify default values...
+				CHECK_FALSE (defaultPkt.GotValidReceiveData());
+				CHECK_EQ (defaultPkt.GetDID(), 0x00);
+				CHECK_EQ (defaultPkt.GetSID(), 0x00);
+				CHECK (defaultPkt.IsEmpty());
+				CHECK_EQ (defaultPkt.GetPayloadByteCount(), 0);
+				CHECK (defaultPkt.GetPayloadData() == AJA_NULL);
+				CHECK_NE (defaultPkt.GetDataLocation(), nullLocation);
+				CHECK (defaultPkt.GetDataLocation().IsValid());
+				CHECK (defaultPkt.IsLumaChannel());
+				CHECK_FALSE (defaultPkt.IsChromaChannel());
+				CHECK (defaultPkt.IsDigital());
+				CHECK_FALSE (defaultPkt.IsRaw());
+				CHECK (defaultPkt.IsVanc());
+				CHECK_FALSE (defaultPkt.IsHanc());
+				CHECK_EQ (defaultPkt.GetLocationLineNumber(), 0);
+				CHECK_EQ(defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_A);
+				CHECK_EQ(defaultPkt.GetLocationDataStream(), AJAAncillaryDataStream_1);
+				CHECK_EQ(defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
+				CHECK_EQ(defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
+				AJAAncillaryData::GetInstanceCounts(numConst, numDest);
+				cerr << "BFT_AncillaryData:  Validated AJAAncillaryData default values (" << DEC(numConst-numDest) << " alive)" << endl;
+				DBG_CHECK_EQ(numConst, 1);	DBG_CHECK_EQ(numDest, 0);
+
+				//	Verify that GetDataLocation/SetDataLocation works...
+				if (true)
+				{
+					const AJAAncillaryDataLocation savedLoc(defaultPkt.GetDataLocation());
+						CHECK(AJA_SUCCESS(defaultPkt.SetLocationVideoLink(AJAAncillaryDataLink_B)));
+						CHECK(AJA_SUCCESS(defaultPkt.SetLocationDataStream(AJAAncillaryDataStream_4)));
+						CHECK(AJA_SUCCESS(defaultPkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc)));
+						CHECK(AJA_SUCCESS(defaultPkt.SetLocationDataChannel(AJAAncillaryDataChannel_C)));
+						CHECK(AJA_SUCCESS(defaultPkt.SetLocationLineNumber(225)));
+						CHECK_EQ(defaultPkt.GetLocationLineNumber(), 225);
+						CHECK_EQ(defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_B);
+						CHECK_EQ(defaultPkt.GetLocationDataStream(), AJAAncillaryDataStream_4);
+						CHECK_EQ(defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_HANC);
+						CHECK_EQ(defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_C);
+					CHECK(AJA_SUCCESS(defaultPkt.SetDataLocation(savedLoc)));
+					cerr << "BFT_AncillaryData:  Validated AJAAncillaryData::GetDataLocation, SetDataLocation" << endl;
+				}
+
+				//	Validate new "Unknown" packet from AJAAncillaryDataFactory::Create...
+				CHECK (pDefaultPkt == AJA_NULL);
+				pDefaultPkt = AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Unknown);	//	constr +1  ==> 2
+				CHECK(pDefaultPkt != AJA_NULL);
+				CHECK_FALSE (pDefaultPkt->GotValidReceiveData());
+				CHECK_EQ (pDefaultPkt->GetDID(), 0x00);
+				CHECK_EQ (pDefaultPkt->GetSID(), 0x00);
+				CHECK (pDefaultPkt->IsEmpty());
+				CHECK_EQ (pDefaultPkt->GetPayloadByteCount(), 0);
+				CHECK (pDefaultPkt->GetPayloadData() == AJA_NULL);
+				CHECK_NE (pDefaultPkt->GetDataLocation(), nullLocation);
+				CHECK (pDefaultPkt->GetDataLocation().IsValid());
+				CHECK (pDefaultPkt->IsLumaChannel());
+				CHECK_FALSE (pDefaultPkt->IsChromaChannel());
+				CHECK (pDefaultPkt->IsDigital());
+				CHECK_FALSE (pDefaultPkt->IsRaw());
+				CHECK (pDefaultPkt->IsVanc());
+				CHECK_FALSE (pDefaultPkt->IsHanc());
+				CHECK_EQ (pDefaultPkt->GetLocationLineNumber(), 0);
+				cerr << "BFT_AncillaryData:  Validated AJAAncillaryData created by AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Unknown)" << endl;
+
+				//	Validate AJAAncillaryData operator == comparing two NULL packets...
+				CHECK_EQ(*pDefaultPkt, defaultPkt);
+
+				//	Validate AJAAncillaryData payload data modification...
+				static const UByte		pTestBytes []	=	{	0x10,	0x11,	0x12,	0x13,	0x14,	0x15,	0x16,	0x17,	0x18,	0x19,	0x1A,	0x1B,	0x1C,	0x1D,	0x1E,	0x1F,
+																0x20,	0x21,	0x22,	0x23,	0x24,	0x25,	0x26,	0x27,	0x28,	0x29,	0x2A,	0x2B,	0x2C,	0x2D,	0x2E,	0x2F	};
+				CHECK(AJA_FAILURE(pDefaultPkt->SetPayloadData (NULL, sizeof(pTestBytes))));
+				CHECK(AJA_FAILURE(pDefaultPkt->SetPayloadData (pTestBytes, 0)));
+				CHECK(AJA_SUCCESS(pDefaultPkt->SetPayloadData (pTestBytes, sizeof(pTestBytes))));
+				CHECK(AJA_SUCCESS(pDefaultPkt->SetDID(0x40)));
+				CHECK(AJA_SUCCESS(pDefaultPkt->SetSID(0x02)));
+				CHECK_EQ (pDefaultPkt->GetDID(), 0x40);
+				CHECK_EQ (pDefaultPkt->GetSID(), 0x02);
+				CHECK_FALSE (pDefaultPkt->IsEmpty());
+				CHECK_EQ (pDefaultPkt->GetPayloadByteCount(), sizeof(pTestBytes));
+				CHECK(pDefaultPkt->GetPayloadData() != AJA_NULL);
+				CHECK_EQ (pDefaultPkt->GetDC(), sizeof(pTestBytes));
+				CHECK_FALSE (pDefaultPkt->ChecksumOK());
+				CHECK(AJA_SUCCESS(pDefaultPkt->SetChecksum(pDefaultPkt->Calculate8BitChecksum())));
+				CHECK (pDefaultPkt->ChecksumOK());
+				CHECK(AJA_SUCCESS(pDefaultPkt->SetDID(0x45)));
+				CHECK_NE (pDefaultPkt->GetChecksum(), pDefaultPkt->Calculate8BitChecksum());	//	Unequal, since DID changed
+				CHECK_FALSE (pDefaultPkt->ChecksumOK());	//	Fail, since DID changed
+				CHECK(AJA_SUCCESS(pDefaultPkt->SetChecksum(pDefaultPkt->Calculate8BitChecksum())));	//	Fix CS
+				CHECK_EQ (pDefaultPkt->GetPayloadByteAtIndex(4), pTestBytes[4]);
+				CHECK_EQ (pDefaultPkt->GetPayloadByteAtIndex(pDefaultPkt->GetDC()), 0);
+				AJAAncillaryData::GetInstanceCounts(numConst, numDest);
+				DBG_CHECK_EQ(numConst, 2);	DBG_CHECK_EQ(numDest, 0);
+
+				//	Validate AJAAncillaryData operators...
+				CHECK_NE(*pDefaultPkt, defaultPkt);		//	Validate AJAAncillaryData operator !=
+				defaultPkt = *pDefaultPkt;				//	Validate AJAAncillaryData operator =
+				CHECK_EQ(*pDefaultPkt, defaultPkt);		//	Validate AJAAncillaryData operator ==
+				defaultPkt.SetPayloadByteAtIndex(0x1F, defaultPkt.GetDC()/2);
+				CHECK_NE(*pDefaultPkt, defaultPkt);
+				cerr << "BFT_AncillaryData:  Validated AJAAncillaryData payload data modification" << endl;
+				AJAAncillaryData::GetInstanceCounts(numConst, numDest);
+				DBG_CHECK_EQ(numConst, 2);	DBG_CHECK_EQ(numDest, 0);
+
+				if (true)	/////	Clone, GeneratePayloadData and GuessAncillaryDataType Tests
+				{
+					pClone = defaultPkt.Clone();	//	constr +1  ==> 3
+					CHECK_EQ(*pClone, defaultPkt);
+
+					//	Validate that Clear works...
+					pClone->Clear();
+					CHECK_NE(*pClone, defaultPkt);
+					CHECK_EQ(*pClone, AJAAncillaryData());	//	constr +1  ==> 4		destr +1  ==> 1
+					CHECK_EQ (pClone->GetDID(), 0);
+					CHECK_EQ (pClone->GetSID(), 0);
+					CHECK (pClone->IsEmpty());
+					CHECK_EQ(pClone->GetDataCoding(), AJAAncillaryDataCoding_Digital);
+					CHECK(AJA_SUCCESS(pClone->SetDataCoding(AJAAncillaryDataCoding_Raw)));
+					CHECK_EQ(pClone->GetDataCoding(), AJAAncillaryDataCoding_Raw);
+					CHECK_EQ(pClone->GetLocationLineNumber(), 0);
+					CHECK(AJA_SUCCESS(pClone->SetLocationLineNumber(100)));
+					CHECK_EQ(pClone->GetLocationLineNumber(), 100);
+					CHECK_EQ(pClone->GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
+					CHECK(AJA_SUCCESS(pClone->SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc)));
+					CHECK_EQ(pClone->GetLocationVideoSpace(), AJAAncillaryDataSpace_HANC);
+					CHECK_EQ(pClone->GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
+					CHECK(AJA_SUCCESS(pClone->SetLocationDataChannel(AJAAncillaryDataChannel_C)));
+					CHECK_EQ(pClone->GetLocationDataChannel(), AJAAncillaryDataChannel_C);
+					CHECK_EQ(pClone->GetLocationVideoLink(), AJAAncillaryDataLink_A);
+					CHECK(AJA_SUCCESS(pClone->SetLocationVideoLink(AJAAncillaryDataLink_B)));
+					CHECK_EQ(pClone->GetLocationVideoLink(), AJAAncillaryDataLink_B);
+					AJAAncillaryData::GetInstanceCounts(numConst, numDest);
+					cerr << "BFT_AncillaryData:  Validated AJAAncillaryData::Clone" << " C" << DEC(numConst) << " D" << DEC(numDest) << endl;
+					DBG_CHECK_EQ(numConst, 4);	DBG_CHECK_EQ(numDest, 1);
+
+					//	Test generating default packet using AJAAncillaryDataFactory::Create for these AJAAncillaryDataTypes...
+					//	...then GeneratePayloadData for it, then clone it, and test AJAAncillaryDataFactory::GuessAncillaryDataType using the clone.
+					//	The detected data type should match the original's...
+					static const AJAAncillaryDataType	gDataTypes[]	=	{	//AJAAncillaryDataType_Unknown,
+																				//	AJAAncillaryDataType_Smpte2016_3,
+																				AJAAncillaryDataType_Timecode_ATC
+																				,AJAAncillaryDataType_Timecode_VITC
+																				,AJAAncillaryDataType_Cea708
+																				,AJAAncillaryDataType_Cea608_Vanc
+																				,AJAAncillaryDataType_Cea608_Line21
+																				//	,AJAAncillaryDataType_Smpte352
+																				//	,AJAAncillaryDataType_Smpte2051
+																				//	,AJAAncillaryDataType_FrameStatusInfo524D
+																				//	,AJAAncillaryDataType_FrameStatusInfo5251
+																				//	,AJAAncillaryDataType_HDR_SDR
+																				//	,AJAAncillaryDataType_HDR_HDR10
+																				//	,AJAAncillaryDataType_HDR_HLG
+																				};
+					const size_t numTypes (sizeof(gDataTypes) / sizeof(AJAAncillaryDataType));
+					for (unsigned ndx(0);  ndx < numTypes;  ndx++)
+					{
+						const AJAAncillaryDataType	dataType (gDataTypes[ndx]);
+						AJAAncillaryData *	pDefaultPkt2 = AJAAncillaryDataFactory::Create(dataType);	//	constr +1  ==> 5, 7, 9, 11, 13
+						CHECK(pDefaultPkt2 != AJA_NULL);
+						CHECK(AJA_SUCCESS(pDefaultPkt2->GeneratePayloadData()));
+						AJAAncillaryData *	pClonePkt	= pDefaultPkt2->Clone();	//	constr +1  ==> 6, 8, 10, 12, 14
+						CHECK(pClonePkt != AJA_NULL);
+						CHECK_NE(pDefaultPkt2, pClonePkt);	//	Different objects in memory
+						CHECK_EQ(*pDefaultPkt2, *pClonePkt);
+						CHECK_EQ (AJAAncillaryDataFactory::GuessAncillaryDataType(pClonePkt), dataType);
+						delete pClonePkt;		//	destr +1  ==> 2,  4,  6,  8,  10
+						delete pDefaultPkt2;	//	destr +1  ==>   3,  5,  7,  9,  11
+						AJAAncillaryData::GetInstanceCounts(numConst, numDest);
+						cerr << "BFT_AncillaryData:  Validated AJAAncillaryDataFactory::GuessAncillaryDataType for '" << ::AJAAncillaryDataTypeToString(dataType) << "' C" << DEC(numConst) << " D" << DEC(numDest) << endl;
+						DBG_CHECK_EQ(numConst, (4 + (ndx+1)*2));	DBG_CHECK_EQ(numDest, 1 + (ndx+1)*2);
+					}
+				}	//	Clone Tests
+				AJAAncillaryData::GetInstanceCounts(numConst, numDest);
+				DBG_CHECK_EQ(numConst, 4 + 10);	DBG_CHECK_EQ(numDest, 1 + 10);
+
+				//	Validate AJAAncillaryData payload append...
+				CHECK(AJA_SUCCESS(defaultPkt.SetPayloadData(buffer4K.data(), uint32_t(buffer4K.size()))));
+				CHECK_EQ (defaultPkt.GetDC(), 4096);
+				CHECK(AJA_SUCCESS(defaultPkt.AppendPayload(*pDefaultPkt)));
+				CHECK_EQ (defaultPkt.GetDC(), 4096+sizeof(pTestBytes));
+				CHECK(AJA_FAILURE(defaultPkt.AppendPayloadData(NULL, 50)));
+				CHECK(AJA_FAILURE(defaultPkt.AppendPayloadData(pTestBytes, 0)));
+				CHECK(AJA_SUCCESS(defaultPkt.AppendPayloadData(pTestBytes, sizeof(pTestBytes))));
+				CHECK_EQ (defaultPkt.GetDC(), 4096 + 2*sizeof(pTestBytes));
+				CHECK(AJA_SUCCESS(defaultPkt.AppendPayload(defaultPkt)));
+				CHECK_EQ (defaultPkt.GetDC(), 2*(4096 + 2*sizeof(pTestBytes)));
+
+				CHECK(AJA_SUCCESS(defaultPkt.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+				CHECK(AJA_SUCCESS(defaultPkt.SetLocationLineNumber(9)));
+				CHECK(AJA_SUCCESS(defaultPkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyVanc)));
+				CHECK(AJA_SUCCESS(defaultPkt.SetLocationDataChannel(AJAAncillaryDataChannel_Y)));
+				CHECK(AJA_SUCCESS(defaultPkt.SetLocationDataStream(AJAAncillaryDataStream_1)));
+				CHECK(AJA_SUCCESS(defaultPkt.SetLocationVideoLink(AJAAncillaryDataLink_A)));
+				CHECK(AJA_SUCCESS(defaultPkt.SetDID(0x45)));
+				CHECK(AJA_SUCCESS(defaultPkt.SetSID(0x01)));
+				cerr << "BFT_AncillaryData:  Validated AJAAncillaryData::AppendPayloadData" << endl;
+
+				if (true)
+				{
+					//	Test 10-bit UDW conversion (with parity)...
+					static const uint8_t				p8_RDD6Pkt1 []	=	{	0x00,	0x01,	0x02,	0x03,	0x04,	0x05,	0x06,	0x07,	0x08,	0x09,	0x0A,	0x0B,	0x0C,	0x0D,	0x0E,	0x0F,
+																				0x10,	0x11,	0x12,	0x13,	0x14,	0x15,	0x16,	0x17,	0x18,	0x19,	0x1A,	0x1B,	0x1C,	0x1D,	0x1E,	0x1F,
+																				0x20,	0x21,	0x22,	0x23,	0x24,	0x25,	0x26,	0x27,	0x28,	0x29,	0x2A,	0x2B,	0x2C,	0x2D,	0x2E,	0x2F,
+																				0x30,	0x31,	0x32,	0x33,	0x34,	0x35,	0x36,	0x37,	0x38,	0x39,	0x3A,	0x3B,	0x3C,	0x3D,	0x3E,	0x3F,
+																				0x40,	0x41,	0x42,	0x43,	0x44,	0x45,	0x46,	0x47,	0x48,	0x49,	0x4A,	0x4B,	0x4C,	0x4D,	0x4E,	0x4F,
+																				0x50,	0x51,	0x52,	0x53,	0x54,	0x55,	0x56,	0x57,	0x58,	0x59,	0x5A,	0x5B,	0x5C,	0x5D,	0x5E,	0x5F,
+																				0x60,	0x61,	0x62,	0x63,	0x64,	0x65,	0x66,	0x67,	0x68,	0x69,	0x6A,	0x6B,	0x6C,	0x6D,	0x6E,	0x6F,
+																				0x70,	0x71,	0x72,	0x73,	0x74,	0x75,	0x76,	0x77,	0x78,	0x79,	0x7A,	0x7B,	0x7C,	0x7D,	0x7E,	0x7F,
+																				0x80,	0x81,	0x82,	0x83,	0x84,	0x85,	0x86,	0x87,	0x88,	0x89,	0x8A,	0x8B,	0x8C,	0x8D,	0x8E,	0x8F,
+																				0x90,	0x91,	0x92,	0x93,	0x94,	0x95,	0x96,	0x97,	0x98,	0x99,	0x9A,	0x9B,	0x9C,	0x9D,	0x9E,	0x9F,
+																				0xA0,	0xA1,	0xA2,	0xA3,	0xA4,	0xA5,	0xA6,	0xA7,	0xA8,	0xA9,	0xAA,	0xAB,	0xAC,	0xAD,	0xAE,	0xAF,
+																				0xB0,	0xB1,	0xB2,	0xB3,	0xB4,	0xB5,	0xB6,	0xB7,	0xB8,	0xB9,	0xBA,	0xBB,	0xBC,	0xBD,	0xBE,	0xBF,
+																				0xC0,	0xC1,	0xC2,	0xC3,	0xC4,	0xC5,	0xC6,	0xC7,	0xC8,	0xC9,	0xCA,	0xCB,	0xCC,	0xCD,	0xCE,	0xCF,
+																				0xD0,	0xD1,	0xD2,	0xD3,	0xD4,	0xD5,	0xD6,	0xD7,	0xD8,	0xD9,	0xDA,	0xDB,	0xDC,	0xDD,	0xDE,	0xDF,
+																				0xE0,	0xE1,	0xE2,	0xE3,	0xE4,	0xE5,	0xE6,	0xE7,	0xE8,	0xE9,	0xEA,	0xEB,	0xEC,	0xED,	0xEE,	0xEF,
+																				0xF0,	0xF1,	0xF2,	0xF3,	0xF4,	0xF5,	0xF6,	0xF7,	0xF8,	0xF9,	0xFA,	0xFB,	0xFC,	0xFD,	0xFE	};
+					static const uint16_t				p16_RDD6Pkt1 [] =	{	0x200,	0x101,	0x102,	0x203,	0x104,	0x205,	0x206,	0x107,	0x108,	0x209,	0x20A,	0x10B,	0x20C,	0x10D,	0x10E,	0x20F,
+																				0x110,	0x211,	0x212,	0x113,	0x214,	0x115,	0x116,	0x217,	0x218,	0x119,	0x11A,	0x21B,	0x11C,	0x21D,	0x21E,	0x11F,
+																				0x120,	0x221,	0x222,	0x123,	0x224,	0x125,	0x126,	0x227,	0x228,	0x129,	0x12A,	0x22B,	0x12C,	0x22D,	0x22E,	0x12F,
+																				0x230,	0x131,	0x132,	0x233,	0x134,	0x235,	0x236,	0x137,	0x138,	0x239,	0x23A,	0x13B,	0x23C,	0x13D,	0x13E,	0x23F,
+																				0x140,	0x241,	0x242,	0x143,	0x244,	0x145,	0x146,	0x247,	0x248,	0x149,	0x14A,	0x24B,	0x14C,	0x24D,	0x24E,	0x14F,
+																				0x250,	0x151,	0x152,	0x253,	0x154,	0x255,	0x256,	0x157,	0x158,	0x259,	0x25A,	0x15B,	0x25C,	0x15D,	0x15E,	0x25F,
+																				0x260,	0x161,	0x162,	0x263,	0x164,	0x265,	0x266,	0x167,	0x168,	0x269,	0x26A,	0x16B,	0x26C,	0x16D,	0x16E,	0x26F,
+																				0x170,	0x271,	0x272,	0x173,	0x274,	0x175,	0x176,	0x277,	0x278,	0x179,	0x17A,	0x27B,	0x17C,	0x27D,	0x27E,	0x17F,
+																				0x180,	0x281,	0x282,	0x183,	0x284,	0x185,	0x186,	0x287,	0x288,	0x189,	0x18A,	0x28B,	0x18C,	0x28D,	0x28E,	0x18F,
+																				0x290,	0x191,	0x192,	0x293,	0x194,	0x295,	0x296,	0x197,	0x198,	0x299,	0x29A,	0x19B,	0x29C,	0x19D,	0x19E,	0x29F,
+																				0x2A0,	0x1A1,	0x1A2,	0x2A3,	0x1A4,	0x2A5,	0x2A6,	0x1A7,	0x1A8,	0x2A9,	0x2AA,	0x1AB,	0x2AC,	0x1AD,	0x1AE,	0x2AF,
+																				0x1B0,	0x2B1,	0x2B2,	0x1B3,	0x2B4,	0x1B5,	0x1B6,	0x2B7,	0x2B8,	0x1B9,	0x1BA,	0x2BB,	0x1BC,	0x2BD,	0x2BE,	0x1BF,
+																				0x2C0,	0x1C1,	0x1C2,	0x2C3,	0x1C4,	0x2C5,	0x2C6,	0x1C7,	0x1C8,	0x2C9,	0x2CA,	0x1CB,	0x2CC,	0x1CD,	0x1CE,	0x2CF,
+																				0x1D0,	0x2D1,	0x2D2,	0x1D3,	0x2D4,	0x1D5,	0x1D6,	0x2D7,	0x2D8,	0x1D9,	0x1DA,	0x2DB,	0x1DC,	0x2DD,	0x2DE,	0x1DF,
+																				0x1E0,	0x2E1,	0x2E2,	0x1E3,	0x2E4,	0x1E5,	0x1E6,	0x2E7,	0x2E8,	0x1E9,	0x1EA,	0x2EB,	0x1EC,	0x2ED,	0x2EE,	0x1EF,
+																				0x2F0,	0x1F1,	0x1F2,	0x2F3,	0x1F4,	0x2F5,	0x2F6,	0x1F7,	0x1F8,	0x2F9,	0x2FA,	0x1FB,	0x2FC,	0x1FD,	0x1FE	};
+					vector<uint16_t>	UDWs, componentData;
+					CHECK(AJA_SUCCESS(defaultPkt.SetPayloadData(p8_RDD6Pkt1, sizeof(p8_RDD6Pkt1)/sizeof(uint8_t))));
+					CHECK(AJA_SUCCESS(defaultPkt.GetPayloadData(UDWs, true)));
+					//for (unsigned ndx(0);  ndx < UDWs.size();  )	{	cerr << xHEX0N(UDWs[ndx],3) << ",\t";	if (++ndx % 16 == 0) cerr << endl;	}
+					CHECK_EQ(UDWs.size(), sizeof(p16_RDD6Pkt1)/sizeof(uint16_t));
+					CHECK_EQ(::memcmp(UDWs.data(), p16_RDD6Pkt1, sizeof(p16_RDD6Pkt1)), 0);
+
+					//	Test GenerateTransmitData...
+					CHECK(AJA_SUCCESS(defaultPkt.GenerateTransmitData(componentData)));
+					CHECK_EQ(componentData.size(), 262);
+					CHECK_EQ(componentData.at(0), 0x000);
+					CHECK_EQ(componentData.at(1), 0x3FF);
+					CHECK_EQ(componentData.at(2), 0x3FF);
+					CHECK_EQ(componentData.at(3)&0x0FF, defaultPkt.GetDID());
+					CHECK_EQ(componentData.at(4)&0x0FF, defaultPkt.GetSID());
+					CHECK_EQ(componentData.at(5)&0x0FF, defaultPkt.GetDC());
+					CHECK_EQ(componentData.at(6), p16_RDD6Pkt1[0]);
+					CHECK_EQ(::memcmp(&componentData[6], p16_RDD6Pkt1, sizeof(p16_RDD6Pkt1)), 0);
+					CHECK_EQ(componentData.back()&0x0FF, defaultPkt.Calculate8BitChecksum());
+					cerr << "BFT_AncillaryData:  Validated AJAAncillaryData::GenerateTransmitData(vector<uint16_t>&) 10-bit UDW conversion (with parity)" << endl;
+				}
+			}	//	defaultPkt destroyed:	destr +1  ==> 12
+			AJAAncillaryData::GetInstanceCounts(numConst, numDest);
+			cerr << "BFT_AncillaryData passed" << " C" << DEC(numConst) << " D" << DEC(numDest) << endl;
+			DBG_CHECK_EQ(numConst, 4 + 10);	DBG_CHECK_EQ(numDest, 1 + 1 + 10);
+		}	//	TEST_CASE("BFT_AncillaryData")
+
+
+		//	We now test SMPTEAncData from the AJACC library here
+		//	because it's now used extensively by AJAANC.
+		TEST_CASE("BFT_SMPTEAncData")
+		{
+			const vector<uint16_t> & in10BitYUVReferenceLine(SD10BitYUVComponents);
 			static const uint16_t	pv210YSamples [] =	{	0x000,	0x3FF,	0x3FF,	0x161,	0x101,	0x152,	0x296,	0x269,	0x152,	0x14F,	0x167,	0x2A9,	0x27E,	0x272,	0x1F4,	0x2FC,
 															0x120,	0x173,	0x2F9,	0x200,	0x200,	0x2FF,	0x146,	0x228,	0x1FE,	0x173,	0x265,	0x1FE,	0x16D,	0x269,	0x1FE,	0x16E,
 															0x161,	0x1FE,	0x272,	0x179,	0x1FE,	0x200,	0x200,	0x2FA,	0x200,	0x200,	0x2FA,	0x200,	0x200,	0x2FA,	0x200,	0x200,
@@ -709,9 +856,8 @@ class CNTV2AncDataTester
 			AJAAncillaryData *			pPkt	(AJA_NULL);
 			AJAAncillaryData_Cea708 *	p708Pkt	(AJA_NULL);
 			UWordSequence				u16s;
-
-			//	WHY TEST SMPTEAncData, which is in the AJACC library, here in the AJAANC BFT?
-			//	Because it's now used extensively by AJAANC.
+			uint32_t numConst(0), numDest(0);
+			AJAAncillaryData::ResetInstanceCounts();
 
 			///////////////////////////////////////////////////////////////////////	BEGIN TEST SECTION 1
 			//	The following 3 tests perform a round-trip validation of:
@@ -741,29 +887,31 @@ class CNTV2AncDataTester
 				v210VancLine.push_back(pv210YSamples[ndx]);	//	Luma
 			}
 			UWordSequence	hOffsets;
-			SHOULD_BE_FALSE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (UWordSequence(), kNTV2SMPTEAncChannel_Y, u16Pkts, hOffsets));	//	This should fail (empty UWordSequence)
-			SHOULD_BE_TRUE (u16Pkts.empty());		//	Returned UWordSequence should be empty
-			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_C, u16Pkts, hOffsets));	//	Should succeed, but no C-channel packets
-			SHOULD_BE_TRUE (u16Pkts.empty());		//	Expect no C-channel packets
-			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_Y, u16Pkts, hOffsets));	//	Should succeed, 1 Y-channel packet
-			SHOULD_BE_FALSE (u16Pkts.empty());		//	Expect 1 Y-channel packet
-			SHOULD_BE_EQUAL (u16Pkts.size(), 1);	//	Expect 1 Y-channel packet
-			SHOULD_SUCCEED (pktList.AddVANCData(u16Pkts.front(), AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 9)));	//	Make a packet list from it
-			SHOULD_BE_EQUAL(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
+			CHECK_FALSE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (UWordSequence(), kNTV2SMPTEAncChannel_Y, u16Pkts, hOffsets));	//	This should fail (empty UWordSequence)
+			CHECK (u16Pkts.empty());		//	Returned UWordSequence should be empty
+			CHECK (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_C, u16Pkts, hOffsets));	//	Should succeed, but no C-channel packets
+			CHECK (u16Pkts.empty());		//	Expect no C-channel packets
+			CHECK (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_Y, u16Pkts, hOffsets));	//	Should succeed, 1 Y-channel packet
+			CHECK_FALSE (u16Pkts.empty());		//	Expect 1 Y-channel packet
+			CHECK_EQ (u16Pkts.size(), 1);	//	Expect 1 Y-channel packet
+			CHECK(AJA_SUCCESS(pktList.AddVANCData(u16Pkts.front(), AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 9))));	//	Make a packet list from it
+			CHECK_EQ(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
 			pPkt = pktList.GetAncillaryDataAtIndex(0);			//	Get a pointer to the 1 and only packet
-			SHOULD_BE_NON_NULL(pPkt);							//	Pointer should be non-NULL
-			SHOULD_BE_EQUAL(AJAAncillaryDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	Guessed Anc type should be CEA708
+			CHECK(pPkt != AJA_NULL);							//	Pointer should be non-NULL
+			CHECK_EQ(AJAAncillaryDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	Guessed Anc type should be CEA708
 			p708Pkt = reinterpret_cast <AJAAncillaryData_Cea708 *> (AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Cea708, pPkt));	//	Make a 708-specific packet instance
-			SHOULD_BE_NON_NULL(p708Pkt);								//	708-specific packet instance creation should work
-			SHOULD_SUCCEED(p708Pkt->GetPayloadData(u16s));				//	Get its packet data as uint16_t vector (with parity)
-			SHOULD_BE_EQUAL(uint32_t(u16s.size()), p708Pkt->GetDC());	//	Vector element count should match packet data count
-			SHOULD_BE_TRUE(size_t(u16s.size()) <= sizeof(pv210YSamples));//	Vector element count should be <= original pkt data count
+			CHECK(p708Pkt != AJA_NULL);								//	708-specific packet instance creation should work
+			CHECK(AJA_SUCCESS(p708Pkt->GetPayloadData(u16s)));			//	Get its packet data as uint16_t vector (with parity)
+			CHECK_EQ(uint32_t(u16s.size()), p708Pkt->GetDC());	//	Vector element count should match packet data count
+			CHECK(size_t(u16s.size()) <= sizeof(pv210YSamples));//	Vector element count should be <= original pkt data count
 			for (UWordSequence::size_type ndx(0);  ndx < u16s.size();  ndx++)
-				SHOULD_BE_EQUAL(pv210YSamples[ndx+6], u16s.at(ndx));	//	Each element should match original
+				CHECK_EQ(pv210YSamples[ndx+6], u16s.at(ndx));	//	Each element should match original
 
 			//	Start over...
 			v210VancLine.clear();	u16Pkts.clear();	u16s.clear();	pktList.Clear();
 			delete p708Pkt;			p708Pkt = NULL;		pPkt = AJA_NULL;
+			AJAAncillaryData::GetInstanceCounts(numConst, numDest);
+			DBG_CHECK_EQ(numConst, 3);	DBG_CHECK_EQ(numDest, 3);
 
 			//	TEST 2:		C-channel-only CEA708 PACKET
 			for (unsigned ndx(0);  ndx < sizeof(pv210YSamples);  ndx++)
@@ -771,45 +919,49 @@ class CNTV2AncDataTester
 				v210VancLine.push_back(pv210YSamples[ndx]);	//	Chroma
 				v210VancLine.push_back(0x040);				//	Luma
 			}
-			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_Y, u16Pkts, hOffsets));	//	Should succeed, but no Y-channel packets
-			SHOULD_BE_TRUE (u16Pkts.empty());		//	Expect no Y-channel packets
-			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_C, u16Pkts, hOffsets));	//	Should succeed, 1 C-channel packet
-			SHOULD_BE_FALSE (u16Pkts.empty());		//	Expect 1 C-channel packet
-			SHOULD_BE_EQUAL (u16Pkts.size(), 1);	//	Expect 1 C-channel packet
-			SHOULD_SUCCEED (pktList.AddVANCData(u16Pkts.front(), AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_C, AJAAncillaryDataSpace_VANC, 9)));	//	Make a packet list from it
-			SHOULD_BE_EQUAL(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
+			CHECK (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_Y, u16Pkts, hOffsets));	//	Should succeed, but no Y-channel packets
+			CHECK (u16Pkts.empty());		//	Expect no Y-channel packets
+			CHECK (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_C, u16Pkts, hOffsets));	//	Should succeed, 1 C-channel packet
+			CHECK_FALSE (u16Pkts.empty());		//	Expect 1 C-channel packet
+			CHECK_EQ (u16Pkts.size(), 1);	//	Expect 1 C-channel packet
+			CHECK(AJA_SUCCESS(pktList.AddVANCData(u16Pkts.front(), AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_C, AJAAncillaryDataSpace_VANC, 9))));	//	Make a packet list from it
+			CHECK_EQ(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
 			pPkt = pktList.GetAncillaryDataAtIndex(0);			//	Get a pointer to the 1 and only packet
-			SHOULD_BE_NON_NULL(pPkt);							//	Pointer should be non-NULL
-			SHOULD_BE_EQUAL(AJAAncillaryDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	This used to fail because it's not in Y channel, but changed in SDK 16.1 to succeed & log warning
-			SHOULD_SUCCEED(pPkt->GetPayloadData(u16s));					//	Get its packet data as uint16_t vector (with parity)
-			SHOULD_BE_EQUAL(uint32_t(u16s.size()), pPkt->GetDC());		//	Vector element count should match packet data count
-			SHOULD_BE_TRUE(size_t(u16s.size()) <= sizeof(pv210YSamples));//	Vector element count should be <= original pkt data count
+			CHECK(pPkt != AJA_NULL);							//	Pointer should be non-NULL
+			CHECK_EQ(AJAAncillaryDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	This used to fail because it's not in Y channel, but changed in SDK 16.1 to succeed & log warning
+			CHECK(AJA_SUCCESS(pPkt->GetPayloadData(u16s)));				//	Get its packet data as uint16_t vector (with parity)
+			CHECK_EQ(uint32_t(u16s.size()), pPkt->GetDC());		//	Vector element count should match packet data count
+			CHECK(size_t(u16s.size()) <= sizeof(pv210YSamples));//	Vector element count should be <= original pkt data count
 			for (UWordSequence::size_type ndx(0);  ndx < u16s.size();  ndx++)
-				SHOULD_BE_EQUAL(pv210YSamples[ndx+6], u16s.at(ndx));	//	Each element should match original
+				CHECK_EQ(pv210YSamples[ndx+6], u16s.at(ndx));	//	Each element should match original
 
 			//	Start over...
 			v210VancLine.clear();	u16Pkts.clear();	u16s.clear();	pktList.Clear();	pPkt = AJA_NULL;
+			AJAAncillaryData::GetInstanceCounts(numConst, numDest);
+			DBG_CHECK_EQ(numConst, 5);	DBG_CHECK_EQ(numDest, 5);
 
 			//	TEST 3:		Y&C-channel CEA708 PACKET
 			for (unsigned ndx(0);  ndx < sizeof(pv210YSamples);  ndx++)
 				v210VancLine.push_back(pv210YSamples[ndx]);	//	Both Chroma & Luma
-			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_Y, u16Pkts, hOffsets));	//	Should succeed, but no Y-channel-only packets
-			SHOULD_BE_TRUE (u16Pkts.empty());		//	Expect no Y-channel-only packets
-			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_C, u16Pkts, hOffsets));	//	Should succeed, but no C-channel-only packets
-			SHOULD_BE_TRUE (u16Pkts.empty());		//	Expect no C-channel-only packets
-			SHOULD_BE_TRUE (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_Both, u16Pkts, hOffsets));	//	Should succeed, 1 Y&C-channel packet
-			SHOULD_BE_EQUAL (u16Pkts.size(), 1);	//	Expect 1 Y&C-channel packet
-			SHOULD_SUCCEED (pktList.AddVANCData(u16Pkts.front(), AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Both, AJAAncillaryDataSpace_VANC, 9)));	//	Make a packet list from it
-			SHOULD_BE_EQUAL(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
+			CHECK (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_Y, u16Pkts, hOffsets));	//	Should succeed, but no Y-channel-only packets
+			CHECK (u16Pkts.empty());		//	Expect no Y-channel-only packets
+			CHECK (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_C, u16Pkts, hOffsets));	//	Should succeed, but no C-channel-only packets
+			CHECK (u16Pkts.empty());		//	Expect no C-channel-only packets
+			CHECK (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_Both, u16Pkts, hOffsets));	//	Should succeed, 1 Y&C-channel packet
+			CHECK_EQ (u16Pkts.size(), 1);	//	Expect 1 Y&C-channel packet
+			CHECK(AJA_SUCCESS(pktList.AddVANCData(u16Pkts.front(), AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Both, AJAAncillaryDataSpace_VANC, 9))));	//	Make a packet list from it
+			CHECK_EQ(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
 			pPkt = pktList.GetAncillaryDataAtIndex(0);			//	Get a pointer to the 1 and only packet
-			SHOULD_BE_NON_NULL(pPkt);							//	Pointer should be non-NULL
-			SHOULD_BE_EQUAL(AJAAncillaryDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	This used to fail, but changed in SDK 16.1 to succeed as CEA708 starting to be carried in SD
-			SHOULD_SUCCEED(pPkt->GetPayloadData(u16s));					//	Get its packet data as uint16_t vector (with parity)
-			SHOULD_BE_EQUAL(uint32_t(u16s.size()), pPkt->GetDC());		//	Vector element count should match packet data count
-			SHOULD_BE_TRUE(size_t(u16s.size()) <= sizeof(pv210YSamples));//	Vector element count should be <= original pkt data count
+			CHECK(pPkt != AJA_NULL);							//	Pointer should be non-NULL
+			CHECK_EQ(AJAAncillaryDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	This used to fail, but changed in SDK 16.1 to succeed as CEA708 starting to be carried in SD
+			CHECK(AJA_SUCCESS(pPkt->GetPayloadData(u16s)));		//	Get its packet data as uint16_t vector (with parity)
+			CHECK_EQ(uint32_t(u16s.size()), pPkt->GetDC());		//	Vector element count should match packet data count
+			CHECK(size_t(u16s.size()) <= sizeof(pv210YSamples));//	Vector element count should be <= original pkt data count
 			for (UWordSequence::size_type ndx(0);  ndx < u16s.size();  ndx++)
-				SHOULD_BE_EQUAL(pv210YSamples[ndx+6], u16s.at(ndx));	//	Each element should match original
+				CHECK_EQ(pv210YSamples[ndx+6], u16s.at(ndx));	//	Each element should match original
 			//p708Pkt->Print(cerr, true);
+			AJAAncillaryData::GetInstanceCounts(numConst, numDest);
+			DBG_CHECK_EQ(numConst, 7);	DBG_CHECK_EQ(numDest, 6);
 			///////////////////////////////////////////////////////////////////////	END TEST SECTION 1
 
 			if (false)		//	** MrBill **	NOT QUITE READY FOR PRIME-TIME (SD NOT YET PASSING THIS TEST)
@@ -846,8 +998,8 @@ class CNTV2AncDataTester
 						const NTV2PixelFormat		fbf	(FBFs[FBFndx]);
 						const NTV2FormatDescriptor	fd	(vf, fbf, NTV2_VANCMODE_TALL);
 						if (!fd.IsValid()) cerr << ::NTV2FrameBufferFormatToString(fbf) << endl;
-						SHOULD_BE_TRUE(fd.IsValid());
-						SHOULD_BE_TRUE(fd.IsVANC());
+						CHECK(fd.IsValid());
+						CHECK(fd.IsVANC());
 						NTV2_POINTER				fb	(size_t(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes()));	//	Just VANC lines
 						fb.Fill(UWord(0x8080));
 cerr << endl << endl << "===========================================================================================================================================" << endl;
@@ -862,20 +1014,20 @@ cerr << __FUNCTION__ << ":  " << fd << endl;
 							for (unsigned CHLndx(0);  CHLndx < sizeof(CHLs)/sizeof(CHLs[0]);  CHLndx++)
 							{
 								const AJAAncillaryDataChannel	chan	(CHLs[CHLndx]);
-								SHOULD_BE_TRUE(fd.GetSMPTELineNumber(pktLineOffset, smpteLine, isF2));
-								SHOULD_SUCCEED(pkt.SetDID(TEST_DID));	SHOULD_SUCCEED(pkt.SetSID(TEST_SID));
-								SHOULD_SUCCEED(pkt.SetDataCoding(AJAAncillaryDataCoding_Digital));
-								SHOULD_SUCCEED(pkt.SetLocationVideoLink(AJAAncillaryDataLink_A));
-								SHOULD_SUCCEED(pkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyVanc));
-								SHOULD_SUCCEED(pkt.SetLocationDataChannel(chan));
-								SHOULD_SUCCEED(pkt.SetLocationLineNumber(smpteLine));
+								CHECK(fd.GetSMPTELineNumber(pktLineOffset, smpteLine, isF2));
+								CHECK(AJA_SUCCESS(pkt.SetDID(TEST_DID)));	CHECK(AJA_SUCCESS(pkt.SetSID(TEST_SID)));
+								CHECK(AJA_SUCCESS(pkt.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+								CHECK(AJA_SUCCESS(pkt.SetLocationVideoLink(AJAAncillaryDataLink_A)));
+								CHECK(AJA_SUCCESS(pkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyVanc)));
+								CHECK(AJA_SUCCESS(pkt.SetLocationDataChannel(chan)));
+								CHECK(AJA_SUCCESS(pkt.SetLocationLineNumber(smpteLine)));
 								const uint8_t		pTestData[]	=	{0xAA, 0xBB, uint8_t(vf), uint8_t(fbf), uint8_t(pkt.GetLocationVideoLink()), uint8_t(pkt.GetLocationDataChannel()), uint8_t(pkt.GetLocationVideoSpace()), uint8_t(smpteLine), uint8_t(pkt.GetDataCoding()), 0xBB, 0xAA};
-								SHOULD_SUCCEED(pkt.SetPayloadData (pTestData, sizeof(pTestData)));
-								SHOULD_SUCCEED(pkts.AddAncillaryData(pkt));
+								CHECK(AJA_SUCCESS(pkt.SetPayloadData (pTestData, sizeof(pTestData))));
+								CHECK(AJA_SUCCESS(pkts.AddAncillaryData(pkt)));
 //cerr << "Line offset " << pktLineOffset << "(" << smpteLine << ") BEFORE GetVANCTransmitData:" << endl;
 //CNTV2CaptionLogConfig::DumpMemory(fd.GetRowAddress(fb.GetHostPointer(), pktLineOffset), fd.GetBytesPerRow(), cerr, 16/*inRadix*/, NTV2_IS_FBF_8BIT(fbf)?1:4/*bytesPerGroup*/,NTV2_IS_FBF_8BIT(fbf)?64:16/*groupsPerRow*/,0/*addressRadix*/,false/*ascii*/);
 fb.Fill(UWord(0x8080));	//	** MrBill **	FOR NOW
-								SHOULD_SUCCEED(pkts.GetVANCTransmitData (fb,  fd));
+								CHECK(AJA_SUCCESS(pkts.GetVANCTransmitData (fb,  fd)));
 								//	At this point, the packet should be in the frame buffer's VANC area.
 AJA_sDEBUG(AJA_DebugUnit_SMPTEAnc, "PKT SHOULD BE FOUND AT lineOffset=" << pktLineOffset << " SMPTELine=" << smpteLine << " chan=" << (isSD?(chan==AJAAncillaryDataChannel_C?"Y+C":"ILLEGAL"):(chan==AJAAncillaryDataChannel_C?"C":"Y")));
 cerr << "Line offset " << pktLineOffset << "(" << smpteLine << ") AFTER GetVANCTransmitData:" << endl;
@@ -883,7 +1035,7 @@ CNTV2CaptionLogConfig::DumpMemory(fd.GetRowAddress(fb.GetHostPointer(), pktLineO
 AJA_sDEBUG(AJA_DebugUnit_SMPTEAnc, ":  PKT SHOULD BE FOUND AT lineOffset=" << pktLineOffset << " SMPTELine=" << smpteLine << " chan=" << (isSD?(chan==AJAAncillaryDataChannel_C?"Y+C":"ILLEGAL"):(chan==AJAAncillaryDataChannel_C?"C":"Y")));
 vector<uint16_t>	u16pktComponents;
 
-SHOULD_SUCCEED(pkt.GenerateTransmitData(u16pktComponents));
+CHECK(AJA_SUCCESS(pkt.GenerateTransmitData(u16pktComponents)));
 cerr <<  "U16 Packet Components returned from GenerateTransmitData:" << endl;  for(unsigned n(0);  n < u16pktComponents.size();  n++)	cerr << " " << HEX0N(u16pktComponents[n],4); ;
 
 //	Round-trip test:
@@ -913,10 +1065,10 @@ cerr <<  "U16 Packet Components returned from GenerateTransmitData:" << endl;  f
 AJA_sDEBUG(AJA_DebugUnit_SMPTEAnc, "cPackets: " << cPackets);
 AJA_sDEBUG(AJA_DebugUnit_SMPTEAnc, "yPackets: " << yPackets);
 AJA_sDEBUG(AJA_DebugUnit_SMPTEAnc, "compPkts: " << compPkts);
-		SHOULD_BE_EQUAL(compPkts.CountAncillaryDataWithID (TEST_DID, TEST_SID), 1);
+		CHECK_EQ(compPkts.CountAncillaryDataWithID (TEST_DID, TEST_SID), 1);
 		AJAAncillaryData *	pCompPkt	(compPkts.GetAncillaryDataWithID (TEST_DID, TEST_SID));
-		SHOULD_BE_NON_NULL(pCompPkt);
-		SHOULD_BE_EQUAL(*pCompPkt, pkt);
+		CHECK(pCompPkt != AJA_NULL);
+		CHECK_EQ(*pCompPkt, pkt);
 	}
 
 								//	Search for the packet using FindAnc...
@@ -957,13 +1109,13 @@ AJA_sDEBUG(AJA_DebugUnit_SMPTEAnc, "compPkts: " << compPkts);
 																					1,							//	inLineIncrement
 																					lineOffset,					//	inOutLineStart
 																					pixelOffset));				//	inOutPixelStart
-*/										SHOULD_BE_TRUE(fd.GetSMPTELineNumber (lineOffset, foundSmpteLine, foundIsF2));
+*/										CHECK(fd.GetSMPTELineNumber (lineOffset, foundSmpteLine, foundIsF2));
 										bool	isAMatch	= foundSmpteLine == smpteLine
 																&&	pktLineOffset == lineOffset
 																&&	numWordsCopied == pkt.GetDC();
 AJA_sREPORT(AJA_DebugUnit_SMPTEAnc, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":  " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << sCHSs[srchChan] << " srchLn=" << srchLineOffset << " ln=" << lineOffset << " px=" << pixelOffset << " words=" << numWordsCopied);
 cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << sCHSs[srchChan] << " srchLn=" << srchLineOffset << " ln=" << lineOffset << " px=" << pixelOffset << " words=" << numWordsCopied << endl;
-										//SHOULD_BE_EQUAL(bFound, isAMatch);
+										//CHECK_EQ(bFound, isAMatch);
 										if (bFound && isAMatch)
 											cerr << "HOORAY!" << endl;
 									}	//	vary the search channel select
@@ -983,34 +1135,41 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 			if (true)
 			{
 				//	Start over:
-				v210VancLine.clear();	u16Pkts.clear();	u16s.clear();	pktList.Clear();	pPkt = NULL;
+				v210VancLine.clear();	u16Pkts.clear();	u16s.clear();	pktList.Clear();	pPkt = AJA_NULL;
 
 				//	Test CNTV2SMPTEAncData::GetAncPacketsFromVANCLine...
 				UWordSequence				hOffsets;
 				AJAAncillaryDataLocation	loc	(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Both, AJAAncillaryDataSpace_VANC, 9);
 				::SetDefaultCaptionLogOutputStream(cerr);
 				//::SetDefaultCaptionLogMask(kCaptionLog_SMPTEAncErrors | kCaptionLog_SMPTEAncSuccess | kCaptionLog_SMPTEAncDebug);
-				SHOULD_BE_TRUE(CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (in10BitYUVReferenceLine, kNTV2SMPTEAncChannel_Both, u16Pkts, hOffsets));
-				SHOULD_BE_EQUAL(u16Pkts.size(), 2);
-				SHOULD_BE_EQUAL(u16Pkts.size(), hOffsets.size());
+				CHECK(CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (in10BitYUVReferenceLine, kNTV2SMPTEAncChannel_Both, u16Pkts, hOffsets));
+				CHECK_EQ(u16Pkts.size(), 2);
+				CHECK_EQ(u16Pkts.size(), hOffsets.size());
 				const UWordSequence	u16s_1	(u16Pkts.at(0));
 				const UWordSequence	u16s_2	(u16Pkts.at(1));
-				SHOULD_BE_EQUAL(u16s_1.size(), 223);
-				SHOULD_BE_EQUAL(u16s_2.size(), 9);
+				CHECK_EQ(u16s_1.size(), 223);
+				CHECK_EQ(u16s_2.size(), 9);
 				//cerr << "BFT_SMPTEAncData:  PACKETS:  " << u16Pkts << endl
 				//	 << "HOFFSETS:  " << hOffsets << endl
 				//	 << "RESULTING PACKET LIST:" << endl;
-				for (UWordVANCPacketList::size_type ndx(0);  ndx < u16Pkts.size();  ndx++)
-					SHOULD_SUCCEED (pktList.AddVANCData(u16Pkts.at(ndx), loc.SetHorizontalOffset(hOffsets.at(ndx))));	//	Add to packet list
+				AJAAncillaryData::GetInstanceCounts(numConst, numDest);
+				DBG_CHECK_EQ(numConst, 7);	DBG_CHECK_EQ(numDest, 7);
+				for (UWordVANCPacketList::size_type ndx(0);  ndx < u16Pkts.size();  ndx++)	//	+2 more pkt instances ==> 11
+					CHECK(AJA_SUCCESS(pktList.AddVANCData(u16Pkts.at(ndx), loc.SetHorizontalOffset(hOffsets.at(ndx)))));	//	Add to packet list
 				//pktList.Print(cerr, true) << endl;
+				AJAAncillaryData::GetInstanceCounts(numConst, numDest);
+				DBG_CHECK_EQ(numConst, 11);	DBG_CHECK_EQ(numDest, 9);
+				pktList.Clear();
+				AJAAncillaryData::GetInstanceCounts(numConst, numDest);
+				DBG_CHECK_EQ(numDest, 11);
 			}
-
-			return true;
-		}	//	BFT_SMPTEAncData
+		}	//	TEST_CASE("BFT_SMPTEAncData")
 
 
-		static bool BFT_SDSetFromVANCData (const vector<uint16_t> & in10BitYUVReferenceLine)
+#if 0	//	** MrBill **	NOT READY FOR PRIME-TIME
+		TEST_CASE("BFT_SDSetFromVANCData")
 		{
+			const vector<uint16_t> & in10BitYUVReferenceLine(SD10BitYUVComponents);
 			//	Test SetFromVANCData
 			NTV2FormatDescriptor	fd	(NTV2_STANDARD_525, NTV2_FBF_10BIT_YCBCR, NTV2_VANCMODE_TALLER);
 			NTV2_POINTER			fb (size_t(fd.GetTotalRasterBytes()));	//	Tall SD frame buffer, in which a single VANC line will receive the packed YUV component data
@@ -1030,313 +1189,116 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 					ULWord				smpteLineNum	(0);
 					bool				isField2		(false);
 					AJAAncillaryList	pktList;	//	Receives decoded Anc packets
-					SHOULD_BE_TRUE(fd.GetSMPTELineNumber (fbRowOffset, smpteLineNum, isField2));
+					CHECK(fd.GetSMPTELineNumber (fbRowOffset, smpteLineNum, isField2));
 					fb.Fill(UByte(0x80));			//	Reset the frame buffer contents to 0x80808080....
-					SHOULD_BE_TRUE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fbRowOffset));
-					SHOULD_SUCCEED(AJAAncillaryList::SetFromVANCData (fb, fd, pktList));
+					CHECK(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fbRowOffset));
+					CHECK(AJA_SUCCESS(AJAAncillaryList::SetFromVANCData (fb, fd, pktList)));
 					if (YUVLine.size() < 228)	//	1st packet disappears around here
 					{
 						if (pktList.CountAncillaryData() != 0)	cerr << "IN ITERATION YUVLine.size=" << YUVLine.size() << " IN fbRowOffset=" << fbRowOffset << "..." << endl;
-						SHOULD_BE_EQUAL(pktList.CountAncillaryData(), 0);	//	Should have no packets
+						CHECK_EQ(pktList.CountAncillaryData(), 0);	//	Should have no packets
 					}
 					else
 					{
 						AJAAncillaryData * pPkt1	(NULL);
 						if (pktList.CountAncillaryData() != ((YUVLine.size() < 240) ? 1 : 2))	cerr << "IN ITERATION YUVLine.size=" << YUVLine.size() << " IN fbRowOffset=" << fbRowOffset << "..." << endl;
-						SHOULD_BE_EQUAL(pktList.CountAncillaryData(),  YUVLine.size() < 240  ?  1  :  2);
+						CHECK_EQ(pktList.CountAncillaryData(),  YUVLine.size() < 240  ?  1  :  2);
 						pPkt1 = pktList.GetAncillaryDataWithID (0x45, 0x01);
-						SHOULD_BE_NON_NULL(pPkt1);	//	Should have packet DID=0x41/SID=0x01
-						SHOULD_BE_EQUAL(pPkt1->GetDID(), 0x45);	//	Should have DID=0x41
-						SHOULD_BE_EQUAL(pPkt1->GetSID(), 0x01);	//	Should have SID=0x01
-						SHOULD_BE_EQUAL(pPkt1->GetDC(), 216);	//	Should have DC=216
-						SHOULD_BE_EQUAL(pPkt1->GetChecksum(), 0xD2);	//	Should have CS=0xD2
-						SHOULD_BE_EQUAL(pPkt1->GetDataCoding(), AJAAncillaryDataCoding_Digital);		//	Should be Digital
-						SHOULD_BE_EQUAL(pPkt1->GetLocationVideoLink(), AJAAncillaryDataLink_Unknown);	//	Should be unknown Link
-						SHOULD_BE_EQUAL(pPkt1->GetLocationDataStream(), AJAAncillaryDataStream_1);		//	Should be DS1
-						SHOULD_BE_EQUAL(pPkt1->GetLocationDataChannel(), AJAAncillaryDataChannel_Both);	//	Should be C/both
-						SHOULD_BE_EQUAL(pPkt1->GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);	//	Should be VANC
-						SHOULD_BE_EQUAL(pPkt1->GetLocationLineNumber(), uint16_t(smpteLineNum));		//	Should match smpteLineNum
-						SHOULD_BE_EQUAL(pPkt1->GetLocationHorizOffset(), 0);							//	Should be zero
+						CHECK(pPkt1 != AJA_NULL);	//	Should have packet DID=0x41/SID=0x01
+						CHECK_EQ(pPkt1->GetDID(), 0x45);	//	Should have DID=0x41
+						CHECK_EQ(pPkt1->GetSID(), 0x01);	//	Should have SID=0x01
+						CHECK_EQ(pPkt1->GetDC(), 216);	//	Should have DC=216
+						CHECK_EQ(pPkt1->GetChecksum(), 0xD2);	//	Should have CS=0xD2
+						CHECK_EQ(pPkt1->GetDataCoding(), AJAAncillaryDataCoding_Digital);		//	Should be Digital
+						CHECK_EQ(pPkt1->GetLocationVideoLink(), AJAAncillaryDataLink_Unknown);	//	Should be unknown Link
+						CHECK_EQ(pPkt1->GetLocationDataStream(), AJAAncillaryDataStream_1);		//	Should be DS1
+						CHECK_EQ(pPkt1->GetLocationDataChannel(), AJAAncillaryDataChannel_Both);	//	Should be C/both
+						CHECK_EQ(pPkt1->GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);	//	Should be VANC
+						CHECK_EQ(pPkt1->GetLocationLineNumber(), uint16_t(smpteLineNum));		//	Should match smpteLineNum
+						CHECK_EQ(pPkt1->GetLocationHorizOffset(), 0);							//	Should be zero
 						if (YUVLine.size() >= 240)	//	2nd packet appears around here
 						{
 							AJAAncillaryData *	pPkt2		(NULL);
 							const UWord			pkt2HOffset	(pPkt1->GetDC() + 7);	//	Pkt2 HOffset should be 7 components more than Pkt1's DC
 							if (pktList.CountAncillaryData() != 2)	cerr << "IN ITERATION YUVLine.size=" << YUVLine.size() << " IN fbRowOffset=" << fbRowOffset << "..." << endl;
-							SHOULD_BE_EQUAL(pktList.CountAncillaryData(), 2);	//	Should have two packets
+							CHECK_EQ(pktList.CountAncillaryData(), 2);	//	Should have two packets
 							pPkt2 = pktList.GetAncillaryDataWithID (0x45, 0x02);
-							SHOULD_BE_NON_NULL(pPkt2);	//	Should have packet DID=0x41/SID=0x02
-							SHOULD_BE_EQUAL(pPkt2->GetDID(), 0x45);	//	Should have DID=0x41
-							SHOULD_BE_EQUAL(pPkt2->GetSID(), 0x02);	//	Should have SID=0x02
-							SHOULD_BE_EQUAL(pPkt2->GetDC(), 2);	//	Should have DC=2
-							SHOULD_BE_EQUAL(pPkt2->GetChecksum(), 0x62);	//	Should have CS=0x62
-							SHOULD_BE_EQUAL(pPkt2->GetDataCoding(), AJAAncillaryDataCoding_Digital);		//	Should be Digital
-							SHOULD_BE_EQUAL(pPkt2->GetLocationVideoLink(), AJAAncillaryDataLink_Unknown);	//	Should be unknown Link
-							SHOULD_BE_EQUAL(pPkt2->GetLocationDataStream(), AJAAncillaryDataStream_1);		//	Should be DS1
-							SHOULD_BE_EQUAL(pPkt2->GetLocationDataChannel(), AJAAncillaryDataChannel_Both);	//	Should be C/both
-							SHOULD_BE_EQUAL(pPkt2->GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);	//	Should be VANC
-							SHOULD_BE_EQUAL(pPkt2->GetLocationLineNumber(), uint16_t(smpteLineNum));		//	Should match smpteLineNum
+							CHECK(pPkt2 != AJA_NULL);	//	Should have packet DID=0x41/SID=0x02
+							CHECK_EQ(pPkt2->GetDID(), 0x45);	//	Should have DID=0x41
+							CHECK_EQ(pPkt2->GetSID(), 0x02);	//	Should have SID=0x02
+							CHECK_EQ(pPkt2->GetDC(), 2);	//	Should have DC=2
+							CHECK_EQ(pPkt2->GetChecksum(), 0x62);	//	Should have CS=0x62
+							CHECK_EQ(pPkt2->GetDataCoding(), AJAAncillaryDataCoding_Digital);		//	Should be Digital
+							CHECK_EQ(pPkt2->GetLocationVideoLink(), AJAAncillaryDataLink_Unknown);	//	Should be unknown Link
+							CHECK_EQ(pPkt2->GetLocationDataStream(), AJAAncillaryDataStream_1);		//	Should be DS1
+							CHECK_EQ(pPkt2->GetLocationDataChannel(), AJAAncillaryDataChannel_Both);	//	Should be C/both
+							CHECK_EQ(pPkt2->GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);	//	Should be VANC
+							CHECK_EQ(pPkt2->GetLocationLineNumber(), uint16_t(smpteLineNum));		//	Should match smpteLineNum
 							if (pPkt2->GetLocationHorizOffset() != pkt2HOffset)	cerr << "IN ITERATION YUVLine.size=" << YUVLine.size() << " IN fbRowOffset=" << fbRowOffset << "..." << endl;
-							SHOULD_BE_EQUAL(pPkt2->GetLocationHorizOffset(), pkt2HOffset);					//	Should match hOffset
+							CHECK_EQ(pPkt2->GetLocationHorizOffset(), pkt2HOffset);					//	Should match hOffset
 						}
 					}	//	else YUVLine.size() >= 228
 					//cerr << "LINE OFFSET " << fbRowOffset << " (YUVLine " << YUVLine.size() << "):" << endl << pktList << endl;
 					YUVLine.pop_back();	//	Lop off last component value
 				}	//	while YUVLine has at least 12 components
 			}	//	for each VANC line
-			return true;
-		}	//	BFT_SDSetFromVANCData
+		}	//	TEST_CASE("BFT_SDSetFromVANCData")
+#endif	//	DISABLE FOR NOW
 
-
-		static bool BFT_AncillaryData (void)
+		TEST_CASE("RTPHeaderBFT")
 		{
-			AJAAncillaryData					defaultPkt;
-			AJAAncillaryData *					pDefaultPkt		(NULL);
-			AJAAncillaryData *					pClone			(NULL);
-			const AJAAncillaryDataLocation		nullLocation;
-			vector<uint8_t>						buffer4K;
-			buffer4K.resize(4096, 0x65);
+			AJARTPAncPayloadHeader	hdrA, hdrB;
+			CHECK(hdrA.IsValid());
+			CHECK(hdrA == hdrB);
+			CHECK_EQ(hdrA, hdrB);
+			//	Set stuff the hardware ordinarily sets...
+			hdrB.SetCCBits(0x5).SetPayloadType(0xF5).SetSequenceNumber(0x12345678).SetTimeStamp(0x6789ABCD).SetSyncSourceID(0xBaadF00d);
+			//	Set stuff the client needs to set...
+			hdrB.SetPayloadLength(0x4321).SetAncPacketCount(20).SetField2();
+			CHECK(hdrB.IsValid());
+			CHECK_NE(hdrA, hdrB);
+			CHECK_FALSE(hdrB.IsField1());
+			CHECK(hdrB.IsField2());
+			CHECK_FALSE(hdrB.IsProgressive());
+			CHECK_EQ(hdrB.GetPayloadLength(), 0x4321);
+			CHECK_EQ(hdrB.GetAncPacketCount(), 20);
+			CHECK_EQ(hdrB.GetSyncSourceID(), 0xBaadF00d);
+			CHECK_EQ(hdrB.GetPayloadType(), 0x75);
+			NTV2_POINTER	nullBuffer;
+			CHECK_FALSE(hdrB.WriteToBuffer(nullBuffer));
 
-			//	Verify default values...
-			SHOULD_BE_FALSE (defaultPkt.GotValidReceiveData());
-			SHOULD_BE_EQUAL (defaultPkt.GetDID(), 0x00);
-			SHOULD_BE_EQUAL (defaultPkt.GetSID(), 0x00);
-			SHOULD_BE_TRUE (defaultPkt.IsEmpty());
-			SHOULD_BE_EQUAL (defaultPkt.GetPayloadByteCount(), 0);
-			SHOULD_BE_NULL (defaultPkt.GetPayloadData());
-			SHOULD_BE_UNEQUAL (defaultPkt.GetDataLocation(), nullLocation);
-			SHOULD_BE_TRUE (defaultPkt.GetDataLocation().IsValid());
-			SHOULD_BE_TRUE (defaultPkt.IsLumaChannel());
-			SHOULD_BE_FALSE (defaultPkt.IsChromaChannel());
-			SHOULD_BE_TRUE (defaultPkt.IsDigital());
-			SHOULD_BE_FALSE (defaultPkt.IsRaw());
-			SHOULD_BE_TRUE (defaultPkt.IsVanc());
-			SHOULD_BE_FALSE (defaultPkt.IsHanc());
-			SHOULD_BE_EQUAL (defaultPkt.GetLocationLineNumber(), 0);
-			SHOULD_BE_EQUAL(defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_A);
-			SHOULD_BE_EQUAL(defaultPkt.GetLocationDataStream(), AJAAncillaryDataStream_1);
-			SHOULD_BE_EQUAL(defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
-			SHOULD_BE_EQUAL(defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
-			cerr << "BFT_AncillaryData:  Validated AJAAncillaryData default values" << endl;
+			//	HdrB => buffer => HdrC	. . .	verify HdrB == HdrC
+			AJARTPAncPayloadHeader	hdrC, hdrD, hdrE;
+			NTV2_POINTER	bBuffer(4096);
+			CHECK(hdrB.WriteToBuffer(bBuffer));
+			if (gIsVerbose)
+				cerr << "hdrB: " << hdrB << endl << bBuffer.AsString(20) << endl;
+			CHECK(hdrC.ReadFromBuffer(bBuffer));
+			if (gIsVerbose)
+				cerr << "hdrC: " << hdrC << endl;
 
-			//	Verify that GetDataLocation/SetDataLocation works...
-			if (true)
-			{
-				const AJAAncillaryDataLocation savedLoc(defaultPkt.GetDataLocation());
-					SHOULD_SUCCEED(defaultPkt.SetLocationVideoLink(AJAAncillaryDataLink_B));
-					SHOULD_SUCCEED(defaultPkt.SetLocationDataStream(AJAAncillaryDataStream_4));
-					SHOULD_SUCCEED(defaultPkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc));
-					SHOULD_SUCCEED(defaultPkt.SetLocationDataChannel(AJAAncillaryDataChannel_C));
-					SHOULD_SUCCEED(defaultPkt.SetLocationLineNumber(225));
-					SHOULD_BE_EQUAL(defaultPkt.GetLocationLineNumber(), 225);
-					SHOULD_BE_EQUAL(defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_B);
-					SHOULD_BE_EQUAL(defaultPkt.GetLocationDataStream(), AJAAncillaryDataStream_4);
-					SHOULD_BE_EQUAL(defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_HANC);
-					SHOULD_BE_EQUAL(defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_C);
-				SHOULD_SUCCEED(defaultPkt.SetDataLocation(savedLoc));
-				cerr << "BFT_AncillaryData:  Validated AJAAncillaryData::GetDataLocation, SetDataLocation" << endl;
-			}
+			//	bufferB => HdrD => bufferC . . .	verify bufferA == bufferB
+			NTV2_POINTER	cBuffer(bBuffer.GetByteCount());
+			CHECK(hdrD.ReadFromBuffer(bBuffer));
+			CHECK(hdrD.WriteToBuffer(cBuffer));
+			CHECK(cBuffer.IsContentEqual(bBuffer));
 
-			//	Validate new "Unknown" packet from AJAAncillaryDataFactory::Create...
-			SHOULD_BE_NULL (pDefaultPkt);
-			pDefaultPkt = AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Unknown);
-			SHOULD_BE_NON_NULL (pDefaultPkt);
-			SHOULD_BE_TRUE (pDefaultPkt);
-			SHOULD_BE_FALSE (pDefaultPkt->GotValidReceiveData());
-			SHOULD_BE_EQUAL (pDefaultPkt->GetDID(), 0x00);
-			SHOULD_BE_EQUAL (pDefaultPkt->GetSID(), 0x00);
-			SHOULD_BE_TRUE (pDefaultPkt->IsEmpty());
-			SHOULD_BE_EQUAL (pDefaultPkt->GetPayloadByteCount(), 0);
-			SHOULD_BE_NULL (pDefaultPkt->GetPayloadData());
-			SHOULD_BE_UNEQUAL (pDefaultPkt->GetDataLocation(), nullLocation);
-			SHOULD_BE_TRUE (pDefaultPkt->GetDataLocation().IsValid());
-			SHOULD_BE_TRUE (pDefaultPkt->IsLumaChannel());
-			SHOULD_BE_FALSE (pDefaultPkt->IsChromaChannel());
-			SHOULD_BE_TRUE (pDefaultPkt->IsDigital());
-			SHOULD_BE_FALSE (pDefaultPkt->IsRaw());
-			SHOULD_BE_TRUE (pDefaultPkt->IsVanc());
-			SHOULD_BE_FALSE (pDefaultPkt->IsHanc());
-			SHOULD_BE_EQUAL (pDefaultPkt->GetLocationLineNumber(), 0);
-			cerr << "BFT_AncillaryData:  Validated AJAAncillaryData created by AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Unknown)" << endl;
+			//	HdrB => u32vectorA => HdrE	. . .	verify HdrB == HdrE
+			vector<uint32_t>	u32vectorA, u32vectorTooSmall;
+			for (unsigned ndx(0);  ndx < 20;  ndx++)	u32vectorA.push_back(0xFFFFFFFF);
+			CHECK_EQ(u32vectorA.size(), 20);	//	Size is 20
+			vector<uint32_t>	u32vectorB (u32vectorA);
+			CHECK_EQ(u32vectorB.size(), 20);	//	Size is 20
+			CHECK(hdrB.WriteToULWordVector(u32vectorA, false));
+			CHECK_EQ(u32vectorA.size(), 20);	//	Size is unchanged -- still 20
+			CHECK(hdrB.WriteToULWordVector(u32vectorB, true));
+			CHECK_EQ(u32vectorB.size(), 5);	//	Size is changed to 5 due to "reset" param being 'true'
+			CHECK_FALSE(hdrE.ReadFromULWordVector(u32vectorTooSmall));
+			//CHECK_FALSE(hdrE.SetFromPacketHeaderULWordAtIndex(5, 0xFFFFFFFF));
+			CHECK(hdrE.ReadFromULWordVector(u32vectorA));
+			CHECK_EQ(hdrB, hdrE);
+		}	//	TEST_CASE("RTPHeaderBFT")
 
-			//	Validate AJAAncillaryData operator == comparing two NULL packets...
-			SHOULD_BE_EQUAL	(*pDefaultPkt, defaultPkt);
-			cerr << "BFT_AncillaryData:  Validated AJAAncillaryData::operator=" << endl;
-
-			//	Validate AJAAncillaryData payload data modification...
-			static const UByte		pTestBytes []	=	{	0x10,	0x11,	0x12,	0x13,	0x14,	0x15,	0x16,	0x17,	0x18,	0x19,	0x1A,	0x1B,	0x1C,	0x1D,	0x1E,	0x1F,
-															0x20,	0x21,	0x22,	0x23,	0x24,	0x25,	0x26,	0x27,	0x28,	0x29,	0x2A,	0x2B,	0x2C,	0x2D,	0x2E,	0x2F	};
-			SHOULD_FAIL (pDefaultPkt->SetPayloadData (NULL, sizeof(pTestBytes)));
-			SHOULD_FAIL (pDefaultPkt->SetPayloadData (pTestBytes, 0));
-			SHOULD_SUCCEED (pDefaultPkt->SetPayloadData (pTestBytes, sizeof(pTestBytes)));
-			SHOULD_SUCCEED (pDefaultPkt->SetDID(0x40));
-			SHOULD_SUCCEED (pDefaultPkt->SetSID(0x02));
-			SHOULD_BE_EQUAL (pDefaultPkt->GetDID(), 0x40);
-			SHOULD_BE_EQUAL (pDefaultPkt->GetSID(), 0x02);
-			SHOULD_BE_FALSE (pDefaultPkt->IsEmpty());
-			SHOULD_BE_EQUAL (pDefaultPkt->GetPayloadByteCount(), sizeof(pTestBytes));
-			SHOULD_BE_NON_NULL (pDefaultPkt->GetPayloadData());
-			SHOULD_BE_EQUAL (pDefaultPkt->GetDC(), sizeof(pTestBytes));
-			SHOULD_BE_FALSE (pDefaultPkt->ChecksumOK());
-			SHOULD_SUCCEED (pDefaultPkt->SetChecksum(pDefaultPkt->Calculate8BitChecksum()));
-			SHOULD_BE_TRUE (pDefaultPkt->ChecksumOK());
-			SHOULD_SUCCEED (pDefaultPkt->SetDID(0x45));
-			SHOULD_BE_UNEQUAL (pDefaultPkt->GetChecksum(), pDefaultPkt->Calculate8BitChecksum());	//	Unequal, since DID changed
-			SHOULD_BE_FALSE (pDefaultPkt->ChecksumOK());	//	Fail, since DID changed
-			SHOULD_SUCCEED (pDefaultPkt->SetChecksum(pDefaultPkt->Calculate8BitChecksum()));	//	Fix CS
-			SHOULD_BE_EQUAL (pDefaultPkt->GetPayloadByteAtIndex(4), pTestBytes[4]);
-			SHOULD_BE_EQUAL (pDefaultPkt->GetPayloadByteAtIndex(pDefaultPkt->GetDC()), 0);
-
-			//	Validate AJAAncillaryData operators...
-			SHOULD_BE_UNEQUAL (*pDefaultPkt, defaultPkt);	//	Validate AJAAncillaryData operator !=
-			defaultPkt = *pDefaultPkt;						//	Validate AJAAncillaryData operator =
-			SHOULD_BE_EQUAL	(*pDefaultPkt, defaultPkt);		//	Validate AJAAncillaryData operator ==
-			defaultPkt.SetPayloadByteAtIndex(0x1F, defaultPkt.GetDC()/2);
-			SHOULD_BE_UNEQUAL (*pDefaultPkt, defaultPkt);
-			cerr << "BFT_AncillaryData:  Validated AJAAncillaryData payload data modification" << endl;
-
-			if (true)	/////	Clone, GeneratePayloadData and GuessAncillaryDataType Tests
-			{
-				pClone = defaultPkt.Clone();
-				SHOULD_BE_EQUAL(*pClone, defaultPkt);
-
-				//	Validate that Clear works...
-				pClone->Clear();
-				SHOULD_BE_UNEQUAL(*pClone, defaultPkt);
-				SHOULD_BE_EQUAL(*pClone, AJAAncillaryData());
-				SHOULD_BE_EQUAL (pClone->GetDID(), 0);
-				SHOULD_BE_EQUAL (pClone->GetSID(), 0);
-				SHOULD_BE_TRUE (pClone->IsEmpty());
-				SHOULD_BE_EQUAL(pClone->GetDataCoding(), AJAAncillaryDataCoding_Digital);
-				SHOULD_SUCCEED(pClone->SetDataCoding(AJAAncillaryDataCoding_Raw));
-				SHOULD_BE_EQUAL(pClone->GetDataCoding(), AJAAncillaryDataCoding_Raw);
-				SHOULD_BE_EQUAL(pClone->GetLocationLineNumber(), 0);
-				SHOULD_SUCCEED(pClone->SetLocationLineNumber(100));
-				SHOULD_BE_EQUAL(pClone->GetLocationLineNumber(), 100);
-				SHOULD_BE_EQUAL(pClone->GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
-				SHOULD_SUCCEED(pClone->SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc));
-				SHOULD_BE_EQUAL(pClone->GetLocationVideoSpace(), AJAAncillaryDataSpace_HANC);
-				SHOULD_BE_EQUAL(pClone->GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
-				SHOULD_SUCCEED(pClone->SetLocationDataChannel(AJAAncillaryDataChannel_C));
-				SHOULD_BE_EQUAL(pClone->GetLocationDataChannel(), AJAAncillaryDataChannel_C);
-				SHOULD_BE_EQUAL(pClone->GetLocationVideoLink(), AJAAncillaryDataLink_A);
-				SHOULD_SUCCEED(pClone->SetLocationVideoLink(AJAAncillaryDataLink_B));
-				SHOULD_BE_EQUAL(pClone->GetLocationVideoLink(), AJAAncillaryDataLink_B);
-				cerr << "BFT_AncillaryData:  Validated AJAAncillaryData::Clone" << endl;
-
-				//	Test generating default packet using AJAAncillaryDataFactory::Create for these AJAAncillaryDataTypes...
-				//	...then GeneratePayloadData for it, then clone it, and test AJAAncillaryDataFactory::GuessAncillaryDataType using the clone.
-				//	The detected data type should match the original's...
-				static const AJAAncillaryDataType	gDataTypes[]	=	{	//AJAAncillaryDataType_Unknown,
-																			//	AJAAncillaryDataType_Smpte2016_3,
-																			AJAAncillaryDataType_Timecode_ATC
-																			,AJAAncillaryDataType_Timecode_VITC
-																			,AJAAncillaryDataType_Cea708
-																			,AJAAncillaryDataType_Cea608_Vanc
-																			,AJAAncillaryDataType_Cea608_Line21
-																			//	,AJAAncillaryDataType_Smpte352
-																			//	,AJAAncillaryDataType_Smpte2051
-																			//	,AJAAncillaryDataType_FrameStatusInfo524D
-																			//	,AJAAncillaryDataType_FrameStatusInfo5251
-																			//	,AJAAncillaryDataType_HDR_SDR
-																			//	,AJAAncillaryDataType_HDR_HDR10
-																			//	,AJAAncillaryDataType_HDR_HLG
-																			};
-				for (unsigned ndx(0);  ndx < sizeof(gDataTypes)/sizeof(AJAAncillaryDataType);  ndx++)
-				{
-					const AJAAncillaryDataType	dataType	(gDataTypes[ndx]);
-					AJAAncillaryData *	pDefaultPkt2	= AJAAncillaryDataFactory::Create(dataType);
-					SHOULD_BE_NON_NULL(pDefaultPkt2);
-					SHOULD_SUCCEED(pDefaultPkt2->GeneratePayloadData());
-					AJAAncillaryData *	pClonePkt	= pDefaultPkt2->Clone();
-					SHOULD_BE_NON_NULL(pClonePkt);
-					SHOULD_BE_UNEQUAL(pDefaultPkt2, pClonePkt);	//	Different objects in memory
-					SHOULD_BE_EQUAL(*pDefaultPkt2, *pClonePkt);
-					SHOULD_BE_EQUAL (AJAAncillaryDataFactory::GuessAncillaryDataType(pClonePkt), dataType);
-					cerr << "BFT_AncillaryData:  Validated AJAAncillaryDataFactory::GuessAncillaryDataType for '" << ::AJAAncillaryDataTypeToString(dataType) << "'" << endl;
-				}
-			}	//	Clone Tests
-
-			//	Validate AJAAncillaryData payload append...
-			SHOULD_SUCCEED(defaultPkt.SetPayloadData(buffer4K.data(), uint32_t(buffer4K.size())));
-			SHOULD_BE_EQUAL (defaultPkt.GetDC(), 4096);
-			SHOULD_SUCCEED(defaultPkt.AppendPayload(*pDefaultPkt));
-			SHOULD_BE_EQUAL (defaultPkt.GetDC(), 4096+sizeof(pTestBytes));
-			SHOULD_FAIL(defaultPkt.AppendPayloadData(NULL, 50));
-			SHOULD_FAIL(defaultPkt.AppendPayloadData(pTestBytes, 0));
-			SHOULD_SUCCEED(defaultPkt.AppendPayloadData(pTestBytes, sizeof(pTestBytes)));
-			SHOULD_BE_EQUAL (defaultPkt.GetDC(), 4096 + 2*sizeof(pTestBytes));
-			SHOULD_SUCCEED(defaultPkt.AppendPayload(defaultPkt));
-			SHOULD_BE_EQUAL (defaultPkt.GetDC(), 2*(4096 + 2*sizeof(pTestBytes)));
-
-			SHOULD_SUCCEED(defaultPkt.SetDataCoding(AJAAncillaryDataCoding_Digital));
-			SHOULD_SUCCEED(defaultPkt.SetLocationLineNumber(9));
-			SHOULD_SUCCEED(defaultPkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyVanc));
-			SHOULD_SUCCEED(defaultPkt.SetLocationDataChannel(AJAAncillaryDataChannel_Y));
-			SHOULD_SUCCEED(defaultPkt.SetLocationDataStream(AJAAncillaryDataStream_1));
-			SHOULD_SUCCEED(defaultPkt.SetLocationVideoLink(AJAAncillaryDataLink_A));
-			SHOULD_SUCCEED(defaultPkt.SetDID(0x45));
-			SHOULD_SUCCEED(defaultPkt.SetSID(0x01));
-			cerr << "BFT_AncillaryData:  Validated AJAAncillaryData::AppendPayloadData" << endl;
-
-			if (true)
-			{
-				//	Test 10-bit UDW conversion (with parity)...
-				static const uint8_t				p8_RDD6Pkt1 []	=	{	0x00,	0x01,	0x02,	0x03,	0x04,	0x05,	0x06,	0x07,	0x08,	0x09,	0x0A,	0x0B,	0x0C,	0x0D,	0x0E,	0x0F,
-																			0x10,	0x11,	0x12,	0x13,	0x14,	0x15,	0x16,	0x17,	0x18,	0x19,	0x1A,	0x1B,	0x1C,	0x1D,	0x1E,	0x1F,
-																			0x20,	0x21,	0x22,	0x23,	0x24,	0x25,	0x26,	0x27,	0x28,	0x29,	0x2A,	0x2B,	0x2C,	0x2D,	0x2E,	0x2F,
-																			0x30,	0x31,	0x32,	0x33,	0x34,	0x35,	0x36,	0x37,	0x38,	0x39,	0x3A,	0x3B,	0x3C,	0x3D,	0x3E,	0x3F,
-																			0x40,	0x41,	0x42,	0x43,	0x44,	0x45,	0x46,	0x47,	0x48,	0x49,	0x4A,	0x4B,	0x4C,	0x4D,	0x4E,	0x4F,
-																			0x50,	0x51,	0x52,	0x53,	0x54,	0x55,	0x56,	0x57,	0x58,	0x59,	0x5A,	0x5B,	0x5C,	0x5D,	0x5E,	0x5F,
-																			0x60,	0x61,	0x62,	0x63,	0x64,	0x65,	0x66,	0x67,	0x68,	0x69,	0x6A,	0x6B,	0x6C,	0x6D,	0x6E,	0x6F,
-																			0x70,	0x71,	0x72,	0x73,	0x74,	0x75,	0x76,	0x77,	0x78,	0x79,	0x7A,	0x7B,	0x7C,	0x7D,	0x7E,	0x7F,
-																			0x80,	0x81,	0x82,	0x83,	0x84,	0x85,	0x86,	0x87,	0x88,	0x89,	0x8A,	0x8B,	0x8C,	0x8D,	0x8E,	0x8F,
-																			0x90,	0x91,	0x92,	0x93,	0x94,	0x95,	0x96,	0x97,	0x98,	0x99,	0x9A,	0x9B,	0x9C,	0x9D,	0x9E,	0x9F,
-																			0xA0,	0xA1,	0xA2,	0xA3,	0xA4,	0xA5,	0xA6,	0xA7,	0xA8,	0xA9,	0xAA,	0xAB,	0xAC,	0xAD,	0xAE,	0xAF,
-																			0xB0,	0xB1,	0xB2,	0xB3,	0xB4,	0xB5,	0xB6,	0xB7,	0xB8,	0xB9,	0xBA,	0xBB,	0xBC,	0xBD,	0xBE,	0xBF,
-																			0xC0,	0xC1,	0xC2,	0xC3,	0xC4,	0xC5,	0xC6,	0xC7,	0xC8,	0xC9,	0xCA,	0xCB,	0xCC,	0xCD,	0xCE,	0xCF,
-																			0xD0,	0xD1,	0xD2,	0xD3,	0xD4,	0xD5,	0xD6,	0xD7,	0xD8,	0xD9,	0xDA,	0xDB,	0xDC,	0xDD,	0xDE,	0xDF,
-																			0xE0,	0xE1,	0xE2,	0xE3,	0xE4,	0xE5,	0xE6,	0xE7,	0xE8,	0xE9,	0xEA,	0xEB,	0xEC,	0xED,	0xEE,	0xEF,
-																			0xF0,	0xF1,	0xF2,	0xF3,	0xF4,	0xF5,	0xF6,	0xF7,	0xF8,	0xF9,	0xFA,	0xFB,	0xFC,	0xFD,	0xFE	};
-				static const uint16_t				p16_RDD6Pkt1 [] =	{	0x200,	0x101,	0x102,	0x203,	0x104,	0x205,	0x206,	0x107,	0x108,	0x209,	0x20A,	0x10B,	0x20C,	0x10D,	0x10E,	0x20F,
-																			0x110,	0x211,	0x212,	0x113,	0x214,	0x115,	0x116,	0x217,	0x218,	0x119,	0x11A,	0x21B,	0x11C,	0x21D,	0x21E,	0x11F,
-																			0x120,	0x221,	0x222,	0x123,	0x224,	0x125,	0x126,	0x227,	0x228,	0x129,	0x12A,	0x22B,	0x12C,	0x22D,	0x22E,	0x12F,
-																			0x230,	0x131,	0x132,	0x233,	0x134,	0x235,	0x236,	0x137,	0x138,	0x239,	0x23A,	0x13B,	0x23C,	0x13D,	0x13E,	0x23F,
-																			0x140,	0x241,	0x242,	0x143,	0x244,	0x145,	0x146,	0x247,	0x248,	0x149,	0x14A,	0x24B,	0x14C,	0x24D,	0x24E,	0x14F,
-																			0x250,	0x151,	0x152,	0x253,	0x154,	0x255,	0x256,	0x157,	0x158,	0x259,	0x25A,	0x15B,	0x25C,	0x15D,	0x15E,	0x25F,
-																			0x260,	0x161,	0x162,	0x263,	0x164,	0x265,	0x266,	0x167,	0x168,	0x269,	0x26A,	0x16B,	0x26C,	0x16D,	0x16E,	0x26F,
-																			0x170,	0x271,	0x272,	0x173,	0x274,	0x175,	0x176,	0x277,	0x278,	0x179,	0x17A,	0x27B,	0x17C,	0x27D,	0x27E,	0x17F,
-																			0x180,	0x281,	0x282,	0x183,	0x284,	0x185,	0x186,	0x287,	0x288,	0x189,	0x18A,	0x28B,	0x18C,	0x28D,	0x28E,	0x18F,
-																			0x290,	0x191,	0x192,	0x293,	0x194,	0x295,	0x296,	0x197,	0x198,	0x299,	0x29A,	0x19B,	0x29C,	0x19D,	0x19E,	0x29F,
-																			0x2A0,	0x1A1,	0x1A2,	0x2A3,	0x1A4,	0x2A5,	0x2A6,	0x1A7,	0x1A8,	0x2A9,	0x2AA,	0x1AB,	0x2AC,	0x1AD,	0x1AE,	0x2AF,
-																			0x1B0,	0x2B1,	0x2B2,	0x1B3,	0x2B4,	0x1B5,	0x1B6,	0x2B7,	0x2B8,	0x1B9,	0x1BA,	0x2BB,	0x1BC,	0x2BD,	0x2BE,	0x1BF,
-																			0x2C0,	0x1C1,	0x1C2,	0x2C3,	0x1C4,	0x2C5,	0x2C6,	0x1C7,	0x1C8,	0x2C9,	0x2CA,	0x1CB,	0x2CC,	0x1CD,	0x1CE,	0x2CF,
-																			0x1D0,	0x2D1,	0x2D2,	0x1D3,	0x2D4,	0x1D5,	0x1D6,	0x2D7,	0x2D8,	0x1D9,	0x1DA,	0x2DB,	0x1DC,	0x2DD,	0x2DE,	0x1DF,
-																			0x1E0,	0x2E1,	0x2E2,	0x1E3,	0x2E4,	0x1E5,	0x1E6,	0x2E7,	0x2E8,	0x1E9,	0x1EA,	0x2EB,	0x1EC,	0x2ED,	0x2EE,	0x1EF,
-																			0x2F0,	0x1F1,	0x1F2,	0x2F3,	0x1F4,	0x2F5,	0x2F6,	0x1F7,	0x1F8,	0x2F9,	0x2FA,	0x1FB,	0x2FC,	0x1FD,	0x1FE	};
-				vector<uint16_t>	UDWs, componentData;
-				SHOULD_SUCCEED(defaultPkt.SetPayloadData(p8_RDD6Pkt1, sizeof(p8_RDD6Pkt1)/sizeof(uint8_t)));
-				SHOULD_SUCCEED(defaultPkt.GetPayloadData(UDWs, true));
-				//for (unsigned ndx(0);  ndx < UDWs.size();  )	{	cerr << xHEX0N(UDWs[ndx],3) << ",\t";	if (++ndx % 16 == 0) cerr << endl;	}
-				SHOULD_BE_EQUAL(UDWs.size(), sizeof(p16_RDD6Pkt1)/sizeof(uint16_t));
-				SHOULD_BE_EQUAL(::memcmp(UDWs.data(), p16_RDD6Pkt1, sizeof(p16_RDD6Pkt1)), 0);
-
-				//	Test GenerateTransmitData...
-				SHOULD_SUCCEED(defaultPkt.GenerateTransmitData(componentData));
-				SHOULD_BE_EQUAL(componentData.size(), 262);
-				SHOULD_BE_EQUAL(componentData.at(0), 0x000);
-				SHOULD_BE_EQUAL(componentData.at(1), 0x3FF);
-				SHOULD_BE_EQUAL(componentData.at(2), 0x3FF);
-				SHOULD_BE_EQUAL(componentData.at(3)&0x0FF, defaultPkt.GetDID());
-				SHOULD_BE_EQUAL(componentData.at(4)&0x0FF, defaultPkt.GetSID());
-				SHOULD_BE_EQUAL(componentData.at(5)&0x0FF, defaultPkt.GetDC());
-				SHOULD_BE_EQUAL(componentData.at(6), p16_RDD6Pkt1[0]);
-				SHOULD_BE_EQUAL(::memcmp(&componentData[6], p16_RDD6Pkt1, sizeof(p16_RDD6Pkt1)), 0);
-				SHOULD_BE_EQUAL(componentData.back()&0x0FF, defaultPkt.Calculate8BitChecksum());
-				cerr << "BFT_AncillaryData:  Validated AJAAncillaryData::GenerateTransmitData(vector<uint16_t>&) 10-bit UDW conversion (with parity)" << endl;
-			}
-			cerr << "BFT_AncillaryData passed" << endl;
-			return true;
-		}	//	BFT_AncillaryData
 
 		/*
 			ROUND-TRIP BFTS:
@@ -1353,8 +1315,9 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				FB-VANC-8bitYC 'a'		=>	AJAAncillaryList	=>	FB-VANC-8bitYC 'b'			Verify buffer contents 'a' == 'b'	BFT_FBYUV8ToAncListToFBYUV8		TBD
 				FB-VANC-10bitYC 'a'		=>	AJAAncillaryList	=>	FB-VANC-10bitYC 'b'			Verify buffer contents 'a' == 'b'	BFT_FBYUV10ToAncListToFBYUV10
 		*/
-		static bool BFT_AncListToGumpToAncList (void)
+		TEST_CASE("BFT_AncListToGumpToAncList")
 		{
+			AJAAncillaryData::ResetInstanceCounts();
 			const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000, NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
 			if (gIsVerbose)	cerr << endl << "Starting BFT_AncListToGumpToAncList..." << endl;
 			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
@@ -1364,60 +1327,60 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				ULWord						smpteLineF1(0), smpteLineF2(0);
 				bool						isF2	(false);
 				if (gIsVerbose)	cerr << "Trying " << ::NTV2VideoFormatToString(vFormat) << endl;
-				SHOULD_BE_TRUE(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
+				CHECK(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
 				if (isF2)
 					smpteLineF2 = smpteLineF1;
 				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat)  &&  !isF2)
-					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
+					CHECK(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
 
 				//	Make the transmit packets...
 				AJAAncillaryDataLocation	loc;
 				loc.SetDataLink(AJAAncillaryDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
 				AJAAncillaryData_Cea608_Vanc	pkt608F1;
-				SHOULD_SUCCEED(pkt608F1.SetLine(false/*isF1*/, 9));
-				SHOULD_SUCCEED(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B')));
-				SHOULD_SUCCEED(pkt608F1.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+9 : 9)));
-				SHOULD_SUCCEED(pkt608F1.GeneratePayloadData());
+				CHECK(AJA_SUCCESS(pkt608F1.SetLine(false/*isF1*/, 9)));
+				CHECK(AJA_SUCCESS(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B'))));
+				CHECK(AJA_SUCCESS(pkt608F1.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+9 : 9))));
+				CHECK(AJA_SUCCESS(pkt608F1.GeneratePayloadData()));
 	
 				AJAAncillaryData_Cea608_Vanc	pkt608F2;
-				SHOULD_SUCCEED(pkt608F2.SetLine(true/*isF2*/, 9));
-				SHOULD_SUCCEED(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b')));
-				SHOULD_SUCCEED(pkt608F2.SetDataLocation(loc.SetLineNumber(pkt608F2.IsField2() ? smpteLineF2+9 : 9)));
-				SHOULD_SUCCEED(pkt608F2.GeneratePayloadData());
+				CHECK(AJA_SUCCESS(pkt608F2.SetLine(true/*isF2*/, 9)));
+				CHECK(AJA_SUCCESS(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b'))));
+				CHECK(AJA_SUCCESS(pkt608F2.SetDataLocation(loc.SetLineNumber(pkt608F2.IsField2() ? smpteLineF2+9 : 9))));
+				CHECK(AJA_SUCCESS(pkt608F2.GeneratePayloadData()));
 	
 				AJAAncillaryData_HDR_HLG		pktHDR;
-				SHOULD_SUCCEED(pktHDR.GeneratePayloadData());
+				CHECK(AJA_SUCCESS(pktHDR.GeneratePayloadData()));
 	
 				AJAAncillaryData				pktCustomY;
-				SHOULD_SUCCEED(pktCustomY.SetDataLocation(loc.SetLineNumber(10)));
-				SHOULD_SUCCEED(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital));
-				SHOULD_SUCCEED(pktCustomY.SetDID(0x7A));
-				SHOULD_SUCCEED(pktCustomY.SetSID(0x01));
+				CHECK(AJA_SUCCESS(pktCustomY.SetDataLocation(loc.SetLineNumber(10))));
+				CHECK(AJA_SUCCESS(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+				CHECK(AJA_SUCCESS(pktCustomY.SetDID(0x7A)));
+				CHECK(AJA_SUCCESS(pktCustomY.SetSID(0x01)));
 				static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x09, 0x0A	};
-				SHOULD_SUCCEED(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY)));
+				CHECK(AJA_SUCCESS(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY))));
 	
 				AJAAncillaryData				pktCustomC;
-				SHOULD_SUCCEED(pktCustomC.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_C).SetLineNumber(11)));
-				SHOULD_SUCCEED(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital));
-				SHOULD_SUCCEED(pktCustomC.SetDID(0x8A));
-				SHOULD_SUCCEED(pktCustomC.SetSID(0x02));
+				CHECK(AJA_SUCCESS(pktCustomC.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_C).SetLineNumber(11))));
+				CHECK(AJA_SUCCESS(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+				CHECK(AJA_SUCCESS(pktCustomC.SetDID(0x8A)));
+				CHECK(AJA_SUCCESS(pktCustomC.SetSID(0x02)));
 				static const uint8_t	pCustomDataC[]	=	{	0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F	};
-				SHOULD_SUCCEED(pktCustomC.SetPayloadData(pCustomDataC, sizeof(pCustomDataC)));
+				CHECK(AJA_SUCCESS(pktCustomC.SetPayloadData(pCustomDataC, sizeof(pCustomDataC))));
 	
 				//	Make the transmit packet list...
 				AJAAncillaryList	txPkts;
-				SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F1));
+				CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pkt608F1)));
 				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
-					SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F2));
-				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktHDR));
-				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomY));
-				SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomC));
-				SHOULD_SUCCEED(txPkts.SortListByLocation());
+					CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pkt608F2)));
+				CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pktHDR)));
+				CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pktCustomY)));
+				CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pktCustomC)));
+				CHECK(AJA_SUCCESS(txPkts.SortListByLocation()));
 				//cerr << "Tx: " << txPkts << endl;
 
 				//	Transmit the packets into the 8-bit GUMP buffer...
 				NTV2_POINTER	gumpF1(4096), gumpF2(4096);
-				SHOULD_SUCCEED(txPkts.GetTransmitData (gumpF1, gumpF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
+				CHECK(AJA_SUCCESS(txPkts.GetTransmitData (gumpF1, gumpF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2)));
 				if (gIsVerbose)	cerr << "GUMP F1: " << gumpF1.AsString(64) << endl << "GUMP F2: " << gumpF2.AsString(64) << endl;
 
 				//	NOTE:	This test saves the F1 GUMP buffers for use later by BFT_GumpToAncListToGump...
@@ -1425,92 +1388,153 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 
 				//	Receive packets from the 8-bit GUMP buffer...
 				AJAAncillaryList	rxPkts;
-				SHOULD_SUCCEED(AJAAncillaryList::SetFromDeviceAncBuffers(gumpF1, gumpF2, rxPkts));
+				CHECK(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers(gumpF1, gumpF2, rxPkts)));
 				//cerr << "Rx: " << rxPkts << endl;
+				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 5 + txPkts.CountAncillaryData() * 2);
 
 				//	Compare the Tx and Rx packet lists.
 				//	The txPkts all have zero checksums because we never set them.
 				//	The rxPkts all have valid checksums because txPkts.GetTransmitData generates them,
 				//	and SetFromDeviceAncBuffers uses the checksums when it creates packets.
 				//	Therefore, when comparing the two lists, we must ignore checksums...
-				SHOULD_SUCCEED(txPkts.Compare(rxPkts, false/*ignoreLocation*/, true/*ignoreChecksum*/));
+				CHECK(AJA_SUCCESS(txPkts.Compare(rxPkts, false/*ignoreLocation*/, true/*ignoreChecksum*/)));
+cerr << ::NTV2VideoFormatToString(vFormat) << ": " << AJAAncillaryData::GetNumActiveInstances() << " pkts alive" << endl;
+				rxPkts.Clear();
+				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 5 + txPkts.CountAncillaryData());
+				txPkts.Clear();
+				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 5);
 			}	//	for each video format
-			cerr << "BFT_AncListToGumpToAncList passed" << endl;
-			return true;
-		}
+			DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 0);
+			cerr << "BFT_AncListToGumpToAncList passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
+		}	//	TEST_CASE("BFT_AncListToGumpToAncList")
 
-		static bool BFT_AncListToSortToAncList (void)
+		TEST_CASE("BFT_GumpToAncListToGump")
 		{
-			LOGMYNOTE("Starting");
+			//	NOTE:	This test relies on GUMP buffers generated by BFT_AncListToGumpToAncList
+			AJAAncillaryData::ResetInstanceCounts();
+			if (gIsVerbose)	cerr << endl << "Starting BFT_GumpToAncListToGump..." << endl;
+			for (NTV2VideoFormat vFormat(NTV2_FORMAT_UNKNOWN);  vFormat < NTV2_MAX_NUM_VIDEO_FORMATS;  vFormat = NTV2VideoFormat(vFormat+1))
+			{
+				if (gGumpBuffers[vFormat].IsNULL())
+					{LOGMYWARN("BFT_GumpToAncListToGump: Missing GUMP buffer for '" << ::NTV2VideoFormatToString(vFormat) << "' -- skipped"); continue;}
+
+				const NTV2FormatDescriptor	fd		(vFormat, NTV2_FBF_10BIT_YCBCR, NTV2_VANCMODE_OFF);
+				ULWord						smpteLineF1(0), smpteLineF2(0);
+				bool						isF2	(false);
+				if (gIsVerbose)	cerr << "Trying " << ::NTV2VideoFormatToString(vFormat) << endl;
+				CHECK(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
+				if (isF2)
+					smpteLineF2 = smpteLineF1;
+				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat)  &&  !isF2)
+					CHECK(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
+
+				{	//	Receive packets from the 8-bit GUMP buffer...
+					AJAAncillaryList	pkts;
+					CHECK(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers(gGumpBuffers[vFormat], NTV2_POINTER(), pkts)));
+					CHECK_EQ(pkts.CountAncillaryData(), 4);
+					if (gIsVerbose)
+						cerr	<< "Received buffer: " << gGumpBuffers[vFormat].AsString(64) << " has " << DEC(pkts.CountAncillaryData()) << " packet(s)"
+								//  << ": " << pkts
+								<< endl;
+
+					//	Transmit the packets into another 8-bit GUMP buffer...
+					NTV2_POINTER	gumpF1(4096), gumpF2;
+					CHECK(AJA_SUCCESS(pkts.GetTransmitData (gumpF1, gumpF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2)));
+					if (gIsVerbose)	cerr << "        GUMP F1: " << gumpF1.AsString(64) << endl;
+					CHECK(gGumpBuffers[vFormat].IsContentEqual(gumpF1));
+					DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 4);
+				}
+				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 0);
+			}	//	for each video format
+			cerr << "BFT_GumpToAncListToGump passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
+		}	//	TEST_CASE("BFT_GumpToAncListToGump")
+
+
+		TEST_CASE("BFT_AncListToSortToAncList")
+		{
+			AJAAncillaryData::ResetInstanceCounts();
+			cerr << "Starting BFT_AncListToSortToAncList" << endl;
 			{
 				const NTV2VideoFormat		vFormat	(NTV2_FORMAT_1080i_5994);
 				const NTV2FormatDescriptor	fd		(vFormat, NTV2_FBF_10BIT_YCBCR);
 				ULWord						smpteLineF1(0), smpteLineF2(0);
 				bool						isF2	(false);
-				SHOULD_BE_TRUE(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
+				CHECK(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
 				if (isF2)
 					smpteLineF2 = smpteLineF1;
 				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat)  &&  !isF2)
-					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
+					CHECK(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
 
 				//	Make the transmit packets...
 				AJAAncillaryDataLocation loc;	loc.SetDataLink(AJAAncillaryDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
 				AJAAncillaryData_Cea608_Vanc	pkt608F1;
-				SHOULD_SUCCEED(pkt608F1.SetLine(false/*isF1*/, 9));
-				SHOULD_SUCCEED(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B')));
-				SHOULD_SUCCEED(pkt608F1.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+9 : 9)));
-				SHOULD_SUCCEED(pkt608F1.GeneratePayloadData());
+				CHECK(AJA_SUCCESS(pkt608F1.SetLine(false/*isF1*/, 9)));
+				CHECK(AJA_SUCCESS(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B'))));
+				CHECK(AJA_SUCCESS(pkt608F1.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+9 : 9))));
+				CHECK(AJA_SUCCESS(pkt608F1.GeneratePayloadData()));
 
 				AJAAncillaryData_Cea608_Vanc	pkt608F2;
-				SHOULD_SUCCEED(pkt608F2.SetLine(true/*isF2*/, 9));
-				SHOULD_SUCCEED(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b')));
-				SHOULD_SUCCEED(pkt608F2.SetDataLocation(loc.SetLineNumber(pkt608F2.IsField2() ? smpteLineF2+9 : 9)));
-				SHOULD_SUCCEED(pkt608F2.GeneratePayloadData());
+				CHECK(AJA_SUCCESS(pkt608F2.SetLine(true/*isF2*/, 9)));
+				CHECK(AJA_SUCCESS(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b'))));
+				CHECK(AJA_SUCCESS(pkt608F2.SetDataLocation(loc.SetLineNumber(pkt608F2.IsField2() ? smpteLineF2+9 : 9))));
+				CHECK(AJA_SUCCESS(pkt608F2.GeneratePayloadData()));
 
 				AJAAncillaryData_HDR_HLG		pktHDR;
-				SHOULD_SUCCEED(pktHDR.GeneratePayloadData());
+				CHECK(AJA_SUCCESS(pktHDR.GeneratePayloadData()));
 
 				AJAAncillaryData				pktCustomY;
-				SHOULD_SUCCEED(pktCustomY.SetDataLocation(loc.SetLineNumber(10)));
-				SHOULD_SUCCEED(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital));
-				SHOULD_SUCCEED(pktCustomY.SetDID(0x7A));
-				SHOULD_SUCCEED(pktCustomY.SetSID(0x01));
+				CHECK(AJA_SUCCESS(pktCustomY.SetDataLocation(loc.SetLineNumber(10))));
+				CHECK(AJA_SUCCESS(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+				CHECK(AJA_SUCCESS(pktCustomY.SetDID(0x7A)));
+				CHECK(AJA_SUCCESS(pktCustomY.SetSID(0x01)));
 				static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x09, 0x0A	};
-				SHOULD_SUCCEED(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY)));
+				CHECK(AJA_SUCCESS(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY))));
 
-				AJAAncillaryData				pktCustomC;
-				SHOULD_SUCCEED(pktCustomC.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_C).SetLineNumber(11)));
-				SHOULD_SUCCEED(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital));
-				SHOULD_SUCCEED(pktCustomC.SetDID(0x8A));
-				SHOULD_SUCCEED(pktCustomC.SetSID(0x02));
+				AJAAncillaryData				pktCustomC;		//	==> 5 active
+				CHECK(AJA_SUCCESS(pktCustomC.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_C).SetLineNumber(11))));
+				CHECK(AJA_SUCCESS(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+				CHECK(AJA_SUCCESS(pktCustomC.SetDID(0x8A)));
+				CHECK(AJA_SUCCESS(pktCustomC.SetSID(0x02)));
 				static const uint8_t	pCustomDataC[]	=	{	0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F	};
-				SHOULD_SUCCEED(pktCustomC.SetPayloadData(pCustomDataC, sizeof(pCustomDataC)));
+				CHECK(AJA_SUCCESS(pktCustomC.SetPayloadData(pCustomDataC, sizeof(pCustomDataC))));
+				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 5);
 
 				//	Make the transmit packet list...
 				AJAAncillaryList	origPkts;
-				SHOULD_SUCCEED(origPkts.AddAncillaryData(pktCustomC));
-				SHOULD_SUCCEED(origPkts.AddAncillaryData(pktCustomY));
-				SHOULD_SUCCEED(origPkts.AddAncillaryData(pktHDR));
+				CHECK(AJA_SUCCESS(origPkts.AddAncillaryData(pktCustomC)));
+				CHECK(AJA_SUCCESS(origPkts.AddAncillaryData(pktCustomY)));
+				CHECK(AJA_SUCCESS(origPkts.AddAncillaryData(pktHDR)));
 				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
-					SHOULD_SUCCEED(origPkts.AddAncillaryData(pkt608F2));
-				SHOULD_SUCCEED(origPkts.AddAncillaryData(pkt608F1));
-				LOGMYDEBUG("ORIG: " << origPkts);
-				AJAAncillaryList	sortedPkts(origPkts);
+					CHECK(AJA_SUCCESS(origPkts.AddAncillaryData(pkt608F2)));
+				CHECK(AJA_SUCCESS(origPkts.AddAncillaryData(pkt608F1)));
+				LOGMYDEBUG("BFT_AncListToSortToAncList: ORIG: " << origPkts);
+				CHECK_EQ(origPkts.CountAncillaryData(), 5);
+				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 10);	//	==> 10 active
 
 				//	Sort...
-				SHOULD_SUCCEED(sortedPkts.SortListByLocation());
-				LOGMYDEBUG("SORTED: " << sortedPkts);
+				AJAAncillaryList	sortedPkts(origPkts);	//	==> 15 active
+				CHECK_EQ(sortedPkts.CountAncillaryData(), 5);
+				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 15);
+				CHECK(AJA_SUCCESS(sortedPkts.SortListByLocation()));
+				LOGMYDEBUG("BFT_AncListToSortToAncList: SORTED: " << sortedPkts);
+				origPkts.Clear();
+				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 10);
+				sortedPkts.Clear();
+				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 5);	//	pktCustomC, pktCustomY, pktHDR, pkt608F2, pkt608F1 still alive
 			}	//	for each video format
-			LOGMYNOTE("Passed");
-			return true;
-		}
+			DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 0);
+			cerr << "BFT_AncListToSortToAncList passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
+		}	//	TEST_CASE("BFT_AncListToSortToAncList")
 
-		static bool BFT_AncListToRTPToAncList (void)
+
+		TEST_CASE("BFT_AncListToRTPToAncList")
 		{
-			LOGMYNOTE("Starting");	if (gIsVerbose)	cerr << endl << "Starting BFT_AncListToRTPToAncList..." << endl;
+			AJAAncillaryData::ResetInstanceCounts();
+			LOGMYNOTE("BFT_AncListToRTPToAncList: Starting");
+			cerr << endl << "Starting BFT_AncListToRTPToAncList..." << endl;
 			for (unsigned isSingleRTPPkt(0);  isSingleRTPPkt < 2;  isSingleRTPPkt++)
 			{
-				LOGMYDEBUG((isSingleRTPPkt ? "TEST SINGLE RTP PKT CONTAINING MULTIPLE ANC PKTS" : "TEST MULTI RTP PKT (ONE RTP PKT PER ANC PKT)"));
+				LOGMYDEBUG("BFT_AncListToRTPToAncList: " << (isSingleRTPPkt ? "TEST SINGLE RTP PKT CONTAINING MULTIPLE ANC PKTS" : "TEST MULTI RTP PKT (ONE RTP PKT PER ANC PKT)"));
 				const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000, NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
 				for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
 				{
@@ -1519,34 +1543,36 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 					ULWord						smpteLineF1(0), smpteLineF2(0);
 					bool						isF2	(false);
 //if (vFormat != NTV2_FORMAT_1080p_3000)	continue;	//	TEST 1080p ONLY??
-					LOGMYDEBUG("Trying " << (isSingleRTPPkt?"SingleRTP ":"MultiRTP ") << fd);	if (gIsVerbose)	cerr << "Trying " << fd << endl;
-					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
+					LOGMYDEBUG("BFT_AncListToRTPToAncList: Trying " << (isSingleRTPPkt?"SingleRTP ":"MultiRTP ") << fd);
+					if (gIsVerbose)	cerr << "Trying " << fd << endl;
+					CHECK(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
 					if (isF2)
 						smpteLineF2 = smpteLineF1;
 					if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat)  &&  !isF2)
-						SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
+						CHECK(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
 
 					//	Make the transmit packets...
 					AJAAncillaryList	txPkts;
 					txPkts.SetAllowMultiRTPTransmit(!isSingleRTPPkt);
+					DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 0);
 					if (true)
 					{
 						AJAAncDataLoc loc;
 						loc.SetDataLink(AJAAncillaryDataLink_A).SetDataChannel(AJAAncillaryDataChannel_Y).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
 						AJAAncillaryData_Cea608_Vanc	pkt608F1;
-						SHOULD_SUCCEED(pkt608F1.SetLine(false/*isF1*/, 9));
-						SHOULD_SUCCEED(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B')));
-						SHOULD_SUCCEED(pkt608F1.SetDataLocation(loc.SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+9 : 9)));
-						SHOULD_SUCCEED(pkt608F1.GeneratePayloadData());
+						CHECK(AJA_SUCCESS(pkt608F1.SetLine(false/*isF1*/, 9)));
+						CHECK(AJA_SUCCESS(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B'))));
+						CHECK(AJA_SUCCESS(pkt608F1.SetDataLocation(loc.SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+9 : 9))));
+						CHECK(AJA_SUCCESS(pkt608F1.GeneratePayloadData()));
 	
 						AJAAncillaryData_Cea608_Vanc	pkt608F2;
-						SHOULD_SUCCEED(pkt608F2.SetLine(true/*isF2*/, 9));
-						SHOULD_SUCCEED(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b')));
-						SHOULD_SUCCEED(pkt608F2.SetDataLocation(loc.SetLineNumber(pkt608F2.IsField2() ? smpteLineF2+9 : 9)));
-						SHOULD_SUCCEED(pkt608F2.GeneratePayloadData());
+						CHECK(AJA_SUCCESS(pkt608F2.SetLine(true/*isF2*/, 9)));
+						CHECK(AJA_SUCCESS(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b'))));
+						CHECK(AJA_SUCCESS(pkt608F2.SetDataLocation(loc.SetLineNumber(pkt608F2.IsField2() ? smpteLineF2+9 : 9))));
+						CHECK(AJA_SUCCESS(pkt608F2.GeneratePayloadData()));
 
 						AJAAncillaryData_HDR_HLG		pktHDR;
-						SHOULD_SUCCEED(pktHDR.GeneratePayloadData());
+						CHECK(AJA_SUCCESS(pktHDR.GeneratePayloadData()));
 
 						AJAAncillaryData_Timecode_ATC	pktATC;
 						{
@@ -1563,40 +1589,46 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 						}
 	
 						AJAAncillaryData				pktCustomY;
-						SHOULD_SUCCEED(pktCustomY.SetDataLocation(loc.SetLineNumber(10)));
-						SHOULD_SUCCEED(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital));
-						SHOULD_SUCCEED(pktCustomY.SetDID(0x7A));
-						SHOULD_SUCCEED(pktCustomY.SetSID(0x01));
+						CHECK(AJA_SUCCESS(pktCustomY.SetDataLocation(loc.SetLineNumber(10))));
+						CHECK(AJA_SUCCESS(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+						CHECK(AJA_SUCCESS(pktCustomY.SetDID(0x7A)));
+						CHECK(AJA_SUCCESS(pktCustomY.SetSID(0x01)));
 						static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20	};
-						SHOULD_SUCCEED(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY)));
+						CHECK(AJA_SUCCESS(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY))));
 	
 						AJAAncillaryData				pktCustomC;
-						SHOULD_SUCCEED(pktCustomC.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_C).SetLineNumber(11)));
-						SHOULD_SUCCEED(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital));
-						SHOULD_SUCCEED(pktCustomC.SetDID(0x8A));
-						SHOULD_SUCCEED(pktCustomC.SetSID(0x02));
+						CHECK(AJA_SUCCESS(pktCustomC.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_C).SetLineNumber(11))));
+						CHECK(AJA_SUCCESS(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+						CHECK(AJA_SUCCESS(pktCustomC.SetDID(0x8A)));
+						CHECK(AJA_SUCCESS(pktCustomC.SetSID(0x02)));
 						static const uint8_t	pCustomDataC[]	=	{	0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F	};
-						SHOULD_SUCCEED(pktCustomC.SetPayloadData(pCustomDataC, sizeof(pCustomDataC)));
+						CHECK(AJA_SUCCESS(pktCustomC.SetPayloadData(pCustomDataC, sizeof(pCustomDataC))));
 	
 						//	Make the transmit packet list...
-						SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F1));
+						CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pkt608F1)));
 						if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
-							SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F2));
-						SHOULD_SUCCEED(txPkts.AddAncillaryData(pktHDR));
-						SHOULD_SUCCEED(txPkts.AddAncillaryData(pktATC));
-						SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomY));
-						SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomC));
+							CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pkt608F2)));
+						CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pktHDR)));
+						CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pktATC)));
+						CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pktCustomY)));
+						CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pktCustomC)));
+						if (NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
+							DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 1 + txPkts.CountAncillaryData() * 2);
+						else
+							DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), txPkts.CountAncillaryData() * 2);
 					}
 //gIsVerbose = true;
-					LOGMYDEBUG("Tx: " << txPkts);	if (gIsVerbose)	cerr << "Tx: " << txPkts << endl;
+					DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), txPkts.CountAncillaryData());
+					LOGMYDEBUG("BFT_AncListToRTPToAncList: Tx: " << txPkts);
+					if (gIsVerbose)	cerr << "Tx: " << txPkts << endl;
 
 					//	Transmit the packets into the IP buffer...
 					NTV2_POINTER	IPF1(2048), IPF2(2048);
 					uint32_t		IPF1bytes(0), IPF2bytes(0);
-LOGMYDEBUG("Call GetIPTransmitDataLength:");
-					SHOULD_SUCCEED(txPkts.GetIPTransmitDataLength (IPF1bytes, IPF2bytes, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
-LOGMYDEBUG("IPF1bytes=" << DEC(IPF1bytes) << ", IPF2bytes=" << DEC(IPF2bytes) << " -- Call GetIPTransmitData:");
-					SHOULD_SUCCEED(txPkts.GetIPTransmitData (IPF1, IPF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
+LOGMYDEBUG("BFT_AncListToRTPToAncList: Call GetIPTransmitDataLength:");
+					CHECK(AJA_SUCCESS(txPkts.GetIPTransmitDataLength (IPF1bytes, IPF2bytes, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2)));
+LOGMYDEBUG("BFT_AncListToRTPToAncList: IPF1bytes=" << DEC(IPF1bytes) << ", IPF2bytes=" << DEC(IPF2bytes) << " -- Call GetIPTransmitData:");
+					CHECK(AJA_SUCCESS(txPkts.GetIPTransmitData (IPF1, IPF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2)));
 //cerr << "POST-TRANSMIT:" << endl << "IP F1 (" << DEC(IPF1bytes) << " bytes):" << endl;	IPF1.Dump(cerr, 0, IPF1bytes, 16, 4, 16);
 //if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
 //	{cerr << "IP F2 (" << DEC(IPF2bytes) << " bytes):" << endl;	IPF2.Dump(cerr, 0, IPF2bytes, 16, 4, 16);}
@@ -1610,258 +1642,30 @@ LOGMYDEBUG("IPF1bytes=" << DEC(IPF1bytes) << ", IPF2bytes=" << DEC(IPF2bytes) <<
 					//	Receive packets from the IP buffer...
 					AJAAncillaryList	rxPkts;
 					rxPkts.SetAllowMultiRTPReceive(!isSingleRTPPkt);
-					LOGMYDEBUG("Receive packets from IP buffers");
-					SHOULD_SUCCEED(AJAAncillaryList::SetFromDeviceAncBuffers(IPF1, IPF2, rxPkts));
-					LOGMYDEBUG("Rx: " << rxPkts);	if (gIsVerbose)	cerr << "Rx: " << rxPkts << endl;
+					LOGMYDEBUG("BFT_AncListToRTPToAncList: Receive packets from IP buffers");
+					CHECK(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers(IPF1, IPF2, rxPkts)));
+					LOGMYDEBUG("BFT_AncListToRTPToAncList: Rx: " << rxPkts);	if (gIsVerbose)	cerr << "Rx: " << rxPkts << endl;
+					DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), txPkts.CountAncillaryData() * 2);
 
 					//	Compare the Tx and Rx packet lists...
-					LOGMYDEBUG("Compare Tx vs Rx packets for " << fd);
+					LOGMYDEBUG("BFT_AncListToRTPToAncList: Compare Tx vs Rx packets for " << fd);
 					const string	cmpInfo	(txPkts.CompareWithInfo(rxPkts, /*ignoreLocation*/false, /*ignoreChecksum*/true));
 					if (!cmpInfo.empty())
-						LOGMYWARN(cmpInfo);
-					SHOULD_BE_TRUE(cmpInfo.empty());
+						LOGMYWARN("BFT_AncListToRTPToAncList: " << cmpInfo);
+					CHECK(cmpInfo.empty());
 				}	//	for each video format
 			}	//	for singleRTP, multiRTP
-			LOGMYNOTE("Passed");	cerr << "BFT_AncListToRTPToAncList passed" << endl;
-			return true;
-		}	//	BFT_AncListToRTPToAncList
+			LOGMYNOTE("BFT_AncListToRTPToAncList: Passed");
+			cerr << "BFT_AncListToRTPToAncList passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
+			DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 0);
+		}	//	TEST_CASE("BFT_AncListToRTPToAncList")
 
-		static bool BFT_AncListToFBYUV8ToAncList (void)
+
+		TEST_CASE("BFT_RTPToAncListToRTP")
 		{
-			const NTV2VideoFormat	vFormats[]	=	{/*NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000,*/ NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
-			LOGMYNOTE("Starting");	if (gIsVerbose)	cerr << endl << "Starting BFT_AncListToRTPToAncList..." << endl;
-			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
-			{
-				const NTV2VideoFormat		vFormat	(vFormats[ndx]);
-				const NTV2FormatDescriptor	fd		(vFormat, NTV2_FBF_8BIT_YCBCR, NTV2_VANCMODE_TALLER);
-				ULWord						smpteLineF1(0), smpteLineF2(0);
-				bool						isF2	(false);
-				if (gIsVerbose)	cerr << "Trying " << ::NTV2VideoFormatToString(vFormat) << endl;
-				SHOULD_BE_TRUE(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
-				if (isF2)
-					smpteLineF2 = smpteLineF1;
-				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat)  &&  !isF2)
-					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
-
-				AJAAncillaryList	txPkts;
-				if (true)
-				{
-					//	Make the transmit packets...
-					AJAAncDataLoc	loc;
-					loc.SetDataLink(AJAAncillaryDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
-					AJAAncillaryData_Cea608_Vanc	pkt608F1;
-					SHOULD_SUCCEED(pkt608F1.SetLine(false/*isF1*/, 10));
-					SHOULD_SUCCEED(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B')));
-					SHOULD_SUCCEED(pkt608F1.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+10 : 10)));
-					SHOULD_SUCCEED(pkt608F1.GeneratePayloadData());
-
-					AJAAncillaryData_Cea608_Vanc	pkt608F2;
-					SHOULD_SUCCEED(pkt608F2.SetLine(true/*isF2*/, 11));
-					SHOULD_SUCCEED(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b')));
-					SHOULD_SUCCEED(pkt608F2.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat) && pkt608F2.IsField2() ? smpteLineF2+11 : 11)));
-					SHOULD_SUCCEED(pkt608F2.GeneratePayloadData());
-	
-					AJAAncillaryData_HDR_HLG		pktHDR;
-					SHOULD_SUCCEED(pktHDR.GeneratePayloadData());
-	
-					AJAAncillaryData				pktCustomY;
-					SHOULD_SUCCEED(pktCustomY.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(12)));
-					SHOULD_SUCCEED(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital));
-					SHOULD_SUCCEED(pktCustomY.SetDID(0x7A));
-					SHOULD_SUCCEED(pktCustomY.SetSID(0x01));
-					static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x09, 0x0A	};
-					SHOULD_SUCCEED(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY)));
-	
-					AJAAncillaryData				pktCustomC;
-					SHOULD_SUCCEED(pktCustomC.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_C).SetLineNumber(13)));
-					SHOULD_SUCCEED(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital));
-					SHOULD_SUCCEED(pktCustomC.SetDID(0x8A));
-					SHOULD_SUCCEED(pktCustomC.SetSID(0x02));
-					static const uint8_t	pCustomDataC[]	=	{	0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F	};
-					SHOULD_SUCCEED(pktCustomC.SetPayloadData(pCustomDataC, sizeof(pCustomDataC)));
-	
-					//	Make the transmit packet list...
-					SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F1));
-					if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
-						SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F2));
-					SHOULD_SUCCEED(txPkts.AddAncillaryData(pktHDR));
-					SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomY));
-					SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomC));
-				}
-				txPkts.SortListByLocation();	//	To match rxPkts order at Compare (below)
-				//	Transmit the packets into the 8-bit YCbCr frame buffer...
-				NTV2_POINTER	vanc8(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes());	//	Just the VANC lines
-				vanc8.Fill(uint8_t(0x80));
-				SHOULD_SUCCEED(txPkts.GetVANCTransmitData (vanc8, fd));
-/* cerr << ::NTV2VideoFormatToString(vFormat) << " " << ::NTV2FrameBufferFormatToString(fd.GetPixelFormat()) << " VANC: " << endl;
-for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset++) {
-	NTV2_POINTER	blankLine(fd.GetBytesPerRow());
-	NTV2_POINTER	oneLine(fd.GetRowAddress(vanc8.GetHostPointer(), lineOffset), fd.GetBytesPerRow());
-	blankLine.Fill(uint8_t(0x80));
-	if (!oneLine.IsContentEqual(blankLine)) {
-		cerr << "+" << DEC0N(lineOffset,2) << ": ";  fd.PrintSMPTELineNumber(cerr, lineOffset, false);  cerr << ":" << endl;
-		CNTV2CaptionLogConfig::DumpMemory(oneLine.GetHostPointer(), 32*4, cerr, 16, 4, 32,0,false);
-} } */
-
-				//	NOTE:	This test saves the VANC buffer for use later by BFT_FBYUV8ToAncListToFBYUV8...
-				gVanc8Buffers[vFormat] = NTV2_POINTER(vanc8);
-
-				//	Receive packets from the 8-bit GUMP buffer...
-				AJAAncillaryList	rxPkts;
-				SHOULD_SUCCEED(AJAAncillaryList::SetFromVANCData (vanc8, fd, rxPkts));
-				rxPkts.SortListByLocation();	//	To match txPkts order -- for Compare below
-
-				//	Compare the Tx and Rx packet lists...
-				//	The txPkts have zero checksums because we never set them.
-				//	The rxPkts all have valid checksums because rxPkts.SetFromVANCData sets them.
-				//	Also, the rxPkts have unknown link values in their Locations.
-				//	Therefore, when comparing the two lists, we must ignore location and checksums...
-				AJAStatus	result	(txPkts.Compare(rxPkts,  true/*ignoreLocation?*/,  true/*ignoreChecksum?*/));
-				if (AJA_FAILURE(result))
-					cerr << "MISCOMPARE:" << endl << "Tx: " << txPkts << endl	<< "Rx: " << rxPkts << endl;
-				SHOULD_SUCCEED(result);
-			}	//	for each video format
-			LOGMYNOTE("Passed");	cerr << "BFT_AncListToFBYUV8ToAncList passed" << endl;
-			return true;
-		}
-
-		static bool BFT_AncListToFBYUV10ToAncList (void)
-		{
-			const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, /*NTV2_FORMAT_625_5000,*/ NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
-			if (gIsVerbose)	cerr << endl << "Starting BFT_AncListToFBYUV10ToAncList..." << endl;
-			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
-			{
-				const NTV2VideoFormat		vFormat	(vFormats[ndx]);
-				const NTV2FormatDescriptor	fd		(vFormat, NTV2_FBF_10BIT_YCBCR, NTV2_VANCMODE_TALLER);
-				ULWord						smpteLineF1(0), smpteLineF2(0);
-				bool						isF2	(false);
-				if (gIsVerbose)	cerr << "Trying " << ::NTV2VideoFormatToString(vFormat) << endl;
-				SHOULD_BE_TRUE(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
-				if (isF2)
-					smpteLineF2 = smpteLineF1;
-				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat)  &&  !isF2)
-					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
-
-				AJAAncillaryList	txPkts;
-				if (true)
-				{
-					//	Make the transmit packets...
-					AJAAncDataLoc	loc;
-					loc.SetDataLink(AJAAncillaryDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
-					AJAAncillaryData_Cea608_Vanc	pkt608F1;
-					SHOULD_SUCCEED(pkt608F1.SetLine(false/*isF1*/, 10));
-					SHOULD_SUCCEED(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B')));
-					SHOULD_SUCCEED(pkt608F1.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+10 : 10)));
-					SHOULD_SUCCEED(pkt608F1.GeneratePayloadData());
-
-					AJAAncillaryData_Cea608_Vanc	pkt608F2;
-					SHOULD_SUCCEED(pkt608F2.SetLine(true/*isF2*/, 11));
-					SHOULD_SUCCEED(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b')));
-					SHOULD_SUCCEED(pkt608F2.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat) && pkt608F2.IsField2() ? smpteLineF2+11 : 11)));
-					SHOULD_SUCCEED(pkt608F2.GeneratePayloadData());
-	
-					AJAAncillaryData_HDR_HLG		pktHDR;
-					SHOULD_SUCCEED(pktHDR.GeneratePayloadData());
-	
-					AJAAncillaryData				pktCustomY;
-					SHOULD_SUCCEED(pktCustomY.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(12)));
-					SHOULD_SUCCEED(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital));
-					SHOULD_SUCCEED(pktCustomY.SetDID(0x7A));
-					SHOULD_SUCCEED(pktCustomY.SetSID(0x01));
-					static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x09, 0x0A	};
-					SHOULD_SUCCEED(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY)));
-	
-					AJAAncillaryData				pktCustomC;
-					SHOULD_SUCCEED(pktCustomC.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_C).SetLineNumber(13)));
-					SHOULD_SUCCEED(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital));
-					SHOULD_SUCCEED(pktCustomC.SetDID(0x8A));
-					SHOULD_SUCCEED(pktCustomC.SetSID(0x02));
-					static const uint8_t	pCustomDataC[]	=	{	0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F	};
-					SHOULD_SUCCEED(pktCustomC.SetPayloadData(pCustomDataC, sizeof(pCustomDataC)));
-	
-					//	Make the transmit packet list...
-					SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F1));
-					if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
-						SHOULD_SUCCEED(txPkts.AddAncillaryData(pkt608F2));
-					SHOULD_SUCCEED(txPkts.AddAncillaryData(pktHDR));
-					SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomY));
-					SHOULD_SUCCEED(txPkts.AddAncillaryData(pktCustomC));
-				}
-
-				//	Transmit the packets into the 10-bit YCbCr frame buffer...
-				NTV2_POINTER	vanc10(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes());	//	Just the VANC lines
-				vanc10.Fill(uint8_t(0x80));
-				SHOULD_SUCCEED(txPkts.GetVANCTransmitData (vanc10, fd));
-/* cerr << ::NTV2VideoFormatToString(vFormat) << " " << ::NTV2FrameBufferFormatToString(fd.GetPixelFormat()) << " VANC: " << endl;
-for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset++) {
-	NTV2_POINTER	blankLine(fd.GetBytesPerRow());
-	NTV2_POINTER	oneLine(fd.GetRowAddress(vanc10.GetHostPointer(), lineOffset), fd.GetBytesPerRow());
-	blankLine.Fill(uint8_t(0x80));
-	if (!oneLine.IsContentEqual(blankLine)) {
-		cerr << "+" << DEC0N(lineOffset,2) << ": ";  fd.PrintSMPTELineNumber(cerr, lineOffset, false);  cerr << ":" << endl;
-		CNTV2CaptionLogConfig::DumpMemory(oneLine.GetHostPointer(), 32*4, cerr, 16, 4, 32,0,false);
-} } */
-
-				//	NOTE:	This test saves the VANC buffer for use later by BFT_FBYUV10ToAncListToFBYUV10...
-				gVanc10Buffers[vFormat] = NTV2_POINTER(vanc10);
-
-				//	Receive packets from the 8-bit GUMP buffer...
-				AJAAncillaryList	rxPkts;
-				SHOULD_SUCCEED(AJAAncillaryList::SetFromVANCData (vanc10, fd, rxPkts));
-				rxPkts.SortListByLocation();	//	To match txPkts order for Compare (below)
-
-				//	Compare the Tx and Rx packet lists...
-				AJAStatus	result	(txPkts.Compare(rxPkts,  true /*ignoreLocation*/,  true /*ignoreChecksum*/));
-				if (AJA_FAILURE(result))
-					cerr << "MISCOMPARE:" << endl << "Tx: " << txPkts << endl	<< "Rx: " << rxPkts << endl;
-				SHOULD_SUCCEED(result);
-			}	//	for each video format
-			cerr << "BFT_AncListToFBYUV10ToAncList passed" << endl;
-			return true;
-		}
-
-		static bool BFT_GumpToAncListToGump (void)
-		{
-			//	NOTE:	This test relies on GUMP buffers generated by BFT_AncListToGumpToAncList
-			if (gIsVerbose)	cerr << endl << "Starting BFT_GumpToAncListToGump..." << endl;
-			for (NTV2VideoFormat vFormat(NTV2_FORMAT_UNKNOWN);  vFormat < NTV2_MAX_NUM_VIDEO_FORMATS;  vFormat = NTV2VideoFormat(vFormat+1))
-			{
-				if (gGumpBuffers[vFormat].IsNULL())
-					continue;
-
-				const NTV2FormatDescriptor	fd		(vFormat, NTV2_FBF_10BIT_YCBCR, NTV2_VANCMODE_OFF);
-				ULWord						smpteLineF1(0), smpteLineF2(0);
-				bool						isF2	(false);
-				if (gIsVerbose)	cerr << "Trying " << ::NTV2VideoFormatToString(vFormat) << endl;
-				SHOULD_BE_TRUE(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
-				if (isF2)
-					smpteLineF2 = smpteLineF1;
-				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat)  &&  !isF2)
-					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
-
-
-				//	Receive packets from the 8-bit GUMP buffer...
-				AJAAncillaryList	pkts;
-				SHOULD_SUCCEED(AJAAncillaryList::SetFromDeviceAncBuffers(gGumpBuffers[vFormat], NTV2_POINTER(), pkts));
-				if (gIsVerbose)
-					cerr	<< "Received buffer: " << gGumpBuffers[vFormat].AsString(64) << " has " << DEC(pkts.CountAncillaryData()) << " packet(s)"
-							//  << ": " << pkts
-							<< endl;
-
-				//	Transmit the packets into another 8-bit GUMP buffer...
-				NTV2_POINTER	gumpF1(4096), gumpF2;
-				SHOULD_SUCCEED(pkts.GetTransmitData (gumpF1, gumpF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
-				if (gIsVerbose)	cerr << "        GUMP F1: " << gumpF1.AsString(64) << endl;
-				SHOULD_BE_TRUE(gGumpBuffers[vFormat].IsContentEqual(gumpF1));
-			}	//	for each video format
-			cerr << "BFT_GumpToAncListToGump passed" << endl;
-			return true;
-		}
-
-		static bool BFT_RTPToAncListToRTP (void)
-		{
+			AJAAncillaryData::ResetInstanceCounts();
 			const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000, NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
-			LOGMYNOTE("Starting");
+			cerr << "Starting BFT_RTPToAncListToRTP" << endl;
 			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
 			{
 				const NTV2VideoFormat		vFormat	(vFormats[ndx]);
@@ -1870,11 +1674,11 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				bool						isF2	(false);
 				AJAAncillaryList			rxPkts;
 				LOGMYNOTE("Trying " << fd);
-				SHOULD_BE_TRUE(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
+				CHECK(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
 				if (isF2)
 					smpteLineF2 = smpteLineF1;
 				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat)  &&  !isF2)
-					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
+					CHECK(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
 
 				//	NOTE:	Use the F1 RTP buffer we saved in BFT_AncListToRTPToAncList...
 				if (gRTPBuffers[vFormat].IsNULL())	{LOGMYINFO("Skipping " << fd << " because " << gRTPBuffers[vFormat]);	continue;}
@@ -1882,9 +1686,11 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				NTV2_POINTER			F1RTP_b	(F1RTP_a.GetByteCount());
 				NTV2_POINTER			F2RTP_b	(F1RTP_a.GetByteCount());
 				//	Unpack into an AJAAncillaryList of anc packets...
-				SHOULD_SUCCEED(AJAAncillaryList::SetFromDeviceAncBuffers(F1RTP_a, NTV2_POINTER(), rxPkts));
+				CHECK(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers(F1RTP_a, NTV2_POINTER(), rxPkts)));
+				CHECK_EQ(rxPkts.CountAncillaryData(), 5);	//	Should have 5 packets
+				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), rxPkts.CountAncillaryData());
 				//	Re-pack into RTP...
-				SHOULD_SUCCEED(rxPkts.GetIPTransmitData (F1RTP_b, F2RTP_b, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2));
+				CHECK(AJA_SUCCESS(rxPkts.GetIPTransmitData (F1RTP_b, F2RTP_b, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2)));
 				//	Content of F1RTP "a" and "b" buffers should match...
 				if (!F1RTP_a.IsContentEqual(F1RTP_b, 0))
 				{
@@ -1904,24 +1710,28 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 					else
 						LOGMYDEBUG(rxA->AsString() << " == " << rxB->AsString());
 					LOGMYDEBUG(rxA->CompareWithInfo(*rxB, false, false));
+					CHECK_EQ(b_pkts.CountAncillaryData(), rxPkts.CountAncillaryData());
+					DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), rxPkts.CountAncillaryData()*2);
 				}
-				SHOULD_BE_TRUE(F1RTP_a.IsContentEqual(F1RTP_b, 0));
+				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), rxPkts.CountAncillaryData());
+				rxPkts.Clear();
+				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 0);
+				CHECK(F1RTP_a.IsContentEqual(F1RTP_b, 0));
 			}	//	for each vFormat
-			LOGMYNOTE("Passed");
-			return true;
-		}	//	BFT_RTPToAncListToRTP
+			cerr << "BFT_RTPToAncListToRTP passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
+		}	//	TEST_CASE("BFT_RTPToAncListToRTP")
 
-		static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianSwap32HtoB(inValue);}
 
-		static bool BFT_RTPXmitTooManyPackets (void)
+		TEST_CASE("BFT_RTPXmitTooManyPackets")
 		{
-			LOGMYNOTE("Started");
+			cerr << "Starting BFT_RTPXmitTooManyPackets" << endl;
+			AJAAncillaryData::ResetInstanceCounts();
 			//	"TOO MANY PACKETS" TEST
 			//	Validates that GetIPTransmitData will correctly encode no more than 255 packets from a list that contains more.
 			for (unsigned oneRTP(0);  oneRTP < 2;  oneRTP++)
 			{
 				const bool	isSingleRTPPacket	(oneRTP ? true : false);
-				LOGMYNOTE("Starting test: " << (isSingleRTPPacket ? "SINGLE RTP PACKET" : "MULTIPLE RTP PACKETS"));
+				LOGMYNOTE("BFT_RTPXmitTooManyPackets: Starting test: " << (isSingleRTPPacket ? "SINGLE RTP PACKET" : "MULTIPLE RTP PACKETS"));
 
 				//	Create a packet list having more than 255 packets...
 				AJAAncillaryList	pkts;
@@ -1950,37 +1760,47 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 						pkt.SetPayloadData(reinterpret_cast<const UByte*>(&pktNumBE), sizeof(ULWord));
 						pkts.AddAncillaryData(pkt);
 
-						SHOULD_SUCCEED(pkts.GetIPTransmitData (F1Buffer, F2Buffer, /*isProgressive=*/true, /*F2StartLine=*/0));
+						CHECK(AJA_SUCCESS(pkts.GetIPTransmitData (F1Buffer, F2Buffer, /*isProgressive=*/true, /*F2StartLine=*/0)));
 					}	//	7 pkts per line
 				}	//	for lineNum from 8 thru 41
 
 				//	At this point, pkts should contain 264 packets, but F1Buffer will only have 255 (max for RTP).
-				//	Convert F1Buffer into a comparison packet list...
-				AJAAncillaryList	cmpPkts;
-				cmpPkts.SetAllowMultiRTPReceive(!isSingleRTPPacket);
-				SHOULD_SUCCEED(AJAAncillaryList::SetFromDeviceAncBuffers (F1Buffer, F2Buffer, cmpPkts));
-				SHOULD_BE_UNEQUAL(pkts.CountAncillaryData(), cmpPkts.CountAncillaryData());
+				CHECK_EQ(pkts.CountAncillaryData(), 264);
+				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 264);
+				{	//	Convert F1Buffer into a comparison packet list...
+					AJAAncillaryList	cmpPkts;
+					cmpPkts.SetAllowMultiRTPReceive(!isSingleRTPPacket);
+					CHECK(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers (F1Buffer, F2Buffer, cmpPkts)));
+					CHECK_NE(pkts.CountAncillaryData(), cmpPkts.CountAncillaryData());
+					CHECK_EQ(cmpPkts.CountAncillaryData(), 255);
+					DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 255+264);
 
-				//	Truncate the original pkts list until its count matches cmpPkts...
-				while (pkts.CountAncillaryData() > cmpPkts.CountAncillaryData())
-					pkts.DeleteAncillaryData(pkts.GetAncillaryDataAtIndex(pkts.CountAncillaryData()-1));
+					//	Truncate the original pkts list until its count matches cmpPkts...
+					while (pkts.CountAncillaryData() > cmpPkts.CountAncillaryData())
+						pkts.DeleteAncillaryData(pkts.GetAncillaryDataAtIndex(pkts.CountAncillaryData()-1));
+					DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 255+255);
 
-				//	Now the two lists should match (ignoring checksums, since original list's packets all have zero checksums)...
-				string	cmpResults (pkts.CompareWithInfo(cmpPkts, /*ignoreLocation=*/false));
-				if (!cmpResults.empty())
-					LOGMYNOTE(cmpResults);
-				SHOULD_BE_TRUE(cmpResults.empty());
-				LOGMYNOTE("Passed test: " << (isSingleRTPPacket ? "SINGLE RTP PACKET" : "MULTIPLE RTP PACKETS"));
+					//	Now the two lists should match (ignoring checksums, since original list's packets all have zero checksums)...
+					string	cmpResults (pkts.CompareWithInfo(cmpPkts, /*ignoreLocation=*/false));
+					if (!cmpResults.empty())
+						LOGMYNOTE(cmpResults);
+					CHECK(cmpResults.empty());
+				}
+				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 255);
+				LOGMYNOTE("BFT_RTPXmitTooManyPackets: Passed test: " << (isSingleRTPPacket ? "SINGLE RTP PACKET" : "MULTIPLE RTP PACKETS"));
+				pkts.Clear();
+				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 0);
 			}	//	permute multiRTP & singleRTP
-			LOGMYNOTE("Passed");
-			return true;
-		}	//	BFT_RTPXmitTooManyPackets
+			cerr << "BFT_RTPXmitTooManyPackets passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
+		}	//	TEST_CASE("BFT_RTPXmitTooManyPackets")
 
-		static bool BFT_RTPXmitTooMuchData (void)
+
+		TEST_CASE("BFT_RTPXmitTooMuchData")
 		{
 			//	"TOO MUCH DATA" TEST
 			//	Validates that GetIPTransmitData will correctly encode no more than 64K of packet data from a list that contains more.
-			LOGMYNOTE("Starting test: SINGLE RTP PACKET");
+			cerr << "BFT_RTPXmitTooMuchData: Starting test: SINGLE RTP PACKET" << endl;
+			AJAAncillaryData::ResetInstanceCounts();
 
 			//	Create a packet list having more than 255 packets...
 			AJAAncillaryList	pkts;
@@ -2010,48 +1830,252 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 					pkt.SetPayloadData(reinterpret_cast<const UByte*>(oss2.str().c_str()), uint32_t(oss2.str().length()));
 					pkts.AddAncillaryData(pkt);
 				}	//	7 pkts per line
+				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), pkts.CountAncillaryData());
 			}	//	for lineNum from 8 thru 41
 
 			//	How big should our F1 anc buffer be?
 			uint32_t	F1TotalBytes(0), F2TotalBytes(0);
-			SHOULD_SUCCEED(pkts.GetIPTransmitDataLength (F1TotalBytes, F2TotalBytes));	//	Progressive, single RTP pkt
+			CHECK(AJA_SUCCESS(pkts.GetIPTransmitDataLength (F1TotalBytes, F2TotalBytes)));	//	Progressive, single RTP pkt
 			LOGMYNOTE(DEC(F1TotalBytes) << " F1 Total Bytes Required, totalPayloadBytes=" << DEC(totalPayloadBytes));
 
 			//	Allocate the F1 anc buffer:   (requires almost 100K!)
 			NTV2_POINTER	F1Buffer((F1TotalBytes / 1024 + 2) * 1024), F2Buffer;
 
 			//	Fill it with RTP xmit data:
-			SHOULD_SUCCEED(pkts.GetIPTransmitData (F1Buffer, F2Buffer));	//	Progressive, single RTP pkt
+			CHECK(AJA_SUCCESS(pkts.GetIPTransmitData (F1Buffer, F2Buffer)));	//	Progressive, single RTP pkt
 
 			//	At this point, pkts should contain ~264 packets, but F1Buffer will only have ~199 (max for RTP).
-			//	Produce a comparison packet list from the F1Buffer contents...
-			AJAAncillaryList	cmpPkts;
-			SHOULD_SUCCEED(AJAAncillaryList::SetFromDeviceAncBuffers (F1Buffer, F2Buffer, cmpPkts));
-			SHOULD_BE_UNEQUAL(pkts.CountAncillaryData(), cmpPkts.CountAncillaryData());
+			CHECK_EQ(pkts.CountAncillaryData(), 264);
+			DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 264);
+			{	//	Produce a comparison packet list from the F1Buffer contents...
+				AJAAncillaryList	cmpPkts;
+				CHECK(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers (F1Buffer, F2Buffer, cmpPkts)));
+				CHECK_NE(pkts.CountAncillaryData(), cmpPkts.CountAncillaryData());
+				CHECK_EQ(cmpPkts.CountAncillaryData(), 199);
 
-			//	Truncate the original pkts list until its count matches cmpPkts...
-			while (pkts.CountAncillaryData() > cmpPkts.CountAncillaryData())
-				pkts.DeleteAncillaryData(pkts.GetAncillaryDataAtIndex(pkts.CountAncillaryData()-1));
+				//	Truncate the original pkts list until its count matches cmpPkts...
+				while (pkts.CountAncillaryData() > cmpPkts.CountAncillaryData())
+					pkts.DeleteAncillaryData(pkts.GetAncillaryDataAtIndex(pkts.CountAncillaryData()-1));
 
-			//	Now the two lists should match (ignoring checksums, since original list's packets all have zero checksums)...
-			string	cmpResults (pkts.CompareWithInfo(cmpPkts, /*ignoreLocation=*/false));
-			if (!cmpResults.empty())
-				LOGMYNOTE(cmpResults);
-			SHOULD_BE_TRUE(cmpResults.empty());
-			LOGMYNOTE("Passed test: SINGLE RTP PACKET");
-			return true;
-		}	//	BFT_RTPXmitTooMuchData
+				//	Now the two lists should match (ignoring checksums, since original list's packets all have zero checksums)...
+				CHECK_EQ(pkts.CountAncillaryData(), cmpPkts.CountAncillaryData());
+				string	cmpResults (pkts.CompareWithInfo(cmpPkts, /*ignoreLocation=*/false));
+				if (!cmpResults.empty())
+					LOGMYNOTE(cmpResults);
+				CHECK(cmpResults.empty());
+				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), pkts.CountAncillaryData() + cmpPkts.CountAncillaryData());
+			}
+			DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), pkts.CountAncillaryData());
+			pkts.Clear();
+			DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 0);
+			cerr << "BFT_RTPXmitTooMuchData: SINGLE RTP PACKET passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
+		}	//	TEST_CASE("BFT_RTPXmitTooMuchData")
 
-		static bool BFT_FBYUV8ToAncListToFBYUV8 (void)
+
+		TEST_CASE("BFT_AncListToFBYUV8ToAncList")
 		{
-			cerr << "BFT_FBYUV8ToAncListToFBYUV8 passed" << endl;
-			return true;
-		}
+			const NTV2VideoFormat	vFormats[]	=	{/*NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000,*/ NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
+			cerr << "Starting BFT_AncListToFBYUV8ToAncList..." << endl;
+			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
+			{
+				const NTV2VideoFormat		vFormat	(vFormats[ndx]);
+				const NTV2FormatDescriptor	fd		(vFormat, NTV2_FBF_8BIT_YCBCR, NTV2_VANCMODE_TALLER);
+				ULWord						smpteLineF1(0), smpteLineF2(0);
+				bool						isF2	(false);
+				if (gIsVerbose)	cerr << "Trying " << ::NTV2VideoFormatToString(vFormat) << endl;
+				CHECK(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
+				if (isF2)
+					smpteLineF2 = smpteLineF1;
+				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat)  &&  !isF2)
+					CHECK(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
 
-		static bool BFT_FBYUV10ToAncListToFBYUV10 (void)
+				AJAAncillaryList	txPkts;
+				if (true)
+				{
+					//	Make the transmit packets...
+					AJAAncDataLoc	loc;
+					loc.SetDataLink(AJAAncillaryDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
+					AJAAncillaryData_Cea608_Vanc	pkt608F1;
+					CHECK(AJA_SUCCESS(pkt608F1.SetLine(false/*isF1*/, 10)));
+					CHECK(AJA_SUCCESS(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B'))));
+					CHECK(AJA_SUCCESS(pkt608F1.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+10 : 10))));
+					CHECK(AJA_SUCCESS(pkt608F1.GeneratePayloadData()));
+
+					AJAAncillaryData_Cea608_Vanc	pkt608F2;
+					CHECK(AJA_SUCCESS(pkt608F2.SetLine(true/*isF2*/, 11)));
+					CHECK(AJA_SUCCESS(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b'))));
+					CHECK(AJA_SUCCESS(pkt608F2.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat) && pkt608F2.IsField2() ? smpteLineF2+11 : 11))));
+					CHECK(AJA_SUCCESS(pkt608F2.GeneratePayloadData()));
+	
+					AJAAncillaryData_HDR_HLG		pktHDR;
+					CHECK(AJA_SUCCESS(pktHDR.GeneratePayloadData()));
+	
+					AJAAncillaryData				pktCustomY;
+					CHECK(AJA_SUCCESS(pktCustomY.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(12))));
+					CHECK(AJA_SUCCESS(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+					CHECK(AJA_SUCCESS(pktCustomY.SetDID(0x7A)));
+					CHECK(AJA_SUCCESS(pktCustomY.SetSID(0x01)));
+					static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x09, 0x0A	};
+					CHECK(AJA_SUCCESS(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY))));
+	
+					AJAAncillaryData				pktCustomC;
+					CHECK(AJA_SUCCESS(pktCustomC.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_C).SetLineNumber(13))));
+					CHECK(AJA_SUCCESS(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+					CHECK(AJA_SUCCESS(pktCustomC.SetDID(0x8A)));
+					CHECK(AJA_SUCCESS(pktCustomC.SetSID(0x02)));
+					static const uint8_t	pCustomDataC[]	=	{	0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F	};
+					CHECK(AJA_SUCCESS(pktCustomC.SetPayloadData(pCustomDataC, sizeof(pCustomDataC))));
+	
+					//	Make the transmit packet list...
+					CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pkt608F1)));
+					if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
+						CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pkt608F2)));
+					CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pktHDR)));
+					CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pktCustomY)));
+					CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pktCustomC)));
+				}
+				txPkts.SortListByLocation();	//	To match rxPkts order at Compare (below)
+				//	Transmit the packets into the 8-bit YCbCr frame buffer...
+				NTV2_POINTER	vanc8(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes());	//	Just the VANC lines
+				vanc8.Fill(uint8_t(0x80));
+				CHECK(AJA_SUCCESS(txPkts.GetVANCTransmitData (vanc8, fd)));
+/* cerr << ::NTV2VideoFormatToString(vFormat) << " " << ::NTV2FrameBufferFormatToString(fd.GetPixelFormat()) << " VANC: " << endl;
+for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset++) {
+	NTV2_POINTER	blankLine(fd.GetBytesPerRow());
+	NTV2_POINTER	oneLine(fd.GetRowAddress(vanc8.GetHostPointer(), lineOffset), fd.GetBytesPerRow());
+	blankLine.Fill(uint8_t(0x80));
+	if (!oneLine.IsContentEqual(blankLine)) {
+		cerr << "+" << DEC0N(lineOffset,2) << ": ";  fd.PrintSMPTELineNumber(cerr, lineOffset, false);  cerr << ":" << endl;
+		CNTV2CaptionLogConfig::DumpMemory(oneLine.GetHostPointer(), 32*4, cerr, 16, 4, 32,0,false);
+} } */
+
+				//	NOTE:	This test saves the VANC buffer for use later by BFT_FBYUV8ToAncListToFBYUV8...
+				gVanc8Buffers[vFormat] = NTV2_POINTER(vanc8);
+
+				//	Receive packets from the 8-bit GUMP buffer...
+				AJAAncillaryList	rxPkts;
+				CHECK(AJA_SUCCESS(AJAAncillaryList::SetFromVANCData(vanc8, fd, rxPkts)));
+				rxPkts.SortListByLocation();	//	To match txPkts order -- for Compare below
+
+				//	Compare the Tx and Rx packet lists...
+				//	The txPkts have zero checksums because we never set them.
+				//	The rxPkts all have valid checksums because rxPkts.SetFromVANCData sets them.
+				//	Also, the rxPkts have unknown link values in their Locations.
+				//	Therefore, when comparing the two lists, we must ignore location and checksums...
+				AJAStatus	result	(txPkts.Compare(rxPkts,  true/*ignoreLocation?*/,  true/*ignoreChecksum?*/));
+				if (AJA_FAILURE(result))
+					cerr << "MISCOMPARE:" << endl << "Tx: " << txPkts << endl	<< "Rx: " << rxPkts << endl;
+				CHECK(AJA_SUCCESS(result));
+			}	//	for each video format
+			cerr << "BFT_AncListToFBYUV8ToAncList passed" << endl;
+		}	//	TEST_CASE("BFT_AncListToFBYUV8ToAncList")
+
+
+		TEST_CASE("BFT_FBYUV8ToAncListToFBYUV8")
+		{
+			CHECK(true);	//	TBD
+		}	//	TEST_CASE("BFT_FBYUV8ToAncListToFBYUV8")
+
+
+		TEST_CASE("BFT_AncListToFBYUV10ToAncList")
+		{
+			const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, /*NTV2_FORMAT_625_5000,*/ NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
+			cerr << "Starting BFT_AncListToFBYUV10ToAncList..." << endl;
+			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
+			{
+				const NTV2VideoFormat		vFormat	(vFormats[ndx]);
+				const NTV2FormatDescriptor	fd		(vFormat, NTV2_FBF_10BIT_YCBCR, NTV2_VANCMODE_TALLER);
+				ULWord						smpteLineF1(0), smpteLineF2(0);
+				bool						isF2	(false);
+				if (gIsVerbose)	cerr << "Trying " << ::NTV2VideoFormatToString(vFormat) << endl;
+				CHECK(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
+				if (isF2)
+					smpteLineF2 = smpteLineF1;
+				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat)  &&  !isF2)
+					CHECK(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
+
+				AJAAncillaryList txPkts;
+				if (true)
+				{
+					//	Make the transmit packets...
+					AJAAncDataLoc	loc;
+					loc.SetDataLink(AJAAncillaryDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
+					AJAAncillaryData_Cea608_Vanc	pkt608F1;
+					CHECK(AJA_SUCCESS(pkt608F1.SetLine(false/*isF1*/, 10)));
+					CHECK(AJA_SUCCESS(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B'))));
+					CHECK(AJA_SUCCESS(pkt608F1.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+10 : 10))));
+					CHECK(AJA_SUCCESS(pkt608F1.GeneratePayloadData()));
+
+					AJAAncillaryData_Cea608_Vanc	pkt608F2;
+					CHECK(AJA_SUCCESS(pkt608F2.SetLine(true/*isF2*/, 11)));
+					CHECK(AJA_SUCCESS(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b'))));
+					CHECK(AJA_SUCCESS(pkt608F2.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat) && pkt608F2.IsField2() ? smpteLineF2+11 : 11))));
+					CHECK(AJA_SUCCESS(pkt608F2.GeneratePayloadData()));
+	
+					AJAAncillaryData_HDR_HLG		pktHDR;
+					CHECK(AJA_SUCCESS(pktHDR.GeneratePayloadData()));
+	
+					AJAAncillaryData				pktCustomY;
+					CHECK(AJA_SUCCESS(pktCustomY.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(12))));
+					CHECK(AJA_SUCCESS(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+					CHECK(AJA_SUCCESS(pktCustomY.SetDID(0x7A)));
+					CHECK(AJA_SUCCESS(pktCustomY.SetSID(0x01)));
+					static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x09, 0x0A	};
+					CHECK(AJA_SUCCESS(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY))));
+	
+					AJAAncillaryData				pktCustomC;
+					CHECK(AJA_SUCCESS(pktCustomC.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_C).SetLineNumber(13))));
+					CHECK(AJA_SUCCESS(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+					CHECK(AJA_SUCCESS(pktCustomC.SetDID(0x8A)));
+					CHECK(AJA_SUCCESS(pktCustomC.SetSID(0x02)));
+					static const uint8_t	pCustomDataC[]	=	{	0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F	};
+					CHECK(AJA_SUCCESS(pktCustomC.SetPayloadData(pCustomDataC, sizeof(pCustomDataC))));
+	
+					//	Make the transmit packet list...
+					CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pkt608F1)));
+					if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
+						CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pkt608F2)));
+					CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pktHDR)));
+					CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pktCustomY)));
+					CHECK(AJA_SUCCESS(txPkts.AddAncillaryData(pktCustomC)));
+				}
+
+				//	Transmit the packets into the 10-bit YCbCr frame buffer...
+				NTV2_POINTER	vanc10(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes());	//	Just the VANC lines
+				vanc10.Fill(uint8_t(0x80));
+				CHECK(AJA_SUCCESS(txPkts.GetVANCTransmitData (vanc10, fd)));
+/* cerr << ::NTV2VideoFormatToString(vFormat) << " " << ::NTV2FrameBufferFormatToString(fd.GetPixelFormat()) << " VANC: " << endl;
+for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset++) {
+	NTV2_POINTER	blankLine(fd.GetBytesPerRow());
+	NTV2_POINTER	oneLine(fd.GetRowAddress(vanc10.GetHostPointer(), lineOffset), fd.GetBytesPerRow());
+	blankLine.Fill(uint8_t(0x80));
+	if (!oneLine.IsContentEqual(blankLine)) {
+		cerr << "+" << DEC0N(lineOffset,2) << ": ";  fd.PrintSMPTELineNumber(cerr, lineOffset, false);  cerr << ":" << endl;
+		CNTV2CaptionLogConfig::DumpMemory(oneLine.GetHostPointer(), 32*4, cerr, 16, 4, 32,0,false);
+} } */
+
+				//	NOTE:	This test saves the VANC buffer for use later by BFT_FBYUV10ToAncListToFBYUV10...
+				gVanc10Buffers[vFormat] = NTV2_POINTER(vanc10);
+
+				//	Receive packets from the 8-bit GUMP buffer...
+				AJAAncillaryList	rxPkts;
+				CHECK(AJA_SUCCESS(AJAAncillaryList::SetFromVANCData (vanc10, fd, rxPkts)));
+				rxPkts.SortListByLocation();	//	To match txPkts order for Compare (below)
+
+				//	Compare the Tx and Rx packet lists...
+				AJAStatus	result	(txPkts.Compare(rxPkts,  true /*ignoreLocation*/,  true /*ignoreChecksum*/));
+				if (AJA_FAILURE(result))
+					cerr << "MISCOMPARE:" << endl << "Tx: " << txPkts << endl	<< "Rx: " << rxPkts << endl;
+				CHECK(AJA_SUCCESS(result));
+			}	//	for each video format
+			cerr << "BFT_AncListToFBYUV10ToAncList passed" << endl;
+		}	//	TEST_CASE("BFT_AncListToFBYUV10ToAncList")
+
+
+		TEST_CASE("BFT_FBYUV10ToAncListToFBYUV10")
 		{
 			//	NOTE:	This test relies on YUV10 buffers generated by BFT_AncListToFBYUV10ToAncList
-			if (gIsVerbose)	cerr << endl << "Starting BFT_FBYUV10ToAncListToFBYUV10..." << endl;
+			cerr << "Starting BFT_FBYUV10ToAncListToFBYUV10..." << endl;
 			for (NTV2VideoFormat vFormat(NTV2_FORMAT_UNKNOWN);  vFormat < NTV2_MAX_NUM_VIDEO_FORMATS;  vFormat = NTV2VideoFormat(vFormat+1))
 			{
 				if (gVanc10Buffers[vFormat].IsNULL())
@@ -2060,68 +2084,285 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				const NTV2FormatDescriptor	fd		(vFormat, NTV2_FBF_10BIT_YCBCR, NTV2_VANCMODE_TALLER);
 				ULWord						smpteLineF1(0), smpteLineF2(0);
 				bool						isF2	(false);
-				SHOULD_BE_TRUE(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
+				CHECK(fd.GetSMPTELineNumber(0, smpteLineF1, isF2));
 				if (isF2)
 					smpteLineF2 = smpteLineF1;
 				if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat)  &&  !isF2)
-					SHOULD_BE_TRUE(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
+					CHECK(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
 
 
 				//	Receive packets from the YUV10 frame buffer's VANC lines...
 				AJAAncillaryList	pkts;
-				SHOULD_SUCCEED(AJAAncillaryList::SetFromVANCData(gVanc10Buffers[vFormat], fd, pkts));
+				CHECK(AJA_SUCCESS(AJAAncillaryList::SetFromVANCData(gVanc10Buffers[vFormat], fd, pkts)));
 				if (gIsVerbose)
 					cerr	<< ::NTV2VideoFormatToString(vFormat) << ": " << "Rx: " << pkts << endl;
 
 				//	Transmit the packets into another YUV10 frame buffer...
 				NTV2_POINTER	yuv10vanc(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes());	//	Just the VANC lines
 				yuv10vanc.Fill(uint8_t(0x80));
-				SHOULD_SUCCEED(pkts.GetVANCTransmitData(yuv10vanc, fd));
-				SHOULD_BE_TRUE(gVanc10Buffers[vFormat].IsContentEqual(yuv10vanc));
+				CHECK(AJA_SUCCESS(pkts.GetVANCTransmitData(yuv10vanc, fd)));
+				CHECK(gVanc10Buffers[vFormat].IsContentEqual(yuv10vanc));
 			}	//	for each video format
 			cerr << "BFT_FBYUV10ToAncListToFBYUV10 passed" << endl;
-			return true;
-		}
+		}	//	TEST_CASE("BFT_FBYUV10ToAncListToFBYUV10")
 
 
-		static bool BFT_YUVComponentsTo10BitYUVPackedBuffer (const vector<uint16_t> & in10BitYUVReferenceLine)
+		TEST_CASE("BFT_AddFromDeviceAncBuffer")
+		{	//	This test is intended to elicit crashes (access violations), not to validate outcomes
+			cerr << "BFT_AddFromDeviceAncBuffer started" << endl;
+			AJAAncillaryList pkts;
+			NTV2_POINTER nullBuffer(0);
+			AJARTPAncPayloadHeader rtpHdr;
+			//	Exercise RTP (variable-length runs of zeroes)
+			for (ULWord sz(20);  sz < 65;  sz++)
+			{
+				NTV2_POINTER buff(sz*4);
+				CHECK_EQ(buff.GetByteCount(), sz*4);
+				CHECK(rtpHdr.WriteToBuffer(buff, /*offset*/sz/4%8));
+				CHECK(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers(buff, nullBuffer, pkts)));
+				CHECK_EQ(pkts.CountAncillaryData(), 0);
+			}
+			//	Exercise RTP (variable-length runs of random data)
+			for (ULWord sz(15);  sz < 65;  sz++)
+			{
+				NTV2_POINTER buff(sz*4);
+				CHECK_EQ(buff.GetByteCount(), sz*4);
+				std::random_device rd;	//	Seeds the random number engine
+				std::mt19937 gen(rd());	//	Standard mersenne_twister_engine seeded with rd()
+				std::uniform_int_distribution<> distrib(0, 255);
+				for (ULWord ndx(0);  ndx < sz;  ++ndx)
+					CHECK(buff.PutU8s(UByteSequence{UByte(distrib(gen))}, ndx));
+				CHECK(rtpHdr.WriteToBuffer(buff, /*offset*/sz/4%8));
+				if (AJA_FAILURE(AJAAncillaryList::SetFromDeviceAncBuffers(buff, nullBuffer, pkts)))
+					LOGMYINFO("whoa, got AJAAncillaryList::SetFromDeviceAncBuffers to fail!");
+				if (pkts.CountAncillaryData())
+					LOGMYINFO("whoa, got one or more packets! " << pkts);
+			}
+			//	Exercise GUMP (variable-length runs of random data)
+			for (ULWord sz(8);  sz < 200;  sz++)
+			{
+				NTV2_POINTER buff(sz);
+				CHECK_EQ(buff.GetByteCount(), sz);
+				std::random_device rd;	//	Seeds the random number engine
+				std::mt19937 gen(rd());	//	Standard mersenne_twister_engine seeded with rd()
+				std::uniform_int_distribution<> distrib(0, 255);
+				for (ULWord ndx(0);  ndx < sz;  ++ndx)
+					CHECK(buff.PutU8s(UByteSequence{UByte(distrib(gen))}, ndx));
+				CHECK(buff.PutU8s(UByteSequence{0xFF}, 0));
+				if (AJAAncillaryList::SetFromDeviceAncBuffers(buff, nullBuffer, pkts))
+					LOGMYINFO("whoa, a successful parse! " << pkts);
+				if (pkts.CountAncillaryData())
+					LOGMYINFO(pkts);
+			}
+			cerr << "BFT_AddFromDeviceAncBuffer passed" << endl;
+		}	//	TEST_CASE("BFT_AddFromDeviceAncBuffer")
+
+
+		TEST_CASE("BFT_AncDataCEA608Vanc")
 		{
+			static const uint8_t pGump608Vanc[]	= {	0xFF,	0xA0,	0x09,	0x61,	0x02,	0x03,
+													0x09,	0xC1,	0xC2,	0xF2,	//	end of packet
+													//	Extra bytes
+													0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,
+													0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10};
+			uint32_t						packetByteCount	(0);
+			AJAAncillaryData_Cea608_Vanc	pktRX, pktTX;
+			AJAAncillaryData				defaultPkt;
+
+			cerr << "BFT_AncDataCEA608Vanc started" << endl;
+			//	Test AJAAncillaryData_Cea608_Vanc  and GUMP decoding of it
+			CHECK(AJA_SUCCESS(defaultPkt.InitWithReceivedData (pGump608Vanc, sizeof(pGump608Vanc), AJAAncillaryDataLocation(), packetByteCount)));
+			CHECK_EQ (defaultPkt.GetDC(), 3);
+			CHECK_EQ (defaultPkt.GetDID(), 0x61);
+			CHECK_EQ (defaultPkt.GetSID(), 0x02);
+			CHECK_EQ (defaultPkt.GetChecksum(), 0xF2);
+			CHECK_EQ (defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_Unknown);
+			CHECK_EQ (defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
+			CHECK_EQ (defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
+			CHECK_EQ (defaultPkt.GetLocationLineNumber(), 9);
+			CHECK_EQ (defaultPkt.GetLocationHorizOffset(), AJAAncDataHorizOffset_AnyVanc);
+			CHECK_EQ (defaultPkt.GetDataCoding(), AJAAncillaryDataCoding_Digital);
+			CHECK_FALSE (defaultPkt.GotValidReceiveData());		//	False, because wasn't vetted by specific subclass
+			CHECK_EQ (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Unknown);
+			CHECK_NE (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Cea608_Vanc);
+			CHECK_EQ (AJAAncillaryData_Cea608_Vanc::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Cea608_Vanc);
+			CHECK_EQ (AJAAncillaryData_Cea608_Line21::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Unknown);
+			CHECK_EQ (AJAAncillaryData_Cea708::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Unknown);
+			CHECK(AJA_SUCCESS(pktRX.InitWithReceivedData (pGump608Vanc, sizeof(pGump608Vanc), AJAAncillaryDataLocation(), packetByteCount)));
+			CHECK(AJA_SUCCESS(pktRX.ParsePayloadData()));
+			CHECK (pktRX.GotValidReceiveData());
+			uint8_t	fieldNumber(0), lineNumber(0), char1(0), char2(0);	bool isValid(false);
+			CHECK(AJA_SUCCESS(pktRX.GetLine(fieldNumber, lineNumber)));
+			CHECK_EQ (fieldNumber, 1);	//	F2 == NTV2_FIELD1
+			CHECK (pktRX.IsField2());	//	F2
+			CHECK_EQ (lineNumber, 9);			//	SMPTE line 9
+			CHECK_EQ (pktRX.GetLineNumber(), 9);	//	SMPTE line 9
+			CHECK(AJA_SUCCESS(pktRX.GetCEA608Characters(char1, char2, isValid)));
+			CHECK_EQ (char1, 'A');
+			CHECK_EQ (char2, 'B');
+			CHECK (isValid);
+			cerr << "BFT_AncDataCEA608Vanc passed" << endl;
+		}	//	TEST_CASE("BFT_AncDataCEA608Vanc")
+
+#if 0	//	** MrBill **	NOT READY FOR PRIME-TIME
+		TEST_CASE("BFT_AncDataCEA608Analog")	
+		{
+			static const uint8_t			pGump608Raw[]	=	{	0xFF,	0xE0,	0x00,	0x00,	0x00,	0xFF,
+																	0x24,	0x47,	0x6a,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x11,	0x16,	0x1d,	0x26,	0x31,	0x3d,	0x4a,	0x56,	0x62,	0x6c,	0x74,
+																	0x7a,	0x7d,	0x7d,	0x7a,	0x74,	0x6c,	0x62,	0x56,	0x4a,	0x3d,	0x31,	0x26,	0x1d,	0x16,	0x11,	0x10,	0x11,	0x16,	0x1d,	0x26,	0x31,	0x3d,	0x4a,	0x56,	0x62,	0x6c,	0x74,	0x7a,	0x7d,	0x7d,	0x7a,	0x74,
+																	0x6c,	0x62,	0x56,	0x4a,	0x3d,	0x31,	0x26,	0x1d,	0x16,	0x11,	0x10,	0x11,	0x16,	0x1d,	0x26,	0x31,	0x3d,	0x4a,	0x56,	0x62,	0x6c,	0x74,	0x7a,	0x7d,	0x7d,	0x7a,	0x74,	0x6c,	0x62,	0x56,	0x4a,	0x3d,
+																	0x31,	0x26,	0x1d,	0x16,	0x11,	0x10,	0x11,	0x16,	0x1d,	0x26,	0x31,	0x3d,	0x4a,	0x56,	0x62,	0x6c,	0x74,	0x7a,	0x7d,	0x7d,	0x7a,	0x74,	0x6c,	0x62,	0x56,	0x4a,	0x3d,	0x31,	0x26,	0x1d,	0x16,	0x11,
+																	0x10,	0x11,	0x16,	0x1d,	0x26,	0x31,	0x3d,	0x4a,	0x56,	0x62,	0x6c,	0x74,	0x7a,	0x7d,	0x7d,	0x7a,	0x74,	0x6c,	0x62,	0x56,	0x4a,	0x3d,	0x31,	0x26,	0x1d,	0x16,	0x11,	0x10,	0x11,	0x16,	0x1d,	0x26,
+																	0x31,	0x3d,	0x4a,	0x56,	0x62,	0x6c,	0x74,	0x7a,	0x7d,	0x7d,	0x7a,	0x74,	0x6c,	0x62,	0x56,	0x4a,	0x3d,	0x31,	0x26,	0x1d,	0x16,	0x11,	0x10,	0x11,	0x16,	0x1d,	0x26,	0x31,	0x3d,	0x4a,	0x56,	0x62,
+																	0x6c,	0x74,	0x7a,	0x7d,	0x7d,	0x7a,	0x74,	0x6c,	0x62,	0x56,	0x4a,	0x3d,	0x31,	0x26,	0x1d,	0x16,	0x11,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,
+																	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x7e,	0x7e,
+																	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x00,	0xff,	0xe0,	0x00,	0x00,	0x00,	0xff,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x10,
+																	0x10,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x6a,	0x47,	0x24,	0x10,
+																	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,
+																	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,
+																	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,
+																	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,
+																	0x10,	0x10,	0x10,	0x24,	0x47,	0x6a,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,
+																	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x6a,	0x47,	0x24,	0x10,	0x10,	0x10,	0x10,
+																	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x00,	0xff,	0xe0,	0x00,	0x00,	0x00,	0xd2,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x24,	0x47,	0x6a,	0x7e,	0x7e,
+																	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,
+																	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,
+																	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x6a,	0x47,	0x24,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,
+																	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x24,	0x47,	0x6a,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,
+																	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x7e,	0x6a,	0x47,	0x24,
+																	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,
+																	0x10,	0x10,	0x10,	0x10,	0x00};
+			uint32_t						packetByteCount	(0);
+			AJAAncillaryData_Cea608_Line21	pktRX, pktTX;
+			AJAAncillaryData				defaultPkt;
+			uint8_t							char1(0), char2(0);
+			bool							isValid(false);
+
+			//	Test AJAAncillaryData_Cea608_Line21  and GUMP decoding of it
+			CHECK(AJA_SUCCESS(defaultPkt.InitWithReceivedData (pGump608Raw, sizeof(pGump608Raw), AJAAncillaryDataLocation(), packetByteCount)));
+			CHECK_EQ (defaultPkt.GetDC(), 255);
+			CHECK_EQ (defaultPkt.GetDID(), 0);
+			CHECK_EQ (defaultPkt.GetSID(), 0);
+			CHECK_EQ (defaultPkt.GetChecksum(), 0);
+			CHECK_EQ (defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_Unknown);
+			CHECK_EQ (defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
+			CHECK_EQ (defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
+			CHECK_EQ (defaultPkt.GetLocationLineNumber(), 9);
+			CHECK_EQ (defaultPkt.GetDataCoding(), AJAAncillaryDataCoding_Raw);
+			CHECK_FALSE (defaultPkt.GotValidReceiveData());		//	False, because wasn't vetted by specific subclass
+			CHECK_EQ (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Unknown);
+			CHECK_NE (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Cea608_Line21);
+			CHECK_EQ (AJAAncillaryData_Cea608_Vanc::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Unknown);
+			CHECK_EQ (AJAAncillaryData_Cea608_Line21::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Cea608_Line21);
+			CHECK_EQ (AJAAncillaryData_Cea708::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Unknown);
+			CHECK(AJA_SUCCESS(pktRX.InitWithReceivedData (pGump608Raw, sizeof(pGump608Raw), AJAAncillaryDataLocation(), packetByteCount)));
+			CHECK(AJA_SUCCESS(pktRX.ParsePayloadData()));
+			CHECK (pktRX.GotValidReceiveData());
+			CHECK(AJA_SUCCESS(pktRX.GetCEA608Characters(char1, char2, isValid)));
+			CHECK_EQ (char1, 'A');
+			CHECK_EQ (char2, 'n');
+			CHECK (isValid);
+
+			AJAAncillaryList	packetList;
+			CHECK(AJA_SUCCESS(packetList.AddReceivedAncillaryData (pGump608Raw, sizeof(pGump608Raw))));
+			cerr << endl << packetList << endl;
+
+
+			AJAAncillaryData_Cea608_Line21 * pLine21Packet = reinterpret_cast <AJAAncillaryData_Cea608_Line21 *> (AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Cea608_Line21));
+			CHECK(pLine21Packet != AJA_NULL);
+			CHECK(AJA_SUCCESS(pLine21Packet->GeneratePayloadData()));
+			CHECK(AJA_SUCCESS(pLine21Packet->SetDataLocation (AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 21))));
+			CHECK(AJA_SUCCESS(pLine21Packet->SetCEA608Bytes (AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('b'))));
+			CHECK(AJA_SUCCESS(pLine21Packet->SetDID(AJAAncillaryData_Cea608_Vanc_DID)));
+			CHECK(AJA_SUCCESS(pLine21Packet->SetSID(AJAAncillaryData_Cea608_Vanc_SID)));
+			//pLine21Packet->Print (cerr, true);
+			CHECK_EQ (AJAAncillaryDataFactory::GuessAncillaryDataType(pLine21Packet), AJAAncillaryDataType_Cea608_Line21);
+		}	//	TEST_CASE("BFT_AncDataCEA608Analog")
+#endif	//	DISABLED FOR NOW
+
+		TEST_CASE("BFT_AncDataCEA708")
+		{
+			static const uint8_t		pGump708	[]=	{	0xFF,	0xA0,	0x09,	0x61,	0x01,	0x52,	0x96,	0x69,	0x52,	0x4F,	0x67,	0xA7,	0x9A,	0x72,	0xF4,	0xFC,	0x80,
+															0x80,	0xF9,	0x00,	0x00,	0xFB,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,
+															0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,
+															0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,
+															0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0xFA,	0x00,	0x00,	0x73,	0x91,	0xE1,	0x00,	0x00,	0x00,
+															0xC1,	0x3F,	0xFF,	0x74,	0xA7,	0x9A,	0x2F,	0xB4,	//	end of packet
+															0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10,	0x10};
+			uint32_t					packetByteCount	(0);
+			AJAAncillaryData_Cea708		pktRX, pktTX;
+			AJAAncillaryData			defaultPkt;
+
+			//	Test AJAAncillaryData_Cea708  and GUMP decoding of it
+			cerr << "BFT_AncDataCEA708 started" << endl;
+			CHECK(AJA_SUCCESS(defaultPkt.InitWithReceivedData (pGump708, sizeof(pGump708), AJAAncillaryDataLocation(), packetByteCount)));
+			CHECK_EQ (defaultPkt.GetDC(), 82);
+			CHECK_EQ (defaultPkt.GetDID(), 0x61);
+			CHECK_EQ (defaultPkt.GetSID(), 0x01);
+			CHECK_EQ (defaultPkt.GetChecksum(), 0xB4);
+			CHECK_EQ (defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_Unknown);
+			CHECK_EQ (defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
+			CHECK_EQ (defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
+			CHECK_EQ (defaultPkt.GetLocationLineNumber(), 9);
+			CHECK_EQ (defaultPkt.GetDataCoding(), AJAAncillaryDataCoding_Digital);
+			CHECK_FALSE (defaultPkt.GotValidReceiveData());		//	False, because wasn't vetted by specific subclass
+			CHECK_EQ (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Unknown);
+			CHECK_NE (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Cea608_Vanc);
+			CHECK_EQ (AJAAncillaryData_Cea608_Vanc::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Unknown);
+			CHECK_EQ (AJAAncillaryData_Cea608_Line21::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Unknown);
+			CHECK_EQ (AJAAncillaryData_Cea708::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Cea708);
+			CHECK(AJA_SUCCESS(pktRX.InitWithReceivedData (pGump708, sizeof(pGump708), AJAAncillaryDataLocation(), packetByteCount)));
+			CHECK(AJA_SUCCESS(pktRX.ParsePayloadData()));
+			CHECK (pktRX.GotValidReceiveData());
+
+			//	Test GUMP encoding...
+			CHECK(AJA_SUCCESS(pktTX.SetPayloadData(pktRX.GetPayloadData(), uint32_t(pktRX.GetPayloadByteCount()))));
+			CHECK_EQ(::memcmp(pktTX.GetPayloadData(), pktRX.GetPayloadData(), pktTX.GetDC()), 0);
+			//CHECK_EQ(pktRX, pktTX);
+			cerr << "BFT_AncDataCEA708 passed" << endl;
+		}	//	TEST_CASE("BFT_AncDataCEA708")
+
+
+		TEST_CASE("BFT_YUVComponentsTo10BitYUVPackedBuffer")
+		{
+			const vector<uint16_t> & in10BitYUVReferenceLine(SD10BitYUVComponents);
 			NTV2FormatDescriptor	fd		(NTV2_STANDARD_525, NTV2_FBF_10BIT_YCBCR, NTV2_VANCMODE_TALLER);
 			NTV2_POINTER			fb		(size_t(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes()));	//	Just the VANC lines
 			UWord					fbRow	(0);
 			vector<uint16_t>		YUVLine;
 
+			cerr << "BFT_YUVComponentsTo10BitYUVPackedBuffer started" << endl;
 			//	Validate "YUVLine too small" failures...
 			fb.Fill(UByte(0x80));  YUVLine = in10BitYUVReferenceLine;  YUVLine.resize(5);
-			SHOULD_BE_FALSE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fbRow));	//	YUVLine too small
+			CHECK_FALSE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fbRow));	//	YUVLine too small
 			fb.Fill(UByte(0x80));  YUVLine = in10BitYUVReferenceLine;  YUVLine.resize(10);
-			SHOULD_BE_FALSE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fbRow));	//	YUVLine too small
+			CHECK_FALSE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fbRow));	//	YUVLine too small
 			fb.Fill(UByte(0x80));  YUVLine = in10BitYUVReferenceLine;  YUVLine.resize(15);
-			SHOULD_BE_TRUE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fbRow));
+			CHECK(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fbRow));
 
 			//	Validate buffer size failures...
 			YUVLine = in10BitYUVReferenceLine;		//	Valid, full input line
-			SHOULD_BE_TRUE(fb.Allocate(0));		//	NULL buffer
-			SHOULD_BE_FALSE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fbRow));	//	Buffer is NULL
-			SHOULD_BE_TRUE(fb.Allocate(256));	//	256-byte buffer
-			SHOULD_BE_FALSE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fbRow));	//	Buffer too small
-			SHOULD_BE_TRUE(fb.Allocate(512));	//	512-byte buffer
-			SHOULD_BE_FALSE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fbRow));	//	Buffer too small
-			SHOULD_BE_TRUE(fb.Allocate(fd.GetBytesPerRow()));	//	One-line buffer
-			SHOULD_BE_TRUE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fbRow));
-			SHOULD_BE_TRUE(fb.Allocate(size_t(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes())));	//	Back to a full-VANC buffer
+			CHECK(fb.Allocate(0));		//	NULL buffer
+			CHECK_FALSE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fbRow));	//	Buffer is NULL
+			CHECK(fb.Allocate(256));	//	256-byte buffer
+			CHECK_FALSE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fbRow));	//	Buffer too small
+			CHECK(fb.Allocate(512));	//	512-byte buffer
+			CHECK_FALSE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fbRow));	//	Buffer too small
+			CHECK(fb.Allocate(fd.GetBytesPerRow()));	//	One-line buffer
+			CHECK(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fbRow));
+			CHECK(fb.Allocate(size_t(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes())));	//	Back to a full-VANC buffer
 
 			//	Validate line number failures...
-			SHOULD_BE_FALSE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fd.GetFirstActiveLine()+20));	//	Line out of bounds for given buffer
-			SHOULD_BE_FALSE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fd.GetFirstActiveLine()));		//	Line out of bounds for given buffer
-			SHOULD_BE_TRUE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fd.GetFirstActiveLine()/2));	//	OK: Line within VANC
+			CHECK_FALSE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fd.GetFirstActiveLine()+20));	//	Line out of bounds for given buffer
+			CHECK_FALSE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fd.GetFirstActiveLine()));		//	Line out of bounds for given buffer
+			CHECK(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fd.GetFirstActiveLine()/2));	//	OK: Line within VANC
 
 			//	Validate format descriptor failures...
-			SHOULD_BE_FALSE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  NTV2FormatDescriptor(),  fbRow));	//	Bad format descriptor
+			CHECK_FALSE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  NTV2FormatDescriptor(),  fbRow));	//	Bad format descriptor
 
 			//	Validate packed data...
 			fb.Fill(UByte(0x80));
-			SHOULD_BE_TRUE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  0));
+			CHECK(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  0));
 			//	Uncomment the following 2 lines to generate the static kCompPackedData array from the contents of line 0 in "fd" buffer...
 			//	const uint64_t *	pData	((const uint64_t *) fb.GetHostPointer());
 			//	cerr << "\t\t\tstatic const uint64_t kCompPackedData64[] = {";  for (UWord ndx(0);  ndx < fd.GetBytesPerRow()/sizeof(uint64_t);  ndx++)	{cerr << "\t" << xHEX0N(pData[ndx],16) << ",";  if((ndx+1)%6==0)cerr << endl << "\t\t\t\t\t\t\t\t\t\t\t\t\t\t";}	cerr << "\t};" << endl;
@@ -2165,70 +2406,34 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 															0x0408004020010200,	0x0408004020010200,	0x0408004020010200,	0x0408004020010200,	0x0408004020010200,	0x0408004020010200,
 															0x0408004020010200,	0x0408004020010200,	0x0408004020010200,	0x0408004020010200,	0x0408004020010200,	0x0408004020010200,
 															0x0408004020010200,	0x0408004020010200,	0x0408004020010200,	0x0408004020010200,	0x0408004020010200,	0x0408004020010200	};
-			SHOULD_BE_EQUAL(::memcmp(kCompPackedData64, fb.GetHostPointer(), fd.GetBytesPerRow()), 0);
-			return true;
-		}
+			CHECK_EQ(::memcmp(kCompPackedData64, fb.GetHostPointer(), fd.GetBytesPerRow()), 0);
+			cerr << "BFT_YUVComponentsTo10BitYUVPackedBuffer passed" << endl;
+		}	//	TEST_CASE("BFT_YUVComponentsTo10BitYUVPackedBuffer")
 
-
-		static bool RTPHeaderBFT (void)
-		{
-			AJARTPAncPayloadHeader	hdrA, hdrB;
-			SHOULD_BE_TRUE(hdrA.IsValid());
-			SHOULD_BE_TRUE(hdrA == hdrB);
-			SHOULD_BE_EQUAL(hdrA, hdrB);
-			//	Set stuff the hardware ordinarily sets...
-			hdrB.SetCCBits(0x5).SetPayloadType(0xF5).SetSequenceNumber(0x12345678).SetTimeStamp(0x6789ABCD).SetSyncSourceID(0xBaadF00d);
-			//	Set stuff the client needs to set...
-			hdrB.SetPayloadLength(0x4321).SetAncPacketCount(20).SetField2();
-			SHOULD_BE_TRUE(hdrB.IsValid());
-			SHOULD_BE_UNEQUAL(hdrA, hdrB);
-			SHOULD_BE_FALSE(hdrB.IsField1());
-			SHOULD_BE_TRUE(hdrB.IsField2());
-			SHOULD_BE_FALSE(hdrB.IsProgressive());
-			SHOULD_BE_EQUAL(hdrB.GetPayloadLength(), 0x4321);
-			SHOULD_BE_EQUAL(hdrB.GetAncPacketCount(), 20);
-			SHOULD_BE_EQUAL(hdrB.GetSyncSourceID(), 0xBaadF00d);
-			SHOULD_BE_EQUAL(hdrB.GetPayloadType(), 0x75);
-			NTV2_POINTER	nullBuffer;
-			SHOULD_BE_FALSE(hdrB.WriteToBuffer(nullBuffer));
-
-			//	HdrB => buffer => HdrC	. . .	verify HdrB == HdrC
-			AJARTPAncPayloadHeader	hdrC, hdrD, hdrE;
-			NTV2_POINTER	bBuffer(4096);
-			SHOULD_BE_TRUE(hdrB.WriteToBuffer(bBuffer));
-			if (gIsVerbose)
-				cerr << "hdrB: " << hdrB << endl << bBuffer.AsString(20) << endl;
-			SHOULD_BE_TRUE(hdrC.ReadFromBuffer(bBuffer));
-			if (gIsVerbose)
-				cerr << "hdrC: " << hdrC << endl;
-
-			//	bufferB => HdrD => bufferC . . .	verify bufferA == bufferB
-			NTV2_POINTER	cBuffer(bBuffer.GetByteCount());
-			SHOULD_BE_TRUE(hdrD.ReadFromBuffer(bBuffer));
-			SHOULD_BE_TRUE(hdrD.WriteToBuffer(cBuffer));
-			SHOULD_BE_TRUE(cBuffer.IsContentEqual(bBuffer));
-
-			//	HdrB => u32vectorA => HdrE	. . .	verify HdrB == HdrE
-			vector<uint32_t>	u32vectorA, u32vectorTooSmall;
-			for (unsigned ndx(0);  ndx < 20;  ndx++)	u32vectorA.push_back(0xFFFFFFFF);
-			SHOULD_BE_EQUAL(u32vectorA.size(), 20);	//	Size is 20
-			vector<uint32_t>	u32vectorB (u32vectorA);
-			SHOULD_BE_EQUAL(u32vectorB.size(), 20);	//	Size is 20
-			SHOULD_BE_TRUE(hdrB.WriteToULWordVector(u32vectorA, false));
-			SHOULD_BE_EQUAL(u32vectorA.size(), 20);	//	Size is unchanged -- still 20
-			SHOULD_BE_TRUE(hdrB.WriteToULWordVector(u32vectorB, true));
-			SHOULD_BE_EQUAL(u32vectorB.size(), 5);	//	Size is changed to 5 due to "reset" param being 'true'
-			SHOULD_BE_FALSE(hdrE.ReadFromULWordVector(u32vectorTooSmall));
-			//SHOULD_BE_FALSE(hdrE.SetFromPacketHeaderULWordAtIndex(5, 0xFFFFFFFF));
-			SHOULD_BE_TRUE(hdrE.ReadFromULWordVector(u32vectorA));
-			SHOULD_BE_EQUAL(hdrB, hdrE);
-			return true;
-		}
-
-
-		static bool RTPTimingTest (void)
+#if 0	//	DISABLED BY DEFAULT
+		TEST_CASE("RTPTimingTest")	//	Normally Disabled
 		{
 			unsigned numRoundTrips(1000);
+
+			{	// How fast is AJAAncillaryList at adding and removing packets?
+				AJAPerformance perfAncList("AncListTimingTest");
+				perfAncList.Start();
+				for (unsigned tripNum(0);  tripNum < numRoundTrips;  tripNum++)
+				{
+					AJAAncillaryList pktListA;
+					for (unsigned pktNum(0);  pktNum < 1000;  pktNum++)
+						pktListA.AddAncillaryData(AJAAncillaryData());
+					AJAAncillaryList pktListB(pktListA);
+					while (pktListA.CountAncillaryData())
+						pktListA.DeleteAncillaryData(pktListA.GetAncillaryDataAtIndex(0));
+					while (pktListB.CountAncillaryData())
+						pktListB.DeleteAncillaryData(pktListB.GetAncillaryDataAtIndex(pktListB.CountAncillaryData()-1));
+				}	//	for numRoundTrips
+				perfAncList.Stop();
+				perfAncList.Report();
+			}
+
+			// Make some test packets for RTP conversion...
 			unsigned numF1Packets(90), numF2Packets(163);
 			vector<uint8_t>	payloadData;
 			for (unsigned ndx(0);  ndx < 255;  ndx++)
@@ -2274,7 +2479,6 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 	        perfOverall.Start();
 			for (unsigned tripNum(0);  tripNum < numRoundTrips;  tripNum++)
 			{
-				
 				perfTx.Start();
 				ancPkts.GetIPTransmitData (F1Buffer, F2Buffer, false, 564);
 				perfTx.Stop();
@@ -2286,208 +2490,8 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			perfTx.Report();
 			perfRx.Report();
 			perfOverall.Report();
-			return true;
-		}
-
-		static bool BFT_AddFromDeviceAncBuffer (void)
-		{	//	This test is intended to elicit crashes (access violations), not to validate outcomes
-			LOGMYNOTE("Starting");
-			AJAAncillaryList pkts;
-			NTV2_POINTER nullBuffer(0);
-			AJARTPAncPayloadHeader rtpHdr;
-			//	Exercise RTP (variable-length runs of zeroes)
-			for (ULWord sz(20);  sz < 65;  sz++)
-			{
-				NTV2_POINTER buff(sz*4);
-				SHOULD_BE_EQUAL(buff.GetByteCount(), sz*4);
-				SHOULD_BE_TRUE(rtpHdr.WriteToBuffer(buff, /*offset*/sz/4%8));
-				SHOULD_SUCCEED(AJAAncillaryList::SetFromDeviceAncBuffers(buff, nullBuffer, pkts));
-				SHOULD_BE_EQUAL(pkts.CountAncillaryData(), 0);
-			}
-			//	Exercise RTP (variable-length runs of random data)
-			for (ULWord sz(15);  sz < 65;  sz++)
-			{
-				NTV2_POINTER buff(sz*4);
-				SHOULD_BE_EQUAL(buff.GetByteCount(), sz*4);
-				std::random_device rd;	//	Seeds the random number engine
-				std::mt19937 gen(rd());	//	Standard mersenne_twister_engine seeded with rd()
-				std::uniform_int_distribution<> distrib(0, 255);
-				for (ULWord ndx(0);  ndx < sz;  ++ndx)
-					SHOULD_BE_TRUE(buff.PutU8s(UByteSequence{UByte(distrib(gen))}, ndx));
-				SHOULD_BE_TRUE(rtpHdr.WriteToBuffer(buff, /*offset*/sz/4%8));
-				if (AJA_FAILURE(AJAAncillaryList::SetFromDeviceAncBuffers(buff, nullBuffer, pkts)))
-					LOGMYINFO("whoa, got AJAAncillaryList::SetFromDeviceAncBuffers to fail!");
-				if (pkts.CountAncillaryData())
-					LOGMYINFO("whoa, got one or more packets! " << pkts);
-			}
-			//	Exercise GUMP (variable-length runs of random data)
-			for (ULWord sz(8);  sz < 200;  sz++)
-			{
-				NTV2_POINTER buff(sz);
-				SHOULD_BE_EQUAL(buff.GetByteCount(), sz);
-				std::random_device rd;	//	Seeds the random number engine
-				std::mt19937 gen(rd());	//	Standard mersenne_twister_engine seeded with rd()
-				std::uniform_int_distribution<> distrib(0, 255);
-				for (ULWord ndx(0);  ndx < sz;  ++ndx)
-					SHOULD_BE_TRUE(buff.PutU8s(UByteSequence{UByte(distrib(gen))}, ndx));
-				SHOULD_BE_TRUE(buff.PutU8s(UByteSequence{0xFF}, 0));
-				if (AJAAncillaryList::SetFromDeviceAncBuffers(buff, nullBuffer, pkts))
-					LOGMYINFO("whoa, a successful parse! " << pkts);
-				if (pkts.CountAncillaryData())
-					LOGMYINFO(pkts);
-			}
-			LOGMYNOTE("Passed");
-			return true;
-		}
-
-		static bool BFT (void)
-		{
-			AJADebug::Open();
-			LOGMYNOTE("Starting");
-			static const uint32_t jeff_data[] = {AJA_ENDIAN_SWAP32(0x80E493EF),	AJA_ENDIAN_SWAP32(0x5B9B84A4),	AJA_ENDIAN_SWAP32(0x000003E8),	AJA_ENDIAN_SWAP32(0x00040010),	AJA_ENDIAN_SWAP32(0x01800000),	AJA_ENDIAN_SWAP32(0x00AFFE00),	AJA_ENDIAN_SWAP32(0x90501411),	AJA_ENDIAN_SWAP32(0x0140A034),	AJA_ENDIAN_SWAP32(0x11500000), 0};
-			NTV2_POINTER	buff(2048), nullbuff(2048);	buff.Fill(uint64_t(0)); nullbuff.Fill(uint64_t(0));
-			::memcpy(buff.GetHostAddress(0), jeff_data, sizeof(jeff_data));
-			AJAAncillaryList	pkts;
-			AJAAncillaryList::SetFromDeviceAncBuffers(buff, nullbuff, pkts);
-			LOGMYNOTE("JEFFL: " << pkts);
-			if (false)
-				RTPTimingTest();
-
-			//	This sequence of 10-bit YUV component values contains two SD ancillary data packets,
-			//	as they would appear in a NTV2_FBF_10BIT_YCBCR frame buffer.
-			//		DID=0x45 SDID=0x01 DC=216 CS=0xD2
-			//		DID=0x45 SDID=0x02 DC=2   CS=0x62
-			//	It's used in BFT_YUVComponentsTo10BitYUVPackedBuffer,  BFT_SMPTEAncData
-			static const uint16_t	SD10BitYCbCrLine[]	=	{//	Cb		Y		Cr		Cb		Y		Cr		Cb		Y		Cr		Cb		Y		Cr			Cb		Y		Cr		Cb		Y		Cr		Cb		Y		Cr		Cb		Y		Cr
-																0x000,	0x3FF,	0x3FF,	0x145,	0x101,	0x2D8,	0x120,	0x221,	0x222,	0x123,	0x224,	0x125,		0x126,	0x227,	0x228,	0x129,	0x12A,	0x22B,	0x12C,	0x22D,	0x22E,	0x12F,	0x230,	0x131,
-																0x132,	0x233,	0x134,	0x235,	0x236,	0x137,	0x138,	0x239,	0x23A,	0x13B,	0x23C,	0x13D,		0x13E,	0x23F,	0x140,	0x241,	0x242,	0x143,	0x244,	0x145,	0x146,	0x247,	0x248,	0x149,
-																0x14A,	0x24B,	0x14C,	0x24D,	0x24E,	0x14F,	0x250,	0x151,	0x152,	0x253,	0x154,	0x255,		0x256,	0x157,	0x158,	0x259,	0x25A,	0x15B,	0x25C,	0x15D,	0x15E,	0x25F,	0x260,	0x161,
-																0x162,	0x263,	0x164,	0x265,	0x266,	0x167,	0x168,	0x269,	0x26A,	0x16B,	0x26C,	0x16D,		0x16E,	0x26F,	0x170,	0x271,	0x272,	0x173,	0x274,	0x175,	0x176,	0x277,	0x278,	0x179,
-																0x17A,	0x27B,	0x17C,	0x27D,	0x27E,	0x17F,	0x180,	0x281,	0x282,	0x183,	0x284,	0x185,		0x186,	0x287,	0x288,	0x189,	0x18A,	0x28B,	0x18C,	0x28D,	0x28E,	0x18F,	0x290,	0x191,
-																0x192,	0x293,	0x194,	0x295,	0x296,	0x197,	0x198,	0x299,	0x29A,	0x19B,	0x29C,	0x19D,		0x19E,	0x29F,	0x2A0,	0x1A1,	0x1A2,	0x2A3,	0x1A4,	0x2A5,	0x2A6,	0x1A7,	0x1A8,	0x2A9,
-																0x2AA,	0x1AB,	0x2AC,	0x1AD,	0x1AE,	0x2AF,	0x1B0,	0x2B1,	0x2B2,	0x1B3,	0x2B4,	0x1B5,		0x1B6,	0x2B7,	0x2B8,	0x1B9,	0x1BA,	0x2BB,	0x1BC,	0x2BD,	0x2BE,	0x1BF,	0x2C0,	0x1C1,
-																0x1C2,	0x2C3,	0x1C4,	0x2C5,	0x2C6,	0x1C7,	0x1C8,	0x2C9,	0x2CA,	0x1CB,	0x2CC,	0x1CD,		0x1CE,	0x2CF,	0x1D0,	0x2D1,	0x2D2,	0x1D3,	0x2D4,	0x1D5,	0x1D6,	0x2D7,	0x2D8,	0x1D9,
-																0x1DA,	0x2DB,	0x1DC,	0x2DD,	0x2DE,	0x1DF,	0x1E0,	0x2E1,	0x2E2,	0x1E3,	0x2E4,	0x1E5,		0x1E6,	0x2E7,	0x2E8,	0x1E9,	0x1EA,	0x2EB,	0x1EC,	0x2ED,	0x2EE,	0x1EF,	0x2F0,	0x1F1,
-																0x1F2,	0x2F3,	0x1F4,	0x2F5,	0x2F6,	0x1F7,	0x2D2,	0x000,	0x3FF,	0x3FF,	0x145,	0x102,		0x102,	0x20F,	0x20A,	0x162,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,
-																0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,		0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040,	0x200,	0x040	};
-			vector<uint16_t>	SD10BitYUVComponents, YUVLine;
-			for (unsigned ndx(0);  ndx < sizeof(SD10BitYCbCrLine)/sizeof(SD10BitYCbCrLine[0]);  ndx++)
-				SD10BitYUVComponents.push_back(SD10BitYCbCrLine[ndx]);
-			SHOULD_BE_TRUE(BFT_YUVComponentsTo10BitYUVPackedBuffer(SD10BitYUVComponents));
-			YUVLine = SD10BitYUVComponents;
-
-			if (true)
-				SHOULD_BE_TRUE(BFT_AncEnums());
-
-			if (true)
-				SHOULD_BE_TRUE(BFT_DataLocation());
-
-			if (true)
-				SHOULD_BE_TRUE(BFT_AnalogGUMP());
-
-			if (true)
-				SHOULD_BE_TRUE(BFT_AncillaryData());
-
-			if (true)
-				SHOULD_BE_TRUE(BFT_SMPTEAncData(SD10BitYUVComponents));
-
-			if (false)
-				SHOULD_BE_TRUE(BFT_SDSetFromVANCData(SD10BitYUVComponents));
-
-			if (true)	//	ROUND-TRIP AJAAncillaryList-to-buffer-to-AJAAncillaryList and Buffer-to-AJAAncillaryList-to-buffer BFTs...
-			{
-				if (true)
-					SHOULD_BE_TRUE(RTPHeaderBFT());
-				if (true)
-					SHOULD_BE_TRUE(BFT_AncListToGumpToAncList());
-				if (true)
-					SHOULD_BE_TRUE(BFT_GumpToAncListToGump());
-				if (true)
-					SHOULD_BE_TRUE(BFT_AncListToSortToAncList());
-				if (true)
-					SHOULD_BE_TRUE(BFT_AncListToRTPToAncList());
-				if (true)
-					SHOULD_BE_TRUE(BFT_RTPToAncListToRTP());
-				if (true)
-					SHOULD_BE_TRUE(BFT_RTPXmitTooManyPackets());
-				if (true)
-					SHOULD_BE_TRUE(BFT_RTPXmitTooMuchData());
-				if (true)
-					SHOULD_BE_TRUE(BFT_AncListToFBYUV8ToAncList());
-				if (true)
-					SHOULD_BE_TRUE(BFT_FBYUV8ToAncListToFBYUV8());
-				if (true)
-					SHOULD_BE_TRUE(BFT_AncListToFBYUV10ToAncList());
-				if (true)
-					SHOULD_BE_TRUE(BFT_FBYUV10ToAncListToFBYUV10());
-				if (true)
-					SHOULD_BE_TRUE(BFT_AddFromDeviceAncBuffer());
-				cerr << "AJAAncillaryList-to-buffer-to-AJAAncillaryList and Buffer-to-AJAAncillaryList-to-buffer round-trip BFTs passed" << endl;
-			}
-
-			if (true)
-				SHOULD_BE_TRUE (BFT_AncDataCEA608Vanc());
-
-			if (false /* NOT YET READY FOR PRIME TIME */)
-				SHOULD_BE_TRUE (BFT_AncDataCEA608Analog());
-
-			if (true)
-				SHOULD_BE_TRUE (BFT_AncDataCEA708());
-
-			LOGMYNOTE("Passed");
-			return true;
-		}	//	BFT
-
-};	//	CNTV2AncDataTester
+		}	//	TEST_CASE("RTPTimingTest")
+#endif	//	DISABLED FOR NOW
 
 
 //	This explicitly tests AJAAncillaryData::GenerateTransmitData:
@@ -2521,45 +2525,14 @@ static bool GenerateIPPacketWordsBFT (void)
 		const string &		data(pkts[ndx++]);
 		pkt.SetDID(0x33);  pkt.SetSID(0x55);  pkt.SetLocationLineNumber(9);
 		if (!data.empty())
-			SHOULD_SUCCEED(pkt.SetPayloadData(reinterpret_cast<const uint8_t *>(data.c_str()), uint32_t(data.length())));
-		SHOULD_SUCCEED(pkt.GenerateTransmitData(pktWords));
+			CHECK(AJA_SUCCESS(pkt.SetPayloadData(reinterpret_cast<const uint8_t *>(data.c_str()), uint32_t(data.length()))));
+		CHECK(AJA_SUCCESS(pkt.GenerateTransmitData(pktWords)));
 		if (data.empty())
 			break;	//	Done
 	};
 	return true;
 }
 #endif
-
-static bool RunAllTests (void)
-{
-	SHOULD_BE_TRUE(CNTV2AncDataTester::BFT());
-	return true;
-}
-
-
-int main (int argc, const char ** argv)
-{
-	//	Command line option descriptions:
-	const struct poptOption userOptionsTable [] =
-	{
-		{"verbose",		'v',	POPT_ARG_NONE,	&gIsVerbose,	0,	"verbose output",	AJA_NULL},
-		POPT_AUTOHELP
-		POPT_TABLEEND
-	};
-
-	//	Read command line arguments...
-	AJADebug::Open();
-	poptContext optionsContext = ::poptGetContext (AJA_NULL, argc, argv, userOptionsTable, 0);
-	if (::poptGetNextOpt (optionsContext) < -1)
-	{
-		cerr << "## ERROR:  Bad command line argument(s)" << endl;
-		return 1;
-	}
-	optionsContext = ::poptFreeContext (optionsContext);
-
-	return RunAllTests() ? 0 : 501;
-
-}	//	main
 
 
 #if 0	///////////////	BEGIN TAILING DUMP

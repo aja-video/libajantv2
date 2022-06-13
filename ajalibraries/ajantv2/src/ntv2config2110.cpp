@@ -1349,6 +1349,9 @@ bool CNTV2Config2110::GetPTPStatus(PTPStatus & ptpStatus)
 	ptpStatus.PTP_masterId[6] = val >> 8;
 	ptpStatus.PTP_masterId[7] = val >> 0;
 
+	mDevice.ReadRegister(SAREK_PLL + kRegPll_swptp_Domain, val);
+	ptpStatus.PTP_domain = val;
+
 	mDevice.ReadRegister(SAREK_PLL + kRegPll_swptp_LockedState, val);
 	ptpStatus.PTP_LockedState = (PTPLockStatus)val;
 
@@ -1923,9 +1926,9 @@ bool CNTV2Config2110::GenSDP(const bool enableSfp1, const bool enableSfp2,
 	GetPTPStatus(ptpStatus);
 
 	char gmInfo[32];
-	sprintf(gmInfo, "%02X-%02X-%02X-%02X-%02X-%02X-%02X-%02X",
+	sprintf(gmInfo, "%02X-%02X-%02X-%02X-%02X-%02X-%02X-%02X:%d",
 			ptpStatus.PTP_gmId[0], ptpStatus.PTP_gmId[1], ptpStatus.PTP_gmId[2], ptpStatus.PTP_gmId[3],
-			ptpStatus.PTP_gmId[4], ptpStatus.PTP_gmId[5], ptpStatus.PTP_gmId[6], ptpStatus.PTP_gmId[7]);
+			ptpStatus.PTP_gmId[4], ptpStatus.PTP_gmId[5], ptpStatus.PTP_gmId[6], ptpStatus.PTP_gmId[7], ptpStatus.PTP_domain);
 
 
 	if (StreamType(stream) == VIDEO_STREAM)

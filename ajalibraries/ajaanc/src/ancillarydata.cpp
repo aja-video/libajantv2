@@ -8,6 +8,7 @@
 #include "ntv2publicinterface.h"
 #include "ancillarydata.h"
 #include "ajabase/system/debug.h"	//	This makes 'ajaanc' dependent upon 'ajabase'
+#include "ajabase/system/atomic.h"
 #if defined(AJA_LINUX)
 	#include <string.h>				// For memcpy
 	#include <stdlib.h>				// For realloc
@@ -68,19 +69,28 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return AJA_ENDIAN_
 
 const uint32_t AJAAncillaryDataWrapperSize = 7;		// 3 bytes header + DID + SID + DC + Checksum: i.e. everything EXCEPT the payload
 
-//const uint8_t	 AJAAncillaryDataAnalogDID = 0x00;		// used in header DID field when ancillary data is "analog"
-//const uint8_t	 AJAAncillaryDataAnalogSID = 0x00;		// used in header SID field when ancillary data is "analog"
+#if defined(_DEBUG)
+	static uint32_t gConstructCount(0); //	Number of constructor calls made
+	static uint32_t gDestructCount(0);	//	Number of destructor calls made
+#endif	//	defined(_DEBUG)
+
 
 
 
 AJAAncillaryData::AJAAncillaryData()
 {
+#if defined(_DEBUG)
+	AJAAtomic::Increment(&gConstructCount);
+#endif	//	defined(_DEBUG)
 	Init();
 }
 
 
 AJAAncillaryData::AJAAncillaryData (const AJAAncillaryData & inClone)
 {
+#if defined(_DEBUG)
+	AJAAtomic::Increment(&gConstructCount);
+#endif	//	defined(_DEBUG)
 	Init();
 	*this = inClone;
 }
@@ -88,6 +98,9 @@ AJAAncillaryData::AJAAncillaryData (const AJAAncillaryData & inClone)
 
 AJAAncillaryData::AJAAncillaryData (const AJAAncillaryData * pClone)
 {
+#if defined(_DEBUG)
+	AJAAtomic::Increment(&gConstructCount);
+#endif	//	defined(_DEBUG)
 	Init();
 	if (pClone)
 		*this = *pClone;
@@ -96,6 +109,9 @@ AJAAncillaryData::AJAAncillaryData (const AJAAncillaryData * pClone)
 
 AJAAncillaryData::~AJAAncillaryData ()
 {
+#if defined(_DEBUG)
+	AJAAtomic::Increment(&gDestructCount);
+#endif	//	defined(_DEBUG)
 	FreeDataMemory();
 }
 
@@ -1422,19 +1438,18 @@ AJAAncillaryData & AJAAncillaryData::operator = (const AJAAncillaryData & inRHS)
 {
 	if (this != &inRHS)
 	{
-		m_DID = inRHS.m_DID;
-		m_SID = inRHS.m_SID;
-		m_checksum = inRHS.m_checksum;
-		m_location = inRHS.m_location;
-		m_coding = inRHS.m_coding;
-		m_payload = inRHS.m_payload;
-		m_rcvDataValid = inRHS.m_rcvDataValid;
-		m_ancType = inRHS.m_ancType;
-		m_bufferFmt = inRHS.m_bufferFmt;
-		m_frameID = inRHS.m_frameID;
-		m_userData = inRHS.m_userData;
+		m_DID			= inRHS.m_DID;
+		m_SID			= inRHS.m_SID;
+		m_checksum		= inRHS.m_checksum;
+		m_location		= inRHS.m_location;
+		m_coding		= inRHS.m_coding;
+		m_payload		= inRHS.m_payload;
+		m_rcvDataValid	= inRHS.m_rcvDataValid;
+		m_ancType		= inRHS.m_ancType;
+		m_bufferFmt		= inRHS.m_bufferFmt;
+		m_frameID		= inRHS.m_frameID;
+		m_userData		= inRHS.m_userData;
 	}
-
 	return *this;
 }
 
@@ -1720,6 +1735,50 @@ bool AJAAncillaryData::Unpack8BitYCbCrToU16sVANCLine (const void * pInYUV8Line,
 	return true;
 }	//	Unpack8BitYCbCrToU16sVANCLine
 
+
+void AJAAncillaryData::GetInstanceCounts (uint32_t & outConstructed, uint32_t & outDestructed)
+{
+#if defined(_DEBUG)
+	outConstructed = gConstructCount;
+	outDestructed = gDestructCount;
+#else
+	outConstructed = outDestructed = 0;
+#endif
+}
+
+void AJAAncillaryData::ResetInstanceCounts (void)
+{
+#if defined(_DEBUG)
+	gConstructCount = gDestructCount = 0;
+#endif
+}
+
+uint32_t AJAAncillaryData::GetNumActiveInstances (void)
+{
+#if defined(_DEBUG)
+	return gConstructCount - gDestructCount;
+#else
+	return 0;
+#endif
+}
+
+uint32_t AJAAncillaryData::GetNumConstructed (void)
+{
+#if defined(_DEBUG)
+	return gConstructCount;
+#else
+	return 0;
+#endif
+}
+
+uint32_t AJAAncillaryData::GetNumDestructed (void)
+{
+#if defined(_DEBUG)
+	return gDestructCount;
+#else
+	return 0;
+#endif
+}
 
 string AJAAncillaryData::DIDSIDToString (const uint8_t inDID, const uint8_t inSID)
 {

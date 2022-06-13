@@ -248,6 +248,8 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 
 	switch (boardID)
 	{
+	case DEVICE_ID_TTAP:
+		break;
 	// based on FrameGeometry
 	case DEVICE_ID_KONALHIDVI:
 	case DEVICE_ID_KONALHI:
@@ -257,7 +259,6 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 	case DEVICE_ID_CORVID22:
 	case DEVICE_ID_CORVID3G:
 	case DEVICE_ID_IOXT:
-	case DEVICE_ID_TTAP:
 	case DEVICE_ID_KONA1:
 	case DEVICE_ID_IOX3:
 		switch (inFrameGeometry)
@@ -485,7 +486,9 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
 	ULWord divisor = 1; // default
 	switch (boardID)
 	{
-		// based on FrameGeometry
+	case DEVICE_ID_TTAP:
+		break;
+	// based on FrameGeometry
 	case DEVICE_ID_KONALHIDVI:
 	case DEVICE_ID_KONALHI:
 	case DEVICE_ID_KONALHEPLUS:
@@ -494,7 +497,6 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
 	case DEVICE_ID_CORVID22:
 	case DEVICE_ID_CORVID3G:
 	case DEVICE_ID_IOXT:
-	case DEVICE_ID_TTAP:
 	case DEVICE_ID_KONA1:
 	case DEVICE_ID_IOX3:
 		switch (inFrameGeometry)
