@@ -19,6 +19,10 @@
 
 class CNTV2PixelComponentReader {
 public:
+    using U8Line = std::vector<UByte>;
+    using U16Line = std::vector<UWord>;
+    using U32Line = std::vector<ULWord>;
+
     explicit CNTV2PixelComponentReader(
         const NTV2_POINTER& buffer,
         const NTV2FormatDesc& fd);
@@ -30,12 +34,36 @@ public:
     void SetBuffer(
         const NTV2_POINTER& buffer,
         const NTV2FormatDesc& fd);
-    
+
     NTV2_POINTER GetBuffer() const;
     NTV2FormatDesc GetFormatDesc() const;
+    ULWord LineCount() const;
+    ULWord ElemsPerLine() const;
+    ULWord BytesPerElement() const;
+    ULWord ComponentsPerElement() const;
+    ULWord RasterPixelsPerElement() const;
+    ULWord ElementsPerLine() const;
 
+    void Reset();
+    void ResetLine();
+    void ResetElement();
+    void ResetComponent();
+    bool EndOfLines() const;
+    bool EndOfElements() const;
+    bool EndOfComponents() const;
+    bool EndOfStream() const;
+    AJAStatus ReadLine(const ULWord lineOffset = 0);
+    AJAStatus ReadElement(const ULWord elemOffset = 0);
+    AJAStatus ReadComponent(const ULWord compOffset = 0);
+    void NextLine();
+    void NextElement();
+    void NextComponent();
+    ULWord LineIndex() const { return (ULWord)_line_index; }
+    ULWord ElemIndex() const { return (ULWord)_elem_index; }
+    ULWord CompIndex() const { return (ULWord)_comp_index; }
     AJAStatus ReadComponentValues();
-    
+    AJAStatus ReadComponents();
+
     std::vector<UByte>& GetComponentsU8() const {
         return _u8_components;
     }
@@ -53,24 +81,23 @@ public:
     }
 
 private:
-    LWord get_line_count() const;
-    LWord get_bytes_per_element() const;
-    LWord get_components_per_element() const;
-    LWord get_raster_pixels_per_element() const;
-    LWord get_elements_per_line() const;
-
-private:
     mutable NTV2_POINTER _framebuffer;
     mutable NTV2FormatDesc _format_desc;
-    
-    std::vector<std::vector<UByte>> _u8_lines;
-    std::vector<std::vector<UWord>> _u16_lines;
-    std::vector<std::vector<ULWord>> _u32_lines;
-    
+
+    size_t _line_index;
+    size_t _elem_index;
+    size_t _comp_index;
+
+    std::vector<U8Line> _u8_lines;
+    std::vector<U16Line> _u16_lines;
+    std::vector<U32Line> _u32_lines;
+
     mutable std::vector<UByte> _u8_components;
     mutable std::vector<UWord> _u16_components;
     mutable std::vector<ULWord> _u32_components;
 
+    UByte const* _planar_bytes[4];
+    UWord const* _planar_words[4];
     size_t _word_size;
 };
 

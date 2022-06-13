@@ -11,13 +11,11 @@
 #include "argparse.h"
 
 #include "test_support.hpp"
-
 #include "ajabase/common/common.h"
 #include "ajabase/system/file_io.h"
 #include "ajabase/system/system.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/system/debug.h"
-
 #include "ajantv2/includes/ntv2bitfile.h"
 #include "ajantv2/includes/ntv2bitfilemanager.h"
 
@@ -161,10 +159,15 @@ bool is_firmware_subdir(const std::string& path)
     return false;
 }
 
-void check_with_msg(const std::string& bitfile, int expected, int found)
+void check_with_msg(
+    const std::string& base_dir,
+    const std::string& bitfile,
+    const std::string& param,
+    int expected,
+    int found)
 {
     std::ostringstream oss;
-    oss << "Bitfile: " << bitfile << " Expected: " << expected << " Found: " << found;
+    oss << "[" << param << "] expected: " << expected << " found: " << found << " (" << base_dir << "/" << bitfile << ")";
     CHECK_MESSAGE(expected == found, oss.str());
 }
 
@@ -202,19 +205,10 @@ void check_bitfile_header(const std::string& path, json& fw_json, bool update_js
                         want_design_id = fw["design_id"].get<int>();
                     else if (fw["design_id"].is_string())
                         want_design_id = std::stoi(fw["design_id"].get_ref<std::string&>());
-
-                    SUBCASE("Bitfile Version") {
-                        check_with_msg(fw_filename, want_bitfile_ver, int(nfo.bitfileVersion));
-                    }
-                    SUBCASE("Bitfile ID") {
-                        check_with_msg(fw_filename, want_bitfile_id, int(nfo.bitfileID));
-                    }
-                    SUBCASE("Design Version") {
-                        check_with_msg(fw_filename, want_design_ver, int(nfo.designVersion));
-                    }
-                    SUBCASE("Design ID") {
-                        check_with_msg(fw_filename, want_design_id, int(nfo.designID));
-                    }
+                    check_with_msg(fw["base_dir"], fw_filename, "bitfile_ver", want_bitfile_ver, int(nfo.bitfileVersion));
+                    check_with_msg(fw["base_dir"], fw_filename, "bitfile_id", want_bitfile_id, int(nfo.bitfileID));
+                    check_with_msg(fw["base_dir"], fw_filename, "design_ver", want_design_ver, int(nfo.designVersion));
+                    check_with_msg(fw["base_dir"], fw_filename, "design_id", want_design_id, int(nfo.designID));
                     if (update_json) {
                         fw["bitfile_ver"] = int(nfo.bitfileVersion);
                         fw["bitfile_id"] = int(nfo.bitfileID);
@@ -226,7 +220,7 @@ void check_bitfile_header(const std::string& path, json& fw_json, bool update_js
                 }
             }
         }
-        SUBCASE("Bitfile in JSON") { CHECK_EQ(found_bitfile_in_json, true); }
+        { CHECK_EQ(found_bitfile_in_json, true); }
     }
 }
 
