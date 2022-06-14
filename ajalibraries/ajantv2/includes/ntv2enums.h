@@ -92,6 +92,7 @@ typedef enum
 	DEVICE_ID_SOJI_OE5					= 0x10922405,
 	DEVICE_ID_SOJI_OE6					= 0x10922406,
 	DEVICE_ID_SOJI_OE7					= 0x10922407,
+    DEVICE_ID_SOJI_DIAGS                = 0x10922499,
 	DEVICE_ID_KONAHDMI					= 0x10767400,	///< @brief See \ref konahdmi
 	DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K	= 0x10646702,	///< @brief See \ref konaip
 	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,	///< @brief See \ref konaip
@@ -148,14 +149,15 @@ typedef enum
 		(__d__) == DEVICE_ID_KONA5_OE12)
 
 #define DEVICE_IS_SOJI(__d__)								\
-	(	(__d__) == DEVICE_ID_SOJI_3DLUT||						\
+	(	(__d__) == DEVICE_ID_SOJI_3DLUT ||						\
 		(__d__) == DEVICE_ID_SOJI_OE1	||						\
 		(__d__) == DEVICE_ID_SOJI_OE2	||						\
 		(__d__) == DEVICE_ID_SOJI_OE3	||						\
 		(__d__) == DEVICE_ID_SOJI_OE4	||						\
 		(__d__) == DEVICE_ID_SOJI_OE5	||						\
 		(__d__) == DEVICE_ID_SOJI_OE6	||						\
-		(__d__) == DEVICE_ID_SOJI_OE7)
+		(__d__) == DEVICE_ID_SOJI_OE7   ||                      \
+        (__d__) == DEVICE_ID_SOJI_DIAGS)
 
 #if !defined (NTV2_DEPRECATE)
 	typedef NTV2DeviceID	NTV2BoardID;	///< @deprecated	Use NTV2DeviceID instead. Identifiers with "board" in them are being phased out.
@@ -3723,6 +3725,7 @@ typedef enum
 	NTV2_BITFILE_SOJI_OE7_MAIN		= 87,
 	NTV2_BITFILE_SOJI_3DLUT_MAIN	= 88,
 	NTV2_BITFILE_KONA5_8K_MV_TX_MAIN		= 89,
+	NTV2_BITFILE_SOJI_DIAGS_MAIN	= 90,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
 
