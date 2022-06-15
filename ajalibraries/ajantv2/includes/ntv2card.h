@@ -1834,28 +1834,30 @@ public:
 										the audio playout buffer.
 	**/
 	AJA_VIRTUAL bool		GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outAbsByteOffset,
-												const NTV2AudioSystem	inAudioSystem, const bool inCaptureBuffer = false);
+												const NTV2AudioSystem inAudioSystem, const bool inCaptureBuffer = false);
 
 	/**
 		@brief		For the given Audio System, answers with the byte offset of the tail end of the last chunk of
 					audio samples read by the device's output audio embedder. This is essentially the position of
 					the "Play Head" during audio output.
 		@param[out] outValue		Receives the byte offset of the tail end of the last chunk of audio samples read
-									by the device's output audio embedder in its output audio buffer.
-		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem (output audio de-embedder) of interest.
+									by the device's output audio embedder in its output audio buffer. This offset is
+									measured from the start of the device playback buffer.
+		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem of interest.
 		@return		True if successful;	 otherwise false.
 		@see		\ref audioplayout
 	**/
 	AJA_VIRTUAL bool		ReadAudioLastOut (ULWord & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
-		@brief		For the given Audio System, answers with the byte offset of the last chunk of audio samples
-					written by the device's input audio de-embedder. This is essentially the position of the
-					"Write Head" during audio capture.
-		@param[out] outValue		Receives the byte offset of the last chunk of audio samples written by the device's
-									input audio de-embedder in its input audio buffer.
-		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem (input audio de-embedder) of interest.
+		@brief		For the given Audio System, answers with the byte offset to the last byte of the latest chunk of
+					4-byte audio samples written into the device's input audio buffer by its input audio de-embedder.
+					This is essentially the position of the "Write Head" during audio capture.
+		@param[out] outValue		Receives the byte offset of the last byte of audio data written into the input
+									audio buffer. This offset is measured from the start of the device capture buffer.
+		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem of interest.
 		@return		True if successful;	 otherwise false.
+		@see		\ref audiocapture
 	**/
 	AJA_VIRTUAL bool		ReadAudioLastIn (ULWord & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
