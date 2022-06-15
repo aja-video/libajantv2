@@ -24,6 +24,18 @@ enum AJAScaleType
 };
 
 
+enum AJASubSampleType
+{
+	AJASubSampleNone,
+	AJASubSample422,
+	AJASubSample420,
+	AJASubSample444,
+	AJASubSample4444,
+	AJASubSampleBayer
+};
+
+
+
 /**
 	@class	AJAPixelFormat pixelformat.h "streams/common/pixelformat.h"
 	@brief	Storage and utility class for AJA_PixelFormat defines.
@@ -78,6 +90,33 @@ public:
 	 *	@return		bit depth per component for specified format
 	 */
 	uint32_t		QueryBitDepth();
+	static uint32_t QueryBitDepth(AJA_PixelFormat format);
+	
+	/**
+	 *	Query chroma sub-sample type
+	 *
+	 *	@return		chroma sub-sample type
+	 */
+	AJASubSampleType QuerySubSampleType();
+	static AJASubSampleType	QuerySubSampleType(AJA_PixelFormat format);
+	
+	/**
+	 *	Query plane count
+	 *
+	 *	@return		plane count
+	 */
+	uint32_t 		QueryPlaneCount();
+	static uint32_t	QueryPlaneCount(AJA_PixelFormat format);
+	
+	
+	/**
+	 *	Query is valid
+	 *
+	 *	@return		true if AJA pixel format is valid
+	 */
+	bool 			QueryIsValid();
+	static bool		QueryIsValid(AJA_PixelFormat format);
+
 
 	/**
 	 *	Query Scale Type.
@@ -170,6 +209,7 @@ public:
 	 *	@return		returns associated pixel format
 	 */
 	static AJA_PixelFormat	QueryScaledPixelFormat(int scaledWidth, int height);
+	
 
 protected:
 	AJA_PixelFormat m_format;

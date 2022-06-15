@@ -153,35 +153,45 @@ enum AJA_PixelFormat
 	AJA_PixelFormat_BAYER12_PACK_HS,	/**< Pixel format Bayer 12 bit packed */
 	AJA_PixelFormat_RAW10,				/**< Pixel format RAW 10 bit fully packed */
 	AJA_PixelFormat_RAW10_HS,			/**< Pixel format RAW 10 bit fully packed, high speed */
-	AJA_PixelFormat_YCBCR10_420PL,		/**< Pixel format YCbCr 10 bit 420 packed planer */
-	AJA_PixelFormat_YCBCR10_422PL,		/**< Pixel format YCbCr 10 bit 422 packed planer */
-	AJA_PixelFormat_YCBCR8_420PL,		/**< Pixel format YCbCr 8 bit 420 packed planer */
-	AJA_PixelFormat_YCBCR8_422PL,		/**< Pixel format YCbCr 8 bit 422 packed planer */
+	AJA_PixelFormat_YCBCR10_420PL,		/**< Pixel format YCbCr 10 bit 420 packed planar */
+	AJA_PixelFormat_YCBCR10_422PL,		/**< Pixel format YCbCr 10 bit 422 packed planar */
+	AJA_PixelFormat_YCBCR8_420PL,		/**< Pixel format YCbCr 8 bit 420 planar */
+	AJA_PixelFormat_YCBCR8_422PL,		/**< Pixel format YCbCr 8 bit 422 planar */
 
-	AJA_PixelFormat_YCBCR8_420PL3,		/**< Pixel format YCbCr 8 bit 420 planar */
-	AJA_PixelFormat_YCBCR8_422PL3,		/**< Pixel format YCbCr 8 bit 422 planar */
-	AJA_PixelFormat_YCBCR10_420PL3LE,	/**< Pixel format YCbCr 10 bit 420 little-endian planar */
-	AJA_PixelFormat_YCBCR10_422PL3LE,	/**< Pixel format YCbCr 10 bit 422 little-endian planar */
+	AJA_PixelFormat_YCBCR8_420PL3,		/**< Pixel format YCbCr 8 bit 420 3planar                           (see NTV2_FBF_8BIT_YCBCR_420PL3, AV_PIX_FMT_YUVJ420P, AV_PIX_FMT_YUV420P) */
+	AJA_PixelFormat_YCBCR8_422PL3,		/**< Pixel format YCbCr 8 bit 422 3planar                           (see NTV2_FBF_8BIT_YCBCR_422PL3, AV_PIX_FMT_YUV422P) */
+	AJA_PixelFormat_YCBCR10_420PL3LE,	/**< Pixel format YCbCr 10 bit 420 unpacked little-endian 3planar   (see NTV2_FBF_10BIT_YCBCR_420PL3_LE, AV_PIX_FMT_YUV420P10LE) */
+	AJA_PixelFormat_YCBCR10_422PL3LE,	/**< Pixel format YCbCr 10 bit 422 unpacked little-endian 3planar   (see NTV2_FBF_10BIT_YCBCR_422PL3_LE, AV_PIX_FMT_YUV422P10LE) */
+	AJA_PixelFormat_YCBCR10_420PL2,		/**< Pixel format YCbCr 10 bit 420 packed 2planar                   (see NTV2_FBF_10BIT_YCBCR_420PL2) */
+	AJA_PixelFormat_YCBCR10_422PL2,		/**< Pixel format YCbCr 10 bit 422 packed 2planar                   (see NTV2_FBF_10BIT_YCBCR_422PL2) */
+	AJA_PixelFormat_YCBCR8_420PL2,		/**< Pixel format YCbCr 8 bit 420 2planar                           (see NTV2_FBF_8BIT_YCBCR_420PL2, AV_PIX_FMT_NV12) */
+	AJA_PixelFormat_YCBCR8_422PL2,		/**< Pixel format YCbCr 8 bit 422 2planar                           (see NTV2_FBF_8BIT_YCBCR_422PL2, AV_PIX_FMT_NV16) */
+
+	/// FFmpeg related (see AVPixelFormat in libavutil/pixfmt.h, libavutil/pixdesc.c) - unpacked 16bpp, no AJA hardware pixel format for now
+	AJA_PixelFormat_YCBCR10_420PL2LE,	/**< Pixel format YCbCr 10 bit 420 unpacked little-endian 2planar   (see AV_PIX_FMT_P010LE) */
+	AJA_PixelFormat_YCBCR10_422PL2LE,	/**< Pixel format YCbCr 10 bit 422 unpacked little-endian 2planar   (see AV_PIX_FMT_NV20LE) */
 
 	/// SMPTE 2022-6/211/OpenCL related....not actually pixel formats on any board...
-			AJA_PixelFormat_S0226_720p50,
-			AJA_PixelFormat_S0226_720p60,
-			AJA_PixelFormat_S0226_1080i30,
-			AJA_PixelFormat_S0226_1080i25,
-			AJA_PixelFormat_S0226_1080p30,
-			AJA_PixelFormat_S0226_1080p25,
-			AJA_PixelFormat_S0226_1080p24,
-			AJA_PixelFormat_S0226_525i30,
-			AJA_PixelFormat_S0226_625i25,
+	AJA_PixelFormat_S0226_720p50,
+	AJA_PixelFormat_S0226_720p60,
+	AJA_PixelFormat_S0226_1080i30,
+	AJA_PixelFormat_S0226_1080i25,
+	AJA_PixelFormat_S0226_1080p30,
+	AJA_PixelFormat_S0226_1080p25,
+	AJA_PixelFormat_S0226_1080p24,
+	AJA_PixelFormat_S0226_525i30,
+	AJA_PixelFormat_S0226_625i25,
 
-			AJA_PixelFormat_RFC4175_720p,
-			AJA_PixelFormat_RFC4175_1080i,
-			AJA_PixelFormat_RFC4175_1080p,
-			AJA_PixelFormat_RFC4175_525i30,
-			AJA_PixelFormat_RFC4175_625i25,
-			AJA_PixelFormat_RFC4175_2160p,
+	AJA_PixelFormat_RFC4175_720p,
+	AJA_PixelFormat_RFC4175_1080i,
+	AJA_PixelFormat_RFC4175_1080p,
+	AJA_PixelFormat_RFC4175_525i30,
+	AJA_PixelFormat_RFC4175_625i25,
+	AJA_PixelFormat_RFC4175_2160p,
 
-			AJA_PixelFormat_RGB10_3DLUT,
+	AJA_PixelFormat_RGB10_3DLUT,
+			
+			
 	AJA_PixelFormat_Size
 };
 
