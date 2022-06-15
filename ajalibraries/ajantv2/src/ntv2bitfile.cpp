@@ -534,6 +534,7 @@ string CNTV2Bitfile::GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID
 		case DEVICE_ID_SOJI_OE5:				return "soji_oe_cfg5";
 		case DEVICE_ID_SOJI_OE6:				return "soji_oe_cfg6";
 		case DEVICE_ID_SOJI_OE7:				return "soji_oe_cfg7";
+		case DEVICE_ID_SOJI_DIAGS:				return "soji_diags";
 		case DEVICE_ID_TTAP:					return "t_tap_top";			//	t_tap_top.ncd
 		case DEVICE_ID_TTAP_PRO:				return "t_tap_pro";
 		case DEVICE_ID_NOTFOUND:				break;
@@ -602,6 +603,7 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 		case DEVICE_ID_SOJI_OE5:
 		case DEVICE_ID_SOJI_OE6:
 		case DEVICE_ID_SOJI_OE7:
+		case DEVICE_ID_SOJI_DIAGS:
 		case DEVICE_ID_KONA5_3DLUT:
 		case DEVICE_ID_KONA5_2X4K:
 		case DEVICE_ID_KONA5_8KMK:
