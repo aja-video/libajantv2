@@ -72,8 +72,8 @@ AJAPixelFormatEntry AJAPixelFormatTable[AJA_PixelFormat_Size] =
 	
 	{AJA_PixelFormat_YCBCR8_420PL3,		  AJA_FOURCC('I','4','2','0'),	  8,	AJAScaleTypeNone,	  AJASubSample420,		3,	false,	"8 Bit YCbCr 420 3-Plane"},
 	{AJA_PixelFormat_YCBCR8_422PL3,		  AJA_FOURCC('Y','4','2','B'),	  8,	AJAScaleTypeNone,	  AJASubSample422,		3,	false,	"8 Bit YCbCr 422 3-Plane"},
-	{AJA_PixelFormat_YCBCR10_420PL3LE,	  AJA_FOURCC('Y','2','0','L'),	  10,	AJAScaleTypeNone,	  AJASubSample420,		3,	false,	"10 Bit YCbCr 420 Unpacked 3-Plane LE"},	// from FFmpeg
-	{AJA_PixelFormat_YCBCR10_422PL3LE,	  AJA_FOURCC('Y','2','2','L'),	  10,	AJAScaleTypeNone,	  AJASubSample422,		3,	false,	"10 Bit YCbCr 422 Unpacked 3-Plane LE"},	// from FFmpeg
+	{AJA_PixelFormat_YCBCR10_420PL3LE,	  AJA_FOURCC('Y','3',0xb,0xa),	  10,	AJAScaleTypeNone,	  AJASubSample420,		3,	false,	"10 Bit YCbCr 420 Unpacked 3-Plane LE"},	// from FFmpeg
+	{AJA_PixelFormat_YCBCR10_422PL3LE,	  AJA_FOURCC('Y','3',0xa,0xa),	  10,	AJAScaleTypeNone,	  AJASubSample422,		3,	false,	"10 Bit YCbCr 422 Unpacked 3-Plane LE"},	// from FFmpeg
 	
 	{AJA_PixelFormat_YCBCR10_420PL2,	  AJA_FOURCC('2','Y','2','0'),	  10,	AJAScaleTypeNone,	  AJASubSample420,		2,	false,	"10 Bit YCbCr 420 Packed 2-Plane LE"},		// AJA ad hoc 4cc
 	{AJA_PixelFormat_YCBCR10_422PL2,	  AJA_FOURCC('2','Y','2','2'),	  10,	AJAScaleTypeNone,	  AJASubSample422,		2,	false,	"10 Bit YCbCr 422 Packed 2-Plane LE"},		// AJA ad hoc 4cc
