@@ -238,9 +238,11 @@ uint32_t AJA_CalcRowBytesForFormat(AJA_PixelFormat format, uint32_t width)
 		rowBytes = width * 2;		// average-effective
 		break;
 	case AJA_PixelFormat_YCBCR10_420PL3LE:
+	case AJA_PixelFormat_YCBCR10_420PL2LE:
 		rowBytes = width * 3;		// average-effective
 		break;
 	case AJA_PixelFormat_YCBCR10_422PL3LE:
+	case AJA_PixelFormat_YCBCR10_422PL2LE:
 		rowBytes = width * 4;		// average-effective
 		break;
 		
