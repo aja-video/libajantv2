@@ -92,6 +92,7 @@ typedef enum
 	DEVICE_ID_SOJI_OE5					= 0x10922405,
 	DEVICE_ID_SOJI_OE6					= 0x10922406,
 	DEVICE_ID_SOJI_OE7					= 0x10922407,
+    DEVICE_ID_SOJI_DIAGS                = 0x10922499,
 	DEVICE_ID_KONAHDMI					= 0x10767400,	///< @brief See \ref konahdmi
 	DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K	= 0x10646702,	///< @brief See \ref konaip
 	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,	///< @brief See \ref konaip
@@ -148,14 +149,15 @@ typedef enum
 		(__d__) == DEVICE_ID_KONA5_OE12)
 
 #define DEVICE_IS_SOJI(__d__)								\
-	(	(__d__) == DEVICE_ID_SOJI_3DLUT||						\
+	(	(__d__) == DEVICE_ID_SOJI_3DLUT ||						\
 		(__d__) == DEVICE_ID_SOJI_OE1	||						\
 		(__d__) == DEVICE_ID_SOJI_OE2	||						\
 		(__d__) == DEVICE_ID_SOJI_OE3	||						\
 		(__d__) == DEVICE_ID_SOJI_OE4	||						\
 		(__d__) == DEVICE_ID_SOJI_OE5	||						\
 		(__d__) == DEVICE_ID_SOJI_OE6	||						\
-		(__d__) == DEVICE_ID_SOJI_OE7)
+		(__d__) == DEVICE_ID_SOJI_OE7   ||                      \
+        (__d__) == DEVICE_ID_SOJI_DIAGS)
 
 #if !defined (NTV2_DEPRECATE)
 	typedef NTV2DeviceID	NTV2BoardID;	///< @deprecated	Use NTV2DeviceID instead. Identifiers with "board" in them are being phased out.
@@ -2154,11 +2156,16 @@ typedef enum
 **/
 typedef enum
 {
-	NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN,		///< @brief Raster lines are read/written top-to-bottom from/to frame buffer memory.
-	NTV2_FRAMEBUFFER_ORIENTATION_NORMAL			= NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN,
-	NTV2_FRAMEBUFFER_ORIENTATION_BOTTOMUP,		///< @brief Raster lines are read/written bottom-to-top from/to frame buffer memory.
-	NTV2_FRAMEBUFFER_ORIENTATION_INVALID,
-	NTV2_MAX_NUM_VideoFrameBufferOrientations	= NTV2_FRAMEBUFFER_ORIENTATION_INVALID
+	NTV2_FBO_TOPDOWN,	///< @brief Normal operation:  raster lines are read/written top-to-bottom from/to frame buffer memory.
+	NTV2_FBO_BOTTOMUP,	///< @brief Raster lines are read/written bottom-to-top from/to frame buffer memory.
+	NTV2_FBO_INVALID,
+	NTV2_FBO_NORMAL								= NTV2_FBO_TOPDOWN,
+	NTV2_FBO_MAX_NUM_FBOS						= NTV2_FBO_INVALID,
+	NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN		= NTV2_FBO_TOPDOWN,
+	NTV2_FRAMEBUFFER_ORIENTATION_NORMAL			= NTV2_FBO_NORMAL,
+	NTV2_FRAMEBUFFER_ORIENTATION_BOTTOMUP		= NTV2_FBO_BOTTOMUP,
+	NTV2_FRAMEBUFFER_ORIENTATION_INVALID		= NTV2_FBO_INVALID,
+	NTV2_MAX_NUM_VideoFrameBufferOrientations	= NTV2_FBO_INVALID
 } NTV2VideoFrameBufferOrientation, NTV2FrameBufferOrientation, NTV2FBOrientation;
 
 #define NTV2_IS_VALID_FRAMEBUFFER_ORIENTATION(_x_)		((_x_) >= NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN	&&	(_x_) < NTV2_MAX_NUM_VideoFrameBufferOrientations)
@@ -3723,6 +3730,7 @@ typedef enum
 	NTV2_BITFILE_SOJI_OE7_MAIN		= 87,
 	NTV2_BITFILE_SOJI_3DLUT_MAIN	= 88,
 	NTV2_BITFILE_KONA5_8K_MV_TX_MAIN		= 89,
+	NTV2_BITFILE_SOJI_DIAGS_MAIN	= 90,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
 

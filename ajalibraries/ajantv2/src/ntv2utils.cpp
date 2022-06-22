@@ -4654,6 +4654,54 @@ int RecordCopyAudio(PULWord pAja, PULWord pSR, int iStartSample, int iNumBytes, 
 #endif
 
 
+bool AddAudioTone (	ULWord &		outNumBytesWritten,
+					NTV2_POINTER &	inAudioBuffer,
+					ULWord &		inOutCurrentSample,
+					const ULWord	inNumSamples,
+					const double	inSampleRate,
+					const double	inAmplitude,
+					const double	inFrequency,
+					const ULWord	inNumBitsPerSample,
+					const bool		inByteSwap,
+					const ULWord	inNumChannels)
+{
+	outNumBytesWritten = 0;
+	if (inAudioBuffer.IsNULL())
+		return false;	//	NULL buffer
+
+	const ULWord numBytes (4 * inNumSamples * inNumChannels);
+	if (inAudioBuffer.GetByteCount() < numBytes)
+		return false;	//	buffer too small
+
+	double			j			(inOutCurrentSample);
+	const double	cycleLength (inSampleRate / inFrequency);
+	const double	scale		(double(ULWord(1 << (inNumBitsPerSample - 1))) - 1.0);
+	ULWord *		pAudioBuffer(inAudioBuffer);
+	NTV2_ASSERT(pAudioBuffer);
+
+	for (ULWord i(0);  i < inNumSamples;  i++)
+	{
+		const double	nextFloat	= double(::sin (j / cycleLength * (M_PI * 2.0)) * inAmplitude);
+		LWord			value		= LWord((nextFloat * scale) + double(0.5));
+
+		if (inByteSwap)
+			value = LWord(NTV2EndianSwap32(value));
+
+		for (ULWord channel(0);  channel < inNumChannels;  channel++)
+			*pAudioBuffer++ = ULWord(value);
+
+		j += 1.0;
+		if (j > cycleLength)
+			j -= cycleLength;
+		inOutCurrentSample++;
+	}	//	for each sample
+
+	outNumBytesWritten = numBytes;
+	return true;
+
+}	//	AddAudioTone (NTV2_POINTER)
+
+
 ULWord	AddAudioTone (	ULWord *		pAudioBuffer,
 						ULWord &		inOutCurrentSample,
 						const ULWord	inNumSamples,
@@ -4709,7 +4757,7 @@ ULWord	AddAudioTone (	UWord *			pAudioBuffer,
 
 	if (pAudioBuffer)
 	{
-		for (ULWord i = 0;	i < inNumSamples;  i++)
+		for (ULWord i(0);  i < inNumSamples;  i++)
 		{
 			const double	nextFloat	= double(::sin (j / cycleLength * (M_PI * 2.0)) * inAmplitude);
 			Word			value		= Word((nextFloat * scale) + double(0.5));
@@ -4717,7 +4765,7 @@ ULWord	AddAudioTone (	UWord *			pAudioBuffer,
 			if (inByteSwap)
 				value = Word(NTV2EndianSwap16(value));
 
-			for (ULWord channel = 0;  channel < inNumChannels;	channel++)
+			for (ULWord channel(0);  channel < inNumChannels;  channel++)
 				*pAudioBuffer++ = UWord(value);
 
 			j += 1.0;
@@ -4744,9 +4792,9 @@ ULWord	AddAudioTone (	ULWord *		pAudioBuffer,
 {
 	double			j [kNumAudioChannelsMax];
 	double			cycleLength [kNumAudioChannelsMax];
-	const double	scale		(double (ULWord (1 << (inNumBits - 1))) - 1.0);
+	const double	scale		(double(ULWord (1 << (inNumBits - 1))) - 1.0);
 
-	for (ULWord channel (0);  channel < inNumChannels;	channel++)
+	for (ULWord channel(0);  channel < inNumChannels;	channel++)
 	{
 		cycleLength[channel] = inSampleRate / pInFrequencies[channel];
 		j [channel] = inOutCurrentSample;
@@ -4754,11 +4802,11 @@ ULWord	AddAudioTone (	ULWord *		pAudioBuffer,
 
 	if (pAudioBuffer && pInAmplitudes && pInFrequencies)
 	{
-		for (ULWord i (0);	i < inNumSamples;  i++)
+		for (ULWord i(0);  i < inNumSamples;  i++)
 		{
-			for (ULWord channel (0);  channel < inNumChannels;	channel++)
+			for (ULWord channel(0);  channel < inNumChannels;  channel++)
 			{
-				const double	nextFloat	= double(::sin (j[channel] / cycleLength[channel] * (M_PI * 2.0)) * pInAmplitudes[channel]);
+				const double	nextFloat	= double(::sin(j[channel] / cycleLength[channel] * (M_PI * 2.0)) * pInAmplitudes[channel]);
 				LWord			value		= LWord((nextFloat * scale) + double(0.5));
 
 				if (inByteSwap)
@@ -4868,6 +4916,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_SOJI_OE5:				return "SOJI-OE5";
 		case DEVICE_ID_SOJI_OE6:				return "SOJI-OE6";
 		case DEVICE_ID_SOJI_OE7:				return "SOJI-OE7";
+		case DEVICE_ID_SOJI_DIAGS:				return "SOJI-DIAGS";
 		case DEVICE_ID_TTAP:					return inForRetailDisplay ? "T-TAP"						: "TTap";
 		case DEVICE_ID_TTAP_PRO:				return inForRetailDisplay ? "T-TAP Pro"					: "TTapPro";
 		case DEVICE_ID_NOTFOUND:				return inForRetailDisplay ? "AJA Device"				: "(Not Found)";
@@ -8473,14 +8522,15 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_KONA5_OE10:					return "kona5_oe_cfg10_tprom.bit";
 	case DEVICE_ID_KONA5_OE11:					return "kona5_oe_cfg11_tprom.bit";
 	case DEVICE_ID_KONA5_OE12:					return "kona5_oe_cfg12_tprom.bit";
-	case DEVICE_ID_SOJI_OE1:					return "soji_oe_cfg1_tprom.bit";
-	case DEVICE_ID_SOJI_OE2:					return "soji_oe_cfg3_tprom.bit";
-	case DEVICE_ID_SOJI_OE3:					return "soji_oe_cfg3_tprom.bit";
-	case DEVICE_ID_SOJI_OE4:					return "soji_oe_cfg4_tprom.bit";
-	case DEVICE_ID_SOJI_OE5:					return "soji_oe_cfg5_tprom.bit";
-	case DEVICE_ID_SOJI_OE6:					return "soji_oe_cfg6_tprom.bit";
-	case DEVICE_ID_SOJI_OE7:					return "soji_oe_cfg7_tprom.bit";
-	case DEVICE_ID_SOJI_3DLUT:					return "soji_3dlut_tprom.bit";
+	case DEVICE_ID_SOJI_OE1:					return "soji_oe_cfg1.bit";
+	case DEVICE_ID_SOJI_OE2:					return "soji_oe_cfg3.bit";
+	case DEVICE_ID_SOJI_OE3:					return "soji_oe_cfg3.bit";
+	case DEVICE_ID_SOJI_OE4:					return "soji_oe_cfg4.bit";
+	case DEVICE_ID_SOJI_OE5:					return "soji_oe_cfg5.bit";
+	case DEVICE_ID_SOJI_OE6:					return "soji_oe_cfg6.bit";
+	case DEVICE_ID_SOJI_OE7:					return "soji_oe_cfg7.bit";
+	case DEVICE_ID_SOJI_3DLUT:					return "soji_3dlut.bit";
+	case DEVICE_ID_SOJI_DIAGS:					return "soji_diags.bit";
 	case DEVICE_ID_KONA5_8K_MV_TX:				return "kona5_8k_mv_tx_tprom.bit";
 	case DEVICE_ID_CORVID44_8KMK:				return "c44_12g_8k_mk_tprom.bit";
 	case DEVICE_ID_CORVID44_8K:					return "c44_12g_8k_tprom.bit";
@@ -8625,6 +8675,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_SOJI_OE6,
 														DEVICE_ID_SOJI_OE7,
 														DEVICE_ID_SOJI_3DLUT,
+														DEVICE_ID_SOJI_DIAGS,
 														DEVICE_ID_TTAP_PRO,
 														DEVICE_ID_TTAP,
 														DEVICE_ID_NOTFOUND	};
@@ -8839,6 +8890,7 @@ string NTV2BitfileTypeToString (const NTV2BitfileType inValue, const bool inComp
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"SOJI OE6 Main",			NTV2_BITFILE_SOJI_OE6_MAIN);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"SOJI OE7 Main",			NTV2_BITFILE_SOJI_OE7_MAIN);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"SOJI 3DLUT Main",			NTV2_BITFILE_SOJI_3DLUT_MAIN);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"SOJI DIAGS Main",			NTV2_BITFILE_SOJI_DIAGS_MAIN);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Kona5 8K MV TX",			NTV2_BITFILE_KONA5_8K_MV_TX_MAIN);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaIP 2110 RGB12",		NTV2_BITFILE_KONAIP_2110_RGB12);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"IoIP 2110 RGB12",			NTV2_BITFILE_IOIP_2110_RGB12);

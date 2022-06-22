@@ -1429,6 +1429,7 @@ private:
 		DefineRegName	(kVRegHDMIInDrmMasteringLuminence2,		"kVRegHDMIInDrmMasteringLuminence2");
 		DefineRegName	(kVRegHDMIInDrmLightLevel2,				"kVRegHDMIInDrmLightLevel2");
 
+		DefineRegName	(kVRegAudioOutputToneSelect,			"kVRegAudioOutputToneSelect");
 		DefineRegister	(kVRegHDMIOutStatus1,					"kVRegHDMIOutStatus1",	mDecodeHDMIOutputStatus,	READWRITE,	kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
 
 		DefineRegName	(kVRegLastAJA,							"kVRegLastAJA");
@@ -1448,6 +1449,7 @@ private:
 			DefineRegReadWrite (regNum, READWRITE);
 			DefineRegClass (regNum, kRegClass_Virtual);
 		}
+		DefineRegClass (kVRegAudioOutputToneSelect, kRegClass_Audio);
 		DefineRegClass (kVRegMonAncField1Offset, kRegClass_Anc);
 		DefineRegClass (kVRegMonAncField2Offset, kRegClass_Anc);
 		DefineRegClass (kVRegAncField1Offset, kRegClass_Anc);
