@@ -52,7 +52,7 @@ void check_bitfile_header(const std::string& path, json& fw_json, bool update_js
     check_bitfile_header(__path__, __json__, __update__)
 
 struct TestOptions {
-    const char* firmware_path;  /* path to an NTV2 bitfile or directory of bitfiles */
+    const char* bitfile_path;  /* path to an NTV2 bitfile or directory of bitfiles */
     bool update_json;           /* update NTV2 firmware JSON expected results from firmware-under-test? */
 };
 static TestOptions gOptions;
@@ -237,10 +237,10 @@ TEST_SUITE("bitfile_header" * doctest::description("NTV2 bitfile header tests"))
         json fw_json;
         CHECK_EQ(read_json_file(fw_json_path, fw_json), true);
     }
-    TEST_CASE("valid_firmware_path") {
+    TEST_CASE("valid_bitfile_path") {
         bool valid_path = false;
-        if (gOptions.firmware_path != NULL) {
-            std::string path = gOptions.firmware_path;
+        if (gOptions.bitfile_path != NULL) {
+            std::string path = gOptions.bitfile_path;
             if (is_bitfile_path(path) || is_firmware_subdir(path)) {
                 valid_path = true;
             }
@@ -256,7 +256,7 @@ TEST_SUITE("bitfile_header" * doctest::description("NTV2 bitfile header tests"))
         auto fw_json_path = exe_dir + AJA_PATHSEP + kFirmwareJSON;
         json fw_json;
         CHECK_EQ(read_json_file(fw_json_path, fw_json), true);
-        const std::string& path = gOptions.firmware_path;
+        const std::string& path = gOptions.bitfile_path;
         if (is_bitfile_path(path)) {
             // std::cout << "Bitfile: " << path << std::endl;
             CHECK_BITFILE_HEADER(path, fw_json, gOptions.update_json);
@@ -303,7 +303,7 @@ int main(int argc, const char** argv)
     struct argparse_option options[] = {
         OPT_ARGPARSE_HELP(),
         OPT_GROUP("ut_ntv2bitfile options"),
-        OPT_STRING('p', "path", &gOptions.firmware_path, "path to a single NTV2 Classic Firmware bitfile, or to the `tprom` or `reconfig` directory for a specific AJA card."),
+        OPT_STRING('b', "bitfile", &gOptions.bitfile_path, "path to a single NTV2 Classic Firmware bitfile, or to the `tprom` or `reconfig` directory for a specific AJA card."),
         OPT_BOOLEAN('u', "update_json", reinterpret_cast<bool*>(&gOptions.update_json), "update NTV2 firmware JSON expected results from firmware-under-test?"),
         OPT_END(),
     };
