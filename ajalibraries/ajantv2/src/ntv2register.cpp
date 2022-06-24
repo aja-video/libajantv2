@@ -228,15 +228,17 @@ bool CNTV2Card::GetEveryFrameServices (NTV2EveryFrameTaskMode & outMode)
 	return CNTV2DriverInterface::ReadRegister(kVRegEveryFrameTaskFilter, outMode);
 }
 
-bool CNTV2Card::SetDefaultVideoOutMode(ULWord mode)
-{
-	return WriteRegister(kVRegDefaultVideoOutMode, mode);
-}
+#if !defined(NTV2_DEPRECATE_16_3)
+	bool CNTV2Card::SetDefaultVideoOutMode(ULWord mode)
+	{
+		return WriteRegister(kVRegDefaultVideoOutMode, mode);
+	}
 
-bool CNTV2Card::GetDefaultVideoOutMode(ULWord & outMode)
-{
-	return ReadRegister (kVRegDefaultVideoOutMode, outMode);
-}
+	bool CNTV2Card::GetDefaultVideoOutMode(ULWord & outMode)
+	{
+		return ReadRegister (kVRegDefaultVideoOutMode, outMode);
+	}
+#endif	//	!defined(NTV2_DEPRECATE_16_3)
 
 // Method: SetVideoFormat
 // Input:  NTV2VideoFormat

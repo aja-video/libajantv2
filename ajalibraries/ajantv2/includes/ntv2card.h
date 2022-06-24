@@ -991,9 +991,6 @@ public:
 	**/
 	AJA_VIRTUAL bool		SetEveryFrameServices (const NTV2EveryFrameTaskMode inMode);
 
-	AJA_VIRTUAL bool		SetDefaultVideoOutMode (ULWord mode);
-	AJA_VIRTUAL bool		GetDefaultVideoOutMode (ULWord & outMode);
-
 	/**
 		@brief		Determines if a given FrameStore on the AJA device will be used to capture or playout video.
 		@param[in]	inChannel		Specifies the FrameStore of interest as an ::NTV2Channel (a zero-based index number).
@@ -1041,12 +1038,6 @@ public:
 
 	// The rest of the routines
 	AJA_VIRTUAL bool		GetVideoFormat (NTV2VideoFormat & outValue, NTV2Channel inChannel = NTV2_CHANNEL1);
-
-#if !defined(NTV2_DEPRECATE_16_2)
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetActiveFrameDimensions (NTV2FrameDimensions & outFrameDimensions, const NTV2Channel inChannel = NTV2_CHANNEL1)); ///< @deprecated	Obsolete starting in SDK 16.2.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(NTV2FrameDimensions GetActiveFrameDimensions (const NTV2Channel inChannel = NTV2_CHANNEL1)); ///< @deprecated	Obsolete starting in SDK 16.2.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetNumberActiveLines (ULWord & outNumActiveLines)); ///< @deprecated	Obsolete starting in SDK 16.2.
-#endif	//	defined(NTV2_DEPRECATE_16_2)
 
 	AJA_VIRTUAL bool		SetStandard (NTV2Standard inValue, NTV2Channel inChannel = NTV2_CHANNEL1);
 	AJA_VIRTUAL bool		GetStandard (NTV2Standard & outValue, NTV2Channel inChannel = NTV2_CHANNEL1);
@@ -1426,7 +1417,14 @@ public:
 	**/
 	AJA_VIRTUAL bool		ReadLineCount (ULWord & outValue);
 
+#if !defined(NTV2_DEPRECATE_16_3)
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetDefaultVideoOutMode(ULWord mode)); ///< @deprecated	Obsolete starting in SDK 16.3.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetDefaultVideoOutMode(ULWord & outMode)); ///< @deprecated	Obsolete starting in SDK 16.3.
+#endif	//	defined(NTV2_DEPRECATE_16_3)
 #if !defined(NTV2_DEPRECATE_16_2)
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetActiveFrameDimensions (NTV2FrameDimensions & outFrameDimensions, const NTV2Channel inChannel = NTV2_CHANNEL1)); ///< @deprecated	Obsolete starting in SDK 16.2.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(NTV2FrameDimensions GetActiveFrameDimensions (const NTV2Channel inChannel = NTV2_CHANNEL1)); ///< @deprecated	Obsolete starting in SDK 16.2.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetNumberActiveLines (ULWord & outNumActiveLines)); ///< @deprecated	Obsolete starting in SDK 16.2.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool FlipFlopPage (const NTV2Channel inChannel)); ///< @deprecated	Declared obsolete starting in SDK 16.2. Swapped the PCI access frame and output frame registers at the next output VBI.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetPCIAccessFrame (const NTV2Channel inChannel, const ULWord inValue, const bool inWaitForVBI = true)); ///< @deprecated	Declared obsolete starting in SDK 16.2. The "PCI Access Frame" register had no effect on the hardware, but was used to store the next/pending output frame.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetPCIAccessFrame (const NTV2Channel inChannel, ULWord & outValue)); ///< @deprecated	Declared obsolete starting in SDK 16.2. The "PCI Access Frame" register had no effect on the hardware, but was used to store the next/pending output frame.
@@ -1834,28 +1832,30 @@ public:
 										the audio playout buffer.
 	**/
 	AJA_VIRTUAL bool		GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outAbsByteOffset,
-												const NTV2AudioSystem	inAudioSystem, const bool inCaptureBuffer = false);
+												const NTV2AudioSystem inAudioSystem, const bool inCaptureBuffer = false);
 
 	/**
 		@brief		For the given Audio System, answers with the byte offset of the tail end of the last chunk of
 					audio samples read by the device's output audio embedder. This is essentially the position of
 					the "Play Head" during audio output.
 		@param[out] outValue		Receives the byte offset of the tail end of the last chunk of audio samples read
-									by the device's output audio embedder in its output audio buffer.
-		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem (output audio de-embedder) of interest.
+									by the device's output audio embedder in its output audio buffer. This offset is
+									measured from the start of the device playback buffer.
+		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem of interest.
 		@return		True if successful;	 otherwise false.
 		@see		\ref audioplayout
 	**/
 	AJA_VIRTUAL bool		ReadAudioLastOut (ULWord & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
-		@brief		For the given Audio System, answers with the byte offset of the last chunk of audio samples
-					written by the device's input audio de-embedder. This is essentially the position of the
-					"Write Head" during audio capture.
-		@param[out] outValue		Receives the byte offset of the last chunk of audio samples written by the device's
-									input audio de-embedder in its input audio buffer.
-		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem (input audio de-embedder) of interest.
+		@brief		For the given Audio System, answers with the byte offset to the last byte of the latest chunk of
+					4-byte audio samples written into the device's input audio buffer by its input audio de-embedder.
+					This is essentially the position of the "Write Head" during audio capture.
+		@param[out] outValue		Receives the byte offset of the last byte of audio data written into the input
+									audio buffer. This offset is measured from the start of the device capture buffer.
+		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem of interest.
 		@return		True if successful;	 otherwise false.
+		@see		\ref audiocapture
 	**/
 	AJA_VIRTUAL bool		ReadAudioLastIn (ULWord & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 

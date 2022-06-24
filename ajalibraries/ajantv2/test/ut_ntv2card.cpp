@@ -52,11 +52,11 @@ static int argparse_help(struct argparse *self, const struct argparse_option *op
                                      argparse_help, 0, OPT_NONEG)
 
 static constexpr size_t kAudioSize1MiB = 0xff000;
-static constexpr size_t kAudioSize2MiB = kAudioSize1MiB * 2;
+//static constexpr size_t kAudioSize2MiB = kAudioSize1MiB * 2;
 static constexpr size_t kAudioSize4MiB = kAudioSize1MiB * 4;
 static constexpr size_t kFrameSize8MiB = 0x800000;
-static constexpr size_t kFrameSize16MiB = kFrameSize8MiB * 2;
-static constexpr size_t kFrameSize32MiB = kFrameSize8MiB * 4;
+//static constexpr size_t kFrameSize16MiB = kFrameSize8MiB * 2;
+//static constexpr size_t kFrameSize32MiB = kFrameSize8MiB * 4;
 static constexpr UByte kSDILegalMin = 0x04;
 static constexpr UByte kSDILegalMax8Bit = 0xfb;
 static constexpr UWord kSDILegalMax10Bit = 0x3fb;
@@ -273,8 +273,7 @@ public:
     uint32_t NumFail() const { return _num_fail; }
 
     AJAStatus Initialize(const std::string& json_path, std::vector<TestCase>& test_cases) {
-        if (!read_json_file(json_path, _test_json))
-            return AJA_STATUS_FAIL;
+        AJA_RETURN_STATUS(read_json_file(json_path, _test_json)?AJA_STATUS_SUCCESS:AJA_STATUS_FAIL);
         for (auto&& vj : _test_json["vpid_tests"]) {
             auto vpid_db_id = vj["vpid_db_id"].get<int>(); // id of the original VPID test case from the QA Database
             auto vf = (NTV2VideoFormat)vj["vid_fmt_value"].get<int>();

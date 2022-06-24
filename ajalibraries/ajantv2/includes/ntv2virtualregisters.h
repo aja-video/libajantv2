@@ -658,8 +658,9 @@ typedef enum
 	kVRegShiftHDMOutAudioRate				= 20,
 	kVRegMaskHDMOutAudioChannels			= BIT(27)+BIT(26)+BIT(25)+BIT(24),
 	kVRegShiftHDMOutAudioChannels			= 24,
+	kVRegAudioOutputToneSelect				= VIRTUALREG_START+642,
 
-	kVRegLastAJA							= VIRTUALREG_START+642,		///< @brief The last AJA virtual register slot
+	kVRegLastAJA							= VIRTUALREG_START+643,		///< @brief The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief Last virtual register slot
 
