@@ -231,10 +231,12 @@ uint32_t AJA_CalcRowBytesForFormat(AJA_PixelFormat format, uint32_t width)
 	// planar format are average-effective
 	case AJA_PixelFormat_YCBCR8_420PL:
 	case AJA_PixelFormat_YCBCR8_420PL3:
+	case AJA_PixelFormat_YCBCR8_420PL2:
 		rowBytes = width * 3 / 2;	// average-effective
 		break;
 	case AJA_PixelFormat_YCBCR8_422PL:
 	case AJA_PixelFormat_YCBCR8_422PL3:
+	case AJA_PixelFormat_YCBCR8_422PL2:
 		rowBytes = width * 2;		// average-effective
 		break;
 	case AJA_PixelFormat_YCBCR10_420PL3LE:
