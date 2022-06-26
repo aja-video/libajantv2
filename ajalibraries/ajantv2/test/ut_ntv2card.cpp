@@ -52,11 +52,11 @@ static int argparse_help(struct argparse *self, const struct argparse_option *op
                                      argparse_help, 0, OPT_NONEG)
 
 static constexpr size_t kAudioSize1MiB = 0xff000;
-static constexpr size_t kAudioSize2MiB = kAudioSize1MiB * 2;
+//static constexpr size_t kAudioSize2MiB = kAudioSize1MiB * 2;
 static constexpr size_t kAudioSize4MiB = kAudioSize1MiB * 4;
 static constexpr size_t kFrameSize8MiB = 0x800000;
-static constexpr size_t kFrameSize16MiB = kFrameSize8MiB * 2;
-static constexpr size_t kFrameSize32MiB = kFrameSize8MiB * 4;
+//static constexpr size_t kFrameSize16MiB = kFrameSize8MiB * 2;
+//static constexpr size_t kFrameSize32MiB = kFrameSize8MiB * 4;
 static constexpr UByte kSDILegalMin = 0x04;
 static constexpr UByte kSDILegalMax8Bit = 0xfb;
 static constexpr UWord kSDILegalMax10Bit = 0x3fb;
