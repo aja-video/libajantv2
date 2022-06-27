@@ -2156,11 +2156,16 @@ typedef enum
 **/
 typedef enum
 {
-	NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN,		///< @brief Raster lines are read/written top-to-bottom from/to frame buffer memory.
-	NTV2_FRAMEBUFFER_ORIENTATION_NORMAL			= NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN,
-	NTV2_FRAMEBUFFER_ORIENTATION_BOTTOMUP,		///< @brief Raster lines are read/written bottom-to-top from/to frame buffer memory.
-	NTV2_FRAMEBUFFER_ORIENTATION_INVALID,
-	NTV2_MAX_NUM_VideoFrameBufferOrientations	= NTV2_FRAMEBUFFER_ORIENTATION_INVALID
+	NTV2_FBO_TOPDOWN,	///< @brief Normal operation:  raster lines are read/written top-to-bottom from/to frame buffer memory.
+	NTV2_FBO_BOTTOMUP,	///< @brief Raster lines are read/written bottom-to-top from/to frame buffer memory.
+	NTV2_FBO_INVALID,
+	NTV2_FBO_NORMAL								= NTV2_FBO_TOPDOWN,
+	NTV2_FBO_MAX_NUM_FBOS						= NTV2_FBO_INVALID,
+	NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN		= NTV2_FBO_TOPDOWN,
+	NTV2_FRAMEBUFFER_ORIENTATION_NORMAL			= NTV2_FBO_NORMAL,
+	NTV2_FRAMEBUFFER_ORIENTATION_BOTTOMUP		= NTV2_FBO_BOTTOMUP,
+	NTV2_FRAMEBUFFER_ORIENTATION_INVALID		= NTV2_FBO_INVALID,
+	NTV2_MAX_NUM_VideoFrameBufferOrientations	= NTV2_FBO_INVALID
 } NTV2VideoFrameBufferOrientation, NTV2FrameBufferOrientation, NTV2FBOrientation;
 
 #define NTV2_IS_VALID_FRAMEBUFFER_ORIENTATION(_x_)		((_x_) >= NTV2_FRAMEBUFFER_ORIENTATION_TOPDOWN	&&	(_x_) < NTV2_MAX_NUM_VideoFrameBufferOrientations)
