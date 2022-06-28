@@ -168,7 +168,7 @@ enum AJA_PixelFormat
 	AJA_PixelFormat_YCBCR8_422PL2,		/**< Pixel format YCbCr 8 bit 422 2planar                           (see NTV2_FBF_8BIT_YCBCR_422PL2, AV_PIX_FMT_NV16) */
 
 	/// FFmpeg related (see AVPixelFormat in libavutil/pixfmt.h, libavutil/pixdesc.c) - unpacked 16bpp, no AJA hardware pixel format for now
-	AJA_PixelFormat_YCBCR10_420PL2LE,	/**< Pixel format YCbCr 10 bit 420 unpacked little-endian 2planar   (see AV_PIX_FMT_P010LE) */
+	AJA_PixelFormat_YCBCR10_420PL2LE,	/**< Pixel format YCbCr 10 bit 420 unpacked little-endian 2planar   (see AV_PIX_FMT_P010LE, AV_PIX_FMT_P010) */
 	AJA_PixelFormat_YCBCR10_422PL2LE,	/**< Pixel format YCbCr 10 bit 422 unpacked little-endian 2planar   (see AV_PIX_FMT_NV20LE) */
 
 	/// SMPTE 2022-6/211/OpenCL related....not actually pixel formats on any board...

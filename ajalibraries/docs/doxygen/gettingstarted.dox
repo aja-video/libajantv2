@@ -247,6 +247,7 @@ disappear from the compilation, and build errors will result if they’re used.
 	-	An overloaded version of AJAAncillaryList::GetIPTransmitData was deprecated.
 	-	An overloaded version of AJAAncillaryList::GetIPTransmitDataLength was deprecated.
 	-	The original Audio Mixer API in ::CNTV2Card was deprecated and replaced with a new, improved API.
+	-	Retroactively deprecated the <b>ntv2rp215</b> module and <b>CNTV2RP215Decoder</b> class via ::NTV2_DEPRECATE_15_3 in SDK 16.3.
 -	<b>SDK 16.0:</b> Defined macros ::NTV2_DEPRECATE_15_6 and ::NTV2_DEPRECATE_16_0 in <b>ajatypes.h</b>.
 	As-shipped, all <b>NTV2_DEPRECATE_</b> macros preceding SDK 15.0 are defined in SDK 16.0 (making all symbols they deprecate unavailable).
 	Here are the functions that have newly been marked for deprecation in SDK 16.0:
