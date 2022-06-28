@@ -35,7 +35,6 @@ enum AJASubSampleType
 };
 
 
-
 /**
 	@class	AJAPixelFormat pixelformat.h "streams/common/pixelformat.h"
 	@brief	Storage and utility class for AJA_PixelFormat defines.
