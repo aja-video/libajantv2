@@ -16,9 +16,9 @@
 #include "ntv2nubtypes.h"
 #include <iomanip>
 #include <locale>		//	For std::locale, std::numpunct, std::use_facet
-#include <assert.h>
 #include <string.h>		//	For memset, et al.
 #include <algorithm>	//	For set_difference
+#include <iterator>		//	For std::inserter
 #include "ntv2rp188.h"
 using namespace std;
 
