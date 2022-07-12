@@ -957,7 +957,16 @@ bool CNTV2DriverInterface::BitstreamWrite (const NTV2_POINTER & inBuffer, const 
 						 BITSTREAM_WRITE |
 						 (inFragment? BITSTREAM_FRAGMENT : 0) |
 						 (inSwap? BITSTREAM_SWAP : 0));
-	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&bsMsg));
+	ULWord counts(0);
+	ReadRegister(kVRegDynFirmwareUpdateCounts, counts);
+	ULWord attempts(counts >> 16), successes(counts & 0x0000FFFF);
+	attempts++;
+	const bool result (NTV2Message (reinterpret_cast<NTV2_HEADER*>(&bsMsg)));
+	if (result)
+		successes++;
+	counts = (attempts << 16) | successes;
+	WriteRegister(kVRegDynFirmwareUpdateCounts, counts);
+	return result;
 }
 
 bool CNTV2DriverInterface::BitstreamReset (const bool inConfiguration, const bool inInterface)
