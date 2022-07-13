@@ -45,12 +45,10 @@ bool CNTV2Card::IsDynamicFirmwareLoaded (void)
 	if (!IsDynamicDevice())
 		return false;
 
-	ULWord counts(0);	//, baseDeviceID(0);
-//	if (!ReadRegister(kVRegBaseFirmwareDeviceID, baseDeviceID))
-//		return false;
+	ULWord counts(0);
 	ReadRegister(kVRegDynFirmwareUpdateCounts, counts);
-	const ULWord successes(counts & 0x0000FFFF);	//	ULWord attempts(counts >> 16);
-	if (/*GetDeviceID() == NTV2DeviceID(baseDeviceID)  && */ !successes)
+	const ULWord successes(counts & 0x0000FFFF);
+	if (!successes)
 		return false;
 	//	At least 1 successful dynamic firmware load/update done
 	return true;
