@@ -52,25 +52,44 @@ static int argparse_help(struct argparse *self, const struct argparse_option *op
                                      argparse_help, 0, OPT_NONEG)
 
 static constexpr size_t kAudioSize1MiB = 0xff000;
-//static constexpr size_t kAudioSize2MiB = kAudioSize1MiB * 2;
+static constexpr size_t kAudioSize2MiB = kAudioSize1MiB * 2;
 static constexpr size_t kAudioSize4MiB = kAudioSize1MiB * 4;
 static constexpr size_t kFrameSize8MiB = 0x800000;
-//static constexpr size_t kFrameSize16MiB = kFrameSize8MiB * 2;
-//static constexpr size_t kFrameSize32MiB = kFrameSize8MiB * 4;
-static constexpr UByte kSDILegalMin = 0x04;
-static constexpr UByte kSDILegalMax8Bit = 0xfb;
-static constexpr UWord kSDILegalMax10Bit = 0x3fb;
-static constexpr ULWord kSDILegalMax12Bit = 0xffc;
+static constexpr size_t kFrameSize16MiB = kFrameSize8MiB * 2;
+static constexpr size_t kFrameSize32MiB = kFrameSize8MiB * 4;
+
+// 8-bit ranges
+static constexpr uint8_t kFullRangeMin8Bit = 0;
+static constexpr uint8_t kFullRangeMax8Bit = 255;
+static constexpr uint8_t kSDIRangeMin8Bit = 4;
+static constexpr uint8_t kSDIRangeMax8Bit = 251;
+static constexpr uint8_t kSMPTERangeMin8Bit = 16;
+static constexpr uint8_t kSMPTERangeMax8Bit = 235;
+// 10-bit ranges
+static constexpr uint16_t kFullRangeMin10Bit = 0;
+static constexpr uint16_t kFullRangeMax10Bit = 1023;
+static constexpr uint16_t kSDIRangeMin10Bit = 4;
+static constexpr uint16_t kSDIRangeMax10Bit = 1019;
+static constexpr uint16_t kSMPTERangeMin10Bit = 16;
+static constexpr uint16_t kSMPTERangeMax10Bit = 940;
+// 12-bit ranges
+static constexpr uint16_t kFullRangeMin12Bit = 0;
+static constexpr uint16_t kFullRangeMax12Bit = 4095;
+static constexpr uint16_t kSDIRangeMin12Bit = 16;
+static constexpr uint16_t kSDIRangeMax12Bit = 4079;
+static constexpr uint16_t kSMPTERangeMin12Bit = 256;
+static constexpr uint16_t kSMPTERangeMax12Bit = 3760;
 
 struct TestOptions {
-    ULWord card_a_index;
-    ULWord card_b_index;
-    ULWord out_channel;
-    ULWord inp_channel;
-    ULWord out_framestore;
-    ULWord inp_framestore;
-    ULWord out_frame;
-    ULWord inp_frame;
+    ULWord card_a_index {0};
+    ULWord card_b_index {0};
+    ULWord out_channel {0};
+    ULWord inp_channel {0};
+    ULWord out_framestore {0};
+    ULWord inp_framestore {0};
+    ULWord out_frame {0};
+    ULWord inp_frame {0};
+    std::string tc_ids {0};
 };
 static TestOptions* gOptions = NULL;
 static CNTV2Card* gCard = NULL;
@@ -190,7 +209,7 @@ TEST_SUITE("framestore_formats" * doctest::description("Framestore widget format
         std::vector<UByte> buffer(kFrameSize8MiB);
         std::vector<UByte> readback(kFrameSize8MiB);
         ULWord seed = 1;
-        qa::CountingPattern8Bit(buffer, fd.GetRasterHeight(), fd.linePitch, kSDILegalMin, kSDILegalMax8Bit);
+        qa::CountingPattern8Bit(buffer, fd.GetRasterHeight(), fd.linePitch, kSDIRangeMin8Bit, kSDIRangeMax8Bit);
         qa::RandomPattern<ULWord>(readback, kFrameSize8MiB, seed, 0, UINT32_MAX, qa::ByteOrder::LittleEndian);
         std::vector<UByte> zeroes(kFrameSize8MiB);
         CHECK_EQ(gCard->DMAWriteFrame(0, reinterpret_cast<const ULWord*>(zeroes.data()), (ULWord)kFrameSize8MiB), true);
@@ -229,9 +248,13 @@ struct TestCase {
     VPIDStandard standard;
     std::function<bool(const TestCase& tc)> func;
 };
-#define DOCTEST_PARAMETERIZE(data_container)                                  \
-    std::for_each(data_container.begin(), data_container.end(), [&](const TestCase& in) {           \
-        DOCTEST_SUBCASE(in.name.c_str()) { CHECK_EQ(in.func(in), true); }   \
+
+// NOTE(paulh): Doctest calls SUBCASE recursively per-TEST_CASE,
+// in order to parameterize the test cases and results.
+// We must ensure that the test case data is only initialized once per test case.
+#define DOCTEST_PARAMETERIZE(data_container) \
+    std::for_each(data_container.begin(), data_container.end(), [&](const TestCase& in) { \
+        DOCTEST_SUBCASE(in.name.c_str()) { CHECK_EQ(in.func(in), true); } \
     });
 
 class FramestoreSDI {
@@ -272,29 +295,62 @@ public:
     uint32_t NumPass() const { return _num_pass; }
     uint32_t NumFail() const { return _num_fail; }
 
-    AJAStatus Initialize(const std::string& json_path, std::vector<TestCase>& test_cases) {
-        if (!read_json_file(json_path, _test_json))
-            return AJA_STATUS_FAIL;
-        for (auto&& vj : _test_json["vpid_tests"]) {
-            auto vpid_db_id = vj["vpid_db_id"].get<int>(); // id of the original VPID test case from the QA Database
-            auto vf = (NTV2VideoFormat)vj["vid_fmt_value"].get<int>();
-            auto pf = (NTV2PixelFormat)vj["pix_fmt_value"].get<int>();
-            auto vpid_standard_str = vj["smpte_id"].get_ref<std::string&>();
-            auto vpid_standard = (VPIDStandard)std::stoul(vpid_standard_str, nullptr, 16);
+    AJAStatus Initialize(const NTV2StringList& json_paths, std::vector<TestCase>& test_cases) {
+        for (const auto& jp : json_paths) {
+            LOGINFO("Adding Framestore SDI test cases from JSON: " << jp);
+            REQUIRE_EQ(AJAFileIO::FileExists(jp), true);
+            if (!read_json_file(jp, _test_json)) {
+                LOGERR("Error reading Framestore SDI test case JSON file!");
+                return AJA_STATUS_FAIL;
+            }
 
-            std::ostringstream oss_log;
-            oss_log << "id_" << vpid_db_id << "_standard_0x" << vpid_standard_str << "_vf_" << NTV2VideoFormatToString(vf) << "_pf_" << NTV2FrameBufferFormatToString(pf, true);
+            std::vector<int> tc_id_filter;
+            if (!gOptions->tc_ids.empty()) {
+                NTV2StringList tc_id_strings;
+                aja::split(gOptions->tc_ids, ',', tc_id_strings);
+                for (auto&& id : tc_id_strings)
+                    tc_id_filter.emplace_back(std::stoi(id));
+            }
 
-            test_cases.push_back(TestCase{
-                vpid_db_id,
-                oss_log.str(),
-                vf, pf,
-                NTV2_VANCMODE_OFF,
-                NTV2_REFERENCE_FREERUN,
-                vpid_standard,
-                std::bind(&FramestoreSDI::ExecuteTest, this, std::placeholders::_1)
-            });
-            _num_tests++;
+            for (auto&& vj : _test_json["vpid_tests"]) {
+                // id of the original VPID test case from the QA Database
+                auto vpid_db_id = vj["vpid_db_id"].get<int>();
+                bool run_test = false;
+                for (const auto& id : tc_id_filter) {
+                    if (vpid_db_id == id) {
+                        run_test = true;
+                        break;
+                    }
+                }
+                if (!run_test) {
+                    LOGINFO("- Skipping Framestore SDI test case ID: " << vpid_db_id);
+                    continue;
+                }
+                auto vf = (NTV2VideoFormat)vj["vid_fmt_value"].get<int>();
+                auto pf = (NTV2PixelFormat)vj["pix_fmt_value"].get<int>();
+                auto vpid_standard_str = vj["smpte_id"].get_ref<std::string&>();
+                auto vpid_standard = (VPIDStandard)std::stoul(
+                    vpid_standard_str, nullptr, 16);
+
+                std::ostringstream oss_log;
+                oss_log << "id_" << vpid_db_id
+                    << "_standard_0x" << vpid_standard_str
+                    << "_vf_" << NTV2VideoFormatToString(vf)
+                    << "_pf_" << NTV2FrameBufferFormatToString(pf, true);
+
+                test_cases.push_back(TestCase{
+                    vpid_db_id,
+                    oss_log.str(),
+                    vf, pf,
+                    NTV2_VANCMODE_OFF,
+                    NTV2_REFERENCE_FREERUN,
+                    vpid_standard,
+                    std::bind(&FramestoreSDI::ExecuteTest,
+                        this, std::placeholders::_1)
+                });
+                LOGINFO("- Added Framestore SDI test case ID: " << vpid_db_id);
+                _num_tests++;
+            }
         }
         return AJA_STATUS_SUCCESS;
     }
@@ -307,6 +363,8 @@ public:
         const auto& ref_src = tc.ref_src;
         const auto& vpid_standard = tc.standard;
         LOGINFO("[ framestore_sdi ] " << tc.name);
+        //TODO(paulh): Add method to PresetRouter to get preset
+        // so we can filter device applicability based on num channels, etc.
         if (!can_do_test_case(vf, pf)) {
             LOGWARN("test not supported!");
             _num_done++;
@@ -358,17 +416,29 @@ public:
         // qa::AlternatingPattern<ULWord>(buffer, frame_size, { 0xdecafbad, 0x1337c0d3 }, 1, qa::ByteOrder::LittleEndian);
         auto stride = fd.linePitch;
         if (NTV2_IS_FBF_8BIT(pf) || pf == NTV2_FBF_24BIT_RGB || pf == NTV2_FBF_24BIT_BGR) {
-            qa::CountingPattern8Bit(_buffer, fd.GetRasterHeight(), stride, kSDILegalMin, kSDILegalMax8Bit);
+            qa::CountingPattern8Bit(_buffer, fd.GetRasterHeight(), stride, kSDIRangeMin8Bit, kSDIRangeMax8Bit);
         } else if (NTV2_IS_FBF_10BIT(pf)) {
             if (pf == NTV2_FBF_10BIT_DPX) {
-                qa::CountingPattern10BitDPX(_buffer, fd.GetRasterHeight(), stride, kSDILegalMin, kSDILegalMax10Bit, qa::ByteOrder::BigEndian);
+                qa::CountingPattern10BitDPX(_buffer,
+                    fd.GetRasterHeight(), stride,
+                    kSDIRangeMin10Bit, kSDIRangeMax10Bit,
+                    qa::ByteOrder::BigEndian);
             } else if (pf == NTV2_FBF_10BIT_DPX_LE) {
-                qa::CountingPattern10BitDPX(_buffer, fd.GetRasterHeight(), stride, kSDILegalMin, kSDILegalMax10Bit, qa::ByteOrder::LittleEndian);
+                qa::CountingPattern10BitDPX(_buffer,
+                    fd.GetRasterHeight(), stride,
+                    kSDIRangeMin10Bit, kSDIRangeMax10Bit,
+                    qa::ByteOrder::LittleEndian);
             } else {
-                qa::CountingPattern10Bit(_buffer, fd.GetRasterHeight(), stride, kSDILegalMin, kSDILegalMax10Bit, qa::ByteOrder::LittleEndian);
+                qa::CountingPattern10Bit(_buffer,
+                    fd.GetRasterHeight(), stride,
+                    kSDIRangeMin10Bit, kSDIRangeMax10Bit,
+                    qa::ByteOrder::LittleEndian);
             }
         } else if (NTV2_IS_FBF_12BIT_RGB(pf)) {
-            qa::CountingPattern12Bit(_buffer, fd.GetRasterHeight(), stride, kSDILegalMin, kSDILegalMax12Bit, qa::ByteOrder::LittleEndian);
+            qa::CountingPatternRGB48(_buffer,
+                fd.GetRasterHeight(), fd.GetBytesPerRow(),
+                kSDIRangeMin12Bit, kSDIRangeMax12Bit,
+                qa::ByteOrder::LittleEndian);
         }
 
         // qa::RandomPattern<ULWord>(readback, frame_size, 0xAB4D533D, 0, UINT32_MAX, qa::ByteOrder::LittleEndian);
@@ -387,12 +457,12 @@ public:
         NTV2_POINTER master_bytes(_buffer.data(), raster_bytes);
         NTV2_POINTER compare_bytes(_readback.data(), raster_bytes);
         CNTV2PixelComponentReader master(master_bytes, fd);
-        CNTV2PixelComponentReader master2(master_bytes, fd);
         CNTV2PixelComponentReader compare(compare_bytes, fd);
+        uint64_t start_time = AJATime::GetSystemMilliseconds();
         CHECK_EQ(master.ReadComponents(), AJA_STATUS_SUCCESS);
-        master2.ReadComponentValues();
-        CHECK(master == master2);
         CHECK_EQ(compare.ReadComponents(), AJA_STATUS_SUCCESS);
+        uint64_t end_time = AJATime::GetSystemMilliseconds() - start_time;
+        LOGINFO("ReadComponents took " << end_time << "ms");
         bool result = (master == compare);
         if (result == true) {
             _num_pass++;
@@ -443,56 +513,38 @@ private:
 };
 
 using FramestoreSDIPtr = std::unique_ptr<FramestoreSDI>;
+static FramestoreSDIPtr fs_sdi = nullptr;
 
 void ntv2card_framestore_sdi_marker() {}
 TEST_SUITE("framestore_sdi" * doctest::description("SDI loopback tests")) {
-    TEST_CASE("framestore_sdi_sd_hd") {
-        static FramestoreSDIPtr fs_sdi = nullptr;
+    TEST_CASE("framestore_sdi_base") {
         static std::vector<TestCase> test_cases;
-        if (fs_sdi == nullptr) {
+        if (!fs_sdi) {
             CNTV2DeviceScanner scanner;
             const size_t num_devices = scanner.GetNumDevices();
-            if (num_devices < 2 && gOptions->card_a_index != gOptions->card_b_index)
-                LOGERR("SDI Loopback tests require two boards connected to the host system!");
-            REQUIRE_GE(num_devices, 2);
-
-            std::string exe_path, exe_dir;
-            REQUIRE_EQ(AJAFileIO::GetExecutablePath(exe_path), AJA_STATUS_SUCCESS);
-            REQUIRE_EQ(AJAFileIO::GetDirectoryName(exe_path, exe_dir), AJA_STATUS_SUCCESS);
-            std::string vpid_json_path = exe_dir + AJA_PATHSEP + "json" + AJA_PATHSEP + "sdi_sd_hd.json";
-            REQUIRE_EQ(AJAFileIO::FileExists(vpid_json_path), true);
-
+            if (gOptions->card_a_index != gOptions->card_b_index) {
+                if (num_devices < 2)
+                    LOGERR("SDI board-to-board test requires 2 devices. Is the NTV2 driver loaded?");
+                REQUIRE_GE(num_devices, 2);
+            } else {
+                if (num_devices < 1)
+                    LOGERR("SDI loopback tests require at least one device. Is the NTV2 driver loaded?");
+                REQUIRE_GE(num_devices, 1);
+            }
             fs_sdi = aja::make_unique<FramestoreSDI>(
                 gOptions->card_a_index,
                 gOptions->card_b_index);
-
-            REQUIRE_EQ(fs_sdi->Initialize(vpid_json_path, test_cases), AJA_STATUS_SUCCESS);
         }
-        // Doctest calls SUBCASE recursively per-TEST_CASE, so we have to ensure the test case data is only established once per test case.
-        // This is done in order to get parameterized test results at the end.
-        DOCTEST_PARAMETERIZE(test_cases);
-    }
-    TEST_CASE("framestore_sdi_uhd_4k") {
-        static FramestoreSDI* fs_sdi = nullptr;
-        static std::vector<TestCase> test_cases;
-        if (fs_sdi == nullptr) {
-            CNTV2DeviceScanner scanner;
-            const size_t num_devices = scanner.GetNumDevices();
-            if (num_devices < 2)
-                LOGERR("SDI Loopback tests require two boards connected to the host system!");
-            REQUIRE_GE(num_devices, 2);
-
+        if (fs_sdi) {
             std::string exe_path, exe_dir;
             REQUIRE_EQ(AJAFileIO::GetExecutablePath(exe_path), AJA_STATUS_SUCCESS);
             REQUIRE_EQ(AJAFileIO::GetDirectoryName(exe_path, exe_dir), AJA_STATUS_SUCCESS);
-            std::string vpid_json_path = exe_dir + AJA_PATHSEP + "json" + AJA_PATHSEP + "sdi_uhd_4k.json";
-            REQUIRE_EQ(AJAFileIO::FileExists(vpid_json_path), true);
-
-            fs_sdi = new FramestoreSDI(gOptions->card_a_index, gOptions->card_b_index);
-            REQUIRE_EQ(fs_sdi->Initialize(vpid_json_path, test_cases), AJA_STATUS_SUCCESS);
+            const std::string json_base_dir = exe_dir + AJA_PATHSEP + "json" + AJA_PATHSEP;
+            NTV2StringList vpid_json_paths;
+            vpid_json_paths.push_back(json_base_dir + "sdi_sd_hd.json");
+            vpid_json_paths.push_back(json_base_dir + "sdi_uhd_4k.json");
+            REQUIRE_EQ(fs_sdi->Initialize(vpid_json_paths, test_cases), AJA_STATUS_SUCCESS);
         }
-        // Doctest calls SUBCASE recursively per-TEST_CASE, so we have to ensure the test case data is only established once per test case.
-        // This is done in order to get parameterized test results at the end.
         DOCTEST_PARAMETERIZE(test_cases);
     }
 }
@@ -523,6 +575,7 @@ int main(int argc, const char** argv) {
         "ut_ntv2card [options]",
         NULL,
     };
+    const char* tc_ids = NULL;
     struct argparse_option options[] = {
         OPT_ARGPARSE_HELP(),
         OPT_GROUP("ut_ntv2card options"),
@@ -534,6 +587,7 @@ int main(int argc, const char** argv) {
         OPT_INTEGER('\0', "inp_framestore", &gOptions->inp_framestore, "input framestore for board-to-board/loopback testing"),
         OPT_INTEGER('\0', "out_frame", &gOptions->out_frame, "output frame number for board-to-board/loopback testing"),
         OPT_INTEGER('\0', "inp_frame", &gOptions->inp_frame, "input frame number for board-to-board/loopback testing"),
+        OPT_STRING('\0', "tc_ids", (void*)&tc_ids, "over-ride one test case id for debugging"),
         OPT_END(),
     };
     struct argparse argparse;
@@ -541,6 +595,9 @@ int main(int argc, const char** argv) {
     argparse_describe(&argparse, "\nntv2 card unit tests",
         "\nPerform CNTV2Card tests against physical hardware.");
     argparse_parse(&argparse, argc, (const char**)argv);
+
+    if (tc_ids != NULL)
+        gOptions->tc_ids = std::string(tc_ids);
 
     gCard = new CNTV2Card(gOptions->card_a_index, "");
     if (gOptions->card_a_index == gOptions->card_b_index)
