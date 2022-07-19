@@ -52,33 +52,35 @@ static int argparse_help(struct argparse *self, const struct argparse_option *op
                                      argparse_help, 0, OPT_NONEG)
 
 static constexpr size_t kAudioSize1MiB = 0xff000;
-static constexpr size_t kAudioSize2MiB = kAudioSize1MiB * 2;
+// static constexpr size_t kAudioSize2MiB = kAudioSize1MiB * 2;
 static constexpr size_t kAudioSize4MiB = kAudioSize1MiB * 4;
 static constexpr size_t kFrameSize8MiB = 0x800000;
-static constexpr size_t kFrameSize16MiB = kFrameSize8MiB * 2;
+// static constexpr size_t kFrameSize16MiB = kFrameSize8MiB * 2;
 static constexpr size_t kFrameSize32MiB = kFrameSize8MiB * 4;
 
 // 8-bit ranges
-static constexpr uint8_t kFullRangeMin8Bit = 0;
-static constexpr uint8_t kFullRangeMax8Bit = 255;
+// static constexpr uint8_t kFullRangeMin8Bit = 0;
+// static constexpr uint8_t kFullRangeMax8Bit = 255;
 static constexpr uint8_t kSDIRangeMin8Bit = 4;
 static constexpr uint8_t kSDIRangeMax8Bit = 251;
-static constexpr uint8_t kSMPTERangeMin8Bit = 16;
-static constexpr uint8_t kSMPTERangeMax8Bit = 235;
+// static constexpr uint8_t kSMPTERangeMin8Bit = 16;
+// static constexpr uint8_t kSMPTERangeMax8Bit = 235;
+
 // 10-bit ranges
-static constexpr uint16_t kFullRangeMin10Bit = 0;
-static constexpr uint16_t kFullRangeMax10Bit = 1023;
+// static constexpr uint16_t kFullRangeMin10Bit = 0;
+// static constexpr uint16_t kFullRangeMax10Bit = 1023;
 static constexpr uint16_t kSDIRangeMin10Bit = 4;
 static constexpr uint16_t kSDIRangeMax10Bit = 1019;
-static constexpr uint16_t kSMPTERangeMin10Bit = 16;
-static constexpr uint16_t kSMPTERangeMax10Bit = 940;
+// static constexpr uint16_t kSMPTERangeMin10Bit = 16;
+// static constexpr uint16_t kSMPTERangeMax10Bit = 940;
+
 // 12-bit ranges
-static constexpr uint16_t kFullRangeMin12Bit = 0;
-static constexpr uint16_t kFullRangeMax12Bit = 4095;
+// static constexpr uint16_t kFullRangeMin12Bit = 0;
+// static constexpr uint16_t kFullRangeMax12Bit = 4095;
 static constexpr uint16_t kSDIRangeMin12Bit = 16;
 static constexpr uint16_t kSDIRangeMax12Bit = 4079;
-static constexpr uint16_t kSMPTERangeMin12Bit = 256;
-static constexpr uint16_t kSMPTERangeMax12Bit = 3760;
+// static constexpr uint16_t kSMPTERangeMin12Bit = 256;
+// static constexpr uint16_t kSMPTERangeMax12Bit = 3760;
 
 struct TestOptions {
     ULWord card_a_index {0};
