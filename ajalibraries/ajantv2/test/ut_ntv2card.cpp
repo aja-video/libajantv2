@@ -20,6 +20,7 @@
 #include "ntv2qa/counting_pattern_cmp.h"
 // #include "ntv2qa/component_reader.h"
 #include "ntv2qa/routing/preset_router.h"
+#include "ntv2qa/test_formats.h"
 
 #include <algorithm>
 #include <functional>
@@ -57,30 +58,6 @@ static constexpr size_t kAudioSize4MiB = kAudioSize1MiB * 4;
 static constexpr size_t kFrameSize8MiB = 0x800000;
 // static constexpr size_t kFrameSize16MiB = kFrameSize8MiB * 2;
 static constexpr size_t kFrameSize32MiB = kFrameSize8MiB * 4;
-
-// 8-bit ranges
-// static constexpr uint8_t kFullRangeMin8Bit = 0;
-// static constexpr uint8_t kFullRangeMax8Bit = 255;
-static constexpr uint8_t kSDIRangeMin8Bit = 4;
-static constexpr uint8_t kSDIRangeMax8Bit = 251;
-// static constexpr uint8_t kSMPTERangeMin8Bit = 16;
-// static constexpr uint8_t kSMPTERangeMax8Bit = 235;
-
-// 10-bit ranges
-// static constexpr uint16_t kFullRangeMin10Bit = 0;
-// static constexpr uint16_t kFullRangeMax10Bit = 1023;
-static constexpr uint16_t kSDIRangeMin10Bit = 4;
-static constexpr uint16_t kSDIRangeMax10Bit = 1019;
-// static constexpr uint16_t kSMPTERangeMin10Bit = 16;
-// static constexpr uint16_t kSMPTERangeMax10Bit = 940;
-
-// 12-bit ranges
-// static constexpr uint16_t kFullRangeMin12Bit = 0;
-// static constexpr uint16_t kFullRangeMax12Bit = 4095;
-static constexpr uint16_t kSDIRangeMin12Bit = 16;
-static constexpr uint16_t kSDIRangeMax12Bit = 4079;
-// static constexpr uint16_t kSMPTERangeMin12Bit = 256;
-// static constexpr uint16_t kSMPTERangeMax12Bit = 3760;
 
 struct TestOptions {
     ULWord card_a_index {0};
@@ -211,7 +188,9 @@ TEST_SUITE("framestore_formats" * doctest::description("Framestore widget format
         std::vector<UByte> buffer(kFrameSize8MiB);
         std::vector<UByte> readback(kFrameSize8MiB);
         ULWord seed = 1;
-        qa::CountingPattern8Bit(buffer, fd.GetRasterHeight(), fd.linePitch, kSDIRangeMin8Bit, kSDIRangeMax8Bit);
+        uint8_t sdi_range_min = qa::LegalVideoValue<8, uint8_t>::GetSDIRangeMin();
+        uint8_t sdi_range_max = qa::LegalVideoValue<8, uint8_t>::GetSDIRangeMax();
+        qa::CountingPattern8Bit(buffer, fd.GetRasterHeight(), fd.linePitch, sdi_range_min, sdi_range_max);
         qa::RandomPattern<ULWord>(readback, kFrameSize8MiB, seed, 0, UINT32_MAX, qa::ByteOrder::LittleEndian);
         std::vector<UByte> zeroes(kFrameSize8MiB);
         CHECK_EQ(gCard->DMAWriteFrame(0, reinterpret_cast<const ULWord*>(zeroes.data()), (ULWord)kFrameSize8MiB), true);
@@ -418,28 +397,34 @@ public:
         // qa::AlternatingPattern<ULWord>(buffer, frame_size, { 0xdecafbad, 0x1337c0d3 }, 1, qa::ByteOrder::LittleEndian);
         auto stride = fd.linePitch;
         if (NTV2_IS_FBF_8BIT(pf) || pf == NTV2_FBF_24BIT_RGB || pf == NTV2_FBF_24BIT_BGR) {
-            qa::CountingPattern8Bit(_buffer, fd.GetRasterHeight(), stride, kSDIRangeMin8Bit, kSDIRangeMax8Bit);
+            uint8_t sdi_range_min = qa::LegalVideoValue<8, uint8_t>::GetSDIRangeMin();
+            uint8_t sdi_range_max = qa::LegalVideoValue<8, uint8_t>::GetSDIRangeMax();
+            qa::CountingPattern8Bit(_buffer, fd.GetRasterHeight(), stride, sdi_range_min, sdi_range_max);
         } else if (NTV2_IS_FBF_10BIT(pf)) {
+            uint16_t sdi_range_min = qa::LegalVideoValue<10, uint16_t>::GetSDIRangeMin();
+            uint16_t sdi_range_max = qa::LegalVideoValue<10, uint16_t>::GetSDIRangeMax();
             if (pf == NTV2_FBF_10BIT_DPX) {
                 qa::CountingPattern10BitDPX(_buffer,
                     fd.GetRasterHeight(), stride,
-                    kSDIRangeMin10Bit, kSDIRangeMax10Bit,
+                    sdi_range_min, sdi_range_max,
                     qa::ByteOrder::BigEndian);
             } else if (pf == NTV2_FBF_10BIT_DPX_LE) {
                 qa::CountingPattern10BitDPX(_buffer,
                     fd.GetRasterHeight(), stride,
-                    kSDIRangeMin10Bit, kSDIRangeMax10Bit,
+                    sdi_range_min, sdi_range_max,
                     qa::ByteOrder::LittleEndian);
             } else {
                 qa::CountingPattern10Bit(_buffer,
                     fd.GetRasterHeight(), stride,
-                    kSDIRangeMin10Bit, kSDIRangeMax10Bit,
+                    sdi_range_min, sdi_range_max,
                     qa::ByteOrder::LittleEndian);
             }
         } else if (NTV2_IS_FBF_12BIT_RGB(pf)) {
+            uint16_t sdi_range_min = qa::LegalVideoValue<12, uint16_t>::GetSDIRangeMin();
+            uint16_t sdi_range_max = qa::LegalVideoValue<12, uint16_t>::GetSDIRangeMax();
             qa::CountingPatternRGB48(_buffer,
                 fd.GetRasterHeight(), fd.GetBytesPerRow(),
-                kSDIRangeMin12Bit, kSDIRangeMax12Bit,
+                sdi_range_min, sdi_range_max,
                 qa::ByteOrder::LittleEndian);
         }
 
@@ -461,8 +446,8 @@ public:
         CNTV2PixelComponentReader master(master_bytes, fd);
         CNTV2PixelComponentReader compare(compare_bytes, fd);
         uint64_t start_time = AJATime::GetSystemMilliseconds();
-        CHECK_EQ(master.ReadComponents(), AJA_STATUS_SUCCESS);
-        CHECK_EQ(compare.ReadComponents(), AJA_STATUS_SUCCESS);
+        CHECK_EQ(master.ReadComponentValues(), AJA_STATUS_SUCCESS);
+        CHECK_EQ(compare.ReadComponentValues(), AJA_STATUS_SUCCESS);
         uint64_t end_time = AJATime::GetSystemMilliseconds() - start_time;
         LOGINFO("ReadComponents took " << end_time << "ms");
         bool result = (master == compare);
