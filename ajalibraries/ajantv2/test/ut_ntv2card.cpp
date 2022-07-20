@@ -68,7 +68,7 @@ struct TestOptions {
     ULWord inp_framestore {0};
     ULWord out_frame {0};
     ULWord inp_frame {0};
-    std::string tc_ids {0};
+    std::string tc_ids{};
 };
 static TestOptions* gOptions = NULL;
 static CNTV2Card* gCard = NULL;
@@ -296,17 +296,22 @@ public:
             for (auto&& vj : _test_json["vpid_tests"]) {
                 // id of the original VPID test case from the QA Database
                 auto vpid_db_id = vj["vpid_db_id"].get<int>();
-                bool run_test = false;
-                for (const auto& id : tc_id_filter) {
-                    if (vpid_db_id == id) {
-                        run_test = true;
-                        break;
+
+                // optionally filter test cases based on args
+                if (!tc_id_filter.empty()) {
+                    bool run_test = false;
+                    for (const auto& id : tc_id_filter) {
+                        if (vpid_db_id == id) {
+                            run_test = true;
+                            break;
+                        }
+                    }
+                    if (!run_test) {
+                        LOGINFO("- Skipping Framestore SDI test case ID: " << vpid_db_id);
+                        continue;
                     }
                 }
-                if (!run_test) {
-                    LOGINFO("- Skipping Framestore SDI test case ID: " << vpid_db_id);
-                    continue;
-                }
+
                 auto vf = (NTV2VideoFormat)vj["vid_fmt_value"].get<int>();
                 auto pf = (NTV2PixelFormat)vj["pix_fmt_value"].get<int>();
                 auto vpid_standard_str = vj["smpte_id"].get_ref<std::string&>();
@@ -329,7 +334,7 @@ public:
                     std::bind(&FramestoreSDI::ExecuteTest,
                         this, std::placeholders::_1)
                 });
-                LOGINFO("- Added Framestore SDI test case ID: " << vpid_db_id);
+                // LOGINFO("- Added Framestore SDI test case ID: " << vpid_db_id);
                 _num_tests++;
             }
         }
@@ -528,7 +533,7 @@ TEST_SUITE("framestore_sdi" * doctest::description("SDI loopback tests")) {
             REQUIRE_EQ(AJAFileIO::GetDirectoryName(exe_path, exe_dir), AJA_STATUS_SUCCESS);
             const std::string json_base_dir = exe_dir + AJA_PATHSEP + "json" + AJA_PATHSEP;
             NTV2StringList vpid_json_paths;
-            vpid_json_paths.push_back(json_base_dir + "sdi_sd_hd.json");
+            // vpid_json_paths.push_back(json_base_dir + "sdi_sd_hd.json");
             vpid_json_paths.push_back(json_base_dir + "sdi_uhd_4k.json");
             REQUIRE_EQ(fs_sdi->Initialize(vpid_json_paths, test_cases), AJA_STATUS_SUCCESS);
         }
