@@ -61,6 +61,7 @@ AJAPixelFormatEntry AJAPixelFormatTable[AJA_PixelFormat_Size] =
 	{AJA_PixelFormat_YCbCr10_4K_RQ,		 AJA_FOURCC(' ',' ',' ',' '),	  10,	AJAScaleTypeNone,	  AJASubSample422,		1,	false,	"10 Bit YCbCr 4K RQ"},
 	{AJA_PixelFormat_BAYER10_DPX_LJ,	 AJA_FOURCC(' ',' ',' ',' '),	  10,	AJAScaleTypeNone,	  AJASubSampleBayer,	1,	true,	"Bayer 10 Bit DPX LJ"},
 	{AJA_PixelFormat_BAYER10_DPX_LJ,	 AJA_FOURCC(' ',' ',' ',' '),	  10,	AJAScaleTypeNone,	  AJASubSampleBayer,	1,	true,	"Bayer 12 Bit DPX LJ"},
+	{AJA_PixelFormat_BAYER10_HS,		 AJA_FOURCC(' ',' ',' ',' '),	  10,	AJAScaleTypeNone,	  AJASubSampleBayer,	1,	true,	"Bayer 10 Bit HS"},
 	{AJA_PixelFormat_BAYER12_HS,		 AJA_FOURCC(' ',' ',' ',' '),	  12,	AJAScaleTypeNone,	  AJASubSampleBayer,	1,	true,	"Bayer 12 Bit HS"},
 	{AJA_PixelFormat_BAYER12_PACK_HS,	 AJA_FOURCC('C','1','2','s'),	  12,	AJAScaleTypeNone,	  AJASubSampleBayer,	1,	true,	"Bayer 12 Bit Packed HS"},
 	{AJA_PixelFormat_RAW10,				 AJA_FOURCC('C','1','0','s'),	  10,	AJAScaleTypeNone,	  AJASubSampleBayer,	1,	true,	"RAW 10 Bit"},			// CION Raw 10 bit
@@ -69,18 +70,16 @@ AJAPixelFormatEntry AJAPixelFormatTable[AJA_PixelFormat_Size] =
 	{AJA_PixelFormat_YCBCR10_422PL,		 AJA_FOURCC(' ',' ',' ',' '),	  10,	AJAScaleTypeNone,	  AJASubSample422,		3,	false,	"10 Bit YCbCr 422 Packed 3-Plane"},
 	{AJA_PixelFormat_YCBCR8_420PL,		 AJA_FOURCC(' ',' ',' ',' '),	  8,	AJAScaleTypeNone,	  AJASubSample420,		3,	false,	"8 Bit YCbCr 420 3-Plane"},
 	{AJA_PixelFormat_YCBCR8_422PL,		 AJA_FOURCC(' ',' ',' ',' '),	  8,	AJAScaleTypeNone,	  AJASubSample422,		3,	false,	"8 Bit YCbCr 422 3-Plane"},
-	
-	{AJA_PixelFormat_YCBCR8_420PL3,		  AJA_FOURCC('I','4','2','0'),	  8,	AJAScaleTypeNone,	  AJASubSample420,		3,	false,	"8 Bit YCbCr 420 3-Plane"},
-	{AJA_PixelFormat_YCBCR8_422PL3,		  AJA_FOURCC('Y','4','2','B'),	  8,	AJAScaleTypeNone,	  AJASubSample422,		3,	false,	"8 Bit YCbCr 422 3-Plane"},
-	{AJA_PixelFormat_YCBCR8_420PL2,       AJA_FOURCC('N','V','1','2'),	  8,	AJAScaleTypeNone,	  AJASubSample420,		2,	false,	"8 Bit YCbCr 420 2-Plane"},					// from FFmpeg
-	{AJA_PixelFormat_YCBCR8_422PL2,       AJA_FOURCC('N','V','1','6'),	  8,	AJAScaleTypeNone,	  AJASubSample422,		2,	false,	"8 Bit YCbCr 422 2-Plane"},					// from FFmpeg
-	
-	{AJA_PixelFormat_YCBCR10_420PL3LE,	  AJA_FOURCC('Y','3',0xb,0xa),	  10,	AJAScaleTypeNone,	  AJASubSample420,		3,	false,	"10 Bit YCbCr 420 Unpacked 3-Plane LE"},	// from FFmpeg
-	{AJA_PixelFormat_YCBCR10_422PL3LE,	  AJA_FOURCC('Y','3',0xa,0xa),	  10,	AJAScaleTypeNone,	  AJASubSample422,		3,	false,	"10 Bit YCbCr 422 Unpacked 3-Plane LE"},	// from FFmpeg
-	{AJA_PixelFormat_YCBCR10_420PL2LE,	  AJA_FOURCC('P','0','1','0'),	  10,	AJAScaleTypeNone,	  AJASubSample420,		3,	false,	"10 Bit YCbCr 420 Unpacked 2-Plane LE"},	// from FFmpeg
-	{AJA_PixelFormat_YCBCR10_422PL2LE,	  AJA_FOURCC('N','V','2','0'),	  10,	AJAScaleTypeNone,	  AJASubSample422,		3,	false,	"10 Bit YCbCr 422 Unpacked 2-Plane LE"},	// from FFmpeg
-	{AJA_PixelFormat_YCBCR10_420PL2,	  AJA_FOURCC('2','Y','2','0'),	  10,	AJAScaleTypeNone,	  AJASubSample420,		2,	false,	"10 Bit YCbCr 420 Packed 2-Plane LE"},		// AJA ad hoc 4cc
-	{AJA_PixelFormat_YCBCR10_422PL2,	  AJA_FOURCC('2','Y','2','2'),	  10,	AJAScaleTypeNone,	  AJASubSample422,		2,	false,	"10 Bit YCbCr 422 Packed 2-Plane LE"},		// AJA ad hoc 4cc
+	{AJA_PixelFormat_YCBCR8_420PL3,		 AJA_FOURCC('I','4','2','0'),	  8,	AJAScaleTypeNone,	  AJASubSample420,		3,	false,	"8 Bit YCbCr 420 3-Plane"},
+	{AJA_PixelFormat_YCBCR8_422PL3,		 AJA_FOURCC('Y','4','2','B'),	  8,	AJAScaleTypeNone,	  AJASubSample422,		3,	false,	"8 Bit YCbCr 422 3-Plane"},
+	{AJA_PixelFormat_YCBCR10_420PL3LE,	 AJA_FOURCC('Y','3',0xb,0xa),	  10,	AJAScaleTypeNone,	  AJASubSample420,		3,	false,	"10 Bit YCbCr 420 Unpacked 3-Plane LE"},	// from FFmpeg
+	{AJA_PixelFormat_YCBCR10_422PL3LE,	 AJA_FOURCC('Y','3',0xa,0xa),	  10,	AJAScaleTypeNone,	  AJASubSample422,		3,	false,	"10 Bit YCbCr 422 Unpacked 3-Plane LE"},	// from FFmpeg
+	{AJA_PixelFormat_YCBCR10_420PL2,	 AJA_FOURCC('2','Y','2','0'),	  10,	AJAScaleTypeNone,	  AJASubSample420,		2,	false,	"10 Bit YCbCr 420 Packed 2-Plane LE"},		// AJA ad hoc 4cc
+	{AJA_PixelFormat_YCBCR10_422PL2,	 AJA_FOURCC('2','Y','2','2'),	  10,	AJAScaleTypeNone,	  AJASubSample422,		2,	false,	"10 Bit YCbCr 422 Packed 2-Plane LE"},		// AJA ad hoc 4cc
+	{AJA_PixelFormat_YCBCR8_420PL2,      AJA_FOURCC('N','V','1','2'),	  8,	AJAScaleTypeNone,	  AJASubSample420,		2,	false,	"8 Bit YCbCr 420 2-Plane"},					// from FFmpeg
+	{AJA_PixelFormat_YCBCR8_422PL2,      AJA_FOURCC('N','V','1','6'),	  8,	AJAScaleTypeNone,	  AJASubSample422,		2,	false,	"8 Bit YCbCr 422 2-Plane"},					// from FFmpeg
+	{AJA_PixelFormat_YCBCR10_420PL2LE,	 AJA_FOURCC('P','0','1','0'),	  10,	AJAScaleTypeNone,	  AJASubSample420,		3,	false,	"10 Bit YCbCr 420 Unpacked 2-Plane LE"},	// from FFmpeg
+	{AJA_PixelFormat_YCBCR10_422PL2LE,	 AJA_FOURCC('N','V','2','0'),	  10,	AJAScaleTypeNone,	  AJASubSample422,		3,	false,	"10 Bit YCbCr 422 Unpacked 2-Plane LE"}		// from FFmpeg
 };
 const size_t AJAPixelFormatTableSize = sizeof(AJAPixelFormatTable) / sizeof(AJAPixelFormatEntry);
 

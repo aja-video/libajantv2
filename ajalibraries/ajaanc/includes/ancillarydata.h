@@ -245,12 +245,16 @@ typedef struct AJAAncillaryDataLocation
 		inline bool		operator == (const AJAAncillaryDataLocation & inRHS) const
 		{
 			//	Everything must match exactly:
-			return GetDataLink() == inRHS.GetDataLink()
+			bool equals = (GetDataLink() == inRHS.GetDataLink()
 					&&  GetDataStream() == inRHS.GetDataStream()
 						&&  GetDataChannel() == inRHS.GetDataChannel()
 //	No longer necessary		&&  GetDataSpace() == inRHS.GetDataSpace()
-								&&  GetLineNumber() == inRHS.GetLineNumber()
-									&&  GetHorizontalOffset() == inRHS.GetHorizontalOffset();
+								&&  GetLineNumber() == inRHS.GetLineNumber());
+			if (GetHorizontalOffset() != 0 && inRHS.GetHorizontalOffset() != 0) {
+				equals = (GetHorizontalOffset() == inRHS.GetHorizontalOffset());
+			}
+
+			return equals;
 		}
 
 		inline bool		operator != (const AJAAncillaryDataLocation & inRHS) const		{return !(*this == inRHS);}
