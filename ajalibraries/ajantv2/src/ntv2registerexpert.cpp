@@ -2170,7 +2170,8 @@ private:
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 		{	(void) inRegNum;	(void) inDeviceID;
 			ostringstream	oss;
-			oss << "Has CanConnect Xpt Route ROM: "		<< YesNo(inRegValue & BIT(0));
+			oss	<< "Has CanConnect Xpt Route ROM: "		<< YesNo(inRegValue & BIT(0)) << endl
+				<< "AudioSystems can start on VBI: "	<< YesNo(inRegValue & BIT(1));
 			return oss.str();
 		}
 	}	mDecodeCanDoStatus;
