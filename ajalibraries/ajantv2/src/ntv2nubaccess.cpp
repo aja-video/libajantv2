@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2nubaccess.cpp
-	@brief		Implementation of NTV2 "nub" functions that connect/open/close/send/receive data.
+	@brief		Implementation of NTV2 "nub" client functions.
 	@copyright	(C) 2006-2022 AJA Video Systems, Inc.
 **/
 
@@ -11,1591 +11,1125 @@
 #include <string.h>
 #include <sys/types.h>
 #include "ajatypes.h"
-
-#if defined(AJALinux ) || defined(AJAMac)
-	#include <sys/socket.h>
-	#include <netinet/in.h>
-	#include <arpa/inet.h>
-	#include <netdb.h>
-	#include <unistd.h>
-#elif defined(MSWindows)
-	//#include <WinSock.h>
-	#include <WinSock2.h>
-#endif
-#if defined(AJAMac)
-	#include <CoreFoundation/CoreFoundation.h>
-	#include <dlfcn.h>
-#endif
-#include "ntv2discover.h"
-#include "ntv2nubpktcom.h"
+#include "ntv2card.h"
+#include "ntv2utils.h"
 #include "ntv2nubaccess.h"
 #include "ntv2endian.h"
 #include "ntv2publicinterface.h"
 #include "ntv2testpatterngen.h"
+#include "ntv2devicescanner.h"	//	For IsAlphaNumeric, etc.
 #include "ajabase/system/debug.h"
 #include "ajabase/common/common.h"
 #include "ajabase/system/info.h"
 #include <iomanip>
+#if defined(AJAMac)
+	#include <CoreFoundation/CoreFoundation.h>
+	#include <dlfcn.h>
+#endif
 
 using namespace std;
 
-// max number of bytes we can get at once 
-#define MAXDATASIZE (sizeof(NTV2NubPktHeader) + NTV2_NUBPKT_MAX_DATASIZE)
-
-#if defined(NTV2_NUB_CLIENT_SUPPORT)
 #define INSTP(_p_)			xHEX0N(uint64_t(_p_),16)
 #define	NBFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_RPCClient, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #define	NBWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_RPCClient, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #define	NBNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_RPCClient, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #define	NBINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_RPCClient, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #define	NBDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_RPCClient, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	DIFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	DIWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	DINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	DIINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#define	DIDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#define	NBCFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_RPCClient, AJAFUNC << ": " << __x__)
+#define	NBCWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_RPCClient, AJAFUNC << ": " << __x__)
+#define	NBCNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_RPCClient, AJAFUNC << ": " << __x__)
+#define	NBCINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_RPCClient, AJAFUNC << ": " << __x__)
+#define	NBCDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_RPCClient, AJAFUNC << ": " << __x__)
+#define	NBSFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_RPCServer, AJAFUNC << ": " << __x__)
+#define	NBSWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_RPCServer, AJAFUNC << ": " << __x__)
+#define	NBSNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_RPCServer, AJAFUNC << ": " << __x__)
+#define	NBSINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_RPCServer, AJAFUNC << ": " << __x__)
+#define	NBSDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_RPCServer, AJAFUNC << ": " << __x__)
+
+
+string NTV2Dictionary::valueForKey (const string & inKey) const
+{
+	DictConstIter it(mDict.find(inKey));
+	if (it == mDict.end())
+		return "";
+	return it->second;
+}
+
+uint16_t NTV2Dictionary::u16ValueForKey (const string & inKey, const uint16_t inDefault) const
+{
+	string str(valueForKey(inKey));
+	if (str.empty())
+		return inDefault;
+	if (str.find("0x") == 0  ||  str.find("0X") == 0)
+	{
+		str.erase(0,2);
+		if (str.empty())
+			return inDefault;
+		return aja::stoul(str, AJA_NULL, 16);
+	}
+	if (str.find("x") == 0  ||  str.find("X") == 0)
+	{
+		str.erase(0,1);
+		if (str.empty())
+			return inDefault;
+		return aja::stoul(str, AJA_NULL, 16);
+	}
+	if (str.find("o") == 0  ||  str.find("O") == 0)
+	{
+		str.erase(0,1);
+		if (str.empty())
+			return inDefault;
+		return aja::stoul(str, AJA_NULL, 8);
+	}
+	if (str.find("b") == 0  ||  str.find("B") == 0)
+	{
+		str.erase(0,1);
+		if (str.empty())
+			return inDefault;
+		return aja::stoul(str, AJA_NULL, 2);
+	}
+	return aja::stoul(str, AJA_NULL, 10);
+}
+
+ostream & NTV2Dictionary::Print (ostream & oss, const bool inCompact) const
+{
+	if (inCompact)
+		for (DictConstIter it(mDict.begin());  it != mDict.end();  )
+		{
+			const string & key(it->first), val(it->second), quote(val.find(' ') != string::npos ? "'" : "");
+			oss << key << "=" << quote << val << quote;
+			if (++it != mDict.end())
+				oss << " ";
+		}
+	else if (empty())
+		oss << "0 entries";
+	else
+	{
+		const int kyWdth(int(largestKeySize()+0)), valWdth(int(largestValueSize()+0));
+		oss << string(size_t(kyWdth), '-') << "   " << string(size_t(valWdth), '-') << endl;
+		for (DictConstIter it(mDict.begin());  it != mDict.end();  )
+		{
+			const string & key(it->first), val(it->second);
+			oss << std::setw(kyWdth) << key << " : " << val;
+			if (++it != mDict.end())
+				oss << endl;
+		}
+	}
+	return oss;
+}
+
+NTV2StringSet NTV2Dictionary::keys (void) const
+{
+	NTV2StringSet result;
+	for (DictConstIter it(mDict.begin());  it != mDict.end();  ++it)
+		result.insert(it->first);
+	return result;
+}
+
+size_t NTV2Dictionary::largestKeySize (void) const
+{
+	size_t result(0);
+	for (DictConstIter it(mDict.begin());  it != mDict.end();  ++it)
+		if (it->first.length() > result)
+			result = it->first.length();
+	return result;
+}
+
+size_t NTV2Dictionary::largestValueSize (void) const
+{
+	size_t result(0);
+	for (DictConstIter it(mDict.begin());  it != mDict.end();  ++it)
+		if (it->second.length() > result)
+			result = it->second.length();
+	return result;
+}
+
+size_t NTV2Dictionary::UpdateFrom (const NTV2Dictionary & inDict)
+{
+	size_t numUpdated(0);
+	for (DictConstIter it(inDict.mDict.begin());  it != inDict.mDict.end();  ++it)
+		if (hasKey(it->first))
+			{mDict[it->first] = it->second;   numUpdated++;}
+	return numUpdated;
+}
+
+size_t NTV2Dictionary::AddFrom (const NTV2Dictionary & inDict)
+{
+	size_t numAdded(0);
+	for (DictConstIter it(inDict.mDict.begin());  it != inDict.mDict.end();  ++it)
+		if (!hasKey(it->first))
+			{mDict[it->first] = it->second;   numAdded++;}
+	return numAdded;
+}
+
+
+NTV2DeviceSpecParser::NTV2DeviceSpecParser (const string inSpec)
+{
+	Reset(inSpec);
+}
+
+void NTV2DeviceSpecParser::Reset (const string inSpec)
+{
+	mErrors.clear();
+	mResult.clear();
+	mQueryParams.clear();
+	mPos = 0;
+	mSpec = inSpec;
+	if (!mSpec.empty())
+		Parse();	//	Go ahead and parse it
+}
+
+string NTV2DeviceSpecParser::Resource (const bool inStripLeadSlash) const
+{
+	string rsrc (Result(kConnectParamResource));
+	if (rsrc.empty())
+		return rsrc;
+	if (!inStripLeadSlash)
+		return rsrc;
+	if (rsrc.at(0) == '/')
+		rsrc.erase(0,1);
+	return rsrc;
+}
+
+void NTV2DeviceSpecParser::Parse (void)
+{
+	//	A run of 3 consecutive letters that match "ntv" -- probably a scheme
+	//	A run of 1 or 2 decimal digits -- probably a local device index number
+	//	"0X" or "0x":
+	//		-	maybe a hexadecimal 32-bit value -- a local device ID
+	//		-	maybe a hexadecimal 64-bit value -- a local device serial number
+	//	A run of 8 or 9 alphanumeric chars -- probably a local device serial number
+	ostringstream err;
+	string	tokDevID, tokIndexNum, tokScheme, tokSerial, tokModelName;
+	size_t	posDevID(0), posIndexNum(0), posScheme(0), posSerial(0), posModelName(0);
+	bool	isSerial(ParseSerialNum(posSerial, tokSerial)), isScheme(ParseScheme(posScheme, tokScheme));
+	bool	isIndexNum(ParseDecNumber(posIndexNum, tokIndexNum)), isDeviceID(ParseDeviceID(posDevID, tokDevID));
+	bool	isModelName(ParseModelName(posModelName, tokModelName));
+	if (isScheme  &&  tokScheme == kLegalSchemeNTV2Local)
+	{	//	Re-parse serial#, index#, deviceID, modelName from just past "://"...
+		posDevID = posIndexNum = posSerial = posModelName  = posScheme;
+		isSerial = ParseSerialNum(posSerial, tokSerial);
+		isIndexNum = ParseDecNumber(posIndexNum, tokIndexNum);
+		isDeviceID = ParseDeviceID(posDevID, tokDevID);
+		isModelName = ParseModelName(posModelName, tokModelName);
+	}
+	do
+	{
+		if (isModelName)
+		{
+			mPos = posModelName;
+			mResult.insert(kConnectParamScheme, kLegalSchemeNTV2Local);
+			mResult.insert(kConnectParamDevModel, tokModelName);
+			break;
+		}
+		if (isSerial)
+		{	//	Final serial number checks...
+			bool converted(false);
+			mPos = posSerial;
+			if (tokSerial.length() == 18)	//	64-bit hex value?
+			{
+				//	Convert numeric serial number into character string...
+				const bool hasLeading0X (tokSerial.find("0X") == 0  ||  tokSerial.find("0x") == 0);
+				const string hex64(tokSerial.substr(hasLeading0X ? 2 : 0, 16));
+				const ULWord64 serNum64(aja::stoull(hex64, AJA_NULL, 16));
+				string serTxt;	//	(CNTV2Card::SerialNum64ToString(serNum64));
+				for (size_t ndx(0);  ndx < 8;  ndx++)
+					serTxt += char(serNum64 >> ((7-ndx)*8));
+				//cerr << "Converted '" << tokSerial << "' into '" << serTxt << "'" << endl;
+				tokSerial = serTxt;
+				converted = true;
+			}
+			//	Check for illegal characters in serial number:
+			for (size_t ndx(0);  ndx < tokSerial.length();  ndx++)
+			{	char ch(tokSerial.at(ndx));
+				if ( ! ( ( (ch >= '0') && (ch <= '9') ) ||
+						 ( (ch >= 'A') && (ch <= 'Z') ) ||
+						 ( (ch >= 'a') && (ch <= 'z') ) ||
+						   (ch == ' ') || (ch == '-') ) )
+				{
+					err << "Illegal serial number character '" << (ch ? ch : '?') << "' (" << xHEX0N(UWord(ch),2) << ")";
+					AddError(err.str());
+					mPos -= converted ? 16 : 8;  mPos += ndx * (converted ? 2 : 1) + (converted ? 1 : 0);
+					break;
+				}
+			}
+			mResult.insert(kConnectParamDevSerial, tokSerial);
+			mResult.insert(kConnectParamScheme, kLegalSchemeNTV2Local);
+			break;
+		}
+		if (isDeviceID)
+		{
+			mPos = posDevID;
+			mResult.insert(kConnectParamDevID, tokDevID);
+			mResult.insert(kConnectParamScheme, kLegalSchemeNTV2Local);
+			break;
+		}
+		if (isIndexNum)
+		{
+			mPos = posIndexNum;
+			mResult.insert(kConnectParamDevIndex, tokIndexNum);
+			mResult.insert(kConnectParamScheme, kLegalSchemeNTV2Local);
+			break;
+		}
+		if (!isScheme  ||  (isScheme  &&  tokScheme == kLegalSchemeNTV2Local))
+		{	//	No such local device
+			err << "Invalid local device specification";
+			AddError(err.str());
+			mPos += isScheme ? 12 : 0;
+			break;
+		}
+		if (isScheme)
+		{	//	Continue parsing URLspec...
+			mPos = posScheme;
+			if (!IsSupportedScheme(tokScheme))
+				{err << "Unsupported scheme '" << tokScheme << "'";  AddError(err.str());  mPos -= 3;  break;}
+			//	"ntv2://swdevice/?"
+			//		"nosharedmemory"
+			//		"&supportlog=file%3A%2F%2F%2FUsers%2Fdemo%2FDesktop%2FAJAWatcherSupport.log"
+			//		"&sdram=file%3A%2F%2F%2FUsers%2Fdemo%2FDesktop%2FSDRAMsnapshot.dat");
+			//	Host[port]/[resource[?query]]
+			size_t posURL(posScheme), posRsrc(0);
+			string	host, port, rsrcPath;
+			if (!ParseHostAddressAndPortNumber(posURL, host, port))
+				{mPos = posURL;  AddError("Bad host address or port number");  break;}
+			mPos = posURL;
+			mResult.insert(kConnectParamScheme, tokScheme);
+			mResult.insert(kConnectParamHost, host);
+			if (!port.empty())
+				mResult.insert(kConnectParamPort, port);
+
+			//	Parse resource path...
+			posRsrc = mPos;
+			if (ParseResourcePath(posRsrc, rsrcPath))
+				{mPos = posRsrc;  mResult.insert(kConnectParamResource, rsrcPath);}
+			//	Parse query...
+			size_t posQuery(mPos);
+			NTV2Dictionary params;
+			if (ParseQuery(posQuery, params))
+			{
+				mResult.insert(kConnectParamQuery, DeviceSpec().substr(mPos, posQuery-mPos+1));
+				mQueryParams = params;
+				mPos = posQuery;
+			}
+			if (mPos < SpecLength())
+				{err << "Extra character(s) at " << DEC(mPos);  AddError(err.str());  break;}
+		}
+	} while (false);
+	#if defined(_DEBUG)
+		ostringstream oss;
+		if (Successful())
+			{oss << "Success: '" << DeviceSpec() << "'  --  "; Print(oss); AJA_sDEBUG(AJA_DebugUnit_Application, oss.str());}
+		else
+			{oss << "Failed: "; PrintErrors(oss); AJA_sERROR(AJA_DebugUnit_Application, oss.str());}
+	#endif	//	defined(_DEBUG)
+}	//	Parse
+
+ostream & NTV2DeviceSpecParser::Print (ostream & oss, const bool inDumpResults) const
+{
+	oss << (IsLocalDevice() ? "local " : "") << "device";
+	if (HasResult(kConnectParamDevSerial))
+		oss << " serial '" << DeviceSerial() << "'";
+	else if (HasResult(kConnectParamDevModel))
+		oss << " model '" << DeviceModel() << "'";
+	else if (HasResult(kConnectParamDevID))
+		oss << " ID '" << DeviceID() << "'";
+	else if (HasResult(kConnectParamDevIndex))
+		oss << " " << DeviceIndex();
+	if (HasResult(kConnectParamHost))
+		oss << " host '" << Result(kConnectParamHost) << "'";
+	if (HasResult(kConnectParamPort))
+		oss << " port " << Result(kConnectParamPort);
+	if (HasResult(kConnectParamResource))
+		oss << " resource '" << Result(kConnectParamResource) << "'";
+	if (HasResult(kConnectParamQuery))
+		oss << " query '" << Result(kConnectParamQuery) << "'";
+	if (inDumpResults)
+		{oss << endl; Results().Print(oss, /*compact?*/false);}
+	return oss;
+}
+
+string NTV2DeviceSpecParser::InfoString (void) const
+{
+	ostringstream oss;
+	Print(oss);
+	return oss.str();
+}
+
+uint64_t NTV2DeviceSpecParser::DeviceSerial (void) const
+{
+	uint64_t result(0);
+	StringToSerialNum64 (Result(kConnectParamDevSerial), result);
+	return result;
+}
+
+NTV2DeviceID NTV2DeviceSpecParser::DeviceID (void) const
+{
+	string devIDStr (Result(kConnectParamDevID));
+	if (devIDStr.find("0X") != string::npos)
+		devIDStr.erase(0,2);	//	Delete "0x"
+	ULWord u32 = ULWord(aja::stoull(devIDStr, AJA_NULL, 16));
+	return NTV2DeviceID(u32);
+}
+
+UWord NTV2DeviceSpecParser::DeviceIndex (void) const
+{
+	string devIDStr (Result(kConnectParamDevIndex));
+	UWord u16 = UWord(aja::stoul(devIDStr));
+	return u16;
+}
+
+ostream & NTV2DeviceSpecParser::PrintErrors (ostream & oss) const
+{
+	oss << DEC(ErrorCount()) << (ErrorCount() == 1 ? " error" : " errors") << (HasErrors() ? ":" : "");
+	if (HasErrors())
+	{
+		oss	<< endl
+			<< DeviceSpec() << endl
+			<< string(mPos ? mPos : 0,' ') << "^" << endl;
+		for (size_t num(0);  num < ErrorCount();  )
+		{
+			oss << Error(num);
+			if (++num < ErrorCount())
+				oss << endl;
+		}
+	}
+	return oss;
+}
+
+bool NTV2DeviceSpecParser::ParseHexNumber (size_t & pos, string & outToken)
+{
+	outToken.clear();
+	string tokHexNum;
+	while (pos < SpecLength())
+	{
+		const char ch(CharAt(pos));
+		if (tokHexNum.length() == 0)
+		{
+			if (ch != '0')
+				break;
+			++pos; tokHexNum = ch;
+		}
+		else if (tokHexNum.length() == 1)
+		{
+			if (ch != 'x'  &&  ch != 'X')
+				break;
+			++pos; tokHexNum += ch;
+		}
+		else
+		{
+			if (!IsHexDigit(ch))
+				break;
+			++pos; tokHexNum += ch;
+		}
+	}
+	if (tokHexNum.length() > 2)	//	At least 3 chars
+		{aja::upper(tokHexNum);  outToken = tokHexNum;}	//	Force upper-case hex
+	return !outToken.empty();
+}
+
+bool NTV2DeviceSpecParser::ParseDecNumber (size_t & pos, string & outToken)
+{
+	outToken.clear();
+	string tokDecNum;
+	while (pos < SpecLength())
+	{
+		const char ch(CharAt(pos));
+		if (!IsDecimalDigit(ch))
+			break;
+		++pos;
+		if (ch != '0'  ||  tokDecNum != "0")	//	This prevents accumulating more than one leading zero
+			tokDecNum += ch;
+	}
+	if (tokDecNum.length() > 0)	//	At least 1 char
+		outToken = tokDecNum;
+	return !outToken.empty();
+}
+
+bool NTV2DeviceSpecParser::ParseAlphaNumeric (size_t & pos, string & outToken, const std::string & inOtherChars)
+{
+	outToken.clear();
+	string tokAlphaNum;
+	while (pos < SpecLength())
+	{
+		const char ch(CharAt(pos));
+		if (!IsLetter(ch) && !IsDecimalDigit(ch) && inOtherChars.find(ch) == string::npos)
+			break;
+		++pos;  tokAlphaNum += ch;
+	}
+	if (tokAlphaNum.length() > 1)	//	At least 2 chars
+		outToken = tokAlphaNum;
+	return !outToken.empty();
+}
+
+bool NTV2DeviceSpecParser::ParseScheme (size_t & pos, string & outToken)
+{
+	outToken.clear();
+	string rawScheme, tokScheme;
+	while (ParseAlphaNumeric(pos, rawScheme))
+	{
+		tokScheme = rawScheme;
+		char ch(CharAt(pos));
+		if (ch != ':')
+			break;
+		++pos;  tokScheme += ch;
+
+		ch = CharAt(pos);
+		if (ch != '/')
+			break;
+		++pos;  tokScheme += ch;
+
+		ch = CharAt(pos);
+		if (ch != '/')
+			break;
+		++pos;  tokScheme += ch;
+		break;
+	}
+	if (tokScheme.find("://") != string::npos)	//	Contains "://"
+		{aja::lower(rawScheme);  outToken = rawScheme;}	//	Force lower-case
+	return !outToken.empty();
+}
+
+bool NTV2DeviceSpecParser::ParseSerialNum (size_t & pos, string & outToken)
+{
+	outToken.clear();
+	string tokAlphaNum, tokHexNum;
+	size_t posAlphaNum(pos), posHexNum(pos);
+	do
+	{
+		while (posAlphaNum < SpecLength())
+		{
+			const char ch(CharAt(posAlphaNum));
+			if (!IsLetter(ch) && !IsDecimalDigit(ch) && ch != '-' && ch != ' ')
+				break;
+			++posAlphaNum;  tokAlphaNum += ch;
+		}
+		if (tokAlphaNum.length() < 2)	//	At least 2 chars
+			tokAlphaNum.clear();
+		else if (tokAlphaNum.length() == 8  ||  tokAlphaNum.length() == 9)
+			{pos = posAlphaNum;   outToken = tokAlphaNum;  break;}
+
+		if (ParseHexNumber(posHexNum, tokHexNum))
+			if (tokHexNum.length() == 18)	//	64-bit value!
+				{pos = posHexNum;  outToken = tokHexNum;}
+	} while (false);
+	return !outToken.empty();
+}
+
+bool NTV2DeviceSpecParser::ParseDeviceID (size_t & pos, string & outToken)
+{
+	outToken.clear();
+	string tokHexNum;
+	if (!ParseHexNumber(pos, tokHexNum))
+		return false;
+	if (tokHexNum.length() != 10)
+		return false;
+	aja::upper(tokHexNum);	//	Fold to upper case
+
+	//	Check if it matches a known supported NTV2DeviceID...
+	NTV2DeviceIDSet allDevIDs(::NTV2GetSupportedDevices());
+	NTV2StringSet devIDStrs;
+	for (NTV2DeviceIDSetConstIter it(allDevIDs.begin());  it != allDevIDs.end();  ++it)
+	{
+		ostringstream devID; devID << xHEX0N(*it,8);
+		string devIDStr(devID.str());
+		aja::upper(devIDStr);
+		devIDStrs.insert(devIDStr);
+	}	//	for each known/supported NTV2DeviceID
+	if (devIDStrs.find(tokHexNum) != devIDStrs.end())
+		outToken = tokHexNum;	//	Valid!
+	return !outToken.empty();
+}
+
+bool NTV2DeviceSpecParser::ParseModelName (size_t & pos, string & outToken)
+{
+	outToken.clear();
+	string tokName;
+	if (!ParseAlphaNumeric(pos, tokName))
+		return false;
+	aja::lower(tokName);	//	Fold to lower case
+
+	//	Check if it matches a known supported device model name...
+	NTV2DeviceIDSet allDevIDs(::NTV2GetSupportedDevices());
+	NTV2StringSet modelNames;
+	for (NTV2DeviceIDSetConstIter it(allDevIDs.begin());  it != allDevIDs.end();  ++it)
+	{
+		string modelName(::NTV2DeviceIDToString(*it));
+		aja::lower(modelName);
+		modelNames.insert(modelName);
+	}	//	for each known/supported NTV2DeviceID
+	if (modelNames.find(tokName) != modelNames.end())
+		outToken = tokName;	//	Valid!
+	return !outToken.empty();
+}
+
+bool NTV2DeviceSpecParser::ParseDNSName (size_t & pos, string & outDNSName)
+{
+	outDNSName.clear();
+	string dnsName, name;
+	size_t dnsPos(pos);
+	char ch(0);
+	while (ParseAlphaNumeric(dnsPos, name, "_-"))	//	also allow '_' and '-'
+	{
+		if (!dnsName.empty())
+			dnsName += '.';
+		dnsName += name;
+		ch = CharAt(dnsPos);
+		if (ch != '.')
+			break;
+		++dnsPos;
+	}
+	if (!dnsName.empty())
+		pos = dnsPos;
+	outDNSName = dnsName;
+	return !outDNSName.empty();
+}
+
+bool NTV2DeviceSpecParser::ParseIPv4Address (size_t & pos, string & outIPv4)
+{
+	outIPv4.clear();
+	string ipv4Name, num;
+	size_t ipv4Pos(pos);
+	char ch(0);
+	while (ParseDecNumber(ipv4Pos, num))
+	{
+		if (!ipv4Name.empty())
+			ipv4Name += '.';
+		ipv4Name += num;
+		ch = CharAt(ipv4Pos);
+		if (ch != '.')
+			break;
+		++ipv4Pos;
+	}
+	if (!ipv4Name.empty())
+		pos = ipv4Pos;
+	outIPv4 = ipv4Name;
+	return !outIPv4.empty();
+}
+
+bool NTV2DeviceSpecParser::ParseHostAddressAndPortNumber (size_t & pos, string & outAddr, string & outPort)
+{
+	outAddr.clear();  outPort.clear();
+	//	Look for a DNSName or an IPv4 dotted quad...
+	string dnsName, ipv4, port;
+	size_t dnsPos(pos), ipv4Pos(pos), portPos(0);
+	bool isDNS(ParseDNSName(dnsPos, dnsName)), isIPv4(ParseIPv4Address(ipv4Pos, ipv4));
+	if (!isDNS  &&  !isIPv4)
+		{pos = dnsPos < ipv4Pos ? ipv4Pos : dnsPos;  return false;}
+	//	NOTE:  It's possible to have both isIPv4 && isDNS true -- in this case, isIPv4 takes precedence:
+	if (isIPv4)
+		{outAddr = ipv4;  pos = portPos = ipv4Pos;}
+	else if (isDNS)
+		{outAddr = dnsName;  pos = portPos = dnsPos;}
+
+	//	Check for optional port number
+	char ch (CharAt(portPos));
+	if (ch != ':')
+		return true;
+	++portPos;
+	if (!ParseDecNumber(portPos, port))
+		{pos = portPos;  return false;}	//	Bad port number!
+	outPort = port;
+	pos = portPos;
+	return true;
+}
+
+bool NTV2DeviceSpecParser::ParseResourcePath (size_t & pos, string & outRsrc)
+{
+	outRsrc.clear();
+	string rsrc, name;
+	size_t rsrcPos(pos);
+	char ch(CharAt(rsrcPos));
+	while (ch == '/')
+	{
+		++rsrcPos;
+		rsrc += '/';
+		if (!ParseAlphaNumeric(rsrcPos, name))
+			break;
+		rsrc += name;
+		ch = CharAt(rsrcPos);
+	}
+	if (!rsrc.empty())
+		pos = rsrcPos;
+	outRsrc = rsrc;
+	return !outRsrc.empty();
+}
+
+bool NTV2DeviceSpecParser::ParseParamAssignment (size_t & pos, string & outKey, string & outValue)
+{
+	outKey.clear();  outValue.clear();
+	string key, value;
+	size_t paramPos(pos);
+	char ch(CharAt(paramPos));
+	if (ch == '&')
+		ch = CharAt(++paramPos);
+	do
+	{
+		if (!ParseAlphaNumeric(paramPos, key))
+			break;
+		ch = CharAt(paramPos);
+		if (ch != '=')
+			break;
+		ch = CharAt(++paramPos);
+		while (ch != 0  &&  ch != '&')
+		{
+			value += ch;
+			ch = CharAt(++paramPos);
+		}
+	} while (false);
+	if (!key.empty())
+		{pos = paramPos;  outKey = key;  outValue = value;}
+	return !key.empty();
+}
+
+bool NTV2DeviceSpecParser::ParseQuery (size_t & pos, NTV2Dictionary & outParams)
+{
+	outParams.clear();
+	string key, value;
+	size_t queryPos(pos);
+	char ch(CharAt(queryPos));
+	if (ch != '?')
+		return false;
+	ch = CharAt(++queryPos);
+
+	while (ParseParamAssignment(queryPos, key, value))
+	{
+		outParams.insert(key, value);
+		ch = CharAt(queryPos);
+		if (ch != '&')
+			break;
+	}
+	if (!outParams.empty())
+		pos = queryPos;
+	return !outParams.empty();
+}
+
+bool NTV2DeviceSpecParser::IsSupportedScheme (const string & inScheme)
+{
+	return inScheme.find("ntv2") == 0;	//	Starts with "ntv2"
+}
+
+bool NTV2DeviceSpecParser::IsUpperLetter (const char inChar)
+{	static const string sHexDigits("_ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+	return sHexDigits.find(inChar) != string::npos;
+}
+
+bool NTV2DeviceSpecParser::IsLowerLetter (const char inChar)
+{	static const string sHexDigits("abcdefghijklmnopqrstuvwxyz");
+	return sHexDigits.find(inChar) != string::npos;
+}
+
+bool NTV2DeviceSpecParser::IsLetter (const char inChar, const bool inIncludeUnderscore)
+{	return (inIncludeUnderscore  &&  inChar == '_')  ||  IsUpperLetter(inChar)  ||  IsLowerLetter(inChar);
+}
+
+bool NTV2DeviceSpecParser::IsDecimalDigit (const char inChar)
+{	static const string sDecDigits("0123456789");
+	return sDecDigits.find(inChar) != string::npos;
+}
+
+bool NTV2DeviceSpecParser::IsHexDigit (const char inChar)
+{	static const string sHexDigits("0123456789ABCDEFabcdef");
+	return sHexDigits.find(inChar) != string::npos;
+}
+
+bool NTV2DeviceSpecParser::IsLegalSerialNumChar (const char inChar)
+{	return IsLetter(inChar) || IsDecimalDigit(inChar);
+}
+
+#if defined(_DEBUG)
+	void NTV2DeviceSpecParser::test (void)
+	{
+		NTV2DeviceSpecParser specParser;
+		specParser.Reset("1");
+		specParser.Reset("00000000000000000000000000000000000000000000000000000000000000000000000000000000000001");
+		specParser.Reset("corvid24");
+		specParser.Reset("corvid88");
+		specParser.Reset("konalhi");
+		specParser.Reset("alpha");
+		specParser.Reset("00T64450");
+		specParser.Reset("00t6-450");
+		specParser.Reset("BLATZBE0");
+		specParser.Reset("0x424C41545A424530");
+		specParser.Reset("0x424C415425424530");
+
+		specParser.Reset("badscheme://1");
+
+		specParser.Reset("ntv2local://1");
+		specParser.Reset("NtV2lOcAl://00000000000000000000000000000000000000000000000000000000000000000000000000000000000001");
+		specParser.Reset("NTV2Local://corvid24");
+		specParser.Reset("ntv2local://corvid88");
+		specParser.Reset("ntv2local://konalhi");
+		specParser.Reset("ntv2local://alpha");
+		specParser.Reset("ntv2local://00T64450");
+		specParser.Reset("ntv2local://00t6-450");
+		specParser.Reset("ntv2local://BLATZBE0");
+
+		specParser.Reset("ntv2nub://1.2.3.4");
+		specParser.Reset("ntv2nub://1.2.3.4/doc");
+		specParser.Reset("ntv2nub://1.2.3.4/doc/");
+		specParser.Reset("ntv2nub://1.2.3.4/doc/alpha?one&two=2&three=&four=4");
+		specParser.Reset("ntv2nub://1.2.3.4/doc/?one&two=2&three=&four=4");
+		specParser.Reset("ntv2nub://1.2.3.4:badport/doc?one&two=2&three=&four=4");
+		specParser.Reset("ntv2nub://1.2.3.4:200/doc?one&two=2&three=&four=4");
+		specParser.Reset("ntv2nub://1.2.3.4:200/doc/?one&two=2&three=&four=4");
+		specParser.Reset("ntv2nub://1.2.3.4:12345");
+		specParser.Reset("ntv2nub://1.2.3.4:65000/doc");
+		specParser.Reset("ntv2nub://1.2.3.4:32767/doc/");
+		specParser.Reset("ntv2nub://1.2.3.4/path/to/doc/");
+		specParser.Reset("ntv2nub://1.2.3.4/path/to/doc/?");
+		specParser.Reset("ntv2nub://1.2.3.4/path/to/doc?");
+		specParser.Reset("ntv2nub://1.2.3.4/path/to/doc/?one");
+		specParser.Reset("ntv2nub://1.2.3.4/path/to/doc?one");
+		specParser.Reset("ntv2nub://1.2.3.4/path/to/doc/?one=");
+		specParser.Reset("ntv2nub://1.2.3.4/path/to/doc?one=");
+		specParser.Reset("ntv2nub://1.2.3.4/path/to/doc/?one=1");
+		specParser.Reset("ntv2nub://1.2.3.4/path/to/doc?one=1");
+		specParser.Reset("ntv2nub://1.2.3.4/path/to/doc/?one=1&two");
+		specParser.Reset("ntv2nub://1.2.3.4/path/to/doc?one=1&two");
+		specParser.Reset("ntv2nub://50.200.250.300");
+		specParser.Reset("ntv2nub://fully.qualified.domain.name.com/path/to/doc/?one=1&two");
+		specParser.Reset("ntv2nub://fully.qualified.domain.name.edu:badport/path/to/doc/?one=1&two");
+		specParser.Reset("ntv2nub://fully.qualified.domain.name.info:5544/path/to/doc/?one=1&two");
+		specParser.Reset("ntv2nub://fully.qualified.domain.name.org/path/to/doc/?one=1&two");
+		specParser.Reset("ntv2nub://fully.qualified.domain.name.nz:badport/path/to/doc/?one=1&two");
+		specParser.Reset("ntv2nub://fully.qualified.domain.name.au:000004/path/to/doc/?one=1&two");
+		specParser.Reset("ntv2nub://fully.qualified.domain.name.ch:4/corvid88");
+		specParser.Reset("ntv2nub://fully.qualified.domain.name.cn:4/00T64450");
+		specParser.Reset("ntv2nub://fully.qualified.domain.name.ru:4/2");
+		specParser.Reset("ntv2nub://fully.qualified.domain.name.co.uk:4/00000000000000000000000000000001");
+		specParser.Reset("ntv2nub://fully.qualified.domain.name.com:4/0000000000000000000000000000000001");
+		specParser.Reset("ntv2://swdevice/?"
+							"nosharedmemory"
+							"&supportlog=file%3A%2F%2F%2FUsers%2Fdemo%2FDesktop%2FAJAWatcherSupport.log"
+							"&sdram=file%3A%2F%2F%2FUsers%2Fdemo%2FDesktop%2FSDRAMsnapshot.dat");
+	}
+#endif	//	defined(_DEBUG)
 
 
 /*****************************************************************************************************************************************************
-	NTV2RPCAPI
+	NTV2RPCClientAPI
 *****************************************************************************************************************************************************/
-NTV2RPCAPI::NTV2RPCAPI ()
-	:	_hostname(),
-		_pvt(_instanceData, sizeof(_instanceData))
+NTV2RPCClientAPI::NTV2RPCClientAPI (const NTV2ConnectParams & inParams)
+	:	mConnectParams	(inParams)
 {
-	_pvt.Fill(ULWord(0));
+	AJADebug::Open();
 }
 
-NTV2RPCAPI::~NTV2RPCAPI ()
+NTV2RPCClientAPI::~NTV2RPCClientAPI ()
 {
+	if (IsConnected())
+		NTV2Disconnect();
 }
 
-bool NTV2RPCAPI::IsConnected (void) const			{return false;}
-string NTV2RPCAPI::Name (void) const					{return _hostname;}
-ostream & NTV2RPCAPI::Print (ostream & oss) const
-{	oss << (IsConnected()?"Connected":"Disconnected");
+bool NTV2RPCClientAPI::SetConnectParams (const NTV2ConnectParams & inNewParams, const bool inAugment)
+{
+	if (IsConnected())
+		{NBFAIL("Cannot set connect params while connected");  return false;}
+	size_t oldCount(mConnectParams.size()), updated(0), added(0);
+	if (inAugment)
+	{
+		updated = mConnectParams.UpdateFrom(inNewParams);
+		added = mConnectParams.AddFrom(inNewParams);
+		NBDBG(DEC(updated) << " connect param(s) updated, " << DEC(added) << " added: " << mConnectParams);
+	}
+	else
+	{
+		mConnectParams = inNewParams;
+		NBDBG(DEC(oldCount) << " connect param(s) removed, replaced with " << inNewParams);
+	}
+	if (mConnectParams.empty())
+		NBWARN("No connect params");
+	return true;
+}
+
+ostream & NTV2RPCClientAPI::Print (ostream & oss) const
+{
+	oss << (IsConnected() ? "Connected" : "Disconnected");
 	if (IsConnected() && !Name().empty())
 		oss << " to '" << Name() << "'";
 	return oss;
 }
-NTV2NubProtocolVersion NTV2RPCAPI::NubProtocolVersion (void) const	{return ntv2NubProtocolVersionNone;}
-uint32_t NTV2RPCAPI::Version (void) const			{return uint32_t(NubProtocolVersion());}
-NTV2_POINTER & NTV2RPCAPI::localStorage (void)				{return _pvt;}
-const NTV2_POINTER & NTV2RPCAPI::localStorage (void) const	{return _pvt;}
 
-//int NTV2RPCAPI::NTV2Connect (const std::string & inHostname, const UWord inDeviceIndex)
-//																		{(void) inDeviceIndex; _hostname = inHostname;	return 0;}
-int	NTV2RPCAPI::NTV2Disconnect (void)							{return NTV2CloseRemote();}
-
-int	NTV2RPCAPI::NTV2ReadRegisterRemote (const ULWord regNum, ULWord & outRegValue, const ULWord regMask, const ULWord regShift)
-{	(void) regNum;  (void) outRegValue; (void) regMask; (void) regShift;
-	return -1;
-}
-
-int	NTV2RPCAPI::NTV2WriteRegisterRemote	(const ULWord regNum, const ULWord regValue, const ULWord regMask, const ULWord regShift)
-{	(void) regNum; (void) regValue; (void) regMask; (void) regShift;
-	return -1;
-}
-
-int	NTV2RPCAPI::NTV2AutoCirculateRemote (AUTOCIRCULATE_DATA & autoCircData)
-{	(void) autoCircData;
-	return -1;
-}
-
-int	NTV2RPCAPI::NTV2WaitForInterruptRemote (const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs)
-{	(void) eInterrupt; (void) timeOutMs;
-	return -1;
-}
-
-int	NTV2RPCAPI::NTV2DriverGetBitFileInformationRemote (BITFILE_INFO_STRUCT & bitFileInfo, const NTV2BitFileType bitFileType)
-{	(void) bitFileInfo; (void) bitFileType;
-	return -1;
-}
-
-int	NTV2RPCAPI::NTV2DriverGetBuildInformationRemote (BUILD_INFO_STRUCT & buildInfo)
-{	(void) buildInfo;
-	return -1;
-}
-
-int	NTV2RPCAPI::NTV2DownloadTestPatternRemote (const NTV2Channel channel, const NTV2PixelFormat testPatternFBF,
-												const UWord signalMask, const bool testPatDMAEnb, const ULWord testPatNum)
-{	(void) channel;  (void) testPatternFBF; (void) signalMask; (void) testPatDMAEnb; (void) testPatNum;
-	return -1;
-}
-
-int	NTV2RPCAPI::NTV2ReadRegisterMultiRemote (const ULWord numRegs, ULWord & outFailedRegNum, NTV2RegInfo outRegs[])
-{	(void) numRegs; (void) outFailedRegNum; (void) outRegs;
-	return -1;
-}
-
-int	NTV2RPCAPI::NTV2GetDriverVersionRemote (ULWord & outDriverVersion)
+string NTV2RPCClientAPI::Description (void) const
 {
-	outDriverVersion = 0xFFFFFFFF;
-	return -1;
+	return "";
 }
 
-int	NTV2RPCAPI::NTV2DMATransferRemote (const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
-										const ULWord inFrameNumber,			ULWord * pFrameBuffer,
-										const ULWord inCardOffsetBytes,		const ULWord inTotalByteCount,
-										const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
-										const ULWord inSegmentCardPitch,	const bool inSynchronous)
-{	(void) inDMAEngine; (void) inIsRead;	(void) inFrameNumber; (void) pFrameBuffer;
-	(void) inCardOffsetBytes; (void) inTotalByteCount; (void) inNumSegments; (void) inSegmentHostPitch;
-	(void) inSegmentCardPitch; (void) inSynchronous;
-	return -1;
-}
-
-int	NTV2RPCAPI::NTV2MessageRemote (NTV2_HEADER * pInMessage)
-{	(void) pInMessage;
-	return -1;
-}
-
-int	NTV2RPCAPI::NTV2OpenRemote (const UWord inDeviceIndex)
-{	(void) inDeviceIndex;
-	return -1;
-}
-
-int	NTV2RPCAPI::NTV2CloseRemote (void)
+bool NTV2RPCClientAPI::NTV2Connect (void)
 {
-	_hostname.clear();
-	return 0;
-}
-
-
-/*****************************************************************************************************************************************************
-	NTV2NubRPCAPI
-*****************************************************************************************************************************************************/
-//	Specific NTV2RPCAPI implementation to talk to remote host
-class AJAExport NTV2NubRPCAPI : public NTV2RPCAPI
-{
-	//	Instance Methods
-	public:
-		NTV2NubRPCAPI()
-			:	_sockfd				(-1),
-				_remoteHandle		(INVALID_NUB_HANDLE),
-				_nubProtocolVersion	(ntv2NubProtocolVersionNone),
-				_remoteIndex		(0)
-		{
-		}
-		AJA_VIRTUAL									~NTV2NubRPCAPI()				{NTV2Disconnect();}
-		AJA_VIRTUAL inline	bool					IsConnected	(void) const		{return SocketValid()  &&  HandleValid();}
-		AJA_VIRTUAL inline	AJASocket				Socket (void) const				{return _sockfd;}
-		AJA_VIRTUAL			bool					SocketValid (void) const;
-		AJA_VIRTUAL inline	LWord					Handle (void) const				{return _remoteHandle;}
-		AJA_VIRTUAL			bool					HandleValid (void) const;
-		AJA_VIRTUAL inline	NTV2NubProtocolVersion	ProtocolVersion (void) const	{return _nubProtocolVersion;}
-		AJA_VIRTUAL	inline	UWord					DeviceIndex (void) const		{return _remoteIndex;}
-		AJA_VIRTUAL	int		NTV2Connect (const string & inHostname, const UWord inDeviceIndexNum);
-		AJA_VIRTUAL	int		NTV2Disconnect (void);
-		AJA_VIRTUAL	int		NTV2ReadRegisterRemote	(const ULWord regNum, ULWord & outRegValue, const ULWord regMask = 0xFFFFFFFF, const ULWord regShift = 0);
-		AJA_VIRTUAL	int		NTV2WriteRegisterRemote	(const ULWord regNum, const ULWord regValue, const ULWord regMask = 0xFFFFFFFF, const ULWord regShift = 0);
-		AJA_VIRTUAL	int		NTV2AutoCirculateRemote	(AUTOCIRCULATE_DATA & autoCircData);
-		AJA_VIRTUAL	int		NTV2WaitForInterruptRemote	(const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs);
-		AJA_VIRTUAL	int		NTV2DriverGetBitFileInformationRemote	(BITFILE_INFO_STRUCT & outInfo, const NTV2BitFileType inType);
-		AJA_VIRTUAL	int		NTV2DriverGetBuildInformationRemote	(BUILD_INFO_STRUCT & outBuildInfo);
-		AJA_VIRTUAL	int		NTV2DownloadTestPatternRemote	(const NTV2Channel channel, const NTV2PixelFormat testPatternFBF,
-															const UWord signalMask, const bool testPatDMAEnb, const ULWord testPatNum);
-		AJA_VIRTUAL	int		NTV2ReadRegisterMultiRemote	(const ULWord numRegs, ULWord & outFailedRegNum,  NTV2RegInfo aRegs[]);
-		AJA_VIRTUAL	int		NTV2GetDriverVersionRemote	(ULWord & outDriverVersion)		{(void) outDriverVersion;	return -1;}
-		AJA_VIRTUAL	int		NTV2DMATransferRemote		(const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
-														const ULWord inFrameNumber,			ULWord * pFrameBuffer,
-														const ULWord inCardOffsetBytes,		const ULWord inTotalByteCount,
-														const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
-														const ULWord inSegmentCardPitch,	const bool inSynchronous);
-		AJA_VIRTUAL	int		NTV2MessageRemote	(NTV2_HEADER *	pInMessage);
-		AJA_VIRTUAL ostream &	Print (ostream & oss) const;
-	protected:
-		AJA_VIRTUAL	int		NTV2OpenRemote (const UWord inDeviceIndex);
-		AJA_VIRTUAL	int		NTV2CloseRemote (void)	{return -1;}
-
-	//	Instance Data
-	private:
-		AJASocket				_sockfd;				///< @brief	Socket descriptor
-		LWord					_remoteHandle;			///< @brief	Remote host handle
-		NTV2NubProtocolVersion	_nubProtocolVersion;	///< @brief	Protocol version
-		UWord					_remoteIndex;			///< @brief	Remote device index number
-};	//	NTV2NubRPCAPI
-
-
-//	Factory method to create NTV2NubRPCAPI instance
-NTV2RPCAPI * NTV2RPCAPI::MakeNTV2NubRPCAPI (const std::string & inSpec, const std::string & inPort)
-{
-	NTV2NubRPCAPI * pResult(new NTV2NubRPCAPI);
-	if (!pResult)
-		return pResult;
-	//	Open the device on the remote system...
-	pResult->NTV2Connect(inSpec, inPort.empty() ? 0 : UWord(aja::stoul(inPort)));
-	return pResult;
-}
-
-
-static bool isNubOpenRespPacket (NTV2NubPkt *pPkt)
-{
-	return isNTV2NubPacketType(pPkt, eNubOpenRespPkt);
-}
-
-static void * getNubPktPayload (NTV2NubPkt *pPkt)
-{
-	NTV2NubPktType pktType(pPkt->hdr.pktType);
-	NTV2NubProtocolVersion protocolVersion(pPkt->hdr.protocolVersion);
-	const char *queryRespStr (nubQueryRespStr(protocolVersion, pktType));
-	return reinterpret_cast<char*>(pPkt->data) + strlen(queryRespStr) + 1;
-}
-
-static NTV2NubPkt * BuildOpenQueryPacket (ULWord inDeviceIndex)
-{
-	char *p(AJA_NULL);
-	NTV2NubPkt *pPkt(BuildNubBasePacket (maxKnownProtocolVersion, eNubOpenQueryPkt, sizeof(NTV2BoardOpenInfo), &p));
-	if (!pPkt)
-		return AJA_NULL;
-
-	NTV2BoardOpenInfo *pBOI (reinterpret_cast<NTV2BoardOpenInfo*>(p));
-	pBOI->boardNumber = htonl(inDeviceIndex);
-	pBOI->boardType = 0;
-	return pPkt;
-}
-
-static bool isNubReadRegisterRespPacket (NTV2NubPkt *pPkt)
-{
-	return isNTV2NubPacketType(pPkt, eNubReadRegisterSingleRespPkt);
-}
-
-static bool isNubWriteRegisterRespPacket (NTV2NubPkt *pPkt)
-{
-	return isNTV2NubPacketType(pPkt, eNubWriteRegisterRespPkt);
-}
-
-static bool isNubGetAutoCirculateRespPacket (NTV2NubPkt *pPkt)
-{
-	return isNTV2NubPacketType(pPkt, eNubGetAutoCirculateRespPkt);
-}
-
-static bool isNubControlAutoCirculateRespPacket (NTV2NubPkt *pPkt)
-{	// Also handles eNubV1ControlAutoCirculateRespPkt
-	return isNTV2NubPacketType(pPkt, eNubV2ControlAutoCirculateRespPkt);
-}
-
-static bool isNubWaitForInterruptRespPacket (NTV2NubPkt *pPkt)
-{
-	return isNTV2NubPacketType(pPkt, eNubWaitForInterruptRespPkt);
-}
-
-static bool isNubDriverGetBitFileInformationRespPacket (NTV2NubPkt *pPkt)
-{
-	return isNTV2NubPacketType(pPkt,  eNubDriverGetBitFileInformationRespPkt);
-}
-
-static bool isNubDriverGetBuildInformationRespPacket (NTV2NubPkt *pPkt)
-{
-	return isNTV2NubPacketType(pPkt,  eNubDriverGetBuildInformationRespPkt);
-}
-
-static bool isNubDownloadTestPatternRespPacket (NTV2NubPkt *pPkt)
-{
-	return isNTV2NubPacketType(pPkt, eNubDownloadTestPatternRespPkt);
-}
-
-static bool isNubReadRegisterMultiRespPacket (NTV2NubPkt *pPkt)
-{
-	return isNTV2NubPacketType(pPkt, eNubReadRegisterMultiRespPkt);
-}
-
-
-static NTV2NubPkt * BuildReadRegisterQueryPacket (	LWord handle,
-													NTV2NubProtocolVersion nubProtocolVersion,
-													ULWord registerNumber,
-													ULWord registerMask,
-													ULWord registerShift)
-{
-	char *p(AJA_NULL);
-	NTV2NubPkt *pPkt(BuildNubBasePacket (nubProtocolVersion, eNubReadRegisterSingleQueryPkt,
-										sizeof(NTV2ReadWriteRegisterPayload), &p));
-	if (!pPkt)
-		return AJA_NULL;
-	
-	NTV2ReadWriteRegisterPayload *pRWRP = reinterpret_cast<NTV2ReadWriteRegisterPayload*>(p);
-	pRWRP->handle			= LWord(htonl(handle));
-	pRWRP->registerNumber	= htonl(registerNumber);
-	pRWRP->registerValue	= htonl(0);	// Value will be here on response 
-	pRWRP->registerMask		= htonl(registerMask);
-	pRWRP->registerShift	= htonl(registerShift);
-	return pPkt;
-}	//	BuildReadRegisterQueryPacket
-
-
-static NTV2NubPkt * BuildWriteRegisterQueryPacket (	LWord handle,
-													NTV2NubProtocolVersion nubProtocolVersion,
-													ULWord registerNumber,
-													ULWord registerValue,
-													ULWord registerMask,
-													ULWord registerShift)
-{
-	char *p(AJA_NULL);
-	NTV2NubPkt *pPkt(BuildNubBasePacket (nubProtocolVersion, eNubWriteRegisterQueryPkt,
-										sizeof(NTV2ReadWriteRegisterPayload), &p));
-	if (!pPkt)
-		return AJA_NULL;
-
-	NTV2ReadWriteRegisterPayload *pRWRP = reinterpret_cast<NTV2ReadWriteRegisterPayload*>(p);
-	pRWRP->handle			= LWord(htonl(handle));
-	pRWRP->registerNumber	= htonl(registerNumber);
-	pRWRP->registerValue	= htonl(registerValue);
-	pRWRP->registerMask		= htonl(registerMask);
-	pRWRP->registerShift	= htonl(registerShift);
-	return pPkt;
-}	//	BuildWriteRegisterQueryPacket
-
-
-static NTV2NubPkt * BuildAutoCirculateQueryPacket (LWord handle,
-													NTV2NubProtocolVersion nubProtocolVersion,
-													AUTOCIRCULATE_DATA &autoCircData)
-{
-	NTV2NubPktType pktType = eNumNTV2NubPktTypes;
-	ULWord payloadSize = 0;
-
-	switch (autoCircData.eCommand)
-	{
-		case eStartAutoCirc:
-		case eStopAutoCirc:
-		case eAbortAutoCirc:
-		case ePauseAutoCirc:
-		case eFlushAutoCirculate:
-			pktType = eNubV2ControlAutoCirculateQueryPkt;
-			payloadSize = sizeof(NTV2ControlAutoCircPayload);
-			break;
-
-		case eGetAutoCirc:
-			// queryStr = NTV2NUB_GET_AUTOCIRCULATE_QUERY;
-			pktType = eNubGetAutoCirculateQueryPkt;
-			payloadSize = sizeof(NTV2GetAutoCircPayload);
-			break;
-
-		default: // Not handled yet.
-			return AJA_NULL;
-	}
-
-	char *p(AJA_NULL);
-	NTV2NubPkt *pPkt(BuildNubBasePacket (nubProtocolVersion, pktType, payloadSize, &p));
-	if (!pPkt)
-		return AJA_NULL;
-
-	switch (autoCircData.eCommand)
-	{
-		case eStartAutoCirc:
-		case eStopAutoCirc:
-		case eAbortAutoCirc:
-		case ePauseAutoCirc:
-		case eFlushAutoCirculate:
-			{
-				NTV2ControlAutoCircPayload *pCACP = reinterpret_cast<NTV2ControlAutoCircPayload*>(p);
-				pCACP->handle		= htonl(handle);
-				pCACP->eCommand		= htonl(autoCircData.eCommand);
-				pCACP->channelSpec	= htonl(autoCircData.channelSpec);
-				if (autoCircData.eCommand == ePauseAutoCirc)
-					pCACP->bVal1	= htonl(ULWord(autoCircData.bVal1)); // bool bPlayToPause
-			}
-			break;
-
-		case eGetAutoCirc:
-			{
-				NTV2GetAutoCircPayload *pGACP = reinterpret_cast<NTV2GetAutoCircPayload*>(p);
-				pGACP->handle		= LWord(htonl(handle));
-				pGACP->eCommand		= htonl(autoCircData.eCommand);
-				pGACP->channelSpec	= htonl(autoCircData.channelSpec);
-			}
-			break;
-
-		default: // Not handled yet.
-			return AJA_NULL;
-	}
-	return pPkt;
-}	//	BuildAutoCirculateQueryPacket
-
-
-static NTV2NubPkt * BuildWaitForInterruptQueryPacket (	LWord handle,
-														NTV2NubProtocolVersion nubProtocolVersion,
-														INTERRUPT_ENUMS eInterrupt,
-														ULWord timeOutMs)
-{
-	char *p(AJA_NULL);
-	NTV2NubPkt *pPkt(BuildNubBasePacket (nubProtocolVersion, eNubWaitForInterruptQueryPkt,
-										sizeof(NTV2WaitForInterruptPayload), &p));
-	if (!pPkt)
-		return AJA_NULL;
-
-	NTV2WaitForInterruptPayload *pWFIP = reinterpret_cast<NTV2WaitForInterruptPayload*>(p);
-	pWFIP->handle		= LWord(htonl(handle));
-	pWFIP->eInterrupt	= htonl(ULWord(eInterrupt));
-	pWFIP->timeOutMs	= htonl(timeOutMs);
-	return pPkt;
-}	//	BuildWaitForInterruptQueryPacket
-
-
-static NTV2NubPkt * BuildDriverGetBitFileInformationQueryPacket (LWord handle,
-																NTV2NubProtocolVersion nubProtocolVersion,
-																BITFILE_INFO_STRUCT &bitFileInfo,
-																NTV2BitFileType bitFileType)
-{
-	char *p(AJA_NULL);
-	NTV2NubPkt *pPkt(BuildNubBasePacket (nubProtocolVersion,  eNubDriverGetBitFileInformationQueryPkt,
-										sizeof(NTV2DriverGetBitFileInformationPayload), &p));
-	if (!pPkt)
-		return AJA_NULL;
-
-	NTV2DriverGetBitFileInformationPayload *pDGBFIP = reinterpret_cast<NTV2DriverGetBitFileInformationPayload*>(p);
-	pDGBFIP->handle					= LWord(htonl(handle));
-	pDGBFIP->bitFileType			= htonl(ULWord(bitFileType));
-	pDGBFIP->bitFileInfo.whichFPGA	= NTV2XilinxFPGA(htonl(ULWord(bitFileInfo.whichFPGA)));
-	return pPkt;
-}	//	BuildDriverGetBitFileInformationQueryPacket
-
-
-static NTV2NubPkt * BuildDriverGetBuildInformationQueryPacket (LWord  handle,
-																NTV2NubProtocolVersion nubProtocolVersion)
-{
-	char *p(AJA_NULL);
-	NTV2NubPkt *pPkt(BuildNubBasePacket (nubProtocolVersion, eNubDriverGetBuildInformationQueryPkt,
-											sizeof(NTV2DriverGetBuildInformationPayload), &p));
-	if (!pPkt)
-		return AJA_NULL;
-
-	NTV2DriverGetBuildInformationPayload *pDGBFIP = reinterpret_cast<NTV2DriverGetBuildInformationPayload*>(p);
-	pDGBFIP->handle = LWord(htonl(handle));
-	return pPkt;
-}	//	BuildDriverGetBuildInformationQueryPacket
-
-
-static NTV2NubPkt * BuildDownloadTestPatternQueryPacket (LWord handle,
-														NTV2NubProtocolVersion nubProtocolVersion,
-														NTV2Channel channel,
-														NTV2FrameBufferFormat testPatternFrameBufferFormat,
-														UWord signalMask,
-														bool testPatternDMAEnable,
-														ULWord testPatternNumber)
-{
-	char *p(AJA_NULL);
-	NTV2NubPkt *pPkt(BuildNubBasePacket (nubProtocolVersion, eNubDownloadTestPatternQueryPkt,
-										sizeof(NTV2DownloadTestPatternPayload), &p));
-	if (!pPkt)
-		return AJA_NULL;
-
-	NTV2DownloadTestPatternPayload *pDTPP = reinterpret_cast<NTV2DownloadTestPatternPayload*>(p);
-	pDTPP->handle						= LWord(htonl(handle));
-	pDTPP->channel						= htonl(channel);
-	pDTPP->testPatternFrameBufferFormat	= htonl(testPatternFrameBufferFormat);
-	pDTPP->signalMask					= htonl(signalMask);
-	pDTPP->testPatternDMAEnable			= htonl(testPatternDMAEnable);
-	pDTPP->testPatternNumber			= htonl(testPatternNumber);
-	return pPkt;
-}	//	BuildDownloadTestPatternQueryPacket
-
-
-static NTV2NubPkt * BuildReadRegisterMultiQueryPacket (	LWord handle,
-														NTV2NubProtocolVersion nubProtocolVersion,
-														ULWord numRegs,
-														NTV2ReadWriteRegisterSingle aRegs[])
-{
-	char *p(AJA_NULL);
-	NTV2NubPkt *pPkt(BuildNubBasePacket (nubProtocolVersion, eNubReadRegisterMultiQueryPkt,
-										sizeof(NTV2ReadWriteMultiRegisterPayloadHeader) + numRegs * sizeof(NTV2ReadWriteRegisterSingle), &p));
-	if (!pPkt)
-		return AJA_NULL;
-
-	// TODO: Move this into BuildNubBasePacket for this pkt type
-	// memset(pPkt, 0xab, sizeof(NTV2NubPkt));
-
-	NTV2ReadWriteMultiRegisterPayload *pRWMRP (reinterpret_cast<NTV2ReadWriteMultiRegisterPayload*>(p));
-	pRWMRP->payloadHeader.handle = LWord(htonl(handle));
-	pRWMRP->payloadHeader.numRegs = htonl(numRegs);
-	for (ULWord i = 0; i < numRegs; i++)
-	{
-		pRWMRP->aRegs[i].registerNumber = htonl(aRegs[i].registerNumber);
-		pRWMRP->aRegs[i].registerValue = htonl(0);	// Value will be here on response 
-		pRWMRP->aRegs[i].registerMask = htonl(aRegs[i].registerMask);
-		pRWMRP->aRegs[i].registerShift = htonl(aRegs[i].registerShift);
-	}
-	return pPkt;
-}	//	BuildReadRegisterMultiQueryPacket
-
-
-int NTV2NubRPCAPI::NTV2Connect (const string & inHostName, const UWord inDeviceIndexNum)
-{
-	//	Get the host info
-	struct hostent * he(::gethostbyname(inHostName.c_str()));
-	if (!he)
-	{
-#ifndef MSWindows
-		herror("gethostbyname");
-#endif
-		return -1;
-	}
-
-	_sockfd = ::socket(PF_INET, SOCK_STREAM, 0);
-	if (!SocketValid()) 
-	{
-		NBFAIL("'socket' failed, socket=" << Socket() << ": " << ::strerror(errno));
-		return -1;
-	}
-
-	struct sockaddr_in their_addr;
-	their_addr.sin_family = AF_INET;	// host byte order 
-	their_addr.sin_port = htons(NTV2NUBPORT);  // short, network byte order 
-	their_addr.sin_addr = *((struct in_addr *)he->h_addr);
-	::memset(&(their_addr.sin_zero), '\0', 8);  // zero the rest of the struct 
-
-	int retval (::connect(Socket(), reinterpret_cast<struct sockaddr*>(&their_addr), sizeof(struct sockaddr)));
-	if (retval == -1) 
-	{
-		NBFAIL("'connect' failed: " << ::strerror(errno) << ", socket=" << Socket() << ", hostName='" << inHostName << "'");
+	if (IsConnected())
 		NTV2Disconnect();
+	return NTV2OpenRemote();
+}
+
+bool NTV2RPCClientAPI::NTV2Disconnect (void)
+{
+	return NTV2CloseRemote();
+}
+
+bool NTV2RPCClientAPI::NTV2ReadRegisterRemote (const ULWord regNum, ULWord & outRegValue, const ULWord regMask, const ULWord regShift)
+{	(void) regNum;  (void) outRegValue; (void) regMask; (void) regShift;
+	return false;	//	UNIMPLEMENTED
+}
+
+bool NTV2RPCClientAPI::NTV2WriteRegisterRemote	(const ULWord regNum, const ULWord regValue, const ULWord regMask, const ULWord regShift)
+{	(void) regNum; (void) regValue; (void) regMask; (void) regShift;
+	return false;	//	UNIMPLEMENTED
+}
+
+bool NTV2RPCClientAPI::NTV2AutoCirculateRemote (AUTOCIRCULATE_DATA & autoCircData)
+{	(void) autoCircData;
+	return false;	//	UNIMPLEMENTED
+}
+
+bool NTV2RPCClientAPI::NTV2WaitForInterruptRemote (const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs)
+{	(void) eInterrupt; (void) timeOutMs;
+	return false;	//	UNIMPLEMENTED
+}
+
+#if !defined(NTV2_DEPRECATE_16_3)
+	bool NTV2RPCClientAPI::NTV2DriverGetBitFileInformationRemote (BITFILE_INFO_STRUCT & bitFileInfo, const NTV2BitFileType bitFileType)
+	{	(void) bitFileType;
+		::memset(&bitFileInfo, 0, sizeof(bitFileInfo));
+		return false;	//	UNIMPLEMENTED
 	}
-	if (retval < 0)
-		return retval;
 
-	_hostname = inHostName;
-	retval = NTV2OpenRemote(inDeviceIndexNum);
-	switch (retval)
+	bool NTV2RPCClientAPI::NTV2DriverGetBuildInformationRemote (BUILD_INFO_STRUCT & buildInfo)
 	{
-		case NTV2_REMOTE_ACCESS_SUCCESS:
-			NBNOTE("OpenRemote succeeded, handle=" << _remoteHandle);
-			return 0;
-
-		case NTV2_REMOTE_ACCESS_CONNECTION_CLOSED:
-			NTV2Disconnect();
-			NBFAIL("OpenRemote failed 'connection closed', handle=" << xHEX0N(_remoteHandle,8));
-			_remoteHandle = LWord(INVALID_NUB_HANDLE);
-			break;
-
-		case NTV2_REMOTE_ACCESS_NOT_CONNECTED:
-		case NTV2_REMOTE_ACCESS_OUT_OF_MEMORY:
-		case NTV2_REMOTE_ACCESS_SEND_ERR:
-		case NTV2_REMOTE_ACCESS_RECV_ERR:
-		case NTV2_REMOTE_ACCESS_TIMEDOUT:
-		case NTV2_REMOTE_ACCESS_NO_CARD:
-		case NTV2_REMOTE_ACCESS_NOT_OPEN_RESP:
-		case NTV2_REMOTE_ACCESS_NON_NUB_PKT:
-		default:
-			// Failed, but don't close connection, can try with another card on same connection.
-			NBWARN("OpenRemote failed, _remoteHandle came back as " << _remoteHandle);
-			_remoteHandle = LWord(INVALID_NUB_HANDLE);
-			break;
+		::memset(&buildInfo, 0, sizeof(buildInfo));
+		return false;	//	UNIMPLEMENTED
 	}
-	return retval;
 
-}	//	NTV2NubRPCAPI::NTV2Connect
-
-bool NTV2NubRPCAPI::SocketValid (void) const
-{
-	return Socket() != AJASocket(-1);
-}
-
-bool NTV2NubRPCAPI::HandleValid (void) const
-{
-	return Handle() != INVALID_NUB_HANDLE;
-}
-
-
-int NTV2NubRPCAPI::NTV2Disconnect (void)
-{
-	NTV2CloseRemote();
-	if (SocketValid())
-	{
-		#ifdef MSWindows
-			closesocket(_sockfd);
-		#else
-			close(_sockfd);
-		#endif
-		_sockfd = -1;
+	bool NTV2RPCClientAPI::NTV2DownloadTestPatternRemote (const NTV2Channel channel, const NTV2PixelFormat testPatternFBF,
+														const UWord signalMask, const bool testPatDMAEnb, const ULWord testPatNum)
+	{	(void) channel;  (void) testPatternFBF; (void) signalMask; (void) testPatDMAEnb; (void) testPatNum;
+		return false;	//	UNIMPLEMENTED
 	}
-	return -1;
 
-}	//	NTV2NubRPCAPI::NTV2Disconnect
-
-
-static void deNBOifyAndCopyGetAutoCirculateData (AUTOCIRCULATE_STATUS_STRUCT & outACStatus,  NTV2GetAutoCircPayload * pGACP)
-{
-	// Some 32 bit quantities
-	outACStatus.channelSpec	= NTV2Crosspoint(ntohl(pGACP->channelSpec));
-	outACStatus.state		= NTV2AutoCirculateState(ntohl(pGACP->state));
-	outACStatus.startFrame	= LWord(ntohl(pGACP->startFrame));
-	outACStatus.endFrame	= LWord(ntohl(pGACP->endFrame));
-	outACStatus.activeFrame	= LWord(ntohl(pGACP->activeFrame));
-
-	// Note: the following four items are 64-bit quantities!
-	outACStatus.rdtscStartTime			= ntohll(pGACP->rdtscStartTime);
-	outACStatus.audioClockStartTime		= ntohll(pGACP->audioClockStartTime);
-	outACStatus.rdtscCurrentTime		= ntohll(pGACP->rdtscCurrentTime);
-	outACStatus.audioClockCurrentTime	= ntohll(pGACP->audioClockCurrentTime);
-
-	// Back to 32 bit quantities.
-	outACStatus.framesProcessed	= ntohl(pGACP->framesProcessed);
-	outACStatus.framesDropped	= ntohl(pGACP->framesDropped);
-	outACStatus.bufferLevel		= ntohl(pGACP->bufferLevel);
-
-	// These are bools, which natively on some systems (Linux) are 1 byte and others 4 (MacOSX)
-	// So the portable structures makes them all ULWords.
-#ifdef MSWindows
-#pragma warning(disable: 4800) 
-#endif	
-	outACStatus.bWithAudio				= bool(ntohl(pGACP->bWithAudio));
-	outACStatus.bWithRP188				= bool(ntohl(pGACP->bWithRP188));
-	outACStatus.bFbfChange				= bool(ntohl(pGACP->bFboChange));
-	outACStatus.bWithColorCorrection	= bool(ntohl(pGACP->bWithColorCorrection));
-	outACStatus.bWithVidProc			= bool(ntohl(pGACP->bWithVidProc));
-	outACStatus.bWithCustomAncData		= bool(ntohl(pGACP->bWithCustomAncData));
-#ifdef MSWindows
-#pragma warning(default: 4800)
-#endif
-}
-
-
-static void deNBOifyAndCopyGetDriverBitFileInformation (BITFILE_INFO_STRUCT &localBitFileInfo,
-														BITFILE_INFO_STRUCT &remoteBitFileInfo)
-{
-	localBitFileInfo.checksum = ntohl(remoteBitFileInfo.checksum);
-	localBitFileInfo.structVersion = ntohl(remoteBitFileInfo.structVersion);
-	localBitFileInfo.structSize = ntohl(remoteBitFileInfo.structSize);
-
-	localBitFileInfo.numBytes = ntohl(remoteBitFileInfo.numBytes);
-
-	::memcpy(localBitFileInfo.dateStr, remoteBitFileInfo.dateStr, NTV2_BITFILE_DATETIME_STRINGLENGTH); 
-	::memcpy(localBitFileInfo.timeStr, remoteBitFileInfo.timeStr, NTV2_BITFILE_DATETIME_STRINGLENGTH); 
-	::memcpy(localBitFileInfo.designNameStr , remoteBitFileInfo.designNameStr, NTV2_BITFILE_DESIGNNAME_STRINGLENGTH); 
-
-	localBitFileInfo.bitFileType = ntohl(remoteBitFileInfo.bitFileType);
-	localBitFileInfo.whichFPGA = (NTV2XilinxFPGA)ntohl(remoteBitFileInfo.whichFPGA);
-}
-
-
-static void deNBOifyAndCopyGetDriverBuildInformation( BUILD_INFO_STRUCT &localBuildInfo,
-													  BUILD_INFO_STRUCT &remoteBuildInfo)
-{
-	localBuildInfo.structVersion = ntohl(remoteBuildInfo.structVersion);
-	localBuildInfo.structSize = ntohl(remoteBuildInfo.structSize);
-
-	memcpy(localBuildInfo.buildStr, remoteBuildInfo.buildStr, NTV2_BUILD_STRINGLENGTH); 
-}
-
-
-int NTV2NubRPCAPI::NTV2OpenRemote (const UWord inDeviceIndex)
-{
-	// Connected?
-	if (!SocketValid())
-		return NTV2_REMOTE_ACCESS_NOT_CONNECTED; 
-
-	// Construct open query
-	NTV2NubPkt *pPkt = BuildOpenQueryPacket(inDeviceIndex);
-	if (!pPkt)
-		return NTV2_REMOTE_ACCESS_OUT_OF_MEMORY;
-
-	int retcode (NTV2_REMOTE_ACCESS_SUCCESS);
-	int len (pPkt  ?  int(sizeof(NTV2NubPktHeader) + pPkt->hdr.dataLength)  :  0);
-	// Send it
-	if (NBOifyNTV2NubPkt(pPkt)) 
-	{
-		if (-1 == ::sendall(Socket(), reinterpret_cast<char*>(pPkt), &len))
-			{NBFAIL("'sendall' failed, socket=" << Socket() << ", len=" << len << ": " << ::strerror(errno));  retcode = NTV2_REMOTE_ACCESS_SEND_ERR;}
-		else
-		{
-			// Wait for response
-			int numbytes (::recvtimeout_sec(Socket(), reinterpret_cast<char*>(pPkt), sizeof(NTV2NubPkt), 2)); // 2 second timeout
-
-			switch (numbytes)
-			{
-				case  0:	// Remote side closed connection
-							retcode = NTV2_REMOTE_ACCESS_CONNECTION_CLOSED;
-							NBFAIL("'recvtimeout_sec' returned zero bytes:  remote access connection closed");
-							break;
-
-				case -1: // error occurred
-						NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << ::strerror(errno));
-						retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
-						break;
-			
-				case -2: // timeout occurred
-						retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
-						NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
-						break;
-			
-				default: // got some data.  Open response packet?
-						if (deNBOifyNTV2NubPkt(pPkt, ULWord(numbytes))) 
-						{
-							if (isNubOpenRespPacket(pPkt)) 
-							{
-								// printf("Got an open response packet\n");
-								NTV2BoardOpenInfo * pBoardOpenInfo;
-								pBoardOpenInfo = reinterpret_cast<NTV2BoardOpenInfo*>(getNubPktPayload(pPkt));
-								_remoteHandle = LWord(ntohl(pBoardOpenInfo->handle));
-								// printf("Handle = %d\n", _remoteHandle);
-								if (Handle() == LWord(INVALID_NUB_HANDLE))
-								{
-									NBFAIL("Got invalid handle on 'open' response");
-									retcode = NTV2_REMOTE_ACCESS_NO_CARD;
-								}
-								_nubProtocolVersion = pPkt->hdr.protocolVersion;
-								NBDBG("Got protocol version " << _nubProtocolVersion << " from 'open' response");
-							}
-							else // Not an open response packet, count it and discard it.
-							{
-								static ULWord ignoredNTV2pkts;
-								++ignoredNTV2pkts;
-								retcode = NTV2_REMOTE_ACCESS_NOT_OPEN_RESP;
-							}
-						}
-						else // Non ntv2 packet on our port.
-						{
-							// NOTE: Defragmentation of jumbo packets would probably go here.
-							retcode = NTV2_REMOTE_ACCESS_NON_NUB_PKT;
-							NBFAIL("Non-nub packet on NTV2 port, socket=" << Socket());
-						}
-			}	//	switch on numbytes
-		}	//	sendall succeeded
-	}	//	if marshalled OK
-	delete pPkt;
-	return retcode;
-}	//	NTV2OpenRemote
-
-
-int NTV2NubRPCAPI::NTV2ReadRegisterRemote (const ULWord regNum, ULWord & outRegValue, const ULWord regMask, const ULWord regShift)
-{
-	// Connected?
-	if (!SocketValid())
-		return NTV2_REMOTE_ACCESS_NOT_CONNECTED; 
-
-	// Construct open query
-	NTV2NubPkt *pPkt (BuildReadRegisterQueryPacket (Handle(), ProtocolVersion(),  regNum, regMask, regShift));
-	if (!pPkt)
-		return NTV2_REMOTE_ACCESS_OUT_OF_MEMORY;
-
-	int retcode (NTV2_REMOTE_ACCESS_SUCCESS);
-	int len (pPkt  ?  int(sizeof(NTV2NubPktHeader) + pPkt->hdr.dataLength)  :  0);
-	// Send it
-	if (NBOifyNTV2NubPkt(pPkt)) 
-	{
-		if (-1 == ::sendall(Socket(), reinterpret_cast<char*>(pPkt), &len))
-			{NBFAIL("'sendall' failed, socket=" << Socket() << ", len=" << len << ": " << strerror(errno));  retcode = NTV2_REMOTE_ACCESS_SEND_ERR;}
-		else
-		{
-			// Wait for response
-			int numbytes (::recvtimeout_sec(Socket(), reinterpret_cast<char*>(pPkt), sizeof(NTV2NubPkt), 2)); // 2 second timeout
-
-			switch (numbytes)
-			{
-				case  0:	// Remote side closed connection
-							retcode = NTV2_REMOTE_ACCESS_CONNECTION_CLOSED;
-							NBFAIL("'recvtimeout_sec' returned zero bytes:  remote access connection closed");
-							break;
-
-				case -1:	// error occurred
-							NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << strerror(errno));
-							retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
-							break;
-
-				case -2:	// timeout occurred
-							retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
-							NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
-							break;
-
-				default: // got some data.  Open response packet?
-						if (deNBOifyNTV2NubPkt(pPkt, ULWord(numbytes))) 
-						{
-							if (isNubReadRegisterRespPacket(pPkt)) 
-							{
-								// printf("Got a read register response packet\n");
-								NTV2ReadWriteRegisterPayload * pRWRP;
-								pRWRP = (NTV2ReadWriteRegisterPayload *)getNubPktPayload(pPkt);
-								// Did card go away?
-								LWord hdl (LWord(ntohl(pRWRP->handle)));
-								// printf("hdl = %d\n", hdl);
-								if (hdl == LWord(INVALID_NUB_HANDLE))
-								{
-									printf("Got invalid nub handle back from register read.\n");
-									retcode = NTV2_REMOTE_ACCESS_NO_CARD;
-								}
-								ULWord result (ntohl (pRWRP->result));
-								if (result)
-								{
-									outRegValue = ntohl(pRWRP->registerValue);
-									// printf("Register #%d value = 0x%08x\n", registerNumber, *registerValue);
-								}
-								else // Read register failed on remote side
-								{
-									// printf("Read Register %d failed on remote side.\n", registerNumber);
-									retcode = NTV2_REMOTE_ACCESS_READ_REG_FAILED;
-								}
-							}
-							else // Not an read register response packet, count it and discard it.
-							{
-								static unsigned long ignoredNTV2pkts;
-								++ignoredNTV2pkts;
-								retcode = NTV2_REMOTE_ACCESS_NOT_READ_REGISTER_RESP;
-							}
-						}
-						else // Non ntv2 packet on our port.
-						{
-							// NOTE: Defragmentation of jumbo packets would probably go here.
-							retcode = NTV2_REMOTE_ACCESS_NON_NUB_PKT;
-							NBFAIL("Non-nub packet on NTV2 port, socket=" << Socket());
-						}
-			}
-		}
+	bool NTV2RPCClientAPI::NTV2ReadRegisterMultiRemote (const ULWord numRegs, ULWord & outFailedRegNum, NTV2RegInfo outRegs[])
+	{	(void) numRegs; (void) outFailedRegNum; (void) outRegs;
+		return false;	//	UNIMPLEMENTED
 	}
-	delete pPkt;
-	return retcode;
-}	//	NTV2NubRPCAPI::NTV2ReadRegisterRemote
 
-
-int NTV2NubRPCAPI::NTV2WriteRegisterRemote (const ULWord regNum, const ULWord regValue, const ULWord regMask, const ULWord regShift)
-{
-	// Connected?
-	if (!SocketValid())
-		return NTV2_REMOTE_ACCESS_NOT_CONNECTED; 
-
-	// Construct open query
-	NTV2NubPkt *pPkt (BuildWriteRegisterQueryPacket (Handle(),  _nubProtocolVersion,  regNum, regValue, regMask, regShift));
-	if (!pPkt)
-		return NTV2_REMOTE_ACCESS_OUT_OF_MEMORY;
-
-	int retcode (NTV2_REMOTE_ACCESS_SUCCESS);
-	int len (pPkt  ?  int(sizeof(NTV2NubPktHeader) + pPkt->hdr.dataLength)  :  0);
-	// Send it
-	if (NBOifyNTV2NubPkt(pPkt)) 
+	bool NTV2RPCClientAPI::NTV2GetDriverVersionRemote (ULWord & outDriverVersion)
 	{
-		if (-1 == ::sendall(Socket(), reinterpret_cast<char*>(pPkt), &len))
-			{NBFAIL("'sendall' failed, socket=" << Socket() << ", len=" << len << ": " << strerror(errno));  retcode = NTV2_REMOTE_ACCESS_SEND_ERR;}
-		else
-		{
-			// Wait for response
-			int numbytes (::recvtimeout_sec(Socket(), reinterpret_cast<char*>(pPkt), sizeof(NTV2NubPkt), 2)); // 2 second timeout
-
-			switch (numbytes)
-			{
-				case  0:	// Remote side closed connection
-							retcode = NTV2_REMOTE_ACCESS_CONNECTION_CLOSED;
-							NBFAIL("'recvtimeout_sec' returned zero bytes:  remote access connection closed");
-							break;
-
-				case -1:	// error occurred
-							NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << strerror(errno));
-							retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
-							break;
-
-				case -2:	// timeout occurred
-							retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
-							NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
-							break;
-
-				default: // got some data.  Open response packet?
-						if (deNBOifyNTV2NubPkt(pPkt, ULWord(numbytes))) 
-						{
-							if (isNubWriteRegisterRespPacket(pPkt)) 
-							{
-								// printf("Got a write register response packet\n");
-								NTV2ReadWriteRegisterPayload * pRWRP(reinterpret_cast<NTV2ReadWriteRegisterPayload*>(getNubPktPayload(pPkt)));
-								// Did card go away?
-								LWord hdl (LWord(ntohl(pRWRP->handle)));
-								// printf("hdl = %d\n", hdl);
-								if (hdl == LWord(INVALID_NUB_HANDLE))
-								{
-									printf("Got invalid nub handle back from register write.\n");
-									retcode = NTV2_REMOTE_ACCESS_NO_CARD;
-								}
-								ULWord result = ntohl (pRWRP->result);
-								if (result)
-								{
-									// ULWord registerValue = ntohl(pRWRP->registerValue);
-									// printf("Write succeeded. Register #%d value = 0x%08x\n", registerNumber, registerValue);
-								}
-								else // write register failed on remote side
-								{
-									printf("Write Register %d failed on remote side.\n", regNum);
-								}
-							}
-							else // Not a write register response packet, count it and discard it.
-							{
-								static unsigned long ignoredNTV2pkts;
-								++ignoredNTV2pkts;
-								retcode = NTV2_REMOTE_ACCESS_NOT_WRITE_REGISTER_RESP;
-							}
-						}
-						else // Non ntv2 packet on our port.
-						{
-							// NOTE: Defragmentation of jumbo packets would probably go here.
-							retcode = NTV2_REMOTE_ACCESS_NON_NUB_PKT;
-							NBFAIL("Non-nub packet on NTV2 port, socket=" << Socket());
-						}
-			}	//	switch
-		}	//	else
-	}	//	NBOify OK
-	delete pPkt;
-	return retcode;
-}	//	NTV2NubRPCAPI::NTV2WriteRegisterRemote
-
-
-int NTV2NubRPCAPI::NTV2AutoCirculateRemote (AUTOCIRCULATE_DATA & autoCircData)
-{
-	// Connected?
-	if (!SocketValid())
-		return NTV2_REMOTE_ACCESS_NOT_CONNECTED; 
-
-	// Construct autocirculate query packet.
-	NTV2NubPkt *pPkt (BuildAutoCirculateQueryPacket (Handle(),  _nubProtocolVersion,  autoCircData));
-	if (!pPkt)
-		return NTV2_REMOTE_ACCESS_OUT_OF_MEMORY;
-
-	int retcode (NTV2_REMOTE_ACCESS_SUCCESS);
-	int len (pPkt  ?  int(sizeof(NTV2NubPktHeader) + pPkt->hdr.dataLength)  :  0);
-	// Send it
-	if(NBOifyNTV2NubPkt(pPkt)) 
-	{
-		if (-1 == ::sendall(Socket(), reinterpret_cast<char*>(pPkt), &len))
-			{NBFAIL("'sendall' failed, socket=" << Socket() << ", len=" << len << ": " << strerror(errno));  retcode = NTV2_REMOTE_ACCESS_SEND_ERR;}
-		else
-		{
-			// Wait for response
-			int numbytes (::recvtimeout_sec(Socket(), reinterpret_cast<char*>(pPkt), sizeof(NTV2NubPkt), 2)); // 2 second timeout
-
-			switch (numbytes)
-			{
-				case  0:	// Remote side closed connection
-							retcode = NTV2_REMOTE_ACCESS_CONNECTION_CLOSED;
-							NBFAIL("'recvtimeout_sec' returned zero bytes:  remote access connection closed");
-							break;
-
-				case -1:	// error occurred
-							NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << strerror(errno));
-							retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
-							break;
-
-				case -2:	// timeout occurred
-							retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
-							NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
-							break;
-
-				default: // got some data.  Autocirculate response packet?
-						if (deNBOifyNTV2NubPkt(pPkt, ULWord(numbytes))) 
-						{
-							if (isNubGetAutoCirculateRespPacket(pPkt)) 
-							{
-								// printf("Got an autocirculate response packet\n");
-								NTV2GetAutoCircPayload * pGACP (reinterpret_cast<NTV2GetAutoCircPayload*>(getNubPktPayload(pPkt)));
-								// Did card go away?
-								LWord hdl (LWord(ntohl(pGACP->handle)));
-								// printf("hdl = %d\n", hdl);
-								if (hdl == LWord(INVALID_NUB_HANDLE))
-								{
-									NBFAIL("Got invalid nub handle back");
-									retcode = NTV2_REMOTE_ACCESS_NO_CARD;
-								}
-								ULWord result (ntohl(pGACP->result));
-								if (result)
-								{	// Success
-									AUTOCIRCULATE_STATUS_STRUCT * pStatus (reinterpret_cast<AUTOCIRCULATE_STATUS_STRUCT*>(autoCircData.pvVal1));
-									deNBOifyAndCopyGetAutoCirculateData(*pStatus, pGACP);
-									NBDBG("Success");
-								}
-								else // GetAutocirculate failed on remote side
-								{
-									NBFAIL("AutoCirculate GET failed on remote side");
-								}
-							}
-							else if (isNubControlAutoCirculateRespPacket(pPkt)) 
-							{
-								// printf("Got an autocirculate response packet\n");
-								NTV2ControlAutoCircPayload * pCACP(reinterpret_cast<NTV2ControlAutoCircPayload*>(getNubPktPayload(pPkt)));
-								// Did card go away?
-								LWord hdl (ntohl(pCACP->handle));
-								// printf("hdl = %d\n", hdl);
-								if (hdl == LWord(INVALID_NUB_HANDLE))
-								{
-									NBFAIL("Got invalid nub handle back");
-									retcode = NTV2_REMOTE_ACCESS_NO_CARD;
-								}
-								ULWord result (ntohl(pCACP->result));
-								if (result)
-								{
-									// Success
-								}
-								else // GetAutocirculate failed on remote side
-								{
-									// printf("Autocirculate CONTROL failed on remote side.\n");
-									retcode = NTV2_REMOTE_AUTOCIRC_FAILED;
-								}
-							}
-							// Other autocirculate responses go here.
-							else // Not an autocirculate response packet, count it and discard it.
-							{
-								static unsigned long ignoredNTV2pkts;
-								++ignoredNTV2pkts;
-								retcode = NTV2_REMOTE_ACCESS_NOT_AUTOCIRC_RESP;
-							}
-						}	//	if deNBOifyNTV2NubPkt
-						else // Non ntv2 packet on our port.
-						{
-							// NOTE: Defragmentation of jumbo packets would probably go here.
-							retcode = NTV2_REMOTE_ACCESS_NON_NUB_PKT;
-							NBFAIL("Non-nub packet on NTV2 port, socket=" << Socket());
-						}	//	else non-ntv2 pkt
-			}	//	switch on numbytes
-		}	//	else sendall successful
-	}	//	if NBOifyNTV2NubPkt OK
-	delete pPkt;
-	return retcode;
-}	//	NTV2NubRPCAPI::NTV2AutoCirculateRemote
-
-
-int NTV2NubRPCAPI::NTV2WaitForInterruptRemote (const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs)
-{
-	// Connected?
-	if (!SocketValid())
-		return NTV2_REMOTE_ACCESS_NOT_CONNECTED; 
-
-	// Construct open query
-	NTV2NubPkt *pPkt(BuildWaitForInterruptQueryPacket(Handle(), _nubProtocolVersion, eInterrupt, timeOutMs));
-	if (!pPkt)
-		return NTV2_REMOTE_ACCESS_OUT_OF_MEMORY;
-
-	int retcode (NTV2_REMOTE_ACCESS_SUCCESS);
-	int len (pPkt  ?  int(sizeof(NTV2NubPktHeader) + pPkt->hdr.dataLength)  :  0);
-	// Send it
-	if (NBOifyNTV2NubPkt(pPkt)) 
-	{
-		if (-1 == ::sendall(Socket(), reinterpret_cast<char*>(pPkt), &len))
-			{NBFAIL("'sendall' failed, socket=" << Socket() << ", len=" << len << ": " << strerror(errno));  retcode = NTV2_REMOTE_ACCESS_SEND_ERR;}
-		else
-		{
-			// Wait for response
-			int numbytes = ::recvtimeout_sec(Socket(), (char *)pPkt, sizeof(NTV2NubPkt), 2); // 2 second timeout
-			switch (numbytes)
-			{
-				case  0:	// Remote side closed connection
-							retcode = NTV2_REMOTE_ACCESS_CONNECTION_CLOSED;
-							NBFAIL("'recvtimeout_sec' returned zero bytes:  remote access connection closed");
-							break;
-
-				case -1:	// error occurred
-							NBFAIL("'recvtimeout_sec' failed on sockfd " << Socket() << ": " << ::strerror(errno));
-							retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
-							break;
-			
-				case -2:	// timeout occurred
-							NBFAIL("'recvtimeout_sec' timed out after 2 seconds");
-							retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
-							break;
-			
-				default:	// got some data.  Open response packet?
-							if (deNBOifyNTV2NubPkt(pPkt, ULWord(numbytes))) 
-							{
-								if (isNubWaitForInterruptRespPacket(pPkt)) 
-								{
-									// printf("Got a write register response packet\n");
-									NTV2WaitForInterruptPayload * pWFIP (reinterpret_cast<NTV2WaitForInterruptPayload*>(getNubPktPayload(pPkt)));
-									// Did card go away?
-									LWord hdl (LWord(ntohl(pWFIP->handle)));
-									// printf("hdl = %d\n", hdl);
-									if (hdl == LWord(INVALID_NUB_HANDLE))
-									{
-										NBWARN("Got invalid nub handle back");
-										retcode = NTV2_REMOTE_ACCESS_NO_CARD;
-									}
-									ULWord result(ntohl(pWFIP->result));
-									if (result)
-									{
-										// printf("Waitfor interrupt %d succeeded.\n", eInterrupt);
-									}
-									else // write register failed on remote side
-									{
-										// printf("Waitfor interrupt %d failed on remote side.\n", eInterrupt);
-										retcode = NTV2_REMOTE_ACCESS_WAIT_FOR_INTERRUPT_FAILED;
-									}
-								}
-								else // Not a write register response packet, count it and discard it.
-								{
-									static unsigned long ignoredNTV2pkts;
-									++ignoredNTV2pkts;
-									retcode = NTV2_REMOTE_ACCESS_NOT_WAIT_FOR_INTERRUPT_RESP;
-								}
-							}
-							else // Non ntv2 packet on our port.
-							{
-								// NOTE: Defragmentation of jumbo packets would probably go here.
-								retcode = NTV2_REMOTE_ACCESS_NON_NUB_PKT;
-								NBFAIL("Non-nub packet on NTV2 port, socket=" << Socket());
-							}
-			}	//	switch
-		}	//	else
+		outDriverVersion = 0xFFFFFFFF;
+		return false;	//	UNIMPLEMENTED
 	}
-	delete pPkt;
-	return retcode;
-}	//	NTV2NubRPCAPI::NTV2WaitForInterruptRemote
+#endif	//	!defined(NTV2_DEPRECATE_16_3)
 
-
-int NTV2NubRPCAPI::NTV2DriverGetBitFileInformationRemote (BITFILE_INFO_STRUCT & outInfo,  const NTV2BitFileType inType)
-{
-	// Connected?
-	if (!SocketValid())
-		return NTV2_REMOTE_ACCESS_NOT_CONNECTED; 
-
-	// Construct open query
-	NTV2NubPkt *pPkt (BuildDriverGetBitFileInformationQueryPacket (Handle(),  _nubProtocolVersion,  outInfo,  inType));
-	if (!pPkt)
-		return NTV2_REMOTE_ACCESS_OUT_OF_MEMORY;
-
-	int retcode (NTV2_REMOTE_ACCESS_SUCCESS);
-	int len (pPkt  ?  int(sizeof(NTV2NubPktHeader) + pPkt->hdr.dataLength)  :  0);
-	// Send it
-	if (NBOifyNTV2NubPkt(pPkt)) 
-	{
-		if (-1 == ::sendall(Socket(), reinterpret_cast<char*>(pPkt), &len))
-			{NBFAIL("'sendall' failed, socket=" << Socket() << ", len=" << len << ": " << strerror(errno));  retcode = NTV2_REMOTE_ACCESS_SEND_ERR;}
-		else
-		{
-			// Wait for response
-			int numbytes = ::recvtimeout_sec(Socket(), (char *)pPkt, sizeof(NTV2NubPkt), 2); // 2 second timeout
-
-			switch (numbytes)
-			{
-				case  0:	// Remote side closed connection
-							retcode = NTV2_REMOTE_ACCESS_CONNECTION_CLOSED;
-							NBFAIL("'recvtimeout_sec' returned zero bytes:  remote access connection closed");
-							break;
-
-				case -1:	// error occurred
-							NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << strerror(errno));
-							retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
-							break;
-			
-				case -2:	// timeout occurred
-							retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
-							NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
-							break;
-			
-				default:	// got some data.  Open response packet?
-							if (deNBOifyNTV2NubPkt(pPkt, ULWord(numbytes))) 
-							{
-								if (isNubDriverGetBitFileInformationRespPacket(pPkt)) 
-								{
-									// printf("Got a driver get bitfile info response packet\n");
-									NTV2DriverGetBitFileInformationPayload * pDGBFIP;
-									pDGBFIP = (NTV2DriverGetBitFileInformationPayload *)getNubPktPayload(pPkt);
-									// Did card go away?
-									LWord hdl (LWord(ntohl(pDGBFIP->handle)));
-									// printf("hdl = %d\n", hdl);
-									if (hdl == LWord(INVALID_NUB_HANDLE))
-									{
-										printf("Got invalid nub handle back from get bitfile info.\n");
-										retcode = NTV2_REMOTE_ACCESS_NO_CARD;
-									}
-									ULWord result (ntohl(pDGBFIP->result));
-									if (result)
-									{
-										deNBOifyAndCopyGetDriverBitFileInformation(outInfo, pDGBFIP->bitFileInfo);
-										NBINFO("Success, socket=" << Socket() << ", bitFileType=" << inType);
-										// printf("Driver get bitfileinfo for type %d succeeded.\n", bitFileType);
-									}
-									else // failed on remote side
-									{
-										// printf("Driver get bitfileinfo for type %d failed on remote side.\n", bitFileType);
-										retcode = NTV2_REMOTE_ACCESS_DRIVER_GET_BITFILE_INFO_FAILED;
-									}
-								}
-								else // Not a write register response packet, count it and discard it.
-								{
-									static unsigned long ignoredNTV2pkts;
-									++ignoredNTV2pkts;
-									retcode = NTV2_REMOTE_ACCESS_NOT_DRIVER_GET_BITFILE_INFO;
-								}
-							}
-							else // Non ntv2 packet on our port.
-							{
-								// NOTE: Defragmentation of jumbo packets would probably go here.
-								retcode = NTV2_REMOTE_ACCESS_NON_NUB_PKT;
-								NBFAIL("Non-nub packet on NTV2 port, socket=" << Socket());
-							}
-			}	//	switch
-		}	//	else sendall OK
-	}	//	if NBOifyNTV2NubPkt
-	delete pPkt;
-	return retcode;
-}	//	NTV2NubRPCAPI::NTV2DriverGetBitFileInformationRemote
-
-
-int NTV2NubRPCAPI::NTV2DriverGetBuildInformationRemote (BUILD_INFO_STRUCT & outBuildInfo)
-{
-	// Connected?
-	if (!SocketValid())
-		return NTV2_REMOTE_ACCESS_NOT_CONNECTED; 
-
-	// Construct open query
-	NTV2NubPkt *pPkt (BuildDriverGetBuildInformationQueryPacket(Handle(),  ProtocolVersion()));
-	if (!pPkt)
-		return NTV2_REMOTE_ACCESS_OUT_OF_MEMORY;
-
-	int retcode (NTV2_REMOTE_ACCESS_SUCCESS);
-	int len (pPkt  ?  int(sizeof(NTV2NubPktHeader) + pPkt->hdr.dataLength)  :  0);
-	// Send it
-	if (NBOifyNTV2NubPkt(pPkt)) 
-	{
-		if (-1 == ::sendall(Socket(), reinterpret_cast<char*>(pPkt), &len))
-			{NBFAIL("'sendall' failed, socket=" << Socket() << ", len=" << len << ": " << strerror(errno));  retcode = NTV2_REMOTE_ACCESS_SEND_ERR;}
-		else
-		{
-			// Wait for response
-			int numbytes (::recvtimeout_sec(Socket(), reinterpret_cast<char*>(pPkt), sizeof(NTV2NubPkt), 2)); // 2 second timeout
-
-			switch (numbytes)
-			{
-				case  0:	// Remote side closed connection
-							retcode = NTV2_REMOTE_ACCESS_CONNECTION_CLOSED;
-							NBFAIL("'recvtimeout_sec' returned zero bytes:  remote access connection closed");
-							break;
-
-				case -1:	// error occurred
-							NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << strerror(errno));
-							retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
-							break;
-			
-				case -2:	// timeout occurred
-							retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
-							NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
-							break;
-			
-				default:	// got some data.  Open response packet?
-							if (deNBOifyNTV2NubPkt(pPkt, ULWord(numbytes))) 
-							{
-								if (isNubDriverGetBuildInformationRespPacket((NTV2NubPkt *)pPkt)) 
-								{
-									// printf("Got a driver get build info response packet\n");
-									NTV2DriverGetBuildInformationPayload * pDGBIP (reinterpret_cast<NTV2DriverGetBuildInformationPayload*>(getNubPktPayload(pPkt)));
-									// Did card go away?
-									LWord hdl (LWord(ntohl(pDGBIP->handle)));
-									// printf("hdl = %d\n", hdl);
-									if (hdl == LWord(INVALID_NUB_HANDLE))
-									{
-										printf("Got invalid nub handle back from get build info.\n");
-										retcode = NTV2_REMOTE_ACCESS_NO_CARD;
-									}
-									ULWord result (ntohl(pDGBIP->result));
-									if (result)
-									{
-										deNBOifyAndCopyGetDriverBuildInformation (outBuildInfo, pDGBIP->buildInfo);
-										// printf("Driver get buildinfo succeeded.\n");
-									}
-									else // failed on remote side
-									{
-										// printf("Driver get buildinfo failed on remote side.\n");
-										retcode = NTV2_REMOTE_ACCESS_DRIVER_GET_BUILD_INFO_FAILED;
-									}
-								}
-								else // Not a write register response packet, count it and discard it.
-								{
-									static unsigned long ignoredNTV2pkts;
-									++ignoredNTV2pkts;
-									retcode = NTV2_REMOTE_ACCESS_NOT_DRIVER_GET_BUILD_INFO;
-								}
-							}
-							else // Non ntv2 packet on our port.
-							{
-								// NOTE: Defragmentation of jumbo packets would probably go here.
-								retcode = NTV2_REMOTE_ACCESS_NON_NUB_PKT;
-								NBFAIL("Non-nub packet on NTV2 port, socket=" << Socket());
-							}
-			}	//	switch
-		}	//	else
-	}	//	if NBOify OK
-	delete pPkt;
-	return retcode;
-}	//	NTV2DriverGetBuildInformationRemote
-
-
-int NTV2NubRPCAPI::NTV2DownloadTestPatternRemote	(const NTV2Channel channel, const NTV2PixelFormat testPatternFBF,
-													const UWord signalMask, const bool testPatDMAEnb, const ULWord testPatNum)
-{
-	// Connected?
-	if (!SocketValid())
-		return NTV2_REMOTE_ACCESS_NOT_CONNECTED; 
-
-	// Construct open query
-	NTV2NubPkt *pPkt (BuildDownloadTestPatternQueryPacket(	Handle(),  _nubProtocolVersion,  channel,  testPatternFBF,
-															signalMask,  testPatDMAEnb,  testPatNum));
-	if (!pPkt)
-		return NTV2_REMOTE_ACCESS_OUT_OF_MEMORY;
-
-	int retcode (NTV2_REMOTE_ACCESS_SUCCESS);
-	int len (pPkt  ?  int(sizeof(NTV2NubPktHeader) + pPkt->hdr.dataLength)  :  0);
-	// Send it
-	if (NBOifyNTV2NubPkt(pPkt)) 
-	{
-		if (-1 == ::sendall(Socket(), reinterpret_cast<char*>(pPkt), &len))
-			{NBFAIL("'sendall' failed, socket=" << Socket() << ", len=" << len << ": " << strerror(errno));  retcode = NTV2_REMOTE_ACCESS_SEND_ERR;}
-		else
-		{
-			// Wait for response
-			int numbytes (::recvtimeout_sec(Socket(), reinterpret_cast<char*>(pPkt), sizeof(NTV2NubPkt), 2)); // 2 second timeout
-
-			switch (numbytes)
-			{
-				case  0:	// Remote side closed connection
-							retcode = NTV2_REMOTE_ACCESS_CONNECTION_CLOSED;
-							NBFAIL("'recvtimeout_sec' returned zero bytes:  remote access connection closed");
-							break;
-
-				case -1:	// error occurred
-							NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << strerror(errno));
-							retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
-							break;
-			
-				case -2:	// timeout occurred
-							retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
-							NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
-							break;
-			
-				default:	// got some data.  Open response packet?
-							if (deNBOifyNTV2NubPkt(pPkt, ULWord(numbytes))) 
-							{
-								if (isNubDownloadTestPatternRespPacket(reinterpret_cast<NTV2NubPkt*>(pPkt))) 
-								{
-									// printf("Got a download test pattern response packet\n");
-									NTV2DownloadTestPatternPayload * pDTPP(reinterpret_cast<NTV2DownloadTestPatternPayload*>(getNubPktPayload(pPkt)));
-									// Did card go away?
-									LWord hdl (LWord(ntohl(pDTPP->handle)));
-									// printf("hdl = %d\n", hdl);
-									if (hdl == LWord(INVALID_NUB_HANDLE))
-									{
-										printf("Got invalid nub handle back from download test pattern.\n");
-										retcode = NTV2_REMOTE_ACCESS_NO_CARD;
-									}
-									ULWord result (ntohl(pDTPP->result));
-									if (result)
-									{
-										// printf("Download test pattern remote succeeded.\n");
-									}
-									else // write register failed on remote side
-									{
-										printf("Download test pattern failed on remote side.\n");
-										retcode = NTV2_REMOTE_ACCESS_DOWNLOAD_TEST_PATTERN_FAILED;
-									}
-								}
-								else // Not a write register response packet, count it and discard it.
-								{
-									static unsigned long ignoredNTV2pkts;
-									++ignoredNTV2pkts;
-									retcode = NTV2_REMOTE_ACCESS_NOT_DOWNLOAD_TEST_PATTERN;
-								}
-							}
-							else // Non ntv2 packet on our port.
-							{
-								// NOTE: Defragmentation of jumbo packets would probably go here.
-								retcode = NTV2_REMOTE_ACCESS_NON_NUB_PKT;
-								NBFAIL("Non-nub packet on NTV2 port, socket=" << Socket());
-							}
-			}	//	switch
-		}	//	else
-	}	//	if NBOify OK
-	delete pPkt;
-	return retcode;
-}	//	NTV2NubRPCAPI::NTV2DownloadTestPatternRemote
-
-int NTV2NubRPCAPI::NTV2ReadRegisterMultiRemote	(const ULWord numRegs, ULWord & outFailedRegNum,  NTV2RegInfo outRegs[])
-{
-	// Connected?
-	if (!SocketValid())
-		return NTV2_REMOTE_ACCESS_NOT_CONNECTED; 
-
-	// Construct open query
-	NTV2NubPkt *pPkt (BuildReadRegisterMultiQueryPacket (Handle(),  _nubProtocolVersion,  numRegs,  outRegs));
-	if (!pPkt)
-		return NTV2_REMOTE_ACCESS_OUT_OF_MEMORY;
-
-	int retcode (NTV2_REMOTE_ACCESS_SUCCESS);
-	int len (pPkt  ?  int(sizeof(NTV2NubPktHeader) + pPkt->hdr.dataLength)  :  0);
-	// Send it
-	if(NBOifyNTV2NubPkt(pPkt)) 
-	{
-		if (-1 == ::sendall(Socket(), reinterpret_cast<char*>(pPkt), &len))
-			{NBFAIL("'sendall' failed, socket=" << Socket() << ", len=" << len << ": " << strerror(errno));  retcode = NTV2_REMOTE_ACCESS_SEND_ERR;}
-		else
-		{
-			// Wait for response
-			LWord maxPktFetchsize = 0;
-			maxPktFetchsize += sizeof(NTV2ReadWriteMultiRegisterPayloadHeader);
-			maxPktFetchsize += sizeof(NTV2NubPktHeader);
-			maxPktFetchsize += (LWord)strlen(nubQueryRespStr(_nubProtocolVersion, eNubReadRegisterMultiRespPkt)) + 1;
-			maxPktFetchsize += numRegs * sizeof(NTV2ReadWriteRegisterSingle);
-
-			int numbytestotal(0), defragAttemptCount(0);
-		defrag:
-			int numbytes(::recvtimeout_usec(Socket(), ((char *)pPkt)+numbytestotal, maxPktFetchsize - numbytestotal, 250000L)); // 500 msec timeout
-
-			if (++defragAttemptCount > 3)
-			{
-				NBFAIL("defrag timeout on socket " << Socket());
-				retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
-			}
-			else switch (numbytes)
-			{
-				case  0:	// Remote side closed connection
-							retcode = NTV2_REMOTE_ACCESS_CONNECTION_CLOSED;
-							NBFAIL("'recvtimeout_sec' returned zero bytes:  remote access connection closed");
-							break;
-
-				case -1:	// error occurred
-							NBFAIL("'recvtimeout_sec' failed on socket " << Socket() << ": " << strerror(errno));
-							retcode = NTV2_REMOTE_ACCESS_RECV_ERR;
-							break;
-			
-				case -2:	// timeout occurred
-							retcode = NTV2_REMOTE_ACCESS_TIMEDOUT;
-							NBFAIL("'recvtimeout_sec' timed out on socket " << Socket());
-							break;
-			
-				default:	// got some data.  Open response packet?
-							numbytestotal += numbytes;
-							if (numbytestotal <  maxPktFetchsize)
-								goto defrag;
-
-							if (deNBOifyNTV2NubPkt(pPkt, ULWord(numbytestotal))) 
-							{
-								if (isNubReadRegisterMultiRespPacket((NTV2NubPkt *)pPkt)) 
-								{
-									// printf("Got a read register multi response packet\n");
-									NTV2ReadWriteMultiRegisterPayload * pRWMRP;
-									pRWMRP = reinterpret_cast<NTV2ReadWriteMultiRegisterPayload*>(getNubPktPayload(pPkt));
-									// Did card go away?
-									LWord hdl = ntohl(pRWMRP->payloadHeader.handle);
-									// printf("hdl = %d\n", hdl);
-									if (hdl == (LWord)INVALID_NUB_HANDLE)
-									{
-										NBWARN("Received invalid nub handle from ReadRegMulti");
-										retcode = NTV2_REMOTE_ACCESS_NO_CARD;
-									}
-									ULWord result = ntohl (pRWMRP->payloadHeader.result);
-									outFailedRegNum = ntohl(pRWMRP->payloadHeader.whichRegisterFailed);
-	
-									if (result)
-									{
-										NBINFO("ReadRegMulti succeeded, numRegs=" << numRegs);
-										for (ULWord i(0);  i < numRegs;  i++)
-										{
-											outRegs[i].registerNumber = ntohl(pRWMRP->aRegs[i].registerNumber);
-											outRegs[i].registerValue = ntohl(pRWMRP->aRegs[i].registerValue);
-										}
-									}
-									else // Read register failed on remote side
-									{
-										// Guard against buffer overrun from remote side
-										ULWord maxRegs (outFailedRegNum > numRegs ? numRegs : outFailedRegNum);
-										NBFAIL("ReadRegMulti failed on remote side, regNum=" << outFailedRegNum);
-										retcode = NTV2_REMOTE_ACCESS_READ_REG_MULTI_FAILED;
-										for (ULWord i(0);  i < maxRegs;  i++)
-											outRegs[i].registerValue = ntohl(pRWMRP->aRegs[i].registerValue);
-									}
-								}
-								else // Not a write register response packet, count it and discard it.
-								{
-									static unsigned long ignoredNTV2pkts;
-									++ignoredNTV2pkts;
-									retcode = NTV2_REMOTE_ACCESS_NOT_READ_REG_MULTI;
-									NBWARN("Received non-ReadRegMulti response pkt, " << ignoredNTV2pkts << " ignored pkts");
-								}
-							}
-							else // Non ntv2 packet on our port.
-							{
-								// NOTE: Defragmentation of jumbo packets would probably go here.
-								retcode = NTV2_REMOTE_ACCESS_NON_NUB_PKT;
-								NBFAIL("Non-nub packet on NTV2 port, socket=" << Socket());
-							}
-			}	//	else switch
-		}	//	else
-	}	//	if NBOify OK
-	delete pPkt;
-	return retcode;
-}	//	NTV2NubRPCAPI::NTV2ReadRegisterMultiRemote
-
-int NTV2NubRPCAPI::NTV2DMATransferRemote (	const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
-											const ULWord inFrameNumber,			ULWord * pFrameBuffer,
-											const ULWord inCardOffsetBytes,		const ULWord inTotalByteCount,
-											const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
-											const ULWord inSegmentCardPitch,	const bool inSynchronous)
-{	(void) inDMAEngine; (void) inIsRead;	(void) inFrameNumber; (void) pFrameBuffer; (void) inCardOffsetBytes;
-	(void) inTotalByteCount; (void) inNumSegments; (void) inSegmentHostPitch; (void) inSegmentCardPitch; (void) inSynchronous;
-	return -1;	//	TBD
+bool NTV2RPCClientAPI::NTV2DMATransferRemote (	const NTV2DMAEngine inDMAEngine,	const bool inIsRead,	const ULWord inFrameNumber,
+												NTV2_POINTER & inOutFrameBuffer,	const ULWord inCardOffsetBytes,
+												const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
+												const ULWord inSegmentCardPitch,	const bool inSynchronous)
+{	(void) inDMAEngine; (void) inIsRead;	(void) inFrameNumber; (void) inOutFrameBuffer;
+	(void) inCardOffsetBytes; (void) inNumSegments; (void) inSegmentHostPitch;
+	(void) inSegmentCardPitch; (void) inSynchronous;
+	return false;	//	UNIMPLEMENTED
 }
 
-int	NTV2NubRPCAPI::NTV2MessageRemote (NTV2_HEADER *	pInMessage)
+bool NTV2RPCClientAPI::NTV2MessageRemote (NTV2_HEADER * pInMessage)
 {	(void) pInMessage;
-	return -1;	//	TBD
+	return false;	//	UNIMPLEMENTED
 }
 
-ostream &	NTV2NubRPCAPI::Print (ostream & oss) const
+bool NTV2RPCClientAPI::NTV2OpenRemote (void)
 {
-	NTV2RPCAPI::Print(oss);
-	oss << " devNdx=" << _remoteIndex << " sockfd=" << Socket()
-		<< " handle=" << Handle() << " protocolVers=" << ProtocolVersion();
-	return oss;
+	return false;	//	UNIMPLEMENTED
 }
 
-
-NTV2RPCAPI * NTV2RPCAPI::FindNTV2SoftwareDevice (const string & inName, const std::string & inQueryParams)
+bool NTV2RPCClientAPI::NTV2CloseRemote (void)
 {
-	//	Look for a dylib/DLL named inName...
-	//	Look for dylibs/DLLs in user persistence store:
+	mConnectParams.clear();
+	return true;
+}
+
+NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inParams)	//	CLASS METHOD
+{
+	//	Scheme dictates which plugin to try loading...
+	if (!inParams.hasKey(kConnectParamScheme))
+		{NBCFAIL("Missing scheme -- params: " << inParams);  return AJA_NULL;}	//	No scheme
+	string scheme(inParams.valueForKey(kConnectParamScheme));
+	if (scheme.find("ntv2"))	//	scheme must start with "ntv2"
+		{NBCFAIL("Scheme '" << inParams.valueForKey(kConnectParamScheme) << "' results in empty plugin name");  return AJA_NULL;}	//	No "host"
+	scheme.erase(0,4);	//	Remainder of scheme yields DLL/dylib/so name...
+
+	//	Look for plugins in the "AJA" folder (usually parent folder of our "firmware" folder)...
+	string pluginName(scheme), pluginPath, errStr;
 	AJASystemInfo sysInfo (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path);
-	string userPath, errStr;
-	if (AJA_FAILURE(sysInfo.GetValue(AJA_SystemInfoTag_Path_Firmware, userPath)))
-		{AJA_sERROR(AJA_DebugUnit_RPCClient, AJAFUNC << ": AJA_SystemInfoTag_Path_Firmware failed");  return AJA_NULL;}	//	Can't get firmware folder
-	AJA_sDEBUG(AJA_DebugUnit_RPCClient, AJAFUNC << ": AJA_SystemInfoTag_Path_Firmware is '" << userPath << "'");
+	if (AJA_FAILURE(sysInfo.GetValue(AJA_SystemInfoTag_Path_Firmware, pluginPath)))
+		{NBCFAIL("AJA_SystemInfoTag_Path_Firmware failed");  return AJA_NULL;}	//	Can't get firmware folder
+	NBCDBG("AJA firmware path is '" << pluginPath << "', seeking '" << pluginName << ".dylib'");
+
 #if defined(AJAMac)
+	//	On MacOS, our plugins are dynamically-loading libraries (dylibs)
+	if (pluginPath.find("Firmware/") == string::npos)
+		{NBCFAIL("'" << pluginPath << "' doesn't end with 'Firmware/'");  return AJA_NULL;}
+	pluginPath.erase(pluginPath.find("Firmware/"), 9);	//	Lop off trailing "Firmware/"
+	pluginPath += pluginName + ".dylib";				//	Append pluginName.dylib
+
 	//	Open the .dylib...
-	if (userPath.find("Firmware/") == string::npos)
-		{AJA_sERROR(AJA_DebugUnit_RPCClient, AJAFUNC << ": '" << userPath << "' doesn't end with 'Firmware/'");  return AJA_NULL;}
-	userPath.erase(userPath.find("Firmware/"), 9);	//	Lop off trailing "Firmware/"
-	userPath += inName + ".dylib";	//	Append inName.dylib
-	void* pHandle = ::dlopen(userPath.c_str(), RTLD_LAZY);
+	void* pHandle = ::dlopen(pluginPath.c_str(), RTLD_LAZY);
 	if (!pHandle)
 	{	const char * pErrorStr(::dlerror());
 		errStr =  pErrorStr ? pErrorStr : "";
-		AJA_sERROR(AJA_DebugUnit_RPCClient, AJAFUNC << ": failed: " << errStr);
+		NBCFAIL("Unable to open dylib '" << pluginPath << "': " << errStr);
 		return AJA_NULL;
 	}	//	dlopen failed
-	AJA_sINFO(AJA_DebugUnit_RPCClient, AJAFUNC << ": 'dlopen' success: '" << userPath << "'");
+	NBCDBG("Dylib '" << pluginPath << "' opened");
 
 	//	Get pointer to its CreateNTV2SoftwareDevice function...
-	const string exportedFunctionName("CreateNTV2SoftwareDevice");
-	uint64_t * pFunc = reinterpret_cast<uint64_t*>(::dlsym(pHandle, exportedFunctionName.c_str()));
+	uint64_t * pFunc = reinterpret_cast<uint64_t*>(::dlsym(pHandle, kFuncNameCreateClient.c_str()));
 	if (!pFunc)
 	{	const char * pErrStr(::dlerror());
 		errStr =  pErrStr ? pErrStr : "";
-		AJA_sERROR(AJA_DebugUnit_RPCClient, AJAFUNC << ": 'dlsym' failed: " << errStr);
+		NBCFAIL("'dlsym' failed for '" << kFuncNameCreateClient << "' in '" << pluginPath << "': " << errStr);
 		::dlclose(pHandle);
 		return AJA_NULL;
 	}
-	AJA_sINFO(AJA_DebugUnit_RPCClient, AJAFUNC << ": 'dlsym' success: calling '" << exportedFunctionName << "'");
+	NBCDBG("Calling '" << kFuncNameCreateClient << "' in '" << pluginPath << "'");
 
-	//	Call its CreateNTV2SoftwareDevice function to instantiate the NTV2RPCAPI object...
-	fpCreateNTV2SoftwareDevice pCreateFunc = reinterpret_cast<fpCreateNTV2SoftwareDevice>(pFunc);
+	//	Call its Create function to instantiate the NTV2RPCClientAPI object...
+	fpCreateClient pCreateFunc = reinterpret_cast<fpCreateClient>(pFunc);
 	NTV2_ASSERT(pCreateFunc);
-	NTV2RPCAPI * pRPCObject = (*pCreateFunc) (pHandle, inQueryParams, AJA_NTV2_SDK_VERSION);
-	//	It's now someone else's responsibility to call ::dlclose
+	NTV2RPCClientAPI * pRPCObject = (*pCreateFunc) (pHandle, inParams, AJA_NTV2_SDK_VERSION);
 	if (!pRPCObject)
 	{
-		AJA_sERROR(AJA_DebugUnit_RPCClient, AJAFUNC << ": 'CreateNTV2SoftwareDevice' returned NULL");
+		NBCFAIL("'" << kFuncNameCreateClient << "' failed to return NTV2RPCClientAPI instance using: " << inParams);
 		::dlclose(pHandle);
 		return AJA_NULL;
 	}
-	AJA_sINFO(AJA_DebugUnit_RPCClient, AJAFUNC << ": Success: 'CreateNTV2SoftwareDevice' returned non-NULL object");
-	return pRPCObject;	//	It's caller's responsibility to delete pRPCObject
+	//	It's now someone else's responsibility to call ::dlclose
+	NBCINFO("'" << kFuncNameCreateClient << "' in '" << pluginPath << "' created instance " << xHEX0N(uint64_t(pRPCObject),16));
+	return pRPCObject;
 #elif defined(MSWindows)
-	(void) inName;
-	(void) inQueryParams;
 #elif defined(AJALinux)
-	(void) inName;
-	(void) inQueryParams;
 #else
-	(void) inName;
-	(void) inQueryParams;
+	#error "Missing implementation"
 #endif
 	return AJA_NULL;
-}	//	FindNTV2SoftwareDevice
+}	//	CreateClient
 
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
+
+/*****************************************************************************************************************************************************
+	NTV2RPCServerAPI
+*****************************************************************************************************************************************************/
+
+NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const NTV2ConfigParams & inParams)	//	CLASS METHOD
+{
+	//	Scheme dictates which plugin to try loading...
+	if (!inParams.hasKey(kConnectParamScheme))
+		{NBSFAIL("Missing scheme");  return AJA_NULL;}	//	No scheme
+	string scheme(inParams.valueForKey(kConnectParamScheme));
+	if (scheme.find("ntv2"))	//	scheme must start with "ntv2"
+		{NBSFAIL("Scheme '" << inParams.valueForKey(kConnectParamScheme) << "' results in empty plugin name");  return AJA_NULL;}	//	No "host"
+	scheme.erase(0,4);	//	Remainder of scheme yields DLL/dylib/so name...
+
+	//	Look for plugins in the "AJA" folder (usually parent folder of our "firmware" folder)...
+	string pluginName(scheme), pluginPath, errStr;
+	AJASystemInfo sysInfo (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path);
+	if (AJA_FAILURE(sysInfo.GetValue(AJA_SystemInfoTag_Path_Firmware, pluginPath)))
+		{NBSFAIL("AJA_SystemInfoTag_Path_Firmware failed");  return AJA_NULL;}	//	Can't get firmware folder
+	NBSDBG("AJA firmware path is '" << pluginPath << "', seeking '" << pluginName << ".dylib'");
+
+#if defined(AJAMac)
+	//	On MacOS, our plugins are dynamically-loading libraries (dylibs)
+	if (pluginPath.find("Firmware/") == string::npos)
+		{NBSFAIL("'" << pluginPath << "' doesn't end with 'Firmware/'");  return AJA_NULL;}
+	pluginPath.erase(pluginPath.find("Firmware/"), 9);	//	Lop off trailing "Firmware/"
+	pluginPath += pluginName + ".dylib";				//	Append pluginName.dylib
+
+	//	Open the .dylib...
+	void* pHandle = ::dlopen(pluginPath.c_str(), RTLD_LAZY);
+	if (!pHandle)
+	{	const char * pErrorStr(::dlerror());
+		errStr =  pErrorStr ? pErrorStr : "";
+		NBSFAIL("Unable to open dylib '" << pluginPath << "': " << errStr);
+		return AJA_NULL;
+	}	//	dlopen failed
+	NBSDBG("Dylib '" << pluginPath << "' opened");
+
+	//	Get pointer to its CreateNTV2SoftwareDevice function...
+	uint64_t * pFunc = reinterpret_cast<uint64_t*>(::dlsym(pHandle, kFuncNameCreateServer.c_str()));
+	if (!pFunc)
+	{	const char * pErrStr(::dlerror());
+		errStr =  pErrStr ? pErrStr : "";
+		NBSFAIL("'dlsym' failed for '" << kFuncNameCreateServer << "' in '" << pluginPath << "': " << errStr);
+		::dlclose(pHandle);
+		return AJA_NULL;
+	}
+	NBSDBG("Calling '" << kFuncNameCreateServer << "' in '" << pluginPath << "'");
+
+	//	Call its Create function to instantiate the NTV2RPCServerAPI object...
+	fpCreateServer pCreateFunc = reinterpret_cast<fpCreateServer>(pFunc);
+	NTV2_ASSERT(pCreateFunc);
+	NTV2RPCServerAPI * pRPCObject = (*pCreateFunc) (pHandle, inParams, AJA_NTV2_SDK_VERSION);
+	if (!pRPCObject)
+	{
+		NBSFAIL("'" << kFuncNameCreateServer << "' failed to return NTV2RPCServerAPI instance using: " << inParams);
+		::dlclose(pHandle);
+		return AJA_NULL;
+	}
+	//	It's now someone else's responsibility to call ::dlclose
+	NBSINFO("'" << kFuncNameCreateServer << "' in '" << pluginPath << "' created instance " << xHEX0N(uint64_t(pRPCObject),16));
+	return pRPCObject;	//	It's caller's responsibility to delete pRPCObject
+#elif defined(MSWindows)
+#elif defined(AJALinux)
+#else
+	#error "Missing implementation"
+#endif
+	return AJA_NULL;
+}	//	CreateServer
+
+NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const string & inURL)	//	CLASS METHOD
+{
+	NTV2DeviceSpecParser parser(inURL);
+	if (parser.HasErrors())
+		return AJA_NULL;
+	return CreateServer(parser.Results());
+}
+
+NTV2RPCServerAPI::NTV2RPCServerAPI (const NTV2ConnectParams & inParams)
+	:	mConfigParams	(inParams)
+{
+	NTV2_POINTER spare(&mSpare, sizeof(mSpare));  spare.Fill(0ULL);
+	AJADebug::Open();
+}
+
+NTV2RPCServerAPI::~NTV2RPCServerAPI()
+{
+}
+
+void NTV2RPCServerAPI::RunServer (void)
+{	//	This function normally should never be called;
+	//	It's usually overridden by a subclass
+	NBSDBG("Started");
+	while (!mSpare[0])
+		AJATime::Sleep(500);
+	NBSDBG("Terminated");
+}	//	ServerFunction
+
+ostream & NTV2RPCServerAPI::Print (ostream & oss) const
+{
+	oss << mConfigParams;
+	return oss;
+}
+
+bool NTV2RPCServerAPI::SetConfigParams (const NTV2ConnectParams & inNewParams, const bool inAugment)
+{
+	size_t oldCount(mConfigParams.size()), updated(0), added(0);
+	if (inAugment)
+	{
+		updated = mConfigParams.UpdateFrom(inNewParams);
+		added = mConfigParams.AddFrom(inNewParams);
+        NBSDBG(DEC(updated) << " config param(s) updated, " << DEC(added) << " added: " << mConfigParams);
+	}
+	else
+	{
+		mConfigParams = inNewParams;
+		NBSDBG(DEC(oldCount) << " config param(s) removed, replaced with " << inNewParams);
+	}
+	if (mConfigParams.empty())
+		NBSWARN("No config params");
+	return true;
+}

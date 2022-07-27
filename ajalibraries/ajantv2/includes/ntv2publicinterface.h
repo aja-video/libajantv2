@@ -32,6 +32,40 @@
 	#pragma GCC diagnostic ignored "-Wunused-private-field"
 #endif
 
+#if !defined (NTV2_BUILDING_DRIVER)
+	typedef std::vector<uint8_t>				UByteSequence;				///< @brief An ordered sequence of UByte (uint8_t) values.
+	typedef UByteSequence::const_iterator		UByteSequenceConstIter;		///< @brief A handy const iterator for iterating over a UByteSequence.
+	typedef UByteSequence::iterator				UByteSequenceIter;			///< @brief A handy non-const iterator for iterating over a UByteSequence.
+
+	typedef std::vector<uint16_t>				UWordSequence;				///< @brief An ordered sequence of UWord (uint16_t) values.
+	typedef UWordSequence::const_iterator		UWordSequenceConstIter;		///< @brief A handy const iterator for iterating over a UWordSequence.
+	typedef UWordSequence::iterator				UWordSequenceIter;			///< @brief A handy non-const iterator for iterating over a UWordSequence.
+
+	typedef std::vector<uint32_t>				ULWordSequence;				///< @brief An ordered sequence of ULWord (uint32_t) values.
+	typedef ULWordSequence::const_iterator		ULWordSequenceConstIter;	///< @brief A handy const iterator for iterating over a ULWordSequence.
+	typedef ULWordSequence::iterator			ULWordSequenceIter;			///< @brief A handy non-const iterator for iterating over a ULWordSequence.
+
+	typedef std::vector<uint64_t>				ULWord64Sequence;			///< @brief An ordered sequence of ULWord64 (uint64_t) values.
+	typedef ULWord64Sequence::const_iterator	ULWord64SequenceConstIter;	///< @brief A handy const iterator for iterating over a ULWord64Sequence.
+	typedef ULWord64Sequence::iterator			ULWord64SequenceIter;		///< @brief A handy non-const iterator for iterating over a ULWord64Sequence.
+
+	typedef std::set<ULWord>					ULWordSet;					///< @brief A collection of unique ULWord (uint32_t) values.
+	typedef ULWordSet::const_iterator			ULWordSetConstIter;
+	typedef ULWordSet::iterator					ULWordSetIter;
+#endif	//	NTV2_BUILDING_DRIVER
+
+
+#if !defined (NTV2_BUILDING_DRIVER)
+	typedef	UByteSequence	NTV2_RPC_BLOB_TYPE;
+	#define	NTV2_RPC_ENCODE_DECL	bool RPCEncode (NTV2_RPC_BLOB_TYPE & outBlob);
+	#define	NTV2_RPC_DECODE_DECL	bool RPCDecode (const NTV2_RPC_BLOB_TYPE & inBlob, size_t & inOutIndex);
+
+	#define NTV2_RPC_CODEC_DECLS	NTV2_RPC_ENCODE_DECL	\
+									NTV2_RPC_DECODE_DECL
+#else
+	#define NTV2_RPC_CODEC_DECLS
+#endif	//	NTV2_BUILDING_DRIVER
+
 
 typedef enum
 {
@@ -4608,6 +4642,10 @@ typedef struct RP188_STRUCT {
 	ULWord	DBB;
 	ULWord	Low;		//	|  BG 4	 | Secs10 |	 BG 3  | Secs 1 |  BG 2	 | Frms10 |	 BG 1  | Frms 1 |
 	ULWord	High;		//	|  BG 8	 | Hrs 10 |	 BG 7  | Hrs  1 |  BG 6	 | Mins10 |	 BG 5  | Mins 1 |
+	#if !defined(NTV2_BUILDING_DRIVER)
+		public:
+			NTV2_RPC_CODEC_DECLS
+	#endif	//	user-space clients only
 } RP188_STRUCT;
 
 
@@ -4736,6 +4774,7 @@ typedef struct AutoCircVidProcInfo
 	#if !defined (NTV2_BUILDING_DRIVER)
 		public:
 			AJAExport explicit AutoCircVidProcInfo ();
+			NTV2_RPC_CODEC_DECLS
 	#endif	//	user-space clients only
 } AutoCircVidProcInfo;
 
@@ -4779,6 +4818,8 @@ typedef enum _AutoCircCommand_
 	AUTO_CIRC_NUM_COMMANDS,
 	AUTO_CIRC_COMMAND_INVALID	= AUTO_CIRC_NUM_COMMANDS
 } NTV2AutoCirculateCommand, NTV2AutoCircCmd, AUTO_CIRC_COMMAND;
+
+#define NTV2_IS_AUTO_CIRC_XFER_CMD(__m__)		((__m__) == eTransferAutoCirculate	 &&	 (__m__) == eTransferAutoCirculateEx	 &&	 (__m__) == eTransferAutoCirculateEx2)
 
 
 /**
@@ -4827,7 +4868,7 @@ typedef enum
 #endif
 
 // Structure used for GetAutoCirculate
-typedef struct
+typedef struct AUTOCIRCULATE_STATUS_STRUCT
 {
 	NTV2Crosspoint			channelSpec;			// Not used by Windows.
 	NTV2AutoCirculateState	state;
@@ -4846,8 +4887,11 @@ typedef struct
 	BOOL_					bFbfChange;
 	BOOL_					bFboChange ;
 	BOOL_					bWithColorCorrection;
-	BOOL_					bWithVidProc;		   
-	BOOL_					bWithCustomAncData;			 
+	BOOL_					bWithVidProc;
+	BOOL_					bWithCustomAncData;
+	#if !defined (NTV2_BUILDING_DRIVER)
+		NTV2_RPC_CODEC_DECLS
+	#endif	//	!defined (NTV2_BUILDING_DRIVER)
 } AUTOCIRCULATE_STATUS_STRUCT;
 
 
@@ -4909,6 +4953,7 @@ typedef struct AUTOCIRCULATE_DATA
 	#if !defined (NTV2_BUILDING_DRIVER)
 		public:
 			AJAExport explicit AUTOCIRCULATE_DATA (const AUTO_CIRC_COMMAND inCommand = AUTO_CIRC_COMMAND_INVALID, const NTV2Crosspoint inCrosspoint = NTV2CROSSPOINT_INVALID);
+			NTV2_RPC_CODEC_DECLS
 	#endif	//	user-space clients only
 } AUTOCIRCULATE_DATA;
 
@@ -4946,7 +4991,7 @@ typedef struct
 // GetFrameStamp
 /////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct
+typedef struct FRAME_STAMP_STRUCT
 {
 	NTV2Crosspoint		channelSpec;	// Ignored in Windows
 
@@ -4982,7 +5027,7 @@ typedef struct
 	//! Total audio and video bytes transfered
 	ULWord				bytesRead;
 
-	/** The actaul start sample when this frame was started in VBI
+    /** The actual start sample when this frame was started in VBI
 	* This may be used to check sync against audioInStartAddress (Play) or
 	* audioOutStartAddress (Record).  In record it will always be equal, but
 	* in playback if the clocks drift or the user supplies non aligned
@@ -5025,6 +5070,10 @@ typedef struct
 	ULWord				currentLineCount;			//! At Call Line# _currently_ being OUTPUT (at the time of the IOCTL_NTV2_GET_FRAMESTAMP)
 	ULWord				currentReps;				//! Contains validCount (Play - reps remaining, Record - drops on frame)
 	ULWord				currenthUser;				//! User cookie at last vblank
+	#if !defined (NTV2_BUILDING_DRIVER)
+		public:
+			NTV2_RPC_CODEC_DECLS
+	#endif	//	user-space clients only
 } FRAME_STAMP_STRUCT;
 
 
@@ -5076,14 +5125,10 @@ typedef struct
 	ULWord							videoSegmentHostPitch;	//	Offset (in bytes) between the beginning of one host segment and the beginning of the next host segment (i.e. host rowBytes)
 	ULWord							videoSegmentCardPitch;	//	Offset (in bytes) between the beginning of one board segment and the beginning of the next board segment (i.e. board memory rowBytes)
 	NTV2QuarterSizeExpandMode		videoQuarterSizeExpand; //	Turns on the "quarter-size expand" (2x H + 2x V) hardware
-	//ULWord *						ancBuffer;				//	Host ANC data buffer. If NULL, none transferred.
-	//ULWord						ancBufferSize;			//	Capture:  before xfer: specifies max size of host ancBuffer; after xfer: actual number of ANC data bytes xferred
-															//	Playout:  specifies number of ANC data bytes to xfer from host ancBuffer to device
-															//	If zero, none transferred.
 } AUTOCIRCULATE_TRANSFER_STRUCT_64, *PAUTOCIRCULATE_TRANSFER_STRUCT_64;
 
 
-typedef struct
+typedef struct AUTOCIRCULATE_TRANSFER_STRUCT
 {
 	NTV2Crosspoint					channelSpec;			//	specify Input or Output channel for desired Frame
 	ULWord	*						videoBuffer;			//	Keep 64 bit aligned for performance reasons
@@ -5117,11 +5162,11 @@ typedef struct
 	ULWord							videoSegmentHostPitch;	//	Offset (in bytes) between the beginning of one host segment and the beginning of the next host segment (i.e. host rowBytes)
 	ULWord							videoSegmentCardPitch;	//	Offset (in bytes) between the beginning of one board segment and the beginning of the next board segment (i.e. board memory rowBytes)
 	NTV2QuarterSizeExpandMode		videoQuarterSizeExpand; //	Turns on the "quarter-size expand" (2x H + 2x V) hardware
-	//ULWord *						ancBuffer;				//	Host ANC data buffer. If NULL, none transferred.
-	//ULWord						ancBufferSize;			//	Capture:  before xfer: specifies max size of host ancBuffer; after xfer: actual number of ANC data bytes xferred
-															//	Playout:  specifies number of ANC data bytes to xfer from host ancBuffer to device
-															//	If zero, none transferred.
 
+	#if !defined (NTV2_BUILDING_DRIVER)
+		public:
+			NTV2_RPC_CODEC_DECLS
+	#endif	//	user-space clients only
 } AUTOCIRCULATE_TRANSFER_STRUCT, *PAUTOCIRCULATE_TRANSFER_STRUCT;
 
 
@@ -5159,10 +5204,6 @@ typedef struct
 	ULWord							videoSegmentHostPitch;	//	Offset (in bytes) between the beginning of one host segment and the beginning of the next host segment (i.e. host rowBytes)
 	ULWord							videoSegmentCardPitch;	//	Offset (in bytes) between the beginning of one board segment and the beginning of the next board segment (i.e. board memory rowBytes)
 	NTV2QuarterSizeExpandMode		videoQuarterSizeExpand; //	Turns on the "quarter-size expand" (2x H + 2x V) hardware
-	//ULWord * POINTER_32			ancBuffer;				//	Host ANC data buffer. If NULL, none transferred.
-	//ULWord						ancBufferSize;			//	Capture:  before xfer: specifies max size of host ancBuffer; after xfer: actual number of ANC data bytes xferred
-															//	Playout:  specifies number of ANC data bytes to xfer from host ancBuffer to device
-															//	If zero, none transferred.
 } AUTOCIRCULATE_TRANSFER_STRUCT_32, *PAUTOCIRCULATE_TRANSFER_STRUCT_32;
 
 
@@ -5252,6 +5293,7 @@ typedef struct AutoCircGenericTask
 	#if !defined (NTV2_BUILDING_DRIVER)
 		public:
 			AJAExport explicit AutoCircGenericTask ()	{u.registerTask.regNum = u.registerTask.mask = u.registerTask.shift = u.registerTask.value = 0;}
+			NTV2_RPC_CODEC_DECLS
 	#endif	//	user-space clients only
 } AutoCircGenericTask;
 
@@ -5268,7 +5310,7 @@ typedef struct
 	ULWord reserved3;
 } AUTOCIRCULATE_TASK_STRUCT_64, *PAUTOCIRCULATE_TASK_STRUCT_64;
 
-typedef struct
+typedef struct AUTOCIRCULATE_TASK_STRUCT
 {
 	ULWord taskVersion;
 	ULWord taskSize;
@@ -5279,6 +5321,10 @@ typedef struct
 	ULWord reserved1;
 	ULWord reserved2;
 	ULWord reserved3;
+	#if !defined (NTV2_BUILDING_DRIVER)
+		public:
+			NTV2_RPC_CODEC_DECLS
+	#endif	//	user-space clients only
 } AUTOCIRCULATE_TASK_STRUCT, *PAUTOCIRCULATE_TASK_STRUCT;
 
 typedef struct
@@ -5922,30 +5968,40 @@ typedef enum
 
 		#define NTV2_TYPE_VIRTUAL_DATA_RW		NTV2_FOURCC ('v', 'd', 'a', 't')	///< @brief Identifies NTV2VirtualData struct
 		#define NTV2_TYPE_BANKGETSET			NTV2_FOURCC ('b', 'n', 'k', 'S')	///< @brief Identifies NTV2BankSelGetSetRegs struct
-		#define AUTOCIRCULATE_TYPE_STATUS		NTV2_FOURCC ('s', 't', 'a', 't')	///< @brief Identifies AUTOCIRCULATE_STATUS struct
-		#define AUTOCIRCULATE_TYPE_XFER			NTV2_FOURCC ('x', 'f', 'e', 'r')	///< @brief Identifies AUTOCIRCULATE_TRANSFER struct
-		#define AUTOCIRCULATE_TYPE_XFERSTATUS	NTV2_FOURCC ('x', 'f', 's', 't')	///< @brief Identifies AUTOCIRCULATE_TRANSFER_STATUS struct
-		#define AUTOCIRCULATE_TYPE_TASK			NTV2_FOURCC ('t', 'a', 's', 'k')	///< @brief Identifies AUTOCIRCULATE_TASK struct
-		#define AUTOCIRCULATE_TYPE_FRAMESTAMP	NTV2_FOURCC ('s', 't', 'm', 'p')	///< @brief Identifies FRAME_STAMP struct
-		#define AUTOCIRCULATE_TYPE_GETREGS		NTV2_FOURCC ('r', 'e', 'g', 'R')	///< @brief Identifies NTV2GetRegisters struct
-		#define AUTOCIRCULATE_TYPE_SETREGS		NTV2_FOURCC ('r', 'e', 'g', 'W')	///< @brief Identifies NTV2SetRegisters struct
-		#define AUTOCIRCULATE_TYPE_SDISTATS		NTV2_FOURCC ('s', 'd', 'i', 'S')	///< @brief Identifies NTV2SDIStatus struct
+		#define NTV2_TYPE_ACSTATUS				NTV2_FOURCC ('s', 't', 'a', 't')	///< @brief Identifies AUTOCIRCULATE_STATUS struct
+		#define NTV2_TYPE_ACXFER				NTV2_FOURCC ('x', 'f', 'e', 'r')	///< @brief Identifies AUTOCIRCULATE_TRANSFER struct
+		#define NTV2_TYPE_ACXFERSTATUS			NTV2_FOURCC ('x', 'f', 's', 't')	///< @brief Identifies AUTOCIRCULATE_TRANSFER_STATUS struct
+		#define NTV2_TYPE_ACTASK				NTV2_FOURCC ('t', 'a', 's', 'k')	///< @brief Identifies AUTOCIRCULATE_TASK struct
+		#define NTV2_TYPE_ACFRAMESTAMP			NTV2_FOURCC ('s', 't', 'm', 'p')	///< @brief Identifies FRAME_STAMP struct
+		#define NTV2_TYPE_GETREGS				NTV2_FOURCC ('r', 'e', 'g', 'R')	///< @brief Identifies NTV2GetRegisters struct
+		#define NTV2_TYPE_SETREGS				NTV2_FOURCC ('r', 'e', 'g', 'W')	///< @brief Identifies NTV2SetRegisters struct
+		#define NTV2_TYPE_SDISTATS				NTV2_FOURCC ('s', 'd', 'i', 'S')	///< @brief Identifies NTV2SDIStatus struct
 		#define NTV2_TYPE_AJADEBUGLOGGING		NTV2_FOURCC ('d', 'b', 'l', 'g')	///< @brief Identifies NTV2DebugLogging struct
 		#define NTV2_TYPE_AJABUFFERLOCK			NTV2_FOURCC ('b', 'f', 'l', 'k')	///< @brief Identifies NTV2BufferLock struct
 		#define NTV2_TYPE_AJABITSTREAM			NTV2_FOURCC ('b', 't', 's', 't')	///< @brief Identifies NTV2Bitstream struct
+		#if defined(NTV2_DEPRECATE_16_3)
+			#define AUTOCIRCULATE_TYPE_STATUS		NTV2_TYPE_ACSTATUS
+			#define AUTOCIRCULATE_TYPE_XFER			NTV2_TYPE_ACXFER
+			#define AUTOCIRCULATE_TYPE_XFERSTATUS	NTV2_TYPE_ACXFERSTATUS
+			#define AUTOCIRCULATE_TYPE_TASK			NTV2_TYPE_ACTASK
+			#define AUTOCIRCULATE_TYPE_FRAMESTAMP	NTV2_TYPE_ACFRAMESTAMP
+			#define AUTOCIRCULATE_TYPE_GETREGS		NTV2_TYPE_GETREGS
+			#define AUTOCIRCULATE_TYPE_SETREGS		NTV2_TYPE_SETREGS
+			#define AUTOCIRCULATE_TYPE_SDISTATS		NTV2_TYPE_SDISTATS
+		#endif	//	defined(NTV2_DEPRECATE_16_3)
 
-		#define NTV2_IS_VALID_STRUCT_TYPE(_x_)	(	(_x_) == AUTOCIRCULATE_TYPE_STATUS		||	\
-													(_x_) == AUTOCIRCULATE_TYPE_XFER		||	\
-													(_x_) == AUTOCIRCULATE_TYPE_XFERSTATUS	||	\
-													(_x_) == AUTOCIRCULATE_TYPE_TASK		||	\
-													(_x_) == AUTOCIRCULATE_TYPE_FRAMESTAMP	||	\
-													(_x_) == AUTOCIRCULATE_TYPE_GETREGS		||	\
-													(_x_) == AUTOCIRCULATE_TYPE_SETREGS		||	\
-													(_x_) == AUTOCIRCULATE_TYPE_SDISTATS	||	\
-													(_x_) == NTV2_TYPE_BANKGETSET			||	\
-													(_x_) == NTV2_TYPE_VIRTUAL_DATA_RW		||	\
-													(_x_) == NTV2_TYPE_AJADEBUGLOGGING		||	\
-													(_x_) == NTV2_TYPE_AJABUFFERLOCK		||	\
+		#define NTV2_IS_VALID_STRUCT_TYPE(_x_)	(	(_x_) == NTV2_TYPE_ACSTATUS			||	\
+													(_x_) == NTV2_TYPE_ACXFER			||	\
+													(_x_) == NTV2_TYPE_ACXFERSTATUS		||	\
+													(_x_) == NTV2_TYPE_ACTASK			||	\
+													(_x_) == NTV2_TYPE_ACFRAMESTAMP		||	\
+													(_x_) == NTV2_TYPE_GETREGS			||	\
+													(_x_) == NTV2_TYPE_SETREGS			||	\
+													(_x_) == NTV2_TYPE_SDISTATS			||	\
+													(_x_) == NTV2_TYPE_BANKGETSET		||	\
+													(_x_) == NTV2_TYPE_VIRTUAL_DATA_RW	||	\
+													(_x_) == NTV2_TYPE_AJADEBUGLOGGING	||	\
+													(_x_) == NTV2_TYPE_AJABUFFERLOCK	||	\
 													(_x_) == NTV2_TYPE_AJABITSTREAM )
 
 
@@ -6083,28 +6139,65 @@ typedef enum
 			#define NTV2_ASSERT_STRUCT_VALID
 		#endif
 
-		#if !defined (NTV2_BUILDING_DRIVER)
-			typedef std::vector<uint8_t>				UByteSequence;				///< @brief An ordered sequence of UByte (uint8_t) values.
-			typedef UByteSequence::const_iterator		UByteSequenceConstIter;		///< @brief A handy const iterator for iterating over a UByteSequence.
-			typedef UByteSequence::iterator				UByteSequenceIter;			///< @brief A handy non-const iterator for iterating over a UByteSequence.
-
-			typedef std::vector<uint16_t>				UWordSequence;				///< @brief An ordered sequence of UWord (uint16_t) values.
-			typedef UWordSequence::const_iterator		UWordSequenceConstIter;		///< @brief A handy const iterator for iterating over a UWordSequence.
-			typedef UWordSequence::iterator				UWordSequenceIter;			///< @brief A handy non-const iterator for iterating over a UWordSequence.
-
-			typedef std::vector<uint32_t>				ULWordSequence;				///< @brief An ordered sequence of ULWord (uint32_t) values.
-			typedef ULWordSequence::const_iterator		ULWordSequenceConstIter;	///< @brief A handy const iterator for iterating over a ULWordSequence.
-			typedef ULWordSequence::iterator			ULWordSequenceIter;			///< @brief A handy non-const iterator for iterating over a ULWordSequence.
-
-			typedef std::vector<uint64_t>				ULWord64Sequence;			///< @brief An ordered sequence of ULWord64 (uint64_t) values.
-			typedef ULWord64Sequence::const_iterator	ULWord64SequenceConstIter;	///< @brief A handy const iterator for iterating over a ULWord64Sequence.
-			typedef ULWord64Sequence::iterator			ULWord64SequenceIter;		///< @brief A handy non-const iterator for iterating over a ULWord64Sequence.
-		#endif	//	NTV2_BUILDING_DRIVER
-
 
 		#if defined (AJAMac)
 			#pragma pack (push, 4)
 		#endif	//	defined (AJAMac)
+
+
+		/**
+			@brief	Describes the horizontal and vertical size dimensions of a raster, bitmap, frame or image.
+		**/
+		NTV2_STRUCT_BEGIN(NTV2FrameDimensions)
+			#if !defined (NTV2_BUILDING_DRIVER)
+				//	Member Functions
+
+				/**
+					@brief		My constructor.
+					@param[in]	inWidth		Optionally specifies my initial width dimension, in pixels. Defaults to zero.
+					@param[in]	inHeight	Optionally specifies my initial height dimension, in lines. Defaults to zero.
+				**/
+				inline NTV2FrameDimensions (const ULWord inWidth = 0, const ULWord inHeight = 0)	{Set (inWidth, inHeight);}
+				inline ULWord					GetWidth (void) const		{return mWidth;}	///< @return	My width, in pixels.
+				inline ULWord					GetHeight (void) const		{return mHeight;}	///< @return	My height, in lines/rows.
+				inline ULWord					Width (void) const			{return mWidth;}	///< @return	My width, in pixels.
+				inline ULWord					Height (void) const			{return mHeight;}	///< @return	My height, in lines/rows.
+				inline bool						IsValid (void) const		{return Width() && Height();}	///< @return	True if both my width and height are non-zero.
+
+				/**
+					@brief		Sets my width dimension.
+					@param[in]	inValue		Specifies the new width dimension, in pixels.
+					@return		A non-constant reference to me.
+				**/
+				inline NTV2FrameDimensions &	SetWidth (const ULWord inValue)						{mWidth = inValue; return *this;}
+
+				/**
+					@brief		Sets my height dimension.
+					@param[in]	inValue		Specifies the new height dimension, in lines.
+					@return		A non-constant reference to me.
+				**/
+				inline NTV2FrameDimensions &	SetHeight (const ULWord inValue)					{mHeight = inValue; return *this;}
+
+				/**
+					@brief		Sets my dimension values.
+					@param[in]	inWidth		Specifies the new width dimension, in pixels.
+					@param[in]	inHeight	Specifies the new height dimension, in lines.
+					@return		A non-constant reference to me.
+				**/
+				inline NTV2FrameDimensions &	Set (const ULWord inWidth, const ULWord inHeight)	{return SetWidth (inWidth).SetHeight (inHeight);}
+
+				/**
+					@brief		Sets both my width and height to zero (an invalid state).
+					@return		A non-constant reference to me.
+				**/
+				inline NTV2FrameDimensions &	Reset (void)										{return Set (0, 0);}
+			#endif	//	!defined (NTV2_BUILDING_DRIVER)
+
+			NTV2_BEGIN_PRIVATE
+				ULWord	mWidth;		///< @brief The horizontal dimension, in pixels.
+				ULWord	mHeight;	///< @brief The vertical dimension, in lines.
+			NTV2_END_PRIVATE
+		NTV2_STRUCT_END(NTV2FrameDimensions)
 
 
 		#if !defined (NTV2_BUILDING_DRIVER)
@@ -6539,7 +6632,7 @@ typedef enum
 					@param[out]	outOffsets	Receives the byte offsets to every occurrence in my buffer.
 					@param[in]	inValue		Specifies the data to search for.
 				**/
-				std::set<ULWord> &	FindAll (std::set<ULWord> & outOffsets, const NTV2_POINTER & inValue) const;	//	New in SDK 16.3
+				ULWordSet &		FindAll (ULWordSet & outOffsets, const NTV2_POINTER & inValue) const;	//	New in SDK 16.3
 
 				/**
 					@return		True if the given memory buffer's contents are identical to my own.
@@ -7003,6 +7096,13 @@ typedef enum
 				inline UByteSequence		GetU8s (const size_t inU8Offset = 0, const size_t inMaxSize = 128) const	{UByteSequence result; GetU8s(result, inU8Offset, inMaxSize); return result;}
 
 				/**
+					@brief		Appends my contents to an existing UByteSequence.
+					@param[out]	outU8s			The vector to be appended to.
+					@return						True if successful;	 otherwise false.
+				**/
+				bool						AppendU8s (UByteSequence & outU8s) const;
+
+				/**
 					@brief		Answers with my contents as a character string.
 					@param[out] outString		Receives the character string copied verbatim from my contents.
 					@param[in]	inU8Offset		The starting offset, in bytes, where copying will commence.
@@ -7085,6 +7185,8 @@ typedef enum
 				**/
 				static bool					SetDefaultPageSize (const size_t inNewSize);
 				///@}
+
+				NTV2_RPC_CODEC_DECLS
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_POINTER)
 
@@ -7167,6 +7269,8 @@ typedef enum
 					@return		True if I'm valid.
 				**/
 				inline operator		bool () const									{return IsValid();}
+
+				NTV2_RPC_CODEC_DECLS
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_RP188)
 
@@ -7292,7 +7396,7 @@ typedef enum
 				ULWord		fVersion;			///< @brief The version of the structure that follows this header, set when created, originally zero
 				ULWord		fSizeInBytes;		///< @brief The total size of the struct, in bytes, including header, body and trailer, set when created
 				ULWord		fPointerSize;		///< @brief The size, in bytes, of a pointer on the host, set when created
-				ULWord		fOperation;			///< @brief An operation to perform -- currently unused -- reserved for future use -- set when created
+				ULWord		fOperation;			///< @brief Starting in SDK 16.3, stores an RPC connection ID
 				ULWord		fResultStatus;		///< @brief The result status of the operation (zero if success or non-zero failure code), cleared when created, set by driver
 			NTV2_END_PRIVATE
 
@@ -7304,11 +7408,14 @@ typedef enum
 					**/
 					explicit		NTV2_HEADER (const ULWord inStructureType, const ULWord inSizeInBytes);
 
-					/**
-						@brief		Returns my total size, in bytes, including header, body, and trailer.
-						@return		My size, in bytes.
-					**/
-					inline ULWord	GetSizeInBytes (void) const			{return fSizeInBytes;}
+					inline ULWord	GetSizeInBytes (void) const			{return fSizeInBytes;}	///< @brief My total size, in bytes, including header, body and trailer (but excluding embedded NTV2_POINTER data)
+					inline ULWord	GetTag (void) const					{return fHeaderTag;}	//	New in SDK 16.3
+					inline ULWord	GetType (void) const				{return fType;}			//	New in SDK 16.3
+					inline ULWord	GetHeaderVersion (void) const		{return fHeaderVersion;}	//	New in SDK 16.3
+					inline ULWord	GetVersion (void) const				{return fVersion;}		//	New in SDK 16.3
+					inline ULWord	GetPointerSize (void) const			{return fPointerSize;}	//	New in SDK 16.3
+					inline ULWord	GetConnectionID (void) const			{return fOperation;}	//	New in SDK 16.3
+					inline void		SetConnectionID (const ULWord inValue)	{fOperation = inValue;}	//	New in SDK 16.3
 
 					/**
 						@brief	Prints a human-readable representation of me into the given output stream.
@@ -7320,7 +7427,11 @@ typedef enum
 					/**
 						@return		True if my tag and type fields are valid;  otherwise false.
 					**/
-					inline bool		IsValid (void) const				{return NTV2_IS_VALID_HEADER_TAG (fHeaderTag) && NTV2_IS_VALID_STRUCT_TYPE (fType);}
+					inline bool		IsValid (void) const	{return NTV2_IS_VALID_HEADER_TAG(fHeaderTag) && NTV2_IS_VALID_STRUCT_TYPE(fType);}
+
+					static std::string FourCCToString (const ULWord in4CC);
+
+					NTV2_RPC_CODEC_DECLS
 				#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_HEADER)
 
@@ -7340,6 +7451,8 @@ typedef enum
 						@return		True if my tag is valid;  otherwise false.
 					**/
 					inline bool		IsValid (void) const	{return NTV2_IS_VALID_TRAILER_TAG (fTrailerTag);}
+
+					NTV2_RPC_CODEC_DECLS
 				#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2_TRAILER)
 
@@ -7415,6 +7528,8 @@ typedef enum
 					@return True if I'm currently active (i.e., I have more than one segment;  otherwise false.
 				**/
 				inline bool		IsSegmented (void) const					{return GetSegmentCount() > 1;}
+
+				NTV2_RPC_CODEC_DECLS
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (NTV2SegmentedDMAInfo)
 
@@ -7464,6 +7579,8 @@ typedef enum
 					@return True if successful;	 otherwise false.
 				**/
 				bool		Set (const NTV2ColorCorrectionMode inMode, const ULWord inSaturation, const void * pInTableData);
+
+				NTV2_RPC_CODEC_DECLS
 
 				NTV2_BEGIN_PRIVATE
 					inline explicit						NTV2ColorCorrectionData (const NTV2ColorCorrectionData & inObj) : ccLookupTables (0) {(void) inObj;}	///< @brief You can't construct an NTV2ColorCorrectionData from another.
@@ -7686,16 +7803,28 @@ typedef enum
 				**/
 				std::string				operator [] (const unsigned inIndexNum) const;
 
+				/**
+					@return		My address casted to an NTV2_HEADER pointer.
+				**/
+				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
+
+				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(acHeader,acTrailer)
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (AUTOCIRCULATE_STATUS)
 
 
 		#if !defined (NTV2_BUILDING_DRIVER)
-			typedef std::set <ULWord>						NTV2RegisterNumberSet;	///< @brief A set of distinct ULWord values.
+			typedef ULWordSet								NTV2RegisterNumberSet;	///< @brief A set of distinct ULWord values.
 			typedef NTV2RegisterNumberSet					NTV2RegNumSet;			///< @brief A set of distinct NTV2RegisterNumbers.
-			typedef NTV2RegNumSet::const_iterator			NTV2RegNumSetConstIter; ///< @brief A const iterator that iterates over a set of distinct NTV2RegisterNumbers.
-			typedef NTV2RegNumSet::iterator					NTV2RegNumSetIter;		///< @brief A non-constant iterator that iterates over a set of distinct NTV2RegisterNumbers.
+			typedef ULWordSetConstIter						NTV2RegNumSetConstIter; ///< @brief A const iterator that iterates over a set of distinct NTV2RegisterNumbers.
+			typedef ULWordSetIter							NTV2RegNumSetIter;		///< @brief A non-constant iterator that iterates over a set of distinct NTV2RegisterNumbers.
+
+			/**
+				@param[in]	inRegInfos	Specifies the NTV2RegInfo collection.
+				@return		A set of unique register numbers contained in the NTV2RegInfo collection.
+			**/
+			AJAExport NTV2RegNumSet GetRegisterNumbers (const NTV2RegReads & inRegInfos);
 
 			/**
 				@brief	Adds the given register number to the specified NTV2RegisterNumberSet.
@@ -7716,7 +7845,7 @@ typedef enum
 			@note	There is no need to access any of this structure's fields directly. Simply call the CNTV2Card instance's ReadRegisters function.
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
-		NTV2_STRUCT_BEGIN (NTV2GetRegisters)		//	AUTOCIRCULATE_TYPE_GETREGS
+		NTV2_STRUCT_BEGIN (NTV2GetRegisters)		//	NTV2_TYPE_GETREGS
 			NTV2_BEGIN_PRIVATE
 				NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
 					ULWord			mInNumRegisters;	///< @brief The number of registers to read in one batch.
@@ -7729,12 +7858,16 @@ typedef enum
 
 			#if !defined (NTV2_BUILDING_DRIVER)
 				/**
-					@brief	Constructs an NTV2GetRegisters struct from the given NTV2RegisterNumberSet.
+					@brief	Constructs an NTV2GetRegisters struct from the given set of register numbers.
 					@param[in]	inRegisterNumbers	A set of distinct NTV2RegisterNumbers to copy into the mRegisters field.
 													If omitted, defaults to an empty set.
 				**/
-				explicit	NTV2GetRegisters (const NTV2RegNumSet & inRegisterNumbers = NTV2RegNumSet ());
+				explicit	NTV2GetRegisters (const NTV2RegNumSet & inRegisterNumbers = NTV2RegNumSet());
 
+				/**
+					@brief	Constructs me from the given NTV2RegInfo sequence.
+					@param[in]	inRegReads	An NTV2RegInfo sequence that identifies the register numbers to be read.
+				**/
 				explicit	NTV2GetRegisters (NTV2RegisterReads & inRegReads);
 
 				/**
@@ -7748,7 +7881,7 @@ typedef enum
 					@param[in]	inRegReads			A vector of NTV2RegInfo values to use for my mInRegisters field.
 					@note		The mask and shift fields of the NTV2RegInfo values are ignored.
 				**/
-				bool		ResetUsing (const NTV2RegisterReads & inRegReads);
+				inline bool	ResetUsing (const NTV2RegisterReads & inRegReads)	{return ResetUsing(::GetRegisterNumbers(inRegReads));}
 
 				/**
 					@brief		Returns an NTV2RegNumSet built from my mOutGoodRegisters field.
@@ -7765,11 +7898,27 @@ typedef enum
 				bool		GetRegisterValues (NTV2RegisterValueMap & outValues) const;
 
 				/**
-					@brief	Returns a vector of NTV2RegInfo values built from my mOutGoodRegisters and mOutValues fields.
-					@param[out] outValues	Receives the register values.
+					@brief	Returns a NTV2RegInfo sequence built from my mOutGoodRegisters and mOutValues fields.
+					@param[out] inOutValues		If empty upon entry, receives all successfully-read register values;
+												otherwise updates only the register values it already contains
+												(if they were requested and successfully read).
 					@return True if successful;	 otherwise false.
 				**/
-				bool		GetRegisterValues (NTV2RegisterReads & outValues) const;
+				bool		GetRegisterValues (NTV2RegisterReads & inOutValues) const;
+
+				/**
+					@brief	Answers with the set of register numbers that were requested.
+					@param[out]	outRegNums		Receives the set of unique register numbers.
+					@return	True if successful;  otherwise false.
+				**/
+				bool		GetRequestedRegisterNumbers (NTV2RegNumSet & outRegNums) const;		//	New in SDK 16.3
+
+				/**
+					@brief		Returns the set of register numbers that were not read successfully.
+					@param[out] outBadRegNums	Receives the set of "bad" registers.
+					@return		True if successful;	 otherwise false.
+				**/
+				bool		GetBadRegisters (NTV2RegNumSet & outBadRegNums) const;	//	New in SDK 16.3
 
 				/**
 					@brief	Prints a human-readable representation of me to the given output stream.
@@ -7778,6 +7927,12 @@ typedef enum
 				**/
 				std::ostream &	Print (std::ostream & inOutStream) const;
 
+				/**
+					@return		My address casted to an NTV2_HEADER pointer.
+				**/
+				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
+
+				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
 
 				NTV2_BEGIN_PRIVATE
@@ -7795,7 +7950,7 @@ typedef enum
 			@note	There is no need to access any of this structure's fields directly. Simply call the CNTV2Card instance's WriteRegisters function.
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
-		NTV2_STRUCT_BEGIN (NTV2SetRegisters)		//	AUTOCIRCULATE_TYPE_SETREGS
+		NTV2_STRUCT_BEGIN (NTV2SetRegisters)	//	NTV2_TYPE_SETREGS
 			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
 				ULWord			mInNumRegisters;	///< @brief The number of NTV2RegInfo's to be set.
 				NTV2_POINTER	mInRegInfos;		///< @brief Read-only array of NTV2RegInfo structs to be set. The SDK owns this memory.
@@ -7809,21 +7964,30 @@ typedef enum
 					@param[in]	inRegWrites		An ordered collection of NTV2ReadWriteRegisterSingle structs to be copied into my mInRegInfos field.
 												If omitted, defaults to an empty collection.
 				**/
-							NTV2SetRegisters (const NTV2RegisterWrites & inRegWrites = NTV2RegisterWrites ());
+							NTV2SetRegisters (const NTV2RegWrites & inRegWrites = NTV2RegWrites());
 
 				/**
 					@brief	Resets me, starting over, now using the given NTV2RegisterNumberSet.
 					@param[in]	inRegWrites		An ordered collection of NTV2ReadWriteRegisterSingle structs to be copied into my mInRegInfos field.
 												If omitted, defaults to an empty collection.
 				**/
-				bool		ResetUsing (const NTV2RegisterWrites & inRegWrites);
+				bool		ResetUsing (const NTV2RegWrites & inRegWrites);
 
 				/**
 					@brief		Returns an NTV2RegisterWrites built from my mOutBadRegInfos field.
 					@param[out] outFailedRegWrites	Receives the list of failed writes.
 					@return		True if successful;	 otherwise false.
 				**/
-				bool		GetFailedRegisterWrites (NTV2RegisterWrites & outFailedRegWrites) const;
+				bool		GetFailedRegisterWrites (NTV2RegWrites & outFailedRegWrites) const;
+
+				/**
+					@return		My address casted to an NTV2_HEADER pointer.
+				**/
+				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
+
+				inline ULWord	GetRequestedRegisterCount	(void) const	{return mInNumRegisters;}	//	New in SDK 16.3
+				bool			GetRequestedRegisterWrites	(NTV2RegWrites & outRegWrites) const;		//	New in SDK 16.3
+				inline ULWord	GetNumFailedWrites			(void) const	{return mOutNumFailures;}	//	New in SDK 16.3
 
 				/**
 					@brief	Prints a human-readable representation of me to the given output stream.
@@ -7832,6 +7996,7 @@ typedef enum
 				**/
 				std::ostream &	Print (std::ostream & inOutStream) const;
 
+				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
 
 				NTV2_BEGIN_PRIVATE
@@ -7848,7 +8013,7 @@ typedef enum
 			@brief	This is used to atomically perform bank-selected register reads or writes.
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
-		NTV2_STRUCT_BEGIN (NTV2BankSelGetSetRegs)		//	NTV2_TYPE_BANKGETSET
+		NTV2_STRUCT_BEGIN (NTV2BankSelGetSetRegs)	//	NTV2_TYPE_BANKGETSET
 			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
 				ULWord			mIsWriting;			///< @brief If non-zero, register(s) will be written;  otherwise, register(s) will be read.
 				NTV2_POINTER	mInBankInfos;		///< @brief Bank select NTV2RegInfo. The SDK owns this memory.
@@ -7877,6 +8042,12 @@ typedef enum
 				**/
 				std::ostream &	Print (std::ostream & inOutStream) const;
 
+				/**
+					@return		My address casted to an NTV2_HEADER pointer.
+				**/
+				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
+
+				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
 
 				NTV2_BEGIN_PRIVATE
@@ -7916,6 +8087,12 @@ typedef enum
 				**/
 				std::ostream &	Print (std::ostream & inOutStream) const;
 
+				/**
+					@return		My address casted to an NTV2_HEADER pointer.
+				**/
+				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
+
+				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
 
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
@@ -7927,7 +8104,7 @@ typedef enum
 			@note	There is no need to access any of this structure's fields directly. Simply call the CNTV2Card instance's ReadSDIStatistics function.
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
-		NTV2_STRUCT_BEGIN (NTV2SDIInStatistics)		//	AUTOCIRCULATE_TYPE_SDISTATS
+		NTV2_STRUCT_BEGIN (NTV2SDIInStatistics)		//	NTV2_TYPE_SDISTATS
 			NTV2_BEGIN_PRIVATE
 				NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
 					NTV2_POINTER	mInStatistics;		///< @brief Array of NTV2SDIStatus s to be read in one batch. The SDK owns this memory.
@@ -7966,6 +8143,7 @@ typedef enum
 				**/
 				std::ostream &	Print (std::ostream & inOutStream) const;
 
+				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader,mTrailer)
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
 		NTV2_STRUCT_END (NTV2SDIInStatistics)
@@ -7977,7 +8155,7 @@ typedef enum
 					pass the NTV2Channel in the least significant byte of FRAME_STAMP::acFrameTime, and the requested frame in FRAME_STAMP::acRequestedFrame.
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
-		NTV2_STRUCT_BEGIN (FRAME_STAMP) //	AUTOCIRCULATE_TYPE_FRAMESTAMP
+		NTV2_STRUCT_BEGIN (FRAME_STAMP) //	NTV2_TYPE_ACFRAMESTAMP
 				NTV2_HEADER			acHeader;						///< @brief The common structure header -- ALWAYS FIRST!
 					LWord64				acFrameTime;					///< @brief On exit, contains host OS clock at time of capture/play.
 																		///<		On entry, contains ::NTV2Channel of interest, but only for new API ::FRAME_STAMP message.
@@ -8111,6 +8289,12 @@ typedef enum
 				**/
 				std::string				operator [] (const unsigned inIndexNum) const;
 
+				/**
+					@return		My address casted to an NTV2_HEADER pointer.
+				**/
+				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
+
+				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(acHeader,acTrailer)
 
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
@@ -8122,7 +8306,7 @@ typedef enum
 					and contains status information about the transfer and the state of AutoCirculate.
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
-		NTV2_STRUCT_BEGIN (AUTOCIRCULATE_TRANSFER_STATUS)	//	AUTOCIRCULATE_TYPE_XFERSTATUS
+		NTV2_STRUCT_BEGIN (AUTOCIRCULATE_TRANSFER_STATUS)	//	NTV2_TYPE_ACXFERSTATUS
 				NTV2_HEADER				acHeader;				///< @brief The common structure header -- ALWAYS FIRST!
 					NTV2AutoCirculateState	acState;				///< @brief Current AutoCirculate state after the transfer
 					LWord					acTransferFrame;		///< @brief Frame buffer number the frame was transferred to/from. (-1 if failed)
@@ -8185,6 +8369,7 @@ typedef enum
 				**/
 				inline ULWord					GetCapturedAncByteCount (const bool inField2 = false) const {return inField2 ? acAncField2TransferSize : acAncTransferSize;}
 
+				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(acHeader,acTrailer)
 
 				NTV2_BEGIN_PRIVATE
@@ -8197,11 +8382,10 @@ typedef enum
 
 		/**
 			@brief	This object specifies the information that will be transferred to or from the AJA device in the CNTV2Card::AutoCirculateTransfer
-					function call. It will be used by the device driver only if the AUTOCIRCULATE_WITH_ANC option was used in the call to
-					CNTV2Card::AutoCirculateInitForInput or CNTV2Card::AutoCirculateInitForOutput.
+					function call.
 			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
-		NTV2_STRUCT_BEGIN (AUTOCIRCULATE_TRANSFER)
+		NTV2_STRUCT_BEGIN (AUTOCIRCULATE_TRANSFER)	//	NTV2_TYPE_ACXFER
 				NTV2_HEADER						acHeader;					///< @brief The common structure header -- ALWAYS FIRST!
 
 					/**
@@ -8273,7 +8457,7 @@ typedef enum
 					NTV2SegmentedDMAInfo			acInSegmentedDMAInfo;		///< @brief Optional segmented DMA info, for use with specialized data transfers.
 					NTV2ColorCorrectionData			acColorCorrection;			///< @brief Color correction data. This field is ignored if AUTOCIRCULATE_WITH_COLORCORRECT option is not set.
 					NTV2FrameBufferFormat			acFrameBufferFormat;		///< @brief Specifies the frame buffer format to change to. Ignored if AUTOCIRCULATE_WITH_FBFCHANGE option is not set.
-					NTV2VideoFrameBufferOrientation acFrameBufferOrientation;	///< @brief Specifies the frame buffer orientation to change to. Ignored if AUTOCIRCULATE_WITH_FBOCHANGE option is not set.
+					NTV2FBOrientation				acFrameBufferOrientation;	///< @brief Specifies the frame buffer orientation to change to. Ignored if AUTOCIRCULATE_WITH_FBOCHANGE option is not set.
 					AutoCircVidProcInfo				acVidProcInfo;				///< @brief Specifies the mixer/keyer transition to make.  Ignored if AUTOCIRCULATE_WITH_VIDPROC option is not set.
 					NTV2QuarterSizeExpandMode		acVideoQuarterSizeExpand;	///< @brief Turns on the "quarter-size expand" (2x H + 2x V) hardware. Defaults to off (1:1).
 
@@ -8622,6 +8806,12 @@ typedef enum
 				bool									SegmentedDMAsEnabled (void) const;
 				///@}
 
+				/**
+					@return		My address casted to an NTV2_HEADER pointer.
+				**/
+				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
+
+				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(acHeader,acTrailer)
 			#endif	//	user-space clients only
 		NTV2_STRUCT_END (AUTOCIRCULATE_TRANSFER)
@@ -8842,6 +9032,12 @@ typedef enum
 				**/
 				std::ostream &	Print (std::ostream & inOutStream) const;
 
+				/**
+					@return		My address casted to an NTV2_HEADER pointer.
+				**/
+				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
+
+				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
 
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)

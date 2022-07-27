@@ -247,44 +247,13 @@ uint64_t CNTV2Card::GetSerialNumber (void)
 
 string CNTV2Card::SerialNum64ToString (const uint64_t inSerialNumber)	//	Class method
 {
-	const ULWord	serialNumHigh	(inSerialNumber >> 32);
-	const ULWord	serialNumLow	(inSerialNumber & 0x00000000FFFFFFFF);
-	char			serialNum [9];
-
-	serialNum[0] = char((serialNumLow  & 0x000000FF)	  );
-	serialNum[1] = char((serialNumLow  & 0x0000FF00) >>	 8);
-	serialNum[2] = char((serialNumLow  & 0x00FF0000) >> 16);
-	serialNum[3] = char((serialNumLow  & 0xFF000000) >> 24);
-	serialNum[4] = char((serialNumHigh & 0x000000FF)	  );
-	serialNum[5] = char((serialNumHigh & 0x0000FF00) >>	 8);
-	serialNum[6] = char((serialNumHigh & 0x00FF0000) >> 16);
-	serialNum[7] = char((serialNumHigh & 0xFF000000) >> 24);
-	serialNum[8] = '\0';
-
-	for (unsigned ndx(0);  ndx < 8;	 ndx++)
-	{
-		if (serialNum[ndx] == 0)
-		{
-			if (ndx == 0)
-				return "";		//	No characters: no serial number
-			break;	//	End of string -- stop scanning
-		}
-
-		//	Allow only 0-9, A-Z, a-z, blank, and dash only.
-		if ( ! ( ( (serialNum[ndx] >= '0') && (serialNum[ndx] <= '9') ) ||
-				 ( (serialNum[ndx] >= 'A') && (serialNum[ndx] <= 'Z') ) ||
-				 ( (serialNum[ndx] >= 'a') && (serialNum[ndx] <= 'z') ) ||
-				   (serialNum[ndx] == ' ') || (serialNum[ndx] == '-') ) )
-			return "";		//	Invalid character -- assume no Serial Number programmed...
-	}
-	return serialNum;
-
+	return ::SerialNum64ToString(inSerialNumber);
 }	//	SerialNum64ToString
 
 
 bool CNTV2Card::GetSerialNumberString (string & outSerialNumberString)
 {
-	outSerialNumberString = SerialNum64ToString(GetSerialNumber());
+	outSerialNumberString = ::SerialNum64ToString(GetSerialNumber());
 	if (outSerialNumberString.empty())
 	{
 		outSerialNumberString = "INVALID?";
@@ -876,7 +845,7 @@ ostream & SDRAMAuditor::RawDump (ostream & oss) const
 	return oss;
 }
 
-SDRAMAuditor::ULWordSet SDRAMAuditor::CoalesceRegions (const ULWordSequence & inRgn1, const ULWordSequence & inRgn2, const ULWordSequence & inRgn3)
+ULWordSet SDRAMAuditor::CoalesceRegions (const ULWordSequence & inRgn1, const ULWordSequence & inRgn2, const ULWordSequence & inRgn3)
 {
 	ULWordSet result;	//	Coalesce all regions into this one sorted set
 	for (size_t ndx(0);  ndx < inRgn1.size();  ndx++)
@@ -1006,16 +975,18 @@ bool SDRAMAuditor::TranslateRegions (ULWordSequence & outDestRgns, const ULWordS
 	if (inSrcRgns.empty())
 		return true;	//	Empty list, not an error
 	const UWord	_8MB_frames_per_dest_frame(UWord(GetIntrinsicFrameByteCount() / m8MB) * (inIsQuad?4:1) * (inIsQuadQuad?16:1));	//	Should result in 1/4/16 or 2/8/32
+	if (!_8MB_frames_per_dest_frame)
+		return false;	//	Ordinarily won't happen, but possible with "ntv2:" (fake/software) "devices" having small SDRAM complement
 	if (_8MB_frames_per_dest_frame == 1)
 		{outDestRgns = inSrcRgns;	return true;}	//	Same
 
 	//	For each region...
 	for (size_t ndx(0);  ndx < inSrcRgns.size();  ndx++)
 	{	const ULWord val(inSrcRgns.at(ndx));
-		UWord startBlkOffset(val >> 16), lengthBlks(UWord(val & 0x0000FFFF));	//	<== These are in 8MB block units
+		ULWord startBlkOffset(val >> 16), lengthBlks(val & 0x0000FFFF);		//	<== These are in 8MB block units
 		startBlkOffset = startBlkOffset / _8MB_frames_per_dest_frame  +  (startBlkOffset % _8MB_frames_per_dest_frame ? 1 : 0);
 		lengthBlks = lengthBlks / _8MB_frames_per_dest_frame;
-		outDestRgns.push_back((ULWord(startBlkOffset) << 16) | ULWord(lengthBlks));
+		outDestRgns.push_back((startBlkOffset << 16) | lengthBlks);
 	}
 	return true;
 }

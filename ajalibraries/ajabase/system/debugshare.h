@@ -241,6 +241,8 @@ typedef enum _AJADebugStats
 	AJA_DebugStat_AutoCirculateXfer,
 	AJA_DebugStat_NTV2Message,
 	AJA_DebugStat_HEVCSendMessage,
+	AJA_DebugStat_ACXferRPCEncode,
+	AJA_DebugStat_ACXferRPCDecode,
 	AJA_DebugStat_NUM_STATS
 } AJADebugStats;
 ///@}

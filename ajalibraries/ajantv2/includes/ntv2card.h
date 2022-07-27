@@ -7846,9 +7846,6 @@ class SDRAMAuditor
 
 	//	Static/Class Methods
 	public:
-		typedef std::set<ULWord>			ULWordSet;
-		typedef ULWordSet::const_iterator	ULWordSetConstIter;
-
 		/**
 			@return	The unique set of regions resulting from the union of the given three lists of regions.
 		**/

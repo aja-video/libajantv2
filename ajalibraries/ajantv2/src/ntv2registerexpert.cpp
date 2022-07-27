@@ -121,7 +121,6 @@ private:
 			(void) inDeviceID;
 			return string();
 		}
-		virtual ~Decoder()	{}
 	} mDefaultRegDecoder;
 
 	void DefineRegName(const uint32_t regNumber, const string & regName)
@@ -1428,9 +1427,11 @@ private:
 		DefineRegName	(kVRegHDMIInDrmWhitePoint2,				"kVRegHDMIInDrmWhitePoint2");
 		DefineRegName	(kVRegHDMIInDrmMasteringLuminence2,		"kVRegHDMIInDrmMasteringLuminence2");
 		DefineRegName	(kVRegHDMIInDrmLightLevel2,				"kVRegHDMIInDrmLightLevel2");
+		DefineRegister	(kVRegBaseFirmwareDeviceID,				"kVRegBaseFirmwareDeviceID",	mDecodeBoardID,				READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 
 		DefineRegName	(kVRegAudioOutputToneSelect,			"kVRegAudioOutputToneSelect");
-		DefineRegister	(kVRegHDMIOutStatus1,					"kVRegHDMIOutStatus1",	mDecodeHDMIOutputStatus,	READWRITE,	kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
+		DefineRegister	(kVRegHDMIOutStatus1,					"kVRegHDMIOutStatus1",			mDecodeHDMIOutputStatus,	READWRITE,	kRegClass_NULL, kRegClass_NULL, kRegClass_NULL);
+		DefineRegister	(kVRegDynFirmwareUpdateCounts,			"kVRegDynFirmwareUpdateCounts",	mDecodeDynFWUpdateCounts,	READWRITE,	kRegClass_NULL,	kRegClass_NULL, kRegClass_NULL);
 
 		DefineRegName	(kVRegLastAJA,							"kVRegLastAJA");
 		DefineRegName	(kVRegFirstOEM,							"kVRegFirstOEM");
@@ -1778,7 +1779,6 @@ private:
 				<< " Bank " << ((inRegValue & BIT (30)) ? "1" : "0");
 			return oss.str();
 		}
-		virtual ~DecodeGlobalControlReg()	{}
 	}	mDecodeGlobalControlReg;
 
 	//	reg 267 aka kRegGlobalControl2
@@ -1813,7 +1813,6 @@ private:
 				<< "2SI Min Align Delay 5-8: "	<< EnabDisab(inRegValue & BIT(25));
 			return oss.str();
 		}
-		virtual ~DecodeGlobalControl2() {}
 	}	mDecodeGlobalControl2;
 	
 	//	reg 108 aka kRegGlobalControl3
@@ -1836,7 +1835,6 @@ private:
 					<< "Frame Pulse Ref Src: "	<< DEC((inRegValue & kRegMaskFramePulseRefSelect) >> kRegShiftFramePulseRefSelect);
 			return oss.str();
 		}
-		virtual ~DecodeGlobalControl3() {}
 	}	mDecodeGlobalControl3;
 	
 	// Regs 377,378,379,380,381,382,383 aka kRegGlobalControlCh2,kRegGlobalControlCh3,kRegGlobalControlCh4,kRegGlobalControlCh5,kRegGlobalControlCh6,kRegGlobalControlCh7,kRegGlobalControlCh8
@@ -1855,7 +1853,6 @@ private:
 				<< "Standard: "			<< ::NTV2StandardToString (videoStandard);
 			return oss.str();
 		}
-		virtual ~DecodeGlobalControlChanReg()	{}
 	}	mDecodeGlobalControlChanRegs;
 
 	//	Regs 1/5/257/260/384/388/392/396  aka  kRegCh1Control,kRegCh2Control,kRegCh3Control,kRegCh4Control,kRegCh5Control,kRegCh6Control,kRegCh7Control,kRegCh8Control
@@ -1883,7 +1880,6 @@ private:
 				<< "VANC Data Shift: "		<< (inRegValue & kRegMaskVidProcVANCShift	? "Enabled"				: "Normal 8 bit conversion");
 			return oss.str();
 		}
-		virtual ~DecodeChannelControlReg()	{}
 	}	mDecodeChannelControl;
 	
 	struct DecodeFBControlReg : public Decoder
@@ -1899,7 +1895,6 @@ private:
 				<< "Format: "	<< xHEX0N(format,4) << " (" << DEC(format) << ")";
 			return oss.str();
 		}
-		virtual ~DecodeFBControlReg()	{}
 	}	mDecodeFBControlReg;
 
 	struct DecodeChannelControlExtReg : public Decoder
@@ -1914,7 +1909,6 @@ private:
 				<< "3:2 Pulldown Mode: "			<< EnabDisab(inRegValue & BIT(2));
 			return oss.str();
 		}
-		virtual ~DecodeChannelControlExtReg()	{}
 	}	mDecodeChannelControlExt;
 	
 	struct DecodeSysmonVccIntDieTemp : public Decoder
@@ -1933,7 +1927,6 @@ private:
 				<< "Core Voltage: " << fDEC(voltage,5,2) << " Volts DC";
 			return oss.str();
 		}
-		virtual ~DecodeSysmonVccIntDieTemp()	{}
 	}	mDecodeSysmonVccIntDieTemp;
 
 	struct DecodeSDITransmitCtrl : public Decoder
@@ -1964,7 +1957,6 @@ private:
 			//	CRC checking
 			return oss.str();
 		}
-		virtual ~DecodeSDITransmitCtrl()	{}
 	}	mDecodeSDITransmitCtrl;
 
 	struct DecodeConversionCtrl : public Decoder
@@ -2026,7 +2018,6 @@ private:
 				oss << "(SDI bypass relays not supported)";
 			return oss.str();
 		}
-		virtual ~DecodeRelayCtrlStat()	{}
 	}	mDecodeRelayCtrlStat;
 
 	struct DecodeWatchdogTimeout : public Decoder
@@ -2048,7 +2039,6 @@ private:
 				oss << "(SDI bypass relays not supported)";
 			return oss.str();
 		}
-		virtual ~DecodeWatchdogTimeout()	{}
 	}	mDecodeWatchdogTimeout;
 
 	struct DecodeWatchdogKick : public Decoder
@@ -2072,7 +2062,6 @@ private:
 				oss << "(SDI bypass relays not supported)";
 			return oss.str();
 		}
-		virtual ~DecodeWatchdogKick()	{}
 	}	mDecodeWatchdogKick;
 
 	struct DecodeInputVPID: public Decoder
@@ -2088,7 +2077,6 @@ private:
 			PrintLabelValuePairs(oss, ntv2vpid.GetInfo(info));
 			return oss.str();
 		}
-		virtual ~DecodeInputVPID()	{}
 	}	mVPIDInpRegDecoder;
 
 	struct DecodeOutputVPID: public Decoder
@@ -2103,7 +2091,6 @@ private:
 			PrintLabelValuePairs(oss, ntv2vpid.GetInfo(info));
 			return oss.str();
 		}
-		virtual ~DecodeOutputVPID() {}
 	}	mVPIDOutRegDecoder;
 
 	struct DecodeBitfileDateTime : public Decoder
@@ -2135,7 +2122,6 @@ private:
 			else NTV2_ASSERT(false);	//	impossible
 			return oss.str();
 		}
-		virtual ~DecodeBitfileDateTime()	{}
 	}	mDecodeBitfileDateTime;
 
 	struct DecodeBoardID : public Decoder
@@ -2152,8 +2138,18 @@ private:
 					<< "Retail Device Name: '" << str2 << "'";
 			return oss.str();
 		}
-		virtual ~DecodeBoardID()	{}
 	}	mDecodeBoardID;
+
+	struct DecodeDynFWUpdateCounts : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{	(void) inRegNum;	(void) inDeviceID;
+			ostringstream	oss;
+			oss	<< "# attempts: " << DEC(inRegValue >> 16)	<< endl
+				<< "# successes: " << DEC(inRegValue & 0x0000FFFF);
+			return oss.str();
+		}
+	}	mDecodeDynFWUpdateCounts;
 
 	struct DecodeFWUserID : public Decoder
 	{
@@ -2167,7 +2163,6 @@ private:
 					<< "Current Bitfile Version: "	<< xHEX0N(NTV2BitfileHeaderParser::GetBitfileVersion(inRegValue),4);
 			return oss.str();
 		}
-		virtual ~DecodeFWUserID()	{}
 	}	mDecodeFirmwareUserID;
 
 	struct DecodeCanDoStatus : public Decoder
@@ -2175,10 +2170,10 @@ private:
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 		{	(void) inRegNum;	(void) inDeviceID;
 			ostringstream	oss;
-			oss << "Has CanConnect Xpt Route ROM: "		<< YesNo(inRegValue & BIT(0));
+			oss	<< "Has CanConnect Xpt Route ROM: "		<< YesNo(inRegValue & BIT(0)) << endl
+				<< "AudioSystems can start on VBI: "	<< YesNo(inRegValue & BIT(1));
 			return oss.str();
 		}
-		virtual ~DecodeCanDoStatus()	{}
 	}	mDecodeCanDoStatus;
 
 	struct DecodeVidControlReg : public Decoder		//	Bit31=Is16x9 | Bit30=IsMono
@@ -2194,7 +2189,6 @@ private:
 				<< "Depth: " << (isMono ? "Monochrome" : "Color");
 			return oss.str();
 		}
-		virtual ~DecodeVidControlReg()	{}
 	}	mDecodeVidControlReg;
 
 	struct DecodeVidIntControl : public Decoder
@@ -2229,7 +2223,6 @@ private:
 				<< "Output 1 Vertical Clear: "		<< ActInact(inRegValue & BIT(31));
 			return oss.str();
 		}
-		virtual ~DecodeVidIntControl()	{}
 	}	mDecodeVidIntControl;
 	
 	struct DecodeVidIntControl2 : public Decoder
@@ -2261,7 +2254,6 @@ private:
 				<< "Input 3 Vertical Clear: "		<< ActInact(inRegValue & BIT(30));
 			return oss.str();
 		}
-		virtual ~DecodeVidIntControl2() {}
 	}	mDecodeVidIntControl2;
 
 	struct DecodeStatusReg : public Decoder
@@ -2307,7 +2299,6 @@ private:
 				<< "Audio 50Hz Interrupt: "			<< ActInact(inRegValue & BIT(28));
 			return oss.str();
 		}
-		virtual ~DecodeStatusReg()	{}
 	}	mDecodeStatusReg;
 
 	struct DecodeCPLDVersion : public Decoder
@@ -2322,7 +2313,6 @@ private:
 				<< "Force Reload: "					<< YesNo(inRegValue & BIT(8));
 			return oss.str();
 		}
-		virtual ~DecodeCPLDVersion()	{}
 	}	mDecodeCPLDVersion;
 
 	struct DecodeStatus2Reg : public Decoder
@@ -2350,7 +2340,6 @@ private:
 				<< "HDMI In Chip Interrupt: "				<< ActInact(inRegValue & BIT(1));
 			return oss.str();
 		}
-		virtual ~DecodeStatus2Reg() {}
 	}	mDecodeStatus2Reg;
 
 	struct DecodeInputStatusReg : public Decoder
@@ -2429,7 +2418,6 @@ private:
 				<< "AES Channel 7-8: " << ((BIT(27) & inRegValue) ? "Invalid" : "Valid");
 			return oss.str();
 		}
-		virtual ~DecodeInputStatusReg() {}
 	}	mDecodeInputStatusReg;
 
 	struct DecodeSDIInputStatusReg : public Decoder
@@ -2480,7 +2468,6 @@ private:
 						<< "TsiMux" << DEC(tsiMux+1) << " Sync Fail: " << ((inRegValue & (0x00010000UL << tsiMux)) ? "FAILED" : "OK");
 			return oss.str();
 		}
-		virtual ~DecodeSDIInputStatusReg()	{}
 	}	mDecodeSDIInputStatusReg;
 
 	struct DecodeSDIInputStatus2Reg : public Decoder
@@ -2536,7 +2523,6 @@ private:
 			}
 			return oss.str();
 		}
-		virtual ~DecodeSDIInputStatus2Reg() {}
 	}	mDecodeSDIInputStatus2Reg;
 
 	struct DecodeFS1RefSelectReg : public Decoder
@@ -2605,7 +2591,6 @@ private:
 			}
 			return oss.str();
 		}
-		virtual ~DecodeAudDetectReg()	{}
 	}	mDecodeAudDetectReg;
 	
 	struct DecodeAudControlReg : public Decoder
@@ -2647,7 +2632,6 @@ private:
 					<< "Audio Buffer Size: "	<< (BIT(31) & inRegValue ? "4 MB" : "1 MB");
 			return oss.str();
 		}
-		virtual ~DecodeAudControlReg()	{}
 	}	mDecodeAudControlReg;
 	
 	struct DecodeAudSourceSelectReg : public Decoder
@@ -2670,7 +2654,6 @@ private:
 				<< "3G audio source: "			<< (inRegValue & BIT(21) ? "Data stream 2" : "Data stream 1");
 			return oss.str();
 		}
-		virtual ~DecodeAudSourceSelectReg() {}
 	}	mDecodeAudSourceSelectReg;
 
 	struct DecodeAudOutputSrcMap : public Decoder
@@ -2720,7 +2703,6 @@ private:
 			}
 			return oss.str();
 		}
-		virtual ~DecodeAudOutputSrcMap()	{}
 	}	mDecodeAudOutputSrcMap;
 
 	struct DecodePCMControlReg : public Decoder
@@ -2748,7 +2730,6 @@ private:
 			}
 			return oss.str();
 		}
-		virtual ~DecodePCMControlReg()	{}
 	}	mDecodePCMControlReg;
 
 	struct DecodeAudioMixerInputSelectReg : public Decoder
@@ -2764,7 +2745,6 @@ private:
 				<< "Aux Input 2 Source: "	<< ::NTV2AudioSystemToString(NTV2AudioSystem(aux2InputSrc)) << " (bits 8-11)";
 			return oss.str();
 		}
-		virtual ~DecodeAudioMixerInputSelectReg()	{}
 	}	mAudMxrInputSelDecoder;
 
 	struct DecodeAudioMixerGainRegs : public Decoder
@@ -2791,7 +2771,6 @@ private:
 			}
 			return oss.str();
 		}
-		virtual ~DecodeAudioMixerGainRegs() {}
 	}	mAudMxrGainDecoder;
 
 	struct DecodeAudioMixerChannelSelectReg : public Decoder
@@ -2805,7 +2784,6 @@ private:
 				<< "Level Measurement Sample Count: "	<< DEC(ULWord(1 << powerOfTwo)) << " (bits 8-15)";
 			return oss.str();
 		}
-		virtual ~DecodeAudioMixerChannelSelectReg() {}
 	}	mAudMxrChanSelDecoder;
 
 
@@ -2861,7 +2839,6 @@ private:
 				<< "Aux Input 2 Unmuted/Enabled Channels: " << unmutedAux2;
 			return oss.str();
 		}
-		virtual ~DecodeAudioMixerMutesReg() {}
 	}	mAudMxrMutesDecoder;
 
 	struct DecodeAudioMixerLevelsReg : public Decoder
@@ -2887,7 +2864,6 @@ private:
 				<< label << " Right Level:" << xHEX0N(rightLevel,4) << " (" << DEC(rightLevel) << ")";			//	bits[16:31]
 			return oss.str();
 		}
-		virtual ~DecodeAudioMixerLevelsReg()	{}
 	}	mAudMxrLevelDecoder;
 
 	struct DecodeAncExtControlReg : public Decoder
@@ -2909,7 +2885,6 @@ private:
 				<< "Metadata from: "		<< (inRegValue & BIT(31) ? "LSBs" : "MSBs");
 			return oss.str();
 		}
-		virtual ~DecodeAncExtControlReg()	{}
 	}	mDecodeAncExtControlReg;
 	
 	struct DecodeAncExtFieldLinesReg : public Decoder
@@ -2941,7 +2916,6 @@ private:
 			}
 			return oss.str();
 		}
-		virtual ~DecodeAncExtFieldLinesReg()	{}
 	}	mDecodeAncExtFieldLines;
 	
 	struct DecodeAncExtStatusReg : public Decoder
@@ -2964,7 +2938,6 @@ private:
 				<< "Overrun: "	<< YesNo(overrun);
 			return oss.str();
 		}
-		virtual ~DecodeAncExtStatusReg()	{}
 	}	mDecodeAncExtStatus;
 	
 	struct DecodeAncExtIgnoreDIDReg : public Decoder
@@ -2980,7 +2953,6 @@ private:
 				<< ", " << HEX0N((inRegValue >> 24) & 0xFF, 2);
 			return oss.str();
 		}
-		virtual ~DecodeAncExtIgnoreDIDReg() {}
 	}	mDecodeAncExtIgnoreDIDs;
 	
 	struct DecodeAncExtAnalogFilterReg : public Decoder
@@ -3003,7 +2975,6 @@ private:
 			oss << " line as analog, else digital";
 			return oss.str();
 		}
-		virtual ~DecodeAncExtAnalogFilterReg()	{}
 	}	mDecodeAncExtAnalogFilter;
 	
 	struct DecodeAncInsValuePairReg : public Decoder
@@ -3043,7 +3014,6 @@ private:
 			}
 			return oss.str();
 		}
-		virtual ~DecodeAncInsValuePairReg() {}
 	}	mDecodeAncInsValuePairReg;
 	
 	struct DecodeAncInsControlReg : public Decoder
@@ -3066,7 +3036,6 @@ private:
 				<< "SD Packet Split: "		<< EnabDisab(inRegValue & BIT(31));
 			return oss.str();
 		}
-		virtual ~DecodeAncInsControlReg()	{}
 	}	mDecodeAncInsControlReg;
 	
 	struct DecodeAncInsChromaBlankReg : public Decoder
@@ -3088,7 +3057,6 @@ private:
 			oss << " should be blanked or passed thru";
 			return oss.str();
 		}
-		virtual ~DecodeAncInsChromaBlankReg()	{}
 	}	mDecodeAncInsChromaBlankReg;
 	
 	struct DecodeXptGroupReg : public Decoder		//	Every byte is a crosspoint number 0-255
@@ -3110,7 +3078,6 @@ private:
 			}
 			return oss.str();
 		}
-		virtual ~DecodeXptGroupReg()	{}
 	}	mDecodeXptGroupReg;
 
 	struct DecodeXptValidReg : public Decoder
@@ -3144,7 +3111,6 @@ private:
 			else
 				return Decoder::operator()(inRegNum, inRegValue, inDeviceID);
 		}
-		virtual ~DecodeXptValidReg()	{}
 	}	mDecodeXptValidReg;
 
 	struct DecodeHDMIOutputControl : public Decoder
@@ -3185,7 +3151,6 @@ private:
 					<< "Audio Loopback: "		<< OnOff(inRegValue & BIT(31));
 			return oss.str();
 		}
-		virtual ~DecodeHDMIOutputControl()	{}
 	}	mDecodeHDMIOutputControl;
 	
 	struct DecodeHDMIInputStatus : public Decoder
@@ -3211,7 +3176,6 @@ private:
 				<< "Video Rate : " << (rate < 11 ? sRates[rate] : string("invalid"));
 			return oss.str();
 		}
-		virtual ~DecodeHDMIInputStatus()	{}
 	}	mDecodeHDMIInputStatus;
 	
 	struct DecodeHDMIInputControl : public Decoder
@@ -3247,7 +3211,6 @@ private:
 				<< "EDID: " << SetNotset(inRegValue & BIT(31));
 			return oss.str();
 		}
-		virtual ~DecodeHDMIInputControl()	{}
 	}	mDecodeHDMIInputControl;
 
 	struct DecodeHDMIOutputStatus : public Decoder
@@ -3259,7 +3222,6 @@ private:
 			stat.Print(oss);
 			return oss.str();
 		}
-		virtual ~DecodeHDMIOutputStatus()	{}
 	}	mDecodeHDMIOutputStatus;
 
 	struct DecodeHDMIOutHDRPrimary : public Decoder
@@ -3320,7 +3282,6 @@ private:
 			}
 			return oss.str();
 		}
-		virtual ~DecodeHDMIOutHDRPrimary()	{}
 	}	mDecodeHDMIOutHDRPrimary;
 	
 	struct DecodeHDMIOutHDRControl : public Decoder
@@ -3342,7 +3303,6 @@ private:
 			}
 			return oss.str();
 		}
-		virtual ~DecodeHDMIOutHDRControl()	{}
 	}	mDecodeHDMIOutHDRControl;
 	
 	struct DecodeHDMIOutMRControl : public Decoder
@@ -3361,7 +3321,6 @@ private:
 				<< "Capture Mode: "				<< ((inRegValue & kRegMaskMREnable) ? "Enabled"			: "Disabled");
 			return oss.str();
 		}
-		virtual ~DecodeHDMIOutMRControl()	{}
 	}	mDecodeHDMIOutMRControl;
 
 	struct DecodeSDIOutputControl : public Decoder
@@ -3400,7 +3359,6 @@ private:
 			}
 			return oss.str();
 		}
-		virtual ~DecodeSDIOutputControl()	{}
 	}	mDecodeSDIOutputControl;
 	
 	struct DecodeDMAControl : public Decoder
@@ -3424,7 +3382,6 @@ private:
 				<< "Lanes: "									<< DEC(lanes) << ((lanes < 9) ? "" : " <invalid>");
 			return oss.str();
 		}
-		virtual ~DecodeDMAControl() {}
 	}	mDMAControlRegDecoder;
 
 	struct DecodeDMAIntControl : public Decoder
@@ -3442,7 +3399,6 @@ private:
 			oss << "Bus Error: "							<< YesNo(inRegValue & BIT(31));
 			return oss.str();
 		}
-		virtual ~DecodeDMAIntControl()	{}
 	}	mDMAIntControlRegDecoder;
 
 	struct DecodeRP188InOutDBB : public Decoder
@@ -3463,7 +3419,6 @@ private:
 				<< "DBB: "		<< HEX0N((inRegValue & 0x0000FF00) >> 8, 2) << " " << HEX0N(inRegValue & 0x000000FF, 2);
 			return oss.str();
 		}
-		virtual ~DecodeRP188InOutDBB()	{}
 	}	mRP188InOutDBBRegDecoder;
 
 	struct DecodeVidProcControl : public Decoder
@@ -3485,7 +3440,6 @@ private:
 				<< "Split Video Std: "	<< sSplitStds[inRegValue & kRegMaskVidProcSplitStd];
 			return oss.str();
 		}
-		virtual ~DecodeVidProcControl() {}
 	}	mVidProcControlRegDecoder;
 	
 	struct DecodeSplitControl : public Decoder
@@ -3505,7 +3459,6 @@ private:
 				<< "Split Type: "	<< ((inRegValue & BIT(30)) ? "Vertical" : "Horizontal");
 			return oss.str();
 		}
-		virtual ~DecodeSplitControl()	{}
 	}	mSplitControlRegDecoder;
 
 	struct DecodeFlatMatteValue : public Decoder
@@ -3521,7 +3474,6 @@ private:
 				<< "Flat Matte Cr: "	<< HEX0N((inRegValue >> 20) & mask, 3);
 			return oss.str();
 		}
-		virtual ~DecodeFlatMatteValue() {}
 	}	mFlatMatteValueRegDecoder;
 
 	struct DecodeEnhancedCSCMode : public Decoder
@@ -3544,7 +3496,6 @@ private:
 				<< "Input pixel format: "	<< sPixFmts[inpPixFmt];
 			return oss.str();
 		}
-		virtual ~DecodeEnhancedCSCMode()	{}
 	}	mEnhCSCModeDecoder;
 
 	struct DecodeEnhancedCSCOffset : public Decoder
@@ -3607,7 +3558,6 @@ private:
 			}
 			return oss.str();
 		}
-		virtual ~DecodeEnhancedCSCOffset()	{}
 	}	mEnhCSCOffsetDecoder;
 
 	struct DecodeEnhancedCSCKeyMode : public Decoder
@@ -3625,7 +3575,6 @@ private:
 				<< "Key Output Range: "		<< sRange[keyOutRange];
 			return oss.str();
 		}
-		virtual ~DecodeEnhancedCSCKeyMode() {}
 	}	mEnhCSCKeyModeDecoder;
 
 	struct DecodeEnhancedCSCCoefficient : public Decoder
@@ -3667,7 +3616,6 @@ private:
 			}
 			return oss.str();
 		}
-		virtual ~DecodeEnhancedCSCCoefficient() {}
 	}	mEnhCSCCoeffDecoder;
 
 	struct DecodeCSCoeff1234 : public Decoder
@@ -3708,7 +3656,6 @@ private:
 				<< "Coefficient" << DEC(nCoeff2) << ": "	<< xHEX0N(coeff2, 4);
 			return oss.str();
 		}
-		virtual ~DecodeCSCoeff1234()	{}
 	}	mCSCoeff1234Decoder;
 
 	struct DecodeCSCoeff567890 : public Decoder
@@ -3740,7 +3687,6 @@ private:
 				<< "Coefficient" << DEC(nCoeff6) << ": "	<< xHEX0N(coeff6, 4);
 			return oss.str();
 		}
-		virtual ~DecodeCSCoeff567890()	{}
 	}	mCSCoeff567890Decoder;
 
 	struct DecodeLUTV1ControlReg : public Decoder	//	kRegCh1ColorCorrectionControl (68), kRegCh2ColorCorrectionControl (69)
@@ -3778,7 +3724,6 @@ private:
 				<< "LUT4 Bank Select: "		<< SetNotset(cc4BankSel);
 			return oss.str();
 		}
-		virtual ~DecodeLUTV1ControlReg()	{}
 	}	mLUTV1ControlRegDecoder;
 
 	struct DecodeLUTV2ControlReg : public Decoder	//	kRegLUTV2Control	376
@@ -3800,7 +3745,6 @@ private:
 			}
 			return oss.str();
 		}
-		virtual ~DecodeLUTV2ControlReg()	{}
 	}	mLUTV2ControlRegDecoder;
 
 	struct DecodeLUT : public Decoder
@@ -3823,7 +3767,6 @@ private:
 				<< label << DEC0N(ndx+1,3) << "]: " << DEC0N(hi,3);
 			return oss.str();
 		}
-		virtual ~DecodeLUT()	{}
 	}	mLUTDecoder;
 
 	struct DecodeSDIErrorStatus : public Decoder
@@ -3841,7 +3784,6 @@ private:
 					<< "TRS Error Detected: "	<< YesNo(inRegValue & BIT(24));
 			return oss.str();
 		}
-		virtual ~DecodeSDIErrorStatus() {}
 	}	mSDIErrorStatusRegDecoder;
 	
 	struct DecodeSDIErrorCount : public Decoder
@@ -3856,7 +3798,6 @@ private:
 					<< "Link B: "		<< DEC((inRegValue & 0xFFFF0000) >> 16);
 			return oss.str();
 		}
-		virtual ~DecodeSDIErrorCount()	{}
 	}	mSDIErrorCountRegDecoder;
 
 	struct DecodeDriverVersion : public Decoder
@@ -3880,7 +3821,6 @@ private:
 				<< "Build Number: "		<< DEC(vBld);
 			return oss.str();
 		}
-		virtual ~DecodeDriverVersion() {}
 	}	mDriverVersionDecoder;
 
 	static const int	NOREADWRITE =	0;

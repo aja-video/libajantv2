@@ -10,7 +10,6 @@
 #include "ntv2utils.h"
 #include "ajabase/common/common.h"
 #include <sstream>
-#include <assert.h>
 
 using namespace std;
 
@@ -268,7 +267,7 @@ bool CNTV2DeviceScanner::GetDeviceAtIndex (const ULWord inDeviceIndexNumber, CNT
 {
 	outDevice.Close();
 	CNTV2DeviceScanner	scanner;
-	return size_t(inDeviceIndexNumber) < scanner.GetDeviceInfoList().size() ? reinterpret_cast<CNTV2DriverInterface&>(outDevice).Open(UWord(inDeviceIndexNumber)) : false;
+	return size_t(inDeviceIndexNumber) < scanner.GetDeviceInfoList().size() ? AsNTV2DriverInterfaceRef(outDevice).Open(UWord(inDeviceIndexNumber)) : false;
 
 }	//	GetDeviceAtIndex
 
@@ -360,10 +359,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 	if (inArgument.empty())
 		return false;
 
-	//	Index number:
-	if (IsLegalDecimalNumber(inArgument))
-		return GetDeviceAtIndex (ULWord(aja::stoul(inArgument)), outDevice);
-
+	//	Special case:  'LIST' or '?'
 	CNTV2DeviceScanner	scanner;
 	const NTV2DeviceInfoList &	infoList (scanner.GetDeviceInfoList());
 	string upperArg(::ToUpper(inArgument));
@@ -384,39 +380,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 		return false;
 	}
 
-	//	Serial number (string):
-	if (IsLegalSerialNumber(upperArg))
-	{
-		if (upperArg.length() == 9)	//	Special case for DNXIV serial numbers
-			upperArg.erase(0,1);	//	Remove 1st character
-		for (NTV2DeviceInfoListConstIter iter(infoList.begin());  iter != infoList.end();  ++iter)
-			if (CNTV2Card::SerialNum64ToString(iter->deviceSerialNumber) == upperArg)
-				return AsNTV2DriverInterfaceRef(outDevice).Open(UWord(iter->deviceIndex));	//	Found!
-	}
-
-	//	Hex serial number:
-	const uint64_t serialNumber(IsLegalHexSerialNumber(inArgument));
-	if (serialNumber)
-		if (GetDeviceWithSerial(serialNumber, outDevice))
-			if (outDevice.IsOpen())
-				return true;
-#if 0
-	if (::IsAlphaNumeric(inArgument))
-	{
-		const string			argLowerCase		(::ToLower(inArgument));
-		const NTV2DeviceIDSet	supportedDeviceIDs	(::NTV2GetSupportedDevices());
-		for (NTV2DeviceIDSetConstIter devIDiter(supportedDeviceIDs.begin());  devIDiter != supportedDeviceIDs.end();  ++devIDiter)
-		{
-			const string deviceName	(::ToLower(::NTV2DeviceIDToString(*devIDiter, false)));
-			if (deviceName.find(argLowerCase) != string::npos)
-				if (GetFirstDeviceWithID(*devIDiter, outDevice))
-					if (outDevice.IsOpen())
-						return true;	//	Found!
-		}
-	}
-#endif
-	//	First matching name:
-	return GetFirstDeviceWithName (inArgument, outDevice);
+	return reinterpret_cast<CNTV2DriverInterface&>(outDevice).Open(inArgument);
 
 }	//	GetFirstDeviceFromArgument
 
@@ -510,7 +474,7 @@ bool CNTV2DeviceScanner::CompareDeviceInfoLists (const NTV2DeviceInfoList & inOl
 			continue;	//	Move along
 		}	//	old is not valid, new is valid
 
-		assert (false && "should never get here");
+		NTV2_ASSERT(false && "should never get here");
 
 	}	//	loop til break
 

@@ -1039,15 +1039,8 @@ bool CNTV2Card::AutoCirculateGetStatus (const NTV2Channel inChannel, AUTOCIRCULA
 		return true;	//	AutoCirculate not running on this channel
 	}
 
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	// Auto circulate status is not implemented in the NUB yet
-	if (IsRemote())
-		return false;
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-	const bool result(NTV2Message(reinterpret_cast<NTV2_HEADER *>(&outStatus)));
-	if (result)
-		;//ACDBG("GetStatus successful on Ch" << DEC(inChannel+1));
-	else
+	const bool result(NTV2Message(outStatus));
+	if (!result)
 		ACFAIL("Failed to get status on Ch" << DEC(inChannel+1));
 	return result;
 
@@ -1059,7 +1052,7 @@ bool CNTV2Card::AutoCirculateGetFrameStamp (const NTV2Channel inChannel, const U
 	//	Use the new driver call...
 	outFrameStamp.acFrameTime = LWord64 (inChannel);
 	outFrameStamp.acRequestedFrame = inFrameNum;
-	return NTV2Message (reinterpret_cast <NTV2_HEADER *> (&outFrameStamp));
+	return NTV2Message(outFrameStamp);
 
 }	//	AutoCirculateGetFrameStamp
 
@@ -1086,7 +1079,7 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 {
 	if (!_boardOpened)
 		return false;
-	#if defined (_DEBUG)
+	#if defined(_DEBUG)
 		NTV2_ASSERT (inOutXferInfo.NTV2_IS_STRUCT_VALID ());
 	#endif
 
@@ -1191,7 +1184,7 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 	/////////////////////////////////////////////////////////////////////////////
 	//	Call the driver...
 	inOutXferInfo.acCrosspoint = crosspoint;
-	bool result = NTV2Message (reinterpret_cast <NTV2_HEADER *> (&inOutXferInfo));
+	bool result = NTV2Message(inOutXferInfo);
 	/////////////////////////////////////////////////////////////////////////////
 
 	if (result	&&	NTV2_IS_INPUT_CROSSPOINT(crosspoint))

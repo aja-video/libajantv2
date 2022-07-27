@@ -2720,7 +2720,7 @@ typedef enum
 	NTV2_QuarterSizeExpandOn,		//	Hardware will pixel-double and line-double to expand quarter-size frame
 	NTV2_MAX_NUM_QuarterSizeExpandModes,
 	NTV2_QuarterSizeExpandInvalid = NTV2_MAX_NUM_QuarterSizeExpandModes
-} NTV2QuarterSizeExpandMode;
+} NTV2QuarterSizeExpandMode, NTV2QtrSizeExpandMode;
 
 #define NTV2_IS_VALID_QuarterSizeExpandMode(__q__)		((__q__) == NTV2_QuarterSizeExpandOff || (__q__) == NTV2_QuarterSizeExpandOn)
 

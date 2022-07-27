@@ -48,6 +48,7 @@
 //#define NTV2_DEPRECATE_16_1		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.1
 //#define NTV2_DEPRECATE_16_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.2
 //#define NTV2_DEPRECATE_16_3		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.3
+//#define NTV2_NULL_DEVICE			//	DO NOT DEFINE UNLESS ABSOLUTELY NECESSARY.  If defined, stubs out ioctl/IOKit/DeviceIoControl calls to AJA device driver.
 #define NTV2_NUB_CLIENT_SUPPORT		//	If defined, includes nub client support;  otherwise, excludes it
 #define AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
 #define AJA_STATIC		static		//	Do not change this.
@@ -521,62 +522,6 @@
 	#define NTV2_DEPRECATED_v(__v__)				__v__
 	#define NTV2_DEPRECATED_vi(__v__, __i__)		__v__  = (__i__)
 #endif
-
-
-/**
-	@brief	Describes the horizontal and vertical size dimensions of a raster, bitmap, frame or image.
-**/
-typedef struct NTV2FrameDimensions
-{
-	#if !defined (NTV2_BUILDING_DRIVER)
-		//	Member Functions
-
-		/**
-			@brief		My constructor.
-			@param[in]	inWidth		Optionally specifies my initial width dimension, in pixels. Defaults to zero.
-			@param[in]	inHeight	Optionally specifies my initial height dimension, in lines. Defaults to zero.
-		**/
-		inline NTV2FrameDimensions (const ULWord inWidth = 0, const ULWord inHeight = 0)	{Set (inWidth, inHeight);}
-		inline ULWord					GetWidth (void) const		{return mWidth;}	///< @return	My width, in pixels.
-		inline ULWord					GetHeight (void) const		{return mHeight;}	///< @return	My height, in lines/rows.
-		inline ULWord					Width (void) const			{return mWidth;}	///< @return	My width, in pixels.
-		inline ULWord					Height (void) const			{return mHeight;}	///< @return	My height, in lines/rows.
-		inline bool						IsValid (void) const		{return Width() && Height();}	///< @return	True if both my width and height are non-zero.
-
-		/**
-			@brief		Sets my width dimension.
-			@param[in]	inValue		Specifies the new width dimension, in pixels.
-			@return		A non-constant reference to me.
-		**/
-		inline NTV2FrameDimensions &	SetWidth (const ULWord inValue)						{mWidth = inValue; return *this;}
-
-		/**
-			@brief		Sets my height dimension.
-			@param[in]	inValue		Specifies the new height dimension, in lines.
-			@return		A non-constant reference to me.
-		**/
-		inline NTV2FrameDimensions &	SetHeight (const ULWord inValue)					{mHeight = inValue; return *this;}
-
-		/**
-			@brief		Sets my dimension values.
-			@param[in]	inWidth		Specifies the new width dimension, in pixels.
-			@param[in]	inHeight	Specifies the new height dimension, in lines.
-			@return		A non-constant reference to me.
-		**/
-		inline NTV2FrameDimensions &	Set (const ULWord inWidth, const ULWord inHeight)	{return SetWidth (inWidth).SetHeight (inHeight);}
-
-		/**
-			@brief		Sets both my width and height to zero (an invalid state).
-			@return		A non-constant reference to me.
-		**/
-		inline NTV2FrameDimensions &	Reset (void)										{return Set (0, 0);}
-
-		private:	//	Private member data only if not building driver
-	#endif	//	!defined (NTV2_BUILDING_DRIVER)
-	//	Member Variables
-	ULWord	mWidth;		///< @brief The horizontal dimension, in pixels.
-	ULWord	mHeight;	///< @brief The vertical dimension, in lines.
-} NTV2FrameDimensions;
 
 
 #if !defined(BIT)

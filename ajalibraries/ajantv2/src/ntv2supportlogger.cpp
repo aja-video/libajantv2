@@ -454,19 +454,7 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 	AJASystemInfo::append(infoTable, "NTV2 SDK Version",	::NTV2GetVersionString(true));
 	AJASystemInfo::append(infoTable, "supportlog Built",	string(__DATE__ " at " __TIME__));
 	AJASystemInfo::append(infoTable, "Driver Version",		mDevice.GetDriverVersionString());
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	const ULWord negotiatedProtocolVersion (mDevice.GetNubProtocolVersion());
-	AJASystemInfo::append(infoTable, "Watcher Nub Protocol Version",	DECStr(maxKnownProtocolVersion));
-	AJASystemInfo::append(infoTable, "Negotiated Nub Protocol Version", negotiatedProtocolVersion ? DECStr(negotiatedProtocolVersion) : "Not available");
-	if (negotiatedProtocolVersion >= ntv2NubProtocolVersion3)
-	{
-		BUILD_INFO_STRUCT buildInfo;
-		if (mDevice.DriverGetBuildInformation(buildInfo))
-			AJASystemInfo::append(infoTable, "Driver Build Version",	buildInfo.buildStr);
-	}
-#else
-	AJASystemInfo::append(infoTable, "Watcher Nub Protocol Version",	"N/A (nub client support missing)");
-#endif	//	NTV2_NUB_CLIENT_SUPPORT
+	AJASystemInfo::append(infoTable, "Watcher Nub Protocol Version",	"Built-in RPC support");
 
 	AJASystemInfo::append(infoTable, "DEVICE INFO", "");
 	AJASystemInfo::append(infoTable, "Device",				mDevice.GetDisplayName());
