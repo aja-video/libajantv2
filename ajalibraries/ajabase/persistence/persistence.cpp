@@ -765,23 +765,34 @@ void AJAPersistence::GetParams(std::string& appID, std::string& deviceType, std:
 bool AJAPersistence::SetValue(const std::string& key, const void *value, AJAPersistenceType type, size_t blobSize)
 {
 	bool shouldLog = should_we_log();
+	bool isGood = false;
+	int dbOpenErr = 0;
+	{
+		AJAPersistenceDBImpl db(mstateKeyName);
+		if (db.IsDBOpen())
+			isGood = db.SetValue(key, value, type, int(blobSize), mboardId, mserialNumber);
+		else
+			dbOpenErr = db.OpenErrorCode();
+	}
+
 	if (shouldLog)
 	{
 		std::string dbgValue = "(could not log type)";
 		AJAPersistenceDBImpl::ConvertValueTypeToString(value, type, dbgValue);
-		AJA_LOG_WRITE(shouldLog, "write value of type: " << labelForPersistenceType(type) <<
-								 ", with key: \""		 << key							  << "\"" <<
-								 ", with dev_name: \""	 << mboardId					  << "\"" <<
-								 ", with dev_num: \""	 << mserialNumber				  << "\"" <<
-								 ", and value of: \""	 << dbgValue					  << "\"");
+
+		std::string dbOpenErrStr = "";
+		if (dbOpenErr != 0)
+		{
+			dbOpenErrStr = "db open err: " + aja::to_string(dbOpenErr) + ", ";
+		}
+
+		AJA_LOG_WRITE(shouldLog, dbOpenErrStr <<
+								"write value of type: " << labelForPersistenceType(type) <<
+								", with key: \""	   << key							<< "\"" <<
+								", with dev_name: \""  << mboardId						<< "\"" <<
+								", with dev_num: \""   << mserialNumber					<< "\"" <<
+								", and value of: \""   << dbgValue						<< "\"");
 	}
-	AJAPersistenceDBImpl db(mstateKeyName);
-	bool isGood = false;
-	int dbOpenErr = 0;
-	if (db.IsDBOpen())
-		isGood = db.SetValue(key, value, type, int(blobSize), mboardId, mserialNumber);
-	else
-		dbOpenErr = db.OpenErrorCode();
 
 	return isGood;
 }
@@ -831,16 +842,26 @@ bool AJAPersistence::GetValuesString(const std::string& keyQuery, std::vector<st
 	if (FileExists() == false)
 		return false;
 
-	AJA_LOG_READ(should_we_log(), "reading string values with query key: " << keyQuery);
-
-	AJAPersistenceDBImpl db(mstateKeyName);
+	bool shouldLog = should_we_log();
 	bool isGood = false;
 	int dbOpenErr = 0;
-	if (db.IsDBOpen())
-		isGood = db.GetAllMatchingValues(keyQuery, keys, values, mboardId, mserialNumber);
-	else
-		dbOpenErr = db.OpenErrorCode();
+	{
+		AJAPersistenceDBImpl db(mstateKeyName);
+		if (db.IsDBOpen())
+			isGood = db.GetAllMatchingValues(keyQuery, keys, values, mboardId, mserialNumber);
+		else
+			dbOpenErr = db.OpenErrorCode();
+	}
+	if (shouldLog)
+	{
+		std::string dbOpenErrStr = "";
+		if (dbOpenErr != 0)
+		{
+			dbOpenErrStr = "db open err: " + aja::to_string(dbOpenErr) + ", ";
+		}
 
+		AJA_LOG_READ(shouldLog, dbOpenErrStr << "reading string values with query key: " << keyQuery);
+	}
 	return isGood;
 }
 
