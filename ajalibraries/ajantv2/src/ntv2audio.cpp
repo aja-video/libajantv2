@@ -441,7 +441,7 @@ bool CNTV2Card::GetEmbeddedAudioClock (NTV2EmbeddedAudioClock & outValue, const 
 
 bool CNTV2Card::GetAudioWrapAddress (ULWord & outWrapAddress, const NTV2AudioSystem inAudioSystem)
 {
-	NTV2AudioBufferSize bufferSize	(NTV2_MAX_NUM_AudioBufferSizes);
+	NTV2AudioBufferSize bufferSize	(NTV2_AUDIO_BUFFER_INVALID);
 	if (!GetAudioBufferSize (bufferSize, inAudioSystem))
 		return false;
 
@@ -461,7 +461,7 @@ bool CNTV2Card::GetAudioWrapAddress (ULWord & outWrapAddress, const NTV2AudioSys
 
 bool CNTV2Card::GetAudioReadOffset (ULWord & outReadOffset, const NTV2AudioSystem inAudioSystem)
 {
-	NTV2AudioBufferSize bufferSize	(NTV2_MAX_NUM_AudioBufferSizes);
+	NTV2AudioBufferSize bufferSize	(NTV2_AUDIO_BUFFER_INVALID);
 	if (!GetAudioBufferSize (bufferSize, inAudioSystem))
 		return false;
 
