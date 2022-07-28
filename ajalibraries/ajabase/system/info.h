@@ -119,6 +119,14 @@ public: //	Instance Methods
 	virtual AJAStatus GetLabel(const AJASystemInfoTag inTag, std::string & outLabel) const;
 
 	/**
+	 *	@brief		 Generates a "table" of label/value pairs that contains the complete host system info table.
+	 *	@param[out]	 outTable	  The AJALabelValuePairs table.
+	 *	@param[in]	 clearTable	  Clear the passed in table before adding new items? Defaults to false.
+	 *	@return		 AJA_SUCCESS if successful
+	 */
+	virtual AJAStatus GetLabelValuePairs(AJALabelValuePairs &outTable, bool clearTable = false) const;
+
+	/**
 	 *	@brief		 Answers with a multi-line string that contains the complete host system info table.
 	 *	@param[out]	 outAllLabelsAndValues	 Receives the string
 	 */
