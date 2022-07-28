@@ -521,10 +521,10 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 	hostInfo.GetLabelValuePairs(infoTable, false);
 
 	// append the health status of the persistence database files
-	std::vector<std::pair<std::string, bool>> persistenceChecks;
+	std::vector<std::pair<std::string, bool> > persistenceChecks;
 	persistenceChecks.push_back(std::pair<std::string, bool>("User Persistence Health", false));
 	persistenceChecks.push_back(std::pair<std::string, bool>("System Persistence Health", true));
-	std::vector<std::pair<std::string, bool>>::const_iterator it(persistenceChecks.begin());
+	std::vector<std::pair<std::string, bool> >::const_iterator it(persistenceChecks.begin());
 	int errCode = 0;
 	std::string errMessage;
 	for (; it != persistenceChecks.end(); ++it)
