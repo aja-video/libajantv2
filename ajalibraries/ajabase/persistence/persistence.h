@@ -43,7 +43,7 @@ public:
 	bool GetValue(const std::string& key, void *value, AJAPersistenceType type, size_t blobBytes = 0);
 	bool FileExists();
 	bool ClearPrefFile();
-	bool DeletePrefFile();
+	bool DeletePrefFile(bool makeBackup = false);
 	bool StorageHealthCheck(int& errCode, std::string& errMessage);
 
 	bool GetValuesInt(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<int>& values);

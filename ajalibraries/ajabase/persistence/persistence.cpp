@@ -10,6 +10,8 @@
 #include "stdlib.h"
 
 #include <iostream>
+#include <cstdio>
+#include <ctime>
 
 #include "ajabase/common/common.h"
 #include "ajabase/system/debug.h"
@@ -955,15 +957,64 @@ bool AJAPersistence::ClearPrefFile()
 	return bSuccess;
 }
 
+bool backup_pref_file(const std::string &path, bool shouldLog)
+{
+	bool result = false;
+	if (AJAFileIO::FileExists(path.c_str()))
+	{
+		time_t t = std::time(NULL);
+		if(t != (time_t)(-1))
+		{
+			static char dateBuffer[64];
+
+			struct tm *timeinfo = std::localtime(&t);
+			std::strftime(dateBuffer, sizeof(dateBuffer), "_%Y_%m_%d_%H%M%S", timeinfo);
+
+			std::string newPath = path;
+			newPath += dateBuffer;
+
+			result = std::rename(path.c_str(), newPath.c_str()) == 0 ? true : false;
+			if (result)
+			{
+				AJA_LOG_NOTICE(shouldLog, "successful backup of db from '" << path << "' to '" << newPath << "'");
+			}
+			else
+			{
+				AJA_LOG_NOTICE(shouldLog, "problem with backup of db from '" << path << "' to '" << newPath << "'");
+			}
+		}
+	}
+	return result;
+}
+
 // delete pref file
-bool AJAPersistence::DeletePrefFile()
+bool AJAPersistence::DeletePrefFile(bool makeBackup)
 {
 	bool shouldLog = should_we_log();
 	bool bSuccess = true;
 	if (FileExists())
 	{
-		int err = remove(mstateKeyName.c_str());
-		bSuccess = err != 0;
+		if (makeBackup)
+		{
+			// backup does a move, so no need to delete if it works
+			bSuccess = backup_pref_file(mstateKeyName, shouldLog);
+			if (!bSuccess)
+			{
+				bSuccess = std::remove(mstateKeyName.c_str()) == 0 ? true : false;
+			}
+		}
+		else
+		{
+			bSuccess = std::remove(mstateKeyName.c_str()) == 0 ? true : false;
+		}
+		if (bSuccess)
+		{
+			AJA_LOG_NOTICE(shouldLog, "success with deletion of db file '" << mstateKeyName << "'");
+		}
+		else
+		{
+			AJA_LOG_NOTICE(shouldLog, "problem with deletion of db file '" << mstateKeyName << "'");
+		}
 	}
 	else
 	{
