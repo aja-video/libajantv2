@@ -43,13 +43,15 @@ public:
 	bool GetValue(const std::string& key, void *value, AJAPersistenceType type, size_t blobBytes = 0);
 	bool FileExists();
 	bool ClearPrefFile();
-	bool DeletePrefFile();
+	bool DeletePrefFile(bool makeBackup = false);
+	bool StorageHealthCheck(int& errCode, std::string& errMessage);
 
 	bool GetValuesInt(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<int>& values);
 	bool GetValuesBool(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<bool>& values);
 	bool GetValuesDouble(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<double>& values);
 	bool GetValuesString(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<std::string>& values);
 	
+	void PathToPrefFile(std::string& path);
 private:	
 
 	std::string				mappId;

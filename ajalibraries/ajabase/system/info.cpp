@@ -170,17 +170,27 @@ AJAStatus AJASystemInfo::GetLabel (const AJASystemInfoTag tag, string & outLabel
 	return AJA_STATUS_FAIL;
 }
 
-string AJASystemInfo::ToString (const size_t inValueWrapLen, const size_t inGutterWidth) const
+AJAStatus AJASystemInfo::GetLabelValuePairs(AJALabelValuePairs &outTable, bool clearTable) const
 {
-	AJALabelValuePairs	infoTable;
-	append(infoTable, "HOST INFO");
+	if (clearTable)
+		outTable.clear();
+
 	for (AJASystemInfoTag tag(AJASystemInfoTag(0));	 tag < AJA_SystemInfoTag_LAST;	tag = AJASystemInfoTag(tag+1))
 	{
 		string label, value;
 		if (AJA_SUCCESS(GetLabel(tag, label)) && AJA_SUCCESS(GetValue(tag, value)))
 			if (!label.empty())
-				append(infoTable, label, value);
+				append(outTable, label, value);
 	}
+
+	return outTable.empty() ? AJA_STATUS_FAIL : AJA_STATUS_SUCCESS;
+}
+
+string AJASystemInfo::ToString (const size_t inValueWrapLen, const size_t inGutterWidth) const
+{
+	AJALabelValuePairs	infoTable;
+	append(infoTable, "HOST INFO");
+	GetLabelValuePairs(infoTable, false);
 	return ToString(infoTable, inValueWrapLen, inGutterWidth);
 }
 

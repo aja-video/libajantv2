@@ -10,6 +10,8 @@
 #include "stdlib.h"
 
 #include <iostream>
+#include <cstdio>
+#include <ctime>
 
 #include "ajabase/common/common.h"
 #include "ajabase/system/debug.h"
@@ -135,7 +137,7 @@ inline bool should_we_log()
 }
 
 // Encapsulate the sqlite3_stmt object so automatically handled by constructor/destructor
-const int gDefaultNumSqliteRetries = 25;
+const int gDefaultNumSqliteRetries = 4;
 const int32_t gDefaultMicrosecondsBetweenRetries = 2000;
 
 // Encapsulate the sqlite3 object so automatically handled by constructor/destructor
@@ -157,7 +159,7 @@ public:
 #if AJA_VERBOSE_LOGGING
 				AJA_LOG_WRITE(shouldLog, "sqlite> successfully opened handle to DB at: " << mPath);
 #endif
-				Execute("PRAGMA journal_mode=DELETE;");
+				mOpenErrorCode = Execute("PRAGMA journal_mode=DELETE;");
 			}
 		}
 
@@ -167,7 +169,7 @@ public:
 			bool shouldLog = should_we_log();
 			if (rc != SQLITE_OK)
 			{
-				AJA_LOG_ERROR(shouldLog, "sqlite> error code: " << mOpenErrorCode <<
+				AJA_LOG_ERROR(shouldLog, "sqlite> error code: " << rc <<
 										 " with message: \"" << sqlite3_errmsg(mDb) << "\" when closing DB at: " << mPath);
 			}
 			else
@@ -196,7 +198,7 @@ public:
 				return rc;
 			}
 			else
-				return SQLITE_ERROR;
+				return SQLITE_CANTOPEN;
 		}
 
 		int Checkpoint(const std::string& dbName, int checkpointMode = SQLITE_CHECKPOINT_PASSIVE)
@@ -375,7 +377,7 @@ public:
 		AJAPersistenceDBImpl(const std::string &pathToDB)
 		: mDb(pathToDB)
 		{
-			if (mDb.IsDBOpen())
+			if (IsDBOpen())
 			{				 
 				// generic table statements
 				AJAPersistenceDBImplStatement createTableStmt(mDb, "CREATE TABLE IF NOT EXISTS persistence(id INTEGER, name CHAR(255), value CHAR(64), dev_name CHAR(64), dev_num CHAR(64), PRIMARY KEY(id))");
@@ -516,7 +518,7 @@ public:
 		bool GetValue(std::string keyQuery, void *value, AJAPersistenceType type, int blobSizeInBytes, std::string devName = "", std::string devNum = "")
 		{
 			bool isGood = false;
-			if (mDb.IsDBOpen())
+			if (IsDBOpen())
 			{
 				AJAPersistenceDBImplStatement *specificStmt;
 				AJAPersistenceDBImplStatement *lessSpecificStmt;
@@ -580,7 +582,7 @@ public:
 		bool SetValue(std::string keyQuery, const void *value, AJAPersistenceType type, int blobSizeInBytes, std::string devName = "", std::string devNum = "")
 		{
 			bool isGood = false;
-			if (mDb.IsDBOpen())
+			if (IsDBOpen())
 			{
 				AJAPersistenceDBImplStatement *insertOrReplaceStmt;
 
@@ -642,7 +644,7 @@ public:
 								  std::string devName = "", std::string devNum = "")
 		{
 			bool isGood = false;
-			if (mDb.IsDBOpen())
+			if (IsDBOpen())
 			{
 				// Reset statements and bind parameters
 				mGetAllValuesSpecificStmt.Reset();
@@ -687,6 +689,10 @@ public:
 			}
 			return isGood;
 		}
+
+		bool IsDBOpen()	{ return mDb.IsDBOpen(); }
+
+		int OpenErrorCode() { return mDb.OpenErrorCode(); }
 
 private:
 	  AJAPersistenceDBImplObject	mDb;
@@ -761,18 +767,34 @@ void AJAPersistence::GetParams(std::string& appID, std::string& deviceType, std:
 bool AJAPersistence::SetValue(const std::string& key, const void *value, AJAPersistenceType type, size_t blobSize)
 {
 	bool shouldLog = should_we_log();
+	bool isGood = false;
+	int dbOpenErr = 0;
+	{
+		AJAPersistenceDBImpl db(mstateKeyName);
+		if (db.IsDBOpen())
+			isGood = db.SetValue(key, value, type, int(blobSize), mboardId, mserialNumber);
+		else
+			dbOpenErr = db.OpenErrorCode();
+	}
+
 	if (shouldLog)
 	{
 		std::string dbgValue = "(could not log type)";
 		AJAPersistenceDBImpl::ConvertValueTypeToString(value, type, dbgValue);
-		AJA_LOG_WRITE(shouldLog, "write value of type: " << labelForPersistenceType(type) <<
-								 ", with key: \""		 << key							  << "\"" <<
-								 ", with dev_name: \""	 << mboardId					  << "\"" <<
-								 ", with dev_num: \""	 << mserialNumber				  << "\"" <<
-								 ", and value of: \""	 << dbgValue					  << "\"");
+
+		std::string dbOpenErrStr = "";
+		if (dbOpenErr != 0)
+		{
+			dbOpenErrStr = "db open err: " + aja::to_string(dbOpenErr) + ", ";
+		}
+
+		AJA_LOG_WRITE(shouldLog, dbOpenErrStr <<
+								"write value of type: " << labelForPersistenceType(type) <<
+								", with key: \""	   << key							<< "\"" <<
+								", with dev_name: \""  << mboardId						<< "\"" <<
+								", with dev_num: \""   << mserialNumber					<< "\"" <<
+								", and value of: \""   << dbgValue						<< "\"");
 	}
-	AJAPersistenceDBImpl db(mstateKeyName);
-	bool isGood = db.SetValue(key, value, type, int(blobSize), mboardId, mserialNumber);
 
 	return isGood;
 }
@@ -785,17 +807,28 @@ bool AJAPersistence::GetValue(const std::string& key, void *value, AJAPersistenc
 
 	bool shouldLog = should_we_log();
 	bool isGood = false;
-
+	int dbOpenErr = 0;
 	{
 		AJAPersistenceDBImpl db(mstateKeyName);
-		isGood = db.GetValue(key, value, type, int(blobSize), mboardId, mserialNumber);
+		if (db.IsDBOpen())
+			isGood = db.GetValue(key, value, type, int(blobSize), mboardId, mserialNumber);
+		else
+			dbOpenErr = db.OpenErrorCode();
 	}
 
 	if (shouldLog)
 	{
 		std::string dbgValue = "(could not log type)";
 		AJAPersistenceDBImpl::ConvertValueTypeToString(value, type, dbgValue);
-		AJA_LOG_READ(shouldLog, "read value of type: " << labelForPersistenceType(type) <<
+
+		std::string dbOpenErrStr = "";
+		if (dbOpenErr != 0)
+		{
+			dbOpenErrStr = "db open err: " + aja::to_string(dbOpenErr) + ", ";
+		}
+
+		AJA_LOG_READ(shouldLog, dbOpenErrStr <<
+								"read value of type: " << labelForPersistenceType(type) <<
 								", with key: \""	   << key							<< "\"" <<
 								", with dev_name: \""  << mboardId						<< "\"" <<
 								", with dev_num: \""   << mserialNumber					<< "\"" <<
@@ -811,11 +844,26 @@ bool AJAPersistence::GetValuesString(const std::string& keyQuery, std::vector<st
 	if (FileExists() == false)
 		return false;
 
-	AJA_LOG_READ(should_we_log(), "reading string values with query key: " << keyQuery);
+	bool shouldLog = should_we_log();
+	bool isGood = false;
+	int dbOpenErr = 0;
+	{
+		AJAPersistenceDBImpl db(mstateKeyName);
+		if (db.IsDBOpen())
+			isGood = db.GetAllMatchingValues(keyQuery, keys, values, mboardId, mserialNumber);
+		else
+			dbOpenErr = db.OpenErrorCode();
+	}
+	if (shouldLog)
+	{
+		std::string dbOpenErrStr = "";
+		if (dbOpenErr != 0)
+		{
+			dbOpenErrStr = "db open err: " + aja::to_string(dbOpenErr) + ", ";
+		}
 
-	AJAPersistenceDBImpl db(mstateKeyName);
-	bool isGood = db.GetAllMatchingValues(keyQuery, keys, values, mboardId, mserialNumber);
-
+		AJA_LOG_READ(shouldLog, dbOpenErrStr << "reading string values with query key: " << keyQuery);
+	}
 	return isGood;
 }
 
@@ -882,6 +930,11 @@ bool AJAPersistence::GetValuesDouble(const std::string& keyQuery, std::vector<st
 	return false;
 }
 
+void AJAPersistence::PathToPrefFile(std::string& path)
+{
+	path = mstateKeyName;
+}
+
 bool AJAPersistence::FileExists()
 {
 	return AJAFileIO::FileExists(mstateKeyName.c_str());
@@ -904,19 +957,90 @@ bool AJAPersistence::ClearPrefFile()
 	return bSuccess;
 }
 
+bool backup_pref_file(const std::string &path, bool shouldLog)
+{
+	bool result = false;
+	if (AJAFileIO::FileExists(path.c_str()))
+	{
+		time_t t = std::time(NULL);
+		if(t != (time_t)(-1))
+		{
+			static char dateBuffer[64];
+
+			struct tm *timeinfo = std::localtime(&t);
+			std::strftime(dateBuffer, sizeof(dateBuffer), "_%Y_%m_%d_%H%M%S", timeinfo);
+
+			std::string newPath = path;
+			newPath += dateBuffer;
+
+			result = std::rename(path.c_str(), newPath.c_str()) == 0 ? true : false;
+			if (result)
+			{
+				AJA_LOG_NOTICE(shouldLog, "successful backup of db from '" << path << "' to '" << newPath << "'");
+			}
+			else
+			{
+				AJA_LOG_NOTICE(shouldLog, "problem with backup of db from '" << path << "' to '" << newPath << "'");
+			}
+		}
+	}
+	return result;
+}
+
 // delete pref file
-bool AJAPersistence::DeletePrefFile()
+bool AJAPersistence::DeletePrefFile(bool makeBackup)
 {
 	bool shouldLog = should_we_log();
 	bool bSuccess = true;
 	if (FileExists())
 	{
-		int err = remove(mstateKeyName.c_str());
-		bSuccess = err != 0;
+		if (makeBackup)
+		{
+			// backup does a move, so no need to delete if it works
+			bSuccess = backup_pref_file(mstateKeyName, shouldLog);
+			if (!bSuccess)
+			{
+				bSuccess = std::remove(mstateKeyName.c_str()) == 0 ? true : false;
+			}
+		}
+		else
+		{
+			bSuccess = std::remove(mstateKeyName.c_str()) == 0 ? true : false;
+		}
+		if (bSuccess)
+		{
+			AJA_LOG_NOTICE(shouldLog, "success with deletion of db file '" << mstateKeyName << "'");
+		}
+		else
+		{
+			AJA_LOG_NOTICE(shouldLog, "problem with deletion of db file '" << mstateKeyName << "'");
+		}
 	}
 	else
 	{
 		AJA_LOG_NOTICE(shouldLog, "could not delete existing db, file not found, called from DeletePrefFile");
 	}
 	return bSuccess;
+}
+
+bool AJAPersistence::StorageHealthCheck(int& errCode, std::string& errMessage)
+{
+	if (FileExists() == false)
+	{
+		errCode = -1;
+		errMessage = "db file does not exist";
+		return false;
+	}
+
+	AJAPersistenceDBImpl db(mstateKeyName);
+	if (db.IsDBOpen())
+	{
+		errCode = 0;
+		errMessage = "";
+		return true;
+	}
+
+	errCode = db.OpenErrorCode();
+	errMessage = sqlite3_errstr(errCode);
+	return false;
 }

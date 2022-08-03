@@ -191,7 +191,7 @@ public:
 	static bool FileExists(const std::string& fileName);
 
 	/**
-	 *	Remove the file for the system
+	 *	Remove the file from the system
 	 *
 	 *	@param[in]	fileName			The fully qualified file name
 	 *

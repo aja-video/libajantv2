@@ -11,8 +11,9 @@
 #include "ntv2registerexpert.h"
 #include "ntv2registersmb.h"
 #include "ntv2rp188.h"
-#include "ajabase/system/info.h"
 #include "ajabase/common/common.h"
+#include "ajabase/persistence/persistence.h"
+#include "ajabase/system/info.h"
 #include <algorithm>
 #include <sstream>
 #include <vector>
@@ -513,10 +514,38 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 		}
 	}
 
-	//	Host info
-	AJASystemInfo	hostInfo;
-	oss << AJASystemInfo::ToString(infoTable) << endl
-		<< hostInfo.ToString() << endl;
+	AJASystemInfo hostInfo;
+
+	// append the system info from AJASystemInfo
+	AJASystemInfo::append(infoTable, "HOST INFO");
+	hostInfo.GetLabelValuePairs(infoTable, false);
+
+	// append the health status of the persistence database files
+	std::vector<std::pair<std::string, bool> > persistenceChecks;
+	persistenceChecks.push_back(std::pair<std::string, bool>("User Persistence Health", false));
+	persistenceChecks.push_back(std::pair<std::string, bool>("System Persistence Health", true));
+	std::vector<std::pair<std::string, bool> >::const_iterator it(persistenceChecks.begin());
+	int errCode = 0;
+	std::string errMessage;
+	for (; it != persistenceChecks.end(); ++it)
+	{
+		std::string label(it->first);
+		bool shared(it->second);
+		AJAPersistence p("com.aja.devicesettings", "Unknown", "00000000", shared);
+		if (p.StorageHealthCheck(errCode, errMessage))
+		{
+			AJASystemInfo::append(infoTable, label, "exists and is good");
+		}
+		else
+		{
+			if (shared && errCode == -1)
+				AJASystemInfo::append(infoTable, label, "doesn't exist (this one is optional)");
+			else
+				AJASystemInfo::append(infoTable, label, std::string("err(") + aja::to_string(errCode) + ") '" + errMessage + "'");
+		}
+	}
+
+	oss << AJASystemInfo::ToString(infoTable) << endl;
 }
 
 void CNTV2SupportLogger::FetchRegisterLog (ostringstream & oss) const
