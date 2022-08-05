@@ -1301,9 +1301,9 @@
 	will thereafter only transmit silence. Use the CNTV2Card::SetAudioOutputEraseMode function to configure this feature.
 
 	<b>DMA Transfer:</b> Audio data can be transferred from the host to the device audio buffer via DMA by calling
-	CNTV2Card::DMAWriteAudio. The last address written into the <b>Audio Output Buffer</b> (via DMA) is latched and
-	available for readback at <b>Audio Output Last Address</b> (within 256 bytes). If the output hardware <b>Play Head</b>
-	pointer catches up to the <b>Audio Output Last Address</b>, the buffer will wrap, and audio/video synchronization will be lost.
+	CNTV2Card::DMAWriteAudio. If the playout engine’s hardware <b>Play Head</b> catches up to, or passes, the buffer region
+	being written by CNTV2Card::DMAWriteAudio, then audio/video synchronization has been lost. Care must be taken to ensure
+	that enough samples are always written well ahead of the <b>Play Head</b>.
 
 	There is no provision for changing the <b>Play Head</b> position while <b>Audio System</b> playback is running … except
 	perhaps to reset playback to the start of the audio buffer (by calling both CNTV2Card::StopAudioOutput and then
