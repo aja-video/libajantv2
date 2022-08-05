@@ -6827,12 +6827,12 @@ string NTV2ChannelToString (const NTV2Channel inValue, const bool inForRetailDis
 
 string NTV2AudioSystemToString (const NTV2AudioSystem inValue, const bool inCompactDisplay)
 {
-	ostringstream	oss;
-	if (NTV2_IS_VALID_AUDIO_SYSTEM (inValue))
+	ostringstream oss;
+	if (NTV2_IS_VALID_AUDIO_SYSTEM(inValue))
 		oss << (inCompactDisplay ? "AudSys" : "NTV2_AUDIOSYSTEM_") << (inValue + 1);
 	else
 		oss << (inCompactDisplay ? "NoAudio" : "NTV2_AUDIOSYSTEM_INVALID");
-	return oss.str ();
+	return oss.str();
 }
 
 
