@@ -440,18 +440,6 @@ bool CNTV2DriverInterface::ReadRegisters (NTV2RegisterReads & inOutValues)
 		if (!inNumRegs)
 			return false;	//	numRegs is zero
 
-	#if 0	//	Original implementation
-		for (ULWord ndx(0);	 ndx < inNumRegs;  ndx++)
-		{
-			NTV2RegInfo & regInfo(pOutRegInfos[ndx]);
-			if (!ReadRegister (regInfo.registerNumber, regInfo.registerValue, regInfo.registerMask, regInfo.registerShift))
-			{
-				*pOutWhichRegFailed = regInfo.registerNumber;
-				return false;
-			}
-		}
-		return true;
-	#endif
 		//	New in SDK 16.0:  Use ReadRegs NTV2Message
 		NTV2RegReads regReads, result;
 		regReads.reserve(inNumRegs);  result.reserve(inNumRegs);

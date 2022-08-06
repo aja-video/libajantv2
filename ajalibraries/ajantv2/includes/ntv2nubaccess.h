@@ -291,6 +291,7 @@ class AJAExport NTV2RPCServerAPI
 						specified URL.
 			@param[in]	inURL	Specifies the server configuration.
 								The URL scheme (required) determines the plugin to load.
+								It must start with "ntv2", and the remainder of the name must match a DLL/dylib/so name.
 			@return		If successful, a non-zero pointer to the new NTV2RPCServerAPI instance;  otherwise nullptr (zero).
 		**/
 		static NTV2RPCServerAPI *	CreateServer (const std::string & inURL);
