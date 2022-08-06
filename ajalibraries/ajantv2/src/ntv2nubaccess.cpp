@@ -24,6 +24,16 @@
 #include <iomanip>
 #if defined(AJAMac)
 	#include <CoreFoundation/CoreFoundation.h>
+	#define	DLL_EXTENSION	".dylib"
+	#define	FIRMWARE_FOLDER	"Firmware/"
+#elif defined(AJALinux)
+	#define	DLL_EXTENSION	".so"
+	#define	FIRMWARE_FOLDER	"firmware/"
+#elif defined(MSWindows)
+	#define	DLL_EXTENSION	".DLL"
+	#define	FIRMWARE_FOLDER	"Firmware/"
+#endif
+#if !defined(MSWindows)
 	#include <dlfcn.h>
 #endif
 
@@ -961,12 +971,12 @@ NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inP
 		{NBCFAIL("AJA_SystemInfoTag_Path_Firmware failed");  return AJA_NULL;}	//	Can't get firmware folder
 	NBCDBG("AJA firmware path is '" << pluginPath << "', seeking '" << pluginName << ".dylib'");
 
-#if defined(AJAMac)
-	//	On MacOS, our plugins are dynamically-loading libraries (dylibs)
-	if (pluginPath.find("Firmware/") == string::npos)
-		{NBCFAIL("'" << pluginPath << "' doesn't end with 'Firmware/'");  return AJA_NULL;}
-	pluginPath.erase(pluginPath.find("Firmware/"), 9);	//	Lop off trailing "Firmware/"
-	pluginPath += pluginName + ".dylib";				//	Append pluginName.dylib
+#if !defined(MSWindows)
+	//	On MacOS and Linux, our plugins are dylibs and so's, respectively...
+	if (pluginPath.find(FIRMWARE_FOLDER) == string::npos)
+		{NBSFAIL("'" << pluginPath << "' doesn't end with '" << FIRMWARE_FOLDER << "'");  return AJA_NULL;}
+	pluginPath.erase(pluginPath.find(FIRMWARE_FOLDER), 9);	//	Lop off trailing "Firmware/"
+	pluginPath += pluginName + DLL_EXTENSION;				//	Append pluginName.dylib|so|dll
 
 	//	Open the .dylib...
 	void* pHandle = ::dlopen(pluginPath.c_str(), RTLD_LAZY);
@@ -1002,8 +1012,6 @@ NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inP
 	//	It's now someone else's responsibility to call ::dlclose
 	NBCINFO("'" << kFuncNameCreateClient << "' in '" << pluginPath << "' created instance " << xHEX0N(uint64_t(pRPCObject),16));
 	return pRPCObject;
-#elif defined(MSWindows)
-#elif defined(AJALinux)
 #else
 	#error "Missing implementation"
 #endif
@@ -1032,12 +1040,12 @@ NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const NTV2ConfigParams & inPa
 		{NBSFAIL("AJA_SystemInfoTag_Path_Firmware failed");  return AJA_NULL;}	//	Can't get firmware folder
 	NBSDBG("AJA firmware path is '" << pluginPath << "', seeking '" << pluginName << ".dylib'");
 
-#if defined(AJAMac)
-	//	On MacOS, our plugins are dynamically-loading libraries (dylibs)
-	if (pluginPath.find("Firmware/") == string::npos)
-		{NBSFAIL("'" << pluginPath << "' doesn't end with 'Firmware/'");  return AJA_NULL;}
-	pluginPath.erase(pluginPath.find("Firmware/"), 9);	//	Lop off trailing "Firmware/"
-	pluginPath += pluginName + ".dylib";				//	Append pluginName.dylib
+#if !defined(MSWindows)
+	//	On MacOS and Linux, our plugins are dylibs and so's, respectively...
+	if (pluginPath.find(FIRMWARE_FOLDER) == string::npos)
+		{NBSFAIL("'" << pluginPath << "' doesn't end with '" << FIRMWARE_FOLDER << "'");  return AJA_NULL;}
+	pluginPath.erase(pluginPath.find(FIRMWARE_FOLDER), 9);	//	Lop off trailing "Firmware/"
+	pluginPath += pluginName + DLL_EXTENSION;				//	Append pluginName + .dylib|.so|.dll
 
 	//	Open the .dylib...
 	void* pHandle = ::dlopen(pluginPath.c_str(), RTLD_LAZY);
@@ -1073,8 +1081,6 @@ NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const NTV2ConfigParams & inPa
 	//	It's now someone else's responsibility to call ::dlclose
 	NBSINFO("'" << kFuncNameCreateServer << "' in '" << pluginPath << "' created instance " << xHEX0N(uint64_t(pRPCObject),16));
 	return pRPCObject;	//	It's caller's responsibility to delete pRPCObject
-#elif defined(MSWindows)
-#elif defined(AJALinux)
 #else
 	#error "Missing implementation"
 #endif
