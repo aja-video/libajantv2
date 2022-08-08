@@ -1013,7 +1013,7 @@ NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inP
 	NBCINFO("'" << kFuncNameCreateClient << "' in '" << pluginPath << "' created instance " << xHEX0N(uint64_t(pRPCObject),16));
 	return pRPCObject;
 #else
-	#error "Missing implementation"
+	//	Need Windows implementation
 #endif
 	return AJA_NULL;
 }	//	CreateClient
