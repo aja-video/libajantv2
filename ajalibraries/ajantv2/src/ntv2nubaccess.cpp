@@ -1082,7 +1082,7 @@ NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const NTV2ConfigParams & inPa
 	NBSINFO("'" << kFuncNameCreateServer << "' in '" << pluginPath << "' created instance " << xHEX0N(uint64_t(pRPCObject),16));
 	return pRPCObject;	//	It's caller's responsibility to delete pRPCObject
 #else
-	#error "Missing implementation"
+	//	Missing Windows implementation"
 #endif
 	return AJA_NULL;
 }	//	CreateServer
