@@ -5,11 +5,6 @@
 	@copyright	(C) 2006-2022 AJA Video Systems, Inc.
 **/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/types.h>
 #include "ajatypes.h"
 #include "ntv2card.h"
 #include "ntv2utils.h"
@@ -24,17 +19,16 @@
 #include <iomanip>
 #if defined(AJAMac)
 	#include <CoreFoundation/CoreFoundation.h>
+	#include <dlfcn.h>
 	#define	DLL_EXTENSION	".dylib"
 	#define	FIRMWARE_FOLDER	"Firmware/"
 #elif defined(AJALinux)
+	#include <dlfcn.h>
 	#define	DLL_EXTENSION	".so"
 	#define	FIRMWARE_FOLDER	"firmware/"
 #elif defined(MSWindows)
-	#define	DLL_EXTENSION	".DLL"
-	#define	FIRMWARE_FOLDER	"Firmware/"
-#endif
-#if !defined(MSWindows)
-	#include <dlfcn.h>
+	#define	DLL_EXTENSION	".dll"
+	#define	FIRMWARE_FOLDER	"Firmware\\"
 #endif
 
 using namespace std;
@@ -75,30 +69,30 @@ uint16_t NTV2Dictionary::u16ValueForKey (const string & inKey, const uint16_t in
 		str.erase(0,2);
 		if (str.empty())
 			return inDefault;
-		return aja::stoul(str, AJA_NULL, 16);
+		return uint16_t(aja::stoul(str, AJA_NULL, 16));
 	}
 	if (str.find("x") == 0  ||  str.find("X") == 0)
 	{
 		str.erase(0,1);
 		if (str.empty())
 			return inDefault;
-		return aja::stoul(str, AJA_NULL, 16);
+		return uint16_t(aja::stoul(str, AJA_NULL, 16));
 	}
 	if (str.find("o") == 0  ||  str.find("O") == 0)
 	{
 		str.erase(0,1);
 		if (str.empty())
 			return inDefault;
-		return aja::stoul(str, AJA_NULL, 8);
+		return uint16_t(aja::stoul(str, AJA_NULL, 8));
 	}
 	if (str.find("b") == 0  ||  str.find("B") == 0)
 	{
 		str.erase(0,1);
 		if (str.empty())
 			return inDefault;
-		return aja::stoul(str, AJA_NULL, 2);
+		return uint16_t(aja::stoul(str, AJA_NULL, 2));
 	}
-	return aja::stoul(str, AJA_NULL, 10);
+	return uint16_t(aja::stoul(str, AJA_NULL, 10));
 }
 
 ostream & NTV2Dictionary::Print (ostream & oss, const bool inCompact) const
@@ -328,9 +322,9 @@ void NTV2DeviceSpecParser::Parse (void)
 	#if defined(_DEBUG)
 		ostringstream oss;
 		if (Successful())
-			{oss << "Success: '" << DeviceSpec() << "'  --  "; Print(oss); AJA_sDEBUG(AJA_DebugUnit_Application, oss.str());}
+			{oss << "NTV2DeviceSpecParser::Parse success: '" << DeviceSpec() << "'  --  "; Print(oss); AJA_sDEBUG(AJA_DebugUnit_Application, oss.str());}
 		else
-			{oss << "Failed: "; PrintErrors(oss); AJA_sERROR(AJA_DebugUnit_Application, oss.str());}
+			{oss << "NTV2DeviceSpecParser::Parse failed: "; PrintErrors(oss); AJA_sERROR(AJA_DebugUnit_Application, oss.str());}
 	#endif	//	defined(_DEBUG)
 }	//	Parse
 
@@ -815,6 +809,29 @@ bool NTV2DeviceSpecParser::IsLegalSerialNumChar (const char inChar)
 	}
 #endif	//	defined(_DEBUG)
 
+#if defined(MSWindows)
+	static string WinErrStr (const DWORD inErr)
+	{
+		string result("foo");
+		LPVOID lpMsgBuf;
+		const DWORD res(FormatMessage (	FORMAT_MESSAGE_ALLOCATE_BUFFER
+										| FORMAT_MESSAGE_FROM_SYSTEM
+										| FORMAT_MESSAGE_IGNORE_INSERTS,	//	dwFlags
+										AJA_NULL,							//	lpSource:		n/a
+										inErr,								//	dwMessageId:	n/a
+										MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),	//	dwLanguageId
+										(LPTSTR) &lpMsgBuf,					//	output buffer
+										0,									//	output buffer size, in TCHARs
+										AJA_NULL));							//	user params
+		if (lpMsgBuf)
+		{
+			result = reinterpret_cast<const char *>(lpMsgBuf);
+			LocalFree(lpMsgBuf);
+		}
+		return result;
+	}
+#endif	//	MSWindows
+
 
 /*****************************************************************************************************************************************************
 	NTV2RPCClientAPI
@@ -954,9 +971,11 @@ bool NTV2RPCClientAPI::NTV2CloseRemote (void)
 	return true;
 }
 
-NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inParams)	//	CLASS METHOD
+
+//	Loads NTV2 plugin, and returns address of given function
+static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, const string & inFuncName)
 {
-	//	Scheme dictates which plugin to try loading...
+	//	Scheme dictates which plugin to load...
 	if (!inParams.hasKey(kConnectParamScheme))
 		{NBCFAIL("Missing scheme -- params: " << inParams);  return AJA_NULL;}	//	No scheme
 	string scheme(inParams.valueForKey(kConnectParamScheme));
@@ -965,57 +984,87 @@ NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inP
 	scheme.erase(0,4);	//	Remainder of scheme yields DLL/dylib/so name...
 
 	//	Look for plugins in the "AJA" folder (usually parent folder of our "firmware" folder)...
-	string pluginName(scheme), pluginPath, errStr;
+	string pluginName(scheme), pluginPath, dllsFolder, errStr;
 	AJASystemInfo sysInfo (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path);
 	if (AJA_FAILURE(sysInfo.GetValue(AJA_SystemInfoTag_Path_Firmware, pluginPath)))
 		{NBCFAIL("AJA_SystemInfoTag_Path_Firmware failed");  return AJA_NULL;}	//	Can't get firmware folder
-	NBCDBG("AJA firmware path is '" << pluginPath << "', seeking '" << pluginName << ".dylib'");
-
-#if !defined(MSWindows)
-	//	On MacOS and Linux, our plugins are dylibs and so's, respectively...
+	NBCDBG("AJA firmware path is '" << pluginPath << "', seeking '" << pluginName << DLL_EXTENSION "'");
+	//	Lop off trailing "Firmware/"...
 	if (pluginPath.find(FIRMWARE_FOLDER) == string::npos)
 		{NBSFAIL("'" << pluginPath << "' doesn't end with '" << FIRMWARE_FOLDER << "'");  return AJA_NULL;}
 	pluginPath.erase(pluginPath.find(FIRMWARE_FOLDER), 9);	//	Lop off trailing "Firmware/"
-	pluginPath += pluginName + DLL_EXTENSION;				//	Append pluginName.dylib|so|dll
+	dllsFolder = pluginPath;
+	dllsFolder.erase(dllsFolder.length()-1,1);	//	Lop off trailing slash or backslash
+	pluginPath += pluginName + DLL_EXTENSION;	//	Append plugin name + extension...
 
-	//	Open the .dylib...
+	ostringstream err;
+	#if defined(MSWindows)
+	//	Open the DLL (Windows)...
+	std::wstring pluginPathW, dllsFolderW;
+	aja::string_to_wstring(pluginPath, pluginPathW);
+	aja::string_to_wstring(dllsFolder, dllsFolderW);
+	if (!AddDllDirectory(dllsFolderW.c_str()))
+	{	NBCFAIL("AddDllDirectory '" << pluginPath << "' failed: " << WinErrStr(::GetLastError()));
+		return AJA_NULL;
+	}	//	AddDllDirectory failed
+	HMODULE pHandle = ::LoadLibraryExA(LPCSTR(pluginPathW.c_str()), AJA_NULL, LOAD_LIBRARY_SEARCH_USER_DIRS);
+	if (!pHandle)
+		err << "Unable to open '" << pluginPath << "' in '" << dllsFolder << "': " << WinErrStr(::GetLastError());
+	#else	//	MacOS or Linux
+	//	Open the .dylib (MacOS) or .so (Linux)...
 	void* pHandle = ::dlopen(pluginPath.c_str(), RTLD_LAZY);
 	if (!pHandle)
 	{	const char * pErrorStr(::dlerror());
 		errStr =  pErrorStr ? pErrorStr : "";
-		NBCFAIL("Unable to open dylib '" << pluginPath << "': " << errStr);
-		return AJA_NULL;
+		err << "Unable to open '" << pluginPath << "': " << errStr;
 	}	//	dlopen failed
-	NBCDBG("Dylib '" << pluginPath << "' opened");
+	#endif	//	MacOS or Linux
+	if (!pHandle)
+		{NBCFAIL(err.str());  return AJA_NULL;}
+	NBCDBG("'" << pluginPath << "' opened");
 
 	//	Get pointer to its CreateNTV2SoftwareDevice function...
-	uint64_t * pFunc = reinterpret_cast<uint64_t*>(::dlsym(pHandle, kFuncNameCreateClient.c_str()));
+	#if defined(MSWindows)
+	uint64_t * pFunc = reinterpret_cast<uint64_t*>(::GetProcAddress(pHandle, inFuncName.c_str()));
 	if (!pFunc)
-	{	const char * pErrStr(::dlerror());
-		errStr =  pErrStr ? pErrStr : "";
-		NBCFAIL("'dlsym' failed for '" << kFuncNameCreateClient << "' in '" << pluginPath << "': " << errStr);
-		::dlclose(pHandle);
-		return AJA_NULL;
+		err << "'GetProcAddress' failed for '" << inFuncName << "' in '" << pluginPath << "': " << WinErrStr(::GetLastError());
+	#else	//	MacOS or Linux
+	uint64_t * pFunc = reinterpret_cast<uint64_t*>(::dlsym(pHandle, inFuncName.c_str()));
+	if (!pFunc)
+	{	const char * pErrorStr(::dlerror());
+		errStr =  pErrorStr ? pErrorStr : "";
+		err << "'dlsym' failed for '" << inFuncName << "' in '" << pluginPath << "': " << errStr;
 	}
-	NBCDBG("Calling '" << kFuncNameCreateClient << "' in '" << pluginPath << "'");
+	#endif	//	MacOS or Linux
+	if (!pFunc)
+	{
+		NBCFAIL(err.str());
+		#if !defined(MSWindows)
+		::dlclose(pHandle);
+		#else	//	MSWindows
+		::FreeLibrary(pHandle);
+		#endif	//	MSWindows
+	}
+	else NBCDBG("Calling '" << inFuncName << "' in '" << pluginPath << "'");
+	return pFunc;
+}	//	GetNTV2PluginFunction
+
+
+NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inParams)	//	CLASS METHOD
+{
+	const string funcName(kFuncNameCreateClient);
+	uint64_t * pFunc = GetNTV2PluginFunction(inParams, funcName);
+	fpCreateClient pCreateFunc = reinterpret_cast<fpCreateClient>(pFunc);
+	if (!pCreateFunc)
+		return AJA_NULL;
 
 	//	Call its Create function to instantiate the NTV2RPCClientAPI object...
-	fpCreateClient pCreateFunc = reinterpret_cast<fpCreateClient>(pFunc);
-	NTV2_ASSERT(pCreateFunc);
-	NTV2RPCClientAPI * pRPCObject = (*pCreateFunc) (pHandle, inParams, AJA_NTV2_SDK_VERSION);
+	NTV2RPCClientAPI * pRPCObject = (*pCreateFunc) (AJA_NULL, inParams, AJA_NTV2_SDK_VERSION);
 	if (!pRPCObject)
-	{
-		NBCFAIL("'" << kFuncNameCreateClient << "' failed to return NTV2RPCClientAPI instance using: " << inParams);
-		::dlclose(pHandle);
-		return AJA_NULL;
-	}
-	//	It's now someone else's responsibility to call ::dlclose
-	NBCINFO("'" << kFuncNameCreateClient << "' in '" << pluginPath << "' created instance " << xHEX0N(uint64_t(pRPCObject),16));
+		NBCFAIL("'" << funcName << "' failed to return NTV2RPCClientAPI instance using: " << inParams);
+	else
+		NBCINFO("'" << funcName << "' created instance " << xHEX0N(uint64_t(pRPCObject),16));
 	return pRPCObject;
-#else
-	//	Need Windows implementation
-#endif
-	return AJA_NULL;
 }	//	CreateClient
 
 
@@ -1025,66 +1074,20 @@ NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inP
 
 NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const NTV2ConfigParams & inParams)	//	CLASS METHOD
 {
-	//	Scheme dictates which plugin to try loading...
-	if (!inParams.hasKey(kConnectParamScheme))
-		{NBSFAIL("Missing scheme");  return AJA_NULL;}	//	No scheme
-	string scheme(inParams.valueForKey(kConnectParamScheme));
-	if (scheme.find("ntv2"))	//	scheme must start with "ntv2"
-		{NBSFAIL("Scheme '" << inParams.valueForKey(kConnectParamScheme) << "' results in empty plugin name");  return AJA_NULL;}	//	No "host"
-	scheme.erase(0,4);	//	Remainder of scheme yields DLL/dylib/so name...
-
-	//	Look for plugins in the "AJA" folder (usually parent folder of our "firmware" folder)...
-	string pluginName(scheme), pluginPath, errStr;
-	AJASystemInfo sysInfo (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path);
-	if (AJA_FAILURE(sysInfo.GetValue(AJA_SystemInfoTag_Path_Firmware, pluginPath)))
-		{NBSFAIL("AJA_SystemInfoTag_Path_Firmware failed");  return AJA_NULL;}	//	Can't get firmware folder
-	NBSDBG("AJA firmware path is '" << pluginPath << "', seeking '" << pluginName << ".dylib'");
-
-#if !defined(MSWindows)
-	//	On MacOS and Linux, our plugins are dylibs and so's, respectively...
-	if (pluginPath.find(FIRMWARE_FOLDER) == string::npos)
-		{NBSFAIL("'" << pluginPath << "' doesn't end with '" << FIRMWARE_FOLDER << "'");  return AJA_NULL;}
-	pluginPath.erase(pluginPath.find(FIRMWARE_FOLDER), 9);	//	Lop off trailing "Firmware/"
-	pluginPath += pluginName + DLL_EXTENSION;				//	Append pluginName + .dylib|.so|.dll
-
-	//	Open the .dylib...
-	void* pHandle = ::dlopen(pluginPath.c_str(), RTLD_LAZY);
-	if (!pHandle)
-	{	const char * pErrorStr(::dlerror());
-		errStr =  pErrorStr ? pErrorStr : "";
-		NBSFAIL("Unable to open dylib '" << pluginPath << "': " << errStr);
+	const string funcName(kFuncNameCreateServer);
+	uint64_t * pFunc = GetNTV2PluginFunction(inParams, funcName);
+	fpCreateServer pCreateFunc = reinterpret_cast<fpCreateServer>(pFunc);
+	if (!pCreateFunc)
 		return AJA_NULL;
-	}	//	dlopen failed
-	NBSDBG("Dylib '" << pluginPath << "' opened");
-
-	//	Get pointer to its CreateNTV2SoftwareDevice function...
-	uint64_t * pFunc = reinterpret_cast<uint64_t*>(::dlsym(pHandle, kFuncNameCreateServer.c_str()));
-	if (!pFunc)
-	{	const char * pErrStr(::dlerror());
-		errStr =  pErrStr ? pErrStr : "";
-		NBSFAIL("'dlsym' failed for '" << kFuncNameCreateServer << "' in '" << pluginPath << "': " << errStr);
-		::dlclose(pHandle);
-		return AJA_NULL;
-	}
-	NBSDBG("Calling '" << kFuncNameCreateServer << "' in '" << pluginPath << "'");
 
 	//	Call its Create function to instantiate the NTV2RPCServerAPI object...
-	fpCreateServer pCreateFunc = reinterpret_cast<fpCreateServer>(pFunc);
-	NTV2_ASSERT(pCreateFunc);
-	NTV2RPCServerAPI * pRPCObject = (*pCreateFunc) (pHandle, inParams, AJA_NTV2_SDK_VERSION);
+	NTV2RPCServerAPI * pRPCObject = (*pCreateFunc) (AJA_NULL, inParams, AJA_NTV2_SDK_VERSION);
 	if (!pRPCObject)
-	{
-		NBSFAIL("'" << kFuncNameCreateServer << "' failed to return NTV2RPCServerAPI instance using: " << inParams);
-		::dlclose(pHandle);
-		return AJA_NULL;
-	}
-	//	It's now someone else's responsibility to call ::dlclose
-	NBSINFO("'" << kFuncNameCreateServer << "' in '" << pluginPath << "' created instance " << xHEX0N(uint64_t(pRPCObject),16));
+		NBSFAIL("'" << funcName << "' failed to return NTV2RPCServerAPI instance using: " << inParams);
+	else
+		NBSINFO("'" << funcName << "' created instance " << xHEX0N(uint64_t(pRPCObject),16));
 	return pRPCObject;	//	It's caller's responsibility to delete pRPCObject
-#else
-	//	Missing Windows implementation"
-#endif
-	return AJA_NULL;
+
 }	//	CreateServer
 
 NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const string & inURL)	//	CLASS METHOD
