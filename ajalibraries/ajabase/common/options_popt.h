@@ -48,10 +48,6 @@ in this Software without prior written authorization from the X Consortium.
 #include <stdio.h>			/* for FILE * */
 #include "export.h"
 
-#define N_(foo) foo
-#define __attribute__(x) 
-#define UNUSED(x) x __attribute__((__unused__))
-
 #define POPT_OPTION_DEPTH	10
 
 /** \ingroup popt
@@ -179,6 +175,29 @@ typedef struct poptItem_s {
 } * poptItem;
 
 /** \ingroup popt
+ * \name Auto-generated help/usage
+ */
+
+/**
+ * Empty table marker to enable displaying popt alias/exec options.
+ */
+extern struct poptOption poptAliasOptions[];
+#define POPT_AUTOALIAS { NULL, '\0', POPT_ARG_INCLUDE_TABLE, poptAliasOptions, \
+			0, "Options implemented via popt alias/exec:", NULL },
+
+/**
+ * Auto help table options.
+ */
+extern struct poptOption poptHelpOptions[];
+
+extern struct poptOption * poptHelpOptionsI18N;
+
+#define POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE, poptHelpOptions, \
+			0, "Help options:", NULL },
+
+#define POPT_TABLEEND { NULL, '\0', 0, NULL, 0, NULL, NULL }
+
+/** \ingroup popt
  */
 typedef struct poptContext_s * poptContext;
 
@@ -189,57 +208,12 @@ typedef struct poptOption * poptOption;
 #endif
 
 /** \ingroup popt
- * \name Auto-generated help/usage
- */
-
-#define POPT_TABLEEND { NULL, '\0', 0, NULL, 0, NULL, NULL }
-
-/**
- * Empty table marker to enable displaying popt alias/exec options.
- */
-static struct poptOption poptAliasOptions[] = {
-	POPT_TABLEEND
-};
-#define POPT_AUTOALIAS { NULL, '\0', POPT_ARG_INCLUDE_TABLE, poptAliasOptions, \
-			0, "Options implemented via popt alias/exec:", NULL },
-
-/**
- * Auto help table options.
- */
-/** \ingroup popt
  */
 enum poptCallbackReason {
 	POPT_CALLBACK_REASON_PRE	= 0, 
 	POPT_CALLBACK_REASON_POST	= 1,
 	POPT_CALLBACK_REASON_OPTION = 2
 };
-
-AJA_EXPORT void displayArgs(poptContext con,
-		UNUSED(enum poptCallbackReason foo),
-		struct poptOption * key, 
-		UNUSED(const char * arg),
-		UNUSED(void * data));
-
-static struct poptOption poptHelpOptions[] = {
-  { NULL, '\0', POPT_ARG_CALLBACK, (void *)displayArgs, 0, NULL, NULL },
-  { "help", '?', 0, NULL, (int)'?', N_("Show this help message"), NULL },
-  { "usage", '\0', 0, NULL, (int)'u', N_("Display brief usage message"), NULL },
-	POPT_TABLEEND
-} ;
-
-static struct poptOption poptHelpOptions2[] = {
-	{ NULL, '\0', POPT_ARG_INTL_DOMAIN, (void*)"PACKAGE", 0, NULL, NULL},
-  { NULL, '\0', POPT_ARG_CALLBACK, (void *)displayArgs, 0, NULL, NULL },
-  { "help", '?', 0, NULL, (int)'?', N_("Show this help message"), NULL },
-  { "usage", '\0', 0, NULL, (int)'u', N_("Display brief usage message"), NULL },
-  { "", '\0',	0, NULL, 0, N_("Terminate options"), NULL },
-	POPT_TABLEEND
-} ;
-
-static struct poptOption * poptHelpOptionsI18N = poptHelpOptions2;
-
-#define POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE, poptHelpOptions, \
-			0, "Help options:", NULL },
 
 #ifdef __cplusplus
 extern "C" {
@@ -264,7 +238,7 @@ typedef void (*poptCallbackType) (poptContext con,
  * @param con		context
  * @return		NULL always
  */
-AJA_EXPORT poptContext poptFreeContext(poptContext con);
+poptContext poptFreeContext(poptContext con);
 
 /** \ingroup popt
  * Initialize popt context.
@@ -275,7 +249,7 @@ AJA_EXPORT poptContext poptFreeContext(poptContext con);
  * @param flags		or'd POPT_CONTEXT_* bits
  * @return		initialized popt context
  */
-AJA_EXPORT poptContext poptGetContext(
+poptContext poptGetContext(
 		const char * name,
 		int argc, const char ** argv,
 		const struct poptOption * options,
@@ -286,7 +260,7 @@ AJA_EXPORT poptContext poptGetContext(
  * @param con		context
  * @return		NULL always
  */
-AJA_EXPORT poptContext poptFini(poptContext con);
+poptContext poptFini(poptContext con);
 
 /** \ingroup popt
  * Initialize popt context (alternative implementation).
@@ -297,7 +271,7 @@ AJA_EXPORT poptContext poptFini(poptContext con);
  * @param configPaths	colon separated file path(s) to read.
  * @return		initialized popt context (NULL on error).
  */
-AJA_EXPORT poptContext poptInit(int argc, const char ** argv,
+poptContext poptInit(int argc, const char ** argv,
 		const struct poptOption * options,
 		const char * configPaths);
 
@@ -305,42 +279,42 @@ AJA_EXPORT poptContext poptInit(int argc, const char ** argv,
  * Reinitialize popt context.
  * @param con		context
  */
-AJA_EXPORT void poptResetContext(poptContext con);
+void poptResetContext(poptContext con);
 
 /** \ingroup popt
  * Return value of next option found.
  * @param con		context
  * @return		next option val, -1 on last item, POPT_ERROR_* on error
  */
-AJA_EXPORT int poptGetNextOpt(poptContext con);
+int poptGetNextOpt(poptContext con);
 
 /** \ingroup popt
  * Return next option argument (if any).
  * @param con		context
  * @return		option argument, NULL if no argument is available
  */
-AJA_EXPORT char * poptGetOptArg(poptContext con);
+char * poptGetOptArg(poptContext con);
 
 /** \ingroup popt
  * Return next argument.
  * @param con		context
  * @return		next argument, NULL if no argument is available
  */
-AJA_EXPORT const char * poptGetArg(/*@null@*/poptContext con);
+const char * poptGetArg(/*@null@*/poptContext con);
 
 /** \ingroup popt
  * Peek at current argument.
  * @param con		context
  * @return		current argument, NULL if no argument is available
  */
-AJA_EXPORT const char * poptPeekArg(poptContext con);
+const char * poptPeekArg(poptContext con);
 
 /** \ingroup popt
  * Return remaining arguments.
  * @param con		context
  * @return		argument array, NULL terminated
  */
-AJA_EXPORT const char ** poptGetArgs(poptContext con);
+const char ** poptGetArgs(poptContext con);
 
 /** \ingroup popt
  * Return the option which caused the most recent error.
@@ -348,7 +322,7 @@ AJA_EXPORT const char ** poptGetArgs(poptContext con);
  * @param flags		option flags
  * @return		offending option
  */
-AJA_EXPORT const char * poptBadOption(poptContext con, unsigned int flags);
+const char * poptBadOption(poptContext con, unsigned int flags);
 
 /** \ingroup popt
  * Add arguments to context.
@@ -356,7 +330,7 @@ AJA_EXPORT const char * poptBadOption(poptContext con, unsigned int flags);
  * @param argv		argument array, NULL terminated
  * @return		0 on success, POPT_ERROR_OPTSTOODEEP on failure
  */
-AJA_EXPORT int poptStuffArgs(poptContext con, const char ** argv);
+int poptStuffArgs(poptContext con, const char ** argv);
 
 /** \ingroup popt
  * Add alias to context.
@@ -367,7 +341,7 @@ AJA_EXPORT int poptStuffArgs(poptContext con, const char ** argv);
  * @param flags		(unused)
  * @return		0 on success
  */
-AJA_EXPORT int poptAddAlias(poptContext con, struct poptAlias alias, int flags);
+int poptAddAlias(poptContext con, struct poptAlias alias, int flags);
 
 /** \ingroup popt
  * Add alias/exec item to context.
@@ -376,14 +350,14 @@ AJA_EXPORT int poptAddAlias(poptContext con, struct poptAlias alias, int flags);
  * @param flags		0 for alias, 1 for exec
  * @return		0 on success
  */
-AJA_EXPORT int poptAddItem(poptContext con, poptItem newItem, int flags);
+int poptAddItem(poptContext con, poptItem newItem, int flags);
 
 /** \ingroup popt
  * Perform sanity checks on a file path.
  * @param fn		file name
  * @return		0 on OK, 1 on NOTOK.
  */
-AJA_EXPORT int poptSaneFile(const char * fn);
+int poptSaneFile(const char * fn);
 
 /**
  * Read a file into a buffer.
@@ -393,7 +367,7 @@ AJA_EXPORT int poptSaneFile(const char * fn);
  * @param flags		1 to trim escaped newlines
  * return		0 on success
  */
-AJA_EXPORT int poptReadFile(const char * fn, char ** bp,
+int poptReadFile(const char * fn, char ** bp,
 		size_t * nbp, int flags);
 #define POPT_READFILE_TRIMNEWLINES	1
 
@@ -403,7 +377,7 @@ AJA_EXPORT int poptReadFile(const char * fn, char ** bp,
  * @param fn		file name to read
  * @return		0 on success, POPT_ERROR_ERRNO on failure
  */
-AJA_EXPORT int poptReadConfigFile(poptContext con, const char * fn);
+int poptReadConfigFile(poptContext con, const char * fn);
 
 /** \ingroup popt
  * Read configuration file(s).
@@ -414,7 +388,7 @@ AJA_EXPORT int poptReadConfigFile(poptContext con, const char * fn);
  * @param paths		colon separated file name(s) to read
  * @return		0 on success, POPT_ERROR_BADCONFIG on failure
  */
-AJA_EXPORT int poptReadConfigFiles(poptContext con, const char * paths);
+int poptReadConfigFiles(poptContext con, const char * paths);
 
 /** \ingroup popt
  * Read default configuration from /etc/popt and $HOME/.popt.
@@ -422,7 +396,7 @@ AJA_EXPORT int poptReadConfigFiles(poptContext con, const char * paths);
  * @param useEnv	(unused)
  * @return		0 on success, POPT_ERROR_ERRNO on failure
  */
-AJA_EXPORT int poptReadDefaultConfig(poptContext con, int useEnv);
+int poptReadDefaultConfig(poptContext con, int useEnv);
 
 /** \ingroup popt
  * Duplicate an argument array.
@@ -435,7 +409,7 @@ AJA_EXPORT int poptReadDefaultConfig(poptContext con, int useEnv);
  * @retval argvPtr	address of returned argument array
  * @return		0 on success, POPT_ERROR_NOARG on failure
  */
-AJA_EXPORT int poptDupArgv(int argc, const char **argv,
+int poptDupArgv(int argc, const char **argv,
 		int * argcPtr,
 		const char *** argvPtr);
 
@@ -450,7 +424,7 @@ AJA_EXPORT int poptDupArgv(int argc, const char **argv,
  * @retval argcPtr	address of returned no. of arguments
  * @retval argvPtr	address of returned argument array
  */
-AJA_EXPORT int poptParseArgvString(const char * s,
+int poptParseArgvString(const char * s,
 		int * argcPtr, const char *** argvPtr);
 
 /** \ingroup popt
@@ -499,14 +473,14 @@ this_is	  =	  fdsafdas
  * @return		0 on success
  * @see			poptParseArgvString
  */
-AJA_EXPORT int poptConfigFileToString(FILE *fp, char ** argstrp, int flags);
+int poptConfigFileToString(FILE *fp, char ** argstrp, int flags);
 
 /** \ingroup popt
  * Return formatted error string for popt failure.
  * @param error		popt error
  * @return		error string
  */
-AJA_EXPORT const char * poptStrerror(const int error);
+const char * poptStrerror(const int error);
 
 /** \ingroup popt
  * Limit search for executables.
@@ -514,7 +488,7 @@ AJA_EXPORT const char * poptStrerror(const int error);
  * @param path		single path to search for executables
  * @param allowAbsolute absolute paths only?
  */
-AJA_EXPORT void poptSetExecPath(poptContext con, const char * path, int allowAbsolute);
+void poptSetExecPath(poptContext con, const char * path, int allowAbsolute);
 
 /** \ingroup popt
  * Print detailed description of options.
@@ -522,7 +496,7 @@ AJA_EXPORT void poptSetExecPath(poptContext con, const char * path, int allowAbs
  * @param fp		ouput file handle
  * @param flags		(unused)
  */
-AJA_EXPORT void poptPrintHelp(poptContext con, FILE * fp, int flags);
+void poptPrintHelp(poptContext con, FILE * fp, int flags);
 
 /** \ingroup popt
  * Print terse description of options.
@@ -530,21 +504,21 @@ AJA_EXPORT void poptPrintHelp(poptContext con, FILE * fp, int flags);
  * @param fp		ouput file handle
  * @param flags		(unused)
  */
-AJA_EXPORT void poptPrintUsage(poptContext con, FILE * fp, int flags);
+void poptPrintUsage(poptContext con, FILE * fp, int flags);
 
 /** \ingroup popt
  * Provide text to replace default "[OPTION...]" in help/usage output.
  * @param con		context
  * @param text		replacement text
  */
-AJA_EXPORT void poptSetOtherOptionHelp(poptContext con, const char * text);
+void poptSetOtherOptionHelp(poptContext con, const char * text);
 
 /** \ingroup popt
  * Return argv[0] from context.
  * @param con		context
  * @return		argv[0]
  */
-AJA_EXPORT const char * poptGetInvocationName(poptContext con);
+const char * poptGetInvocationName(poptContext con);
 
 /** \ingroup popt
  * Shuffle argv pointers to remove stripped args, returns new argc.
@@ -553,7 +527,7 @@ AJA_EXPORT const char * poptGetInvocationName(poptContext con);
  * @param argv		arg vector
  * @return		new argc
  */
-AJA_EXPORT int poptStrippedArgv(poptContext con, int argc, char ** argv);
+int poptStrippedArgv(poptContext con, int argc, char ** argv);
 
 /**
  * Add a string to an argv array.
@@ -562,7 +536,7 @@ AJA_EXPORT int poptStrippedArgv(poptContext con, int argc, char ** argv);
  * @param val		string arg to add (using strdup)
  * @return		0 on success, POPT_ERROR_NULLARG/POPT_ERROR_BADOPERATION
  */
-AJA_EXPORT int poptSaveString(const char *** argvp, unsigned int argInfo,
+int poptSaveString(const char *** argvp, unsigned int argInfo,
 		const char * val);
 
 /**
@@ -573,7 +547,7 @@ AJA_EXPORT int poptSaveString(const char *** argvp, unsigned int argInfo,
  * @param aLongLong value to use
  * @return		0 on success, POPT_ERROR_NULLARG/POPT_ERROR_BADOPERATION
  */
-AJA_EXPORT int poptSaveLongLong(long long * arg, unsigned int argInfo,
+int poptSaveLongLong(long long * arg, unsigned int argInfo,
 		long long aLongLong);
 
 /**
@@ -584,7 +558,7 @@ AJA_EXPORT int poptSaveLongLong(long long * arg, unsigned int argInfo,
  * @param aLong		value to use
  * @return		0 on success, POPT_ERROR_NULLARG/POPT_ERROR_BADOPERATION
  */
-AJA_EXPORT int poptSaveLong(long * arg, unsigned int argInfo, long aLong);
+int poptSaveLong(long * arg, unsigned int argInfo, long aLong);
 
 /**
  * Save a short integer, performing logical operation with value.
@@ -594,7 +568,7 @@ AJA_EXPORT int poptSaveLong(long * arg, unsigned int argInfo, long aLong);
  * @param aLong		value to use
  * @return		0 on success, POPT_ERROR_NULLARG/POPT_ERROR_BADOPERATION
  */
-AJA_EXPORT int poptSaveShort(short * arg, unsigned int argInfo, long aLong);
+int poptSaveShort(short * arg, unsigned int argInfo, long aLong);
 
 /**
  * Save an integer, performing logical operation with value.
@@ -604,7 +578,7 @@ AJA_EXPORT int poptSaveShort(short * arg, unsigned int argInfo, long aLong);
  * @param aLong		value to use
  * @return		0 on success, POPT_ERROR_NULLARG/POPT_ERROR_BADOPERATION
  */
-AJA_EXPORT int poptSaveInt(int * arg, unsigned int argInfo, long aLong);
+int poptSaveInt(int * arg, unsigned int argInfo, long aLong);
 
 /* The bit set typedef. */
 typedef struct poptBits_s {
