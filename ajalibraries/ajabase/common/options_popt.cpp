@@ -154,9 +154,6 @@ char * xstrdup (const char *str);
 #define xrealloc(_ptr, _size)	realloc((_ptr), (_size))
 #define xstrdup(_str)	strdup(_str)
 
-#define __attribute__(x) 
-#define UNUSED(x) x __attribute__((__unused__))
-
 #include "options_popt.h"
 
 /* End of section from popt's system.h
@@ -284,9 +281,6 @@ const char *POPT_next_char (const char *str);
 
 #define D_(dom, str) str
 #define POPT_(foo) foo
-
-#define N_(foo) foo
-
 
 /* End of section from poptint.h
 */
@@ -437,7 +431,7 @@ static int poptConfigLine(poptContext con, char * line)
 
 	if (con->appName == NULL)
 	goto exit;
-	
+
 	memset(item, 0, sizeof(*item));
 
 	appName = se;
@@ -530,7 +524,7 @@ static int poptConfigLine(poptContext con, char * line)
 	item->argv[j] = NULL;
 	item->argc = j;
 	}
-	
+
 	if (!strcmp(entryType, "alias"))
 	rc = poptAddItem(con, item, 0);
 	else if (!strcmp(entryType, "exec"))
@@ -694,7 +688,7 @@ poptInit(int argc, const char ** argv,
 
 	if ((argv0 = strrchr(argv[0], '/')) != NULL) argv0++;
 	else argv0 = argv[0];
-   
+
 	con = poptGetContext(argv0, argc, (const char **)argv, options, 0);
 	if (con != NULL&& poptReadConfigFiles(con, configPaths))
 	con = poptFini(con);
@@ -723,9 +717,9 @@ poptInit(int argc, const char ** argv,
  * @param arg		(unused)
  * @param data		(unused)
  */
-static void displayArgs(poptContext con,
+void displayArgs(poptContext con,
 		UNUSED(enum poptCallbackReason foo),
-		struct poptOption * key, 
+		struct poptOption * key,
 		UNUSED(const char * arg),
 		UNUSED(void * data))
 {
@@ -747,13 +741,6 @@ struct poptOption poptAliasOptions[] = {
 /**
  * Auto help table options.
  */
-struct poptOption poptHelpOptions[] = {
-  { NULL, '\0', POPT_ARG_CALLBACK, (void *)displayArgs, 0, NULL, NULL },
-  { "help", '?', 0, NULL, (int)'?', N_("Show this help message"), NULL },
-  { "usage", '\0', 0, NULL, (int)'u', N_("Display brief usage message"), NULL },
-	POPT_TABLEEND
-} ;
-
 static struct poptOption poptHelpOptions2[] = {
 	{ NULL, '\0', POPT_ARG_INTL_DOMAIN, (void*)"PACKAGE", 0, NULL, NULL},
   { NULL, '\0', POPT_ARG_CALLBACK, (void *)displayArgs, 0, NULL, NULL },
@@ -772,16 +759,16 @@ typedef struct columns_s {
 	size_t max;
 } * columns_t;
 
-/** 
+/**
  * Return no. of columns in output window.
  * @param fp		   FILE
- * @return			   no. of columns 
- */ 
+ * @return			   no. of columns
+ */
 static size_t maxColumnWidth(FILE *fp)
-{	
+{
 	size_t maxcols = _POPTHELP_MAXLINE;
 	return maxcols;
-}	
+}
 
 /**
  * Determine number of display characters in a string.
@@ -1069,7 +1056,7 @@ static void singleOptionHelp(FILE * fp, columns_t columns,
 	if (help)
 		POPT_fprintf(fp,"  %-*s	  ", (int)(maxLeftCol+displaypad), left);
 	else {
-		POPT_fprintf(fp,"  %s\n", left); 
+		POPT_fprintf(fp,"  %s\n", left);
 	goto out;
 	}
 
@@ -1129,7 +1116,7 @@ static size_t maxArgWidth(const struct poptOption * opt,
 	size_t max = 0;
 	size_t len = 0;
 	const char * argDescrip;
-	
+
 	if (opt != NULL)
 	while (opt->longName || opt->shortName || opt->arg) {
 	if (poptArgType(opt) == POPT_ARG_INCLUDE_TABLE) {
@@ -1161,7 +1148,7 @@ static size_t maxArgWidth(const struct poptOption * opt,
 	}
 	opt++;
 	}
-	
+
 	return max;
 }
 
@@ -1225,7 +1212,7 @@ static void singleTableHelp(poptContext con, FILE * fp,
 	sub_transdom = getTableTranslationDomain((const poptOption*)opt->arg);
 	if (sub_transdom == NULL)
 		sub_transdom = translation_domain;
-		
+
 	/* If no popt aliases/execs, skip poptAliasOption processing. */
 	if (opt->arg == poptAliasOptions && !(con->numAliases || con->numExecs))
 		continue;
@@ -1317,7 +1304,7 @@ static size_t singleOptionUsage(FILE * fp, columns_t columns,
 	if ((columns->cur + len) > columns->max) {
 	fprintf(fp, "\n		  ");
 	columns->cur = (size_t)7;
-	} 
+	}
 
 	fprintf(fp, " [");
 	if (prtshort)
@@ -1454,7 +1441,7 @@ static size_t showShortOptions(const struct poptOption * opt, FILE * fp,
 	} else if (poptArgType(opt) == POPT_ARG_INCLUDE_TABLE)
 		if (opt->arg)	/* XXX program error */
 		len = showShortOptions((const poptOption*)opt->arg, fp, s);
-	} 
+	}
 
 	/* On return to top level, print the short options, return print length. */
 	if (s != str && *s != '\0') {
@@ -1525,20 +1512,20 @@ void poptSetOtherOptionHelp(poptContext con, const char * text)
 /* -------------------------------------------------------------------- */
 /*
  * lookup3.c, by Bob Jenkins, May 2006, Public Domain.
- * 
+ *
  * These are functions for producing 32-bit hashes for hash table lookup.
- * jlu32w(), jlu32l(), jlu32lpair(), jlu32b(), _JLU3_MIX(), and _JLU3_FINAL() 
- * are externally useful functions.	 Routines to test the hash are included 
+ * jlu32w(), jlu32l(), jlu32lpair(), jlu32b(), _JLU3_MIX(), and _JLU3_FINAL()
+ * are externally useful functions.	 Routines to test the hash are included
  * if SELF_TEST is defined.	 You can use this free for any purpose.	 It's in
  * the public domain.  It has no warranty.
- * 
+ *
  * You probably want to use jlu32l().  jlu32l() and jlu32b()
  * hash byte arrays.  jlu32l() is is faster than jlu32b() on
  * little-endian machines.	Intel and AMD are little-endian machines.
  * On second thought, you probably want jlu32lpair(), which is identical to
- * jlu32l() except it returns two 32-bit hashes for the price of one.  
+ * jlu32l() except it returns two 32-bit hashes for the price of one.
  * You could implement jlu32bpair() if you wanted but I haven't bothered here.
- * 
+ *
  * If you want to find a hash of, say, exactly 7 integers, do
  *	 a = i1;  b = i2;  c = i3;
  *	 _JLU3_MIX(a,b,c);
@@ -1549,9 +1536,9 @@ void poptSetOtherOptionHelp(poptContext con, const char * text)
  * then use c as the hash value.  If you have a variable size array of
  * 4-byte integers to hash, use jlu32w().  If you have a byte array (like
  * a character string), use jlu32l().  If you have several byte arrays, or
- * a mix of things, see the comments above jlu32l().  
- * 
- * Why is this so big?	I read 12 bytes at a time into 3 4-byte integers, 
+ * a mix of things, see the comments above jlu32l().
+ *
+ * Why is this so big?	I read 12 bytes at a time into 3 4-byte integers,
  * then mix those integers.	 This is fast (you can do a lot more thorough
  * mixing with 12*3 instructions on 3 integers than you can with 3 instructions
  * on 1 byte), but shoehorning those bytes into integers efficiently is messy.
@@ -1575,10 +1562,10 @@ static const union _dbswap {
 /* -------------------------------------------------------------------- */
 /*
  * _JLU3_MIX -- mix 3 32-bit values reversibly.
- * 
+ *
  * This is reversible, so any information in (a,b,c) before _JLU3_MIX() is
  * still in (a,b,c) after _JLU3_MIX().
- * 
+ *
  * If four pairs of (a,b,c) inputs are run through _JLU3_MIX(), or through
  * _JLU3_MIX() in reverse, there are at least 32 bits of the output that
  * are sometimes the same for one pair and different for another pair.
@@ -1590,9 +1577,9 @@ static const union _dbswap {
  *	 the output delta to a Gray code (a^(a>>1)) so a string of 1's (as
  *	 is commonly produced by subtraction) look like a single 1-bit
  *	 difference.
- * * the base values were pseudorandom, all zero but one bit set, or 
+ * * the base values were pseudorandom, all zero but one bit set, or
  *	 all zero plus a counter that starts at zero.
- * 
+ *
  * Some k values for my "a-=c; a^=ROTL32(c,k); c+=b;" arrangement that
  * satisfy this are
  *	   4  6	 8 16 19  4
@@ -1600,14 +1587,14 @@ static const union _dbswap {
  *	  14  9	 3	7 17  3
  * Well, "9 15 3 18 27 15" didn't quite get 32 bits diffing
  * for "differ" defined as + with a one-bit base and a two-bit delta.  I
- * used http://burtleburtle.net/bob/hash/avalanche.html to choose 
+ * used http://burtleburtle.net/bob/hash/avalanche.html to choose
  * the operations, constants, and arrangements of the variables.
- * 
+ *
  * This does not achieve avalanche.	 There are input bits of (a,b,c)
  * that fail to affect some output bits of (a,b,c), especially of a.  The
  * most thoroughly mixed value is c, but it doesn't really even achieve
  * avalanche in c.
- * 
+ *
  * This allows some parallelism.  Read-after-writes are good at doubling
  * the number of bits affected, so the goal of mixing pulls in the opposite
  * direction as the goal of parallelism.  I did what I could.  Rotates
@@ -1629,7 +1616,7 @@ static const union _dbswap {
 /* -------------------------------------------------------------------- */
 /**
  * _JLU3_FINAL -- final mixing of 3 32-bit values (a,b,c) into c
- * 
+ *
  * Pairs of (a,b,c) values differing in only a few bits will usually
  * produce values of c that look totally different.	 This was tested for
  * * pairs that differed by one bit, by two bits, in any combination
@@ -1639,9 +1626,9 @@ static const union _dbswap {
  *	 the output delta to a Gray code (a^(a>>1)) so a string of 1's (as
  *	 is commonly produced by subtraction) look like a single 1-bit
  *	 difference.
- * * the base values were pseudorandom, all zero but one bit set, or 
+ * * the base values were pseudorandom, all zero but one bit set, or
  *	 all zero plus a counter that starts at zero.
- * 
+ *
  * These constants passed:
  *	14 11 25 16 4 14 24
  *	12 14 25 16 4 14 24
@@ -1705,7 +1692,7 @@ void jlu32lpair(const void *key, size_t size, uint32_t *pc, uint32_t *pb)
 		k += 3;
 	}
 	/*------------------------- handle the last (probably partial) block */
-	/* 
+	/*
 	 * "k[2]&0xffffff" actually reads beyond the end of the string, but
 	 * then masks off the part it's not allowed to read.  Because the
 	 * string is aligned, the masked-off tail is in the same word as the
@@ -1940,7 +1927,7 @@ int poptDupArgv(int argc, const char **argv,
 		return POPT_ERROR_NOARG;
 	nb += strlen(argv[i]) + 1;
 	}
-	
+
 	dst = (char*)malloc(nb);
 	if (dst == NULL)			/* XXX can't happen */
 	return POPT_ERROR_MALLOC;
@@ -2109,7 +2096,7 @@ int poptConfigFileToString(FILE *fp, char ** argstrp,
 	}
 	if (*q != '=')
 		continue;	/* XXX for now, silently ignore bogus line */
-		
+
 	/* *q is an equal sign. */
 	*q++ = '\0';
 
@@ -2468,7 +2455,7 @@ static int handleAlias(poptContext con,
 	con->os->currAlias = con->aliases + i;
 	{	const char ** av;
 	int ac = con->os->currAlias->argc;
-	/* Append --foo=bar arg to alias argv array (if present). */ 
+	/* Append --foo=bar arg to alias argv array (if present). */
 	if (longName && nextArg != NULL && *nextArg != '\0') {
 		av = (const char**)malloc((ac + 1 + 1) * sizeof(*av));
 		if (av != NULL) {	/* XXX won't happen. */
@@ -2948,7 +2935,7 @@ int poptSaveString(const char *** argvp,
 	if (*argvp != NULL)
 	while ((*argvp)[argc] != NULL)
 	argc++;
- 
+
 	if ((*argvp = (const char**)xrealloc(*argvp, (argc + 1 + 1) * sizeof(**argvp))) != NULL) {
 	(*argvp)[argc++] = xstrdup(val);
 	(*argvp)[argc  ] = NULL;
@@ -3409,7 +3396,7 @@ int poptGetNextOpt(poptContext con)
 			{
 			poptStripArg(con, con->os->next);
 			}
-		
+
 			if (con->os->argv != NULL) {	/* XXX can't happen */
 			if (F_ISSET(opt, OPTIONAL) &&
 				con->os->argv[con->os->next][0] == '-') {
@@ -3543,7 +3530,7 @@ poptContext poptFreeContext(poptContext con)
 	con->otherHelp = (const char*)_free(con->otherHelp);
 	con->execPath = (const char*)_free(con->execPath);
 	con->arg_strip = (pbm_set*)PBM_FREE(con->arg_strip);
-	
+
 	con = (poptContext)_free(con);
 	return con;
 }
@@ -3682,19 +3669,19 @@ int poptStrippedArgv(poptContext con, int argc, char ** argv)
 	int numargs = argc;
 	int j = 1;
 	int i;
-	
+
 	if (con->arg_strip)
 	for (i = 1; i < argc; i++) {
 	if (PBM_ISSET(i, con->arg_strip))
 		numargs--;
 	}
-	
+
 	for (i = 1; i < argc; i++) {
 	if (con->arg_strip && PBM_ISSET(i, con->arg_strip))
 		continue;
 	argv[j] = (j < numargs) ? argv[i] : NULL;
 	j++;
 	}
-	
+
 	return numargs;
 }

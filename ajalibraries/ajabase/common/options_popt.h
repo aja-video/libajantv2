@@ -11,7 +11,7 @@
 */
 
 /* (C) 1998-2000 Red Hat, Inc. -- Licensing details are in the COPYING
-   file accompanying popt source distributions, available from 
+   file accompanying popt source distributions, available from
    ftp://ftp.rpm.org/pub/rpm/dist. */
 
 /* Here is the contents of the COPYING file:
@@ -46,7 +46,7 @@ in this Software without prior written authorization from the X Consortium.
 #define H_POPT
 
 #include <stdio.h>			/* for FILE * */
-#include "export.h"
+#include "public.h"
 
 #define POPT_OPTION_DEPTH	10
 
@@ -59,8 +59,8 @@ in this Software without prior written authorization from the X Consortium.
 #define POPT_ARG_LONG		 3U /*!< arg ==> long */
 #define POPT_ARG_INCLUDE_TABLE	 4U /*!< arg points to table */
 #define POPT_ARG_CALLBACK	 5U /*!< table-wide callback... must be
-					   set first in table; arg points 
-					   to callback, descrip points to 
+					   set first in table; arg points
+					   to callback, descrip points to
 					   callback data to pass */
 #define POPT_ARG_INTL_DOMAIN	 6U /*!< set the translation domain
 					   for this table and any
@@ -188,32 +188,45 @@ extern struct poptOption poptAliasOptions[];
 /**
  * Auto help table options.
  */
-extern struct poptOption poptHelpOptions[];
-
-extern struct poptOption * poptHelpOptionsI18N;
-
-#define POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE, poptHelpOptions, \
-			0, "Help options:", NULL },
-
-#define POPT_TABLEEND { NULL, '\0', 0, NULL, 0, NULL, NULL }
-
 /** \ingroup popt
  */
 typedef struct poptContext_s * poptContext;
 
 /** \ingroup popt
  */
-#ifndef __cplusplus
-typedef struct poptOption * poptOption;
-#endif
-
-/** \ingroup popt
- */
 enum poptCallbackReason {
-	POPT_CALLBACK_REASON_PRE	= 0, 
+	POPT_CALLBACK_REASON_PRE	= 0,
 	POPT_CALLBACK_REASON_POST	= 1,
 	POPT_CALLBACK_REASON_OPTION = 2
 };
+
+#define __attribute__(x)
+#define UNUSED(x) x __attribute__((__unused__))
+AJA_EXPORT extern void displayArgs(poptContext con,
+		UNUSED(enum poptCallbackReason foo),
+		struct poptOption * key,
+		UNUSED(const char * arg),
+		UNUSED(void * data));
+
+#define N_(foo) foo
+#define POPT_TABLEEND { NULL, '\0', 0, NULL, 0, NULL, NULL }
+static struct poptOption poptHelpOptions[] = {
+  { NULL, '\0', POPT_ARG_CALLBACK, (void *)displayArgs, 0, NULL, NULL },
+  { "help", '?', 0, NULL, (int)'?', N_("Show this help message"), NULL },
+  { "usage", '\0', 0, NULL, (int)'u', N_("Display brief usage message"), NULL },
+	POPT_TABLEEND
+} ;
+
+extern struct poptOption * poptHelpOptionsI18N;
+
+#define POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE, poptHelpOptions, \
+			0, "Help options:", NULL },
+
+/** \ingroup popt
+ */
+#ifndef __cplusplus
+typedef struct poptOption * poptOption;
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -227,7 +240,7 @@ extern "C" {
  * @param arg		argument
  * @param data		argument data
  */
-typedef void (*poptCallbackType) (poptContext con, 
+typedef void (*poptCallbackType) (poptContext con,
 		enum poptCallbackReason reason,
 		const struct poptOption * opt,
 		const char * arg,
@@ -238,7 +251,7 @@ typedef void (*poptCallbackType) (poptContext con,
  * @param con		context
  * @return		NULL always
  */
-poptContext poptFreeContext(poptContext con);
+AJA_EXPORT poptContext poptFreeContext(poptContext con);
 
 /** \ingroup popt
  * Initialize popt context.
@@ -249,7 +262,7 @@ poptContext poptFreeContext(poptContext con);
  * @param flags		or'd POPT_CONTEXT_* bits
  * @return		initialized popt context
  */
-poptContext poptGetContext(
+AJA_EXPORT poptContext poptGetContext(
 		const char * name,
 		int argc, const char ** argv,
 		const struct poptOption * options,
@@ -286,7 +299,7 @@ void poptResetContext(poptContext con);
  * @param con		context
  * @return		next option val, -1 on last item, POPT_ERROR_* on error
  */
-int poptGetNextOpt(poptContext con);
+AJA_EXPORT int poptGetNextOpt(poptContext con);
 
 /** \ingroup popt
  * Return next option argument (if any).
@@ -322,7 +335,7 @@ const char ** poptGetArgs(poptContext con);
  * @param flags		option flags
  * @return		offending option
  */
-const char * poptBadOption(poptContext con, unsigned int flags);
+AJA_EXPORT const char * poptBadOption(poptContext con, unsigned int flags);
 
 /** \ingroup popt
  * Add arguments to context.
@@ -428,7 +441,7 @@ int poptParseArgvString(const char * s,
 		int * argcPtr, const char *** argvPtr);
 
 /** \ingroup popt
- * Parses an input configuration file and returns an string that is a 
+ * Parses an input configuration file and returns an string that is a
  * command line.  For use with popt.  You must free the return value when done.
  *
  * Given the file:
@@ -437,14 +450,14 @@ int poptParseArgvString(const char * s,
 	#	this one too
 aaa
   bbb
-	ccc	  
+	ccc
 bla=bla
 
 this_is	  =	  fdsafdas
-	 bad_line=		  
-  reall bad line  
+	 bad_line=
+  reall bad line
   reall bad line  = again
-5555=	55555	
+5555=	55555
   test = with lots of spaces
 \endverbatim
 *
@@ -456,12 +469,12 @@ this_is	  =	  fdsafdas
 * Passing this to poptParseArgvString() yields an argv of:
 \verbatim
 '--aaa'
-'--bbb' 
-'--ccc' 
-'--bla=bla' 
-'--this_is=fdsafdas' 
-'--5555=55555' 
-'--test=with lots of spaces' 
+'--bbb'
+'--ccc'
+'--bla=bla'
+'--this_is=fdsafdas'
+'--5555=55555'
+'--test=with lots of spaces'
 \endverbatim
  *
  * @bug NULL is returned if file line is too long.
@@ -480,7 +493,7 @@ int poptConfigFileToString(FILE *fp, char ** argstrp, int flags);
  * @param error		popt error
  * @return		error string
  */
-const char * poptStrerror(const int error);
+AJA_EXPORT const char * poptStrerror(const int error);
 
 /** \ingroup popt
  * Limit search for executables.
