@@ -46,7 +46,7 @@ in this Software without prior written authorization from the X Consortium.
 #define H_POPT
 
 #include <stdio.h>			/* for FILE * */
-#include "public.h"
+#include "export.h"
 
 #define POPT_OPTION_DEPTH	10
 
@@ -200,7 +200,10 @@ enum poptCallbackReason {
 	POPT_CALLBACK_REASON_OPTION = 2
 };
 
+#ifdef _MSC_VER
 #define __attribute__(x)
+#endif
+// TODO(paulh): Can we get rid of the UNUSED macro?
 #define UNUSED(x) x __attribute__((__unused__))
 AJA_EXPORT extern void displayArgs(poptContext con,
 		UNUSED(enum poptCallbackReason foo),
