@@ -206,6 +206,13 @@ static struct poptOption poptAliasOptions[] = {
 /**
  * Auto help table options.
  */
+/** \ingroup popt
+ */
+enum poptCallbackReason {
+	POPT_CALLBACK_REASON_PRE	= 0, 
+	POPT_CALLBACK_REASON_POST	= 1,
+	POPT_CALLBACK_REASON_OPTION = 2
+};
 
 AJA_EXPORT void displayArgs(poptContext con,
 		UNUSED(enum poptCallbackReason foo),
@@ -233,14 +240,6 @@ static struct poptOption * poptHelpOptionsI18N = poptHelpOptions2;
 
 #define POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE, poptHelpOptions, \
 			0, "Help options:", NULL },
-
-/** \ingroup popt
- */
-enum poptCallbackReason {
-	POPT_CALLBACK_REASON_PRE	= 0, 
-	POPT_CALLBACK_REASON_POST	= 1,
-	POPT_CALLBACK_REASON_OPTION = 2
-};
 
 #ifdef __cplusplus
 extern "C" {
