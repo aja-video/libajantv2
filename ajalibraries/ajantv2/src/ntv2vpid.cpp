@@ -726,6 +726,7 @@ NTV2VideoFormat CNTV2VPID::GetVideoFormat (void) const
 			break;
 		}
 		break;
+	case VPIDStandard_720_3Ga:
 	case VPIDStandard_720_3Gb:
 		videoFormat = stTable720p[vpidFrameRate];
 		break;
