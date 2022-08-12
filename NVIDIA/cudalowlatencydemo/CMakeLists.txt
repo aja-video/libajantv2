@@ -27,6 +27,10 @@ if (NOT X11_FOUND)
 	return()
 endif()
 
+if (NOT CMAKE_CUDA_COMPILER)
+	set(CMAKE_CUDA_COMPILER ${CUDA_NVCC_EXECUTABLE})
+endif()
+
 project(cudalowlatencydemo LANGUAGES CUDA CXX)
 
 set(TARGET_COMPILE_DEFS
