@@ -448,7 +448,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${AJABASE_SYS_LIN_SOURCES})
 
     set(TARGET_LINK_LIBS
-		rt pthread)
+		rt pthread dl)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(TARGET_COMPILE_DEFS_STATIC
         -DAJASTATIC)
