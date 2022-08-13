@@ -1,4 +1,6 @@
 # https://stackoverflow.com/questions/34878276/build-doxygen-from-cmake-script
+project(ntv2docs)
+
 find_package(Doxygen COMPONENTS dot)
 if (NOT DOXYGEN_FOUND)
     aja_message(STATUS "skipping docs (Doxygen not found!)")
@@ -13,7 +15,11 @@ if (AJA_QT_DIR)
     find_package(Qt5Core HINTS ${AJA_QT_DIR} REQUIRED)
     get_target_property(_qmake_location Qt5::qmake IMPORTED_LOCATION)
     get_filename_component(_qt_bin_dir "${_qmake_location}" DIRECTORY)
-    set(QT_HELPGEN_PATH ${_qt_bin_dir}/qhelpgenerator)
+    if (EXISTS ${_qt_bin_dir} AND EXISTS ${_qt_bin_dir}/qhelpgenerator)
+        set(QT_HELPGEN_PATH ${_qt_bin_dir}/qhelpgenerator)
+    else()
+        aja_message(STATUS "qhelpgenerator not found in ${_qt_bin_dir}")
+    endif()
 endif()
 
 # Generate doxygen config file from template
@@ -23,7 +29,7 @@ configure_file(config.doxy.in ${DOXY_CONFIG} @ONLY)
 
 # Run doxygen and output docs to ${CMAKE_BINARY_DIR}/ajalibraries/docs/html
 add_custom_target(
-    doc ALL
+    ntv2docs ALL
     COMMAND ${DOXYGEN_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/${DOXY_CONFIG}"
     WORKING_DIRECTORY ${AJA_NTV2_ROOT}
     COMMENT "Generating NTV2 SDK documentation with Doxygen"
