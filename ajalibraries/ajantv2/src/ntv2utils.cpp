@@ -2332,7 +2332,7 @@ NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inVideoFormat
 	case NTV2_FORMAT_1080psf_2K_2398:
 	case NTV2_FORMAT_1080psf_2K_2400:
 	case NTV2_FORMAT_1080psf_2K_2500:
-		standard = NTV2_STANDARD_2Kx1080p;
+		standard = NTV2_STANDARD_2Kx1080i;
 		break;
 	case NTV2_FORMAT_720p_2398:
 	case NTV2_FORMAT_720p_5000:
