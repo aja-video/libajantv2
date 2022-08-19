@@ -244,7 +244,7 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 
 		check_fmts_are_std({NTV2_FORMAT_1080psf_2K_2398,
 							NTV2_FORMAT_1080psf_2K_2400,
-							NTV2_FORMAT_1080psf_2K_2500}, NTV2_STANDARD_2Kx1080p);
+							NTV2_FORMAT_1080psf_2K_2500}, NTV2_STANDARD_2Kx1080i);
 
 		check_fmts_are_std({NTV2_FORMAT_720p_2398,
 							NTV2_FORMAT_720p_5000,
@@ -606,13 +606,13 @@ TEST_SUITE("ntv2devicescanner" * doctest::description("ntv2 device scanner funct
 		CHECK(std_set.count(NTV2_STANDARD_625) > 0);
 		CHECK(std_set.count(NTV2_STANDARD_1080p) > 0);
 		CHECK(std_set.count(NTV2_STANDARD_2Kx1080p) > 0);
+		CHECK(std_set.count(NTV2_STANDARD_2Kx1080i) > 0);
 		CHECK(std_set.count(NTV2_STANDARD_3840x2160p) > 0);
 		CHECK(std_set.count(NTV2_STANDARD_4096x2160p) > 0);
 		CHECK(std_set.count(NTV2_STANDARD_3840HFR) > 0);
 		CHECK(std_set.count(NTV2_STANDARD_4096HFR) > 0);
 		// not supported
 		CHECK(std_set.count(NTV2_STANDARD_2K) == 0);
-		CHECK(std_set.count(NTV2_STANDARD_2Kx1080i) == 0);
 		CHECK(std_set.count(NTV2_STANDARD_7680) == 0);
 		CHECK(std_set.count(NTV2_STANDARD_8192) == 0);
 		CHECK(std_set.count(NTV2_STANDARD_3840i) == 0);
