@@ -36,7 +36,7 @@ static const PixelFormatMetadata kPixelFormatMetadata = {
     { NTV2_FBF_10BIT_YCBCRA,            {0, 0, 0} },
     { NTV2_FBF_10BIT_DPX_LE,            {4, 3, 1} },
     { NTV2_FBF_48BIT_RGB,               {6, 3, 1} },
-    { NTV2_FBF_12BIT_RGB_PACKED,        {6, 3, 1} },
+    { NTV2_FBF_12BIT_RGB_PACKED,        {36, 3, 8} },
     // { NTV2_FBF_PRORES, {0, 0, 0} },
     { NTV2_FBF_PRORES_DVCPRO,           {0, 0, 0} },
     { NTV2_FBF_PRORES_HDV,              {0, 0, 0} },
@@ -358,7 +358,6 @@ AJAStatus CNTV2PixelComponentReader::ReadLine(const ULWord lineOffset)
 			break;
 		}
 		case NTV2_FBF_48BIT_RGB:
-		case NTV2_FBF_12BIT_RGB_PACKED:
 		{
 			img_data_u16 = reinterpret_cast<UWord const*>(line_ptr);
 			line_u16.assign(img_data_u16, img_data_u16 + (line_stride / 2));
@@ -414,6 +413,7 @@ AJAStatus CNTV2PixelComponentReader::ReadLine(const ULWord lineOffset)
 			_planar_bytes[PLANE_CB_CR] = reinterpret_cast<UByte const*>(cb_cr_line);
 			break;
 		}
+		case NTV2_FBF_12BIT_RGB_PACKED:
 		case NTV2_FBF_8BIT_DVCPRO:
 		case NTV2_FBF_8BIT_HDV:
 		case NTV2_FBF_10BIT_YCBCRA:
@@ -546,7 +546,6 @@ AJAStatus CNTV2PixelComponentReader::ReadComponent(const ULWord compOffset)
 			break;
 		}
 		case NTV2_FBF_48BIT_RGB:
-		case NTV2_FBF_12BIT_RGB_PACKED:
 		{
 			NTV2_ASSERT(_comp_index < 3);
 			const size_t word_index = static_cast<size_t>(
@@ -601,6 +600,7 @@ AJAStatus CNTV2PixelComponentReader::ReadComponent(const ULWord compOffset)
 										|  UWord(UWord(_planar_bytes[plane][byteOffset] & lsbMask) >> lsbShift));
 			break;
 		}
+		case NTV2_FBF_12BIT_RGB_PACKED:
 		case NTV2_FBF_8BIT_DVCPRO:
 		case NTV2_FBF_8BIT_HDV:
 		case NTV2_FBF_10BIT_YCBCRA:
@@ -739,7 +739,6 @@ AJAStatus CNTV2PixelComponentReader::ReadComponentValues() {
                 break;
             }
             case NTV2_FBF_48BIT_RGB:
-            case NTV2_FBF_12BIT_RGB_PACKED:
             {
                 img_data_u16 = reinterpret_cast<UWord const*>(line_ptr);
                 line_u16.assign(img_data_u16, img_data_u16 + (line_stride / 2));
@@ -781,10 +780,21 @@ AJAStatus CNTV2PixelComponentReader::ReadComponentValues() {
             {
                 const void* y_plane_line = _format_desc.GetRowAddress(_framebuffer.GetHostPointer(), line_index, y_plane);
                 const void* cb_cr_line = _format_desc.GetRowAddress(_framebuffer.GetHostPointer(), line_index, cb_cr_plane);
-                planar_bytes[y_plane] = reinterpret_cast<UByte const*>(y_plane_line);
-                planar_bytes[cb_cr_plane] = reinterpret_cast<UByte const*>(cb_cr_line);
+                planar_bytes[PLANE_Y] = reinterpret_cast<UByte const*>(y_plane_line);
+                planar_bytes[PLANE_CB_CR] = reinterpret_cast<UByte const*>(cb_cr_line);
                 break;
             }
+            case NTV2_FBF_10BIT_YCBCR_420PL2:
+            case NTV2_FBF_10BIT_YCBCR_422PL2:
+            {
+                const int c_line_offset = (pixel_format == NTV2_FBF_10BIT_YCBCR_422PL2 ? line_index/2 : line_index);
+                const void* y_plane_line = _format_desc.GetRowAddress(_framebuffer.GetHostPointer(), line_index, PLANE_Y);
+                const void* cb_cr_line = _format_desc.GetRowAddress(_framebuffer.GetHostPointer(), c_line_offset, PLANE_CB_CR);
+                planar_bytes[PLANE_Y] = reinterpret_cast<UByte const*>(y_plane_line);
+                planar_bytes[PLANE_CB_CR] = reinterpret_cast<UByte const*>(cb_cr_line);
+                break;
+            }
+            case NTV2_FBF_12BIT_RGB_PACKED:
             case NTV2_FBF_8BIT_DVCPRO:
             case NTV2_FBF_8BIT_HDV:
             case NTV2_FBF_10BIT_YCBCRA:
@@ -795,13 +805,15 @@ AJAStatus CNTV2PixelComponentReader::ReadComponentValues() {
             case NTV2_FBF_16BIT_ARGB:
             case NTV2_FBF_10BIT_RAW_RGB:
             case NTV2_FBF_10BIT_RAW_YCBCR:
-            case NTV2_FBF_10BIT_YCBCR_420PL2:
-            case NTV2_FBF_10BIT_YCBCR_422PL2:
             case NTV2_FBF_8BIT_YCBCR_422PL2:
+            default:
             case NTV2_FBF_INVALID:
-                std::cout << NTV2FrameBufferFormatToString(pixel_format) << " not yet implemented in CNTV2PixelComponentReader!" << std::endl;
+            {
+                std::cerr << NTV2FrameBufferFormatToString(pixel_format)
+                    << " not yet implemented in CNTV2PixelComponentReader!" << std::endl;
                 status = AJA_STATUS_FAIL;
                 break;
+            }
         }
 
         // Read each pixel
@@ -888,7 +900,6 @@ AJAStatus CNTV2PixelComponentReader::ReadComponentValues() {
                         break;
                     }
                     case NTV2_FBF_48BIT_RGB:
-                    case NTV2_FBF_12BIT_RGB_PACKED:
                     {
                         NTV2_ASSERT(component_index < 3);
                         const size_t word_index = static_cast<size_t>(
@@ -923,6 +934,26 @@ AJAStatus CNTV2PixelComponentReader::ReadComponentValues() {
                         _u8_components.push_back((UByte)component_value);
                         break;
                     }
+                    case NTV2_FBF_10BIT_YCBCR_420PL2:
+                    case NTV2_FBF_10BIT_YCBCR_422PL2:
+                    {
+                        static const UWord	msbShifts []	= {   8,    8,    6,    6,    4,    4,    2,    2};
+                        static const UByte	msbMasks []		= {0x03, 0x03, 0x0F, 0x0F, 0x3F, 0x3F, 0xFF, 0xFF};
+                        static const UWord	lsbShifts []	= {   0,    0,    2,    2,    4,    4,    6,    6};
+                        static const UByte	lsbMasks []		= {0xFF, 0xFF, 0xFC, 0xFC, 0xF0, 0xF0, 0xC0, 0xFF};
+                        static const int	offsets []		= {   0,    0,    1,    1,    2,    2,    3,    3};
+                        NTV2_ASSERT(component_index < 8);
+                        const UWord plane = (component_index & 1) ? PLANE_CB_CR : PLANE_Y;
+                        const int byteOffset = offsets[component_index];
+                        const UByte msbMask = msbMasks[component_index];
+                        const UByte lsbMask = lsbMasks[component_index];
+                        const UWord msbShift = msbShifts[component_index];
+                        const UWord lsbShift = lsbShifts[component_index];
+                        _u16_components.push_back(UWord(UWord(_planar_bytes[plane][byteOffset+1] & msbMask) << msbShift)
+                                                    |  UWord(UWord(_planar_bytes[plane][byteOffset] & lsbMask) >> lsbShift));
+                        break;
+                    }
+                    case NTV2_FBF_12BIT_RGB_PACKED:
                     case NTV2_FBF_8BIT_DVCPRO:
                     case NTV2_FBF_8BIT_HDV:
                     case NTV2_FBF_10BIT_YCBCRA:
@@ -933,13 +964,15 @@ AJAStatus CNTV2PixelComponentReader::ReadComponentValues() {
                     case NTV2_FBF_16BIT_ARGB:
                     case NTV2_FBF_10BIT_RAW_RGB:
                     case NTV2_FBF_10BIT_RAW_YCBCR:
-                    case NTV2_FBF_10BIT_YCBCR_420PL2:
-                    case NTV2_FBF_10BIT_YCBCR_422PL2:
                     case NTV2_FBF_8BIT_YCBCR_422PL2:
+                    default:
                     case NTV2_FBF_INVALID:
-                        std::cout << NTV2FrameBufferFormatToString(pixel_format) << " not yet implemented in CNTV2PixelComponentReader!" << std::endl;
+                    {
+                        std::cerr << NTV2FrameBufferFormatToString(pixel_format)
+                            << " not yet implemented in CNTV2PixelComponentReader!" << std::endl;
                         status = AJA_STATUS_FAIL;
                         break;
+                    }
                 }
             }
         }

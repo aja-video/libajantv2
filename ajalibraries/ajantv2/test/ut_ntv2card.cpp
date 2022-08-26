@@ -11,16 +11,17 @@
 #include "ajabase/system/file_io.h"
 #include "ajabase/system/make_unique_shim.h"
 #include "ajabase/system/systemtime.h"
+
 #include "ajantv2/includes/ntv2card.h"
 #include "ajantv2/utilityfiles/public/ntv2pixelcomponent.h"
 #include "ajantv2/includes/ntv2devicefeatures.h"
 #include "ajantv2/includes/ntv2devicescanner.h"
-#include "ntv2qa/binary_pattern_gen.h"
-#include "ntv2qa/binary_pattern_cmp.h"
-#include "ntv2qa/counting_pattern_cmp.h"
-// #include "ntv2qa/component_reader.h"
+
+#include "ntv2qa/card_config.hpp"
+#include "ntv2qa/component_reader.h"
+#include "ntv2qa/test_pattern.h"
 #include "ntv2qa/routing/preset_router.h"
-#include "ntv2qa/test_formats.h"
+#include "ntv2qa/video.h"
 
 #include <algorithm>
 #include <functional>
@@ -52,6 +53,7 @@ static int argparse_help(struct argparse *self, const struct argparse_option *op
                                      "show this help message and exit", \
                                      argparse_help, 0, OPT_NONEG)
 
+static constexpr uint32_t kDefaultAudioChannels = 8;
 static constexpr size_t kAudioSize1MiB = 0xff000;
 // static constexpr size_t kAudioSize2MiB = kAudioSize1MiB * 2;
 static constexpr size_t kAudioSize4MiB = kAudioSize1MiB * 4;
@@ -75,7 +77,7 @@ static CNTV2Card* gCard = NULL;
 static CNTV2Card* gCard2 = NULL;
 static NTV2EveryFrameTaskMode gTaskMode = NTV2_TASK_MODE_INVALID;
 
-static void SetCardBaseline(CNTV2Card* card, bool clear=false)
+static void SetCardDefaults(CNTV2Card* card, bool clear=false)
 {
     if (card) {
         NTV2DeviceID id = card->GetDeviceID();
@@ -124,13 +126,13 @@ TEST_SUITE("card_dma" * doctest::description("CNTV2Card DMA tests")) {
         qa::RandomPattern<ULWord>(readback, kFrameSize8MiB, seed, 0, UINT32_MAX, qa::ByteOrder::LittleEndian);
         CHECK_EQ(gCard->SetMode(channel, NTV2_MODE_DISPLAY), true);
         CHECK_EQ(gCard->SetOutputFrame(channel, frame_num), true);
-        CHECK_EQ(gCard->DMAWriteFrame(frame_num, reinterpret_cast<const ULWord*>(buffer.data()), (ULWord)kFrameSize8MiB), true);
+        CHECK_EQ(gCard->DMAWriteFrame(frame_num, (const ULWord*)buffer.data(), (ULWord)kFrameSize8MiB), true);
         AJATime::Sleep(150);
         CHECK_EQ(gCard->DMAReadFrame(frame_num, reinterpret_cast<ULWord*>(&readback[0]), (ULWord)kFrameSize8MiB), true);
         CHECK_EQ(memcmp(readback.data(), buffer.data(), kFrameSize8MiB), 0);
     }
     TEST_CASE("dma_write_read_all_frames" * doctest::description("DMAWriteFrame/DMAReadFrame all frames random data test")) {
-        SetCardBaseline(gCard);
+        SetCardDefaults(gCard);
         NTV2Channel channel = NTV2_CHANNEL1;
         const ULWord num_frame_buffers = gCard->GetNumFrameBuffers();
         std::vector<UByte> buffer(kFrameSize8MiB);
@@ -144,7 +146,7 @@ TEST_SUITE("card_dma" * doctest::description("CNTV2Card DMA tests")) {
             ULWord seed = 1;
             qa::RandomPattern<ULWord>(buffer, kFrameSize8MiB, seed, 0, UINT32_MAX, qa::ByteOrder::LittleEndian);
             qa::RandomPattern<ULWord>(readback, kFrameSize8MiB, seed, 0, UINT32_MAX, qa::ByteOrder::LittleEndian);
-            if (gCard->DMAWriteFrame(i, reinterpret_cast<const ULWord*>(buffer.data()), (ULWord)kFrameSize8MiB))
+            if (gCard->DMAWriteFrame(i, (const ULWord*)buffer.data(), (ULWord)kFrameSize8MiB))
                 num_writes++;
             AJATime::Sleep(150);
             if (gCard->DMAReadFrame(i, reinterpret_cast<ULWord*>(&readback[0]), (ULWord)kFrameSize8MiB))
@@ -168,9 +170,9 @@ TEST_SUITE("card_dma" * doctest::description("CNTV2Card DMA tests")) {
         qa::RandomPattern<ULWord>(buffer, kAudioSize4MiB, seed, 0, UINT32_MAX, qa::ByteOrder::LittleEndian);
         qa::RandomPattern<ULWord>(readback, kAudioSize4MiB, seed, 0, UINT32_MAX, qa::ByteOrder::LittleEndian);
         CHECK_EQ(gCard->SetMode(channel, NTV2_MODE_DISPLAY), true);
-        CHECK_EQ(gCard->DMAWriteAudio(audio_sys, reinterpret_cast<const ULWord*>(buffer.data()), 0, kAudioSize4MiB), true);
+        CHECK_EQ(gCard->DMAWriteAudio(audio_sys, (const ULWord*)buffer.data(), 0, kAudioSize4MiB), true);
         AJATime::Sleep(150);
-        CHECK_EQ(gCard->DMAReadAudio(audio_sys, reinterpret_cast<ULWord*>(&readback[0]), 0, kAudioSize4MiB), true);
+        CHECK_EQ(gCard->DMAReadAudio(audio_sys, (ULWord*)&readback[0], 0, kAudioSize4MiB), true);
         CHECK_EQ(memcmp(readback.data(), buffer.data(), kAudioSize4MiB), 0);
     }
 }
@@ -188,15 +190,17 @@ TEST_SUITE("framestore_formats" * doctest::description("Framestore widget format
         std::vector<UByte> buffer(kFrameSize8MiB);
         std::vector<UByte> readback(kFrameSize8MiB);
         ULWord seed = 1;
-        uint8_t sdi_range_min = qa::LegalVideoValue<8, uint8_t>::GetSDIRangeMin();
-        uint8_t sdi_range_max = qa::LegalVideoValue<8, uint8_t>::GetSDIRangeMax();
+
+        uint8_t sdi_range_min = (uint8_t)(qa::LegalVideoValue<8>::GetSDIRangeMin());
+        uint8_t sdi_range_max = (uint8_t)(qa::LegalVideoValue<8>::GetSDIRangeMax());
         qa::CountingPattern8Bit(buffer, fd.GetRasterHeight(), fd.linePitch, sdi_range_min, sdi_range_max);
         qa::RandomPattern<ULWord>(readback, kFrameSize8MiB, seed, 0, UINT32_MAX, qa::ByteOrder::LittleEndian);
+
         std::vector<UByte> zeroes(kFrameSize8MiB);
-        CHECK_EQ(gCard->DMAWriteFrame(0, reinterpret_cast<const ULWord*>(zeroes.data()), (ULWord)kFrameSize8MiB), true);
-        CHECK_EQ(gCard->DMAWriteFrame(0, reinterpret_cast<const ULWord*>(buffer.data()), raster_size), true);
+        CHECK_EQ(gCard->DMAWriteFrame(0, (const ULWord*)zeroes.data(), (ULWord)kFrameSize8MiB), true);
+        CHECK_EQ(gCard->DMAWriteFrame(0, (const ULWord*)buffer.data(), raster_size), true);
         AJATime::Sleep(150);
-        CHECK_EQ(gCard->DMAReadFrame(0, reinterpret_cast<ULWord*>(&readback[0]), raster_size), true);
+        CHECK_EQ(gCard->DMAReadFrame(0, (ULWord*)&readback[0], raster_size), true);
         CHECK_EQ(memcmp(buffer.data(), readback.data(), raster_size), 0);
     }
     // TEST_CASE("Framestore UHDp30 YUV-8") {
@@ -212,9 +216,9 @@ TEST_SUITE("framestore_formats" * doctest::description("Framestore widget format
     //     ULWord seed = 1;
     //     qa::CountingPattern8Bit(buffer, fd.GetRasterHeight(), fd.GetBytesPerRow(), kSDILegalMin, kSDILegalMax8Bit);
     //     qa::RandomPattern<ULWord>(readback, kFrameSize32MiB, seed, 0, UINT32_MAX, qa::ByteOrder::LittleEndian);
-    //     CHECK_EQ(gCard->DMAWriteFrame(0, reinterpret_cast<const ULWord*>(buffer.data()), raster_size), true);
+    //     CHECK_EQ(gCard->DMAWriteFrame(0, (const ULWord*)buffer.data(), raster_size), true);
     //     AJATime::Sleep(150);
-    //     CHECK_EQ(gCard->DMAReadFrame(0, reinterpret_cast<ULWord*>(&readback[0]), raster_size), true);
+    //     CHECK_EQ(gCard->DMAReadFrame(0, (ULWord*)&readback[0], raster_size), true);
     //     CHECK_EQ(memcmp(buffer.data(), readback.data(), raster_size), 0);
     // }
 }
@@ -359,24 +363,30 @@ public:
             return false;
         }
 
-        qa::PresetRouterConfig src_cfg {
-            gOptions->out_channel, gOptions->out_framestore,
-            NTV2_MODE_DISPLAY, vf, pf,
-            ref_src, vanc_mode, vpid_standard, ConnectionKind::SDI
-        };
-        auto src_router = qa::PresetRouter(src_cfg, _src_card);
-        qa::PresetRouterConfig dst_cfg {
-            gOptions->inp_channel, gOptions->inp_framestore,
-            NTV2_MODE_CAPTURE, vf, pf,
-            ref_src, vanc_mode, vpid_standard, ConnectionKind::SDI
-        };
-        auto dst_router = qa::PresetRouter(dst_cfg, _dst_card);
+        qa::QACardConfig src_cfg;
+        src_cfg.base.index = gOptions->card_a_index;
+        src_cfg.base.multi_format = false;
+        src_cfg.base.channel = GetNTV2ChannelForIndex(gOptions->out_channel);
+        src_cfg.base.framestore = GetNTV2ChannelForIndex(gOptions->out_framestore);
+        src_cfg.base.mode = NTV2_MODE_DISPLAY;
+        src_cfg.video.ntv2_vid_fmt = vf;
+        src_cfg.video.ntv2_pix_fmt = pf;
+        src_cfg.video.ntv2_vanc_mode = vanc_mode;
+        src_cfg.timing.ntv2_ref_src = ref_src;
+        src_cfg.video.smpte_standard = vpid_standard;
+        src_cfg.base.connection = qa::ConnectionKind::SDI;
+        qa::QACardConfig dst_cfg(src_cfg);
+        dst_cfg.base.index = gOptions->card_b_index;
+        dst_cfg.base.channel = GetNTV2ChannelForIndex(gOptions->inp_channel);
+        dst_cfg.base.framestore = GetNTV2ChannelForIndex(gOptions->inp_framestore);
+        dst_cfg.base.mode = NTV2_MODE_CAPTURE;
+        auto src_router = qa::QAPresetRouter(src_cfg, _src_card);
+        auto dst_router = qa::QAPresetRouter(dst_cfg, _dst_card);
 
-        SetCardBaseline(_src_card, _clear_routing);
-        if (!use_single_card)
-            SetCardBaseline(_dst_card, _clear_routing);
+        SetCardDefaults(_src_card, _clear_routing);
+        SetCardDefaults(_dst_card, _clear_routing);
 
-        NTV2FormatDescriptor fd(vf, pf, vanc_mode);
+        const NTV2FormatDesc& fd = src_cfg.video.GetFormatDesc();
         ULWord frame_size = fd.GetTotalBytes();
         _buffer.clear();
         _buffer.resize(frame_size);
@@ -386,8 +396,8 @@ public:
         _zeroes.resize(frame_size);
 
         // Zero out framebuffers on cards
-        CHECK_EQ(_src_card->DMAWriteFrame(gOptions->out_frame, reinterpret_cast<const ULWord*>(_zeroes.data()), frame_size), true);
-        CHECK_EQ(_dst_card->DMAWriteFrame(gOptions->inp_frame, reinterpret_cast<const ULWord*>(_zeroes.data()), frame_size), true);
+        CHECK_EQ(_src_card->DMAWriteFrame(gOptions->out_frame, (const ULWord*)_zeroes.data(), frame_size), true);
+        CHECK_EQ(_dst_card->DMAWriteFrame(gOptions->inp_frame, (const ULWord*)_zeroes.data(), frame_size), true);
 
         CHECK_EQ(src_router.ApplyRouting(_clear_routing, true), AJA_STATUS_SUCCESS);
         CHECK_EQ(dst_router.ApplyRouting(_clear_routing && !use_single_card, true), AJA_STATUS_SUCCESS);
@@ -399,15 +409,15 @@ public:
         //TODO(paulh): If we use random numbers, we need to massage the values into SDI legal values first
         // or the SDI readback will not compare to the original.
         // qa::RandomPattern<ULWord>(0xDECAFBAD, 0x1337c0d3, 0xdecafbad, buffer, qa::ByteOrder::LittleEndian);
-        // qa::AlternatingPattern<ULWord>(buffer, frame_size, { 0xdecafbad, 0x1337c0d3 }, 1, qa::ByteOrder::LittleEndian);
+        // aja::AlternatingPattern<ULWord>(buffer, frame_size, { 0xdecafbad, 0x1337c0d3 }, 1, qa::ByteOrder::LittleEndian);
         auto stride = fd.linePitch;
         if (NTV2_IS_FBF_8BIT(pf) || pf == NTV2_FBF_24BIT_RGB || pf == NTV2_FBF_24BIT_BGR) {
-            uint8_t sdi_range_min = qa::LegalVideoValue<8, uint8_t>::GetSDIRangeMin();
-            uint8_t sdi_range_max = qa::LegalVideoValue<8, uint8_t>::GetSDIRangeMax();
+            uint8_t sdi_range_min = (uint8_t)(qa::LegalVideoValue<8>::GetSDIRangeMin());
+            uint8_t sdi_range_max = (uint8_t)(qa::LegalVideoValue<8>::GetSDIRangeMax());
             qa::CountingPattern8Bit(_buffer, fd.GetRasterHeight(), stride, sdi_range_min, sdi_range_max);
         } else if (NTV2_IS_FBF_10BIT(pf)) {
-            uint16_t sdi_range_min = qa::LegalVideoValue<10, uint16_t>::GetSDIRangeMin();
-            uint16_t sdi_range_max = qa::LegalVideoValue<10, uint16_t>::GetSDIRangeMax();
+            uint16_t sdi_range_min = (uint16_t)(qa::LegalVideoValue<10>::GetSDIRangeMin());
+            uint16_t sdi_range_max = (uint16_t)(qa::LegalVideoValue<10>::GetSDIRangeMax());
             if (pf == NTV2_FBF_10BIT_DPX) {
                 qa::CountingPattern10BitDPX(_buffer,
                     fd.GetRasterHeight(), stride,
@@ -425,8 +435,8 @@ public:
                     qa::ByteOrder::LittleEndian);
             }
         } else if (NTV2_IS_FBF_12BIT_RGB(pf)) {
-            uint16_t sdi_range_min = qa::LegalVideoValue<12, uint16_t>::GetSDIRangeMin();
-            uint16_t sdi_range_max = qa::LegalVideoValue<12, uint16_t>::GetSDIRangeMax();
+            uint16_t sdi_range_min = (uint16_t)(qa::LegalVideoValue<12>::GetSDIRangeMin());
+            uint16_t sdi_range_max = (uint16_t)(qa::LegalVideoValue<12>::GetSDIRangeMax());
             qa::CountingPatternRGB48(_buffer,
                 fd.GetRasterHeight(), fd.GetBytesPerRow(),
                 sdi_range_min, sdi_range_max,
@@ -435,16 +445,14 @@ public:
 
         // qa::RandomPattern<ULWord>(readback, frame_size, 0xAB4D533D, 0, UINT32_MAX, qa::ByteOrder::LittleEndian);
 
-        NTV2Channel out_channel = GetNTV2ChannelForIndex(gOptions->out_channel);
-        NTV2Channel inp_channel = GetNTV2ChannelForIndex(gOptions->inp_channel);
-        CHECK_EQ(_src_card->SetMode(out_channel, NTV2_MODE_DISPLAY), true);
-        CHECK_EQ(_src_card->SetOutputFrame(out_channel, gOptions->out_frame), true);
-        CHECK_EQ(_src_card->DMAWriteFrame(gOptions->out_frame, reinterpret_cast<const ULWord*>(_buffer.data()), frame_size), true);
+        CHECK_EQ(_src_card->SetMode(src_cfg.base.channel, NTV2_MODE_DISPLAY), true);
+        CHECK_EQ(_src_card->SetOutputFrame(src_cfg.base.channel, gOptions->out_frame), true);
+        CHECK_EQ(_src_card->DMAWriteFrame(gOptions->out_frame, (const ULWord*)_buffer.data(), frame_size), true);
         AJATime::Sleep(1000); // TODO (paulh): Maybe we need to build a histogram of results and check for consistency over multiple readbacks?
         size_t raster_bytes = fd.GetTotalBytes();
-        CHECK_EQ(_dst_card->SetMode(inp_channel, NTV2_MODE_CAPTURE, false), true);
-        CHECK_EQ(_dst_card->SetInputFrame(inp_channel, gOptions->inp_frame), true);
-        CHECK_EQ(_dst_card->DMAReadFrame(gOptions->inp_frame, reinterpret_cast<ULWord*>(&_readback[0]), (ULWord)raster_bytes), true);
+        CHECK_EQ(_dst_card->SetMode(dst_cfg.base.channel, NTV2_MODE_CAPTURE, false), true);
+        CHECK_EQ(_dst_card->SetInputFrame(dst_cfg.base.channel, gOptions->inp_frame), true);
+        CHECK_EQ(_dst_card->DMAReadFrame(gOptions->inp_frame, (ULWord*)&_readback[0], (ULWord)raster_bytes), true);
 
         NTV2_POINTER master_bytes(_buffer.data(), raster_bytes);
         NTV2_POINTER compare_bytes(_readback.data(), raster_bytes);

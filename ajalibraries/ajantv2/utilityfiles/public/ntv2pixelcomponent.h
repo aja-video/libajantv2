@@ -84,9 +84,9 @@ private:
     mutable NTV2_POINTER _framebuffer;
     mutable NTV2FormatDesc _format_desc;
 
-    size_t _line_index;
-    size_t _elem_index;
-    size_t _comp_index;
+    ULWord _line_index;
+    ULWord _elem_index;
+    ULWord _comp_index;
 
     std::vector<U8Line> _u8_lines;
     std::vector<U16Line> _u16_lines;
