@@ -84,7 +84,7 @@
 	-	Operating Altitude: under 3,000 meters (under 10,000 feet)
 	-	Safe Storage Temperature (Power OFF): -40°C to +70°C (-40° to +158°F)
 
-	@note	The fanless (passively-cooled) version of this device requires airflow of 100LFM @30°C or lower.
+	@note	The fanless (passively-cooled) version of this device requires airflow of 150LFM @30°C or lower.
 			Most host systems have enough circulating airflow, neighboring vent holes, and/or ability to increase
 			the case fan speed as necessary, such that additional steps or precautions are not required.
 			However, if adequate cooling is not being achieved, then removal of the adjacent PCIe bracket
