@@ -60,6 +60,7 @@ set(CUDALOWLATENCYDEMO_SOURCES
 	cudaapp.cpp)
 
 set(NVIDIA_COMMONCUDA_SOURCES
+	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/assertion.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/cudaUtils.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2cudaArrayTransferNV.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2cudaArrayTransferNV.h
@@ -69,12 +70,14 @@ set(NVIDIA_COMMONCUDA_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2gpucircularbuffer.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2gpuTextureTransferNV.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2gpuTextureTransferNV.h
+	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2gpuTextureTransfer.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2rendertotexture.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2rendertotexture.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2texture.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2texture.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/oglview.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/oglview.h
+	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/opengl.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simplegpuvio.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simplegpuvio.h
 )
@@ -102,7 +105,7 @@ if (AJA_INSTALL_SOURCES)
 	install(FILES ${CUDALOWLATENCYDEMO_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/cudalowlatencydemo)
 	install(FILES ${CUDALOWLATENCYDEMO_BUILD_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/cudalowlatencydemo)
 	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/commonCUDA)
-	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/cudalowlatencydemo)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/cudalowlatencydemo)
 endif()
 
 install(TARGETS cudalowlatencydemo
