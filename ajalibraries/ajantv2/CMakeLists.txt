@@ -401,9 +401,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         ${AJA_LIB_BASE_ROOT}/pnp/windows
         ${AJA_LIB_BASE_ROOT}/system/windows)
 
-    set(AJANTV2_HEADERS
-        ${AJANTV2_HEADERS}
-        ${AJANTV2_WIN_HEADERS})
     set(AJABASE_HEADERS
         ${AJABASE_HEADERS}
         ${AJABASE_PNP_WIN_HEADERS}
@@ -432,9 +429,6 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${AJA_LIB_BASE_ROOT}/pnp/linux
         ${AJA_LIB_BASE_ROOT}/system/linux)
 
-    set(AJANTV2_HEADERS
-        ${AJANTV2_HEADERS}
-        ${AJANTV2_LIN_HEADERS})
     set(AJABASE_HEADERS
         ${AJABASE_HEADERS}
         ${AJABASE_PNP_LIN_HEADERS}
@@ -463,9 +457,6 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         ${AJA_LIB_BASE_ROOT}/system/mac
         /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include)
 
-    set(AJANTV2_HEADERS
-        ${AJANTV2_HEADERS}
-        ${AJANTV2_MAC_HEADERS})
     set(AJABASE_HEADERS
         ${AJABASE_HEADERS}
         ${AJABASE_PNP_MAC_HEADERS}
@@ -500,6 +491,19 @@ if (NOT AJA_BUILD_OPENSOURCE)
         ${AJANTV2_TARGET_SOURCES}
         ${AJANTV2_HEVC_HEADERS}
         ${AJANTV2_HEVC_SOURCES})
+endif()
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(AJANTV2_TARGET_SOURCES
+        ${AJANTV2_TARGET_SOURCES}
+        ${AJANTV2_WIN_HEADERS})
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(AJANTV2_TARGET_SOURCES
+        ${AJANTV2_TARGET_SOURCES}
+        ${AJANTV2_LIN_HEADERS})
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(AJANTV2_TARGET_SOURCES
+        ${AJANTV2_TARGET_SOURCES}
+        ${AJANTV2_MAC_HEADERS})
 endif()
 
 # libajantv2
@@ -571,6 +575,8 @@ if (AJA_INSTALL_SOURCES)
     install(FILES ${AJANTV2_UTILITY_PUBLIC_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/utilityfiles/public)
     # build stuff
     install(FILES ${AJA_CMAKE_DIR}/../ajalibraries/ajantv2/build/Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/build)
+    install(FILES ${AJA_CMAKE_DIR}/../ajalibraries/ajantv2/Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2)
+    install(FILES ${AJA_CMAKE_DIR}/../ajalibraries/ajantv2/src/targets.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/src)
     install(FILES ${AJA_CMAKE_DIR}/../build/common.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
     install(FILES ${AJA_CMAKE_DIR}/../build/configure.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
     install(FILES ${AJA_CMAKE_DIR}/../build/internal.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
