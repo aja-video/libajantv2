@@ -22,6 +22,7 @@
 #include "ajabase/common/timebase.h"
 #include "ajabase/common/timecode.h"
 #include "ajabase/common/timer.h"
+#include "ajabase/common/ajamovingavg.h"
 #include "ajabase/persistence/persistence.h"
 #include "ajabase/system/atomic.h"
 #include "ajabase/system/file_io.h"
@@ -595,6 +596,153 @@ TEST_SUITE("guid" * doctest::description("functions in ajabase/common/guid.h")) 
 
 } //guid
 
+void movingavg_marker() {}
+TEST_SUITE("ajamovingavg" * doctest::description("functions in ajabase/common/ajamovingavg.h")) {
+
+	TEST_CASE("BFT-char")
+	{
+		AJAMovingAvg<char> cAvg;
+		CHECK_FALSE(cAvg.isValid());
+		CHECK(cAvg.isEmpty());
+		CHECK_EQ(cAvg.sampleCapacity(), 10);
+		cAvg.addSample(-10);
+		cAvg.addSample(-5);
+		cAvg.addSample(0);
+		cAvg.addSample(5);
+		cAvg.addSample(10);
+		CHECK_EQ(cAvg.numStoredSamples(),5);
+		CHECK_EQ(cAvg.totalSamples(),5);
+		CHECK_EQ(cAvg.average(), 0);
+		CHECK_EQ(cAvg.averageF(), 0.0);
+		CHECK_EQ(cAvg.minimum(), -10);
+		CHECK_EQ(cAvg.maximum(), 10);
+		cAvg.addSample(7);
+		cAvg.addSample(8);
+		cAvg.addSample(9);
+		cAvg.addSample(10);
+		cAvg.addSample(11);
+		CHECK_EQ(cAvg.numStoredSamples(),10);
+		CHECK_EQ(cAvg.totalSamples(),10);
+		CHECK_EQ(cAvg.average(), 4);
+		CHECK_EQ(cAvg.minimum(), -10);
+		CHECK_EQ(cAvg.maximum(), 11);
+		cAvg.addSample(8);
+		cAvg.addSample(10);
+		cAvg.addSample(12);
+		cAvg.addSample(6);
+		cAvg.addSample(5);
+		CHECK_EQ(cAvg.numStoredSamples(),10);
+		CHECK_EQ(cAvg.totalSamples(),15);
+		CHECK_EQ(cAvg.average(), 8);
+		CHECK_EQ(cAvg.averageF(), 8.6);
+		CHECK_EQ(cAvg.minimum(), -10);
+		CHECK_EQ(cAvg.maximum(), 12);
+		CHECK_EQ(cAvg.recentMaximum(), 12);
+		CHECK_EQ(cAvg.recentMinimum(), 5);
+	}
+
+	TEST_CASE("BFT-int")
+	{
+		AJAMovingAvg<int> iAvg;
+		CHECK_FALSE(iAvg.isValid());
+		CHECK(iAvg.isEmpty());
+		CHECK_EQ(iAvg.sampleCapacity(), 10);
+		iAvg.addSample(-10);
+		iAvg.addSample(-5);
+		iAvg.addSample(0);
+		iAvg.addSample(5);
+		iAvg.addSample(10);
+		CHECK_EQ(iAvg.numStoredSamples(),5);
+		CHECK_EQ(iAvg.totalSamples(),5);
+		CHECK_EQ(iAvg.average(), 0);
+		CHECK_EQ(iAvg.averageF(), 0.0);
+		CHECK_EQ(iAvg.minimum(), -10);
+		CHECK_EQ(iAvg.maximum(), 10);
+		iAvg.addSample(7);
+		iAvg.addSample(8);
+		iAvg.addSample(9);
+		iAvg.addSample(10);
+		iAvg.addSample(11);
+		CHECK_EQ(iAvg.numStoredSamples(),10);
+		CHECK_EQ(iAvg.totalSamples(),10);
+		CHECK_EQ(iAvg.average(), 4);
+		CHECK_EQ(iAvg.minimum(), -10);
+		CHECK_EQ(iAvg.maximum(), 11);
+		iAvg.addSample(8);
+		iAvg.addSample(10);
+		iAvg.addSample(12);
+		iAvg.addSample(6);
+		iAvg.addSample(5);
+		CHECK_EQ(iAvg.numStoredSamples(),10);
+		CHECK_EQ(iAvg.totalSamples(),15);
+		CHECK_EQ(iAvg.average(), 8);
+		CHECK_EQ(iAvg.averageF(), 8.6);
+		CHECK_EQ(iAvg.minimum(), -10);
+		CHECK_EQ(iAvg.maximum(), 12);
+		CHECK_EQ(iAvg.recentMaximum(), 12);
+		CHECK_EQ(iAvg.recentMinimum(), 5);
+	}
+
+	TEST_CASE("BFT-int8")
+	{
+		AJAMovingAvg<int8_t> i8Avg;
+		CHECK_FALSE(i8Avg.isValid());
+		CHECK(i8Avg.isEmpty());
+		CHECK_EQ(i8Avg.sampleCapacity(), 10);
+		i8Avg.addSample(-10);
+		i8Avg.addSample(-5);
+		i8Avg.addSample(0);
+		i8Avg.addSample(5);
+		i8Avg.addSample(10);
+		CHECK_EQ(i8Avg.numStoredSamples(),5);
+		CHECK_EQ(i8Avg.totalSamples(),5);
+		CHECK_EQ(i8Avg.average(), 0);
+		CHECK_EQ(i8Avg.averageF(), 0.0);
+		CHECK_EQ(i8Avg.minimum(), -10);
+		CHECK_EQ(i8Avg.maximum(), 10);
+		i8Avg.addSample(7);
+		i8Avg.addSample(8);
+		i8Avg.addSample(9);
+		i8Avg.addSample(10);
+		i8Avg.addSample(11);
+		CHECK_EQ(i8Avg.numStoredSamples(),10);
+		CHECK_EQ(i8Avg.totalSamples(),10);
+		CHECK_EQ(i8Avg.average(), 4);
+		CHECK_EQ(i8Avg.minimum(), -10);
+		CHECK_EQ(i8Avg.maximum(), 11);
+		i8Avg.addSample(8);
+		i8Avg.addSample(10);
+		i8Avg.addSample(12);
+		i8Avg.addSample(6);
+		i8Avg.addSample(5);
+		CHECK_EQ(i8Avg.numStoredSamples(),10);
+		CHECK_EQ(i8Avg.totalSamples(),15);
+		CHECK_EQ(i8Avg.average(), 8);
+		CHECK_EQ(i8Avg.averageF(), 8.6);
+		CHECK_EQ(i8Avg.minimum(), -10);
+		CHECK_EQ(i8Avg.maximum(), 12);
+		CHECK_EQ(i8Avg.recentMaximum(), 12);
+		CHECK_EQ(i8Avg.recentMinimum(), 5);
+	}
+
+	TEST_CASE("BFT-uint32")
+	{
+		AJAMovingAvg<uint32_t> u32Avg;
+		u32Avg.addSample(2);	u32Avg.addSample(4);	u32Avg.addSample(6);	u32Avg.addSample(8);
+		u32Avg.addSample(12);	u32Avg.addSample(10);	u32Avg.addSample(10);	u32Avg.addSample(10);
+		u32Avg.addSample(10);	u32Avg.addSample(10);
+		CHECK_EQ(u32Avg.average(), 8);
+		u32Avg.addSample(10);	u32Avg.addSample(10);	u32Avg.addSample(10);	u32Avg.addSample(10);
+		u32Avg.addSample(10);
+		CHECK_EQ(u32Avg.average(), 10);
+		CHECK_EQ(u32Avg.minimum(), 2);
+		CHECK_EQ(u32Avg.maximum(), 12);
+		CHECK_EQ(u32Avg.recentMinimum(), 10);
+		CHECK_EQ(u32Avg.recentMaximum(), 10);
+	}
+
+} //movingavg
+
 
 void persistence_marker() {}
 TEST_SUITE("persistence" * doctest::description("functions in ajabase/persistence/persistence.h")) {
@@ -906,6 +1054,72 @@ TEST_SUITE("time" * doctest::description("functions in ajabase/system/systemtime
 	}
 
 } //time
+
+
+//	These macros borrowed from ntv2publicinterface.h:
+#define DECN(__x__,__n__)		std::dec << std::setw(int(__n__)) << std::right << (__x__)
+#define DEC0N(__x__,__n__)		std::dec << std::setw(int(__n__)) << std::setfill('0') << std::right << (__x__) << std::dec << std::setfill(' ')
+
+static const std::vector<uint64_t> ETs = {12, 123, 1234, 12345, 123456, 1234567, 12345678, 123456789, 1234567890};
+static const std::vector<std::string> mETStrs = {"12.0 msec", "123.0 msec", " 1.2 secs", "12.3 secs", " 2.1 mins", "20.6 mins", " 3.4 hrs", " 1.4 days", "14.3 days"};
+static const std::vector<std::string> uETStrs = {"12.0 usec", "123.0 usec", " 1.2 msec", "12.3 msec", "123.5 msec", " 1.2 secs", "12.3 secs", " 2.1 mins", "20.6 mins"};
+static const std::vector<std::string> nETStrs = {"12.0 nsec", "123.0 nsec", " 1.2 usec", "12.3 usec", "123.5 usec", " 1.2 msec", "12.3 msec", "123.5 msec", " 1.2 secs"};
+static inline std::string AsStr(const AJATimer & inTimer)	{std::ostringstream oss; oss << inTimer; return oss.str();}
+
+void timer_marker() {}
+TEST_SUITE("timer" * doctest::description("functions in ajabase/common/timer.h")) {
+
+	TEST_CASE("AJATimer")
+	{
+		AJATimer milli(AJATimerPrecisionMilliseconds);
+		CHECK_EQ(milli.Precision(), AJATimerPrecisionMilliseconds);
+		milli.Start();
+		CHECK(milli.IsRunning());
+		while (milli.ElapsedTime() < 1000)
+			;
+		milli.Stop();
+		CHECK_FALSE(milli.IsRunning());
+		CHECK(milli.ElapsedTime() > 0);
+		std::cerr << std::endl << milli.PrecisionName(milli.Precision()) << std::endl;
+		for (size_t n(0);  n < ETs.size();  n++)
+		{	milli.SetStopTime(ETs.at(n));
+			std::cerr << DECN(milli.ElapsedTime(),10) << ": " << milli << std::endl;
+			CHECK_EQ(mETStrs.at(n), AsStr(milli));
+		}
+
+		AJATimer micro(AJATimerPrecisionMicroseconds);
+		CHECK_EQ(micro.Precision(), AJATimerPrecisionMicroseconds);
+		micro.Start();
+		CHECK(micro.IsRunning());
+		while (micro.ElapsedTime() < 1000)
+			;
+		micro.Stop();
+		CHECK_FALSE(micro.IsRunning());
+		CHECK(micro.ElapsedTime() > 0);
+		std::cerr << std::endl << micro.PrecisionName(micro.Precision()) << std::endl;
+		for (size_t n(0);  n < ETs.size();  n++)
+		{	micro.SetStopTime(ETs.at(n));	std::cerr << DECN(micro.ElapsedTime(),10) << ": " << micro << std::endl;
+			CHECK_EQ(uETStrs.at(n), AsStr(micro));
+		}
+
+		AJATimer nano(AJATimerPrecisionNanoseconds);
+		CHECK_EQ(nano.Precision(), AJATimerPrecisionNanoseconds);
+		nano.Start();
+		CHECK(nano.IsRunning());
+		while (nano.ElapsedTime() < 1000)
+			;
+		nano.Stop();
+		CHECK_FALSE(nano.IsRunning());
+		CHECK(nano.ElapsedTime() > 0);
+		std::cerr << std::endl << nano.PrecisionName(nano.Precision()) << std::endl;
+		for (size_t n(0);  n < ETs.size();  n++)
+		{	nano.SetStopTime(ETs.at(n));	std::cerr << DECN(nano.ElapsedTime(),10) << ": " << nano << std::endl;
+			CHECK_EQ(nETStrs.at(n), AsStr(nano));
+		}
+	}
+
+}	//	timer
+
 
 void performance_marker() {}
 TEST_SUITE("performance" * doctest::description("functions in ajabase/common/performance.h")) {

@@ -219,6 +219,7 @@ set(AJAANC_SOURCES
 
 # ajabase
 set(AJABASE_COMMON_HEADERS
+    ${AJA_LIB_BASE_ROOT}/common/ajamovingavg.h
     ${AJA_LIB_BASE_ROOT}/common/ajarefptr.h
     ${AJA_LIB_BASE_ROOT}/common/audioutilities.h
     ${AJA_LIB_BASE_ROOT}/common/buffer.h
