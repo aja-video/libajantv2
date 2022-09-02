@@ -78,6 +78,8 @@ set(NVIDIA_COMMONCUDA_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/oglview.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/oglview.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/opengl.h
+	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simplecudavio.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simplecudavio.h
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simplegpuvio.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simplegpuvio.h
 )
