@@ -9,162 +9,132 @@
 #include "ajabase/common/timer.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/system/system.h"
+#include <iomanip>
 
 
-AJATimer::AJATimer(AJATimerPrecision precision)
+AJATimer::AJATimer (const AJATimerPrecision inPrecision)
+	:	mPrecision (inPrecision)
 {
-	mStartTime = 0;
-	mStopTime = 0;
-	mRun = false;
-	mPrecision = precision;
+	Reset();
 }
 
 
-AJATimer::~AJATimer()
+void AJATimer::Start (void)
 {
-}
-
-
-void 
-AJATimer::Start()
-{
-	// save the time at start
-	switch(mPrecision)
+	//	Save the time at start
+	switch (mPrecision)
 	{
 		default:
-		case AJATimerPrecisionMilliseconds:
-			mStartTime = AJATime::GetSystemMilliseconds();
-			break;
-
-		case AJATimerPrecisionMicroseconds:
-			mStartTime = AJATime::GetSystemMicroseconds();
-			break;
-
-		case AJATimerPrecisionNanoseconds:
-			mStartTime = AJATime::GetSystemNanoseconds();
-			break;
+		case AJATimerPrecisionMilliseconds:	mStartTime = AJATime::GetSystemMilliseconds();	break;
+		case AJATimerPrecisionMicroseconds:	mStartTime = AJATime::GetSystemMicroseconds();	break;
+		case AJATimerPrecisionNanoseconds:	mStartTime = AJATime::GetSystemNanoseconds();	break;
 	}
-
 	mRun = true;
 }
 
 
-void 
-AJATimer::Stop()
+void AJATimer::Stop (void)
 {
-	// save the time at stop
-	switch(mPrecision)
+	//	Save the time at stop...
+	switch (mPrecision)
 	{
 		default:
-		case AJATimerPrecisionMilliseconds:
-			mStopTime = AJATime::GetSystemMilliseconds();
-			break;
-
-		case AJATimerPrecisionMicroseconds:
-			mStopTime = AJATime::GetSystemMicroseconds();
-			break;
-
-		case AJATimerPrecisionNanoseconds:
-			mStopTime = AJATime::GetSystemNanoseconds();
-			break;
+		case AJATimerPrecisionMilliseconds:	mStopTime = AJATime::GetSystemMilliseconds();	break;
+		case AJATimerPrecisionMicroseconds:	mStopTime = AJATime::GetSystemMicroseconds();	break;
+		case AJATimerPrecisionNanoseconds:	mStopTime = AJATime::GetSystemNanoseconds();	break;
 	}
-
 	mRun = false;
 }
 
 
-void 
-AJATimer::Reset()
+void AJATimer::Reset (void)
 {
-	// clear the start and stop time
-	mStartTime = 0;
-	mStopTime = 0;
+	//	Clear the start and stop time
+	mStartTime = mStopTime = 0;
 	mRun = false;
 }
 
 
-uint32_t 
-AJATimer::ElapsedTime()
+uint32_t AJATimer::ElapsedTime (void) const
 {
-	uint32_t elapsedTime = 0;
-
-	// compute the elapsed time when running
-	if (mRun)
-	{
-		switch(mPrecision)
+	if (IsRunning())	//	Running:
+		switch (mPrecision)
 		{
 			default:
-			case AJATimerPrecisionMilliseconds:
-				elapsedTime = (uint32_t)(AJATime::GetSystemMilliseconds() - mStartTime);
-				break;
-
-			case AJATimerPrecisionMicroseconds:
-				elapsedTime = (uint32_t)(AJATime::GetSystemMicroseconds() - mStartTime);
-				break;
-
-			case AJATimerPrecisionNanoseconds:
-				elapsedTime = (uint32_t)(AJATime::GetSystemNanoseconds() - mStartTime);
-				break;
+			case AJATimerPrecisionMilliseconds:	return uint32_t(AJATime::GetSystemMilliseconds() - mStartTime);
+			case AJATimerPrecisionMicroseconds:	return uint32_t(AJATime::GetSystemMicroseconds() - mStartTime);
+			case AJATimerPrecisionNanoseconds:	return uint32_t(AJATime::GetSystemNanoseconds() - mStartTime);
 		}
+	//	Stopped:
+	return uint32_t(mStopTime - mStartTime);
+}
+
+
+#define __fDEC(__x__,__w__,__p__) std::dec << std::fixed << std::setw(__w__) << std::setprecision(__p__) << (__x__)
+
+std::ostream & AJATimer::Print (std::ostream & oss) const
+{
+	const double secs(ETSecs());
+	if (secs > 60.0)
+	{
+		const double mins (secs / 60.0);
+		if (mins > 60.0)
+		{
+			const double hrs (mins / 60.0);
+			if (hrs > 24.0)
+			{
+				const double days (hrs / 24.0);
+				oss << __fDEC(days,4,1) << " days";
+			}
+			else
+				oss << __fDEC(hrs,4,1) << " hrs";
+		}
+		else
+			oss << __fDEC(mins,4,1) << " mins";
 	}
-	// compute the elapsed time when stopped
+	else if (secs >= 1.0)
+		oss << __fDEC(secs,4,1) << " secs";
+	else if (secs >= 1.0E-03)
+		oss << __fDEC(secs*1.0E+3,4,1) << " msec";
+	else if (secs >= 1.0E-06)
+		oss << __fDEC(secs*1.0E+6,4,1) << " usec";
+	else if (secs >= 1.0E-09)
+		oss << __fDEC(secs*1.0E+9,4,1) << " nsec";
+	else if (secs >= 1.0E-12)
+		oss << __fDEC(secs*1.0E+12,4,1) << " psec";
 	else
-	{
-		elapsedTime = (uint32_t)(mStopTime - mStartTime);
-	}
-
-	return elapsedTime;
+		oss << "0 sec";
+	return oss;
 }
 
 
-bool 
-AJATimer::Timeout(uint32_t interval)
+std::string AJATimer::PrecisionName (const AJATimerPrecision precision, const bool longName)		//	STATIC
 {
-	// timeout is true if greater than specified interval
-	if (ElapsedTime() >= interval)
-	{
-		return true;
-	}
-
-	return false;
-}
-
-
-bool
-AJATimer::IsRunning(void)
-{
-	return mRun;
-}
-
-AJATimerPrecision
-AJATimer::Precision(void)
-{
-	return mPrecision;
-}
-
-std::string
-AJATimer::PrecisionName(AJATimerPrecision precision, bool longName)
-{
-	std::string retStr;
 	if (longName)
-	{
-		switch(precision)
+		switch (precision)
 		{
 			default:
-			case AJATimerPrecisionMilliseconds: retStr = "milliseconds"; break;
-			case AJATimerPrecisionMicroseconds: retStr = "microseconds"; break;
-			case AJATimerPrecisionNanoseconds:	retStr = "nanoseconds";	 break;
+			case AJATimerPrecisionMilliseconds: return "milliseconds";
+			case AJATimerPrecisionMicroseconds: return "microseconds";
+			case AJATimerPrecisionNanoseconds:	return "nanoseconds";
 		}
-	}
 	else
-	{
-		switch(precision)
+		switch (precision)
 		{
 			default:
-			case AJATimerPrecisionMilliseconds: retStr = "ms"; break;
-			case AJATimerPrecisionMicroseconds: retStr = "us"; break;
-			case AJATimerPrecisionNanoseconds:	retStr = "ns"; break;
+			case AJATimerPrecisionMilliseconds: return "ms";
+			case AJATimerPrecisionMicroseconds: return "us";
+			case AJATimerPrecisionNanoseconds:	return "ns";
 		}
+}
+
+double AJATimer::PrecisionSecs (const AJATimerPrecision precision)		//	STATIC
+{
+	switch (precision)
+	{
+		default:
+		case AJATimerPrecisionMilliseconds:	return 1.0E-03;
+		case AJATimerPrecisionMicroseconds:	return 1.0E-06;
+		case AJATimerPrecisionNanoseconds:	return 1.0E-09;
 	}
-	return retStr;
 }

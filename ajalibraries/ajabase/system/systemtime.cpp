@@ -8,6 +8,11 @@
 #include "ajabase/system/system.h"
 #include "ajabase/common/common.h"
 #include "ajabase/system/systemtime.h"
+#if defined(AJA_COLLECT_SLEEP_STATS)
+	#include "ajabase/common/timer.h"
+	#include "ajabase/system/atomic.h"
+	#include "ajabase/system/thread.h"
+#endif	//	defined(AJA_COLLECT_SLEEP_STATS)
 
 #if defined(AJA_MAC)
 	#include <mach/mach_time.h>
@@ -15,7 +20,10 @@
 	static int64_t s_PerformanceFrequency;
 	static bool s_bPerformanceInit = false;
 #endif
-
+#if defined(AJA_USE_CPLUSPLUS11)
+	#include <chrono>
+	#include <thread>
+#endif	//	AJA_USE_CPLUSPLUS11
 
 #if defined(AJA_WINDOWS)
 	#include "timeapi.h"
@@ -42,8 +50,7 @@
 #endif
 
 
-int64_t 
-AJATime::GetSystemTime()
+int64_t AJATime::GetSystemTime (void)
 {
 	// system dependent time function
 #if defined(AJA_WINDOWS)
@@ -52,7 +59,7 @@ AJATime::GetSystemTime()
 
 #if defined(AJA_MAC)
 	static mach_timebase_info_data_t	sTimebaseInfo;
-	uint64_t ticks = mach_absolute_time();
+	uint64_t ticks = ::mach_absolute_time();
 	
 	if ( sTimebaseInfo.denom == 0 )
 	{
@@ -82,8 +89,7 @@ AJATime::GetSystemTime()
 }
 
 
-int64_t 
-AJATime::GetSystemCounter()
+int64_t AJATime::GetSystemCounter (void)
 {
 #if defined(AJA_WINDOWS)
 	LARGE_INTEGER performanceCounter;
@@ -98,7 +104,7 @@ AJATime::GetSystemCounter()
 #endif
 
 #if defined(AJA_MAC)
-	return (int64_t) mach_absolute_time();
+	return int64_t(::clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW));	//(mach_absolute_time());
 #endif
 
 #if defined(AJA_LINUX)
@@ -117,8 +123,7 @@ AJATime::GetSystemCounter()
 }
 
 
-int64_t 
-AJATime::GetSystemFrequency()
+int64_t AJATime::GetSystemFrequency (void)
 {
 #if defined(AJA_WINDOWS)
 	if (!s_bPerformanceInit)
@@ -163,8 +168,8 @@ AJATime::GetSystemFrequency()
 #endif
 }
 
-double
-AJATime::GetSystemSeconds()
+
+double AJATime::GetSystemSeconds (void)
 {
 	double ticks = double(GetSystemCounter());
 	double ticksPerSecond = double(GetSystemFrequency());
@@ -176,8 +181,8 @@ AJATime::GetSystemSeconds()
 	return sec;
 }
 
-uint64_t 
-AJATime::GetSystemMilliseconds()
+
+uint64_t AJATime::GetSystemMilliseconds (void)
 {				
 	uint64_t ticks			= GetSystemCounter();
 	uint64_t ticksPerSecond = GetSystemFrequency();
@@ -191,8 +196,8 @@ AJATime::GetSystemMilliseconds()
 	return ms;
 }
 
-uint64_t 
-AJATime::GetSystemMicroseconds()
+
+uint64_t AJATime::GetSystemMicroseconds (void)
 {
 	uint64_t ticks			= GetSystemCounter();
 	uint64_t ticksPerSecond = GetSystemFrequency();
@@ -206,8 +211,8 @@ AJATime::GetSystemMicroseconds()
 	return us;
 }
 
-uint64_t
-AJATime::GetSystemNanoseconds()
+
+uint64_t AJATime::GetSystemNanoseconds (void)
 {
 	uint64_t ticks			= GetSystemCounter();
 	uint64_t ticksPerSecond = GetSystemFrequency();
@@ -221,48 +226,105 @@ AJATime::GetSystemNanoseconds()
 	return us;
 }
 
+
+#if defined(AJA_COLLECT_SLEEP_STATS)
+	static uint64_t		sMonThreadID	= 0;//   1    2    3    4    5    6    7     8     9     10     11     12     13      14      15      16
+	static const double	sPercentiles[]	= {	1.0, 1.1, 1.2, 1.5, 2.0, 3.0, 6.0, 11.0, 21.0, 51.0, 101.0, 201.0, 501.0, 1001.0, 2001.0, 5001.0, 10001.0};
+	static uint32_t		sCounts[]		= {	0,   0,   0,   0,   0,   0,   0,   0,    0,    0,    0,     0,     0,     0,      0,      0,      0,       0};
+	static int			sNumPercentiles	= sizeof(sPercentiles) / sizeof(double);	//	17
+	static int			sNumCounts		= sizeof(sCounts) / sizeof(uint32_t);		//	18
+	static AJATimer		sTimer (AJATimerPrecisionMicroseconds);
+
+	#define	PRE_STATS	const bool doStats(sMonThreadID == AJAThread::GetThreadId());	\
+						if (doStats)									\
+						{	sTimer.Reset();								\
+							sTimer.Start();								\
+						}
+
+	#define	POST_STATS(_req_)	if (doStats)											\
+								{	sTimer.Stop();										\
+									const double act(sTimer.ETSecs());					\
+									const double req(_req_);							\
+									for (int n(0);  n < sNumPercentiles;  n++)			\
+										if (act < (sPercentiles[n] * req))				\
+										{												\
+											AJAAtomic::Increment(&sCounts[n]);			\
+											return;										\
+										}												\
+									AJAAtomic::Increment(&sCounts[sNumPercentiles]);	\
+								}
+#else	//	AJA_COLLECT_SLEEP_STATS
+	#define	PRE_STATS
+	#define	POST_STATS
+#endif	//	!defined(AJA_COLLECT_SLEEP_STATS)
+
+
 // sleep time in milliseconds
-void 
-AJATime::Sleep(int32_t interval)
+void AJATime::Sleep (int32_t inTime)
 {
-	if(interval < 0)
-	{
-		interval = 0;
-	}
+	if (inTime <= 0)
+		return;	//	Don't sleep at all
 
-	// system dependent sleep function
-#if defined(AJA_WINDOWS)
-	::Sleep((DWORD)interval);
-#endif
-
-#if defined(AJA_MAC)
-	usleep(interval * 1000);
-#endif
-
-#if defined(AJA_LINUX)
-	usleep(interval * 1000);  // milliseconds to microseconds
-#endif
+	PRE_STATS
+	#if defined(AJA_USE_CPLUSPLUS11)
+		std::this_thread::sleep_for(std::chrono::milliseconds(inTime));
+	#elif defined(AJA_WINDOWS)
+		::Sleep(DWORD(inTime));
+	#else	//	POSIX
+		#if 0	//	usleep is deprecated in POSIX
+			usleep(inTime * 1000);
+		#else
+			timespec req, rm;
+			req.tv_sec = 0;
+			req.tv_nsec = long(inTime)*1000L*1000L;
+			rm.tv_sec = 0; rm.tv_nsec = 0;
+			if (::nanosleep(&req, &rm) < 0)
+				;	//	failed
+		#endif
+	#endif
+	POST_STATS(double(inTime) / 1000.0);
 }
+
 
 // sleep time in microseconds
-void 
-AJATime::SleepInMicroseconds(int32_t interval)
+void AJATime::SleepInMicroseconds (int32_t inTime)
 {
-	if(interval < 0)
+	if (inTime <= 0)
+		return;	//	Don't sleep at all
+
+	PRE_STATS
+	#if defined(AJA_USE_CPLUSPLUS11)
+		std::this_thread::sleep_for(std::chrono::microseconds(inTime));
+	#elif defined(AJA_WINDOWS)
+		::Sleep(DWORD(inTime) / 1000);	//	Windows Sleep expects millisecs
+	#else	//	POSIX
+		usleep(inTime);	//	Warning:  usleep is deprecated in POSIX
+	#endif
+	POST_STATS(double(inTime) / 1000000.0);
+}
+
+
+#if defined(AJA_COLLECT_SLEEP_STATS)
+	bool AJATime::CollectSleepStats (const bool inEnable)
 	{
-		interval = 0;
+		if (!inEnable)
+			{sMonThreadID = 0;  return true;}
+
+		if (sMonThreadID != AJAThread::GetThreadId())
+			for (int n(0);  n < sNumPercentiles;  n++)
+				sCounts[n] = 0;
+		sMonThreadID = AJAThread::GetThreadId();
+		return true;
 	}
 
-	// system dependent sleep function
-#if defined(AJA_WINDOWS)
-	::Sleep((DWORD)interval / 1000);
-#endif
-
-#if defined(AJA_MAC)
-	usleep(interval);
-#endif
-
-#if defined(AJA_LINUX)
-	usleep(interval);  
-#endif
-}
+	std::string	AJATime::GetSleepStats (void)
+	{
+		std::ostringstream oss;
+		for (int n(0);  n < sNumCounts;  n++)
+			if (sCounts[n])
+			{
+				oss << sCounts[n] << "\t< " << sPercentiles[n] << std::endl;
+			}
+		return oss.str();
+	}
+#endif	//	defined(AJA_COLLECT_SLEEP_STATS)
