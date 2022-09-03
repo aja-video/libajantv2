@@ -120,7 +120,7 @@ class AJA_EXPORT AJATimer
 		bool				mRun;
 		AJATimerPrecision	mPrecision;
 
-	#if defined(_DEBUG) && defined(DOCTEST_LIBRARY_INCLUDED)
+	#if defined(DOCTEST_LIBRARY_INCLUDED)
 		public: inline void	SetStopTime (const uint64_t inIncr)	{mStartTime = 0; mStopTime = inIncr;};
 	#endif
 };	//	AJATimer
