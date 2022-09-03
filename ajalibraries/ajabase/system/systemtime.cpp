@@ -255,7 +255,7 @@ uint64_t AJATime::GetSystemNanoseconds (void)
 								}
 #else	//	AJA_COLLECT_SLEEP_STATS
 	#define	PRE_STATS
-	#define	POST_STATS
+	#define	POST_STATS(__x__)
 #endif	//	!defined(AJA_COLLECT_SLEEP_STATS)
 
 
