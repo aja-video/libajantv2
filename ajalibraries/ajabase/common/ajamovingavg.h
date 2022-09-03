@@ -13,6 +13,7 @@
 #include <cfloat>
 #include <deque>
 #include <ostream>
+#include <typeinfo>
 
 
 /**
