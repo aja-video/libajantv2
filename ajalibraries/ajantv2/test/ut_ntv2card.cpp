@@ -1,3 +1,38 @@
+/* ut_ntv2card - Application for physical ntv2 card testing.
+ *
+ * This application can perform a variety of either board-to-board or board-to-self tests.
+ *
+ * 1. [ Currently Supported Tests ]
+ *  - card_dma: dma_write_read_one_frame, dma_write_read_all_frames, dma_write_read_audio
+ *  This tests the gamut of basic DMA functionality on NTV2 boards.
+ *
+ *  - framestore_sdi: framestore_sdi_base test case is driven and parameterized from the JSON format tables.
+ *  This test configures a framestore for a particular video/pixel format, outputs to SDI, captures the output
+ *  signal into another SDI, and validates the frame data captured matches the output data.
+ *
+ *  The Framestore SDI tests are driven from the VPID format tables, stored in JSON format in the 'json' sub-directory.
+ *
+ * 2. [ Planned Future Tests ]
+ *  - card_dma: Ancillary data DMA and readback
+ *  - framestore_sdi: VPID output and readback validation
+ *
+ * 3. [ Usage Examples ]
+ *  a. Board-to-board: output from one SDI to another on a different board
+ *  > ut_ntv2card.exe --card=0 --card_b=1
+ *
+ *  b. Board-to-self: output from one SDI to another on the same board
+ *  > ut_ntv2card.exe --card=0 --card_b=0
+ *
+ *  c. Specify specific FramestoreSDI test cases from JSON via a list of comma-separated IDs:
+ *  > ut_ntv2card.exe --card=0 --card_b=1 --tc_ids=1,2,3,4
+ *
+ *  d. Run only a specified Doctest "TEST_SUITE":
+ *  > ut_ntv2card.exe --card=0 --card_b=1 -ts=framestore_sdi
+ *
+ *  e. Run only a specified Doctest "TEST_CASE":
+ *  > ut_ntv2card.exe --card=0 --card_b=1 -tc=dma_write_read_one_frame
+ */
+
 #define DOCTEST_CONFIG_IMPLEMENT
 #define DOCTEST_THREAD_LOCAL
 #include "doctest.h"
@@ -175,52 +210,6 @@ TEST_SUITE("card_dma" * doctest::description("CNTV2Card DMA tests")) {
         CHECK_EQ(gCard->DMAReadAudio(audio_sys, (ULWord*)&readback[0], 0, kAudioSize4MiB), true);
         CHECK_EQ(memcmp(readback.data(), buffer.data(), kAudioSize4MiB), 0);
     }
-}
-
-void ntv2card_framestore_marker() {}
-TEST_SUITE("framestore_formats" * doctest::description("Framestore widget format tests")) {
-    TEST_CASE("Framestore 1080p30 YUV-8") {
-        auto vf = NTV2_FORMAT_1080p_3000;
-        auto pf = NTV2_FBF_8BIT_YCBCR;
-        CHECK_EQ(gCard->SetMode(NTV2_CHANNEL1, NTV2_MODE_DISPLAY), true);
-        CHECK_EQ(gCard->SetVideoFormat(vf, false, false, NTV2_CHANNEL1), true);
-        CHECK_EQ(gCard->SetFrameBufferFormat(NTV2_CHANNEL1, pf), true);
-        NTV2FormatDesc fd(vf, pf);
-        auto raster_size = fd.GetTotalBytes();
-        std::vector<UByte> buffer(kFrameSize8MiB);
-        std::vector<UByte> readback(kFrameSize8MiB);
-        ULWord seed = 1;
-
-        uint8_t sdi_range_min = (uint8_t)(qa::LegalVideoValue<8>::GetSDIRangeMin());
-        uint8_t sdi_range_max = (uint8_t)(qa::LegalVideoValue<8>::GetSDIRangeMax());
-        qa::CountingPattern8Bit(buffer, fd.GetRasterHeight(), fd.linePitch, sdi_range_min, sdi_range_max);
-        qa::RandomPattern<ULWord>(readback, kFrameSize8MiB, seed, 0, UINT32_MAX, qa::ByteOrder::LittleEndian);
-
-        std::vector<UByte> zeroes(kFrameSize8MiB);
-        CHECK_EQ(gCard->DMAWriteFrame(0, (const ULWord*)zeroes.data(), (ULWord)kFrameSize8MiB), true);
-        CHECK_EQ(gCard->DMAWriteFrame(0, (const ULWord*)buffer.data(), raster_size), true);
-        AJATime::Sleep(150);
-        CHECK_EQ(gCard->DMAReadFrame(0, (ULWord*)&readback[0], raster_size), true);
-        CHECK_EQ(memcmp(buffer.data(), readback.data(), raster_size), 0);
-    }
-    // TEST_CASE("Framestore UHDp30 YUV-8") {
-    //     auto vf = NTV2_FORMAT_4x1920x1080p_3000;
-    //     auto pf = NTV2_FBF_8BIT_YCBCR;
-    //     CHECK_EQ(gCard->SetMode(NTV2_CHANNEL1, NTV2_MODE_DISPLAY), true);
-    //     CHECK_EQ(gCard->SetVideoFormat(vf, false, false, NTV2_CHANNEL1), true);
-    //     CHECK_EQ(gCard->SetFrameBufferFormat(NTV2_CHANNEL1, pf), true);
-    //     NTV2FormatDesc fd(vf, pf);
-    //     auto raster_size = fd.GetTotalBytes();
-    //     std::vector<UByte> buffer(kFrameSize32MiB);
-    //     std::vector<UByte> readback(kFrameSize32MiB);
-    //     ULWord seed = 1;
-    //     qa::CountingPattern8Bit(buffer, fd.GetRasterHeight(), fd.GetBytesPerRow(), kSDILegalMin, kSDILegalMax8Bit);
-    //     qa::RandomPattern<ULWord>(readback, kFrameSize32MiB, seed, 0, UINT32_MAX, qa::ByteOrder::LittleEndian);
-    //     CHECK_EQ(gCard->DMAWriteFrame(0, (const ULWord*)buffer.data(), raster_size), true);
-    //     AJATime::Sleep(150);
-    //     CHECK_EQ(gCard->DMAReadFrame(0, (ULWord*)&readback[0], raster_size), true);
-    //     CHECK_EQ(memcmp(buffer.data(), readback.data(), raster_size), 0);
-    // }
 }
 
 struct TestCase {
@@ -581,8 +570,8 @@ int main(int argc, const char** argv) {
     struct argparse_option options[] = {
         OPT_ARGPARSE_HELP(),
         OPT_GROUP("ut_ntv2card options"),
-        OPT_INTEGER('\0', "card", &gOptions->card_a_index, "card_a"),
-        OPT_INTEGER('\0', "card_b", &gOptions->card_b_index, "card_b"),
+        OPT_INTEGER('a', "card", &gOptions->card_a_index, "card_a"),
+        OPT_INTEGER('b', "card_b", &gOptions->card_b_index, "card_b"),
         OPT_INTEGER('\0', "out_channel", &gOptions->out_channel, "output channel for board-to-board/loopback testing"),
         OPT_INTEGER('\0', "inp_channel", &gOptions->inp_channel, "input channel for board-to-board/loopback testing"),
         OPT_INTEGER('\0', "out_framestore", &gOptions->out_framestore, "output framestore for board-to-board/loopback testing"),
