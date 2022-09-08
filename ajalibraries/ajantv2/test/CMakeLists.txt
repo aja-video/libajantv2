@@ -54,6 +54,7 @@ if (AJA_BUILD_QA)
 		${AJA_QA_ROOT}/libs)
 	target_link_libraries(ut_ntv2card PRIVATE ajantv2 ntv2qa ${TARGET_LINK_LIBS})
 	set(UT_NTV2CARD_JSON
+		json/sdi_validated.json
 		json/sdi_sd_hd.json
 		json/sdi_uhd_4k.json)
 	foreach(j IN LISTS UT_NTV2CARD_JSON)

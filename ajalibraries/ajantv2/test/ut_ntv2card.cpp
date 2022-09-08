@@ -337,6 +337,7 @@ public:
     }
 
     bool ExecuteTest(const TestCase& tc) {
+        uint64_t tc_start = AJATime::GetSystemMilliseconds();
         bool use_single_card = _src_card == _dst_card;
         const auto& vf = tc.vf;
         const auto& pf = tc.pf;
@@ -392,7 +393,7 @@ public:
 
         CHECK_EQ(src_router.ApplyRouting(_clear_routing, true), AJA_STATUS_SUCCESS);
         CHECK_EQ(dst_router.ApplyRouting(_clear_routing && !use_single_card, true), AJA_STATUS_SUCCESS);
-        AJATime::Sleep(500);
+        AJATime::Sleep(2000);
         // if (!is_routed) {
         //     is_routed = true;
         // }
@@ -449,11 +450,11 @@ public:
         NTV2_POINTER compare_bytes(_readback.data(), raster_bytes);
         CNTV2PixelComponentReader master(master_bytes, fd);
         CNTV2PixelComponentReader compare(compare_bytes, fd);
-        uint64_t start_time = AJATime::GetSystemMilliseconds();
+        uint64_t rc_start = AJATime::GetSystemMilliseconds();
         CHECK_EQ(master.ReadComponentValues(), AJA_STATUS_SUCCESS);
         CHECK_EQ(compare.ReadComponentValues(), AJA_STATUS_SUCCESS);
-        uint64_t end_time = AJATime::GetSystemMilliseconds() - start_time;
-        LOGINFO("ReadComponents took " << end_time << "ms");
+        uint64_t rc_end = AJATime::GetSystemMilliseconds() - rc_start;
+        LOGINFO("CNTV2PixelComponentReader::ReadComponents finished in " << rc_end << "ms");
         bool result = (master == compare);
         if (result == true) {
             _num_pass++;
@@ -463,6 +464,8 @@ public:
         }
         _num_done++;
         CHECK_EQ(result, true);
+        uint64_t tc_end = AJATime::GetSystemMilliseconds() - tc_start;
+        LOGINFO("FramestoreSDI::ExecuteTest finished in " << tc_end << "ms");
         return result;
     }
 
@@ -532,8 +535,11 @@ TEST_SUITE("framestore_sdi" * doctest::description("SDI loopback tests")) {
             REQUIRE_EQ(AJAFileIO::GetDirectoryName(exe_path, exe_dir), AJA_STATUS_SUCCESS);
             const std::string json_base_dir = exe_dir + AJA_PATHSEP + "json" + AJA_PATHSEP;
             NTV2StringList vpid_json_paths;
-            vpid_json_paths.push_back(json_base_dir + "sdi_sd_hd.json");
-            // vpid_json_paths.push_back(json_base_dir + "sdi_uhd_4k.json");
+            vpid_json_paths.push_back(json_base_dir + "sdi_validated.json");            // VALIDATED TESTS
+            // ^^^^^ WORKING/TBD vvvvv
+            // vpid_json_paths.push_back(json_base_dir + "sdi_sd_hd.json");             // SD/HD TESTS
+            // vpid_json_paths.push_back(json_base_dir + "sdi_uhd_4k.json");            // UHD/4K TESTS
+            // vpid_json_paths.push_back(json_base_dir + "ntv2_vpid_tests.json");       // ALL TEST CASES
             REQUIRE_EQ(fs_sdi->Initialize(vpid_json_paths, test_cases), AJA_STATUS_SUCCESS);
         }
         DOCTEST_PARAMETERIZE(test_cases);
