@@ -276,7 +276,7 @@ void AJATime::Sleep (int32_t inTime)
 		#else
 			timespec req, rm;
 			req.tv_sec = 0;
-			req.tv_nsec = long(inTime)*1000L*1000L;
+			req.tv_nsec = long(inTime) * 1000L * 1000L;
 			rm.tv_sec = 0; rm.tv_nsec = 0;
 			if (::nanosleep(&req, &rm) < 0)
 				;	//	failed
@@ -298,7 +298,16 @@ void AJATime::SleepInMicroseconds (int32_t inTime)
 	#elif defined(AJA_WINDOWS)
 		::Sleep(DWORD(inTime) / 1000);	//	Windows Sleep expects millisecs
 	#else	//	POSIX
-		usleep(inTime);	//	Warning:  usleep is deprecated in POSIX
+		#if 0	//	usleep is deprecated in POSIX
+			usleep(inTime);
+		#else
+			timespec req, rm;
+			req.tv_sec = 0;
+			req.tv_nsec = long(inTime) * 1000L;
+			rm.tv_sec = 0; rm.tv_nsec = 0;
+			if (::nanosleep(&req, &rm) < 0)
+				;	//	failed
+		#endif
 	#endif
 	POST_STATS(double(inTime) / 1000000.0);
 }
