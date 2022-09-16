@@ -29,9 +29,7 @@
 	#include "timeapi.h"
 	static LARGE_INTEGER s_PerformanceFrequency;
 	static bool s_bPerformanceInit = false;
-#endif
-
-#if defined(AJA_LINUX)
+#elif defined(AJA_LINUX)
 	#include <unistd.h>
 	#if (_POSIX_TIMERS > 0)
 		#ifdef _POSIX_MONOTONIC_CLOCK
@@ -55,9 +53,7 @@ int64_t AJATime::GetSystemTime (void)
 	// system dependent time function
 #if defined(AJA_WINDOWS)
 	return (int64_t)::timeGetTime();
-#endif
-
-#if defined(AJA_MAC)
+#elif defined(AJA_MAC)
 	static mach_timebase_info_data_t	sTimebaseInfo;
 	uint64_t ticks = ::mach_absolute_time();
 	
@@ -69,22 +65,21 @@ int64_t AJATime::GetSystemTime (void)
 	// Do the maths. We hope that the multiplication doesn't
 	// overflow; the price you pay for working in fixed point.
 	int64_t nanoSeconds = ticks * sTimebaseInfo.numer / sTimebaseInfo.denom;
-	
 	return nanoSeconds;
-#endif
-
-#if defined(AJA_LINUX)
-#ifdef AJA_USE_CLOCK_GETTIME
-	struct timespec ts;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-	return (ts.tv_sec * ((int64_t)1000)) + (ts.tv_nsec / (int64_t)1000000);
+#elif defined(AJA_LINUX)
+	#ifdef AJA_USE_CLOCK_GETTIME
+		struct timespec ts;
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+		return (ts.tv_sec * ((int64_t)1000)) + (ts.tv_nsec / (int64_t)1000000);
+	#else
+		struct timeval tv;
+		struct timezone tz;
+	
+		gettimeofday( &tv, &tz );
+		return (int64_t)((tv.tv_sec * ((int64_t)1000)) + (int64_t)(tv.tv_usec / 1000));
+	#endif
 #else
-	struct timeval tv;
-	struct timezone tz;
-
-	gettimeofday( &tv, &tz );
-	return (int64_t)((tv.tv_sec * ((int64_t)1000)) + (int64_t)(tv.tv_usec / 1000));
-#endif
+	return 0;
 #endif
 }
 
@@ -101,24 +96,25 @@ int64_t AJATime::GetSystemCounter (void)
 	}
 
 	return (int64_t)performanceCounter.QuadPart;
-#endif
-
-#if defined(AJA_MAC)
-	return int64_t(::clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW));	//(mach_absolute_time());
-#endif
-
-#if defined(AJA_LINUX)
-#ifdef AJA_USE_CLOCK_GETTIME
-	struct timespec ts;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-	return (ts.tv_sec * ((int64_t)1000000000)) + (ts.tv_nsec);
+#elif defined(AJA_MAC)
+	//	Issue 846:	mach_absolute_time doesn't have nanosec resolution on ARM hardware.
+	//				Need to use clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW), but need to
+	//				also change GetSystemFrequency.
+	return int64_t(mach_absolute_time());
+#elif defined(AJA_LINUX)
+	#ifdef AJA_USE_CLOCK_GETTIME
+		struct timespec ts;
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+		return (ts.tv_sec * ((int64_t)1000000000)) + (ts.tv_nsec);
+	#else
+		struct timeval tv;
+		struct timezone tz;
+	
+		gettimeofday( &tv, &tz );
+		return (int64_t)((int64_t)tv.tv_sec * (int64_t)1000000 + tv.tv_usec);
+	#endif
 #else
-	struct timeval tv;
-	struct timezone tz;
-
-	gettimeofday( &tv, &tz );
-	return (int64_t)((int64_t)tv.tv_sec * (int64_t)1000000 + tv.tv_usec);
-#endif
+	return 0;
 #endif
 }
 
@@ -131,11 +127,8 @@ int64_t AJATime::GetSystemFrequency (void)
 		QueryPerformanceFrequency(&s_PerformanceFrequency);
 		s_bPerformanceInit = true;
 	}
-
 	return (int64_t)s_PerformanceFrequency.QuadPart;
-#endif
-
-#if defined(AJA_MAC)
+#elif defined(AJA_MAC)
 	if (!s_bPerformanceInit)
 	{
 		// 1 billion ticks approximately equals 1 sec on a Mac
@@ -155,16 +148,15 @@ int64_t AJATime::GetSystemFrequency (void)
 		s_PerformanceFrequency = ticks * 1000000000 / nanoSeconds;	
 		s_bPerformanceInit = true;
 	}
-	
 	return s_PerformanceFrequency;
-#endif
-
-#if defined(AJA_LINUX)
-#ifdef AJA_USE_CLOCK_GETTIME
-	return 1000000000;
+#elif defined(AJA_LINUX)
+	#ifdef AJA_USE_CLOCK_GETTIME
+		return 1000000000;
+	#else
+		return 1000000;
+	#endif
 #else
-	return 1000000;
-#endif
+	return 0;
 #endif
 }
 
