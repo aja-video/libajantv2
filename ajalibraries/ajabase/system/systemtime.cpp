@@ -14,16 +14,24 @@
 	#include "ajabase/system/thread.h"
 #endif	//	defined(AJA_COLLECT_SLEEP_STATS)
 
+#if defined(AJA_USE_CPLUSPLUS11)
+	//	If compiling with C++11, by default, implementation uses STL chrono & thread.
+	#define	AJA_SLEEP_USE_STL	//	Sleep... functions use STL chrono/thread;  comment this out to use native impl
+//	#define	AJA_SYSCLK_USE_STL	//	GetSystem... functions use STL chrono;  comment this out to use native impl (TBD)
+#elif !defined(AJA_WINDOWS)
+//	#define	AJA_USE_USLEEP		//	Uncomment this to use POSIX-deprecated usleep function instead of nanosleep
+#endif	//	AJA_USE_CPLUSPLUS11
+
 #if defined(AJA_MAC)
 	#include <mach/mach_time.h>
 	#include <CoreServices/CoreServices.h>
 	static int64_t s_PerformanceFrequency;
 	static bool s_bPerformanceInit = false;
 #endif
-#if defined(AJA_USE_CPLUSPLUS11)
+#if defined(AJA_SLEEP_USE_STL)  ||  defined(AJA_SYSCLK_USE_STL)
 	#include <chrono>
 	#include <thread>
-#endif	//	AJA_USE_CPLUSPLUS11
+#endif	//	AJA_SLEEP_USE_STL || AJA_SYSCLK_USE_STL
 
 #if defined(AJA_WINDOWS)
 	#include "timeapi.h"
@@ -51,7 +59,9 @@
 int64_t AJATime::GetSystemTime (void)
 {
 	// system dependent time function
-#if defined(AJA_WINDOWS)
+#if defined(AJA_SYSCLK_USE_STL)
+	** NEED STL IMPL **
+#elif defined(AJA_WINDOWS)
 	return (int64_t)::timeGetTime();
 #elif defined(AJA_MAC)
 	static mach_timebase_info_data_t	sTimebaseInfo;
@@ -86,7 +96,9 @@ int64_t AJATime::GetSystemTime (void)
 
 int64_t AJATime::GetSystemCounter (void)
 {
-#if defined(AJA_WINDOWS)
+#if defined(AJA_SYSCLK_USE_STL)
+	** NEED STL IMPL **
+#elif defined(AJA_WINDOWS)
 	LARGE_INTEGER performanceCounter;
 
 	performanceCounter.QuadPart = 0;
@@ -121,7 +133,9 @@ int64_t AJATime::GetSystemCounter (void)
 
 int64_t AJATime::GetSystemFrequency (void)
 {
-#if defined(AJA_WINDOWS)
+#if defined(AJA_SYSCLK_USE_STL)
+	** NEED STL IMPL **
+#elif defined(AJA_WINDOWS)
 	if (!s_bPerformanceInit)
 	{
 		QueryPerformanceFrequency(&s_PerformanceFrequency);
@@ -258,13 +272,13 @@ void AJATime::Sleep (int32_t inTime)
 		return;	//	Don't sleep at all
 
 	PRE_STATS
-	#if defined(AJA_USE_CPLUSPLUS11)
+	#if defined(AJA_SLEEP_USE_STL)
 		std::this_thread::sleep_for(std::chrono::milliseconds(inTime));
 	#elif defined(AJA_WINDOWS)
 		::Sleep(DWORD(inTime));
 	#else	//	POSIX
-		#if 0	//	usleep is deprecated in POSIX
-			usleep(inTime * 1000);
+		#if defined(AJA_USE_USLEEP)
+			usleep(inTime * 1000);	//	usleep is deprecated in POSIX
 		#else
 			timespec req, rm;
 			req.tv_sec = 0;
@@ -285,13 +299,13 @@ void AJATime::SleepInMicroseconds (int32_t inTime)
 		return;	//	Don't sleep at all
 
 	PRE_STATS
-	#if defined(AJA_USE_CPLUSPLUS11)
+	#if defined(AJA_SLEEP_USE_STL)
 		std::this_thread::sleep_for(std::chrono::microseconds(inTime));
 	#elif defined(AJA_WINDOWS)
 		::Sleep(DWORD(inTime) / 1000);	//	Windows Sleep expects millisecs
 	#else	//	POSIX
-		#if 0	//	usleep is deprecated in POSIX
-			usleep(inTime);
+		#if defined(AJA_USE_USLEEP)
+			usleep(inTime);	//	usleep is deprecated in POSIX
 		#else
 			timespec req, rm;
 			req.tv_sec = 0;
