@@ -104,7 +104,8 @@ int64_t AJATime::GetSystemCounter (void)
 #endif
 
 #if defined(AJA_MAC)
-	return int64_t(::clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW));	//(mach_absolute_time());
+	//return int64_t(::clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW));
+	return (mach_absolute_time());
 #endif
 
 #if defined(AJA_LINUX)
