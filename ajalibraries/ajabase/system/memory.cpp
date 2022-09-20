@@ -163,7 +163,7 @@ AJAMemory::FreeAligned(void* pMemory)
 
 
 void* 
-AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
+AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName, bool global)
 {
 	AJAAutoLock lock(&sSharedLock);
 	
@@ -197,7 +197,8 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
 
 	std::string name;
 #if defined(AJA_WINDOWS)
-	name = "Global\\";
+	if (global)
+		name = "Global\\";
 	name += pShareName;
 #elif defined(AJA_LINUX)
 	// Docs say to start name with a slash
@@ -226,35 +227,47 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName)
 
 	// allocate new share
 #if defined(AJA_WINDOWS)
-
-	// Initialize a security descriptor.  
-	PSECURITY_DESCRIPTOR  pSD = (PSECURITY_DESCRIPTOR) LocalAlloc(LPTR, SECURITY_DESCRIPTOR_MIN_LENGTH); 
-	BOOL rv = InitializeSecurityDescriptor(pSD,SECURITY_DESCRIPTOR_REVISION);
-	if (rv == FALSE)
+	if (global)
 	{
-		DWORD err = GetLastError();
-		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::AllocateShared  InitializeSecurityDescriptor failed (err=%d)", err);
+		// cross-user access
+		SECURITY_DESCRIPTOR sd;
+		BOOL rv = InitializeSecurityDescriptor(&sd, SECURITY_DESCRIPTOR_REVISION);
+		if (rv != FALSE) {
+			// Add the ACL to the security descriptor.
+			rv = SetSecurityDescriptorDacl(&sd,
+				TRUE,	  // bDaclPresent flag
+				NULL,	  // this makes it completely open
+				FALSE);	  // not a default DACL
+			if (rv != FALSE)
+			{
+				SECURITY_ATTRIBUTES sa;
+				sa.nLength = sizeof (SECURITY_ATTRIBUTES);
+				sa.lpSecurityDescriptor = &sd;
+				sa.bInheritHandle = FALSE;
+				newData.fileMapHandle = CreateFileMapping(INVALID_HANDLE_VALUE,
+					&sa, PAGE_READWRITE, 0, (DWORD)sizeInBytes, name.c_str());
+			}
+			else
+			{
+				DWORD err = GetLastError();
+				AJA_REPORT(0, AJA_DebugSeverity_Error,
+					"AJAMemory::AllocateShared  SetSecurityDescriptorDacl failed (err=%d)", err);
+			}
+		}
+		else
+		{
+			DWORD err = GetLastError();
+			AJA_REPORT(0, AJA_DebugSeverity_Error,
+				"AJAMemory::AllocateShared  InitializeSecurityDescriptor failed (err=%d)", err);
+		}
+	}
+	else
+	{
+		// Local user access only
+		newData.fileMapHandle = CreateFileMapping(INVALID_HANDLE_VALUE,
+			NULL, PAGE_READWRITE, 0, (DWORD)sizeInBytes, name.c_str());
 	}
 
-	// Add the ACL to the security descriptor. 
-	rv = SetSecurityDescriptorDacl(pSD, 
-		TRUE,	  // bDaclPresent flag	 
-		NULL,	  // this makes it completely open
-		FALSE);	  // not a default DACL 
-
-	if (rv == FALSE)
-	{
-		DWORD err = GetLastError();
-		AJA_REPORT(0, AJA_DebugSeverity_Error, "AJAMemory::AllocateShared  SetSecurityDescriptorDacl failed (err=%d)", err);
-	}
-
-	SECURITY_ATTRIBUTES sa;
-	sa.nLength = sizeof (SECURITY_ATTRIBUTES);
-	sa.lpSecurityDescriptor = pSD;
-	sa.bInheritHandle = FALSE;
-
-	newData.fileMapHandle = CreateFileMapping(INVALID_HANDLE_VALUE, &sa, PAGE_READWRITE, 0, (DWORD)sizeInBytes, name.c_str());
-	LocalFree(pSD);
 	if (newData.fileMapHandle == NULL)
 	{
 		DWORD err = GetLastError();
