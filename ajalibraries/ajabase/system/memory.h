@@ -63,7 +63,7 @@ public:
 	 *	@param[in]		global		If true, shared memory region will be accessible across user accounts (Windows-only).
 	 *	@return						Address of allocated memory.  NULL if allocation fails.
 	 */
-	static void* AllocateShared(size_t* size, const char* pShareName, bool global = false);
+	static void* AllocateShared(size_t* size, const char* pShareName, bool global = true);
 
 	/**
 	 *	Free memory allocated using AllocateShared().
