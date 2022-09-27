@@ -179,8 +179,8 @@ inline bool should_we_log()
 }
 
 // Encapsulate the sqlite3_stmt object so automatically handled by constructor/destructor
-const int gDefaultNumSqliteRetries = 4;
-const int32_t gDefaultMicrosecondsBetweenRetries = 2000;
+const int gDefaultNumSqliteRetries = 6;
+const int32_t gDefaultMicrosecondsBetweenRetries = 2500;//2000;
 
 // Encapsulate the sqlite3 object so automatically handled by constructor/destructor
 class AJAPersistenceDBImplObject
