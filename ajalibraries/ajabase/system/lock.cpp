@@ -7,6 +7,7 @@
 
 #if defined(AJA_USE_CPLUSPLUS11)
 	#include <chrono>
+	#include "ajabase/system/lock.h"
 #else
 	// include the system dependent implementation class
 	#if defined(AJA_WINDOWS)
