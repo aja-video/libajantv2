@@ -5,9 +5,9 @@
 	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
+#include "ajabase/system/lock.h"
 #if defined(AJA_USE_CPLUSPLUS11)
 	#include <chrono>
-	#include "ajabase/system/lock.h"
 #else
 	// include the system dependent implementation class
 	#if defined(AJA_WINDOWS)
