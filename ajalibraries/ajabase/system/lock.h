@@ -73,9 +73,10 @@ public:
 			#endif
 		}
 
+	AJALock (const AJALock & inLock);
+	virtual AJALock &	operator = (const AJALock & inLock);
+
 private:
-	AJALock (const AJALock & inLock)					{(void) inLock;  assert(false);}	//	Disable copy constructor
-	AJALock &	operator = (const AJALock & inLock)		{(void) inLock;  assert(false);  return *this;}	//	Disable assignment operator
 #if defined(AJA_USE_CPLUSPLUS11)
 	recursive_timed_mutex* mpMutex={nullptr};
 	string name;
