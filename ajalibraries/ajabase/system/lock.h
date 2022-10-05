@@ -9,7 +9,7 @@
 #define AJA_LOCK_H
 
 #include "ajabase/common/public.h"
-
+#include <assert.h>
 #if defined(AJA_USE_CPLUSPLUS11)
 	#include <mutex>
 	#include <string>
@@ -74,6 +74,8 @@ public:
 		}
 
 private:
+	AJALock (const AJALock & inLock)					{(void) inLock;  assert(false);}	//	Disable copy constructor
+	AJALock &	operator = (const AJALock & inLock)		{(void) inLock;  assert(false);}	//	Disable assignment operator
 #if defined(AJA_USE_CPLUSPLUS11)
 	recursive_timed_mutex* mpMutex={nullptr};
 	string name;
