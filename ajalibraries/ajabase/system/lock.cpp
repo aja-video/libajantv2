@@ -41,7 +41,7 @@ AJALock::AJALock (const AJALock & inLock)
 	name = inLock.name;
 #else
 	mpImpl = NULL;
-	mpImpl = new AJALockImpl(inLock.name.c_str());
+	mpImpl = new AJALockImpl(NULL);	//	FOR NOW, NAME NOT COPIED -- TBD:  inLock.mpImpl->mName);
 #endif
 }
 
