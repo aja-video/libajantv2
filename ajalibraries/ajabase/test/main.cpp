@@ -83,7 +83,7 @@ TEST_SUITE("thread" * doctest::description("functions in ajabase/system/thread.h
 			uint64_t startTime = AJATime::GetSystemMilliseconds();
 			uint64_t now = AJATime::GetSystemMilliseconds();
 			uint64_t elapsed = now - startTime;
-			while (elapsed < THREAD_LIFETIME_MS) {
+			while (!Terminate() && elapsed < THREAD_LIFETIME_MS) {
 				now = AJATime::GetSystemMilliseconds();
 				elapsed = now - startTime;
 				int64_t remain = (int64_t)(THREAD_LIFETIME_MS - elapsed);
@@ -93,10 +93,11 @@ TEST_SUITE("thread" * doctest::description("functions in ajabase/system/thread.h
 			return AJA_STATUS_SUCCESS;
 		}
 	};
-	TEST_CASE("AJAThread constructor")
+	TEST_CASE("AJAThread::Active")
 	{
 		CHECK(THREAD_FORCE_KILL_MS - THREAD_LIFETIME_MS >= 1000); // run for at least 1 second
 		TestThread tt;
+		std::cout << "AJAThread::Active loops" << std::endl;
 		tt.Start();
 		uint64_t tid = tt.GetThreadId();
 		bool running = true;
@@ -115,6 +116,24 @@ TEST_SUITE("thread" * doctest::description("functions in ajabase/system/thread.h
 		}
 		CHECK_FALSE(running);
 		CHECK_FALSE(tt.Active());
+	}
+	TEST_CASE("AJAThread::Stop")
+	{
+		TestThread tt;
+		std::cout << "AJAThread::Stop loops" << std::endl;
+		tt.Start();
+		uint64_t tid = tt.GetThreadId();
+		bool running = true;
+		uint64_t startTime = AJATime::GetSystemMilliseconds();
+		while (running) {
+			uint64_t now = AJATime::GetSystemMilliseconds();
+			if (now - startTime > 100) {
+				AJAStatus s = tt.Stop(300);
+				CHECK(s == AJA_STATUS_SUCCESS);
+				running = false;
+			}
+		}
+		tt.Terminate();
 	}
 }
 
