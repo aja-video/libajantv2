@@ -19,6 +19,28 @@
 
 static const size_t STACK_SIZE = 1024 * 1024;
 
+bool is_pthread_alive(pthread_t thread)
+{
+#if 1
+	// since this is a Linux impl use the non portable, non blocking pthread_tryjoin_np.
+	// If the thread is alive a non zero value is returned
+	// NOTE: if this impl is ever changed to not be PTHREAD_CREATE_JOINABLE this will not work
+	void* exitValue;
+	if (pthread_tryjoin_np(thread, &exitValue) != 0)
+		return true;
+#else
+	// This way no longer works with modern glibc
+	// seen failures with versions: 2.34 & 2.35
+	// seen success with versions: 2.31 and earlier
+	//
+	// with zero, no signal sent to thread, it's only checked for validity
+	if (!pthread_kill(thread, 0))
+		return true;
+#endif
+
+	return false;
+}
+
 AJAThreadImpl::AJAThreadImpl(AJAThread* pThreadContext) :
 	mpThreadContext(pThreadContext),
 	mThread(0),
@@ -302,8 +324,7 @@ AJAThreadImpl::Kill(uint32_t exitCode)
 	AJAStatus returnStatus = AJA_STATUS_SUCCESS;
 
 	// If the thread doesn't exist, consider the Kill successful
-	// with zero, no signal sent to thread, it's only checked for validity
-	if (!pthread_kill(mThread, 0))
+	if (!is_pthread_alive(mThread))
 		return returnStatus;
 
 	// Try to make the thread as killable as possible
@@ -353,8 +374,7 @@ AJAThreadImpl::Active()
 		return false;
 	}
 
-	// with zero, no signal sent to thread, it's only checked for validity
-	if (!pthread_kill(mThread, 0))
+	if (is_pthread_alive(mThread))
 		return true;
 
 	// the thread has terminated, so clear the handle
