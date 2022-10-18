@@ -664,6 +664,9 @@ bool CNTV2Card::AutoCirculateInitForInput ( const NTV2Channel		inChannel,
 		{ACFAIL("Input Ch" << DEC(inChannel+1) << ": Frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber) << " < 2 frames"); return false;}
 	if (inOptionFlags & (AUTOCIRCULATE_WITH_MULTILINK_AUDIO1 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO2 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO3)  &&  !::NTV2DeviceCanDoMultiLinkAudio(GetDeviceID()))
 		ACWARN("Input Ch" << DEC(inChannel+1) << ": MultiLink Audio requested, but device doesn't support it");
+	const UWord numAudSystems(::NTV2DeviceGetNumAudioSystems(GetDeviceID()));	//	AutoCirc cannot use AudioMixer or HostAudio
+	if (inAudioSystem  &&  UWord(inAudioSystem) >= numAudSystems)
+		{ACFAIL("Invalid audio system specified: AudSys" << DEC(inAudioSystem+1) << " -- exceeds max legal AudSys" << DEC(numAudSystems)); return false;}
 
 	//	Fill in our OS independent data structure...
 	AUTOCIRCULATE_DATA	autoCircData(eInitAutoCirc);
@@ -786,6 +789,9 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 		{ACFAIL("Output Ch" << DEC(inChannel+1) << ": Frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber) << " < 2 frames"); return false;}
 	if (inOptionFlags & (AUTOCIRCULATE_WITH_MULTILINK_AUDIO1 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO2 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO3)  &&  !::NTV2DeviceCanDoMultiLinkAudio(GetDeviceID()))
 		ACWARN("Output Ch" << DEC(inChannel+1) << ": MultiLink Audio requested, but device doesn't support it");
+	const UWord numAudSystems(::NTV2DeviceGetNumAudioSystems(GetDeviceID()));	//	AutoCirc cannot use AudioMixer or HostAudio
+	if (inAudioSystem  &&  UWord(inAudioSystem) >= numAudSystems)
+		{ACFAIL("Invalid audio system specified: AudSys" << DEC(inAudioSystem+1) << " -- exceeds max legal AudSys" << DEC(numAudSystems)); return false;}
 
 	//	Warn about "with anc" and VANC mode...
 	if (inOptionFlags & AUTOCIRCULATE_WITH_ANC)
