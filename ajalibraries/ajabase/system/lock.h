@@ -9,7 +9,7 @@
 #define AJA_LOCK_H
 
 #include "ajabase/common/public.h"
-
+#include <assert.h>
 #if defined(AJA_USE_CPLUSPLUS11)
 	#include <mutex>
 	#include <string>
@@ -72,6 +72,9 @@ public:
 				return mpImpl != NULL;
 			#endif
 		}
+
+	AJALock (const AJALock & inLock);
+	virtual AJALock &	operator = (const AJALock & inLock);
 
 private:
 #if defined(AJA_USE_CPLUSPLUS11)

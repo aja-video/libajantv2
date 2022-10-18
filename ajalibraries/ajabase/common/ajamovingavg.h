@@ -9,6 +9,7 @@
 #define AJA_MOVINGAVG_H
 
 #include "ajabase/common/public.h"
+#include "ajabase/system/lock.h"
 #include <climits>
 #include <cfloat>
 #include <deque>
@@ -20,7 +21,6 @@
  *	Class that maintains a moving average of a fixed number of T samples.
  *	Defaults to a maximum of 10 samples.
  *	@ingroup AJAGroupSystem
- *	@note	This class is not thread-safe.
  */
 template <typename T> class AJAMovingAvg
 {
@@ -44,7 +44,7 @@ template <typename T> class AJAMovingAvg
 		 *	@param[in]	inValue		Specifies the new sample value.
 		 */
 		inline void				addSample (const T inValue)
-		{
+		{	AJAAutoLock tmp(&mLock);
 			mValues.push_front(inValue);
 			if (mValues.size() > mSampleCapacity)
 				mValues.pop_back();
@@ -61,7 +61,7 @@ template <typename T> class AJAMovingAvg
 		 *	@param[in]	inMaxNumSamples		Specifies my new sample capacity.
 		 */
 		inline void				reset (const size_t inMaxNumSamples = kDefaultMaxNumSamples)
-		{
+		{	AJAAutoLock tmp(&mLock);
 			mValues.clear();
 			mSampleCapacity = inMaxNumSamples;
 			mTotNumSamples = 0;
@@ -72,33 +72,33 @@ template <typename T> class AJAMovingAvg
 		/**
 		 *	@returns the current number of samples I'm storing.
 		 */
-		inline size_t			numStoredSamples (void) const	{return mValues.size();}
+		inline size_t			numStoredSamples (void) const	{AJAAutoLock tmp(&mLock);  return mValues.size();}
 
 		/**
 		 *	@returns the maximum number of samples I will store.
 		 */
-		inline size_t			sampleCapacity (void) const		{return mSampleCapacity;}
+		inline size_t			sampleCapacity (void) const		{AJAAutoLock tmp(&mLock);  return mSampleCapacity;}
 
 		/**
 		 *	@returns the total number of samples (i.e. number of addSample calls made).
 		 */
-		inline size_t			totalSamples (void) const		{return mTotNumSamples;}
+		inline size_t			totalSamples (void) const		{AJAAutoLock tmp(&mLock);  return mTotNumSamples;}
 
 		/**
 		 *	@returns true if I'm valid.
 		 */
-		inline bool				isValid (void) const			{return totalSamples() > 0;}
+		inline bool				isValid (void) const			{AJAAutoLock tmp(&mLock);  return totalSamples() > 0;}
 
 		/**
 		 *	@returns true if I'm empty.
 		 */
-		inline bool				isEmpty (void) const			{return mValues.empty();}
+		inline bool				isEmpty (void) const			{AJAAutoLock tmp(&mLock);  return mValues.empty();}
 
 		/**
 		 *	@returns my recent average.
 		 */
 		inline T				average (void) const
-		{
+		{	AJAAutoLock tmp(&mLock);
 			if (isEmpty())
 				return 0;
 			return sum() / T(numStoredSamples());
@@ -108,7 +108,7 @@ template <typename T> class AJAMovingAvg
 		 *	@returns my recent average as a double-precision floating-point value.
 		 */
 		inline double			averageF (void) const
-		{
+		{	AJAAutoLock tmp(&mLock);
 			if (isEmpty())
 				return 0.0;
 			return double(sum()) / double(numStoredSamples());
@@ -117,7 +117,7 @@ template <typename T> class AJAMovingAvg
 		/**
 		 *	@returns the minimum value ever seen by addSample.
 		 */
-		inline T				minimum (void) const			{return mMinValue;}
+		inline T				minimum (void) const			{AJAAutoLock tmp(&mLock);  return mMinValue;}
 
 		/**
 		 *	@returns the minimum value from my stored samples.
@@ -125,6 +125,7 @@ template <typename T> class AJAMovingAvg
 		inline T				recentMinimum (void) const
 		{
 			T result(largestPossibleValue());
+			AJAAutoLock tmp(&mLock);
 			for (auto it(mValues.begin());  it != mValues.end();  ++it)
 				if (*it < result)
 					result = *it;
@@ -134,7 +135,7 @@ template <typename T> class AJAMovingAvg
 		/**
 		 *	@returns the maximum value ever seen by addSample.
 		 */
-		inline T				maximum (void) const			{return mMaxValue;}
+		inline T				maximum (void) const			{AJAAutoLock tmp(&mLock);  return mMaxValue;}
 
 		/**
 		 *	@returns the maximum value from my stored samples.
@@ -142,6 +143,7 @@ template <typename T> class AJAMovingAvg
 		inline T				recentMaximum (void) const
 		{
 			T result(smallestPossibleValue());
+			AJAAutoLock tmp(&mLock);
 			for (auto it(mValues.begin());  it != mValues.end();  ++it)
 				if (*it > result)
 					result = *it;
@@ -158,6 +160,7 @@ template <typename T> class AJAMovingAvg
 		 */
 		inline std::ostream &	Print (std::ostream & oss, const bool inDetailed = false) const
 		{
+			AJAAutoLock tmp(&mLock);
 			if (isValid())
 			{
 				if (inDetailed)
@@ -172,6 +175,7 @@ template <typename T> class AJAMovingAvg
 	protected:
 		inline T	sum (void) const
 		{
+			AJAAutoLock tmp(&mLock);
 			if (isEmpty())
 				return T(0);
 			T result = T(0);
@@ -243,6 +247,7 @@ template <typename T> class AJAMovingAvg
 		}
 
 	private:
+		mutable AJALock	mLock;
 		std::deque<T>	mValues;			///< @brief	My last N values for computing an average
 		size_t			mSampleCapacity;	///< @brief	Maximum allowed size of the mValues deque
 		size_t			mTotNumSamples;		///< @brief	Total number of times that addSample was called

@@ -5,6 +5,7 @@
 	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
+#include "ajabase/system/lock.h"
 #if defined(AJA_USE_CPLUSPLUS11)
 	#include <chrono>
 #else
@@ -31,6 +32,23 @@ AJALock::AJALock(const char* pName)
 	mpImpl = NULL;
 	mpImpl = new AJALockImpl(pName);
 #endif
+}
+
+AJALock::AJALock (const AJALock & inLock)
+{	//	Copy constructor -- only name is copied...
+#if defined(AJA_USE_CPLUSPLUS11)
+	mpMutex = new recursive_timed_mutex;
+	name = inLock.name;
+#else
+	mpImpl = NULL;
+	mpImpl = new AJALockImpl(NULL);	//	FOR NOW, NAME NOT COPIED -- TBD:  inLock.mpImpl->mName);
+#endif
+}
+
+AJALock & AJALock::operator = (const AJALock & inLock)
+{	//	Assignment operator -- no-op
+	(void) inLock;
+	return *this;
 }
 
 

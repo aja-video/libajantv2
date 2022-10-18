@@ -61,7 +61,7 @@ AJAStatus AJADebug::Open (bool incrementRefCount)
 		{
 			// allocate the shared memory storage
 			size_t size (sizeof(AJADebugShare));
-			spShare = reinterpret_cast<AJADebugShare*>(AJAMemory::AllocateShared(&size, AJA_DEBUG_SHARE_NAME));
+			spShare = reinterpret_cast<AJADebugShare*>(AJAMemory::AllocateShared(&size, AJA_DEBUG_SHARE_NAME, false));
 			if (spShare == NULL || spShare == reinterpret_cast<void*>(-1))
 			{
 				spShare = NULL;

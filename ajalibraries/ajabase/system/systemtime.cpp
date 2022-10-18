@@ -14,24 +14,30 @@
 	#include "ajabase/system/thread.h"
 #endif	//	defined(AJA_COLLECT_SLEEP_STATS)
 
+#if defined(AJA_USE_CPLUSPLUS11)
+	//	If compiling with C++11, by default, implementation uses STL chrono & thread.
+	#define	AJA_SLEEP_USE_STL	//	Sleep... functions use STL chrono/thread;  comment this out to use native impl
+//	#define	AJA_SYSCLK_USE_STL	//	GetSystem... functions use STL chrono;  comment this out to use native impl (TBD)
+#elif !defined(AJA_WINDOWS)
+//	#define	AJA_USE_USLEEP		//	Uncomment this to use POSIX-deprecated usleep function instead of nanosleep
+#endif	//	AJA_USE_CPLUSPLUS11
+
 #if defined(AJA_MAC)
 	#include <mach/mach_time.h>
 	#include <CoreServices/CoreServices.h>
 	static int64_t s_PerformanceFrequency;
 	static bool s_bPerformanceInit = false;
 #endif
-#if defined(AJA_USE_CPLUSPLUS11)
+#if defined(AJA_SLEEP_USE_STL)  ||  defined(AJA_SYSCLK_USE_STL)
 	#include <chrono>
 	#include <thread>
-#endif	//	AJA_USE_CPLUSPLUS11
+#endif	//	AJA_SLEEP_USE_STL || AJA_SYSCLK_USE_STL
 
 #if defined(AJA_WINDOWS)
 	#include "timeapi.h"
 	static LARGE_INTEGER s_PerformanceFrequency;
 	static bool s_bPerformanceInit = false;
-#endif
-
-#if defined(AJA_LINUX)
+#elif defined(AJA_LINUX)
 	#include <unistd.h>
 	#if (_POSIX_TIMERS > 0)
 		#ifdef _POSIX_MONOTONIC_CLOCK
@@ -53,11 +59,11 @@
 int64_t AJATime::GetSystemTime (void)
 {
 	// system dependent time function
-#if defined(AJA_WINDOWS)
+#if defined(AJA_SYSCLK_USE_STL)
+	** NEED STL IMPL **
+#elif defined(AJA_WINDOWS)
 	return (int64_t)::timeGetTime();
-#endif
-
-#if defined(AJA_MAC)
+#elif defined(AJA_MAC)
 	static mach_timebase_info_data_t	sTimebaseInfo;
 	uint64_t ticks = ::mach_absolute_time();
 	
@@ -69,29 +75,30 @@ int64_t AJATime::GetSystemTime (void)
 	// Do the maths. We hope that the multiplication doesn't
 	// overflow; the price you pay for working in fixed point.
 	int64_t nanoSeconds = ticks * sTimebaseInfo.numer / sTimebaseInfo.denom;
-	
 	return nanoSeconds;
-#endif
-
-#if defined(AJA_LINUX)
-#ifdef AJA_USE_CLOCK_GETTIME
-	struct timespec ts;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-	return (ts.tv_sec * ((int64_t)1000)) + (ts.tv_nsec / (int64_t)1000000);
+#elif defined(AJA_LINUX)
+	#ifdef AJA_USE_CLOCK_GETTIME
+		struct timespec ts;
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+		return (ts.tv_sec * ((int64_t)1000)) + (ts.tv_nsec / (int64_t)1000000);
+	#else
+		struct timeval tv;
+		struct timezone tz;
+	
+		gettimeofday( &tv, &tz );
+		return (int64_t)((tv.tv_sec * ((int64_t)1000)) + (int64_t)(tv.tv_usec / 1000));
+	#endif
 #else
-	struct timeval tv;
-	struct timezone tz;
-
-	gettimeofday( &tv, &tz );
-	return (int64_t)((tv.tv_sec * ((int64_t)1000)) + (int64_t)(tv.tv_usec / 1000));
-#endif
+	return 0;
 #endif
 }
 
 
 int64_t AJATime::GetSystemCounter (void)
 {
-#if defined(AJA_WINDOWS)
+#if defined(AJA_SYSCLK_USE_STL)
+	** NEED STL IMPL **
+#elif defined(AJA_WINDOWS)
 	LARGE_INTEGER performanceCounter;
 
 	performanceCounter.QuadPart = 0;
@@ -101,42 +108,41 @@ int64_t AJATime::GetSystemCounter (void)
 	}
 
 	return (int64_t)performanceCounter.QuadPart;
-#endif
-
-#if defined(AJA_MAC)
-	//return int64_t(::clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW));
-	return (mach_absolute_time());
-#endif
-
-#if defined(AJA_LINUX)
-#ifdef AJA_USE_CLOCK_GETTIME
-	struct timespec ts;
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-	return (ts.tv_sec * ((int64_t)1000000000)) + (ts.tv_nsec);
+#elif defined(AJA_MAC)
+	//	Issue 846:	mach_absolute_time doesn't have nanosec resolution on ARM hardware.
+	//				Need to use clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW), but need to
+	//				also change GetSystemFrequency.
+	return int64_t(mach_absolute_time());
+#elif defined(AJA_LINUX)
+	#ifdef AJA_USE_CLOCK_GETTIME
+		struct timespec ts;
+		clock_gettime(CLOCK_MONOTONIC, &ts);
+		return (ts.tv_sec * ((int64_t)1000000000)) + (ts.tv_nsec);
+	#else
+		struct timeval tv;
+		struct timezone tz;
+	
+		gettimeofday( &tv, &tz );
+		return (int64_t)((int64_t)tv.tv_sec * (int64_t)1000000 + tv.tv_usec);
+	#endif
 #else
-	struct timeval tv;
-	struct timezone tz;
-
-	gettimeofday( &tv, &tz );
-	return (int64_t)((int64_t)tv.tv_sec * (int64_t)1000000 + tv.tv_usec);
-#endif
+	return 0;
 #endif
 }
 
 
 int64_t AJATime::GetSystemFrequency (void)
 {
-#if defined(AJA_WINDOWS)
+#if defined(AJA_SYSCLK_USE_STL)
+	** NEED STL IMPL **
+#elif defined(AJA_WINDOWS)
 	if (!s_bPerformanceInit)
 	{
 		QueryPerformanceFrequency(&s_PerformanceFrequency);
 		s_bPerformanceInit = true;
 	}
-
 	return (int64_t)s_PerformanceFrequency.QuadPart;
-#endif
-
-#if defined(AJA_MAC)
+#elif defined(AJA_MAC)
 	if (!s_bPerformanceInit)
 	{
 		// 1 billion ticks approximately equals 1 sec on a Mac
@@ -156,16 +162,15 @@ int64_t AJATime::GetSystemFrequency (void)
 		s_PerformanceFrequency = ticks * 1000000000 / nanoSeconds;	
 		s_bPerformanceInit = true;
 	}
-	
 	return s_PerformanceFrequency;
-#endif
-
-#if defined(AJA_LINUX)
-#ifdef AJA_USE_CLOCK_GETTIME
-	return 1000000000;
+#elif defined(AJA_LINUX)
+	#ifdef AJA_USE_CLOCK_GETTIME
+		return 1000000000;
+	#else
+		return 1000000;
+	#endif
 #else
-	return 1000000;
-#endif
+	return 0;
 #endif
 }
 
@@ -267,13 +272,13 @@ void AJATime::Sleep (int32_t inTime)
 		return;	//	Don't sleep at all
 
 	PRE_STATS
-	#if defined(AJA_USE_CPLUSPLUS11)
+	#if defined(AJA_SLEEP_USE_STL)
 		std::this_thread::sleep_for(std::chrono::milliseconds(inTime));
 	#elif defined(AJA_WINDOWS)
 		::Sleep(DWORD(inTime));
 	#else	//	POSIX
-		#if 0	//	usleep is deprecated in POSIX
-			usleep(inTime * 1000);
+		#if defined(AJA_USE_USLEEP)
+			usleep(inTime * 1000);	//	usleep is deprecated in POSIX
 		#else
 			timespec req, rm;
 			req.tv_sec = 0;
@@ -294,13 +299,13 @@ void AJATime::SleepInMicroseconds (int32_t inTime)
 		return;	//	Don't sleep at all
 
 	PRE_STATS
-	#if defined(AJA_USE_CPLUSPLUS11)
+	#if defined(AJA_SLEEP_USE_STL)
 		std::this_thread::sleep_for(std::chrono::microseconds(inTime));
 	#elif defined(AJA_WINDOWS)
 		::Sleep(DWORD(inTime) / 1000);	//	Windows Sleep expects millisecs
 	#else	//	POSIX
-		#if 0	//	usleep is deprecated in POSIX
-			usleep(inTime);
+		#if defined(AJA_USE_USLEEP)
+			usleep(inTime);	//	usleep is deprecated in POSIX
 		#else
 			timespec req, rm;
 			req.tv_sec = 0;

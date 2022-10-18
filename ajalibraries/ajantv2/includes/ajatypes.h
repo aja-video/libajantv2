@@ -54,7 +54,9 @@
 #define AJA_STATIC		static		//	Do not change this.
 #define NTV2_WRITEREG_PROFILING		//	If defined, enables register write profiling
 #define NTV2_UNUSED(__p__)			(void)__p__
-#define NTV2_USE_CPLUSPLUS11		//	New in SDK 16.0. If defined (now default), 'ajalibraries/ajantv2' will use C++11 features (requires C++11 compiler)
+#if !defined(NTV2_USE_CPLUSPLUS11)
+	#define NTV2_USE_CPLUSPLUS11		//	New in SDK 16.0. If defined (now default), 'ajalibraries/ajantv2' will use C++11 features (requires C++11 compiler)
+#endif	//	!defined(NTV2_USE_CPLUSPLUS11)
 
 #if defined(__CPLUSPLUS__) || defined(__cplusplus)
 	#if defined(AJAMac)

@@ -28,6 +28,7 @@
 #include "ajabase/system/file_io.h"
 #include "ajabase/system/info.h"
 #include "ajabase/system/systemtime.h"
+#include "ajabase/system/thread.h"
 
 #include <algorithm>
 #include <clocale>
@@ -69,6 +70,72 @@ TEST_SUITE("types" * doctest::description("functions in ajabase/common/types.h")
 	}
 
 } //types
+
+void thread_marker() {}
+TEST_SUITE("thread" * doctest::description("functions in ajabase/system/thread.h")) {
+
+#define THREAD_LIFETIME_MS 1000
+#define THREAD_FORCE_KILL_MS 3000
+
+	class TestThread : public AJAThread {
+	public:
+		AJAStatus ThreadRun(void) override {
+			uint64_t startTime = AJATime::GetSystemMilliseconds();
+			uint64_t now = AJATime::GetSystemMilliseconds();
+			uint64_t elapsed = now - startTime;
+			while (!Terminate() && elapsed < THREAD_LIFETIME_MS) {
+				now = AJATime::GetSystemMilliseconds();
+				elapsed = now - startTime;
+				int64_t remain = (int64_t)(THREAD_LIFETIME_MS - elapsed);
+				std::cout << "TestThread::ThreadRun: elapsed=" << elapsed << ", remaining=" << remain << std::endl;
+				AJATime::Sleep(100);
+			}
+			return AJA_STATUS_SUCCESS;
+		}
+	};
+	TEST_CASE("AJAThread::Active")
+	{
+		CHECK(THREAD_FORCE_KILL_MS - THREAD_LIFETIME_MS >= 1000); // run for at least 1 second
+		TestThread tt;
+		std::cout << "AJAThread::Active loops" << std::endl;
+		tt.Start();
+		uint64_t tid = tt.GetThreadId();
+		bool running = true;
+		uint64_t startTime = AJATime::GetSystemMilliseconds();
+		while (running) {
+			running = tt.Active();
+			uint64_t now = AJATime::GetSystemMilliseconds();
+			if (running && now - startTime >= THREAD_FORCE_KILL_MS) {
+				std::cerr << "TestThread (id=" << tid
+					<< ") did not exit after "
+					<< THREAD_LIFETIME_MS
+					<< " milliseconds! Forcing termination after " << (now - startTime) << "ms!" << std::endl;
+				tt.Terminate();
+				break;
+			}
+		}
+		CHECK_FALSE(running);
+		CHECK_FALSE(tt.Active());
+	}
+	TEST_CASE("AJAThread::Stop")
+	{
+		TestThread tt;
+		std::cout << "AJAThread::Stop loops" << std::endl;
+		tt.Start();
+		uint64_t tid = tt.GetThreadId();
+		bool running = true;
+		uint64_t startTime = AJATime::GetSystemMilliseconds();
+		while (running) {
+			uint64_t now = AJATime::GetSystemMilliseconds();
+			if (now - startTime > 100) {
+				AJAStatus s = tt.Stop(300);
+				CHECK(s == AJA_STATUS_SUCCESS);
+				running = false;
+			}
+		}
+		tt.Terminate();
+	}
+}
 
 void bytestream_marker() {}
 TEST_SUITE("bytestream" * doctest::description("functions in ajabase/common/bytestream.h")) {
