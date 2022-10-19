@@ -16,7 +16,7 @@ remove_definitions(
     -D_UNICODE
     -DQT_LARGEFILE_SUPPORT)
 
-set(AJANTV2_TARGET_INCLUDE_DIRS
+set(TARGET_INCLUDE_DIRS
     includes
     ${AJA_LIB_ANC_ROOT}/includes
     ${AJA_LIBRARIES_ROOT}
@@ -402,7 +402,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         -DAJA_WINDLL
         -DAJADLL_BUILD)
 
-    list(APPEND AJANTV2_TARGET_INCLUDE_DIRS
+    list(APPEND TARGET_INCLUDE_DIRS
         src/win
         ${AJA_LIB_BASE_ROOT}/pnp/windows
         ${AJA_LIB_BASE_ROOT}/system/windows)
@@ -429,7 +429,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         -DAJADLL_BUILD
         -DAJADLL_BUILD)
 
-    list(APPEND AJANTV2_TARGET_INCLUDE_DIRS
+    list(APPEND TARGET_INCLUDE_DIRS
         src/lin
         ${AJA_LIB_BASE_ROOT}/pnp/linux
         ${AJA_LIB_BASE_ROOT}/system/linux)
@@ -455,7 +455,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         -DAJADLL_BUILD
         -DAJADLL_BUILD)
 
-    list(APPEND AJANTV2_TARGET_INCLUDE_DIRS
+    list(APPEND TARGET_INCLUDE_DIRS
         src/mac
         ${AJA_LIB_BASE_ROOT}/pnp/mac
         ${AJA_LIB_BASE_ROOT}/system/mac
@@ -480,7 +480,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         ${FOUNDATION_FRAMEWORK})
 endif()
 
-set(AJANTV2_TARGET_SOURCES
+set(TARGET_SOURCES
     ${AJAANC_SOURCES}
     ${AJAANC_HEADERS}
     ${AJABASE_SOURCES}
@@ -488,44 +488,45 @@ set(AJANTV2_TARGET_SOURCES
     ${AJANTV2_SOURCES}
     ${AJANTV2_HEADERS})
 if (NOT AJA_BUILD_OPENSOURCE)
-    set(AJANTV2_TARGET_SOURCES
-        ${AJANTV2_TARGET_SOURCES}
+    set(TARGET_SOURCES
+        ${TARGET_SOURCES}
         ${AJANTV2_HEVC_HEADERS}
         ${AJANTV2_HEVC_SOURCES})
 endif()
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    set(AJANTV2_TARGET_SOURCES
-        ${AJANTV2_TARGET_SOURCES}
+    set(TARGET_SOURCES
+        ${TARGET_SOURCES}
         ${AJANTV2_WIN_HEADERS}
         ${AJANTV2_WIN_SOURCES})
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    set(AJANTV2_TARGET_SOURCES
-        ${AJANTV2_TARGET_SOURCES}
+    set(TARGET_SOURCES
+        ${TARGET_SOURCES}
         ${AJANTV2_LIN_HEADERS}
         ${AJANTV2_LIN_SOURCES})
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    set(AJANTV2_TARGET_SOURCES
-        ${AJANTV2_TARGET_SOURCES}
+    set(TARGET_SOURCES
+        ${TARGET_SOURCES}
         ${AJANTV2_MAC_HEADERS}
         ${AJANTV2_MAC_SOURCES})
 endif()
 
 # libajantv2
 set(BUILD_TARGETS ajantv2)
-add_library(ajantv2 STATIC ${AJANTV2_TARGET_SOURCES})
-target_include_directories(ajantv2 PUBLIC ${AJANTV2_TARGET_INCLUDE_DIRS})
-target_link_libraries(ajantv2 PUBLIC ${TARGET_LINK_LIBS})
-target_compile_definitions(ajantv2 PUBLIC ${TARGET_COMPILE_DEFS_STATIC})
+aja_add_library(ajantv2 "ajantv2" STATIC PUBLIC
+    "${TARGET_SOURCES}" ""
+    "${TARGET_INCLUDE_DIRS}"
+    "${TARGET_LINK_LIBS}"
+    "${TARGET_COMPILE_DEFS_STATIC}")
 if (AJA_NTV2_SDK_GEN)
     aja_ntv2_sdk_gen(ajantv2)
 endif()
 if (AJA_BUILD_SHARED)
     list(APPEND BUILD_TARGETS ajantv2-dl)
-    add_library(ajantv2-dl SHARED ${AJANTV2_TARGET_SOURCES})
-    target_compile_definitions(ajantv2-dl PUBLIC ${TARGET_COMPILE_DEFS_DYNAMIC})
-    target_include_directories(ajantv2-dl PUBLIC ${AJANTV2_TARGET_INCLUDE_DIRS})
-    target_link_libraries(ajantv2-dl PUBLIC ${TARGET_LINK_LIBS} ${EXTRA_DYNAMIC_LIBRARIES})
-    set_target_properties(ajantv2-dl PROPERTIES OUTPUT_NAME "${PROJECT_NAME}_${AJA_NTV2_SDK_VERSION_MAJOR}")
+    aja_add_library(ajantv2-dl "ajantv2" SHARED PUBLIC
+        "${TARGET_SOURCES}" ""
+        "${TARGET_INCLUDE_DIRS}"
+        "${TARGET_LINK_LIBS}"
+        "${TARGET_COMPILE_DEFS_DYNAMIC}")
     if (AJA_NTV2_SDK_GEN)
         aja_ntv2_sdk_gen(ajantv2-dl)
     endif()

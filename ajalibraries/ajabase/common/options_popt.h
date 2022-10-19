@@ -309,14 +309,14 @@ AJA_EXPORT int poptGetNextOpt(poptContext con);
  * @param con		context
  * @return		option argument, NULL if no argument is available
  */
-char * poptGetOptArg(poptContext con);
+AJA_EXPORT char * poptGetOptArg(poptContext con);
 
 /** \ingroup popt
  * Return next argument.
  * @param con		context
  * @return		next argument, NULL if no argument is available
  */
-const char * poptGetArg(/*@null@*/poptContext con);
+AJA_EXPORT const char * poptGetArg(/*@null@*/poptContext con);
 
 /** \ingroup popt
  * Peek at current argument.

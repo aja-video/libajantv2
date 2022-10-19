@@ -48,7 +48,7 @@ struct IntelRecordInfo
 /**
 	@brief	Instances of me can parse an MCS file.
 **/
-class CNTV2MCSfile
+class AJAExport CNTV2MCSfile
 {
 public:
 	/**
