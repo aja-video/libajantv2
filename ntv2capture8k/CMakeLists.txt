@@ -33,26 +33,33 @@ set(TARGET_SOURCES
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-add_executable(ntv2capture8k ${TARGET_SOURCES})
-add_dependencies(ntv2capture8k ajantv2)
-target_include_directories(ntv2capture8k PUBLIC ${TARGET_INCLUDE_DIRS})
-target_link_libraries(ntv2capture8k PUBLIC ajantv2 ${TARGET_LINK_LIBS})
-
+aja_add_executable(ntv2capture8k PUBLIC
+	"${TARGET_SOURCES}"
+	ajantv2
+	"${TARGET_INCLUDE_DIRS}"
+	"${TARGET_LINK_LIBS};ajantv2" "")
+set(BUILD_TARGETS ntv2capture8k)
+if (AJA_BUILD_SHARED)
+	set(BUILD_TARGETS ${BUILD_TARGETS} ntv2capture8k-dl)
+	aja_add_executable(ntv2capture8k-dl PUBLIC
+		"${TARGET_SOURCES}"
+		ajantv2-dl
+		"${TARGET_INCLUDE_DIRS}"
+		"${TARGET_LINK_LIBS};ajantv2-dl" "")
+endif()
+if (AJA_CODE_SIGN)
+    aja_code_sign(${BUILD_TARGETS})
+endif()
+install(TARGETS ${BUILD_TARGETS}
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
 	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
 	install(FILES ${NTV2CAPTURE8K_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2capture8k)
 	install(FILES ${NTV2CAPTURE8K_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2capture8k)
 	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2capture8k)
-endif()
-
-install(TARGETS ntv2capture8k
-	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-if (AJA_CODE_SIGN)
-    aja_code_sign(ntv2capture8k)
 endif()

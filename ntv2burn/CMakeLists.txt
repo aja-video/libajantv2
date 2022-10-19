@@ -1,6 +1,5 @@
 project(ntv2burn)
 
-
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
 	${AJA_APPS_ROOT}/crossplatform/demoapps
@@ -34,34 +33,33 @@ set(TARGET_SOURCES
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-add_executable(ntv2burn ${TARGET_SOURCES})
-add_dependencies(ntv2burn ajantv2)
-target_include_directories(ntv2burn PUBLIC ${TARGET_INCLUDE_DIRS})
-target_link_libraries(ntv2burn PUBLIC ajantv2 ${TARGET_LINK_LIBS})
+aja_add_executable(ntv2burn PUBLIC
+	"${TARGET_SOURCES}"
+	ajantv2
+	"${TARGET_INCLUDE_DIRS}"
+	"${TARGET_LINK_LIBS};ajantv2" "")
 set(BUILD_TARGETS ntv2burn)
 if (AJA_BUILD_SHARED)
 	set(BUILD_TARGETS ${BUILD_TARGETS} ntv2burn-dl)
-	add_executable(ntv2burn-dl ${TARGET_SOURCES})
-	add_dependencies(ntv2burn-dl ajantv2-dl)
-	target_include_directories(ntv2burn-dl PUBLIC ${TARGET_INCLUDE_DIRS})
-	target_link_libraries(ntv2burn-dl PUBLIC ajantv2-dl ${TARGET_LINK_LIBS})
+	aja_add_executable(ntv2burn-dl PUBLIC
+		"${TARGET_SOURCES}"
+		ajantv2-dl
+		"${TARGET_INCLUDE_DIRS}"
+		"${TARGET_LINK_LIBS};ajantv2-dl" "")
 endif()
-
-if (AJA_INSTALL_SOURCES)
-	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
-	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
-	install(FILES ${NTV2BURN_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2burn)
-	install(FILES ${NTV2BURN_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2burn)
-	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2burn)
+if (AJA_CODE_SIGN)
+    aja_code_sign(${BUILD_TARGETS})
 endif()
-
 install(TARGETS ${BUILD_TARGETS}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-if (AJA_CODE_SIGN)
-    aja_code_sign(${BUILD_TARGETS})
+if (AJA_INSTALL_SOURCES)
+	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
+	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
+	install(FILES ${NTV2BURN_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2burn)
+	install(FILES ${NTV2BURN_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2burn)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2burn)
 endif()

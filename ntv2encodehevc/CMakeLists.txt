@@ -64,26 +64,33 @@ set(TARGET_SOURCES
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-add_executable(ntv2encodehevc ${TARGET_SOURCES})
-add_dependencies(ntv2encodehevc ajantv2)
-target_include_directories(ntv2encodehevc PUBLIC ${TARGET_INCLUDE_DIRS})
-target_link_libraries(ntv2encodehevc PUBLIC ajantv2 ${TARGET_LINK_LIBS})
-
+aja_add_executable(ntv2encodehevc PUBLIC
+	"${TARGET_SOURCES}"
+	ajantv2
+	"${TARGET_INCLUDE_DIRS}"
+	"${TARGET_LINK_LIBS};ajantv2" "")
+set(BUILD_TARGETS ntv2encodehevc)
+if (AJA_BUILD_SHARED)
+	set(BUILD_TARGETS ${BUILD_TARGETS} ntv2encodehevc-dl)
+	aja_add_executable(ntv2encodehevc-dl PUBLIC
+		"${TARGET_SOURCES}"
+		ajantv2-dl
+		"${TARGET_INCLUDE_DIRS}"
+		"${TARGET_LINK_LIBS};ajantv2-dl" "")
+endif()
+if (AJA_CODE_SIGN)
+    aja_code_sign(${BUILD_TARGETS})
+endif()
+install(TARGETS ${BUILD_TARGETS}
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
 	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
 	install(FILES ${NTV2CUDACAPTURE_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2encodehevc)
 	install(FILES ${NTV2CUDACAPTURE_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2encodehevc)
 	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2encodehevc)
-endif()
-
-install(TARGETS ntv2encodehevc
-	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-if (AJA_CODE_SIGN)
-    aja_code_sign(ntv2encodehevc)
 endif()

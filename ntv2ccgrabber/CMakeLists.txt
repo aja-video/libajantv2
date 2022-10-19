@@ -33,26 +33,33 @@ set(TARGET_SOURCES
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-add_executable(ntv2ccgrabber ${TARGET_SOURCES})
-add_dependencies(ntv2ccgrabber ajacc ajantv2)
-target_include_directories(ntv2ccgrabber PUBLIC ${TARGET_INCLUDE_DIRS})
-target_link_libraries(ntv2ccgrabber PUBLIC ajacc ajantv2 ${TARGET_LINK_LIBS})
-
+aja_add_executable(ntv2ccgrabber PUBLIC
+	"${TARGET_SOURCES}"
+	"ajacc;ajantv2"
+	"${TARGET_INCLUDE_DIRS}"
+	"${TARGET_LINK_LIBS};ajacc;ajantv2" "")
+set(BUILD_TARGETS ntv2ccgrabber)
+if (AJA_BUILD_SHARED)
+	set(BUILD_TARGETS ${BUILD_TARGETS} ntv2ccgrabber-dl)
+	aja_add_executable(ntv2ccgrabber-dl PUBLIC
+		"${TARGET_SOURCES}"
+		"ajacc-dl;ajantv2-dl"
+		"${TARGET_INCLUDE_DIRS}"
+		"${TARGET_LINK_LIBS};ajacc-dl;ajantv2-dl" "")
+endif()
+if (AJA_CODE_SIGN)
+    aja_code_sign(${BUILD_TARGETS})
+endif()
+install(TARGETS ${BUILD_TARGETS}
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
 	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
 	install(FILES ${NTV2CCGRABBER_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2ccgrabber)
 	install(FILES ${NTV2CCGRABBER_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2ccgrabber)
 	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2ccgrabber)
-endif()
-
-install(TARGETS ntv2ccgrabber
-	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-if (AJA_CODE_SIGN)
-    aja_code_sign(ntv2ccgrabber)
 endif()

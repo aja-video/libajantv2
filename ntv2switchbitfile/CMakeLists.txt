@@ -30,25 +30,32 @@ set(TARGET_SOURCES
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-add_executable(ntv2switchbitfile ${TARGET_SOURCES})
-add_dependencies(ntv2switchbitfile ajantv2)
-target_include_directories(ntv2switchbitfile PUBLIC ${TARGET_INCLUDE_DIRS})
-target_link_libraries(ntv2switchbitfile PUBLIC ajantv2 ${TARGET_LINK_LIBS})
-
-if (AJA_INSTALL_SOURCES)
-	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
-	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
-	install(FILES ${NTV2SWITCHBITFILE_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2switchbitfile)
-	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2switchbitfile)
+aja_add_executable(ntv2switchbitfile PUBLIC
+	"${TARGET_SOURCES}"
+	ajantv2
+	"${TARGET_INCLUDE_DIRS}"
+	"${TARGET_LINK_LIBS};ajantv2" "")
+set(BUILD_TARGETS ntv2switchbitfile)
+if (AJA_BUILD_SHARED)
+	set(BUILD_TARGETS ${BUILD_TARGETS} ntv2switchbitfile-dl)
+	aja_add_executable(ntv2switchbitfile-dl PUBLIC
+		"${TARGET_SOURCES}"
+		ajantv2-dl
+		"${TARGET_INCLUDE_DIRS}"
+		"${TARGET_LINK_LIBS};ajantv2-dl" "")
 endif()
-
-install(TARGETS ntv2switchbitfile
+if (AJA_CODE_SIGN)
+    aja_code_sign(${BUILD_TARGETS})
+endif()
+install(TARGETS ${BUILD_TARGETS}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-if (AJA_CODE_SIGN)
-    aja_code_sign(ntv2switchbitfile)
+if (AJA_INSTALL_SOURCES)
+	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
+	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
+	install(FILES ${NTV2SWITCHBITFILE_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2switchbitfile)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2switchbitfile)
 endif()

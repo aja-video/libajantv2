@@ -72,7 +72,7 @@ typedef struct
 	@brief	I encapsulate the video, audio and anc host buffers used in the AutoCirculate demos.
 			I'm a more modern version of the AVDataBuffer.
 **/
-AJAExport class NTV2FrameData
+class AJAExport NTV2FrameData
 {
 	public:
 		NTV2_POINTER	fVideoBuffer;		///< @brief	Host video buffer

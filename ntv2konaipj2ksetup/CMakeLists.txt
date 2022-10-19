@@ -13,6 +13,8 @@ set(TARGET_INCLUDE_DIRS
 	${AJA_LIB_RETAIL_ROOT}/includes
 	${AJA_LIB_RETAIL_ROOT}/services)
 
+set(TARGET_LINK_LIBS ${QT_LIBRARIES})
+
 set(NTV2KONAIPJ2KSETUP_HEADERS
 	konaipj2ksetup.h)
 set(NTV2KONAIPJ2KSETUP_SOURCES
@@ -35,12 +37,15 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_library(IOKIT_FRAMEWORK IoKit)
 
     set(TARGET_LINK_LIBS
+		${TARGET_LINK_LIBS}
         ${CORE_FOUNDATION_FRAMEWORK}
 		${CORE_SERVICES_FRAMEWORK}
 		${FOUNDATION_FRAMEWORK}
         ${IOKIT_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(TARGET_LINK_LIBS dl pthread rt)
+	set(TARGET_LINK_LIBS
+		${TARGET_LINK_LIBS}
+		dl pthread rt)
 endif()
 
 set(TARGET_SOURCES
@@ -49,31 +54,37 @@ set(TARGET_SOURCES
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-add_executable(ntv2konaipj2ksetup ${TARGET_SOURCES})
-add_dependencies(ntv2konaipj2ksetup ajantv2)
-target_include_directories(ntv2konaipj2ksetup PUBLIC ${TARGET_INCLUDE_DIRS})
-target_link_libraries(ntv2konaipj2ksetup PUBLIC ajantv2 ${TARGET_LINK_LIBS} ${QT_LIBRARIES})
-
+aja_add_executable(ntv2konaipj2ksetup PUBLIC
+	"${TARGET_SOURCES}"
+	ajantv2
+	"${TARGET_INCLUDE_DIRS}"
+	"${TARGET_LINK_LIBS};ajantv2" "")
+set(BUILD_TARGETS ntv2konaipj2ksetup)
+if (AJA_BUILD_SHARED)
+	set(BUILD_TARGETS ${BUILD_TARGETS} ntv2konaipj2ksetup-dl)
+	aja_add_executable(ntv2konaipj2ksetup-dl PUBLIC
+		"${TARGET_SOURCES}"
+		ajantv2-dl
+		"${TARGET_INCLUDE_DIRS}"
+		"${TARGET_LINK_LIBS};ajantv2-dl" "")
+endif()
+if (AJA_CODE_SIGN)
+    aja_code_sign(${BUILD_TARGETS})
+endif()
 if (AJA_DEPLOY_LIBS)
     include(AJAQtHelpers)
     deploy_qt_libs(ntv2konaipj2ksetup)
 endif()
-
+install(TARGETS ${BUILD_TARGETS}
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
 	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
 	install(FILES ${NTV2CUDACAPTURE_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2konaipj2ksetup)
 	install(FILES ${NTV2CUDACAPTURE_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2konaipj2ksetup)
 	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2konaipj2ksetup)
-endif()
-
-install(TARGETS ntv2konaipj2ksetup
-	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-if (AJA_CODE_SIGN)
-    aja_code_sign(ntv2konaipj2ksetup)
 endif()
