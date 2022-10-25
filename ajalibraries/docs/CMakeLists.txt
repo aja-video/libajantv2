@@ -34,3 +34,8 @@ add_custom_target(
     WORKING_DIRECTORY ${AJA_NTV2_ROOT}
     COMMENT "Generating NTV2 SDK documentation with Doxygen"
     VERBATIM)
+
+if (AJA_INSTALL_SOURCES)
+    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/docs)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ntv2.doxy DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/docs)
+endif()
