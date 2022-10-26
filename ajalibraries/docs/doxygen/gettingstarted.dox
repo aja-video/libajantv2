@@ -110,7 +110,7 @@ Starting in SDK 16.1, AJA opened the NTV2 SDK to the <b>Open Source</b> communit
 (which includes the \ref ajabase and \ref ajaanc) as a dynamic library both on public forums (including source header files on GitHub),
 and in AJA’s MacOS, Windows, and Linux “retail” desktop software installers.
 
-@note	For more information on <b>AJA’s Open Source Initiative</b>, visit  <a href="https://www.aja.com/products/developer/open-source">https://www.aja.com/products/developer/open-source</a>.
+@note	For more information on <b>AJA’s Open Source Initiative</b>, visit  <a href="https://www.aja.com/family/developer">https://www.aja.com/family/developer</a>.
 
 The \ref ajantv2 is publically-distributed as a dynamic library.
 -	<b>Location:</b> AJA’s retail desktop installers will install the NTV2 dynamic libraries into the following locations on the host:
