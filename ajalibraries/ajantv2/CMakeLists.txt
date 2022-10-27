@@ -1,14 +1,28 @@
 project(ajantv2)
 
 if(CMAKE_CXX_STANDARD EQUAL 11)
+    aja_message(STATUS "ajantv2 building for C++11")
     set(TARGET_COMPILE_DEFS
         ${TARGET_COMPILE_DEFS}
         -DAJA_USE_CPLUSPLUS11
         -DNTV2_USE_CPLUSPLUS11)
-elseif(CMAKE_CXX_STANDARD LESS 11)
+else()
+    aja_message(STATUS "ajantv2 building for C++98")
     remove_definitions(
         -DAJA_USE_CPLUSPLUS11
         -DNTV2_USE_CPLUSPLUS11)
+
+    set(_ajabase_types_path "${AJA_LIB_BASE_ROOT}/common/types.h")
+    file(READ ${_ajabase_types_path} _ajabase_types_file)
+    STRING(REPLACE "#define AJA_USE_CPLUSPLUS11" "//#define AJA_USE_CPLUSPLUS11 " _ajabase_types_file "${_ajabase_types_file}")
+    file(WRITE ${_ajabase_types_path} "${_ajabase_types_file}")
+    aja_message(STATUS "Overwrote ${_ajabase_types_path} to remove AJA_USE_CPLUSPLUS11 define!")
+
+    set(_ajantv2_ajatypes_path "${AJA_LIB_NTV2_ROOT}/includes/ajatypes.h")
+    file(READ ${_ajantv2_ajatypes_path} _ajatypes_file)
+    STRING(REPLACE "#define NTV2_USE_CPLUSPLUS11" "//#define NTV2_USE_CPLUSPLUS11 " _ajatypes_file "${_ajatypes_file}")
+    file(WRITE ${_ajantv2_ajatypes_path} "${_ajatypes_file}")
+    aja_message(STATUS "Overwrote ${_ajantv2_ajatypes_path} to remove NTV2_USE_CPLUSPLUS11 define!")
 endif()
 
 remove_definitions(
