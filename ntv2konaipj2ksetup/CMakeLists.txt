@@ -1,5 +1,7 @@
 project(ntv2konaipj2ksetup)
 
+aja_require(ntv2konaipj2ksetup AJA_BUILD_QT)
+
 find_package(Qt5 HINTS ${AJA_QT_DIR} COMPONENTS Core Widgets REQUIRED)
 set(QT_LIBRARIES Qt5::Core Qt5::Widgets)
 set(CMAKE_AUTOMOC ON)

@@ -1,5 +1,7 @@
 project(ntv2oglcapture)
 
+aja_require(ntv2oglcapture AJA_BUILD_QT)
+
 find_package(OpenGL REQUIRED)
 set(OPENGL_LIBRARIES OpenGL::GLU)
 
