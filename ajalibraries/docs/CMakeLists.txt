@@ -7,6 +7,14 @@ if (NOT DOXYGEN_FOUND)
     return()
 endif()
 
+find_program(GRAPHVIZ_DOT_PATH dot)
+if (NOT GRAPHVIZ_DOT_PATH)
+    aja_message(STATUS "skipping docs (GraphViz dot command not found!)")
+    return()
+else()
+    aja_message(STATUS "GraphViz dot Location: ${GRAPHVIZ_DOT_PATH}")
+endif()
+
 set(NTV2_DOXYGEN_SDK_VERSION "${AJA_NTV2_VER_STR}")
 
 # Attempt to locate qhelpgenerator for generation of Qt-related docs
