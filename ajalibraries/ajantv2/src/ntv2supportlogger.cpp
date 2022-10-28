@@ -623,6 +623,7 @@ void CNTV2SupportLogger::FetchAutoCirculateLog (ostringstream & oss) const
 	{
 		FrameToTCList			perFrameTCs;
 		AUTOCIRCULATE_STATUS	acStatus;
+		mDevice.AutoCirculateGetStatus (chan, acStatus);
 		if (NTV2_IS_INPUT_CROSSPOINT(acStatus.acCrosspoint))
 			mDevice.WaitForInputVerticalInterrupt(chan);
 		else
