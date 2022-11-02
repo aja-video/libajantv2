@@ -387,7 +387,7 @@
         {
             "base_dir": "kona5/reconfig",
             "bitfile_id": 2,
-            "bitfile_ver": 25,
+            "bitfile_ver": 26,
             "design_id": 1,
             "design_ver": 23,
             "filename": "kona5_8k_update_region_partial.bit",
@@ -403,7 +403,7 @@
         {
             "base_dir": "kona5/reconfig",
             "bitfile_id": 2,
-            "bitfile_ver": 25,
+            "bitfile_ver": 26,
             "design_id": 1,
             "design_ver": 23,
             "filename": "kona5_8k_update_region_partial_clear.bit",
@@ -723,7 +723,7 @@
         {
             "base_dir": "kona5/reconfig",
             "bitfile_id": 0,
-            "bitfile_ver": 21,
+            "bitfile_ver": 23,
             "design_id": 1,
             "design_ver": 23,
             "filename": "kona5_retail_update_region_partial.bit",
@@ -739,7 +739,7 @@
         {
             "base_dir": "kona5/tprom",
             "bitfile_id": 2,
-            "bitfile_ver": 25,
+            "bitfile_ver": 26,
             "design_id": 1,
             "design_ver": 23,
             "filename": "kona5_8k_tprom.bit",
@@ -851,7 +851,7 @@
         {
             "base_dir": "kona5/reconfig",
             "bitfile_id": 0,
-            "bitfile_ver": 21,
+            "bitfile_ver": 23,
             "design_id": 1,
             "design_ver": 23,
             "filename": "kona5_retail_update_region_partial_clear.bit",
@@ -915,7 +915,7 @@
         {
             "base_dir": "kona5/tprom",
             "bitfile_id": 0,
-            "bitfile_ver": 21,
+            "bitfile_ver": 23,
             "design_id": 1,
             "design_ver": 23,
             "filename": "kona5_retail_tprom.bit",

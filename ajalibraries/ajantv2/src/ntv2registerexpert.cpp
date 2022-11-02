@@ -19,7 +19,8 @@
 #include <iterator>
 #include <iomanip>
 #include <map>
-#include "math.h"
+#include <math.h>
+#include <ctype.h>	//	for isprint()
 
 
 using namespace std;
@@ -1073,7 +1074,7 @@ private:
 		DefineRegName	(kVRegOutputTimecodeType,				"kVRegOutputTimecodeType");
 		DefineRegName	(kVRegQuicktimeUsingBoard,				"kVRegQuicktimeUsingBoard");
 		DefineRegName	(kVRegApplicationPID,					"kVRegApplicationPID");
-		DefineRegName	(kVRegApplicationCode,					"kVRegApplicationCode");
+		DefineRegister	(kVRegApplicationCode,					"kVRegApplicationCode",	mDecodeFourCC, READWRITE, kRegClass_Virtual, kRegClass_NULL, kRegClass_NULL);
 		DefineRegName	(kVRegReleaseApplication,				"kVRegReleaseApplication");
 		DefineRegName	(kVRegForceApplicationPID,				"kVRegForceApplicationPID");
 		DefineRegName	(kVRegForceApplicationCode,				"kVRegForceApplicationCode");
@@ -3822,6 +3823,26 @@ private:
 			return oss.str();
 		}
 	}	mDriverVersionDecoder;
+
+	struct DecodeFourCC : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{	(void) inDeviceID;
+			char ch;  string str4cc;
+			ch = char((inRegValue & 0xFF000000) >> 24);
+			str4cc += ::isprint(ch) ? ch : '?';
+			ch = char((inRegValue & 0x00FF0000) >> 16);
+			str4cc += ::isprint(ch) ? ch : '?';
+			ch = char((inRegValue & 0x0000FF00) >>  8);
+			str4cc += ::isprint(ch) ? ch : '?';
+			ch = char((inRegValue & 0x000000FF) >>  0);
+			str4cc += ::isprint(ch) ? ch : '?';
+
+			ostringstream	oss;
+			oss << "'" << str4cc << "'";
+			return oss.str();
+		}
+	}	mDecodeFourCC;
 
 	static const int	NOREADWRITE =	0;
 	static const int	READONLY	=	1;

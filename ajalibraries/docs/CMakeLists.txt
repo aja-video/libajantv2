@@ -7,6 +7,14 @@ if (NOT DOXYGEN_FOUND)
     return()
 endif()
 
+find_program(GRAPHVIZ_DOT_PATH dot)
+if (NOT GRAPHVIZ_DOT_PATH)
+    aja_message(STATUS "skipping docs (GraphViz dot command not found!)")
+    return()
+else()
+    aja_message(STATUS "GraphViz dot Location: ${GRAPHVIZ_DOT_PATH}")
+endif()
+
 set(NTV2_DOXYGEN_SDK_VERSION "${AJA_NTV2_VER_STR}")
 
 # Attempt to locate qhelpgenerator for generation of Qt-related docs
@@ -34,3 +42,8 @@ add_custom_target(
     WORKING_DIRECTORY ${AJA_NTV2_ROOT}
     COMMENT "Generating NTV2 SDK documentation with Doxygen"
     VERBATIM)
+
+if (AJA_INSTALL_SOURCES)
+    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/docs)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ntv2.doxy DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/docs)
+endif()

@@ -60,9 +60,10 @@ public:
 	 *
 	 *	@param[in,out]	size		Bytes of memory to allocate.
 	 *	@param[in]		pShareName	Name of system wide memory to allocate.
+	 *	@param[in]		global		If true, shared memory region will be accessible across user accounts (Windows-only).
 	 *	@return						Address of allocated memory.  NULL if allocation fails.
 	 */
-	static void* AllocateShared(size_t* size, const char* pShareName);
+	static void* AllocateShared(size_t* size, const char* pShareName, bool global = true);
 
 	/**
 	 *	Free memory allocated using AllocateShared().

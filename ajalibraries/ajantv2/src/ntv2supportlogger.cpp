@@ -454,65 +454,69 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 	AJASystemInfo::append(infoTable, "SDK/DRIVER INFO", "");
 	AJASystemInfo::append(infoTable, "NTV2 SDK Version",	::NTV2GetVersionString(true));
 	AJASystemInfo::append(infoTable, "supportlog Built",	string(__DATE__ " at " __TIME__));
-	AJASystemInfo::append(infoTable, "Driver Version",		mDevice.GetDriverVersionString());
+	if (mDevice.IsOpen())
+		AJASystemInfo::append(infoTable, "Driver Version",		mDevice.GetDriverVersionString());
 	AJASystemInfo::append(infoTable, "Watcher Nub Protocol Version",	"Built-in RPC support");
 
-	AJASystemInfo::append(infoTable, "DEVICE INFO", "");
-	AJASystemInfo::append(infoTable, "Device",				mDevice.GetDisplayName());
-	str = xHEX0NStr(mDevice.GetDeviceID(),8) + " (" + string(::NTV2DeviceIDString(mDevice.GetDeviceID())) + ")";
-	AJASystemInfo::append(infoTable, "Device ID",			str);
-	AJASystemInfo::append(infoTable, "Serial Number",		(mDevice.GetSerialNumberString(str) ? str : "Not programmed"));
-	AJASystemInfo::append(infoTable, "Video Bitfile",		(getBitfileDate(mDevice, str, eFPGAVideoProc) ? str : "Not available"));
-	AJASystemInfo::append(infoTable, "PCI FPGA Version",	mDevice.GetPCIFPGAVersionString());
-	ULWord	numBytes(0);	string	dateStr, timeStr;
-	if (mDevice.GetInstalledBitfileInfo(numBytes, dateStr, timeStr))
+	if (mDevice.IsOpen())
 	{
-		AJASystemInfo::append(infoTable, "Installed Bitfile ByteCount", DECStr(numBytes));
-		AJASystemInfo::append(infoTable, "Installed Bitfile Build Date",	dateStr + " " + timeStr);
-	}
-
-	if (mDevice.IsIPDevice())
-	{
-		PACKAGE_INFO_STRUCT pkgInfo;
-		if (mDevice.GetPackageInformation(pkgInfo))
+		AJASystemInfo::append(infoTable, "DEVICE INFO", "");
+		AJASystemInfo::append(infoTable, "Device",				mDevice.GetDisplayName());
+		str = xHEX0NStr(mDevice.GetDeviceID(),8) + " (" + string(::NTV2DeviceIDString(mDevice.GetDeviceID())) + ")";
+		AJASystemInfo::append(infoTable, "Device ID",			str);
+		AJASystemInfo::append(infoTable, "Serial Number",		(mDevice.GetSerialNumberString(str) ? str : "Not programmed"));
+		AJASystemInfo::append(infoTable, "Video Bitfile",		(getBitfileDate(mDevice, str, eFPGAVideoProc) ? str : "Not available"));
+		AJASystemInfo::append(infoTable, "PCI FPGA Version",	mDevice.GetPCIFPGAVersionString());
+		ULWord	numBytes(0);	string	dateStr, timeStr;
+		if (mDevice.GetInstalledBitfileInfo(numBytes, dateStr, timeStr))
 		{
-			AJASystemInfo::append(infoTable, "Package",		DECStr(pkgInfo.packageNumber));
-			AJASystemInfo::append(infoTable, "Build",		DECStr(pkgInfo.buildNumber));
-			AJASystemInfo::append(infoTable, "Build Date",	pkgInfo.date);
-			AJASystemInfo::append(infoTable, "Build Time",	pkgInfo.time);
+			AJASystemInfo::append(infoTable, "Installed Bitfile ByteCount", DECStr(numBytes));
+			AJASystemInfo::append(infoTable, "Installed Bitfile Build Date",	dateStr + " " + timeStr);
 		}
 
-		CNTV2KonaFlashProgram ntv2Card(mDevice.GetIndexNumber());
-		MacAddr mac1, mac2;
-		if (ntv2Card.ReadMACAddresses(mac1, mac2))
+		if (mDevice.IsIPDevice())
 		{
-			AJASystemInfo::append(infoTable, "MAC1",	mac1.AsString());
-			AJASystemInfo::append(infoTable, "MAC2",	mac2.AsString());
-		}
+			PACKAGE_INFO_STRUCT pkgInfo;
+			if (mDevice.GetPackageInformation(pkgInfo))
+			{
+				AJASystemInfo::append(infoTable, "Package",		DECStr(pkgInfo.packageNumber));
+				AJASystemInfo::append(infoTable, "Build",		DECStr(pkgInfo.buildNumber));
+				AJASystemInfo::append(infoTable, "Build Date",	pkgInfo.date);
+				AJASystemInfo::append(infoTable, "Build Time",	pkgInfo.time);
+			}
 
-		ULWord cfg(0);
-		mDevice.ReadRegister((kRegSarekFwCfg + SAREK_REGS), cfg);
-		if (cfg & SAREK_2022_2)
-		{
-			ULWord dnaLo(0), dnaHi(0);
-			if (ntv2Card.ReadRegister(kRegSarekDNALow + SAREK_REGS, dnaLo))
-				if (ntv2Card.ReadRegister(kRegSarekDNAHi + SAREK_REGS, dnaHi))
-					AJASystemInfo::append(infoTable, "Device DNA",	string(HEX0NStr(dnaHi,8)+HEX0NStr(dnaLo,8)));
-		}
+			CNTV2KonaFlashProgram ntv2Card(mDevice.GetIndexNumber());
+			MacAddr mac1, mac2;
+			if (ntv2Card.ReadMACAddresses(mac1, mac2))
+			{
+				AJASystemInfo::append(infoTable, "MAC1",	mac1.AsString());
+				AJASystemInfo::append(infoTable, "MAC2",	mac2.AsString());
+			}
 
-		string licenseInfo;
-		ntv2Card.ReadLicenseInfo(licenseInfo);
-		AJASystemInfo::append(infoTable, "License", licenseInfo);
+			ULWord cfg(0);
+			mDevice.ReadRegister((kRegSarekFwCfg + SAREK_REGS), cfg);
+			if (cfg & SAREK_2022_2)
+			{
+				ULWord dnaLo(0), dnaHi(0);
+				if (ntv2Card.ReadRegister(kRegSarekDNALow + SAREK_REGS, dnaLo))
+					if (ntv2Card.ReadRegister(kRegSarekDNAHi + SAREK_REGS, dnaHi))
+						AJASystemInfo::append(infoTable, "Device DNA",	string(HEX0NStr(dnaHi,8)+HEX0NStr(dnaLo,8)));
+			}
 
-		if (cfg & SAREK_2022_2)
-		{
-			ULWord licenseStatus(0);
-			ntv2Card.ReadRegister(kRegSarekLicenseStatus + SAREK_REGS, licenseStatus);
-			AJASystemInfo::append(infoTable, "License Present", licenseStatus & SAREK_LICENSE_PRESENT ? "Yes" : "No");
-			AJASystemInfo::append(infoTable, "License Status",	licenseStatus & SAREK_LICENSE_VALID ? "License is valid" : "License NOT valid");
-			AJASystemInfo::append(infoTable, "License Enable Mask", xHEX0NStr(licenseStatus & 0xff,2));
-		}
-	}
+			string licenseInfo;
+			ntv2Card.ReadLicenseInfo(licenseInfo);
+			AJASystemInfo::append(infoTable, "License", licenseInfo);
+
+			if (cfg & SAREK_2022_2)
+			{
+				ULWord licenseStatus(0);
+				ntv2Card.ReadRegister(kRegSarekLicenseStatus + SAREK_REGS, licenseStatus);
+				AJASystemInfo::append(infoTable, "License Present", licenseStatus & SAREK_LICENSE_PRESENT ? "Yes" : "No");
+				AJASystemInfo::append(infoTable, "License Status",	licenseStatus & SAREK_LICENSE_VALID ? "License is valid" : "License NOT valid");
+				AJASystemInfo::append(infoTable, "License Enable Mask", xHEX0NStr(licenseStatus & 0xff,2));
+			}
+		}	//	if IsIPDevice
+	}	//	if IsOpen
 
 	AJASystemInfo hostInfo;
 
@@ -546,7 +550,8 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 	}
 
 	oss << AJASystemInfo::ToString(infoTable) << endl;
-}
+}	//	FetchInfoLog
+
 
 void CNTV2SupportLogger::FetchRegisterLog (ostringstream & oss) const
 {
@@ -618,6 +623,7 @@ void CNTV2SupportLogger::FetchAutoCirculateLog (ostringstream & oss) const
 	{
 		FrameToTCList			perFrameTCs;
 		AUTOCIRCULATE_STATUS	acStatus;
+		mDevice.AutoCirculateGetStatus (chan, acStatus);
 		if (NTV2_IS_INPUT_CROSSPOINT(acStatus.acCrosspoint))
 			mDevice.WaitForInputVerticalInterrupt(chan);
 		else

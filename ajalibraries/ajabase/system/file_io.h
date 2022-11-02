@@ -328,7 +328,7 @@ public:
 #if defined(AJA_WINDOWS)
 	void	 *GetHandle(void) {return mFileDescriptor;}
 #else
-	void	 *GetHandle(void) {return NULL;}
+	void	 *GetHandle(void) {return mpFile;}
 #endif
 
 private:

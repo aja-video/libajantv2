@@ -6,72 +6,81 @@
 **/
 
 #ifndef AJA_TIME_H
-#define AJA_TIME_H
+	#define AJA_TIME_H
 
-#include "ajabase/common/public.h"
+//	#define	AJA_COLLECT_SLEEP_STATS		//	Define this to allow thread-specific stat collection for Sleep & SleepInMicroseconds
 
-/** 
-	@brief		Collection of platform-independent host system clock time functions.
-	@ingroup	AJAGroupSystem
-**/
-class AJA_EXPORT AJATime
-{
-public:
+	#include "ajabase/common/public.h"
+	#if defined(AJA_COLLECT_SLEEP_STATS)
+		#include <string>
+	#endif	//	defined(AJA_COLLECT_SLEEP_STATS)
 
-	/**
-		@brief		Returns the current value of the host system's low-resolution clock, in milliseconds.
-		@return		The current value of the host system's low-resolution clock, in milliseconds.
+	/** 
+		@brief		Collection of platform-independent host system clock time functions.
+		@ingroup	AJAGroupSystem
 	**/
-	static int64_t	GetSystemTime (void);
+	class AJA_EXPORT AJATime
+	{
+		public:
 
-	/**
-		@brief		Returns the current value of the host system's high-resolution time counter.
-		@return		The current value of the host system's high-resolution time counter.
-	**/
-	static int64_t	GetSystemCounter (void);
+		/**
+			@brief		Returns the current value of the host system's low-resolution clock, in milliseconds.
+			@return		The current value of the host system's low-resolution clock, in milliseconds.
+		**/
+		static int64_t	GetSystemTime (void);
 
-	/**
-		@brief		Returns the frequency of the host system's high-resolution time counter.
-		@return		The high resolution counter frequency in ticks per second.
-	**/
-	static int64_t	GetSystemFrequency (void);
+		/**
+			@brief		Returns the current value of the host system's high-resolution time counter.
+			@return		The current value of the host system's high-resolution time counter.
+		**/
+		static int64_t	GetSystemCounter (void);
 
-	/**
-		@brief		Returns the current value of the host's high-resolution clock, in seconds.
-		@return		Current value of the host's clock, in seconds, based on GetSystemCounter() and GetSystemFrequency().
-	**/
-	static double 	GetSystemSeconds (void);
+		/**
+			@brief		Returns the frequency of the host system's high-resolution time counter.
+			@return		The high resolution counter frequency in ticks per second.
+		**/
+		static int64_t	GetSystemFrequency (void);
 
-	/**
-		@brief		Returns the current value of the host's high-resolution clock, in milliseconds.
-		@return		Current value of the host's clock, in milliseconds, based on GetSystemCounter() and GetSystemFrequency().
-	**/
-	static uint64_t GetSystemMilliseconds (void);
+		/**
+			@brief		Returns the current value of the host's high-resolution clock, in seconds.
+			@return		Current value of the host's clock, in seconds, based on GetSystemCounter() and GetSystemFrequency().
+		**/
+		static double 	GetSystemSeconds (void);
 
-	/**
-		@brief		Returns the current value of the host's high-resolution clock, in microseconds.
-		@return		Current value of the host's clock, in microseconds, based on GetSystemCounter() and GetSystemFrequency().
-	**/
-	static uint64_t GetSystemMicroseconds (void);
+		/**
+			@brief		Returns the current value of the host's high-resolution clock, in milliseconds.
+			@return		Current value of the host's clock, in milliseconds, based on GetSystemCounter() and GetSystemFrequency().
+		**/
+		static uint64_t GetSystemMilliseconds (void);
 
-	/**
-		@brief		Returns the current value of the host's high-resolution clock, in nanoseconds.
-		@return		Current value of the host's clock, in nanoseconds, based on GetSystemCounter() and GetSystemFrequency().
-	**/
-	static uint64_t GetSystemNanoseconds (void);
+		/**
+			@brief		Returns the current value of the host's high-resolution clock, in microseconds.
+			@return		Current value of the host's clock, in microseconds, based on GetSystemCounter() and GetSystemFrequency().
+		**/
+		static uint64_t GetSystemMicroseconds (void);
 
-	/**
-		@brief		Suspends execution of the current thread for a given number of milliseconds.
-		@param		inMilliseconds		Specifies the sleep time, in milliseconds.
-	**/
-	static void		Sleep (const int32_t inMilliseconds);
+		/**
+			@brief		Returns the current value of the host's high-resolution clock, in nanoseconds.
+			@return		Current value of the host's clock, in nanoseconds, based on GetSystemCounter() and GetSystemFrequency().
+		**/
+		static uint64_t GetSystemNanoseconds (void);
 
-	/**
-		@brief		Suspends execution of the current thread for a given number of microseconds.
-		@param		inMicroseconds		Time to sleep (microseconds).
-	**/
-	static void		SleepInMicroseconds (const int32_t inMicroseconds);
+		/**
+			@brief		Suspends execution of the current thread for a given number of milliseconds.
+			@param		inMilliseconds		Specifies the sleep time, in milliseconds.
+		**/
+		static void		Sleep (const int32_t inMilliseconds);
 
-};	//	AJATime
+		/**
+			@brief		Suspends execution of the current thread for a given number of microseconds.
+			@param		inMicroseconds		Time to sleep (microseconds).
+		**/
+		static void		SleepInMicroseconds (const int32_t inMicroseconds);
+
+		#if defined(AJA_COLLECT_SLEEP_STATS)
+			static bool			CollectSleepStats (const bool inEnable = true);
+			static std::string	GetSleepStats (void);
+		#endif	//	AJA_COLLECT_SLEEP_STATS
+	};	//	AJATime
 
 #endif	//	AJA_TIME_H

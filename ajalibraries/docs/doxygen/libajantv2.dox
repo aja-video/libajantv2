@@ -219,7 +219,7 @@
 	@endcode
 
 
-	@subsection	libajantv2-has	‘GetNum’ Functions
+	@subsection	libajantv2-getnum	‘GetNum’ Functions
 
 	These functions return a count of a particular device feature. For example, to find out which devices have at least one HDMI output:
 

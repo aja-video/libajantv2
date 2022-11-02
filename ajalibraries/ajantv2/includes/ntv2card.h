@@ -6505,7 +6505,7 @@ public:
 		@warning	Setting these values too large will result in anc data occupying the bottom of the video raster.
 		@see		CNTV2Card::GetAncRegionOffsetAndSize, \ref anccapture-dataspace
 	**/
-	AJA_VIRTUAL bool	AncSetFrameBufferSize (const ULWord inF1Size, const ULWord inF2Size);
+	AJA_VIRTUAL bool	AncSetFrameBufferSize (const ULWord inF1Size, const ULWord inF2Size);	//	New in SDK 16.0
 
 
 	/**
@@ -6522,7 +6522,7 @@ public:
 					\ref aboutautocirculate based applications should not call this function.
 	**/
 	AJA_VIRTUAL bool	AncInsertInit (const UWord inSDIOutput, const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
-										const NTV2Standard inStandard = NTV2_STANDARD_INVALID);
+										const NTV2Standard inStandard = NTV2_STANDARD_INVALID);	//	New in SDK 15.0
 
 	/**
 		@brief		Enables or disables individual Anc insertion components for the given SDI output.
@@ -6538,7 +6538,7 @@ public:
 	**/
 	AJA_VIRTUAL bool	AncInsertSetComponents (const UWord inSDIOutput,
 												const bool inVancY, const bool inVancC,
-												const bool inHancY, const bool inHancC);
+												const bool inHancY, const bool inHancC);	//	New in SDK 16.0
 
 	/**
 		@brief		Enables or disables the given SDI output's Anc inserter frame buffer reads.
@@ -6549,7 +6549,7 @@ public:
 		@note		This function is provided for playback methods that don't use \ref aboutautocirculate.
 					\ref aboutautocirculate based applications should not call this function.
 	**/
-	AJA_VIRTUAL bool	AncInsertSetEnable (const UWord inSDIOutput, const bool inIsEnabled);
+	AJA_VIRTUAL bool	AncInsertSetEnable (const UWord inSDIOutput, const bool inIsEnabled);	//	New in SDK 15.0
 
 	/**
 		@brief		Answers with the run state of the given Anc inserter -- i.e. if its "memory reader" is enabled or not.
@@ -6558,7 +6558,7 @@ public:
 		@param[in]	inSDIOutput		Specifies the SDI output of interest as a zero-based index value (e.g., 0 == SDIOut1).
 		@param[out] outIsEnabled	Receives 'true' if the Anc inserter is enabled (running);  otherwise false.
 	**/
-	AJA_VIRTUAL bool	AncInsertIsEnabled (const UWord inSDIOutput, bool & outIsEnabled);
+	AJA_VIRTUAL bool	AncInsertIsEnabled (const UWord inSDIOutput, bool & outIsEnabled);	//	New in SDK 15.0
 
 	/**
 		@brief		Configures the Anc inserter for the next frame's F1 Anc data to embed/transmit.
@@ -6578,7 +6578,7 @@ public:
 	**/
 	AJA_VIRTUAL bool	AncInsertSetReadParams (const UWord inSDIOutput, const ULWord inFrameNumber, const ULWord inF1Size,
 												const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
-												const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);
+												const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);	//	New in SDK 15.0
 
 	/**
 		@brief		Configures the Anc inserter for the next frame's F2 Anc data to embed/transmit.
@@ -6598,7 +6598,7 @@ public:
 	**/
 	AJA_VIRTUAL bool	AncInsertSetField2ReadParams (const UWord inSDIOutput, const ULWord inFrameNumber, const ULWord inF2Size,
 														const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
-														const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);
+														const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);	//	New in SDK 15.0
 
 	/**
 		@brief		Configures the Anc inserter IP specific params.
@@ -6608,7 +6608,7 @@ public:
 		@param[in]	payloadID		Tells the IP packetizer what the RTP Payload Id is.
 		@param[in]	ssrc			Tells the IP packetizer what the RTP SSRC is.
 	**/
-	AJA_VIRTUAL bool	AncInsertSetIPParams (const UWord inSDIOutput, const UWord ancChannel, const ULWord payloadID, const ULWord ssrc);
+	AJA_VIRTUAL bool	AncInsertSetIPParams (const UWord inSDIOutput, const UWord ancChannel, const ULWord payloadID, const ULWord ssrc);	//	New in SDK 15.2
 
 	/**
 		@brief		Answers where, in device SDRAM, the given SDI connector's Anc inserter is currently reading Anc data for playout.
@@ -6636,7 +6636,7 @@ public:
 					CNTV2Card::AncExtractSetFilterDIDs, \ref anccapture
 	**/
 	AJA_VIRTUAL bool	AncExtractInit (const UWord inSDIInput, const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
-										const NTV2Standard inStandard = NTV2_STANDARD_INVALID);
+										const NTV2Standard inStandard = NTV2_STANDARD_INVALID);	//	New in SDK 15.0
 
 	/**
 		@brief		Enables or disables the Anc extraction components for the given SDI input.
@@ -6664,7 +6664,7 @@ public:
 					\ref aboutautocirculate based applications should not call this function.
 		@see		CNTV2Card::AncExtractIsEnabled, \ref anccapture
 	**/
-	AJA_VIRTUAL bool	AncExtractSetEnable (const UWord inSDIInput, const bool inIsEnabled);
+	AJA_VIRTUAL bool	AncExtractSetEnable (const UWord inSDIInput, const bool inIsEnabled);	//	New in SDK 15.0
 
 	/**
 		@brief		Answers whether the given SDI input's Anc extractor is enabled/active or not.
@@ -6674,7 +6674,7 @@ public:
 		@param[out] outIsEnabled	Receives 'true' if the Anc extractor is enabled (running);	otherwise false.
 		@see		CNTV2Card::AncExtractSetEnable, \ref anccapture
 	**/
-	AJA_VIRTUAL bool	AncExtractIsEnabled (const UWord inSDIInput, bool & outIsEnabled);
+	AJA_VIRTUAL bool	AncExtractIsEnabled (const UWord inSDIInput, bool & outIsEnabled);	//	New in SDK 15.0
 
 	/**
 		@brief		Configures the given SDI input's Anc extractor to receive the next frame's F1 Anc data.
@@ -6694,7 +6694,7 @@ public:
 	**/
 	AJA_VIRTUAL bool	AncExtractSetWriteParams (const UWord inSDIInput, const ULWord inFrameNumber,
 													const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
-													const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);
+													const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);	//	New in SDK 15.0
 
 	/**
 		@brief		Configures the given SDI input's Anc extractor to receive the next frame's F2 Anc data.
@@ -6714,7 +6714,7 @@ public:
 	**/
 	AJA_VIRTUAL bool	AncExtractSetField2WriteParams (const UWord inSDIInput, const ULWord inFrameNumber,
 														const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
-														const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);
+														const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);	//	New in SDK 15.0
 
 	/**
 		@brief		Answers with the given SDI input's current Anc extractor info.
@@ -6740,7 +6740,7 @@ public:
 									filtered (excluded).
 		@see		CNTV2Card::AncExtractSetFilterDIDs, \ref anccapture-filter
 	**/
-	AJA_VIRTUAL bool	AncExtractGetFilterDIDs (const UWord inSDIInput, NTV2DIDSet & outDIDs);
+	AJA_VIRTUAL bool	AncExtractGetFilterDIDs (const UWord inSDIInput, NTV2DIDSet & outDIDs);	//	New in SDK 15.0
 
 	/**
 		@brief		Replaces the DIDs to be excluded (filtered) by the given SDI input's Anc extractor.
@@ -6752,7 +6752,7 @@ public:
 		@note		DIDs having the value 0 (zero) are ignored.
 		@see		CNTV2Card::AncExtractGetFilterDIDs, \ref anccapture-filter
 	**/
-	AJA_VIRTUAL bool	AncExtractSetFilterDIDs (const UWord inSDIInput, const NTV2DIDSet & inDIDs);
+	AJA_VIRTUAL bool	AncExtractSetFilterDIDs (const UWord inSDIInput, const NTV2DIDSet & inDIDs);	//	New in SDK 15.0
 
 	/**
 		@brief		Answers with the number of bytes of field 1 ANC extracted.
@@ -6761,7 +6761,7 @@ public:
 		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
 		@param[out] outF1Size		Receives the number of bytes of field 1 ANC extracted;
 	**/
-	AJA_VIRTUAL bool	AncExtractGetField1Size (const UWord inSDIInput, ULWord & outF1Size);
+	AJA_VIRTUAL bool	AncExtractGetField1Size (const UWord inSDIInput, ULWord & outF1Size);	//	New in SDK 16.0
 
 	/**
 		@brief		Answers with the number of bytes of field 2 ANC extracted.
@@ -6770,7 +6770,7 @@ public:
 		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
 		@param[out] outF2Size		Receives the number of bytes of field 2 ANC extracted;
 	**/
-	AJA_VIRTUAL bool	AncExtractGetField2Size (const UWord inSDIInput, ULWord & outF2Size);
+	AJA_VIRTUAL bool	AncExtractGetField2Size (const UWord inSDIInput, ULWord & outF2Size);	//	New in SDK 16.0
 
 	/**
 		@brief		Answers whether or not the given SDI input's Anc extractor reached its buffer limits.
@@ -6785,13 +6785,13 @@ public:
 		@note		The extractor will not actually write any Anc bytes past its "stop" address, but it will
 					report that it was about to via this "overrun" flag.
 	**/
-	AJA_VIRTUAL bool	AncExtractGetBufferOverrun (const UWord inSDIInput, bool & outIsOverrun, const UWord inField = 0);
+	AJA_VIRTUAL bool	AncExtractGetBufferOverrun (const UWord inSDIInput, bool & outIsOverrun, const UWord inField = 0);	//	New in SDK 15.0
 
 	/**
 		@return		The maximum number of distinct DIDs that the device Anc extractor filter can accommodate.
 		@see		CNTV2Card::AncExtractSetFilterDIDs, CNTV2Card::AncExtractGetDefaultDIDs, \ref anccapture-filter
 	**/
-	static UWord		AncExtractGetMaxNumFilterDIDs (void);
+	static UWord		AncExtractGetMaxNumFilterDIDs (void);	//	New in SDK 15.0
 
 	/**
 		@return		The default DIDs that the device Anc extractor filter is started with.
@@ -6800,7 +6800,7 @@ public:
 								otherwise false for the default SD audio packet DIDs.
 		@see		CNTV2Card::AncExtractSetFilterDIDs, CNTV2Card::AncExtractGetMaxNumFilterDIDs, \ref anccapture-filter
 	**/
-	static NTV2DIDSet	AncExtractGetDefaultDIDs (const bool inHDAudio = true);
+	static NTV2DIDSet	AncExtractGetDefaultDIDs (const bool inHDAudio = true);	//	New in SDK 15.0
 
 
 #if !defined(NTV2_DEPRECATE_14_3)

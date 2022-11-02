@@ -39,36 +39,39 @@ install(TARGETS ut_ajantv2
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-add_executable(ut_ntv2card
-	${ARGPARSE_SOURCES}
-	${AJA_LIB_NTV2_ROOT}/utilityfiles/public/ntv2pixelcomponent.h
-	${AJA_LIB_NTV2_ROOT}/utilityfiles/public/ntv2pixelcomponent.cpp
-	ut_ntv2card.cpp
-	test_support.hpp)
-target_compile_features(ut_ntv2card PUBLIC cxx_std_14)
-set_target_properties(ut_ntv2card PROPERTIES CXX_STANDARD_REQUIRED ON)
-add_dependencies(ut_ntv2card ajantv2 ntv2qa)
-target_include_directories(ut_ntv2card PRIVATE
-	${TARGET_INCLUDE_DIRS}
-	${AJA_QA_ROOT}/libs)
-target_link_libraries(ut_ntv2card PRIVATE ajantv2 ntv2qa ${TARGET_LINK_LIBS})
-set(UT_NTV2CARD_JSON
-	json/sdi_sd_hd.json
-	json/sdi_uhd_4k.json)
-foreach(j IN LISTS UT_NTV2CARD_JSON)
-	post_build_copy_file(ut_ntv2card
-		${CMAKE_CURRENT_SOURCE_DIR}/${j}
-		$<TARGET_FILE_DIR:${PROJECT_NAME}>/${j})
-endforeach()
+if (AJA_BUILD_QA)
+	add_executable(ut_ntv2card
+		${ARGPARSE_SOURCES}
+		${AJA_LIB_NTV2_ROOT}/utilityfiles/public/ntv2pixelcomponent.h
+		${AJA_LIB_NTV2_ROOT}/utilityfiles/public/ntv2pixelcomponent.cpp
+		ut_ntv2card.cpp
+		test_support.hpp)
+	target_compile_features(ut_ntv2card PUBLIC cxx_std_14)
+	set_target_properties(ut_ntv2card PROPERTIES CXX_STANDARD_REQUIRED ON)
+	add_dependencies(ut_ntv2card ajantv2 ntv2qa)
+	target_include_directories(ut_ntv2card PRIVATE
+		${TARGET_INCLUDE_DIRS}
+		${AJA_QA_ROOT}/libs)
+	target_link_libraries(ut_ntv2card PRIVATE ajantv2 ntv2qa ${TARGET_LINK_LIBS})
+	set(UT_NTV2CARD_JSON
+		json/sdi_validated.json
+		json/sdi_sd_hd.json
+		json/sdi_uhd_4k.json)
+	foreach(j IN LISTS UT_NTV2CARD_JSON)
+		post_build_copy_file(ut_ntv2card
+			${CMAKE_CURRENT_SOURCE_DIR}/${j}
+			$<TARGET_FILE_DIR:${PROJECT_NAME}>/${j})
+	endforeach()
 
-install(FILES ${UT_NTV2CARD_JSON} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/json)
-install(TARGETS ut_ntv2card
-    BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
-	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+	install(FILES ${UT_NTV2CARD_JSON} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/json)
+	install(TARGETS ut_ntv2card
+		BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
+		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+		FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+endif()
 
 add_executable(ut_ntv2bitfile
 	${ARGPARSE_SOURCES}

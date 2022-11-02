@@ -4976,13 +4976,11 @@ bool CNTV2Card::Connect (const NTV2InputCrosspointID inInputXpt, const NTV2Outpu
 	bool			canConnect	(true);
 
 	if (!CNTV2RegisterExpert::GetCrosspointSelectGroupRegisterInfo(inInputXpt, regNum, ndx))
-		return false;
-	if (!regNum)
-		return false;	//	Register number is zero
+		{ROUTEFAIL(GetDisplayName() << ": GetCrosspointSelectGroupRegisterInfo failed, inputXpt=" << DEC(inInputXpt));  return false;}
+	if (!regNum  ||  regNum > maxRegNum)
+		{ROUTEFAIL(GetDisplayName() << ": GetCrosspointSelectGroupRegisterInfo returned bad register number '" << DEC(regNum) << "' for inputXpt=" << DEC(inInputXpt));  return false;}
 	if (ndx > 3)
-		return false;	//	Bad index
-	if (regNum > maxRegNum)
-		return false;	//	This device doesn't have that routing register
+		{ROUTEFAIL(GetDisplayName() << ": GetCrosspointSelectGroupRegisterInfo returned bad index '" << DEC(ndx) << "' for inputXpt=" << DEC(inInputXpt));  return false;}
 
 	if (inValidate)		//	If caller requested xpt validation
 		if (CanConnect(inInputXpt, inOutputXpt, canConnect))	//	If answer can be trusted
@@ -7132,7 +7130,9 @@ bool CNTV2Card::GetVPIDRGBRange (NTV2VPIDRGBRange & outValue, const NTV2Channel 
 bool CNTV2Card::HasMultiRasterWidget (void)
 {
 	bool hasMultiRasterWidget(false);
-	return CNTV2DriverInterface::ReadRegister(kRegMRSupport, hasMultiRasterWidget, kRegMaskMRSupport, kRegShiftMRSupport)  &&  hasMultiRasterWidget;
+	return NTV2DeviceCanDoHDMIMultiView(_boardID)
+			&&  CNTV2DriverInterface::ReadRegister(kRegMRSupport, hasMultiRasterWidget, kRegMaskMRSupport, kRegShiftMRSupport)
+			&&  hasMultiRasterWidget;
 }
 
 bool CNTV2Card::SetMultiRasterBypassEnable (const bool inEnable)

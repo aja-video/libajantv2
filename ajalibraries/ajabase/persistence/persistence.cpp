@@ -21,90 +21,132 @@
 
 // Mac defines
 #if !defined(AJA_MAC) && defined(AJAMac)
-#define AJA_MAC
+	#define AJA_MAC
 #endif
 
 // Linux defines
 #if !defined(AJA_LINUX) && defined(AJALinux)
-#define AJA_LINUX
+	#define AJA_LINUX
 #endif
 
 // Windows defines
 #if !defined(AJA_WINDOWS) && defined(MSWindows)
-#define AJA_WINDOWS
+	#define AJA_WINDOWS
 #endif
 
 // Platform includes
 #if defined(AJA_MAC)
-#include <sys/stat.h>
-#include <unistd.h>
+	#include <sys/stat.h>
+	#include <unistd.h>
+	#define AJAFUNC		__func__
+#elif defined(AJA_WINDOWS)
+	#include <Windows.h>
+	#include <io.h>
+	#pragma warning(disable:4996)
+	#ifndef F_OK
+		#define F_OK 0
+	#endif
+	#define AJAFUNC		__FUNCTION__
+#elif defined(AJA_LINUX)
+	#include <sys/stat.h>
+	#include <stdio.h>
+	#include <string.h>
+	#include <unistd.h>
+	#ifndef F_OK
+		#define F_OK 0
+	#endif
+	#define AJAFUNC		__func__
 #endif
 
-#if defined(AJA_WINDOWS)
-#include <Windows.h>
-#include <io.h>
-#pragma warning(disable:4996)
-#ifndef F_OK
-#define F_OK 0
-#endif
-#endif
-
-#if defined(AJA_LINUX)
-#include <sys/stat.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#ifndef F_OK
-#define F_OK 0
-#endif
-#endif
-
-static std::vector<std::string> sTypeLabelsVector;
+static std::vector<std::string>	sTypeLabelsVector;
 static AJALock					sTypeLabelsVectorLock;
+static std::set<std::string>	sLogKeys;
+static AJALock					sLogKeysLock;
 
-#define addTypeLabelToVector(x) sTypeLabelsVector.push_back(#x)
 
-inline void initTypeLabels()
+#define addTypeLabelToVector(_x_)	sTypeLabelsVector.push_back(#_x_)
+#define addTypeLabel(_x_)			sTypeLabelsVector.push_back(_x_)
+
+static inline void initTypeLabels (void)
 {
 	AJAAutoLock autoLock(&sTypeLabelsVectorLock);
 	sTypeLabelsVector.clear();
-	addTypeLabelToVector(AJAPersistenceTypeInt);
-	addTypeLabelToVector(AJAPersistenceTypeBool);
-	addTypeLabelToVector(AJAPersistenceTypeDouble);
-	addTypeLabelToVector(AJAPersistenceTypeString);
-	addTypeLabelToVector(AJAPersistenceTypeBlob);
-	addTypeLabelToVector(AJAPersistenceTypeEnd);
+	addTypeLabel("int");	//	addTypeLabelToVector(AJAPersistenceTypeInt);
+	addTypeLabel("bool");	//	addTypeLabelToVector(AJAPersistenceTypeBool);
+	addTypeLabel("double");	//	addTypeLabelToVector(AJAPersistenceTypeDouble);
+	addTypeLabel("string");	//	addTypeLabelToVector(AJAPersistenceTypeString);
+	addTypeLabel("blob");	//	addTypeLabelToVector(AJAPersistenceTypeBlob);
+	addTypeLabel("end");	//	addTypeLabelToVector(AJAPersistenceTypeEnd);
 }
 
-inline std::string labelForPersistenceType(AJAPersistenceType type)
+static inline std::string labelForPersistenceType (AJAPersistenceType type)
 {
 	AJAAutoLock autoLock(&sTypeLabelsVectorLock);
 	if (type >= 0  &&  type < AJAPersistenceTypeEnd	 &&	 size_t(type) < sTypeLabelsVector.size())
 		return sTypeLabelsVector.at(type);
 	else
-		return "unknown type";
+		return "unk";
+}
+
+bool AJAPersistence::DebugLogAddKey (const std::string & inKey)
+{
+	AJAAutoLock lock(&sLogKeysLock);
+	if (sLogKeys.find(inKey) != sLogKeys.end())
+		return false;
+	sLogKeys.insert(inKey);
+	return true;
+}
+
+bool AJAPersistence::DebugLogHasKeys (void)
+{
+	AJAAutoLock lock(&sLogKeysLock);
+	return !sLogKeys.empty();
+}
+
+bool AJAPersistence::DebugLogHasKey (const std::string & inKey)
+{
+	AJAAutoLock lock(&sLogKeysLock);
+	std::set<std::string>::iterator it(sLogKeys.find(inKey));
+	return it != sLogKeys.end();
+}
+
+bool AJAPersistence::DebugLogRemoveKey (const std::string & inKey)
+{
+	AJAAutoLock lock(&sLogKeysLock);
+	std::set<std::string>::iterator it(sLogKeys.find(inKey));
+	if (it == sLogKeys.end())
+		return false;
+	sLogKeys.erase(it);
+	return true;
+}
+
+bool AJAPersistence::DebugLogRemoveAll (void)
+{
+	AJAAutoLock lock(&sLogKeysLock);
+	sLogKeys.clear();
+	return true;
 }
 
 // Reduce the typing when using the logging macros
 //#define AJA_VERBOSE_LOGGING = 1
-#define AJA_LOG_DEBUG(_should_log_, _expr_)	   if (_should_log_) { AJA_sDEBUG(AJA_DebugUnit_Persistence, _expr_); }
-#define AJA_LOG_INFO(_should_log_, _expr_)	   if (_should_log_) { AJA_sINFO(AJA_DebugUnit_Persistence, _expr_); }
-#define AJA_LOG_NOTICE(_should_log_, _expr_)   if (_should_log_) { AJA_sNOTICE(AJA_DebugUnit_Persistence, _expr_); }
-#define AJA_LOG_WARN(_should_log_, _expr_)	   if (_should_log_) { AJA_sWARNING(AJA_DebugUnit_Persistence, _expr_); }
-#define AJA_LOG_ERROR(_should_log_, _expr_)	   if (_should_log_) { AJA_sERROR(AJA_DebugUnit_Persistence, _expr_); }
-//#define AJA_LOG_ALERT(_should_log_, _expr_)	 if (_should_log_) { AJA_sALERT(AJA_DebugUnit_Persistence, _expr_); }
-//#define AJA_LOG_EMERGENCY(_should_log_, _expr_) if (_should_log_) { AJA_sEMERGENCY(AJA_DebugUnit_Persistence, _expr_); }
-//#define AJA_LOG_ASSERT(_should_log_, _expr_)	 if (_should_log_) { AJA_sASSERT(AJA_DebugUnit_Persistence, _expr_); }
+#define AJA_LOG_DEBUG(_should_log_, _xpr_)		do (if (_should_log_) AJA_sDEBUG(AJA_DebugUnit_Persistence,	AJAFUNC << ": " << _xpr_); } while(false)
+#define AJA_LOG_INFO(_should_log_, _xpr_)		do {if (_should_log_) AJA_sINFO(AJA_DebugUnit_Persistence,	AJAFUNC << ": " << _xpr_); } while(false)
+#define AJA_LOG_NOTICE(_should_log_, _xpr_)		do {if (_should_log_) AJA_sNOTICE(AJA_DebugUnit_Persistence,AJAFUNC << ": " << _xpr_); } while(false)
+#define AJA_LOG_WARN(_should_log_, _xpr_)		do {if (_should_log_) AJA_sWARNING(AJA_DebugUnit_Persistence,AJAFUNC << ": " << _xpr_); } while(false)
+#define AJA_LOG_ERROR(_should_log_, _xpr_)		do {if (_should_log_) AJA_sERROR(AJA_DebugUnit_Persistence,	AJAFUNC << ": " << _xpr_); } while(false)
+//#define AJA_LOG_ALERT(_should_log_, _xpr_)		do {if (_should_log_) AJA_sALERT(AJA_DebugUnit_Persistence,		AJAFUNC << ": " << _xpr_); } while(false)
+//#define AJA_LOG_EMERGENCY(_should_log_, _xpr_)	do {if (_should_log_) AJA_sEMERGENCY(AJA_DebugUnit_Persistence,	AJAFUNC << ": " << _xpr_); } while(false)
+//#define AJA_LOG_ASSERT(_should_log_, _xpr_)		do {if (_should_log_) AJA_sASSERT(AJA_DebugUnit_Persistence,	AJAFUNC << ": " << _xpr_); } while(false)
 
 // Use different log levels so can better sort reads/writes
-#define AJA_LOG_READ(_should_log_, _expr_)	   AJA_LOG_INFO(_should_log_, _expr_)
-#define AJA_LOG_WRITE(_should_log_, _expr_)	   AJA_LOG_NOTICE(_should_log_, _expr_)
+#define AJA_LOG_READ(_should_log_, _xpr_)	   AJA_LOG_INFO(_should_log_, _xpr_)
+#define AJA_LOG_WRITE(_should_log_, _xpr_)	   AJA_LOG_NOTICE(_should_log_, _xpr_)
 
 inline bool should_we_log()
 {
 	int32_t refCount = 0;
 	AJADebug::GetClientReferenceCount(&refCount);
-	return (refCount > 0);
+	return refCount > 0;
 }
 
 // There are a few places where we want to try calling sqlite3_*() calls a couple of times if busy
@@ -137,8 +179,8 @@ inline bool should_we_log()
 }
 
 // Encapsulate the sqlite3_stmt object so automatically handled by constructor/destructor
-const int gDefaultNumSqliteRetries = 4;
-const int32_t gDefaultMicrosecondsBetweenRetries = 2000;
+const int gDefaultNumSqliteRetries = 6;
+const int32_t gDefaultMicrosecondsBetweenRetries = 2500;//2000;
 
 // Encapsulate the sqlite3 object so automatically handled by constructor/destructor
 class AJAPersistenceDBImplObject
@@ -735,134 +777,106 @@ AJAPersistence::~AJAPersistence()
 
 void AJAPersistence::SetParams(const std::string& appID, const std::string& deviceType, const std::string& deviceNumber, bool bSharePrefFile)
 {
-	std::string lastStateKeyName = mstateKeyName;
-
-	mappId			= appID;
-	mboardId		= deviceType;
-	mserialNumber	= deviceNumber;
+	std::string lastStateKeyName = mStateKeyName;
+	mAppID			= appID;
+	mBoardID		= deviceType;
+	mSerialNumber	= deviceNumber;
 	mSharedPrefFile = bSharePrefFile;
-
-	if (mSharedPrefFile)
-		mSysInfo.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreSystem, mstateKeyName);
-	else
-		mSysInfo.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreUser, mstateKeyName);
-
-	mstateKeyName += appID;
+	mSysInfo.GetValue(mSharedPrefFile ? AJA_SystemInfoTag_Path_PersistenceStoreSystem : AJA_SystemInfoTag_Path_PersistenceStoreUser, mStateKeyName);
+	mStateKeyName += appID;
 
 	bool shouldLog = should_we_log();
-	if (mappId != "null_device")
-	{
-		AJA_LOG_INFO(shouldLog, "setting db params, mstateKeyName is " << mstateKeyName << ", called from SetParams");
-	}
+	if (mAppID != "null_device")
+		AJA_LOG_INFO(shouldLog, mStateKeyName << ": dev='" << mBoardID << "' devNum='" << mSerialNumber << "'");
 }
 
 void AJAPersistence::GetParams(std::string& appID, std::string& deviceType, std::string& deviceNumber, bool& bSharePrefFile)
 {
-	appID = mappId;
-	deviceType = mboardId;
-	deviceNumber = mserialNumber;
+	appID = mAppID;
+	deviceType = mBoardID;
+	deviceNumber = mSerialNumber;
 	bSharePrefFile = mSharedPrefFile;
 }
 
 bool AJAPersistence::SetValue(const std::string& key, const void *value, AJAPersistenceType type, size_t blobSize)
 {
-	bool shouldLog = should_we_log();
-	bool isGood = false;
+	bool shouldLog(should_we_log()), isGood(false);
 	int dbOpenErr = 0;
 	{
-		AJAPersistenceDBImpl db(mstateKeyName);
+		AJAPersistenceDBImpl db(mStateKeyName);
 		if (db.IsDBOpen())
-			isGood = db.SetValue(key, value, type, int(blobSize), mboardId, mserialNumber);
+			isGood = db.SetValue(key, value, type, int(blobSize), mBoardID, mSerialNumber);
 		else
 			dbOpenErr = db.OpenErrorCode();
 	}
 
 	if (shouldLog)
 	{
-		std::string dbgValue = "(could not log type)";
+		std::string dbgValue("cannotLogValue"), dbOpenErrStr;
 		AJAPersistenceDBImpl::ConvertValueTypeToString(value, type, dbgValue);
-
-		std::string dbOpenErrStr = "";
-		if (dbOpenErr != 0)
-		{
-			dbOpenErrStr = "db open err: " + aja::to_string(dbOpenErr) + ", ";
-		}
-
-		AJA_LOG_WRITE(shouldLog, dbOpenErrStr <<
-								"write value of type: " << labelForPersistenceType(type) <<
-								", with key: \""	   << key							<< "\"" <<
-								", with dev_name: \""  << mboardId						<< "\"" <<
-								", with dev_num: \""   << mserialNumber					<< "\"" <<
-								", and value of: \""   << dbgValue						<< "\"");
+		if (dbOpenErr)
+			dbOpenErrStr = "(" + aja::to_string(dbOpenErr) + ")";
+		if (!DebugLogHasKeys() ||  DebugLogHasKey(key))
+			AJA_LOG_WRITE(shouldLog, mStateKeyName << dbOpenErrStr << ": '" << mBoardID << "' " << mSerialNumber << ": "
+									<< " key='" << key << "' " << labelForPersistenceType(type) << " val='" << dbgValue << "'");
 	}
-
 	return isGood;
 }
 
 bool AJAPersistence::GetValue(const std::string& key, void *value, AJAPersistenceType type, size_t blobSize)
 {
 	// with Get, don't create file if it does not exist
-	if (FileExists() == false)
+	if (!FileExists())
 		return false;
 
-	bool shouldLog = should_we_log();
-	bool isGood = false;
+	bool shouldLog(should_we_log()), isGood(false);
 	int dbOpenErr = 0;
 	{
-		AJAPersistenceDBImpl db(mstateKeyName);
+		AJAPersistenceDBImpl db(mStateKeyName);
 		if (db.IsDBOpen())
-			isGood = db.GetValue(key, value, type, int(blobSize), mboardId, mserialNumber);
+			isGood = db.GetValue(key, value, type, int(blobSize), mBoardID, mSerialNumber);
 		else
 			dbOpenErr = db.OpenErrorCode();
 	}
 
 	if (shouldLog)
 	{
-		std::string dbgValue = "(could not log type)";
+		std::string dbgValue("cannotLogValue"), dbOpenErrStr;
 		AJAPersistenceDBImpl::ConvertValueTypeToString(value, type, dbgValue);
-
-		std::string dbOpenErrStr = "";
-		if (dbOpenErr != 0)
-		{
-			dbOpenErrStr = "db open err: " + aja::to_string(dbOpenErr) + ", ";
-		}
-
-		AJA_LOG_READ(shouldLog, dbOpenErrStr <<
-								"read value of type: " << labelForPersistenceType(type) <<
-								", with key: \""	   << key							<< "\"" <<
-								", with dev_name: \""  << mboardId						<< "\"" <<
-								", with dev_num: \""   << mserialNumber					<< "\"" <<
-								", and value of: \""   << dbgValue						<< "\"");
+		if (dbOpenErr)
+			dbOpenErrStr = "(" + aja::to_string(dbOpenErr) + ")";
+		if (!DebugLogHasKeys() ||  DebugLogHasKey(key))
+			AJA_LOG_READ(shouldLog, mStateKeyName << dbOpenErrStr << ": '" << mBoardID << "' " << mSerialNumber << ": "
+									<< " key='" << key << "' " << labelForPersistenceType(type) << " val='" << dbgValue << "'");
 	}
-
 	return isGood;
 }
 
 bool AJAPersistence::GetValuesString(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<std::string>& values)
 {
 	// with Get, don't create file if it does not exist
-	if (FileExists() == false)
+	if (!FileExists())
 		return false;
 
-	bool shouldLog = should_we_log();
-	bool isGood = false;
+	bool shouldLog(should_we_log()), isGood(false);
 	int dbOpenErr = 0;
+	if (!shouldLog)
+		for (auto it(keys.begin());  it != keys.end();  ++it)
+			if (DebugLogHasKey(*it))
+				{shouldLog = true;  break;}
 	{
-		AJAPersistenceDBImpl db(mstateKeyName);
+		AJAPersistenceDBImpl db(mStateKeyName);
 		if (db.IsDBOpen())
-			isGood = db.GetAllMatchingValues(keyQuery, keys, values, mboardId, mserialNumber);
+			isGood = db.GetAllMatchingValues(keyQuery, keys, values, mBoardID, mSerialNumber);
 		else
 			dbOpenErr = db.OpenErrorCode();
 	}
 	if (shouldLog)
 	{
-		std::string dbOpenErrStr = "";
-		if (dbOpenErr != 0)
-		{
-			dbOpenErrStr = "db open err: " + aja::to_string(dbOpenErr) + ", ";
-		}
-
-		AJA_LOG_READ(shouldLog, dbOpenErrStr << "reading string values with query key: " << keyQuery);
+		std::string dbOpenErrStr;
+		if (dbOpenErr)
+			dbOpenErrStr = "(" + aja::to_string(dbOpenErr) + ")";
+		AJA_LOG_READ(shouldLog, mStateKeyName << dbOpenErrStr << ": query='" << keyQuery << "'");
 	}
 	return isGood;
 }
@@ -870,74 +884,56 @@ bool AJAPersistence::GetValuesString(const std::string& keyQuery, std::vector<st
 bool AJAPersistence::GetValuesInt(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<int>& values)
 {
 	// with Get, don't create file if it does not exist
-	if (FileExists() == false)
+	if (!FileExists())
 		return false;
 
-	AJA_LOG_READ(should_we_log(), "reading int values with query key: " << keyQuery);
-	
+	AJA_LOG_READ(should_we_log(), mStateKeyName << ": query='" << keyQuery << "'");
 	std::vector<std::string> tmpValues;
-	if (GetValuesString(keyQuery, keys, tmpValues))
-	{
-		for (int i = 0; i < (int)keys.size(); i++)
-		{
-			values.push_back(atoi(tmpValues.at(i).c_str()));
-		}
-
-		return true;
-	}
-	return false;
+	if (!GetValuesString(keyQuery, keys, tmpValues))
+		return false;
+	for (size_t i(0);  i < keys.size();  i++)
+		values.push_back(atoi(tmpValues.at(i).c_str()));
+	return true;
 }
 
 bool AJAPersistence::GetValuesBool(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<bool>& values)
 {
 	// with Get, don't create file if it does not exist
-	if (FileExists() == false)
+	if (!FileExists())
 		return false;
 
-	AJA_LOG_READ(should_we_log(), "reading bool values with query key: " << keyQuery);
-
+	AJA_LOG_READ(should_we_log(), mStateKeyName << ": query='" << keyQuery << "'");
 	std::vector<std::string> tmpValues;
-	if (GetValuesString(keyQuery, keys, tmpValues))
-	{
-		for (int i = 0; i < (int)keys.size(); i++)
-		{
-			values.push_back((atoi(tmpValues.at(i).c_str()) == 1) ? true : false);
-		}
-
-		return true;
-	}
-	return false;
+	if (!GetValuesString(keyQuery, keys, tmpValues))
+		return false;
+	for (size_t i(0);  i < keys.size();  i++)
+		values.push_back((atoi(tmpValues.at(i).c_str()) == 1) ? true : false);
+	return true;
 }
 
 bool AJAPersistence::GetValuesDouble(const std::string& keyQuery, std::vector<std::string>& keys, std::vector<double>& values)
 {
 	// with Get, don't create file if it does not exist
-	if (FileExists() == false)
+	if (!FileExists())
 		return false;
 
-	AJA_LOG_READ(should_we_log(), "reading double values with query key: " << keyQuery);
-
+	AJA_LOG_READ(should_we_log(), mStateKeyName << ": query='" << keyQuery << "'");
 	std::vector<std::string> tmpValues;
-	if (GetValuesString(keyQuery, keys, tmpValues))
-	{
-		for (int i = 0; i < (int)keys.size(); i++)
-		{
-			values.push_back(atof(tmpValues.at(i).c_str()));
-		}
-
-		return true;
-	}
-	return false;
+	if (!GetValuesString(keyQuery, keys, tmpValues))
+		return false;
+	for (int i(0);  i < int(keys.size());  i++)
+		values.push_back(atof(tmpValues.at(i).c_str()));
+	return true;
 }
 
 void AJAPersistence::PathToPrefFile(std::string& path)
 {
-	path = mstateKeyName;
+	path = mStateKeyName;
 }
 
 bool AJAPersistence::FileExists()
 {
-	return AJAFileIO::FileExists(mstateKeyName.c_str());
+	return AJAFileIO::FileExists(mStateKeyName.c_str());
 }
 
 bool AJAPersistence::ClearPrefFile()
@@ -946,14 +942,12 @@ bool AJAPersistence::ClearPrefFile()
 	bool bSuccess = true;
 	if (FileExists())
 	{
-		AJAPersistenceDBImpl db(mstateKeyName);
-		AJA_LOG_INFO(shouldLog, "clearing existing tables in db, called from ClearPrefFile");
+		AJAPersistenceDBImpl db(mStateKeyName);
+		AJA_LOG_INFO(shouldLog, "cleared existing db tables");
 		bSuccess = db.ClearTables();
 	}
 	else
-	{
-		AJA_LOG_NOTICE(shouldLog, "could not clear existing tables in db, file not found, called from ClearPrefFile");
-	}
+		AJA_LOG_WARN(shouldLog, "failed, file not found");
 	return bSuccess;
 }
 
@@ -975,13 +969,9 @@ bool backup_pref_file(const std::string &path, bool shouldLog)
 
 			result = std::rename(path.c_str(), newPath.c_str()) == 0 ? true : false;
 			if (result)
-			{
-				AJA_LOG_NOTICE(shouldLog, "successful backup of db from '" << path << "' to '" << newPath << "'");
-			}
+				AJA_LOG_NOTICE(shouldLog, "db file backed up, from '" << path << "' to '" << newPath << "'");
 			else
-			{
-				AJA_LOG_NOTICE(shouldLog, "problem with backup of db from '" << path << "' to '" << newPath << "'");
-			}
+				AJA_LOG_WARN(shouldLog, "db file backup failed, from '" << path << "' to '" << newPath << "'");
 		}
 	}
 	return result;
@@ -997,42 +987,32 @@ bool AJAPersistence::DeletePrefFile(bool makeBackup)
 		if (makeBackup)
 		{
 			// backup does a move, so no need to delete if it works
-			bSuccess = backup_pref_file(mstateKeyName, shouldLog);
+			bSuccess = backup_pref_file(mStateKeyName, shouldLog);
 			if (!bSuccess)
-			{
-				bSuccess = std::remove(mstateKeyName.c_str()) == 0 ? true : false;
-			}
+				bSuccess = std::remove(mStateKeyName.c_str()) == 0 ? true : false;
 		}
 		else
-		{
-			bSuccess = std::remove(mstateKeyName.c_str()) == 0 ? true : false;
-		}
+			bSuccess = std::remove(mStateKeyName.c_str()) == 0 ? true : false;
 		if (bSuccess)
-		{
-			AJA_LOG_NOTICE(shouldLog, "success with deletion of db file '" << mstateKeyName << "'");
-		}
+			AJA_LOG_NOTICE(shouldLog, "db file '" << mStateKeyName << "' deleted");
 		else
-		{
-			AJA_LOG_NOTICE(shouldLog, "problem with deletion of db file '" << mstateKeyName << "'");
-		}
+			AJA_LOG_WARN(shouldLog, "failed to delete db file '" << mStateKeyName << "'");
 	}
 	else
-	{
-		AJA_LOG_NOTICE(shouldLog, "could not delete existing db, file not found, called from DeletePrefFile");
-	}
+		AJA_LOG_WARN(shouldLog, "failed to delete db file, not found");
 	return bSuccess;
 }
 
 bool AJAPersistence::StorageHealthCheck(int& errCode, std::string& errMessage)
 {
-	if (FileExists() == false)
+	if (!FileExists())
 	{
 		errCode = -1;
 		errMessage = "db file does not exist";
 		return false;
 	}
 
-	AJAPersistenceDBImpl db(mstateKeyName);
+	AJAPersistenceDBImpl db(mStateKeyName);
 	if (db.IsDBOpen())
 	{
 		errCode = 0;
