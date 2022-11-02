@@ -12,8 +12,6 @@
 #include <sys/stat.h>
 #include <sstream>
 
-#define USE_M1
-
 #if defined(AJA_WINDOWS)
 	// Windows includes
 	#include <direct.h>
