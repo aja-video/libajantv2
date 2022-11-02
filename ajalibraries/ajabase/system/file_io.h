@@ -8,12 +8,16 @@
 #ifndef AJA_FILE_IO_H
 #define AJA_FILE_IO_H
 
+#include <mutex>
+using std::mutex;
+using std::unique_lock;
 
 #include "ajabase/common/types.h"
 #include "ajabase/common/public.h"
 #include "ajabase/system/system.h"
 #include <vector>
 #include <string>
+
 
 #if defined(AJA_WINDOWS)
 	const char AJA_PATHSEP = '\\';
@@ -49,6 +53,13 @@ typedef enum
 	eAJASeekCurrent,
 	eAJASeekEnd
 } AJAFileSetFlag;
+	
+	
+typedef enum
+{
+	eAJAIoDefault,
+	eAJAIoAlternate
+} AJAIOModel;
 
 
 /**
@@ -323,10 +334,11 @@ public:
 private:
 
 #if defined(AJA_WINDOWS)
-	HANDLE		 mFileDescriptor;
+	HANDLE		mFileDescriptor;
 #else
-	FILE*		 mpFile;
+	FILE*		mpFile;
 #endif
+	AJAIOModel	mIoModel;
 };
 
 #endif // AJA_FILE_IO_H
