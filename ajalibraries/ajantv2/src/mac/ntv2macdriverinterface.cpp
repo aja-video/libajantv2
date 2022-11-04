@@ -753,29 +753,31 @@ bool CNTV2MacDriverInterface::WriteRegister (const ULWord inRegNum, const ULWord
 }
 
 
-//--------------------------------------------------------------------------------------------------------------------
-//	StartDriver
-//
-//	For IoHD this is currently a no-op
-//	For Kona this starts the driver after all of the bitFiles have been sent to the driver.
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::StartDriver (DriverStartPhase phase)
-{
-	kern_return_t kernResult = KERN_FAILURE;
-	uint64_t	scalarI_64[1] = {phase};
-	uint32_t	outputCount = 0;
-	if (GetIOConnect())
-		kernResult = OS_IOConnectCallScalarMethod (	GetIOConnect(),		// an io_connect_t returned from IOServiceOpen().
-													kDriverStartDriver,	// selector of the function to be called via the user client.
-													scalarI_64,			// array of scalar (64-bit) input values.
-													1,					// the number of scalar input values.
-													AJA_NULL,			// array of scalar (64-bit) output values.
-													&outputCount);		// pointer to the number of scalar output values.
-	if (kernResult == KERN_SUCCESS)
-		return true;
-	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
-	return false;
-}
+#if !defined(NTV2_DEPRECATE_15_6)
+	//--------------------------------------------------------------------------------------------------------------------
+	//	StartDriver
+	//
+	//	For IoHD this is currently a no-op
+	//	For Kona this starts the driver after all of the bitFiles have been sent to the driver.
+	//--------------------------------------------------------------------------------------------------------------------
+	bool CNTV2MacDriverInterface::StartDriver (DriverStartPhase phase)
+	{
+		kern_return_t kernResult = KERN_FAILURE;
+		uint64_t	scalarI_64[1] = {phase};
+		uint32_t	outputCount = 0;
+		if (GetIOConnect())
+			kernResult = OS_IOConnectCallScalarMethod (	GetIOConnect(),		// an io_connect_t returned from IOServiceOpen().
+														kDriverStartDriver,	// selector of the function to be called via the user client.
+														scalarI_64,			// array of scalar (64-bit) input values.
+														1,					// the number of scalar input values.
+														AJA_NULL,			// array of scalar (64-bit) output values.
+														&outputCount);		// pointer to the number of scalar output values.
+		if (kernResult == KERN_SUCCESS)
+			return true;
+		DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
+		return false;
+	}
+#endif	//	!defined(NTV2_DEPRECATE_15_6)
 
 
 //--------------------------------------------------------------------------------------------------------------------
