@@ -60,8 +60,8 @@ typedef enum
 	kDriverAutoCirculateStatus							= 22,
 	kDriverAutoCirculateTransfer						= 23,
 	kDriverAutoCirculateFramestamp						= 24,
-	kDriverSetDefaultDeviceForPID						= 25,
-	kDriverIsDefaultDeviceForPID						= 26,
+	kDriverSetDefaultDeviceForPID						= 25,	//	Unsupported when classic QuickTime dropped after SDK 14
+	kDriverIsDefaultDeviceForPID						= 26,	//	Unsupported when classic QuickTime dropped after SDK 14
 	kDriverSystemControl								= 27,
 	kDriverSystemStatus									= 28,
 	kDriverDMATransferEx								= 29,

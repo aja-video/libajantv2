@@ -463,7 +463,7 @@ io_connect_t CNTV2MacDriverInterface::GetIOConnect (const bool inDoNotAllocate) 
 	return gDeviceMap.GetConnection (_boardNumber, inDoNotAllocate);
 }
 
-
+#if !defined(NTV2_NULL_DEVICE)
 //--------------------------------------------------------------------------------------------------------------------
 //	Open
 //--------------------------------------------------------------------------------------------------------------------
@@ -525,6 +525,7 @@ bool CNTV2MacDriverInterface::CloseLocalPhysical (void)
 	return true; // success
 
 }	//	CloseLocalPhysical
+#endif	//	!defined(NTV2_NULL_DEVICE)
 
 
 #if !defined(NTV2_DEPRECATE_16_0)
@@ -941,62 +942,6 @@ bool CNTV2MacDriverInterface::GetStreamingApplication (ULWord & outAppType, int3
 		return true;
 	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
 	return false;
-}
-
-
-//--------------------------------------------------------------------------------------------------------------------
-//	SetDefaultDeviceForPID
-//
-//	Used for multicard support with QT components. (Also see IsDefaultDeviceForPID)
-//	QT components are created and destroyed multiple times in the lifetime of running app. This call allows a component
-//	to mark a device as its default device, so that each time the component reopens, it can find the device it used last.
-//	This call adds the input PID to driver/device's PID list.
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::SetDefaultDeviceForPID (int32_t pid)
-{
-	kern_return_t	kernResult		= KERN_FAILURE;
-	uint64_t		scalarI_64[1]	= {uint64_t(pid)};
-	uint32_t		outputCount		= 0;
-	if (GetIOConnect())
-	{
-		kernResult = OS_IOConnectCallScalarMethod (	GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
-													kDriverSetDefaultDeviceForPID,// selector of the function to be called via the user client.
-													scalarI_64,				// array of scalar (64-bit) input values.
-													1,						// the number of scalar input values.
-													AJA_NULL,				// array of scalar (64-bit) output values.
-													&outputCount);			// pointer to the number of scalar output values.
-	}
-	if (kernResult == KERN_SUCCESS)
-		return true;
-	DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
-	return false;
-}
-
-
-//--------------------------------------------------------------------------------------------------------------------
-//	IsDefaultDeviceForPID
-//
-//	Used for multicard support with QT components. (Also see SetDefaultDeviceForPID)
-//	QT components are created and destroyed multiple times in the lifetime of running app. This call allows a component
-//	to mark a device as its default device, so that each time the component reopens, it can find the device it used last.
-//	Returns true if the input process ID was previously marked as the default device using SetDefaultDeviceForPID.
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::IsDefaultDeviceForPID (const int32_t inProcessID)
-{
-	kern_return_t	kernResult		= KERN_FAILURE;
-	uint64_t		scalarI_64[1]	= {uint64_t(inProcessID)};
-	uint64_t		scalarO_64		= 0;
-	uint32_t		outputCount		= 1;
-	if (GetIOConnect())
-		kernResult = OS_IOConnectCallScalarMethod (	GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
-													kDriverIsDefaultDeviceForPID,// selector of the function to be called via the user client.
-													scalarI_64,				// array of scalar (64-bit) input values.
-													1,						// the number of scalar input values.
-													&scalarO_64,				// array of scalar (64-bit) output values.
-													&outputCount);			// pointer to the number of scalar output values.
-	if (kernResult != KERN_SUCCESS)
-		DIFAIL (KR(kernResult) << ": con=" << HEX8(GetIOConnect()));
-	return bool(scalarO_64);
 }
 
 

@@ -37,6 +37,11 @@ using namespace std;
 #define DINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #define DIINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #define DIDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#if defined(_DEBUG)
+	#define DIDBGX(__x__)	AJA_sDEBUG	(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#else
+	#define DIDBGX(__x__)	
+#endif
 
 //	Stats
 static uint32_t gConstructCount(0); //	Number of constructor calls made
@@ -73,9 +78,7 @@ CNTV2DriverInterface::CNTV2DriverInterface ()
 		mSkipRegWrites					(false),
 #endif
 		_programStatus					(0),
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
 		_pRPCAPI						(AJA_NULL),
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 		mInterruptEventHandles			(),
 		mEventCounts					(),
 #if defined(NTV2_WRITEREG_PROFILING)
@@ -102,19 +105,17 @@ CNTV2DriverInterface::CNTV2DriverInterface ()
 	while (mEventCounts.size() < eNumInterruptTypes)
 		mEventCounts.push_back(0);
 	AJAAtomic::Increment(&gConstructCount);
-	DIDBG(DEC(gConstructCount) << " constructed, " << DEC(gDestructCount) << " destroyed");
+	DIDBGX(DEC(gConstructCount) << " constructed, " << DEC(gDestructCount) << " destroyed");
 }	//	constructor
 
 
 CNTV2DriverInterface::~CNTV2DriverInterface ()
 {
 	AJAAtomic::Increment(&gDestructCount);
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (_pRPCAPI)
 		delete _pRPCAPI;
 	_pRPCAPI = AJA_NULL;
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-	DIDBG(DEC(gConstructCount) << " constructed, " << DEC(gDestructCount) << " destroyed");
+	DIDBGX(DEC(gConstructCount) << " constructed, " << DEC(gDestructCount) << " destroyed");
 }	//	destructor
 
 CNTV2DriverInterface & CNTV2DriverInterface::operator = (const CNTV2DriverInterface & inRHS)
@@ -164,7 +165,7 @@ bool CNTV2DriverInterface::Open (const UWord inDeviceIndex)
 
 	FinishOpen();
 	AJAAtomic::Increment(&gOpenCount);
-	DIDBG(DEC(gOpenCount) << " opened, " << DEC(gCloseCount) << " closed");
+	DIDBGX(DEC(gOpenCount) << " opened, " << DEC(gCloseCount) << " closed");
 	return true;
 }
 
@@ -172,15 +173,13 @@ bool CNTV2DriverInterface::Open (const UWord inDeviceIndex)
 bool CNTV2DriverInterface::Open (const std::string & inURLSpec)
 {
 	Close();
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
 	if (OpenRemote(inURLSpec))
 	{
 		FinishOpen();
 		AJAAtomic::Increment(&gOpenCount);
-		DIDBG(DEC(gOpenCount) << " opens, " << DEC(gCloseCount) << " closes");
+		DIDBGX(DEC(gOpenCount) << " opens, " << DEC(gCloseCount) << " closes");
 		return true;
 	}
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	return false;
 }
 
@@ -199,29 +198,15 @@ bool CNTV2DriverInterface::Close (void)
 {
 	if (IsOpen())
 	{
-		// Unsubscribe all...
+		//	Unsubscribe all...
 		for (INTERRUPT_ENUMS eInt(eNumInterruptTypes);	eInt < eNumInterruptTypes;	eInt = INTERRUPT_ENUMS(eInt+1))
 			ConfigureSubscription (false, eInt, mInterruptEventHandles[eInt]);
 
-		bool closeOK(true);
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-		if (IsRemote())
-			closeOK = CloseRemote();
-		else
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-		{	//	Local/physical device:
-			closeOK = CloseLocalPhysical();
-			//	Common to all platforms:
-#if !defined(NTV2_DEPRECATE_16_0)
-			DmaUnlock();
-			UnmapFrameBuffers();
-			UnmapRegisters();
-#endif	//	!defined(NTV2_DEPRECATE_16_0)
-		}
+		const bool closeOK(IsRemote() ? CloseRemote() : CloseLocalPhysical());
 		if (closeOK)
 			AJAAtomic::Increment(&gCloseCount);
 		_boardID = DEVICE_ID_NOTFOUND;
-		DIDBG(DEC(gOpenCount) << " opens, " << DEC(gCloseCount) << " closes");
+		DIDBGX(DEC(gOpenCount) << " opens, " << DEC(gCloseCount) << " closes");
 		return closeOK;
 	}
 	return true;
@@ -230,8 +215,13 @@ bool CNTV2DriverInterface::Close (void)
 
 
 bool CNTV2DriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
-{	(void) inDeviceIndex;
+{
+#if defined(NTV2_NULL_DEVICE)
+	DIFAIL("SDK built with 'NTV2_NULL_DEVICE' defined -- cannot OpenLocalPhysical '" << DEC(inDeviceIndex) << "'");
+#else	//	else defined(NTV2_NULL_DEVICE)
+	(void) inDeviceIndex;
 	NTV2_ASSERT(false && "Requires platform-specific implementation");
+#endif	//	else NTV2_NULL_DEVICE defined
 	return false;
 }
 
@@ -241,81 +231,84 @@ bool CNTV2DriverInterface::CloseLocalPhysical (void)
 	return false;
 }
 
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-
-	#ifdef AJA_WINDOWS
-		static bool winsock_inited = false;
-		static WSADATA wsaData;
-
-		static void initWinsock(void)
-		{
-			int wret;
-			if (!winsock_inited)
-				wret = WSAStartup(MAKEWORD(2,2), &wsaData);
-			winsock_inited = true;
-		}
-	#endif	//	AJA_WINDOWS
-
-	bool CNTV2DriverInterface::OpenRemote (const string & inURLSpec)
-	{
 #if defined(AJA_WINDOWS)
-		initWinsock();
-#endif	//	defined(AJA_WINDOWS)
-		NTV2_ASSERT(!IsOpen()); //	Must be closed!
-		NTV2DeviceSpecParser specParser (inURLSpec);
-		if (specParser.HasErrors())
-			{DIFAIL("Bad device specification '" << inURLSpec << "': " << specParser.Error()); return false;}
+	static bool winsock_inited = false;
+	static WSADATA wsaData;
 
-		if (specParser.IsLocalDevice())
-		{	//	Local device?
-			CNTV2Card card;
-			if (specParser.HasResult(kConnectParamDevSerial))
-				CNTV2DeviceScanner::GetDeviceWithSerial(specParser.DeviceSerial(), card);
-			else if (specParser.HasResult(kConnectParamDevModel))
-				CNTV2DeviceScanner::GetFirstDeviceWithName(specParser.DeviceModel(), card);
-			else if (specParser.HasResult(kConnectParamDevID))
-				CNTV2DeviceScanner::GetFirstDeviceWithID(specParser.DeviceID(), card);
-			else if (specParser.HasResult(kConnectParamDevIndex))
-				CNTV2DeviceScanner::GetDeviceAtIndex(specParser.DeviceIndex(), card);
-			if (!card.IsOpen())
-				{DIFAIL("Failed to open " << specParser.InfoString());  return false;}
-			return Open(card.GetIndexNumber());
-		}
-		DIDBG("Opening " << specParser.InfoString() << "...");
-		//	Remote or software device:
-		_pRPCAPI = NTV2RPCClientAPI::CreateClient(specParser.Results());
-		if (!_pRPCAPI)
-			return false;	//	Failed to instantiate plugin client
-		//	A plugin's constructor might call its NTV2Connect method right away...
-		if (IsRemote()  &&  !_pRPCAPI->IsConnected())	//	... but in case it doesn't...
-			_pRPCAPI->NTV2Connect();					//	... establish the connection
-		if (IsRemote())
-			_boardOpened = ReadRegister(kRegBoardID, _boardID);	//	Try reading its kRegBoardID
-		if (!IsRemote() || !IsOpen())
-			DIFAIL("Failed to open '" << inURLSpec << "'");
-		return IsRemote() && IsOpen();	//	Fail if not remote nor open
-	}	//	OpenRemote
-
-
-	bool CNTV2DriverInterface::CloseRemote()
+	static void initWinsock(void)
 	{
-		if (_pRPCAPI)
-		{
-			DIDBG("Closing remote: " << *_pRPCAPI);
-			if (_pRPCAPI->NTV2Disconnect())
-				DIINFO("Remote closed: " << *_pRPCAPI);
-			else
-				DIFAIL("Remote close (NTV2Disconnect) failed: " << *_pRPCAPI);
-			delete _pRPCAPI;
-			_pRPCAPI = AJA_NULL;
-			_boardOpened = false;
-			return true;
-		}
-		//	Wasn't open
-		_boardOpened = false;
-		return false;
+		int wret;
+		if (!winsock_inited)
+			wret = WSAStartup(MAKEWORD(2,2), &wsaData);
+		winsock_inited = true;
 	}
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
+#endif	//	AJA_WINDOWS
+
+bool CNTV2DriverInterface::OpenRemote (const string & inURLSpec)
+{
+#if defined(AJA_WINDOWS)
+	initWinsock();
+#endif	//	defined(AJA_WINDOWS)
+	NTV2_ASSERT(!IsOpen()); //	Must be closed!
+	_pRPCAPI = AJA_NULL;
+	NTV2DeviceSpecParser specParser (inURLSpec);
+	if (specParser.HasErrors())
+		{DIFAIL("Bad device specification '" << inURLSpec << "': " << specParser.Error()); return false;}
+
+	if (specParser.IsLocalDevice())
+	{	//	Local device?
+		CNTV2Card card;
+		if (specParser.HasResult(kConnectParamDevSerial))
+			CNTV2DeviceScanner::GetDeviceWithSerial(specParser.DeviceSerial(), card);
+		else if (specParser.HasResult(kConnectParamDevModel))
+			CNTV2DeviceScanner::GetFirstDeviceWithName(specParser.DeviceModel(), card);
+		else if (specParser.HasResult(kConnectParamDevID))
+			CNTV2DeviceScanner::GetFirstDeviceWithID(specParser.DeviceID(), card);
+		else if (specParser.HasResult(kConnectParamDevIndex))
+			CNTV2DeviceScanner::GetDeviceAtIndex(specParser.DeviceIndex(), card);
+		if (!card.IsOpen())
+			{DIFAIL("Failed to open " << specParser.InfoString());  return false;}
+		return Open(card.GetIndexNumber());
+	}
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	DIDBG("Opening " << specParser.InfoString() << "...");
+	//	Remote or software device:
+	_pRPCAPI = NTV2RPCClientAPI::CreateClient(specParser.Results());
+	if (!_pRPCAPI)
+		return false;	//	Failed to instantiate plugin client
+	//	A plugin's constructor might call its NTV2Connect method right away...
+	if (IsRemote()  &&  !_pRPCAPI->IsConnected())	//	... but if it doesn't...
+		_pRPCAPI->NTV2Connect();					//	... connect now
+	if (IsRemote())
+		_boardOpened = ReadRegister(kRegBoardID, _boardID)  &&  _boardID  &&  _boardID != 0xFFFFFFFF;	//	Try reading its kRegBoardID
+	if (!IsRemote() || !IsOpen())
+		DIFAIL("Failed to open '" << inURLSpec << "'");
+	return IsRemote() && IsOpen();	//	Fail if not remote nor open
+#else	//	NTV2_NUB_CLIENT_SUPPORT
+	DIFAIL("SDK built without 'NTV2_NUB_CLIENT_SUPPORT' -- cannot OpenRemote '" << inURLSpec << "'");
+	return false;
+#endif	//	NTV2_NUB_CLIENT_SUPPORT
+}	//	OpenRemote
+
+
+bool CNTV2DriverInterface::CloseRemote()
+{
+	if (_pRPCAPI)
+	{
+		DIDBG("Closing remote: " << *_pRPCAPI);
+		if (_pRPCAPI->NTV2Disconnect())
+			DIINFO("Remote closed: " << *_pRPCAPI);
+		else
+			DIFAIL("Remote close (NTV2Disconnect) failed: " << *_pRPCAPI);
+		delete _pRPCAPI;
+		_pRPCAPI = AJA_NULL;
+		_boardOpened = false;
+		return true;
+	}
+	//	Wasn't open
+	_boardOpened = false;
+	return false;
+}
 
 
 bool CNTV2DriverInterface::GetInterruptEventCount (const INTERRUPT_ENUMS inInterrupt, ULWord & outCount)
@@ -400,7 +393,7 @@ NTV2DeviceID CNTV2DriverInterface::GetDeviceID (void)
 // that does platform-specific read of register on local card.
 bool CNTV2DriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outValue, const ULWord inMask, const ULWord inShift)
 {
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
 	if (IsRemote())
 		return _pRPCAPI->NTV2ReadRegisterRemote (inRegNum, outValue, inMask, inShift);
 #else
@@ -467,7 +460,7 @@ bool CNTV2DriverInterface::WriteRegister (const ULWord inRegNum, const ULWord in
 #if defined(NTV2_WRITEREG_PROFILING)
 	//	Recording is done in platform-specific WriteRegister
 #endif	//	NTV2_WRITEREG_PROFILING
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
 	//	If we get here, must be a non-physical device connection...
 	return IsRemote() ? _pRPCAPI->NTV2WriteRegisterRemote(inRegNum, inValue, inMask, inShift) : false;
 #else
@@ -485,7 +478,7 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine inDMAEngine,
 										const ULWord		inTotalByteCount,
 										const bool			inSynchronous)
 {
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT(IsRemote());
 	NTV2_POINTER buffer(pFrameBuffer, inTotalByteCount);
 	return _pRPCAPI->NTV2DMATransferRemote(inDMAEngine, inIsRead, inFrameNumber, buffer, inCardOffsetBytes,
@@ -508,7 +501,7 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine inDMAEngine,
 										const ULWord		inCardPitchPerSeg,
 										const bool			inSynchronous)
 {
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT(IsRemote());
 	NTV2_POINTER buffer(pFrameBuffer, inTotalByteCount);
 	return _pRPCAPI->NTV2DMATransferRemote(inDMAEngine, inIsRead, inFrameNumber, buffer, inCardOffsetBytes,
@@ -532,7 +525,7 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine inDMAEngine,
 									const PCHANNEL_P2P_STRUCT & inP2PData)
 {	(void) inDMAEngine; (void) inDMAChannel; (void) inIsTarget; (void) inFrameNumber; (void) inCardOffsetBytes;
 	(void) inByteCount; (void) inNumSegments; (void) inSegmentHostPitch; (void) inSegmentCardPitch; (void) inP2PData;
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT(IsRemote());
 	//	No NTV2DMATransferP2PRemote implementation yet
 #endif
@@ -543,9 +536,8 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine inDMAEngine,
 // that does platform-specific waitforinterrupt on local cards.
 bool CNTV2DriverInterface::WaitForInterrupt (INTERRUPT_ENUMS eInterrupt, ULWord timeOutMs)
 {
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	NTV2_ASSERT(IsRemote());
-	return _pRPCAPI->NTV2WaitForInterruptRemote(eInterrupt, timeOutMs);
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	return _pRPCAPI ? _pRPCAPI->NTV2WaitForInterruptRemote(eInterrupt, timeOutMs) : false;
 #else
 	(void) eInterrupt;
 	(void) timeOutMs;
@@ -557,22 +549,22 @@ bool CNTV2DriverInterface::WaitForInterrupt (INTERRUPT_ENUMS eInterrupt, ULWord 
 // that does platform-specific autocirculate on local cards.
 bool CNTV2DriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 {
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	NTV2_ASSERT(IsRemote());
-
-	switch(autoCircData.eCommand)
-	{
-		case eStartAutoCirc:
-		case eAbortAutoCirc:
-		case ePauseAutoCirc:
-		case eFlushAutoCirculate:
-		case eGetAutoCirc:
-		case eStopAutoCirc:
-		case eInitAutoCirc:
-			return _pRPCAPI->NTV2AutoCirculateRemote(autoCircData);
-		default:	// Others not handled
-			return false;
-	}
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+		switch (autoCircData.eCommand)
+		{
+			case eStartAutoCirc:
+			case eAbortAutoCirc:
+			case ePauseAutoCirc:
+			case eFlushAutoCirculate:
+			case eGetAutoCirc:
+			case eStopAutoCirc:
+			case eInitAutoCirc:
+				return _pRPCAPI->NTV2AutoCirculateRemote(autoCircData);
+			default:	// Others not handled
+				return false;
+		}
+	return false;
 #else
 	(void) autoCircData;
 	return false;
@@ -581,11 +573,10 @@ bool CNTV2DriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 
 bool CNTV2DriverInterface::NTV2Message (NTV2_HEADER * pInMessage)
 {
-	(void) pInMessage;
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	NTV2_ASSERT(IsRemote());
-	return _pRPCAPI->NTV2MessageRemote(pInMessage);
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	return _pRPCAPI ? _pRPCAPI->NTV2MessageRemote(pInMessage) : false;
 #else
+	(void) pInMessage;
 	return false;
 #endif
 }
@@ -597,11 +588,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 {	(void)bitFileType;
 	::memset(&bitFileInfo, 0, sizeof(bitFileInfo));
 	if (IsRemote())
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
 		return false;
-#else
-		return false;
-#endif
 	if (!::NTV2DeviceHasSPIFlash(_boardID))
 		return false;
 
@@ -796,14 +783,8 @@ bool CNTV2DriverInterface::GetPackageInformation (PACKAGE_INFO_STRUCT & packageI
 // that does platform-specific function on local cards.
 bool CNTV2DriverInterface::DriverGetBuildInformation (BUILD_INFO_STRUCT & buildInfo)
 {
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	NTV2_ASSERT (IsRemote());
 	::memset(&buildInfo, 0, sizeof(buildInfo));
 	return false;
-#else
-	(void) buildInfo;
-	return false;
-#endif
 }
 
 bool CNTV2DriverInterface::BitstreamWrite (const NTV2_POINTER & inBuffer, const bool inFragment, const bool inSwap)
@@ -1219,24 +1200,6 @@ void CNTV2DriverInterface::BumpEventCount (const INTERRUPT_ENUMS eInterruptType)
 
 }	//	BumpEventCount
 
-
-string CNTV2DriverInterface::GetHostName (void) const
-{
-#if defined(NTV2_NUB_CLIENT_SUPPORT)
-	if (_pRPCAPI)
-		return _pRPCAPI->Name();
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-	return "";
-}
-
-bool CNTV2DriverInterface::IsRemote (void) const
-{
-#if defined(NTV2_NUB_CLIENT_SUPPORT)
-	return _pRPCAPI ? true : false;
-#else	//	NTV2_NUB_CLIENT_SUPPORT
-	return false;
-#endif	//	NTV2_NUB_CLIENT_SUPPORT
-}
 
 bool CNTV2DriverInterface::IsDeviceReady (const bool checkValid)
 {

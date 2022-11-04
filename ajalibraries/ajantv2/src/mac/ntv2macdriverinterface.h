@@ -41,8 +41,6 @@ class CNTV2MacDriverInterface : public CNTV2DriverInterface
 	AJA_VIRTUAL bool	ReleaseStreamForApplicationWithReference (ULWord inApplicationType, int32_t inProcessID);
 	AJA_VIRTUAL bool	SetStreamingApplication (const ULWord appType, const int32_t pid);
 	AJA_VIRTUAL bool	GetStreamingApplication (ULWord & outAppType, int32_t & outProcessID);
-	AJA_VIRTUAL bool	SetDefaultDeviceForPID (const int32_t pid);
-	AJA_VIRTUAL bool	IsDefaultDeviceForPID (const int32_t pid);
 
 	AJA_VIRTUAL bool	WaitForInterrupt (const INTERRUPT_ENUMS type,  const ULWord timeout = 50);
 	AJA_VIRTUAL bool	GetInterruptCount (const INTERRUPT_ENUMS eInterrupt, ULWord & outCount);
@@ -104,17 +102,17 @@ class CNTV2MacDriverInterface : public CNTV2DriverInterface
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetQuickTimeTime (UInt32 *time, UInt32 *scale));	//	Formerly called "GetTime" which shadowed CNTV2KonaFlashProgram::GetTime
 #endif	//	!defined(NTV2_DEPRECATE_15_6)
 #if !defined(NTV2_DEPRECATE_16_0)
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool GetStreamingApplication(ULWord * pAppType, int32_t * pPID))	{return pAppType && pPID ? GetStreamingApplication(*pAppType,*pPID) : false;}	///< @deprecated	Deprecated starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool SystemControl(void* dataPtr, SystemControlCode systemControlCode));		///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(void Sleep(int))		 	{}			///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool MapFrameBuffers(void));			///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool UnmapFrameBuffers(void));		///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool MapRegisters(void));				///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool UnmapRegisters(void));			///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool MapXena2Flash(void));			///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool UnmapXena2Flash(void));			///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetStreamingApplication(ULWord * pAppType, int32_t * pPID))	{return pAppType && pPID ? GetStreamingApplication(*pAppType,*pPID) : false;}	///< @deprecated	Deprecated starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SystemControl(void* dataPtr, SystemControlCode systemControlCode));		///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(void Sleep(int))		 	{}			///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool MapFrameBuffers(void));			///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool UnmapFrameBuffers(void));		///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool MapRegisters(void));				///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool UnmapRegisters(void));			///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool MapXena2Flash(void));			///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool UnmapXena2Flash(void));			///< @deprecated	Obsolete starting in SDK 16.0.
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(ULWord GetPCISlotNumber(void) const);	///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool MapMemory(const MemoryType memType, void **memPtr));	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool MapMemory(const MemoryType memType, void **memPtr));	///< @deprecated	Obsolete starting in SDK 16.0.
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 
 	AJA_VIRTUAL bool	SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode);
@@ -134,9 +132,11 @@ public:
 	static UWord		GetConnectionCount (void);
 	static ULWord		GetConnectionChecksum (void);
 
+#if !defined(NTV2_NULL_DEVICE)
 protected:
 		AJA_VIRTUAL bool	OpenLocalPhysical (const UWord inDeviceIndex);
 		AJA_VIRTUAL bool	CloseLocalPhysical (void);
+#endif	//	!defined(NTV2_NULL_DEVICE)
 
 private:
 	AJA_VIRTUAL io_connect_t	GetIOConnect (const bool inDoNotAllocate = false) const;	//	For internal use only
