@@ -593,7 +593,7 @@ bootexit:
 	return result;
 }
 
-HEVCError CNTV2HEVCFirmwareInstallerThread::Stop()
+HEVCError CNTV2HEVCFirmwareInstallerThread::StopHEVC()
 {
 	uint32_t		mode;
 	uint32_t		val;

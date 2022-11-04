@@ -165,6 +165,7 @@ CNTV2WinDriverInterface::~CNTV2WinDriverInterface()
 }
 
 
+#if !defined(NTV2_NULL_DEVICE)
 /////////////////////////////////////////////////////////////////////////////////////
 // Board Open / Close methods
 /////////////////////////////////////////////////////////////////////////////////////
@@ -287,6 +288,7 @@ bool CNTV2WinDriverInterface::CloseLocalPhysical (void)
 	_boardOpened = false;
 	return true;
 }
+#endif	//	!defined(NTV2_NULL_DEVICE)
 
 
 

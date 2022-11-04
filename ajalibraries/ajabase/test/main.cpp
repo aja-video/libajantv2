@@ -122,7 +122,7 @@ TEST_SUITE("thread" * doctest::description("functions in ajabase/system/thread.h
 		TestThread tt;
 		std::cout << "AJAThread::Stop loops" << std::endl;
 		tt.Start();
-		uint64_t tid = tt.GetThreadId();
+		//uint64_t tid = tt.GetThreadId();
 		bool running = true;
 		uint64_t startTime = AJATime::GetSystemMilliseconds();
 		while (running) {

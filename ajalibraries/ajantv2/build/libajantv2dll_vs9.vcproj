@@ -418,10 +418,6 @@
 				>
 			</File>
 			<File
-				RelativePath="ntv2discover.cpp"
-				>
-			</File>
-			<File
 				RelativePath="ntv2dma.cpp"
 				>
 			</File>
@@ -439,10 +435,6 @@
 			</File>
 			<File
 				RelativePath="ntv2nubaccess.cpp"
-				>
-			</File>
-			<File
-				RelativePath="ntv2nubpktcom.cpp"
 				>
 			</File>
 			<File
@@ -580,10 +572,6 @@
 				>
 			</File>
 			<File
-				RelativePath="ntv2discover.h"
-				>
-			</File>
-			<File
 				RelativePath="ntv2driverinterface.h"
 				>
 			</File>
@@ -593,10 +581,6 @@
 			</File>
 			<File
 				RelativePath="ntv2nubaccess.h"
-				>
-			</File>
-			<File
-				RelativePath="ntv2nubpktcom.h"
 				>
 			</File>
 			<File

@@ -115,10 +115,12 @@ class AJAExport CNTV2WinDriverInterface : public CNTV2DriverInterface
 		AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool PrepareMemoryForDMA(ULWord * pFrameBuffer, const ULWord ulNumBytes));	///< @deprecated	Obsolete starting in SDK 16.0.
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 
+#if !defined(NTV2_NULL_DEVICE)
 	//	PRIVATE INSTANCE METHODS
 	protected:
 		AJA_VIRTUAL bool	OpenLocalPhysical (const UWord inDeviceIndex);
 		AJA_VIRTUAL bool	CloseLocalPhysical (void);
+#endif	//	!defined(NTV2_NULL_DEVICE)
 
 	//	MEMBER DATA
 	protected:

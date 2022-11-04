@@ -110,7 +110,6 @@ typedef enum
 	kVRegDisplayReferenceSelect				= VIRTUALREG_START+120,
 	kVRegVANCMode							= VIRTUALREG_START+121,
 	kVRegDualStreamTransportType			= VIRTUALREG_START+122,
-	kVRegSDIOut1TransportType				= kVRegDualStreamTransportType,
 	kVRegDSKMode							= VIRTUALREG_START+123,
 	kVRegIsoConvertEnable					= VIRTUALREG_START+124,
 	kVRegDSKAudioMode						= VIRTUALREG_START+125,
@@ -332,8 +331,7 @@ typedef enum
 	kVRegAncField1Offset					= VIRTUALREG_START+392,		///< @brief Anc Field1 byte offset from end of frame buffer (GUMP on all boards except RTP for SMPTE2022/IP)
 	kVRegAncField2Offset					= VIRTUALREG_START+393,		///< @brief Anc Field2 byte offset from end of frame buffer (GUMP on all boards except RTP for SMPTE2022/IP)
 	kVRegAgentCheck							= VIRTUALREG_START+394,
-	kVRegUnused_2							= VIRTUALREG_START+395,
-	
+
 	kVReg4kOutputTransportSelection			= VIRTUALREG_START+396,
 	kVRegCustomAncInputSelect				= VIRTUALREG_START+397,
 	kVRegUseThermostat						= VIRTUALREG_START+398,
@@ -459,7 +457,6 @@ typedef enum
 	kVRegUserDefinedDBB						= VIRTUALREG_START+502,
 	
 	kVRegHDMIOutAudioChannels				= VIRTUALREG_START+503,
-	kVRegUnused504							= VIRTUALREG_START+504,
 	kVRegZeroHostAncPostCapture				= VIRTUALREG_START+505,
 	kVRegZeroDeviceAncPostCapture			= VIRTUALREG_START+506,
 	kVRegAudioMonitorChannelSelect			= VIRTUALREG_START+507,
@@ -667,7 +664,11 @@ typedef enum
 
 } VirtualRegisterNum;
 
-
+#if !defined(NTV2_DEPRECATE_16_3)
+	#define	kVRegSDIOut1TransportType			kVRegDualStreamTransportType
+	#define kVRegUnused_2						(VIRTUALREG_START+395)
+	#define kVRegUnused504						(VIRTUALREG_START+504)
+#endif
 #if !defined(NTV2_DEPRECATE_15_0)
 	#define kVRegLinuxDriverVersion				VIRTUALREG_START		///< @deprecated	Obsolete in SDK 15.0, use kVRegDriverVersion instead
 #endif

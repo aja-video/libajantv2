@@ -498,30 +498,11 @@ class AJAExport CNTV2DriverInterface
 	
 		AJA_VIRTUAL bool SetStreamingApplication (const ULWord inAppType, const int32_t inProcessID);
 		AJA_VIRTUAL bool GetStreamingApplication (ULWord & outAppType, int32_t & outProcessID);
-
-		/**
-			@brief		Associates this device as the default or "native" device to use with the given host process.
-			@result		True if successful; otherwise false.
-			@param[in]	inProcessID		Specifies the OS-specific process identifier that uniquely identifies a running
-										process on the host machine.
-			@note		Not implemented on Windows or Linux.
-			@see		CNTV2DriverInterface::IsDefaultDeviceForPID
-		**/
-		AJA_VIRTUAL bool SetDefaultDeviceForPID (const int32_t inProcessID)		{(void)inProcessID; return false;}
-
-		/**
-			@return		True if the given host process is associated with this device;  otherwise false.
-			@param[in]	inProcessID		Specifies the OS-specific process identifier that uniquely identifies a running
-										process on the host machine.
-			@note		Not implemented on Windows or Linux.
-			@see		CNTV2DriverInterface::SetDefaultDeviceForPID
-		**/
-		AJA_VIRTUAL bool IsDefaultDeviceForPID (const int32_t inProcessID)		{(void)inProcessID; return false;}
 	///@}
 
-		AJA_VIRTUAL bool			ReadRP188Registers (const NTV2Channel inChannel, RP188_STRUCT * pRP188Data);
-		AJA_VIRTUAL std::string		GetHostName (void) const;	///< @return	String containing the name of the host (if connected to a remote device) or the name of the non-physical device;  otherwise an empty string.
-		AJA_VIRTUAL bool			IsRemote (void) const;	///< @return	True if I'm connected to a non-local or non-physical device;  otherwise false.
+		AJA_VIRTUAL bool				ReadRP188Registers (const NTV2Channel inChannel, RP188_STRUCT * pRP188Data);
+		AJA_VIRTUAL inline std::string	GetHostName (void) const	{return _pRPCAPI ? _pRPCAPI->Name() : "";}	///< @return	String containing the name of the host (if connected to a remote device) or the name of the non-physical device;  otherwise an empty string.
+		AJA_VIRTUAL inline bool			IsRemote (void) const		{return _pRPCAPI ? true : false;}			///< @return	True if I'm connected to a non-local or non-physical device;  otherwise false.
 #if defined(NTV2_NUB_CLIENT_SUPPORT)  &&  !defined(NTV2_DEPRECATE_16_0)
 		AJA_VIRTUAL inline NTV2NubProtocolVersion	GetNubProtocolVersion (void) const	{return 0;}	///< @return	My nub protocol version.
 #endif
@@ -568,26 +549,30 @@ class AJAExport CNTV2DriverInterface
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetDebugFilterStrings(char* inclStr, char* exclStr))	{(void)inclStr; (void)exclStr; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
 #endif	//	!defined(NTV2_DEPRECATE_15_6)
 #if !defined(NTV2_DEPRECATE_16_0)
-		// SuspendAudio/ResumeAudio were only implemented on MacOS
-		AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SuspendAudio(void))	{return true;}
-		AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool ResumeAudio(const ULWord inFBSize))	{(void) inFBSize; return true;}
-		//	Memory Mapping/Unmapping
-		AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool MapFrameBuffers(void))	{return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
-		AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool UnmapFrameBuffers(void))	{return true;}	///< @deprecated	Obsolete starting in SDK 16.0.
-		AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool MapRegisters(void))		{return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
-		AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool UnmapRegisters(void))	{return true;}	///< @deprecated	Obsolete starting in SDK 16.0.
-		AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool MapXena2Flash(void))		{return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
-		AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool UnmapXena2Flash(void))	{return true;}	///< @deprecated	Obsolete starting in SDK 16.0.
-		//	Others
-		AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool DmaUnlock(void))			{return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
-		AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool CompleteMemoryForDMA(ULWord * pHostBuffer))	{(void)pHostBuffer; return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
-		AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool PrepareMemoryForDMA(ULWord * pHostBuffer, const ULWord inNumBytes))	{(void)pHostBuffer; (void)inNumBytes; return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
-		AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetInterruptCount(const INTERRUPT_ENUMS eInt, ULWord *pCnt))	{return pCnt ? GetInterruptCount(eInt, *pCnt) : false;}	///< @deprecated	Use version of this function that accepts a non-const reference.
-		AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool ReadRegisterMulti(const ULWord numRegs, ULWord * pOutWhichRegFailed, NTV2RegInfo aRegs[]));	///< @deprecated	Use CNTV2DriverInterface::ReadRegisters instead.
-		AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(ULWord	GetPCISlotNumber(void) const)	{return _pciSlot;}			///< @deprecated	Obsolete starting in SDK 16.0.
-		AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(Word SleepMs(const LWord msec));	///< @deprecated	Obsolete starting in SDK 16.0. Use AJATime::Sleep instead.
-		AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(ULWord	GetAudioFrameBufferNumber(void) const)	{return GetNumFrameBuffers() - 1;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	// SuspendAudio/ResumeAudio were only implemented on MacOS
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SuspendAudio(void))	{return true;}
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool ResumeAudio(const ULWord inFBSize))	{(void) inFBSize; return true;}
+	//	Memory Mapping/Unmapping
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool MapFrameBuffers(void))	{return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool UnmapFrameBuffers(void))	{return true;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool MapRegisters(void))		{return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool UnmapRegisters(void))		{return true;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool MapXena2Flash(void))		{return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool UnmapXena2Flash(void))	{return true;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	//	Others
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool DmaUnlock(void))	{return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool CompleteMemoryForDMA(ULWord * pHostBuffer))	{(void)pHostBuffer; return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool PrepareMemoryForDMA(ULWord * pHostBuffer, const ULWord inNumBytes))	{(void)pHostBuffer; (void)inNumBytes; return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetInterruptCount(const INTERRUPT_ENUMS eInt, ULWord *pCnt))	{return pCnt ? GetInterruptCount(eInt, *pCnt) : false;}	///< @deprecated	Use version of this function that accepts a non-const reference.
+	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool ReadRegisterMulti(const ULWord numRegs, ULWord * pOutWhichRegFailed, NTV2RegInfo aRegs[]));	///< @deprecated	Use CNTV2DriverInterface::ReadRegisters instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(ULWord	GetPCISlotNumber(void) const)	{return _pciSlot;}			///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(Word SleepMs(const LWord msec));	///< @deprecated	Obsolete starting in SDK 16.0. Use AJATime::Sleep instead.
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(ULWord	GetAudioFrameBufferNumber(void) const)	{return GetNumFrameBuffers() - 1;}	///< @deprecated	Obsolete starting in SDK 16.0.
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
+#if !defined(NTV2_DEPRECATE_16_3)
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetDefaultDeviceForPID(const int32_t procID)) {(void)procID; return false;}	///< @deprecated	Obsolete, first deprecated in SDK 14.3 when classic Apple QuickTime support was dropped.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool IsDefaultDeviceForPID(const int32_t procID))  {(void)procID; return false;}	///< @deprecated	Obsolete, first deprecated in SDK 14.3 when classic Apple QuickTime support was dropped.
+#endif	//	!defined(NTV2_DEPRECATE_16_3)
 
 #if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling
 		/**
@@ -610,7 +595,6 @@ class AJAExport CNTV2DriverInterface
 #if !defined(NTV2_DEPRECATE_12_7)
 		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool DisplayNTV2Error(const char* pInStr))	{(void)pInStr; return false;}	///< @deprecated	This function is obsolete.
 #endif
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
 		/**
 			@brief		Peforms the housekeeping details of opening the specified local, remote or software device.
 			@param[in]	inURLSpec	Specifies the local, remote or software device to be opened.
@@ -618,9 +602,8 @@ class AJAExport CNTV2DriverInterface
 		**/
 		AJA_VIRTUAL bool			OpenRemote (const std::string & inURLSpec);
 		AJA_VIRTUAL bool			CloseRemote (void);	///< @brief	Releases host resources associated with the remote/special device connection.
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-		AJA_VIRTUAL bool			OpenLocalPhysical (const UWord inDeviceIndex) = 0;	///< @brief	Opens the local/physical device connection.
-		AJA_VIRTUAL bool			CloseLocalPhysical (void) = 0;	///< @brief	Releases host resources associated with the local/physical device connection.
+		AJA_VIRTUAL bool			OpenLocalPhysical (const UWord inDeviceIndex);	///< @brief	Opens the local/physical device connection.
+		AJA_VIRTUAL bool			CloseLocalPhysical (void);	///< @brief	Releases host resources associated with the local/physical device connection.
 		AJA_VIRTUAL bool			ParseFlashHeader (BITFILE_INFO_STRUCT & outBitfileInfo);
 
 		/**
@@ -652,9 +635,7 @@ class AJAExport CNTV2DriverInterface
 		bool				mSkipRegWrites;			///< @brief	True if actual register writes are skipped while recording
 #endif	//	NTV2_WRITEREG_PROFILING
 		ULWord				_programStatus;
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
 		NTV2RPCAPI *		_pRPCAPI;				///< @brief	Points to remote or software device interface; otherwise NULL for local physical device.
-#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 		_EventHandles		mInterruptEventHandles;	///< @brief	For subscribing to each possible event, one for each interrupt type
 		_EventCounts		mEventCounts;			///< @brief	My event tallies, one for each interrupt type. Note that these
 #if defined(NTV2_WRITEREG_PROFILING)

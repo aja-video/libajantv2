@@ -274,7 +274,6 @@
     <ClCompile Include="..\src\ntv2debug.cpp" />
     <ClCompile Include="..\src\ntv2devicefeatures.cpp" />
     <ClCompile Include="..\src\ntv2devicescanner.cpp" />
-    <ClCompile Include="..\src\ntv2discover.cpp" />
     <ClCompile Include="..\src\ntv2dma.cpp" />
     <ClCompile Include="..\src\ntv2driverinterface.cpp" />
     <ClCompile Include="..\src\ntv2dynamicdevice.cpp" />
@@ -287,7 +286,6 @@
     <ClCompile Include="..\src\ntv2mbcontroller.cpp" />
     <ClCompile Include="..\src\ntv2mcsfile.cpp" />
     <ClCompile Include="..\src\ntv2nubaccess.cpp" />
-    <ClCompile Include="..\src\ntv2nubpktcom.cpp" />
     <ClCompile Include="..\src\ntv2publicinterface.cpp" />
     <ClCompile Include="..\src\ntv2register.cpp" />
     <ClCompile Include="..\src\ntv2registerexpert.cpp">
@@ -408,7 +406,6 @@
     <ClInclude Include="..\includes\ntv2supportlogger.h" />
     <ClInclude Include="..\src\ntv2devicefeatures.hpp" />
     <ClInclude Include="..\includes\ntv2devicescanner.h" />
-    <ClInclude Include="..\includes\ntv2discover.h" />
     <ClInclude Include="..\includes\ntv2driverinterface.h" />
     <ClInclude Include="..\includes\ntv2fltknetprefs.h" />
     <ClInclude Include="..\includes\ntv2konaflashprogram.h" />
@@ -416,7 +413,6 @@
     <ClInclude Include="..\includes\ntv2mbcontroller.h" />
     <ClInclude Include="..\includes\ntv2mcsfile.h" />
     <ClInclude Include="..\includes\ntv2nubaccess.h" />
-    <ClInclude Include="..\includes\ntv2nubpktcom.h" />
     <ClInclude Include="..\includes\ntv2nubtypes.h" />
     <ClInclude Include="..\includes\ntv2procamp.h" />
     <ClInclude Include="..\includes\ntv2registers2022.h" />

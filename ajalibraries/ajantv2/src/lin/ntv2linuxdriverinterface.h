@@ -136,9 +136,11 @@ public:
 	AJA_VIRTUAL bool SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode); // Supported!
 	AJA_VIRTUAL bool GetAudioOutputMode(NTV2_GlobalAudioPlaybackMode* mode);// Supported!
 
+#if !defined(NTV2_NULL_DEVICE)
 protected:	//	PRIVATE METHODS
 	AJA_VIRTUAL bool	OpenLocalPhysical (const UWord inDeviceIndex);	///< @brief Opens the local/physical device connection.
 	AJA_VIRTUAL bool	CloseLocalPhysical	(void);
+#endif	//	!defined(NTV2_NULL_DEVICE)
 
 protected:	//	INSTANCE DATA
 	std::string		_bitfileDirectory;
