@@ -171,7 +171,7 @@ class CNTV2HEVCFirmwareInstallerThread : public AJAThread
 		bool				IsBooted();
 		HEVCError			Check();
 		HEVCError			Boot();
-		HEVCError			Stop();
+		HEVCError			StopHEVC();
 		HEVCError			LoadFlash();
 		HEVCError			ChipErase();
 		HEVCError			SectorErase(uint32_t offset, uint32_t dataSize);
