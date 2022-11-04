@@ -1618,8 +1618,8 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 			oldNonPcmPairs.insert (NTV2_AudioChannel57_58);
 			nonPcmPairs.insert (NTV2_AudioChannel3_4);
 
-			std::set_difference (oldNonPcmPairs.begin(), oldNonPcmPairs.end(), nonPcmPairs.begin(), nonPcmPairs.end(),  inserter (whatsGone, whatsGone.begin()));
-			std::set_difference (nonPcmPairs.begin(), nonPcmPairs.end(),  oldNonPcmPairs.begin(), oldNonPcmPairs.end(),  inserter (whatsNew, whatsNew.begin()));
+			std::set_difference (oldNonPcmPairs.begin(), oldNonPcmPairs.end(), nonPcmPairs.begin(), nonPcmPairs.end(),  std::inserter (whatsGone, whatsGone.begin()));
+			std::set_difference (nonPcmPairs.begin(), nonPcmPairs.end(),  oldNonPcmPairs.begin(), oldNonPcmPairs.end(),  std::inserter (whatsNew, whatsNew.begin()));
 			if (gVerboseOutput  &&  !whatsNew.empty ())
 				std::cerr << "Whats new:  " << whatsNew << std::endl;
 			CHECK_FALSE(whatsNew.empty ());
@@ -1642,8 +1642,8 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 			oldNonPcmPairs.insert (NTV2_AudioChannel125_128);
 			nonPcmPairs.insert (NTV2_AudioChannel1_4);
 
-			std::set_difference (oldNonPcmPairs.begin(), oldNonPcmPairs.end(), nonPcmPairs.begin(), nonPcmPairs.end(),  inserter (whatsGone, whatsGone.begin()));
-			std::set_difference (nonPcmPairs.begin(), nonPcmPairs.end(),  oldNonPcmPairs.begin(), oldNonPcmPairs.end(),  inserter (whatsNew, whatsNew.begin()));
+			std::set_difference (oldNonPcmPairs.begin(), oldNonPcmPairs.end(), nonPcmPairs.begin(), nonPcmPairs.end(),  std::inserter (whatsGone, whatsGone.begin()));
+			std::set_difference (nonPcmPairs.begin(), nonPcmPairs.end(),  oldNonPcmPairs.begin(), oldNonPcmPairs.end(),  std::inserter (whatsNew, whatsNew.begin()));
 			if (gVerboseOutput  &&  !whatsNew.empty ())
 				std::cerr << "Whats new:  " << whatsNew << std::endl;
 			CHECK_FALSE (whatsNew.empty ());
@@ -1666,8 +1666,8 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 			oldNonPcmPairs.insert (NTV2_AudioChannel121_128);
 			nonPcmPairs.insert (NTV2_AudioChannel1_8);
 
-			std::set_difference (oldNonPcmPairs.begin(), oldNonPcmPairs.end(), nonPcmPairs.begin(), nonPcmPairs.end(),  inserter (whatsGone, whatsGone.begin()));
-			std::set_difference (nonPcmPairs.begin(), nonPcmPairs.end(),  oldNonPcmPairs.begin(), oldNonPcmPairs.end(),  inserter (whatsNew, whatsNew.begin()));
+			std::set_difference (oldNonPcmPairs.begin(), oldNonPcmPairs.end(), nonPcmPairs.begin(), nonPcmPairs.end(),  std::inserter (whatsGone, whatsGone.begin()));
+			std::set_difference (nonPcmPairs.begin(), nonPcmPairs.end(),  oldNonPcmPairs.begin(), oldNonPcmPairs.end(),  std::inserter (whatsNew, whatsNew.begin()));
 			if (gVerboseOutput && !whatsNew.empty())
 				std::cerr << "Whats new:  " << whatsNew << std::endl;
 			CHECK_FALSE (whatsNew.empty ());
