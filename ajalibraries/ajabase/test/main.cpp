@@ -1472,7 +1472,7 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 		SUBCASE("::GetHandle")
 		{
 			AJAFileIO fio;
-			AJAStatus status = fio.Open("foobar.dat", eAJAWriteOnly|eAJACreateNew|eAJACreateAlways, 0);
+			AJAStatus status = fio.Open("foobar.dat", eAJAWriteOnly|eAJACreateAlways, 0);
 			CHECK_EQ(status, AJA_STATUS_SUCCESS);
 			if (status == AJA_STATUS_SUCCESS) {
 				char cwd[256];
@@ -1480,21 +1480,25 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 				std::string buf("Hello, AJAFileIO!");
 				CHECK_EQ(fio.Write(buf), buf.size());
 #if defined(AJA_WINDOWS)
-				// TODO: FIXME
-				// HANDLE handle = (HANDLE)fio.GetHandle();
-				// DWORD fileSize = 0;
-				// GetFileSize(handle, &fileSize);
-				// CHECK_EQ(fileSize, buf.size());
+				HANDLE handle = (HANDLE)fio.GetHandle();
+				CHECK(handle != NULL);
+				if (handle != NULL) {
+					CHECK_EQ(::GetFileType(handle), FILE_TYPE_DISK);
+					LARGE_INTEGER sizeInfo;
+					if(::GetFileSizeEx(handle,&sizeInfo)) {
+						CHECK_EQ(sizeInfo.QuadPart, buf.size());
+					}
+				}
 #else
 				FILE* handle = (FILE*)fio.GetHandle();
-				if(handle) {
+				CHECK(handle != NULL);
+				if(handle != NULL) {
 					fseek(handle, 0 , SEEK_END);
 					long fileSize = ftell(handle);
 					fseek(handle, 0 , SEEK_SET);// needed for next read from beginning of file
 					CHECK_EQ(fileSize, buf.size());
 				}
 #endif
-				CHECK(handle != NULL);
 				if (fio.IsOpen())
 					CHECK_EQ(fio.Close(), AJA_STATUS_SUCCESS);
 			}
