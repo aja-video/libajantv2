@@ -8,7 +8,6 @@
 #ifndef AJA_FILE_IO_H
 #define AJA_FILE_IO_H
 
-
 #include "ajabase/common/types.h"
 #include "ajabase/common/public.h"
 #include "ajabase/system/system.h"
@@ -49,6 +48,13 @@ typedef enum
 	eAJASeekCurrent,
 	eAJASeekEnd
 } AJAFileSetFlag;
+	
+	
+typedef enum
+{
+	eAJAIoDefault,
+	eAJAIoAlternate
+} AJAIOModel;
 
 
 /**
@@ -250,6 +256,17 @@ public:
 	static AJAStatus DoesDirectoryExist(const std::wstring& directory);
 
 	/**
+	 *	Tests if a directory exists.
+	 *	Does not change the current directory.
+	 *
+	 *	@param[in]	directory	The path to the directory
+	 *
+	 *	@return		true		If and only if the directory exists
+	 */
+	static bool DirectoryExists(const std::string& directory);
+	static bool DirectoryExists(const std::wstring& directory);
+
+	/**
 	 *	Tests if a directory is empty.
 	 *	Does not change the current directory.
 	 *
@@ -317,16 +334,17 @@ public:
 #if defined(AJA_WINDOWS)
 	void	 *GetHandle(void) {return mFileDescriptor;}
 #else
-	void	 *GetHandle(void) {return NULL;}
+	void	 *GetHandle(void) {return mpFile;}
 #endif
 
 private:
 
 #if defined(AJA_WINDOWS)
-	HANDLE		 mFileDescriptor;
+	HANDLE		mFileDescriptor;
 #else
-	FILE*		 mpFile;
+	FILE*		mpFile;
 #endif
+	AJAIOModel	mIoModel;
 };
 
 #endif // AJA_FILE_IO_H

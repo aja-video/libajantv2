@@ -72,6 +72,13 @@ AJAFileIO::AJAFileIO()
 #else
 	mpFile			= NULL;
 #endif
+
+#if TARGET_CPU_ARM64
+	mIoModel		= eAJAIoAlternate;
+#else
+	mIoModel		= eAJAIoDefault;
+#endif
+	
 }
 
 
@@ -181,7 +188,7 @@ AJAFileIO::Open(
 	const std::string&	fileName,
 	const int			flags,
 	const int			properties)
-{
+{	
 #if defined(AJA_WINDOWS)
 	wstring wString;
 	aja::string_to_wstring(fileName,wString);
@@ -189,8 +196,9 @@ AJAFileIO::Open(
 
 	return status;
 #else
-	AJAStatus status = AJA_STATUS_FAIL;
-	string	  flagsAndAttributes;
+	AJAStatus	status = AJA_STATUS_FAIL;
+	string		flagsAndAttributes;
+	bool		bIsWriting = false;
 
 	if ((mpFile == NULL) && (0 != fileName.length()))
 	{
@@ -203,13 +211,9 @@ AJAFileIO::Open(
 		else if (eAJAWriteOnly & flags)
 		{
 			if (eAJATruncateExisting & flags)
-			{
 				flagsAndAttributes = "w";
-			}
 			else
-			{
 				flagsAndAttributes = "w+";
-			}
 		}
 		else if (eAJAReadWrite & flags)
 		{
@@ -220,41 +224,32 @@ AJAFileIO::Open(
 			else
 			{
 				if (eAJACreateAlways & flags)
-				{
 					flagsAndAttributes = "a+";
-				}
+				
 				if (eAJACreateNew & flags)
-				{
 					flagsAndAttributes = "w+";
-				}
 			}
 		}
 
 		if (true == flagsAndAttributes.empty())
-		{
 			return AJA_STATUS_BAD_PARAM;
-		}
-
+		
 		// One can also change the buffering behavior via:
 		// setvbuf(FILE*, char* pBuffer, _IOFBF,  size_t size);
-		//printf ("fopen name=%s attr=%s\n", fileName.c_str(), flagsAndAttributes.c_str());
 		mpFile = fopen(fileName.c_str(), flagsAndAttributes.c_str());
-
 		if (NULL != mpFile)
 		{
 			int fd = fileno(mpFile);
 #if defined(AJA_MAC)
 			if (eAJANoCaching & properties)
 			{
-				fcntl(fd, F_NOCACHE, 1);
+				int ret = fcntl(fd, F_NOCACHE, 1);
 			}
 #endif
 			if (eAJAUnbuffered & properties)
 			{
 				if (-1 != fd)
-				{
 					status = AJA_STATUS_SUCCESS;
-				}
 			}
 			else
 			{
@@ -269,7 +264,7 @@ AJAFileIO::Open(
 
 AJAStatus
 AJAFileIO::Close()
-{
+{	
 #if defined(AJA_WINDOWS)
 	AJAStatus status = AJA_STATUS_FAIL;
 
@@ -287,10 +282,15 @@ AJAFileIO::Close()
 
 	if (NULL != mpFile)
 	{
-		if (0 == fclose(mpFile))
-		{
+		int retVal = 0;
+		if (mIoModel == eAJAIoAlternate)
+			retVal = close(fileno(mpFile));
+		else
+			retVal = fclose(mpFile);
+		
+		if (0 == retVal)
 			status = AJA_STATUS_SUCCESS;
-		}
+		
 		mpFile = NULL;
 	}
 	return status;
@@ -324,11 +324,14 @@ AJAFileIO::Read(uint8_t* pBuffer, const uint32_t length)
 	uint32_t retVal = 0;
 	if (NULL != mpFile)
 	{
-		size_t bytesRead = 0;
-		if ((bytesRead = fread(pBuffer, 1, length, mpFile)) > 0)
-		{
+		size_t bytesRead;
+		if (mIoModel == eAJAIoAlternate)
+			bytesRead = read(fileno(mpFile), pBuffer, length);
+		else
+			bytesRead = fread(pBuffer, 1, length, mpFile);
+	
+		if (bytesRead > 0)
 			retVal = uint32_t(bytesRead);
-		}
 	}
 	return retVal;
 #endif
@@ -354,7 +357,7 @@ AJAFileIO::Read(std::string& buffer, const uint32_t length)
 
 uint32_t
 AJAFileIO::Write(const uint8_t* pBuffer, const uint32_t length) const
-{
+{	
 #if defined(AJA_WINDOWS)
 	DWORD bytesWritten = 0;
 
@@ -368,9 +371,19 @@ AJAFileIO::Write(const uint8_t* pBuffer, const uint32_t length) const
 	if (NULL != mpFile)
 	{
 		size_t bytesWritten = 0;
-		if ((bytesWritten = fwrite(pBuffer, 1, length, mpFile)) > 0)
+		if (mIoModel == eAJAIoAlternate)
 		{
-			retVal = uint32_t(bytesWritten);
+			if ((bytesWritten = write(fileno(mpFile), pBuffer, length)) > 0)
+			{
+				retVal = uint32_t(bytesWritten);
+			}
+		}
+		else
+		{
+			if ((bytesWritten = fwrite(pBuffer, 1, length, mpFile)) > 0)
+			{
+				retVal = uint32_t(bytesWritten);
+			}
 		}
 	}
 	return retVal;
@@ -458,7 +471,7 @@ AJAFileIO::Truncate(int32_t size)
 
 int64_t
 AJAFileIO::Tell()
-{
+{	
 #if defined(AJA_WINDOWS)
 	int64_t retVal = 0;
 	if (INVALID_HANDLE_VALUE != mFileDescriptor)
@@ -485,7 +498,10 @@ AJAFileIO::Tell()
 	int64_t retVal = 0;
 	if (IsOpen())
 	{
-		retVal = (int64_t)ftello(mpFile);
+		if (mIoModel == eAJAIoAlternate)
+			retVal = lseek(fileno(mpFile), 0, SEEK_CUR);
+		else
+			retVal = (int64_t)ftello(mpFile);
 	}
 	return retVal;
 #endif
@@ -494,7 +510,7 @@ AJAFileIO::Tell()
 
 AJAStatus
 AJAFileIO::Seek(const int64_t distance, const AJAFileSetFlag flag) const
-{
+{	
 #if defined(AJA_WINDOWS)
 	DWORD	  moveMethod;
 	DWORD	  retVal;
@@ -555,7 +571,11 @@ AJAFileIO::Seek(const int64_t distance, const AJAFileSetFlag flag) const
 			default:
 				return (AJA_STATUS_BAD_PARAM);
 		}
-		retVal = fseeko(mpFile, (off_t)distance, whence);
+		
+		if (mIoModel == eAJAIoAlternate)
+			retVal = lseek(fileno(mpFile), (off_t)distance, whence);
+		else
+			retVal = fseeko(mpFile, (off_t)distance, whence);
 
 		if (-1 != retVal)
 		{
@@ -1024,6 +1044,18 @@ AJAFileIO::DoesDirectoryExist(const std::wstring& directory)
 
 	return status;
 #endif
+}
+
+bool
+AJAFileIO::DirectoryExists(const std::string& directory)
+{
+	return DoesDirectoryExist(directory) == AJA_STATUS_SUCCESS;
+}
+
+bool
+AJAFileIO::DirectoryExists(const std::wstring& directory)
+{
+	return DoesDirectoryExist(directory) == AJA_STATUS_SUCCESS;
 }
 
 

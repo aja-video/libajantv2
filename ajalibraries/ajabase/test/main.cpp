@@ -1279,6 +1279,7 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 			const std::string checkMsg = "Expected temp directory '" +
 				tempDir + "' not found! Check result of ::TempDirectory sub-case.";
 			CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, checkMsg);
+			CHECK_EQ(AJAFileIO::DirectoryExists(tempDir), true);
 		}
 
 		SUBCASE("::GetWorkingDirectory")
@@ -1307,6 +1308,7 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 #else
 			CHECK_EQ(tempDir, tempDirCwd);
 #endif
+			chdir(cwdStr.c_str());
 		}
 		SUBCASE("::GetExecutablePath")
 		{
@@ -1466,6 +1468,42 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 			status = AJAFileIO::GetDirectoryName(tempDir + pathSepStr + "foo" + pathSepStr + "bar.txt", dirName);
 			CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, "GetDirectoryName(const std::string&, std::string&) failed");
 			CHECK_EQ(tempDir + pathSepStr + "foo", dirName);
+		}
+
+		SUBCASE("::GetHandle")
+		{
+			AJAFileIO fio;
+			AJAStatus status = fio.Open("foobar.dat", eAJAWriteOnly|eAJACreateAlways, 0);
+			CHECK_EQ(status, AJA_STATUS_SUCCESS);
+			if (status == AJA_STATUS_SUCCESS) {
+				char cwd[256];
+				char* cwdbuf = getcwd(&cwd[0], 256);
+				std::string buf("Hello, AJAFileIO!");
+				CHECK_EQ(fio.Write(buf), buf.size());
+#if defined(AJA_WINDOWS)
+				HANDLE handle = (HANDLE)fio.GetHandle();
+				CHECK(handle != NULL);
+				if (handle != NULL) {
+					CHECK_EQ(::GetFileType(handle), FILE_TYPE_DISK);
+					LARGE_INTEGER sizeInfo;
+					if(::GetFileSizeEx(handle,&sizeInfo)) {
+						CHECK_EQ(sizeInfo.QuadPart, buf.size());
+					}
+				}
+#else
+				FILE* handle = (FILE*)fio.GetHandle();
+				CHECK(handle != NULL);
+				if(handle != NULL) {
+					fseek(handle, 0 , SEEK_END);
+					long fileSize = ftell(handle);
+					fseek(handle, 0 , SEEK_SET);// needed for next read from beginning of file
+					CHECK_EQ(fileSize, buf.size());
+				}
+#endif
+				if (fio.IsOpen())
+					CHECK_EQ(fio.Close(), AJA_STATUS_SUCCESS);
+			}
+
 		}
 	}
 
