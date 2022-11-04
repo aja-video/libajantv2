@@ -1313,7 +1313,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 														DEVICE_ID_KONAIP_2TX_1SFP_J2K,		DEVICE_ID_KONAIP_4CH_2SFP,
 														DEVICE_ID_KONALHEPLUS,				DEVICE_ID_KONALHI,				DEVICE_ID_KONALHIDVI,		DEVICE_ID_TTAP,
 														NTV2DeviceID(1234567)	};
-			const string			devIDStrs []	= {	"DEVICE_ID_NOTFOUND",
+			const std::string			devIDStrs []	= {	"DEVICE_ID_NOTFOUND",
 														"DEVICE_ID_CORVID1",				"DEVICE_ID_CORVID22",			"DEVICE_ID_CORVID24",		"DEVICE_ID_CORVID3G",
 														"DEVICE_ID_CORVID44",				"DEVICE_ID_CORVID88",			"DEVICE_ID_CORVIDHBR",		"DEVICE_ID_CORVIDHEVC",
 														"DEVICE_ID_IO4K",					"DEVICE_ID_IO4KPLUS",			"DEVICE_ID_IO4KUFC",		"DEVICE_ID_IOEXPRESS",
@@ -1324,7 +1324,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 														"DEVICE_ID_KONAIP_2TX_1SFP_J2K",	"DEVICE_ID_KONAIP_4CH_2SFP",
 														"DEVICE_ID_KONALHEPLUS",			"DEVICE_ID_KONALHI",			"DEVICE_ID_KONALHIDVI",		"DEVICE_ID_TTAP",
 														""						};
-			const string			deviceStrs []	= {	"Unknown",
+			const std::string			deviceStrs []	= {	"Unknown",
 														"Corvid1",							"Corvid22",						"Corvid24",					"Corvid3G",
 														"Corvid44",							"Corvid88",						"CorvidHBR",				"CorvidHEVC",
 														"Io4K",								"DNxIV",						"Io4KUfc",					"IoExpress",
@@ -1338,15 +1338,15 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 			for (unsigned ndx (0);  ndx < sizeof (deviceIDs) / sizeof (NTV2DeviceID);  ndx++)
 			{
 				CHECK(::NTV2DeviceIDString (deviceIDs [ndx]) != NULL);	//	never NULL!
-				CHECK_EQ(string (::NTV2DeviceIDString (deviceIDs [ndx])), devIDStrs [ndx]);
-				CHECK_EQ(string (::NTV2DeviceString (deviceIDs [ndx])), deviceStrs [ndx]);
+				CHECK_EQ(std::string (::NTV2DeviceIDString (deviceIDs [ndx])), devIDStrs [ndx]);
+				CHECK_EQ(std::string (::NTV2DeviceString (deviceIDs [ndx])), deviceStrs [ndx]);
 			}
 		}
 		{
 			const NTV2Standard		standards []	= {	NTV2_STANDARD_1080,			NTV2_STANDARD_720,		NTV2_STANDARD_525,			NTV2_STANDARD_625,
 														NTV2_STANDARD_1080p,		NTV2_STANDARD_2K,		NTV2_NUM_STANDARDS,			NTV2_STANDARD_UNDEFINED,
 														NTV2_STANDARD_INVALID		};
-			const string			stdStrs []		= {	"NTV2_STANDARD_1080",		"NTV2_STANDARD_720",	"NTV2_STANDARD_525",		"NTV2_STANDARD_625",
+			const std::string			stdStrs []		= {	"NTV2_STANDARD_1080",		"NTV2_STANDARD_720",	"NTV2_STANDARD_525",		"NTV2_STANDARD_625",
 														"NTV2_STANDARD_1080p",		"NTV2_STANDARD_2K",		"NTV2_STANDARD_INVALID",	"NTV2_STANDARD_INVALID",
 														"NTV2_STANDARD_INVALID"	};
 			const bool				valid []	= 	{	true,						true,					true,						true,
@@ -1359,7 +1359,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 			{
 				CHECK_EQ(NTV2_IS_VALID_STANDARD (standards [ndx]), valid [ndx]);
 				CHECK(::NTV2StandardString (standards [ndx]) != NULL);	//	never NULL!
-				CHECK_EQ(string (::NTV2StandardString (standards [ndx])), stdStrs [ndx]);
+				CHECK_EQ(std::string (::NTV2StandardString (standards [ndx])), stdStrs [ndx]);
 				CHECK_EQ(NTV2_IS_PROGRESSIVE_STANDARD (standards [ndx]), isProg [ndx]);
 			}
 		}
@@ -1373,7 +1373,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 													NTV2_FBF_10BIT_RAW_YCBCR,	NTV2_FBF_10BIT_YCBCR_420PL2,	NTV2_FBF_10BIT_YCBCR_422PL2,	NTV2_FBF_8BIT_YCBCR_420PL2,
 													NTV2_FBF_8BIT_YCBCR_422PL2,	NTV2_FBF_8BIT_YCBCR_422PL3,		NTV2_FBF_10BIT_YCBCR_420PL3_LE,	NTV2_FBF_10BIT_YCBCR_422PL3_LE,
 													NTV2_FBF_INVALID	};
-			const string			fbfStrs []	= {	"NTV2_FBF_10BIT_YCBCR",			"NTV2_FBF_8BIT_YCBCR",			"NTV2_FBF_ARGB",					"NTV2_FBF_RGBA",
+			const std::string			fbfStrs []	= {	"NTV2_FBF_10BIT_YCBCR",			"NTV2_FBF_8BIT_YCBCR",			"NTV2_FBF_ARGB",					"NTV2_FBF_RGBA",
 													"NTV2_FBF_10BIT_RGB",			"NTV2_FBF_8BIT_YCBCR_YUY2",		"NTV2_FBF_ABGR",					"NTV2_FBF_10BIT_DPX",
 													"NTV2_FBF_10BIT_YCBCR_DPX",		"NTV2_FBF_8BIT_DVCPRO",			"NTV2_FBF_8BIT_YCBCR_420PL3",		"NTV2_FBF_8BIT_HDV",
 													"NTV2_FBF_24BIT_RGB",			"NTV2_FBF_24BIT_BGR",			"NTV2_FBF_10BIT_YCBCRA",			"NTV2_FBF_10BIT_DPX_LE",
@@ -1450,7 +1450,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 				std::cerr << ndx << ": " << ::NTV2FrameBufferFormatToString(pf) << std::endl;
 				CHECK_EQ(NTV2_IS_VALID_FRAME_BUFFER_FORMAT(pf), valid[ndx]);
 				CHECK(::NTV2FrameBufferFormatString(pf) != NULL);	//	never NULL!
-				CHECK_EQ(string(::NTV2FrameBufferFormatString(pf)), fbfStrs[ndx]);
+				CHECK_EQ(std::string(::NTV2FrameBufferFormatString(pf)), fbfStrs[ndx]);
 				CHECK_EQ(NTV2_IS_FBF_PLANAR(pf), isPlanar[ndx]);
 				CHECK_EQ(NTV2_IS_FBF_PRORES(pf), isProRes[ndx]);
 				CHECK_EQ(NTV2_IS_FBF_RGB(pf), isRGB[ndx]);
@@ -1464,7 +1464,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 														NTV2_FG_1920x1112,		NTV2_FG_1280x740,		NTV2_FG_2048x1080,	NTV2_FG_2048x1556,
 														NTV2_FG_2048x1588,		NTV2_FG_2048x1112,		NTV2_FG_720x514,	NTV2_FG_720x612,
 														NTV2_FG_4x1920x1080,	NTV2_FG_4x2048x1080,	NTV2_FG_INVALID		};
-			const string			geomStrs []		= {	"NTV2_FG_1920x1080",	"NTV2_FG_1280x720",		"NTV2_FG_720x486",		"NTV2_FG_720x576",
+			const std::string			geomStrs []		= {	"NTV2_FG_1920x1080",	"NTV2_FG_1280x720",		"NTV2_FG_720x486",		"NTV2_FG_720x576",
 														"NTV2_FG_1920x1114",	"NTV2_FG_2048x1114",	"NTV2_FG_720x508",		"NTV2_FG_720x598",
 														"NTV2_FG_1920x1112",	"NTV2_FG_1280x740",		"NTV2_FG_2048x1080",	"NTV2_FG_2048x1556",
 														"NTV2_FG_2048x1588",	"NTV2_FG_2048x1112",	"NTV2_FG_720x514",		"NTV2_FG_720x612",
@@ -1488,7 +1488,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 			{
 				CHECK_EQ(NTV2_IS_VALID_NTV2FrameGeometry (geometries [ndx]), valid [ndx]);
 				CHECK(::NTV2FrameGeometryString (geometries [ndx]) != NULL);	//	never NULL!
-				CHECK_EQ(string (::NTV2FrameGeometryString (geometries [ndx])), geomStrs [ndx]);
+				CHECK_EQ(std::string (::NTV2FrameGeometryString (geometries [ndx])), geomStrs [ndx]);
 				CHECK_EQ(NTV2_IS_QUAD_FRAME_GEOMETRY (geometries [ndx]), isQuad [ndx]);
 				CHECK_EQ(NTV2_IS_2K_1080_FRAME_GEOMETRY (geometries [ndx]), is2K1080 [ndx]);
 			}
@@ -1498,7 +1498,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 														NTV2_FRAMERATE_5000,		NTV2_FRAMERATE_4800,		NTV2_FRAMERATE_4795,		NTV2_FRAMERATE_3000,
 														NTV2_FRAMERATE_2997,		NTV2_FRAMERATE_2500,		NTV2_FRAMERATE_2400,		NTV2_FRAMERATE_2398,
 														NTV2_FRAMERATE_1500,		NTV2_FRAMERATE_1498,		NTV2_FRAMERATE_INVALID		};
-			const string			rateStrs []		= {	"NTV2_FRAMERATE_12000",		"NTV2_FRAMERATE_11988",		"NTV2_FRAMERATE_6000",		"NTV2_FRAMERATE_5994",
+			const std::string			rateStrs []		= {	"NTV2_FRAMERATE_12000",		"NTV2_FRAMERATE_11988",		"NTV2_FRAMERATE_6000",		"NTV2_FRAMERATE_5994",
 														"NTV2_FRAMERATE_5000",		"NTV2_FRAMERATE_4800",		"NTV2_FRAMERATE_4795",		"NTV2_FRAMERATE_3000",
 														"NTV2_FRAMERATE_2997",		"NTV2_FRAMERATE_2500",		"NTV2_FRAMERATE_2400",		"NTV2_FRAMERATE_2398",
 														"NTV2_FRAMERATE_1500",		"NTV2_FRAMERATE_1498",		"NTV2_FRAMERATE_INVALID"	};
@@ -1510,7 +1510,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 			{
 				CHECK_EQ(NTV2_IS_VALID_NTV2FrameRate (rates [ndx]), valid [ndx]);
 				CHECK(::NTV2FrameRateString (rates [ndx]) != NULL);	//	never NULL!
-				CHECK_EQ(string (::NTV2FrameRateString (rates [ndx])), rateStrs [ndx]);
+				CHECK_EQ(std::string (::NTV2FrameRateString (rates [ndx])), rateStrs [ndx]);
 			}
 		}
 		{
@@ -1540,7 +1540,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 														NTV2_FORMAT_4x2048x1080p_11988,		NTV2_FORMAT_4x2048x1080p_12000,
 														NTV2_FORMAT_END_HIGH_DEF_FORMATS2,
 														NTV2_FORMAT_UNKNOWN	};
-			const string			fmtStrs []		= {	"NTV2_FORMAT_1080i_5000",				"NTV2_FORMAT_1080i_5994",				"NTV2_FORMAT_1080i_6000",
+			const std::string			fmtStrs []		= {	"NTV2_FORMAT_1080i_5000",				"NTV2_FORMAT_1080i_5994",				"NTV2_FORMAT_1080i_6000",
 														"NTV2_FORMAT_720p_5994",		"NTV2_FORMAT_720p_6000",		"NTV2_FORMAT_1080psf_2398",		"NTV2_FORMAT_1080psf_2400",
 														"NTV2_FORMAT_1080p_2997",		"NTV2_FORMAT_1080p_3000",		"NTV2_FORMAT_1080p_2500",		"NTV2_FORMAT_1080p_2398",
 														"NTV2_FORMAT_1080p_2400",		"NTV2_FORMAT_1080p_2K_2398",	"NTV2_FORMAT_1080p_2K_2400",	"NTV2_FORMAT_1080p_2K_2500",
@@ -1593,13 +1593,13 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 														false,
 														false	};
 	//	TODO:	Validate IS_HD, IS_SD, IS_720P, IS_2K, IS_2K_1080, IS_4K, IS_4K_HFR, IS_QUAD_FRAME, IS_4K_4096, IS_4K_QUADHD, IS_372_DL, IS_525, IS_625, IS_INTERMEDIATE, IS_3G, IS_3Gb, IS_WIRE, IS_PSF, IS_PROGRESSIVE, IS_A
-			CHECK_EQ (sizeof(formats) / sizeof(NTV2VideoFormat),  sizeof (fmtStrs) / sizeof (string));
+			CHECK_EQ (sizeof(formats) / sizeof(NTV2VideoFormat),  sizeof (fmtStrs) / sizeof (std::string));
 			for (unsigned ndx(0);  ndx < sizeof(formats) / sizeof(NTV2VideoFormat);  ndx++)
 			{
 				//cerr << " " << ndx << " " << ::NTV2VideoFormatString(formats[ndx]) << " == " << fmtStrs[ndx] << endl;
 				CHECK_EQ (NTV2_IS_VALID_VIDEO_FORMAT(formats[ndx]), valid[ndx]);
 				CHECK(::NTV2VideoFormatString (formats[ndx]) != NULL);	//	never NULL!
-				CHECK_EQ (string(::NTV2VideoFormatString(formats[ndx])), fmtStrs[ndx]);
+				CHECK_EQ (std::string(::NTV2VideoFormatString(formats[ndx])), fmtStrs[ndx]);
 			}
 		}
 
