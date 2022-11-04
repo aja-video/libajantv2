@@ -59,10 +59,10 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 set(TARGET_SOURCES
-	${NTV2KONAIPJSONSETUP_SOURCES}
 	${NTV2KONAIPJSONSETUP_HEADERS}
-	${DEMO_APPS_SOURCES}
-	${DEMO_APPS_HEADERS})
+	${NTV2KONAIPJSONSETUP_SOURCES}
+	${DEMO_APPS_HEADERS}
+	${DEMO_APPS_SOURCES})
 
 aja_add_executable(ntv2konaipjsonsetup PUBLIC
 	"${TARGET_SOURCES}"
@@ -94,8 +94,8 @@ install(TARGETS ${BUILD_TARGETS}
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
 	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
-	install(FILES ${NTV2CUDACAPTURE_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2konaipjsonsetup)
-	install(FILES ${NTV2CUDACAPTURE_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2konaipjsonsetup)
+	install(FILES ${NTV2KONAIPJSONSETUP_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2konaipjsonsetup)
+	install(FILES ${NTV2KONAIPJSONSETUP_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2konaipjsonsetup)
 endif()
 if (AJA_INSTALL_CMAKE)
 	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2konaipjsonsetup)

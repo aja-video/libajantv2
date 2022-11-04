@@ -27,10 +27,10 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 set(NTV2RECORDDPX_TARGET_SOURCES
-	${NTV2RECORDDPX_SOURCES}
 	${NTV2RECORDDPX_HEADERS}
-	${DEMO_APPS_SOURCES}
-	${DEMO_APPS_HEADERS})
+	${NTV2RECORDDPX_SOURCES}
+	${DEMO_APPS_HEADERS}
+	${DEMO_APPS_SOURCES})
 
 aja_add_executable(ntv2recorddpx PUBLIC
 	"${TARGET_SOURCES}"
@@ -58,8 +58,8 @@ install(TARGETS ${BUILD_TARGETS}
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
 	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
-	install(FILES ${NTV2CUDACAPTURE_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2recorddpx)
-	install(FILES ${NTV2CUDACAPTURE_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2recorddpx)
+	install(FILES ${NTV2RECORDDPX_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2recorddpx)
+	install(FILES ${NTV2RECORDDPX_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2recorddpx)
 endif()
 if (AJA_INSTALL_CMAKE)
 	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2recorddpx)

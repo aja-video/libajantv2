@@ -26,8 +26,8 @@ endif()
 
 set(TARGET_SOURCES
 	${NTV2TESTOGL_SOURCES}
-	${DEMO_APPS_SOURCES}
-	${DEMO_APPS_HEADERS})
+	${DEMO_APPS_HEADERS}
+	${DEMO_APPS_SOURCES})
 
 aja_add_executable(ntv2testOGL PUBLIC
 	"${TARGET_SOURCES}"
@@ -55,8 +55,7 @@ install(TARGETS ${BUILD_TARGETS}
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
 	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
-	install(FILES ${NTV2CUDACAPTURE_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2testOGL)
-	install(FILES ${NTV2CUDACAPTURE_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2testOGL)
+	install(FILES ${NTV2TESTOGL_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2testOGL)
 endif()
 if (AJA_INSTALL_CMAKE)
 	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2testOGL)
