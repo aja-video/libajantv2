@@ -12,22 +12,23 @@
 	#define NTV2_USE_STDINT
 #endif	//	if not MSWindows
 
-/**
-	SYMBOL & API DEPRECATION MACROS
+/*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////	DEPRECATION CONTROL MACROS
+////////
+////////	These macros control which deprecated symbols and APIs are included or excluded from compilation.
+////////
+////////	-	To activate/include the symbols/APIs that were deprecated in a particular SDK, comment out
+////////		(undefine) the SDK's corresponding macro.
+////////
+////////	-	To deactivate/exclude the symbols/APIs that were deprecated in a particular SDK, leave the
+////////		SDK's corresponding macro defined.
+////////
+////////	WARNING:	Do not sparsely mix-and-match across SDK versions.
+////////				It's best to activate/include symbols/APIs contiguously from the latest SDK
+////////				(starting at the bottom), and continue activating/including to the SDK at which
+////////				symbols/APIs should start to be deactivated/excluded.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
-	These macros control which deprecated symbols and APIs are included or excluded from compilation.
-
-	-	To activate/include the symbols/APIs that were deprecated in a particular SDK, comment out
-		(undefine) the SDK's corresponding macro.
-
-	-	To deactivate/exclude the symbols/APIs that were deprecated in a particular SDK, leave the
-		SDK's corresponding macro defined.
-
-	WARNING:	Do not sparsely mix-and-match across SDK versions.
-				It's best to activate/include symbols/APIs contiguously from the latest SDK
-				(starting at the bottom), and continue activating/including to the SDK at which
-				symbols/APIs should start to be deactivated/excluded.
-**/
 #define NTV2_DEPRECATE			//	If defined, excludes all symbols/APIs first deprecated in SDK 12.4 or earlier
 #define NTV2_DEPRECATE_12_5		//	If defined, excludes all symbols/APIs first deprecated in SDK 12.5
 #define NTV2_DEPRECATE_12_6		//	If defined, excludes all symbols/APIs first deprecated in SDK 12.6
@@ -41,22 +42,81 @@
 #define NTV2_DEPRECATE_15_0		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.0
 #define NTV2_DEPRECATE_15_1		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.1
 #define NTV2_DEPRECATE_15_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.2
-//#define NTV2_DEPRECATE_15_3		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.3 (never released)
-//#define NTV2_DEPRECATE_15_5		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.5
-//#define NTV2_DEPRECATE_15_6		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.6 (never released)
+#define NTV2_DEPRECATE_15_3		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.3 (never released)
+#define NTV2_DEPRECATE_15_5		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.5
+#define NTV2_DEPRECATE_15_6		//	If defined, excludes all symbols/APIs first deprecated in SDK 15.6 (never released)
 //#define NTV2_DEPRECATE_16_0		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.0
 //#define NTV2_DEPRECATE_16_1		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.1
 //#define NTV2_DEPRECATE_16_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.2
 //#define NTV2_DEPRECATE_16_3		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.3
-//#define NTV2_NULL_DEVICE			//	DO NOT DEFINE UNLESS ABSOLUTELY NECESSARY.  If defined, stubs out ioctl/IOKit/DeviceIoControl calls to AJA device driver.
-#define NTV2_NUB_CLIENT_SUPPORT		//	If defined, includes nub client support;  otherwise, excludes it
+
+
+/*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////	COMPILE-TIME FEATURES
+////////	These macros control important aspects of SDK behavior.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+/**************************************************************************************************************
+	NTV2_NULL_DEVICE			Controls whether or not the SDK will be able to connect to the NTV2 kernel
+								driver via the normal connection method provided by the host operating system.
+								Introduced in SDK 12.4.
+
+	Undefined:	(Default) Locally-connected/installed NTV2 devices will be enumerable via
+				CNTV2DeviceScanner and accessible via CNTV2Card::Open.
+
+	Defined:	"OpenLocalPhysical" calls will fail, and CNTV2DeviceScanner won't find any locally
+				connected/installed devices.
+**************************************************************************************************************/
+//#define NTV2_NULL_DEVICE	
+
+/**************************************************************************************************************
+	NTV2_NUB_CLIENT_SUPPORT		Controls whether or not the SDK will use plugin DLLs/dylibs/so's to connect
+								to remote or software NTV2 devices.
+								Introduced in SDK 12.4.
+
+	Undefined:	SDK clients cannot access or connect to remote or software devices. This may be useful for
+				SDK clients that require greater security by preventing the loading of plugins.
+
+	Defined:	(Default) SDK clients will be able to access and connect to remote or software devices (via
+				dynamically-loaded plugins).
+**************************************************************************************************************/
+#define NTV2_NUB_CLIENT_SUPPORT	
+
+/**************************************************************************************************************
+	NTV2_WRITEREG_PROFILING		Controls profiling of WriteRegister calls.
+								Introduced in SDK 15.1.
+
+	Undefined:	WriteRegister calls cannot be profiled, and the *RecordRegisterWrites API functions are
+				unavailable.
+
+	Defined:	(Default) WriteRegister calls can be profiled, and the API that controls profiling and
+				retrieve results is available (e.g. the *RecordRegisterWrites API functions).
+**************************************************************************************************************/
+#define NTV2_WRITEREG_PROFILING		//	If defined, enables register write profiling
+
+
+/**************************************************************************************************************
+	NTV2_USE_CPLUSPLUS11		Controls use of C++11 language features.
+								Introduced in SDK 16.0.
+
+	Undefined:	The 'ajalibraries/ajantv2' portion of the SDK will not use C++11 features.
+
+	Defined:	(Default) The 'ajalibraries/ajantv2' portion of the SDK will use C++11 features that require
+				a C++11 compiler.
+
+	See also:	AJA_USE_CPLUSPLUS11 in 'ajalibraries/ajabase/include/types.h'
+**************************************************************************************************************/
+#if !defined(NTV2_USE_CPLUSPLUS11)
+	#define NTV2_USE_CPLUSPLUS11	
+#endif	//	!defined(NTV2_USE_CPLUSPLUS11)
+
+
+
+/*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////	HELPER MACROS
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 #define AJA_VIRTUAL		virtual		//	Force use of virtual functions in CNTV2Card, etc.
 #define AJA_STATIC		static		//	Do not change this.
-#define NTV2_WRITEREG_PROFILING		//	If defined, enables register write profiling
 #define NTV2_UNUSED(__p__)			(void)__p__
-#if !defined(NTV2_USE_CPLUSPLUS11)
-	#define NTV2_USE_CPLUSPLUS11		//	New in SDK 16.0. If defined (now default), 'ajalibraries/ajantv2' will use C++11 features (requires C++11 compiler)
-#endif	//	!defined(NTV2_USE_CPLUSPLUS11)
 
 #if defined(__CPLUSPLUS__) || defined(__cplusplus)
 	#if defined(AJAMac)
