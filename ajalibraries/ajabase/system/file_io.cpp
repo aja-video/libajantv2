@@ -1046,6 +1046,18 @@ AJAFileIO::DoesDirectoryExist(const std::wstring& directory)
 #endif
 }
 
+bool
+AJAFileIO::DirectoryExists(const std::string& directory)
+{
+	return DoesDirectoryExist(directory) == AJA_STATUS_SUCCESS;
+}
+
+bool
+AJAFileIO::DirectoryExists(const std::wstring& directory)
+{
+	return DoesDirectoryExist(directory) == AJA_STATUS_SUCCESS;
+}
+
 
 AJAStatus
 AJAFileIO::IsDirectoryEmpty(const std::string& directory)

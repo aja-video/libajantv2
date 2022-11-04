@@ -1279,6 +1279,7 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 			const std::string checkMsg = "Expected temp directory '" +
 				tempDir + "' not found! Check result of ::TempDirectory sub-case.";
 			CHECK_MESSAGE(status == AJA_STATUS_SUCCESS, checkMsg);
+			CHECK_EQ(AJAFileIO::DirectoryExists(tempDir), true);
 		}
 
 		SUBCASE("::GetWorkingDirectory")

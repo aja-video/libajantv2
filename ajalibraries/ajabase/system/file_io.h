@@ -256,6 +256,17 @@ public:
 	static AJAStatus DoesDirectoryExist(const std::wstring& directory);
 
 	/**
+	 *	Tests if a directory exists.
+	 *	Does not change the current directory.
+	 *
+	 *	@param[in]	directory	The path to the directory
+	 *
+	 *	@return		true		If and only if the directory exists
+	 */
+	static bool DirectoryExists(const std::string& directory);
+	static bool DirectoryExists(const std::wstring& directory);
+
+	/**
 	 *	Tests if a directory is empty.
 	 *	Does not change the current directory.
 	 *
