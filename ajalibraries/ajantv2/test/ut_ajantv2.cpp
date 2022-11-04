@@ -21,9 +21,19 @@
 #include "ntv2debug.h"
 #include "ntv2endian.h"
 #include "ntv2signalrouter.h"
+#include "ntv2registerexpert.h"
 #include "ntv2routingexpert.h"
+#include "ntv2transcode.h"
 #include "ntv2utils.h"
 #include "ntv2vpid.h"
+
+static bool gVerboseOutput = false;
+
+#define	LOGERR(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Error,		__FUNCTION__ << ":  " << __x__)
+#define	LOGWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
+#define	LOGNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":  " << __x__)
+#define	LOGINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
+#define	LOGDBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
 
 #if 0
 template
@@ -907,6 +917,1666 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		}
 	}
 
+	TEST_CASE("NTV2_POINTER")
+	{
+		//							              1         2         3         4
+		//							    01234567890123456789012345678901234567890123
+		static const std::string str1 ("The rain in Spain stays mainly on the plain.");
+		static const std::string str2 ("The rain in Japan stays mainly on the plain.");
+		static const std::string str3 ("APWRAPWR in Spain stays mainly on WRAPWRAPWR");
+
+		LOGNOTE("Started");
+		NTV2_POINTER a(AJA_NULL, 0), b(str1.c_str(), 0), c(AJA_NULL, str1.length()), d(str1.c_str(),str1.length());
+		CHECK_FALSE(a);
+		CHECK_FALSE(b);
+		CHECK_FALSE(c);
+		CHECK((bool)d);
+		CHECK(a.Set(AJA_NULL, 0));
+		CHECK_FALSE(b.Set(str1.c_str(), 0));
+		CHECK_FALSE(c.Set(AJA_NULL, str1.length()));
+		CHECK(d.Set(str1.c_str(),str1.length()));
+
+		NTV2_POINTER		spain	(str1.c_str(), str1.length());
+		NTV2_POINTER		japan	(str2.c_str(), str2.length());
+		NTV2_POINTER		wrap	(str3.c_str(), str3.length());
+		ULWord				firstDiff	(0);
+		ULWord				lastDiff	(0);
+		CHECK(spain.GetRingChangedByteRange (japan, firstDiff, lastDiff));
+		CHECK(firstDiff < lastDiff);
+		CHECK_EQ(firstDiff, 12);
+		CHECK_EQ(lastDiff, 15);
+		CHECK(spain.GetRingChangedByteRange (wrap, firstDiff, lastDiff));
+		CHECK_FALSE(firstDiff < lastDiff);
+		CHECK_EQ(firstDiff, 34);
+		CHECK_EQ(lastDiff, 7);
+		std::string			stringOutput[5];	//	= {"", "", "", "", ""};
+		std::ostringstream	ostreamOutput[5];
+		//								offset	length	radix	bytes/group	groups/line	addrRadix	ascii	addrOffset
+		spain.Dump(ostreamOutput[0],	0,		0,		16,		8,			8,			0,			false,	0);
+		spain.Dump(ostreamOutput[1],	0,		0,		16,		4,			16,			0,			false,	0);
+		spain.Dump(ostreamOutput[2],	0,		0,		16,		2,			32,			10,			true,	0);
+		spain.Dump(ostreamOutput[3],	0,		0,		16,		1,			64,			16,			true,	0x10000);
+		japan.Dump(ostreamOutput[4]);
+		spain.Dump(stringOutput[0],		0,		0,		16,		8,			8,			0,			false,	0);
+		spain.Dump(stringOutput[1],		0,		0,		16,		4,			16,			0,			false,	0);
+		spain.Dump(stringOutput[2],		0,		0,		16,		2,			32,			10,			true,	0);
+		spain.Dump(stringOutput[3],		0,		0,		16,		1,			64,			16,			true,	0x10000);
+		japan.Dump(stringOutput[4]);
+
+		auto CheckSizeT = [=](size_t x) {
+			return x ? true : false;
+		};
+		// Test cast operators
+		CHECK(CheckSizeT(spain));
+		CHECK_FALSE(CheckSizeT(NTV2_POINTER()));
+		size_t sz(spain);
+		CHECK_EQ(sz, spain.GetByteCount());
+		sz = japan;
+		CHECK_EQ(sz, japan.GetByteCount());
+		sz = size_t(wrap) + 0;
+		CHECK_EQ(sz, wrap.GetByteCount());
+		sz = NTV2_POINTER();
+		CHECK_EQ(sz, 0);
+
+		for (unsigned ndx(0);  ndx < 5;  ndx++)
+			CHECK_EQ(ostreamOutput[ndx].str(),  stringOutput[ndx]);
+
+		if (gVerboseOutput) {
+			for (unsigned len(7);  len < str1.length()+2;  len+=5)
+				for (unsigned n(0);  n <= str1.length()+2;  n++)
+					std::cerr << spain.GetString(n, len) << std::endl;
+		}
+
+		std::vector<uint64_t> u64s;
+		std::vector<uint32_t> u32s;
+		std::vector<uint16_t> u16s;
+		std::vector<uint8_t> u8s;
+		NTV2_POINTER spainCmp(spain.GetByteCount());
+		CHECK(spain.GetU64s(u64s, 0, 0, true));
+		CHECK_EQ(u64s.size(), 5);
+		std::cerr << ULWord64Sequence(u64s) << std::endl;
+		spain.Dump(std::cerr, 0, spain.GetByteCount(), 16, 8, 16, 0, false, 0);
+		CHECK(spainCmp.PutU64s(u64s, 0, true));
+		std::cerr << "spain: " << spain << std::endl;
+		spain.Dump(std::cerr);
+		std::cerr << "spainCmp: " << spainCmp << std::endl;
+		spainCmp.Dump(std::cerr);
+		CHECK(spainCmp.IsContentEqual(spain, 0, ULWord(u64s.size()*sizeof(uint64_t))));
+		CHECK(spain.GetU64s(u64s, 0, 1));
+		CHECK_EQ(u64s.size(), 1);
+		CHECK(spainCmp.PutU64s(u64s, 0, true));
+
+		CHECK(spain.GetU32s(u32s, 0, 0, true));
+		CHECK_EQ(u32s.size(), 11);
+		std::cerr << ULWordSequence(u32s) << std::endl;
+		spain.Dump(std::cerr, 0, spain.GetByteCount(), 16, 4, 32, 0, false, 0);
+		CHECK(spain.GetU32s(u32s, 0, 2));
+		CHECK_EQ(u32s.size(), 2);
+
+		CHECK(spain.GetU16s(u16s, 0, 0, true));
+		CHECK_EQ(u16s.size(), 22);
+		std::cerr << UWordSequence(u16s) << std::endl;
+		spain.Dump(std::cerr, 0, spain.GetByteCount(), 16, 2, 64, 0, false, 0);
+		CHECK(spain.GetU16s(u16s, 0, 3));
+		CHECK_EQ(u16s.size(), 3);
+
+		//	Test cast-to-pointer & cast-to-size_t operators:
+		const char * pConstChars = spain;
+		std::string s;
+		for (size_t ndx(0); ndx < size_t(spain); ndx++)
+			s += pConstChars[ndx];
+		CHECK_EQ(s, str1);
+		const ULWord * pConstULWord = spain;
+		for (size_t num(0); num < size_t(spain)/sizeof(ULWord); num++)
+			CHECK_EQ(pConstULWord[num], spain.U32(int(num)));
+		::memcpy(japan, spain, spain);
+
+		//	Test scalar accessors:
+		uint32_t saved(spain.U32(3));
+		spain.U32(3) = 0x12345678;
+		CHECK_EQ(0x12345678, spain.U32(3));
+		spain.U32(3) = saved;
+		CHECK_EQ(saved, spain.U32(3));
+		//	Access from end:
+		for (int nd(-1);  nd > (-int(str1.length()+1));  nd--)
+			std::cout << char(spain.U8(nd));
+		std::cout << std::endl;
+
+		//           1         2         3         4
+		// 01234567890123456789012345678901234567890123
+		// The rain in Spain stays mainly on the plain.
+		NTV2_POINTER foo(50);
+		NTV2SegmentedXferInfo segInfo;
+		segInfo.setSegmentCount(4).setSegmentLength(3).setSourceOffset(2).setSourcePitch(5);
+		CHECK(segInfo.isValid());
+		CHECK(foo.CopyFrom(spain, segInfo));
+		std::cerr << segInfo << foo << ":" << std::endl;
+		foo.Dump(std::cerr, 0, 0, 16, 1, 64, 16, true, 0);
+
+		// Check PutU64s..
+		u64s.clear();
+		// 16 x U64s is 128 bytes
+		for (uint64_t u64(0); u64 < 16; u64++)
+			u64s.push_back(u64 | 0xFEDCBA9800000000);
+		foo.Allocate(128);
+		foo.Fill(uint64_t(0));
+		CHECK_FALSE(foo.PutU64s(u64s, 1));
+		CHECK(foo.PutU64s(u64s, 0));
+		foo.Allocate(256);  foo.Fill(uint64_t(0)); // 256 bytes permits up to 32 U64s
+		for (size_t u64offset(0); u64offset < 17; u64offset++)
+			CHECK(foo.PutU64s(u64s, u64offset));
+		CHECK(foo.PutU64s(u64s, 16)); // Last U64 offset that will work
+		CHECK_FALSE(foo.PutU64s(u64s, 17)); // First U64 offset that will write past end
+
+		// Check PutU32s...
+		u32s.clear();
+		// 32 x U32s is 128 bytes
+		for (uint32_t u32(0); u32 < 32; u32++)
+			u32s.push_back(u32 | 0xFEDC0000);
+		foo.Allocate(128);
+		foo.Fill(uint32_t(0));
+		CHECK_FALSE(foo.PutU32s(u32s, 1));
+		CHECK(foo.PutU32s(u32s, 0));
+		foo.Allocate(256);  foo.Fill(uint32_t(0)); // 256 bytes permits up to 64 U32s
+		CHECK(foo.PutU32s(u32s, 32)); // Last U32 offset that will work
+		CHECK_FALSE(foo.PutU32s(u32s, 33)); // First U32 offset that will write past end
+
+		// Check PutU16s...
+		u16s.clear();
+		// 64 x U16s is 128 bytes
+		for (uint16_t u16(0); u16 < 64; u16++)
+			u16s.push_back(u16);
+		foo.Allocate(128);
+		foo.Fill(uint16_t(0));
+		CHECK_FALSE(foo.PutU16s(u16s, 1));
+		CHECK(foo.PutU16s(u16s, 0));
+		foo.Allocate(256);  foo.Fill(uint16_t(0)); // 256 bytes permits up to 128 U16s
+		CHECK(foo.PutU16s(u16s, 64)); // Last U16 offset that will work
+		CHECK_FALSE(foo.PutU16s(u16s, 65)); // First U16 offset that will write past end
+
+		// Check PutU8s...
+		u8s.clear();
+		// 128 x U8s is 128 bytes
+		for (uint8_t u8(0);  u8 < 128;  u8++)
+			u8s.push_back(u8);
+		foo.Allocate(128);
+		foo.Fill(uint8_t(0));
+		CHECK_FALSE(foo.PutU8s(u8s, 1));
+		CHECK(foo.PutU8s(u8s, 0));
+		foo.Allocate(256);
+		foo.Fill(uint8_t(0)); // 256 bytes permits up to 256 U8s
+		CHECK(foo.PutU8s(u8s, 128)); // Last U8 offset that will work
+		CHECK_FALSE(foo.PutU8s(u8s, 129)); // First U8 offset that will write past end
+
+		// Make a "raster" of character strings of '.'s, 64 rows tall x 256 chars wide
+		NTV2_POINTER A(16*1024);
+		A.Fill('.');
+		for (ULWord row(1); row < A.GetByteCount() / 256; row++)
+			CHECK(A.PutU8s(UByteSequence{'\n'}, row * 256));
+		CHECK(A.PutU8s(UByteSequence{0x0}, A.GetByteCount() - 1)); // NUL terminate
+
+		const NTV2_POINTER aOrig(A); // Keep copy of original
+		CHECK(A.IsContentEqual(aOrig)); // A == aOrig
+
+		// "Blit" 5Hx128W box of X's into the "raster" of '.'s...
+		NTV2_POINTER X(16*1024);
+		X.Fill('X');
+		segInfo.reset().setSegmentInfo(5/*5 tall*/, 128 /*128 wide*/); // Xfer 128x5 box of X's
+		segInfo.setSourceOffset(0).setSourcePitch(256); // From upper-left corner of X...
+		segInfo.setDestInfo(8*256+64/*8 lines down, 64 chars in*/, 256/*charsPerLine*/);// ...into A @R8C64
+		CHECK(segInfo.isValid());
+		CHECK_EQ(segInfo.getTotalBytes(), segInfo.getTotalElements());
+		CHECK_EQ(segInfo.getTotalBytes(), 128*5);
+		if (gVerboseOutput) {
+			std::cout << std::endl << A.GetString(0, 16*1024) << std::endl;
+		}
+		CHECK(A.CopyFrom (X, segInfo)); // Do the CopyBlit
+		CHECK_FALSE(A.IsContentEqual(aOrig)); // A != aOrig
+		CHECK(A.IsContentEqual (aOrig, /*offset*/ 0, /*byteCount*/segInfo.getSourceOffset())); // 1st part up to srcOffset same
+		CHECK(A.IsContentEqual(aOrig, /*offset*/ segInfo.getDestEndOffset(), /*byteCount*/A.GetByteCount()-segInfo.getDestEndOffset()));
+		std::cout << std::endl << A.GetString(0, 16*1024) << std::endl;
+	}
+
+	// TODO(paulh): Ask Mr. Bill how to test this...
+	// TEST_CASE("NTV2Card Remote Device")
+	// {
+	// 	CNTV2Card card;
+	// 	CNTV2DriverInterface & device(AsNTV2DriverInterfaceRef(card));
+	// 	LOGNOTE("Legal schemes: " << aja::join(device.GetLegalSchemeNames(),", "));
+	// 	device.Open("ntv2local://blabber");
+	// 	device.Open("ntv2local://blabber.foo.bar");
+	// 	device.Open("ntv2local://blabber/");
+	// 	device.Open("ntv2local://blabber.foo.bar/");
+	// 	device.Open("ntv2local://127.0.0.1");
+	// 	device.Open("ntv2local://localhost");
+	// 	device.Open("ntv2local://127.0.0.1/");
+	// 	device.Open("ntv2local://localhost/");
+	// 	device.Open("badscheme://localhost/");
+	// 	device.Open("127.0.0.1");
+	// 	device.Open("localhost");
+	// 	device.Open("127.0.0.1:54321");
+	// 	device.Open("localhost:6221");
+	// 	device.Open("corvid24");
+	// 	device.Open("ntv2nub://127.0.0.1");
+	// 	device.Open("ntv2nub://localhost");
+	// 	device.Open("ntv2nub://127.0.0.1/");
+	// 	device.Open("ntv2nub://localhost/");
+	// 	device.Open("ntv2local://corvid24;");
+	// 	device.Open("ntv2local://corvid24:/");
+	// 	device.Open("ntv2local://corvid24:4/");
+	// 	device.Open("ntv2local://corvid24:4goof");
+	// 	device.Open("ntv2local://corvid24:4;goof");
+	// 	device.Open("ntv2local://corvid24:4/goof");
+	// 	device.Open("ntv2local://kona4");
+	// 	device.Open("ntv2local://0x10402100");
+	// 	device.Open("ntv2local://0x12345678");
+	// 	device.Open("ntv2local://0x1234567890");
+	// 	device.Open("ntv2local://0x12345678:");
+	// 	device.Open("ntv2local://0x12345678;");
+	// 	device.Open("ntv2local://0x12345678:/");
+	// 	device.Open("ntv2local://0x12345678:goof/");
+	// 	device.Open("ntv2local://0x12345678:goof/query");
+	// 	device.Open("ntv2://foobar:4/query");
+	// 	device.Open("ntv2://ntv2-shm-dev/");
+	// 	device.Open("ntv2://ntv2shmdev/");
+	// 	/*
+	// 	CHECK_FALSE(device.Open(""));
+	// 	CHECK_FALSE(device.Open("blabber"));
+	// 	CHECK(device.Open("0"));
+	// 	CHECK_FALSE(device.Open("6"));
+	// 	CHECK(device.Open("corvid24"));
+	// 	CHECK_FALSE(device.Open("kona4"));
+	// 	CHECK_FALSE(device.Open("0x10402100"));
+	// 	CHECK_FALSE(device.Open("0x12345678"));
+	// 	CHECK(device.Open("ntv2local://0"));
+	// 	CHECK(device.Open("ntv2local://corvid24"));
+	// 	CHECK_FALSE(device.Open("ntv2local://kona4"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0x10402100"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678"));
+
+	// 	CHECK(device.Open("ntv2local://0:"));
+	// 	CHECK(device.Open("ntv2local://0:25"));
+	// 	CHECK(device.Open("ntv2local://0:25/"));
+	// 	CHECK(device.Open("ntv2local://0:25/query"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0:25goof"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0:goof"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0goof"));
+
+	// 	CHECK_FALSE(device.Open("ntv2local://corvid26"));
+	// 	CHECK_FALSE(device.Open("ntv2local://corvid24;"));
+	// 	CHECK_FALSE(device.Open("ntv2local://corvid24:/"));
+	// 	CHECK(device.Open("ntv2local://corvid24:4/"));
+	// 	CHECK_FALSE(device.Open("ntv2local://corvid24:4goof"));
+	// 	CHECK_FALSE(device.Open("ntv2local://corvid24:4;goof"));
+	// 	CHECK(device.Open("ntv2local://corvid24:4/goof"));
+	// 	CHECK_FALSE(device.Open("ntv2local://kona4"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0x10402100"));
+	// 	CHECK(device.Open("ntv2local://0x12345678"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0x1234567890"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678:"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678;"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678:/"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678:goof/"));
+	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678:goof/query"));
+	// 	*/
+	// }
+
+	TEST_CASE("Copy Raster")
+	{
+		LOGNOTE("Started");
+
+		//	Test CopyRaster
+		const UWord		nDstWidthPixels		(32);
+		const UWord		nDstHeightLines		(32);
+		const UWord		nDstBytesPerLine	(nDstWidthPixels * 2);
+		const UWord		nDstBytes			(nDstBytesPerLine * nDstHeightLines);
+		NTV2_POINTER	dstRaster			(nDstBytes);
+		UByte *			pDstRaster			(reinterpret_cast<UByte*>(dstRaster.GetHostPointer()));
+		dstRaster.Fill(uint8_t(0xAA));
+
+		const UWord		nSrcWidthPixels		(16);
+		const UWord		nSrcHeightLines		(16);
+		const UWord		nSrcBytesPerLine	(nSrcWidthPixels * 2);
+		const UWord		nSrcBytes			(nSrcBytesPerLine * nSrcHeightLines);
+		NTV2_POINTER	srcRaster			(nSrcBytes);
+		UByte *			pSrcRaster			(reinterpret_cast<UByte*>(srcRaster.GetHostPointer()));
+		srcRaster.Fill(UByte(0xBB));
+		if (gVerboseOutput)	{std::cerr << "SrcRaster:" << std::endl;  srcRaster.Dump(std::cerr, 0/*byteOffset*/, 0/*byteCount*/, 16/*radix*/, 2/*bytes/group*/, nSrcWidthPixels/*groups/line*/, 16/*addrRadix*/);}
+		if (gVerboseOutput)	{std::cerr << "DstRaster:" << std::endl;  dstRaster.Dump(std::cerr, 0/*byteOffset*/, 0/*byteCount*/, 16/*radix*/, 2/*bytes/group*/, nDstWidthPixels/*groups/line*/, 16/*addrRadix*/);}
+		//				CopyRaster (NTV2FrameBufferFormat, pDstRaster, dstBytesPerLine,  dstTotalLines,  dstVertLineOffset, dstHorzPixelOffset, pSrcRaster, srcBytesPerLine,  srcTotalLines,  srcVertLineOffset, srcVertLinesToCopy, srcHorzPixelOffset, srcHorzPixelsToCopy)
+		CHECK_FALSE(CopyRaster (NTV2_FBF_10BIT_YCBCR, pDstRaster, nDstBytesPerLine, nDstHeightLines,                2,                  4, pSrcRaster, nSrcBytesPerLine, nSrcHeightLines,                0,    nSrcHeightLines,                  0, nSrcWidthPixels));
+		CHECK_FALSE(CopyRaster ( NTV2_FBF_8BIT_YCBCR, pDstRaster, nDstBytesPerLine, nDstHeightLines,                2,                  4, pDstRaster, nSrcBytesPerLine, nSrcHeightLines,                0,    nSrcHeightLines,                  0, nSrcWidthPixels));
+		CHECK_FALSE(CopyRaster ( NTV2_FBF_8BIT_YCBCR, pDstRaster, nDstBytesPerLine, nDstHeightLines,                2,                  4, NULL,       nSrcBytesPerLine, nSrcHeightLines,                0,    nSrcHeightLines,                  0, nSrcWidthPixels));
+		CHECK_FALSE(CopyRaster ( NTV2_FBF_8BIT_YCBCR,       NULL, nDstBytesPerLine, nDstHeightLines,                2,                  4, pSrcRaster, nSrcBytesPerLine, nSrcHeightLines,                0,    nSrcHeightLines,                  0, nSrcWidthPixels));
+
+		//	Blit src into dst at vert offset 2, horz offset 4
+		CHECK(CopyRaster ( NTV2_FBF_8BIT_YCBCR, pDstRaster, nDstBytesPerLine, nDstHeightLines,                2,                  4, pSrcRaster, nSrcBytesPerLine, nSrcHeightLines,                0,    nSrcHeightLines,                  0, nSrcWidthPixels));
+		if (gVerboseOutput)	{std::cerr << "DstRaster:" << std::endl;  dstRaster.Dump(std::cerr, 0/*byteOffset*/, 0/*byteCount*/, 16/*radix*/, 2/*bytes/group*/, nDstWidthPixels/*groups/line*/, 16/*addrRadix*/);}
+		dstRaster.Fill(uint8_t(0xAA));	//	::memset (pDstRaster, 0xAA, nDstBytes);
+
+		//	Blit lines 1,2,3,4 from src into dst at vert offset 2, horz offset 4
+		::memset (pSrcRaster + 0 * nSrcBytesPerLine, 0x00, nSrcBytesPerLine);
+		::memset (pSrcRaster + 1 * nSrcBytesPerLine, 0x11, nSrcBytesPerLine);
+		::memset (pSrcRaster + 2 * nSrcBytesPerLine, 0x22, nSrcBytesPerLine);
+		::memset (pSrcRaster + 3 * nSrcBytesPerLine, 0x33, nSrcBytesPerLine);
+		::memset (pSrcRaster + 4 * nSrcBytesPerLine, 0x44, nSrcBytesPerLine);
+		if (gVerboseOutput)	{std::cerr << "SrcRaster:" << std::endl;  srcRaster.Dump(std::cerr, 0/*byteOffset*/, 0/*byteCount*/, 16/*radix*/, 2/*bytes/group*/, nSrcWidthPixels/*groups/line*/, 16/*addrRadix*/);}
+		CHECK(CopyRaster ( NTV2_FBF_8BIT_YCBCR, pDstRaster, nDstBytesPerLine, nDstHeightLines,                2,                  4, pSrcRaster, nSrcBytesPerLine, nSrcHeightLines,                1,                  4,                  0, nSrcWidthPixels));
+		if (gVerboseOutput)	{std::cerr << "DstRaster:" << std::endl;  dstRaster.Dump(std::cerr, 0/*byteOffset*/, 0/*byteCount*/, 16/*radix*/, 2/*bytes/group*/, nDstWidthPixels/*groups/line*/, 16/*addrRadix*/);}
+		dstRaster.Fill(uint8_t(0xAA));	//	::memset (pDstRaster, 0xAA, nDstBytes);
+
+		//	Ask to grab pixels past right edge of src raster -- Blit lines 1,2,3,4 from src into dst at vert offset 2, horz offset 4
+		CHECK(CopyRaster ( NTV2_FBF_8BIT_YCBCR, pDstRaster, nDstBytesPerLine, nDstHeightLines,                2,                  4, pSrcRaster, nSrcBytesPerLine, nSrcHeightLines,                1,                  4,                  2, nSrcWidthPixels));
+		if (gVerboseOutput)	{std::cerr << "DstRaster:" << std::endl;  dstRaster.Dump(std::cerr, 0/*byteOffset*/, 0/*byteCount*/, 16/*radix*/, 2/*bytes/group*/, nDstWidthPixels/*groups/line*/, 16/*addrRadix*/);}
+		dstRaster.Fill(uint8_t(0xAA));	//	::memset (pDstRaster, 0xAA, nDstBytes);
+		//	Ask to grab 14 pixels past right edge of src raster -- Blit lines 1,2,3,4 from src into dst at vert offset 2, horz offset 4
+		CHECK(CopyRaster ( NTV2_FBF_8BIT_YCBCR, pDstRaster, nDstBytesPerLine, nDstHeightLines,                2,                  4, pSrcRaster, nSrcBytesPerLine, nSrcHeightLines,                1,                  4,                 14, nSrcWidthPixels));
+		if (gVerboseOutput)	{std::cerr << "DstRaster:" << std::endl;  dstRaster.Dump(std::cerr, 0/*byteOffset*/, 0/*byteCount*/, 16/*radix*/, 2/*bytes/group*/, nDstWidthPixels/*groups/line*/, 16/*addrRadix*/);}
+		dstRaster.Fill(uint8_t(0xAA));	//	::memset (pDstRaster, 0xAA, nDstBytes);
+		//	Request all pixels past right edge of src raster -- fail
+		CHECK_FALSE (CopyRaster ( NTV2_FBF_8BIT_YCBCR, pDstRaster, nDstBytesPerLine, nDstHeightLines,                2,                  4, pSrcRaster, nSrcBytesPerLine, nSrcHeightLines,                1,                  4,                 16, nSrcWidthPixels));
+		if (gVerboseOutput)	{std::cerr << "DstRaster:" << std::endl;  dstRaster.Dump(std::cerr, 0/*byteOffset*/, 0/*byteCount*/, 16/*radix*/, 2/*bytes/group*/, nDstWidthPixels/*groups/line*/, 16/*addrRadix*/);}
+		dstRaster.Fill(uint8_t(0xAA));	//	::memset (pDstRaster, 0xAA, nDstBytes);
+
+		//	Ask to grab lines past bottom edge of src raster -- Blit last 4 lines from src into dst at vert offset 2, horz offset 4
+		srcRaster.Fill(UByte(0xBB));	//	::memset (pSrcRaster, 0xBB, nSrcBytes);
+		::memset (pSrcRaster + 11 * nSrcBytesPerLine, 0x11, nSrcBytesPerLine);
+		::memset (pSrcRaster + 12 * nSrcBytesPerLine, 0x22, nSrcBytesPerLine);
+		::memset (pSrcRaster + 13 * nSrcBytesPerLine, 0x33, nSrcBytesPerLine);
+		::memset (pSrcRaster + 14 * nSrcBytesPerLine, 0x44, nSrcBytesPerLine);
+		::memset (pSrcRaster + 15 * nSrcBytesPerLine, 0x55, nSrcBytesPerLine);
+		if (gVerboseOutput)	{std::cerr << "SrcRaster:" << std::endl;  srcRaster.Dump(std::cerr, 0/*byteOffset*/, 0/*byteCount*/, 16/*radix*/, 2/*bytes/group*/, nSrcWidthPixels/*groups/line*/, 16/*addrRadix*/);}
+		CHECK(CopyRaster ( NTV2_FBF_8BIT_YCBCR, pDstRaster, nDstBytesPerLine, nDstHeightLines,                2,                  4, pSrcRaster, nSrcBytesPerLine, nSrcHeightLines,               12,                  4,                  0, nSrcWidthPixels));
+		if (gVerboseOutput)	{std::cerr << "DstRaster:" << std::endl;  dstRaster.Dump(std::cerr, 0/*byteOffset*/, 0/*byteCount*/, 16/*radix*/, 2/*bytes/group*/, nDstWidthPixels/*groups/line*/, 16/*addrRadix*/);}
+		dstRaster.Fill(uint8_t(0xAA));	//	::memset (pDstRaster, 0xAA, nDstBytes);
+		//	Ask to grab lines past bottom edge of src raster -- Blit last 4 lines from src into dst at vert offset 2, horz offset 4
+		CHECK(CopyRaster ( NTV2_FBF_8BIT_YCBCR, pDstRaster, nDstBytesPerLine, nDstHeightLines,                2,                  4, pSrcRaster, nSrcBytesPerLine, nSrcHeightLines,               12,    nSrcHeightLines,                  0, nSrcWidthPixels));
+		if (gVerboseOutput)	{std::cerr << "DstRaster:" << std::endl;  dstRaster.Dump(std::cerr, 0/*byteOffset*/, 0/*byteCount*/, 16/*radix*/, 2/*bytes/group*/, nDstWidthPixels/*groups/line*/, 16/*addrRadix*/);}
+		dstRaster.Fill(uint8_t(0xAA));	//	::memset (pDstRaster, 0xAA, nDstBytes);
+		//	Blit past bottom of dst raster -- Blit src into dst at vert offset 30, horz offset 4
+		CHECK(CopyRaster ( NTV2_FBF_8BIT_YCBCR, pDstRaster, nDstBytesPerLine, nDstHeightLines,               30,                  4, pSrcRaster, nSrcBytesPerLine, nSrcHeightLines,               12,    nSrcHeightLines,                  0, nSrcWidthPixels));
+		if (gVerboseOutput)	{std::cerr << "DstRaster:" << std::endl;  dstRaster.Dump(std::cerr, 0/*byteOffset*/, 0/*byteCount*/, 16/*radix*/, 2/*bytes/group*/, nDstWidthPixels/*groups/line*/, 16/*addrRadix*/);}
+		dstRaster.Fill(uint8_t(0xAA));	//	::memset (pDstRaster, 0xAA, nDstBytes);
+	}
+
+	TEST_CASE("NTV2Debug")
+	{
+		{
+			const NTV2DeviceID		deviceIDs []	= {	DEVICE_ID_NOTFOUND,
+														DEVICE_ID_CORVID1,					DEVICE_ID_CORVID22,				DEVICE_ID_CORVID24,			DEVICE_ID_CORVID3G,
+														DEVICE_ID_CORVID44,					DEVICE_ID_CORVID88,				DEVICE_ID_CORVIDHBR,		DEVICE_ID_CORVIDHEVC,
+														DEVICE_ID_IO4K,						DEVICE_ID_IO4KPLUS,				DEVICE_ID_IO4KUFC,			DEVICE_ID_IOEXPRESS,
+														DEVICE_ID_IOIP_2022,				DEVICE_ID_IOIP_2110,			DEVICE_ID_IOXT,
+														DEVICE_ID_KONA1,					DEVICE_ID_KONA3G,				DEVICE_ID_KONA3GQUAD,		DEVICE_ID_KONA4,
+														DEVICE_ID_KONA4UFC,					DEVICE_ID_KONAHDMI,
+														DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K,	DEVICE_ID_KONAIP_1RX_1TX_2110,	DEVICE_ID_KONAIP_2022,		DEVICE_ID_KONAIP_2110,
+														DEVICE_ID_KONAIP_2TX_1SFP_J2K,		DEVICE_ID_KONAIP_4CH_2SFP,
+														DEVICE_ID_KONALHEPLUS,				DEVICE_ID_KONALHI,				DEVICE_ID_KONALHIDVI,		DEVICE_ID_TTAP,
+														NTV2DeviceID(1234567)	};
+			const string			devIDStrs []	= {	"DEVICE_ID_NOTFOUND",
+														"DEVICE_ID_CORVID1",				"DEVICE_ID_CORVID22",			"DEVICE_ID_CORVID24",		"DEVICE_ID_CORVID3G",
+														"DEVICE_ID_CORVID44",				"DEVICE_ID_CORVID88",			"DEVICE_ID_CORVIDHBR",		"DEVICE_ID_CORVIDHEVC",
+														"DEVICE_ID_IO4K",					"DEVICE_ID_IO4KPLUS",			"DEVICE_ID_IO4KUFC",		"DEVICE_ID_IOEXPRESS",
+														"DEVICE_ID_IOIP_2022",				"DEVICE_ID_IOIP_2110",			"DEVICE_ID_IOXT",
+														"DEVICE_ID_KONA1",					"DEVICE_ID_KONA3G",				"DEVICE_ID_KONA3GQUAD",		"DEVICE_ID_KONA4",
+														"DEVICE_ID_KONA4UFC",				"DEVICE_ID_KONAHDMI",
+														"DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K","DEVICE_ID_KONAIP_1RX_1TX_2110","DEVICE_ID_KONAIP_2022",	"DEVICE_ID_KONAIP_2110",
+														"DEVICE_ID_KONAIP_2TX_1SFP_J2K",	"DEVICE_ID_KONAIP_4CH_2SFP",
+														"DEVICE_ID_KONALHEPLUS",			"DEVICE_ID_KONALHI",			"DEVICE_ID_KONALHIDVI",		"DEVICE_ID_TTAP",
+														""						};
+			const string			deviceStrs []	= {	"Unknown",
+														"Corvid1",							"Corvid22",						"Corvid24",					"Corvid3G",
+														"Corvid44",							"Corvid88",						"CorvidHBR",				"CorvidHEVC",
+														"Io4K",								"DNxIV",						"Io4KUfc",					"IoExpress",
+														"DNxIP_2022",						"DNxIP_2110",					"IoXT",
+														"Kona1",							"Kona3G",						"Kona3GQuad",				"Kona4",
+														"Kona4Ufc",							"KonaHDMI",
+														"KonaIP_1Rx1Tx1SFPJ2K",				"KonaIP_1Rx1Tx2110",			"KonaIP_2022",				"KonaIP_2110",
+														"KonaIP_2Tx1SFPJ2K",				"KonaIP_4ch2SFP",
+														"KonaLHePlus",						"KonaLHi",						"KonaLHiDVI",				"TTap",
+														""						};
+			for (unsigned ndx (0);  ndx < sizeof (deviceIDs) / sizeof (NTV2DeviceID);  ndx++)
+			{
+				CHECK(::NTV2DeviceIDString (deviceIDs [ndx]) != NULL);	//	never NULL!
+				CHECK_EQ(string (::NTV2DeviceIDString (deviceIDs [ndx])), devIDStrs [ndx]);
+				CHECK_EQ(string (::NTV2DeviceString (deviceIDs [ndx])), deviceStrs [ndx]);
+			}
+		}
+		{
+			const NTV2Standard		standards []	= {	NTV2_STANDARD_1080,			NTV2_STANDARD_720,		NTV2_STANDARD_525,			NTV2_STANDARD_625,
+														NTV2_STANDARD_1080p,		NTV2_STANDARD_2K,		NTV2_NUM_STANDARDS,			NTV2_STANDARD_UNDEFINED,
+														NTV2_STANDARD_INVALID		};
+			const string			stdStrs []		= {	"NTV2_STANDARD_1080",		"NTV2_STANDARD_720",	"NTV2_STANDARD_525",		"NTV2_STANDARD_625",
+														"NTV2_STANDARD_1080p",		"NTV2_STANDARD_2K",		"NTV2_STANDARD_INVALID",	"NTV2_STANDARD_INVALID",
+														"NTV2_STANDARD_INVALID"	};
+			const bool				valid []	= 	{	true,						true,					true,						true,
+														true,						true,					false,						false,
+														false					};
+			const bool				isProg []	= 	{	false,						true,					false,						false,
+														true,						false,					false,						false,
+														false					};
+			for (unsigned ndx (0);  ndx < sizeof (standards) / sizeof (NTV2Standard);  ndx++)
+			{
+				CHECK_EQ(NTV2_IS_VALID_STANDARD (standards [ndx]), valid [ndx]);
+				CHECK(::NTV2StandardString (standards [ndx]) != NULL);	//	never NULL!
+				CHECK_EQ(string (::NTV2StandardString (standards [ndx])), stdStrs [ndx]);
+				CHECK_EQ(NTV2_IS_PROGRESSIVE_STANDARD (standards [ndx]), isProg [ndx]);
+			}
+		}
+		{
+			const NTV2FrameBufferFormat	fbfs []	= {	NTV2_FBF_10BIT_YCBCR,		NTV2_FBF_8BIT_YCBCR,			NTV2_FBF_ARGB,					NTV2_FBF_RGBA,
+													NTV2_FBF_10BIT_RGB,			NTV2_FBF_8BIT_YCBCR_YUY2,		NTV2_FBF_ABGR,					NTV2_FBF_10BIT_DPX,
+													NTV2_FBF_10BIT_YCBCR_DPX,	NTV2_FBF_8BIT_DVCPRO,			NTV2_FBF_8BIT_YCBCR_420PL3,		NTV2_FBF_8BIT_HDV,
+													NTV2_FBF_24BIT_RGB,			NTV2_FBF_24BIT_BGR,				NTV2_FBF_10BIT_YCBCRA,			NTV2_FBF_10BIT_DPX_LE,
+													NTV2_FBF_48BIT_RGB,			NTV2_FBF_12BIT_RGB_PACKED,		NTV2_FBF_PRORES_DVCPRO,			NTV2_FBF_PRORES_HDV,
+													NTV2_FBF_10BIT_RGB_PACKED,	NTV2_FBF_10BIT_ARGB,			NTV2_FBF_16BIT_ARGB,			NTV2_FBF_10BIT_RAW_RGB,
+													NTV2_FBF_10BIT_RAW_YCBCR,	NTV2_FBF_10BIT_YCBCR_420PL2,	NTV2_FBF_10BIT_YCBCR_422PL2,	NTV2_FBF_8BIT_YCBCR_420PL2,
+													NTV2_FBF_8BIT_YCBCR_422PL2,	NTV2_FBF_8BIT_YCBCR_422PL3,		NTV2_FBF_10BIT_YCBCR_420PL3_LE,	NTV2_FBF_10BIT_YCBCR_422PL3_LE,
+													NTV2_FBF_INVALID	};
+			const string			fbfStrs []	= {	"NTV2_FBF_10BIT_YCBCR",			"NTV2_FBF_8BIT_YCBCR",			"NTV2_FBF_ARGB",					"NTV2_FBF_RGBA",
+													"NTV2_FBF_10BIT_RGB",			"NTV2_FBF_8BIT_YCBCR_YUY2",		"NTV2_FBF_ABGR",					"NTV2_FBF_10BIT_DPX",
+													"NTV2_FBF_10BIT_YCBCR_DPX",		"NTV2_FBF_8BIT_DVCPRO",			"NTV2_FBF_8BIT_YCBCR_420PL3",		"NTV2_FBF_8BIT_HDV",
+													"NTV2_FBF_24BIT_RGB",			"NTV2_FBF_24BIT_BGR",			"NTV2_FBF_10BIT_YCBCRA",			"NTV2_FBF_10BIT_DPX_LE",
+													"NTV2_FBF_48BIT_RGB",			"NTV2_FBF_12BIT_RGB_PACKED",	"NTV2_FBF_PRORES_DVCPRO",			"NTV2_FBF_PRORES_HDV",
+													"NTV2_FBF_10BIT_RGB_PACKED",	"NTV2_FBF_10BIT_ARGB",			"NTV2_FBF_16BIT_ARGB",				"NTV2_FBF_10BIT_RAW_RGB",
+													"NTV2_FBF_10BIT_RAW_YCBCR",		"NTV2_FBF_10BIT_YCBCR_420PL2",	"NTV2_FBF_10BIT_YCBCR_422PL2",		"NTV2_FBF_8BIT_YCBCR_420PL2",
+													"NTV2_FBF_8BIT_YCBCR_422PL2",	"NTV2_FBF_8BIT_YCBCR_422PL3",	"NTV2_FBF_10BIT_YCBCR_420PL3_LE",	"NTV2_FBF_10BIT_YCBCR_422PL3_LE",
+													"NTV2_FBF_INVALID"	};
+			const bool				valid []	= {	true,							true,							true,							true,
+													true,							true,							true,							true,
+													true,							true,							true,							true,
+													true,							true,							true,							true,
+													true,							true,							true,							true,
+													true,							true,							true,							true,
+													true,							true,							true,							true,
+													true,							true,							true,							true,
+													false		};
+			const bool				isPlanar []	= {	false,							false,							false,							false,
+													false,							false,							false,							false,
+													false,							false,							true,							false,
+													false,							false,							false,							false,
+													false,							false,							false,							false,
+													false,							false,							false,							false,
+													false,							true,							true,							true,
+													true,							true,							true,							true,
+													false		};
+	//		const UWord				numPlanes [] = {	0,								0,								0,								0,
+	//													0,								0,								0,								0,
+	//													0,								0,								3,								0,
+	//													0,								0,								0,								0,
+	//													0,								0,								0,								0,
+	//													0,								0,								0,								0,
+	//													0,								2,								2,								2,
+	//													2,								3,								3,								3,
+	//												0		};
+			const bool				isProRes []	= {	false,							false,							false,							false,
+													false,							false,							false,							false,
+													false,							false,							false,							false,
+													false,							false,							false,							false,
+													false,							false,							true,							true,
+													false,							false,							false,							false,
+													false,							false,							false,							false,
+													false,							false,							false,							false,
+													false		};
+			const bool				isRGB []	= {	false,							false,							true,							true,//3
+													true,							false,							true,							true,//7
+													false,							false,							false,							false,//11
+													true,							true,							false,							true,//15
+													true,							true,							false,							false,//19
+													true,							true,							true,							true,
+													false,							false,							false,							false,
+													false,							false,							false,							false,
+													false		};
+			const bool				hasAlpha []	= {	false,							false,							true,							true,//3
+													false,							false,							true,							false,//7
+													false,							false,							false,							false,//11
+													false,							false,							true,							false,//15
+													false,							false,							false,							false,//19
+													false,							true,							true,							false,
+													false,							false,							false,							false,
+													false,							false,							false,							false,
+													false		};
+			const bool				isRaw []	= {	false,							false,							false,							false,//3
+													false,							false,							false,							false,//7
+													false,							false,							false,							false,//11
+													false,							false,							false,							false,//15
+													false,							false,							false,							false,//19
+													false,							false,							false,							true,
+													true,							false,							false,							false,
+													false,							false,							false,							false,
+													false		};
+			for (unsigned ndx(0);  ndx < sizeof(fbfs) / sizeof(NTV2FrameBufferFormat);  ndx++)
+			{	const NTV2PixelFormat pf(fbfs[ndx]);
+				std::cerr << ndx << ": " << ::NTV2FrameBufferFormatToString(pf) << std::endl;
+				CHECK_EQ(NTV2_IS_VALID_FRAME_BUFFER_FORMAT(pf), valid[ndx]);
+				CHECK(::NTV2FrameBufferFormatString(pf) != NULL);	//	never NULL!
+				CHECK_EQ(string(::NTV2FrameBufferFormatString(pf)), fbfStrs[ndx]);
+				CHECK_EQ(NTV2_IS_FBF_PLANAR(pf), isPlanar[ndx]);
+				CHECK_EQ(NTV2_IS_FBF_PRORES(pf), isProRes[ndx]);
+				CHECK_EQ(NTV2_IS_FBF_RGB(pf), isRGB[ndx]);
+				CHECK_EQ(NTV2_FBF_HAS_ALPHA(pf), hasAlpha[ndx]);
+				CHECK_EQ(NTV2_FBF_IS_RAW(pf), isRaw[ndx]);
+			}
+		}
+		{
+			const NTV2FrameGeometry	geometries []	= {	NTV2_FG_1920x1080,		NTV2_FG_1280x720,		NTV2_FG_720x486,	NTV2_FG_720x576,
+														NTV2_FG_1920x1114,		NTV2_FG_2048x1114,		NTV2_FG_720x508,	NTV2_FG_720x598,
+														NTV2_FG_1920x1112,		NTV2_FG_1280x740,		NTV2_FG_2048x1080,	NTV2_FG_2048x1556,
+														NTV2_FG_2048x1588,		NTV2_FG_2048x1112,		NTV2_FG_720x514,	NTV2_FG_720x612,
+														NTV2_FG_4x1920x1080,	NTV2_FG_4x2048x1080,	NTV2_FG_INVALID		};
+			const string			geomStrs []		= {	"NTV2_FG_1920x1080",	"NTV2_FG_1280x720",		"NTV2_FG_720x486",		"NTV2_FG_720x576",
+														"NTV2_FG_1920x1114",	"NTV2_FG_2048x1114",	"NTV2_FG_720x508",		"NTV2_FG_720x598",
+														"NTV2_FG_1920x1112",	"NTV2_FG_1280x740",		"NTV2_FG_2048x1080",	"NTV2_FG_2048x1556",
+														"NTV2_FG_2048x1588",	"NTV2_FG_2048x1112",	"NTV2_FG_720x514",		"NTV2_FG_720x612",
+														"NTV2_FG_4x1920x1080",	"NTV2_FG_4x2048x1080",	"NTV2_FG_INVALID"		};
+			const bool				valid []	= 	{	true,					true,					true,		true,
+														true,					true,					true,		true,
+														true,					true,					true,		true,
+														true,					true,					true,		true,
+														true,					true,					false				};
+			const bool				isQuad []	= 	{	false,					false,					false,		false,
+														false,					false,					false,		false,
+														false,					false,					false,		false,
+														false,					false,					false,		false,
+														true,					true,					false				};
+			const bool				is2K1080 []	= 	{	false,					false,					false,		false,
+														false,					true,					false,		false,
+														false,					false,					true,		false,
+														false,					true,					false,		false,
+														false,					false,					false				};
+			for (unsigned ndx (0);  ndx < sizeof (geometries) / sizeof (NTV2FrameGeometry);  ndx++)
+			{
+				CHECK_EQ(NTV2_IS_VALID_NTV2FrameGeometry (geometries [ndx]), valid [ndx]);
+				CHECK(::NTV2FrameGeometryString (geometries [ndx]) != NULL);	//	never NULL!
+				CHECK_EQ(string (::NTV2FrameGeometryString (geometries [ndx])), geomStrs [ndx]);
+				CHECK_EQ(NTV2_IS_QUAD_FRAME_GEOMETRY (geometries [ndx]), isQuad [ndx]);
+				CHECK_EQ(NTV2_IS_2K_1080_FRAME_GEOMETRY (geometries [ndx]), is2K1080 [ndx]);
+			}
+		}
+		{
+			const NTV2FrameRate		rates []		= {	NTV2_FRAMERATE_12000,		NTV2_FRAMERATE_11988,		NTV2_FRAMERATE_6000,		NTV2_FRAMERATE_5994,
+														NTV2_FRAMERATE_5000,		NTV2_FRAMERATE_4800,		NTV2_FRAMERATE_4795,		NTV2_FRAMERATE_3000,
+														NTV2_FRAMERATE_2997,		NTV2_FRAMERATE_2500,		NTV2_FRAMERATE_2400,		NTV2_FRAMERATE_2398,
+														NTV2_FRAMERATE_1500,		NTV2_FRAMERATE_1498,		NTV2_FRAMERATE_INVALID		};
+			const string			rateStrs []		= {	"NTV2_FRAMERATE_12000",		"NTV2_FRAMERATE_11988",		"NTV2_FRAMERATE_6000",		"NTV2_FRAMERATE_5994",
+														"NTV2_FRAMERATE_5000",		"NTV2_FRAMERATE_4800",		"NTV2_FRAMERATE_4795",		"NTV2_FRAMERATE_3000",
+														"NTV2_FRAMERATE_2997",		"NTV2_FRAMERATE_2500",		"NTV2_FRAMERATE_2400",		"NTV2_FRAMERATE_2398",
+														"NTV2_FRAMERATE_1500",		"NTV2_FRAMERATE_1498",		"NTV2_FRAMERATE_INVALID"	};
+			const bool				valid []	= 	{	true,						true,						true,						true,
+														true,						true,						true,						true,
+														true,						true,						true,						true,
+														true,						true,						false						};
+			for (unsigned ndx (0);  ndx < sizeof (rates) / sizeof (NTV2FrameRate);  ndx++)
+			{
+				CHECK_EQ(NTV2_IS_VALID_NTV2FrameRate (rates [ndx]), valid [ndx]);
+				CHECK(::NTV2FrameRateString (rates [ndx]) != NULL);	//	never NULL!
+				CHECK_EQ(string (::NTV2FrameRateString (rates [ndx])), rateStrs [ndx]);
+			}
+		}
+		{
+			const NTV2VideoFormat	formats []		= {	NTV2_FORMAT_1080i_5000,											NTV2_FORMAT_1080i_5994,											NTV2_FORMAT_1080i_6000,
+														NTV2_FORMAT_720p_5994,			NTV2_FORMAT_720p_6000,			NTV2_FORMAT_1080psf_2398,		NTV2_FORMAT_1080psf_2400,
+														NTV2_FORMAT_1080p_2997,			NTV2_FORMAT_1080p_3000,			NTV2_FORMAT_1080p_2500,			NTV2_FORMAT_1080p_2398,
+														NTV2_FORMAT_1080p_2400,			NTV2_FORMAT_1080p_2K_2398,		NTV2_FORMAT_1080p_2K_2400,		NTV2_FORMAT_1080p_2K_2500,
+														NTV2_FORMAT_1080p_2K_2997,		NTV2_FORMAT_1080p_2K_3000,
+														NTV2_FORMAT_1080p_2K_4795_A,	NTV2_FORMAT_1080p_2K_4800_A,	NTV2_FORMAT_1080p_2K_5000_A,	NTV2_FORMAT_1080p_2K_5994_A,	NTV2_FORMAT_1080p_2K_6000_A,
+														NTV2_FORMAT_1080p_2K_4795_B,	NTV2_FORMAT_1080p_2K_4800_B,	NTV2_FORMAT_1080p_2K_5000_B,	NTV2_FORMAT_1080p_2K_5994_B,	NTV2_FORMAT_1080p_2K_6000_B,
+														NTV2_FORMAT_1080psf_2K_2398,	NTV2_FORMAT_1080psf_2K_2400,	NTV2_FORMAT_1080psf_2K_2500,	NTV2_FORMAT_1080psf_2500_2,		NTV2_FORMAT_1080psf_2997_2,
+														NTV2_FORMAT_1080psf_3000_2,		NTV2_FORMAT_720p_5000,			NTV2_FORMAT_1080p_5000_B,		NTV2_FORMAT_1080p_5000_A,		NTV2_FORMAT_1080p_5994_B,//
+														NTV2_FORMAT_1080p_6000_B,		NTV2_FORMAT_1080p_6000_B,		NTV2_FORMAT_1080p_5000_A,		NTV2_FORMAT_1080p_5994_A,		NTV2_FORMAT_1080p_6000_A,
+														NTV2_FORMAT_END_HIGH_DEF_FORMATS,
+														NTV2_FORMAT_720p_2398,			NTV2_FORMAT_720p_2500,			NTV2_FORMAT_525_5994,			NTV2_FORMAT_625_5000,
+														NTV2_FORMAT_525_2398,			NTV2_FORMAT_525_2400,			NTV2_FORMAT_525psf_2997,		NTV2_FORMAT_625psf_2500,
+														NTV2_FORMAT_END_STANDARD_DEF_FORMATS,
+														NTV2_FORMAT_2K_1498,			NTV2_FORMAT_2K_1500,			NTV2_FORMAT_2K_2398,			NTV2_FORMAT_2K_2400,			NTV2_FORMAT_2K_2500,
+														NTV2_FORMAT_END_2K_DEF_FORMATS,
+														NTV2_FORMAT_4x1920x1080psf_2398,	NTV2_FORMAT_4x1920x1080psf_2400,	NTV2_FORMAT_4x1920x1080psf_2500,	NTV2_FORMAT_4x1920x1080psf_2997,
+														NTV2_FORMAT_4x1920x1080psf_3000,	NTV2_FORMAT_4x1920x1080p_2398,		NTV2_FORMAT_4x1920x1080p_2400,		NTV2_FORMAT_4x1920x1080p_2500,
+														NTV2_FORMAT_4x1920x1080p_2997,		NTV2_FORMAT_4x1920x1080p_3000,		NTV2_FORMAT_4x2048x1080psf_2398,	NTV2_FORMAT_4x2048x1080psf_2400,
+														NTV2_FORMAT_4x2048x1080psf_2500,	NTV2_FORMAT_4x2048x1080psf_2997,	NTV2_FORMAT_4x2048x1080psf_3000,	NTV2_FORMAT_4x2048x1080p_2398,
+														NTV2_FORMAT_4x2048x1080p_2400,		NTV2_FORMAT_4x2048x1080p_2500,		NTV2_FORMAT_4x2048x1080p_2997,		NTV2_FORMAT_4x2048x1080p_3000,
+														NTV2_FORMAT_4x2048x1080p_4795,		NTV2_FORMAT_4x2048x1080p_4800,		NTV2_FORMAT_4x1920x1080p_5000,		NTV2_FORMAT_4x1920x1080p_5994,
+														NTV2_FORMAT_4x1920x1080p_6000,		NTV2_FORMAT_4x2048x1080p_5000,		NTV2_FORMAT_4x2048x1080p_5994,		NTV2_FORMAT_4x2048x1080p_6000,
+														NTV2_FORMAT_4x2048x1080p_11988,		NTV2_FORMAT_4x2048x1080p_12000,
+														NTV2_FORMAT_END_HIGH_DEF_FORMATS2,
+														NTV2_FORMAT_UNKNOWN	};
+			const string			fmtStrs []		= {	"NTV2_FORMAT_1080i_5000",				"NTV2_FORMAT_1080i_5994",				"NTV2_FORMAT_1080i_6000",
+														"NTV2_FORMAT_720p_5994",		"NTV2_FORMAT_720p_6000",		"NTV2_FORMAT_1080psf_2398",		"NTV2_FORMAT_1080psf_2400",
+														"NTV2_FORMAT_1080p_2997",		"NTV2_FORMAT_1080p_3000",		"NTV2_FORMAT_1080p_2500",		"NTV2_FORMAT_1080p_2398",
+														"NTV2_FORMAT_1080p_2400",		"NTV2_FORMAT_1080p_2K_2398",	"NTV2_FORMAT_1080p_2K_2400",	"NTV2_FORMAT_1080p_2K_2500",
+														"NTV2_FORMAT_1080p_2K_2997",	"NTV2_FORMAT_1080p_2K_3000",
+														"NTV2_FORMAT_1080p_2K_4795_A",	"NTV2_FORMAT_1080p_2K_4800_A",	"NTV2_FORMAT_1080p_2K_5000_A",	"NTV2_FORMAT_1080p_2K_5994_A",	"NTV2_FORMAT_1080p_2K_6000_A",
+														"NTV2_FORMAT_1080p_2K_4795_B",	"NTV2_FORMAT_1080p_2K_4800_B",	"NTV2_FORMAT_1080p_2K_5000_B",	"NTV2_FORMAT_1080p_2K_5994_B",	"NTV2_FORMAT_1080p_2K_6000_B",
+														"NTV2_FORMAT_1080psf_2K_2398",	"NTV2_FORMAT_1080psf_2K_2400",	"NTV2_FORMAT_1080psf_2K_2500",	"NTV2_FORMAT_1080psf_2500_2",	"NTV2_FORMAT_1080psf_2997_2",
+														"NTV2_FORMAT_1080psf_3000_2",	"NTV2_FORMAT_720p_5000",		"NTV2_FORMAT_1080p_5000_B",		"NTV2_FORMAT_1080p_5000_A",		"NTV2_FORMAT_1080p_5994_B",//
+														"NTV2_FORMAT_1080p_6000_B",		"NTV2_FORMAT_1080p_6000_B",		"NTV2_FORMAT_1080p_5000_A",		"NTV2_FORMAT_1080p_5994_A",		"NTV2_FORMAT_1080p_6000_A",
+														"",
+														"NTV2_FORMAT_720p_2398",		"NTV2_FORMAT_720p_2500",		"NTV2_FORMAT_525_5994",			"NTV2_FORMAT_625_5000",
+														"NTV2_FORMAT_525_2398",			"NTV2_FORMAT_525_2400",			"NTV2_FORMAT_525psf_2997",		"NTV2_FORMAT_625psf_2500",
+														"",
+														"NTV2_FORMAT_2K_1498",			"NTV2_FORMAT_2K_1500",			"NTV2_FORMAT_2K_2398",		"NTV2_FORMAT_2K_2400",				"NTV2_FORMAT_2K_2500",
+														"",
+														"NTV2_FORMAT_4x1920x1080psf_2398",	"NTV2_FORMAT_4x1920x1080psf_2400",	"NTV2_FORMAT_4x1920x1080psf_2500",	"NTV2_FORMAT_4x1920x1080psf_2997",
+														"NTV2_FORMAT_4x1920x1080psf_3000",	"NTV2_FORMAT_4x1920x1080p_2398",	"NTV2_FORMAT_4x1920x1080p_2400",	"NTV2_FORMAT_4x1920x1080p_2500",
+														"NTV2_FORMAT_4x1920x1080p_2997",	"NTV2_FORMAT_4x1920x1080p_3000",	"NTV2_FORMAT_4x2048x1080psf_2398",	"NTV2_FORMAT_4x2048x1080psf_2400",
+														"NTV2_FORMAT_4x2048x1080psf_2500",	"NTV2_FORMAT_4x2048x1080psf_2997",	"NTV2_FORMAT_4x2048x1080psf_3000",	"NTV2_FORMAT_4x2048x1080p_2398",
+														"NTV2_FORMAT_4x2048x1080p_2400",	"NTV2_FORMAT_4x2048x1080p_2500",	"NTV2_FORMAT_4x2048x1080p_2997",	"NTV2_FORMAT_4x2048x1080p_3000",
+														"NTV2_FORMAT_4x2048x1080p_4795",	"NTV2_FORMAT_4x2048x1080p_4800",	"NTV2_FORMAT_4x1920x1080p_5000",	"NTV2_FORMAT_4x1920x1080p_5994",
+														"NTV2_FORMAT_4x1920x1080p_6000",	"NTV2_FORMAT_4x2048x1080p_5000",	"NTV2_FORMAT_4x2048x1080p_5994",	"NTV2_FORMAT_4x2048x1080p_6000",
+														"NTV2_FORMAT_4x2048x1080p_11988",	"NTV2_FORMAT_4x2048x1080p_12000",
+														"",
+														""	};
+			const bool				valid []		= {	true,															true,															true,
+														true,							true,							true,							true,
+														true,							true,							true,							true,
+														true,							true,							true,							true,
+														true,							true,
+														true,							true,							true,							true,							true,
+														true,							true,							true,							true,							true,
+														true,							true,							true,							true,							true,
+														true,							true,							true,							true,							true,//
+														true,							true,							true,							true,							true,
+														false,
+														true,							true,							true,							true,
+														true,							true,							true,							true,
+														false,
+														true,							true,							true,							true,							true,
+														false,
+														true,								true,								true,								true,
+														true,								true,								true,								true,
+														true,								true,								true,								true,
+														true,								true,								true,								true,
+														true,								true,								true,								true,
+														true,								true,								true,								true,
+														true,								true,								true,								true,
+														true,								true,
+														false,
+														false	};
+	//	TODO:	Validate IS_HD, IS_SD, IS_720P, IS_2K, IS_2K_1080, IS_4K, IS_4K_HFR, IS_QUAD_FRAME, IS_4K_4096, IS_4K_QUADHD, IS_372_DL, IS_525, IS_625, IS_INTERMEDIATE, IS_3G, IS_3Gb, IS_WIRE, IS_PSF, IS_PROGRESSIVE, IS_A
+			CHECK_EQ (sizeof(formats) / sizeof(NTV2VideoFormat),  sizeof (fmtStrs) / sizeof (string));
+			for (unsigned ndx(0);  ndx < sizeof(formats) / sizeof(NTV2VideoFormat);  ndx++)
+			{
+				//cerr << " " << ndx << " " << ::NTV2VideoFormatString(formats[ndx]) << " == " << fmtStrs[ndx] << endl;
+				CHECK_EQ (NTV2_IS_VALID_VIDEO_FORMAT(formats[ndx]), valid[ndx]);
+				CHECK(::NTV2VideoFormatString (formats[ndx]) != NULL);	//	never NULL!
+				CHECK_EQ (string(::NTV2VideoFormatString(formats[ndx])), fmtStrs[ndx]);
+			}
+		}
+
+	//	TODO:	Validate ::NTV2RegisterNameString
+	}
+
+	TEST_CASE("NTV2AudioChannelPairs Quad Octet")
+	{
+		{
+			NTV2AudioChannelPairs	nonPcmPairs, oldNonPcmPairs;
+			NTV2AudioChannelPairs	whatsNew, whatsGone;
+			CHECK(nonPcmPairs.empty ());
+			CHECK(equal (oldNonPcmPairs.begin(), oldNonPcmPairs.end(), nonPcmPairs.begin()));
+			oldNonPcmPairs.insert (NTV2_AudioChannel7_8);
+			oldNonPcmPairs.insert (NTV2_AudioChannel11_12);
+			oldNonPcmPairs.insert (NTV2_AudioChannel57_58);
+			nonPcmPairs.insert (NTV2_AudioChannel3_4);
+
+			std::set_difference (oldNonPcmPairs.begin(), oldNonPcmPairs.end(), nonPcmPairs.begin(), nonPcmPairs.end(),  inserter (whatsGone, whatsGone.begin()));
+			std::set_difference (nonPcmPairs.begin(), nonPcmPairs.end(),  oldNonPcmPairs.begin(), oldNonPcmPairs.end(),  inserter (whatsNew, whatsNew.begin()));
+			if (gVerboseOutput  &&  !whatsNew.empty ())
+				std::cerr << "Whats new:  " << whatsNew << std::endl;
+			CHECK_FALSE(whatsNew.empty ());
+			CHECK_EQ(whatsNew.size (), 1);
+			CHECK_EQ(*whatsNew.begin (), NTV2_AudioChannel3_4);
+			if (gVerboseOutput  &&  !whatsGone.empty ())
+				std::cerr << "Whats gone:  " << whatsGone.size() << ":  " << whatsGone << std::endl;
+			CHECK_FALSE (whatsGone.empty ());
+			CHECK_EQ (whatsGone.size (), 3);
+			CHECK_EQ (*whatsGone.begin (), NTV2_AudioChannel7_8);
+			CHECK_EQ (*whatsGone.rbegin (), NTV2_AudioChannel57_58);
+		}
+		{
+			NTV2AudioChannelQuads	nonPcmPairs, oldNonPcmPairs;
+			NTV2AudioChannelQuads	whatsNew, whatsGone;
+			CHECK(nonPcmPairs.empty ());
+			CHECK(equal (oldNonPcmPairs.begin(), oldNonPcmPairs.end(), nonPcmPairs.begin()));
+			oldNonPcmPairs.insert (NTV2_AudioChannel5_8);
+			oldNonPcmPairs.insert (NTV2_AudioChannel37_40);
+			oldNonPcmPairs.insert (NTV2_AudioChannel125_128);
+			nonPcmPairs.insert (NTV2_AudioChannel1_4);
+
+			std::set_difference (oldNonPcmPairs.begin(), oldNonPcmPairs.end(), nonPcmPairs.begin(), nonPcmPairs.end(),  inserter (whatsGone, whatsGone.begin()));
+			std::set_difference (nonPcmPairs.begin(), nonPcmPairs.end(),  oldNonPcmPairs.begin(), oldNonPcmPairs.end(),  inserter (whatsNew, whatsNew.begin()));
+			if (gVerboseOutput  &&  !whatsNew.empty ())
+				std::cerr << "Whats new:  " << whatsNew << std::endl;
+			CHECK_FALSE (whatsNew.empty ());
+			CHECK_EQ (whatsNew.size (), 1);
+			CHECK_EQ (*whatsNew.begin (), NTV2_AudioChannel1_4);
+			if (gVerboseOutput  &&  !whatsGone.empty ())
+				std::cerr << "Whats gone:  " << whatsGone << std::endl;
+			CHECK_FALSE (whatsGone.empty ());
+			CHECK_EQ(whatsGone.size (), 3);
+			CHECK_EQ(*whatsGone.begin (), NTV2_AudioChannel5_8);
+			CHECK_EQ(*whatsGone.rbegin (), NTV2_AudioChannel125_128);
+		}
+		{
+			NTV2AudioChannelOctets	nonPcmPairs, oldNonPcmPairs;
+			NTV2AudioChannelOctets	whatsNew, whatsGone;
+			CHECK (nonPcmPairs.empty ());
+			CHECK (equal (oldNonPcmPairs.begin(), oldNonPcmPairs.end(), nonPcmPairs.begin()));
+			oldNonPcmPairs.insert (NTV2_AudioChannel9_16);
+			oldNonPcmPairs.insert (NTV2_AudioChannel73_80);
+			oldNonPcmPairs.insert (NTV2_AudioChannel121_128);
+			nonPcmPairs.insert (NTV2_AudioChannel1_8);
+
+			std::set_difference (oldNonPcmPairs.begin(), oldNonPcmPairs.end(), nonPcmPairs.begin(), nonPcmPairs.end(),  inserter (whatsGone, whatsGone.begin()));
+			std::set_difference (nonPcmPairs.begin(), nonPcmPairs.end(),  oldNonPcmPairs.begin(), oldNonPcmPairs.end(),  inserter (whatsNew, whatsNew.begin()));
+			if (gVerboseOutput && !whatsNew.empty())
+				std::cerr << "Whats new:  " << whatsNew << std::endl;
+			CHECK_FALSE (whatsNew.empty ());
+			CHECK_EQ (whatsNew.size (), 1);
+			CHECK_EQ (*whatsNew.begin (), NTV2_AudioChannel1_8);
+			if (gVerboseOutput  &&  !whatsGone.empty())
+				std::cerr << "Whats gone:  " << whatsGone << std::endl;
+			CHECK_FALSE (whatsGone.empty ());
+			CHECK_EQ(whatsGone.size (), 3);
+			CHECK_EQ(*whatsGone.begin (), NTV2_AudioChannel9_16);
+			CHECK_EQ(*whatsGone.rbegin (), NTV2_AudioChannel121_128);
+		}
+
+		//	Spot-check the Pair/Quad/Octet-To-String conversions...
+		CHECK_EQ(::NTV2AudioChannelPairToString (NTV2_AudioChannel57_58), "NTV2_AudioChannel57_58");
+		CHECK_EQ(::NTV2AudioChannelQuadToString (NTV2_AudioChannel37_40), "NTV2_AudioChannel37_40");
+		CHECK_EQ(::NTV2AudioChannelOctetToString (NTV2_AudioChannel121_128), "NTV2_AudioChannel121_128");
+	}
+
+	// TEST_CASE("NTV2RegisterExpert")
+	// {
+	// 	const NTV2RegNumSet	audioRegs	(CNTV2RegisterExpert::GetRegistersForClass(kRegClass_Audio));
+	// 	const NTV2RegNumSet	deviceRegs	(CNTV2RegisterExpert::GetRegistersForDevice(DEVICE_ID_KONA4));
+	// 	//cerr << endl << endl << "AUDIO REGS:" << endl << audioRegs << endl;
+	// 	//cerr << endl << endl << "DEVICE REGS:" << endl << deviceRegs << endl;
+	// 	CHECK(audioRegs.find(kRegAudioMixerInputSelects) != audioRegs.end());
+	// 	CHECK(deviceRegs.find(kRegAudioMixerInputSelects) != audioRegs.end());
+	// }
+
+	TEST_CASE("NTV2FormatDescriptorBFT")
+	{
+		////////////////////////////////////////////////////	BEGIN TEST GetSMPTELineNumber
+		NTV2FormatDescriptor	fd;
+		ULWord					smpteLineNum	(0);
+		ULWord					lineOffset		(0);
+		bool					isF2			(false);
+		const NTV2PixelFormat	fbf				(NTV2_FBF_10BIT_YCBCR);
+		CHECK_FALSE(fd.GetSMPTELineNumber(0, smpteLineNum, isF2));
+		CHECK_EQ(smpteLineNum, 0);
+		CHECK_FALSE(isF2);
+
+		//	525i	NO VANC
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_525, fbf, NTV2_VANCMODE_OFF);
+		CHECK(fd.GetSMPTELineNumber(fd.GetFullRasterHeight()-2, smpteLineNum, isF2));
+		CHECK_EQ(smpteLineNum, 525);
+		CHECK(isF2);
+		CHECK(fd.GetSMPTELineNumber(fd.GetFullRasterHeight()-1, smpteLineNum, isF2));
+		CHECK_EQ(smpteLineNum, 263);
+		CHECK_FALSE(isF2);
+		CHECK_FALSE(fd.GetSMPTELineNumber(fd.GetFullRasterHeight(), smpteLineNum, isF2));
+		CHECK_EQ(smpteLineNum, 0);
+		CHECK_FALSE(isF2);
+		CHECK(fd.GetSMPTELineNumber(0, smpteLineNum, isF2));
+		CHECK_EQ(smpteLineNum, 283);
+		CHECK(isF2);
+		CHECK(fd.GetSMPTELineNumber(1, smpteLineNum, isF2));
+		CHECK_EQ(smpteLineNum, 21);
+		CHECK_FALSE(isF2);
+
+		//	525i	NTV2_VANCMODE_OFF
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_525, fbf, NTV2_VANCMODE_OFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(268,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(6,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(269,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(7,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(271,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(9,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(272,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(10,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(282,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(20,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(283,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(21,	lineOffset));	CHECK_EQ(lineOffset, 1);
+		CHECK (fd.GetLineOffsetFromSMPTELine(525,	lineOffset));	CHECK_EQ(lineOffset, 484);
+		CHECK (fd.GetLineOffsetFromSMPTELine(263,	lineOffset));	CHECK_EQ(lineOffset, 485);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(600,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	525i	NTV2_VANCMODE_TALL
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_525, fbf, NTV2_VANCMODE_TALL);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(268,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(6,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(269,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(7,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(271,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(9,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(272,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(10,	lineOffset));	CHECK_EQ(lineOffset, 1);
+		CHECK (fd.GetLineOffsetFromSMPTELine(282,	lineOffset));	CHECK_EQ(lineOffset, 20);
+		CHECK (fd.GetLineOffsetFromSMPTELine(20,	lineOffset));	CHECK_EQ(lineOffset, 21);
+		CHECK (fd.GetLineOffsetFromSMPTELine(283,	lineOffset));	CHECK_EQ(lineOffset, 22);
+		CHECK (fd.GetLineOffsetFromSMPTELine(21,	lineOffset));	CHECK_EQ(lineOffset, 23);
+		CHECK (fd.GetLineOffsetFromSMPTELine(525,	lineOffset));	CHECK_EQ(lineOffset, 506);
+		CHECK (fd.GetLineOffsetFromSMPTELine(263,	lineOffset));	CHECK_EQ(lineOffset, 507);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(600,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	525i	NTV2_VANCMODE_TALLER
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_525, fbf, NTV2_VANCMODE_TALLER);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(268,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(6,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(269,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(7,	lineOffset));	CHECK_EQ(lineOffset, 1);
+		CHECK (fd.GetLineOffsetFromSMPTELine(271,	lineOffset));	CHECK_EQ(lineOffset, 4);
+		CHECK (fd.GetLineOffsetFromSMPTELine(9,	lineOffset));	CHECK_EQ(lineOffset, 5);
+		CHECK (fd.GetLineOffsetFromSMPTELine(272,	lineOffset));	CHECK_EQ(lineOffset, 6);
+		CHECK (fd.GetLineOffsetFromSMPTELine(10,	lineOffset));	CHECK_EQ(lineOffset, 7);
+		CHECK (fd.GetLineOffsetFromSMPTELine(282,	lineOffset));	CHECK_EQ(lineOffset, 26);
+		CHECK (fd.GetLineOffsetFromSMPTELine(20,	lineOffset));	CHECK_EQ(lineOffset, 27);
+		CHECK (fd.GetLineOffsetFromSMPTELine(283,	lineOffset));	CHECK_EQ(lineOffset, 28);
+		CHECK (fd.GetLineOffsetFromSMPTELine(21,	lineOffset));	CHECK_EQ(lineOffset, 29);
+		CHECK (fd.GetLineOffsetFromSMPTELine(525,	lineOffset));	CHECK_EQ(lineOffset, 512);
+		CHECK (fd.GetLineOffsetFromSMPTELine(263,	lineOffset));	CHECK_EQ(lineOffset, 513);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(600,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	625i	NTV2_VANCMODE_OFF
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_625, fbf, NTV2_VANCMODE_OFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(4,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(317,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(5,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(318,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(11,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(324,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(12,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(325,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(22,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(335,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(23,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(336,	lineOffset));	CHECK_EQ(lineOffset, 1);
+		CHECK (fd.GetLineOffsetFromSMPTELine(310,	lineOffset));	CHECK_EQ(lineOffset, 574);
+		CHECK (fd.GetLineOffsetFromSMPTELine(623,	lineOffset));	CHECK_EQ(lineOffset, 575);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(311,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(624,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	625i	NTV2_VANCMODE_TALL
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_625, fbf, NTV2_VANCMODE_TALL);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(4,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(317,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(5,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(318,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(11,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(324,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(12,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(325,	lineOffset));	CHECK_EQ(lineOffset, 1);
+		CHECK (fd.GetLineOffsetFromSMPTELine(22,	lineOffset));	CHECK_EQ(lineOffset, 20);
+		CHECK (fd.GetLineOffsetFromSMPTELine(335,	lineOffset));	CHECK_EQ(lineOffset, 21);
+		CHECK (fd.GetLineOffsetFromSMPTELine(23,	lineOffset));	CHECK_EQ(lineOffset, 22);
+		CHECK (fd.GetLineOffsetFromSMPTELine(336,	lineOffset));	CHECK_EQ(lineOffset, 23);
+		CHECK (fd.GetLineOffsetFromSMPTELine(310,	lineOffset));	CHECK_EQ(lineOffset, 596);
+		CHECK (fd.GetLineOffsetFromSMPTELine(623,	lineOffset));	CHECK_EQ(lineOffset, 597);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(311,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(624,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	625i	NTV2_VANCMODE_TALLER
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_625, fbf, NTV2_VANCMODE_TALLER);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(4,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(317,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(5,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(318,	lineOffset));	CHECK_EQ(lineOffset, 1);
+		CHECK (fd.GetLineOffsetFromSMPTELine(11,	lineOffset));	CHECK_EQ(lineOffset, 12);
+		CHECK (fd.GetLineOffsetFromSMPTELine(324,	lineOffset));	CHECK_EQ(lineOffset, 13);
+		CHECK (fd.GetLineOffsetFromSMPTELine(12,	lineOffset));	CHECK_EQ(lineOffset, 14);
+		CHECK (fd.GetLineOffsetFromSMPTELine(325,	lineOffset));	CHECK_EQ(lineOffset, 15);
+		CHECK (fd.GetLineOffsetFromSMPTELine(22,	lineOffset));	CHECK_EQ(lineOffset, 34);
+		CHECK (fd.GetLineOffsetFromSMPTELine(335,	lineOffset));	CHECK_EQ(lineOffset, 35);
+		CHECK (fd.GetLineOffsetFromSMPTELine(23,	lineOffset));	CHECK_EQ(lineOffset, 36);
+		CHECK (fd.GetLineOffsetFromSMPTELine(336,	lineOffset));	CHECK_EQ(lineOffset, 37);
+		CHECK (fd.GetLineOffsetFromSMPTELine(310,	lineOffset));	CHECK_EQ(lineOffset, 610);
+		CHECK (fd.GetLineOffsetFromSMPTELine(623,	lineOffset));	CHECK_EQ(lineOffset, 611);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(311,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(624,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	720p	NTV2_VANCMODE_OFF
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_720, fbf, NTV2_VANCMODE_OFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(5,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(6,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(25,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(26,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(386,	lineOffset));	CHECK_EQ(lineOffset, 360);
+		CHECK (fd.GetLineOffsetFromSMPTELine(745,	lineOffset));	CHECK_EQ(lineOffset, 719);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(746,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1200,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	720p	NTV2_VANCMODE_TALL
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_720, fbf, NTV2_VANCMODE_TALL);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(5,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(6,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(25,	lineOffset));	CHECK_EQ(lineOffset, 19);
+		CHECK (fd.GetLineOffsetFromSMPTELine(26,	lineOffset));	CHECK_EQ(lineOffset, 20);
+		CHECK (fd.GetLineOffsetFromSMPTELine(386,	lineOffset));	CHECK_EQ(lineOffset, 380);
+		CHECK (fd.GetLineOffsetFromSMPTELine(745,	lineOffset));	CHECK_EQ(lineOffset, 739);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(746,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1200,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	1080i	NTV2_VANCMODE_OFF
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_1080, fbf, NTV2_VANCMODE_OFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(3,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(566,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(4,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(567,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(5,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(568,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(20,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(583,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(21,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(584,	lineOffset));	CHECK_EQ(lineOffset, 1);
+		CHECK (fd.GetLineOffsetFromSMPTELine(291,	lineOffset));	CHECK_EQ(lineOffset, 540);
+		CHECK (fd.GetLineOffsetFromSMPTELine(854,	lineOffset));	CHECK_EQ(lineOffset, 541);
+		CHECK (fd.GetLineOffsetFromSMPTELine(560,	lineOffset));	CHECK_EQ(lineOffset, 1078);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1123,	lineOffset));	CHECK_EQ(lineOffset, 1079);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(561,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1124,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1600,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	1080i	NTV2_VANCMODE_TALL
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_1080, fbf, NTV2_VANCMODE_TALL);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(3,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(566,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(4,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(567,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(5,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(568,	lineOffset));	CHECK_EQ(lineOffset, 1);
+		CHECK (fd.GetLineOffsetFromSMPTELine(20,	lineOffset));	CHECK_EQ(lineOffset, 30);
+		CHECK (fd.GetLineOffsetFromSMPTELine(583,	lineOffset));	CHECK_EQ(lineOffset, 31);
+		CHECK (fd.GetLineOffsetFromSMPTELine(21,	lineOffset));	CHECK_EQ(lineOffset, 32);
+		CHECK (fd.GetLineOffsetFromSMPTELine(584,	lineOffset));	CHECK_EQ(lineOffset, 33);
+		CHECK (fd.GetLineOffsetFromSMPTELine(291,	lineOffset));	CHECK_EQ(lineOffset, 572);
+		CHECK (fd.GetLineOffsetFromSMPTELine(854,	lineOffset));	CHECK_EQ(lineOffset, 573);
+		CHECK (fd.GetLineOffsetFromSMPTELine(560,	lineOffset));	CHECK_EQ(lineOffset, 1110);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1123,	lineOffset));	CHECK_EQ(lineOffset, 1111);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(561,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1124,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1600,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	1080i	NTV2_VANCMODE_TALLER
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_1080, fbf, NTV2_VANCMODE_TALLER);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(3,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(566,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(4,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(567,	lineOffset));	CHECK_EQ(lineOffset, 1);
+		CHECK (fd.GetLineOffsetFromSMPTELine(5,	lineOffset));	CHECK_EQ(lineOffset, 2);
+		CHECK (fd.GetLineOffsetFromSMPTELine(568,	lineOffset));	CHECK_EQ(lineOffset, 3);
+		CHECK (fd.GetLineOffsetFromSMPTELine(20,	lineOffset));	CHECK_EQ(lineOffset, 32);
+		CHECK (fd.GetLineOffsetFromSMPTELine(583,	lineOffset));	CHECK_EQ(lineOffset, 33);
+		CHECK (fd.GetLineOffsetFromSMPTELine(21,	lineOffset));	CHECK_EQ(lineOffset, 34);
+		CHECK (fd.GetLineOffsetFromSMPTELine(584,	lineOffset));	CHECK_EQ(lineOffset, 35);
+		CHECK (fd.GetLineOffsetFromSMPTELine(291,	lineOffset));	CHECK_EQ(lineOffset, 574);
+		CHECK (fd.GetLineOffsetFromSMPTELine(854,	lineOffset));	CHECK_EQ(lineOffset, 575);
+		CHECK (fd.GetLineOffsetFromSMPTELine(560,	lineOffset));	CHECK_EQ(lineOffset, 1112);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1123,	lineOffset));	CHECK_EQ(lineOffset, 1113);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(561,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1124,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1600,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	1080p	NTV2_VANCMODE_OFF
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_1080p, fbf, NTV2_VANCMODE_OFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(7,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(8,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(9,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(10,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(41,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(42,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(582,	lineOffset));	CHECK_EQ(lineOffset, 540);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1121,	lineOffset));	CHECK_EQ(lineOffset, 1079);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1122,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1600,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	1080p	NTV2_VANCMODE_TALL
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_1080p, fbf, NTV2_VANCMODE_TALL);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(7,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(8,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(9,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(10,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(41,	lineOffset));	CHECK_EQ(lineOffset, 31);
+		CHECK (fd.GetLineOffsetFromSMPTELine(42,	lineOffset));	CHECK_EQ(lineOffset, 32);
+		CHECK (fd.GetLineOffsetFromSMPTELine(582,	lineOffset));	CHECK_EQ(lineOffset, 572);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1121,	lineOffset));	CHECK_EQ(lineOffset, 1111);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1122,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1600,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	1080p	NTV2_VANCMODE_TALLER
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_1080p, fbf, NTV2_VANCMODE_TALLER);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(7,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(8,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(9,	lineOffset));	CHECK_EQ(lineOffset, 1);
+		CHECK (fd.GetLineOffsetFromSMPTELine(10,	lineOffset));	CHECK_EQ(lineOffset, 2);
+		CHECK (fd.GetLineOffsetFromSMPTELine(41,	lineOffset));	CHECK_EQ(lineOffset, 33);
+		CHECK (fd.GetLineOffsetFromSMPTELine(42,	lineOffset));	CHECK_EQ(lineOffset, 34);
+		CHECK (fd.GetLineOffsetFromSMPTELine(582,	lineOffset));	CHECK_EQ(lineOffset, 574);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1121,	lineOffset));	CHECK_EQ(lineOffset, 1113);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1122,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1600,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	2K1080p		NTV2_VANCMODE_OFF
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_2Kx1080p, fbf, NTV2_VANCMODE_OFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(7,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(8,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(9,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(10,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(41,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(42,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(582,	lineOffset));	CHECK_EQ(lineOffset, 540);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1121,	lineOffset));	CHECK_EQ(lineOffset, 1079);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1122,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1600,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	2K1080p		NTV2_VANCMODE_TALL
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_2Kx1080p, fbf, NTV2_VANCMODE_TALL);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(7,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(8,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(9,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(10,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(41,	lineOffset));	CHECK_EQ(lineOffset, 31);
+		CHECK (fd.GetLineOffsetFromSMPTELine(42,	lineOffset));	CHECK_EQ(lineOffset, 32);
+		CHECK (fd.GetLineOffsetFromSMPTELine(582,	lineOffset));	CHECK_EQ(lineOffset, 572);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1121,	lineOffset));	CHECK_EQ(lineOffset, 1111);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1122,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1600,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	2K1080p		NTV2_VANCMODE_TALLER
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_2Kx1080p, fbf, NTV2_VANCMODE_TALLER);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(7,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(8,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(9,	lineOffset));	CHECK_EQ(lineOffset, 1);
+		CHECK (fd.GetLineOffsetFromSMPTELine(10,	lineOffset));	CHECK_EQ(lineOffset, 2);
+		CHECK (fd.GetLineOffsetFromSMPTELine(41,	lineOffset));	CHECK_EQ(lineOffset, 33);
+		CHECK (fd.GetLineOffsetFromSMPTELine(42,	lineOffset));	CHECK_EQ(lineOffset, 34);
+		CHECK (fd.GetLineOffsetFromSMPTELine(582,	lineOffset));	CHECK_EQ(lineOffset, 574);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1121,	lineOffset));	CHECK_EQ(lineOffset, 1113);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1122,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1600,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		if (AJA_NTV2_SDK_VERSION_MAJOR > 0  &&  AJA_NTV2_SDK_VERSION_MAJOR < 15)	//	Film formats officially abandoned in SDK 15
+		{
+			//	2Kx1556		NTV2_VANCMODE_OFF
+			fd = NTV2FormatDescriptor(NTV2_STANDARD_2K, fbf, NTV2_VANCMODE_OFF);
+			CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(7,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+			CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(194,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+			CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(195,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+			CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(210,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+			CHECK (fd.GetLineOffsetFromSMPTELine(211,	lineOffset));	CHECK_EQ(lineOffset, 0);
+			CHECK (fd.GetLineOffsetFromSMPTELine(988,	lineOffset));	CHECK_EQ(lineOffset, 1554);
+			CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1000,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+			//	2Kx1556		NTV2_VANCMODE_TALL
+			fd = NTV2FormatDescriptor(NTV2_STANDARD_2K, fbf, NTV2_VANCMODE_TALL);
+			CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(7,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+			CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(194,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+			CHECK (fd.GetLineOffsetFromSMPTELine(195,	lineOffset));	CHECK_EQ(lineOffset, 0);
+			CHECK (fd.GetLineOffsetFromSMPTELine(210,	lineOffset));	CHECK_EQ(lineOffset, 30);
+			CHECK (fd.GetLineOffsetFromSMPTELine(211,	lineOffset));	CHECK_EQ(lineOffset, 31);
+			CHECK (fd.GetLineOffsetFromSMPTELine(988,	lineOffset));	CHECK_EQ(lineOffset, 1586);
+			CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(1000,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		}	//	AJA_NTV2_SDK_VERSION_MAJOR > 0  &&  AJA_NTV2_SDK_VERSION_MAJOR < 15
+
+		//	UHD		NTV2_STANDARD_3840x2160p
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_3840x2160p, fbf);
+		CHECK(fd.IsValid());
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(7,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(41,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(42,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(582,	lineOffset));	CHECK_EQ(lineOffset, 540);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1121,	lineOffset));	CHECK_EQ(lineOffset, 1079);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1122,	lineOffset));	CHECK_EQ(lineOffset, 1080);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1600,	lineOffset));	CHECK_EQ(lineOffset, 1558);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2048,	lineOffset));	CHECK_EQ(lineOffset, 2006);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2159,	lineOffset));	CHECK_EQ(lineOffset, 2117);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2160,	lineOffset));	CHECK_EQ(lineOffset, 2118);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2201,	lineOffset));	CHECK_EQ(lineOffset, 2159);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(2202,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(3840,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	4K		NTV2_STANDARD_4096x2160p
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_4096x2160p, fbf);
+		CHECK(fd.IsValid());
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(7,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(41,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(42,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(582,	lineOffset));	CHECK_EQ(lineOffset, 540);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1121,	lineOffset));	CHECK_EQ(lineOffset, 1079);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1122,	lineOffset));	CHECK_EQ(lineOffset, 1080);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1600,	lineOffset));	CHECK_EQ(lineOffset, 1558);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2048,	lineOffset));	CHECK_EQ(lineOffset, 2006);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2159,	lineOffset));	CHECK_EQ(lineOffset, 2117);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2160,	lineOffset));	CHECK_EQ(lineOffset, 2118);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2201,	lineOffset));	CHECK_EQ(lineOffset, 2159);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(2202,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(3840,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	UHD HFR	NTV2_STANDARD_3840HFR -- 3840x2160
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_3840HFR, fbf);
+		CHECK(fd.IsValid());
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(7,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(41,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(42,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(582,	lineOffset));	CHECK_EQ(lineOffset, 540);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1121,	lineOffset));	CHECK_EQ(lineOffset, 1079);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1122,	lineOffset));	CHECK_EQ(lineOffset, 1080);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1600,	lineOffset));	CHECK_EQ(lineOffset, 1558);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2048,	lineOffset));	CHECK_EQ(lineOffset, 2006);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2159,	lineOffset));	CHECK_EQ(lineOffset, 2117);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2160,	lineOffset));	CHECK_EQ(lineOffset, 2118);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2201,	lineOffset));	CHECK_EQ(lineOffset, 2159);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(2202,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(3840,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	4K HFR	NTV2_STANDARD_4096HFR -- 4096x2160
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_4096HFR, fbf);
+		CHECK(fd.IsValid());
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(7,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(41,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(42,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(582,	lineOffset));	CHECK_EQ(lineOffset, 540);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1121,	lineOffset));	CHECK_EQ(lineOffset, 1079);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1122,	lineOffset));	CHECK_EQ(lineOffset, 1080);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1600,	lineOffset));	CHECK_EQ(lineOffset, 1558);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2048,	lineOffset));	CHECK_EQ(lineOffset, 2006);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2159,	lineOffset));	CHECK_EQ(lineOffset, 2117);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2160,	lineOffset));	CHECK_EQ(lineOffset, 2118);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2201,	lineOffset));	CHECK_EQ(lineOffset, 2159);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(2202,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(3840,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	UHD2	NTV2_STANDARD_7680 -- 4x3840x2160 or 7680x4320
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_7680, fbf);
+		CHECK(fd.IsValid());
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(7,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(41,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(42,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(582,	lineOffset));	CHECK_EQ(lineOffset, 540);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1121,	lineOffset));	CHECK_EQ(lineOffset, 1079);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1122,	lineOffset));	CHECK_EQ(lineOffset, 1080);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1600,	lineOffset));	CHECK_EQ(lineOffset, 1558);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2048,	lineOffset));	CHECK_EQ(lineOffset, 2006);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2159,	lineOffset));	CHECK_EQ(lineOffset, 2117);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2160,	lineOffset));	CHECK_EQ(lineOffset, 2118);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2201,	lineOffset));	CHECK_EQ(lineOffset, 2159);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2202,	lineOffset));	CHECK_EQ(lineOffset, 2160);
+		CHECK (fd.GetLineOffsetFromSMPTELine(3840,	lineOffset));	CHECK_EQ(lineOffset, 3798);
+		CHECK (fd.GetLineOffsetFromSMPTELine(4319,	lineOffset));	CHECK_EQ(lineOffset, 4277);
+		CHECK (fd.GetLineOffsetFromSMPTELine(4320,	lineOffset));	CHECK_EQ(lineOffset, 4278);
+		CHECK (fd.GetLineOffsetFromSMPTELine(4361,	lineOffset));	CHECK_EQ(lineOffset, 4319);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(4362,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(5000,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+
+		//	8K		NTV2_STANDARD_8192 -- 4x4096x2160 or 8192x4320
+		fd = NTV2FormatDescriptor(NTV2_STANDARD_8192, fbf);
+		CHECK(fd.IsValid());
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(7,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(41,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK (fd.GetLineOffsetFromSMPTELine(42,	lineOffset));	CHECK_EQ(lineOffset, 0);
+		CHECK (fd.GetLineOffsetFromSMPTELine(582,	lineOffset));	CHECK_EQ(lineOffset, 540);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1121,	lineOffset));	CHECK_EQ(lineOffset, 1079);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1122,	lineOffset));	CHECK_EQ(lineOffset, 1080);
+		CHECK (fd.GetLineOffsetFromSMPTELine(1600,	lineOffset));	CHECK_EQ(lineOffset, 1558);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2048,	lineOffset));	CHECK_EQ(lineOffset, 2006);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2159,	lineOffset));	CHECK_EQ(lineOffset, 2117);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2160,	lineOffset));	CHECK_EQ(lineOffset, 2118);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2201,	lineOffset));	CHECK_EQ(lineOffset, 2159);
+		CHECK (fd.GetLineOffsetFromSMPTELine(2202,	lineOffset));	CHECK_EQ(lineOffset, 2160);
+		CHECK (fd.GetLineOffsetFromSMPTELine(3840,	lineOffset));	CHECK_EQ(lineOffset, 3798);
+		CHECK (fd.GetLineOffsetFromSMPTELine(4319,	lineOffset));	CHECK_EQ(lineOffset, 4277);
+		CHECK (fd.GetLineOffsetFromSMPTELine(4320,	lineOffset));	CHECK_EQ(lineOffset, 4278);
+		CHECK (fd.GetLineOffsetFromSMPTELine(4361,	lineOffset));	CHECK_EQ(lineOffset, 4319);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(4362,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+		CHECK_FALSE(fd.GetLineOffsetFromSMPTELine(5000,	lineOffset));	CHECK_EQ(lineOffset, 0xFFFFFFFF);
+	}
+
+	// TEST_CASE("NTV2 Driver Version")
+	// {
+	// 	const ULWord	maxMajorNum	(0x00000080);	//	Major Version:	0 thru 127
+	// 	const ULWord	maxMinorNum	(0x00000040);	//	Minor Version:	0 thru 63
+	// 	const ULWord	maxPointNum	(0x00000040);	//	Point Number:	0 thru 63
+	// 	const ULWord	maxBuildNum	(0x00000400);	//	Build Number:	0 thru 1023
+	// 	for (ULWord major=0;  major < maxMajorNum;  major++)
+	// 		for (ULWord minor=0;  minor < maxMinorNum;  minor++)
+	// 			for (ULWord point(0);  point < maxPointNum;  point++)
+	// 				for (ULWord build(0);  build < maxBuildNum;  build++)
+	// 				{
+	// 					const ULWord	encodedVersion	(NTV2DriverVersionEncode(major, minor, point, build));
+	// 					const ULWord	compMajor		(NTV2DriverVersionDecode_Major(encodedVersion));
+	// 					const ULWord	compMinor		(NTV2DriverVersionDecode_Minor(encodedVersion));
+	// 					const ULWord	compPoint		(NTV2DriverVersionDecode_Point(encodedVersion));
+	// 					const ULWord	compBuild		(NTV2DriverVersionDecode_Build(encodedVersion));
+	// 					//if (major != compMajor || minor != compMinor || point != compPoint || build != compBuild)
+	// 					//	cerr << DEC(compMajor) << "." << DEC(compMinor) << "." << DEC(compPoint) << "." << DEC(compBuild) << endl;
+	// 					CHECK_EQ(major, compMajor);
+	// 					CHECK_EQ(minor, compMinor);
+	// 					CHECK_EQ(point, compPoint);
+	// 					CHECK_EQ(build, compBuild);
+	// 					const ULWord	reEncodedVers	(NTV2DriverVersionEncode(compMajor, compMinor, compPoint, compBuild));
+	// 					CHECK_EQ(encodedVersion, reEncodedVers);
+	// 				}
+	// }
+
+	/*
+		NTV2AncCollisionBFT
+		This detects if the Anc area will run into the visible raster.
+		It uses the default Anc offsets.
+		If these change in the drivers, then it needs to be changed here too:
+											NTV2_AncRgn_Field1	NTV2_AncRgn_Field2	NTV2_AncRgn_MonField1	NTV2_AncRgn_MonField2
+		defaultAncRgnOffsetsFromBottom = {	0x4000,				0x2000,				0x8000,					0x6000};
+	*/
+	TEST_CASE("NTV2AncCollision")
+	{
+		typedef	std::vector<NTV2Standard>			NTV2Stds;
+		typedef	NTV2Stds::const_iterator		NTV2StdsConstIter;
+		typedef	std::vector<NTV2VANCMode>			NTV2VANCModes;
+		const NTV2Stds	standards = {	NTV2_STANDARD_1080, NTV2_STANDARD_720, NTV2_STANDARD_525, NTV2_STANDARD_625,
+											NTV2_STANDARD_1080p, NTV2_STANDARD_2K, NTV2_STANDARD_2Kx1080p, NTV2_STANDARD_2Kx1080i,
+											NTV2_STANDARD_3840x2160p, NTV2_STANDARD_4096x2160p, NTV2_STANDARD_3840HFR,
+											NTV2_STANDARD_4096HFR, NTV2_STANDARD_7680, NTV2_STANDARD_3840i, NTV2_STANDARD_4096i};
+		const NTV2VANCModes	vancModes =	{	NTV2_VANCMODE_OFF, NTV2_VANCMODE_TALL, NTV2_VANCMODE_TALLER };
+		const ULWordSequence defaultAncRgnOffsetsFromBottom = {0x4000, 0x2000, 0x8000, 0x6000};
+		ULWord minAncGap(0xFFFFFFFF), minMonGap(0xFFFFFFFF);
+		NTV2FrameGeometry minAncGeo(NTV2_FG_INVALID), minMonGeo(NTV2_FG_INVALID);
+		NTV2PixelFormat minAncFBF(NTV2_FBF_INVALID), minMonFBF(NTV2_FBF_INVALID);
+
+		LOGDBG("Standard" << "@" << "Geometry" << "@" << "PixelFormat" << "@" << "Phys" << "@" << "Start Avail Space" << "@" << "Start F1 Anc" << "@" << "Gap");
+		for (NTV2StdsConstIter it(standards.begin());  it != standards.end();  ++it)
+		{
+			const NTV2Standard		standard	(*it);
+			const NTV2FrameGeometry	stdGeometry	(::GetGeometryFromStandard(standard));
+			const NTV2GeometrySet	geometries	(::GetRelatedGeometries(stdGeometry));
+			for (NTV2PixelFormat fbf(NTV2_FBF_FIRST);  fbf < NTV2_FBF_LAST;  fbf = NTV2PixelFormat(fbf+1))
+			{
+				if (!NTV2_IS_VALID_FBF(fbf) || NTV2_IS_FBF_PLANAR(fbf) || NTV2_IS_FBF_PRORES(fbf) || NTV2_FBF_IS_RAW(fbf))
+					continue;
+				if (fbf == NTV2_FBF_8BIT_DVCPRO  ||  fbf == NTV2_FBF_8BIT_HDV)
+					continue;
+
+				for (size_t ndx(0);  ndx < geometries.size();  ndx++)
+				{
+					const NTV2FrameGeometry actualGeometry (::GetVANCFrameGeometry (stdGeometry, vancModes.at(ndx)));
+					const ULWord	physBufferSize	(ULWord(::Get8MBFrameSizeFactor(actualGeometry, fbf)) * 8LL * 1024LL * 1024LL);
+					const NTV2FormatDescriptor fd (standard, fbf, vancModes.at(ndx));
+					ULWord	legalAncStartOffset(fd.GetTotalRasterBytes());
+					NTV2_ASSERT(legalAncStartOffset>0);
+					const ULWord ancF1Offset (physBufferSize - defaultAncRgnOffsetsFromBottom.at(NTV2_AncRgn_Field1));
+					ULWord gap (ancF1Offset - legalAncStartOffset);
+					LOGDBG(::NTV2StandardToString(standard) << "@" << ::NTV2FrameGeometryToString(actualGeometry) << "@" << ::NTV2FrameBufferFormatToString(fbf) << "@" << DEC(physBufferSize) << "@" << DEC(legalAncStartOffset) << "@" << DEC(ancF1Offset) << "@" << DEC(gap));
+					if (gap < minAncGap)
+						{minAncGap = gap;  minAncGeo = actualGeometry;  minAncFBF = fbf;}
+					const ULWord monAncF1Offset (physBufferSize - defaultAncRgnOffsetsFromBottom.at(NTV2_AncRgn_MonField1));
+					gap = monAncF1Offset - legalAncStartOffset;
+					if (gap < minMonGap)
+						{minMonGap = gap;  minMonGeo = actualGeometry;  minMonFBF = fbf;}
+					CHECK(ancF1Offset >= legalAncStartOffset);
+					CHECK(monAncF1Offset >= legalAncStartOffset);
+				}	//	for each VANC mode
+			}	//	for each valid FBF
+		}	//	for every video standard
+
+		LOGNOTE("Passed, minAncGap=" << DEC(minAncGap) << "|" << ::NTV2FrameGeometryToString(minAncGeo) << "|" << ::NTV2FrameBufferFormatToString(minAncFBF)
+				<< ", minMonGap=" << DEC(minMonGap) << "|" << ::NTV2FrameGeometryToString(minMonGeo) << "|" << ::NTV2FrameBufferFormatToString(minMonFBF));
+	}
+
+	TEST_CASE("NTV2Utils")
+	{
+		static const NTV2FrameRate	fr1498[]	= {NTV2_FRAMERATE_1498, NTV2_FRAMERATE_2997, NTV2_FRAMERATE_5994, NTV2_FRAMERATE_11988};
+		static const NTV2FrameRate	fr1500[]	= {NTV2_FRAMERATE_1500, NTV2_FRAMERATE_3000, NTV2_FRAMERATE_6000, NTV2_FRAMERATE_12000};
+		static const NTV2FrameRate	fr2398[]	= {NTV2_FRAMERATE_2398, NTV2_FRAMERATE_4795};
+		static const NTV2FrameRate	fr2400[]	= {NTV2_FRAMERATE_2400, NTV2_FRAMERATE_4800};
+		static const NTV2FrameRate	fr2500[]	= {NTV2_FRAMERATE_2500, NTV2_FRAMERATE_5000};
+
+	//	for (NTV2FrameRate fr(NTV2_FRAMERATE_6000);  fr <= NTV2_FRAMERATE_1498;  fr = NTV2FrameRate(fr+1))
+	//		cerr << ::NTV2FrameRateToString(fr) << " family is " << ::NTV2FrameRateToString(::GetFrameRateFamily(fr)) << endl;
+
+		//	Verify Related Rates
+		CHECK(::IsMultiFormatCompatible(fr1498[0], fr1498[0]));
+		CHECK(::IsMultiFormatCompatible(fr1498[0], fr1498[1]));
+		CHECK(::IsMultiFormatCompatible(fr1498[0], fr1498[2]));
+		CHECK(::IsMultiFormatCompatible(fr1498[0], fr1498[3]));
+		CHECK(::IsMultiFormatCompatible(fr1498[1], fr1498[0]));
+		CHECK(::IsMultiFormatCompatible(fr1498[1], fr1498[2]));
+		CHECK(::IsMultiFormatCompatible(fr1498[1], fr1498[3]));
+		CHECK(::IsMultiFormatCompatible(fr1498[2], fr1498[0]));
+		CHECK(::IsMultiFormatCompatible(fr1498[2], fr1498[1]));
+		CHECK(::IsMultiFormatCompatible(fr1498[2], fr1498[3]));
+		CHECK(::IsMultiFormatCompatible(fr1498[3], fr1498[0]));
+		CHECK(::IsMultiFormatCompatible(fr1498[3], fr1498[1]));
+		CHECK(::IsMultiFormatCompatible(fr1498[3], fr1498[2]));
+		CHECK(::IsMultiFormatCompatible(fr1500[0], fr1500[0]));
+		CHECK(::IsMultiFormatCompatible(fr1500[0], fr1500[1]));
+		CHECK(::IsMultiFormatCompatible(fr1500[0], fr1500[2]));
+		CHECK(::IsMultiFormatCompatible(fr1500[0], fr1500[3]));
+		CHECK(::IsMultiFormatCompatible(fr1500[1], fr1500[0]));
+		CHECK(::IsMultiFormatCompatible(fr1500[1], fr1500[2]));
+		CHECK(::IsMultiFormatCompatible(fr1500[1], fr1500[3]));
+		CHECK(::IsMultiFormatCompatible(fr1500[2], fr1500[0]));
+		CHECK(::IsMultiFormatCompatible(fr1500[2], fr1500[1]));
+		CHECK(::IsMultiFormatCompatible(fr1500[2], fr1500[3]));
+		CHECK(::IsMultiFormatCompatible(fr1500[3], fr1500[0]));
+		CHECK(::IsMultiFormatCompatible(fr1500[3], fr1500[1]));
+		CHECK(::IsMultiFormatCompatible(fr1500[3], fr1500[2]));
+		CHECK(::IsMultiFormatCompatible(fr2398[0], fr2398[0]));
+		CHECK(::IsMultiFormatCompatible(fr2398[0], fr2398[1]));
+		CHECK(::IsMultiFormatCompatible(fr2398[1], fr2398[0]));
+		CHECK(::IsMultiFormatCompatible(fr2400[0], fr2400[0]));
+		CHECK(::IsMultiFormatCompatible(fr2400[0], fr2400[1]));
+		CHECK(::IsMultiFormatCompatible(fr2400[1], fr2400[0]));
+		CHECK(::IsMultiFormatCompatible(fr2500[0], fr2500[0]));
+		CHECK(::IsMultiFormatCompatible(fr2500[0], fr2500[1]));
+		CHECK(::IsMultiFormatCompatible(fr2500[1], fr2500[0]));
+
+		//	Verify Unrelated Rates
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1498[0], fr1500[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1498[0], fr1500[1]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1498[0], fr1500[2]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1498[0], fr1500[3]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1498[0], fr2398[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1498[0], fr2398[1]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1498[0], fr2400[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1498[0], fr2400[1]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1498[0], fr2500[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1498[0], fr2500[1]));
+
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1500[0], fr1498[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1500[0], fr1498[1]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1500[0], fr1498[2]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1500[0], fr1498[3]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1500[0], fr2398[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1500[0], fr2398[1]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1500[0], fr2400[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1500[0], fr2400[1]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1500[0], fr2500[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr1500[0], fr2500[1]));
+
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2398[0], fr1498[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2398[0], fr1498[1]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2398[0], fr1498[2]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2398[0], fr1498[3]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2398[0], fr1500[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2398[0], fr1500[1]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2398[0], fr1500[2]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2398[0], fr1500[3]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2398[0], fr2400[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2398[0], fr2400[1]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2398[0], fr2500[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2398[0], fr2500[1]));
+
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2400[0], fr1498[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2400[0], fr1498[1]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2400[0], fr1498[2]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2400[0], fr1498[3]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2400[0], fr1500[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2400[0], fr1500[1]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2400[0], fr1500[2]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2400[0], fr1500[3]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2400[0], fr2398[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2400[0], fr2398[1]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2400[0], fr2500[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2400[0], fr2500[1]));
+
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2500[0], fr1498[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2500[0], fr1498[1]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2500[0], fr1498[2]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2500[0], fr1498[3]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2500[0], fr1500[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2500[0], fr1500[1]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2500[0], fr1500[2]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2500[0], fr1500[3]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2500[0], fr2398[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2500[0], fr2398[1]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2500[0], fr2400[0]));
+		CHECK_FALSE(::IsMultiFormatCompatible(fr2500[0], fr2400[1]));
+
+		// CHECK(NTV2CopyRasterBFT ()); // TODO: BFTs called NTV2CopyRasterBFT as a function. Does it need to be here or can it be separate?
+		for (NTV2FrameBufferFormat fbf(NTV2_FBF_10BIT_YCBCR);  fbf < NTV2_FBF_NUMFRAMEBUFFERFORMATS;  fbf = NTV2FrameBufferFormat(fbf+1))
+			if (NTV2_IS_VALID_FRAME_BUFFER_FORMAT (fbf))
+			{
+				CHECK_EQ (::CalcRowBytesForFormat (fbf, 0), 0);
+			}
+
+		CHECK_FALSE(NTV2_IS_VALID_NTV2FrameGeometry(::GetGeometryFromStandard(NTV2_STANDARD_INVALID)));
+		for (NTV2Standard std(NTV2_STANDARD_1080);  std < NTV2_NUM_STANDARDS;  std = NTV2Standard(std+1))
+		{
+			CHECK(NTV2_IS_VALID_STANDARD(std));
+			const NTV2FrameGeometry fg(::GetGeometryFromStandard(std));
+			LOGDBG(::NTV2StandardToString(std) << " ==> " << ::NTV2FrameGeometryToString(fg));
+			CHECK(NTV2_IS_VALID_NTV2FrameGeometry(fg));
+			const NTV2FrameGeometry fg_normalized(::GetNormalizedFrameGeometry(fg));
+			CHECK(NTV2_IS_VALID_NTV2FrameGeometry(fg_normalized));
+			for (NTV2VANCMode vancMode(NTV2_VANCMODE_TALL);  vancMode < NTV2_VANCMODE_INVALID;  vancMode = NTV2VANCMode(vancMode+1))
+			{
+				const NTV2FrameGeometry fg_vanc(::GetVANCFrameGeometry(fg, vancMode));
+				CHECK(NTV2_IS_VALID_NTV2FrameGeometry(fg_vanc));
+				if (!NTV2_IS_VANC_GEOMETRY(fg_vanc))
+					{LOGDBG("No VANC geometry for " << ::NTV2FrameGeometryToString(fg_vanc)); continue;}
+				CHECK(NTV2_IS_VALID_NTV2FrameGeometry(::GetNormalizedFrameGeometry(fg_vanc)));
+			}
+		}
+		//	Check raster sizes
+		for (NTV2FrameGeometry fg(NTV2_FG_1920x1080);  fg < NTV2_FG_NUMFRAMEGEOMETRIES;  fg = NTV2FrameGeometry(fg+1))
+		{
+			if (!NTV2_IS_VALID_NTV2FrameGeometry(fg))
+				continue;	//	Skip invalid FGs
+			for (NTV2PixelFormat fbf(NTV2_FBF_FIRST);  fbf < NTV2_FBF_NUMFRAMEBUFFERFORMATS;  fbf = NTV2PixelFormat(fbf+1))
+			{
+				if (!NTV2_IS_VALID_FRAME_BUFFER_FORMAT(fbf))
+					continue;	//	Skip invalid FBFs
+				if (NTV2_IS_FBF_PLANAR(fbf) || NTV2_FBF_IS_RAW(fbf) || NTV2_IS_FBF_PRORES(fbf))
+					continue;	//	Skip planar, raw & ProRes formats
+				if (fbf == NTV2_FBF_8BIT_DVCPRO  ||  fbf == NTV2_FBF_8BIT_HDV)
+					continue;	//	Skip DVCPRO & HDV formats
+				ULWord factor(ULWord(::Get8MBFrameSizeFactor(fg, fbf)));
+				CHECK(factor != 0);	//	Factor must never be zero
+				NTV2Standard	fs(::GetStandardFromGeometry(fg));
+				CHECK(NTV2_IS_VALID_STANDARD(fs));	//	Standard from valid FG must be valid
+				NTV2FormatDescriptor	fd (fs, fbf);
+				CHECK(fd.IsValid());	//	FD from Standard & FBF must be valid
+				ULWord	fdBytes (fd.GetTotalRasterBytes()),  factorBytes(ULWord(factor*8LL)*1024LL*1024LL);
+				CHECK(fdBytes <= factorBytes);
+			}
+		}
+	}
+
+	TEST_CASE("NTV2Planar3Formats")
+	{
+		NTV2_POINTER dummyBuffer(32*1024*1024);
+		static const NTV2Standard	stds[]	=	{	NTV2_STANDARD_525,	NTV2_STANDARD_625,	NTV2_STANDARD_720,	NTV2_STANDARD_1080,	NTV2_STANDARD_1080p, NTV2_STANDARD_2K, NTV2_STANDARD_2Kx1080p, NTV2_STANDARD_2Kx1080i, NTV2_STANDARD_3840x2160p, NTV2_STANDARD_4096x2160p, NTV2_STANDARD_3840HFR, NTV2_STANDARD_4096HFR};
+		for (unsigned stdNdx(0);  stdNdx < sizeof(stds)/sizeof(NTV2Standard);  stdNdx++)
+		{
+			const NTV2Standard		std			(stds[stdNdx]);
+			const NTV2FormatDesc	fdv210		(std,	NTV2_FBF_10BIT_YCBCR,			NTV2_VANCMODE_OFF);
+			const NTV2FormatDesc	fd8b420		(std,	NTV2_FBF_8BIT_YCBCR_420PL3,		NTV2_VANCMODE_OFF);
+			const NTV2FormatDesc	fd8b422		(std,	NTV2_FBF_8BIT_YCBCR_422PL3,		NTV2_VANCMODE_OFF);
+			const NTV2FormatDesc	fd10b420	(std,	NTV2_FBF_10BIT_YCBCR_420PL3_LE,	NTV2_VANCMODE_OFF);
+			const NTV2FormatDesc	fd10b422	(std,	NTV2_FBF_10BIT_YCBCR_422PL3_LE,	NTV2_VANCMODE_OFF);
+			const ULWord			hghtAdj		(std == NTV2_STANDARD_525  ?  6  :  0);	//	Only when comparing planar 525i with non-planar 525i formats
+
+			CHECK(fd8b420.IsValid());		CHECK(fd8b422.IsValid());
+			CHECK(fd10b420.IsValid());		CHECK(fd10b422.IsValid());
+			CHECK(fd8b420.IsPlanar());		CHECK(fd8b422.IsPlanar());
+			CHECK(fd10b420.IsPlanar());	CHECK(fd10b422.IsPlanar());
+			CHECK_FALSE(fd8b420.IsVANC());		CHECK_FALSE(fd8b422.IsVANC());
+			CHECK_FALSE(fd10b420.IsVANC());		CHECK_FALSE(fd10b422.IsVANC());
+			CHECK_EQ(fd8b420.GetNumPlanes(), 3);		CHECK_EQ(fd8b422.GetNumPlanes(), 3);
+			CHECK_EQ(fd10b420.GetNumPlanes(), 3);	CHECK_EQ(fd10b422.GetNumPlanes(), 3);
+
+			CHECK_EQ(fd8b420.GetRasterHeight(),	fdv210.GetRasterHeight()-hghtAdj);
+			CHECK_EQ(fd8b422.GetRasterHeight(),	fd8b420.GetRasterHeight());
+			CHECK_EQ(fd10b420.GetRasterHeight(),	fd8b422.GetRasterHeight());
+			CHECK_EQ(fd10b422.GetRasterHeight(),	fd10b420.GetRasterHeight());
+
+			CHECK_EQ(fd8b420.GetRasterWidth(),	fdv210.GetRasterWidth());
+			CHECK_EQ(fd8b422.GetRasterWidth(),	fd8b420.GetRasterWidth());
+			CHECK_EQ(fd10b420.GetRasterWidth(),	fd8b422.GetRasterWidth());
+			CHECK_EQ(fd10b422.GetRasterWidth(),	fd10b420.GetRasterWidth());
+
+			CHECK_EQ(fd8b420.GetBytesPerRow(0),	fdv210.GetRasterWidth());
+			CHECK_EQ(fd8b422.GetBytesPerRow(0),	fdv210.GetRasterWidth());
+			CHECK_EQ(fd10b420.GetBytesPerRow(0),	sizeof(uint16_t)*fdv210.GetRasterWidth());
+			CHECK_EQ(fd10b422.GetBytesPerRow(0),	sizeof(uint16_t)*fdv210.GetRasterWidth());
+
+			CHECK_EQ(fd8b420.GetTotalRasterBytes(0),		fdv210.GetRasterWidth()*(fdv210.GetRasterHeight()-hghtAdj));
+			CHECK_EQ(fd8b422.GetTotalRasterBytes(0),		fdv210.GetRasterWidth()*(fdv210.GetRasterHeight()-hghtAdj));
+			CHECK_EQ(fd10b420.GetTotalRasterBytes(0),	sizeof(uint16_t)*fdv210.GetRasterWidth()*(fdv210.GetRasterHeight()-hghtAdj));
+			CHECK_EQ(fd10b422.GetTotalRasterBytes(0),	sizeof(uint16_t)*fdv210.GetRasterWidth()*(fdv210.GetRasterHeight()-hghtAdj));
+
+			//	Row bytes of Cb plane should be half the Y rowbytes in 3-plane formats:
+			CHECK_EQ(fd8b420.GetBytesPerRow(1),	fd8b420.GetBytesPerRow()/2);
+			CHECK_EQ(fd8b422.GetBytesPerRow(1),	fd8b422.GetBytesPerRow()/2);
+			CHECK_EQ(fd10b420.GetBytesPerRow(1),	fd10b420.GetBytesPerRow()/2);
+			CHECK_EQ(fd10b422.GetBytesPerRow(1),	fd10b422.GetBytesPerRow()/2);
+
+			//	Row bytes of Cr plane should be same as Cb plane
+			CHECK_EQ(fd8b420.GetBytesPerRow(2),	fd8b420.GetBytesPerRow(1));
+			CHECK_EQ(fd8b422.GetBytesPerRow(2),	fd8b422.GetBytesPerRow(1));
+			CHECK_EQ(fd10b420.GetBytesPerRow(2),	fd10b420.GetBytesPerRow(1));
+			CHECK_EQ(fd10b422.GetBytesPerRow(2),	fd10b422.GetBytesPerRow(1));
+
+			//	Size of Cb plane should be 1/4th the Y plane in 4:2:0, 1/2 in 4:2:2
+			CHECK_EQ(fd8b420.GetTotalRasterBytes(1),		fd8b420.GetTotalRasterBytes(0)/4);
+			CHECK_EQ(fd8b422.GetTotalRasterBytes(1),		fd8b422.GetTotalRasterBytes(0)/2);
+			CHECK_EQ(fd10b420.GetTotalRasterBytes(1),	fd10b420.GetTotalRasterBytes(0)/4);
+			CHECK_EQ(fd10b422.GetTotalRasterBytes(1),	fd10b422.GetTotalRasterBytes(0)/2);
+
+			//	Size of Cr plane should be same as Cb plane
+			CHECK_EQ(fd8b420.GetTotalRasterBytes(2),		fd8b420.GetTotalRasterBytes(1));
+			CHECK_EQ(fd8b422.GetTotalRasterBytes(2),		fd8b422.GetTotalRasterBytes(1));
+			CHECK_EQ(fd10b420.GetTotalRasterBytes(2),	fd10b420.GetTotalRasterBytes(1));
+			CHECK_EQ(fd10b422.GetTotalRasterBytes(2),	fd10b422.GetTotalRasterBytes(1));
+
+			//	Verify plane labels
+			CHECK_EQ(fd8b420.PlaneToString(0),			fd8b422.PlaneToString(0));
+			CHECK_EQ(fd8b420.PlaneToString(1),			fd8b422.PlaneToString(1));
+			CHECK_EQ(fd8b420.PlaneToString(2),			fd8b422.PlaneToString(2));
+			CHECK_EQ(fd10b420.PlaneToString(0),			fd10b422.PlaneToString(0));
+			CHECK_EQ(fd10b420.PlaneToString(1),			fd10b422.PlaneToString(1));
+			CHECK_EQ(fd10b420.PlaneToString(2),			fd10b422.PlaneToString(2));
+			CHECK_EQ(fd8b420.PlaneToString(0),			fd10b420.PlaneToString(0));
+			CHECK_EQ(fd8b420.PlaneToString(1),			fd10b420.PlaneToString(1));
+			CHECK_EQ(fd8b420.PlaneToString(2),			fd10b420.PlaneToString(2));
+
+			//	Spot-check address calculations
+			CHECK(fd8b420.GetRowAddress(dummyBuffer,fd8b420.GetRasterHeight(),0) == NULL);	//	Past bottom
+			CHECK(fd8b422.GetRowAddress(dummyBuffer,fd8b422.GetRasterHeight(),0) == NULL);	//	Past bottom
+			CHECK(fd10b420.GetRowAddress(dummyBuffer,fd10b420.GetRasterHeight(),0) == NULL);	//	Past bottom
+			CHECK(fd10b422.GetRowAddress(dummyBuffer,fd10b422.GetRasterHeight(),0) == NULL);	//	Past bottom
+			//	Y plane line offsets should match between 4:2:0 and 4:2:2
+			CHECK_EQ(fd8b420.GetRowAddress(dummyBuffer,15,0),		fd8b422.GetRowAddress(dummyBuffer,15,0));
+			CHECK_EQ(fd10b420.GetRowAddress(dummyBuffer,15,0),		fd10b422.GetRowAddress(dummyBuffer,15,0));
+			//	Distance, in bytes, between line 200 in Cb and Cr planes should match size of chroma plane
+			CHECK_EQ(uint64_t(fd8b420.GetRowAddress(dummyBuffer,200,2)) - uint64_t(fd8b420.GetRowAddress(dummyBuffer,200,1)),	uint64_t(fd8b420.GetTotalRasterBytes(1)));
+			CHECK_EQ(uint64_t(fd8b422.GetRowAddress(dummyBuffer,200,2)) - uint64_t(fd8b422.GetRowAddress(dummyBuffer,200,1)),	uint64_t(fd8b422.GetTotalRasterBytes(1)));
+			CHECK_EQ(uint64_t(fd10b420.GetRowAddress(dummyBuffer,200,2)) - uint64_t(fd10b420.GetRowAddress(dummyBuffer,200,1)),	uint64_t(fd10b420.GetTotalRasterBytes(1)));
+			CHECK_EQ(uint64_t(fd10b422.GetRowAddress(dummyBuffer,200,2)) - uint64_t(fd10b422.GetRowAddress(dummyBuffer,200,1)),	uint64_t(fd10b422.GetTotalRasterBytes(1)));
+			//	Line offset checks
+			CHECK_EQ(fd8b420.ByteOffsetToRasterLine(fd8b420.GetTotalRasterBytes(2)+fd8b420.GetTotalRasterBytes(1)+fd8b420.GetTotalRasterBytes(0)),	0xFFFF);
+			CHECK_EQ(fd8b422.ByteOffsetToRasterLine(fd8b422.GetTotalRasterBytes(2)+fd8b422.GetTotalRasterBytes(1)+fd8b422.GetTotalRasterBytes(0)),	0xFFFF);
+			CHECK_EQ(fd10b420.ByteOffsetToRasterLine(fd10b420.GetTotalRasterBytes(2)+fd10b420.GetTotalRasterBytes(1)+fd10b420.GetTotalRasterBytes(0)),	0xFFFF);
+			CHECK_EQ(fd10b422.ByteOffsetToRasterLine(fd10b422.GetTotalRasterBytes(2)+fd10b422.GetTotalRasterBytes(1)+fd10b422.GetTotalRasterBytes(0)),	0xFFFF);
+			CHECK_EQ(fd8b420.ByteOffsetToRasterLine(ULWord(uint64_t(fd8b420.GetRowAddress(dummyBuffer,200,0)) - uint64_t(dummyBuffer.GetHostAddress(0)))),	200);
+			CHECK_EQ(fd8b420.ByteOffsetToRasterLine(ULWord(uint64_t(fd8b420.GetRowAddress(dummyBuffer,200,1)) - uint64_t(dummyBuffer.GetHostAddress(0)))),	200);
+			CHECK_EQ(fd8b420.ByteOffsetToRasterLine(ULWord(uint64_t(fd8b420.GetRowAddress(dummyBuffer,200,2)) - uint64_t(dummyBuffer.GetHostAddress(0)))),	200);
+			CHECK_EQ(fd8b422.ByteOffsetToRasterLine(ULWord(uint64_t(fd8b422.GetRowAddress(dummyBuffer,200,0)) - uint64_t(dummyBuffer.GetHostAddress(0)))),	200);
+			CHECK_EQ(fd8b422.ByteOffsetToRasterLine(ULWord(uint64_t(fd8b422.GetRowAddress(dummyBuffer,200,1)) - uint64_t(dummyBuffer.GetHostAddress(0)))),	200);
+			CHECK_EQ(fd8b422.ByteOffsetToRasterLine(ULWord(uint64_t(fd8b422.GetRowAddress(dummyBuffer,200,2)) - uint64_t(dummyBuffer.GetHostAddress(0)))),	200);
+			CHECK_EQ(fd10b420.ByteOffsetToRasterLine(ULWord(uint64_t(fd10b420.GetRowAddress(dummyBuffer,200,0)) - uint64_t(dummyBuffer.GetHostAddress(0)))),	200);
+			CHECK_EQ(fd10b420.ByteOffsetToRasterLine(ULWord(uint64_t(fd10b420.GetRowAddress(dummyBuffer,200,1)) - uint64_t(dummyBuffer.GetHostAddress(0)))),	200);
+			CHECK_EQ(fd10b420.ByteOffsetToRasterLine(ULWord(uint64_t(fd10b420.GetRowAddress(dummyBuffer,200,2)) - uint64_t(dummyBuffer.GetHostAddress(0)))),	200);
+			CHECK_EQ(fd10b422.ByteOffsetToRasterLine(ULWord(uint64_t(fd10b422.GetRowAddress(dummyBuffer,200,0)) - uint64_t(dummyBuffer.GetHostAddress(0)))),	200);
+			CHECK_EQ(fd10b422.ByteOffsetToRasterLine(ULWord(uint64_t(fd10b422.GetRowAddress(dummyBuffer,200,1)) - uint64_t(dummyBuffer.GetHostAddress(0)))),	200);
+			CHECK_EQ(fd10b422.ByteOffsetToRasterLine(ULWord(uint64_t(fd10b422.GetRowAddress(dummyBuffer,200,2)) - uint64_t(dummyBuffer.GetHostAddress(0)))),	200);
+		}	//	for each NTV2Standard
+		{
+			//	Test line offsets for VANC FBFs
+			const NTV2FormatDescriptor	fdNoVanc		(NTV2_STANDARD_1080p,	NTV2_FBF_10BIT_YCBCR,	NTV2_VANCMODE_OFF);
+			const NTV2FormatDescriptor	fdVancTall		(NTV2_STANDARD_1080p,	NTV2_FBF_10BIT_YCBCR,	NTV2_VANCMODE_TALL);
+			const NTV2FormatDescriptor	fdVancTaller	(NTV2_STANDARD_1080p,	NTV2_FBF_10BIT_YCBCR,	NTV2_VANCMODE_TALLER);
+			CHECK_EQ(fdNoVanc.ByteOffsetToRasterLine(fdNoVanc.GetTotalRasterBytes()),	0xFFFF);
+			CHECK_EQ(fdNoVanc.ByteOffsetToRasterLine(ULWord(uint64_t(fdNoVanc.GetTopVisibleRowAddress(dummyBuffer)) - uint64_t(dummyBuffer.GetHostAddress(0)))),	fdNoVanc.GetFirstActiveLine());
+			CHECK_EQ(fdVancTall.ByteOffsetToRasterLine(fdVancTall.GetTotalRasterBytes()),	0xFFFF);
+			CHECK_EQ(fdVancTall.ByteOffsetToRasterLine(ULWord(uint64_t(fdVancTall.GetTopVisibleRowAddress(dummyBuffer)) - uint64_t(dummyBuffer.GetHostAddress(0)))),	fdVancTall.GetFirstActiveLine());
+			CHECK_EQ(fdVancTaller.ByteOffsetToRasterLine(fdVancTaller.GetTotalRasterBytes()),	0xFFFF);
+			CHECK_EQ(fdVancTaller.ByteOffsetToRasterLine(ULWord(uint64_t(fdVancTaller.GetTopVisibleRowAddress(dummyBuffer)) - uint64_t(dummyBuffer.GetHostAddress(0)))),	fdVancTaller.GetFirstActiveLine());
+		}
+	}
+
+	TEST_CASE("NTV2WidgetCount")
+	{
+		//	This test exposes contradictions between NTV2DeviceGetNumXXXXX and NTV2DeviceCanDoWidget...
+		const NTV2DeviceIDSet	devices(::NTV2GetSupportedDevices());
+		static const NTV2WidgetID	sWgtMixers[]		= {	NTV2_WgtMixer1, NTV2_WgtMixer2, NTV2_WgtMixer3, NTV2_WgtMixer4	};
+		static const NTV2WidgetID	sWgtCSCs[]			= {	NTV2_WgtCSC1, NTV2_WgtCSC2, NTV2_WgtCSC3, NTV2_WgtCSC4, NTV2_WgtCSC5, NTV2_WgtCSC6, NTV2_WgtCSC7, NTV2_WgtCSC8	};
+		static const NTV2WidgetID	sWgtLUTs[]			= {	NTV2_WgtLUT1, NTV2_WgtLUT2, NTV2_WgtLUT3, NTV2_WgtLUT4, NTV2_WgtLUT5, NTV2_WgtLUT6, NTV2_WgtLUT7, NTV2_WgtLUT8	};
+		static const NTV2WidgetID	sWgtFrameStores[]	= {	NTV2_WgtFrameBuffer1, NTV2_WgtFrameBuffer2, NTV2_WgtFrameBuffer3, NTV2_WgtFrameBuffer4, NTV2_WgtFrameBuffer5, NTV2_WgtFrameBuffer6, NTV2_WgtFrameBuffer7, NTV2_WgtFrameBuffer8	};
+
+		for (NTV2DeviceIDSetConstIter iter(devices.begin());  iter != devices.end();  ++iter)
+		{
+			const NTV2DeviceID	deviceID	(*iter);
+			const UWord			numMixers(::NTV2DeviceGetNumMixers(deviceID));
+			const UWord			numCSCs(::NTV2DeviceGetNumCSCs(deviceID));
+			const UWord			numLUTs(::NTV2DeviceGetNumLUTs(deviceID));
+			const UWord			numFrameStores(::NTV2DeviceGetNumFrameStores(deviceID));
+			UWord				mixerTally(0), CSCTally(0), LUTTally(0), frameStoreTally(0);
+
+			std::cerr << "Checking " << ::NTV2DeviceIDString(deviceID) << " (" << ::NTV2DeviceIDToString(deviceID) << ")..." << std::endl;
+			//	Mixers
+			for (unsigned ndx(0);  ndx < sizeof(sWgtMixers) / sizeof(NTV2WidgetID);  ndx++)
+				if (::NTV2DeviceCanDoWidget(deviceID, sWgtMixers[ndx]))
+					mixerTally++;
+			CHECK_EQ(numMixers, mixerTally);
+
+			//	CSCs
+			for (unsigned ndx(0);  ndx < sizeof(sWgtCSCs) / sizeof(NTV2WidgetID);  ndx++)
+				if (::NTV2DeviceCanDoWidget(deviceID, sWgtCSCs[ndx]))
+					CSCTally++;
+			CHECK_EQ(numCSCs, CSCTally);
+
+			//	LUTs
+			for (unsigned ndx(0);  ndx < sizeof(sWgtLUTs) / sizeof(NTV2WidgetID);  ndx++)
+				if (::NTV2DeviceCanDoWidget(deviceID, sWgtLUTs[ndx]))
+					LUTTally++;
+			CHECK_EQ(numLUTs, LUTTally);
+
+			//	FrameStores
+			for (unsigned ndx(0);  ndx < sizeof(sWgtFrameStores) / sizeof(NTV2WidgetID);  ndx++)
+				if (::NTV2DeviceCanDoWidget(deviceID, sWgtFrameStores[ndx]))
+					frameStoreTally++;
+			CHECK_EQ(numFrameStores, frameStoreTally);
+
+		}	//	for each supported device
+	}
+
+	TEST_CASE("NTV2Transcode")
+	{
+		//	Make a '2vuy' line to test with...
+		std::vector<UByte>	testLine2VUY;
+		for (unsigned ndx(0);  ndx < 1440;  ndx++)
+			testLine2VUY.push_back(UByte(ndx%256));
+		NTV2_POINTER	bufferV210(sizeof(UWord)*1440);
+		NTV2_POINTER	buffer2VUY(sizeof(UByte)*1440);
+		std::vector<uint8_t>	compLine2VUY;
+		CHECK_FALSE(::ConvertLine_2vuy_to_v210(NULL, reinterpret_cast<ULWord*>(bufferV210.GetHostPointer()), 720));	//	NULL src ptr
+		CHECK_FALSE(::ConvertLine_2vuy_to_v210(&testLine2VUY[0], NULL, 720));	//	NULL dst ptr
+		CHECK_FALSE(::ConvertLine_2vuy_to_v210(&testLine2VUY[0], reinterpret_cast<ULWord*>(bufferV210.GetHostPointer()), 0));	//	0 pixel count
+		CHECK(::ConvertLine_2vuy_to_v210(&testLine2VUY[0], reinterpret_cast<ULWord*>(bufferV210.GetHostPointer()), 720));
+
+		CHECK_FALSE(::ConvertLine_v210_to_2vuy(NULL, reinterpret_cast<UByte*>(buffer2VUY.GetHostPointer()), 720));	//	NULL src
+		CHECK_FALSE(::ConvertLine_v210_to_2vuy(reinterpret_cast<const ULWord*>(bufferV210.GetHostPointer()), NULL, 720));	//	NULL dst
+		CHECK_FALSE(::ConvertLine_v210_to_2vuy(reinterpret_cast<const ULWord*>(bufferV210.GetHostPointer()), reinterpret_cast<UByte*>(buffer2VUY.GetHostPointer()), 0));	//	0 pix count
+		CHECK_FALSE(::ConvertLine_v210_to_2vuy(NULL, compLine2VUY, 720));	//	NULL src
+		CHECK_FALSE(::ConvertLine_v210_to_2vuy(reinterpret_cast<const ULWord*>(bufferV210.GetHostPointer()), compLine2VUY, 0));	//	0 pix cnt
+
+		CHECK(::ConvertLine_v210_to_2vuy(reinterpret_cast<const ULWord*>(bufferV210.GetHostPointer()), reinterpret_cast<UByte*>(buffer2VUY.GetHostPointer()), 720));
+		CHECK(::ConvertLine_v210_to_2vuy(reinterpret_cast<const ULWord*>(bufferV210.GetHostPointer()), compLine2VUY, 720));
+		CHECK_EQ(::memcmp(buffer2VUY.GetHostPointer(), &compLine2VUY[0], compLine2VUY.size()), 0);
+	}
+
 	TEST_CASE("NTV2Bitfile")
 	{
 		static unsigned char sTTapPro[] = { //	.............a.Et_tap_pro;COMPRESS=TRUE;UserID=0XFFFFFFFF;TANDEM=TRUE;Version=2019.1.b..xcku035-fbva676-1LV-i.c..2020/11/04.d..14:58:54.e..'......................................................................".D..........Uf ... ...0. .....0.......0......
@@ -1000,6 +2670,205 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 			}
 		}
 	}
+
+	// TODO
+	// static bool NTV2SignalRouterBFT (void)
+	// {
+	// 	LOGNOTE("Started");
+	// 	if (true)
+	// 	{	//	Test GetFrameBufferOutputXptFromChannel
+	// 		const bool	kIsNotRGB	(false);
+	// 		const bool	kIsRGB		(true);
+	// 		const bool	kIsNot425	(false);
+	// 		const bool	kIs425		(true);
+
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL1, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer1YUV);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL2, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer2YUV);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL3, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer3YUV);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL4, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer4YUV);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL5, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer5YUV);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL6, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer6YUV);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL7, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer7YUV);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL8, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer8YUV);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL1, kIsNotRGB, kIs425), NTV2_XptFrameBuffer1_DS2YUV);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL2, kIsNotRGB, kIs425), NTV2_XptFrameBuffer2_DS2YUV);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL3, kIsNotRGB, kIs425), NTV2_XptFrameBuffer3_DS2YUV);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL4, kIsNotRGB, kIs425), NTV2_XptFrameBuffer4_DS2YUV);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL5, kIsNotRGB, kIs425), NTV2_XptFrameBuffer5_DS2YUV);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL6, kIsNotRGB, kIs425), NTV2_XptFrameBuffer6_DS2YUV);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL7, kIsNotRGB, kIs425), NTV2_XptFrameBuffer7_DS2YUV);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL8, kIsNotRGB, kIs425), NTV2_XptFrameBuffer8_DS2YUV);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL1, kIsRGB, kIsNot425), NTV2_XptFrameBuffer1RGB);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL2, kIsRGB, kIsNot425), NTV2_XptFrameBuffer2RGB);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL3, kIsRGB, kIsNot425), NTV2_XptFrameBuffer3RGB);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL4, kIsRGB, kIsNot425), NTV2_XptFrameBuffer4RGB);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL5, kIsRGB, kIsNot425), NTV2_XptFrameBuffer5RGB);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL6, kIsRGB, kIsNot425), NTV2_XptFrameBuffer6RGB);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL7, kIsRGB, kIsNot425), NTV2_XptFrameBuffer7RGB);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL8, kIsRGB, kIsNot425), NTV2_XptFrameBuffer8RGB);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL1, kIsRGB, kIs425), NTV2_XptFrameBuffer1_DS2RGB);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL2, kIsRGB, kIs425), NTV2_XptFrameBuffer2_DS2RGB);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL3, kIsRGB, kIs425), NTV2_XptFrameBuffer3_DS2RGB);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL4, kIsRGB, kIs425), NTV2_XptFrameBuffer4_DS2RGB);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL5, kIsRGB, kIs425), NTV2_XptFrameBuffer5_DS2RGB);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL6, kIsRGB, kIs425), NTV2_XptFrameBuffer6_DS2RGB);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL7, kIsRGB, kIs425), NTV2_XptFrameBuffer7_DS2RGB);
+	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL8, kIsRGB, kIs425), NTV2_XptFrameBuffer8_DS2RGB);
+	// 	}
+	// 	if (false)
+	// 	{	//	This generates the NTV2OutputCrosspointID enum declarations -- they should compare:
+	// 		NTV2OutputXptIDSet legitOutputXpts;
+	// 		for (UWord oxpt(NTV2_FIRST_OUTPUT_CROSSPOINT);  oxpt < UWord(NTV2_LAST_OUTPUT_CROSSPOINT);  oxpt++)
+	// 		{
+	// 			const string oxptName(::NTV2OutputCrosspointIDToString(NTV2OutputXptID(oxpt)));
+	// 			if (!oxptName.empty())
+	// 				legitOutputXpts.insert(NTV2OutputXptID(oxpt));
+	// 		}
+	// 		while (!legitOutputXpts.empty())
+	// 		{
+	// 			const NTV2OutputXptID yuvXpt(*legitOutputXpts.begin());
+	// 			const string yuvName(::NTV2OutputCrosspointIDToString(yuvXpt));
+	// 			SHOULD_BE_FALSE(yuvName.empty());
+	// 			legitOutputXpts.erase(yuvXpt);
+	// 			cout << yuvName << "= " << xHEX0N(yuvXpt,2) << "," << endl;
+
+	// 			const NTV2OutputXptID rgbXpt(NTV2OutputXptID(yuvXpt | 0x80));
+	// 			if (legitOutputXpts.find(rgbXpt) == legitOutputXpts.end())
+	// 				continue;
+	// 			const string rgbName(::NTV2OutputCrosspointIDToString(rgbXpt));
+	// 			SHOULD_BE_FALSE(rgbName.empty());
+	// 			legitOutputXpts.erase(rgbXpt);
+	// 			cout << rgbName << "= " << yuvName << " | 0x80," << endl;
+	// 		}
+	// 	}
+	// 	if (true)
+	// 	{	//	Test CNTV2SignalRouter
+	// 		CNTV2SignalRouter routerA, routerB;
+	// 		NTV2XptConnections adds, chgs, dels;
+	// 		SHOULD_BE_TRUE(routerA.IsEmpty());
+	// 		SHOULD_BE_EQUAL(routerA.GetNumberOfConnections(), 0);
+	// 		SHOULD_BE_FALSE(routerA.HasInput(NTV2_XptCSC3VidInput));
+	// 		SHOULD_BE_FALSE(routerA.HasConnection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer2YUV));
+	// 		SHOULD_BE_TRUE(routerA.Compare(routerB, adds, chgs, dels));
+	// 		SHOULD_BE_TRUE(adds.empty());	SHOULD_BE_TRUE(chgs.empty());	SHOULD_BE_TRUE(dels.empty());
+	// 		SHOULD_BE_TRUE(routerB.IsEmpty());
+	// 		SHOULD_BE_EQUAL(routerA.GetNumberOfConnections(), 0);
+	// 		SHOULD_BE_TRUE(routerB.Compare(routerA, adds, chgs, dels));
+	// 		SHOULD_BE_TRUE(adds.empty());	SHOULD_BE_TRUE(chgs.empty());	SHOULD_BE_TRUE(dels.empty());
+
+	// 		//	routerA connects CSC1 <== FB1,  routerB empty
+	// 		SHOULD_BE_TRUE(routerA.AddConnection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer1YUV));
+	// 		SHOULD_BE_FALSE(routerA.IsEmpty());
+	// 		SHOULD_BE_EQUAL(routerA.GetNumberOfConnections(), 1);
+	// 		SHOULD_BE_TRUE(routerA.HasInput(NTV2_XptCSC1VidInput));
+	// 		SHOULD_BE_TRUE(routerA.HasConnection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer1YUV));
+	// 		SHOULD_BE_FALSE(routerA.HasInput(NTV2_XptCSC3VidInput));
+	// 		SHOULD_BE_FALSE(routerA.HasConnection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer2YUV));
+	// 		SHOULD_BE_TRUE(routerA != routerB);
+	// 		SHOULD_BE_FALSE(routerA == routerB);
+	// 		SHOULD_BE_FALSE(routerA.Compare(routerB, adds, chgs, dels));
+	// 		SHOULD_BE_FALSE(adds.empty());	SHOULD_BE_TRUE(chgs.empty());	SHOULD_BE_TRUE(dels.empty());
+	// 		SHOULD_BE_TRUE(adds.size() == 1);
+	// 		SHOULD_BE_TRUE(adds.begin()->first == NTV2_XptCSC1VidInput);
+	// 		SHOULD_BE_TRUE(adds.begin()->second == NTV2_XptFrameBuffer1YUV);
+	// 		SHOULD_BE_FALSE(routerB.Compare(routerA, adds, chgs, dels));
+	// 		SHOULD_BE_TRUE(adds.empty());	SHOULD_BE_TRUE(chgs.empty());	SHOULD_BE_FALSE(dels.empty());
+	// 		SHOULD_BE_TRUE(dels.size() == 1);
+	// 		SHOULD_BE_TRUE(dels.begin()->first == NTV2_XptCSC1VidInput);
+	// 		SHOULD_BE_TRUE(dels.begin()->second == NTV2_XptFrameBuffer1YUV);
+
+	// 		//	routerA & routerB both connect CSC1 <== FB1
+	// 		SHOULD_BE_TRUE(routerB.AddConnection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer1YUV));
+	// 		SHOULD_BE_EQUAL(routerA.IsEmpty(), routerB.IsEmpty());
+	// 		SHOULD_BE_EQUAL(routerA.GetNumberOfConnections(), routerB.GetNumberOfConnections());
+	// 		SHOULD_BE_TRUE(routerA == routerB);
+	// 		SHOULD_BE_FALSE(routerA != routerB);
+	// 		SHOULD_BE_TRUE(routerB.Compare(routerA, adds, chgs, dels));
+	// 		SHOULD_BE_TRUE(adds.empty());	SHOULD_BE_TRUE(chgs.empty());	SHOULD_BE_TRUE(dels.empty());
+
+	// 		//	routerA connects CSC1 <== FB1,  routerB connects CSC1 <= FB2
+	// 		routerB.Reset();
+	// 		SHOULD_BE_TRUE(routerB.AddConnection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer2YUV));
+	// 		SHOULD_BE_EQUAL(routerA.IsEmpty(), routerB.IsEmpty());
+	// 		SHOULD_BE_EQUAL(routerA.GetNumberOfConnections(), routerB.GetNumberOfConnections());
+	// 		SHOULD_BE_TRUE(routerA != routerB);
+	// 		SHOULD_BE_FALSE(routerA == routerB);
+	// 		string	code;
+	// 		CNTV2SignalRouter::PrintCodeConfig	config;
+	// 		SHOULD_BE_FALSE(routerA.Compare(routerB, config.mNew, config.mChanged, config.mMissing));
+	// 		SHOULD_BE_TRUE(config.mNew.empty());	SHOULD_BE_FALSE(config.mChanged.empty());	SHOULD_BE_TRUE(config.mMissing.empty());
+	// 		cerr << config.mChanged << endl;
+	// 		routerA.PrintCode (code, config); cerr << code << endl;
+	// 	}
+	// 	if (true)
+	// 	{	//	Test NTV2XptConnections, CompareConnections
+	// 		NTV2XptConnections routingA, routingB, newConns, delConns;
+	// 		//	A == B
+	// 		routingA[NTV2_XptCSC1VidInput] = NTV2_XptFrameBuffer1YUV;
+	// 		routingB[NTV2_XptCSC1VidInput] = NTV2_XptFrameBuffer1YUV;
+	// 		SHOULD_BE_TRUE(CNTV2SignalRouter::CompareConnections(routingA, routingB, newConns, delConns));
+	// 		SHOULD_BE_TRUE(newConns.empty());	//	Nothing added
+	// 		SHOULD_BE_TRUE(delConns.empty());	//	Nothing removed
+
+	// 		//	Change B's output xpt (same input xpt)
+	// 		routingB[NTV2_XptCSC1VidInput] = NTV2_XptFrameBuffer1RGB;
+	// 		SHOULD_BE_FALSE(CNTV2SignalRouter::CompareConnections(routingA, routingB, newConns, delConns));
+	// 		SHOULD_BE_EQUAL(routingB, newConns);	//	B's connection added
+	// 		SHOULD_BE_EQUAL(routingA, delConns);	//	A's connection removed
+
+	// 		//	B empty, A still has 1 entry
+	// 		routingB.clear();
+	// 		SHOULD_BE_FALSE(CNTV2SignalRouter::CompareConnections(routingA, routingB, newConns, delConns));
+	// 		SHOULD_BE_TRUE(newConns.empty());		//	Nothing added
+	// 		SHOULD_BE_EQUAL(routingA, delConns);	//	A's connection removed
+
+	// 		//	A empty, B has 1 entry
+	// 		routingA.clear();
+	// 		routingB[NTV2_XptCSC1VidInput] = NTV2_XptFrameBuffer1RGB;
+	// 		SHOULD_BE_FALSE(CNTV2SignalRouter::CompareConnections(routingA, routingB, newConns, delConns));
+	// 		SHOULD_BE_EQUAL(routingB, newConns);	//	B's connection added
+	// 		SHOULD_BE_TRUE(delConns.empty());		//	Nothing removed
+
+	// 		//	B == A, except one route removed
+	// 		routingA[NTV2_XptCSC1VidInput]		= NTV2_XptLUT1Out;
+	// 		routingA[NTV2_XptCSC2VidInput]		= NTV2_XptFrameBuffer2YUV;
+	// 		routingA[NTV2_XptLUT1Input]			= NTV2_XptFrameBuffer1RGB;
+	// 		routingA[NTV2_XptLUT2Input]			= NTV2_XptCSC2VidRGB;
+	// 		routingA[NTV2_XptSDIOut3Input]		= NTV2_XptDuallinkOut3;
+	// 		routingA[NTV2_XptSDIOut3InputDS2]	= NTV2_XptDuallinkOut3DS2;
+	// 		routingA[NTV2_XptSDIOut4Input]		= NTV2_XptDuallinkOut4;
+	// 		routingA[NTV2_XptSDIOut4InputDS2]	= NTV2_XptDuallinkOut4DS2;
+	// 		routingA[NTV2_XptSDIOut5Input]		= NTV2_XptDuallinkOut5;
+	// 		routingA[NTV2_XptSDIOut5InputDS2]	= NTV2_XptDuallinkOut5DS2;
+	// 		routingA[NTV2_XptDualLinkOut3Input]	= NTV2_XptLUT1Out;
+	// 		routingA[NTV2_XptDualLinkOut4Input]	= NTV2_XptLUT1Out;
+	// 		routingA[NTV2_XptDualLinkOut5Input]	= NTV2_XptLUT1Out;
+	// 		routingB = routingA;
+	// 		NTV2XptConnection removedConnection(NTV2_XptSDIOut4InputDS2, NTV2_XptDuallinkOut4DS2);
+	// 		routingB.erase(routingB.find(removedConnection.first));
+	// 		cerr << "A:" << endl << routingA << endl << "B:" << endl << routingB << endl;
+	// 		SHOULD_BE_FALSE(CNTV2SignalRouter::CompareConnections(routingA, routingB, newConns, delConns));
+	// 		SHOULD_BE_TRUE(newConns.empty());
+	// 		SHOULD_BE_EQUAL(delConns.size(), 1);
+	// 		SHOULD_BE_EQUAL(delConns.begin()->first, removedConnection.first);
+	// 		SHOULD_BE_EQUAL(delConns.begin()->second, removedConnection.second);
+
+	// 		//	B == A, except one route removed, and one route added
+	// 		NTV2XptConnection addedConnection(NTV2_XptFrameBuffer5Input, NTV2_XptSDIIn5);
+	// 		routingB[addedConnection.first] = addedConnection.second;
+	// 		SHOULD_BE_FALSE(CNTV2SignalRouter::CompareConnections(routingA, routingB, newConns, delConns));
+	// 		SHOULD_BE_EQUAL(newConns.size(), 1);
+	// 		SHOULD_BE_EQUAL(delConns.size(), 1);
+	// 		SHOULD_BE_EQUAL(newConns.begin()->first, addedConnection.first);
+	// 		SHOULD_BE_EQUAL(newConns.begin()->second, addedConnection.second);
+	// 		SHOULD_BE_EQUAL(delConns.begin()->first, removedConnection.first);
+	// 		SHOULD_BE_EQUAL(delConns.begin()->second, removedConnection.second);
+	// 		cerr << "New:" << endl << newConns << endl << "Removed:" << endl << delConns << endl;
+	// 	}
+	// 	LOGNOTE("Passed");
+	// 	return true;
+	// }
+
 } //bft
 
 void signalrouter_marker() {}
@@ -1041,7 +2910,7 @@ TEST_SUITE("signal router" * doctest::description("CNTV2SignalRouter & RoutingEx
 		CNTV2SignalRouter::GetWidgetForInput(NTV2_XptDualLinkIn1Input,
 						widgetID, DEVICE_ID_KONA4);
 		CHECK(widgetID == NTV2_WgtDualLinkV2In1);
-		
+
 		CHECK(CNTV2SignalRouter::WidgetIDToChannel(NTV2_Wgt3GSDIIn3) == NTV2_CHANNEL3);
 		CHECK(CNTV2SignalRouter::WidgetIDFromTypeAndChannel(NTV2WidgetType_CSC, NTV2_CHANNEL4) == NTV2_WgtCSC4);
 
