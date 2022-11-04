@@ -13,6 +13,9 @@
 #include "doctest.h"
 
 #include <vector>
+#include <algorithm>
+#include <iomanip>
+#include <iterator>    //      For std::inserter
 
 #include "ajabase/system/thread.h"
 
