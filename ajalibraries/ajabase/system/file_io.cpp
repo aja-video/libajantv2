@@ -15,6 +15,7 @@
 #if defined(AJA_WINDOWS)
 	// Windows includes
 	#include <direct.h>
+	#include <io.h>
 #else
 	// Posix includes
 	#include <fcntl.h>
@@ -260,7 +261,6 @@ AJAFileIO::Open(
 	return status;
 #endif
 }
-
 
 AJAStatus
 AJAFileIO::Close()
@@ -1322,4 +1322,14 @@ AJAFileIO::GetExecutablePath(std::wstring& path)
 	}
 #endif
 	return AJA_STATUS_NOT_FOUND;
+}
+
+void
+AJAFileIO::SetHandle(FILE *fp)
+{
+#if defined(AJA_WINDOWS)
+	mFileDescriptor = (HANDLE)_get_osfhandle(fileno(fp));
+#else
+	mpFile = fp;
+#endif
 }

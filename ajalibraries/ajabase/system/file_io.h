@@ -331,6 +331,13 @@ public:
 	static AJAStatus GetExecutablePath(std::string& path); // New in SDK 16.2
 	static AJAStatus GetExecutablePath(std::wstring& path); // New in SDK 16.2
 
+	/**
+	 *	Set private file handle from FILE pointer.
+	 *
+	 *	@param[in]	fp					The FILE pointer
+	 */
+	void	SetHandle(FILE *fp);
+
 #if defined(AJA_WINDOWS)
 	void	 *GetHandle(void) {return mFileDescriptor;}
 #else
