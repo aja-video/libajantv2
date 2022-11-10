@@ -235,6 +235,9 @@ typedef enum
 													||	(__s__) == NTV2_STANDARD_7680			\
 													||	(__s__) == NTV2_STANDARD_8192	)
 #define NTV2_IS_SD_STANDARD(__s__)				((__s__) == NTV2_STANDARD_525 || (__s__) == NTV2_STANDARD_625)
+#define NTV2_IS_HD_STANDARD(__s__)				((__s__) == NTV2_STANDARD_1080 || (__s__) == NTV2_STANDARD_720 \
+													|| (__s__) == NTV2_STANDARD_1080p || (__s__) == NTV2_STANDARD_2Kx1080p \
+													|| (__s__) == NTV2_STANDARD_2Kx1080i)
 #define NTV2_IS_UHD_STANDARD(__s__)				((__s__) == NTV2_STANDARD_3840x2160p	\
 													|| (__s__) == NTV2_STANDARD_3840HFR \
 													|| (__s__) == NTV2_STANDARD_3840i)
@@ -923,7 +926,9 @@ typedef enum _NTV2VideoFormat
 		((__f__) >= NTV2_FORMAT_FIRST_UHD_TSI_DEF_FORMAT	&&		\
 		(__f__) < NTV2_FORMAT_FIRST_4K_TSI_DEF_FORMAT	)			\
 	)
-	
+
+#define NTV2_IS_UHD_VIDEO_FORMAT(__f__) NTV2_IS_4K_QUADHD_VIDEO_FORMAT(__f__)
+
 #define NTV2_IS_UHD2_VIDEO_FORMAT(__f__)							\
 	(	((__f__) >= NTV2_FORMAT_FIRST_UHD2_DEF_FORMAT &&			\
 		(__f__) < NTV2_FORMAT_END_UHD2_DEF_FORMATS)					\
