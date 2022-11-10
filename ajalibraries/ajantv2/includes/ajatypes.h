@@ -106,7 +106,7 @@
 	See also:	AJA_USE_CPLUSPLUS11 in 'ajalibraries/ajabase/include/types.h'
 **************************************************************************************************************/
 #if !defined(NTV2_USE_CPLUSPLUS11)
-	#define NTV2_USE_CPLUSPLUS11	
+	//#define NTV2_USE_CPLUSPLUS11 	
 #endif	//	!defined(NTV2_USE_CPLUSPLUS11)
 
 

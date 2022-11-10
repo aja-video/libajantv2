@@ -1243,7 +1243,7 @@ AJAStatus AJAAncillaryList::GetVANCTransmitData (NTV2_POINTER & inFrameBuffer,	c
 	SortListByLocation();
 
 	//	BRUTE-FORCE METHOD -- NOT VERY EFFICIENT
-	const bool	isSD	(inFormatDesc.IsSDFormat());
+	const bool	isSD	(inFormatDesc.IsSD());
 	AJAAncillaryList	failures, successes;
 	set <uint16_t>		lineOffsetsWritten;
 
@@ -1346,7 +1346,7 @@ AJAStatus AJAAncillaryList::GetVANCTransmitData (NTV2_POINTER & inFrameBuffer,	c
 	//	Any analog packets?
 	for (AJAAncDataListConstIter iter(m_ancList.begin());	(iter != m_ancList.end()) && *iter;	  ++iter)
 	{
-		bool								success		(inFormatDesc.IsSDFormat());
+		bool								success		(inFormatDesc.IsSD());
 		AJAAncillaryData &					ancData		(**iter);
 		const AJAAncillaryDataLocation &	loc			(ancData.GetDataLocation());
 		ULWord								lineOffset	(0);

@@ -1898,20 +1898,20 @@ LOGMYDEBUG("BFT_AncListToRTPToAncList: IPF1bytes=" << DEC(IPF1bytes) << ", IPF2b
 					AJAAncillaryData_Cea608_Vanc	pkt608F1;
 					CHECK(AJA_SUCCESS(pkt608F1.SetLine(false/*isF1*/, 10)));
 					CHECK(AJA_SUCCESS(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B'))));
-					CHECK(AJA_SUCCESS(pkt608F1.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+10 : 10))));
+					CHECK(AJA_SUCCESS(pkt608F1.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+10 : 10))));
 					CHECK(AJA_SUCCESS(pkt608F1.GeneratePayloadData()));
 
 					AJAAncillaryData_Cea608_Vanc	pkt608F2;
 					CHECK(AJA_SUCCESS(pkt608F2.SetLine(true/*isF2*/, 11)));
 					CHECK(AJA_SUCCESS(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b'))));
-					CHECK(AJA_SUCCESS(pkt608F2.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat) && pkt608F2.IsField2() ? smpteLineF2+11 : 11))));
+					CHECK(AJA_SUCCESS(pkt608F2.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat) && pkt608F2.IsField2() ? smpteLineF2+11 : 11))));
 					CHECK(AJA_SUCCESS(pkt608F2.GeneratePayloadData()));
 	
 					AJAAncillaryData_HDR_HLG		pktHDR;
 					CHECK(AJA_SUCCESS(pktHDR.GeneratePayloadData()));
 	
 					AJAAncillaryData				pktCustomY;
-					CHECK(AJA_SUCCESS(pktCustomY.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(12))));
+					CHECK(AJA_SUCCESS(pktCustomY.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(12))));
 					CHECK(AJA_SUCCESS(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital)));
 					CHECK(AJA_SUCCESS(pktCustomY.SetDID(0x7A)));
 					CHECK(AJA_SUCCESS(pktCustomY.SetSID(0x01)));
@@ -1919,7 +1919,7 @@ LOGMYDEBUG("BFT_AncListToRTPToAncList: IPF1bytes=" << DEC(IPF1bytes) << ", IPF2b
 					CHECK(AJA_SUCCESS(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY))));
 	
 					AJAAncillaryData				pktCustomC;
-					CHECK(AJA_SUCCESS(pktCustomC.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_C).SetLineNumber(13))));
+					CHECK(AJA_SUCCESS(pktCustomC.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_C).SetLineNumber(13))));
 					CHECK(AJA_SUCCESS(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital)));
 					CHECK(AJA_SUCCESS(pktCustomC.SetDID(0x8A)));
 					CHECK(AJA_SUCCESS(pktCustomC.SetSID(0x02)));
@@ -2003,20 +2003,20 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 					AJAAncillaryData_Cea608_Vanc	pkt608F1;
 					CHECK(AJA_SUCCESS(pkt608F1.SetLine(false/*isF1*/, 10)));
 					CHECK(AJA_SUCCESS(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B'))));
-					CHECK(AJA_SUCCESS(pkt608F1.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+10 : 10))));
+					CHECK(AJA_SUCCESS(pkt608F1.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+10 : 10))));
 					CHECK(AJA_SUCCESS(pkt608F1.GeneratePayloadData()));
 
 					AJAAncillaryData_Cea608_Vanc	pkt608F2;
 					CHECK(AJA_SUCCESS(pkt608F2.SetLine(true/*isF2*/, 11)));
 					CHECK(AJA_SUCCESS(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b'))));
-					CHECK(AJA_SUCCESS(pkt608F2.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat) && pkt608F2.IsField2() ? smpteLineF2+11 : 11))));
+					CHECK(AJA_SUCCESS(pkt608F2.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat) && pkt608F2.IsField2() ? smpteLineF2+11 : 11))));
 					CHECK(AJA_SUCCESS(pkt608F2.GeneratePayloadData()));
 	
 					AJAAncillaryData_HDR_HLG		pktHDR;
 					CHECK(AJA_SUCCESS(pktHDR.GeneratePayloadData()));
 	
 					AJAAncillaryData				pktCustomY;
-					CHECK(AJA_SUCCESS(pktCustomY.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(12))));
+					CHECK(AJA_SUCCESS(pktCustomY.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(12))));
 					CHECK(AJA_SUCCESS(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital)));
 					CHECK(AJA_SUCCESS(pktCustomY.SetDID(0x7A)));
 					CHECK(AJA_SUCCESS(pktCustomY.SetSID(0x01)));
@@ -2024,7 +2024,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 					CHECK(AJA_SUCCESS(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY))));
 	
 					AJAAncillaryData				pktCustomC;
-					CHECK(AJA_SUCCESS(pktCustomC.SetDataLocation(loc.SetDataChannel(fd.IsSDFormat() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_C).SetLineNumber(13))));
+					CHECK(AJA_SUCCESS(pktCustomC.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_C).SetLineNumber(13))));
 					CHECK(AJA_SUCCESS(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital)));
 					CHECK(AJA_SUCCESS(pktCustomC.SetDID(0x8A)));
 					CHECK(AJA_SUCCESS(pktCustomC.SetSID(0x02)));

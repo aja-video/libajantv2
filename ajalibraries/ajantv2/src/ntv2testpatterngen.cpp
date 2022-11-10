@@ -2864,7 +2864,7 @@ bool NTV2TestPatternGen::DrawTestPattern (const string & inStartsWith,
 	rgbaPixel.Green = (rgbValue & 0x0000FF00) >> 8;
 	rgbaPixel.Blue = rgbValue & 0x000000FF;
 	YCbCr10BitPixel yCbCrPixel;
-	if (inFormatDesc.IsSDFormat())
+	if (inFormatDesc.IsSD())
 		SDConvertRGBAlphatoYCbCr(&rgbaPixel, &yCbCrPixel);
 	else
 		HDConvertRGBAlphatoYCbCr(&rgbaPixel, &yCbCrPixel);

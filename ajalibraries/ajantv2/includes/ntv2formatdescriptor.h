@@ -322,14 +322,21 @@ public:
 	inline NTV2VideoFormat			GetVideoFormat (void) const		{return mVideoFormat;}						///< @return	The video format I was created with.
 	inline NTV2FrameBufferFormat	GetPixelFormat (void) const		{return mPixelFormat;}						///< @return	The pixel format I was created with.
 	inline NTV2VANCMode				GetVANCMode (void) const		{return mVancMode;}							///< @return	The VANC mode I was created with.
-	inline bool						IsSDFormat (void) const			{return NTV2_IS_SD_VIDEO_FORMAT(GetVideoFormat()) || NTV2_IS_SD_STANDARD(GetVideoStandard());}	///< @return	True if I was created with an SD video format or standard.
+	inline bool						IsSD (void) const {return NTV2_IS_SD_VIDEO_FORMAT(GetVideoFormat()) || NTV2_IS_SD_STANDARD(GetVideoStandard());}		///< @return	True if I was created with an SD video format or standard.
+	inline bool						IsHD (void) const {return NTV2_IS_HD_VIDEO_FORMAT(GetVideoFormat()) || NTV2_IS_HD_STANDARD(GetVideoStandard());}		///< @return	True if I was created with an HD video format or standard.
+	inline bool						IsUHD (void) const {return NTV2_IS_UHD_VIDEO_FORMAT(GetVideoFormat()) || NTV2_IS_UHD_STANDARD(GetVideoStandard());}		///< @return	True if I was created with an UHD video format or standard.
+	inline bool						Is4K (void) const {return NTV2_IS_4K_VIDEO_FORMAT(GetVideoFormat()) || NTV2_IS_4K_STANDARD(GetVideoStandard());}		///< @return	True if I was created with an 4K video format or standard.
+	inline bool						IsUHD2 (void) const {return NTV2_IS_UHD2_VIDEO_FORMAT(GetVideoFormat()) || NTV2_IS_UHD2_STANDARD(GetVideoStandard());}	///< @return	True if I was created with an UHD2 video format or standard.
+	inline bool						Is8K (void) const {return NTV2_IS_8K_VIDEO_FORMAT(GetVideoFormat()) || NTV2_IS_8K_STANDARD(GetVideoStandard());}		///< @return	True if I was created with an 8K video format or standard.
 	inline bool						IsQuadRaster (void) const		{return NTV2_IS_QUAD_STANDARD(mStandard) || NTV2_IS_4K_VIDEO_FORMAT(mVideoFormat);}	///< @return	True if I was created with a 4K/UHD video format or standard.
 	inline bool						IsTallVanc (void) const			{return mVancMode == NTV2_VANCMODE_TALL;}	///< @return	True if I was created with just "tall" VANC.
 	inline bool						IsTallerVanc (void) const		{return mVancMode == NTV2_VANCMODE_TALLER;}	///< @return	True if I was created with "taller" VANC.
 	inline NTV2FrameGeometry		GetFrameGeometry (void) const	{return mFrameGeometry;}					///< @return	The frame geometry I was created with.
 	bool							Is2KFormat (void) const;		///< @return	True if I was created with a 2Kx1080 video format.
 	///@}
-
+#if !defined(NTV2_DEPRECATE_16_3)
+	inline bool						IsSDFormat (void) const			{return NTV2_IS_SD_VIDEO_FORMAT(GetVideoFormat()) || NTV2_IS_SD_STANDARD(GetVideoStandard());} ///< @deprecated	Obsolete starting in SDK 16.3.
+#endif
 	void							MakeInvalid (void);				///< @brief	Resets me into an invalid (NULL) state.
 
 	private:
