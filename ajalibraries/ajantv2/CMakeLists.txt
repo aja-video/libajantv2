@@ -143,6 +143,7 @@ set(AJANTV2_SOURCES
     src/ntv2transcode.cpp
     src/ntv2utf8.cpp
     src/ntv2utils.cpp
+    src/ntv2version.cpp
     src/ntv2verticalfilter.cpp
     src/ntv2vpid.cpp
     src/ntv2vpidfromspec.cpp)
@@ -395,10 +396,16 @@ set(AJABASE_SOURCES
     ${AJABASE_PNP_SOURCES}
     ${AJABASE_SYS_SOURCES})
 
+set(TARGET_COMPILE_DEFS
+    ${TARGET_COMPILE_DEFS}
+    -DAJA_GIT_COMMIT_HASH="${AJA_GIT_COMMIT_HASH}"
+    -DAJA_GIT_COMMIT_HASH_SHORT="${AJA_GIT_COMMIT_HASH_SHORT}")
+
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     remove_definitions(-DUNICODE -D_UNICODE)
 
     set(TARGET_COMPILE_DEFS
+        ${TARGET_COMPILE_DEFS}
         -D_MBCS
         -DCRT_NONSTDC_DEPRECATE
         -D_WINSOCK_DEPRECATED_NO_WARNINGS
