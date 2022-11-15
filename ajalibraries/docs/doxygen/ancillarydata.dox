@@ -339,6 +339,9 @@ the timecode to be transmitted:  one for the high-order 32 bits, the other for 
 
 LTC output can be driven “end-to-end” by its corresponding LTC input.
 
+@note	On newer multi-format-capable devices (see ::NTV2DeviceCanDoMultiFormat), the outgoing LTC frame rate must match a
+		designated SDI output’s frame rate (see CNTV2Card::SetAnalogLTCOutClockChannel).
+
 There are two ways to output analog LTC:
 -	Using \ref autocirculateplayout :
 	-	AutoCirculate automatically sets the LTC output register(s) at the proper time.

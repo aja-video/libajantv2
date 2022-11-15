@@ -931,44 +931,48 @@ public:
 		@param[in]	inKeepFramePulseSelect	For devices that support a frame pulse source that's independent of the
 											reference source, specify true to prevent resetting the frame pulse source.
 		@return		True if successful; otherwise false.
+		@see		GetReference, GetReferenceVideoFormat, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool		SetReference (const NTV2ReferenceSource inRefSource, const bool inKeepFramePulseSelect = false);
 
 	/**
-		@brief			Answers with the device's current clock reference source. See \ref deviceclockingandsync for more information.
-		@param[out]		outRefSource	Receives the ::NTV2ReferenceSource value.
-		@return			True if successful; otherwise false.
+		@brief		Answers with the device's current clock reference source.
+		@param[out]	outRefSource	Receives the current ::NTV2ReferenceSource value.
+		@return		True if successful; otherwise false.
+		@see		SetReference, GetReferenceVideoFormat, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool		GetReference (NTV2ReferenceSource & outRefSource);
 	
 	/**
 		@brief		Enables the device's frame pulse reference select.
-					See \ref deviceclockingandsync for more information.
 		@param[in]	inEnable	Specify true to enable the frame pulse reference; otherwise specify false.
 		@return		True if successful; otherwise false.
+		@see		GetEnableFramePulseReference, GetFramePulseReference, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool		EnableFramePulseReference (const bool inEnable);	//	New in SDK 15.5
 	
 	/**
-		@brief			Answers whether or not the device's current frame pulse reference source is enabled.
-						See \ref deviceclockingandsync for more information.
-		@param[out]		outEnabled		Receives true if the frame pulse reference is enabled; otherwise false.
-		@return			True if successful; otherwise false.
+		@brief		Answers whether or not the device's current frame pulse reference source is enabled.
+					See \ref deviceclockingandsync for more information.
+		@param[out]	outEnabled		Receives true if the frame pulse reference is enabled; otherwise false.
+		@return		True if successful; otherwise false.
+		@see		EnableFramePulseReference, GetFramePulseReference, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool		GetEnableFramePulseReference (bool & outEnabled);	//	New in SDK 15.5
 	
 	/**
 		@brief		Sets the device's frame pulse reference source. See \ref deviceclockingandsync for more information.
-		@return		True if successful; otherwise false.
 		@param[in]	inRefSource		Specifies the ::NTV2ReferenceSource to use for the device's frame pulse reference.
-					
+		@return		True if successful; otherwise false.
+		@see		GetFramePulseReference, GetEnableFramePulseReference, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool		SetFramePulseReference (const NTV2ReferenceSource inRefSource); //	New in SDK 15.5
 	
 	/**
-		@brief			Answers with the device's current frame pulse reference source.
-		@return			True if successful; otherwise false.
-		@param[out]		outRefSource	Receives the ::NTV2ReferenceSource value.
+		@brief		Answers with the device's current frame pulse reference source.
+		@param[out]	outRefSource	Receives the ::NTV2ReferenceSource value.
+		@return		True if successful; otherwise false.
+		@see		SetFramePulseReference, GetEnableFramePulseReference, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool		GetFramePulseReference (NTV2ReferenceSource & outRefSource);	//	New in SDK 15.5
 
@@ -4938,6 +4942,10 @@ public:
 		@brief		Returns the video format of the signal that is present on the device's reference input.
 		@return		A valid ::NTV2VideoFormat if successful; otherwise returns ::NTV2_FORMAT_UNKNOWN.
 		@note		The returned video format, if valid, will be an SD format for black burst and HD for tri-level.
+		@note		If the device is capable of reading analog LTC from its reference input connector
+					(i.e. if ::NTV2DeviceCanDoLTCInOnRefPort returns true), then CNTV2Card::GetLTCInputEnable
+					should be called to confirm that the reference port is reading reference, and not LTC.
+		@see		GetReference, SetReference, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL NTV2VideoFormat GetReferenceVideoFormat (void);
 	
@@ -5933,12 +5941,26 @@ public:
 	///@{
 	/**
 		@brief		Enables or disables the ability for the device to read analog LTC on the reference input connector.
-		@param[in]	inEnable	If true, the device will read analog LTC from the reference input connector.
-								Otherwise, the device cannot read analog LTC from the reference input connector.
+		@param[in]	inEnable	If true, the device will read analog LTC from the reference input connector,
+								and won't be able to genlock to external reference. If false, the device will
+								expect a reference signal at the reference input connector, not analog LTC.
 		@return		True if successful; otherwise false.
-		@note		When enabled, the device cannot genlock to whatever signal is applied to the reference input.
+		@note		Not all devices are able to read analog LTC from their reference input.
+					Call ::NTV2DeviceCanDoLTCInOnRefPort to find out.
+		@see		GetLTCInputEnable, ::NTV2DeviceCanDoLTCInOnRefPort, \ref ancanalogltcinput
 	**/
-	AJA_VIRTUAL bool		SetLTCInputEnable (bool inEnable);
+	AJA_VIRTUAL bool		SetLTCInputEnable (const bool inEnable);
+
+	/**
+		@brief		Answers true if the device is currently configured to read analog LTC from the reference
+					input connector (instead of reference).
+		@param[out]	outEnabled	Receives true if the device is set to read analog LTC from its reference connector,
+								or false if it's configured to read reference.
+		@return		True if successful; otherwise false.
+		@note		Not all devices are able to read analog LTC from their reference input.
+					Call ::NTV2DeviceCanDoLTCInOnRefPort to find out.
+		@see		SetLTCInputEnable, ::NTV2DeviceCanDoLTCInOnRefPort, \ref ancanalogltcinput
+	**/
 	AJA_VIRTUAL bool		GetLTCInputEnable (bool & outIsEnabled);
 
 	/**
@@ -5949,14 +5971,20 @@ public:
 		@return		True if successful; otherwise false.
 		@note		Some devices share analog LTC input and reference input on one connector.
 					For these devices, this call should be preceded by a call to NTV2Card::SetLTCInputEnable(true).
+		@see		ReadAnalogLTCInput, ::NTV2DeviceGetNumLTCInputs, \ref ancanalogltcinput
 	**/
 	AJA_VIRTUAL bool		GetLTCInputPresent (bool & outIsPresent, const UWord inLTCInputNdx = 0);
 
-	AJA_VIRTUAL bool		SetLTCOnReference (bool inNewValue);			//	DEPRECATE??
-	AJA_VIRTUAL bool		GetLTCOnReference (bool & outLTCIsOnReference); //	DEPRECATE??
-
-	AJA_VIRTUAL bool		SetLTCEmbeddedOutEnable (bool inNewValue);
-	AJA_VIRTUAL bool		GetLTCEmbeddedOutEnable (bool & outValue);
+	/**
+		@brief	Reads the current contents of the device's analog LTC input registers.
+		@param[in]	inLTCInput		Specifies the device's analog LTC input to use. Use 0 for LTC In 1, or 1 for LTC In 2.
+									(Call ::NTV2DeviceGetNumLTCInputs to determine the number of analog LTC inputs.)
+		@param[out] outRP188Data	Receives the timecode read from the device registers.
+		@return		True if successful; otherwise false.
+		@note		The registers are read immediately, and should contain stable data if called soon after the VBI.
+		@see		GetLTCInputPresent, ::NTV2DeviceGetNumLTCInputs, \ref ancanalogltcinput
+	**/
+	AJA_VIRTUAL bool		ReadAnalogLTCInput (const UWord inLTCInput, RP188_STRUCT & outRP188Data);
 
 	/**
 		@brief	Reads the current contents of the device's analog LTC input registers.
@@ -5965,18 +5993,9 @@ public:
 		@param[out] outRP188Data	Receives the timecode read from the device registers.
 		@return		True if successful; otherwise false.
 		@note		The registers are read immediately, and should contain stable data if called soon after the VBI.
+		@see		GetLTCInputPresent, ::NTV2DeviceGetNumLTCInputs, \ref ancanalogltcinput
 	**/
-	AJA_VIRTUAL bool	ReadAnalogLTCInput (const UWord inLTCInput, RP188_STRUCT & outRP188Data);
-
-	/**
-		@brief	Reads the current contents of the device's analog LTC input registers.
-		@param[in]	inLTCInput		Specifies the device's analog LTC input to use. Use 0 for LTC In 1, or 1 for LTC In 2.
-									(Call ::NTV2DeviceGetNumLTCInputs to determine the number of analog LTC inputs.)
-		@param[out] outRP188Data	Receives the timecode read from the device registers.
-		@return		True if successful; otherwise false.
-		@note		The registers are read immediately, and should contain stable data if called soon after the VBI.
-	**/
-	AJA_VIRTUAL bool	ReadAnalogLTCInput (const UWord inLTCInput, NTV2_RP188 & outRP188Data);
+	AJA_VIRTUAL bool		ReadAnalogLTCInput (const UWord inLTCInput, NTV2_RP188 & outRP188Data);
 
 	/**
 		@brief	Answers with the (SDI) input channel that's providing the clock reference being used by the given device's analog LTC input.
@@ -5986,8 +6005,9 @@ public:
 		@return		True if successful; otherwise false.
 		@note		This function is provided for devices that are capable of handling multiple, disparate video formats (see ::NTV2DeviceCanDoMultiFormat
 					and CNTV2Card::GetMultiFormatMode functions). It doesn't make sense to call this function on a device that is running in "UniFormat" mode.
+		@see		SetAnalogLTCInClockChannel, ::NTV2DeviceGetNumLTCInputs, \ref ancanalogltcinput
 	**/
-	AJA_VIRTUAL bool	GetAnalogLTCInClockChannel (const UWord inLTCInput, NTV2Channel & outChannel);
+	AJA_VIRTUAL bool		GetAnalogLTCInClockChannel (const UWord inLTCInput, NTV2Channel & outChannel);
 
 	/**
 		@brief	Sets the (SDI) input channel that is to provide the clock reference to be used by the given analog LTC input.
@@ -5997,8 +6017,9 @@ public:
 		@return		True if successful; otherwise false.
 		@note		This function is provided for devices that are capable of handling multiple, disparate video formats (see ::NTV2DeviceCanDoMultiFormat
 					and CNTV2Card::GetMultiFormatMode functions). It doesn't make sense to call this function on a device that is running in "UniFormat" mode.
+		@see		GetAnalogLTCInClockChannel, ::NTV2DeviceGetNumLTCInputs, \ref ancanalogltcinput
 	**/
-	AJA_VIRTUAL bool	SetAnalogLTCInClockChannel (const UWord inLTCInput, const NTV2Channel inChannel);
+	AJA_VIRTUAL bool		SetAnalogLTCInClockChannel (const UWord inLTCInput, const NTV2Channel inChannel);
 
 	/**
 		@brief	Writes the given timecode to the specified analog LTC output register.
@@ -6007,8 +6028,9 @@ public:
 		@param[in]	inRP188Data		Specifies the timecode to write into the device registers.
 									Only the "Low" and "High" fields are used -- the "DBB" field is ignored.
 		@return		True if successful; otherwise false.
+		@see		::NTV2DeviceGetNumLTCOutputs, \ref ancanalogltcoutput
 	**/
-	AJA_VIRTUAL bool	WriteAnalogLTCOutput (const UWord inLTCOutput, const RP188_STRUCT & inRP188Data);
+	AJA_VIRTUAL bool		WriteAnalogLTCOutput (const UWord inLTCOutput, const RP188_STRUCT & inRP188Data);
 
 	/**
 		@brief	Writes the given timecode to the specified analog LTC output register.
@@ -6017,8 +6039,9 @@ public:
 		@param[in]	inRP188Data		Specifies the timecode to write into the device registers.
 									Only the "Low" and "High" fields are used -- the "DBB" field is ignored.
 		@return		True if successful; otherwise false.
+		@see		::NTV2DeviceGetNumLTCOutputs, \ref ancanalogltcoutput
 	**/
-	AJA_VIRTUAL bool	WriteAnalogLTCOutput (const UWord inLTCOutput, const NTV2_RP188 & inRP188Data);
+	AJA_VIRTUAL bool		WriteAnalogLTCOutput (const UWord inLTCOutput, const NTV2_RP188 & inRP188Data);
 
 	/**
 		@brief	Answers with the (SDI) output channel that's providing the clock reference being used by the given device's analog LTC output.
@@ -6028,8 +6051,9 @@ public:
 		@return		True if successful; otherwise false.
 		@note		This function is provided for devices that are capable of handling multiple, disparate video formats (see ::NTV2DeviceCanDoMultiFormat
 					and CNTV2Card::GetMultiFormatMode functions). It doesn't make sense to call this function on a device that is running in "UniFormat" mode.
+		@see		SetAnalogLTCOutClockChannel, ::NTV2DeviceGetNumLTCOutputs, \ref ancanalogltcoutput
 	**/
-	AJA_VIRTUAL bool	GetAnalogLTCOutClockChannel (const UWord inLTCOutput, NTV2Channel & outChannel);
+	AJA_VIRTUAL bool		GetAnalogLTCOutClockChannel (const UWord inLTCOutput, NTV2Channel & outChannel);
 
 	/**
 		@brief	Sets the (SDI) output channel that is to provide the clock reference to be used by the given analog LTC output.
@@ -6039,8 +6063,16 @@ public:
 		@return		True if successful; otherwise false.
 		@note		This function is provided for devices that are capable of handling multiple, disparate video formats (see ::NTV2DeviceCanDoMultiFormat
 					and CNTV2Card::GetMultiFormatMode functions). It doesn't make sense to call this function on a device that is running in "UniFormat" mode.
+		@see		GetAnalogLTCOutClockChannel, ::NTV2DeviceGetNumLTCOutputs, \ref ancanalogltcoutput
 	**/
-	AJA_VIRTUAL bool	SetAnalogLTCOutClockChannel (const UWord inLTCOutput, const NTV2Channel inChannel);
+	AJA_VIRTUAL bool		SetAnalogLTCOutClockChannel (const UWord inLTCOutput, const NTV2Channel inChannel);
+
+#if !defined(NTV2_DEPRECATE_16_3)
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetLTCOnReference(bool val))		{return SetLTCInputEnable(val);}	///< @deprecated	Use SetLTCInputEnable instead. First deprecated in SDK 16.3.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetLTCOnReference(bool & outVal))	{return GetLTCInputEnable(outVal);}	///< @deprecated	Use GetLTCInputEnable instead. First deprecated in SDK 16.3.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetLTCEmbeddedOutEnable (const bool inNewValue));	///< @deprecated	Use GetLTCInputEnable instead. First deprecated in SDK 16.3.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetLTCEmbeddedOutEnable (bool & outValue));			///< @deprecated	Obsolete, do not use. First deprecated in SDK 16.3.
+#endif	//	!defined(NTV2_DEPRECATE_16_3)
 	///@}
 
 	/**

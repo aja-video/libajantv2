@@ -1596,7 +1596,7 @@ bool CNTV2Card::SetReference (const NTV2ReferenceSource inRefSource, const bool 
 	NTV2DeviceID id = GetDeviceID();
 
 	if (::NTV2DeviceCanDoLTCInOnRefPort(id) && inRefSource == NTV2_REFERENCE_EXTERNAL)
-		SetLTCOnReference(false);
+		SetLTCInputEnable(false);
 	
 	if (NTV2DeviceCanDoFramePulseSelect(id) && !inKeepFramePulseSelect)
 		EnableFramePulseReference(false);	//Reset this for backwards compatibility
@@ -6013,67 +6013,21 @@ bool CNTV2Card::GetLHIVideoDACMode(NTV2VideoDACMode & outValue)
 }
 
 
-bool CNTV2Card::SetLTCInputEnable(bool value)
+bool CNTV2Card::SetLTCInputEnable (bool inEnable)
 {
-	if(value && ((GetDeviceID() == DEVICE_ID_IO4K)		||
-				 (GetDeviceID() == DEVICE_ID_IO4KUFC)	||
-				 (GetDeviceID() == DEVICE_ID_IO4KPLUS)	||
-				 (GetDeviceID() == DEVICE_ID_IOIP_2022) ||
-				 (GetDeviceID() == DEVICE_ID_IOIP_2110) ||
-				 (GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12)))
-	{
-		NTV2ReferenceSource source;
-		GetReference(source);
-//		if(source == NTV2_REFERENCE_EXTERNAL)
-//			SetReference(NTV2_REFERENCE_FREERUN);
-	}
-	if(GetDeviceID() == DEVICE_ID_CORVID24)
-	{
-		value = !value;
-	}
-	WriteRegister (kRegFS1ReferenceSelect, value, kFS1RefMaskLTCOnRefInSelect, kFS1RefShiftLTCOnRefInSelect);
-	return WriteRegister (kRegFS1ReferenceSelect, value? 0 : 1, kRegMaskLTCOnRefInSelect, kRegShiftLTCOnRefInSelect);
-}
-
-bool CNTV2Card::SetLTCOnReference(bool value)
-{
-
-	if(value && ((GetDeviceID() == DEVICE_ID_IO4K)		||
-				 (GetDeviceID() == DEVICE_ID_IO4KUFC)	||
-				 (GetDeviceID() == DEVICE_ID_IO4KPLUS)	||
-				 (GetDeviceID() == DEVICE_ID_IOIP_2022) ||
-				 (GetDeviceID() == DEVICE_ID_IOIP_2110) ||
-				 (GetDeviceID() == DEVICE_ID_IOIP_2110_RGB12)))
-	{
-		NTV2ReferenceSource source;
-		GetReference(source);
-//		if(source == NTV2_REFERENCE_EXTERNAL)
-//			SetReference(NTV2_REFERENCE_FREERUN);
-	}
-	if(GetDeviceID() == DEVICE_ID_CORVID24)
-	{
-		value = !value;
-	}
-	WriteRegister (kRegFS1ReferenceSelect, value, kFS1RefMaskLTCOnRefInSelect, kFS1RefShiftLTCOnRefInSelect);
-	return WriteRegister (kRegFS1ReferenceSelect, value? 0 : 1, kRegMaskLTCOnRefInSelect, kRegShiftLTCOnRefInSelect);
+	if (GetDeviceID() == DEVICE_ID_CORVID24)
+		inEnable = !inEnable;	//	Oops, Corvid24's LTCOnRefInSelect bit sense was flipped
+	return WriteRegister (kRegFS1ReferenceSelect, ULWord(inEnable), kFS1RefMaskLTCOnRefInSelect, kFS1RefShiftLTCOnRefInSelect)
+		&& WriteRegister (kRegFS1ReferenceSelect, ULWord(inEnable), kRegMaskLTCOnRefInSelect, kRegShiftLTCOnRefInSelect);
 }
 
 bool CNTV2Card::GetLTCInputEnable (bool & outIsEnabled)
 {
-	ULWord	tempVal (0);
-	if (!ReadRegister (kRegFS1ReferenceSelect, tempVal, kFS1RefMaskLTCOnRefInSelect, kFS1RefShiftLTCOnRefInSelect))
+	if (!CNTV2DriverInterface::ReadRegister (kRegFS1ReferenceSelect, outIsEnabled, kFS1RefMaskLTCOnRefInSelect, kFS1RefShiftLTCOnRefInSelect))
 		return false;
-	outIsEnabled = tempVal ? true : false;
+	if (GetDeviceID() == DEVICE_ID_CORVID24)
+		outIsEnabled = !outIsEnabled;	//	Oops, Corvid24's LTCOnRefInSelect bit sense was flipped
 	return true;
-}
-
-bool CNTV2Card::GetLTCOnReference (bool & outLTCIsOnReference)
-{
-	ULWord	tempVal (0);
-	bool	retVal	(ReadRegister (kRegFS1ReferenceSelect, tempVal, kFS1RefMaskLTCOnRefInSelect, kFS1RefShiftLTCOnRefInSelect));
-	if (retVal)
-		outLTCIsOnReference = (tempVal == 1) ? false : true;
-	return retVal;
 }
 
 bool CNTV2Card::GetLTCInputPresent (bool & outIsPresent, const UWord inLTCInputNdx)
@@ -6091,20 +6045,17 @@ bool CNTV2Card::GetLTCInputPresent (bool & outIsPresent, const UWord inLTCInputN
 	}		
 }
 
-bool CNTV2Card::SetLTCEmbeddedOutEnable(bool value)
-{
-	return WriteRegister (kRegFS1ReferenceSelect, value, kFS1RefMaskLTCEmbeddedOutEnable, kFS1RefShiftLTCEmbeddedOutEnable);
-}
+#if !defined(NTV2_DEPRECATE_16_3)
+	bool CNTV2Card::SetLTCEmbeddedOutEnable (const bool inEnable)
+	{
+		return WriteRegister (kRegFS1ReferenceSelect, ULWord(inEnable), kFS1RefMaskLTCEmbeddedOutEnable, kFS1RefShiftLTCEmbeddedOutEnable);
+	}
 
-bool CNTV2Card::GetLTCEmbeddedOutEnable (bool & outValue)
-{
-	ULWord	tempVal (0);
-	if (!ReadRegister(kRegFS1ReferenceSelect, tempVal, kFS1RefMaskLTCEmbeddedOutEnable, kFS1RefShiftLTCEmbeddedOutEnable))
-		return false;
-	outValue = tempVal ? true : false;
-	return true;
-}
-
+	bool CNTV2Card::GetLTCEmbeddedOutEnable (bool & outEnabled)
+	{
+		return CNTV2DriverInterface::ReadRegister (kRegFS1ReferenceSelect, outEnabled, kFS1RefMaskLTCEmbeddedOutEnable, kFS1RefShiftLTCEmbeddedOutEnable);
+	}
+#endif	//	!defined(NTV2_DEPRECATE_16_3)
 
 bool CNTV2Card::ReadAnalogLTCInput (const UWord inLTCInput, RP188_STRUCT & outRP188Data)
 {
@@ -6200,7 +6151,7 @@ bool CNTV2Card::SetAnalogLTCOutClockChannel (const UWord inLTCOutput, const NTV2
 }
 
 
-bool CNTV2Card::SetSDITransmitEnable(NTV2Channel inChannel, bool enable)
+bool CNTV2Card::SetSDITransmitEnable (NTV2Channel inChannel, bool enable)
 {
 	ULWord mask, shift;
 	if (IS_CHANNEL_INVALID (inChannel))
