@@ -12,28 +12,26 @@
 // The hash should be precisely 40 characters, and the short hash 10 characters.
 // Both hashes come from the git rev-parse command.
 
-#if !defined(AJA_GIT_COMMIT_HASH)
-extern "C" const char GitCommitHash[41] = "";
-#else
-extern "C" const char GitCommitHash[41] = AJA_GIT_COMMIT_HASH;
-#endif
-
-#if !defined(AJA_GIT_COMMIT_HASH_SHORT)
-extern "C" const char GitCommitHashShort[11] = "";
-#else
-extern "C" const char GitCommitHashShort[11] = AJA_GIT_COMMIT_HASH_SHORT;
-#endif
-
-#pragma comment(linker, "/include:GitCommitHash")
-#pragma comment(linker, "/include:GitCommitHashShort")
+// #pragma comment(linker, "/include:GitCommitHash")
+// #pragma comment(linker, "/include:GitCommitHashShort")
 
 const char* NTV2GitHash()
 {
+#if !defined(AJA_GIT_COMMIT_HASH)
+	static const char GitCommitHash[41] = "";
+#else
+	static const char GitCommitHash[41] = AJA_GIT_COMMIT_HASH;
+#endif
 	return &GitCommitHash[0];
 }
 
 const char* NTV2GitHashShort()
 {
+#if !defined(AJA_GIT_COMMIT_HASH_SHORT)
+	static const char GitCommitHashShort[11] = "";
+#else
+	static const char GitCommitHashShort[11] = AJA_GIT_COMMIT_HASH_SHORT;
+#endif
     return &GitCommitHashShort[0];
 }
 
