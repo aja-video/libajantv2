@@ -8,6 +8,8 @@
 
 #include "ajaexport.h"
 
+#include <string>
+
 //	Automated builds remove this and the following several lines		//	__AUTO_BUILD_REMOVE__
 #if !defined (AJA_PATCHED)												//	__AUTO_BUILD_REMOVE__
 	#define AJA_DECIMAL_PLACEHOLDER			0							//	__AUTO_BUILD_REMOVE__
@@ -27,8 +29,6 @@
 #define AJA_NTV2_SDK_VERSION_BEFORE(__a__,__b__)		(AJA_NTV2_SDK_VERSION < (((__a__) << 24) | ((__b__) << 16)))
 
 #if !defined(NTV2_BUILDING_DRIVER)
-extern "C" const char GitCommitHash[41];
-extern "C" const char GitCommitHashShort[11];
-AJAExport const char* NTV2GitHash();
-AJAExport const char* NTV2GitHashShort();
+AJAExport const std::string& NTV2GitHash();
+AJAExport const std::string& NTV2GitHashShort();
 #endif

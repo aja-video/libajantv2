@@ -1381,7 +1381,9 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 			// Checking this way because on Mac it returns /private/var/folders... for fullFilePath
 			// while tempFilePath is /var/folders...
 			// var is a symbolic link to /private/var
+#if !defined(AJA_WINDOWS)
 			CHECK(fullFilePath.find(tempFilePath) != std::string::npos);
+#endif
 			// size should equal the truncate
 			CHECK(size == 16);
 			status = file.Seek(0, eAJASeekSet);

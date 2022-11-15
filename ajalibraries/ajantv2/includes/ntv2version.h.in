@@ -8,6 +8,8 @@
 
 #include "ajaexport.h"
 
+#include <string>
+
 #define AJA_NTV2_SDK_VERSION_MAJOR		@AJA_NTV2_SDK_VERSION_MAJOR@		///< @brief The SDK major version number, an unsigned decimal integer.
 #define AJA_NTV2_SDK_VERSION_MINOR		@AJA_NTV2_SDK_VERSION_MINOR@		///< @brief The SDK minor version number, an unsigned decimal integer.
 #define AJA_NTV2_SDK_VERSION_POINT		@AJA_NTV2_SDK_VERSION_POINT@		///< @brief The SDK "point" release version, an unsigned decimal integer.
@@ -20,8 +22,6 @@
 #define AJA_NTV2_SDK_VERSION_BEFORE(__a__,__b__)		(AJA_NTV2_SDK_VERSION < (((__a__) << 24) | ((__b__) << 16)))
 
 #if !defined(NTV2_BUILDING_DRIVER)
-extern "C" const char GitCommitHash[41];
-extern "C" const char GitCommitHashShort[11];
-AJAExport const char* NTV2GitHash();
-AJAExport const char* NTV2GitHashShort();
+AJAExport const std::string& NTV2GitHash();
+AJAExport const std::string& NTV2GitHashShort();
 #endif
