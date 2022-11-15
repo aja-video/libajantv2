@@ -12,31 +12,20 @@
 // The hash should be precisely 40 characters, and the short hash 10 characters.
 // Both hashes come from the git rev-parse command.
 
-// #pragma comment(linker, "/include:GitCommitHash")
-// #pragma comment(linker, "/include:GitCommitHashShort")
-
-const char* NTV2GitHash()
+const std::string& NTV2GitHash()
 {
-#if !defined(AJA_GIT_COMMIT_HASH)
-	static const char GitCommitHash[41] = "";
-#else
-	static const char GitCommitHash[41] = AJA_GIT_COMMIT_HASH;
+	static std::string gitHash;
+#if defined(AJA_GIT_COMMIT_HASH)
+	gitHash = AJA_GIT_COMMIT_HASH;	
 #endif
-	return &GitCommitHash[0];
+	return gitHash;
 }
 
-const char* NTV2GitHashShort()
+const std::string& NTV2GitHashShort()
 {
-#if !defined(AJA_GIT_COMMIT_HASH_SHORT)
-	static const char GitCommitHashShort[11] = "";
-#else
-	static const char GitCommitHashShort[11] = AJA_GIT_COMMIT_HASH_SHORT;
+	static std::string gitHash;
+#if defined(AJA_GIT_COMMIT_HASH_SHORT)
+	gitHash = AJA_GIT_COMMIT_HASH_SHORT;
 #endif
-    return &GitCommitHashShort[0];
+	return gitHash;
 }
-
-// #if defined(WIN64)
-// #pragma comment(linker, "/include:GitVersionHash")
-// #elif defined(WIN32)
-// #pragma comment(linker, "/include:_GitVersionHash")
-// #endif
