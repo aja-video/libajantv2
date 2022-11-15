@@ -1477,7 +1477,7 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 			CHECK_EQ(status, AJA_STATUS_SUCCESS);
 			if (status == AJA_STATUS_SUCCESS) {
 				char cwd[256];
-				char* cwdbuf = getcwd(&cwd[0], 256);
+				//char* cwdbuf = getcwd(&cwd[0], 256);
 				std::string buf("Hello, AJAFileIO!");
 				CHECK_EQ(fio.Write(buf), buf.size());
 #if defined(AJA_WINDOWS)

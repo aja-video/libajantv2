@@ -199,7 +199,6 @@ AJAFileIO::Open(
 #else
 	AJAStatus	status = AJA_STATUS_FAIL;
 	string		flagsAndAttributes;
-	bool		bIsWriting = false;
 
 	if ((mpFile == NULL) && (0 != fileName.length()))
 	{
