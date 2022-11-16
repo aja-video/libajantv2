@@ -6073,24 +6073,23 @@ bool CNTV2Card::ReadAnalogLTCInput (const UWord inLTCInput, NTV2_RP188 & outRP18
 	if (inLTCInput >= ::NTV2DeviceGetNumLTCInputs(_boardID))
 		return false;
 
-	ULWord	regLo	(inLTCInput == 0 ? kRegLTCAnalogBits0_31 : (inLTCInput == 1 ? kRegLTC2AnalogBits0_31 : 0));
-	ULWord	regHi	(inLTCInput == 0 ? kRegLTCAnalogBits32_63 : (inLTCInput == 1 ? kRegLTC2AnalogBits32_63 : 0));
+	const ULWord regLo (inLTCInput ? kRegLTC2AnalogBits0_31  : kRegLTCAnalogBits0_31 );
+	const ULWord regHi (inLTCInput ? kRegLTC2AnalogBits32_63 : kRegLTCAnalogBits32_63);
 	outRP188Data.fDBB = 0;
-	return regLo  &&  regHi	 &&	 ReadRegister(regLo, outRP188Data.fLo)	&&	ReadRegister(regHi, outRP188Data.fHi);
+	return ReadRegister(regLo, outRP188Data.fLo)  &&  ReadRegister(regHi, outRP188Data.fHi);
 }
 
 
 bool CNTV2Card::GetAnalogLTCInClockChannel (const UWord inLTCInput, NTV2Channel & outChannel)
 {
-	if (inLTCInput >= ::NTV2DeviceGetNumLTCInputs (_boardID))
+	if (inLTCInput >= ::NTV2DeviceGetNumLTCInputs(_boardID))
 		return false;
 
-	ULWord		value			(0);
-	ULWord		shift			(inLTCInput == 0 ? 1 : (inLTCInput == 1 ? 9 : 0));	//	Bits 1|2|3 for LTCIn1, bits 9|10|11 for LTCIn2
-	const bool	retVal			(ReadRegister (kRegLTCStatusControl, value, 0x7, shift));
-	if (retVal)
-		outChannel = static_cast <NTV2Channel> (value + 1);
-	return retVal;
+	ULWord value(0);
+	if (!ReadRegister (kRegLTCStatusControl, value, 0x7, inLTCInput ? 9 : 1)) // Bits 1|2|3 for LTCIn1, bits 9|10|11 for LTCIn2
+		return false;
+	outChannel = NTV2Channel(value + 1);
+	return true;
 }
 
 
@@ -6098,17 +6097,15 @@ bool CNTV2Card::SetAnalogLTCInClockChannel (const UWord inLTCInput, const NTV2Ch
 {
 	if (inLTCInput >= ::NTV2DeviceGetNumLTCInputs (_boardID))
 		return false;
-
-	ULWord	shift			(inLTCInput == 0 ? 1 : (inLTCInput == 1 ? 9 : 0));	//	Bits 1|2|3 for LTCIn1, bits 9|10|11 for LTCIn2
-	if (IS_CHANNEL_INVALID (inChannel))
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	return WriteRegister (kRegLTCStatusControl, inChannel - 1, 0x7, shift);
+	return WriteRegister (kRegLTCStatusControl, inChannel - 1, 0x7, inLTCInput ? 9 : 1); // Bits 1|2|3 for LTCIn1, bits 9|10|11 for LTCIn2
 }
 
 
 bool CNTV2Card::WriteAnalogLTCOutput (const UWord inLTCOutput, const RP188_STRUCT & inRP188Data)
 {
-	const NTV2_RP188	rp188data (inRP188Data);
+	const NTV2_RP188 rp188data(inRP188Data);
 	return WriteAnalogLTCOutput (inLTCOutput, rp188data);
 }
 
@@ -6119,87 +6116,71 @@ bool CNTV2Card::WriteAnalogLTCOutput (const UWord inLTCOutput, const NTV2_RP188 
 		return false;
 
 	return WriteRegister (inLTCOutput == 0 ? kRegLTCAnalogBits0_31	: kRegLTC2AnalogBits0_31,  inRP188Data.fLo)
-			&& WriteRegister (inLTCOutput == 0 ? kRegLTCAnalogBits32_63 : kRegLTC2AnalogBits32_63, inRP188Data.fHi);
+		&& WriteRegister (inLTCOutput == 0 ? kRegLTCAnalogBits32_63 : kRegLTC2AnalogBits32_63, inRP188Data.fHi);
 }
 
 
 bool CNTV2Card::GetAnalogLTCOutClockChannel (const UWord inLTCOutput, NTV2Channel & outChannel)
 {
-	if (inLTCOutput >= ::NTV2DeviceGetNumLTCOutputs (_boardID))
+	if (inLTCOutput >= ::NTV2DeviceGetNumLTCOutputs(_boardID))
 		return false;
 
-	ULWord		value			(0);
-	ULWord		shift			(inLTCOutput == 0 ? 16 : (inLTCOutput == 1 ? 20 : 0));	//	Bits 16|17|18 for LTCOut1, bits 20|21|22 for LTCOut2
-	bool		isMultiFormat	(false);
-	const bool	retVal			(shift && GetMultiFormatMode (isMultiFormat) && isMultiFormat && ReadRegister (kRegLTCStatusControl, value, 0x7, shift));
-	if (retVal)
-		outChannel = static_cast <NTV2Channel> (value + 1);
-	return retVal;
+	ULWord	value(0);
+	bool	isMultiFormat(false);
+	if (!GetMultiFormatMode(isMultiFormat))
+		return false;
+	if (!isMultiFormat)
+		return false;
+	if (!ReadRegister(kRegLTCStatusControl, value, 0x7, inLTCOutput ? 20 : 16)) // Bits 16|17|18 for LTCOut1, bits 20|21|22 for LTCOut2
+		return false;
+	outChannel = NTV2Channel(value + 1);
+	return true;
 }
 
 
 bool CNTV2Card::SetAnalogLTCOutClockChannel (const UWord inLTCOutput, const NTV2Channel inChannel)
 {
-	if (inLTCOutput >= ::NTV2DeviceGetNumLTCOutputs (_boardID))
+	if (inLTCOutput >= ::NTV2DeviceGetNumLTCOutputs(_boardID))
 		return false;
-
-	ULWord	shift			(inLTCOutput == 0 ? 16 : (inLTCOutput == 1 ? 20 : 0));	//	Bits 16|17|18 for LTCOut1, bits 20|21|22 for LTCOut2
-	bool	isMultiFormat	(false);
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
-	return shift && GetMultiFormatMode (isMultiFormat) && isMultiFormat && WriteRegister (kRegLTCStatusControl, inChannel - 1, 0x7, shift);
+	bool isMultiFormat(false);
+	if (!GetMultiFormatMode(isMultiFormat))
+		return false;
+	if (!isMultiFormat)
+		return false;
+	return WriteRegister (kRegLTCStatusControl, inChannel - 1, 0x7, inLTCOutput ? 20 : 16); // Bits 16|17|18 for LTCOut1, bits 20|21|22 for LTCOut2
 }
 
 
-bool CNTV2Card::SetSDITransmitEnable (NTV2Channel inChannel, bool enable)
+static const ULWord sSDIXmitEnableMasks[] = {	kRegMaskSDI1Transmit, kRegMaskSDI2Transmit, kRegMaskSDI3Transmit, kRegMaskSDI4Transmit,
+												kRegMaskSDI5Transmit, kRegMaskSDI6Transmit, kRegMaskSDI7Transmit, kRegMaskSDI8Transmit};
+static const ULWord sSDIXmitEnableShifts[] = {	kRegShiftSDI1Transmit, kRegShiftSDI2Transmit, kRegShiftSDI3Transmit, kRegShiftSDI4Transmit,
+												kRegShiftSDI5Transmit, kRegShiftSDI6Transmit, kRegShiftSDI7Transmit, kRegShiftSDI8Transmit};
+
+bool CNTV2Card::SetSDITransmitEnable (const NTV2Channel inChannel, const bool inEnable)
 {
-	ULWord mask, shift;
-	if (IS_CHANNEL_INVALID (inChannel))
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	switch (inChannel)
-	{
-		default:
-		case NTV2_CHANNEL1:		mask = kRegMaskSDI1Transmit;	shift = kRegShiftSDI1Transmit;	break;
-		case NTV2_CHANNEL2:		mask = kRegMaskSDI2Transmit;	shift = kRegShiftSDI2Transmit;	break;
-		case NTV2_CHANNEL3:		mask = kRegMaskSDI3Transmit;	shift = kRegShiftSDI3Transmit;	break;
-		case NTV2_CHANNEL4:		mask = kRegMaskSDI4Transmit;	shift = kRegShiftSDI4Transmit;	break;
-		case NTV2_CHANNEL5:		mask = kRegMaskSDI5Transmit;	shift = kRegShiftSDI5Transmit;	break;
-		case NTV2_CHANNEL6:		mask = kRegMaskSDI6Transmit;	shift = kRegShiftSDI6Transmit;	break;
-		case NTV2_CHANNEL7:		mask = kRegMaskSDI7Transmit;	shift = kRegShiftSDI7Transmit;	break;
-		case NTV2_CHANNEL8:		mask = kRegMaskSDI8Transmit;	shift = kRegShiftSDI8Transmit;	break;
-	}
-	return WriteRegister(kRegSDITransmitControl, enable, mask, shift);
+	const ULWord mask(sSDIXmitEnableMasks[inChannel]), shift(sSDIXmitEnableShifts[inChannel]);
+	return WriteRegister(kRegSDITransmitControl, ULWord(inEnable), mask, shift);
 }
 
 bool CNTV2Card::SetSDITransmitEnable (const NTV2ChannelSet & inSDIConnectors, const bool inEnable)
-{	UWord failures(0);
+{
+	UWord failures(0);
 	for (NTV2ChannelSetConstIter it(inSDIConnectors.begin());  it != inSDIConnectors.end();	 ++it)
 		if (!SetSDITransmitEnable(*it, inEnable))
 			failures++;
 	return !failures;
 }
 
-bool CNTV2Card::GetSDITransmitEnable(NTV2Channel inChannel, bool & outIsEnabled)
+bool CNTV2Card::GetSDITransmitEnable (const NTV2Channel inChannel, bool & outIsEnabled)
 {
-	ULWord mask (0), shift (0), tempVal (0);
-	if (IS_CHANNEL_INVALID (inChannel))
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	switch (inChannel)
-	{
-		default:
-		case NTV2_CHANNEL1:		mask = kRegMaskSDI1Transmit;	shift = kRegShiftSDI1Transmit;	break;
-		case NTV2_CHANNEL2:		mask = kRegMaskSDI2Transmit;	shift = kRegShiftSDI2Transmit;	break;
-		case NTV2_CHANNEL3:		mask = kRegMaskSDI3Transmit;	shift = kRegShiftSDI3Transmit;	break;
-		case NTV2_CHANNEL4:		mask = kRegMaskSDI4Transmit;	shift = kRegShiftSDI4Transmit;	break;
-		case NTV2_CHANNEL5:		mask = kRegMaskSDI5Transmit;	shift = kRegShiftSDI5Transmit;	break;
-		case NTV2_CHANNEL6:		mask = kRegMaskSDI6Transmit;	shift = kRegShiftSDI6Transmit;	break;
-		case NTV2_CHANNEL7:		mask = kRegMaskSDI7Transmit;	shift = kRegShiftSDI7Transmit;	break;
-		case NTV2_CHANNEL8:		mask = kRegMaskSDI8Transmit;	shift = kRegShiftSDI8Transmit;	break;
-	}
-
-	const bool	retVal	(ReadRegister (kRegSDITransmitControl, tempVal, mask, shift));
-	outIsEnabled = static_cast <bool> (tempVal);
-	return retVal;
+	const ULWord mask(sSDIXmitEnableMasks[inChannel]), shift(sSDIXmitEnableShifts[inChannel]);
+	return CNTV2DriverInterface::ReadRegister (kRegSDITransmitControl, outIsEnabled, mask, shift);
 }
 
 
@@ -6207,17 +6188,14 @@ bool CNTV2Card::SetSDIOut2Kx1080Enable (NTV2Channel inChannel, const bool inIsEn
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
-	return WriteRegister (gChannelToSDIOutControlRegNum [inChannel], inIsEnabled, kK2RegMaskSDI1Out_2Kx1080Mode, kK2RegShiftSDI1Out_2Kx1080Mode);
+	return WriteRegister (gChannelToSDIOutControlRegNum[inChannel], inIsEnabled, kK2RegMaskSDI1Out_2Kx1080Mode, kK2RegShiftSDI1Out_2Kx1080Mode);
 }
 
 bool CNTV2Card::GetSDIOut2Kx1080Enable(NTV2Channel inChannel, bool & outIsEnabled)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
-	ULWord		tempVal (0);
-	const bool	retVal	(ReadRegister (gChannelToSDIOutControlRegNum[inChannel], tempVal, kK2RegMaskSDI1Out_2Kx1080Mode, kK2RegShiftSDI1Out_2Kx1080Mode));
-	outIsEnabled = static_cast <bool> (tempVal);
-	return retVal;
+	return CNTV2DriverInterface::ReadRegister (gChannelToSDIOutControlRegNum[inChannel], outIsEnabled, kK2RegMaskSDI1Out_2Kx1080Mode, kK2RegShiftSDI1Out_2Kx1080Mode);
 }
 
 bool CNTV2Card::SetSDIOut3GEnable (const NTV2Channel inChannel, const bool inEnable)
@@ -6253,9 +6231,7 @@ bool CNTV2Card::SetSDIOut6GEnable (const NTV2Channel inChannel, const bool inEna
 {
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	NTV2Channel channel (inChannel);
-	if (!NTV2DeviceCanDo12gRouting(GetDeviceID()))
-		channel = NTV2_CHANNEL3;
+	const NTV2Channel channel (::NTV2DeviceCanDo12gRouting(GetDeviceID()) ? inChannel : NTV2_CHANNEL3);
 	if (inEnable)
 		WriteRegister(gChannelToSDIOutControlRegNum[channel], 0, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
 	return WriteRegister(gChannelToSDIOutControlRegNum[channel], inEnable, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode);
@@ -6265,10 +6241,8 @@ bool CNTV2Card::GetSDIOut6GEnable (const NTV2Channel inChannel, bool & outIsEnab
 {
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	bool	is6G(false), is12G(false);
-	NTV2Channel channel (inChannel);
-	if (!NTV2DeviceCanDo12gRouting(GetDeviceID()))
-		channel = NTV2_CHANNEL3;
+	bool is6G(false), is12G(false);
+	NTV2Channel channel (::NTV2DeviceCanDo12gRouting(GetDeviceID()) ? inChannel : NTV2_CHANNEL3);
 	const bool result (CNTV2DriverInterface::ReadRegister(gChannelToSDIOutControlRegNum[channel], is6G, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode)
 						&& CNTV2DriverInterface::ReadRegister(gChannelToSDIOutControlRegNum[channel], is12G, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode));
 	if (is6G && !is12G)
@@ -6282,9 +6256,7 @@ bool CNTV2Card::SetSDIOut12GEnable (const NTV2Channel inChannel, const bool inEn
 {
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	NTV2Channel channel (inChannel);
-	if (!NTV2DeviceCanDo12gRouting(GetDeviceID()))
-		channel = NTV2_CHANNEL3;
+	NTV2Channel channel (::NTV2DeviceCanDo12gRouting(GetDeviceID()) ? inChannel : NTV2_CHANNEL3);
 	if (inEnable)
 		WriteRegister(gChannelToSDIOutControlRegNum[channel], 0, kRegMaskSDIOut6GbpsMode, kRegShiftSDIOut6GbpsMode);
 	return WriteRegister(gChannelToSDIOutControlRegNum[channel], inEnable, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
@@ -6294,9 +6266,7 @@ bool CNTV2Card::GetSDIOut12GEnable(const NTV2Channel inChannel, bool & outIsEnab
 {
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	NTV2Channel channel (inChannel);
-	if (!NTV2DeviceCanDo12gRouting(GetDeviceID()))
-		channel = NTV2_CHANNEL3;
+	NTV2Channel channel (::NTV2DeviceCanDo12gRouting(GetDeviceID()) ? inChannel : NTV2_CHANNEL3);
 	return CNTV2DriverInterface::ReadRegister(gChannelToSDIOutControlRegNum[channel], outIsEnabled, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
 }
 
