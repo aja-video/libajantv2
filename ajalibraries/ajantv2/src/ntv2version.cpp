@@ -12,6 +12,7 @@
 // The hash should be precisely 40 characters, and the short hash 10 characters.
 // Both hashes come from the git rev-parse command.
 
+#if !defined(NTV2_BUILDING_DRIVER)
 const std::string& NTV2GitHash()
 {
 	static std::string gitHash;
@@ -29,3 +30,4 @@ const std::string& NTV2GitHashShort()
 #endif
 	return gitHash;
 }
+#endif
