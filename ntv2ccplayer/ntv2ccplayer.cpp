@@ -114,7 +114,6 @@ static const string gBuiltInCaptions ("IN CONGRESS, July 4, 1776.\n"
 	@brief	The global built-in caption data input stream.
 **/
 static istringstream	gBuiltInStream (gBuiltInCaptions);
-static AJALock			gLogLock;	//	Prevent interleaving cerr messages from multiple threads
 
 #if defined (MEASURE_ACCURACY)
 
