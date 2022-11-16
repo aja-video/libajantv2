@@ -27,7 +27,7 @@
 #define AJA_NTV2_SDK_VERSION_BEFORE(__a__,__b__)		(AJA_NTV2_SDK_VERSION < (((__a__) << 24) | ((__b__) << 16)))
 
 #if !defined(NTV2_BUILDING_DRIVER)
-#include <string>
-AJAExport const std::string& NTV2GitHash();
-AJAExport const std::string& NTV2GitHashShort();
+	#include <string>
+	AJAExport const std::string & NTV2GitHash (void);		///< @returns the 40-character ID of the last commit for this SDK build
+	AJAExport const std::string & NTV2GitHashShort (void);	///< @returns the 10-character ID of the last commit for this SDK build
 #endif

@@ -8,26 +8,31 @@
 
 #include "ntv2version.h"
 
-// NOTE: The following should be defined in the build script, i.e. CMake
-// The hash should be precisely 40 characters, and the short hash 10 characters.
-// Both hashes come from the git rev-parse command.
-
 #if !defined(NTV2_BUILDING_DRIVER)
-const std::string& NTV2GitHash()
-{
-	static std::string gitHash;
-#if defined(AJA_GIT_COMMIT_HASH)
-	gitHash = AJA_GIT_COMMIT_HASH;	
-#endif
-	return gitHash;
-}
 
-const std::string& NTV2GitHashShort()
-{
-	static std::string gitHash;
-#if defined(AJA_GIT_COMMIT_HASH_SHORT)
-	gitHash = AJA_GIT_COMMIT_HASH_SHORT;
-#endif
-	return gitHash;
-}
-#endif
+	//	NOTE:	AJA_GIT_COMMIT_HASH and AJA_GIT_COMMIT_HASH_SHORT are defined by the CMake build script:
+	//			The hash should be precisely 40 characters, and the short hash 10 characters.
+	//			Both hashes come from the git rev-parse command.
+
+	const std::string & NTV2GitHash()
+	{
+		//	This is ugly, but it's guaranteed thread-safe:
+		static const std::string gitHash
+		#if defined(AJA_GIT_COMMIT_HASH)
+										(AJA_GIT_COMMIT_HASH)	
+		#endif	//	defined(AJA_GIT_COMMIT_HASH)
+																;
+		return gitHash;
+	}
+
+	const std::string & NTV2GitHashShort()
+	{
+		//	This is ugly, but it's guaranteed thread-safe:
+		static std::string gitHash
+		#if defined(AJA_GIT_COMMIT_HASH_SHORT)
+									(AJA_GIT_COMMIT_HASH_SHORT)
+		#endif	//	defined(AJA_GIT_COMMIT_HASH_SHORT)
+																;
+		return gitHash;
+	}
+#endif	//	!defined(NTV2_BUILDING_DRIVER)
