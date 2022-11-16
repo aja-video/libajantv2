@@ -14,25 +14,25 @@
 	//			The hash should be precisely 40 characters, and the short hash 10 characters.
 	//			Both hashes come from the git rev-parse command.
 
-	const std::string & NTV2GitHash()
+	const std::string & NTV2GitHash (void)
 	{
 		//	This is ugly, but it's guaranteed thread-safe:
-		static const std::string gitHash
+		static const std::string sLongHash
 		#if defined(AJA_GIT_COMMIT_HASH)
 										(AJA_GIT_COMMIT_HASH)	
 		#endif	//	defined(AJA_GIT_COMMIT_HASH)
 																;
-		return gitHash;
+		return sLongHash;
 	}
 
-	const std::string & NTV2GitHashShort()
+	const std::string & NTV2GitHashShort (void)
 	{
-		//	This is ugly, but it's guaranteed thread-safe:
-		static std::string gitHash
+		//	This is ugly, but it's guaranteed thread-safe, anwith no mutex needed:
+		static const std::string sShortHash
 		#if defined(AJA_GIT_COMMIT_HASH_SHORT)
-									(AJA_GIT_COMMIT_HASH_SHORT)
+										(AJA_GIT_COMMIT_HASH_SHORT)
 		#endif	//	defined(AJA_GIT_COMMIT_HASH_SHORT)
 																;
-		return gitHash;
+		return sShortHash;
 	}
 #endif	//	!defined(NTV2_BUILDING_DRIVER)
