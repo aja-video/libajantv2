@@ -63,7 +63,6 @@ static AJALock					sTypeLabelsVectorLock;
 static std::set<std::string>	sLogKeys;
 static AJALock					sLogKeysLock;
 
-
 #define addTypeLabelToVector(_x_)	sTypeLabelsVector.push_back(#_x_)
 #define addTypeLabel(_x_)			sTypeLabelsVector.push_back(_x_)
 
@@ -861,7 +860,7 @@ bool AJAPersistence::GetValuesString(const std::string& keyQuery, std::vector<st
 	bool shouldLog(should_we_log()), isGood(false);
 	int dbOpenErr = 0;
 	if (!shouldLog)
-		for (auto it(keys.begin());  it != keys.end();  ++it)
+		for (std::vector<std::string>::const_iterator it(keys.begin());  it != keys.end();  ++it)
 			if (DebugLogHasKey(*it))
 				{shouldLog = true;  break;}
 	{
