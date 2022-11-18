@@ -24,6 +24,24 @@ namespace aja
 static std::string WHITESPACE = " \t\n\r";
 
 /**
+ *	Determine if `str` starts with specified string.
+ *
+ *	@param[in]		str		The string to check
+ *	@param[in]		needle	The substring to look for at the start of str
+ *	@return			`true` if str starts with the specified string, otherwise `false`.
+ */
+AJA_EXPORT bool starts_with(const std::string &str, const std::string &needle);
+
+/**
+ *	Determine if `str` starts with specified character.
+ *
+ *	@param[in]		str		The string to check
+ *	@param[in]		needle	The character to look for at the start of str
+ *	@return			`true` if str starts with the specified string, otherwise `false`.
+ */
+AJA_EXPORT bool starts_with(const std::string &str, const char needle);
+
+/**
  *	Replaces all occurrences of a substring within a string with a new string
  *
  *	@param[in,out]	str	 The string to modify

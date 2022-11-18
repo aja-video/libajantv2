@@ -57,6 +57,18 @@
 namespace aja
 {
 
+bool starts_with(const std::string &str, const std::string &needle)
+{
+    return (str.substr(0, needle.size()) == needle);
+}
+
+bool starts_with(const std::string &str, const char needle)
+{
+    if (str.length() > 0)
+        return str[0] == needle;
+    return false;
+}
+
 std::string& replace(std::string& str, const std::string& from, const std::string& to)
 {
 	if (!from.empty())
