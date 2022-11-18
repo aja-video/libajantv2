@@ -102,7 +102,7 @@ if (AJA_CODE_SIGN)
 endif()
 if (AJA_DEPLOY_LIBS)
     include(AJAQtHelpers)
-    deploy_qt_libs(ntv2qtmultiinput)
+    aja_deploy_qt_libs(ntv2qtmultiinput)
 endif()
 install(TARGETS ${BUILD_TARGETS}
     BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}

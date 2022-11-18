@@ -83,7 +83,7 @@ if (AJA_CODE_SIGN)
 endif()
 if (AJA_DEPLOY_LIBS)
     include(AJAQtHelpers)
-    deploy_qt_libs(ntv2konaipjsonsetup)
+    aja_deploy_qt_libs(ntv2konaipjsonsetup)
 endif()
 install(TARGETS ${BUILD_TARGETS}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
