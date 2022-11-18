@@ -1326,16 +1326,23 @@ The <b>Tone Generator</b> is a handy tool for generating one or more channels of
 @image	html	watcher-tool-tonegen.png
 
 <b>Controls:</b>
-	-	“Channel Enable” checkboxes — There’s one checkbox for each audio channel.
-		-	Disabled channels always produce silence (zero values).
-		-	An enabled channel has its own additional controls:
-			-	<b>Frequency</b> — Adjusts the frequency of the generated waveform.
-			-	<b>Phase</b> — Adjusts the phase of the generated waveform.
-			-	<b>Amplitude</b> — Adjusts the amplitude of the generated waveform.
-			-	<b>Offset</b> — Adjusts the (amplitude) offset of the generated waveform (like adding a DC component to it).
+	-	<b>Function</b> — For each audio channel, determines if the audio channel is enabled or not,
+		and if enabled, the waveform signal that will fill the channel.
+		-	<b>Off</b> — Disables the channel, and produces silence (zero values).
+		-	<b>Sine</b> — Produces sinusoidal waveform.
+		-	<b>Trian</b> — Produces a triangle waveform.
+		-	<b>Square</b> — Produces a square waveform.
+		-	<b>Noise</b> — Produces pseudo-random noise.
+	-	For enabled channels, additional controls are available:
+		-	<b>Frequency</b> — Adjusts the frequency of the generated waveform (not available for <b>Noise</b>).
+			For finer-grained control, click on the control, then adjust it using your keyboardʼs arrow keys.
+		-	<b>Phase</b> — Adjusts the phase (time shift) of the generated waveform (not available for <b>Noise</b>).
+		-	<b>Amplitude</b> — Adjusts the amplitude of the generated waveform.
+		-	<b>Offset</b> — Adjusts the (amplitude) offset of the generated waveform (like adding a DC component to it).
+		-	<b>Duty Cycle</b> — Adjusts the duty cycle (for <b>Square</b> or <b>Triangle</b> waveforms only).
 	-	<b>Audio System</b> popup menu — Specifies the target Audio System whose buffer will receive the generated audio samples.
 		Choosing a new Audio System will automatically stop the generator (if running).
-	-	<b>Fill</b> — Generates samples and Fills the given Audio System’s output buffer.
+	-	<b>Fill</b> — Generates samples and fills the given Audio System’s entire output buffer in a one-shot operation.
 	-	<b>Start</b> — Starts the generator to run continuously.
 		When running, this button will be disabled and will be titled “Running”.
 	-	<b>Stop</b> — Stops the generator.
