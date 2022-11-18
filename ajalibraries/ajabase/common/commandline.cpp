@@ -177,9 +177,7 @@ void AJACommandLineParser::operator=(const AJACommandLineParser &other)
     mUnknownOptions.clear();
 	mUnknownOptions = other.mUnknownOptions;
     mSubParsers.clear();
-    // for (const auto &sp : other.mSubParsers) {
     for (SubParserMapConstIter iter = other.mSubParsers.begin(); iter != other.mSubParsers.end(); iter++) {
-        // mSubParsers.emplace(AJASubParserPair(sp.first, sp.second));
         mSubParsers.insert(AJASubParserPair(iter->first, iter->second));
     }
 }
@@ -228,9 +226,7 @@ bool AJACommandLineParser::OptionByName(const std::string &name, AJACommandLineO
         iter != mOptions.end(); iter++) {
         const AJACommandLineOption &o = *iter;
         const AJAStringList &names = o.GetNames();
-        // for (const auto &n : names) {
         for (AJAStringListConstIter nameIter = names.begin(); nameIter != names.end(); nameIter++) {
-            // if (name == n) {
             if (name == *nameIter) {
                 opt = o;
                 return true;
@@ -245,7 +241,6 @@ bool AJACommandLineParser::AddSubParser(AJACommandLineParser *p)
 {
     const std::string &name = p->GetName();
     if (mSubParsers.find(name) == mSubParsers.end()) {
-        // mSubParsers.emplace(AJASubParserPair(name, p));
         mSubParsers.insert(AJASubParserPair(name, p));
         return true;
     }
@@ -446,13 +441,9 @@ bool AJACommandLineParser::AddOption(const AJACommandLineOption &option)
     bool exists = false;
     const AJAStringList &wantNames = option.GetNames();
     for (AJACommandLineOptionListIter optIter = mOptions.begin(); optIter != mOptions.end(); optIter++) {
-    // for (const auto &opt : mOptions) {
         const AJAStringList &names = optIter->GetNames();
         for (AJAStringListConstIter nameIter = names.begin(); nameIter != names.end(); nameIter++) {
-        // for (const auto &name : names) {
             for (AJAStringListConstIter wantIter = wantNames.begin(); wantIter != wantNames.end(); wantIter++) {
-            // for (const auto &wn : wantNames) {
-                // if (wn == name) {
                 if (*wantIter == *nameIter) {
                     exists = true;
                     goto next;
@@ -707,9 +698,7 @@ bool AJACommandLineParser::setOptionValue(const std::string &name, const std::st
         for (size_t i = 0; i < mOptions.size(); i++) {
             AJACommandLineOption opt = mOptions.at(i);
             const AJAStringList &names = opt.GetNames();
-            // for (const auto &n : names) {
             for (AJAStringListConstIter iter = names.begin(); iter != names.end(); iter++) {
-                // if (name == n) {
                 if (name == *iter) {
                     mOptions[i].AddValue(value);
                     return true;
