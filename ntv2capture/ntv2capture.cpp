@@ -164,8 +164,11 @@ AJAStatus NTV2Capture::SetupVideo (void)
 		return AJA_STATUS_NOINPUT;	//	Sorry, can't handle this format
 	}
 
+	//	Set output clock timing/reference when critical for SDI output(s) -- not so critical for capture apps.
+	if (!mConfig.fDoMultiFormat)						//	If not sharing the device...
+		mDevice.SetReference (NTV2_REFERENCE_FREERUN);	//	...then free-run
+
 	//	Set the device video format to whatever we detected at the input...
-	mDevice.SetReference (::NTV2InputSourceToReferenceSource(mConfig.fInputSource));
 	mDevice.SetVideoFormat (mVideoFormat, false, false, mConfig.fInputChannel);
 
 	//	Set the frame buffer pixel format for all the channels on the device
