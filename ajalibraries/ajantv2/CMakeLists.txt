@@ -195,6 +195,7 @@ if (NOT AJA_BUILD_OPENSOURCE)
 endif()
 
 configure_file(includes/ntv2version.h.in includes/ntv2version.h @ONLY)
+configure_file(includes/ntv2version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/includes/ntv2version.h @ONLY)
 
 # ajaanc
 set(AJAANC_HEADERS
