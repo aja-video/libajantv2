@@ -5,6 +5,8 @@
 	See the `ajantv2/includes/ntv2version.h.in` template when building with with CMake.
 	@copyright	(C) 2013-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
+#ifndef _NTV2VERSION_H_
+#define _NTV2VERSION_H_
 
 #include "ajaexport.h"
 
@@ -28,6 +30,9 @@
 
 #if !defined(NTV2_BUILDING_DRIVER)
 	#include <string>
+	AJAExport std::string NTV2Version (const bool inDetailed = false);	///< @returns a string containing SDK version information
 	AJAExport const std::string & NTV2GitHash (void);		///< @returns the 40-character ID of the last commit for this SDK build
 	AJAExport const std::string & NTV2GitHashShort (void);	///< @returns the 10-character ID of the last commit for this SDK build
 #endif
+
+#endif	//	_NTV2VERSION_H_

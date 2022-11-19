@@ -10,6 +10,8 @@
 
 #if !defined(NTV2_BUILDING_DRIVER)
 
+	#include <sstream>
+
 	//	NOTE:	AJA_GIT_COMMIT_HASH and AJA_GIT_COMMIT_HASH_SHORT are defined by the CMake build script:
 	//			The hash should be precisely 40 characters, and the short hash 10 characters.
 	//			Both hashes come from the git rev-parse command.
@@ -34,5 +36,21 @@
 		#endif	//	defined(AJA_GIT_COMMIT_HASH_SHORT)
 																;
 		return sShortHash;
+	}
+
+	std::string NTV2Version (const bool inDetailed)
+	{
+		std::ostringstream oss;
+		if (inDetailed)
+			oss	<< "NTV2 SDK version ";
+		else
+			oss << "v";
+		oss << AJA_NTV2_SDK_VERSION_MAJOR << "." << AJA_NTV2_SDK_VERSION_MINOR << "." << AJA_NTV2_SDK_VERSION_POINT
+			<< "." << AJA_NTV2_SDK_BUILD_NUMBER;
+		if (inDetailed)
+			oss << " built " << AJA_DATETIME_PLACEHOLDER << " from " << ::NTV2GitHash();
+		else
+			oss << " (" << ::NTV2GitHashShort() << ")";
+		return oss.str();
 	}
 #endif	//	!defined(NTV2_BUILDING_DRIVER)
