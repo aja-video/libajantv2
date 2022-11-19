@@ -16,6 +16,7 @@
 #include "limits.h"
 
 #include "ajabase/common/bytestream.h"
+#include "ajabase/common/commandline.h"
 #include "ajabase/common/common.h"
 #include "ajabase/common/guid.h"
 #include "ajabase/common/performance.h"
@@ -33,6 +34,7 @@
 #include <algorithm>
 #include <clocale>
 #include <iostream>
+#include <limits>
 #include <string.h>
 
 #ifdef AJA_WINDOWS
@@ -71,6 +73,446 @@ TEST_SUITE("types" * doctest::description("functions in ajabase/common/types.h")
 
 } //types
 
+void commandline_marker() {}
+TEST_SUITE("commandline" * doctest::description("function in ajabase/common/commandline.h")) {
+	TEST_CASE("AJACommandLineParser Constructor")
+	{
+		AJACommandLineParser parser;
+		CHECK(parser.GetName().empty() == true);
+		AJACommandLineParser parser2("foobar");
+		CHECK(parser2.GetName() == "foobar");
+	}
+	TEST_CASE("AJACommandLineParser AddOption")
+	{
+		AJACommandLineParser parser;
+		CHECK_EQ(parser.AddOption(AJACommandLineOption(AJAStringList{"f", "foo"}, "Tweak the foo")), true);
+		CHECK_EQ(parser.AddOption(AJACommandLineOption(AJAStringList{"F", "foo"}, "Tweak the foo")), false);
+		CHECK_EQ(parser.AddOption(AJACommandLineOption(AJAStringList{"F", "fabulous"}, "Tweak the fabulous")), true);
+		CHECK_EQ(parser.AddOption(AJACommandLineOption(AJAStringList{"f", "foobar"}, "Tweak the foobar")), false);
+		CHECK_EQ(parser.AddOption(AJACommandLineOption(AJAStringList{"b", "bar"}, "Tweak the bar")), true);
+		CHECK_EQ(parser.AddOption(AJACommandLineOption(AJAStringList{"z", "baz"}, "Tweak the baz")), true);
+		CHECK_EQ(parser.AddOption(AJACommandLineOption(AJAStringList{"b", "boom"}, "Tweak the boom")), false);
+	}
+	TEST_CASE("AJACommandLineParser OptionByName")
+	{
+		AJACommandLineParser parser;
+		parser.AddOption(AJACommandLineOption(AJAStringList{"f", "foo"}, "Tweak the foo"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"F", "fabulous"}, "Tweak the fabulous"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"b", "bar"}, "Tweak the bar"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"z", "baz"}, "Tweak the baz"));
+		AJACommandLineOption opt;
+		parser.OptionByName("fabulous", opt);
+		AJAStringList optNames = opt.GetNames();
+		CHECK_EQ(optNames.size(), 2);
+		CHECK_EQ(optNames[0], "F");
+		CHECK_EQ(optNames[1], "fabulous");
+	}
+	TEST_CASE("AJACommandLineParser ParseArgs kShortOptionsDefault")
+	{
+		AJACommandLineParser parser;
+		parser.AddOption(AJACommandLineOption(AJAStringList{"f", "foo"}, "Tweak the foo"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"b", "bar"}, "Tweak the bar"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"z", "baz"}, "Tweak the baz"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"q", "qux"}, "Tweak the qux"));
+		AJAStringList args;
+		args.push_back("ut_ajabase"); // skipped by the parser
+		args.push_back("-fnz");
+		args.push_back("-b23");
+		args.push_back("-q");
+		args.push_back("\"AJA Video Systems\"");
+		parser.ParseArgs(args);
+		CHECK_EQ(parser.IsSet("foo"), true);
+		CHECK_EQ(parser.IsSet("bar"), true);
+		CHECK_EQ(parser.IsSet("baz"), false);
+		CHECK_EQ(parser.Value("foo").AsString(), "nz");
+		CHECK_EQ(parser.Value("bar").AsInt32(), 23);
+		CHECK_EQ(parser.Value("qux").AsString(), "\"AJA Video Systems\"");
+	}
+	TEST_CASE("AJACommandLineParser ParseArgs kShortOptionsAsLong")
+	{
+		AJACommandLineParser parser(kShortOptionsAsLong);
+		parser.AddOption(AJACommandLineOption(AJAStringList{"f", "foo"}, "Tweak the foo"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"b", "bar"}, "Tweak the bar"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"z", "baz"}, "Tweak the baz"));
+		AJAStringList args;
+		args.push_back("ut_ajabase"); // skipped by the parser
+		args.push_back("-fnz");
+		parser.ParseArgs(args);
+		CHECK_EQ(parser.IsSet("foo"), true);
+		CHECK_EQ(parser.IsSet("bar"), false);
+		CHECK_EQ(parser.IsSet("baz"), true);
+		parser.Reset();
+		args.clear();
+		args.push_back("ut_ajabase"); // skipped by the parser
+		args.push_back("-fubz");
+		parser.ParseArgs(args);
+		CHECK_EQ(parser.IsSet("foo"), true);
+		CHECK_EQ(parser.IsSet("bar"), true);
+		CHECK_EQ(parser.IsSet("baz"), true);
+		CHECK_EQ(parser.IsSet("u"), false);
+	}
+	TEST_CASE("AJACommandLineParser ParseArgs Long")
+	{
+		AJACommandLineParser parser;
+		parser.AddOption(AJACommandLineOption(AJAStringList{"f", "foo"}, "Tweak the foo"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"b", "bar"}, "Tweak the bar"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"z", "baz"}, "Tweak the baz"));
+		AJAStringList args;
+		args.push_back("ut_ajabase"); // skipped by the parser
+		args.push_back("--foo=123");
+		args.push_back("--bar");
+		args.push_back("42");
+		parser.ParseArgs(args);
+		CHECK_EQ(parser.IsSet("foo"), true);
+		CHECK_EQ(parser.IsSet("bar"), true);
+		CHECK_EQ(parser.IsSet("baz"), false);
+		CHECK_EQ(parser.Value("foo").AsInt32(), 123);
+		CHECK_EQ(parser.Value("bar").AsInt32(), 42);
+	}
+	TEST_CASE("AJACommandLineParser Subparser")
+	{
+		AJACommandLineParser subParser("sub");
+		subParser.AddOption(AJACommandLineOption(AJAStringList{"q", "quack"}, "sub quack"));
+		subParser.AddOption(AJACommandLineOption(AJAStringList{"u", "update"}, "sub update"));
+		subParser.AddOption(AJACommandLineOption(AJAStringList{"x", "jinx"}, "sub jinx"));
+		AJACommandLineParser subParser2("sub2");
+		subParser2.AddOption(AJACommandLineOption(AJAStringList{"s", "stop"}, "sub2 stop"));
+		subParser2.AddOption(AJACommandLineOption(AJAStringList{"g", "go"}, "sub2 go"));
+		AJACommandLineParser parser;
+		parser.AddSubParser(&subParser);
+		parser.AddSubParser(&subParser2);
+		parser.AddOption(AJACommandLineOption(AJAStringList{"f", "foo"}, "Tweak the foo"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"b", "bar"}, "Tweak the bar"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"z", "baz"}, "Tweak the baz"));
+		AJAStringList args;
+		args.push_back("ut_ajabase"); // skipped by the parser
+		args.push_back("--foo=123");
+		args.push_back("--bar=42");
+		args.push_back("--baz=999");
+		parser.ParseArgs(args);
+		CHECK_EQ(parser.Value("foo").AsInt32(), 123);
+		CHECK_EQ(parser.Value("bar").AsInt32(), 42);
+		CHECK_EQ(parser.Value("baz").AsInt32(), 999);
+		args.clear();
+		args.push_back("ut_ajabase"); // skipped by the parser
+		args.push_back("sub");
+		args.push_back("-qa");
+		args.push_back("-ub");
+		args.push_back("-xc");
+		parser.ParseArgs(args);
+		CHECK_EQ(parser.Value("quack").AsString(), "a");
+		CHECK_EQ(parser.Value("update").AsString(), "b");
+		CHECK_EQ(parser.Value("jinx").AsString(), "c");
+		args.clear();
+		args.push_back("ut_ajabase"); // skipped by the parser
+		args.push_back("sub2");
+		args.push_back("--go");
+		parser.ParseArgs(args);
+		CHECK_EQ(parser.IsSet("go"), true);
+		CHECK_EQ(parser.IsSet("stop"), false);
+		CHECK_EQ(parser.IsSet("foo"), false);
+		CHECK_EQ(parser.IsSet("bar"), false);
+		CHECK_EQ(parser.IsSet("baz"), false);
+	}
+	TEST_CASE("AJACommandLineParser C++98 compliant")
+	{
+		AJACommandLineParser parser;
+		AJACommandLineOption opt1("foo", "foo arg", "0");
+		CHECK_EQ(parser.AddOption(opt1), true);
+		AJACommandLineOption opt2("foo", "foo arg", "0");
+		CHECK_EQ(parser.AddOption(opt2), false);
+		AJACommandLineOption opt3("foobar", "foobar arg", "0");
+		CHECK_EQ(parser.AddOption(opt3), true);
+		AJACommandLineOption abc("abc", "abc arg", "0");
+		AJACommandLineOption abd("abd", "abd arg", "0");
+		AJACommandLineOption abcdef("abcdef", "abcdef arg", "0");
+		CHECK_EQ(parser.AddOption(abc), true);
+		CHECK_EQ(parser.AddOption(abcdef), true);
+		CHECK_EQ(parser.AddOption(abd), true);
+		AJAStringList args;
+		args.push_back("appname.exe");
+		args.push_back("--foo=42");
+		args.push_back("--abc=123");
+		args.push_back("--abcdef=456");
+		args.push_back("--abcdefg=600");
+		parser.ParseArgs(args);
+		CHECK_EQ(parser.Value("foo").AsUInt32(), 42);
+		CHECK_EQ(parser.Value("abc").AsUInt32(), 123);
+		CHECK_EQ(parser.Value("abcdef").AsUInt32(), 456);
+		CHECK_EQ(parser.Value("abcdefg").AsUInt32(), 0);
+		parser.Reset(); // clear parsed args and values
+		args.clear();
+		args.push_back("appname.exe");
+		args.push_back("-foo=42");
+		args.push_back("-abc=123");
+		args.push_back("-abcdef=456");
+		args.push_back("-abcdefg=600");
+		CHECK_EQ(parser.Value("foo").AsUInt32(), 42);
+		CHECK_EQ(parser.Value("abc").AsUInt32(), 123);
+		CHECK_EQ(parser.Value("abcdef").AsUInt32(), 456);
+		CHECK_EQ(parser.Value("abcdefg").AsUInt32(), 0);
+		parser.Reset(true); // clear everything
+		args.clear();
+		args.push_back("appname.exe");
+		args.push_back("-f");
+		args.push_back("99");
+		args.push_back("-a"),
+		args.push_back("hello");
+		args.push_back("-r3.14159");
+		opt1.AddName("f");
+		opt2.AddName("o");
+		opt3.AddName("r");
+		abc.AddName("a");
+		CHECK_EQ(parser.AddOption(opt1), true);
+		CHECK_EQ(parser.AddOption(opt2), false);
+		CHECK_EQ(parser.AddOption(opt3), true);
+		CHECK_EQ(parser.AddOption(abc), true);
+		parser.ParseArgs(args);
+		CHECK_EQ(parser.Value("foo").AsUInt32(), 99);
+		CHECK_EQ(parser.Value("abc").AsString(), "hello");
+		CHECK_EQ(parser.Value("foobar").AsFloat(), doctest::Approx(3.14159f));
+	}
+}
+
+void variant_marker() {}
+TEST_SUITE("variant" * doctest::description("functions in ajabase/common/variant.h")) {
+	TEST_CASE("constructors")
+	{
+		{ /* AJAVariantType ctor*/
+			AJAVariant v1(AJA_VARIANT_NONE);
+			CHECK_EQ(v1.AsInt32(), 0);
+			AJAVariant v2(AJA_VARIANT_BOOL);
+			CHECK_EQ(v2.AsInt32(), 0);
+			AJAVariant v3(AJA_VARIANT_FLOAT);
+			CHECK_EQ(v3.AsInt32(), 0);
+			AJAVariant v4(AJA_VARIANT_DOUBLE);
+			CHECK_EQ(v4.AsInt32(), 0);
+			AJAVariant v5(AJA_VARIANT_INT8);
+			CHECK_EQ(v5.AsInt32(), 0);
+			AJAVariant v6(AJA_VARIANT_UINT8);
+			CHECK_EQ(v6.AsInt32(), 0);
+			AJAVariant v7(AJA_VARIANT_INT16);
+			CHECK_EQ(v7.AsInt32(), 0);
+			AJAVariant v8(AJA_VARIANT_UINT16);
+			CHECK_EQ(v8.AsInt32(), 0);
+			AJAVariant v9(AJA_VARIANT_INT32);
+			CHECK_EQ(v9.AsInt32(), 0);
+			AJAVariant v10(AJA_VARIANT_UINT32);
+			CHECK_EQ(v10.AsInt32(), 0);
+			AJAVariant v11(AJA_VARIANT_INT64);
+			CHECK_EQ(v11.AsInt32(), 0);
+			AJAVariant v12(AJA_VARIANT_UINT64);
+			CHECK_EQ(v12.AsInt32(), 0);
+			AJAVariant v13(AJA_VARIANT_STRING);
+			CHECK_EQ(v13.AsInt32(), 0);
+		}
+
+		{ /* bool ctor */
+			AJAVariant v1(true);
+			CHECK_EQ(v1.AsBool(), true);
+			CHECK_EQ(v1.AsFloat(), 1.0f);
+			CHECK_EQ(v1.AsDouble(), 1.0);
+			CHECK_EQ(v1.AsInt8(), 1);
+			CHECK_EQ(v1.AsUInt8(), 1);
+			CHECK_EQ(v1.AsInt16(), 1);
+			CHECK_EQ(v1.AsUInt16(), 1);
+			CHECK_EQ(v1.AsInt32(), 1);
+			CHECK_EQ(v1.AsUInt32(), 1);
+			CHECK_EQ(v1.AsInt64(), 1);
+			CHECK_EQ(v1.AsUInt64(), 1);
+			CHECK_EQ(v1.AsString(), "true");
+		}
+
+		{ /* float ctor */
+			AJAVariant v1(3.14159f);
+			CHECK_EQ(v1.AsBool(), true);
+			CHECK_EQ(v1.AsFloat(), doctest::Approx(3.14159f));
+			CHECK_EQ(v1.AsDouble(), doctest::Approx(3.14159));
+			CHECK_EQ(v1.AsInt8(), 3);
+			CHECK_EQ(v1.AsUInt8(), 3);
+			CHECK_EQ(v1.AsInt16(), 3);
+			CHECK_EQ(v1.AsUInt16(), 3);
+			CHECK_EQ(v1.AsInt32(), 3);
+			CHECK_EQ(v1.AsUInt32(), 3);
+			CHECK_EQ(v1.AsInt64(), 3);
+			CHECK_EQ(v1.AsUInt64(), 3);
+			CHECK_EQ(v1.AsString(), std::string("3.141590"));
+		}
+
+		{ /* double ctor */
+			AJAVariant v1((double)6.95334);
+			CHECK_EQ(v1.AsBool(), true);
+			CHECK_EQ(v1.AsFloat(), doctest::Approx(6.95334f));
+			CHECK_EQ(v1.AsDouble(), doctest::Approx(6.95334));
+			CHECK_EQ(v1.AsInt8(), 6);
+			CHECK_EQ(v1.AsUInt8(), 6);
+			CHECK_EQ(v1.AsInt16(), 6);
+			CHECK_EQ(v1.AsUInt16(), 6);
+			CHECK_EQ(v1.AsInt32(), 6);
+			CHECK_EQ(v1.AsUInt32(), 6);
+			CHECK_EQ(v1.AsInt64(), 6);
+			CHECK_EQ(v1.AsUInt64(), 6);
+			CHECK_EQ(v1.AsString(), std::string("6.953340"));
+		}
+
+		{ /* int8 ctor */
+			AJAVariant v1((int8_t)INT8_MAX);
+			CHECK_EQ(v1.AsBool(), true);
+			CHECK_EQ(v1.AsFloat(), doctest::Approx(127.0f));
+			CHECK_EQ(v1.AsDouble(), doctest::Approx(127.0));
+			CHECK_EQ(v1.AsInt8(), 127);
+			CHECK_EQ(v1.AsUInt8(), 127);
+			CHECK_EQ(v1.AsInt16(), 127);
+			CHECK_EQ(v1.AsUInt16(), 127);
+			CHECK_EQ(v1.AsInt32(), 127);
+			CHECK_EQ(v1.AsUInt32(), 127);
+			CHECK_EQ(v1.AsInt64(), 127);
+			CHECK_EQ(v1.AsUInt64(), 127);
+			CHECK_EQ(v1.AsString(), std::string("127"));
+		}
+
+		{ /* uint8 ctor */
+			AJAVariant v1((uint8_t)UINT8_MAX);
+			CHECK_EQ(v1.AsBool(), true);
+			CHECK_EQ(v1.AsFloat(), doctest::Approx(255.0f));
+			CHECK_EQ(v1.AsDouble(), doctest::Approx(255.0));
+			CHECK_EQ(v1.AsInt8(), -1);
+			CHECK_EQ(v1.AsUInt8(), 255);
+			CHECK_EQ(v1.AsInt16(), 255);
+			CHECK_EQ(v1.AsUInt16(), 255);
+			CHECK_EQ(v1.AsInt32(), 255);
+			CHECK_EQ(v1.AsUInt32(), 255);
+			CHECK_EQ(v1.AsInt64(), 255);
+			CHECK_EQ(v1.AsUInt64(), 255);
+			CHECK_EQ(v1.AsString(), std::string("255"));
+		}
+
+		{ /* int16_t ctor */
+			AJAVariant v1((int16_t)INT16_MAX);
+			CHECK_EQ(v1.AsBool(), true);
+			CHECK_EQ(v1.AsFloat(), doctest::Approx(32767.0f));
+			CHECK_EQ(v1.AsDouble(), doctest::Approx(32767.0));
+			CHECK_EQ(v1.AsInt8(), -1);
+			CHECK_EQ(v1.AsUInt8(), 255);
+			CHECK_EQ(v1.AsInt16(), 32767);
+			CHECK_EQ(v1.AsUInt16(), 32767);
+			CHECK_EQ(v1.AsInt32(), 32767);
+			CHECK_EQ(v1.AsUInt32(), 32767);
+			CHECK_EQ(v1.AsInt64(), 32767);
+			CHECK_EQ(v1.AsUInt64(), 32767);
+			CHECK_EQ(v1.AsString(), std::string("32767"));
+		}
+
+		{ /* uint16_t ctor */
+			AJAVariant v1((uint16_t)UINT16_MAX);
+			CHECK_EQ(v1.AsBool(), true);
+			CHECK_EQ(v1.AsFloat(), doctest::Approx(65535.0f));
+			CHECK_EQ(v1.AsDouble(), doctest::Approx(65535.0));
+			CHECK_EQ(v1.AsInt8(), -1);
+			CHECK_EQ(v1.AsUInt8(), 255);
+			CHECK_EQ(v1.AsInt16(), -1);
+			CHECK_EQ(v1.AsUInt16(), 65535);
+			CHECK_EQ(v1.AsInt32(), 65535);
+			CHECK_EQ(v1.AsUInt32(), 65535);
+			CHECK_EQ(v1.AsInt64(), 65535);
+			CHECK_EQ(v1.AsUInt64(), 65535);
+			CHECK_EQ(v1.AsString(), std::string("65535"));
+		}
+
+		{ /* int32_t ctor */
+			AJAVariant v1((int32_t)INT32_MAX);
+			CHECK_EQ(v1.AsBool(), true);
+			CHECK_EQ(v1.AsFloat(), doctest::Approx(2147483647.0f));
+			CHECK_EQ(v1.AsDouble(), doctest::Approx(2147483647.0));
+			CHECK_EQ(v1.AsInt8(), -1);
+			CHECK_EQ(v1.AsUInt8(), 255);
+			CHECK_EQ(v1.AsInt16(), -1);
+			CHECK_EQ(v1.AsUInt16(), 65535);
+			CHECK_EQ(v1.AsInt32(), 2147483647);
+			CHECK_EQ(v1.AsUInt32(), 2147483647);
+			CHECK_EQ(v1.AsInt64(), 2147483647);
+			CHECK_EQ(v1.AsUInt64(), 2147483647);
+			CHECK_EQ(v1.AsString(), std::string("2147483647"));
+		}
+
+		{ /* uint32_t ctor */
+			AJAVariant v1((uint32_t)UINT32_MAX);
+			CHECK_EQ(v1.AsBool(), true);
+			CHECK_EQ(v1.AsFloat(), doctest::Approx(4294967295.0f));
+			CHECK_EQ(v1.AsDouble(), doctest::Approx(4294967295.0));
+			CHECK_EQ(v1.AsInt8(), -1);
+			CHECK_EQ(v1.AsUInt8(), 255);
+			CHECK_EQ(v1.AsInt16(), -1);
+			CHECK_EQ(v1.AsUInt16(), 65535);
+			CHECK_EQ(v1.AsInt32(), -1);
+			CHECK_EQ(v1.AsUInt32(), 4294967295U);
+			CHECK_EQ(v1.AsInt64(), 4294967295U);
+			CHECK_EQ(v1.AsUInt64(), 4294967295U);
+			CHECK_EQ(v1.AsString(), std::string("4294967295"));
+		}
+
+		{ /* int64_t ctor */
+			AJAVariant v1((int64_t)INT64_MAX);
+			CHECK_EQ(v1.AsBool(), true);
+			CHECK_EQ(v1.AsFloat(), doctest::Approx(9.22337204e+18f));
+			CHECK_EQ(v1.AsDouble(), doctest::Approx(9.2233720368547758e+18));
+			CHECK_EQ(v1.AsInt8(), -1);
+			CHECK_EQ(v1.AsUInt8(), 255);
+			CHECK_EQ(v1.AsInt16(), -1);
+			CHECK_EQ(v1.AsUInt16(), 65535);
+			CHECK_EQ(v1.AsInt32(), -1);
+			CHECK_EQ(v1.AsUInt32(), 4294967295U);
+			CHECK_EQ(v1.AsInt64(), 9223372036854775807);
+			CHECK_EQ(v1.AsUInt64(), 9223372036854775807);
+			CHECK_EQ(v1.AsString(), std::string("9223372036854775807"));
+		}
+
+		{ /* uint64_t ctor */
+			AJAVariant v1((uint64_t)UINT64_MAX);
+			CHECK_EQ(v1.AsBool(), true);
+			float f = v1.AsFloat();
+			double d = v1.AsDouble();
+			CHECK_EQ(v1.AsFloat(), doctest::Approx(1.84467441e+19));
+			CHECK_EQ(v1.AsDouble(), doctest::Approx(1.8446744073709552e+19));
+			CHECK_EQ(v1.AsInt8(), -1);
+			CHECK_EQ(v1.AsUInt8(), 255);
+			CHECK_EQ(v1.AsInt16(), -1);
+			CHECK_EQ(v1.AsUInt16(), 65535);
+			CHECK_EQ(v1.AsInt32(), -1);
+			CHECK_EQ(v1.AsUInt32(), 4294967295U);
+			CHECK_EQ(v1.AsInt64(), -1);
+			CHECK_EQ(v1.AsUInt64(), 18446744073709551615);
+			CHECK_EQ(v1.AsString(), std::string("18446744073709551615"));
+		}
+
+		{ /* string ctor */
+			AJAVariant v1((std::string)"hello");
+			CHECK_EQ(v1.AsBool(), false);
+			CHECK_EQ(v1.AsFloat(), doctest::Approx(0.0f));
+			CHECK_EQ(v1.AsDouble(), doctest::Approx(0.0));
+			CHECK_EQ(v1.AsInt8(), 0);
+			CHECK_EQ(v1.AsUInt8(), 0);
+			CHECK_EQ(v1.AsInt16(), 0);
+			CHECK_EQ(v1.AsUInt16(), 0);
+			CHECK_EQ(v1.AsInt32(), 0);
+			CHECK_EQ(v1.AsUInt32(), 0);
+			CHECK_EQ(v1.AsInt64(), 0);
+			CHECK_EQ(v1.AsUInt64(), 0);
+			CHECK_EQ(v1.AsString(), std::string("hello"));
+			AJAVariant v2((std::string)"true");
+			CHECK_EQ(v2.AsBool(), true);
+			AJAVariant v3((std::string)"false");
+			CHECK_EQ(v3.AsBool(), false);
+		}
+
+		{ /* copy ctor */
+			AJAVariant v1("123");
+			CHECK_EQ(v1.AsString(), "123");
+			AJAVariant v2(v1);
+			CHECK_EQ(v2.AsString(), "123");
+		}
+	}
+}
 void thread_marker() {}
 TEST_SUITE("thread" * doctest::description("functions in ajabase/system/thread.h")) {
 

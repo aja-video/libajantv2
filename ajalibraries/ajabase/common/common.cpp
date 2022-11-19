@@ -155,13 +155,13 @@ std::string to_string (long val)
 	std::ostringstream oss; oss << val;
 	return oss.str();
 }
-/*
+
 std::string to_string (long long val)
 {
 	std::ostringstream oss; oss << val;
 	return oss.str();
 }
-*/
+
 std::string to_string (unsigned val)
 {
 	std::ostringstream oss; oss << val;
@@ -173,13 +173,13 @@ std::string to_string (unsigned long val)
 	std::ostringstream oss; oss << val;
 	return oss.str();
 }
-/*
+
 std::string to_string (unsigned long long val)
 {
 	std::ostringstream oss; oss << val;
 	return oss.str();
 }
-*/
+
 std::string to_string (float val)
 {
 	std::ostringstream oss;
