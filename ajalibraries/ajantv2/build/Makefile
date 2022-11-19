@@ -45,6 +45,7 @@ AJA_LIB_SRCS =\
 		atomic.cpp \
 	    audioutilities.cpp \
 		buffer.cpp \
+		commandline.cpp \
 		common.cpp \
 		debug.cpp \
 		dpx_hdr.cpp \
@@ -76,6 +77,7 @@ AJA_LIB_SRCS =\
 		timecodeburn.cpp \
 		timer.cpp \
 		udp_socket.cpp \
+		variant.cpp \
 		videoutilities.cpp \
 		wavewriter.cpp \
 		ntv2audio.cpp \
@@ -120,6 +122,7 @@ AJA_LIB_SRCS =\
 		ntv2transcode.cpp \
 		ntv2utf8.cpp \
 		ntv2utils.cpp \
+		ntv2version.cpp \
 		ntv2verticalfilter.cpp \
 		ntv2vpid.cpp \
 		ntv2vpidfromspec.cpp \
