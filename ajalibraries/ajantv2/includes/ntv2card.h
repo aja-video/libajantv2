@@ -4300,6 +4300,22 @@ public:
 	**/
 	AJA_VIRTUAL bool	IsChannelEnabled (const NTV2Channel inChannel, bool & outEnabled);
 
+	/**
+		@brief		Answers with the set of channels that are currently enabled.
+		@param[out] outChannels		Receives the set of enabled channels.
+		@return		True if successful;	 otherwise false.
+		@see		CNTV2Card::GetDisabledChannels, CNTV2Card::EnableChannels, CNTV2Card::DisableChannels, \ref vidop-fs
+	**/
+	AJA_VIRTUAL bool	GetEnabledChannels (NTV2ChannelSet & outChannels);	//	New in SDK 16.3
+
+	/**
+		@brief		Answers with the set of channels that are currently disabled.
+		@param[out] outChannels		Receives the set of enabled channels.
+		@return		True if successful;	 otherwise false.
+		@see		CNTV2Card::GetEnabledChannels, CNTV2Card::EnableChannels, CNTV2Card::DisableChannels, \ref vidop-fs
+	**/
+	AJA_VIRTUAL bool	GetDisabledChannels (NTV2ChannelSet & outChannels);	//	New in SDK 16.3
+
 	#if !defined (NTV2_DEPRECATE)
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	SetChannel2Disable (bool value));	///< @deprecated	Use EnableChannel or DisableChannel instead.
 		AJA_VIRTUAL NTV2_DEPRECATED_f(bool	GetChannel2Disable (bool* value));	///< @deprecated	Use IsChannelEnabled instead.

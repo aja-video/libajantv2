@@ -2332,6 +2332,34 @@ bool CNTV2Card::IsChannelEnabled (const NTV2Channel inChannel, bool & outEnabled
 }	//	IsChannelEnabled
 
 
+bool CNTV2Card::GetEnabledChannels (NTV2ChannelSet & outChannels)
+{
+	UWord failures(0);
+	bool enabled(false);
+	outChannels.clear();
+	for (NTV2Channel ch(NTV2_CHANNEL1);  ch < NTV2Channel(::NTV2DeviceGetNumFrameStores(GetDeviceID()));  ch = NTV2Channel(ch+1))
+		if (!IsChannelEnabled (ch, enabled))
+			failures++;
+		else if (enabled)
+			outChannels.insert(ch);
+	return !failures;
+}
+
+
+bool CNTV2Card::GetDisabledChannels (NTV2ChannelSet & outChannels)
+{
+	UWord failures(0);
+	bool enabled(false);
+	outChannels.clear();
+	for (NTV2Channel ch(NTV2_CHANNEL1);  ch < NTV2Channel(::NTV2DeviceGetNumFrameStores(GetDeviceID()));  ch = NTV2Channel(ch+1))
+		if (!IsChannelEnabled (ch, enabled))
+			failures++;
+		else if (!enabled)
+			outChannels.insert(ch);
+	return !failures;
+}
+
+
 #if !defined (NTV2_DEPRECATE)
 	bool CNTV2Card::SetChannel2Disable(bool value)		{return WriteRegister (kRegCh2Control, value, kRegMaskChannelDisable, kRegShiftChannelDisable);}
 	bool CNTV2Card::GetChannel2Disable(bool* value)
