@@ -2,9 +2,12 @@
 /**
 	@file		ntv2version.h.in
 	@brief		CMake template for generating ajantv2/includes/ntv2version.h, which populates the SDK version number.
-    These variables are set in the ntv2 project CMakeLists.txt, found in the base of this repository.
+    These variables are set in cmake/AJAVersionConfig.cmake in the base of this repo.
 	@copyright	(C) 2013-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
+
+#ifndef _NTV2VERSION_H_
+#define _NTV2VERSION_H_
 
 #include "ajaexport.h"
 
@@ -22,6 +25,10 @@
 #define AJA_NTV2_SDK_VERSION_BEFORE(__a__,__b__)		(AJA_NTV2_SDK_VERSION < (((__a__) << 24) | ((__b__) << 16)))
 
 #if !defined(NTV2_BUILDING_DRIVER)
-AJAExport const std::string& NTV2GitHash();
-AJAExport const std::string& NTV2GitHashShort();
+	#include <string>
+	AJAExport std::string NTV2Version (const bool inDetailed = false);	///< @returns a string containing SDK version information
+	AJAExport const std::string & NTV2GitHash (void);		///< @returns the 40-character ID of the last commit for this SDK build
+	AJAExport const std::string & NTV2GitHashShort (void);	///< @returns the 10-character ID of the last commit for this SDK build
 #endif
+
+#endif	//	_NTV2VERSION_H_

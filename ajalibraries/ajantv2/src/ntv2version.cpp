@@ -1,8 +1,8 @@
 /* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2version.cpp
-	@brief		Defines for the NTV2 SDK git hash, used by `ajantv2/includes/ntv2version.h`.
-	See the `ajantv2/includes/ntv2version.h.in` template when building with with CMake.
+	@brief		Defines for the NTV2 SDK version helpers.
+	See the `ajantv2/includes/ntv2version.h.in` template when building with CMake.
 	@copyright	(C) 2013-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
@@ -48,7 +48,7 @@
 		oss << AJA_NTV2_SDK_VERSION_MAJOR << "." << AJA_NTV2_SDK_VERSION_MINOR << "." << AJA_NTV2_SDK_VERSION_POINT
 			<< "." << AJA_NTV2_SDK_BUILD_NUMBER;
 		if (inDetailed)
-			oss << " built " << AJA_DATETIME_PLACEHOLDER << " from " << ::NTV2GitHash();
+			oss << " built " << AJA_NTV2_SDK_BUILD_DATETIME << " from " << ::NTV2GitHash();
 		else
 			oss << " (" << ::NTV2GitHashShort() << ")";
 		return oss.str();
