@@ -224,6 +224,7 @@
     <ClCompile Include="..\..\ajaanc\src\ancillarylist.cpp" />
     <ClCompile Include="..\..\ajabase\common\audioutilities.cpp" />
     <ClCompile Include="..\..\ajabase\common\buffer.cpp" />
+    <ClCompile Include="..\..\ajabase\common\commandline.cpp" />
     <ClCompile Include="..\..\ajabase\common\common.cpp" />
     <ClCompile Include="..\..\ajabase\common\dpxfileio.cpp" />
     <ClCompile Include="..\..\ajabase\common\dpx_hdr.cpp" />
@@ -236,6 +237,7 @@
     <ClCompile Include="..\..\ajabase\common\timecode.cpp" />
     <ClCompile Include="..\..\ajabase\common\timecodeburn.cpp" />
     <ClCompile Include="..\..\ajabase\common\timer.cpp" />
+    <ClCompile Include="..\..\ajabase\common\variant.cpp" />
     <ClCompile Include="..\..\ajabase\common\videoutilities.cpp" />
     <ClCompile Include="..\..\ajabase\common\wavewriter.cpp" />
     <ClCompile Include="..\..\ajabase\network\ip_socket.cpp" />
@@ -345,6 +347,7 @@
     <ClInclude Include="..\..\ajabase\common\circularbuffer.h" />
     <ClInclude Include="..\..\ajabase\common\cli_utils.h" />
     <ClInclude Include="..\..\ajabase\common\common.h" />
+    <ClInclude Include="..\..\ajabase\common\commandline.h" />
     <ClInclude Include="..\..\ajabase\common\dpxfileio.h" />
     <ClInclude Include="..\..\ajabase\common\dpx_hdr.h" />
     <ClInclude Include="..\..\ajabase\common\export.h" />
@@ -361,6 +364,7 @@
     <ClInclude Include="..\..\ajabase\common\timecodeburn.h" />
     <ClInclude Include="..\..\ajabase\common\timer.h" />
     <ClInclude Include="..\..\ajabase\common\types.h" />
+    <ClInclude Include="..\..\ajabase\common\variant.h" />
     <ClInclude Include="..\..\ajabase\common\videotypes.h" />
     <ClInclude Include="..\..\ajabase\common\videoutilities.h" />
     <ClInclude Include="..\..\ajabase\common\wavewriter.h" />
