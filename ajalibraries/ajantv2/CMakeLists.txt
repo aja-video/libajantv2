@@ -239,6 +239,7 @@ set(AJABASE_COMMON_HEADERS
     ${AJA_LIB_BASE_ROOT}/common/bytestream.h
     ${AJA_LIB_BASE_ROOT}/common/circularbuffer.h
     ${AJA_LIB_BASE_ROOT}/common/cli_utils.h
+    ${AJA_LIB_BASE_ROOT}/common/commandline.h
     ${AJA_LIB_BASE_ROOT}/common/common.h
     ${AJA_LIB_BASE_ROOT}/common/dpxfileio.h
     ${AJA_LIB_BASE_ROOT}/common/dpx_hdr.h
@@ -255,6 +256,7 @@ set(AJABASE_COMMON_HEADERS
     ${AJA_LIB_BASE_ROOT}/common/timecodeburn.h
     ${AJA_LIB_BASE_ROOT}/common/timer.h
     ${AJA_LIB_BASE_ROOT}/common/types.h
+    ${AJA_LIB_BASE_ROOT}/common/variant.h
     ${AJA_LIB_BASE_ROOT}/common/videotypes.h
     ${AJA_LIB_BASE_ROOT}/common/videoutilities.h
     ${AJA_LIB_BASE_ROOT}/common/wavewriter.h)
@@ -286,6 +288,7 @@ set(AJABASE_SYS_HEADERS
 set(AJABASE_COMMON_SOURCES
     ${AJA_LIB_BASE_ROOT}/common/audioutilities.cpp
     ${AJA_LIB_BASE_ROOT}/common/buffer.cpp
+    ${AJA_LIB_BASE_ROOT}/common/commandline.cpp
     ${AJA_LIB_BASE_ROOT}/common/common.cpp
     ${AJA_LIB_BASE_ROOT}/common/dpxfileio.cpp
     ${AJA_LIB_BASE_ROOT}/common/dpx_hdr.cpp
@@ -298,8 +301,10 @@ set(AJABASE_COMMON_SOURCES
     ${AJA_LIB_BASE_ROOT}/common/timecode.cpp
     ${AJA_LIB_BASE_ROOT}/common/timecodeburn.cpp
     ${AJA_LIB_BASE_ROOT}/common/timer.cpp
+    ${AJA_LIB_BASE_ROOT}/common/variant.cpp
     ${AJA_LIB_BASE_ROOT}/common/videoutilities.cpp
     ${AJA_LIB_BASE_ROOT}/common/wavewriter.cpp)
+
 set(AJABASE_NETWORK_SOURCES
     ${AJA_LIB_BASE_ROOT}/network/ip_socket.cpp
     ${AJA_LIB_BASE_ROOT}/network/tcp_socket.cpp
