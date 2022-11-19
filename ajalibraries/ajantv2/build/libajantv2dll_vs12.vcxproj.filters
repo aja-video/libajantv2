@@ -90,6 +90,9 @@
     <ClCompile Include="..\src\ntv2vidproc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ntv2version.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\ntv2vpid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -429,6 +432,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\ntv2vidprocmasks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\ntv2version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\ntv2vpid.h">

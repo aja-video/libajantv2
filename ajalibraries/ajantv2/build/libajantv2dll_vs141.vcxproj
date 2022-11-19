@@ -2343,6 +2343,7 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release_2013_MD|x64'">MaxSpeed</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release_2013_MD|Win32'">MaxSpeed</Optimization>
     </ClCompile>
+    <ClCompile Include="..\src\ntv2version.cpp" />
     <ClCompile Include="..\src\ntv2vpid.cpp" />
     <ClCompile Include="..\src\ntv2vpidfromspec.cpp" />
     <ClCompile Include="..\src\ntv2serialcontrol.cpp" />
@@ -2463,6 +2464,7 @@
     <ClInclude Include="..\includes\ntv2tshelper.h" />
     <ClInclude Include="..\includes\ntv2utf8.h" />
     <ClInclude Include="..\includes\ntv2utils.h" />
+    <ClInclude Include="..\includes\ntv2version.h" />
     <ClInclude Include="..\includes\ntv2vpid.h" />
     <ClInclude Include="..\includes\ntv2vpidfromspec.h" />
     <ClInclude Include="..\includes\testpatterndata.h" />

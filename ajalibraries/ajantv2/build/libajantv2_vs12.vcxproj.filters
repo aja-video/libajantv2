@@ -87,6 +87,9 @@
     <ClCompile Include="..\src\ntv2utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\ntv2version.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\ntv2vidproc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -411,6 +414,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\ntv2utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\includes\ntv2version.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\includes\ntv2vidproc.h">
