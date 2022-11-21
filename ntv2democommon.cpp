@@ -1220,6 +1220,7 @@ string CNTV2DemoCommon::ACFrameRange::toString(void) const
 	return oss.str();
 }
 
+
 CNTV2DemoCommon::Popt::Popt (const int inArgc, const char ** pArgs, const PoptOpts * pInOptionsTable)
 {
 	mContext = ::poptGetContext(AJA_NULL, inArgc, pArgs, pInOptionsTable, 0);
@@ -1466,4 +1467,35 @@ bool CNTV2DemoCommon::BFT(void)
 		SHOULD_BE_FALSE(fRange.valid());
 	}
 	return true;
+}
+
+
+//////////////////////////////////////////////
+
+
+AJALabelValuePairs CaptureConfig::Get (const bool inCompact) const
+{
+	AJALabelValuePairs result;
+	AJASystemInfo::append(result,	"Capture Config");
+	AJASystemInfo::append(result,		"Device Specifier",	fDeviceSpec);
+	AJASystemInfo::append(result,		"Input Channel",	::NTV2ChannelToString(fInputChannel, inCompact));
+	AJASystemInfo::append(result,		"Input Source",		::NTV2InputSourceToString(fInputSource, inCompact));
+	AJASystemInfo::append(result,		"Pixel Format",		::NTV2FrameBufferFormatToString(fPixelFormat, inCompact));
+	AJASystemInfo::append(result,		"AutoCirc Frames",	fFrames.toString());
+	AJASystemInfo::append(result,		"A/B Conversion",	fABConversion ? "Y" : "N");
+	AJASystemInfo::append(result,		"MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
+	AJASystemInfo::append(result,		"Capture Anc",		fWithAnc ? "Y" : "N");
+	AJASystemInfo::append(result,		"Anc Capture File",	fAncDataFilePath);
+	AJASystemInfo::append(result,		"Capture Audio",	fWithAudio ? "Y" : "N");
+	AJASystemInfo::append(result,		"TSI Routing",		fDoTSIRouting ? "Y" : "N");
+	if (fNumAudioLinks > 1)
+		AJASystemInfo::append(result,	"Num Audio Links",	aja::to_string(fNumAudioLinks));
+	return result;
+}
+
+
+std::ostream & operator << (std::ostream & ioStrm,  const CaptureConfig & inObj)
+{
+	ioStrm	<< AJASystemInfo::ToString(inObj.Get());
+	return ioStrm;
 }

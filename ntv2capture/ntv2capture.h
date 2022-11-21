@@ -9,54 +9,9 @@
 #ifndef _NTV2CAPTURE_H
 #define _NTV2CAPTURE_H
 
-#include "ntv2enums.h"
-#include "ntv2devicefeatures.h"
-#include "ntv2devicescanner.h"
 #include "ntv2democommon.h"
-#include "ntv2formatdescriptor.h"
-#include "ajabase/common/videotypes.h"
 #include "ajabase/common/circularbuffer.h"
 #include "ajabase/system/thread.h"
-#include "ajabase/system/info.h"
-
-
-/**
-	@brief	This class is used to configure an NTV2Capture instance.
-**/
-typedef struct CaptureConfig
-{
-	public:
-		std::string						fDeviceSpec;		///< @brief	The AJA device to use
-		std::string						fAncDataFilePath;	///< @brief	Optional path to Anc binary data file
-		NTV2Channel						fInputChannel;		///< @brief	The device channel to use
-		NTV2InputSource					fInputSource;		///< @brief	The device input connector to use
-		CNTV2DemoCommon::ACFrameRange	fFrames;			///< @brief	AutoCirculate frame count or range
-		NTV2PixelFormat					fPixelFormat;		///< @brief	Pixel format to use
-		bool							fABConversion;		///< @brief	If true, do level-A/B conversion
-		bool							fDoMultiFormat;		///< @brief	If true, use multi-format/multi-channel mode, if device supports it; otherwise normal mode
-		bool							fWithAnc;			///< @brief	If true, also capture Anc
-		bool							fWithAudio;			///< @brief	If true, also capture Audio
-
-		/**
-			@brief	Constructs a default NTV2Capture configuration.
-		**/
-		inline explicit	CaptureConfig (const std::string & inDeviceSpec	= "0")
-			:	fDeviceSpec		(inDeviceSpec),
-				fAncDataFilePath(),
-				fInputChannel	(NTV2_CHANNEL_INVALID),
-				fInputSource	(NTV2_INPUTSOURCE_INVALID),
-				fFrames			(7),
-				fPixelFormat	(NTV2_FBF_8BIT_YCBCR),
-				fABConversion	(false),
-				fDoMultiFormat	(false),
-				fWithAnc		(false),
-				fWithAudio		(true)
-		{
-		}
-		AJALabelValuePairs	Get (const bool inCompact = false) const;
-} CaptureConfig;
-
-std::ostream &	operator << (std::ostream & ioStrm, const CaptureConfig & inObj);
 
 
 /**
@@ -174,12 +129,12 @@ class NTV2Capture
 		NTV2DeviceID		mDeviceID;			///< @brief	My device identifier
 		CaptureConfig		mConfig;			///< @brief	My operating configuration
 		NTV2VideoFormat		mVideoFormat;		///< @brief	My video format
-		NTV2FormatDesc		mFormatDesc;		///< @brief	Describes my video/pixel format
+		NTV2FormatDesc		mFormatDesc;		///< @brief	Describes my video raster
 		NTV2TaskMode		mSavedTaskMode;		///< @brief	Used to restore prior every-frame task mode
 		NTV2AudioSystem		mAudioSystem;		///< @brief	The audio system I'm using (if any)
-		bool				mGlobalQuit;		///< @brief	Set "true" to gracefully stop
 		NTV2FrameDataArray	mHostBuffers;		///< @brief	My host buffers
 		MyCircularBuffer	mAVCircularBuffer;	///< @brief	My ring buffer object
+		bool				mGlobalQuit;		///< @brief	Set "true" to gracefully stop
 
 };	//	NTV2Capture
 

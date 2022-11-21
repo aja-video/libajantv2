@@ -41,6 +41,7 @@ int main (int argc, const char ** argv)
 	char *			pFramesSpec		(AJA_NULL);		//	AutoCirculate frames spec
 	char *			pRecordAnc		(AJA_NULL);		//	Record anc to this file path
 	uint32_t		channelNumber	(1);			//	Channel/FrameStore to use
+	int				showVersion		(0);			//	Show version?
 	int				captureAnc		(0);			//	Capture anc?
 	int				noAudio			(0);			//	Disable audio capture?
 	int				doMultiFormat	(0);			//	Enable multi-format?
@@ -61,12 +62,15 @@ int main (int argc, const char ** argv)
 		{"multiFormat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"Configure multi-format",		AJA_NULL					},
 		{AJA_NULL,		'a',	POPT_ARG_NONE,		&captureAnc,	0,	"capture anc?",					AJA_NULL					},
 		{"noaudio",		 0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio capture",		AJA_NULL					},
+		{"version",		 0,		POPT_ARG_NONE,		&showVersion,	0,	"show version",					AJA_NULL					},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
 	CNTV2DemoCommon::Popt popt(argc, argv, optionsTable);
 	if (!popt)
 		{cerr << "## ERROR: " << popt.errorStr() << endl;  return 2;}
+	if (showVersion)
+		{cout << "NTV2Capture, NTV2 SDK " << ::NTV2Version() << endl;  return 0;}
 
 	const string	deviceSpec		(pDeviceSpec   ? pDeviceSpec : "0");
 	const string	inputSourceStr	(pInputSrcSpec ? CNTV2DemoCommon::ToLower(string(pInputSrcSpec)) : "");
@@ -142,18 +146,18 @@ int main (int argc, const char ** argv)
 	config.fWithAudio		= noAudio ? false : true;
 	//cerr << "Specified Configuration:" << endl << config << endl;
 
-	::signal (SIGINT, SignalHandler);
-	#if defined (AJAMac)
-		::signal (SIGHUP, SignalHandler);
-		::signal (SIGQUIT, SignalHandler);
-	#endif
-
 	NTV2Capture	capturer(config);
 
 	//	Initialize the NTV2Capture instance...
 	status = capturer.Init();
 	if (!AJA_SUCCESS(status))
 		{cout << "## ERROR:  Capture initialization failed with status " << status << endl;	return 1;}
+
+	::signal (SIGINT, SignalHandler);
+	#if defined(AJAMac)
+		::signal (SIGHUP, SignalHandler);
+		::signal (SIGQUIT, SignalHandler);
+	#endif
 
 	//	Run the capturer...
 	capturer.Run();

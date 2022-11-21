@@ -17,6 +17,7 @@
 #include "ajabase/common/options_popt.h"
 #include "ajabase/common/timecodeburn.h"
 #include "ajabase/system/debug.h"
+#include "ajabase/system/info.h"
 #include <algorithm>
 #include <string>
 
@@ -601,6 +602,49 @@ class CNTV2DemoCommon
 	static bool	BFT(void);
 
 };	//	CNTV2DemoCommon
+
+
+/**
+	@brief	This class is used to configure an NTV2Capture instance.
+**/
+typedef struct CaptureConfig
+{
+	public:
+		std::string						fDeviceSpec;		///< @brief	The AJA device to use
+		std::string						fAncDataFilePath;	///< @brief	Optional path to Anc binary data file
+		NTV2Channel						fInputChannel;		///< @brief	The device channel to use
+		NTV2InputSource					fInputSource;		///< @brief	The device input connector to use
+		CNTV2DemoCommon::ACFrameRange	fFrames;			///< @brief	AutoCirculate frame count or range
+		NTV2PixelFormat					fPixelFormat;		///< @brief	Pixel format to use
+		bool							fABConversion;		///< @brief	If true, do level-A/B conversion
+		bool							fDoMultiFormat;		///< @brief	If true, use multi-format/multi-channel mode, if device supports it; otherwise normal mode
+		bool							fWithAnc;			///< @brief	If true, also capture Anc
+		bool							fWithAudio;			///< @brief	If true, also capture Audio
+		bool							fDoTSIRouting;		///< @brief	If true, do TSI routing; otherwise squares
+		UWord							fNumAudioLinks;		///< @brief	Number of audio links to capture
+
+		/**
+			@brief	Constructs a default NTV2Capture configuration.
+		**/
+		inline explicit	CaptureConfig (const std::string & inDeviceSpec	= "0")
+			:	fDeviceSpec			(inDeviceSpec),
+				fAncDataFilePath	(),
+				fInputChannel		(NTV2_CHANNEL_INVALID),
+				fInputSource		(NTV2_INPUTSOURCE_INVALID),
+				fFrames				(7),
+				fPixelFormat		(NTV2_FBF_8BIT_YCBCR),
+				fABConversion		(false),
+				fDoMultiFormat		(false),
+				fWithAnc			(false),
+				fWithAudio			(true),
+				fDoTSIRouting		(true),
+				fNumAudioLinks		(1)
+		{
+		}
+		AJALabelValuePairs	Get (const bool inCompact = false) const;
+} CaptureConfig;
+
+std::ostream &	operator << (std::ostream & ioStrm, const CaptureConfig & inObj);
 
 
 //	These AJA_NTV2_AUDIO_RECORD* macros can, if enabled, record audio samples into a file in the current directory.
