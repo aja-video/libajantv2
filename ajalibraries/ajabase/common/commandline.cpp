@@ -252,9 +252,9 @@ bool AJACommandLineParser::reverseOptionSearch(AJAStringListConstIter *iter,
     const AJAStringList &args, const std::string &arg,
     int prefixSize, AJACommandLineOption &opt)
 {
-    if (arg.length() > prefixSize) {
+    if (static_cast<int>(arg.length()) > prefixSize) {
         std::string subStr;
-        for (size_t c = arg.length(); c > prefixSize; c--) {
+        for (size_t c = arg.length(); static_cast<int>(c) > prefixSize; c--) {
             subStr = arg.substr(prefixSize, c-prefixSize);
             if (OptionByName(subStr, opt)) {
                 parseOptionValue(subStr, arg, iter, args.end());
