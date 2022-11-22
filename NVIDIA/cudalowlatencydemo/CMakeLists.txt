@@ -103,6 +103,15 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	target_link_libraries(cudalowlatencydemo PRIVATE ajantv2 ${TARGET_LINK_LIBS})
 endif()
 
+# Extra sources that were in the commonCUDA dir, but don't seem to actually be required to build cudalowlatencydemo or dvplowlatencydemo.
+list(APPEND NVIDIA_COMMONCUDA_SOURCES
+	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/gpuvio.h
+	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2cudaArrayTransfer.h
+	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2glTextureTransfer.h
+	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2glTextureTransferNV.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/ntv2glTextureTransferNV.h
+	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simpleoglvio.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simpleoglvio.h)
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${CUDALOWLATENCYDEMO_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/cudalowlatencydemo)
 	install(FILES ${CUDALOWLATENCYDEMO_BUILD_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/cudalowlatencydemo)

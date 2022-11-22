@@ -86,20 +86,24 @@ target_include_directories(dvplowlatencydemo PRIVATE ${TARGET_INCLUDE_DIRS})
 target_link_directories(dvplowlatencydemo PRIVATE ${TARGET_LINK_DIRS})
 target_link_libraries(dvplowlatencydemo PRIVATE ajantv2 ${TARGET_LINK_LIBS})
 
+install(TARGETS dvplowlatencydemo
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR})
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${DVPLOWLATENCYDEMO_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
 	install(FILES ${DVPLOWLATENCYDEMO_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
 	install(FILES ${DVPLOWLATENCYDEMO_BUILD_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
 	install(FILES ${NVIDIA_COMMON_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/common)
 	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/commonCUDA)
+endif()
+if (AJA_INSTALL_CMAKE)
 	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
 endif()
-
-install(TARGETS dvplowlatencydemo
-	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR})
+if (AJA_INSTALL_MISC)
+	install(FILES AJA_Logo_Small.png DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
+endif()
 
 if (AJA_CODE_SIGN)
     aja_code_sign(dvplowlatencydemo)
