@@ -15,7 +15,8 @@ set(APP_HEADERS ${AJA_DOCTEST_ROOT}/doctest.h)
 set(APP_SOURCES ${APP_ROOT}/main.cpp)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	# noop
+	set(TARGET_COMPILE_DEFS
+		-DNOMINMAX)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	find_library(CORE_FOUNDATION_FRAMEWORK CoreFoundation)
 	find_library(CORE_SERVICES_FRAMEWORK CoreServices)
@@ -35,5 +36,6 @@ set(APP_TARGET_SOURCES
 
 add_executable(ut_ajabase ${APP_TARGET_SOURCES})
 add_dependencies(ut_ajabase ajantv2)
-target_include_directories(ut_ajabase PUBLIC ${APP_TARGET_INCLUDE_DIRS})
-target_link_libraries(ut_ajabase PUBLIC ajantv2 ${TARGET_LINK_LIBS})
+target_compile_definitions(ut_ajabase PRIVATE ${TARGET_COMPILE_DEFS})
+target_include_directories(ut_ajabase PRIVATE ${APP_TARGET_INCLUDE_DIRS})
+target_link_libraries(ut_ajabase PRIVATE ajantv2 ${TARGET_LINK_LIBS})
