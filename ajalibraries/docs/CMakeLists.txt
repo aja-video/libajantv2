@@ -44,6 +44,10 @@ add_custom_target(
     VERBATIM)
 
 if (AJA_INSTALL_SOURCES)
+    string(CONCAT AJA_NTV2_SDK_DOCS_URL
+        "https://sdksupport.aja.com/docs/NTV2SDK_docs_"
+        "${AJA_NTV2_SDK_VERSION_MAJOR}_${AJA_NTV2_SDK_VERSION_MINOR}"
+        "_${AJA_NTV2_SDK_VERSION_POINT}${AJA_NTV2_SDK_BUILD_TYPE_LONG}/")
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         configure_file(${CMAKE_MODULE_PATH}/bundle/windows/aja_ntv2_documentation.url.in aja_ntv2_documentation.url)
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/aja_ntv2_documentation.url DESTINATION ${CMAKE_INSTALL_PREFIX}/docs)
