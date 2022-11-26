@@ -73,6 +73,332 @@ TEST_SUITE("types" * doctest::description("functions in ajabase/common/types.h")
 
 } //types
 
+void common_marker() {}
+TEST_SUITE("common" * doctest::description("functions in ajabase/common/common.h")) {
+	TEST_CASE("aja::starts_with")
+	{
+		CHECK_EQ(aja::starts_with("abc", ""),  true);
+		CHECK_EQ(aja::starts_with("abc", "a"), true);
+		CHECK_EQ(aja::starts_with("abc", 'a'), true);
+		CHECK_EQ(aja::starts_with("abc", "ab"), true);
+		CHECK_EQ(aja::starts_with("abc", "bc"), false);
+		CHECK_EQ(aja::starts_with(L"abc", L""),  true);
+		CHECK_EQ(aja::starts_with(L"abc", L"a"), true);
+		CHECK_EQ(aja::starts_with(L"abc", L'a'), true);
+		CHECK_EQ(aja::starts_with(L"abc", L"ab"), true);
+		CHECK_EQ(aja::starts_with(L"abc", L"bc"), false);
+	}
+	TEST_CASE("aja::ends_with")
+	{
+		CHECK_EQ(aja::ends_with("abc", ""),  true);
+		CHECK_EQ(aja::ends_with("abc", "c"), true);
+		CHECK_EQ(aja::ends_with("abc", 'c'), true);
+		CHECK_EQ(aja::ends_with("abc", "bc"), true);
+		CHECK_EQ(aja::ends_with("abc", "bcd"), false);
+		CHECK_EQ(aja::ends_with(L"abc", L""),  true);
+		CHECK_EQ(aja::ends_with(L"abc", L"c"), true);
+		CHECK_EQ(aja::ends_with(L"abc", L'c'), true);
+		CHECK_EQ(aja::ends_with(L"abc", L"bc"), true);
+		CHECK_EQ(aja::ends_with(L"abc", L"bcd"), false);
+	}
+	TEST_CASE("aja::replace")
+	{
+		std::string haystack("schoolbus");
+		std::string needle("bus");
+		CHECK(aja::replace(haystack, needle, "") == "school");
+		CHECK(haystack == "school");
+		needle = "";
+		CHECK(aja::replace(haystack, needle, "") == "school");
+		CHECK(haystack == "school");
+	}
+
+	TEST_CASE("aja::stol")
+	{
+		std::size_t idx=0;
+		int v = aja::stol("42",&idx,10);
+		CHECK(v == 42);
+		CHECK(idx == 2);
+		int v2 = aja::stol("-42",&idx,10);
+		CHECK(v2 == -42);
+		CHECK(idx == 3);
+		int v3 = aja::stol("0xF00D",&idx,16);
+		CHECK(v3 == 61453);
+		CHECK(idx == 6);
+	}
+
+	TEST_CASE("aja::stoul")
+	{
+		std::size_t idx=0;
+		unsigned long v = aja::stoul("-42",&idx,10);
+		CHECK(v == ULONG_MAX-41);
+		CHECK(idx == 3);
+		int v2 = aja::stoul("0xF00D",&idx,16);
+		CHECK(v2 == 61453);
+		CHECK(idx == 6);
+	}
+
+	TEST_CASE("aja::stod")
+	{
+		std::size_t idx=0;
+		double v = aja::stod("-42",&idx);
+		CHECK(v == -42);
+		CHECK(idx == 3);
+		double v2 = aja::stod("1e9",&idx);
+		CHECK(v2 == 1000000000.000000);
+		CHECK(idx == 3);
+		double v3 = aja::stod("3.14",&idx);
+		CHECK(v3 == 3.14);
+		CHECK(idx == 4);
+		double v4 = aja::stod("1e-9",&idx);
+		CHECK(v4 == 0.000000001);
+		CHECK(idx == 4);
+	}
+
+	TEST_CASE("aja::to_string variants")
+	{
+		double f1 = 23.43;
+		double f2 = 1e-9;
+		double f3 = 1e16;
+		double f4 = 1e-40;
+		double f5 = 123456789;
+		double f6 = 3.1415926;
+		int	   f7 = 28;
+		CHECK(aja::to_string(f1) == "23.430000");
+		CHECK(aja::to_string(f2) == "0.000000");
+		CHECK(aja::to_string(f3) == "10000000000000000.000000");
+		CHECK(aja::to_string(f4) == "0.000000");
+		CHECK(aja::to_string(f5) == "123456789.000000");
+		CHECK(aja::to_string(f6) == "3.141593");
+		CHECK(aja::to_string(f7) == "28");
+		CHECK(aja::to_string(true) == "true");
+		CHECK(aja::to_string(false) == "false");
+	}
+
+	TEST_CASE("aja::string_to_wstring & aja::wstring_to_string")
+	{
+		std::setlocale(LC_ALL, "en_US.utf8");
+
+		std::string str, str2;
+		std::wstring wstr, wstr2;
+
+		str = "hello";
+		CHECK(aja::string_to_wstring(str, wstr));
+		CHECK(wstr == L"hello");
+
+		str	 = "";
+		wstr = L"hello";
+		CHECK(aja::wstring_to_string(wstr, str));
+		CHECK(str == "hello");
+
+#if !defined(AJA_WINDOWS)
+		str	 = "z\u00df\u6c34\U0001f34c";
+		wstr = L"";
+		CHECK(aja::string_to_wstring(str, wstr));
+		CHECK(aja::wstring_to_string(wstr, str2));
+		CHECK(str == str2);
+#endif
+		str	 = "";
+		wstr = L"a¥z";
+		wstr2= L"";
+		CHECK(aja::wstring_to_string(wstr, str));
+		CHECK(aja::string_to_wstring(str, wstr2));
+		CHECK(wstr == wstr2);
+
+		str	 = "";
+		wstr = L"漢字";
+		wstr2= L"";
+		CHECK(aja::wstring_to_string(wstr, str));
+		CHECK(aja::string_to_wstring(str, wstr2));
+		CHECK(wstr == wstr2);
+	}
+
+	TEST_CASE("aja::string_to_cstring")
+	{
+		std::string str("hello");
+		std::string strlong("hello there friend");
+		const int c_str_len = 10;
+		char c_str[c_str_len];
+		CHECK_FALSE(aja::string_to_cstring(str, NULL, 100));
+		CHECK_FALSE(aja::string_to_cstring(str, c_str, 0));
+		CHECK(aja::string_to_cstring(str, c_str, c_str_len));
+		CHECK(strcmp(c_str, "hello") == 0);
+		CHECK(aja::string_to_cstring(strlong, c_str, c_str_len));
+		CHECK(strcmp(c_str, "hello the") == 0);
+	}
+
+	TEST_CASE("aja::split")
+	{
+		std::string tosplit("Larry,Moe,Curly,Shemp");
+		const std::string urlParam("foo=bar&two=2");
+		std::vector<std::string> results;
+		SUBCASE("return style (ch)")
+		{
+			results = aja::split(tosplit, ',');
+			CHECK(results.size() == 4);
+			CHECK(results.at(0) == "Larry");
+			CHECK(results.at(1) == "Moe");
+			CHECK(results.at(2) == "Curly");
+			CHECK(results.at(3) == "Shemp");
+		}
+		SUBCASE("parameter style (ch)")
+		{
+			aja::split(tosplit, ',', results);
+			CHECK(results.size() == 4);
+			CHECK(results.at(0) == "Larry");
+			CHECK(results.at(1) == "Moe");
+			CHECK(results.at(2) == "Curly");
+			CHECK(results.at(3) == "Shemp");
+		}
+		SUBCASE("split not found (ch)")
+		{
+			aja::split(tosplit, '?', results);
+			CHECK(results.size() == 1);
+			CHECK(results.at(0) == tosplit);
+		}
+		SUBCASE("split at front (ch)")
+		{
+			aja::split(tosplit, 'L', results);
+			CHECK(results.size() == 2);
+			CHECK(results.at(0) == "");
+			CHECK(results.at(1) == "arry,Moe,Curly,Shemp");
+		}
+		SUBCASE("split at end (ch)")
+		{
+			aja::split(tosplit, 'p', results);
+			CHECK(results.size() == 2);
+			CHECK(results.at(0) == "Larry,Moe,Curly,Shem");
+			CHECK(results.at(1) == "");
+		}
+		SUBCASE("split all delims (ch)")
+		{
+			std::string alldelims = "???";
+			aja::split(alldelims, '?', results);
+			CHECK(results.size() == 4);
+			CHECK(results.at(0) == "");
+			CHECK(results.at(1) == "");
+			CHECK(results.at(2) == "");
+			CHECK(results.at(3) == "");
+		}
+
+		SUBCASE("return style (str)")
+		{
+			results = aja::split(tosplit, ",");
+			CHECK(results.size() == 4);
+			CHECK(results.at(0) == "Larry");
+			CHECK(results.at(1) == "Moe");
+			CHECK(results.at(2) == "Curly");
+			CHECK(results.at(3) == "Shemp");
+		}
+		SUBCASE("return style 2 (str)")
+		{
+			results = aja::split(tosplit, ",");
+			CHECK(results.size() == 4);
+			CHECK(results.at(0) == "Larry");
+			CHECK(results.at(1) == "Moe");
+			CHECK(results.at(2) == "Curly");
+			CHECK(results.at(3) == "Shemp");
+		}
+		SUBCASE("split not found (str)")
+		{
+			results = aja::split(tosplit, "?");
+			CHECK(results.size() == 1);
+			CHECK(results.at(0) == tosplit);
+		}
+		SUBCASE("split at front (str)")
+		{
+			results = aja::split(tosplit, "L");
+			CHECK(results.size() == 2);
+			CHECK(results.at(0) == "");
+			CHECK(results.at(1) == "arry,Moe,Curly,Shemp");
+		}
+		SUBCASE("split at end (str)")
+		{
+			results = aja::split(tosplit, "p");
+			CHECK(results.size() == 2);
+			CHECK(results.at(0) == "Larry,Moe,Curly,Shem");
+			CHECK(results.at(1) == "");
+		}
+		SUBCASE("split all delims (str)")
+		{
+			std::string alldelims = "???";
+			results = aja::split(alldelims, "?");
+			CHECK(results.size() == 4);
+			CHECK(results.at(0) == "");
+			CHECK(results.at(1) == "");
+			CHECK(results.at(2) == "");
+			CHECK(results.at(3) == "");
+		}
+	}
+
+	TEST_CASE("aja::lower")
+	{
+		std::string str("This is a MiXeD case STRING!");
+		CHECK(aja::lower(str) == "this is a mixed case string!");
+	}
+
+	TEST_CASE("aja::upper")
+	{
+		std::string str("This is a MiXeD case STRING!");
+		CHECK(aja::upper(str) == "THIS IS A MIXED CASE STRING!");
+	}
+
+	TEST_CASE("aja::strip variants")
+	{
+		std::string test("  \tA test string\n");
+		SUBCASE("lstrip")
+		{
+			CHECK(aja::lstrip(test) == "A test string\n");
+		}
+		SUBCASE("rstrip")
+		{
+			CHECK(aja::rstrip(test) == "  \tA test string");
+		}
+		SUBCASE("strip")
+		{
+			CHECK(aja::strip(test) == "A test string");
+		}
+	}
+
+	TEST_CASE("aja::join")
+	{
+		std::vector<std::string> parts;
+		parts.push_back("A");
+		parts.push_back("B");
+		parts.push_back("C");
+		std::string joined = aja::join(parts, "-");
+		CHECK(joined == "A-B-C");
+	}
+
+	TEST_CASE("aja::safer_strncpy")
+	{
+		const int maxSize = 32;
+		char target[maxSize];
+		const char* source = "The quick brown fox jumps over the lazy dog";
+
+		char *retVal = aja::safer_strncpy(target, source, strlen(source), maxSize);
+		CHECK(retVal == target);
+		CHECK(strlen(target) == maxSize-1);
+		CHECK(strcmp(target, "The quick brown fox jumps over ") == 0);
+
+		char* target2 = NULL;
+		char *retVal2 = aja::safer_strncpy(target2, source, 0, maxSize);
+		CHECK(retVal2 == target2);
+
+		char *retVal3 = aja::safer_strncpy(target2, source, 100, 0);
+		CHECK(retVal3 == target2);
+
+		const int maxSize2 = 8;
+		char target3[maxSize2];
+		strcpy(target3,"???????");
+		CHECK(strcmp(target3, "???????") == 0);
+
+		const char* source2 = "a dog!";
+		aja::safer_strncpy(target3, source2, strlen(source2), maxSize2);
+		CHECK(strcmp(target3, source2) == 0);
+	}
+
+} //common
+
 void commandline_marker() {}
 TEST_SUITE("commandline" * doctest::description("function in ajabase/common/commandline.h")) {
 	TEST_CASE("AJACommandLineParser Constructor")
@@ -658,308 +984,6 @@ TEST_SUITE("bytestream" * doctest::description("functions in ajabase/common/byte
 		CHECK(get_buf[28] == 0xad);
 	}
 } //bytestream
-
-void common_marker() {}
-TEST_SUITE("common" * doctest::description("functions in ajabase/common/common.h")) {
-
-	TEST_CASE("aja::replace")
-	{
-		std::string haystack("schoolbus");
-		std::string needle("bus");
-		CHECK(aja::replace(haystack, needle, "") == "school");
-		CHECK(haystack == "school");
-		needle = "";
-		CHECK(aja::replace(haystack, needle, "") == "school");
-		CHECK(haystack == "school");
-	}
-
-	TEST_CASE("aja::stol")
-	{
-		std::size_t idx=0;
-		int v = aja::stol("42",&idx,10);
-		CHECK(v == 42);
-		CHECK(idx == 2);
-		int v2 = aja::stol("-42",&idx,10);
-		CHECK(v2 == -42);
-		CHECK(idx == 3);
-		int v3 = aja::stol("0xF00D",&idx,16);
-		CHECK(v3 == 61453);
-		CHECK(idx == 6);
-	}
-
-	TEST_CASE("aja::stoul")
-	{
-		std::size_t idx=0;
-		unsigned long v = aja::stoul("-42",&idx,10);
-		CHECK(v == ULONG_MAX-41);
-		CHECK(idx == 3);
-		int v2 = aja::stoul("0xF00D",&idx,16);
-		CHECK(v2 == 61453);
-		CHECK(idx == 6);
-	}
-
-	TEST_CASE("aja::stod")
-	{
-		std::size_t idx=0;
-		double v = aja::stod("-42",&idx);
-		CHECK(v == -42);
-		CHECK(idx == 3);
-		double v2 = aja::stod("1e9",&idx);
-		CHECK(v2 == 1000000000.000000);
-		CHECK(idx == 3);
-		double v3 = aja::stod("3.14",&idx);
-		CHECK(v3 == 3.14);
-		CHECK(idx == 4);
-		double v4 = aja::stod("1e-9",&idx);
-		CHECK(v4 == 0.000000001);
-		CHECK(idx == 4);
-	}
-
-	TEST_CASE("aja::to_string variants")
-	{
-		double f1 = 23.43;
-		double f2 = 1e-9;
-		double f3 = 1e16;
-		double f4 = 1e-40;
-		double f5 = 123456789;
-		double f6 = 3.1415926;
-		int	   f7 = 28;
-		CHECK(aja::to_string(f1) == "23.430000");
-		CHECK(aja::to_string(f2) == "0.000000");
-		CHECK(aja::to_string(f3) == "10000000000000000.000000");
-		CHECK(aja::to_string(f4) == "0.000000");
-		CHECK(aja::to_string(f5) == "123456789.000000");
-		CHECK(aja::to_string(f6) == "3.141593");
-		CHECK(aja::to_string(f7) == "28");
-		CHECK(aja::to_string(true) == "true");
-		CHECK(aja::to_string(false) == "false");
-	}
-
-	TEST_CASE("aja::string_to_wstring & aja::wstring_to_string")
-	{
-		std::setlocale(LC_ALL, "en_US.utf8");
-
-		std::string str, str2;
-		std::wstring wstr, wstr2;
-
-		str = "hello";
-		CHECK(aja::string_to_wstring(str, wstr));
-		CHECK(wstr == L"hello");
-
-		str	 = "";
-		wstr = L"hello";
-		CHECK(aja::wstring_to_string(wstr, str));
-		CHECK(str == "hello");
-
-#if !defined(AJA_WINDOWS)
-		str	 = "z\u00df\u6c34\U0001f34c";
-		wstr = L"";
-		CHECK(aja::string_to_wstring(str, wstr));
-		CHECK(aja::wstring_to_string(wstr, str2));
-		CHECK(str == str2);
-#endif
-		str	 = "";
-		wstr = L"a¥z";
-		wstr2= L"";
-		CHECK(aja::wstring_to_string(wstr, str));
-		CHECK(aja::string_to_wstring(str, wstr2));
-		CHECK(wstr == wstr2);
-
-		str	 = "";
-		wstr = L"漢字";
-		wstr2= L"";
-		CHECK(aja::wstring_to_string(wstr, str));
-		CHECK(aja::string_to_wstring(str, wstr2));
-		CHECK(wstr == wstr2);
-	}
-
-	TEST_CASE("aja::string_to_cstring")
-	{
-		std::string str("hello");
-		std::string strlong("hello there friend");
-		const int c_str_len = 10;
-		char c_str[c_str_len];
-		CHECK_FALSE(aja::string_to_cstring(str, NULL, 100));
-		CHECK_FALSE(aja::string_to_cstring(str, c_str, 0));
-		CHECK(aja::string_to_cstring(str, c_str, c_str_len));
-		CHECK(strcmp(c_str, "hello") == 0);
-		CHECK(aja::string_to_cstring(strlong, c_str, c_str_len));
-		CHECK(strcmp(c_str, "hello the") == 0);
-	}
-
-	TEST_CASE("aja::split")
-	{
-		std::string tosplit("Larry,Moe,Curly,Shemp");
-		const std::string urlParam("foo=bar&two=2");
-		std::vector<std::string> results;
-		SUBCASE("return style (ch)")
-		{
-			results = aja::split(tosplit, ',');
-			CHECK(results.size() == 4);
-			CHECK(results.at(0) == "Larry");
-			CHECK(results.at(1) == "Moe");
-			CHECK(results.at(2) == "Curly");
-			CHECK(results.at(3) == "Shemp");
-		}
-		SUBCASE("parameter style (ch)")
-		{
-			aja::split(tosplit, ',', results);
-			CHECK(results.size() == 4);
-			CHECK(results.at(0) == "Larry");
-			CHECK(results.at(1) == "Moe");
-			CHECK(results.at(2) == "Curly");
-			CHECK(results.at(3) == "Shemp");
-		}
-		SUBCASE("split not found (ch)")
-		{
-			aja::split(tosplit, '?', results);
-			CHECK(results.size() == 1);
-			CHECK(results.at(0) == tosplit);
-		}
-		SUBCASE("split at front (ch)")
-		{
-			aja::split(tosplit, 'L', results);
-			CHECK(results.size() == 2);
-			CHECK(results.at(0) == "");
-			CHECK(results.at(1) == "arry,Moe,Curly,Shemp");
-		}
-		SUBCASE("split at end (ch)")
-		{
-			aja::split(tosplit, 'p', results);
-			CHECK(results.size() == 2);
-			CHECK(results.at(0) == "Larry,Moe,Curly,Shem");
-			CHECK(results.at(1) == "");
-		}
-		SUBCASE("split all delims (ch)")
-		{
-			std::string alldelims = "???";
-			aja::split(alldelims, '?', results);
-			CHECK(results.size() == 4);
-			CHECK(results.at(0) == "");
-			CHECK(results.at(1) == "");
-			CHECK(results.at(2) == "");
-			CHECK(results.at(3) == "");
-		}
-
-		SUBCASE("return style (str)")
-		{
-			results = aja::split(tosplit, ",");
-			CHECK(results.size() == 4);
-			CHECK(results.at(0) == "Larry");
-			CHECK(results.at(1) == "Moe");
-			CHECK(results.at(2) == "Curly");
-			CHECK(results.at(3) == "Shemp");
-		}
-		SUBCASE("return style 2 (str)")
-		{
-			results = aja::split(tosplit, ",");
-			CHECK(results.size() == 4);
-			CHECK(results.at(0) == "Larry");
-			CHECK(results.at(1) == "Moe");
-			CHECK(results.at(2) == "Curly");
-			CHECK(results.at(3) == "Shemp");
-		}
-		SUBCASE("split not found (str)")
-		{
-			results = aja::split(tosplit, "?");
-			CHECK(results.size() == 1);
-			CHECK(results.at(0) == tosplit);
-		}
-		SUBCASE("split at front (str)")
-		{
-			results = aja::split(tosplit, "L");
-			CHECK(results.size() == 2);
-			CHECK(results.at(0) == "");
-			CHECK(results.at(1) == "arry,Moe,Curly,Shemp");
-		}
-		SUBCASE("split at end (str)")
-		{
-			results = aja::split(tosplit, "p");
-			CHECK(results.size() == 2);
-			CHECK(results.at(0) == "Larry,Moe,Curly,Shem");
-			CHECK(results.at(1) == "");
-		}
-		SUBCASE("split all delims (str)")
-		{
-			std::string alldelims = "???";
-			results = aja::split(alldelims, "?");
-			CHECK(results.size() == 4);
-			CHECK(results.at(0) == "");
-			CHECK(results.at(1) == "");
-			CHECK(results.at(2) == "");
-			CHECK(results.at(3) == "");
-		}
-	}
-
-	TEST_CASE("aja::lower")
-	{
-		std::string str("This is a MiXeD case STRING!");
-		CHECK(aja::lower(str) == "this is a mixed case string!");
-	}
-
-	TEST_CASE("aja::upper")
-	{
-		std::string str("This is a MiXeD case STRING!");
-		CHECK(aja::upper(str) == "THIS IS A MIXED CASE STRING!");
-	}
-
-	TEST_CASE("aja::strip variants")
-	{
-		std::string test("  \tA test string\n");
-		SUBCASE("lstrip")
-		{
-			CHECK(aja::lstrip(test) == "A test string\n");
-		}
-		SUBCASE("rstrip")
-		{
-			CHECK(aja::rstrip(test) == "  \tA test string");
-		}
-		SUBCASE("strip")
-		{
-			CHECK(aja::strip(test) == "A test string");
-		}
-	}
-
-	TEST_CASE("aja::join")
-	{
-		std::vector<std::string> parts;
-		parts.push_back("A");
-		parts.push_back("B");
-		parts.push_back("C");
-		std::string joined = aja::join(parts, "-");
-		CHECK(joined == "A-B-C");
-	}
-
-	TEST_CASE("aja::safer_strncpy")
-	{
-		const int maxSize = 32;
-		char target[maxSize];
-		const char* source = "The quick brown fox jumps over the lazy dog";
-
-		char *retVal = aja::safer_strncpy(target, source, strlen(source), maxSize);
-		CHECK(retVal == target);
-		CHECK(strlen(target) == maxSize-1);
-		CHECK(strcmp(target, "The quick brown fox jumps over ") == 0);
-
-		char* target2 = NULL;
-		char *retVal2 = aja::safer_strncpy(target2, source, 0, maxSize);
-		CHECK(retVal2 == target2);
-
-		char *retVal3 = aja::safer_strncpy(target2, source, 100, 0);
-		CHECK(retVal3 == target2);
-
-		const int maxSize2 = 8;
-		char target3[maxSize2];
-		strcpy(target3,"???????");
-		CHECK(strcmp(target3, "???????") == 0);
-
-		const char* source2 = "a dog!";
-		aja::safer_strncpy(target3, source2, strlen(source2), maxSize2);
-		CHECK(strcmp(target3, source2) == 0);
-	}
-
-} //common
-
 
 void timebase_timecode_marker() {}
 TEST_SUITE("timebase/timecode" * doctest::description("functions in ajabase/common/time[base|code].h")) {
