@@ -57,16 +57,54 @@
 namespace aja
 {
 
+// string starts with
 bool starts_with(const std::string &str, const std::string &needle)
 {
-    return (str.substr(0, needle.size()) == needle);
+	return (str.substr(0, needle.size()) == needle);
 }
-
 bool starts_with(const std::string &str, const char needle)
 {
-    if (str.length() > 0)
-        return str[0] == needle;
-    return false;
+	if (str.length() > 0)
+		return str[0] == needle;
+	return false;
+}
+bool starts_with(const std::wstring& wstr, const std::wstring& needle)
+{
+	return (wstr.substr(0, needle.size()) == needle);
+}
+bool starts_with(const std::wstring& wstr, const wchar_t needle)
+{
+	if (wstr.length() > 0)
+		return wstr[0] == needle;
+	return false;
+}
+
+// string ends with
+bool ends_with(const std::string& str, const std::string& needle)
+{
+	if (needle.length() < str.length()) {
+		size_t idx = str.length()-needle.length();
+		return str.rfind(needle, idx) == idx;
+	}
+	return false;
+}
+bool ends_with(const std::string& str, const char needle)
+{
+	size_t idx = str.length() - 1;
+	return str.rfind(needle, idx) == idx;
+}
+bool ends_with(const std::wstring& wstr, const std::wstring& needle)
+{
+	if (needle.length() < wstr.length()) {
+		size_t idx = wstr.length() - needle.length();
+		return wstr.rfind(needle, idx) == idx;
+	}
+	return false;
+}
+bool ends_with(const std::wstring& wstr, const wchar_t needle)
+{
+	size_t idx = wstr.length() - 1;
+	return wstr.rfind(needle, idx) == idx;
 }
 
 std::string& replace(std::string& str, const std::string& from, const std::string& to)
@@ -326,9 +364,33 @@ void split (const std::string & str, const char delim, std::vector<std::string> 
 	}
 }
 
+void split (const std::wstring & str, const wchar_t delim, std::vector<std::wstring> & elems)
+{
+	elems.clear();
+	std::wstringstream ss(str);
+	std::wstring item;
+	while(std::getline(ss, item, delim))
+	{
+		elems.push_back(item);
+	}
+
+	// if last character in wstring matches the split delim add an empty string
+	if (str.length() > 0 && str[str.length()-1] == delim)
+	{
+		elems.push_back(L"");
+	}
+}
+
 std::vector<std::string> split (const std::string & str, const char delim)
 {
 	std::vector<std::string> elems;
+	split(str, delim, elems);
+	return elems;
+}
+
+std::vector<std::wstring> split (const std::wstring & str, const wchar_t delim)
+{
+	std::vector<std::wstring> elems;
 	split(str, delim, elems);
 	return elems;
 }
@@ -349,6 +411,25 @@ std::vector<std::string> split (const std::string & inStr, const std::string & i
 		result.push_back(inStr.substr(startPos, inStr.length()-startPos));
 	else if (startPos == inStr.length())	//	if last character in string matches the split delim add an empty string
 		result.push_back(std::string());
+	return result;
+}
+
+std::vector<std::wstring> split (const std::wstring & inStr, const std::wstring & inDelim)
+{
+	std::vector<std::wstring> result;
+	size_t	startPos(0);
+	size_t	delimPos(inStr.find(inDelim, startPos));
+	while (delimPos != std::wstring::npos)
+	{
+		const std::wstring item (inStr.substr(startPos, delimPos - startPos));
+		result.push_back(item);
+		startPos = delimPos + inDelim.length();
+		delimPos = inStr.find(inDelim, startPos);
+	}
+	if (startPos < inStr.length())			//	add last piece
+		result.push_back(inStr.substr(startPos, inStr.length()-startPos));
+	else if (startPos == inStr.length())	//	if last character in string matches the split delim add an empty string
+		result.push_back(std::wstring());
 	return result;
 }
 

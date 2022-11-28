@@ -116,6 +116,7 @@ NTV2_WgtCSC1
 NTV2_WgtCSC2
 NTV2_WgtMixer1
 NTV2_WgtGenLock
+NTV2_WgtMixer2
 NTV2_Wgt12GSDIIn1
 NTV2_Wgt12GSDIIn2
 NTV2_Wgt12GSDIIn3
@@ -148,7 +149,7 @@ NTV2DeviceGetNumEmbeddedAudioInputChannels		16
 NTV2DeviceGetNumEmbeddedAudioOutputChannels		16
 NTV2DeviceGetNumFrameStores						4
 NTV2DeviceGetNumLUTs							0
-NTV2DeviceGetNumMixers							1
+NTV2DeviceGetNumMixers							2
 NTV2DeviceGetNumReferenceVideoInputs			1
 NTV2DeviceGetNumSerialPorts						1
 NTV2DeviceGetNumVideoInputs						4

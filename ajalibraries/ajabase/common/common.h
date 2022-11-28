@@ -31,7 +31,6 @@ static std::string WHITESPACE = " \t\n\r";
  *	@return			`true` if str starts with the specified string, otherwise `false`.
  */
 AJA_EXPORT bool starts_with(const std::string &str, const std::string &needle);
-
 /**
  *	Determine if `str` starts with specified character.
  *
@@ -40,6 +39,54 @@ AJA_EXPORT bool starts_with(const std::string &str, const std::string &needle);
  *	@return			`true` if str starts with the specified string, otherwise `false`.
  */
 AJA_EXPORT bool starts_with(const std::string &str, const char needle);
+/**
+ *	Determine if `wstr` starts with specified string.
+ *
+ *	@param[in]		wstr	The wide string to check
+ *	@param[in]		needle	The substring to look for at the start of wstr
+ *	@return			`true` if wstr starts with the specified string, otherwise `false`.
+ */
+AJA_EXPORT bool starts_with(const std::wstring& wstr, const std::wstring& needle);
+/**
+ *	Determine if `wstr` starts with specified character.
+ *
+ *	@param[in]		wstr	The wide string to check
+ *	@param[in]		needle	The wide character to look for at the start of wstr
+ *	@return			`true` if wstr starts with the specified string, otherwise `false`.
+ */
+AJA_EXPORT bool starts_with(const std::wstring& wstr, const wchar_t needle);
+/**
+ *	Determine if `str` ends with specified string.
+ *
+ *	@param[in]		str		The string to check
+ *	@param[in]		needle	The substring to look for at the end of str
+ *	@return			`true` if str ends with the specified string, otherwise `false`.
+ */
+AJA_EXPORT bool ends_with(const std::string& str, const std::string& needle);
+/**
+ *	Determine if `str` ends with specified character.
+ *
+ *	@param[in]		str		The string to check
+ *	@param[in]		needle	The character to look for at the end of str
+ *	@return			`true` if str ends with the specified string, otherwise `false`.
+ */
+AJA_EXPORT bool ends_with(const std::string& str, const char needle);
+/**
+ *	Determine if `wstr` ends with specified string.
+ *
+ *	@param[in]		wstr	The wide string to check
+ *	@param[in]		needle	The substring to look for at the end of wstr
+ *	@return			`true` if wstr ends with the specified string, otherwise `false`.
+ */
+AJA_EXPORT bool ends_with(const std::wstring& wstr, const std::wstring& needle);
+/**
+ *	Determine if `wstr` ends with specified character.
+ *
+ *	@param[in]		wstr	The wide string to check
+ *	@param[in]		needle	The wide character to look for at the end of wstr
+ *	@return			`true` if wstr ends with the specified string, otherwise `false`.
+ */
+AJA_EXPORT bool ends_with(const std::wstring& wstr, const wchar_t needle);
 
 /**
  *	Replaces all occurrences of a substring within a string with a new string
@@ -208,6 +255,15 @@ AJA_EXPORT bool string_to_cstring (const std::string & str, char * c_str, size_t
 AJA_EXPORT void split (const std::string & str, const char delim, std::vector<std::string> & elems);
 
 /**
+ *	Splits a wstring into substrings at a character delimiter
+ *
+ *	@param[in]	 str   The wstring to split into parts
+ *	@param[in]	 delim The wide character delimiter to split the wstring at
+ *	@param[out]	 elems A vector of wstrings that contains all the substrings
+ */
+AJA_EXPORT void split (const std::wstring & str, const wchar_t delim, std::vector<std::wstring> & elems);
+
+/**
  *	Splits a string into substrings at a character delimiter
  *
  *	@param[in]	str	  The string to split into parts
@@ -217,6 +273,15 @@ AJA_EXPORT void split (const std::string & str, const char delim, std::vector<st
 AJA_EXPORT std::vector<std::string> split (const std::string & str, const char delim);
 
 /**
+ *	Splits a wstring into substrings at a character delimiter
+ *
+ *	@param[in]	str	  The wstring to split into parts
+ *	@param[in]	delim The wide character delimiter to split the wstring at
+ *	@return		A vector of wstrings that contains all the substrings
+ */
+AJA_EXPORT std::vector<std::wstring> split (const std::wstring & str, const wchar_t delim);
+
+/**
  *	Splits a string into substrings at a string delimiter
  *
  *	@param[in]	inStr	The string to split into parts
@@ -224,6 +289,15 @@ AJA_EXPORT std::vector<std::string> split (const std::string & str, const char d
  *	@return		A vector of strings that contains all the substrings
  */
 AJA_EXPORT std::vector<std::string> split (const std::string & inStr, const std::string & inDelim);
+
+/**
+ *	Splits a wstring into substrings at a string delimiter
+ *
+ *	@param[in]	inStr	The wstring to split into parts
+ *	@param[in]	inDelim The delimiter wstring to split the string at
+ *	@return		A vector of wstrings that contains all the substrings
+ */
+AJA_EXPORT std::vector<std::wstring> split (const std::wstring & inStr, const std::wstring & inDelim);
 
 /**
  *	Converts the passed string to lowercase
