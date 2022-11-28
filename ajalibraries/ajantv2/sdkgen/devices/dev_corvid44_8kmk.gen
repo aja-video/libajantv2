@@ -149,7 +149,7 @@ NTV2DeviceGetNumEmbeddedAudioInputChannels		16
 NTV2DeviceGetNumEmbeddedAudioOutputChannels		16
 NTV2DeviceGetNumFrameStores						4
 NTV2DeviceGetNumLUTs							0
-NTV2DeviceGetNumMixers							1
+NTV2DeviceGetNumMixers							2
 NTV2DeviceGetNumReferenceVideoInputs			1
 NTV2DeviceGetNumSerialPorts						1
 NTV2DeviceGetNumVideoInputs						4
