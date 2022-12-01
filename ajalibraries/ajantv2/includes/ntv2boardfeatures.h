@@ -11,7 +11,7 @@
 		#if defined (MSWindows)
 			#pragma message("'ntv2boardfeatures.h' is deprecated -- include 'ntv2devicefeatures.h' instead")
 		#else
-			#warning "'ntv2boardfeatures.h' is deprecated -- include 'ntv2devicefeatures.h' instead""
+			#warning "'ntv2boardfeatures.h' is deprecated -- include 'ntv2devicefeatures.h' instead"
 		#endif
 	#else
 		#include "ntv2devicefeatures.h"
