@@ -665,8 +665,11 @@ bool CNTV2Card::AutoCirculateInitForInput ( const NTV2Channel		inChannel,
 	if (inOptionFlags & (AUTOCIRCULATE_WITH_MULTILINK_AUDIO1 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO2 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO3)  &&  !::NTV2DeviceCanDoMultiLinkAudio(GetDeviceID()))
 		ACWARN("Input Ch" << DEC(inChannel+1) << ": MultiLink Audio requested, but device doesn't support it");
 	const UWord numAudSystems(::NTV2DeviceGetNumAudioSystems(GetDeviceID()));	//	AutoCirc cannot use AudioMixer or HostAudio
-	if (numAudSystems  &&  UWord(inAudioSystem) >= numAudSystems)
-		{ACFAIL("Invalid audio system specified: AudSys" << DEC(inAudioSystem+1) << " -- exceeds max legal AudSys" << DEC(numAudSystems)); return false;}
+	if (inAudioSystem != NTV2_AUDIOSYSTEM_INVALID)
+	{
+		if (numAudSystems  &&  UWord(inAudioSystem) >= numAudSystems)
+			{ACFAIL("Invalid audio system specified: AudSys" << DEC(inAudioSystem+1) << " -- exceeds max legal AudSys" << DEC(numAudSystems)); return false;}
+	}
 
 	//	Fill in our OS independent data structure...
 	AUTOCIRCULATE_DATA	autoCircData(eInitAutoCirc);
@@ -790,8 +793,11 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 	if (inOptionFlags & (AUTOCIRCULATE_WITH_MULTILINK_AUDIO1 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO2 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO3)  &&  !::NTV2DeviceCanDoMultiLinkAudio(GetDeviceID()))
 		ACWARN("Output Ch" << DEC(inChannel+1) << ": MultiLink Audio requested, but device doesn't support it");
 	const UWord numAudSystems(::NTV2DeviceGetNumAudioSystems(GetDeviceID()));	//	AutoCirc cannot use AudioMixer or HostAudio
-	if (numAudSystems  &&  UWord(inAudioSystem) >= numAudSystems)
-		{ACFAIL("Invalid audio system specified: AudSys" << DEC(inAudioSystem+1) << " -- exceeds max legal AudSys" << DEC(numAudSystems)); return false;}
+	if (inAudioSystem != NTV2_AUDIOSYSTEM_INVALID)
+	{
+		if (numAudSystems  &&  UWord(inAudioSystem) >= numAudSystems)
+			{ACFAIL("Invalid audio system specified: AudSys" << DEC(inAudioSystem+1) << " -- exceeds max legal AudSys" << DEC(numAudSystems)); return false;}
+	}
 
 	//	Warn about "with anc" and VANC mode...
 	if (inOptionFlags & AUTOCIRCULATE_WITH_ANC)
