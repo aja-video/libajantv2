@@ -68,36 +68,36 @@ if (AJA_BUILD_QA AND GTest_FOUND)
 			${NON_AJA_ROOT}/snmp++-3.4.10/include)
 		set(TARGET_LINK_LIBS ${TARGET_LINK_LIBS} snmp++)
 	endif()
-	add_executable(ntv2card_test
+	add_executable(ntv2card-test
 		${AJA_LIB_NTV2_ROOT}/utilityfiles/public/ntv2pixelcomponent.h
 		${AJA_LIB_NTV2_ROOT}/utilityfiles/public/ntv2pixelcomponent.cpp
-		ntv2card_test.cpp
+		ntv2card-test.cpp
 		test_support.hpp)
-	add_dependencies(ntv2card_test ${TARGET_DEPS})
+	add_dependencies(ntv2card-test ${TARGET_DEPS})
 	if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 		set(TARGET_COMPILE_DEFS ${TARGET_COMPILE_DEFS} -DAJACONV_USE_OPENMP)
 		set(TARGET_LINK_LIBS ${TARGET_LINK_LIBS} dl pthread rt gomp)
 	endif()
-	target_compile_definitions(ntv2card_test PRIVATE ${TARGET_COMPILE_DEFS})
-	target_compile_features(ntv2card_test PUBLIC cxx_std_11)
-	set_target_properties(ntv2card_test PROPERTIES
+	target_compile_definitions(ntv2card-test PRIVATE ${TARGET_COMPILE_DEFS})
+	target_compile_features(ntv2card-test PUBLIC cxx_std_11)
+	set_target_properties(ntv2card-test PROPERTIES
 		CXX_STANDARD 11
 		CXX_STANDARD_REQUIRED ON
 		CXX_EXTENSIONS ON)
-	target_include_directories(ntv2card_test PRIVATE
+	target_include_directories(ntv2card-test PRIVATE
 		${TARGET_INCLUDE_DIRS}
 		${NON_AJA_ROOT}/gtest/googletest/include)
-	target_link_libraries(ntv2card_test PRIVATE ${TARGET_LINK_LIBS})
-	set(ntv2card_test_JSON
+	target_link_libraries(ntv2card-test PRIVATE ${TARGET_LINK_LIBS})
+	set(ntv2card-test_JSON
 		json/sdi_validated.json
 		json/sdi_not_validated.json)
-	foreach(j IN LISTS ntv2card_test_JSON)
-		post_build_copy_file(ntv2card_test
+	foreach(j IN LISTS ntv2card-test_JSON)
+		post_build_copy_file(ntv2card-test
 			${CMAKE_CURRENT_SOURCE_DIR}/${j}
 			$<TARGET_FILE_DIR:${PROJECT_NAME}>/${j})
 	endforeach()
-	install(FILES ${ntv2card_test_JSON} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/json)
-	install(TARGETS ntv2card_test
+	install(FILES ${ntv2card-test_JSON} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/json)
+	install(TARGETS ntv2card-test
 		BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
 		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
