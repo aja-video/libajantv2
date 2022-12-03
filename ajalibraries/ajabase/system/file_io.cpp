@@ -282,10 +282,7 @@ AJAFileIO::Close()
 	if (NULL != mpFile)
 	{
 		int retVal = 0;
-		if (mIoModel == eAJAIoAlternate)
-			retVal = close(fileno(mpFile));
-		else
-			retVal = fclose(mpFile);
+		retVal = fclose(mpFile);
 		
 		if (0 == retVal)
 			status = AJA_STATUS_SUCCESS;
