@@ -39,32 +39,65 @@ install(TARGETS ut_ajantv2
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-if (AJA_BUILD_QA)
-	add_executable(ut_ntv2card
-		${ARGPARSE_SOURCES}
+find_package(GTest)
+if (AJA_BUILD_QA AND GTest_FOUND)
+	option(NTV2CARD_TEST_USE_PNG "Enable PNG screenshots of the framebuffer under test?" ON)
+	option(NTV2CARD_TEST_USE_WFM "Enable reading Tektronix WFM8300 via SNMP++ library?" OFF)
+	set(TARGET_DEPS ajaconv ajantv2 ntv2qa GTest::gtest)
+	set(TARGET_LINK_LIBS ajaconv ajantv2 ntv2qa GTest::gtest)
+
+	# PNG support
+	if (NTV2CARD_TEST_USE_PNG)
+		find_package(PNG)
+		if (PNG_FOUND)
+			set(TARGET_INCLUDE_DIRS ${TARGET_INCLUDE_DIRS} ${PNG_INCLUDE_DIRS})
+			set(TARGET_LINK_LIBS ${TARGET_LINK_LIBS} PNG::PNG)
+			set(TARGET_COMPILE_DEFS ${TARGET_COMPILE_DEFS} -DUSE_PNG)
+		endif()
+	endif()
+
+	# SNMP++ support
+	if (NTV2CARD_TEST_USE_WFM)
+		set(TARGET_COMPILE_DEFS ${TARGET_COMPILE_DEFS} -DUSE_WFM)
+		set(TARGET_DEPS
+			${TARGET_DEPS}
+			snmp++)
+		set(TARGET_INCLUDE_DIRS
+			${TARGET_INCLUDE_DIRS}
+			${NON_AJA_ROOT}/snmp++-3.4.10
+			${NON_AJA_ROOT}/snmp++-3.4.10/include)
+		set(TARGET_LINK_LIBS ${TARGET_LINK_LIBS} snmp++)
+	endif()
+	add_executable(ntv2card-test
 		${AJA_LIB_NTV2_ROOT}/utilityfiles/public/ntv2pixelcomponent.h
 		${AJA_LIB_NTV2_ROOT}/utilityfiles/public/ntv2pixelcomponent.cpp
-		ut_ntv2card.cpp
+		ntv2card-test.cpp
 		test_support.hpp)
-	target_compile_features(ut_ntv2card PUBLIC cxx_std_14)
-	set_target_properties(ut_ntv2card PROPERTIES CXX_STANDARD_REQUIRED ON)
-	add_dependencies(ut_ntv2card ajantv2 ntv2qa)
-	target_include_directories(ut_ntv2card PRIVATE
+	add_dependencies(ntv2card-test ${TARGET_DEPS})
+	if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+		set(TARGET_COMPILE_DEFS ${TARGET_COMPILE_DEFS} -DAJACONV_USE_OPENMP)
+		set(TARGET_LINK_LIBS ${TARGET_LINK_LIBS} dl pthread rt gomp)
+	endif()
+	target_compile_definitions(ntv2card-test PRIVATE ${TARGET_COMPILE_DEFS})
+	target_compile_features(ntv2card-test PUBLIC cxx_std_11)
+	set_target_properties(ntv2card-test PROPERTIES
+		CXX_STANDARD 11
+		CXX_STANDARD_REQUIRED ON
+		CXX_EXTENSIONS ON)
+	target_include_directories(ntv2card-test PRIVATE
 		${TARGET_INCLUDE_DIRS}
-		${AJA_QA_ROOT}/libs)
-	target_link_libraries(ut_ntv2card PRIVATE ajantv2 ntv2qa ${TARGET_LINK_LIBS})
-	set(UT_NTV2CARD_JSON
+		${NON_AJA_ROOT}/gtest/googletest/include)
+	target_link_libraries(ntv2card-test PRIVATE ${TARGET_LINK_LIBS})
+	set(ntv2card-test_JSON
 		json/sdi_validated.json
-		json/sdi_sd_hd.json
-		json/sdi_uhd_4k.json)
-	foreach(j IN LISTS UT_NTV2CARD_JSON)
-		post_build_copy_file(ut_ntv2card
+		json/sdi_not_validated.json)
+	foreach(j IN LISTS ntv2card-test_JSON)
+		post_build_copy_file(ntv2card-test
 			${CMAKE_CURRENT_SOURCE_DIR}/${j}
 			$<TARGET_FILE_DIR:${PROJECT_NAME}>/${j})
 	endforeach()
-
-	install(FILES ${UT_NTV2CARD_JSON} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/json)
-	install(TARGETS ut_ntv2card
+	install(FILES ${ntv2card-test_JSON} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/json)
+	install(TARGETS ntv2card-test
 		BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
 		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

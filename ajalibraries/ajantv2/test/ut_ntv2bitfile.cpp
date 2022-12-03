@@ -235,7 +235,7 @@ TEST_SUITE("bitfile_header" * doctest::description("NTV2 bitfile header tests"))
         CHECK_EQ(AJAFileIO::GetDirectoryName(exe_path, exe_dir), AJA_STATUS_SUCCESS);
         auto fw_json_path = exe_dir + AJA_PATHSEP + kFirmwareJSON;
         json fw_json;
-        CHECK_EQ(read_json_file(fw_json_path, fw_json), true);
+        CHECK_EQ(TestSupport::ReadJsonFile(fw_json_path, fw_json), true);
     }
     TEST_CASE("valid_bitfile_path") {
         bool valid_path = false;
@@ -255,13 +255,13 @@ TEST_SUITE("bitfile_header" * doctest::description("NTV2 bitfile header tests"))
         AJAFileIO::GetDirectoryName(exe_path, exe_dir);
         auto fw_json_path = exe_dir + AJA_PATHSEP + kFirmwareJSON;
         json fw_json;
-        CHECK_EQ(read_json_file(fw_json_path, fw_json), true);
+        CHECK_EQ(TestSupport::ReadJsonFile(fw_json_path, fw_json), true);
         const std::string& path = gOptions.bitfile_path;
         if (is_bitfile_path(path)) {
             // std::cout << "Bitfile: " << path << std::endl;
             CHECK_BITFILE_HEADER(path, fw_json, gOptions.update_json);
             if (gOptions.update_json)
-                write_json_file(fw_json_path, fw_json);
+                TestSupport::WriteJsonFile(fw_json_path, fw_json);
         } else if (is_firmware_subdir(path)) {
             NTV2StringList bitfile_list;
             if (AJAFileIO::ReadDirectory(path, "*.bit", bitfile_list) == AJA_STATUS_SUCCESS) {
@@ -270,7 +270,7 @@ TEST_SUITE("bitfile_header" * doctest::description("NTV2 bitfile header tests"))
                         // std::cout << "Bitfile: " << bf << std::endl;
                         CHECK_BITFILE_HEADER(bf, fw_json, gOptions.update_json);
                         if (gOptions.update_json)
-                            write_json_file(fw_json_path, fw_json);
+                            TestSupport::WriteJsonFile(fw_json_path, fw_json);
                     }
                 }
             }
