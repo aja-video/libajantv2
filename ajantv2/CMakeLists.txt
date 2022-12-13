@@ -1,5 +1,7 @@
 project(ajantv2)
 
+include(AJAVersionConfig)
+
 if(CMAKE_CXX_STANDARD EQUAL 11)
     aja_message(STATUS "ajantv2 building for C++11")
     list(APPEND TARGET_COMPILE_DEFS
@@ -11,7 +13,7 @@ else()
         -DAJA_USE_CPLUSPLUS11
         -DNTV2_USE_CPLUSPLUS11)
 
-    set(_ajabase_types_path "${AJA_LIB_BASE_ROOT}/common/types.h")
+    set(_ajabase_types_path "../ajabase/common/types.h")
     file(READ ${_ajabase_types_path} _ajabase_types_file)
     STRING(REPLACE "#define AJA_USE_CPLUSPLUS11" "//#define AJA_USE_CPLUSPLUS11 " _ajabase_types_file "${_ajabase_types_file}")
     file(WRITE ${_ajabase_types_path} "${_ajabase_types_file}")
@@ -28,10 +30,10 @@ remove_definitions(
     -DQT_LARGEFILE_SUPPORT)
 
 set(TARGET_INCLUDE_DIRS
+    ../
+    ../ajaanc/includes
+    ../ajabase
     includes
-    ${AJA_LIB_ANC_ROOT}/includes
-    ${AJA_LIBRARIES_ROOT}
-    ${AJA_LIB_BASE_ROOT}
     ${CMAKE_CURRENT_BINARY_DIR})
 
 # ajantv2
@@ -173,223 +175,223 @@ set(AJANTV2_UTILITY_PUBLIC_SOURCES
     utilityfiles/public/ntv2firmwareinstallerthread.cpp
     utilityfiles/public/ntv2hevcfirmwareinstallerthread.cpp)
 # ajantv2 hevc
-if (NOT AJA_BUILD_OPENSOURCE)
-    aja_message(STATUS "added ajantv2 HEVC/M31 codec")
-    set(AJANTV2_HEVC_HEADERS
-        codecs/hevc/m31/ntv2m31.h
-        codecs/hevc/m31/ntv2m31cparam.h
-        codecs/hevc/m31/ntv2m31ehparam.h
-        codecs/hevc/m31/ntv2m31vaparam.h
-        codecs/hevc/m31/ntv2m31vinparam.h
-        codecs/hevc/m31/ntv2m31viparam.h)
-    set(AJANTV2_HEVC_SOURCES
-        codecs/hevc/m31/ntv2m31.cpp
-        codecs/hevc/m31/ntv2m31cparam.cpp
-        codecs/hevc/m31/ntv2m31ehparam.cpp
-        codecs/hevc/m31/ntv2m31vaparam.cpp
-        codecs/hevc/m31/ntv2m31vinparam.cpp
-        codecs/hevc/m31/ntv2m31viparam.cpp)
-    # `cmake --install` deployments
-    if (AJA_INSTALL_HEADERS)
-        install(FILES ${AJANTV2_HEVC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/codecs/hevc/m31)
-    endif()
-    if (AJA_INSTALL_SOURCES)
-        install(FILES ${AJANTV2_HEVC_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/codecs/hevc/m31)
-    endif()
-endif()
+# if (NOT AJA_BUILD_OPENSOURCE)
+#     aja_message(STATUS "added ajantv2 HEVC/M31 codec")
+#     set(AJANTV2_HEVC_HEADERS
+#         codecs/hevc/m31/ntv2m31.h
+#         codecs/hevc/m31/ntv2m31cparam.h
+#         codecs/hevc/m31/ntv2m31ehparam.h
+#         codecs/hevc/m31/ntv2m31vaparam.h
+#         codecs/hevc/m31/ntv2m31vinparam.h
+#         codecs/hevc/m31/ntv2m31viparam.h)
+#     set(AJANTV2_HEVC_SOURCES
+#         codecs/hevc/m31/ntv2m31.cpp
+#         codecs/hevc/m31/ntv2m31cparam.cpp
+#         codecs/hevc/m31/ntv2m31ehparam.cpp
+#         codecs/hevc/m31/ntv2m31vaparam.cpp
+#         codecs/hevc/m31/ntv2m31vinparam.cpp
+#         codecs/hevc/m31/ntv2m31viparam.cpp)
+#     # `cmake --install` deployments
+#     if (AJA_INSTALL_HEADERS)
+#         install(FILES ${AJANTV2_HEVC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/codecs/hevc/m31)
+#     endif()
+#     if (AJA_INSTALL_SOURCES)
+#         install(FILES ${AJANTV2_HEVC_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/codecs/hevc/m31)
+#     endif()
+# endif()
 
 configure_file(includes/ntv2version.h.in includes/ntv2version.h @ONLY)
 configure_file(includes/ntv2version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/includes/ntv2version.h @ONLY)
 
 # ajaanc
 set(AJAANC_HEADERS
-    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata.h
-    ${AJA_LIB_ANC_ROOT}/includes/ancillarydatafactory.h
-    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_cea608.h
-    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_cea608_line21.h
-    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_cea608_vanc.h
-    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_cea708.h
-    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_framestatusinfo524D.h
-    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_framestatusinfo5251.h
-    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_hdr_hdr10.h
-    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_hdr_hlg.h
-    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_hdr_sdr.h
-    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_timecode.h
-    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_timecode_atc.h
-    ${AJA_LIB_ANC_ROOT}/includes/ancillarydata_timecode_vitc.h
-    ${AJA_LIB_ANC_ROOT}/includes/ancillarylist.h)
+    ../ajaanc/includes/ancillarydata.h
+    ../ajaanc/includes/ancillarydatafactory.h
+    ../ajaanc/includes/ancillarydata_cea608.h
+    ../ajaanc/includes/ancillarydata_cea608_line21.h
+    ../ajaanc/includes/ancillarydata_cea608_vanc.h
+    ../ajaanc/includes/ancillarydata_cea708.h
+    ../ajaanc/includes/ancillarydata_framestatusinfo524D.h
+    ../ajaanc/includes/ancillarydata_framestatusinfo5251.h
+    ../ajaanc/includes/ancillarydata_hdr_hdr10.h
+    ../ajaanc/includes/ancillarydata_hdr_hlg.h
+    ../ajaanc/includes/ancillarydata_hdr_sdr.h
+    ../ajaanc/includes/ancillarydata_timecode.h
+    ../ajaanc/includes/ancillarydata_timecode_atc.h
+    ../ajaanc/includes/ancillarydata_timecode_vitc.h
+    ../ajaanc/includes/ancillarylist.h)
 set(AJAANC_SOURCES
-    ${AJA_LIB_ANC_ROOT}/src/ancillarydata.cpp
-    ${AJA_LIB_ANC_ROOT}/src/ancillarydatafactory.cpp
-    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_cea608.cpp
-    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_cea608_line21.cpp
-    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_cea608_vanc.cpp
-    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_cea708.cpp
-    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_framestatusinfo524D.cpp
-    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_framestatusinfo5251.cpp
-    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_hdr_hdr10.cpp
-    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_hdr_hlg.cpp
-    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_hdr_sdr.cpp
-    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_timecode.cpp
-    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_timecode_atc.cpp
-    ${AJA_LIB_ANC_ROOT}/src/ancillarydata_timecode_vitc.cpp
-    ${AJA_LIB_ANC_ROOT}/src/ancillarylist.cpp)
+    ../ajaanc/src/ancillarydata.cpp
+    ../ajaanc/src/ancillarydatafactory.cpp
+    ../ajaanc/src/ancillarydata_cea608.cpp
+    ../ajaanc/src/ancillarydata_cea608_line21.cpp
+    ../ajaanc/src/ancillarydata_cea608_vanc.cpp
+    ../ajaanc/src/ancillarydata_cea708.cpp
+    ../ajaanc/src/ancillarydata_framestatusinfo524D.cpp
+    ../ajaanc/src/ancillarydata_framestatusinfo5251.cpp
+    ../ajaanc/src/ancillarydata_hdr_hdr10.cpp
+    ../ajaanc/src/ancillarydata_hdr_hlg.cpp
+    ../ajaanc/src/ancillarydata_hdr_sdr.cpp
+    ../ajaanc/src/ancillarydata_timecode.cpp
+    ../ajaanc/src/ancillarydata_timecode_atc.cpp
+    ../ajaanc/src/ancillarydata_timecode_vitc.cpp
+    ../ajaanc/src/ancillarylist.cpp)
 
 # ajabase
 set(AJABASE_COMMON_HEADERS
-    ${AJA_LIB_BASE_ROOT}/common/ajamovingavg.h
-    ${AJA_LIB_BASE_ROOT}/common/ajarefptr.h
-    ${AJA_LIB_BASE_ROOT}/common/audioutilities.h
-    ${AJA_LIB_BASE_ROOT}/common/buffer.h
-    ${AJA_LIB_BASE_ROOT}/common/bytestream.h
-    ${AJA_LIB_BASE_ROOT}/common/circularbuffer.h
-    ${AJA_LIB_BASE_ROOT}/common/cli_utils.h
-    ${AJA_LIB_BASE_ROOT}/common/commandline.h
-    ${AJA_LIB_BASE_ROOT}/common/common.h
-    ${AJA_LIB_BASE_ROOT}/common/dpxfileio.h
-    ${AJA_LIB_BASE_ROOT}/common/dpx_hdr.h
-    ${AJA_LIB_BASE_ROOT}/common/export.h
-    ${AJA_LIB_BASE_ROOT}/common/guid.h
-    ${AJA_LIB_BASE_ROOT}/common/options_popt.h
-    ${AJA_LIB_BASE_ROOT}/common/performance.h
-    ${AJA_LIB_BASE_ROOT}/common/pixelformat.h
-    ${AJA_LIB_BASE_ROOT}/common/public.h
-    ${AJA_LIB_BASE_ROOT}/common/rawfile.h
-    ${AJA_LIB_BASE_ROOT}/common/testpatterngen.h
-    ${AJA_LIB_BASE_ROOT}/common/timebase.h
-    ${AJA_LIB_BASE_ROOT}/common/timecode.h
-    ${AJA_LIB_BASE_ROOT}/common/timecodeburn.h
-    ${AJA_LIB_BASE_ROOT}/common/timer.h
-    ${AJA_LIB_BASE_ROOT}/common/types.h
-    ${AJA_LIB_BASE_ROOT}/common/variant.h
-    ${AJA_LIB_BASE_ROOT}/common/videotypes.h
-    ${AJA_LIB_BASE_ROOT}/common/videoutilities.h
-    ${AJA_LIB_BASE_ROOT}/common/wavewriter.h)
+    ../ajabase/common/ajamovingavg.h
+    ../ajabase/common/ajarefptr.h
+    ../ajabase/common/audioutilities.h
+    ../ajabase/common/buffer.h
+    ../ajabase/common/bytestream.h
+    ../ajabase/common/circularbuffer.h
+    ../ajabase/common/cli_utils.h
+    ../ajabase/common/commandline.h
+    ../ajabase/common/common.h
+    ../ajabase/common/dpxfileio.h
+    ../ajabase/common/dpx_hdr.h
+    ../ajabase/common/export.h
+    ../ajabase/common/guid.h
+    ../ajabase/common/options_popt.h
+    ../ajabase/common/performance.h
+    ../ajabase/common/pixelformat.h
+    ../ajabase/common/public.h
+    ../ajabase/common/rawfile.h
+    ../ajabase/common/testpatterngen.h
+    ../ajabase/common/timebase.h
+    ../ajabase/common/timecode.h
+    ../ajabase/common/timecodeburn.h
+    ../ajabase/common/timer.h
+    ../ajabase/common/types.h
+    ../ajabase/common/variant.h
+    ../ajabase/common/videotypes.h
+    ../ajabase/common/videoutilities.h
+    ../ajabase/common/wavewriter.h)
 set(AJABASE_NETWORK_HEADERS
-    ${AJA_LIB_BASE_ROOT}/network/ip_socket.h
-    ${AJA_LIB_BASE_ROOT}/network/tcp_socket.h
-    ${AJA_LIB_BASE_ROOT}/network/udp_socket.h)
+    ../ajabase/network/ip_socket.h
+    ../ajabase/network/tcp_socket.h
+    ../ajabase/network/udp_socket.h)
 set(AJABASE_PERSISTENCE_HEADERS
-    ${AJA_LIB_BASE_ROOT}/persistence/persistence.h
-    ${AJA_LIB_BASE_ROOT}/persistence/sqlite3.h)
+    ../ajabase/persistence/persistence.h
+    ../ajabase/persistence/sqlite3.h)
 set(AJABASE_PNP_HEADERS
-    ${AJA_LIB_BASE_ROOT}/pnp/pnp.h)
+    ../ajabase/pnp/pnp.h)
 set(AJABASE_SYS_HEADERS
-    ${AJA_LIB_BASE_ROOT}/system/atomic.h
-    ${AJA_LIB_BASE_ROOT}/system/debug.h
-    ${AJA_LIB_BASE_ROOT}/system/debugshare.h
-    ${AJA_LIB_BASE_ROOT}/system/diskstatus.h
-    ${AJA_LIB_BASE_ROOT}/system/event.h
-    ${AJA_LIB_BASE_ROOT}/system/file_io.h
-    ${AJA_LIB_BASE_ROOT}/system/info.h
-    ${AJA_LIB_BASE_ROOT}/system/lock.h
-    ${AJA_LIB_BASE_ROOT}/system/log.h
-    ${AJA_LIB_BASE_ROOT}/system/make_unique_shim.h
-    ${AJA_LIB_BASE_ROOT}/system/memory.h
-    ${AJA_LIB_BASE_ROOT}/system/process.h
-    ${AJA_LIB_BASE_ROOT}/system/system.h
-    ${AJA_LIB_BASE_ROOT}/system/systemtime.h
-    ${AJA_LIB_BASE_ROOT}/system/thread.h)
+    ../ajabase/system/atomic.h
+    ../ajabase/system/debug.h
+    ../ajabase/system/debugshare.h
+    ../ajabase/system/diskstatus.h
+    ../ajabase/system/event.h
+    ../ajabase/system/file_io.h
+    ../ajabase/system/info.h
+    ../ajabase/system/lock.h
+    ../ajabase/system/log.h
+    ../ajabase/system/make_unique_shim.h
+    ../ajabase/system/memory.h
+    ../ajabase/system/process.h
+    ../ajabase/system/system.h
+    ../ajabase/system/systemtime.h
+    ../ajabase/system/thread.h)
 set(AJABASE_COMMON_SOURCES
-    ${AJA_LIB_BASE_ROOT}/common/audioutilities.cpp
-    ${AJA_LIB_BASE_ROOT}/common/buffer.cpp
-    ${AJA_LIB_BASE_ROOT}/common/commandline.cpp
-    ${AJA_LIB_BASE_ROOT}/common/common.cpp
-    ${AJA_LIB_BASE_ROOT}/common/dpxfileio.cpp
-    ${AJA_LIB_BASE_ROOT}/common/dpx_hdr.cpp
-    ${AJA_LIB_BASE_ROOT}/common/guid.cpp
-    ${AJA_LIB_BASE_ROOT}/common/options_popt.cpp
-    ${AJA_LIB_BASE_ROOT}/common/performance.cpp
-    ${AJA_LIB_BASE_ROOT}/common/pixelformat.cpp
-    ${AJA_LIB_BASE_ROOT}/common/testpatterngen.cpp
-    ${AJA_LIB_BASE_ROOT}/common/timebase.cpp
-    ${AJA_LIB_BASE_ROOT}/common/timecode.cpp
-    ${AJA_LIB_BASE_ROOT}/common/timecodeburn.cpp
-    ${AJA_LIB_BASE_ROOT}/common/timer.cpp
-    ${AJA_LIB_BASE_ROOT}/common/variant.cpp
-    ${AJA_LIB_BASE_ROOT}/common/videoutilities.cpp
-    ${AJA_LIB_BASE_ROOT}/common/wavewriter.cpp)
+    ../ajabase/common/audioutilities.cpp
+    ../ajabase/common/buffer.cpp
+    ../ajabase/common/commandline.cpp
+    ../ajabase/common/common.cpp
+    ../ajabase/common/dpxfileio.cpp
+    ../ajabase/common/dpx_hdr.cpp
+    ../ajabase/common/guid.cpp
+    ../ajabase/common/options_popt.cpp
+    ../ajabase/common/performance.cpp
+    ../ajabase/common/pixelformat.cpp
+    ../ajabase/common/testpatterngen.cpp
+    ../ajabase/common/timebase.cpp
+    ../ajabase/common/timecode.cpp
+    ../ajabase/common/timecodeburn.cpp
+    ../ajabase/common/timer.cpp
+    ../ajabase/common/variant.cpp
+    ../ajabase/common/videoutilities.cpp
+    ../ajabase/common/wavewriter.cpp)
 
 set(AJABASE_NETWORK_SOURCES
-    ${AJA_LIB_BASE_ROOT}/network/ip_socket.cpp
-    ${AJA_LIB_BASE_ROOT}/network/tcp_socket.cpp
-    ${AJA_LIB_BASE_ROOT}/network/udp_socket.cpp)
+    ../ajabase/network/ip_socket.cpp
+    ../ajabase/network/tcp_socket.cpp
+    ../ajabase/network/udp_socket.cpp)
 set(AJABASE_PERSISTENCE_SOURCES
-    ${AJA_LIB_BASE_ROOT}/persistence/persistence.cpp
-    ${AJA_LIB_BASE_ROOT}/persistence/sqlite3.c)
+    ../ajabase/persistence/persistence.cpp
+    ../ajabase/persistence/sqlite3.c)
 set(AJABASE_PNP_SOURCES
-    ${AJA_LIB_BASE_ROOT}/pnp/pnp.cpp)
+    ../ajabase/pnp/pnp.cpp)
 set(AJABASE_SYS_SOURCES
-    ${AJA_LIB_BASE_ROOT}/system/atomic.cpp
-    ${AJA_LIB_BASE_ROOT}/system/debug.cpp
-    ${AJA_LIB_BASE_ROOT}/system/diskstatus.cpp
-    ${AJA_LIB_BASE_ROOT}/system/event.cpp
-    ${AJA_LIB_BASE_ROOT}/system/file_io.cpp
-    ${AJA_LIB_BASE_ROOT}/system/info.cpp
-    ${AJA_LIB_BASE_ROOT}/system/lock.cpp
-    ${AJA_LIB_BASE_ROOT}/system/log.cpp
-    ${AJA_LIB_BASE_ROOT}/system/memory.cpp
-    ${AJA_LIB_BASE_ROOT}/system/process.cpp
-    ${AJA_LIB_BASE_ROOT}/system/system.cpp
-    ${AJA_LIB_BASE_ROOT}/system/systemtime.cpp
-    ${AJA_LIB_BASE_ROOT}/system/thread.cpp)
+    ../ajabase/system/atomic.cpp
+    ../ajabase/system/debug.cpp
+    ../ajabase/system/diskstatus.cpp
+    ../ajabase/system/event.cpp
+    ../ajabase/system/file_io.cpp
+    ../ajabase/system/info.cpp
+    ../ajabase/system/lock.cpp
+    ../ajabase/system/log.cpp
+    ../ajabase/system/memory.cpp
+    ../ajabase/system/process.cpp
+    ../ajabase/system/system.cpp
+    ../ajabase/system/systemtime.cpp
+    ../ajabase/system/thread.cpp)
 # ajabase windows
 set(AJABASE_PNP_WIN_HEADERS
-    ${AJA_LIB_BASE_ROOT}/pnp/windows/pnpimpl.h)
+    ../ajabase/pnp/windows/pnpimpl.h)
 set(AJABASE_PNP_WIN_SOURCES
-    ${AJA_LIB_BASE_ROOT}/pnp/windows/pnpimpl.cpp)
+    ../ajabase/pnp/windows/pnpimpl.cpp)
 set(AJABASE_SYS_WIN_HEADERS
-    ${AJA_LIB_BASE_ROOT}/system/windows/eventimpl.h
-    ${AJA_LIB_BASE_ROOT}/system/windows/infoimpl.h
-    ${AJA_LIB_BASE_ROOT}/system/windows/lockimpl.h
-    ${AJA_LIB_BASE_ROOT}/system/windows/processimpl.h
-    ${AJA_LIB_BASE_ROOT}/system/windows/threadimpl.h)
+    ../ajabase/system/windows/eventimpl.h
+    ../ajabase/system/windows/infoimpl.h
+    ../ajabase/system/windows/lockimpl.h
+    ../ajabase/system/windows/processimpl.h
+    ../ajabase/system/windows/threadimpl.h)
 set(AJABASE_SYS_WIN_SOURCES
-    ${AJA_LIB_BASE_ROOT}/system/windows/eventimpl.cpp
-    ${AJA_LIB_BASE_ROOT}/system/windows/infoimpl.cpp
-    ${AJA_LIB_BASE_ROOT}/system/windows/lockimpl.cpp
-    ${AJA_LIB_BASE_ROOT}/system/windows/processimpl.cpp
-    ${AJA_LIB_BASE_ROOT}/system/windows/threadimpl.cpp)
+    ../ajabase/system/windows/eventimpl.cpp
+    ../ajabase/system/windows/infoimpl.cpp
+    ../ajabase/system/windows/lockimpl.cpp
+    ../ajabase/system/windows/processimpl.cpp
+    ../ajabase/system/windows/threadimpl.cpp)
 # ajabase linux
 set(AJABASE_PNP_LIN_HEADERS
-    ${AJA_LIB_BASE_ROOT}/pnp/linux/pnpimpl.h)
+    ../ajabase/pnp/linux/pnpimpl.h)
 set(AJABASE_PNP_LIN_SOURCES
-    ${AJA_LIB_BASE_ROOT}/pnp/linux/pnpimpl.cpp)
+    ../ajabase/pnp/linux/pnpimpl.cpp)
 set(AJABASE_SYS_LIN_HEADERS
-    ${AJA_LIB_BASE_ROOT}/system/linux/eventimpl.h
-    ${AJA_LIB_BASE_ROOT}/system/linux/infoimpl.h
-    ${AJA_LIB_BASE_ROOT}/system/linux/lockimpl.h
-    ${AJA_LIB_BASE_ROOT}/system/linux/processimpl.h
-    ${AJA_LIB_BASE_ROOT}/system/linux/threadimpl.h)
+    ../ajabase/system/linux/eventimpl.h
+    ../ajabase/system/linux/infoimpl.h
+    ../ajabase/system/linux/lockimpl.h
+    ../ajabase/system/linux/processimpl.h
+    ../ajabase/system/linux/threadimpl.h)
 set(AJABASE_SYS_LIN_SOURCES
-    ${AJA_LIB_BASE_ROOT}/system/linux/eventimpl.cpp
-    ${AJA_LIB_BASE_ROOT}/system/linux/infoimpl.cpp
-    ${AJA_LIB_BASE_ROOT}/system/linux/lockimpl.cpp
-    ${AJA_LIB_BASE_ROOT}/system/linux/processimpl.cpp
-    ${AJA_LIB_BASE_ROOT}/system/linux/threadimpl.cpp)
+    ../ajabase/system/linux/eventimpl.cpp
+    ../ajabase/system/linux/infoimpl.cpp
+    ../ajabase/system/linux/lockimpl.cpp
+    ../ajabase/system/linux/processimpl.cpp
+    ../ajabase/system/linux/threadimpl.cpp)
 # ajabase mac
 set(AJABASE_PNP_MAC_HEADERS
-    ${AJA_LIB_BASE_ROOT}/pnp/mac/devicenotifier.h
-    ${AJA_LIB_BASE_ROOT}/pnp/mac/masterport.h
-    ${AJA_LIB_BASE_ROOT}/pnp/mac/pnpimpl.h)
+    ../ajabase/pnp/mac/devicenotifier.h
+    ../ajabase/pnp/mac/masterport.h
+    ../ajabase/pnp/mac/pnpimpl.h)
 set(AJABASE_PNP_MAC_SOURCES
-    ${AJA_LIB_BASE_ROOT}/pnp/mac/devicenotifier.cpp
-    ${AJA_LIB_BASE_ROOT}/pnp/mac/masterport.cpp
-    ${AJA_LIB_BASE_ROOT}/pnp/mac/pnpimpl.cpp)
+    ../ajabase/pnp/mac/devicenotifier.cpp
+    ../ajabase/pnp/mac/masterport.cpp
+    ../ajabase/pnp/mac/pnpimpl.cpp)
 set(AJABASE_SYS_MAC_HEADERS
-    ${AJA_LIB_BASE_ROOT}/system/mac/eventimpl.h
-    ${AJA_LIB_BASE_ROOT}/system/mac/infoimpl.h
-    ${AJA_LIB_BASE_ROOT}/system/mac/lockimpl.h
-    ${AJA_LIB_BASE_ROOT}/system/mac/processimpl.h
-    ${AJA_LIB_BASE_ROOT}/system/mac/pthreadsextra.h
-    ${AJA_LIB_BASE_ROOT}/system/mac/threadimpl.h)
+    ../ajabase/system/mac/eventimpl.h
+    ../ajabase/system/mac/infoimpl.h
+    ../ajabase/system/mac/lockimpl.h
+    ../ajabase/system/mac/processimpl.h
+    ../ajabase/system/mac/pthreadsextra.h
+    ../ajabase/system/mac/threadimpl.h)
 set(AJABASE_SYS_MAC_SOURCES
-    ${AJA_LIB_BASE_ROOT}/system/mac/eventimpl.cpp
-    ${AJA_LIB_BASE_ROOT}/system/mac/infoimpl.mm
-    ${AJA_LIB_BASE_ROOT}/system/mac/lockimpl.cpp
-    ${AJA_LIB_BASE_ROOT}/system/mac/processimpl.cpp
-    ${AJA_LIB_BASE_ROOT}/system/mac/pthreadsextra.cpp
-    ${AJA_LIB_BASE_ROOT}/system/mac/threadimpl.cpp)
+    ../ajabase/system/mac/eventimpl.cpp
+    ../ajabase/system/mac/infoimpl.mm
+    ../ajabase/system/mac/lockimpl.cpp
+    ../ajabase/system/mac/processimpl.cpp
+    ../ajabase/system/mac/pthreadsextra.cpp
+    ../ajabase/system/mac/threadimpl.cpp)
 set(AJABASE_HEADERS
     ${AJABASE_COMMON_HEADERS}
     ${AJABASE_NETWORK_HEADERS}
@@ -426,8 +428,8 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 
     list(APPEND TARGET_INCLUDE_DIRS
         src/win
-        ${AJA_LIB_BASE_ROOT}/pnp/windows
-        ${AJA_LIB_BASE_ROOT}/system/windows)
+        ../ajabase/pnp/windows
+        ../ajabase/system/windows)
 
     set(AJABASE_HEADERS
         ${AJABASE_HEADERS}
@@ -453,8 +455,8 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
     list(APPEND TARGET_INCLUDE_DIRS
         src/lin
-        ${AJA_LIB_BASE_ROOT}/pnp/linux
-        ${AJA_LIB_BASE_ROOT}/system/linux)
+        ../ajabase/pnp/linux
+        ../ajabase/system/linux)
 
     set(AJABASE_HEADERS
         ${AJABASE_HEADERS}
@@ -478,8 +480,8 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 
     list(APPEND TARGET_INCLUDE_DIRS
         src/mac
-        ${AJA_LIB_BASE_ROOT}/pnp/mac
-        ${AJA_LIB_BASE_ROOT}/system/mac
+        ../ajabase/pnp/mac
+        ../ajabase/system/mac
         /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include)
 
     set(AJABASE_HEADERS
@@ -558,56 +560,56 @@ add_library(ajabase INTERFACE)
 # `cmake --install` deployments
 if (AJA_INSTALL_HEADERS)
     list(REMOVE_ITEM AJANTV2_HEADERS src/ntv2devicefeatures.hpp)
-    install(FILES ${AJABASE_COMMON_HEADERS}         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/common)
-    install(FILES ${AJABASE_NETWORK_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/network)
-    install(FILES ${AJABASE_PERSISTENCE_HEADERS}    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/persistence)
-    install(FILES ${AJABASE_PNP_HEADERS}            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp)
-    install(FILES ${AJABASE_PNP_WIN_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/windows)
-    install(FILES ${AJABASE_PNP_MAC_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/mac)
-    install(FILES ${AJABASE_PNP_LIN_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/pnp/linux)
-    install(FILES ${AJABASE_SYS_HEADERS}            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system)
-    install(FILES ${AJABASE_SYS_WIN_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system/windows)
-    install(FILES ${AJABASE_SYS_MAC_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system/mac)
-    install(FILES ${AJABASE_SYS_LIN_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajabase/system/linux)
-    install(FILES ${AJAANC_HEADERS}                 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajaanc/includes)
-    install(FILES ${AJANTV2_HEADERS}                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/includes)
-    install(FILES ${AJANTV2_WIN_HEADERS}            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/src/win)
-    install(FILES ${AJANTV2_MAC_HEADERS}            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/src/mac)
-    install(FILES ${AJANTV2_LIN_HEADERS}            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/src/lin)
-    install(FILES ${AJANTV2_UTILITY_PUBLIC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/utilityfiles/public)
-    install(FILES includes/ntv2version.h.in         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/includes)
-    install(FILES includes/ntv2version.h            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/includes)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/includes/ntv2version.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/includes)
+    install(FILES ${AJABASE_COMMON_HEADERS}         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajabase/common)
+    install(FILES ${AJABASE_NETWORK_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajabase/network)
+    install(FILES ${AJABASE_PERSISTENCE_HEADERS}    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajabase/persistence)
+    install(FILES ${AJABASE_PNP_HEADERS}            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajabase/pnp)
+    install(FILES ${AJABASE_PNP_WIN_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajabase/pnp/windows)
+    install(FILES ${AJABASE_PNP_MAC_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajabase/pnp/mac)
+    install(FILES ${AJABASE_PNP_LIN_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajabase/pnp/linux)
+    install(FILES ${AJABASE_SYS_HEADERS}            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajabase/system)
+    install(FILES ${AJABASE_SYS_WIN_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajabase/system/windows)
+    install(FILES ${AJABASE_SYS_MAC_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajabase/system/mac)
+    install(FILES ${AJABASE_SYS_LIN_HEADERS}        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajabase/system/linux)
+    install(FILES ${AJAANC_HEADERS}                 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajaanc/includes)
+    install(FILES ${AJANTV2_HEADERS}                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/includes)
+    install(FILES ${AJANTV2_WIN_HEADERS}            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/src/win)
+    install(FILES ${AJANTV2_MAC_HEADERS}            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/src/mac)
+    install(FILES ${AJANTV2_LIN_HEADERS}            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/src/lin)
+    install(FILES ${AJANTV2_UTILITY_PUBLIC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/utilityfiles/public)
+    install(FILES includes/ntv2version.h.in         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/includes)
+    install(FILES includes/ntv2version.h            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/includes)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/includes/ntv2version.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/includes)
 endif()
 if (AJA_INSTALL_SOURCES)
     list(APPEND AJANTV2_SOURCES src/ntv2devicefeatures.hpp)
     list(APPEND AJANTV2_WIN_SOURCES src/win/dllmain.cpp)
-    install(FILES ${AJABASE_COMMON_SOURCES}         DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/common)
-    install(FILES ${AJABASE_NETWORK_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/network)
-    install(FILES ${AJABASE_PERSISTENCE_SOURCES}    DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/persistence)
-    install(FILES ${AJABASE_PNP_SOURCES}            DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/pnp)
-    install(FILES ${AJABASE_PNP_WIN_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/pnp/windows)
-    install(FILES ${AJABASE_PNP_MAC_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/pnp/mac)
-    install(FILES ${AJABASE_PNP_LIN_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/pnp/linux)
-    install(FILES ${AJABASE_SYS_SOURCES}            DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/system)
-    install(FILES ${AJABASE_SYS_WIN_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/system/windows)
-    install(FILES ${AJABASE_SYS_MAC_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/system/mac)
-    install(FILES ${AJABASE_SYS_LIN_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajabase/system/linux)
-    install(FILES ${AJAANC_SOURCES}                 DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajaanc/src)
-    install(FILES ${AJANTV2_SOURCES}                DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/src)
-    install(FILES ${AJANTV2_WIN_SOURCES}            DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/src/win)
-    install(FILES ${AJANTV2_MAC_SOURCES}            DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/src/mac)
-    install(FILES ${AJANTV2_LIN_SOURCES}            DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/src/lin)
-    install(FILES ${AJANTV2_UTILITY_PUBLIC_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/utilityfiles/public)
+    install(FILES ${AJABASE_COMMON_SOURCES}         DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajabase/common)
+    install(FILES ${AJABASE_NETWORK_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajabase/network)
+    install(FILES ${AJABASE_PERSISTENCE_SOURCES}    DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajabase/persistence)
+    install(FILES ${AJABASE_PNP_SOURCES}            DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajabase/pnp)
+    install(FILES ${AJABASE_PNP_WIN_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajabase/pnp/windows)
+    install(FILES ${AJABASE_PNP_MAC_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajabase/pnp/mac)
+    install(FILES ${AJABASE_PNP_LIN_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajabase/pnp/linux)
+    install(FILES ${AJABASE_SYS_SOURCES}            DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajabase/system)
+    install(FILES ${AJABASE_SYS_WIN_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajabase/system/windows)
+    install(FILES ${AJABASE_SYS_MAC_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajabase/system/mac)
+    install(FILES ${AJABASE_SYS_LIN_SOURCES}        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajabase/system/linux)
+    install(FILES ${AJAANC_SOURCES}                 DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajaanc/src)
+    install(FILES ${AJANTV2_SOURCES}                DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2/src)
+    install(FILES ${AJANTV2_WIN_SOURCES}            DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2/src/win)
+    install(FILES ${AJANTV2_MAC_SOURCES}            DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2/src/mac)
+    install(FILES ${AJANTV2_LIN_SOURCES}            DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2/src/lin)
+    install(FILES ${AJANTV2_UTILITY_PUBLIC_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2/utilityfiles/public)
 endif()
 if (AJA_INSTALL_CMAKE)
-    install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2)
+    install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2)
 endif()
 if (AJA_INSTALL_MISC)
     # build stuff
-    install(FILES ${AJA_CMAKE_DIR}/../ajalibraries/ajantv2/build/Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/build)
-    install(FILES ${AJA_CMAKE_DIR}/../ajalibraries/ajantv2/Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2)
-    install(FILES ${AJA_CMAKE_DIR}/../ajalibraries/ajantv2/src/targets.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/src)
+    install(FILES ${AJA_CMAKE_DIR}/../libajantv2/ajantv2/build/Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2/build)
+    install(FILES ${AJA_CMAKE_DIR}/../libajantv2/ajantv2/Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2)
+    install(FILES ${AJA_CMAKE_DIR}/../libajantv2/ajantv2/src/targets.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2/src)
     install(FILES ${AJA_CMAKE_DIR}/../build/common.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
     install(FILES ${AJA_CMAKE_DIR}/../build/configure.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
     install(FILES ${AJA_CMAKE_DIR}/../build/internal.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
@@ -626,3 +628,7 @@ install(TARGETS ${BUILD_TARGETS}
 if (AJA_CODE_SIGN)
     aja_code_sign(ajantv2-dl)
 endif()
+
+# if (AJA_BUILD_TESTS)
+#     aja_add_subdirectory(ajantv2/test)
+# endif()
