@@ -224,7 +224,7 @@ AJAStatus NTV2CCGrabber::SetupHostBuffers (const NTV2VideoFormat inVideoFormat)
 		frameData.LockAll(mDevice);
 		#endif
 		mCircularBuffer.Add(&frameData);	//	Add to my circular buffer
-	}	//	for each AVDataBuffer
+	}	//	for each NTV2FrameData
 
 	return AJA_STATUS_SUCCESS;
 
@@ -233,7 +233,7 @@ AJAStatus NTV2CCGrabber::SetupHostBuffers (const NTV2VideoFormat inVideoFormat)
 
 void NTV2CCGrabber::ReleaseHostBuffers (void)
 {
-	//	Unlock each in-host AVDataBuffer...
+	//	Unlock each in-host NTV2FrameData...
 	#ifdef NTV2_BUFFER_LOCK
 	mDevice.DMABufferUnlockAll();	//	Unlock all my buffers
 	#endif	// NTV2_BUFFER_LOCK
@@ -704,14 +704,14 @@ void NTV2CCGrabber::CaptureFrames (void)
 		//	Process frames until signal format changes...
 		while (!mGlobalQuit)
 		{
-			AUTOCIRCULATE_STATUS	acStatus;
+			AUTOCIRCULATE_STATUS acStatus;
 			mDevice.AutoCirculateGetStatus (mConfig.fInputChannel, acStatus);
 			if (acStatus.IsRunning()  &&  acStatus.HasAvailableInputFrame())
 			{
 				//	At this point, there's at least one fully-formed frame available in the device's
-				//	frame buffer to transfer to the host. Reserve an AVDataBuffer to "produce", and
+				//	frame buffer to transfer to the host. Reserve an NTV2FrameData to "produce", and
 				//	use it to store the next frame to be transferred from the device...
-				NTV2FrameData *	pCaptureData	(mCircularBuffer.StartProduceNextBuffer());
+				NTV2FrameData *	pCaptureData (mCircularBuffer.StartProduceNextBuffer());
 				if (pCaptureData)
 				{
 					mInputXferInfo.acFrameBufferFormat = mConfig.fPixelFormat;
@@ -720,21 +720,18 @@ void NTV2CCGrabber::CaptureFrames (void)
 												pCaptureData->AncBuffer(), pCaptureData->AncBufferSize(),
 												pCaptureData->AncBuffer2(), pCaptureData->AncBuffer2Size());
 
-					//	Transfer the frame data from the device into our host AVDataBuffer...
-					if (mDevice.AutoCirculateTransfer (mConfig.fInputChannel, mInputXferInfo))	xferTally++;
-					else xferFails++;
-
-					if (mConfig.fBurnCaptions)
+					//	Transfer the frame data from the device into our host NTV2FrameData...
+					if (mDevice.AutoCirculateTransfer (mConfig.fInputChannel, mInputXferInfo))
 					{
-						pCaptureData->fNumAudioBytes	= mInputXferInfo.GetCapturedAudioByteCount();		//	Actual audio byte count goes with captured frame
-						pCaptureData->fNumAncBytes		= mInputXferInfo.GetCapturedAncByteCount(false);	//	Actual F1 anc byte count goes with captured frame
-						pCaptureData->fNumAnc2Bytes		= mInputXferInfo.GetCapturedAncByteCount(true);		//	Actual F2 anc byte count goes with captured frame
-						mInputXferInfo.GetInputTimeCodes(pCaptureData->fTimecodes, ::NTV2InputSourceToChannel(mConfig.fInputSource));	//	Captured timecodes
-					}
+						xferTally++;
+						if (mConfig.fBurnCaptions)
+							mInputXferInfo.GetInputTimeCodes(pCaptureData->fTimecodes, ::NTV2InputSourceToChannel(mConfig.fInputSource));	//	Captured timecodes
 
-					//	Extract closed-captioning data from the host AVDataBuffer while we have full access
-					//	to the buffer, and write the CC data to stdout...
-					ExtractClosedCaptionData(mInputXferInfo.GetTransferStatus().GetProcessedFrameCount(), currentVF);
+						//	Extract closed-captioning data from the host NTV2FrameData while we have full access to it...
+						ExtractClosedCaptionData (mInputXferInfo.GetTransferStatus().GetProcessedFrameCount(), currentVF);
+					}
+					else
+						xferFails++;
 
 					//	Signal that we're done "producing" the frame, making it available for future "consumption"...
 					mCircularBuffer.EndProduceNextBuffer();
@@ -784,10 +781,10 @@ void NTV2CCGrabber::CaptureFrames (void)
 					else if (squares != mSquares)
 						CAPWARN("Input changed from " << (mSquares?"SqDiv":"TSI") << " to " << (squares?"SqDiv":"TSI"));
 
-					//	These next 2 calls terminate the playout thread...
+					//	Terminate the playout thread...
 					mCircularBuffer.StartProduceNextBuffer();
 					mCircularBuffer.EndProduceNextBuffer();
-					break;	//	exit frame processing loop -- restart AutoCirculate
+					break;	//	exit frame processing loop to restart AutoCirculate
 				}	//	if incoming video format changed
 			}	//	else not running or no frames available
 			if (mConfig.fPixelFormat != currentPF)
@@ -1021,11 +1018,11 @@ void NTV2CCGrabber::SwitchPixelFormat (void)
 
 void NTV2CCGrabber::ExtractClosedCaptionData (const uint32_t inFrameNum, const NTV2VideoFormat inVideoFormat)
 {
-	NTV2VANCMode		vancMode			(NTV2_VANCMODE_INVALID);
+	NTV2VANCMode		vancMode (NTV2_VANCMODE_INVALID);
 	AJAAncillaryList	ancPackets, vancPackets;
 	CaptionData			captionData708Anc, captionData708Vanc, captionData608Anc, captionData608Vanc, captionDataL21Anc, captionDataL21;	//	The 608 caption byte pairs (one pair per field)
 	mDevice.GetVANCMode(vancMode, mConfig.fInputChannel);
-	const NTV2FormatDescriptor	formatDesc (inVideoFormat, mConfig.fPixelFormat, vancMode);
+	const NTV2FormatDescriptor formatDesc (inVideoFormat, mConfig.fPixelFormat, vancMode);
 
 	if (NTV2_IS_VANCMODE_ON(vancMode) || DeviceAncExtractorIsAvailable())	//	Gotta have at least VANC or AncExt
 	{
@@ -1039,7 +1036,9 @@ void NTV2CCGrabber::ExtractClosedCaptionData (const uint32_t inFrameNum, const N
 		//	Get all anc extractor packets...
 		if (DeviceAncExtractorIsAvailable())
 		{
-			AJAAncillaryList::SetFromDeviceAncBuffers (mInputXferInfo.acANCBuffer, mInputXferInfo.acANCField2Buffer, ancPackets, inFrameNum);
+			const NTV2_POINTER validAncF1 (mInputXferInfo.acANCBuffer.GetHostAddress(0), mInputXferInfo.GetCapturedAncByteCount(false));
+			const NTV2_POINTER validAncF2 (mInputXferInfo.acANCField2Buffer.GetHostAddress(0), mInputXferInfo.GetCapturedAncByteCount(true));
+			AJAAncillaryList::SetFromDeviceAncBuffers (validAncF1, validAncF2, ancPackets, inFrameNum);
 			ancPackets.ParseAllAncillaryData();
 			if (NTV2_IS_VANCMODE_ON(vancMode))
 			{	//	Compare with what we got from VANC lines:
@@ -1065,7 +1064,7 @@ void NTV2CCGrabber::ExtractClosedCaptionData (const uint32_t inFrameNum, const N
 			captionDataL21.bGotField1Data = CNTV2Line21Captioner::DecodeLine(pLine21, captionDataL21.f1_char1, captionDataL21.f1_char2);
 		}
 		pLine21 = AsConstUBytePtr(formatDesc.GetRowAddress(mInputXferInfo.acVideoBuffer.GetHostPointer(),
-																			line21RowOffset+1));	//	F2 should be on next row
+															line21RowOffset+1));	//	F2 should be on next row
 		if (pLine21)
 		{
 			if (mConfig.fPixelFormat == NTV2_FBF_10BIT_YCBCR)	//	CNTV2Line21Captioner::DecodeLine requires 8-bit YUV
@@ -1196,7 +1195,7 @@ void NTV2CCGrabber::ExtractClosedCaptionData (const uint32_t inFrameNum, const N
 		CAPDBG("CaptionData mis-compare(s): " << ossCompare.str());
 
 	//	Set p608CaptionData based on mConfig.fCaptionSrc...
-	switch(mConfig.fCaptionSrc)
+	switch (mConfig.fCaptionSrc)
 	{	//	captionData708Anc, captionData708Vanc, captionData608Anc, captionData608Vanc, captionDataL21Anc, captionDataL21
 		case kCaptionDataSrc_Line21:		p608CaptionData = &captionDataL21Anc;	break;
 		case kCaptionDataSrc_608FBVanc:		p608CaptionData = &captionDataL21;		break;

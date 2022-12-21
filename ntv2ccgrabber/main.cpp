@@ -83,6 +83,7 @@ int main (int argc, const char ** argv)
 	int				bMultiFormat	(0);					//	Enable multi-format?
 	int				bUseVanc		(0);					//	Use Vanc (tall frame) geometry?
 	int				bWithAudio		(0);					//	Grab audio?
+	int				bShowVersion	(0);					//	Show version?
 	poptContext		optionsContext;							//	Context for parsing command line arguments
 	AJADebug::Open();
 
@@ -93,6 +94,7 @@ int main (int argc, const char ** argv)
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
+		{"version",		 0,		POPT_ARG_NONE,		&bShowVersion,		0,	"show version and exit",		AJA_NULL					},
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device to use",			"index#, serial#, or model"	},
 		{"input",		'i',	POPT_ARG_STRING,	&pInputSrcSpec,		0,	"which SDI input",				"1-8, ?=list"				},
 		{"tcsource",	't',	POPT_ARG_STRING,	&pTimecodeSpec,		0,	"time code source",				"'?' or 'list' to list"		},
@@ -119,6 +121,8 @@ int main (int argc, const char ** argv)
 	const string	tcSourceStr		(pTimecodeSpec ? CNTV2DemoCommon::ToLower(string(pTimecodeSpec)) : "");
 	const string	pixelFormatStr	(pPixelFormat  ? pPixelFormat :  "");
 	const string	framesSpec		(pFramesSpec   ? pFramesSpec  :  "");
+	if (bShowVersion)
+		{cout << argv[0] << ", NTV2 SDK " << ::NTV2Version() << endl;  return 0;}
 
 	//	Device
 	const string	legalDevices(CNTV2DemoCommon::GetDeviceStrings());
