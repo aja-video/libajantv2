@@ -1,0 +1,17 @@
+{
+    "decoder":[
+    {
+        "_comment_SelectionMode_":"Valid modes are 0:off, 1:first program, 2:lowest program num, 3:specific program num, 4:specific program PID ",
+        "SelectionMode":1,
+
+        "_comment_ProgramNumber_":"Used if selection mode is set to 3",
+        "ProgramNumber":1,
+
+        "_comment_ProgramPID_":"Used if selection mode is set to 4",
+        "ProgramPID":256,
+
+        "_comment_AudioNumber_":"Which program to pull audio from",
+        "AudioNumber":1
+    }
+    ]
+}

@@ -1,0 +1,33 @@
+{
+	"protocol":"2022",
+    "sfps":[
+        {
+            "designator":"sfp1",
+            "ipAddress":"172.16.45.10",
+            "subnetMask":"255.255.0.0",
+            "gateway":"255.255.255.255"
+        }
+    ],
+    "transmit2022":[
+        {
+            "designator":"channel1",
+            "sfp1RemoteIPAddress":"239.0.45.15",
+            "sfp1RemotePort":"6010",
+            "sfp1LocalPort":"5010",
+            "tos":"100",
+            "ttl":"128",
+            "ssrc":"1000",
+            "enable":"true"
+        },
+        {
+            "designator":"channel2",
+            "sfp1RemoteIPAddress":"239.0.45.25",
+            "sfp1RemotePort":"6011",
+            "sfp1LocalPort":"5011",
+            "tos":"100",
+            "ttl":"128",
+            "ssrc":"1000",
+            "enable":"false"
+        }
+    ]
+}

@@ -1,0 +1,30 @@
+<RCC>
+    <qresource prefix="/resources" >
+        <file>media/step-backward-16.png</file>
+        <file>media/step-backward-32.png</file>
+        <file>media/step-forward-16.png</file>
+        <file>media/step-forward-32.png</file>
+        <file>media/record-bright-32.png</file>
+        <file>media/record-dim-32.png</file>
+        <file>media/record-very-bright-32.png</file>
+        <file>media/capture-48.png</file>
+        <file>media/controlpanel-48.png</file>
+        <file>media/playback-48.png</file>
+        <file>media/pause-16.png</file>
+        <file>media/pause-32.png</file>
+        <file>media/play-16.png</file>
+        <file>media/play-32.png</file>
+        <file>media/stop-16.png</file>
+        <file>media/stop-32.png</file>
+        <file>media/back-16.png</file>
+        <file>media/back-32.png</file>
+        <file>media/forward-16.png</file>
+        <file>media/forward-32.png</file>
+        <file>media/info-32.png</file>
+        <file>media/loop-32.png</file>
+        <file>media/noloop-32.png</file>
+        <file>media/close-32.png</file>
+        <file>media/shade-32.png</file>
+        <file>media/info-italic-32.png</file>
+    </qresource>
+</RCC>

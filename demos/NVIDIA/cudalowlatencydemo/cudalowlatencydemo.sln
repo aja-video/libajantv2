@@ -1,0 +1,42 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.1433
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cudalowlatencydemo", "cudalowlatencydemo.vcxproj", "{4417B1F6-E78A-4B93-856C-959BAD3A9C05}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589} = {8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libajantv2dll", "..\..\..\..\..\ajalibraries\ajantv2\build\libajantv2dll_cuda.vcxproj", "{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4417B1F6-E78A-4B93-856C-959BAD3A9C05}.Debug|x64.ActiveCfg = Debug|x64
+		{4417B1F6-E78A-4B93-856C-959BAD3A9C05}.Debug|x64.Build.0 = Debug|x64
+		{4417B1F6-E78A-4B93-856C-959BAD3A9C05}.Debug|x86.ActiveCfg = Debug|x64
+		{4417B1F6-E78A-4B93-856C-959BAD3A9C05}.Release|x64.ActiveCfg = Release|x64
+		{4417B1F6-E78A-4B93-856C-959BAD3A9C05}.Release|x64.Build.0 = Release|x64
+		{4417B1F6-E78A-4B93-856C-959BAD3A9C05}.Release|x86.ActiveCfg = Release|x64
+		{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}.Debug|x64.ActiveCfg = Debug|x64
+		{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}.Debug|x64.Build.0 = Debug|x64
+		{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}.Debug|x86.ActiveCfg = Debug|Win32
+		{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}.Debug|x86.Build.0 = Debug|Win32
+		{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}.Release|x64.ActiveCfg = Release|x64
+		{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}.Release|x64.Build.0 = Release|x64
+		{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}.Release|x86.ActiveCfg = Release|Win32
+		{8E9FCB9F-934A-4DFA-B9EB-8F0359EBE589}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {288A2292-229D-4D80-BB3C-5F3769814403}
+	EndGlobalSection
+EndGlobal
