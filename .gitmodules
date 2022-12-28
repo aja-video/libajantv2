@@ -1,4 +1,4 @@
 [submodule "ntv2cmake"]
 	path = cmake
-	url = ../ntv2cmake.git
+	url = ../cmake.git
 	branch = main
