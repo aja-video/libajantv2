@@ -34,7 +34,12 @@ set(TARGET_INCLUDE_DIRS
     ../ajaanc/includes
     ../ajabase
     includes
-    ${CMAKE_CURRENT_BINARY_DIR})
+    ${AJA_LIB_ANC_ROOT}/includes
+    ${AJA_LIB_BASE_ROOT}
+    ${AJA_LIBAJANTV2_ROOT}
+    ${AJA_LIB_NTV2_ROOT}/includes
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
 
 # ajantv2
 set(AJANTV2_HEADERS
@@ -175,30 +180,30 @@ set(AJANTV2_UTILITY_PUBLIC_SOURCES
     utilityfiles/public/ntv2firmwareinstallerthread.cpp
     utilityfiles/public/ntv2hevcfirmwareinstallerthread.cpp)
 # ajantv2 hevc
-# if (NOT AJA_BUILD_OPENSOURCE)
-#     aja_message(STATUS "added ajantv2 HEVC/M31 codec")
-#     set(AJANTV2_HEVC_HEADERS
-#         codecs/hevc/m31/ntv2m31.h
-#         codecs/hevc/m31/ntv2m31cparam.h
-#         codecs/hevc/m31/ntv2m31ehparam.h
-#         codecs/hevc/m31/ntv2m31vaparam.h
-#         codecs/hevc/m31/ntv2m31vinparam.h
-#         codecs/hevc/m31/ntv2m31viparam.h)
-#     set(AJANTV2_HEVC_SOURCES
-#         codecs/hevc/m31/ntv2m31.cpp
-#         codecs/hevc/m31/ntv2m31cparam.cpp
-#         codecs/hevc/m31/ntv2m31ehparam.cpp
-#         codecs/hevc/m31/ntv2m31vaparam.cpp
-#         codecs/hevc/m31/ntv2m31vinparam.cpp
-#         codecs/hevc/m31/ntv2m31viparam.cpp)
-#     # `cmake --install` deployments
-#     if (AJA_INSTALL_HEADERS)
-#         install(FILES ${AJANTV2_HEVC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/codecs/hevc/m31)
-#     endif()
-#     if (AJA_INSTALL_SOURCES)
-#         install(FILES ${AJANTV2_HEVC_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/codecs/hevc/m31)
-#     endif()
-# endif()
+if (NOT AJA_BUILD_OPENSOURCE)
+    aja_message(STATUS "added ajantv2 HEVC/M31 codec")
+    set(AJANTV2_HEVC_HEADERS
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../private/ajantv2/codecs/hevc/m31/ntv2m31.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../private/ajantv2/codecs/hevc/m31/ntv2m31cparam.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../private/ajantv2/codecs/hevc/m31/ntv2m31ehparam.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../private/ajantv2/codecs/hevc/m31/ntv2m31vaparam.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../private/ajantv2/codecs/hevc/m31/ntv2m31vinparam.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../private/ajantv2/codecs/hevc/m31/ntv2m31viparam.h)
+    set(AJANTV2_HEVC_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../private/ajantv2/codecs/hevc/m31/ntv2m31.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../private/ajantv2/codecs/hevc/m31/ntv2m31cparam.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../private/ajantv2/codecs/hevc/m31/ntv2m31ehparam.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../private/ajantv2/codecs/hevc/m31/ntv2m31vaparam.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../private/ajantv2/codecs/hevc/m31/ntv2m31vinparam.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../private/ajantv2/codecs/hevc/m31/ntv2m31viparam.cpp)
+    # `cmake --install` deployments
+    if (AJA_INSTALL_HEADERS)
+        install(FILES ${AJANTV2_HEVC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/codecs/hevc/m31)
+    endif()
+    if (AJA_INSTALL_SOURCES)
+        install(FILES ${AJANTV2_HEVC_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/codecs/hevc/m31)
+    endif()
+endif()
 
 configure_file(includes/ntv2version.h.in includes/ntv2version.h @ONLY)
 configure_file(includes/ntv2version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/includes/ntv2version.h @ONLY)
