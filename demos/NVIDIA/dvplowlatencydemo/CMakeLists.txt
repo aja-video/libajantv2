@@ -35,7 +35,7 @@ project(dvplowlatencydemo LANGUAGES CUDA CXX)
 
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
-	${AJA_APPS_ROOT}/crossplatform/demoapps/NVIDIA/common
+	${CMAKE_CURRENT_SOURCE_DIR}/../common
 	${AJA_LIBRARIES_ROOT}
 	${AJA_LIBRARIES_ROOT}/gpustuff/include
 	${CUDA_INCLUDE_DIRS}
@@ -92,17 +92,17 @@ install(TARGETS dvplowlatencydemo
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR})
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${DVPLOWLATENCYDEMO_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
-	install(FILES ${DVPLOWLATENCYDEMO_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
-	install(FILES ${DVPLOWLATENCYDEMO_BUILD_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
-	install(FILES ${NVIDIA_COMMON_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/common)
-	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/commonCUDA)
+	install(FILES ${DVPLOWLATENCYDEMO_HEADERS} 		DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/NVIDIA/dvplowlatencydemo)
+	install(FILES ${DVPLOWLATENCYDEMO_SOURCES} 		DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/NVIDIA/dvplowlatencydemo)
+	install(FILES ${DVPLOWLATENCYDEMO_BUILD_FILES} 	DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/NVIDIA/dvplowlatencydemo)
+	install(FILES ${NVIDIA_COMMON_SOURCES} 			DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/NVIDIA/common)
+	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} 		DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/NVIDIA/commonCUDA)
 endif()
 if (AJA_INSTALL_CMAKE)
-	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/NVIDIA/dvplowlatencydemo)
 endif()
 if (AJA_INSTALL_MISC)
-	install(FILES AJA_Logo_Small.png DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/dvplowlatencydemo)
+	install(FILES AJA_Logo_Small.png DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/NVIDIA/dvplowlatencydemo)
 endif()
 
 if (AJA_CODE_SIGN)

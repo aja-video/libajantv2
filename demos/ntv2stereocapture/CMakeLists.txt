@@ -1,36 +1,36 @@
 project(ntv2stereocapture)
 
+find_package(Qt5 HINTS ${AJA_QT_DIR} COMPONENTS Core Widgets REQUIRED)
+set(QT_LIBRARIES Qt5::Core Qt5::Widgets)
+list(APPEND TARGET_LINK_LIBS ${QT_LIBRARIES})
+
 set(TARGET_INCLUDE_DIRS
+	${CMAKE_CURRENT_SOURCE_DIR}/../
 	${AJA_LIBRARIES_ROOT}
-	${AJA_APPS_ROOT}/crossplatform/demoapps
 	${AJA_LIB_NTV2_ROOT}/includes
-	${AJA_LIB_RETAIL_ROOT}/includes
-	${AJA_LIB_RETAIL_ROOT}/services)
-
-set(NTV2STEREOCAPTURE_HEADERS
-	ntv2stereocapture.h)
-set(NTV2STEREOCAPTURE_SOURCES
-	ntv2stereocapture.cpp)
-
-set(DEMO_APPS_SOURCES
-	${CMAKE_CURRENT_SOURCE_DIR}/../ntv2democommon.cpp)
-set(DEMO_APPS_HEADERS
-	${CMAKE_CURRENT_SOURCE_DIR}/../ntv2democommon.h)
+)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# noop
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	find_library(FOUNDATION_FRAMEWORK Foundation)
-	set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
+	list(APPEND TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(TARGET_LINK_LIBS dl pthread rt)
+	list(APPEND TARGET_LINK_LIBS dl pthread rt)
 endif()
 
+set(DEMO_APP_SOURCES
+	ntv2stereocapture.h
+	ntv2stereocapture.cpp
+)
+set(DEMO_COMMON_SOURCES
+	${CMAKE_CURRENT_SOURCE_DIR}/../ntv2democommon.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/../ntv2democommon.h
+)
 set(TARGET_SOURCES
-	${NTV2STEREOCAPTURE_HEADERS}
-	${NTV2STEREOCAPTURE_SOURCES}
-	${DEMO_APPS_HEADERS}
-	${DEMO_APPS_SOURCES})
+	${DEMO_APP_SOURCES}
+	${DEMO_COMMON_SOURCES}
+)
 
 aja_add_executable(ntv2stereocapture PUBLIC
 	"${TARGET_SOURCES}"
@@ -56,11 +56,12 @@ install(TARGETS ${BUILD_TARGETS}
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
-	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
-	install(FILES ${NTV2STEREOCAPTURE_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2stereocapture)
-	install(FILES ${NTV2STEREOCAPTURE_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2stereocapture)
+	install(FILES ${DEMO_COMMON_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/demos)
+	install(FILES ${DEMO_APP_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2stereocapture)
 endif()
 if (AJA_INSTALL_CMAKE)
-	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2stereocapture)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2stereocapture)
+endif()
+if (AJA_INSTALL_MISC)
+	install(FILES Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2stereocapture)
 endif()

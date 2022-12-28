@@ -1,0 +1,2 @@
+aja_add_subdirectory(cudalowlatencydemo)
+aja_add_subdirectory(dvplowlatencydemo)

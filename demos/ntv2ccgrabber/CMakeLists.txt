@@ -2,7 +2,7 @@ project(ntv2ccgrabber)
 
 set(TARGET_INCLUDE_DIRS
 	${AJA_LIBRARIES_ROOT}
-	${AJA_APPS_ROOT}/crossplatform/demoapps
+	${CMAKE_CURRENT_SOURCE_DIR}/../
 	${AJA_LIB_NTV2_ROOT}/includes
 	${AJA_LIB_RETAIL_ROOT}/includes
 	${AJA_LIB_RETAIL_ROOT}/services)
@@ -57,14 +57,14 @@ install(TARGETS ${BUILD_TARGETS}
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
-	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
-	install(FILES ${NTV2CCGRABBER_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2ccgrabber)
-	install(FILES ${NTV2CCGRABBER_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2ccgrabber)
+	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/demos)
+	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/demos)
+	install(FILES ${NTV2CCGRABBER_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2ccgrabber)
+	install(FILES ${NTV2CCGRABBER_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2ccgrabber)
 endif()
 if (AJA_INSTALL_CMAKE)
-	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2ccgrabber)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2ccgrabber)
 endif()
 if (AJA_INSTALL_MISC)
-	install(FILES Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2ccgrabber)
+	install(FILES Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2ccgrabber)
 endif()

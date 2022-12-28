@@ -39,8 +39,8 @@ set(TARGET_COMPILE_DEFS
 	-DAJA_RDMA=1)
 
 set(TARGET_INCLUDE_DIRS
-	${AJA_APPS_ROOT}/crossplatform/demoapps/NVIDIA/commonCUDA
-	${AJA_APPS_ROOT}/crossplatform/demoapps
+	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA
+	${CMAKE_CURRENT_SOURCE_DIR}/../../
 	${AJA_LIBRARIES_ROOT}
 	${AJA_LIB_BASE_ROOT}/system
 	${AJA_LIB_NTV2_ROOT}/includes
@@ -49,9 +49,9 @@ set(TARGET_INCLUDE_DIRS
 	${GLEW_INCLUDE_DIRS})
 
 set(DEMO_APPS_SOURCES
-	${AJA_APPS_ROOT}/crossplatform/demoapps/ntv2democommon.cpp)
+	${CMAKE_CURRENT_SOURCE_DIR}/../../ntv2democommon.cpp)
 set(DEMO_APPS_HEADERS
-	${AJA_APPS_ROOT}/crossplatform/demoapps/ntv2democommon.h)
+	${CMAKE_CURRENT_SOURCE_DIR}/../../ntv2democommon.h)
 
 set(CUDALOWLATENCYDEMO_BUILD_FILES
 	Makefile
@@ -113,10 +113,10 @@ list(APPEND NVIDIA_COMMONCUDA_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simpleoglvio.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA/simpleoglvio.h)
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${CUDALOWLATENCYDEMO_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/cudalowlatencydemo)
-	install(FILES ${CUDALOWLATENCYDEMO_BUILD_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/cudalowlatencydemo)
-	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/commonCUDA)
-	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/NVIDIA/cudalowlatencydemo)
+	install(FILES ${CUDALOWLATENCYDEMO_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/NVIDIA/cudalowlatencydemo)
+	install(FILES ${CUDALOWLATENCYDEMO_BUILD_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/NVIDIA/cudalowlatencydemo)
+	install(FILES ${NVIDIA_COMMONCUDA_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/NVIDIA/commonCUDA)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/NVIDIA/cudalowlatencydemo)
 endif()
 
 install(TARGETS cudalowlatencydemo

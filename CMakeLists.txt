@@ -10,3 +10,4 @@ include(AJACommonFlags)
 include(AJAHelpers)
 
 aja_add_subdirectory(ajantv2)
+aja_add_subdirectory(demos)

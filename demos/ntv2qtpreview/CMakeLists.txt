@@ -1,6 +1,9 @@
 project(ntv2qtpreview)
 
-aja_require(ntv2qtpreview AJA_BUILD_QT)
+if (NOT AJA_BUILD_QT)
+    aja_message(STATUS "AJA_BUILD_QT not set. Ignoring project ${project}...")
+    return()
+endif()
 
 find_package(Qt5 HINTS ${AJA_QT_DIR} COMPONENTS Core Multimedia Widgets REQUIRED)
 set(QT_LIBRARIES Qt5::Core Qt5::Multimedia Qt5::Widgets)
@@ -13,18 +16,19 @@ set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
 	${AJA_LIBRARIES_ROOT}
 	${AJA_LIB_NTV2_ROOT}/includes
-    ${AJA_LIB_GUI_ROOT}
-    ${AJA_DEMO_COMMON_ROOT})
+)
 
 set(NTV2QTPREVIEW_SOURCES
     main.cpp
     ntv2qtpreview.h
     ntv2qtpreview.cpp
     ntv2qtpreview.qrc
-    ${AJA_DEMO_COMMON_ROOT}/ntv2framegrabber.h
-    ${AJA_DEMO_COMMON_ROOT}/ntv2framegrabber.cpp
-    ${AJA_DEMO_COMMON_ROOT}/ntv2democommon.h
-    ${AJA_DEMO_COMMON_ROOT}/ntv2democommon.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/../ajapreviewwidget.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../ajapreviewwidget.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../ntv2framegrabber.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../ntv2framegrabber.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../ntv2democommon.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../ntv2democommon.cpp)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     remove_definitions(
@@ -58,9 +62,9 @@ endif()
 
 set(TARGET_SOURCES
 	${NTV2QTPREVIEW_SOURCES})
-set(TARGET_DEPS ajagui ajantv2)
+set(TARGET_DEPS ajantv2)
 set(TARGET_LINK_LIBS ${TARGET_LINK_LIBS}
-    ajantv2 ajagui ${QT_LIBRARIES})
+    ajantv2 ${QT_LIBRARIES})
 
 aja_add_executable(ntv2qtpreview PUBLIC
     "${TARGET_SOURCES}"
@@ -116,21 +120,21 @@ if (AJA_INSTALL_SOURCES)
     install(FILES ${AJA_LIB_GUI_ROOT}/ajaapplication.qrc
         DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajainternal/gui)
     install(FILES ${NTV2QTPREVIEW_HEADERS} DESTINATION
-        ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2qtpreview)
+        ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtpreview)
     install(FILES ${NTV2QTPREVIEW_SOURCES}
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2qtpreview)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtpreview)
 endif()
 if (AJA_INSTALL_CMAKE)
     install(FILES CMakeLists.txt
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2qtpreview)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtpreview)
 endif()
 if (AJA_INSTALL_MISC)
     install(FILES Makefile
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2qtpreview)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtpreview)
     install(FILES app.icns
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2qtpreview)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtpreview)
     install(FILES app.ico
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2qtpreview)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtpreview)
     install(FILES splash.png
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps/ntv2qtpreview)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtpreview)
 endif()
