@@ -1,6 +1,6 @@
 project(ajantv2)
 
-include(AJAVersionConfig)
+include(NTV2Version)
 
 if(CMAKE_CXX_STANDARD EQUAL 11)
     aja_message(STATUS "ajantv2 building for C++11")
