@@ -1,8 +1,8 @@
 project(ajantv2)
 
-include(include/Helpers)
-include(NTV2Defines)
-include(NTV2Version)
+include(common/Helpers)
+include(ntv2/NTV2Defines)
+include(ntv2/NTV2Version)
 
 option(AJA_NTV2_BUILD_SHARED "Build ajantv2 shared library?" OFF)
 
