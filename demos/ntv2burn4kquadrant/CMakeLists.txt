@@ -29,24 +29,17 @@ set(TARGET_SOURCES
 	${DEMO_COMMON_SOURCES}
 )
 
-aja_add_executable(ntv2burn4kquadrant PUBLIC
+aja_add_executable(${PROJECT_NAME} PUBLIC
 	"${TARGET_SOURCES}"
 	ajantv2
 	"${TARGET_INCLUDE_DIRS}"
 	"${TARGET_LINK_LIBS};ajantv2" "")
-set(BUILD_TARGETS ntv2burn4kquadrant)
-if (AJA_BUILD_SHARED)
-	set(BUILD_TARGETS ${BUILD_TARGETS} ntv2burn4kquadrant-dl)
-	aja_add_executable(ntv2burn4kquadrant-dl PUBLIC
-		"${TARGET_SOURCES}"
-		ajantv2-dl
-		"${TARGET_INCLUDE_DIRS}"
-		"${TARGET_LINK_LIBS};ajantv2-dl" "")
-endif()
+
 if (AJA_CODE_SIGN)
-    aja_code_sign(${BUILD_TARGETS})
+    aja_code_sign(${PROJECT_NAME})
 endif()
-install(TARGETS ${BUILD_TARGETS}
+
+install(TARGETS ${PROJECT_NAME}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

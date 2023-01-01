@@ -33,24 +33,17 @@ set(TARGET_SOURCES
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-aja_add_executable(ntv2ccgrabber PUBLIC
+aja_add_executable(${PROJECT_NAME} PUBLIC
 	"${TARGET_SOURCES}"
 	"ajacc;ajantv2"
 	"${TARGET_INCLUDE_DIRS}"
-	"${TARGET_LINK_LIBS};ajacc;ajantv2" "")
-set(BUILD_TARGETS ntv2ccgrabber)
-if (AJA_BUILD_SHARED)
-	set(BUILD_TARGETS ${BUILD_TARGETS} ntv2ccgrabber-dl)
-	aja_add_executable(ntv2ccgrabber-dl PUBLIC
-		"${TARGET_SOURCES}"
-		"ajacc-dl;ajantv2-dl"
-		"${TARGET_INCLUDE_DIRS}"
-		"${TARGET_LINK_LIBS};ajacc-dl;ajantv2-dl" "")
-endif()
+	"${TARGET_LINK_LIBS};ajantv2;ajacc" "")
+
 if (AJA_CODE_SIGN)
-    aja_code_sign(${BUILD_TARGETS})
+    aja_code_sign(${PROJECT_NAME})
 endif()
-install(TARGETS ${BUILD_TARGETS}
+
+install(TARGETS ${PROJECT_NAME}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

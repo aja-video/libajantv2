@@ -66,24 +66,17 @@ set(TARGET_SOURCES
 	${DEMO_APPS_HEADERS}
 	${DEMO_APPS_SOURCES})
 
-aja_add_executable(ntv2encodehevcvif PUBLIC
+aja_add_executable(${PROJECT_NAME} PUBLIC
 	"${TARGET_SOURCES}"
 	ajantv2
 	"${TARGET_INCLUDE_DIRS}"
 	"${TARGET_LINK_LIBS};ajantv2" "")
-set(BUILD_TARGETS ntv2encodehevcvif)
-if (AJA_BUILD_SHARED)
-	set(BUILD_TARGETS ${BUILD_TARGETS} ntv2encodehevcvif-dl)
-	aja_add_executable(ntv2encodehevcvif-dl PUBLIC
-		"${TARGET_SOURCES}"
-		ajantv2-dl
-		"${TARGET_INCLUDE_DIRS}"
-		"${TARGET_LINK_LIBS};ajantv2-dl" "")
-endif()
+
 if (AJA_CODE_SIGN)
-    aja_code_sign(${BUILD_TARGETS})
+    aja_code_sign(${PROJECT_NAME})
 endif()
-install(TARGETS ${BUILD_TARGETS}
+
+install(TARGETS ${PROJECT_NAME}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

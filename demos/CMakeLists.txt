@@ -1,4 +1,5 @@
 aja_add_subdirectory(ntv2burn)
+
 aja_add_subdirectory(ntv2burn4kquadrant)
 aja_add_subdirectory(ntv2capture)
 aja_add_subdirectory(ntv2capture4k)
