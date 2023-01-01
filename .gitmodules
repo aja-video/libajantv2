@@ -1,4 +1,0 @@
-[submodule "cmake-include"]
-	path = cmake/include
-	url = git@engit.aja.com:sw/ntv2/cmake.git
-	branch = main
