@@ -1,8 +1,8 @@
 [submodule "cmake-common"]
 	path = cmake/common
-	url = git@engit.aja.com:sw/cmake-modules.git
+	url = ../../cmake-modules.git
 	branch = main
 [submodule "ntv2-cmake"]
 	path = cmake/ntv2
-	url = git@engit.aja.com:sw/ntv2/cmake.git
+	url = ../cmake.git
 	branch = main
