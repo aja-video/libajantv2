@@ -555,7 +555,9 @@ if (AJA_NTV2_SDK_GEN)
     aja_ntv2_sdk_gen(${PROJECT_NAME})
 endif()
 
-add_library(ajabase INTERFACE)
+if (NOT TARGET ajabase)
+    add_library(ajabase INTERFACE)
+endif()
 
 # `cmake --install` deployments
 if (AJA_NTV2_INSTALL_HEADERS)
