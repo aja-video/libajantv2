@@ -25,7 +25,5 @@ option(AJA_NTV2_CI_USE_CLANG            "Build NTV2 SDK with LLVM Clang compiler
 option(AJA_NTV2_CI_BUILD                "Enabled if building from a continuous integration system." OFF)
 option(AJA_NTV2_CI_LINUX_GCC_NEW_ABI    "Build NTV2 SDK with GCC 5 or later?" OFF)
 
-aja_ntv2_log_build_info()
-
 aja_add_subdirectory(ajantv2)
 aja_add_subdirectory(demos)

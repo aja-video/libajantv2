@@ -533,6 +533,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 endif()
 
 if (AJA_NTV2_BUILD_SHARED)
+    aja_ntv2_log_build_info()
     aja_add_library(${PROJECT_NAME} "${PROJECT_NAME}" SHARED PUBLIC
         "${TARGET_SOURCES}" ""
         "${TARGET_INCLUDE_DIRS}"
@@ -542,6 +543,7 @@ if (AJA_NTV2_BUILD_SHARED)
         aja_code_sign(${PROJECT_NAME})
     endif()
 else()
+    aja_ntv2_log_build_info()
     aja_add_library(${PROJECT_NAME} "${PROJECT_NAME}" STATIC PUBLIC
         "${TARGET_SOURCES}" ""
         "${TARGET_INCLUDE_DIRS}"
