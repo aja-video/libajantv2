@@ -5844,6 +5844,82 @@ typedef enum
 
 } ANCInsMaskShift;
 
+//  HDMI AUX extractor registers
+typedef enum
+{
+	regAuxExt_FIRST,
+	regAuxExtControl	=	regAuxExt_FIRST,	//	Reg 0 - filter_inv[29], dis_mem_wr[28], syncro[25:24], prog[16]
+	regAuxExtField1StartAddress,				//	Reg 1 - f1_start_address[31:0]
+	regAuxExtField1EndAddress,					//	Reg 2 - f1_end_address[31:0]
+	regAuxExtField2StartAddress,				//	Reg 3 - f2_start_addr[31:0]
+	regAuxExt4,             					//	Reg 4
+	regAuxExt5,					                //	Reg 5
+	regAuxExtTotalStatus,						//	Reg 6 - mem_sz_overrun[28], total_bytes[23:0]
+	regAuxExtField1Status,						//	Reg 7 - mem_sz_overrun_f1[28], total_bytes_f1[23:0]
+	regAuxExtField2Status,						//	Reg 8 - mem_sz_overrun_f2[28], total_bytes_f2[23:0]
+	regAuxExtFieldVBLStartLine,					//	Reg 9 - f2_vbl_start[27:16], f1_vbl_start[11:0]
+	regAuxExtTotalFrameLines,					//	Reg 10 - total_lines[11:0]
+	regAuxExtFID,								//	Reg 11 - fid_low[27:26], fid_hi[11:0]
+	regAuxExtPacketMask0,						//	Reg 12 - Packet Ignore bytes
+	regAuxExtPacketMask_First	= regAuxExtPacketMask0,
+	regAuxExtPacketMask1,						//	Reg 13 - Packet Ignore bytes
+	regAuxExtPacketMask2,						//	Reg 14 - Packet Ignore bytes
+	regAuxExtPacketMask3,						//	Reg 15 - Packet Ignore bytes
+	regAuxExtPacketMask_Last		= regAuxExtPacketMask3,
+	regAuxExtFillData,                  		//	Reg 16 - Buffer fill data
+	regAuxExt_LAST
+} AUXExtRegisters;
+
+typedef enum
+{
+	// regAuxExtControl
+	maskAuxSetProgressive = BIT(16),
+	shiftAuxSetProgressive = 16,
+	maskAuxSyncro = BIT(24) + BIT(25),
+	shiftAuxSyncro = 24,
+	maskAuxDisableExtractor = BIT(28),
+	shiftAuxDisableExtractor = 28,
+	maskAuxFilterInvert = BIT(29),
+	shiftAuxFilterInvert = 29,
+	// regAuxExtField1StartAddress, regAuxExtField1EndAddress, regAuxExtField2StartAddress
+	maskAuxTotalBytesIn = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) +
+							BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15) +
+							BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23),
+	shiftAuxTotalBytesIn = 0,
+	// regAuxExtTotalStatus
+	maskAuxTotalOverrun = BIT(28),
+	shiftAuxTotalOverrun = 28,
+	// regAuxExtField1Status, regAuxExtField2Status
+	maskAuxFieldBytesIn = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) +
+							BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15) +
+							BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23),
+	shiftAuxFieldBytesIn = 0,
+	maskAuxFieldOverrun = BIT(28),
+	shiftAuxFieldOverrun = 28,
+	// regAuxExtFieldVBLStartLine
+	maskAuxField1StartLine = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11),
+	shiftAuxField1StartLine = 0,
+	maskAuxField2StartLine = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27),
+	shiftAuxField2StartLine = 16,
+	// regAuxExtTotalFrameLines
+	maskAuxTotalFrameLines = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11),
+	shiftAuxTotalFrameLines = 0,
+	// regAuxExtFID
+	maskAuxFIDHi = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) + BIT(8) + BIT(9) + BIT(10) + BIT(11),
+	shiftAuxFIDHi = 0,
+	maskAuxFIDLow = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) + BIT(24) + BIT(25) + BIT(26) + BIT(27),
+	shiftAuxFIDLow = 16,
+	// regAuxExtPacketMask0, regAuxExtPacketMask1, regAuxExtPacketMask2, regAuxExtPacketMask3
+	maskAuxPacket0 = BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7),
+	shiftAuxPacket0 = 0,
+	maskAuxPacket1 = BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15),
+	shiftAuxPacket1_2_6_10_14 = 8,
+	maskAuxPacket2 = BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23),
+	shiftAuxPacket2 = 16,
+	maskAuxPacket3 = BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29) + BIT(30) + BIT(31),
+	shiftAuxPacket3 = 24,
+} AUXExtMaskShift;
+
 
 //	Driver Version ULWord encode/decode macros
 //	Introduced in SDK 15.0

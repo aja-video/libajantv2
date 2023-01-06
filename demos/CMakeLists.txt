@@ -7,6 +7,7 @@ aja_add_subdirectory(ntv2capture8k)
 # aja_add_subdirectory(ntv2ccgrabber)  # add to libajacc repo
 # aja_add_subdirectory(ntv2ccplayer)  # add to libajacc repo
 # aja_add_subdirectory(ntv2cudacapture) # requires gpustuff
+aja_add_subdirectory(ntv2dolbycapture)
 aja_add_subdirectory(ntv2dolbyplayer)
 # aja_add_subdirectory(ntv2dpxplayer) # deprecated SDK calls
 # # aja_add_subdirectory(ntv2encodehevc) # requires HEVC codecs
