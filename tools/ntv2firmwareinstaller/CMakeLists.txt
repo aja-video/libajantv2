@@ -1,15 +1,5 @@
 project(ntv2firmwareinstaller)
 
-set(DEMOS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../demoapps)
-
-# set(TARGET_INCLUDE_DIRS
-# 	${CMAKE_CURRENT_SOURCE_DIR}/../
-# 	${AJA_LIBRARIES_ROOT}
-# 	${AJA_LIB_NTV2_ROOT}/includes
-# 	${DEMOS_DIR}
-# 	${AJA_LIB_NTV2_ROOT}/utilityfiles/private
-# 	${AJA_LIB_NTV2_ROOT}/utilityfiles/public)
-
 set(DEMOS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../demos)
 set(AJANTV2_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../ajantv2)
 

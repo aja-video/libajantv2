@@ -1,17 +1,18 @@
 project(pciwhacker)
 
-set(DEMO_APPS_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../demoapps)
+set(DEMOS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../demos)
+set(AJANTV2_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../ajantv2)
 
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
-	${AJA_LIBRARIES_ROOT}
-	${AJA_LIB_NTV2_ROOT}/includes
-    ${DEMO_APPS_ROOT})
+	${CMAKE_CURRENT_SOURCE_DIR}/../../
+	${DEMOS_DIR}
+	${AJANTV2_DIR}/includes)
 
-set(DEMO_APPS_SOURCES
-	${DEMO_APPS_ROOT}/ntv2democommon.cpp)
 set(DEMO_APPS_HEADERS
-	${DEMO_APPS_ROOT}/ntv2democommon.h)
+	${DEMOS_DIR}/ntv2democommon.h)
+set(DEMO_APPS_SOURCES
+	${DEMOS_DIR}/ntv2democommon.cpp)
 
 set(PCIWHACKER_SOURCES
     main.cpp)

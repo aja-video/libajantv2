@@ -14,7 +14,7 @@
 #include "ntv2mcsfile.h"
 #include "ntv2registers2022.h"
 #include "sys/stat.h"
-#include "../demoapps/ntv2democommon.h"
+#include "ntv2democommon.h"
 #include "ajabase/common/options_popt.h"
 #include "ajabase/system/debug.h"
 #include "ajabase/system/systemtime.h"
