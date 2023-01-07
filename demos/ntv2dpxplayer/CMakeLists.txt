@@ -14,10 +14,9 @@ set(QT_LIBRARIES
 
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
-	${CMAKE_CURRENT_SOURCE_DIR}/../ntv2recorddpx
-	${AJA_LIBRARIES_ROOT}
-	${AJA_LIB_NTV2_ROOT}/includes
-)
+	${CMAKE_CURRENT_SOURCE_DIR}/../../
+	${CMAKE_CURRENT_SOURCE_DIR}/../../ajantv2/includes
+	${CMAKE_CURRENT_SOURCE_DIR}/../ntv2recorddpx)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# noop

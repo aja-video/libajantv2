@@ -27,3 +27,4 @@ option(AJA_NTV2_CI_LINUX_GCC_NEW_ABI    "Build NTV2 SDK with GCC 5 or later?" OF
 
 aja_add_subdirectory(ajantv2)
 aja_add_subdirectory(demos)
+aja_add_subdirectory(tools)

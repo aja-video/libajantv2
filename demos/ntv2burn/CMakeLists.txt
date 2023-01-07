@@ -2,9 +2,8 @@ project(ntv2burn)
 
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
-	${AJA_LIBRARIES_ROOT}
-	${AJA_LIB_NTV2_ROOT}/includes
-)
+	${CMAKE_CURRENT_SOURCE_DIR}/../../
+	${CMAKE_CURRENT_SOURCE_DIR}/../../ajantv2/includes)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# noop
