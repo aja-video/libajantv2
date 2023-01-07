@@ -4,7 +4,7 @@ include(common/Helpers)
 include(ntv2/NTV2Defines)
 include(ntv2/NTV2Version)
 
-option(AJA_NTV2_BUILD_SHARED "Build ajantv2 shared library?" OFF)
+option(AJANTV2_BUILD_SHARED "Build ajantv2 shared library?" OFF)
 
 if(CMAKE_CXX_STANDARD EQUAL 11)
     aja_message(STATUS "ajantv2 building for C++11")
@@ -184,7 +184,7 @@ set(AJANTV2_UTILITY_PUBLIC_SOURCES
     utilityfiles/public/ntv2firmwareinstallerthread.cpp
     utilityfiles/public/ntv2hevcfirmwareinstallerthread.cpp)
 
-if (NOT AJA_NTV2_BUILD_OPENSOURCE)
+if (NOT AJANTV2_BUILD_OPENSOURCE)
     # ajantv2 hevc codec sources
     if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../../private)
         set(AJANTV2_HEVC_HEADERS
@@ -511,7 +511,7 @@ set(TARGET_SOURCES
     ${AJABASE_HEADERS}
     ${AJANTV2_SOURCES}
     ${AJANTV2_HEADERS})
-if (NOT AJA_NTV2_BUILD_OPENSOURCE)
+if (NOT AJANTV2_BUILD_OPENSOURCE)
     list(APPEND TARGET_SOURCES
         ${AJANTV2_HEVC_HEADERS}
         ${AJANTV2_HEVC_SOURCES})
@@ -532,7 +532,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         ${AJANTV2_MAC_SOURCES})
 endif()
 
-if (AJA_NTV2_BUILD_SHARED)
+if (AJANTV2_BUILD_SHARED)
     aja_ntv2_log_build_info()
     aja_add_library(${PROJECT_NAME} "${PROJECT_NAME}" SHARED PUBLIC
         "${TARGET_SOURCES}" ""
@@ -551,7 +551,7 @@ else()
         "${TARGET_COMPILE_DEFS_STATIC};${AJA_NTV2_TARGET_COMPILE_DEFS}")
 endif()
 
-if (AJA_NTV2_SDK_GEN)
+if (AJANTV2_SDK_GEN)
     aja_ntv2_sdk_gen(${PROJECT_NAME})
 endif()
 
