@@ -1,0 +1,57 @@
+project(pciwhacker)
+
+set(DEMO_APPS_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../demoapps)
+
+set(TARGET_INCLUDE_DIRS
+	${CMAKE_CURRENT_SOURCE_DIR}/../
+	${AJA_LIBRARIES_ROOT}
+	${AJA_LIB_NTV2_ROOT}/includes
+    ${DEMO_APPS_ROOT})
+
+set(DEMO_APPS_SOURCES
+	${DEMO_APPS_ROOT}/ntv2democommon.cpp)
+set(DEMO_APPS_HEADERS
+	${DEMO_APPS_ROOT}/ntv2democommon.h)
+
+set(PCIWHACKER_SOURCES
+    main.cpp)
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	# noop
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+	find_library(FOUNDATION_FRAMEWORK Foundation)
+	set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	set(TARGET_LINK_LIBS dl pthread rt)
+endif()
+
+set(TARGET_SOURCES
+	${DEMO_APPS_HEADERS}
+	${DEMO_APPS_SOURCES}
+	${PCIWHACKER_SOURCES})
+
+aja_add_executable(pciwhacker PUBLIC
+	"${TARGET_SOURCES}"
+	ajantv2
+	"${TARGET_INCLUDE_DIRS}"
+	"${TARGET_LINK_LIBS};ajantv2" "")
+if (AJA_CODE_SIGN)
+    aja_code_sign(${PROJECT_NAME})
+endif()
+install(TARGETS ${PROJECT_NAME}
+	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+if (AJA_INSTALL_SOURCES)
+	install(FILES ${DEMO_APPS_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
+	install(FILES ${DEMO_APPS_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/demoapps)
+	install(FILES ${PCIWHACKER_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/pciwhacker)
+endif()
+if (AJA_INSTALL_CMAKE)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/pciwhacker)
+endif()
+if (AJA_INSTALL_MISC)
+	install(FILES Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/pciwhacker)
+endif()
