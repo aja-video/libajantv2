@@ -1,7 +1,7 @@
 project(ntv2konaipj2ksetup)
 
-if (NOT AJA_BUILD_QT)
-    aja_message(STATUS "AJA_BUILD_QT not set. Ignoring project ${PROJECT_NAME}...")
+if (NOT AJA_QT_ENABLED)
+	aja_message(STATUS "AJA_QT_ENABLED not set. Ignoring project ${PROJECT_NAME}...")
     return()
 endif()
 
