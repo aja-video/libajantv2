@@ -11,6 +11,8 @@ include(ntv2/NTV2Version)
 
 option(AJA_NTV2_BUILD_OPENSOURCE "Build NTV2 SDK as open-source (MIT license)?" OFF)
 option(AJA_NTV2_BUILD_SHARED     "Build NTV2 shared libraries?" OFF)
+option(AJA_BUILD_QT	 	 "Build NTV2 demos requiring QT" ON)
+
 option(AJA_NTV2_DEPLOY_QT_LIBS   "Run winqtdeploy/macqtdeploy/patchelf to fix-up Qt library paths and deploy in build directory?" ON)
 option(AJA_NTV2_INSTALL_SOURCES  "Deploy sources into CMake install directory?" OFF)
 option(AJA_NTV2_INSTALL_HEADERS  "Deploy headers into CMake install directory?" ON)
