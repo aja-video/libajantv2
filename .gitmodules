@@ -1,8 +1,0 @@
-[submodule "cmake-common"]
-	path = cmake/common
-	url = ../../cmake-modules.git
-	branch = main
-[submodule "cmake-ntv2"]
-	path = cmake/ntv2
-	url = ../cmake.git
-	branch = main
