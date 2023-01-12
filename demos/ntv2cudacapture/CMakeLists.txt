@@ -1,7 +1,7 @@
 project(ntv2cudacapture)
 
 if (NOT AJA_QT_ENABLED)
-	aja_message(STATUS "AJA_QT_ENABLED not set. Ignoring project ${PROJECT_NAME}...")
+	message(STATUS "AJA_QT_ENABLED not set. Ignoring project ${PROJECT_NAME}...")
     return()
 endif()
 
@@ -36,11 +36,10 @@ set(TARGET_SOURCES
 	${DEMO_COMMON_SOURCES}
 )
 
-aja_add_executable(${PROJECT_NAME} PUBLIC
-	"${TARGET_SOURCES}"
-	ajantv2
-	"${TARGET_INCLUDE_DIRS}"
-	"${TARGET_LINK_LIBS};ajantv2" "")
+add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
+add_dependencies(${PROJECT_NAME} ajantv2)
+target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS} ajantv2)
 
 if (AJA_CODE_SIGN)
     aja_code_sign(${PROJECT_NAME})

@@ -1,17 +1,18 @@
 project(ntv2burn)
 
+include(Defines)
+
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
 	${CMAKE_CURRENT_SOURCE_DIR}/../../
 	${CMAKE_CURRENT_SOURCE_DIR}/../../ajantv2/includes)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	# noop
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	find_library(FOUNDATION_FRAMEWORK Foundation)
-	set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
+	list(APPEND TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(TARGET_LINK_LIBS dl pthread rt)
+	list(APPEND TARGET_LINK_LIBS dl pthread rt)
 endif()
 
 set(DEMO_APP_SOURCES
@@ -28,11 +29,11 @@ set(TARGET_SOURCES
 	${DEMO_COMMON_SOURCES}
 )
 
-aja_add_executable(${PROJECT_NAME} PUBLIC
-	"${TARGET_SOURCES}"
-	ajantv2
-	"${TARGET_INCLUDE_DIRS}"
-	"${TARGET_LINK_LIBS};ajantv2" "")
+add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
+add_dependencies(${PROJECT_NAME} ajantv2)
+target_compile_definitions(${PROJECT_NAME} PUBLIC ${AJANTV2_TARGET_COMPILE_DEFS})
+target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS} ajantv2)
 
 if (AJA_CODE_SIGN)
     aja_code_sign(${PROJECT_NAME})

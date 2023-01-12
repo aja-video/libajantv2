@@ -1,6 +1,6 @@
 find_package(CUDA 11.1)
 if (NOT CUDA_FOUND)
-	aja_message(STATUS "skipping testrdma (CUDA not found)")
+	message(STATUS "skipping testrdma (CUDA not found)")
 	return()
 endif()
 
@@ -32,12 +32,11 @@ endif()
 set(TARGET_SOURCES
 	${TESTRDMA_SOURCES})
 
-aja_add_executable(${PROJECT_NAME} PUBLIC
-	"${TARGET_SOURCES}"
-	ajantv2
-	"${TARGET_INCLUDE_DIRS}"
-	"${TARGET_LINK_LIBS};ajantv2"
-	"${TARGET_COMPILE_DEFS}")
+add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
+add_dependencies(${PROJECT_NAME} ajantv2)
+target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS} ajantv2)
+
 if (AJA_CODE_SIGN)
     aja_code_sign(${PROJECT_NAME})
 endif()

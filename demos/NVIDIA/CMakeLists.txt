@@ -1,2 +1,2 @@
-aja_add_subdirectory(cudalowlatencydemo)
-aja_add_subdirectory(dvplowlatencydemo)
+add_subdirectory(cudalowlatencydemo)
+add_subdirectory(dvplowlatencydemo)

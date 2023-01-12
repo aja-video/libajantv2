@@ -1,7 +1,7 @@
 project(ntv2dpxplayer)
 
 if (NOT AJA_QT_ENABLED)
-	aja_message(STATUS "AJA_QT_ENABLED not set. Ignoring project ${PROJECT_NAME}...")
+	message(STATUS "AJA_QT_ENABLED not set. Ignoring project ${PROJECT_NAME}...")
     return()
 endif()
 

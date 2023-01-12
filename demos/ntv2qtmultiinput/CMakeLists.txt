@@ -1,7 +1,7 @@
 project(ntv2qtmultiinput)
 
 if (NOT AJA_QT_ENABLED)
-	aja_message(STATUS "AJA_QT_ENABLED not set. Ignoring project ${PROJECT_NAME}...")
+	message(STATUS "AJA_QT_ENABLED not set. Ignoring project ${PROJECT_NAME}...")
     return()
 endif()
 
@@ -103,7 +103,7 @@ endif()
 if (AJA_CODE_SIGN)
     aja_code_sign(${BUILD_TARGETS})
 endif()
-if (AJA_DEPLOY_QT_LIBS)
+if (AJA_QT_DEPLOY)
     include(AJAQtHelpers)
     aja_deploy_qt_libs(ntv2qtmultiinput)
 endif()

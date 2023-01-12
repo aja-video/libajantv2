@@ -1,18 +1,16 @@
 project(ajantv2)
 
-include(common/Helpers)
-include(ntv2/NTV2Defines)
-include(ntv2/NTV2Version)
-
-option(AJANTV2_BUILD_SHARED "Build ajantv2 shared library?" OFF)
+include(Defines)
+include(Helpers)
+include(Version)
 
 if(CMAKE_CXX_STANDARD EQUAL 11)
-    aja_message(STATUS "ajantv2 building for C++11")
+    message(STATUS "ajantv2 building for C++11")
     list(APPEND TARGET_COMPILE_DEFS
         -DAJA_USE_CPLUSPLUS11
         -DNTV2_USE_CPLUSPLUS11)
 else()
-    aja_message(STATUS "ajantv2 building for C++98")
+    message(STATUS "ajantv2 building for C++98")
     remove_definitions(
         -DAJA_USE_CPLUSPLUS11
         -DNTV2_USE_CPLUSPLUS11)
@@ -21,13 +19,13 @@ else()
     file(READ ${_ajabase_types_path} _ajabase_types_file)
     STRING(REPLACE "#define AJA_USE_CPLUSPLUS11" "//#define AJA_USE_CPLUSPLUS11 " _ajabase_types_file "${_ajabase_types_file}")
     file(WRITE ${_ajabase_types_path} "${_ajabase_types_file}")
-    aja_message(STATUS "Overwrote ${_ajabase_types_path} to remove AJA_USE_CPLUSPLUS11 define!")
+    message(STATUS "Overwrote ${_ajabase_types_path} to remove AJA_USE_CPLUSPLUS11 define!")
 
-    set(_ajantv2_ajatypes_path "${AJA_LIB_NTV2_ROOT}/includes/ajatypes.h")
+    set(_ajantv2_ajatypes_path "includes/ajatypes.h")
     file(READ ${_ajantv2_ajatypes_path} _ajatypes_file)
     STRING(REPLACE "#define NTV2_USE_CPLUSPLUS11" "//#define NTV2_USE_CPLUSPLUS11 " _ajatypes_file "${_ajatypes_file}")
     file(WRITE ${_ajantv2_ajatypes_path} "${_ajatypes_file}")
-    aja_message(STATUS "Overwrote ${_ajantv2_ajatypes_path} to remove NTV2_USE_CPLUSPLUS11 define!")
+    message(STATUS "Overwrote ${_ajantv2_ajatypes_path} to remove NTV2_USE_CPLUSPLUS11 define!")
 endif()
 
 remove_definitions(
@@ -38,10 +36,6 @@ set(TARGET_INCLUDE_DIRS
     ../ajaanc/includes
     ../ajabase
     includes
-    ${AJA_LIB_ANC_ROOT}/includes
-    ${AJA_LIB_BASE_ROOT}
-    ${AJA_LIBAJANTV2_ROOT}
-    ${AJA_LIB_NTV2_ROOT}/includes
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -202,13 +196,13 @@ if (NOT AJANTV2_BUILD_OPENSOURCE)
             ${CMAKE_CURRENT_SOURCE_DIR}/../../private/ajantv2/codecs/hevc/m31/ntv2m31vinparam.cpp
             ${CMAKE_CURRENT_SOURCE_DIR}/../../private/ajantv2/codecs/hevc/m31/ntv2m31viparam.cpp)
         # `cmake --install` deployments
-        if (AJA_NTV2_INSTALL_HEADERS)
+        if (AJA_INSTALL_HEADERS)
             install(FILES ${AJANTV2_HEVC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/codecs/hevc/m31)
         endif()
-        if (AJA_NTV2_INSTALL_SOURCES)
+        if (AJA_INSTALL_SOURCES)
             install(FILES ${AJANTV2_HEVC_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/codecs/hevc/m31)
         endif()
-        aja_message(STATUS "added ajantv2 HEVC/M31 codec")
+        message(STATUS "added ajantv2 HEVC/M31 codec")
     endif()
 endif()
 
@@ -428,10 +422,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         -DCRT_NONSTDC_DEPRECATE
         -D_WINSOCK_DEPRECATED_NO_WARNINGS
         -DAJA_NO_AUTOIMPORT)
-    set(TARGET_COMPILE_DEFS_STATIC
+    list(APPEND TARGET_COMPILE_DEFS_STATIC
         ${TARGET_COMPILE_DEFS}
         -DAJASTATIC)
-    set(TARGET_COMPILE_DEFS_DYNAMIC
+    list(APPEND TARGET_COMPILE_DEFS_DYNAMIC
         ${TARGET_COMPILE_DEFS}
         -DAJADLL
         -DAJA_WINDLL
@@ -532,23 +526,40 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         ${AJANTV2_MAC_SOURCES})
 endif()
 
-if (AJANTV2_BUILD_SHARED)
-    aja_ntv2_log_build_info()
-    aja_add_library(${PROJECT_NAME} "${PROJECT_NAME}" SHARED PUBLIC
-        "${TARGET_SOURCES}" ""
-        "${TARGET_INCLUDE_DIRS}"
-        "${TARGET_LINK_LIBS}"
-        "${TARGET_COMPILE_DEFS_DYNAMIC};${AJA_NTV2_TARGET_COMPILE_DEFS}")
-    if (AJA_NTV2_CODE_SIGN)
-        aja_code_sign(${PROJECT_NAME})
+if (NOT TARGET ${PROJECT_NAME})
+    if (AJANTV2_BUILD_SHARED)
+        aja_ntv2_log_build_info()
+
+        add_library(${PROJECT_NAME} SHARED ${TARGET_SOURCES})
+        target_compile_definitions(${PROJECT_NAME} PUBLIC
+            ${TARGET_COMPIILE_DEFS_DYNAMIC}
+            ${AJANTV2_TARGET_COMPILE_DEFS})
+        target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
+        target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS})
+
+        if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+            include(WindowsHelpers)
+            aja_set_msvc_runtime_library(${PROJECT_NAME} SHARED)
+        endif()
+
+        if (AJA_CODE_SIGN)
+            aja_code_sign(${PROJECT_NAME})
+        endif()
+    else()
+        aja_ntv2_log_build_info()
+
+        add_library(${PROJECT_NAME} STATIC ${TARGET_SOURCES})
+        target_compile_definitions(${PROJECT_NAME} PUBLIC
+            ${TARGET_COMPILE_DEFS_STATIC}
+            ${AJANTV2_TARGET_COMPILE_DEFS})
+        target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
+        target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS})
+
+        if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+            include(WindowsHelpers)
+            aja_set_msvc_runtime_library(${PROJECT_NAME} SHARED)
+        endif()
     endif()
-else()
-    aja_ntv2_log_build_info()
-    aja_add_library(${PROJECT_NAME} "${PROJECT_NAME}" STATIC PUBLIC
-        "${TARGET_SOURCES}" ""
-        "${TARGET_INCLUDE_DIRS}"
-        "${TARGET_LINK_LIBS}"
-        "${TARGET_COMPILE_DEFS_STATIC};${AJA_NTV2_TARGET_COMPILE_DEFS}")
 endif()
 
 if (AJANTV2_SDK_GEN)
@@ -560,7 +571,7 @@ if (NOT TARGET ajabase)
 endif()
 
 # `cmake --install` deployments
-if (AJA_NTV2_INSTALL_HEADERS)
+if (AJA_INSTALL_HEADERS)
     list(REMOVE_ITEM AJANTV2_HEADERS src/ntv2devicefeatures.hpp)
     install(FILES ${AJABASE_COMMON_HEADERS}                             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajabase/common)
     install(FILES ${AJABASE_NETWORK_HEADERS}                            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajabase/network)
@@ -583,7 +594,7 @@ if (AJA_NTV2_INSTALL_HEADERS)
     install(FILES includes/ntv2version.h                                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/includes)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/includes/ntv2version.h    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/includes)
 endif()
-if (AJA_NTV2_INSTALL_SOURCES)
+if (AJA_INSTALL_SOURCES)
     list(APPEND AJANTV2_SOURCES src/ntv2devicefeatures.hpp)
     list(APPEND AJANTV2_WIN_SOURCES src/win/dllmain.cpp)
     install(FILES ${AJABASE_COMMON_SOURCES}         DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajabase/common)
@@ -604,10 +615,10 @@ if (AJA_NTV2_INSTALL_SOURCES)
     install(FILES ${AJANTV2_LIN_SOURCES}            DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2/src/lin)
     install(FILES ${AJANTV2_UTILITY_PUBLIC_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2/utilityfiles/public)
 endif()
-if (AJA_NTV2_INSTALL_CMAKE)
+if (AJA_INSTALL_CMAKE)
     install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2)
 endif()
-if (AJA_NTV2_INSTALL_MISC)
+if (AJA_INSTALL_MISC)
     # legacy build stuff
     install(FILES ${AJA_CMAKE_DIR}/../libajantv2/ajantv2/build/Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2/build)
     install(FILES ${AJA_CMAKE_DIR}/../libajantv2/ajantv2/Makefile       DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2)

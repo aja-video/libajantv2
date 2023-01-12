@@ -33,11 +33,10 @@ set(TARGET_SOURCES
 	${DEMO_APPS_SOURCES}
 	${DEMO_APPS_HEADERS})
 
-aja_add_executable(${PROJECT_NAME} PUBLIC
-	"${TARGET_SOURCES}"
-	"ajacc;ajantv2"
-	"${TARGET_INCLUDE_DIRS}"
-	"${TARGET_LINK_LIBS};ajantv2;ajacc" "")
+add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
+add_dependencies(${PROJECT_NAME} ajacc ajantv2)
+target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS} ajacc ajantv2)
 
 if (AJA_CODE_SIGN)
     aja_code_sign(${PROJECT_NAME})
