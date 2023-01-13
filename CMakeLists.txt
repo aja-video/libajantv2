@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 project(libajantv2)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
-set(MY_HOME_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+
 include(CMakeOptions)
 include(CompileFlags)
 include(Defines)
