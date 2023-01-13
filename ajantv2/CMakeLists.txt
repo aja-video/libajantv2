@@ -532,7 +532,7 @@ if (NOT TARGET ${PROJECT_NAME})
 
         add_library(${PROJECT_NAME} SHARED ${TARGET_SOURCES})
         target_compile_definitions(${PROJECT_NAME} PUBLIC
-            ${TARGET_COMPIILE_DEFS_DYNAMIC}
+            ${TARGET_COMPILE_DEFS_DYNAMIC}
             ${AJANTV2_TARGET_COMPILE_DEFS})
         target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
         target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS})
@@ -557,7 +557,7 @@ if (NOT TARGET ${PROJECT_NAME})
 
         if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
             include(WindowsHelpers)
-            aja_set_msvc_runtime_library(${PROJECT_NAME} SHARED)
+            aja_set_msvc_runtime_library(${PROJECT_NAME} STATIC)
         endif()
     endif()
 endif()
