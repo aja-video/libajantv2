@@ -41,5 +41,11 @@ install(TARGETS ${PROJECT_NAME}
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${REGIO_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/regio)
 	install(FILES ${REGIO_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/regio)
+endif()
+
+if (AJA_INSTALL_MISC)
+	install(FILES Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/regio)
+endif()
+if (AJA_INSTALL_CMAKE)
 	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/regio)
 endif()

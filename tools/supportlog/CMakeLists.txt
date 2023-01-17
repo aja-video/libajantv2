@@ -37,5 +37,7 @@ install(TARGETS ${PROJECT_NAME}
 if (AJA_INSTALL_SOURCES)
 	install(FILES ${SUPPORTLOG_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/supportlog)
 	install(FILES ${SUPPORTLOG_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/supportlog)
+endif()
+if (AJA_INSTALL_CMAKE)
 	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/supportlog)
 endif()

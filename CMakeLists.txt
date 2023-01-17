@@ -15,6 +15,7 @@ option(AJANTV2_BUILD_SHARED     "Build libajantv2 shared libraries?" OFF)
 option(AJANTV2_BUILD_DEMOS      "Build libajantv2 demo apps?" ON)
 option(AJANTV2_BUILD_TOOLS      "Build libajantv2 tools?" ON)
 option(AJANTV2_BUILD_TESTS      "Build libajantv2 tests?" ON)
+option(AJANTV2_BUILD_DOCS       "Build libajantv2 docs?" OFF)
 
 add_subdirectory(ajantv2)
 if (AJANTV2_BUILD_DEMOS)
