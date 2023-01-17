@@ -2,8 +2,10 @@ project(ut_ajantv2)
 
 set(TEST_XML_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
+message(STATUS "!*!*!*! Doctestpath: ${DOCTEST_PATH}")
+
 set(TARGET_INCLUDE_DIRS
-	${doctest_SOURCE_DIR}/doctest
+	${DOCTEST_PATH}/doctest
 	../ajantv2
 	../ajantv2/includes)
 
