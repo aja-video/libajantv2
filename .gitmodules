@@ -1,0 +1,3 @@
+[submodule "thirdparty/doctest"]
+	path = thirdparty/doctest
+	url = ../../thirdparty/doctest
