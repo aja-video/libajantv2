@@ -6,6 +6,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 
 include(CMakeOptions)
 include(CompileFlags)
+include(WindowsHelpers)
 include(Defines)
 include(Helpers)
 include(Version)
