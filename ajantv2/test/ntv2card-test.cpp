@@ -777,7 +777,7 @@ protected:
         srcCardCfg.video.ntv2_pix_fmt = tc.pf;
         srcCardCfg.video.ntv2_vanc_mode = tc.vancMode;
         srcCardCfg.timing.ref_select = tc.refSelect;
-        srcCardCfg.video.smpte_standard = tc.standard;
+        srcCardCfg.sdi.smpte_standard = tc.standard;
         srcCardCfg.base.connection = qa::ConnectionKind::SDI;
 
         qa::NTV2CardConfig dstCardCfg(srcCardCfg);
