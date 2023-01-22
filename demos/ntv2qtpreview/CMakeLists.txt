@@ -105,8 +105,7 @@ if (AJA_CODE_SIGN)
     aja_code_sign(${BUILD_TARGETS})
 endif()
 if (AJA_QT_DEPLOY)
-    include(AJAQtHelpers)
-    aja_deploy_qt_libs(ntv2qtpreview)
+    AJA_QT_DEPLOY(ntv2qtpreview)
 endif()
 install(TARGETS ${BUILD_TARGETS}
     BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
