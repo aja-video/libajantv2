@@ -1,6 +1,6 @@
 # https://stackoverflow.com/questions/60854495/qt5-cmake-include-all-libraries-into-executable
 # get absolute path to qmake, then use it to find windeployqt executable
-function(AJA_QT_DEPLOY target)
+function(aja_deploy_qt_libs target)
     if (WIN32)
         find_package(Qt5Core HINTS ${AJA_QT_DIR} REQUIRED)
         get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
@@ -85,4 +85,4 @@ function(AJA_QT_DEPLOY target)
             message(STATUS "WARNING -- AJA Linux Deploy Qt script not found: ${_lin_deploy_qt_path}")
         endif()
     endif()
-endfunction()
+endfunction(aja_deploy_qt_libs)
