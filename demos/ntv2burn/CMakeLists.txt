@@ -1,6 +1,6 @@
 project(ntv2burn)
 
-include(Defines)
+include(ntv2/Defines)
 
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
