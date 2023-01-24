@@ -3,4 +3,4 @@
 	url = ../../thirdparty/doctest
 [submodule "cmake"]
 	path = cmake
-	url = git@engit.aja.com:sw/cmake-modules.git
+	url = ../../cmake-modules.git
