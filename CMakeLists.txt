@@ -20,13 +20,19 @@ option(AJANTV2_BUILD_TOOLS      "Build libajantv2 tools?" ON)
 option(AJANTV2_BUILD_TESTS      "Build libajantv2 tests?" ON)
 option(AJANTV2_BUILD_DOCS       "Build libajantv2 docs?" OFF)
 
+if(NOT AJANTV2_BUILD_OPENSOURCE)
+    set (AJA_PRIVATE_DIR ${CMAKE_SOURCE_DIR}/private)
+endif()
+
 add_subdirectory(ajantv2)
 if (AJANTV2_BUILD_DEMOS)
     add_subdirectory(demos)
 endif()
+
 if (AJANTV2_BUILD_TOOLS)
     add_subdirectory(tools)
 endif()
+
 if (AJANTV2_BUILD_TESTS)
     include(CTest)
     if (NOT TARGET doctest::doctest)
