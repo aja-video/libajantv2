@@ -4,6 +4,3 @@
 [submodule "cmake"]
 	path = cmake
 	url = ../../cmake-modules.git
-[submodule "private"]
-	path = private
-	url = ../private
