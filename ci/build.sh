@@ -12,8 +12,9 @@ ROOT_DIR="$( cd "$SELF_DIR/.." || exit ; pwd -P )"
 # environment vars to control the build
 if [ -z ${GENERATOR} ]; then GENERATOR="Unix Makefiles"; fi
 if [ -z ${BUILD_DIR} ]; then BUILD_DIR="$ROOT_DIR/build"; fi
+if [ -z ${AJA_BUILD_OPENSOURCE} ]; then BUILD_OPENSOURCE=ON; fi
 
-cmake -S"$ROOT_DIR" -B"$BUILD_DIR" -G"$GENERATOR"
+cmake -S"$ROOT_DIR" -B"$BUILD_DIR" -G"$GENERATOR" -DAJANTV2_BUILD_OPENSOURCE="$BUILD_OPENSOURCE"
 if [ "$?" != 0 ]; then
     echo "problem running 'cmake ../"
     exit 3
