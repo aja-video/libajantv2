@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(libajantv2)
+if(POLICY CMP0091)
+  cmake_policy(SET CMP0091 NEW)
+endif()
 
 if (NOT CMAKE_MODULE_PATH)
     set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 endif()
+
+project(libajantv2)
 
 include(CMakeOptions)
 include(CompilerFlags)
@@ -12,6 +16,12 @@ include(WindowsHelpers)
 include(ntv2/Defines)
 include(ntv2/Helpers)
 include(ntv2/Version)
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	if (DEFINED AJA_MSVC_RUNTIME_LIBRARY)
+		aja_set_global_msvc_runtime_library(${AJA_MSVC_RUNTIME_LIBRARY})
+	endif()
+endif()
 
 option(AJANTV2_BUILD_OPENSOURCE "Build libajantv2 as open-source (MIT license)?" OFF)
 option(AJANTV2_BUILD_SHARED     "Build libajantv2 shared libraries?" OFF)

@@ -538,11 +538,6 @@ if (NOT TARGET ${PROJECT_NAME})
         target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
         target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS})
 
-        if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-            include(WindowsHelpers)
-            aja_set_msvc_runtime_library(${PROJECT_NAME} SHARED)
-        endif()
-
         if (AJA_CODE_SIGN)
             aja_code_sign(${PROJECT_NAME})
         endif()
@@ -556,10 +551,6 @@ if (NOT TARGET ${PROJECT_NAME})
         target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
         target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS})
 
-        if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-            include(WindowsHelpers)
-            aja_set_msvc_runtime_library(${PROJECT_NAME} STATIC)
-        endif()
     endif()
 endif()
 
@@ -638,3 +629,4 @@ install(TARGETS ${PROJECT_NAME}
     RUNTIME         DESTINATION ${CMAKE_INSTALL_BINDIR}
     FRAMEWORK       DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+	
