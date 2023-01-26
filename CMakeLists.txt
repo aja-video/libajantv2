@@ -1,14 +1,15 @@
 cmake_minimum_required(VERSION 3.10)
 
+# For CMAKE_MSVC_RUNTIME_LIBRARY compatability. Per note: This must be before the first project()
 if(POLICY CMP0091)
   cmake_policy(SET CMP0091 NEW)
 endif()
 
+project(libajantv2)
+
 if (NOT CMAKE_MODULE_PATH)
     set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 endif()
-
-project(libajantv2)
 
 include(CMakeOptions)
 include(CompilerFlags)
@@ -23,7 +24,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	endif()
 endif()
 
-option(AJANTV2_BUILD_OPENSOURCE "Build libajantv2 as open-source (MIT license)?" OFF)
+option(AJANTV2_BUILD_OPENSOURCE "Build libajantv2 as open-source (MIT license)?" ON)
 option(AJANTV2_BUILD_SHARED     "Build libajantv2 shared libraries?" OFF)
 option(AJANTV2_BUILD_DEMOS      "Build libajantv2 demo apps?" ON)
 option(AJANTV2_BUILD_TOOLS      "Build libajantv2 tools?" ON)
