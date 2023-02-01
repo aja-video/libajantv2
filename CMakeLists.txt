@@ -32,7 +32,7 @@ option(AJANTV2_BUILD_TESTS      "Build libajantv2 tests?" ON)
 option(AJANTV2_BUILD_DOCS       "Build libajantv2 docs?" OFF)
 
 if(NOT AJANTV2_BUILD_OPENSOURCE)
-    set (AJA_PRIVATE_DIR ${CMAKE_SOURCE_DIR}/private)
+    set(NTV2_PROPRIETARY_DIR ${CMAKE_SOURCE_DIR}/proprietary)
 endif()
 
 add_subdirectory(ajantv2)
