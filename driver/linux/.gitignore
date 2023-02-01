@@ -1,0 +1,13 @@
+# Filter out Linux driver temporary files
+.*.cmd
+*.order
+*.ko
+*.o
+*.symvers
+.cache.mk
+.tmp_versions/
+ajantv2.mod
+ajantv2.mod.c
+ntv2devicefeatures.c
+ntv2driverprocamp.c
+ntv2vpidfromspec.c
