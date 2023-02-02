@@ -1,3 +1,6 @@
 /build/
 /ajantv2/includes/ntv2version.h
 /docs/ntv2.doxy
+/driver/*.o
+/driver/*.o.cmd
+/driver/bin/*.ko
