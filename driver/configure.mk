@@ -47,7 +47,7 @@ A_DRIVER_PATH       := $(DIR_HERE)
 A_LINUX_DRIVER_PATH := $(DIR_HERE)/linux
 A_PETA_DRIVER_PATH := $(DIR_HERE)/peta
 
-A_LIB_NTV2_PATH     := $(A_LIBRARIES_PATH)/libajantv2/ajantv2
+A_LIB_NTV2_PATH     := $(A_LIBRARIES_PATH)/ajantv2
 A_LIB_NTV2_INC	   	:= $(A_LIB_NTV2_PATH)/includes
 A_LIB_NTV2_SRC	   	:= $(A_LIB_NTV2_PATH)/src
 
