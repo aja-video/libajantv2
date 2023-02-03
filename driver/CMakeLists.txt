@@ -115,6 +115,33 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 		${AJADRIVER_LINUX_SOURCES})
 endif()
 
+set(LIBAJANTV2_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../)
+set(AJANTV2_ROOT ${LIBAJANTV2_ROOT}/ajantv2)
+set(NEEDED_NTV2_INCLUDES
+    ${AJANTV2_ROOT}/includes/ajaexport.h
+    ${AJANTV2_ROOT}/includes/ajatypes.h
+    ${AJANTV2_ROOT}/includes/ntv2audiodefines.h
+    ${AJANTV2_ROOT}/includes/ntv2devicefeatures.h
+    ${AJANTV2_ROOT}/includes/ntv2devicefeatures.hh
+    ${AJANTV2_ROOT}/includes/ntv2driverprocamp.h
+    ${AJANTV2_ROOT}/includes/ntv2enums.h
+    ${AJANTV2_ROOT}/includes/ntv2fixed.h
+    ${AJANTV2_ROOT}/includes/ntv2publicinterface.h
+    ${AJANTV2_ROOT}/includes/ntv2version.h
+    ${AJANTV2_ROOT}/includes/ntv2videodefines.h
+    ${AJANTV2_ROOT}/includes/ntv2virtualregisters.h
+    ${AJANTV2_ROOT}/includes/ntv2vpidfromspec.h
+    )
+set(NEEDED_NTV2_LIN_INCLUDES
+    ${AJANTV2_ROOT}/src/lin/ntv2linuxpublicinterface.h
+    )
+set(NEEDED_NTV2_SOURCES
+    ${AJANTV2_ROOT}/src/ntv2devicefeatures.cpp
+    ${AJANTV2_ROOT}/src/ntv2driverprocamp.cpp
+    ${AJANTV2_ROOT}/src/ntv2vpidfromspec.cpp
+    ${AJANTV2_ROOT}/src/ntv2devicefeatures.hpp
+    )
+
 if (AJANTV2_BUILD_DRIVER)
 	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 		aja_message(STATUS "Windows driver CMake build not yet implemented!")
@@ -159,7 +186,6 @@ if (AJANTV2_BUILD_OPENSOURCE)
     file(WRITE mac/README.md ${WIN_MAC_MIT_DRIVER_README})
 endif()
 
-#[[
 # installing
 
 add_custom_target(ajadriver_install ${AJADRIVER_TARGET_SOURCES})
@@ -167,7 +193,7 @@ add_dependencies(ajadriver_install install)
 
 # Windows
 if (AJANTV2_BUILD_OPENSOURCE AND AJA_INSTALL_SOURCES)
-	install(FILES win/README.md DESTINATION ${CMAKE_INSTALL_PREFIX}/driver/win)
+    install(FILES win/README.md DESTINATION ${CMAKE_INSTALL_PREFIX}/driver/win)
 endif()
 
 # macOS
@@ -177,24 +203,58 @@ endif()
 
 if (AJA_INSTALL_HEADERS)
 	if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-		install(FILES ${AJADRIVER_LINUX_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/driver/linux)
+		install(FILES ${AJADRIVER_LINUX_HEADERS}
+                DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/driver/linux
+                COMPONENT install_driver)
 	endif()
-	install(FILES ${AJADRIVER_COMMON_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/driver)
-	install(FILES ${AJA_LIB_NTV2_ROOT}/includes/ntv2driverprocamp.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/includes)
+	install(FILES ${AJADRIVER_COMMON_HEADERS}
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/driver
+            COMPONENT install_driver)
+
+    install(FILES ${NEEDED_NTV2_INCLUDES}
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2/includes
+            COMPONENT install_driver)
+
+    install(FILES ${NEEDED_NTV2_LIN_INCLUDES}
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2/src/lin
+            COMPONENT install_driver)
 endif()
 if (AJA_INSTALL_SOURCES)
 	if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-		install(FILES ${AJADRIVER_LINUX_SOURCES}              DESTINATION ${CMAKE_INSTALL_PREFIX}/ajadriver/linux)
+		install(FILES ${AJADRIVER_LINUX_SOURCES}
+                DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/driver/linux
+                COMPONENT install_driver)
 	endif()
-	install(FILES ${AJADRIVER_COMMON_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajadriver)
-	install(FILES ${AJA_LIB_NTV2_ROOT}/src/ntv2driverprocamp.cpp DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/src)
+	install(FILES ${AJADRIVER_COMMON_SOURCES}
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/driver
+            COMPONENT install_driver)
+
+    install(FILES ${NEEDED_NTV2_SOURCES}
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2/src
+            COMPONENT install_driver)
 endif()
 if (AJA_INSTALL_MISC)
 	if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-		install(FILES ${AJADRIVER_LINUX_BUILD_FILES}            DESTINATION ${CMAKE_INSTALL_PREFIX}/driver/linux)
-		install(FILES ${AJADRIVER_LINUX_LOAD_FILES}             DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
-		install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/configure.mk  DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
-		install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/sdkversion.mk DESTINATION ${CMAKE_INSTALL_PREFIX}/build)
+		install(FILES ${AJADRIVER_LINUX_BUILD_FILES}
+                DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/driver/linux
+                COMPONENT install_driver)
+		install(FILES ${AJADRIVER_LINUX_LOAD_FILES}
+                DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/driver/bin
+                PERMISSIONS OWNER_EXECUTE OWNER_READ OWNER_WRITE
+                            GROUP_EXECUTE GROUP_READ GROUP_WRITE
+                            WORLD_EXECUTE WORLD_READ
+                COMPONENT install_driver)
+		install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/configure.mk
+                DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/driver
+                COMPONENT install_driver)
+		install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/sdkversion.mk
+                DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/driver
+                COMPONENT install_driver)
+        install(FILES ${LIBAJANTV2_ROOT}/.gitignore
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2
+            COMPONENT install_driver)
+        install(FILES ${LIBAJANTV2_ROOT}/driver/linux/.gitignore
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/driver/linux
+            COMPONENT install_driver)
 	endif()
 endif()
-#]]
