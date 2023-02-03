@@ -4,3 +4,5 @@
 /driver/*.o
 /driver/*.o.cmd
 /driver/bin/*.ko
+/driver/win
+/driver/mac
