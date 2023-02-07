@@ -36,14 +36,12 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(TARGET_COMPILE_DEFS
         -D_MBCS
         -DNOMINMAX)
-    aja_make_version_rc(
-        ${AJA_PRODUCT_NAME}
-        ${AJA_PRODUCT_DESC}
-        ${CMAKE_MODULE_PATH}/bundle/windows/win-ver.rc.in
-        win-ver.rc
-        ${CMAKE_CURRENT_SOURCE_DIR}/app.ico)
-    set(NTV2QTMULTIINPUT_SOURCES
-        ${NTV2QTMULTIINPUT_SOURCES}
+    aja_versionize(
+        ${PROJECT_NAME}
+        ${PROJECT_NAME}
+        ${PROJECT_NAME}
+        app.ico)
+    list(APPEND NTV2QTMULTIINPUT_SOURCES
         win-ver.rc)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(TARGET_LINK_LIBS dl pthread rt)
