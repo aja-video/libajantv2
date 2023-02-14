@@ -85,11 +85,10 @@ set(BUILD_TARGETS ntv2qtpreview)
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set_target_properties(ntv2qtpreview PROPERTIES WIN32_EXECUTABLE TRUE)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    aja_make_version_elf(ntv2qtpreview
-        ${AJA_PRODUCT_NAME}
-        ${AJA_PRODUCT_DESC}
-        ${CMAKE_MODULE_PATH}/bundle/linux/lin-ver.json.in
-        lin-ver.json
+    aja_versionize_linux(
+        ${PROJECT_NAME}
+        ${PROJECT_NAME}
+        ${PROJECT_NAME}
         app.ico)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     aja_make_version_plist(ntv2qtpreview
