@@ -1982,7 +1982,7 @@ private:
 			const double	dieTempF	(dieTempC * 9.0 / 5.0  +  32.0);
 			const double	voltage		(double(rawVoltage)/ 1024.0 * 3.0);
 			ostringstream	oss;
-			oss << "Die Temperature: " << fDEC(dieTempC,5,2) << " Celcius  (" << fDEC(dieTempF,5,2) << " Fahrenheit"	<< endl
+			oss << "Die Temperature: " << fDEC(dieTempC,5,2) << " Celcius  (" << fDEC(dieTempF,5,2) << " Fahrenheit)"	<< endl
 				<< "Core Voltage: " << fDEC(voltage,5,2) << " Volts DC";
 			return oss.str();
 		}
