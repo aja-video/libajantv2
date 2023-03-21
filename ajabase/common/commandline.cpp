@@ -487,6 +487,7 @@ bool AJACommandLineParser::AddHelpOption()
             oss << " " << mName;
         oss << " [OPTION...]" << std::endl;
 
+        // Get the longest line size first...
         size_t longestSize = 0;
         for (AJACommandLineOptionListIter it = mOptions.begin();
             it != mOptions.end(); it++) {
@@ -509,6 +510,8 @@ bool AJACommandLineParser::AddHelpOption()
         }
 
         mHelpText.clear();
+
+        // ...now calculate all of the line padding.
         for (AJACommandLineOptionListIter it = mOptions.begin();
             it != mOptions.end(); it++) {
             oss << std::setw(2) << std::right;
@@ -530,11 +533,12 @@ bool AJACommandLineParser::AddHelpOption()
                 }
             }
             namesLength += ((names.size()*2)-2);
-            oss << std::setw(longestSize + (longestSize-namesLength)
-                + it->GetDesc().length());
+            oss << std::setw((longestSize-namesLength) + it->GetDesc().length() + 8);
             oss << it->GetDesc() << std::endl;
         }
+
         mHelpText = oss.str();
+
         return true;
     }
 
