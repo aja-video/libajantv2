@@ -156,9 +156,7 @@ if (AJANTV2_BUILD_DRIVER)
 						  COMMAND make -C linux
 						  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 						  SOURCES ${AJADRIVER_TARGET_SOURCES}
-                          BYPRODUCTS ${BIN_PATH}/ajantv2.ko
-                                     ${BIN_PATH}/load_ajantv2
-                                     ${BIN_PATH}/unload_ajantv2)
+                          BYPRODUCTS ${BIN_PATH}/ajantv2.ko)
 
 		set(LIN_LOAD_DRIVER_MSG
 			"         After building Linux driver can enable with: sudo .${BIN_PATH}/load_ajantv2")
