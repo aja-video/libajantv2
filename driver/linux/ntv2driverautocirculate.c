@@ -3136,7 +3136,16 @@ OemAutoCirculateInit (ULWord deviceNumber,
 	    return -ECHRNG;
 	}
 
+    if (lStartFrameNum >= NTV2_MAX_FRAMEBUFFERS)
+        return -EINVAL;
+
+    if (lEndFrameNum >= NTV2_MAX_FRAMEBUFFERS)
+        return -EINVAL;
+
 	channelRange = lEndFrameNum - lStartFrameNum + 1;
+    if (channelRange >= NTV2_MAX_FRAMEBUFFERS)
+        return -EINVAL;
+
 	csIndex = GetIndexForNTV2Crosspoint(channelSpec);
 	if (lChannelCount > 1)
 		pNTV2Params->_bMultiChannel = true;
