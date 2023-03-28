@@ -2839,7 +2839,12 @@ static int reboot_handler(struct notifier_block *this, unsigned long code, void 
 static UWord deviceNumber;
 
 #if defined(AJA_CREATE_DEVICE_NODES)
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,2,0))
+static int aja_ntv2_dev_uevent(const struct device *dev, struct kobj_uevent_env *env)
+#else
 static int aja_ntv2_dev_uevent(struct device *dev, struct kobj_uevent_env *env)
+#endif
 {
 	add_uevent_var(env, "DEVMODE=%#o", 0666);
 	return 0;
