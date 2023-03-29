@@ -551,6 +551,7 @@ if (NOT TARGET ${PROJECT_NAME})
         target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS})
 
     endif()
+    set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "d")
 endif()
 
 if (AJANTV2_SDK_GEN)
