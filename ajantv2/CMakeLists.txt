@@ -536,6 +536,7 @@ if (NOT TARGET ${PROJECT_NAME})
             ${AJANTV2_TARGET_COMPILE_DEFS})
         target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
         target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS})
+        set_target_properties(${PROJECT_NAME} PROPERTIES VERSION "${AJA_NTV2_VER_STR}")
 
         if (AJA_CODE_SIGN)
             aja_code_sign(${PROJECT_NAME})
