@@ -1,8 +1,9 @@
 project(ntv2stereocapture)
 
-find_package(Qt5 HINTS ${AJA_QT_DIR} COMPONENTS Core Widgets REQUIRED)
-set(QT_LIBRARIES Qt5::Core Qt5::Widgets)
-list(APPEND TARGET_LINK_LIBS ${QT_LIBRARIES} ajantv2)
+include(QtHelpers)
+aja_find_qt_modules(Core Widgets)
+
+list(APPEND TARGET_LINK_LIBS ${TARGET_QT_LIBS} ajantv2)
 
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../

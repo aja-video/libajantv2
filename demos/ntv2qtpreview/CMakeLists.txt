@@ -5,8 +5,9 @@ if (NOT AJA_QT_ENABLED)
     return()
 endif()
 
-find_package(Qt5 HINTS ${AJA_QT_DIR} COMPONENTS Core Multimedia Widgets REQUIRED)
-set(QT_LIBRARIES Qt5::Core Qt5::Multimedia Qt5::Widgets)
+include(QtHelpers)
+aja_find_qt_modules(Core Multimedia Widgets)
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
@@ -62,7 +63,7 @@ set(TARGET_SOURCES
 	${NTV2QTPREVIEW_SOURCES})
 set(TARGET_DEPS ajantv2)
 set(TARGET_LINK_LIBS ${TARGET_LINK_LIBS}
-    ajantv2 ${QT_LIBRARIES})
+    ajantv2 ${TARGET_QT_LIBS})
 
 add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
 add_dependencies(${PROJECT_NAME} ${TARGET_DEPS})
@@ -90,7 +91,7 @@ if (AJA_CODE_SIGN)
     aja_code_sign(${PROJECT_NAME})
 endif()
 if (AJA_QT_DEPLOY)
-    aja_deploy_qt_libs_to_dest(ntv2qtpreview)
+    aja_deploy_qt_libs_to_dest(ntv2qtpreview ${CMAKE_INSTALL_BINDIR})
 endif()
 install(TARGETS ${PROJECT_NAME}
     BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}

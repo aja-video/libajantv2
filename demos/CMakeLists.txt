@@ -27,9 +27,9 @@ add_subdirectory(ntv2outputtestpattern)
 add_subdirectory(ntv2player)
 add_subdirectory(ntv2player4k)
 add_subdirectory(ntv2player8k)
-# # add_subdirectory(ntv2qtmultiinput "NTV2 Qt Multi-Input" "NTV2 Qt Multi-Input Demonstration") # requires ajagui
+# # add_subdirectory(ntv2qtmultiinput) # requires ajagui
 # # add_subdirectory(ntv2qtplaycorder)
-# # add_subdirectory(ntv2qtpreview "NTV2 Qt Preview" "NTV2 Qt GUI Demonstration") # optionally requires libajacc
+# # add_subdirectory(ntv2qtpreview) # optionally requires libajacc
 # # # add_subdirectory(ntv2qtrawcapture)
 # # # add_subdirectory(ntv2qtstereopreview)
 # # add_subdirectory(ntv2recorddpx)
