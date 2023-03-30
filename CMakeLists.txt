@@ -11,6 +11,7 @@ if (NOT CMAKE_MODULE_PATH)
     set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 endif()
 
+include(GNUInstallDirs)
 include(CMakeOptions)
 include(CompilerFlags)
 include(WindowsHelpers)
