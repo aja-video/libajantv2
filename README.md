@@ -1,11 +1,12 @@
 # libajantv2
 
-## What is this thing?
+## Description
 
-libajantv2 is a C++ class library for communicating and controlling AJA NTV2 I/O devices.
+**libajantv2** is an SDK and C++ class library for discovering, interrogating and controlling AJA NTV2 professional video I/O devices.
 
-The library is composed of the following components:
-- `docs` - Documentation for libajantv2.
-- `ajabase` - AJA common and platform class library.
-- `ajaanc` - AJA ancillary data library, for preparing ancillary data for delivery over SDI.
-- `ajantv2` - AJA NTV2 device library, allows for control and querying of AJA NTV2 I/O devices.
+The NTV2 SDK has the following components:
+- `ajabase` - Platform-independent classes for handling threads, mutexes, files, etc.
+- `ajaanc` - Ancillary data classes, to aid encoding & decoding of SDI ancillary data packets.
+- `ajantv2` - The principal classes, particularly **CNTV2Card**.
+- `docs` - Additional documentation for **libajantv2**.
+- `plugins` - Plugins that add additional functionality to the NTV2 SDK.
