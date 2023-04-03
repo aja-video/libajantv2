@@ -61,7 +61,7 @@
 
 	@par	Physical
 
-	-	Size, without bracket (W × D × H):  0.7" × 6.7" × 2.7" (18mm × 170mm × 69mm)
+	-	Size, without bracket (W × D × H):  0.7\" × 6.7\" × 2.7\" (18mm × 170mm × 69mm)
 	-	Bracket is standard full-height PCIe card size
 	-	Conforms to PCIe Card Electromechanical Specification Rev 1.0A low-profile add-in card
 	-	Power: 10-20V, 10W (typical, card only), 16W (typical, when powering <a href="https://www.aja.com/products/rovocam">RovoCam</a>), 18W (max)

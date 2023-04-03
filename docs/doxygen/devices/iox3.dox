@@ -3,7 +3,7 @@
 
 	@section		ntv2hwio
 
-	<hr>
+    <hr>
 	@subsection		iox3	IoX3
 
 	This page describes the IoX3 Thunderbolt-3 capture/playout device.

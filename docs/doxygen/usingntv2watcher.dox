@@ -27,6 +27,9 @@ This page describes how to use the <b>NTV2 Watcher</b> tool to interactively mon
 	-	\ref tonegenerator — writes tone values into an audio buffer
 	-	\ref memmapdlog — shows device memory utilization
 	-	\ref scraptool — displays contents of arbitrary host buffers
+	-	\ref demostool — configures and runs demo apps
+	-	\ref debugstats — displays AJA debug stats
+	-	\ref debuglog — displays AJA debug logs
 
 
 
@@ -44,34 +47,58 @@ The user interface consists of a main window that contains these major elements:
 -	<b>Inspector List</b> — for selecting which aspect of the device to inspect and/or control;
 -	<b>Inspector Display Area</b> — the main data display area;
 -	<b>Status Bar</b> — which holds the status indicators:
-	-	<b>Status Message</b> — for messages;
+	-	<b>Status Message</b> — Some inspectors will display messages here in certain situations.
 	-	<b>Selection Indicator</b> — Some inspectors allow data portions to be selected interactively using the keyboard or mouse.
-		This part of the Status Bar indicates the current selection.
-	-	<b>Endianness</b> — Some inspectors display 2/4/8-byte values.
+		This part of the Status Bar briefly describes the current selection.
+	-	<b>Endianness</b> — Some inspectors display 2, 4, or 8-byte numbers.
 		This indicator shows the current endianness of the data display as <b>BE</b> (“Big Endian”) or <b>LE</b> (“Little Endian”).
-		It’s colored Green if it’s the native endianness, or Yellow if not native.
-	-	<b>Die Temperature</b> — Indicates the die temperature of the FPGA.
-	-	<b>Refresh Rate</b> — This part of the Status Bar shows the measured refresh rate of the inspector display (a moving average).
+		-	It’s colored Green if it’s the native endianness for the host processor.
+		-	It’s colored Yellow if it’s not native.
+	-	<b>Die Temperature</b> — Indicates the instantaneous measured die temperature of the device’s FPGA.
+		-	It’s colored Green if the temperature is at or below normal.
+		-	It’s colored Yellow if the temperature is slightly above normal.
+		-	It’s colored Red if the temperature is significantly above normal.
+	-	<b>Refresh Rate</b> — Indicates the actual measured refresh rate of the main window’s active inspector
+		(a moving average).
+		-	The refresh rate of detached inspector windows is not measured.
+		-	The indicator shows “N/A” when polling is disabled (i.e. when the <b>Poll</b> checkbox is not checked/ticked).
+		-	The indicator is Green if the measured refresh rate is what’s expected:
+			-	For inspectors tied to the VBI, it must be no more than the expected frame rate.
+			-	For all other inspectors, it must be no greater than the polling <b>Interval</b> slider setting.
+		-	It’s colored Yellow if the measured rate lags the expected rate by less than about 5%.
+		-	It’s colored Red if the measured rate lags the expected rate by more than approximately 5%.
 
 
 @par	Device Selection
 
-@image	html	watcher-deviceselection.png
-
 A single instance of <b>NTV2 Watcher</b> monitors and/or controls one AJA device at a time.
-This panel provides the ability to choose which AJA device the tool will focus on.
+This panel provides a menu for choosing which AJA device the tool will focus on.
 
-Choosing an item in the menu causes <b>NTV2 Watcher</b> to stop monitoring the previously-selected AJA device,
-and starts it monitoring the newly-selected AJA device. Depending on the device and its capabilities,
+The top of the menu is populated with devices that are installed or attached directly to the host.
+It’s followed by the “<b>Manage Other Devices…</b>” command, which opens the <b>Manage Devices</b> tool window.
+The bottom section of the menu is populated with the <b>Known Remote Devices</b> (see below).
+
+Choosing a different device in the menu causes <b>NTV2Watcher</b> to stop monitoring the previously-selected
+device, and starts monitoring the newly-selected one. Depending on the device and its capabilities,
 the list of available inspectors may change.
 
-To monitor an NTV2 device that’s running on another machine in your local network, click the <b>+</b> button
-and enter the machine’s IP address in the dialog that appears … then click OK.
-The first device local to that machine will be added to the popup menu.
+<b>“Manage Devices” Window</b>
 
-To remove a remote device, be sure it’s the currently selected one, then click the <b>-</b> button.
+@image	html	watcher-deviceselection.png
 
-@note	The “NTV2 Nub” server must be running on any machine to permit its devices to be monitored remotely.
+This tool window is for…
+-	<b>Remote Devices</b> — to find remote devices on other hosts in your LAN to monitor and/or control:
+	-	To add a remote device to the list of <b>Known Remote Devices</b>:
+		-	Type its IP address or DNS name in the provided text box.
+		-	If the remote “nub” uses a port number other than 7575, enter its port number in the <b>Port:</b> box.
+		-	When NTV2Watcher is able to successfully communicate with the remote “nub”, the <b>Add</b> button will become enabled.
+		-	Click <b>Add</b> to add the remote device to the <b>Known Remote Devices</b> list.
+	-	To remove a remote device from the <b>Known Remote Devices</b> list:
+		-	Right-click on the remote device to be removed.
+		-	Choose the appropriate <b>Remove</b> command from the menu.
+-	<b>Publish Devices</b> — to publish a locally attached/installed host device (to allow other hosts to connect to it).
+		-	This runs or stops a local “NTV2 Nub” server.
+-	<b>Software Devices</b> — to configure AJA “software” devices.
 
 
 @par	Menu Commands
@@ -93,6 +120,10 @@ Here’s what’s in the menu bar:
 	-	<b>Fill Buffers</b> — Shows/Hides the \ref fillbufferdlog.
 	-	<b>Register Cycler</b> — Shows/Hides the \ref regautocycler.
 	-	<b>Tone Generator</b> — Shows/Hides the \ref tonegenerator.
+	-	<b>Scrap Buffer</b> — Shows/Hides the \ref scraptool.
+	-	<b>SDK Demos</b> — Shows/Hides the \ref demostool.
+	-	<b>AJADebug Stats</b> — Shows/Hides the \ref debugstats.
+	-	<b>AJADebug Log</b> — Shows/Hides the \ref debuglog.
 	-	<b>Register Name</b> — <i>(IP Device inspectors only)</i> — Shows/Hides register names.
 	-	<b>Hex Reg Numbers</b> — <i>(IP Device inspectors only)</i> — Toggles showing IP Device register numbers in hexadecimal or decimal.
 	-	<b>Register Address</b> — <i>(IP Device inspectors only)</i> — Displays IP Device registers as a hexadecimal (BAR) address.
@@ -114,14 +145,20 @@ Here’s what’s in the menu bar:
 @image	html	watcher-commonsettings.png
 
 There are several settings that are common to the device and apply to all inspectors:
--	<b>Poll Device</b> — Check the box to repeatedly poll the device, and update the Watcher’s data displays.
-	Un-check the box to “freeze” the Watcher’s data displays.
-	Some inspectors are sync’d to an input/output/reference VBI and ignore this setting.
--	<b>Polling Interval</b> — Adjusts the polling interval, from 25 milliseconds up to 2 seconds.
-	Some inspectors are sync’d to an input/output/reference VBI and ignore this setting.
--	<b>Task Mode</b> — Indicates the device’s current task mode, and allows it to be changed by choosing a different setting.
--	<b>Multi-Format Mode</b> — Indicates the device’s “multi-format” mode, and allows it to be changed by choosing a different setting.
--	<b>Reference</b> — Indicates the device’s current clock reference setting, and allows it to be changed by choosing a different setting.
+-	<b>Poll</b> — Indicates and controls automatic device polling.
+	-	Check/tick the box to repeatedly poll the device, and automatically update all active/visible inspectors.
+		-	When polling is enabled, the <b>Polling Interval</b> slider appears, while the <b>Refresh</b> button will disappear.
+	-	Un-check/un-tick the box to “freeze” all active/visible inspectors.
+		-	When polling is disabled, a <b>Refresh</b> button appears, while the <b>Polling Interval</b> slider will disappear.
+-	<b>Refresh</b> — Push this button to immediately update and refresh all active/visible inspectors.
+	-	This control is visible only when polling is disabled.  It’s hidden when polling is enabled.
+-	<b>Interval</b> — Adjusts the polling interval, from 25 milliseconds up to 2 seconds.
+	-	This control is visible only when polling is enabled.  It’s hidden when polling is disabled.
+	-	The \ref inspectorframebuffer and \ref inspectoranc are sync’d to an input/output/reference VBI, and ignore this setting
+		when polling is enabled.
+-	<b>Task Mode</b> — Indicates the device’s current task mode, and allows it to be changed.
+-	<b>Multi-Format Mode</b> — Indicates the device’s “multi-format” mode, and allows it to be changed.
+-	<b>Reference</b> — Indicates the device’s current clock reference setting, and allows it to be changed.
 
 
 @par	Inspectors
@@ -133,15 +170,17 @@ This list may change if more capabilities are added to <b>NTV2 Watcher</b> in su
 
 Each inspector has its own particular user interface that’s designed to monitor and/or control a specific aspect of the AJA device.
 
-Clicking on an inspector item in the list replaces the one that was previously selected with the one that was newly selected.
-If you click back to return to an inspector that was previously in use, its state is exactly as it was left.
+Clicking on an inspector item in the list replaces the one that’s currently displayed in the main window to the newly-selected one.
+If the newly-selected inspector was previously in use for the current device, its state will be exactly as it was left.
 (Only when the device is changed does a new inspector get started in its default state.)
 
-Right-clicking an inspector item in the list pops up a menu with one choice: “Move to Separate Window”.
-Choosing <b>Move to Separate Window</b> — or double-clicking an inspector item in the list — opens the inspector in a separate window.
-This permits multiple inspectors to be open simultaneously.
+Right-clicking an inspector item in the list pops up a context menu
+-	“<b>Move to Separate Window</b>” — Opens or moves the inspector to a separate window.
+	This permits multiple inspectors to be viewed simultaneously.
 
-@note	Having multiple inspectors open in separate windows increases CPU utilization,
+Double-clicking on an inspector item in the list does the same thing as choosing the “<b>Move to Separate Window</b>” context menu item.
+
+@note	Having multiple inspectors open in separate windows increases NTV2 Watcher CPU utilization,
 		and can significantly impact the DMA transfer budget of the device and the PCIe bus.
 
 @bug	NTV2Watcher keeps some persistent settings data in a local config file.
@@ -158,39 +197,41 @@ This permits multiple inspectors to be open simultaneously.
 
 @image	html	watcher-inspector-framebuffer.png
 
-The <b>Frame Buffer</b> inspector monitors the contents of frame buffer memory on the AJA device.
+The <b>Frame Buffer</b> inspector displays the contents of frame buffer memory on the AJA device in the context of a FrameStore.
 
 @note	Because this inspector reads (via DMA) the entire contents of a frame buffer at the selected channel’s frame rate,
 		it can interfere with any currently running video application, particularly if the additional DMAs exceed the available
 		device or host data transfer budget. Thus, this inspector is not immune from “Heisenbugs” in which the act of monitoring
 		an AJA device affects it and the application(s) under test.
 
-Frame buffer memory contents can be displayed in four different <b>View Mode</b>s:
-	-	<b>Line</b> — The full raster (including VANC lines, if any), line-by-line, in hexadecimal format, grouped by byte, 2-byte word, 4-byte longword or 8-byte (64-bit) chunks.
-	-	<b>Raw</b> — The entire 8MB or 16MB buffer in fixed-length “lines”, grouped by 1, 2, 4 or 8 byte chunks. The line length is adjustable.
+In the context of the selected Channel/FrameStore, this inspector…
+	-	…reads (via DMA) the frame buffer into host memory.
+		-	In <b>Raw</b> mode, or for planar pixel formats, it reads the entire 8MB/16MB/32MB/etc. buffer.
+		-	All other views — <b>Line</b>, <b>Component</b>, <b>Waveform</b>, <b>Image</b>  — it reads the frame buffer up to
+			and including the last visible raster line.
+	-	…attempts to refresh at the FrameStore’s current frame rate (as soon after the VBI as possible) when polling is enabled
+		(i.e. when the <b>Poll</b> checkbox is checked/ticked).
+		-	An indicator in the bottom-right corner of the main window’s status bar shows the actual, measured refresh rate.
+		-	When the indicator’s color is not Green, then the inspector is not frame-accurate, and the data being displayed is stale.
+	-	When polling is disabled, it will only update when the <b>Refresh</b> button is pressed.
+	-	After each refresh, it compares the frame buffer contents to what was read the last time:
+		-	The bottom left of the main window‘s status bar shows the number of raster lines that changed from the last frame
+			(except <b>Raw</b> view).
+		-	Changed data is highlighted with a brighter color (except <b>Image</b> view).
+		-	<b>Frame Differencing mode</b> statically highlights the differences between the current frame and another frame.
+
+Frame buffer memory content can be displayed in four different <b>View Mode</b>s:
+	-	<b>Line</b> — The full raster (including VANC lines, if any), line-by-line, in decimal or hex format, grouped by 1, 2, 4 or 8-byte chunks.
+	-	<b>Raw</b> — The entire 8MB or 16MB buffer in fixed-length “lines”, grouped by 1, 2, 4 or 8-byte chunks. The line length is adjustable.
 		By default, unless disabled, boundaries between raster lines are indicated with a blue marker.
 		Regions and planes are indicated by color:  green for audio, yellow for Ancillary data, etc.
 	-	<b>Component</b> — The full raster (including VANC lines, if any), line-by-line, in component format,
-		dictated by the frame store’s frame buffer format, in hex or decimal.
+		determined by the FrameStore’s frame buffer format, in hex or decimal.
 		@image	html	watcher-inspector-fb-comp.png
 	-	<b>Waveform</b> — The full raster (including VANC lines, if any), one-line-at-a-time, as a waveform,
 		with the component waveforms overlaid on top of each other.
 		@image	html	watcher-inspector-fb-wfm.png
 	-	<b>Image</b> — The visible raster, as an image.
-
-This inspector repeatedly monitors the indicated frame buffer for the selected channel or frame store.
-	-	It reads (via DMA) the frame buffer into host memory.
-		-	In <b>Raw</b> mode, or for planar pixel formats, it reads the entire 8MB/16MB/32MB/etc. buffer.
-		-	All other views — <b>Line</b>, <b>Component</b>, <b>Waveform</b>, <b>Image</b>  — it reads the frame buffer up to
-			and including the last visible raster line.
-	-	The inspector attempts to refresh at the FrameStore’s current frame rate (as soon after the VBI as possible).
-		-	An indicator in the bottom-right corner of the main window’s status bar shows the average time between updates.
-		-	When the indicator exceeds the reciprocal of the frame rate, then the inspector is not frame-accurate.
-	-	After each refresh, it compares the frame buffer contents to what was read the last time:
-		-	The bottom left of the main window‘s status bar shows the number of raster lines that changed from the last frame
-			(except <b>Raw</b> view).
-		-	The data display highlights changed content with a brighter color (except <b>Image</b> view).
-		-	<b>Frame Differencing mode</b> statically highlights the differences between the current frame and another frame.
 
 
 @par	Frame/Buffer Controls
@@ -422,23 +463,24 @@ This inspector repeatedly monitors the indicated frame buffer for the selected c
 
 @image	html	watcher-inspector-audio.png
 
-The <b>Audio</b> inspector monitors the input or output of a selected audio engine of the AJA device, including its buffer memory
-and read or write “head” position.
+The <b>Audio</b> inspector displays the input or output audio buffer memory of the AJA device in the context of an Audio System,
+including its read or write “head” position.
 
 @note	Because this inspector reads (via DMA) the entire contents of an audio buffer at NTV2Watcher’s currently selected polling rate,
 		it can interfere with any currently running application, particularly if the additional DMAs exceed the available
 		device or host data transfer budget. Thus, this inspector is not immune from “Heisenbugs” in which the act of monitoring an AJA
 		device affects it and the application(s) under test.
 
-Audio buffer memory contents can be displayed in three ways:
+Audio buffer memory content can be displayed in any one of three ways:
 	-	<b>Raw</b> — The entire buffer in per-channel “lines”, each sample value shown as a 4-byte (32-bit) longword.
-	-	<b>Waveform</b> — A stack of waveform plots, for each audio channel that’s carrying PCM data.
+	-	<b>Waveform</b> — A vertical stack of waveform plots for each audio channel that’s carrying PCM data.
 	-	<b>Phase</b> — A phase plot of one audio channel against another. Both audio channels must be carrying PCM data.
 
-When device polling is enabled, this inspector repeatedly monitors the audio system’s input or output buffer.
-It reads the entire buffer into host memory and compares it to its previous contents.
+When device polling is enabled (i.e. when the <b>Poll</b> checkbox is checked/ticked),
+this inspector monitors the audio system’s input or output buffer.
+At the given polling <b>Interval</b> rate, it reads the entire buffer into host memory, and compares it to its previous contents.
 The status bar shows the read or write head position, as well as what changed.
-The display highlights changed content with a brighter color.
+The display highlights changed content in a brighter color.
 
 @par	Audio System Controls and Indicators
 	-	<b>Audio System Selection and Configuration</b>
@@ -562,9 +604,18 @@ The <b>Anc</b> inspector monitors the ancillary data areas of a frame buffer, an
 		device or host data transfer budget. Thus, this inspector is not immune from “Heisenbugs” (the Heisenburg Uncertainty Principle)
 		in which the act of monitoring an AJA device affects it and the application(s) under test.
 
-When device polling is enabled, this inspector repeatedly monitors the device frame buffer at every VBI of the selected Channel/FrameStore,
-ignoring the <b>Interval</b> slider setting. It reads the portions of the buffer that contain ancillary data into host memory, and compares
-it with what was read last time. Changed values are highlighted with a brighter color.
+This inspector monitors the indicated frame buffer for the selected Channel/FrameStore (i.e. its corresponding SDI connector’s Anc Extractor/Inserter).
+	-	It reads (via DMA) all or part of the frame buffer into host memory, depending on the minimum data transfer it can get away with.
+		-	If VANC is enabled for the Channel/FrameStore, it will read all VANC lines that precede the first visible line in the raster.
+		-	If the Channel/FrameStore is configured for SD, then it will read all visible lines in the raster (to ensure it gets line 21 for “analog” captions).
+		-	If the device supports Anc inserters/extractors, then it will read the entire 8MB/16MB/32MB/etc. buffer.
+	-	When polling is enabled (i.e. when the <b>Poll</b> checkbox is checked/ticked), this inspector attempts to refresh
+		at the Channel/FrameStore’s current frame rate (as soon after the VBI as possible).
+		-	An indicator in the bottom-right corner of the main window’s status bar shows the actual, measured refresh rate.
+		-	When the indicator’s color is not Green, then the inspector is not frame-accurate, and the data being presented is late (stale).
+	-	When polling is disabled, it will only update when the <b>Refresh</b> button is pressed.
+	-	After each refresh, it compares the frame buffer contents to what was read the last time:
+		-	The data display highlights changed content with a brighter color.
 
 The Anc inspector has four main sections:
 	-	<b>Channel/FrameStore and Frame Controls</b> — Selects a FrameStore (Channel) and frame to inspect.
@@ -616,7 +667,7 @@ The Anc inspector has four main sections:
 				-	<b>Clear</b> button — Click to clear/zero the Anc region of frame buffer memory.
 					-	If <b>Auto</b> is enabled, this will clear/zero the Anc region of all relevant frame buffers on the device
 						(i.e. those being accessed by the FrameStore).
-					-	if <b>Auto</b> is disabbled, only the current frame’s Anc region is cleared/zeroed.
+					-	if <b>Auto</b> is disabled, only the current frame’s Anc region is cleared/zeroed.
 				-	<b>Anc Exclusions:</b> menu <i>(capture mode only)</i> — Indicates which Anc packet types (Data IDs)
 					are currently being excluded by the Anc Extractor. It can be used to add or remove Anc packet types from the exclusion set.
 					-	<b>None (Show All Packets)</b> — Checked if the Anc Extractor is not filtering any packets.
@@ -646,7 +697,7 @@ The Anc inspector has four main sections:
 					the F1 extractor is attempting to write past the end of its allotted buffer space.
 					@image	html	watcher-inspector-anc-ovfl.png
 				-	<b>Data Display Area</b>
-					-	When shown, displays the “raw" F1 data buffer or the list of packets that were decoded from the buffer area.
+					-	When shown, displays the “raw” F1 data buffer or the list of packets that were decoded from the buffer area.
 			-	<b>F2</b>
 				-	<b>F1 Anc:</b> — This menu controls the F2 Anc data display:
 					-	<b>Hide</b> — Hides the F2 buffer data display.
@@ -656,7 +707,7 @@ The Anc inspector has four main sections:
 				-	<b>Overrun Indicator</b> <i>(capture mode only)</i> — This indicator will be visible and bright red if
 					the F2 extractor is attempting to write past the end of its allotted buffer space.
 				-	<b>Data Display Area</b>
-					-	When shown, displays the “raw" F1 data buffer or the list of packets that were decoded from the buffer area.
+					-	When shown, displays the “raw” F1 data buffer or the list of packets that were decoded from the buffer area.
 
 @subsubsection	inspectoranc-raw	Raw Data Display
 	-	Displays the contents of the buffer as raw numeric data.
@@ -713,7 +764,7 @@ Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot o
 	-	Only one of the Anc buffer regions should be visible, and it must be set to display “Packets”.
 	-	Only one caption packet should be listed in the packet list.
 
-@note	Hiding unneeded buffer displays uses far less CPU resources, helping the inspector update at frame rate
+@note	Hiding unneeded buffer displays uses fewer CPU resources, helping the inspector update at frame rate
 		(which increases the fidelity of the \ref anc608viewer, if needed).
 
 @subsubsection	inspectoranc-dragdrop	Drag and Drop Support
@@ -733,6 +784,8 @@ Choose <b>Copy</b> from the <b>Edit</b> menu to copy a human-readable snapshot o
 @image	html	watcher-inspector-ac.png
 
 The <b>AutoCirculate</b> inspector monitors the \ref aboutautocirculate state for every available channel on the device.
+When the <b>Poll</b> checkbox is checked/ticked, this inspector updates at the given polling <b>Interval</b> rate.
+Information that changed from the last update is shown in a brighter color.
 
 The inspector shows the following:
 	-	<b>Streaming Application</b> — Shows the process ID and four-CC “signature” of the application that called CNTV2Card::SetStreamingApplication.
@@ -899,8 +952,11 @@ Instead, the displayed table data must be manually loaded from the device on dem
 
 @image	html	watcher-inspector-regs.png
 
-The <b>Regs</b> inspector monitors any number of real and/or virtual 32-bit registers at NTV2Watcher’s current Polling Interval.
+The <b>Regs</b> inspector monitors any number of real and/or virtual 32-bit registers at the current <b>Polling Interval</b>.
 Its <b>Filter</b> feature permits immediate customization to focus on specific registers of interest.
+
+When the <b>Poll</b> checkbox is checked/ticked, this inspector updates at the given polling <b>Interval</b> rate.
+Register contents that changed from the last update are shown in a brighter color.
 
 The inspector has the following:
 	-	A scrollable table of registers, one register per row, in ascending register number (i.e. bar address) order.
@@ -1385,7 +1441,7 @@ It can readily indicate \ref vidop-fbconflict and/or \ref audioclobber.
 		-	<b>AutoCirculate</b> — These translucent boxes span multiple Frames, and represents the frames being used
 			by an \ref aboutautocirculate channel.
 			-	Color depends on the Channel video format: green for SD, purple for HD, etc.
-			-	Label identifies the Mode and Channel (e.g. “In1", “Out2”, etc.).
+			-	Label identifies the Mode and Channel (e.g. “In1”, “Out2”, etc.).
 			-	When in <b>Quad Mode</b> (4K/UHD) or <b>Quad-Quad Mode</b> (8K/UHD2), the logical frame size is 4 or 16 times
 				(respectively) the device’s intrinsic frame size.
 			-	Double-click to open the \ref inspectorac.
@@ -1416,13 +1472,13 @@ It can readily indicate \ref vidop-fbconflict and/or \ref audioclobber.
 				-	<b>Disable</b> — disables (turns off) the FrameStore.
 			-	Drag to interactively change the FrameStore’s “Input Frame”.
 		-	<b>Audio Read</b> — (Green) — Represents the playout audio buffer being read during \ref audioplayout .
-			-	Labeled with the Audio System (e.g. “A1", “A2”, etc.).
+			-	Labeled with the Audio System (e.g. “A1”, “A2”, etc.).
 			-	Double-click to open the \ref inspectoraudio and reveal the audio buffer’s contents.
 			-	Right-click for a context menu:
 				-	<b>Inspect</b> — opens the \ref inspectoraudio to reveal the audio buffer’s contents.
 				-	<b>Stop Playback</b> — stops the audio system’s playback engine.
 		-	<b>Audio Write</b> — (Red) — Represents the capture audio buffer being written during \ref audiocapture .
-			-	Labeled with the Audio System (e.g. “A1", “A2”, etc.).
+			-	Labeled with the Audio System (e.g. “A1”, “A2”, etc.).
 			-	Double-click to open the \ref inspectoraudio and reveal the audio buffer’s contents.
 			-	Right-click for a context menu:
 				-	<b>Inspect</b> — opens the \ref inspectoraudio to reveal the audio buffer’s contents.
@@ -1489,6 +1545,342 @@ To close the <b>Scrap Buffer</b> tool window:
 	-	or un-check the <b>View</b> menu’s <b>Scrap Buffer</b> command.
 	-	If there are unsaved changes in any of the open tabs, you’ll be given an opportunity to save them all, discard them all,
 		or cancel the close request.
+
+
+
+<hr size="50px">
+@subsection	demostool		“SDK Demos” Tool
+
+The <b>SDK Demos</b> tool makes it easy to quickly configure and run SDK demo programs directly from <b>NTV2Watcher</b>
+without having to use an external command-line Terminal or remember option parameter names.
+
+@image	html	watcher-tool-demos-config.png
+
+The <b>Configure</b> tab is the first tab, is always present, and is where demo apps are configured and started.
+It has no close box … and thus cannot be closed.
+
+To close the <b>SDK Demos</b> tool window:
+	-	click its close box;
+	-	or un-check the <b>View</b> menu’s <b>SDK Demos</b> command.
+
+@par	Starting a demo
+
+-	From the <b>Demo:</b> menu, choose the demo to run.
+	@note	If the <b>Run</b> button (in the bottom-right corner) is dimmed (disabled), the demo executable
+			could not be found in folders (or sub-folders) starting in the folder that contains <b>NTV2Watcher</b>.
+-	The <b>Parameters and Options</b> section will re-populate with those options and parameters supported
+	by the chosen demo.
+-	Make any option choices and parameter selections as desired.
+	The <b>Command Line</b> will automatically update as option choices and parameter selections change.
+-	Click <b>Run</b> to start the demo. A new tab will be created to show the status of the running demo.
+
+@par	Monitoring the running demo
+
+-	Each running demo is represented by a separate tab.
+-	The tab title indicates which demo app was (or is still) running.
+-	Hovering over the tab title pops up a tooltip that shows the full path to the demo executable file.
+-	Left-click the tab title to bring its content to the front.
+-	Right-click the tab title to pop-up a context menu:
+	-	<b>Close</b> — Closes the tab. If its corresponding SDK demo is running, it will be terminated.
+	-	<b>Save…</b> — Choose this to open a standard <b>Save As…</b> dialog box for choosing the name
+		and location of a text file to be filled with the demo’s output text.
+	-	<b>Terminate</b> — Choose this to terminate the running demo.
+-	The cyan-colored text at the top shows the command line that was (or is still) running.
+	The text panel below it indicates the execution status:
+	-	<b>completed normally</b> (green) indicates the demo ran and completed without errors.
+		@image	html	watcher-tool-demos-done.png
+	-	<b>running</b> (yellow) indicates the demo is still running.
+		@image	html	watcher-tool-demos-running.png
+	-	<b>terminated abnormally with exit code</b> (red) indicates the demo terminated with a
+		non-zero exit code.
+		@image	html	watcher-tool-demos-abend.png
+-	Click <b>Stop</b> to terminate the running demo.
+-	Click <b>Re-Run</b> to re-run the completed (or terminated) demo.
+
+@note	Closing the <b>SDK Demos</b> window closes all demo tabs, and thus terminate any running demos.
+
+
+
+<hr size="50px">
+@subsection	debugstats		“AJADebug Stats” Tool
+
+@image	html	watcher-tool-debugstats.png
+
+The <b>AJADebug Stats</b> tool monitors active ::AJADebugStat instances.
+
+-	The very top of the window shows the version number and size of the ::AJADebug facility’s shared memory buffer.
+	It also shows the number of active ::AJADebugStat instances (and the maximum number of stats that the shared buffer can accommodate).
+-	The window can be resized, and the monitored ::AJADebugStat instances will automatically “reflow” to fit within the given window dimensions.
+-	Right-click in the window to pop-up its context menu:
+	-	<b>Named Stats</b> — Pops up a sub-menu of known stats that can be monitored.
+		Selecting a named stat adds it to those being monitored in the window.
+	-	<b>Show Details</b> — Expands all monitored ::AJADebugStat instances to show all their information (max, min, count, average, etc.).
+	-	<b>Hide Details</b> — Shrinks all monitored ::AJADebugStat instances to only show the minimum information.
+	-	<b>Reset All</b> — Resets all monitored ::AJADebugStat instances (such that their max, min and moving average computations are restarted).
+-	Right-click in a monitored ::AJADebugStat instance to pop-up its context menu:
+	-	<b>Min</b> — If checked, displays the smallest value ever seen for the stat (since last reset).
+	-	<b>Max</b> — If checked, displays the largest value ever seen for the stat (since last reset).
+	-	<b>Count</b> — If checked, displays the number of times the stat value was updated.
+	-	<b>Timestamp</b> — If checked, displays the host operating system timestamp when the stat value was last updated.
+	-	<b>Value</b> — If checked, displays the latest (instantaneous) value.
+	-	<b>Avg</b> — If checked, displays the moving average value.
+	-	<b>Format</b> — Pops up a sub-menu for changing the display format of the stat value as <b>Decimal</b> (base 10),
+		<b>Hex</b> (base 16), and <b>Float</b> (in floating-point).
+	-	<b>Designated Timer</b> — If checked, declares the stat to be a timer, which displays its data as timing measurements.
+		If not checked, declares the stat to NOT be a timer, which displays its data as simple numeric values.
+	-	<b>Delete</b> — Stops monitoring the ::AJADebugStat instance, removing it from the stats being displayed.
+
+To close the <b>SDK Demos</b> tool window:
+	-	click its close box;
+	-	or un-check the <b>View</b> menu’s <b>AJADebug Stats</b> command.
+
+
+
+<hr size="50px">
+@subsection	debuglog		“AJADebug Log” Tool
+
+The <b>AJADebug Log</b> tool allows you to monitor, in near real time, log messages originated by the ::AJADebug facility.
+It has several handy features:
+-	Filtering based on message content.
+-	Filter based on message classification and/or severity.
+-	Colorize messages based on originating process ID.
+-	Calculate time between two messages.
+-	Log recording, snapshotting, copying (clipboard) and printing.
+
+The user interface consists of the <b>AJA Debug Log</b> window that has three parts:
+-	A button bar at the top that allows you to configure what is seen (or not seen) in the main view;
+-	The main view containing the log display with column headings;
+-	A status bar at the bottom that shows logging activity statistics.
+
+To close the <b>AJADebug Log</b> tool window:
+	-	click its close box;
+	-	or un-check the <b>View</b> menu’s <b>AJADebug Log</b> command.
+
+@image	html	watcher-tool-debuglog.png
+
+@par	Operation
+
+The Main View shows log messages in tabular fashion, one log entry per row, with the log entry data shown in columns.
+The tool bar at the top has the following controls:
+-	<b>Message Groups…</b>: Click to open the <b>Enable/Disable Message Groups</b> dialog:
+	@image	html	logger-enables.png
+-	<b>Log to File</b>: Enables or disables recording incoming messages to a log file.
+-	<b>Save…</b>: Saves the contents of the message display to a file of the user’s choosing.
+-	<b>Font…</b>: Opens a font dialog to change the font and size of the log display.
+-	<b>Clear</b>: Erases all captured messages from the log display.
+-	<b>AutoScroll</b>: Enables or disables the auto-scrolling feature.
+-	<b>Pause</b>: Pauses or resumes the capture/display of new messages.
+-	<b>Add Marker</b>: Inserts a marker into the log.
+-	<b>Auto Group</b>: Specifies a “quiet time”, in seconds, that if no messages are logged in that interval,
+	the first that arrives after it transpires will automatically be preceded by a marker entry.
+-	<b>Message Filter</b>: If non-empty, filters the log display such that it will only show messages containing
+	the filter text.
+
+The data columns are as follows:
+-	<b>Index</b>: The unique index number of the message. This number starts at zero when the AJA Debug Facility is initialized.
+-	<b>PID</b>: The ID of the message’s originating host process.
+-	<b>TID</b>: The ID of the message’s originating host thread.
+-	<b>Time</b>: The host timestamp when the message entered the AJA Debug Facility’s ring buffer.
+-	<b>Group</b>: The message’s classification group (see ::AJADebugUnit).
+-	<b>Severity</b>: The message’s severity (see ::AJADebugSeverity).
+-	<b>Source</b>: The message’s originating source file name and line number (if known).
+-	<b>Message</b>: The log message text.
+
+By default, all columns are visible. If needed, any of the columns (except for <b>Message</b>) can be hidden.
+-	To hide a column, uncheck it in the <b>View</b> menu’s <b>Column</b> sub-menu.
+-	To re-show a column, check it.
+-	To quickly re-show all columns, choose the <b>Show All Columns</b> command in the <b>Column</b> submenu in the <b>View</b> menu.
+
+Messages are always displayed in increasing index/time order, top-to-bottom.
+
+The <b>Status Bar</b> shows:
+-	<b>File Recording State</b>:  If the logger’s “Log” setting is enabled, it shows the path of the log file
+	being written, and its size, in bytes.  If the logger’s “Log” setting is off, it shows “not logging to file”.
+-	<b>Message Stats</b>:
+	-	<b>Ignored</b>: The number of messages that were reported by ::AJADebug clients, but ignored by the AJA Logger.
+		You can choose the kinds of messages to ignore by showing the <b>Enables</b> dialog box by clicking the
+		<b>Enables</b> button. You can also pause the logger by clicking the <b>Pause</b> button.
+	-	<b>Accepted</b>: The number of messages that were reported by ::AJADebug clients, and accepted for display
+		by the AJA Logger application.
+	-	<b>Total</b>: The total number of messages that were reported by ::AJADebug clients.
+	-	<b>Ref Count</b>: The number of attached clients that are currently monitoring ::AJADebug activity.
+
+As new messages are reported to the ::AJADebug logging facility, these are detected and, if configured to show them,
+incorporated into the log display. If <b>AutoScroll</b> is enabled, the display will auto-scroll to the bottom, to
+continually show the newest message.
+
+@note	Log messages containing line breaks (newline characters) are displayed in a single row, with the message text
+		truncated at the first line break in the message with an ellipsis (‘…’). If logging to a file, the message text
+		is written to the log file unchanged (including line breaks).
+
+@par	Selecting and Copying Data
+
+Clicking inside the Main View highlights (selects) information on a per-messsage (row) basis.
+The usual rules of selection are followed:
+-	“Shift-click” — Extends the selection.
+-	“Ctrl-click” or “Command-click” — Extends or contracts the selection.
+-	“Dragging” — Continues to extend (or contract) the selection while the mouse button is down (and auto-scrolls, too).
+
+Right-clicking inside the Main View pops up a context menu:
+-	<b>Set row color for PID…</b> — 
+-	<b>Copy</b> — Copies selected log entries to the host’s clipboard.
+-	<b>Clear</b> — Clears the entire log display.
+-	<b>Select All</b> — Selects (highlights) all captured log entries.
+-	<b>Columns</b> — Chooses which columns (fields) are shown.
+	-	<b>Index</b> — If checked, shows the log message sequence (index) number.
+	-	<b>PID</b> — If checked, shows the originating process IDs.
+	-	<b>TID</b> — If checked, shows the originating thread IDs.
+	-	<b>Time</b> — If checked, shows the timestamp when the message was received.
+	-	<b>Group</b> — If checked, shows the message group.
+	-	<b>Severity</b> — If checked, shows the message severity.
+	-	<b>Source</b> — If checked, shows the originating source file name.
+	-	<b>Show All Columns</b> — Choose this item to enable all columns (fields).
+-	<b>Grid</b> — If checked, displays a grid between columns and rows.
+-	<b>AutoScroll</b> or <b>Stop AutoScroll</b> — Choose this item to enable or disable auto-scrolling.
+-	<b>Auto-Resize Columns</b> — Choose this item to toggle column auto-resizing.
+-	<b>Font…</b> — Choose this item to choose a different display font and/or size.
+-	<b>Message Groups…</b> — Choose this item to open the \ref loggerconfig.
+-	<b>Add Marker</b> — Choose this item to insert a marker into the log.
+-	<b>Pause</b> or <b>Resume</b> — Choose this item to pause or resume the capture and display of
+	new incoming log messages.
+-	<b>Log to File</b> — Choose this item to start or stop the capture of incoming log message to
+	a local host file.
+-	<b>Text Delimiter</b> — Choose this item to pop up a sub-menu to choose a different column delimiter.
+-	<b>Page Setup…</b> — Choose this item to pop up the Page Setup dialog.
+-	<b>Print…</b> — Choose this item to bring up the Print dialog to print the captured log.
+-	<b>Reset Ref Count</b> — Choose this item to reset the ::AJADebug facility’s reference counter.
+
+@par	Logging to a File
+
+To toggle the automatic recording of incoming messages into a file on the host:
+-	Click the <b>Log to File</b> button;
+-	or choose <b>Log to File</b> in the context menu.
+
+When enabled:
+-	The path to the file (and its current size, in bytes) is displayed in the Status Bar, on the left side.
+-	The file is written in clear text, in UTF-8 encoding, one line per message.
+-	The line delimiter used is native to the host operating system.
+-	The field delimiter is user-selectable, and defaults to the semicolon (“;”).
+	-	To change it, choose the <b>Text Delimiter</b> command in the context menu …
+		then choose the desired delimiter (<b>semicolon</b>, <b>colon</b>, <b>comma</b>,
+		<b>space</b>, or <b>tab</b>).
+	-	Subsequent writes to the file will use the new delimiter.
+-	Log messages that contain line breaks in the message text are written into the log file without change.
+
+To toggle file logging on or off, click the <b>Log to File</b> button in the Toolbar, or un-check its command in the <b>Action</b> menu.
+
+@par	Clearing the Log Display
+
+To clear the log display, do one of the following:
+-	click the <b>Clear</b> button;
+-	or choose <b>Clear</b> from the context menu;
+-	or press the forward-delete key.
+
+@par	Pausing or Resuming the Log Display
+
+To pause the capture and display of new incoming messages:
+-	click the <b>Pause</b> button;
+-	or choose <b>Pause</b> in the context menu.
+
+Even if paused, new messages are still recorded in the log file (if file logging is enabled).
+
+To resume capture and display of new messages:
+-	click the <b>Resume</b> button;
+-	or choose <b>Resume</b> in the context menu.
+
+@par	Inserting Markers Into the Log
+
+An “elapsed time” marker is automatically inserted into the log when a new log message is captured
+after a user-configurable number of seconds has passed since the last accepted message was received.
+The default time interval is 86400 seconds (one day).
+To change time interval, type a new value, in seconds, into the <b>Auto Group</b> edit box …
+then press Return, Enter or Tab.
+
+To manually insert a marker into the log, click the <b>Add Marker</b> button.
+It will be timestamped and appended to the log.
+
+@par	Changing the Display Font/Typeface
+
+To change the typeface used in the log display, click the <b>Font…</b> button or the <b>Font…</b>
+command in the context menu. The host-specific Font-chooser dialog box will appear.
+Choose the font family, size and style, then click <b>OK</b>.
+The Main View will be redrawn using the new typeface.
+
+@par	Changing the Message Color Based on Process ID
+
+<b>AJADebug Log</b> can display messages having the same process ID (PID) with a chosen background color,
+making it easy to differentiate messages coming from different processes on the host computer.
+-	Right-click on the message(s) having the desired process ID you wish to colorize.
+-	Choose <b>Set row color for PID…</b>.
+-	A color picker dialog will appear. Choose the new desired background color, then click OK.
+
+All messages having that process ID will be drawn with the newly-chosen background color.
+
+@par	Resizing Columns
+
+<b>AJADebug Log</b> can automatically adjust its column widths based on the widest data in the column.
+When the <b>Auto-Resize Columns</b> item in the context menu is checked, columns will automatically
+resize based on the captured messages being displayed. If the item is unchecked, column widths are fixed.
+Choose the <b>Auto-Resize Columns</b> item to toggle its setting.
+
+To manually resize a column, click on the column’s border in the column heading, and drag.
+
+@par	Filtering Displayed Messages
+
+To see only those messages that contain a particular character string, enter the search text into
+the <b>Message Filter</b> edit box … then press Return, Enter or Tab. Henceforth, you’ll only see
+messages that contain that text — all others will be excluded and invisible.
+
+@note	This will only affect messages received by AJA Logger <i>after</i> changing the
+<b>Message Filter</b> text.
+
+To stop filtering displayed messages, delete all text from the <b>Message Filter</b> edit box …
+then press Return, Enter or Tab.
+
+@par	Measuring the Time Between Two Messages
+
+To measure the time span between two messages in the display:
+-	Click the <b>Stop AutoScroll</b> button. This makes it easier to select the desired message.
+-	Scroll to reveal the first message, then (left) click on it.
+-	Scroll to reveal the second message, then Command-Click (MacOS) or Control-Click on it.
+-	Right-click on either of the two highlighted messages.
+-	Note the elapsed “Time Difference” is the first item in the popup menu.
+
+
+@subsubsection	loggerconfig	Enable/Disable Message Groups Dialog
+
+@image	html	logger-enables.png
+
+<b>AJADebug Tool</b> has powerful filtering capabilities that make it easy to “include everything
+except…” or “exclude everything but…” or a combination.
+
+To reveal the <b>Enable/Disable Message Groups</b> dialog box:
+-	click the <b>Message Groups…</b> button;
+-	or choose the <b>Message Groups…</b> command from the context menu.
+
+The dialog box has two sections:
+-	<b>Groups</b> — Enable or disable message display by group (aka ::AJADebugUnit).
+-	<b>Severity</b> — Enable or disable message display by severity (aka ::AJADebugSeverity).
+
+Each checkbox is “live” — i.e. toggling a checkbox takes effect immediately.
+
+There are handy pushbuttons for immediately enabling or disabling all of the Group or Severity
+checkboxes.
+
+Click <b>OK</b> to dismiss (hide) the dialog box.
+
+
+@subsubsection	loggercustom	How to Post Messages
+
+SDK clients can post their own messages with the ::AJADebug facility.
+
+-#	In your source file(s), \c #include \c "ajadebug.h" .
+-#	Be sure to link with the <b>libajantv2</b> library.
+-#	When the application starts, call AJADebug::Open.
+-#	Call AJADebug::Report to log a message … or use one of the ::AJA_sDEBUG, ::AJA_sINFO,
+	::AJA_sNOTICE, etc. macros.
+
+
 
 
 <hr size="50px">

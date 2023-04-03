@@ -34,8 +34,8 @@ Plays video containing closed-caption data sourced from...
 	-c 1..8                                  Specifies the channel/frameStore to use.
 	--channel=1..8                           Defaults to channel 1.
 
-	-f formatSpec                            Specifies the video format to produce.
-	--format=formatSpec                      Defaults to 1080i5994.
+	-v formatSpec                            Specifies the video format to produce.
+	--videoFormat=formatSpec                 Defaults to 1080i5994.
 	                                         Specify 'list' or '?' to display the valid video formats for the device.
 
 	--rgb                                    Configure to emit dual-link RGB over SDI.
@@ -56,7 +56,7 @@ Plays video containing closed-caption data sourced from...
 	-s, --stats                              Emits statistics to stdout.
 	                                         By default, ntv2ccplayer emits caption text to stdout.
 
-	-v, --vanc                               Uses a (tall) VANC frame geometry for the frame buffer.
+	--vanc                                   Uses a (tall) VANC frame geometry for the frame buffer.
 	                                         By default, ntv2ccplayer uses normal frame geometry.
 	
 	--frames {spec}                          Optionally specifies device frame buffers to use, where {spec} is:

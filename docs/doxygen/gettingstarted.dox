@@ -20,10 +20,10 @@ web browser at <https://sdksupport.aja.com/>.
 @image	html	sdkdownloadpage-75.png
 
 
-The SDK’s documentation is online. The link to it is on the SDK download page.
+The SDK documentation is online. The link to it is on the SDK download page.
 The URLs are typically of this form  <tt>https://sdksupport.aja.com/docs/NTV2SDK_docs_x_y/</tt>
 …where <b>x</b> and <b>y</b> are the SDK’s <i>major</i> and <i>minor</i> version numbers.
-The documentation is fully cross-referenced, searchable, and includes collaboration diagrams and call graphs.
+The documentation is fully cross-referenced and searchable.
 
 
 <hr size="50px">

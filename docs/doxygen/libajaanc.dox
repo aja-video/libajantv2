@@ -26,7 +26,7 @@
 	@par	Receive/Capture:
 	To decode received host ancillary data buffer(s) into an ::AJAAncillaryList of ::AJAAncillaryData packets:
 	-	For decoding VANC lines from a “tall” or “taller” frame buffer, call the AJAAncillaryList::SetFromVANCData
-		class method, passing it an ::NTV2_POINTER that references the frame buffer (or just the VANC portion of one),
+		class method, passing it an ::NTV2Buffer that references the frame buffer (or just the VANC portion of one),
 		and an ::NTV2FormatDescriptor that describes the raster.
 	-	For devices with Anc extractors (see ::NTV2DeviceCanDoCustomAnc), using the buffer(s) passed to
 		AUTOCIRCULATE_TRANSFER::SetAncBuffers or CNTV2Card::DMAReadAnc, call AJAAncillaryList::SetFromDeviceAncBuffers.

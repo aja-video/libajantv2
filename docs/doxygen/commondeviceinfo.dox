@@ -5,7 +5,7 @@
 	-	\ref ntv2devops-intro
 	-	\ref devicesignalinputsoutputs
 		-	\ref commonelectricalchars
-		-	\ref hardwarecharacteristics
+		-	\ref hwcharacteristics
 	-	\ref videooperation
 		-	\ref vidop-fs
 		-	\ref independentmode
@@ -16,6 +16,7 @@
 		-	\ref vidop-csc
 		-	\ref vidop-lut
 		-	\ref vidop-mixerkeyer
+		-	\ref vidop-hdr
 	-	\ref audiooperation
 		-	\ref audiocapture
 		-	\ref audioplayout
@@ -227,7 +228,7 @@
 	-	<b>Maximum Level, unclipped:</b>  +12dBu, +15dBu, +18dBu, +24dBu (selectable)
 
 
-	@subsection	hardwarecharacteristics	Hardware Characteristics
+	@subsection	hwcharacteristics	Hardware Characteristics
 
 	@par		PCI Interface
 
@@ -705,24 +706,27 @@
 	The number of input or output vertical events that have successfully been waited on and fired can be obtained
 	by calling CNTV2Card::GetInputVerticalEventCount or CNTV2Card::GetOutputVerticalEventCount.
 	By calling either of these methods before and after calling the “wait for input/output” function, you
-	can determine if indeed the interrupt event actually triggered. Call CNTV2Card::SetInputVerticalEventCount
+	can determine if the interrupt event actually triggered. Call CNTV2Card::SetInputVerticalEventCount
 	or CNTV2Card::SetOutputVerticalEventCount to reset the tally counter.
 
 	Normally it’s not necessary to explicitly unsubscribe the CNTV2Card instance’s event subscriptions, as
-	its destructor automatically calls CNTV2Card::Close.
+	its destructor automatically does this when it calls CNTV2Card::Close.
 
-	@note	On the <b>Windows</b> platform, the AJA NTV2 driver supplies a finite number of event subscription handles
-			to client applications, which get consumed when subscribed (via CNTV2Card::SubscribeInputVerticalEvent,
-			CNTV2Card::SubscribeOutputVerticalEvent, CNTV2Card::SubscribeEvent). They’re made available
-			again to other clients when unsubscribed (via CNTV2Card::UnsubscribeInputVerticalEvent,
-			CNTV2Card::UnsubscribeOutputVerticalEvent, CNTV2Card::UnsubscribeEvent), and automatically when
-			the CNTV2Card object is closed or destroyed (via CNTV2Card::Close). However, abnormal program
-			terminations, crashes, or force-quitting from a debugger will prevent this handle clean-up,
-			which, after many repetitions of this, can result in their exhaustion. The are three ways to
-			recover from this: 1) Reboot the machine. 2) Manually disabling and re-enabling the AJA driver
-			(after closing all running NTV2 client applications, including the AJA Service. 3) Set virtual
-			register kVRegClearAllSubscriptions to a non-zero value (this can be easily done in \ref usingntv2watcher
-			tool’s \ref inspectorregs ).
+	@note	On the <b>Windows</b> platform, the AJA NTV2 driver stores a finite number of event subscription
+			handles for client applications. This storage is consumed with every <b>Subscribe…</b> call
+			(e.g. CNTV2Card::SubscribeInputVerticalEvent, CNTV2Card::SubscribeOutputVerticalEvent, etc.),
+			while it's freed and made available again to other client applications with every <b>Unsubscribe…</b> call
+			(e.g. CNTV2Card::UnsubscribeInputVerticalEvent, CNTV2Card::UnsubscribeOutputVerticalEvent, etc.).
+			Prior to SDK/driver version 16.2.3, abnormal program terminations, crashes, or force-quitting client
+			apps from a debugger prevented the driver from freeing the handle storage, which, after many repetitions
+			of this, would exhaust the handle storage space. To recover from this, you had to…
+			-	reboot the machine, or…
+			-	manually disable and re-enable the AJA driver (after closing all running NTV2 client applications,
+				including the AJA Service, or…
+			-	set virtual register kVRegClearAllSubscriptions to a non-zero value (which can be easily done
+				in \ref usingntv2watcher tool’s \ref inspectorregs ).
+			Starting in version 16.2.3, the driver now automatically frees its storage of subscribed event
+			handles for abnormally-terminated client applications.
 
 
 	@subsection	vidop-fbconflict	When FrameStores Access the Same Frame Buffer Memory
@@ -1037,6 +1041,34 @@
 		widget’s current configuration, as well as make changes to it.
 
 
+	<hr size="50px">
+	@subsection vidop-hdr		High Dynamic Range (HDR) Video
+
+	HDR support was introduced in SDK 12.5.
+
+	<b>SDI output:</b>  HDR data is delivered in-band using VPID signaling for SDR/HDR Transfer Characteristics,
+	Colorimetry and Luminance.
+
+	<b>HDMI output:</b>  Side-band information is used to inform an HDMI sink device (e.g. a monitor) that the video
+	content is HDR. This includes generation of the Dynamic Range and Mastering Info-frame and the static metadata
+	descriptors as defined in CTA-861.3 and HDMI v2.0a.
+
+	Check the device page in \ref ntv2devices for any notes on HDR support for a given device.
+	You can also call ::NTV2DeviceCanDoHDMIHDROut to determine if the device's HDMI output is capable of HDR.
+
+	HLG and HDR10 parameters are formatted in the dynamic mastering info frame based on the HDR values passed to
+	specific CNTV2Card functions (e.g. CNTV2Card::SetHDMIHDRWhitePointY). The data does not need to be sequenced per-frame.
+
+	HDR10+ requires a vendor-specific info frame for each video frame.  There is a way to pass custom HDMI info
+	frames to the driver, however it was only a technology demonstration, and may not be supported in all drivers.
+	Proper HDR10+ support is scheduled for a future SDK.
+
+	<b>Dolby Vision</b> support was added in SDK 13.0.  Call CNTV2Card::EnableHDMIHDRDolbyVision method to enable or disable
+	sending the Dolby Vision bit in the HDMI AVI info frame to the monitor.  Note that Dolby Vision data is encoded,
+	and is output as 8-bit RGB, with the metadata in the least significant bits of the video at the top of the frame.
+	(The actual video itself is actually 12-bit YUV 4:2:2.) Client applications must properly encode the Dolby Vision
+	metadata into the host frame buffer before transferring it to the device during playback.
+
 
 	<hr size="50px">
 	@section	audiooperation		Audio System Operation
@@ -1324,7 +1356,7 @@
 		-	Call CNTV2Card::GetSDIOutputDS2AudioSystem to determine the Audio System that’s currently driving Data Stream 2.
 		-	Call CNTV2Card::SetSDIOutputDS2AudioSystem to change DS2’s Audio System.
 
-	<b>HDMI Output:</b> The HDMI standard supports a minimum baseline of 2 audio channels up to a maximum of 8.
+	<b>HDMI Output:</b> The HDMI standard supports a minimum of 2 audio channels or a maximum of 8.
 	If the NTV2 device has an HDMI output (see ::NTV2DeviceGetNumHDMIVideoOutputs ), it can be configured
 	to transmit audio from any <b>Audio System</b>:
 	-	To transmit 2 audio channels, call CNTV2Card::SetHDMIOutAudioSource2Channel :

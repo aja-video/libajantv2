@@ -3,13 +3,23 @@
 
 @section	ntv2capture4k		NTV2Capture4K Demo
 
-This command-line program is identical to the \ref ntv2capture except that it captures 4K/UHD video.
+This command-line program is identical to \ref ntv2capture except that it captures 4K/UHD video using its NTV2Capture4K
+class.  It differs from \ref ntv2capture in several ways:
+-	Captures only 4K/UHD video.
+-	By default, it captures TSI (two sample interleave) video. It can capture "squares" (4-link quadrants) via the
+	<b>--squares</b> command line option.
+-	The <b>--audioLinks</b> option can capture multi-link audio data into raw binary data files for devices with
+	appropriate firmware;
+-	Only the <b>-c</b> option can be used to specify the capture channel (FrameStore), whereas in NTV2Capture,
+	the <b>-c</b> and <b>-i</b> options allow specifying the channel, or input source, or both;
+-	Thereʼs no <b>--frames</b> option:  NTV2Capture4K always uses fixed frame ranges;
+-	Thereʼs no <b>--a</b> option:  NTV2Capture4K always captures anc data;
+-	Thereʼs no <b>--anc</b> option:  NTV2Capture4K cannot record captured ancillary data into raw binary data files;
+-	Thereʼs no <b>--noaudio</b> option:  in NTV2Capture4K, <b>--audioLinks 0</b> will disable audio capture;
+-	Doesnʼt log warnings about CRC/TRS errors received for devices that support SDI error checking;
+-	Doesnʼt log PCM/NonPCM changes that may occur in the received audio stream;
+-	Doesnʼt log warnings about Anc buffer overruns.
 
-The NTV2Capture4K class demonstrates…
-- how to properly acquire and release an AJA device in order to use it exclusively;
-- how to use AutoCirculate to efficiently stream video and audio;
-- how to use an AJACircularBuffer and the producer/consumer model with AutoCirculate.
-- how to capture 4K or UHD "squares" (quadrants).
 
 <b>Command line usage:</b>
 @code
@@ -29,10 +39,11 @@ The NTV2Capture4K class demonstrates…
 
 	-s|--squares                     Use Square routing? (Defaults to TSI)
 
-	-a|--audioLinks {spec}           Optional multi-link audio, for more than 16 audio channels, where {spec} is:
-	                                     0      Silence
-	                                     1-4    Number of audio systems to simultaneously operate
-	                                            (Defaults to 1)
+	-a|--audioLinks {count}          Optional multi-link audio (can operate > 1 audio system), where {count} specifies
+	                                 the number of audio systems to operate:
+	                                     0          Silence
+	                                     1          Normal 16-ch audio (default)
+	                                     2 thru 4   Multi-link audio from multiple SDI links (32/48/64 audio channels)
 
 	-?|--help|--usage                Shows how to use this command.
 @endcode

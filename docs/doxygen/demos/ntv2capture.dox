@@ -10,6 +10,8 @@ The NTV2Capture class demonstrates…
 - how to use AutoCirculate to efficiently stream video and audio;
 - how to use an AJACircularBuffer and the producer/consumer model with AutoCirculate.
 
+Itʼs configured in <tt>main()</tt> by a CaptureConfig class thatʼs used in other capture demos.
+
 <b>Command line usage:</b>
 @code
 	ntv2capture  [options...]

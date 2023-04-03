@@ -7,9 +7,10 @@ This simple command-line program performs HDR configuration on the HDMI output f
 
 The program shows how to…
 -	determine if the device supports HDMI-HDR;
--	enables or disables HDMI-HDR on the device;
+-	enable or disable HDMI-HDR on the device;
 -	how to configure for BT-2020 and/or constant luminance;
 -	how to configure for HLG or ST-2084 compliance.
+-	how to enable DolbyVision signaling.
 
 <b>Command line usage:</b>
 @code
@@ -23,11 +24,22 @@ The program shows how to…
 	                                1: Traditional gamma HD
 	                                2: SMPTE ST 2084
 	                                3: HLG
-	-l|--luminance {lumaSpec}   Specifies the luminance to use:
+	-l|--luminance              Specifies the luminance to use:
 	                                0: Non-constant luminance
 	                                1: Constant luminance.
-	--dolbyvision               Uses Dolby Vision.
+	--dolbyvision               Enables Dolby Vision signaling bit.
 	--nohdr                     Disables HDMI HDR output.
+	-v|--verbose                Verbose output.
+	--version                   Displays the version and exits.
 	-?|--help|--usage           Shows how to use this command.
 @endcode
+
+Exit codes:
+-	<b>0</b> — Success (no errors)
+-	<b>1</b> — Failed: invalid argument(s)
+-	<b>2</b> — Failed: illegal EOTF value
+-	<b>3</b> — Failed: specified device not found
+-	<b>4</b> — Failed: device found, but not ready
+-	<b>5</b> — Failed: device has no HDMI HDR support
+-	<b>6</b> — Failed: device in use by another application
 **/

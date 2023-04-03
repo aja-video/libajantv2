@@ -3,13 +3,13 @@ project(ntv2docs)
 
 find_package(Doxygen COMPONENTS dot)
 if (NOT DOXYGEN_FOUND)
-    message(STATUS "skipping docs (Doxygen not found!)")
+    message(WARNING "skipping docs (Doxygen not found!)")
     return()
 endif()
 
 find_program(GRAPHVIZ_DOT_PATH dot)
 if (NOT GRAPHVIZ_DOT_PATH)
-    message(STATUS "skipping docs (GraphViz dot command not found!)")
+    message(WARNING "skipping docs (GraphViz dot command not found!)")
     return()
 else()
     message(STATUS "GraphViz dot Location: ${GRAPHVIZ_DOT_PATH}")
@@ -26,7 +26,7 @@ if (AJA_QT_ENABLED)
     if (EXISTS ${_qt_bin_dir} AND EXISTS ${_qt_bin_dir}/qhelpgenerator)
         set(QT_HELPGEN_PATH ${_qt_bin_dir}/qhelpgenerator)
     else()
-        message(STATUS "qhelpgenerator not found in ${_qt_bin_dir}")
+        message(WARNING "qhelpgenerator not found in ${_qt_bin_dir}")
     endif()
 endif()
 
@@ -38,7 +38,8 @@ configure_file(config.doxy.in ${DOXY_CONFIG} @ONLY)
 # Run doxygen and output docs to ${CMAKE_BINARY_DIR}/ajalibraries/docs/html
 add_custom_target(
     ntv2docs ALL
-    COMMAND ${DOXYGEN_EXECUTABLE} "${DOXY_CONFIG}"
+    DEPENDS ${DOXY_CONFIG}
+    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Generating NTV2 SDK documentation with Doxygen"
     VERBATIM)
@@ -50,14 +51,18 @@ if (AJA_INSTALL_SOURCES)
         "_${AJA_NTV2_SDK_VERSION_POINT}${AJA_NTV2_SDK_BUILD_TYPE_LONG}/")
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         configure_file(${CMAKE_MODULE_PATH}/bundle/windows/aja_ntv2_documentation.url.in aja_ntv2_documentation.url)
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/aja_ntv2_documentation.url DESTINATION ${CMAKE_INSTALL_PREFIX}/docs)
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/aja_ntv2_documentation.url DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME})
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         configure_file("${CMAKE_MODULE_PATH}/bundle/mac/AJA NTV2 Documentation.webloc.in" "AJA NTV2 Documentation.webloc")
-        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/AJA NTV2 Documentation.webloc" DESTINATION ${CMAKE_INSTALL_PREFIX}/docs)
+        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/AJA NTV2 Documentation.webloc" DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME})
     elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         configure_file(${CMAKE_MODULE_PATH}/bundle/linux/desktop/aja_ntv2_documentation.desktop.in aja_ntv2_documentation.desktop)
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/aja_ntv2_documentation.desktop DESTINATION ${CMAKE_INSTALL_PREFIX}/docs)
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/aja_ntv2_documentation.desktop DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME})
     endif()
-    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/docs)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/ntv2.doxy DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/docs)
+
+    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html 
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}
+            USE_SOURCE_PERMISSIONS)
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ntv2.doxy 
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME})
 endif()

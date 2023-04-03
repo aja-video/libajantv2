@@ -5,6 +5,10 @@
 
 This page describes how to use the <b>AJA Logger</b> utility to monitor AJA software.
 
+@note	This application is deprecated and will be removed in a future SDK.
+		Please use the \ref debuglog in \ref usingntv2watcher.
+
+
 @image	html	logger-in-action.png
 
 The <b>AJA Logger</b> application allows you to monitor, in near real time, log messages originated by the ::AJADebug facility.
@@ -24,11 +28,11 @@ The<b>AJA Logger</b>’s user interface consists of one main window, the main wi
 -	A <b>Status Bar</b> at the bottom that shows logging activity statistics.
 
 
-@bug	On Windows, elevated user privileges are required to create the ::AJADebug facility’s global shared
-		memory region. Before any kind of logging can be done, an ::AJADebug client (any software that calls
-		AJADebug::Open) must be “Run as Administrator”. Once this has been done, ::AJADebug clients can log
-		messages, and ‘ajalogger.exe’ will operate under ordinary user privileges.
-
+@bug	On Windows, prior to SDK 16.2, elevated user privileges were required for the first process to
+		create the ::AJADebug facility’s global shared memory region. Before any kind of logging could
+		be done, the first ::AJADebug client (a process that calls AJADebug::Open) must be “Run as
+		Administrator”. Once this was done, all subsequent processes calling AJADebug::Open could read
+		or write log messages.
 
 
 

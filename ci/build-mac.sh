@@ -9,6 +9,13 @@ if [ -z "${BUILD_DIR}" ];     then BUILD_DIR="$CHECKOUT_DIR/build"; fi
 if [ -z "${INSTALL_DIR}" ];   then INSTALL_DIR="$CHECKOUT_DIR/install"; fi
 if [ -z "${OSX_ARCHITECTURE}" ]; then OSX_ARCHITECTURE="arm64"; fi
 
+# AJA-specific CMake Options
+if [ -z "${AJA_BUILD_OPENSOURCE}" ]; then AJA_BUILD_OPENSOURCE="ON"; fi
+if [ -z "${AJA_BUILD_DOCS}" ]; then AJA_BUILD_DOCS="OFF"; fi
+if [ -z "${AJA_INSTALL_SOURCES}" ]; then AJA_INSTALL_SOURCES="OFF"; fi
+if [ -z "${AJA_QT_ENABLED}" ]; then AJA_QT_ENABLED="OFF"; fi
+if [ -z "${AJA_QT_DEPLOY}" ]; then AJA_QT_DEPLOY="OFF"; fi
+
 echo Configured Options:
 echo -------------------
 echo CHECKOUT_DIR: $CHECKOUT_DIR
@@ -19,6 +26,12 @@ echo BUILD_DIR:   $BUILD_DIR
 echo INSTALL_DIR: $INSTALL_DIR
 echo OSX_ARCHITECTURE: $OSX_ARCHITECTURE
 echo -------------------
+echo AJA_BUILD_OPENSOURCE: $AJA_BUILD_OPENSOURCE
+echo AJA_BUILD_DOCS: $AJA_BUILD_DOCS
+echo AJA_INSTALL_SOURCES: $AJA_INSTALL_SOURCES
+echo AJA_QT_ENABLED: $AJA_QT_ENABLED
+echo AJA_QT_DEPLOY: $AJA_QT_DEPLOY
+echo -------------------
 
 # Generate makefiles/ninja files
 echo "Generating build"
@@ -27,9 +40,11 @@ echo "Generating build"
         -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
         -DCMAKE_PREFIX_PATH=$PREFIX_PATH \
         -DCMAKE_OSX_ARCHITECTURES=$OSX_ARCHITECTURE \
-        -DAJANTV2_BUILD_OPENSOURCE=OFF \
-        -DAJA_QT_ENABLED=ON \
-        -DAJA_QT_DEPLOY=ON"
+        -DAJANTV2_BUILD_OPENSOURCE=$AJA_BUILD_OPENSOURCE \
+        -DAJANTV2_BUILD_DOCS=$AJA_BUILD_DOCS \
+        -DAJA_INSTALL_SOURCES=$AJA_INSTALL_SOURCES \
+        -DAJA_QT_ENABLED=$AJA_QT_ENABLED \
+        -DAJA_QT_DEPLOY=$AJA_QT_DEPLOY"
 
 if [ "$?" != 0 ]; then
     echo "problem running 'cmake ../"
