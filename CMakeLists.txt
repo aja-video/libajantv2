@@ -39,6 +39,15 @@ if(NOT AJANTV2_BUILD_OPENSOURCE)
     endif()
 endif()
 
+# Cascade top-level options
+if(AJA_BUILD_SHARED)
+    set(AJANTV2_BUILD_SHARED ON)
+endif()
+
+if(AJA_BUILD_DOCS)
+    set(AJANTV2_BUILD_DOCS ON)
+endif()
+
 add_subdirectory(ajantv2)
 if (AJANTV2_BUILD_DEMOS)
     add_subdirectory(demos)
