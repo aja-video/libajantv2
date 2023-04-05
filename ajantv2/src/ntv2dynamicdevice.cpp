@@ -113,7 +113,7 @@ NTV2DeviceIDSet CNTV2Card::GetDynamicDeviceIDs (void)
 		return result;
 
 	//	Get the clear file matching current bitfile...
-	NTV2_POINTER clearStream;
+	NTV2Buffer clearStream;
 	if (!s_BitfileManager.GetBitStream (clearStream,
 										currentDesignID,
 										currentDesignVersion,
@@ -182,7 +182,7 @@ bool CNTV2Card::LoadDynamicDevice (const NTV2DeviceID inDeviceID)
 		{DDFAIL("Current design ID is zero for " << oldDevName);  return false;}
 
 	//	Get the clear file matching current bitfile...
-	NTV2_POINTER clearStream;
+	NTV2Buffer clearStream;
 	if (!s_BitfileManager.GetBitStream (clearStream,
 										currentDesignID,
 										currentDesignVersion,
@@ -192,7 +192,7 @@ bool CNTV2Card::LoadDynamicDevice (const NTV2DeviceID inDeviceID)
 		{DDFAIL("GetBitStream 'clear' failed for " << oldDevName);  return false;}
 
 	//	Get the partial file matching the inDeviceID...
-	NTV2_POINTER partialStream;
+	NTV2Buffer partialStream;
 	if (!s_BitfileManager.GetBitStream (partialStream,
 										currentDesignID,
 										currentDesignVersion,

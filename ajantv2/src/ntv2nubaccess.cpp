@@ -946,7 +946,7 @@ bool NTV2RPCClientAPI::NTV2WaitForInterruptRemote (const INTERRUPT_ENUMS eInterr
 #endif	//	!defined(NTV2_DEPRECATE_16_3)
 
 bool NTV2RPCClientAPI::NTV2DMATransferRemote (	const NTV2DMAEngine inDMAEngine,	const bool inIsRead,	const ULWord inFrameNumber,
-												NTV2_POINTER & inOutFrameBuffer,	const ULWord inCardOffsetBytes,
+												NTV2Buffer & inOutFrameBuffer,	const ULWord inCardOffsetBytes,
 												const ULWord inNumSegments,			const ULWord inSegmentHostPitch,
 												const ULWord inSegmentCardPitch,	const bool inSynchronous)
 {	(void) inDMAEngine; (void) inIsRead;	(void) inFrameNumber; (void) inOutFrameBuffer;
@@ -1000,14 +1000,13 @@ static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, con
 	ostringstream err;
 	#if defined(MSWindows)
 	//	Open the DLL (Windows)...
-	std::wstring pluginPathW, dllsFolderW;
-	aja::string_to_wstring(pluginPath, pluginPathW);
+	std::wstring dllsFolderW;
 	aja::string_to_wstring(dllsFolder, dllsFolderW);
 	if (!AddDllDirectory(dllsFolderW.c_str()))
 	{	NBCFAIL("AddDllDirectory '" << pluginPath << "' failed: " << WinErrStr(::GetLastError()));
 		return AJA_NULL;
 	}	//	AddDllDirectory failed
-	HMODULE pHandle = ::LoadLibraryExA(LPCSTR(pluginPathW.c_str()), AJA_NULL, LOAD_LIBRARY_SEARCH_USER_DIRS);
+	HMODULE pHandle = ::LoadLibraryExA(LPCSTR(pluginPath.c_str()), AJA_NULL, LOAD_LIBRARY_SEARCH_USER_DIRS);
 	if (!pHandle)
 		err << "Unable to open '" << pluginPath << "' in '" << dllsFolder << "': " << WinErrStr(::GetLastError());
 	#else	//	MacOS or Linux
@@ -1023,7 +1022,7 @@ static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, con
 		{NBCFAIL(err.str());  return AJA_NULL;}
 	NBCDBG("'" << pluginPath << "' opened");
 
-	//	Get pointer to its CreateNTV2SoftwareDevice function...
+	//	Get pointer to its CreateClient function...
 	#if defined(MSWindows)
 	uint64_t * pFunc = reinterpret_cast<uint64_t*>(::GetProcAddress(pHandle, inFuncName.c_str()));
 	if (!pFunc)
@@ -1101,7 +1100,7 @@ NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const string & inURL)	//	CLAS
 NTV2RPCServerAPI::NTV2RPCServerAPI (const NTV2ConnectParams & inParams)
 	:	mConfigParams	(inParams)
 {
-	NTV2_POINTER spare(&mSpare, sizeof(mSpare));  spare.Fill(0ULL);
+	NTV2Buffer spare(&mSpare, sizeof(mSpare));  spare.Fill(0ULL);
 	AJADebug::Open();
 }
 

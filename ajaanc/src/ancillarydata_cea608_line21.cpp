@@ -48,8 +48,8 @@ AJAAncillaryData_Cea608_Line21::~AJAAncillaryData_Cea608_Line21()
 
 void AJAAncillaryData_Cea608_Line21::Init (void)
 {
-	m_ancType = AJAAncillaryDataType_Cea608_Line21;
-	m_coding  = AJAAncillaryDataCoding_Analog;
+	m_ancType = AJAAncDataType_Cea608_Line21;
+	m_coding  = AJAAncDataCoding_Raw;
 	m_DID	  = AJAAncillaryData_Cea608_Line21_DID;
 	m_SID	  = AJAAncillaryData_Cea608_Line21_SID;
 	m_bEncodeBufferInitialized = false;
@@ -140,23 +140,23 @@ AJAStatus AJAAncillaryData_Cea608_Line21::AllocEncodeBuffer (void)
 }
 
 
-AJAAncillaryDataType AJAAncillaryData_Cea608_Line21::RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData)
+AJAAncDataType AJAAncillaryData_Cea608_Line21::RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData)
 {
 	//	BIG ASSUMPTION! If the user deliberately captured analog line 21 on either field,
 	//	we're assuming it was for the sake of getting captioning data (NTSC/525-line).
 	//	The only way we could know "for sure" would be to run ParsePayloadData() on
 	//	the payload data, but that's not a static method so you'd have to recast the
 	//	AJAAncillaryData object anyway!
-	if (pInAncData->GetDataCoding() == AJAAncillaryDataCoding_Analog)
+	if (pInAncData->GetDataCoding() == AJAAncDataCoding_Raw)
 		if (pInAncData->GetLocationLineNumber() == 21 || pInAncData->GetLocationLineNumber() == 284)
-			return AJAAncillaryDataType_Cea608_Line21;
-	return AJAAncillaryDataType_Unknown;
+			return AJAAncDataType_Cea608_Line21;
+	return AJAAncDataType_Unknown;
 }
 
 
 ostream & AJAAncillaryData_Cea608_Line21::Print (ostream & debugStream, const bool bShowDetail) const
 {
-	debugStream << IDAsString() << "(" << ::AJAAncillaryDataCodingToString (m_coding) << ")" << endl;
+	debugStream << IDAsString() << "(" << ::AJAAncDataCodingToString(m_coding) << ")" << endl;
 	return AJAAncillaryData_Cea608::Print (debugStream, bShowDetail);
 
 }

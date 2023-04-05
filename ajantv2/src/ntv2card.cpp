@@ -812,7 +812,7 @@ ostream &	operator << (ostream & inOutStr, const NTV2DIDSet & inDIDs)
 #endif	//	!defined (NTV2_DEPRECATE)
 
 
-NTV2_POINTER CNTV2Card::NULL_POINTER (AJA_NULL, 0);
+NTV2Buffer CNTV2Card::NULL_POINTER (AJA_NULL, 0);
 
 
 bool SDRAMAuditor::AssessDevice (CNTV2Card & inDevice, const bool inMarkStoppedAudioBuffersFree)

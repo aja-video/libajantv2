@@ -26,8 +26,8 @@ using namespace std;
 #define MAX_BITFILEHEADERSIZE 512
 static const unsigned char gSignature[8]= {0xFF, 0xFF, 0xFF, 0xFF, 0xAA, 0x99, 0x55, 0x66};
 static const unsigned char gHead13[]	= {0x00, 0x09, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x0f, 0xf0, 0x00, 0x00, 0x01};
-static const NTV2_POINTER	Header13 (gHead13, sizeof(gHead13));
-static const NTV2_POINTER	Signature (gSignature, sizeof(gSignature));
+static const NTV2Buffer	Header13 (gHead13, sizeof(gHead13));
+static const NTV2Buffer	Signature (gSignature, sizeof(gSignature));
 
 #define BUMPPOS(_inc_)	pos += (_inc_);																				\
 						if (pos >= headerLength)																	\
@@ -173,7 +173,7 @@ bool NTV2BitfileHeaderParser::SetProgramSizeBytes (const ULWord inValue, ostream
 }
 
 
-bool NTV2BitfileHeaderParser::ParseHeader (const NTV2_POINTER & inHdrBuffer, ostream & outMsgs)
+bool NTV2BitfileHeaderParser::ParseHeader (const NTV2Buffer & inHdrBuffer, ostream & outMsgs)
 {
 	uint32_t		fieldLen	(0);	//	Holds size of various header fields, in bytes
 	int				pos			(0);	//	Byte offset during parse
@@ -186,7 +186,7 @@ bool NTV2BitfileHeaderParser::ParseHeader (const NTV2_POINTER & inHdrBuffer, ost
 	do
 	{
 		//	Make sure first 13 bytes are what we expect...
-		NTV2_POINTER portion;
+		NTV2Buffer portion;
 		if (!Header13.IsContentEqual(inHdrBuffer.Segment(portion, 0, 13)))
 			{oss << "Failed, byte mismatch in first 13 bytes";	break;}
 		BUMPPOS(13)					// skip over header header -- now pointing at 'a'
@@ -366,11 +366,11 @@ void CNTV2Bitfile::SetLastError (const string & inStr, const bool inAppend)
 
 string CNTV2Bitfile::ParseHeaderFromBuffer (const uint8_t* inBitfileBuffer, const size_t inBufferSize)
 {
-	return ParseHeaderFromBuffer (NTV2_POINTER(inBitfileBuffer, inBufferSize));
+	return ParseHeaderFromBuffer (NTV2Buffer(inBitfileBuffer, inBufferSize));
 }
 
 
-string CNTV2Bitfile::ParseHeaderFromBuffer (const NTV2_POINTER & inBitfileBuffer)
+string CNTV2Bitfile::ParseHeaderFromBuffer (const NTV2Buffer & inBitfileBuffer)
 {
 	Close();
 	ostringstream oss;
@@ -380,7 +380,7 @@ string CNTV2Bitfile::ParseHeaderFromBuffer (const NTV2_POINTER & inBitfileBuffer
 }
 
 
-size_t CNTV2Bitfile::GetProgramByteStream (NTV2_POINTER & outBuffer)
+size_t CNTV2Bitfile::GetProgramByteStream (NTV2Buffer & outBuffer)
 {
 	if (!mHeaderParser.IsValid())
 		{SetLastError("No header info");  return 0;}
@@ -424,7 +424,7 @@ size_t CNTV2Bitfile::GetProgramByteStream (NTV2_POINTER & outBuffer)
 }
 
 
-size_t CNTV2Bitfile::GetFileByteStream (NTV2_POINTER & outBuffer)
+size_t CNTV2Bitfile::GetFileByteStream (NTV2Buffer & outBuffer)
 {
 	const size_t fileStreamLength(GetFileStreamLength());
 	if (!fileStreamLength)

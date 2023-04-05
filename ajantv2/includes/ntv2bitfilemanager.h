@@ -95,8 +95,8 @@ public:
 
 	/**
 		@brief		Retrieves the bitstream specified by design ID & version, and bitfile ID & version.
-					It loads it into host memory, and updates/reallocates the given NTV2_POINTER to access it.
-		@param[out]	outBitstream		Receives the bitstream in this NTV2_POINTER.
+					It loads it into host memory, and updates/reallocates the given NTV2Buffer to access it.
+		@param[out]	outBitstream		Receives the bitstream in this NTV2Buffer.
 		@param[in]	inDesignID			Specifies the design ID.
 		@param[in]	inDesignVersion		Specifies the design version.
 		@param[in]	inBitfileID			Specifies the bitfile ID.
@@ -104,7 +104,7 @@ public:
 		@param[in]	inBitfileFlags		Specifies the bitfile flags.
 		@return		True if the bitfile is present and loads successfully; otherwise false.
 	**/
-	virtual bool						GetBitStream (NTV2_POINTER & outBitstream,
+	virtual bool						GetBitStream (NTV2Buffer & outBitstream,
 													  const ULWord inDesignID,
 													  const ULWord inDesignVersion,
 													  const ULWord inBitfileID,
@@ -120,7 +120,7 @@ private:
 	**/
 	bool ReadBitstream (const size_t inIndex);
 		
-	typedef std::vector <NTV2_POINTER>	NTV2BitstreamList;
+	typedef std::vector <NTV2Buffer>	NTV2BitstreamList;
 	typedef NTV2BitstreamList::iterator	NTV2BitstreamListIter;
 
 	NTV2BitfileInfoList		_bitfileList;	///< @brief	List of bitfiles that I'm managing

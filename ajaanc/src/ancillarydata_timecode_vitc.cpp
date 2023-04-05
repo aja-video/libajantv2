@@ -41,8 +41,8 @@ AJAAncillaryData_Timecode_VITC::AJAAncillaryData_Timecode_VITC(const AJAAncillar
 
 void AJAAncillaryData_Timecode_VITC::Init (void)
 {
-	m_ancType = AJAAncillaryDataType_Timecode_VITC;
-	m_coding  = AJAAncillaryDataCoding_Analog;
+	m_ancType = AJAAncDataType_Timecode_VITC;
+	m_coding  = AJAAncDataCoding_Raw;
 	m_DID	  = AJAAncillaryData_VITC_DID;
 	m_SID	  = AJAAncillaryData_VITC_SID;
 
@@ -125,18 +125,18 @@ AJAStatus AJAAncillaryData_Timecode_VITC::SetVITCDataType (const AJAAncillaryDat
 
 
 
-AJAAncillaryDataType AJAAncillaryData_Timecode_VITC::RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData)
+AJAAncDataType AJAAncillaryData_Timecode_VITC::RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData)
 {
 	// note: BIG ASSUMPTION! If the user deliberately captured analog line 19 on either field,
 	//		 we're assuming it was for the sake of getting captioning data (NTSC/525-line).
 	//		 The only way we could know "for sure" would be to run ParsePayloadData() on
 	//		 the payload data, but that's not a static method so you'd have to recast the
 	//		 AJAAncillaryData object anyway!
-	if (pInAncData->GetDataCoding() == AJAAncillaryDataCoding_Analog)
+	if (pInAncData->GetDataCoding() == AJAAncDataCoding_Raw)
 		if (pInAncData->GetLocationLineNumber() == 14 || pInAncData->GetLocationLineNumber() == 277)
-		return AJAAncillaryDataType_Timecode_VITC;
+		return AJAAncDataType_Timecode_VITC;
 
-	return AJAAncillaryDataType_Unknown;
+	return AJAAncDataType_Unknown;
 }
 
 
@@ -788,7 +788,7 @@ string AJAAncillaryData_Timecode_VITC::VITCTypeToString (const AJAAncillaryData_
 
 ostream & AJAAncillaryData_Timecode_VITC::Print (ostream & debugStream, const bool bShowDetail) const
 {
-	debugStream << IDAsString() << "(" << ::AJAAncillaryDataCodingToString (m_coding) << ")" << endl;
+	debugStream << IDAsString() << "(" << ::AJAAncDataCodingToString(m_coding) << ")" << endl;
 	//debugStream << "SMPTE 12M VITC Analog Data (" << ((m_coding == AJAAncillaryDataCoding_Digital) ? "Digital" : ((m_coding == AJAAncillaryDataCoding_Analog) ? "Analog" : "???????")) << ")" << endl;
 	AJAAncillaryData_Timecode::Print (debugStream, bShowDetail);	// print the generic stuff
 	debugStream << endl

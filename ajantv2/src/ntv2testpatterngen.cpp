@@ -14,7 +14,6 @@
 #include "ntv2testpatterngen.h"
 #include "ntv2transcode.h"
 #include "ntv2resample.h"
-#include "ajabase/system/lock.h"
 #include "ajabase/system/debug.h"
 #include "ajabase/common/common.h"
 #include "math.h"
@@ -2341,7 +2340,7 @@ static TPStringMap & CreateTPStringMap (TPStringMap & outMap)
 	outMap.insert(TPStringPair(NTV2_TestPatt_ColorQuadrant,			string("Color Quadrant")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_ColorQuadrantBorder,	string("Color Quadrant Border")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_ColorQuadrantTsi,		string("Color Quadrant Tsi")));
-	outMap.insert(TPStringPair(NTV2_TestPatt_TsiAlignment,		string("Color Quadrant Tsi2")));
+	outMap.insert(TPStringPair(NTV2_TestPatt_TsiAlignment,			string("Color Quadrant Tsi2")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_ZonePlate_12b_RGB,		string("ZonePlate 12b RGB")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_LinearRamp_12b_RGB,	string("LinearRamp 12b RGB")));
 	outMap.insert(TPStringPair(NTV2_TestPatt_HLG_Narrow_12b_RGB,	string("HLG_Narrow 12b RGB")));
@@ -2361,6 +2360,12 @@ static StringTPMap & CreateStringTPMap (StringTPMap & outMap)
 	for (TPStringMapConstIter it(TPNames.begin());	it != TPNames.end();  ++it)
 	{	string name(it->second);
 		outMap[aja::lower(name)] = it->first;
+		if (name.find(' ') != string::npos)
+			aja::replace(name, " ", "");
+		if (name.find('%') != string::npos)
+			aja::replace(name, "%", "");
+		if (outMap.find(name) == outMap.end())
+			outMap[name] = it->first;
 	}
 	return outMap;
 }
@@ -2732,7 +2737,7 @@ bool NTV2TestPatternGen::drawIt (void)
 
 bool NTV2TestPatternGen::DrawTestPattern (const NTV2TestPatternSelect inPattern,
 											const NTV2FormatDescriptor & inFormatDesc,
-											NTV2_POINTER & buffer)
+											NTV2Buffer & buffer)
 {
 	if (!NTV2_IS_VALID_PATTERN(inPattern))
 		{TPGFAIL("Invalid pattern selector " << DEC(inPattern)); return false;}
@@ -2801,7 +2806,7 @@ bool NTV2TestPatternGen::DrawTestPattern (const NTV2TestPatternSelect inPattern,
 
 bool NTV2TestPatternGen::DrawTestPattern (const string & inStartsWith,
 											const NTV2FormatDescriptor & inFormatDesc,
-											NTV2_POINTER & inBuffer)
+											NTV2Buffer & inBuffer)
 {
 	string startsWith(inStartsWith);
 	aja::strip(startsWith);

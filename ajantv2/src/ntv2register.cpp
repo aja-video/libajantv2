@@ -1791,6 +1791,15 @@ bool CNTV2Card::SetMode (const NTV2Channel inChannel, const NTV2Mode inValue,  c
 	return WriteRegister (gChannelToControlRegNum[inChannel], inValue, kRegMaskMode, kRegShiftMode);
 }
 
+bool CNTV2Card::SetMode (const NTV2ChannelSet & inChannels, const NTV2Mode inMode)
+{
+	size_t errors(0);
+	for (NTV2ChannelSetConstIter it(inChannels.begin());	it != inChannels.end();  ++it)
+		if (!SetMode(*it, inMode))
+			errors++;
+	return !errors;
+}
+
 bool CNTV2Card::GetMode (const NTV2Channel inChannel, NTV2Mode & outValue)
 {
 	if (IsMultiRasterWidgetChannel(inChannel))
@@ -2308,11 +2317,13 @@ bool CNTV2Card::EnableChannel (const NTV2Channel inChannel)
 bool CNTV2Card::EnableChannels (const NTV2ChannelSet & inChannels, const bool inDisableOthers)
 {	UWord failures(0);
 	for (NTV2Channel chan(NTV2_CHANNEL1);  chan < NTV2Channel(::NTV2DeviceGetNumFrameStores(GetDeviceID()));  chan = NTV2Channel(chan+1))
-		if (inChannels.find(chan) == inChannels.end()  &&  inDisableOthers)
-			DisableChannel(chan);
-		else if (inChannels.find(chan) != inChannels.end())
+		if (inChannels.find(chan) != inChannels.end())
+		{
 			if (!EnableChannel(chan))
 				failures++;
+		}
+		else if (inDisableOthers)
+			DisableChannel(chan);
 	return !failures;
 
 }	//	EnableChannels
@@ -3030,7 +3041,7 @@ bool CNTV2Card::SetVANCMode (const NTV2ChannelSet & inChannels, const NTV2VANCMo
 {
 	size_t errors(0);
 	for (NTV2ChannelSetConstIter it(inChannels.begin());  it != inChannels.end();  ++it)
-		if (!SetEnableVANCData (inVancMode, *it))
+		if (!SetVANCMode (inVancMode, *it))
 			errors++;
 	return !errors;
 }
@@ -6576,7 +6587,16 @@ bool CNTV2Card::SetSDIInLevelBtoLevelAConversion (const UWord inInputSpigot, con
 	return WriteRegister(regNum, inEnable, mask, shift);
 }
 
-bool CNTV2Card::GetSDIInLevelBtoLevelAConversion (const UWord inInputSpigot, bool & outEnable)
+bool CNTV2Card::SetSDIInLevelBtoLevelAConversion (const NTV2ChannelSet & inSDIInputs, const bool inEnable)
+{
+	size_t errors(0);
+	for (NTV2ChannelSetConstIter it(inSDIInputs.begin());	it != inSDIInputs.end();  ++it)
+		if (!SetSDIInLevelBtoLevelAConversion(*it, inEnable))
+			errors++;
+	return !errors;
+}
+
+bool CNTV2Card::GetSDIInLevelBtoLevelAConversion (const UWord inInputSpigot, bool & outEnabled)
 {
 	if (!::NTV2DeviceCanDo3GLevelConversion (_boardID))
 		return false;
@@ -6596,10 +6616,7 @@ bool CNTV2Card::GetSDIInLevelBtoLevelAConversion (const UWord inInputSpigot, boo
 		case NTV2_CHANNEL8:		regNum = kRegSDI5678Input3GStatus;		mask = kRegMaskSDIIn8LevelBtoLevelA;	shift = kRegShiftSDIIn8LevelBtoLevelA;	break;
 		default:				return false;
 	}
-	ULWord tempVal;
-	bool retVal = ReadRegister (regNum, tempVal, mask, shift);
-	outEnable = static_cast <bool> (tempVal);
-	return retVal;
+	return CNTV2DriverInterface::ReadRegister (regNum, outEnabled, mask, shift);
 }
 
 bool CNTV2Card::SetSDIOutLevelAtoLevelBConversion (const UWord inOutputSpigot, const bool inEnable)

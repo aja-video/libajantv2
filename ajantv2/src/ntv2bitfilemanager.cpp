@@ -120,7 +120,7 @@ size_t CNTV2BitfileManager::GetNumBitfiles (void)
 }
 
 
-bool CNTV2BitfileManager::GetBitStream (NTV2_POINTER & outBitstream,
+bool CNTV2BitfileManager::GetBitStream (NTV2Buffer & outBitstream,
 										const ULWord inDesignID,
 										const ULWord inDesignVersion,
 										const ULWord inBitfileID,
@@ -180,7 +180,7 @@ bool CNTV2BitfileManager::ReadBitstream (const size_t inIndex)
 		{BFMFAIL("Bitfile '" << _bitfileList.at(inIndex).bitfilePath << "' failed to open");  return false;}
 
 	//	Read bitstream from bitfile (will automatically Allocate it)...
-	NTV2_POINTER Bitstream;
+	NTV2Buffer Bitstream;
 	if (!Bitfile.GetProgramByteStream(Bitstream))
 		{BFMFAIL("GetProgramByteStream failed for bitfile '" << _bitfileList.at(inIndex).bitfilePath << "'");  return false;}
 

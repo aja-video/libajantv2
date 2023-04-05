@@ -50,8 +50,8 @@ AJAAncillaryData_Timecode_ATC::~AJAAncillaryData_Timecode_ATC()
 
 void AJAAncillaryData_Timecode_ATC::Init()
 {
-	m_ancType = AJAAncillaryDataType_Timecode_ATC;
-	m_coding  = AJAAncillaryDataCoding_Digital;
+	m_ancType = AJAAncDataType_Timecode_ATC;
+	m_coding  = AJAAncDataCoding_Digital;
 	m_DID	  = AJAAncillaryData_SMPTE12M_DID;
 	m_SID	  = AJAAncillaryData_SMPTE12M_SID;
 
@@ -274,14 +274,14 @@ AJAStatus AJAAncillaryData_Timecode_ATC::GetDBB1PayloadType (AJAAncillaryData_Ti
 
 
 
-AJAAncillaryDataType AJAAncillaryData_Timecode_ATC::RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData)
+AJAAncDataType AJAAncillaryData_Timecode_ATC::RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData)
 {
-	if (pInAncData->GetDataCoding() == AJAAncillaryDataCoding_Digital)
+	if (pInAncData->GetDataCoding() == AJAAncDataCoding_Digital)
 		if (pInAncData->GetDID() == AJAAncillaryData_SMPTE12M_DID)
 			if (pInAncData->GetSID() == AJAAncillaryData_SMPTE12M_SID)
 				if (pInAncData->GetDC() == AJAAncillaryData_SMPTE12M_PayloadSize)
-					return AJAAncillaryDataType_Timecode_ATC;
-	return AJAAncillaryDataType_Unknown;
+					return AJAAncDataType_Timecode_ATC;
+	return AJAAncDataType_Unknown;
 }
 
 

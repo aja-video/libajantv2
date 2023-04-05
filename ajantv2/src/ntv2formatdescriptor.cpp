@@ -1062,7 +1062,7 @@ bool NTV2FormatDescriptor::IsAtLineStart (ULWord inByteOffset) const
 	return (inByteOffset % GetBytesPerRow(plane)) == 0;
 }
 
-bool NTV2FormatDescriptor::GetRowBuffer (const NTV2_POINTER & inFrameBuffer, NTV2_POINTER & inOutRowBuffer,  const ULWord inRowIndex0,  const UWord inPlaneIndex0) const
+bool NTV2FormatDescriptor::GetRowBuffer (const NTV2Buffer & inFrameBuffer, NTV2Buffer & inOutRowBuffer,  const ULWord inRowIndex0,  const UWord inPlaneIndex0) const
 {
 	inOutRowBuffer.Deallocate();
 	if (inRowIndex0 >= numLines)

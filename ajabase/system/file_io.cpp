@@ -243,7 +243,7 @@ AJAFileIO::Open(
 #if defined(AJA_MAC)
 			if (eAJANoCaching & properties)
 			{
-				int ret = fcntl(fd, F_NOCACHE, 1);
+				fcntl(fd, F_NOCACHE, 1);
 			}
 #endif
 			if (eAJAUnbuffered & properties)

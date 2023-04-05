@@ -39,10 +39,10 @@ using namespace std::rel_ops;
 #endif
 
 static int	gIsVerbose(0);	//	Verbose output?
-static NTV2_POINTER	gGumpBuffers[NTV2_MAX_NUM_VIDEO_FORMATS];
-static NTV2_POINTER gRTPBuffers[NTV2_MAX_NUM_VIDEO_FORMATS];
-static NTV2_POINTER gVanc8Buffers[NTV2_MAX_NUM_VIDEO_FORMATS];
-static NTV2_POINTER gVanc10Buffers[NTV2_MAX_NUM_VIDEO_FORMATS];
+static NTV2Buffer	gGumpBuffers[NTV2_MAX_NUM_VIDEO_FORMATS];
+static NTV2Buffer gRTPBuffers[NTV2_MAX_NUM_VIDEO_FORMATS];
+static NTV2Buffer gVanc8Buffers[NTV2_MAX_NUM_VIDEO_FORMATS];
+static NTV2Buffer gVanc10Buffers[NTV2_MAX_NUM_VIDEO_FORMATS];
 
 
 static const AJA_FrameRate	sNTV2Rate2AJARate[] = {	AJA_FrameRate_Unknown	//	NTV2_FRAMERATE_UNKNOWN	= 0,
@@ -141,71 +141,137 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 		TEST_CASE("BFT_AncEnums")
 		{
 			AJADebug::Open();
-			//	AJAAncillaryDataType
-			for (unsigned ordinal(0);  ordinal < AJAAncillaryDataType_Size;  ordinal++)
+			//	AJAAncDataType
+			for (unsigned ordinal(0);  ordinal < AJAAncDataType_Size;  ordinal++)
 			{
-				const AJAAncillaryDataType	ancType = AJAAncillaryDataType(ordinal);
-				//cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncillaryDataTypeToString(ancType,false) << "\t" << ::AJAAncillaryDataTypeToString(ancType,true) << endl;
-				CHECK(IS_VALID_AJAAncillaryDataType(ancType));
+				const AJAAncDataType	ancType = AJAAncDataType(ordinal);
+				//cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncDataTypeToString(ancType,false) << "\t" << ::AJAAncDataTypeToString(ancType,true) << endl;
+				CHECK(IS_VALID_AJAAncDataType(ancType));
 			}
 
-			//	AJAAncillaryDataLink
-			for (unsigned ordinal(0);  ordinal < AJAAncillaryDataLink_Size;  ordinal++)
+			//	AJAAncDataLink
+			for (unsigned ordinal(0);  ordinal < AJAAncDataLink_Size;  ordinal++)
 			{
-				const AJAAncillaryDataLink	link = AJAAncillaryDataLink(ordinal);
-				cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncillaryDataLinkToString(link,false) << "\t" << ::AJAAncillaryDataLinkToString(link,true) << endl;
-				if (link == AJAAncillaryDataLink_Unknown)
-					CHECK_FALSE(IS_VALID_AJAAncillaryDataLink(link));
+				const AJAAncDataLink	link = AJAAncDataLink(ordinal);
+				cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncDataLinkToString(link,false) << "\t" << ::AJAAncDataLinkToString(link,true) << endl;
+				if (link == AJAAncDataLink_Unknown)
+					CHECK_FALSE(IS_VALID_AJAAncDataLink(link));
 				else
-					CHECK(IS_VALID_AJAAncillaryDataLink(link));
+					CHECK(IS_VALID_AJAAncDataLink(link));
 			}
 
-			//	AJAAncillaryDataStream
-			for (unsigned ordinal(0);  ordinal < AJAAncillaryDataStream_Size;  ordinal++)
+			//	AJAAncDataStream
+			for (unsigned ordinal(0);  ordinal < AJAAncDataStream_Size;  ordinal++)
 			{
-				const AJAAncillaryDataStream	stream = AJAAncillaryDataStream(ordinal);
-				cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncillaryDataStreamToString(stream,false) << "\t" << ::AJAAncillaryDataStreamToString(stream,true) << endl;
-				if (stream == AJAAncillaryDataStream_Unknown)
-					CHECK_FALSE(IS_VALID_AJAAncillaryDataStream(stream));
+				const AJAAncDataStream	stream = AJAAncDataStream(ordinal);
+				cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncDataStreamToString(stream,false) << "\t" << ::AJAAncDataStreamToString(stream,true) << endl;
+				if (stream == AJAAncDataStream_Unknown)
+					CHECK_FALSE(IS_VALID_AJAAncDataStream(stream));
 				else
-					CHECK(IS_VALID_AJAAncillaryDataStream(stream));
+					CHECK(IS_VALID_AJAAncDataStream(stream));
 			}
 
-			//	AJAAncillaryDataChannel
-			for (unsigned ordinal(0);  ordinal < AJAAncillaryDataChannel_Size;  ordinal++)
+			//	AJAAncDataChannel
+			for (unsigned ordinal(0);  ordinal < AJAAncDataChannel_Size;  ordinal++)
 			{
-				const AJAAncillaryDataChannel	chan = AJAAncillaryDataChannel(ordinal);
-				cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncillaryDataChannelToString(chan,false) << "\t" << ::AJAAncillaryDataChannelToString(chan,true) << endl;
-				if (chan == AJAAncillaryDataChannel_Unknown)
-					CHECK_FALSE(IS_VALID_AJAAncillaryDataChannel(chan));
+				const AJAAncDataChannel	chan = AJAAncDataChannel(ordinal);
+				cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncDataChannelToString(chan,false) << "\t" << ::AJAAncDataChannelToString(chan,true) << endl;
+				if (chan == AJAAncDataChannel_Unknown)
+					CHECK_FALSE(IS_VALID_AJAAncDataChannel(chan));
 				else
-					CHECK(IS_VALID_AJAAncillaryDataChannel(chan));
+					CHECK(IS_VALID_AJAAncDataChannel(chan));
 			}
 
-			//	AJAAncillaryDataSpace
-			for (unsigned ordinal(0);  ordinal < AJAAncillaryDataSpace_Size;  ordinal++)
+			//	AJAAncDataSpace
+			for (unsigned ordinal(0);  ordinal < AJAAncDataSpace_Size;  ordinal++)
 			{
-				const AJAAncillaryDataSpace	space = AJAAncillaryDataSpace(ordinal);
-				cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncillaryDataSpaceToString(space,false) << "\t" << ::AJAAncillaryDataSpaceToString(space,true) << endl;
-				if (space == AJAAncillaryDataSpace_Unknown)
-					CHECK_FALSE(IS_VALID_AJAAncillaryDataSpace(space));
+				const AJAAncDataSpace	space = AJAAncDataSpace(ordinal);
+				cerr << DEC(ordinal) << " " << xHEX0N(uint16_t(ordinal),2) << "\t" << ::AJAAncDataSpaceToString(space,false) << "\t" << ::AJAAncDataSpaceToString(space,true) << endl;
+				if (space == AJAAncDataSpace_Unknown)
+					CHECK_FALSE(IS_VALID_AJAAncDataSpace(space));
 				else
-					CHECK(IS_VALID_AJAAncillaryDataSpace(space));
+					CHECK(IS_VALID_AJAAncDataSpace(space));
 			}
 		}	//	TEST_CASE("BFT_AncEnums")
 
+		TEST_CASE("BFT_DataLocCompare")
+		{
+			string info;
+			AJAAncDataLoc a, b;
+			a.SetDataLink(AJAAncDataLink_A)
+				.SetDataStream(AJAAncDataStream_1)
+				.SetDataChannel(AJAAncDataChannel_C)
+				.SetLineNumber(9)
+				.SetHorizontalOffset(200);
+			b = a;
+			CHECK(AJA_SUCCESS(a.Compare(b)));
+			info = a.CompareWithInfo(b);
+			CHECK(info.empty());
+
+			b.SetDataLink(AJAAncDataLink_B);
+			CHECK(AJA_FAILURE(a.Compare(b)));
+			info = a.CompareWithInfo(b);
+			CHECK_FALSE(info.empty());	if (gIsVerbose)	cerr << "BFT_DataLocCompare " << __LINE__ << ": " << info << endl;
+			CHECK_EQ(info, "Link A != B");
+
+			b = a;
+			b.SetDataStream(AJAAncDataStream_2);
+			CHECK(AJA_FAILURE(a.Compare(b)));
+			info = a.CompareWithInfo(b);
+			CHECK_FALSE(info.empty());	if (gIsVerbose) cerr << "BFT_DataLocCompare " << __LINE__ << ": " << info << endl;
+			CHECK_EQ(info, "DS1 != DS2");
+
+			b = a;
+			b.SetDataChannel(AJAAncDataChannel_Y);
+			CHECK(AJA_FAILURE(a.Compare(b)));
+			info = a.CompareWithInfo(b);
+			CHECK_FALSE(info.empty());	if (gIsVerbose) cerr << "BFT_DataLocCompare " << __LINE__ << ": " << info << endl;
+			CHECK_EQ(info, "Data Channel C != Y");
+
+			b = a;
+			b.SetLineNumber(10);
+			CHECK(AJA_FAILURE(a.Compare(b)));
+			info = a.CompareWithInfo(b);
+			CHECK_FALSE(info.empty());	if (gIsVerbose) cerr << "BFT_DataLocCompare " << __LINE__ << ": " << info << endl;
+			CHECK_EQ(info, "Line 9 != 10");
+
+			b = a;
+			b.SetHorizontalOffset(400);
+			CHECK(AJA_FAILURE(a.Compare(b)));
+			info = a.CompareWithInfo(b);
+			CHECK_FALSE(info.empty());	if (gIsVerbose) cerr << "BFT_DataLocCompare " << __LINE__ << ": " << info << endl;
+			CHECK_EQ(info, "HOffset 200 != 400");
+
+			//	Multiple diffs
+			b = a;
+			b.SetDataLink(AJAAncDataLink_B)
+				.SetDataStream(AJAAncDataStream_2)
+				.SetDataChannel(AJAAncDataChannel_Y)
+				.SetLineNumber(10)
+				.SetHorizontalOffset(400);
+			CHECK(AJA_FAILURE(a.Compare(b)));
+			info = a.CompareWithInfo(b);
+			CHECK_FALSE(info.empty());	if (gIsVerbose) cerr << "BFT_DataLocCompare " << __LINE__ << ": " << info << endl;
+			CHECK(info.find("A != B") > 0);
+			CHECK(info.find("DS1 != DS2") > 0);
+			CHECK(info.find("C != Y") > 0);
+			CHECK(info.find("9 != 10") > 0);
+			CHECK(info.find("200 != 400") > 0);
+		}	//	TEST_CASE("BFT_DataLocCompare")
+
 		TEST_CASE("BFT_DataLocation")
 		{
-			typedef	std::set<AJAAncillaryDataLocation>	AncLocationSet;
+			typedef	std::set<AJAAncDataLoc>	AncLocationSet;
 			//typedef	AncLocationSet::const_iterator		AncLocationSetConstIter;
 			AncLocationSet	ancLocations;
-			static const uint16_t					lines[]		=	{9,		16,		220,	285,	1910,	2320};
-			static const uint16_t					hOffsets[]	=	{0,	AJAAncDataHorizOffset_Anywhere,	AJAAncDataHorizOffset_AnyVanc, AJAAncDataHorizOffset_AnyHanc,	127,	898,	1321};
-			static const AJAAncillaryDataChannel	channels[]	=	{AJAAncillaryDataChannel_C,		AJAAncillaryDataChannel_Y};
-			static const AJAAncillaryDataStream		streams[]	=	{AJAAncillaryDataStream_1,		AJAAncillaryDataStream_2,	AJAAncillaryDataStream_3,	AJAAncillaryDataStream_4};
-			static const AJAAncillaryDataLink		links[]		=	{AJAAncillaryDataLink_A,		AJAAncillaryDataLink_B};
-			AJAAncillaryDataLocation	nullLoc;
-			AJAAncillaryDataLocation	aFromSets, toSetAllAtOnce, toBeSet;
+			static const uint16_t			lines[]		=	{9,		16,		220,	285,	1910,	2320};
+			static const uint16_t			hOffsets[]	=	{0,	AJAAncDataHorizOffset_Anywhere,	AJAAncDataHorizOffset_AnyVanc, AJAAncDataHorizOffset_AnyHanc,	127,	898,	1321};
+			static const AJAAncDataChannel	channels[]	=	{AJAAncDataChannel_C,		AJAAncDataChannel_Y};
+			static const AJAAncDataStream	streams[]	=	{AJAAncDataStream_1,		AJAAncDataStream_2,	AJAAncDataStream_3,	AJAAncDataStream_4};
+			static const AJAAncDataLink		links[]		=	{AJAAncDataLink_A,				AJAAncDataLink_B};
+			AJAAncDataLoc	nullLoc;
+			AJAAncDataLoc	aFromSets, toSetAllAtOnce, toBeSet;
+			string info;
 
 			CHECK_FALSE(nullLoc.IsValid());	//	Invalid, because default constructor makes everything "unknown"
 			CHECK(nullLoc == aFromSets);
@@ -226,7 +292,7 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 							toBeSet.SetHorizontalOffset(hOffset);
 							for (unsigned linkNdx(0);  linkNdx < sizeof(links)/sizeof(links[0]);  linkNdx++)
 							{
-								const AJAAncillaryDataLocation	bFromConstructor(links[linkNdx], channels[chanNdx], AJAAncillaryDataSpace_Unknown, lineNum, hOffset, streams[streamNdx]);
+								const AJAAncDataLoc	bFromConstructor(links[linkNdx], channels[chanNdx], AJAAncDataSpace_Unknown, lineNum, hOffset, streams[streamNdx]);
 								toBeSet.SetDataLink(links[linkNdx]);
 								toSetAllAtOnce.SetDataLink(links[linkNdx]).SetDataChannel(channels[chanNdx]).SetLineNumber(lineNum).SetHorizontalOffset(hOffset).SetDataStream(streams[streamNdx]);
 								aFromSets.SetLineNumber(lineNum).SetHorizontalOffset(hOffsets[hOffNdx]).SetDataChannel(channels[chanNdx]).SetDataStream(streams[streamNdx]).SetDataLink(links[linkNdx]);
@@ -243,13 +309,14 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 								CHECK_FALSE(aFromSets == bFromConstructor);
 								CHECK_FALSE(aFromSets.IsValid());
 								ancLocations.insert(bFromConstructor);
-							}	//	for each AJAAncillaryDataLink
+							}	//	for each AJAAncDataLink
 						}	//	for each horizOffset
-					}	//	for each AJAAncillaryDataStream
-				}	//	for each AJAAncillaryDataChannel
+					}	//	for each AJAAncDataStream
+				}	//	for each AJAAncDataChannel
 			}	//	for each line number
 			//cerr << endl << endl;		for (AncLocationSetConstIter it(ancLocations.begin());  it != ancLocations.end();  ++it)	cerr << *it << endl;	cerr << endl << endl;
 
+			SUBCASE("SimpleOrdering")
 			{	//	Ordering Tests
 				AJAAncDataLoc	a, b;
 				CHECK_EQ(a, b);	//	AJAAncDataLoc doesn't have != -- requires rel_ops
@@ -258,44 +325,231 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 				a.Reset();  a.SetLineNumber(100);  b = a;  b.SetLineNumber(99);		//	B precedes A
 				CHECK(b < a);
 				CHECK_FALSE(b == a);
+				info = a.CompareWithInfo(b);	CHECK_EQ(info.find("Line 100 != 99"), 0);
 				//	Horizontal Offset
 				a.Reset();  a.SetHorizontalOffset(1023);  b = a;  b.SetHorizontalOffset(1022);	//	B precedes A
 				CHECK(b < a);
 				CHECK_FALSE(b == a);
+				info = a.CompareWithInfo(b);	CHECK_EQ(info.find("HOffset 1023 != 1022"), 0);
 				//	Horizontal Offset -- HANC anywhere versus VANC anywhere:
 				a.Reset();  a.SetHorizontalOffset(AJAAncDataHorizOffset_AnyHanc);  b = a;  b.SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);	//	B precedes A
 				CHECK(b < a);
 				CHECK_FALSE(b == a);
+				info = a.CompareWithInfo(b);	CHECK_EQ(info.find("HOffset 4094 != 4093"), 0);
 				//	Data Channel
-				a.Reset();  a.SetDataChannel(AJAAncillaryDataChannel_Y);  b = a;  b.SetDataChannel(AJAAncillaryDataChannel_C);	//	B precedes A
+				a.Reset();  a.SetDataChannel(AJAAncDataChannel_Y);  b = a;  b.SetDataChannel(AJAAncDataChannel_C);	//	B precedes A
 				CHECK(b < a);
 				CHECK_FALSE(b == a);
+				info = a.CompareWithInfo(b);	CHECK_EQ(info.find("Data Channel Y != C"), 0);
 				//	Data Stream
-				a.Reset();  a.SetDataStream(AJAAncillaryDataStream_3);  b = a;  b.SetDataStream(AJAAncillaryDataStream_2);	//	B precedes A
+				a.Reset();  a.SetDataStream(AJAAncDataStream_3);  b = a;  b.SetDataStream(AJAAncDataStream_2);	//	B precedes A
 				CHECK(b < a);
 				CHECK_FALSE(b == a);
+				info = a.CompareWithInfo(b);	CHECK_EQ(info.find("DS3 != DS2"), 0);
 				//	Data Link
-				a.Reset();  a.SetDataLink(AJAAncillaryDataLink_B);  b = a;  b.SetDataLink(AJAAncillaryDataLink_A);	//	B precedes A
+				a.Reset();  a.SetDataLink(AJAAncDataLink_B);  b = a;  b.SetDataLink(AJAAncDataLink_A);	//	B precedes A
 				CHECK(b < a);
 				CHECK_FALSE(b == a);
+				info = a.CompareWithInfo(b);	CHECK_EQ(info.find("Link B != A"), 0);
+			}
 
-				//	Combo
-				a.Reset();
-				a.SetDataLink(AJAAncillaryDataLink_B).SetDataStream(AJAAncillaryDataStream_3).SetDataChannel(AJAAncillaryDataChannel_Y);
+			SUBCASE("ComboOrdering")
+			{	//	Combo Tests
+				AJAAncDataLoc	a, b;
+				a.SetDataLink(AJAAncDataLink_B).SetDataStream(AJAAncDataStream_3).SetDataChannel(AJAAncDataChannel_Y);
 				a.SetHorizontalOffset(1000).SetLineNumber(12);
-				b = a;  b.SetDataLink(AJAAncillaryDataLink_A);
+				b = a;  b.SetDataLink(AJAAncDataLink_A);
 				CHECK(b < a);
-				b = a;  b.SetDataStream(AJAAncillaryDataStream_2);
+				CHECK_FALSE(b == a);
+				b = a;  b.SetDataStream(AJAAncDataStream_2);
 				CHECK(b < a);
-				b = a;  b.SetDataChannel(AJAAncillaryDataChannel_C);
+				CHECK_FALSE(b == a);
+				b = a;  b.SetDataChannel(AJAAncDataChannel_C);
 				CHECK(b < a);
+				CHECK_FALSE(b == a);
 				b = a;  b.SetHorizontalOffset(a.GetHorizontalOffset()-1);
 				CHECK(b < a);
+				CHECK_FALSE(b == a);
 				b = a;  b.SetLineNumber(a.GetLineNumber()-1);
 				CHECK(b < a);
+				CHECK_FALSE(b == a);
 			}
-			LOGMYNOTE("Passed");	cerr << "BFT_DataLocation passed" << endl;
 		}	//	TEST_CASE("BFT_DataLocation")
+
+
+		TEST_CASE("BFT_AncDataCompare")
+		{
+			const string a("This is a test"), b("This is A test");
+			const NTV2Buffer A(a.c_str(), a.length()), B(b.c_str(), b.length());
+			string info;
+			AJAAncillaryData pkt;
+			pkt.SetDID(0x05);	pkt.SetSID(0x07);
+			pkt.SetDataCoding(AJAAncDataCoding_Digital);
+			pkt.SetLocationVideoLink(AJAAncDataLink_A);
+			pkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyVanc);
+			pkt.SetLocationDataChannel(AJAAncDataChannel_Y);
+			pkt.SetLocationLineNumber(9);
+			pkt.SetPayloadData (A, size_t(A));
+			AJAAncillaryData pktA(pkt);
+			CHECK(AJA_SUCCESS(pkt.Compare(pktA, /*ignoreLoc*/false, /*ignoreChkSum*/false)));
+			info =   pkt.CompareWithInfo (pktA, /*ignoreLoc*/false, /*ignoreChkSum*/false);
+			CHECK(info.empty());
+
+			//	Validate "ignoreLoc"
+			pktA.SetLocationDataChannel(AJAAncDataChannel_C);	//	pktA location differs from pkt
+			CHECK(AJA_FAILURE(pkt.Compare(pktA, /*ignoreLoc*/false, /*ignoreChkSum*/false)));
+			info =   pkt.CompareWithInfo (pktA, /*ignoreLoc*/false, /*ignoreChkSum*/false);
+			CHECK_FALSE(info.empty());	if (gIsVerbose) cerr << "BFT_AncDataCompare " << __LINE__ << ": ignoreLoc=N ignoreCS=N " << info << endl;
+			CHECK(AJA_FAILURE(pkt.Compare(pktA, /*ignoreLoc*/false, /*ignoreChkSum*/true)));
+			info =   pkt.CompareWithInfo (pktA, /*ignoreLoc*/false, /*ignoreChkSum*/true);
+			CHECK_FALSE(info.empty());	if (gIsVerbose) cerr << "BFT_AncDataCompare " << __LINE__ << ": ignoreLoc=N ignoreCS=Y " << info << endl;
+			CHECK(AJA_SUCCESS(pkt.Compare(pktA, /*ignoreLoc*/true,  /*ignoreChkSum*/false)));
+			info =   pkt.CompareWithInfo (pktA, /*ignoreLoc*/true,  /*ignoreChkSum*/false);
+			CHECK(info.empty());
+			CHECK(AJA_SUCCESS(pkt.Compare(pktA, /*ignoreLoc*/true,  /*ignoreChkSum*/true)));
+			info =   pkt.CompareWithInfo (pktA, /*ignoreLoc*/true,  /*ignoreChkSum*/true);
+			CHECK(info.empty());
+
+			//	Validate "ignoreChkSum"
+			pkt.SetChecksum(pkt.Calculate8BitChecksum());
+			pktA = pkt;  pktA.SetPayloadData(B, size_t(B));	//	pkt & pktA payloads now differ
+			pkt.SetChecksum(pktA.Calculate8BitChecksum());	//	force bad pkt CS
+			pktA.SetPayloadData(A, size_t(A));				//	pkt & pktA payloads now match, but CS differs
+			CHECK(AJA_FAILURE(pkt.Compare(pktA, /*ignoreLoc*/false, /*ignoreChkSum*/false)));
+			info =   pkt.CompareWithInfo (pktA, /*ignoreLoc*/false, /*ignoreChkSum*/false);
+			CHECK_FALSE(info.empty());	if (gIsVerbose) cerr << "BFT_AncDataCompare " << __LINE__ << ": ignoreLoc=N ignoreCS=N " << info << endl;
+			CHECK(AJA_SUCCESS(pkt.Compare(pktA, /*ignoreLoc*/false, /*ignoreChkSum*/true)));
+			info =   pkt.CompareWithInfo (pktA, /*ignoreLoc*/false, /*ignoreChkSum*/true);
+			CHECK(info.empty());
+			CHECK(AJA_FAILURE(pkt.Compare(pktA, /*ignoreLoc*/true,  /*ignoreChkSum*/false)));
+			info =   pkt.CompareWithInfo (pktA, /*ignoreLoc*/true,  /*ignoreChkSum*/false);
+			CHECK_FALSE(info.empty());	if (gIsVerbose) cerr << "BFT_AncDataCompare " << __LINE__ << ": ignoreLoc=Y ignoreCS=N " << info << endl;
+			CHECK(AJA_SUCCESS(pkt.Compare(pktA, /*ignoreLoc*/true,  /*ignoreChkSum*/true)));
+			info =   pkt.CompareWithInfo (pktA, /*ignoreLoc*/true,  /*ignoreChkSum*/true);
+			CHECK(info.empty());
+
+			//	Validate both "ignoreLoc" & "ignoreChkSum"
+			pktA.SetLocationDataChannel(AJAAncDataChannel_C);	//	pktA location differs from pkt
+			CHECK(AJA_FAILURE(pkt.Compare(pktA, /*ignoreLoc*/false, /*ignoreChkSum*/false)));
+			info =   pkt.CompareWithInfo (pktA, /*ignoreLoc*/false, /*ignoreChkSum*/false);
+			CHECK_FALSE(info.empty());	if (gIsVerbose) cerr << "BFT_AncDataCompare " << __LINE__ << ": ignoreLoc=N ignoreCS=N " << info << endl;
+			CHECK(AJA_FAILURE(pkt.Compare(pktA, /*ignoreLoc*/false, /*ignoreChkSum*/true)));
+			info =   pkt.CompareWithInfo (pktA, /*ignoreLoc*/false, /*ignoreChkSum*/true);
+			CHECK_FALSE(info.empty());	if (gIsVerbose) cerr << "BFT_AncDataCompare " << __LINE__ << ": ignoreLoc=N ignoreCS=Y " << info << endl;
+			CHECK(AJA_FAILURE(pkt.Compare(pktA, /*ignoreLoc*/true,  /*ignoreChkSum*/false)));
+			info =   pkt.CompareWithInfo (pktA, /*ignoreLoc*/true,  /*ignoreChkSum*/false);
+			CHECK_FALSE(info.empty());	if (gIsVerbose) cerr << "BFT_AncDataCompare " << __LINE__ << ": ignoreLoc=Y ignoreCS=N " << info << endl;
+			CHECK(AJA_SUCCESS(pkt.Compare(pktA, /*ignoreLoc*/true,  /*ignoreChkSum*/true)));
+			info =   pkt.CompareWithInfo (pktA, /*ignoreLoc*/true,  /*ignoreChkSum*/true);
+			CHECK(info.empty());
+		}	//	TEST_CASE("BFT_AncDataCompare")
+
+
+		TEST_CASE("BFT_AncListCompare")
+		{
+			const string a("This is a test"), b("This is A test");
+			const NTV2Buffer A(a.c_str(), a.length()), B(b.c_str(), b.length());
+			string info;
+			NTV2StringList nfo;
+			AJAAncillaryData pkt, pktA;
+			pkt.SetDID(0x05);	pkt.SetSID(0x07);
+			pkt.SetDataCoding(AJAAncDataCoding_Digital);
+			pkt.SetLocationVideoLink(AJAAncDataLink_A);
+			pkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyVanc);
+			pkt.SetLocationDataChannel(AJAAncDataChannel_Y);
+			pkt.SetLocationLineNumber(9);
+			pkt.SetPayloadData (A, size_t(A));
+			pkt.SetChecksum(123);	//	arbitrary CS
+
+			//	Make two lists with same 4 packets:  1st normal;  2nd uses LinkB;  3rd uses C chl;  4th uses line 10
+			AJAAncillaryList pktsA, pktsB;
+			pktsA.AddAncillaryData(pkt);
+			pktA = pkt;		pktA.GetDataLocation().SetDataLink(AJAAncDataLink_B);
+			pktsA.AddAncillaryData(pktA);
+			pktA = pkt;		pktA.GetDataLocation().SetDataChannel(AJAAncDataChannel_C);
+			pktsA.AddAncillaryData(pktA);
+			pktA = pkt;		pktA.GetDataLocation().SetLineNumber(10);
+			pktsA.AddAncillaryData(pktA);
+			pktsB = pktsA;
+
+			//	Test 1:		1 diff:		2nd packet in list B has location difference:   uses LinkA instead of LinkB
+			pktsB.GetAncillaryDataAtIndex(1)->GetDataLocation().SetDataLink(AJAAncDataLink_A);
+			CHECK(AJA_FAILURE(pktsA.Compare (pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/false)));
+//			info =    pktsA.CompareWithInfo (pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/false);		cerr << __LINE__ << ":\t" << info << endl;
+			pktsA.CompareWithInfo (nfo,      pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/false);		cerr << __LINE__ << ":\t" << aja::join(nfo,"\n\t") << endl;
+
+			CHECK(AJA_FAILURE(pktsA.Compare (pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/true)));
+//			info =    pktsA.CompareWithInfo (pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/true);		cerr << __LINE__ << ":\t" << info << endl;
+			pktsA.CompareWithInfo (nfo,      pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/true);		cerr << __LINE__ << ":\t" << aja::join(nfo,"\n\t") << endl;
+
+			CHECK(AJA_SUCCESS(pktsA.Compare (pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/false)));
+//			info =    pktsA.CompareWithInfo (pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/false);
+			CHECK(pktsA.CompareWithInfo (nfo,pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/false));
+
+			CHECK(AJA_SUCCESS(pktsA.Compare (pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/true)));
+//			info =    pktsA.CompareWithInfo (pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/true);
+			CHECK(pktsA.CompareWithInfo (nfo,pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/true));
+
+
+			//	Test 2:		1 diff:		3rd packet in list B has checksum difference
+			pktsB = pktsA;
+			pktsB.GetAncillaryDataAtIndex(2)->SetChecksum(100);
+			CHECK(AJA_FAILURE(pktsA.Compare (pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/false)));
+//			info =    pktsA.CompareWithInfo (pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/false);		cerr << __LINE__ << ":\t" << info << endl;
+			pktsA.CompareWithInfo (nfo,      pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/false);		cerr << __LINE__ << ":\t" << aja::join(nfo,"\n\t") << endl;
+
+			CHECK(AJA_SUCCESS(pktsA.Compare (pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/true)));
+//			info =    pktsA.CompareWithInfo (pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/true);
+			CHECK(pktsA.CompareWithInfo (nfo,pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/true));
+
+			CHECK(AJA_FAILURE(pktsA.Compare (pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/false)));
+//			info =    pktsA.CompareWithInfo (pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/false);		cerr << __LINE__ << ":\t" << info << endl;
+			pktsA.CompareWithInfo (nfo,      pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/false);		cerr << __LINE__ << ":\t" << aja::join(nfo,"\n\t") << endl;
+
+			CHECK(AJA_SUCCESS(pktsA.Compare (pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/true)));
+//			info =    pktsA.CompareWithInfo (pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/true);
+			CHECK(pktsA.CompareWithInfo (nfo,pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/true));
+
+
+			//	Test 3:		2 diffs:	Combo of tests 1 & 2
+			pktsB.GetAncillaryDataAtIndex(1)->GetDataLocation().SetDataLink(AJAAncDataLink_A);
+			CHECK(AJA_FAILURE(pktsA.Compare (pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/false)));
+//			info =    pktsA.CompareWithInfo (pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/false);		cerr << __LINE__ << ":\t" << info << endl;
+			pktsA.CompareWithInfo (nfo,      pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/false);		cerr << __LINE__ << ":\t" << aja::join(nfo,"\n\t") << endl;
+
+			CHECK(AJA_FAILURE(pktsA.Compare (pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/true)));
+//			info =    pktsA.CompareWithInfo (pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/true);		cerr << __LINE__ << ":\t" << info << endl;
+			pktsA.CompareWithInfo (nfo,      pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/true);		cerr << __LINE__ << ":\t" << aja::join(nfo,"\n\t") << endl;
+
+			CHECK(AJA_FAILURE(pktsA.Compare (pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/false)));
+//			info =    pktsA.CompareWithInfo (pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/false);		cerr << __LINE__ << ":\t" << info << endl;
+			pktsA.CompareWithInfo (nfo,      pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/false);		cerr << __LINE__ << ":\t" << aja::join(nfo,"\n\t") << endl;
+
+			CHECK(AJA_SUCCESS(pktsA.Compare (pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/true)));
+//			info =    pktsA.CompareWithInfo (pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/true);
+			CHECK(pktsA.CompareWithInfo (nfo,pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/true));
+
+
+			//	Test 4:		3 diffs:	Combo of test 3 + different packet data in 4th packet of list B
+			pktsB.GetAncillaryDataAtIndex(3)->SetPayloadData (B, size_t(B));
+			pktsB.GetAncillaryDataAtIndex(3)->GetDataLocation().SetLineNumber(11);
+			pktsB.GetAncillaryDataAtIndex(3)->SetSID(0xFE);
+			CHECK(AJA_FAILURE(pktsA.Compare (pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/false)));
+//			info =    pktsA.CompareWithInfo (pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/false);		cerr << __LINE__ << ":\t" << info << endl;
+			pktsA.CompareWithInfo (nfo,      pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/false);		cerr << __LINE__ << ":\t" << aja::join(nfo,"\n\t") << endl;
+
+			CHECK(AJA_FAILURE(pktsA.Compare (pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/true)));
+//			info =    pktsA.CompareWithInfo (pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/true);		cerr << __LINE__ << ":\t" << info << endl;
+			pktsA.CompareWithInfo (nfo,      pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/true);		cerr << __LINE__ << ":\t" << aja::join(nfo,"\n\t") << endl;
+
+			CHECK(AJA_FAILURE(pktsA.Compare (pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/false)));
+//			info =    pktsA.CompareWithInfo (pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/false);		cerr << __LINE__ << ":\t" << info << endl;
+			pktsA.CompareWithInfo (nfo,      pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/false);		cerr << __LINE__ << ":\t" << aja::join(nfo,"\n\t") << endl;
+
+			CHECK(AJA_FAILURE(pktsA.Compare (pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/true)));
+//			info =    pktsA.CompareWithInfo (pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/true);
+			pktsA.CompareWithInfo (nfo,      pktsB, /*ignoreLoc*/true,  /*ignoreChkSum*/true);		cerr << __LINE__ << ":\t" << aja::join(nfo,"\n\t") << endl;
+		}	//	TEST_CASE("BFT_AncListCompare")
 
 
 		TEST_CASE("BFT_AnalogGUMP")
@@ -575,7 +829,7 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 			uint32_t numConst(0), numDest(0);
 			AJAAncillaryData::ResetInstanceCounts();
 			AJAAncillaryData *pDefaultPkt(AJA_NULL), *pClone(AJA_NULL);
-			const AJAAncillaryDataLocation nullLocation;
+			const AJAAncDataLoc nullLocation;
 			vector<uint8_t> buffer4K;
 			buffer4K.resize(4096, 0x65);
 
@@ -596,10 +850,10 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 				CHECK (defaultPkt.IsVanc());
 				CHECK_FALSE (defaultPkt.IsHanc());
 				CHECK_EQ (defaultPkt.GetLocationLineNumber(), 0);
-				CHECK_EQ(defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_A);
-				CHECK_EQ(defaultPkt.GetLocationDataStream(), AJAAncillaryDataStream_1);
-				CHECK_EQ(defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
-				CHECK_EQ(defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
+				CHECK_EQ(defaultPkt.GetLocationVideoLink(), AJAAncDataLink_A);
+				CHECK_EQ(defaultPkt.GetLocationDataStream(), AJAAncDataStream_1);
+				CHECK_EQ(defaultPkt.GetLocationVideoSpace(), AJAAncDataSpace_VANC);
+				CHECK_EQ(defaultPkt.GetLocationDataChannel(), AJAAncDataChannel_Y);
 				AJAAncillaryData::GetInstanceCounts(numConst, numDest);
 				cerr << "BFT_AncillaryData:  Validated AJAAncillaryData default values (" << DEC(numConst-numDest) << " alive)" << endl;
 				DBG_CHECK_EQ(numConst, 1);	DBG_CHECK_EQ(numDest, 0);
@@ -607,24 +861,24 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 				//	Verify that GetDataLocation/SetDataLocation works...
 				if (true)
 				{
-					const AJAAncillaryDataLocation savedLoc(defaultPkt.GetDataLocation());
-						CHECK(AJA_SUCCESS(defaultPkt.SetLocationVideoLink(AJAAncillaryDataLink_B)));
-						CHECK(AJA_SUCCESS(defaultPkt.SetLocationDataStream(AJAAncillaryDataStream_4)));
+					const AJAAncDataLoc savedLoc(defaultPkt.GetDataLocation());
+						CHECK(AJA_SUCCESS(defaultPkt.SetLocationVideoLink(AJAAncDataLink_B)));
+						CHECK(AJA_SUCCESS(defaultPkt.SetLocationDataStream(AJAAncDataStream_4)));
 						CHECK(AJA_SUCCESS(defaultPkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc)));
-						CHECK(AJA_SUCCESS(defaultPkt.SetLocationDataChannel(AJAAncillaryDataChannel_C)));
+						CHECK(AJA_SUCCESS(defaultPkt.SetLocationDataChannel(AJAAncDataChannel_C)));
 						CHECK(AJA_SUCCESS(defaultPkt.SetLocationLineNumber(225)));
 						CHECK_EQ(defaultPkt.GetLocationLineNumber(), 225);
-						CHECK_EQ(defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_B);
-						CHECK_EQ(defaultPkt.GetLocationDataStream(), AJAAncillaryDataStream_4);
-						CHECK_EQ(defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_HANC);
-						CHECK_EQ(defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_C);
+						CHECK_EQ(defaultPkt.GetLocationVideoLink(), AJAAncDataLink_B);
+						CHECK_EQ(defaultPkt.GetLocationDataStream(), AJAAncDataStream_4);
+						CHECK_EQ(defaultPkt.GetLocationVideoSpace(), AJAAncDataSpace_HANC);
+						CHECK_EQ(defaultPkt.GetLocationDataChannel(), AJAAncDataChannel_C);
 					CHECK(AJA_SUCCESS(defaultPkt.SetDataLocation(savedLoc)));
 					cerr << "BFT_AncillaryData:  Validated AJAAncillaryData::GetDataLocation, SetDataLocation" << endl;
 				}
 
 				//	Validate new "Unknown" packet from AJAAncillaryDataFactory::Create...
 				CHECK (pDefaultPkt == AJA_NULL);
-				pDefaultPkt = AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Unknown);	//	constr +1  ==> 2
+				pDefaultPkt = AJAAncillaryDataFactory::Create(AJAAncDataType_Unknown);	//	constr +1  ==> 2
 				CHECK(pDefaultPkt != AJA_NULL);
 				CHECK_FALSE (pDefaultPkt->GotValidReceiveData());
 				CHECK_EQ (pDefaultPkt->GetDID(), 0x00);
@@ -641,7 +895,7 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 				CHECK (pDefaultPkt->IsVanc());
 				CHECK_FALSE (pDefaultPkt->IsHanc());
 				CHECK_EQ (pDefaultPkt->GetLocationLineNumber(), 0);
-				cerr << "BFT_AncillaryData:  Validated AJAAncillaryData created by AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Unknown)" << endl;
+				cerr << "BFT_AncillaryData:  Validated AJAAncillaryData created by AJAAncillaryDataFactory::Create(AJAAncDataType_Unknown)" << endl;
 
 				//	Validate AJAAncillaryData operator == comparing two NULL packets...
 				CHECK_EQ(*pDefaultPkt, defaultPkt);
@@ -694,47 +948,47 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 					CHECK_EQ (pClone->GetDID(), 0);
 					CHECK_EQ (pClone->GetSID(), 0);
 					CHECK (pClone->IsEmpty());
-					CHECK_EQ(pClone->GetDataCoding(), AJAAncillaryDataCoding_Digital);
-					CHECK(AJA_SUCCESS(pClone->SetDataCoding(AJAAncillaryDataCoding_Raw)));
-					CHECK_EQ(pClone->GetDataCoding(), AJAAncillaryDataCoding_Raw);
+					CHECK_EQ(pClone->GetDataCoding(), AJAAncDataCoding_Digital);
+					CHECK(AJA_SUCCESS(pClone->SetDataCoding(AJAAncDataCoding_Raw)));
+					CHECK_EQ(pClone->GetDataCoding(), AJAAncDataCoding_Raw);
 					CHECK_EQ(pClone->GetLocationLineNumber(), 0);
 					CHECK(AJA_SUCCESS(pClone->SetLocationLineNumber(100)));
 					CHECK_EQ(pClone->GetLocationLineNumber(), 100);
-					CHECK_EQ(pClone->GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
+					CHECK_EQ(pClone->GetLocationVideoSpace(), AJAAncDataSpace_VANC);
 					CHECK(AJA_SUCCESS(pClone->SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc)));
-					CHECK_EQ(pClone->GetLocationVideoSpace(), AJAAncillaryDataSpace_HANC);
-					CHECK_EQ(pClone->GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
-					CHECK(AJA_SUCCESS(pClone->SetLocationDataChannel(AJAAncillaryDataChannel_C)));
-					CHECK_EQ(pClone->GetLocationDataChannel(), AJAAncillaryDataChannel_C);
-					CHECK_EQ(pClone->GetLocationVideoLink(), AJAAncillaryDataLink_A);
-					CHECK(AJA_SUCCESS(pClone->SetLocationVideoLink(AJAAncillaryDataLink_B)));
-					CHECK_EQ(pClone->GetLocationVideoLink(), AJAAncillaryDataLink_B);
+					CHECK_EQ(pClone->GetLocationVideoSpace(), AJAAncDataSpace_HANC);
+					CHECK_EQ(pClone->GetLocationDataChannel(), AJAAncDataChannel_Y);
+					CHECK(AJA_SUCCESS(pClone->SetLocationDataChannel(AJAAncDataChannel_C)));
+					CHECK_EQ(pClone->GetLocationDataChannel(), AJAAncDataChannel_C);
+					CHECK_EQ(pClone->GetLocationVideoLink(), AJAAncDataLink_A);
+					CHECK(AJA_SUCCESS(pClone->SetLocationVideoLink(AJAAncDataLink_B)));
+					CHECK_EQ(pClone->GetLocationVideoLink(), AJAAncDataLink_B);
 					AJAAncillaryData::GetInstanceCounts(numConst, numDest);
 					cerr << "BFT_AncillaryData:  Validated AJAAncillaryData::Clone" << " C" << DEC(numConst) << " D" << DEC(numDest) << endl;
 					DBG_CHECK_EQ(numConst, 4);	DBG_CHECK_EQ(numDest, 1);
 
-					//	Test generating default packet using AJAAncillaryDataFactory::Create for these AJAAncillaryDataTypes...
+					//	Test generating default packet using AJAAncillaryDataFactory::Create for these AJAAncDataTypes...
 					//	...then GeneratePayloadData for it, then clone it, and test AJAAncillaryDataFactory::GuessAncillaryDataType using the clone.
 					//	The detected data type should match the original's...
-					static const AJAAncillaryDataType	gDataTypes[]	=	{	//AJAAncillaryDataType_Unknown,
-																				//	AJAAncillaryDataType_Smpte2016_3,
-																				AJAAncillaryDataType_Timecode_ATC
-																				,AJAAncillaryDataType_Timecode_VITC
-																				,AJAAncillaryDataType_Cea708
-																				,AJAAncillaryDataType_Cea608_Vanc
-																				,AJAAncillaryDataType_Cea608_Line21
-																				//	,AJAAncillaryDataType_Smpte352
-																				//	,AJAAncillaryDataType_Smpte2051
-																				//	,AJAAncillaryDataType_FrameStatusInfo524D
-																				//	,AJAAncillaryDataType_FrameStatusInfo5251
-																				//	,AJAAncillaryDataType_HDR_SDR
-																				//	,AJAAncillaryDataType_HDR_HDR10
-																				//	,AJAAncillaryDataType_HDR_HLG
+					static const AJAAncDataType	gDataTypes[]	=	{	//AJAAncDataType_Unknown,
+																				//	AJAAncDataType_Smpte2016_3,
+																				AJAAncDataType_Timecode_ATC
+																				,AJAAncDataType_Timecode_VITC
+																				,AJAAncDataType_Cea708
+																				,AJAAncDataType_Cea608_Vanc
+																				,AJAAncDataType_Cea608_Line21
+																				//	,AJAAncDataType_Smpte352
+																				//	,AJAAncDataType_Smpte2051
+																				//	,AJAAncDataType_FrameStatusInfo524D
+																				//	,AJAAncDataType_FrameStatusInfo5251
+																				//	,AJAAncDataType_HDR_SDR
+																				//	,AJAAncDataType_HDR_HDR10
+																				//	,AJAAncDataType_HDR_HLG
 																				};
-					const size_t numTypes (sizeof(gDataTypes) / sizeof(AJAAncillaryDataType));
+					const size_t numTypes (sizeof(gDataTypes) / sizeof(AJAAncDataType));
 					for (unsigned ndx(0);  ndx < numTypes;  ndx++)
 					{
-						const AJAAncillaryDataType	dataType (gDataTypes[ndx]);
+						const AJAAncDataType	dataType (gDataTypes[ndx]);
 						AJAAncillaryData *	pDefaultPkt2 = AJAAncillaryDataFactory::Create(dataType);	//	constr +1  ==> 5, 7, 9, 11, 13
 						CHECK(pDefaultPkt2 != AJA_NULL);
 						CHECK(AJA_SUCCESS(pDefaultPkt2->GeneratePayloadData()));
@@ -746,7 +1000,7 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 						delete pClonePkt;		//	destr +1  ==> 2,  4,  6,  8,  10
 						delete pDefaultPkt2;	//	destr +1  ==>   3,  5,  7,  9,  11
 						AJAAncillaryData::GetInstanceCounts(numConst, numDest);
-						cerr << "BFT_AncillaryData:  Validated AJAAncillaryDataFactory::GuessAncillaryDataType for '" << ::AJAAncillaryDataTypeToString(dataType) << "' C" << DEC(numConst) << " D" << DEC(numDest) << endl;
+						cerr << "BFT_AncillaryData:  Validated AJAAncillaryDataFactory::GuessAncillaryDataType for '" << ::AJAAncDataTypeToString(dataType) << "' C" << DEC(numConst) << " D" << DEC(numDest) << endl;
 						DBG_CHECK_EQ(numConst, (4 + (ndx+1)*2));	DBG_CHECK_EQ(numDest, 1 + (ndx+1)*2);
 					}
 				}	//	Clone Tests
@@ -765,12 +1019,12 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 				CHECK(AJA_SUCCESS(defaultPkt.AppendPayload(defaultPkt)));
 				CHECK_EQ (defaultPkt.GetDC(), 2*(4096 + 2*sizeof(pTestBytes)));
 
-				CHECK(AJA_SUCCESS(defaultPkt.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+				CHECK(AJA_SUCCESS(defaultPkt.SetDataCoding(AJAAncDataCoding_Digital)));
 				CHECK(AJA_SUCCESS(defaultPkt.SetLocationLineNumber(9)));
 				CHECK(AJA_SUCCESS(defaultPkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyVanc)));
-				CHECK(AJA_SUCCESS(defaultPkt.SetLocationDataChannel(AJAAncillaryDataChannel_Y)));
-				CHECK(AJA_SUCCESS(defaultPkt.SetLocationDataStream(AJAAncillaryDataStream_1)));
-				CHECK(AJA_SUCCESS(defaultPkt.SetLocationVideoLink(AJAAncillaryDataLink_A)));
+				CHECK(AJA_SUCCESS(defaultPkt.SetLocationDataChannel(AJAAncDataChannel_Y)));
+				CHECK(AJA_SUCCESS(defaultPkt.SetLocationDataStream(AJAAncDataStream_1)));
+				CHECK(AJA_SUCCESS(defaultPkt.SetLocationVideoLink(AJAAncDataLink_A)));
 				CHECK(AJA_SUCCESS(defaultPkt.SetDID(0x45)));
 				CHECK(AJA_SUCCESS(defaultPkt.SetSID(0x01)));
 				cerr << "BFT_AncillaryData:  Validated AJAAncillaryData::AppendPayloadData" << endl;
@@ -833,7 +1087,7 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 				}
 			}	//	defaultPkt destroyed:	destr +1  ==> 12
 			AJAAncillaryData::GetInstanceCounts(numConst, numDest);
-			cerr << "BFT_AncillaryData passed" << " C" << DEC(numConst) << " D" << DEC(numDest) << endl;
+//			cerr << "BFT_AncillaryData passed" << " C" << DEC(numConst) << " D" << DEC(numDest) << endl;
 			DBG_CHECK_EQ(numConst, 4 + 10);	DBG_CHECK_EQ(numDest, 1 + 1 + 10);
 		}	//	TEST_CASE("BFT_AncillaryData")
 
@@ -894,12 +1148,12 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 			CHECK (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_Y, u16Pkts, hOffsets));	//	Should succeed, 1 Y-channel packet
 			CHECK_FALSE (u16Pkts.empty());		//	Expect 1 Y-channel packet
 			CHECK_EQ (u16Pkts.size(), 1);	//	Expect 1 Y-channel packet
-			CHECK(AJA_SUCCESS(pktList.AddVANCData(u16Pkts.front(), AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 9))));	//	Make a packet list from it
+			CHECK(AJA_SUCCESS(pktList.AddVANCData(u16Pkts.front(), AJAAncDataLoc(AJAAncDataLink_A, AJAAncDataChannel_Y, AJAAncDataSpace_VANC, 9))));	//	Make a packet list from it
 			CHECK_EQ(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
 			pPkt = pktList.GetAncillaryDataAtIndex(0);			//	Get a pointer to the 1 and only packet
 			CHECK(pPkt != AJA_NULL);							//	Pointer should be non-NULL
-			CHECK_EQ(AJAAncillaryDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	Guessed Anc type should be CEA708
-			p708Pkt = reinterpret_cast <AJAAncillaryData_Cea708 *> (AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Cea708, pPkt));	//	Make a 708-specific packet instance
+			CHECK_EQ(AJAAncDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	Guessed Anc type should be CEA708
+			p708Pkt = reinterpret_cast <AJAAncillaryData_Cea708 *> (AJAAncillaryDataFactory::Create(AJAAncDataType_Cea708, pPkt));	//	Make a 708-specific packet instance
 			CHECK(p708Pkt != AJA_NULL);								//	708-specific packet instance creation should work
 			CHECK(AJA_SUCCESS(p708Pkt->GetPayloadData(u16s)));			//	Get its packet data as uint16_t vector (with parity)
 			CHECK_EQ(uint32_t(u16s.size()), p708Pkt->GetDC());	//	Vector element count should match packet data count
@@ -924,11 +1178,11 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 			CHECK (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_C, u16Pkts, hOffsets));	//	Should succeed, 1 C-channel packet
 			CHECK_FALSE (u16Pkts.empty());		//	Expect 1 C-channel packet
 			CHECK_EQ (u16Pkts.size(), 1);	//	Expect 1 C-channel packet
-			CHECK(AJA_SUCCESS(pktList.AddVANCData(u16Pkts.front(), AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_C, AJAAncillaryDataSpace_VANC, 9))));	//	Make a packet list from it
+			CHECK(AJA_SUCCESS(pktList.AddVANCData(u16Pkts.front(), AJAAncDataLoc(AJAAncDataLink_A, AJAAncDataChannel_C, AJAAncDataSpace_VANC, 9))));	//	Make a packet list from it
 			CHECK_EQ(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
 			pPkt = pktList.GetAncillaryDataAtIndex(0);			//	Get a pointer to the 1 and only packet
 			CHECK(pPkt != AJA_NULL);							//	Pointer should be non-NULL
-			CHECK_EQ(AJAAncillaryDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	This used to fail because it's not in Y channel, but changed in SDK 16.1 to succeed & log warning
+			CHECK_EQ(AJAAncDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	This used to fail because it's not in Y channel, but changed in SDK 16.1 to succeed & log warning
 			CHECK(AJA_SUCCESS(pPkt->GetPayloadData(u16s)));				//	Get its packet data as uint16_t vector (with parity)
 			CHECK_EQ(uint32_t(u16s.size()), pPkt->GetDC());		//	Vector element count should match packet data count
 			CHECK(size_t(u16s.size()) <= sizeof(pv210YSamples));//	Vector element count should be <= original pkt data count
@@ -949,11 +1203,11 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 			CHECK (u16Pkts.empty());		//	Expect no C-channel-only packets
 			CHECK (CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (v210VancLine, kNTV2SMPTEAncChannel_Both, u16Pkts, hOffsets));	//	Should succeed, 1 Y&C-channel packet
 			CHECK_EQ (u16Pkts.size(), 1);	//	Expect 1 Y&C-channel packet
-			CHECK(AJA_SUCCESS(pktList.AddVANCData(u16Pkts.front(), AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Both, AJAAncillaryDataSpace_VANC, 9))));	//	Make a packet list from it
+			CHECK(AJA_SUCCESS(pktList.AddVANCData(u16Pkts.front(), AJAAncDataLoc(AJAAncDataLink_A, AJAAncDataChannel_Both, AJAAncDataSpace_VANC, 9))));	//	Make a packet list from it
 			CHECK_EQ(pktList.CountAncillaryData(), 1);	//	List should contain 1 packet
 			pPkt = pktList.GetAncillaryDataAtIndex(0);			//	Get a pointer to the 1 and only packet
 			CHECK(pPkt != AJA_NULL);							//	Pointer should be non-NULL
-			CHECK_EQ(AJAAncillaryDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	This used to fail, but changed in SDK 16.1 to succeed as CEA708 starting to be carried in SD
+			CHECK_EQ(AJAAncDataType_Cea708, AJAAncillaryDataFactory::GuessAncillaryDataType(pPkt));	//	This used to fail, but changed in SDK 16.1 to succeed as CEA708 starting to be carried in SD
 			CHECK(AJA_SUCCESS(pPkt->GetPayloadData(u16s)));		//	Get its packet data as uint16_t vector (with parity)
 			CHECK_EQ(uint32_t(u16s.size()), pPkt->GetDC());		//	Vector element count should match packet data count
 			CHECK(size_t(u16s.size()) <= sizeof(pv210YSamples));//	Vector element count should be <= original pkt data count
@@ -986,7 +1240,7 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 				//
 				const NTV2VideoFormat				VFs[]	=	{NTV2_FORMAT_525_5994, NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994};
 				const NTV2PixelFormat				FBFs[]	=	{NTV2_FBF_8BIT_YCBCR, NTV2_FBF_10BIT_YCBCR};
-				const AJAAncillaryDataChannel		CHLs[]	=	{AJAAncillaryDataChannel_C, AJAAncillaryDataChannel_Y};
+				const AJAAncDataChannel				CHLs[]	=	{AJAAncDataChannel_C, AJAAncDataChannel_Y};
 				const NTV2_SMPTEAncChannelSelect	CHSs[]	=	{kNTV2SMPTEAncChannel_Both, kNTV2SMPTEAncChannel_Y, kNTV2SMPTEAncChannel_C};
 				static const string					sCHSs[]	=	{"Y", "C", "Y+C", ""};
 				for (unsigned VFndx(0);  VFndx < sizeof(VFs)/sizeof(VFs[0]);  VFndx++)
@@ -1000,24 +1254,24 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 						if (!fd.IsValid()) cerr << ::NTV2FrameBufferFormatToString(fbf) << endl;
 						CHECK(fd.IsValid());
 						CHECK(fd.IsVANC());
-						NTV2_POINTER				fb	(size_t(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes()));	//	Just VANC lines
+						NTV2Buffer					fb	(size_t(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes()));	//	Just VANC lines
 						fb.Fill(UWord(0x8080));
 cerr << endl << endl << "===========================================================================================================================================" << endl;
 AJA_sREPORT(AJA_DebugUnit_SMPTEAnc, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":  " << fd);
 cerr << __FUNCTION__ << ":  " << fd << endl;
 						for (UWord pktLineOffset(0);  pktLineOffset < fd.GetFirstActiveLine();  pktLineOffset++)
 						{
-							AJAAncillaryData	pkt;
+							AJAAncillaryData pkt;
 							AJAAncillaryList	pkts;
 							ULWord				smpteLine	(0);
 							bool				isF2		(false);
 							for (unsigned CHLndx(0);  CHLndx < sizeof(CHLs)/sizeof(CHLs[0]);  CHLndx++)
 							{
-								const AJAAncillaryDataChannel	chan	(CHLs[CHLndx]);
+								const AJAAncDataChannel	chan	(CHLs[CHLndx]);
 								CHECK(fd.GetSMPTELineNumber(pktLineOffset, smpteLine, isF2));
 								CHECK(AJA_SUCCESS(pkt.SetDID(TEST_DID)));	CHECK(AJA_SUCCESS(pkt.SetSID(TEST_SID)));
-								CHECK(AJA_SUCCESS(pkt.SetDataCoding(AJAAncillaryDataCoding_Digital)));
-								CHECK(AJA_SUCCESS(pkt.SetLocationVideoLink(AJAAncillaryDataLink_A)));
+								CHECK(AJA_SUCCESS(pkt.SetDataCoding(AJAAncDataCoding_Digital)));
+								CHECK(AJA_SUCCESS(pkt.SetLocationVideoLink(AJAAncDataLink_A)));
 								CHECK(AJA_SUCCESS(pkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyVanc)));
 								CHECK(AJA_SUCCESS(pkt.SetLocationDataChannel(chan)));
 								CHECK(AJA_SUCCESS(pkt.SetLocationLineNumber(smpteLine)));
@@ -1029,10 +1283,10 @@ cerr << __FUNCTION__ << ":  " << fd << endl;
 fb.Fill(UWord(0x8080));	//	** MrBill **	FOR NOW
 								CHECK(AJA_SUCCESS(pkts.GetVANCTransmitData (fb,  fd)));
 								//	At this point, the packet should be in the frame buffer's VANC area.
-AJA_sDEBUG(AJA_DebugUnit_SMPTEAnc, "PKT SHOULD BE FOUND AT lineOffset=" << pktLineOffset << " SMPTELine=" << smpteLine << " chan=" << (isSD?(chan==AJAAncillaryDataChannel_C?"Y+C":"ILLEGAL"):(chan==AJAAncillaryDataChannel_C?"C":"Y")));
+AJA_sDEBUG(AJA_DebugUnit_SMPTEAnc, "PKT SHOULD BE FOUND AT lineOffset=" << pktLineOffset << " SMPTELine=" << smpteLine << " chan=" << (isSD?(chan==AJAAncDataChannel_C?"Y+C":"ILLEGAL"):(chan==AJAAncDataChannel_C?"C":"Y")));
 cerr << "Line offset " << pktLineOffset << "(" << smpteLine << ") AFTER GetVANCTransmitData:" << endl;
 CNTV2CaptionLogConfig::DumpMemory(fd.GetRowAddress(fb.GetHostPointer(), pktLineOffset), fd.GetBytesPerRow(), cerr, 16/*inRadix*/, NTV2_IS_FBF_8BIT(fbf)?1:4/*bytesPerGroup*/,NTV2_IS_FBF_8BIT(fbf)?64:16/*groupsPerRow*/,0/*addressRadix*/,false/*ascii*/);
-AJA_sDEBUG(AJA_DebugUnit_SMPTEAnc, ":  PKT SHOULD BE FOUND AT lineOffset=" << pktLineOffset << " SMPTELine=" << smpteLine << " chan=" << (isSD?(chan==AJAAncillaryDataChannel_C?"Y+C":"ILLEGAL"):(chan==AJAAncillaryDataChannel_C?"C":"Y")));
+AJA_sDEBUG(AJA_DebugUnit_SMPTEAnc, ":  PKT SHOULD BE FOUND AT lineOffset=" << pktLineOffset << " SMPTELine=" << smpteLine << " chan=" << (isSD?(chan==AJAAncDataChannel_C?"Y+C":"ILLEGAL"):(chan==AJAAncDataChannel_C?"C":"Y")));
 vector<uint16_t>	u16pktComponents;
 
 CHECK(AJA_SUCCESS(pkt.GenerateTransmitData(u16pktComponents)));
@@ -1054,12 +1308,12 @@ cerr <<  "U16 Packet Components returned from GenerateTransmitData:" << endl;  f
 		CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, isSD ? kNTV2SMPTEAncChannel_Both : kNTV2SMPTEAncChannel_C, cPackets, cHOffsets);
 		if (!isSD)
 			CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (uwords, kNTV2SMPTEAncChannel_Y, yPackets, yHOffsets);
-		AJAAncillaryDataLocation	loc	(AJAAncillaryDataLink_Unknown, isSD ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_C,
-										AJAAncillaryDataSpace_VANC, uint16_t(smpteLine));
+		AJAAncDataLoc loc	(AJAAncDataLink_Unknown, isSD ? AJAAncDataChannel_Both : AJAAncDataChannel_C,
+							AJAAncDataSpace_VANC, uint16_t(smpteLine));
 		for (UWordVANCPacketListConstIter it(cPackets.begin());  it != cPackets.end();  ++it, ndx++)
 			compPkts.AddVANCData (*it, loc.SetHorizontalOffset(cHOffsets[ndx]));
 		ndx = 0;
-		loc.SetDataChannel(AJAAncillaryDataChannel_Y);
+		loc.SetDataChannel(AJAAncDataChannel_Y);
 		for (UWordVANCPacketListConstIter it(yPackets.begin());  it != yPackets.end();  ++it, ndx++)
 			compPkts.AddVANCData (*it, loc.SetHorizontalOffset(yHOffsets[ndx]));
 AJA_sDEBUG(AJA_DebugUnit_SMPTEAnc, "cPackets: " << cPackets);
@@ -1124,7 +1378,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 								pkts.Clear();
 								pkt.Clear();
 								if (NTV2_IS_SD_VIDEO_FORMAT(vf))
-									break;	//	For SD, only one channel: AJAAncillaryDataChannel_Both == AJAAncillaryDataChannel_C
+									break;	//	For SD, only one channel: AJAAncDataChannel_Both == AJAAncDataChannel_C
 							}	//	permute Y+C/Y/C channel
 						}	//	permute line offset
 					}	//	permute FBF
@@ -1138,8 +1392,8 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				v210VancLine.clear();	u16Pkts.clear();	u16s.clear();	pktList.Clear();	pPkt = AJA_NULL;
 
 				//	Test CNTV2SMPTEAncData::GetAncPacketsFromVANCLine...
-				UWordSequence				hOffsets;
-				AJAAncillaryDataLocation	loc	(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Both, AJAAncillaryDataSpace_VANC, 9);
+				UWordSequence	hOffsets;
+				AJAAncDataLoc	loc	(AJAAncDataLink_A, AJAAncDataChannel_Both, AJAAncDataSpace_VANC, 9);
 				::SetDefaultCaptionLogOutputStream(cerr);
 				//::SetDefaultCaptionLogMask(kCaptionLog_SMPTEAncErrors | kCaptionLog_SMPTEAncSuccess | kCaptionLog_SMPTEAncDebug);
 				CHECK(CNTV2SMPTEAncData::GetAncPacketsFromVANCLine (in10BitYUVReferenceLine, kNTV2SMPTEAncChannel_Both, u16Pkts, hOffsets));
@@ -1172,7 +1426,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 			const vector<uint16_t> & in10BitYUVReferenceLine(SD10BitYUVComponents);
 			//	Test SetFromVANCData
 			NTV2FormatDescriptor	fd	(NTV2_STANDARD_525, NTV2_FBF_10BIT_YCBCR, NTV2_VANCMODE_TALLER);
-			NTV2_POINTER			fb (size_t(fd.GetTotalRasterBytes()));	//	Tall SD frame buffer, in which a single VANC line will receive the packed YUV component data
+			NTV2Buffer				fb (size_t(fd.GetTotalRasterBytes()));	//	Tall SD frame buffer, in which a single VANC line will receive the packed YUV component data
 
 			cerr << "WILL ITERATE OVER " << fd.GetFirstActiveLine() << " VANC LINES AND " << in10BitYUVReferenceLine.size() << " YUV COMPONENTS" << endl;
 			//	For each VANC line...
@@ -1209,11 +1463,11 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 						CHECK_EQ(pPkt1->GetSID(), 0x01);	//	Should have SID=0x01
 						CHECK_EQ(pPkt1->GetDC(), 216);	//	Should have DC=216
 						CHECK_EQ(pPkt1->GetChecksum(), 0xD2);	//	Should have CS=0xD2
-						CHECK_EQ(pPkt1->GetDataCoding(), AJAAncillaryDataCoding_Digital);		//	Should be Digital
-						CHECK_EQ(pPkt1->GetLocationVideoLink(), AJAAncillaryDataLink_Unknown);	//	Should be unknown Link
-						CHECK_EQ(pPkt1->GetLocationDataStream(), AJAAncillaryDataStream_1);		//	Should be DS1
-						CHECK_EQ(pPkt1->GetLocationDataChannel(), AJAAncillaryDataChannel_Both);	//	Should be C/both
-						CHECK_EQ(pPkt1->GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);	//	Should be VANC
+						CHECK_EQ(pPkt1->GetDataCoding(), AJAAncDataCoding_Digital);		//	Should be Digital
+						CHECK_EQ(pPkt1->GetLocationVideoLink(), AJAAncDataLink_Unknown);	//	Should be unknown Link
+						CHECK_EQ(pPkt1->GetLocationDataStream(), AJAAncDataStream_1);		//	Should be DS1
+						CHECK_EQ(pPkt1->GetLocationDataChannel(), AJAAncDataChannel_Both);	//	Should be C/both
+						CHECK_EQ(pPkt1->GetLocationVideoSpace(), AJAAncDataSpace_VANC);	//	Should be VANC
 						CHECK_EQ(pPkt1->GetLocationLineNumber(), uint16_t(smpteLineNum));		//	Should match smpteLineNum
 						CHECK_EQ(pPkt1->GetLocationHorizOffset(), 0);							//	Should be zero
 						if (YUVLine.size() >= 240)	//	2nd packet appears around here
@@ -1228,11 +1482,11 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 							CHECK_EQ(pPkt2->GetSID(), 0x02);	//	Should have SID=0x02
 							CHECK_EQ(pPkt2->GetDC(), 2);	//	Should have DC=2
 							CHECK_EQ(pPkt2->GetChecksum(), 0x62);	//	Should have CS=0x62
-							CHECK_EQ(pPkt2->GetDataCoding(), AJAAncillaryDataCoding_Digital);		//	Should be Digital
-							CHECK_EQ(pPkt2->GetLocationVideoLink(), AJAAncillaryDataLink_Unknown);	//	Should be unknown Link
-							CHECK_EQ(pPkt2->GetLocationDataStream(), AJAAncillaryDataStream_1);		//	Should be DS1
-							CHECK_EQ(pPkt2->GetLocationDataChannel(), AJAAncillaryDataChannel_Both);	//	Should be C/both
-							CHECK_EQ(pPkt2->GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);	//	Should be VANC
+							CHECK_EQ(pPkt2->GetDataCoding(), AJAAncDataCoding_Digital);		//	Should be Digital
+							CHECK_EQ(pPkt2->GetLocationVideoLink(), AJAAncDataLink_Unknown);	//	Should be unknown Link
+							CHECK_EQ(pPkt2->GetLocationDataStream(), AJAAncDataStream_1);		//	Should be DS1
+							CHECK_EQ(pPkt2->GetLocationDataChannel(), AJAAncDataChannel_Both);	//	Should be C/both
+							CHECK_EQ(pPkt2->GetLocationVideoSpace(), AJAAncDataSpace_VANC);	//	Should be VANC
 							CHECK_EQ(pPkt2->GetLocationLineNumber(), uint16_t(smpteLineNum));		//	Should match smpteLineNum
 							if (pPkt2->GetLocationHorizOffset() != pkt2HOffset)	cerr << "IN ITERATION YUVLine.size=" << YUVLine.size() << " IN fbRowOffset=" << fbRowOffset << "..." << endl;
 							CHECK_EQ(pPkt2->GetLocationHorizOffset(), pkt2HOffset);					//	Should match hOffset
@@ -1264,12 +1518,12 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 			CHECK_EQ(hdrB.GetAncPacketCount(), 20);
 			CHECK_EQ(hdrB.GetSyncSourceID(), 0xBaadF00d);
 			CHECK_EQ(hdrB.GetPayloadType(), 0x75);
-			NTV2_POINTER	nullBuffer;
+			NTV2Buffer	nullBuffer;
 			CHECK_FALSE(hdrB.WriteToBuffer(nullBuffer));
 
 			//	HdrB => buffer => HdrC	. . .	verify HdrB == HdrC
 			AJARTPAncPayloadHeader	hdrC, hdrD, hdrE;
-			NTV2_POINTER	bBuffer(4096);
+			NTV2Buffer	bBuffer(4096);
 			CHECK(hdrB.WriteToBuffer(bBuffer));
 			if (gIsVerbose)
 				cerr << "hdrB: " << hdrB << endl << bBuffer.AsString(20) << endl;
@@ -1278,7 +1532,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				cerr << "hdrC: " << hdrC << endl;
 
 			//	bufferB => HdrD => bufferC . . .	verify bufferA == bufferB
-			NTV2_POINTER	cBuffer(bBuffer.GetByteCount());
+			NTV2Buffer	cBuffer(bBuffer.GetByteCount());
 			CHECK(hdrD.ReadFromBuffer(bBuffer));
 			CHECK(hdrD.WriteToBuffer(cBuffer));
 			CHECK(cBuffer.IsContentEqual(bBuffer));
@@ -1319,7 +1573,6 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 		{
 			AJAAncillaryData::ResetInstanceCounts();
 			const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000, NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
-			if (gIsVerbose)	cerr << endl << "Starting BFT_AncListToGumpToAncList..." << endl;
 			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
 			{
 				const NTV2VideoFormat		vFormat	(vFormats[ndx]);
@@ -1334,12 +1587,12 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 					CHECK(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
 
 				//	Make the transmit packets...
-				AJAAncillaryDataLocation	loc;
-				loc.SetDataLink(AJAAncillaryDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
+				AJAAncDataLoc	loc;
+				loc.SetDataLink(AJAAncDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
 				AJAAncillaryData_Cea608_Vanc	pkt608F1;
 				CHECK(AJA_SUCCESS(pkt608F1.SetLine(false/*isF1*/, 9)));
 				CHECK(AJA_SUCCESS(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B'))));
-				CHECK(AJA_SUCCESS(pkt608F1.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+9 : 9))));
+				CHECK(AJA_SUCCESS(pkt608F1.SetDataLocation(loc.SetDataChannel(AJAAncDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+9 : 9))));
 				CHECK(AJA_SUCCESS(pkt608F1.GeneratePayloadData()));
 	
 				AJAAncillaryData_Cea608_Vanc	pkt608F2;
@@ -1353,15 +1606,15 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 	
 				AJAAncillaryData				pktCustomY;
 				CHECK(AJA_SUCCESS(pktCustomY.SetDataLocation(loc.SetLineNumber(10))));
-				CHECK(AJA_SUCCESS(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+				CHECK(AJA_SUCCESS(pktCustomY.SetDataCoding(AJAAncDataCoding_Digital)));
 				CHECK(AJA_SUCCESS(pktCustomY.SetDID(0x7A)));
 				CHECK(AJA_SUCCESS(pktCustomY.SetSID(0x01)));
 				static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x09, 0x0A	};
 				CHECK(AJA_SUCCESS(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY))));
 	
 				AJAAncillaryData				pktCustomC;
-				CHECK(AJA_SUCCESS(pktCustomC.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_C).SetLineNumber(11))));
-				CHECK(AJA_SUCCESS(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+				CHECK(AJA_SUCCESS(pktCustomC.SetDataLocation(loc.SetDataChannel(AJAAncDataChannel_C).SetLineNumber(11))));
+				CHECK(AJA_SUCCESS(pktCustomC.SetDataCoding(AJAAncDataCoding_Digital)));
 				CHECK(AJA_SUCCESS(pktCustomC.SetDID(0x8A)));
 				CHECK(AJA_SUCCESS(pktCustomC.SetSID(0x02)));
 				static const uint8_t	pCustomDataC[]	=	{	0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F	};
@@ -1379,12 +1632,12 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				//cerr << "Tx: " << txPkts << endl;
 
 				//	Transmit the packets into the 8-bit GUMP buffer...
-				NTV2_POINTER	gumpF1(4096), gumpF2(4096);
+				NTV2Buffer	gumpF1(4096), gumpF2(4096);
 				CHECK(AJA_SUCCESS(txPkts.GetTransmitData (gumpF1, gumpF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2)));
 				if (gIsVerbose)	cerr << "GUMP F1: " << gumpF1.AsString(64) << endl << "GUMP F2: " << gumpF2.AsString(64) << endl;
 
 				//	NOTE:	This test saves the F1 GUMP buffers for use later by BFT_GumpToAncListToGump...
-				gGumpBuffers[vFormat] = NTV2_POINTER(gumpF1);
+				gGumpBuffers[vFormat] = NTV2Buffer(gumpF1);
 
 				//	Receive packets from the 8-bit GUMP buffer...
 				AJAAncillaryList	rxPkts;
@@ -1405,14 +1658,13 @@ cerr << ::NTV2VideoFormatToString(vFormat) << ": " << AJAAncillaryData::GetNumAc
 				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 5);
 			}	//	for each video format
 			DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 0);
-			cerr << "BFT_AncListToGumpToAncList passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
+//			cerr << "BFT_AncListToGumpToAncList passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
 		}	//	TEST_CASE("BFT_AncListToGumpToAncList")
 
 		TEST_CASE("BFT_GumpToAncListToGump")
 		{
 			//	NOTE:	This test relies on GUMP buffers generated by BFT_AncListToGumpToAncList
 			AJAAncillaryData::ResetInstanceCounts();
-			if (gIsVerbose)	cerr << endl << "Starting BFT_GumpToAncListToGump..." << endl;
 			for (NTV2VideoFormat vFormat(NTV2_FORMAT_UNKNOWN);  vFormat < NTV2_MAX_NUM_VIDEO_FORMATS;  vFormat = NTV2VideoFormat(vFormat+1))
 			{
 				if (gGumpBuffers[vFormat].IsNULL())
@@ -1430,7 +1682,7 @@ cerr << ::NTV2VideoFormatToString(vFormat) << ": " << AJAAncillaryData::GetNumAc
 
 				{	//	Receive packets from the 8-bit GUMP buffer...
 					AJAAncillaryList	pkts;
-					CHECK(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers(gGumpBuffers[vFormat], NTV2_POINTER(), pkts)));
+					CHECK(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers(gGumpBuffers[vFormat], NTV2Buffer(), pkts)));
 					CHECK_EQ(pkts.CountAncillaryData(), 4);
 					if (gIsVerbose)
 						cerr	<< "Received buffer: " << gGumpBuffers[vFormat].AsString(64) << " has " << DEC(pkts.CountAncillaryData()) << " packet(s)"
@@ -1438,7 +1690,7 @@ cerr << ::NTV2VideoFormatToString(vFormat) << ": " << AJAAncillaryData::GetNumAc
 								<< endl;
 
 					//	Transmit the packets into another 8-bit GUMP buffer...
-					NTV2_POINTER	gumpF1(4096), gumpF2;
+					NTV2Buffer	gumpF1(4096), gumpF2;
 					CHECK(AJA_SUCCESS(pkts.GetTransmitData (gumpF1, gumpF2, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2)));
 					if (gIsVerbose)	cerr << "        GUMP F1: " << gumpF1.AsString(64) << endl;
 					CHECK(gGumpBuffers[vFormat].IsContentEqual(gumpF1));
@@ -1446,14 +1698,13 @@ cerr << ::NTV2VideoFormatToString(vFormat) << ": " << AJAAncillaryData::GetNumAc
 				}
 				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 0);
 			}	//	for each video format
-			cerr << "BFT_GumpToAncListToGump passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
+//			cerr << "BFT_GumpToAncListToGump passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
 		}	//	TEST_CASE("BFT_GumpToAncListToGump")
 
 
 		TEST_CASE("BFT_AncListToSortToAncList")
 		{
 			AJAAncillaryData::ResetInstanceCounts();
-			cerr << "Starting BFT_AncListToSortToAncList" << endl;
 			{
 				const NTV2VideoFormat		vFormat	(NTV2_FORMAT_1080i_5994);
 				const NTV2FormatDescriptor	fd		(vFormat, NTV2_FBF_10BIT_YCBCR);
@@ -1466,11 +1717,11 @@ cerr << ::NTV2VideoFormatToString(vFormat) << ": " << AJAAncillaryData::GetNumAc
 					CHECK(fd.GetSMPTELineNumber(1, smpteLineF2, isF2));
 
 				//	Make the transmit packets...
-				AJAAncillaryDataLocation loc;	loc.SetDataLink(AJAAncillaryDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
+				AJAAncDataLoc loc;	loc.SetDataLink(AJAAncDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
 				AJAAncillaryData_Cea608_Vanc	pkt608F1;
 				CHECK(AJA_SUCCESS(pkt608F1.SetLine(false/*isF1*/, 9)));
 				CHECK(AJA_SUCCESS(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B'))));
-				CHECK(AJA_SUCCESS(pkt608F1.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+9 : 9))));
+				CHECK(AJA_SUCCESS(pkt608F1.SetDataLocation(loc.SetDataChannel(AJAAncDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+9 : 9))));
 				CHECK(AJA_SUCCESS(pkt608F1.GeneratePayloadData()));
 
 				AJAAncillaryData_Cea608_Vanc	pkt608F2;
@@ -1484,15 +1735,15 @@ cerr << ::NTV2VideoFormatToString(vFormat) << ": " << AJAAncillaryData::GetNumAc
 
 				AJAAncillaryData				pktCustomY;
 				CHECK(AJA_SUCCESS(pktCustomY.SetDataLocation(loc.SetLineNumber(10))));
-				CHECK(AJA_SUCCESS(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+				CHECK(AJA_SUCCESS(pktCustomY.SetDataCoding(AJAAncDataCoding_Digital)));
 				CHECK(AJA_SUCCESS(pktCustomY.SetDID(0x7A)));
 				CHECK(AJA_SUCCESS(pktCustomY.SetSID(0x01)));
 				static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x09, 0x0A	};
 				CHECK(AJA_SUCCESS(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY))));
 
 				AJAAncillaryData				pktCustomC;		//	==> 5 active
-				CHECK(AJA_SUCCESS(pktCustomC.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_C).SetLineNumber(11))));
-				CHECK(AJA_SUCCESS(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+				CHECK(AJA_SUCCESS(pktCustomC.SetDataLocation(loc.SetDataChannel(AJAAncDataChannel_C).SetLineNumber(11))));
+				CHECK(AJA_SUCCESS(pktCustomC.SetDataCoding(AJAAncDataCoding_Digital)));
 				CHECK(AJA_SUCCESS(pktCustomC.SetDID(0x8A)));
 				CHECK(AJA_SUCCESS(pktCustomC.SetSID(0x02)));
 				static const uint8_t	pCustomDataC[]	=	{	0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F	};
@@ -1523,7 +1774,7 @@ cerr << ::NTV2VideoFormatToString(vFormat) << ": " << AJAAncillaryData::GetNumAc
 				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 5);	//	pktCustomC, pktCustomY, pktHDR, pkt608F2, pkt608F1 still alive
 			}	//	for each video format
 			DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 0);
-			cerr << "BFT_AncListToSortToAncList passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
+//			cerr << "BFT_AncListToSortToAncList passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
 		}	//	TEST_CASE("BFT_AncListToSortToAncList")
 
 
@@ -1531,7 +1782,6 @@ cerr << ::NTV2VideoFormatToString(vFormat) << ": " << AJAAncillaryData::GetNumAc
 		{
 			AJAAncillaryData::ResetInstanceCounts();
 			LOGMYNOTE("BFT_AncListToRTPToAncList: Starting");
-			cerr << endl << "Starting BFT_AncListToRTPToAncList..." << endl;
 			for (unsigned isSingleRTPPkt(0);  isSingleRTPPkt < 2;  isSingleRTPPkt++)
 			{
 				LOGMYDEBUG("BFT_AncListToRTPToAncList: " << (isSingleRTPPkt ? "TEST SINGLE RTP PKT CONTAINING MULTIPLE ANC PKTS" : "TEST MULTI RTP PKT (ONE RTP PKT PER ANC PKT)"));
@@ -1558,7 +1808,7 @@ cerr << ::NTV2VideoFormatToString(vFormat) << ": " << AJAAncillaryData::GetNumAc
 					if (true)
 					{
 						AJAAncDataLoc loc;
-						loc.SetDataLink(AJAAncillaryDataLink_A).SetDataChannel(AJAAncillaryDataChannel_Y).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
+						loc.SetDataLink(AJAAncDataLink_A).SetDataChannel(AJAAncDataChannel_Y).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
 						AJAAncillaryData_Cea608_Vanc	pkt608F1;
 						CHECK(AJA_SUCCESS(pkt608F1.SetLine(false/*isF1*/, 9)));
 						CHECK(AJA_SUCCESS(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B'))));
@@ -1590,15 +1840,15 @@ cerr << ::NTV2VideoFormatToString(vFormat) << ": " << AJAAncillaryData::GetNumAc
 	
 						AJAAncillaryData				pktCustomY;
 						CHECK(AJA_SUCCESS(pktCustomY.SetDataLocation(loc.SetLineNumber(10))));
-						CHECK(AJA_SUCCESS(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+						CHECK(AJA_SUCCESS(pktCustomY.SetDataCoding(AJAAncDataCoding_Digital)));
 						CHECK(AJA_SUCCESS(pktCustomY.SetDID(0x7A)));
 						CHECK(AJA_SUCCESS(pktCustomY.SetSID(0x01)));
 						static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20	};
 						CHECK(AJA_SUCCESS(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY))));
 	
 						AJAAncillaryData				pktCustomC;
-						CHECK(AJA_SUCCESS(pktCustomC.SetDataLocation(loc.SetDataChannel(AJAAncillaryDataChannel_C).SetLineNumber(11))));
-						CHECK(AJA_SUCCESS(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+						CHECK(AJA_SUCCESS(pktCustomC.SetDataLocation(loc.SetDataChannel(AJAAncDataChannel_C).SetLineNumber(11))));
+						CHECK(AJA_SUCCESS(pktCustomC.SetDataCoding(AJAAncDataCoding_Digital)));
 						CHECK(AJA_SUCCESS(pktCustomC.SetDID(0x8A)));
 						CHECK(AJA_SUCCESS(pktCustomC.SetSID(0x02)));
 						static const uint8_t	pCustomDataC[]	=	{	0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F	};
@@ -1623,8 +1873,8 @@ cerr << ::NTV2VideoFormatToString(vFormat) << ": " << AJAAncillaryData::GetNumAc
 					if (gIsVerbose)	cerr << "Tx: " << txPkts << endl;
 
 					//	Transmit the packets into the IP buffer...
-					NTV2_POINTER	IPF1(2048), IPF2(2048);
-					uint32_t		IPF1bytes(0), IPF2bytes(0);
+					NTV2Buffer	IPF1(2048), IPF2(2048);
+					uint32_t	IPF1bytes(0), IPF2bytes(0);
 LOGMYDEBUG("BFT_AncListToRTPToAncList: Call GetIPTransmitDataLength:");
 					CHECK(AJA_SUCCESS(txPkts.GetIPTransmitDataLength (IPF1bytes, IPF2bytes, NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat), smpteLineF2)));
 LOGMYDEBUG("BFT_AncListToRTPToAncList: IPF1bytes=" << DEC(IPF1bytes) << ", IPF2bytes=" << DEC(IPF2bytes) << " -- Call GetIPTransmitData:");
@@ -1634,7 +1884,7 @@ LOGMYDEBUG("BFT_AncListToRTPToAncList: IPF1bytes=" << DEC(IPF1bytes) << ", IPF2b
 //	{cerr << "IP F2 (" << DEC(IPF2bytes) << " bytes):" << endl;	IPF2.Dump(cerr, 0, IPF2bytes, 16, 4, 16);}
 
 					//	NOTE:	This test saves the F1 RTP buffers for use later by BFT_RTPToAncListToRTP...
-					gRTPBuffers[vFormat] = NTV2_POINTER(IPF1);	//	Deep copy
+					gRTPBuffers[vFormat] = NTV2Buffer(IPF1);	//	Deep copy
 //cerr << endl << "gRTPBuffers[" << ::NTV2VideoFormatToString(vFormat) << "]:" << endl << IPF1.GetU32s(/*u32offset*/0, /*u32count*/IPF1bytes/4, /*byteSwap*/true) << endl;
 //if (!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat))
 //	LOGMYDEBUG("F2 RTP Buffer:" << IPF2.GetU32s(/*u32offset*/0, /*u32count*/10, /*byteSwap*/true));
@@ -1656,7 +1906,7 @@ LOGMYDEBUG("BFT_AncListToRTPToAncList: IPF1bytes=" << DEC(IPF1bytes) << ", IPF2b
 				}	//	for each video format
 			}	//	for singleRTP, multiRTP
 			LOGMYNOTE("BFT_AncListToRTPToAncList: Passed");
-			cerr << "BFT_AncListToRTPToAncList passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
+//			cerr << "BFT_AncListToRTPToAncList passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
 			DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 0);
 		}	//	TEST_CASE("BFT_AncListToRTPToAncList")
 
@@ -1665,7 +1915,6 @@ LOGMYDEBUG("BFT_AncListToRTPToAncList: IPF1bytes=" << DEC(IPF1bytes) << ", IPF2b
 		{
 			AJAAncillaryData::ResetInstanceCounts();
 			const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000, NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
-			cerr << "Starting BFT_RTPToAncListToRTP" << endl;
 			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
 			{
 				const NTV2VideoFormat		vFormat	(vFormats[ndx]);
@@ -1682,11 +1931,11 @@ LOGMYDEBUG("BFT_AncListToRTPToAncList: IPF1bytes=" << DEC(IPF1bytes) << ", IPF2b
 
 				//	NOTE:	Use the F1 RTP buffer we saved in BFT_AncListToRTPToAncList...
 				if (gRTPBuffers[vFormat].IsNULL())	{LOGMYINFO("Skipping " << fd << " because " << gRTPBuffers[vFormat]);	continue;}
-				const NTV2_POINTER &	F1RTP_a	(gRTPBuffers[vFormat]);
-				NTV2_POINTER			F1RTP_b	(F1RTP_a.GetByteCount());
-				NTV2_POINTER			F2RTP_b	(F1RTP_a.GetByteCount());
+				const NTV2Buffer &	F1RTP_a	(gRTPBuffers[vFormat]);
+				NTV2Buffer			F1RTP_b	(F1RTP_a.GetByteCount());
+				NTV2Buffer			F2RTP_b	(F1RTP_a.GetByteCount());
 				//	Unpack into an AJAAncillaryList of anc packets...
-				CHECK(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers(F1RTP_a, NTV2_POINTER(), rxPkts)));
+				CHECK(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers(F1RTP_a, NTV2Buffer(), rxPkts)));
 				CHECK_EQ(rxPkts.CountAncillaryData(), 5);	//	Should have 5 packets
 				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), rxPkts.CountAncillaryData());
 				//	Re-pack into RTP...
@@ -1697,7 +1946,7 @@ LOGMYDEBUG("BFT_AncListToRTPToAncList: IPF1bytes=" << DEC(IPF1bytes) << ", IPF2b
 					LOGMYERROR("MIS-COMPARE: Rx RTP: " << F1RTP_a.GetU32s(0, 32, true));
 					LOGMYERROR("MIS-COMPARE: CmpRTP: " << F1RTP_b.GetU32s(0, 32, true));
 					AJAAncillaryList	b_pkts;
-					AJAAncillaryList::SetFromDeviceAncBuffers(F1RTP_b, NTV2_POINTER(), b_pkts);
+					AJAAncillaryList::SetFromDeviceAncBuffers(F1RTP_b, NTV2Buffer(), b_pkts);
 					const string	info	(rxPkts.CompareWithInfo(b_pkts, false, false));
 					if (!info.empty())
 						LOGMYERROR("RxPkts != B-Pkts --- MISCOMPARE: " << info);
@@ -1718,13 +1967,12 @@ LOGMYDEBUG("BFT_AncListToRTPToAncList: IPF1bytes=" << DEC(IPF1bytes) << ", IPF2b
 				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 0);
 				CHECK(F1RTP_a.IsContentEqual(F1RTP_b, 0));
 			}	//	for each vFormat
-			cerr << "BFT_RTPToAncListToRTP passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
+//			cerr << "BFT_RTPToAncListToRTP passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
 		}	//	TEST_CASE("BFT_RTPToAncListToRTP")
 
 
 		TEST_CASE("BFT_RTPXmitTooManyPackets")
 		{
-			cerr << "Starting BFT_RTPXmitTooManyPackets" << endl;
 			AJAAncillaryData::ResetInstanceCounts();
 			//	"TOO MANY PACKETS" TEST
 			//	Validates that GetIPTransmitData will correctly encode no more than 255 packets from a list that contains more.
@@ -1738,22 +1986,22 @@ LOGMYDEBUG("BFT_AncListToRTPToAncList: IPF1bytes=" << DEC(IPF1bytes) << ", IPF2b
 				ULWord				pktNum(0);
 				AJAAncDataLoc		loc;
 				//	This test requires a 5K anc buffer for single-RTP, 10K for multiple-RTP:
-				NTV2_POINTER		F1Buffer((isSingleRTPPacket?5:10)*1024), F2Buffer;
+				NTV2Buffer			F1Buffer((isSingleRTPPacket?5:10)*1024), F2Buffer;
 				pkts.SetAllowMultiRTPTransmit(!isSingleRTPPacket);
 				for (UWord lineNum(9);  lineNum < 42;  lineNum++)
 				{
 					for (UWord pktInLine(0);  pktInLine < 8;  pktInLine++)
 					{
-						AJAAncillaryData	pkt;
-						loc.Reset().SetDataLink(AJAAncillaryDataLink_A)
-									.SetDataChannel(AJAAncillaryDataChannel_Y)
-									.SetDataSpace(AJAAncillaryDataSpace_VANC)
-									.SetDataStream(AJAAncillaryDataStream_1)
+						AJAAncillaryData pkt;
+						loc.Reset().SetDataLink(AJAAncDataLink_A)
+									.SetDataChannel(AJAAncDataChannel_Y)
+									.SetDataSpace(AJAAncDataSpace_VANC)
+									.SetDataStream(AJAAncDataStream_1)
 									.SetLineNumber(lineNum)
 									.SetHorizontalOffset(AJAAncDataHorizOffset_Anywhere);
 						pkt.SetDataLocation(loc);
-						pkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
-						pkt.SetBufferFormat(AJAAncillaryBufferFormat_RTP);
+						pkt.SetDataCoding(AJAAncDataCoding_Digital);
+						pkt.SetBufferFormat(AJAAncBufferFormat_RTP);
 						pkt.SetDID(0xCC);
 						pkt.SetSID(0xDD);
 						const ULWord pktNumBE (ENDIAN_32HtoN(pktNum++));
@@ -1791,7 +2039,7 @@ LOGMYDEBUG("BFT_AncListToRTPToAncList: IPF1bytes=" << DEC(IPF1bytes) << ", IPF2b
 				pkts.Clear();
 				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 0);
 			}	//	permute multiRTP & singleRTP
-			cerr << "BFT_RTPXmitTooManyPackets passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
+//			cerr << "BFT_RTPXmitTooManyPackets passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
 		}	//	TEST_CASE("BFT_RTPXmitTooManyPackets")
 
 
@@ -1811,16 +2059,16 @@ LOGMYDEBUG("BFT_AncListToRTPToAncList: IPF1bytes=" << DEC(IPF1bytes) << ", IPF2b
 			{
 				for (UWord pktInLine(0);  pktInLine < 8;  pktInLine++)
 				{
-					AJAAncillaryData	pkt;
-					loc.Reset().SetDataLink(AJAAncillaryDataLink_A)
-								.SetDataChannel(AJAAncillaryDataChannel_Y)
-								.SetDataSpace(AJAAncillaryDataSpace_VANC)
-								.SetDataStream(AJAAncillaryDataStream_1)
+					AJAAncillaryData pkt;
+					loc.Reset().SetDataLink(AJAAncDataLink_A)
+								.SetDataChannel(AJAAncDataChannel_Y)
+								.SetDataSpace(AJAAncDataSpace_VANC)
+								.SetDataStream(AJAAncDataStream_1)
 								.SetLineNumber(lineNum)
 								.SetHorizontalOffset(AJAAncDataHorizOffset_Anywhere);
 					pkt.SetDataLocation(loc);
-					pkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
-					pkt.SetBufferFormat(AJAAncillaryBufferFormat_RTP);
+					pkt.SetDataCoding(AJAAncDataCoding_Digital);
+					pkt.SetBufferFormat(AJAAncBufferFormat_RTP);
 					pkt.SetDID(0xCC);
 					pkt.SetSID(0xDD);
 					totalPayloadBytes += 255;
@@ -1839,7 +2087,7 @@ LOGMYDEBUG("BFT_AncListToRTPToAncList: IPF1bytes=" << DEC(IPF1bytes) << ", IPF2b
 			LOGMYNOTE(DEC(F1TotalBytes) << " F1 Total Bytes Required, totalPayloadBytes=" << DEC(totalPayloadBytes));
 
 			//	Allocate the F1 anc buffer:   (requires almost 100K!)
-			NTV2_POINTER	F1Buffer((F1TotalBytes / 1024 + 2) * 1024), F2Buffer;
+			NTV2Buffer	F1Buffer((F1TotalBytes / 1024 + 2) * 1024), F2Buffer;
 
 			//	Fill it with RTP xmit data:
 			CHECK(AJA_SUCCESS(pkts.GetIPTransmitData (F1Buffer, F2Buffer)));	//	Progressive, single RTP pkt
@@ -1868,14 +2116,13 @@ LOGMYDEBUG("BFT_AncListToRTPToAncList: IPF1bytes=" << DEC(IPF1bytes) << ", IPF2b
 			DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), pkts.CountAncillaryData());
 			pkts.Clear();
 			DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 0);
-			cerr << "BFT_RTPXmitTooMuchData: SINGLE RTP PACKET passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
+//			cerr << "BFT_RTPXmitTooMuchData: SINGLE RTP PACKET passed -- C" << AJAAncillaryData::GetNumConstructed() << " D" << AJAAncillaryData::GetNumDestructed() << endl;
 		}	//	TEST_CASE("BFT_RTPXmitTooMuchData")
 
 
 		TEST_CASE("BFT_AncListToFBYUV8ToAncList")
 		{
 			const NTV2VideoFormat	vFormats[]	=	{/*NTV2_FORMAT_525_5994, NTV2_FORMAT_625_5000,*/ NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
-			cerr << "Starting BFT_AncListToFBYUV8ToAncList..." << endl;
 			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
 			{
 				const NTV2VideoFormat		vFormat	(vFormats[ndx]);
@@ -1894,33 +2141,33 @@ LOGMYDEBUG("BFT_AncListToRTPToAncList: IPF1bytes=" << DEC(IPF1bytes) << ", IPF2b
 				{
 					//	Make the transmit packets...
 					AJAAncDataLoc	loc;
-					loc.SetDataLink(AJAAncillaryDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
+					loc.SetDataLink(AJAAncDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
 					AJAAncillaryData_Cea608_Vanc	pkt608F1;
 					CHECK(AJA_SUCCESS(pkt608F1.SetLine(false/*isF1*/, 10)));
 					CHECK(AJA_SUCCESS(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B'))));
-					CHECK(AJA_SUCCESS(pkt608F1.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+10 : 10))));
+					CHECK(AJA_SUCCESS(pkt608F1.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncDataChannel_Both : AJAAncDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+10 : 10))));
 					CHECK(AJA_SUCCESS(pkt608F1.GeneratePayloadData()));
 
 					AJAAncillaryData_Cea608_Vanc	pkt608F2;
 					CHECK(AJA_SUCCESS(pkt608F2.SetLine(true/*isF2*/, 11)));
 					CHECK(AJA_SUCCESS(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b'))));
-					CHECK(AJA_SUCCESS(pkt608F2.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat) && pkt608F2.IsField2() ? smpteLineF2+11 : 11))));
+					CHECK(AJA_SUCCESS(pkt608F2.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncDataChannel_Both : AJAAncDataChannel_Y).SetLineNumber(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat) && pkt608F2.IsField2() ? smpteLineF2+11 : 11))));
 					CHECK(AJA_SUCCESS(pkt608F2.GeneratePayloadData()));
 	
 					AJAAncillaryData_HDR_HLG		pktHDR;
 					CHECK(AJA_SUCCESS(pktHDR.GeneratePayloadData()));
 	
 					AJAAncillaryData				pktCustomY;
-					CHECK(AJA_SUCCESS(pktCustomY.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(12))));
-					CHECK(AJA_SUCCESS(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+					CHECK(AJA_SUCCESS(pktCustomY.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncDataChannel_Both : AJAAncDataChannel_Y).SetLineNumber(12))));
+					CHECK(AJA_SUCCESS(pktCustomY.SetDataCoding(AJAAncDataCoding_Digital)));
 					CHECK(AJA_SUCCESS(pktCustomY.SetDID(0x7A)));
 					CHECK(AJA_SUCCESS(pktCustomY.SetSID(0x01)));
 					static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x09, 0x0A	};
 					CHECK(AJA_SUCCESS(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY))));
 	
 					AJAAncillaryData				pktCustomC;
-					CHECK(AJA_SUCCESS(pktCustomC.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_C).SetLineNumber(13))));
-					CHECK(AJA_SUCCESS(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+					CHECK(AJA_SUCCESS(pktCustomC.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncDataChannel_Both : AJAAncDataChannel_C).SetLineNumber(13))));
+					CHECK(AJA_SUCCESS(pktCustomC.SetDataCoding(AJAAncDataCoding_Digital)));
 					CHECK(AJA_SUCCESS(pktCustomC.SetDID(0x8A)));
 					CHECK(AJA_SUCCESS(pktCustomC.SetSID(0x02)));
 					static const uint8_t	pCustomDataC[]	=	{	0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F	};
@@ -1936,13 +2183,13 @@ LOGMYDEBUG("BFT_AncListToRTPToAncList: IPF1bytes=" << DEC(IPF1bytes) << ", IPF2b
 				}
 				txPkts.SortListByLocation();	//	To match rxPkts order at Compare (below)
 				//	Transmit the packets into the 8-bit YCbCr frame buffer...
-				NTV2_POINTER	vanc8(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes());	//	Just the VANC lines
+				NTV2Buffer	vanc8(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes());	//	Just the VANC lines
 				vanc8.Fill(uint8_t(0x80));
 				CHECK(AJA_SUCCESS(txPkts.GetVANCTransmitData (vanc8, fd)));
 /* cerr << ::NTV2VideoFormatToString(vFormat) << " " << ::NTV2FrameBufferFormatToString(fd.GetPixelFormat()) << " VANC: " << endl;
 for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset++) {
-	NTV2_POINTER	blankLine(fd.GetBytesPerRow());
-	NTV2_POINTER	oneLine(fd.GetRowAddress(vanc8.GetHostPointer(), lineOffset), fd.GetBytesPerRow());
+	NTV2Buffer	blankLine(fd.GetBytesPerRow());
+	NTV2Buffer	oneLine(fd.GetRowAddress(vanc8.GetHostPointer(), lineOffset), fd.GetBytesPerRow());
 	blankLine.Fill(uint8_t(0x80));
 	if (!oneLine.IsContentEqual(blankLine)) {
 		cerr << "+" << DEC0N(lineOffset,2) << ": ";  fd.PrintSMPTELineNumber(cerr, lineOffset, false);  cerr << ":" << endl;
@@ -1950,7 +2197,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 } } */
 
 				//	NOTE:	This test saves the VANC buffer for use later by BFT_FBYUV8ToAncListToFBYUV8...
-				gVanc8Buffers[vFormat] = NTV2_POINTER(vanc8);
+				gVanc8Buffers[vFormat] = NTV2Buffer(vanc8);
 
 				//	Receive packets from the 8-bit GUMP buffer...
 				AJAAncillaryList	rxPkts;
@@ -1967,7 +2214,6 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 					cerr << "MISCOMPARE:" << endl << "Tx: " << txPkts << endl	<< "Rx: " << rxPkts << endl;
 				CHECK(AJA_SUCCESS(result));
 			}	//	for each video format
-			cerr << "BFT_AncListToFBYUV8ToAncList passed" << endl;
 		}	//	TEST_CASE("BFT_AncListToFBYUV8ToAncList")
 
 
@@ -1980,7 +2226,6 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 		TEST_CASE("BFT_AncListToFBYUV10ToAncList")
 		{
 			const NTV2VideoFormat	vFormats[]	=	{NTV2_FORMAT_525_5994, /*NTV2_FORMAT_625_5000,*/ NTV2_FORMAT_720p_5994, NTV2_FORMAT_1080i_5994, NTV2_FORMAT_1080p_3000};
-			cerr << "Starting BFT_AncListToFBYUV10ToAncList..." << endl;
 			for (unsigned ndx(0);  ndx < sizeof(vFormats)/sizeof(NTV2VideoFormat);  ndx++)
 			{
 				const NTV2VideoFormat		vFormat	(vFormats[ndx]);
@@ -1999,33 +2244,33 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				{
 					//	Make the transmit packets...
 					AJAAncDataLoc	loc;
-					loc.SetDataLink(AJAAncillaryDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
+					loc.SetDataLink(AJAAncDataLink_A).SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc);
 					AJAAncillaryData_Cea608_Vanc	pkt608F1;
 					CHECK(AJA_SUCCESS(pkt608F1.SetLine(false/*isF1*/, 10)));
 					CHECK(AJA_SUCCESS(pkt608F1.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('B'))));
-					CHECK(AJA_SUCCESS(pkt608F1.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+10 : 10))));
+					CHECK(AJA_SUCCESS(pkt608F1.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncDataChannel_Both : AJAAncDataChannel_Y).SetLineNumber(pkt608F1.IsField2() ? smpteLineF2+10 : 10))));
 					CHECK(AJA_SUCCESS(pkt608F1.GeneratePayloadData()));
 
 					AJAAncillaryData_Cea608_Vanc	pkt608F2;
 					CHECK(AJA_SUCCESS(pkt608F2.SetLine(true/*isF2*/, 11)));
 					CHECK(AJA_SUCCESS(pkt608F2.SetCEA608Bytes(AJAAncillaryData_Cea608::AddOddParity('a'), AJAAncillaryData_Cea608::AddOddParity('b'))));
-					CHECK(AJA_SUCCESS(pkt608F2.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat) && pkt608F2.IsField2() ? smpteLineF2+11 : 11))));
+					CHECK(AJA_SUCCESS(pkt608F2.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncDataChannel_Both : AJAAncDataChannel_Y).SetLineNumber(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(vFormat) && pkt608F2.IsField2() ? smpteLineF2+11 : 11))));
 					CHECK(AJA_SUCCESS(pkt608F2.GeneratePayloadData()));
 	
 					AJAAncillaryData_HDR_HLG		pktHDR;
 					CHECK(AJA_SUCCESS(pktHDR.GeneratePayloadData()));
 	
 					AJAAncillaryData				pktCustomY;
-					CHECK(AJA_SUCCESS(pktCustomY.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_Y).SetLineNumber(12))));
-					CHECK(AJA_SUCCESS(pktCustomY.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+					CHECK(AJA_SUCCESS(pktCustomY.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncDataChannel_Both : AJAAncDataChannel_Y).SetLineNumber(12))));
+					CHECK(AJA_SUCCESS(pktCustomY.SetDataCoding(AJAAncDataCoding_Digital)));
 					CHECK(AJA_SUCCESS(pktCustomY.SetDID(0x7A)));
 					CHECK(AJA_SUCCESS(pktCustomY.SetSID(0x01)));
 					static const uint8_t	pCustomDataY[]	=	{	0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x09, 0x0A	};
 					CHECK(AJA_SUCCESS(pktCustomY.SetPayloadData(pCustomDataY, sizeof(pCustomDataY))));
 	
 					AJAAncillaryData				pktCustomC;
-					CHECK(AJA_SUCCESS(pktCustomC.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncillaryDataChannel_Both : AJAAncillaryDataChannel_C).SetLineNumber(13))));
-					CHECK(AJA_SUCCESS(pktCustomC.SetDataCoding(AJAAncillaryDataCoding_Digital)));
+					CHECK(AJA_SUCCESS(pktCustomC.SetDataLocation(loc.SetDataChannel(fd.IsSD() ? AJAAncDataChannel_Both : AJAAncDataChannel_C).SetLineNumber(13))));
+					CHECK(AJA_SUCCESS(pktCustomC.SetDataCoding(AJAAncDataCoding_Digital)));
 					CHECK(AJA_SUCCESS(pktCustomC.SetDID(0x8A)));
 					CHECK(AJA_SUCCESS(pktCustomC.SetSID(0x02)));
 					static const uint8_t	pCustomDataC[]	=	{	0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F	};
@@ -2041,13 +2286,13 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				}
 
 				//	Transmit the packets into the 10-bit YCbCr frame buffer...
-				NTV2_POINTER	vanc10(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes());	//	Just the VANC lines
+				NTV2Buffer	vanc10(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes());	//	Just the VANC lines
 				vanc10.Fill(uint8_t(0x80));
 				CHECK(AJA_SUCCESS(txPkts.GetVANCTransmitData (vanc10, fd)));
 /* cerr << ::NTV2VideoFormatToString(vFormat) << " " << ::NTV2FrameBufferFormatToString(fd.GetPixelFormat()) << " VANC: " << endl;
 for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset++) {
-	NTV2_POINTER	blankLine(fd.GetBytesPerRow());
-	NTV2_POINTER	oneLine(fd.GetRowAddress(vanc10.GetHostPointer(), lineOffset), fd.GetBytesPerRow());
+	NTV2Buffer	blankLine(fd.GetBytesPerRow());
+	NTV2Buffer	oneLine(fd.GetRowAddress(vanc10.GetHostPointer(), lineOffset), fd.GetBytesPerRow());
 	blankLine.Fill(uint8_t(0x80));
 	if (!oneLine.IsContentEqual(blankLine)) {
 		cerr << "+" << DEC0N(lineOffset,2) << ": ";  fd.PrintSMPTELineNumber(cerr, lineOffset, false);  cerr << ":" << endl;
@@ -2055,7 +2300,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 } } */
 
 				//	NOTE:	This test saves the VANC buffer for use later by BFT_FBYUV10ToAncListToFBYUV10...
-				gVanc10Buffers[vFormat] = NTV2_POINTER(vanc10);
+				gVanc10Buffers[vFormat] = NTV2Buffer(vanc10);
 
 				//	Receive packets from the 8-bit GUMP buffer...
 				AJAAncillaryList	rxPkts;
@@ -2068,14 +2313,12 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 					cerr << "MISCOMPARE:" << endl << "Tx: " << txPkts << endl	<< "Rx: " << rxPkts << endl;
 				CHECK(AJA_SUCCESS(result));
 			}	//	for each video format
-			cerr << "BFT_AncListToFBYUV10ToAncList passed" << endl;
 		}	//	TEST_CASE("BFT_AncListToFBYUV10ToAncList")
 
 
 		TEST_CASE("BFT_FBYUV10ToAncListToFBYUV10")
 		{
 			//	NOTE:	This test relies on YUV10 buffers generated by BFT_AncListToFBYUV10ToAncList
-			cerr << "Starting BFT_FBYUV10ToAncListToFBYUV10..." << endl;
 			for (NTV2VideoFormat vFormat(NTV2_FORMAT_UNKNOWN);  vFormat < NTV2_MAX_NUM_VIDEO_FORMATS;  vFormat = NTV2VideoFormat(vFormat+1))
 			{
 				if (gVanc10Buffers[vFormat].IsNULL())
@@ -2098,25 +2341,23 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 					cerr	<< ::NTV2VideoFormatToString(vFormat) << ": " << "Rx: " << pkts << endl;
 
 				//	Transmit the packets into another YUV10 frame buffer...
-				NTV2_POINTER	yuv10vanc(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes());	//	Just the VANC lines
+				NTV2Buffer	yuv10vanc(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes());	//	Just the VANC lines
 				yuv10vanc.Fill(uint8_t(0x80));
 				CHECK(AJA_SUCCESS(pkts.GetVANCTransmitData(yuv10vanc, fd)));
 				CHECK(gVanc10Buffers[vFormat].IsContentEqual(yuv10vanc));
 			}	//	for each video format
-			cerr << "BFT_FBYUV10ToAncListToFBYUV10 passed" << endl;
 		}	//	TEST_CASE("BFT_FBYUV10ToAncListToFBYUV10")
 
 
 		TEST_CASE("BFT_AddFromDeviceAncBuffer")
 		{	//	This test is intended to elicit crashes (access violations), not to validate outcomes
-			cerr << "BFT_AddFromDeviceAncBuffer started" << endl;
 			AJAAncillaryList pkts;
-			NTV2_POINTER nullBuffer(0);
+			NTV2Buffer nullBuffer(0);
 			AJARTPAncPayloadHeader rtpHdr;
 			//	Exercise RTP (variable-length runs of zeroes)
 			for (ULWord sz(20);  sz < 65;  sz++)
 			{
-				NTV2_POINTER buff(sz*4);
+				NTV2Buffer buff(sz*4);
 				CHECK_EQ(buff.GetByteCount(), sz*4);
 				CHECK(rtpHdr.WriteToBuffer(buff, /*offset*/sz/4%8));
 				CHECK(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers(buff, nullBuffer, pkts)));
@@ -2125,7 +2366,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			//	Exercise RTP (variable-length runs of random data)
 			for (ULWord sz(15);  sz < 65;  sz++)
 			{
-				NTV2_POINTER buff(sz*4);
+				NTV2Buffer buff(sz*4);
 				CHECK_EQ(buff.GetByteCount(), sz*4);
 				std::random_device rd;	//	Seeds the random number engine
 				std::mt19937 gen(rd());	//	Standard mersenne_twister_engine seeded with rd()
@@ -2141,7 +2382,7 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			//	Exercise GUMP (variable-length runs of random data)
 			for (ULWord sz(8);  sz < 200;  sz++)
 			{
-				NTV2_POINTER buff(sz);
+				NTV2Buffer buff(sz);
 				CHECK_EQ(buff.GetByteCount(), sz);
 				std::random_device rd;	//	Seeds the random number engine
 				std::mt19937 gen(rd());	//	Standard mersenne_twister_engine seeded with rd()
@@ -2154,7 +2395,6 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 				if (pkts.CountAncillaryData())
 					LOGMYINFO(pkts);
 			}
-			cerr << "BFT_AddFromDeviceAncBuffer passed" << endl;
 		}	//	TEST_CASE("BFT_AddFromDeviceAncBuffer")
 
 
@@ -2169,26 +2409,25 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			AJAAncillaryData_Cea608_Vanc	pktRX, pktTX;
 			AJAAncillaryData				defaultPkt;
 
-			cerr << "BFT_AncDataCEA608Vanc started" << endl;
 			//	Test AJAAncillaryData_Cea608_Vanc  and GUMP decoding of it
-			CHECK(AJA_SUCCESS(defaultPkt.InitWithReceivedData (pGump608Vanc, sizeof(pGump608Vanc), AJAAncillaryDataLocation(), packetByteCount)));
+			CHECK(AJA_SUCCESS(defaultPkt.InitWithReceivedData (pGump608Vanc, sizeof(pGump608Vanc), AJAAncDataLoc(), packetByteCount)));
 			CHECK_EQ (defaultPkt.GetDC(), 3);
 			CHECK_EQ (defaultPkt.GetDID(), 0x61);
 			CHECK_EQ (defaultPkt.GetSID(), 0x02);
 			CHECK_EQ (defaultPkt.GetChecksum(), 0xF2);
-			CHECK_EQ (defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_Unknown);
-			CHECK_EQ (defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
-			CHECK_EQ (defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
+			CHECK_EQ (defaultPkt.GetLocationVideoLink(), AJAAncDataLink_Unknown);
+			CHECK_EQ (defaultPkt.GetLocationDataChannel(), AJAAncDataChannel_Y);
+			CHECK_EQ (defaultPkt.GetLocationVideoSpace(), AJAAncDataSpace_VANC);
 			CHECK_EQ (defaultPkt.GetLocationLineNumber(), 9);
 			CHECK_EQ (defaultPkt.GetLocationHorizOffset(), AJAAncDataHorizOffset_AnyVanc);
-			CHECK_EQ (defaultPkt.GetDataCoding(), AJAAncillaryDataCoding_Digital);
+			CHECK_EQ (defaultPkt.GetDataCoding(), AJAAncDataCoding_Digital);
 			CHECK_FALSE (defaultPkt.GotValidReceiveData());		//	False, because wasn't vetted by specific subclass
-			CHECK_EQ (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Unknown);
-			CHECK_NE (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Cea608_Vanc);
-			CHECK_EQ (AJAAncillaryData_Cea608_Vanc::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Cea608_Vanc);
-			CHECK_EQ (AJAAncillaryData_Cea608_Line21::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Unknown);
-			CHECK_EQ (AJAAncillaryData_Cea708::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Unknown);
-			CHECK(AJA_SUCCESS(pktRX.InitWithReceivedData (pGump608Vanc, sizeof(pGump608Vanc), AJAAncillaryDataLocation(), packetByteCount)));
+			CHECK_EQ (defaultPkt.GetAncillaryDataType(), AJAAncDataType_Unknown);
+			CHECK_NE (defaultPkt.GetAncillaryDataType(), AJAAncDataType_Cea608_Vanc);
+			CHECK_EQ (AJAAncillaryData_Cea608_Vanc::RecognizeThisAncillaryData(&defaultPkt), AJAAncDataType_Cea608_Vanc);
+			CHECK_EQ (AJAAncillaryData_Cea608_Line21::RecognizeThisAncillaryData(&defaultPkt), AJAAncDataType_Unknown);
+			CHECK_EQ (AJAAncillaryData_Cea708::RecognizeThisAncillaryData(&defaultPkt), AJAAncDataType_Unknown);
+			CHECK(AJA_SUCCESS(pktRX.InitWithReceivedData (pGump608Vanc, sizeof(pGump608Vanc), AJAAncDataLoc(), packetByteCount)));
 			CHECK(AJA_SUCCESS(pktRX.ParsePayloadData()));
 			CHECK (pktRX.GotValidReceiveData());
 			uint8_t	fieldNumber(0), lineNumber(0), char1(0), char2(0);	bool isValid(false);
@@ -2201,7 +2440,6 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			CHECK_EQ (char1, 'A');
 			CHECK_EQ (char2, 'B');
 			CHECK (isValid);
-			cerr << "BFT_AncDataCEA608Vanc passed" << endl;
 		}	//	TEST_CASE("BFT_AncDataCEA608Vanc")
 
 #if 0	//	** MrBill **	NOT READY FOR PRIME-TIME
@@ -2239,23 +2477,23 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			bool							isValid(false);
 
 			//	Test AJAAncillaryData_Cea608_Line21  and GUMP decoding of it
-			CHECK(AJA_SUCCESS(defaultPkt.InitWithReceivedData (pGump608Raw, sizeof(pGump608Raw), AJAAncillaryDataLocation(), packetByteCount)));
+			CHECK(AJA_SUCCESS(defaultPkt.InitWithReceivedData (pGump608Raw, sizeof(pGump608Raw), AJAAncDataLoc(), packetByteCount)));
 			CHECK_EQ (defaultPkt.GetDC(), 255);
 			CHECK_EQ (defaultPkt.GetDID(), 0);
 			CHECK_EQ (defaultPkt.GetSID(), 0);
 			CHECK_EQ (defaultPkt.GetChecksum(), 0);
-			CHECK_EQ (defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_Unknown);
-			CHECK_EQ (defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
-			CHECK_EQ (defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
+			CHECK_EQ (defaultPkt.GetLocationVideoLink(), AJAAncDataLink_Unknown);
+			CHECK_EQ (defaultPkt.GetLocationDataChannel(), AJAAncDataChannel_Y);
+			CHECK_EQ (defaultPkt.GetLocationVideoSpace(), AJAAncDataSpace_VANC);
 			CHECK_EQ (defaultPkt.GetLocationLineNumber(), 9);
-			CHECK_EQ (defaultPkt.GetDataCoding(), AJAAncillaryDataCoding_Raw);
+			CHECK_EQ (defaultPkt.GetDataCoding(), AJAAncDataCoding_Raw);
 			CHECK_FALSE (defaultPkt.GotValidReceiveData());		//	False, because wasn't vetted by specific subclass
-			CHECK_EQ (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Unknown);
-			CHECK_NE (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Cea608_Line21);
-			CHECK_EQ (AJAAncillaryData_Cea608_Vanc::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Unknown);
-			CHECK_EQ (AJAAncillaryData_Cea608_Line21::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Cea608_Line21);
-			CHECK_EQ (AJAAncillaryData_Cea708::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Unknown);
-			CHECK(AJA_SUCCESS(pktRX.InitWithReceivedData (pGump608Raw, sizeof(pGump608Raw), AJAAncillaryDataLocation(), packetByteCount)));
+			CHECK_EQ (defaultPkt.GetAncillaryDataType(), AJAAncDataType_Unknown);
+			CHECK_NE (defaultPkt.GetAncillaryDataType(), AJAAncDataType_Cea608_Line21);
+			CHECK_EQ (AJAAncillaryData_Cea608_Vanc::RecognizeThisAncillaryData(&defaultPkt), AJAAncDataType_Unknown);
+			CHECK_EQ (AJAAncillaryData_Cea608_Line21::RecognizeThisAncillaryData(&defaultPkt), AJAAncDataType_Cea608_Line21);
+			CHECK_EQ (AJAAncillaryData_Cea708::RecognizeThisAncillaryData(&defaultPkt), AJAAncDataType_Unknown);
+			CHECK(AJA_SUCCESS(pktRX.InitWithReceivedData (pGump608Raw, sizeof(pGump608Raw), AJAAncDataLoc(), packetByteCount)));
 			CHECK(AJA_SUCCESS(pktRX.ParsePayloadData()));
 			CHECK (pktRX.GotValidReceiveData());
 			CHECK(AJA_SUCCESS(pktRX.GetCEA608Characters(char1, char2, isValid)));
@@ -2268,15 +2506,15 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			cerr << endl << packetList << endl;
 
 
-			AJAAncillaryData_Cea608_Line21 * pLine21Packet = reinterpret_cast <AJAAncillaryData_Cea608_Line21 *> (AJAAncillaryDataFactory::Create(AJAAncillaryDataType_Cea608_Line21));
+			AJAAncillaryData_Cea608_Line21 * pLine21Packet = reinterpret_cast <AJAAncillaryData_Cea608_Line21 *> (AJAAncillaryDataFactory::Create(AJAAncDataType_Cea608_Line21));
 			CHECK(pLine21Packet != AJA_NULL);
 			CHECK(AJA_SUCCESS(pLine21Packet->GeneratePayloadData()));
-			CHECK(AJA_SUCCESS(pLine21Packet->SetDataLocation (AJAAncillaryDataLocation(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 21))));
+			CHECK(AJA_SUCCESS(pLine21Packet->SetDataLocation (AJAAncDataLoc(AJAAncDataLink_A, AJAAncDataChannel_Y, AJAAncDataSpace_VANC, 21))));
 			CHECK(AJA_SUCCESS(pLine21Packet->SetCEA608Bytes (AJAAncillaryData_Cea608::AddOddParity('A'), AJAAncillaryData_Cea608::AddOddParity('b'))));
 			CHECK(AJA_SUCCESS(pLine21Packet->SetDID(AJAAncillaryData_Cea608_Vanc_DID)));
 			CHECK(AJA_SUCCESS(pLine21Packet->SetSID(AJAAncillaryData_Cea608_Vanc_SID)));
 			//pLine21Packet->Print (cerr, true);
-			CHECK_EQ (AJAAncillaryDataFactory::GuessAncillaryDataType(pLine21Packet), AJAAncillaryDataType_Cea608_Line21);
+			CHECK_EQ (AJAAncillaryDataFactory::GuessAncillaryDataType(pLine21Packet), AJAAncDataType_Cea608_Line21);
 		}	//	TEST_CASE("BFT_AncDataCEA608Analog")
 #endif	//	DISABLED FOR NOW
 
@@ -2294,24 +2532,23 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			AJAAncillaryData			defaultPkt;
 
 			//	Test AJAAncillaryData_Cea708  and GUMP decoding of it
-			cerr << "BFT_AncDataCEA708 started" << endl;
-			CHECK(AJA_SUCCESS(defaultPkt.InitWithReceivedData (pGump708, sizeof(pGump708), AJAAncillaryDataLocation(), packetByteCount)));
+			CHECK(AJA_SUCCESS(defaultPkt.InitWithReceivedData (pGump708, sizeof(pGump708), AJAAncDataLoc(), packetByteCount)));
 			CHECK_EQ (defaultPkt.GetDC(), 82);
 			CHECK_EQ (defaultPkt.GetDID(), 0x61);
 			CHECK_EQ (defaultPkt.GetSID(), 0x01);
 			CHECK_EQ (defaultPkt.GetChecksum(), 0xB4);
-			CHECK_EQ (defaultPkt.GetLocationVideoLink(), AJAAncillaryDataLink_Unknown);
-			CHECK_EQ (defaultPkt.GetLocationDataChannel(), AJAAncillaryDataChannel_Y);
-			CHECK_EQ (defaultPkt.GetLocationVideoSpace(), AJAAncillaryDataSpace_VANC);
+			CHECK_EQ (defaultPkt.GetLocationVideoLink(), AJAAncDataLink_Unknown);
+			CHECK_EQ (defaultPkt.GetLocationDataChannel(), AJAAncDataChannel_Y);
+			CHECK_EQ (defaultPkt.GetLocationVideoSpace(), AJAAncDataSpace_VANC);
 			CHECK_EQ (defaultPkt.GetLocationLineNumber(), 9);
-			CHECK_EQ (defaultPkt.GetDataCoding(), AJAAncillaryDataCoding_Digital);
+			CHECK_EQ (defaultPkt.GetDataCoding(), AJAAncDataCoding_Digital);
 			CHECK_FALSE (defaultPkt.GotValidReceiveData());		//	False, because wasn't vetted by specific subclass
-			CHECK_EQ (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Unknown);
-			CHECK_NE (defaultPkt.GetAncillaryDataType(), AJAAncillaryDataType_Cea608_Vanc);
-			CHECK_EQ (AJAAncillaryData_Cea608_Vanc::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Unknown);
-			CHECK_EQ (AJAAncillaryData_Cea608_Line21::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Unknown);
-			CHECK_EQ (AJAAncillaryData_Cea708::RecognizeThisAncillaryData(&defaultPkt), AJAAncillaryDataType_Cea708);
-			CHECK(AJA_SUCCESS(pktRX.InitWithReceivedData (pGump708, sizeof(pGump708), AJAAncillaryDataLocation(), packetByteCount)));
+			CHECK_EQ (defaultPkt.GetAncillaryDataType(), AJAAncDataType_Unknown);
+			CHECK_NE (defaultPkt.GetAncillaryDataType(), AJAAncDataType_Cea608_Vanc);
+			CHECK_EQ (AJAAncillaryData_Cea608_Vanc::RecognizeThisAncillaryData(&defaultPkt), AJAAncDataType_Unknown);
+			CHECK_EQ (AJAAncillaryData_Cea608_Line21::RecognizeThisAncillaryData(&defaultPkt), AJAAncDataType_Unknown);
+			CHECK_EQ (AJAAncillaryData_Cea708::RecognizeThisAncillaryData(&defaultPkt), AJAAncDataType_Cea708);
+			CHECK(AJA_SUCCESS(pktRX.InitWithReceivedData (pGump708, sizeof(pGump708), AJAAncDataLoc(), packetByteCount)));
 			CHECK(AJA_SUCCESS(pktRX.ParsePayloadData()));
 			CHECK (pktRX.GotValidReceiveData());
 
@@ -2319,7 +2556,6 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			CHECK(AJA_SUCCESS(pktTX.SetPayloadData(pktRX.GetPayloadData(), uint32_t(pktRX.GetPayloadByteCount()))));
 			CHECK_EQ(::memcmp(pktTX.GetPayloadData(), pktRX.GetPayloadData(), pktTX.GetDC()), 0);
 			//CHECK_EQ(pktRX, pktTX);
-			cerr << "BFT_AncDataCEA708 passed" << endl;
 		}	//	TEST_CASE("BFT_AncDataCEA708")
 
 
@@ -2327,11 +2563,10 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 		{
 			const vector<uint16_t> & in10BitYUVReferenceLine(SD10BitYUVComponents);
 			NTV2FormatDescriptor	fd		(NTV2_STANDARD_525, NTV2_FBF_10BIT_YCBCR, NTV2_VANCMODE_TALLER);
-			NTV2_POINTER			fb		(size_t(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes()));	//	Just the VANC lines
+			NTV2Buffer				fb		(size_t(fd.GetTotalRasterBytes() - fd.GetVisibleRasterBytes()));	//	Just the VANC lines
 			UWord					fbRow	(0);
 			vector<uint16_t>		YUVLine;
 
-			cerr << "BFT_YUVComponentsTo10BitYUVPackedBuffer started" << endl;
 			//	Validate "YUVLine too small" failures...
 			fb.Fill(UByte(0x80));  YUVLine = in10BitYUVReferenceLine;  YUVLine.resize(5);
 			CHECK_FALSE(::YUVComponentsTo10BitYUVPackedBuffer (YUVLine,  fb,  fd,  fbRow));	//	YUVLine too small
@@ -2407,7 +2642,6 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 															0x0408004020010200,	0x0408004020010200,	0x0408004020010200,	0x0408004020010200,	0x0408004020010200,	0x0408004020010200,
 															0x0408004020010200,	0x0408004020010200,	0x0408004020010200,	0x0408004020010200,	0x0408004020010200,	0x0408004020010200	};
 			CHECK_EQ(::memcmp(kCompPackedData64, fb.GetHostPointer(), fd.GetBytesPerRow()), 0);
-			cerr << "BFT_YUVComponentsTo10BitYUVPackedBuffer passed" << endl;
 		}	//	TEST_CASE("BFT_YUVComponentsTo10BitYUVPackedBuffer")
 
 #if 0	//	DISABLED BY DEFAULT
@@ -2438,42 +2672,42 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			vector<uint8_t>	payloadData;
 			for (unsigned ndx(0);  ndx < 255;  ndx++)
 				payloadData.push_back(ndx);
-			NTV2_POINTER	payloadBuffer(255);
+			NTV2Buffer	payloadBuffer(255);
 			payloadBuffer.PutU8s(payloadData);
 			AJAAncillaryList	ancPkts;
-			AJAAncillaryDataLocation	loc;
+			AJAAncDataLoc	loc;
 			for (unsigned pktNum(0);  pktNum < numF1Packets;  pktNum++)
 			{
-				loc.Reset().SetDataLink(pktNum & 1 ? AJAAncillaryDataLink_A : AJAAncillaryDataLink_B);
-				loc.SetDataChannel(pktNum & 1 ? AJAAncillaryDataChannel_C : AJAAncillaryDataChannel_Y);
-				loc.SetDataSpace(AJAAncillaryDataSpace_VANC).SetDataStream(AJAAncillaryDataStream(pktNum & 3));
+				loc.Reset().SetDataLink(pktNum & 1 ? AJAAncDataLink_A : AJAAncDataLink_B);
+				loc.SetDataChannel(pktNum & 1 ? AJAAncDataChannel_C : AJAAncDataChannel_Y);
+				loc.SetDataSpace(AJAAncDataSpace_VANC).SetDataStream(AJAAncDataStream(pktNum & 3));
 				loc.SetLineNumber(9+(pktNum&0x0F));
 				loc.SetHorizontalOffset(AJAAncDataHorizOffset_Anywhere);
-				AJAAncillaryData	pkt;
+				AJAAncillaryData pkt;
 				pkt.SetDID(pktNum);
 				pkt.SetSID(200-pktNum);
-				pkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
+				pkt.SetDataCoding(AJAAncDataCoding_Digital);
 				pkt.SetDataLocation(loc);
 				pkt.SetPayloadData(&payloadData[0], uint32_t(payloadData.size()));
 				ancPkts.AddAncillaryData(pkt);
 			}	//	for numF1Packets
 			for (unsigned pktNum(0);  pktNum < numF2Packets;  pktNum++)
 			{
-				loc.Reset().SetDataLink(pktNum & 1 ? AJAAncillaryDataLink_A : AJAAncillaryDataLink_B);
-				loc.SetDataChannel(pktNum & 1 ? AJAAncillaryDataChannel_C : AJAAncillaryDataChannel_Y);
-				loc.SetDataSpace(AJAAncillaryDataSpace_VANC).SetDataStream(AJAAncillaryDataStream(pktNum & 3));
+				loc.Reset().SetDataLink(pktNum & 1 ? AJAAncDataLink_A : AJAAncDataLink_B);
+				loc.SetDataChannel(pktNum & 1 ? AJAAncDataChannel_C : AJAAncDataChannel_Y);
+				loc.SetDataSpace(AJAAncDataSpace_VANC).SetDataStream(AJAAncDataStream(pktNum & 3));
 				loc.SetLineNumber(567+(pktNum&0x0F));
 				loc.SetHorizontalOffset(AJAAncDataHorizOffset_Anywhere);
-				AJAAncillaryData	pkt;
+				AJAAncillaryData pkt;
 				pkt.SetDID(pktNum);
 				pkt.SetSID(200-pktNum);
-				pkt.SetDataCoding(AJAAncillaryDataCoding_Digital);
+				pkt.SetDataCoding(AJAAncDataCoding_Digital);
 				pkt.SetDataLocation(loc);
 				pkt.SetPayloadData(&payloadData[0], uint32_t(payloadData.size()));
 				ancPkts.AddAncillaryData(pkt);
 			}	//	for numF2Packets
 
-			NTV2_POINTER		F1Buffer(4096),	F2Buffer(4096);
+			NTV2Buffer			F1Buffer(4096),	F2Buffer(4096);
 			AJAAncillaryList	packetList;
 	        AJAPerformance		perfOverall("RTPTimingTest"), perfTx("RTPTimingTx"), perfRx("RTPTimingRx");
 	        perfOverall.Start();
@@ -2521,8 +2755,8 @@ static bool GenerateIPPacketWordsBFT (void)
 	unsigned			ndx(0);
 	while(true)
 	{
-		AJAAncillaryData	pkt;
-		const string &		data(pkts[ndx++]);
+		AJAAncillaryData pkt;
+		const string & data(pkts[ndx++]);
 		pkt.SetDID(0x33);  pkt.SetSID(0x55);  pkt.SetLocationLineNumber(9);
 		if (!data.empty())
 			CHECK(AJA_SUCCESS(pkt.SetPayloadData(reinterpret_cast<const uint8_t *>(data.c_str()), uint32_t(data.length()))));

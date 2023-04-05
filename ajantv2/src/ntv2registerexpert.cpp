@@ -564,7 +564,7 @@ private:
 		{	ostringstream regName;	//	used to synthesize reg name
 			const ULWord rawInputXpt	((regNum - ULWord(kRegFirstValidXptROMRegister)) / 4UL + ULWord(NTV2_FIRST_INPUT_CROSSPOINT));
 			const ULWord ndx			((regNum - ULWord(kRegFirstValidXptROMRegister)) % 4UL);
-			const NTV2InputXptID inputXpt	(static_cast<NTV2InputXptID>(rawInputXpt));
+			const NTV2InputXptID inputXpt	(NTV2InputXptID(rawInputXpt+0));
 			if (NTV2_IS_VALID_InputCrosspointID(inputXpt))
 			{
 				string inputXptEnumName (::NTV2InputCrosspointIDToString(inputXpt,false));	//	e.g. "NTV2_XptFrameBuffer1Input"
@@ -575,7 +575,7 @@ private:
 			}
 			else
 				regName << "kRegXptValue" << HEX0N(regNum,4);
-			DefineRegister (regNum, regName.str(),	mDecodeXptValidReg, READONLY,	kRegClass_NULL, kRegClass_NULL, kRegClass_NULL);
+			DefineRegister (regNum, regName.str(),	mDecodeXptValidReg, READONLY,	kRegClass_XptROM, kRegClass_NULL, kRegClass_NULL);
 		}
 	}	//	SetupXptSelect
 	
@@ -1417,22 +1417,22 @@ private:
 		DEF_REG	(kVRegAudioEncoderOutputEnable,			mDefaultRegDecoder, READWRITE, kRegClass_Audio, kRegClass_Output, kRegClass_NULL);
 		DEF_REG	(kVRegAudioEncoderHeadphoneEnable,		mDefaultRegDecoder, READWRITE, kRegClass_Audio, kRegClass_NULL, kRegClass_NULL);
 
-		DEF_REG	(kVRegDmaTransferRateC2H1,				mDefaultRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
-		DEF_REG	(kVRegDmaHardwareRateC2H1,				mDefaultRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
-		DEF_REG	(kVRegDmaTransferRateH2C1,				mDefaultRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
-		DEF_REG	(kVRegDmaHardwareRateH2C1,				mDefaultRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
-		DEF_REG	(kVRegDmaTransferRateC2H2,				mDefaultRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
-		DEF_REG	(kVRegDmaHardwareRateC2H2,				mDefaultRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
-		DEF_REG	(kVRegDmaTransferRateH2C2,				mDefaultRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
-		DEF_REG	(kVRegDmaHardwareRateH2C2,				mDefaultRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
-		DEF_REG	(kVRegDmaTransferRateC2H3,				mDefaultRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
-		DEF_REG	(kVRegDmaHardwareRateC2H3,				mDefaultRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
-		DEF_REG	(kVRegDmaTransferRateH2C3,				mDefaultRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
-		DEF_REG	(kVRegDmaHardwareRateH2C3,				mDefaultRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
-		DEF_REG	(kVRegDmaTransferRateC2H4,				mDefaultRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
-		DEF_REG	(kVRegDmaHardwareRateC2H4,				mDefaultRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
-		DEF_REG	(kVRegDmaTransferRateH2C4,				mDefaultRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
-		DEF_REG	(kVRegDmaHardwareRateH2C4,				mDefaultRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
+		DEF_REG	(kVRegDmaTransferRateC2H1,				mDMAXferRateRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
+		DEF_REG	(kVRegDmaHardwareRateC2H1,				mDMAXferRateRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
+		DEF_REG	(kVRegDmaTransferRateH2C1,				mDMAXferRateRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
+		DEF_REG	(kVRegDmaHardwareRateH2C1,				mDMAXferRateRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
+		DEF_REG	(kVRegDmaTransferRateC2H2,				mDMAXferRateRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
+		DEF_REG	(kVRegDmaHardwareRateC2H2,				mDMAXferRateRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
+		DEF_REG	(kVRegDmaTransferRateH2C2,				mDMAXferRateRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
+		DEF_REG	(kVRegDmaHardwareRateH2C2,				mDMAXferRateRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
+		DEF_REG	(kVRegDmaTransferRateC2H3,				mDMAXferRateRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
+		DEF_REG	(kVRegDmaHardwareRateC2H3,				mDMAXferRateRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
+		DEF_REG	(kVRegDmaTransferRateH2C3,				mDMAXferRateRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
+		DEF_REG	(kVRegDmaHardwareRateH2C3,				mDMAXferRateRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
+		DEF_REG	(kVRegDmaTransferRateC2H4,				mDMAXferRateRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
+		DEF_REG	(kVRegDmaHardwareRateC2H4,				mDMAXferRateRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
+		DEF_REG	(kVRegDmaTransferRateH2C4,				mDMAXferRateRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
+		DEF_REG	(kVRegDmaHardwareRateH2C4,				mDMAXferRateRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
 
 		DEF_REG	(kVRegHDMIInAviInfo1,					mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_NULL);
 
@@ -1611,7 +1611,7 @@ public:
 	}
 	
 
-	NTV2RegNumSet	GetRegistersForDevice (const NTV2DeviceID inDeviceID, const bool inIncludeVirtuals) const
+	NTV2RegNumSet	GetRegistersForDevice (const NTV2DeviceID inDeviceID, const int inOtherRegsToInclude) const
 	{
 		static const string chanClasses[] = {kRegClass_Channel1, kRegClass_Channel2, kRegClass_Channel3, kRegClass_Channel4, kRegClass_Channel5, kRegClass_Channel6, kRegClass_Channel7, kRegClass_Channel8};
 		NTV2RegNumSet		result;
@@ -1695,10 +1695,16 @@ public:
 				result.insert(regNum);
 		}
 
-		if (inIncludeVirtuals)
+		if (inOtherRegsToInclude & kIncludeOtherRegs_VRegs)
 		{
 			const NTV2RegNumSet vRegs	(GetRegistersForClass(kRegClass_Virtual));
 			result.insert(vRegs.begin(), vRegs.end());
+		}
+
+		if (inOtherRegsToInclude & kIncludeOtherRegs_XptROM)
+		{
+			const NTV2RegNumSet xptMapRegs	(GetRegistersForClass(kRegClass_XptROM));
+			result.insert(xptMapRegs.begin(), xptMapRegs.end());
 		}
 		return result;
 	}
@@ -3118,31 +3124,42 @@ private:
 		}
 	}	mDecodeAncInsChromaBlankReg;
 	
-	struct DecodeXptGroupReg : public Decoder		//	Every byte is a crosspoint number 0-255
-	{
+	struct DecodeXptGroupReg : public Decoder
+	{	//	Every byte in the reg value is an NTV2OutputXptID
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
-		{
-			(void) inRegNum;
-			(void) inDeviceID;
+		{	(void) inRegNum;
 			static unsigned sShifts[4]	= {0, 8, 16, 24};
-			ostringstream	oss;
+			NTV2StringList strs;
 			for (unsigned ndx(0);  ndx < 4;	 ndx++)
 			{
 				const NTV2InputCrosspointID		inputXpt	(CNTV2RegisterExpert::GetInputCrosspointID (inRegNum, ndx));
-				const NTV2OutputCrosspointID	outputXpt	(static_cast <NTV2OutputCrosspointID> ((inRegValue >> sShifts[ndx]) & 0xFF));
-				if (NTV2_IS_VALID_InputCrosspointID (inputXpt))
-					oss << ::NTV2InputCrosspointIDToString (inputXpt, false) << " <== " << ::NTV2OutputCrosspointIDToString (outputXpt, false);
-				if (ndx < 3)
-					oss << endl;
+				const NTV2OutputCrosspointID	outputXpt	(NTV2OutputCrosspointID((inRegValue >> sShifts[ndx]) & 0xFF));
+				if (NTV2_IS_VALID_InputCrosspointID(inputXpt))
+				{
+					if (outputXpt != NTV2_XptBlack)
+					{
+						NTV2WidgetID wgtID(NTV2_WIDGET_INVALID);
+						ostringstream oss;
+						oss << ::NTV2InputCrosspointIDToString(inputXpt, false);
+					/*	Don't bother with inputXpt check, since wgtID guaranteed valid for every inputXpt seen here:
+						if (!CNTV2SignalRouter::GetWidgetForInput (inputXpt,  wgtID, inDeviceID))
+							oss << " (unimpl)";
+					*/
+						oss << " <== " << ::NTV2OutputCrosspointIDToString(outputXpt, false);
+						if (!CNTV2SignalRouter::GetWidgetForOutput (outputXpt,  wgtID, inDeviceID))
+							oss << " (unimpl)";
+						strs.push_back(oss.str());
+					}
+				}
 			}
-			return oss.str();
+			return aja::join(strs, "\n");
 		}
 	}	mDecodeXptGroupReg;
 
 	struct DecodeXptValidReg : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
-		{	(void) inDeviceID;
+		{
 			NTV2_ASSERT(inRegNum >= uint32_t(kRegFirstValidXptROMRegister));
 			NTV2_ASSERT(inRegNum < uint32_t(kRegInvalidValidXptROMRegister));
 			ostringstream	oss;
@@ -3459,6 +3476,16 @@ private:
 			return oss.str();
 		}
 	}	mDMAIntControlRegDecoder;
+
+	struct DecodeDMAXferRate : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{	(void) inRegNum;	(void) inDeviceID;
+			ostringstream oss;
+			oss	<< DEC(inRegValue) << " [MB/sec] [kB/ms] [B/us]";
+			return oss.str();
+		}
+	}	mDMAXferRateRegDecoder;
 
 	struct DecodeRP188InOutDBB : public Decoder
 	{
@@ -3885,7 +3912,7 @@ private:
 	struct DecodeFourCC : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
-		{	(void) inDeviceID;
+		{	(void) inDeviceID;  (void) inRegNum;
 			char ch;  string str4cc;
 			ch = char((inRegValue & 0xFF000000) >> 24);
 			str4cc += ::isprint(ch) ? ch : '?';
@@ -4039,11 +4066,11 @@ NTV2RegNumSet CNTV2RegisterExpert::GetRegistersForChannel (const NTV2Channel inC
 	return NTV2_IS_VALID_CHANNEL(inChannel)	 ?	(pRegExpert ? pRegExpert->GetRegistersForClass(gChlClasses[inChannel]):NTV2RegNumSet())	 :	NTV2RegNumSet();
 }
 
-NTV2RegNumSet CNTV2RegisterExpert::GetRegistersForDevice (const NTV2DeviceID inDeviceID, const bool inIncludeVirtuals)
+NTV2RegNumSet CNTV2RegisterExpert::GetRegistersForDevice (const NTV2DeviceID inDeviceID, const int inOtherRegsToInclude)
 {
 	AJAAutoLock locker(&gRegExpertGuardMutex);
 	RegisterExpertPtr pRegExpert(RegisterExpert::GetInstance());
-	return pRegExpert ? pRegExpert->GetRegistersForDevice(inDeviceID, inIncludeVirtuals) : NTV2RegNumSet();
+	return pRegExpert ? pRegExpert->GetRegistersForDevice(inDeviceID, inOtherRegsToInclude) : NTV2RegNumSet();
 }
 
 NTV2RegNumSet CNTV2RegisterExpert::GetRegistersWithName (const string & inName, const int inSearchStyle)

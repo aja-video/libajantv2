@@ -1054,7 +1054,7 @@ bool CNTV2Card::SetAudioMixerLevelsSampleCount (const ULWord inSampleCount)
 
 bool CNTV2Card::SetHDMIOutAudioChannels (const NTV2HDMIAudioChannels value)
 {
-	return WriteRegister (kRegHDMIOutControl, static_cast <ULWord> (value), kRegMaskHDMIOutAudioCh, kRegShiftHDMIOutAudioCh);
+	return WriteRegister (kRegHDMIOutControl, ULWord(value), kRegMaskHDMIOutAudioCh, kRegShiftHDMIOutAudioCh);
 }
 
 
@@ -1187,13 +1187,13 @@ bool CNTV2Card::GetHDMIOutAudioRate (NTV2AudioRate & outValue)
 
 bool CNTV2Card::SetHDMIOutAudioFormat (const NTV2AudioFormat inNewValue)
 {
-	return WriteRegister (kRegHDMIInputControl, static_cast <ULWord> (inNewValue), kRegMaskHDMIOutAudioFormat, kRegShiftHDMIOutAudioFormat);
+	return WriteRegister (kRegHDMIOutControl, static_cast <ULWord> (inNewValue), kRegMaskHDMIOutAudioFormat, kRegShiftHDMIOutAudioFormat);
 }
 
 
 bool CNTV2Card::GetHDMIOutAudioFormat (NTV2AudioFormat & outValue)
 {
-	return CNTV2DriverInterface::ReadRegister (kRegHDMIInputControl, outValue, kRegMaskHDMIOutAudioFormat, kRegShiftHDMIOutAudioFormat);
+	return CNTV2DriverInterface::ReadRegister (kRegHDMIOutControl, outValue, kRegMaskHDMIOutAudioFormat, kRegShiftHDMIOutAudioFormat);
 }
 
 
@@ -1869,7 +1869,7 @@ bool CNTV2Card::GetAnalogAudioTransmitEnable (const NTV2Audio4ChannelSelect inCh
 	return true;
 }
 
-bool CNTV2Card::SetMultiLinkAudioMode (const NTV2AudioSystem inAudioSystem, bool inEnable)
+bool CNTV2Card::SetMultiLinkAudioMode (const NTV2AudioSystem inAudioSystem, const bool inEnable)
 {
 	if (!NTV2DeviceCanDoMultiLinkAudio(_boardID))
 		return false;

@@ -50,8 +50,8 @@ AJAAncillaryData_Cea608_Vanc::~AJAAncillaryData_Cea608_Vanc ()
 
 void AJAAncillaryData_Cea608_Vanc::Init (void)
 {
-	m_ancType = AJAAncillaryDataType_Cea608_Vanc;
-	m_coding  = AJAAncillaryDataCoding_Digital;
+	m_ancType = AJAAncDataType_Cea608_Vanc;
+	m_coding  = AJAAncDataCoding_Digital;
 	m_DID	  = AJAAncillaryData_Cea608_Vanc_DID;
 	m_SID	  = AJAAncillaryData_Cea608_Vanc_SID;
 
@@ -149,7 +149,7 @@ AJAStatus AJAAncillaryData_Cea608_Vanc::GeneratePayloadData (void)
 
 ostream & AJAAncillaryData_Cea608_Vanc::Print (ostream & debugStream, const bool bShowDetail) const
 {
-	debugStream << IDAsString() << "(" << ::AJAAncillaryDataCodingToString (m_coding) << ")" << endl;
+	debugStream << IDAsString() << "(" << ::AJAAncDataCodingToString (m_coding) << ")" << endl;
 	AJAAncillaryData_Cea608::Print (debugStream, bShowDetail);
 	debugStream << endl
 				<< "Field: " << (m_isF2 ? "F2" : "F1") << endl
@@ -158,12 +158,12 @@ ostream & AJAAncillaryData_Cea608_Vanc::Print (ostream & debugStream, const bool
 }
 
 
-AJAAncillaryDataType AJAAncillaryData_Cea608_Vanc::RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData)
+AJAAncDataType AJAAncillaryData_Cea608_Vanc::RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData)
 {
-	if (pInAncData->GetDataCoding() == AJAAncillaryDataCoding_Digital)
+	if (pInAncData->GetDataCoding() == AJAAncDataCoding_Digital)
 		if (pInAncData->GetDID() == AJAAncillaryData_Cea608_Vanc_DID)
 			if (pInAncData->GetSID() == AJAAncillaryData_Cea608_Vanc_SID)
 				if (pInAncData->GetDC() == AJAAncillaryData_Cea608_Vanc_PayloadSize)
-					return AJAAncillaryDataType_Cea608_Vanc;
-	return AJAAncillaryDataType_Unknown;
+					return AJAAncDataType_Cea608_Vanc;
+	return AJAAncDataType_Unknown;
 }

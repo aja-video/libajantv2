@@ -227,10 +227,13 @@
 class AJAMemory;
 
 /** 
- *	@param[in]	inStatus   The AJAStatus value of interest.
- *	@return		A string containing the given AJAStatus value as human-readable text.
+ *	@param[in]	inStatus	The AJAStatus value of interest.
+ *	@param[in]	inDetailed	Optionally specifies the type of string content to return.
+ *							If false, the default, returns the literal enum (e.g. "AJA_STATUS_FAIL").
+ *							If true, returns a description (e.g. "Failed").
+ *	@return		A string that contains the given AJAStatus value as human-readable text.
  */
-AJA_EXPORT std::string AJAStatusToString (const AJAStatus inStatus);
+AJA_EXPORT std::string AJAStatusToString (const AJAStatus inStatus, const bool inDetailed = false);
 
 
 /** 

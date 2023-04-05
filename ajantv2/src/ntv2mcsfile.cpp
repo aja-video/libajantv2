@@ -180,7 +180,7 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 	}
 
 	const size_t bitfileLength(bitfile.GetFileStreamLength());
-	NTV2_POINTER bitfileBuffer(bitfileLength + 512);
+	NTV2Buffer bitfileBuffer(bitfileLength + 512);
 	if (!bitfileBuffer)
 	{
 		oss << "CNTV2MCSfile::InsertBitFile: Unable to allocate " << DEC(bitfileLength+512) << "-byte bitfile buffer";

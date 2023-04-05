@@ -1386,18 +1386,36 @@ typedef enum
 #define NTV2_IS_VALID_INPUT_SOURCE(_inpSrc_)			(((_inpSrc_) >= 0) && ((_inpSrc_) < NTV2_INPUTSOURCE_INVALID))
 
 /**
-	@brief		Used to specify one or more ::NTV2InputSource types.
+	@brief		Used to classify or filter ::NTV2InputSource or ::NTV2OutputDest values.
 **/
-typedef enum _NTV2InputSourceKinds
+typedef enum
 {
-	NTV2_INPUTSOURCES_ALL		= 0xFF, ///< @brief Specifies any/all input source kinds.
-	NTV2_INPUTSOURCES_SDI		= 1,	///< @brief Specifies SDI input source kinds.
-	NTV2_INPUTSOURCES_HDMI		= 2,	///< @brief Specifies HDMI input source kinds.
-	NTV2_INPUTSOURCES_ANALOG	= 4,	///< @brief Specifies analog input source kinds.
-	NTV2_INPUTSOURCES_NONE		= 0		///< @brief Doesn't specify any kind of input source.
-} NTV2InputSourceKinds;
+	NTV2_IOKINDS_ALL			= 0xFF, ///< @brief Specifies any/all input/output kinds.
+	NTV2_IOKINDS_SDI			= 1,	///< @brief Specifies SDI input/output kinds.
+	NTV2_IOKINDS_HDMI			= 2,	///< @brief Specifies HDMI input/output kinds.
+	NTV2_IOKINDS_ANALOG			= 4,	///< @brief Specifies analog input/output kinds.
+	NTV2_IOKINDS_NONE			= 0		///< @brief Doesn't specify any kind of input/output.
+	#if !defined(NTV2_DEPRECATE_16_3)
+	,	NTV2_INPUTSOURCES_ALL		= NTV2_IOKINDS_ALL,
+		NTV2_INPUTSOURCES_SDI		= NTV2_IOKINDS_SDI,
+		NTV2_INPUTSOURCES_HDMI		= NTV2_IOKINDS_HDMI,
+		NTV2_INPUTSOURCES_ANALOG	= NTV2_IOKINDS_ANALOG,
+		NTV2_INPUTSOURCES_NONE		= NTV2_IOKINDS_NONE
+	#endif	//	!defined(NTV2_DEPRECATE_16_3)
+} NTV2InputSourceKinds, NTV2OutputDestKinds, NTV2IOKinds;
+
+#define NTV2_IS_VALID_IOKINDS(_k_)		(((_k_) == NTV2_IOKINDS_ALL) || ((_k_) == NTV2_IOKINDS_SDI) || ((_k_) == NTV2_IOKINDS_HDMI) || ((_k_) == NTV2_IOKINDS_ANALOG))
 
 
+/**
+	@brief		Identifies a specific video output destination.
+	@details	Always call ::NTV2DeviceCanDoOutputDest to determine if a device has one of these input sources.
+				Call CNTV2Card::GetInputVideoFormat to determine what video signal is present on the input (if any).
+				Call ::GetInputSourceOutputXpt to get an NTV2OutputCrosspointID for one of these inputs to pass to
+				CNTV2Card::Connect. See \ref devicesignalinputsoutputs.
+	@warning	Do not rely on the ordinal values of these constants between successive SDKs, since new devices
+				can be introduced that require additional inputs.
+**/
 typedef enum
 {
 	#if defined (NTV2_DEPRECATE)

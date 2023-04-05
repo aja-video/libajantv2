@@ -83,7 +83,8 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram ()
 		_bQuiet				(false),
 		_mcsStep			(0),
 		_failSafePadding	(0),
-		_spiFlash			(AJA_NULL)
+		_spiFlash			(AJA_NULL),
+		_hasExtendedCommandSupport	(false)
 {
 }
 
@@ -110,7 +111,8 @@ CNTV2KonaFlashProgram::CNTV2KonaFlashProgram (const UWord boardNumber)
 		_bQuiet				(false),
 		_mcsStep			(0),
 		_failSafePadding	(0),
-		_spiFlash			(AJA_NULL)
+		_spiFlash			(AJA_NULL),
+		_hasExtendedCommandSupport	(false)
 {
 	SetDeviceProperties();
 }
@@ -128,6 +130,15 @@ void CNTV2KonaFlashProgram::SetQuietMode()
 	{
 		_spiFlash->SetVerbosity(false);
 	}
+}
+
+bool CNTV2KonaFlashProgram::WriteCommand(_FLASH_COMMAND inCommand)
+{
+	ULWord theCommand = (ULWord)inCommand;
+	if(_hasExtendedCommandSupport && inCommand == WRITESTATUS_COMMAND)
+		theCommand |= BIT_16;
+	
+	return WriteRegister(kRegXenaxFlashControlStatus, theCommand);
 }
 
 bool CNTV2KonaFlashProgram::SetMBReset()
@@ -288,6 +299,14 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 		_bankSize = 16 * 1024 * 1024;
 		_sectorSize = 64 * 1024;
 		_failSafePadding = 4;
+		knownChip = true;
+		break;
+	case 0x0020ba20://Micron MT25QL512ABB
+		_flashSize = 64 * 1024 * 1024;
+		_bankSize = 16 * 1024 * 1024;
+		_sectorSize = 64 * 1024;
+		_failSafePadding = 4;
+		_hasExtendedCommandSupport = true;
 		knownChip = true;
 		break;
 	case 0x00C84018://GIGADEVICE GD25Q127CFIG
@@ -463,12 +482,12 @@ bool CNTV2KonaFlashProgram::ReadHeader(FlashBlockID blockID)
 {
 	uint32_t baseAddress (GetBaseAddressForProgramming(blockID));
 	SetFlashBlockIDBank(blockID);
-	NTV2_POINTER bitFileHeader(MAXBITFILE_HEADERSIZE);
+	NTV2Buffer bitFileHeader(MAXBITFILE_HEADERSIZE);
 	const uint32_t dwordSizeCount (bitFileHeader.GetByteCount() / 4);
 	for (uint32_t count(0);  count < dwordSizeCount;  count++, baseAddress += 4)
 	{
 		WriteRegister(kRegXenaxFlashAddress, baseAddress);
-		WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
+		WriteCommand(READFAST_COMMAND);
 		WaitForFlashNOTBusy();
 		ReadRegister(kRegXenaxFlashDOUT, bitFileHeader.U32(int(count)));
 	}
@@ -504,12 +523,12 @@ bool CNTV2KonaFlashProgram::ReadInfoString()
 		uint32_t baseAddress = _mcsInfoOffset;
 		SetFlashBlockIDBank(MCS_INFO_BLOCK);
 
-		NTV2_POINTER mcsInfoPtr(MAXMCSINFOSIZE);
+		NTV2Buffer mcsInfoPtr(MAXMCSINFOSIZE);
 		uint32_t dwordSizeCount (MAXMCSINFOSIZE / 4);
 		for (uint32_t count(0);  count < dwordSizeCount;  count++, baseAddress += 4)
 		{
 			WriteRegister(kRegXenaxFlashAddress, baseAddress);
-			WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
+			WriteCommand(READFAST_COMMAND);
 			WaitForFlashNOTBusy();
 			ReadRegister(kRegXenaxFlashDOUT, mcsInfoPtr.U32(int(count)));
 			if (mcsInfoPtr.U32(int(count)) == 0)
@@ -569,23 +588,24 @@ std::string CNTV2KonaFlashProgram::Program(bool fullVerify)
 	if (!_bQuiet)
 		cout << "Program status: 100%				   " << endl;
 
-	// Protect Device
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
-	WaitForFlashNOTBusy();
-	WriteRegister(kRegXenaxFlashDIN, 0x1C);
-	WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
-	WaitForFlashNOTBusy();
-
 	SetBankSelect(BANK_0);
 	if (!VerifyFlash(_flashID, fullVerify))
 	{
 		SetBankSelect(BANK_0);
 		return "Program Didn't Verify";
 	}
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+	
+	// Protect Device
+	WriteCommand(WRITEENABLE_COMMAND);
+	WaitForFlashNOTBusy();
+	WriteRegister(kRegXenaxFlashDIN, 0x1C);
+	WriteCommand(WRITESTATUS_COMMAND);
+	WaitForFlashNOTBusy();
+
+	WriteCommand(WRITEENABLE_COMMAND);
 	WaitForFlashNOTBusy();
 	WriteRegister(kRegXenaxFlashDIN, 0x9C);
-	WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+	WriteCommand(WRITESTATUS_COMMAND);
 	WaitForFlashNOTBusy();
 	SetBankSelect(BANK_0);
 	
@@ -595,11 +615,11 @@ std::string CNTV2KonaFlashProgram::Program(bool fullVerify)
 
 bool CNTV2KonaFlashProgram::ProgramFlashValue(uint32_t address, uint32_t value)
 {
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+	WriteCommand(WRITEENABLE_COMMAND);
 	WaitForFlashNOTBusy();
 	WriteRegister(kRegXenaxFlashDIN, value);
 	WriteRegister(kRegXenaxFlashAddress, address);
-	WriteRegister(kRegXenaxFlashControlStatus, PAGEPROGRAM_COMMAND);
+	WriteCommand(PAGEPROGRAM_COMMAND);
 	WaitForFlashNOTBusy();
 
 	return true;
@@ -607,16 +627,16 @@ bool CNTV2KonaFlashProgram::ProgramFlashValue(uint32_t address, uint32_t value)
 
 bool CNTV2KonaFlashProgram::FastProgramFlash256(uint32_t address, uint32_t* buffer)
 {
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+	WriteCommand(WRITEENABLE_COMMAND);
 	WaitForFlashNOTBusy();
 	for ( uint32_t count=0; count < 64; count++ )
 	{
 		WriteRegister(kRegXenaxFlashDIN, *buffer++);
 	}
 	WriteRegister(kRegXenaxFlashAddress, address);
-	WriteRegister(kRegXenaxFlashControlStatus, PAGEPROGRAM_COMMAND);
+	WriteCommand(PAGEPROGRAM_COMMAND);
 	WaitForFlashNOTBusy();
-
+	
 	return true;
 }
 
@@ -625,7 +645,7 @@ uint32_t CNTV2KonaFlashProgram::ReadDeviceID()
 	uint32_t deviceID = 0;
 	if (IsOpen ())
 	{
-		WriteRegister(kRegXenaxFlashControlStatus, READID_COMMAND);
+		WriteCommand(READID_COMMAND);
 		WaitForFlashNOTBusy();
 		ReadRegister(kRegXenaxFlashDOUT, deviceID);
 	}
@@ -638,10 +658,10 @@ bool CNTV2KonaFlashProgram::EraseBlock (FlashBlockID blockID)
 		return false;
 	SetFlashBlockIDBank(blockID);
 
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+	WriteCommand(WRITEENABLE_COMMAND);
 	WaitForFlashNOTBusy();
 	WriteRegister(kRegXenaxFlashDIN, 0x0);
-	WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+	WriteCommand(WRITESTATUS_COMMAND);
 	WaitForFlashNOTBusy();
 	uint32_t percentComplete = 0;
 
@@ -683,23 +703,23 @@ bool CNTV2KonaFlashProgram::EraseBlock (FlashBlockID blockID)
 bool CNTV2KonaFlashProgram::EraseSector (uint32_t sectorAddress)
 {
 	WriteRegister(kRegXenaxFlashAddress, sectorAddress);
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+	WriteCommand(WRITEENABLE_COMMAND);
 	WaitForFlashNOTBusy();	
-	WriteRegister(kRegXenaxFlashControlStatus, SECTORERASE_COMMAND);
+	WriteCommand(SECTORERASE_COMMAND);
 	return WaitForFlashNOTBusy();
 }
 
 bool CNTV2KonaFlashProgram::EraseChip (UWord chip)
 {	(void) chip;	//	unused
 	WriteRegister(kRegXenaxFlashControlStatus,0);
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+	WriteCommand(WRITEENABLE_COMMAND);
 	WaitForFlashNOTBusy();
 	WriteRegister(kRegXenaxFlashDIN, 0x0);
-	WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+	WriteCommand(WRITESTATUS_COMMAND);
 	WaitForFlashNOTBusy();
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+	WriteCommand(WRITEENABLE_COMMAND);
 	WaitForFlashNOTBusy();
-	WriteRegister(kRegXenaxFlashControlStatus, CHIPERASE_COMMAND);
+	WriteCommand(CHIPERASE_COMMAND);
 	return WaitForFlashNOTBusy();
 }
 
@@ -722,7 +742,7 @@ bool CNTV2KonaFlashProgram::VerifyFlash (FlashBlockID flashID, bool fullVerify)
 			SetBankSelect(_flashID == FAILSAFE_FLASHBLOCK  ?  BANK_3  :  BANK_1);
 		}
 		WriteRegister(kRegXenaxFlashAddress, baseAddress);
-		WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
+		WriteCommand(READFAST_COMMAND);
 		WaitForFlashNOTBusy();
 		uint32_t flashValue;
 		ReadRegister(kRegXenaxFlashDOUT, flashValue);
@@ -762,7 +782,7 @@ bool CNTV2KonaFlashProgram::VerifyFlash (FlashBlockID flashID, bool fullVerify)
 	return true;
 }
 
-bool CNTV2KonaFlashProgram::ReadFlash (NTV2_POINTER & outBuffer, const FlashBlockID inFlashID, CNTV2FlashProgress & inFlashProgress)
+bool CNTV2KonaFlashProgram::ReadFlash (NTV2Buffer & outBuffer, const FlashBlockID inFlashID, CNTV2FlashProgress & inFlashProgress)
 {
 	uint32_t baseAddress(GetBaseAddressForProgramming(inFlashID));
 	const uint32_t numDWords((_bitFileSize+4)/4);
@@ -806,7 +826,7 @@ bool CNTV2KonaFlashProgram::ReadFlash (NTV2_POINTER & outBuffer, const FlashBloc
 			}
 		}
 		WriteRegister(kRegXenaxFlashAddress, baseAddress);
-		WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
+		WriteCommand(READFAST_COMMAND);
 		WaitForFlashNOTBusy();
 		uint32_t flashValue;
 		ReadRegister(kRegXenaxFlashDOUT, flashValue);
@@ -864,7 +884,7 @@ bool CNTV2KonaFlashProgram::CheckFlashErasedWithBlockID (FlashBlockID flashID)
 	for (uint32_t count = 0;  count < dwordSizeCount;  count++, baseAddress += 4)
 	{
 		WriteRegister(kRegXenaxFlashAddress, baseAddress);
-		WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
+		WriteCommand(READFAST_COMMAND);
 		WaitForFlashNOTBusy();
 		uint32_t flashValue;
 		ReadRegister(kRegXenaxFlashDOUT, flashValue);
@@ -951,7 +971,7 @@ bool CNTV2KonaFlashProgram::CreateSRecord(bool bChangeEndian)
 		while(i < recordSize)
 		{
 			WriteRegister(kRegXenaxFlashAddress,baseAddress);
-			WriteRegister(kRegXenaxFlashControlStatus,READFAST_COMMAND);
+			WriteCommand(READFAST_COMMAND);
 			WaitForFlashNOTBusy();
 			uint32_t flashValue;
 			ReadRegister(kRegXenaxFlashDOUT, flashValue);
@@ -1041,7 +1061,7 @@ bool CNTV2KonaFlashProgram::CreateBankRecord(BankSelect bankID)
 		while (i < recordSize)
 		{
 			WriteRegister(kRegXenaxFlashAddress, baseAddress);
-			WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
+			WriteCommand(READFAST_COMMAND);
 			WaitForFlashNOTBusy();
 			uint32_t flashValue;
 			ReadRegister(kRegXenaxFlashDOUT, flashValue);
@@ -1228,10 +1248,10 @@ bool CNTV2KonaFlashProgram::ProgramMACAddresses(MacAddr * mac1, MacAddr * mac2)
 		baseAddress += 4;
 		ProgramFlashValue(baseAddress, hi2);
 
-		WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+		WriteCommand(WRITEENABLE_COMMAND);
 		WaitForFlashNOTBusy();
 		WriteRegister(kRegXenaxFlashDIN, 0x9C);
-		WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+		WriteCommand(WRITESTATUS_COMMAND);
 		WaitForFlashNOTBusy();
 
 		SetBankSelect(BANK_0);
@@ -1289,25 +1309,25 @@ bool CNTV2KonaFlashProgram::ReadMACAddresses(MacAddr & mac1, MacAddr & mac2)
 		SetFlashBlockIDBank(MAC_FLASHBLOCK);
 
 		WriteRegister(kRegXenaxFlashAddress, baseAddress);
-		WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
+		WriteCommand(READFAST_COMMAND);
 		WaitForFlashNOTBusy();
 		ReadRegister(kRegXenaxFlashDOUT, lo);
 		baseAddress += 4;
 
 		WriteRegister(kRegXenaxFlashAddress, baseAddress);
-		WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
+		WriteCommand(READFAST_COMMAND);
 		WaitForFlashNOTBusy();
 		ReadRegister(kRegXenaxFlashDOUT, hi);
 		baseAddress += 4;
 
 		WriteRegister(kRegXenaxFlashAddress, baseAddress);
-		WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
+		WriteCommand(READFAST_COMMAND);
 		WaitForFlashNOTBusy();
 		ReadRegister(kRegXenaxFlashDOUT, lo2);
 		baseAddress += 4;
 
 		WriteRegister(kRegXenaxFlashAddress, baseAddress);
-		WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
+		WriteCommand(READFAST_COMMAND);
 		WaitForFlashNOTBusy();
 		ReadRegister(kRegXenaxFlashDOUT, hi2);
 
@@ -1369,7 +1389,7 @@ bool CNTV2KonaFlashProgram::ProgramLicenseInfo (const string & licenseString)
 
 		size_t len (licenseString.size());
 		size_t words ((len/4) + 2);
-		NTV2_POINTER data8(words*4);
+		NTV2Buffer data8(words*4);
 		ULWord	* data32 = data8;
 		data8.Fill(0x0000);
 		strcat(data8,licenseString.c_str());
@@ -1383,15 +1403,15 @@ bool CNTV2KonaFlashProgram::ProgramLicenseInfo (const string & licenseString)
 		}
 
 		// Protect Device
-		WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+		WriteCommand( WRITEENABLE_COMMAND);
 		WaitForFlashNOTBusy();
 		WriteRegister(kRegXenaxFlashDIN, 0x1C);
-		WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+		WriteCommand(WRITESTATUS_COMMAND);
 		WaitForFlashNOTBusy();
-		WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+		WriteCommand(WRITEENABLE_COMMAND);
 		WaitForFlashNOTBusy();
 		WriteRegister(kRegXenaxFlashDIN, 0x9C);
-		WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+		WriteCommand(WRITESTATUS_COMMAND);
 		WaitForFlashNOTBusy();
 		SetBankSelect(BANK_0);
 	}
@@ -1448,7 +1468,7 @@ bool CNTV2KonaFlashProgram::ReadLicenseInfo(string& serialString)
 		for(uint32_t i = 0; i < maxSize; i++)
 		{
 			WriteRegister(kRegXenaxFlashAddress,baseAddress);
-			WriteRegister(kRegXenaxFlashControlStatus,READFAST_COMMAND);
+			WriteCommand(READFAST_COMMAND);
 			WaitForFlashNOTBusy();
 			ReadRegister(kRegXenaxFlashDOUT, license[i]);
 			if (license[i] == 0xffffffff)
@@ -1479,9 +1499,14 @@ bool CNTV2KonaFlashProgram::SetBankSelect( BankSelect bankNumber )
 {
 	if (ROMHasBankSelect())
 	{
-		WriteRegister(kRegXenaxFlashAddress, uint32_t(bankNumber));
-		WriteRegister(kRegXenaxFlashControlStatus, BANKSELECT_COMMMAND);
+		WriteCommand(WRITEENABLE_COMMAND);
 		WaitForFlashNOTBusy();
+		WriteRegister(kRegXenaxFlashAddress, uint32_t(bankNumber));
+		
+		WriteCommand(_hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND);
+		WaitForFlashNOTBusy();
+		if (!_bQuiet)
+			cout << "selected bank: " << ReadBankSelect() << endl;
 	}
 	return true;
 }
@@ -1491,7 +1516,7 @@ uint32_t CNTV2KonaFlashProgram::ReadBankSelect()
 	uint32_t bankNumber = 0;
 	if (ROMHasBankSelect())
 	{
-		WriteRegister(kRegXenaxFlashControlStatus, READBANKSELECT_COMMAND);
+		WriteCommand(_hasExtendedCommandSupport ? READEXTENDEDADDRESS_COMMAND : READBANKSELECT_COMMAND);
 		WaitForFlashNOTBusy();
 		ReadRegister(kRegXenaxFlashDOUT, bankNumber);
 	}
@@ -1500,7 +1525,8 @@ uint32_t CNTV2KonaFlashProgram::ReadBankSelect()
 
 bool CNTV2KonaFlashProgram::SetMCSFile (const string & inMCSFileName)
 {
-	cout << "Parsing MCS File" << endl;
+	if (!_bQuiet)
+		cout << "Parsing MCS File" << endl;
 	return _mcsFile.Open(inMCSFileName.c_str());
 }
 
@@ -1559,7 +1585,8 @@ bool CNTV2KonaFlashProgram::ProgramFromMCS(bool verify)
 			blockID = MAIN_FLASHBLOCK;
 			linearOffsetToBankOffset = 0x0000;
 			//Program Main
-			cout << "Erase Main Bitfile Bank" << endl;
+			if (!_bQuiet)
+				cout << "Erase Main Bitfile Bank" << endl;
 			WriteRegister(kVRegFlashState, kProgramStateEraseMainFlashBlock);
 			EraseBlock(MAIN_FLASHBLOCK);
 			WriteRegister(kVRegFlashState, kProgramStateProgramFlash);
@@ -1569,7 +1596,8 @@ bool CNTV2KonaFlashProgram::ProgramFromMCS(bool verify)
 			blockID = MCS_INFO_BLOCK;
 			linearOffsetToBankOffset = 0x0100;
 			//Program Comment
-			cout << "Erase Package Info Block" << endl;
+			if (!_bQuiet)
+				cout << "Erase Package Info Block" << endl;
 			WriteRegister(kVRegFlashState, kProgramStateErasePackageInfo);
 			EraseBlock(MCS_INFO_BLOCK);
 			WriteRegister(kVRegFlashState, kProgramStateProgramPackageInfo);
@@ -1578,10 +1606,12 @@ bool CNTV2KonaFlashProgram::ProgramFromMCS(bool verify)
 		{
 			if (!hasErasedSOCs)
 			{
-				cout << "Erase SOC Bank 1" << endl;
+				if (!_bQuiet)
+					cout << "Erase SOC Bank 1" << endl;
 				WriteRegister(kVRegFlashState, kProgramStateEraseBank3);
 				EraseBlock(SOC1_FLASHBLOCK);
-				cout << "Erase SOC Bank 2" << endl;
+				if (!_bQuiet)
+					cout << "Erase SOC Bank 2" << endl;
 				WriteRegister(kVRegFlashState, kProgramStateEraseBank4);
 				EraseBlock(SOC2_FLASHBLOCK);
 				hasErasedSOCs = true;
@@ -1636,7 +1666,7 @@ bool CNTV2KonaFlashProgram::ProgramFromMCS(bool verify)
 				WriteRegister(kVRegFlashState, kProgramStateProgramBank4);
 			}
 			uint32_t remainderBytes = static_cast<uint32_t>(_partitionBuffer.size() - bufferIndex);
-			WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+			WriteCommand(WRITEENABLE_COMMAND);
 			WaitForFlashNOTBusy();
 
 			for (uint32_t dwordCount = 0; dwordCount < dwordsPerBlock; dwordCount++)
@@ -1679,7 +1709,7 @@ bool CNTV2KonaFlashProgram::ProgramFromMCS(bool verify)
 				WriteRegister(kRegXenaxFlashDIN, partitionValue);
 			}
 			WriteRegister(kRegXenaxFlashAddress, baseAddress);
-			WriteRegister(kRegXenaxFlashControlStatus, PAGEPROGRAM_COMMAND);
+			WriteCommand(PAGEPROGRAM_COMMAND);
 
 			WaitForFlashNOTBusy();
 
@@ -1730,16 +1760,16 @@ bool CNTV2KonaFlashProgram::ProgramFromMCS(bool verify)
 	}
 
 	//Protect Device
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+	WriteCommand(WRITEENABLE_COMMAND);
 	WaitForFlashNOTBusy();
 	WriteRegister(kRegXenaxFlashDIN, 0x1C);
-	WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+	WriteCommand(WRITESTATUS_COMMAND);
 	WaitForFlashNOTBusy();
 
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+	WriteCommand(WRITEENABLE_COMMAND);
 	WaitForFlashNOTBusy();
 	WriteRegister(kRegXenaxFlashDIN, 0x9C);
-	WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+	WriteCommand(WRITESTATUS_COMMAND);
 	WaitForFlashNOTBusy();
 	SetBankSelect(BANK_0);
 
@@ -1820,10 +1850,11 @@ bool CNTV2KonaFlashProgram::ProgramSOC (const bool verify)
 	//	Not _spiFlash:
 	if (!IsOpen())
 		{cerr << "Device not open" << endl;  return false;}
-
-	cout << "Erase SOC Bank 1" << endl;
+	if (!_bQuiet)
+		cout << "Erase SOC Bank 1" << endl;
 	EraseBlock(SOC1_FLASHBLOCK);
-	cout << "Erase SOC Bank 2" << endl;
+	if (!_bQuiet)
+		cout << "Erase SOC Bank 2" << endl;
 	EraseBlock(SOC2_FLASHBLOCK);
 
 	//1st partition is assumed to be at 32M mark
@@ -1862,7 +1893,7 @@ bool CNTV2KonaFlashProgram::ProgramSOC (const bool verify)
 				baseAddress = GetBaseAddressForProgramming(blockID);
 			}
 			uint32_t remainderBytes = static_cast<uint32_t>(_partitionBuffer.size() - bufferIndex);
-			WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+			WriteCommand(WRITEENABLE_COMMAND);
 			WaitForFlashNOTBusy();
 
 			for (uint32_t dwordCount = 0; dwordCount < dwordsPerBlock; dwordCount++)
@@ -1905,7 +1936,7 @@ bool CNTV2KonaFlashProgram::ProgramSOC (const bool verify)
 				WriteRegister(kRegXenaxFlashDIN, partitionValue);
 			}	//	for dwordCount
 			WriteRegister(kRegXenaxFlashAddress, baseAddress);
-			WriteRegister(kRegXenaxFlashControlStatus, PAGEPROGRAM_COMMAND);
+			WriteCommand(PAGEPROGRAM_COMMAND);
 
 			WaitForFlashNOTBusy();
 
@@ -1935,16 +1966,16 @@ bool CNTV2KonaFlashProgram::ProgramSOC (const bool verify)
 	}	//	while bPartitionValid
 
 	//Protect Device
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+	WriteCommand(WRITEENABLE_COMMAND);
 	WaitForFlashNOTBusy();
 	WriteRegister(kRegXenaxFlashDIN, 0x1C);
-	WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+	WriteCommand(WRITESTATUS_COMMAND);
 	WaitForFlashNOTBusy();
 
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+	WriteCommand(WRITEENABLE_COMMAND);
 	WaitForFlashNOTBusy();
 	WriteRegister(kRegXenaxFlashDIN, 0x9C);
-	WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+	WriteCommand(WRITESTATUS_COMMAND);
 	WaitForFlashNOTBusy();
 	SetBankSelect(BANK_0);
 	return true;
@@ -2003,7 +2034,7 @@ bool CNTV2KonaFlashProgram::ProgramCustom (const string &sCustomFileName, const 
 	else
 	{
 		static const size_t MAX_CUSTOM_FILE_SIZE (8<<20); // 1M
-		NTV2_POINTER customFileBuffer(MAX_CUSTOM_FILE_SIZE);
+		NTV2Buffer customFileBuffer(MAX_CUSTOM_FILE_SIZE);
 		size_t customSize(0), sz(0);
 
 		uint32_t bank(addr / _bankSize),  offset(addr % _bankSize);
@@ -2027,20 +2058,21 @@ bool CNTV2KonaFlashProgram::ProgramCustom (const string &sCustomFileName, const 
 		static const BankSelect BankIdxToBankSelect[] = {BANK_0, BANK_1, BANK_2, BANK_3};
 
 		SetBankSelect(BankIdxToBankSelect[bank]);
-		WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+		WriteCommand(WRITEENABLE_COMMAND);
 		WaitForFlashNOTBusy();
 		WriteRegister(kRegXenaxFlashDIN, 0x0);
-		WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+		WriteCommand(WRITESTATUS_COMMAND);
 		WaitForFlashNOTBusy();
 
 		const uint32_t customSectors ((uint32_t(customSize) + _sectorSize - 1) / (_sectorSize));
 		for (uint32_t i(0);  i < customSectors;  i++)
 		{
-			cout << "Erasing sectors - " << DECN(i,3) << " of " << DECN(customSectors,3) << "\r" << flush;
+			if (!_bQuiet)
+				cout << "Erasing sectors - " << DECN(i,3) << " of " << DECN(customSectors,3) << "\r" << flush;
 			EraseSector(offset + (i * _sectorSize));
 		}
 
-		WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+		WriteCommand(WRITEENABLE_COMMAND);
 		WaitForFlashNOTBusy();
 
 		uint32_t	blockSize		(512);
@@ -2052,7 +2084,7 @@ bool CNTV2KonaFlashProgram::ProgramCustom (const string &sCustomFileName, const 
 		uint32_t	bufferIndex		(0);
 		for (uint32_t blockCount(0);  blockCount < totalBlockCount;  blockCount++)
 		{
-			WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+			WriteCommand(WRITEENABLE_COMMAND);
 			WaitForFlashNOTBusy();
 
 			for (uint32_t dwordCount(0);  dwordCount < dwordsPerBlock;  dwordCount++)
@@ -2094,7 +2126,7 @@ bool CNTV2KonaFlashProgram::ProgramCustom (const string &sCustomFileName, const 
 				WriteRegister(kRegXenaxFlashDIN, partitionValue);
 			}	//	for each dword
 			WriteRegister(kRegXenaxFlashAddress, baseAddress);
-			WriteRegister(kRegXenaxFlashControlStatus, PAGEPROGRAM_COMMAND);
+			WriteCommand(PAGEPROGRAM_COMMAND);
 			WaitForFlashNOTBusy();
 
 			baseAddress += blockSize;
@@ -2105,16 +2137,16 @@ bool CNTV2KonaFlashProgram::ProgramCustom (const string &sCustomFileName, const 
 		}	//	for each block
 
 		//Protect Device
-		WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+		WriteCommand(WRITEENABLE_COMMAND);
 		WaitForFlashNOTBusy();
 		WriteRegister(kRegXenaxFlashDIN, 0x1C);
-		WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+		WriteCommand(WRITESTATUS_COMMAND);
 		WaitForFlashNOTBusy();
 
-		WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+		WriteCommand(WRITEENABLE_COMMAND);
 		WaitForFlashNOTBusy();
 		WriteRegister(kRegXenaxFlashDIN, 0x9C);
-		WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+		WriteCommand(WRITESTATUS_COMMAND);
 		WaitForFlashNOTBusy();
 		SetBankSelect(BANK_0);
 	}	//	else !_spiFlash
@@ -2187,7 +2219,7 @@ bool CNTV2KonaFlashProgram::VerifySOCPartition(FlashBlockID flashID, uint32_t fl
 	{
 		WriteRegister(kVRegFlashStatus,dwordCount);
 		WriteRegister(kRegXenaxFlashAddress, baseAddress);
-		WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
+		WriteCommand(READFAST_COMMAND);
 		WaitForFlashNOTBusy();
 		uint32_t flashValue;
 		ReadRegister(kRegXenaxFlashDOUT, flashValue);
@@ -2240,7 +2272,7 @@ void CNTV2KonaFlashProgram::DisplayData(uint32_t address, uint32_t count)
 	for (uint32_t i = 0; i < count; i++, offset += 4)
 	{
 		WriteRegister(kRegXenaxFlashAddress, offset);
-		WriteRegister(kRegXenaxFlashControlStatus, READFAST_COMMAND);
+		WriteCommand(READFAST_COMMAND);
 		WaitForFlashNOTBusy();
 		uint32_t flashValue;
 		ReadRegister(kRegXenaxFlashDOUT, flashValue);
@@ -2248,14 +2280,15 @@ void CNTV2KonaFlashProgram::DisplayData(uint32_t address, uint32_t count)
 		pLine += sprintf(pLine, "%08x  ", uint32_t(flashValue));
 		if (++lineCount == WORDS_PER_LINE)
 		{
-			cout << line << endl;
+			if (!_bQuiet)
+				cout << line << endl;
 			memset(line, 0, 1024);
 			pLine = &line[0];
 			pLine += sprintf(pLine, "%08x: ", uint32_t((bank * _bankSize) + offset + 4));
 			lineCount = 0;
 		}
 	}
-	if (lineCount != 0)
+	if (!_bQuiet && lineCount != 0)
 		cout << line << endl;
 }
 
@@ -2264,8 +2297,8 @@ bool CNTV2KonaFlashProgram::FullProgram (vector<uint8_t> & dataBuffer)
 	if (!IsOpen())
 		return false;
 	uint32_t baseAddress = 0;
-
-	cout << "Erasing ROM" << endl;
+	if (!_bQuiet)
+		cout << "Erasing ROM" << endl;
 	EraseChip();
 	BankSelect currentBank = BANK_0;
 	SetBankSelect(currentBank);
@@ -2300,18 +2333,18 @@ bool CNTV2KonaFlashProgram::FullProgram (vector<uint8_t> & dataBuffer)
 		cout << "Program status: 100%				   " << endl;
 
 	// Protect Device
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+	WriteCommand(WRITEENABLE_COMMAND);
 	WaitForFlashNOTBusy();
 	WriteRegister(kRegXenaxFlashDIN, 0x1C);
-	WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+	WriteCommand(WRITESTATUS_COMMAND);
 	WaitForFlashNOTBusy();
 
 	SetBankSelect(BANK_0);
 
-	WriteRegister(kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+	WriteCommand(WRITEENABLE_COMMAND);
 	WaitForFlashNOTBusy();
 	WriteRegister(kRegXenaxFlashDIN, 0x9C);
-	WriteRegister(kRegXenaxFlashControlStatus, WRITESTATUS_COMMAND);
+	WriteCommand(WRITESTATUS_COMMAND);
 	WaitForFlashNOTBusy();
 	SetBankSelect(BANK_0);
 	SetWarmBootFirmwareReload(true);
@@ -2324,7 +2357,8 @@ bool CNTV2KonaFlashProgram::CheckAndFixMACs()
 	ReadMACAddresses(mac1, mac2);
 	if(mac1.mac[1] != 0x0C || mac2.mac[1] != 0x0c)
 	{
-		cout << "Reprogramming the Mac Addresses!" << endl;
+		if (!_bQuiet)
+			cout << "Reprogramming the Mac Addresses!" << endl;
 		string serialString;
 		GetSerialNumberString(serialString);
 		MakeMACsFromSerial(serialString.c_str(), &mac1, &mac2);

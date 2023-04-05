@@ -14,7 +14,6 @@
 #include "ajaexport.h"
 #include "ajatypes.h"
 #include "ntv2enums.h"
-#include "ntv2videodefines.h"
 #include "ntv2publicinterface.h"
 
 

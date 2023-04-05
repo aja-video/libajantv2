@@ -237,9 +237,9 @@ public:
 
 	/**
 		@param[in]	pInAncData	A valid pointer to an AJAAncillaryData instance.
-		@return		The AJAAncillaryDataType if I recognize this ancillary data (or unknown if unrecognized).
+		@return		The AJAAncDataType if I recognize this ancillary data (or unknown if unrecognized).
 	**/
-	static AJAAncillaryDataType			RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData);
+	static AJAAncDataType				RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData);
 
 	/**
 		@brief		Streams a human-readable representation of me to the given output stream.

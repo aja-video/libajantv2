@@ -8,7 +8,11 @@
 #include "ajabase/common/variant.h"
 #include "ajabase/common/common.h"
 
-#include <cstdlib>
+#ifdef AJA_USE_CPLUSPLUS11
+    #include <cstdlib>
+#else
+    #include <stdlib.h>
+#endif
 
 AJAVariant::AJAVariant()
 : mType(AJA_VARIANT_INT32), mInt32Value(0)
@@ -321,7 +325,7 @@ bool AJAVariant::AsBool() const {
             if (!mStringValue.empty()) {
                 std::string tmp = std::string(mStringValue);
                 std::string lower = aja::lower(tmp);
-                if (tmp == "true")
+                if (tmp == "true" || tmp == "1" || tmp == "y")
                     return true;
                 else
                     return false;
@@ -366,7 +370,11 @@ float AJAVariant::AsFloat() const {
             if (mStringValue.empty()) {
                 return 0.f;
             } else {
-                return strtof(mStringValue.data(), NULL);
+#ifdef AJA_USE_CPLUSPLUS11
+                return std::strtof(mStringValue.data(), NULL);
+#else
+                return (float)atof(mStringValue.data());
+#endif
             }
         }
         default:
@@ -678,7 +686,11 @@ int64_t AJAVariant::AsInt64() const {
             if (mStringValue.empty()) {
                 return 0;
             } else {
-                return strtoll(mStringValue.data(), NULL, 0);
+#ifdef AJA_USE_CPLUSPLUS11
+                return std::strtoll(mStringValue.data(), NULL, 0);
+#else
+                return atol(mStringValue.data());
+#endif
             }
         }
         default:
@@ -717,7 +729,20 @@ uint64_t AJAVariant::AsUInt64() const {
             if (mStringValue.empty()) {
                 return 0;
             } else {
-                return strtoull(mStringValue.data(), NULL, 0);
+#ifdef AJA_USE_CPLUSPLUS11
+                return std::strtoull(mStringValue.data(), NULL, 0);
+#else
+                char* endptr;
+                const char* data = mStringValue.data();
+#if defined(_MSC_VER) && _MSC_VER < 1900
+                unsigned long value = _strtoui64(data, &endptr, 10);
+#else
+                unsigned long value = strtoull(data, &endptr, 10);
+#endif
+                if (data == endptr)
+                    return 0;
+                return value;
+#endif
             }
         }
         default:

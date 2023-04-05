@@ -214,6 +214,7 @@ AJATimeLog::~AJATimeLog()
 void AJATimeLog::Reset()
 {
 	_time = AJATime::GetSystemMicroseconds();
+	_lastDelta = 0;
 }
 
 // reset time
@@ -226,42 +227,33 @@ void AJATimeLog::PrintReset()
 // print dela time in micro seconds
 void AJATimeLog::PrintDelta(bool bReset)
 {
-	uint64_t currTime = AJATime::GetSystemMicroseconds();
-	PrintValue(currTime-_time);
-	if (bReset)
-		_time = currTime;
+	uint64_t delta = GetDelta(bReset);
+	PrintValue(delta);
 }
-
 
 // print dela time in micro seconds
 int32_t AJATimeLog::GetDelta(bool bReset)
 {
 	uint64_t currTime = AJATime::GetSystemMicroseconds();
-	int32_t delta = int32_t(currTime - _time);
+	_lastDelta = currTime - _time;
 	if (bReset)
 		_time = currTime;
-	return delta;
+	return (int32_t)_lastDelta;
 }
 
 // print delta time in micro seconds, use additional tag
 void AJATimeLog::PrintDelta(const char* addedTag, bool bReset)
 {
-	uint64_t currTime = AJATime::GetSystemMicroseconds();
-	PrintValue(currTime-_time, addedTag);
-	if (bReset)
-		_time = currTime;
+	uint64_t delta = GetDelta(bReset);
+	PrintValue(delta, addedTag);
 }
 
 void AJATimeLog::PrintDelta(uint64_t threashold, const char* addedTag, bool bReset)
 {
-	uint64_t currTime = AJATime::GetSystemMicroseconds();
-	if ((currTime-_time) > threashold)
-		PrintValue(currTime-_time, addedTag);
-	if (bReset)
-		_time = currTime;
+	uint64_t delta = GetDelta(bReset);
+	if (delta > threashold)
+		PrintValue(delta, addedTag);
 }
-
-
 
 void AJATimeLog::PrintValue(int64_t val)
 {

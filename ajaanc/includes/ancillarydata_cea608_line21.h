@@ -14,8 +14,8 @@
 
 
 // Line 21 ("Analog") Packet IDs
-const uint8_t	AJAAncillaryData_Cea608_Line21_DID = AJAAncillaryData_AnalogSID;
-const uint8_t	AJAAncillaryData_Cea608_Line21_SID = AJAAncillaryData_AnalogDID;
+const uint8_t	AJAAncillaryData_Cea608_Line21_DID = AJAAncData_AnalogSID;
+const uint8_t	AJAAncillaryData_Cea608_Line21_SID = AJAAncData_AnalogDID;
 
 const uint32_t  AJAAncillaryData_Cea608_Line21_PayloadSize = 720;		// note: assumes we're only using this for SD (720 pixels/line)
 
@@ -79,13 +79,13 @@ public:
 		@param[in]	inDetailed		Specify 'true' for a detailed representation;  otherwise use 'false' for a brief one.
 		@return		The given output stream.
 	**/
-	virtual std::ostream &					Print (std::ostream & inOutStream, const bool inDetailed = false) const;
+	virtual std::ostream &			Print (std::ostream & inOutStream, const bool inDetailed = false) const;
 
 	/**
 		@param[in]	pInAncData	A valid pointer to a base AJAAncillaryData object that contains the Anc data to inspect.
-		@return		AJAAncillaryDataType if I recognize this Anc data (or AJAAncillaryDataType_Unknown if unrecognized).
+		@return		AJAAncDataType if I recognize this Anc data (or AJAAncDataType_Unknown if unrecognized).
 	**/
-	static AJAAncillaryDataType		RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData);
+	static AJAAncDataType			RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData);
 
 
 protected:

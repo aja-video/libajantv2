@@ -21,6 +21,9 @@
 
 #include <iomanip>
 
+#include <comdef.h>
+#include <Wbemidl.h>  // links with wbemuuid.lib
+
 struct WindowsVersionEntry
 {
 	int major;
@@ -37,8 +40,8 @@ const WindowsVersionEntry WindowsVersionTable[] =
 	{ 6, 0, (char*)"Windows Vista",		  (char*)"Windows Server 2008"},
 	{ 6, 1, (char*)"Windows 7",			  (char*)"Windows Server 2008 R2"},
 	{ 6, 2, (char*)"Windows 8",			  (char*)"Windows Server 2012"},
-	{ 6, 3, (char*)"Windows 8.1",		  (char*)"Windows Server 2012 R2"},
-	{10, 0, (char*)"Windows 10",		  (char*)"Windows Server 2016"}
+	{ 6, 3, (char*)"Windows 8.1",		  (char*)"Windows Server 2012 R2"}
+	//{10, 0, (char*)"Windows 10",		  (char*)"Windows Server 2016"} // Use Registry to retrieve from this point forward
 };
 const int WindowsVersionTableSize = sizeof(WindowsVersionTable) / sizeof(WindowsVersionEntry);
 
@@ -134,6 +137,157 @@ aja_getboottime()
 	return t.str();
 }
 
+// helper function if error encountered in getOSName_WMI
+// Creates a fall-back return string for OS Name while also embedding basic error information
+// Takes a code marker as argument, and optional HRESULT to output it's value.
+// Example:  "Windows (Edition not found) 3-x80012345".  The code marker is "3" and HRESULT is 80012345
+static std::string getOSName_WMI_error(const std::string codemarker, const HRESULT &hres=0)
+{
+	std::string ret_val = "Windows (Edition not found)"; //error code markers will be appended
+	char hr_errcode[9]; //8 Hex digits + null
+	sprintf(hr_errcode,"%lX",hres);
+	//std::string errcode(hr_errcode);
+	ret_val = ret_val + " "+ codemarker + "-x" + hr_errcode;
+	return ret_val;
+}
+// Uses WMI (Windows Management Instrumentation), to retrieve a pretty OS name complete with edition.
+//		WMI Object=Win32_OperatingSystem ; Property=Caption
+// The Method used below was largely taken from an MSDN example.  This method was chosen for it's use of native Win32 API
+// The same property can be retrieved with a single line powershell command: (Get-WmiObject Win32_OperatingSystem).Caption
+static std::string getOSName_WMI()
+{
+	std::string ret_val;
+	try {
+
+		//Following steps are as recommended on MSDN
+		HRESULT hres;
+
+		// Initialize COM
+		hres = CoInitializeEx(0, COINIT_MULTITHREADED);
+		if (FAILED(hres)){
+			if (hres != RPC_E_CHANGED_MODE)
+				return getOSName_WMI_error("1",hres);
+		}
+
+		// Set general COM security levels
+		hres = CoInitializeSecurity(
+			NULL,
+			-1,                          // COM authentication
+			NULL,                        // Authentication services
+			NULL,                        // Reserved
+			RPC_C_AUTHN_LEVEL_DEFAULT,   // Default authentication
+			RPC_C_IMP_LEVEL_IMPERSONATE, // Default Impersonation
+			NULL,                        // Authentication info
+			EOAC_NONE,                   // Additional capabilities
+			NULL                         // Reserved
+			);
+		if (FAILED(hres)){
+			CoUninitialize();
+			return getOSName_WMI_error("2",hres);
+		}
+		// Obtain the initial locator
+		IWbemLocator *pLoc = NULL;
+		hres = CoCreateInstance(
+				CLSID_WbemLocator,
+				0,
+				CLSCTX_INPROC_SERVER,
+				IID_IWbemLocator, (LPVOID *) &pLoc);
+		if (FAILED(hres)){
+			CoUninitialize();
+			return getOSName_WMI_error("3",hres);
+		}
+		// Connect to the root\cimv2 namespace with
+		// the current user and obtain pointer pSvc
+		// to make IWbemServices calls.
+		IWbemServices *pSvc = NULL;
+
+		hres = pLoc->ConnectServer(
+			 _bstr_t(L"ROOT\\CIMV2"), // Object path of WMI namespace
+			 NULL,                    // User name. NULL = current user
+			 NULL,                    // User password. NULL = current
+			 0,                       // Locale. NULL indicates current
+			 NULL,                    // Security flags.
+			 0,                       // Authority (for example, Kerberos)
+			 0,                       // Context object
+			 &pSvc                    // pointer to IWbemServices proxy
+			 );
+		if (FAILED(hres)){
+			pLoc->Release();
+			CoUninitialize();
+			return getOSName_WMI_error("4",hres);
+		}
+		// Set security levels on the proxy
+		hres = CoSetProxyBlanket(
+		   pSvc,                        // Indicates the proxy to set
+		   RPC_C_AUTHN_WINNT,           // RPC_C_AUTHN_xxx
+		   RPC_C_AUTHZ_NONE,            // RPC_C_AUTHZ_xxx
+		   NULL,                        // Server principal name
+		   RPC_C_AUTHN_LEVEL_CALL,      // RPC_C_AUTHN_LEVEL_xxx
+		   RPC_C_IMP_LEVEL_IMPERSONATE, // RPC_C_IMP_LEVEL_xxx
+		   NULL,                        // client identity
+		   EOAC_NONE                    // proxy capabilities
+		);
+		if (FAILED(hres)){
+			pSvc->Release();
+			pLoc->Release();
+			CoUninitialize();
+			return getOSName_WMI_error("5",hres);
+		}
+
+		//Execute Query agianst WMI Object: Win32_OperatingSystem
+		IEnumWbemClassObject* pEnumerator = NULL;
+		hres = pSvc->ExecQuery(
+			bstr_t("WQL"),
+			bstr_t("SELECT Caption FROM Win32_OperatingSystem"),
+			WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
+			NULL,
+			&pEnumerator);
+		if (FAILED(hres)){
+			pSvc->Release();
+			pLoc->Release();
+			CoUninitialize();
+			return getOSName_WMI_error("6",hres);
+		}
+		// Get the data from the query -------------------
+		IWbemClassObject *pclsObj = NULL;
+		ULONG uReturn = 0;
+
+		HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
+
+		if(0 == uReturn || FAILED(hr))
+		{
+			pSvc->Release();
+			pLoc->Release();
+			pEnumerator->Release();
+			CoUninitialize();
+			return getOSName_WMI_error("7",hr);
+		}
+
+		VARIANT vtProp;
+		VariantInit(&vtProp);
+		// Get the value of the Name property
+		hr = pclsObj->Get(L"Caption", 0, &vtProp, 0, 0);
+
+		ret_val = _bstr_t(vtProp.bstrVal);
+		VariantClear(&vtProp);
+
+		pclsObj->Release();
+
+		// Cleanup
+		pSvc->Release();
+		pLoc->Release();
+		pEnumerator->Release();
+		CoUninitialize();
+	}
+
+	catch(...){
+		return getOSName_WMI_error("8",0x0);
+	}
+
+	return ret_val;
+
+}
+
 std::string
 aja_getosname()
 {
@@ -154,6 +308,11 @@ aja_getosname()
 	//
 	// They forgot to "break" NetWkstaGetInfo(), so use that to get the
 	// major and minor versions for Windows 8.1 and beyound
+	//
+	// Update: Windows 10 and corresponding Server versions have been removed from WindowsVersionTable
+	// due to the variety of builds under Windows 10, while the majorVesrion and minorVersion apparently do not update beyond 10.0
+	// For Windows 10 and beyond, getting "Caption" from the WMI (Windows Management Instrumentation) Object Win32_OperatingSystem
+
 	if (majorVersion >=6 && minorVersion >= 2)
 	{
 		LPBYTE pinfoRawData;
@@ -200,7 +359,20 @@ aja_getosname()
 			foundVersion = true;
 			break;
 		}
+
 	}
+
+	if (!foundVersion)
+	{
+		//Microsoft is not updating the below key for Windows 11, it still reads as Windows 10.
+		//osname = aja::read_registry_string(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
+		//								  "ProductName");
+
+		//Changed to retrieve a pretty OS Name with Edition from Win32_Operatingystem WMI class
+		osname = getOSName_WMI();
+	}
+
+
 
 	// append the service pack info if available
 	osname += " ";
@@ -314,9 +486,13 @@ aja_getmemory(AJASystemInfoMemoryUnit units, std::string &total, std::string &us
 std::string
 aja_getosversion()
 {
+	//At some point circa Windows 10, Reg Key DisplayVersion began to be used instead of ReleaseId. Check for that first.
 	std::string outVal;
 	outVal = aja::read_registry_string(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
-									  "ReleaseId");
+									  "DisplayVersion");
+	if (outVal == "")
+		outVal = aja::read_registry_string(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
+										  "ReleaseId");
 
 	return outVal;
 }
@@ -352,6 +528,8 @@ aja_mkpath_to_user_dir(const std::string& username)
 	return path;
 }
 
+
+
 AJASystemInfoImpl::AJASystemInfoImpl(int units)
 {
 	mMemoryUnits = units;
@@ -364,6 +542,8 @@ AJASystemInfoImpl::~AJASystemInfoImpl()
 
 AJAStatus
 AJASystemInfoImpl::Rescan(AJASystemInfoSections sections)
+
+
 {
 	AJAStatus ret = AJA_STATUS_FAIL;
 
@@ -544,3 +724,6 @@ AJASystemInfoImpl::Rescan(AJASystemInfoSections sections)
 
 	return ret;
 }
+
+//
+

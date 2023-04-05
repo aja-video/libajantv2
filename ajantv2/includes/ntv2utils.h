@@ -94,7 +94,7 @@ AJAExport bool		PackLine_UWordSequenceTo10BitYUV (const UWordSequence & in16BitY
 	@note		Neighboring components in the packed output will be corrupted if input component values exceed 0x3FF.
 	@note		This is a safer version of the ::PackLine_UWordSequenceTo10BitYUV function.
 **/
-AJAExport bool YUVComponentsTo10BitYUVPackedBuffer (const std::vector<uint16_t> & inYCbCrLine, NTV2_POINTER & inFrameBuffer,
+AJAExport bool YUVComponentsTo10BitYUVPackedBuffer (const std::vector<uint16_t> & inYCbCrLine, NTV2Buffer & inFrameBuffer,
 													const NTV2FormatDescriptor & inDescriptor, const UWord inLineOffset);
 
 /**
@@ -108,7 +108,7 @@ AJAExport bool YUVComponentsTo10BitYUVPackedBuffer (const std::vector<uint16_t> 
 	@return		True if successful;	 otherwise false.
 	@note		This is a safer version of the ::UnpackLine_10BitYUVtoUWordSequence function.
 **/
-AJAExport bool UnpackLine_10BitYUVtoU16s (std::vector<uint16_t> & outYCbCrLine, const NTV2_POINTER & inFrameBuffer,
+AJAExport bool UnpackLine_10BitYUVtoU16s (std::vector<uint16_t> & outYCbCrLine, const NTV2Buffer & inFrameBuffer,
 											const NTV2FormatDescriptor & inDescriptor, const UWord inLineOffset);
 
 
@@ -549,7 +549,7 @@ AJAExport bool					IsTransportCompatibleFormat (const NTV2VideoFormat inFormat1,
 	@param[in]	inKinds		Optionally specifies the input source type (SDI, HDMI, Analog, etc.) of interest.
 							Defaults to ::NTV2_INPUTSOURCES_SDI.
 **/
-AJAExport NTV2InputSource		GetNTV2InputSourceForIndex (const ULWord inIndex0, const NTV2InputSourceKinds inKinds = NTV2_INPUTSOURCES_SDI);
+AJAExport NTV2InputSource		GetNTV2InputSourceForIndex (const ULWord inIndex0, const NTV2IOKinds inKinds = NTV2_IOKINDS_SDI);
 AJAExport ULWord				GetIndexForNTV2InputSource (const NTV2InputSource inValue);		//	0-based index
 
 /**
@@ -687,7 +687,7 @@ AJAExport NTV2AudioSystem NTV2ChannelToAudioSystem (const NTV2Channel inChannel)
 								Defaults to SDI.
 	@return		The NTV2InputSource value that corresponds to the given NTV2Channel value.
 **/
-AJAExport NTV2InputSource NTV2ChannelToInputSource (const NTV2Channel inChannel, const NTV2InputSourceKinds inKinds = NTV2_INPUTSOURCES_SDI);
+AJAExport NTV2InputSource NTV2ChannelToInputSource (const NTV2Channel inChannel, const NTV2IOKinds inKinds = NTV2_IOKINDS_SDI);
 
 /**
 	@brief		Converts a given NTV2OutputDestination to its equivalent NTV2Channel value.
@@ -762,7 +762,7 @@ AJAExport int  RecordCopyAudio (PULWord pAja, PULWord pSR, int iStartSample, int
 	@return		True if successful;  otherwise false.
 **/
 AJAExport bool AddAudioTone (	ULWord &		outNumBytesWritten,
-								NTV2_POINTER &	inAudioBuffer,
+								NTV2Buffer &	inAudioBuffer,
 								ULWord &		inOutCurrentSample,
 								const ULWord	inNumSamples,
 								const double	inSampleRate,
@@ -1007,6 +1007,72 @@ AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2Smpt
 	@return		The NTV2SmpteLineNumber structure that corresponds to the given video standard.
 **/
 inline NTV2SmpteLineNumber GetSmpteLineNumber (const NTV2Standard inStandard)	{return NTV2SmpteLineNumber (inStandard);}
+
+
+/**
+	@brief	AutoCirculate Frame Range
+**/
+class AJAExport NTV2ACFrameRange
+{
+	public:
+		explicit inline	NTV2ACFrameRange (const UWord inFrameCount = 0)
+						{
+							setCountOnly(inFrameCount);
+						}
+		explicit inline	NTV2ACFrameRange (const UWord inFirstFrame, const UWord inLastFrame)
+						{
+							setExactRange (inFirstFrame, inLastFrame);
+						}
+		inline bool		isCountOnly (void) const	{return mIsCountOnly;}		//	@return	True if simply a frame count
+		inline bool		isFrameRange (void) const	{return !isCountOnly();}	//	@return	True if a specific frame range
+		inline UWord	count (void) const			{return isCountOnly() ? mFrameCount : 0;}	//	@return	Frame count (if isCountOnly); otherwise zero
+		inline UWord	firstFrame (void) const		{return mFirstFrame;}		//	@return	
+		inline UWord	lastFrame (void) const		{return mLastFrame;}
+		inline bool		valid (void) const
+						{
+							if (isCountOnly())
+								return count() > 0;
+							return lastFrame() >= firstFrame();
+						}
+		inline NTV2ACFrameRange &	makeInvalid (void)
+						{
+							mIsCountOnly = true;
+							mFrameCount = mFirstFrame = mLastFrame = 0;
+							return *this;
+						}
+		inline bool		setExactRange (const UWord inFirstFrame, const UWord inLastFrame)
+						{
+							mIsCountOnly = false;
+							mFrameCount = 0;
+							mFirstFrame = inFirstFrame;
+							mLastFrame = inLastFrame;
+							return valid();
+						}
+		inline bool		setRangeWithCount (const UWord inCount, const UWord inFirstFrame)
+						{
+							mIsCountOnly = false;
+							mFrameCount = 0;
+							mFirstFrame = inFirstFrame;
+							mLastFrame = mFirstFrame + inCount - 1;
+							return valid();
+						}
+		inline bool		setCountOnly (const UWord inCount)
+						{
+							mIsCountOnly	= true;
+							mFrameCount		= inCount;
+							mFirstFrame = mLastFrame = 0;
+							return valid();
+						}
+		std::string		setFromString (const std::string & inStr);
+		std::string		toString (const bool inNormalized = false) const;
+
+	private:
+		bool	mIsCountOnly;	///< @brief	Frame count only? If false, specifies absolute frame range.
+		UWord	mFrameCount;	///< @brief	Frame count (mIsCountOnly == true).
+		UWord	mFirstFrame;	///< @brief	First frame (mIsCountOnly == false).
+		UWord	mLastFrame;		///< @brief	Last frame (mIsCountOnly == false).
+
+};	//	NTV2ACFrameRange
 
 
 typedef std::vector <NTV2DeviceID>			NTV2DeviceIDList;			///< @brief An ordered list of NTV2DeviceIDs.

@@ -27,7 +27,7 @@ class AJAExport NTV2BitfileHeaderParser
 {
 	public:
 		explicit					NTV2BitfileHeaderParser	()	{Clear();}
-		bool						ParseHeader			(const NTV2_POINTER & inHdrBuffer,
+		bool						ParseHeader			(const NTV2Buffer & inHdrBuffer,
 														std::ostream & outMsgs);
 		void						Clear				(void);
 
@@ -125,7 +125,7 @@ class AJAExport CNTV2Bitfile
 			@param[in]	inBitfileBuffer	Specifies the buffer of the bitfile to be parsed.
 			@return		A std::string containing parsing errors. It will be empty if successful.
 		**/
-		virtual std::string					ParseHeaderFromBuffer (const NTV2_POINTER & inBitfileBuffer);
+		virtual std::string					ParseHeaderFromBuffer (const NTV2Buffer & inBitfileBuffer);
 
 		/**
 			@return		A string containing the extracted bitfile build date.
@@ -224,7 +224,7 @@ class AJAExport CNTV2Bitfile
 									storage if IsNULL or IsAllocatedBySDK.
 			@return		Number of bytes copied to the outBuffer, or zero upon failure.
 		**/
-		virtual size_t			GetProgramByteStream (NTV2_POINTER & outBuffer);
+		virtual size_t			GetProgramByteStream (NTV2Buffer & outBuffer);
 
 		/**
 			@brief		Retrieves the file bitstream.
@@ -232,7 +232,7 @@ class AJAExport CNTV2Bitfile
 									storage if IsNULL or IsAllocatedBySDK.
 			@return		Number of bytes copied to the outBuffer, or zero upon failure.
 		**/
-		virtual size_t			GetFileByteStream (NTV2_POINTER & outBuffer);
+		virtual size_t			GetFileByteStream (NTV2Buffer & outBuffer);
 
 	public:	//	Class Methods
 		static NTV2DeviceID		ConvertToDeviceID	(const ULWord inDesignID, const ULWord inBitfileID);
@@ -246,7 +246,7 @@ class AJAExport CNTV2Bitfile
 
 	private:	//	Private Member Data
 		std::ifstream			mFileStream;	//	Binary input filestream
-		NTV2_POINTER			mHeaderBuffer;	//	Header buffer in use
+		NTV2Buffer				mHeaderBuffer;	//	Header buffer in use
 		NTV2BitfileHeaderParser	mHeaderParser;	//	Header parser (and state info)
 		std::string				mLastError;		//	Last error message
 		size_t					mFileSize;		//	Bitfile size, in bytes

@@ -15,6 +15,7 @@
 #include "ntv2transcode.h"
 #include "ntv2devicefeatures.h"
 #include "ajabase/system/lock.h"
+#include "ajabase/common/common.h"
 #if defined(AJALinux)
 	#include <string.h>	 // For memset
 	#include <stdint.h>
@@ -580,7 +581,7 @@ bool PackLine_UWordSequenceTo10BitYUV (const UWordSequence & in16BitYUVLine, ULW
 }
 
 
-bool YUVComponentsTo10BitYUVPackedBuffer (const vector<uint16_t> & inYCbCrLine,	 NTV2_POINTER & inFrameBuffer,
+bool YUVComponentsTo10BitYUVPackedBuffer (const vector<uint16_t> & inYCbCrLine,	 NTV2Buffer & inFrameBuffer,
 											const NTV2FormatDescriptor & inDescriptor,	const UWord inLineOffset)
 {
 	if (inYCbCrLine.size() < 12)
@@ -623,7 +624,7 @@ bool YUVComponentsTo10BitYUVPackedBuffer (const vector<uint16_t> & inYCbCrLine,	
 }
 
 
-bool UnpackLine_10BitYUVtoU16s (vector<uint16_t> & outYCbCrLine, const NTV2_POINTER & inFrameBuffer,
+bool UnpackLine_10BitYUVtoU16s (vector<uint16_t> & outYCbCrLine, const NTV2Buffer & inFrameBuffer,
 								const NTV2FormatDescriptor & inDescriptor, const UWord inLineOffset)
 {
 	outYCbCrLine.clear();
@@ -4174,6 +4175,86 @@ string NTV2SmpteLineNumber::PrintLineNumber (const ULWord inLineOffset, const NT
 	return oss.str();
 }
 
+
+string NTV2ACFrameRange::setFromString (const string & inStr)
+{
+	makeInvalid();
+	if (inStr.empty())
+		return "Frame count/range not specified";
+	const bool hasCount(inStr.find('@') != string::npos);
+	const bool hasRange(inStr.find('-') != string::npos);
+	NTV2StringList	strs;
+	if (hasCount && hasRange)
+		return "'@' and '-' cannot both be specified";
+	else if (hasCount)
+		aja::split(inStr, '@', strs);
+	else if (hasRange)
+		aja::split(inStr, '-', strs);
+	else
+		strs.push_back(inStr);
+	if (strs.empty())
+		return "No frame count/range values parsed";
+	if (strs.size() > 2)
+		return "More than 2 frame count/range values parsed";
+	if (hasCount || hasRange)
+		if (strs.size() != 2)
+			return "Expected exactly 2 frame count/range values";
+
+	//	Check that all characters are decimal digits...
+	for (size_t strNdx(0);  strNdx < strs.size();  strNdx++)
+	{	string	str(strs.at(strNdx));
+		if (aja::strip(str).empty())
+			return "Expected unsigned decimal integer value";
+		for (size_t chNdx(0);  chNdx < str.length();  chNdx++)
+			if (!isdigit(str.at(chNdx)))
+				return "Non-digit character encountered in '" + str + "'";
+	}
+
+	UWordSequence numbers;
+	for (NTV2StringListConstIter it(strs.begin());  it != strs.end();  ++it)
+	{
+		string	str(*it);
+		numbers.push_back(UWord(aja::stoul(aja::strip(str))));
+	}
+	bool isValid(false);
+	if (hasCount)
+		isValid = setRangeWithCount(numbers[0], numbers[1]);
+	else if (hasRange)
+		isValid = setExactRange(numbers[0], numbers[1]);
+	else
+		isValid = setCountOnly(numbers[0]);
+	return isValid ? "" : "First frame past last frame";
+}
+
+string NTV2ACFrameRange::toString (const bool inNormalized) const
+{
+	ostringstream oss;
+	if (inNormalized)
+	{
+		if (!valid())
+			;
+		else if (isFrameRange())
+		{
+			if (false)
+				oss << DEC(count()) << "@" << DEC(firstFrame());
+			else
+				oss << DEC(firstFrame()) << "-" << DEC(lastFrame());
+		}
+		else
+			oss << DEC(count());
+	}
+	else
+	{
+		if (!valid())
+			oss << "<invalid>";
+		else if (isFrameRange())
+			oss << "Frames " << DEC(firstFrame()) << "-" << DEC(lastFrame()) << " (" << DEC(lastFrame()-firstFrame()+1) << "@" << DEC(firstFrame()) << ")";
+		else
+			oss << DEC(count()) << " frames (auto-allocated)";
+	}
+	return oss.str();
+}
+
 #if !defined (NTV2_DEPRECATE)
 	AJA_LOCAL_STATIC const char * NTV2VideoFormatStrings [NTV2_MAX_NUM_VIDEO_FORMATS] =
 	{
@@ -4655,7 +4736,7 @@ int RecordCopyAudio(PULWord pAja, PULWord pSR, int iStartSample, int iNumBytes, 
 
 
 bool AddAudioTone (	ULWord &		outNumBytesWritten,
-					NTV2_POINTER &	inAudioBuffer,
+					NTV2Buffer &	inAudioBuffer,
 					ULWord &		inOutCurrentSample,
 					const ULWord	inNumSamples,
 					const double	inSampleRate,
@@ -4699,7 +4780,7 @@ bool AddAudioTone (	ULWord &		outNumBytesWritten,
 	outNumBytesWritten = numBytes;
 	return true;
 
-}	//	AddAudioTone (NTV2_POINTER)
+}	//	AddAudioTone (NTV2Buffer)
 
 
 ULWord	AddAudioTone (	ULWord *		pAudioBuffer,
@@ -5395,7 +5476,7 @@ NTV2TimecodeIndex NTV2InputSourceToTimecodeIndex (const NTV2InputSource inInputS
 }
 
 
-NTV2InputSource NTV2ChannelToInputSource (const NTV2Channel inChannel, const NTV2InputSourceKinds inSourceType)
+NTV2InputSource NTV2ChannelToInputSource (const NTV2Channel inChannel, const NTV2IOKinds inSourceType)
 {
 	static const NTV2InputSource	gChannelToSDIInputSource [] =	{	NTV2_INPUTSOURCE_SDI1,		NTV2_INPUTSOURCE_SDI2,		NTV2_INPUTSOURCE_SDI3,		NTV2_INPUTSOURCE_SDI4,
 																		NTV2_INPUTSOURCE_SDI5,		NTV2_INPUTSOURCE_SDI6,		NTV2_INPUTSOURCE_SDI7,		NTV2_INPUTSOURCE_SDI8,
@@ -5409,10 +5490,10 @@ NTV2InputSource NTV2ChannelToInputSource (const NTV2Channel inChannel, const NTV
 	if (NTV2_IS_VALID_CHANNEL(inChannel))
 		switch (inSourceType)
 		{
-			case NTV2_INPUTSOURCES_SDI:		return gChannelToSDIInputSource[inChannel];
-			case NTV2_INPUTSOURCES_HDMI:	return gChannelToHDMIInputSource[inChannel];
-			case NTV2_INPUTSOURCES_ANALOG:	return gChannelToAnlgInputSource[inChannel];
-			default:						break;
+			case NTV2_IOKINDS_SDI:		return gChannelToSDIInputSource[inChannel];
+			case NTV2_IOKINDS_HDMI:		return gChannelToHDMIInputSource[inChannel];
+			case NTV2_IOKINDS_ANALOG:	return gChannelToAnlgInputSource[inChannel];
+			default:					break;
 		}
 	return NTV2_INPUTSOURCE_INVALID;
 }
@@ -5514,7 +5595,7 @@ bool IsTransportCompatibleFormat (const NTV2VideoFormat inFormat1, const NTV2Vid
 }
 
 
-NTV2InputSource GetNTV2InputSourceForIndex (const ULWord inIndex0, const NTV2InputSourceKinds inKinds)
+NTV2InputSource GetNTV2InputSourceForIndex (const ULWord inIndex0, const NTV2IOKinds inKinds)
 {
 	static const NTV2InputSource	sSDIInputSources[]	= { NTV2_INPUTSOURCE_SDI1,	NTV2_INPUTSOURCE_SDI2,	NTV2_INPUTSOURCE_SDI3,	NTV2_INPUTSOURCE_SDI4,
 															NTV2_INPUTSOURCE_SDI5,	NTV2_INPUTSOURCE_SDI6,	NTV2_INPUTSOURCE_SDI7,	NTV2_INPUTSOURCE_SDI8};
@@ -5522,21 +5603,21 @@ NTV2InputSource GetNTV2InputSourceForIndex (const ULWord inIndex0, const NTV2Inp
 	static const NTV2InputSource	sANLGInputSources[] = { NTV2_INPUTSOURCE_ANALOG1 };
 	switch (inKinds)
 	{
-		case NTV2_INPUTSOURCES_SDI:
+		case NTV2_IOKINDS_SDI:
 			if (inIndex0 < sizeof(sSDIInputSources) / sizeof(NTV2InputSource))
 				return sSDIInputSources[inIndex0];
 			break;
-		case NTV2_INPUTSOURCES_HDMI:
+		case NTV2_IOKINDS_HDMI:
 			if (inIndex0 < sizeof(sHDMIInputSources) / sizeof(NTV2InputSource))
 				return sHDMIInputSources[inIndex0];
 			break;
-		case NTV2_INPUTSOURCES_ANALOG:
+		case NTV2_IOKINDS_ANALOG:
 			if (inIndex0 < sizeof(sANLGInputSources) / sizeof(NTV2InputSource))
 				return sANLGInputSources[inIndex0];
 			break;
 	#if defined(_DEBUG)
-		case NTV2_INPUTSOURCES_NONE:
-		case NTV2_INPUTSOURCES_ALL:
+		case NTV2_IOKINDS_NONE:
+		case NTV2_IOKINDS_ALL:
 			break;
 	#else
 		default:	break;
@@ -5548,7 +5629,7 @@ NTV2InputSource GetNTV2InputSourceForIndex (const ULWord inIndex0, const NTV2Inp
 
 NTV2InputSource GetNTV2HDMIInputSourceForIndex (const ULWord inIndex0)	//	NTV2_SHOULD_BE_DEPRECATED
 {
-	return ::GetNTV2InputSourceForIndex(inIndex0, NTV2_INPUTSOURCES_HDMI);
+	return ::GetNTV2InputSourceForIndex(inIndex0, NTV2_IOKINDS_HDMI);
 }
 
 

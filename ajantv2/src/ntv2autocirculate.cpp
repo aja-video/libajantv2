@@ -662,6 +662,10 @@ bool CNTV2Card::AutoCirculateInitForInput ( const NTV2Channel		inChannel,
 		{ACFAIL("Input Ch" << DEC(inChannel+1) << ": EndFrame(" << DEC(endFrameNumber) << ") precedes StartFrame(" << DEC(startFrameNumber) << ")");  return false;}
 	if ((endFrameNumber - startFrameNumber + 1) < 2)	//	must be at least 2 frames
 		{ACFAIL("Input Ch" << DEC(inChannel+1) << ": Frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber) << " < 2 frames"); return false;}
+	if (startFrameNumber >= MAX_FRAMEBUFFERS)
+		{ACFAIL("Output Ch" << DEC(inChannel+1) << ": Start frame " << DEC(startFrameNumber) << " exceeds max " << DEC(MAX_FRAMEBUFFERS-1)); return false;}
+	if (endFrameNumber >= MAX_FRAMEBUFFERS)
+		{ACFAIL("Output Ch" << DEC(inChannel+1) << ": End frame " << DEC(endFrameNumber) << " exceeds max " << DEC(MAX_FRAMEBUFFERS-1)); return false;}
 	if (inOptionFlags & (AUTOCIRCULATE_WITH_MULTILINK_AUDIO1 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO2 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO3)  &&  !::NTV2DeviceCanDoMultiLinkAudio(GetDeviceID()))
 		ACWARN("Input Ch" << DEC(inChannel+1) << ": MultiLink Audio requested, but device doesn't support it");
 	const UWord numAudSystems(::NTV2DeviceGetNumAudioSystems(GetDeviceID()));	//	AutoCirc cannot use AudioMixer or HostAudio
@@ -686,6 +690,8 @@ bool CNTV2Card::AutoCirculateInitForInput ( const NTV2Channel		inChannel,
 	autoCircData.lVal4 = inNumChannels;
 	if (inOptionFlags & AUTOCIRCULATE_WITH_FIELDS)
 		autoCircData.lVal6 |= AUTOCIRCULATE_WITH_FIELDS;
+	if (inOptionFlags & AUTOCIRCULATE_WITH_HDMIAUX)
+		autoCircData.lVal6 |= AUTOCIRCULATE_WITH_HDMIAUX;
 	if (inOptionFlags & AUTOCIRCULATE_WITH_AUDIO_CONTROL)
 		autoCircData.bVal1 = false;
 	else
@@ -790,6 +796,10 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 				<< DEC(startFrameNumber) << ")");  return false;}
 	if ((endFrameNumber - startFrameNumber + 1) < 2)	//	must be at least 2 frames
 		{ACFAIL("Output Ch" << DEC(inChannel+1) << ": Frames " << DEC(startFrameNumber) << "-" << DEC(endFrameNumber) << " < 2 frames"); return false;}
+	if (startFrameNumber >= MAX_FRAMEBUFFERS)
+		{ACFAIL("Output Ch" << DEC(inChannel+1) << ": Start frame " << DEC(startFrameNumber) << " exceeds max " << DEC(MAX_FRAMEBUFFERS-1)); return false;}
+	if (endFrameNumber >= MAX_FRAMEBUFFERS)
+		{ACFAIL("Output Ch" << DEC(inChannel+1) << ": End frame " << DEC(endFrameNumber) << " exceeds max " << DEC(MAX_FRAMEBUFFERS-1)); return false;}
 	if (inOptionFlags & (AUTOCIRCULATE_WITH_MULTILINK_AUDIO1 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO2 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO3)  &&  !::NTV2DeviceCanDoMultiLinkAudio(GetDeviceID()))
 		ACWARN("Output Ch" << DEC(inChannel+1) << ": MultiLink Audio requested, but device doesn't support it");
 	const UWord numAudSystems(::NTV2DeviceGetNumAudioSystems(GetDeviceID()));	//	AutoCirc cannot use AudioMixer or HostAudio
@@ -962,6 +972,15 @@ bool CNTV2Card::AutoCirculateStop (const NTV2Channel inChannel, const bool inAbo
 }	//	AutoCirculateStop
 
 
+bool CNTV2Card::AutoCirculateStop (const NTV2ChannelSet & inChannels, const bool inAbort)
+{	UWord failures(0);
+	for (NTV2ChannelSetConstIter it(inChannels.begin());  it != inChannels.end();  ++it)
+		if (!AutoCirculateStop(*it, inAbort))
+			failures++;
+	return !failures;
+}
+
+
 bool CNTV2Card::AutoCirculatePause (const NTV2Channel inChannel,  const UWord inAtFrameNum)
 {	(void) inAtFrameNum;
 	//	Use the old A/C driver call...
@@ -1117,8 +1136,8 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 			inOutXferInfo.SetAllOutputTimeCodes(pArray[NTV2_TCINDEX_DEFAULT], /*alsoSetF2*/!isProgressive);
 	}
 
-	bool			tmpLocalF1AncBuffer(false),	 tmpLocalF2AncBuffer(false);
-	NTV2_POINTER	savedAncF1,	 savedAncF2;
+	bool		tmpLocalF1AncBuffer(false),	 tmpLocalF2AncBuffer(false);
+	NTV2Buffer	savedAncF1,	 savedAncF2;
 	if (::NTV2DeviceCanDo2110(_boardID)	 &&	 NTV2_IS_OUTPUT_CROSSPOINT(crosspoint))
 	{
 		//	S2110 Playout:	So that most Retail & OEM playout apps "just work" with S2110 RTP Anc streams,
@@ -1268,7 +1287,7 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 			ULWord	doZeroing	(0);
 			if (ReadRegister(kVRegZeroDeviceAncPostCapture, doZeroing)	&&	doZeroing)
 			{	//	Zero out the Anc buffer on the device...
-				static NTV2_POINTER gClearDeviceAncBuffer;
+				static NTV2Buffer gClearDeviceAncBuffer;
 				const LWord		xferFrame	(inOutXferInfo.GetTransferFrameNumber());
 				ULWord			ancOffsetF1 (0);
 				ULWord			ancOffsetF2 (0);
@@ -1302,8 +1321,8 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 			ULWord	doZeroing	(0);
 			if (ReadRegister(kVRegZeroHostAncPostCapture, doZeroing)  &&  doZeroing)
 			{	//	Zero out everything past the last captured Anc byte in the client's host buffer(s)... 
-				NTV2_POINTER &	clientAncBufferF1	(inOutXferInfo.acANCBuffer);
-				NTV2_POINTER &	clientAncBufferF2	(inOutXferInfo.acANCField2Buffer);
+				NTV2Buffer &	clientAncBufferF1	(inOutXferInfo.acANCBuffer);
+				NTV2Buffer &	clientAncBufferF2	(inOutXferInfo.acANCField2Buffer);
 				const ULWord	ancF1ByteCount		(inOutXferInfo.GetCapturedAncByteCount(false));
 				const ULWord	ancF2ByteCount		(inOutXferInfo.GetCapturedAncByteCount(true));
 				void *			pF1TailEnd			(clientAncBufferF1.GetHostAddress(ancF1ByteCount));
@@ -1388,8 +1407,8 @@ bool CNTV2Card::S2110DeviceAncFromXferBuffers (const NTV2Channel inChannel, AUTO
 	bool				isProgressive	(false);
 	const bool			isMonitoring	(AJADebug::IsActive(AJA_DebugUnit_Anc2110Rcv));
 	NTV2Standard		standard		(NTV2_STANDARD_INVALID);
-	NTV2_POINTER &		ancF1			(inOutXferInfo.acANCBuffer);
-	NTV2_POINTER &		ancF2			(inOutXferInfo.acANCField2Buffer);
+	NTV2Buffer &		ancF1			(inOutXferInfo.acANCBuffer);
+	NTV2Buffer &		ancF2			(inOutXferInfo.acANCField2Buffer);
 	AJAAncillaryData *	pPkt			(AJA_NULL);
 	uint32_t			vpidA(0), vpidB(0);
 	AJAAncillaryList	pkts;
@@ -1423,17 +1442,17 @@ bool CNTV2Card::S2110DeviceAncFromXferBuffers (const NTV2Channel inChannel, AUTO
 			if (!pPkt->GetDataLocation().IsHanc())
 				continue;	//	Skip . . . expected IsHANC
 			vpidValue = NTV2EndianSwap32BtoH(vpidValue);
-			if (IS_LINKB_AJAAncillaryDataStream(pPkt->GetDataLocation().GetDataStream()))
+			if (IS_LINKB_AJAAncDataStream(pPkt->GetDataLocation().GetDataStream()))
 				vpidB = vpidValue;
 			else
 				vpidA = vpidValue;
 			continue;	//	Done . . . on to next packet
 		}
 
-		const AJAAncillaryDataType	ancType	 (pPkt->GetAncillaryDataType());
-		if (ancType != AJAAncillaryDataType_Timecode_ATC)
+		const AJAAncDataType ancType (pPkt->GetAncillaryDataType());
+		if (ancType != AJAAncDataType_Timecode_ATC)
 		{
-			if (ancType == AJAAncillaryDataType_Timecode_VITC  &&  isMonitoring)
+			if (ancType == AJAAncDataType_Timecode_VITC  &&  isMonitoring)
 				RCVWARN("Skipped VITC packet: " << pPkt->AsString(16));
 			continue;	//	Not timecode . . . skip
 		}
@@ -1508,7 +1527,7 @@ bool CNTV2Card::S2110DeviceAncFromXferBuffers (const NTV2Channel inChannel, AUTO
 }	//	S2110DeviceAncFromXferBuffers
 
 
-bool CNTV2Card::S2110DeviceAncFromBuffers (const NTV2Channel inChannel, NTV2_POINTER & ancF1, NTV2_POINTER & ancF2)
+bool CNTV2Card::S2110DeviceAncFromBuffers (const NTV2Channel inChannel, NTV2Buffer & ancF1, NTV2Buffer & ancF2)
 {
 	//	IP 2110 Capture:	Extract timecode(s) and put into RP188 registers
 	//						Extract VPID and put into SDIIn VPID registers
@@ -1546,8 +1565,8 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 	const bool			isMonitoring	(AJADebug::IsActive(AJA_DebugUnit_Anc2110Xmit));
 	const bool			isIoIP2110		((_boardID == DEVICE_ID_IOIP_2110) || (_boardID == DEVICE_ID_IOIP_2110_RGB12));
 	NTV2Standard		standard		(NTV2_STANDARD_INVALID);
-	NTV2_POINTER &		ancF1			(inOutXferInfo.acANCBuffer);
-	NTV2_POINTER &		ancF2			(inOutXferInfo.acANCField2Buffer);
+	NTV2Buffer &		ancF1			(inOutXferInfo.acANCBuffer);
+	NTV2Buffer &		ancF2			(inOutXferInfo.acANCField2Buffer);
 	NTV2TaskMode		taskMode		(NTV2_OEM_TASKS);
 	ULWord				vpidA(0), vpidB(0);
 	AJAAncillaryList	packetList;
@@ -1571,9 +1590,9 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 	GetAncRegionOffsetFromBottom(F1MonOffsetFromBottom, NTV2_AncRgn_MonField1);
 	GetAncRegionOffsetFromBottom(F2MonOffsetFromBottom, NTV2_AncRgn_MonField2);
 	//	Define F1 & F2 GUMP sub-buffers from ancF1 & ancF2 (only used for IoIP 2110)...
-	NTV2_POINTER gumpF1(ancF1.GetHostAddress(F1OffsetFromBottom - F1MonOffsetFromBottom), // addr
+	NTV2Buffer gumpF1(ancF1.GetHostAddress(F1OffsetFromBottom - F1MonOffsetFromBottom), // addr
 						F1MonOffsetFromBottom - F2OffsetFromBottom);	// byteCount
-	NTV2_POINTER gumpF2(ancF2.GetHostAddress(F2OffsetFromBottom - F2MonOffsetFromBottom), // addr
+	NTV2Buffer gumpF2(ancF2.GetHostAddress(F2OffsetFromBottom - F2MonOffsetFromBottom), // addr
 						F2MonOffsetFromBottom); // byteCount
 
 	if (ancF1 || ancF2)
@@ -1599,7 +1618,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 					{	//	Caller F1 buffer contains RTP
 						if (isIoIP2110)
 						{	//	Generate GUMP from packetList...
-							NTV2_POINTER	skipF2Data;
+							NTV2Buffer skipF2Data;
 							packetList.GetSDITransmitData(gumpF1, skipF2Data, isProgressive, F2StartLine);
 						}
 					}
@@ -1619,7 +1638,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 					{	//	Caller F2 buffer contains RTP
 						if (isIoIP2110)
 						{	//	Generate GUMP from packetList...
-							NTV2_POINTER	skipF1Data;
+							NTV2Buffer skipF1Data;
 							packetList.GetSDITransmitData(skipF1Data, gumpF2, isProgressive, F2StartLine);
 						}
 					}
@@ -1647,9 +1666,9 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 			AJAAncillaryData	vpidPkt;
 			vpidPkt.SetDID(0x41);
 			vpidPkt.SetSID(0x01);
-			vpidPkt.SetLocationVideoLink(AJAAncillaryDataLink_A);
-			vpidPkt.SetLocationDataStream(AJAAncillaryDataStream_1);
-			vpidPkt.SetLocationDataChannel(AJAAncillaryDataChannel_Y);
+			vpidPkt.SetLocationVideoLink(AJAAncDataLink_A);
+			vpidPkt.SetLocationDataStream(AJAAncDataStream_1);
+			vpidPkt.SetLocationDataChannel(AJAAncDataChannel_Y);
 			vpidPkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc);
 			if (vpidA)
 			{	//	LinkA/DS1:
@@ -1668,8 +1687,8 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 			{	//	LinkB/DS2:
 				vpidB = ::EndianSwap32NtoH(vpidB);
 				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidB), 4);
-				vpidPkt.SetLocationVideoLink(AJAAncillaryDataLink_B);
-				vpidPkt.SetLocationDataStream(AJAAncillaryDataStream_2);
+				vpidPkt.SetLocationVideoLink(AJAAncDataLink_B);
+				vpidPkt.SetLocationDataStream(AJAAncDataStream_2);
 				vpidPkt.GeneratePayloadData();
 				packetList.AddAncillaryData(vpidPkt);	generateRTP = true;
 				if (!isProgressive)
@@ -1685,8 +1704,8 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 	//	IoIP monitor GUMP VPID cannot be overridden -- SDI anc insert always inserts VPID via firmware
 
 	//	Callers can override our register-based RP188 values...
-	if (!packetList.CountAncillaryDataWithType(AJAAncillaryDataType_Timecode_ATC)		//	if no caller-specified ATC timecodes...
-		&& !packetList.CountAncillaryDataWithType(AJAAncillaryDataType_Timecode_VITC))	//	...and no caller-specified VITC timecodes...
+	if (!packetList.CountAncillaryDataWithType(AJAAncDataType_Timecode_ATC)		//	if no caller-specified ATC timecodes...
+		&& !packetList.CountAncillaryDataWithType(AJAAncDataType_Timecode_VITC))	//	...and no caller-specified VITC timecodes...
 	{
 		if (inOutXferInfo.acOutputTimeCodes)		//	...and if there's an output timecode array...
 		{
@@ -1742,8 +1761,8 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 		//XMTDBG("CHGD: " << packetList);	//	DEBUG:	Changed packet list (to be converted to RTP)
 		const bool		multiRTPPkt = inOutXferInfo.acTransferStatus.acState == NTV2_AUTOCIRCULATE_INVALID	?  true	 :	false;
 		packetList.SetAllowMultiRTPTransmit(multiRTPPkt);
-		NTV2_POINTER rtpF1 (ancF1.GetHostAddress(0),  isIoIP2110  ?	 F1OffsetFromBottom - F1MonOffsetFromBottom	 :	ancF1.GetByteCount());
-		NTV2_POINTER rtpF2 (ancF2.GetHostAddress(0),  isIoIP2110  ?	 F2OffsetFromBottom - F2MonOffsetFromBottom	 :	ancF2.GetByteCount());
+		NTV2Buffer rtpF1 (ancF1.GetHostAddress(0),  isIoIP2110  ?	 F1OffsetFromBottom - F1MonOffsetFromBottom	 :	ancF1.GetByteCount());
+		NTV2Buffer rtpF2 (ancF2.GetHostAddress(0),  isIoIP2110  ?	 F2OffsetFromBottom - F2MonOffsetFromBottom	 :	ancF2.GetByteCount());
 		result = AJA_SUCCESS(packetList.GetIPTransmitData (rtpF1, rtpF2, isProgressive, F2StartLine));
 		//if (isIoIP2110)	XMTDBG("F1RTP: " << rtpF1 << " F2RTP: " << rtpF2 << " Xfer: " << inOutXferInfo);
 #if 0	/// Development
@@ -1779,7 +1798,7 @@ bool CNTV2Card::S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCI
 }	//	S2110DeviceAncToXferBuffers
 
 
-bool CNTV2Card::S2110DeviceAncToBuffers (const NTV2Channel inChannel, NTV2_POINTER & ancF1, NTV2_POINTER & ancF2)
+bool CNTV2Card::S2110DeviceAncToBuffers (const NTV2Channel inChannel, NTV2Buffer & ancF1, NTV2Buffer & ancF2)
 {
 	//	IP 2110 Playout:	Add relevant transmit timecodes and VPID to outgoing RTP Anc
 	NTV2FrameRate		ntv2Rate		(NTV2_FRAMERATE_UNKNOWN);
@@ -1819,9 +1838,9 @@ bool CNTV2Card::S2110DeviceAncToBuffers (const NTV2Channel inChannel, NTV2_POINT
 			AJAAncillaryData	vpidPkt;
 			vpidPkt.SetDID(0x41);
 			vpidPkt.SetSID(0x01);
-			vpidPkt.SetLocationVideoLink(AJAAncillaryDataLink_A);
-			vpidPkt.SetLocationDataStream(AJAAncillaryDataStream_1);
-			vpidPkt.SetLocationDataChannel(AJAAncillaryDataChannel_Y);
+			vpidPkt.SetLocationVideoLink(AJAAncDataLink_A);
+			vpidPkt.SetLocationDataStream(AJAAncDataStream_1);
+			vpidPkt.SetLocationDataChannel(AJAAncDataChannel_Y);
 			vpidPkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyHanc);
 			if (vpidA)
 			{	//	LinkA/DS1:
@@ -1839,8 +1858,8 @@ bool CNTV2Card::S2110DeviceAncToBuffers (const NTV2Channel inChannel, NTV2_POINT
 			{	//	LinkB/DS2:
 				vpidB = ::EndianSwap32NtoH(vpidB);
 				vpidPkt.SetPayloadData (reinterpret_cast<uint8_t*>(&vpidB), 4);
-				vpidPkt.SetLocationVideoLink(AJAAncillaryDataLink_B);
-				vpidPkt.SetLocationDataStream(AJAAncillaryDataStream_2);
+				vpidPkt.SetLocationVideoLink(AJAAncDataLink_B);
+				vpidPkt.SetLocationDataStream(AJAAncDataStream_2);
 				vpidPkt.GeneratePayloadData();
 				pkts.AddAncillaryData(vpidPkt); changed = true;
 				if (!isProgressive)
@@ -1857,8 +1876,8 @@ bool CNTV2Card::S2110DeviceAncToBuffers (const NTV2Channel inChannel, NTV2_POINT
 	//	1)	Insert ATC or VITC packets into the Anc buffers themselves, or
 	//	2)	Set output timecode using RP188 registers using CNTV2Card::SetRP188Data,
 	//		(but this will only work on newer boards with bidirectional SDI)
-	if (!pkts.CountAncillaryDataWithType(AJAAncillaryDataType_Timecode_ATC)		//	if no caller-specified ATC timecodes...
-		&& !pkts.CountAncillaryDataWithType(AJAAncillaryDataType_Timecode_VITC))	//	...and no caller-specified VITC timecodes...
+	if (!pkts.CountAncillaryDataWithType(AJAAncDataType_Timecode_ATC)		//	if no caller-specified ATC timecodes...
+		&& !pkts.CountAncillaryDataWithType(AJAAncDataType_Timecode_VITC))	//	...and no caller-specified VITC timecodes...
 	{
 		if (::NTV2DeviceHasBiDirectionalSDI(_boardID) && ::NTV2DeviceCanDoStackedAudio(_boardID))	//	if newer device with bidirectional SDI
 		{

@@ -19,36 +19,36 @@
 //#include "ancillarydata_smpte2051.h"
 
 
-AJAAncillaryData * AJAAncillaryDataFactory::Create (const AJAAncillaryDataType inAncType, const AJAAncillaryData & inAncData)
+AJAAncillaryData * AJAAncillaryDataFactory::Create (const AJAAncDataType inAncType, const AJAAncillaryData & inAncData)
 {
 	return Create (inAncType, &inAncData);
 }
 
 
-AJAAncillaryData * AJAAncillaryDataFactory::Create (const AJAAncillaryDataType inAncType, const AJAAncillaryData *pAncData)
+AJAAncillaryData * AJAAncillaryDataFactory::Create (const AJAAncDataType inAncType, const AJAAncillaryData *pAncData)
 {
 	AJAAncillaryData * pResult (NULL);
 	switch (inAncType)
 	{
-		case AJAAncillaryDataType_Unknown:				pResult = new AJAAncillaryData(pAncData);						break;	//	Use base type for 'Unknown'
-		case AJAAncillaryDataType_Timecode_ATC:			pResult = new AJAAncillaryData_Timecode_ATC(pAncData);			break;
-		case AJAAncillaryDataType_Timecode_VITC:		pResult = new AJAAncillaryData_Timecode_VITC(pAncData);			break;
-		case AJAAncillaryDataType_Cea708:				pResult = new AJAAncillaryData_Cea708(pAncData);				break;
-		case AJAAncillaryDataType_Cea608_Vanc:			pResult = new AJAAncillaryData_Cea608_Vanc(pAncData);			break;
-		case AJAAncillaryDataType_Cea608_Line21:		pResult = new AJAAncillaryData_Cea608_Line21(pAncData);			break;
-		case AJAAncillaryDataType_FrameStatusInfo524D:	pResult = new AJAAncillaryData_FrameStatusInfo524D(pAncData);	break;
-		case AJAAncillaryDataType_FrameStatusInfo5251:	pResult = new AJAAncillaryData_FrameStatusInfo5251(pAncData);	break;
+		case AJAAncDataType_Unknown:				pResult = new AJAAncillaryData(pAncData);						break;	//	Use base type for 'Unknown'
+		case AJAAncDataType_Timecode_ATC:			pResult = new AJAAncillaryData_Timecode_ATC(pAncData);			break;
+		case AJAAncDataType_Timecode_VITC:			pResult = new AJAAncillaryData_Timecode_VITC(pAncData);			break;
+		case AJAAncDataType_Cea708:					pResult = new AJAAncillaryData_Cea708(pAncData);				break;
+		case AJAAncDataType_Cea608_Vanc:			pResult = new AJAAncillaryData_Cea608_Vanc(pAncData);			break;
+		case AJAAncDataType_Cea608_Line21:			pResult = new AJAAncillaryData_Cea608_Line21(pAncData);			break;
+		case AJAAncDataType_FrameStatusInfo524D:	pResult = new AJAAncillaryData_FrameStatusInfo524D(pAncData);	break;
+		case AJAAncDataType_FrameStatusInfo5251:	pResult = new AJAAncillaryData_FrameStatusInfo5251(pAncData);	break;
 
- 		case AJAAncillaryDataType_Smpte2016_3:			break;	//	pResult = new AJAAncillaryData_Smpte2016_3(pAncData);	break;
- 		case AJAAncillaryDataType_Smpte352:				break;	//	pResult = new AJAAncillaryData_Smpte352(pAncData);		break;
- 		case AJAAncillaryDataType_Smpte2051:			break;	//	pResult = new AJAAncillaryData_Smpte2051(pAncData);		break;
- 		case AJAAncillaryDataType_HDR_SDR:				break;
- 		case AJAAncillaryDataType_HDR_HDR10:			break;
- 		case AJAAncillaryDataType_HDR_HLG:				break;
+ 		case AJAAncDataType_Smpte2016_3:			break;	//	pResult = new AJAAncillaryData_Smpte2016_3(pAncData);	break;
+ 		case AJAAncDataType_Smpte352:				break;	//	pResult = new AJAAncillaryData_Smpte352(pAncData);		break;
+ 		case AJAAncDataType_Smpte2051:				break;	//	pResult = new AJAAncillaryData_Smpte2051(pAncData);		break;
+ 		case AJAAncDataType_HDR_SDR:				break;
+ 		case AJAAncDataType_HDR_HDR10:				break;
+ 		case AJAAncDataType_HDR_HLG:				break;
 #if !defined(_DEBUG)
 		default:	break;
 #else
-		case AJAAncillaryDataType_Size:					break;
+		case AJAAncDataType_Size:					break;
 #endif
 	}
 	if (pResult)
@@ -59,7 +59,7 @@ AJAAncillaryData * AJAAncillaryDataFactory::Create (const AJAAncillaryDataType i
 
 
 
-AJAAncillaryDataType AJAAncillaryDataFactory::GuessAncillaryDataType (const AJAAncillaryData & inAncData)
+AJAAncDataType AJAAncillaryDataFactory::GuessAncillaryDataType (const AJAAncillaryData & inAncData)
 {
 	return GuessAncillaryDataType (&inAncData);
 }
@@ -71,41 +71,41 @@ AJAAncillaryDataType AJAAncillaryDataFactory::GuessAncillaryDataType (const AJAA
 // the factory.)
 //
 
-AJAAncillaryDataType AJAAncillaryDataFactory::GuessAncillaryDataType (const AJAAncillaryData * pAncData)
+AJAAncDataType AJAAncillaryDataFactory::GuessAncillaryDataType (const AJAAncillaryData * pAncData)
 {
-	AJAAncillaryDataType result = AJAAncillaryDataType_Unknown;
+	AJAAncDataType result = AJAAncDataType_Unknown;
 
 		// walk through each of the known derived AncillaryData derived classes
 		// and ask them if they recognize this data
 
-// 	if ( (result = AJAAncillaryData_Smpte2016_3::RecognizeThisAncillaryData(pAncData)) != AJAAncillaryDataType_Unknown)
+// 	if ( (result = AJAAncillaryData_Smpte2016_3::RecognizeThisAncillaryData(pAncData)) != AJAAncDataType_Unknown)
 // 		return result;
 // 
-	if ( (result = AJAAncillaryData_Timecode_ATC::RecognizeThisAncillaryData(pAncData)) != AJAAncillaryDataType_Unknown)
+	if ( (result = AJAAncillaryData_Timecode_ATC::RecognizeThisAncillaryData(pAncData)) != AJAAncDataType_Unknown)
 		return result;
 
-	if ( (result = AJAAncillaryData_Timecode_VITC::RecognizeThisAncillaryData(pAncData)) != AJAAncillaryDataType_Unknown)
+	if ( (result = AJAAncillaryData_Timecode_VITC::RecognizeThisAncillaryData(pAncData)) != AJAAncDataType_Unknown)
 		return result;
 
-	if ( (result = AJAAncillaryData_Cea708::RecognizeThisAncillaryData(pAncData)) != AJAAncillaryDataType_Unknown)
+	if ( (result = AJAAncillaryData_Cea708::RecognizeThisAncillaryData(pAncData)) != AJAAncDataType_Unknown)
 		return result;
 
-	if ( (result = AJAAncillaryData_Cea608_Vanc::RecognizeThisAncillaryData(pAncData)) != AJAAncillaryDataType_Unknown)
+	if ( (result = AJAAncillaryData_Cea608_Vanc::RecognizeThisAncillaryData(pAncData)) != AJAAncDataType_Unknown)
 		return result;
 
-	if ( (result = AJAAncillaryData_Cea608_Line21::RecognizeThisAncillaryData(pAncData)) != AJAAncillaryDataType_Unknown)
+	if ( (result = AJAAncillaryData_Cea608_Line21::RecognizeThisAncillaryData(pAncData)) != AJAAncDataType_Unknown)
 		return result;
 
-// 	if ( (result = AJAAncillaryData_Smpte352::RecognizeThisAncillaryData(pAncData)) != AJAAncillaryDataType_Unknown)
+// 	if ( (result = AJAAncillaryData_Smpte352::RecognizeThisAncillaryData(pAncData)) != AJAAncDataType_Unknown)
 // 		return result;
 
-// 	if ( (result = AJAAncillaryData_Smpte2051::RecognizeThisAncillaryData(pAncData)) != AJAAncillaryDataType_Unknown)
+// 	if ( (result = AJAAncillaryData_Smpte2051::RecognizeThisAncillaryData(pAncData)) != AJAAncDataType_Unknown)
 // 		return result;
 // 
-	if ( (result = AJAAncillaryData_FrameStatusInfo524D::RecognizeThisAncillaryData(pAncData)) != AJAAncillaryDataType_Unknown)
+	if ( (result = AJAAncillaryData_FrameStatusInfo524D::RecognizeThisAncillaryData(pAncData)) != AJAAncDataType_Unknown)
 		return result;
 
-	if ( (result = AJAAncillaryData_FrameStatusInfo5251::RecognizeThisAncillaryData(pAncData)) != AJAAncillaryDataType_Unknown)
+	if ( (result = AJAAncillaryData_FrameStatusInfo5251::RecognizeThisAncillaryData(pAncData)) != AJAAncDataType_Unknown)
 		return result;
 
 	return result;

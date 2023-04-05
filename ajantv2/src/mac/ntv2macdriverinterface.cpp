@@ -31,7 +31,11 @@
 using namespace std;
 
 
-static const char * GetKernErrStr (const kern_return_t inError);
+static const char *		GetKernErrStr (const kern_return_t inError);
+static AJALock			gLegalDevIDsLock;
+static NTV2DeviceIDSet	gLegalDeviceIDs;
+static const string		sNTV2PCIKEXTClassName	("com_aja_iokit_ntv2");	//	AJA NTV2 KEXT's IOService class name
+static const string		sNTV2PCIDEXTName		("NTV2PCIe");			//	AJA NTV2 DEXT's IOService name
 
 
 //	MacDriverInterface-specific Logging Macros
@@ -56,23 +60,13 @@ static const char * GetKernErrStr (const kern_return_t inError);
 #define MDIDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_DriverInterface, AJAFUNC << ": " << __x__)
 
 
-#define						kMaxNumDevices			(32)						/// Limit to 32 devices
-static const string			sNTV2PCIDriverName		("com_aja_iokit_ntv2");		/// This should be the only place the driver's IOService name is defined
-static unsigned				gnBoardMaps;										/// Instance counter -- should never exceed one
-static uint64_t				RECHECK_INTERVAL		(1024LL);					/// Number of calls to DeviceMap::GetConnection before connection recheck performed
-#define						NTV2_IGNORE_IOREG_BUSY	(true)						/// If defined, ignore IORegistry busy state;
-																					/// otherwise wait for non-busy IORegistry before making new connections
-#if !defined(NTV2_IGNORE_IOREG_BUSY)
-	/// Max wait times for IORegistry to settle for hot plug/unplug...
-	static unsigned int		TWO_SECONDS				(2);
-#endif
-
 #if !defined (NTV2_NULL_DEVICE)
 	//	This section builds 'libajantv2.a' with the normal linkage to the IOKit...
 	#define OS_IOMasterPort(_x_,_y_)											::IOMasterPort ((_x_), (_y_))
 	#define OS_IOServiceOpen(_w_,_x_,_y_,_z_)									::IOServiceOpen((_w_), (_x_), (_y_), (_z_))
 	#define OS_IOServiceClose(_x_)												::IOServiceClose ((_x_))
 	#define OS_IOServiceMatching(_x_)											::IOServiceMatching ((_x_))
+	#define OS_IOServiceNameMatching(_x_)										::IOServiceNameMatching((_x_))
 	#define OS_IOServiceGetMatchingServices(_x_,_y_,_z_)						::IOServiceGetMatchingServices ((_x_), (_y_), (_z_))
 	#define OS_IOIteratorNext(_x_)												::IOIteratorNext ((_x_))
 	#define OS_IOObjectRelease(_x_)												::IOObjectRelease ((_x_))
@@ -154,6 +148,14 @@ static uint64_t				RECHECK_INTERVAL		(1024LL);					/// Number of calls to Device
 	}
 #endif	//	NTV2_NULL_DEVICE defined
 
+
+#if defined(USE_DEVICE_MAP)
+static unsigned		gnBoardMaps				(0);		//	Instance counter -- should never exceed one
+static const UWord	kMaxNumDevices			(32);		//	Limit to 32 devices
+static uint64_t		RECHECK_INTERVAL		(1024LL);	//	Number of calls to DeviceMap::GetConnection before connection recheck performed
+static unsigned int	TWO_SECONDS				(2);		//	Max wait times for IORegistry to settle for hot plug/unplug
+#define				NTV2_IGNORE_IOREG_BUSY	(true)		//	If defined, ignore IORegistry busy state;
+														//	otherwise wait for non-busy IORegistry before making new connections
 
 /**
 	@details	The DeviceMap global singleton maintains the underlying Mach connection handles used to talk
@@ -272,19 +274,20 @@ class DeviceMap
 			IOReturn		error		(kIOReturnSuccess);
 			io_object_t		ioObject	(0);
 			io_connect_t	ioConnect	(0);
+			const string &	className	(sNTV2PCIKEXTClassName);
 
 			NTV2_ASSERT (mMasterPort && "No MasterPort!");
 
 			//	Create an iterator to search for our driver...
-			error = OS_IOServiceGetMatchingServices (mMasterPort, OS_IOServiceMatching(CNTV2MacDriverInterface::GetIOServiceName().c_str()), &ioIterator);
+			error = OS_IOServiceGetMatchingServices (mMasterPort, OS_IOServiceMatching(className.c_str()), &ioIterator);
 			if (error != kIOReturnSuccess)
 			{
-				MDIFAIL (KR(error) << " -- IOServiceGetMatchingServices failed, no match for '" << sNTV2PCIDriverName << "', device index " << inDeviceIndex << " requested");
+				MDIFAIL (KR(error) << " -- IOServiceGetMatchingServices failed, no match for '" << className << "', device index " << inDeviceIndex << " requested");
 				return 0;
 			}
 
 			//	Use ndx to find nth device -- and only open that one...
-			for ( ; (ioObject = OS_IOIteratorNext (ioIterator));  OS_IOObjectRelease (ioObject))
+			for ( ; (ioObject = OS_IOIteratorNext(ioIterator));  OS_IOObjectRelease(ioObject))
 				if (ndx == 0)
 					break;		//	Found it!
 				else
@@ -298,7 +301,7 @@ class DeviceMap
 				return 0;		//	Requested device index exceeds number of devices found
 
 			//	Found the device we want -- open it...
-			error = OS_IOServiceOpen (ioObject, ::mach_task_self (), 0, &ioConnect);
+			error = OS_IOServiceOpen (ioObject, ::mach_task_self(), 0, &ioConnect);
 			OS_IOObjectRelease (ioObject);
 			if (error != kIOReturnSuccess)
 			{
@@ -429,10 +432,12 @@ class DeviceMap
 static DeviceMap	gDeviceMap;		//	The DeviceMap singleton
 
 
-const string & CNTV2MacDriverInterface::GetIOServiceName (void)
+io_connect_t CNTV2MacDriverInterface::GetIOConnect (const bool inDoNotAllocate) const
 {
-	return sNTV2PCIDriverName;
+	return gDeviceMap.GetConnection (_boardNumber, inDoNotAllocate);
 }
+#endif	//	defined(USE_DEVICE_MAP)
+
 
 #if defined(_DEBUG)
 ////////#define	AJA_MULTIRASTER_TEST
@@ -445,6 +450,10 @@ const string & CNTV2MacDriverInterface::GetIOServiceName (void)
 //--------------------------------------------------------------------------------------------------------------------
 CNTV2MacDriverInterface::CNTV2MacDriverInterface (void)
 {
+	mIsDEXT = false;
+#if !defined(USE_DEVICE_MAP)
+	mConnection = 0;
+#endif
 }
 
 
@@ -457,74 +466,124 @@ CNTV2MacDriverInterface::~CNTV2MacDriverInterface (void)
 		Close();
 }
 
-
-io_connect_t CNTV2MacDriverInterface::GetIOConnect (const bool inDoNotAllocate) const
-{
-	return gDeviceMap.GetConnection (_boardNumber, inDoNotAllocate);
-}
-
 #if !defined(NTV2_NULL_DEVICE)
-//--------------------------------------------------------------------------------------------------------------------
-//	Open
-//--------------------------------------------------------------------------------------------------------------------
-bool CNTV2MacDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
-{
-	// Local host open -- get a Mach connection
-	_boardOpened = gDeviceMap.GetConnection (inDeviceIndex) != 0;								
+	//--------------------------------------------------------------------------------------------------------------------
+	//	Open
+	//--------------------------------------------------------------------------------------------------------------------
+	bool CNTV2MacDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
+	{
+		bool isLegal (false);
+	#if defined(USE_DEVICE_MAP)
+		// Local host open -- get a Mach connection
+		_boardOpened = gDeviceMap.GetConnection (inDeviceIndex) != 0;								
 	
-	// When device is unplugged, saved static io_connect_t value goes stale, yet remains non-zero.
-	// This resets it it to zero, reestablishes a connection on replug. Fixes many pnp/sleep issues.
-	if (IsOpen())
-	{
-		if (!gDeviceMap.ConnectionIsStillOkay(inDeviceIndex))
+		// When device is unplugged, saved static io_connect_t value goes stale, yet remains non-zero.
+		// This resets it it to zero, reestablishes a connection on replug. Fixes many pnp/sleep issues.
+		if (IsOpen())
 		{
-			gDeviceMap.Reset();
-			_boardOpened = gDeviceMap.GetConnection(inDeviceIndex) != 0;
+			if (!gDeviceMap.ConnectionIsStillOkay(inDeviceIndex))
+			{
+				gDeviceMap.Reset();
+				_boardOpened = gDeviceMap.GetConnection(inDeviceIndex) != 0;
+			}
 		}
-	}
+	#else	//	!defined(USE_DEVICE_MAP)
+		//	Make a new connection...
+		io_iterator_t	ioIterator	(0);
+		IOReturn		error		(kIOReturnSuccess);
+		io_object_t		ioObject	(0);
+		static const string kSvcNames[] = {sNTV2PCIDEXTName, sNTV2PCIKEXTClassName, ""};	//	Try DEXT first, then KEXT
 
-	if (!IsOpen())
-		{DIFAIL("No connection: ndx=" << inDeviceIndex);  return false;}
-
-	// Set _boardNumber now, because ReadRegister needs it to talk to the correct device
-	_boardNumber = inDeviceIndex;	
-	const NTV2DeviceIDSet	legalDeviceIDs(::NTV2GetSupportedDevices());
-	if (!CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID))
-	{
-		DIFAIL ("ReadRegister failed for 'kRegBoardID' -- " << ", ndx=" << inDeviceIndex << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndex, false)) << ", id=" << HEX8(_boardID));
-		if (!CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID))
+		for (size_t svcNdx(0);  svcNdx < 2  &&  !mConnection;  svcNdx++)
 		{
-			DIFAIL("ReadRegister retry failed for 'kRegBoardID', ndx=" << inDeviceIndex << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndex, false)) << ", id=" << HEX8(_boardID));
+			const string &	svcName (kSvcNames[svcNdx]);
+			const char *	pSvcName(svcName.c_str());
+			const bool		tryKEXT	(svcName.find("com_aja_iokit") != string::npos);
+
+			//	Create an iterator to search for our driver instances...
+			error = OS_IOServiceGetMatchingServices (kIOMasterPortDefault,
+													tryKEXT ? OS_IOServiceMatching(pSvcName) : OS_IOServiceNameMatching(pSvcName),
+													&ioIterator);
+			if (error != kIOReturnSuccess)
+				{DIWARN(KR(error) << ": No '" << svcName << "' driver");  continue;}
+
+			//	Find nth device -- and only use that one...
+			for (UWord ndx(inDeviceIndex);  (ioObject = OS_IOIteratorNext(ioIterator));  OS_IOObjectRelease(ioObject))
+				if (ndx == 0)
+					break;	//	Found a match!
+				else
+					--ndx;
+
+			if (ioIterator)
+				OS_IOObjectRelease(ioIterator);
+			if (!ioObject)
+			{
+				if (!inDeviceIndex)	//	Warn only if requesting first device, to show "no devices"
+					DIWARN("No '" << svcName << "' devices");
+				continue;	//	No service object
+			}
+
+			//	Found the device we want -- open it...
+			error = OS_IOServiceOpen (ioObject, ::mach_task_self(), 0, &mConnection);
+			OS_IOObjectRelease(ioObject);
+			if (error != kIOReturnSuccess)
+				{DIWARN(KR(error) << ": IOServiceOpen failed for '" << svcName << "' ndx=" << inDeviceIndex);  continue;}
+
+			mIsDEXT = !tryKEXT;
+		}	//	for each in kServiceNames
+
+		_boardOpened = mConnection != 0;
+		if (IsOpen())
+			DIDBG((mIsDEXT ? "DEXT" : "KEXT") << " ndx=" << inDeviceIndex << " conn=" << HEX8(GetIOConnect()) << " opened");
+	#endif	//	!defined(USE_DEVICE_MAP)
+		if (!IsOpen())
+			{DIFAIL(INSTP(this) << ": No connection: ndx=" << inDeviceIndex);  return false;}
+
+		//	If USE_DEVICE_MAP defined, _boardNumber must be set before first ReadReg call, or it won't work:
+		_boardNumber = inDeviceIndex;
+		if (!CNTV2DriverInterface::ReadRegister (kRegBoardID, _boardID))
+		{
+			DIFAIL("ReadRegister(kRegBoardID) failed: ndx=" << inDeviceIndex << " con=" << HEX8(GetIOConnect()) << " boardID=" << HEX8(_boardID));
 			Close();
 			return false;
 		}
-		DIDBG("Retry succeeded, ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection (_boardNumber, false)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
-	}
-#if 0	//	Fake out:
-	if (_boardID == DEVICE_ID_CORVID88) //	Pretend a Corvid88 is a TTapPro
-		_boardID = DEVICE_ID_TTAP_PRO;
-#endif
-	if (legalDeviceIDs.find(_boardID) == legalDeviceIDs.end ())
+
+#if !defined(OPEN_UNSUPPORTED_DEVICES)
+		{	//	Check if device is officially supported...
+			AJAAutoLock autoLock (&gLegalDevIDsLock);
+			if (gLegalDeviceIDs.empty())
+				gLegalDeviceIDs = ::NTV2GetSupportedDevices();
+			isLegal = gLegalDeviceIDs.find(_boardID) != gLegalDeviceIDs.end();
+		}
+#endif	//	!defined(OPEN_UNSUPPORTED_DEVICES)
+		if (!isLegal)
+		{
+			DIFAIL("Unsupported _boardID=" << HEX8(_boardID) << " ndx=" << inDeviceIndex << " con=" << HEX8(GetIOConnect()));
+			Close();  return false;
+		}
+
+		//	Good to go...
+		DIDBG("Opened ndx=" << _boardNumber << " con=" << HEX8(GetIOConnect()) << " id=" << ::NTV2DeviceIDToString(_boardID));
+		return true;
+
+	}	//	OpenLocalPhysical
+
+
+	bool CNTV2MacDriverInterface::CloseLocalPhysical (void)
 	{
-		DIFAIL("Unsupported _boardID " << HEX8(_boardID) << ", ndx=" << inDeviceIndex << ", con=" << HEX8(gDeviceMap.GetConnection (inDeviceIndex, false)));
-		Close();
-		return false;
-	}
-	DIDBG ("ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection (_boardNumber, false)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
-	return true;
+		NTV2_ASSERT(!IsRemote());
+		DIDBG("Closed " << (mIsDEXT ? "DEXT" : "KEXT") << " ndx=" << _boardNumber << " con=" << HEX8(GetIOConnect()) << " id=" << ::NTV2DeviceIDToString(_boardID));
+		_boardOpened = false;
+		_boardNumber = 0;
+	#if !defined(USE_DEVICE_MAP)
+		if (mConnection)
+			OS_IOServiceClose(mConnection);
+		mConnection = 0;
+	#endif	//	!defined(USE_DEVICE_MAP)
+		mIsDEXT = false;
+		return true;
 
-}	//	OpenLocalPhysical
-
-
-bool CNTV2MacDriverInterface::CloseLocalPhysical (void)
-{
-	NTV2_ASSERT(!IsRemote());
-	DIDBG (INSTP(this) << ", ndx=" << _boardNumber << ", con=" << HEX8(gDeviceMap.GetConnection(_boardNumber)) << ", id=" << ::NTV2DeviceIDToString(_boardID));
-	_boardOpened = false;
-	_boardNumber = 0;
-	return true; // success
-
-}	//	CloseLocalPhysical
+	}	//	CloseLocalPhysical
 #endif	//	!defined(NTV2_NULL_DEVICE)
 
 
@@ -695,7 +754,7 @@ bool CNTV2MacDriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outV
 	outValue = uint32_t(scalarO_64);
 	if (kernResult == KERN_SUCCESS)
 		return true;
-	DIFAIL(KR(kernResult) << ": ndx=" << _boardNumber << ", con=" << HEX8(GetIOConnect(false))
+	DIFAIL(KR(kernResult) << ": ndx=" << _boardNumber << ", con=" << HEX8(GetIOConnect())
 			<< " -- reg=" << DEC(inRegNum) << ", mask=" << HEX8(inMask) << ", shift=" << HEX8(inShift));
 	return false;
 }
@@ -1812,22 +1871,6 @@ void CNTV2MacDriverInterface::CopyTo_AUTOCIRCULATE_TASK_STRUCT_64 (AUTOCIRCULATE
 	{	(void) inWhichUserClientCommands;	//	Ignored -- replaced by AJADebug logging facility
 	}
 #endif	//	!defined(NTV2_DEPRECATE_14_3)
-
-
-void CNTV2MacDriverInterface::DumpDeviceMap (void)
-{
-	gDeviceMap.Dump();
-}
-
-UWord CNTV2MacDriverInterface::GetConnectionCount (void)
-{
-	return gDeviceMap.GetConnectionCount ();
-}
-
-ULWord CNTV2MacDriverInterface::GetConnectionChecksum (void)
-{
-	return gDeviceMap.GetConnectionChecksum();
-}
 
 
 static const char * GetKernErrStr (const kern_return_t inError)

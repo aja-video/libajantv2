@@ -151,12 +151,12 @@ AJAAncillaryList::AJAAncillaryList ()
 		m_ignoreCS		(false)
 {
 	Clear();
-	SetAnalogAncillaryDataTypeForLine (20, AJAAncillaryDataType_Cea608_Line21);
-	SetAnalogAncillaryDataTypeForLine (21, AJAAncillaryDataType_Cea608_Line21);
-	SetAnalogAncillaryDataTypeForLine (22, AJAAncillaryDataType_Cea608_Line21);
-	SetAnalogAncillaryDataTypeForLine (283, AJAAncillaryDataType_Cea608_Line21);
-	SetAnalogAncillaryDataTypeForLine (284, AJAAncillaryDataType_Cea608_Line21);
-	SetAnalogAncillaryDataTypeForLine (285, AJAAncillaryDataType_Cea608_Line21);
+	SetAnalogAncillaryDataTypeForLine (20, AJAAncDataType_Cea608_Line21);
+	SetAnalogAncillaryDataTypeForLine (21, AJAAncDataType_Cea608_Line21);
+	SetAnalogAncillaryDataTypeForLine (22, AJAAncDataType_Cea608_Line21);
+	SetAnalogAncillaryDataTypeForLine (283, AJAAncDataType_Cea608_Line21);
+	SetAnalogAncillaryDataTypeForLine (284, AJAAncDataType_Cea608_Line21);
+	SetAnalogAncillaryDataTypeForLine (285, AJAAncDataType_Cea608_Line21);
 }
 
 
@@ -215,14 +215,14 @@ AJAStatus AJAAncillaryList::ParseAllAncillaryData (void)
 }
 
 
-uint32_t AJAAncillaryList::CountAncillaryDataWithType (const AJAAncillaryDataType matchType) const
+uint32_t AJAAncillaryList::CountAncillaryDataWithType (const AJAAncDataType matchType) const
 {
 	uint32_t count = 0;
 
 	for (AJAAncDataListConstIter it(m_ancList.begin());	 it != m_ancList.end();	 ++it)
 	{
-		AJAAncillaryData *		pAncData	(*it);
-		AJAAncillaryDataType	ancType		(pAncData->GetAncillaryDataType());
+		AJAAncillaryData *	pAncData	(*it);
+		AJAAncDataType		ancType		(pAncData->GetAncillaryDataType());
 
 		if (matchType == ancType)
 			count++;
@@ -231,15 +231,15 @@ uint32_t AJAAncillaryList::CountAncillaryDataWithType (const AJAAncillaryDataTyp
 }
 
 
-AJAAncillaryData * AJAAncillaryList::GetAncillaryDataWithType (const AJAAncillaryDataType matchType, const uint32_t index) const
+AJAAncillaryData * AJAAncillaryList::GetAncillaryDataWithType (const AJAAncDataType matchType, const uint32_t index) const
 {
 	AJAAncillaryData *	pResult (AJA_NULL);
 	uint32_t count = 0;
 
 	for (AJAAncDataListConstIter it(m_ancList.begin());	 it != m_ancList.end();	 ++it)
 	{
-		AJAAncillaryData *		pAncData (*it);
-		AJAAncillaryDataType	ancType	 (pAncData->GetAncillaryDataType());
+		AJAAncillaryData *	pAncData (*it);
+		AJAAncDataType		ancType	 (pAncData->GetAncillaryDataType());
 
 		if (matchType == ancType)
 		{
@@ -420,8 +420,8 @@ static bool SortBySID (AJAAncillaryData * lhs, AJAAncillaryData * rhs)
 
 static bool SortByLocation (AJAAncillaryData * lhs, AJAAncillaryData * rhs)
 {
-	const AJAAncillaryDataLocation &	locLHS (lhs->GetDataLocation());
-	const AJAAncillaryDataLocation &	locRHS (rhs->GetDataLocation());
+	const AJAAncDataLoc &	locLHS (lhs->GetDataLocation());
+	const AJAAncDataLoc &	locRHS (rhs->GetDataLocation());
 	return locLHS < locRHS;
 }
 
@@ -479,7 +479,9 @@ string AJAAncillaryList::CompareWithInfo (const AJAAncillaryList & inCompareList
 {
 	ostringstream	oss;
 	if (inCompareList.CountAncillaryData() != CountAncillaryData())
-		{oss << "Packet count mismatch: " << DEC(CountAncillaryData()) << " vs " << DEC(inCompareList.CountAncillaryData());  return oss.str();}
+	{	oss << "Packet count mismatch: " << DEC(CountAncillaryData()) << " vs " << DEC(inCompareList.CountAncillaryData());
+		return oss.str();
+	}
 
 	for (uint32_t ndx (0);	ndx < CountAncillaryData();	 ndx++)
 	{
@@ -487,9 +489,42 @@ string AJAAncillaryList::CompareWithInfo (const AJAAncillaryList & inCompareList
 		AJAAncillaryData *	pPkt	(GetAncillaryDataAtIndex(ndx));
 		const string		info	(pPkt->CompareWithInfo(*pPktRHS, inIgnoreLocation, inIgnoreChecksum));
 		if (!info.empty())
-			{oss << "Pkt " << DEC(ndx+1) << " of " << DEC(CountAncillaryData()) << ": " << pPkt->AsString() << " != " << pPktRHS->AsString() << ": " << info;  return oss.str();}
+		{
+			oss << "Pkt " << DEC(ndx+1) << " of " << DEC(CountAncillaryData()) << ": " << pPkt->AsString() << " != " << pPktRHS->AsString() << ": " << info;
+			return oss.str();
+		}
 	}	//	for each packet
 	return string();
+}
+
+
+bool AJAAncillaryList::CompareWithInfo (vector<string> & outDiffInfo, const AJAAncillaryList & inCompareList, const bool inIgnoreLocation,	const bool inIgnoreChecksum) const
+{
+	outDiffInfo.clear();
+	if (inCompareList.CountAncillaryData() != CountAncillaryData())
+	{
+		ostringstream oss;
+		oss << "Packet count mismatch: " << DEC(CountAncillaryData()) << " vs " << DEC(inCompareList.CountAncillaryData());
+		outDiffInfo.push_back(oss.str());
+		return false;	//	Miscompared
+	}
+
+	for (uint32_t ndx(0);  ndx < CountAncillaryData();  ndx++)
+	{
+		AJAAncillaryData *	pPktRHS (inCompareList.GetAncillaryDataAtIndex(ndx));
+		AJAAncillaryData *	pPkt	(GetAncillaryDataAtIndex(ndx));
+		const string		info	(pPkt->CompareWithInfo(*pPktRHS, inIgnoreLocation, inIgnoreChecksum));
+		if (!info.empty())
+		{
+			ostringstream oss;
+			oss << "Pkt " << DEC(ndx+1) << " of " << DEC(CountAncillaryData()) << ":" << endl
+				<< "LHS " << pPkt->AsString(250) << endl
+				<< "RHS " << pPktRHS->AsString(250) << endl
+				<< info;
+			outDiffInfo.push_back(oss.str());
+		}
+	}	//	for each packet
+	return outDiffInfo.empty();	//	equal if empty list
 }
 
 
@@ -499,16 +534,16 @@ static bool TestForAnalogContinuation (AJAAncillaryData * pPrevData, AJAAncillar
 		return false;
 
 	//	Get coding type and location for the previous ancillary packet...
-	AJAAncillaryDataCoding		prevCoding	(pPrevData->GetDataCoding ());
-	AJAAncillaryDataLocation	prevLoc		(pPrevData->GetDataLocation ());
+	AJAAncDataCoding	prevCoding	(pPrevData->GetDataCoding ());
+	AJAAncDataLoc		prevLoc		(pPrevData->GetDataLocation ());
 
 	//	Get coding type and location for the new ancillary packet...
-	AJAAncillaryDataCoding		newCoding	(pNewData->GetDataCoding ());
-	AJAAncillaryDataLocation	newLoc		(pNewData->GetDataLocation ());
+	AJAAncDataCoding	newCoding	(pNewData->GetDataCoding ());
+	AJAAncDataLoc		newLoc		(pNewData->GetDataLocation ());
 
 	//	Compare...
-	if (   (prevCoding == AJAAncillaryDataCoding_Analog)
-		&& (newCoding  == AJAAncillaryDataCoding_Analog)
+	if (   (prevCoding == AJAAncDataCoding_Raw)
+		&& (newCoding  == AJAAncDataCoding_Raw)
 		&& (prevLoc.GetLineNumber()	 == newLoc.GetLineNumber())
 		&& (prevLoc.GetHorizontalOffset()  == newLoc.GetHorizontalOffset()) // technically, these should ALWAYS be the same for "analog"...?
 		&& (prevLoc.GetDataSpace()	 == newLoc.GetDataSpace())		//	Should always be VANC
@@ -538,7 +573,7 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
 
 	//	Use this as an uninitialized template...
 	AJAAncillaryData	newAncData;
-	AJAAncDataLoc		defaultLoc		(AJAAncillaryDataLink_A, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, 9);
+	AJAAncDataLoc		defaultLoc		(AJAAncDataLink_A, AJAAncDataChannel_Y, AJAAncDataSpace_VANC, 9);
 	int32_t				remainingSize	(int32_t(dataSize + 0));
 	const uint8_t *		pInputData		(pRcvData);
 	bool				bMoreData		(true);
@@ -546,7 +581,7 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
 	while (bMoreData)
 	{
 		bool bInsertNew (false);	//	We'll set this 'true' if/when we find a new Anc packet to insert
-		AJAAncillaryDataType newAncType (AJAAncillaryDataType_Unknown); //	We'll set this to the proper type once we know it
+		AJAAncDataType newAncType (AJAAncDataType_Unknown); //	We'll set this to the proper type once we know it
 		uint32_t packetSize (0);	//	This is where the AncillaryData object returns the number of bytes that were "consumed" from the input stream
 
 		//	Reset the AncData object, then load itself from the next GUMP packet...
@@ -609,7 +644,7 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
 			AJAAncillaryData *	pData	(AJAAncillaryDataFactory::Create (newAncType, &newAncData));
 			if (pData)
 			{
-				pData->SetBufferFormat(AJAAncillaryBufferFormat_SDI);
+				pData->SetBufferFormat(AJAAncBufferFormat_SDI);
 				if (IsIncludingZeroLengthPackets()	||	pData->GetDC())
 				{
 					try {m_ancList.push_back(pData);}	//	Append to my list
@@ -678,13 +713,13 @@ LOGMYDEBUG(RTPheader);
 		if (AJA_FAILURE(status))
 			continue;
 
-		const AJAAncillaryDataType newAncType (AJAAncillaryDataFactory::GuessAncillaryDataType(tempPkt));
+		const AJAAncDataType newAncType (AJAAncillaryDataFactory::GuessAncillaryDataType(tempPkt));
 		AJAAncillaryData *	pNewPkt (AJAAncillaryDataFactory::Create (newAncType, tempPkt));
 		if (!pNewPkt)
 			{status = AJA_STATUS_NULL;	continue;}
 
-		pNewPkt->SetBufferFormat(AJAAncillaryBufferFormat_RTP); //	Originated in RTP packet
-		pNewPkt->SetFrameID(RTPheader.GetTimeStamp());			//	TimeStamp it using RTP timestamp
+		pNewPkt->SetBufferFormat(AJAAncBufferFormat_RTP);	//	Originated in RTP packet
+		pNewPkt->SetFrameID(RTPheader.GetTimeStamp());		//	TimeStamp it using RTP timestamp
 		if (IsIncludingZeroLengthPackets()	||	pNewPkt->GetDC())
 		{
 			try {m_ancList.push_back(pNewPkt);	pktsAdded++;}	//	Append to my list
@@ -703,18 +738,18 @@ LOGMYDEBUG(RTPheader);
 }	//	AddReceivedAncillaryData
 
 
-static AJAStatus AppendUWordPacketToGump (	UByteSequence &					outGumpPkt,
-											const UWordSequence &			inPacketWords,
-											const AJAAncillaryDataLocation	inLoc = AJAAncillaryDataLocation(AJAAncillaryDataLink_A,
-																											AJAAncillaryDataChannel_Y,
-																											AJAAncillaryDataSpace_VANC,
-																											0))
+static AJAStatus AppendUWordPacketToGump (	UByteSequence &			outGumpPkt,
+											const UWordSequence &	inPacketWords,
+											const AJAAncDataLoc		inLoc = AJAAncDataLoc(AJAAncDataLink_A,
+																							AJAAncDataChannel_Y,
+																							AJAAncDataSpace_VANC,
+																							0))
 {
 	AJAStatus	status	(AJA_STATUS_SUCCESS);
 
 	if (inPacketWords.size () < 7)
 		return AJA_STATUS_RANGE;
-//	NOTE: Tough call. Decided not to validate the AJAAncillaryDataLocation here:
+//	NOTE: Tough call. Decided not to validate the AJAAncDataLoc here:
 //	if (!inLoc.IsValid())
 //		return AJA_STATUS_BAD_PARAM;
 
@@ -752,21 +787,21 @@ static AJAStatus AppendUWordPacketToGump (	UByteSequence &					outGumpPkt,
 }
 
 
-AJAStatus AJAAncillaryList::AddVANCData (const UWordSequence & inPacketWords, const AJAAncillaryDataLocation & inLocation, const uint32_t inFrameNum)
+AJAStatus AJAAncillaryList::AddVANCData (const UWordSequence & inPacketWords, const AJAAncDataLoc & inLocation, const uint32_t inFrameNum)
 {
 	UByteSequence	gumpPacketData;
 	AJAStatus		status	(AppendUWordPacketToGump (gumpPacketData,  inPacketWords, inLocation));
 	if (AJA_FAILURE(status))
 		return status;
 
-	AJAAncillaryDataType	newAncType	(AJAAncillaryDataType_Unknown);
-	AJAAncillaryData *		pData		(AJA_NULL);
+	AJAAncDataType		newAncType	(AJAAncDataType_Unknown);
+	AJAAncillaryData *	pData		(AJA_NULL);
 	{
 		AJAAncillaryData	pkt;
 		status = pkt.InitWithReceivedData (gumpPacketData, inLocation);
 		if (AJA_FAILURE(status))
 			return status;
-		pkt.SetBufferFormat(AJAAncillaryBufferFormat_FBVANC);
+		pkt.SetBufferFormat(AJAAncBufferFormat_FBVANC);
 
 		newAncType = AJAAncillaryDataFactory::GuessAncillaryDataType(pkt);
 		pData = AJAAncillaryDataFactory::Create(newAncType, pkt);
@@ -793,14 +828,14 @@ AJAStatus AJAAncillaryList::AddVANCData (const UWordSequence & inPacketWords, co
 
 
 #if !defined(NTV2_DEPRECATE_14_2)
-	AJAStatus AJAAncillaryList::AddVANCData (const UWordSequence & inPacketWords, const uint16_t inLineNum, const AJAAncillaryDataChannel inChannel)
+	AJAStatus AJAAncillaryList::AddVANCData (const UWordSequence & inPacketWords, const uint16_t inLineNum, const AJAAncDataChannel inChannel)
 	{
-		return AddVANCData (inPacketWords, AJAAncillaryDataLocation (AJAAncillaryDataLink_A,  inChannel, AJAAncillaryDataSpace_VANC,  inLineNum));
+		return AddVANCData (inPacketWords, AJAAncDataLoc (AJAAncDataLink_A,  inChannel, AJAAncDataSpace_VANC,  inLineNum));
 	}	//	AddVANCData
 #endif	//	!defined(NTV2_DEPRECATE_14_2)
 
 
-AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER &			inFrameBuffer,
+AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2Buffer &				inFrameBuffer,
 											const NTV2FormatDescriptor &	inFormatDesc,
 											AJAAncillaryList &				outPackets,
 											const uint32_t					inFrameNum)
@@ -843,6 +878,7 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER &			inFrameBuffe
 		bool			isF2			(false);
 		ULWord			smpteLineNum	(0);
 		unsigned		ndx				(0);
+		const AJAAncDataLink	defaultLink (AJAAncDataLink_A);	//	This is most common
 
 		inFormatDesc.GetSMPTELineNumber (lineOffset, smpteLineNum, isF2);
 		if (fbf == NTV2_FBF_10BIT_YCBCR)
@@ -855,7 +891,7 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER &			inFrameBuffe
 		{
 			AJAAncillaryData::U16Packets	ycPackets;
 			UWordSequence					ycHOffsets;
-			AJAAncillaryDataLocation		loc (AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_Both, AJAAncillaryDataSpace_VANC, uint16_t(smpteLineNum));
+			AJAAncDataLoc					loc (defaultLink, AJAAncDataChannel_Both, AJAAncDataSpace_VANC, uint16_t(smpteLineNum));
 
 			AJAAncillaryData::GetAncPacketsFromVANCLine (uwords, AncChannelSearch_Both, ycPackets, ycHOffsets);
 			NTV2_ASSERT(ycPackets.size() == ycHOffsets.size());
@@ -867,8 +903,8 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER &			inFrameBuffe
 		{
 			AJAAncillaryData::U16Packets	yPackets, cPackets;
 			UWordSequence					yHOffsets, cHOffsets;
-			AJAAncillaryDataLocation		yLoc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_Y, AJAAncillaryDataSpace_VANC, uint16_t(smpteLineNum));
-			AJAAncillaryDataLocation		cLoc	(AJAAncillaryDataLink_Unknown, AJAAncillaryDataChannel_C, AJAAncillaryDataSpace_VANC, uint16_t(smpteLineNum));
+			AJAAncDataLoc					yLoc	(defaultLink, AJAAncDataChannel_Y, AJAAncDataSpace_VANC, uint16_t(smpteLineNum));
+			AJAAncDataLoc					cLoc	(defaultLink, AJAAncDataChannel_C, AJAAncDataSpace_VANC, uint16_t(smpteLineNum));
 			//cerr << endl << "SetFromVANCData: +" << DEC0N(lineOffset,2) << ": ";	inFormatDesc.PrintSMPTELineNumber(cerr, lineOffset);  cerr << ":" << endl << uwords << endl;
 			AJAAncillaryData::GetAncPacketsFromVANCLine (uwords, AncChannelSearch_Y, yPackets, yHOffsets);
 			AJAAncillaryData::GetAncPacketsFromVANCLine (uwords, AncChannelSearch_C, cPackets, cHOffsets);
@@ -889,7 +925,7 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2_POINTER &			inFrameBuffe
 }
 
 //	STATIC
-AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBuffer,
+AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2Buffer & inAncBuffer,
 													AJAAncillaryList & outPackets,
 													const uint32_t inFrameNum)
 {
@@ -907,7 +943,7 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBu
 	else
 	{
 		//	RTP	  RTP	RTP	  RTP	RTP	  RTP	RTP	  RTP	RTP	  RTP	RTP	  RTP	RTP	  RTP	RTP	  RTP	RTP	  RTP
-		NTV2_POINTER	ancBuffer		(inAncBuffer.GetHostPointer(), inAncBuffer.GetByteCount()); //	Don't copy
+		NTV2Buffer		ancBuffer		(inAncBuffer.GetHostPointer(), inAncBuffer.GetByteCount()); //	Don't copy
 		size_t			ULWordCount		(0);	//	Size of current RTP packet, including RTP header, in 32-bit words
 		size_t			ULWordOffset	(0);	//	Offset to start of current RTP packet, in 32-bit words
 		unsigned		retries			(0);	//	Retry count
@@ -971,8 +1007,8 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2_POINTER & inAncBu
 
 
 //	STATIC
-AJAStatus AJAAncillaryList::SetFromDeviceAncBuffers (const NTV2_POINTER & inF1AncBuffer,
-													const NTV2_POINTER & inF2AncBuffer,
+AJAStatus AJAAncillaryList::SetFromDeviceAncBuffers (const NTV2Buffer & inF1AncBuffer,
+													const NTV2Buffer & inF2AncBuffer,
 													AJAAncillaryList & outPackets,
 													const uint32_t inFrameNum)		//	STATIC
 {
@@ -987,7 +1023,7 @@ AJAStatus AJAAncillaryList::SetFromDeviceAncBuffers (const NTV2_POINTER & inF1An
 }
 
 
-bool AJAAncillaryList::BufferHasGUMPData (const NTV2_POINTER & inBuffer)
+bool AJAAncillaryList::BufferHasGUMPData (const NTV2Buffer & inBuffer)
 {
 	if (!inBuffer)
 		return false;
@@ -1033,7 +1069,7 @@ AJAStatus AJAAncillaryList::GetRTPPackets (AJAU32Pkts & outF1U32Pkts,  AJAU32Pkt
 			return AJA_STATUS_NULL; //	Fail
 
 		AJAAncillaryData &	pkt (*pAncData);
-		if (pkt.GetDataCoding() != AJAAncillaryDataCoding_Digital)
+		if (pkt.GetDataCoding() != AJAAncDataCoding_Digital)
 		{
 			LOGMYDEBUG("Skipped Pkt " << DEC(pktNdx+1) << " of " << DEC(CountAncillaryData()) << " -- Analog/Raw");
 			continue;	//	Skip analog/raw packets
@@ -1154,7 +1190,7 @@ AJAStatus AJAAncillaryList::GetAncillaryDataTransmitSize (const bool bProgressiv
 
 AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (const bool bProgressive, const uint32_t f2StartLine, uint8_t * pF1AncData, const uint32_t inMaxF1Data, uint8_t * pF2AncData, const uint32_t inMaxF2Data)
 {
-	NTV2_POINTER	F1Buffer(pF1AncData, inMaxF1Data), F2Buffer(pF2AncData, inMaxF2Data);
+	NTV2Buffer	F1Buffer(pF1AncData, inMaxF1Data), F2Buffer(pF2AncData, inMaxF2Data);
 	if (!F1Buffer.IsNULL())
 		NTV2_ASSERT(F1Buffer.IsProvidedByClient());
 	if (!F2Buffer.IsNULL())
@@ -1163,7 +1199,7 @@ AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (const bool bProgressiv
 }
 
 
-AJAStatus AJAAncillaryList::GetTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
+AJAStatus AJAAncillaryList::GetTransmitData (NTV2Buffer & F1Buffer, NTV2Buffer & F2Buffer,
 												const bool inIsProgressive, const uint32_t inF2StartLine)
 {
 	AJAStatus	status		(AJA_STATUS_SUCCESS);
@@ -1211,7 +1247,7 @@ AJAStatus AJAAncillaryList::GetTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINT
 }
 
 
-AJAStatus AJAAncillaryList::GetVANCTransmitData (NTV2_POINTER & inFrameBuffer,	const NTV2FormatDescriptor & inFormatDesc)
+AJAStatus AJAAncillaryList::GetVANCTransmitData (NTV2Buffer & inFrameBuffer,	const NTV2FormatDescriptor & inFormatDesc)
 {
 	if (inFrameBuffer.IsNULL())
 	{
@@ -1256,23 +1292,23 @@ AJAStatus AJAAncillaryList::GetVANCTransmitData (NTV2_POINTER & inFrameBuffer,	c
 		//	Look for non-HANC packets destined for this line...
 		for (AJAAncDataListConstIter iter(m_ancList.begin());	(iter != m_ancList.end()) && *iter;	  ++iter)
 		{
-			bool								muxedOK (false);
-			AJAAncillaryData &					ancData (**iter);
-			const AJAAncillaryDataLocation &	loc		(ancData.GetDataLocation());
-			UWordSequence						u16PktComponents;
-			if (ancData.GetDataCoding() != AJAAncillaryDataCoding_Digital)	//	Ignore "Raw" or "Analog" or "Unknown" packets
+			bool					muxedOK (false);
+			AJAAncillaryData &		ancData (**iter);
+			const AJAAncDataLoc &	loc	(ancData.GetDataLocation());
+			UWordSequence			u16PktComponents;
+			if (ancData.GetDataCoding() != AJAAncDataCoding_Digital)	//	Ignore "Raw" or "Analog" or "Unknown" packets
 				continue;
-			if (loc.GetDataSpace() != AJAAncillaryDataSpace_VANC)			//	Ignore "HANC" or "Unknown" packets
+			if (loc.GetDataSpace() != AJAAncDataSpace_VANC)				//	Ignore "HANC" or "Unknown" packets
 			{
 				//LOGMYWARN("Skipping non-VANC packet " << ancData);
 				continue;
 			}
-			if (loc.GetLineNumber() != smpteLine)							//	Wrong line number
+			if (loc.GetLineNumber() != smpteLine)						//	Wrong line number
 			{
 				//LOGMYWARN("Skipping packet not destined for line " << DEC(smpteLine) << " " << loc);
 				continue;
 			}
-			if (!IS_VALID_AJAAncillaryDataChannel(loc.GetDataChannel()))	//	Bad data channel
+			if (!IS_VALID_AJAAncDataChannel(loc.GetDataChannel()))		//	Bad data channel
 			{
 				LOGMYWARN("Skipped packet with invalid data channel " << loc);
 				continue;
@@ -1346,10 +1382,10 @@ AJAStatus AJAAncillaryList::GetVANCTransmitData (NTV2_POINTER & inFrameBuffer,	c
 	//	Any analog packets?
 	for (AJAAncDataListConstIter iter(m_ancList.begin());	(iter != m_ancList.end()) && *iter;	  ++iter)
 	{
-		bool								success		(inFormatDesc.IsSD());
-		AJAAncillaryData &					ancData		(**iter);
-		const AJAAncillaryDataLocation &	loc			(ancData.GetDataLocation());
-		ULWord								lineOffset	(0);
+		bool					success	(inFormatDesc.IsSD());
+		AJAAncillaryData &		ancData	(**iter);
+		const AJAAncDataLoc &	loc		(ancData.GetDataLocation());
+		ULWord							lineOffset	(0);
 		if (!ancData.IsRaw())
 			continue;	//	Ignore "Digital" or "Unknown" packets
 
@@ -1391,7 +1427,7 @@ AJAStatus AJAAncillaryList::GetVANCTransmitData (NTV2_POINTER & inFrameBuffer,	c
 
 
 //	STATIC
-AJAStatus AJAAncillaryList::WriteRTPPackets (NTV2_POINTER & theBuffer,	uint32_t & outBytesWritten,
+AJAStatus AJAAncillaryList::WriteRTPPackets (NTV2Buffer & theBuffer,	uint32_t & outBytesWritten,
 											const AJAU32Pkts & inRTPPkts,  const AJAAncPktCounts & inAncCounts,
 											const bool inIsF2,	const bool inIsProgressive)
 {
@@ -1467,7 +1503,7 @@ AJAStatus AJAAncillaryList::WriteRTPPackets (NTV2_POINTER & theBuffer,	uint32_t 
 }
 
 
-AJAStatus AJAAncillaryList::GetIPTransmitData (NTV2_POINTER & F1Buffer, NTV2_POINTER & F2Buffer,
+AJAStatus AJAAncillaryList::GetIPTransmitData (NTV2Buffer & F1Buffer, NTV2Buffer & F2Buffer,
 												const bool inIsProgressive, const uint32_t inF2StartLine)
 {
 	AJAStatus		result (AJA_STATUS_SUCCESS);
@@ -1516,7 +1552,7 @@ AJAStatus AJAAncillaryList::GetIPTransmitDataLength (uint32_t & outF1ByteCount, 
 	if (AJA_FAILURE(result))
 		return result;
 
-	NTV2_POINTER	nullBuffer; //	An empty buffer tells WriteRTPPackets to just calculate byteCount...
+	NTV2Buffer	nullBuffer; //	An empty buffer tells WriteRTPPackets to just calculate byteCount...
 	result = WriteRTPPackets (nullBuffer, outF1ByteCount, F1U32Pkts, F1AncCounts, /*isF2*/false, inIsProgressive);
 	if (AJA_SUCCESS(result)	 &&	 !inIsProgressive)
 		result = WriteRTPPackets (nullBuffer, outF2ByteCount, F2U32Pkts, F2AncCounts, /*isF2*/true, inIsProgressive);
@@ -1572,13 +1608,13 @@ AJAStatus AJAAncillaryList::GetAnalogAncillaryDataTypeMap (AJAAncillaryAnalogTyp
 }
 
 
-AJAStatus AJAAncillaryList::SetAnalogAncillaryDataTypeForLine (const uint16_t inLineNum, const AJAAncillaryDataType inAncType)
+AJAStatus AJAAncillaryList::SetAnalogAncillaryDataTypeForLine (const uint16_t inLineNum, const AJAAncDataType inAncType)
 {
 	AJAAutoLock locker(&gAnalogTypeMapMutex);
 	gAnalogTypeMap.erase(inLineNum);				//	In case someone has already set this line
-	if (inAncType == AJAAncillaryDataType_Unknown)
-		return AJA_STATUS_SUCCESS;					//	A non-entry is the same as AJAAncillaryDataType_Unknown
-	else if (IS_VALID_AJAAncillaryDataType(inAncType))
+	if (inAncType == AJAAncDataType_Unknown)
+		return AJA_STATUS_SUCCESS;					//	A non-entry is the same as AJAAncDataType_Unknown
+	else if (IS_VALID_AJAAncDataType(inAncType))
 			gAnalogTypeMap[inLineNum] = inAncType;
 	else
 		return AJA_STATUS_BAD_PARAM;
@@ -1586,10 +1622,10 @@ AJAStatus AJAAncillaryList::SetAnalogAncillaryDataTypeForLine (const uint16_t in
 }
 
 
-AJAAncillaryDataType AJAAncillaryList::GetAnalogAncillaryDataTypeForLine (const uint16_t inLineNum)
+AJAAncDataType AJAAncillaryList::GetAnalogAncillaryDataTypeForLine (const uint16_t inLineNum)
 {
 	AJAAutoLock locker(&gAnalogTypeMapMutex);
-	AJAAncillaryDataType	ancType (AJAAncillaryDataType_Unknown);
+	AJAAncDataType	ancType (AJAAncDataType_Unknown);
 	if (!gAnalogTypeMap.empty ())
 	{
 		AJAAncillaryAnalogTypeMap::const_iterator	it	(gAnalogTypeMap.find (inLineNum));

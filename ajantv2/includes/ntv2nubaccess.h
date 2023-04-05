@@ -223,7 +223,7 @@ class AJAExport NTV2RPCClientAPI
 		virtual bool	NTV2AutoCirculateRemote	(AUTOCIRCULATE_DATA & autoCircData);
 		virtual bool	NTV2WaitForInterruptRemote	(const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs);
 		virtual	bool	NTV2DMATransferRemote		(const NTV2DMAEngine inDMAEngine,	const bool inIsRead,
-													const ULWord inFrameNumber,			NTV2_POINTER & inOutBuffer,
+													const ULWord inFrameNumber,			NTV2Buffer & inOutBuffer,
 													const ULWord inCardOffsetBytes,		const ULWord inNumSegments,
 													const ULWord inSegmentHostPitch,	const ULWord inSegmentCardPitch,
 													const bool inSynchronous);

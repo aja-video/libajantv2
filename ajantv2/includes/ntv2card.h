@@ -635,8 +635,8 @@ public:
 					-	To disable this behavior completely, use an invalid ::NTV2Channel value (e.g. ::NTV2_CHANNEL_INVALID).
 	**/
 	AJA_VIRTUAL bool	DMAReadAnc (	const ULWord	inFrameNumber,
-										NTV2_POINTER &	outAncF1Buffer,
-										NTV2_POINTER &	outAncF2Buffer	= NULL_POINTER,
+										NTV2Buffer &	outAncF1Buffer,
+										NTV2Buffer &	outAncF2Buffer	= NULL_POINTER,
 										const NTV2Channel	inChannel	= NTV2_CHANNEL1);
 
 	/**
@@ -668,8 +668,8 @@ public:
 						F1 and/or F2 Anc buffers.
 	**/
 	AJA_VIRTUAL bool	DMAWriteAnc (	const ULWord		inFrameNumber,
-										NTV2_POINTER &		inAncF1Buffer,
-										NTV2_POINTER &		inAncF2Buffer	= NULL_POINTER,
+										NTV2Buffer &		inAncF1Buffer,
+										NTV2Buffer &		inAncF2Buffer	= NULL_POINTER,
 										const NTV2Channel	inChannel		= NTV2_CHANNEL1);
 	
 
@@ -693,7 +693,7 @@ public:
 		@return		True if successful; otherwise false.
 		@see		CNTV2Card::DMABufferUnlock, CNTV2Card::DMABufferAutoLock, CNTV2Card::DMABufferUnlockAll, \ref vidop-fblocking
 	**/
-	AJA_VIRTUAL bool	DMABufferLock (const NTV2_POINTER & inBuffer, bool inMap = false, bool inRDMA = false); //	New in SDK 15.5
+	AJA_VIRTUAL bool	DMABufferLock (const NTV2Buffer & inBuffer, bool inMap = false, bool inRDMA = false); //	New in SDK 15.5
 
 	/**
 		@brief		Page-locks the given host buffer to reduce transfer time and CPU usage of DMA transfers.
@@ -709,7 +709,7 @@ public:
 	**/
 	AJA_VIRTUAL inline bool DMABufferLock (const ULWord * pInBuffer, const ULWord inByteCount, bool inMap = false, bool inRDMA = false)
 	{
-		return DMABufferLock(NTV2_POINTER(pInBuffer, inByteCount), inMap, inRDMA);
+		return DMABufferLock(NTV2Buffer(pInBuffer, inByteCount), inMap, inRDMA);
 	}
 
 
@@ -719,7 +719,7 @@ public:
 		@return		True if successful; otherwise false.
 		@see		CNTV2Card::DMABufferLock, CNTV2Card::DMABufferUnlockAll, \ref vidop-fblocking
 	**/
-	AJA_VIRTUAL bool	DMABufferUnlock (const NTV2_POINTER & inBuffer);
+	AJA_VIRTUAL bool	DMABufferUnlock (const NTV2Buffer & inBuffer);
 
 	/**
 		@brief		Unlocks the given host buffer that was previously locked using CNTV2Card::DMABufferLock.
@@ -730,7 +730,7 @@ public:
 	**/
 	AJA_VIRTUAL inline bool DMABufferUnlock (const ULWord * pInBuffer, const ULWord inByteCount)
 	{
-		return DMABufferUnlock(NTV2_POINTER(pInBuffer, inByteCount));
+		return DMABufferUnlock(NTV2Buffer(pInBuffer, inByteCount));
 	}
 
 	/**
@@ -826,9 +826,9 @@ public:
 
 #if !defined(NTV2_DEPRECATE_15_2)
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DMAReadAnc(const ULWord inFrameNumber, UByte* pOutAncBuffer, const NTV2FieldID inFieldID = NTV2_FIELD0,
-												const ULWord inByteCount = 2048));	///< @deprecated	Call CNTV2Card::DMAWriteAnc(const ULWord, NTV2_POINTER &, NTV2_POINTER &) instead.
+												const ULWord inByteCount = 2048));	///< @deprecated	Call CNTV2Card::DMAWriteAnc(const ULWord, NTV2Buffer &, NTV2Buffer &) instead.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DMAWriteAnc(const ULWord inFrameNumber, const UByte* pInAncBuffer, const NTV2FieldID inFieldID = NTV2_FIELD0,
-												const ULWord inByteCount = 2048));	///< @deprecated	Call CNTV2Card::DMAWriteAnc(const ULWord, const NTV2_POINTER &, const NTV2_POINTER &) instead.
+												const ULWord inByteCount = 2048));	///< @deprecated	Call CNTV2Card::DMAWriteAnc(const ULWord, const NTV2Buffer &, const NTV2Buffer &) instead.
 #endif	//	!defined(NTV2_DEPRECATE_15_2)
 	///@}
 
@@ -1006,6 +1006,17 @@ public:
 		@see		CNTV2Card::GetMode, \ref vidop-fs
 	**/
 	AJA_VIRTUAL bool		SetMode (const NTV2Channel inChannel, const NTV2Mode inNewValue, const bool inIsRetail = AJA_RETAIL_DEFAULT);
+
+	/**
+		@brief		Sets the capture or playout mode of a set of FrameStores on the AJA device.
+		@param[in]	inChannels		Specifies the FrameStore(s) of interest.
+		@param[in]	inNewValue		Specifies the desired mode (::NTV2_MODE_DISPLAY or ::NTV2_MODE_CAPTURE).
+		@return		True if all FrameStore(s) were successfully configured; otherwise false.
+		@details	In ::NTV2_MODE_CAPTURE mode, device frame memory is written;  in ::NTV2_MODE_DISPLAY mode, it's read from.
+		@note		\ref aboutautocirculate automatically sets the ::NTV2Mode (but doesn't automatically un-set it after use).
+		@see		CNTV2Card::GetMode, \ref vidop-fs
+	**/
+	AJA_VIRTUAL bool		SetMode (const NTV2ChannelSet & inChannels, const NTV2Mode inMode);
 
 	/**
 		@brief		Answers with the current ::NTV2Mode of the given FrameStore on the AJA device.
@@ -1728,7 +1739,7 @@ public:
 		@param[in]	inEnable		Specify \c true to use 20-bit mode;	 specify \c false for normal (24-bit) mode.
 		@note		This function is relevant only for the \ref konaip or \ref ioip.
 	**/
-	AJA_VIRTUAL bool		SetAudio20BitMode (const NTV2AudioSystem inAudioSystem, const bool inEnable);
+	AJA_VIRTUAL bool		SetAudio20BitMode (const NTV2AudioSystem inAudioSystem, const bool inEnable);	//	New in SDK 13.0
 
 	/**
 		@brief		Answers whether or not the device's ::NTV2AudioSystem is currently operating in 20-bit mode.
@@ -1739,7 +1750,7 @@ public:
 									if audio is in 24 bit mode.
 		@note		This function is relevant only for the \ref konaip or \ref ioip.
 	**/
-	AJA_VIRTUAL bool		GetAudio20BitMode (const NTV2AudioSystem inAudioSystem, bool & outEnable);
+	AJA_VIRTUAL bool		GetAudio20BitMode (const NTV2AudioSystem inAudioSystem, bool & outEnable);	//	New in SDK 13.0
 
 	/**
 		@brief		Enables or disables ::NTV2AudioLoopBack mode for the given ::NTV2AudioSystem.
@@ -1836,7 +1847,7 @@ public:
 										the audio playout buffer.
 	**/
 	AJA_VIRTUAL bool		GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outAbsByteOffset,
-												const NTV2AudioSystem inAudioSystem, const bool inCaptureBuffer = false);
+												const NTV2AudioSystem inAudioSystem, const bool inCaptureBuffer = false);	//	New in SDK 13.0
 
 	/**
 		@brief		For the given Audio System, answers with the byte offset of the tail end of the last chunk of
@@ -1847,7 +1858,7 @@ public:
 									measured from the start of the device playback buffer.
 		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem of interest.
 		@return		True if successful;	 otherwise false.
-		@see		\ref audioplayout
+		@see		CNTV2Card::WriteAudioLastOut, \ref audioplayout
 	**/
 	AJA_VIRTUAL bool		ReadAudioLastOut (ULWord & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
@@ -1875,9 +1886,9 @@ public:
 		@note		It is not an error to call this function when the Audio System's playout side is already running.
 		@note		Applications using \ref aboutautocirculate won't need to call this function, since AutoCirculate
 					configures the Audio System automatically.
-		@see		CNTV2Card::StopAudioOutput, CNTV2Card::IsAudioOutputRunning, \ref audioplayout
+		@see		CNTV2Card::StopAudioOutput, CNTV2Card::IsAudioOutputRunning, CNTV2Card::CanDoAudioWaitForVBI, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		StartAudioOutput (const NTV2AudioSystem inAudioSystem, const bool inWaitForVBI = false);
+	AJA_VIRTUAL bool		StartAudioOutput (const NTV2AudioSystem inAudioSystem, const bool inWaitForVBI = false);	//	New in SDK 14.3
 
 	/**
 		@brief		Stops the playout side of the given ::NTV2AudioSystem, parking the "Read Head" at the start
@@ -1889,7 +1900,7 @@ public:
 					configures the Audio System automatically.
 		@see		CNTV2Card::StartAudioOutput, CNTV2Card::IsAudioOutputRunning, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		StopAudioOutput (const NTV2AudioSystem inAudioSystem);
+	AJA_VIRTUAL bool		StopAudioOutput (const NTV2AudioSystem inAudioSystem);	//	New in SDK 14.3
 
 	/**
 		@brief		Answers whether or not the playout side of the given ::NTV2AudioSystem is currently running.
@@ -1900,7 +1911,7 @@ public:
 		@see		CNTV2Card::StartAudioOutput, CNTV2Card::StopAudioOutput, CNTV2Card::SetAudioOutputPause,
 					CNTV2Card::GetAudioOutputPause, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		IsAudioOutputRunning (const NTV2AudioSystem inAudioSystem, bool & outIsRunning);
+	AJA_VIRTUAL bool		IsAudioOutputRunning (const NTV2AudioSystem inAudioSystem, bool & outIsRunning);	//	New in SDK 14.3
 
 	/**
 		@brief		Pauses or resumes output of audio samples and advancement of the audio buffer pointer
@@ -1913,7 +1924,7 @@ public:
 					To reset the "play head" back to the beginning of the buffer, use CNTV2Card::SetAudioOutputReset instead.
 		@see		CNTV2Card::GetAudioOutputPause, CNTV2Card::StartAudioOutput, CNTV2Card::StopAudioOutput, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		SetAudioOutputPause (const NTV2AudioSystem inAudioSystem, const bool inPausePlayout);
+	AJA_VIRTUAL bool		SetAudioOutputPause (const NTV2AudioSystem inAudioSystem, const bool inPausePlayout);	//	New in SDK 12.3
 
 	/**
 		@brief		Answers if the device's Audio System is currently paused or not.
@@ -1923,7 +1934,7 @@ public:
 										playout is running normally.
 		@see		CNTV2Card::SetAudioOutputPause, CNTV2Card::IsAudioOutputRunning, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		GetAudioOutputPause (const NTV2AudioSystem inAudioSystem, bool & outIsPaused);
+	AJA_VIRTUAL bool		GetAudioOutputPause (const NTV2AudioSystem inAudioSystem, bool & outIsPaused);	//	New in SDK 12.3
 
 	/**
 		@brief		Starts the capture side of the given ::NTV2AudioSystem, writing incoming audio samples
@@ -1939,7 +1950,7 @@ public:
 					configures the Audio System automatically.
 		@see		CNTV2Card::StopAudioInput, CNTV2Card::IsAudioInputRunning, \ref audiocapture
 	**/
-	AJA_VIRTUAL bool		StartAudioInput (const NTV2AudioSystem inAudioSystem, const bool inWaitForVBI = false);
+	AJA_VIRTUAL bool		StartAudioInput (const NTV2AudioSystem inAudioSystem, const bool inWaitForVBI = false);	//	New in SDK 14.3
 
 	/**
 		@brief		Stops the capture side of the given ::NTV2AudioSystem, and resets the capture position
@@ -1952,7 +1963,7 @@ public:
 					configures the Audio System automatically.
 		@see		CNTV2Card::StartAudioInput, CNTV2Card::IsAudioInputRunning, \ref audiocapture
 	**/
-	AJA_VIRTUAL bool		StopAudioInput (const NTV2AudioSystem inAudioSystem);
+	AJA_VIRTUAL bool		StopAudioInput (const NTV2AudioSystem inAudioSystem);	//	New in SDK 14.3
 
 	/**
 		@brief		Answers whether or not the capture side of the given ::NTV2AudioSystem is currently running.
@@ -1962,7 +1973,7 @@ public:
 										otherwise receives 'false'.
 		@see		CNTV2Card::StartAudioInput, CNTV2Card::StopAudioInput, \ref audiocapture
 	**/
-	AJA_VIRTUAL bool		IsAudioInputRunning (const NTV2AudioSystem inAudioSystem, bool & outIsRunning);
+	AJA_VIRTUAL bool		IsAudioInputRunning (const NTV2AudioSystem inAudioSystem, bool & outIsRunning);	//	New in SDK 14.3
 
 	/**
 		@brief		Enables or disables the writing of incoming audio into the given Audio System's capture buffer.
@@ -1975,7 +1986,7 @@ public:
 					configures the Audio System automatically.
 		@see		CNTV2Card::GetAudioCaptureEnable, \ref audiocapture
 	**/
-	AJA_VIRTUAL bool		SetAudioCaptureEnable (const NTV2AudioSystem inAudioSystem, const bool inEnable);
+	AJA_VIRTUAL bool		SetAudioCaptureEnable (const NTV2AudioSystem inAudioSystem, const bool inEnable);	//	New in SDK 12.3
 
 	/**
 		@brief		Answers whether or not the Audio System is configured to write captured audio samples into
@@ -1987,7 +1998,7 @@ public:
 										prohibited from writing captured samples into device audio buffer memory.
 		@see		CNTV2Card::SetAudioCaptureEnable, \ref audiocapture
 	**/
-	AJA_VIRTUAL bool		GetAudioCaptureEnable (const NTV2AudioSystem inAudioSystem, bool & outEnable);
+	AJA_VIRTUAL bool		GetAudioCaptureEnable (const NTV2AudioSystem inAudioSystem, bool & outEnable);	//	New in SDK 12.3
 
 	/**
 		@brief		Enables or disables a special mode for the given Audio System whereby its embedder and
@@ -2073,7 +2084,7 @@ public:
 					(see ::NTV2DeviceCanDoPCMControl).
 		@see		CNTV2Card::GetAudioPCMControl, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		SetAudioPCMControl (const NTV2AudioSystem inAudioSystem, const bool inIsNonPCM);
+	AJA_VIRTUAL bool		SetAudioPCMControl (const NTV2AudioSystem inAudioSystem, const bool inIsNonPCM);	//	New in SDK 12.1
 
 
 	/**
@@ -2085,7 +2096,7 @@ public:
 		@return		True if successful; otherwise false.
 		@see		CNTV2Card::SetAudioPCMControl, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		GetAudioPCMControl (const NTV2AudioSystem inAudioSystem, bool & outIsNonPCM);
+	AJA_VIRTUAL bool		GetAudioPCMControl (const NTV2AudioSystem inAudioSystem, bool & outIsNonPCM);	//	New in SDK 12.1
 
 
 	/**
@@ -2101,7 +2112,7 @@ public:
 					(See the two-parameter overloaded version of this function.)
 		@see		CNTV2Card::GetAudioPCMControl, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		SetAudioPCMControl (const NTV2AudioSystem inAudioSystem, const NTV2AudioChannelPair inChannelPair, const bool inIsNonPCM);
+	AJA_VIRTUAL bool		SetAudioPCMControl (const NTV2AudioSystem inAudioSystem, const NTV2AudioChannelPair inChannelPair, const bool inIsNonPCM);	//	New in SDK 12.2
 
 
 	/**
@@ -2112,7 +2123,7 @@ public:
 		@note		Call ::NTV2DeviceCanDoPCMControl to determine if this device supports per-audio-channel-pair PCM control.
 		@see		CNTV2Card::GetAudioPCMControl, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		SetAudioPCMControl (const NTV2AudioSystem inAudioSystem, const NTV2AudioChannelPairs & inNonPCMChannelPairs);
+	AJA_VIRTUAL bool		SetAudioPCMControl (const NTV2AudioSystem inAudioSystem, const NTV2AudioChannelPairs & inNonPCMChannelPairs);	//	New in SDK 12.4
 
 
 	/**
@@ -2128,7 +2139,7 @@ public:
 					(See the two-parameter overloaded version of this function.)
 		@see		CNTV2Card::SetAudioPCMControl, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		GetAudioPCMControl (const NTV2AudioSystem inAudioSystem, const NTV2AudioChannelPair inChannelPair, bool & outIsNonPCM);
+	AJA_VIRTUAL bool		GetAudioPCMControl (const NTV2AudioSystem inAudioSystem, const NTV2AudioChannelPair inChannelPair, bool & outIsNonPCM);	//	New in SDK 12.2
 
 
 	/**
@@ -2140,7 +2151,7 @@ public:
 		@note		Call ::NTV2DeviceCanDoPCMControl to determine if this device supports per-audio-channel-pair PCM control.
 		@see		CNTV2Card::SetAudioPCMControl, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		GetAudioPCMControl (const NTV2AudioSystem inAudioSystem, NTV2AudioChannelPairs & outNonPCMChannelPairs);
+	AJA_VIRTUAL bool		GetAudioPCMControl (const NTV2AudioSystem inAudioSystem, NTV2AudioChannelPairs & outNonPCMChannelPairs);	//	New in SDK 12.4
 
 
 	/**
@@ -2151,7 +2162,7 @@ public:
 		@return		True if successful; otherwise false.
 		@see		CNTV2Card::GetDetectedAudioChannelPairs, \ref audiocapture
 	**/
-	AJA_VIRTUAL bool		IsAudioChannelPairPresent (const NTV2AudioSystem inAudioSystem, const NTV2AudioChannelPair inChannelPair, bool & outIsPresent);
+	AJA_VIRTUAL bool		IsAudioChannelPairPresent (const NTV2AudioSystem inAudioSystem, const NTV2AudioChannelPair inChannelPair, bool & outIsPresent);	//	New in SDK 12.5
 
 
 	/**
@@ -2164,7 +2175,7 @@ public:
 					checking the V/U/C/P bits per SMPTE 299.
 		@see		CNTV2Card::IsAudioChannelPairPresent, \ref audiocapture
 	**/
-	AJA_VIRTUAL bool		GetDetectedAudioChannelPairs (const NTV2AudioSystem inAudioSystem, NTV2AudioChannelPairs & outDetectedChannelPairs);
+	AJA_VIRTUAL bool		GetDetectedAudioChannelPairs (const NTV2AudioSystem inAudioSystem, NTV2AudioChannelPairs & outDetectedChannelPairs);	//	New in SDK 12.5
 
 
 	/**
@@ -2173,7 +2184,7 @@ public:
 		@return		True if successful; otherwise false.
 		@see		CNTV2Card::IsAudioChannelPairPresent, \ref audiocapture
 	**/
-	AJA_VIRTUAL bool		GetDetectedAESChannelPairs (NTV2AudioChannelPairs & outDetectedChannelPairs);
+	AJA_VIRTUAL bool		GetDetectedAESChannelPairs (NTV2AudioChannelPairs & outDetectedChannelPairs);	//	New in SDK 13.0
 
 
 	/**
@@ -2305,7 +2316,7 @@ public:
 		@param[out] outIsPCM			Receives true if the channel pair is currently PCM-encoded;	 otherwise false.
 		@return		True if successful;	 otherwise false.
 	**/
-	virtual bool			InputAudioChannelPairHasPCM (const NTV2Channel inSDIInputConnector, const NTV2AudioChannelPair inAudioChannelPair, bool & outIsPCM);
+	virtual bool			InputAudioChannelPairHasPCM (const NTV2Channel inSDIInputConnector, const NTV2AudioChannelPair inAudioChannelPair, bool & outIsPCM);	//	New in SDK 12.3
 
 	/**
 		@brief		For the given SDI input (specified as a channel number), returns the set of audio channel pairs that are currently PCM-encoded.
@@ -2317,7 +2328,7 @@ public:
 					call CNTV2Card::GetDetectedAudioChannelPairs (or CNTV2Card::GetDetectedAESChannelPairs), and then use std::set_intersection to
 					produce a more realistic set of PCM channel pairs.
 	**/
-	virtual bool			GetInputAudioChannelPairsWithPCM (const NTV2Channel inSDIInputConnector, NTV2AudioChannelPairs & outChannelPairs);
+	virtual bool			GetInputAudioChannelPairsWithPCM (const NTV2Channel inSDIInputConnector, NTV2AudioChannelPairs & outChannelPairs);	//	New in SDK 12.3
 
 	/**
 		@brief		For the given SDI input (specified as a channel number), returns the set of audio channel pairs that are currently not PCM-encoded.
@@ -2325,7 +2336,7 @@ public:
 		@param[out] outChannelPairs			Receives the channel pairs that are not currently PCM-encoded.
 		@return		True if successful;	 otherwise false.
 	**/
-	virtual bool			GetInputAudioChannelPairsWithoutPCM (const NTV2Channel inSDIInputConnector, NTV2AudioChannelPairs & outChannelPairs);
+	virtual bool			GetInputAudioChannelPairsWithoutPCM (const NTV2Channel inSDIInputConnector, NTV2AudioChannelPairs & outChannelPairs);	//	New in SDK 12.3
 
 	/**
 		@brief		Answers as to whether or not the host OS audio services for the AJA device (e.g. CoreAudio on MacOS)
@@ -2334,7 +2345,7 @@ public:
 									device;	 otherwise, receives 'false'.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool		GetSuspendHostAudio (bool & outIsSuspended);
+	AJA_VIRTUAL bool		GetSuspendHostAudio (bool & outIsSuspended);	//	New in SDK 12.1
 
 	/**
 		@brief		Suspends or resumes host OS audio (e.g. CoreAudio on MacOS) for the AJA device.
@@ -2344,7 +2355,7 @@ public:
 					when an application uses AutoCirculate to capture or play audio, to keep the two Audio Systems
 					from conflicting with each other.
 	**/
-	AJA_VIRTUAL bool		SetSuspendHostAudio (const bool inSuspend);
+	AJA_VIRTUAL bool		SetSuspendHostAudio (const bool inSuspend);	//	New in SDK 12.1
 
 	/**
 		@brief		Answers with the current audio source for a given quad of AES audio output channels.
@@ -2356,7 +2367,7 @@ public:
 		@return		True if successful; otherwise false.
 		@see		CNTV2Card::SetAESOutputSource, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		GetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, NTV2AudioSystem & outSrcAudioSystem, NTV2Audio4ChannelSelect & outSrcAudioChannels);
+	AJA_VIRTUAL bool		GetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, NTV2AudioSystem & outSrcAudioSystem, NTV2Audio4ChannelSelect & outSrcAudioChannels);	//	New in SDK 12.5
 
 	/**
 		@brief		Changes the audio source for the given quad of AES audio output channels.
@@ -2368,7 +2379,7 @@ public:
 		@return		True if successful; otherwise false.
 		@see		CNTV2Card::GetAESOutputSource, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		SetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, const NTV2AudioSystem inSrcAudioSystem, const NTV2Audio4ChannelSelect inSrcAudioChannels);
+	AJA_VIRTUAL bool		SetAESOutputSource (const NTV2Audio4ChannelSelect inAESAudioChannels, const NTV2AudioSystem inSrcAudioSystem, const NTV2Audio4ChannelSelect inSrcAudioChannels);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the audio monitor output source to a specified audio system and channel pair. The audio output monitor
@@ -2398,7 +2409,7 @@ public:
 		@return		True if successful;	 otherwise false.
 		@see		CNTV2Card::SetAudioOutputEmbedderState, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		GetAudioOutputEmbedderState (const NTV2Channel inSDIOutputConnector, bool & outIsEnabled);
+	AJA_VIRTUAL bool		GetAudioOutputEmbedderState (const NTV2Channel inSDIOutputConnector, bool & outIsEnabled);	//	New in SDK 13.0
 
 	/**
 		@brief		Enables or disables the audio output embedder for the given SDI output connector (specified as a channel number).
@@ -2409,7 +2420,7 @@ public:
 		@return		True if successful;	 otherwise false.
 		@see		CNTV2Card::GetAudioOutputEmbedderState, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		SetAudioOutputEmbedderState (const NTV2Channel inSDIOutputConnector, const bool & inEnable);
+	AJA_VIRTUAL bool		SetAudioOutputEmbedderState (const NTV2Channel inSDIOutputConnector, const bool & inEnable);	//	New in SDK 13.0
 
 	/**
 		@brief		Answers with the current state of the audio output erase mode for the given Audio System.
@@ -2419,7 +2430,7 @@ public:
 		@return		True if successful;	 otherwise false.
 		@see		CNTV2Card::SetAudioOutputEraseMode, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		GetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, bool & outEraseModeEnabled);
+	AJA_VIRTUAL bool		GetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, bool & outEraseModeEnabled);	//	New in SDK 13.0
 
 	/**
 		@brief		Enables or disables output erase mode for the given Audio System, which, when enabled, automatically writes zeroes into the audio output buffer
@@ -2429,7 +2440,7 @@ public:
 		@return		True if successful;	 otherwise false.
 		@see		CNTV2Card::GetAudioOutputEraseMode, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, const bool & inEraseModeEnabled);
+	AJA_VIRTUAL bool		SetAudioOutputEraseMode (const NTV2AudioSystem inAudioSystem, const bool & inEraseModeEnabled);	//	New in SDK 13.0
 
 	/**
 		@brief		Answers with the current state of the AES Sync Mode bit for the given Audio System's output.
@@ -2438,7 +2449,7 @@ public:
 		@return		True if successful;	 otherwise false.
 		@see		CNTV2Card::SetAudioOutputAESSyncModeBit, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		GetAudioOutputAESSyncModeBit (const NTV2AudioSystem inAudioSystem, bool & outAESSyncModeBitSet);
+	AJA_VIRTUAL bool		GetAudioOutputAESSyncModeBit (const NTV2AudioSystem inAudioSystem, bool & outAESSyncModeBitSet);	//	New in SDK 15.2
 
 	/**
 		@brief		Sets or clears the AES Sync Mode bit for the given Audio System's output.
@@ -2447,7 +2458,7 @@ public:
 		@return		True if successful;	 otherwise false.
 		@see		CNTV2Card::GetAudioOutputAESSyncModeBit, \ref audioplayout
 	**/
-	AJA_VIRTUAL bool		SetAudioOutputAESSyncModeBit (const NTV2AudioSystem inAudioSystem, const bool & inAESSyncModeBitSet);
+	AJA_VIRTUAL bool		SetAudioOutputAESSyncModeBit (const NTV2AudioSystem inAudioSystem, const bool & inAESSyncModeBitSet);	//	New in SDK 15.2
 
 	/**
 		@brief		Sets the specified bidirectional XLR audio connectors to collectively act as inputs or outputs.
@@ -2478,12 +2489,31 @@ public:
 									may be used if a future NTV2 device has more than one audio clock.
 		@note		This counter will overflow and wrap back to zero in 24:51:00 [hh:mm:ss].
 	**/
-	AJA_VIRTUAL bool		GetRawAudioTimer (ULWord & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
+	AJA_VIRTUAL bool		GetRawAudioTimer (ULWord & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);	//	New in SDK 15.5
 
-	AJA_VIRTUAL bool		CanDoAudioWaitForVBI (void);	///< @return	True if the device firmware supports audio start delay-til-VBI.
+	/**
+		@return		True if the running device firmware supports audio start delay-til-VBI.
+		@see		CNTV2Card::StartAudioOutput, \ref audioplayout
+	**/
+	AJA_VIRTUAL bool		CanDoAudioWaitForVBI (void);	//	New in SDK 16.0
 	
-	AJA_VIRTUAL bool		SetMultiLinkAudioMode (const NTV2AudioSystem inAudioSystem, bool inEnable);	///< @brief	Sets the specified audio systems multi-link mode bit
-	AJA_VIRTUAL bool		GetMultiLinkAudioMode (const NTV2AudioSystem inAudioSystem, bool & outEnabled);
+	/**
+		@brief		Sets the multi-link audio mode for the given audio system.
+		@return		True if successful; otherwise false.
+		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem of interest.
+		@param[in]	inEnable		Specify true to enable multi-link audio mode;  otherwise specify false.
+		@see		CNTV2Card::GetMultiLinkAudioMode, ::NTV2DeviceCanDoMultiLinkAudio, \ref audiomultilink
+	**/
+	AJA_VIRTUAL bool		SetMultiLinkAudioMode (const NTV2AudioSystem inAudioSystem, const bool inEnable);	//	New in SDK 16.2
+
+	/**
+		@brief		Answers with the current multi-link audio mode for the given audio system.
+		@return		True if successful; otherwise false.
+		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem of interest.
+		@param[out]	outEnable		Receives true if multi-link audio mode is currently enabled;  otherwise false if disabled.
+		@see		CNTV2Card::SetMultiLinkAudioMode, ::NTV2DeviceCanDoMultiLinkAudio, \ref audiomultilink
+	**/
+	AJA_VIRTUAL bool		GetMultiLinkAudioMode (const NTV2AudioSystem inAudioSystem, bool & outEnabled);	//	New in SDK 16.2
 
 #if !defined(NTV2_DEPRECATE_16_0)
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool WriteAudioSource (const ULWord inValue, const NTV2Channel inChannel = NTV2_CHANNEL1));	///< @deprecated	This function is obsolete.
@@ -3962,7 +3992,7 @@ public:
 	/**
 		@brief		Stops AutoCirculate for the given channel, and releases the on-device frame buffers that were allocated to it.
 		@return		True if successful; otherwise false.
-		@param[in]	inChannel		Specifies the ::NTV2Channel to use. Call ::NTV2DeviceGetNumFrameStores to discover how many
+		@param[in]	inChannel		Specifies the ::NTV2Channel to stop. Call ::NTV2DeviceGetNumFrameStores to discover how many
 									FrameStores (and therefore channels) are available on the device.
 		@param[in]	inAbort			Specifies if AutoCirculate is to be immediately stopped, not gracefully.
 									Defaults to false (graceful stop).
@@ -3975,6 +4005,16 @@ public:
 		@see		CNTV2Card::AutoCirculatePause, CNTV2Card::AutoCirculateResume, CNTV2Card::AutoCirculateStart, \ref aboutautocirculate
 	**/
 	AJA_VIRTUAL bool	AutoCirculateStop (const NTV2Channel inChannel, const bool inAbort = false);
+
+	/**
+		@brief		Stops any number of AutoCirculate channels.
+					See the other AutoCirculateStop function overload for full details on what happens to each channel.
+		@return		True if all specified channels were successfully stopped; otherwise false.
+		@param[in]	inChannels		Specifies the channel(s) to stop.
+		@param[in]	inAbort			Specifies if each channel is to be stopped immediately (i.e. not gracefully).
+									Defaults to false (graceful stop).
+	**/
+	AJA_VIRTUAL bool	AutoCirculateStop (const NTV2ChannelSet & inChannels, const bool inAbort = false);	//	New in SDK 17.0
 
 	/**
 		@brief		Pauses AutoCirculate for the given channel. Once paused, AutoCirculate can be resumed later by calling
@@ -6338,6 +6378,16 @@ public:
 
 
 	/**
+		@brief		Enables or disables 3G level B to 3G level A conversion at the SDI input(s).
+		@return		True if successful; otherwise false.
+		@param[in]	inSDIInputs		Specifies the SDI input(s) to be affected, each specified by an ::NTV2Channel,
+									a zero-based index (where 0 == SDIIn1, 1 == SDIIn2, etc.).
+		@param[in]	inEnable		Specify true to automatically convert incoming 3g level B signals to 3g level A.
+									Specify false for normal operation.
+	**/
+	AJA_VIRTUAL bool		SetSDIInLevelBtoLevelAConversion (const NTV2ChannelSet & inSDIInputs, const bool inEnable);
+
+	/**
 		@brief		Enables or disables 3G level B to 3G level A conversion at the SDI input widget (assuming the AJA device can do so).
 		@return		True if successful; otherwise false.
 		@param[in]	inInputSpigot	Specifies the SDI input spigot to be affected (where 0 == SDIIn1, 1 == SDIIn2, etc.).
@@ -6848,7 +6898,7 @@ public:
 								otherwise false for the default SD audio packet DIDs.
 		@see		CNTV2Card::AncExtractSetFilterDIDs, CNTV2Card::AncExtractGetMaxNumFilterDIDs, \ref anccapture-filter
 	**/
-	static NTV2DIDSet	AncExtractGetDefaultDIDs (const bool inHDAudio = true);	//	New in SDK 15.0
+	static NTV2DIDSet	AncExtractGetDefaultDIDs (const bool inHDAudio = true);	//	New in SDK 13.0
 
 
 #if !defined(NTV2_DEPRECATE_14_3)
@@ -7005,7 +7055,7 @@ public:
 	} ColorCorrectionColor; //	From CNTV2ColorCorrection
 
 protected:
-	static NTV2_POINTER NULL_POINTER;	///< @brief Used for default empty NTV2_POINTER parameters -- do not modify.
+	static NTV2Buffer NULL_POINTER;	///< @brief Used for default empty NTV2Buffer parameters -- do not modify.
 
 public:
 	/**
@@ -7071,7 +7121,7 @@ public:
 	///@}
 
 	/**
-		@name	HDR Support
+		@name	HDMI HDR Support
 	**/
 	///@{
 	/**
@@ -7079,7 +7129,7 @@ public:
 		@param[in]	inEnableHDMIHDR		If true, sets the device to output HDMI HDR Metadata; otherwise sets the device to not output HDMI HDR Metadata.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool EnableHDMIHDR (const bool inEnableHDMIHDR);
+	AJA_VIRTUAL bool EnableHDMIHDR (const bool inEnableHDMIHDR);	//	New in SDK 12.5
 	AJA_VIRTUAL bool GetHDMIHDREnabled (void);	///< @return	True if HDMI HDR metadata output is enabled for the device;	 otherwise false.
 
 	/**
@@ -7090,7 +7140,7 @@ public:
 		@see		CNTV2Card::GetHDMIHDRDolbyVisionEnabled
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool EnableHDMIHDRDolbyVision (const bool inEnable);
+	AJA_VIRTUAL bool EnableHDMIHDRDolbyVision (const bool inEnable);	//	New in SDK 13.0
 	AJA_VIRTUAL bool GetHDMIHDRDolbyVisionEnabled (void);	///< @return	True if HDMI HDR Dolby Vision output is enabled for the device;	 otherwise false.
 
 
@@ -7099,7 +7149,7 @@ public:
 		@param[in]	inEnableConstantLuminance	If true, sets the device to BT.2020 Y'cC'bcC'rc; otherwise sets the device to BT.2020 Y'C'bC'r or R'G'B'.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRConstantLuminance (const bool inEnableConstantLuminance);
+	AJA_VIRTUAL bool SetHDMIHDRConstantLuminance (const bool inEnableConstantLuminance);	//	New in SDK 12.5
 	AJA_VIRTUAL bool GetHDMIHDRConstantLuminance (void);		///< @return	True if BT.2020 Y'cC'bcC'rc is enabled; otherwise false for BT.2020 Y'C'bC'r or R'G'B'.
 
 	/**
@@ -7107,183 +7157,183 @@ public:
 		@param[in]	inGreenPrimaryX		Specifies the Green Primary X value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRGreenPrimaryX (const uint16_t inGreenPrimaryX);
+	AJA_VIRTUAL bool SetHDMIHDRGreenPrimaryX (const uint16_t inGreenPrimaryX);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for Green Primary X as defined in SMPTE ST 2086. This is Byte 3 and 4 of SMDT Type 1.
 		@param[out] outGreenPrimaryX		Receives the Green Primary X value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRGreenPrimaryX (uint16_t & outGreenPrimaryX);
+	AJA_VIRTUAL bool GetHDMIHDRGreenPrimaryX (uint16_t & outGreenPrimaryX);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for Green Primary Y as defined in SMPTE ST 2086. This is Byte 5 and 6 of SMDT Type 1.
 		@param[in]	inGreenPrimaryY		Specifies the Green Primary Y value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRGreenPrimaryY (const uint16_t inGreenPrimaryY);
+	AJA_VIRTUAL bool SetHDMIHDRGreenPrimaryY (const uint16_t inGreenPrimaryY);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for Green Primary Y as defined in SMPTE ST 2086. This is Byte 5 and 6 of SMDT Type 1.
 		@param[out] outGreenPrimaryY		Receives the Green Primary Y value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRGreenPrimaryY (uint16_t & outGreenPrimaryY);
+	AJA_VIRTUAL bool GetHDMIHDRGreenPrimaryY (uint16_t & outGreenPrimaryY);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for Blue Primary X as defined in SMPTE ST 2086. This is Byte 7 and 8 of SMDT Type 1.
 		@param[in]	inBluePrimaryX		Specifies the Blue Primary X value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRBluePrimaryX (const uint16_t inBluePrimaryX);
+	AJA_VIRTUAL bool SetHDMIHDRBluePrimaryX (const uint16_t inBluePrimaryX);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for Blue Primary X as defined in SMPTE ST 2086. This is Byte 7 and 8 of SMDT Type 1.
 		@param[out] outBluePrimaryX		Receives the Blue Primary X value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRBluePrimaryX (uint16_t & outBluePrimaryX);
+	AJA_VIRTUAL bool GetHDMIHDRBluePrimaryX (uint16_t & outBluePrimaryX);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for Blue Primary Y as defined in SMPTE ST 2086. This is Byte 9 and 10 of SMDT Type 1.
 		@param[in]	inBluePrimaryY		Specifies the Blue Primary Y value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRBluePrimaryY (const uint16_t inBluePrimaryY);
+	AJA_VIRTUAL bool SetHDMIHDRBluePrimaryY (const uint16_t inBluePrimaryY);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for Blue Primary Y as defined in SMPTE ST 2086. This is Byte 9 and 10 of SMDT Type 1.
 		@param[out] outBluePrimaryY		Receives the Blue Primary Y value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRBluePrimaryY (uint16_t & outBluePrimaryY);
+	AJA_VIRTUAL bool GetHDMIHDRBluePrimaryY (uint16_t & outBluePrimaryY);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for Red Primary X as defined in SMPTE ST 2086. This is Byte 11 and 12 of SMDT Type 1.
 		@param[in]	inRedPrimaryX		Specifies the Red Primary X value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRRedPrimaryX (const uint16_t inRedPrimaryX);
+	AJA_VIRTUAL bool SetHDMIHDRRedPrimaryX (const uint16_t inRedPrimaryX);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for Red Primary X as defined in SMPTE ST 2086. This is Byte 11 and 12 of SMDT Type 1.
 		@param[out] outRedPrimaryX		Receives the Red Primary X value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRRedPrimaryX (uint16_t & outRedPrimaryX);
+	AJA_VIRTUAL bool GetHDMIHDRRedPrimaryX (uint16_t & outRedPrimaryX);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for Red Primary Y as defined in SMPTE ST 2086. This is Byte 13 and 14 of SMDT Type 1.
 		@param[in]	inRedPrimaryY		Specifies the Red Primary Y value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRRedPrimaryY (const uint16_t inRedPrimaryY);
+	AJA_VIRTUAL bool SetHDMIHDRRedPrimaryY (const uint16_t inRedPrimaryY);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for Red Primary Y as defined in SMPTE ST 2086. This is Byte 13 and 14 of SMDT Type 1.
 		@param[out] outRedPrimaryY		Receives the Red Primary Y value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRRedPrimaryY (uint16_t & outRedPrimaryY);
+	AJA_VIRTUAL bool GetHDMIHDRRedPrimaryY (uint16_t & outRedPrimaryY);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for White Point X as defined in SMPTE ST 2086. This is Byte 15 and 16 of SMDT Type 1.
 		@param[in]	inWhitePointX		Specifies the White Point X value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRWhitePointX (const uint16_t inWhitePointX);
+	AJA_VIRTUAL bool SetHDMIHDRWhitePointX (const uint16_t inWhitePointX);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for White Point X as defined in SMPTE ST 2086. This is Byte 15 and 16 of SMDT Type 1.
 		@param[out] outWhitePointX		Receives the White Point X value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRWhitePointX (uint16_t & outWhitePointX);
+	AJA_VIRTUAL bool GetHDMIHDRWhitePointX (uint16_t & outWhitePointX);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for White Point Y as defined in SMPTE ST 2086. This is Byte 17 and 18 of SMDT Type 1.
 		@param[in]	inWhitePointY		Specifies the White Point Y value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRWhitePointY (const uint16_t inWhitePointY);
+	AJA_VIRTUAL bool SetHDMIHDRWhitePointY (const uint16_t inWhitePointY);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for White Point Y as defined in SMPTE ST 2086. This is Byte 17 and 18 of SMDT Type 1.
 		@param[out] outWhitePointY		Receives the White Point Y value as defined in SMPTE ST 2086.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRWhitePointY (uint16_t & outWhitePointY);
+	AJA_VIRTUAL bool GetHDMIHDRWhitePointY (uint16_t & outWhitePointY);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for the Max Mastering Luminance value as defined in SMPTE ST 2086. This is Byte 19 and 20 of SMDT Type 1.
 		@param[in]	inMaxMasteringLuminance		Specifies the Max Mastering Luminance value.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRMaxMasteringLuminance (const uint16_t inMaxMasteringLuminance);
+	AJA_VIRTUAL bool SetHDMIHDRMaxMasteringLuminance (const uint16_t inMaxMasteringLuminance);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for the Max Mastering Luminance value as defined in SMPTE ST 2086. This is Byte 19 and 20 of SMDT Type 1.
 		@param[out] outMaxMasteringLuminance		Receives the Max Mastering Luminance value.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRMaxMasteringLuminance (uint16_t & outMaxMasteringLuminance);
+	AJA_VIRTUAL bool GetHDMIHDRMaxMasteringLuminance (uint16_t & outMaxMasteringLuminance);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for the Min Mastering Luminance value as defined in SMPTE ST 2086. This is Byte 21 and 22 of SMDT Type 1.
 		@param[in]	inMinMasteringLuminance		Specifies the Min Mastering Luminance value.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRMinMasteringLuminance (const uint16_t inMinMasteringLuminance);
+	AJA_VIRTUAL bool SetHDMIHDRMinMasteringLuminance (const uint16_t inMinMasteringLuminance);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for the Min Mastering Luminance value as defined in SMPTE ST 2086. This is Byte 21 and 22 of SMDT Type 1.
 		@param[out] outMinMasteringLuminance		Receives the Min Mastering Luminance value.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRMinMasteringLuminance (uint16_t & outMinMasteringLuminance);
+	AJA_VIRTUAL bool GetHDMIHDRMinMasteringLuminance (uint16_t & outMinMasteringLuminance);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for the Max Content Light Level(Max CLL) value. This is Byte 23 and 24 of SMDT Type 1.
 		@param[in]	inMaxContentLightLevel		Specifies the Max Content Light Level value.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRMaxContentLightLevel (const uint16_t inMaxContentLightLevel);
+	AJA_VIRTUAL bool SetHDMIHDRMaxContentLightLevel (const uint16_t inMaxContentLightLevel);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for the Max Content Light Level(Max CLL) value. This is Byte 23 and 24 of SMDT Type 1.
 		@param[out] outMaxContentLightLevel		Receives the Max Content Light Level value.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRMaxContentLightLevel (uint16_t & outMaxContentLightLevel);
+	AJA_VIRTUAL bool GetHDMIHDRMaxContentLightLevel (uint16_t & outMaxContentLightLevel);	//	New in SDK 12.5
 
 	/**
 		@brief		Sets the Display Mastering data for the Max Frame Average Light Level(Max FALL) value. This is Byte 25 and 26 of SMDT Type 1.
 		@param[in]	inMaxFrameAverageLightLevel		Specifies the Max Frame Average Light Level value.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool SetHDMIHDRMaxFrameAverageLightLevel (const uint16_t inMaxFrameAverageLightLevel);
+	AJA_VIRTUAL bool SetHDMIHDRMaxFrameAverageLightLevel (const uint16_t inMaxFrameAverageLightLevel);	//	New in SDK 12.5
 	/**
 		@brief		Answers with the Display Mastering data for the Max Frame Average Light Level(Max FALL) value. This is Byte 25 and 26 of SMDT Type 1.
 		@param[out] outMaxFrameAverageLightLevel		Receives the Max Frame Average Light Level value.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool GetHDMIHDRMaxFrameAverageLightLevel (uint16_t & outMaxFrameAverageLightLevel);
+	AJA_VIRTUAL bool GetHDMIHDRMaxFrameAverageLightLevel (uint16_t & outMaxFrameAverageLightLevel);	//	New in SDK 12.5
 
 
-	AJA_VIRTUAL bool SetHDMIHDRElectroOpticalTransferFunction (const uint8_t inEOTFByte);
-	AJA_VIRTUAL bool GetHDMIHDRElectroOpticalTransferFunction (uint8_t & outEOTFByte);
-	AJA_VIRTUAL bool SetHDMIHDRStaticMetadataDescriptorID (const uint8_t inSMDId);
-	AJA_VIRTUAL bool GetHDMIHDRStaticMetadataDescriptorID (uint8_t & outSMDId);
+	AJA_VIRTUAL bool SetHDMIHDRElectroOpticalTransferFunction (const uint8_t inEOTFByte);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDMIHDRElectroOpticalTransferFunction (uint8_t & outEOTFByte);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDMIHDRStaticMetadataDescriptorID (const uint8_t inSMDId);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDMIHDRStaticMetadataDescriptorID (uint8_t & outSMDId);	//	New in SDK 12.5
 
-	AJA_VIRTUAL bool SetHDRData (const HDRFloatValues & inFloatValues);
-	AJA_VIRTUAL bool SetHDRData (const HDRRegValues & inRegisterValues);
-	AJA_VIRTUAL bool GetHDRData (HDRFloatValues & outFloatValues);
-	AJA_VIRTUAL bool GetHDRData (HDRRegValues & outRegisterValues);
-	AJA_VIRTUAL bool SetHDMIHDRBT2020 (void);
-	AJA_VIRTUAL bool SetHDMIHDRDCIP3 (void);
+	AJA_VIRTUAL bool SetHDRData (const HDRFloatValues & inFloatValues);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDRData (const HDRRegValues & inRegisterValues);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDRData (HDRFloatValues & outFloatValues);	//	New in SDK 12.5
+	AJA_VIRTUAL bool GetHDRData (HDRRegValues & outRegisterValues);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDMIHDRBT2020 (void);	//	New in SDK 12.5
+	AJA_VIRTUAL bool SetHDMIHDRDCIP3 (void);	//	New in SDK 12.5
 	
-	AJA_VIRTUAL bool SetVPIDTransferCharacteristics (const NTV2VPIDTransferCharacteristics inValue, const NTV2Channel inChannel);
-	AJA_VIRTUAL bool GetVPIDTransferCharacteristics (NTV2VPIDTransferCharacteristics & outValue, const NTV2Channel inChannel);
-	AJA_VIRTUAL bool SetVPIDColorimetry (const NTV2VPIDColorimetry inValue, const NTV2Channel inChannel);
-	AJA_VIRTUAL bool GetVPIDColorimetry (NTV2VPIDColorimetry & outValue, const NTV2Channel inChannel);
-	AJA_VIRTUAL bool SetVPIDLuminance (const NTV2VPIDLuminance inValue, const NTV2Channel inChannel);
-	AJA_VIRTUAL bool GetVPIDLuminance (NTV2VPIDLuminance & outValue, const NTV2Channel inChannel);
-	AJA_VIRTUAL bool SetVPIDRGBRange (const NTV2VPIDRGBRange inValue, const NTV2Channel inChannel);
-	AJA_VIRTUAL bool GetVPIDRGBRange (NTV2VPIDRGBRange & outValue, const NTV2Channel inChannel);
+	AJA_VIRTUAL bool SetVPIDTransferCharacteristics (const NTV2VPIDTransferCharacteristics inValue, const NTV2Channel inChannel);	//	New in SDK 15.2
+	AJA_VIRTUAL bool GetVPIDTransferCharacteristics (NTV2VPIDTransferCharacteristics & outValue, const NTV2Channel inChannel);	//	New in SDK 15.2
+	AJA_VIRTUAL bool SetVPIDColorimetry (const NTV2VPIDColorimetry inValue, const NTV2Channel inChannel);	//	New in SDK 15.2
+	AJA_VIRTUAL bool GetVPIDColorimetry (NTV2VPIDColorimetry & outValue, const NTV2Channel inChannel);	//	New in SDK 15.2
+	AJA_VIRTUAL bool SetVPIDLuminance (const NTV2VPIDLuminance inValue, const NTV2Channel inChannel);	//	New in SDK 15.2
+	AJA_VIRTUAL bool GetVPIDLuminance (NTV2VPIDLuminance & outValue, const NTV2Channel inChannel);	//	New in SDK 15.2
+	AJA_VIRTUAL bool SetVPIDRGBRange (const NTV2VPIDRGBRange inValue, const NTV2Channel inChannel);	//	New in SDK 16.0
+	AJA_VIRTUAL bool GetVPIDRGBRange (NTV2VPIDRGBRange & outValue, const NTV2Channel inChannel);	//	New in SDK 16.0
 	
-	AJA_VIRTUAL bool Set3DLUTTableLocation (const ULWord inFrameNumber, ULWord inLUTIndex = 0);
-	AJA_VIRTUAL bool Load3DLUTTable ();
-	AJA_VIRTUAL bool Set1DLUTTableLocation (const NTV2Channel inChannel, const ULWord inFrameNumber, ULWord inLUTIndex = 0);
-	AJA_VIRTUAL bool Load1DLUTTable (const NTV2Channel inChannel);
+	AJA_VIRTUAL bool Set3DLUTTableLocation (const ULWord inFrameNumber, ULWord inLUTIndex = 0);	//	New in SDK 16.0
+	AJA_VIRTUAL bool Load3DLUTTable (void);	//	New in SDK 16.0
+	AJA_VIRTUAL bool Set1DLUTTableLocation (const NTV2Channel inChannel, const ULWord inFrameNumber, ULWord inLUTIndex = 0);	//	New in SDK 16.0
+	AJA_VIRTUAL bool Load1DLUTTable (const NTV2Channel inChannel);	//	New in SDK 16.0
 
 	//	MultiViewer/MultiRasterizer
 	AJA_VIRTUAL bool HasMultiRasterWidget (void);						//	New in SDK 16.1
@@ -7474,11 +7524,11 @@ protected:
 	//		For AutoCirculate Playout
 	AJA_VIRTUAL bool			S2110DeviceAncToXferBuffers (const NTV2Channel inChannel, AUTOCIRCULATE_TRANSFER & inOutXferInfo);
 	//		For Non-AutoCirculate Playout
-	AJA_VIRTUAL bool			S2110DeviceAncToBuffers (const NTV2Channel inChannel, NTV2_POINTER & ancF1, NTV2_POINTER & ancF2);
+	AJA_VIRTUAL bool			S2110DeviceAncToBuffers (const NTV2Channel inChannel, NTV2Buffer & ancF1, NTV2Buffer & ancF2);
 	//		For AutoCirculate Capture
 	AJA_VIRTUAL bool			S2110DeviceAncFromXferBuffers (const NTV2Channel inChannel, AUTOCIRCULATE_TRANSFER & inOutXferInfo);
 	//		For Non-AutoCirculate Capture
-	AJA_VIRTUAL bool			S2110DeviceAncFromBuffers (const NTV2Channel inChannel, NTV2_POINTER & ancF1, NTV2_POINTER & ancF2);
+	AJA_VIRTUAL bool			S2110DeviceAncFromBuffers (const NTV2Channel inChannel, NTV2Buffer & ancF1, NTV2Buffer & ancF2);
 	AJA_VIRTUAL bool			WriteSDIInVPID (const NTV2Channel inChannel, const ULWord inValA, const ULWord inValB);
 
 private:

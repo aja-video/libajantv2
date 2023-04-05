@@ -856,37 +856,3 @@ bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2Fram
 	return isOkay;
 
 }	//	NTV2DeviceGetSupportedPixelFormats
-
-
-//	This needs to be moved into a C++ compatible "device features" module:
-bool NTV2DeviceGetSupportedStandards (const NTV2DeviceID inDeviceID, NTV2StandardSet & outStandards)
-{
-	NTV2VideoFormatSet	videoFormats;
-	outStandards.clear();
-	if (!::NTV2DeviceGetSupportedVideoFormats(inDeviceID, videoFormats))
-		return false;
-	for (NTV2VideoFormatSetConstIter it(videoFormats.begin());  it != videoFormats.end();  ++it)
-	{
-		const NTV2Standard	std	(::GetNTV2StandardFromVideoFormat(*it));
-		if (NTV2_IS_VALID_STANDARD(std)  &&  outStandards.find(std) == outStandards.end())
-			outStandards.insert(std);
-	}
-	return true;
-}
-
-
-//	This needs to be moved into a C++ compatible "device features" module:
-bool NTV2DeviceGetSupportedGeometries (const NTV2DeviceID inDeviceID, NTV2GeometrySet & outGeometries)
-{
-	NTV2VideoFormatSet	videoFormats;
-	outGeometries.clear();
-	if (!::NTV2DeviceGetSupportedVideoFormats(inDeviceID, videoFormats))
-		return false;
-	for (NTV2VideoFormatSetConstIter it(videoFormats.begin());  it != videoFormats.end();  ++it)
-	{
-		const NTV2FrameGeometry	fg	(::GetNTV2FrameGeometryFromVideoFormat(*it));
-		if (NTV2_IS_VALID_NTV2FrameGeometry(fg))
-			outGeometries += ::GetRelatedGeometries(fg);
-	}
-	return true;
-}

@@ -6025,12 +6025,6 @@ typedef enum
 		#endif	//	else Little-Endian
 
 
-		/**
-			@brief	32-bit host addresses go into the upper 4 bytes of the ULWord64, while the lower 4 bytes contain 0xBAADF00D.
-					64-bit host addresses consume the entire ULWord64.
-		**/
-		#define NTV2_POINTER_TO_ULWORD64(__p__)		((sizeof (int *) == 4)	?  (ULWord64 (ULWord64 (__p__) << 32) | 0x00000000BAADF00D)	 :	ULWord64 (__p__))
-
 		#define NTV2_CURRENT_HEADER_VERSION		0					///< @brief Current version of NTV2_HEADER struct, originally 0
 		#define NTV2_CURRENT_TRAILER_VERSION	0					///< @brief Current version of NTV2_TRAILER struct, originally 0
 
@@ -6081,9 +6075,19 @@ typedef enum
 													(_x_) == NTV2_TYPE_AJABITSTREAM )
 
 
-		//	NTV2_POINTER FLAGS
-		#define NTV2_POINTER_ALLOCATED				BIT(0)		///< @brief Allocated using Allocate function?
-		#define NTV2_POINTER_PAGE_ALIGNED			BIT(1)		///< @brief Allocated page-aligned?
+		//	NTV2Buffer FLAGS
+		#define NTV2Buffer_ALLOCATED				BIT(0)		///< @brief Allocated using Allocate function?
+		#define NTV2Buffer_PAGE_ALIGNED				BIT(1)		///< @brief Allocated page-aligned?
+		#define NTV2Buffer_SHARED					BIT(2)		///< @brief Allocated shared?
+		#define NTV2Buffer_SHARED_GLOBAL			BIT(4)		///< @brief Allocated shared global?
+		/**	NTV2Buffer_TO_ULWORD64:		32-bit host addresses go into MS 4 bytes of ULWord64, while LS 4 bytes contain 0xBAADF00D.
+										64-bit host addresses utilize the entire ULWord64.	**/
+		#define NTV2Buffer_TO_ULWORD64(__p__)		((sizeof(int*) == 4)  ?  (ULWord64(ULWord64(__p__) << 32) | 0x00000000BAADF00D)	 :  ULWord64(__p__))
+		#if !defined(NTV2_DEPRECATE_17_0)
+			#define	NTV2_POINTER_ALLOCATED			NTV2Buffer_ALLOCATED
+			#define	NTV2_POINTER_PAGE_ALIGNED		NTV2Buffer_PAGE_ALIGNED
+			#define NTV2_POINTER_TO_ULWORD64(_p_)	NTV2Buffer_TO_ULWORD64(_p_)
+		#endif	//	defined(NTV2_DEPRECATE_17_0)
 
 
 		//	AUTOCIRCULATE OPTION FLAGS
@@ -6528,7 +6532,7 @@ typedef enum
 						@code
 							static ULWord pFoo [1000];
 							{
-								NTV2_POINTER foo (pFoo, sizeof (pFoo));
+								NTV2Buffer foo (pFoo, sizeof (pFoo));
 								. . .
 							}	//	When foo goes out of scope, it won't try to free pFoo
 						@endcode
@@ -6536,20 +6540,20 @@ typedef enum
 						@code
 							{
 								ULWord pFoo [100];
-								NTV2_POINTER foo (pFoo, sizeof (pFoo));
+								NTV2Buffer foo (pFoo, sizeof (pFoo));
 								. . .
 							}	//	No need to do anything, as both foo and pFoo are automatically freed when they go out of scope
 						@endcode
 					-	For a buffer you allocate and free yourself:
 						@code
-							NTV2_POINTER	foo (new Bar [1], sizeof (Bar));
+							NTV2Buffer	foo (new Bar [1], sizeof (Bar));
 							. . .
 							delete [] (Bar*) foo.GetHostPointer ();		//	You must free the memory yourself
 						@endcode
 					-	For a 2K-byte buffer that's allocated and freed automatically by the SDK:
 						@code
 							{
-								NTV2_POINTER foo (2048);
+								NTV2Buffer foo (2048);
 								::memset (foo.GetHostPointer(), 0, foo.GetByteCount());
 								. . .
 							}	//	The memory is freed automatically when foo goes out of scope
@@ -6557,7 +6561,7 @@ typedef enum
 			@note	This struct uses a constructor to properly initialize itself.
 					Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
-		NTV2_STRUCT_BEGIN (NTV2_POINTER)
+		NTV2_STRUCT_BEGIN (NTV2Buffer)
 			NTV2_BEGIN_PRIVATE
 				ULWord64	fUserSpacePtr;			///< @brief User space pointer. Do not set directly. Use constructor or Set method.
 				ULWord		fByteCount;				///< @brief The (maximum) size of the buffer pointed to by fUserSpacePtr, in bytes.
@@ -6583,7 +6587,7 @@ typedef enum
 												Ignored if inByteCount is zero.
 					@param[in]	inByteCount		Specifies the byte count. Ignored if pInUserPointer is NULL.
 				**/
-				explicit		NTV2_POINTER (const void * pInUserPointer, const size_t inByteCount);
+				explicit		NTV2Buffer (const void * pInUserPointer, const size_t inByteCount);
 
 				/**
 					@brief		Constructs me from a client-specified byte count.
@@ -6592,18 +6596,18 @@ typedef enum
 												If non-zero, causes Allocate to be called, and if successful, automatically zeroes the buffer.
 												If zero (the default), I don't allocate anything, and my host pointer will be NULL.
 				**/
-								NTV2_POINTER (const size_t inByteCount = 0);
+								NTV2Buffer (const size_t inByteCount = 0);
 
 				/**
-					@brief		Constructs me from another NTV2_POINTER instance.
-					@param[in]	inObj		NTV2_POINTER instance to "deep" copy into me.
+					@brief		Constructs me from another NTV2Buffer instance.
+					@param[in]	inObj		NTV2Buffer instance to "deep" copy into me.
 				**/
-				explicit		NTV2_POINTER (const NTV2_POINTER & inObj);
+				explicit		NTV2Buffer (const NTV2Buffer & inObj);
 
 				/**
 					@brief		My destructor. If I'm responsible for the memory, I free it here.
 				**/
-								~NTV2_POINTER ();
+								~NTV2Buffer ();
 				///@}
 
 				/**
@@ -6636,13 +6640,18 @@ typedef enum
 					@return		True if my host storage was allocated by my Allocate function;	otherwise false if my host storage
 								address and size was provided by the client application.
 				**/
-				inline bool		IsAllocatedBySDK (void) const			{return fFlags & NTV2_POINTER_ALLOCATED ? true : false;}
+				inline bool		IsAllocatedBySDK (void) const			{return fFlags & NTV2Buffer_ALLOCATED ? true : false;}
 
 				/**
 					@return		True if my host storage was provided by the client application;	 otherwise false if it was allocated
 								by my Allocate function.
 				**/
-				inline bool		IsProvidedByClient (void) const			{return fFlags & NTV2_POINTER_ALLOCATED ? false : true;}
+				inline bool		IsProvidedByClient (void) const			{return fFlags & NTV2Buffer_ALLOCATED ? false : true;}
+
+				/**
+					@return		True if my host storage was page-aligned when Allocated;  otherwise false.
+				**/
+				inline bool		IsPageAligned (void) const				{return fFlags & NTV2Buffer_PAGE_ALIGNED ? true : false;}	//	New in SDK 17.0
 
 				/**
 					@return		True if my user-space pointer is NULL, or my size is zero.
@@ -6708,7 +6717,7 @@ typedef enum
 					@param[out]	outOffsets	Receives the byte offsets to every occurrence in my buffer.
 					@param[in]	inValue		Specifies the data to search for.
 				**/
-				ULWordSet &		FindAll (ULWordSet & outOffsets, const NTV2_POINTER & inValue) const;	//	New in SDK 16.3
+				ULWordSet &		FindAll (ULWordSet & outOffsets, const NTV2Buffer & inValue) const;	//	New in SDK 16.3
 
 				/**
 					@return		True if the given memory buffer's contents are identical to my own.
@@ -6716,7 +6725,7 @@ typedef enum
 					@param[in]	inByteOffset	Specifies the byte offset to start comparing. Defaults to the first byte.
 					@param[in]	inByteCount		Specifies the maximum number of bytes to compare. Defaults to 0xFFFFFFFF (entire buffer).
 				**/
-				bool			IsContentEqual (const NTV2_POINTER & inBuffer, const ULWord inByteOffset = 0, const ULWord inByteCount = 0xFFFFFFFF) const;
+				bool			IsContentEqual (const NTV2Buffer & inBuffer, const ULWord inByteOffset = 0, const ULWord inByteCount = 0xFFFFFFFF) const;
 
 				/**
 					@brief		Assuming my contents and the contents of the given buffer comprise ring buffers that periodically get overwritten
@@ -6726,18 +6735,18 @@ typedef enum
 					@param[out] outByteOffsetFirst	Receives the offset, in bytes, from the start of the buffer, of the first byte of the contiguous
 													range that's different.
 													Zero indicates the first byte in the buffer.
-													If equal to NTV2_POINTER::GetByteCount(), then both buffers are identical.
+													If equal to NTV2Buffer::GetByteCount(), then both buffers are identical.
 													If greater than 'outByteOffsetLast', then a wrap condition exists (see Note).
 					@param[out] outByteOffsetLast	Receives the offset, in bytes, from the start of the buffer, of the last byte of the contiguous
 													range that's different.
 													Zero indicates the first byte in the buffer.
-													If equal to NTV2_POINTER::GetByteCount(), then both buffers are identical.
+													If equal to NTV2Buffer::GetByteCount(), then both buffers are identical.
 													If less than 'outByteOffsetFirst', a wrap condition exists (see Note).
 					@note		If a wrap condition exists -- i.e., the contiguous byte range that differs starts near the end and wraps around
 								to near the front -- then 'outByteOffsetFirst' will be greater than 'outByteOffsetLast'.
 					@return		True if successful;	 otherwise false.
 				**/
-				bool			GetRingChangedByteRange (const NTV2_POINTER & inBuffer, ULWord & outByteOffsetFirst, ULWord & outByteOffsetLast) const;
+				bool			GetRingChangedByteRange (const NTV2Buffer & inBuffer, ULWord & outByteOffsetFirst, ULWord & outByteOffsetLast) const;
 				///@}
 
 				/**
@@ -6789,7 +6798,7 @@ typedef enum
 					if (!inXferInfo.isValid())
 						return false;
 					//	Fill a temporary buffer to hold all the segment data...
-					NTV2_POINTER	segData(inXferInfo.getElementLength() * inXferInfo.getSegmentCount() * inXferInfo.getSegmentLength());
+					NTV2Buffer	segData(inXferInfo.getElementLength() * inXferInfo.getSegmentCount() * inXferInfo.getSegmentLength());
 					if (!segData.Fill(inValue))
 						return false;	//	Fill failed
 
@@ -6814,10 +6823,10 @@ typedef enum
 				}
 
 				/**
-					@brief		Assigns me from another NTV2_POINTER instance.
-					@param[in]	inRHS		Specifies the NTV2_POINTER instance to assign ("deep" copy) to me.
+					@brief		Assigns me from another NTV2Buffer instance.
+					@param[in]	inRHS		Specifies the NTV2Buffer instance to assign ("deep" copy) to me.
 				**/
-				NTV2_POINTER &	operator = (const NTV2_POINTER & inRHS);
+				NTV2Buffer &	operator = (const NTV2Buffer & inRHS);
 
 				/**
 					@brief		Sets (or resets) me from a client-supplied address and size.
@@ -6851,7 +6860,7 @@ typedef enum
 											those bytes that fit in me will be copied.
 					@return		True if successful; otherwise false.
 				**/
-				bool			SetFrom (const NTV2_POINTER & inBuffer);
+				bool			SetFrom (const NTV2Buffer & inBuffer);
 
 				/**
 					@brief		Replaces my contents from the given memory buffer, resizing me to the new byte count.
@@ -6871,7 +6880,7 @@ typedef enum
 					@note		The offsets and byte counts are checked against the existing sizes of the two buffers.
 								The function will return false for any overflow.
 				**/
-				bool			CopyFrom (const NTV2_POINTER & inSrcBuffer, const ULWord inSrcByteOffset, const ULWord inDstByteOffset, const ULWord inByteCount);
+				bool			CopyFrom (const NTV2Buffer & inSrcBuffer, const ULWord inSrcByteOffset, const ULWord inDstByteOffset, const ULWord inByteCount);
 
 				/**
 					@brief		Copies data segments from a given buffer into me.
@@ -6880,18 +6889,18 @@ typedef enum
 					@return		True if successful; otherwise false.
 					@note		Offsets and lengths are checked. The function will return false for any overflow or underflow.
 				**/
-				bool			CopyFrom (const NTV2_POINTER & inSrcBuffer, const NTV2SegmentedXferInfo & inXferInfo);
+				bool			CopyFrom (const NTV2Buffer & inSrcBuffer, const NTV2SegmentedXferInfo & inXferInfo);
 
 				/**
 					@brief		Swaps my underlying buffer with another's.
-					@param[in]	inBuffer	Specifies the NTV2_POINTER I'll swap buffers with.
+					@param[in]	inBuffer	Specifies the NTV2Buffer I'll swap buffers with.
 					@return		True if successful; otherwise false.
 					@note		The buffers must have identical sizes, and must have equal ownership attributes.
-					@note		AJA recommends not using this function to swap NTV2_POINTERs that were allocated in different
-								executable modules (e.g., on Windows, an NTV2_POINTER that was allocated in a DLL with another
+					@note		AJA recommends not using this function to swap NTV2Buffers that were allocated in different
+								executable modules (e.g., on Windows, an NTV2Buffer that was allocated in a DLL with another
 								that was allocated in an EXE).
 				**/
-				bool			SwapWith (NTV2_POINTER & inBuffer);
+				bool			SwapWith (NTV2Buffer & inBuffer);
 
 				/**
 					@brief		Byte-swaps my contents 64-bits at a time.
@@ -7009,15 +7018,15 @@ typedef enum
 				template<typename T>	operator T*() const				{return reinterpret_cast<T*>(GetHostPointer());}	//	New in SDK 16.0
 
 				/**
-					@brief		Resets an NTV2_POINTER instance to reference a contiguous segment of my memory buffer.
-					@param[out] outPtr			The NTV2_POINTER to be reset to my sub-segment.
+					@brief		Resets an NTV2Buffer instance to reference a contiguous segment of my memory buffer.
+					@param[out] outPtr			The NTV2Buffer to be reset to my sub-segment.
 					@param[in]	inByteOffset	Specifies the offset, in bytes, where the segment starts.
 					@param[in]	inByteCount		Specifies the segment length, in bytes.
-					@return		The specified NTV2_POINTER.	 It will be set to null/empty upon failure.
+					@return		The specified NTV2Buffer.	 It will be set to null/empty upon failure.
 					@note		The offset and byte count are both checked against my buffer size.
 					@warning	Using the "outPtr" instance after my destruction will likely cause access violations, heap corruption, etc.
 				**/
-				NTV2_POINTER &			Segment (NTV2_POINTER & outPtr, const ULWord inByteOffset, const ULWord inByteCount) const;
+				NTV2Buffer &			Segment (NTV2Buffer & outPtr, const ULWord inByteOffset, const ULWord inByteCount) const;
 
 				/**
 					@return		A copy of the value at the given zero-based index position.
@@ -7260,11 +7269,20 @@ typedef enum
 					@return		True if successful;	 otherwise false.
 				**/
 				static bool					SetDefaultPageSize (const size_t inNewSize);
+
+				/**
+					@return		Host OS/hardware page size, in bytes.
+				**/
+				static size_t				HostPageSize (void);	//	New in SDK 16.3
 				///@}
 
 				NTV2_RPC_CODEC_DECLS
 			#endif	//	user-space clients only
-		NTV2_STRUCT_END (NTV2_POINTER)
+		NTV2_STRUCT_END (NTV2Buffer)
+
+		#if !defined(NTV2_DEPRECATE_17_0)
+			typedef NTV2Buffer	NTV2_POINTER;	//	Renamed in SDK 17.0
+		#endif	//	!defined(NTV2_DEPRECATE_17_0
 
 
 		/**
@@ -7484,7 +7502,7 @@ typedef enum
 					**/
 					explicit		NTV2_HEADER (const ULWord inStructureType, const ULWord inSizeInBytes);
 
-					inline ULWord	GetSizeInBytes (void) const			{return fSizeInBytes;}	///< @brief My total size, in bytes, including header, body and trailer (but excluding embedded NTV2_POINTER data)
+					inline ULWord	GetSizeInBytes (void) const			{return fSizeInBytes;}	///< @brief My total size, in bytes, including header, body and trailer (but excluding embedded NTV2Buffer data)
 					inline ULWord	GetTag (void) const					{return fHeaderTag;}	//	New in SDK 16.3
 					inline ULWord	GetType (void) const				{return fType;}			//	New in SDK 16.3
 					inline ULWord	GetHeaderVersion (void) const		{return fHeaderVersion;}	//	New in SDK 16.3
@@ -7623,7 +7641,7 @@ typedef enum
 						This field is owned by the SDK, which is wholly responsible for allocating and/or freeing it. If empty, no color
 						correction tables will be transferred. Use the Getter/Setter methods to get/set this field.
 			**/
-			NTV2_POINTER				ccLookupTables;
+			NTV2Buffer					ccLookupTables;
 
 			#if !defined (NTV2_BUILDING_DRIVER)
 				/**
@@ -7925,10 +7943,10 @@ typedef enum
 			NTV2_BEGIN_PRIVATE
 				NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
 					ULWord			mInNumRegisters;	///< @brief The number of registers to read in one batch.
-					NTV2_POINTER	mInRegisters;		///< @brief Array of register numbers to be read in one batch. The SDK owns this memory.
+					NTV2Buffer		mInRegisters;		///< @brief Array of register numbers to be read in one batch. The SDK owns this memory.
 					ULWord			mOutNumRegisters;	///< @brief The number of registers successfully read.
-					NTV2_POINTER	mOutGoodRegisters;	///< @brief Array of register numbers that were read successfully. The SDK owns this memory.
-					NTV2_POINTER	mOutValues;			///< @brief Array of register values that were read successfully. The SDK owns this memory.
+					NTV2Buffer		mOutGoodRegisters;	///< @brief Array of register numbers that were read successfully. The SDK owns this memory.
+					NTV2Buffer		mOutValues;			///< @brief Array of register values that were read successfully. The SDK owns this memory.
 				NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
 			NTV2_END_PRIVATE
 
@@ -8029,9 +8047,9 @@ typedef enum
 		NTV2_STRUCT_BEGIN (NTV2SetRegisters)	//	NTV2_TYPE_SETREGS
 			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
 				ULWord			mInNumRegisters;	///< @brief The number of NTV2RegInfo's to be set.
-				NTV2_POINTER	mInRegInfos;		///< @brief Read-only array of NTV2RegInfo structs to be set. The SDK owns this memory.
+				NTV2Buffer		mInRegInfos;		///< @brief Read-only array of NTV2RegInfo structs to be set. The SDK owns this memory.
 				ULWord			mOutNumFailures;	///< @brief The number of registers unsuccessfully written.
-				NTV2_POINTER	mOutBadRegIndexes;	///< @brief Array of UWords containing index numbers of the register writes that failed. The SDK owns this memory.
+				NTV2Buffer		mOutBadRegIndexes;	///< @brief Array of UWords containing index numbers of the register writes that failed. The SDK owns this memory.
 			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
 
 			#if !defined (NTV2_BUILDING_DRIVER)
@@ -8092,8 +8110,8 @@ typedef enum
 		NTV2_STRUCT_BEGIN (NTV2BankSelGetSetRegs)	//	NTV2_TYPE_BANKGETSET
 			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
 				ULWord			mIsWriting;			///< @brief If non-zero, register(s) will be written;  otherwise, register(s) will be read.
-				NTV2_POINTER	mInBankInfos;		///< @brief Bank select NTV2RegInfo. The SDK owns this memory.
-				NTV2_POINTER	mInRegInfos;		///< @brief NTV2RegInfo array of registers be read/written. The SDK owns this memory.
+				NTV2Buffer		mInBankInfos;		///< @brief Bank select NTV2RegInfo. The SDK owns this memory.
+				NTV2Buffer		mInRegInfos;		///< @brief NTV2RegInfo array of registers be read/written. The SDK owns this memory.
 			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
 
 			#if !defined (NTV2_BUILDING_DRIVER)
@@ -8143,7 +8161,7 @@ typedef enum
 			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
 				ULWord			mTag;				///< @brief Tag for virtual data.  This value is used to recal saved data by tag.
 				ULWord			mIsWriting;			///< @brief If non-zero, virtual data will be written;	otherwise, virtual data will be read.
-				NTV2_POINTER	mVirtualData;		///< @brief Pointer object to virtual data. The SDK owns this memory.
+				NTV2Buffer		mVirtualData;		///< @brief Pointer object to virtual data. The SDK owns this memory.
 			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
 
 			#if !defined (NTV2_BUILDING_DRIVER)
@@ -8183,7 +8201,7 @@ typedef enum
 		NTV2_STRUCT_BEGIN (NTV2SDIInStatistics)		//	NTV2_TYPE_SDISTATS
 			NTV2_BEGIN_PRIVATE
 				NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
-					NTV2_POINTER	mInStatistics;		///< @brief Array of NTV2SDIStatus s to be read in one batch. The SDK owns this memory.
+					NTV2Buffer		mInStatistics;		///< @brief Array of NTV2SDIStatus s to be read in one batch. The SDK owns this memory.
 				NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
 			NTV2_END_PRIVATE
 
@@ -8259,7 +8277,7 @@ typedef enum
 						@note	This field is owned by the SDK, which is responsible for allocating and/or freeing it.
 								Call FRAME_STAMP::GetInputTimeCodes or FRAME_STAMP::GetInputTimeCode to retrieve the timecodes stored in this field.
 					**/
-					NTV2_POINTER		acTimeCodes;
+					NTV2Buffer			acTimeCodes;
 					LWord64				acCurrentTime;					///< @brief Current processor time, derived from the finest-grained counter available on the host OS.
 																		///<		Granularity can vary depending on the HAL. FRAME_STAMP::acAudioClockCurrentTime is the recommended time-stamp to use instead of this.
 					ULWord				acCurrentFrame;					///< @brief Last vertical blank frame for this autocirculate channel (when CNTV2Card::AutoCirculateGetFrameStamp was called)
@@ -8469,14 +8487,14 @@ typedef enum
 								If the pointer is NULL or the size is zero, no video will be transferred. AJA recommends keeping this buffer 64-bit aligned
 								and page-aligned for best performance. Use the AUTOCIRCULATE_TRANSFER::SetVideoBuffer method to set or reset this field.
 					**/
-					NTV2_POINTER					acVideoBuffer;
+					NTV2Buffer						acVideoBuffer;
 
 					/**
 						@brief	The host audio buffer. This field is owned by the client application, and thus is responsible for allocating and/or freeing it.
 								If the pointer is NULL or the size is zero, no audio will be transferred. AJA recommends keeping this buffer 64-bit aligned
 								and page-aligned for best performance. Use the AUTOCIRCULATE_TRANSFER::SetAudioBuffer method to set or reset this field.
 					**/
-					NTV2_POINTER					acAudioBuffer;
+					NTV2Buffer						acAudioBuffer;
 
 					/**
 						@brief	The host ancillary data buffer. This field is owned by the client application, and thus is responsible for allocating and/or
@@ -8487,7 +8505,7 @@ typedef enum
 								and all subsequent bytes in the buffer should be zero. For capture, AJA recommends clearing (zeroing) the buffer prior to
 								each transfer.
 					**/
-					NTV2_POINTER					acANCBuffer;
+					NTV2Buffer						acANCBuffer;
 
 					/**
 						@brief	The host "Field 2" ancillary data buffer. This field is owned by the client application, and thus is responsible for allocating
@@ -8498,7 +8516,7 @@ typedef enum
 								and all subsequent bytes in the buffer should be zero. For capture, AJA recommends clearing (zeroing) the buffer prior to
 								each transfer.
 					**/
-					NTV2_POINTER					acANCField2Buffer;
+					NTV2Buffer						acANCField2Buffer;
 
 					/**
 						@brief	Intended for playout, this is an ordered sequence of NTV2_RP188 values to send to the device. If empty, no timecodes will
@@ -8506,7 +8524,7 @@ typedef enum
 						@note	This field is owned by the SDK, which is responsible for allocating and/or freeing it.
 								Use my AUTOCIRCULATE_TRANSFER::SetOutputTimeCodes or AUTOCIRCULATE_TRANSFER::SetOutputTimeCode methods to change this field.
 					**/
-					NTV2_POINTER					acOutputTimeCodes;
+					NTV2Buffer						acOutputTimeCodes;
 
 					/**
 						@brief	Contains status information that's valid after CNTV2Card::AutoCirculateTransfer returns, including the driver buffer level, number of
@@ -8537,7 +8555,7 @@ typedef enum
 					AutoCircVidProcInfo				acVidProcInfo;				///< @brief Specifies the mixer/keyer transition to make.  Ignored if AUTOCIRCULATE_WITH_VIDPROC option is not set.
 					NTV2QuarterSizeExpandMode		acVideoQuarterSizeExpand;	///< @brief Turns on the "quarter-size expand" (2x H + 2x V) hardware. Defaults to off (1:1).
 
-					NTV2_POINTER					acHDMIAuxData;
+					NTV2Buffer						acHDMIAuxData;
 
 					/**
 						@name	Lesser-used and Deprecated Members
@@ -8684,18 +8702,18 @@ typedef enum
 				/**
 					@return		My video buffer.
 				**/
-				inline const NTV2_POINTER &				GetVideoBuffer (void) const								{return acVideoBuffer;}
+				inline const NTV2Buffer &				GetVideoBuffer (void) const								{return acVideoBuffer;}
 
 				/**
 					@return		My audio buffer.
 				**/
-				inline const NTV2_POINTER &				GetAudioBuffer (void) const								{return acAudioBuffer;}
+				inline const NTV2Buffer &				GetAudioBuffer (void) const								{return acAudioBuffer;}
 
 				/**
 					@param[in]	inField2	Specify true for Field2. Defaults to false (Field1).
 					@return		My ancillary data buffer.
 				**/
-				inline const NTV2_POINTER &				GetAncBuffer (const bool inField2 = false) const		{return inField2 ? acANCField2Buffer : acANCBuffer;}
+				inline const NTV2Buffer &				GetAncBuffer (const bool inField2 = false) const		{return inField2 ? acANCField2Buffer : acANCBuffer;}
 				///@}
 
 				/**
@@ -8899,7 +8917,7 @@ typedef enum
 		**/
 		NTV2_STRUCT_BEGIN (NTV2DebugLogging)
 			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
-				NTV2_POINTER	mSharedMemory;		///< @brief Virtual address of AJADebug shared memory in calling process' context,
+				NTV2Buffer		mSharedMemory;		///< @brief Virtual address of AJADebug shared memory in calling process' context,
 													//			and its length. The AJADebug logging facility owns and manages this memory.
 													//			If NULL or zero length, debug logging will be disabled in the driver.
 													//			If non-NULL and zero length, debug logging will be enabled in the driver.
@@ -8935,7 +8953,7 @@ typedef enum
 		**/
 		NTV2_STRUCT_BEGIN (NTV2BufferLock)
 			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
-				NTV2_POINTER	mBuffer;			///< @brief Virtual address of a buffer to prelock, and its length.
+				NTV2Buffer		mBuffer;			///< @brief Virtual address of a buffer to prelock, and its length.
 													//			A NULL buffer (or zero length) releases all locked buffers.
 				ULWord			mFlags;				///< @brief Action flags (lock, unlock, etc)
 				ULWord64		mMaxLockSize;		///< @brief Max locked bytes.
@@ -8955,7 +8973,7 @@ typedef enum
 					@param	inBuffer		Specifies the memory to be locked for DMA operations.
 					@param	inFlags			Specifies action flags (e.g. ::DMABUFFERLOCK_LOCK, etc.).
 				**/
-				explicit	NTV2BufferLock (const NTV2_POINTER & inBuffer, const ULWord inFlags);
+				explicit	NTV2BufferLock (const NTV2Buffer & inBuffer, const ULWord inFlags);
 
 				/**
 					@brief	Constructs an NTV2BufferLock object to use in a CNTV2Card::DMABufferLock call.
@@ -8982,7 +9000,7 @@ typedef enum
 					@param	inBuffer		Specifies the memory to be locked for DMA operations.
 					@return True if successful;	 otherwise false.
 				**/
-				bool		SetBuffer (const NTV2_POINTER & inBuffer);
+				bool		SetBuffer (const NTV2Buffer & inBuffer);
 
 				/**
 					@brief	Sets the buffer to lock for use in a subsequent call to CNTV2Card::DMABufferLock.
@@ -8992,7 +9010,7 @@ typedef enum
 				**/
 				inline bool SetBuffer (const ULWord * pInBuffer, const ULWord inByteCount)
 				{
-					return SetBuffer(NTV2_POINTER(pInBuffer, inByteCount));
+					return SetBuffer(NTV2Buffer(pInBuffer, inByteCount));
 				}
 
 				/**
@@ -9013,7 +9031,7 @@ typedef enum
 				**/
 				inline void Clear (void)
 				{
-					SetBuffer(NTV2_POINTER());
+					SetBuffer(NTV2Buffer());
 					SetFlags(0);
 					SetMaxLockSize(0);
 				}
@@ -9039,7 +9057,7 @@ typedef enum
 		**/
 		NTV2_STRUCT_BEGIN (NTV2Bitstream)
 			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
-				NTV2_POINTER	mBuffer;			///< @brief Virtual address of a bitstream buffer and its length.
+				NTV2Buffer		mBuffer;			///< @brief Virtual address of a bitstream buffer and its length.
 				ULWord			mFlags;				///< @brief Action flags (lock, unlock, etc)
 				ULWord			mStatus;			///< @brief Action status
 				ULWord			mRegisters[16];		///< @brief Register data
@@ -9059,7 +9077,7 @@ typedef enum
 					@param	inBuffer		Specifies the memory containing the bitstream to load.
 					@param	inFlags			Specifies action flags (fragment swap, etc.).
 				**/
-				explicit	NTV2Bitstream (const NTV2_POINTER & inBuffer, const ULWord inFlags);
+				explicit	NTV2Bitstream (const NTV2Buffer & inBuffer, const ULWord inFlags);
 
 				/**
 					@brief	Constructs an NTV2Bitstream object to use in a CNTV2Card::LoadBitstream call.
@@ -9079,7 +9097,7 @@ typedef enum
 					@param	inBuffer		Specifies the memory containing the bitstream to load.
 					@return True if successful;	 otherwise false.
 				**/
-				bool		SetBuffer (const NTV2_POINTER & inBuffer);
+				bool		SetBuffer (const NTV2Buffer & inBuffer);
 
 				/**
 					@brief	Sets the buffer to lock for use in a subsequent call to CNTV2Card::LoadBitstream.
@@ -9087,7 +9105,7 @@ typedef enum
 					@param	inByteCount			Specifies a the length of the buffer to load in bytes.
 					@return True if successful;	 otherwise false.
 				**/
-				inline bool SetBuffer (const ULWord * pInBuffer, const ULWord inByteCount)	{return SetBuffer(NTV2_POINTER(pInBuffer, inByteCount));}
+				inline bool SetBuffer (const ULWord * pInBuffer, const ULWord inByteCount)	{return SetBuffer(NTV2Buffer(pInBuffer, inByteCount));}
 
 				/**
 					@brief	Sets the action flags for use in a subsequent call to CNTV2Card::LoadBitstream.
@@ -9098,7 +9116,7 @@ typedef enum
 				/**
 					@brief	Resets the struct to its initialized state.
 				**/
-				inline void Clear (void)		{SetBuffer(NTV2_POINTER());}
+				inline void Clear (void)		{SetBuffer(NTV2Buffer());}
 				///@}
 
 				/**
@@ -9278,6 +9296,17 @@ typedef enum
 			AJAExport NTV2InputSourceSet & operator += (NTV2InputSourceSet & inOutSet, const NTV2InputSourceSet & inSet);
 
 			/**
+				@brief		Returns a set of distinct ::NTV2InputSource values supported on the given device.
+				@param[in]	inDeviceID		Specifies the ::NTV2DeviceID of the device of interest.
+											Specify ::DEVICE_ID_INVALID to disable the "is supported" check.
+				@param[out] outInputSources	Receives the set of distinct ::NTV2InputSource values supported by the device.
+				@param[in]	inKinds			Specifies the kinds of inputs of interest.  Defaults to ALL.
+				@return		True if successful;	 otherwise false.
+				@todo		Needs to be moved to a C++ compatible "device features" module.
+			**/
+			AJAExport bool NTV2DeviceGetSupportedInputSources (const NTV2DeviceID inDeviceID, NTV2InputSourceSet & outInputSources, const NTV2IOKinds inKinds = NTV2_IOKINDS_ALL);	//	New in SDK 16.3
+
+			/**
 				@brief		Prints the given ::NTV2OutputDestinations' contents into the given output stream.
 				@param		inOStream	The stream into which the human-readable list will be written.
 				@param[in]	inSet		Specifies the set to be streamed.
@@ -9292,6 +9321,17 @@ typedef enum
 				@return		A reference to the modified set.
 			**/
 			AJAExport NTV2OutputDestinations & operator += (NTV2OutputDestinations & inOutSet, const NTV2OutputDestinations & inSet);	//	New in SDK 16.0
+
+			/**
+				@brief		Returns a set of distinct ::NTV2OutputDest values supported on the given device.
+				@param[in]	inDeviceID			Specifies the ::NTV2DeviceID of the device of interest.
+												Specify ::DEVICE_ID_INVALID to disable the "is supported" check.
+				@param[out] outOutputSources	Receives the set of distinct ::NTV2OutputDest values supported by the device.
+				@param[in]	inKinds				Specifies the kinds of outputs of interest.  Defaults to ALL.
+				@return		True if successful;	 otherwise false.
+				@todo		Needs to be moved to a C++ compatible "device features" module.
+			**/
+			AJAExport bool NTV2DeviceGetSupportedOutputDests (const NTV2DeviceID inDeviceID, NTV2OutputDestinations & outOutputDests, const NTV2IOKinds inKinds = NTV2_IOKINDS_ALL);	//	New in SDK 16.3
 
 
 			/**
@@ -9311,12 +9351,12 @@ typedef enum
 			AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2_TRAILER & inObj);
 
 			/**
-				@brief	Streams the given ::NTV2_POINTER to the specified ostream in a human-readable format.
+				@brief	Streams the given ::NTV2Buffer to the specified ostream in a human-readable format.
 				@param		inOutStream		Specifies the ostream to use.
-				@param[in]	inObj			Specifies the ::NTV2_POINTER to be streamed.
+				@param[in]	inObj			Specifies the ::NTV2Buffer to be streamed.
 				@return The ostream being used.
 			**/
-			AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2_POINTER & inObj);
+			AJAExport std::ostream & operator << (std::ostream & inOutStream, const NTV2Buffer & inObj);
 
 			/**
 				@brief	Streams the given ::NTV2_RP188 struct to the specified ostream in a human-readable format.

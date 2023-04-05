@@ -88,11 +88,11 @@ AJAStatus AJAAncillaryData_Timecode::ParsePayloadData (void)
 }
 
 
-AJAAncillaryDataType AJAAncillaryData_Timecode::RecognizeThisAncillaryData (const AJAAncillaryData * pAncData)
+AJAAncDataType AJAAncillaryData_Timecode::RecognizeThisAncillaryData (const AJAAncillaryData * pAncData)
 {
 	(void) pAncData;
 	// Since I have no "concrete" transport of my own, this must be done by my derived classes.
-	return AJAAncillaryDataType_Unknown;
+	return AJAAncDataType_Unknown;
 }
 
 
@@ -645,7 +645,7 @@ AJAAncillaryData_Timecode_Format AJAAncillaryData_Timecode::GetTimecodeFormatFro
 
 ostream & AJAAncillaryData_Timecode::Print (ostream & debugStream, const bool bShowDetail) const
 {
-	debugStream << IDAsString() << "(" << ::AJAAncillaryDataCodingToString (m_coding) << ")" << endl;
+	debugStream << IDAsString() << "(" << ::AJAAncDataCodingToString (m_coding) << ")" << endl;
 	AJAAncillaryData::Print (debugStream, bShowDetail);
 
 	uint8_t		timeDigits[kNumTimeDigits];

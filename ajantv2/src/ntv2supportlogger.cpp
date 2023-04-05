@@ -37,6 +37,7 @@ typedef pair <uint16_t, NTV2TimeCodeList>			FrameToTCListPair;
 typedef map <NTV2Channel, FrameToTCList>			ChannelToPerFrameTCList;
 typedef ChannelToPerFrameTCList::const_iterator		ChannelToPerFrameTCListConstIter;
 typedef pair <NTV2Channel, FrameToTCList>			ChannelToPerFrameTCListPair;
+#define AsMacDriverInterface(_x_)					reinterpret_cast<CNTV2MacDriverInterface*>(&(_x_))
 
 static string makeHeader(ostringstream & oss, const string & inName)
 {
@@ -467,7 +468,8 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 		AJASystemInfo::append(infoTable, "Serial Number",		(mDevice.GetSerialNumberString(str) ? str : "Not programmed"));
 		AJASystemInfo::append(infoTable, "Video Bitfile",		(getBitfileDate(mDevice, str, eFPGAVideoProc) ? str : "Not available"));
 		AJASystemInfo::append(infoTable, "PCI FPGA Version",	mDevice.GetPCIFPGAVersionString());
-		ULWord	numBytes(0);	string	dateStr, timeStr;
+		ULWord	numBytes(0);
+		string	dateStr, timeStr, connType;
 		if (mDevice.GetInstalledBitfileInfo(numBytes, dateStr, timeStr))
 		{
 			AJASystemInfo::append(infoTable, "Installed Bitfile ByteCount", DECStr(numBytes));
@@ -516,6 +518,11 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 				AJASystemInfo::append(infoTable, "License Enable Mask", xHEX0NStr(licenseStatus & 0xff,2));
 			}
 		}	//	if IsIPDevice
+		#if defined(AJAMac)
+			connType = AsMacDriverInterface(mDevice)->GetConnectionType();
+			if (!connType.empty())
+				AJASystemInfo::append(infoTable, "Driver Connection", connType);
+		#endif	//	AJAMac
 	}	//	if IsOpen
 
 	AJASystemInfo hostInfo;
@@ -1076,7 +1083,7 @@ bool CNTV2SupportLogger::DumpDeviceSDRAM (CNTV2Card & inDevice, const string & i
 	const ULWord maxBytes(::NTV2DeviceGetActiveMemorySize(inDevice.GetDeviceID()));
 	inDevice.GetFrameBufferSize(NTV2_CHANNEL1, frmsz);
 	const ULWord byteCount(::NTV2FramesizeToByteCount(frmsz)), megs(byteCount/1024/1024), numFrames(maxBytes / byteCount);
-	NTV2_POINTER buffer(byteCount);
+	NTV2Buffer buffer(byteCount);
 	NTV2ULWordVector goodFrames, badDMAs, badWrites;
 	ofstream ofs(inFilePath.c_str(), ofstream::out | ofstream::binary);
 	if (!ofs)

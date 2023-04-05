@@ -53,8 +53,8 @@ AJAAncillaryData_FrameStatusInfo5251::~AJAAncillaryData_FrameStatusInfo5251 ()
 
 void AJAAncillaryData_FrameStatusInfo5251::Init (void)
 {
-	m_ancType	   = AJAAncillaryDataType_FrameStatusInfo5251;
-	m_coding	   = AJAAncillaryDataCoding_Digital;
+	m_ancType	   = AJAAncDataType_FrameStatusInfo5251;
+	m_coding	   = AJAAncDataCoding_Digital;
 	m_DID		   = AJAAncillaryData_FrameStatusInfo5251_DID;
 	m_SID		   = AJAAncillaryData_FrameStatusInfo5251_SID;
 	m_IsRecording  = false;
@@ -109,14 +109,14 @@ AJAStatus AJAAncillaryData_FrameStatusInfo5251::ParsePayloadData (void)
 }
 
 
-AJAAncillaryDataType AJAAncillaryData_FrameStatusInfo5251::RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData)
+AJAAncDataType AJAAncillaryData_FrameStatusInfo5251::RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData)
 {
-	if (pInAncData->GetDataCoding() == AJAAncillaryDataCoding_Digital)
+	if (pInAncData->GetDataCoding() == AJAAncDataCoding_Digital)
 		if (pInAncData->GetDID() == AJAAncillaryData_FrameStatusInfo5251_DID)
 			if (pInAncData->GetSID() == AJAAncillaryData_FrameStatusInfo5251_SID)
 				if (pInAncData->GetDC()	 == AJAAncillaryData_FrameStatusInfo5251_PayloadSize)
-					return AJAAncillaryDataType_FrameStatusInfo5251;
-	return AJAAncillaryDataType_Unknown;
+					return AJAAncDataType_FrameStatusInfo5251;
+	return AJAAncDataType_Unknown;
 }
 
 

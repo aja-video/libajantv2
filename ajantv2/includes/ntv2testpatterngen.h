@@ -9,7 +9,6 @@
 #define NTV2_TESTPATTERN_GEN_
 
 #include "ajaexport.h"
-#include "ntv2videodefines.h"
 #include "ntv2enums.h"
 #include "ntv2utils.h"
 #include <vector>
@@ -146,7 +145,7 @@ class AJAExport NTV2TestPatternGen
 		**/
 		virtual bool			DrawTestPattern (const std::string & inTPName,
 												const NTV2FormatDescriptor & inFormatDesc,
-												NTV2_POINTER & inBuffer);	//	New in SDK 16.0
+												NTV2Buffer & inBuffer);	//	New in SDK 16.0
 		/**
 			@brief		Renders the given test pattern into a host raster buffer.
 			@param[in]	inPattern		Specifies the test pattern to be drawn.
@@ -161,15 +160,15 @@ class AJAExport NTV2TestPatternGen
 		**/
 		virtual bool			DrawTestPattern (const NTV2TestPatternSelect inPattern,
 												const NTV2FormatDescriptor & inFormatDesc,
-												NTV2_POINTER & inBuffer);	//	New in SDK 16.0
+												NTV2Buffer & inBuffer);	//	New in SDK 16.0
 
 #if !defined(NTV2_DEPRECATE_16_0)
 		/**
-			@deprecated	Use the DrawTestPattern method that requires an NTV2_POINTER to specify the buffer to fill.
+			@deprecated	Use the DrawTestPattern method that requires an NTV2Buffer to specify the buffer to fill.
 		**/
 		virtual NTV2_DEPRECATED_f(bool DrawTestPattern (const NTV2TestPatternSelect inPattern, const NTV2FormatDescriptor & inDesc, NTV2TestPatBuffer & outBuffer));
 		/**
-			@deprecated	Use the DrawTestPattern method that requires an NTV2_POINTER to specify the buffer to fill.
+			@deprecated	Use the DrawTestPattern method that requires an NTV2Buffer to specify the buffer to fill.
 		**/
 		virtual NTV2_DEPRECATED_f(bool DrawTestPattern (const NTV2TestPatternSelect inPat, const uint32_t inWdth, const uint32_t inHght, const NTV2FrameBufferFormat inPF, NTV2TestPatBuffer & outBuf));
 #endif	//	!defined(NTV2_DEPRECATE_16_0)

@@ -46,6 +46,24 @@ typedef enum
 	BANK_3
 } BankSelect;
 
+typedef enum {
+	READID_COMMAND			= 0x9F,
+	WRITEENABLE_COMMAND		= 0x06,
+	WRITEDISABLE_COMMAND	= 0x04,
+	READSTATUS_COMMAND		= 0x05,
+	WRITESTATUS_COMMAND		= 0x01,
+	READFAST_COMMAND		= 0x0B,
+	PAGEPROGRAM_COMMAND		= 0x02,
+	SECTORERASE_COMMAND		= 0xD8,
+	CHIPERASE_COMMAND		= 0xC7,
+	BANKSELECT_COMMMAND		= 0x17,
+	READBANKSELECT_COMMAND	= 0x16,
+	EXTENDEDADDRESS_COMMAND = 0xC5,
+	READEXTENDEDADDRESS_COMMAND = 0xC8,
+	WRITENONVOLATILECONFIGURATION_COMMAND = 0xB1,
+	READNONVOLATILECONFIGURATION_COMMAND = 0xB5
+} _FLASH_COMMAND;
+
 struct MacAddr
 {
 	uint8_t mac[6];
@@ -88,13 +106,14 @@ public:
 	bool			CreateEDIDIntelRecord ();
 	void			SetQuietMode ();
 	bool			VerifyFlash (FlashBlockID flashBlockNumber, bool fullVerify = false);
-	bool			ReadFlash (NTV2_POINTER & outBuffer, const FlashBlockID flashID, CNTV2FlashProgress & inFlashProgress = CNTV2FlashProgress::nullUpdater);	//	New in SDK 16.0
+	bool			ReadFlash (NTV2Buffer & outBuffer, const FlashBlockID flashID, CNTV2FlashProgress & inFlashProgress = CNTV2FlashProgress::nullUpdater);	//	New in SDK 16.0
 	bool			SetBankSelect (BankSelect bankNumber);
 	bool			SetFlashBlockIDBank(FlashBlockID blockID);
 	bool			ROMHasBankSelect();
 	uint32_t		ReadBankSelect ();
 	bool			SetMBReset();
 	bool			IsInstalledFWRunning (bool & outIsRunning, std::ostream & outErrorMsgs);
+	bool			WriteCommand(_FLASH_COMMAND inCommand);
 
 	std::string		GetDesignName (void) const	{return _parser.DesignName();}
 	std::string		GetPartName (void) const	{return _parser.PartName();}
@@ -167,7 +186,7 @@ public:
 	bool MakeMACsFromSerial( const char *sSerialNumber, MacAddr *pMac1, MacAddr *pMac2 );
 
 protected:
-	NTV2_POINTER	_bitFileBuffer;
+	NTV2Buffer		_bitFileBuffer;
 	uint8_t *		_customFileBuffer;
 	uint32_t		_bitFileSize;
 	NTV2BitfileHeaderParser	_parser;
@@ -197,21 +216,7 @@ protected:
 	std::vector<uint8_t> _partitionBuffer;
 	uint32_t		_failSafePadding;
 	CNTV2SpiFlash * _spiFlash;
-
-	typedef enum {
-		READID_COMMAND			= 0x9F,
-		WRITEENABLE_COMMAND		= 0x06,
-		WRITEDISABLE_COMMAND	= 0x04,
-		READSTATUS_COMMAND		= 0x05,
-		WRITESTATUS_COMMAND		= 0x01,
-		READFAST_COMMAND		= 0x0B,
-		PAGEPROGRAM_COMMAND		= 0x02,
-		SECTORERASE_COMMAND		= 0xD8,
-		CHIPERASE_COMMAND		= 0xC7,
-		BANKSELECT_COMMMAND		= 0x17,
-		READBANKSELECT_COMMAND	= 0x16
-	} _FLASH_STUFF;
-
+	bool			_hasExtendedCommandSupport;
 };	//	CNTV2KonaFlashProgram
 
 #endif	//	NTV2KONAFLASHPROGRAM_H

@@ -19,8 +19,8 @@
 
 
 // VITC ("Analog") Packet IDs
-const uint8_t	AJAAncillaryData_VITC_DID = AJAAncillaryData_AnalogSID;
-const uint8_t	AJAAncillaryData_VITC_SID = AJAAncillaryData_AnalogDID;
+const uint8_t	AJAAncillaryData_VITC_DID = AJAAncData_AnalogSID;
+const uint8_t	AJAAncillaryData_VITC_SID = AJAAncData_AnalogDID;
 
 const uint32_t  AJAAncillaryData_VITC_PayloadSize = 720;	// note: assumes we're only using this for SD (720 pixels/line)
 
@@ -92,9 +92,9 @@ public:
 
 	/**
 		@param[in]	pInAncData	A valid pointer to an AJAAncillaryData instance.
-		@return		The AJAAncillaryDataType if I recognize this ancillary data (or unknown if unrecognized).
+		@return		The AJAAncDataType if I recognize this ancillary data (or unknown if unrecognized).
 	**/
-	static AJAAncillaryDataType			RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData);
+	static AJAAncDataType				RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData);
 
 	/**
 		@param[in]	inType	Specifies the VITC data type.

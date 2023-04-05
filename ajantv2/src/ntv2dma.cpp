@@ -209,16 +209,16 @@ bool CNTV2Card::DMAWriteAudio ( const NTV2AudioSystem	inAudioSystem,
 		if (!NTV2_IS_VALID_FIELD(inFieldID))
 			return false;
 	
-		NTV2_POINTER	ancF1Buffer (inFieldID ? AJA_NULL : pOutAncBuffer, inFieldID ? 0 : inByteCount);
-		NTV2_POINTER	ancF2Buffer (inFieldID ? pOutAncBuffer : AJA_NULL, inFieldID ? inByteCount : 0);
+		NTV2Buffer	ancF1Buffer (inFieldID ? AJA_NULL : pOutAncBuffer, inFieldID ? 0 : inByteCount);
+		NTV2Buffer	ancF2Buffer (inFieldID ? pOutAncBuffer : AJA_NULL, inFieldID ? inByteCount : 0);
 		return DMAReadAnc (inFrameNumber, ancF1Buffer, ancF2Buffer);
 	}
 #endif	//	!defined(NTV2_DEPRECATE_15_2)
 
 
 bool CNTV2Card::DMAReadAnc (const ULWord		inFrameNumber,
-							NTV2_POINTER &		outAncF1Buffer,
-							NTV2_POINTER &		outAncF2Buffer,
+							NTV2Buffer &		outAncF1Buffer,
+							NTV2Buffer &		outAncF2Buffer,
 							const NTV2Channel	inChannel)
 {
 	ULWord			F1Offset(0),  F2Offset(0), inByteCount(0), bytesToTransfer(0), byteOffsetToAncData(0);
@@ -283,16 +283,16 @@ bool CNTV2Card::DMAReadAnc (const ULWord		inFrameNumber,
 		if (!NTV2_IS_VALID_FIELD(inFieldID))
 			return false;
 	
-		NTV2_POINTER	ancF1Buffer (inFieldID ? AJA_NULL : pInAncBuffer, inFieldID ? 0 : inByteCount);
-		NTV2_POINTER	ancF2Buffer (inFieldID ? pInAncBuffer : AJA_NULL, inFieldID ? inByteCount : 0);
+		NTV2Buffer	ancF1Buffer (inFieldID ? AJA_NULL : pInAncBuffer, inFieldID ? 0 : inByteCount);
+		NTV2Buffer	ancF2Buffer (inFieldID ? pInAncBuffer : AJA_NULL, inFieldID ? inByteCount : 0);
 		return DMAWriteAnc (inFrameNumber, ancF1Buffer, ancF2Buffer);
 	}
 #endif	//	!defined(NTV2_DEPRECATE_15_2)
 
 
 bool CNTV2Card::DMAWriteAnc (const ULWord		inFrameNumber,
-							NTV2_POINTER &		inAncF1Buffer,
-							NTV2_POINTER &		inAncF2Buffer,
+							NTV2Buffer &		inAncF1Buffer,
+							NTV2Buffer &		inAncF2Buffer,
 							const NTV2Channel	inChannel)
 {
 	ULWord			F1Offset(0),  F2Offset(0), inByteCount(0), bytesToTransfer(0), byteOffsetToAncData(0);
@@ -491,7 +491,7 @@ bool CNTV2Card::DeviceAddressToFrameNumber (const uint64_t inAddress,  UWord & o
 }
 
 
-bool CNTV2Card::DMABufferLock (const NTV2_POINTER & inBuffer, bool inMap, bool inRDMA)
+bool CNTV2Card::DMABufferLock (const NTV2Buffer & inBuffer, bool inMap, bool inRDMA)
 {
 	if (!_boardOpened)
 		return false;		//	Device not open!
@@ -506,7 +506,7 @@ bool CNTV2Card::DMABufferLock (const NTV2_POINTER & inBuffer, bool inMap, bool i
 }
 
 
-bool CNTV2Card::DMABufferUnlock (const NTV2_POINTER & inBuffer)
+bool CNTV2Card::DMABufferUnlock (const NTV2Buffer & inBuffer)
 {
 	if (!_boardOpened)
 		return false;		//	Device not open!
@@ -524,7 +524,7 @@ bool CNTV2Card::DMABufferUnlockAll (void)
 	if (!_boardOpened)
 		return false;		//	Device not open!
 
-	NTV2BufferLock unlockAllMsg (NTV2_POINTER(), DMABUFFERLOCK_UNLOCK_ALL);
+	NTV2BufferLock unlockAllMsg (NTV2Buffer(), DMABUFFERLOCK_UNLOCK_ALL);
 	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&unlockAllMsg));
 }
 
@@ -566,7 +566,7 @@ bool CNTV2Card::DMAClearAncRegion (const UWord inStartFrameNumber,	const UWord i
 	ULWord offsetInBytes(0), sizeInBytes(0);
 	if (!GetAncRegionOffsetAndSize(offsetInBytes, sizeInBytes, inAncRegion))
 		return false;	//	no such region
-	NTV2_POINTER zeroBuffer(sizeInBytes);
+	NTV2Buffer zeroBuffer(sizeInBytes);
 	if (!zeroBuffer)
 		return false;
 	zeroBuffer.Fill(ULWord64(0));

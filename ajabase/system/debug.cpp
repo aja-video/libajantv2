@@ -976,44 +976,44 @@ int64_t AJADebug::DebugTime (void)
 }
 
 
-std::string AJAStatusToString (const AJAStatus inStatus)
+std::string AJAStatusToString (const AJAStatus inStatus, const bool inDetailed)
 {
 	switch (inStatus)
 	{
-		case AJA_STATUS_SUCCESS:			return "AJA_STATUS_SUCCESS";
-		case AJA_STATUS_TRUE:				return "AJA_STATUS_TRUE";
-		case AJA_STATUS_UNKNOWN:			return "AJA_STATUS_UNKNOWN";
-		case AJA_STATUS_FAIL:				return "AJA_STATUS_FAIL";
-		case AJA_STATUS_TIMEOUT:			return "AJA_STATUS_TIMEOUT";
-		case AJA_STATUS_RANGE:				return "AJA_STATUS_RANGE";
-		case AJA_STATUS_INITIALIZE:			return "AJA_STATUS_INITIALIZE";
-		case AJA_STATUS_NULL:				return "AJA_STATUS_NULL";
-		case AJA_STATUS_OPEN:				return "AJA_STATUS_OPEN";
-		case AJA_STATUS_IO:					return "AJA_STATUS_IO";
-		case AJA_STATUS_DISABLED:			return "AJA_STATUS_DISABLED";
-		case AJA_STATUS_BUSY:				return "AJA_STATUS_BUSY";
-		case AJA_STATUS_BAD_PARAM:			return "AJA_STATUS_BAD_PARAM";
-		case AJA_STATUS_FEATURE:			return "AJA_STATUS_FEATURE";
-		case AJA_STATUS_UNSUPPORTED:		return "AJA_STATUS_UNSUPPORTED";
-		case AJA_STATUS_READONLY:			return "AJA_STATUS_READONLY";
-		case AJA_STATUS_WRITEONLY:			return "AJA_STATUS_WRITEONLY";
-		case AJA_STATUS_MEMORY:				return "AJA_STATUS_MEMORY";
-		case AJA_STATUS_ALIGN:				return "AJA_STATUS_ALIGN";
-		case AJA_STATUS_FLUSH:				return "AJA_STATUS_FLUSH";
-		case AJA_STATUS_NOINPUT:			return "AJA_STATUS_NOINPUT";
-		case AJA_STATUS_SURPRISE_REMOVAL:	return "AJA_STATUS_SURPRISE_REMOVAL";
-		case AJA_STATUS_NOT_FOUND:			return "AJA_STATUS_NOT_FOUND";
-		case AJA_STATUS_NOBUFFER:			return "AJA_STATUS_NOBUFFER";
-		case AJA_STATUS_INVALID_TIME:		return "AJA_STATUS_INVALID_TIME";
-		case AJA_STATUS_NOSTREAM:			return "AJA_STATUS_NOSTREAM";
-		case AJA_STATUS_TIMEEXPIRED:		return "AJA_STATUS_TIMEEXPIRED";
-		case AJA_STATUS_BADBUFFERCOUNT:		return "AJA_STATUS_BADBUFFERCOUNT";
-		case AJA_STATUS_BADBUFFERSIZE:		return "AJA_STATUS_BADBUFFERSIZE";
-		case AJA_STATUS_STREAMCONFLICT:		return "AJA_STATUS_STREAMCONFLICT";
-		case AJA_STATUS_NOTINITIALIZED:		return "AJA_STATUS_NOTINITIALIZED";
-		case AJA_STATUS_STREAMRUNNING:		return "AJA_STATUS_STREAMRUNNING";
-		case AJA_STATUS_REBOOT:				return "AJA_STATUS_REBOOT";
-		case AJA_STATUS_POWER_CYCLE:		return "AJA_STATUS_POWER_CYCLE";
+		case AJA_STATUS_SUCCESS:			return inDetailed ? "Success"			: "AJA_STATUS_SUCCESS";
+		case AJA_STATUS_TRUE:				return inDetailed ? "True"				: "AJA_STATUS_TRUE";
+		case AJA_STATUS_UNKNOWN:			return inDetailed ? "Unknown Error"		: "AJA_STATUS_UNKNOWN";
+		case AJA_STATUS_FAIL:				return inDetailed ? "Failed"			: "AJA_STATUS_FAIL";
+		case AJA_STATUS_TIMEOUT:			return inDetailed ? "Timed Out"			: "AJA_STATUS_TIMEOUT";
+		case AJA_STATUS_RANGE:				return inDetailed ? "Out Of Range"		: "AJA_STATUS_RANGE";
+		case AJA_STATUS_INITIALIZE:			return inDetailed ? "Initialize"		: "AJA_STATUS_INITIALIZE";
+		case AJA_STATUS_NULL:				return inDetailed ? "Null"				: "AJA_STATUS_NULL";
+		case AJA_STATUS_OPEN:				return inDetailed ? "Not Open"			: "AJA_STATUS_OPEN";
+		case AJA_STATUS_IO:					return inDetailed ? "I/O Error"			: "AJA_STATUS_IO";
+		case AJA_STATUS_DISABLED:			return inDetailed ? "Disabled"			: "AJA_STATUS_DISABLED";
+		case AJA_STATUS_BUSY:				return inDetailed ? "Busy"				: "AJA_STATUS_BUSY";
+		case AJA_STATUS_BAD_PARAM:			return inDetailed ? "Bad Param"			: "AJA_STATUS_BAD_PARAM";
+		case AJA_STATUS_FEATURE:			return inDetailed ? "Feature"			: "AJA_STATUS_FEATURE";
+		case AJA_STATUS_UNSUPPORTED:		return inDetailed ? "Unsupported"		: "AJA_STATUS_UNSUPPORTED";
+		case AJA_STATUS_READONLY:			return inDetailed ? "Read-Only"			: "AJA_STATUS_READONLY";
+		case AJA_STATUS_WRITEONLY:			return inDetailed ? "Write-Only"		: "AJA_STATUS_WRITEONLY";
+		case AJA_STATUS_MEMORY:				return inDetailed ? "Out Of Memory"		: "AJA_STATUS_MEMORY";
+		case AJA_STATUS_ALIGN:				return inDetailed ? "Misaligned"		: "AJA_STATUS_ALIGN";
+		case AJA_STATUS_FLUSH:				return inDetailed ? "Flush"				: "AJA_STATUS_FLUSH";
+		case AJA_STATUS_NOINPUT:			return inDetailed ? "No Input"			: "AJA_STATUS_NOINPUT";
+		case AJA_STATUS_SURPRISE_REMOVAL:	return inDetailed ? "Surprise Removal"	: "AJA_STATUS_SURPRISE_REMOVAL";
+		case AJA_STATUS_NOT_FOUND:			return inDetailed ? "Not Found"			: "AJA_STATUS_NOT_FOUND";
+		case AJA_STATUS_NOBUFFER:			return inDetailed ? "No Buffer"			: "AJA_STATUS_NOBUFFER";
+		case AJA_STATUS_INVALID_TIME:		return inDetailed ? "Invalid Time"		: "AJA_STATUS_INVALID_TIME";
+		case AJA_STATUS_NOSTREAM:			return inDetailed ? "No Stream"			: "AJA_STATUS_NOSTREAM";
+		case AJA_STATUS_TIMEEXPIRED:		return inDetailed ? "Time Expired"		: "AJA_STATUS_TIMEEXPIRED";
+		case AJA_STATUS_BADBUFFERCOUNT:		return inDetailed ? "Bad Buffer Count"	: "AJA_STATUS_BADBUFFERCOUNT";
+		case AJA_STATUS_BADBUFFERSIZE:		return inDetailed ? "Bad Buffer Size"	: "AJA_STATUS_BADBUFFERSIZE";
+		case AJA_STATUS_STREAMCONFLICT:		return inDetailed ? "Stream Conflict"	: "AJA_STATUS_STREAMCONFLICT";
+		case AJA_STATUS_NOTINITIALIZED:		return inDetailed ? "Uninitialized"		: "AJA_STATUS_NOTINITIALIZED";
+		case AJA_STATUS_STREAMRUNNING:		return inDetailed ? "Stream Running"	: "AJA_STATUS_STREAMRUNNING";
+		case AJA_STATUS_REBOOT:				return inDetailed ? "Reboot"			: "AJA_STATUS_REBOOT";
+		case AJA_STATUS_POWER_CYCLE:		return inDetailed ? "Power Cycle"		: "AJA_STATUS_POWER_CYCLE";
 #if !defined(_DEBUG)
 		default:	break;
 #endif

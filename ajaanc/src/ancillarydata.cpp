@@ -34,6 +34,11 @@ using namespace std;
 #define XMT2110NOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Notice,	AJAFUNC << ":  " << __x__)
 #define XMT2110INFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Info,		AJAFUNC << ":  " << __x__)
 #define XMT2110DBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Debug,		AJAFUNC << ":  " << __x__)
+#if defined(AJA_WINDOWS)
+	const size_t sENDL(2);	//	CRLF
+#else
+	const size_t sENDL(1);	//	LF
+#endif
 
 //	RCV2110DDBG & XMT2110DDBG are for EXTREMELY detailed debug logging:
 #if 0	// DetailedDebugging
@@ -126,14 +131,14 @@ void AJAAncillaryData::Init()
 	m_frameID		= 0;
 	m_userData		= 0;
 	m_rcvDataValid	= false;
-	m_coding		= AJAAncillaryDataCoding_Digital;
-	m_ancType		= AJAAncillaryDataType_Unknown;
-	m_bufferFmt		= AJAAncillaryBufferFormat_Unknown;
+	m_coding		= AJAAncDataCoding_Digital;
+	m_ancType		= AJAAncDataType_Unknown;
+	m_bufferFmt		= AJAAncBufferFormat_Unknown;
 	//	Default location:
-	m_location.SetDataLink(AJAAncillaryDataLink_A)					//	LinkA
-				.SetDataStream(AJAAncillaryDataStream_1)			//	DS1
-				.SetDataChannel(AJAAncillaryDataChannel_Y)			//	Y channel
-				.SetDataSpace(AJAAncillaryDataSpace_VANC)			//	VANC
+	m_location.SetDataLink(AJAAncDataLink_A)						//	LinkA
+				.SetDataStream(AJAAncDataStream_1)					//	DS1
+				.SetDataChannel(AJAAncDataChannel_Y)				//	Y channel
+//				.SetDataSpace(AJAAncDataSpace_VANC)					//	VANC
 				.SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc) //	VANC
 				.SetLineNumber(AJAAncDataLineNumber_Unknown);		//	Unknown line number
 }
@@ -205,9 +210,9 @@ AJAStatus AJAAncillaryData::SetChecksum (const uint8_t inChecksum, const bool in
 
 uint16_t AJAAncillaryData::GetStreamInfo (void) const
 {
-	if (IS_VALID_AJAAncillaryDataStream(GetLocationDataStream()))
+	if (IS_VALID_AJAAncDataStream(GetLocationDataStream()))
 		return uint16_t(GetLocationDataStream());
-	else if (IS_VALID_AJAAncillaryDataLink(GetLocationVideoLink()))
+	else if (IS_VALID_AJAAncDataLink(GetLocationVideoLink()))
 		return uint16_t(GetLocationVideoLink());
 	return 0;
 }
@@ -248,7 +253,7 @@ uint16_t AJAAncillaryData::Calculate9BitChecksum (void) const
 //**********
 // Set anc data location parameters
 //
-AJAStatus AJAAncillaryData::SetDataLocation (const AJAAncillaryDataLocation & loc)
+AJAStatus AJAAncillaryData::SetDataLocation (const AJAAncDataLoc & loc)
 {
 	AJAStatus	status	(SetLocationVideoLink(loc.GetDataLink()));
 	if (AJA_SUCCESS(status))
@@ -264,9 +269,9 @@ AJAStatus AJAAncillaryData::SetDataLocation (const AJAAncillaryDataLocation & lo
 
 
 #if !defined(NTV2_DEPRECATE_15_2)
-	AJAStatus AJAAncillaryData::GetDataLocation (AJAAncillaryDataLink &			outLink,
+	AJAStatus AJAAncillaryData::GetDataLocation (AJAAncDataLink &				outLink,
 												AJAAncillaryDataVideoStream &	outStream,
-												AJAAncillaryDataSpace &			outAncSpace,
+												AJAAncDataSpace &				outAncSpace,
 												uint16_t &						outLineNum)
 	{
 		outLink		= m_location.GetDataLink();
@@ -276,7 +281,7 @@ AJAStatus AJAAncillaryData::SetDataLocation (const AJAAncillaryDataLocation & lo
 		return AJA_STATUS_SUCCESS;
 	}
 
-	AJAStatus AJAAncillaryData::SetDataLocation (const AJAAncillaryDataLink inLink, const AJAAncillaryDataChannel inChannel, const AJAAncillaryDataSpace inAncSpace, const uint16_t inLineNum, const AJAAncillaryDataStream inStream)
+	AJAStatus AJAAncillaryData::SetDataLocation (const AJAAncDataLink inLink, const AJAAncDataChannel inChannel, const AJAAncDataSpace inAncSpace, const uint16_t inLineNum, const AJAAncDataStream inStream)
 	{
 		AJAStatus	status	(SetLocationVideoLink(inLink));
 		if (AJA_SUCCESS(status))
@@ -294,9 +299,9 @@ AJAStatus AJAAncillaryData::SetDataLocation (const AJAAncillaryDataLocation & lo
 
 //-------------
 //
-AJAStatus AJAAncillaryData::SetLocationVideoLink (const AJAAncillaryDataLink inLinkValue)
+AJAStatus AJAAncillaryData::SetLocationVideoLink (const AJAAncDataLink inLinkValue)
 {
-	if (!IS_VALID_AJAAncillaryDataLink(inLinkValue))
+	if (!IS_VALID_AJAAncDataLink(inLinkValue))
 		return AJA_STATUS_RANGE;
 
 	m_location.SetDataLink(inLinkValue);
@@ -306,9 +311,9 @@ AJAStatus AJAAncillaryData::SetLocationVideoLink (const AJAAncillaryDataLink inL
 
 //-------------
 //
-AJAStatus AJAAncillaryData::SetLocationDataStream (const AJAAncillaryDataStream inStream)
+AJAStatus AJAAncillaryData::SetLocationDataStream (const AJAAncDataStream inStream)
 {
-	if (!IS_VALID_AJAAncillaryDataStream(inStream))
+	if (!IS_VALID_AJAAncDataStream(inStream))
 		return AJA_STATUS_RANGE;
 
 	m_location.SetDataStream(inStream);
@@ -318,9 +323,9 @@ AJAStatus AJAAncillaryData::SetLocationDataStream (const AJAAncillaryDataStream 
 
 //-------------
 //
-AJAStatus AJAAncillaryData::SetLocationDataChannel (const AJAAncillaryDataChannel inChannel)
+AJAStatus AJAAncillaryData::SetLocationDataChannel (const AJAAncDataChannel inChannel)
 {
-	if (!IS_VALID_AJAAncillaryDataChannel(inChannel))
+	if (!IS_VALID_AJAAncDataChannel(inChannel))
 		return AJA_STATUS_RANGE;
 
 	m_location.SetDataChannel(inChannel);
@@ -329,9 +334,9 @@ AJAStatus AJAAncillaryData::SetLocationDataChannel (const AJAAncillaryDataChanne
 
 
 #if !defined(NTV2_DEPRECATE_15_2)
-	AJAStatus AJAAncillaryData::SetLocationVideoSpace (const AJAAncillaryDataSpace inSpace)
+	AJAStatus AJAAncillaryData::SetLocationVideoSpace (const AJAAncDataSpace inSpace)
 	{
-		if (!IS_VALID_AJAAncillaryDataSpace(inSpace))
+		if (!IS_VALID_AJAAncDataSpace(inSpace))
 			return AJA_STATUS_RANGE;
 	
 		m_location.SetDataSpace(inSpace);
@@ -361,9 +366,9 @@ AJAStatus AJAAncillaryData::SetLocationHorizOffset (const uint16_t inOffset)
 
 //-------------
 //
-AJAStatus AJAAncillaryData::SetDataCoding (const AJAAncillaryDataCoding inCodingType)
+AJAStatus AJAAncillaryData::SetDataCoding (const AJAAncDataCoding inCodingType)
 {
-	if (m_coding != AJAAncillaryDataCoding_Digital	&&	m_coding != AJAAncillaryDataCoding_Raw)
+	if (m_coding != AJAAncDataCoding_Digital	&&	m_coding != AJAAncDataCoding_Raw)
 		return AJA_STATUS_RANGE;
 
 	m_coding = inCodingType;
@@ -391,7 +396,7 @@ AJAStatus AJAAncillaryData::SetPayloadData (const uint8_t * pInData, const uint3
 }
 
 
-AJAStatus AJAAncillaryData::SetFromSMPTE334 (const uint16_t * pInData, const uint32_t inNumWords, const AJAAncillaryDataLocation & inLocInfo)
+AJAStatus AJAAncillaryData::SetFromSMPTE334 (const uint16_t * pInData, const uint32_t inNumWords, const AJAAncDataLoc & inLocInfo)
 {
 	if (!pInData)
 		return AJA_STATUS_NULL;
@@ -411,7 +416,7 @@ AJAStatus AJAAncillaryData::SetFromSMPTE334 (const uint16_t * pInData, const uin
 	for (uint32_t numWord (0);	numWord < payloadByteCount;	 numWord++)
 		m_payload[numWord] = UByte(pInData[6+numWord] & 0x00FF);
 
-	SetDataCoding(AJAAncillaryDataCoding_Digital);
+	SetDataCoding(AJAAncDataCoding_Digital);
 	SetDataLocation(inLocInfo);
 	SetChecksum(UByte(pInData[6+payloadByteCount] & 0x00FF));
 	SetDID(UByte(pInData[3] & 0x00FF));
@@ -533,10 +538,10 @@ AJAStatus AJAAncillaryData::ParsePayloadData (void)
 
 //**********
 //	[Re]Initializes me from the 8-bit GUMP buffer received from extractor (ingest)
-AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *					pInData,
-													const size_t					inMaxBytes,
-													const AJAAncillaryDataLocation & inLocationInfo,
-													uint32_t &						outPacketByteCount)
+AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *			pInData,
+													const size_t			inMaxBytes,
+													const AJAAncDataLoc &	inLocationInfo,
+													uint32_t &				outPacketByteCount)
 {
 	AJAStatus status = AJA_STATUS_SUCCESS;
 	Clear();
@@ -564,7 +569,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *					pInData,
 	// ANC Data buffer. We use this as a sanity check to make sure we don't try to parse past the end
 	// of the captured data.
 	//
-	// The caller provides an AJAAncillaryDataLocation struct with all of the information filled in
+	// The caller provides an AJAAncDataLoc struct with all of the information filled in
 	// except the line number.
 	//
 	// When we have extracted the useful data from the packet, we return the packet size, in bytes, so the
@@ -618,12 +623,12 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *					pInData,
 
 	if ((pInData[1] & 0x80) != 0)
 	{
-		m_coding			= ((pInData[1] & 0x40) == 0) ? AJAAncillaryDataCoding_Digital : AJAAncillaryDataCoding_Analog;	// byte 1, bit 6
-		m_location.SetDataStream(AJAAncillaryDataStream_1); //	??? GUMP doesn't tell us the data stream it came from
-		m_location.SetDataChannel(((pInData[1] & 0x20) == 0) ? AJAAncillaryDataChannel_C : AJAAncillaryDataChannel_Y);		// byte 1, bit 5
-		m_location.SetDataSpace(((pInData[1] & 0x10) == 0) ? AJAAncillaryDataSpace_VANC : AJAAncillaryDataSpace_HANC);		// byte 1, bit 4
+		m_coding			= ((pInData[1] & 0x40) == 0) ? AJAAncDataCoding_Digital : AJAAncDataCoding_Raw;	// byte 1, bit 6
+		m_location.SetDataStream(AJAAncDataStream_1); //	??? GUMP doesn't tell us the data stream it came from
+		m_location.SetDataChannel(((pInData[1] & 0x20) == 0) ? AJAAncDataChannel_C : AJAAncDataChannel_Y);		// byte 1, bit 5
+		m_location.SetDataSpace(((pInData[1] & 0x10) == 0) ? AJAAncDataSpace_VANC : AJAAncDataSpace_HANC);		// byte 1, bit 4
 		m_location.SetLineNumber(uint16_t((pInData[1] & 0x0F) << 7) + uint16_t(pInData[2] & 0x7F));							// byte 1, bits 3:0 + byte 2, bits 6:0
-		SetBufferFormat(AJAAncillaryBufferFormat_SDI);
+		SetBufferFormat(AJAAncBufferFormat_SDI);
 		//m_location.SetHorizontalOffset(hOffset);	//	??? GUMP doesn't report the horiz offset of where the packet started in the raster line
 	}
 
@@ -644,7 +649,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *					pInData,
 }	//	InitWithReceivedData
 
 
-AJAStatus AJAAncillaryData::InitWithReceivedData (const ByteVector & inData, const AJAAncillaryDataLocation & inLocationInfo)
+AJAStatus AJAAncillaryData::InitWithReceivedData (const ByteVector & inData, const AJAAncDataLoc & inLocationInfo)
 {
 	uint32_t	pktByteCount(0);
 	if (inData.empty())
@@ -661,7 +666,7 @@ AJAStatus AJAAncillaryData::GetRawPacketSize (uint32_t & outPacketSize) const
 {
 	outPacketSize = 0;
 
-	if (m_coding == AJAAncillaryDataCoding_Digital)
+	if (m_coding == AJAAncDataCoding_Digital)
 	{
 		//	Normal, "digital" ancillary data (i.e. SMPTE-291 based) will have a total size of
 		//	seven bytes (3 bytes header + DID + SID + DC + Checksum) plus the payload size...
@@ -674,7 +679,7 @@ AJAStatus AJAAncillaryData::GetRawPacketSize (uint32_t & outPacketSize) const
 			outPacketSize = 255 + AJAAncillaryDataWrapperSize;
 		}
 	}
-	else if (m_coding == AJAAncillaryDataCoding_Raw)
+	else if (m_coding == AJAAncDataCoding_Raw)
 	{
 		//	Determine how many "packets" are needed to be generated in order to pass all of the payload data (max 255 bytes per packet)...
 		if (!IsEmpty())
@@ -798,7 +803,7 @@ uint8_t AJAAncillaryData::GetGUMPHeaderByte2 (void) const
 {
 	uint8_t result	(0x80); // LE bit is always active
 
-	if (m_coding == AJAAncillaryDataCoding_Raw)
+	if (m_coding == AJAAncDataCoding_Raw)
 		result |= 0x40;		// analog/raw (1) or digital (0) ancillary data
 
 	if (m_location.IsLumaChannel())
@@ -992,7 +997,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const ULWordSequence & inU32s,
 	if (!ancPktHeader.ReadFromULWordVector(inU32s, inOutU32Ndx))
 		{RCV2110ERR("AJARTPAncPacketHeader::ReadFromULWordVector failed at [" << DEC(inOutU32Ndx) << "]");	return AJA_STATUS_FAIL;}
 
-	const AJAAncillaryDataLocation	dataLoc (ancPktHeader.AsDataLocation());
+	const AJAAncDataLoc	dataLoc (ancPktHeader.AsDataLocation());
 	RCV2110DDBG("u32=" << xHEX0N(ENDIAN_32NtoH(inU32s.at(inOutU32Ndx)),8) << " inU32s[" << DEC(inOutU32Ndx) << " of " << DEC(numU32s) << "] AncPktHdr: " << ancPktHeader << " -- AncDataLoc: " << dataLoc);
 
 	if (++inOutU32Ndx >= numU32s)
@@ -1108,7 +1113,7 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const ULWordSequence & inU32s,
 		else
 			{RCV2110ERR("SetChecksum=" << xHEX0N(u16s.at(u16s.size()-1),3) << " failed, calculated=" << xHEX0N(Calculate9BitChecksum(),3));	 return result;}
 	}
-	SetBufferFormat(AJAAncillaryBufferFormat_RTP);
+	SetBufferFormat(AJAAncBufferFormat_RTP);
 	RCV2110DBG(AsString(64));
 
 	/*	The Pattern:  (unrolling the above loop):
@@ -1165,40 +1170,40 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const ULWordSequence & inU32s,
 static const string		gEmptyString;
 
 
-const string & AJAAncillaryDataLinkToString (const AJAAncillaryDataLink inValue, const bool inCompact)
+const string & AJAAncDataLinkToString (const AJAAncDataLink inValue, const bool inCompact)
 {
 	static const string		gAncDataLinkToStr []			= {"A", "B", "?"};
-	static const string		gDAncDataLinkToStr []			= {"AJAAncillaryDataLink_A", "AJAAncillaryDataLink_B", "AJAAncillaryDataLink_Unknown"};
+	static const string		gDAncDataLinkToStr []			= {"AJAAncDataLink_A", "AJAAncDataLink_B", "AJAAncDataLink_Unknown"};
 
-	return IS_VALID_AJAAncillaryDataLink(inValue) ? (inCompact ? gAncDataLinkToStr[inValue] : gDAncDataLinkToStr[inValue]) : gAncDataLinkToStr[2];
+	return IS_VALID_AJAAncDataLink(inValue) ? (inCompact ? gAncDataLinkToStr[inValue] : gDAncDataLinkToStr[inValue]) : gAncDataLinkToStr[2];
 }
 
 
-const string &	AJAAncillaryDataStreamToString (const AJAAncillaryDataStream inValue, const bool inCompact)
+const string &	AJAAncDataStreamToString (const AJAAncDataStream inValue, const bool inCompact)
 {
-	static const string		gAncDataStreamToStr []			= {"DS1", "DS2", "DS3", "DS4", "?"};
-	static const string		gDAncDataStreamToStr []			= {"AJAAncillaryDataStream_1", "AJAAncillaryDataStream_2",
-																"AJAAncillaryDataStream_3", "AJAAncillaryDataStream_4", "AJAAncillaryDataStream_Unknown"};
+	static const string		gAncDataStreamToStr []	= {"DS1", "DS2", "DS3", "DS4", "?"};
+	static const string		gDAncDataStreamToStr []	= {"AJAAncDataStream_1", "AJAAncDataStream_2",
+														"AJAAncDataStream_3", "AJAAncDataStream_4", "AJAAncDataStream_Unknown"};
 
-	return IS_VALID_AJAAncillaryDataStream(inValue) ? (inCompact ? gAncDataStreamToStr[inValue] : gDAncDataStreamToStr[inValue]) : gEmptyString;
+	return IS_VALID_AJAAncDataStream(inValue) ? (inCompact ? gAncDataStreamToStr[inValue] : gDAncDataStreamToStr[inValue]) : gEmptyString;
 }
 
 
-const string & AJAAncillaryDataChannelToString (const AJAAncillaryDataChannel inValue, const bool inCompact)
+const string & AJAAncDataChannelToString (const AJAAncDataChannel inValue, const bool inCompact)
 {
 	static const string		gAncDataChannelToStr []		= {"C", "Y", "?"};
-	static const string		gDAncDataChannelToStr []	= {"AJAAncillaryDataChannel_C", "AJAAncillaryDataChannel_Y", "AJAAncillaryDataChannel_Unknown"};
+	static const string		gDAncDataChannelToStr []	= {"AJAAncDataChannel_C", "AJAAncDataChannel_Y", "AJAAncDataChannel_Unknown"};
 
-	return IS_VALID_AJAAncillaryDataChannel(inValue) ? (inCompact ? gAncDataChannelToStr[inValue] : gDAncDataChannelToStr[inValue]) : gEmptyString;
+	return IS_VALID_AJAAncDataChannel(inValue) ? (inCompact ? gAncDataChannelToStr[inValue] : gDAncDataChannelToStr[inValue]) : gEmptyString;
 }
 
 
-const string & AJAAncillaryDataSpaceToString (const AJAAncillaryDataSpace inValue, const bool inCompact)
+const string & AJAAncDataSpaceToString (const AJAAncDataSpace inValue, const bool inCompact)
 {
-	static const string		gAncDataSpaceToStr []			= {"VANC", "HANC", "????"};
-	static const string		gDAncDataSpaceToStr []			= {"AJAAncillaryDataSpace_VANC", "AJAAncillaryDataSpace_HANC", "AJAAncillaryDataSpace_Unknown"};
+	static const string		gAncDataSpaceToStr []	= {"VANC", "HANC", "????"};
+	static const string		gDAncDataSpaceToStr []	= {"AJAAncDataSpace_VANC", "AJAAncDataSpace_HANC", "AJAAncDataSpace_Unknown"};
 
-	return IS_VALID_AJAAncillaryDataSpace(inValue) ? (inCompact ? gAncDataSpaceToStr[inValue] : gDAncDataSpaceToStr[inValue]) : gEmptyString;
+	return IS_VALID_AJAAncDataSpace(inValue) ? (inCompact ? gAncDataSpaceToStr[inValue] : gDAncDataSpaceToStr[inValue]) : gEmptyString;
 }
 
 
@@ -1238,77 +1243,118 @@ string AJAAncHorizOffsetToString (const uint16_t inValue)
 }
 
 
-ostream & AJAAncillaryDataLocation::Print (ostream & oss, const bool inCompact) const
+ostream & AJAAncDataLoc::Print (ostream & oss, const bool inCompact) const
 {
-	oss << ::AJAAncillaryDataLinkToString(GetDataLink(), inCompact)
-		<< "|" << ::AJAAncillaryDataStreamToString(GetDataStream(), inCompact)
-		<< "|" << ::AJAAncillaryDataChannelToString(GetDataChannel(), inCompact)
+	oss << ::AJAAncDataLinkToString(GetDataLink(), inCompact)
+		<< "|" << ::AJAAncDataStreamToString(GetDataStream(), inCompact)
+		<< "|" << ::AJAAncDataChannelToString(GetDataChannel(), inCompact)
 		<< "|" << ::AJAAncLineNumberToString(GetLineNumber())
 		<< "|" << ::AJAAncHorizOffsetToString(GetHorizontalOffset());
 	return oss;
 }
 
+AJAStatus AJAAncDataLoc::Compare (const AJAAncDataLoc & inRHS) const
+{
+	//	Everything must match exactly:
+	if (GetDataLink() != inRHS.GetDataLink())
+		return AJA_STATUS_FAIL;
+	if (GetDataStream() != inRHS.GetDataStream())
+		return AJA_STATUS_FAIL;
+	if (GetDataChannel() != inRHS.GetDataChannel())
+		return AJA_STATUS_FAIL;
+//	if (GetDataSpace() == inRHS.GetDataSpace())		//	No longer necessary
+//		return AJA_STATUS_FAIL;
+	if (GetLineNumber() != inRHS.GetLineNumber())
+		return AJA_STATUS_FAIL;
+	if (GetHorizontalOffset()  &&  inRHS.GetHorizontalOffset())
+		if (GetHorizontalOffset() != inRHS.GetHorizontalOffset())
+			return AJA_STATUS_FAIL;
+	return AJA_STATUS_SUCCESS;
+}
 
-string AJAAncillaryDataLocationToString (const AJAAncillaryDataLocation & inValue, const bool inCompact)
+string AJAAncDataLoc::CompareWithInfo (const AJAAncDataLoc & inRHS) const
+{
+	ostringstream oss;
+	if (GetDataLink() != inRHS.GetDataLink())
+		oss << ", Link " << ::AJAAncDataLinkToString(GetDataLink()) << " != " << ::AJAAncDataLinkToString(inRHS.GetDataLink());
+	if (GetDataStream() != inRHS.GetDataStream())
+		oss << ", " << ::AJAAncDataStreamToString(GetDataStream()) << " != " << ::AJAAncDataStreamToString(inRHS.GetDataStream());
+	if (GetDataChannel() != inRHS.GetDataChannel())
+		oss << ", Data Channel " << ::AJAAncDataChannelToString(GetDataChannel()) << " != " << ::AJAAncDataChannelToString(inRHS.GetDataChannel());
+//	if (GetDataSpace() == inRHS.GetDataSpace())		//	No longer necessary
+//		oss << ", " << ::AJAAncDataSpaceToString(GetDataSpace()) << " != " << ::AJAAncDataSpaceToString(inRHS.GetDataSpace());
+	if (GetLineNumber() != inRHS.GetLineNumber())
+		oss << ", " << "Line " << DEC(GetLineNumber()) << " != " << DEC(inRHS.GetLineNumber());
+	if (GetHorizontalOffset()  &&  inRHS.GetHorizontalOffset())
+		if (GetHorizontalOffset() != inRHS.GetHorizontalOffset())
+			oss << ", " << "HOffset " << DEC(GetHorizontalOffset()) << " != " << DEC(inRHS.GetHorizontalOffset());
+
+	if (oss.str().length() > 2)
+		return oss.str().substr(2, oss.str().length() - 2);	//	remove first ", "
+	return string();
+}
+
+
+string AJAAncDataLocToString (const AJAAncDataLoc & inValue, const bool inCompact)
 {
 	ostringstream	oss;
 	inValue.Print(oss, inCompact);
 	return oss.str();
 }
 
-ostream & operator << (ostream & inOutStream, const AJAAncillaryDataLocation & inValue)
+ostream & operator << (ostream & inOutStream, const AJAAncDataLoc & inValue)
 {
 	return inValue.Print(inOutStream, true);
 }
 
 
-const string & AJAAncillaryDataCodingToString (const AJAAncillaryDataCoding inValue, const bool inCompact)
+const string & AJAAncDataCodingToString (const AJAAncDataCoding inValue, const bool inCompact)
 {
-	static const string		gAncDataCodingToStr []			= {"Dig", "Ana", "???"};
-	static const string		gDAncDataCodingToStr []			= {"AJAAncillaryDataCoding_Digital", "AJAAncillaryDataCoding_Raw", "AJAAncillaryDataCoding_Unknown"};
+	static const string gAncDataCodingToStr []	= {"Dig", "Ana", "???"};
+	static const string gDAncDataCodingToStr []	= {"AJAAncDataCoding_Digital", "AJAAncDataCoding_Raw", "AJAAncDataCoding_Unknown"};
 
-	return IS_VALID_AJAAncillaryDataCoding (inValue) ? (inCompact ? gAncDataCodingToStr[inValue] : gDAncDataCodingToStr[inValue]) : gEmptyString;
+	return IS_VALID_AJAAncDataCoding(inValue) ? (inCompact ? gAncDataCodingToStr[inValue] : gDAncDataCodingToStr[inValue]) : gEmptyString;
 }
 
 
-const string &	AJAAncillaryBufferFormatToString (const AJAAncillaryBufferFormat inValue, const bool inCompact)
+const string &	AJAAncBufferFormatToString (const AJAAncBufferFormat inValue, const bool inCompact)
 {
-	static const string		gAncBufFmtToStr []	= {"UNK", "FBVANC", "SDI", "RTP", ""};
-	static const string		gDAncBufFmtToStr [] = {"AJAAncillaryBufferFormat_Unknown", "AJAAncillaryBufferFormat_FBVANC",
-													"AJAAncillaryBufferFormat_SDI", "AJAAncillaryBufferFormat_RTP", ""};
+	static const string gAncBufFmtToStr []	= {"UNK", "FBVANC", "SDI", "RTP", ""};
+	static const string gDAncBufFmtToStr [] = {"AJAAncBufferFormat_Unknown", "AJAAncBufferFormat_FBVANC",
+												"AJAAncBufferFormat_SDI", "AJAAncBufferFormat_RTP", ""};
 
-	return IS_VALID_AJAAncillaryBufferFormat (inValue) ? (inCompact ? gAncBufFmtToStr[inValue] : gDAncBufFmtToStr[inValue]) : gEmptyString;
+	return IS_VALID_AJAAncBufferFormat(inValue) ? (inCompact ? gAncBufFmtToStr[inValue] : gDAncBufFmtToStr[inValue]) : gEmptyString;
 }
 
 
-const string & AJAAncillaryDataTypeToString (const AJAAncillaryDataType inValue, const bool inCompact)
+const string & AJAAncDataTypeToString (const AJAAncDataType inValue, const bool inCompact)
 {
 	static const string		gAncDataTypeToStr []			= { "Unknown", "SMPTE 2016-3 AFD", "SMPTE 12-M RP188", "SMPTE 12-M VITC",
 																"SMPTE 334 CEA708", "SMPTE 334 CEA608", "CEA608 Line21", "SMPTE 352 VPID",
 																"SMPTE 2051 2 Frame Marker", "524D Frame Status", "5251 Frame Status",
 																"HDR SDR", "HDR10", "HDR HLG", "?"};
 
-	static const string		gDAncDataTypeToStr []			= { "AJAAncillaryDataType_Unknown", "AJAAncillaryDataType_Smpte2016_3", "AJAAncillaryDataType_Timecode_ATC",
-																"AJAAncillaryDataType_Timecode_VITC", "AJAAncillaryDataType_Cea708", "AJAAncillaryDataType_Cea608_Vanc",
-																"AJAAncillaryDataType_Cea608_Line21", "AJAAncillaryDataType_Smpte352", "AJAAncillaryDataType_Smpte2051",
-																"AJAAncillaryDataType_FrameStatusInfo524D", "AJAAncillaryDataType_FrameStatusInfo5251",
-																"AJAAncillaryDataType_HDR_SDR", "AJAAncillaryDataType_HDR_HDR10", "AJAAncillaryDataType_HDR_HLG", "?"};
+	static const string		gDAncDataTypeToStr []			= { "AJAAncDataType_Unknown", "AJAAncDataType_Smpte2016_3", "AJAAncDataType_Timecode_ATC",
+																"AJAAncDataType_Timecode_VITC", "AJAAncDataType_Cea708", "AJAAncDataType_Cea608_Vanc",
+																"AJAAncDataType_Cea608_Line21", "AJAAncDataType_Smpte352", "AJAAncDataType_Smpte2051",
+																"AJAAncDataType_FrameStatusInfo524D", "AJAAncDataType_FrameStatusInfo5251",
+																"AJAAncDataType_HDR_SDR", "AJAAncDataType_HDR_HDR10", "AJAAncDataType_HDR_HLG", "?"};
 
-	return inValue < AJAAncillaryDataType_Size ? (inCompact ? gAncDataTypeToStr[inValue] : gDAncDataTypeToStr[inValue]) : gEmptyString;
+	return inValue < AJAAncDataType_Size ? (inCompact ? gAncDataTypeToStr[inValue] : gDAncDataTypeToStr[inValue]) : gEmptyString;
 }
 
 
 ostream & AJAAncillaryData::Print (ostream & inOutStream, const bool inDumpPayload) const
 {
-	inOutStream << "Type:\t\t"	<< AJAAncillaryData::DIDSIDToString(m_DID, m_SID)			<< endl
-				<< "DID:\t\t"	<< xHEX0N(uint32_t(m_DID),2)								<< endl
-				<< "SID:\t\t"	<< xHEX0N(uint32_t(m_SID),2)								<< endl
-				<< "DC:\t\t"	<< DEC(GetDC())												<< endl
-				<< "CS:\t\t"	<< xHEX0N(uint32_t(m_checksum),2)							<< endl
-				<< "Loc:\t\t"	<< m_location												<< endl
-				<< "Coding:\t\t"<< ::AJAAncillaryDataCodingToString(m_coding)				<< endl
-				<< "Frame:\t\t" << xHEX0N(GetFrameID(),8)									<< endl
-				<< "Format:\t\t"<< ::AJAAncillaryBufferFormatToString(GetBufferFormat())	<< endl
+	inOutStream << "Type:\t\t"	<< AJAAncillaryData::DIDSIDToString(m_DID, m_SID)	<< endl
+				<< "DID:\t\t"	<< xHEX0N(uint32_t(m_DID),2)						<< endl
+				<< "SID:\t\t"	<< xHEX0N(uint32_t(m_SID),2)						<< endl
+				<< "DC:\t\t"	<< DEC(GetDC())										<< endl
+				<< "CS:\t\t"	<< xHEX0N(uint32_t(m_checksum),2)					<< endl
+				<< "Loc:\t\t"	<< m_location										<< endl
+				<< "Coding:\t\t"<< ::AJAAncDataCodingToString(m_coding)				<< endl
+				<< "Frame:\t\t" << xHEX0N(GetFrameID(),8)							<< endl
+				<< "Format:\t\t"<< ::AJAAncBufferFormatToString(GetBufferFormat())	<< endl
 				<< "Valid:\t\t" << (GotValidReceiveData() ? "Yes" : "No");
 	if (inDumpPayload)
 		{inOutStream << endl;  DumpPayload (inOutStream);}
@@ -1319,13 +1365,13 @@ ostream & AJAAncillaryData::Print (ostream & inOutStream, const bool inDumpPaylo
 string AJAAncillaryData::AsString (const uint16_t inMaxBytes) const
 {
 	ostringstream	oss;
-	oss << "[" << ::AJAAncillaryDataCodingToString(GetDataCoding())
-		<< "|" << ::AJAAncillaryDataLocationToString(GetDataLocation())
+	oss << "[" << ::AJAAncDataCodingToString(GetDataCoding())
+		<< "|" << ::AJAAncDataLocToString(GetDataLocation())
 		<< "|" << GetDIDSIDPair() << "|CS" << HEX0N(uint16_t(GetChecksum()),2) << "|DC=" << DEC(GetDC());
 	if (m_frameID)
 		oss << "|FRx" << HEX0N(GetFrameID(),8);
-	if (IS_KNOWN_AJAAncillaryBufferFormat(m_bufferFmt))
-		oss << "|" << ::AJAAncillaryBufferFormatToString(GetBufferFormat());
+	if (IS_KNOWN_AJAAncBufferFormat(m_bufferFmt))
+		oss << "|" << ::AJAAncBufferFormatToString(GetBufferFormat());
 	const string	typeStr (AJAAncillaryData::DIDSIDToString(m_DID, m_SID));
 	if (!typeStr.empty())
 		oss << "|" << typeStr;
@@ -1345,7 +1391,7 @@ string AJAAncillaryData::AsString (const uint16_t inMaxBytes) const
 }
 
 
-ostream & operator << (ostream & inOutStream, const AJAAncillaryDIDSIDPair & inData)
+ostream & operator << (ostream & inOutStream, const AJAAncDIDSIDPair & inData)
 {
 	inOutStream << "x" << HEX0N(uint16_t(inData.first), 2) << "x" << HEX0N(uint16_t(inData.second), 2);
 	return inOutStream;
@@ -1362,9 +1408,9 @@ ostream & AJAAncillaryData::DumpPayload (ostream & inOutStream) const
 		uint32_t		count			(GetDC());
 		const uint8_t * pData			(GetPayloadData());
 
-		while (count > 0)
+		while (count)
 		{
-			const uint32_t	numBytes	((count >= kBytesPerLine) ? kBytesPerLine : count);
+			const uint32_t numBytes ((count >= kBytesPerLine) ? kBytesPerLine : count);
 			inOutStream << ((count == GetDC()) ? "Payload:	" : "		   ");
 			for (uint8_t num(0);  num < numBytes;  num++)
 			{
@@ -1394,8 +1440,8 @@ AJAStatus AJAAncillaryData::Compare (const AJAAncillaryData & inRHS, const bool 
 		if (GetChecksum() != inRHS.GetChecksum())
 			return AJA_STATUS_FAIL;
 	if (!inIgnoreLocation)
-		if (!(GetDataLocation() == inRHS.GetDataLocation()))
-		return AJA_STATUS_FAIL;
+		if (AJA_FAILURE(GetDataLocation().Compare(inRHS.GetDataLocation())))
+			return AJA_STATUS_FAIL;
 
 	if (GetDataCoding() != inRHS.GetDataCoding())
 		return AJA_STATUS_FAIL;
@@ -1410,28 +1456,41 @@ AJAStatus AJAAncillaryData::Compare (const AJAAncillaryData & inRHS, const bool 
 
 string AJAAncillaryData::CompareWithInfo (const AJAAncillaryData & inRHS, const bool inIgnoreLocation, const bool inIgnoreChecksum) const
 {
-	ostringstream	oss;
+	ostringstream oss;
 	if (GetDID() != inRHS.GetDID())
-		oss << "DID mismatch: " << xHEX0N(uint16_t(GetDID()),2) << " != " << xHEX0N(uint16_t(inRHS.GetDID()),2) << endl;
+		oss << endl << "DID mismatch: " << xHEX0N(uint16_t(GetDID()),2) << " != " << xHEX0N(uint16_t(inRHS.GetDID()),2);
 	if (GetSID() != inRHS.GetSID())
-		oss << "SID mismatch: " << xHEX0N(uint16_t(GetSID()),2) << " != " << xHEX0N(uint16_t(inRHS.GetSID()),2) << endl;
+		oss << endl << "SID mismatch: " << xHEX0N(uint16_t(GetSID()),2) << " != " << xHEX0N(uint16_t(inRHS.GetSID()),2);
 	if (GetDC() != inRHS.GetDC())
-		oss << "DC mismatch: " << xHEX0N(GetDC(),4) << " != " << xHEX0N(inRHS.GetDC(),4) << endl;
+		oss << endl << "DC mismatch: " << xHEX0N(GetDC(),4) << " != " << xHEX0N(inRHS.GetDC(),4);
 
 	if (!inIgnoreChecksum)
 		if (GetChecksum() != inRHS.GetChecksum())
-			oss << "CS mismatch: " << xHEX0N(uint16_t(GetChecksum()),2) << " != " << xHEX0N(uint16_t(inRHS.GetChecksum()),2) << endl;
+			oss << endl << "CS mismatch: " << xHEX0N(uint16_t(GetChecksum()),2) << " != " << xHEX0N(uint16_t(inRHS.GetChecksum()),2);
 	if (!inIgnoreLocation)
-		if (!(GetDataLocation() == inRHS.GetDataLocation()))
-			oss << "Location mismatch: " << GetDataLocation() << " != " << inRHS.GetDataLocation() << endl;
+	{	const string info(GetDataLocation().CompareWithInfo(inRHS.GetDataLocation()));
+		if (!info.empty())
+			oss << endl << "Location mismatch: " << info;
+	}
 
 	if (GetDataCoding() != inRHS.GetDataCoding())
-		oss << "DataCoding mismatch: " << AJAAncillaryDataCodingToString(GetDataCoding()) << " != " << AJAAncillaryDataCodingToString(inRHS.GetDataCoding()) << endl;
+		oss << endl << "DataCoding mismatch: " << AJAAncDataCodingToString(GetDataCoding()) << " != " << AJAAncDataCodingToString(inRHS.GetDataCoding());
 
 	if (!IsEmpty())
-		if (::memcmp (GetPayloadData(), inRHS.GetPayloadData(), GetPayloadByteCount()) != 0)
-			{oss << "LHS: "; DumpPayload(oss);	oss << "RHS: "; inRHS.DumpPayload(oss);}
-	return oss.str();
+	{
+		const uint8_t *pLHS(GetPayloadData()), *pRHS(inRHS.GetPayloadData());
+		ULWordSequence diffNdxs;
+		for (size_t ndx(0);  ndx < GetPayloadByteCount();  ndx++)
+			if (pLHS[ndx] != pRHS[ndx])
+				diffNdxs.push_back(ndx);
+		if (!diffNdxs.empty())
+			oss	<< endl << DEC(diffNdxs.size()) << " of " << DEC(GetDC()) << " (" << fDEC(100.0*double(diffNdxs.size())/double(GetDC()), 5, 2)
+				<< "%) mismatched payload bytes, starting at offset " << DEC(diffNdxs.at(0));
+	}
+
+	if (oss.str().length() > sENDL)
+		return oss.str().substr(sENDL, oss.str().length() - sENDL);	//	remove leading newline
+	return string();
 }
 
 AJAAncillaryData & AJAAncillaryData::operator = (const AJAAncillaryData & inRHS)
@@ -1455,7 +1514,7 @@ AJAAncillaryData & AJAAncillaryData::operator = (const AJAAncillaryData & inRHS)
 
 bool AJAAncillaryData::operator == (const AJAAncillaryData & inRHS) const
 {
-	return AJA_SUCCESS(Compare(inRHS, false/*ignoreLocations=false*/, false/*ignoreChecksums=false*/));
+	return AJA_SUCCESS(Compare(inRHS, false/*ignoreLocations*/, false/*ignoreChecksums*/));
 }
 
 
@@ -1889,7 +1948,7 @@ string AJAAncillaryData::DIDSIDToString (const uint8_t inDID, const uint8_t inSI
 //	AJARTPAncPayloadHeader
 
 
-bool AJARTPAncPayloadHeader::BufferStartsWithRTPHeader (const NTV2_POINTER & inBuffer)
+bool AJARTPAncPayloadHeader::BufferStartsWithRTPHeader (const NTV2Buffer & inBuffer)
 {
 	if (inBuffer.IsNULL())
 		return false;
@@ -2008,7 +2067,7 @@ bool AJARTPAncPayloadHeader::WriteToULWordVector (ULWordSequence & outVector, co
 	return true;
 }
 
-bool AJARTPAncPayloadHeader::WriteToBuffer (NTV2_POINTER & outBuffer, const ULWord inU32Offset) const
+bool AJARTPAncPayloadHeader::WriteToBuffer (NTV2Buffer & outBuffer, const ULWord inU32Offset) const
 {
 	const ULWord	startingByteOffset	(inU32Offset * sizeof(uint32_t));
 	if ((startingByteOffset + ULWord(GetHeaderByteCount())) > outBuffer.GetByteCount())
@@ -2030,7 +2089,7 @@ bool AJARTPAncPayloadHeader::ReadFromULWordVector (const ULWordSequence & inVect
 	return true;
 }
 
-bool AJARTPAncPayloadHeader::ReadFromBuffer(const NTV2_POINTER & inBuffer)
+bool AJARTPAncPayloadHeader::ReadFromBuffer(const NTV2Buffer & inBuffer)
 {
 	if (inBuffer.GetByteCount() < GetHeaderByteCount())
 		return false;	//	Too small
@@ -2103,7 +2162,7 @@ AJARTPAncPacketHeader::AJARTPAncPacketHeader()
 {
 }
 
-AJARTPAncPacketHeader::AJARTPAncPacketHeader(const AJAAncillaryDataLocation & inLoc)
+AJARTPAncPacketHeader::AJARTPAncPacketHeader(const AJAAncDataLoc & inLoc)
 	:	mCBit	(false),
 		mSBit	(false),
 		mLineNum	(0),
@@ -2165,44 +2224,44 @@ bool AJARTPAncPacketHeader::ReadFromULWordVector (const ULWordSequence & inVecto
 	return SetFromULWord(inVector[inIndex0]);
 }
 
-AJAAncillaryDataLocation AJARTPAncPacketHeader::AsDataLocation(void) const
+AJAAncDataLoc AJARTPAncPacketHeader::AsDataLocation(void) const
 {
-	AJAAncillaryDataLocation	result;
+	AJAAncDataLoc	result;
 	result.SetLineNumber(GetLineNumber()).SetHorizontalOffset(GetHorizOffset())
-			.SetDataChannel(IsCBitSet() ? AJAAncillaryDataChannel_C : AJAAncillaryDataChannel_Y)
-			.SetDataLink(AJAAncillaryDataLink_A).SetDataStream(AJAAncillaryDataStream_1);
+			.SetDataChannel(IsCBitSet() ? AJAAncDataChannel_C : AJAAncDataChannel_Y)
+			.SetDataLink(AJAAncDataLink_A).SetDataStream(AJAAncDataStream_1);
 	if (IsSBitSet())
 	{
 		//	e.g. SMPTE ST 425-3 DL 3Gbps, data streams are numbered 1-4, so DS1/DS2 on linkA, DS3/DS4 on linkB
-		result.SetDataStream(AJAAncillaryDataStream(GetStreamNumber()));
-		if (IS_LINKB_AJAAncillaryDataStream(result.GetDataStream()))
-			result.SetDataLink(AJAAncillaryDataLink_B);
+		result.SetDataStream(AJAAncDataStream(GetStreamNumber()));
+		if (IS_LINKB_AJAAncDataStream(result.GetDataStream()))
+			result.SetDataLink(AJAAncDataLink_B);
 	}
 	return result;
 }
 
-AJARTPAncPacketHeader & AJARTPAncPacketHeader::SetFrom(const AJAAncillaryDataLocation & inLoc)
+AJARTPAncPacketHeader & AJARTPAncPacketHeader::SetFrom(const AJAAncDataLoc & inLoc)
 {
-	const AJAAncillaryDataLink		lnk		(inLoc.GetDataLink());
-	const AJAAncillaryDataStream	ds		(inLoc.GetDataStream());
-	const AJAAncillaryDataChannel	dChan	(inLoc.GetDataChannel());
+	const AJAAncDataLink	lnk		(inLoc.GetDataLink());
+	const AJAAncDataStream	ds		(inLoc.GetDataStream());
+	const AJAAncDataChannel	dChan	(inLoc.GetDataChannel());
 
-	//	@bug	Dang, the sense of the C bit is opposite of our AJAAncillaryDataChannel enum!
-	//			The C bit should be '1' for AJAAncillaryDataChannel_C (0).
-	//			The C bit should be '0' for AJAAncillaryDataChannel_Y (1).
-	//			The C bit should be '0' for SD, but we use AJAAncillaryDataChannel_Both (0) for this,
-	//			which is indistinguishable from AJAAncillaryDataChannel_C (0).
+	//	@bug	Dang, the sense of the C bit is opposite of our AJAAncDataChannel enum!
+	//			The C bit should be '1' for AJAAncDataChannel_C (0).
+	//			The C bit should be '0' for AJAAncDataChannel_Y (1).
+	//			The C bit should be '0' for SD, but we use AJAAncDataChannel_Both (0) for this,
+	//			which is indistinguishable from AJAAncDataChannel_C (0).
 	//	@todo	This needs to be addressed.
-	mCBit = IS_VALID_AJAAncillaryDataChannel(dChan)	 &&	 (dChan != AJAAncillaryDataChannel_Y);
+	mCBit = IS_VALID_AJAAncDataChannel(dChan)	 &&	 (dChan != AJAAncDataChannel_Y);
 
 	//	Data Stream Flag
 	//		'0':	No guidance -- don't know -- don't care
 	//		'1':	StreamNum field carries info about source data stream number
-	mSBit = IS_VALID_AJAAncillaryDataLink(lnk)	||	IS_VALID_AJAAncillaryDataStream(ds);
+	mSBit = IS_VALID_AJAAncDataLink(lnk)	||	IS_VALID_AJAAncDataStream(ds);
 
-	if (IS_VALID_AJAAncillaryDataLink(lnk))
+	if (IS_VALID_AJAAncDataLink(lnk))
 		mStreamNum = uint8_t(lnk);
-	else if (IS_VALID_AJAAncillaryDataStream(ds))
+	else if (IS_VALID_AJAAncDataStream(ds))
 		mStreamNum = uint8_t(ds);
 	else
 		mStreamNum = 0;

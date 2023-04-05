@@ -138,12 +138,12 @@ AJAStatus AJAAncillaryData_Cea608::GetCEA608Characters (uint8_t & char1, uint8_t
 }
 
 
-AJAAncillaryDataType AJAAncillaryData_Cea608::RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData)
+AJAAncDataType AJAAncillaryData_Cea608::RecognizeThisAncillaryData (const AJAAncillaryData * pInAncData)
 {
 	(void) pInAncData;
 	// Since the AJAAncillaryData_Cea608 object has no "concrete" transport of its own,
 	// this has to be done by its subclasses.
-	return AJAAncillaryDataType_Unknown;
+	return AJAAncDataType_Unknown;
 }
 
 ostream & AJAAncillaryData_Cea608::Print (ostream & debugStream, const bool bShowDetail) const

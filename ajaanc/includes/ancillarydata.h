@@ -22,147 +22,140 @@
 //			Anc Inserter hardware care. To determine if a given packet is "analog" or "digital", check
 //			the appropriate flag in the packet header. This is just to have all the locally (software)
 //			built "analog" IDs come from a single location.
-const uint8_t AJAAncillaryData_AnalogDID = 0x00;
-const uint8_t AJAAncillaryData_AnalogSID = 0x00;
+const uint8_t AJAAncData_AnalogDID = 0x00;
+const uint8_t AJAAncData_AnalogSID = 0x00;
 
-
-typedef std::pair <uint8_t, uint8_t>		AJAAncillaryDIDSIDPair;	///< @brief	A DID/SID pair, typically used as an indexing key.
-typedef uint16_t							AJAAncPktDIDSID;		///< @brief	Packet DID/SID pair: DID (MS 8 bits) and SID (LS 8 bits)
+typedef std::pair <uint8_t, uint8_t>		AJAAncDIDSIDPair, AJAAncillaryDIDSIDPair;	///< @brief	A DID/SID pair, typically used as an indexing key.
+typedef uint16_t							AJAAncPktDIDSID;	///< @brief	Packet DID/SID pair: DID (MS 8 bits) and SID (LS 8 bits)
 #define ToAJAAncPktDIDSID(_d_,_s_)			(uint16_t((_d_) << 8) | uint16_t(_s_))
 #define FromAJAAncPktDIDSID(_k_,_d_,_s_)	(_d_) = uint8_t(((_k_) & 0xFF00) >> 8); (_d_) = uint8_t(_k_ & 0x00FF);
 
 /**
-	@brief	Writes a human-readable rendition of the given AJAAncillaryDIDSIDPair into the given output stream.
+	@brief	Writes a human-readable rendition of the given AJAAncDIDSIDPair into the given output stream.
 	@param		inOutStream		Specifies the output stream to be written.
-	@param[in]	inData			Specifies the AJAAncillaryDIDSIDPair to be rendered into the output stream.
+	@param[in]	inData			Specifies the AJAAncDIDSIDPair to be rendered into the output stream.
 	@return		A non-constant reference to the specified output stream.
 **/
-AJAExport std::ostream & operator << (std::ostream & inOutStream, const AJAAncillaryDIDSIDPair & inData);
+AJAExport std::ostream & operator << (std::ostream & inOutStream, const AJAAncDIDSIDPair & inData);
 
 
 /**
 	@brief	Identifies the ancillary data types that are known to this module.
 **/
-enum AJAAncillaryDataType
+typedef enum
 {
-	AJAAncillaryDataType_Unknown,				///< @brief	Includes data that is valid, but we don't recognize
+	AJAAncDataType_Unknown,				///< @brief	Includes data that is valid, but we don't recognize
+	AJAAncDataType_Smpte2016_3,			///< @brief	SMPTE 2016-3 VANC Aspect Format Description (AFD) metadata
+	AJAAncDataType_Timecode_ATC,		///< @brief	SMPTE 12-M Ancillary Timecode (formerly known as "RP-188")
+	AJAAncDataType_Timecode_VITC,		///< @brief	SMPTE 12-M Vertical Interval Timecode (aka "VITC")
+	AJAAncDataType_Cea708,				///< @brief	CEA708 (SMPTE 334) HD Closed Captioning
+	AJAAncDataType_Cea608_Vanc,			///< @brief	CEA608 SD Closed Captioning (SMPTE 334 VANC packet)
+	AJAAncDataType_Cea608_Line21,		///< @brief	CEA608 SD Closed Captioning ("Line 21" waveform)
+	AJAAncDataType_Smpte352,			///< @brief	SMPTE 352 "Payload ID"
+	AJAAncDataType_Smpte2051,			///< @brief	SMPTE 2051 "Two Frame Marker"
+	AJAAncDataType_FrameStatusInfo524D,	///< @brief	Frame Status Information, such as Active Frame flag
+	AJAAncDataType_FrameStatusInfo5251,	///< @brief	Frame Status Information, such as Active Frame flag
+	AJAAncDataType_HDR_SDR,
+	AJAAncDataType_HDR_HDR10,
+	AJAAncDataType_HDR_HLG,
+	AJAAncDataType_Size
+} AJAAncDataType;
 
-	AJAAncillaryDataType_Smpte2016_3,			///< @brief	SMPTE 2016-3 VANC Aspect Format Description (AFD) metadata
-	AJAAncillaryDataType_Timecode_ATC,			///< @brief	SMPTE 12-M Ancillary Timecode (formerly known as "RP-188")
-	AJAAncillaryDataType_Timecode_VITC,			///< @brief	SMPTE 12-M Vertical Interval Timecode (aka "VITC")
-	AJAAncillaryDataType_Cea708,				///< @brief	CEA708 (SMPTE 334) HD Closed Captioning
-	AJAAncillaryDataType_Cea608_Vanc,			///< @brief	CEA608 SD Closed Captioning (SMPTE 334 VANC packet)
-	AJAAncillaryDataType_Cea608_Line21,			///< @brief	CEA608 SD Closed Captioning ("Line 21" waveform)
-	AJAAncillaryDataType_Smpte352,				///< @brief	SMPTE 352 "Payload ID"
-	AJAAncillaryDataType_Smpte2051,				///< @brief	SMPTE 2051 "Two Frame Marker"
-	AJAAncillaryDataType_FrameStatusInfo524D,	///< @brief	Frame Status Information, such as Active Frame flag
-	AJAAncillaryDataType_FrameStatusInfo5251,	///< @brief	Frame Status Information, such as Active Frame flag
-	AJAAncillaryDataType_HDR_SDR,
-	AJAAncillaryDataType_HDR_HDR10,
-	AJAAncillaryDataType_HDR_HLG,
-	AJAAncillaryDataType_Size
-};
-
-#define	IS_VALID_AJAAncillaryDataType(_x_)		((_x_) >= AJAAncillaryDataType_Unknown  &&  (_x_) < AJAAncillaryDataType_Size)
-#define	IS_KNOWN_AJAAncillaryDataType(_x_)		((_x_) > AJAAncillaryDataType_Unknown  &&  (_x_) < AJAAncillaryDataType_Size)
+#define	IS_VALID_AJAAncDataType(_x_)		((_x_) >= AJAAncDataType_Unknown  &&  (_x_) < AJAAncDataType_Size)
+#define	IS_KNOWN_AJAAncDataType(_x_)		((_x_) > AJAAncDataType_Unknown  &&  (_x_) < AJAAncDataType_Size)
 
 /**
-	@return		A string containing a human-readable representation of the given AJAAncillaryDataType value (or empty if not possible).
-	@param[in]	inValue		Specifies the AJAAncillaryDataType value to be converted.
+	@return		A string containing a human-readable representation of the given AJAAncDataType value (or empty if not possible).
+	@param[in]	inValue		Specifies the AJAAncDataType value to be converted.
 	@param[in]	inCompact	If true (the default), returns the compact representation;  otherwise use the longer symbolic format.
 **/
-AJAExport const std::string & AJAAncillaryDataTypeToString (const AJAAncillaryDataType inValue, const bool inCompact = true);
+AJAExport const std::string & AJAAncDataTypeToString (const AJAAncDataType inValue, const bool inCompact = true);
 
 
 
 /**
 	@brief	Identifies which link of a video stream the ancillary data is associated with.
 **/
-enum AJAAncillaryDataLink
+typedef enum
 {
-	AJAAncillaryDataLink_A,			///< @brief	The ancillary data is associated with Link A of the video stream.
-	AJAAncillaryDataLink_B,			///< @brief	The ancillary data is associated with Link B of the video stream.
-	AJAAncillaryDataLink_LeftEye	= AJAAncillaryDataLink_A,	///< @brief	The ancillary data is associated with the Left Eye stereoscopic video stream.
-	AJAAncillaryDataLink_RightEye	= AJAAncillaryDataLink_B,	///< @brief	The ancillary data is associated with the Right Eye stereoscopic video stream.
-	AJAAncillaryDataLink_Unknown,	///< @brief	It is not known which link of the video stream the ancillary data is associated with.
-	AJAAncillaryDataLink_Size
-};
+	AJAAncDataLink_A,			///< @brief	The ancillary data is associated with Link A of the video stream.
+	AJAAncDataLink_B,			///< @brief	The ancillary data is associated with Link B of the video stream.
+	AJAAncDataLink_LeftEye	= AJAAncDataLink_A,	///< @brief	The ancillary data is associated with the Left Eye stereoscopic video stream.
+	AJAAncDataLink_RightEye	= AJAAncDataLink_B,	///< @brief	The ancillary data is associated with the Right Eye stereoscopic video stream.
+	AJAAncDataLink_Unknown,	///< @brief	It is not known which link of the video stream the ancillary data is associated with.
+	AJAAncDataLink_Size
+} AJAAncDataLink;
 
-#define	IS_VALID_AJAAncillaryDataLink(_x_)		((_x_) >= AJAAncillaryDataLink_A  &&  (_x_) < AJAAncillaryDataLink_Unknown)
+#define	IS_VALID_AJAAncDataLink(_x_)		((_x_) >= AJAAncDataLink_A  &&  (_x_) < AJAAncDataLink_Unknown)
 
 /**
-	@return		A string containing a human-readable representation of the given AJAAncillaryDataLink value (or empty if not possible).
-	@param[in]	inValue		Specifies the AJAAncillaryDataLink value to be converted.
+	@return		A string containing a human-readable representation of the given AJAAncDataLink value (or empty if not possible).
+	@param[in]	inValue		Specifies the AJAAncDataLink value to be converted.
 	@param[in]	inCompact	If true (the default), returns the compact representation;  otherwise use the longer symbolic format.
 **/
-AJAExport const std::string &	AJAAncillaryDataLinkToString (const AJAAncillaryDataLink inValue, const bool inCompact = true);
+AJAExport const std::string &	AJAAncDataLinkToString (const AJAAncDataLink inValue, const bool inCompact = true);
 
 
 
 /**
 	@brief	Identifies which data stream the ancillary data is associated with.
 **/
-enum AJAAncillaryDataStream
+typedef enum
 {
-	AJAAncillaryDataStream_1,		///< @brief	The ancillary data is associated with DS1 of the video stream (Link A).
-	AJAAncillaryDataStream_2,		///< @brief	The ancillary data is associated with DS2 of the video stream (Link A).
-	AJAAncillaryDataStream_3,		///< @brief	The ancillary data is associated with DS3 of the video stream (Link B).
-	AJAAncillaryDataStream_4,		///< @brief	The ancillary data is associated with DS4 of the video stream (Link B).
-	AJAAncillaryDataStream_Unknown,	///< @brief	It is not known which data stream the ancillary data is associated with.
-	AJAAncillaryDataStream_Size
-};
+	AJAAncDataStream_1,		///< @brief	The ancillary data is associated with DS1 of the video stream (Link A).
+	AJAAncDataStream_2,		///< @brief	The ancillary data is associated with DS2 of the video stream (Link A).
+	AJAAncDataStream_3,		///< @brief	The ancillary data is associated with DS3 of the video stream (Link B).
+	AJAAncDataStream_4,		///< @brief	The ancillary data is associated with DS4 of the video stream (Link B).
+	AJAAncDataStream_Unknown,	///< @brief	It is not known which data stream the ancillary data is associated with.
+	AJAAncDataStream_Size
+} AJAAncDataStream, AJAAncillaryDataStream;
 
-#define	IS_VALID_AJAAncillaryDataStream(_x_)	((_x_) >= AJAAncillaryDataStream_1  &&  (_x_) < AJAAncillaryDataStream_Unknown)
-#define	IS_LINKA_AJAAncillaryDataStream(_x_)	((_x_) == AJAAncillaryDataStream_1)
-#define	IS_LINKB_AJAAncillaryDataStream(_x_)	((_x_) == AJAAncillaryDataStream_2)
+#define	IS_VALID_AJAAncDataStream(_x_)	((_x_) >= AJAAncDataStream_1  &&  (_x_) < AJAAncDataStream_Unknown)
+#define	IS_LINKA_AJAAncDataStream(_x_)	((_x_) == AJAAncDataStream_1)
+#define	IS_LINKB_AJAAncDataStream(_x_)	((_x_) == AJAAncDataStream_2)
 
 /**
-	@return		A string containing a human-readable representation of the given AJAAncillaryDataStream value (or empty if not possible).
-	@param[in]	inValue		Specifies the AJAAncillaryDataStream value to be converted.
+	@return		A string containing a human-readable representation of the given AJAAncDataStream value (or empty if not possible).
+	@param[in]	inValue		Specifies the AJAAncDataStream value to be converted.
 	@param[in]	inCompact	If true (the default), returns the compact representation;  otherwise use the longer symbolic format.
 **/
-AJAExport const std::string &	AJAAncillaryDataStreamToString (const AJAAncillaryDataStream inValue, const bool inCompact = true);
+AJAExport const std::string &	AJAAncDataStreamToString (const AJAAncDataStream inValue, const bool inCompact = true);
+
 
 
 /**
 	@brief	Identifies which component of a video stream in which the ancillary data is placed or found.
 **/
-enum AJAAncillaryDataChannel
+typedef enum
 {
-	AJAAncillaryDataChannel_C,			///< @brief	The ancillary data is associated with the chrominance (C) channel of the video stream.
-	AJAAncillaryDataChannel_Both = AJAAncillaryDataChannel_C,	///< @brief	SD ONLY -- The ancillary data is associated with both the chroma and luma channels.
-	AJAAncillaryDataChannel_Y,			///< @brief	The ancillary data is associated with the luminance (Y) channel of the video stream.
-	AJAAncillaryDataChannel_Unknown,	///< @brief	It is not known which channel of the video stream the ancillary data is associated with.
-	AJAAncillaryDataChannel_Size
-};
-typedef AJAAncillaryDataChannel	AJAAncillaryDataVideoStream;
+	AJAAncDataChannel_C,			///< @brief	The ancillary data is associated with the chrominance (C) channel of the video stream.
+	AJAAncDataChannel_Both = AJAAncDataChannel_C,	///< @brief	SD ONLY -- The ancillary data is associated with both the chroma and luma channels.
+	AJAAncDataChannel_Y,			///< @brief	The ancillary data is associated with the luminance (Y) channel of the video stream.
+	AJAAncDataChannel_Unknown,		///< @brief	It is not known which channel of the video stream the ancillary data is associated with.
+	AJAAncDataChannel_Size
+} AJAAncDataChannel;
 
-#define	IS_VALID_AJAAncillaryDataChannel(_x_)		((_x_) >= AJAAncillaryDataChannel_C  &&  (_x_) < AJAAncillaryDataChannel_Unknown)
-#define	IS_VALID_AJAAncillaryDataVideoStream(_x_)	(IS_VALID_AJAAncillaryDataChannel(_x_))
-#define	AJAAncillaryDataVideoStream_C		AJAAncillaryDataChannel_C
-#define	AJAAncillaryDataVideoStream_Y		AJAAncillaryDataChannel_Y
-#define	AJAAncillaryDataVideoStream_Unknown	AJAAncillaryDataChannel_Unknown
-#define	AJAAncillaryDataVideoStream_Size	AJAAncillaryDataChannel_Size
+#define	IS_VALID_AJAAncDataChannel(_x_)			((_x_) >= AJAAncDataChannel_C  &&  (_x_) < AJAAncDataChannel_Unknown)
 
 /**
-	@return		A string containing a human-readable representation of the given AJAAncillaryDataChannel value (or empty if not possible).
-	@param[in]	inValue		Specifies the AJAAncillaryDataChannel value to be converted.
+	@return		A string containing a human-readable representation of the given AJAAncDataChannel value (or empty if not possible).
+	@param[in]	inValue		Specifies the AJAAncDataChannel value to be converted.
 	@param[in]	inCompact	If true (the default), returns the compact representation;  otherwise use the longer symbolic format.
 **/
-AJAExport const std::string &	AJAAncillaryDataChannelToString (const AJAAncillaryDataChannel inValue, const bool inCompact = true);
-AJAExport inline const std::string &	AJAAncillaryDataVideoStreamToString (const AJAAncillaryDataVideoStream inValue, const bool inCompact = true)	{return AJAAncillaryDataChannelToString(inValue,inCompact);}
+AJAExport const std::string &	AJAAncDataChannelToString (const AJAAncDataChannel inValue, const bool inCompact = true);
+
 
 
 /**
 	@brief	Specifies which channel of a video stream in which to look for Anc data.
 **/
-enum AncChannelSearchSelect
+typedef enum
 {
 	AncChannelSearch_Y,			///< @brief	Only look in luma samples
 	AncChannelSearch_C,			///< @brief	Only look in chroma samples
 	AncChannelSearch_Both,		///< @brief	Look both luma and chroma samples (SD only)
 	AncChannelSearch_Invalid	///< @brief	Invalid
-};
+} AncChannelSearchSelect;
 
 #define	IS_VALID_AncChannelSearchSelect(_x_)	((_x_) >= AncChannelSearch_Y  &&  (_x_) < AncChannelSearch_Invalid)
 
@@ -179,24 +172,25 @@ AJAExport std::string AncChannelSearchSelectToString (const AncChannelSearchSele
 			Deprecated in favor of Horizontal Offset -- ::AJAAncDataHorizOffset_AnyVanc and
 			::AJAAncDataHorizOffset_AnyHanc
 **/
-enum AJAAncillaryDataSpace
+typedef enum
 {
-	AJAAncillaryDataSpace_VANC,		///< @brief	Ancillary data found between SAV and EAV (@see ::AJAAncDataHorizOffset_AnyVanc).
-	AJAAncillaryDataSpace_HANC,		///< @brief	Ancillary data found between EAV and SAV (@see ::AJAAncDataHorizOffset_AnyHanc).
-	AJAAncillaryDataSpace_Unknown,	///< @brief	It's unknown which raster section contains the ancillary data (@see ::AJAAncDataHorizOffset_Unknown).
-	AJAAncillaryDataSpace_Size
-};
+	AJAAncDataSpace_VANC,		///< @brief	Ancillary data found between SAV and EAV (@see ::AJAAncDataHorizOffset_AnyVanc).
+	AJAAncDataSpace_HANC,		///< @brief	Ancillary data found between EAV and SAV (@see ::AJAAncDataHorizOffset_AnyHanc).
+	AJAAncDataSpace_Unknown,	///< @brief	It's unknown which raster section contains the ancillary data (@see ::AJAAncDataHorizOffset_Unknown).
+	AJAAncDataSpace_Size
+} AJAAncDataSpace;
 
-#define	IS_VALID_AJAAncillaryDataSpace(_x_)		((_x_) >= AJAAncillaryDataSpace_VANC  &&  (_x_) < AJAAncillaryDataSpace_Unknown)
-#define	IS_HANC_AJAAncillaryDataSpace(_x_)		((_x_) == AJAAncillaryDataSpace_HANC)
-#define	IS_VANC_AJAAncillaryDataSpace(_x_)		((_x_) == AJAAncillaryDataSpace_VANC)
+#define	IS_VALID_AJAAncDataSpace(_x_)		((_x_) >= AJAAncDataSpace_VANC  &&  (_x_) < AJAAncDataSpace_Unknown)
+#define	IS_HANC_AJAAncDataSpace(_x_)		((_x_) == AJAAncDataSpace_HANC)
+#define	IS_VANC_AJAAncDataSpace(_x_)		((_x_) == AJAAncDataSpace_VANC)
 
 /**
-	@return		A string containing a human-readable representation of the given AJAAncillaryDataSpace value (or empty if not possible).
-	@param[in]	inValue		Specifies the AJAAncillaryDataSpace value to be converted.
+	@return		A string containing a human-readable representation of the given AJAAncDataSpace value (or empty if not possible).
+	@param[in]	inValue		Specifies the AJAAncDataSpace value to be converted.
 	@param[in]	inCompact	If true (the default), returns the compact representation;  otherwise use the longer symbolic format.
 **/
-AJAExport const std::string &	AJAAncillaryDataSpaceToString (const AJAAncillaryDataSpace inValue, const bool inCompact = true);
+AJAExport const std::string &	AJAAncDataSpaceToString (const AJAAncDataSpace inValue, const bool inCompact = true);
+
 
 
 #define	AJAAncDataLineNumber_Unknown	uint16_t(0x0000)	///< @brief	Packet line number is unknown.
@@ -228,38 +222,37 @@ AJAExport std::string AJAAncHorizOffsetToString (const uint16_t inValue);
 /**
 	@brief	Defines where the ancillary data can be found within a video stream.
 **/
-typedef struct AJAAncillaryDataLocation
+typedef struct AJAAncDataLoc
 {
 	//	Instance Methods
 	public:
-		inline	AJAAncillaryDataLocation (	const AJAAncillaryDataLink		inLink			= AJAAncillaryDataLink_Unknown,
-											const AJAAncillaryDataChannel	inChannel		= AJAAncillaryDataChannel_Unknown,
-											const AJAAncillaryDataSpace		inIgnored		= AJAAncillaryDataSpace_Unknown,
-											const uint16_t					inLineNum		= AJAAncDataLineNumber_Unknown,
-											const uint16_t					inHorizOffset	= AJAAncDataHorizOffset_Unknown,
-											const AJAAncillaryDataStream	inStream		= AJAAncillaryDataStream_1)
+		inline	AJAAncDataLoc (	const AJAAncDataLink	inLink			= AJAAncDataLink_Unknown,
+								const AJAAncDataChannel	inChannel		= AJAAncDataChannel_Unknown,
+								const AJAAncDataSpace	inIgnored		= AJAAncDataSpace_Unknown,
+								const uint16_t			inLineNum		= AJAAncDataLineNumber_Unknown,
+								const uint16_t			inHorizOffset	= AJAAncDataHorizOffset_Unknown,
+								const AJAAncDataStream	inStream		= AJAAncDataStream_1)
 		{	AJA_UNUSED(inIgnored);
 			SetDataLink(inLink).SetDataChannel(inChannel).SetLineNumber(inLineNum).SetHorizontalOffset(inHorizOffset).SetDataStream(inStream);
 		}
 
-		inline bool		operator == (const AJAAncillaryDataLocation & inRHS) const
+		inline bool		operator == (const AJAAncDataLoc & inRHS) const
 		{
 			//	Everything must match exactly:
-			bool equals = (GetDataLink() == inRHS.GetDataLink()
-					&&  GetDataStream() == inRHS.GetDataStream()
-						&&  GetDataChannel() == inRHS.GetDataChannel()
-//	No longer necessary		&&  GetDataSpace() == inRHS.GetDataSpace()
-								&&  GetLineNumber() == inRHS.GetLineNumber());
-			if (GetHorizontalOffset() != 0 && inRHS.GetHorizontalOffset() != 0) {
-				equals = (GetHorizontalOffset() == inRHS.GetHorizontalOffset());
-			}
+			bool equal = (GetDataLink() == inRHS.GetDataLink()
+						&&  GetDataStream() == inRHS.GetDataStream()
+							&&  GetDataChannel() == inRHS.GetDataChannel()
+//	No longer necessary			&&  GetDataSpace() == inRHS.GetDataSpace()
+									&&  GetLineNumber() == inRHS.GetLineNumber());
+			if (equal  &&  GetHorizontalOffset()  &&  inRHS.GetHorizontalOffset())
+				equal = (GetHorizontalOffset() == inRHS.GetHorizontalOffset());
 
-			return equals;
+			return equal;
 		}
 
-		inline bool		operator != (const AJAAncillaryDataLocation & inRHS) const		{return !(*this == inRHS);}
+		inline bool		operator != (const AJAAncDataLoc & inRHS) const		{return !(*this == inRHS);}
 
-		inline bool		operator < (const AJAAncillaryDataLocation & inRHS) const
+		inline bool		operator < (const AJAAncDataLoc & inRHS) const
 		{
 			const uint64_t	lhs	(OrdinalValue());
 			const uint64_t	rhs	(inRHS.OrdinalValue());
@@ -268,23 +261,38 @@ typedef struct AJAAncillaryDataLocation
 
 		inline bool		IsValid (void) const
 		{
-			return IS_VALID_AJAAncillaryDataLink(link)
-					&& IS_VALID_AJAAncillaryDataStream(stream)
-						&& IS_VALID_AJAAncillaryDataChannel(channel)
-							&& (IS_VALID_AJAAncillaryDataSpace(GetDataSpace())
-									|| (GetDataSpace() == AJAAncillaryDataSpace_Unknown));
+			return IS_VALID_AJAAncDataLink(link)
+					&& IS_VALID_AJAAncDataStream(stream)
+						&& IS_VALID_AJAAncDataChannel(channel)
+							&& (IS_VALID_AJAAncDataSpace(GetDataSpace())
+									|| (GetDataSpace() == AJAAncDataSpace_Unknown));
 		}
+
+		/**
+			@brief		Compares me with another location.
+			@param[in]	inRHS	The location I'm to be compared with.
+			@return		AJA_STATUS_SUCCESS if equal;  otherwise AJA_STATUS_FAIL.
+		**/
+		virtual AJAStatus	Compare (const AJAAncDataLoc & inRHS) const;
+
+		/**
+			@brief		Compares me with another location and returns a string that describes what's different.
+			@param[in]	inRHS	The location I'm to be compared with.
+			@return		Empty string if equal;  otherwise a string that contains one or more differences found,
+						delimited by newline characters.
+		**/
+		virtual std::string	CompareWithInfo (const AJAAncDataLoc & inRHS) const;
 
 #if !defined(NTV2_DEPRECATE_15_2)
 		/**
 			@deprecated		Use the individual SetXXX functions (below) instead.
 		**/
-		inline AJAAncillaryDataLocation &	Set (	const AJAAncillaryDataLink		inLink,
-													const AJAAncillaryDataChannel	inChannel,
-													const AJAAncillaryDataSpace		inIgnored,
-													const uint16_t					inLineNum,
-													const uint16_t					inHorizOffset = AJAAncDataHorizOffset_Unknown,
-													const AJAAncillaryDataStream	inStream = AJAAncillaryDataStream_1)
+		inline AJAAncDataLoc &	Set (	const AJAAncDataLink	inLink,
+										const AJAAncDataChannel	inChannel,
+										const AJAAncDataSpace	inIgnored,
+										const uint16_t			inLineNum,
+										const uint16_t			inHorizOffset = AJAAncDataHorizOffset_Unknown,
+										const AJAAncDataStream	inStream = AJAAncDataStream_1)
 		{	AJA_UNUSED(inIgnored);
 			link		= inLink;
 			stream		= inStream;
@@ -299,25 +307,25 @@ typedef struct AJAAncillaryDataLocation
 			@brief		Resets all of my location elements to an unknown, invalid state.
 			@return		A reference to myself.
 		**/
-		inline AJAAncillaryDataLocation &	Reset (void)
+		inline AJAAncDataLoc &	Reset (void)
 		{
-			link		= AJAAncillaryDataLink_Unknown;
-			stream		= AJAAncillaryDataStream_Unknown;
-			channel		= AJAAncillaryDataChannel_Unknown;
+			link		= AJAAncDataLink_Unknown;
+			stream		= AJAAncDataStream_Unknown;
+			channel		= AJAAncDataChannel_Unknown;
 			lineNum		= AJAAncDataLineNumber_Unknown;
 			horizOffset	= AJAAncDataHorizOffset_Unknown;
 			return *this;
 		}
 
-		inline AJAAncillaryDataLink			GetDataLink (void) const				{return link;}		///< @return	My data link.
-		inline bool							IsDataLinkA (void) const				{return link == AJAAncillaryDataLink_A;}
-		inline bool							IsDataLinkB (void) const				{return link == AJAAncillaryDataLink_B;}
+		inline AJAAncDataLink			GetDataLink (void) const				{return link;}		///< @return	My data link.
+		inline bool						IsDataLinkA (void) const				{return link == AJAAncDataLink_A;}
+		inline bool						IsDataLinkB (void) const				{return link == AJAAncDataLink_B;}
 
-		inline AJAAncillaryDataStream		GetDataStream (void) const				{return stream;}		///< @return	My data stream.
+		inline AJAAncDataStream			GetDataStream (void) const				{return stream;}		///< @return	My data stream.
 
-		inline AJAAncillaryDataChannel		GetDataChannel (void) const				{return channel;}		///< @return	My data channel.
-		inline bool							IsLumaChannel (void) const				{return channel == AJAAncillaryDataChannel_Y;}
-		inline bool							IsChromaChannel (void) const			{return channel == AJAAncillaryDataChannel_C;}
+		inline AJAAncDataChannel		GetDataChannel (void) const				{return channel;}		///< @return	My data channel.
+		inline bool						IsLumaChannel (void) const				{return channel == AJAAncDataChannel_Y;}
+		inline bool						IsChromaChannel (void) const			{return channel == AJAAncDataChannel_C;}
 
 		/**
 			@return	"VANC" if my horizontal offset is "Any VANC", or "HANC" if my H offset is "Any HANC";
@@ -325,18 +333,18 @@ typedef struct AJAAncillaryDataLocation
 			@note	To be truly accurate, this function would need to know the video standard/geometry
 					to determine if my line number precedes SAV, and if my horizontal offset is after EAV.
 		**/
-		inline AJAAncillaryDataSpace		GetDataSpace (void) const
+		inline AJAAncDataSpace	GetDataSpace (void) const
 		{
 			if (horizOffset == AJAAncDataHorizOffset_AnyVanc)
-				return AJAAncillaryDataSpace_VANC;
+				return AJAAncDataSpace_VANC;
 			if (horizOffset == AJAAncDataHorizOffset_AnyHanc)
-				return AJAAncillaryDataSpace_HANC;
-			return AJAAncillaryDataSpace_Unknown;
+				return AJAAncDataSpace_HANC;
+			return AJAAncDataSpace_Unknown;
 		}
-		inline bool							IsVanc (void) const						{return GetDataSpace() == AJAAncillaryDataSpace_VANC;}
-		inline bool							IsHanc (void) const						{return GetDataSpace() == AJAAncillaryDataSpace_HANC;}
+		inline bool				IsVanc (void) const						{return GetDataSpace() == AJAAncDataSpace_VANC;}
+		inline bool				IsHanc (void) const						{return GetDataSpace() == AJAAncDataSpace_HANC;}
 
-		inline uint16_t						GetLineNumber (void) const				{return lineNum;}		///< @return	My SMPTE line number.
+		inline uint16_t			GetLineNumber (void) const				{return lineNum;}		///< @return	My SMPTE line number.
 
 		/**
 			@return		The 12-bit horizontal offset of the packet.
@@ -348,7 +356,7 @@ typedef struct AJAAncillaryDataLocation
 						-	::AJAAncDataHorizOffset_AnyHanc -- i.e., any legal area of the raster line after EAV.
 						-	::AJAAncDataHorizOffset_AnyVanc -- i.e., any legal area of raster line after SAV, but before EAV.
 		**/
-		inline uint16_t						GetHorizontalOffset (void) const		{return horizOffset & 0x0FFF;}
+		inline uint16_t			GetHorizontalOffset (void) const		{return horizOffset & 0x0FFF;}
 
 		/**
 			@brief		Writes a human-readable rendition of me into the given output stream.
@@ -356,40 +364,42 @@ typedef struct AJAAncillaryDataLocation
 			@param[in]	inCompact	Specify 'true' for compact output;  otherwise 'false' for more detail.
 			@return		The given output stream.
 		**/
-		std::ostream &						Print (std::ostream & ostrm, const bool inCompact = true) const;
+		std::ostream &			Print (std::ostream & ostrm, const bool inCompact = true) const;
 
 		/**
 			@brief	Sets my data link value to the given value (if valid).
 			@param[in]	inLink		Specifies the new data link value to use. Must be valid.
 			@return	A non-const reference to myself.
 		**/
-		inline AJAAncillaryDataLocation &	SetDataLink (const AJAAncillaryDataLink inLink)						{link = inLink;	return *this;}
+		inline AJAAncDataLoc &	SetDataLink (const AJAAncDataLink inLink)						{link = inLink;	return *this;}
 
 		/**
 			@brief	Sets my data link value to the given value (if valid).
 			@param[in]	inStream		Specifies the new data stream value to use. Must be valid.
 			@return	A non-const reference to myself.
 		**/
-		inline AJAAncillaryDataLocation &	SetDataStream (const AJAAncillaryDataStream inStream)				{stream = inStream;	return *this;}
+		inline AJAAncDataLoc &	SetDataStream (const AJAAncDataStream inStream)					{stream = inStream;	return *this;}
 
 		/**
 			@brief	Sets my data video stream value to the given value (if valid).
 			@param[in]	inChannel	Specifies the new data channel value to use. Must be valid.
 			@return	A non-const reference to myself.
 		**/
-		inline AJAAncillaryDataLocation &	SetDataChannel (const AJAAncillaryDataChannel inChannel)			{channel = inChannel; return *this;}
-		inline AJAAncillaryDataLocation &	SetDataVideoStream (const AJAAncillaryDataVideoStream inChannel)	{return SetDataChannel(inChannel);}
+		inline AJAAncDataLoc &	SetDataChannel (const AJAAncDataChannel inChannel)				{channel = inChannel; return *this;}
+#if AJA_NTV2_SDK_VERSION_AT_LEAST(16,3)
+		inline AJAAncDataLoc &	SetDataVideoStream (const AJAAncDataChannel inChannel)			{return SetDataChannel(inChannel);}
+#endif
 
 		/**
 			@brief		Sets my data space value to the given value (if valid).
 			@param[in]	inSpace		Specifies the new data space value to use. Must be valid.
 			@return		A non-const reference to myself.
 		**/
-		inline AJAAncillaryDataLocation &	SetDataSpace (const AJAAncillaryDataSpace inSpace)
+		inline AJAAncDataLoc &	SetDataSpace (const AJAAncDataSpace inSpace)
 		{
-			if (IS_VANC_AJAAncillaryDataSpace(inSpace))
+			if (IS_VANC_AJAAncDataSpace(inSpace))
 				horizOffset = AJAAncDataHorizOffset_AnyVanc;
-			else if (IS_HANC_AJAAncillaryDataSpace(inSpace))
+			else if (IS_HANC_AJAAncDataSpace(inSpace))
 				horizOffset = AJAAncDataHorizOffset_AnyHanc;
 			return *this;
 		}
@@ -400,22 +410,22 @@ typedef struct AJAAncillaryDataLocation
 										Can also be AJAAncDataLineNumber_DontCare.
 			@return		A non-const reference to myself.
 		**/
-		inline AJAAncillaryDataLocation &	SetLineNumber (const uint16_t inLineNum)							{lineNum = inLineNum; return *this;}
+		inline AJAAncDataLoc &	SetLineNumber (const uint16_t inLineNum)							{lineNum = inLineNum; return *this;}
 
 
 		/**
 			@brief		Specifies the horizontal packet position in the raster.
 			@param[in]	inHOffset	Specifies my new horizontal offset. Only the least-significant 12 bits are used.
-									-	Use AJAAncillaryDataLocation::AJAAncDataHorizOffset_AnyVanc for any legal area of the raster line after SAV.
-										This will reset my ::AJAAncillaryDataSpace to ::AJAAncillaryDataSpace_VANC.
-									-	Use AJAAncillaryDataLocation::AJAAncDataHorizOffset_AnyHanc for any legal area of the raster line after EAV.
-										This will reset my ::AJAAncillaryDataSpace to ::AJAAncillaryDataSpace_HANC.
+									-	Use AJAAncDataLoc::AJAAncDataHorizOffset_AnyVanc for any legal area of the raster line after SAV.
+										This will reset my ::AJAAncDataSpace to ::AJAAncDataSpace_VANC.
+									-	Use AJAAncDataLoc::AJAAncDataHorizOffset_AnyHanc for any legal area of the raster line after EAV.
+										This will reset my ::AJAAncDataSpace to ::AJAAncDataSpace_HANC.
 									-	For HD, this is the number of luma samples (see SMPTE ST274).
 									-	For SD, this is the number of Y/C muxed words (see SMPTE ST125).
 									-	Use AJAAncDataHorizOffset_Unknown for zero -- i.e., immediately after SAV.
 			@return		A non-const reference to myself.
 		**/
-		inline AJAAncillaryDataLocation &	SetHorizontalOffset (uint16_t inHOffset)
+		inline AJAAncDataLoc &	SetHorizontalOffset (uint16_t inHOffset)
 		{	inHOffset &= 0x0FFF;
 			if (inHOffset == AJAAncDataHorizOffset_AnyVanc)
 				horizOffset = inHOffset;	//	Force [any] VANC
@@ -428,7 +438,7 @@ typedef struct AJAAncillaryDataLocation
 			return *this;
 		}
 
-#if defined(_DEBUG)
+#if AJA_NTV2_SDK_VERSION_AT_LEAST(16,3)
 	private:	//	Ordinarily, this is a private API
 #endif	//	defined(_DEBUG)
 		/**
@@ -441,7 +451,7 @@ typedef struct AJAAncillaryDataLocation
 						-	data stream, ascending (DS1 highest, then DS2, ... then Unknown lowest)
 						-	data link, ascending (Link "A" highest, then Link "B", then Unknown lowest)
 		**/
-		inline uint64_t						OrdinalValue (void) const
+		inline uint64_t			OrdinalValue (void) const
 		{	//	64-bit unsigned compare:					LLLLLLLLLLLLSSSHHHHHHHHHHHHCCCDDDDDDDKK
 			const uint64_t	hOffset	(horizOffset == AJAAncDataHorizOffset_AnyVanc || horizOffset == AJAAncDataHorizOffset_Anywhere ? 0 : horizOffset);
 			return ((uint64_t(lineNum) << 27)			//	LLLLLLLLLLLL
@@ -452,79 +462,82 @@ typedef struct AJAAncillaryDataLocation
 					| uint64_t(link));					//	                                     KK
 		}
 
-#if defined(NTV2_DEPRECATE_15_2)
+#if AJA_NTV2_SDK_VERSION_AT_LEAST(15,2)
 	private:	//	First proposed to make my member data private in SDK 15.2
 #endif
-		AJAAncillaryDataLink		link;			///< @brief	Which data link (A or B)?
-		AJAAncillaryDataStream		stream;			///< @brief	Which data stream (DS1, DS2... etc.)?
-		AJAAncillaryDataChannel		channel;		///< @brief	Which channel (Y or C)?
-		uint16_t					lineNum;		///< @brief	Which SMPTE line number?
-		uint16_t					horizOffset;	///< @brief	12-bit horizontal offset in raster line
+		AJAAncDataLink		link;			///< @brief	Which data link (A or B)?
+		AJAAncDataStream	stream;			///< @brief	Which data stream (DS1, DS2... etc.)?
+		AJAAncDataChannel	channel;		///< @brief	Which channel (Y or C)?
+		uint16_t			lineNum;		///< @brief	Which SMPTE line number?
+		uint16_t			horizOffset;	///< @brief	12-bit horizontal offset in raster line
 
-} AJAAncillaryDataLocation, AJAAncDataLoc, *AJAAncillaryDataLocationPtr;
+} AJAAncDataLoc;
 
+typedef	AJAAncDataLoc	AJAAncillaryDataLocation;
+typedef AJAAncDataLoc *	AJAAncDataLocPtr;
 
 /**
-	@return		A string containing a human-readable representation of the given AJAAncillaryDataLocation value (or empty if invalid).
-	@param[in]	inValue		Specifies the AJAAncillaryDataLocation to be converted.
+	@return		A string containing a human-readable representation of the given AJAAncDataLoc value (or empty if invalid).
+	@param[in]	inValue		Specifies the AJAAncDataLoc to be converted.
 	@param[in]	inCompact	If true (the default), returns the compact representation;  otherwise use the longer symbolic format.
 **/
-AJAExport std::string	AJAAncillaryDataLocationToString (const AJAAncillaryDataLocation & inValue, const bool inCompact = true);
-
+AJAExport std::string	AJAAncDataLocToString (const AJAAncDataLoc & inValue, const bool inCompact = true);
 
 /**
-	@brief	Writes a human-readable rendition of the given AJAAncillaryDataLocation into the given output stream.
+	@brief	Writes a human-readable rendition of the given AJAAncDataLoc into the given output stream.
 	@param		inOutStream		Specifies the output stream to be written.
-	@param[in]	inData			Specifies the AJAAncillaryDataLocation to be rendered into the output stream.
+	@param[in]	inData			Specifies the AJAAncDataLoc to be rendered into the output stream.
 	@return		A non-constant reference to the specified output stream.
 **/
-AJAExport std::ostream & operator << (std::ostream & inOutStream, const AJAAncillaryDataLocation & inData);
+AJAExport std::ostream & operator << (std::ostream & inOutStream, const AJAAncDataLoc & inData);
+
 
 
 /**
 	@brief	Identifies the ancillary data coding type:  digital or non-digital (analog/raw).
 **/
-enum AJAAncillaryDataCoding
+typedef enum
 {
-	AJAAncillaryDataCoding_Digital,		///< @brief	The ancillary data is in the form of a SMPTE-291 Ancillary Packet.
-	AJAAncillaryDataCoding_Raw,			///< @brief	The ancillary data is in the form of a digitized waveform (e.g. CEA-608 captions, VITC, etc.).
-	AJAAncillaryDataCoding_Analog	= AJAAncillaryDataCoding_Raw,	///< @deprecated	Use AJAAncillaryDataCoding_Raw instead.
-	AJAAncillaryDataCoding_Unknown,		///< @brief	It is not known which coding type the ancillary data is using.
-	AJAAncillaryDataCoding_Size
-};
+	AJAAncDataCoding_Digital,		///< @brief	The ancillary data is in the form of a SMPTE-291 Ancillary Packet.
+	AJAAncDataCoding_Raw,			///< @brief	The ancillary data is in the form of a digitized waveform (e.g. CEA-608 captions, VITC, etc.).
+	AJAAncDataCoding_Unknown,		///< @brief	It is not known which coding type the ancillary data is using.
+	AJAAncDataCoding_Size
+} AJAAncDataCoding;
 
-#define	IS_VALID_AJAAncillaryDataCoding(_x_)		((_x_) >= AJAAncillaryDataCoding_Digital  &&  (_x_) < AJAAncillaryDataCoding_Size)
+#define	IS_VALID_AJAAncDataCoding(_x_)			((_x_) >= AJAAncDataCoding_Digital  &&  (_x_) < AJAAncDataCoding_Size)
 
 /**
-	@return		A string containing a human-readable representation of the given AJAAncillaryDataLocation value (or empty if invalid).
-	@param[in]	inValue		Specifies the AJAAncillaryDataLocation to be converted.
+	@return		A string containing a human-readable representation of the given AJAAncDataCoding value (or empty if invalid).
+	@param[in]	inValue		Specifies the AJAAncDataCoding to be converted.
 	@param[in]	inCompact	If true (the default), returns the compact representation;  otherwise use the longer symbolic format.
 **/
-AJAExport const std::string &	AJAAncillaryDataCodingToString (const AJAAncillaryDataCoding inValue, const bool inCompact = true);
+AJAExport const std::string &	AJAAncDataCodingToString (const AJAAncDataCoding inValue, const bool inCompact = true);
+
 
 
 /**
 	@brief	Identifies the type of anc buffer the packet originated from:  GUMP, RTP, VANC, or unknown.
 **/
-enum AJAAncillaryBufferFormat
+typedef enum
 {
-	AJAAncillaryBufferFormat_Unknown,		///< @brief	Unknown or "don't care".
-	AJAAncillaryBufferFormat_FBVANC,		///< @brief	Frame buffer VANC line.
-	AJAAncillaryBufferFormat_SDI,			///< @brief	SDI ("GUMP").
-	AJAAncillaryBufferFormat_RTP,			///< @brief	RTP/IP.
-	AJAAncillaryBufferFormat_Invalid,		///< @brief	Invalid.
-	AJAAncillaryBufferFormat_Size = AJAAncillaryBufferFormat_Invalid
-};
+	AJAAncBufferFormat_Unknown,		///< @brief	Unknown or "don't care".
+	AJAAncBufferFormat_FBVANC,		///< @brief	Frame buffer VANC line.
+	AJAAncBufferFormat_SDI,			///< @brief	SDI ("GUMP").
+	AJAAncBufferFormat_RTP,			///< @brief	RTP/IP.
+	AJAAncBufferFormat_Invalid,		///< @brief	Invalid.
+	AJAAncBufferFormat_Size	= AJAAncBufferFormat_Invalid
 
-#define	IS_VALID_AJAAncillaryBufferFormat(_x_)		((_x_) >= AJAAncillaryBufferFormat_Unknown  &&  (_x_) < AJAAncillaryBufferFormat_Size)
-#define	IS_KNOWN_AJAAncillaryBufferFormat(_x_)		((_x_) > AJAAncillaryBufferFormat_Unknown  &&  (_x_) < AJAAncillaryBufferFormat_Size)
+} AJAAncBufferFormat;
+
+#define	IS_VALID_AJAAncBufferFormat(_x_)		((_x_) >= AJAAncBufferFormat_Unknown  &&  (_x_) < AJAAncBufferFormat_Size)
+#define	IS_KNOWN_AJAAncBufferFormat(_x_)		((_x_) > AJAAncBufferFormat_Unknown  &&  (_x_) < AJAAncBufferFormat_Size)
 
 /**
-	@return		A string containing a human-readable representation of the given AJAAncillaryBufferFormat value (or empty if invalid).
-	@param[in]	inValue		Specifies the AJAAncillaryBufferFormat to be converted.
+	@return		A string containing a human-readable representation of the given AJAAncBufferFormat value (or empty if invalid).
+	@param[in]	inValue		Specifies the AJAAncBufferFormat to be converted.
 	@param[in]	inCompact	If true (the default), returns the compact representation;  otherwise use the longer symbolic format.
 **/
-AJAExport const std::string &	AJAAncillaryBufferFormatToString (const AJAAncillaryBufferFormat inValue, const bool inCompact = true);
+AJAExport const std::string &	AJAAncBufferFormatToString (const AJAAncBufferFormat inValue, const bool inCompact = true);
 
 
 /**
@@ -545,7 +558,7 @@ AJAExport const std::string &	AJAAncillaryBufferFormatToString (const AJAAncilla
 				-	Or to "Manually" create a packet:
 					@code{.cpp}
 						const string myPacketData ("This is a test");
-						AJAAncillaryData packet;  //  Defaults to AJAAncillaryDataCoding_Digital, AJAAncillaryDataLink_A, AJAAncillaryDataStream_1, AJAAncillaryDataVideoStream_Y, AJAAncillaryDataSpace_VANC
+						AJAAncillaryData packet;  //  Defaults to AJAAncDataCoding_Digital, AJAAncDataLink_A, AJAAncDataStream_1, AJAAncDataChannel_Y, AJAAncDataSpace_VANC
 						packet.SetDID(0xAA);  packet.SetSID(0xBB);  //  Set the DID & SDID
 						packet.SetLocationLineNumber(10);  //  Set the SMPTE line number you want the packet inserted at
 						packet.SetPayloadData(myPacketData.c_str(), myPacketData.length());  //  Copy in the packet data
@@ -596,21 +609,22 @@ public:
 	virtual inline uint8_t					GetDID (void) const							{return m_DID;}							///< @return	My Data ID (DID).
 	virtual inline uint8_t					GetSID (void) const							{return m_SID;}							///< @return	My secondary data ID (SID).
 	virtual inline uint32_t					GetDC (void) const							{return uint32_t(m_payload.size());}	///< @return	My payload data count, in bytes.
-	virtual inline AJAAncillaryDIDSIDPair	GetDIDSIDPair (void) const					{return AJAAncillaryDIDSIDPair(GetDID(),GetSID());}	///< @return	My DID & SID as an AJAAncillaryDIDSIDPair.
-	virtual inline AJAAncPktDIDSID			GetDIDSID (void) const						{return ToAJAAncPktDIDSID(GetDID(),GetSID());}		///< @return	My DID & SID as an AJAAncPktDIDSID.
+	virtual inline AJAAncDIDSIDPair			GetDIDSIDPair (void) const					{return AJAAncDIDSIDPair(GetDID(),GetSID());}	///< @return	My DID & SID as an AJAAncDIDSIDPair.
+	virtual inline AJAAncPktDIDSID			GetDIDSID (void) const						{return ToAJAAncPktDIDSID(GetDID(),GetSID());}	///< @return	My DID & SID as an AJAAncPktDIDSID.
 	virtual inline size_t					GetPayloadByteCount (void) const			{return size_t(GetDC());}				///< @return	My current payload byte count.
-	virtual AJAAncillaryDataType			GetAncillaryDataType (void) const			{return m_ancType;}						///< @return	My anc data type (if known).
+	virtual AJAAncDataType					GetAncillaryDataType (void) const			{return m_ancType;}						///< @return	My anc data type (if known).
 	virtual inline uint32_t					GetFrameID (void) const						{return m_frameID;}						///< @return	My frame identifier (if known).
 
-	virtual inline const AJAAncillaryDataLocation &		GetDataLocation (void) const	{return m_location;}					///< @brief	My ancillary data "location" within the video stream.
-	virtual inline AJAAncillaryDataCoding	GetDataCoding (void) const					{return m_coding;}						///< @return	The ancillary data coding type (e.g., digital or analog/raw waveform).
-	virtual inline AJAAncillaryBufferFormat	GetBufferFormat (void) const				{return m_bufferFmt;}					///< @return	The ancillary buffer format (e.g., SDI/GUMP, RTP or Unknown).
+	virtual inline const AJAAncDataLoc &	GetDataLocation (void) const				{return m_location;}					///< @return	A const reference to my AJAAncDataLoc.
+	virtual inline AJAAncDataLoc &			GetDataLocation (void)						{return m_location;}					///< @return	A non-const reference to my AJAAncDataLoc.
+	virtual inline AJAAncDataCoding			GetDataCoding (void) const					{return m_coding;}						///< @return	The ancillary data coding type (e.g., digital or analog/raw waveform).
+	virtual inline AJAAncBufferFormat		GetBufferFormat (void) const				{return m_bufferFmt;}					///< @return	The ancillary buffer format (e.g., SDI/GUMP, RTP or Unknown).
 	virtual uint8_t							GetChecksum (void) const					{return m_checksum;}					///< @return	My 8-bit checksum.
 
-	virtual inline AJAAncillaryDataLink		GetLocationVideoLink (void) const			{return GetDataLocation().GetDataLink();}				///< @return	My current anc data video link value (A or B).
-	virtual inline AJAAncillaryDataStream	GetLocationDataStream (void) const			{return GetDataLocation().GetDataStream();}				///< @return	My current anc data location's data stream (DS1,DS2...).
-	virtual inline AJAAncillaryDataChannel	GetLocationDataChannel (void) const			{return GetDataLocation().GetDataChannel();}			///< @return	My current anc data location's video stream (Y or C).
-	virtual inline AJAAncillaryDataSpace	GetLocationVideoSpace (void) const			{return GetDataLocation().GetDataSpace();}				///< @return	My current ancillary data space (HANC or VANC).
+	virtual inline AJAAncDataLink			GetLocationVideoLink (void) const			{return GetDataLocation().GetDataLink();}				///< @return	My current anc data video link value (A or B).
+	virtual inline AJAAncDataStream			GetLocationDataStream (void) const			{return GetDataLocation().GetDataStream();}				///< @return	My current anc data location's data stream (DS1,DS2...).
+	virtual inline AJAAncDataChannel		GetLocationDataChannel (void) const			{return GetDataLocation().GetDataChannel();}			///< @return	My current anc data location's video stream (Y or C).
+	virtual inline AJAAncDataSpace			GetLocationVideoSpace (void) const			{return GetDataLocation().GetDataSpace();}				///< @return	My current ancillary data space (HANC or VANC).
 	virtual inline uint16_t					GetLocationLineNumber (void) const			{return GetDataLocation().GetLineNumber();}				///< @return	My current frame line number value (SMPTE line numbering).
 	virtual inline uint16_t					GetLocationHorizOffset (void) const			{return GetDataLocation().GetHorizontalOffset();}		///< @return	My current horizontal offset value.
 	virtual uint16_t						GetStreamInfo (void) const;																			///< @return	My 7-bit stream info (if relevant)
@@ -619,14 +633,14 @@ public:
 	/**
 		@return	True if I have valid DataLink/DataStream stream information (rather than unknown).
 	**/
-	virtual inline bool						HasStreamInfo (void) const					{return IS_VALID_AJAAncillaryDataLink(GetLocationVideoLink()) && IS_VALID_AJAAncillaryDataStream(GetLocationDataStream());}
-	virtual inline bool						IsEmpty (void) const						{return GetDC() == 0;}										///< @return	True if I have an empty payload.
-	virtual inline bool						IsLumaChannel (void) const					{return GetDataLocation().IsLumaChannel ();}				///< @return	True if my location component stream is Y (luma).
-	virtual inline bool						IsChromaChannel (void) const				{return GetDataLocation().IsChromaChannel ();}				///< @return	True if my location component stream is C (chroma).
-	virtual inline bool						IsVanc (void) const							{return GetDataLocation().IsVanc ();}						///< @return	True if my location data space is VANC.
-	virtual inline bool						IsHanc (void) const							{return GetDataLocation().IsHanc ();}						///< @return	True if my location data space is HANC.
-	virtual inline bool						IsDigital (void) const						{return GetDataCoding() == AJAAncillaryDataCoding_Digital;}	///< @return	True if my coding type is digital.
-	virtual inline bool						IsRaw (void) const							{return GetDataCoding() == AJAAncillaryDataCoding_Raw;}		///< @return	True if my coding type is "raw" (i.e., from an digitized waveform).
+	virtual inline bool						HasStreamInfo (void) const					{return IS_VALID_AJAAncDataLink(GetLocationVideoLink()) && IS_VALID_AJAAncDataStream(GetLocationDataStream());}
+	virtual inline bool						IsEmpty (void) const						{return GetDC() == 0;}									///< @return	True if I have an empty payload.
+	virtual inline bool						IsLumaChannel (void) const					{return GetDataLocation().IsLumaChannel ();}			///< @return	True if my location component stream is Y (luma).
+	virtual inline bool						IsChromaChannel (void) const				{return GetDataLocation().IsChromaChannel ();}			///< @return	True if my location component stream is C (chroma).
+	virtual inline bool						IsVanc (void) const							{return GetDataLocation().IsVanc ();}					///< @return	True if my location data space is VANC.
+	virtual inline bool						IsHanc (void) const							{return GetDataLocation().IsHanc ();}					///< @return	True if my location data space is HANC.
+	virtual inline bool						IsDigital (void) const						{return GetDataCoding() == AJAAncDataCoding_Digital;}	///< @return	True if my coding type is digital.
+	virtual inline bool						IsRaw (void) const							{return GetDataCoding() == AJAAncDataCoding_Raw;}		///< @return	True if my coding type is "raw" (i.e., from an digitized waveform).
 
 	/**
 		@brief	Generates an 8-bit checksum from the DID + SID + DC + payload data.
@@ -667,7 +681,7 @@ public:
 	/**
 		@brief		Compares me with another packet.
 		@param[in]	inRHS				The packet I am to be compared with.
-		@param[in]	inIgnoreLocation	If true, don't compare each packet's AJAAncillaryDataLocation info. Defaults to true.
+		@param[in]	inIgnoreLocation	If true, don't compare each packet's AJAAncDataLoc info. Defaults to true.
 		@param[in]	inIgnoreChecksum	If true, don't compare each packet's checksums. Defaults to true.
 		@return		AJA_STATUS_SUCCESS if equal;  otherwise AJA_STATUS_FAIL.
 	**/
@@ -675,14 +689,14 @@ public:
 
 
 #if !defined(NTV2_DEPRECATE_15_2)
-		virtual inline AJAStatus					GetDataLocation (AJAAncillaryDataLocation & outLocInfo) const	///< @deprecated	Use the inline version instead.
+		virtual inline AJAStatus			GetDataLocation (AJAAncDataLoc & outLocInfo) const	///< @deprecated	Use the inline version instead.
 																								{outLocInfo = GetDataLocation();	return AJA_STATUS_SUCCESS;}
-		virtual AJAStatus							GetDataLocation (AJAAncillaryDataLink & outLink,
-																	AJAAncillaryDataVideoStream & outChannel,
-																	AJAAncillaryDataSpace & outAncSpace,
-																	uint16_t & outLineNum);		///< @deprecated	Use the inline GetDataLocation() instead.
-		virtual inline AJAAncillaryDataVideoStream	GetLocationVideoStream (void) const			{return m_location.GetDataChannel();}	///< @deprecated	Use GetLocationDataChannel instead.
-		virtual inline bool							IsAnalog (void) const						{return GetDataCoding() == AJAAncillaryDataCoding_Raw;}		///< @deprecated	Use IsRaw instead.
+		virtual AJAStatus					GetDataLocation (AJAAncDataLink & outLink,
+															AJAAncDataChannel & outChannel,
+															AJAAncDataSpace & outAncSpace,
+															uint16_t & outLineNum);		///< @deprecated	Use the inline GetDataLocation() instead.
+		virtual inline AJAAncDataChannel	GetLocationVideoStream (void) const			{return m_location.GetDataChannel();}	///< @deprecated	Use GetLocationDataChannel instead.
+		virtual inline bool					IsAnalog (void) const						{return GetDataCoding() == AJAAncDataCoding_Raw;}		///< @deprecated	Use IsRaw instead.
 #endif	//	!defined(NTV2_DEPRECATE_15_2)
 	///@}
 
@@ -708,10 +722,10 @@ public:
 
 	/**
 		@brief		Sets both my Data ID (DID) and Secondary Data ID (SID).
-		@param[in]	inDIDSID	The AJAAncillaryDIDSIDPair that specifies both a DID and SID value.
+		@param[in]	inDIDSID	The AJAAncDIDSIDPair that specifies both a DID and SID value.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual inline AJAStatus				SetDIDSID (const AJAAncillaryDIDSIDPair & inDIDSID)		{SetDID(inDIDSID.first); return SetSID(inDIDSID.second);}	//	New in SDK 16.0
+	virtual inline AJAStatus				SetDIDSID (const AJAAncDIDSIDPair & inDIDSID)		{SetDID(inDIDSID.first); return SetSID(inDIDSID.second);}	//	New in SDK 16.0
 
 	/**
 		@brief		Sets my 8-bit checksum. Note that it is not usually necessary to generate an 8-bit checksum, since the ANC Insertion
@@ -726,10 +740,10 @@ public:
 
 	/**
 		@brief		Sets my ancillary data "location" within the video stream.
-		@param[in]	inLoc		Specifies the new AJAAncillaryDataLocation value.
+		@param[in]	inLoc		Specifies the new AJAAncDataLoc value.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						SetDataLocation (const AJAAncillaryDataLocation & inLoc);
+	virtual AJAStatus						SetDataLocation (const AJAAncDataLoc & inLoc);
 
 #if !defined(NTV2_DEPRECATE_15_2)
 	/**
@@ -741,11 +755,11 @@ public:
 		@param[in]	inStream	Optionally specifies the data stream (DS1 or DS2 for link A, or DS3 or DS4 for link B). Defaults to DS1.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						SetDataLocation (	const AJAAncillaryDataLink		inLink,
-																const AJAAncillaryDataChannel	inChannel,
-																const AJAAncillaryDataSpace		inAncSpace,
-																const uint16_t					inLineNum,
-																const AJAAncillaryDataStream	inStream  = AJAAncillaryDataStream_1);
+	virtual AJAStatus						SetDataLocation (	const AJAAncDataLink	inLink,
+																const AJAAncDataChannel	inChannel,
+																const AJAAncDataSpace	inAncSpace,
+																const uint16_t			inLineNum,
+																const AJAAncDataStream	inStream  = AJAAncDataStream_1);
 #endif	//	!defined(NTV2_DEPRECATE_15_2)
 
 	/**
@@ -753,24 +767,24 @@ public:
 		@param[in]	inLink	Specifies the new video link value (A or B).
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						SetLocationVideoLink (const AJAAncillaryDataLink inLink);
+	virtual AJAStatus						SetLocationVideoLink (const AJAAncDataLink inLink);
 
 	/**
 		@brief		Sets my ancillary data "location" data stream value (DS1,DS2...).
 		@param[in]	inStream	Specifies my new data stream (DS1,DS2...) value.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						SetLocationDataStream (const AJAAncillaryDataStream inStream);
+	virtual AJAStatus						SetLocationDataStream (const AJAAncDataStream inStream);
 
 	/**
 		@brief		Sets my ancillary data "location" data channel value (Y or C).
 		@param[in]	inChannel	Specifies my new data channel (Y or C) value.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						SetLocationDataChannel (const AJAAncillaryDataChannel inChannel);
+	virtual AJAStatus						SetLocationDataChannel (const AJAAncDataChannel inChannel);
 
 #if !defined(NTV2_DEPRECATE_15_2)
-	virtual AJAStatus						SetLocationVideoSpace (const AJAAncillaryDataSpace inAncSpace);	///< @deprecated	Call SetLocationHorizOffset instead.
+	virtual AJAStatus						SetLocationVideoSpace (const AJAAncDataSpace inAncSpace);	///< @deprecated	Call SetLocationHorizOffset instead.
 #endif	//	NTV2_DEPRECATE_15_2
 
 	/**
@@ -782,17 +796,17 @@ public:
 
 	/**
 		@brief	Sets my ancillary data "location" horizontal offset.
-		@param[in]	inOffset	Specifies the new horizontal offset value. \sa AJAAncillaryDataLocation::SetHorizontalOffset.
+		@param[in]	inOffset	Specifies the new horizontal offset value. \sa AJAAncDataLoc::SetHorizontalOffset.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						SetLocationHorizOffset (const uint16_t inOffset);
 
 	/**
 		@brief		Sets my ancillary data coding type (e.g. digital or analog/raw waveform).
-		@param[in]	inCodingType	AJAAncillaryDataCoding
+		@param[in]	inCodingType	AJAAncDataCoding
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						SetDataCoding (const AJAAncillaryDataCoding inCodingType);
+	virtual AJAStatus						SetDataCoding (const AJAAncDataCoding inCodingType);
 
 	/**
 		@brief		Sets my originating frame identifier.
@@ -806,7 +820,7 @@ public:
 		@param[in]	inFmt	Specifies my new buffer format.
 		@return		A non-constant reference to myself.
 	**/
-	virtual inline AJAAncillaryData &		SetBufferFormat (const AJAAncillaryBufferFormat inFmt)	{m_bufferFmt = inFmt;  return *this;}
+	virtual inline AJAAncillaryData &		SetBufferFormat (const AJAAncBufferFormat inFmt)		{m_bufferFmt = inFmt;  return *this;}
 
 	virtual inline uint64_t &				UserData (void)			{return m_userData;}	///< @return	Returns a non-constant reference to my user data. (New in SDK 16.0)
 
@@ -814,7 +828,7 @@ public:
 		/**
 			@deprecated		Use SetLocationDataChannel function instead.
 		**/
-		virtual inline NTV2_DEPRECATED_f(AJAStatus	SetLocationVideoStream (const AJAAncillaryDataVideoStream inChannel))
+		virtual inline NTV2_DEPRECATED_f(AJAStatus	SetLocationVideoStream (const AJAAncDataChannel inChannel))
 													{return SetLocationDataChannel(inChannel);}
 #endif	//	!defined(NTV2_DEPRECATE_14_2)
 	///@}
@@ -902,7 +916,7 @@ public:
 		@param[in]	inLocInfo	Specifies the anc data location information.
 		@return					AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						SetFromSMPTE334 (const uint16_t * pInData, const uint32_t inNumWords, const AJAAncillaryDataLocation & inLocInfo);
+	virtual AJAStatus						SetFromSMPTE334 (const uint16_t * pInData, const uint32_t inNumWords, const AJAAncDataLoc & inLocInfo);
 
 	/**
 		@brief		Parses (interprets) the "local" ancillary data from my payload data.
@@ -916,7 +930,7 @@ public:
 		@details	This result will only be trustworthy if I'm an AJAAncillaryData subclass (e.g. AJAAncillaryData_Cea708),
 					and my ParsePayloadData method was previously called, to determine whether or not my packet
 					data is legit or not. Typically, AJAAncillaryDataFactory::GuessAncillaryDataType is called
-					to ascertain a packet's AJAAncillaryDataType, then AJAAncillaryDataFactory::Create is used
+					to ascertain a packet's AJAAncDataType, then AJAAncillaryDataFactory::Create is used
 					to instantiate the specific AJAAncillaryData subclass instance. This is done automatically
 					by AJAAncillaryList::AddReceivedAncillaryData.
 	**/
@@ -944,18 +958,18 @@ public:
 		@param[out]	outPacketByteCount	Receives the size (in bytes) of the parsed packet.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						InitWithReceivedData (	const uint8_t *						pInData,
-																	const size_t						inMaxBytes,
-																	const AJAAncillaryDataLocation &	inLocationInfo,
-																	uint32_t &							outPacketByteCount);
+	virtual AJAStatus						InitWithReceivedData (	const uint8_t *			pInData,
+																	const size_t			inMaxBytes,
+																	const AJAAncDataLoc &	inLocationInfo,
+																	uint32_t &				outPacketByteCount);
 	/**
 		@brief		Initializes me from "raw" ancillary data received from hardware (ingest) -- see \ref ancgumpformat.
 		@param[in]	inData				Specifies the "raw" packet data.
 		@param[in]	inLocationInfo		Specifies the default location info.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						InitWithReceivedData (	const std::vector<uint8_t> &		inData,
-																	const AJAAncillaryDataLocation &	inLocationInfo);
+	virtual AJAStatus						InitWithReceivedData (	const std::vector<uint8_t> &	inData,
+																	const AJAAncDataLoc &			inLocationInfo);
 
 	/**
 		@brief		Initializes me from the given 32-bit IP packet words received from hardware (ingest).
@@ -1026,6 +1040,7 @@ public:
 
 	/**
 		@brief		Dumps a human-readable representation of my payload bytes into the given output stream.
+		@param		inOutStream		Specifies the output stream.
 		@return		The given output stream.
 	**/
 	virtual std::ostream &					DumpPayload (std::ostream & inOutStream) const;
@@ -1033,9 +1048,10 @@ public:
 	/**
 		@brief		Compares me with another packet and returns a string that describes what's different.
 		@param[in]	inRHS				The packet I am to be compared with.
-		@param[in]	inIgnoreLocation	If true, don't compare each packet's AJAAncillaryDataLocation info. Defaults to true.
+		@param[in]	inIgnoreLocation	If true, don't compare each packet's AJAAncDataLoc info. Defaults to true.
 		@param[in]	inIgnoreChecksum	If true, don't compare each packet's checksums. Defaults to true.
-		@return		Empty string if equal;  otherwise a string that contains the differences.
+		@return		Empty string if equal;  otherwise a string that contains one or more differences found,
+					delimited by newline characters.
 	**/
 	virtual std::string						CompareWithInfo (const AJAAncillaryData & inRHS, const bool inIgnoreLocation = true, const bool inIgnoreChecksum = true) const;
 
@@ -1129,19 +1145,21 @@ public:
 
 	//	Instance Data
 	protected:
-		uint8_t						m_DID;			///< @brief	Official SMPTE ancillary packet ID (w/o parity)
-		uint8_t						m_SID;			///< @brief	Official SMPTE secondary ID (or DBN - w/o parity)
-		uint8_t						m_checksum;		///< @brief	My 8-bit checksum: DID + SID + DC + payload (w/o parity) [note: NOT the same as the 9-bit checksum in a SMPTE-291 packet!]
-		AJAAncillaryDataLocation	m_location;		///< @brief	Location of the ancillary data in the video stream (Y or C, HANC or VANC, etc.)
-		AJAAncillaryDataCoding		m_coding;		///< @brief	Analog or digital data
-		ByteVector					m_payload;		///< @brief	My payload data (DC = size)
-		bool						m_rcvDataValid;	///< @brief	This is set true (or not) by ParsePayloadData()
-		AJAAncillaryDataType		m_ancType;		///< @brief	One of a known set of ancillary data types (or "Custom" if not identified)
-		AJAAncillaryBufferFormat	m_bufferFmt;	///< @brief	My originating buffer format, if known
-		uint32_t					m_frameID;		///< @brief	ID of my originating frame, if known
-		uint64_t					m_userData;		///< @brief	User data (for client use)
+		uint8_t				m_DID;			///< @brief	Official SMPTE ancillary packet ID (w/o parity)
+		uint8_t				m_SID;			///< @brief	Official SMPTE secondary ID (or DBN - w/o parity)
+		uint8_t				m_checksum;		///< @brief	My 8-bit checksum: DID + SID + DC + payload (w/o parity) [note: NOT the same as the 9-bit checksum in a SMPTE-291 packet!]
+		AJAAncDataLoc		m_location;		///< @brief	Location of the ancillary data in the video stream (Y or C, HANC or VANC, etc.)
+		AJAAncDataCoding	m_coding;		///< @brief	Analog or digital data
+		ByteVector			m_payload;		///< @brief	My payload data (DC = size)
+		bool				m_rcvDataValid;	///< @brief	This is set true (or not) by ParsePayloadData()
+		AJAAncDataType		m_ancType;		///< @brief	One of a known set of ancillary data types (or "Custom" if not identified)
+		AJAAncBufferFormat	m_bufferFmt;	///< @brief	My originating buffer format, if known
+		uint32_t			m_frameID;		///< @brief	ID of my originating frame, if known
+		uint64_t			m_userData;		///< @brief	User data (for client use)
 
 };	//	AJAAncillaryData
+
+typedef AJAAncillaryData	AJAAncPacket, AJAAncData;
 
 
 /**
@@ -1167,7 +1185,7 @@ class AJAExport AJARTPAncPayloadHeader
 			@return		True if the given buffer starts with an RTP packet header.
 			@param[in]	inBuffer		Specifies the buffer to inspect.
 		**/
-		static bool				BufferStartsWithRTPHeader (const NTV2_POINTER & inBuffer);
+		static bool				BufferStartsWithRTPHeader (const NTV2Buffer & inBuffer);
 
 		static inline size_t	GetHeaderWordCount (void)	{return 5;}											///< @return	The number of U32s in an RTP header.
 		static inline size_t	GetHeaderByteCount (void)	{return GetHeaderWordCount() * sizeof(uint32_t);}	///< @return	The number of bytes in an RTP header.
@@ -1248,7 +1266,7 @@ class AJAExport AJARTPAncPayloadHeader
 									Defaults to zero (the start of the buffer).
 			@return		True if successful;  otherwise false.
 		**/
-		virtual bool			WriteToBuffer (NTV2_POINTER & outBuffer, const ULWord inU32Offset = 0) const;
+		virtual bool			WriteToBuffer (NTV2Buffer & outBuffer, const ULWord inU32Offset = 0) const;
 
 		/**
 			@brief		Resets my current state from the RTP packet header stored in the given ::ULWordSequence.
@@ -1264,7 +1282,7 @@ class AJAExport AJARTPAncPayloadHeader
 			@param[in]	inBuffer	A buffer containing a number of 32-bit words. Each word must be in network byte order.
 			@return		True if successful;  otherwise false.
 		**/
-		virtual bool			ReadFromBuffer (const NTV2_POINTER & inBuffer);
+		virtual bool			ReadFromBuffer (const NTV2Buffer & inBuffer);
 	///@}
 
 	/**
@@ -1420,7 +1438,7 @@ class AJAExport AJARTPAncPacketHeader
 	**/
 	///@{
 								AJARTPAncPacketHeader ();		///< @brief	My default constructor
-		explicit				AJARTPAncPacketHeader (const AJAAncillaryDataLocation & inLocation);	///< @brief	Constructs me from an ::AJAAncillaryDataLocation
+		explicit				AJARTPAncPacketHeader (const AJAAncDataLoc & inLocation);	///< @brief	Constructs me from an ::AJAAncDataLoc
 		virtual inline			~AJARTPAncPacketHeader ()		{}		///< @brief	My destructor
 	///@}
 
@@ -1434,7 +1452,7 @@ class AJAExport AJARTPAncPacketHeader
 		virtual inline uint16_t	GetLineNumber (void) const			{return mLineNum;}		///< @return	My current line number value (in host native byte order).
 		virtual inline uint16_t	GetHorizOffset (void) const			{return mHOffset;}		///< @return	My current horizontal offset value (in host native byte order).
 		virtual inline uint8_t	GetStreamNumber (void) const		{return mStreamNum;}	///< @return	My current data stream number value.
-		virtual AJAAncillaryDataLocation	AsDataLocation(void) const;						///< @return	An ::AJAAncillaryDataLocation that represents my current state.
+		virtual AJAAncDataLoc	AsDataLocation(void) const;									///< @return	An ::AJAAncDataLoc that represents my current state.
 
 		/**
 			@brief		Streams a human-readable represetation of my current state to the given output stream.
@@ -1491,18 +1509,18 @@ class AJAExport AJARTPAncPacketHeader
 		virtual inline AJARTPAncPacketHeader &	SetDataStreamFlag (const bool inFlag)		{mSBit = inFlag;  return *this;}
 
 		/**
-			@brief		Resets me from a given ::AJAAncillaryDataLocation.
-			@param[in]	inLocation		Specifies the ::AJAAncillaryDataLocation to reset my current state from.
+			@brief		Resets me from a given ::AJAAncDataLoc.
+			@param[in]	inLocation		Specifies the ::AJAAncDataLoc to reset my current state from.
 			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
 		**/
-		virtual AJARTPAncPacketHeader &	SetFrom (const AJAAncillaryDataLocation & inLocation);
+		virtual AJARTPAncPacketHeader &	SetFrom (const AJAAncDataLoc & inLocation);
 
 		/**
-			@brief		Assigns the given ::AJAAncillaryDataLocation to me, resetting my current state.
-			@param[in]	inRHS			Specifies the ::AJAAncillaryDataLocation to reset my current state from.
+			@brief		Assigns the given ::AJAAncDataLoc to me, resetting my current state.
+			@param[in]	inRHS			Specifies the ::AJAAncDataLoc to reset my current state from.
 			@return		A non-constant reference to myself (for daisy-chaining "Set..." calls).
 		**/
-		virtual inline AJARTPAncPacketHeader &	operator = (const AJAAncillaryDataLocation & inRHS)		{return SetFrom(inRHS);}
+		virtual inline AJARTPAncPacketHeader &	operator = (const AJAAncDataLoc & inRHS)		{return SetFrom(inRHS);}
 	///@}
 
 	/**
@@ -1550,5 +1568,107 @@ class AJAExport AJARTPAncPacketHeader
 	@return		A non-constant reference to the given output stream.
 **/
 static inline std::ostream & operator << (std::ostream & inOutStrm,  const AJARTPAncPacketHeader & inObj)	{return inObj.Print(inOutStrm);}
+
+
+#if !defined(NTV2_DEPRECATE_16_3)
+	//	The old, original long names...
+	typedef AJAAncDataSpace								AJAAncillaryDataSpace;
+	typedef AJAAncDataStream							AJAAncillaryDataStream;
+	typedef AJAAncDataLink								AJAAncillaryDataLink;
+	typedef AJAAncDataType								AJAAncillaryDataType;
+	typedef AJAAncDataLoc								AJAAncillaryDataLocation;
+	typedef AJAAncillaryDataLocation *					AJAAncillaryDataLocationPtr;
+	typedef AJAAncDataCoding							AJAAncillaryDataCoding;
+	typedef AJAAncBufferFormat							AJAAncillaryBufferFormat;
+	typedef	AJAAncDataChannel							AJAAncillaryDataChannel;
+//	typedef AJAAncillaryDataChannel						AJAAncDataChannel;
+	typedef AJAAncillaryDataChannel						AJAAncillaryDataVideoStream;
+
+	AJAExport inline const std::string & AJAAncillaryDataVideoStreamToString (const AJAAncillaryDataVideoStream inValue, const bool inCompact = true)
+	{
+		return AJAAncDataChannelToString(inValue,inCompact);
+	}
+
+	#define AJAAncillaryDataChannel_C					AJAAncDataChannel_C
+	#define AJAAncillaryDataChannel_Both				AJAAncDataChannel_Both
+	#define AJAAncillaryDataChannel_Y					AJAAncDataChannel_Y
+	#define AJAAncillaryDataChannel_Unknown				AJAAncDataChannel_Unknown
+	#define AJAAncillaryDataChannel_Size				AJAAncDataChannel_Size
+	#define	IS_VALID_AJAAncillaryDataVideoStream(_x_)	(IS_VALID_AJAAncDataChannel(_x_))
+	#define	AJAAncillaryDataVideoStream_C				AJAAncillaryDataChannel_C
+	#define	AJAAncillaryDataVideoStream_Y				AJAAncillaryDataChannel_Y
+	#define	AJAAncillaryDataVideoStream_Unknown			AJAAncillaryDataChannel_Unknown
+	#define	AJAAncillaryDataVideoStream_Size			AJAAncillaryDataChannel_Size
+	#define	IS_VALID_AJAAncillaryDataChannel			IS_VALID_AJAAncDataChannel
+	#define AJAAncillaryDataChannelToString				AJAAncDataChannelToString
+
+	#define AJAAncillaryDataSpace_VANC					AJAAncDataSpace_VANC
+	#define AJAAncillaryDataSpace_HANC					AJAAncDataSpace_HANC
+	#define AJAAncillaryDataSpace_Unknown				AJAAncDataSpace_Unknown
+	#define AJAAncillaryDataSpace_Size					AJAAncDataSpace_Size
+	#define	IS_VALID_AJAAncillaryDataSpace				IS_VALID_AJAAncDataSpace
+	#define	IS_HANC_AJAAncillaryDataSpace				IS_HANC_AJAAncDataSpace
+	#define	IS_VANC_AJAAncillaryDataSpace				IS_VANC_AJAAncDataSpace
+	#define AJAAncillaryDataSpaceToString				AJAAncDataSpaceToString
+
+	#define	AJAAncillaryDataStream_1					AJAAncDataStream_1
+	#define	AJAAncillaryDataStream_2					AJAAncDataStream_2
+	#define	AJAAncillaryDataStream_3					AJAAncDataStream_3
+	#define	AJAAncillaryDataStream_4					AJAAncDataStream_4
+	#define	AJAAncillaryDataStream_Unknown				AJAAncDataStream_Unknown
+	#define	AJAAncillaryDataStream_Size					AJAAncDataStream_Size
+	#define	IS_VALID_AJAAncillaryDataStream				IS_VALID_AJAAncDataStream
+	#define	IS_LINKA_AJAAncillaryDataStream				IS_LINKA_AJAAncDataStream
+	#define	IS_LINKB_AJAAncillaryDataStream				IS_LINKB_AJAAncDataStream
+	#define AJAAncillaryDataStreamToString				AJAAncDataStreamToString
+
+	#define AJAAncillaryDataLink_A						AJAAncDataLink_A
+	#define AJAAncillaryDataLink_B						AJAAncDataLink_B
+	#define AJAAncillaryDataLink_LeftEye				AJAAncDataLink_LeftEye
+	#define AJAAncillaryDataLink_RightEye				AJAAncDataLink_RightEye
+	#define AJAAncillaryDataLink_Unknown				AJAAncDataLink_Unknown
+	#define AJAAncillaryDataLink_Size					AJAAncDataLink_Size
+	#define IS_VALID_AJAAncillaryDataLink				IS_VALID_AJAAncDataLink
+	#define AJAAncillaryDataLinkToString				AJAAncDataLinkToString
+
+	#define	AJAAncillaryDataType_Unknown				AJAAncDataType_Unknown
+	#define	AJAAncillaryDataType_Smpte2016_3			AJAAncDataType_Smpte2016_3
+	#define	AJAAncillaryDataType_Timecode_ATC			AJAAncDataType_Timecode_ATC
+	#define	AJAAncillaryDataType_Timecode_VITC			AJAAncDataType_Timecode_VITC
+	#define	AJAAncillaryDataType_Cea708					AJAAncDataType_Cea708
+	#define	AJAAncillaryDataType_Cea608_Vanc			AJAAncDataType_Cea608_Vanc
+	#define	AJAAncillaryDataType_Cea608_Line21			AJAAncDataType_Cea608_Line21
+	#define	AJAAncillaryDataType_Smpte352				AJAAncDataType_Smpte352
+	#define	AJAAncillaryDataType_Smpte2051				AJAAncDataType_Smpte2051
+	#define	AJAAncillaryDataType_FrameStatusInfo524D	AJAAncDataType_FrameStatusInfo524D
+	#define	AJAAncillaryDataType_FrameStatusInfo5251	AJAAncDataType_FrameStatusInfo5251
+	#define	AJAAncillaryDataType_HDR_SDR				AJAAncDataType_HDR_SDR
+	#define	AJAAncillaryDataType_HDR_HDR10				AJAAncDataType_HDR_HDR10
+	#define	AJAAncillaryDataType_HDR_HLG				AJAAncDataType_HDR_HLG
+	#define	AJAAncillaryDataType_Size					AJAAncDataType_Size
+	#define	IS_VALID_AJAAncillaryDataType				IS_VALID_AJAAncDataType
+	#define	IS_KNOWN_AJAAncillaryDataType				IS_KNOWN_AJAAncDataType
+	#define AJAAncillaryDataTypeToString				AJAAncDataTypeToString
+	#define AJAAncillaryData_AnalogDID					AJAAncData_AnalogDID
+	#define AJAAncillaryData_AnalogSID					AJAAncData_AnalogSID
+
+	#define	AJAAncillaryDataCoding_Digital				AJAAncDataCoding_Digital
+	#define	AJAAncillaryDataCoding_Raw					AJAAncDataCoding_Raw
+	#define	AJAAncillaryDataCoding_Analog				AJAAncDataCoding_Raw
+	#define	AJAAncillaryDataCoding_Unknown				AJAAncDataCoding_Unknown
+	#define	AJAAncillaryDataCoding_Size					AJAAncDataCoding_Size
+	#define	IS_VALID_AJAAncillaryDataCoding(_x_)		IS_VALID_AJAAncDataCoding(_x_)
+	#define	AJAAncillaryDataCodingToString				AJAAncDataCodingToString
+
+	#define	AJAAncillaryBufferFormat_Unknown			AJAAncBufferFormat_Unknown
+	#define	AJAAncillaryBufferFormat_FBVANC				AJAAncBufferFormat_FBVANC
+	#define	AJAAncillaryBufferFormat_SDI				AJAAncBufferFormat_SDI
+	#define	AJAAncillaryBufferFormat_RTP				AJAAncBufferFormat_RTP
+	#define	AJAAncillaryBufferFormat_Invalid			AJAAncBufferFormat_Invalid
+	#define	AJAAncillaryBufferFormat_Size				AJAAncBufferFormat_Invalid
+	#define	IS_VALID_AJAAncillaryBufferFormat(_x_)		IS_VALID_AJAAncBufferFormat(_x_)
+	#define	IS_KNOWN_AJAAncillaryBufferFormat(_x_)		IS_KNOWN_AJAAncBufferFormat(_x_)
+	#define	AJAAncillaryBufferFormatToString			AJAAncBufferFormatToString
+#endif	//	!defined(NTV2_DEPRECATE_16_3)
 
 #endif	// AJA_ANCILLARYDATA_H

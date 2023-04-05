@@ -48,7 +48,8 @@
 //#define NTV2_DEPRECATE_16_0		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.0
 //#define NTV2_DEPRECATE_16_1		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.1
 //#define NTV2_DEPRECATE_16_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.2
-//#define NTV2_DEPRECATE_16_3		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.3
+//#define NTV2_DEPRECATE_16_3		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.3 (never released)
+//#define NTV2_DEPRECATE_17_0		//	If defined, excludes all symbols/APIs first deprecated in SDK 17.0
 
 
 /*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

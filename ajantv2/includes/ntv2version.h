@@ -10,19 +10,12 @@
 
 #include "ajaexport.h"
 
-//	Automated builds remove this and the following several lines		//	__AUTO_BUILD_REMOVE__
-#if !defined (AJA_PATCHED)												//	__AUTO_BUILD_REMOVE__
-	#define AJA_DECIMAL_PLACEHOLDER			0							//	__AUTO_BUILD_REMOVE__
-	#define AJA_DATETIME_PLACEHOLDER		"00/00/0000 +8:00:00:00"	//	__AUTO_BUILD_REMOVE__
-	#define AJA_STRING_PLACEHOLDER			"d"							//	__AUTO_BUILD_REMOVE__
-#endif																	//	__AUTO_BUILD_REMOVE__
-
-#define AJA_NTV2_SDK_VERSION_MAJOR		AJA_DECIMAL_PLACEHOLDER			///< @brief The SDK major version number, an unsigned decimal integer.
-#define AJA_NTV2_SDK_VERSION_MINOR		AJA_DECIMAL_PLACEHOLDER			///< @brief The SDK minor version number, an unsigned decimal integer.
-#define AJA_NTV2_SDK_VERSION_POINT		AJA_DECIMAL_PLACEHOLDER			///< @brief The SDK "point" release version, an unsigned decimal integer.
-#define AJA_NTV2_SDK_BUILD_NUMBER		AJA_DECIMAL_PLACEHOLDER			///< @brief The SDK build number, an unsigned decimal integer.
-#define AJA_NTV2_SDK_BUILD_DATETIME		AJA_DATETIME_PLACEHOLDER		///< @brief The date and time the SDK was built, in this format: "MM/DD/YYYY +8:hh:mm:ss"
-#define AJA_NTV2_SDK_BUILD_TYPE			AJA_STRING_PLACEHOLDER			///< @brief The SDK build type, where "a"=alpha, "b"=beta, "d"=development, ""=release.
+#define AJA_NTV2_SDK_VERSION_MAJOR		17		///< @brief The SDK major version number, an unsigned decimal integer.
+#define AJA_NTV2_SDK_VERSION_MINOR		0		///< @brief The SDK minor version number, an unsigned decimal integer.
+#define AJA_NTV2_SDK_VERSION_POINT		0		///< @brief The SDK "point" release version, an unsigned decimal integer.
+#define AJA_NTV2_SDK_BUILD_NUMBER		1			///< @brief The SDK build number, an unsigned decimal integer.
+#define AJA_NTV2_SDK_BUILD_DATETIME		"04/05/2023 +8:16:38:24"		///< @brief The date and time the SDK was built, in this format: "MM/DD/YYYY +8:hh:mm:ss"
+#define AJA_NTV2_SDK_BUILD_TYPE			"d"			///< @brief The SDK build type, where "a"=alpha, "b"=beta, "d"=development, ""=release.
 
 #define AJA_NTV2_SDK_VERSION	((AJA_NTV2_SDK_VERSION_MAJOR << 24) | (AJA_NTV2_SDK_VERSION_MINOR << 16) | (AJA_NTV2_SDK_VERSION_POINT << 8) | (AJA_NTV2_SDK_BUILD_NUMBER))
 #define AJA_NTV2_SDK_VERSION_AT_LEAST(__a__,__b__)		(AJA_NTV2_SDK_VERSION >= (((__a__) << 24) | ((__b__) << 16)))

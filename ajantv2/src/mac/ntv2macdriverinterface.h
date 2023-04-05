@@ -13,6 +13,9 @@
 #include "ntv2macpublicinterface.h"
 #include "ntv2driverinterface.h"
 
+//#define USE_DEVICE_MAP			//	Define to use one io_connect_t for all CNTV2Card instances (per device)
+//#define OPEN_UNSUPPORTED_DEVICES	//	Define to open device, even if it's not support (see NTV2GetSupportedDevices)
+
 
 /**
 	@brief	A Mac-specific implementation of CNTV2DriverInterface.
@@ -122,26 +125,29 @@ class CNTV2MacDriverInterface : public CNTV2DriverInterface
 	AJA_VIRTUAL bool	SystemStatus( void* dataPtr, SystemStatusCode systemStatusCode );
 	AJA_VIRTUAL bool	KernelLog( void* dataPtr, UInt32 dataSize );
 	AJA_VIRTUAL bool	ConfigureInterrupt( bool /*bEnable*/, INTERRUPT_ENUMS /*eInterruptType*/ ) {return true;}
+	AJA_VIRTUAL std::string	GetConnectionType (void) const	{return IsOpen() && !IsRemote()  ?  (mIsDEXT ? "DEXT" : "KEXT")  :  "";}	//	New in SDK 17.0
 
-public:
-	static const std::string &	GetIOServiceName (void);	//	For internal use only
 #if !defined(NTV2_DEPRECATE_14_3)
+public:
 	static void			SetDebugLogging (const uint64_t inWhichUserClientCommands);
 #endif	//	NTV2_DEPRECATE_14_3
-	static void			DumpDeviceMap (void);
-	static UWord		GetConnectionCount (void);
-	static ULWord		GetConnectionChecksum (void);
 
 #if !defined(NTV2_NULL_DEVICE)
-protected:
+	protected:
 		AJA_VIRTUAL bool	OpenLocalPhysical (const UWord inDeviceIndex);
 		AJA_VIRTUAL bool	CloseLocalPhysical (void);
 #endif	//	!defined(NTV2_NULL_DEVICE)
 
 private:
+	bool			mIsDEXT;		//	Uses DEXT interface?
+#if defined(USE_DEVICE_MAP)
 	AJA_VIRTUAL io_connect_t	GetIOConnect (const bool inDoNotAllocate = false) const;	//	For internal use only
+#else
+	AJA_VIRTUAL inline io_connect_t	GetIOConnect (void) const	{return mConnection;}	//	For internal use only
+	io_connect_t	mConnection;	//	My io_connect_t
+#endif
 
-		// 64 bit thunking - only for structures that contain pointers
+	// 64 bit thunking - only for structures that contain pointers
 	AJA_VIRTUAL void CopyTo_AUTOCIRCULATE_DATA_64 (AUTOCIRCULATE_DATA *p, AUTOCIRCULATE_DATA_64 *p64);
 	AJA_VIRTUAL void CopyTo_AUTOCIRCULATE_DATA (AUTOCIRCULATE_DATA_64 *p64, AUTOCIRCULATE_DATA *p);
 	AJA_VIRTUAL void CopyTo_AUTOCIRCULATE_TRANSFER_STRUCT_64 (AUTOCIRCULATE_TRANSFER_STRUCT *p, AUTOCIRCULATE_TRANSFER_STRUCT_64 *p64);

@@ -202,9 +202,11 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName, bool glob
 	name += pShareName;
 #elif defined(AJA_LINUX)
 	// Docs say to start name with a slash
+	(void) global;
 	name = "/";
 	name += pShareName;
 #else //Mac
+	(void) global;
 	name = pShareName;
 #endif
 

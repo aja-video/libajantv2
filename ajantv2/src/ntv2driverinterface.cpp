@@ -480,7 +480,7 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine inDMAEngine,
 {
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT(IsRemote());
-	NTV2_POINTER buffer(pFrameBuffer, inTotalByteCount);
+	NTV2Buffer buffer(pFrameBuffer, inTotalByteCount);
 	return _pRPCAPI->NTV2DMATransferRemote(inDMAEngine, inIsRead, inFrameNumber, buffer, inCardOffsetBytes,
 											0/*numSegs*/,	 0/*hostPitch*/,  0/*cardPitch*/, inSynchronous);
 #else
@@ -503,7 +503,7 @@ bool CNTV2DriverInterface::DmaTransfer (const NTV2DMAEngine inDMAEngine,
 {
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	NTV2_ASSERT(IsRemote());
-	NTV2_POINTER buffer(pFrameBuffer, inTotalByteCount);
+	NTV2Buffer buffer(pFrameBuffer, inTotalByteCount);
 	return _pRPCAPI->NTV2DMATransferRemote(inDMAEngine, inIsRead, inFrameNumber, buffer, inCardOffsetBytes,
 											inNumSegments, inHostPitchPerSeg, inCardPitchPerSeg, inSynchronous);
 #else
@@ -787,7 +787,7 @@ bool CNTV2DriverInterface::DriverGetBuildInformation (BUILD_INFO_STRUCT & buildI
 	return false;
 }
 
-bool CNTV2DriverInterface::BitstreamWrite (const NTV2_POINTER & inBuffer, const bool inFragment, const bool inSwap)
+bool CNTV2DriverInterface::BitstreamWrite (const NTV2Buffer & inBuffer, const bool inFragment, const bool inSwap)
 {
 	NTV2Bitstream bsMsg (inBuffer,
 						 BITSTREAM_WRITE |
@@ -807,7 +807,7 @@ bool CNTV2DriverInterface::BitstreamWrite (const NTV2_POINTER & inBuffer, const 
 
 bool CNTV2DriverInterface::BitstreamReset (const bool inConfiguration, const bool inInterface)
 {
-	NTV2_POINTER inBuffer;
+	NTV2Buffer inBuffer;
 	NTV2Bitstream bsMsg (inBuffer,
 						 (inConfiguration? BITSTREAM_RESET_CONFIG : 0) |
 						 (inInterface? BITSTREAM_RESET_MODULE : 0));
@@ -819,7 +819,7 @@ bool CNTV2DriverInterface::BitstreamStatus (NTV2ULWordVector & outRegValues)
 	outRegValues.reserve(BITSTREAM_MCAP_DATA);
 	outRegValues.clear();
 
-	NTV2_POINTER inBuffer;
+	NTV2Buffer inBuffer;
 	NTV2Bitstream bsMsg (inBuffer, BITSTREAM_READ_REGISTERS);
 	if (!NTV2Message(bsMsg))
 		return false;
@@ -832,7 +832,7 @@ bool CNTV2DriverInterface::BitstreamStatus (NTV2ULWordVector & outRegValues)
 
 bool CNTV2DriverInterface::BitstreamLoad (const bool inSuspend, const bool inResume)
 {
-	NTV2_POINTER inBuffer;
+	NTV2Buffer inBuffer;
 	NTV2Bitstream bsMsg (inBuffer,
 				(inSuspend? BITSTREAM_SUSPEND : 0) |
 				(inResume? BITSTREAM_RESUME : 0));
@@ -910,7 +910,7 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 
 	//	Allocate header buffer, read/fill from SPI-flash...
 	static const ULWord dwordCount(256/4);
-	NTV2_POINTER bitFileHdrBuffer(dwordCount * sizeof(ULWord));
+	NTV2Buffer bitFileHdrBuffer(dwordCount * sizeof(ULWord));
 	if (!bitFileHdrBuffer)
 		return false;
 
