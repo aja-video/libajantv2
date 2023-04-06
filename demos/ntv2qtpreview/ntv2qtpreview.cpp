@@ -48,10 +48,10 @@ NTV2QtPreview::NTV2QtPreview (QWidget * parent, Qt::WindowFlags flags)
 	mInputButtonGroup = new QButtonGroup ();
 	mInputButtonGroup->addButton (new QRadioButton (tr ("Off")), NTV2_INPUTSOURCE_INVALID);
 	for (unsigned ndx (0);  ndx < 8;  ndx++)
-		mInputButtonGroup->addButton (new QRadioButton ((QString ("SDI %1").arg (string (1, char (ndx + '1')).c_str ()))), ::GetNTV2InputSourceForIndex(ndx, NTV2_INPUTSOURCES_SDI));
+		mInputButtonGroup->addButton (new QRadioButton ((QString ("SDI %1").arg (string (1, char (ndx + '1')).c_str ()))), ::GetNTV2InputSourceForIndex(ndx, NTV2_IOKINDS_SDI));
 	for (unsigned ndx (0);  ndx < 4;  ndx++)
-		mInputButtonGroup->addButton (new QRadioButton ((QString ("HDMI %1").arg (string (1, char (ndx + '1')).c_str ()))), ::GetNTV2InputSourceForIndex(ndx, NTV2_INPUTSOURCES_HDMI));
-	mInputButtonGroup->addButton (new QRadioButton (tr ("Analog")), ::GetNTV2InputSourceForIndex(0, NTV2_INPUTSOURCES_ANALOG));
+		mInputButtonGroup->addButton (new QRadioButton ((QString ("HDMI %1").arg (string (1, char (ndx + '1')).c_str ()))), ::GetNTV2InputSourceForIndex(ndx, NTV2_IOKINDS_HDMI));
+	mInputButtonGroup->addButton (new QRadioButton (tr ("Analog")), ::GetNTV2InputSourceForIndex(0, NTV2_IOKINDS_ANALOG));
 	mInputButtonGroup->button (NTV2_INPUTSOURCE_INVALID)->setChecked (true);
 
 	//	Checkboxes...

@@ -9,72 +9,9 @@
 #ifndef _NTV2PLAYER4K_H
 #define _NTV2PLAYER4K_H
 
-#include "ntv2enums.h"
-#include "ntv2devicefeatures.h"
-#include "ntv2devicescanner.h"
 #include "ntv2democommon.h"
-#include "ajabase/common/circularbuffer.h"
 #include "ajabase/system/thread.h"
-#include "ajaanc/includes/ancillarydata.h"
-
-
-/**
-	@brief	Configures an NTV2Player4K instance.
-**/
-typedef struct Player4KConfig
-{
-	public:
-		std::string						fDeviceSpecifier;	///< @brief	The AJA device to use
-		NTV2Channel						fOutputChannel;		///< @brief	The device channel to use
-		NTV2VideoFormat					fVideoFormat;		///< @brief	The video format to use
-		NTV2PixelFormat					fPixelFormat;		///< @brief	The pixel format to use
-		CNTV2DemoCommon::ACFrameRange	fFrames;			///< @brief	AutoCirculate frame count or range
-		AJAAncillaryDataType			fTransmitHDRType;	///< @brief	Specifies the HDR anc data packet to transmit, if any.
-		bool							fDoMultiFormat;		///< @brief	If true, enables device-sharing;  otherwise takes exclusive control of the device.
-		bool							fDoHDMIOutput;		///< @brief	If true, enables HDMI output;  otherwise, disables it.
-		bool							fDoTsiRouting;		///< @brief	If true, enables two sample interleave routing, else squares.
-		bool							fDoRGBOnWire;		///< @brief	If true, enables RGB on the wire, else CSCs convert to YCbCr.
-		bool							fDoLinkGrouping;	///< @brief	If true, enables 6/12G output mode
-		UWord							fNumAudioLinks;		///< @brief	Specifies the number of audio systems to control for multi-link audio
-
-		/**
-			@brief	Constructs a default Player4K configuration.
-		**/
-		inline explicit	Player4KConfig (const std::string & inDeviceSpecifier	= "0")
-			:	fDeviceSpecifier	(inDeviceSpecifier),
-				fOutputChannel		(NTV2_CHANNEL1),
-				fVideoFormat		(NTV2_FORMAT_4x1920x1080p_2997),
-				fPixelFormat		(NTV2_FBF_8BIT_YCBCR),
-				fFrames				(),
-				fTransmitHDRType	(AJAAncillaryDataType_Unknown),
-				fDoMultiFormat		(false),
-				fDoHDMIOutput		(false),
-				fDoTsiRouting		(false),
-				fDoRGBOnWire		(false),
-				fDoLinkGrouping		(false),
-				fNumAudioLinks		(1)
-		{
-		}
-
-		inline bool	WithAudio(void) const	{return fNumAudioLinks > 0;}	///< @return	True if playing audio, false if not.
-
-		/**
-			@brief		Renders a human-readable representation of me into the given output stream.
-			@param		strm		The output stream.
-			@param[in]	inCompact	If true, setting values are printed in a more compact form. Defaults to false.
-			@return		A reference to the output stream.
-		**/
-		std::ostream &	Print (std::ostream & strm, const bool inCompact = false) const;
-
-}	Player4KConfig;
-
-/**
-	@brief		Renders a human-readable representation of a Player4KConfig into an output stream.
-	@param		strm	The output stream.
-	@param[in]	inObj	The configuration to be rendered into the output stream.
-	@return		A reference to the specified output stream.
-**/
-inline std::ostream &	operator << (std::ostream & strm, const Player4KConfig & inObj)		{return inObj.Print(strm);}
+#include "ajabase/common/timecodeburn.h"
 
 
 /**
@@ -93,7 +30,7 @@ class NTV2Player4K
 			@note	I'm not completely initialized and ready for use until after my Init method has been called.
 			@param[in]	inConfig	Specifies all configuration parameters.
 		**/
-							NTV2Player4K (const Player4KConfig & inConfig);
+							NTV2Player4K (const PlayerConfig & inConfig);
 
 		virtual				~NTV2Player4K (void);
 
@@ -167,8 +104,7 @@ class NTV2Player4K
 			@brief	This is the consumer thread's static callback function that gets called when the consumer thread starts.
 					This function gets "Attached" to the consumer thread's AJAThread instance.
 			@param[in]	pThread		A valid pointer to the consumer thread's AJAThread instance.
-			@param[in]	pContext	Context information to pass to the thread.
-									(For this application, this will be set to point to the NTV2Player4K instance.)
+			@param[in]	pContext	Context information to pass to the thread (the NTV2Player4K instance).
 		**/
 		static void			ConsumerThreadStatic (AJAThread * pThread, void * pContext);
 
@@ -176,25 +112,23 @@ class NTV2Player4K
 			@brief	This is the producer thread's static callback function that gets called when the producer thread starts.
 					This function gets "Attached" to the producer thread's AJAThread instance.
 			@param[in]	pThread		A valid pointer to the producer thread's AJAThread instance.
-			@param[in]	pContext	Context information to pass to the thread.
-									(For this application, this will be set to point to the NTV2Player4K instance.)
+			@param[in]	pContext	Context information to pass to the thread (the NTV2Player4K instance).
 		**/
 		static void			ProducerThreadStatic (AJAThread * pThread, void * pContext);
 
 
 	//	Private Member Data
 	private:
-		typedef AJACircularBuffer<NTV2FrameData*>	CircularBuffer;
-		typedef std::vector<NTV2_POINTER>			NTV2Buffers;
+		typedef std::vector<NTV2Buffer>	NTV2Buffers;
 
-		Player4KConfig		mConfig;			///< @brief	My operating configuration.
+		PlayerConfig		mConfig;			///< @brief	My operating configuration
 		AJAThread			mConsumerThread;	///< @brief	My playout (consumer) thread object
 		AJAThread			mProducerThread;	///< @brief	My generator (producer) thread object
 		CNTV2Card			mDevice;			///< @brief	My CNTV2Card instance
 		NTV2DeviceID		mDeviceID;			///< @brief	My device (model) identifier
 		NTV2TaskMode		mSavedTaskMode;		///< @brief	Used to restore the previous task mode
-		uint32_t			mCurrentFrame;		///< @brief	My current frame number (for generating timecode)
-		ULWord				mCurrentSample;		///< @brief	My current audio sample (maintains audio tone generator state)
+		ULWord				mCurrentFrame;		///< @brief	My current frame number (for generating timecode)
+		ULWord				mCurrentSample;		///< @brief	My current audio sample (tone generator state)
 		double				mToneFrequency;		///< @brief	My current audio tone frequency [Hz]
 		NTV2AudioSystem		mAudioSystem;		///< @brief	The audio system I'm using (if any)
 		NTV2FormatDesc		mFormatDesc;		///< @brief	Describes my video/pixel format
@@ -202,7 +136,7 @@ class NTV2Player4K
 		bool				mGlobalQuit;		///< @brief	Set "true" to gracefully stop
 		AJATimeCodeBurn		mTCBurner;			///< @brief	My timecode burner
 		NTV2FrameDataArray	mHostBuffers;		///< @brief	My host buffers
-		CircularBuffer		mFrameDataRing;		///< @brief	AJACircularBuffer that controls frame data access by producer/consumer threads
+		FrameDataRingBuffer	mFrameDataRing;		///< @brief	AJACircularBuffer that controls frame data access by producer/consumer threads
 		NTV2Buffers			mTestPatRasters;	///< @brief	Pre-rendered test pattern rasters
 
 };	//	NTV2Player4K

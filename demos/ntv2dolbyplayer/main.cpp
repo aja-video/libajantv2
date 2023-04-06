@@ -38,6 +38,7 @@ int main (int argc, const char ** argv)
     uint32_t		channelNumber	(2);		//	Number of the channel to use
 	int				noAudio			(0);		//	Disable audio tone?
 	int				doMultiChannel	(0);		//	Enable multi-format?
+	int				doRamp			(0);		//	Enable audio ramp
 	poptContext		optionsContext; 			//	Context for parsing command line arguments
     AJAStatus       status;
 
@@ -46,13 +47,14 @@ int main (int argc, const char ** argv)
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
-		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"index#, serial#, or model"	},
-        {"dolbyFile",	'f',	POPT_ARG_STRING,	&pDolbyName,	0,	"dolby audio to play",			"file name"	},
-        {"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,	0,	"which video format to use",	"'?' or 'list' to list"},
-		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"which pixel format to use",	"'?' or 'list' to list"},
-		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,	0,	"which channel to use",			"number of the channel"},
+		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"device to use",				"index#, serial#, or model"	},
+		{"dolbyFile",	'f',	POPT_ARG_STRING,	&pDolbyName,	0,	"dolby audio to play",			"file name"	},
+		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,	0,	"video format to produce",		"'?' or 'list' to list"},
+		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",			"'?' or 'list' to list"},
+		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,	0,	"channel to use",				"1-8"},
 		{"multiChannel",'m',	POPT_ARG_NONE,		&doMultiChannel,0,	"use multi-channel/format",		AJA_NULL},
-		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio tone",			AJA_NULL},
+		{"ramp",		'r',	POPT_ARG_NONE,		&doRamp,		0,	"audio ramp",					AJA_NULL},
+		{"noaudio",		't',	POPT_ARG_NONE,		&noAudio,		0,	"disable audio tone",			AJA_NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -64,13 +66,17 @@ int main (int argc, const char ** argv)
 
 	const string			deviceSpec		(pDeviceSpec ? pDeviceSpec : "0");
 	const string			videoFormatStr	(pVideoFormat  ?  pVideoFormat  :  "");
-	const NTV2VideoFormat	videoFormat		(videoFormatStr.empty () ? NTV2_FORMAT_1080i_5994 : CNTV2DemoCommon::GetVideoFormatFromString (videoFormatStr));
+	NTV2VideoFormat	videoFormat		(videoFormatStr.empty () ? NTV2_FORMAT_1080i_5994 : CNTV2DemoCommon::GetVideoFormatFromString (videoFormatStr));
+	if (videoFormat == NTV2_FORMAT_UNKNOWN)
+		videoFormat = CNTV2DemoCommon::GetVideoFormatFromString (videoFormatStr, VIDEO_FORMATS_4KUHD);
 	if (videoFormatStr == "?" || videoFormatStr == "list")
-		{cout << CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_NON_4KUHD, deviceSpec) << endl;  return 0;}
+		{cout << CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_NON_4KUHD, deviceSpec)
+			  << CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_4KUHD, deviceSpec) << endl;  return 0;}
 	else if (!videoFormatStr.empty () && videoFormat == NTV2_FORMAT_UNKNOWN)
 	{
 		cerr	<< "## ERROR:  Invalid '--videoFormat' value '" << videoFormatStr << "' -- expected values:" << endl
-				<< CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_NON_4KUHD, deviceSpec) << endl;
+				<< CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_NON_4KUHD, deviceSpec)
+				<< CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_4KUHD, deviceSpec) << endl;
 		return 2;
 	}
 
@@ -106,6 +112,7 @@ int main (int argc, const char ** argv)
 							pixelFormat,					//	inPixelFormat
 							videoFormat,					//	inVideoFormat
                             doMultiChannel ? true : false,  //	inDoMultiFormat
+							doRamp ? true : false,			//  inDoRamp
                             pDolbyFile);                    //  inDolbyFile
 
 	::signal (SIGINT, SignalHandler);

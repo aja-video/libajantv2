@@ -9,7 +9,6 @@
 #define _NTV2FIELDBURN_H
 
 #include "ntv2card.h"
-#include "ntv2utils.h"
 #include "ntv2formatdescriptor.h"
 #include "ntv2democommon.h"
 #include "ajabase/common/types.h"
@@ -19,38 +18,27 @@
 
 
 /**
-	@brief	Instances of me can capture frames from a video signal provided to an input of an AJA device.
-			The frame is captured as two fields stored in non-contiguous system memory buffers.
-			I burn timecode into those fields, then deliver both of them to an output of the same AJA device ... in real time.
+	@brief	I capture individual fields from an interlaced video signal provided to an SDI input. Each frame is
+			captured as two fields in separate host buffers. I burn F1 timecode into the top of F1, and F2 timecode
+			into the bottom half of F2. Then I reassemble both fields and play them through an output of the same
+			device, with a 7-frame latency (by default).
 			I make use of the AJACircularBuffer, which simplifies implementing a producer/consumer model,
-			I use a "consumer" thread to deliver burned-in frames to the AJA device output, and a "producer"
-			thread to capture raw frames from the AJA device input.
+			in which a "consumer" thread delivers burned-in frames to the AJA device output, and a "producer"
+			thread captures raw frames from the AJA device input.
 			I also demonstrate how to detect if an SDI input has embedded timecode, and if so, how AutoCirculate
 			makes it available. I also show how to embed timecode into an SDI output signal using AutoCirculate
 			during playout.
 **/
-
 class NTV2FieldBurn
 {
 	//	Public Instance Methods
 	public:
 		/**
 			@brief	Constructs me using the given configuration settings.
+			@param[in]	inConfig		Specifies the configuration parameters.
 			@note	I'm not completely initialized and ready for use until after my Init method has been called.
-			@param[in]	inDeviceSpecifier	Specifies the AJA device to use. Defaults to "0", the first device found.
-			@param[in]	inWithAudio			If true (the default), include audio in the output signal;  otherwise, omit it.
-			@param[in]	inFieldMode			If true (the default), use AutoCirculate's "Field Mode" (introduced in SDK 15.1);
-											otherwise use "Frame Mode".
-			@param[in]	inPixelFormat		Specifies the pixel format to use for the device's frame buffers. Defaults to 8-bit YUV.
-			@param[in]	inInputSource		Specifies which input to capture from. Defaults to SDI1.
-			@param[in]	inDoMultiFormat		If true, use multi-format mode; otherwise use uniformat mode. Defaults to false (uniformat mode).
 		**/
-						NTV2FieldBurn (const std::string &			inDeviceSpecifier	= "0",
-										const bool					inWithAudio			= true,
-										const bool					inFieldMode			= true,
-										const NTV2FrameBufferFormat	inPixelFormat		= NTV2_FBF_8BIT_YCBCR,
-										const NTV2InputSource		inInputSource		= NTV2_INPUTSOURCE_SDI1,
-										const bool					inDoMultiFormat		= false);
+						NTV2FieldBurn (const BurnConfig & inConfig);
 		virtual 		~NTV2FieldBurn ();
 
 		/**
@@ -155,32 +143,24 @@ class NTV2FieldBurn
 		**/
 		static void				CaptureThreadStatic (AJAThread * pThread, void * pContext);
 
-		typedef	AJACircularBuffer<NTV2FrameData*>	NTV2CircularBuffer;
-
 	//	Private Member Data
 	private:
-		AJAThread					mPlayThread;		///< @brief	My playout thread object
-		AJAThread					mCaptureThread;		///< @brief	My capture thread object
-		CNTV2Card					mDevice;			///< @brief	My CNTV2Card instance
-		NTV2DeviceID				mDeviceID;			///< @brief	My device identifier
-		const std::string			mDeviceSpecifier;	///< @brief	Specifies which device I should use
-		NTV2Channel					mInputChannel;		///< @brief	The input channel I'm using
-		NTV2Channel					mOutputChannel;		///< @brief	The output channel I'm using
-		NTV2InputSource				mInputSource;		///< @brief	The input source I'm using
-		NTV2OutputDestination		mOutputDestination;	///< @brief	The output I'm using
-		NTV2VideoFormat				mVideoFormat;		///< @brief	My video format
-		NTV2FrameBufferFormat		mPixelFormat;		///< @brief	My pixel format
-		NTV2FormatDescriptor		mFormatDescriptor;	///< @brief	Description of the board's frame geometry
-		NTV2EveryFrameTaskMode		mSavedTaskMode;		///< @brief	We will restore the previous state
-		NTV2VANCMode				mVancMode;			///< @brief	VANC mode
-		NTV2AudioSystem				mAudioSystem;		///< @brief	The audio system I'm using
-		const bool					mIsFieldMode;		///< @brief	True if Field Mode, false if Frame Mode
-		bool						mGlobalQuit;		///< @brief	Set "true" to gracefully stop
-		bool						mDoMultiChannel;	///< @brief	Set the board up for multi-format
-		AJATimeCodeBurn				mTCBurner;			///< @brief	My timecode burner
-		NTV2ChannelList				mTCOutputs;			///< @brief	My output timecode destinations
-		NTV2FrameDataArray			mHostBuffers;		///< @brief	My host buffers
-		NTV2CircularBuffer			mAVCircularBuffer;	///< @brief	My ring buffer object
+		typedef AJACircularBuffer<NTV2FrameData*>	CircularBuffer;
+		BurnConfig			mConfig;			///< @brief	My configuration info
+		AJAThread			mPlayThread;		///< @brief	My playout thread object
+		AJAThread			mCaptureThread;		///< @brief	My capture thread object
+		CNTV2Card			mDevice;			///< @brief	My CNTV2Card instance
+		NTV2DeviceID		mDeviceID;			///< @brief	Keep my device ID handy
+		NTV2VideoFormat		mVideoFormat;		///< @brief	Format of video being ingested & played
+		NTV2FormatDesc		mFormatDesc;		///< @brief	Describes raster images
+		NTV2TaskMode		mSavedTaskMode;		///< @brief	For restoring prior state
+		NTV2OutputDest		mOutputDest;		///< @brief	The desired output connector to use
+		NTV2AudioSystem		mAudioSystem;		///< @brief	The audio system I'm using
+		AJATimeCodeBurn		mTCBurner;			///< @brief	My timecode burner
+		NTV2ChannelList		mTCOutputs;			///< @brief	My output timecode destinations
+		NTV2FrameDataArray	mHostBuffers;		///< @brief	My host buffers
+		CircularBuffer		mFrameDataRing;		///< @brief	AJACircularBuffer that controls frame data access by producer/consumer threads
+		bool				mGlobalQuit;		///< @brief	Set "true" to gracefully stop
 
 };	//	NTV2FieldBurn
 

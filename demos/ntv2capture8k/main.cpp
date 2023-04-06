@@ -7,20 +7,14 @@
 
 
 //	Includes
-#include "ntv2utils.h"
-#include "ajatypes.h"
-#include "ajabase/common/options_popt.h"
-#include "ajabase/system/systemtime.h"
 #include "ntv2capture8k.h"
 #include <signal.h>
-#include <iostream>
-#include <iomanip>
 
 using namespace std;
 
 
 //	Globals
-static bool	gGlobalQuit		(false);	//	Set this "true" to exit gracefully
+static bool	gGlobalQuit	(false);	//	Set this "true" to exit gracefully
 
 
 static void SignalHandler (int inSignal)
@@ -32,89 +26,86 @@ static void SignalHandler (int inSignal)
 
 int main (int argc, const char ** argv)
 {
-	AJAStatus		status			(AJA_STATUS_SUCCESS);
-	char *			pPixelFormat	(AJA_NULL);				//	Pixel format argument
-	char *			pDeviceSpec		(AJA_NULL);				//	Device specifier string, if any
-	uint32_t		channelNumber	(1);					//	Number of the channel to use
-	int				noAudio			(0);					//	Disable audio tone?
-	int				doMultiFormat	(0);					//	Enable multi-format
-	int				doTsiRouting	(0);
-	poptContext		optionsContext; 						//	Context for parsing command line arguments
+	char *			pDeviceSpec		(AJA_NULL);		//	Device specifier string, if any
+	char *			pPixelFormat	(AJA_NULL);		//	Pixel format argument
+	int				channelNumber	(1);			//	Channel/FrameStore to use
+	int				doMultiFormat	(0);			//	MultiFormat mode?
+	int				showVersion		(0);			//	Show version?
+	int				doQuadRouting	(0);			//	Quad/Square routing (i.e. not TSI)?
 	AJADebug::Open();
 
 	//	Command line option descriptions:
-	const struct poptOption userOptionsTable [] =
+	const CNTV2DemoCommon::PoptOpts optionsTable [] =
 	{
-		#if !defined(NTV2_DEPRECATE_16_0)	//	--board option is deprecated!
-		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"(deprecated)"	},
-		#endif
-		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"index#, serial#, or model"		},
-		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"which pixel format to use",	"'?' or 'list' to list"			},
-		{"channel",	    'c',	POPT_ARG_INT,		&channelNumber,	0,	"which channel to use",			"1-8"							},
-		{"multiFormat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"Configure multi-format",		AJA_NULL						},
-		{"tsi",			't',	POPT_ARG_NONE,		&doTsiRouting,	0,	"use Tsi routing?",				AJA_NULL						},
+		{"version",		  0,	POPT_ARG_NONE,		&showVersion,	0,	"show version",				AJA_NULL					},
+		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"device to use",			"index#, serial#, or model"	},
+		{"channel",		'c',	POPT_ARG_INT,		&channelNumber,	0,	"channel to use",			"1-8"						},
+		{"multiFormat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"use multi-format/channel",	AJA_NULL					},
+		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",		"'?' or 'list' to list"		},
+		{"squares",		's',	POPT_ARG_NONE,		&doQuadRouting,	0,	"use quad routing?",		AJA_NULL					},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
+	CNTV2DemoCommon::Popt popt(argc, argv, optionsTable);
+	if (!popt)
+		{cerr << "## ERROR: " << popt.errorStr() << endl;  return 2;}
+	if (showVersion)
+		{cout << argv[0] << ", NTV2 SDK " << ::NTV2Version() << endl;  return 0;}
 
-	//	Read command line arguments...
-	optionsContext = ::poptGetContext (AJA_NULL, argc, argv, userOptionsTable, 0);
-	::poptGetNextOpt (optionsContext);
-	optionsContext = ::poptFreeContext (optionsContext);
+	//	Device
+	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "0");
+	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
+		return 1;
 
-	const string				deviceSpec		(pDeviceSpec ? pDeviceSpec : "0");
-	const string				pixelFormatStr	(pPixelFormat  ?  pPixelFormat  :  "");
-	const NTV2FrameBufferFormat	pixelFormat		(pixelFormatStr.empty () ? NTV2_FBF_10BIT_YCBCR : CNTV2DemoCommon::GetPixelFormatFromString (pixelFormatStr));
-	if (pixelFormatStr == "?" || pixelFormatStr == "list")
-		{cout << CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 0;}
-	else if (!pixelFormatStr.empty () && !NTV2_IS_VALID_FRAME_BUFFER_FORMAT (pixelFormat))
+	CaptureConfig config(deviceSpec);
+
+	//	Channel
+	if ((channelNumber < 1)  ||  (channelNumber > 8))
+		{cerr << "## ERROR:  Invalid channel number " << channelNumber << " -- expected 1 thru 8" << endl;  return 1;}
+	config.fInputChannel = NTV2Channel(channelNumber - 1);
+
+	//	Pixel Format
+	const string pixelFormatStr (pPixelFormat  ?  pPixelFormat  :  "");
+	config.fPixelFormat = pixelFormatStr.empty() ? NTV2_FBF_8BIT_YCBCR : CNTV2DemoCommon::GetPixelFormatFromString(pixelFormatStr);
+	if (pixelFormatStr == "?"  ||  pixelFormatStr == "list")
+		{cout << CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 0;}
+	else if (!pixelFormatStr.empty()  &&  !NTV2_IS_VALID_FRAME_BUFFER_FORMAT(config.fPixelFormat))
 	{
 		cerr	<< "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl
-				<< CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;
+				<< CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec) << endl;
 		return 2;
 	}
 
-    if (channelNumber != 1 && channelNumber != 3)
-        {cerr << "## ERROR:  Invalid channel number " << channelNumber << " -- expected 1 or 3" << endl;  return 2;}
+	config.fDoTSIRouting	= !doQuadRouting;						//	TSI?
+	config.fWithAnc			= true;									//	Always capture anc
+	config.fDoMultiFormat	= doMultiFormat ? true : false;			//	Multiformat mode?
 
-	//	Instantiate the NTV2Capture object, using the specified AJA device...
-	NTV2Capture8K	capturer (pDeviceSpec ? string (pDeviceSpec) : "0",
-                              (noAudio ? false : true),
-                              ::GetNTV2ChannelForIndex (channelNumber - 1),
-							  pixelFormat,
-							  false,
-							  doMultiFormat ? true : false,
-                              true,
-                              doTsiRouting ? true : false);
+	//	Instantiate and initialize the NTV2Capture8K object...
+	NTV2Capture8K capturer(config);
+	AJAStatus status = capturer.Init();
+	if (AJA_FAILURE(status))
+		{cout << "## ERROR:  Initialization failed: " << ::AJAStatusToString(status) << endl;	return 1;}
 
 	::signal (SIGINT, SignalHandler);
-	#if defined (AJAMac)
+	#if defined(AJAMac)
 		::signal (SIGHUP, SignalHandler);
 		::signal (SIGQUIT, SignalHandler);
 	#endif
 
-	//	Initialize the NTV2Capture instance...
-	status = capturer.Init ();
-	if (!AJA_SUCCESS (status))
-		{cout << "## ERROR:  Capture initialization failed with status " << status << endl;	return 1;}
+	//	Run it...
+	capturer.Run();
 
-	//	Run the capturer...
-	capturer.Run ();
-
-	cout	<< "           Capture  Capture" << endl
-			<< "   Frames   Frames   Buffer" << endl
-			<< "Processed  Dropped    Level" << endl;
-	//	Poll its status until stopped...
+	cout	<< "   Frames   Frames   Buffer" << endl
+			<< " Captured  Dropped    Level" << endl;
 	do
-	{
+	{	//	Poll its status until stopped...
 		ULWord	framesProcessed, framesDropped, bufferLevel;
 		capturer.GetACStatus (framesProcessed, framesDropped, bufferLevel);
-		cout << setw (9) << framesProcessed << setw (9) << framesDropped << setw (9) << bufferLevel << "\r" << flush;
-		AJATime::Sleep (2000);
-	} while (!gGlobalQuit);	//	loop til quit time
+		cout << setw(9) << framesProcessed << setw(9) << framesDropped << setw(9) << bufferLevel << "\r" << flush;
+		AJATime::Sleep(2000);
+	} while (!gGlobalQuit);	//	loop til done
 
 	cout << endl;
-
-	return AJA_SUCCESS (status) ? 0 : 1;
+	return 0;
 
 }	//	main

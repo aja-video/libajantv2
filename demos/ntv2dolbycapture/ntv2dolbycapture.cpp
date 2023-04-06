@@ -590,7 +590,7 @@ void NTV2DolbyCapture::GetACStatus (ULWord & outGoodFrames, ULWord & outDroppedF
 	outBufferLevel = status.acBufferLevel;
 }
 
-uint32_t NTV2DolbyCapture::RecoverAudio(NTV2_POINTER& anc, uint32_t ancSize, NTV2_POINTER& audio)
+uint32_t NTV2DolbyCapture::RecoverAudio(NTV2Buffer & anc, uint32_t ancSize, NTV2Buffer & audio)
 {
 	uint8_t* audioData = (uint8_t*)audio.GetHostAddress(0);
 	uint32_t audioSize = 0;
@@ -693,7 +693,7 @@ uint32_t NTV2DolbyCapture::RecoverAudio(NTV2_POINTER& anc, uint32_t ancSize, NTV
 	return audioSize;
 }
 
-uint32_t NTV2DolbyCapture::RecoverDolby(NTV2_POINTER& audio, uint32_t audioSize, NTV2_POINTER& dolby)
+uint32_t NTV2DolbyCapture::RecoverDolby(NTV2Buffer & audio, uint32_t audioSize, NTV2Buffer & dolby)
 {
 	uint16_t* dolbyData = (uint16_t*)dolby.GetHostAddress(0);
 	uint32_t dolbySize = 0;

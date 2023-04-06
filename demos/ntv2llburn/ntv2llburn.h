@@ -36,25 +36,9 @@ class NTV2LLBurn
 		/**
 			@brief	Constructs me using the given configuration settings.
 			@note	I'm not completely initialized and ready for use until after my Init method has been called.
-			@param[in]	inDeviceSpecifier	Specifies the AJA device to use. Defaults to "0", the first device found.
-			@param[in]	inWithAudio			If true, include audio in the output signal; otherwise, omit it.
-											Defaults to "true".
-			@param[in]	inPixelFormat		Specifies the pixel format to use for the device's frame buffers. Defaults to 8-bit YUV.
-			@param[in]	inInputSource		Specifies which input to capture video from. Defaults to SDI1.
-			@param[in]	inTCIndex			Specifies the timecode of interest. Defaults to whatever is found embedded in the input video.
-			@param[in]	inDoMultiChannel	If true, enables multichannel mode (if the device supports it), and won't acquire
-											or release the device. If false (the default), acquires/releases exclusive use of the device.
-			@param[in]	inWithAnc			If true, capture & play ancillary data. Defaults to false.
-			@param[in]	inWithHanc			If true, capture & play HANC data. Defaults to false.
+			@param[in]	inConfig		Specifies the configuration parameters.
 		**/
-							NTV2LLBurn (const std::string &			inDeviceSpecifier	= "0",
-										const bool					inWithAudio			= true,
-										const NTV2FrameBufferFormat	inPixelFormat		= NTV2_FBF_8BIT_YCBCR,
-										const NTV2InputSource		inInputSource		= NTV2_INPUTSOURCE_SDI1,
-										const NTV2TCIndex			inTCIndex			= NTV2_TCINDEX_SDI1,
-										const bool					inDoMultiChannel	= false,
-										const bool					inWithAnc			= false,
-										const bool					inWithHanc			= false);
+							NTV2LLBurn (const BurnConfig & inConfig);
 		virtual				~NTV2LLBurn ();
 
 		/**
@@ -143,40 +127,30 @@ class NTV2LLBurn
 
 	//	Private Member Data
 	private:
-		AJAThread				mRunThread;				///< @brief	My worker thread object
+		BurnConfig			mConfig;				///< @brief	My configuration info
+		AJAThread			mRunThread;				///< @brief	My worker thread object
+		CNTV2Card			mDevice;				///< @brief	My CNTV2Card instance
+		NTV2DeviceID		mDeviceID;				///< @brief	Keep my device ID handy
+		NTV2VideoFormat		mVideoFormat;			///< @brief	Format of video being ingested & played
+		NTV2FormatDesc		mFormatDesc;			///< @brief	Describes raster images
+		NTV2TaskMode		mSavedTaskMode;			///< @brief	For restoring prior state
+		NTV2OutputDest		mOutputDest;			///< @brief	The desired output connector to use
+		NTV2AudioSystem		mAudioSystem;			///< @brief	The audio system I'm using
+		AJATimeCodeBurn		mTCBurner;				///< @brief	My timecode burner
 
-		CNTV2Card				mDevice;				///< @brief	My CNTV2Card instance
-		NTV2DeviceID			mDeviceID;				///< @brief	My device identifier
-		const std::string		mDeviceSpecifier;		///< @brief	Specifies the device I should use
-		bool					mWithAudio;				///< @brief	Capture and playout audio?
-		NTV2Channel				mInputChannel;			///< @brief	The input channel I'm using
-		NTV2Channel				mOutputChannel;			///< @brief	The output channel I'm using
-		NTV2InputSource			mInputSource;			///< @brief	The input source I'm using
-		NTV2TCIndex				mTimecodeIndex;			///< @brief	The timecode of interest
-		NTV2OutputDestination	mOutputDestination;		///< @brief	The output I'm using
-		NTV2VideoFormat			mVideoFormat;			///< @brief	My video format
-		NTV2PixelFormat			mPixelFormat;			///< @brief	My pixel format
-		NTV2TaskMode			mSavedTaskMode;			///< @brief	Previous task mode to restore
-		NTV2VANCMode			mVancMode;				///< @brief	VANC mode
-		NTV2AudioSystem			mAudioSystem;			///< @brief	The audio system I'm using
-		bool					mDoMultiChannel;		///< @brief	Set the board up for multi-format
-		bool					mWithAnc;				///< @brief	Capture and Playout packetized ANC data
-		bool					mWithHanc;				///< @brief	Capture and Playout packetized ANC data with audio
+		bool				mGlobalQuit;			///< @brief	Set "true" to gracefully stop
+		NTV2ChannelSet		mRP188Outputs;			///< @brief	SDI outputs into which I'll inject timecode
 
-		bool					mGlobalQuit;			///< @brief	Set "true" to gracefully stop
-		AJATimeCodeBurn			mTCBurner;				///< @brief	My timecode burner
-		NTV2ChannelSet			mRP188Outputs;			///< @brief	SDI outputs into which I'll inject timecode
+		NTV2Buffer			mpHostVideoBuffer;		///< @brief My host video buffer for burning in the timecode
+		NTV2Buffer			mpHostAudioBuffer;		///< @brief My host audio buffer for the samples matching the video buffer
+		NTV2Buffer			mpHostF1AncBuffer;		///< @brief My host Anc buffer (F1)
+		NTV2Buffer			mpHostF2AncBuffer;		///< @brief My host Anc buffer (F2)
 
-		NTV2_POINTER			mpHostVideoBuffer;		///< @brief My host video buffer for burning in the timecode
-		NTV2_POINTER			mpHostAudioBuffer;		///< @brief My host audio buffer for the samples matching the video buffer
-		NTV2_POINTER			mpHostF1AncBuffer;		///< @brief My host Anc buffer (F1)
-		NTV2_POINTER			mpHostF2AncBuffer;		///< @brief My host Anc buffer (F2)
+		uint32_t			mAudioInLastAddress;	///< @brief My record of the location of the last audio sample captured
+		uint32_t			mAudioOutLastAddress;	///< @brief My record of the location of the last audio sample played
 
-		uint32_t				mAudioInLastAddress;	///< @brief My record of the location of the last audio sample captured
-		uint32_t				mAudioOutLastAddress;	///< @brief My record of the location of the last audio sample played
-
-		uint32_t				mFramesProcessed;		///< @brief My count of the number of burned frames produced
-		uint32_t				mFramesDropped;			///< @brief My count of the number of dropped frames
+		uint32_t			mFramesProcessed;		///< @brief My count of the number of burned frames produced
+		uint32_t			mFramesDropped;			///< @brief My count of the number of dropped frames
 
 };	//	NTV2LLBurn
 

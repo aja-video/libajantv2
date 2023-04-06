@@ -10,7 +10,6 @@
 #define _NTV2CAPTURE_H
 
 #include "ntv2democommon.h"
-#include "ajabase/common/circularbuffer.h"
 #include "ajabase/system/thread.h"
 
 
@@ -70,7 +69,7 @@ class NTV2Capture
 		/**
 			@brief	Sets up device routing for capture.
 		**/
-		virtual void			RouteInputSignal (void);
+		virtual bool			RouteInputSignal (void);
 
 		/**
 			@brief	Sets up my circular buffers.
@@ -121,8 +120,6 @@ class NTV2Capture
 
 	//	Private Member Data
 	private:
-		typedef	AJACircularBuffer<NTV2FrameData*>	MyCircularBuffer;
-
 		AJAThread			mConsumerThread;	///< @brief	My consumer thread object -- consumes the captured frames.
 		AJAThread			mProducerThread;	///< @brief	My producer thread object -- does the frame capturing
 		CNTV2Card			mDevice;			///< @brief	My CNTV2Card instance. This is what I use to talk to the device.
@@ -133,7 +130,7 @@ class NTV2Capture
 		NTV2TaskMode		mSavedTaskMode;		///< @brief	Used to restore prior every-frame task mode
 		NTV2AudioSystem		mAudioSystem;		///< @brief	The audio system I'm using (if any)
 		NTV2FrameDataArray	mHostBuffers;		///< @brief	My host buffers
-		MyCircularBuffer	mAVCircularBuffer;	///< @brief	My ring buffer object
+		FrameDataRingBuffer	mAVCircularBuffer;	///< @brief	My ring buffer object
 		bool				mGlobalQuit;		///< @brief	Set "true" to gracefully stop
 
 };	//	NTV2Capture

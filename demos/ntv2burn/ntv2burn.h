@@ -9,79 +9,17 @@
 #define _NTV2BURN_H
 
 #include "ntv2card.h"
-#include "ntv2utils.h"
 #include "ntv2formatdescriptor.h"
 #include "ntv2democommon.h"
 #include "ajabase/common/types.h"
 #include "ajabase/common/circularbuffer.h"
 #include "ajabase/system/thread.h"
 #include "ajabase/common/timecodeburn.h"
-#include "ajabase/system/info.h"
-
-/**
-	@brief	Configures an NTV2Player instance.
-**/
-typedef struct BurnConfig
-{
-	public:
-		std::string						fDeviceSpec;		///< @brief	The AJA device to use
-		NTV2Channel						fInputChannel;		///< @brief	The input channel to use
-		NTV2Channel						fOutputChannel;		///< @brief	The output channel to use
-		NTV2InputSource					fInputSource;		///< @brief	The device input connector to use
-		CNTV2DemoCommon::ACFrameRange	fInputFrames;		///< @brief	Ingest frame count or range
-		CNTV2DemoCommon::ACFrameRange	fOutputFrames;		///< @brief	Playout frame count or range
-		NTV2PixelFormat					fPixelFormat;		///< @brief	The pixel format to use
-		NTV2TCIndex						fTimecodeSource;	///< @brief	Timecode source to use
-		bool							fDoMultiFormat;		///< @brief	If true, enables device-sharing;  otherwise takes exclusive control of the device.
-		bool							fSuppressAudio;		///< @brief	If true, suppress audio;  otherwise include audio
-		bool							fSuppressVideo;		///< @brief	If true, suppress video;  otherwise include video
-		bool							fSuppressAnc;		///< @brief	If true, suppress anc;  otherwise include anc
-
-		/**
-			@brief	Constructs a default Player configuration.
-		**/
-		inline explicit	BurnConfig (const std::string & inDeviceSpecifier	= "0")
-			:	fDeviceSpec			(inDeviceSpecifier),
-				fInputChannel		(NTV2_CHANNEL1),
-				fOutputChannel		(NTV2_CHANNEL3),
-				fInputSource		(NTV2_INPUTSOURCE_SDI1),
-				fInputFrames		(7),
-				fOutputFrames		(7),
-				fPixelFormat		(NTV2_FBF_8BIT_YCBCR),
-				fTimecodeSource		(NTV2_TCINDEX_SDI1),
-				fDoMultiFormat		(false),
-				fSuppressAudio		(false),
-				fSuppressVideo		(false),
-				fSuppressAnc		(false)
-		{
-		}
-
-		inline bool	WithAudio(void) const		{return !fSuppressAudio;}	///< @return	True if streaming audio, false if not.
-		inline bool	WithVideo(void) const		{return !fSuppressVideo;}	///< @return	True if streaming video, false if not.
-		inline bool	WithAnc(void) const			{return !fSuppressAnc;}		///< @return	True if streaming audio, false if not.
-		inline bool WithTimecode(void) const	{return NTV2_IS_VALID_TIMECODE_INDEX(fTimecodeSource);}	///< @return	True if valid TC source
-
-		/**
-			@brief		Renders a human-readable representation of me.
-			@param[in]	inCompact	If true, setting values are printed in a more compact form. Defaults to false.
-			@return		A list of label/value pairs.
-		**/
-		AJALabelValuePairs Get (const bool inCompact = false) const;
-
-}	BurnConfig;
-
-/**
-	@brief		Renders a human-readable representation of a BurnConfig into an output stream.
-	@param		strm	The output stream.
-	@param[in]	inObj	The configuration to be rendered into the output stream.
-	@return		A reference to the specified output stream.
-**/
-inline std::ostream &	operator << (std::ostream & strm, const BurnConfig & inObj)	{return strm << AJASystemInfo::ToString(inObj.Get());}
 
 
 /**
-	@brief	Instances of me can capture frames from a video signal provided to an input of an AJA device,
-			burn timecode into those frames, then deliver them to an output of the same AJA device, all in real time.
+	@brief	I capture frames from a video signal provided to an AJA device's video input. I burn timecode into
+			those frames, then deliver them to an output of the same AJA device with a 7-frame latency (by default).
 			I make use of the AJACircularBuffer, which simplifies implementing a producer/consumer model,
 			in which a "consumer" thread delivers burned-in frames to the AJA device output, and a "producer"
 			thread captures raw frames from the AJA device input.
@@ -89,7 +27,6 @@ inline std::ostream &	operator << (std::ostream & strm, const BurnConfig & inObj
 			makes it available. I also show how to embed timecode into an SDI output signal using AutoCirculate
 			during playout.
 **/
-
 class NTV2Burn
 {
 	//	Public Instance Methods
@@ -205,7 +142,6 @@ class NTV2Burn
 									(For this application, this will be set to point to the NTV2Burn instance.)
 		**/
 		static void				CaptureThreadStatic (AJAThread * pThread, void * pContext);
-
 
 	//	Private Member Data
 	private:

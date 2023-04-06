@@ -9,13 +9,14 @@
 #ifndef _NTV2DEMOCOMMON_H
 #define _NTV2DEMOCOMMON_H
 
-#include "stdint.h"
 #include "ntv2rp188.h"
 #include "ntv2publicinterface.h"
-#include "ntv2testpatterngen.h"
 #include "ntv2card.h"
+#include "ntv2utils.h"	//	for NTV2ACFrameRange
+#include "ajaanc/includes/ancillarydata.h"
 #include "ajabase/common/options_popt.h"
-#include "ajabase/common/timecodeburn.h"
+#include "ajabase/common/videotypes.h"
+#include "ajabase/common/circularbuffer.h"
 #include "ajabase/system/debug.h"
 #include "ajabase/system/info.h"
 #include <algorithm>
@@ -76,11 +77,11 @@ typedef struct
 class AJAExport NTV2FrameData
 {
 	public:
-		NTV2_POINTER	fVideoBuffer;		///< @brief	Host video buffer
-		NTV2_POINTER	fVideoBuffer2;		///< @brief	Additional host video buffer, usually F2
-		NTV2_POINTER	fAudioBuffer;		///< @brief	Host audio buffer
-		NTV2_POINTER	fAncBuffer;			///< @brief	Host ancillary data buffer
-		NTV2_POINTER	fAncBuffer2;		///< @brief	Additional "F2" host anc buffer
+		NTV2Buffer		fVideoBuffer;		///< @brief	Host video buffer
+		NTV2Buffer		fVideoBuffer2;		///< @brief	Additional host video buffer, usually F2
+		NTV2Buffer		fAudioBuffer;		///< @brief	Host audio buffer
+		NTV2Buffer		fAncBuffer;			///< @brief	Host ancillary data buffer
+		NTV2Buffer		fAncBuffer2;		///< @brief	Additional "F2" host anc buffer
 		NTV2TimeCodes	fTimecodes;			///< @brief	Map of TC indexes to NTV2_RP188 values
 		ULWord			fNumAudioBytes;		///< @brief	Actual number of captured audio bytes
 		ULWord			fNumAncBytes;		///< @brief	Actual number of captured F1 anc bytes
@@ -100,22 +101,22 @@ class AJAExport NTV2FrameData
 				fFrameFlags(0)	{}
 
 		//	Inquiry Methods
-		inline NTV2_POINTER &	VideoBuffer (void)			{return fVideoBuffer;}
+		inline NTV2Buffer &	VideoBuffer (void)				{return fVideoBuffer;}
 		inline ULWord	VideoBufferSize (void) const		{return fVideoBuffer.GetByteCount();}
 
-		inline NTV2_POINTER &	AudioBuffer (void)			{return fAudioBuffer;}
+		inline NTV2Buffer &	AudioBuffer (void)				{return fAudioBuffer;}
 		inline ULWord	AudioBufferSize (void) const		{return fAudioBuffer.GetByteCount();}
 		inline ULWord	NumCapturedAudioBytes (void) const	{return fNumAudioBytes;}
 
-		inline NTV2_POINTER &	AncBuffer (void)			{return fAncBuffer;}
+		inline NTV2Buffer &	AncBuffer (void)				{return fAncBuffer;}
 		inline ULWord	AncBufferSize (void) const			{return fAncBuffer.GetByteCount();}
 		inline ULWord	NumCapturedAncBytes (void) const	{return fNumAncBytes;}
 
-		inline NTV2_POINTER &	AncBuffer2 (void)			{return fAncBuffer2;}
+		inline NTV2Buffer &	AncBuffer2 (void)				{return fAncBuffer2;}
 		inline ULWord	AncBuffer2Size (void) const			{return fAncBuffer2.GetByteCount();}
 		inline ULWord	NumCapturedAnc2Bytes (void) const	{return fNumAnc2Bytes;}
 
-		inline NTV2_POINTER &	VideoBuffer2 (void)			{return fVideoBuffer2;}
+		inline NTV2Buffer &	VideoBuffer2 (void)				{return fVideoBuffer2;}
 		inline ULWord	VideoBufferSize2 (void) const		{return fVideoBuffer2.GetByteCount();}
 
 		inline bool		IsNULL (void) const					{return fVideoBuffer.IsNULL() && fVideoBuffer2.IsNULL()
@@ -149,10 +150,11 @@ class AJAExport NTV2FrameData
 typedef std::vector<NTV2FrameData>			NTV2FrameDataArray;				///< @brief A vector of NTV2FrameData elements
 typedef NTV2FrameDataArray::iterator		NTV2FrameDataArrayIter;			///< @brief Handy non-const iterator
 typedef NTV2FrameDataArray::const_iterator	NTV2FrameDataArrayConstIter;	///< @brief Handy const iterator
+typedef	AJACircularBuffer<NTV2FrameData*>	FrameDataRingBuffer;			///< @brief	Buffer ring of NTV2FrameData's
 
 
 
-static const size_t CIRCULAR_BUFFER_SIZE	(10);	///< @brief	Number of AVDataBuffers in our ring
+static const size_t CIRCULAR_BUFFER_SIZE	(10);	///< @brief	Number of NTV2FrameData's in our ring
 static const ULWord	kDemoAppSignature		NTV2_FOURCC('D','E','M','O');
 
 
@@ -255,13 +257,193 @@ typedef enum _NTV2TCIndexKinds
 } NTV2TCIndexKinds;
 
 
+/**
+	@brief	This class is used to configure an NTV2Capture instance.
+**/
+class AJAExport CaptureConfig
+{
+	public:
+		std::string			fDeviceSpec;		///< @brief	The AJA device to use
+		std::string			fAncDataFilePath;	///< @brief	Optional path to Anc binary data file
+		NTV2Channel			fInputChannel;		///< @brief	The device channel to use
+		NTV2InputSource		fInputSource;		///< @brief	The device input connector to use
+		NTV2ACFrameRange	fFrames;			///< @brief	AutoCirculate frame count or range
+		NTV2PixelFormat		fPixelFormat;		///< @brief	Pixel format to use
+		UWord				fNumAudioLinks;		///< @brief	Number of audio links to capture
+		bool				fDoABConversion;	///< @brief	If true, do level-A/B conversion;  otherwise don't
+		bool				fDoMultiFormat;		///< @brief	If true, use multi-format/multi-channel mode, if device supports it; otherwise normal mode
+		bool				fWithAnc;			///< @brief	If true, also capture Anc
+		bool				fWithAudio;			///< @brief	If true, also capture Audio
+		bool				fDoTSIRouting;		///< @brief	If true, do TSI routing; otherwise squares
+
+		/**
+			@brief	Constructs a default NTV2Capture configuration.
+		**/
+		inline explicit	CaptureConfig (const std::string & inDeviceSpec	= "0")
+			:	fDeviceSpec			(inDeviceSpec),
+				fAncDataFilePath	(),
+				fInputChannel		(NTV2_CHANNEL_INVALID),
+				fInputSource		(NTV2_INPUTSOURCE_INVALID),
+				fFrames				(7),
+				fPixelFormat		(NTV2_FBF_8BIT_YCBCR),
+				fNumAudioLinks		(1),
+				fDoABConversion		(false),
+				fDoMultiFormat		(false),
+				fWithAnc			(false),
+				fWithAudio			(true),
+				fDoTSIRouting		(true)
+		{
+		}
+
+		AJALabelValuePairs	Get (const bool inCompact = false) const;
+
+};	//	CaptureConfig
+
+AJAExport std::ostream &	operator << (std::ostream & ioStrm, const CaptureConfig & inObj);
+
+
+/**
+	@brief	Configures an NTV2Player instance.
+**/
+typedef struct PlayerConfig
+{
+	public:
+		std::string			fDeviceSpec;		///< @brief	The AJA device to use
+		std::string			fAncDataFilePath;	///< @brief	Optional path to Anc binary data file to playout
+		NTV2Channel			fOutputChannel;		///< @brief	The device channel to use
+		NTV2OutputDest		fOutputDest;		///< @brief	The desired output connector to use
+		NTV2ACFrameRange	fFrames;			///< @brief	AutoCirculate frame count or range
+		NTV2PixelFormat		fPixelFormat;		///< @brief	The pixel format to use
+		NTV2VideoFormat		fVideoFormat;		///< @brief	The video format to use
+		NTV2VANCMode		fVancMode;			///< @brief	VANC mode to use
+		AJAAncDataType		fTransmitHDRType;	///< @brief	Specifies the HDR anc data packet to transmit, if any.
+		UWord				fNumAudioLinks;		///< @brief	The number of audio systems to control for multi-link audio (4K/8K)
+		bool				fDoMultiFormat;		///< @brief	If true, enable device-sharing;  otherwise take exclusive control of device
+		bool				fSuppressAudio;		///< @brief	If true, suppress audio;  otherwise generate audio tone
+		bool				fSuppressVideo;		///< @brief	If true, suppress video;  otherwise generate test patterns
+		bool				fTransmitLTC;		///< @brief	If true, embed LTC;  otherwise embed VITC
+		bool				fDoABConversion;	///< @brief	If true, do level-A/B conversion;  otherwise don't
+		bool				fDoHDMIOutput;		///< @brief	If true, enable HDMI output;  otherwise, disable HDMI output
+		bool				fDoTsiRouting;		///< @brief	If true, enable TSI routing; otherwise route for square division (4K/8K)
+		bool				fDoRGBOnWire;		///< @brief	If true, produce RGB on the wire; otherwise output YUV
+		bool				fDoLinkGrouping;	///< @brief	If true, enables 6/12G output mode on IoX3/Kona5 (4K/8K)
+
+		/**
+			@brief	Constructs a default Player configuration.
+		**/
+		inline explicit	PlayerConfig (const std::string & inDeviceSpecifier	= "0")
+			:	fDeviceSpec			(inDeviceSpecifier),
+				fAncDataFilePath	(),
+				fOutputChannel		(NTV2_CHANNEL1),
+				fOutputDest			(NTV2_OUTPUTDESTINATION_SDI2),
+				fFrames				(7),
+				fPixelFormat		(NTV2_FBF_8BIT_YCBCR),
+				fVideoFormat		(NTV2_FORMAT_1080i_5994),
+				fVancMode			(NTV2_VANCMODE_OFF),
+				fTransmitHDRType	(AJAAncDataType_Unknown),
+				fNumAudioLinks		(1),
+				fDoMultiFormat		(false),
+				fSuppressAudio		(false),
+				fSuppressVideo		(false),
+				fTransmitLTC		(false),
+				fDoABConversion		(false),
+				fDoHDMIOutput		(false),
+				fDoTsiRouting		(false),
+				fDoRGBOnWire		(false),
+				fDoLinkGrouping		(false)
+		{
+		}
+
+		inline bool	WithAudio(void) const	{return !fSuppressAudio  &&  fNumAudioLinks > 0;}	///< @return	True if playing audio, false if not.
+		inline bool	WithVideo(void) const	{return !fSuppressVideo;}	///< @return	True if playing video, false if not.
+
+		/**
+			@brief		Renders a human-readable representation of me.
+			@param[in]	inCompact	If true, setting values are printed in a more compact form. Defaults to false.
+			@return		A list of label/value pairs.
+		**/
+		AJALabelValuePairs Get (const bool inCompact = false) const;
+
+}	PlayerConfig;
+
+AJAExport std::ostream &	operator << (std::ostream & ioStrm, const PlayerConfig & inObj);
+
+/**
+	@brief	Configures an NTV2Burn or NTV2FieldBurn instance.
+**/
+typedef struct BurnConfig
+{
+	public:
+		std::string			fDeviceSpec;		///< @brief	The AJA device to use
+		std::string			fDeviceSpec2;		///< @brief	Second AJA device to use (Burn4KQuadrant or BurnBoardToBoard only)
+		NTV2Channel			fInputChannel;		///< @brief	The input channel to use
+		NTV2Channel			fOutputChannel;		///< @brief	The output channel to use
+		NTV2InputSource		fInputSource;		///< @brief	The device input connector to use
+		NTV2ACFrameRange	fInputFrames;		///< @brief	Ingest frame count or range
+		NTV2ACFrameRange	fOutputFrames;		///< @brief	Playout frame count or range
+		NTV2PixelFormat		fPixelFormat;		///< @brief	The pixel format to use
+		NTV2TCIndex			fTimecodeSource;	///< @brief	Timecode source to use
+		bool				fDoMultiFormat;		///< @brief	If true, enables device-sharing;  otherwise takes exclusive control of the device.
+		bool				fSuppressAudio;		///< @brief	If true, suppress audio;  otherwise include audio
+		bool				fSuppressVideo;		///< @brief	If true, suppress video;  otherwise include video
+		bool				fIsFieldMode;		///< @brief	True if Field Mode, otherwise Frame Mode
+		bool				fWithAnc;			///< @brief	If true, capture & play anc data (LLBurn). Defaults to false.
+		bool				fWithHanc;			///< @brief	If true, capture & play HANC data, including audio (LLBurn). Defaults to false.
+
+		/**
+			@brief	Constructs a default Player configuration.
+		**/
+		inline explicit	BurnConfig (const std::string & inDeviceSpecifier	= "0")
+			:	fDeviceSpec			(inDeviceSpecifier),
+				fDeviceSpec2		(),
+				fInputChannel		(NTV2_CHANNEL1),
+				fOutputChannel		(NTV2_CHANNEL3),
+				fInputSource		(NTV2_INPUTSOURCE_SDI1),
+				fInputFrames		(7),
+				fOutputFrames		(7),
+				fPixelFormat		(NTV2_FBF_8BIT_YCBCR),
+				fTimecodeSource		(NTV2_TCINDEX_SDI1),
+				fDoMultiFormat		(false),
+				fSuppressAudio		(false),
+				fSuppressVideo		(false),
+				fIsFieldMode		(false),
+				fWithAnc			(false),
+				fWithHanc			(false)
+		{
+		}
+
+		inline bool	WithAudio(void) const		{return !fSuppressAudio;}	///< @return	True if streaming audio, false if not.
+		inline bool	WithVideo(void) const		{return !fSuppressVideo;}	///< @return	True if streaming video, false if not.
+		inline bool	WithAnc(void) const			{return fWithAnc;}			///< @return	True if streaming anc data, false if not.
+		inline bool	WithHanc(void) const		{return fWithHanc;}			///< @return	True if streaming HANC, false if not.
+		inline bool WithTimecode(void) const	{return NTV2_IS_VALID_TIMECODE_INDEX(fTimecodeSource);}	///< @return	True if valid TC source
+		inline bool FieldMode(void) const		{return fIsFieldMode;}		///< @return	True if field mode, otherwise false.
+
+		/**
+			@brief		Renders a human-readable representation of me.
+			@param[in]	inCompact	If true, setting values are printed in a more compact form. Defaults to false.
+			@return		A list of label/value pairs.
+		**/
+		AJALabelValuePairs Get (const bool inCompact = false) const;
+
+}	BurnConfig;
+
+/**
+	@brief		Renders a human-readable representation of a BurnConfig into an output stream.
+	@param		strm	The output stream.
+	@param[in]	inObj	The configuration to be rendered into the output stream.
+	@return		A reference to the specified output stream.
+**/
+inline std::ostream &	operator << (std::ostream & strm, const BurnConfig & inObj)	{return strm << AJASystemInfo::ToString(inObj.Get());}
+
+
 
 /**
 	@brief	A set of common convenience functions used by the NTV2 \ref demoapps.
 			Most are used for converting a command line argument into ::NTV2VideoFormat,
 			::NTV2FrameBufferFormat, etc. types.
 **/
-class CNTV2DemoCommon
+class AJAExport CNTV2DemoCommon
 {
 	public:
 	/**
@@ -371,7 +553,7 @@ class CNTV2DemoCommon
 			@param[in]	inKinds		Specifies the types of input sources returned. Defaults to all sources.
 			@return		The supported ::NTV2InputSourceSet.
 		**/
-		static const NTV2InputSourceSet		GetSupportedInputSources (const NTV2InputSourceKinds inKinds = NTV2_INPUTSOURCES_ALL);
+		static const NTV2InputSourceSet		GetSupportedInputSources (const NTV2IOKinds inKinds = NTV2_IOKINDS_ALL);
 
 		/**
 			@param[in]	inKinds				Specifies the types of input sources returned. Defaults to all sources.
@@ -381,7 +563,7 @@ class CNTV2DemoCommon
 			@note		These input source strings are mere conveniences for specifying input sources in the command-line-based demo apps,
 						and are subject to change without notice. They are not intended to be canonical in any way.
 		**/
-		static std::string					GetInputSourceStrings (const NTV2InputSourceKinds inKinds = NTV2_INPUTSOURCES_ALL,
+		static std::string					GetInputSourceStrings (const NTV2IOKinds inKinds = NTV2_IOKINDS_ALL,
 																	const std::string inDeviceSpecifier = std::string ());
 
 		/**
@@ -487,6 +669,64 @@ class CNTV2DemoCommon
 	///@}
 
 	/**
+		@name	VANC Mode Functions
+	**/
+	///@{
+		/**
+			@return		A string that can be printed to show the available VANC mode identifiers.
+			@note		These identifiers are mere conveniences for specifying VANC modes in the command-line-based demo apps,
+						and are subject to change without notice. They are not intended to be canonical in any way.
+		**/
+		static std::string					GetVANCModeStrings (void);
+
+		/**
+			@param[in]	inStr	Specifies the string to be converted to a NTV2VANCMode.
+			@return		The NTV2VANCMode that best matches the given string, or an empty string if invalid.
+		**/
+		static NTV2VANCMode					GetVANCModeFromString (const std::string & inStr);
+	///@}
+
+	/**
+		@name	Routing Functions
+	**/
+	///@{
+		/**
+			@brief		Answers with the crosspoint connections needed to implement the given capture configuration.
+			@param[in]	inConfig		Specifies the CaptureConfig to route for.
+			@param[in]	isInputRGB		Optionally specifies if the input is RGB. Defaults to false (YUV).
+			@param[out]	outConnections	Receives the crosspoint connection set.
+		**/
+		static bool							GetInputRouting (NTV2XptConnections & outConnections,
+															const CaptureConfig & inConfig,
+															const bool isInputRGB = false);
+
+		/**
+			@brief		Answers with the crosspoint connections needed to implement the given 4K/UHD capture configuration.
+			@param[in]	inConfig		Specifies the CaptureConfig to route for.
+			@param[in]	inDevID			Optionally specifies the NTV2DeviceID.
+			@param[in]	isInputRGB		Optionally specifies if the input is RGB. Defaults to false (YUV).
+			@param[out]	outConnections	Receives the crosspoint connection set.
+		**/
+		static bool							GetInputRouting4K (	NTV2XptConnections & outConnections,
+																const CaptureConfig & inConfig,
+																const NTV2DeviceID inDevID = DEVICE_ID_INVALID,
+																const bool isInputRGB = false);
+
+		/**
+			@brief		Answers with the crosspoint connections needed to implement the given 8K/UHD2 capture configuration.
+			@param[in]	inConfig		Specifies the CaptureConfig to route for.
+			@param[in]	inDevID			Optionally specifies the NTV2DeviceID.
+			@param[in]	isInputRGB		Optionally specifies if the input is RGB. Defaults to false (YUV).
+			@param[out]	outConnections	Receives the crosspoint connection set.
+		**/
+		static bool							GetInputRouting8K (	NTV2XptConnections & outConnections,
+																const CaptureConfig & inConfig,
+																const NTV2VideoFormat inVidFormat,
+																const NTV2DeviceID inDevID = DEVICE_ID_INVALID,
+																const bool isInputRGB = false);
+	///@}
+
+	/**
 		@name	Miscellaneous Functions
 	**/
 	///@{
@@ -540,111 +780,42 @@ class CNTV2DemoCommon
 			@param[in]	inCount			Specifies the number of Muxes.
 		**/
 		static NTV2ChannelList				GetTSIMuxesForFrameStore (const NTV2DeviceID inDeviceID, const NTV2Channel in1stFrameStore, const UWord inCount);
+
+		/**
+			@brief		Configures capture audio systems.
+			@param[in]	inDevice		Specifies the device to configure.
+			@param[in]	inConfig    	Specifies the capture configuration (primarily for fInputSource).
+			@param[in]	inAudioSystems	Specifies the audio systems to configure.
+			@return		True if successful;  otherwise false.
+		**/
+		static bool							ConfigureAudioSystems (CNTV2Card & inDevice, const CaptureConfig & inConfig, const NTV2AudioSystemSet inAudioSystems);
+
+		static size_t						SetDefaultPageSize (void);
 	///@}
 
-
-	/**
-		@brief	AutoCirculate Frame Range
-	**/
-	class ACFrameRange
-	{
-		public:
-			explicit inline	ACFrameRange (const UWord inFrameCount = 0)
-						:	mIsCountOnly	(true),
-							mFrameCount		(inFrameCount),
-							mFirstFrame		(0),
-							mLastFrame		(0)
-						{}
-			explicit inline	ACFrameRange (const UWord inFirstFrame, const UWord inLastFrame)
-						:	mIsCountOnly	(true),
-							mFrameCount		(0),
-							mFirstFrame		(inFirstFrame),
-							mLastFrame		(inLastFrame)
-						{}
-			inline bool		isCount(void) const			{return mIsCountOnly;}
-			inline bool		isFrameRange(void) const	{return !isCount();}
-			inline UWord	count(void) const			{return isCount() ? mFrameCount : 0;}
-			inline UWord	firstFrame(void) const		{return mFirstFrame;}
-			inline UWord	lastFrame(void) const		{return mLastFrame;}
-			inline bool		valid(void) const
-							{
-								if (isCount())
-									return count() > 0;
-								return lastFrame() >= firstFrame();
-							}
-			inline ACFrameRange &	makeInvalid(void)	{mIsCountOnly = true;  mFrameCount = mFirstFrame = mLastFrame = 0; return *this;}
-			std::string		setFromString(const std::string & inStr);
-			std::string		toString(void) const;
-		private:
-			bool	mIsCountOnly;	///< @brief	Frame count only? If false, specifies absolute frame range.
-			UWord	mFrameCount;	///< @brief	Frame count (mIsCountOnly == true).
-			UWord	mFirstFrame;	///< @brief	First frame (mIsCountOnly == false).
-			UWord	mLastFrame;		///< @brief	Last frame (mIsCountOnly == false).
-	};
-
+	typedef NTV2ACFrameRange	ACFrameRange;	///< @deprecated	Starting in SDK 17.0, use NTV2ACFrameRange from now on
 
 	typedef struct poptOption	PoptOpts;
-	class Popt
+	class AJAExport Popt
 	{
 		public:
 			Popt (const int inArgc, const char ** pArgs, const PoptOpts * pInOptionsTable);
-			virtual								~Popt();
-			virtual inline int					parseResult(void) const		{return mResult;}
-			virtual inline bool					isGood (void) const			{return parseResult() == -1;}
-			virtual inline						operator bool() const		{return isGood();}
-			virtual inline const std::string &	errorStr (void) const		{return mError;}
+			virtual									~Popt();
+			virtual inline int						parseResult(void) const		{return mResult;}
+			virtual inline bool						isGood (void) const			{return parseResult() == -1;}
+			virtual inline							operator bool() const		{return isGood();}
+			virtual inline const std::string &		errorStr (void) const		{return mError;}
+			virtual inline const NTV2StringList &	otherArgs (void) const		{return mOtherArgs;}
 		private:
-			poptContext	mContext;
-			int			mResult;
-			std::string	mError;
+			poptContext		mContext;
+			int				mResult;
+			std::string		mError;
+			NTV2StringList	mOtherArgs;
 	};
 
 	static bool	BFT(void);
 
 };	//	CNTV2DemoCommon
-
-
-/**
-	@brief	This class is used to configure an NTV2Capture instance.
-**/
-typedef struct CaptureConfig
-{
-	public:
-		std::string						fDeviceSpec;		///< @brief	The AJA device to use
-		std::string						fAncDataFilePath;	///< @brief	Optional path to Anc binary data file
-		NTV2Channel						fInputChannel;		///< @brief	The device channel to use
-		NTV2InputSource					fInputSource;		///< @brief	The device input connector to use
-		CNTV2DemoCommon::ACFrameRange	fFrames;			///< @brief	AutoCirculate frame count or range
-		NTV2PixelFormat					fPixelFormat;		///< @brief	Pixel format to use
-		bool							fABConversion;		///< @brief	If true, do level-A/B conversion
-		bool							fDoMultiFormat;		///< @brief	If true, use multi-format/multi-channel mode, if device supports it; otherwise normal mode
-		bool							fWithAnc;			///< @brief	If true, also capture Anc
-		bool							fWithAudio;			///< @brief	If true, also capture Audio
-		bool							fDoTSIRouting;		///< @brief	If true, do TSI routing; otherwise squares
-		UWord							fNumAudioLinks;		///< @brief	Number of audio links to capture
-
-		/**
-			@brief	Constructs a default NTV2Capture configuration.
-		**/
-		inline explicit	CaptureConfig (const std::string & inDeviceSpec	= "0")
-			:	fDeviceSpec			(inDeviceSpec),
-				fAncDataFilePath	(),
-				fInputChannel		(NTV2_CHANNEL_INVALID),
-				fInputSource		(NTV2_INPUTSOURCE_INVALID),
-				fFrames				(7),
-				fPixelFormat		(NTV2_FBF_8BIT_YCBCR),
-				fABConversion		(false),
-				fDoMultiFormat		(false),
-				fWithAnc			(false),
-				fWithAudio			(true),
-				fDoTSIRouting		(true),
-				fNumAudioLinks		(1)
-		{
-		}
-		AJALabelValuePairs	Get (const bool inCompact = false) const;
-} CaptureConfig;
-
-std::ostream &	operator << (std::ostream & ioStrm, const CaptureConfig & inObj);
 
 
 //	These AJA_NTV2_AUDIO_RECORD* macros can, if enabled, record audio samples into a file in the current directory.
@@ -699,6 +870,34 @@ std::ostream &	operator << (std::ostream & ioStrm, const CaptureConfig & inObj);
 	#define		AJA_NTV2_AUDIO_RECORD_BEGIN		
 	#define		AJA_NTV2_AUDIO_RECORD_DO			
 	#define		AJA_NTV2_AUDIO_RECORD_END		
+#endif
+
+//	Optionally used in the CNTV2Capture4K demo.
+#if defined(AJA_RECORD_MLAUDIO)
+	#include <fstream>
+	#define	AJA_NTV2_MLAUDIO_RECORD_BEGIN		ofstream ofs1, ofs2;												\
+												if (mConfig.fNumAudioLinks > 1)										\
+												{																	\
+													ofs1.open("temp1.raw", ios::out | ios::trunc | ios::binary);	\
+													ofs2.open("temp2.raw", ios::out | ios::trunc | ios::binary);	\
+												}
+
+	#define	AJA_NTV2_MLAUDIO_RECORD_DO			if (mConfig.fNumAudioLinks > 1)																\
+												{	const ULWord halfBytes (pFrameData->NumCapturedAudioBytes() / 2);						\
+													ofs1.write(pFrameData->AudioBuffer(), halfBytes);										\
+													NTV2Buffer lastHalf (pFrameData->fAudioBuffer.GetHostAddress(halfBytes), halfBytes);	\
+													ofs2.write(lastHalf, lastHalf.GetByteCount());											\
+												}
+
+	#define	AJA_NTV2_MLAUDIO_RECORD_END			if (mConfig.fNumAudioLinks > 1)				\
+												{											\
+													ofs1.close();							\
+													ofs2.close();							\
+												}
+#else
+	#define	AJA_NTV2_MLAUDIO_RECORD_BEGIN		
+	#define	AJA_NTV2_MLAUDIO_RECORD_DO			
+	#define	AJA_NTV2_MLAUDIO_RECORD_END			
 #endif
 
 #endif	//	_NTV2DEMOCOMMON_H

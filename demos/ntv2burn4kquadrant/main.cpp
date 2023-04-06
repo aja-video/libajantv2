@@ -31,75 +31,74 @@ static void SignalHandler (int inSignal)
 
 int main (int argc, const char ** argv)
 {
-	AJAStatus	status				(AJA_STATUS_SUCCESS);	//	Result status
-	char *		pInputDeviceSpec 	(AJA_NULL);				//	Which device to use for capture
-	char *		pOutputDeviceSpec 	(AJA_NULL);				//	Which device to use for playout
-	char *		pTimecodeSpec		(AJA_NULL);				//	Timecode source spec
-	char *		pPixelFormat		(AJA_NULL);				//	Pixel format spec
-	int			noAudio				(0);					//	Disable audio?
-	poptContext	optionsContext;								//	Context for parsing command line arguments
+	char *			pDeviceSpec		(AJA_NULL);		//	Which device to use for input
+	char *			pOutDevSpec 	(AJA_NULL);		//	Which device to use for output
+	char *			pTcSource		(AJA_NULL);		//	Time code source string
+	char *			pPixelFormat	(AJA_NULL);		//	Pixel format spec
+	int				showVersion		(0);			//	Show version?
+	int				noAudio			(0);			//	Disable audio?
 	AJADebug::Open();
 
 	//	Command line option descriptions:
-	const struct poptOption userOptionsTable [] =
+	const struct poptOption optionsTable [] =
 	{
-		{"input",	'i',	POPT_ARG_STRING,	&pInputDeviceSpec,	0,	"input device",		"index#, serial#, or model"	},
-		{"output",	'o',	POPT_ARG_STRING,	&pOutputDeviceSpec,	0,	"output device",	"index#, serial#, or model"	},
-		{"tcsource",'t',	POPT_ARG_STRING,	&pTimecodeSpec,		0,	"timecode source",	"'?' or 'list' to list"		},
-		{"noaudio",	0,		POPT_ARG_NONE,		&noAudio,			0,	"disable audio?",	AJA_NULL					},
-		{"pixelFormat",'p',	POPT_ARG_STRING,	&pPixelFormat,		0,	"pixel format",		"'?' or 'list' to list"		},
+		{"version",		  0,	POPT_ARG_NONE,		&showVersion,	0,	"show version",				AJA_NULL					},
+		{"input",		'i',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"input device to use",		"index#, serial#, or model"	},
+		{"output",		'o',	POPT_ARG_STRING,	&pOutDevSpec,	0,	"output device",			"index#, serial#, or model"	},
+		{"tcsource",	't',	POPT_ARG_STRING,	&pTcSource,		0,	"time code source",			"'?' to list"				},
+		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio?",		AJA_NULL					},
+		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",	"'?' or 'list' to list"		},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
+	CNTV2DemoCommon::Popt popt(argc, argv, optionsTable);
+	if (!popt)
+		{cerr << "## ERROR: " << popt.errorStr() << endl;  return 2;}
+	if (showVersion)
+		{cout << argv[0] << ", NTV2 SDK " << ::NTV2Version() << endl;  return 0;}
 
-	//	Read command line arguments...
-	optionsContext = ::poptGetContext (AJA_NULL, argc, argv, userOptionsTable, 0);
-	::poptGetNextOpt (optionsContext);
-	optionsContext = ::poptFreeContext (optionsContext);
+	//	Device
+	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "0");
+	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
+		return 1;
+
+	BurnConfig config (deviceSpec);
 
 	//	Devices
-	const string	legalDevices		(CNTV2DemoCommon::GetDeviceStrings());
-	const string	inputDeviceSpec		(pInputDeviceSpec  ? pInputDeviceSpec  : "0");
-	const string	outputDeviceSpec	(pOutputDeviceSpec ? pOutputDeviceSpec : "1");
-	if (inputDeviceSpec == "?" || inputDeviceSpec == "list"  ||  outputDeviceSpec == "?" || outputDeviceSpec == "list")
-		{cout << legalDevices << endl;  return 0;}
-	if (!CNTV2DemoCommon::IsValidDevice(inputDeviceSpec))
-		{cout << "## ERROR:  No such input device '" << inputDeviceSpec << "'" << endl << legalDevices;  return 1;}
-	if (!CNTV2DemoCommon::IsValidDevice(outputDeviceSpec))
-		{cout << "## ERROR:  No such output device '" << outputDeviceSpec << "'" << endl << legalDevices;  return 1;}
+	config.fDeviceSpec2 = pOutDevSpec ? pOutDevSpec : "1";
+	if (!CNTV2DemoCommon::IsValidDevice(config.fDeviceSpec2))
+		{cout << "## ERROR:  No such output device '" << config.fDeviceSpec2 << "'" << endl;  return 1;}
 
-	//	Timecode source
-	const string	tcSourceStr		(pTimecodeSpec ? CNTV2DemoCommon::ToLower(string(pTimecodeSpec)) : "");
-	const string	legalTCSources	(CNTV2DemoCommon::GetTCIndexStrings(TC_INDEXES_ALL, inputDeviceSpec));
-	NTV2TCIndex		tcSource		(NTV2_TCINDEX_SDI1);
-	if (tcSourceStr == "?" || tcSourceStr == "list")
+	//	Pixel Format
+	const string pixelFormatStr (pPixelFormat  ?  pPixelFormat  :  "");
+	config.fPixelFormat = pixelFormatStr.empty() ? NTV2_FBF_8BIT_YCBCR : CNTV2DemoCommon::GetPixelFormatFromString(pixelFormatStr);
+	if (pixelFormatStr == "?"  ||  pixelFormatStr == "list")
+		{cout << CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 0;}
+	else if (!pixelFormatStr.empty()  &&  !NTV2_IS_VALID_FRAME_BUFFER_FORMAT(config.fPixelFormat))
+	{
+		cerr	<< "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl
+				<< CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec) << endl;
+		return 2;
+	}
+
+	//	Timecode source...
+	const string	legalTCSources(CNTV2DemoCommon::GetTCIndexStrings(TC_INDEXES_ALL, deviceSpec));
+	const string	tcSourceStr		(pTcSource ? CNTV2DemoCommon::ToLower(pTcSource) : "");
+	if (tcSourceStr == "?"  ||  tcSourceStr == "list")
 		{cout << legalTCSources << endl;  return 0;}
 	if (!tcSourceStr.empty())
 	{
-		tcSource = CNTV2DemoCommon::GetTCIndexFromString(tcSourceStr);
-		if (!NTV2_IS_VALID_TIMECODE_INDEX(tcSource))
-			{cerr << "## ERROR:  Timecode source '" << tcSourceStr << "' not one of:" << endl << legalTCSources << endl;	return 1;}
+		config.fTimecodeSource = CNTV2DemoCommon::GetTCIndexFromString(tcSourceStr);
+		if (!NTV2_IS_VALID_TIMECODE_INDEX(config.fTimecodeSource))
+			{cerr << "## ERROR:  Timecode source '" << tcSourceStr << "' not one of these:" << endl << legalTCSources << endl;	return 1;}
 	}
 
-	//	Pixel format
-	NTV2PixelFormat	pixelFormat		(NTV2_FBF_8BIT_YCBCR);
-	const string	pixelFormatStr	(pPixelFormat  ? pPixelFormat :  "1");
-	const string	legalFBFs		(CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, inputDeviceSpec));
-	if (pixelFormatStr == "?" || pixelFormatStr == "list")
-		{cout << CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, inputDeviceSpec) << endl;  return 0;}
-	if (!pixelFormatStr.empty())
-	{
-		pixelFormat = CNTV2DemoCommon::GetPixelFormatFromString(pixelFormatStr);
-		if (!NTV2_IS_VALID_FRAME_BUFFER_FORMAT(pixelFormat))
-			{cerr << "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl << legalFBFs << endl;  return 2;}
-	}
+	config.fSuppressAudio	= noAudio ? true  : false;
+	config.fInputFrames.setCountOnly(5);
+	config.fOutputFrames.setCountOnly(5);
 
-	//	Instantiate our NTV2Burn4KQuadrant object...
-	NTV2Burn4KQuadrant	burner (inputDeviceSpec,		//	Which device will be the input device?
-								outputDeviceSpec,		//	Which device will be the output device?
-								noAudio ? false : true,	//	Include audio?
-								pixelFormat,			//	Frame buffer format
-								tcSource);				//	Which time code source?				
+	//	Instantiate the NTV2Burn4KQuadrant object...
+	NTV2Burn4KQuadrant burner (config);
 
 	::signal (SIGINT, SignalHandler);
 	#if defined (AJAMac)
@@ -108,9 +107,9 @@ int main (int argc, const char ** argv)
 	#endif
 
 	//	Initialize the NTV2Burn4KQuadrant instance...
-	status = burner.Init();
+	AJAStatus status (burner.Init());
 	if (AJA_FAILURE(status))
-		{cerr << "## ERROR: Initialization failed" << endl;  return 2;}
+		{cerr << "## ERROR:  Initialization failed, status=" << status << endl;  return 4;}
 
 	//	Start the burner's capture and playout threads...
 	burner.Run();

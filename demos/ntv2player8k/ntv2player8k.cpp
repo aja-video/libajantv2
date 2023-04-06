@@ -6,14 +6,10 @@
 **/
 
 #include "ntv2player8k.h"
-#include "ntv2utils.h"
-#include "ntv2formatdescriptor.h"
 #include "ntv2debug.h"
+#include "ntv2devicescanner.h"
 #include "ntv2testpatterngen.h"
-#include "ajabase/common/timecode.h"
-#include "ajabase/system/memory.h"
-#include "ajabase/system/systemtime.h"
-#include "ajabase/system/info.h"
+#include "ajabase/common/timebase.h"
 #include "ajabase/system/process.h"
 #include "ajaanc/includes/ancillarydata_hdr_sdr.h"
 #include "ajaanc/includes/ancillarydata_hdr_hdr10.h"
@@ -47,13 +43,6 @@ static ULWord	gAncMaxSizeBytes (NTV2_ANCSIZE_MAX);	//	Max per-frame anc buffer s
 **/
 static const uint32_t	gAudMaxSizeBytes (256 * 1024);	//	Max per-frame audio buffer size, in bytes
 
-/**
-	@brief	The alignment of the video and audio buffers has a big impact on the efficiency of
-			DMA transfers. When aligned to the page size of the architecture, only one DMA
-			descriptor is needed per page. Misalignment will double the number of descriptors
-			that need to be fetched and processed, thus reducing bandwidth.
-**/
-static const uint32_t	BUFFER_ALIGNMENT	(4096);		//	The optimal size for most systems
 static const bool		BUFFER_PAGE_ALIGNED	(true);
 
 //	Audio tone generator data
@@ -62,7 +51,7 @@ static const ULWord		gNumFrequencies		(sizeof(gFrequencies) / sizeof(double));
 //	Unlike NTV2Player, this demo uses the same waveform amplitude in each audio channel
 
 
-NTV2Player8K::NTV2Player8K (const Player8KConfig & inConfig)
+NTV2Player8K::NTV2Player8K (const PlayerConfig & inConfig)
 	:	mConfig				(inConfig),
 		mConsumerThread		(),
 		mProducerThread		(),
@@ -120,12 +109,14 @@ AJAStatus NTV2Player8K::Init (void)
 	AJAStatus	status	(AJA_STATUS_SUCCESS);
 
 	//	Open the device...
-	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpecifier, mDevice))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpecifier << "' not found" << endl;  return AJA_STATUS_OPEN;}
+	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
+		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
 	mDeviceID = mDevice.GetDeviceID();	//	Keep this ID handy -- it's used frequently
 
     if (!mDevice.IsDeviceReady(false))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpecifier << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
+		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
+	if (!::NTV2DeviceCanDoPlayback(mDeviceID))
+		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
 
 	const UWord maxNumChannels (::NTV2DeviceGetNumFrameStores(mDeviceID));
 
@@ -185,9 +176,7 @@ AJAStatus NTV2Player8K::Init (void)
 	//	Ready to go...
 	#if defined(_DEBUG)
 		cerr << mConfig << endl;
-	#else
-		PLINFO("Configuration: " << mConfig);
-	#endif	//	not _DEBUG
+	#endif	//	defined(_DEBUG)
 	return AJA_STATUS_SUCCESS;
 
 }	//	Init
@@ -198,13 +187,16 @@ AJAStatus NTV2Player8K::SetUpVideo (void)
 	//	Configure the device to output the requested video format...
  	if (mConfig.fVideoFormat == NTV2_FORMAT_UNKNOWN)
 		return AJA_STATUS_BAD_PARAM;
-
 	if (!::NTV2DeviceCanDoVideoFormat (mDeviceID, mConfig.fVideoFormat))
-		cerr << "## NOTE:  NTV2DeviceCanDoVideoFormat says device can't do " << ::NTV2VideoFormatToString(mConfig.fVideoFormat) << endl;
-
+	{	cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' doesn't support "
+				<< ::NTV2VideoFormatToString(mConfig.fVideoFormat) << endl;
+		return AJA_STATUS_UNSUPPORTED;
+	}
 	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
-		{cerr << "## ERROR: Pixel format '" << ::NTV2FrameBufferFormatString(mConfig.fPixelFormat) << "' not supported on this device" << endl;
-			return AJA_STATUS_UNSUPPORTED;}
+	{	cerr	<< "## ERROR: '" << mDevice.GetDisplayName() << "' doesn't support "
+				<< ::NTV2FrameBufferFormatString(mConfig.fPixelFormat) << endl;
+		return AJA_STATUS_UNSUPPORTED;
+	}
 
 	NTV2ChannelSet channels13, frameStores;
 	channels13.insert(NTV2_CHANNEL1);  channels13.insert(NTV2_CHANNEL3);
@@ -245,9 +237,9 @@ AJAStatus NTV2Player8K::SetUpVideo (void)
 	mDevice.SubscribeOutputVerticalEvent (mConfig.fOutputChannel);
 
 	//	Check if HDR anc is permissible...
-	if (IS_KNOWN_AJAAncillaryDataType(mConfig.fTransmitHDRType)  &&  !::NTV2DeviceCanDoCustomAnc(mDeviceID))
+	if (IS_KNOWN_AJAAncDataType(mConfig.fTransmitHDRType)  &&  !::NTV2DeviceCanDoCustomAnc(mDeviceID))
 		{cerr << "## WARNING:  HDR Anc requested, but device can't do custom anc" << endl;
-			mConfig.fTransmitHDRType = AJAAncillaryDataType_Unknown;}
+			mConfig.fTransmitHDRType = AJAAncDataType_Unknown;}
 
 	//	Get current per-field maximum Anc buffer size...
 	if (!mDevice.GetAncRegionOffsetFromBottom (gAncMaxSizeBytes, NTV2_AncRgn_Field2))
@@ -315,11 +307,7 @@ AJAStatus NTV2Player8K::SetUpAudio (void)
 
 AJAStatus NTV2Player8K::SetUpHostBuffers (void)
 {
-	if (NTV2_POINTER::DefaultPageSize() != BUFFER_ALIGNMENT)
-	{
-		PLNOTE("Buffer alignment changed from " << xHEX0N(NTV2_POINTER::DefaultPageSize(),8) << " to " << xHEX0N(BUFFER_ALIGNMENT,8));
-		NTV2_POINTER::SetDefaultPageSize(BUFFER_ALIGNMENT);
-	}
+	CNTV2DemoCommon::SetDefaultPageSize();	//	Set host-specific page size
 
 	//	Let my circular buffer know when it's time to quit...
 	mFrameDataRing.SetAbortFlag (&mGlobalQuit);
@@ -386,7 +374,7 @@ AJAStatus NTV2Player8K::SetUpTestPatternBuffers (void)
 
 	mTestPatRasters.clear();
 	for (size_t tpNdx(0);  tpNdx < testPatIDs.size();  tpNdx++)
-		mTestPatRasters.push_back(NTV2_POINTER());
+		mTestPatRasters.push_back(NTV2Buffer());
 
 	if (!mFormatDesc.IsValid())
 		{PLFAIL("Bad format descriptor");  return AJA_STATUS_FAIL;}
@@ -656,7 +644,7 @@ void NTV2Player8K::ConsumeFrames (void)
 	mDevice.WaitForOutputVerticalInterrupt(mConfig.fOutputChannel, 4);	//	Let it stop
 	PLNOTE("Thread started");
 
-	if (IS_KNOWN_AJAAncillaryDataType(mConfig.fTransmitHDRType))
+	if (IS_KNOWN_AJAAncDataType(mConfig.fTransmitHDRType))
 	{	//	HDR anc doesn't change per-frame, so fill outputXfer.acANCBuffer with the packet data...
 		static AJAAncillaryData_HDR_SDR		sdrPkt;
 		static AJAAncillaryData_HDR_HDR10	hdr10Pkt;
@@ -664,10 +652,10 @@ void NTV2Player8K::ConsumeFrames (void)
 
 		switch (mConfig.fTransmitHDRType)
 		{
-			case AJAAncillaryDataType_HDR_SDR:		pPkt = &sdrPkt;		break;
-			case AJAAncillaryDataType_HDR_HDR10:	pPkt = &hdr10Pkt;	break;
-			case AJAAncillaryDataType_HDR_HLG:		pPkt = &hlgPkt;		break;
-			default:								break;
+			case AJAAncDataType_HDR_SDR:	pPkt = &sdrPkt;		break;
+			case AJAAncDataType_HDR_HDR10:	pPkt = &hdr10Pkt;	break;
+			case AJAAncDataType_HDR_HLG:	pPkt = &hlgPkt;		break;
+			default:											break;
 		}
 	}
 	if (pPkt)
@@ -811,7 +799,7 @@ void NTV2Player8K::ProduceFrames (void)
 		//	Instead, to avoid wasting time copying large 8K/UHD2 rasters, in this thread we simply note which test
 		//	pattern buffer is to be modified and subsequently transferred to the hardware. This happens later, in
 		//	NTV2Player8K::ConsumeFrames...
-		NTV2_POINTER & testPatVidBuffer(mTestPatRasters.at(testPatNdx));
+		NTV2Buffer & testPatVidBuffer(mTestPatRasters.at(testPatNdx));
 		pFrameData->fVideoBuffer.Set(testPatVidBuffer.GetHostPointer(), testPatVidBuffer.GetByteCount());
 
 		//	If also playing audio...
@@ -853,6 +841,8 @@ uint32_t NTV2Player8K::AddTone (ULWord * audioBuffer)
 	//	called to calculate the correct sample count for the current frame...
 	const ULWord	numSamples		(::GetAudioSamplesPerFrame (frameRate, audioRate, mCurrentFrame));
 	const double	sampleRateHertz	(::GetAudioSamplesPerSecond(audioRate));
+
+	//	Unlike NTV2Player::AddTone, NTV2Player8K::AddTone handles multi-link audio:
 	ULWord bytesWritten(0), startSample(mCurrentSample);
 	for (UWord linkNdx(0);  linkNdx < mConfig.fNumAudioLinks;  linkNdx++)
 	{
@@ -861,7 +851,7 @@ uint32_t NTV2Player8K::AddTone (ULWord * audioBuffer)
 									   mCurrentSample,					//	which sample for continuing the waveform
 									   numSamples,						//	number of samples to generate
 									   sampleRateHertz,					//	sample rate [Hz]
-									   0.1,								//	amplitude
+									   0.5,								//	amplitude
 									   mToneFrequency,					//	tone frequency [Hz]
 									   31,								//	bits per sample
 									   false,							//	don't byte swap
@@ -875,25 +865,4 @@ uint32_t NTV2Player8K::AddTone (ULWord * audioBuffer)
 void NTV2Player8K::GetACStatus (AUTOCIRCULATE_STATUS & outStatus)
 {
 	mDevice.AutoCirculateGetStatus (mConfig.fOutputChannel, outStatus);
-}
-
-
-ostream & Player8KConfig::Print (ostream & strm, const bool inCompact) const
-{
-	AJALabelValuePairs result;
-	AJASystemInfo::append (result, "NTV2Player8K Config");
-	AJASystemInfo::append (result, "Device Specifier",	fDeviceSpecifier);
-	AJASystemInfo::append (result, "Video Format",		::NTV2VideoFormatToString(fVideoFormat));
-	AJASystemInfo::append (result, "Pixel Format",		::NTV2FrameBufferFormatToString(fPixelFormat, inCompact));
-	AJASystemInfo::append (result, "MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
-	AJASystemInfo::append (result, "HDR Anc Type",		::AJAAncillaryDataTypeToString(fTransmitHDRType));
-	AJASystemInfo::append (result, "Output Channel",	::NTV2ChannelToString(fOutputChannel, inCompact));
-	AJASystemInfo::append (result, "HDMI Output",		fDoHDMIOutput ? "Yes" : "No");
-	AJASystemInfo::append (result, "Tsi Routing",		fDoTsiRouting ? "Yes" : "No");
-	AJASystemInfo::append (result, "RGB-On-SDI",		fDoRGBOnWire ? "Yes" : "No");
-	AJASystemInfo::append (result, "Audio",				WithAudio() ? "Yes" : "No");
-	ostringstream numLinks;  numLinks << DEC(fNumAudioLinks);
-	AJASystemInfo::append (result, "Num Audio Links",	numLinks.str());
-	strm << AJASystemInfo::ToString(result);
-	return strm;
 }

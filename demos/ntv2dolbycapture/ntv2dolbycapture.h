@@ -152,12 +152,12 @@ class NTV2DolbyCapture
 		/**
 			@brief	Recover audio from ancillary data.
 		**/
-		virtual uint32_t		RecoverAudio(NTV2_POINTER& anc, uint32_t ancSize, NTV2_POINTER& audio);
+		virtual uint32_t		RecoverAudio (NTV2Buffer & anc, uint32_t ancSize, NTV2Buffer & audio);
 
 		/**
 			@brief	Recover dolby from audio data.
 		**/
-		virtual uint32_t		RecoverDolby(NTV2_POINTER& audio, uint32_t audioSize, NTV2_POINTER& dolby);
+		virtual uint32_t		RecoverDolby (NTV2Buffer & audio, uint32_t audioSize, NTV2Buffer & dolby);
 
 	//	Protected Class Methods
 	protected:

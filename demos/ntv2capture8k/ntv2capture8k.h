@@ -9,45 +9,23 @@
 #ifndef _NTV2CAPTURE_H
 #define _NTV2CAPTURE_H
 
-#include "ntv2enums.h"
-#include "ntv2devicefeatures.h"
-#include "ntv2devicescanner.h"
 #include "ntv2democommon.h"
-#include "ajabase/common/videotypes.h"
-#include "ajabase/common/circularbuffer.h"
 #include "ajabase/system/thread.h"
 
 
 /**
 	@brief	Instances of me capture frames in real time from a video signal provided to an input of an AJA device.
 **/
-
 class NTV2Capture8K
 {
 	//	Public Instance Methods
 	public:
 		/**
-			@brief	Constructs me using the given settings.
-			@note	I'm not completely initialized and ready to use until after my Init method has been called.
-			@param[in]	inDeviceSpecifier	Specifies the AJA device to use.  Defaults to "0" (first device found).
-			@param[in]	inWithAudio			If true (the default), capture audio in addition to video;  otherwise, don't capture audio.
-			@param[in]	inChannel			Specifies the channel to use. Defaults to NTV2_CHANNEL1.
-			@param[in]	inPixelFormat		Specifies the pixel format to use for the device's frame buffers. Defaults to 8-bit YUV.
-			@param[in]	inDoLvlABConversion	Specifies if level-A/B conversion should be done or not.  Defaults to false (no conversion).
-			@param[in]	inMultiFormat		If true, enables multiformat/multichannel mode if the device supports it, and won't acquire
-											or release the device. If false (the default), acquires/releases exclusive use of the device.
-			@param[in]	inWithAnc			If true, captures ancillary data using the new AutoCirculate APIs (if the device supports it).
-											Defaults to false.
-			@param[in]	inDoTsiRouting		If true, routes for TSI;  otherwise routes for quad-quad.  Defaults to false.
+			@brief		Constructs me using the given settings.
+			@param[in]	inConfig	Specifies how to configure capture.
+			@note		I'm not completely initialized and ready to use until after my Init method has been called.
 		**/
-		NTV2Capture8K (	const std::string			inDeviceSpecifier	= "0",
-						const bool					inWithAudio			= true,
-						const NTV2Channel			inChannel			= NTV2_CHANNEL1,
-						const NTV2FrameBufferFormat	inPixelFormat		= NTV2_FBF_8BIT_YCBCR,
-						const bool					inDoLvlABConversion	= false,
-						const bool					inMultiFormat		= false,
-                        const bool					inWithAnc			= false,
-                        const bool					inDoTsiRouting		= false);
+		NTV2Capture8K (const CaptureConfig & inConfig);
 
 		virtual						~NTV2Capture8K ();
 
@@ -58,7 +36,7 @@ class NTV2Capture8K
 
 		/**
 			@brief	Runs me.
-			@note	Do not call this method without first calling my Init method.
+			@note	Call this method only after calling Init and it returned AJA_STATUS_SUCCESS.
 		**/
 		virtual AJAStatus			Run (void);
 
@@ -91,17 +69,12 @@ class NTV2Capture8K
 		/**
 			@brief	Sets up device routing for capture.
 		**/
-		virtual void			RouteInputSignal (void);
+		virtual bool			RouteInputSignal (void);
 
 		/**
 			@brief	Sets up my circular buffers.
 		**/
 		virtual void			SetupHostBuffers (void);
-
-		/**
-			@brief	Initializes AutoCirculate.
-		**/
-		virtual void			SetupInputAutoCirculate (void);
 
 		/**
 			@brief	Starts my capture thread.
@@ -147,32 +120,20 @@ class NTV2Capture8K
 
 	//	Private Member Data
 	private:
-		typedef	AJACircularBuffer <AVDataBuffer *>	MyCircularBuffer;
-
-		AJAThread					mConsumerThread;		///< @brief	My consumer thread object -- consumes the captured frames.
-		AJAThread					mProducerThread;		///< @brief	My producer thread object -- does the frame capturing
-		CNTV2Card					mDevice;				///< @brief	My CNTV2Card instance. This is what I use to talk to the device.
-		NTV2DeviceID				mDeviceID;				///< @brief	My device identifier
-		const std::string			mDeviceSpecifier;		///< @brief	The device specifier string
-		const bool					mWithAudio;				///< @brief	Capture and playout audio?
-		NTV2Channel					mInputChannel;			///< @brief	My input channel
-		NTV2InputSource				mInputSource;			///< @brief	The input source I'm using
-		NTV2VideoFormat				mVideoFormat;			///< @brief	My video format
-		NTV2FrameBufferFormat		mPixelFormat;			///< @brief	My pixel format
-		NTV2EveryFrameTaskMode		mSavedTaskMode;			///< @brief	Used to restore prior every-frame task mode
-		NTV2AudioSystem				mAudioSystem;			///< @brief	The audio system I'm using
-		bool						mDoLevelConversion;		///< @brief	Demonstrates a level A to level B conversion
-		bool						mDoMultiFormat;			///< @brief	Demonstrates how to configure the board for multi-format
-		bool						mGlobalQuit;			///< @brief	Set "true" to gracefully stop
-		bool						mWithAnc;				///< @brief	Capture custom anc data?
-        uint32_t					mVideoBufferSize;		///< @brief	My video buffer size, in bytes
-		uint32_t					mAudioBufferSize;		///< @brief	My audio buffer size, in bytes
-        bool						mDoTsiRouting;          ///< @brief	Input is TSI
-        uint32_t					mAncBufferSize;
-		AVDataBuffer				mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
-		MyCircularBuffer			mAVCircularBuffer;		///< @brief	My ring buffer object
-
-		AUTOCIRCULATE_TRANSFER		mInputTransfer;			///< @brief	My A/C input transfer info
+		AJAThread			mConsumerThread;	///< @brief	My consumer thread object -- consumes the captured frames.
+		AJAThread			mProducerThread;	///< @brief	My producer thread object -- does the frame capturing
+		CNTV2Card			mDevice;			///< @brief	My CNTV2Card instance. This is what I use to talk to the device.
+		NTV2DeviceID		mDeviceID;			///< @brief	My device identifier
+		CaptureConfig		mConfig;			///< @brief	My operating configuration
+		NTV2VideoFormat		mVideoFormat;		///< @brief	My video format
+		NTV2FormatDesc		mFormatDesc;		///< @brief	Describes my video raster
+		NTV2TaskMode		mSavedTaskMode;		///< @brief	Used to restore prior every-frame task mode
+		NTV2AudioSystem		mAudioSystem;		///< @brief	The audio system I'm using (if any)
+		NTV2FrameDataArray	mHostBuffers;		///< @brief	My host buffers
+		FrameDataRingBuffer	mAVCircularBuffer;	///< @brief	My ring buffer object
+		bool				mGlobalQuit;		///< @brief	Set "true" to gracefully stop
+		NTV2ChannelSet		mActiveFrameStores;	///< @brief	Active FrameStores/Channels
+		NTV2ChannelSet		mActiveSDIs;		///< @brief	Active SDI/HDMI input connectors
 
 };	//	NTV2Capture
 

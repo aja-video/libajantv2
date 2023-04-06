@@ -8,6 +8,7 @@
 #include "ntv2democommon.h"
 #include "ntv2devicescanner.h"
 #include "ntv2devicefeatures.h"
+#include "ntv2testpatterngen.h"
 #include "ntv2debug.h"
 #include "ntv2utils.h"
 #include "ntv2bft.h"
@@ -33,6 +34,9 @@ typedef	String2PixelFormatMap::const_iterator	String2PixelFormatMapConstIter;
 
 typedef	map <string, NTV2AudioSystem>			String2AudioSystemMap;
 typedef	String2AudioSystemMap::const_iterator	String2AudioSystemMapConstIter;
+
+typedef	map <string, NTV2VANCMode>				String2VANCModeMap;
+typedef	String2VANCModeMap::const_iterator		String2VANCModeMapConstIter;
 
 typedef	map <string, NTV2InputSource>			String2InputSourceMap;
 typedef	String2InputSourceMap::const_iterator	String2InputSourceMapConstIter;
@@ -69,6 +73,7 @@ static NTV2OutputDestinations	gOutputDestinations;
 static String2VideoFormatMap	gString2VideoFormatMap;
 static String2PixelFormatMap	gString2PixelFormatMap;
 static String2AudioSystemMap	gString2AudioSystemMap;
+static String2VANCModeMap		gString2VANCModeMap;
 static String2InputSourceMap	gString2InputSourceMap;
 static String2OutputDestMap		gString2OutputDestMap;
 static NTV2TCIndexSet			gTCIndexes;
@@ -91,6 +96,7 @@ class DemoCommonInitializer
 			typedef	pair <string, NTV2VideoFormat>			String2VideoFormatPair;
 			typedef	pair <string, NTV2FrameBufferFormat>	String2PixelFormatPair;
 			typedef	pair <string, NTV2AudioSystem>			String2AudioSystemPair;
+			typedef pair <string, NTV2VANCMode>				String2VANCModePair;
 			typedef	pair <string, NTV2InputSource>			String2InputSourcePair;
 			typedef	pair <string, NTV2OutputDestination>	String2OutputDestPair;
 
@@ -276,39 +282,49 @@ class DemoCommonInitializer
 
 			//	Audio systems...
 			for (uint8_t ndx (0);  ndx < 8;  ndx++)
-				gString2AudioSystemMap.insert (String2AudioSystemPair (ULWordToString (ndx + 1), NTV2AudioSystem (ndx)));
+				gString2AudioSystemMap.insert (String2AudioSystemPair(ULWordToString (ndx + 1), NTV2AudioSystem(ndx)));
+
+			//	VANC Modes...
+			for (NTV2VANCMode vm(NTV2_VANCMODE_OFF);  vm < NTV2_VANCMODE_INVALID;  vm = NTV2VANCMode(vm+1))
+			{
+				gString2VANCModeMap.insert (String2VANCModePair(aja::to_string(vm), vm));
+//				gString2VANCModeMap.insert (String2VANCModePair(::NTV2VANCModeToString(vm, false), vm));
+				gString2VANCModeMap.insert (String2VANCModePair(::NTV2VANCModeToString(vm, true), vm));
+			}
 
 			//	Input Sources...
-			for (NTV2InputSource inputSource(NTV2_INPUTSOURCE_ANALOG1);  inputSource < NTV2_NUM_INPUTSOURCES;  inputSource = NTV2InputSource(inputSource+1))
+			::NTV2DeviceGetSupportedInputSources(DEVICE_ID_INVALID, gInputSources);
+			::NTV2DeviceGetSupportedInputSources(DEVICE_ID_INVALID, gInputSourcesSDI, NTV2_IOKINDS_SDI);
+			::NTV2DeviceGetSupportedInputSources(DEVICE_ID_INVALID, gInputSourcesHDMI, NTV2_IOKINDS_HDMI);
+			::NTV2DeviceGetSupportedInputSources(DEVICE_ID_INVALID, gInputSourcesAnalog, NTV2_IOKINDS_ANALOG);
+			for (NTV2InputSourceSetConstIter it(gInputSources.begin());  it != gInputSources.end();  ++it)
 			{
-				gInputSources.insert(inputSource);
-				if (NTV2_INPUT_SOURCE_IS_SDI(inputSource))
+				const NTV2InputSource src(*it);
+				string sSmall(::NTV2InputSourceToString(src, true)), sBig(::NTV2InputSourceToString(src, false));
+				gString2InputSourceMap.insert(String2InputSourcePair(sBig, src));
+				gString2InputSourceMap.insert(String2InputSourcePair(sSmall, src));
+				gString2InputSourceMap.insert(String2InputSourcePair(CNTV2DemoCommon::ToLower(sSmall), src));
+				if (NTV2_INPUT_SOURCE_IS_SDI(src))
 				{
-					gInputSourcesSDI.insert(inputSource);
-					gString2InputSourceMap.insert(String2InputSourcePair(ULWordToString(inputSource - NTV2_INPUTSOURCE_SDI1 + 1), inputSource));
+					sSmall.erase(0, 3);	//	Erase first 3 chars to leave just the number (e.g. "SDI3" becomes "3")
+					gString2InputSourceMap.insert(String2InputSourcePair(sSmall, src));
 				}
-				else if (NTV2_INPUT_SOURCE_IS_HDMI(inputSource))
-					gInputSourcesHDMI.insert(inputSource);
-				else if (NTV2_INPUT_SOURCE_IS_ANALOG(inputSource))
-					gInputSourcesAnalog.insert(inputSource);
-				else
-					continue;
-				gString2InputSourceMap.insert(String2InputSourcePair(::NTV2InputSourceToString(inputSource, false), inputSource));
-				gString2InputSourceMap.insert(String2InputSourcePair(::NTV2InputSourceToString(inputSource, true), inputSource));
-				gString2InputSourceMap.insert(String2InputSourcePair(CNTV2DemoCommon::ToLower(::NTV2InputSourceToString (inputSource, true)), inputSource));
 			}	//	for each input source
 			gString2InputSourceMap.insert(String2InputSourcePair(string("hdmi"),NTV2_INPUTSOURCE_HDMI1));
 
 			//	Output Destinations...
-			for (NTV2OutputDestination outputDest(NTV2_OUTPUTDESTINATION_ANALOG);  outputDest < NTV2_OUTPUTDESTINATION_INVALID;  outputDest = NTV2OutputDestination(outputDest+1))
+			::NTV2DeviceGetSupportedOutputDests (DEVICE_ID_INVALID, gOutputDestinations);
+			for (NTV2OutputDestinationsConstIter it(gOutputDestinations.begin());  it != gOutputDestinations.end();  ++it)
 			{
-				gOutputDestinations.insert(outputDest);
-				gString2OutputDestMap.insert(String2OutputDestPair(::NTV2OutputDestinationToString(outputDest,false), outputDest));
-				gString2OutputDestMap.insert(String2OutputDestPair(::NTV2OutputDestinationToString(outputDest,true), outputDest));
-				gString2OutputDestMap.insert(String2OutputDestPair(CNTV2DemoCommon::ToLower(::NTV2OutputDestinationToString(outputDest, true)), outputDest));
-				if (NTV2_OUTPUT_DEST_IS_SDI(outputDest))
-				{	ostringstream oss;  oss << DEC(UWord(::NTV2OutputDestinationToChannel(outputDest)+1));
-					gString2OutputDestMap.insert(String2OutputDestPair(oss.str(), outputDest));
+				const NTV2OutputDest dst(*it);
+				string sSmall(::NTV2OutputDestinationToString(dst, true)), sBig(::NTV2OutputDestinationToString(dst, false));
+				gString2OutputDestMap.insert(String2OutputDestPair(sBig, dst));
+				gString2OutputDestMap.insert(String2OutputDestPair(sSmall, dst));
+				gString2OutputDestMap.insert(String2OutputDestPair(CNTV2DemoCommon::ToLower(sSmall), dst));
+				if (NTV2_OUTPUT_DEST_IS_SDI(dst))
+				{
+					const string str(aja::to_string(UWord(::NTV2OutputDestinationToChannel(dst)+1)));
+					gString2OutputDestMap.insert(String2OutputDestPair(str, dst));
 				}
 			}	//	for each output dest
 			gString2OutputDestMap.insert(String2OutputDestPair(string("hdmi1"),NTV2_OUTPUTDESTINATION_HDMI));
@@ -316,7 +332,7 @@ class DemoCommonInitializer
 			//	TCIndexes...
 			for (uint16_t ndx (0);  ndx < NTV2_MAX_NUM_TIMECODE_INDEXES;  ndx++)
 			{
-				const NTV2TCIndex	tcIndex	(static_cast<NTV2TCIndex>(ndx));
+				const NTV2TCIndex	tcIndex	(NTV2TCIndex(ndx+0));
 				gTCIndexes.insert (tcIndex);
 				gString2TCIndexMap.insert (String2TCIndexPair(ULWordToString(ndx), tcIndex));
 				gString2TCIndexMap.insert (String2TCIndexPair(::NTV2TCIndexToString(tcIndex, false), tcIndex));
@@ -417,9 +433,15 @@ bool NTV2FrameData::UnlockAll (CNTV2Card & inDevice)
 
 bool CNTV2DemoCommon::IsValidDevice (const string & inDeviceSpec)
 {
-	CNTV2Card	device;
-	const string	deviceSpec	(inDeviceSpec.empty() ? "0" : inDeviceSpec);
-	return CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, device);
+	CNTV2Card device;
+	const string deviceSpec	(inDeviceSpec.empty() ? "0" : inDeviceSpec);
+	if (! CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, device))
+	{
+		if (deviceSpec != "LIST" && deviceSpec != "list" && deviceSpec != "?")
+			cerr << "## ERROR: Device spec '" << deviceSpec << "' not valid" << endl;
+		return false;
+	}
+	return true;
 }
 
 
@@ -643,25 +665,25 @@ NTV2FrameBufferFormat CNTV2DemoCommon::GetPixelFormatFromString (const string & 
 }
 
 
-const NTV2InputSourceSet CNTV2DemoCommon::GetSupportedInputSources (const NTV2InputSourceKinds inKinds)
+const NTV2InputSourceSet CNTV2DemoCommon::GetSupportedInputSources (const NTV2IOKinds inKinds)
 {
-	if (inKinds == NTV2_INPUTSOURCES_ALL)
+	if (inKinds == NTV2_IOKINDS_ALL)
 		return gInputSources;
 
 	NTV2InputSourceSet	result;
 
-	if (inKinds & NTV2_INPUTSOURCES_SDI)
+	if (inKinds & NTV2_IOKINDS_SDI)
 		result += gInputSourcesSDI;
-	if (inKinds & NTV2_INPUTSOURCES_HDMI)
+	if (inKinds & NTV2_IOKINDS_HDMI)
 		result += gInputSourcesHDMI;
-	if (inKinds & NTV2_INPUTSOURCES_ANALOG)
+	if (inKinds & NTV2_IOKINDS_ANALOG)
 		result += gInputSourcesAnalog;
 
 	return result;
 }
 
 
-string CNTV2DemoCommon::GetInputSourceStrings (const NTV2InputSourceKinds inKinds,  const string inDeviceSpecifier)
+string CNTV2DemoCommon::GetInputSourceStrings (const NTV2IOKinds inKinds,  const string inDeviceSpecifier)
 {
 	const NTV2InputSourceSet &	sourceSet	(GetSupportedInputSources (inKinds));
 	ostringstream				oss;
@@ -803,28 +825,28 @@ NTV2TCIndex CNTV2DemoCommon::GetTCIndexFromString (const string & inStr)
 
 string CNTV2DemoCommon::GetAudioSystemStrings (const string inDeviceSpecifier)
 {
-	NTV2DeviceID	deviceID	(DEVICE_ID_NOTFOUND);
+	NTV2DeviceID	deviceID (DEVICE_ID_NOTFOUND);
 	string			displayName;
 	ostringstream	oss;
 
-	if (!inDeviceSpecifier.empty ())
+	if (!inDeviceSpecifier.empty())
 	{
 		CNTV2Card	device;
 		CNTV2DeviceScanner::GetFirstDeviceFromArgument (inDeviceSpecifier, device);
-		if (device.IsOpen ())
+		if (device.IsOpen())
 		{
-			deviceID = device.GetDeviceID ();
-			displayName = device.GetDisplayName ();
+			deviceID = device.GetDeviceID();
+			displayName = device.GetDisplayName();
 		}
 	}
 
-	const UWord		numAudioSystems	(::NTV2DeviceGetNumAudioSystems (deviceID));
+	const UWord		numAudioSystems	(::NTV2DeviceGetNumAudioSystems(deviceID));
 	oss << setw(12) << left << "Audio System"	<< endl
 		<< setw(12) << left << "------------"	<< endl;
-	for (UWord ndx (0);  ndx < 8;  ndx++)
+	for (UWord ndx(0);  ndx < 8;  ndx++)
 	{
 		oss << setw(12) << left << (ndx+1);
-		if (!displayName.empty ()  &&  ndx >= numAudioSystems)
+		if (!displayName.empty()  &&  ndx >= numAudioSystems)
 			oss << "\t## Incompatible with " << displayName;
 		oss << endl;
 	}
@@ -834,8 +856,45 @@ string CNTV2DemoCommon::GetAudioSystemStrings (const string inDeviceSpecifier)
 
 NTV2AudioSystem CNTV2DemoCommon::GetAudioSystemFromString (const string & inStr)
 {
-	String2AudioSystemMapConstIter	iter	(gString2AudioSystemMap.find (inStr));
-	return iter != gString2AudioSystemMap.end ()  ?  iter->second  :  NTV2_AUDIOSYSTEM_INVALID;
+	String2AudioSystemMapConstIter iter(gString2AudioSystemMap.find(inStr));
+	return iter != gString2AudioSystemMap.end()  ?  iter->second  :  NTV2_AUDIOSYSTEM_INVALID;
+}
+
+string CNTV2DemoCommon::GetVANCModeStrings (void)
+{
+	typedef map<string,string>	NTV2StringMap;
+	NTV2StringSet keys;
+	for (String2VANCModeMapConstIter it(gString2VANCModeMap.begin());  it != gString2VANCModeMap.end();  ++it)
+	{
+		const string val(aja::to_string(it->second));
+		if (keys.find(val) == keys.end())
+			keys.insert(val);
+	}
+
+	NTV2StringMap legals;
+	for (NTV2StringSet::const_iterator kit(keys.begin());  kit != keys.end();  ++kit)
+	{
+		NTV2VANCMode officialVM(NTV2VANCMode(aja::stoul(*kit)));
+		NTV2StringList legalValues;
+		for (String2VANCModeMapConstIter it(gString2VANCModeMap.begin());  it != gString2VANCModeMap.end();  ++it)
+			if (it->second == officialVM)
+				legalValues.push_back(it->first);
+		legals[aja::to_string(officialVM)] = aja::join(legalValues, ", ");
+	}
+
+	ostringstream oss;
+	oss	<< setw(12) << left << "VANC Mode" << "\t" << setw(32) << left << "Legal --vanc Values             " << endl
+		<< setw(12) << left << "---------" << "\t" << setw(32) << left << "--------------------------------" << endl;
+	for (NTV2StringMap::const_iterator it(legals.begin());  it != legals.end();  ++it)
+		oss << setw(12) << left << it->first << "\t" << setw(32) << left << it->second << endl;
+	return oss.str();
+}
+
+
+NTV2VANCMode CNTV2DemoCommon::GetVANCModeFromString (const string & inStr)
+{
+	String2VANCModeMapConstIter iter(gString2VANCModeMap.find(inStr));
+	return iter != gString2VANCModeMap.end()  ?  iter->second  :  NTV2_VANCMODE_INVALID;
 }
 
 
@@ -1157,67 +1216,304 @@ NTV2ChannelList CNTV2DemoCommon::GetTSIMuxesForFrameStore (const NTV2DeviceID in
 	return result;
 }
 
-string CNTV2DemoCommon::ACFrameRange::setFromString (const string & inStr)
+
+bool CNTV2DemoCommon::GetInputRouting (	NTV2XptConnections & conns,
+										const CaptureConfig & inConfig,
+										const bool isInputRGB)
 {
-	makeInvalid();
-	if (inStr.empty())
-		return "Frame count/range not specified";
-	const bool hasCount(inStr.find('@') != string::npos);
-	const bool hasRange(inStr.find('-') != string::npos);
-	NTV2StringList	strs;
-	if (hasCount && hasRange)
-		return "'@' and '-' cannot both be specified";
-	else if (hasCount)
-		aja::split(inStr, '@', strs);
-	else if (hasRange)
-		aja::split(inStr, '-', strs);
-	else
-		strs.push_back(inStr);
-	if (strs.empty())
-		return "No frame count/range values parsed";
-	if (strs.size() > 2)
-		return "More than 2 frame count/range values parsed";
-	if (hasCount || hasRange)
-		if (strs.size() != 2)
-			return "Expected exactly 2 frame count/range values";
+	const bool				isFrameRGB	(::IsRGBFormat(inConfig.fPixelFormat));
+	const NTV2InputXptID	fbIXpt		(::GetFrameBufferInputXptFromChannel(inConfig.fInputChannel));
+	const NTV2OutputXptID	inputOXpt	(::GetInputSourceOutputXpt(inConfig.fInputSource, false, isInputRGB));
+	const NTV2InputXptID	cscVidIXpt	(::GetCSCInputXptFromChannel(inConfig.fInputChannel));
+	NTV2OutputXptID			cscOXpt		(::GetCSCOutputXptFromChannel(inConfig.fInputChannel, /*key?*/false, /*RGB?*/isFrameRGB));
 
-	//	Check that all characters are decimal digits...
-	for (size_t strNdx(0);  strNdx < strs.size();  strNdx++)
-	{	string	str(strs.at(strNdx));
-		if (aja::strip(str).empty())
-			return "Expected unsigned decimal integer value";
-		for (size_t chNdx(0);  chNdx < str.length();  chNdx++)
-			if (!isdigit(str.at(chNdx)))
-				return "Non-digit character encountered in '" + str + "'";
-	}
-
-	UWordSequence numbers;
-	for (NTV2StringListConstIter it(strs.begin());  it != strs.end();  ++it)
+	conns.clear();
+	if (isInputRGB && !isFrameRGB)
 	{
-		string	str(*it);
-		numbers.push_back(UWord(aja::stoul(aja::strip(str))));
+		conns.insert(NTV2Connection(fbIXpt,		cscOXpt));		//	FB <== CSC
+		conns.insert(NTV2Connection(cscVidIXpt,	inputOXpt));	//	CSC <== SDIIn/HDMIin
 	}
-	if (hasCount)
-		{mIsCountOnly = false;  mFrameCount = 0;  mFirstFrame = numbers[1];  mLastFrame = mFirstFrame + numbers[0] - 1;}
-	else if (hasRange)
-		{mIsCountOnly = false;  mFrameCount = 0;  mFirstFrame = numbers[0];  mLastFrame = numbers[1];}
+	else if (!isInputRGB && isFrameRGB)
+	{
+		conns.insert(NTV2Connection(fbIXpt,		cscOXpt));		//	FB <== CSC
+		conns.insert(NTV2Connection(cscVidIXpt,	inputOXpt));	//	CSC <== SDIIn/HDMIIn
+	}
 	else
-		{mIsCountOnly = true;  mFrameCount = numbers[0];  mFirstFrame = mLastFrame = 0;}
-	if (!isCount()  &&  lastFrame() < firstFrame())
-		{makeInvalid();  return "First frame past last frame";}
-	return "";
+		conns.insert(NTV2Connection(fbIXpt,		inputOXpt));	//	FB <== SDIIn/HDMIin
+
+	return !conns.empty();
+
+}	//	GetRoutingCapture
+
+
+bool CNTV2DemoCommon::GetInputRouting4K (NTV2XptConnections & conns,
+										const CaptureConfig & inConfig,
+										const NTV2DeviceID devID,
+										const bool isInputRGB)
+{
+	UWord sdi(0), mux(0), csc(0), fb(0), path(0);
+	NTV2InputXptID in (NTV2_INPUT_CROSSPOINT_INVALID);
+	NTV2OutputXptID out (NTV2_OUTPUT_CROSSPOINT_INVALID);
+	const bool	isFrameRGB (::IsRGBFormat(inConfig.fPixelFormat));
+	conns.clear();
+	if (NTV2_INPUT_SOURCE_IS_HDMI(inConfig.fInputSource))
+	{	//	HDMI
+		if (inConfig.fInputChannel == NTV2_CHANNEL1)
+		{	//	HDMI CH1234
+			if (isInputRGB == isFrameRGB)
+			{	//	HDMI CH1234 RGB SIGNAL AND RGB FBF  OR  YUV SIGNAL AND YUV FBF
+				for (UWord path(0);  path < 4;  path++)
+				{	//	MUX <== HDMIIn
+					in = ::GetTSIMuxInputXptFromChannel(NTV2Channel(mux+path/2), /*LinkB*/path & 1);
+					out = ::GetInputSourceOutputXpt(inConfig.fInputSource, /*DS2*/false, isInputRGB, /*quadrant*/path);
+					conns.insert(NTV2Connection(in, out));
+					//	FB <== MUX
+					in = ::GetFrameBufferInputXptFromChannel(NTV2Channel(fb+path/2), /*Binput*/path & 1);
+					out = ::GetTSIMuxOutputXptFromChannel(NTV2Channel(mux+path/2), /*LinkB*/path & 1, /*RGB*/isInputRGB);
+					conns.insert(NTV2Connection(in, out));
+				}
+			}	//	HDMI CH1234 RGB SIGNAL AND RGB FBF
+			else if (isInputRGB && !isFrameRGB)
+			{	//	HDMI CH1234 RGB SIGNAL AND YUV FBF
+				for (path = 0;  path < 4;  path++)
+				{
+					//	CSC <== HDMIIn
+					in = ::GetCSCInputXptFromChannel(NTV2Channel(csc+path));
+					out = ::GetInputSourceOutputXpt(inConfig.fInputSource, /*DS2*/false, isInputRGB, /*quadrant*/path);
+					conns.insert(NTV2Connection(in, out));
+					//	MUX <== CSC
+					in = ::GetTSIMuxInputXptFromChannel(NTV2Channel(mux+path/2), /*LinkB*/path & 1);
+					out = ::GetCSCOutputXptFromChannel(NTV2Channel(csc+path), /*key*/false, /*rgb*/isFrameRGB);
+					conns.insert(NTV2Connection(in, out));
+					//	FB <== MUX
+					in = ::GetFrameBufferInputXptFromChannel(NTV2Channel(fb+path/2), /*DS2*/path & 1);
+					out = ::GetTSIMuxOutputXptFromChannel(NTV2Channel(mux+path/2), /*LinkB*/path & 1, /*rgb*/isFrameRGB);
+					conns.insert(NTV2Connection(in, out));
+				}
+			}	//	HDMI CH1234 RGB SIGNAL AND YUV FBF
+			else	//	!isInputRGB && isFrameRGB
+			{	//	HDMI CH1234 YUV SIGNAL AND RGB FBF
+				for (path = 0;  path < 4;  path++)
+				{
+					//	CSC <== HDMIIn
+					in = ::GetCSCInputXptFromChannel(NTV2Channel(csc+path));
+					out = ::GetInputSourceOutputXpt(inConfig.fInputSource, /*DS2*/false, isInputRGB, /*quadrant*/path);
+					conns.insert(NTV2Connection(in, out));
+					//	MUX <== CSC
+					in = ::GetTSIMuxInputXptFromChannel(NTV2Channel(mux+path/2), /*LinkB*/path & 1);
+					out = ::GetCSCOutputXptFromChannel(NTV2Channel(csc+path), /*key*/false, /*rgb*/isFrameRGB);
+					conns.insert(NTV2Connection(in, out));
+					//	FB <== MUX
+					in = ::GetFrameBufferInputXptFromChannel(NTV2Channel(fb+path/2), /*DS2*/path & 1);
+					out = ::GetTSIMuxOutputXptFromChannel(NTV2Channel(mux+path/2), /*LinkB*/path & 1, /*rgb*/isFrameRGB);
+					conns.insert(NTV2Connection(in, out));
+				}
+			}	//	HDMI CH1234 YUV SIGNAL AND RGB FBF
+		}	//	HDMI CH1234
+		else
+		{	//	HDMI CH5678
+			cerr << "## ERROR: Ch5678 must be for Corvid88, but no HDMI on that device" << endl;
+		}	//	HDMI CH5678
+	}	//	HDMI
+	else
+	{	//	SDI
+		if (::NTV2DeviceCanDo12gRouting(devID))
+		{	//	FB <== SDIIn
+			in = ::GetFrameBufferInputXptFromChannel(inConfig.fInputChannel);
+			out = ::GetInputSourceOutputXpt(inConfig.fInputSource);
+			conns.insert(NTV2Connection(in, out));
+		}
+		else
+		{	//	SDI CH1234 or CH5678
+			if (inConfig.fInputChannel != NTV2_CHANNEL1)
+				{fb = 4;  sdi = fb;  mux = fb / 2;  csc = fb;}
+			if (isFrameRGB)
+			{	//	RGB FB
+				if (inConfig.fDoTSIRouting)
+				{	//	SDI CH1234 RGB TSI
+					for (path = 0;  path < 4;  path++)
+					{
+						//	CSC <== SDIIn
+						in = ::GetCSCInputXptFromChannel(NTV2Channel(csc+path));
+						out = ::GetInputSourceOutputXpt(::NTV2ChannelToInputSource(NTV2Channel(sdi+path)));
+						conns.insert(NTV2Connection(in, out));
+						//	MUX <== CSC
+						in = ::GetTSIMuxInputXptFromChannel(NTV2Channel(mux+path/2), /*LinkB*/path & 1);
+						out = ::GetCSCOutputXptFromChannel(NTV2Channel(csc+path), /*key*/false, /*rgb*/isFrameRGB);
+						conns.insert(NTV2Connection(in, out));
+						//	FB <== MUX
+						in = ::GetFrameBufferInputXptFromChannel(NTV2Channel(fb+path/2), /*DS2*/path & 1);
+						out = ::GetTSIMuxOutputXptFromChannel(NTV2Channel(mux+path/2), /*LinkB*/path & 1, /*rgb*/isFrameRGB);
+						conns.insert(NTV2Connection(in, out));
+					}	//	for each spigot
+				}	//	SDI CH1234 RGB TSI
+				else
+				{	//	SDI CH1234 RGB SQUARES
+					for (path = 0;  path < 4;  path++)
+					{
+						//	CSC <== SDIIn
+						in = ::GetCSCInputXptFromChannel(NTV2Channel(csc+path));
+						out = ::GetInputSourceOutputXpt(::NTV2ChannelToInputSource(NTV2Channel(sdi+path)));
+						conns.insert(NTV2Connection(in, out));
+						//	FB <== CSC
+						in = ::GetFrameBufferInputXptFromChannel(NTV2Channel(fb+path));
+						out = ::GetCSCOutputXptFromChannel(NTV2Channel(csc+path), /*key*/false, /*rgb*/isFrameRGB);
+						conns.insert(NTV2Connection(in, out));
+					}	//	for each spigot
+				}	//	SDI CH1234 RGB SQUARES
+			}	//	SDI CH1234 RGB FBF
+			else	//	YUV FBF
+			{
+				if (inConfig.fDoTSIRouting)
+				{	//	SDI CH1234 YUV TSI
+					for (path = 0;  path < 4;  path++)
+					{
+						//	MUX <== SDIIn
+						in = ::GetTSIMuxInputXptFromChannel(NTV2Channel(mux+path/2), /*LinkB*/path & 1);
+						out = ::GetInputSourceOutputXpt(::NTV2ChannelToInputSource(NTV2Channel(sdi+path)));
+						conns.insert(NTV2Connection(in, out));
+						//	FB <== MUX
+						in = ::GetFrameBufferInputXptFromChannel(NTV2Channel(fb+path/2), /*DS2*/path & 1);
+						out = ::GetTSIMuxOutputXptFromChannel(NTV2Channel(mux+path/2), /*LinkB*/path & 1, /*rgb*/isFrameRGB);
+						conns.insert(NTV2Connection(in, out));
+					}	//	for each spigot
+				}	//	SDI CH1234 YUV TSI
+				else
+				{
+					for (path = 0;  path < 4;  path++)
+					{	//	FB <== SDIIn
+						in = ::GetFrameBufferInputXptFromChannel(NTV2Channel(fb+path));
+						out = ::GetInputSourceOutputXpt(::NTV2ChannelToInputSource(NTV2Channel(sdi+path)));
+						conns.insert(NTV2Connection(in, out));
+					}	//	for each path
+				}	//	SDI CH1234 YUV SQUARES
+			}	//	YUV FBF
+		}	//	3G SDI CH1234 or CH5678
+	}	//	SDI
+	return !conns.empty();
+}	//	GetRoutingCapture4K
+
+
+bool CNTV2DemoCommon::GetInputRouting8K (NTV2XptConnections & conns,
+										const CaptureConfig & inConfig,
+										const NTV2VideoFormat inVideoFormat,
+										const NTV2DeviceID devID,
+										const bool isInputRGB)
+{	(void)isInputRGB;  (void) devID;
+	UWord fb(0), path(0);
+	NTV2InputXptID in (NTV2_INPUT_CROSSPOINT_INVALID);
+	NTV2OutputXptID out (NTV2_OUTPUT_CROSSPOINT_INVALID);
+	const bool	isFrameRGB (::IsRGBFormat(inConfig.fPixelFormat));
+	const bool	isQuadQuadHFR (NTV2_IS_QUAD_QUAD_HFR_VIDEO_FORMAT(inVideoFormat));
+	conns.clear();
+	if (inConfig.fInputChannel % 2)
+		return false;   //  Input channel cannot be Ch2/Ch4/Ch6/etc
+	if (inConfig.fInputChannel > 3)
+		return false;   //  Input channel cannot be Ch5 or greater
+	if (::NTV2InputSourceToChannel(inConfig.fInputSource) % 2)
+		return false;	//	Input source cannot be SDIIn2/4/6/etc
+	if (::NTV2InputSourceToChannel(inConfig.fInputSource) > 3)
+		return false;	//	Input source cannot be SDIIn5 or greater
+
+	if (inConfig.fDoTSIRouting)
+	{	//	TSI
+		if (inConfig.fInputChannel)
+			fb = 2;
+		for (path = 0;  path < 4;  path++)
+			if (isFrameRGB)	//	Uses 2 FBs, 4 SDIs
+			{	//	RGB
+				//	DLInDS1 <== SDIInDS1
+				in = ::GetDLInInputXptFromChannel (NTV2Channel(path), /*B*/false);
+				out = ::GetSDIInputOutputXptFromChannel (NTV2Channel(path),	/*DS2*/false);
+				conns.insert(NTV2Connection(in, out));
+				//	DLInDS2 <== SDIInDS2
+				in = ::GetDLInInputXptFromChannel (NTV2Channel(path), /*B*/true);
+				out = ::GetSDIInputOutputXptFromChannel (NTV2Channel(path),	/*DS2*/true);
+				conns.insert(NTV2Connection(in, out));
+				//	FB <== DLIn
+				in = ::GetFrameBufferInputXptFromChannel (NTV2Channel(fb+path/2), /*B*/path & 1);
+				out = ::GetDLInOutputXptFromChannel (NTV2Channel(path));
+				conns.insert(NTV2Connection(in, out));
+			}	//	if RGB
+			else if (isQuadQuadHFR)	//	Uses 2 FBs, 4 SDIs
+			{	//	FB <== SDIIn, FBDS2 <== SDIIn
+				in = ::GetFrameBufferInputXptFromChannel (NTV2Channel(fb+path/2), /*DS2?*/path & 1);
+				out = ::GetSDIInputOutputXptFromChannel (NTV2Channel(path));
+				conns.insert(NTV2Connection(in, out));
+			}	//	else if YUV QuadQuad
+			else	//	Uses 2 FBs, 2 SDIs
+			{	//	FB <== SDIIn, FBDS2 <== SDIInDS2
+				in = ::GetFrameBufferInputXptFromChannel (NTV2Channel(fb+path/2), /*DS2?*/path & 1);
+				out = ::GetSDIInputOutputXptFromChannel (NTV2Channel(fb+path/2), /*DS2?*/path & 1);
+				conns.insert(NTV2Connection(in, out));
+			}	//	else YUV non-QuadQuad
+	}	//	if TSI
+	else
+	{	//	Square-division routing
+		if (inConfig.fInputChannel)
+			return false;   //  Sorry, Ch1 only
+		if (inConfig.fInputSource != NTV2_INPUTSOURCE_SDI1)
+			return false;   //  Sorry, SDI1 only (1st SDI of 4 links)
+		for (path = 0;  path < 4;  path++)	//	4 FBs, 4 SDIs
+			if (isFrameRGB)
+			{	//	RGB
+				//	DLInDS1 <== SDIInDS1
+				in = ::GetDLInInputXptFromChannel (NTV2Channel(path), /*B*/false);
+				out = ::GetSDIInputOutputXptFromChannel (NTV2Channel(path),	/*DS2*/false);
+				conns.insert(NTV2Connection(in, out));
+				//	DLInDS2 <== SDIInDS2
+				in = ::GetDLInInputXptFromChannel (NTV2Channel(path), /*B*/true);
+				out = ::GetSDIInputOutputXptFromChannel (NTV2Channel(path),	/*DS2*/true);
+				conns.insert(NTV2Connection(in, out));
+				//	FB <== DLIn
+				in = ::GetFrameBufferInputXptFromChannel (NTV2Channel(fb+path));
+				out = ::GetDLInOutputXptFromChannel (NTV2Channel(path));
+				conns.insert(NTV2Connection(in, out));
+			}	//	for each path
+			else	//	YUV
+			{	//	FB <== SDIIn
+				in = ::GetFrameBufferInputXptFromChannel (NTV2Channel(fb+path));
+				out = ::GetSDIInputOutputXptFromChannel (NTV2Channel(path));
+				conns.insert(NTV2Connection(in, out));
+			}	//	for each path
+	}	//	else Squares
+	return !conns.empty();
+}   //  GetInputRouting8K
+
+
+bool CNTV2DemoCommon::ConfigureAudioSystems (CNTV2Card & inDevice, const CaptureConfig & inConfig, const NTV2AudioSystemSet inAudioSystems)
+{
+    UWord failures(0);
+    UWord numAudChannels(::NTV2DeviceGetMaxAudioChannels(inDevice.GetDeviceID()));
+    for (NTV2AudioSystemSetConstIter it(inAudioSystems.begin());  it != inAudioSystems.end();  ++it)
+    {	const NTV2AudioSystem audSys(*it);
+		//	Have the audio system capture audio from the designated device input...
+		if (!inDevice.SetAudioSystemInputSource (audSys, NTV2_AUDIO_EMBEDDED,
+			::NTV2InputSourceToEmbeddedAudioInput(inConfig.fInputSource)))
+				failures++;
+
+		//	Configure for max available audio channels, 48KHz, 4MB buffers, and disable loopback...
+		if (!inDevice.SetNumberAudioChannels (numAudChannels, audSys))			failures++;
+		if (!inDevice.SetAudioRate (NTV2_AUDIO_48K, audSys))					failures++;
+		if (!inDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_SIZE_4MB, audSys))	failures++;
+		if (!inDevice.SetAudioLoopBack(NTV2_AUDIO_LOOPBACK_OFF, audSys))		failures++;
+	}
+	return !failures;
 }
 
-string CNTV2DemoCommon::ACFrameRange::toString(void) const
+
+size_t CNTV2DemoCommon::SetDefaultPageSize (void)
 {
-	ostringstream oss;
-	if (!valid())
-		oss << "<invalid>";
-	else if (isFrameRange())
-		oss << "Frames " << DEC(firstFrame()) << "-" << DEC(lastFrame()) << " (" << DEC(lastFrame()-firstFrame()+1) << "@" << DEC(firstFrame()) << ")";
-	else
-		oss << DEC(count()) << " frames (auto-allocated)";
-	return oss.str();
+	const size_t hwPageSizeBytes (NTV2Buffer::HostPageSize());
+	const size_t sdkPageSizeBytes (NTV2Buffer::DefaultPageSize());
+	if (hwPageSizeBytes != sdkPageSizeBytes)
+	{
+		if (NTV2Buffer::SetDefaultPageSize(hwPageSizeBytes))
+			cerr << "## NOTE:  Page size changed from " << DEC(sdkPageSizeBytes/1024) << "K to " << DEC(hwPageSizeBytes/1024) << "K" << endl;
+		else
+			cerr << "## WARNING:  Failed to change page size from " << DEC(sdkPageSizeBytes/1024) << "K to " << DEC(hwPageSizeBytes/1024) << "K" << endl;
+	}
+	return hwPageSizeBytes;
 }
 
 
@@ -1229,6 +1525,15 @@ CNTV2DemoCommon::Popt::Popt (const int inArgc, const char ** pArgs, const PoptOp
 	{	ostringstream oss;
 		oss << ::poptBadOption(mContext, 0) << ": " << ::poptStrerror(mResult);
 		mError = oss.str();
+	}
+	else
+	{
+		const char * pStr (::poptGetArg(mContext));
+		while (pStr)
+		{
+			mOtherArgs.push_back(string(pStr));	//	Append to file list
+			pStr = ::poptGetArg(mContext);
+		}	//	for each additional positional argument
 	}
 }
 
@@ -1372,7 +1677,7 @@ bool CNTV2DemoCommon::BFT(void)
 	}
 	if (true)
 	{
-		CNTV2DemoCommon::ACFrameRange fRange(0);
+		NTV2ACFrameRange fRange(0);
 		SHOULD_BE_FALSE(fRange.valid());
 		cerr << fRange.setFromString("") << endl;
 		SHOULD_BE_FALSE(fRange.valid());	//	Nothing -- empty string
@@ -1381,7 +1686,7 @@ bool CNTV2DemoCommon::BFT(void)
 
 		cerr << fRange.setFromString("10") << endl;
 		SHOULD_BE_TRUE(fRange.valid());
-		SHOULD_BE_TRUE(fRange.isCount());
+		SHOULD_BE_TRUE(fRange.isCountOnly());
 		SHOULD_BE_FALSE(fRange.isFrameRange());
 		SHOULD_BE_EQUAL(fRange.count(), 10);
 
@@ -1389,7 +1694,7 @@ bool CNTV2DemoCommon::BFT(void)
 
 		cerr << fRange.setFromString("   \t   15   \t   ") << endl;
 		SHOULD_BE_TRUE(fRange.valid());
-		SHOULD_BE_TRUE(fRange.isCount());
+		SHOULD_BE_TRUE(fRange.isCountOnly());
 		SHOULD_BE_FALSE(fRange.isFrameRange());
 		SHOULD_BE_EQUAL(fRange.count(), 15);
 
@@ -1402,7 +1707,7 @@ bool CNTV2DemoCommon::BFT(void)
 
 		cerr << fRange.setFromString("20@10") << endl;
 		SHOULD_BE_TRUE(fRange.valid());
-		SHOULD_BE_FALSE(fRange.isCount());
+		SHOULD_BE_FALSE(fRange.isCountOnly());
 		SHOULD_BE_TRUE(fRange.isFrameRange());
 		SHOULD_BE_EQUAL(fRange.count(), 0);
 		SHOULD_BE_EQUAL(fRange.firstFrame(), 10);
@@ -1410,7 +1715,7 @@ bool CNTV2DemoCommon::BFT(void)
 
 		cerr << fRange.setFromString("   \t   25   @   15   \t   ") << endl;
 		SHOULD_BE_TRUE(fRange.valid());
-		SHOULD_BE_FALSE(fRange.isCount());
+		SHOULD_BE_FALSE(fRange.isCountOnly());
 		SHOULD_BE_TRUE(fRange.isFrameRange());
 		SHOULD_BE_EQUAL(fRange.count(), 0);
 		SHOULD_BE_EQUAL(fRange.firstFrame(), 15);
@@ -1438,7 +1743,7 @@ bool CNTV2DemoCommon::BFT(void)
 
 		cerr << fRange.setFromString("20-30") << endl;
 		SHOULD_BE_TRUE(fRange.valid());
-		SHOULD_BE_FALSE(fRange.isCount());
+		SHOULD_BE_FALSE(fRange.isCountOnly());
 		SHOULD_BE_TRUE(fRange.isFrameRange());
 		SHOULD_BE_EQUAL(fRange.count(), 0);
 		SHOULD_BE_EQUAL(fRange.firstFrame(), 20);
@@ -1449,7 +1754,7 @@ bool CNTV2DemoCommon::BFT(void)
 
 		cerr << fRange.setFromString("                   25            -                35         ") << endl;
 		SHOULD_BE_TRUE(fRange.valid());
-		SHOULD_BE_FALSE(fRange.isCount());
+		SHOULD_BE_FALSE(fRange.isCountOnly());
 		SHOULD_BE_TRUE(fRange.isFrameRange());
 		SHOULD_BE_EQUAL(fRange.count(), 0);
 		SHOULD_BE_EQUAL(fRange.firstFrame(), 25);
@@ -1457,7 +1762,7 @@ bool CNTV2DemoCommon::BFT(void)
 
 		cerr << fRange.setFromString("36-36") << endl;
 		SHOULD_BE_TRUE(fRange.valid());
-		SHOULD_BE_FALSE(fRange.isCount());
+		SHOULD_BE_FALSE(fRange.isCountOnly());
 		SHOULD_BE_TRUE(fRange.isFrameRange());
 		SHOULD_BE_EQUAL(fRange.count(), 0);
 		SHOULD_BE_EQUAL(fRange.firstFrame(), 36);
@@ -1476,20 +1781,19 @@ bool CNTV2DemoCommon::BFT(void)
 AJALabelValuePairs CaptureConfig::Get (const bool inCompact) const
 {
 	AJALabelValuePairs result;
-	AJASystemInfo::append(result,	"Capture Config");
-	AJASystemInfo::append(result,		"Device Specifier",	fDeviceSpec);
-	AJASystemInfo::append(result,		"Input Channel",	::NTV2ChannelToString(fInputChannel, inCompact));
-	AJASystemInfo::append(result,		"Input Source",		::NTV2InputSourceToString(fInputSource, inCompact));
-	AJASystemInfo::append(result,		"Pixel Format",		::NTV2FrameBufferFormatToString(fPixelFormat, inCompact));
-	AJASystemInfo::append(result,		"AutoCirc Frames",	fFrames.toString());
-	AJASystemInfo::append(result,		"A/B Conversion",	fABConversion ? "Y" : "N");
-	AJASystemInfo::append(result,		"MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
-	AJASystemInfo::append(result,		"Capture Anc",		fWithAnc ? "Y" : "N");
-	AJASystemInfo::append(result,		"Anc Capture File",	fAncDataFilePath);
-	AJASystemInfo::append(result,		"Capture Audio",	fWithAudio ? "Y" : "N");
-	AJASystemInfo::append(result,		"TSI Routing",		fDoTSIRouting ? "Y" : "N");
-	if (fNumAudioLinks > 1)
-		AJASystemInfo::append(result,	"Num Audio Links",	aja::to_string(fNumAudioLinks));
+	AJASystemInfo::append (result,	"Capture Config");
+	AJASystemInfo::append (result,		"Device Specifier",	fDeviceSpec);
+	AJASystemInfo::append (result,		"Input Channel",	::NTV2ChannelToString(fInputChannel, inCompact));
+	AJASystemInfo::append (result,		"Input Source",		::NTV2InputSourceToString(fInputSource, inCompact));
+	AJASystemInfo::append (result,		"Pixel Format",		::NTV2FrameBufferFormatToString(fPixelFormat, inCompact));
+	AJASystemInfo::append (result,		"AutoCirc Frames",	fFrames.toString());
+	AJASystemInfo::append (result,		"A/B Conversion",	fDoABConversion ? "Y" : "N");
+	AJASystemInfo::append (result,		"MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
+	AJASystemInfo::append (result,		"Capture Anc",		fWithAnc ? "Y" : "N");
+	AJASystemInfo::append (result,		"Anc Capture File",	fAncDataFilePath);
+	AJASystemInfo::append (result,		"Capture Audio",	fWithAudio ? "Y" : "N");
+	AJASystemInfo::append (result,		"Num Audio Links",	aja::to_string(fNumAudioLinks));
+	AJASystemInfo::append (result,		"TSI Routing",		fDoTSIRouting ? "Y" : "N");
 	return result;
 }
 
@@ -1498,4 +1802,73 @@ std::ostream & operator << (std::ostream & ioStrm,  const CaptureConfig & inObj)
 {
 	ioStrm	<< AJASystemInfo::ToString(inObj.Get());
 	return ioStrm;
+}
+
+
+//////////////////////////////////////////////
+
+
+AJALabelValuePairs PlayerConfig::Get (const bool inCompact) const
+{
+	AJALabelValuePairs result;
+	AJASystemInfo::append (result,	"NTV2Player Config");
+	AJASystemInfo::append (result,		"Device Specifier",		fDeviceSpec);
+	AJASystemInfo::append (result,		"Video Format",			::NTV2VideoFormatToString(fVideoFormat));
+	AJASystemInfo::append (result,		"Pixel Format",			::NTV2FrameBufferFormatToString(fPixelFormat, inCompact));
+	AJASystemInfo::append (result,		"AutoCirc Frames",		fFrames.toString());
+	AJASystemInfo::append (result,		"MultiFormat Mode",		fDoMultiFormat ? "Y" : "N");
+	AJASystemInfo::append (result,		"VANC Mode",			::NTV2VANCModeToString(fVancMode));
+	AJASystemInfo::append (result,		"HDR Anc Type",			::AJAAncDataTypeToString(fTransmitHDRType));
+	AJASystemInfo::append (result,		"Output Channel",		::NTV2ChannelToString(fOutputChannel, inCompact));
+	AJASystemInfo::append (result,		"Output Connector",		::NTV2OutputDestinationToString(fOutputDest, inCompact));
+	AJASystemInfo::append (result,		"Anc Playback File",	fAncDataFilePath);
+	AJASystemInfo::append (result,		"Suppress Audio",		fSuppressAudio ? "Y" : "N");
+	AJASystemInfo::append (result,		"Num Audio Links",		aja::to_string(fNumAudioLinks));
+	AJASystemInfo::append (result,		"Suppress Video",		fSuppressVideo ? "Y" : "N");
+	AJASystemInfo::append (result,		"Embedded Timecode",	fTransmitLTC ? "LTC" : "VITC");
+	AJASystemInfo::append (result,		"Level Conversion",		fDoABConversion ? "Y" : "N");
+	AJASystemInfo::append (result,		"HDMI Output",			fDoHDMIOutput ? "Yes" : "No");
+	AJASystemInfo::append (result,		"RGB-On-SDI",			fDoRGBOnWire ? "Yes" : "No");
+	AJASystemInfo::append (result,		"TSI Routing",			fDoTsiRouting ? "Yes" : "No");
+	AJASystemInfo::append (result,		"6G/12G Output",		fDoLinkGrouping ? "Yes" : "No");
+	return result;
+}
+
+
+std::ostream & operator << (std::ostream & ioStrm,  const PlayerConfig & inObj)
+{
+	ioStrm	<< AJASystemInfo::ToString(inObj.Get());
+	return ioStrm;
+}
+
+
+//////////////////////////////////////////////
+
+
+AJALabelValuePairs BurnConfig::Get (const bool inCompact) const
+{
+	AJALabelValuePairs result;
+	AJASystemInfo::append(result, "NTV2Burn Config");
+	if (fDeviceSpec2.empty())
+		AJASystemInfo::append(result, "Device Specifier",	fDeviceSpec);
+	else
+	{
+		AJASystemInfo::append(result, "Input Device",	fDeviceSpec);
+		AJASystemInfo::append(result, "Output Device",	fDeviceSpec2);
+	}
+	AJASystemInfo::append(result, "Input Channel",		::NTV2ChannelToString(fInputChannel, inCompact));
+	AJASystemInfo::append(result, "Output Channel",		::NTV2ChannelToString(fOutputChannel, inCompact));
+	AJASystemInfo::append(result, "Input Source",		::NTV2InputSourceToString(fInputSource, inCompact));
+	if (WithTimecode())
+		AJASystemInfo::append(result, "Timecode Source",	::NTV2TCIndexToString(fTimecodeSource, inCompact));
+	AJASystemInfo::append(result, "Pixel Format",		::NTV2FrameBufferFormatToString(fPixelFormat, inCompact));
+	AJASystemInfo::append(result, "AC Input Frames",	fInputFrames.toString());
+	AJASystemInfo::append(result, "AC Output Frames",	fOutputFrames.toString());
+	AJASystemInfo::append(result, "Include Video",		WithVideo() ? "Y" : "N");
+	AJASystemInfo::append(result, "Include Audio",		WithAudio() ? "Y" : "N");
+	AJASystemInfo::append(result, "Include Anc",		WithAnc() ? "Y" : "N");
+	AJASystemInfo::append(result, "Include HANC",		WithHanc() ? "Y" : "N");
+	AJASystemInfo::append(result, "MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
+	AJASystemInfo::append(result, "Field Mode",			FieldMode() ? "Y" : "N");
+	return result;
 }

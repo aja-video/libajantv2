@@ -6,45 +6,29 @@
 **/
 
 #include "ntv2burn4kquadrant.h"
-#include "ntv2democommon.h"
+#include "ntv2devicescanner.h"
 #include "ntv2formatdescriptor.h"
 #include "ajabase/common/types.h"
+#include "ajabase/system/process.h"
 #include <iostream>
 
 using namespace std;
 
 
-#define NTV2_AUDIOSIZE_MAX	(401 * 1024)
 
+NTV2Burn4KQuadrant::NTV2Burn4KQuadrant (const BurnConfig & inConfig)
 
-static const ULWord	gAppSignature	(NTV2_FOURCC('D','E','M','O'));
-
-
-
-
-NTV2Burn4KQuadrant::NTV2Burn4KQuadrant (const string &				inInputDeviceSpecifier,
-										const string &				inOutputDeviceSpecifier,
-										const bool					inWithAudio,
-										const NTV2FrameBufferFormat	inPixelFormat,
-										const NTV2TCIndex			inTCIndex)
-
-	:	mPlayThread				(AJAThread()),
+	:	mConfig					(inConfig),
+		mPlayThread				(AJAThread()),
 		mCaptureThread			(AJAThread()),
-		mSingleDevice			(false),
-		mInputDeviceSpecifier	(inInputDeviceSpecifier),
-		mOutputDeviceSpecifier	(inOutputDeviceSpecifier),
-		mWithAudio				(inWithAudio),
-		mInputChannel			(NTV2_CHANNEL1),
-		mOutputChannel			(NTV2_CHANNEL1),
-		mTimecodeIndex			(inTCIndex),
-		mPixelFormat			(inPixelFormat),
 		mInputAudioSystem		(NTV2_AUDIOSYSTEM_1),
 		mOutputAudioSystem		(NTV2_AUDIOSYSTEM_1),
+		mSingleDevice			(false),
 		mGlobalQuit				(false)
 {
-	::memset (mAVHostBuffer, 0x0, sizeof (mAVHostBuffer));
+	CNTV2DemoCommon::SetDefaultPageSize();	//	Set host-specific page size
 
-	if (mInputDeviceSpecifier.compare (mOutputDeviceSpecifier) == 0)
+	if (mConfig.fDeviceSpec == mConfig.fDeviceSpec2)
 		mSingleDevice = true;
 
 }	//	constructor
@@ -56,31 +40,16 @@ NTV2Burn4KQuadrant::~NTV2Burn4KQuadrant ()
 	Quit ();
 
 	//	Unsubscribe from input vertical event...
-	mInputDevice.UnsubscribeInputVerticalEvent (mInputChannel);
-	mOutputDevice.UnsubscribeOutputVerticalEvent (mOutputChannel);
-
-	//	Free all my buffers...
-	for (unsigned bufferNdx = 0; bufferNdx < CIRCULAR_BUFFER_SIZE; bufferNdx++)
-	{
-		if (mAVHostBuffer[bufferNdx].fVideoBuffer)
-		{
-			delete mAVHostBuffer[bufferNdx].fVideoBuffer;
-			mAVHostBuffer[bufferNdx].fVideoBuffer = AJA_NULL;
-		}
-		if (mAVHostBuffer[bufferNdx].fAudioBuffer)
-		{
-			delete mAVHostBuffer[bufferNdx].fAudioBuffer;
-			mAVHostBuffer[bufferNdx].fAudioBuffer = AJA_NULL;
-		}
-	}	//	for each buffer in the ring
+	mInputDevice.UnsubscribeInputVerticalEvent (mConfig.fInputChannel);
+	mOutputDevice.UnsubscribeOutputVerticalEvent (mConfig.fOutputChannel);
 
 	mInputDevice.SetEveryFrameServices (mInputSavedTaskMode);										//	Restore prior service level
-	mInputDevice.ReleaseStreamForApplication (gAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));	//	Release the device
+	mInputDevice.ReleaseStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid()));	//	Release the device
 
 	if (!mSingleDevice)
 	{
 		mOutputDevice.SetEveryFrameServices (mOutputSavedTaskMode);										//	Restore prior service level
-		mOutputDevice.ReleaseStreamForApplication (gAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));	//	Release the device
+		mOutputDevice.ReleaseStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid()));	//	Release the device
 	}
 
 }	//	destructor
@@ -105,46 +74,46 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 	AJAStatus	status	(AJA_STATUS_SUCCESS);
 
 	//	Open the device...
-	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mInputDeviceSpecifier, mInputDevice))
-		{cerr << "## ERROR:  Input device '" << mInputDeviceSpecifier << "' not found" << endl;  return AJA_STATUS_OPEN;}
+	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mInputDevice))
+		{cerr << "## ERROR:  Input device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
 
 	//	Store the input device ID in a member because it will be used frequently...
 	mInputDeviceID = mInputDevice.GetDeviceID ();
 	if (!::NTV2DeviceCanDo4KVideo (mInputDeviceID))
-		{cerr << "## ERROR:  Input device '" << mInputDeviceSpecifier << "' cannot do 4K/UHD video" << endl;  return AJA_STATUS_UNSUPPORTED;}
+		{cerr << "## ERROR:  Input device '" << mConfig.fDeviceSpec << "' cannot do 4K/UHD video" << endl;  return AJA_STATUS_UNSUPPORTED;}
 
     if (!mInputDevice.IsDeviceReady (false))
-		{cerr << "## ERROR:  Input device '" << mInputDeviceSpecifier << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
+		{cerr << "## ERROR:  Input device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
 	//	Output device:
-	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mOutputDeviceSpecifier, mOutputDevice))
-		{cerr << "## ERROR:  Output device '" << mOutputDeviceSpecifier << "' not found" << endl;  return AJA_STATUS_OPEN;}
+	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec2, mOutputDevice))
+		{cerr << "## ERROR:  Output device '" << mConfig.fDeviceSpec2 << "' not found" << endl;  return AJA_STATUS_OPEN;}
 
 	//	Store the output device ID in a member because it will be used frequently...
 	mOutputDeviceID = mOutputDevice.GetDeviceID ();
 	if (!::NTV2DeviceCanDo4KVideo (mOutputDeviceID))
-		{cerr << "## ERROR:  Output device '" << mOutputDeviceSpecifier << "' cannot do 4K/UHD video" << endl;  return AJA_STATUS_UNSUPPORTED;}
+		{cerr << "## ERROR:  Output device '" << mConfig.fDeviceSpec2 << "' cannot do 4K/UHD video" << endl;  return AJA_STATUS_UNSUPPORTED;}
 
     if (!mOutputDevice.IsDeviceReady(false))
-		{cerr << "## ERROR:  Output device '" << mOutputDeviceSpecifier << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
+		{cerr << "## ERROR:  Output device '" << mConfig.fDeviceSpec2 << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
 	if (mSingleDevice)
 	{
 		if (::NTV2DeviceGetNumFrameStores (mInputDeviceID) < 8)
-			{cerr << "## ERROR:  Single device '" << mOutputDeviceSpecifier << "' requires 8 video channels" << endl;  return AJA_STATUS_UNSUPPORTED;}
+			{cerr << "## ERROR:  Single device '" << mConfig.fDeviceSpec2 << "' requires 8 video channels" << endl;  return AJA_STATUS_UNSUPPORTED;}
 		mOutputAudioSystem = NTV2_AUDIOSYSTEM_5;
-		mOutputChannel = NTV2_CHANNEL5;
+		mConfig.fOutputChannel = NTV2_CHANNEL5;
 	}
 
-	if (!mInputDevice.AcquireStreamForApplication (gAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
-		{cerr << "## ERROR:  Input device '" << mInputDeviceSpecifier << "' is in use by another application" << endl;  return AJA_STATUS_BUSY;}
+	if (!mInputDevice.AcquireStreamForApplication (kDemoAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
+		{cerr << "## ERROR:  Input device '" << mConfig.fDeviceSpec << "' is in use by another application" << endl;  return AJA_STATUS_BUSY;}
 	mInputDevice.GetEveryFrameServices (mInputSavedTaskMode);	//	Save the current state before changing it
 	mInputDevice.SetEveryFrameServices (NTV2_OEM_TASKS);		//	Since this is an OEM demo, use the OEM service level
 
 	if (!mSingleDevice)
 	{
-		if (!mOutputDevice.AcquireStreamForApplication (gAppSignature, static_cast <int32_t>(AJAProcess::GetPid())))
-			{cerr << "## ERROR:  Output device '" << mOutputDeviceSpecifier << "' is in use by another application" << endl;  return AJA_STATUS_BUSY;}
+		if (!mOutputDevice.AcquireStreamForApplication (kDemoAppSignature, static_cast <int32_t>(AJAProcess::GetPid())))
+			{cerr << "## ERROR:  Output device '" << mConfig.fDeviceSpec2 << "' is in use by another application" << endl;  return AJA_STATUS_BUSY;}
 
 		mOutputDevice.GetEveryFrameServices (mOutputSavedTaskMode);		//	Save the current state before changing it
 		mOutputDevice.SetEveryFrameServices (NTV2_OEM_TASKS);			//	Since this is an OEM demo, use the OEM service level
@@ -190,31 +159,40 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 		}
 
 	//	Set up the video and audio...
-	status = SetupInputVideo ();
+	status = SetupInputVideo();
 	if (AJA_FAILURE (status))
 		return status;
 
-	status = SetupOutputVideo ();
+	status = SetupOutputVideo();
 	if (AJA_FAILURE (status))
 		return status;
 
-	status = SetupInputAudio ();
+	status = SetupInputAudio();
 	if (AJA_FAILURE (status))
 		return status;
 
-	status = SetupOutputAudio ();
+	status = SetupOutputAudio();
 	if (AJA_FAILURE (status))
 		return status;
 
-	//	Set up the circular buffers, the device signal routing, and both playout and capture AutoCirculate...
-	SetupHostBuffers ();
-	RouteInputSignal ();
-	RouteOutputSignal ();
+	//	Set up the circular buffers...
+	status = SetupHostBuffers();
+	if (AJA_FAILURE(status))
+		return status;
 
-	//	Lastly, prepare my timecode burner instance...
-	NTV2FormatDescriptor	fd	(mVideoFormat, mPixelFormat, mVancMode);
-	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat (mPixelFormat), fd.numPixels, fd.numLines);
+	//	Set up the signal routing...
+	RouteInputSignal();
+	RouteOutputSignal();
 
+	//	Lastly, prepare my AJATimeCodeBurn instance...
+	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat (mConfig.fPixelFormat),
+																		mFormatDesc.numPixels,
+																		mFormatDesc.numLines);
+	//	Ready to go...
+	#if defined(_DEBUG)
+		cerr << mConfig << endl;
+	#endif	//	not _DEBUG
+	BURNINFO("Configuration: " << mConfig);
 	return AJA_STATUS_SUCCESS;
 
 }	//	Init
@@ -231,8 +209,8 @@ AJAStatus NTV2Burn4KQuadrant::SetupInputVideo (void)
 	//	inputs (this assumes all quadrants are timed)...
 
 	//	First, enable all of the necessary interrupts, and subscribe to the interrupts for the channel to be used...
-	mInputDevice.EnableInputInterrupt (mInputChannel);
-	mInputDevice.SubscribeInputVerticalEvent (mInputChannel);
+	mInputDevice.EnableInputInterrupt (mConfig.fInputChannel);
+	mInputDevice.SubscribeInputVerticalEvent (mConfig.fInputChannel);
 
 	//	Turn multiformat off for this demo -- all multiformat devices will follow channel 1 configuration...
 
@@ -259,14 +237,14 @@ AJAStatus NTV2Burn4KQuadrant::SetupInputVideo (void)
 
 	//	Set the frame buffer pixel format for all the channels on the device
 	//	(assuming the device supports that pixel format -- otherwise default to 8-bit YCbCr)...
-	if (!::NTV2DeviceCanDoFrameBufferFormat (mInputDeviceID, mPixelFormat))
-		mPixelFormat = NTV2_FBF_8BIT_YCBCR;
+	if (!::NTV2DeviceCanDoFrameBufferFormat (mInputDeviceID, mConfig.fPixelFormat))
+		mConfig.fPixelFormat = NTV2_FBF_8BIT_YCBCR;
 
 	//	...and set all buffers pixel format...
-	mInputDevice.SetFrameBufferFormat (NTV2_CHANNEL1, mPixelFormat);
-	mInputDevice.SetFrameBufferFormat (NTV2_CHANNEL2, mPixelFormat);
-	mInputDevice.SetFrameBufferFormat (NTV2_CHANNEL3, mPixelFormat);
-	mInputDevice.SetFrameBufferFormat (NTV2_CHANNEL4, mPixelFormat);
+	mInputDevice.SetFrameBufferFormat (NTV2_CHANNEL1, mConfig.fPixelFormat);
+	mInputDevice.SetFrameBufferFormat (NTV2_CHANNEL2, mConfig.fPixelFormat);
+	mInputDevice.SetFrameBufferFormat (NTV2_CHANNEL3, mConfig.fPixelFormat);
+	mInputDevice.SetFrameBufferFormat (NTV2_CHANNEL4, mConfig.fPixelFormat);
 
 	mInputDevice.SetEnableVANCData (false, false);
 
@@ -306,23 +284,23 @@ AJAStatus NTV2Burn4KQuadrant::SetupOutputVideo (void)
 
 	//	Set the frame buffer pixel format for all the channels on the device
 	//	(assuming the device supports that pixel format -- otherwise default to 8-bit YCbCr)...
-	if (!::NTV2DeviceCanDoFrameBufferFormat (mOutputDeviceID, mPixelFormat))
-		mPixelFormat = NTV2_FBF_8BIT_YCBCR;
+	if (!::NTV2DeviceCanDoFrameBufferFormat (mOutputDeviceID, mConfig.fPixelFormat))
+		mConfig.fPixelFormat = NTV2_FBF_8BIT_YCBCR;
 
 	//	...and set the pixel format for all frame stores...
 	if (mSingleDevice)
 	{
-		mOutputDevice.SetFrameBufferFormat (NTV2_CHANNEL5, mPixelFormat);
-		mOutputDevice.SetFrameBufferFormat (NTV2_CHANNEL6, mPixelFormat);
-		mOutputDevice.SetFrameBufferFormat (NTV2_CHANNEL7, mPixelFormat);
-		mOutputDevice.SetFrameBufferFormat (NTV2_CHANNEL8, mPixelFormat);
+		mOutputDevice.SetFrameBufferFormat (NTV2_CHANNEL5, mConfig.fPixelFormat);
+		mOutputDevice.SetFrameBufferFormat (NTV2_CHANNEL6, mConfig.fPixelFormat);
+		mOutputDevice.SetFrameBufferFormat (NTV2_CHANNEL7, mConfig.fPixelFormat);
+		mOutputDevice.SetFrameBufferFormat (NTV2_CHANNEL8, mConfig.fPixelFormat);
 	}
 	else
 	{
-		mOutputDevice.SetFrameBufferFormat (NTV2_CHANNEL1, mPixelFormat);
-		mOutputDevice.SetFrameBufferFormat (NTV2_CHANNEL2, mPixelFormat);
-		mOutputDevice.SetFrameBufferFormat (NTV2_CHANNEL3, mPixelFormat);
-		mOutputDevice.SetFrameBufferFormat (NTV2_CHANNEL4, mPixelFormat);
+		mOutputDevice.SetFrameBufferFormat (NTV2_CHANNEL1, mConfig.fPixelFormat);
+		mOutputDevice.SetFrameBufferFormat (NTV2_CHANNEL2, mConfig.fPixelFormat);
+		mOutputDevice.SetFrameBufferFormat (NTV2_CHANNEL3, mConfig.fPixelFormat);
+		mOutputDevice.SetFrameBufferFormat (NTV2_CHANNEL4, mConfig.fPixelFormat);
 	}
 
 	//	Set all frame buffers to playback
@@ -433,24 +411,46 @@ AJAStatus NTV2Burn4KQuadrant::SetupOutputAudio (void)
 }	//	SetupAudio
 
 
-void NTV2Burn4KQuadrant::SetupHostBuffers (void)
+AJAStatus NTV2Burn4KQuadrant::SetupHostBuffers (void)
 {
+	CNTV2DemoCommon::SetDefaultPageSize();	//	Set host-specific page size
+
 	//	Let my circular buffer know when it's time to quit...
-	mAVCircularBuffer.SetAbortFlag (&mGlobalQuit);
+	mFrameDataRing.SetAbortFlag (&mGlobalQuit);
 
-	mInputDevice.GetVANCMode (mVancMode);
-	mVideoBufferSize = GetVideoWriteSize (mVideoFormat, mPixelFormat, mVancMode);
-	mAudioBufferSize = NTV2_AUDIOSIZE_MAX;
+	//  Determine video buffer size...
+	const ULWord vidBuffSizeBytes (mFormatDesc.GetVideoWriteSize(ULWord(NTV2Buffer::DefaultPageSize())));
 
-	//	Allocate and add each in-host AVDataBuffer to my circular buffer member variable...
-	for (unsigned bufferNdx = 0; bufferNdx < CIRCULAR_BUFFER_SIZE; bufferNdx++ )
+	//	Allocate and add each in-host NTV2FrameData to my mFrameDataRing...
+	mHostBuffers.reserve(CIRCULAR_BUFFER_SIZE);
+	while (mHostBuffers.size() < CIRCULAR_BUFFER_SIZE)
 	{
-		mAVHostBuffer [bufferNdx].fVideoBuffer = reinterpret_cast <uint32_t *> (new uint8_t [mVideoBufferSize]);
-		mAVHostBuffer [bufferNdx].fVideoBufferSize = mVideoBufferSize;
-		mAVHostBuffer [bufferNdx].fAudioBuffer = mWithAudio ? reinterpret_cast <uint32_t *> (new uint8_t [mAudioBufferSize]) : AJA_NULL;
-		mAVHostBuffer [bufferNdx].fAudioBufferSize = mWithAudio ? mAudioBufferSize : 0;
-		mAVCircularBuffer.Add (& mAVHostBuffer [bufferNdx]);
-	}	//	for each AVDataBuffer
+		mHostBuffers.push_back(NTV2FrameData());			//	Make a new NTV2FrameData...
+		NTV2FrameData & frameData (mHostBuffers.back());	//	...and get a reference to it
+
+		//	Allocate a page-aligned video buffer (if handling video)...
+		if (!mConfig.fSuppressVideo)
+			if (!frameData.fVideoBuffer.Allocate (vidBuffSizeBytes, /*pageAligned*/true))
+			{
+				BURNFAIL("Failed to allocate " << xHEX0N(vidBuffSizeBytes,8) << "-byte video buffer");
+				return AJA_STATUS_MEMORY;
+			}
+
+		//	Allocate a page-aligned audio buffer (if handling audio)...
+		if (mConfig.WithAudio())
+			if (!frameData.fAudioBuffer.Allocate (NTV2_AUDIOSIZE_MAX, /*pageAligned*/true))
+			{
+				BURNFAIL("Failed to allocate " << xHEX0N(NTV2_AUDIOSIZE_MAX,8) << "-byte audio buffer");
+				return AJA_STATUS_MEMORY;
+			}
+		if (frameData.AudioBuffer())
+			frameData.fAudioBuffer.Fill(ULWord(0));
+
+		//	Add this NTV2FrameData to the ring...
+		mFrameDataRing.Add(&frameData);
+	}	//	for each NTV2FrameData
+
+	return AJA_STATUS_SUCCESS;
 
 }	//	SetupHostBuffers
 
@@ -460,7 +460,7 @@ void NTV2Burn4KQuadrant::RouteInputSignal (void)
 	//	Since this is only a 4k example, we will route all inputs to framebuffers
 	//	and color space convert when necessary...
 	mInputDevice.ClearRouting ();
-	if(IsRGBFormat(mPixelFormat))
+	if(IsRGBFormat(mConfig.fPixelFormat))
 	{
 		mInputDevice.Connect (NTV2_XptCSC1VidInput, NTV2_XptSDIIn1);
 		mInputDevice.Connect (NTV2_XptCSC2VidInput, NTV2_XptSDIIn2);
@@ -490,7 +490,7 @@ void NTV2Burn4KQuadrant::RouteOutputSignal (void)
 		mOutputDevice.ClearRouting ();
 	if (!mSingleDevice)
 	{
-		if (::IsRGBFormat (mPixelFormat))
+		if (::IsRGBFormat (mConfig.fPixelFormat))
 		{
 			mOutputDevice.Connect (NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer1RGB);
 			mOutputDevice.Connect (NTV2_XptCSC2VidInput, NTV2_XptFrameBuffer2RGB);
@@ -512,7 +512,7 @@ void NTV2Burn4KQuadrant::RouteOutputSignal (void)
 	}
 	else
 	{
-		if (::IsRGBFormat (mPixelFormat))
+		if (::IsRGBFormat (mConfig.fPixelFormat))
 		{
 			mOutputDevice.Connect (NTV2_XptCSC5VidInput, NTV2_XptFrameBuffer5RGB);
 			mOutputDevice.Connect (NTV2_XptCSC6VidInput, NTV2_XptFrameBuffer6RGB);
@@ -574,8 +574,10 @@ void NTV2Burn4KQuadrant::PlayThreadStatic (AJAThread * pThread, void * pContext)
 
 void NTV2Burn4KQuadrant::PlayFrames (void)
 {
+	const ULWord			acOptions (AUTOCIRCULATE_WITH_RP188);
+	ULWord					goodXfers(0), badXfers(0), starves(0), noRoomWaits(0);
 	AUTOCIRCULATE_TRANSFER	outputXferInfo;
-	BURNNOTE("Thread started");
+	AUTOCIRCULATE_STATUS	outputStatus;
 
 	if (mSingleDevice)
 	{
@@ -591,37 +593,57 @@ void NTV2Burn4KQuadrant::PlayFrames (void)
 		mOutputDevice.AutoCirculateStop (NTV2_CHANNEL3);
 		mOutputDevice.AutoCirculateStop (NTV2_CHANNEL4);
 	}
-	AJATime::Sleep (1000);
-	mOutputDevice.AutoCirculateInitForOutput (mOutputChannel, 5, mOutputAudioSystem, AUTOCIRCULATE_WITH_RP188);
+	mOutputDevice.WaitForOutputVerticalInterrupt(mConfig.fOutputChannel, 4);	//	Let it stop
+	BURNNOTE("Thread started");
 
-	//	Start AutoCirculate running...
-	mOutputDevice.AutoCirculateStart (mOutputChannel);
+	//	Initialize AutoCirculate...
+	if (!mOutputDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel, mConfig.fOutputFrames.count(), mOutputAudioSystem, acOptions,
+													1 /*numChannels*/,  mConfig.fOutputFrames.firstFrame(),  mConfig.fOutputFrames.lastFrame()))
+		{BURNFAIL("AutoCirculateInitForOutput failed");  mGlobalQuit = true;}
 
 	while (!mGlobalQuit)
 	{
-		//	Wait for the next frame to become ready to "consume"...
-		AVDataBuffer *	playData	(mAVCircularBuffer.StartConsumeNextBuffer ());
-		if (playData)
-		{
-			//	Transfer the timecode-burned frame to the device for playout...
-			outputXferInfo.SetVideoBuffer(playData->fVideoBuffer, playData->fVideoBufferSize);
-			outputXferInfo.SetAudioBuffer(playData->fAudioBuffer, playData->fAudioBufferSize);
-			outputXferInfo.SetOutputTimeCode(NTV2_RP188(playData->fRP188Data), NTV2_TCINDEX_SDI1);
-			outputXferInfo.SetOutputTimeCode(NTV2_RP188(playData->fRP188Data), NTV2_TCINDEX_SDI1_LTC);
-			outputXferInfo.acRP188 = playData->fRP188Data;
+		mOutputDevice.AutoCirculateGetStatus (mConfig.fOutputChannel, outputStatus);
 
-			// Output the time code in the autocirculate struct
-			mOutputDevice.AutoCirculateTransfer (mOutputChannel, outputXferInfo);
+		//	Check if there's room for another frame on the card...
+		if (outputStatus.CanAcceptMoreOutputFrames())
+		{
+			//	Device has at least one free frame buffer that can be filled.
+			//	Wait for the next frame in our ring to become ready to "consume"...
+			NTV2FrameData *	pFrameData (mFrameDataRing.StartConsumeNextBuffer());
+			if (!pFrameData)
+				{starves++;  continue;}	//	Producer thread isn't producing frames fast enough
+
+			//	Transfer the timecode-burned frame to the device for playout...
+			outputXferInfo.SetVideoBuffer (pFrameData->VideoBuffer(), pFrameData->VideoBufferSize());
+			if (pFrameData->AudioBuffer())
+				outputXferInfo.SetAudioBuffer(pFrameData->AudioBuffer(), pFrameData->AudioBufferSize());
+			outputXferInfo.SetOutputTimeCode(pFrameData->Timecode(NTV2_TCINDEX_SDI1), NTV2_TCINDEX_SDI1);
+			outputXferInfo.SetOutputTimeCode(pFrameData->Timecode(NTV2_TCINDEX_SDI1_LTC), NTV2_TCINDEX_SDI1_LTC);
+
+			//	Transfer the frame to the device for eventual playout...
+			if (mOutputDevice.AutoCirculateTransfer (mConfig.fOutputChannel, outputXferInfo))
+				goodXfers++;
+			else
+				badXfers++;
+
+			if (goodXfers == 3)	//	Start AutoCirculate playout once 3 frames are buffered on the device...
+				mOutputDevice.AutoCirculateStart(mConfig.fOutputChannel);
 
 			//	Signal that the frame has been "consumed"...
-			mAVCircularBuffer.EndConsumeNextBuffer ();
-		}
+			mFrameDataRing.EndConsumeNextBuffer();
+			continue;	//	Back to top of while loop
+		}	//	if CanAcceptMoreOutputFrames
+
+		//	Wait for one or more buffers to become available on the device, which should occur at next VBI...
+		noRoomWaits++;
+		mOutputDevice.WaitForOutputVerticalInterrupt(mConfig.fOutputChannel);
 	}	//	loop til quit signaled
 
 	//	Stop AutoCirculate...
-	mOutputDevice.AutoCirculateStop (mOutputChannel);
-	BURNNOTE("Thread completed, will exit");
-
+	mOutputDevice.AutoCirculateStop(mConfig.fOutputChannel);
+	BURNNOTE("Thread completed: " << DEC(goodXfers) << " xfers, " << DEC(badXfers) << " failed, "
+			<< DEC(starves) << " ring starves, " << DEC(noRoomWaits) << " device starves");
 }	//	PlayFrames
 
 
@@ -661,6 +683,7 @@ void NTV2Burn4KQuadrant::CaptureThreadStatic (AJAThread * pThread, void * pConte
 void NTV2Burn4KQuadrant::CaptureFrames (void)
 {
 	AUTOCIRCULATE_TRANSFER	inputXferInfo;
+	ULWord					goodXfers(0), badXfers(0), ringFulls(0), devWaits(0);
 	BURNNOTE("Thread started");
 
 	mInputDevice.AutoCirculateStop (NTV2_CHANNEL1);
@@ -668,7 +691,6 @@ void NTV2Burn4KQuadrant::CaptureFrames (void)
 	mInputDevice.AutoCirculateStop (NTV2_CHANNEL3);
 	mInputDevice.AutoCirculateStop (NTV2_CHANNEL4);
 	AJATime::Sleep (1000);
-	mInputDevice.AutoCirculateInitForInput (mInputChannel, 5, mInputAudioSystem, AUTOCIRCULATE_WITH_RP188);
 
 	//	Enable analog LTC input (some LTC inputs are shared with reference input)
 	mInputDevice.SetLTCInputEnable (true);
@@ -679,70 +701,77 @@ void NTV2Burn4KQuadrant::CaptureFrames (void)
 	mInputDevice.SetRP188SourceFilter (NTV2_CHANNEL3, 0);
 	mInputDevice.SetRP188SourceFilter (NTV2_CHANNEL4, 0);
 
-	//	Start AutoCirculate running...
-	mInputDevice.AutoCirculateStart (mInputChannel);
+	//	Initialize AutoCirculate...
+	if (!mInputDevice.AutoCirculateInitForInput (mConfig.fInputChannel,		//	channel
+											mConfig.fInputFrames.count(),	//	numFrames (zero if specifying range)
+											mInputAudioSystem,				//	audio system
+											AUTOCIRCULATE_WITH_RP188,		//	flags
+											1,								//	frameStores to gang
+											mConfig.fInputFrames.firstFrame(), mConfig.fInputFrames.lastFrame()))
+		{BURNFAIL("AutoCirculateInitForInput failed");  mGlobalQuit = true;}
+	else
+		//	Start AutoCirculate running...
+		mInputDevice.AutoCirculateStart (mConfig.fInputChannel);
 
 	while (!mGlobalQuit)
 	{
-		AUTOCIRCULATE_STATUS	acStatus;
-		mInputDevice.AutoCirculateGetStatus (mInputChannel, acStatus);
+		AUTOCIRCULATE_STATUS acStatus;
+		mInputDevice.AutoCirculateGetStatus (mConfig.fInputChannel, acStatus);
 
-		if (acStatus.acState == NTV2_AUTOCIRCULATE_RUNNING && acStatus.acBufferLevel > 1)
+		if (acStatus.IsRunning()  &&  acStatus.HasAvailableInputFrame())
 		{
-			string	timeCodeString;
+			//	At this point, there's at least one fully-formed frame available in the device's frame buffer
+			//	memory waiting to be transferred to the host. Reserve an NTV2FrameData to fill ("produce"),
+			//	and use it in the next frame transferred from the device...
+			NTV2FrameData *	pFrameData	(mFrameDataRing.StartProduceNextBuffer ());
+			if (!pFrameData)
+				{ringFulls++;  continue;}	//	Ring full -- consumer thread isn't consuming frames fast enough
 
-			//	At this point, there's at least one fully-formed frame available in the device's
-			//	frame buffer to transfer to the host. Reserve an AVDataBuffer to "produce", and
-			//	use it in the next transfer from the device...
-			AVDataBuffer *	captureData	(mAVCircularBuffer.StartProduceNextBuffer ());
+			inputXferInfo.SetVideoBuffer(pFrameData->VideoBuffer(), pFrameData->VideoBufferSize());
+			if (pFrameData->AudioBuffer())
+				inputXferInfo.SetAudioBuffer(pFrameData->AudioBuffer(), pFrameData->AudioBufferSize());
 
-			inputXferInfo.SetVideoBuffer(captureData->fVideoBuffer, captureData->fVideoBufferSize);
-			inputXferInfo.SetAudioBuffer(captureData->fAudioBuffer, captureData->fAudioBufferSize);
+			//	Transfer the frame from the device into our host buffers...
+			if (mInputDevice.AutoCirculateTransfer (mConfig.fInputChannel, inputXferInfo)) goodXfers++;
+			else badXfers++;
 
-			//	Do the transfer from the device into our host AVDataBuffer...
-			mInputDevice.AutoCirculateTransfer (mInputChannel, inputXferInfo);
+			//	Remember the amount, in bytes, of captured audio & anc data...
+			pFrameData->fNumAudioBytes	= pFrameData->AudioBuffer()	? inputXferInfo.GetCapturedAudioByteCount()			: 0;
 
-			//	Remember the audio & anc data byte counts...
-			NTV2_RP188	defaultTimeCode;
-			inputXferInfo.acTransferStatus.acFrameStamp.GetInputTimeCode (defaultTimeCode, NTV2_TCINDEX_SDI1);
-			captureData->fAudioBufferSize = inputXferInfo.GetCapturedAudioByteCount ();
-			captureData->fRP188Data = defaultTimeCode;
-			
-			if (InputSignalHasTimecode ())
-			{
-				CRP188	inputRP188Info	(captureData->fRP188Data);
-				inputRP188Info.GetRP188Str (timeCodeString);
-			}
-			else
-			{
-				//	Invent a timecode (based on frame count)...
-				const	NTV2FrameRate	ntv2FrameRate	(GetNTV2FrameRateFromVideoFormat (mVideoFormat));
+			//	Get a timecode to use for burn-in...
+			NTV2_RP188	thisFrameTC;
+			inputXferInfo.GetInputTimeCodes (pFrameData->fTimecodes, mConfig.fInputChannel);
+			if (!pFrameData->HasValidTimecode(mConfig.fTimecodeSource))
+			{	//	Invent a timecode (based on frame count)...
+				const	NTV2FrameRate	ntv2FrameRate	(::GetNTV2FrameRateFromVideoFormat (mVideoFormat));
 				const	TimecodeFormat	tcFormat		(CNTV2DemoCommon::NTV2FrameRate2TimecodeFormat(ntv2FrameRate));
-				const	CRP188			frameRP188Info	(inputXferInfo.acTransferStatus.acFramesProcessed, 0, 0, 10, tcFormat);
-
-				frameRP188Info.GetRP188Reg (captureData->fRP188Data);
-				frameRP188Info.GetRP188Str (timeCodeString);
+				const	CRP188			inventedTC		(inputXferInfo.GetTransferStatus().GetProcessedFrameCount(), 0, 0, 10, tcFormat);
+				inventedTC.GetRP188Reg(thisFrameTC);
 			}
+			CRP188 tc(thisFrameTC);
+			string tcStr;
+			tc.GetRP188Str(tcStr);
 
-			//	"Burn" the timecode into the host AVDataBuffer while we have full access to it...
-			mTCBurner.BurnTimeCode(reinterpret_cast <char *> (inputXferInfo.acVideoBuffer.GetHostPointer()), timeCodeString.c_str(), 80);
+			//	While this NTV2FrameData's buffers are locked, "burn" timecode into the raster...
+			mTCBurner.BurnTimeCode (pFrameData->VideoBuffer(), tcStr.c_str(), 80);
 
-			//	Signal that we're done "producing" the frame, making it available for future "consumption"...
-			mAVCircularBuffer.EndProduceNextBuffer ();
-
+			//	Signal that we're done "producing" this frame, making it available for future "consumption"...
+			mFrameDataRing.EndProduceNextBuffer();
 		}	//	if A/C running and frame(s) are available for transfer
 		else
 		{
 			//	Either AutoCirculate is not running, or there were no frames available on the device to transfer.
 			//	Rather than waste CPU cycles spinning, waiting until a frame becomes available, it's far more
 			//	efficient to wait for the next input vertical interrupt event to get signaled...
-			mInputDevice.WaitForInputVerticalInterrupt (mInputChannel);
+			devWaits++;
+			mInputDevice.WaitForInputVerticalInterrupt (mConfig.fInputChannel);
 		}
 	}	//	loop til quit signaled
 
 	//	Stop AutoCirculate...
-	mInputDevice.AutoCirculateStop (mInputChannel);
-	BURNNOTE("Thread completed, will exit");
+	mInputDevice.AutoCirculateStop (mConfig.fInputChannel);
+	BURNNOTE("Thread completed: " << DEC(goodXfers) << " xfers, " << DEC(badXfers) << " failed, "
+			<< DEC(ringFulls) << " ring full(s), " << DEC(devWaits) << " device waits");
 
 }	//	CaptureFrames
 
@@ -752,8 +781,8 @@ void NTV2Burn4KQuadrant::CaptureFrames (void)
 
 void NTV2Burn4KQuadrant::GetACStatus (AUTOCIRCULATE_STATUS & inputStatus, AUTOCIRCULATE_STATUS & outputStatus)
 {
-	mInputDevice.AutoCirculateGetStatus (mInputChannel, inputStatus);
-	mOutputDevice.AutoCirculateGetStatus(mOutputChannel, outputStatus);
+	mInputDevice.AutoCirculateGetStatus (mConfig.fInputChannel, inputStatus);
+	mOutputDevice.AutoCirculateGetStatus(mConfig.fOutputChannel, outputStatus);
 
 }	//	GetACStatus
 

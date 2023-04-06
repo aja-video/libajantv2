@@ -6,10 +6,9 @@
 **/
 
 #include "ntv2burn.h"
-#include "ntv2devicefeatures.h"
 #include "ntv2devicescanner.h"
+#include "ntv2testpatterngen.h"	//	Needed for --novideo
 #include "ajabase/common/types.h"
-#include "ajabase/system/memory.h"
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
 #include <iostream>
@@ -18,34 +17,7 @@ using namespace std;
 
 //#define NTV2_BUFFER_LOCKING		//	Define this to pre-lock video/audio buffers in kernel
 
-
-/**
-	@brief	The maximum number of bytes of ancillary data that can be transferred for a single field.
-			Each driver instance sets this maximum to the 8K default at startup.
-			It can be changed at runtime, so it's sampled and reset in SetUpVideo.
-**/
-static ULWord			gAncMaxSizeBytes	(NTV2_ANCSIZE_MAX);	//	Max per-frame anc buffer size, in bytes
-
-/**
-	@brief	The maximum number of bytes of 48KHz audio that can be transferred for a single frame.
-			Worst case, assuming 16 channels of audio (max), 4 bytes per sample, and 67 msec per frame
-			(assuming the lowest possible frame rate of 14.98 fps)...
-			48,000 samples per second requires 3,204 samples x 4 bytes/sample x 16 = 205,056 bytes
-			201K min will suffice, with 768 bytes to spare
-			But it could be more efficient for page-aligned (and page-locked) memory to round to 256K.
-**/
-static const uint32_t	gAudMaxSizeBytes	(256 * 1024);	//	Max per-frame audio buffer size, in bytes
-
-/**
-	@brief	The alignment of the video buffers has a big impact on the efficiency of DMA transfers.
-			When aligned to the host operating systems' page size, only one DMA descriptor is needed
-			per page. Misalignment will double the number of descriptors that need to be fetched and
-			processed, thus reducing bandwidth.
-**/
-static const uint32_t	BUFFER_ALIGNMENT	(4096);		//	The optimal size for most modern hosts
-static const bool		BUFFER_PAGE_ALIGNED	(true);		//	Set this false to disable page-alignment
-
-static const uint32_t	kAppSignature		(NTV2_FOURCC('B','u','r','n'));
+static const uint32_t	kAppSignature	(NTV2_FOURCC('B','u','r','n'));
 
 
 //////////////////////	IMPLEMENTATION
@@ -67,9 +39,7 @@ NTV2Burn::NTV2Burn (const BurnConfig & inConfig)
 
 NTV2Burn::~NTV2Burn ()
 {
-	//	Stop my capture and playout threads, then destroy them...
-	Quit();
-
+	Quit();	//	Stop my capture and playout threads, then destroy them
 	mDevice.UnsubscribeInputVerticalEvent(mConfig.fInputChannel);	//	Unsubscribe from input VBI event
 }	//	destructor
 
@@ -85,9 +55,9 @@ void NTV2Burn::Quit (void)
 	while (mCaptureThread.Active())
 		AJATime::Sleep(10);
 
-	if (!mConfig.fDoMultiFormat  &&  mDevice.IsOpen())
-	{
-		mDevice.ReleaseStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid()));	//	Release the device
+	if (!mConfig.fDoMultiFormat)
+	{	//	Release the device...
+		mDevice.ReleaseStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid()));
 		if (NTV2_IS_VALID_TASK_MODE(mSavedTaskMode))
 			mDevice.SetEveryFrameServices(mSavedTaskMode);	//	Restore prior task mode
 	}
@@ -96,7 +66,7 @@ void NTV2Burn::Quit (void)
 
 AJAStatus NTV2Burn::Init (void)
 {
-	AJAStatus	status(AJA_STATUS_SUCCESS);
+	AJAStatus status (AJA_STATUS_SUCCESS);
 
 	//	Open the device...
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
@@ -105,24 +75,26 @@ AJAStatus NTV2Burn::Init (void)
     if (!mDevice.IsDeviceReady(false))
 		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
+	mDeviceID = mDevice.GetDeviceID();	//	Keep the device ID handy since it will be used frequently
+	if (!::NTV2DeviceCanDoCapture(mDeviceID))
+		{cerr << "## ERROR:  Device '" << mDeviceID << "' cannot capture" << endl;  return AJA_STATUS_FEATURE;}
+	if (!::NTV2DeviceCanDoPlayback(mDeviceID))
+		{cerr << "## ERROR:  Device '" << mDeviceID << "' cannot playout" << endl;  return AJA_STATUS_FEATURE;}
+
 	ULWord	appSignature	(0);
 	int32_t	appPID			(0);
 	mDevice.GetStreamingApplication (appSignature, appPID);	//	Who currently "owns" the device?
 	mDevice.GetEveryFrameServices(mSavedTaskMode);			//	Save the current device state
 	if (!mConfig.fDoMultiFormat)
 	{
-		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
+		if (!mDevice.AcquireStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid())))
 		{
 			cerr << "## ERROR:  Unable to acquire device because another app (pid " << appPID << ") owns it" << endl;
 			return AJA_STATUS_BUSY;		//	Some other app is using the device
 		}
-		mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Set the OEM service level
 		mDevice.ClearRouting();									//	Clear the current device routing (since I "own" the device)
 	}
-	else
-		mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Force OEM tasks
-
-	mDeviceID = mDevice.GetDeviceID();							//	Keep the device ID handy since it will be used frequently
+	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Force OEM tasks
 
 	//	Configure the SDI relays if present
 	if (::NTV2DeviceHasSDIRelays(mDeviceID))
@@ -142,8 +114,8 @@ AJAStatus NTV2Burn::Init (void)
 	}
 
 	//	Make sure the device actually supports custom anc before using it...
-	if (!mConfig.fSuppressAnc)
-		mConfig.fSuppressAnc = !::NTV2DeviceCanDoCustomAnc(mDeviceID);
+	if (mConfig.WithAnc())
+		mConfig.fWithAnc = ::NTV2DeviceCanDoCustomAnc(mDeviceID);
 
 	//	Set up the video and audio...
 	status = SetupVideo();
@@ -163,21 +135,22 @@ AJAStatus NTV2Burn::Init (void)
 	RouteOutputSignal();
 
 	//	Lastly, prepare my AJATimeCodeBurn instance...
-	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat(mConfig.fPixelFormat), mFormatDesc.numPixels, mFormatDesc.numLines);
-
+	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat (mConfig.fPixelFormat),
+																		mFormatDesc.numPixels,
+																		mFormatDesc.numLines);
 	//	Ready to go...
 	#if defined(_DEBUG)
 		cerr << mConfig << endl;
 	#endif	//	not _DEBUG
 	BURNINFO("Configuration: " << mConfig);
-	return status;
+	return AJA_STATUS_SUCCESS;
 
 }	//	Init
 
 
 AJAStatus NTV2Burn::SetupVideo (void)
 {
-	const UWord	numFrameStores	(::NTV2DeviceGetNumFrameStores (mDeviceID));
+	const UWord	numFrameStores	(::NTV2DeviceGetNumFrameStores(mDeviceID));
 
 	//	Does this device have the requested input source?
 	if (!::NTV2DeviceCanDoInputSource (mDeviceID, mConfig.fInputSource))
@@ -190,27 +163,31 @@ AJAStatus NTV2Burn::SetupVideo (void)
 	//	Pick an appropriate output NTV2Channel, and enable its frame buffer...
 	switch (mConfig.fInputSource)
 	{
-		case NTV2_INPUTSOURCE_SDI1:		mConfig.fOutputChannel = numFrameStores == 2 || numFrameStores > 4 ? NTV2_CHANNEL2 : NTV2_CHANNEL3;	break;
+		case NTV2_INPUTSOURCE_SDI1:		mConfig.fOutputChannel = numFrameStores == 2 || numFrameStores > 4 ? NTV2_CHANNEL2 : NTV2_CHANNEL3;
+										break;
 
 		case NTV2_INPUTSOURCE_HDMI2:
-		case NTV2_INPUTSOURCE_SDI2:		mConfig.fOutputChannel = numFrameStores > 4 ? NTV2_CHANNEL3 : NTV2_CHANNEL4;						break;
+		case NTV2_INPUTSOURCE_SDI2:		mConfig.fOutputChannel = numFrameStores > 4 ? NTV2_CHANNEL3 : NTV2_CHANNEL4;
+										break;
 
 		case NTV2_INPUTSOURCE_HDMI3:
-		case NTV2_INPUTSOURCE_SDI3:		mConfig.fOutputChannel = NTV2_CHANNEL4;																break;
+		case NTV2_INPUTSOURCE_SDI3:		mConfig.fOutputChannel = NTV2_CHANNEL4;
+										break;
 
 		case NTV2_INPUTSOURCE_HDMI4:
-		case NTV2_INPUTSOURCE_SDI4:		mConfig.fOutputChannel = numFrameStores > 4 ? NTV2_CHANNEL5 : NTV2_CHANNEL3;						break;
+		case NTV2_INPUTSOURCE_SDI4:		mConfig.fOutputChannel = numFrameStores > 4 ? NTV2_CHANNEL5 : NTV2_CHANNEL3;
+										break;
 
-		case NTV2_INPUTSOURCE_SDI5: 	mConfig.fOutputChannel = NTV2_CHANNEL6;																break;
-		case NTV2_INPUTSOURCE_SDI6:		mConfig.fOutputChannel = NTV2_CHANNEL7;																break;
-		case NTV2_INPUTSOURCE_SDI7:		mConfig.fOutputChannel = NTV2_CHANNEL8;																break;
-		case NTV2_INPUTSOURCE_SDI8:		mConfig.fOutputChannel = NTV2_CHANNEL7;																break;
+		case NTV2_INPUTSOURCE_SDI5: 	mConfig.fOutputChannel = NTV2_CHANNEL6;		break;
+		case NTV2_INPUTSOURCE_SDI6:		mConfig.fOutputChannel = NTV2_CHANNEL7;		break;
+		case NTV2_INPUTSOURCE_SDI7:		mConfig.fOutputChannel = NTV2_CHANNEL8;		break;
+		case NTV2_INPUTSOURCE_SDI8:		mConfig.fOutputChannel = NTV2_CHANNEL7;		break;
 
 		case NTV2_INPUTSOURCE_ANALOG1:
 		case NTV2_INPUTSOURCE_HDMI1:	mConfig.fOutputChannel = numFrameStores < 3 ? NTV2_CHANNEL2 : NTV2_CHANNEL3;
 										mAudioSystem = NTV2_AUDIOSYSTEM_2;
 										break;
-
+		default:
 		case NTV2_INPUTSOURCE_INVALID:	cerr << "## ERROR:  Bad input source" << endl;  return AJA_STATUS_BAD_PARAM;
 	}
 	mDevice.EnableChannel(mConfig.fOutputChannel);	//	Enable the output frame buffer
@@ -223,22 +200,24 @@ AJAStatus NTV2Burn::SetupVideo (void)
 
 	//	Pick an appropriate output spigot based on the output channel...
 	mOutputDest	= ::NTV2ChannelToOutputDestination(mConfig.fOutputChannel);
-	if (!::NTV2DeviceCanDoWidget (mDeviceID, NTV2_Wgt12GSDIOut2) && !::NTV2DeviceCanDoWidget (mDeviceID, NTV2_Wgt3GSDIOut2) && !::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtSDIOut2))
-		mOutputDest = NTV2_OUTPUTDESTINATION_SDI1;							//	If device has only one SDI output
+	if (!::NTV2DeviceCanDoWidget (mDeviceID, NTV2_Wgt12GSDIOut2)
+		&& !::NTV2DeviceCanDoWidget (mDeviceID, NTV2_Wgt3GSDIOut2)
+		&& !::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtSDIOut2))
+			mOutputDest = NTV2_OUTPUTDESTINATION_SDI1;						//	If device has only one SDI output
 	if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID)							//	If device has bidirectional SDI connectors...
 		&& NTV2_OUTPUT_DEST_IS_SDI(mOutputDest))							//	...and output destination is SDI...
 			mDevice.SetSDITransmitEnable (mConfig.fOutputChannel, true);	//	...then enable transmit mode
 
 	//	Flip the input spigot to "receive" if necessary...
-	bool	isTransmit	(false);
-	if (::NTV2DeviceHasBiDirectionalSDI (mDevice.GetDeviceID ())				//	If device has bidirectional SDI connectors...
-		&& NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource)						//	...and desired input source is SDI...
-			&& mDevice.GetSDITransmitEnable (mConfig.fInputChannel, isTransmit)	//	...and GetSDITransmitEnable succeeds...
-				&& isTransmit)													//	...and input is set to "transmit"...
-	{
-		mDevice.SetSDITransmitEnable (mConfig.fInputChannel, false);			//	...then disable transmit mode...
-		mDevice.WaitForOutputVerticalInterrupt (mConfig.fOutputChannel, 12);	//	...and give the device a dozen frames or so to lock to the input signal
-	}	//	if input SDI connector needs to switch from transmit mode
+	bool isXmit (false);
+	if (::NTV2DeviceHasBiDirectionalSDI (mDevice.GetDeviceID ())			//	If device has bidirectional SDI connectors...
+		&& NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource)					//	...and desired input source is SDI...
+		&& mDevice.GetSDITransmitEnable (mConfig.fInputChannel, isXmit)		//	...and GetSDITransmitEnable succeeds...
+		&& isXmit)															//	...and input is set to "transmit"...
+		{
+			mDevice.SetSDITransmitEnable (mConfig.fInputChannel, false);			//	...then disable transmit mode...
+			mDevice.WaitForOutputVerticalInterrupt (mConfig.fOutputChannel, 10);	//	...and allow device to lock to input signal
+		}	//	if input SDI connector needs to switch from transmit mode
 
 	//	Is there an input signal?  What format is it?
 	mVideoFormat = mDevice.GetInputVideoFormat(mConfig.fInputSource);
@@ -258,17 +237,17 @@ AJAStatus NTV2Burn::SetupVideo (void)
 		if (tcChannel == mConfig.fOutputChannel)
 			{cerr << "## ERROR:  Timecode source '" << ::NTV2TCIndexToString(mConfig.fTimecodeSource, true) << "' conflicts with output channel" << endl;  return AJA_STATUS_BAD_PARAM;}
 		if (::NTV2DeviceHasBiDirectionalSDI (mDevice.GetDeviceID ())	//	If device has bidirectional SDI connectors...
-			&& mDevice.GetSDITransmitEnable (tcChannel, isTransmit)		//	...and GetSDITransmitEnable succeeds...
-				&& isTransmit)											//	...and the SDI timecode source is set to "transmit"...
-		{
-			mDevice.SetSDITransmitEnable (tcChannel, false);			//	...then disable transmit mode...
-			AJATime::Sleep (500);										//	...and give the device a dozen frames or so to lock to the input signal
-		}	//	if input SDI connector needs to switch from transmit mode
+			&& mDevice.GetSDITransmitEnable (tcChannel, isXmit)			//	...and GetSDITransmitEnable succeeds...
+			&& isXmit)													//	...and the SDI timecode source is set to "transmit"...
+			{
+				mDevice.SetSDITransmitEnable (tcChannel, false);		//	...then disable transmit mode...
+				AJATime::Sleep (500);									//	...and give the device a dozen frames or so to lock to the input signal
+			}	//	if input SDI connector needs to switch from transmit mode
 
 		// configure for vitc capture (should the driver do this?)
 		mDevice.SetRP188SourceFilter(tcChannel, 0x01);
 
-		const NTV2VideoFormat	tcInputVideoFormat	(mDevice.GetInputVideoFormat (::NTV2TimecodeIndexToInputSource(mConfig.fTimecodeSource)));
+		const NTV2VideoFormat tcInputVideoFormat (mDevice.GetInputVideoFormat (::NTV2TimecodeIndexToInputSource(mConfig.fTimecodeSource)));
 		if (tcInputVideoFormat == NTV2_FORMAT_UNKNOWN)
 			cerr << "## WARNING:  Timecode source '" << ::NTV2TCIndexToString(mConfig.fTimecodeSource, true) << "' has no input signal" << endl;
 		if (!InputSignalHasTimecode ())
@@ -288,7 +267,7 @@ AJAStatus NTV2Burn::SetupVideo (void)
 
 	//	Can the device handle the requested frame buffer pixel format?
 	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
-		{cerr << "## ERROR:  Device doesn't support '" << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, true) << "'" << endl;  return AJA_STATUS_UNSUPPORTED;}
+		{cerr << "## ERROR: " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat) << " unsupported" << endl;  return AJA_STATUS_UNSUPPORTED;}
 
 	//	Set both input and output frame buffers' pixel formats...
 	mDevice.SetFrameBufferFormat (mConfig.fInputChannel, mConfig.fPixelFormat);
@@ -319,12 +298,10 @@ AJAStatus NTV2Burn::SetupVideo (void)
 	if (NTV2_IS_ANALOG_TIMECODE_INDEX(mConfig.fTimecodeSource))
 		mDevice.SetLTCInputEnable (true);	//	Enable analog LTC input (some LTC inputs are shared with reference input)
 
-	//	Get current per-field maximum Anc buffer size...
-	if (!mDevice.GetAncRegionOffsetFromBottom (gAncMaxSizeBytes, NTV2_AncRgn_Field2))
-		gAncMaxSizeBytes = NTV2_ANCSIZE_MAX;
-
 	//	Now that the video is set up, get information about the current frame geometry...
-	mFormatDesc = NTV2FormatDescriptor (mVideoFormat, mConfig.fPixelFormat, NTV2_VANCMODE_OFF);
+	mFormatDesc = NTV2FormatDescriptor (mVideoFormat, mConfig.fPixelFormat);
+	if (mFormatDesc.IsPlanar())
+		{cerr << "## ERROR: This demo doesn't work with planar pixel formats" << endl;  return AJA_STATUS_UNSUPPORTED;}
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetupVideo
@@ -336,7 +313,8 @@ AJAStatus NTV2Burn::SetupAudio (void)
 		return AJA_STATUS_SUCCESS;
 
 	//	Have the audio subsystem capture audio from the designated input source...
-	mDevice.SetAudioSystemInputSource (mAudioSystem, ::NTV2InputSourceToAudioSource(mConfig.fInputSource), ::NTV2InputSourceToEmbeddedAudioInput(mConfig.fInputSource));
+	mDevice.SetAudioSystemInputSource (mAudioSystem, ::NTV2InputSourceToAudioSource(mConfig.fInputSource),
+										::NTV2InputSourceToEmbeddedAudioInput(mConfig.fInputSource));
 
 	//	It's best to use all available audio channels...
 	mDevice.SetNumberAudioChannels (::NTV2DeviceGetMaxAudioChannels(mDeviceID), mAudioSystem);
@@ -369,7 +347,6 @@ AJAStatus NTV2Burn::SetupAudio (void)
 	//	data being played, so loopback must be turned off...
 	//
 	mDevice.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_OFF, mAudioSystem);
-
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetupAudio
@@ -377,26 +354,29 @@ AJAStatus NTV2Burn::SetupAudio (void)
 
 AJAStatus NTV2Burn::SetupHostBuffers (void)
 {
-	if (NTV2_POINTER::DefaultPageSize() != BUFFER_ALIGNMENT)
-	{
-		PLNOTE("Buffer alignment changed from " << xHEX0N(NTV2_POINTER::DefaultPageSize(),8) << " to " << xHEX0N(BUFFER_ALIGNMENT,8));
-		NTV2_POINTER::SetDefaultPageSize(BUFFER_ALIGNMENT);
-	}
+	CNTV2DemoCommon::SetDefaultPageSize();	//	Set host-specific page size
 
 	//	Let my circular buffer know when it's time to quit...
 	mFrameDataRing.SetAbortFlag (&mGlobalQuit);
+
+	//  Determine video buffer size...
+	const ULWord vidBuffSizeBytes (mFormatDesc.GetVideoWriteSize(ULWord(NTV2Buffer::DefaultPageSize())));
+
+	//	Determine per-field max Anc buffer size...
+	ULWord ancBuffSizeBytes (0);
+	if (!mDevice.GetAncRegionOffsetFromBottom (ancBuffSizeBytes, NTV2_AncRgn_Field2))
+		ancBuffSizeBytes = NTV2_ANCSIZE_MAX;
 
 	//	Allocate and add each in-host NTV2FrameData to my mFrameDataRing...
 	mHostBuffers.reserve(CIRCULAR_BUFFER_SIZE);
 	while (mHostBuffers.size() < CIRCULAR_BUFFER_SIZE)
 	{
-		mHostBuffers.push_back(NTV2FrameData());		//	Make a new NTV2FrameData...
-		NTV2FrameData & frameData(mHostBuffers.back());	//	...and get a reference to it
+		mHostBuffers.push_back(NTV2FrameData());			//	Make a new NTV2FrameData...
+		NTV2FrameData & frameData (mHostBuffers.back());	//	...and get a reference to it
 
 		//	Allocate a page-aligned video buffer (if handling video)...
-		const ULWord vidBuffSizeBytes (mFormatDesc.GetVideoWriteSize(ULWord(NTV2_POINTER::DefaultPageSize())));
 		if (!mConfig.fSuppressVideo)
-			if (!frameData.fVideoBuffer.Allocate (vidBuffSizeBytes, BUFFER_PAGE_ALIGNED))
+			if (!frameData.fVideoBuffer.Allocate (vidBuffSizeBytes, /*pageAligned*/true))
 			{
 				BURNFAIL("Failed to allocate " << xHEX0N(vidBuffSizeBytes,8) << "-byte video buffer");
 				return AJA_STATUS_MEMORY;
@@ -408,9 +388,9 @@ AJAStatus NTV2Burn::SetupHostBuffers (void)
 
 		//	Allocate a page-aligned audio buffer (if handling audio)...
 		if (NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem)  &&  mConfig.WithAudio())
-			if (!frameData.fAudioBuffer.Allocate (gAudMaxSizeBytes, BUFFER_PAGE_ALIGNED))
+			if (!frameData.fAudioBuffer.Allocate (NTV2_AUDIOSIZE_MAX, /*pageAligned*/true))
 			{
-				BURNFAIL("Failed to allocate " << xHEX0N(gAudMaxSizeBytes,8) << "-byte audio buffer");
+				BURNFAIL("Failed to allocate " << xHEX0N(NTV2_AUDIOSIZE_MAX,8) << "-byte audio buffer");
 				return AJA_STATUS_MEMORY;
 			}
 		if (frameData.AudioBuffer())
@@ -418,15 +398,15 @@ AJAStatus NTV2Burn::SetupHostBuffers (void)
 
 		if (mConfig.WithAnc())
 		{	//	Allocate page-aligned anc buffers...
-			if (!frameData.fAncBuffer.Allocate(gAncMaxSizeBytes, BUFFER_PAGE_ALIGNED))
+			if (!frameData.fAncBuffer.Allocate (ancBuffSizeBytes, /*pageAligned*/true))
 			{
-				BURNFAIL("Failed to allocate " << xHEX0N(gAncMaxSizeBytes,8) << "-byte anc buffer");
+				BURNFAIL("Failed to allocate " << xHEX0N(ancBuffSizeBytes,8) << "-byte anc buffer");
 				return AJA_STATUS_MEMORY;
 			}
 			if (!::IsProgressivePicture(mVideoFormat))
-				if (!frameData.fAncBuffer2.Allocate(gAncMaxSizeBytes, BUFFER_PAGE_ALIGNED))
+				if (!frameData.fAncBuffer2.Allocate(ancBuffSizeBytes, /*pageAligned*/true))
 				{
-					BURNFAIL("Failed to allocate " << xHEX0N(gAncMaxSizeBytes,8) << "-byte F2 anc buffer");
+					BURNFAIL("Failed to allocate " << xHEX0N(ancBuffSizeBytes,8) << "-byte F2 anc buffer");
 					return AJA_STATUS_MEMORY;
 				}
 		}
@@ -436,7 +416,7 @@ AJAStatus NTV2Burn::SetupHostBuffers (void)
 			frameData.AncBuffer2().Fill(ULWord(0));
 
 		//	Add this NTV2FrameData to the ring...
-		mFrameDataRing.Add (&frameData);
+		mFrameDataRing.Add(&frameData);
 	}	//	for each NTV2FrameData
 
 	return AJA_STATUS_SUCCESS;
@@ -448,14 +428,15 @@ void NTV2Burn::RouteInputSignal (void)
 {
 	const NTV2OutputCrosspointID	inputOutputXpt	(::GetInputSourceOutputXpt(mConfig.fInputSource));
 	const NTV2InputCrosspointID		fbInputXpt		(::GetFrameBufferInputXptFromChannel(mConfig.fInputChannel));
+	const bool						isRGB			(::IsRGBFormat(mConfig.fPixelFormat));
 
-	if (::IsRGBFormat(mConfig.fPixelFormat))
+	if (isRGB)
 	{
 		//	If the frame buffer is configured for RGB pixel format, incoming YUV must be converted.
 		//	This routes the video signal from the input through a color space converter before
 		//	connecting to the RGB frame buffer...
 		const NTV2InputCrosspointID		cscVideoInputXpt	(::GetCSCInputXptFromChannel (mConfig.fInputChannel));
-		const NTV2OutputCrosspointID	cscOutputXpt		(::GetCSCOutputXptFromChannel (mConfig.fInputChannel, false/*isKey*/, true/*isRGB*/));	//	Use CSC's RGB video output
+		const NTV2OutputCrosspointID	cscOutputXpt		(::GetCSCOutputXptFromChannel (mConfig.fInputChannel, false/*isKey*/, true/*isRGB*/));
 
 		mDevice.Connect (cscVideoInputXpt, inputOutputXpt);	//	Connect the CSC's video input to the input spigot's output
 		mDevice.Connect (fbInputXpt, cscOutputXpt);			//	Connect the frame store's input to the CSC's output
@@ -470,9 +451,10 @@ void NTV2Burn::RouteOutputSignal (void)
 {
 	const NTV2InputCrosspointID		outputInputXpt	(::GetOutputDestInputXpt(mOutputDest));
 	const NTV2OutputCrosspointID	fbOutputXpt		(::GetFrameBufferOutputXptFromChannel (mConfig.fOutputChannel, ::IsRGBFormat(mConfig.fPixelFormat)));
+	const bool						isRGB			(::IsRGBFormat(mConfig.fPixelFormat));
 	NTV2OutputCrosspointID			outputXpt		(fbOutputXpt);
 
-	if (::IsRGBFormat(mConfig.fPixelFormat))
+	if (isRGB)
 	{
 		const NTV2OutputCrosspointID	cscVidOutputXpt	(::GetCSCOutputXptFromChannel(mConfig.fOutputChannel));	//	Use CSC's YUV video output
 		const NTV2InputCrosspointID		cscVidInputXpt	(::GetCSCInputXptFromChannel(mConfig.fOutputChannel));
@@ -491,7 +473,7 @@ void NTV2Burn::RouteOutputSignal (void)
 	{
 		//	Route all SDI outputs to the outputXpt...
 		const NTV2Channel	startNum		(NTV2_CHANNEL1);
-		const NTV2Channel	endNum			(NTV2Channel (::NTV2DeviceGetNumVideoChannels (mDeviceID)));
+		const NTV2Channel	endNum			(NTV2Channel(::NTV2DeviceGetNumVideoChannels (mDeviceID)));
 		const NTV2Channel	tcInputChannel	(NTV2_IS_SDI_TIMECODE_INDEX(mConfig.fTimecodeSource) ? ::NTV2TimecodeIndexToChannel(mConfig.fTimecodeSource) : NTV2_CHANNEL_INVALID);
 		NTV2WidgetID		outputWidgetID	(NTV2_WIDGET_INVALID);
 
@@ -522,13 +504,13 @@ void NTV2Burn::RouteOutputSignal (void)
 			mDevice.Connect (NTV2_XptAnalogOutInput, outputXpt);		//	Route the output signal to the Analog output
 		if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtSDIMonOut1))
 			mDevice.Connect (::GetSDIOutputInputXpt (NTV2_CHANNEL5), outputXpt);	//	Route the output signal to the SDI monitor output
-	}
-//	cerr << "## DEBUG:  " << mTCOutputs.size () << " timecode destination(s):  " << mTCOutputs << endl;
+	}	//	if not multiChannel
+	PLDBG(mTCOutputs.size() << " timecode destination(s):  " << mTCOutputs);
 
 }	//	RouteOutputSignal
 
 
-AJAStatus NTV2Burn::Run ()
+AJAStatus NTV2Burn::Run (void)
 {
 	//	Start the playout and capture threads...
 	StartPlayThread();
@@ -557,7 +539,7 @@ void NTV2Burn::PlayThreadStatic (AJAThread * pThread, void * pContext)		//	stati
 {	(void) pThread;
 	//	Grab the NTV2Burn instance pointer from the pContext parameter,
 	//	then call its PlayFrames method...
-	NTV2Burn * pApp(reinterpret_cast<NTV2Burn*>(pContext));
+	NTV2Burn * pApp (reinterpret_cast<NTV2Burn*>(pContext));
 	pApp->PlayFrames();
 
 }	//	PlayThreadStatic
@@ -565,7 +547,7 @@ void NTV2Burn::PlayThreadStatic (AJAThread * pThread, void * pContext)		//	stati
 
 void NTV2Burn::PlayFrames (void)
 {
-	const ULWord			acOptions (AUTOCIRCULATE_WITH_RP188 | (mConfig.fSuppressAnc ? 0 : AUTOCIRCULATE_WITH_ANC));
+	const ULWord			acOptions (AUTOCIRCULATE_WITH_RP188 | (mConfig.WithAnc() ? AUTOCIRCULATE_WITH_ANC : 0));
 	ULWord					goodXfers(0), badXfers(0), starves(0), noRoomWaits(0);
 	AUTOCIRCULATE_TRANSFER	outputXferInfo;
 	AUTOCIRCULATE_STATUS	outputStatus;
@@ -576,13 +558,13 @@ void NTV2Burn::PlayFrames (void)
 	BURNNOTE("Thread started");
 
 	//	Initialize AutoCirculate...
-	if (!mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  mConfig.fOutputFrames.count(),  mAudioSystem,  acOptions,
+	if (!mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel, mConfig.fOutputFrames.count(), mAudioSystem, acOptions,
 											1 /*numChannels*/,  mConfig.fOutputFrames.firstFrame(),  mConfig.fOutputFrames.lastFrame()))
-		{PLFAIL("AutoCirculateInitForOutput failed");  mGlobalQuit = true;}
+		{BURNFAIL("AutoCirculateInitForOutput failed");  mGlobalQuit = true;}
 	else if (!mConfig.WithVideo())
 	{	//	Video suppressed --
 		//	Clear device frame buffers being AutoCirculated (prevent garbage output frames)
-		NTV2_POINTER tmpFrame (mFormatDesc.GetVideoWriteSize());
+		NTV2Buffer tmpFrame (mFormatDesc.GetVideoWriteSize());
 		NTV2TestPatternGen blackPatternGen;
 		blackPatternGen.DrawTestPattern (NTV2_TestPatt_Black, mFormatDesc, tmpFrame);
 		mDevice.AutoCirculateGetStatus (mConfig.fOutputChannel, outputStatus);
@@ -614,6 +596,7 @@ void NTV2Burn::PlayFrames (void)
 
 			//	Tell AutoCirculate to embed this frame's timecode(s) into the SDI output(s)...
 			outputXferInfo.SetOutputTimeCodes(pFrameData->fTimecodes);
+			PLDBG(pFrameData->fTimecodes);
 
 			//	Transfer the frame to the device for eventual playout...
 			if (mDevice.AutoCirculateTransfer (mConfig.fOutputChannel, outputXferInfo))
@@ -636,7 +619,7 @@ void NTV2Burn::PlayFrames (void)
 
 	//	Stop AutoCirculate...
 	mDevice.AutoCirculateStop(mConfig.fOutputChannel);
-	PLNOTE("Thread completed: " << DEC(goodXfers) << " xfers, " << DEC(badXfers) << " failed, "
+	BURNNOTE("Thread completed: " << DEC(goodXfers) << " xfers, " << DEC(badXfers) << " failed, "
 			<< DEC(starves) << " ring starves, " << DEC(noRoomWaits) << " device starves");
 }	//	PlayFrames
 
@@ -686,15 +669,16 @@ void NTV2Burn::CaptureFrames (void)
 	mDevice.AutoCirculateStop(mConfig.fInputChannel);
 
 	//	Initialize AutoCirculate...
-	mDevice.AutoCirculateInitForInput (	mConfig.fInputChannel,			//	primary channel
-										mConfig.fInputFrames.count(),	//	numFrames (zero if specifying range)
-										mAudioSystem,					//	audio system
-										acOptions,						//	flags
-										1,								//	numChannels to gang
-										mConfig.fInputFrames.firstFrame(), mConfig.fInputFrames.lastFrame());
-
-	//	Start AutoCirculate running...
-	mDevice.AutoCirculateStart(mConfig.fInputChannel);
+	if (!mDevice.AutoCirculateInitForInput (mConfig.fInputChannel,			//	channel
+											mConfig.fInputFrames.count(),	//	numFrames (zero if specifying range)
+											mAudioSystem,					//	audio system
+											acOptions,						//	flags
+											1,								//	frameStores to gang
+											mConfig.fInputFrames.firstFrame(), mConfig.fInputFrames.lastFrame()))
+		{BURNFAIL("AutoCirculateInitForInput failed");  mGlobalQuit = true;}
+	else
+		//	Start AutoCirculate running...
+		mDevice.AutoCirculateStart (mConfig.fInputChannel);
 
 	while (!mGlobalQuit)
 	{
@@ -720,23 +704,18 @@ void NTV2Burn::CaptureFrames (void)
 			if (pFrameData->AncBuffer()  ||  pFrameData->AncBuffer2())
 				inputXferInfo.SetAncBuffers (pFrameData->AncBuffer(), pFrameData->AncBufferSize(), pFrameData->AncBuffer2(), pFrameData->AncBuffer2Size());
 
-			//	Transfer the frame from the device into our host AVDataBuffer...
-			if (mDevice.AutoCirculateTransfer (mConfig.fInputChannel, inputXferInfo))
-				goodXfers++;
-			else
-				badXfers++;
+			//	Transfer the frame from the device into our host buffers...
+			if (mDevice.AutoCirculateTransfer (mConfig.fInputChannel, inputXferInfo)) goodXfers++;
+			else badXfers++;
 
 			//	Remember the amount, in bytes, of captured audio & anc data...
-			if (pFrameData->AudioBuffer())
-				pFrameData->fNumAudioBytes = inputXferInfo.GetCapturedAudioByteCount();
-			if (pFrameData->AncBuffer())
-				pFrameData->fNumAncBytes = inputXferInfo.GetCapturedAncByteCount(false/*F1*/);
-			if (pFrameData->AncBuffer2())
-				pFrameData->fNumAnc2Bytes = inputXferInfo.GetCapturedAncByteCount(true/*F2*/);
+			pFrameData->fNumAudioBytes	= pFrameData->AudioBuffer()	? inputXferInfo.GetCapturedAudioByteCount()			: 0;
+			pFrameData->fNumAncBytes	= pFrameData->AncBuffer()	? inputXferInfo.GetCapturedAncByteCount(false/*F1*/): 0;
+			pFrameData->fNumAnc2Bytes	= pFrameData->AncBuffer2()	? inputXferInfo.GetCapturedAncByteCount(true/*F2*/)	: 0;
 
 			//	Get a timecode to use for burn-in...
 			NTV2_RP188	thisFrameTC;
-			inputXferInfo.GetInputTimeCodes (pFrameData->fTimecodes, mConfig.fInputChannel, /*ValidOnly*/ true);
+			inputXferInfo.GetInputTimeCodes (pFrameData->fTimecodes, mConfig.fInputChannel);
 			if (!pFrameData->HasValidTimecode(mConfig.fTimecodeSource))
 			{	//	Invent a timecode (based on frame count)...
 				const	NTV2FrameRate	ntv2FrameRate	(::GetNTV2FrameRateFromVideoFormat (mVideoFormat));
@@ -748,7 +727,7 @@ void NTV2Burn::CaptureFrames (void)
 			string tcStr;
 			tc.GetRP188Str(tcStr);
 
-			//	"Burn" the timecode into the host AVDataBuffer while it's locked for our exclusive access...
+			//	While this NTV2FrameData's buffers are locked, "burn" timecode into the raster...
 			mTCBurner.BurnTimeCode (pFrameData->VideoBuffer(), tcStr.c_str(), yPercent.Next());
 
 			//	Signal that we're done "producing" this frame, making it available for future "consumption"...
@@ -766,8 +745,7 @@ void NTV2Burn::CaptureFrames (void)
 
 	//	Stop AutoCirculate...
 	mDevice.AutoCirculateStop (mConfig.fInputChannel);
-	BURNNOTE("Thread completed, will exit");
-	CAPNOTE("Thread completed: " << DEC(goodXfers) << " xfers, " << DEC(badXfers) << " failed, "
+	BURNNOTE("Thread completed: " << DEC(goodXfers) << " xfers, " << DEC(badXfers) << " failed, "
 			<< DEC(ringFulls) << " ring full(s), " << DEC(devWaits) << " device waits");
 
 }	//	CaptureFrames
@@ -823,23 +801,3 @@ bool NTV2Burn::AnalogLTCInputHasTimecode (void)
 	return result;
 
 }	//	AnalogLTCInputHasTimecode
-
-AJALabelValuePairs BurnConfig::Get (const bool inCompact) const
-{
-	AJALabelValuePairs result;
-	AJASystemInfo::append(result, "NTV2Burn Config");
-	AJASystemInfo::append(result, "Device Specifier",	fDeviceSpec);
-	AJASystemInfo::append(result, "Input Channel",		::NTV2ChannelToString(fInputChannel, inCompact));
-	AJASystemInfo::append(result, "Output Channel",		::NTV2ChannelToString(fOutputChannel, inCompact));
-	AJASystemInfo::append(result, "Input Source",		::NTV2InputSourceToString(fInputSource, inCompact));
-	if (WithTimecode())
-		AJASystemInfo::append(result, "Timecode Source",	::NTV2TCIndexToString(fTimecodeSource, inCompact));
-	AJASystemInfo::append(result, "Pixel Format",		::NTV2FrameBufferFormatToString(fPixelFormat, inCompact));
-	AJASystemInfo::append(result, "AC Input Frames",	fInputFrames.toString());
-	AJASystemInfo::append(result, "AC Output Frames",	fOutputFrames.toString());
-	AJASystemInfo::append(result, "Transfer Video",		WithVideo() ? "Y" : "N");
-	AJASystemInfo::append(result, "Transfer Audio",		WithAudio() ? "Y" : "N");
-	AJASystemInfo::append(result, "Transfer Anc",		WithAnc() ? "Y" : "N");
-	AJASystemInfo::append(result, "MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
-	return result;
-}

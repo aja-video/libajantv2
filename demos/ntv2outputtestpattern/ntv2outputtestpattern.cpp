@@ -9,12 +9,8 @@
 //	Includes
 #include "ntv2outputtestpattern.h"
 #include "ntv2devicescanner.h"
-#include "ntv2democommon.h"	//	Also includes ntv2testpatterngen.h
+#include "ntv2testpatterngen.h"
 #include "ajabase/system/process.h"
-#include "ajabase/common/options_popt.h"
-#include <signal.h>
-#include <iostream>
-#include <iomanip>
 
 #define	AsULWordPtr(_p_)	reinterpret_cast<const ULWord*>	(_p_)
 
@@ -25,21 +21,24 @@ using namespace std;
 const uint32_t	kAppSignature	(NTV2_FOURCC('T','e','s','t'));
 
 
-NTV2OutputTestPattern::NTV2OutputTestPattern (	const std::string &		inDeviceSpecifier,
-												const std::string &		inTestPatternSpec,
-												const NTV2VideoFormat	inVideoFormat,
-												const NTV2PixelFormat	inPixelFormat,
-												const NTV2Channel		inChannel,
-												const NTV2VANCMode		inVancMode)
-	:	mDeviceID			(DEVICE_ID_NOTFOUND),
-		mDeviceSpecifier	(inDeviceSpecifier),
-		mTestPatternSpec	(inTestPatternSpec.empty() ? "100% ColorBars" : inTestPatternSpec),
-		mOutputChannel		(inChannel),
-		mPixelFormat		(inPixelFormat),
-		mVideoFormat		(inVideoFormat),
+AJALabelValuePairs TestPatConfig::Get (const bool inCompact) const
+{
+	AJALabelValuePairs result (PlayerConfig::Get (inCompact));
+	AJASystemInfo::append(result, "Background Pattern",	fTestPatternName);
+	return result;
+}
+
+std::ostream & operator << (std::ostream & ioStrm,  const TestPatConfig & inObj)
+{
+	return ioStrm << AJASystemInfo::ToString(inObj.Get());
+}
+
+
+NTV2OutputTestPattern::NTV2OutputTestPattern (const TestPatConfig & inConfig)
+	:	mConfig				(inConfig),
+		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mSavedTaskMode		(NTV2_TASK_MODE_INVALID),
-		mSavedConnections	(),
-		mVancMode			(inVancMode)
+		mSavedConnections	()
 {
 }	//	constructor
 
@@ -58,62 +57,52 @@ NTV2OutputTestPattern::~NTV2OutputTestPattern ()
 
 AJAStatus NTV2OutputTestPattern::Init (void)
 {
-	//	Open the board...
-	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mDeviceSpecifier, mDevice))
-		{cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' not found" << endl;  return AJA_STATUS_OPEN;}
+	//	Open the device...
+	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
+		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
+	mDeviceID = mDevice.GetDeviceID();	//	Keep this ID handy -- it's used frequently
 
     if (!mDevice.IsDeviceReady(false))
-		{cerr << "## ERROR:  Device '" << mDeviceSpecifier << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
+		{cerr << "## ERROR:  Device '" << mDevice.GetDisplayName() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
+	if (!::NTV2DeviceCanDoPlayback(mDeviceID))
+		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
 
-	if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
-	{
-		cerr << "## ERROR:  Unable to acquire device because another app owns it" << endl;
-		return AJA_STATUS_BUSY;		//	Some other app is using the device
+	const UWord maxNumChannels (::NTV2DeviceGetNumFrameStores(mDeviceID));
+
+	if ((mConfig.fOutputChannel == NTV2_CHANNEL1) && (!::NTV2DeviceCanDoFrameStore1Display(mDeviceID)))
+	{	//	Some older devices (e.g. Corvid1) can only output from FrameStore 2...
+		mConfig.fOutputChannel = NTV2_CHANNEL2;
+		cerr << "## WARNING:  '" << mDevice.GetDisplayName() << "' switched to Ch2 (Ch1 is input-only)" << endl;
 	}
-
-	mDeviceID = mDevice.GetDeviceID();				//	Keep this handy, since it will be used frequently
-	mDevice.GetEveryFrameServices(mSavedTaskMode);	//	Save current task mode, so it can be restored later
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);	//	Since this is an OEM demo, so use the OEM tasks mode
-	mDevice.GetConnections(mSavedConnections);		//	Save current routing, so it can be restored later
-
-	if (mVideoFormat != NTV2_FORMAT_UNKNOWN)
+	if (UWord(mConfig.fOutputChannel) >= maxNumChannels)
 	{
-		//	User specified a video format -- is it legal for this device?
-		if (!::NTV2DeviceCanDoVideoFormat(mDeviceID, mVideoFormat))
-		{	cerr << "## ERROR: '" << mDevice.GetDisplayName() << "' cannot do " << ::NTV2VideoFormatToString(mVideoFormat) << endl;
-			return AJA_STATUS_UNSUPPORTED;
-		}
-
-		//	Set the video format -- is it legal for this device?
-		if (!mDevice.SetVideoFormat (mVideoFormat, /*retail?*/false, /*keepVANC*/false, mOutputChannel))
-		{	cerr << "## ERROR: SetVideoFormat '" << ::NTV2VideoFormatToString(mVideoFormat) << "' failed" << endl;
-			return AJA_STATUS_FAIL;
-		}
-
-		//	Set the VANC mode
-		if (!mDevice.SetEnableVANCData (NTV2_IS_VANCMODE_ON(mVancMode), NTV2_IS_VANCMODE_TALLER(mVancMode), mOutputChannel))
-		{	cerr << "## ERROR: SetEnableVANCData '" << ::NTV2VANCModeToString(mVancMode,true) << "' failed" << endl;
-			return AJA_STATUS_FAIL;
-		}
-	}
-	else
-	{
-		//	User didn't specify a video format.
-		//  Get the device's current video format and use it to create the test pattern...
-		if (!mDevice.GetVideoFormat (mVideoFormat, mOutputChannel))
-			return AJA_STATUS_FAIL;
-
-		//  Read the current VANC mode, as this can affect the NTV2FormatDescriptor and host frame buffer size...
-		if (!mDevice.GetVANCMode (mVancMode, mOutputChannel))
-			return AJA_STATUS_FAIL;
-	}
-
-	//	SD/HD/2K only -- no 4K or 8K...
-	if (NTV2_IS_4K_VIDEO_FORMAT(mVideoFormat) ||  NTV2_IS_8K_VIDEO_FORMAT(mVideoFormat))
-	{	cerr << "## ERROR: This demo only supports SD/HD/2K1080, not '" << ::NTV2VideoFormatToString(mVideoFormat) << "'" << endl;
+		cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' can't use Ch" << DEC(mConfig.fOutputChannel+1)
+				<< " -- only supports Ch1" << (maxNumChannels > 1  ?  string("-Ch") + string(1, char(maxNumChannels+'0'))  :  "") << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
 
+	if (!mConfig.fDoMultiFormat)
+	{
+		mDevice.GetConnections(mSavedConnections);		//	Save current routing, so it can be restored later
+		mDevice.GetEveryFrameServices(mSavedTaskMode);	//	Save the current task mode
+		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
+			return AJA_STATUS_BUSY;		//	Device is in use by another app -- fail
+	}
+	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Set OEM service level
+
+	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
+		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
+	else
+		mConfig.fDoMultiFormat = false;
+
+	//  Set up the desired video configuration...
+	AJAStatus status (SetUpVideo());
+	if (AJA_FAILURE(status))
+		return status;
+
+	#if defined(_DEBUG)
+		cerr << mConfig << endl;
+	#endif	//	defined(_DEBUG)
 	return AJA_STATUS_SUCCESS;
 
 }	//	Init
@@ -121,24 +110,66 @@ AJAStatus NTV2OutputTestPattern::Init (void)
 
 AJAStatus NTV2OutputTestPattern::SetUpVideo (void)
 {
+ 	if (mConfig.fVideoFormat == NTV2_FORMAT_UNKNOWN)
+	{
+		//	User didn't specify a video format.
+		//  Get the device's current video format and use it to create the test pattern...
+		bool enabled(false);
+		mDevice.IsChannelEnabled(mConfig.fOutputChannel, enabled);
+		if (!enabled)
+		if (!mDevice.GetVideoFormat (mConfig.fVideoFormat, mConfig.fOutputChannel))
+			return AJA_STATUS_FAIL;
+
+		//  Read the current VANC mode, as this can affect the NTV2FormatDescriptor and host frame buffer size...
+		if (!mDevice.GetVANCMode (mConfig.fVancMode, mConfig.fOutputChannel))
+			return AJA_STATUS_FAIL;
+	}
+
+	if (mConfig.fVideoFormat != NTV2_FORMAT_UNKNOWN)
+	{
+		//	User specified a video format -- is it legal for this device?
+		if (!::NTV2DeviceCanDoVideoFormat(mDeviceID, mConfig.fVideoFormat))
+		{	cerr << "## ERROR: '" << mDevice.GetDisplayName() << "' cannot do " << ::NTV2VideoFormatToString(mConfig.fVideoFormat) << endl;
+			return AJA_STATUS_UNSUPPORTED;
+		}
+
+		//	Set the video format -- is it legal for this device?
+		if (!mDevice.SetVideoFormat (mConfig.fVideoFormat, /*retail?*/false, /*keepVANC*/false, mConfig.fOutputChannel))
+		{	cerr << "## ERROR: SetVideoFormat '" << ::NTV2VideoFormatToString(mConfig.fVideoFormat) << "' failed" << endl;
+			return AJA_STATUS_FAIL;
+		}
+
+		//	Set the VANC mode
+		if (!mDevice.SetEnableVANCData (NTV2_IS_VANCMODE_ON(mConfig.fVancMode), NTV2_IS_VANCMODE_TALLER(mConfig.fVancMode), mConfig.fOutputChannel))
+		{	cerr << "## ERROR: SetEnableVANCData '" << ::NTV2VANCModeToString(mConfig.fVancMode,true) << "' failed" << endl;
+			return AJA_STATUS_FAIL;
+		}
+	}
+
+	//	SD/HD/2K only -- no 4K or 8K...
+	if (NTV2_IS_4K_VIDEO_FORMAT(mConfig.fVideoFormat) ||  NTV2_IS_8K_VIDEO_FORMAT(mConfig.fVideoFormat))
+	{	cerr << "## ERROR: This demo only supports SD/HD/2K1080, not '" << ::NTV2VideoFormatToString(mConfig.fVideoFormat) << "'" << endl;
+		return AJA_STATUS_UNSUPPORTED;
+	}
+
 	//	This is a "playback" application, so set the board reference to free run...
 	if (!mDevice.SetReference(NTV2_REFERENCE_FREERUN))
 		return AJA_STATUS_FAIL;
 
 	//	Set the FrameStore's pixel format...
-	if (!mDevice.SetFrameBufferFormat (mOutputChannel, mPixelFormat))
+	if (!mDevice.SetFrameBufferFormat (mConfig.fOutputChannel, mConfig.fPixelFormat))
 		return AJA_STATUS_FAIL;
 
 	//	Enable the FrameStore (if currently disabled)...
-	mDevice.EnableChannel(mOutputChannel);
+	mDevice.EnableChannel(mConfig.fOutputChannel);
 
 	//	Set the FrameStore mode to "playout" (not capture)...
-	if (!mDevice.SetMode (mOutputChannel, NTV2_MODE_DISPLAY))
+	if (!mDevice.SetMode (mConfig.fOutputChannel, NTV2_MODE_DISPLAY))
 		return AJA_STATUS_FAIL;
 
 	//	Enable SDI output from the channel being used, but only if the device supports bi-directional SDI...
 	if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID))
-		mDevice.SetSDITransmitEnable (mOutputChannel, true);
+		mDevice.SetSDITransmitEnable (mConfig.fOutputChannel, true);
 
 	return AJA_STATUS_SUCCESS;
 
@@ -152,18 +183,18 @@ void NTV2OutputTestPattern::RouteOutputSignal (void)
 	//	Build a set of crosspoint connections (input-to-output)
 	//	between the relevant signal processing widgets on the device.
 	//	By default, the main output crosspoint that feeds the SDI output widgets is the FrameStore's video output:
-	NTV2OutputXptID		outputXpt (::GetFrameBufferOutputXptFromChannel(mOutputChannel, ::IsRGBFormat(mPixelFormat)));
-	if (::IsRGBFormat(mPixelFormat))
+	NTV2OutputXptID	outputXpt (::GetFrameBufferOutputXptFromChannel(mConfig.fOutputChannel, ::IsRGBFormat(mConfig.fPixelFormat)));
+	if (::IsRGBFormat(mConfig.fPixelFormat))
 	{	//	Even though this demo defaults to using an 8-bit YUV frame buffer,
 		//	this code block allows it to work with RGB frame buffers, which
 		//	necessitate inserting a CSC between the FrameStore and the SDI output(s)...
-		connections.insert(NTV2Connection(::GetCSCInputXptFromChannel(mOutputChannel), outputXpt));	//	CSC video input to FrameStore output
-		outputXpt = ::GetCSCOutputXptFromChannel(mOutputChannel);	//	The CSC output feeds all SDIOut inputs
+		connections.insert(NTV2Connection(::GetCSCInputXptFromChannel(mConfig.fOutputChannel), outputXpt));	//	CSC video input to FrameStore output
+		outputXpt = ::GetCSCOutputXptFromChannel(mConfig.fOutputChannel);	//	The CSC output feeds all SDIOut inputs
 	}
 
 	//	Route all SDI outputs to the outputXpt...
 	const NTV2ChannelSet	sdiOutputs	(::NTV2MakeChannelSet(NTV2_CHANNEL1, ::NTV2DeviceGetNumVideoOutputs(mDeviceID)));
-	const NTV2Standard		videoStd	(::GetNTV2StandardFromVideoFormat(mVideoFormat));
+	const NTV2Standard		videoStd	(::GetNTV2StandardFromVideoFormat(mConfig.fVideoFormat));
 	const NTV2ChannelList	sdiOuts		(::NTV2MakeChannelList(sdiOutputs));
 
 	//	Some devices have bi-directional SDI connectors...
@@ -198,29 +229,24 @@ void NTV2OutputTestPattern::RouteOutputSignal (void)
 
 AJAStatus NTV2OutputTestPattern::EmitPattern (void)
 {
-	//  Set up the desired video configuration...
-	AJAStatus status (SetUpVideo());
-	if (AJA_FAILURE(status))
-		return status;
-
 	//  Connect the FrameStore to the video output...
 	RouteOutputSignal();
 
 	//	Allocate a host video buffer that will hold our test pattern raster...
-	NTV2FormatDescriptor fd	(mVideoFormat, mPixelFormat, mVancMode);
-	NTV2_POINTER hostBuffer (fd.GetTotalBytes());
+	NTV2FormatDescriptor fd	(mConfig.fVideoFormat, mConfig.fPixelFormat, mConfig.fVancMode);
+	NTV2Buffer hostBuffer (fd.GetTotalBytes());
 	if (hostBuffer.IsNULL())
 		return AJA_STATUS_MEMORY;
 
 	//	Write the requested test pattern into host buffer...
 	NTV2TestPatternGen	testPatternGen;
 	testPatternGen.setVANCToLegalBlack(fd.IsVANC());
-	if (!testPatternGen.DrawTestPattern (mTestPatternSpec,	fd,	hostBuffer))
+	if (!testPatternGen.DrawTestPattern (mConfig.fTestPatternName,	fd,	hostBuffer))
 		return AJA_STATUS_FAIL;
 
 	//	Find out which frame is currently being output from the frame store...
 	uint32_t currentOutputFrame(0);
-	if (!mDevice.GetOutputFrame (mOutputChannel, currentOutputFrame))
+	if (!mDevice.GetOutputFrame (mConfig.fOutputChannel, currentOutputFrame))
 		return AJA_STATUS_FAIL;	//	ReadRegister failure?
 
 	//	Now simply transfer the contents of the host buffer to the device's current output frame...

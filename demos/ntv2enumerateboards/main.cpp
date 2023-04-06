@@ -1,104 +1,112 @@
 /* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2enumerateboards/main.cpp
-	@brief		Demonstration application to enumerate the AJA devices for the host system.
-				Shows two ways of dynamically getting a device's features.
+	@brief		Demonstration application to enumerate the AJA devices for the host system,
+				printing information about each device.
 	@copyright	(C) 2012-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
 
 //	Includes
-#include "ajatypes.h"
-#include "ntv2devicefeatures.h"
+#include "ntv2democommon.h"
 #include "ntv2devicescanner.h"
-#include "ntv2utils.h"
-#include "ntv2enumerateboards.h"
-#include "ajabase/system/debug.h"
-#include <iostream>
-#include <iomanip>
-#include "ntv2testpatterngen.h"
-#include "ntv2bft.h"
 
 
 using namespace std;
 
 
+/**
+	@brief	Prints a variety of information about the given device.
+	@param[in]	inCard	The CNTV2Card instance for the device of interest.
+**/
+static int ShowDeviceInfo (CNTV2Card & inCard)
+{
+	//	Get detailed device information...
+	const NTV2DeviceID deviceID (inCard.GetDeviceID());
+	NTV2VideoFormatSet videoFormats;
+	NTV2FrameBufferFormatSet pixelFormats;
+	string serial;
+
+			//	Print the display name...
+	cout	<< "Device '" << inCard.GetDisplayName() << "'" << endl
+
+			//	Print device ID and serial number...
+			<< "\t" << "Device ID: " << xHEX0N(deviceID,8) << endl
+			<< "\t" << "Serial Number: '" << (inCard.GetSerialNumberString(serial) ? serial : serial) << "'" << endl
+
+			//	Print additional info gleaned from the device features API...
+			<< "\t" << ::NTV2DeviceGetNumVideoInputs(deviceID) << " SDI Input(s)" << endl
+			<< "\t" << ::NTV2DeviceGetNumVideoOutputs(deviceID) << " SDI Output(s)" << endl
+			<< "\t" << ::NTV2DeviceGetNumHDMIVideoInputs(deviceID) << " HDMI Input(s)" << endl
+			<< "\t" << ::NTV2DeviceGetNumHDMIVideoOutputs(deviceID) << " HDMI Output(s)" << endl
+			<< "\t" << ::NTV2DeviceGetNumAnalogVideoInputs(deviceID) << " Analog Input(s)" << endl
+			<< "\t" << ::NTV2DeviceGetNumAnalogVideoOutputs(deviceID) << " Analog Output(s)" << endl
+			<< "\t" << ::NTV2DeviceGetNumEmbeddedAudioInputChannels(deviceID) << " channel(s) of Embedded Audio Input" << endl
+			<< "\t" << ::NTV2DeviceGetNumEmbeddedAudioOutputChannels(deviceID) << " channel(s) of Embedded Audio Output" << endl;
+
+	//	Show its video and pixel format capabilities:
+	inCard.GetSupportedVideoFormats(videoFormats);
+	NTV2DeviceGetSupportedPixelFormats (deviceID, pixelFormats);
+	cout	<< "\t" << videoFormats << endl
+			<< "\t" << pixelFormats << endl;
+	return 0;
+}
+
+
 //	Main Program
 
 int main (int argc, const char ** argv)
-{
-	(void) argc;
-	(void) argv;
+{	(void)argc;	(void)argv;
+	int		showVersion	(0);
+	char *	pDeviceSpec	(AJA_NULL);
 	AJADebug::Open();
 
-	//	Create an instance of a class that can scan the hardware for AJA devices...
-	NTV2EnumerateDevices	deviceEnumerator;
-	const size_t			deviceCount	(deviceEnumerator.GetDeviceCount ());
+	//	Command line option descriptions:
+	const struct poptOption optionsTable [] =
+	{
+		{"version",	  0,	POPT_ARG_NONE,		&showVersion,	0,	"show version",		AJA_NULL					},
+		{"device",	'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"device to use",	"index#, serial#, or model"	},
+		POPT_AUTOHELP
+		POPT_TABLEEND
+	};
+	CNTV2DemoCommon::Popt popt(argc, argv, optionsTable);
+	if (!popt)
+		{cerr << "## ERROR: " << popt.errorStr() << endl;  return 2;}
+	if (!popt.otherArgs().empty())
+		{cerr << "## ERROR: Unexpected argument(s): " << popt.otherArgs() << endl;  return 2;}
+	if (showVersion)
+		{cout << argv[0] << ", NTV2 SDK " << ::NTV2Version() << endl;  return 0;}
 
-	#if defined (AJA_NTV2_SDK_VERSION_MAJOR)
-		cout	<< "AJA NTV2 SDK version " << DEC(AJA_NTV2_SDK_VERSION_MAJOR) << "." << DEC(AJA_NTV2_SDK_VERSION_MINOR)
-				<< "." << DEC(AJA_NTV2_SDK_VERSION_POINT) << " (" << xHEX0N(AJA_NTV2_SDK_VERSION,8)
-				<< ") build " << DEC(AJA_NTV2_SDK_BUILD_NUMBER) << " built on " << AJA_NTV2_SDK_BUILD_DATETIME << endl;
-		cout << "Devices supported:  " << ::NTV2GetSupportedDevices() << endl;
-	#else
-		cout	<< "Unknown AJA NTV2 SDK version" << endl;
-	#endif
+	//	Device
+	CNTV2Card device;
+	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "");
+	if (!deviceSpec.empty())
+	{
+		if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
+			return 0;
+		else if (CNTV2DeviceScanner::GetFirstDeviceFromArgument(deviceSpec, device))
+			return ShowDeviceInfo(device);	//	Show info for a single device
+		else
+			{cerr << "## ERROR: Failed to open '" << deviceSpec << "'";  return 2;}
+	}	//	if -d option used
+
+	//	Discover the AJA device(s) on the local host...
+	CNTV2DeviceScanner scanner;
+	const size_t deviceCount (scanner.GetNumDevices());
+
+	cout << "AJA NTV2 SDK " << ::NTV2Version() << " supports devices:  " << ::NTV2GetSupportedDevices() << endl;
 
 	//	Print the results of the scan...
 	if (deviceCount)
 	{
-		cout << deviceCount << " AJA device(s) found:" << endl;
-
-		for (uint32_t deviceIndex(0);  deviceIndex < uint32_t(deviceCount);  deviceIndex++)
+		cout << deviceCount << " AJA device(s) found" << endl;
+		uint32_t deviceIndex(0);
+		while (CNTV2DeviceScanner::GetDeviceAtIndex(deviceIndex, device))
 		{
-			//	Get detailed device information...
-			CNTV2Card	ntv2Card;
-			if (!CNTV2DeviceScanner::GetDeviceAtIndex(deviceIndex, ntv2Card))
-				break;	//	No more devices
-
-			const NTV2DeviceID	deviceID	(ntv2Card.GetDeviceID());
-
-			//	Print the device number and display name...
-			cout	<< "AJA device " << deviceIndex << " is called '" << ntv2Card.GetDisplayName() << "'" << endl;
-
-			//	The device features API can tell you everything you need to know about the device...
-			cout	<< endl
-					<< "This device has a deviceID of " << xHEX0N(deviceID,8) << endl;
-
-			cout	<< "This device has " << ::NTV2DeviceGetNumVideoInputs(deviceID) << " SDI Input(s)" << endl
-					<< "This device has " << ::NTV2DeviceGetNumVideoOutputs(deviceID) << " SDI Output(s)" << endl;
-
-			cout	<< "This device has " << ::NTV2DeviceGetNumHDMIVideoInputs(deviceID) << " HDMI Input(s)" << endl
-					<< "This device has " << ::NTV2DeviceGetNumHDMIVideoOutputs(deviceID) << " HDMI Output(s)" << endl;
-
-			cout	<< "This device has " << ::NTV2DeviceGetNumAnalogVideoInputs(deviceID) << " Analog Input(s)" << endl
-					<< "This device has " << ::NTV2DeviceGetNumAnalogVideoOutputs(deviceID) << " Analog Output(s)" << endl;
-
-			cout	<< "This device has " << ::NTV2DeviceGetNumUpConverters(deviceID) << " Up-Converter(s)" << endl
-					<< "This device has " << ::NTV2DeviceGetNumDownConverters(deviceID) << " Down-Converter(s)" << endl;
-
-			cout	<< "This device has " << ::NTV2DeviceGetNumEmbeddedAudioInputChannels(deviceID) << " Channel(s) of Embedded Audio Input" << endl
-					<< "This device has " << ::NTV2DeviceGetNumEmbeddedAudioOutputChannels(deviceID) << " Channel(s) of Embedded Audio Output" << endl;
-
-			//	What video formats does it support?
-			NTV2VideoFormatSet	videoFormats;
-			ntv2Card.GetSupportedVideoFormats(videoFormats);
-			cout << endl << videoFormats << endl;
-
-			#if defined (AJA_NTV2_SDK_VERSION_AT_LEAST)
-				#if AJA_NTV2_SDK_VERSION_AT_LEAST (12, 0)
-					if (::NTV2DeviceCanDoMultiFormat(deviceID))
-						cout	<< "This device can handle different signal formats on each input/output" << endl;
-				#endif
-				#if AJA_NTV2_SDK_VERSION_AT_LEAST (11, 4)
-					cout << "This device " << (::NTV2DeviceCanDoAudioDelay(deviceID) ? "can" : "cannot") << " delay audio" << endl;
-				#else
-					cout << "This SDK does not support the NTV2DeviceCanDoAudioDelay function call" << endl;
-				#endif
-			#endif	//	AJA_NTV2_SDK_VERSION_AT_LEAST
-
-			ntv2Card.Close();
-			cout << endl << endl << endl;
+			if (deviceIndex)
+				cout << endl << endl << endl;
+			ShowDeviceInfo(device);
+			deviceIndex++;
 		}	//	for each device
 	}	//	if deviceCount > 0
 	else

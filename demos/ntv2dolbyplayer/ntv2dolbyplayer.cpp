@@ -10,11 +10,11 @@
 #include "ntv2formatdescriptor.h"
 #include "ntv2debug.h"
 #include "ntv2testpatterngen.h"
+#include "ntv2devicescanner.h"
 #include "ajabase/system/debug.h"
-#include "ajabase/common/timecode.h"
-#include "ajabase/system/memory.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/system/process.h"
+#include "ajabase/common/timebase.h"
 
 using namespace std;
 
@@ -56,6 +56,7 @@ NTV2DolbyPlayer::NTV2DolbyPlayer (const string &				inDeviceSpecifier,
 								  const NTV2FrameBufferFormat	inPixelFormat,
                                   const NTV2VideoFormat         inVideoFormat,
                                   const bool					inDoMultiChannel,
+								  const bool					inDoRamp,
                                   AJAFileIO *                   inDolbyFile)
 
 	:	mConsumerThread				(AJA_NULL),
@@ -63,6 +64,7 @@ NTV2DolbyPlayer::NTV2DolbyPlayer (const string &				inDeviceSpecifier,
 		mCurrentFrame				(0),
 		mCurrentSample				(0),
 		mToneFrequency				(440.0),
+		mRampSample					(0),
 		mDeviceSpecifier			(inDeviceSpecifier),
 		mDeviceID					(DEVICE_ID_NOTFOUND),
         mOutputChannel              (inChannel),
@@ -74,6 +76,7 @@ NTV2DolbyPlayer::NTV2DolbyPlayer (const string &				inDeviceSpecifier,
 		mWithAudio					(inWithAudio),
 		mGlobalQuit					(false),
 		mDoMultiChannel				(inDoMultiChannel),
+		mDoRamp						(inDoRamp),
 		mVideoBufferSize			(0),
 		mAudioBufferSize			(0),
 		mTestPatternVideoBuffers	(AJA_NULL),
@@ -562,9 +565,16 @@ void NTV2DolbyPlayer::ProduceFrames (void)
 
 		//	Generate audio tone data...
         if (mDolbyFile != NULL)
+		{
             frameData->fAudioBufferSize		= mWithAudio ? AddDolby(frameData->fAudioBuffer) : 0;
+		}
         else
-            frameData->fAudioBufferSize		= mWithAudio ? AddTone(frameData->fAudioBuffer) : 0;
+		{
+			if (mDoRamp)
+				frameData->fAudioBufferSize		= mWithAudio ? AddRamp(frameData->fAudioBuffer) : 0;
+			else
+				frameData->fAudioBufferSize		= mWithAudio ? AddTone(frameData->fAudioBuffer) : 0;
+		}
 
 		//	Every few seconds, change the test pattern and tone frequency...
 		const double	currentTime	(timeBase.FramesToSeconds(mCurrentFrame));
@@ -631,6 +641,35 @@ uint32_t NTV2DolbyPlayer::AddTone (ULWord * pInAudioBuffer)
 							false,				//	don't byte swap
 							numChannels);		//	number of audio channels to generate
 }	//	AddTone
+
+uint32_t NTV2DolbyPlayer::AddRamp (ULWord * pInAudioBuffer)
+{
+	ULWord*			audioBuffer	(pInAudioBuffer);
+	NTV2FrameRate	frameRate	(NTV2_FRAMERATE_INVALID);
+	NTV2AudioRate	audioRate	(NTV2_AUDIO_RATE_INVALID);
+	ULWord			numChannels	(0);
+
+	mDevice.GetFrameRate (frameRate, mOutputChannel);
+	mDevice.GetAudioRate (audioRate, mAudioSystem);
+	mDevice.GetNumberAudioChannels (numChannels, mAudioSystem);
+
+	//	Because audio on AJA devices use fixed sample rates (typically 48KHz), certain video frame rates will necessarily
+	//	result in some frames having more audio samples than others. The GetAudioSamplesPerFrame function
+	//	is used to calculate the correct sample count...
+	const ULWord	numSamples		(::GetAudioSamplesPerFrame (frameRate, audioRate, mCurrentFrame));
+
+	for (uint32_t i = 0; i < numSamples; i++)
+	{
+		for (uint32_t j = 0; j < numChannels; j++)
+		{
+			*audioBuffer = ((uint32_t)mRampSample) << 16;
+			audioBuffer++;
+			mRampSample++;
+		}
+	}
+
+	return numSamples * numChannels * 4;
+}	//	AddRamp
 
 #ifdef DOLBY_FULL_PARSER
 

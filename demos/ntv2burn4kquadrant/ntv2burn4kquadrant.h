@@ -8,21 +8,21 @@
 #ifndef _NTV2BURN4KQUADRANT_H
 #define _NTV2BURN4KQUADRANT_H
 
-#include "ntv2enums.h"
-#include "ntv2devicefeatures.h"
-#include "ntv2devicescanner.h"
+#include "ntv2card.h"
+//#include "ntv2devicefeatures.h"
+//#include "ntv2devicescanner.h"
 #include "ntv2democommon.h"
-#include "ntv2task.h"
-#include "ntv2utils.h"
-#include "ntv2rp188.h"
-#include "ajabase/common/types.h"
-#include "ajabase/common/videotypes.h"
-#include "ajabase/common/timecode.h"
+//#include "ntv2task.h"
+//#include "ntv2utils.h"
+//#include "ntv2rp188.h"
+//#include "ajabase/common/types.h"
+//#include "ajabase/common/videotypes.h"
+//#include "ajabase/common/timecode.h"
 #include "ajabase/common/timecodeburn.h"
 #include "ajabase/common/circularbuffer.h"
 #include "ajabase/system/thread.h"
-#include "ajabase/system/process.h"
-#include "ajabase/system/systemtime.h"
+//#include "ajabase/system/process.h"
+//#include "ajabase/system/systemtime.h"
 
 
 /**
@@ -36,22 +36,10 @@ class NTV2Burn4KQuadrant
 	public:
 		/**
 			@brief	Constructs me using the given configuration settings.
+			@param[in]	inConfig		Specifies the configuration parameters.
 			@note	I'm not completely initialized and ready for use until after my Init method has been called.
-			@param[in]	inInputDeviceSpec	Specifies the zero-based index number of the AJA device to use as input.
-											Defaults to zero, the first device found.
-			@param[in]	inOutputDeviceSpec	Specifies the zero-based index number of the AJA device to use as output.
-											Defaults to one, the second device found.
-			@param[in]	inWithAudio			If true, include audio in the output signal;  otherwise, omit it.
-											Defaults to "true".
-			@param[in]	inPixelFormat		Specifies the pixel format to use for the device's frame buffers.
-											Defaults to 8-bit YUV.
-			@param[in]	inTCIndex			Specifies the timecode source. Defaults to whatever is found embedded in the input video.
 		**/
-							NTV2Burn4KQuadrant (const std::string &			inInputDeviceSpec	= "0",
-												const std::string &			inOutputDeviceSpec	= "1",
-												const bool					inWithAudio			= true,
-												const NTV2FrameBufferFormat	inPixelFormat		= NTV2_FBF_8BIT_YCBCR,
-												const NTV2TCIndex			inTCIndex			= NTV2_TCINDEX_SDI1);
+							NTV2Burn4KQuadrant (const BurnConfig & inConfig);
 		virtual				~NTV2Burn4KQuadrant ();
 
 		/**
@@ -113,7 +101,7 @@ class NTV2Burn4KQuadrant
 		/**
 			@brief	Sets up my circular buffers.
 		**/
-		virtual void		SetupHostBuffers (void);
+		virtual AJAStatus	SetupHostBuffers (void);
 
 		/**
 			@brief	Starts my playout thread.
@@ -171,34 +159,26 @@ class NTV2Burn4KQuadrant
 
 	//	Private Member Data
 	private:
-		AJAThread					mPlayThread;			///< @brief	My playout thread object
-		AJAThread					mCaptureThread;			///< @brief	My capture thread object
-		CNTV2Card					mInputDevice;			///< @brief	My CNTV2Card input instance
-		CNTV2Card					mOutputDevice;			///< @brief	My CNTV2Card output instance
-		bool						mSingleDevice;			///< @brief	Using single 8-channel device (4K I/O on one device)?
-		NTV2DeviceID				mInputDeviceID;			///< @brief	My device identifier
-		NTV2DeviceID				mOutputDeviceID;		///< @brief	My device identifier
-		std::string					mInputDeviceSpecifier;	///< @brief	Specifies the input device I should use
-		std::string					mOutputDeviceSpecifier;	///< @brief	Specifies the output device I should use
-		bool						mWithAudio;				///< @brief	Capture and playout audio?
-		NTV2Channel					mInputChannel;			///< @brief	The channel I'm using
-		NTV2Channel					mOutputChannel;			///< @brief	The channel I'm using
-		NTV2TCIndex					mTimecodeIndex;			///< @brief	The time code of interest
-		NTV2VideoFormat				mVideoFormat;			///< @brief	My video format
-		NTV2FrameBufferFormat		mPixelFormat;			///< @brief	My pixel format
-		NTV2EveryFrameTaskMode		mInputSavedTaskMode;	///< @brief	For restoring the input device's prior task mode
-		NTV2EveryFrameTaskMode		mOutputSavedTaskMode;	///< @brief	For restoring the output device's prior task mode
-		NTV2VANCMode				mVancMode;				///< @brief	VANC mode
-		NTV2AudioSystem				mInputAudioSystem;		///< @brief	The input audio system I'm using
-		NTV2AudioSystem				mOutputAudioSystem;		///< @brief	The output audio system I'm using
-		bool						mGlobalQuit;			///< @brief	Set "true" to gracefully stop
-		AJATimeCodeBurn				mTCBurner;				///< @brief	My timecode burner
-		uint32_t					mQueueSize;				///< @brief	My queue size
-		uint32_t					mVideoBufferSize;		///< @brief	My video buffer size, in bytes
-		uint32_t					mAudioBufferSize;		///< @brief	My audio buffer size, in bytes
-
-		AVDataBuffer						mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
-		AJACircularBuffer <AVDataBuffer *>	mAVCircularBuffer;						///< @brief	My ring buffer
+		typedef AJACircularBuffer<NTV2FrameData*>	CircularBuffer;
+		BurnConfig			mConfig;				///< @brief	My configuration info
+		AJAThread			mPlayThread;			///< @brief	My playout thread object
+		AJAThread			mCaptureThread;			///< @brief	My capture thread object
+		CNTV2Card			mInputDevice;			///< @brief	My CNTV2Card input instance
+		CNTV2Card			mOutputDevice;			///< @brief	My CNTV2Card output instance
+		NTV2DeviceID		mInputDeviceID;			///< @brief	My device identifier
+		NTV2DeviceID		mOutputDeviceID;		///< @brief	My device identifier
+		NTV2VideoFormat		mVideoFormat;			///< @brief	My video format
+		NTV2TaskMode		mInputSavedTaskMode;	///< @brief	For restoring the input device's prior task mode
+		NTV2TaskMode		mOutputSavedTaskMode;	///< @brief	For restoring the output device's prior task mode
+		NTV2AudioSystem		mInputAudioSystem;		///< @brief	The input audio system I'm using
+		NTV2AudioSystem		mOutputAudioSystem;		///< @brief	The output audio system I'm using
+		bool				mSingleDevice;			///< @brief	Using single 8-channel device (4K I/O on one device)?
+		bool				mGlobalQuit;			///< @brief	Set "true" to gracefully stop
+		AJATimeCodeBurn		mTCBurner;				///< @brief	My timecode burner
+		uint32_t			mQueueSize;				///< @brief	My queue size
+		NTV2FormatDesc		mFormatDesc;		///< @brief	Describes raster images
+		NTV2FrameDataArray	mHostBuffers;			///< @brief	My host buffers
+		CircularBuffer		mFrameDataRing;			///< @brief	AJACircularBuffer that controls frame data access by producer/consumer threads
 
 };	//	NTV2Burn4KQuadrant
 

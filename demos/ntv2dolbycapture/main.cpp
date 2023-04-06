@@ -52,19 +52,19 @@ int main (int argc, const char ** argv)
         const CNTV2DemoCommon::PoptOpts optionsTable [] =
         {
     #if !defined(NTV2_DEPRECATE_16_0)	//	--board option is deprecated!
-            {"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"(deprecated)"				},
+            {"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"device to use",			"(deprecated)"				},
     #endif
-            {"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"index#, serial#, or model"	},
-            {"input",		'i',	POPT_ARG_STRING,	&pInputSrcSpec,	0,	"which HDMI input",				"?=list"                	},
-            {"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"which pixel format to use",	"'?' or 'list' to list"		},
-			{"frames",		0,		POPT_ARG_STRING,	&pFramesSpec,	0,	"frames to AutoCirc",			"num[@min] or min-max"		},
-			{"anc",			'a',	POPT_ARG_NONE,		&doRecordAnc,	0,	"record anc to file",			AJA_NULL    				},
-			{"audio",		'f',	POPT_ARG_NONE,		&doRecordAudio,	0,	"record audio to file",			AJA_NULL    				},
-			{"dolby",		'g',	POPT_ARG_NONE,		&doRecordDolby,	0,	"record dolby to file",			AJA_NULL    				},
-			{"audioFilter",	'x',	POPT_ARG_NONE,		&doAudioFilter,	0,	"only capture audio anc",		AJA_NULL    				},
-			{"frameData",	'y',	POPT_ARG_NONE,		&doFrameData,	0,	"output per frame statistics",	AJA_NULL    				},
-			{"channel",		'c',	POPT_ARG_INT,		&channelNumber,	0,	"which channel to use",			"1 thru 8"					},
-            {"multiFormat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"Configure multi-format",		AJA_NULL					},
+            {"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"device to use",			"index#, serial#, or model"	},
+            {"input",		'i',	POPT_ARG_STRING,	&pInputSrcSpec,	0,	"which HDMI input",			"?=list"                	},
+            {"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",		"'?' or 'list' to list"		},
+			{"frames",		0,		POPT_ARG_STRING,	&pFramesSpec,	0,	"frames to AutoCirculate",	"num[@min] or min-max"		},
+			{"anc",			'a',	POPT_ARG_NONE,		&doRecordAnc,	0,	"record anc to file",		AJA_NULL    				},
+			{"audio",		'f',	POPT_ARG_NONE,		&doRecordAudio,	0,	"record audio to file",		AJA_NULL    				},
+			{"dolby",		'g',	POPT_ARG_NONE,		&doRecordDolby,	0,	"record dolby to file",		AJA_NULL    				},
+			{"audioFilter",	'x',	POPT_ARG_NONE,		&doAudioFilter,	0,	"only capture audio anc",	AJA_NULL    				},
+			{"frameData",	'y',	POPT_ARG_NONE,		&doFrameData,	0,	"show per-frame stats",		AJA_NULL    				},
+			{"channel",		'c',	POPT_ARG_INT,		&channelNumber,	0,	"channel to use",			"1-8"						},
+            {"multiFormat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"use multi-format/channel",	AJA_NULL					},
             POPT_AUTOHELP
             POPT_TABLEEND
         };
@@ -175,7 +175,7 @@ int main (int argc, const char ** argv)
 
 	//	Initialize the ntv2dolbycapture instance...
 	status = capturer.Init();
-	if (!AJA_SUCCESS(status))
+	if (AJA_FAILURE(status))
 		{cout << "## ERROR:  Capture initialization failed with status " << status << endl;	return 1;}
 
 	//	Run the capturer...
