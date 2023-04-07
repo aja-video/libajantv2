@@ -448,7 +448,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     list(APPEND TARGET_LINK_LIBS
         advapi32 comctl32 netapi32
         odbc32 psapi rpcrt4 setupapi shell32
-        shlwapi user32 winmm ws2_32 wsock32)
+        shlwapi user32 wbemuuid winmm ws2_32 wsock32)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     list(APPEND TARGET_COMPILE_DEFS
         -DAJASTATIC)
