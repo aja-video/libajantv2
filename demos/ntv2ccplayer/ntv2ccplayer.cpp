@@ -7,6 +7,7 @@
 
 #include "ntv2ccplayer.h"
 #include "ntv2devicefeatures.h"
+#include "ntv2devicescanner.h"
 #include "ntv2debug.h"
 #include "ntv2democommon.h"
 #include "ntv2rp188.h"
@@ -16,14 +17,12 @@
 #include "ajabase/common/ajarefptr.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/system/process.h"
-#include "ajabase/system/lock.h"
 #include "ntv2testpatterngen.h"
 #include "ajabase/common/videotypes.h"
 #include "ajabase/system/debugshare.h"
 #include "ajabase/common/timecode.h"
 #include "ajabase/common/common.h"
 #include "ajaanc/includes/ancillarylist.h"
-#include "ajaanc/includes/ancillarydata_cea608_line21.h"
 #include "ajaanc/includes/ancillarydata_cea608_vanc.h"
 #include "ajaanc/includes/ancillarydata_cea708.h"
 #include "ajacc/includes/ntv2captionrenderer.h"
@@ -37,8 +36,11 @@
 using namespace std;
 
 
+#define	AsSCCSource(__x__)	reinterpret_cast<SCCSource&>(__x__)
+#define AsUBytePtr(__x__)	reinterpret_cast<UByte*>(__x__)
 //#define	MEASURE_ACCURACY	1		//	Enables a feedback mechanism to precisely generate captions at the desired rate
-static const uint32_t		kAppSignature		(NTV2_FOURCC ('C','C','P','L'));
+
+static const uint32_t	kAppSignature	(NTV2_FOURCC('C','C','P','L'));
 
 
 /**
@@ -224,29 +226,16 @@ AJALabelValuePairs CCGeneratorConfig::Get (void) const
 
 AJALabelValuePairs CCPlayerConfig::Get (const bool inCompact) const
 {
-	AJALabelValuePairs result;
-	AJASystemInfo::append(result, "CCPlayer Config");
-	AJASystemInfo::append(result, "Device Specifier",	fDeviceSpecifier);
-	AJASystemInfo::append(result, "Output Channel",		::NTV2ChannelToString(fOutputChannel, inCompact));
-	AJASystemInfo::append(result, "Output Connector",	::NTV2OutputDestinationToString(fOutputDestination, inCompact));
-	AJASystemInfo::append(result, "Output Format",		fDualLinkRGB ? "DL-RGB" : "YCbCr");
-	AJASystemInfo::append(result, "Video Format",		::NTV2VideoFormatToString(fVideoFormat));
-	AJASystemInfo::append(result, "Pixel Format",		::NTV2FrameBufferFormatToString(fPixelFormat, inCompact));
+	AJALabelValuePairs result (PlayerConfig::Get (inCompact));
 	AJASystemInfo::append(result, "Background Pattern",	fTestPatternName);
-	AJASystemInfo::append(result, "AutoCirc Frames",	fFrames.toString());
 	AJASystemInfo::append(result, "Emit Statistics",	fEmitStats ? "Y" : "N");
-	AJASystemInfo::append(result, "MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
-	AJASystemInfo::append(result, "DL-RGB SDI Output",	fDualLinkRGB ? "Y" : "N");
-	if (NTV2_IS_QUAD_FRAME_FORMAT(fVideoFormat))
-	AJASystemInfo::append(result, "2-Sample-Interleave",fSquareDivision ? "N (Square Division)" : "Y");
-	AJASystemInfo::append(result, "Force Vanc",			fForceVanc ? "Y" : "N");
 	AJASystemInfo::append(result, "Force RTP",			fForceRTP ? (fForceRTP&2 ? "MultiPkt" : "UniPkt") : "Normal");
 	AJASystemInfo::append(result, "Suppress Audio",		fSuppressAudio ? "Y" : "N");
 	AJASystemInfo::append(result, "Suppress Line21",	fSuppressLine21 ? "Y" : "N");
 	AJASystemInfo::append(result, "Suppress 608 Pkt",	fSuppress608 ? "Y" : "N");
 	AJASystemInfo::append(result, "Suppress 708 Pkt",	fSuppress708 ? "Y" : "N");
 	AJASystemInfo::append(result, "Suppress Timecode",	fSuppressTimecode ? "Y" : "N");
-	for (CaptionChanGenMapCIter it(fChannelGenerators.begin());  it != fChannelGenerators.end();  ++it)
+	for (CaptionChanGenMapCIter it(fCapChanGenConfigs.begin());  it != fCapChanGenConfigs.end();  ++it)
 	{
 		AJASystemInfo::append(result, ::NTV2Line21ChannelToStr(it->first, false));
 		AJALabelValuePairs pairs(it->second.Get());
@@ -293,11 +282,13 @@ class CaptionSource
 			@brief	My only constructor.
 			@param[in]	inCharsPerMinute		Specifies the maximum rate at which I will emit characters.
 			@param[in]	pInInputStream			Specifies a valid, non-NULL pointer to the input stream to use.
+			@param[in]	inFilePath				Specifies the input stream file path (if any)
 			@param[in]	inDeleteInputStream		If true, I will delete the input stream object when I'm destroyed;
 												otherwise it's the caller's responsibility.
 		**/
-		explicit CaptionSource (const double inCharsPerMinute, istream * pInInputStream, const bool inDeleteInputStream = false)
+		explicit CaptionSource (const double inCharsPerMinute, istream * pInInputStream, const string & inFilePath, const bool inDeleteInputStream = false)
 			:	mpInputStream		(pInInputStream),
+				mInputFilePath		(inFilePath),
 				mCharsPerMinute		(inCharsPerMinute),
 				mMaxRowCharWidth	(32),
 				mFinished			(false),
@@ -340,7 +331,9 @@ class CaptionSource
 			string			resultChar;
 			unsigned char	rawBytes[5]	= {0, 0, 0, 0, 0};
 
-			AJATime::Sleep (static_cast<int32_t>(milliSecsPerChar));
+			AJATime::Sleep (int32_t(milliSecsPerChar));
+			if (mpInputStream->tellg() == 0  &&  !mInputFilePath.empty())
+				PLNOTE("Starting caption file '" << mInputFilePath << "'");
 
 			*mpInputStream >> rawBytes[0];
 			if (mpInputStream->eof())
@@ -584,14 +577,15 @@ class CaptionSource
 
 	//	Instance Data
 	private:
-		istream *			mpInputStream;		///< @brief	My current input file stream.
-		double				mCharsPerMinute;	///< @brief	My character emission rate, in characters per minute.
-		string				mLeftoverRowText;	///< @brief	My row text accumulator.
-		size_t				mMaxRowCharWidth;	///< @brief	My maximum row width, in characters.
-		bool				mFinished;			///< @brief	True if I've delivered everything I can.
-		const bool			mDeleteInputStream;	///< @brief	True if I'm responsible for deleting the input stream.
-		bool				mIsTextMode;		///< @brief	True if I'm generating Text Mode caption data instead of normal Captions.
-		double				mMilliSecsPerChar;	///< @brief	Delay between emitting successive characters, in milliseconds.
+		istream *			mpInputStream;		///< @brief	My current input file stream
+		string				mInputFilePath;		///< @brief	My input file stream's file path (if any)
+		double				mCharsPerMinute;	///< @brief	My character emission rate, in characters per minute
+		string				mLeftoverRowText;	///< @brief	My row text accumulator
+		size_t				mMaxRowCharWidth;	///< @brief	My maximum row width, in characters
+		bool				mFinished;			///< @brief	True if I've delivered everything I can
+		const bool			mDeleteInputStream;	///< @brief	True if I'm responsible for deleting the input stream
+		bool				mIsTextMode;		///< @brief	True if I'm generating Text Mode caption data instead of normal Captions
+		double				mMilliSecsPerChar;	///< @brief	Delay between emitting successive characters, in milliseconds
 		NTV2Line21Channel	mCaptionChannel;	///< @brief	Used to tag debug output only
 		#if defined (MEASURE_ACCURACY)
 			Speedometer		mCharSpeed;			///< @brief	Used to measure/adjust the rate at which I generate captions.
@@ -636,7 +630,7 @@ class CaptionSource
 class SCCSource : public CaptionSource
 {
 	public:		//	PUBLIC INSTANCE METHODS
-		explicit SCCSource (const double inCharsPerMinute, istream * pInInputStream, const bool inDeleteInputStream = false);
+		explicit SCCSource (const double inCharsPerMinute, istream * pInInputStream, const string & inFilePath, const bool inDeleteInputStream = false);
 		virtual ~SCCSource ()
 		{
 		}
@@ -661,11 +655,10 @@ class SCCSource : public CaptionSource
 		uint32_t			mMaxFrameNum;
 };	//	SCCSource
 
-#define	AsSCCSource(__obj__)	reinterpret_cast<SCCSource&>(__obj__)
 
 
-SCCSource::SCCSource (const double inCharsPerMinute, istream * pInInputStream, const bool inDeleteInputStream)
-	:	CaptionSource(inCharsPerMinute, pInInputStream, inDeleteInputStream),
+SCCSource::SCCSource (const double inCharsPerMinute, istream * pInInputStream, const string & inFilePath, const bool inDeleteInputStream)
+	:	CaptionSource(inCharsPerMinute, pInInputStream, inFilePath, inDeleteInputStream),
 		mLastCCDataWordNdx	(0),
 		mMaxFrameNum		(0)
 {
@@ -817,17 +810,18 @@ static CaptionSourceList GetCaptionSources (const NTV2StringList & inFilesToPlay
 			gBuiltInStream.clear();		//	Clear EOF
 			gBuiltInStream.seekg(0);	//	Rewind
 		}
-		result.push_back(CaptionSourcePtr(new CaptionSource(inCharsPerMinute, &gBuiltInStream)));
+		result.push_back(CaptionSourcePtr(new CaptionSource(inCharsPerMinute, &gBuiltInStream, string())));
 	}
 	else
 	{
-		for (NTV2StringListConstIter pFilePath(inFilesToPlay.begin());  pFilePath != inFilesToPlay.end();  ++pFilePath)
+		for (size_t ndx(0);  ndx < inFilesToPlay.size();  ndx++)
 		{
-			if (*pFilePath == "-")
+			const string filePath(inFilesToPlay.at(ndx));
+			if (filePath == "-")
 			{
 				if (pStdIn)
-				{
-					result.push_back(CaptionSourcePtr(new CaptionSource(inCharsPerMinute, pStdIn)));	//	Add stdin once
+				{	//	Add stdin once
+					result.push_back(CaptionSourcePtr(new CaptionSource(inCharsPerMinute, pStdIn, string())));
 					pStdIn = AJA_NULL;	//	Standard input can only be read from once
 				}
 				else
@@ -835,23 +829,26 @@ static CaptionSourceList GetCaptionSources (const NTV2StringList & inFilesToPlay
 			}	//	'-' means "read from standard input"
 			else
 			{
-				ifstream * pFileStream (new ifstream(pFilePath->c_str()));
+				ifstream * pFileStream (new ifstream(filePath.c_str()));
 				NTV2_ASSERT(pFileStream);
 				if (pFileStream->is_open())
 				{
 					static const string scc(".scc");
-					const size_t pos (pFilePath->rfind(scc));
-					if (pos == (pFilePath->length()-scc.length()))
-						result.push_back(CaptionSourcePtr(new SCCSource(inCharsPerMinute, pFileStream, true)));
+					const size_t pos (filePath.rfind(scc));
+					if (pos == (filePath.length()-scc.length()))
+						result.push_back(CaptionSourcePtr(new SCCSource(inCharsPerMinute, pFileStream, filePath, true)));
 					else
-						result.push_back(CaptionSourcePtr(new CaptionSource(inCharsPerMinute, pFileStream, true)));
+						result.push_back(CaptionSourcePtr(new CaptionSource(inCharsPerMinute, pFileStream, filePath, true)));
+					PLINFO("Caption file '" << filePath << "' opened");
 				}
 				else
-					cerr << "## WARNING:  Cannot play '" << pFilePath->c_str () << "'" << endl;
+				{
+					PLWARN("Cannot open caption file '" << filePath << "'");
+					cerr << "## WARNING:  Cannot play '" << filePath << "'" << endl;
+				}
 			}	//	else not '-'
-
-		}	//	for each file path
-	}	//	else file list is not empty
+		}	//	for each caption file to play
+	}	//	else caption file list is not empty
 
 	return result;
 
@@ -865,14 +862,13 @@ NTV2CCPlayer::NTV2CCPlayer (const CCPlayerConfig & inConfigData)
 		mGeneratorThreads		(),
 		mDeviceID				(DEVICE_ID_NOTFOUND),
 		mSavedTaskMode			(NTV2_DISABLE_TASKS),
-		mVancMode				(NTV2_VANCMODE_OFF),
 		mVideoStandard			(NTV2_STANDARD_INVALID),
 		mPlayerQuit				(false),
 		mCaptionGeneratorQuit	(false),
 		mActiveFrameStores		(),
 		mConnections			()
 {
-	NTV2_ASSERT(!mConfig.fChannelGenerators.empty());
+	NTV2_ASSERT(!mConfig.fCapChanGenConfigs.empty());
 	mGeneratorThreads.resize(size_t(NTV2_CC608_XDS));
 	while (mGeneratorThreads.size() < size_t(NTV2_CC608_XDS))
 		mGeneratorThreads.push_back(AJAThread());
@@ -887,8 +883,8 @@ NTV2CCPlayer::~NTV2CCPlayer (void)
 	mDevice.UnsubscribeOutputVerticalEvent(mActiveFrameStores);
 	if (!mConfig.fDoMultiFormat)
 	{
-		mDevice.SetEveryFrameServices(mSavedTaskMode);														//	Restore prior service level
-		mDevice.ReleaseStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));	//	Release the device
+		mDevice.SetEveryFrameServices(mSavedTaskMode);										//	Restore prior service level
+		mDevice.ReleaseStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid()));	//	Release the device
 	}
 
 }	//	destructor
@@ -948,33 +944,33 @@ bool NTV2CCPlayer::DeviceAncExtractorIsAvailable (void)
 AJAStatus NTV2CCPlayer::Init (void)
 {
 	AJAStatus	status	(AJA_STATUS_SUCCESS);
+	CNTV2DemoCommon::SetDefaultPageSize();	//	Set host-specific page size
 
 	//	Any AJA devices out there?
-	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpecifier, mDevice))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpecifier << "' not found" << endl;  return AJA_STATUS_OPEN;}
+	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
+		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
+	mDeviceID = mDevice.GetDeviceID();	//	Keep this ID handy -- it's used frequently
 
     if (!mDevice.IsDeviceReady(false))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpecifier << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
+		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
+	if (!::NTV2DeviceCanDoPlayback(mDeviceID))
+		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
 
 	if (!mConfig.fDoMultiFormat)
 	{
-		if (!mDevice.AcquireStreamForApplication (kAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
+		if (!mDevice.AcquireStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid())))
 		{
-			cerr << "## ERROR:  Unable to acquire device because another app owns it" << endl;
+			cerr << "## ERROR:  Cannot acquire '" << mDevice.GetDisplayName() << "' because another app owns it" << endl;
 			return AJA_STATUS_BUSY;		//	Some other app owns the device
 		}
 		mDevice.GetEveryFrameServices(mSavedTaskMode);	//	Save the current task mode
 	}
-
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);		//	Use the OEM service level
-
-	//	Store the device ID in a member because it will be used frequently...
-	mDeviceID = mDevice.GetDeviceID();
+	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);		//	Set OEM service level
 
 #if defined(_DEBUG)
 	if (mConfig.fForceRTP & BIT(2))
 	{	//	Hack -- force device to pretend it's a KonaIP2110
-		NTV2_POINTER	pDevice (&mDevice, sizeof(CNTV2Card));
+		NTV2Buffer	pDevice (&mDevice, sizeof(CNTV2Card));
 		ULWordSequence	U32s (pDevice.GetU32s(0, pDevice.GetByteCount()/sizeof(uint32_t)));
 		for (unsigned ndx(0);  ndx < U32s.size();  ndx++)
 			if (U32s.at(ndx) == ULWord(mDeviceID))
@@ -992,11 +988,9 @@ AJAStatus NTV2CCPlayer::Init (void)
 	else if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
 		mDevice.SetMultiFormatMode(false);
 
-	if (!mConfig.fForceVanc)						//	if user didn't use --vanc option...
-		if (!DeviceAncExtractorIsAvailable())		//	and anc extractor isn't available...
-			mConfig.fForceVanc = true;				//	then force Vanc anyway
-	if (mConfig.fForceVanc)
-		mVancMode = NTV2_VANCMODE_TALL;
+	if (NTV2_IS_VANCMODE_OFF(mConfig.fVancMode))		//	if user didn't use --vanc option...
+		if (!DeviceAncExtractorIsAvailable())			//	and anc extractor isn't available...
+			mConfig.fVancMode = NTV2_VANCMODE_TALLER;	//	then enable Vanc anyway
 
 	//	Set up the device video config...
 	status = SetUpOutputVideo();
@@ -1009,21 +1003,27 @@ AJAStatus NTV2CCPlayer::Init (void)
 		return status;
 
 	//	Set up device signal routing...
-	return RouteOutputSignal();
+	status = RouteOutputSignal();
+	if (AJA_FAILURE(status))
+		return status;
+
+	#if defined(_DEBUG)
+		cerr << mConfig << endl;
+	#endif	//	defined(_DEBUG)
+	return AJA_STATUS_SUCCESS;
 
 }	//	Init
 
-#define AsUBytePtr(__x__)		reinterpret_cast<UByte*>(__x__)
 
 AJAStatus NTV2CCPlayer::SetUpBackgroundPatternBuffer (void)
 {
-	//	Allocate and clear the host video buffer memory...
-	mVideoBuffer.Allocate(::GetVideoWriteSize(mConfig.fVideoFormat, mConfig.fPixelFormat, mVancMode));
-
 	//	Generate the test pattern...
 	NTV2TestPatternGen			testPatternGen;
-	const NTV2FormatDescriptor	formatDesc	(mConfig.fVideoFormat, mConfig.fPixelFormat, mVancMode);
-	testPatternGen.setVANCToLegalBlack(formatDesc.IsVANC());	//	Also clear the VANC region to legal black
+	const NTV2FormatDescriptor	formatDesc	(mConfig.fVideoFormat, mConfig.fPixelFormat, mConfig.fVancMode);
+	testPatternGen.setVANCToLegalBlack(formatDesc.IsVANC());	//	Clear the VANC region to legal black if needed
+
+	//	Allocate and clear the host video buffer memory...
+	mVideoBuffer.Allocate(formatDesc.GetVideoWriteSize());
 
 	if (!testPatternGen.DrawTestPattern (mConfig.fTestPatternName, formatDesc, mVideoBuffer))
 	{
@@ -1032,7 +1032,7 @@ AJAStatus NTV2CCPlayer::SetUpBackgroundPatternBuffer (void)
 	}
 
 	//	Burn static info into the test pattern...
-	const string	strVideoFormat	(CNTV2DemoCommon::StripFormatString (::NTV2VideoFormatToString(mConfig.fVideoFormat)));
+	const string strVideoFormat (CNTV2DemoCommon::StripFormatString (::NTV2VideoFormatToString(mConfig.fVideoFormat)));
 	{	ostringstream oss;
 		oss	<< setw(32) << left << string("CCPlayer ") + strVideoFormat + string(formatDesc.IsVANC() ? " VANC" : "");
 		CNTV2CaptionRenderer::BurnString (oss.str(), NTV2Line21Attributes(NTV2_CC608_White, NTV2_CC608_Cyan), mVideoBuffer, formatDesc, 1, 1);	//	R1C1
@@ -1054,50 +1054,52 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 		{cerr << "## ERROR:  Device cannot playout" << endl;  return AJA_STATUS_UNSUPPORTED;}
 	if ((mConfig.fOutputChannel == NTV2_CHANNEL1)  &&  !::NTV2DeviceCanDoFrameStore1Display(mDeviceID))
 		{cerr << "## ERROR:  Device cannot playout thru FrameStore 1" << endl;  return AJA_STATUS_UNSUPPORTED;}
-	if (!NTV2_OUTPUT_DEST_IS_SDI(mConfig.fOutputDestination))
+	if (!NTV2_OUTPUT_DEST_IS_SDI(mConfig.fOutputDest))
 	{
-		cerr << "## ERROR:  CCPlayer uses SDI only, not '" << ::NTV2OutputDestinationToString(mConfig.fOutputDestination,true) << "'" << endl;
+		cerr << "## ERROR:  CCPlayer uses SDI only, not '" << ::NTV2OutputDestinationToString(mConfig.fOutputDest,true) << "'" << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
-	if (!::NTV2DeviceCanDoOutputDestination(mDeviceID, mConfig.fOutputDestination))
+	if (!::NTV2DeviceCanDoOutputDestination(mDeviceID, mConfig.fOutputDest))
 	{
-		cerr << "## ERROR:  No such output connector '" << ::NTV2OutputDestinationToString(mConfig.fOutputDestination,true) << "'" << endl;
+		cerr << "## ERROR:  No such output connector '" << ::NTV2OutputDestinationToString(mConfig.fOutputDest,true) << "'" << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
 	if (NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
 	{
-		if (mConfig.fSquareDivision  &&  mConfig.fOutputChannel != NTV2_CHANNEL1  &&  mConfig.fOutputChannel != NTV2_CHANNEL5)
+		if (!mConfig.fDoTsiRouting  &&  mConfig.fOutputChannel != NTV2_CHANNEL1  &&  mConfig.fOutputChannel != NTV2_CHANNEL5)
 		{
 			cerr << "## ERROR:  Quad-frame format must use Ch1|Ch5, not '" << ::NTV2ChannelToString(mConfig.fOutputChannel, true) << "'" << endl;
 			return AJA_STATUS_BAD_PARAM;
 		}
-		else if (!mConfig.fSquareDivision  &&  (mConfig.fOutputChannel & 1))
+		else if (mConfig.fDoTsiRouting  &&  (mConfig.fOutputChannel & 1))
 		{
 			cerr << "## ERROR:  UHD/4K TSI must use Ch[1|3|5|7], not '" << ::NTV2ChannelToString(mConfig.fOutputChannel, true) << "'" << endl;
 			return AJA_STATUS_BAD_PARAM;
 		}
-		const NTV2Channel sdiChan(::NTV2OutputDestinationToChannel(mConfig.fOutputDestination));
-		if (mConfig.fSquareDivision  &&  sdiChan != NTV2_CHANNEL1  &&  sdiChan != NTV2_CHANNEL5)
+		const NTV2Channel sdiChan(::NTV2OutputDestinationToChannel(mConfig.fOutputDest));
+		if (!mConfig.fDoTsiRouting  &&  sdiChan != NTV2_CHANNEL1  &&  sdiChan != NTV2_CHANNEL5)
 		{
 			cerr << "## ERROR:  UHD/4K Squares must use SDIOut[1|5], not '" << ::NTV2ChannelToString(mConfig.fOutputChannel, true) << "'" << endl;
 			return AJA_STATUS_BAD_PARAM;
 		}
-		else if (!mConfig.fSquareDivision  &&  (sdiChan & 1))
+		else if (mConfig.fDoTsiRouting  &&  (sdiChan & 1))
 		{
 			cerr << "## ERROR:  UHD/4K TSI must use SDIOut[1|3|5|7], not '" << ::NTV2ChannelToString(mConfig.fOutputChannel, true) << "'" << endl;
 			return AJA_STATUS_BAD_PARAM;
 		}
 	}
 	else
-		mConfig.fSquareDivision = true;	//	Allows RouteOutputSignal to cheat
+		mConfig.fDoTsiRouting = false;	//	Allows RouteOutputSignal to cheat
 	if (NTV2_IS_QUAD_QUAD_FORMAT(mConfig.fVideoFormat))
 		{cerr << "## ERROR:  CCPlayer doesn't yet support UHD2/8K formats" << endl;  return AJA_STATUS_UNSUPPORTED;}
 	if (NTV2_IS_625_FORMAT(mConfig.fVideoFormat))
 		cerr << "## WARNING:  SD 625/PAL not supported -- but will insert CEA608 caption packets anyway" << endl;
-	if ((NTV2_IS_4K_VIDEO_FORMAT(mConfig.fVideoFormat) || NTV2_IS_QUAD_QUAD_FORMAT(mConfig.fVideoFormat))  &&  mConfig.fForceVanc)
-		{cerr << "## ERROR:  UHD/4K/UHD2/8K formats have no VANC mode" << endl;  return AJA_STATUS_UNSUPPORTED;}
-	if (NTV2_IS_SD_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  !mConfig.fSuppressLine21  &&  mConfig.fPixelFormat != NTV2_FBF_8BIT_YCBCR  &&  mConfig.fPixelFormat != NTV2_FBF_10BIT_YCBCR)
-		{cerr << "## ERROR:  SD/line21 in " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat) << "' not '2vuy'|'v210'" << endl;  return AJA_STATUS_UNSUPPORTED;}
+	if ((NTV2_IS_4K_VIDEO_FORMAT(mConfig.fVideoFormat) || NTV2_IS_QUAD_QUAD_FORMAT(mConfig.fVideoFormat)))
+		if (NTV2_IS_VANCMODE_ON(mConfig.fVancMode))
+			{cerr << "## ERROR:  Cannot use VANC mode with UHD/4K/UHD2/8K formats" << endl;  return AJA_STATUS_UNSUPPORTED;}
+	if (NTV2_IS_SD_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  !mConfig.fSuppressLine21)
+		if (mConfig.fPixelFormat != NTV2_FBF_8BIT_YCBCR  &&  mConfig.fPixelFormat != NTV2_FBF_10BIT_YCBCR)
+			{cerr << "## ERROR:  SD/line21 in " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat) << "' not '2vuy'|'v210'" << endl;  return AJA_STATUS_UNSUPPORTED;}
 	if (UWord(mConfig.fOutputChannel) >= ::NTV2DeviceGetNumFrameStores(mDeviceID))
 		{cerr << "## ERROR:  Device has " << DEC(::NTV2DeviceGetNumFrameStores(mDeviceID)) << " FrameStore(s), no channel " << DEC(mConfig.fOutputChannel+1) << endl;  return AJA_STATUS_UNSUPPORTED;}
 
@@ -1110,7 +1112,7 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 	//	Enable the required framestore(s)...
 	//
 	if (NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
-		mActiveFrameStores = ::NTV2MakeChannelSet(mConfig.fOutputChannel, mConfig.fSquareDivision ? 4 : 2);
+		mActiveFrameStores = ::NTV2MakeChannelSet(mConfig.fOutputChannel, mConfig.fDoTsiRouting ? 2 : 4);
 	else
 		mActiveFrameStores.insert(mConfig.fOutputChannel);
 	mDevice.EnableChannels (mActiveFrameStores,
@@ -1125,24 +1127,24 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 	mDevice.SetVideoFormat (mActiveFrameStores, mConfig.fVideoFormat, AJA_RETAIL_DEFAULT);
 	if (!NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
 		{}
-	else if (mConfig.fSquareDivision)
-		mDevice.Set4kSquaresEnable(true, mConfig.fOutputChannel);
-	else
+	else if (mConfig.fDoTsiRouting)
 		mDevice.SetTsiFrameEnable(true, mConfig.fOutputChannel);
+	else
+		mDevice.Set4kSquaresEnable(true, mConfig.fOutputChannel);
 
 	//
 	//	Set frame buffer pixel format...
 	//
 	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
 		{cerr << "## ERROR:  '" << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat) << "' not supported" << endl;  return AJA_STATUS_UNSUPPORTED;}
-	if (mConfig.fForceVanc  &&  ::IsRGBFormat(mConfig.fPixelFormat) != mConfig.fDualLinkRGB)
-		{cerr << "## ERROR:  Routing thru CSC will corrupt VANC in frame buffer" << endl;  return AJA_STATUS_UNSUPPORTED;}
+	if (NTV2_IS_VANCMODE_ON(mConfig.fVancMode)  &&  ::IsRGBFormat(mConfig.fPixelFormat) != mConfig.fDoRGBOnWire)
+		{cerr << "## ERROR:  Routing thru CSC may corrupt VANC in frame buffer" << endl;  return AJA_STATUS_UNSUPPORTED;}
 	mDevice.SetFrameBufferFormat (mActiveFrameStores, mConfig.fPixelFormat);
-	if (!mConfig.fForceVanc)
-		if (mConfig.fOutputChannel != ::NTV2OutputDestinationToChannel(mConfig.fOutputDestination))
+	if (NTV2_IS_VANCMODE_OFF(mConfig.fVancMode))
+		if (mConfig.fOutputChannel != ::NTV2OutputDestinationToChannel(mConfig.fOutputDest))
 		{
 			cerr << "## ERROR:  FrameStore" << DEC(mConfig.fOutputChannel+1)
-					<< " doesn't correlate with SDIOut" << DEC(::NTV2OutputDestinationToChannel(mConfig.fOutputDestination)+1)
+					<< " doesn't correlate with SDIOut" << DEC(::NTV2OutputDestinationToChannel(mConfig.fOutputDest)+1)
 					<< " -- Anc inserter requires both to match, output signal won't have captions" << endl;
 			return AJA_STATUS_FAIL;
 		}
@@ -1151,11 +1153,10 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 	//	Enable VANC only if device has no Anc inserters, or if --vanc specified...
 	//
 	if (NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
-		NTV2_ASSERT(NTV2_IS_VANCMODE_OFF(mVancMode));
-	for (NTV2ChannelSetConstIter it(mActiveFrameStores.begin());  it != mActiveFrameStores.end();  ++it)
-		mDevice.SetVANCMode (mVancMode, *it);
+		NTV2_ASSERT(NTV2_IS_VANCMODE_OFF(mConfig.fVancMode));
+	mDevice.SetVANCMode (mActiveFrameStores, mConfig.fVancMode);
 	if (!NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
-		if (NTV2_IS_VANCMODE_ON(mVancMode))
+		if (NTV2_IS_VANCMODE_ON(mConfig.fVancMode))
 			if (::Is8BitFrameBufferFormat(mConfig.fPixelFormat))
 				mDevice.SetVANCShiftMode (mConfig.fOutputChannel, NTV2_VANCDATA_8BITSHIFT_ENABLE);	//	8-bit FBFs require VANC bit shift
 
@@ -1175,9 +1176,9 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 	mDevice.SubscribeOutputVerticalEvent(mActiveFrameStores);
 
 	cerr	<< "## NOTE:  Generating '" << ::NTV2VideoFormatToString(mConfig.fVideoFormat)
-			<< "' using " << (mConfig.fForceVanc ? "VANC" : "device Anc inserter")
-			<< " on '" << mDevice.GetDisplayName() << "' to " << ::NTV2OutputDestinationToString(mConfig.fOutputDestination)
-			<< (mConfig.fDualLinkRGB ? " (DL-RGB)" : "")
+			<< "' using " << (NTV2_IS_VANCMODE_ON(mConfig.fVancMode) ? "VANC" : "device Anc inserter")
+			<< " on '" << mDevice.GetDisplayName() << "' to " << ::NTV2OutputDestinationToString(mConfig.fOutputDest)
+			<< (mConfig.fDoRGBOnWire ? " (DL-RGB)" : "")
 			<< " from FrameStore" << DEC(mConfig.fOutputChannel+1)
 			<< " using " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat) << endl;
 	return AJA_STATUS_SUCCESS;
@@ -1188,10 +1189,10 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 {
 	const bool			isRGBFBF	(::IsRGBFormat(mConfig.fPixelFormat));
-	const bool			isRGBWire	(mConfig.fDualLinkRGB);	//	RGB-over-SDI?
+	const bool			isRGBWire	(mConfig.fDoRGBOnWire);	//	RGB-over-SDI?
 	const bool			isQuadFmt	(NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat));
 	const bool			is4KHFR		(NTV2_IS_HFR_STANDARD(mVideoStandard));
-	const NTV2Channel	sdiOutput	(::NTV2OutputDestinationToChannel(mConfig.fOutputDestination));
+	const NTV2Channel	sdiOutput	(::NTV2OutputDestinationToChannel(mConfig.fOutputDest));
 	NTV2ChannelSet		sdiOuts		(::NTV2MakeChannelSet(sdiOutput, UWord(mActiveFrameStores.size())));
 	NTV2ChannelList		sdiOutputs	(::NTV2MakeChannelList(sdiOuts));
 	NTV2ChannelList		frameStores	(::NTV2MakeChannelList(mActiveFrameStores));
@@ -1207,7 +1208,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 	mDevice.SetSDITransmitEnable(sdiOuts, true);
 	if (isRGBFBF && isRGBWire)
 	{
-		if (mConfig.fSquareDivision)	//	RGBFrameStore ==> DLOut ==> SDIOut
+		if (!mConfig.fDoTsiRouting)	//	RGBFrameStore ==> DLOut ==> SDIOut
 			for (size_t ndx(0);  ndx < sdiOutputs.size();  ndx++)
 			{	NTV2Channel frmSt(frameStores.at(ndx)), sdiOut(sdiOutputs.at(ndx));
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut, /*isDS2*/false),  ::GetDLOutOutputXptFromChannel(sdiOut, /*isDS2*/false)));
@@ -1237,7 +1238,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 	}
 	else if (isRGBFBF && !isRGBWire)
 	{
-		if (mConfig.fSquareDivision)	//	RGBFrameStore ==> CSC ==> SDIOut
+		if (!mConfig.fDoTsiRouting)	//	RGBFrameStore ==> CSC ==> SDIOut
 			for (size_t ndx(0);  ndx < sdiOutputs.size();  ndx++)
 			{	NTV2Channel frmSt(frameStores.at(ndx)), sdiOut(sdiOutputs.at(ndx));
 				mConnections.insert(NTV2XptConnection(::GetCSCInputXptFromChannel(frmSt),
@@ -1273,7 +1274,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 	}
 	else if (!isRGBFBF && isRGBWire)
 	{
-		if (mConfig.fSquareDivision)	//	YUVFrameStore ==> CSC ==> DLOut ==> SDIOut
+		if (!mConfig.fDoTsiRouting)	//	YUVFrameStore ==> CSC ==> DLOut ==> SDIOut
 			for (size_t ndx(0);  ndx < sdiOutputs.size();  ndx++)
 			{	NTV2Channel frmSt(frameStores.at(ndx)), sdiOut(sdiOutputs.at(ndx));
 				mConnections.insert(NTV2XptConnection(::GetCSCInputXptFromChannel(frmSt, /*isKeyInput*/false),	::GetFrameBufferOutputXptFromChannel(frmSt, false/*isRGB*/, false/*is425*/)));
@@ -1305,7 +1306,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 	}
 	else	//	!isRGBFBF && !isRGBWire
 	{
-		if (mConfig.fSquareDivision)	//	YUVFrameStore  ==>  SDIOut
+		if (!mConfig.fDoTsiRouting)	//	YUVFrameStore  ==>  SDIOut
 			for (size_t ndx(0);  ndx < sdiOutputs.size();  ndx++)
 			{	NTV2Channel frmSt(frameStores.at(ndx)), sdiOut(sdiOutputs.at(ndx));
 				mConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(sdiOut),
@@ -1374,7 +1375,7 @@ class CapGenStartInfo
 void NTV2CCPlayer::StartCaptionGeneratorThreads ()
 {
 	//	Create and start the caption generator threads, one per caption channel...
-	for (CaptionChanGenMapCIter it(mConfig.fChannelGenerators.begin());  it != mConfig.fChannelGenerators.end();  ++it)
+	for (CaptionChanGenMapCIter it(mConfig.fCapChanGenConfigs.begin());  it != mConfig.fCapChanGenConfigs.end();  ++it)
 	{
 		const CCGeneratorConfig &	genConfig (it->second);
 		AJAThread &	genThread (mGeneratorThreads.at(size_t(genConfig.fCaptionChannel)));
@@ -1405,8 +1406,8 @@ void NTV2CCPlayer::CaptionGeneratorThreadStatic (AJAThread * pThread, void * pCo
 
 void NTV2CCPlayer::GenerateCaptions (const NTV2Line21Channel inCCChannel)
 {
-	CaptionChanGenMapCIter	iter(mConfig.fChannelGenerators.find(inCCChannel));
-	NTV2_ASSERT(iter != mConfig.fChannelGenerators.end());
+	CaptionChanGenMapCIter	iter(mConfig.fCapChanGenConfigs.find(inCCChannel));
+	NTV2_ASSERT(iter != mConfig.fCapChanGenConfigs.end());
 
 	const CCGeneratorConfig &	ccGeneratorConfig	(iter->second);
 	const NTV2Line21Mode		captionMode			(ccGeneratorConfig.fCaptionMode);		//	My caption mode (paint-on, pop-on, roll-up, etc.)
@@ -1452,7 +1453,7 @@ void NTV2CCPlayer::GenerateCaptions (const NTV2Line21Channel inCCChannel)
 
 						if (!mConfig.fEmitStats && !str.empty())
 							cout << str << endl;	//	Echo caption lines (if not emitting stats)
-						PLINFO(ccChannelStr << " caption line " << DEC(lineTally+1) << ": '" << str << "'");
+						PLDBG(ccChannelStr << " caption line " << DEC(lineTally+1) << ": '" << str << "'");
 
 						//	For now, only the 608 encoder generates caption data.
 						//	Someday we'll generate captions using 708-specific features (e.g., windowing, etc.).
@@ -1565,8 +1566,8 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	const NTV2SmpteLineNumber	smpteLineNumInfo	(::GetSmpteLineNumber(mVideoStandard));
 	const uint16_t				kF2PktLineNumCEA608	(gF2LineNums608[mVideoStandard]);
 	const uint32_t				F2StartLine			(smpteLineNumInfo.GetLastLine(smpteLineNumInfo.firstFieldTop ? NTV2_FIELD0 : NTV2_FIELD1) + 1);	//	F2 VBI starts here
-	static const AJAAncillaryDataLocation	kCEA708LocF1(AJAAncillaryDataLink_A,  AJAAncillaryDataVideoStream_Y,  AJAAncillaryDataSpace_VANC,  kF1PktLineNumCEA708, AJAAncDataHorizOffset_AnyVanc);
-	const NTV2FormatDescriptor	formatDesc			(mConfig.fVideoFormat, mConfig.fPixelFormat, mVancMode);
+	static const AJAAncDataLoc	kCEA708LocF1		(AJAAncDataLink_A,  AJAAncDataChannel_Y,  AJAAncDataSpace_VANC,  kF1PktLineNumCEA708, AJAAncDataHorizOffset_AnyVanc);
+	const NTV2FormatDescriptor	formatDesc			(mConfig.fVideoFormat, mConfig.fPixelFormat, mConfig.fVancMode);
 	const ULWord				bytesPerRow			(formatDesc.GetBytesPerRow());
 	const bool					isProgressive		(::IsProgressivePicture(mConfig.fVideoFormat));
 	const bool					isInterlaced		(!isProgressive);
@@ -1577,10 +1578,10 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	NTV2AudioSystem				audioSystem			(NTV2_AUDIOSYSTEM_INVALID);
 	ULWord						numAudioChannels	(0);
 	Bouncer<UWord>				colBouncer			(32 - 11 /*upperLimit*/, 0 /*lowerLimit*/, 0 /*startAt*/);
-	NTV2_POINTER				pAudioBuffer		(0);
+	NTV2Buffer					pAudioBuffer		(0);
 	AUTOCIRCULATE_TRANSFER		xferInfo;
 
-	if (!mConfig.fForceVanc)
+	if (NTV2_IS_VANCMODE_OFF(mConfig.fVancMode))
 	{
 		xferInfo.acANCBuffer.Allocate(2048);
 		if (isInterlaced)
@@ -1629,7 +1630,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	const TimecodeFormat tcFormat(CNTV2DemoCommon::NTV2FrameRate2TimecodeFormat(frameRate));
 
 	//	Set up playout AutoCirculate and start it...
-	if (!mConfig.fForceVanc)
+	if (NTV2_IS_VANCMODE_OFF(mConfig.fVancMode))
 		acOptionFlags |= AUTOCIRCULATE_WITH_ANC;
 	if (!mConfig.fSuppressTimecode)
 		acOptionFlags |= AUTOCIRCULATE_WITH_RP188;
@@ -1657,7 +1658,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 			mDevice.WaitForOutputVerticalInterrupt (mConfig.fOutputChannel);	//	Wait for next VBI
 			continue;	//	Try again
 		}
-		if (!mConfig.fForceVanc)
+		if (NTV2_IS_VANCMODE_OFF(mConfig.fVancMode))
 			{xferInfo.acANCBuffer.Fill(ULWord(0));	xferInfo.acANCField2Buffer.Fill(ULWord(0));}	//	Clear Anc buffers before filling
 
 		AJAAncillaryList	packetList;	//	List of packets to be transmitted
@@ -1726,9 +1727,9 @@ void NTV2CCPlayer::PlayoutFrames (void)
 			}
 		}	//	else HD video
 
-		PLDBG("Xmit pkts: " << packetList);	//	DEBUG: Packet list to be transmitted
+		//	PLDBG("Xmit pkts: " << packetList);	//	DEBUG: Packet list to be transmitted
 		packetList.SetAllowMultiRTPTransmit(mConfig.fForceRTP & BIT(1));
-		if (mConfig.fForceVanc)	//	Write FB VANC lines...
+		if (NTV2_IS_VANCMODE_ON(mConfig.fVancMode))	//	Write FB VANC lines...
 			packetList.GetVANCTransmitData (mVideoBuffer,  formatDesc);
 		else if (mConfig.fForceRTP)	//	Force RTP? Non-IP2110 devices won't understand what's in the Anc buffer...
 			packetList.GetIPTransmitData(xferInfo.acANCBuffer, xferInfo.acANCField2Buffer, isProgressive, F2StartLine);

@@ -9,12 +9,12 @@
 #ifndef _NTV2CCPLAYER_H
 #define _NTV2CCPLAYER_H
 
-#include "ntv2devicescanner.h"
 #include "ntv2democommon.h"
-#include "ntv2testpatterngen.h"
 #include "ajabase/system/thread.h"
 #include "ajabase/system/info.h"
-#include "ajacc/includes/ajacc.h"
+#include "ajacc/includes/ntv2captionencoder608.h"
+#include "ajacc/includes/ntv2captionencoder708.h"
+#include "ajacc/includes/ntv2caption608types.h"
 #include <vector>
 #include <map>
 
@@ -65,7 +65,7 @@ typedef struct CCGeneratorConfig
 		{
 		}
 
-		AJALabelValuePairs Get(void)const;
+		AJALabelValuePairs Get (void) const;
 }	CCGeneratorConfig;
 
 
@@ -75,57 +75,37 @@ typedef CaptionChanGenMap::iterator							CaptionChanGenMapIter;
 
 
 /**
-	@brief	This class is used to configure an NTV2CCPlayer instance.
+	@brief	Configures an NTV2CCPlayer instance.
 **/
-typedef struct CCPlayerConfig
+typedef struct CCPlayerConfig : public PlayerConfig
 {
 	public:
-		std::string						fDeviceSpecifier;		///< @brief	The AJA device to use
-		NTV2Channel						fOutputChannel;			///< @brief	The device channel to use
-		NTV2OutputDestination			fOutputDestination;		///< @brief	The desired output connector to use
-		CNTV2DemoCommon::ACFrameRange	fFrames;				///< @brief	AutoCirculate frame count or range
-		bool							fEmitStats;				///< @brief	If true, show stats while playing; otherwise echo caption text being played
-		bool							fDoMultiFormat;			///< @brief	If true, use multi-format/multi-channel mode, if device supports it; otherwise normal mode
-		bool							fForceVanc;				///< @brief	If true, force the use of Vanc, even if the device supports Anc insertion
-		bool							fSuppressLine21;		///< @brief	SD output only:  if true, do not encode Line 21 waveform;  otherwise encode Line 21 waveform
-		bool							fSuppress608;			///< @brief	If true, don't transmit CEA608 packets;  otherwise include 608 packets
-		bool							fSuppress708;			///< @brief	If true, don't transmit CEA708 packets;  otherwise include 708 packets
-		bool							fSuppressAudio;			///< @brief	If true, suppress audio;  otherwise generate audio tones
-		bool							fSuppressTimecode;		///< @brief	If true, suppress timecode;  otherwise embed VITC/LTC
-		bool							fDualLinkRGB;			///< @brief	If true, route dual-link RGB output;  otherwise normal YCbCr
-		bool							fSquareDivision;		///< @brief	If true, square-division used for 4K/UHD;  otherwise default is TSI
-		uint16_t						fForceRTP;				///< @brief	BIT(0):0=normal,1=forceRTP  BIT(1):0=uniPkt,1=multiPkt  BIT(2):0=normal,1=patchDeviceID
-		NTV2VideoFormat					fVideoFormat;			///< @brief	The video format to use
-		NTV2FrameBufferFormat			fPixelFormat;			///< @brief	The pixel format to use
-		std::string						fTestPatternName;		///< @brief	The test pattern to use
-		CaptionChanGenMap				fChannelGenerators;		///< @brief	Caption channel generators
+		bool				fEmitStats;				///< @brief	If true, show stats while playing; otherwise echo caption text being played
+		bool				fSuppressLine21;		///< @brief	SD output only:  if true, do not encode Line 21 waveform;  otherwise encode Line 21 waveform
+		bool				fSuppress608;			///< @brief	If true, don't transmit CEA608 packets;  otherwise include 608 packets
+		bool				fSuppress708;			///< @brief	If true, don't transmit CEA708 packets;  otherwise include 708 packets
+		bool				fSuppressTimecode;		///< @brief	If true, suppress timecode;  otherwise embed VITC/LTC
+		uint16_t			fForceRTP;				///< @brief	BIT(0):0=normal,1=forceRTP  BIT(1):0=uniPkt,1=multiPkt  BIT(2):0=normal,1=patchDeviceID
+		std::string			fTestPatternName;		///< @brief	The test pattern to use
+		CaptionChanGenMap	fCapChanGenConfigs;		///< @brief	Caption channel generator configs
 
 		/**
 			@brief	Constructs a default CCPlayer configuration.
 		**/
 		inline explicit	CCPlayerConfig (const std::string & inDeviceSpecifier	= "0")
-			:	fDeviceSpecifier	(inDeviceSpecifier),
-				fOutputChannel		(NTV2_CHANNEL1),
-				fOutputDestination	(NTV2_OUTPUTDESTINATION_INVALID),
-				fFrames				(7),
+			:	PlayerConfig		(inDeviceSpecifier),
 				fEmitStats			(true),
-				fDoMultiFormat		(false),
-				fForceVanc			(false),
 				fSuppressLine21		(false),
 				fSuppress608		(false),
 				fSuppress708		(false),
-				fSuppressAudio		(false),
 				fSuppressTimecode	(false),
-				fDualLinkRGB		(false),
-				fSquareDivision		(false),
 				fForceRTP			(0),
-				fVideoFormat		(NTV2_FORMAT_525_5994),
-				fPixelFormat		(NTV2_FBF_10BIT_YCBCR),
 				fTestPatternName	("Flat Field"),
-				fChannelGenerators	()
+				fCapChanGenConfigs	()
 		{
 		}
-		AJALabelValuePairs Get(const bool inCompact = false)const;
+
+		AJALabelValuePairs Get (const bool inCompact = false) const;
 
 }	CCPlayerConfig;
 
@@ -142,7 +122,6 @@ std::ostream &	operator << (std::ostream & ioStrm, const CCPlayerConfig & inObj)
 			(i.e., the "play" thread) sends those frames to the AJA device.
 			I demonstrate how to use the "AJA CC LIB" caption library to embed captions into an SDI output signal.
 **/
-
 class NTV2CCPlayer
 {
 	//	Public Instance Methods
@@ -250,13 +229,12 @@ class NTV2CCPlayer
 		CNTV2Card					mDevice;				///< @brief	My CNTV2Card instance
 		NTV2DeviceID				mDeviceID;				///< @brief	My device (model) identifier
 		NTV2TaskMode				mSavedTaskMode;			///< @brief	Used to restore the previous state
-		NTV2VANCMode				mVancMode;				///< @brief	VANC mode
 		NTV2Standard				mVideoStandard;			///< @brief	Output video standard
 		bool						mPlayerQuit;			///< @brief	Set "true" to terminate player
 		bool						mCaptionGeneratorQuit;	///< @brief	Set "true" to terminate caption generator(s)
 		CNTV2CaptionEncoder608Ptr	m608Encoder;			///< @brief	My CEA-608 caption encoder
 		CNTV2CaptionEncoder708Ptr	m708Encoder;			///< @brief	My 708 caption encoder
-		NTV2_POINTER				mVideoBuffer;			///< @brief	My video buffer
+		NTV2Buffer					mVideoBuffer;			///< @brief	My video buffer
 		NTV2ChannelSet				mActiveFrameStores;		///< @brief	My active FrameStores
 		NTV2XptConnections			mConnections;			///< @brief	Routing connections I make
 

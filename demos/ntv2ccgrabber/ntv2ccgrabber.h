@@ -59,45 +59,35 @@ typedef enum _CaptionDataSrc
 /**
 	@brief	This class is used to configure an NTV2CCGrabber instance.
 **/
-typedef struct CCGrabberConfig
+typedef struct CCGrabberConfig	:	public CaptureConfig
 {
 	public:
-		std::string						fDeviceSpecifier;	///< @brief	The AJA device to use
-		NTV2Channel						fInputChannel;		///< @brief	The device channel to use
-		NTV2InputSource					fInputSource;		///< @brief	The device input connector to use
-		CNTV2DemoCommon::ACFrameRange	fFrames;			///< @brief	AutoCirculate frame count or range
-		OutputMode						fOutputMode;		///< @brief	Desired output (captionStream, Screen etc)
-		CaptionDataSrc					fCaptionSrc;		///< @brief	Caption data source (Line21? 608 VANC? 608 Anc?  etc)
-		NTV2TCIndex						fTimecodeSrc;		///< @brief	Timecode source to use (if any)
-		NTV2FrameBufferFormat			fPixelFormat;		///< @brief	Pixel format to use
-		NTV2Line21Channel				fCaptionChannel;	///< @brief	Caption channel to monitor (defaults to CC1)
-		bool							fBurnCaptions;		///< @brief	If true, burn-in captions on 2nd channel
-		bool							fDoMultiFormat;		///< @brief	If true, use multi-format/multi-channel mode, if device supports it; otherwise normal mode
-		bool							fUseVanc;			///< @brief	If true, use Vanc, even if the device supports Anc insertion
-		bool							fCaptureAudio;		///< @brief	If true, also capture audio
+		OutputMode				fOutputMode;		///< @brief	Desired output (captionStream, Screen etc)
+		CaptionDataSrc			fCaptionSrc;		///< @brief	Caption data source (Line21? 608 VANC? 608 Anc?  etc)
+		NTV2TCIndex				fTimecodeSrc;		///< @brief	Timecode source to use (if any)
+		NTV2Line21Channel		fCaptionChannel;	///< @brief	Caption channel to monitor (defaults to CC1)
+		bool					fBurnCaptions;		///< @brief	If true, burn-in captions on 2nd channel
+		bool					fUseVanc;			///< @brief	If true, use Vanc, even if the device supports Anc insertion
 
 		/**
 			@brief	Constructs a default CCPlayer configuration.
 		**/
 		inline explicit	CCGrabberConfig (const std::string & inDeviceSpecifier	= "0")
-			:	fDeviceSpecifier	(inDeviceSpecifier),
-				fInputChannel		(NTV2_CHANNEL_INVALID),
-				fInputSource		(NTV2_INPUTSOURCE_INVALID),
-				fFrames				(7),
+			:	CaptureConfig		(inDeviceSpecifier),
 				fOutputMode			(kOutputMode_CaptionStream),
 				fCaptionSrc			(kCaptionDataSrc_Default),
 				fTimecodeSrc		(NTV2_TCINDEX_INVALID),
-				fPixelFormat		(NTV2_FBF_10BIT_YCBCR),
 				fCaptionChannel		(NTV2_CC608_CC1),
 				fBurnCaptions		(false),
-				fDoMultiFormat		(false),
-				fUseVanc			(false),
-				fCaptureAudio		(false)
+				fUseVanc			(false)
 		{
+			fWithAnc = true;
+			fWithAudio = false;
 		}
-		unsigned GetNumSourceSpecs(void)const {return	(NTV2_IS_VALID_CHANNEL(fInputChannel)?1:0)
+		unsigned GetNumSourceSpecs (void) const	{return	(NTV2_IS_VALID_CHANNEL(fInputChannel)?1:0)
 													+	(NTV2_IS_VALID_INPUT_SOURCE(fInputSource)?1:0);}
-		AJALabelValuePairs Get(const bool inCompact = false)const;
+		AJALabelValuePairs	Get (const bool inCompact = false) const;
+
 		static std::string	GetLegalOutputModes (void);
 		static std::string	OutputModeToString (const OutputMode inMode);
 		static OutputMode	StringToOutputMode (const std::string & inModeStr);
@@ -286,9 +276,9 @@ class NTV2CCGrabber
 		virtual void			CaptioningChanged (const NTV2Caption608ChangeInfo & inChangeInfo);
 
 		/**
-			@return	True if the device supports ancillary data extraction, and the driver supports the new AutoCirculate calls.
+			@return	True if the device supports ancillary data extraction.
 		**/
-		virtual bool			DeviceAncExtractorIsAvailable (void);
+		virtual bool			DeviceAncExtractorIsAvailable (void) const;
 
 
 	//	Protected Class Methods
@@ -318,7 +308,6 @@ class NTV2CCGrabber
 		**/
 		static void				Caption608ChangedStatic (void * pInstance, const NTV2Caption608ChangeInfo & inChangeInfo);
 
-		typedef	AJACircularBuffer <NTV2FrameData *>	MyCircularBuffer;
 
 	//	Instance Data
 	private:
@@ -348,7 +337,7 @@ class NTV2CCGrabber
 		NTV2ChannelSet				mActiveCSCs;		///< @brief	Active CSCs
 		NTV2XptConnections			mInputConnections;	///< @brief	Input routing connections
 		NTV2FrameDataArray			mHostBuffers;		///< @brief	My host buffers
-		MyCircularBuffer			mCircularBuffer;	///< @brief	My circular buffer
+		FrameDataRingBuffer			mCircularBuffer;	///< @brief	My circular buffer
 		AUTOCIRCULATE_TRANSFER		mInputXferInfo;		///< @brief	My input AutoCirculate transfer info
 
 		//	Instance data only used for caption burn-in:

@@ -13,9 +13,9 @@ int main(int argc, char *argv[])
     parser.setApplicationDescription("Kona IP Json Setup");
     parser.addHelpOption();
     parser.addVersionOption();
-    const QCommandLineOption deviceOption("d", "which device to use", "device");
+    const QCommandLineOption deviceOption("d", "device to use", "device");
     parser.addOption(deviceOption);
-    const QCommandLineOption boardOption("b", "which device to use", "board");
+    const QCommandLineOption boardOption("b", "device to use", "board");
     parser.addOption(boardOption);
     const QCommandLineOption keywordsOption("k", "list supported JSON keywords");
     parser.addOption(keywordsOption);

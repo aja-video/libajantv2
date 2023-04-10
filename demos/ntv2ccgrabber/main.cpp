@@ -69,7 +69,6 @@ int main (int argc, const char ** argv)
 	const string	legal608Sources	(CCGrabberConfig::CaptionDataSrcToString(kCaptionDataSrc_INVALID));
 	const string	legalOutputModes(CCGrabberConfig::OutputModeToString(kOutputMode_INVALID));
 	const string	legalFramesSpec	("{frameCount}[@{firstFrameNum}]  or  {firstFrameNum}-{lastFrameNum}");
-	AJAStatus		status			(AJA_STATUS_SUCCESS);	//	Init result
 	char *			pDeviceSpec		(AJA_NULL);				//	Device spec
 	char *			pInputSrcSpec	(AJA_NULL);				//	SDI source spec
 	char *			pTimecodeSpec	(AJA_NULL);				//	Timecode source spec
@@ -78,13 +77,12 @@ int main (int argc, const char ** argv)
 	char *			pCaptionSource	(AJA_NULL);				//	Caption source of interest (line21, 608vanc, 608anc ...)
 	char *			pOutputMode		(AJA_NULL);				//	Output mode (stream, screen, file ...)
 	char *			pFramesSpec		(AJA_NULL);				//	AutoCirculate frames spec
-	int				channelNumber	(0);					//	Channel (framestore) spec
-	int				bBurnCaptions	(0);					//	Burn-in captions?
-	int				bMultiFormat	(0);					//	Enable multi-format?
-	int				bUseVanc		(0);					//	Use Vanc (tall frame) geometry?
-	int				bWithAudio		(0);					//	Grab audio?
-	int				bShowVersion	(0);					//	Show version?
-	poptContext		optionsContext;							//	Context for parsing command line arguments
+	int				channelNumber	(1);					//	Channel (framestore) spec
+	int				burnCaptions	(0);					//	Burn-in captions?
+	int				doMultiFormat	(0);					//	MultiFormat mode?
+	int				useVanc			(0);					//	Use Vanc (tall frame) geometry?
+	int				grabAudio		(0);					//	Grab audio?
+	int				showVersion		(0);					//	Show version?
 	AJADebug::Open();
 
 	::setlocale (LC_ALL, "");	//	Might have to emit UTF-8 Unicode
@@ -92,36 +90,37 @@ int main (int argc, const char ** argv)
 	gPlugAndPlay.Install (PnpCallback, 0, AJA_Pnp_PciVideoDevices);
 
 	//	Command line option descriptions:
-	const struct poptOption userOptionsTable [] =
+	const CNTV2DemoCommon::PoptOpts optionsTable [] =
 	{
-		{"version",		 0,		POPT_ARG_NONE,		&bShowVersion,		0,	"show version and exit",		AJA_NULL					},
-		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device to use",			"index#, serial#, or model"	},
-		{"input",		'i',	POPT_ARG_STRING,	&pInputSrcSpec,		0,	"which SDI input",				"1-8, ?=list"				},
-		{"tcsource",	't',	POPT_ARG_STRING,	&pTimecodeSpec,		0,	"time code source",				"'?' or 'list' to list"		},
-		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,		0,	"pixel format to use",			"'?' or 'list' to list"		},
-		{"608chan",		0,		POPT_ARG_STRING,	&pCaptionChannel,	0,	"608 caption chl to monitor",	legalChannels.c_str()		},
-		{"608src",		0,		POPT_ARG_STRING,	&pCaptionSource,	0,	"608 source to use",			legal608Sources.c_str()		},
-		{"output",		0,		POPT_ARG_STRING,	&pOutputMode,		0,	"608 output mode",				legalOutputModes.c_str()	},
-		{"channel",		'c',	POPT_ARG_INT,		&channelNumber,		0,	"channel/frameStore to use",	"1-8"						},
-		{"frames",		0,		POPT_ARG_STRING,	&pFramesSpec,		0,	"frames to AutoCirc",			"num[@min] or min-max"		},
-		{"burn",		'b',	POPT_ARG_NONE,		&bBurnCaptions,		0,	"burn-in captions",				AJA_NULL					},
-		{"multiChannel",'m',	POPT_ARG_NONE,		&bMultiFormat,		0,	"enables multi-channel/format",	AJA_NULL					},
-		{"vanc",		'v',	POPT_ARG_NONE,		&bUseVanc,			0,	"use vanc geometry",			AJA_NULL					},
-		{"audio",		'a',	POPT_ARG_NONE,		&bWithAudio,		0,	"also capture audio",			AJA_NULL					},
+		{"version",		  0,	POPT_ARG_NONE,		&showVersion,		0,	"show version",				AJA_NULL					},
+		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"device to use",			"index#, serial#, or model"	},
+		{"channel",		'c',	POPT_ARG_INT,		&channelNumber,		0,	"channel to use",			"1-8"						},
+		{"multiFormat",	'm',	POPT_ARG_NONE,		&doMultiFormat,		0,	"use multi-format/channel",	AJA_NULL					},
+		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,		0,	"pixel format to use",		"'?' or 'list' to list"		},
+		{"frames",		  0,	POPT_ARG_STRING,	&pFramesSpec,		0,	"frames to AutoCirculate",	"num[@min] or min-max"		},
+		{"input",		'i',	POPT_ARG_STRING,	&pInputSrcSpec,		0,	"which SDI input",			"1-8, ?=list"				},
+		{"tcsource",	't',	POPT_ARG_STRING,	&pTimecodeSpec,		0,	"timecode source",			"'?' or 'list' to list"		},
+		{"608chan",		  0,	POPT_ARG_STRING,	&pCaptionChannel,	0,	"608 cap chan to monitor",	legalChannels.c_str()		},
+		{"608src",		  0,	POPT_ARG_STRING,	&pCaptionSource,	0,	"608 source to use",		legal608Sources.c_str()		},
+		{"output",		  0,	POPT_ARG_STRING,	&pOutputMode,		0,	"608 output mode",			legalOutputModes.c_str()	},
+		{"burn",		'b',	POPT_ARG_NONE,		&burnCaptions,		0,	"burn-in captions",			AJA_NULL					},
+		{"vanc",		'v',	POPT_ARG_NONE,		&useVanc,			0,	"use vanc geometry",		AJA_NULL					},
+		{"audio",		'a',	POPT_ARG_NONE,		&grabAudio,			0,	"also capture audio",		AJA_NULL					},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
 
 	//	Read command line arguments...
-	optionsContext = ::poptGetContext (argv[0], argc, argv, userOptionsTable, 0);
-	::poptGetNextOpt (optionsContext);
-	optionsContext = ::poptFreeContext (optionsContext);
+	CNTV2DemoCommon::Popt popt(argc, argv, optionsTable);
+	if (!popt)
+		{cerr << "## ERROR: " << popt.errorStr() << endl;  return 2;}
+
 	const string	deviceSpec		(pDeviceSpec   ? pDeviceSpec : "0");
 	const string	inputSourceStr	(pInputSrcSpec ? CNTV2DemoCommon::ToLower(string(pInputSrcSpec)) : "");
 	const string	tcSourceStr		(pTimecodeSpec ? CNTV2DemoCommon::ToLower(string(pTimecodeSpec)) : "");
 	const string	pixelFormatStr	(pPixelFormat  ? pPixelFormat :  "");
 	const string	framesSpec		(pFramesSpec   ? pFramesSpec  :  "");
-	if (bShowVersion)
+	if (showVersion)
 		{cout << argv[0] << ", NTV2 SDK " << ::NTV2Version() << endl;  return 0;}
 
 	//	Device
@@ -134,13 +133,12 @@ int main (int argc, const char ** argv)
 	CCGrabberConfig	config(deviceSpec);
 
 	//	Channel
-	if (channelNumber > 8)
-		{cerr << "## ERROR:  Bad channel number '" << DEC(channelNumber) << "', must be between 1 and 8" << endl;	return 1;}
-	if (channelNumber)
-		config.fInputChannel = NTV2Channel(channelNumber - 1);
+	if ((channelNumber < 1)  ||  (channelNumber > 8))
+		{cerr << "## ERROR:  Invalid channel number " << channelNumber << " -- expected 1 thru 8" << endl;  return 1;}
+	config.fInputChannel = NTV2Channel(channelNumber - 1);
 
 	//	Input source
-	const string	legalSources(CNTV2DemoCommon::GetInputSourceStrings(NTV2_INPUTSOURCES_SDI, deviceSpec));
+	const string	legalSources(CNTV2DemoCommon::GetInputSourceStrings(NTV2_IOKINDS_SDI, deviceSpec));
 	if (inputSourceStr == "?" || inputSourceStr == "list")
 		{cout << legalSources << endl;  return 0;}
 	if (!inputSourceStr.empty())
@@ -220,25 +218,23 @@ int main (int argc, const char ** argv)
 		{cerr << "## ERROR:  Bad 'frames' spec '" << framesSpec << "'\n## Expected " << legalFramesSpec << endl;  return 1;}
 
 	//	Configure the grabber...
-	config.fBurnCaptions	= bBurnCaptions	? true : false;
-	config.fDoMultiFormat	= bMultiFormat	? true : false;
-	config.fUseVanc			= bUseVanc		? true : false;
-	config.fCaptureAudio	= bWithAudio	? true : false;
+	config.fBurnCaptions	= burnCaptions	? true : false;
+	config.fDoMultiFormat	= doMultiFormat	? true : false;
+	config.fUseVanc			= useVanc		? true : false;
+	config.fWithAudio		= grabAudio		? true : false;
 
-	cerr << config << endl;	//	Dump config
+	NTV2CCGrabber ccGrabber (config);
+
+	//	Initialize the ccGrabber instance...
+	AJAStatus status (ccGrabber.Init());
+	if (AJA_FAILURE(status))
+		{cerr << "## ERROR:  'ntv2ccgrabber' initialization failed with status " << status << endl;	return 2;}
 
 	::signal (SIGINT, SignalHandler);
 	#if defined (AJAMac)
 		::signal (SIGHUP, SignalHandler);
 		::signal (SIGQUIT, SignalHandler);
 	#endif
-
-	NTV2CCGrabber ccGrabber (config);
-
-	//	Initialize the ccGrabber instance...
-	status = ccGrabber.Init();
-	if (AJA_FAILURE(status))
-		{cerr << "## ERROR:  'ntv2ccgrabber' initialization failed with status " << status << endl;	return 2;}
 
 	//	Run the ccGrabber...
 	if (AJA_FAILURE(ccGrabber.Run()))
