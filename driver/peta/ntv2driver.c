@@ -191,7 +191,7 @@ typedef struct _fileData
 static void SetupBoard(ULWord deviceNumber);
 
 static int ValidateAjaNTV2Message(NTV2_HEADER * pHeaderIn);
-static int DoMessageSDIInStatictics(ULWord deviceNumber, NTV2_POINTER * pInStatistics, void * pOutBuff);
+static int DoMessageSDIInStatictics(ULWord deviceNumber, NTV2Buffer * pInStatistics, void * pOutBuff);
 static int DoMessageBankAndRegisterWrite(ULWord deviceNumber, NTV2RegInfo * pInReg, NTV2RegInfo * pInBank);
 static int DoMessageBankAndRegisterRead(ULWord deviceNumber, NTV2RegInfo * pInReg, NTV2RegInfo * pInBank);
 static int DoMessageAutoCircFrame(ULWord deviceNumber, FRAME_STAMP * pInOutFrameStamp, NTV2_RP188 * pTimecodeArray);
@@ -1258,7 +1258,7 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 
 			case NTV2_TYPE_SDISTATS:
 				{
-					NTV2_POINTER * pInStatistics = &((NTV2SDIInStatistics*)pMessage)->mInStatistics;
+					NTV2Buffer * pInStatistics = &((NTV2SDIInStatistics*)pMessage)->mInStatistics;
 					if(copy_from_user((void*) pOutBuff,
 									  (const void*)(pInStatistics->fUserSpacePtr),
 									  pInStatistics->fByteCount))
@@ -1282,9 +1282,9 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 			case NTV2_TYPE_GETREGS:
 				{
 					ULWord  		mInNumRegisters		=  ((NTV2GetRegisters*)pMessage)->mInNumRegisters;
-					NTV2_POINTER *	pInRegisters		= &((NTV2GetRegisters*)pMessage)->mInRegisters;
-					NTV2_POINTER *	pOutGoodRegisters	= &((NTV2GetRegisters*)pMessage)->mOutGoodRegisters;
-					NTV2_POINTER *	pOutValues			= &((NTV2GetRegisters*)pMessage)->mOutValues;
+					NTV2Buffer *	pInRegisters		= &((NTV2GetRegisters*)pMessage)->mInRegisters;
+					NTV2Buffer *	pOutGoodRegisters	= &((NTV2GetRegisters*)pMessage)->mOutGoodRegisters;
+					NTV2Buffer *	pOutValues			= &((NTV2GetRegisters*)pMessage)->mOutValues;
 					ULWord *		pInRegArray			= (ULWord*) pInBuff;
 					ULWord *		pOutRegArray		= (ULWord*) pOutBuff;
 					ULWord *		pOutValuesArray		= (ULWord*) pOutBuff2;
@@ -1363,7 +1363,7 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 			case NTV2_TYPE_SETREGS:
 				{
 					ULWord  		mInNumRegisters		=  ((NTV2SetRegisters*)pMessage)->mInNumRegisters;
-					NTV2_POINTER *	pInRegisters		= &((NTV2SetRegisters*)pMessage)->mInRegInfos;
+					NTV2Buffer *	pInRegisters		= &((NTV2SetRegisters*)pMessage)->mInRegInfos;
 					NTV2RegInfo  *	pInRegInfos			= (NTV2RegInfo*) pInBuff;
 					ULWord			i;
 
@@ -1396,8 +1396,8 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 			case NTV2_TYPE_BANKGETSET:
 				{
 					ULWord  		mIsWriting		=  ((NTV2BankSelGetSetRegs*)pMessage)->mIsWriting;
-					NTV2_POINTER *	pInBankInfos	= &((NTV2BankSelGetSetRegs*)pMessage)->mInBankInfos;
-					NTV2_POINTER *	pInRegInfos		= &((NTV2BankSelGetSetRegs*)pMessage)->mInRegInfos;
+					NTV2Buffer *	pInBankInfos	= &((NTV2BankSelGetSetRegs*)pMessage)->mInBankInfos;
+					NTV2Buffer *	pInRegInfos		= &((NTV2BankSelGetSetRegs*)pMessage)->mInRegInfos;
 
 
 					//	Check for buffer overrun
@@ -1444,7 +1444,7 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 #if 0
 			case NTV2_TYPE_ACFRAMESTAMP:
 				{
-					NTV2_POINTER *	pAcTimeCodes	= &((FRAME_STAMP*)pMessage)->acTimeCodes;
+					NTV2Buffer *	pAcTimeCodes	= &((FRAME_STAMP*)pMessage)->acTimeCodes;
 
 					//	Check for buffer overrun
 					if (pAcTimeCodes->fByteCount > PAGE_SIZE)
@@ -3383,7 +3383,7 @@ int ValidateAjaNTV2Message(NTV2_HEADER * pHeaderIn)
 	return 0;
 }
 
-int DoMessageSDIInStatictics(ULWord deviceNumber, NTV2_POINTER * pInStatistics, void * pOutBuff)
+int DoMessageSDIInStatictics(ULWord deviceNumber, NTV2Buffer * pInStatistics, void * pOutBuff)
 {
 	INTERNAL_SDI_STATUS_STRUCT internalSDIStruct;
 	Ntv2SystemContext systemContext;

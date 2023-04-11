@@ -178,6 +178,7 @@ static void ntv2_uartops_set_termios(struct uart_port *port,
 									 struct ktermios *termios,
 									 struct ktermios *old)
 #endif
+
 {
 	struct ntv2_serial *ntv2_ser = container_of(port, struct ntv2_serial, uart_port);
 	u32 valid = ntv2_kona_fld_serial_rx_valid;
