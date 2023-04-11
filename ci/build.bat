@@ -6,7 +6,7 @@ set ROOT_DIR=%SELF_DIR%..
 
 REM Handle Default options
 if "%VS_YEAR%" == "" (
-	set VS_YEAR=2017
+	set VS_YEAR=2019
 )
 
 if "%VS_EDITION%" == "" (
