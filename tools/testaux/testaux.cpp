@@ -202,7 +202,7 @@ int main(int argc, const char ** argv)
 		if (lastFrameIndex < 0)
 			lastFrameIndex  = 0;
 
-		NTV2_POINTER		vidSrcBuffer (formatDesc.GetTotalBytes());
+		NTV2Buffer			vidSrcBuffer (formatDesc.GetTotalBytes());
 		NTV2TestPatternGen	testPatternGen;
 		if (!testPatternGen.DrawTestPattern (testPattern, formatDesc, vidSrcBuffer))
 		{
@@ -237,9 +237,9 @@ int main(int argc, const char ** argv)
 			if (acStatus.GetNumAvailableOutputFrames() > 1)
 			{
 				if ((iTest & 0x100) != 0)
-					transfer.acHDMIAuxData = NTV2_POINTER(auxSPDf0, 32);
+					transfer.acHDMIAuxData = NTV2Buffer(auxSPDf0, 32);
 				else
-					transfer.acHDMIAuxData = NTV2_POINTER(auxSPDf1, 32);
+					transfer.acHDMIAuxData = NTV2Buffer(auxSPDf1, 32);
 				if (!device.AutoCirculateTransfer(videoChannel, transfer))
 					fprintf (stderr, "## ERROR:  TransferWithAutoCirculate failed!\n");
 
@@ -258,7 +258,7 @@ int main(int argc, const char ** argv)
 		cout << endl;
 
 		// disable hdr aux
-		transfer.acHDMIAuxData = NTV2_POINTER(auxDisable, 32);
+		transfer.acHDMIAuxData = NTV2Buffer(auxDisable, 32);
 		device.AutoCirculateTransfer(videoChannel, transfer);
 		device.AutoCirculateGetStatus(videoChannel, acStatus);
 		while (acStatus.GetBufferLevel() > 1)

@@ -120,7 +120,7 @@ int main (int argc, const char ** argv)
 	device.GetFrameBufferSize	(NTV2_CHANNEL1, frameSize);
     const ULWord	byteCount	(dmaSize? dmaSize : ::NTV2FramesizeToByteCount(frameSize));
 	const double	megaBytes	(double(byteCount) / 1024.0 / 1024.0);
-	NTV2_POINTER	buffer		(byteCount);
+	NTV2Buffer		buffer		(byteCount);
 	const string	rw			(doCapture ? " READ " : " WRITE ");
 	double			xferMin		(100000.0);
 	double			xferMax		(0.0);
