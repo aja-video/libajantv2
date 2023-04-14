@@ -19,8 +19,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# noop
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	if (CMAKE_OSX_ARCHITECTURES STREQUAL "x86_64")
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse3 -msse4.1 -msse4.2")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse3 -msse4.1 -msse4.2")
+        list(APPEND TARGET_COMPILE_OPTIONS
+            -msse3
+            -msse4.1
+            -msse4.2)
 	endif()
 
 	set_source_files_properties(Info.plist PROPERTIES MACOSX_PACKAGE_LOCATION Contents)
@@ -59,6 +61,7 @@ set(TARGET_SOURCES
 
 add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
 add_dependencies(${PROJECT_NAME} ajantv2)
+target_compile_options(${PROJECT_NAME} PRIVATE ${TARGET_COMPILE_OPTIONS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS} ajantv2)
 
