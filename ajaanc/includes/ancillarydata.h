@@ -222,7 +222,7 @@ AJAExport std::string AJAAncHorizOffsetToString (const uint16_t inValue);
 /**
 	@brief	Defines where the ancillary data can be found within a video stream.
 **/
-typedef struct AJAAncDataLoc
+typedef struct AJAExport AJAAncDataLoc
 {
 	//	Instance Methods
 	public:

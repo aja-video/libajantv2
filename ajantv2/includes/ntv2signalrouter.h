@@ -245,7 +245,7 @@ class AJAExport CNTV2SignalRouter
 		**/
 		virtual std::ostream &						Print (std::ostream & inOutStream, const bool inForRetailDisplay = false) const;
 
-		struct PrintCodeConfig
+		struct AJAExport PrintCodeConfig
 		{
 			bool		mShowComments;		///< @brief If true, show comments in the generated code
 			bool		mShowDeclarations;	///< @brief If true, show variable declarations in the generated code
