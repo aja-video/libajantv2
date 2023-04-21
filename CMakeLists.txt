@@ -44,6 +44,10 @@ if(AJA_BUILD_SHARED)
     set(AJANTV2_BUILD_SHARED ON)
 endif()
 
+if(AJA_BUILD_TESTS)
+	set(AJANTV2_BUILD_TESTS ON)
+endif()
+
 if(AJA_BUILD_DOCS)
     set(AJANTV2_BUILD_DOCS ON)
 endif()
