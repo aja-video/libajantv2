@@ -15,11 +15,12 @@
 	#include <set>
 	#include <map>
 	#include <vector>
+	#include <string>
 	#include <iomanip>
 	#include <bitset>
 	#include <string>
+	#include "string.h"	//	for memcpy
 	#include "ajaexport.h"
-	#include "string.h"
 	#if defined(MSWindows)
 		#pragma warning(disable:4800)	//	int/bool conversion
 		#pragma warning(disable:4127)	//	Stop MSVC from bitching about "do{...}while(false)" macros
