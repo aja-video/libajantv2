@@ -152,7 +152,11 @@ bool ReadSDIInVPID(Ntv2SystemContext* context, NTV2Channel channel, ULWord* valu
 #elif defined (MSWindows)
 				*valueA = RtlUlongByteSwap(regValue);
 #elif defined (AJAMac)
+	#ifdef AJAMacDext
+				*valueA = OSSwapBigToHostInt32(regValue);
+	#else
 				*valueA = OSSwapInt32(regValue);
+	#endif
 #elif defined (AJALinux)
 				*valueA = be32_to_cpu(regValue);
 #endif
@@ -178,7 +182,11 @@ bool ReadSDIInVPID(Ntv2SystemContext* context, NTV2Channel channel, ULWord* valu
 #elif defined (MSWindows)
 				*valueB = RtlUlongByteSwap(ntv2ReadRegister(context, gVPIDBInRegs[channel]));
 #elif defined (AJAMac)
+	#ifdef AJAMacDext
+				*valueA = OSSwapBigToHostInt32(regValue);
+	#else
 				*valueB = OSSwapInt64(regValue);
+	#endif
 #elif defined (AJALinux)
 				*valueB = be32_to_cpu(regValue);
 #endif

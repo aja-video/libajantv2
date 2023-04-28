@@ -737,7 +737,7 @@ bool CNTV2MacDriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outV
 		{outValue = (gMRRegs[inRegNum - kRegMRQ1Control] & inMask) >> inShift;	return true;}
 #endif
 	kern_return_t kernResult(KERN_FAILURE);
-	uint64_t	scalarI_64[2] = {inRegNum, inMask};
+	uint64_t	scalarI_64[3] = {inRegNum, inMask, inShift};
 	uint64_t	scalarO_64 = outValue;
 	uint32_t	outputCount = 1;
 	if (GetIOConnect())
@@ -746,7 +746,7 @@ bool CNTV2MacDriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outV
 		kernResult = OS_IOConnectCallScalarMethod (	GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 													kDriverReadRegister,	// selector of the function to be called via the user client.
 													scalarI_64,				// array of scalar (64-bit) input values.
-													2,						// the number of scalar input values.
+													mIsDEXT ? 3 : 2,		// the number of scalar input values.
 													&scalarO_64,			// array of scalar (64-bit) output values.
 													&outputCount);			// pointer to the number of scalar output values.
 		AJADebug::StatTimerStop(AJA_DebugStat_ReadRegister);
@@ -791,7 +791,7 @@ bool CNTV2MacDriverInterface::WriteRegister (const ULWord inRegNum, const ULWord
 		{gMRRegs[inRegNum - kRegMRQ1Control] = ((inValue << inShift) & inMask) | ((~inMask) & gMRRegs[inRegNum - kRegMRQ1Control]);	return true;}
 #endif
 	kern_return_t kernResult(KERN_FAILURE);
-	uint64_t	scalarI_64[3] = {inRegNum, inValue, inMask};
+	uint64_t	scalarI_64[4] = {inRegNum, inValue, inMask, inShift};
 	uint32_t	outputCount = 0;
 	if (GetIOConnect())
 	{
@@ -799,7 +799,7 @@ bool CNTV2MacDriverInterface::WriteRegister (const ULWord inRegNum, const ULWord
 		kernResult = OS_IOConnectCallScalarMethod (	GetIOConnect(),			// an io_connect_t returned from IOServiceOpen().
 													kDriverWriteRegister,	// selector of the function to be called via the user client.
 													scalarI_64,				// array of scalar (64-bit) input values.
-													3,						// the number of scalar input values.
+													mIsDEXT ? 4 : 3,						// the number of scalar input values.
 													AJA_NULL,				// array of scalar (64-bit) output values.
 													&outputCount);			// pointer to the number of scalar output values.
 		AJADebug::StatTimerStop(AJA_DebugStat_WriteRegister);

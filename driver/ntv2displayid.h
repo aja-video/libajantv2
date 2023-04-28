@@ -88,7 +88,7 @@ struct ntv2_displayid_audio
  *	@param[out]	regVal				Register value
  *	@return							AJA_STATUS_SUCCESS if register read works
  */
-typedef bool ntv2_displayid_callback(void* context, uint8_t block_num, uint8_t reg_num, uint8_t* reg_val);
+typedef bool ntv2_displayid_callback(void* pContext, uint8_t blockNum, uint8_t regNum, uint8_t* regVal);
 
 
 struct ntv2_displayid

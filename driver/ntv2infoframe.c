@@ -212,7 +212,11 @@ bool ntv2_aux_to_avi_info(uint32_t *aux_data, uint32_t aux_size, struct ntv2_avi
 		return false;
 
 	/* clear avi data */
+#ifdef AJAMacDext
+	bzero((void*)avi_data, sizeof(struct ntv2_avi_info_data));
+#else
 	memset(avi_data, 0, sizeof(struct ntv2_avi_info_data));
+#endif
 
 	/* check for avi info present */
 	if (NTV2_FLD_GET(ntv2_fld_header_type, aux_data[ntv2_info_frame_header]) != ntv2_header_type_video_info)
