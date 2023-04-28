@@ -32,24 +32,16 @@ set(TARGET_SOURCES
 	${DEMO_APPS_HEADERS}
 	${DEMO_APPS_SOURCES})
 
-aja_add_executable(ntv2recorddpx PUBLIC
-	"${TARGET_SOURCES}"
-	ajantv2
-	"${TARGET_INCLUDE_DIRS}"
-	"${TARGET_LINK_LIBS};ajantv2" "")
-set(BUILD_TARGETS ntv2recorddpx)
-if (AJA_BUILD_SHARED)
-	set(BUILD_TARGETS ${BUILD_TARGETS} ntv2recorddpx-dl)
-	aja_add_executable(ntv2recorddpx-dl PUBLIC
-		"${TARGET_SOURCES}"
-		ajantv2-dl
-		"${TARGET_INCLUDE_DIRS}"
-		"${TARGET_LINK_LIBS};ajantv2-dl" "")
-endif()
+add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
+add_dependencies(${PROJECT_NAME} ajantv2)
+target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS} ajantv2)
+
 if (AJA_CODE_SIGN)
-    aja_code_sign(${BUILD_TARGETS})
+    aja_code_sign(${PROJECT_NAME})
 endif()
-install(TARGETS ${BUILD_TARGETS}
+
+install(TARGETS ${PROJECT_NAME}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}

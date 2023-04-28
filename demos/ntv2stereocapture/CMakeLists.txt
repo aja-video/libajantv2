@@ -2,7 +2,7 @@ project(ntv2stereocapture)
 
 find_package(Qt5 HINTS ${AJA_QT_DIR} COMPONENTS Core Widgets REQUIRED)
 set(QT_LIBRARIES Qt5::Core Qt5::Widgets)
-list(APPEND TARGET_LINK_LIBS ${QT_LIBRARIES})
+list(APPEND TARGET_LINK_LIBS ${QT_LIBRARIES} ajantv2)
 
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
@@ -31,20 +31,21 @@ set(TARGET_SOURCES
 	${DEMO_COMMON_SOURCES}
 )
 
-aja_add_executable(ntv2stereocapture PUBLIC
-	"${TARGET_SOURCES}"
-	ajantv2
-	"${TARGET_INCLUDE_DIRS}"
-	"${TARGET_LINK_LIBS};ajantv2" "")
-set(BUILD_TARGETS ntv2stereocapture)
+
 if (AJA_BUILD_SHARED)
 	set(BUILD_TARGETS ${BUILD_TARGETS} ntv2stereocapture-dl)
-	aja_add_executable(ntv2stereocapture-dl PUBLIC
-		"${TARGET_SOURCES}"
-		ajantv2-dl
-		"${TARGET_INCLUDE_DIRS}"
-		"${TARGET_LINK_LIBS};ajantv2-dl" "")
+    add_executable(${PROJECT_NAME}-dl PUBLIC ${TARGET_SOURCES})
+    add_dependencies(ajantv2-dl)
+    target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
+    target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS})
+else()
+    set(BUILD_TARGETS ${PROJECT_NAME})
+    add_executable(${PROJECT_NAME} PUBLIC ${TARGET_SOURCES})
+    add_dependencies(ajantv2)
+    target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
+    target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS})
 endif()
+
 if (AJA_CODE_SIGN)
     aja_code_sign(${BUILD_TARGETS})
 endif()

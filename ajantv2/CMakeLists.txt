@@ -1,12 +1,12 @@
 project(ajantv2)
 
 if(CMAKE_CXX_STANDARD EQUAL 11)
-    aja_message(STATUS "ajantv2 building for C++11")
+    message(STATUS "ajantv2 building for C++11")
     list(APPEND TARGET_COMPILE_DEFS
         -DAJA_USE_CPLUSPLUS11
         -DNTV2_USE_CPLUSPLUS11)
 else()
-    aja_message(STATUS "ajantv2 building for C++98")
+    message(STATUS "ajantv2 building for C++98")
     remove_definitions(
         -DAJA_USE_CPLUSPLUS11
         -DNTV2_USE_CPLUSPLUS11)
@@ -15,13 +15,13 @@ else()
     file(READ ${_ajabase_types_path} _ajabase_types_file)
     STRING(REPLACE "#define AJA_USE_CPLUSPLUS11" "//#define AJA_USE_CPLUSPLUS11 " _ajabase_types_file "${_ajabase_types_file}")
     file(WRITE ${_ajabase_types_path} "${_ajabase_types_file}")
-    aja_message(STATUS "Overwrote ${_ajabase_types_path} to remove AJA_USE_CPLUSPLUS11 define!")
+    message(STATUS "Overwrote ${_ajabase_types_path} to remove AJA_USE_CPLUSPLUS11 define!")
 
     set(_ajantv2_ajatypes_path "includes/ajatypes.h")
     file(READ ${_ajantv2_ajatypes_path} _ajatypes_file)
     STRING(REPLACE "#define NTV2_USE_CPLUSPLUS11" "//#define NTV2_USE_CPLUSPLUS11 " _ajatypes_file "${_ajatypes_file}")
     file(WRITE ${_ajantv2_ajatypes_path} "${_ajatypes_file}")
-    aja_message(STATUS "Overwrote ${_ajantv2_ajatypes_path} to remove NTV2_USE_CPLUSPLUS11 define!")
+    message(STATUS "Overwrote ${_ajantv2_ajatypes_path} to remove NTV2_USE_CPLUSPLUS11 define!")
 endif()
 
 remove_definitions(
@@ -198,9 +198,9 @@ if (NOT AJANTV2_BUILD_OPENSOURCE)
         if (AJA_INSTALL_SOURCES)
             install(FILES ${AJANTV2_HEVC_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/codecs/hevc/m31)
         endif()
-        aja_message(STATUS "added ajantv2 HEVC/M31 codec sources from ${NTV2_PROPRIETARY_DIR}")
+        message(STATUS "added ajantv2 HEVC/M31 codec sources from ${NTV2_PROPRIETARY_DIR}")
     else()
-        aja_message(STATUS "ntv2 proprietary repo not found: ${NTV2_PROPRIETARY_DIR}")
+        message(STATUS "ntv2 proprietary repo not found: ${NTV2_PROPRIETARY_DIR}")
     endif()
 endif()
 
@@ -553,10 +553,6 @@ if (NOT TARGET ${PROJECT_NAME})
 
     endif()
     set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "d")
-endif()
-
-if (AJANTV2_SDK_GEN)
-    aja_ntv2_sdk_gen(${PROJECT_NAME})
 endif()
 
 if (NOT TARGET ajabase)

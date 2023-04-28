@@ -21,7 +21,7 @@ include(ntv2/Version)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	if (DEFINED AJA_MSVC_RUNTIME_LIBRARY)
-		aja_set_global_msvc_runtime_library(${AJA_MSVC_RUNTIME_LIBRARY})
+		set(CMAKE_MSVC_RUNTIME_LIBRARY "${AJA_MSVC_RUNTIME_LIBRARY}" PARENT_SCOPE)
 	endif()
 endif()
 
@@ -40,16 +40,16 @@ if(NOT AJANTV2_BUILD_OPENSOURCE)
 endif()
 
 # Cascade top-level options
-if(AJA_BUILD_SHARED)
-    set(AJANTV2_BUILD_SHARED ON)
+if(DEFINED AJA_BUILD_SHARED)
+    set(AJANTV2_BUILD_SHARED ${AJA_BUILD_SHARED})
 endif()
 
-if(AJA_BUILD_TESTS)
-	set(AJANTV2_BUILD_TESTS ON)
+if(DEFINED AJA_BUILD_TESTS)
+	set(AJANTV2_BUILD_TESTS ${AJA_BUILD_TESTS})
 endif()
 
-if(AJA_BUILD_DOCS)
-    set(AJANTV2_BUILD_DOCS ON)
+if(DEFINED AJA_BUILD_DOCS)
+    set(AJANTV2_BUILD_DOCS ${AJA_BUILD_DOCS})
 endif()
 
 add_subdirectory(ajantv2)

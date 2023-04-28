@@ -64,23 +64,11 @@ set(TARGET_DEPS ajantv2)
 set(TARGET_LINK_LIBS ${TARGET_LINK_LIBS}
     ajantv2 ${QT_LIBRARIES})
 
-aja_add_executable(ntv2qtpreview PUBLIC
-    "${TARGET_SOURCES}"
-    "${TARGET_DEPS}"
-    "${TARGET_INCLUDE_DIRS}"
-    "${TARGET_LINK_LIBS}"
-    "${TARGET_COMPILE_DEFS}")
-set(BUILD_TARGETS ntv2qtpreview)
-# if (AJA_BUILD_SHARED)
-#     set(BUILD_TARGETS ${BUILD_TARGETS} ntv2qtpreview-dl)
-#     set(TARGET_DEPS ajagui-dl ajantv2-dl)
-#     aja_add_executable(ntv2qtpreview-dl PUBLIC
-#         "${TARGET_SOURCES}"
-#         "${TARGET_DEPS}"
-#         "${TARGET_INCLUDE_DIRS}"
-#         "${TARGET_LINK_LIBS}"
-#         "${TARGET_COMPILE_DEFS}")
-# endif()
+add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
+add_dependencies(${PROJECT_NAME} ${TARGET_DEPS})
+target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS})
+target_compile_definitions(${PROJECT_NAME} PUBLIC ${TARGET_COMPILE_DEFS})
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set_target_properties(ntv2qtpreview PROPERTIES WIN32_EXECUTABLE TRUE)
@@ -99,12 +87,12 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         app.icns)
 endif()
 if (AJA_CODE_SIGN)
-    aja_code_sign(${BUILD_TARGETS})
+    aja_code_sign(${PROJECT_NAME})
 endif()
 if (AJA_QT_DEPLOY)
     aja_deploy_qt_libs_to_dest(ntv2qtpreview)
 endif()
-install(TARGETS ${BUILD_TARGETS}
+install(TARGETS ${PROJECT_NAME}
     BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

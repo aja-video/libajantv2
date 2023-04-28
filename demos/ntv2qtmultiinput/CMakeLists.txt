@@ -63,23 +63,11 @@ set(TARGET_DEPS ajagui ajantv2)
 set(TARGET_LINK_LIBS ${TARGET_LINK_LIBS}
     ajantv2 ajagui ${QT_LIBRARIES})
 
-aja_add_executable(ntv2qtmultiinput PUBLIC
-    "${TARGET_SOURCES}"
-    "${TARGET_DEPS}"
-    "${TARGET_INCLUDE_DIRS}"
-    "${TARGET_LINK_LIBS}"
-    "${TARGET_COMPILE_DEFS}")
-set(BUILD_TARGETS ntv2qtmultiinput)
-# if (AJA_BUILD_SHARED)
-#     set(BUILD_TARGETS ${BUILD_TARGETS} ntv2qtmultiinput-dl)
-#     set(TARGET_DEPS ajagui-dl ajantv2-dl)
-#     aja_add_executable(ntv2qtmultiinput-dl PUBLIC
-#         "${TARGET_SOURCES}"
-#         "${TARGET_DEPS}"
-#         "${TARGET_INCLUDE_DIRS}"
-#         "${TARGET_LINK_LIBS}"
-#         "${TARGET_COMPILE_DEFS}")
-# endif()
+add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
+add_dependencies(${PROJECT_NAME} ${TARGET_DEPS})
+target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS})
+target_compile_definitions(${PROJECT_NAME PUBLIC ${TARGET_COMPILE_DEFS})
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set_target_properties(ntv2qtmultiinput PROPERTIES WIN32_EXECUTABLE TRUE)
