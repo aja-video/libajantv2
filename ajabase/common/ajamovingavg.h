@@ -8,13 +8,16 @@
 #ifndef AJA_MOVINGAVG_H
 #define AJA_MOVINGAVG_H
 
-#include "ajabase/common/public.h"
+//#include "ajabase/common/public.h"
 #include "ajabase/system/lock.h"
 #include <climits>
 #include <cfloat>
 #include <deque>
 #include <ostream>
 #include <typeinfo>
+#if defined(AJA_WINDOWS)
+	#pragma warning(disable:4056)
+#endif
 
 
 /**

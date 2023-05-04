@@ -488,7 +488,7 @@ bool NTV2LegacyNubClient::NTV2OpenRemote (void)
 	{
 		const string portStr(ConnectParam(kConnectParamPort));
 		if (!portStr.empty())
-			portNumber = aja::stoul(portStr);	//	Override default legacy port number
+			portNumber = UWord(aja::stoul(portStr));	//	Override default legacy port number
 	}
 
 	UWord inDeviceIndexNum(0);
@@ -496,7 +496,7 @@ bool NTV2LegacyNubClient::NTV2OpenRemote (void)
 	{
 		const string devNumStr(ConnectParam(kConnectParamDevIndex));
 		if (!devNumStr.empty())
-			inDeviceIndexNum = aja::stoul(devNumStr);	//	Override default device index number
+			inDeviceIndexNum = UWord(aja::stoul(devNumStr));	//	Override default device index number
 	}
 
 	//	Get the host info
@@ -1216,7 +1216,7 @@ bool NTV2LegacyNubClient::NTV2DownloadTestPatternRemote	(const NTV2Channel chann
 	NTV2NubPkt *pPkt (BuildDownloadTestPatternQueryPacket(	Handle(),  _nubProtocolVersion,  channel,  testPatternFBF,
 															signalMask,  testPatDMAEnb,  testPatNum));
 	if (!pPkt)
-		return NTV2_REMOTE_ACCESS_OUT_OF_MEMORY;
+		return false;   //  NTV2_REMOTE_ACCESS_OUT_OF_MEMORY
 
 	int retcode (NTV2_REMOTE_ACCESS_SUCCESS);
 	int len (pPkt  ?  int(sizeof(NTV2NubPktHeader) + pPkt->hdr.dataLength)  :  0);
@@ -1290,7 +1290,7 @@ bool NTV2LegacyNubClient::NTV2DownloadTestPatternRemote	(const NTV2Channel chann
 		}	//	else
 	}	//	if NBOify OK
 	delete pPkt;
-	return retcode;
+	return retcode == NTV2_REMOTE_ACCESS_SUCCESS;
 }
 
 bool NTV2LegacyNubClient::NTV2ReadRegisterMultiRemote	(const ULWord numRegs, ULWord & outFailedRegNum,  NTV2RegInfo outRegs[])

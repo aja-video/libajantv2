@@ -1482,7 +1482,7 @@ string AJAAncillaryData::CompareWithInfo (const AJAAncillaryData & inRHS, const 
 		ULWordSequence diffNdxs;
 		for (size_t ndx(0);  ndx < GetPayloadByteCount();  ndx++)
 			if (pLHS[ndx] != pRHS[ndx])
-				diffNdxs.push_back(ndx);
+				diffNdxs.push_back(ULWord(ndx));
 		if (!diffNdxs.empty())
 			oss	<< endl << DEC(diffNdxs.size()) << " of " << DEC(GetDC()) << " (" << fDEC(100.0*double(diffNdxs.size())/double(GetDC()), 5, 2)
 				<< "%) mismatched payload bytes, starting at offset " << DEC(diffNdxs.at(0));

@@ -614,13 +614,13 @@ bool NTV2SoftwareDevice::NTV2MessageRemote (NTV2_HEADER * pInMessage)
 		{NBFAIL("Bad NTV2_TRAILER tag");  return false;}
 
 	//	Dispatch...
-	switch (pInMessage->GetType())
+/**	switch (pInMessage->GetType())
 	{
-/**		case NTV2_TYPE_ACSTATUS:		return !AutoCirculateGetStatus (ACContext(), AsAUTOCIRCULATE_STATUS(pInMessage));
-		case NTV2_TYPE_ACXFER:			return !AutoCirculateTransfer (ACContext(), AsAUTOCIRCULATE_TRANSFER(pInMessage));**/
+		case NTV2_TYPE_ACSTATUS:		return !AutoCirculateGetStatus (ACContext(), AsAUTOCIRCULATE_STATUS(pInMessage));
+		case NTV2_TYPE_ACXFER:			return !AutoCirculateTransfer (ACContext(), AsAUTOCIRCULATE_TRANSFER(pInMessage));
 //		case NTV2_TYPE_GETREGS:			return GetRegistersImmediate (ACContext(), AsNTV2GetRegisters(pInMessage));
 //		case NTV2_TYPE_SETREGS:			return SetRegistersImmediate (AsNTV2SetRegisters(pInMessage));
-/**		case NTV2_TYPE_ACFRAMESTAMP:	return AutoCirculateFrameStampImmediate (AsFRAME_STAMP(pInMessage), pClientTask);
+		case NTV2_TYPE_ACFRAMESTAMP:	return AutoCirculateFrameStampImmediate (AsFRAME_STAMP(pInMessage), pClientTask);
 		case NTV2_TYPE_AJABUFFERLOCK:	return BufferLockImmediate (AsNTV2BufferLock(pInMessage), pClientTask);
 		case NTV2_TYPE_AJABITSTREAM:	return BitstreamImmediate (AsNTV2Bitstream(pInMessage), pClientTask);
 
@@ -635,9 +635,9 @@ bool NTV2SoftwareDevice::NTV2MessageRemote (NTV2_HEADER * pInMessage)
 				return VirtualDataSetImmediate (AsNTV2NTV2VirtualData (pInOutStruct));
 			else
 				return VirtualDataGetImmediate (AsNTV2NTV2VirtualData (pInOutStruct));
-**/
 		default:	break;
 	}
+**/
 	NBFAIL("Unhandled message type " << xHEX0N(pInMessage->GetType(),8));
 	return false;
 }

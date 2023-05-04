@@ -6186,7 +6186,7 @@ bool CNTV2Card::SetAnalogLTCOutClockChannel (const UWord inLTCOutput, const NTV2
 }
 
 
-static const ULWord sSDIXmitEnableMasks[] = {	kRegMaskSDI1Transmit, kRegMaskSDI2Transmit, kRegMaskSDI3Transmit, kRegMaskSDI4Transmit,
+static const ULWord sSDIXmitEnableMasks[] = {	kRegMaskSDI1Transmit, kRegMaskSDI2Transmit, kRegMaskSDI3Transmit, ULWord(kRegMaskSDI4Transmit),
 												kRegMaskSDI5Transmit, kRegMaskSDI6Transmit, kRegMaskSDI7Transmit, kRegMaskSDI8Transmit};
 static const ULWord sSDIXmitEnableShifts[] = {	kRegShiftSDI1Transmit, kRegShiftSDI2Transmit, kRegShiftSDI3Transmit, kRegShiftSDI4Transmit,
 												kRegShiftSDI5Transmit, kRegShiftSDI6Transmit, kRegShiftSDI7Transmit, kRegShiftSDI8Transmit};
