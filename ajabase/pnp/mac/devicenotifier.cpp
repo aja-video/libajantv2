@@ -14,6 +14,7 @@
 #include "ajatypes.h"
 #include "devicenotifier.h"
 #include "ajabase/common/common.h"
+#include "ajabase/system/debug.h"
 
 
 using namespace std;
