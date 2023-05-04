@@ -6,7 +6,7 @@
 **/
 
 #include "ajabase/system/windows/lockimpl.h"
-#include "ajabase/common/timer.h"
+#include "ajabase/system/debug.h"
 
 
 // class AJALockImpl

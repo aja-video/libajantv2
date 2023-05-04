@@ -18,11 +18,10 @@
 #include <ShlObj.h>
 #include <Shlwapi.h>
 #include <time.h>
-
 #include <iomanip>
-
 #include <comdef.h>
 #include <Wbemidl.h>  // links with wbemuuid.lib
+#include <sstream>
 
 struct WindowsVersionEntry
 {

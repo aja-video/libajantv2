@@ -365,7 +365,7 @@ public:
 		@return A reference to my DeviceCapabilities API, for querying my capabilities,
 				even if I'm a virtual device.
 	**/
-	AJA_VIRTUAL inline DeviceCapabilities & features (void)	{return mDevCap;}	//	New in SDK 17.0
+	AJA_VIRTUAL inline class DeviceCapabilities & features (void)	{return mDevCap;}	//	New in SDK 17.0
 #endif	//	defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
 #if !defined(NTV2_DEPRECATE_16_3)
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoFormat (const NTV2FrameRate inFR,
@@ -7528,8 +7528,7 @@ private:
 
 	AJA_VIRTUAL bool	IsMultiFormatActive (void); ///< @return	True if the device supports the multi format feature and it's enabled; otherwise false.
 	AJA_VIRTUAL bool	CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFirst, const NTV2Channel inLast);
-	DeviceCapabilities	mDevCap;
-
+	class DeviceCapabilities	mDevCap;
 };	//	CNTV2Card
 
 

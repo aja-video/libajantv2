@@ -273,6 +273,7 @@
 	#define AJAFUNC		__FUNCTION__
 	#define NTV2_CPP_MIN(__x__,__y__)		min((__x__),(__y__))
 	#define NTV2_CPP_MAX(__x__,__y__)		max((__x__),(__y__))
+	#pragma warning(disable:4996)
 
 									//////////////////////////////////////////////////////////////////
 #elif defined (AJAMac)				////////////////////////	MAC		//////////////////////////////

@@ -17,6 +17,8 @@
 	#include <sys/types.h>
 	#include <unistd.h>
 	#include <string.h> //	for strerror
+#elif defined(MSWindows)
+    #include "ajabase/system/system.h"  //  for Windows API #includes
 #endif
 #include <iostream>
 
