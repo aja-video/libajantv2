@@ -13,7 +13,8 @@
 #include "ntv2endian.h"
 #include "ntv2debug.h"
 #include "ntv2transcode.h"
-#include "ntv2devicefeatures.h"
+#include "ntv2version.h"
+#include "ntv2devicefeatures.h"	//	Required for NTV2DeviceCanDoVideoFormat
 #include "ajabase/system/lock.h"
 #include "ajabase/common/common.h"
 #if defined(AJALinux)

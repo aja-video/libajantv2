@@ -7,10 +7,10 @@
 #include "ntv2signalrouter.h"
 #include "ntv2routingexpert.h"
 #include "ntv2debug.h"
-#include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
+#include "ntv2devicefeatures.hh"
 #include "ntv2registerexpert.h"
-
+#include "ajabase/system/debug.h"
 #include <memory.h>
 #include <stdio.h>
 #include <assert.h>

@@ -12,24 +12,222 @@
 #if defined(AJALinux) || defined(AJA_LINUX)
 	// For size_t
 	#ifdef __KERNEL__
-	#include <linux/stddef.h>
+		#include <linux/stddef.h>
 	#else
-	#include <stddef.h>
+		#include <stddef.h>
 	#endif
 #endif
-
 #include "ajaexport.h"
 #include "ajatypes.h"
 #include "ntv2enums.h"
-#include "ntv2publicinterface.h"
-
 #if defined(__CPLUSPLUS__) || defined(__cplusplus)
 #elif !defined(NTV2_BUILDING_DRIVER)
 	#define false (0)
 	#define true (!false)
 #endif
 
-#define NTV2DeviceGetNumAudioEngines	NTV2DeviceGetNumAudioSystems
+/**
+	@brief	Used with CNTV2Card::GetBoolParam to determine device capabilities.
+**/
+typedef enum _NTV2BoolParamID
+{
+	kNTV2BoolParam_FIRST		= 0,
+	kDeviceCanChangeEmbeddedAudioClock = kNTV2BoolParam_FIRST,
+	kDeviceCanChangeFrameBufferSize,			///< @brief True if frame buffer sizes are not fixed.
+	kDeviceCanDisableUFC,						///< @brief True if there's at least one UFC, and it can be disabled.
+	kDeviceCanDo2KVideo,						///< @brief True if device can handle 2Kx1556 (film) video.
+	kDeviceCanDo3GLevelConversion,				///< @brief True if device can do 3G level B to 3G level A conversion.
+	kDeviceCanDoRGBLevelAConversion,			///< @brief True if the device can do RGB over 3G Level A.
+	kDeviceCanDo425Mux,							///< @brief True if the device supports SMPTE 425 mux control.
+	kDeviceCanDo4KVideo,						///< @brief True if the device can handle 4K/UHD video.
+	kDeviceCanDoAESAudioIn,						///< @note Calculate based on kDeviceGetNumAESAudioInputChannels
+	kDeviceCanDoAnalogAudio,					///< @note Calculate based on kDeviceGetNumAnalogAudioInputChannels and kDeviceGetNumAnalogAudioOutputChannels
+	kDeviceCanDoAnalogVideoIn,					///< @note Calculate based on kDeviceGetNumAnalogVideoInputs
+	kDeviceCanDoAnalogVideoOut,					///< @note Calculate based on kDeviceGetNumAnalogVideoOutputs
+	kDeviceCanDoAudio2Channels,					///< @note Calculate based on kDeviceGetMaxAudioChannels
+	kDeviceCanDoAudio6Channels,					///< @note Calculate based on kDeviceGetMaxAudioChannels
+	kDeviceCanDoAudio8Channels,					///< @note Calculate based on kDeviceGetMaxAudioChannels
+	kDeviceCanDoAudio96K,						///< @brief Use with CNTV2Card::GetBoolParam to determine if Audio System(s) on the device can be set to a 96kHz sample rate.
+	kDeviceCanDoAudioDelay,						///< @brief Use with CNTV2Card::GetBoolParam to determine if Audio System(s) on the device have an adjustable delay.
+	kDeviceCanDoBreakoutBox,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can be connected to an AJA breakout box.
+	kDeviceCanDoCapture,						///< @note Calculate based on kDeviceGetNumVideoInputs and kDeviceGetNumHDMIVideoInputs and kDeviceGetNumAnalogVideoInputs
+	kDeviceCanDoColorCorrection,				///< @note Calculate based on kDeviceGetNumLUTs
+	kDeviceCanDoCustomAnc,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports ANC insertion/extraction.
+	kDeviceCanDoDSKOpacity,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has a mixer/keyer whose opacity is adjustable.
+	kDeviceCanDoDualLink,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can input/output 10-bit RGB over 2-wire SDI.
+	kDeviceCanDoDVCProHD,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can squeeze/stretch between 1920x1080/1280x1080 and 1280x720/960x720.
+	kDeviceCanDoEnhancedCSC,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has enhanced color space converter capability.
+	kDeviceCanDoFrameStore1Display,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can display video from FrameStore 1.
+	kDeviceCanDoFreezeOutput,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can freeze output video.
+	kDeviceCanDoHDMIOutStereo,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can handle 3D-stereo video output over HDMI.
+	kDeviceCanDoHDV,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can squeeze/stretch between 1920x1080 and 1440x1080.
+	kDeviceCanDoHDVideo,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can handle HD (High Definition) video.
+	kDeviceCanDoIsoConvert,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can do ISO conversion.
+	kDeviceCanDoLTC,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can take in LTC (Linear TimeCode) from one of its inputs.
+	kDeviceCanDoLTCInOnRefPort,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can read LTC (Linear TimeCode) from its reference input.
+	kDeviceCanDoMSI,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device DMA hardware supports MSI (Message Signaled Interrupts).
+	kDeviceCanDoMultiFormat,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can simultaneously handle different video formats on more than one SDI input or output.
+	kDeviceCanDoPCMControl,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device Audio System(s) can indicate non-PCM (Pulse Code Modulation) on a per-channel-pair basis.
+	kDeviceCanDoPCMDetection,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has per-audio-channel-pair PCM detection capabilities.
+	kDeviceCanDoPIO,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports Programmed I/O.
+	kDeviceCanDoPlayback,						///< @note Calculate based on kDeviceGetNumVideoOutputs and kDeviceGetNumHDMIVideoOutputs and kDeviceGetNumAnalogVideoOutputs
+	kDeviceCanDoProgrammableCSC,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has at least one programmable color space converter widget.
+	kDeviceCanDoProgrammableRS422,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has at least one RS-422 serial port, and it (they) can be programmed (for baud rate, parity, etc.).
+	kDeviceCanDoProRes,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can can accommodate Apple ProRes-compressed video in its frame buffers.
+	kDeviceCanDoQREZ,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can handle QRez.
+	kDeviceCanDoQuarterExpand,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can handle quarter-sized frames (pixel-halving and line-halving during input, pixel-double and line-double during output).
+	kDeviceCanDoRateConvert,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can do frame rate conversion.
+	kDeviceCanDoRGBPlusAlphaOut,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has CSCs capable of splitting the key (alpha) and YCbCr (fill) from RGB frame buffers that include alpha. (Has nothing to do with RGB wire formats.)
+	kDeviceCanDoRP188,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can insert and/or extract RP-188/VITC.
+	kDeviceCanDoSDVideo,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can handle SD (Standard Definition) video.
+	kDeviceCanDoSDIErrorChecks,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can perform SDI error checking.
+	kDeviceCanDoStackedAudio,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device uses a "stacked" arrangement of its audio buffers.
+	kDeviceCanDoStereoIn,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports 3D video input over dual-stream SDI.
+	kDeviceCanDoStereoOut,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports 3D video output over dual-stream SDI.
+	kDeviceCanDoThunderbolt,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device connects to the host using a Thunderbolt cable.
+	kDeviceCanDoVideoProcessing,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can do video processing.
+	kDeviceCanMeasureTemperature,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can measure its temperature.
+	kDeviceCanReportFrameSize,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can report its frame size.
+	kDeviceHasBiDirectionalSDI,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device SDI connectors are bi-directional.
+	kDeviceHasColorSpaceConverterOnChannel2,	///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has a CSC on channel 2.
+	kDeviceHasNWL,								///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has NorthWest Logic DMA hardware.
+	kDeviceHasPCIeGen2,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports 2nd-generation PCIe.
+	kDeviceHasRetailSupport,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can be configured and controlled by the retail services and AJA ControlPanel.
+	kDeviceHasSDIRelays,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has bypass relays on its SDI connectors.
+	kDeviceHasSPIFlash,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has SPI flash hardware.
+	kDeviceHasSPIFlashSerial,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has serial SPI flash hardware.
+	kDeviceHasSPIv2,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device uses version 2 SPI hardware.
+	kDeviceHasSPIv3,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device uses version 3 SPI hardware.
+	kDeviceHasSPIv4,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device uses version 4 SPI hardware.
+	kDeviceIs64Bit,								///< @brief Use with CNTV2Card::GetBoolParam to determine if the device is 64-bit addressable.
+	kDeviceIsDirectAddressable,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device is direct addressable.
+	kDeviceIsExternalToHost,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device connects to the host with a cable.
+	kDeviceIsSupported,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device is supported by this SDK.
+	kDeviceNeedsRoutingSetup,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device widget routing can be queried and/or changed.
+	kDeviceSoftwareCanChangeFrameBufferSize,	///< @brief Use with CNTV2Card::GetBoolParam to determine if the device frame buffer size can be changed.
+	kDeviceCanThermostat,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the fan on the device can be thermostatically controlled.
+	kDeviceHasHEVCM31,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has an HEVC M31 encoder.
+	kDeviceHasHEVCM30,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has an HEVC M30 encoder/decoder.
+	kDeviceCanDoVITC2,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can insert and/or extract RP-188/VITC2.
+	kDeviceCanDoHDMIHDROut,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports HDMI HDR output.
+	kDeviceCanDoJ2K,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports the JPEG 2000 codec.
+	kDeviceCanDo12gRouting,
+	kDeviceCanDo12GSDI,
+	kDeviceCanDo2110,
+	kDeviceCanDo8KVideo,
+	kDeviceCanDoAudio192K,
+	kDeviceCanDoAudioMixer,
+	kDeviceCanDoCustomAux,
+	kDeviceCanDoFramePulseSelect,
+	kDeviceCanDoHDMIMultiView,
+	kDeviceCanDoHFRRGB,
+	kDeviceCanDoIP,
+	kDeviceCanDoMultiLinkAudio,
+	kDeviceCanDoWarmBootFPGA,
+	kDeviceCanReportFailSafeLoaded,
+	kDeviceCanReportRunningFirmwareDate,
+	kDeviceHasAudioMonitorRCAJacks,
+	kDeviceHasBiDirectionalAnalogAudio,
+	kDeviceHasGenlockv2,
+	kDeviceHasGenlockv3,
+	kDeviceHasHeadphoneJack,
+	kDeviceHasLEDAudioMeters,
+	kDeviceHasRotaryEncoder,
+	kDeviceHasSPIv5,
+	kDeviceHasXilinxDMA,
+	kDeviceHasMicrophoneInput,
+	kNTV2BoolParam_LAST,
+	kDeviceCanDo_INVALID	= kNTV2BoolParam_LAST
+} NTV2BoolParamID;
+
+#define NTV2_IS_VALID_BOOLPARAMID(__x__)		((__x__) >= kNTV2BoolParam_FIRST  &&  (__x__) < kNTV2BoolParam_LAST)
+
+/**
+	@brief	Used with CNTV2Card::GetNumericParam to determine device capabilities.
+**/
+typedef enum _NTV2NumericParamID
+{
+	kNTV2NumericParam_FIRST		= 2000,
+	kDeviceGetActiveMemorySize	= kNTV2NumericParam_FIRST,	///< @brief The size, in bytes, of the device's active RAM available for video and audio.
+	kDeviceGetDACVersion,						///< @brief The version number of the DAC on the device.
+	kDeviceGetDownConverterDelay,				///< @brief The down-converter delay on the device.
+	kDeviceGetHDMIVersion,						///< @brief The HDMI input(s) and/or output(s) on the device.
+	kDeviceGetLUTVersion,						///< @brief The version number of the LUT(s) on the device.
+	kDeviceGetMaxAudioChannels,					///< @brief The maximum number of audio channels that a single Audio System can support on the device.
+	kDeviceGetMaxRegisterNumber,				///< @brief The highest register number for the device.
+	kDeviceGetMaxTransferCount,					///< @brief The maximum number of 32-bit words that the DMA engine can move at a time on the device.
+	kDeviceGetNumDMAEngines,					///< @brief The number of DMA engines on the device.
+	kDeviceGetNumVideoChannels,					///< @brief The number of video channels supported on the device.
+	kDeviceGetPingLED,							///< @brief The highest bit number of the LED bits in the Global Control Register on the device.
+	kDeviceGetUFCVersion,						///< @brief The version number of the UFC on the device.
+	kDeviceGetNum4kQuarterSizeConverters,		///< @brief The number of quarter-size 4K/UHD down-converters on the device.
+	kDeviceGetNumAESAudioInputChannels,			///< @brief The number of AES/EBU audio input channels on the device.
+	kDeviceGetNumAESAudioOutputChannels,		///< @brief The number of AES/EBU audio output channels on the device.
+	kDeviceGetNumAnalogAudioInputChannels,		///< @brief The number of analog audio input channels on the device.
+	kDeviceGetNumAnalogAudioOutputChannels,		///< @brief The number of analog audio output channels on the device.
+	kDeviceGetNumAnalogVideoInputs,				///< @brief The number of analog video inputs on the device.
+	kDeviceGetNumAnalogVideoOutputs,			///< @brief The number of analog video outputs on the device.
+	kDeviceGetNumAudioSystems,					///< @brief The number of independent Audio Systems on the device.
+	kDeviceGetNumCrossConverters,				///< @brief The number of cross-converters on the device.
+	kDeviceGetNumCSCs,							///< @brief The number of colorspace converter widgets on the device.
+	kDeviceGetNumDownConverters,				///< @brief The number of down-converters on the device.
+	kDeviceGetNumEmbeddedAudioInputChannels,	///< @brief The number of SDI-embedded input audio channels supported by the device.
+	kDeviceGetNumEmbeddedAudioOutputChannels,	///< @brief The number of SDI-embedded output audio channels supported by the device.
+	kDeviceGetNumFrameStores,					///< @brief The number of FrameStores on the device.
+	kDeviceGetNumFrameSyncs,					///< @brief The number of frame sync widgets on the device.
+	kDeviceGetNumHDMIAudioInputChannels,		///< @brief The number of HDMI audio input channels on the device.
+	kDeviceGetNumHDMIAudioOutputChannels,		///< @brief The number of HDMI audio output channels on the device.
+	kDeviceGetNumHDMIVideoInputs,				///< @brief The number of HDMI video inputs on the device.
+	kDeviceGetNumHDMIVideoOutputs,				///< @brief The number of HDMI video outputs on the device.
+	kDeviceGetNumInputConverters,				///< @brief The number of input converter widgets on the device.
+	kDeviceGetNumLUTs,							///< @brief The number of LUT widgets on the device.
+	kDeviceGetNumMixers,						///< @brief The number of mixer/keyer widgets on the device.
+	kDeviceGetNumOutputConverters,				///< @brief The number of output converter widgets on the device.
+	kDeviceGetNumReferenceVideoInputs,			///< @brief The number of external reference video inputs on the device.
+	kDeviceGetNumSerialPorts,					///< @brief The number of RS-422 serial ports on the device.
+	kDeviceGetNumUpConverters,					///< @brief The number of up-converters on the device.
+	kDeviceGetNumVideoInputs,					///< @brief The number of SDI video inputs on the device.
+	kDeviceGetNumVideoOutputs,					///< @brief The number of SDI video outputs on the device.
+	kDeviceGetNum2022ChannelsSFP1,				///< @brief The number of 2022 channels configured on SFP 1 on the device.
+	kDeviceGetNum2022ChannelsSFP2,				///< @brief The number of 2022 channels configured on SFP 2 on the device.
+	kDeviceGetNumLTCInputs,						///< @brief The number of analog LTC inputs on the device.
+	kDeviceGetNumLTCOutputs,					///< @brief The number of analog LTC outputs on the device.
+	kDeviceGetNumMicInputs,						///< @brief The number of microphone inputs on the device.
+	kDeviceGetNumLUTBanks,						///< @brief The number of LUT banks on the device. New in SDK 17.0
+	kDeviceGetTotalNumAudioSystems,				///< @brief The total number of audio systems on the device, including host audio and mixer audio systems, if present. New in SDK 17.0
+	kDeviceGetNumBufferedAudioSystems,			///< @brief The total number of audio systems on the device that can read/write audio buffer memory. Includes host audio system, if present. New in SDK 17.0
+	kNTV2NumericParam_LAST,
+	kDeviceGetNum_INVALID	= kNTV2NumericParam_LAST
+} NTV2NumericParamID;
+
+#define NTV2_IS_VALID_NUMPARAMID(__x__)		((__x__) >= kNTV2NumericParam_FIRST  &&  (__x__) < kNTV2NumericParam_LAST)
+
+/**
+	@brief	Identifies NTV2 enumerated types, used in CNTV2DriverInterface::GetSupported.
+**/
+typedef enum _NTV2EnumsID
+{
+	kNTV2EnumsID_DeviceID,					///< @brief Identifies the NTV2DeviceID enumerated type
+	kNTV2EnumsID_Standard,					///< @brief Identifies the NTV2Standard enumerated type
+	kNTV2EnumsID_PixelFormat,				///< @brief Identifies the NTV2PixelFormat enumerated type
+	kNTV2EnumsID_FrameGeometry,				///< @brief Identifies the NTV2FrameGeometry enumerated type
+	kNTV2EnumsID_FrameRate,					///< @brief Identifies the NTV2FrameRate enumerated type
+	kNTV2EnumsID_ScanGeometry,				///< @brief Identifies the NTV2ScanGeometry enumerated type
+	kNTV2EnumsID_VideoFormat,				///< @brief Identifies the NTV2VideoFormat enumerated type
+	kNTV2EnumsID_Mode,						///< @brief Identifies the NTV2Mode enumerated type
+	kNTV2EnumsID_InputSource,				///< @brief Identifies the NTV2InputSource enumerated type
+	kNTV2EnumsID_OutputDest,				///< @brief Identifies the NTV2OutputDest enumerated type
+	kNTV2EnumsID_Channel,					///< @brief Identifies the NTV2Channel enumerated type
+	kNTV2EnumsID_RefSource,					///< @brief Identifies the NTV2RefSource enumerated type
+	kNTV2EnumsID_AudioRate,					///< @brief Identifies the NTV2AudioRate enumerated type
+	kNTV2EnumsID_AudioSource,				///< @brief Identifies the NTV2AudioSource enumerated type
+	kNTV2EnumsID_WidgetID,					///< @brief Identifies the NTV2AudioWidgetID enumerated type
+	kNTV2EnumsID_ConversionMode,			///< @brief Identifies the NTV2ConversionMode enumerated type
+	kNTV2EnumsID_DSKMode,					///< @brief	Identifies the NTV2DSKMode enumerated type
+	kNTV2EnumsID_INVALID
+} NTV2EnumsID;
+
+#define NTV2_IS_VALID_ENUMSID(__x__)		((__x__) >= kNTV2EnumsID_DeviceID  &&  (__x__) < kNTV2EnumsID_INVALID)
 
 
 //	Most of the device features functions are generated from a Python script.
@@ -106,12 +304,6 @@ AJAExport ULWord NTV2DeviceGetNumberFrameBuffers(NTV2DeviceID boardID, NTV2Frame
 AJAExport ULWord NTV2DeviceGetAudioFrameBuffer(NTV2DeviceID boardID, NTV2FrameGeometry frameGeometry, NTV2FrameBufferFormat frameFormat);	//	Revisit for 2MB granularity
 AJAExport ULWord NTV2DeviceGetAudioFrameBuffer2(NTV2DeviceID boardID, NTV2FrameGeometry frameGeometry, NTV2FrameBufferFormat frameFormat);	//	Revisit for 2MB granularity
 
-#define NTV2GetDACVersion						NTV2DeviceGetDACVersion					///< @deprecated	Use NTV2DeviceGetDACVersion instead.
-#define NTV2GetNumDMAEngines					NTV2DeviceGetNumDMAEngines				///< @deprecated	Use NTV2DeviceGetNumDMAEngines instead.
-#define NTV2DeviceGetNumAnlgVideoInputs			NTV2DeviceGetNumAnalogVideoInputs		///< @deprecated	Use NTV2DeviceGetNumAnalogVideoInputs instead.
-#define NTV2DeviceGetNumAnlgVideoOutputs		NTV2DeviceGetNumAnalogVideoOutputs		///< @deprecated	Use NTV2DeviceGetNumAnalogVideoOutputs instead.
-#define NTV2GetHDMIVersion						NTV2DeviceGetHDMIVersion				///< @deprecated	Use NTV2DeviceGetHDMIVersion instead.
-
 AJAExport bool NTV2DeviceGetVideoFormatFromState (	NTV2VideoFormat *		pOutValue,
 													const NTV2FrameRate		inFrameRate,
 													const NTV2FrameGeometry inFrameGeometry,
@@ -152,6 +344,13 @@ AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoRS422N (const NTV2DeviceID inDev
 #endif	//	!defined (NTV2_DEPRECATE_14_3)
 
 #if !defined (NTV2_DEPRECATE)
+	#define NTV2GetDACVersion						NTV2DeviceGetDACVersion					///< @deprecated	Use NTV2DeviceGetDACVersion instead.
+	#define NTV2GetNumDMAEngines					NTV2DeviceGetNumDMAEngines				///< @deprecated	Use NTV2DeviceGetNumDMAEngines instead.
+	#define NTV2DeviceGetNumAnlgVideoInputs			NTV2DeviceGetNumAnalogVideoInputs		///< @deprecated	Use NTV2DeviceGetNumAnalogVideoInputs instead.
+	#define NTV2DeviceGetNumAnlgVideoOutputs		NTV2DeviceGetNumAnalogVideoOutputs		///< @deprecated	Use NTV2DeviceGetNumAnalogVideoOutputs instead.
+	#define NTV2GetHDMIVersion						NTV2DeviceGetHDMIVersion				///< @deprecated	Use NTV2DeviceGetHDMIVersion instead.
+	#define NTV2DeviceGetNumAudioEngines			NTV2DeviceGetNumAudioSystems			///< @deprecated	Use NTV2DeviceGetNumAudioSystems instead.
+
 	#define NTV2DeviceCanDoProAudio(_boardID_)								false
 	#define NTV2BoardCanDoProcAmp(_boardID_)								false
 	#define NTV2BoardCanDoBrightnessAdjustment(_boardID_,_videoADCMode_)	false

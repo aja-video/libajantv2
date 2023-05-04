@@ -15,11 +15,11 @@
 #if defined(AJA_MAC)
 	#include "ajabase/system/mac/infoimpl.h"
 #endif
-
 #include "ajabase/system/info.h"
 #include <cstring>
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 

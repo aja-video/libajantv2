@@ -4,18 +4,15 @@
 	@brief		Implementation of NTV2 "nub" client functions.
 	@copyright	(C) 2006-2022 AJA Video Systems, Inc.
 **/
-
 #include "ajatypes.h"
-#include "ntv2card.h"
 #include "ntv2utils.h"
 #include "ntv2nubaccess.h"
-#include "ntv2endian.h"
 #include "ntv2publicinterface.h"
-#include "ntv2testpatterngen.h"
-#include "ntv2devicescanner.h"	//	For IsAlphaNumeric, etc.
+#include "ntv2version.h"
 #include "ajabase/system/debug.h"
 #include "ajabase/common/common.h"
 #include "ajabase/system/info.h"
+#include "ajabase/system/systemtime.h"
 #include <iomanip>
 #if defined(AJAMac)
 	#include <CoreFoundation/CoreFoundation.h>
@@ -693,7 +690,7 @@ bool NTV2DeviceSpecParser::ParseQuery (size_t & pos, NTV2Dictionary & outParams)
 	char ch(CharAt(queryPos));
 	if (ch != '?')
 		return false;
-	ch = CharAt(++queryPos);
+	queryPos++;
 
 	while (ParseParamAssignment(queryPos, key, value))
 	{
@@ -957,6 +954,24 @@ bool NTV2RPCClientAPI::NTV2DMATransferRemote (	const NTV2DMAEngine inDMAEngine,	
 
 bool NTV2RPCClientAPI::NTV2MessageRemote (NTV2_HEADER * pInMessage)
 {	(void) pInMessage;
+	return false;	//	UNIMPLEMENTED
+}
+
+bool NTV2RPCClientAPI::NTV2GetBoolParamRemote (const ULWord inParamID,  ULWord & outValue)
+{	(void) inParamID;
+	outValue = 0;
+	return false;	//	UNIMPLEMENTED
+}
+
+bool NTV2RPCClientAPI::NTV2GetNumericParamRemote (const ULWord inParamID,  ULWord & outValue)
+{	(void) inParamID;
+	outValue = 0;
+	return false;	//	UNIMPLEMENTED
+}
+
+bool NTV2RPCClientAPI::NTV2GetSupportedRemote (const ULWord inEnumsID, ULWordSet & outSupported)
+{	(void) inEnumsID;
+	outSupported.clear();
 	return false;	//	UNIMPLEMENTED
 }
 

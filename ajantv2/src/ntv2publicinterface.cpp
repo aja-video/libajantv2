@@ -4,7 +4,6 @@
 	@brief		Implementations of methods declared in 'ntv2publicinterface.h'.
 	@copyright	(C) 2016-2022 AJA Video Systems, Inc.
 **/
-
 #include "ntv2publicinterface.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
@@ -14,6 +13,7 @@
 #include "ajabase/common/common.h"
 #include "ntv2registerexpert.h"
 #include "ntv2nubtypes.h"
+#include "ntv2version.h"
 #include <iomanip>
 #include <locale>		//	For std::locale, std::numpunct, std::use_facet
 #include <string.h>		//	For memset, et al.
@@ -1077,6 +1077,60 @@ NTV2OutputDestinations & operator += (NTV2OutputDestinations & inOutSet, const N
 
 
 //	This needs to be moved into a C++ compatible "device features" module:
+bool NTV2DeviceGetSupportedVideoFormats (const NTV2DeviceID inDeviceID, NTV2VideoFormatSet & outFormats)
+{
+	bool isOkay(true);
+	outFormats.clear();
+
+    for (NTV2VideoFormat vf(NTV2_FORMAT_UNKNOWN);  vf < NTV2_MAX_NUM_VIDEO_FORMATS;  vf = NTV2VideoFormat(vf+1))
+	{
+		if (inDeviceID != DEVICE_ID_INVALID  &&  !::NTV2DeviceCanDoVideoFormat(inDeviceID, vf))
+			continue;	//	Valid devID specified and VF not supported on that device
+		if (inDeviceID == DEVICE_ID_INVALID  &&  !NTV2_IS_VALID_VIDEO_FORMAT(vf))
+			continue;	//	Invalid devID specified and invalid VF
+		try
+		{
+			outFormats.insert(vf);
+		}
+		catch (const std::bad_alloc &)
+		{
+			isOkay = false;
+			outFormats.clear();
+			break;
+		}
+	}	//	for each video format
+
+	NTV2_ASSERT ((isOkay && !outFormats.empty())  ||  (!isOkay && outFormats.empty()));
+	return isOkay;
+
+}	//	NTV2DeviceGetSupportedVideoFormats
+
+//	This needs to be moved into a C++ compatible "device features" module:
+bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2FrameBufferFormatSet & outFormats)
+{
+	bool	isOkay	(true);
+
+	outFormats.clear ();
+
+	for (NTV2PixelFormat pixelFormat(NTV2_FBF_FIRST);  pixelFormat < NTV2_FBF_LAST;  pixelFormat = NTV2PixelFormat(pixelFormat+1))
+		if (::NTV2DeviceCanDoFrameBufferFormat (inDeviceID, pixelFormat))
+			try
+			{
+				outFormats.insert (pixelFormat);
+			}
+			catch (const std::bad_alloc &)
+			{
+				isOkay = false;
+				outFormats.clear ();
+				break;
+			}
+
+	NTV2_ASSERT ((isOkay && !outFormats.empty () ) || (!isOkay && outFormats.empty () ));
+	return isOkay;
+
+}	//	NTV2DeviceGetSupportedPixelFormats
+
+//	This needs to be moved into a C++ compatible "device features" module:
 bool NTV2DeviceGetSupportedStandards (const NTV2DeviceID inDeviceID, NTV2StandardSet & outStandards)
 {
 	NTV2VideoFormatSet	videoFormats;
@@ -1091,7 +1145,6 @@ bool NTV2DeviceGetSupportedStandards (const NTV2DeviceID inDeviceID, NTV2Standar
 	}
 	return true;
 }
-
 
 //	This needs to be moved into a C++ compatible "device features" module:
 bool NTV2DeviceGetSupportedGeometries (const NTV2DeviceID inDeviceID, NTV2GeometrySet & outGeometries)
@@ -1141,6 +1194,41 @@ bool NTV2DeviceGetSupportedOutputDests (const NTV2DeviceID inDeviceID, NTV2Outpu
 				||	(NTV2_OUTPUT_DEST_IS_HDMI(dst)		&&  (inKinds & NTV2_IOKINDS_HDMI))
 				||	(NTV2_OUTPUT_DEST_IS_ANALOG(dst)	&&  (inKinds & NTV2_IOKINDS_ANALOG))	)
 					outOutputDests.insert(dst);
+	}
+	return true;
+}
+
+ostream & operator << (ostream & oss, const NTV2FrameRateSet & inSet)
+{
+	NTV2FrameRateSetConstIter it(inSet.begin());
+	oss	<< inSet.size()
+		<< (inSet.size() == 1 ? " rate:  " : " rates:  ");
+	while (it != inSet.end())
+	{
+		oss << ::NTV2FrameRateToString(*it);
+		oss << (++it == inSet.end()	 ?	""	:  ", ");
+	}
+	return oss;
+}
+
+NTV2FrameRateSet & operator += (NTV2FrameRateSet & inOutSet, const NTV2FrameRateSet & inSet)
+{
+	for (NTV2FrameRateSetConstIter it(inSet.begin());  it != inSet.end();  ++it)
+		if (inOutSet.find(*it) == inOutSet.end())
+			inOutSet.insert(*it);
+	return inOutSet;
+}
+
+bool NTV2DeviceGetSupportedFrameRates (const NTV2DeviceID inDeviceID, NTV2FrameRateSet & outRates)
+{
+	outRates.clear();
+	NTV2VideoFormatSet vfs;
+	if (!::NTV2DeviceGetSupportedVideoFormats (inDeviceID, vfs))
+		return false;
+	for (NTV2VideoFormatSetConstIter it(vfs.begin());  it != vfs.end();  ++it)
+	{	const NTV2FrameRate fr (::GetNTV2FrameRateFromVideoFormat(*it));
+		if (NTV2_IS_VALID_NTV2FrameRate(fr))
+			outRates.insert(fr);
 	}
 	return true;
 }

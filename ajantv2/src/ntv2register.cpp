@@ -10,8 +10,6 @@
 #include "ntv2utils.h"
 #include "ntv2registerexpert.h"
 #include "ntv2endian.h"
-#include "ntv2bitfile.h"
-#include "ntv2mcsfile.h"
 #include "ntv2registersmb.h"
 #include "ntv2konaflashprogram.h"
 #include "ntv2konaflashprogram.h"
@@ -19,12 +17,10 @@
 #include "ajabase/system/debug.h"
 #include <math.h>
 #include <assert.h>
-#if defined (AJALinux)
-	#include "ntv2linuxpublicinterface.h"
-#elif defined (MSWindows)
+#include <deque>
+#if defined (MSWindows)
 	#pragma warning(disable: 4800)
 #endif
-#include <deque>
 
 #define HEX16(__x__)		"0x" << hex << setw(16) << setfill('0') <<				 uint64_t(__x__)  << dec
 #define INSTP(_p_)			HEX16(uint64_t(_p_))
@@ -2460,8 +2456,6 @@ bool CNTV2Card::GetInputFrame (const NTV2Channel inChannel, ULWord & outValue)
 
 bool CNTV2Card::SetAlphaFromInput2Bit (ULWord value)							{return WriteRegister (kRegCh1Control, value, kRegMaskAlphaFromInput2, kRegShiftAlphaFromInput2);}
 bool CNTV2Card::GetAlphaFromInput2Bit (ULWord & outValue)						{return ReadRegister (kRegCh1Control, outValue, kRegMaskAlphaFromInput2, kRegShiftAlphaFromInput2);}
-bool CNTV2Card::WriteGlobalControl (ULWord value)								{return WriteRegister (kRegGlobalControl, value);}
-bool CNTV2Card::ReadGlobalControl (ULWord * pValue)								{return pValue ? ReadRegister (kRegGlobalControl, *pValue) : false;}
 
 #if !defined (NTV2_DEPRECATE)
 	bool CNTV2Card::WriteCh1Control (ULWord value)								{return WriteRegister (kRegCh1Control, value);}

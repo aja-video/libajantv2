@@ -15,8 +15,7 @@
 #if defined(AJA_MAC)
 	#include "ajabase/system/mac/threadimpl.h"
 #endif
-
-
+#include "ajabase/system/debug.h"
 #include "ajabase/system/systemtime.h"
 
 

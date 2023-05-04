@@ -9,10 +9,9 @@
 #define AJA_ANCILLARYDATA_H
 
 #include "ajatypes.h"
-#include "ntv2enums.h"
-#include "ajaexport.h"
+#include "ntv2version.h"
+#include "ajabase/common/types.h"	//	for AJAStatus
 #include "ntv2publicinterface.h"
-#include "ajabase/common/common.h"
 #include <sstream>
 #include <vector>
 

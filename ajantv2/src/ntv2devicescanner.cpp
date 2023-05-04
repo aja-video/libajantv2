@@ -180,8 +180,6 @@ void CNTV2DeviceScanner::ScanHardware (void)
 			{
 				ostringstream	oss;
 				NTV2DeviceInfo	info;
-				bool bRetail = tmpDevice.DeviceIsDNxIV();
-
 				info.deviceIndex		= boardNum;
 				info.deviceID			= deviceID;
 				info.pciSlot			= 0;
@@ -190,7 +188,7 @@ void CNTV2DeviceScanner::ScanHardware (void)
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 				info.deviceSerialNumber	= tmpDevice.GetSerialNumber();
 
-				oss << ::NTV2DeviceIDToString (deviceID, bRetail) << " - " << boardNum;
+				oss << ::NTV2DeviceIDToString (deviceID, tmpDevice.features().IsDNxIV()) << " - " << boardNum;
 				if (info.pciSlot)
 					oss << ", Slot " << info.pciSlot;
 
@@ -705,7 +703,7 @@ void CNTV2DeviceScanner::SetVideoAttributes (NTV2DeviceInfo & info)
 	info.breakoutBoxSupport		= NTV2DeviceCanDoBreakoutBox		(info.deviceID);
 	info.vidProcSupport			= NTV2DeviceCanDoVideoProcessing	(info.deviceID);
 	info.dualLinkSupport		= NTV2DeviceCanDoDualLink			(info.deviceID);
-	info.numDMAEngines			= static_cast <UWord> (NTV2GetNumDMAEngines (info.deviceID));
+	info.numDMAEngines			= UWord(::NTV2DeviceGetNumDMAEngines(info.deviceID));
 	info.pingLED				= NTV2DeviceGetPingLED				(info.deviceID);
 	info.has2KSupport			= NTV2DeviceCanDo2KVideo			(info.deviceID);
 	info.has4KSupport			= NTV2DeviceCanDo4KVideo			(info.deviceID);
@@ -801,58 +799,3 @@ void CNTV2DeviceScanner::SortDeviceInfoList (void)
 {
 	std::sort (_deviceInfoList.begin (), _deviceInfoList.end (), gCompareSlot);
 }
-
-
-//	This needs to be moved into a C++ compatible "device features" module:
-bool NTV2DeviceGetSupportedVideoFormats (const NTV2DeviceID inDeviceID, NTV2VideoFormatSet & outFormats)
-{
-	bool	isOkay	(true);
-
-	outFormats.clear();
-
-    for (NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);  videoFormat < NTV2_MAX_NUM_VIDEO_FORMATS;  videoFormat = NTV2VideoFormat(videoFormat + 1))
-	{
-		if (!::NTV2DeviceCanDoVideoFormat (inDeviceID, videoFormat))
-			continue;
-		try
-		{
-			outFormats.insert(videoFormat);
-		}
-		catch (const std::bad_alloc &)
-		{
-			isOkay = false;
-			outFormats.clear();
-			break;
-		}
-	}	//	for each video format
-
-	NTV2_ASSERT ((isOkay && !outFormats.empty())  ||  (!isOkay && outFormats.empty()));
-	return isOkay;
-
-}	//	NTV2DeviceGetSupportedVideoFormats
-
-
-//	This needs to be moved into a C++ compatible "device features" module:
-bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2FrameBufferFormatSet & outFormats)
-{
-	bool	isOkay	(true);
-
-	outFormats.clear ();
-
-	for (NTV2PixelFormat pixelFormat(NTV2_FBF_FIRST);  pixelFormat < NTV2_FBF_LAST;  pixelFormat = NTV2PixelFormat(pixelFormat+1))
-		if (::NTV2DeviceCanDoFrameBufferFormat (inDeviceID, pixelFormat))
-			try
-			{
-				outFormats.insert (pixelFormat);
-			}
-			catch (const std::bad_alloc &)
-			{
-				isOkay = false;
-				outFormats.clear ();
-				break;
-			}
-
-	NTV2_ASSERT ((isOkay && !outFormats.empty () ) || (!isOkay && outFormats.empty () ));
-	return isOkay;
-
-}	//	NTV2DeviceGetSupportedPixelFormats

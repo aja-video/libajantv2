@@ -11,24 +11,21 @@
 // ie xcode 6, 7
 #define DOCTEST_THREAD_LOCAL
 #include "doctest.h"
-
-#include <vector>
-#include <algorithm>
-#include <iomanip>
-#include <iterator>    //      For std::inserter
-
-#include "ajabase/system/thread.h"
-
 #include "ntv2bitfile.h"
 #include "ntv2card.h"
 #include "ntv2debug.h"
 #include "ntv2endian.h"
 #include "ntv2signalrouter.h"
-#include "ntv2registerexpert.h"
 #include "ntv2routingexpert.h"
 #include "ntv2transcode.h"
 #include "ntv2utils.h"
 #include "ntv2vpid.h"
+#include "ntv2version.h"
+#include "ajabase/system/debug.h"
+#include <vector>
+#include <algorithm>
+#include <iomanip>
+#include <iterator>    //      For std::inserter
 
 static bool gVerboseOutput = false;
 

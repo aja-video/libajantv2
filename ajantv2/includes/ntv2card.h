@@ -8,8 +8,6 @@
 #ifndef NTV2CARD_H
 #define NTV2CARD_H
 
-#include "ajaexport.h"
-
 #if defined (MSWindows)
 	#include "ntv2windriverinterface.h"
 #elif defined (AJAMac)
@@ -24,145 +22,6 @@
 #include <iostream>
 #include <vector>
 #include <bitset>
-
-/**
-	@brief	Used in calls to CNTV2Card::GetBoolParam to determine device features.
-**/
-typedef enum _NTV2BoolParamID
-{
-//	kDeviceCanChangeEmbeddedAudioClock,			///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has NorthWest Logic DMA hardware.
-	kDeviceCanChangeFrameBufferSize,			///< @brief Use with CNTV2Card::GetBoolParam to determine if the device does not have fixed frame buffer sizes.
-	kDeviceCanDisableUFC,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has at least one UFC, and it can be disabled.
-	kDeviceCanDo2KVideo,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device is capable of handling 2Kx1556 video.
-	kDeviceCanDo3GLevelConversion,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can perform 3G level B to 3G level A conversion.
-	kDeviceCanDoRGBLevelAConversion,			///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can do RGB over 3G Level A.
-	kDeviceCanDo425Mux,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports SMPTE 425 mux control.
-	kDeviceCanDo4KVideo,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can handle 4K/UHD video.
-	kDeviceCanDoAESAudioIn,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has at least one AES/EBU audio input.
-	kDeviceCanDoAnalogAudio,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has at least one analog audio input or output.
-	kDeviceCanDoAnalogVideoIn,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has at least one analog video input.
-	kDeviceCanDoAnalogVideoOut,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has at least one analog video output.
-//	kDeviceCanDoAudio2Channels,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the Audio System(s) on the device can be configured to embed/de-embed only 2 audio channels.
-//	kDeviceCanDoAudio6Channels,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the Audio System(s) on the device can be configured to embed/de-embed only 6 audio channels.
-//	kDeviceCanDoAudio8Channels,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the Audio System(s) on the device can be configured to embed/de-embed only 8 audio channels.
-//	kDeviceCanDoAudio96K,						///< @brief Use with CNTV2Card::GetBoolParam to determine if Audio System(s) on the device can be set to a 96kHz sample rate.
-//	kDeviceCanDoAudioDelay,						///< @brief Use with CNTV2Card::GetBoolParam to determine if Audio System(s) on the device have an adjustable delay.
-	kDeviceCanDoBreakoutBox,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can be connected to an AJA breakout box.
-	kDeviceCanDoCapture,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can capture (ingest) video.
-//	kDeviceCanDoColorCorrection,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has at least one programmable LUT.
-//	kDeviceCanDoCustomAnc,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports ANC insertion/extraction.
-//	kDeviceCanDoDSKOpacity,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has a mixer/keyer whose opacity is adjustable.
-//	kDeviceCanDoDualLink,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can input/output 10-bit RGB over 2-wire SDI.
-//	kDeviceCanDoDVCProHD,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can squeeze/stretch between 1920x1080/1280x1080 and 1280x720/960x720.
-//	kDeviceCanDoEnhancedCSC,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has enhanced color space converter capability.
-//	kDeviceCanDoFrameStore1Display,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can display video from FrameStore 1.
-//	kDeviceCanDoFreezeOutput,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can freeze output video.
-//	kDeviceCanDoHDMIOutStereo,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can handle 3D-stereo video output over HDMI.
-//	kDeviceCanDoHDV,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can squeeze/stretch between 1920x1080 and 1440x1080.
-//	kDeviceCanDoHDVideo,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can handle HD (High Definition) video.
-	kDeviceCanDoIsoConvert,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can do ISO conversion.
-	kDeviceCanDoLTC,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can take in LTC (Linear TimeCode) from one of its inputs.
-	kDeviceCanDoLTCInOnRefPort,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can read LTC (Linear TimeCode) from its reference input.
-	kDeviceCanDoMSI,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device DMA hardware supports MSI (Message Signaled Interrupts).
-	kDeviceCanDoMultiFormat,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can simultaneously handle different video formats on more than one SDI input or output.
-	kDeviceCanDoPCMControl,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device Audio System(s) can indicate non-PCM (Pulse Code Modulation) on a per-channel-pair basis.
-	kDeviceCanDoPCMDetection,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has per-audio-channel-pair PCM detection capabilities.
-//	kDeviceCanDoPIO,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports Programmed I/O.
-	kDeviceCanDoPlayback,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can output (play) video.
-	kDeviceCanDoProgrammableCSC,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has at least one programmable color space converter widget.
-	kDeviceCanDoProgrammableRS422,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has at least one RS-422 serial port, and it (they) can be programmed (for baud rate, parity, etc.).
-	kDeviceCanDoProRes,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can can accommodate Apple ProRes-compressed video in its frame buffers.
-	kDeviceCanDoQREZ,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can handle QRez.
-	kDeviceCanDoQuarterExpand,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can handle quarter-sized frames (pixel-halving and line-halving during input, pixel-double and line-double during output).
-//	kDeviceCanDoRateConvert,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can do frame rate conversion.
-//	kDeviceCanDoRGBPlusAlphaOut,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has CSCs capable of splitting the key (alpha) and YCbCr (fill) from RGB frame buffers that include alpha. (Has nothing to do with RGB wire formats.)
-//	kDeviceCanDoRP188,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can insert and/or extract RP-188/VITC.
-//	kDeviceCanDoSDVideo,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can handle SD (Standard Definition) video.
-	kDeviceCanDoSDIErrorChecks,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can perform SDI error checking.
-//	kDeviceCanDoStackedAudio,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device uses a "stacked" arrangement of its audio buffers.
-//	kDeviceCanDoStereoIn,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports 3D video input over dual-stream SDI.
-//	kDeviceCanDoStereoOut,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports 3D video output over dual-stream SDI.
-	kDeviceCanDoThunderbolt,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device connects to the host using a Thunderbolt cable.
-	kDeviceCanDoVideoProcessing,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can do video processing.
-	kDeviceCanMeasureTemperature,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can measure its temperature.
-	kDeviceCanReportFrameSize,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can report its frame size.
-	kDeviceHasBiDirectionalSDI,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device SDI connectors are bi-directional.
-//	kDeviceHasColorSpaceConverterOnChannel2,	///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has a CSC on channel 2.
-	kDeviceHasNWL,								///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has NorthWest Logic DMA hardware.
-	kDeviceHasPCIeGen2,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports 2nd-generation PCIe.
-	kDeviceHasRetailSupport,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can be configured and controlled by the retail services and AJA ControlPanel.
-	kDeviceHasSDIRelays,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has bypass relays on its SDI connectors.
-//	kDeviceHasSPIFlash,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has SPI flash hardware.
-//	kDeviceHasSPIFlashSerial,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has serial SPI flash hardware.
-	kDeviceHasSPIv2,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device uses version 2 SPI hardware.
-	kDeviceHasSPIv3,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device uses version 3 SPI hardware.
-	kDeviceHasSPIv4,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device uses version 4 SPI hardware.
-//	kDeviceIs64Bit,								///< @brief Use with CNTV2Card::GetBoolParam to determine if the device is 64-bit addressable.
-//	kDeviceIsDirectAddressable,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device is direct addressable.
-	kDeviceIsExternalToHost,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device connects to the host with a cable.
-	kDeviceIsSupported,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device is supported by this SDK.
-//	kDeviceNeedsRoutingSetup,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device widget routing can be queried and/or changed.
-	kDeviceSoftwareCanChangeFrameBufferSize,	///< @brief Use with CNTV2Card::GetBoolParam to determine if the device frame buffer size can be changed.
-	kDeviceCanThermostat,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the fan on the device can be thermostatically controlled.
-	kDeviceHasHEVCM31,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has an HEVC M31 encoder.
-	kDeviceHasHEVCM30,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has an HEVC M30 encoder/decoder.
-	kDeviceCanDoVITC2,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can insert and/or extract RP-188/VITC2.
-	kDeviceCanDoHDMIHDROut,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports HDMI HDR output.
-	kDeviceCanDoJ2K,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports the JPEG 2000 codec.
-	kDeviceCanDo_INVALID
-} NTV2BoolParamID;
-
-/**
-	@brief	Used in calls to CNTV2Card::GetNumericParam to determine numeric device features.
-**/
-typedef enum _NTV2NumericParamID
-{
-	kDeviceGetActiveMemorySize,					///< @brief Use with CNTV2Card::GetNumericParam to obtain the size, in bytes, of the device's active RAM available for video and audio.
-	kDeviceGetDACVersion,						///< @brief Use with CNTV2Card::GetNumericParam to obtain the version number of the DAC on the device.
-	kDeviceGetDownConverterDelay,				///< @brief Use with CNTV2Card::GetNumericParam to obtain the down-converter delay on the device.
-	kDeviceGetHDMIVersion,						///< @brief Use with CNTV2Card::GetNumericParam to obtain the version number of the HDMI input(s) and/or output(s) on the device.
-	kDeviceGetLUTVersion,						///< @brief Use with CNTV2Card::GetNumericParam to obtain the version number of the LUT(s) on the device.
-	kDeviceGetMaxAudioChannels,					///< @brief Use with CNTV2Card::GetNumericParam to obtain the maximum number of audio channels that a single Audio System can support on the device.
-	kDeviceGetMaxRegisterNumber,				///< @brief Use with CNTV2Card::GetNumericParam to obtain the highest register number for the device.
-	kDeviceGetMaxTransferCount,					///< @brief Use with CNTV2Card::GetNumericParam to obtain the maximum number of 32-bit words that the DMA engine can move at a time on the device.
-	kDeviceGetNumDMAEngines,					///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of DMA engines on the device.
-	kDeviceGetNumVideoChannels,					///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of video channels supported on the device.
-	kDeviceGetPingLED,							///< @brief Use with CNTV2Card::GetNumericParam to obtain the highest bit number of the LED bits in the Global Control Register on the device.
-	kDeviceGetUFCVersion,						///< @brief Use with CNTV2Card::GetNumericParam to obtain the version number of the UFC on the device.
-	kDeviceGetNum4kQuarterSizeConverters,		///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of quarter-size 4K/UHD down-converters on the device.
-	kDeviceGetNumAESAudioInputChannels,			///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of AES/EBU audio input channels on the device.
-	kDeviceGetNumAESAudioOutputChannels,		///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of AES/EBU audio output channels on the device.
-	kDeviceGetNumAnalogAudioInputChannels,		///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of analog audio input channels on the device.
-	kDeviceGetNumAnalogAudioOutputChannels,		///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of analog audio output channels on the device.
-	kDeviceGetNumAnalogVideoInputs,				///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of analog video inputs on the device.
-	kDeviceGetNumAnalogVideoOutputs,			///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of analog video outputs on the device.
-	kDeviceGetNumAudioSystems,					///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of independent Audio Systems on the device.
-	kDeviceGetNumCrossConverters,				///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of cross-converters on the device.
-	kDeviceGetNumCSCs,							///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of colorspace converter widgets on the device.
-	kDeviceGetNumDownConverters,				///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of down-converters on the device.
-	kDeviceGetNumEmbeddedAudioInputChannels,	///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of SDI-embedded input audio channels supported by the device.
-	kDeviceGetNumEmbeddedAudioOutputChannels,	///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of SDI-embedded output audio channels supported by the device.
-	kDeviceGetNumFrameStores,					///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of FrameStores on the device.
-	kDeviceGetNumFrameSyncs,					///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of frame sync widgets on the device.
-	kDeviceGetNumHDMIAudioInputChannels,		///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of HDMI audio input channels on the device.
-	kDeviceGetNumHDMIAudioOutputChannels,		///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of HDMI audio output channels on the device.
-	kDeviceGetNumHDMIVideoInputs,				///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of HDMI video inputs on the device.
-	kDeviceGetNumHDMIVideoOutputs,				///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of HDMI video outputs on the device.
-	kDeviceGetNumInputConverters,				///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of input converter widgets on the device.
-	kDeviceGetNumLUTs,							///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of LUT widgets on the device.
-	kDeviceGetNumMixers,						///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of mixer/keyer widgets on the device.
-	kDeviceGetNumOutputConverters,				///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of output converter widgets on the device.
-	kDeviceGetNumReferenceVideoInputs,			///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of reference video inputs on the device.
-	kDeviceGetNumSerialPorts,					///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of RS-422 serial ports on the device.
-	kDeviceGetNumUpConverters,					///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of up-converters on the device.
-	kDeviceGetNumVideoInputs,					///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of SDI video inputs on the device.
-	kDeviceGetNumVideoOutputs,					///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of SDI video outputs on the device.
-	kDeviceGetNum2022ChannelsSFP1,				///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of 2022 channels configured on SFP 1 on the device.
-	kDeviceGetNum2022ChannelsSFP2,				///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of 2022 channels configured on SFP 2 on the device.
-	kDeviceGetNumLTCInputs,						///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of analog LTC inputs on the device.
-	kDeviceGetNumLTCOutputs,					///< @brief Use with CNTV2Card::GetNumericParam to obtain the number of analog LTC outputs on the device.
-	kDeviceGetNum_INVALID
-} NTV2NumericParamID;
 
 
 typedef std::set <NTV2AudioChannelPair>			NTV2AudioChannelPairs;			///< @brief A set of distinct NTV2AudioChannelPair values.
@@ -189,12 +48,200 @@ typedef NTV2DIDSet::const_iterator	NTV2DIDSetConstIter;	///< @brief Handy const 
 AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DIDSet & inDIDs);	///<	@brief	Handy ostream writer for NTV2DIDSet.
 
 
-typedef std::bitset<16>		NTV2AudioChannelsMuted16;				///< @brief Per-audio-channel mute state for up to 16 audio channels.
+typedef std::bitset<16>		NTV2AudioChannelsMuted16;		///< @brief Per-audio-channel mute state for up to 16 audio channels.
 const NTV2AudioChannelsMuted16	NTV2AudioChannelsMuteAll = NTV2AudioChannelsMuted16(0xFFFF);	///< @brief All 16 audio channels muted/disabled.
 const NTV2AudioChannelsMuted16	NTV2AudioChannelsEnableAll = NTV2AudioChannelsMuted16(0x0000);	///< @brief All 16 audio channels unmuted/enabled.
 const ULWord LUTTablePartitionSize = ULWord(0x40000);
 
-
+#if defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
+/**
+	@brief	Convenience class/API for inquiring about device capabilities of physical and virtual devices.
+			Instead of calling the old global ::NTV2DeviceCanDoXXX(mDeviceID) functions,
+			call mCard.features().CanDoXXX().
+			Instead of calling ::NTV2DeviceGetNumYYY(mDeviceID), call mCard.features().GetNumYYY().
+**/
+class AJAExport DeviceCapabilities
+{
+	public:
+		explicit inline	DeviceCapabilities (CNTV2DriverInterface & inDev)	: dev(inDev)	{}
+		inline bool	CanChangeEmbeddedAudioClock (void)		{return dev.IsSupported(kDeviceCanChangeEmbeddedAudioClock);}
+		inline bool	CanChangeFrameBufferSize (void)			{return dev.IsSupported(kDeviceCanChangeFrameBufferSize);}
+		inline bool	CanDisableUFC (void)					{return dev.IsSupported(kDeviceCanDisableUFC);}
+		inline bool	CanDo12gRouting (void)					{return dev.IsSupported(kDeviceCanDo12gRouting);}
+		inline bool	CanDo12GSDI (void)						{return dev.IsSupported(kDeviceCanDo12GSDI);}
+		inline bool	CanDo2110 (void)						{return dev.IsSupported(kDeviceCanDo2110);}
+		inline bool	CanDo2KVideo (void)						{return dev.IsSupported(kDeviceCanDo2KVideo);}
+		inline bool	CanDo3GLevelConversion (void)			{return dev.IsSupported(kDeviceCanDo3GLevelConversion);}
+		inline bool	CanDo425Mux (void)						{return dev.IsSupported(kDeviceCanDo425Mux);}
+		inline bool	CanDo4KVideo (void)						{return dev.IsSupported(kDeviceCanDo4KVideo);}
+		inline bool	CanDo8KVideo (void)						{return dev.IsSupported(kDeviceCanDo8KVideo);}
+		inline bool	CanDoAESAudioIn (void)					{return dev.IsSupported(kDeviceCanDoAESAudioIn);}
+		inline bool	CanDoAnalogAudio (void)					{return dev.IsSupported(kDeviceCanDoAnalogAudio);}
+		inline bool	CanDoAnalogVideoIn (void)				{return dev.IsSupported(kDeviceCanDoAnalogVideoIn);}
+		inline bool	CanDoAnalogVideoOut (void)				{return dev.IsSupported(kDeviceCanDoAnalogVideoOut);}
+		inline bool	CanDoAudio192K (void)					{return dev.IsSupported(kDeviceCanDoAudio192K);}
+		inline bool	CanDoAudio2Channels (void)				{return dev.IsSupported(kDeviceCanDoAudio2Channels);}
+		inline bool	CanDoAudio6Channels (void)				{return dev.IsSupported(kDeviceCanDoAudio6Channels);}
+		inline bool	CanDoAudio8Channels (void)				{return dev.IsSupported(kDeviceCanDoAudio8Channels);}
+		inline bool	CanDoAudio96K (void)					{return dev.IsSupported(kDeviceCanDoAudio96K);}
+		inline bool	CanDoAudioDelay (void)					{return dev.IsSupported(kDeviceCanDoAudioDelay);}
+		inline bool	CanDoAudioMixer (void)					{return dev.IsSupported(kDeviceCanDoAudioMixer);}
+		inline bool	CanDoBreakoutBox (void)					{return dev.IsSupported(kDeviceCanDoBreakoutBox);}
+		inline bool	CanDoCapture (void)						{return dev.IsSupported(kDeviceCanDoCapture);}
+		inline bool	CanDoCustomAnc (void)					{return dev.IsSupported(kDeviceCanDoCustomAnc);}
+		inline bool	CanDoCustomAux (void)					{return dev.IsSupported(kDeviceCanDoCustomAux);}
+		inline bool	CanDoDSKOpacity (void)					{return dev.IsSupported(kDeviceCanDoDSKOpacity);}
+		inline bool	CanDoDualLink (void)					{return dev.IsSupported(kDeviceCanDoDualLink);}
+		inline bool	CanDoDVCProHD (void)					{return dev.IsSupported(kDeviceCanDoDVCProHD);}
+		inline bool	CanDoEnhancedCSC (void)					{return dev.IsSupported(kDeviceCanDoEnhancedCSC);}
+		inline bool	CanDoFramePulseSelect (void)			{return dev.IsSupported(kDeviceCanDoFramePulseSelect);}
+		inline bool	CanDoFrameStore1Display (void)			{return dev.IsSupported(kDeviceCanDoFrameStore1Display);}
+		inline bool	CanDoHDMIHDROut (void)					{return dev.IsSupported(kDeviceCanDoHDMIHDROut);}
+		inline bool	CanDoHDMIMultiView (void)				{return dev.IsSupported(kDeviceCanDoHDMIMultiView);}
+		inline bool	CanDoHDMIOutStereo (void)				{return dev.IsSupported(kDeviceCanDoHDMIOutStereo);}
+		inline bool	CanDoHDV (void)							{return dev.IsSupported(kDeviceCanDoHDV);}
+		inline bool	CanDoHDVideo (void)						{return dev.IsSupported(kDeviceCanDoHDVideo);}
+		inline bool	CanDoHFRRGB (void)						{return dev.IsSupported(kDeviceCanDoHFRRGB);}
+		inline bool	CanDoIP (void)							{return dev.IsSupported(kDeviceCanDoIP);}
+		inline bool	CanDoIsoConvert (void)					{return dev.IsSupported(kDeviceCanDoIsoConvert);}
+		inline bool	CanDoJ2K (void)							{return dev.IsSupported(kDeviceCanDoJ2K);}
+		inline bool	CanDoLTC (void)							{return dev.IsSupported(kDeviceCanDoLTC);}
+		inline bool	CanDoLTCInOnRefPort (void)				{return dev.IsSupported(kDeviceCanDoLTCInOnRefPort);}
+		inline bool	CanDoMSI (void)							{return dev.IsSupported(kDeviceCanDoMSI);}
+		inline bool	CanDoMultiFormat (void)					{return dev.IsSupported(kDeviceCanDoMultiFormat);}
+		inline bool	CanDoMultiLinkAudio (void)				{return dev.IsSupported(kDeviceCanDoMultiLinkAudio);}
+		inline bool	CanDoPCMControl (void)					{return dev.IsSupported(kDeviceCanDoPCMControl);}
+		inline bool	CanDoPCMDetection (void)				{return dev.IsSupported(kDeviceCanDoPCMDetection);}
+		inline bool	CanDoPIO (void)							{return dev.IsSupported(kDeviceCanDoPIO);}
+		inline bool	CanDoPlayback (void)					{return dev.IsSupported(kDeviceCanDoPlayback);}
+		inline bool	CanDoProgrammableRS422 (void)			{return dev.IsSupported(kDeviceCanDoProgrammableRS422);}
+		inline bool	CanDoProRes (void)						{return dev.IsSupported(kDeviceCanDoProRes);}
+		inline bool	CanDoQREZ (void)						{return dev.IsSupported(kDeviceCanDoQREZ);}
+		inline bool	CanDoQuarterExpand (void)				{return dev.IsSupported(kDeviceCanDoQuarterExpand);}
+		inline bool	CanDoRateConvert (void)					{return dev.IsSupported(kDeviceCanDoRateConvert);}
+		inline bool	CanDoRGBLevelAConversion (void)			{return dev.IsSupported(kDeviceCanDoRGBLevelAConversion);}
+		inline bool	CanDoRGBPlusAlphaOut (void)				{return dev.IsSupported(kDeviceCanDoRGBPlusAlphaOut);}
+		inline bool	CanDoRP188 (void)						{return dev.IsSupported(kDeviceCanDoRP188);}
+		inline bool	CanDoSDIErrorChecks (void)				{return dev.IsSupported(kDeviceCanDoSDIErrorChecks);}
+		inline bool	CanDoSDVideo (void)						{return dev.IsSupported(kDeviceCanDoSDVideo);}
+		inline bool	CanDoStackedAudio (void)				{return dev.IsSupported(kDeviceCanDoStackedAudio);}
+		inline bool	CanDoStereoIn (void)					{return dev.IsSupported(kDeviceCanDoStereoIn);}
+		inline bool	CanDoStereoOut (void)					{return dev.IsSupported(kDeviceCanDoStereoOut);}
+		inline bool	CanDoThunderbolt (void)					{return dev.IsSupported(kDeviceCanDoThunderbolt);}
+		inline bool	CanDoVideoProcessing (void)				{return dev.IsSupported(kDeviceCanDoVideoProcessing);}
+		inline bool	CanDoVITC2 (void)						{return dev.IsSupported(kDeviceCanDoVITC2);}
+		inline bool	CanDoWarmBootFPGA (void)				{return dev.IsSupported(kDeviceCanDoWarmBootFPGA);}
+		inline bool	CanMeasureTemperature (void)			{return dev.IsSupported(kDeviceCanMeasureTemperature);}
+		inline bool	CanReportFailSafeLoaded (void)			{return dev.IsSupported(kDeviceCanReportFailSafeLoaded);}
+		inline bool	CanReportFrameSize (void)				{return dev.IsSupported(kDeviceCanReportFrameSize);}
+		inline bool	CanReportRunningFirmwareDate (void)		{return dev.IsSupported(kDeviceCanReportRunningFirmwareDate);}
+		inline bool	CanThermostat (void)					{return dev.IsSupported(kDeviceCanThermostat);}
+		inline bool	HasAudioMonitorRCAJacks (void)			{return dev.IsSupported(kDeviceHasAudioMonitorRCAJacks);}
+		inline bool	HasBiDirectionalAnalogAudio (void)		{return dev.IsSupported(kDeviceHasBiDirectionalAnalogAudio);}
+		inline bool	HasBiDirectionalSDI (void)				{return dev.IsSupported(kDeviceHasBiDirectionalSDI);}
+		inline bool	HasColorSpaceConverterOnChannel2 (void)	{return dev.IsSupported(kDeviceHasColorSpaceConverterOnChannel2);}
+		inline bool	HasGenlockv2 (void)						{return dev.IsSupported(kDeviceHasGenlockv2);}
+		inline bool	HasGenlockv3 (void)						{return dev.IsSupported(kDeviceHasGenlockv3);}
+		inline bool	HasHeadphoneJack (void)					{return dev.IsSupported(kDeviceHasHeadphoneJack);}
+		inline bool	HasHEVCM30 (void)						{return dev.IsSupported(kDeviceHasHEVCM30);}
+		inline bool	HasHEVCM31 (void)						{return dev.IsSupported(kDeviceHasHEVCM31);}
+		inline bool	HasLEDAudioMeters (void)				{return dev.IsSupported(kDeviceHasLEDAudioMeters);}
+		inline bool	HasMicInput (void)						{return dev.IsSupported(kDeviceHasMicrophoneInput);}
+		inline bool	HasNWL (void)							{return dev.IsSupported(kDeviceHasNWL);}
+		inline bool	HasPCIeGen2 (void)						{return dev.IsSupported(kDeviceHasPCIeGen2);}
+		inline bool	HasRetailSupport (void)					{return dev.IsSupported(kDeviceHasRetailSupport);}
+		inline bool	HasRotaryEncoder (void)					{return dev.IsSupported(kDeviceHasRotaryEncoder);}
+		inline bool	HasSDIRelays (void)						{return dev.IsSupported(kDeviceHasSDIRelays);}
+		inline bool	HasSPIFlash (void)						{return dev.IsSupported(kDeviceHasSPIFlash);}
+		inline bool	HasSPIFlashSerial (void)				{return dev.IsSupported(kDeviceHasSPIFlashSerial);}
+		inline bool	HasSPIv2 (void)							{return dev.IsSupported(kDeviceHasSPIv2);}
+		inline bool	HasSPIv3 (void)							{return dev.IsSupported(kDeviceHasSPIv3);}
+		inline bool	HasSPIv4 (void)							{return dev.IsSupported(kDeviceHasSPIv4);}
+		inline bool	HasSPIv5 (void)							{return dev.IsSupported(kDeviceHasSPIv5);}
+		inline bool	HasXilinxDMA (void)						{return dev.IsSupported(kDeviceHasXilinxDMA);}
+		inline bool	Is64Bit (void)							{return dev.IsSupported(kDeviceIs64Bit);}
+		inline bool	IsDirectAddressable (void)				{return dev.IsSupported(kDeviceIsDirectAddressable);}
+		inline bool	IsDNxIV (void)							{return dev.IsSupported(kDeviceHasMicrophoneInput);}
+		inline bool	IsExternalToHost (void)					{return dev.IsSupported(kDeviceIsExternalToHost);}
+		inline bool	IsSupported (void)						{return dev.IsSupported(kDeviceIsSupported);}
+		inline bool	NeedsRoutingSetup (void)				{return dev.IsSupported(kDeviceNeedsRoutingSetup);}
+		inline bool	SoftwareCanChangeFrameBufferSize (void)	{return dev.IsSupported(kDeviceSoftwareCanChangeFrameBufferSize);}
+		inline ULWord	GetActiveMemorySize (void)				{return dev.GetNumSupported(kDeviceGetActiveMemorySize);}
+		inline UWord	GetDACVersion (void)					{return UWord(dev.GetNumSupported(kDeviceGetDACVersion));}
+		inline UWord	GetDownConverterDelay (void)			{return UWord(dev.GetNumSupported(kDeviceGetDownConverterDelay));}
+		inline ULWord	GetHDMIVersion (void)					{return dev.GetNumSupported(kDeviceGetHDMIVersion);}
+		inline ULWord	GetLUTVersion (void)					{return dev.GetNumSupported(kDeviceGetLUTVersion);}
+		inline UWord	GetMaxAudioChannels (void)				{return UWord(dev.GetNumSupported(kDeviceGetMaxAudioChannels));}
+		inline ULWord	GetMaxRegisterNumber (void)				{return dev.GetNumSupported(kDeviceGetMaxRegisterNumber);}
+		inline ULWord	GetMaxTransferCount (void)				{return dev.GetNumSupported(kDeviceGetMaxTransferCount);}
+		inline UWord	GetNum2022ChannelsSFP1 (void)			{return UWord(dev.GetNumSupported(kDeviceGetNum2022ChannelsSFP1));}
+		inline UWord	GetNum2022ChannelsSFP2 (void)			{return UWord(dev.GetNumSupported(kDeviceGetNum2022ChannelsSFP2));}
+		inline UWord	GetNum4kQuarterSizeConverters (void)	{return UWord(dev.GetNumSupported(kDeviceGetNum4kQuarterSizeConverters));}
+		inline UWord	GetNumAESAudioInputChannels (void)		{return UWord(dev.GetNumSupported(kDeviceGetNumAESAudioInputChannels));}
+		inline UWord	GetNumAESAudioOutputChannels (void)		{return UWord(dev.GetNumSupported(kDeviceGetNumAESAudioOutputChannels));}
+		inline UWord	GetNumAnalogAudioInputChannels (void)	{return UWord(dev.GetNumSupported(kDeviceGetNumAnalogAudioInputChannels));}
+		inline UWord	GetNumAnalogAudioOutputChannels (void)	{return UWord(dev.GetNumSupported(kDeviceGetNumAnalogAudioOutputChannels));}
+		inline UWord	GetNumAnalogVideoInputs (void)			{return UWord(dev.GetNumSupported(kDeviceGetNumAnalogVideoInputs));}
+		inline UWord	GetNumAnalogVideoOutputs (void)			{return UWord(dev.GetNumSupported(kDeviceGetNumAnalogVideoOutputs));}
+		inline UWord	GetNumAudioSystems (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumAudioSystems));}
+		inline UWord	GetNumCrossConverters (void)			{return UWord(dev.GetNumSupported(kDeviceGetNumCrossConverters));}
+		inline UWord	GetNumCSCs (void)						{return UWord(dev.GetNumSupported(kDeviceGetNumCSCs));}
+		inline ULWord	GetNumDMAEngines (void)					{return dev.GetNumSupported(kDeviceGetNumDMAEngines);}
+		inline UWord	GetNumDownConverters (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumDownConverters));}
+		inline UWord	GetNumEmbeddedAudioInputChannels (void)	{return UWord(dev.GetNumSupported(kDeviceGetNumEmbeddedAudioInputChannels));}
+		inline UWord	GetNumEmbeddedAudioOutputChannels (void){return UWord(dev.GetNumSupported(kDeviceGetNumEmbeddedAudioOutputChannels));}
+		inline UWord	GetNumFrameStores (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumFrameStores));}
+		inline UWord	GetNumFrameSyncs (void)					{return UWord(dev.GetNumSupported(kDeviceGetNumFrameSyncs));}
+		inline UWord	GetNumHDMIAudioInputChannels (void)		{return UWord(dev.GetNumSupported(kDeviceGetNumHDMIAudioInputChannels));}
+		inline UWord	GetNumHDMIAudioOutputChannels (void)	{return UWord(dev.GetNumSupported(kDeviceGetNumHDMIAudioOutputChannels));}
+		inline UWord	GetNumHDMIVideoInputs (void)			{return UWord(dev.GetNumSupported(kDeviceGetNumHDMIVideoInputs));}
+		inline UWord	GetNumHDMIVideoOutputs (void)			{return UWord(dev.GetNumSupported(kDeviceGetNumHDMIVideoOutputs));}
+		inline UWord	GetNumInputConverters (void)			{return UWord(dev.GetNumSupported(kDeviceGetNumInputConverters));}
+		inline UWord	GetNumLTCInputs (void)					{return UWord(dev.GetNumSupported(kDeviceGetNumLTCInputs));}
+		inline UWord	GetNumLTCOutputs (void)					{return UWord(dev.GetNumSupported(kDeviceGetNumLTCOutputs));}
+		inline UWord	GetNumLUTBanks (void)					{return UWord(dev.GetNumSupported(kDeviceGetNumLUTBanks));}
+		inline UWord	GetNumLUTs (void)						{return UWord(dev.GetNumSupported(kDeviceGetNumLUTs));}
+		inline UWord	GetNumMicInputs (void)					{return UWord(dev.GetNumSupported(kDeviceGetNumMicInputs));}
+		inline UWord	GetNumMixers (void)						{return UWord(dev.GetNumSupported(kDeviceGetNumMixers));}
+		inline UWord	GetNumOutputConverters (void)			{return UWord(dev.GetNumSupported(kDeviceGetNumOutputConverters));}
+		inline UWord	GetNumReferenceVideoInputs (void)		{return UWord(dev.GetNumSupported(kDeviceGetNumReferenceVideoInputs));}
+		inline UWord	GetNumSerialPorts (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumSerialPorts));}
+		inline UWord	GetNumUpConverters (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumUpConverters));}
+		inline ULWord	GetNumVideoChannels (void)				{return dev.GetNumSupported(kDeviceGetNumVideoChannels);}
+		inline UWord	GetNumVideoInputs (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumVideoInputs));}
+		inline UWord	GetNumVideoOutputs (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumVideoOutputs));}
+		inline ULWord	GetPingLED (void)						{return dev.GetNumSupported(kDeviceGetPingLED);}
+		inline UWord	GetTotalNumAudioSystems (void)			{return UWord(dev.GetNumSupported(kDeviceGetTotalNumAudioSystems));}
+		inline UWord	GetNumBufferedAudioSystems (void)		{return UWord(dev.GetNumSupported(kDeviceGetNumBufferedAudioSystems));}
+		inline ULWord	GetUFCVersion (void)					{return dev.GetNumSupported(kDeviceGetUFCVersion);}
+		bool			CanDoConversionMode (const NTV2ConversionMode inMode)
+						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_ConversionMode));
+							return itms.find(ULWord(inMode)) != itms.end();
+						}
+		bool			CanDoDSKMode (const NTV2DSKMode inMode)
+						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_DSKMode));
+							return itms.find(ULWord(inMode)) != itms.end();
+						}
+		bool			CanDoFrameBufferFormat (const NTV2PixelFormat inPF)
+						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_PixelFormat));
+							return itms.find(ULWord(inPF)) != itms.end();
+						}
+		bool			CanDoInputSource (const NTV2InputSource inSrc)
+						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_InputSource));
+							return itms.find(ULWord(inSrc)) != itms.end();
+						}
+		bool			CanDoVideoFormat (const NTV2VideoFormat inVF)
+						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_VideoFormat));
+							return itms.find(ULWord(inVF)) != itms.end();
+						}
+		bool			CanDoWidget (const NTV2WidgetID inWgtID)
+						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_WidgetID));
+							return itms.find(ULWord(inWgtID)) != itms.end();
+						}
+	private:
+		CNTV2DriverInterface &	dev;	//	My reference to the physical or virtual NTV2 device
+};	//	DeviceCapabilities
+#endif	//	defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
 
 /**
 	@brief	I interrogate and control an AJA video/audio capture/playout device.
@@ -242,7 +289,6 @@ public:
 		@name	Inquiry
 	**/
 	///@{
-
 	/**
 		@brief	Answers with this device's display name.
 		@return A string containing this device's display name.
@@ -310,101 +356,42 @@ public:
 	AJA_VIRTUAL NTV2BreakoutType	GetBreakoutHardware (void);
 	///@}
 
-
 	/**
 		@name	Device Features
 	**/
 	///@{
-	AJA_VIRTUAL bool	DeviceCanDoFormat (NTV2FrameRate		inFrameRate,
-											NTV2FrameGeometry	inFrameGeometry, 
-											NTV2Standard		inStandard);
-	AJA_VIRTUAL bool	DeviceCanDo3GOut (UWord index0);
-	AJA_VIRTUAL bool	DeviceCanDoLTCEmbeddedN (UWord index0);
-	AJA_VIRTUAL ULWord	DeviceGetFrameBufferSize (void);
-	AJA_VIRTUAL ULWord	DeviceGetNumberFrameBuffers (void);
-	AJA_VIRTUAL ULWord	DeviceGetAudioFrameBuffer (void);
-	AJA_VIRTUAL ULWord	DeviceGetAudioFrameBuffer2 (void);
-	AJA_VIRTUAL ULWord	DeviceGetFrameBufferSize (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat); //	Revisit for 2MB granularity
-	AJA_VIRTUAL ULWord	DeviceGetNumberFrameBuffers (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat);	//	Revisit for 2MB granularity
-	AJA_VIRTUAL ULWord	DeviceGetAudioFrameBuffer (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat);	//	Revisit for 2MB granularity
-	AJA_VIRTUAL ULWord	DeviceGetAudioFrameBuffer2 (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat);	//	Revisit for 2MB granularity
-
+#if defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
 	/**
-		@brief		Returns true if the device having the given ID supports the given NTV2VideoFormat.
-		@param[in]	inVideoFormat	Specifies the NTV2VideoFormat.
-		@return		True if the device supports the given video format.
+		@return A reference to my DeviceCapabilities API, for querying my capabilities,
+				even if I'm a virtual device.
 	**/
-	AJA_VIRTUAL bool	DeviceCanDoVideoFormat (const NTV2VideoFormat inVideoFormat);
-
-	/**
-		@brief		Returns true if the device having the given ID supports the given NTV2FrameBufferFormat.
-		@param[in]	inFBFormat		Specifies the NTV2FrameBufferFormat.
-		@return		True if the device supports the given frame buffer (pixel) format.
-	**/
-	AJA_VIRTUAL bool	DeviceCanDoFrameBufferFormat (const NTV2FrameBufferFormat inFBFormat);
-
-	/**
-		@brief		Returns true if the device having the given ID supports the given NTV2WidgetID.
-		@param[in]	inWidgetID		Specifies the NTV2WidgetID.
-		@return		True if the device supports the given widget.
-	**/
-	AJA_VIRTUAL bool	DeviceCanDoWidget (const NTV2WidgetID inWidgetID);
-
-	/**
-		@brief		Returns true if the device having the given ID supports the given NTV2ConversionMode.
-		@param[in]	inConversionMode	Specifies the NTV2ConversionMode.
-		@return		True if the device supports the given conversion mode.
-	**/
-	AJA_VIRTUAL bool	DeviceCanDoConversionMode (const NTV2ConversionMode inConversionMode);
-
-	/**
-		@brief		Returns true if the device having the given ID supports the given NTV2DSKMode.
-		@param[in]	inDSKMode		Specifies the NTV2DSKMode.
-		@return		True if the device supports the given DSK mode.
-	**/
-	AJA_VIRTUAL bool	DeviceCanDoDSKMode (const NTV2DSKMode inDSKMode);
-
-	/**
-		@brief		Returns true if the device having the given ID supports the given NTV2InputSource.
-		@param[in]	inInputSource	Specifies the NTV2InputSource.
-		@return		True if the device supports the given input source.
-	**/
-	AJA_VIRTUAL bool	DeviceCanDoInputSource (const NTV2InputSource inInputSource);
-
-	/**
-		@brief		Returns true if the supports the audio mixer.
-		@return		True if the device supports the audio mixer.
-	**/
-	AJA_VIRTUAL bool	DeviceCanDoAudioMixer (void);
-
-	/**
-		@brief		Returns true if the device can convert HDMI tsi to/from quad raster.
-		@return		True if the device supports quad raster conversion.
-	**/
-	AJA_VIRTUAL bool	DeviceCanDoHDMIQuadRasterConversion (void);
-
-	AJA_VIRTUAL bool	DeviceIsDNxIV (void);
-
-	/**
-		@return		Returns true if the device has a microphone input connector.
-	**/
-	AJA_VIRTUAL bool	DeviceHasMicInput (void);
-
-	/**
-		@brief		Fetches the requested boolean value. Typically called to determine device features.
-		@param[in]	inParamID	Specifies the NTV2BoolParamID of interest.
-		@param[out] outValue	Receives the requested boolean value.
-		@return		True if successful;	 otherwise false.
-	**/
-	AJA_VIRTUAL bool	GetBoolParam (const NTV2BoolParamID inParamID, bool & outValue);
-
-	/**
-		@brief		Fetches the requested numeric value. Typically called to determine device features.
-		@param[in]	inParamID	Specifies the NTV2NumericParamID of interest.
-		@param[out] outValue	Receives the requested numeric value.
-		@return		True if successful;	 otherwise false.
-	**/
-	AJA_VIRTUAL bool	GetNumericParam (const NTV2NumericParamID inParamID, uint32_t & outValue);
+	AJA_VIRTUAL inline DeviceCapabilities & features (void)	{return mDevCap;}	//	New in SDK 17.0
+#endif	//	defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
+#if !defined(NTV2_DEPRECATE_16_3)
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoFormat (const NTV2FrameRate inFR,
+														const NTV2FrameGeometry	inFG, 
+														const NTV2Standard inStd));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDo3GOut (const UWord index0));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoLTCEmbeddedN (const UWord index0));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetFrameBufferSize(void));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetNumberFrameBuffers(void));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetAudioFrameBuffer(void));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetAudioFrameBuffer2(void));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetFrameBufferSize (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetNumberFrameBuffers (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetAudioFrameBuffer (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetAudioFrameBuffer2 (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoVideoFormat (const NTV2VideoFormat inVF));	///< @deprecated	Use DeviceCapabilities::CanDoVideoFormat instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoFrameBufferFormat (const NTV2PixelFormat inPF));	///< @deprecated	Use DeviceCapabilities::CanDoFrameBufferFormat instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoWidget (const NTV2WidgetID inWgtID));	///< @deprecated	Use DeviceCapabilities::CanDoWidget instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoConversionMode (const NTV2ConversionMode inCM));	///< @deprecated	Use DeviceCapabilities::CanDoConversionMode instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoDSKMode (const NTV2DSKMode inDSKM));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoInputSource (const NTV2InputSource inSrc));	///< @deprecated	Use DeviceCapabilities::CanDoInputSource instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoAudioMixer(void));	///< @deprecated	Use CNTV2DriverInterface::IsSupported with kDeviceCanDoAudioMixer instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoHDMIQuadRasterConversion(void));	///< @deprecated	This function is obsolete. Do not use it.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceIsDNxIV(void));	///< @deprecated	Use DeviceCapabilities::IsDNxIV instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceHasMicInput(void));	///< @deprecated	Use CNTV2DriverInterface::IsSupported with kDeviceHasMicrophoneInput instead.
+#endif	//	defined(NTV2_DEPRECATE_16_3)
 	///@}
 
 
@@ -2723,38 +2710,36 @@ public:
 	AJA_VIRTUAL bool		SetAudioMixerOutputChannelsMute (const NTV2AudioChannelsMuted16 inMutes);	//	New in SDK 15.5
 
 #if !defined(NTV2_DEPRECATE_15_5)
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerMainInputAudioSystem(NTV2AudioSystem & outAudioSystem))		{return GetAudioMixerInputAudioSystem(NTV2_AudioMixerInputMain, outAudioSystem);}	///< @deprecated	Call CNTV2Card::GetAudioMixerInputAudioSystem instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerMainInputAudioSystem(const NTV2AudioSystem inAudioSystem))	{return SetAudioMixerInputAudioSystem(NTV2_AudioMixerInputMain, inAudioSystem);}	///< @deprecated	Call CNTV2Card::SetAudioMixerInputAudioSystem instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerMainInputChannelSelect(NTV2AudioChannelPair & outChannelPair))	{return GetAudioMixerInputChannelSelect(NTV2_AudioMixerInputMain, outChannelPair);} ///< @deprecated	Call CNTV2Card::GetAudioMixerInputChannelSelect instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerMainInputChannelSelect(const NTV2AudioChannelPair inChannelPair)){return SetAudioMixerInputChannelSelect(NTV2_AudioMixerInputMain, inChannelPair);}	///< @deprecated	Call CNTV2Card::SetAudioMixerInputChannelSelect instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerMainInputGain(ULWord & outGainValue))							{return GetAudioMixerInputGain(NTV2_AudioMixerInputMain, NTV2_AudioMixerChannel1, outGainValue);}	///< @deprecated	Call CNTV2Card::GetAudioMixerInputGain instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerMainInputGain (const ULWord inGainValue))	{return SetAudioMixerInputGain(NTV2_AudioMixerInputMain, NTV2_AudioMixerChannel1, inGainValue);}	///< @deprecated	Call CNTV2Card::SetAudioMixerInputGain instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerAux1x2chInputAudioSystem(NTV2AudioSystem & outAudioSystem))		{return GetAudioMixerInputAudioSystem(NTV2_AudioMixerInputAux1, outAudioSystem);}	///< @deprecated	Call CNTV2Card::GetAudioMixerInputAudioSystem instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerAux1x2chInputAudioSystem(const NTV2AudioSystem inAudioSystem))	{return SetAudioMixerInputAudioSystem(NTV2_AudioMixerInputAux1, inAudioSystem);}	///< @deprecated	Call CNTV2Card::SetAudioMixerInputAudioSystem instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerAux1InputGain(const NTV2AudioMixerChannel inChannel, ULWord & outGainValue)) {return GetAudioMixerInputGain(NTV2_AudioMixerInputAux1, inChannel, outGainValue);} ///< @deprecated	Call CNTV2Card::GetAudioMixerInputGain instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerAux2x2chInputAudioSystem(NTV2AudioSystem & outAudioSystem))		{return GetAudioMixerInputAudioSystem(NTV2_AudioMixerInputAux2, outAudioSystem);}	///< @deprecated	Call CNTV2Card::GetAudioMixerInputAudioSystem instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerAux2x2chInputAudioSystem(const NTV2AudioSystem inAudioSystem))	{return SetAudioMixerInputAudioSystem(NTV2_AudioMixerInputAux2, inAudioSystem);}	///< @deprecated	Call CNTV2Card::SetAudioMixerInputAudioSystem instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerAux2InputGain(const NTV2AudioMixerChannel inChannel, ULWord & outGainValue)) {return GetAudioMixerInputGain(NTV2_AudioMixerInputAux2, inChannel, outGainValue);} ///< @deprecated	Call CNTV2Card::GetAudioMixerInputGain instead.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerAux1InputGain (const NTV2AudioMixerChannel inChannel, const ULWord inGainValue));	///< @deprecated	Call CNTV2Card::SetAudioMixerInputGain instead.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerAux2InputGain (const NTV2AudioMixerChannel inChannel, const ULWord inGainValue));	///< @deprecated	Call CNTV2Card::SetAudioMixerInputGain instead.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerMainInputEnable(bool & outEnabled));	///< @deprecated	Call CNTV2Card::GetAudioMixerInputChannelsMute instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerMainInputEnable(const bool inEnable))	{return SetAudioMixerInputChannelsMute(NTV2_AudioMixerInputMain, inEnable ? NTV2AudioChannelsEnableAll : NTV2AudioChannelsMuteAll);}		///< @deprecated	Call CNTV2Card::SetAudioMixerInputChannelsMute instead.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerAux1InputEnable (bool & outEnabled));	///< @deprecated	Call CNTV2Card::GetAudioMixerInputChannelsMute instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerAux1InputEnable (const bool inEnable))	{return SetAudioMixerInputChannelsMute(NTV2_AudioMixerInputAux1, inEnable ? NTV2AudioChannelsEnableAll : NTV2AudioChannelsMuteAll);}		///< @deprecated	Call CNTV2Card::SetAudioMixerInputChannelsMute instead.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool GetAudioMixerAux2InputEnable (bool & outEnabled));	///< @deprecated	Call CNTV2Card::GetAudioMixerInputChannelsMute instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SetAudioMixerAux2InputEnable (const bool inEnable))	{return SetAudioMixerInputChannelsMute(NTV2_AudioMixerInputAux2, inEnable ? NTV2AudioChannelsEnableAll : NTV2AudioChannelsMuteAll);}		///< @deprecated	Call CNTV2Card::SetAudioMixerInputChannelsMute instead.
-	AJA_VIRTUAL ULWord		GetAudioMixerMainInputChannelLevel (const NTV2AudioMixerChannel inChannel);
-	AJA_VIRTUAL ULWord		GetAudioMixerAux1InputChannelLevel (const NTV2AudioMixerChannel inChannel);
-	AJA_VIRTUAL ULWord		GetAudioMixerAux2InputChannelLevel (const NTV2AudioMixerChannel inChannel);
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetAudioMixerMainInputAudioSystem(NTV2AudioSystem & outAudioSystem))		{return GetAudioMixerInputAudioSystem(NTV2_AudioMixerInputMain, outAudioSystem);}	///< @deprecated	Call CNTV2Card::GetAudioMixerInputAudioSystem instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioMixerMainInputAudioSystem(const NTV2AudioSystem inAudioSystem))	{return SetAudioMixerInputAudioSystem(NTV2_AudioMixerInputMain, inAudioSystem);}	///< @deprecated	Call CNTV2Card::SetAudioMixerInputAudioSystem instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetAudioMixerMainInputChannelSelect(NTV2AudioChannelPair & outChannelPair))	{return GetAudioMixerInputChannelSelect(NTV2_AudioMixerInputMain, outChannelPair);} ///< @deprecated	Call CNTV2Card::GetAudioMixerInputChannelSelect instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioMixerMainInputChannelSelect(const NTV2AudioChannelPair inChannelPair)){return SetAudioMixerInputChannelSelect(NTV2_AudioMixerInputMain, inChannelPair);}	///< @deprecated	Call CNTV2Card::SetAudioMixerInputChannelSelect instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetAudioMixerMainInputGain(ULWord & outGainValue))							{return GetAudioMixerInputGain(NTV2_AudioMixerInputMain, NTV2_AudioMixerChannel1, outGainValue);}	///< @deprecated	Call CNTV2Card::GetAudioMixerInputGain instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioMixerMainInputGain (const ULWord inGainValue))	{return SetAudioMixerInputGain(NTV2_AudioMixerInputMain, NTV2_AudioMixerChannel1, inGainValue);}	///< @deprecated	Call CNTV2Card::SetAudioMixerInputGain instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetAudioMixerAux1x2chInputAudioSystem(NTV2AudioSystem & outAudioSystem))		{return GetAudioMixerInputAudioSystem(NTV2_AudioMixerInputAux1, outAudioSystem);}	///< @deprecated	Call CNTV2Card::GetAudioMixerInputAudioSystem instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioMixerAux1x2chInputAudioSystem(const NTV2AudioSystem inAudioSystem))	{return SetAudioMixerInputAudioSystem(NTV2_AudioMixerInputAux1, inAudioSystem);}	///< @deprecated	Call CNTV2Card::SetAudioMixerInputAudioSystem instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetAudioMixerAux1InputGain(const NTV2AudioMixerChannel inChannel, ULWord & outGainValue)) {return GetAudioMixerInputGain(NTV2_AudioMixerInputAux1, inChannel, outGainValue);} ///< @deprecated	Call CNTV2Card::GetAudioMixerInputGain instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetAudioMixerAux2x2chInputAudioSystem(NTV2AudioSystem & outAudioSystem))		{return GetAudioMixerInputAudioSystem(NTV2_AudioMixerInputAux2, outAudioSystem);}	///< @deprecated	Call CNTV2Card::GetAudioMixerInputAudioSystem instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioMixerAux2x2chInputAudioSystem(const NTV2AudioSystem inAudioSystem))	{return SetAudioMixerInputAudioSystem(NTV2_AudioMixerInputAux2, inAudioSystem);}	///< @deprecated	Call CNTV2Card::SetAudioMixerInputAudioSystem instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetAudioMixerAux2InputGain(const NTV2AudioMixerChannel inChannel, ULWord & outGainValue)) {return GetAudioMixerInputGain(NTV2_AudioMixerInputAux2, inChannel, outGainValue);} ///< @deprecated	Call CNTV2Card::GetAudioMixerInputGain instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetAudioMixerAux1InputGain (const NTV2AudioMixerChannel inChannel, const ULWord inGainValue));	///< @deprecated	Call CNTV2Card::SetAudioMixerInputGain instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetAudioMixerAux2InputGain (const NTV2AudioMixerChannel inChannel, const ULWord inGainValue));	///< @deprecated	Call CNTV2Card::SetAudioMixerInputGain instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetAudioMixerMainInputEnable(bool & outEnabled));	///< @deprecated	Call CNTV2Card::GetAudioMixerInputChannelsMute instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioMixerMainInputEnable(const bool inEnable))	{return SetAudioMixerInputChannelsMute(NTV2_AudioMixerInputMain, inEnable ? NTV2AudioChannelsEnableAll : NTV2AudioChannelsMuteAll);}		///< @deprecated	Call CNTV2Card::SetAudioMixerInputChannelsMute instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetAudioMixerAux1InputEnable (bool & outEnabled));	///< @deprecated	Call CNTV2Card::GetAudioMixerInputChannelsMute instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioMixerAux1InputEnable (const bool inEnable))	{return SetAudioMixerInputChannelsMute(NTV2_AudioMixerInputAux1, inEnable ? NTV2AudioChannelsEnableAll : NTV2AudioChannelsMuteAll);}		///< @deprecated	Call CNTV2Card::SetAudioMixerInputChannelsMute instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetAudioMixerAux2InputEnable (bool & outEnabled));	///< @deprecated	Call CNTV2Card::GetAudioMixerInputChannelsMute instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioMixerAux2InputEnable (const bool inEnable))	{return SetAudioMixerInputChannelsMute(NTV2_AudioMixerInputAux2, inEnable ? NTV2AudioChannelsEnableAll : NTV2AudioChannelsMuteAll);}		///< @deprecated	Call CNTV2Card::SetAudioMixerInputChannelsMute instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord GetAudioMixerMainInputChannelLevel (const NTV2AudioMixerChannel inChannel));	///< @deprecated	Call CNTV2Card::GetAudioMixerInputGain instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord GetAudioMixerAux1InputChannelLevel (const NTV2AudioMixerChannel inChannel));	///< @deprecated	Call CNTV2Card::GetAudioMixerInputGain instead.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord GetAudioMixerAux2InputChannelLevel (const NTV2AudioMixerChannel inChannel));	///< @deprecated	Call CNTV2Card::GetAudioMixerInputGain instead.
 #endif	//	!defined(NTV2_DEPRECATE_15_5)
 	///@}
 
-	//
-	//	Read/Write Particular Register routines
-	//
-	AJA_VIRTUAL bool	WriteGlobalControl (ULWord value);
-	AJA_VIRTUAL bool	ReadGlobalControl (ULWord *value);
-
+	#if !defined(NTV2_DEPRECATE_16_3)
+		AJA_VIRTUAL NTV2_DEPRECATED_f(bool WriteGlobalControl(const ULWord inVal))		{return WriteRegister(kRegGlobalControl, inVal);}	///< @deprecated	This function is obsolete. Do not use it.
+		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadGlobalControl(ULWord * pOutVal))	{return pOutVal ? ReadRegister(kRegGlobalControl, *pOutVal) : false;}	///< @deprecated	This function is obsolete. Do not use it.
+	#endif	//	!defined(NTV2_DEPRECATE_16_3)
 	#if !defined (NTV2_DEPRECATE)
 		virtual NTV2_DEPRECATED_f(bool	SetBoard (UWord inDeviceIndex));	///< @deprecated	Use ::CNTV2DeviceScanner instead.
 		AJA_VIRTUAL inline NTV2_DEPRECATED_f(NTV2BoardID	GetBoardID (void))				{return GetDeviceID ();}		///< @deprecated	Use GetDeviceID instead.
@@ -7542,22 +7527,8 @@ private:
 	AJA_VIRTUAL bool	GetFBSizeAndCountFromHW(ULWord* size, ULWord* count);
 
 	AJA_VIRTUAL bool	IsMultiFormatActive (void); ///< @return	True if the device supports the multi format feature and it's enabled; otherwise false.
-
-	/**
-		@brief		Answers with the NTV2RegInfo of the register associated with the given boolean (i.e., "Can Do") device feature.
-		@param[in]	inParamID		Specifies the device features parameter of interest.
-		@param[out] outRegInfo		Receives the associated NTV2RegInfo.
-		@return		True if successful; otherwise false.
-	**/
-	AJA_VIRTUAL bool	GetRegInfoForBoolParam (const NTV2BoolParamID inParamID, NTV2RegInfo & outRegInfo);
-	/**
-		@brief		Answers with the NTV2RegInfo of the register associated with the given numeric (i.e., "Get Num") device feature.
-		@param[in]	inParamID		Specifies the device features parameter of interest.
-		@param[out] outRegInfo		Receives the associated NTV2RegInfo.
-		@return		True if successful; otherwise false.
-	**/
-	AJA_VIRTUAL bool	GetRegInfoForNumericParam (const NTV2NumericParamID inParamID, NTV2RegInfo & outRegInfo);
 	AJA_VIRTUAL bool	CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFirst, const NTV2Channel inLast);
+	DeviceCapabilities	mDevCap;
 
 };	//	CNTV2Card
 

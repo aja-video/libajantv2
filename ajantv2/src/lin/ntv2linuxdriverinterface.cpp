@@ -4,27 +4,13 @@
 	@brief		Implementation of the CNTV2LinuxDriverInterface class.
 	@copyright	(C) 2003-2022 AJA Video Systems, Inc.
 **/
-
-#include <errno.h>
-#include <time.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <iomanip>
-#include <sys/ioctl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-
-#include <iostream>
-
 #include "ntv2linuxdriverinterface.h"
 #include "ntv2linuxpublicinterface.h"
-#include "ntv2devicefeatures.h"				// For multiple bitfile support for XenaHS
-#include "ntv2nubtypes.h"
 #include "ntv2utils.h"
 #include "ajabase/system/debug.h"
-#include "ajabase/system/systemtime.h"
-#include "ajabase/system/process.h"
-
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
 
 using namespace std;
 

@@ -8,8 +8,8 @@
 #ifndef __NTV2NUBTYPES_H
 #define __NTV2NUBTYPES_H
 
-#include "ntv2publicinterface.h"
 #include "ntv2endian.h"
+#include <vector>
 
 #define NTV2NUBPORT		7575	//	Default port we listen on
 
@@ -53,12 +53,12 @@ namespace ntv2nub
 		inArr.push_back(_pU64[6]); inArr.push_back(_pU64[7]);
 	}
 
-	inline void POPU8 (uint8_t & outVal, const std::vector<uint8_t> & inArr, size_t & inOutNdx)
+	inline void POPU8 (uint8_t & outVal, const std::vector<uint8_t> & inArr, std::size_t & inOutNdx)
 	{
 		outVal = inArr.at(inOutNdx++);
 	}
 
-	inline void POPU16 (uint16_t & outVal, const std::vector<uint8_t> & inArr, size_t & inOutNdx, const bool dontSwap = false)
+	inline void POPU16 (uint16_t & outVal, const std::vector<uint8_t> & inArr, std::size_t & inOutNdx, const bool dontSwap = false)
 	{
 		uint16_t _u16(0);
 		UByte * _pU8(reinterpret_cast<UByte*>(&_u16));
@@ -66,7 +66,7 @@ namespace ntv2nub
 		outVal = (NTV2HostIsBigEndian || dontSwap) ? _u16 : NTV2EndianSwap16BtoH(_u16);
 	}
 
-	inline void POPU32 (uint32_t & outVal, const std::vector<uint8_t> & inArr, size_t & inOutNdx, const bool dontSwap = false)
+	inline void POPU32 (uint32_t & outVal, const std::vector<uint8_t> & inArr, std::size_t & inOutNdx, const bool dontSwap = false)
 	{
 		uint32_t _u32(0);
 		UByte * _pU8(reinterpret_cast<UByte*>(&_u32));
@@ -75,7 +75,7 @@ namespace ntv2nub
 		outVal = (NTV2HostIsBigEndian || dontSwap) ? _u32 : NTV2EndianSwap32BtoH(_u32);
 	}
 
-	inline void POPU64 (uint64_t & outVal, const std::vector<uint8_t> & inArr, size_t & inOutNdx, const bool dontSwap = false)
+	inline void POPU64 (uint64_t & outVal, const std::vector<uint8_t> & inArr, std::size_t & inOutNdx, const bool dontSwap = false)
 	{
 		uint32_t _u64(0);
 		UByte * _pU8(reinterpret_cast<UByte*>(&_u64));

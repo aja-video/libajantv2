@@ -8,8 +8,7 @@
 #ifndef NTV2ENUMS_H
 #define NTV2ENUMS_H
 
-#include "ajatypes.h"	//	Defines NTV2_DEPRECATE (or not)
-#include "ntv2version.h" // Defines NTV2 SDK version number in major.minor.point.build format
+#include "ajatypes.h"	//	for NTV2_DEPRECATE & friends
 
 #if !defined(NTV2_DEPRECATE_14_3)
 typedef enum
@@ -2148,7 +2147,7 @@ typedef enum
 	NTV2_AUDIO_AES,				///< @brief Obtain audio samples from the device AES inputs, if available.
 	NTV2_AUDIO_ANALOG,			///< @brief Obtain audio samples from the device analog input(s), if available.
 	NTV2_AUDIO_HDMI,			///< @brief Obtain audio samples from the device HDMI input, if available
-	NTV2_AUDIO_MIC,
+	NTV2_AUDIO_MIC,				///< @brief	Obtain audio samples from the device microphone input, if available.
 	NTV2_MAX_NUM_AudioSources,
 	NTV2_AUDIO_SOURCE_INVALID	= NTV2_MAX_NUM_AudioSources
 } NTV2AudioSource;

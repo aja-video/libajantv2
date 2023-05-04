@@ -4,12 +4,12 @@
 	@brief		Implementation of CNTV2KonaFlashProgram class.
 	@copyright	(C) 2010-2022 AJA Video Systems, Inc.
 **/
-
 #include "ntv2konaflashprogram.h"
-#include "ntv2devicefeatures.h"
-#include "ntv2devicescanner.h"
+//#include "ntv2devicefeatures.h"
+//#include "ntv2devicescanner.h"
 #include "ntv2endian.h"
-#include "ntv2registers2022.h"
+#include "ntv2registersmb.h"
+#include "ajabase/system/debug.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/common/common.h"
 #include <ctime>

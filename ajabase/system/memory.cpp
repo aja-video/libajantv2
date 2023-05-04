@@ -4,7 +4,9 @@
 	@brief		Implements the AJAMemory class.
 	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
-
+#include "ajabase/system/memory.h"
+#include "ajabase/system/lock.h"
+#include "ajabase/system/debug.h"
 #if defined(AJA_LINUX) || defined(AJA_MAC)
 	#include <errno.h>
 	#include <fcntl.h>
@@ -16,11 +18,6 @@
 	#include <unistd.h>
 	#include <string.h> //	for strerror
 #endif
-
-#include "ajabase/system/system.h"
-#include "ajabase/common/common.h"
-#include "ajabase/system/memory.h"
-#include "ajabase/system/lock.h"
 #include <iostream>
 
 // structure to track shared memory allocations

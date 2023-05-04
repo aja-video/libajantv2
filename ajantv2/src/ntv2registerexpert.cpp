@@ -5,7 +5,7 @@
 	@copyright	(C) 2016-2022 AJA Video Systems, Inc.
  **/
 #include "ntv2registerexpert.h"
-#include "ntv2devicefeatures.h"
+#include "ntv2devicefeatures.hh"
 #include "ntv2utils.h"
 #include "ntv2debug.h"
 #include "ntv2endian.h"
@@ -14,6 +14,7 @@
 #include "ajabase/common/common.h"
 #include "ajabase/system/lock.h"
 #include "ajabase/common/ajarefptr.h"
+#include "ajabase/system/debug.h"
 #include <algorithm>
 #include <sstream>
 #include <iterator>
