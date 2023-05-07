@@ -1087,36 +1087,6 @@ bool NTV2DeviceCanDoInputTCIndex (const NTV2DeviceID inDeviceID, const NTV2TCInd
 	return false;
 }
 
-
-bool NTV2DeviceCanDoLTCInN (NTV2DeviceID boardID, UWord index0)
-{
-	return index0 < NTV2DeviceGetNumLTCInputs (boardID);
-
-}	//	NTV2DeviceCanDoLTCInN
-
-
-bool NTV2DeviceCanDoLTCOutN(NTV2DeviceID boardID, UWord index0)
-{
-	return index0 < NTV2DeviceGetNumLTCOutputs (boardID);
-}	//	NTV2DeviceCanDoLTCOutN
-
-
-bool NTV2DeviceCanDoAudioN (NTV2DeviceID boardID, UWord index0)
-{
-	return index0 < NTV2DeviceGetNumAudioSystems (boardID);
-
-}	//	NTV2DeviceCanDoAudioN
-
-UWord NTV2DeviceGetNumAudioStreams (NTV2DeviceID boardID)
-{
-	return NTV2DeviceGetNumAudioSystems (boardID);
-}
-
-bool NTV2DeviceCanDoRS422N (const NTV2DeviceID inDeviceID, const NTV2Channel inChannel)
-{
-	return inChannel < NTV2DeviceGetNumSerialPorts (inDeviceID);
-}
-
 NTV2AudioSystem NTV2DeviceGetAudioMixerSystem(const NTV2DeviceID inDeviceID)
 {
 	if (NTV2DeviceGetNumAudioSystems(inDeviceID))
@@ -1134,7 +1104,7 @@ NTV2AudioSystem NTV2DeviceGetHostAudioSystem(const NTV2DeviceID inDeviceID)
 
 bool NTV2DeviceROMHasBankSelect (const NTV2DeviceID inDeviceID)
 {
-	if (NTV2DeviceHasSPIv3(inDeviceID) || NTV2DeviceHasSPIv4(inDeviceID) || NTV2DeviceHasSPIv5(inDeviceID))
+	if (NTV2DeviceGetSPIFlashVersion(inDeviceID) >= 3  &&  NTV2DeviceGetSPIFlashVersion(inDeviceID) <= 5)
 		return true;
 	else
 		return false;

@@ -47,95 +47,96 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoAudio2Channels,					///< @note Calculate based on kDeviceGetMaxAudioChannels
 	kDeviceCanDoAudio6Channels,					///< @note Calculate based on kDeviceGetMaxAudioChannels
 	kDeviceCanDoAudio8Channels,					///< @note Calculate based on kDeviceGetMaxAudioChannels
-	kDeviceCanDoAudio96K,						///< @brief Use with CNTV2Card::GetBoolParam to determine if Audio System(s) on the device can be set to a 96kHz sample rate.
-	kDeviceCanDoAudioDelay,						///< @brief Use with CNTV2Card::GetBoolParam to determine if Audio System(s) on the device have an adjustable delay.
-	kDeviceCanDoBreakoutBox,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can be connected to an AJA breakout box.
+	kDeviceCanDoAudio96K,						///< @brief True if Audio System(s) support a 96kHz sample rate.
+	kDeviceCanDoAudioDelay,						///< @brief True if Audio System(s) support an adjustable delay.
+	kDeviceCanDoBreakoutBox,					///< @brief True if device supports an AJA breakout box.
 	kDeviceCanDoCapture,						///< @note Calculate based on kDeviceGetNumVideoInputs and kDeviceGetNumHDMIVideoInputs and kDeviceGetNumAnalogVideoInputs
 	kDeviceCanDoColorCorrection,				///< @note Calculate based on kDeviceGetNumLUTs
-	kDeviceCanDoCustomAnc,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports ANC insertion/extraction.
-	kDeviceCanDoDSKOpacity,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has a mixer/keyer whose opacity is adjustable.
-	kDeviceCanDoDualLink,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can input/output 10-bit RGB over 2-wire SDI.
-	kDeviceCanDoDVCProHD,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can squeeze/stretch between 1920x1080/1280x1080 and 1280x720/960x720.
-	kDeviceCanDoEnhancedCSC,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has enhanced color space converter capability.
-	kDeviceCanDoFrameStore1Display,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can display video from FrameStore 1.
-	kDeviceCanDoFreezeOutput,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can freeze output video.
-	kDeviceCanDoHDMIOutStereo,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can handle 3D-stereo video output over HDMI.
-	kDeviceCanDoHDV,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can squeeze/stretch between 1920x1080 and 1440x1080.
-	kDeviceCanDoHDVideo,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can handle HD (High Definition) video.
-	kDeviceCanDoIsoConvert,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can do ISO conversion.
-	kDeviceCanDoLTC,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can take in LTC (Linear TimeCode) from one of its inputs.
-	kDeviceCanDoLTCInOnRefPort,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can read LTC (Linear TimeCode) from its reference input.
-	kDeviceCanDoMSI,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device DMA hardware supports MSI (Message Signaled Interrupts).
-	kDeviceCanDoMultiFormat,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can simultaneously handle different video formats on more than one SDI input or output.
-	kDeviceCanDoPCMControl,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device Audio System(s) can indicate non-PCM (Pulse Code Modulation) on a per-channel-pair basis.
-	kDeviceCanDoPCMDetection,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has per-audio-channel-pair PCM detection capabilities.
-	kDeviceCanDoPIO,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports Programmed I/O.
+	kDeviceCanDoCustomAnc,						///< @brief True if device has ANC inserter/extractor firmware.
+	kDeviceCanDoDSKOpacity,						///< @brief True if device mixer/keyer supports adjustable opacity.
+	kDeviceCanDoDualLink,						///< @brief True if device supports 10-bit RGB input/output over 2-wire SDI.
+	kDeviceCanDoDVCProHD,						///< @brief True if device can squeeze/stretch between 1920x1080/1280x1080 and 1280x720/960x720.
+	kDeviceCanDoEnhancedCSC,					///< @brief True if device has enhanced CSCs.
+	kDeviceCanDoFrameStore1Display,				///< @brief True if device can display/output video from FrameStore 1.
+	kDeviceCanDoFreezeOutput,					///< @brief True if device can freeze output video.
+	kDeviceCanDoHDMIOutStereo,					///< @brief True if device supports 3D/stereo HDMI video output.
+	kDeviceCanDoHDV,							///< @brief True if device can squeeze/stretch between 1920x1080 and 1440x1080.
+	kDeviceCanDoHDVideo,						///< @brief True if device can handle HD (High Definition) video.
+	kDeviceCanDoIsoConvert,						///< @brief True if device can do ISO conversion.
+	kDeviceCanDoLTC,							///< @brief True if device can read LTC (Linear TimeCode) from one of its inputs.
+	kDeviceCanDoLTCInOnRefPort,					///< @brief True if device can read LTC (Linear TimeCode) from its reference input.
+	kDeviceCanDoMSI,							///< @brief True if device DMA hardware supports MSI (Message Signaled Interrupts).
+	kDeviceCanDoMultiFormat,					///< @brief True if device can simultaneously handle different video formats on more than one SDI input or output.
+	kDeviceCanDoPCMControl,						///< @brief True if device can mark specific audio channel pairs as not carrying PCM (Pulse Code Modulation) audio.
+	kDeviceCanDoPCMDetection,					///< @brief True if device can detect which audio channel pairs are not carrying PCM (Pulse Code Modulation) audio.
+	kDeviceCanDoPIO,							///< @brief True if device supports Programmed I/O.
 	kDeviceCanDoPlayback,						///< @note Calculate based on kDeviceGetNumVideoOutputs and kDeviceGetNumHDMIVideoOutputs and kDeviceGetNumAnalogVideoOutputs
-	kDeviceCanDoProgrammableCSC,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has at least one programmable color space converter widget.
-	kDeviceCanDoProgrammableRS422,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has at least one RS-422 serial port, and it (they) can be programmed (for baud rate, parity, etc.).
-	kDeviceCanDoProRes,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can can accommodate Apple ProRes-compressed video in its frame buffers.
-	kDeviceCanDoQREZ,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can handle QRez.
-	kDeviceCanDoQuarterExpand,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can handle quarter-sized frames (pixel-halving and line-halving during input, pixel-double and line-double during output).
-	kDeviceCanDoRateConvert,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can do frame rate conversion.
-	kDeviceCanDoRGBPlusAlphaOut,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has CSCs capable of splitting the key (alpha) and YCbCr (fill) from RGB frame buffers that include alpha. (Has nothing to do with RGB wire formats.)
-	kDeviceCanDoRP188,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can insert and/or extract RP-188/VITC.
-	kDeviceCanDoSDVideo,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can handle SD (Standard Definition) video.
-	kDeviceCanDoSDIErrorChecks,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can perform SDI error checking.
-	kDeviceCanDoStackedAudio,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device uses a "stacked" arrangement of its audio buffers.
-	kDeviceCanDoStereoIn,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports 3D video input over dual-stream SDI.
-	kDeviceCanDoStereoOut,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports 3D video output over dual-stream SDI.
-	kDeviceCanDoThunderbolt,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device connects to the host using a Thunderbolt cable.
-	kDeviceCanDoVideoProcessing,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can do video processing.
-	kDeviceCanMeasureTemperature,				///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can measure its temperature.
-	kDeviceCanReportFrameSize,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can report its frame size.
-	kDeviceHasBiDirectionalSDI,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device SDI connectors are bi-directional.
-	kDeviceHasColorSpaceConverterOnChannel2,	///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has a CSC on channel 2.
-	kDeviceHasNWL,								///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has NorthWest Logic DMA hardware.
-	kDeviceHasPCIeGen2,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports 2nd-generation PCIe.
-	kDeviceHasRetailSupport,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can be configured and controlled by the retail services and AJA ControlPanel.
-	kDeviceHasSDIRelays,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has bypass relays on its SDI connectors.
-	kDeviceHasSPIFlash,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has SPI flash hardware.
-	kDeviceHasSPIFlashSerial,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has serial SPI flash hardware.
-	kDeviceHasSPIv2,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device uses version 2 SPI hardware.
-	kDeviceHasSPIv3,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device uses version 3 SPI hardware.
-	kDeviceHasSPIv4,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device uses version 4 SPI hardware.
-	kDeviceIs64Bit,								///< @brief Use with CNTV2Card::GetBoolParam to determine if the device is 64-bit addressable.
-	kDeviceIsDirectAddressable,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device is direct addressable.
-	kDeviceIsExternalToHost,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device connects to the host with a cable.
-	kDeviceIsSupported,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device is supported by this SDK.
-	kDeviceNeedsRoutingSetup,					///< @brief Use with CNTV2Card::GetBoolParam to determine if the device widget routing can be queried and/or changed.
-	kDeviceSoftwareCanChangeFrameBufferSize,	///< @brief Use with CNTV2Card::GetBoolParam to determine if the device frame buffer size can be changed.
-	kDeviceCanThermostat,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the fan on the device can be thermostatically controlled.
-	kDeviceHasHEVCM31,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has an HEVC M31 encoder.
-	kDeviceHasHEVCM30,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device has an HEVC M30 encoder/decoder.
-	kDeviceCanDoVITC2,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device can insert and/or extract RP-188/VITC2.
-	kDeviceCanDoHDMIHDROut,						///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports HDMI HDR output.
-	kDeviceCanDoJ2K,							///< @brief Use with CNTV2Card::GetBoolParam to determine if the device supports the JPEG 2000 codec.
-	kDeviceCanDo12gRouting,
-	kDeviceCanDo12GSDI,
-	kDeviceCanDo2110,
-	kDeviceCanDo8KVideo,
-	kDeviceCanDoAudio192K,
-	kDeviceCanDoAudioMixer,
-	kDeviceCanDoCustomAux,
-	kDeviceCanDoFramePulseSelect,
-	kDeviceCanDoHDMIMultiView,
-	kDeviceCanDoHFRRGB,
-	kDeviceCanDoIP,
-	kDeviceCanDoMultiLinkAudio,
-	kDeviceCanDoWarmBootFPGA,
-	kDeviceCanReportFailSafeLoaded,
-	kDeviceCanReportRunningFirmwareDate,
-	kDeviceHasAudioMonitorRCAJacks,
-	kDeviceHasBiDirectionalAnalogAudio,
-	kDeviceHasGenlockv2,
-	kDeviceHasGenlockv3,
-	kDeviceHasHeadphoneJack,
-	kDeviceHasLEDAudioMeters,
-	kDeviceHasRotaryEncoder,
-	kDeviceHasSPIv5,
-	kDeviceHasXilinxDMA,
-	kDeviceHasMicrophoneInput,
+	kDeviceCanDoProgrammableCSC,				///< @brief True if device has at least one programmable color space converter widget.
+	kDeviceCanDoProgrammableRS422,				///< @brief True if device has at least one RS-422 serial port, and it (they) can be programmed (for baud rate, parity, etc.).
+	kDeviceCanDoProRes,							///< @brief True if device can can accommodate Apple ProRes-compressed video in its frame buffers.
+	kDeviceCanDoQREZ,							///< @brief True if device can handle QRez.
+	kDeviceCanDoQuarterExpand,					///< @brief True if device can handle quarter-sized frames (pixel-halving and line-halving during input, pixel-double and line-double during output).
+	kDeviceCanDoRateConvert,					///< @brief True if device can do frame rate conversion.
+	kDeviceCanDoRGBPlusAlphaOut,				///< @brief True if device has CSCs capable of splitting the key (alpha) and YCbCr (fill) from RGB frame buffers that include alpha. (Has nothing to do with RGB wire formats.)
+	kDeviceCanDoRP188,							///< @brief True if device can insert and/or extract RP-188/VITC.
+	kDeviceCanDoSDVideo,						///< @brief True if device can handle SD (Standard Definition) video.
+	kDeviceCanDoSDIErrorChecks,					///< @brief True if device can perform SDI error checking.
+	kDeviceCanDoStackedAudio,					///< @brief True if device uses a "stacked" arrangement of its audio buffers.
+	kDeviceCanDoStereoIn,						///< @brief True if device supports 3D video input over dual-stream SDI.
+	kDeviceCanDoStereoOut,						///< @brief True if device supports 3D video output over dual-stream SDI.
+	kDeviceCanDoThunderbolt,					///< @brief True if device connects to the host using a Thunderbolt cable.
+	kDeviceCanDoVideoProcessing,				///< @brief True if device can do video processing.
+	kDeviceCanMeasureTemperature,				///< @brief True if device can measure its FPGA die temperature.
+	kDeviceCanReportFrameSize,					///< @brief True if device can report its frame size.
+	kDeviceHasBiDirectionalSDI,					///< @brief True if device SDI connectors are bi-directional.
+	kDeviceHasColorSpaceConverterOnChannel2,	///< @brief Calculate based on if NTV2_WgtCSC2 is present.
+	kDeviceHasNWL,								///< @brief True if device has NorthWest Logic DMA hardware.
+	kDeviceHasPCIeGen2,							///< @brief True if device supports 2nd-generation PCIe.
+	kDeviceHasRetailSupport,					///< @brief True if device is supported by AJA "retail" software (AJA ControlPanel & ControlRoom).
+	kDeviceHasSDIRelays,						///< @brief True if device has bypass relays on its SDI connectors.
+	kDeviceHasSPIFlash,							///< @brief True if device has SPI flash hardware.
+	kDeviceHasSPIFlashSerial,					///< @brief True if device has serial SPI flash hardware.
+	kDeviceHasSPIv2,							///< @brief Use kDeviceGetSPIVersion instead.
+	kDeviceHasSPIv3,							///< @brief Use kDeviceGetSPIVersion instead.
+	kDeviceHasSPIv4,							///< @brief Use kDeviceGetSPIVersion instead.
+	kDeviceIs64Bit,								///< @brief True if device is 64-bit addressable.
+	kDeviceIsDirectAddressable,					///< @brief True if device is direct addressable.
+	kDeviceIsExternalToHost,					///< @brief True if device connects to the host with a cable.
+	kDeviceIsSupported,							///< @brief True if device is supported by this SDK.
+	kDeviceNeedsRoutingSetup,					///< @brief True if device widget routing can be queried or changed.
+	kDeviceSoftwareCanChangeFrameBufferSize,	///< @brief True if device frame buffer size can be changed.
+	kDeviceCanThermostat,						///< @brief True if device fan can be thermostatically controlled.
+	kDeviceHasHEVCM31,							///< @brief True if device has an HEVC M31 encoder.
+	kDeviceHasHEVCM30,							///< @brief True if device has an HEVC M30 encoder/decoder.
+	kDeviceCanDoVITC2,							///< @brief True if device can insert or extract RP-188/VITC2.
+	kDeviceCanDoHDMIHDROut,						///< @brief True if device supports HDMI HDR output.
+	kDeviceCanDoJ2K,							///< @brief True if device supports JPEG 2000 codec.
+	kDeviceCanDo12gRouting,						///< @brief True if device supports 12G routing crosspoints.
+	kDeviceCanDo12GSDI,							///< @brief True if device has 12G SDI connectors.
+	kDeviceCanDo2110,							///< @brief True if device supports SMPTE ST2110.
+	kDeviceCanDo8KVideo,						///< @brief True if device supports 8K video formats.
+	kDeviceCanDoAudio192K,						///< @brief True if Audio System(s) support a 192kHz sample rate.
+	kDeviceCanDoAudioMixer,						///< @brief True if device has a firmware audio mixer.
+	kDeviceCanDoCustomAux,						///< @brief True if device supports HDMI AUX data insertion/extraction.
+	kDeviceCanDoFramePulseSelect,				///< @brief True if device supports frame pulse source independent of reference source.
+	kDeviceCanDoHDMIMultiView,					///< @brief True if device can rasterize 4 HD signals into a single HDMI output.
+	kDeviceHasMultiRasterWidget,				///< @brief True if device can rasterize 4 HD signals into a single HDMI output.
+	kDeviceCanDoHFRRGB,							///< @brief True if device supports 1080p RGB at more than 50Hz frame rates.
+	kDeviceCanDoIP,								///< @brief True if device has SFP connectors.
+	kDeviceCanDoMultiLinkAudio,					///< @brief True if device supports grouped audio system control.
+	kDeviceCanDoWarmBootFPGA,					///< @brief True if device can warm-boot to load updated firmware.
+	kDeviceCanReportFailSafeLoaded,				///< @brief True if device can report if its "fail-safe" firmware is loaded/running.
+	kDeviceCanReportRunningFirmwareDate,		///< @brief True if device can report its running (and not necessarily installed) firmware date.
+	kDeviceHasAudioMonitorRCAJacks,				///< @brief True if device has a pair of unbalanced RCA audio monitor output connectors.
+	kDeviceHasBiDirectionalAnalogAudio,			///< @brief True if device has a bi-directional analog audio connector.
+	kDeviceHasGenlockv2,						///< @brief True if device has version 2 genlock hardware and/or firmware.
+	kDeviceHasGenlockv3,						///< @brief True if device has version 3 genlock hardware and/or firmware.
+	kDeviceHasHeadphoneJack,					///< @brief True if device has a headphone jack.
+	kDeviceHasLEDAudioMeters,					///< @brief True if device has LED audio meters.
+	kDeviceHasRotaryEncoder,					///< @brief True if device has a rotary encoder volume control.
+	kDeviceHasSPIv5,							///< @brief Use kDeviceGetSPIVersion instead.
+	kDeviceHasXilinxDMA,						///< @brief True if device has Xilinx DMA hardware.
+	kDeviceHasMicrophoneInput,					///< @brief True if device has a microphone input connector.
 	kNTV2BoolParam_LAST,
 	kDeviceCanDo_INVALID	= kNTV2BoolParam_LAST
 } NTV2BoolParamID;
@@ -324,6 +325,32 @@ AJAExport bool NTV2DeviceGetVideoFormatFromState_Ex2 (	NTV2VideoFormat *		pOutVa
 														const ULWord			inIsSMPTE372Enabled,
 														const bool				inIsProgressivePicture,
 														const bool				inIsSquareDivision);
+#if !defined(NTV2_DEPRECATE_17_0)
+	//	In SDK 17.0, these were all replaced by NTV2DeviceGetSPIFlashVersion:
+	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv2(const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 2;}) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
+	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv3(const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 3;}) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
+	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv4(const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 4;}) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
+	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv5(const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 5;}) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
+
+	//	In SDK 17.0, these were replaced by NTV2DeviceGetGenlockVersion...
+	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceHasGenlockv2(const NTV2DeviceID devID)	{return NTV2DeviceGetGenlockVersion(devID) == 2;})	///< @deprecated	Use NTV2DeviceGetGenlockVersion instead.
+	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceHasGenlockv3(const NTV2DeviceID devID)	{return NTV2DeviceGetGenlockVersion(devID) == 3;})	///< @deprecated	Use NTV2DeviceGetGenlockVersion instead.
+
+	//	In SDK 17.0, this was replaced by NTV2DeviceCanDoWidget(NTV2_WgtCSC2)...
+	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceHasColorSpaceConverterOnChannel2(const NTV2DeviceID devID)	{return NTV2DeviceCanDoWidget(devID, NTV2_WgtCSC2);})	///< @deprecated	Call NTV2DeviceCanDoWidget with NTV2_WgtCSC2 instead.
+
+	//	In SDK 17.0, these were replaced by NTV2GetMaxNumAudioChannels:
+	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudio2Channels(const NTV2DeviceID devID)	{return NTV2DeviceGetMaxAudioChannels(devID) >= 2;})	///< @deprecated	Use NTV2DeviceGetMaxAudioChannels instead.
+	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudio6Channels(const NTV2DeviceID devID)	{return NTV2DeviceGetMaxAudioChannels(devID) >= 6;})	///< @deprecated	Use NTV2DeviceGetMaxAudioChannels instead.
+	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudio8Channels(const NTV2DeviceID devID)	{return NTV2DeviceGetMaxAudioChannels(devID) >= 8;})	///< @deprecated	Use NTV2DeviceGetMaxAudioChannels instead.
+
+	//	These have been marked deprecated for some time. In SDK 17.0, it's official.
+	AJAExport inline NTV2_DEPRECATED_f(UWord NTV2DeviceGetNumAudioStreams(const NTV2DeviceID devID)	{return NTV2DeviceGetNumAudioSystems(devID);})	///< @deprecated	Use NTV2DeviceGetNumAudioSystems instead.
+	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudioN(const NTV2DeviceID devID, UWord index0)	{return index0 < NTV2DeviceGetNumAudioSystems(devID);})	///< @deprecated	Use NTV2DeviceGetNumAudioSystems instead.
+	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCOutN(const NTV2DeviceID devID, UWord index0)	{return index0 < NTV2DeviceGetNumLTCOutputs(devID);})	///< @deprecated	Use NTV2DeviceGetNumLTCOutputs instead.
+	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCInN(const NTV2DeviceID devID, UWord index0)	{return index0 < NTV2DeviceGetNumLTCInputs(devID);})	///< @deprecated	Use NTV2DeviceGetNumLTCInputs instead.
+	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceCanDoRS422N(const NTV2DeviceID devID, const NTV2Channel ch)	{return ch < NTV2DeviceGetNumSerialPorts(devID);})	///< @deprecated	Use NTV2DeviceGetNumSerialPorts instead.
+#endif	//	NTV2_DEPRECATE_17_0
 
 #if !defined(NTV2_DEPRECATE_15_6)
 	AJAExport bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt);	///< @deprecated	Obsoleted by CNTV2Card::HasCanConnectROM and CNTV2Card::CanConnect
@@ -333,11 +360,6 @@ AJAExport bool NTV2DeviceCanDoInputTCIndex (const NTV2DeviceID inDeviceID, const
 AJAExport NTV2AudioSystem NTV2DeviceGetAudioMixerSystem(const NTV2DeviceID inDeviceID);
 AJAExport NTV2AudioSystem NTV2DeviceGetHostAudioSystem(const NTV2DeviceID inDeviceID);
 AJAExport bool NTV2DeviceROMHasBankSelect (const NTV2DeviceID inDeviceID);
-AJAExport NTV2_DEPRECATED_f(UWord NTV2DeviceGetNumAudioStreams (NTV2DeviceID boardID));		///< @deprecated	Will be deprecated soon. Use NTV2DeviceGetNumAudioSystems instead.
-AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudioN (NTV2DeviceID boardID, UWord index0));	///< @deprecated	Will be deprecated soon. Use NTV2DeviceGetNumAudioSystems instead.
-AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCOutN (NTV2DeviceID boardID, UWord index0));	///< @deprecated	Will be deprecated soon. Use NTV2DeviceGetNumLTCOutputs instead.
-AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCInN (NTV2DeviceID boardID, UWord index0));	///< @deprecated	Will be deprecated soon. Use NTV2DeviceGetNumLTCInputs instead.
-AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoRS422N (const NTV2DeviceID inDeviceID, const NTV2Channel inChannel));	///< @deprecated	Will be deprecated soon. Use NTV2DeviceGetNumSerialPorts instead.
 
 #if !defined (NTV2_DEPRECATE_14_3)
 	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoFreezeOutput (const NTV2DeviceID inDeviceID));	///< @deprecated	This function is obsolete.

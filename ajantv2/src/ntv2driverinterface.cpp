@@ -877,7 +877,7 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 	if (!IsDeviceReady(false))
 		return false;	// cannot read flash
 
-	if (::NTV2DeviceHasSPIv4(_boardID))
+	if (::NTV2DeviceGetSPIFlashVersion(_boardID) == 4)
 	{
 		uint32_t val;
 		ReadRegister((0x100000 + 0x08) / 4, val);
@@ -885,7 +885,7 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 			return false;	// cannot read flash
 	}
 
-	if (::NTV2DeviceHasSPIv3(_boardID) || ::NTV2DeviceHasSPIv4(_boardID) || ::NTV2DeviceHasSPIv5(_boardID))
+	if (::NTV2DeviceGetSPIFlashVersion(_boardID) >= 3  &&  ::NTV2DeviceGetSPIFlashVersion(_boardID) <= 5)
 	{
 		WriteRegister(kRegXenaxFlashAddress, 0ULL);
 		WriteRegister(kRegXenaxFlashControlStatus, 0x17);
@@ -1514,16 +1514,16 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanMeasureTemperature:				outValue = ::NTV2DeviceCanMeasureTemperature			(devID);	break;
 		case kDeviceCanReportFrameSize:					outValue = ::NTV2DeviceCanReportFrameSize				(devID);	break;
 		case kDeviceHasBiDirectionalSDI:				outValue = ::NTV2DeviceHasBiDirectionalSDI				(devID);	break;
-		case kDeviceHasColorSpaceConverterOnChannel2:	outValue = ::NTV2DeviceHasColorSpaceConverterOnChannel2 (devID);	break;	//	Deprecate?
+		case kDeviceHasColorSpaceConverterOnChannel2:	outValue = ::NTV2DeviceCanDoWidget(devID, NTV2_WgtCSC2);	break;	//	Deprecate?
 		case kDeviceHasNWL:								outValue = ::NTV2DeviceHasNWL							(devID);	break;
 		case kDeviceHasPCIeGen2:						outValue = ::NTV2DeviceHasPCIeGen2						(devID);	break;
 		case kDeviceHasRetailSupport:					outValue = ::NTV2DeviceHasRetailSupport					(devID);	break;
 		case kDeviceHasSDIRelays:						outValue = ::NTV2DeviceHasSDIRelays						(devID);	break;
 		case kDeviceHasSPIFlash:						outValue = ::NTV2DeviceHasSPIFlash						(devID);	break;	//	Deprecate?
 		case kDeviceHasSPIFlashSerial:					outValue = ::NTV2DeviceHasSPIFlashSerial				(devID);	break;	//	Deprecate?
-		case kDeviceHasSPIv2:							outValue = ::NTV2DeviceHasSPIv2							(devID);	break;
-		case kDeviceHasSPIv3:							outValue = ::NTV2DeviceHasSPIv3							(devID);	break;
-		case kDeviceHasSPIv4:							outValue = ::NTV2DeviceHasSPIv4							(devID);	break;
+		case kDeviceHasSPIv2:							outValue = ::NTV2DeviceGetSPIFlashVersion(devID) == 2;	break;
+		case kDeviceHasSPIv3:							outValue = ::NTV2DeviceGetSPIFlashVersion(devID) == 3;	break;
+		case kDeviceHasSPIv4:							outValue = ::NTV2DeviceGetSPIFlashVersion(devID) == 4;	break;
 		case kDeviceIs64Bit:							outValue = ::NTV2DeviceIs64Bit							(devID);	break;	//	Deprecate?
 		case kDeviceIsDirectAddressable:				outValue = ::NTV2DeviceIsDirectAddressable				(devID);	break;	//	Deprecate?
 		case kDeviceIsExternalToHost:					outValue = ::NTV2DeviceIsExternalToHost					(devID);	break;
@@ -1553,12 +1553,12 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanReportRunningFirmwareDate:	outValue = ::NTV2DeviceCanReportRunningFirmwareDate		(devID);	break;
 		case kDeviceHasAudioMonitorRCAJacks:		outValue = ::NTV2DeviceHasAudioMonitorRCAJacks			(devID);	break;
 		case kDeviceHasBiDirectionalAnalogAudio:	outValue = ::NTV2DeviceHasBiDirectionalAnalogAudio		(devID);	break;
-		case kDeviceHasGenlockv2:					outValue = ::NTV2DeviceHasGenlockv2						(devID);	break;
-		case kDeviceHasGenlockv3:					outValue = ::NTV2DeviceHasGenlockv3						(devID);	break;
+		case kDeviceHasGenlockv2:					outValue = ::NTV2DeviceGetGenlockVersion(devID) == 2;	break;
+		case kDeviceHasGenlockv3:					outValue = ::NTV2DeviceGetGenlockVersion(devID) == 3;	break;
 		case kDeviceHasHeadphoneJack:				outValue = ::NTV2DeviceHasHeadphoneJack					(devID);	break;
 		case kDeviceHasLEDAudioMeters:				outValue = ::NTV2DeviceHasLEDAudioMeters				(devID);	break;
 		case kDeviceHasRotaryEncoder:				outValue = ::NTV2DeviceHasRotaryEncoder					(devID);	break;
-		case kDeviceHasSPIv5:						outValue = ::NTV2DeviceHasSPIv5							(devID);	break;
+		case kDeviceHasSPIv5:						outValue = ::NTV2DeviceGetSPIFlashVersion(devID) == 5;	break;
 		case kDeviceHasXilinxDMA:					outValue = ::NTV2DeviceHasXilinxDMA						(devID);	break;
 		case kDeviceCanDoAudioMixer:
 		case kDeviceHasMicrophoneInput:
@@ -1647,7 +1647,8 @@ bool CNTV2DriverInterface::GetRegInfoForBoolParam (const NTV2BoolParamID inParam
 	outRegInfo.MakeInvalid();
 	switch (inParamID)
 	{
-		case kDeviceCanDoAudioMixer:	outRegInfo.Set(kRegGlobalControl2, 0, kRegMaskAudioMixerPresent, kRegShiftAudioMixerPresent);  break;
+		case kDeviceCanDoAudioMixer:		outRegInfo.Set(kRegGlobalControl2, 0, kRegMaskAudioMixerPresent, kRegShiftAudioMixerPresent);	break;
+		case kDeviceHasMultiRasterWidget:	outRegInfo.Set(kRegMRSupport, 0, kRegMaskMRSupport, kRegShiftMRSupport);						break;
 		default:	break;
 	}
 	return outRegInfo.IsValid();

@@ -741,14 +741,14 @@ void CNTV2DeviceScanner::SetAudioAttributes(NTV2DeviceInfo & info, CNTV2Card & i
 	info.audioOutSourceList.clear();
 
 
-	if (::NTV2DeviceGetNumAudioSystems(info.deviceID))
+	if (inBoard.features().GetNumAudioSystems())
 	{
 		ULWord audioControl;
 		inBoard.ReadRegister(kRegAud1Control, audioControl);
 
 		//audioSampleRateList
 		info.audioSampleRateList.push_back(k48KHzSampleRate);
-		if (::NTV2DeviceCanDoAudio96K(info.deviceID))
+		if (inBoard.features().CanDoAudio96K())
 			info.audioSampleRateList.push_back(k96KHzSampleRate);
 
 		//audioBitsPerSampleList
@@ -758,31 +758,31 @@ void CNTV2DeviceScanner::SetAudioAttributes(NTV2DeviceInfo & info, CNTV2Card & i
 		info.audioInSourceList.push_back(kSourceSDI);
 		if (audioControl & BIT(21))
 			info.audioInSourceList.push_back(kSourceAES);
-		if (::NTV2DeviceCanDoAnalogAudio(info.deviceID))
+		if (inBoard.features().CanDoAnalogAudio())
 			info.audioInSourceList.push_back(kSourceAnalog);
 
 		//audioOutSourceList
 		info.audioOutSourceList.push_back(kSourceAll);
 
 		//audioNumChannelsList
-		if (::NTV2DeviceCanDoAudio2Channels(info.deviceID))
+		if (inBoard.features().CanDoAudio2Channels())
 			info.audioNumChannelsList.push_back(kNumAudioChannels2);
-		if (::NTV2DeviceCanDoAudio6Channels(info.deviceID))
+		if (inBoard.features().CanDoAudio6Channels())
 			info.audioNumChannelsList.push_back(kNumAudioChannels6);
-		if (::NTV2DeviceCanDoAudio8Channels(info.deviceID))
+		if (inBoard.features().CanDoAudio8Channels())
 			info.audioNumChannelsList.push_back(kNumAudioChannels8);
 
-		info.numAudioStreams = ::NTV2DeviceGetNumAudioSystems(info.deviceID);
+		info.numAudioStreams = inBoard.features().GetNumAudioSystems();
 	}
 
-	info.numAnalogAudioInputChannels = ::NTV2DeviceGetNumAnalogAudioInputChannels(info.deviceID);
-	info.numAESAudioInputChannels = ::NTV2DeviceGetNumAESAudioInputChannels(info.deviceID);
-	info.numEmbeddedAudioInputChannels = ::NTV2DeviceGetNumEmbeddedAudioInputChannels(info.deviceID);
-	info.numHDMIAudioInputChannels = ::NTV2DeviceGetNumHDMIAudioInputChannels(info.deviceID);
-	info.numAnalogAudioOutputChannels = ::NTV2DeviceGetNumAnalogAudioOutputChannels(info.deviceID);
-	info.numAESAudioOutputChannels = ::NTV2DeviceGetNumAESAudioOutputChannels(info.deviceID);
-	info.numEmbeddedAudioOutputChannels = ::NTV2DeviceGetNumEmbeddedAudioOutputChannels(info.deviceID);
-	info.numHDMIAudioOutputChannels = ::NTV2DeviceGetNumHDMIAudioOutputChannels(info.deviceID);
+	info.numAnalogAudioInputChannels = inBoard.features().GetNumAnalogAudioInputChannels();
+	info.numAESAudioInputChannels = inBoard.features().GetNumAESAudioInputChannels();
+	info.numEmbeddedAudioInputChannels = inBoard.features().GetNumEmbeddedAudioInputChannels();
+	info.numHDMIAudioInputChannels = inBoard.features().GetNumHDMIAudioInputChannels();
+	info.numAnalogAudioOutputChannels = inBoard.features().GetNumAnalogAudioOutputChannels();
+	info.numAESAudioOutputChannels = inBoard.features().GetNumAESAudioOutputChannels();
+	info.numEmbeddedAudioOutputChannels = inBoard.features().GetNumEmbeddedAudioOutputChannels();
+	info.numHDMIAudioOutputChannels = inBoard.features().GetNumHDMIAudioOutputChannels();
 
 }	//	SetAudioAttributes
 
