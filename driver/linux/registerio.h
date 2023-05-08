@@ -89,6 +89,8 @@
 
 #define NTV2_MAX_HDMI_MONITOR	4
 
+#define NTV2_MAX_STREAMS	4
+
 // Singleton module params
 typedef struct ntv2_module_private
 {
@@ -540,6 +542,7 @@ typedef struct ntv2_private
 	struct ntv2_serial		*m_pSerialPort;
 	struct ntv2_mcap		*m_pBitstream;
 	struct ntv2_setup		*m_pSetupMonitor;
+	struct ntv2_stream  	*m_pStream[NTV2_MAX_STREAMS];
 
 	bool registerEnable;
 	bool serialActive;
@@ -736,6 +739,12 @@ ULWord XlnxSgdmaRegBase(ULWord deviceNumber, bool bC2H, int index);
 ULWord XlnxConfigRegBase(ULWord deviceNumber);
 ULWord XlnxIrqRegBase(ULWord deviceNumber);
 ULWord XlnxIrqBitMask(ULWord deviceNumber, bool bC2H, int index);
+ULWord XlnxReadChannelIdentifier(ULWord deviceNumber, bool bC2H, ULWord index);
+bool IsXlnxChannelStream(ULWord idReg);
+bool IsXlnxChannelMapped(ULWord idReg);
+ULWord XlnxReadChannelAlignments(ULWord deviceNumber, bool bC2H, ULWord index);
+ULWord GetXlnxAddressAlignment(ULWord alReg);
+ULWord GetXlnxTransferAlignment(ULWord alReg);
 void EnableXlnxUserInterrupt(ULWord deviceNumber, int index);
 void DisableXlnxUserInterrupt(ULWord deviceNumber, int index);
 ULWord ReadXlnxUserInterrupt(ULWord deviceNumber);

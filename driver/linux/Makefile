@@ -77,7 +77,8 @@ DRIVERSRCS = ntv2devicefeatures.c \
 			../ntv2kona.c \
 			../ntv2vpid.c \
 			../ntv2rp188.c \
-			../ntv2setup.c
+			../ntv2setup.c \
+			../ntv2stream.c
 
 DRIVEROBJS = $(patsubst %.c,%.o,$(DRIVERSRCS))
 

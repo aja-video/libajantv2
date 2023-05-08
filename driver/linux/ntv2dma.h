@@ -254,6 +254,9 @@ typedef struct _dmaEngine_
 	NTV2DmaMethod			dmaMethod;				// dma method				
 	ULWord					dmaIndex;				// dma index
 	bool					dmaC2H;					// dma to host
+    bool                    dmaStream;              // streaming engine
+    ULWord                  alignmentMask;          // streaming alignment
+    ULWord                  granularityMask;        // streaming granularity
 	ULWord					maxVideoSize;			// maximum video transfer size
 	ULWord					maxVideoPages;			// maximum video pages
 	ULWord					maxAudioSize;			// maximum audio transfer size
@@ -334,5 +337,10 @@ int dmaTransfer(PDMA_PARAMS pDmaParams);
 int dmaTargetP2P(ULWord deviceNumber, NTV2_DMA_P2P_CONTROL_STRUCT* pParams);
 
 void dmaInterrupt(ULWord deviceNumber, ULWord intStatus);
+
+int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuffer, uint32_t index);
+int dmaXlnxStreamLink(PDMA_ENGINE pDmaEngine, uint32_t srcIndex, uint32_t dstIndex);
+int dmaXlnxStreamStart(PDMA_ENGINE pDmaEngine, uint32_t index);
+int dmaXlnxStreamStop(PDMA_ENGINE pDmaEngine);
 
 #endif

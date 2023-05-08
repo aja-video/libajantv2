@@ -661,6 +661,8 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 		case DEVICE_ID_TTAP:						bitFileInfo.bitFileType = NTV2_BITFILE_TTAP_MAIN;					break;
 		case DEVICE_ID_TTAP_PRO:					bitFileInfo.bitFileType = NTV2_BITFILE_TTAP_PRO_MAIN;				break;
 		case DEVICE_ID_IOX3:						bitFileInfo.bitFileType = NTV2_BITFILE_IOX3_MAIN;					break;
+		case DEVICE_ID_KONAX:						bitFileInfo.bitFileType = NTV2_BITFILE_KONAX;						break;
+		case DEVICE_ID_KONAXR:						bitFileInfo.bitFileType = NTV2_BITFILE_KONAXR;						break;
 		case DEVICE_ID_NOTFOUND:					bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;				break;
 	#if !defined (_DEBUG)
 		default:					break;
@@ -838,6 +840,29 @@ bool CNTV2DriverInterface::BitstreamLoad (const bool inSuspend, const bool inRes
 	return NTV2Message(bsMsg);
 }
 
+bool CNTV2DriverInterface::StreamChannelOps (const NTV2Channel inChannel,
+												ULWord flags,
+												NTV2StreamChannel& status)
+{
+	status.mChannel = inChannel;
+	status.mFlags = flags;
+
+	return NTV2Message(status);
+}
+
+bool CNTV2DriverInterface::StreamBufferOps (const NTV2Channel inChannel,
+												NTV2_POINTER inBuffer,
+												ULWord64 bufferCookie,
+												ULWord flags,
+												NTV2StreamBuffer& status)
+{
+	status.mChannel = inChannel;
+	status.mBuffer = inBuffer;
+	status.mBufferCookie = bufferCookie;
+	status.mFlags = flags;
+
+	return NTV2Message(status);
+}
 
 // FinishOpen
 // NOTE _boardID must be set before calling this routine.

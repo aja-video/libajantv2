@@ -2128,6 +2128,47 @@ ULWord XlnxIrqBitMask(ULWord deviceNumber, bool bC2H, int index)
 	return ((ULWord)0x1) << bit;
 }
 
+ULWord XlnxReadChannelIdentifier(ULWord deviceNumber, bool bC2H, ULWord index)
+{
+	if (!IsXlnxChannel(deviceNumber, bC2H, index))
+	{
+		return 0;
+	}
+
+	return ReadXlnxRegister(deviceNumber, XlnxChannelRegBase(deviceNumber, bC2H, index) + kRegXlnxChannelIdentifier);
+}
+
+bool IsXlnxChannelStream(ULWord idReg)
+{
+	return ((idReg & kRegMaskXlnxStreamInterface) != 0) ? true : false;
+}
+
+bool IsXlnxChannelMapped(ULWord idReg)
+{
+	return ((idReg & kRegMaskXlnxStreamInterface) != 0) ? false : true;
+}
+
+
+ULWord XlnxReadChannelAlignments(ULWord deviceNumber, bool bC2H, ULWord index)
+{
+	if (!IsXlnxChannel(deviceNumber, bC2H, index))
+	{
+		return 0;
+	}
+
+	return ReadXlnxRegister(deviceNumber, XlnxChannelRegBase(deviceNumber, bC2H, index) + kRegXlnxChannelAlignments);
+}
+
+ULWord GetXlnxAddressAlignment(ULWord alReg)
+{
+	return (alReg & kRegMaskXlnxAddressAlignment) >> kRegShiftXlnxAddressAlignment;
+}
+
+ULWord GetXlnxTransferAlignment(ULWord alReg)
+{
+	return (alReg & kRegMaskXlnxTransferAlignment) >> kRegShiftXlnxTransferAlignment;
+}
+
 void EnableXlnxUserInterrupt(ULWord deviceNumber, int index)
 {
 	WriteXlnxRegister(deviceNumber,

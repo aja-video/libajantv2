@@ -1745,6 +1745,7 @@ bool GetSourceVideoFormat(Ntv2SystemContext* context, NTV2VideoFormat* format, N
 	NTV2VideoFormat videoFormat = NTV2_FORMAT_UNKNOWN;
 	NTV2VideoFormat shadowFormat = NTV2_FORMAT_UNKNOWN;
 	NTV2Channel multiFormatModeChannel = NTV2_CHANNEL1;
+	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
 	bool multiFormatActive = IsMultiFormatActive(context);
 	memset(hdrRegValues, 0, sizeof(HDRDriverValues));
 
@@ -1779,6 +1780,7 @@ bool GetSourceVideoFormat(Ntv2SystemContext* context, NTV2VideoFormat* format, N
 	case NTV2_XptHDMIIn1Q3RGB:
 	case NTV2_XptHDMIIn1Q4RGB:
 		videoFormat = GetHDMIInputVideoFormat(context);
+		*quadMode = NTV2_IS_QUAD_FRAME_FORMAT(videoFormat) && NTV2DeviceCanDo12gRouting(deviceID);
 		ReadFSHDRRegValues(context, NTV2_CHANNEL1, hdrRegValues);
 		break;
 	case NTV2_XptAnalogIn:

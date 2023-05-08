@@ -444,6 +444,18 @@ class AJAExport CNTV2DriverInterface
 		AJA_VIRTUAL ULWordSet	GetSupportedItems (const NTV2EnumsID inEnumsID);	//	New in SDK 17.0
 	///@}
 
+		// stream channel operations
+		AJA_VIRTUAL bool	StreamChannelOps (const NTV2Channel inChannel,
+												ULWord flags,
+												NTV2StreamChannel& status);
+
+		// stream buffer operations
+		AJA_VIRTUAL bool	StreamBufferOps (const NTV2Channel inChannel,
+												NTV2_POINTER inBuffer,
+												ULWord64 bufferCookie,
+												ULWord flags,
+												NTV2StreamBuffer& status);
+    
 	/**
 		@name	Device Ownership
 	**/

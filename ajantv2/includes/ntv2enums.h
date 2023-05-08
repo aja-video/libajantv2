@@ -105,6 +105,8 @@ typedef enum
 	DEVICE_ID_KONALHIDVI				= 0x10266401,	///< @brief See \ref konalhi
 	DEVICE_ID_TTAP						= 0x10416000,	///< @brief See \ref ttap
 	DEVICE_ID_TTAP_PRO					= 0x10879000,	///< @brief See \ref ttappro
+	DEVICE_ID_KONAX						= 0X10958500,	///< @brief See \ref gallifrey
+	DEVICE_ID_KONAXR					= 0X10958501,	///< @brief See \ref gallifrey
 #if !defined (NTV2_DEPRECATE_12_6)
 	DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		 ///< @deprecated	Use ::DEVICE_ID_CORVIDHBR instead.
 #endif	//	NTV2_DEPRECATE_12_6
@@ -3753,6 +3755,8 @@ typedef enum
 	NTV2_BITFILE_SOJI_3DLUT_MAIN	= 88,
 	NTV2_BITFILE_KONA5_8K_MV_TX_MAIN		= 89,
 	NTV2_BITFILE_SOJI_DIAGS_MAIN	= 90,
+	NTV2_BITFILE_KONAX				= 91,
+	NTV2_BITFILE_KONAXR				= 92,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
 

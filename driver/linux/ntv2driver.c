@@ -81,6 +81,7 @@
 #include "ntv2genlock.h"
 #include "../ntv2kona.h"
 #include "ntv2mcap.h"
+#include "ntv2stream.h"
 
 #if  !defined(x86_64) && !defined(aarch64)
 #error "*** AJA driver must be built 64 bit ***"
@@ -210,6 +211,8 @@ static int DoMessageBankAndRegisterRead(ULWord deviceNumber, NTV2RegInfo * pInRe
 static int DoMessageAutoCircFrame(ULWord deviceNumber, FRAME_STAMP * pInOutFrameStamp, NTV2_RP188 * pTimecodeArray);
 static int DoMessageBufferLock(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot, NTV2BufferLock* pBufferLock);
 static int DoMessageBitstream(ULWord deviceNumber, NTV2Bitstream* pBitstream);
+static int DoMessageStreamChannel(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamChannel* pStreamChannel);
+static int DoMessageStreamBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamBuffer* pStreamBuffer);
 
 /* PCI Device Module functions */
 static int probe( struct pci_dev *dev, const struct pci_device_id *id);	/* New device inserted */
@@ -421,6 +424,12 @@ static struct pci_device_id pci_device_id_tab[] =
 	},
 	{  // IOX3
 	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_IOX3,				// Vendor and device IDs
+	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
+	   0, 0,											// Class, class_mask
+	   0												// Opaque data
+	},
+	{  // KonaX
+        NTV2_VENDOR_ID, NTV2_DEVICE_ID_KONAX,			// Vendor and device IDs
 	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
 	   0, 0,											// Class, class_mask
 	   0												// Opaque data
@@ -1736,6 +1745,38 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 					}
 
 					if(copy_to_user((void*)arg, (const void*)pMessage, sizeof(NTV2Bitstream)))
+					{
+						returnCode = -EFAULT;
+						goto messageError;
+					}
+				}
+				break;
+
+            case NTV2_TYPE_AJASTREAMCHANNEL:
+				{
+					returnCode = DoMessageStreamChannel (deviceNumber, pFileData, (NTV2StreamChannel*)pMessage);
+					if (returnCode)
+					{
+						goto messageError;
+					}
+
+					if(copy_to_user((void*)arg, (const void*)pMessage, sizeof(NTV2StreamChannel)))
+					{
+						returnCode = -EFAULT;
+						goto messageError;
+					}
+				}
+				break;
+
+            case NTV2_TYPE_AJASTREAMBUFFER:
+				{
+					returnCode = DoMessageStreamBuffer (deviceNumber, pFileData, (NTV2StreamBuffer*)pMessage);
+					if (returnCode)
+					{
+						goto messageError;
+					}
+
+					if(copy_to_user((void*)arg, (const void*)pMessage, sizeof(NTV2StreamBuffer)))
 					{
 						returnCode = -EFAULT;
 						goto messageError;
@@ -3369,6 +3410,31 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
         }
     }
 	
+    if ((ntv2pp->_DeviceID == DEVICE_ID_KONAX) || (ntv2pp->_DeviceID == DEVICE_ID_KONAXR))
+    {
+		ntv2pp->m_pHDMIIn4Monitor[0] = ntv2_hdmiin4_open(&ntv2pp->systemContext, "ntv2hdmi4in", 1);
+		if (ntv2pp->m_pHDMIIn4Monitor[0] != NULL)
+		{
+			status = ntv2_hdmiin4_configure(ntv2pp->m_pHDMIIn4Monitor[0],
+											ntv2_edid_type_konahdmi_20, 0);
+			if (status != NTV2_STATUS_SUCCESS)
+			{
+				ntv2_hdmiin4_close(ntv2pp->m_pHDMIIn4Monitor[0]);
+				ntv2pp->m_pHDMIIn4Monitor[0] = NULL;
+			}
+		}
+        ntv2pp->m_pHDMIOut4Monitor[0] = ntv2_hdmiout4_open(&ntv2pp->systemContext, "ntv2hdmiout4", 0);
+        if (ntv2pp->m_pHDMIOut4Monitor[0] != NULL)
+        {
+            status = ntv2_hdmiout4_configure(ntv2pp->m_pHDMIOut4Monitor[0]);
+            if (status != NTV2_STATUS_SUCCESS)
+            {
+                ntv2_hdmiout4_close(ntv2pp->m_pHDMIOut4Monitor[0]);
+                ntv2pp->m_pHDMIOut4Monitor[0] = NULL;
+            }
+        }
+    }
+	
 	ntv2pp->m_pSetupMonitor = ntv2_setup_open(&ntv2pp->systemContext, "ntv2setup");
 	if (ntv2pp->m_pSetupMonitor != NULL)
 	{
@@ -3404,7 +3470,8 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 	linuxSerial = true;
 #endif
 
-	if (isKonaIP || (ntv2pp->_DeviceID == DEVICE_ID_CORVIDHBR))
+	if (isKonaIP || (ntv2pp->_DeviceID == DEVICE_ID_CORVIDHBR) ||
+        (ntv2pp->_DeviceID == DEVICE_ID_KONAX) || (ntv2pp->_DeviceID == DEVICE_ID_KONAXR))
 	{
 		if ((!linuxSerial && (MakeSerial == 1)) ||
 			(linuxSerial && (MakeSerial != (-1))))
@@ -4341,6 +4408,92 @@ int DoMessageBitstream(ULWord deviceNumber, NTV2Bitstream* pBitstream)
 		ntv2_mcap_read_register(pNTV2Params->m_pBitstream,
 								MCAP_DATA,
 								&pBitstream->mRegisters[BITSTREAM_MCAP_DATA]);	
+	}
+
+	return 0;
+}
+
+int DoMessageStreamChannel(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamChannel* pChannel)
+{
+	NTV2PrivateParams * pNTV2Params = getNTV2Params(deviceNumber);
+    int chn = 0;
+    struct ntv2_stream* pStr = NULL;
+	
+	if (pChannel == NULL)
+		return -EINVAL;
+
+    chn = (int)pChannel->mChannel;
+    if (chn >= NTV2_MAX_STREAMS)
+    {
+        pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_INVALID;
+        return -EINVAL;
+    }
+
+    pStr = pNTV2Params->m_pStream[chn];
+    if (pStr == NULL)
+    {
+        pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_INVALID;
+        return -EINVAL;
+    }
+
+    if ((pChannel->mFlags & NTV2_STREAM_CHANNEL_INITIALIZE) != 0)
+    {
+        ntv2_stream_channel_initialize(pStr, pChannel);
+    }
+    if ((pChannel->mFlags & NTV2_STREAM_CHANNEL_START) != 0)
+    {
+        ntv2_stream_channel_start(pStr, pChannel);
+    }
+    if ((pChannel->mFlags & NTV2_STREAM_CHANNEL_STOP) != 0)
+    {
+        ntv2_stream_channel_stop(pStr, pChannel);
+    }
+	if ((pChannel->mFlags & NTV2_STREAM_CHANNEL_FLUSH) != 0)
+	{
+        ntv2_stream_channel_flush(pStr, pChannel);
+    }
+    if ((pChannel->mFlags & NTV2_STREAM_CHANNEL_STATUS) != 0)
+    {
+        ntv2_stream_channel_status(pStr, pChannel);
+    }
+	if ((pChannel->mFlags & NTV2_STREAM_CHANNEL_WAIT) != 0)
+	{
+        ntv2_stream_channel_wait(pStr, pChannel);
+    }
+
+    return 0;
+}
+
+int DoMessageStreamBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamBuffer* pBuffer)
+{
+	NTV2PrivateParams * pNTV2Params = getNTV2Params(deviceNumber);
+    int chn = 0;
+    struct ntv2_stream* pStr = NULL;
+	
+	if (pBuffer == NULL)
+		return -EINVAL;
+
+    chn = (int)pBuffer->mChannel;
+    if (chn >= NTV2_MAX_STREAMS)
+    {
+        pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_INVALID;
+        return -EINVAL;
+    }
+
+    pStr = pNTV2Params->m_pStream[chn];
+    if (pStr == NULL)
+    {
+        pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_INVALID;
+        return -EINVAL;
+    }
+
+	if ((pBuffer->mFlags & NTV2_STREAM_BUFFER_ADD) != 0)
+	{
+        ntv2_stream_buffer_add(pStr, pBuffer);
+    }
+	if ((pBuffer->mFlags & NTV2_STREAM_BUFFER_STATUS) != 0)
+	{
+        ntv2_stream_buffer_status(pStr, pBuffer);
 	}
 
 	return 0;

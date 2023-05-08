@@ -59,6 +59,7 @@
 #define NTV2_DEVICE_ID_CORVID44_12g			0xEB25
 #define NTV2_DEVICE_ID_TTAPPRO				0xEB26 
 #define NTV2_DEVICE_ID_IOX3					0xEB27 
+#define NTV2_DEVICE_ID_KONAX                0xEB28
 #define PRIVATIZE(name)						AJANTV2_ ## name
 
 

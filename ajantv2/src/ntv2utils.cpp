@@ -5001,6 +5001,8 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_SOJI_DIAGS:				return "SOJI-DIAGS";
 		case DEVICE_ID_TTAP:					return inForRetailDisplay ? "T-TAP"						: "TTap";
 		case DEVICE_ID_TTAP_PRO:				return inForRetailDisplay ? "T-TAP Pro"					: "TTapPro";
+		case DEVICE_ID_KONAX:					return "KonaX";
+		case DEVICE_ID_KONAXR:					return "KonaXR";
 		case DEVICE_ID_NOTFOUND:				return inForRetailDisplay ? "AJA Device"				: "(Not Found)";
 #if defined(_DEBUG)
 #else
@@ -8620,6 +8622,8 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_CORVID44_PLNR:				return "c44_12g_plnr_tprom.bit";
 	case DEVICE_ID_TTAP_PRO:					return "t_tap_pro.bit";
 	case DEVICE_ID_IOX3:						return "iox3.bit";
+	case DEVICE_ID_KONAX:						return "konax.bit";
+	case DEVICE_ID_KONAXR:						return "konaxr.bit";
 	default:									return "";
 	}
 	return "";
@@ -8661,7 +8665,7 @@ NTV2DeviceID NTV2GetDeviceIDFromBitfileName (const string & inBitfileName)
 													DEVICE_ID_CORVID3G,		DEVICE_ID_IOXT,		DEVICE_ID_IOEXPRESS,	DEVICE_ID_IO4K,		DEVICE_ID_IO4KUFC,
 													DEVICE_ID_KONA1,		DEVICE_ID_KONAHDMI, DEVICE_ID_KONA5,		DEVICE_ID_KONA5_8KMK,DEVICE_ID_CORVID44_8KMK,
 													DEVICE_ID_KONA5_8K,		DEVICE_ID_CORVID44_8K,	DEVICE_ID_TTAP_PRO, DEVICE_ID_KONA5_2X4K,	DEVICE_ID_CORVID44_2X4K,
-													DEVICE_ID_CORVID44_PLNR,DEVICE_ID_IOX3,		DEVICE_ID_KONA5_8K_MV_TX,
+													DEVICE_ID_CORVID44_PLNR,DEVICE_ID_IOX3,		DEVICE_ID_KONA5_8K_MV_TX, DEVICE_ID_KONAX, DEVICE_ID_KONAXR,
 													DEVICE_ID_NOTFOUND };
 		for (unsigned ndx (0);	ndx < sizeof (sDeviceIDs) / sizeof (NTV2DeviceID);	ndx++)
 			sBitfileName2DeviceID [::NTV2GetBitfileName (sDeviceIDs [ndx])] = sDeviceIDs [ndx];
@@ -8760,6 +8764,8 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_SOJI_DIAGS,
 														DEVICE_ID_TTAP_PRO,
 														DEVICE_ID_TTAP,
+														DEVICE_ID_KONAX,
+														DEVICE_ID_KONAXR,
 														DEVICE_ID_NOTFOUND	};
 	if (inKinds == NTV2_DEVICEKIND_NONE)
 		return NTV2DeviceIDSet();

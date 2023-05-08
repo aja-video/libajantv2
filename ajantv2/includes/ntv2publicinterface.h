@@ -6050,6 +6050,9 @@ typedef enum
 		#define NTV2_TYPE_AJADEBUGLOGGING		NTV2_FOURCC ('d', 'b', 'l', 'g')	///< @brief Identifies NTV2DebugLogging struct
 		#define NTV2_TYPE_AJABUFFERLOCK			NTV2_FOURCC ('b', 'f', 'l', 'k')	///< @brief Identifies NTV2BufferLock struct
 		#define NTV2_TYPE_AJABITSTREAM			NTV2_FOURCC ('b', 't', 's', 't')	///< @brief Identifies NTV2Bitstream struct
+		#define NTV2_TYPE_AJADMASTREAM			NTV2_FOURCC ('d', 'm', 's', 't')	///< @brief Identifies NTV2DmaStream struct
+		#define NTV2_TYPE_AJASTREAMCHANNEL		NTV2_FOURCC ('s', 't', 'c', 'h')	///< @brief Identifies NTV2StreamChannel struct
+		#define NTV2_TYPE_AJASTREAMBUFFER		NTV2_FOURCC ('s', 't', 'b', 'u')	///< @brief Identifies NTV2StreamBuffer struct
 		#if defined(NTV2_DEPRECATE_16_3)
 			#define AUTOCIRCULATE_TYPE_STATUS		NTV2_TYPE_ACSTATUS
 			#define AUTOCIRCULATE_TYPE_XFER			NTV2_TYPE_ACXFER
@@ -6073,8 +6076,8 @@ typedef enum
 													(_x_) == NTV2_TYPE_VIRTUAL_DATA_RW	||	\
 													(_x_) == NTV2_TYPE_AJADEBUGLOGGING	||	\
 													(_x_) == NTV2_TYPE_AJABUFFERLOCK	||	\
-													(_x_) == NTV2_TYPE_AJABITSTREAM )
-
+													(_x_) == NTV2_TYPE_AJABITSTREAM		||	\
+													(_x_) == NTV2_TYPE_AJADMASTREAM)
 
 		//	NTV2Buffer FLAGS
 		#define NTV2Buffer_ALLOCATED				BIT(0)		///< @brief Allocated using Allocate function?
@@ -6143,6 +6146,11 @@ typedef enum
 		#define BITSTREAM_MCAP_CONTROL				5			///< @brief MCAP control register
 		#define BITSTREAM_MCAP_DATA					6			///< @brief MCAP data register
 		#define BITSTREAM_NUM_REGISTERS				7			///< @brief Number of MCAP registes
+	
+		// DMA Stream flags
+		#define DMASTREAM_START						BIT(0)		///< @brief Used in ::NTV2DmaStream to start DMA streaming
+		#define DMASTREAM_STOP						BIT(1)		///< @brief Used in ::NTV2DmaStream to stop DMA streaming
+		#define DMASTREAM_TO_HOST					BIT(2)		///< @brief Used in ::NTV2DmaStream to host
 	
 		#if !defined (NTV2_BUILDING_DRIVER)
 			/**
@@ -9137,6 +9145,211 @@ typedef enum
 
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
 		NTV2_STRUCT_END (NTV2Bitstream)
+
+
+		/**
+			@brief	This is used for streaming dma.
+			@note	This struct uses a constructor to properly initialize itself.
+					Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
+		**/
+		NTV2_STRUCT_BEGIN (NTV2DmaStream)
+			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
+				NTV2_POINTER	mBuffer;			///< @brief Virtual address of a DMA stream buffer and its length.
+				NTV2Channel		mChannel;			///< @brief Video stream channel
+				ULWord			mFlags;				///< @brief Action flags (lock, unlock, etc)
+				ULWord			mStatus;			///< @brief Action status
+				ULWord			mReserved[32];		///< @brief Reserved for future expansion.
+			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
+
+			#if !defined (NTV2_BUILDING_DRIVER)
+				/**
+					@name	Construction & Destruction
+				**/
+				///@{
+				explicit	NTV2DmaStream ();		///< @brief Constructs a default NTV2DmaStream struct.
+				inline		~NTV2DmaStream ()	{}	///< @brief My default destructor, which frees all allocatable fields that I own.
+
+				/**
+					@brief	Constructs an NTV2DmaStream object to use to specify a streaming buffer.
+					@param	inBuffer		Specifies the memory to use for streaming.
+					@param	inChannel		Specifies the video channel to use for streaming.
+					@param	inFlags			Specifies action flags (start, stop, etc.).
+				**/
+				explicit	NTV2DmaStream (const NTV2_POINTER & inBuffer, const NTV2Channel inChannel, const ULWord inFlags);
+
+				/**
+					@brief	Constructs an NTV2DmaStream object to use in a CNTV2Card::StartDmaStream.
+					@param	pInBuffer		Specifies a pointer to the host buffer to stream to or from.
+					@param	inByteCount		Specifies a the length of the buffer in bytes.
+					@param	inChannel		Specifies the video channel to use for streaming.
+					@param	inFlags			Specifies action flags (start, stop etc)
+				**/
+				explicit	NTV2DmaStream (const ULWord * pInBuffer, const ULWord inByteCount, const NTV2Channel inChannel, const ULWord inFlags);
+				///@}
+
+				/**
+					@brief	Constructs an NTV2DmaStream object to use to specify a streaming flags.
+					@param	inChannel		Specifies the video channel to use for streaming.
+					@param	inFlags			Specifies action flags (start, stop, etc.).
+				**/
+				explicit	NTV2DmaStream (const NTV2Channel inChannel, const ULWord inFlags);
+
+				/**
+					@name	Changing
+				**/
+				///@{
+				/**
+					@brief	Sets the buffer to use for streaming.
+					@param	inBuffer		Specifies the memory containing the DMA buffer.
+					@return True if successful;	 otherwise false.
+				**/
+				bool		SetBuffer (const NTV2_POINTER & inBuffer);
+
+				/**
+					@brief	Sets the buffer to use for streaming.
+					@param	pInBuffer			Specifies a pointer to the host buffer.
+					@param	inByteCount			Specifies a the length of the buffer in bytes.
+					@return True if successful;	 otherwise false.
+				**/
+				inline bool SetBuffer (const ULWord * pInBuffer, const ULWord inByteCount)	{return SetBuffer(NTV2_POINTER(pInBuffer, inByteCount));}
+
+				///@{
+				/**
+					@brief	Sets the video channel to use for streaming.
+					@param	inChannel		Specifies the video channel.
+					@return True if successful;	 otherwise false.
+				**/
+				bool		SetChannel (const NTV2Channel inChannel);
+
+				/**
+					@brief	Sets the action flags.
+					@param	inFlags			Specifies action flags (fragment, swap, etc)
+				**/
+				inline void SetFlags (const ULWord inFlags)		{NTV2_ASSERT_STRUCT_VALID;	mFlags = inFlags;}
+
+				/**
+					@brief	Resets the struct to its initialized state.
+				**/
+				inline void Clear (void)		{SetBuffer(NTV2_POINTER());}
+				///@}
+
+				/**
+					@brief	Prints a human-readable representation of me to the given output stream.
+					@param	inOutStream		Specifies the output stream to use.
+					@return A reference to the output stream.
+				**/
+				std::ostream &	Print (std::ostream & inOutStream) const;
+
+				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
+
+			#endif	//	!defined (NTV2_BUILDING_DRIVER)
+		NTV2_STRUCT_END (NTV2DmaStream)
+
+
+		// Stream channel action flags
+		#define NTV2_STREAM_CHANNEL_INITIALIZE			BIT(0)			///< @brief Used in ::NTV2StreamChannel to initialize the stream
+		#define NTV2_STREAM_CHANNEL_START				BIT(1)			///< @brief Used in ::NTV2StreamChannel to start streaming
+		#define NTV2_STREAM_CHANNEL_STOP				BIT(2)			///< @brief Used in ::NTV2StreamChannel to stop streaming
+        #define NTV2_STREAM_CHANNEL_FLUSH				BIT(3)			///< @brief Used in ::NTV2StreamChannel to flush buffer queue
+        #define NTV2_STREAM_CHANNEL_STATUS				BIT(4)			///< @brief Used in ::NTV2StreamChannel to request stream status
+        #define NTV2_STREAM_CHANNEL_WAIT				BIT(5)			///< @brief Used in ::NTV2StreamChannel to wait for signal
+
+		// Stream channel state flags
+		#define NTV2_STREAM_CHANNEL_STATE_DISABLED		BIT(0)			///< @brief Used in ::NTV2StreamChannel stream disabled
+		#define NTV2_STREAM_CHANNEL_STATE_INITIALIZED	BIT(1)			///< @brief Used in ::NTV2StreamChannel stream initialized
+		#define NTV2_STREAM_CHANNEL_STATE_IDLE			BIT(2)			///< @brief Used in ::NTV2StreamChannel stream idle
+		#define NTV2_STREAM_CHANNEL_STATE_ACTIVE		BIT(3)			///< @brief Used in ::NTV2StreamChannel stream active
+		#define NTV2_STREAM_CHANNEL_STATE_ERROR			BIT(4)			///< @brief Used in ::NTV2StreamChannel stream error
+
+		// Stream buffer action flags
+		#define NTV2_STREAM_BUFFER_ADD					BIT(0)			///< @brief Used in ::NTV2StreamBuffer to add buffer to queue
+		#define NTV2_STREAM_BUFFER_COMMIT				BIT(1)			///< @brief Used in ::NTV2StreamBuffer to commit added buffers
+		#define NTV2_STREAM_BUFFER_STATUS				BIT(3)			///< @brief Used in ::NTV2StreamBuffer to request buffer status
+		#define NTV2_STREAM_BUFFER_SIGNAL				BIT(4)			///< @brief Used in ::NTV2StreamBuffer to signal on complete
+
+		// Stream buffer state flags
+		#define NTV2_STREAM_BUFFER_STATE_QUEUED			BIT(0)			///< @brief Used in ::NTV2StreamBuffer buffer queued
+		#define NTV2_STREAM_BUFFER_STATE_LINKED			BIT(1)			///< @brief Used in ::NTV2StreamBuffer buffer linked
+		#define NTV2_STREAM_BUFFER_STATE_ACTIVE			BIT(2)			///< @brief Used in ::NTV2StreamBuffer buffer transfering
+		#define NTV2_STREAM_BUFFER_STATE_COMPLETED		BIT(3)			///< @brief Used in ::NTV2StreamBuffer buffer completed
+		#define NTV2_STREAM_BUFFER_STATE_FLUSHED		BIT(4)			///< @brief Used in ::NTV2StreamBuffer buffer flushed
+		#define NTV2_STREAM_BUFFER_STATE_ERROR			BIT(5)			///< @brief Used in ::NTV2StreamBuffer buffer error
+
+		// Stream action status flags
+		#define NTV2_STREAM_STATUS_SUCCESS				BIT(0)			///< @brief Used in ::NTV2Stream success
+		#define NTV2_STREAM_STATUS_FAIL					BIT(1)			///< @brief Used in ::NTV2Stream fail
+        #define NTV2_STREAM_STATUS_STATE				BIT(2)			///< @brief Used in ::NTV2Stream bad state
+        #define NTV2_STREAM_STATUS_MESSAGE				BIT(3)			///< @brief Used in ::NTV2Stream driver message failure
+        #define NTV2_STREAM_STATUS_INVALID				BIT(4)			///< @brief Used in ::NTV2Stream invalid parameter
+        #define NTV2_STREAM_STATUS_TIMEOUT				BIT(5)			///< @brief Used in ::NTV2Stream timeout
+        #define NTV2_STREAM_STATUS_RESOURCE				BIT(6)			///< @brief Used in ::NTV2Stream insufficient resource
+
+		NTV2_STRUCT_BEGIN (NTV2StreamChannel)
+			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
+				NTV2Channel		mChannel;			///< @brief Stream channel
+				ULWord			mFlags;				///< @brief Action flags
+				ULWord			mStatus;            ///< @brief Action status
+				ULWord64		mSteps;				///< @brief Stream number of steps
+                ULWord			mStreamState;		///< @brief Stream state
+				ULWord			mQueueDepth;		///< @brief Queue depth
+				ULWord64		mBufferCookie;		///< @brief Active buffer user cookie
+				LWord64			mStartTime;			///< @brief Stream start time
+				LWord64			mStopTime;			///< @brief Stream stop time
+				ULWord64		mBufferCount;		///< @brief Stream buffer count
+				ULWord64		mRepeatCount;		///< @brief Stream repeat count
+				ULWord			mReserved[32];		///< @brief Reserved for future expansion.
+			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
+
+			#if !defined (NTV2_BUILDING_DRIVER)
+				/**
+					@name	Construction & Destruction
+				**/
+				///@{
+				explicit	NTV2StreamChannel ();		///< @brief Constructs a default NTV2StreamChannel struct.
+				inline		~NTV2StreamChannel ()	{}	///< @brief My default destructor, which frees all allocatable fields that I own.
+				///@}
+
+				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
+
+				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
+
+			#endif	//	!defined (NTV2_BUILDING_DRIVER)
+
+        NTV2_STRUCT_END (NTV2StreamChannel)
+
+		NTV2_STRUCT_BEGIN (NTV2StreamBuffer)
+			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
+				NTV2Channel		mChannel;			///< @brief Stream channel
+				ULWord			mFlags;				///< @brief Action flags
+				ULWord			mStatus;            ///< @brief Action status
+				NTV2_POINTER	mBuffer;			///< @brief Virtual address of a stream buffer and its length.
+				ULWord64		mBufferCookie;		///< @brief Buffer User cookie
+				ULWord			mBufferState;		///< @brief Buffer state
+				LWord64			mQueueTime;			///< @brief Queue time (queued to driver by app)
+				LWord64			mLinkTime;			///< @brief Link time (linked into stream by irq)
+				LWord64			mStartTime;			///< @brief Active start time (on air interrupt time)
+				LWord64			mStopTime;			///< @brief Active stop time (off air interrupt time)
+				LWord64			mFlushTime;			///< @brief Flush time (if flushed before on air)
+				ULWord64		mRepeatCount;		///< @brief Number of repeat cycles
+				ULWord			mReserved[32];		///< @brief Reserved for future expansion.
+			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
+
+			#if !defined (NTV2_BUILDING_DRIVER)
+				/**
+					@name	Construction & Destruction
+				**/
+				///@{
+				explicit	NTV2StreamBuffer ();		///< @brief Constructs a default NTV2StreamBuffer struct.
+				inline		~NTV2StreamBuffer ()	{}	///< @brief My default destructor, which frees all allocatable fields that I own.
+				///@}
+
+				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
+
+				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
+
+			#endif	//	!defined (NTV2_BUILDING_DRIVER)
+
+        NTV2_STRUCT_END (NTV2StreamBuffer)
 
 
 		#if !defined (NTV2_BUILDING_DRIVER)

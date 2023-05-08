@@ -2756,6 +2756,70 @@ ostream & NTV2Bitstream::Print (ostream & inOutStream) const
 }
 
 
+NTV2DmaStream::NTV2DmaStream()
+	:	mHeader (NTV2_TYPE_AJADMASTREAM, sizeof(NTV2DmaStream))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+}
+
+NTV2DmaStream::NTV2DmaStream (const NTV2_POINTER & inBuffer, const NTV2Channel inChannel, const ULWord inFlags)
+	:	mHeader (NTV2_TYPE_AJADMASTREAM, sizeof(NTV2DmaStream))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	SetBuffer (inBuffer);
+	SetChannel (inChannel);
+	SetFlags (inFlags);
+}
+
+NTV2DmaStream::NTV2DmaStream(const ULWord * pInBuffer, const ULWord inByteCount, const NTV2Channel inChannel, const ULWord inFlags)
+	:	mHeader (NTV2_TYPE_AJADMASTREAM, sizeof(NTV2DmaStream))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	SetBuffer (NTV2_POINTER(pInBuffer, inByteCount));
+	SetChannel (inChannel);
+	SetFlags (inFlags);
+}
+
+NTV2DmaStream::NTV2DmaStream(const NTV2Channel inChannel, const ULWord inFlags)
+	:	mHeader (NTV2_TYPE_AJADMASTREAM, sizeof(NTV2DmaStream))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	SetChannel (inChannel);
+	SetFlags (inFlags);
+}
+
+bool NTV2DmaStream::SetBuffer (const NTV2_POINTER & inBuffer)
+{	//	Just use address & length (don't deep copy)...
+	NTV2_ASSERT_STRUCT_VALID;
+	return mBuffer.Set (inBuffer.GetHostPointer(), inBuffer.GetByteCount());
+}
+
+bool NTV2DmaStream::SetChannel (const NTV2Channel inChannel)
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	mChannel = inChannel;
+	return true;
+}
+
+ostream & NTV2DmaStream::Print (ostream & inOutStream) const
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	inOutStream << mHeader << mBuffer << " flags=" << xHEX0N(mFlags,8) << " " << mTrailer;
+	return inOutStream;
+}
+
+NTV2StreamChannel::NTV2StreamChannel()
+	:	mHeader (NTV2_TYPE_AJASTREAMCHANNEL, sizeof(NTV2StreamChannel))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+}
+
+NTV2StreamBuffer::NTV2StreamBuffer()
+	:	mHeader (NTV2_TYPE_AJASTREAMBUFFER, sizeof(NTV2StreamBuffer))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+}
+
 NTV2GetRegisters::NTV2GetRegisters (const NTV2RegNumSet & inRegisterNumbers)
 	:	mHeader				(NTV2_TYPE_GETREGS, sizeof(NTV2GetRegisters)),
 		mInNumRegisters		(ULWord (inRegisterNumbers.size ())),

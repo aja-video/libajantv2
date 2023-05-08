@@ -67,7 +67,87 @@ NTV2_CON(ntv2_frame_rate_4795,					10);
 NTV2_CON(ntv2_frame_rate_12000,					11);
 NTV2_CON(ntv2_frame_rate_11988,					12);
 NTV2_CON(ntv2_frame_rate_1500,					13);
-NTV2_CON(ntv2_frame_rate_1400,					14);
+NTV2_CON(ntv2_frame_rate_1498,					14);
+
+/* video frame geometry */
+NTV2_CON(ntv2_frame_geometry_1920x1080,         0);
+NTV2_CON(ntv2_frame_geometry_1280x720,          1);
+NTV2_CON(ntv2_frame_geometry_720x486,           2);
+NTV2_CON(ntv2_frame_geometry_720x576,           3);
+NTV2_CON(ntv2_frame_geometry_1920x1114,         4);
+NTV2_CON(ntv2_frame_geometry_2048x1114,         5);
+NTV2_CON(ntv2_frame_geometry_720x508,           6);
+NTV2_CON(ntv2_frame_geometry_720x598,           7);
+NTV2_CON(ntv2_frame_geometry_1920x1112,         8);
+NTV2_CON(ntv2_frame_geometry_1280x740,          9);
+NTV2_CON(ntv2_frame_geometry_2048x1080,         10);
+NTV2_CON(ntv2_frame_geometry_2048x1556,         11);
+NTV2_CON(ntv2_frame_geometry_2048x1588,         12);
+NTV2_CON(ntv2_frame_geometry_2048x1112,         13);
+NTV2_CON(ntv2_frame_geometry_720x514,           14);
+NTV2_CON(ntv2_frame_geometry_720x612,           15);
+
+/* video scan */
+NTV2_CON(ntv2_video_scan_unknown,               0);
+NTV2_CON(ntv2_video_scan_progressive,           1);
+NTV2_CON(ntv2_video_scan_top_first,             2);
+NTV2_CON(ntv2_video_scan_bottom_first,          3);
+
+/* pixel format */
+NTV2_CON(ntv2_pixel_format_10bit_ycbcr,         0);
+NTV2_CON(ntv2_pixel_format_8bit_ycbcr,          1);
+NTV2_CON(ntv2_pixel_format_argb,                2);
+NTV2_CON(ntv2_pixel_format_rgba,                3);
+NTV2_CON(ntv2_pixel_format_10bit_rgb,           4);
+NTV2_CON(ntv2_pixel_format_8bit_ycbcr_yuy2,     5);
+NTV2_CON(ntv2_pixel_format_abgr,                6);
+NTV2_CON(ntv2_pixel_format_10bit_dpx,           7);
+NTV2_CON(ntv2_pixel_format_10bit_ycbcr_dpx,     8);
+NTV2_CON(ntv2_pixel_format_8bit_dvcpro,         9);
+NTV2_CON(ntv2_pixel_format_8bit_ycbcr_420pl3,   10);
+NTV2_CON(ntv2_pixel_format_8bit_hdv,            11);
+NTV2_CON(ntv2_pixel_format_24bit_rgb,           12);
+NTV2_CON(ntv2_pixel_format_24bit_bgr,           13);
+NTV2_CON(ntv2_pixel_format_10bit_ycbcra,        14);
+NTV2_CON(ntv2_pixel_format_10bit_dpx_le,        15);
+NTV2_CON(ntv2_pixel_format_48bit_rgb,           16);
+NTV2_CON(ntv2_pixel_format_12bit_rgb_packed,    17);
+NTV2_CON(ntv2_pixel_format_prores_dvcpro,       18);
+NTV2_CON(ntv2_pixel_format_prores_hdv,          19);
+NTV2_CON(ntv2_pixel_format_10bit_rgb_packed,    20);
+NTV2_CON(ntv2_pixel_format_10bit_argb,          21);
+NTV2_CON(ntv2_pixel_format_16bit_argb,          22);
+NTV2_CON(ntv2_pixel_format_8bit_ycbcr_422pl3,   23);
+NTV2_CON(ntv2_pixel_format_10bit_raw_rgb,       24);
+NTV2_CON(ntv2_pixel_format_10bit_raw_ycbcr,     25);
+NTV2_CON(ntv2_pixel_format_10bit_ycbcr_420pl3_le,  26);
+NTV2_CON(ntv2_pixel_format_10bit_ycbcr_422pl3_le,  27);
+NTV2_CON(ntv2_pixel_format_10bit_ycbcr_420pl2,  28);
+NTV2_CON(ntv2_pixel_format_10bit_ycbcr_422pl2,  29);
+NTV2_CON(ntv2_pixel_format_8bit_ycbcr_420pl2,   30);
+NTV2_CON(ntv2_pixel_format_8bit_ycbcr_422pl2,   31);
+
+/* frame format */
+NTV2_CON(ntv2_frame_format_unknown,             0);
+NTV2_CON(ntv2_frame_format_packed,              1);
+NTV2_CON(ntv2_frame_format_2plane,              2);
+NTV2_CON(ntv2_frame_format_3plane,              3);
+NTV2_CON(ntv2_frame_format_raw,                 4);
+
+/* pixel rate */
+NTV2_CON(ntv2_pixel_rate_none,                  0);
+NTV2_CON(ntv2_pixel_rate_1350,                  1);
+NTV2_CON(ntv2_pixel_rate_2700,                  2);
+NTV2_CON(ntv2_pixel_rate_7418,                  3);
+NTV2_CON(ntv2_pixel_rate_7425,                  4);
+NTV2_CON(ntv2_pixel_rate_14835,                 5);
+NTV2_CON(ntv2_pixel_rate_14850,                 6);
+
+/* register syncronization */
+NTV2_CON(ntv2_con_reg_sync_field,               0);
+NTV2_CON(ntv2_con_reg_sync_frame,               1);
+NTV2_CON(ntv2_con_reg_sync_immediate,           2);
+NTV2_CON(ntv2_con_reg_sync_field_10_lines,      3);
 
 /* color space */
 NTV2_CON(ntv2_color_space_yuv422,				0);
@@ -80,7 +160,8 @@ NTV2_CON(ntv2_color_space_none,					4);
 NTV2_CON(ntv2_color_depth_8bit,					0);
 NTV2_CON(ntv2_color_depth_10bit,				1);
 NTV2_CON(ntv2_color_depth_12bit,				2);
-NTV2_CON(ntv2_color_depth_none,					3);
+NTV2_CON(ntv2_color_depth_16bit,				3);
+NTV2_CON(ntv2_color_depth_none,					4);
 
 /* reference source */
 NTV2_CON(ntv2_ref_source_external,				0);
@@ -166,6 +247,12 @@ void ntv2_vregnum_rmw(Ntv2SystemContext* context, uint32_t regnum, uint32_t data
 
 const char* ntv2_video_standard_name(uint32_t standard);
 const char* ntv2_frame_rate_name(uint32_t rate);
+const char* ntv2_frame_geometry_name(uint32_t geometry);
+const char* ntv2_video_scan_name(uint32_t scan);
+const char* ntv2_pixel_format_name(uint32_t format);
+const char* ntv2_frame_format_name(uint32_t format);
+const char* ntv2_pixel_rate_name(uint32_t rate);
+const char* ntv2_reg_sync_name(uint32_t sync);
 const char* ntv2_color_space_name(uint32_t color_space);
 const char* ntv2_color_depth_name(uint32_t color_depth);
 const char* ntv2_ref_source_name(uint32_t ref_source);

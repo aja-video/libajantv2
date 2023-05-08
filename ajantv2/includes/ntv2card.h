@@ -560,6 +560,17 @@ public:
 											 PCHANNEL_P2P_STRUCT pP2PData);		// p2p target data
 
 	/**
+		@brief		Streaming transfers
+	**/
+	AJA_VIRTUAL bool	DMAStreamStart  (ULWord * inBuffer,
+										 const ULWord inByteCount,
+										 const NTV2Channel inChannel,
+										 const bool inToHost);
+
+	AJA_VIRTUAL bool	DMAStreamStop  (const NTV2Channel inChannel,
+										const bool inToHost);
+
+	/**
 		@brief		Synchronously transfers audio data from a given Audio System's buffer memory on the AJA device to the specified host
 					buffer, blocking until the transfer has completed.
 		@param[in]	inAudioSystem		Specifies the Audio System on the device that is to supply the audio data.
@@ -4170,6 +4181,48 @@ public:
 	AJA_VIRTUAL bool	FindUnallocatedFrames (const UWord inFrameCount, LWord & outStartFrame, LWord & outEndFrame,
 												const NTV2Channel inFrameStore = NTV2_CHANNEL_INVALID);
 	///@}
+
+
+#define NTV2_STREAM_SUCCESS(__status__)  (__status__ == NTV2_STREAM_SUCCESS)
+#define NTV2_STREAM_FAIL(__status__)  (__status__ != NTV2_STREAM_SUCCESS)
+
+	// initialize the stream
+	AJA_VIRTUAL ULWord	StreamChannelInitialize (const NTV2Channel inChannel);
+
+	// start the stream
+	AJA_VIRTUAL ULWord	StreamChannelStart (const NTV2Channel inChannel,
+												NTV2StreamChannel& status);
+
+	// stop the stream
+	AJA_VIRTUAL ULWord	StreamChannelStop (const NTV2Channel inChannel,
+												NTV2StreamChannel& status);
+
+    // flush the buffers
+    AJA_VIRTUAL ULWord	StreamChannelFlush (const NTV2Channel inChannel,
+                                            NTV2StreamChannel& status);
+
+    // current stream status
+	AJA_VIRTUAL ULWord	StreamChannelStatus (const NTV2Channel inChannel,
+												NTV2StreamChannel& status);
+
+	// wait for a buffer interrupt
+	AJA_VIRTUAL ULWord	StreamChannelWait (const NTV2Channel inChannel,
+											NTV2StreamChannel& status);
+
+	// add a buffer to the stream
+	AJA_VIRTUAL ULWord	StreamBufferAdd (const NTV2Channel inChannel,
+											NTV2_POINTER inBuffer,
+											ULWord64 bufferCookie,
+											NTV2StreamBuffer& status);
+
+	// request buffer status
+	AJA_VIRTUAL ULWord	StreamBufferStatus (const NTV2Channel inChannel,
+											ULWord64 bufferCookie,
+											NTV2StreamBuffer& status);
+
+
+
+
 
 #if defined(READREGMULTICHANGE)
 	/**
