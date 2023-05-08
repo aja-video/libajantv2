@@ -9,7 +9,7 @@
 
 #ifndef AJA_DEBUGSHARE_H
 #define AJA_DEBUGSHARE_H
-#include "common/export.h"
+#include "ajabase/common/export.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <string>
