@@ -8,8 +8,8 @@
 #ifndef NTV2ENUMS_H
 #define NTV2ENUMS_H
 
-#include "ajatypes.h"	//	for NTV2_DEPRECATE & friends
-
+#include "ajatypes.h"		//	for NTV2_DEPRECATE & friends
+#include "ntv2version.h"	//	for AJA_NTV2_SDK_VERSION_MAJOR & friends
 #if !defined(NTV2_DEPRECATE_14_3)
 typedef enum
 {

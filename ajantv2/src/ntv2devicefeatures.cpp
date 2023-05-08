@@ -1131,3 +1131,24 @@ bool NTV2DeviceCanDoProgrammableCSC (const NTV2DeviceID inDeviceID)
 		return false;
 	}
 #endif	//	!defined (NTV2_DEPRECATE_14_3)
+#if !defined(NTV2_DEPRECATE_17_0)
+	bool NTV2DeviceHasSPIv2 (const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 2;}
+	bool NTV2DeviceHasSPIv3(const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 3;}
+	bool NTV2DeviceHasSPIv4(const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 4;}
+	bool NTV2DeviceHasSPIv5(const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 5;}
+
+	bool NTV2DeviceHasGenlockv2(const NTV2DeviceID devID)	{return NTV2DeviceGetGenlockVersion(devID) == 2;}
+	bool NTV2DeviceHasGenlockv3(const NTV2DeviceID devID)	{return NTV2DeviceGetGenlockVersion(devID) == 3;}
+
+	bool NTV2DeviceHasColorSpaceConverterOnChannel2(const NTV2DeviceID devID)	{return NTV2DeviceCanDoWidget(devID, NTV2_WgtCSC2);}
+
+	bool NTV2DeviceCanDoAudio2Channels(const NTV2DeviceID devID)	{return NTV2DeviceGetMaxAudioChannels(devID) >= 2;}
+	bool NTV2DeviceCanDoAudio6Channels(const NTV2DeviceID devID)	{return NTV2DeviceGetMaxAudioChannels(devID) >= 6;}
+	bool NTV2DeviceCanDoAudio8Channels(const NTV2DeviceID devID)	{return NTV2DeviceGetMaxAudioChannels(devID) >= 8;}
+
+	UWord NTV2DeviceGetNumAudioStreams(const NTV2DeviceID devID)	{return NTV2DeviceGetNumAudioSystems(devID);}
+	bool NTV2DeviceCanDoAudioN(const NTV2DeviceID devID, UWord index0)	{return index0 < NTV2DeviceGetNumAudioSystems(devID);}
+	bool NTV2DeviceCanDoLTCOutN(const NTV2DeviceID devID, UWord index0)	{return index0 < NTV2DeviceGetNumLTCOutputs(devID);}
+	bool NTV2DeviceCanDoLTCInN(const NTV2DeviceID devID, UWord index0)	{return index0 < NTV2DeviceGetNumLTCInputs(devID);}
+	bool NTV2DeviceCanDoRS422N(const NTV2DeviceID devID, const NTV2Channel ch)	{return ch < NTV2DeviceGetNumSerialPorts(devID);}
+#endif	//	!defined(NTV2_DEPRECATE_17_0)

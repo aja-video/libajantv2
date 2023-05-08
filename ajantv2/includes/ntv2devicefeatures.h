@@ -327,29 +327,29 @@ AJAExport bool NTV2DeviceGetVideoFormatFromState_Ex2 (	NTV2VideoFormat *		pOutVa
 														const bool				inIsSquareDivision);
 #if !defined(NTV2_DEPRECATE_17_0)
 	//	In SDK 17.0, these were all replaced by NTV2DeviceGetSPIFlashVersion:
-	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv2(const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 2;}) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
-	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv3(const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 3;}) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
-	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv4(const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 4;}) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
-	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv5(const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 5;}) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv2(const NTV2DeviceID inDeviceID);) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv3(const NTV2DeviceID inDeviceID);) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv4(const NTV2DeviceID inDeviceID);) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasSPIv5(const NTV2DeviceID inDeviceID);) ///< @deprecated	Call NTV2DeviceGetSPIFlashVersion instead.
 
 	//	In SDK 17.0, these were replaced by NTV2DeviceGetGenlockVersion...
-	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceHasGenlockv2(const NTV2DeviceID devID)	{return NTV2DeviceGetGenlockVersion(devID) == 2;})	///< @deprecated	Use NTV2DeviceGetGenlockVersion instead.
-	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceHasGenlockv3(const NTV2DeviceID devID)	{return NTV2DeviceGetGenlockVersion(devID) == 3;})	///< @deprecated	Use NTV2DeviceGetGenlockVersion instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasGenlockv2(const NTV2DeviceID devID);)	///< @deprecated	Use NTV2DeviceGetGenlockVersion instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasGenlockv3(const NTV2DeviceID devID);)	///< @deprecated	Use NTV2DeviceGetGenlockVersion instead.
 
 	//	In SDK 17.0, this was replaced by NTV2DeviceCanDoWidget(NTV2_WgtCSC2)...
-	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceHasColorSpaceConverterOnChannel2(const NTV2DeviceID devID)	{return NTV2DeviceCanDoWidget(devID, NTV2_WgtCSC2);})	///< @deprecated	Call NTV2DeviceCanDoWidget with NTV2_WgtCSC2 instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceHasColorSpaceConverterOnChannel2(const NTV2DeviceID devID);)	///< @deprecated	Call NTV2DeviceCanDoWidget with NTV2_WgtCSC2 instead.
 
 	//	In SDK 17.0, these were replaced by NTV2GetMaxNumAudioChannels:
-	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudio2Channels(const NTV2DeviceID devID)	{return NTV2DeviceGetMaxAudioChannels(devID) >= 2;})	///< @deprecated	Use NTV2DeviceGetMaxAudioChannels instead.
-	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudio6Channels(const NTV2DeviceID devID)	{return NTV2DeviceGetMaxAudioChannels(devID) >= 6;})	///< @deprecated	Use NTV2DeviceGetMaxAudioChannels instead.
-	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudio8Channels(const NTV2DeviceID devID)	{return NTV2DeviceGetMaxAudioChannels(devID) >= 8;})	///< @deprecated	Use NTV2DeviceGetMaxAudioChannels instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudio2Channels(const NTV2DeviceID devID);)	///< @deprecated	Use NTV2DeviceGetMaxAudioChannels instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudio6Channels(const NTV2DeviceID devID);)	///< @deprecated	Use NTV2DeviceGetMaxAudioChannels instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudio8Channels(const NTV2DeviceID devID);)	///< @deprecated	Use NTV2DeviceGetMaxAudioChannels instead.
 
 	//	These have been marked deprecated for some time. In SDK 17.0, it's official.
-	AJAExport inline NTV2_DEPRECATED_f(UWord NTV2DeviceGetNumAudioStreams(const NTV2DeviceID devID)	{return NTV2DeviceGetNumAudioSystems(devID);})	///< @deprecated	Use NTV2DeviceGetNumAudioSystems instead.
-	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudioN(const NTV2DeviceID devID, UWord index0)	{return index0 < NTV2DeviceGetNumAudioSystems(devID);})	///< @deprecated	Use NTV2DeviceGetNumAudioSystems instead.
-	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCOutN(const NTV2DeviceID devID, UWord index0)	{return index0 < NTV2DeviceGetNumLTCOutputs(devID);})	///< @deprecated	Use NTV2DeviceGetNumLTCOutputs instead.
-	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCInN(const NTV2DeviceID devID, UWord index0)	{return index0 < NTV2DeviceGetNumLTCInputs(devID);})	///< @deprecated	Use NTV2DeviceGetNumLTCInputs instead.
-	AJAExport inline NTV2_DEPRECATED_f(bool NTV2DeviceCanDoRS422N(const NTV2DeviceID devID, const NTV2Channel ch)	{return ch < NTV2DeviceGetNumSerialPorts(devID);})	///< @deprecated	Use NTV2DeviceGetNumSerialPorts instead.
+	AJAExport NTV2_DEPRECATED_f(UWord NTV2DeviceGetNumAudioStreams(const NTV2DeviceID devID);)	///< @deprecated	Use NTV2DeviceGetNumAudioSystems instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudioN(const NTV2DeviceID devID, UWord index0);)	///< @deprecated	Use NTV2DeviceGetNumAudioSystems instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCOutN(const NTV2DeviceID devID, UWord index0);)	///< @deprecated	Use NTV2DeviceGetNumLTCOutputs instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCInN(const NTV2DeviceID devID, UWord index0);)	///< @deprecated	Use NTV2DeviceGetNumLTCInputs instead.
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoRS422N(const NTV2DeviceID devID, const NTV2Channel ch);)	///< @deprecated	Use NTV2DeviceGetNumSerialPorts instead.
 #endif	//	NTV2_DEPRECATE_17_0
 
 #if !defined(NTV2_DEPRECATE_15_6)
