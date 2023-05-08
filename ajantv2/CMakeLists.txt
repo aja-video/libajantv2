@@ -138,6 +138,7 @@ set(AJANTV2_SOURCES
     src/ntv2serialcontrol.cpp
     src/ntv2signalrouter.cpp
     src/ntv2spiinterface.cpp
+    src/ntv2stream.cpp
     src/ntv2subscriptions.cpp
     src/ntv2supportlogger.cpp
     src/ntv2task.cpp
