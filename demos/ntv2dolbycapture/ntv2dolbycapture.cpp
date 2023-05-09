@@ -109,10 +109,10 @@ AJAStatus NTV2DolbyCapture::Init (void)
 	else if (!NTV2_IS_VALID_CHANNEL(mConfig.fInputChannel)  &&  NTV2_IS_VALID_INPUT_SOURCE(mConfig.fInputSource))
 		mConfig.fInputChannel = ::NTV2InputSourceToChannel(mConfig.fInputSource);
 	else if (NTV2_IS_VALID_CHANNEL(mConfig.fInputChannel)  &&  !NTV2_IS_VALID_INPUT_SOURCE(mConfig.fInputSource))
-        mConfig.fInputSource = ::NTV2ChannelToInputSource(mConfig.fInputChannel, NTV2_INPUTSOURCES_HDMI);
+        mConfig.fInputSource = ::NTV2ChannelToInputSource(mConfig.fInputChannel, NTV2_IOKINDS_HDMI);
 	//	On KonaHDMI, map specified SDI input to equivalent HDMI input...
     if (::NTV2DeviceGetNumHDMIVideoInputs(mDeviceID) > 1  &&  NTV2_INPUT_SOURCE_IS_HDMI(mConfig.fInputSource))
-		mConfig.fInputSource = ::NTV2ChannelToInputSource(::NTV2InputSourceToChannel(mConfig.fInputSource), NTV2_INPUTSOURCES_HDMI);
+		mConfig.fInputSource = ::NTV2ChannelToInputSource(::NTV2InputSourceToChannel(mConfig.fInputSource), NTV2_IOKINDS_HDMI);
 
 	//	Set up the video and audio...
 	status = SetupVideo();
