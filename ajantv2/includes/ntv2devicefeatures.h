@@ -357,9 +357,9 @@ AJAExport bool NTV2DeviceGetVideoFormatFromState_Ex2 (	NTV2VideoFormat *		pOutVa
 #endif	//	NTV2_DEPRECATE_15_6
 AJAExport bool NTV2DeviceCanDoTCIndex (const NTV2DeviceID inDeviceID, const NTV2TCIndex inTCIndex); ///< @return	True if the device having the given ID supports the specified NTV2TCIndex.
 AJAExport bool NTV2DeviceCanDoInputTCIndex (const NTV2DeviceID inDeviceID, const NTV2TCIndex inTCIndex);	///< @return	True if the device having the given ID supports the specified NTV2TCIndex for input.
-AJAExport NTV2AudioSystem NTV2DeviceGetAudioMixerSystem(const NTV2DeviceID inDeviceID);
-AJAExport NTV2AudioSystem NTV2DeviceGetHostAudioSystem(const NTV2DeviceID inDeviceID);
-AJAExport bool NTV2DeviceROMHasBankSelect (const NTV2DeviceID inDeviceID);
+AJAExport NTV2AudioSystem NTV2DeviceGetAudioMixerSystem(const NTV2DeviceID inDeviceID);	///< @return	The NTV2AudioSystem used by the audio mixer for the given device (or NTV2_AUDIOSYSTEM_INVALID if there is no mixer).
+AJAExport NTV2AudioSystem NTV2DeviceGetHostAudioSystem(const NTV2DeviceID inDeviceID);	///< @return	The NTV2AudioSystem used for host audio support for the given device (or NTV2_AUDIOSYSTEM_INVALID if there is no host audio system).
+AJAExport bool NTV2DeviceROMHasBankSelect (const NTV2DeviceID inDeviceID);	///< @return	True if the device has SPI flash that incorporates bank selection.
 
 #if !defined (NTV2_DEPRECATE_14_3)
 	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoFreezeOutput (const NTV2DeviceID inDeviceID));	///< @deprecated	This function is obsolete.
