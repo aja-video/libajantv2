@@ -3842,12 +3842,22 @@ static void SetupBoard(ULWord deviceNumber)
 	{
 		ULWord baseAddress		= 0xFC0000;	//Fixed offset #defined in ntv2konaserializer.cpp
 		ULWord serialRegister	= kRegReserved54;
+		bool hasExtendedCommandSupport = false;
+		ULWord deviceID = 0;
+		WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, READID_COMMAND, NO_MASK, NO_SHIFT);
+		WaitForFlashNOTBusy(deviceNumber);
+		deviceID = ReadRegister(deviceNumber, kRegXenaxFlashDOUT, NO_MASK, NO_SHIFT);
+
+		if(deviceID == 0x0020ba20)//Micron MT25QL512ABB
+			hasExtendedCommandSupport = true;
 
         if(NTV2DeviceROMHasBankSelect(ntv2pp->_DeviceID))
 		{
             ULWord bankSelectNumber = NTV2DeviceHasSPIv5(ntv2pp->_DeviceID) ? 0x03 : 0x01;
+			WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND, NO_MASK, NO_SHIFT);
+			WaitForFlashNOTBusy(deviceNumber);
 			WriteRegister(deviceNumber, kRegXenaxFlashAddress, bankSelectNumber, NO_MASK, NO_SHIFT);
-			WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, 0x17, NO_MASK, NO_SHIFT);
+			WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND, NO_MASK, NO_SHIFT);
 
 			WaitForFlashNOTBusy(deviceNumber);
 		}
@@ -3857,7 +3867,7 @@ static void SetupBoard(ULWord deviceNumber)
 			ULWord serialNumber = 0;
 
 			WriteRegister(deviceNumber, kRegXenaxFlashAddress, baseAddress, NO_MASK, NO_SHIFT);
-			WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, 0x0B, NO_MASK, NO_SHIFT);
+			WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, READFAST_COMMAND, NO_MASK, NO_SHIFT);
 
 			WaitForFlashNOTBusy(deviceNumber);
 
@@ -3869,8 +3879,10 @@ static void SetupBoard(ULWord deviceNumber)
 		{
 			ULWord bankSelectNumber = 0x00;
 
+			WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND, NO_MASK, NO_SHIFT);
+			WaitForFlashNOTBusy(deviceNumber);
 			WriteRegister(deviceNumber, kRegXenaxFlashAddress, bankSelectNumber, NO_MASK, NO_SHIFT);
-			WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, 0x17, NO_MASK, NO_SHIFT);
+			WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND, NO_MASK, NO_SHIFT);
 
 			WaitForFlashNOTBusy(deviceNumber);
 		}
