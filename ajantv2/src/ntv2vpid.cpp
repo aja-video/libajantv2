@@ -10,7 +10,7 @@
 #include "ntv2debug.h"
 #include "ntv2utils.h"
 #include "ntv2registerexpert.h" //	For YesNo macro
-#include <string.h>
+#include <sstream>
 
 using namespace std;
 

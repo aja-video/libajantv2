@@ -21,19 +21,22 @@
 #include "ntv2utils.h"
 #include "ntv2vpid.h"
 #include "ntv2version.h"
+#include "ntv2testpatterngen.h"
 #include "ajabase/system/debug.h"
 #include <vector>
 #include <algorithm>
 #include <iomanip>
 #include <iterator>    //      For std::inserter
 
+using namespace std;
+
 static bool gVerboseOutput = false;
 
-#define	LOGERR(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Error,		__FUNCTION__ << ":  " << __x__)
-#define	LOGWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
-#define	LOGNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":  " << __x__)
-#define	LOGINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
-#define	LOGDBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
+#define	LOGERR(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Error,		AJAFUNC << ":  " << __x__)
+#define	LOGWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Warning,	AJAFUNC << ":  " << __x__)
+#define	LOGNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Notice,	AJAFUNC << ":  " << __x__)
+#define	LOGINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Info,		AJAFUNC << ":  " << __x__)
+#define	LOGDBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Debug,		AJAFUNC << ":  " << __x__)
 
 #if 0
 template
@@ -46,6 +49,9 @@ TEST_SUITE("filename" * doctest::description("functions in streams/common/filena
 
 } //filename
 #endif
+
+typedef	vector<NTV2VANCMode>	NTV2VANCModes;
+
 
 void ntv2debug_marker() {}
 TEST_SUITE("ntv2debug" * doctest::description("ntv2 debug string functions")) {
@@ -2173,7 +2179,6 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 	{
 		typedef	std::vector<NTV2Standard>			NTV2Stds;
 		typedef	NTV2Stds::const_iterator		NTV2StdsConstIter;
-		typedef	std::vector<NTV2VANCMode>			NTV2VANCModes;
 		const NTV2Stds	standards = {	NTV2_STANDARD_1080, NTV2_STANDARD_720, NTV2_STANDARD_525, NTV2_STANDARD_625,
 											NTV2_STANDARD_1080p, NTV2_STANDARD_2K, NTV2_STANDARD_2Kx1080p, NTV2_STANDARD_2Kx1080i,
 											NTV2_STANDARD_3840x2160p, NTV2_STANDARD_4096x2160p, NTV2_STANDARD_3840HFR,
@@ -2940,3 +2945,68 @@ TEST_SUITE("signal router" * doctest::description("CNTV2SignalRouter & RoutingEx
 		CHECK(CNTV2SignalRouter::IsHDMIOutWidgetType(NTV2WidgetType_HDMIInV2) == false);
 	}
 }
+
+
+void testpatterngenmarker() {}
+TEST_SUITE("TestPatternGen" * doctest::description("NTV2TestPatternGen tests"))
+{
+	TEST_CASE("Permutations")
+	{
+		static const NTV2PixelFormats pixFmtsToTest = {	NTV2_FBF_10BIT_YCBCR, NTV2_FBF_8BIT_YCBCR, NTV2_FBF_ARGB,
+														NTV2_FBF_RGBA, NTV2_FBF_10BIT_RGB, NTV2_FBF_8BIT_YCBCR_YUY2,
+														NTV2_FBF_ABGR, NTV2_FBF_10BIT_DPX,
+#if defined(_DEBUG)
+														NTV2_FBF_10BIT_YCBCR_DPX,	//	crashes!
+#endif	//	_DEBUG
+														NTV2_FBF_10BIT_DPX_LE, NTV2_FBF_24BIT_RGB, NTV2_FBF_24BIT_BGR,
+														NTV2_FBF_48BIT_RGB};
+		static const NTV2StandardSet standardsToTest = {/*NTV2_STANDARD_1080,*/ NTV2_STANDARD_720, NTV2_STANDARD_525,
+														NTV2_STANDARD_625, NTV2_STANDARD_1080p, /*NTV2_STANDARD_2K,*/
+														NTV2_STANDARD_2Kx1080p, /*NTV2_STANDARD_2Kx1080i,*/
+														NTV2_STANDARD_3840x2160p, NTV2_STANDARD_4096x2160p,
+														NTV2_STANDARD_7680, NTV2_STANDARD_8192};
+		static const NTV2TestPatternNames tpNames(NTV2TestPatternGen::getTestPatternNames());
+
+		NTV2Buffer fb;
+		//	For each possible raster dimension (via video standard)...
+		for (NTV2StandardSetConstIter stIt(standardsToTest.begin());  stIt != standardsToTest.end();  ++stIt)
+		{	const NTV2Standard st(*stIt);
+			//	For this Standard, get a list of permissible VANC modes (off, tall, taller?)
+			NTV2GeometrySet fgs (::GetRelatedGeometries(::GetGeometryFromStandard(st)));
+			NTV2VANCModes vms;
+			if (fgs.empty())
+				vms.push_back(NTV2_VANCMODE_OFF);
+			else for (NTV2GeometrySetConstIter fgIt(fgs.begin());  fgIt != fgs.end();  ++fgIt)
+				vms.push_back(::GetVANCModeForGeometry(*fgIt));
+
+			//	For each possible pixel format...
+			for (NTV2PixelFormatsConstIter pfIt(pixFmtsToTest.begin());  pfIt != pixFmtsToTest.end();  ++pfIt)
+			{	const NTV2PixelFormat pf(*pfIt);
+
+				//	For each VANC mode...
+				for (size_t vmNdx(0);  vmNdx < vms.size();  vmNdx++)
+				{	const NTV2VANCMode vm(vms.at(vmNdx));
+					NTV2FormatDesc fd (st, pf, vm);
+					CHECK(fd.IsValid());
+					//	Allocate a video buffer for this raster size...
+					CHECK(fb.Allocate(fd.GetTotalBytes()));
+
+					//	For each test pattern...
+					for (size_t ndx(0);  ndx < tpNames.size();  ndx++)
+					{	const string tpName (tpNames.at(ndx));
+						const NTV2TestPatternSelect tpID(NTV2TestPatternGen::findTestPatternByName(tpName));
+						if (NTV2_IS_12B_PATTERN(tpID)  &&  !NTV2_IS_FBF_12BIT_RGB(pf))
+							continue;	//	skip -- this test pattern won't work with this pixel format
+						if (!NTV2TestPatternGen::canDrawTestPattern (tpID, fd))
+							continue;	//	skip -- it admits it can't do this
+
+						//	Draw the test pattern into the buffer...
+						cout << fd << ": '" << tpName << "'" << endl;
+						NTV2TestPatternGen gen;
+						CHECK(gen.DrawTestPattern (tpName, fd, fb));
+					}	//	for each test pattern
+				}	//	for each VANC mode
+			}	//	for each pixel format
+		}	//	for each video standard
+	}	//	TEST_CASE("Permutations")
+}	//	TEST_SUITE("TestPatternGen")

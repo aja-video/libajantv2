@@ -568,9 +568,7 @@ bool NTV2Buffer::GetU8s (UByteSequence & outUint8s, const size_t inU8Offset, con
 	{
 		outUint8s.reserve(maxSize);
 		for (size_t ndx(0);	 ndx < maxSize;	 ndx++)
-		{
 			outUint8s.push_back(*pU8++);
-		}
 	}
 	catch (...)
 	{
@@ -956,28 +954,26 @@ ostream & operator << (ostream & inOStream, const NTV2VideoFormatSet & inFormats
 
 
 //	Implementation of NTV2FrameBufferFormatSet's ostream writer...
-ostream & operator << (ostream & inOStream, const NTV2FrameBufferFormatSet & inFormats)
+ostream & operator << (ostream & inOStream, const NTV2PixelFormats & inFormats)
 {
-	NTV2FrameBufferFormatSetConstIter	iter	(inFormats.begin ());
+	NTV2PixelFormatsConstIter iter(inFormats.begin());
+	inOStream	<< inFormats.size()
+				<< (inFormats.size() == 1 ? " pixel format:  " : " pixel formats:	");
 
-	inOStream	<< inFormats.size ()
-				<< (inFormats.size () == 1 ? " pixel format:  " : " pixel formats:	");
-
-	while (iter != inFormats.end ())
+	while (iter != inFormats.end())
 	{
-		inOStream << ::NTV2FrameBufferFormatToString (*iter);
-		inOStream << (++iter == inFormats.end ()  ?	 ""	 :	", ");
+		inOStream << ::NTV2FrameBufferFormatToString(*iter);
+		inOStream << (++iter == inFormats.end()  ?	 ""	 :	", ");
 	}
-
 	return inOStream;
 
 }	//	operator <<
 
 
-NTV2FrameBufferFormatSet & operator += (NTV2FrameBufferFormatSet & inOutSet, const NTV2FrameBufferFormatSet inFBFs)
+NTV2PixelFormats & operator += (NTV2PixelFormats & inOutSet, const NTV2PixelFormats inFBFs)
 {
-	for (NTV2FrameBufferFormatSetConstIter iter (inFBFs.begin ());	iter != inFBFs.end ();	++iter)
-		inOutSet.insert (*iter);
+	for (NTV2PixelFormatsConstIter iter(inFBFs.begin());  iter != inFBFs.end();  ++iter)
+		inOutSet.insert(*iter);
 	return inOutSet;
 }
 
@@ -1106,26 +1102,25 @@ bool NTV2DeviceGetSupportedVideoFormats (const NTV2DeviceID inDeviceID, NTV2Vide
 }	//	NTV2DeviceGetSupportedVideoFormats
 
 //	This needs to be moved into a C++ compatible "device features" module:
-bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2FrameBufferFormatSet & outFormats)
+bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2PixelFormats & outFormats)
 {
-	bool	isOkay	(true);
-
-	outFormats.clear ();
+	bool isOkay(true);
+	outFormats.clear();
 
 	for (NTV2PixelFormat pixelFormat(NTV2_FBF_FIRST);  pixelFormat < NTV2_FBF_LAST;  pixelFormat = NTV2PixelFormat(pixelFormat+1))
 		if (::NTV2DeviceCanDoFrameBufferFormat (inDeviceID, pixelFormat))
 			try
 			{
-				outFormats.insert (pixelFormat);
+				outFormats.insert(pixelFormat);
 			}
 			catch (const std::bad_alloc &)
 			{
 				isOkay = false;
-				outFormats.clear ();
+				outFormats.clear();
 				break;
 			}
 
-	NTV2_ASSERT ((isOkay && !outFormats.empty () ) || (!isOkay && outFormats.empty () ));
+	NTV2_ASSERT ((isOkay && !outFormats.empty() ) || (!isOkay && outFormats.empty() ));
 	return isOkay;
 
 }	//	NTV2DeviceGetSupportedPixelFormats

@@ -109,6 +109,8 @@ class AJAExport NTV2TestPatternGen
 			@param[in]	inName	Specifies the "web color" name. The search is done case-insensitively.
 			@note		"Black" and "White" are not returned, as these are available as ordinary
 						test patterns NTV2_TestPatt_Black and NTV2_TestPatt_White, respectively.
+			@bug		As currently implemented and documented, this function only returns
+						8-bit deep color values.
 		**/
 		static ULWord					findRGBColorByName (const std::string & inName);	//	New in SDK 16.0
 

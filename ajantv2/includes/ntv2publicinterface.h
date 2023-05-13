@@ -9145,6 +9145,8 @@ typedef enum
 
 			typedef std::set <NTV2FrameBufferFormat>			NTV2FrameBufferFormatSet;			///< @brief A set of distinct NTV2FrameBufferFormat values.
 			typedef NTV2FrameBufferFormatSet::const_iterator	NTV2FrameBufferFormatSetConstIter;	///< @brief A handy const iterator for iterating over an NTV2FrameBufferFormatSet.
+			typedef NTV2FrameBufferFormatSet NTV2PixelFormats;	//	New in SDK 17.0
+			typedef NTV2FrameBufferFormatSetConstIter NTV2PixelFormatsConstIter;	//	New in SDK 17.0
 
 			typedef std::set <NTV2FrameGeometry>				NTV2GeometrySet;					///< @brief A set of distinct NTV2FrameGeometry values.
 			typedef NTV2GeometrySet::const_iterator				NTV2GeometrySetConstIter;			///< @brief A handy const iterator for iterating over an NTV2GeometrySet.
@@ -9216,7 +9218,7 @@ typedef enum
 				@return		True if successful;	 otherwise false.
 				@todo	This needs to be moved to a C++ compatible "device features" module.
 			**/
-			AJAExport bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2FrameBufferFormatSet & outFormats);
+			AJAExport bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2PixelFormats & outFormats);
 
 			/**
 				@brief		Prints the given ::NTV2FrameBufferFormatSet contents into the given output stream.
@@ -9224,7 +9226,7 @@ typedef enum
 				@param[in]	inFormats	Specifies the set of pixel formats to be streamed.
 				@return		The "inOStream" that was specified.
 			**/
-			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2FrameBufferFormatSet & inFormats);
+			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2PixelFormats & inFormats);
 
 			/**
 				@brief		Appends the given ::NTV2FrameBufferFormatSet contents into the given set.
@@ -9232,7 +9234,7 @@ typedef enum
 				@param[in]	inSet		Specifies the set whose contents will be appended.
 				@return		A reference to the modified set.
 			**/
-			AJAExport NTV2FrameBufferFormatSet & operator += (NTV2FrameBufferFormatSet & inOutSet, const NTV2FrameBufferFormatSet inSet);
+			AJAExport NTV2PixelFormats & operator += (NTV2PixelFormats & inOutSet, const NTV2PixelFormats inSet);
 
 			/**
 				@brief	Returns a set of distinct ::NTV2Standard values supported on the given device.

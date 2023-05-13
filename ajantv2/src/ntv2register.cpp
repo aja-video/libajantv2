@@ -841,7 +841,12 @@ bool CNTV2Card::GetVideoVOffset (int & outVOffset, const UWord inOutputSpigot)
 	
 	bool CNTV2Card::GetActiveFrameDimensions (NTV2FrameDimensions & outFrameDimensions, const NTV2Channel inChannel)
 	{
-		outFrameDimensions = GetActiveFrameDimensions(inChannel);
+		NTV2Standard st(NTV2_STANDARD_INVALID);	NTV2VANCMode vm(NTV2_VANCMODE_INVALID);
+		outFrameDimensions.Reset();
+		if (IsXilinxProgrammed()  &&  GetStandard(st, inChannel)  &&  GetVANCMode(vm, inChannel))
+		{	const NTV2FormatDescriptor fd (st, NTV2_FBF_10BIT_YCBCR, vm);
+			outFrameDimensions.Set (fd.GetRasterWidth(), fd.GetRasterHeight());
+		}
 		return outFrameDimensions.IsValid();
 	}
 	
@@ -2408,13 +2413,18 @@ bool CNTV2Card::GetDisabledChannels (NTV2ChannelSet & outChannels)
 
 	bool CNTV2Card::GetPCIAccessFrame (const NTV2Channel inChannel, ULWord & outValue)
 	{
-		return !IS_CHANNEL_INVALID(inChannel)  &&  ReadRegister (gChannelToPCIAccessFrameRegNum[inChannel], outValue);
+		return !IS_CHANNEL_INVALID(inChannel)
+				&&  ReadRegister (gChannelToPCIAccessFrameRegNum[inChannel], outValue);
 	}
 
 	bool CNTV2Card::FlipFlopPage (const NTV2Channel inCh)
 	{
 		ULWord nextFrm(0), outFrm(0);
-		return !IS_CHANNEL_INVALID(inCh)  &&  GetPCIAccessFrame(inCh, nextFrm)  &&  GetOutputFrame(inCh, outFrm)  &&  SetOutputFrame(inCh, nextFrm)  &&  SetPCIAccessFrame(inCh, outFrm);
+		return !IS_CHANNEL_INVALID(inCh)
+				&&  ReadRegister(gChannelToPCIAccessFrameRegNum[inCh], nextFrm) // GetPCIAccessFrame(inCh, nextFrm)
+				&&  GetOutputFrame(inCh, outFrm)
+				&&  SetOutputFrame(inCh, nextFrm)
+				&&  WriteRegister(gChannelToPCIAccessFrameRegNum[inCh], outFrm) && WaitForOutputVerticalInterrupt(inCh); // SetPCIAccessFrame(inCh, outFrm);
 	}
 #endif	//	!defined (NTV2_DEPRECATE_16_2)
 
@@ -3517,10 +3527,11 @@ bool CNTV2Card::GetMixerRGBRange (const UWord inWhichMixer, NTV2MixerRGBRange & 
 	// Output:	bool status and modifies ULWord **pBaseAddress
 	bool CNTV2Card::GetBaseAddress (NTV2Channel channel, ULWord **pBaseAddress)
 	{
-		ULWord ulFrame;
-		if (IS_CHANNEL_INVALID (channel))
+		if (IS_CHANNEL_INVALID(channel))
 			return false;
-		GetPCIAccessFrame (channel, ulFrame);
+		ULWord ulFrame(0);
+		if (!ReadRegister(gChannelToPCIAccessFrameRegNum[channel], ulFrame))  //  GetPCIAccessFrame(channel, ulFrame);
+			return false;
 		if (ulFrame > GetNumFrameBuffers())
 			ulFrame = 0;
 	
