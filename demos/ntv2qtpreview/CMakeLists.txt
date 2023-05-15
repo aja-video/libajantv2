@@ -80,11 +80,11 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${PROJECT_NAME}
         app.ico)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    aja_make_version_plist(ntv2qtpreview
-        ${AJA_PRODUCT_NAME}
+    aja_versionize_mac(ntv2qtpreview
+        com.aja.ntv2qtpreview
         "AjLg"
-        ${CMAKE_MODULE_PATH}/bundle/mac/Info.plist.in
-        ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
+        "APPL"
+        "ntv2qtpreview"
         app.icns)
 endif()
 if (AJA_CODE_SIGN)
