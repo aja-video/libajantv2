@@ -41,11 +41,13 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(TARGET_COMPILE_DEFS
         -D_MBCS
         -DNOMINMAX)
-    aja_versionize(
+    aja_versionize_windows(
         ${PROJECT_NAME}
         ${PROJECT_NAME}
-        ${PROJECT_NAME}
-        app.ico)
+        app.ico
+        "ntv2qtmultiinput.exe"
+        ${CMAKE_MODULE_PATH}/bundle/windows/win-ver.rc.in
+        win-ver.rc)
     list(APPEND NTV2QTMULTIINPUT_SOURCES
         win-ver.rc)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
