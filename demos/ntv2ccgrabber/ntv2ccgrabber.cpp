@@ -6,8 +6,8 @@
 **/
 
 #include "ntv2ccgrabber.h"
-#include "ajacc/includes/ntv2captionrenderer.h"
-#include "ajacc/includes/ntv2line21captioner.h"
+#include "ntv2captionrenderer.h"
+#include "ntv2line21captioner.h"
 #include "ajaanc/includes/ancillarylist.h"
 #include "ajaanc/includes/ancillarydata_cea608_line21.h"
 #include "ajaanc/includes/ancillarydata_cea608_vanc.h"

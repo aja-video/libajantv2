@@ -14,6 +14,9 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+set(AJA_DEMO_COMMON_ROOT
+    ${CMAKE_CURRENT_SOURCE_DIR}/../)
+
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
 	${AJA_LIBRARIES_ROOT}
@@ -69,7 +72,7 @@ add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
 add_dependencies(${PROJECT_NAME} ${TARGET_DEPS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS})
-target_compile_definitions(${PROJECT_NAME PUBLIC ${TARGET_COMPILE_DEFS})
+target_compile_definitions(${PROJECT_NAME} PUBLIC ${TARGET_COMPILE_DEFS})
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set_target_properties(ntv2qtmultiinput PROPERTIES WIN32_EXECUTABLE TRUE)
