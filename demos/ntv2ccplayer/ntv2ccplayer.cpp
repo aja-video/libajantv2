@@ -1409,18 +1409,25 @@ void NTV2CCPlayer::GenerateCaptions (const NTV2Line21Channel inCCChannel)
 	CaptionChanGenMapCIter	iter(mConfig.fCapChanGenConfigs.find(inCCChannel));
 	NTV2_ASSERT(iter != mConfig.fCapChanGenConfigs.end());
 
-	const CCGeneratorConfig &	ccGeneratorConfig	(iter->second);
-	const NTV2Line21Mode		captionMode			(ccGeneratorConfig.fCaptionMode);		//	My caption mode (paint-on, pop-on, roll-up, etc.)
-	const double				charsPerMinute		(ccGeneratorConfig.fCharsPerMinute);	//	Desired caption rate (in characters per minute)
-	const bool					newlinesMakeNewRows	(ccGeneratorConfig.fNewLinesAreNewRows);//	Newline characters cause row breaks?
-	const AtEndAction			endAction			(ccGeneratorConfig.fEndAction);			//	What to do after last file is done playing
-	NTV2StringList				filesToPlay			(ccGeneratorConfig.fFilesToPlay);		//	List of text files to play
-	UWord						linesWanted			(3);									//	Desired number of lines to Enqueue in one shot (min 1, max 4)
-	bool						quitThisGenerator	(false);								//	Set true to exit this function/thread
-	const UWord					paintPopTopRow		(9);									//	PaintOn/PopOn only:	top display row
-	const UWord					paintPopMaxNumRows	(15 - paintPopTopRow + 1);				//	PaintOn/PopOn only:	number of rows to fill to bottom
-	UWord						lineTally			(0);									//	PaintOn/PopOn only:	used to calculate display row
-	const string				ccChannelStr		(::NTV2Line21ChannelToStr(inCCChannel));
+	const CCGenConfig &		ccGenConfig			(iter->second);
+	const NTV2Line21Mode	captionMode			(ccGenConfig.fCaptionMode);			//	My caption mode (paint-on, pop-on, roll-up, etc.)
+	const double			charsPerMinute		(ccGenConfig.fCharsPerMinute);		//	Desired caption rate (in characters per minute)
+	const bool				newlinesMakeNewRows	(ccGenConfig.fNewLinesAreNewRows);	//	Newline characters cause row breaks?
+	const AtEndAction		endAction			(ccGenConfig.fEndAction);			//	What to do after last file is done playing
+	NTV2StringList			filesToPlay			(ccGenConfig.fFilesToPlay);			//	List of text files to play
+	UWord					linesWanted			(3);								//	Desired number of lines to Enqueue in one shot (min 1, max 4)
+	bool					quitThisGenerator	(false);							//	Set true to exit this function/thread
+	const UWord				paintPopTopRow		(9);								//	PaintOn/PopOn only:	top display row
+	const UWord				paintPopMaxNumRows	(15 - paintPopTopRow + 1);			//	PaintOn/PopOn only:	number of rows to fill to bottom
+	UWord					lineTally			(0);								//	PaintOn/PopOn only:	used to calculate display row
+	const string			ccChannelStr		(::NTV2Line21ChannelToStr(inCCChannel));
+
+	static const NTV2Line21Attrs sBlkYelSemi	(NTV2_CC608_Black,	NTV2_CC608_Yellow,	NTV2_CC608_SemiTransparent);
+	static const NTV2Line21Attrs sBluCynItal	(NTV2_CC608_Blue,	NTV2_CC608_Cyan,	NTV2_CC608_Opaque,			/*italic*/true);
+	static const NTV2Line21Attrs sRedBlkFlas	(NTV2_CC608_Red,	NTV2_CC608_Black,	NTV2_CC608_Opaque,			/*italic*/false,	/*UL*/false,	/*flash*/true);
+	static const NTV2Line21Attrs sBluGrnSemiUL	(NTV2_CC608_Blue,	NTV2_CC608_Green,	NTV2_CC608_SemiTransparent, /*italic*/false,	/*UL*/true);
+	static const NTV2Line21Attrs sMgnCynItal	(NTV2_CC608_Magenta,NTV2_CC608_Cyan,	NTV2_CC608_SemiTransparent,	/*italic*/true);
+	static const NTV2Line21Attrs sAttrs[]	= {	NTV2Line21Attrs(), sBlkYelSemi, sBluCynItal, sRedBlkFlas, sBluGrnSemiUL, sMgnCynItal};
 
 	PLNOTE("Started " << ccChannelStr << " generator thread");
 	if (IsLine21TextChannel(inCCChannel)  ||  !IsLine21RollUpMode(captionMode))
@@ -1455,25 +1462,37 @@ void NTV2CCPlayer::GenerateCaptions (const NTV2Line21Channel inCCChannel)
 							cout << str << endl;	//	Echo caption lines (if not emitting stats)
 						PLDBG(ccChannelStr << " caption line " << DEC(lineTally+1) << ": '" << str << "'");
 
-						//	For now, only the 608 encoder generates caption data.
-						//	Someday we'll generate captions using 708-specific features (e.g., windowing, etc.).
+						const NTV2Line21Attrs & attrs (sAttrs[lineTally % 6]);	//	Cycle thru different display attributes
 
-						//	Convert the UTF-8 string into a string containing CEA-608 byte sequences, which is
-						//	what the Enqueue*Message functions accept (except for EnqueueTextMessage)...
+						//	For now, only the 608 encoder generates caption data.
+						//	Someday we may generate captions using 708-specific features (e.g., windowing, etc.).
+
+						//	Convert the UTF-8 string into a string containing CEA-608 byte codes expected
+						//	by Enqueue*Message functions (except EnqueueTextMessage, which accepts UTF-8)...
 						if (!IsLine21TextChannel(inCCChannel))
 							str = CUtf8Helpers::Utf8ToCEA608String(str, inCCChannel);
 						switch (captionMode)
 						{
 							case NTV2_CC608_CapModePopOn:
-								m608Encoder->EnqueuePopOnMessage (str, inCCChannel, lineTally % paintPopMaxNumRows + paintPopTopRow, 1);
+								m608Encoder->EnqueuePopOnMessage (str, inCCChannel,
+																	/*row*/lineTally % paintPopMaxNumRows + paintPopTopRow,
+																	/*col*/1,
+																	/*attrs*/attrs);
 								break;
 							case NTV2_CC608_CapModeRollUp2:
 							case NTV2_CC608_CapModeRollUp3:
 							case NTV2_CC608_CapModeRollUp4:
-								m608Encoder->EnqueueRollUpMessage (str, captionMode, inCCChannel);
+								m608Encoder->EnqueueRollUpMessage (str, captionMode, inCCChannel,
+																	/*row*/0, /*col*/0,
+																	/*attrs*/attrs);
 								break;
 							case NTV2_CC608_CapModePaintOn:
-								m608Encoder->EnqueuePaintOnMessage (str, lineTally % paintPopMaxNumRows == 0, inCCChannel, lineTally % paintPopMaxNumRows + paintPopTopRow, 1);
+								m608Encoder->EnqueuePaintOnMessage (str,
+																	/*eraseFirst*/lineTally % paintPopMaxNumRows == 0,
+																	/*chan*/inCCChannel,
+																	/*row*/lineTally % paintPopMaxNumRows + paintPopTopRow,
+																	/*col*/1,
+																	/*attrs*/attrs);
 								break;
 							default:
 								NTV2_ASSERT (IsLine21TextChannel(inCCChannel));
@@ -1809,15 +1828,16 @@ void NTV2CCPlayer::GetStatus (	size_t & outMessagesQueued,	size_t & outBytesQueu
 								size_t & outTotMsgsDeq,		size_t & outTotBytesDeq,
 								size_t & outMaxQueDepth,	size_t & outDroppedFrames) const
 {
+	mDevice.WaitForOutputVerticalInterrupt (NTV2_CHANNEL1, 60);
 	if (m608Encoder)
 	{
-		outMessagesQueued	= m608Encoder->GetQueuedMessageCount ();
-		outBytesQueued		= m608Encoder->GetQueuedByteCount ();
-		outTotMsgsEnq		= m608Encoder->GetEnqueueMessageTally ();
-		outTotBytesEnq		= m608Encoder->GetEnqueueByteTally ();
-		outTotMsgsDeq		= m608Encoder->GetDequeueMessageTally ();
-		outTotBytesDeq		= m608Encoder->GetDequeueByteTally ();
-		outMaxQueDepth		= m608Encoder->GetHighestQueueDepth ();
+		outMessagesQueued	= m608Encoder->GetQueuedMessageCount();
+		outBytesQueued		= m608Encoder->GetQueuedByteCount();
+		outTotMsgsEnq		= m608Encoder->GetEnqueueMessageTally();
+		outTotBytesEnq		= m608Encoder->GetEnqueueByteTally();
+		outTotMsgsDeq		= m608Encoder->GetDequeueMessageTally();
+		outTotBytesDeq		= m608Encoder->GetDequeueByteTally();
+		outMaxQueDepth		= m608Encoder->GetHighestQueueDepth();
 	}
 	else
 		outMessagesQueued = outBytesQueued = outTotMsgsEnq = outTotBytesEnq = outTotMsgsDeq = outTotBytesDeq = outMaxQueDepth = 0;
