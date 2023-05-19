@@ -11,6 +11,8 @@ if (NOT CMAKE_MODULE_PATH)
     set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 endif()
 
+set(AJANTV2_VERSION_FILENAME ${CMAKE_CURRENT_SOURCE_DIR}/VERSION)
+
 include(GNUInstallDirs)
 include(CMakeOptions)
 include(CompilerFlags)
