@@ -5,10 +5,10 @@ if (NOT AJA_QT_ENABLED)
     return()
 endif()
 
-find_package(Qt5 HINTS ${AJA_QT_DIR} COMPONENTS Core REQUIRED)
-set(QT_LIBRARIES Qt5::Core)
+include(QtHelpers)
+aja_find_qt_modules(Core)
 
-list(APPEND TARGET_LINK_LIBS ${QT_LIBRARIES})
+list(APPEND TARGET_LINK_LIBS ${TARGET_QT_LIBS})
 
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../

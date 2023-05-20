@@ -4,18 +4,16 @@
 	@brief		Implements the AJASystemInfoImpl class on the Mac platform.
 	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
-
+#include "ajabase/system/mac/infoimpl.h"
 #include "ajabase/system/system.h"
 #include "ajabase/system/info.h"
-#include "ajabase/system/mac/infoimpl.h"
-
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <sys/utsname.h>
 #include <mach/mach.h>
-
 #import <Foundation/Foundation.h>
 #include <Availability.h>
+#include <sstream>
 
 static AJAStatus
 aja_sysctl(const char *name, std::string &result)

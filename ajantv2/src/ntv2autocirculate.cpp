@@ -6,7 +6,6 @@
 **/
 
 #include "ntv2card.h"
-#include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
 #include "ntv2rp188.h"
 #include "ntv2endian.h"
@@ -15,6 +14,7 @@
 #include "ajaanc/includes/ancillarylist.h"
 #include "ajaanc/includes/ancillarydata_timecode_atc.h"
 #include "ajabase/common/timecode.h"
+#include "ajabase/common/common.h"
 #include <iomanip>
 #include <assert.h>
 #include <algorithm>
@@ -477,10 +477,7 @@ bool   CNTV2Card::GetFrameStamp (NTV2Crosspoint channelSpec, ULWord frameNum, FR
 	if (! _boardOpened )	return false;
 
 	// Fill in our OS independent data structure 
-	AUTOCIRCULATE_DATA autoCircData;
-	::memset(&autoCircData, 0, sizeof(AUTOCIRCULATE_DATA));
-	autoCircData.eCommand	 = eGetFrameStamp;
-	autoCircData.channelSpec = channelSpec;
+	AUTOCIRCULATE_DATA autoCircData (eGetFrameStamp, channelSpec);
 	autoCircData.lVal1		 = LWord(frameNum);
 	autoCircData.pvVal1		 = PVOID(pFrameStamp);
 
@@ -511,10 +508,7 @@ bool   CNTV2Card::GetAutoCirculate(NTV2Crosspoint channelSpec, AUTOCIRCULATE_STA
 	autoCirculateStatus -> channelSpec = channelSpec;
 	
 	// Fill in our OS independent data structure 
-	AUTOCIRCULATE_DATA autoCircData;
-	memset(&autoCircData, 0, sizeof(AUTOCIRCULATE_DATA));
-	autoCircData.eCommand	 = eGetAutoCirc;
-	autoCircData.channelSpec = channelSpec;
+	AUTOCIRCULATE_DATA autoCircData (eGetAutoCirc, channelSpec);
 	autoCircData.pvVal1		 = PVOID(autoCirculateStatus);
 
 	// Call the OS specific method

@@ -8,12 +8,7 @@
 #ifndef NTV2NUBACCESS_H
 #define NTV2NUBACCESS_H
 
-#include "ajaexport.h"
-#include "ntv2nubtypes.h"
 #include "ntv2utils.h"		//	NTV2StringList
-#include "ajabase/system/lock.h"
-#include "ajabase/system/thread.h"
-#include "ajabase/system/systemtime.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -228,6 +223,15 @@ class AJAExport NTV2RPCClientAPI
 													const ULWord inSegmentHostPitch,	const ULWord inSegmentCardPitch,
 													const bool inSynchronous);
 		virtual bool	NTV2MessageRemote	(NTV2_HEADER *	pInMessage);
+		///@}
+
+		/**
+			@name	Device Features
+		**/
+		///@{
+		virtual bool	NTV2GetBoolParamRemote (const ULWord inParamID,  ULWord & outValue);	//	New in SDK 17.0
+		virtual bool	NTV2GetNumericParamRemote (const ULWord inParamID,  ULWord & outValue);	//	New in SDK 17.0
+		virtual bool	NTV2GetSupportedRemote (const ULWord inEnumsID, ULWordSet & outSupported);	//	New in SDK 17.0
 		///@}
 
 		/**

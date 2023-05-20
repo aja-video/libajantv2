@@ -9,7 +9,11 @@
 
 #ifndef AJA_DEBUGSHARE_H
 #define AJA_DEBUGSHARE_H
+#include "ajabase/common/export.h"
 #include <stddef.h>
+#include <stdint.h>
+#include <string>
+#include <vector>
 
 /**
  *	The list of debug message severity codes.

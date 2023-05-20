@@ -5,8 +5,9 @@
 	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
-#include "ajabase/system/event.h"
 #include "ajabase/system/windows/eventimpl.h"
+#include "ajabase/system/event.h"
+#include "ajabase/system/debug.h"
 
 #define MAX_EVENTS 64
 

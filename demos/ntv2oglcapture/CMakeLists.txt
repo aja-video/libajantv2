@@ -3,8 +3,9 @@ project(ntv2oglcapture)
 find_package(OpenGL REQUIRED)
 set(OPENGL_LIBRARIES OpenGL::GLU)
 
-find_package(Qt5 HINTS ${AJA_QT_DIR} COMPONENTS Core OpenGL Widgets REQUIRED)
-set(QT_LIBRARIES Qt5::Core Qt5::OpenGL Qt5::Widgets)
+include(QtHelpers)
+aja_find_qt_modules(Core OpenGL Widgets)
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -16,7 +17,7 @@ set(TARGET_INCLUDE_DIRS
 )
 
 list(APPEND TARGET_LINK_LIBS
-	${QT_LIBRARIES}
+    ${TARGET_QT_LIBS}
 	${OPENGL_LIBRARIES})
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")

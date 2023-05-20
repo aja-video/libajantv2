@@ -5,15 +5,17 @@
 	@copyright	(C) 2016-2022 AJA Video Systems, Inc.
  **/
 #include "ntv2registerexpert.h"
-#include "ntv2devicefeatures.h"
+#include "ntv2devicefeatures.hh"
 #include "ntv2utils.h"
 #include "ntv2debug.h"
 #include "ntv2endian.h"
 #include "ntv2vpid.h"
 #include "ntv2bitfile.h"
+#include "ntv2signalrouter.h"
 #include "ajabase/common/common.h"
 #include "ajabase/system/lock.h"
 #include "ajabase/common/ajarefptr.h"
+#include "ajabase/system/debug.h"
 #include <algorithm>
 #include <sstream>
 #include <iterator>
@@ -212,6 +214,7 @@ private:
 		DefineRegister (kRegCh6Control,			"", mDecodeChannelControl,		READWRITE,	kRegClass_NULL,		kRegClass_Channel6, kRegClass_NULL);
 		DefineRegister (kRegCh7Control,			"", mDecodeChannelControl,		READWRITE,	kRegClass_NULL,		kRegClass_Channel7, kRegClass_NULL);
 		DefineRegister (kRegCh8Control,			"", mDecodeChannelControl,		READWRITE,	kRegClass_NULL,		kRegClass_Channel8, kRegClass_NULL);
+	#if 1	//	PCIAccessFrame regs are obsolete
 		DefineRegister (kRegCh1PCIAccessFrame,	"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel1, kRegClass_NULL);
 		DefineRegister (kRegCh2PCIAccessFrame,	"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel2, kRegClass_NULL);
 		DefineRegister (kRegCh3PCIAccessFrame,	"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel3, kRegClass_NULL);
@@ -220,22 +223,23 @@ private:
 		DefineRegister (kRegCh6PCIAccessFrame,	"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel6, kRegClass_NULL);
 		DefineRegister (kRegCh7PCIAccessFrame,	"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel7, kRegClass_NULL);
 		DefineRegister (kRegCh8PCIAccessFrame,	"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel8, kRegClass_NULL);
-		DefineRegister (kRegCh1InputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel1, kRegClass_NULL);
-		DefineRegister (kRegCh2InputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel2, kRegClass_NULL);
-		DefineRegister (kRegCh3InputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel3, kRegClass_NULL);
-		DefineRegister (kRegCh4InputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel4, kRegClass_NULL);
-		DefineRegister (kRegCh5InputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel5, kRegClass_NULL);
-		DefineRegister (kRegCh6InputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel6, kRegClass_NULL);
-		DefineRegister (kRegCh7InputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel7, kRegClass_NULL);
-		DefineRegister (kRegCh8InputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel8, kRegClass_NULL);
-		DefineRegister (kRegCh1OutputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel1, kRegClass_NULL);
-		DefineRegister (kRegCh2OutputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel2, kRegClass_NULL);
-		DefineRegister (kRegCh3OutputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel3, kRegClass_NULL);
-		DefineRegister (kRegCh4OutputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel4, kRegClass_NULL);
-		DefineRegister (kRegCh5OutputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel5, kRegClass_NULL);
-		DefineRegister (kRegCh6OutputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel6, kRegClass_NULL);
-		DefineRegister (kRegCh7OutputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel7, kRegClass_NULL);
-		DefineRegister (kRegCh8OutputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel8, kRegClass_NULL);
+	#endif	//	PCIAccessFrame regs are obsolete
+		DefineRegister (kRegCh1InputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_Input,	kRegClass_Channel1, kRegClass_NULL);
+		DefineRegister (kRegCh2InputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_Input,	kRegClass_Channel2, kRegClass_NULL);
+		DefineRegister (kRegCh3InputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_Input,	kRegClass_Channel3, kRegClass_NULL);
+		DefineRegister (kRegCh4InputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_Input,	kRegClass_Channel4, kRegClass_NULL);
+		DefineRegister (kRegCh5InputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_Input,	kRegClass_Channel5, kRegClass_NULL);
+		DefineRegister (kRegCh6InputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_Input,	kRegClass_Channel6, kRegClass_NULL);
+		DefineRegister (kRegCh7InputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_Input,	kRegClass_Channel7, kRegClass_NULL);
+		DefineRegister (kRegCh8InputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_Input,	kRegClass_Channel8, kRegClass_NULL);
+		DefineRegister (kRegCh1OutputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_Output,	kRegClass_Channel1, kRegClass_NULL);
+		DefineRegister (kRegCh2OutputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_Output,	kRegClass_Channel2, kRegClass_NULL);
+		DefineRegister (kRegCh3OutputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_Output,	kRegClass_Channel3, kRegClass_NULL);
+		DefineRegister (kRegCh4OutputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_Output,	kRegClass_Channel4, kRegClass_NULL);
+		DefineRegister (kRegCh5OutputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_Output,	kRegClass_Channel5, kRegClass_NULL);
+		DefineRegister (kRegCh6OutputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_Output,	kRegClass_Channel6, kRegClass_NULL);
+		DefineRegister (kRegCh7OutputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_Output,	kRegClass_Channel7, kRegClass_NULL);
+		DefineRegister (kRegCh8OutputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_Output,	kRegClass_Channel8, kRegClass_NULL);
 		DefineRegister (kRegSDIOut1Control,		"", mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel1, kRegClass_NULL);
 		DefineRegister (kRegSDIOut2Control,		"", mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel2, kRegClass_NULL);
 		DefineRegister (kRegSDIOut3Control,		"", mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel3, kRegClass_NULL);
@@ -246,13 +250,13 @@ private:
 		DefineRegister (kRegSDIOut8Control,		"", mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel8, kRegClass_NULL);
 		DefineRegister (kRegCh1ControlExtended, "", mDecodeChannelControlExt,	READWRITE,	kRegClass_NULL,		kRegClass_Channel1, kRegClass_NULL);
 		DefineRegister (kRegCh2ControlExtended, "", mDecodeChannelControlExt,	READWRITE,	kRegClass_NULL,		kRegClass_Channel2, kRegClass_NULL);
-		DefineRegister (kRegBoardID,			"", mDecodeBoardID,				READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
-		DefineRegister (kRegFirmwareUserID,		"", mDecodeFirmwareUserID,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegBoardID,			"", mDecodeBoardID,				READONLY,	kRegClass_Info,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegFirmwareUserID,		"", mDecodeFirmwareUserID,		READONLY,	kRegClass_Info,		kRegClass_NULL,		kRegClass_NULL);
 
-		DefineRegister (kRegCanDoStatus,		"", mDecodeCanDoStatus,			READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
-		DefineRegister (kRegBitfileDate,		"", mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
-		DefineRegister (kRegBitfileTime,		"", mDecodeBitfileDateTime,		READONLY,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
-		DefineRegister (kRegCPLDVersion,		"", mDecodeCPLDVersion,			READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegCanDoStatus,		"", mDecodeCanDoStatus,			READONLY,	kRegClass_Info,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegBitfileDate,		"", mDecodeBitfileDateTime,		READONLY,	kRegClass_Info,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegBitfileTime,		"", mDecodeBitfileDateTime,		READONLY,	kRegClass_Info,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegCPLDVersion,		"", mDecodeCPLDVersion,			READONLY,	kRegClass_Info,		kRegClass_NULL,		kRegClass_NULL);
 
 		DefineRegister (kRegVidIntControl,		"", mDecodeVidIntControl,		READWRITE,	kRegClass_Interrupt,		kRegClass_Channel1, kRegClass_Channel2);
 			DefineRegClass (kRegVidIntControl, kRegClass_Channel3);
@@ -286,7 +290,6 @@ private:
 			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel6);
 			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel7);
 			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel8);
-		DefineRegister (kRegCh1InputFrame,		"", mDefaultRegDecoder,			READWRITE,	kRegClass_NULL,		kRegClass_Channel1, kRegClass_NULL);
 
 		DefineRegister (kRegConversionControl,	"", mConvControlRegDecoder,		READWRITE,	kRegClass_NULL,		kRegClass_Channel1, kRegClass_Channel2);
 		DefineRegister (kRegSDIWatchdogControlStatus,"", mDecodeRelayCtrlStat,	READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
@@ -407,9 +410,11 @@ private:
 		DefineRegister (kRegAud6Control,		"", mDecodeAudControlReg,		READWRITE,	kRegClass_Audio,	kRegClass_Channel6, kRegClass_NULL);
 		DefineRegister (kRegAud7Control,		"", mDecodeAudControlReg,		READWRITE,	kRegClass_Audio,	kRegClass_Channel7, kRegClass_NULL);
 		DefineRegister (kRegAud8Control,		"", mDecodeAudControlReg,		READWRITE,	kRegClass_Audio,	kRegClass_Channel8, kRegClass_NULL);
-		DefineRegister (kRegAud1Detect,			"", mDecodeAudDetectReg,		READWRITE,	kRegClass_Audio,	kRegClass_Channel1, kRegClass_Channel2);
-		DefineRegister (kRegAudDetect2,			"", mDecodeAudDetectReg,		READWRITE,	kRegClass_Audio,	kRegClass_Channel3, kRegClass_Channel4);
-		DefineRegister (kRegAudioDetect5678,	"", mDecodeAudDetectReg,		READWRITE,	kRegClass_Audio,	kRegClass_Channel8, kRegClass_NULL);
+		DefineRegister (kRegAud1Detect,			"", mDecodeAudDetectReg,		READONLY,	kRegClass_Audio,	kRegClass_Channel1, kRegClass_Channel2);
+		DefineRegister (kRegAudDetect2,			"", mDecodeAudDetectReg,		READONLY,	kRegClass_Audio,	kRegClass_Channel3, kRegClass_Channel4);
+		DefineRegister (kRegAudioDetect5678,	"", mDecodeAudDetectReg,		READONLY,	kRegClass_Audio,	kRegClass_Channel8, kRegClass_Channel7);
+			DefineRegClass (kRegAudioDetect5678, kRegClass_Channel6);
+			DefineRegClass (kRegAudioDetect5678, kRegClass_Channel5);
 		DefineRegister (kRegAud1SourceSelect,	"", mDecodeAudSourceSelectReg,	READWRITE,	kRegClass_Audio,	kRegClass_Channel1, kRegClass_NULL);
 		DefineRegister (kRegAud2SourceSelect,	"", mDecodeAudSourceSelectReg,	READWRITE,	kRegClass_Audio,	kRegClass_Channel2, kRegClass_NULL);
 		DefineRegister (kRegAud3SourceSelect,	"", mDecodeAudSourceSelectReg,	READWRITE,	kRegClass_Audio,	kRegClass_Channel3, kRegClass_NULL);
@@ -1578,7 +1583,7 @@ public:
 	
 	inline bool		IsRegisterWriteOnly (const uint32_t inRegNum) const				{return IsRegInClass (inRegNum, kRegClass_WriteOnly);}
 	inline bool		IsRegisterReadOnly (const uint32_t inRegNum) const				{return IsRegInClass (inRegNum, kRegClass_ReadOnly);}
-	
+
 	NTV2StringSet	GetAllRegisterClasses (void) const
 	{
 		AJAAutoLock lock(&mGuardMutex);
@@ -1588,18 +1593,24 @@ public:
 					mAllRegClasses.insert (it->first);
 		return mAllRegClasses;
 	}
-	
-	NTV2StringSet	GetRegisterClasses (const uint32_t inRegNum) const
+
+	NTV2StringSet	GetRegisterClasses (const uint32_t inRegNum, const bool inRemovePrefix) const
 	{
 		AJAAutoLock lock(&mGuardMutex);
 		NTV2StringSet	result;
 		NTV2StringSet	allClasses	(GetAllRegisterClasses());
 		for (NTV2StringSetConstIter it	(allClasses.begin ());	it != allClasses.end();	 ++it)
 			if (IsRegInClass (inRegNum, *it))
-				result.insert (*it);
+			{
+				string str(*it);
+				if (inRemovePrefix)
+					str.erase(0, 10);	//	Remove "kRegClass_" prefix
+				if (result.find(str) == result.end())
+					result.insert(str);
+			}
 		return result;
 	}
-	
+
 	NTV2RegNumSet	GetRegistersForClass (const string & inClassName) const
 	{
 		AJAAutoLock lock(&mGuardMutex);
@@ -1609,7 +1620,6 @@ public:
 				result.insert(it->second);
 		return result;
 	}
-	
 
 	NTV2RegNumSet	GetRegistersForDevice (const NTV2DeviceID inDeviceID, const int inOtherRegsToInclude) const
 	{
@@ -1709,7 +1719,7 @@ public:
 		return result;
 	}
 
-	
+
 	NTV2RegNumSet	GetRegistersWithName (const string & inName, const int inMatchStyle = EXACTMATCH) const
 	{
 		NTV2RegNumSet	result;
@@ -1744,7 +1754,7 @@ public:
 		}
 		return result;
 	}
-	
+
 	bool		GetXptRegNumAndMaskIndex (const NTV2InputCrosspointID inInputXpt, uint32_t & outXptRegNum, uint32_t & outMaskIndex) const
 	{
 		AJAAutoLock lock(&mGuardMutex);
@@ -1757,7 +1767,7 @@ public:
 		outMaskIndex = iter->second.second;
 		return true;
 	}
-	
+
 	NTV2InputCrosspointID	GetInputCrosspointID (const uint32_t inXptRegNum, const uint32_t inMaskIndex) const
 	{
 		AJAAutoLock lock(&mGuardMutex);
@@ -1767,7 +1777,7 @@ public:
 			return iter->second;
 		return NTV2_INPUT_CROSSPOINT_INVALID;
 	}
-	
+
 	ostream &	Print (ostream & inOutStream) const
 	{
 		AJAAutoLock lock(&mGuardMutex);
@@ -1803,11 +1813,11 @@ public:
 			<< setw(27) << ::NTV2InputCrosspointIDToString(it->second) << "(" << HEX0N(it->second,2) << ")" << endl;
 		return inOutStream;
 	}
-	
+
 private:
 	typedef std::map<uint32_t, string>	RegNumToStringMap;
 	typedef std::pair<uint32_t, string> RegNumToStringPair;
-	
+
 	static string ToLower (const string & inStr)
 	{
 		string	result (inStr);
@@ -4045,11 +4055,11 @@ NTV2StringSet CNTV2RegisterExpert::GetAllRegisterClasses (void)
 	return pRegExpert ? pRegExpert->GetAllRegisterClasses() : NTV2StringSet();
 }
 
-NTV2StringSet CNTV2RegisterExpert::GetRegisterClasses (const uint32_t inRegNum)
+NTV2StringSet CNTV2RegisterExpert::GetRegisterClasses (const uint32_t inRegNum, const bool inRemovePrefix)
 {
 	AJAAutoLock locker(&gRegExpertGuardMutex);
 	RegisterExpertPtr pRegExpert(RegisterExpert::GetInstance());
-	return pRegExpert ? pRegExpert->GetRegisterClasses(inRegNum) : NTV2StringSet();
+	return pRegExpert ? pRegExpert->GetRegisterClasses(inRegNum, inRemovePrefix) : NTV2StringSet();
 }
 
 NTV2RegNumSet CNTV2RegisterExpert::GetRegistersForClass (const string & inClassName)

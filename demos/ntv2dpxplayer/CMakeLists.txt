@@ -5,12 +5,8 @@ if (NOT AJA_QT_ENABLED)
     return()
 endif()
 
-find_package(Qt5 HINTS ${AJA_QT_DIR} COMPONENTS
-    Core
-    REQUIRED)
-
-set(QT_LIBRARIES
-    Qt5::Core)
+include(QtHelpers)
+aja_find_qt_modules(Core)
 
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
@@ -41,11 +37,10 @@ set(TARGET_SOURCES
 	${DEMO_COMMON_SOURCES}
 )
 
-aja_add_executable(${PROJECT_NAME} PUBLIC
-	"${TARGET_SOURCES}"
-	ajantv2
-	"${TARGET_INCLUDE_DIRS}"
-	"${TARGET_LINK_LIBS};${QT_LIBRARIES};ajantv2" "")
+add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
+add_dependencies(${PROJECT_NAME} ajantv2)
+target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS} ${TARGET_QT_LIBS} ajantv2)
 
 if (AJA_CODE_SIGN)
     aja_code_sign(${PROJECT_NAME})

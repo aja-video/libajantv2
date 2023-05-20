@@ -5,7 +5,8 @@ set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
 	${AJA_LIB_NTV2_ROOT}/includes
 	${AJA_LIB_RETAIL_ROOT}/includes
-	${AJA_LIB_RETAIL_ROOT}/services)
+	${AJA_LIB_RETAIL_ROOT}/services
+    ${LIBAJACC_DIR}/includes)
 
 set(NTV2CCGRABBER_HEADERS
 	ntv2ccgrabber.h)

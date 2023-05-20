@@ -13,7 +13,8 @@
 #include "ntv2endian.h"
 #include "ntv2debug.h"
 #include "ntv2transcode.h"
-#include "ntv2devicefeatures.h"
+#include "ntv2version.h"
+#include "ntv2devicefeatures.h"	//	Required for NTV2DeviceCanDoVideoFormat
 #include "ajabase/system/lock.h"
 #include "ajabase/common/common.h"
 #if defined(AJALinux)
@@ -1649,19 +1650,19 @@ static bool CopyRaster6BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer t
 }	//	CopyRaster6BytesPerPixel
 
 
-bool CopyRaster (const NTV2FrameBufferFormat	inPixelFormat,			//	Pixel format of both src and dst buffers
-				UByte *							pDstBuffer,				//	Dest buffer to be modified
-				const ULWord						inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
-				const UWord						inDstTotalLines,		//	Dest buffer total lines in raster (max height)
-				const UWord						inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
-				const UWord						inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear
-				const UByte *					pSrcBuffer,				//	Src buffer
-				const ULWord						inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
-				const UWord						inSrcTotalLines,		//	Src buffer total lines in raster (max height)
-				const UWord						inSrcVertLineOffset,	//	Src image top edge
-				const UWord						inSrcVertLinesToCopy,	//	Src image height
-				const UWord						inSrcHorzPixelOffset,	//	Src image left edge
-				const UWord						inSrcHorzPixelsToCopy)	//	Src image width
+bool CopyRaster (const NTV2PixelFormat	inPixelFormat,			//	Pixel format of both src and dst buffers
+				UByte *					pDstBuffer,				//	Dest buffer to be modified
+				const ULWord			inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
+				const UWord				inDstTotalLines,		//	Dest buffer total lines in raster (max height)
+				const UWord				inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
+				const UWord				inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear
+				const UByte *			pSrcBuffer,				//	Src buffer
+				const ULWord			inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
+				const UWord				inSrcTotalLines,		//	Src buffer total lines in raster (max height)
+				const UWord				inSrcVertLineOffset,	//	Src image top edge
+				const UWord				inSrcVertLinesToCopy,	//	Src image height
+				const UWord				inSrcHorzPixelOffset,	//	Src image left edge
+				const UWord				inSrcHorzPixelsToCopy)	//	Src image width
 {
 	if (!pDstBuffer)					//	NULL buffer
 		return false;

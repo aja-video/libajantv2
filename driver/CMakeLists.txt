@@ -144,10 +144,10 @@ set(NEEDED_NTV2_SOURCES
 
 if (AJANTV2_BUILD_DRIVER)
 	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-		aja_message(STATUS "Windows driver CMake build not yet implemented!")
+		message(STATUS "Windows driver CMake build not yet implemented!")
 		return()
 	elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-		aja_message(STATUS "macOS driver CMake build not yet implemented!")
+		message(STATUS "macOS driver CMake build not yet implemented!")
 		return()
 	elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 		set(BIN_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin")

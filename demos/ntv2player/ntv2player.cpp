@@ -58,7 +58,6 @@ NTV2Player::NTV2Player (const PlayerConfig & inConfig)
 		mConsumerThread		(),
 		mProducerThread		(),
 		mDevice				(),
-		mDeviceID			(DEVICE_ID_INVALID),
 		mSavedTaskMode		(NTV2_TASK_MODE_INVALID),
 		mCurrentFrame		(0),
 		mCurrentSample		(0),
@@ -114,17 +113,16 @@ AJAStatus NTV2Player::Init (void)
 	//	Open the device...
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
 		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
-	mDeviceID = mDevice.GetDeviceID();	//	Keep this ID handy -- it's used frequently
 
     if (!mDevice.IsDeviceReady(false))
 		{cerr << "## ERROR:  Device '" << mDevice.GetDisplayName() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
-	if (!::NTV2DeviceCanDoPlayback(mDeviceID))
+	if (!mDevice.features().CanDoPlayback())
 		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
 
-	const UWord maxNumChannels (::NTV2DeviceGetNumFrameStores(mDeviceID));
+	const UWord maxNumChannels (mDevice.features().GetNumFrameStores());
 
 	//	Beware -- some older devices (e.g. Corvid1) can only output from FrameStore 2...
-	if ((mConfig.fOutputChannel == NTV2_CHANNEL1) && (!::NTV2DeviceCanDoFrameStore1Display(mDeviceID)))
+	if ((mConfig.fOutputChannel == NTV2_CHANNEL1) && (!mDevice.features().CanDoFrameStore1Display()))
 		mConfig.fOutputChannel = NTV2_CHANNEL2;
 	if (UWord(mConfig.fOutputChannel) >= maxNumChannels)
 	{
@@ -141,7 +139,7 @@ AJAStatus NTV2Player::Init (void)
 	}
 	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Set OEM service level
 
-	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
+	if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
 	else
 		mConfig.fDoMultiFormat = false;
@@ -184,12 +182,12 @@ AJAStatus NTV2Player::SetUpVideo (void)
 	//	Configure the device to output the requested video format...
  	if (mConfig.fVideoFormat == NTV2_FORMAT_UNKNOWN)
 		return AJA_STATUS_BAD_PARAM;
-	if (!::NTV2DeviceCanDoVideoFormat (mDeviceID, mConfig.fVideoFormat))
+	if (!mDevice.features().CanDoVideoFormat(mConfig.fVideoFormat))
 	{	cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' doesn't support "
 				<< ::NTV2VideoFormatToString(mConfig.fVideoFormat) << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
-	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
+	if (!mDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
 	{	cerr	<< "## ERROR: '" << mDevice.GetDisplayName() << "' doesn't support "
 				<< ::NTV2FrameBufferFormatString(mConfig.fPixelFormat) << endl;
 		return AJA_STATUS_UNSUPPORTED;
@@ -198,11 +196,11 @@ AJAStatus NTV2Player::SetUpVideo (void)
 	//	This demo doesn't playout dual-link RGB over SDI -- only YCbCr.
 	//	Check that this device has a CSC to convert RGB to YUV...
 	if (::IsRGBFormat(mConfig.fPixelFormat))	//	If RGB FBF...
-		if (UWord(mConfig.fOutputChannel) > ::NTV2DeviceGetNumCSCs(mDeviceID))	//	No CSC for this channel?
+		if (UWord(mConfig.fOutputChannel) > mDevice.features().GetNumCSCs())	//	No CSC for this channel?
 			{cerr << "## ERROR: No CSC for channel " << DEC(mConfig.fOutputChannel+1) << " to convert RGB pixel format" << endl;
 				return AJA_STATUS_UNSUPPORTED;}
 
-	if (!::NTV2DeviceCanDo3GLevelConversion(mDeviceID) && mConfig.fDoABConversion && ::IsVideoFormatA(mConfig.fVideoFormat))
+	if (!mDevice.features().CanDo3GLevelConversion() && mConfig.fDoABConversion && ::IsVideoFormatA(mConfig.fVideoFormat))
 		mConfig.fDoABConversion = false;
 	if (mConfig.fDoABConversion)
 		mDevice.SetSDIOutLevelAtoLevelBConversion (mConfig.fOutputChannel, mConfig.fDoABConversion);
@@ -230,7 +228,7 @@ AJAStatus NTV2Player::SetUpVideo (void)
 	mDevice.SubscribeOutputVerticalEvent (mConfig.fOutputChannel);
 
 	//	Check if HDR anc is permissible...
-	if (IS_KNOWN_AJAAncDataType(mConfig.fTransmitHDRType)  &&  !::NTV2DeviceCanDoCustomAnc(mDeviceID))
+	if (IS_KNOWN_AJAAncDataType(mConfig.fTransmitHDRType)  &&  !mDevice.features().CanDoCustomAnc())
 		{cerr << "## WARNING:  HDR Anc requested, but device can't do custom anc" << endl;
 			mConfig.fTransmitHDRType = AJAAncDataType_Unknown;}
 
@@ -239,7 +237,7 @@ AJAStatus NTV2Player::SetUpVideo (void)
 		gAncMaxSizeBytes = NTV2_ANCSIZE_MAX;
 
 	//	Set output clock reference...
-	mDevice.SetReference(::NTV2DeviceCanDo2110(mDeviceID) ? NTV2_REFERENCE_SFP1_PTP : NTV2_REFERENCE_FREERUN);
+	mDevice.SetReference(mDevice.features().CanDo2110() ? NTV2_REFERENCE_SFP1_PTP : NTV2_REFERENCE_FREERUN);
 
 	//	At this point, video setup is complete (except for widget signal routing).
 	return AJA_STATUS_SUCCESS;
@@ -249,7 +247,7 @@ AJAStatus NTV2Player::SetUpVideo (void)
 
 AJAStatus NTV2Player::SetUpAudio (void)
 {
-	uint16_t numAudioChannels (::NTV2DeviceGetMaxAudioChannels(mDeviceID));
+	uint16_t numAudioChannels (mDevice.features().GetMaxAudioChannels());
 
 	//	If there are 2048 pixels on a line instead of 1920, reduce the number of audio channels
 	//	This is because HANC is narrower, and has space for only 8 channels
@@ -257,11 +255,11 @@ AJAStatus NTV2Player::SetUpAudio (void)
 		numAudioChannels = 8;
 
 	mAudioSystem = NTV2_AUDIOSYSTEM_1;										//	Use NTV2_AUDIOSYSTEM_1...
-	if (::NTV2DeviceGetNumAudioSystems(mDeviceID) > 1)						//	...but if the device has more than one audio system...
+	if (mDevice.features().GetNumAudioSystems() > 1)						//	...but if the device has more than one audio system...
 		mAudioSystem = ::NTV2ChannelToAudioSystem(mConfig.fOutputChannel);	//	...base it on the channel
 	//	However, there are a few older devices that have only 1 audio system,
 	//	yet 2 frame stores (or must use channel 2 for playout)...
-	if (!::NTV2DeviceCanDoFrameStore1Display(mDeviceID))
+	if (!mDevice.features().CanDoFrameStore1Display())
 		mAudioSystem = NTV2_AUDIOSYSTEM_1;
 
 	mDevice.SetNumberAudioChannels (numAudioChannels, mAudioSystem);
@@ -279,7 +277,7 @@ AJAStatus NTV2Player::SetUpAudio (void)
 	//	must be disabled --- otherwise the output audio will be pass-thru SDI input audio...
 	mDevice.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_OFF, mAudioSystem);
 
-	if (!mConfig.fDoMultiFormat  &&  ::NTV2DeviceGetNumHDMIVideoOutputs(mDeviceID))
+	if (!mConfig.fDoMultiFormat  &&  mDevice.features().GetNumHDMIVideoOutputs())
 	{
 		mDevice.SetHDMIOutAudioRate(NTV2_AUDIO_48K);
 		mDevice.SetHDMIOutAudioFormat(NTV2_AUDIO_FORMAT_LPCM);
@@ -390,7 +388,7 @@ AJAStatus NTV2Player::SetUpTestPatternBuffers (void)
 bool NTV2Player::RouteOutputSignal (void)
 {
 	const NTV2Standard	outputStandard	(::GetNTV2StandardFromVideoFormat(mConfig.fVideoFormat));
-	const UWord			numSDIOutputs	(::NTV2DeviceGetNumVideoOutputs (mDeviceID));
+	const UWord			numSDIOutputs	(mDevice.features().GetNumVideoOutputs());
 	const bool			isRGB			(::IsRGBFormat(mConfig.fPixelFormat));
 	const bool			canVerify		(mDevice.HasCanConnectROM());
 	UWord				connectFailures	(0);
@@ -410,7 +408,7 @@ bool NTV2Player::RouteOutputSignal (void)
 	if (mConfig.fDoMultiFormat)
 	{
 		//	Multiformat --- We may be sharing the device with other processes, so route only one SDI output...
-		if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID))
+		if (mDevice.features().HasBiDirectionalSDI())
 			mDevice.SetSDITransmitEnable(mConfig.fOutputChannel, true);
 
 		if (!mDevice.Connect (::GetSDIOutputInputXpt (mConfig.fOutputChannel, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
@@ -422,7 +420,7 @@ bool NTV2Player::RouteOutputSignal (void)
 	else
 	{
 		//	Not multiformat:  We own the whole device, so connect all possible SDI outputs...
-		const UWord	numFrameStores(::NTV2DeviceGetNumFrameStores(mDeviceID));
+		const UWord	numFrameStores(mDevice.features().GetNumFrameStores());
 		mDevice.ClearRouting();		//	Start with clean slate
 
 		if (isRGB)
@@ -433,7 +431,7 @@ bool NTV2Player::RouteOutputSignal (void)
 		{
 			if (chan != mConfig.fOutputChannel  &&  chan < numFrameStores)
 				mDevice.DisableChannel(chan);				//	Disable unused FrameStore
-			if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID))
+			if (mDevice.features().HasBiDirectionalSDI())
 				mDevice.SetSDITransmitEnable (chan, true);	//	Make it an output
 
 			const NTV2OutputDestination sdiOutput(::NTV2ChannelToOutputDestination(chan));
@@ -451,12 +449,12 @@ bool NTV2Player::RouteOutputSignal (void)
 		}	//	for each SDI output spigot
 
 		//	And connect analog video output, if the device has one...
-		if (::NTV2DeviceGetNumAnalogVideoOutputs(mDeviceID))
+		if (mDevice.features().GetNumAnalogVideoOutputs())
 			if (!mDevice.Connect (::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_ANALOG),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
 				connectFailures++;
 
 		//	And connect HDMI video output, if the device has one...
-		if (::NTV2DeviceGetNumHDMIVideoOutputs(mDeviceID))
+		if (mDevice.features().GetNumHDMIVideoOutputs())
 			if (!mDevice.Connect (::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_HDMI),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
 				connectFailures++;
 	}

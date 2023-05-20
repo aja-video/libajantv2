@@ -4,7 +4,8 @@
 	@brief		Implements the AJAThreadImpl class on the Linux platform.
 	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
-
+#include "ajabase/system/linux/threadimpl.h"
+#include "ajabase/system/debug.h"
 #include <errno.h>
 #include <sched.h>
 #include <signal.h>
@@ -13,8 +14,6 @@
 #include <sys/syscall.h>
 #include <sys/prctl.h>
 #include <unistd.h>
-#include "ajabase/system/linux/threadimpl.h"
-#include "ajabase/common/timer.h"
 #include <string.h>
 
 static const size_t STACK_SIZE = 1024 * 1024;

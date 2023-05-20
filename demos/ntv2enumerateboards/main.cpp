@@ -11,7 +11,6 @@
 #include "ntv2democommon.h"
 #include "ntv2devicescanner.h"
 
-
 using namespace std;
 
 
@@ -24,7 +23,7 @@ static int ShowDeviceInfo (CNTV2Card & inCard)
 	//	Get detailed device information...
 	const NTV2DeviceID deviceID (inCard.GetDeviceID());
 	NTV2VideoFormatSet videoFormats;
-	NTV2FrameBufferFormatSet pixelFormats;
+	NTV2PixelFormats pixelFormats;
 	string serial;
 
 			//	Print the display name...

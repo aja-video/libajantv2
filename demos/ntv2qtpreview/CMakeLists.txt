@@ -5,12 +5,16 @@ if (NOT AJA_QT_ENABLED)
     return()
 endif()
 
-find_package(Qt5 HINTS ${AJA_QT_DIR} COMPONENTS Core Multimedia Widgets REQUIRED)
-set(QT_LIBRARIES Qt5::Core Qt5::Multimedia Qt5::Widgets)
+include(QtHelpers)
+aja_find_qt_modules(Core Multimedia Widgets)
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+set(AJA_LIB_GUI_ROOT
+        ${LIBAJAQT_DIR}/gui)
 
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
@@ -37,11 +41,13 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(TARGET_COMPILE_DEFS
         -D_MBCS
         -DNOMINMAX)
-    aja_versionize(
+    aja_versionize_windows(
         ${PROJECT_NAME}
         ${PROJECT_NAME}
-        ${PROJECT_NAME}
-        app.ico)
+        app.ico
+        "ntv2qtpreview.exe"
+        ${CMAKE_MODULE_PATH}/bundle/windows/win-ver.rc.in
+        win-ver.rc)
     list(APPEND NTV2QTPREVIEW_SOURCES
         win-ver.rc)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -62,25 +68,13 @@ set(TARGET_SOURCES
 	${NTV2QTPREVIEW_SOURCES})
 set(TARGET_DEPS ajantv2)
 set(TARGET_LINK_LIBS ${TARGET_LINK_LIBS}
-    ajantv2 ${QT_LIBRARIES})
+    ajantv2 ${TARGET_QT_LIBS})
 
-aja_add_executable(ntv2qtpreview PUBLIC
-    "${TARGET_SOURCES}"
-    "${TARGET_DEPS}"
-    "${TARGET_INCLUDE_DIRS}"
-    "${TARGET_LINK_LIBS}"
-    "${TARGET_COMPILE_DEFS}")
-set(BUILD_TARGETS ntv2qtpreview)
-# if (AJA_BUILD_SHARED)
-#     set(BUILD_TARGETS ${BUILD_TARGETS} ntv2qtpreview-dl)
-#     set(TARGET_DEPS ajagui-dl ajantv2-dl)
-#     aja_add_executable(ntv2qtpreview-dl PUBLIC
-#         "${TARGET_SOURCES}"
-#         "${TARGET_DEPS}"
-#         "${TARGET_INCLUDE_DIRS}"
-#         "${TARGET_LINK_LIBS}"
-#         "${TARGET_COMPILE_DEFS}")
-# endif()
+add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
+add_dependencies(${PROJECT_NAME} ${TARGET_DEPS})
+target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS})
+target_compile_definitions(${PROJECT_NAME} PUBLIC ${TARGET_COMPILE_DEFS})
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set_target_properties(ntv2qtpreview PROPERTIES WIN32_EXECUTABLE TRUE)
@@ -91,20 +85,20 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${PROJECT_NAME}
         app.ico)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    aja_make_version_plist(ntv2qtpreview
-        ${AJA_PRODUCT_NAME}
+    aja_versionize_mac(ntv2qtpreview
+        com.aja.ntv2qtpreview
         "AjLg"
-        ${CMAKE_MODULE_PATH}/bundle/mac/Info.plist.in
-        ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
+        "APPL"
+        "ntv2qtpreview"
         app.icns)
 endif()
 if (AJA_CODE_SIGN)
-    aja_code_sign(${BUILD_TARGETS})
+    aja_code_sign(${PROJECT_NAME})
 endif()
 if (AJA_QT_DEPLOY)
-    aja_deploy_qt_libs_to_dest(ntv2qtpreview)
+    aja_deploy_qt_libs_to_dest(ntv2qtpreview ${CMAKE_INSTALL_BINDIR})
 endif()
-install(TARGETS ${BUILD_TARGETS}
+install(TARGETS ${PROJECT_NAME}
     BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

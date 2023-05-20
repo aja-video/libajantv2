@@ -1158,7 +1158,7 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context)
 	NTV2Standard hdmiv2std = NTV2_STANDARD_INVALID;
 	ULWord sampling = NTV2_HDMI_422;
 	deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
-	hdmiVersion = NTV2GetHDMIVersion(deviceID);
+	hdmiVersion = NTV2DeviceGetHDMIVersion(deviceID);
 	
 	if (hdmiVersion == 0)
 		return false;
@@ -1944,7 +1944,7 @@ NTV2VideoFormat GetHDMIInputVideoFormat(Ntv2SystemContext* context)
 
 	if(NTV2DeviceCanDoInputSource(deviceID, NTV2_INPUTSOURCE_HDMI1))
 	{
-		ULWord hdmiVersion = NTV2GetHDMIVersion(deviceID);
+		ULWord hdmiVersion = NTV2DeviceGetHDMIVersion(deviceID);
 		status = ntv2ReadRegister(context, kRegHDMIInputStatus);
 
 		if(hdmiVersion == 1)

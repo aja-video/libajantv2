@@ -365,7 +365,7 @@ AJAStatus NTV2LLBurn::SetupHostBuffers (void)
 
 	//	Allocate and add each in-host buffer to my member variables.
 	//	DMA performance can be accelerated slightly by using page-aligned video buffers...
-	mpHostVideoBuffer.Allocate(mFormatDesc.GetVideoWriteSize(NTV2Buffer::DefaultPageSize()), true);
+	mpHostVideoBuffer.Allocate(mFormatDesc.GetVideoWriteSize(ULWord(NTV2Buffer::DefaultPageSize())), true);
 	mpHostAudioBuffer.Allocate(NTV2_AUDIOSIZE_MAX, /*page-aligned*/true);
 	mpHostF1AncBuffer.Allocate(mConfig.WithAnc() ? NTV2_ANCSIZE_MAX : 0, /*pageAligned*/true);
 	mpHostF2AncBuffer = NTV2Buffer(mConfig.WithAnc() ? NTV2_ANCSIZE_MAX : 0);

@@ -6,6 +6,7 @@
 **/
 
 #include "ancillarydata_cea708.h"
+#include "ajabase/system/debug.h"
 #include <ios>
 #include <iomanip>
 

@@ -15,11 +15,12 @@
 	#include <set>
 	#include <map>
 	#include <vector>
+	#include <string>
 	#include <iomanip>
 	#include <bitset>
 	#include <string>
+	#include "string.h"	//	for memcpy
 	#include "ajaexport.h"
-	#include "string.h"
 	#if defined(MSWindows)
 		#pragma warning(disable:4800)	//	int/bool conversion
 		#pragma warning(disable:4127)	//	Stop MSVC from bitching about "do{...}while(false)" macros
@@ -9144,6 +9145,8 @@ typedef enum
 
 			typedef std::set <NTV2FrameBufferFormat>			NTV2FrameBufferFormatSet;			///< @brief A set of distinct NTV2FrameBufferFormat values.
 			typedef NTV2FrameBufferFormatSet::const_iterator	NTV2FrameBufferFormatSetConstIter;	///< @brief A handy const iterator for iterating over an NTV2FrameBufferFormatSet.
+			typedef NTV2FrameBufferFormatSet NTV2PixelFormats;	//	New in SDK 17.0
+			typedef NTV2FrameBufferFormatSetConstIter NTV2PixelFormatsConstIter;	//	New in SDK 17.0
 
 			typedef std::set <NTV2FrameGeometry>				NTV2GeometrySet;					///< @brief A set of distinct NTV2FrameGeometry values.
 			typedef NTV2GeometrySet::const_iterator				NTV2GeometrySetConstIter;			///< @brief A handy const iterator for iterating over an NTV2GeometrySet.
@@ -9156,6 +9159,9 @@ typedef enum
 
 			typedef std::set <NTV2OutputDestination>			NTV2OutputDestinations;				///< @brief A set of distinct NTV2OutputDestination values.
 			typedef NTV2OutputDestinations::const_iterator		NTV2OutputDestinationsConstIter;	///< @brief A handy const iterator for iterating over an NTV2OutputDestinations.
+
+			typedef std::set <NTV2FrameRate>					NTV2FrameRateSet;					///< @brief A set of distinct NTV2FrameRate values.  New in SDK 17.0.
+			typedef NTV2FrameRateSet::const_iterator			NTV2FrameRateSetConstIter;			///< @brief A handy const iterator for iterating over an NTV2FrameRateSet.
 
 			/**
 				@brief		Prints the given ::UWordSequence contents into the given output stream.
@@ -9190,7 +9196,8 @@ typedef enum
 			/**
 				@brief	Returns a set of distinct ::NTV2VideoFormat values supported on the given device.
 				@param[in]	inDeviceID	Specifies the ::NTV2DeviceID of the device of interest.
-				@param[out] outFormats	Receives the set of distinct ::NTV2VideoFormat values supported by the device.
+										Specify DEVICE_ID_INVALID to return ALL known video formats.
+				@param[out] outFormats	Receives the set of requested distinct ::NTV2VideoFormat values.
 				@return		True if successful;	 otherwise false.
 				@todo	This needs to be moved to a C++ compatible "device features" module.
 			**/
@@ -9211,7 +9218,7 @@ typedef enum
 				@return		True if successful;	 otherwise false.
 				@todo	This needs to be moved to a C++ compatible "device features" module.
 			**/
-			AJAExport bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2FrameBufferFormatSet & outFormats);
+			AJAExport bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2PixelFormats & outFormats);
 
 			/**
 				@brief		Prints the given ::NTV2FrameBufferFormatSet contents into the given output stream.
@@ -9219,7 +9226,7 @@ typedef enum
 				@param[in]	inFormats	Specifies the set of pixel formats to be streamed.
 				@return		The "inOStream" that was specified.
 			**/
-			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2FrameBufferFormatSet & inFormats);
+			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2PixelFormats & inFormats);
 
 			/**
 				@brief		Appends the given ::NTV2FrameBufferFormatSet contents into the given set.
@@ -9227,7 +9234,7 @@ typedef enum
 				@param[in]	inSet		Specifies the set whose contents will be appended.
 				@return		A reference to the modified set.
 			**/
-			AJAExport NTV2FrameBufferFormatSet & operator += (NTV2FrameBufferFormatSet & inOutSet, const NTV2FrameBufferFormatSet inSet);
+			AJAExport NTV2PixelFormats & operator += (NTV2PixelFormats & inOutSet, const NTV2PixelFormats inSet);
 
 			/**
 				@brief	Returns a set of distinct ::NTV2Standard values supported on the given device.
@@ -9332,6 +9339,32 @@ typedef enum
 				@todo		Needs to be moved to a C++ compatible "device features" module.
 			**/
 			AJAExport bool NTV2DeviceGetSupportedOutputDests (const NTV2DeviceID inDeviceID, NTV2OutputDestinations & outOutputDests, const NTV2IOKinds inKinds = NTV2_IOKINDS_ALL);	//	New in SDK 16.3
+
+			/**
+				@brief		Prints the given ::NTV2FrameRateSet into the given output stream.
+				@param		inOStream	The stream into which the human-readable list will be written.
+				@param[in]	inSet		Specifies the set to be streamed.
+				@return		The "inOStream" that was specified.
+			**/
+			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2FrameRateSet & inSet);	//	New in SDK 17.0
+
+			/**
+				@brief		Appends the given ::NTV2FrameRateSet into the given set.
+				@param		inOutSet	The set to which the other set will be appended.
+				@param[in]	inSet		Specifies the set whose contents will be appended.
+				@return		A reference to the modified set.
+			**/
+			AJAExport NTV2FrameRateSet & operator += (NTV2FrameRateSet & inOutSet, const NTV2FrameRateSet & inSet);	//	New in SDK 17.0
+
+			/**
+				@brief		Returns a set of distinct ::NTV2FrameRate values supported on the given device.
+				@param[in]	inDeviceID			Specifies the ::NTV2DeviceID of the device of interest.
+												Specify ::DEVICE_ID_INVALID to disable the "is supported" check.
+				@param[out] outRates			Receives the requested ::NTV2FrameRateSet.
+				@return		True if successful;	 otherwise false.
+				@todo		Needs to be moved to a C++ compatible "device features" module.
+			**/
+			AJAExport bool NTV2DeviceGetSupportedFrameRates (const NTV2DeviceID inDeviceID, NTV2FrameRateSet & outRates);	//	New in SDK 17.0
 
 
 			/**

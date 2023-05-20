@@ -19,6 +19,8 @@
 #include "ajabase/common/circularbuffer.h"
 #include "ajabase/system/debug.h"
 #include "ajabase/system/info.h"
+#include "ajabase/system/systemtime.h"	//	convenience to get AJATime
+#include "ajabase/common/common.h"	//	convenience to get aja::strip & etc.
 #include <algorithm>
 #include <string>
 

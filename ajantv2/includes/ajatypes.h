@@ -99,16 +99,29 @@
 	NTV2_USE_CPLUSPLUS11		Controls use of C++11 language features.
 								Introduced in SDK 16.0.
 
-	Undefined:	The 'ajalibraries/ajantv2' portion of the SDK will not use C++11 features.
+	Undefined:	The 'libajantv2' portion of the SDK will not use C++11 features.
 
-	Defined:	(Default) The 'ajalibraries/ajantv2' portion of the SDK will use C++11 features that require
+	Defined:	(Default) The 'libajantv2' portion of the SDK will use C++11 features that require
 				a C++11 compiler.
 
-	See also:	AJA_USE_CPLUSPLUS11 in 'ajalibraries/ajabase/include/types.h'
+	See also:	AJA_USE_CPLUSPLUS11 in 'libajabase/include/types.h'
 **************************************************************************************************************/
 #if !defined(NTV2_USE_CPLUSPLUS11)
 	#define NTV2_USE_CPLUSPLUS11 	
 #endif	//	!defined(NTV2_USE_CPLUSPLUS11)
+
+
+/**************************************************************************************************************
+	NTV2_INCLUDE_DEVICE_CAPABILITIES_API	Controls the availability of the new DeviceCapabilities class/API.
+											Introduced in SDK 17.0.
+
+	Undefined:	No DeviceCapabilities class/API is declared. SDK clients will have to use the lower-level
+				CNTV2DriverInterface::IsSupported and CNTV2DriverInterface::GetNumSupported member functions.
+
+	Defined:	(Default) The DeviceCapabilities class/API is defined. SDK clients will be able to access
+				and use this API via the CNTV2Card::features() accessor function.
+**************************************************************************************************************/
+#define	NTV2_INCLUDE_DEVICE_CAPABILITIES_API
 
 
 
@@ -260,6 +273,7 @@
 	#define AJAFUNC		__FUNCTION__
 	#define NTV2_CPP_MIN(__x__,__y__)		min((__x__),(__y__))
 	#define NTV2_CPP_MAX(__x__,__y__)		max((__x__),(__y__))
+	#pragma warning(disable:4996)   //  Sadly MSVC bitches about DECLARING a deprecated function but not about USING one.
 
 									//////////////////////////////////////////////////////////////////
 #elif defined (AJAMac)				////////////////////////	MAC		//////////////////////////////

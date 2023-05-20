@@ -14,9 +14,9 @@
 #endif
 
 #include "ajabase/common/export.h"
-#include "ajabase/common/public.h"
-#include "ajabase/system/debug.h"
 #include <set>
+#include <string>
+#include <vector>
 
 namespace aja
 {

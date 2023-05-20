@@ -6,6 +6,7 @@
 **/
 #include "ajabase/pnp/mac/pnpimpl.h"
 #include "ajabase/common/common.h"
+#include "ajabase/system/debug.h"
 #include "devicenotifier.h"		//	For now use NTV2 DeviceNotifier facility
 #include <sstream>
 #include <iostream>

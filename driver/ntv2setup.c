@@ -194,7 +194,7 @@ static void ntv2_setup_monitor(void* data)
 				SetVideoOutputStandard(systemContext, NTV2_CHANNEL5);
 			}
 
-			if (NTV2GetDACVersion(deviceID) == 2)
+			if (NTV2DeviceGetDACVersion(deviceID) == 2)
 			{
 				SetLHiAnalogOutputStandard(systemContext);
 			}

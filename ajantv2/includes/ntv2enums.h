@@ -8,9 +8,8 @@
 #ifndef NTV2ENUMS_H
 #define NTV2ENUMS_H
 
-#include "ajatypes.h"	//	Defines NTV2_DEPRECATE (or not)
-#include "ntv2version.h" // Defines NTV2 SDK version number in major.minor.point.build format
-
+#include "ajatypes.h"		//	for NTV2_DEPRECATE & friends
+#include "ntv2version.h"	//	for AJA_NTV2_SDK_VERSION_MAJOR & friends
 #if !defined(NTV2_DEPRECATE_14_3)
 typedef enum
 {
@@ -1601,7 +1600,7 @@ typedef enum
 	NTV2_REFERENCE_HDMI_INPUT		= NTV2_REFERENCE_HDMI_INPUT1,	///< @deprecated	Use NTV2_REFERENCE_HDMI_INPUT1 instead.
 	NTV2_REFERENCE_ANALOG_INPUT		= NTV2_REFERENCE_ANALOG_INPUT1, ///< @deprecated	Use NTV2_REFERENCE_ANALOG_INPUT1 instead.
 	NTV2_REFERENCE_INVALID = NTV2_NUM_REFERENCE_INPUTS
-} NTV2ReferenceSource;
+} NTV2ReferenceSource, NTV2RefSource;
 
 #define NTV2_IS_VALID_NTV2ReferenceSource(__x__)		((__x__) >= NTV2_REFERENCE_EXTERNAL && (__x__) < NTV2_NUM_REFERENCE_INPUTS)
 
@@ -2148,7 +2147,7 @@ typedef enum
 	NTV2_AUDIO_AES,				///< @brief Obtain audio samples from the device AES inputs, if available.
 	NTV2_AUDIO_ANALOG,			///< @brief Obtain audio samples from the device analog input(s), if available.
 	NTV2_AUDIO_HDMI,			///< @brief Obtain audio samples from the device HDMI input, if available
-	NTV2_AUDIO_MIC,
+	NTV2_AUDIO_MIC,				///< @brief	Obtain audio samples from the device microphone input, if available.
 	NTV2_MAX_NUM_AudioSources,
 	NTV2_AUDIO_SOURCE_INVALID	= NTV2_MAX_NUM_AudioSources
 } NTV2AudioSource;
@@ -4679,6 +4678,44 @@ typedef enum
 	NTV2_VPID_Range_Narrow,
 	NTV2_VPID_Range_Full
 } NTV2VPIDRGBRange;
+		
+typedef enum 
+{
+	MAIN_FLASHBLOCK,
+	FAILSAFE_FLASHBLOCK,
+	AUTO_FLASHBLOCK,
+	SOC1_FLASHBLOCK,
+	SOC2_FLASHBLOCK,
+	MAC_FLASHBLOCK,
+	MCS_INFO_BLOCK,
+	LICENSE_BLOCK
+} FlashBlockID;
+
+typedef enum
+{
+	BANK_0,
+	BANK_1,
+	BANK_2,
+	BANK_3
+} BankSelect;
+
+typedef enum {
+	READID_COMMAND			= 0x9F,
+	WRITEENABLE_COMMAND		= 0x06,
+	WRITEDISABLE_COMMAND	= 0x04,
+	READSTATUS_COMMAND		= 0x05,
+	WRITESTATUS_COMMAND		= 0x01,
+	READFAST_COMMAND		= 0x0B,
+	PAGEPROGRAM_COMMAND		= 0x02,
+	SECTORERASE_COMMAND		= 0xD8,
+	CHIPERASE_COMMAND		= 0xC7,
+	BANKSELECT_COMMMAND		= 0x17,
+	READBANKSELECT_COMMAND	= 0x16,
+	EXTENDEDADDRESS_COMMAND = 0xC5,
+	READEXTENDEDADDRESS_COMMAND = 0xC8,
+	WRITENONVOLATILECONFIGURATION_COMMAND = 0xB1,
+	READNONVOLATILECONFIGURATION_COMMAND = 0xB5
+} _FLASH_COMMAND;
 
 
 #if !defined (NTV2_DEPRECATE)

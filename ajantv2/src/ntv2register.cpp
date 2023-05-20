@@ -10,8 +10,6 @@
 #include "ntv2utils.h"
 #include "ntv2registerexpert.h"
 #include "ntv2endian.h"
-#include "ntv2bitfile.h"
-#include "ntv2mcsfile.h"
 #include "ntv2registersmb.h"
 #include "ntv2konaflashprogram.h"
 #include "ntv2konaflashprogram.h"
@@ -19,12 +17,10 @@
 #include "ajabase/system/debug.h"
 #include <math.h>
 #include <assert.h>
-#if defined (AJALinux)
-	#include "ntv2linuxpublicinterface.h"
-#elif defined (MSWindows)
+#include <deque>
+#if defined (MSWindows)
 	#pragma warning(disable: 4800)
 #endif
-#include <deque>
 
 #define HEX16(__x__)		"0x" << hex << setw(16) << setfill('0') <<				 uint64_t(__x__)  << dec
 #define INSTP(_p_)			HEX16(uint64_t(_p_))
@@ -845,7 +841,12 @@ bool CNTV2Card::GetVideoVOffset (int & outVOffset, const UWord inOutputSpigot)
 	
 	bool CNTV2Card::GetActiveFrameDimensions (NTV2FrameDimensions & outFrameDimensions, const NTV2Channel inChannel)
 	{
-		outFrameDimensions = GetActiveFrameDimensions(inChannel);
+		NTV2Standard st(NTV2_STANDARD_INVALID);	NTV2VANCMode vm(NTV2_VANCMODE_INVALID);
+		outFrameDimensions.Reset();
+		if (IsXilinxProgrammed()  &&  GetStandard(st, inChannel)  &&  GetVANCMode(vm, inChannel))
+		{	const NTV2FormatDescriptor fd (st, NTV2_FBF_10BIT_YCBCR, vm);
+			outFrameDimensions.Set (fd.GetRasterWidth(), fd.GetRasterHeight());
+		}
 		return outFrameDimensions.IsValid();
 	}
 	
@@ -2412,13 +2413,18 @@ bool CNTV2Card::GetDisabledChannels (NTV2ChannelSet & outChannels)
 
 	bool CNTV2Card::GetPCIAccessFrame (const NTV2Channel inChannel, ULWord & outValue)
 	{
-		return !IS_CHANNEL_INVALID(inChannel)  &&  ReadRegister (gChannelToPCIAccessFrameRegNum[inChannel], outValue);
+		return !IS_CHANNEL_INVALID(inChannel)
+				&&  ReadRegister (gChannelToPCIAccessFrameRegNum[inChannel], outValue);
 	}
 
 	bool CNTV2Card::FlipFlopPage (const NTV2Channel inCh)
 	{
 		ULWord nextFrm(0), outFrm(0);
-		return !IS_CHANNEL_INVALID(inCh)  &&  GetPCIAccessFrame(inCh, nextFrm)  &&  GetOutputFrame(inCh, outFrm)  &&  SetOutputFrame(inCh, nextFrm)  &&  SetPCIAccessFrame(inCh, outFrm);
+		return !IS_CHANNEL_INVALID(inCh)
+				&&  ReadRegister(gChannelToPCIAccessFrameRegNum[inCh], nextFrm) // GetPCIAccessFrame(inCh, nextFrm)
+				&&  GetOutputFrame(inCh, outFrm)
+				&&  SetOutputFrame(inCh, nextFrm)
+				&&  WriteRegister(gChannelToPCIAccessFrameRegNum[inCh], outFrm) && WaitForOutputVerticalInterrupt(inCh); // SetPCIAccessFrame(inCh, outFrm);
 	}
 #endif	//	!defined (NTV2_DEPRECATE_16_2)
 
@@ -2460,8 +2466,6 @@ bool CNTV2Card::GetInputFrame (const NTV2Channel inChannel, ULWord & outValue)
 
 bool CNTV2Card::SetAlphaFromInput2Bit (ULWord value)							{return WriteRegister (kRegCh1Control, value, kRegMaskAlphaFromInput2, kRegShiftAlphaFromInput2);}
 bool CNTV2Card::GetAlphaFromInput2Bit (ULWord & outValue)						{return ReadRegister (kRegCh1Control, outValue, kRegMaskAlphaFromInput2, kRegShiftAlphaFromInput2);}
-bool CNTV2Card::WriteGlobalControl (ULWord value)								{return WriteRegister (kRegGlobalControl, value);}
-bool CNTV2Card::ReadGlobalControl (ULWord * pValue)								{return pValue ? ReadRegister (kRegGlobalControl, *pValue) : false;}
 
 #if !defined (NTV2_DEPRECATE)
 	bool CNTV2Card::WriteCh1Control (ULWord value)								{return WriteRegister (kRegCh1Control, value);}
@@ -3523,10 +3527,11 @@ bool CNTV2Card::GetMixerRGBRange (const UWord inWhichMixer, NTV2MixerRGBRange & 
 	// Output:	bool status and modifies ULWord **pBaseAddress
 	bool CNTV2Card::GetBaseAddress (NTV2Channel channel, ULWord **pBaseAddress)
 	{
-		ULWord ulFrame;
-		if (IS_CHANNEL_INVALID (channel))
+		if (IS_CHANNEL_INVALID(channel))
 			return false;
-		GetPCIAccessFrame (channel, ulFrame);
+		ULWord ulFrame(0);
+		if (!ReadRegister(gChannelToPCIAccessFrameRegNum[channel], ulFrame))  //  GetPCIAccessFrame(channel, ulFrame);
+			return false;
 		if (ulFrame > GetNumFrameBuffers())
 			ulFrame = 0;
 	
@@ -6192,7 +6197,7 @@ bool CNTV2Card::SetAnalogLTCOutClockChannel (const UWord inLTCOutput, const NTV2
 }
 
 
-static const ULWord sSDIXmitEnableMasks[] = {	kRegMaskSDI1Transmit, kRegMaskSDI2Transmit, kRegMaskSDI3Transmit, kRegMaskSDI4Transmit,
+static const ULWord sSDIXmitEnableMasks[] = {	kRegMaskSDI1Transmit, kRegMaskSDI2Transmit, kRegMaskSDI3Transmit, ULWord(kRegMaskSDI4Transmit),
 												kRegMaskSDI5Transmit, kRegMaskSDI6Transmit, kRegMaskSDI7Transmit, kRegMaskSDI8Transmit};
 static const ULWord sSDIXmitEnableShifts[] = {	kRegShiftSDI1Transmit, kRegShiftSDI2Transmit, kRegShiftSDI3Transmit, kRegShiftSDI4Transmit,
 												kRegShiftSDI5Transmit, kRegShiftSDI6Transmit, kRegShiftSDI7Transmit, kRegShiftSDI8Transmit};

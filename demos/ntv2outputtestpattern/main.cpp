@@ -8,6 +8,7 @@
 
 //	Includes
 #include "ntv2outputtestpattern.h"
+#include "ajabase/common/common.h"
 
 
 using namespace std;

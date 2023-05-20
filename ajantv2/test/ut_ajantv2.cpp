@@ -11,32 +11,32 @@
 // ie xcode 6, 7
 #define DOCTEST_THREAD_LOCAL
 #include "doctest.h"
-
-#include <vector>
-#include <algorithm>
-#include <iomanip>
-#include <iterator>    //      For std::inserter
-
-#include "ajabase/system/thread.h"
-
 #include "ntv2bitfile.h"
 #include "ntv2card.h"
 #include "ntv2debug.h"
 #include "ntv2endian.h"
 #include "ntv2signalrouter.h"
-#include "ntv2registerexpert.h"
 #include "ntv2routingexpert.h"
 #include "ntv2transcode.h"
 #include "ntv2utils.h"
 #include "ntv2vpid.h"
+#include "ntv2version.h"
+#include "ntv2testpatterngen.h"
+#include "ajabase/system/debug.h"
+#include <vector>
+#include <algorithm>
+#include <iomanip>
+#include <iterator>    //      For std::inserter
+
+using namespace std;
 
 static bool gVerboseOutput = false;
 
-#define	LOGERR(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Error,		__FUNCTION__ << ":  " << __x__)
-#define	LOGWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Warning,	__FUNCTION__ << ":  " << __x__)
-#define	LOGNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Notice,	__FUNCTION__ << ":  " << __x__)
-#define	LOGINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Info,		__FUNCTION__ << ":  " << __x__)
-#define	LOGDBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Debug,		__FUNCTION__ << ":  " << __x__)
+#define	LOGERR(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Error,		AJAFUNC << ":  " << __x__)
+#define	LOGWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Warning,	AJAFUNC << ":  " << __x__)
+#define	LOGNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Notice,	AJAFUNC << ":  " << __x__)
+#define	LOGINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Info,		AJAFUNC << ":  " << __x__)
+#define	LOGDBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Testing, AJA_DebugSeverity_Debug,		AJAFUNC << ":  " << __x__)
 
 #if 0
 template
@@ -49,6 +49,9 @@ TEST_SUITE("filename" * doctest::description("functions in streams/common/filena
 
 } //filename
 #endif
+
+typedef	vector<NTV2VANCMode>	NTV2VANCModes;
+
 
 void ntv2debug_marker() {}
 TEST_SUITE("ntv2debug" * doctest::description("ntv2 debug string functions")) {
@@ -920,7 +923,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		}
 	}
 
-	TEST_CASE("NTV2_POINTER")
+	TEST_CASE("NTV2Buffer")
 	{
 		//							              1         2         3         4
 		//							    01234567890123456789012345678901234567890123
@@ -929,7 +932,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		static const std::string str3 ("APWRAPWR in Spain stays mainly on WRAPWRAPWR");
 
 		LOGNOTE("Started");
-		NTV2_POINTER a(AJA_NULL, 0), b(str1.c_str(), 0), c(AJA_NULL, str1.length()), d(str1.c_str(),str1.length());
+		NTV2Buffer a(AJA_NULL, 0), b(str1.c_str(), 0), c(AJA_NULL, str1.length()), d(str1.c_str(),str1.length());
 		CHECK_FALSE(a);
 		CHECK_FALSE(b);
 		CHECK_FALSE(c);
@@ -939,11 +942,11 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		CHECK_FALSE(c.Set(AJA_NULL, str1.length()));
 		CHECK(d.Set(str1.c_str(),str1.length()));
 
-		NTV2_POINTER		spain	(str1.c_str(), str1.length());
-		NTV2_POINTER		japan	(str2.c_str(), str2.length());
-		NTV2_POINTER		wrap	(str3.c_str(), str3.length());
-		ULWord				firstDiff	(0);
-		ULWord				lastDiff	(0);
+		NTV2Buffer	spain	(str1.c_str(), str1.length());
+		NTV2Buffer	japan	(str2.c_str(), str2.length());
+		NTV2Buffer	wrap	(str3.c_str(), str3.length());
+		ULWord		firstDiff	(0);
+		ULWord		lastDiff	(0);
 		CHECK(spain.GetRingChangedByteRange (japan, firstDiff, lastDiff));
 		CHECK(firstDiff < lastDiff);
 		CHECK_EQ(firstDiff, 12);
@@ -971,14 +974,14 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		};
 		// Test cast operators
 		CHECK(CheckSizeT(spain));
-		CHECK_FALSE(CheckSizeT(NTV2_POINTER()));
+		CHECK_FALSE(CheckSizeT(NTV2Buffer()));
 		size_t sz(spain);
 		CHECK_EQ(sz, spain.GetByteCount());
 		sz = japan;
 		CHECK_EQ(sz, japan.GetByteCount());
 		sz = size_t(wrap) + 0;
 		CHECK_EQ(sz, wrap.GetByteCount());
-		sz = NTV2_POINTER();
+		sz = NTV2Buffer();
 		CHECK_EQ(sz, 0);
 
 		for (unsigned ndx(0);  ndx < 5;  ndx++)
@@ -994,7 +997,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		std::vector<uint32_t> u32s;
 		std::vector<uint16_t> u16s;
 		std::vector<uint8_t> u8s;
-		NTV2_POINTER spainCmp(spain.GetByteCount());
+		NTV2Buffer spainCmp(spain.GetByteCount());
 		CHECK(spain.GetU64s(u64s, 0, 0, true));
 		CHECK_EQ(u64s.size(), 5);
 		std::cerr << ULWord64Sequence(u64s) << std::endl;
@@ -1048,7 +1051,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		//           1         2         3         4
 		// 01234567890123456789012345678901234567890123
 		// The rain in Spain stays mainly on the plain.
-		NTV2_POINTER foo(50);
+		NTV2Buffer foo(50);
 		NTV2SegmentedXferInfo segInfo;
 		segInfo.setSegmentCount(4).setSegmentLength(3).setSourceOffset(2).setSourcePitch(5);
 		CHECK(segInfo.isValid());
@@ -1112,17 +1115,17 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		CHECK_FALSE(foo.PutU8s(u8s, 129)); // First U8 offset that will write past end
 
 		// Make a "raster" of character strings of '.'s, 64 rows tall x 256 chars wide
-		NTV2_POINTER A(16*1024);
+		NTV2Buffer A(16*1024);
 		A.Fill('.');
 		for (ULWord row(1); row < A.GetByteCount() / 256; row++)
 			CHECK(A.PutU8s(UByteSequence{'\n'}, row * 256));
 		CHECK(A.PutU8s(UByteSequence{0x0}, A.GetByteCount() - 1)); // NUL terminate
 
-		const NTV2_POINTER aOrig(A); // Keep copy of original
+		const NTV2Buffer aOrig(A); // Keep copy of original
 		CHECK(A.IsContentEqual(aOrig)); // A == aOrig
 
 		// "Blit" 5Hx128W box of X's into the "raster" of '.'s...
-		NTV2_POINTER X(16*1024);
+		NTV2Buffer X(16*1024);
 		X.Fill('X');
 		segInfo.reset().setSegmentInfo(5/*5 tall*/, 128 /*128 wide*/); // Xfer 128x5 box of X's
 		segInfo.setSourceOffset(0).setSourcePitch(256); // From upper-left corner of X...
@@ -1233,7 +1236,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		const UWord		nDstHeightLines		(32);
 		const UWord		nDstBytesPerLine	(nDstWidthPixels * 2);
 		const UWord		nDstBytes			(nDstBytesPerLine * nDstHeightLines);
-		NTV2_POINTER	dstRaster			(nDstBytes);
+		NTV2Buffer		dstRaster			(nDstBytes);
 		UByte *			pDstRaster			(reinterpret_cast<UByte*>(dstRaster.GetHostPointer()));
 		dstRaster.Fill(uint8_t(0xAA));
 
@@ -1241,7 +1244,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		const UWord		nSrcHeightLines		(16);
 		const UWord		nSrcBytesPerLine	(nSrcWidthPixels * 2);
 		const UWord		nSrcBytes			(nSrcBytesPerLine * nSrcHeightLines);
-		NTV2_POINTER	srcRaster			(nSrcBytes);
+		NTV2Buffer		srcRaster			(nSrcBytes);
 		UByte *			pSrcRaster			(reinterpret_cast<UByte*>(srcRaster.GetHostPointer()));
 		srcRaster.Fill(UByte(0xBB));
 		if (gVerboseOutput)	{std::cerr << "SrcRaster:" << std::endl;  srcRaster.Dump(std::cerr, 0/*byteOffset*/, 0/*byteCount*/, 16/*radix*/, 2/*bytes/group*/, nSrcWidthPixels/*groups/line*/, 16/*addrRadix*/);}
@@ -2176,7 +2179,6 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 	{
 		typedef	std::vector<NTV2Standard>			NTV2Stds;
 		typedef	NTV2Stds::const_iterator		NTV2StdsConstIter;
-		typedef	std::vector<NTV2VANCMode>			NTV2VANCModes;
 		const NTV2Stds	standards = {	NTV2_STANDARD_1080, NTV2_STANDARD_720, NTV2_STANDARD_525, NTV2_STANDARD_625,
 											NTV2_STANDARD_1080p, NTV2_STANDARD_2K, NTV2_STANDARD_2Kx1080p, NTV2_STANDARD_2Kx1080i,
 											NTV2_STANDARD_3840x2160p, NTV2_STANDARD_4096x2160p, NTV2_STANDARD_3840HFR,
@@ -2388,7 +2390,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 
 	TEST_CASE("NTV2Planar3Formats")
 	{
-		NTV2_POINTER dummyBuffer(32*1024*1024);
+		NTV2Buffer dummyBuffer(32*1024*1024);
 		static const NTV2Standard	stds[]	=	{	NTV2_STANDARD_525,	NTV2_STANDARD_625,	NTV2_STANDARD_720,	NTV2_STANDARD_1080,	NTV2_STANDARD_1080p, NTV2_STANDARD_2K, NTV2_STANDARD_2Kx1080p, NTV2_STANDARD_2Kx1080i, NTV2_STANDARD_3840x2160p, NTV2_STANDARD_4096x2160p, NTV2_STANDARD_3840HFR, NTV2_STANDARD_4096HFR};
 		for (unsigned stdNdx(0);  stdNdx < sizeof(stds)/sizeof(NTV2Standard);  stdNdx++)
 		{
@@ -2561,8 +2563,8 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		std::vector<UByte>	testLine2VUY;
 		for (unsigned ndx(0);  ndx < 1440;  ndx++)
 			testLine2VUY.push_back(UByte(ndx%256));
-		NTV2_POINTER	bufferV210(sizeof(UWord)*1440);
-		NTV2_POINTER	buffer2VUY(sizeof(UByte)*1440);
+		NTV2Buffer	bufferV210(sizeof(UWord)*1440);
+		NTV2Buffer	buffer2VUY(sizeof(UByte)*1440);
 		std::vector<uint8_t>	compLine2VUY;
 		CHECK_FALSE(::ConvertLine_2vuy_to_v210(NULL, reinterpret_cast<ULWord*>(bufferV210.GetHostPointer()), 720));	//	NULL src ptr
 		CHECK_FALSE(::ConvertLine_2vuy_to_v210(&testLine2VUY[0], NULL, 720));	//	NULL dst ptr
@@ -2588,8 +2590,8 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 			0x34, 0x3a, 0x35, 0x38, 0x3a, 0x35, 0x34, 0x00, 0x65, 0x00, 0xd2, 0x27, 0xd4, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 			0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0xbb, 0x11, 0x22, 0x00, 0x44, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xaa, 0x99, 0x55, 0x66, 0x20, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0x00, 0x30, 0x02, 0x20, 0x01, 0x00, 0x00, 0x00, 0x00, 0x30, 0x02, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x30, 0x00, 0x80, 0x01, 0x00, 0x00, 0x00	};
 
-		const NTV2_POINTER TTapPro(sTTapPro, sizeof(sTTapPro));
-		NTV2_POINTER sub(TTapPro.GetHostAddress(0), TTapPro.GetByteCount());
+		const NTV2Buffer TTapPro(sTTapPro, sizeof(sTTapPro));
+		NTV2Buffer sub(TTapPro.GetHostAddress(0), TTapPro.GetByteCount());
 		CNTV2Bitfile bf;
 		std::string err;
 
@@ -2623,10 +2625,10 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 			uint16_t dSectionExpected(uint16_t(TTapPro.U8(125) << 8) | uint16_t(TTapPro.U8(126)));
 			CHECK_EQ(dSectionExpected, 0x0009);
 
-			NTV2_POINTER aSectionBad(TTapPro);
-			NTV2_POINTER bSectionBad(TTapPro);
-			NTV2_POINTER cSectionBad(TTapPro);
-			NTV2_POINTER dSectionBad(TTapPro);
+			NTV2Buffer aSectionBad(TTapPro);
+			NTV2Buffer bSectionBad(TTapPro);
+			NTV2Buffer cSectionBad(TTapPro);
+			NTV2Buffer dSectionBad(TTapPro);
 			for (uint16_t fnLen(0);	 fnLen < 0xFFFF;  fnLen++) {
 
 				// A Section -- bad FileName length test
@@ -2943,3 +2945,68 @@ TEST_SUITE("signal router" * doctest::description("CNTV2SignalRouter & RoutingEx
 		CHECK(CNTV2SignalRouter::IsHDMIOutWidgetType(NTV2WidgetType_HDMIInV2) == false);
 	}
 }
+
+
+void testpatterngenmarker() {}
+TEST_SUITE("TestPatternGen" * doctest::description("NTV2TestPatternGen tests"))
+{
+	TEST_CASE("Permutations")
+	{
+		static const NTV2PixelFormats pixFmtsToTest = {	NTV2_FBF_10BIT_YCBCR, NTV2_FBF_8BIT_YCBCR, NTV2_FBF_ARGB,
+														NTV2_FBF_RGBA, NTV2_FBF_10BIT_RGB, NTV2_FBF_8BIT_YCBCR_YUY2,
+														NTV2_FBF_ABGR, NTV2_FBF_10BIT_DPX,
+#if defined(_DEBUG)
+														NTV2_FBF_10BIT_YCBCR_DPX,	//	crashes!
+#endif	//	_DEBUG
+														NTV2_FBF_10BIT_DPX_LE, NTV2_FBF_24BIT_RGB, NTV2_FBF_24BIT_BGR,
+														NTV2_FBF_48BIT_RGB};
+		static const NTV2StandardSet standardsToTest = {/*NTV2_STANDARD_1080,*/ NTV2_STANDARD_720, NTV2_STANDARD_525,
+														NTV2_STANDARD_625, NTV2_STANDARD_1080p, /*NTV2_STANDARD_2K,*/
+														NTV2_STANDARD_2Kx1080p, /*NTV2_STANDARD_2Kx1080i,*/
+														NTV2_STANDARD_3840x2160p, NTV2_STANDARD_4096x2160p,
+														NTV2_STANDARD_7680, NTV2_STANDARD_8192};
+		static const NTV2TestPatternNames tpNames(NTV2TestPatternGen::getTestPatternNames());
+
+		NTV2Buffer fb;
+		//	For each possible raster dimension (via video standard)...
+		for (NTV2StandardSetConstIter stIt(standardsToTest.begin());  stIt != standardsToTest.end();  ++stIt)
+		{	const NTV2Standard st(*stIt);
+			//	For this Standard, get a list of permissible VANC modes (off, tall, taller?)
+			NTV2GeometrySet fgs (::GetRelatedGeometries(::GetGeometryFromStandard(st)));
+			NTV2VANCModes vms;
+			if (fgs.empty())
+				vms.push_back(NTV2_VANCMODE_OFF);
+			else for (NTV2GeometrySetConstIter fgIt(fgs.begin());  fgIt != fgs.end();  ++fgIt)
+				vms.push_back(::GetVANCModeForGeometry(*fgIt));
+
+			//	For each possible pixel format...
+			for (NTV2PixelFormatsConstIter pfIt(pixFmtsToTest.begin());  pfIt != pixFmtsToTest.end();  ++pfIt)
+			{	const NTV2PixelFormat pf(*pfIt);
+
+				//	For each VANC mode...
+				for (size_t vmNdx(0);  vmNdx < vms.size();  vmNdx++)
+				{	const NTV2VANCMode vm(vms.at(vmNdx));
+					NTV2FormatDesc fd (st, pf, vm);
+					CHECK(fd.IsValid());
+					//	Allocate a video buffer for this raster size...
+					CHECK(fb.Allocate(fd.GetTotalBytes()));
+
+					//	For each test pattern...
+					for (size_t ndx(0);  ndx < tpNames.size();  ndx++)
+					{	const string tpName (tpNames.at(ndx));
+						const NTV2TestPatternSelect tpID(NTV2TestPatternGen::findTestPatternByName(tpName));
+						if (NTV2_IS_12B_PATTERN(tpID)  &&  !NTV2_IS_FBF_12BIT_RGB(pf))
+							continue;	//	skip -- this test pattern won't work with this pixel format
+						if (!NTV2TestPatternGen::canDrawTestPattern (tpID, fd))
+							continue;	//	skip -- it admits it can't do this
+
+						//	Draw the test pattern into the buffer...
+						cout << fd << ": '" << tpName << "'" << endl;
+						NTV2TestPatternGen gen;
+						CHECK(gen.DrawTestPattern (tpName, fd, fb));
+					}	//	for each test pattern
+				}	//	for each VANC mode
+			}	//	for each pixel format
+		}	//	for each video standard
+	}	//	TEST_CASE("Permutations")
+}	//	TEST_SUITE("TestPatternGen")

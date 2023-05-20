@@ -5,9 +5,10 @@
 	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
-#include <errno.h>
-#include "ajabase/system/mac/pthreadsextra.h"
 #include "ajabase/system/mac/lockimpl.h"
+#include "ajabase/system/mac/pthreadsextra.h"
+#include "ajabase/system/debug.h"
+#include <errno.h>
 
 // For converting milliseconds to nanoseconds
 static const int MIL_2_NSEC = 1000000;

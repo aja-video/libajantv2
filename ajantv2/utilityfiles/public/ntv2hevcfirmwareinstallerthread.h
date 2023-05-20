@@ -51,7 +51,7 @@
 #define RD_FUNC_DATA					(0x0C)
 
 #define PERCENT_PROGRESS_START()		do { printf("  0%%	"); fflush(stdout); pp = 0; } while (0)
-#define PERCENT_PROGRESS()				do { px = (double)(dataSize - remainSize) * 100 / dataSize; if (px > pp) { printf("\r%3d%%	", px); fflush(stdout); pp = px; } } while (0)
+#define PERCENT_PROGRESS()				do { px = uint32_t(double(dataSize - remainSize) * 100 / dataSize); if (px > pp) { printf("\r%3d%%	", px); fflush(stdout); pp = px; } } while (0)
 #define PERCENT_PROGRESS_END()			do { printf("\r100%%\n"); fflush(stdout); } while (0)
 
 typedef enum

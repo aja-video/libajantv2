@@ -12,9 +12,9 @@
 #include "ntv2democommon.h"
 #include "ajabase/system/thread.h"
 #include "ajabase/system/info.h"
-#include "ajacc/includes/ntv2captionencoder608.h"
-#include "ajacc/includes/ntv2captionencoder708.h"
-#include "ajacc/includes/ntv2caption608types.h"
+#include "ntv2captionencoder608.h"
+#include "ntv2captionencoder708.h"
+#include "ntv2caption608types.h"
 #include <vector>
 #include <map>
 

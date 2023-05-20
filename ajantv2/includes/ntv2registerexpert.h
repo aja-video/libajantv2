@@ -52,6 +52,7 @@
 #define kRegClass_HDMI		std::string ("kRegClass_HDMI")
 #define kRegClass_HDR		std::string ("kRegClass_HDR")
 #define kRegClass_Input		std::string ("kRegClass_Input")
+#define kRegClass_Info		std::string ("kRegClass_Info")
 #define kRegClass_Interrupt	std::string ("kRegClass_Interrupt")
 #define kRegClass_IP		std::string ("kRegClass_IP")
 #define kRegClass_LUT		std::string ("kRegClass_LUT")
@@ -125,7 +126,7 @@ class AJAExport CNTV2RegisterExpert
 		/**
 			@return		A set of strings containing the names of all register classes the given register belongs to.
 		**/
-		static NTV2StringSet	GetRegisterClasses (const uint32_t inRegNum);
+		static NTV2StringSet	GetRegisterClasses (const uint32_t inRegNum, const bool inRemovePrefix = false);
 
 		/**
 			@param[in]	inClassName Specifies the register class.
