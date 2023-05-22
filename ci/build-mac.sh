@@ -3,13 +3,6 @@
 CHECKOUT_DIR="$(git rev-parse --show-toplevel)"
 
 # environment vars to control the build
-if [ -z "${GENERATOR}" ];     then GENERATOR="Ninja"; fi
-if [ -z "${BUILD_TYPE}" ];    then BUILD_TYPE="Release"; fi
-if [ -z "${BUILD_DIR}" ];     then BUILD_DIR="$CHECKOUT_DIR/build"; fi
-if [ -z "${INSTALL_DIR}" ];   then INSTALL_DIR="$CHECKOUT_DIR/install"; fi
-if [ -z "${OSX_ARCHITECTURE}" ]; then OSX_ARCHITECTURE="arm64"; fi
-
-# environment vars to control the build
 if [ -z ${GENERATOR} ]; then GENERATOR="Ninja"; fi
 if [ -z ${BUILD_TYPE} ]; then BUILD_TYPE="Release"; fi
 if [ -z ${BUILD_DIR} ]; then BUILD_DIR="$CHECKOUT_DIR/build"; fi
@@ -58,8 +51,8 @@ echo "Generating build targets"
         -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
         -DCMAKE_PREFIX_PATH=$PREFIX_PATH \
         -DCMAKE_OSX_ARCHITECTURES=$OSX_ARCHITECTURE \
-        -DAJANTV2_BUILD_OPENSOURCE=$AJA_BUILD_OPENSOURCE \
-        -DAJANTV2_BUILD_DOCS=$AJA_BUILD_DOCS \
+        -DAJANTV2_BUILD_OPENSOURCE=$BUILD_OPENSOURCE \
+        -DAJANTV2_BUILD_DOCS=$BUILD_DOCS \
         -DAJANTV2_BUILD_DEMOS="$BUILD_DEMOS" \
         -DAJA_BUILD_DOCS="$BUILD_DOCS" \
         -DAJA_BUILD_TESTS="$BUILD_TESTS" \
