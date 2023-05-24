@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-# For CMAKE_MSVC_RUNTIME_LIBRARY compatability. Per note: This must be before the first project()
+# For CMAKE_MSVC_RUNTIME_LIBRARY compatability. Per note: This must be before the first project() 
 if(POLICY CMP0091)
   cmake_policy(SET CMP0091 NEW)
 endif()
