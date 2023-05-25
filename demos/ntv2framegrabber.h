@@ -16,7 +16,11 @@
 	#include <QtGui>
 #endif
 #include <QThread>
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
 #include <QtMultimedia>
+#else
+#include <QAudioOutput>
+#endif
 #include "ntv2card.h"
 #include "ntv2enums.h"
 #include "ntv2task.h"
@@ -178,9 +182,13 @@ class NTV2FrameGrabber : public QThread
 		NTV2EveryFrameTaskMode		mSavedTaskMode;			///< @brief	Used to restore the previous task mode
 		bool						mDoMultiChannel;		///< @brief	Demonstrates how to configure the board for multi-format
 
-		bool						mbWithAudio;			///< @brief	Capture audio?
-		QAudioOutput *				mAudioOutput;			///< @brief	Used to play captured audio on host audio system
-		QAudioFormat				mFormat;				///< @brief	Output audio stream format information
+        bool						mbWithAudio;			///< @brief	Capture audio?
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+        QAudioOutput *				mAudioOutput;			///< @brief	Used to play captured audio on host audio system
+#else
+        QAudioSink *				mAudioOutput;			///< @brief	Used to play captured audio on host audio system
+#endif
+        QAudioFormat				mFormat;				///< @brief	Output audio stream format information
 		QIODevice *					mAudioDevice;			///< @brief	Host audio device
 		ULWord						mNumAudioChannels;		///< @brief	Number of audio channels being captured on the AJA device
 		NTV2AudioSystem				mAudioSystem;			///< @brief	Audio subsystem to use

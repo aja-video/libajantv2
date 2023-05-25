@@ -64,14 +64,9 @@ NTV2QtMultiInput::NTV2QtMultiInput (QWidget * parent, Qt::WindowFlags flags)
 	mDeviceChoicePopupMenu->setCurrentIndex (initialBoardIndex);
 
 	//
-	//	Map all "with audio" checkbox clicks to a single handler...
-	//
-	QSignalMapper * signalMapper = new QSignalMapper (this);
-	connect (signalMapper, SIGNAL (mapped (int)), this, SLOT (SlotAudioCheckBox (int)));
-
-	//
 	//	Set up each of the preview widgets and frame grabber threads...
 	//
+    QSignalMapper * signalMapper = new QSignalMapper (this);
 	for (uint32_t inputNumber = 0;  inputNumber < numInputs;  inputNumber++)
 	{
 		mPreviewGroupBoxes [inputNumber] = new QGroupBox (this);
@@ -114,6 +109,15 @@ NTV2QtMultiInput::NTV2QtMultiInput (QWidget * parent, Qt::WindowFlags flags)
 			//connect (mWithCaptionsCheckBoxes [inputNumber], SIGNAL (clicked ()), signalMapper, SLOT (map ()));
 		#endif
 	}	//	for each video input
+
+    //
+    //	Map all "with audio" checkbox clicks to a single handler...
+    //
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+    connect (signalMapper, SIGNAL (mappedInt (int)), this, SLOT (SlotAudioCheckBox (int)));
+#else
+    connect (signalMapper, SIGNAL (mapped (int)), this, SLOT (SlotAudioCheckBox (int)));
+#endif
 
 	//
 	//	Lay out everything...
