@@ -92,3 +92,8 @@ endif()
 if (AJANTV2_BUILD_DRIVER)
     add_subdirectory(driver)
 endif()
+
+if(AJA_INSTALL_CMAKE)
+    install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2)
+endif()
+

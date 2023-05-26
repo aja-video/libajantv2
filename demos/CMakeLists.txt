@@ -49,3 +49,8 @@ endif()
 # # if (AJA_BUILD_NVIDIA)
 # #     add_subdirectory(NVIDIA)
 # # endif()
+
+if(AJA_INSTALL_CMAKE)
+    install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos)
+endif()
+
