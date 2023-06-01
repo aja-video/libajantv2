@@ -25,8 +25,8 @@
 #include "ajabase/system/info.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/system/process.h"
-#include "ajacc/includes/ntv2captiondecoder608.h"
-#include "ajacc/includes/ntv2captiondecoder708.h"
+#include "ntv2captiondecoder608.h"
+#include "ntv2captiondecoder708.h"
 
 
 typedef enum _OutputMode

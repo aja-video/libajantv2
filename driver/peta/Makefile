@@ -98,7 +98,24 @@ default: makesymlinks all
 	$(call ensure_dir_exists, $(A_DRIVER_PATH)/bin)
 	cp $(NTV2TARGET).ko $(A_DRIVER_PATH)/bin
 
-all: $(DRIVERINCS) $(DRIVERSRCS) $(HEVCINCS) $(HEVCSRCS)
+ntv2version_gen:
+	@if [ ! -e "$(A_LIB_NTV2_INC)/ntv2version.h" ]; then \
+		printf "\ngenerating: $(A_LIB_NTV2_INC)/ntv2version.h\n"; \
+		if [ -e "$(A_LIB_NTV2_INC)/ntv2version.h.in" ]; then \
+			awk '\
+				sub("@AJA_NTV2_SDK_VERSION_MAJOR@", "$(SDKVER_MAJ)") {print;next} \
+				sub("@AJA_NTV2_SDK_VERSION_MINOR@", "$(SDKVER_MIN)") {print;next} \
+				sub("@AJA_NTV2_SDK_VERSION_POINT@", "$(SDKVER_PNT)") {print;next} \
+				sub("@AJA_NTV2_SDK_BUILD_NUMBER@", "$(SDKVER_BLD)") {print;next} \
+				sub("@AJA_NTV2_SDK_BUILD_TYPE@", "$(SDKVER_STR)") {print;next} \
+				sub("@AJA_NTV2_SDK_BUILD_DATETIME@", "$(shell date -u +%Y-%m-%dT%H:%M:%SZ)") {print;next} \
+				{print} \
+			' "$(A_LIB_NTV2_INC)/ntv2version.h.in" > "$(A_LIB_NTV2_INC)/ntv2version.h"; \
+		fi \
+	fi
+
+.PHONY: all
+all: ntv2version_gen $(DRIVERINCS) $(DRIVERSRCS) $(HEVCINCS) $(HEVCSRCS)
 
 # Make a symlink to the C-only CPP files we need in classes.
 .PHONY: makesymlinks 

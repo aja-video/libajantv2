@@ -90,12 +90,12 @@ int main (int argc, const char ** argv)
         DolbyConfig config(deviceSpec);
 
 	//	Channel
-	if (channelNumber < 1  ||  channelNumber > 8)
+	if ((channelNumber < 1)  ||  (channelNumber > 8))
 		{cerr << "## ERROR:  Invalid channel number " << channelNumber << " -- expected 1 thru 8" << endl;  return 1;}
 	config.fInputChannel = NTV2Channel(channelNumber - 1);
 
 	//	Input source
-    const string legalSources(CNTV2DemoCommon::GetInputSourceStrings(NTV2_INPUTSOURCES_HDMI, deviceSpec));
+    const string legalSources(CNTV2DemoCommon::GetInputSourceStrings(NTV2_IOKINDS_HDMI, deviceSpec));
 	if (inputSourceStr == "?" || inputSourceStr == "list")
 		{cout << legalSources << endl;  return 0;}
 	if (!inputSourceStr.empty())

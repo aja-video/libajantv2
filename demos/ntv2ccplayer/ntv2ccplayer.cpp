@@ -25,7 +25,7 @@
 #include "ajaanc/includes/ancillarylist.h"
 #include "ajaanc/includes/ancillarydata_cea608_vanc.h"
 #include "ajaanc/includes/ancillarydata_cea708.h"
-#include "ajacc/includes/ntv2captionrenderer.h"
+#include "ntv2captionrenderer.h"
 #include <sstream>
 #include <fstream>
 #include <iostream>

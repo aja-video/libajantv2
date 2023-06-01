@@ -11,6 +11,7 @@
 #include "ntv2endian.h"
 #include "ntv2vpid.h"
 #include "ntv2bitfile.h"
+#include "ntv2signalrouter.h"
 #include "ajabase/common/common.h"
 #include "ajabase/system/lock.h"
 #include "ajabase/common/ajarefptr.h"

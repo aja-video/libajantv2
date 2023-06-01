@@ -922,7 +922,8 @@ INPUT                  = doxygen \
                          ../ajabase/pnp \
                          ../ajabase/system \
                          ../ajaanc/includes \
-                         ../../../libajacc/includes \
+                         ../../libajacc/src \
+                         ../../libajacc/includes \
                          ../demos \
                          ../ajantv2/includes \
                          ../ajantv2/src

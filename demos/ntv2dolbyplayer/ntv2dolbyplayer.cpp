@@ -505,8 +505,8 @@ AJAStatus NTV2DolbyPlayer::SetUpTestPatternVideoBuffers (void)
 
 		//	Use the test pattern generator to fill an NTV2TestPatternBuffer...
 		NTV2TestPatternGen		testPatternGen;
-        NTV2FormatDescriptor	formatDesc	(mVideoFormat, mPixelFormat, NTV2_VANCMODE_OFF);
-        NTV2_POINTER			vidBuffer	(mTestPatternVideoBuffers [testPatternIndex], mVideoBufferSize);
+        NTV2FormatDescriptor	formatDesc	(mVideoFormat, mPixelFormat);
+        NTV2Buffer				vidBuffer	(mTestPatternVideoBuffers [testPatternIndex], mVideoBufferSize);
 
 		if (!testPatternGen.DrawTestPattern (testPatternTypes[testPatternIndex],  formatDesc, vidBuffer))
 		{

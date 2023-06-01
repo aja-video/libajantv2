@@ -14,8 +14,7 @@
 #include "ntv2videodefines.h"
 #include "ntv2publicinterface.h"
 #include "ntv2formatdescriptor.h"
-#include "ntv2m31publicinterface.h"
-#include "ntv2signalrouter.h"
+#include "ntv2m31enums.h"
 #include <string>
 #include <iostream>
 #include <vector>
@@ -218,8 +217,8 @@ AJAExport bool	SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
 										const UWord					inDstTotalLines);
 
 /**
-	@brief	Copies all or part of a source raster image into another raster at a given position.
-	@param[in]	inPixelFormat			Specifies the NTV2FrameBufferFormat of both the destination and source buffers.
+	@brief	Copies all or part of a source raster image into a destination raster at a given position.
+	@param[in]	inPixelFormat			Specifies the NTV2PixelFormat of both the destination and source buffers.
 										(Note that many pixel formats are not currently supported.)
 	@param		pDstBuffer				Specifies the starting address of the destination buffer to be modified. Must be non-NULL.
 	@param[in]	inDstBytesPerLine		The number of bytes per raster line of the destination buffer. Note that this value
@@ -266,23 +265,23 @@ AJAExport bool	SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
 	@note		The use of unsigned values precludes positioning the source raster above the top line of the destination raster,
 				or to the left of the destination raster's left edge. This function will, however, clip the source raster if it
 				overhangs the bottom and/or right edge of the destination raster.
-	@note		This function probably can't be made to work with planar formats.
+	@bug		This function doesn't work with planar formats.
 	@bug		Needs implementations for NTV2_FBF_10BIT_YCBCRA, NTV2_FBF_10BIT_RGB_PACKED, NTV2_FBF_10BIT_ARGB,
 				NTV2_FBF_16BIT_ARGB.
 **/
-AJAExport bool	CopyRaster (const NTV2FrameBufferFormat inPixelFormat,
-							UByte *						pDstBuffer,
-							const ULWord				inDstBytesPerLine,
-							const UWord					inDstTotalLines,
-							const UWord					inDstVertLineOffset,
-							const UWord					inDstHorzPixelOffset,
-							const UByte *				pSrcBuffer,
-							const ULWord				inSrcBytesPerLine,
-							const UWord					inSrcTotalLines,
-							const UWord					inSrcVertLineOffset,
-							const UWord					inSrcVertLinesToCopy,
-							const UWord					inSrcHorzPixelOffset,
-							const UWord					inSrcHorzPixelsToCopy);
+AJAExport bool	CopyRaster (const NTV2PixelFormat	inPixelFormat,
+							UByte *					pDstBuffer,
+							const ULWord			inDstBytesPerLine,
+							const UWord				inDstTotalLines,
+							const UWord				inDstVertLineOffset,
+							const UWord				inDstHorzPixelOffset,
+							const UByte *			pSrcBuffer,
+							const ULWord			inSrcBytesPerLine,
+							const UWord				inSrcTotalLines,
+							const UWord				inSrcVertLineOffset,
+							const UWord				inSrcVertLinesToCopy,
+							const UWord				inSrcHorzPixelOffset,
+							const UWord				inSrcHorzPixelsToCopy);
 
 AJAExport NTV2Standard GetNTV2StandardFromScanGeometry (const UByte inScanGeometry, const bool inIsProgressiveTransport);
 
