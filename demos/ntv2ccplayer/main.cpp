@@ -229,7 +229,7 @@ int main (int argc, const char ** argv)
 
 	for (NTV2StringListConstIter iter (sCaptionChannels.begin());  iter != sCaptionChannels.end();  ++iter, ++ndx)
 	{
-		CCGeneratorConfig	generatorConfig;
+		CCGenConfig	generatorConfig;
 
 		//	Caption Channel
 		generatorConfig.fCaptionChannel = ::StrToNTV2Line21Channel (*iter);

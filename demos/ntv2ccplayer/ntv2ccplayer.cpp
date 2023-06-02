@@ -208,7 +208,7 @@ static istringstream	gBuiltInStream (gBuiltInCaptions);
 
 #endif	//	MEASURE_ACCURACY
 
-AJALabelValuePairs CCGeneratorConfig::Get (void) const
+AJALabelValuePairs CCGenConfig::Get (void) const
 {
 	static const string EndActions[] = {"Quit", "Repeat", "Idle", ""};
 	AJALabelValuePairs result;
@@ -1347,7 +1347,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 }	//	RouteOutputSignal
 
 
-AJAStatus NTV2CCPlayer::Run ()
+AJAStatus NTV2CCPlayer::Run (void)
 {
 	//	Start the threads...
 	StartPlayoutThread();
@@ -1377,7 +1377,7 @@ void NTV2CCPlayer::StartCaptionGeneratorThreads ()
 	//	Create and start the caption generator threads, one per caption channel...
 	for (CaptionChanGenMapCIter it(mConfig.fCapChanGenConfigs.begin());  it != mConfig.fCapChanGenConfigs.end();  ++it)
 	{
-		const CCGeneratorConfig &	genConfig (it->second);
+		const CCGenConfig &	genConfig (it->second);
 		AJAThread &	genThread (mGeneratorThreads.at(size_t(genConfig.fCaptionChannel)));
 		//	The generator thread needs to know the NTV2CCPlayer instance, and the caption channel:
 		genThread.Attach(CaptionGeneratorThreadStatic,
@@ -1597,7 +1597,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	NTV2AudioSystem				audioSystem			(NTV2_AUDIOSYSTEM_INVALID);
 	ULWord						numAudioChannels	(0);
 	Bouncer<UWord>				colBouncer			(32 - 11 /*upperLimit*/, 0 /*lowerLimit*/, 0 /*startAt*/);
-	NTV2Buffer					pAudioBuffer		(0);
+	NTV2Buffer					audioBuffer;
 	AUTOCIRCULATE_TRANSFER		xferInfo;
 
 	if (NTV2_IS_VANCMODE_OFF(mConfig.fVancMode))
@@ -1620,8 +1620,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 		mDevice.SetSDIOutputAudioSystem (mConfig.fOutputChannel, audioSystem);		//	Set output DS1 audio embedders to use designated audio system
 		mDevice.SetSDIOutputDS2AudioSystem (mConfig.fOutputChannel, audioSystem);	//	Set output DS2 audio embedders to use designated audio system
 		mDevice.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_OFF, audioSystem);	//	Config audio: Disable loopback (not E-E)
-		pAudioBuffer.Allocate(AUDIOBYTES_MAX_48K);							//	Allocate audio buffer (large enough for one frame's audio)
-		pAudioBuffer.Fill(UByte(0));										//	Zero audio buffer
+		audioBuffer.Allocate(AUDIOBYTES_MAX_48K);							//	Allocate audio buffer (large enough for one frame's audio)
 		if (!mConfig.fDoMultiFormat)
 		{
 			for (UWord chan (0);  chan < ::NTV2DeviceGetNumVideoOutputs (mDeviceID);  chan++)
@@ -1797,16 +1796,16 @@ void NTV2CCPlayer::PlayoutFrames (void)
 			CNTV2CaptionRenderer::BurnString (tcString, tcOK ? kBlueOnWhite : kRedOnYellow, mVideoBuffer, formatDesc, 3, 1);	//	R3C1
 		}	//	if not suppressing timecode injection
 
-		if (!pAudioBuffer.IsNULL())
-			xferInfo.SetAudioBuffer(reinterpret_cast<ULWord*>(pAudioBuffer.GetHostPointer()),
-									::AddAudioTone(reinterpret_cast<ULWord *>(pAudioBuffer.GetHostPointer()),	//	audio buffer to fill
-													currentSample,												//	sample for continuing the waveform
+		if (audioBuffer)
+			xferInfo.SetAudioBuffer (audioBuffer,
+									::AddAudioTone (audioBuffer,		//	audio buffer to fill
+													currentSample,		//	sample for continuing the waveform
 													::GetAudioSamplesPerFrame(frameRate, NTV2_AUDIO_48K, mACStatus.GetProcessedFrameCount()),	//	# samples to generate
 													48000.0,			//	sample rate [Hz]
 													gAmplitudes,		//	per-channel amplitudes
 													gFrequencies,		//	per-channel tone frequencies [Hz]
 													31,					//	bits per sample
-													false,				//	don't byte swap
+													false,				//	false means "don't byte swap"
 													numAudioChannels));	//	number of audio channels
 		//	Finally ... transfer the frame data to the device...
 		mDevice.AutoCirculateTransfer (mConfig.fOutputChannel, xferInfo);
