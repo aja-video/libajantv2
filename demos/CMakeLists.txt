@@ -32,12 +32,12 @@ add_subdirectory(ntv2player8k)
 # # add_subdirectory(ntv2stereocapture) # deprecated SDK calls
 add_subdirectory(ntv2switchbitfile)
 
-if(AJA_QT_ENABLED)
-    add_subdirectory(ntv2qtmultiinput) 
-    add_subdirectory(ntv2qtpreview) # optionally requires libajacc
-endif()
+if(NOT AJANTV2_BUILD_OPENSOURCE)
+    if(AJA_QT_ENABLED)
+        add_subdirectory(ntv2qtmultiinput) 
+        add_subdirectory(ntv2qtpreview) # optionally requires libajacc
+    endif()
 
-if(AJANTV2_BUILD_OPENSOURCE STREQUAL "OFF")
     add_subdirectory(ntv2ccgrabber)  
     add_subdirectory(ntv2ccplayer)
 endif()
@@ -49,3 +49,8 @@ endif()
 # # if (AJA_BUILD_NVIDIA)
 # #     add_subdirectory(NVIDIA)
 # # endif()
+
+if(AJA_INSTALL_CMAKE)
+    install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos)
+endif()
+

@@ -105,6 +105,7 @@ set(AJADRIVER_LINUX_BUILD_FILES
 	linux/Makefile
 	linux/nvidia-ko-to-module-symvers)
 set(AJADRIVER_LINUX_LOAD_FILES
+	${CMAKE_CURRENT_SOURCE_DIR}/bin/ajantv2.ko
 	${CMAKE_CURRENT_SOURCE_DIR}/bin/load_ajantv2
 	${CMAKE_CURRENT_SOURCE_DIR}/bin/unload_ajantv2)
 

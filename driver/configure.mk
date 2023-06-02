@@ -54,8 +54,6 @@ A_LIB_NTV2_SRC	   	:= $(A_LIB_NTV2_PATH)/src
 A_LIBCMD 		:= ar crsv
 A_LIBCMD_SO		:= ar crsv
 
-$(info $(A_LIB_NTV2_PATH))
-
 # helper functions
 # these can be invoked in make rules like so:
 # $(call ensure_dir_exists, somepath/value)
