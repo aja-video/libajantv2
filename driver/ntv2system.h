@@ -55,6 +55,7 @@
 
 	typedef struct ntv2_system_context
 	{
+        PVOID pDevice;
 	} Ntv2SystemContext;
 
 	// virtual register abstraction
@@ -66,18 +67,20 @@
 
 	// virtual message abstraction
 
-	#define ntv2Message(string, ...) 			printf(string, __VA_ARGS__)
+	#define ntv2Message(string, ...) 			printf(string, __VA_ARGS__); fflush(stdout)
 
 	// virtual spinlock abstraction
 
 	typedef struct ntv2_spinlock
 	{
+ 		uint32_t dummy;
 	} Ntv2SpinLock;
 
 	// virtual interrupt lock abstraction
 
 	typedef struct ntv2_interrupt_lock
 	{
+		uint32_t dummy;
 	} Ntv2InterruptLock;
 
 	// virtual memory abstraction
@@ -106,18 +109,21 @@
 
 	typedef struct ntv2_dpc
 	{
+		uint32_t dummy;
 	} Ntv2Dpc;
 
 	// virtual event abstraction
 
 	typedef struct ntv2_event
 	{
+		uint32_t dummy;
 	} Ntv2Event;
 
 	// virtual semaphore abstraction
 
 	typedef struct ntv2_semaphore
 	{
+		uint32_t dummy;
 	} Ntv2Semaphore;
 
 	// virtual thread abstraction

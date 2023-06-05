@@ -458,7 +458,7 @@ static void ntv2_hdmiin4_monitor(void* data)
 					if (plug_wait > c_plug_wait_max) {
 						NTV2_MSG_HDMIIN4_STATE("%s: bad input state (hot plug)\n", ntv2_hin->name);
 						plug_wait = 0;
-						hot_plug(ntv2_hin);
+//						hot_plug(ntv2_hin);
 					}
 				}
 				new_input = false;
@@ -491,7 +491,7 @@ static void ntv2_hdmiin4_monitor(void* data)
 				if (plug_wait > c_plug_wait_max) {
 					NTV2_MSG_HDMIIN4_STATE("%s: lock timeout (hot plug)\n", ntv2_hin->name);
 					plug_wait = 0;
-					hot_plug(ntv2_hin);
+//					hot_plug(ntv2_hin);
 				}
 			}
 		}
@@ -909,7 +909,7 @@ bool update_input_state(struct ntv2_hdmiin4 *ntv2_hin)
 
 		ntv2_reg_rmw(ntv2_hin->system_context, ntv2_reg_hdmiin4_videocontrol, ntv2_hin->index, value, mask);
 
-		value = NTV2_FLD_SET(ntv2_fld_hdmiin4_pixelcontrol_hlinefilter, ntv2_con_hdmiin4_hlinefilter_enable);
+		value = NTV2_FLD_SET(ntv2_fld_hdmiin4_pixelcontrol_hlinefilter, ntv2_con_hdmiin4_hlinefilter_disable);
 		mask = NTV2_FLD_MASK(ntv2_fld_hdmiin4_pixelcontrol_hlinefilter);
 
 		value |= NTV2_FLD_SET(ntv2_fld_hdmiin4_pixelcontrol_clockratio, format_data->clock_ratio);

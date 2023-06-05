@@ -170,7 +170,7 @@ static const char *color_depth_name[NTV2_MAX_COLOR_DEPTHS] = {
 	/* ntv2_con_hdmiin4_colordepth_8bit */		" 8",
 	/* ntv2_con_hdmiin4_colordepth_10bit */		"10",
 	/* ntv2_con_hdmiin4_colordepth_12bit */		"12",
-	/*  */										"##"
+	/*  */										"#3#"
 };
 
 static const char *ref_source_name[NTV2_MAX_REF_SOURCES] = {
@@ -198,9 +198,9 @@ static const char *ref_standard_name[NTV2_MAX_REF_STANDARDS] = {
 	/* ntv2_ref_standard_625 */					"625",
 	/* ntv2_ref_standard_750 */					"750",
 	/* ntv2_ref_standard_1125 */				"1125",
-	/* ntv2_ref_standard_unknown */				"unknown", 
-	/* ntv2_ref_standard_unknown */				"unknown", 
-	/* ntv2_ref_standard_unknown */				"unknown"
+	/*  */				                        "#5#", 
+	/*  */				                        "#6#", 
+	/*  */				                        "#7#"
 };
 
 static const char *hdr_eotf_name[NTV2_MAX_HDR_EOTFS] = {
@@ -208,24 +208,24 @@ static const char *hdr_eotf_name[NTV2_MAX_HDR_EOTFS] = {
 	/* ntv2_hdr_eotf_hdr */						"traditional hdr",
 	/* ntv2_hdr_eotf_st2084 */					"smpte st2084",
 	/* ntv2_hdr_eotf_hlg */						"hybrid log gamma",
-	/* unknown */								"unknown",
-	/* unknown */								"unknown",
-	/* unknown */								"unknown",
-	/* unknown */								"unknown"
+	/*  */								        "#4#",
+	/*  */								        "#5#",
+	/*  */								        "#6#",
+	/*  */								        "#7#"
 };
 
 static const char *audio_rate_name[NTV2_MAX_AUDIO_RATES] = {
 	/* ntv2_audio_rate_48 */					"48",
 	/* ntv2_audio_rate_96 */					"96",
 	/* ntv2_audio_rate_192 */					"192",
-	/*  */										"##"
+	/*  */										"#3#"
 };
 
 static const char *audio_format_name[NTV2_MAX_AUDIO_FORMATS] = {
 	/* ntv2_audio_format_lpcm */				"lpcm",
 	/* ntv2_audio_format_dolby */				"dolby",
-	/*  */										"unknown",
-	/*  */										"unknown"
+	/*  */										"#2#",
+	/*  */										"#3#"
 };
 
 static const uint32_t video_standard_info[NTV2_MAX_VIDEO_STANDARDS][4] = {
