@@ -2932,7 +2932,7 @@ SetColorCorrectionHostAccessBank (ULWord deviceNumber, NTV2ColorCorrectionHostAc
 								kRegCh1ColorCorrectioncontrol,
 								regValue,
 								kRegMaskLUTSelect,
-								kRegMaskLUTSelect);
+								kRegShiftLUTSelect);
 
 				regValue = value << kRegShiftCCHostAccessBankSelect;
 				WriteRegister (	deviceNumber,
@@ -2956,7 +2956,7 @@ SetColorCorrectionHostAccessBank (ULWord deviceNumber, NTV2ColorCorrectionHostAc
 								kRegCh1ColorCorrectioncontrol,
 								regValue,
 								kRegMaskLUTSelect,
-								kRegMaskLUTSelect);
+								kRegShiftLUTSelect);
 
 				regValue = (value-NTV2_CCHOSTACCESS_CH3BANK0) << kRegShiftCCHostAccessBankSelect;
 				WriteRegister (	deviceNumber,
