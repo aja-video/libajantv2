@@ -1,0 +1,272 @@
+/* SPDX-License-Identifier: MIT */
+/**
+	@file		ntv2streampreview.cpp
+	@brief		Implementation of the NTV2StreamPreview class.
+	@copyright	(C) 2013-2022 AJA Video Systems, Inc.
+**/
+
+
+#include <QtCore>
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    #include <QtWidgets>
+#else
+    #include <QtGui>
+#endif
+
+#include "ntv2streampreview.h"
+#include "ntv2devicefeatures.h"
+#include "ajabase/common/types.h"
+#include "ntv2utils.h"
+
+
+using namespace std;
+
+
+typedef QListIterator <QAbstractButton *>	QButtonIterator;
+
+
+NTV2StreamPreview::NTV2StreamPreview (QWidget * parent, Qt::WindowFlags flags)
+	:	QDialog (parent, flags)
+{
+	if (objectName ().isEmpty ())
+		setObjectName (QString::fromUtf8 ("Dialog"));
+
+	mBoardChoiceCombo = new QComboBox;
+	for (ULWord ndx (0);  ndx < 100;  ndx++)
+	{
+		CNTV2Card	device;
+		if (CNTV2DeviceScanner::GetDeviceAtIndex (ndx, device))
+			mBoardChoiceCombo->addItem (tr (device.GetDisplayName ().c_str ()));
+		else if (ndx == 0)
+			{mBoardChoiceCombo->addItem (tr ("No Devices Found"));	break;}
+		else
+			break;
+	}
+	mBoardChoiceCombo->setCurrentIndex (0);
+
+	//	Input selection radio button group...
+	mInputButtonGroup = new QButtonGroup ();
+	mInputButtonGroup->addButton (new QRadioButton (tr ("Off")), NTV2_INPUTSOURCE_INVALID);
+	for (unsigned ndx (0);  ndx < 8;  ndx++)
+		mInputButtonGroup->addButton (new QRadioButton ((QString ("SDI %1").arg (string (1, char (ndx + '1')).c_str ()))), ::GetNTV2InputSourceForIndex(ndx, NTV2_IOKINDS_SDI));
+	for (unsigned ndx (0);  ndx < 4;  ndx++)
+		mInputButtonGroup->addButton (new QRadioButton ((QString ("HDMI %1").arg (string (1, char (ndx + '1')).c_str ()))), ::GetNTV2InputSourceForIndex(ndx, NTV2_IOKINDS_HDMI));
+	mInputButtonGroup->addButton (new QRadioButton (tr ("Analog")), ::GetNTV2InputSourceForIndex(0, NTV2_IOKINDS_ANALOG));
+	mInputButtonGroup->button (NTV2_INPUTSOURCE_INVALID)->setChecked (true);
+
+	//	Checkboxes...
+	mWithAudioCheckBox = new QCheckBox ("With Audio", this);
+    mCheckFor4kCheckBox = new QCheckBox ("Check for 4K Input", this);
+    mCheckFixedReference = new QCheckBox ("Fixed Reference", this);
+
+ 	mVideoPreviewWidget = new AJAPreviewWidget (this);
+	mVideoPreviewWidget->setFixedWidth (STREAMPREVIEW_WIDGET_X);
+	mVideoPreviewWidget->setFixedHeight (STREAMPREVIEW_WIDGET_Y);
+
+	mStreamGrabber = new NTV2StreamGrabber (this);
+	mStreamGrabber->SetDeviceIndex (mBoardChoiceCombo->currentIndex ());
+	mStreamGrabber->SetInputSource (NTV2_INPUTSOURCE_SDI1);
+
+	QVBoxLayout *	layout	(new QVBoxLayout);
+	layout->addWidget (mBoardChoiceCombo);
+	layout->addWidget (mVideoPreviewWidget);
+
+	#if defined (INCLUDE_AJACC)
+		QVBoxLayout *	bottomLeftLayout	(new QVBoxLayout);
+		bottomLeftLayout->setContentsMargins (0, 0, 0, 0);
+
+		for (QButtonIterator iter (mInputButtonGroup->buttons());  iter.hasNext ();  )
+			bottomLeftLayout->addWidget (iter.next());
+
+		bottomLeftLayout->addWidget (mWithAudioCheckBox);
+		bottomLeftLayout->addWidget (mCheckFor4kCheckBox);
+		bottomLeftLayout->addStretch (1);
+
+		QVBoxLayout *	bottomRightLayout	(new QVBoxLayout);
+		bottomRightLayout->setContentsMargins (0, 0, 0, 0);
+
+		mCaptionButtonGroup = new QButtonGroup ();
+		mCaptionButtonGroup->addButton (new QRadioButton (tr ("CC Off")), NTV2_CC608_ChannelInvalid);
+		for (unsigned ndx (1);  ndx <= 8;  ndx++)
+			mCaptionButtonGroup->addButton (new QRadioButton (QString ("%1%2").arg (string (ndx < 5 ? "CC" : "TXT").c_str(), string (1, char ((ndx < 5 ? ndx : ndx - 4) + '0')).c_str())),
+											NTV2Line21Channel (ndx-1));
+		mCaptionButtonGroup->button (NTV2_CC608_ChannelInvalid)->setChecked (true);
+
+		for (QButtonIterator iter (mCaptionButtonGroup->buttons());  iter.hasNext ();  )
+			bottomRightLayout->addWidget (iter.next());
+
+		QHBoxLayout *	bottomLayout		(new QHBoxLayout);
+		bottomLayout->setContentsMargins (0, 0, 0, 0);
+
+		bottomLayout->addLayout (bottomLeftLayout);
+		bottomLayout->addLayout (bottomRightLayout);
+		layout->addLayout (bottomLayout);
+	#else	//	!defined (INCLUDE_AJACC)
+		for (QButtonIterator iter (mInputButtonGroup->buttons());  iter.hasNext ();  )
+			layout->addWidget (iter.next());
+		layout->addWidget (mWithAudioCheckBox);
+        layout->addWidget (mCheckFor4kCheckBox);
+        layout->addWidget (mCheckFixedReference);
+	#endif	//	!defined (INCLUDE_AJACC)
+
+	layout->addStretch (1);
+	setLayout (layout);
+
+    QObject::connect (mBoardChoiceCombo,	SIGNAL (currentIndexChanged (int)),				this,					SLOT (RequestDeviceChange (const int)));
+	QObject::connect (mInputButtonGroup,	SIGNAL (buttonReleased (int)),					this,					SLOT (inputChanged (int)));
+	QObject::connect (mWithAudioCheckBox,	SIGNAL (stateChanged (int)),					this,					SLOT (withAudioChanged (int)));
+    QObject::connect (mCheckFixedReference,	SIGNAL (toggled (bool)),                        this,					SLOT (fixedRefChanged (bool)));
+	QObject::connect (mCheckFor4kCheckBox,	SIGNAL (stateChanged (int)),					this,					SLOT (checkFor4kChanged (int)));
+			 connect (mStreamGrabber,		SIGNAL (newFrame (const QImage &, bool)),		mVideoPreviewWidget,	SLOT (updateFrame (const QImage &, bool)));
+			 connect (mStreamGrabber,		SIGNAL (newStatusString (const QString)),		mVideoPreviewWidget,	SLOT (updateStatusString (const QString)));
+	#if defined (INCLUDE_AJACC)
+			 connect (mFrameGrabber,		SIGNAL (captionScreenChanged (const ushort *)),	mVideoPreviewWidget,	SLOT (updateCaptionScreen (const ushort *)));
+	QObject::connect (mCaptionButtonGroup,	SIGNAL (buttonReleased (int)),					mFrameGrabber,			SLOT (changeCaptionChannel (int)));
+	#endif	//	defined (INCLUDE_AJACC)
+
+	mStreamGrabber->SetInputSource (NTV2_NUM_INPUTSOURCES);
+	mStreamGrabber->start ();
+	mTimerID = startTimer (100);
+
+	mPnp.Install (PnpCallback, this, AJA_Pnp_PciVideoDevices);
+
+}	//	constructor
+
+
+NTV2StreamPreview::~NTV2StreamPreview ()
+{
+	mPnp.Uninstall ();
+	delete mStreamGrabber;
+
+}	//	destructor
+
+
+void NTV2StreamPreview::RequestDeviceChange (const int inDeviceIndexNum)
+{
+	//	Notify my frame grabber to change devices...
+	if (mStreamGrabber)
+		mStreamGrabber->SetDeviceIndex (inDeviceIndexNum);
+	qDebug ("## NOTE:  Device changed to %d", inDeviceIndexNum);
+
+}	//	RequestDeviceChange
+
+
+void NTV2StreamPreview::inputChanged (int inputRadioButtonId)
+{
+	const NTV2InputSource	chosenInputSource	(static_cast <NTV2InputSource> (inputRadioButtonId));
+
+	CNTV2Card	device;
+	CNTV2DeviceScanner::GetDeviceAtIndex (mBoardChoiceCombo->currentIndex (), device);
+
+	const NTV2DeviceID		deviceID			(device.GetDeviceID ());
+
+	if (!NTV2_IS_VALID_INPUT_SOURCE (chosenInputSource))
+	{
+		mStreamGrabber->SetInputSource (NTV2_INPUTSOURCE_INVALID);
+		qDebug ("## DEBUG:  NTV2StreamPreview::inputChanged:  off");
+	}
+	else if (::NTV2DeviceCanDoInputSource (deviceID, chosenInputSource))
+	{
+		mStreamGrabber->SetInputSource (chosenInputSource);
+		cerr << "## DEBUG:  NTV2StreamPreview::inputChanged:  " << ::NTV2InputSourceToString (chosenInputSource) << endl;
+	}
+}	//	inputChanged
+
+
+void NTV2StreamPreview::withAudioChanged (int state)
+{
+	mStreamGrabber->SetWithAudio (state == Qt::Checked ? true : false);
+
+}	//	withAudioChanged
+
+
+void NTV2StreamPreview::fixedRefChanged (bool checked)
+{
+    mStreamGrabber->SetFixedReference(checked);
+
+}
+
+
+void NTV2StreamPreview::checkFor4kChanged (int state)
+{
+	mStreamGrabber->CheckFor4kInput (state == Qt::Checked ? true : false);
+
+}	//	checkFor4kChanged
+
+
+void NTV2StreamPreview::updateInputs (void)
+{
+	CNTV2Card	ntv2Card (mBoardChoiceCombo->currentIndex());
+	if (ntv2Card.IsOpen())
+	{
+		const NTV2DeviceID	deviceID	(ntv2Card.GetDeviceID());
+
+		for (QButtonIterator iter (mInputButtonGroup->buttons());  iter.hasNext ();  )
+		{
+			QRadioButton *			pButton			(reinterpret_cast <QRadioButton*> (iter.next ()));
+			const NTV2InputSource	inputSource		(static_cast <NTV2InputSource> (mInputButtonGroup->id (pButton)));
+			if (NTV2_IS_VALID_INPUT_SOURCE (inputSource))
+			{
+				const bool				hasInputSource	(::NTV2DeviceCanDoInputSource (deviceID, inputSource));
+				const string			videoFormatStr	(hasInputSource ? ::NTV2VideoFormatToString (ntv2Card.GetInputVideoFormat (inputSource)) : "");
+				const QString			buttonLabel		(QString ("%1   %2").arg (::NTV2InputSourceToString (inputSource, true).c_str(), videoFormatStr.empty() ? "No Detected Input" : videoFormatStr.c_str()));
+				pButton->setText (buttonLabel);
+				pButton->setEnabled (hasInputSource);
+			}
+		}
+
+		#if defined (INCLUDE_AJACC)
+			const bool	hasCustomAnc	(::NTV2DeviceCanDoCustomAnc (deviceID));
+			for (QButtonIterator iter (mCaptionButtonGroup->buttons());  iter.hasNext ();  )
+				iter.next()->setEnabled (hasCustomAnc);
+		#endif	//	defined (INCLUDE_AJACC)
+
+	}	//	if board opened ok
+
+}	//	updateInputs
+
+
+void NTV2StreamPreview::timerEvent (QTimerEvent * event)
+{
+	if (event->timerId () == mTimerID)
+		updateInputs ();
+	else
+		QWidget::timerEvent (event);
+
+}	//	timerEvent
+
+
+void NTV2StreamPreview::devicesChanged (void)
+{
+	qDebug () << QString ("devicesChanged");
+	mInputButtonGroup->button (NTV2_INPUTSOURCE_INVALID)->setChecked (true);
+	inputChanged (NTV2_INPUTSOURCE_INVALID);	//	necessary?
+
+	mBoardChoiceCombo->clear ();
+	for (ULWord ndx (0);  ndx < 100;  ndx++)
+	{
+		CNTV2Card	device;
+		if (CNTV2DeviceScanner::GetDeviceAtIndex (ndx, device))
+			mBoardChoiceCombo->addItem (tr (device.GetDisplayName ().c_str ()));
+		else if (ndx == 0)
+			{mBoardChoiceCombo->addItem (tr ("No Devices Found"));	break;}
+		else
+			break;
+	}
+	mBoardChoiceCombo->setCurrentIndex (0);
+
+}	//	devicesChanged
+
+
+void NTV2StreamPreview::PnpCallback (AJAPnpMessage inMessage, void * pUserData)		//  static
+{
+	if (pUserData)
+	{
+		if (inMessage == AJA_Pnp_DeviceAdded  ||  inMessage == AJA_Pnp_DeviceRemoved)
+		{
+			NTV2StreamPreview *	pMainWindow	(reinterpret_cast <NTV2StreamPreview *>(pUserData));
+			pMainWindow->devicesChanged ();
+		}
+	}
+
+} // PnpCallback

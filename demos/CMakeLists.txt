@@ -36,6 +36,7 @@ if(NOT AJANTV2_BUILD_OPENSOURCE)
     if(AJA_QT_ENABLED)
         add_subdirectory(ntv2qtmultiinput) 
         add_subdirectory(ntv2qtpreview) # optionally requires libajacc
+        add_subdirectory(ntv2streampreview) # optionally requires libajacc
     endif()
 
     add_subdirectory(ntv2ccgrabber)  
