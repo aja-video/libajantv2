@@ -16,7 +16,7 @@
 
 struct ntv2_genlock2_data {
 	uint32_t	size;
-	uint16_t	offset;
+	uint8_t	offset;
 	uint8_t		data[1000];
 };
 

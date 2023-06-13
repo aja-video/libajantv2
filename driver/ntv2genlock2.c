@@ -104,8 +104,7 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 static void spi_reset(struct ntv2_genlock2 *ntv2_gen);
 static void spi_reset_fifos(struct ntv2_genlock2 *ntv2_gen);
 static bool spi_wait_write_empty(struct ntv2_genlock2 *ntv2_gen);
-static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, uint32_t offset, uint8_t* data);
-static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint32_t size, uint16_t offset, uint8_t* data);
+static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, uint8_t offset, uint8_t* data);
 
 static uint32_t reg_read(struct ntv2_genlock2 *ntv2_gen, const uint32_t *reg);
 static void reg_write(struct ntv2_genlock2 *ntv2_gen, const uint32_t *reg, uint32_t data);
@@ -444,9 +443,7 @@ static struct ntv2_genlock2_data* get_genlock2_config(struct ntv2_genlock2 *ntv2
 static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlock2_data *config, bool check)
 {
 	struct ntv2_genlock2_data* gdat = config;
-	uint8_t data;
 	uint32_t count = 0;
-	uint32_t errors = 0;
 	uint32_t value;
 	uint32_t mask;
 
@@ -466,33 +463,6 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 		}
 		count++;
 		gdat++;
-	}
-
-	if (check) {
-		gdat = config;
-
-		NTV2_MSG_GENLOCK_CHECK("%s: genlock verify %d registers\n", ntv2_gen->name, count);
-
-		while ((gdat->offset != 0) || (gdat->size != 0))
-		{
-			if (gdat->offset != 0)
-			{
-				if (!spi_genlock2_read(ntv2_gen, (uint16_t)gdat->offset, &data)) {
-					NTV2_MSG_ERROR("%s: genlock spi read failed\n", ntv2_gen->name);
-					return false;
-				}
-				if (data != (uint8_t)gdat->data) {
-					NTV2_MSG_GENLOCK_CHECK("%s: genlock verify failed  addr %04x  wrote %02x  read %02x\n",
-										   ntv2_gen->name, gdat->offset, gdat->data, data);
-					errors++;
-				}
-			}
-			gdat++;
-		}
-
-		if (errors > c_configure_error_limit) {
-			NTV2_MSG_ERROR("%s: genlock %d configuration read verify errors\n", ntv2_gen->name, errors);
-		}
 	}
 
 	// reset genlock
@@ -565,50 +535,6 @@ static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, ui
     reg_write(ntv2_gen, ntv2_reg_spi_write, value);
 
 	return true;
-}
-
-static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint8_t addr, uint8_t* value)
-{
-    uint8_t page = (addr & 0xff00) >> 8;
-    uint8_t reg_8 = addr & 0xff;
-	uint32_t val = 0;
-	uint32_t count = 0;
-	uint32_t status;
-
-	// reset the fifos
-    if (!spi_wait_write_empty(ntv2_gen)) return false;
-	spi_reset_fifos(ntv2_gen);
-
-	// update page
-    if (page !=  ntv2_gen->page_address)
-    {
-        reg_write(ntv2_gen, ntv2_reg_spi_write, GENL_SPI_SET_ADDR_CMD);
-        reg_write(ntv2_gen, ntv2_reg_spi_write, 0x01);			// page register
-        reg_write(ntv2_gen, ntv2_reg_spi_write, GENL_SPI_WRITE_CMD);
-        reg_write(ntv2_gen, ntv2_reg_spi_write, page);			// data
-        ntv2_gen->page_address = page;
-    }
-
-	// read command
-    reg_write(ntv2_gen, ntv2_reg_spi_write, GENL_SPI_SET_ADDR_CMD);
-    reg_write(ntv2_gen, ntv2_reg_spi_write, reg_8);				// the register
-    reg_write(ntv2_gen, ntv2_reg_spi_write, GENL_SPI_READ_CMD);
-    reg_write(ntv2_gen, ntv2_reg_spi_write, 0xff);				// dummy write clocks in the read value
-
-	// read data
-    if (!spi_wait_write_empty(ntv2_gen)) return false;
-    val = reg_read(ntv2_gen, ntv2_reg_spi_read);				// read data until fifo empty
-	status = reg_read(ntv2_gen, ntv2_reg_spi_status);
-    while ((status & GENL_SPI_READ_FIFO_EMPTY) == 0)									
-	{
-		val = reg_read(ntv2_gen, ntv2_reg_spi_read);
-		status = reg_read(ntv2_gen, ntv2_reg_spi_status);
-		if (count++ > 50) return false;
-	}
-
-    *value = (uint8_t)(val & 0x00ff);
-
-    return true;
 }
 
 static uint32_t reg_read(struct ntv2_genlock2 *ntv2_gen, const uint32_t *reg)
