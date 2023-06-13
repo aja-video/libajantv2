@@ -514,25 +514,8 @@ static bool spi_wait_write_empty(struct ntv2_genlock2 *ntv2_gen)
 
 static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, uint8_t offset, uint8_t* value)
 {
-	uint8_t page = (offset & 0xff00) >> 8;
-    uint8_t reg_8 = offset & 0xff;
-
     if (!spi_wait_write_empty(ntv2_gen)) return false;
 	spi_reset_fifos(ntv2_gen);
-	
-    if (page !=  ntv2_gen->page_address)
-    {
-        reg_write(ntv2_gen, ntv2_reg_spi_write, GENL_SPI_SET_ADDR_CMD);
-        reg_write(ntv2_gen, ntv2_reg_spi_write, 0x01);         // page register
-        reg_write(ntv2_gen, ntv2_reg_spi_write, GENL_SPI_WRITE_CMD);
-        reg_write(ntv2_gen, ntv2_reg_spi_write, page);         // data
-        ntv2_gen->page_address = page;
-    }
-
-    reg_write(ntv2_gen, ntv2_reg_spi_write, GENL_SPI_SET_ADDR_CMD);
-    reg_write(ntv2_gen, ntv2_reg_spi_write, reg_8);            // the register
-    reg_write(ntv2_gen, ntv2_reg_spi_write, GENL_SPI_WRITE_CMD);
-    reg_write(ntv2_gen, ntv2_reg_spi_write, value);
 
 	return true;
 }
