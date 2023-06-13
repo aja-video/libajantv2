@@ -88,8 +88,6 @@ typedef struct _xlnxDmaDescriptor
 
 // dma page map
 typedef struct _dmaPageRoot
-
-
 {
 	struct list_head		bufferHead;			// locked buffer list
 	spinlock_t				bufferLock;			// lock buffer list
@@ -98,6 +96,7 @@ typedef struct _dmaPageRoot
 	LWord64					lockCounter;		// lock access counter
 	LWord64					lockTotalSize;		// current locked bytes
 	LWord64					lockMaxSize;		// maximum locked bytes
+	ULWord					serialRef[DMA_NUM_ENGINES];
 } DMA_PAGE_ROOT, *PDMA_PAGE_ROOT;
 
 typedef struct _dmaPageBuffer
@@ -255,8 +254,6 @@ typedef struct _dmaEngine_
 	ULWord					dmaIndex;				// dma index
 	bool					dmaC2H;					// dma to host
     bool                    dmaStream;              // streaming engine
-    ULWord                  alignmentMask;          // streaming alignment
-    ULWord                  granularityMask;        // streaming granularity
 	ULWord					maxVideoSize;			// maximum video transfer size
 	ULWord					maxVideoPages;			// maximum video pages
 	ULWord					maxAudioSize;			// maximum audio transfer size
@@ -264,6 +261,9 @@ typedef struct _dmaEngine_
 	ULWord					maxAncSize;				// maximum anc transfer size
 	ULWord					maxAncPages;			// maximum anc pages
 	ULWord					maxDescriptors;			// maximum number of descriptors
+	ULWord					alignmentMask;			// transfer source and destination alignment
+	ULWord					granularityMask;		// transfer length granularity
+	ULWord					activeContext;			// dma active context index
 	bool					transferP2P;			// is p2p transfer;
 	NTV2DmaState			state;					// dma engine state
 	spinlock_t				engineLock;				// engine data structure lock
@@ -336,11 +336,14 @@ void dmaDisable(ULWord deviceNumber);
 int dmaTransfer(PDMA_PARAMS pDmaParams);
 int dmaTargetP2P(ULWord deviceNumber, NTV2_DMA_P2P_CONTROL_STRUCT* pParams);
 
-void dmaInterrupt(ULWord deviceNumber, ULWord intStatus);
+int dmaStreamStart(PDMA_PARAMS pDmaParams);
+int dmaStreamStop(PDMA_PARAMS pDmaParams);
 
 int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuffer, uint32_t index);
 int dmaXlnxStreamLink(PDMA_ENGINE pDmaEngine, uint32_t srcIndex, uint32_t dstIndex);
 int dmaXlnxStreamStart(PDMA_ENGINE pDmaEngine, uint32_t index);
 int dmaXlnxStreamStop(PDMA_ENGINE pDmaEngine);
+
+void dmaInterrupt(ULWord deviceNumber, ULWord intStatus);
 
 #endif

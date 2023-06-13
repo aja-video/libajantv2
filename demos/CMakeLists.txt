@@ -25,6 +25,7 @@ add_subdirectory(ntv2outputtestpattern)
 add_subdirectory(ntv2player)
 add_subdirectory(ntv2player4k)
 add_subdirectory(ntv2player8k)
+add_subdirectory(ntv2streamplayer)
 # # add_subdirectory(ntv2qtplaycorder)
 # # # add_subdirectory(ntv2qtrawcapture)
 # # # add_subdirectory(ntv2qtstereopreview)
@@ -36,6 +37,7 @@ if(NOT AJANTV2_BUILD_OPENSOURCE)
     if(AJA_QT_ENABLED)
         add_subdirectory(ntv2qtmultiinput) 
         add_subdirectory(ntv2qtpreview) # optionally requires libajacc
+        add_subdirectory(ntv2streampreview) # optionally requires libajacc
     endif()
 
     add_subdirectory(ntv2ccgrabber)  
