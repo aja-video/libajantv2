@@ -341,7 +341,7 @@ int dmaStreamStop(PDMA_PARAMS pDmaParams);
 
 int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuffer, uint32_t index);
 int dmaXlnxStreamLink(PDMA_ENGINE pDmaEngine, uint32_t srcIndex, uint32_t dstIndex);
-int dmaXlnxStreamStart(PDMA_ENGINE pDmaEngine, uint32_t index);
+int dmaXlnxStreamStart(PDMA_ENGINE pDmaEngine, uint32_t startIndex);
 int dmaXlnxStreamStop(PDMA_ENGINE pDmaEngine);
 
 void dmaInterrupt(ULWord deviceNumber, ULWord intStatus);
