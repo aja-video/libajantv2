@@ -1,6 +1,5 @@
 # syntax=docker/dockerfile:1
 FROM centos:7
-ADD . /mnt/libajantv2
 RUN yum update -y \
 	&& yum groupinstall -y "Development Tools" \
 	&& yum install -y epel-release centos-release-scl \
