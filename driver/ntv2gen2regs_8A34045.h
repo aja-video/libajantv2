@@ -12,12 +12,10 @@
 #ifndef NTV2GEN2REGS_8A34045_HEADER
 #define NTV2GEN2REGS_8A34045_HEADER
 
-#include "ntv2system.h"
-
 struct ntv2_genlock2_data {
 	uint32_t	size;
-	uint8_t	offset;
-	uint8_t		data[1000];
+	uint8_t		offset;
+	char		data[1000];
 };
 
 static struct ntv2_genlock2_data s_8A34045_broadcast_1485[] =
@@ -550,7 +548,8 @@ static struct ntv2_genlock2_data s_8A34045_broadcast_1485[] =
 	{	0x4,	0x5B,	"0x00000000"	},
 	{	0x8,	0x5F,	"0x0000000000000001"	},
 	{	0x6,	0x67,	"0x000000000000"	},
-	{	0x1,	0x6D,	"0x00"	}
+	{	0x1,	0x6D,	"0x00"	},
+	{	0x0,	0x0,	"0x00"	}
 };
 
 

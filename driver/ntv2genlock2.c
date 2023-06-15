@@ -104,7 +104,9 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 static void spi_reset(struct ntv2_genlock2 *ntv2_gen);
 static void spi_reset_fifos(struct ntv2_genlock2 *ntv2_gen);
 static bool spi_wait_write_empty(struct ntv2_genlock2 *ntv2_gen);
-static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, uint8_t offset, uint8_t* data);
+static uint32_t make_spi_ready(struct ntv2_genlock2 *ntv2_gen);
+static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, uint8_t offset, char* data);
+static void hex_to_bytes(char *hex, uint8_t *output, uint8_t array_length);
 
 static uint32_t reg_read(struct ntv2_genlock2 *ntv2_gen, const uint32_t *reg);
 static void reg_write(struct ntv2_genlock2 *ntv2_gen, const uint32_t *reg, uint32_t data);
@@ -133,9 +135,9 @@ struct ntv2_genlock2 *ntv2_genlock2_open(Ntv2SystemContext* sys_con,
 #endif
 	ntv2_gen->system_context = sys_con;
 
-	ntv2SpinLockOpen(&ntv2_gen->state_lock, sys_con);
-	ntv2ThreadOpen(&ntv2_gen->monitor_task, sys_con, "genlock2 monitor");
-	ntv2EventOpen(&ntv2_gen->monitor_event, sys_con);
+	//ntv2SpinLockOpen(&ntv2_gen->state_lock, sys_con);
+	//ntv2ThreadOpen(&ntv2_gen->monitor_task, sys_con, "genlock2 monitor");
+	//ntv2EventOpen(&ntv2_gen->monitor_event, sys_con);
 
 	NTV2_MSG_GENLOCK_INFO("%s: open ntv2_genlock2\n", ntv2_gen->name);
 
@@ -149,11 +151,11 @@ void ntv2_genlock2_close(struct ntv2_genlock2 *ntv2_gen)
 
 	NTV2_MSG_GENLOCK_INFO("%s: close ntv2_genlock2\n", ntv2_gen->name);
 
-	ntv2_genlock2_disable(ntv2_gen);
+	//ntv2_genlock2_disable(ntv2_gen);
 
-	ntv2EventClose(&ntv2_gen->monitor_event);
-	ntv2ThreadClose(&ntv2_gen->monitor_task);
-	ntv2SpinLockClose(&ntv2_gen->state_lock);
+	//ntv2EventClose(&ntv2_gen->monitor_event);
+	//ntv2ThreadClose(&ntv2_gen->monitor_task);
+	//ntv2SpinLockClose(&ntv2_gen->state_lock);
 
 	memset(ntv2_gen, 0, sizeof(struct ntv2_genlock2));
 	ntv2MemoryFree(ntv2_gen, sizeof(struct ntv2_genlock2));
@@ -420,6 +422,7 @@ static struct ntv2_genlock2_data* get_genlock2_config(struct ntv2_genlock2 *ntv2
 	UNREFERENCED_PARAMETER(ntv2_gen);
 #endif
 	struct ntv2_genlock2_data* config = NULL;
+	uint32_t genlockDeviceID = reg_read(ntv2_gen, 0xc032);
 
 	if (rate >= GENLOCK2_FRAME_RATE_SIZE) return NULL;
 
@@ -430,10 +433,26 @@ static struct ntv2_genlock2_data* get_genlock2_config(struct ntv2_genlock2 *ntv2
 	case 750:
 	case 1125:
 	case 2250:
-		config = s_8A34045_broadcast_1485;
+		switch (genlockDeviceID)
+		{
+		default:
+		case 0x45:
+			config = s_8A34045_broadcast_1485;
+			break;
+		//case 0x12:
+			//config = s_8A34045_broadcast_1485;
+		}
 		break;
 	default:
-		config = s_8A34045_broadcast_1485;
+		switch (genlockDeviceID)
+		{
+		default:
+		case 0x45:
+			config = s_8A34045_broadcast_1485;
+			break;
+		//case 0x12:
+			//config = s_8A34045_broadcast_1485;
+		}
 		break;
 	}
 		
@@ -455,12 +474,12 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 		NTV2_MSG_GENLOCK_CHECK("%s: genlock write registers\n", ntv2_gen->name);
 	}
 
-	while ((gdat->offset != 0) || (gdat->size != 0))
+	//while ((gdat->offset != 0) || (gdat->size != 0))
 	{
-		if (!spi_genlock2_write(ntv2_gen, gdat->size, gdat->offset, gdat->data)) {
-			NTV2_MSG_ERROR("%s: genlock spi write failed\n", ntv2_gen->name);
-			return false;
-		}
+		//if (!spi_genlock2_write(ntv2_gen, gdat->size, gdat->offset, gdat->data)) {
+		//	NTV2_MSG_ERROR("%s: genlock spi write failed\n", ntv2_gen->name);
+		//	return false;
+		//}
 		count++;
 		gdat++;
 	}
@@ -493,7 +512,7 @@ static void spi_reset(struct ntv2_genlock2 *ntv2_gen)
 
 static void spi_reset_fifos(struct ntv2_genlock2 *ntv2_gen)
 {
-    reg_write(ntv2_gen, ntv2_reg_spi_control, 0xe6);
+    reg_write(ntv2_gen, ntv2_reg_spi_control, 0x1e6);
 }
 
 static bool spi_wait_write_empty(struct ntv2_genlock2 *ntv2_gen)
@@ -512,12 +531,67 @@ static bool spi_wait_write_empty(struct ntv2_genlock2 *ntv2_gen)
 	return true;
 }
 
-static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, uint8_t offset, uint8_t* value)
+uint32_t make_spi_ready(struct ntv2_genlock2 *ntv2_gen)
+{
+	return reg_read(ntv2_gen, kRegBoardID);
+}
+
+static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, uint8_t offset, char* data)
 {
     if (!spi_wait_write_empty(ntv2_gen)) return false;
+
+	// Step 1 reset FIFOs
 	spi_reset_fifos(ntv2_gen);
 
+	// Step 2 load data
+	uint8_t writeBytes[1000];
+	writeBytes[0] = offset;
+    hex_to_bytes(data+2, writeBytes + 1, size);
+	for (int i = 0; i <= size; i++)
+	{
+		make_spi_ready(ntv2_gen);
+		reg_write(ntv2_gen, ntv2_reg_spi_write, writeBytes[i]);
+	}
+
+	// Step 3 chip select low
+	make_spi_ready(ntv2_gen);
+	reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x0);
+
+	// Step 4 enable master transactions
+	uint32_t controlVal = reg_read(ntv2_gen, ntv2_reg_spi_control);
+	controlVal &= ~0x100;
+	make_spi_ready(ntv2_gen);
+	reg_write(ntv2_gen, ntv2_reg_spi_control, controlVal);
+
+	spi_wait_write_empty(ntv2_gen);
+
+	// Step 5 deassert chip select
+	make_spi_ready(ntv2_gen);
+	reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x01);
+
+	// Step 6 disable master transactions
+	controlVal = reg_read(ntv2_gen, ntv2_reg_spi_control);
+	controlVal |= 0x100;
+	make_spi_ready(ntv2_gen);
+	reg_write(ntv2_gen, ntv2_reg_spi_control, controlVal);
+	
 	return true;
+}
+
+/**
+ * @brief Convert a hex string to a byte array
+ * @param hex pointer to the hex string to convert
+ * @param output Array to place the results, should be half the size of the input array
+ * @param array_length Number of bytes to convert
+ */
+void hex_to_bytes(char *hex, uint8_t *output, uint8_t array_length)
+{
+    for (int i = 0, j = 0; i < array_length; i++, j+=2)
+    {
+        uint8_t bottom = hex[j+1] - (hex[j+1] > '9' ? 'A' - 10 : '0');
+        uint8_t top = hex[j] - (hex[j] > '9' ? 'A' - 10 : '0');
+        output[i] = (top * 16) + bottom;
+    }
 }
 
 static uint32_t reg_read(struct ntv2_genlock2 *ntv2_gen, const uint32_t *reg)
