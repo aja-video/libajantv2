@@ -106,7 +106,7 @@ static void spi_reset_fifos(struct ntv2_genlock2 *ntv2_gen);
 static bool spi_wait_write_empty(struct ntv2_genlock2 *ntv2_gen);
 static uint32_t make_spi_ready(struct ntv2_genlock2 *ntv2_gen);
 static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, uint8_t offset, char* data);
-static void hex_to_bytes(char *hex, uint8_t *output, uint8_t array_length);
+static void hex_to_bytes(char *hex, uint8_t *output, uint32_t array_length);
 
 static uint32_t reg_read(struct ntv2_genlock2 *ntv2_gen, const uint32_t *reg);
 static void reg_write(struct ntv2_genlock2 *ntv2_gen, const uint32_t *reg, uint32_t data);
@@ -422,7 +422,7 @@ static struct ntv2_genlock2_data* get_genlock2_config(struct ntv2_genlock2 *ntv2
 	UNREFERENCED_PARAMETER(ntv2_gen);
 #endif
 	struct ntv2_genlock2_data* config = NULL;
-	uint32_t genlockDeviceID = reg_read(ntv2_gen, 0xc032);
+	uint32_t genlockDeviceID = 0x45;//reg_read(ntv2_gen, 0xc032);
 
 	if (rate >= GENLOCK2_FRAME_RATE_SIZE) return NULL;
 
@@ -546,8 +546,8 @@ static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, ui
 	// Step 2 load data
 	uint8_t writeBytes[1000];
 	writeBytes[0] = offset;
-    hex_to_bytes(data+2, writeBytes + 1, size);
-	for (int i = 0; i <= size; i++)
+    hex_to_bytes(data+2, writeBytes+1, size);
+	for (uint32_t i = 0; i <= size; i++)
 	{
 		make_spi_ready(ntv2_gen);
 		reg_write(ntv2_gen, ntv2_reg_spi_write, writeBytes[i]);
@@ -578,15 +578,9 @@ static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, ui
 	return true;
 }
 
-/**
- * @brief Convert a hex string to a byte array
- * @param hex pointer to the hex string to convert
- * @param output Array to place the results, should be half the size of the input array
- * @param array_length Number of bytes to convert
- */
-void hex_to_bytes(char *hex, uint8_t *output, uint8_t array_length)
+void hex_to_bytes(char *hex, uint8_t *output, uint32_t array_length)
 {
-    for (int i = 0, j = 0; i < array_length; i++, j+=2)
+    for (uint32_t i = 0, j = 0; i < array_length; i++, j+=2)
     {
         uint8_t bottom = hex[j+1] - (hex[j+1] > '9' ? 'A' - 10 : '0');
         uint8_t top = hex[j] - (hex[j] > '9' ? 'A' - 10 : '0');
