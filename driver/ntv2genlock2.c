@@ -474,12 +474,12 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 		NTV2_MSG_GENLOCK_CHECK("%s: genlock write registers\n", ntv2_gen->name);
 	}
 
-	//while ((gdat->offset != 0) || (gdat->size != 0))
+	while ((gdat->size != 0))
 	{
-		//if (!spi_genlock2_write(ntv2_gen, gdat->size, gdat->offset, gdat->data)) {
-		//	NTV2_MSG_ERROR("%s: genlock spi write failed\n", ntv2_gen->name);
-		//	return false;
-		//}
+		if (!spi_genlock2_write(ntv2_gen, gdat->size, gdat->offset, gdat->data)) {
+			NTV2_MSG_ERROR("%s: genlock spi write failed\n", ntv2_gen->name);
+		return false;
+		}
 		count++;
 		gdat++;
 	}
@@ -533,7 +533,7 @@ static bool spi_wait_write_empty(struct ntv2_genlock2 *ntv2_gen)
 
 uint32_t make_spi_ready(struct ntv2_genlock2 *ntv2_gen)
 {
-	return reg_read(ntv2_gen, kRegBoardID);
+	return ntv2_regnum_read(ntv2_gen->system_context, kRegBoardID);
 }
 
 static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, uint8_t offset, char* data)
