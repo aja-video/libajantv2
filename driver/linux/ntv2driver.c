@@ -1997,7 +1997,9 @@ int ntv2_mmap(struct file *file,struct vm_area_struct* vma)
 		return -ENODEV;
 
 	// Don't try to swap out physical pages
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,3,0))
+    vm_flags_set(vma, VM_IO);
+#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
 	vma->vm_flags |= VM_IO;
 #elif (LINUX_VERSION_CODE >= KERNEL_VERSION(3,7,0))
 	vma->vm_flags |= (VM_DONTEXPAND | VM_DONTDUMP );
