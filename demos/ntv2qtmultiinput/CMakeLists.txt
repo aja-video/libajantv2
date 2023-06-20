@@ -99,7 +99,7 @@ if (AJA_CODE_SIGN)
     aja_code_sign(${PROJECT_NAME})
 endif()
 if (AJA_QT_DEPLOY)
-    aja_deploy_qt_libs_to_dest(ntv2qtmultiinput ${CMAKE_INSTALL_BINDIR})
+    aja_deploy_qt_libs_to_dest(ntv2qtmultiinput ${CMAKE_INSTALL_FULL_BINDIR})
 endif()
 install(TARGETS ${BUILD_TARGETS}
     BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
