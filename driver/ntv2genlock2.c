@@ -533,6 +533,12 @@ static bool spi_wait_write_empty(struct ntv2_genlock2 *ntv2_gen)
 
 uint32_t make_spi_ready(struct ntv2_genlock2 *ntv2_gen)
 {
+	uint32_t count = 0;
+	while (count < 100)
+	{
+		ntv2_regnum_read(ntv2_gen->system_context, kRegBoardID);
+		count++;
+	}
 	return ntv2_regnum_read(ntv2_gen->system_context, kRegBoardID);
 }
 
