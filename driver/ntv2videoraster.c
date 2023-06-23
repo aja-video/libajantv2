@@ -903,7 +903,6 @@ static uint32_t get_frame_size(struct ntv2_videoraster *ntv2_raster, uint32_t in
     if (is_8k_sqd_mode(ntv2_raster, index) || is_8k_tsi_mode(ntv2_raster, index))
         mult = 16;
 
-	NTV2_MSG_VIDEORASTER_INFO("SHIFTING VALUE: %d", NTV2_FLD_GET(ntv2_fld_channel_control_frame_size, channel_control));
     size = (2 << (NTV2_FLD_GET(ntv2_fld_channel_control_frame_size, channel_control))) * 1024 * 1024 * mult;
 
     return size;
