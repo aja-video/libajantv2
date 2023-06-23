@@ -458,7 +458,8 @@ static bool has_config_changed(struct ntv2_videoraster *ntv2_raster, uint32_t in
         NTV2_FLD_MASK(ntv2_fld_channel_control_capture_enable) |
         NTV2_FLD_MASK(ntv2_fld_channel_control_pixel_format) |
         NTV2_FLD_MASK(ntv2_fld_channel_control_pixel_format_high) |
-        NTV2_FLD_MASK(ntv2_fld_channel_control_channel_disable);
+        NTV2_FLD_MASK(ntv2_fld_channel_control_channel_disable) |
+		NTV2_FLD_MASK(ntv2_fld_channel_control_frame_size);
 
     bool ret = true;
 
@@ -892,7 +893,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
 
 static uint32_t get_frame_size(struct ntv2_videoraster *ntv2_raster, uint32_t index)
 {
-   uint32_t channel_control = ntv2_raster->channel_control[index];
+   uint32_t channel_control = ntv2_raster->channel_control[0]; // Only channel 1 reports size
     uint32_t mult = 0;
     uint32_t size = 0;
 
@@ -902,7 +903,8 @@ static uint32_t get_frame_size(struct ntv2_videoraster *ntv2_raster, uint32_t in
     if (is_8k_sqd_mode(ntv2_raster, index) || is_8k_tsi_mode(ntv2_raster, index))
         mult = 16;
 
-    size = (2 << NTV2_FLD_GET(ntv2_fld_channel_control_frame_size, channel_control)) * 1024 * 1024 * mult;
+	NTV2_MSG_VIDEORASTER_INFO("SHIFTING VALUE: %d", NTV2_FLD_GET(ntv2_fld_channel_control_frame_size, channel_control));
+    size = (2 << (NTV2_FLD_GET(ntv2_fld_channel_control_frame_size, channel_control))) * 1024 * 1024 * mult;
 
     return size;
 }
