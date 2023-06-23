@@ -53,6 +53,7 @@
 #include "../ntv2hdmiin4.h"
 #include "../ntv2kona.h"
 #include "../ntv2setup.h"
+#include "../ntv2genlock2.h"
 
 // clean old stuff
 #define FGVCROSSPOINTMASK (BIT_0+BIT_1+BIT_2+BIT_3)
@@ -536,6 +537,7 @@ typedef struct ntv2_private
 
 	Ntv2SystemContext		systemContext;
 //    struct ntv2_genlock		*m_pGenlockMonitor;
+    struct ntv2_genlock2	*m_pGenlock2Monitor;
 	struct ntv2_hdmiin		*m_pHDMIInputMonitor[NTV2_MAX_HDMI_MONITOR];
 	struct ntv2_hdmiin4		*m_pHDMIIn4Monitor[NTV2_MAX_HDMI_MONITOR];
 	struct ntv2_hdmiout4	*m_pHDMIOut4Monitor[NTV2_MAX_HDMI_MONITOR];

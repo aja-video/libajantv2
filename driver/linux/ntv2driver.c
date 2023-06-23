@@ -3327,6 +3327,8 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 	// initialize dma
 	dmaInit(deviceNumber);
 
+	ntv2pp->m_pGenlock2Monitor = NULL;
+
 	// configure hdmi input monitor
 	for (i = 0; i < NTV2_MAX_HDMI_MONITOR; i++)
 	{
@@ -3431,6 +3433,19 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 	
     if ((ntv2pp->_DeviceID == DEVICE_ID_KONAX) || (ntv2pp->_DeviceID == DEVICE_ID_KONAXR))
     {
+		ntv2pp->m_pGenlock2Monitor = ntv2_genlock2_open(&ntv2pp->systemContext, "ntv2genlock2", 0);
+		if (ntv2pp->m_pGenlock2Monitor != NULL)
+		{
+			status = ntv2_genlock2_program(ntv2pp->m_pGenlock2Monitor, ntv2_genlock2_mode_broadcast_1485);
+			ntv2_genlock2_close(ntv2pp->m_pGenlock2Monitor);
+			ntv2pp->m_pGenlock2Monitor = NULL;
+			//status = ntv2_genlock2_configure(m_pGenlock2Monitor);
+			//if (status != NTV2_STATUS_SUCCESS)
+			//{
+			//	ntv2_genlock2_close(m_pGenlockMonitor);
+			//	m_pGenlock2Monitor = NULL;
+			//}
+		}
 		ntv2pp->m_pHDMIIn4Monitor[0] = ntv2_hdmiin4_open(&ntv2pp->systemContext, "ntv2hdmi4in", 1);
 		if (ntv2pp->m_pHDMIIn4Monitor[0] != NULL)
 		{
@@ -3605,6 +3620,12 @@ static void __exit aja_ntv2_module_cleanup(void)
 			}	
 		}
 		
+        if (ntv2pp->m_pGenlock2Monitor != NULL)
+        {
+            ntv2_genlock2_close(ntv2pp->m_pGenlock2Monitor);
+            ntv2pp->m_pGenlock2Monitor = NULL;
+        }
+
 		// close hdmi monitor
 		for (j = 0; j < NTV2_MAX_HDMI_MONITOR; j++)
 		{

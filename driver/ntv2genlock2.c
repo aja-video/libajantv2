@@ -11,7 +11,7 @@
 #include "ntv2genlock2.h"
 #include "ntv2commonreg.h"
 #include "ntv2gen2regs_8A34045.h"
-
+#include "ntv2kona.h"
 
 //#define MONITOR_STATE_CHANGES
 
@@ -544,16 +544,19 @@ uint32_t make_spi_ready(struct ntv2_genlock2 *ntv2_gen)
 
 static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, uint8_t offset, char* data)
 {
+	uint8_t writeBytes[1000];
+    uint32_t controlVal;
+    uint32_t i;
+    
     if (!spi_wait_write_empty(ntv2_gen)) return false;
 
 	// Step 1 reset FIFOs
 	spi_reset_fifos(ntv2_gen);
 
 	// Step 2 load data
-	uint8_t writeBytes[1000];
 	writeBytes[0] = offset;
     hex_to_bytes(data+2, writeBytes+1, size);
-	for (uint32_t i = 0; i <= size; i++)
+	for (i = 0; i <= size; i++)
 	{
 		make_spi_ready(ntv2_gen);
 		reg_write(ntv2_gen, ntv2_reg_spi_write, writeBytes[i]);
@@ -564,7 +567,7 @@ static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, ui
 	reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x0);
 
 	// Step 4 enable master transactions
-	uint32_t controlVal = reg_read(ntv2_gen, ntv2_reg_spi_control);
+	controlVal = reg_read(ntv2_gen, ntv2_reg_spi_control);
 	controlVal &= ~0x100;
 	make_spi_ready(ntv2_gen);
 	reg_write(ntv2_gen, ntv2_reg_spi_control, controlVal);
@@ -586,7 +589,10 @@ static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, ui
 
 void hex_to_bytes(char *hex, uint8_t *output, uint32_t array_length)
 {
-    for (uint32_t i = 0, j = 0; i < array_length; i++, j+=2)
+    uint32_t i;
+    uint32_t j;
+    
+    for (i = 0, j = 0; i < array_length; i++, j+=2)
     {
         uint8_t bottom = hex[j+1] - (hex[j+1] > '9' ? 'A' - 10 : '0');
         uint8_t top = hex[j] - (hex[j] > '9' ? 'A' - 10 : '0');
