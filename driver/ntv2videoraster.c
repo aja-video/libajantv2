@@ -10,6 +10,7 @@
 
 #include "ntv2videoraster.h"
 #include "ntv2videorasterreg.h"
+#include "ntv2kona.h"
 
 /* debug messages */
 #define NTV2_DEBUG_INFO					    0x00000001
@@ -30,8 +31,8 @@
 #define NTV2_MSG_VIDEORASTER_STATE(string, ...)		NTV2_MSG_PRINT(NTV2_DEBUG_VIDEORASTER_STATE, string, __VA_ARGS__)
 #define NTV2_MSG_VIDEORASTER_CONFIG(string, ...)	NTV2_MSG_PRINT(NTV2_DEBUG_VIDEORASTER_CONFIG, string, __VA_ARGS__)
 
-static uint32_t ntv2_debug_mask = 0xffffffff;
-static uint32_t ntv2_user_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
+//static uint32_t ntv2_debug_mask = 0xffffffff;
+//static uint32_t ntv2_user_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
 static uint32_t ntv2_active_mask = 0xffffffff;
 static const int64_t c_default_timeout		= 50000;
 
@@ -259,10 +260,10 @@ static bool has_config_changed(struct ntv2_videoraster *ntv2_raster, uint32_t in
 static bool update_format(struct ntv2_videoraster *ntv2_raster, uint32_t index);
 static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t index);
 static uint32_t get_frame_size(struct ntv2_videoraster *ntv2_raster, uint32_t index);
-static bool is_4k_sqd_mode(struct ntv2_videoraster *ntv2_raster, uint32_t index);
-static bool is_4k_tsi_mode(struct ntv2_videoraster *ntv2_raster, uint32_t index);
-static bool is_8k_sqd_mode(struct ntv2_videoraster *ntv2_raster, uint32_t index);
-static bool is_8k_tsi_mode(struct ntv2_videoraster *ntv2_raster, uint32_t index);
+//static bool is_4k_sqd_mode(struct ntv2_videoraster *ntv2_raster, uint32_t index);
+//static bool is_4k_tsi_mode(struct ntv2_videoraster *ntv2_raster, uint32_t index);
+//static bool is_8k_sqd_mode(struct ntv2_videoraster *ntv2_raster, uint32_t index);
+//static bool is_8k_tsi_mode(struct ntv2_videoraster *ntv2_raster, uint32_t index);
 static uint32_t get_sdi_pixel_rate(uint32_t video_standard, uint32_t frame_rate);
 
 struct ntv2_videoraster *ntv2_videoraster_open(Ntv2SystemContext* sys_con,
@@ -893,21 +894,9 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
 
 static uint32_t get_frame_size(struct ntv2_videoraster *ntv2_raster, uint32_t index)
 {
-   uint32_t channel_control = ntv2_raster->channel_control[0]; // Only channel 1 reports size
-    uint32_t mult = 0;
-    uint32_t size = 0;
-
-    mult = 1;
-    if (is_4k_sqd_mode(ntv2_raster, index) || is_4k_tsi_mode(ntv2_raster, index))
-        mult = 4;
-    if (is_8k_sqd_mode(ntv2_raster, index) || is_8k_tsi_mode(ntv2_raster, index))
-        mult = 16;
-
-    size = (2 << (NTV2_FLD_GET(ntv2_fld_channel_control_frame_size, channel_control))) * 1024 * 1024 * mult;
-
-    return size;
+    return GetFrameBufferSize(ntv2_raster->system_context, (NTV2Channel)ntv2_raster->index);
 }
-
+#if 0
 static bool is_4k_sqd_mode(struct ntv2_videoraster *ntv2_raster, uint32_t index)
 {
     uint32_t global_control2 = ntv2_raster->global_control2[index];
@@ -1003,7 +992,7 @@ static bool is_8k_tsi_mode(struct ntv2_videoraster *ntv2_raster, uint32_t index)
 
     return quad_quad_mode;
 }
-
+#endif
 static uint32_t get_sdi_pixel_rate(uint32_t video_standard, uint32_t frame_rate)
 {
     uint32_t pixel_rate = ntv2_pixel_rate_none;

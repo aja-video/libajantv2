@@ -3328,6 +3328,7 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 	dmaInit(deviceNumber);
 
 	ntv2pp->m_pGenlock2Monitor = NULL;
+    ntv2pp->m_pRasterMonitor = NULL;
 
 	// configure hdmi input monitor
 	for (i = 0; i < NTV2_MAX_HDMI_MONITOR; i++)
@@ -3446,6 +3447,16 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 			//	m_pGenlock2Monitor = NULL;
 			//}
 		}
+		ntv2pp->m_pRasterMonitor = ntv2_videoraster_open(&ntv2pp->systemContext, "ntv2videoraster", 0);
+		if (ntv2pp->m_pRasterMonitor != NULL)
+		{
+			status = ntv2_videoraster_configure(ntv2pp->m_pRasterMonitor, 0x3400, 64, 4);
+			if (status != NTV2_STATUS_SUCCESS)
+			{
+				ntv2_videoraster_close(ntv2pp->m_pRasterMonitor);
+				ntv2pp->m_pRasterMonitor = NULL;
+			}
+		}
 		ntv2pp->m_pHDMIIn4Monitor[0] = ntv2_hdmiin4_open(&ntv2pp->systemContext, "ntv2hdmi4in", 1);
 		if (ntv2pp->m_pHDMIIn4Monitor[0] != NULL)
 		{
@@ -3497,6 +3508,11 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
         }
 	}
 
+    if (ntv2pp->m_pRasterMonitor != NULL)
+    {
+        ntv2_videoraster_enable(ntv2pp->m_pRasterMonitor);
+    }
+    
 	// configure tty uart
 	ntv2pp->m_pSerialPort = NULL;
 	isKonaIP = IsKonaIPDevice(deviceNumber, ntv2pp->_DeviceID);
@@ -3620,10 +3636,9 @@ static void __exit aja_ntv2_module_cleanup(void)
 			}	
 		}
 		
-        if (ntv2pp->m_pGenlock2Monitor != NULL)
+        if (ntv2pp->m_pRasterMonitor != NULL)
         {
-            ntv2_genlock2_close(ntv2pp->m_pGenlock2Monitor);
-            ntv2pp->m_pGenlock2Monitor = NULL;
+            ntv2_videoraster_disable(ntv2pp->m_pRasterMonitor);
         }
 
 		// close hdmi monitor
@@ -3652,6 +3667,18 @@ static void __exit aja_ntv2_module_cleanup(void)
 			ntv2_setup_close(ntv2pp->m_pSetupMonitor);
 			ntv2pp->m_pSetupMonitor = NULL;
 		}
+
+        if (ntv2pp->m_pGenlock2Monitor != NULL)
+        {
+            ntv2_genlock2_close(ntv2pp->m_pGenlock2Monitor);
+            ntv2pp->m_pGenlock2Monitor = NULL;
+        }
+
+        if (ntv2pp->m_pRasterMonitor != NULL)
+        {
+            ntv2_videoraster_close(ntv2pp->m_pRasterMonitor);
+            ntv2pp->m_pRasterMonitor = NULL;
+        }
 
 		// close the serial port
 		if (ntv2pp->m_pSerialPort != NULL)
@@ -5237,6 +5264,11 @@ static void suspend(ULWord deviceNumber)
 		ntv2_setup_disable(ntv2pp->m_pSetupMonitor);
 	}
 
+    if (ntv2pp->m_pRasterMonitor != NULL)
+    {
+        ntv2_videoraster_disable(ntv2pp->m_pRasterMonitor);
+    }
+
 	// shut down autocirculate
 	AutoCirculateInitialize(deviceNumber);
 
@@ -5338,6 +5370,11 @@ static void resume(ULWord deviceNumber)
 	{
 		ntv2_setup_enable(ntv2pp->m_pSetupMonitor);
 	}
+
+    if (ntv2pp->m_pRasterMonitor != NULL)
+    {
+        ntv2_videoraster_enable(ntv2pp->m_pRasterMonitor);
+    }
 
 	// Enable interrupts
 	EnableAllInterrupts(deviceNumber);
