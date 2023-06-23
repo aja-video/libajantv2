@@ -894,7 +894,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
 
 static uint32_t get_frame_size(struct ntv2_videoraster *ntv2_raster, uint32_t index)
 {
-    return GetFrameBufferSize(ntv2_raster->system_context, (NTV2Channel)ntv2_raster->index);
+    return GetFrameBufferSize(ntv2_raster->system_context, (NTV2Channel)index);
 }
 #if 0
 static bool is_4k_sqd_mode(struct ntv2_videoraster *ntv2_raster, uint32_t index)
