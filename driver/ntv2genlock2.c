@@ -507,7 +507,7 @@ static void spi_reset(struct ntv2_genlock2 *ntv2_gen)
 
 	// configure spi & reset fifos
     reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x0);
-	reg_write(ntv2_gen, ntv2_reg_spi_control, 0xe6);
+	reg_write(ntv2_gen, ntv2_reg_spi_control, 0x1e6);
 }
 
 static void spi_reset_fifos(struct ntv2_genlock2 *ntv2_gen)
@@ -526,14 +526,24 @@ static bool spi_wait_write_empty(struct ntv2_genlock2 *ntv2_gen)
 		if (count++ > c_spi_timeout) return false;
 		if (!ntv2_gen->monitor_enable) return false;
 		status = reg_read(ntv2_gen, ntv2_reg_spi_status);
+		//NTV2_MSG_GENLOCK_INFO("FIFO NOT EMPTY!");
 	}
-
+	//NTV2_MSG_GENLOCK_INFO("FIFO EMPTY! %d", count);
 	return true;
 }
 
 uint32_t make_spi_ready(struct ntv2_genlock2 *ntv2_gen)
 {
 	(void)ntv2_gen;
+	/*
+	uint32_t count = 0;
+	while (count < 100)
+	{
+		ntv2_regnum_read(ntv2_gen->system_context, kRegBoardID);
+		count++;
+	}
+	*/
+	//return ntv2_regnum_read(ntv2_gen->system_context, kRegBoardID);
 	return 1;
 }
 
@@ -545,38 +555,43 @@ static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, ui
     
     if (!spi_wait_write_empty(ntv2_gen)) return false;
 
+	for (i = 0; i < 8; i++)
+		reg_write(ntv2_gen, ntv2_reg_spi_write, 1);
+
 	// Step 1 reset FIFOs
 	spi_reset_fifos(ntv2_gen);
 
 	// Step 2 load data
 	writeBytes[0] = offset;
     hex_to_bytes(data+2, writeBytes+1, size);
+	//NTV2_MSG_GENLOCK_INFO("Writing offset %02X %s", offset, data);
 	for (i = 0; i <= size; i++)
 	{
-		make_spi_ready(ntv2_gen);
+		//make_spi_ready(ntv2_gen);
 		reg_write(ntv2_gen, ntv2_reg_spi_write, writeBytes[i]);
+		//NTV2_MSG_GENLOCK_INFO("Wrote %02X", writeBytes[i]);
 	}
 
 	// Step 3 chip select low
-	make_spi_ready(ntv2_gen);
+	//make_spi_ready(ntv2_gen);
 	reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x0);
 
 	// Step 4 enable master transactions
 	controlVal = reg_read(ntv2_gen, ntv2_reg_spi_control);
 	controlVal &= ~0x100;
-	make_spi_ready(ntv2_gen);
+	//make_spi_ready(ntv2_gen);
 	reg_write(ntv2_gen, ntv2_reg_spi_control, controlVal);
 
 	spi_wait_write_empty(ntv2_gen);
 
 	// Step 5 deassert chip select
-	make_spi_ready(ntv2_gen);
+	//make_spi_ready(ntv2_gen);
 	reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x01);
 
 	// Step 6 disable master transactions
 	controlVal = reg_read(ntv2_gen, ntv2_reg_spi_control);
 	controlVal |= 0x100;
-	make_spi_ready(ntv2_gen);
+	//make_spi_ready(ntv2_gen);
 	reg_write(ntv2_gen, ntv2_reg_spi_control, controlVal);
 	
 	return true;
