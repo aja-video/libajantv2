@@ -42,11 +42,6 @@ static uint32_t ntv2_debug_mask =
 	NTV2_DEBUG_INFO |
 	NTV2_DEBUG_ERROR;
 
-// genlock spi registers
-#define GENL_SPI_SET_ADDR_CMD				0x00
-#define GENL_SPI_WRITE_CMD					0x40
-#define GENL_SPI_READ_CMD					0x80
-
 #define GENL_SPI_READ_FIFO_EMPTY			0x01
 #define GENL_SPI_READ_FIFO_FULL				0x02
 #define GENL_SPI_WRITE_FIFO_EMPTY			0x04
@@ -506,7 +501,7 @@ static void spi_reset(struct ntv2_genlock2 *ntv2_gen)
     reg_write(ntv2_gen, ntv2_reg_spi_reset, 0x0a);
 
 	// configure spi & reset fifos
-    reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x0);
+    reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x1);
 	reg_write(ntv2_gen, ntv2_reg_spi_control, 0x1e6);
 }
 
@@ -555,8 +550,8 @@ static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, ui
     
     if (!spi_wait_write_empty(ntv2_gen)) return false;
 
-	for (i = 0; i < 8; i++)
-		reg_write(ntv2_gen, ntv2_reg_spi_write, 1);
+	//for (i = 0; i < 8; i++)
+		//reg_write(ntv2_gen, ntv2_reg_spi_write, 1);
 
 	// Step 1 reset FIFOs
 	spi_reset_fifos(ntv2_gen);
