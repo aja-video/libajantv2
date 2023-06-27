@@ -565,7 +565,14 @@ static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, ui
 	controlVal |= 0x100;
 	reg_write(ntv2_gen, ntv2_reg_spi_control, controlVal);
 
+#if defined (AJAMac)
 	ntv2TimeSleep(200);
+#else
+	uint64_t startTime = ntv2Time100ns();
+	uint64_t endTime = ntv2Time100ns();
+	while ((endTime - startTime) < 2000)
+		endTime = ntv2Time100ns();
+#endif
 	
 	return true;
 }
