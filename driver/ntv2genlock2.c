@@ -531,6 +531,8 @@ static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, ui
 	uint8_t writeBytes[1000];
     uint32_t controlVal;
     uint32_t i;
+	uint32_t usTicks;
+	uint32_t timeoutCount;
     
     if (!spi_wait_write_empty(ntv2_gen)) return false;
 
@@ -566,24 +568,23 @@ static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, ui
 	reg_write(ntv2_gen, ntv2_reg_spi_control, controlVal);
 
 	ntv2_regnum_write(ntv2_gen->system_context, 0x3606, 0);
+
+	usTicks = 0;
+	timeoutCount = 0;
+	//NTV2_MSG_GENLOCK_INFO("Genlock2 timeout count: %d", timeoutCount);
+	while (usTicks < 400 && timeoutCount < 100)
 	{
-		uint32_t usTicks = 0;
-		uint32_t timeoutCount = 0;
-		//NTV2_MSG_GENLOCK_INFO("Genlock2 timeout count: %d", timeoutCount);
-		while (usTicks < 200 && timeoutCount < 100)
-		{
-			usTicks = ntv2_regnum_read(ntv2_gen->system_context, 0x3606);
-			timeoutCount++;
-		}
-		if (timeoutCount == 100)
-		{
-		//	NTV2_MSG_GENLOCK_INFO("Genlock2 200us wait TIMEDOUT");
-		}
-		//else
-		//{
-		//	NTV2_MSG_GENLOCK_INFO("Genlock2 timeout count: %d", timeoutCount);
-		//}
+		usTicks = ntv2_regnum_read(ntv2_gen->system_context, 0x3606);
+		timeoutCount++;
 	}
+	if (timeoutCount == 100)
+	{
+	//	NTV2_MSG_GENLOCK_INFO("Genlock2 200us wait TIMEDOUT");
+	}
+	//else
+	//{
+	//	NTV2_MSG_GENLOCK_INFO("Genlock2 timeout count: %d", timeoutCount);
+	//}
 	
 	return true;
 }
