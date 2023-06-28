@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-CHECKOUT_DIR="$(git rev-parse --show-toplevel)"
+CHECKOUT_DIR="$(git rev-parse --show-toplevel)" 
 
 # environment vars to control the build
 if [ -z ${GENERATOR} ]; then GENERATOR="Ninja"; fi
