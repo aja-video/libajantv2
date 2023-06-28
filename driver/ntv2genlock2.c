@@ -572,7 +572,7 @@ static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, ui
 	usTicks = 0;
 	timeoutCount = 0;
 	//NTV2_MSG_GENLOCK_INFO("Genlock2 timeout count: %d", timeoutCount);
-	while (usTicks < 400 && timeoutCount < 100)
+	while (usTicks < 200 && timeoutCount < 100)
 	{
 		usTicks = ntv2_regnum_read(ntv2_gen->system_context, 0x3606);
 		timeoutCount++;
