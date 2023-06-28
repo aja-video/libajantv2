@@ -10,7 +10,7 @@
 
 #include "ntv2genlock2.h"
 #include "ntv2commonreg.h"
-#include "ntv2gen2regs_8A34045.h"
+#include "ntv2gen2regs.h"
 #include "ntv2kona.h"
 
 //#define MONITOR_STATE_CHANGES
@@ -565,14 +565,23 @@ static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, ui
 	controlVal |= 0x100;
 	reg_write(ntv2_gen, ntv2_reg_spi_control, controlVal);
 
-#if defined (AJAMac)
-	ntv2TimeSleep(200);
-#else
-	uint64_t startTime = ntv2Time100ns();
-	uint64_t endTime = ntv2Time100ns();
-	while ((endTime - startTime) < 2000)
-		endTime = ntv2Time100ns();
-#endif
+	ntv2_regnum_write(ntv2_gen->system_context, 0x3606, 0);
+	uint32_t usTicks = 0;
+	uint32_t timeoutCount = 0;
+	//NTV2_MSG_GENLOCK_INFO("Genlock2 timeout count: %d", timeoutCount);
+	while (usTicks < 200 && timeoutCount < 100)
+	{
+		usTicks = ntv2_regnum_read(ntv2_gen->system_context, 0x3606);
+		timeoutCount++;
+	}
+	if (timeoutCount == 100)
+	{
+		NTV2_MSG_GENLOCK_INFO("Genlock2 200us wait TIMEDOUT");
+	}
+	//else
+	//{
+	//	NTV2_MSG_GENLOCK_INFO("Genlock2 timeout count: %d", timeoutCount);
+	//}
 	
 	return true;
 }

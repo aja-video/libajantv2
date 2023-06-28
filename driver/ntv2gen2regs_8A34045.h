@@ -12,12 +12,6 @@
 #ifndef NTV2GEN2REGS_8A34045_HEADER
 #define NTV2GEN2REGS_8A34045_HEADER
 
-struct ntv2_genlock2_data {
-	uint32_t	size;
-	uint8_t		offset;
-	char		data[1000];
-};
-
 static struct ntv2_genlock2_data s_8A34045_broadcast_1485[] =
 {
 	{	0x4,	0x7C,	"0x00C01020"	},
