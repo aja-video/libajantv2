@@ -537,8 +537,8 @@ string CNTV2Bitfile::GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID
 		case DEVICE_ID_SOJI_DIAGS:				return "soji_diags";
 		case DEVICE_ID_TTAP:					return "t_tap_top";			//	t_tap_top.ncd
 		case DEVICE_ID_TTAP_PRO:				return "t_tap_pro";
-		case DEVICE_ID_KONAX:					return "konax_top";
-		case DEVICE_ID_KONAXR:					return "konaxr_top";
+		case DEVICE_ID_KONAX:					return "konax";
+		case DEVICE_ID_KONAXR:					return "konaxr";
 		case DEVICE_ID_NOTFOUND:				break;
 #if !defined(_DEBUG)
 		default:								break;
