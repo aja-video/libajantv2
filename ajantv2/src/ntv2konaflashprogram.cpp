@@ -425,7 +425,7 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 		_spiFlash = AJA_NULL;
 	}
 
-	if (CNTV2AxiSpiFlash::DeviceSupported(GetDeviceID()))
+	if (DEVICE_IS_IOIP(_boardID))
 	{
 		_spiFlash = new CNTV2AxiSpiFlash(GetIndexNumber(), !_bQuiet);
 	}
@@ -2151,6 +2151,18 @@ bool CNTV2KonaFlashProgram::ProgramCustom (const string &sCustomFileName, const 
 		SetBankSelect(BANK_0);
 	}	//	else !_spiFlash
 	return true;
+}
+
+bool CNTV2KonaFlashProgram::ProgramKonaxMB (const string &sCustomFileName, const uint32_t addr, ostream & outMsgs)
+{
+    if (DEVICE_IS_KONAX(_boardID))
+    {
+        _spiFlash = new CNTV2AxiSpiFlash(GetIndexNumber(), !_bQuiet);
+    }
+    else
+        return false;
+    
+    return ProgramCustom(sCustomFileName, addr, outMsgs);
 }
 
 bool CNTV2KonaFlashProgram::SetFlashBlockIDBank(FlashBlockID blockID)

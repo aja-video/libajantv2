@@ -805,8 +805,6 @@ bool CNTV2AxiSpiFlash::SpiTransfer(std::vector<uint8_t> commandSequence,
 			//printf("Not empty Rx_Empty = %d, count = %d\n", Rx_Empty, notEmptyCount);
 			notEmptyCount++;
 		}
-		if(outputData.size() < 128 && commandSequence.at(0) == CYPRESS_FLASH_READFAST_COMMAND)
-			printf("There is something wrong %d\n", outputData.size());
 	}
 
 	return retVal;

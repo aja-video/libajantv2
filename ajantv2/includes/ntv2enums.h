@@ -160,6 +160,15 @@ typedef enum
 		(__d__) == DEVICE_ID_SOJI_OE7   ||                      \
         (__d__) == DEVICE_ID_SOJI_DIAGS)
 
+#define DEVICE_IS_IOIP(__d__)                                   \
+    (   (__d__) == DEVICE_ID_IOIP_2022 ||						\
+        (__d__) == DEVICE_ID_IOIP_2110 ||						\
+        (__d__) == DEVICE_ID_IOIP_2110_RGB12)
+
+#define DEVICE_IS_KONAX(__d__)                                  \
+    (   (__d__) == DEVICE_ID_KONAX ||       					\
+        (__d__) == DEVICE_ID_KONAXR)
+
 #if !defined (NTV2_DEPRECATE)
 	typedef NTV2DeviceID	NTV2BoardID;	///< @deprecated	Use NTV2DeviceID instead. Identifiers with "board" in them are being phased out.
 
