@@ -4115,12 +4115,16 @@ typedef NTV2_CSC_RGB_Range	NTV2RGBBlackRange;
 #define NTV2_IS_VALID_CSCRGBRANGE(__v__)		((__v__) >= NTV2_CSC_RGB_RANGE_FULL && (__v__) < NTV2_CSC_RGB_RANGE_INVALID)
 
 
+/**
+	@brief	These enum values identify the available SDI video output limiting modes.
+	@see	CNTV2Card::GetVideoLimiting, CNTV2Card::SetVideoLimiting
+**/
 typedef enum
 {
-	NTV2_VIDEOLIMITING_LEGALSDI,
-	NTV2_VIDEOLIMITING_OFF,
-	NTV2_VIDEOLIMITING_LEGALBROADCAST,
-	NTV2_MAX_NUM_VideoLimitingEnums,
+	NTV2_VIDEOLIMITING_LEGALSDI,		///< @brief Identifies the "Legal SDI" mode (Ymax=0x3AC, Cmax=0x3C0)
+	NTV2_VIDEOLIMITING_OFF,				///< @brief Disables normal FrameBuffer Y/C value read limiting (NOT RECOMMENDED).
+	NTV2_VIDEOLIMITING_LEGALBROADCAST,	///< @brief Identifies the "Legal Broadcast" mode (Ymax=0x340, Cmax=0x340)
+	NTV2_MAX_NUM_VideoLimitingEnums,	///< @brief Identifies the invalid (unspecified, uninitialized) video limiting.
 	NTV2_VIDEOLIMITING_INVALID	=	NTV2_MAX_NUM_VideoLimitingEnums
 } NTV2VideoLimiting;
 

@@ -171,7 +171,7 @@ class AJAExport NTV2DeviceSpecParser
 			-	device operation:  read/write register, (old) AutoCirculate, WaitForInterrupt, DMATransfer and NTV2Message.
 			-	The Create factory method attempts to find and load a plugin that implements the requested software or remote device.
 	@note	Starting in SDK 16.3, most functions no longer return an int value, but instead return boolean true (success) or false (failure).
-			To determine the failure reason, call LastError.
+			(Check the AJADebug log for AJA_DebugUnit_RPCServer or AJA_DebugUnit_RPCClient messages.)
 **/
 class AJAExport NTV2RPCClientAPI
 {
