@@ -387,6 +387,39 @@ Ntv2Status ntv2_videoraster_disable(struct ntv2_videoraster *ntv2_raster)
 	return NTV2_STATUS_SUCCESS;
 }
 
+Ntv2Status ntv2_videoraster_update_input_frame(struct ntv2_videoraster *ntv2_raster, NTV2Channel channel, uint32_t frame_number)
+{
+    uint32_t global_control = ntv2_raster->global_control[index];
+    uint32_t output_frame = ntv2_raster->output_frame[index];
+    uint32_t input_frame = ntv2_raster->input_frame[index];
+    uint32_t standard = 0;
+    uint32_t geometry = 0;
+    uint32_t format = 0;
+    uint32_t frame_rate = 0;
+    uint32_t pixel_rate = 0;
+    uint32_t length = 0;
+    uint32_t pitch = 0;
+	uint32_t width = 0;
+	uint32_t height = 0;
+    uint32_t total_width = 0;
+    uint32_t frame_size = 0;
+
+    standard = NTV2_FLD_GET(ntv2_fld_global_control_standard, global_control);
+    if (standard >= s_standard_size) return false;
+    geometry = NTV2_FLD_GET(ntv2_fld_global_control_geometry, global_control);
+    if (geometry >= s_geometry_size) return false;
+
+    progressive = c_standard_data[standard].video_scan == ntv2_video_scan_progressive;
+    top_first = c_standard_data[standard].video_scan == ntv2_video_scan_top_first;
+
+    ntv2_raster->frame_size[index] = frame_size;
+
+}
+
+Ntv2Status ntv2_videoraster_update_output_frame(struct ntv2_videoraster *ntv2_raster, NTV2Channel channel, uint32_t frame_number)
+{
+}
+
 static void ntv2_videoraster_monitor(void* data)
 {
 	struct ntv2_videoraster *ntv2_raster = (struct ntv2_videoraster *)data;
@@ -632,6 +665,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     frame_size = get_frame_size(ntv2_raster, index);
 	if (quad)
 		frame_size *= 4;
+    ntv2_raster->frame_size[index] = frame_size;
 
     if (mode == ntv2_con_videoraster_mode_capture)
         frame_number = input_frame;
@@ -896,6 +930,7 @@ static uint32_t get_frame_size(struct ntv2_videoraster *ntv2_raster, uint32_t in
 {
     return GetFrameBufferSize(ntv2_raster->system_context, (NTV2Channel)index);
 }
+
 #if 0
 static bool is_4k_sqd_mode(struct ntv2_videoraster *ntv2_raster, uint32_t index)
 {
