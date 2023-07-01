@@ -18,7 +18,7 @@ struct ntv2_genlock2_data {
 	char		data[1000];
 };
 
-#include "ntv2gen2regs_8A34045.h"
-
+#include "ntv2gen2regs_8a34045.h"
+#include "ntv2gen2regs_rc32012a.h"
 
 #endif

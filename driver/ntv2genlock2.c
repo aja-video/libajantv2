@@ -217,7 +217,7 @@ Ntv2Status ntv2_genlock2_program(struct ntv2_genlock2 *ntv2_gen,
 	switch (mode)
 	{
 	case ntv2_genlock2_mode_broadcast_1485:
-		if (!configure_genlock2(ntv2_gen, s_8A34045_broadcast_1485, false))
+		if (!configure_genlock2(ntv2_gen, s_8a34045_broadcast_1485, false))
 			return NTV2_STATUS_FAIL;
 		break;
 	default:
@@ -431,7 +431,7 @@ static struct ntv2_genlock2_data* get_genlock2_config(struct ntv2_genlock2 *ntv2
 		{
 		default:
 		case 0x45:
-			config = s_8A34045_broadcast_1485;
+			config = s_8a34045_broadcast_1485;
 			break;
 		//case 0x12:
 			//config = s_8A34045_broadcast_1485;
@@ -442,7 +442,7 @@ static struct ntv2_genlock2_data* get_genlock2_config(struct ntv2_genlock2 *ntv2
 		{
 		default:
 		case 0x45:
-			config = s_8A34045_broadcast_1485;
+			config = s_8a34045_broadcast_1485;
 			break;
 		//case 0x12:
 			//config = s_8A34045_broadcast_1485;
