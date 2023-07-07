@@ -1566,37 +1566,12 @@ TEST_SUITE("time" * doctest::description("functions in ajabase/system/systemtime
 
 		// AJATime::Sleep (milliseconds)
 		{
-			std::cout << "AJATime::Sleep" << std::endl;
+			const int sleepDuration = 100; // 100msec (1/10th second)
+			std::cout << "\nAJATime::Sleep - " << sleepDuration << "msec" << std::endl;
 			uint64_t startMs = AJATime::GetSystemMilliseconds();
 			uint64_t startUs = AJATime::GetSystemMicroseconds();
 			uint64_t startNs = AJATime::GetSystemNanoseconds();
-
-			AJATime::Sleep(100); // 1/10th of a second
-			uint64_t endMs = AJATime::GetSystemMilliseconds();
-			uint64_t endUs = AJATime::GetSystemMicroseconds();
-			uint64_t endNs = AJATime::GetSystemNanoseconds();
-
-			uint64_t deltaMs = endMs - startMs;
-			uint64_t deltaUs = endUs - startUs;
-			uint64_t deltaNs = endNs - startNs;
-
-			// There could be variablitiy in the sleep call, so make sure in range
-			// check to make sure the units are correct
-			CHECK(deltaMs > 90);
-			CHECK(deltaMs < 150);
-			CHECK(deltaUs > 90000);
-			CHECK(deltaUs < 150000);
-			CHECK(deltaNs > 90000000);
-			CHECK(deltaNs < 150000000);	
-		}
-
-		// AJATime::SleepInMicroseconds
-		{
-			std::cout << "AJATime::SleepInMicroseconds" << std::endl;
-			uint64_t startMs = AJATime::GetSystemMilliseconds();
-			uint64_t startUs = AJATime::GetSystemMicroseconds();
-			uint64_t startNs = AJATime::GetSystemNanoseconds();
-			AJATime::SleepInMicroseconds(100 * 1000); // 1/10th of a second
+			AJATime::Sleep(sleepDuration);
 			uint64_t endMs = AJATime::GetSystemMilliseconds();
 			uint64_t endUs = AJATime::GetSystemMicroseconds();
 			uint64_t endNs = AJATime::GetSystemNanoseconds();
@@ -1613,31 +1588,75 @@ TEST_SUITE("time" * doctest::description("functions in ajabase/system/systemtime
 			CHECK(deltaUs < 150000);
 			CHECK(deltaNs > 90000000);
 			CHECK(deltaNs < 150000000);
+			std::cout << "Milliseconds: " << deltaMs << "\n"
+				<< "Microseconds: " << deltaUs << "\n"
+				<< "Nanoseconds: " << deltaNs << "\n" << std::endl;
+		}
+
+		// AJATime::SleepInMicroseconds
+		{
+			int sleepDuration = 100 * 1000; // 100msec (1/10th second)
+			std::cout << "AJATime::SleepInMicroseconds - " << sleepDuration << "usec" << std::endl;
+			uint64_t startMs = AJATime::GetSystemMilliseconds();
+			uint64_t startUs = AJATime::GetSystemMicroseconds();
+			uint64_t startNs = AJATime::GetSystemNanoseconds();
+			AJATime::SleepInMicroseconds(sleepDuration);
+			uint64_t endMs = AJATime::GetSystemMilliseconds();
+			uint64_t endUs = AJATime::GetSystemMicroseconds();
+			uint64_t endNs = AJATime::GetSystemNanoseconds();
+
+			uint64_t deltaMs = endMs - startMs;
+			uint64_t deltaUs = endUs - startUs;
+			uint64_t deltaNs = endNs - startNs;
+
+			// There could be variablitiy in the sleep call, so make sure in range
+			// check to make sure the units are correct
+			CHECK(deltaMs > 90);
+			CHECK(deltaMs < 150);
+			CHECK(deltaUs > 90000);
+			CHECK(deltaUs < 150000);
+			CHECK(deltaNs > 90000000);
+			CHECK(deltaNs < 150000000);
+			std::cout << "Milliseconds: " << deltaMs << "\n"
+				<< "Microseconds: " << deltaUs << "\n"
+				<< "Nanoseconds: " << deltaNs << "\n" << std::endl;
 		}
 
 		// AJATime::SleepInNanoseconds
-		// {
-		// 	std::cout << "AJATime::SleepInNanoseconds" << std::endl;
-		// 	uint64_t startMs = AJATime::GetSystemMilliseconds();
-		// 	uint64_t startUs = AJATime::GetSystemMicroseconds();
-		// 	uint64_t startNs = AJATime::GetSystemNanoseconds();
-		// 	AJATime::SleepInNanoseconds(100); // 1/10th of a second
-		// 	uint64_t endMs = AJATime::GetSystemMilliseconds();
-		// 	uint64_t endUs = AJATime::GetSystemMicroseconds();
-		// 	uint64_t endNs = AJATime::GetSystemNanoseconds();
+		{
+			int sleepDuration = 100; // 100 nanoseconds
+			std::cout << "AJATime::SleepInNanoseconds - " << sleepDuration << "nsec" << std::endl;
+			uint64_t startMs = AJATime::GetSystemMilliseconds();
+			uint64_t startUs = AJATime::GetSystemMicroseconds();
+			uint64_t startNs = AJATime::GetSystemNanoseconds();
+			AJATime::SleepInNanoseconds(100);
+			uint64_t endMs = AJATime::GetSystemMilliseconds();
+			uint64_t endUs = AJATime::GetSystemMicroseconds();
+			uint64_t endNs = AJATime::GetSystemNanoseconds();
 
-		// 	uint64_t deltaMs = endMs - startMs;
-		// 	uint64_t deltaUs = endUs - startUs;
-		// 	uint64_t deltaNs = endNs - startNs;
+			uint64_t deltaMs = endMs - startMs;
+			uint64_t deltaUs = endUs - startUs;
+			uint64_t deltaNs = endNs - startNs;
 
-		// 	// There could be variablitiy in the sleep call, so make sure in range
-		// 	// check to make sure the units are correct
-		// 	CHECK(deltaMs == 0);
-		// 	CHECK(deltaUs > 50);
-		// 	CHECK(deltaUs < 100);
-		// 	CHECK(deltaNs > 50000);
-		// 	CHECK(deltaNs < 100000);
-		// }
+			// There could be variablitiy in the sleep call, so make sure in range
+			// check to make sure the units are correct
+#if defined(AJA_WINDOWS)
+			CHECK(deltaMs == 0);
+			CHECK(deltaUs > 0);
+			CHECK(deltaUs < 5);
+			CHECK(deltaNs > 50);
+			CHECK(deltaNs < 2500);
+#else
+			CHECK(deltaMs == 0);
+			CHECK(deltaUs > 50);
+			CHECK(deltaUs < 100);
+			CHECK(deltaNs > 50000);
+			CHECK(deltaNs < 100000);
+#endif
+			std::cout << "Milliseconds: " << deltaMs << "\n"
+				<< "Microseconds: " << deltaUs << "\n"
+				<< "Nanoseconds: " << deltaNs << "\n" << std::endl;
+		}
 	}
 
 } //time
@@ -1998,8 +2017,6 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 			AJAStatus status = fio.Open("foobar.dat", eAJAWriteOnly|eAJACreateAlways, 0);
 			CHECK_EQ(status, AJA_STATUS_SUCCESS);
 			if (status == AJA_STATUS_SUCCESS) {
-				char cwd[256];
-				//char* cwdbuf = getcwd(&cwd[0], 256);
 				std::string buf("Hello, AJAFileIO!");
 				CHECK_EQ(fio.Write(buf), buf.size());
 #if defined(AJA_WINDOWS)
