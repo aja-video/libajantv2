@@ -6729,6 +6729,16 @@ typedef enum
 				bool			IsContentEqual (const NTV2Buffer & inBuffer, const ULWord inByteOffset = 0, const ULWord inByteCount = 0xFFFFFFFF) const;
 
 				/**
+					@brief		Answers with the byte offset to the first or next difference.
+					@param[in]	inBuffer		Specifies the memory buffer whose contents are to be compared with mine.
+												The buffer sizes must match.
+					@param		byteOffset		On entry, specifies the byte offset where comparing starts (use zero to find the first difference);
+												on exit, receives the byte offset of the next difference found (or 0xFFFFFFFF if identical).
+					@return		True if successful; otherwise false.
+				**/
+				bool			NextDifference (const NTV2Buffer & inBuffer, ULWord & byteOffset) const;
+
+				/**
 					@brief		Assuming my contents and the contents of the given buffer comprise ring buffers that periodically get overwritten
 								in contiguous variable-length chunks, answers with the contiguous byte range that differs between the two.
 					@param[in]	inBuffer			Specifies the memory buffer whose contents are to be compared with mine. Contents are

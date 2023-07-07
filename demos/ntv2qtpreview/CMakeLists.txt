@@ -96,7 +96,7 @@ if (AJA_CODE_SIGN)
     aja_code_sign(${PROJECT_NAME})
 endif()
 if (AJA_QT_DEPLOY)
-    aja_deploy_qt_libs_to_dest(ntv2qtpreview ${CMAKE_INSTALL_BINDIR})
+    aja_deploy_qt_libs_to_dest(ntv2qtpreview ${CMAKE_INSTALL_FULL_BINDIR})
 endif()
 install(TARGETS ${PROJECT_NAME}
     BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -109,22 +109,22 @@ if (AJA_INSTALL_SOURCES)
     list(REMOVE_ITEM NTV2QTPREVIEW_SOURCES win-ver.rc)
     install(FILES ${AJA_LIB_GUI_ROOT}/ajaapplication.qrc
         DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajainternal/gui)
-    install(FILES ${NTV2QTPREVIEW_HEADERS} DESTINATION
-        ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtpreview)
+    install(FILES ${NTV2QTPREVIEW_HEADERS} 
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtpreview)
     install(FILES ${NTV2QTPREVIEW_SOURCES}
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtpreview)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtpreview)
 endif()
 if (AJA_INSTALL_CMAKE)
     install(FILES CMakeLists.txt
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtpreview)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtpreview)
 endif()
 if (AJA_INSTALL_MISC)
     install(FILES Makefile
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtpreview)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtpreview)
     install(FILES app.icns
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtpreview)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtpreview)
     install(FILES app.ico
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtpreview)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtpreview)
     install(FILES splash.png
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtpreview)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtpreview)
 endif()

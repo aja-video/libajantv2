@@ -1720,6 +1720,34 @@ bool NTV2Buffer::IsContentEqual (const NTV2Buffer & inBuffer, const ULWord inByt
 	return ::memcmp (pByte1, pByte2, byteCount) == 0;
 }
 
+bool NTV2Buffer::NextDifference (const NTV2Buffer & inBuffer, ULWord & byteOffset) const
+{
+	if (byteOffset == 0xFFFFFFFF)
+		return false;	//	bad offset
+	if (IsNULL() || inBuffer.IsNULL())
+		return false;	//	NULL or empty buffers
+	if (inBuffer.GetByteCount() != GetByteCount())
+		return false;	//	Different byte counts
+	if (inBuffer.GetHostPointer() == GetHostPointer())
+		{byteOffset = 0xFFFFFFFF;  return true;}	//	Same buffer
+
+	ULWord	totalBytesToCompare(GetByteCount());
+	if (byteOffset >= totalBytesToCompare)
+		return false;	//	Bad offset
+	totalBytesToCompare -= byteOffset;
+
+	const UByte * pByte1 (*this);
+	const UByte * pByte2 (inBuffer);
+	while (totalBytesToCompare)
+	{
+		if (pByte1[byteOffset] != pByte2[byteOffset])
+			return true;
+		totalBytesToCompare--;
+		byteOffset++;
+	}
+	byteOffset = 0xFFFFFFFF;
+	return true;
+}
 
 bool NTV2Buffer::GetRingChangedByteRange (const NTV2Buffer & inBuffer, ULWord & outByteOffsetFirst, ULWord & outByteOffsetLast) const
 {

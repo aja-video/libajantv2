@@ -99,7 +99,7 @@ if (AJA_CODE_SIGN)
     aja_code_sign(${PROJECT_NAME})
 endif()
 if (AJA_QT_DEPLOY)
-    aja_deploy_qt_libs_to_dest(ntv2qtmultiinput ${CMAKE_INSTALL_BINDIR})
+    aja_deploy_qt_libs_to_dest(ntv2qtmultiinput ${CMAKE_INSTALL_FULL_BINDIR})
 endif()
 install(TARGETS ${BUILD_TARGETS}
     BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -112,18 +112,18 @@ if (AJA_INSTALL_SOURCES)
     list(REMOVE_ITEM NTV2QTMULTIINPUT_SOURCES win-ver.rc)
     install(FILES ${AJA_LIB_GUI_ROOT}/ajaapplication.qrc
         DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajainternal/gui)
-    install(FILES ${NTV2QTMULTIINPUT_HEADERS} DESTINATION
-        ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtmultiinput)
+    install(FILES ${NTV2QTMULTIINPUT_HEADERS} 
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtmultiinput)
     install(FILES ${NTV2QTMULTIINPUT_SOURCES}
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtmultiinput)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtmultiinput)
 endif()
 if (AJA_INSTALL_CMAKE)
     install(FILES CMakeLists.txt
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtmultiinput)
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtmultiinput)
 endif()
 if (AJA_INSTALL_MISC)
-    install(FILES Makefile      DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtmultiinput)
-    install(FILES app.icns      DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtmultiinput)
-    install(FILES app.ico       DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtmultiinput)
-    install(FILES splash.png    DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2qtmultiinput)
+    install(FILES Makefile      DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtmultiinput)
+    install(FILES app.icns      DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtmultiinput)
+    install(FILES app.ico       DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtmultiinput)
+    install(FILES splash.png    DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtmultiinput)
 endif()

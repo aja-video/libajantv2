@@ -213,16 +213,11 @@ AJA_EXPORT extern void displayArgs(poptContext con,
 
 #define N_(foo) foo
 #define POPT_TABLEEND { NULL, '\0', 0, NULL, 0, NULL, NULL }
-static struct poptOption poptHelpOptions[] = {
-  { NULL, '\0', POPT_ARG_CALLBACK, (void *)displayArgs, 0, NULL, NULL },
-  { "help", '?', 0, NULL, (int)'?', N_("Show this help message"), NULL },
-  { "usage", '\0', 0, NULL, (int)'u', N_("Display brief usage message"), NULL },
-	POPT_TABLEEND
-} ;
 
+extern struct poptOption * poptHelpOptionsAutoHelp;
 extern struct poptOption * poptHelpOptionsI18N;
 
-#define POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE, poptHelpOptions, \
+#define POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE, poptHelpOptionsAutoHelp, \
 			0, "Help options:", NULL },
 
 /** \ingroup popt
