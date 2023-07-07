@@ -225,7 +225,7 @@ template <typename T> class AJAMovingAvg
 			else if (typeid(T) == typeid(int8_t))
 				return SCHAR_MAX;
 			else if (typeid(T) == typeid(uint8_t))
-				return 0xFF;
+				return T(UCHAR_MAX);
 			else if (typeid(T) == typeid(int16_t))
 				return T(SHRT_MAX);
 			else if (typeid(T) == typeid(uint16_t))
