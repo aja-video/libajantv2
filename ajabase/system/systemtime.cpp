@@ -16,7 +16,7 @@
 #endif	//	defined(AJA_COLLECT_SLEEP_STATS)
 
 #if defined(AJA_USE_CPLUSPLUS11)
-	//	If compiling with C++11, by default, implementation uses STL chrono & thread.
+	// If compiling with C++11, by default, implementation uses STL chrono & thread.
 	#define	AJA_SLEEP_USE_STL	//	Sleep... functions use STL chrono/thread;  comment this out to use native impl
 //	#define	AJA_SYSCLK_USE_STL	//	GetSystem... functions use STL chrono;  comment this out to use native impl (TBD)
 #elif !defined(AJA_WINDOWS)
@@ -329,10 +329,10 @@ void AJATime::SleepInNanoseconds (const uint64_t inTime)
 		std::this_thread::sleep_for(std::chrono::nanoseconds(inTime));
 	#elif defined(AJA_WINDOWS)
 		// Adapted from OBS Windows platform code
-		uint64_t freq = (uint64_t)GetSystemFrequency();
-		uint64_t timeTarget = GetSystemNanoseconds() + inTime;
+		int64_t freq = GetSystemFrequency();
+		int64_t timeTarget = (int64_t)GetSystemNanoseconds() + (int64_t)inTime;
 		const LONGLONG countTarget = (LONGLONG)util_mul_div64(timeTarget, freq, 1000000000);
-		uint64_t count = (uint64_t)GetSystemCounter();
+		int64_t count = GetSystemCounter();
 		const bool stall = count < countTarget;
 		if (stall) {
 			DWORD milliseconds = (DWORD)(((countTarget - count) * 1000.0) / freq);
@@ -340,7 +340,7 @@ void AJATime::SleepInNanoseconds (const uint64_t inTime)
 				Sleep(milliseconds - 1);
 			}
 			for (;;) {
-				QueryPerformanceCounter(&count);
+				count = GetSystemCounter();
 				if (count >= countTarget)
 					break;
 				YieldProcessor();
