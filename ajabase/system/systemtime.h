@@ -77,6 +77,12 @@
 		**/
 		static void		SleepInMicroseconds (const int32_t inMicroseconds);
 
+		/**
+			@brief		Suspends execution of the current thread for a given number of nanoseconds.
+			@param		inMicroseconds		Time to sleep (nanoseconds).
+		**/
+		static void		SleepInNanoseconds (const uint64_t inNanoseconds);
+
 		#if defined(AJA_COLLECT_SLEEP_STATS)
 			static bool			CollectSleepStats (const bool inEnable = true);
 			static std::string	GetSleepStats (void);

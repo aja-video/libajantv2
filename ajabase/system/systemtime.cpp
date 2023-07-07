@@ -12,6 +12,7 @@
 	#include "ajabase/common/timer.h"
 	#include "ajabase/system/atomic.h"
 	#include "ajabase/system/thread.h"
+	#include <sstream>
 #endif	//	defined(AJA_COLLECT_SLEEP_STATS)
 
 #if defined(AJA_USE_CPLUSPLUS11)
@@ -37,6 +38,24 @@
 	#include "timeapi.h"
 	static LARGE_INTEGER s_PerformanceFrequency;
 	static bool s_bPerformanceInit = false;
+
+	// From OBS utils
+	#if defined(_MSC_VER) && defined(_M_X64)
+	#include <intrin.h>
+	#endif
+	static inline uint64_t util_mul_div64(uint64_t num, uint64_t mul, uint64_t div)
+	{
+	#if defined(_MSC_VER) && defined(_M_X64) && (_MSC_VER >= 1920)
+		unsigned __int64 high;
+		const unsigned __int64 low = _umul128(num, mul, &high);
+		unsigned __int64 rem;
+		return _udiv128(high, low, div, &rem);
+	#else
+		const uint64_t rem = num % div;
+		return (num / div) * mul + (rem * mul) / div;
+	#endif
+	}
+
 #elif defined(AJA_LINUX)
 	#include <unistd.h>
 	#if (_POSIX_TIMERS > 0)
@@ -266,7 +285,7 @@ uint64_t AJATime::GetSystemNanoseconds (void)
 
 
 // sleep time in milliseconds
-void AJATime::Sleep (int32_t inTime)
+void AJATime::Sleep (const int32_t inTime)
 {
 	if (inTime <= 0)
 		return;	//	Don't sleep at all
@@ -277,23 +296,14 @@ void AJATime::Sleep (int32_t inTime)
 	#elif defined(AJA_WINDOWS)
 		::Sleep(DWORD(inTime));
 	#else	//	POSIX
-		#if defined(AJA_USE_USLEEP)
-			usleep(inTime * 1000);	//	usleep is deprecated in POSIX
-		#else
-			timespec req, rm;
-			req.tv_sec = 0;
-			req.tv_nsec = long(inTime) * 1000L * 1000L;
-			rm.tv_sec = 0; rm.tv_nsec = 0;
-			if (::nanosleep(&req, &rm) < 0)
-				;	//	failed
-		#endif
+		usleep(inTime * 1000);	//	NOTE: usleep is deprecated in POSIX
 	#endif
 	POST_STATS(double(inTime) / 1000.0);
 }
 
 
 // sleep time in microseconds
-void AJATime::SleepInMicroseconds (int32_t inTime)
+void AJATime::SleepInMicroseconds (const int32_t inTime)
 {
 	if (inTime <= 0)
 		return;	//	Don't sleep at all
@@ -304,20 +314,51 @@ void AJATime::SleepInMicroseconds (int32_t inTime)
 	#elif defined(AJA_WINDOWS)
 		::Sleep(DWORD(inTime) / 1000);	//	Windows Sleep expects millisecs
 	#else	//	POSIX
-		#if defined(AJA_USE_USLEEP)
-			usleep(inTime);	//	usleep is deprecated in POSIX
-		#else
-			timespec req, rm;
-			req.tv_sec = 0;
-			req.tv_nsec = long(inTime) * 1000L;
-			rm.tv_sec = 0; rm.tv_nsec = 0;
-			if (::nanosleep(&req, &rm) < 0)
-				;	//	failed
-		#endif
+		usleep(inTime);	//	NOTE: usleep is deprecated in POSIX
 	#endif
 	POST_STATS(double(inTime) / 1000000.0);
 }
 
+// sleep time in nanoseconds
+void AJATime::SleepInNanoseconds (const uint64_t inTime)
+{
+	if (inTime == 0)
+		return; //  Don't sleep at all
+
+	#if defined(AJA_SLEEP_USE_STL)
+		std::this_thread::sleep_for(std::chrono::nanoseconds(inTime));
+	#elif defined(AJA_WINDOWS)
+		// Adapted from OBS Windows platform code
+		uint64_t freq = (uint64_t)GetSystemFrequency();
+		uint64_t timeTarget = GetSystemNanoseconds() + inTime;
+		const LONGLONG countTarget = (LONGLONG)util_mul_div64(timeTarget, freq, 1000000000);
+		uint64_t count = (uint64_t)GetSystemCounter();
+		const bool stall = count < countTarget;
+		if (stall) {
+			DWORD milliseconds = (DWORD)(((countTarget - count) * 1000.0) / freq);
+			if (milliseconds > 1) {
+				Sleep(milliseconds - 1);
+			}
+			for (;;) {
+				QueryPerformanceCounter(&count);
+				if (count >= countTarget)
+					break;
+				YieldProcessor();
+			}
+		}
+	#else
+		timespec req, rm;
+		req.tv_sec = inTime / 1000000000;
+		req.tv_nsec = long(inTime) % 1000000000L;
+		rm.tv_sec = 0;
+		rm.tv_nsec = 0;
+		if (::nanosleep(&req, &rm) < 0)
+			;	//	failed
+	#endif
+
+	PRE_STATS
+	POST_STATS(double(inTime) / 1000000000.0)
+}
 
 #if defined(AJA_COLLECT_SLEEP_STATS)
 	bool AJATime::CollectSleepStats (const bool inEnable)

@@ -1614,6 +1614,30 @@ TEST_SUITE("time" * doctest::description("functions in ajabase/system/systemtime
 			CHECK(deltaNs > 90000000);
 			CHECK(deltaNs < 150000000);
 		}
+
+		// AJATime::SleepInNanoseconds
+		// {
+		// 	std::cout << "AJATime::SleepInNanoseconds" << std::endl;
+		// 	uint64_t startMs = AJATime::GetSystemMilliseconds();
+		// 	uint64_t startUs = AJATime::GetSystemMicroseconds();
+		// 	uint64_t startNs = AJATime::GetSystemNanoseconds();
+		// 	AJATime::SleepInNanoseconds(100); // 1/10th of a second
+		// 	uint64_t endMs = AJATime::GetSystemMilliseconds();
+		// 	uint64_t endUs = AJATime::GetSystemMicroseconds();
+		// 	uint64_t endNs = AJATime::GetSystemNanoseconds();
+
+		// 	uint64_t deltaMs = endMs - startMs;
+		// 	uint64_t deltaUs = endUs - startUs;
+		// 	uint64_t deltaNs = endNs - startNs;
+
+		// 	// There could be variablitiy in the sleep call, so make sure in range
+		// 	// check to make sure the units are correct
+		// 	CHECK(deltaMs == 0);
+		// 	CHECK(deltaUs > 50);
+		// 	CHECK(deltaUs < 100);
+		// 	CHECK(deltaNs > 50000);
+		// 	CHECK(deltaNs < 100000);
+		// }
 	}
 
 } //time
