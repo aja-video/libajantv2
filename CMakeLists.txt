@@ -88,6 +88,7 @@ if (AJANTV2_BUILD_TESTS)
         add_subdirectory(${DOCTEST_PATH})
         include(${DOCTEST_PATH}/scripts/cmake/doctest.cmake)
     endif()
+    add_subdirectory(ajabase/test)
     add_subdirectory(ajantv2/test)
 endif()
 

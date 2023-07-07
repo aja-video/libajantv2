@@ -1,18 +1,10 @@
 project(ut_ajabase)
 
-set(APP_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
-
-set(AJALIBRARIES_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../../ajalibraries)
-set(AJA_DOCTEST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../../non-aja/doctest)
-
-set(APP_TARGET_INCLUDE_DIRS
-	${APP_ROOT}/..
-	${AJALIBRARIES_ROOT}
-	${AJA_DOCTEST_ROOT})
-
-set(APP_HEADERS ${AJA_DOCTEST_ROOT}/doctest.h)
-
-set(APP_SOURCES ${APP_ROOT}/main.cpp)
+set(TARGET_INCLUDE_DIRS
+	${CMAKE_CURRENT_SOURCE_DIR}/../
+	${LIBAJANTV2_DIR}
+	${THIRDPARTY_DIR}/doctest/doctest
+)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	set(TARGET_COMPILE_DEFS
@@ -30,12 +22,10 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
-set(APP_TARGET_SOURCES
-	${APP_HEADERS}
-	${APP_SOURCES})
+set(TARGET_SOURCES main.cpp)
 
-add_executable(ut_ajabase ${APP_TARGET_SOURCES})
+add_executable(ut_ajabase ${TARGET_SOURCES})
 add_dependencies(ut_ajabase ajantv2)
 target_compile_definitions(ut_ajabase PRIVATE ${TARGET_COMPILE_DEFS})
-target_include_directories(ut_ajabase PRIVATE ${APP_TARGET_INCLUDE_DIRS})
+target_include_directories(ut_ajabase PRIVATE ${TARGET_INCLUDE_DIRS})
 target_link_libraries(ut_ajabase PRIVATE ajantv2 ${TARGET_LINK_LIBS})
