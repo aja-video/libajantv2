@@ -35,9 +35,9 @@ install(TARGETS ${PROJECT_NAME}
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${SUPPORTLOG_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/supportlog)
-	install(FILES ${SUPPORTLOG_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/supportlog)
+	install(FILES ${SUPPORTLOG_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/tools/supportlog)
+	install(FILES ${SUPPORTLOG_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/tools/supportlog)
 endif()
 if (AJA_INSTALL_CMAKE)
-	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/supportlog)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/tools/supportlog)
 endif()

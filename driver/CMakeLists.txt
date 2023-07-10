@@ -232,6 +232,9 @@ if (AJA_INSTALL_SOURCES)
             DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2/src
             COMPONENT install_driver)
 endif()
+if (AJA_INSTALL_CMAKE)
+    install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/driver)
+endif()
 if (AJA_INSTALL_MISC)
 	if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 		install(FILES ${AJADRIVER_LINUX_BUILD_FILES}
