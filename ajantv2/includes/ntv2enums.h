@@ -105,8 +105,8 @@ typedef enum
 	DEVICE_ID_KONALHIDVI				= 0x10266401,	///< @brief See \ref konalhi
 	DEVICE_ID_TTAP						= 0x10416000,	///< @brief See \ref ttap
 	DEVICE_ID_TTAP_PRO					= 0x10879000,	///< @brief See \ref ttappro
-	DEVICE_ID_KONAX						= 0X10958500,	///< @brief See \ref gallifrey
-	DEVICE_ID_KONAXR					= 0X10958501,	///< @brief See \ref gallifrey
+	DEVICE_ID_KONAXM					= 0X10958500,	///< @brief See \ref gallifrey
+	DEVICE_ID_KONAX						= 0X10958501,	///< @brief See \ref gallifrey
 #if !defined (NTV2_DEPRECATE_12_6)
 	DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		 ///< @deprecated	Use ::DEVICE_ID_CORVIDHBR instead.
 #endif	//	NTV2_DEPRECATE_12_6
@@ -166,8 +166,8 @@ typedef enum
         (__d__) == DEVICE_ID_IOIP_2110_RGB12)
 
 #define DEVICE_IS_KONAX(__d__)                                  \
-    (   (__d__) == DEVICE_ID_KONAX ||       					\
-        (__d__) == DEVICE_ID_KONAXR)
+    (   (__d__) == DEVICE_ID_KONAXM ||       					\
+        (__d__) == DEVICE_ID_KONAX)
 
 #if !defined (NTV2_DEPRECATE)
 	typedef NTV2DeviceID	NTV2BoardID;	///< @deprecated	Use NTV2DeviceID instead. Identifiers with "board" in them are being phased out.
