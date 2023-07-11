@@ -345,8 +345,7 @@ void AJATime::SleepInNanoseconds (const uint64_t inTime)
 		req.tv_nsec = long(inTime) % 1000000000L;
 		rm.tv_sec = 0;
 		rm.tv_nsec = 0;
-		if (::nanosleep(&req, &rm) < 0)
-			;	//	failed
+		nanosleep(&req, &rm);
 	#endif
 
 	PRE_STATS
