@@ -8,20 +8,13 @@
 #include "ajabase/system/system.h"
 #include "ajabase/common/common.h"
 #include "ajabase/system/systemtime.h"
+#include "ajabase/common/types.h"
 #if defined(AJA_COLLECT_SLEEP_STATS)
 	#include "ajabase/common/timer.h"
 	#include "ajabase/system/atomic.h"
 	#include "ajabase/system/thread.h"
 	#include <sstream>
 #endif	//	defined(AJA_COLLECT_SLEEP_STATS)
-
-#if defined(AJA_USE_CPLUSPLUS11)
-	// If compiling with C++11, by default, implementation uses STL chrono & thread.
-	#define	AJA_SLEEP_USE_STL	//	Sleep... functions use STL chrono/thread;  comment this out to use native impl
-//	#define	AJA_SYSCLK_USE_STL	//	GetSystem... functions use STL chrono;  comment this out to use native impl (TBD)
-#elif !defined(AJA_WINDOWS)
-//	#define	AJA_USE_USLEEP		//	Uncomment this to use POSIX-deprecated usleep function instead of nanosleep
-#endif	//	AJA_USE_CPLUSPLUS11
 
 #if defined(AJA_MAC)
 	#include <mach/mach_time.h>

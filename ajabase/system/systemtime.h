@@ -8,6 +8,12 @@
 #ifndef AJA_TIME_H
 	#define AJA_TIME_H
 
+#if defined(AJA_USE_CPLUSPLUS11)
+	// If compiling with C++11, by default, implementation uses STL chrono & thread.
+	#define	AJA_SLEEP_USE_STL	//	Sleep... functions use STL chrono/thread;  comment this out to use native impl
+	// #define	AJA_SYSCLK_USE_STL	//	GetSystem... functions use STL chrono;  comment this out to use native impl (TBD)
+#endif	//	AJA_USE_CPLUSPLUS11
+
 //	#define	AJA_COLLECT_SLEEP_STATS		//	Define this to allow thread-specific stat collection for Sleep & SleepInMicroseconds
 
 	#include "ajabase/common/public.h"
