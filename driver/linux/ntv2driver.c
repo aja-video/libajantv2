@@ -3432,7 +3432,7 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
         }
     }
 	
-    if ((ntv2pp->_DeviceID == DEVICE_ID_KONAX) || (ntv2pp->_DeviceID == DEVICE_ID_KONAXR))
+    if ((ntv2pp->_DeviceID == DEVICE_ID_KONAX) || (ntv2pp->_DeviceID == DEVICE_ID_KONAXM))
     {
 		ntv2pp->m_pGenlock2Monitor = ntv2_genlock2_open(&ntv2pp->systemContext, "ntv2genlock2", 0);
 		if (ntv2pp->m_pGenlock2Monitor != NULL)
@@ -3521,7 +3521,7 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 #endif
 
 	if (isKonaIP || (ntv2pp->_DeviceID == DEVICE_ID_CORVIDHBR) ||
-        (ntv2pp->_DeviceID == DEVICE_ID_KONAX) || (ntv2pp->_DeviceID == DEVICE_ID_KONAXR))
+        (ntv2pp->_DeviceID == DEVICE_ID_KONAX) || (ntv2pp->_DeviceID == DEVICE_ID_KONAXM))
 	{
 		if ((!linuxSerial && (MakeSerial == 1)) ||
 			(linuxSerial && (MakeSerial != (-1))))
