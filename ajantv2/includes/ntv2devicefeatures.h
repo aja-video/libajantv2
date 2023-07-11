@@ -352,7 +352,7 @@ AJAExport bool NTV2DeviceGetVideoFormatFromState_Ex2 (	NTV2VideoFormat *		pOutVa
 	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoRS422N(const NTV2DeviceID devID, const NTV2Channel ch);)	///< @deprecated	Use NTV2DeviceGetNumSerialPorts instead.
 #endif	//	NTV2_DEPRECATE_17_0
 
-inline bool work_around_erroneous_compiler_warning (void) {return true;}	//	This declaration stops erroneous deprecation warnings for NTV2DeviceCanDoTCIndex (immediately below)
+bool work_around_erroneous_compiler_warning (void);	//	This declaration stops erroneous deprecation warnings for NTV2DeviceCanDoTCIndex (immediately below)
 AJAExport bool NTV2DeviceCanDoTCIndex (const NTV2DeviceID inDeviceID, const NTV2TCIndex inTCIndex); ///< @return	True if the device having the given ID supports the specified NTV2TCIndex.
 AJAExport bool NTV2DeviceCanDoInputTCIndex (const NTV2DeviceID inDeviceID, const NTV2TCIndex inTCIndex);	///< @return	True if the device having the given ID supports the specified NTV2TCIndex for input.
 AJAExport NTV2AudioSystem NTV2DeviceGetAudioMixerSystem(const NTV2DeviceID inDeviceID);	///< @return	The NTV2AudioSystem used by the audio mixer for the given device (or NTV2_AUDIOSYSTEM_INVALID if there is no mixer).

@@ -1137,3 +1137,5 @@ bool NTV2DeviceCanDoProgrammableCSC (const NTV2DeviceID inDeviceID)
 	bool NTV2DeviceCanDoLTCInN(const NTV2DeviceID devID, UWord index0)	{return index0 < NTV2DeviceGetNumLTCInputs(devID);}
 	bool NTV2DeviceCanDoRS422N(const NTV2DeviceID devID, const NTV2Channel ch)	{return ch < NTV2DeviceGetNumSerialPorts(devID);}
 #endif	//	!defined(NTV2_DEPRECATE_17_0)
+
+bool work_around_erroneous_compiler_warning (void)	{return true;}
