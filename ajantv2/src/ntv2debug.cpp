@@ -12,24 +12,6 @@
 // Macro to simplify returning of strings for given enum
 #define NTV2DEBUG_ENUM_CASE_RETURN_STR(enum_name) case(enum_name): return #enum_name;
 
-#if !defined(NTV2_DEPRECATE_14_3)
-const char * NTV2DeviceTypeString (NTV2DeviceType type)
-{
-	const char *result = "";
-
-	switch (type)
-	{
-		case DEVICETYPE_NTV2:		result = "DEVICETYPE_NTV2";		break;
-#if !defined (_DEBUG)
-		default:
-#endif
-		case DEVICETYPE_UNKNOWN:	result = "DEVICETYPE_UNKNOWN";	break;
-	}
-
-	return (result);
-}
-#endif	//	!defined(NTV2_DEPRECATE_14_3)
-
 const char * NTV2DeviceIDString (const NTV2DeviceID id)
 {
 	switch (id)
@@ -1225,7 +1207,6 @@ const char * NTV2InterruptEnumString (const unsigned inInterruptEnum)
 }	//	NTV2InterruptEnumString
 
 #ifdef MSWindows
-
 #include <stdio.h>
 #include <stdarg.h>
 #include <ctype.h>
@@ -1250,9 +1231,4 @@ void __cdecl odprintf(const char *format, ...)
 	::OutputDebugStringA(buf);
 //#endif
 }
-#endif
-
-#if !defined (NTV2_DEPRECATE)
-	const char * NTV2BoardTypeString (NTV2BoardType type)	{return NTV2DeviceTypeString (type);}
-	const char * NTV2BoardIDString (NTV2DeviceID id)		{return NTV2DeviceIDString (id);}
-#endif	//	!defined (NTV2_DEPRECATE)
+#endif	//	MSWindows

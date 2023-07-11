@@ -39,12 +39,6 @@ using namespace std;
 #define DEF_REGNAME(_num_)								DefineRegName(_num_, #_num_)
 #define DEF_REG(_num_, _dec_, _rw_, _c1_, _c2_, _c3_)	DefineRegister((_num_), #_num_, _dec_, _rw_, _c1_, _c2_, _c3_)
 
-#if defined (NTV2_DEPRECATE)
-	#define AJA_LOCAL_STATIC	static
-#else	//	!defined (NTV2_DEPRECATE)
-	#define AJA_LOCAL_STATIC
-#endif	//	!defined (NTV2_DEPRECATE)
-
 
 static const string gChlClasses[8]	=	{	kRegClass_Channel1, kRegClass_Channel2, kRegClass_Channel3, kRegClass_Channel4,
 											kRegClass_Channel5, kRegClass_Channel6, kRegClass_Channel7, kRegClass_Channel8	};

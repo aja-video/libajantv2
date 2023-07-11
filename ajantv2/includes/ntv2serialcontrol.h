@@ -13,9 +13,6 @@
 #include "ntv2card.h"
 
 #define	NTV2_SERIAL_RESPONSE_SIZE	64
-#if !defined (NTV2_DEPRECATE)
-	#define	XENA_SERIAL_RESPONSE_SIZE	NTV2_SERIAL_RESPONSE_SIZE
-#endif
 
 
 typedef struct

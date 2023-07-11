@@ -976,14 +976,6 @@ bool NTV2DeviceGetVideoFormatFromState_Ex2( NTV2VideoFormat *		pOutValue,
 	return true;
 }
 
-#if !defined(NTV2_DEPRECATE_15_6)
-	//	Starting in SDK 15.6, CNTV2Card::HasCanConnectROM returns true if device firmware has ROM that lists valid xpt connections
-	bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt)
-	{	(void) inDeviceID;	(void) inInputXpt;	(void) inOutputXpt;
-		return false;
-	}
-#endif	//	NTV2_DEPRECATE_15_6
-
 
 #define MAX_OF(__a__,__b__)		((__a__) > (__b__) ? (__a__) : (__b__))
 
@@ -1124,13 +1116,6 @@ bool NTV2DeviceCanDoProgrammableCSC (const NTV2DeviceID inDeviceID)
 	return false;
 }
 
-#if !defined (NTV2_DEPRECATE_14_3)
-	bool NTV2DeviceCanDoFreezeOutput (const NTV2DeviceID inDeviceID)
-	{
-		(void) inDeviceID;
-		return false;
-	}
-#endif	//	!defined (NTV2_DEPRECATE_14_3)
 #if !defined(NTV2_DEPRECATE_17_0)
 	bool NTV2DeviceHasSPIv2 (const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 2;}
 	bool NTV2DeviceHasSPIv3(const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 3;}

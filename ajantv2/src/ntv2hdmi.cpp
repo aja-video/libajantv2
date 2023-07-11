@@ -351,21 +351,6 @@ bool CNTV2Card::SetHDMIV2TxBypass (const bool bypass)
 			&& WriteRegister (kRegHDMIOutControl,		bypass,				kRegMaskHDMIV2TxBypass,					kRegShiftHDMIV2TxBypass);
 }
 
-// HDMI V2 includes an extra bit for quad formats
-#if !defined (NTV2_DEPRECATE)
-	bool CNTV2Card::SetHDMIV2OutVideoStandard (NTV2V2Standard value)				
-	{
-		return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
-				&& WriteRegister (kRegHDMIOutControl,		(ULWord)value,		kRegMaskHDMIOutV2VideoStd,				kRegShiftHDMIOutVideoStd);
-	}
-
-	bool CNTV2Card::GetHDMIV2OutVideoStandard		(NTV2V2Standard * pOutValue)		
-	{
-		return ::NTV2DeviceGetNumHDMIVideoOutputs(GetDeviceID()) > 0
-				&& ReadRegister	 (kRegHDMIOutControl,		(ULWord*)pOutValue, kRegMaskHDMIOutV2VideoStd,				kRegShiftHDMIOutVideoStd);
-	}
-#endif	//	!defined (NTV2_DEPRECATE)
-
 bool CNTV2Card::SetHDMIOutSampleStructure (const NTV2HDMISampleStructure inValue)		
 {
 	if (!NTV2_IS_VALID_HDMI_SAMPLE_STRUCT(inValue))

@@ -10,10 +10,6 @@
 
 #include "ajaexport.h"
 #include "ntv2card.h"
-#if !defined (NTV2_DEPRECATE)
-	#include "ntv2signalrouter.h"
-#endif	//	!defined (NTV2_DEPRECATE)
-
 #if defined(AJALinux)
 	#include <stdio.h>
 #endif
@@ -47,20 +43,6 @@ public:
 	AJA_VIRTUAL AutoCircGenericTask * AddRegisterReadTask (ULWord registerNum,
 															ULWord registerMask		= 0xffffffff,
 															ULWord registerShift	= 0);
-
-	#if !defined (NTV2_DEPRECATE)
-		// convert routing entries to register write tasks
-		AJA_VIRTUAL NTV2_DEPRECATED_f(AutoCircGenericTask *	AddRoutingEntry (const NTV2RoutingEntry & inEntry));
-		AJA_VIRTUAL NTV2_DEPRECATED_f(AutoCircGenericTask *	AddRoutingEntryWithValue (const NTV2RoutingEntry & inEntry, const ULWord inValue));
-		AJA_VIRTUAL NTV2_DEPRECATED_f(void					AddSignalRouting (const CNTV2SignalRouter & inRouter));
-
-
-		AJA_VIRTUAL NTV2_DEPRECATED_f(AutoCircGenericTask *	AddXena2Routing (const NTV2RoutingEntry & inEntry));
-		AJA_VIRTUAL NTV2_DEPRECATED_f(AutoCircGenericTask *	AddXena2RoutingWithValue (const NTV2RoutingEntry & inEntry, const ULWord inValue));
-		AJA_VIRTUAL NTV2_DEPRECATED_f(void					CopyXena2Routing (const CNTV2SignalRouter * pInRouter));
-		// dump the task list to debug output
-		AJA_VIRTUAL NTV2_DEPRECATED_f(void					DumpTaskList (void) const);
-	#endif	//	!defined (NTV2_DEPRECATE)
 
 	// add time code write
 	AJA_VIRTUAL AutoCircGenericTask * AddTimeCodeWriteTask (RP188_STRUCT * pTCInOut1 = NULL,
