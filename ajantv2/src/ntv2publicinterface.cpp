@@ -2276,12 +2276,12 @@ bool AUTOCIRCULATE_STATUS::CopyFrom (const AUTOCIRCULATE_STATUS_STRUCT & inOldSt
 	acFramesDropped			= inOldStruct.framesDropped;
 	acBufferLevel			= inOldStruct.bufferLevel;
 	acAudioSystem			= NTV2_AUDIOSYSTEM_INVALID; //	NTV2_AUDIOSYSTEM_1;
-	acOptionFlags			=	inOldStruct.bWithRP188				? AUTOCIRCULATE_WITH_RP188			: 0		|
-								inOldStruct.bFbfChange				? AUTOCIRCULATE_WITH_FBFCHANGE		: 0		|
-								inOldStruct.bFboChange				? AUTOCIRCULATE_WITH_FBOCHANGE		: 0		|
-								inOldStruct.bWithColorCorrection	? AUTOCIRCULATE_WITH_COLORCORRECT	: 0		|
-								inOldStruct.bWithVidProc			? AUTOCIRCULATE_WITH_VIDPROC		: 0		|
-								inOldStruct.bWithCustomAncData		? AUTOCIRCULATE_WITH_ANC			: 0;
+	acOptionFlags			=	(inOldStruct.bWithRP188				? AUTOCIRCULATE_WITH_RP188			: 0) |
+								(inOldStruct.bFbfChange				? AUTOCIRCULATE_WITH_FBFCHANGE		: 0) |
+								(inOldStruct.bFboChange				? AUTOCIRCULATE_WITH_FBOCHANGE		: 0) |
+								(inOldStruct.bWithColorCorrection	? AUTOCIRCULATE_WITH_COLORCORRECT	: 0) |
+								(inOldStruct.bWithVidProc			? AUTOCIRCULATE_WITH_VIDPROC		: 0) |
+								(inOldStruct.bWithCustomAncData		? AUTOCIRCULATE_WITH_ANC			: 0);
 	return true;
 }
 
