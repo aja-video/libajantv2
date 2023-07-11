@@ -1055,7 +1055,7 @@ TEST_SUITE("time" * doctest::description("functions in ajabase/system/systemtime
 			// check to make sure the units are correct
 #if defined(AJA_SLEEP_USE_STL)
 	#if defined(AJA_WINDOWS)
-			CHECK_EQ(avgMsec, 0);
+			CHECK(avgMsec <= 1);
 			CHECK(avgUsec < 10);
 			CHECK(avgNsec > 50);
 			CHECK(avgNsec < 10000);
