@@ -7101,14 +7101,18 @@ bool CNTV2Card::GetVPIDRGBRange (NTV2VPIDRGBRange & outValue, const NTV2Channel 
 bool CNTV2Card::HasMultiRasterWidget (void)
 {
 	bool hasMultiRasterWidget(false);
-	return NTV2DeviceCanDoHDMIMultiView(_boardID)
-			&&  CNTV2DriverInterface::ReadRegister(kRegMRSupport, hasMultiRasterWidget, kRegMaskMRSupport, kRegShiftMRSupport)
-			&&  hasMultiRasterWidget;
+	if (NTV2DeviceCanDoHDMIMultiView(_boardID))
+	{
+		CNTV2DriverInterface::ReadRegister(kRegMRSupport, hasMultiRasterWidget, kRegMaskMRSupport, kRegShiftMRSupport);
+	}
+	return hasMultiRasterWidget;
 }
 
 bool CNTV2Card::SetMultiRasterBypassEnable (const bool inEnable)
 {
-	return HasMultiRasterWidget() && WriteRegister(kRegMROutControl, inEnable, kRegMaskMRBypass, kRegShiftMRBypass);
+	if (!HasMultiRasterWidget())
+		return false;
+	return WriteRegister(kRegMROutControl, inEnable, kRegMaskMRBypass, kRegShiftMRBypass);
 }
 
 bool CNTV2Card::GetMultiRasterBypassEnable (bool & outEnabled)
