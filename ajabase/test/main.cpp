@@ -839,6 +839,363 @@ TEST_SUITE("variant" * doctest::description("functions in ajabase/common/variant
 		}
 	}
 }
+
+void time_marker() {}
+TEST_SUITE("time" * doctest::description("functions in ajabase/system/systemtime.h")) {
+
+	TEST_CASE("AJATime")
+	{
+#if defined(AJA_SLEEP_USE_STL)
+	std::cout << "-- C++11 std::chrono sleep impl --" << std::endl;
+#else
+	std::cout << "-- AJA sleep impl --" << std::endl;
+#endif
+
+#if defined(AJA_WINDOWS)
+		TIMECAPS tc;
+		if (timeGetDevCaps(&tc, sizeof(TIMECAPS)) == MMSYSERR_NOERROR)
+		{
+			// Attempt to set the timer resolution to 1 millisecond
+			uint32_t eventPeriod = std::min<uint32_t>(std::max<uint32_t>(tc.wPeriodMin, 1), tc.wPeriodMax);
+			timeBeginPeriod(eventPeriod);
+		}
+#endif
+		/* NOTE(paulh): AJATime::Sleep* methods have multiple implementations behind #defines.
+		 * This code is pretty hard to test accurately on every platform. There can be a lot of
+		 * variation in the amount of time each sleep takes, depending on CPU and OS.
+		 * Take these results with a grain of salt.
+		 *
+		 * Where possible, use the AJA_SLEEP_USE_STL implementation in production code,
+		 * which uses the C++11 STL std::chrono library. See `ajabase/system/systemtime.h` for details. */
+		SUBCASE("AJATime::Sleep (Milliseconds)")
+		{
+			const int sleepDuration = 100; // 100msec (1/10th second)
+			std::cout << "\nAJATime::Sleep - " << sleepDuration << "msec" << std::endl;
+			uint64_t avgMs = 0;
+			uint64_t avgUs = 0;
+			uint64_t avgNs = 0;
+			const int iterations = 10;
+			for (int i = 0; i < iterations; i++) {
+				uint64_t startMs = AJATime::GetSystemMilliseconds();
+				uint64_t startUs = AJATime::GetSystemMicroseconds();
+				uint64_t startNs = AJATime::GetSystemNanoseconds();
+				AJATime::Sleep(sleepDuration);
+				uint64_t endMs = AJATime::GetSystemMilliseconds();
+				uint64_t endUs = AJATime::GetSystemMicroseconds();
+				uint64_t endNs = AJATime::GetSystemNanoseconds();
+				uint64_t deltaMs = endMs - startMs;
+				uint64_t deltaUs = endUs - startUs;
+				uint64_t deltaNs = endNs - startNs;
+				avgMs += deltaMs;
+				avgUs += deltaUs;
+				avgNs += deltaNs;
+			}
+			uint64_t avgMsec = avgMs / iterations;
+			uint64_t avgUsec = avgUs / iterations;
+			uint64_t avgNsec = avgNs / iterations;
+			// There could be variability in the sleep call, so make sure in range
+			// check to make sure the units are correct
+#if defined(AJA_SLEEP_USE_STL)
+	#if defined(AJA_WINDOWS)
+			CHECK(avgMsec > 90);
+			CHECK(avgMsec < 150);
+			CHECK(avgUsec > 90000);
+			CHECK(avgUsec < 150000);
+			CHECK(avgNsec > 90000000);
+			CHECK(avgNsec < 150000000);
+	#elif defined(AJA_MAC)
+			CHECK(avgMsec > 90);
+			CHECK(avgMsec < 150);
+			CHECK(avgUsec > 90000);
+			CHECK(avgUsec < 150000);
+			CHECK(avgNsec > 90000000);
+			CHECK(avgNsec < 150000000);
+	#elif defined(AJA_LINUX)
+			CHECK(avgMsec > 90);
+			CHECK(avgMsec < 150);
+			CHECK(avgUsec > 90000);
+			CHECK(avgUsec < 150000);
+			CHECK(avgNsec > 90000000);
+			CHECK(avgNsec < 150000000);
+	#endif
+#else
+	#if defined(AJA_WINDOWS)
+			CHECK(avgMsec > 90);
+			CHECK(avgMsec < 150);
+			CHECK(avgUsec > 90000);
+			CHECK(avgUsec < 150000);
+			CHECK(avgNsec > 90000000);
+			CHECK(avgNsec < 150000000);
+	#elif defined(AJA_MAC)
+			CHECK(avgMsec > 90);
+			CHECK(avgMsec < 150);
+			CHECK(avgUsec > 90000);
+			CHECK(avgUsec < 150000);
+			CHECK(avgNsec > 90000000);
+			CHECK(avgNsec < 150000000);
+	#elif defined(AJA_LINUX)
+			CHECK(avgMsec > 90);
+			CHECK(avgMsec < 150);
+			CHECK(avgUsec > 90000);
+			CHECK(avgUsec < 150000);
+			CHECK(avgNsec > 90000000);
+			CHECK(avgNsec < 150000000);
+	#endif
+#endif
+			std::cout << "Milliseconds: " << avgMsec << "\n"
+				<< "Microseconds: " << avgUsec << "\n"
+				<< "Nanoseconds: " << avgNsec << "\n" << std::endl;
+		}
+		SUBCASE("AJATime::SleepInMicroseconds")
+		{
+			int sleepDuration = 100; // 100usec (0.0001 second)
+			std::cout << "AJATime::SleepInMicroseconds - " << sleepDuration << "usec" << std::endl;
+			uint64_t avgMs = 0;
+			uint64_t avgUs = 0;
+			uint64_t avgNs = 0;
+			const int iterations = 10;
+			for (int i = 0; i < iterations; i++) {
+				uint64_t startMs = AJATime::GetSystemMilliseconds();
+				uint64_t startUs = AJATime::GetSystemMicroseconds();
+				uint64_t startNs = AJATime::GetSystemNanoseconds();
+				AJATime::SleepInMicroseconds(sleepDuration);
+				uint64_t endMs = AJATime::GetSystemMilliseconds();
+				uint64_t endUs = AJATime::GetSystemMicroseconds();
+				uint64_t endNs = AJATime::GetSystemNanoseconds();
+				uint64_t deltaMs = endMs - startMs;
+				uint64_t deltaUs = endUs - startUs;
+				uint64_t deltaNs = endNs - startNs;
+				avgMs += deltaMs;
+				avgUs += deltaUs;
+				avgNs += deltaNs;
+			}
+			uint64_t avgMsec = avgMs / iterations;
+			uint64_t avgUsec = avgUs / iterations;
+			uint64_t avgNsec = avgNs / iterations;
+			// There could be variability in the sleep call, so make sure in range
+			// check to make sure the units are correct
+#if defined(AJA_SLEEP_USE_STL)
+	#if defined(AJA_WINDOWS)
+			CHECK(avgMsec >= 0);
+			CHECK(avgMsec < 5);
+			CHECK(avgUsec > 90);
+			CHECK(avgUsec < 2500);
+			CHECK(avgNsec > 90000);
+			CHECK(avgNsec < 2500000);
+	#elif defined(AJA_MAC)
+			CHECK(avgMsec >= 0);
+			CHECK(avgMsec < 5);
+			CHECK(avgUsec > 90);
+			CHECK(avgUsec < 2500);
+			CHECK(avgNsec > 90000);
+			CHECK(avgNsec < 2500000);
+	#elif defined(AJA_LINUX)
+			CHECK(avgMsec >= 0);
+			CHECK(avgMsec < 5);
+			CHECK(avgUsec > 90);
+			CHECK(avgUsec < 2500);
+			CHECK(avgNsec > 90000);
+			CHECK(avgNsec < 2500000);
+	#endif
+#else
+	#if defined(AJA_WINDOWS)
+			CHECK(avgMsec >= 0);
+			CHECK(avgMsec < 5);
+			CHECK(avgUsec >= 0);
+			CHECK(avgUsec < 2);
+			CHECK(avgNsec >= 0);
+			CHECK(avgNsec < 500);
+	#elif defined(AJA_MAC)
+			CHECK(avgMsec >= 0);
+			CHECK(avgMsec < 5);
+			CHECK(avgUsec > 90);
+			CHECK(avgUsec < 2500);
+			CHECK(avgNsec > 90000);
+			CHECK(avgNsec < 2500000);
+	#elif defined(AJA_LINUX)
+			CHECK(avgMsec >= 0);
+			CHECK(avgMsec < 5);
+			CHECK(avgUsec > 90);
+			CHECK(avgUsec < 2500);
+			CHECK(avgNsec > 90000);
+			CHECK(avgNsec < 2500000);
+	#endif
+#endif
+			std::cout << "Milliseconds: " << avgMsec << "\n"
+				<< "Microseconds: " << avgUsec << "\n"
+				<< "Nanoseconds: " << avgNsec << "\n" << std::endl;
+		}
+		SUBCASE("AJATime::SleepInNanoseconds")
+		{
+			int sleepDuration = 100; // 100 nanoseconds
+			std::cout << "AJATime::SleepInNanoseconds - " << sleepDuration << "nsec" << std::endl;
+			uint64_t avgMs = 0;
+			uint64_t avgUs = 0;
+			uint64_t avgNs = 0;
+			const int iterations = 10;
+			for (int i = 0; i < iterations; i++) {
+				uint64_t startMs = AJATime::GetSystemMilliseconds();
+				uint64_t startUs = AJATime::GetSystemMicroseconds();
+				uint64_t startNs = AJATime::GetSystemNanoseconds();
+				AJATime::SleepInNanoseconds(sleepDuration);
+				uint64_t endMs = AJATime::GetSystemMilliseconds();
+				uint64_t endUs = AJATime::GetSystemMicroseconds();
+				uint64_t endNs = AJATime::GetSystemNanoseconds();
+				uint64_t deltaMs = endMs - startMs;
+				uint64_t deltaUs = endUs - startUs;
+				uint64_t deltaNs = endNs - startNs;
+				avgMs += deltaMs;
+				avgUs += deltaUs;
+				avgNs += deltaNs;
+			}
+			uint64_t avgMsec = avgMs / iterations;
+			uint64_t avgUsec = avgUs / iterations;
+			uint64_t avgNsec = avgNs / iterations;
+			// There could be variability in the sleep call, so make sure in range
+			// check to make sure the units are correct
+#if defined(AJA_SLEEP_USE_STL)
+	#if defined(AJA_WINDOWS)
+			CHECK_EQ(avgMsec, 0);
+			CHECK(avgUsec < 10);
+			CHECK(avgNsec > 50);
+			CHECK(avgNsec < 10000);
+	#elif defined(AJA_MAC)
+			CHECK_EQ(avgMsec, 0);
+			CHECK(avgUsec < 100);
+			CHECK(avgNsec > 50);
+			CHECK(avgNsec < 100000);
+	#elif defined(AJA_LINUX)
+			CHECK_EQ(avgMsec, 0);
+			CHECK(avgUsec < 100);
+			CHECK(avgNsec > 50);
+			CHECK(avgNsec < 100000);
+	#endif
+#else
+	#if defined(AJA_WINDOWS)
+			CHECK_EQ(avgMsec, 0);
+			CHECK(avgUsec < 1000);
+			CHECK(avgNsec > 0);
+			CHECK(avgNsec < 50000);
+	#elif defined(AJA_MAC)
+			// NOTE(paulh): Nanosleep doesn't seem to sleep at nanosecond resolution on my M1 Mac Mini.
+			CHECK_EQ(avgMsec, 0);
+			CHECK(avgUsec < 1000);
+			CHECK(avgNsec > 0);
+			CHECK(avgNsec < 50000);
+	#elif defined(AJA_LINUX)
+			CHECK_EQ(avgMsec, 0);
+			CHECK(avgUsec < 1000);
+			CHECK(avgNsec > 0);
+			CHECK(avgNsec < 75000);
+	#endif
+#endif
+			std::cout << "Milliseconds: " << avgMsec << "\n"
+				<< "Microseconds: " << avgUsec << "\n"
+				<< "Nanoseconds: " << avgNsec << "\n" << std::endl;
+		}
+	}
+
+} //time
+
+
+//	These macros borrowed from ntv2publicinterface.h:
+#define DECN(__x__,__n__)		std::dec << std::setw(int(__n__)) << std::right << (__x__)
+#define DEC0N(__x__,__n__)		std::dec << std::setw(int(__n__)) << std::setfill('0') << std::right << (__x__) << std::dec << std::setfill(' ')
+
+static const std::vector<uint64_t> ETs = {12, 123, 1234, 12345, 123456, 1234567, 12345678, 123456789, 1234567890};
+static const std::vector<std::string> mETStrs = {"12.0 msec", "123.0 msec", " 1.2 secs", "12.3 secs", " 2.1 mins", "20.6 mins", " 3.4 hrs", " 1.4 days", "14.3 days"};
+static const std::vector<std::string> uETStrs = {"12.0 usec", "123.0 usec", " 1.2 msec", "12.3 msec", "123.5 msec", " 1.2 secs", "12.3 secs", " 2.1 mins", "20.6 mins"};
+static const std::vector<std::string> nETStrs = {"12.0 nsec", "123.0 nsec", " 1.2 usec", "12.3 usec", "123.5 usec", " 1.2 msec", "12.3 msec", "123.5 msec", " 1.2 secs"};
+static inline std::string AsStr(const AJATimer & inTimer)	{std::ostringstream oss; oss << inTimer; return oss.str();}
+
+void timer_marker() {}
+TEST_SUITE("timer" * doctest::description("functions in ajabase/common/timer.h")) {
+
+	TEST_CASE("AJATimer")
+	{
+		AJATimer milli(AJATimerPrecisionMilliseconds);
+		CHECK_EQ(milli.Precision(), AJATimerPrecisionMilliseconds);
+		milli.Start();
+		CHECK(milli.IsRunning());
+		while (milli.ElapsedTime() < 1000)
+			;
+		milli.Stop();
+		CHECK_FALSE(milli.IsRunning());
+		CHECK(milli.ElapsedTime() > 0);
+		std::cerr << std::endl << milli.PrecisionName(milli.Precision()) << std::endl;
+		for (size_t n(0);  n < ETs.size();  n++)
+		{	milli.SetStopTime(ETs.at(n));
+			std::cerr << DECN(milli.ElapsedTime(),10) << ": " << milli << std::endl;
+			CHECK_EQ(mETStrs.at(n), AsStr(milli));
+		}
+
+		AJATimer micro(AJATimerPrecisionMicroseconds);
+		CHECK_EQ(micro.Precision(), AJATimerPrecisionMicroseconds);
+		micro.Start();
+		CHECK(micro.IsRunning());
+		while (micro.ElapsedTime() < 1000)
+			;
+		micro.Stop();
+		CHECK_FALSE(micro.IsRunning());
+		CHECK(micro.ElapsedTime() > 0);
+		std::cerr << std::endl << micro.PrecisionName(micro.Precision()) << std::endl;
+		for (size_t n(0);  n < ETs.size();  n++)
+		{	micro.SetStopTime(ETs.at(n));	std::cerr << DECN(micro.ElapsedTime(),10) << ": " << micro << std::endl;
+			CHECK_EQ(uETStrs.at(n), AsStr(micro));
+		}
+
+		AJATimer nano(AJATimerPrecisionNanoseconds);
+		CHECK_EQ(nano.Precision(), AJATimerPrecisionNanoseconds);
+		nano.Start();
+		CHECK(nano.IsRunning());
+		while (nano.ElapsedTime() < 1000)
+			;
+		nano.Stop();
+		CHECK_FALSE(nano.IsRunning());
+		CHECK(nano.ElapsedTime() > 0);
+		std::cerr << std::endl << nano.PrecisionName(nano.Precision()) << std::endl;
+		for (size_t n(0);  n < ETs.size();  n++)
+		{	nano.SetStopTime(ETs.at(n));	std::cerr << DECN(nano.ElapsedTime(),10) << ": " << nano << std::endl;
+			CHECK_EQ(nETStrs.at(n), AsStr(nano));
+		}
+	}
+
+}	//	timer
+
+
+void performance_marker() {}
+TEST_SUITE("performance" * doctest::description("functions in ajabase/common/performance.h")) {
+
+	TEST_CASE("AJAPerformance")
+	{
+		AJAPerformance p("unit_test", AJATimerPrecisionMilliseconds);
+		p.Start();
+		AJATime::SleepInMicroseconds(100 * 1000);
+		p.Stop();
+		p.Start();
+		AJATime::SleepInMicroseconds(200 * 1000);
+		p.Stop();
+		p.Start();
+		AJATime::SleepInMicroseconds(300 * 1000);
+		p.Stop();
+
+		CHECK(p.Entries() == 3);
+		CHECK(p.MinTime() != 0);
+		CHECK(p.MaxTime() != 0);
+		// There could be variablitiy in the sleep call, so make sure in range
+		CHECK(p.StandardDeviation() > 94);
+		CHECK(p.StandardDeviation() < 110);
+
+		AJAPerformance p2("unit_test_empty", AJATimerPrecisionMilliseconds);
+		CHECK(p2.Entries() == 0);
+		CHECK(p2.MinTime() != 0);
+		CHECK(p2.MaxTime() == 0);
+		CHECK(p2.Mean() == 0.0);
+		CHECK(p2.StandardDeviation() == 0.0);
+	}
+
+} //performance
+
 void thread_marker() {}
 TEST_SUITE("thread" * doctest::description("functions in ajabase/system/thread.h")) {
 
@@ -1548,217 +1905,6 @@ TEST_SUITE("atomic" * doctest::description("functions in ajabase/system/atomic.h
 	}
 
 } //atomic
-
-void time_marker() {}
-TEST_SUITE("time" * doctest::description("functions in ajabase/system/systemtime.h")) {
-
-	TEST_CASE("AJATime")
-	{
-#ifdef AJA_WINDOWS
-		TIMECAPS tc;
-		if (timeGetDevCaps(&tc, sizeof(TIMECAPS)) == MMSYSERR_NOERROR)
-		{
-			// Attempt to set the timer resolution to 1 millisecond
-			uint32_t eventPeriod = std::min<uint32_t>(std::max<uint32_t>(tc.wPeriodMin, 1), tc.wPeriodMax);
-			timeBeginPeriod(eventPeriod);
-		}
-#endif
-
-		// AJATime::Sleep (milliseconds)
-		{
-			const int sleepDuration = 100; // 100msec (1/10th second)
-			std::cout << "\nAJATime::Sleep - " << sleepDuration << "msec" << std::endl;
-			uint64_t startMs = AJATime::GetSystemMilliseconds();
-			uint64_t startUs = AJATime::GetSystemMicroseconds();
-			uint64_t startNs = AJATime::GetSystemNanoseconds();
-			AJATime::Sleep(sleepDuration);
-			uint64_t endMs = AJATime::GetSystemMilliseconds();
-			uint64_t endUs = AJATime::GetSystemMicroseconds();
-			uint64_t endNs = AJATime::GetSystemNanoseconds();
-
-			uint64_t deltaMs = endMs - startMs;
-			uint64_t deltaUs = endUs - startUs;
-			uint64_t deltaNs = endNs - startNs;
-
-			// There could be variablitiy in the sleep call, so make sure in range
-			// check to make sure the units are correct
-			CHECK(deltaMs > 90);
-			CHECK(deltaMs < 150);
-			CHECK(deltaUs > 90000);
-			CHECK(deltaUs < 150000);
-			CHECK(deltaNs > 90000000);
-			CHECK(deltaNs < 150000000);
-			std::cout << "Milliseconds: " << deltaMs << "\n"
-				<< "Microseconds: " << deltaUs << "\n"
-				<< "Nanoseconds: " << deltaNs << "\n" << std::endl;
-		}
-
-		// AJATime::SleepInMicroseconds
-		{
-			int sleepDuration = 100 * 1000; // 100msec (1/10th second)
-			std::cout << "AJATime::SleepInMicroseconds - " << sleepDuration << "usec" << std::endl;
-			uint64_t startMs = AJATime::GetSystemMilliseconds();
-			uint64_t startUs = AJATime::GetSystemMicroseconds();
-			uint64_t startNs = AJATime::GetSystemNanoseconds();
-			AJATime::SleepInMicroseconds(sleepDuration);
-			uint64_t endMs = AJATime::GetSystemMilliseconds();
-			uint64_t endUs = AJATime::GetSystemMicroseconds();
-			uint64_t endNs = AJATime::GetSystemNanoseconds();
-
-			uint64_t deltaMs = endMs - startMs;
-			uint64_t deltaUs = endUs - startUs;
-			uint64_t deltaNs = endNs - startNs;
-
-			// There could be variablitiy in the sleep call, so make sure in range
-			// check to make sure the units are correct
-			CHECK(deltaMs > 90);
-			CHECK(deltaMs < 150);
-			CHECK(deltaUs > 90000);
-			CHECK(deltaUs < 150000);
-			CHECK(deltaNs > 90000000);
-			CHECK(deltaNs < 150000000);
-			std::cout << "Milliseconds: " << deltaMs << "\n"
-				<< "Microseconds: " << deltaUs << "\n"
-				<< "Nanoseconds: " << deltaNs << "\n" << std::endl;
-		}
-
-		// AJATime::SleepInNanoseconds
-// 		{
-// 			int sleepDuration = 100; // 100 nanoseconds
-// 			std::cout << "AJATime::SleepInNanoseconds - " << sleepDuration << "nsec" << std::endl;
-// 			uint64_t startMs = AJATime::GetSystemMilliseconds();
-// 			uint64_t startUs = AJATime::GetSystemMicroseconds();
-// 			uint64_t startNs = AJATime::GetSystemNanoseconds();
-// 			AJATime::SleepInNanoseconds(100);
-// 			uint64_t endMs = AJATime::GetSystemMilliseconds();
-// 			uint64_t endUs = AJATime::GetSystemMicroseconds();
-// 			uint64_t endNs = AJATime::GetSystemNanoseconds();
-
-// 			uint64_t deltaMs = endMs - startMs;
-// 			uint64_t deltaUs = endUs - startUs;
-// 			uint64_t deltaNs = endNs - startNs;
-
-// 			// There could be variablitiy in the sleep call, so make sure in range
-// 			// check to make sure the units are correct
-// #if defined(AJA_WINDOWS)
-// 			CHECK(deltaMs == 0);
-// 			CHECK(deltaUs > 0);
-// 			CHECK(deltaUs < 5);
-// 			CHECK(deltaNs > 50);
-// 			CHECK(deltaNs < 2500);
-// #else
-// 			CHECK(deltaMs == 0);
-// 			CHECK(deltaUs > 50);
-// 			CHECK(deltaUs < 100);
-// 			CHECK(deltaNs > 50000);
-// 			CHECK(deltaNs < 100000);
-// #endif
-// 			std::cout << "Milliseconds: " << deltaMs << "\n"
-// 				<< "Microseconds: " << deltaUs << "\n"
-// 				<< "Nanoseconds: " << deltaNs << "\n" << std::endl;
-// 		}
-	}
-
-} //time
-
-
-//	These macros borrowed from ntv2publicinterface.h:
-#define DECN(__x__,__n__)		std::dec << std::setw(int(__n__)) << std::right << (__x__)
-#define DEC0N(__x__,__n__)		std::dec << std::setw(int(__n__)) << std::setfill('0') << std::right << (__x__) << std::dec << std::setfill(' ')
-
-static const std::vector<uint64_t> ETs = {12, 123, 1234, 12345, 123456, 1234567, 12345678, 123456789, 1234567890};
-static const std::vector<std::string> mETStrs = {"12.0 msec", "123.0 msec", " 1.2 secs", "12.3 secs", " 2.1 mins", "20.6 mins", " 3.4 hrs", " 1.4 days", "14.3 days"};
-static const std::vector<std::string> uETStrs = {"12.0 usec", "123.0 usec", " 1.2 msec", "12.3 msec", "123.5 msec", " 1.2 secs", "12.3 secs", " 2.1 mins", "20.6 mins"};
-static const std::vector<std::string> nETStrs = {"12.0 nsec", "123.0 nsec", " 1.2 usec", "12.3 usec", "123.5 usec", " 1.2 msec", "12.3 msec", "123.5 msec", " 1.2 secs"};
-static inline std::string AsStr(const AJATimer & inTimer)	{std::ostringstream oss; oss << inTimer; return oss.str();}
-
-void timer_marker() {}
-TEST_SUITE("timer" * doctest::description("functions in ajabase/common/timer.h")) {
-
-	TEST_CASE("AJATimer")
-	{
-		AJATimer milli(AJATimerPrecisionMilliseconds);
-		CHECK_EQ(milli.Precision(), AJATimerPrecisionMilliseconds);
-		milli.Start();
-		CHECK(milli.IsRunning());
-		while (milli.ElapsedTime() < 1000)
-			;
-		milli.Stop();
-		CHECK_FALSE(milli.IsRunning());
-		CHECK(milli.ElapsedTime() > 0);
-		std::cerr << std::endl << milli.PrecisionName(milli.Precision()) << std::endl;
-		for (size_t n(0);  n < ETs.size();  n++)
-		{	milli.SetStopTime(ETs.at(n));
-			std::cerr << DECN(milli.ElapsedTime(),10) << ": " << milli << std::endl;
-			CHECK_EQ(mETStrs.at(n), AsStr(milli));
-		}
-
-		AJATimer micro(AJATimerPrecisionMicroseconds);
-		CHECK_EQ(micro.Precision(), AJATimerPrecisionMicroseconds);
-		micro.Start();
-		CHECK(micro.IsRunning());
-		while (micro.ElapsedTime() < 1000)
-			;
-		micro.Stop();
-		CHECK_FALSE(micro.IsRunning());
-		CHECK(micro.ElapsedTime() > 0);
-		std::cerr << std::endl << micro.PrecisionName(micro.Precision()) << std::endl;
-		for (size_t n(0);  n < ETs.size();  n++)
-		{	micro.SetStopTime(ETs.at(n));	std::cerr << DECN(micro.ElapsedTime(),10) << ": " << micro << std::endl;
-			CHECK_EQ(uETStrs.at(n), AsStr(micro));
-		}
-
-		AJATimer nano(AJATimerPrecisionNanoseconds);
-		CHECK_EQ(nano.Precision(), AJATimerPrecisionNanoseconds);
-		nano.Start();
-		CHECK(nano.IsRunning());
-		while (nano.ElapsedTime() < 1000)
-			;
-		nano.Stop();
-		CHECK_FALSE(nano.IsRunning());
-		CHECK(nano.ElapsedTime() > 0);
-		std::cerr << std::endl << nano.PrecisionName(nano.Precision()) << std::endl;
-		for (size_t n(0);  n < ETs.size();  n++)
-		{	nano.SetStopTime(ETs.at(n));	std::cerr << DECN(nano.ElapsedTime(),10) << ": " << nano << std::endl;
-			CHECK_EQ(nETStrs.at(n), AsStr(nano));
-		}
-	}
-
-}	//	timer
-
-
-void performance_marker() {}
-TEST_SUITE("performance" * doctest::description("functions in ajabase/common/performance.h")) {
-
-	TEST_CASE("AJAPerformance")
-	{
-		AJAPerformance p("unit_test", AJATimerPrecisionMilliseconds);
-		p.Start();
-		AJATime::SleepInMicroseconds(100 * 1000);
-		p.Stop();
-		p.Start();
-		AJATime::SleepInMicroseconds(200 * 1000);
-		p.Stop();
-		p.Start();
-		AJATime::SleepInMicroseconds(300 * 1000);
-		p.Stop();
-
-		CHECK(p.Entries() == 3);
-		CHECK(p.MinTime() != 0);
-		CHECK(p.MaxTime() != 0);
-		// There could be variablitiy in the sleep call, so make sure in range
-		CHECK(p.StandardDeviation() > 94);
-		CHECK(p.StandardDeviation() < 110);
-
-		AJAPerformance p2("unit_test_empty", AJATimerPrecisionMilliseconds);
-		CHECK(p2.Entries() == 0);
-		CHECK(p2.MinTime() != 0);
-		CHECK(p2.MaxTime() == 0);
-		CHECK(p2.Mean() == 0.0);
-		CHECK(p2.StandardDeviation() == 0.0);
-	}
-
-} //performance
 
 void info_marker() {}
 TEST_SUITE("info" * doctest::description("functions in ajabase/system/info.h")) {
