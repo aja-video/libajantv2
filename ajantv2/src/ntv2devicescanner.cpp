@@ -183,9 +183,6 @@ void CNTV2DeviceScanner::ScanHardware (void)
 				info.deviceIndex		= boardNum;
 				info.deviceID			= deviceID;
 				info.pciSlot			= 0;
-#if !defined(NTV2_DEPRECATE_16_0)
-				info.pciSlot			= tmpDevice.GetPCISlotNumber();
-#endif	//	!defined(NTV2_DEPRECATE_16_0)
 				info.deviceSerialNumber	= tmpDevice.GetSerialNumber();
 
 				oss << ::NTV2DeviceIDToString (deviceID, tmpDevice.features().IsDNxIV()) << " - " << boardNum;
@@ -193,12 +190,6 @@ void CNTV2DeviceScanner::ScanHardware (void)
 					oss << ", Slot " << info.pciSlot;
 
 				info.deviceIdentifier = oss.str();
-#if !defined (NTV2_DEPRECATE)
-				strcpy(info.boardIdentifier, oss.str().c_str());
-				info.boardID = deviceID;
-				info.boardSerialNumber = tmpDevice.GetSerialNumber();
-				info.boardNumber = boardNum;
-#endif
 
 				SetVideoAttributes(info);
 				SetAudioAttributes(info, tmpDevice);
@@ -211,24 +202,6 @@ void CNTV2DeviceScanner::ScanHardware (void)
 	}	//	boardNum loop
 
 }	//	ScanHardware
-
-
-#if !defined (NTV2_DEPRECATE)
-	bool CNTV2DeviceScanner::BoardTypePresent (NTV2BoardType boardType, bool rescan)
-	{
-		if (rescan)
-			ScanHardware(true);
-
-		const NTV2DeviceInfoList & boardList(GetDeviceInfoList());
-		for (NTV2DeviceInfoListConstIter boardIter(boardList.begin());  boardIter != boardList.end();  ++boardIter)
-			if (boardIter->boardType == boardType)
-				return true;	//	Found!
-
-		return false;	//	Not found
-
-	}	//	BoardTypePresent
-
-#endif	//	else !defined (NTV2_DEPRECATE)
 
 
 bool CNTV2DeviceScanner::DeviceIDPresent (const NTV2DeviceID inDeviceID, const bool inRescan)
@@ -401,9 +374,6 @@ bool NTV2DeviceInfo::operator == (const NTV2DeviceInfo & second) const
 	//	its "boardIdentifier" field are indeterminate, making it worthless for accurate comparisons.
 	//	"boardSerialNumber" and boardNumber are the only required comparisons, but I also check boardType,
 	//	boardID, and pciSlot for good measure...
-	#if !defined (NTV2_DEPRECATE)
-	if (first.boardType							!=	second.boardType)						diffs++;
-	#endif	//	!defined (NTV2_DEPRECATE)
 	if (first.deviceID							!=	second.deviceID)						diffs++;
 	if (first.deviceIndex						!=	second.deviceIndex)						diffs++;
 	if (first.deviceSerialNumber				!=	second.deviceSerialNumber)				diffs++;
@@ -549,27 +519,10 @@ ostream &	operator << (ostream & inOutStr, const NTV2AudioBitsPerSampleList & in
 }
 
 
-#if !defined (NTV2_DEPRECATE)
-
-	void CNTV2DeviceScanner::DumpBoardInfo (const NTV2DeviceInfo & info)
-	{
-		#if defined (DEBUG) || defined (_DEBUG) || defined (AJA_DEBUG)
-			cout << info << endl;
-		#else
-			(void) info;
-		#endif
-	}	//	DumpBoardInfo
-
-#endif	//	!NTV2_DEPRECATE
-
-
 ostream &	operator << (ostream & inOutStr, const NTV2DeviceInfo & inInfo)
 {
 	inOutStr	<< "Device Info for '" << inInfo.deviceIdentifier << "'" << endl
 				<< "            Device Index Number: " << inInfo.deviceIndex << endl
-				#if !defined (NTV2_DEPRECATE)
-				<< "                    Device Type: 0x" << hex << inInfo.boardType << dec << endl
-				#endif	//	!defined (NTV2_DEPRECATE)
 				<< "                      Device ID: 0x" << hex << inInfo.deviceID << dec << endl
 				<< "                  Serial Number: 0x" << hex << inInfo.deviceSerialNumber << dec << endl
 				<< "                       PCI Slot: 0x" << hex << inInfo.pciSlot << dec << endl
@@ -664,20 +617,6 @@ std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioPhysicalForm
 }	//	AudioPhysicalFormatList ostream operator <<
 
 
-#if !defined (NTV2_DEPRECATE)
-
-	void CNTV2DeviceScanner::DumpAudioFormatInfo (const NTV2AudioPhysicalFormat & audioPhysicalFormat)
-	{
-		#if defined (DEBUG) || defined (AJA_DEBUG)
-			cout << audioPhysicalFormat << endl;
-		#else
-			(void) audioPhysicalFormat;
-		#endif
-	}	//	DumpAudioFormatInfo
-
-#endif	//	!NTV2_DEPRECATE
-
-
 // Private methods
 
 void CNTV2DeviceScanner::SetVideoAttributes (NTV2DeviceInfo & info)
@@ -723,11 +662,7 @@ void CNTV2DeviceScanner::SetVideoAttributes (NTV2DeviceInfo & info)
 	info.stereoInSupport		= NTV2DeviceCanDoStereoIn			(info.deviceID);
 	info.multiFormat			= NTV2DeviceCanDoMultiFormat		(info.deviceID);
 	info.numSerialPorts			= NTV2DeviceGetNumSerialPorts		(info.deviceID);
-	#if !defined (NTV2_DEPRECATE)
-		info.procAmpSupport		= NTV2BoardCanDoProcAmp				(info.deviceID);
-	#else
-		info.procAmpSupport		= false;
-	#endif
+	info.procAmpSupport			= false;
 
 }	//	SetVideoAttributes
 

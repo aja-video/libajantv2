@@ -146,30 +146,6 @@ public:
 	static bool					VPIDStandardIsDualLink		(const VPIDStandard inStd);		//	New in SDK 16.0
 	static bool					VPIDStandardIsQuadLink		(const VPIDStandard inStd);		//	New in SDK 16.0
 	static bool					VPIDStandardIsOctLink		(const VPIDStandard inStd);		//	New in SDK 16.0
-	#if !defined (NTV2_DEPRECATE)
-		virtual VPIDDynamicRange NTV2_DEPRECATED_f(GetDynamicRange (void) const);
-		virtual void NTV2_DEPRECATED_f(SetDynamicRange (const VPIDDynamicRange inDynamicRange));	
-		static inline NTV2_DEPRECATED_f(bool	SetVPIDData (ULWord *				pOutVPID,
-														const NTV2VideoFormat		inOutputFormat,
-														const NTV2FrameBufferFormat inFrameBufferFormat,
-														const bool					inIsProgressive,
-														const bool					inIs16x9Aspect,
-														const VPIDChannel			inVPIDChannel,
-														const bool					inUseVPIDChannel = true))
-											{return pOutVPID ? SetVPIDData (*pOutVPID, inOutputFormat, inFrameBufferFormat, inIsProgressive, inIs16x9Aspect, inVPIDChannel, inUseVPIDChannel) : false;}
-
-		static inline NTV2_DEPRECATED_f(bool	SetVPIDData (ULWord *				pOutVPID,
-														const NTV2VideoFormat	inOutputFormat,
-														const bool				inDualLinkRGB,
-														const bool				inIsRGB48Bit,
-														const bool				inIsOutput3Gb,
-														const bool				inIsSMPTE425,
-														const VPIDChannel		inVPIDChannel,
-														const bool				inUseChannel = true))
-											{return pOutVPID ? SetVPIDData (*pOutVPID, inOutputFormat, inDualLinkRGB, inIsRGB48Bit, inIsOutput3Gb, inIsSMPTE425, inVPIDChannel, inUseChannel) : false;}
-
-		virtual inline NTV2_DEPRECATED_f(void	Init (void))				{}		///< @deprecated	Obsolete. Do not use.
-	#endif	//	!defined (NTV2_DEPRECATE)
 	///@}
 
 private:

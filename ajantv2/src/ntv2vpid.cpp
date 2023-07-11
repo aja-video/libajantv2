@@ -573,20 +573,6 @@ NTV2VPIDRGBRange CNTV2VPID::GetRGBRange (void) const
 	}
 }
 
-#if !defined (NTV2_DEPRECATE)
-void CNTV2VPID::SetDynamicRange (const VPIDDynamicRange inDynamicRange)
-{
-	m_uVPID = (m_uVPID & ~kRegMaskVPIDDynamicRange) |
-		(((ULWord)inDynamicRange << kRegShiftVPIDDynamicRange) & kRegMaskVPIDDynamicRange);
-}
-
-
-VPIDDynamicRange CNTV2VPID::GetDynamicRange (void) const
-{
-	return (VPIDDynamicRange)((m_uVPID & kRegMaskVPIDDynamicRange) >> kRegShiftVPIDDynamicRange); 
-}
-#endif
-
 
 //	static - this one doesn't support 3Gb
 bool CNTV2VPID::SetVPIDData (ULWord &					outVPID,
