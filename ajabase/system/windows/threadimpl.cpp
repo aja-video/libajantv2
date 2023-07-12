@@ -6,7 +6,7 @@
 **/
 
 #include "ajabase/system/windows/threadimpl.h"
-#include "ajabase/common/timer.h"
+#include "ajabase/system/debug.h"
 
 
 AJAThreadImpl::AJAThreadImpl(AJAThread* pThread)

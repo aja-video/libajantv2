@@ -5,15 +5,17 @@
 	@copyright	(C) 2016-2022 AJA Video Systems, Inc.
  **/
 #include "ntv2registerexpert.h"
-#include "ntv2devicefeatures.h"
+#include "ntv2devicefeatures.hh"
 #include "ntv2utils.h"
 #include "ntv2debug.h"
 #include "ntv2endian.h"
 #include "ntv2vpid.h"
 #include "ntv2bitfile.h"
+#include "ntv2signalrouter.h"
 #include "ajabase/common/common.h"
 #include "ajabase/system/lock.h"
 #include "ajabase/common/ajarefptr.h"
+#include "ajabase/system/debug.h"
 #include <algorithm>
 #include <sstream>
 #include <iterator>
@@ -36,12 +38,6 @@ using namespace std;
 
 #define DEF_REGNAME(_num_)								DefineRegName(_num_, #_num_)
 #define DEF_REG(_num_, _dec_, _rw_, _c1_, _c2_, _c3_)	DefineRegister((_num_), #_num_, _dec_, _rw_, _c1_, _c2_, _c3_)
-
-#if defined (NTV2_DEPRECATE)
-	#define AJA_LOCAL_STATIC	static
-#else	//	!defined (NTV2_DEPRECATE)
-	#define AJA_LOCAL_STATIC
-#endif	//	!defined (NTV2_DEPRECATE)
 
 
 static const string gChlClasses[8]	=	{	kRegClass_Channel1, kRegClass_Channel2, kRegClass_Channel3, kRegClass_Channel4,

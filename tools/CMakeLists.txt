@@ -12,3 +12,8 @@ add_subdirectory(testframe)
 add_subdirectory(testp2p)
 add_subdirectory(testrdma)
 add_subdirectory(vpidtool)
+
+
+if (AJA_INSTALL_CMAKE)
+    install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/tools)
+endif()

@@ -3,8 +3,6 @@ add_subdirectory(ntv2burn4kquadrant)
 add_subdirectory(ntv2capture)
 add_subdirectory(ntv2capture4k)
 add_subdirectory(ntv2capture8k)
-# # add_subdirectory(ntv2ccgrabber)  # add to libajacc repo
-# # add_subdirectory(ntv2ccplayer)  # add to libajacc repo
 # # add_subdirectory(ntv2cudacapture) # requires gpustuff
 add_subdirectory(ntv2dolbycapture)
 add_subdirectory(ntv2dolbyplayer)
@@ -27,14 +25,23 @@ add_subdirectory(ntv2outputtestpattern)
 add_subdirectory(ntv2player)
 add_subdirectory(ntv2player4k)
 add_subdirectory(ntv2player8k)
-# # add_subdirectory(ntv2qtmultiinput "NTV2 Qt Multi-Input" "NTV2 Qt Multi-Input Demonstration") # requires ajagui
 # # add_subdirectory(ntv2qtplaycorder)
-# # add_subdirectory(ntv2qtpreview "NTV2 Qt Preview" "NTV2 Qt GUI Demonstration") # optionally requires libajacc
 # # # add_subdirectory(ntv2qtrawcapture)
 # # # add_subdirectory(ntv2qtstereopreview)
 # # add_subdirectory(ntv2recorddpx)
 # # add_subdirectory(ntv2stereocapture) # deprecated SDK calls
 add_subdirectory(ntv2switchbitfile)
+
+if(NOT AJANTV2_BUILD_OPENSOURCE)
+    if(AJA_QT_ENABLED)
+        add_subdirectory(ntv2qtmultiinput) 
+        add_subdirectory(ntv2qtpreview) # optionally requires libajacc
+    endif()
+
+    add_subdirectory(ntv2ccgrabber)  
+    add_subdirectory(ntv2ccplayer)
+endif()
+    
 # # add_subdirectory(ntv2testOGL)
 # # if (AJA_BUILD_AMD)
 # #     add_subdirectory(AMD)
@@ -42,3 +49,8 @@ add_subdirectory(ntv2switchbitfile)
 # # if (AJA_BUILD_NVIDIA)
 # #     add_subdirectory(NVIDIA)
 # # endif()
+
+if(AJA_INSTALL_CMAKE)
+    install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos)
+endif()
+

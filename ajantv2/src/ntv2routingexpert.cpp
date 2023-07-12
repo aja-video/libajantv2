@@ -6,6 +6,7 @@
 **/
 
 #include "ntv2routingexpert.h"
+#include "ajabase/system/debug.h"
 
 // Logging helpers
 #define	HEX16(__x__)		"0x" << std::hex << std::setw(16) << std::setfill('0') << uint64_t(__x__)  << std::dec
@@ -21,8 +22,8 @@
 #define	SRINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_RoutingGeneric, AJAFUNC << ": " << __x__)
 #define	SRDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_RoutingGeneric, AJAFUNC << ": " << __x__)
 
-static uint32_t						gInstanceTally(0);
-static uint32_t						gLivingInstances(0);
+static uint32_t				gInstanceTally(0);
+static uint32_t				gLivingInstances(0);
 
 RoutingExpertPtr RoutingExpert::GetInstance(const bool inCreateIfNecessary)
 {

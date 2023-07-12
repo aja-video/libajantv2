@@ -132,7 +132,7 @@ bool CNTV2Card::GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outA
 {
 	outAbsByteOffset = 0;
 	const NTV2DeviceID	deviceID(GetDeviceID());
-	if (UWord(inAudioSystem) >= (::NTV2DeviceGetNumAudioSystems(deviceID) + (DeviceCanDoAudioMixer() ? 1 : 0)))
+	if (ULWord(inAudioSystem) >= GetNumSupported(kDeviceGetNumBufferedAudioSystems))
 		return false;	//	Invalid audio system
 
 	if (::NTV2DeviceCanDoStackedAudio(deviceID))
@@ -198,24 +198,6 @@ bool CNTV2Card::DMAWriteAudio ( const NTV2AudioSystem	inAudioSystem,
 }
 
 
-#if !defined(NTV2_DEPRECATE_15_2)
-	bool CNTV2Card::DMAReadAnc (const ULWord		inFrameNumber,
-								UByte *				pOutAncBuffer,
-								const NTV2FieldID	inFieldID,
-								const ULWord		inByteCount)
-	{
-		if (!::NTV2DeviceCanDoCustomAnc (GetDeviceID ()))
-			return false;
-		if (!NTV2_IS_VALID_FIELD(inFieldID))
-			return false;
-	
-		NTV2Buffer	ancF1Buffer (inFieldID ? AJA_NULL : pOutAncBuffer, inFieldID ? 0 : inByteCount);
-		NTV2Buffer	ancF2Buffer (inFieldID ? pOutAncBuffer : AJA_NULL, inFieldID ? inByteCount : 0);
-		return DMAReadAnc (inFrameNumber, ancF1Buffer, ancF2Buffer);
-	}
-#endif	//	!defined(NTV2_DEPRECATE_15_2)
-
-
 bool CNTV2Card::DMAReadAnc (const ULWord		inFrameNumber,
 							NTV2Buffer &		outAncF1Buffer,
 							NTV2Buffer &		outAncF2Buffer,
@@ -270,24 +252,6 @@ bool CNTV2Card::DMAReadAnc (const ULWord		inFrameNumber,
 		S2110DeviceAncFromBuffers (inChannel, outAncF1Buffer, outAncF2Buffer);
 	return result;
 }
-
-
-#if !defined(NTV2_DEPRECATE_15_2)
-	bool CNTV2Card::DMAWriteAnc (const ULWord		inFrameNumber,
-								const UByte *		pInAncBuffer,
-								const NTV2FieldID	inFieldID,
-								const ULWord		inByteCount)
-	{
-		if (!::NTV2DeviceCanDoCustomAnc (GetDeviceID ()))
-			return false;
-		if (!NTV2_IS_VALID_FIELD(inFieldID))
-			return false;
-	
-		NTV2Buffer	ancF1Buffer (inFieldID ? AJA_NULL : pInAncBuffer, inFieldID ? 0 : inByteCount);
-		NTV2Buffer	ancF2Buffer (inFieldID ? pInAncBuffer : AJA_NULL, inFieldID ? inByteCount : 0);
-		return DMAWriteAnc (inFrameNumber, ancF1Buffer, ancF2Buffer);
-	}
-#endif	//	!defined(NTV2_DEPRECATE_15_2)
 
 
 bool CNTV2Card::DMAWriteAnc (const ULWord		inFrameNumber,
@@ -702,90 +666,3 @@ bool CNTV2Card::GetAncRegionOffsetFromBottom (ULWord & bytesFromBottom, const NT
 	}
 	return bytesFromBottom > 0;
 }
-
-
-#if !defined (NTV2_DEPRECATE)
-	bool CNTV2Card::DmaRead (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
-							 const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous)
-	{
-		return DmaTransfer (inDMAEngine, true, inFrameNumber, pFrameBuffer, inOffsetBytes, inByteCount, inSynchronous);
-	}
-
-	bool CNTV2Card::DmaWrite (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, const ULWord * pFrameBuffer,
-							  const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous)
-	{
-		return DmaTransfer (inDMAEngine, false, inFrameNumber, const_cast <ULWord *> (pFrameBuffer), inOffsetBytes, inByteCount, inSynchronous);
-	}
-
-	bool CNTV2Card::DmaReadFrame (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
-								  const ULWord inByteCount, const bool inSynchronous)
-	{
-		return DmaTransfer (inDMAEngine, true, inFrameNumber, pFrameBuffer, (ULWord) 0, inByteCount, inSynchronous);
-	}
-
-	bool CNTV2Card::DmaWriteFrame (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, const ULWord * pFrameBuffer,
-									 const ULWord inByteCount, const bool inSynchronous)
-	{
-		return DmaTransfer (inDMAEngine, false, inFrameNumber, const_cast <ULWord *> (pFrameBuffer), (ULWord) 0, inByteCount, inSynchronous);
-	}
-
-	bool CNTV2Card::DmaReadSegment (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, ULWord * pFrameBuffer,
-									const ULWord inOffsetBytes, const ULWord inByteCount,
-									const ULWord inNumSegments, const ULWord inSegmentHostPitch, const ULWord inSegmentCardPitch,
-									const bool inSynchronous)
-	{
-		return DmaTransfer (inDMAEngine, true, inFrameNumber, pFrameBuffer, inOffsetBytes, inByteCount,
-							inNumSegments, inSegmentHostPitch, inSegmentCardPitch, inSynchronous);
-	}
-
-	bool CNTV2Card::DmaWriteSegment (const NTV2DMAEngine inDMAEngine, const ULWord inFrameNumber, const ULWord * pFrameBuffer,
-									const ULWord inOffsetBytes, const ULWord inByteCount,
-									const ULWord inNumSegments, const ULWord inSegmentHostPitch, const ULWord inSegmentCardPitch,
-									const bool inSynchronous)
-	{
-		return DmaTransfer (inDMAEngine, false, inFrameNumber, const_cast <ULWord *> (pFrameBuffer), inOffsetBytes, inByteCount,
-							inNumSegments, inSegmentHostPitch, inSegmentCardPitch, inSynchronous);
-	}
-
-	bool CNTV2Card::DmaAudioRead (const NTV2DMAEngine inDMAEngine, const NTV2AudioSystem inAudioEngine, ULWord * pOutAudioBuffer,
-								 const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous)
-	{
-		WriteRegister (kVRegAdvancedIndexing, 1);	//	Mac only, required for SDK 12.4 or earlier, obsolete after 12.4
-		if (!::NTV2DeviceCanDoStackedAudio (GetDeviceID ()))
-			return false;
-
-		const ULWord	memSize			(::NTV2DeviceGetActiveMemorySize (GetDeviceID ()));
-		const ULWord	engineOffset	(memSize - ((ULWord (inAudioEngine) + 1) * 0x800000));
-		const ULWord	audioOffset		(inOffsetBytes + engineOffset);
-
-		return DmaTransfer (inDMAEngine, true, 0, pOutAudioBuffer, audioOffset, inByteCount, inSynchronous);
-	}
-
-	bool CNTV2Card::DmaAudioWrite (const NTV2DMAEngine inDMAEngine, const NTV2AudioSystem inAudioEngine, const ULWord * pInAudioBuffer,
-								  const ULWord inOffsetBytes, const ULWord inByteCount, const bool inSynchronous)
-	{
-		WriteRegister (kVRegAdvancedIndexing, 1);	//	Mac only, required for SDK 12.4 or earlier, obsolete after 12.4
-		if (!::NTV2DeviceCanDoStackedAudio (GetDeviceID ()))
-			return false;
-
-		const ULWord	memSize			(::NTV2DeviceGetActiveMemorySize (GetDeviceID ()));
-		const ULWord	engineOffset	(memSize - ((ULWord (inAudioEngine) + 1) * 0x800000));
-		const ULWord	audioOffset		(inOffsetBytes + engineOffset);
-
-		return DmaTransfer (inDMAEngine, false, 0, const_cast <ULWord *> (pInAudioBuffer), audioOffset, inByteCount, inSynchronous);
-	}
-
-	bool CNTV2Card::DmaReadField (NTV2DMAEngine DMAEngine, ULWord frameNumber, NTV2FieldID fieldID,
-								  ULWord * pFrameBuffer, ULWord bytes, bool bSync)
-	{
-		const ULWord	ulOffset	(fieldID == NTV2_FIELD0 ? 0 : ULWord (_ulFrameBufferSize / 2));
-		return DmaTransfer (DMAEngine, true, frameNumber, (ULWord *) pFrameBuffer, ulOffset, bytes, bSync);
-	}
-
-	bool CNTV2Card::DmaWriteField (NTV2DMAEngine DMAEngine, ULWord frameNumber, NTV2FieldID fieldID,
-								   ULWord * pFrameBuffer, ULWord bytes, bool bSync)
-	{
-		const ULWord	ulOffset	(fieldID == NTV2_FIELD0 ? 0 : ULWord (_ulFrameBufferSize / 2));
-		return DmaTransfer (DMAEngine, false, frameNumber, pFrameBuffer, ulOffset, bytes, bSync);
-	}
-#endif	//	!defined (NTV2_DEPRECATE)

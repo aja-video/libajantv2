@@ -976,14 +976,6 @@ bool NTV2DeviceGetVideoFormatFromState_Ex2( NTV2VideoFormat *		pOutValue,
 	return true;
 }
 
-#if !defined(NTV2_DEPRECATE_15_6)
-	//	Starting in SDK 15.6, CNTV2Card::HasCanConnectROM returns true if device firmware has ROM that lists valid xpt connections
-	bool NTV2DeviceCanConnect (const NTV2DeviceID inDeviceID, const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt)
-	{	(void) inDeviceID;	(void) inInputXpt;	(void) inOutputXpt;
-		return false;
-	}
-#endif	//	NTV2_DEPRECATE_15_6
-
 
 #define MAX_OF(__a__,__b__)		((__a__) > (__b__) ? (__a__) : (__b__))
 
@@ -1087,36 +1079,6 @@ bool NTV2DeviceCanDoInputTCIndex (const NTV2DeviceID inDeviceID, const NTV2TCInd
 	return false;
 }
 
-
-bool NTV2DeviceCanDoLTCInN (NTV2DeviceID boardID, UWord index0)
-{
-	return index0 < NTV2DeviceGetNumLTCInputs (boardID);
-
-}	//	NTV2DeviceCanDoLTCInN
-
-
-bool NTV2DeviceCanDoLTCOutN(NTV2DeviceID boardID, UWord index0)
-{
-	return index0 < NTV2DeviceGetNumLTCOutputs (boardID);
-}	//	NTV2DeviceCanDoLTCOutN
-
-
-bool NTV2DeviceCanDoAudioN (NTV2DeviceID boardID, UWord index0)
-{
-	return index0 < NTV2DeviceGetNumAudioSystems (boardID);
-
-}	//	NTV2DeviceCanDoAudioN
-
-UWord NTV2DeviceGetNumAudioStreams (NTV2DeviceID boardID)
-{
-	return NTV2DeviceGetNumAudioSystems (boardID);
-}
-
-bool NTV2DeviceCanDoRS422N (const NTV2DeviceID inDeviceID, const NTV2Channel inChannel)
-{
-	return inChannel < NTV2DeviceGetNumSerialPorts (inDeviceID);
-}
-
 NTV2AudioSystem NTV2DeviceGetAudioMixerSystem(const NTV2DeviceID inDeviceID)
 {
 	if (NTV2DeviceGetNumAudioSystems(inDeviceID))
@@ -1134,7 +1096,7 @@ NTV2AudioSystem NTV2DeviceGetHostAudioSystem(const NTV2DeviceID inDeviceID)
 
 bool NTV2DeviceROMHasBankSelect (const NTV2DeviceID inDeviceID)
 {
-	if (NTV2DeviceHasSPIv3(inDeviceID) || NTV2DeviceHasSPIv4(inDeviceID) || NTV2DeviceHasSPIv5(inDeviceID))
+	if (NTV2DeviceGetSPIFlashVersion(inDeviceID) >= 3  &&  NTV2DeviceGetSPIFlashVersion(inDeviceID) <= 5)
 		return true;
 	else
 		return false;
@@ -1154,10 +1116,26 @@ bool NTV2DeviceCanDoProgrammableCSC (const NTV2DeviceID inDeviceID)
 	return false;
 }
 
-#if !defined (NTV2_DEPRECATE_14_3)
-	bool NTV2DeviceCanDoFreezeOutput (const NTV2DeviceID inDeviceID)
-	{
-		(void) inDeviceID;
-		return false;
-	}
-#endif	//	!defined (NTV2_DEPRECATE_14_3)
+#if !defined(NTV2_DEPRECATE_17_0)
+	bool NTV2DeviceHasSPIv2 (const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 2;}
+	bool NTV2DeviceHasSPIv3(const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 3;}
+	bool NTV2DeviceHasSPIv4(const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 4;}
+	bool NTV2DeviceHasSPIv5(const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 5;}
+
+	bool NTV2DeviceHasGenlockv2(const NTV2DeviceID devID)	{return NTV2DeviceGetGenlockVersion(devID) == 2;}
+	bool NTV2DeviceHasGenlockv3(const NTV2DeviceID devID)	{return NTV2DeviceGetGenlockVersion(devID) == 3;}
+
+	bool NTV2DeviceHasColorSpaceConverterOnChannel2(const NTV2DeviceID devID)	{return NTV2DeviceCanDoWidget(devID, NTV2_WgtCSC2);}
+
+	bool NTV2DeviceCanDoAudio2Channels(const NTV2DeviceID devID)	{return NTV2DeviceGetMaxAudioChannels(devID) >= 2;}
+	bool NTV2DeviceCanDoAudio6Channels(const NTV2DeviceID devID)	{return NTV2DeviceGetMaxAudioChannels(devID) >= 6;}
+	bool NTV2DeviceCanDoAudio8Channels(const NTV2DeviceID devID)	{return NTV2DeviceGetMaxAudioChannels(devID) >= 8;}
+
+	UWord NTV2DeviceGetNumAudioStreams(const NTV2DeviceID devID)	{return NTV2DeviceGetNumAudioSystems(devID);}
+	bool NTV2DeviceCanDoAudioN(const NTV2DeviceID devID, UWord index0)	{return index0 < NTV2DeviceGetNumAudioSystems(devID);}
+	bool NTV2DeviceCanDoLTCOutN(const NTV2DeviceID devID, UWord index0)	{return index0 < NTV2DeviceGetNumLTCOutputs(devID);}
+	bool NTV2DeviceCanDoLTCInN(const NTV2DeviceID devID, UWord index0)	{return index0 < NTV2DeviceGetNumLTCInputs(devID);}
+	bool NTV2DeviceCanDoRS422N(const NTV2DeviceID devID, const NTV2Channel ch)	{return ch < NTV2DeviceGetNumSerialPorts(devID);}
+#endif	//	!defined(NTV2_DEPRECATE_17_0)
+
+bool work_around_erroneous_compiler_warning (void)	{return true;}

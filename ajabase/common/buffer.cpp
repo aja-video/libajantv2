@@ -5,9 +5,10 @@
 	@copyright	(C) 2010-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
-#include "common.h"
+//#include "common.h"
 #include "buffer.h"
 #include "ajabase/system/memory.h"
+#include "ajabase/system/debug.h"
 #include <string.h>
 
 

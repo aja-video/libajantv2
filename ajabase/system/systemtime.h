@@ -8,8 +8,17 @@
 #ifndef AJA_TIME_H
 	#define AJA_TIME_H
 
-//	#define	AJA_COLLECT_SLEEP_STATS		//	Define this to allow thread-specific stat collection for Sleep & SleepInMicroseconds
+#if defined(AJA_USE_CPLUSPLUS11)
+	// If compiling with C++11, by default, implementation uses STL chrono & thread.
+	#ifndef AJA_SLEEP_USE_STL
+		#define	AJA_SLEEP_USE_STL	//	Sleep... functions use STL chrono/thread;  comment this out to use native impl
+	#endif
+	// #ifndef AJA_SYSCLK_USE_STL
+	// 	#define	AJA_SYSCLK_USE_STL	//	GetSystem... functions use STL chrono;  comment this out to use native impl (TBD)
+	// #endif
+#endif	//	AJA_USE_CPLUSPLUS11
 
+//	#define	AJA_COLLECT_SLEEP_STATS		//	Define this to allow thread-specific stat collection for Sleep & SleepInMicroseconds
 	#include "ajabase/common/public.h"
 	#if defined(AJA_COLLECT_SLEEP_STATS)
 		#include <string>
@@ -76,6 +85,12 @@
 			@param		inMicroseconds		Time to sleep (microseconds).
 		**/
 		static void		SleepInMicroseconds (const int32_t inMicroseconds);
+
+		/**
+			@brief		Suspends execution of the current thread for a given number of nanoseconds.
+			@param		inMicroseconds		Time to sleep (nanoseconds).
+		**/
+		static void		SleepInNanoseconds (const uint64_t inNanoseconds);
 
 		#if defined(AJA_COLLECT_SLEEP_STATS)
 			static bool			CollectSleepStats (const bool inEnable = true);

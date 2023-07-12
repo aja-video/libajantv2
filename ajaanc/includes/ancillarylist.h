@@ -97,11 +97,6 @@ public:	//	CLASS METHODS
 																	const NTV2Buffer & inF2AncBuffer,
 																	AJAAncillaryList & outPackets,
 																	const uint32_t inFrameNum = 0);
-
-	#if !defined(NTV2_DEPRECATE_15_2)
-		static inline AJAStatus	SetFromSDIAncData (const NTV2Buffer & inF1, const NTV2Buffer & inF2, AJAAncillaryList & outPkts)	{return SetFromDeviceAncBuffers(inF1, inF2, outPkts);}	///< @deprecated	Use SetFromDeviceAncBuffers instead.
-		static inline AJAStatus	SetFromIPAncData (const NTV2Buffer & inF1, const NTV2Buffer & inF2, AJAAncillaryList & outPkts)		{return SetFromDeviceAncBuffers(inF1, inF2, outPkts);}	///< @deprecated	Use SetFromDeviceAncBuffers instead.
-	#endif	//	!defined(NTV2_DEPRECATE_15_2)
 	///@}
 
 
@@ -457,33 +452,6 @@ public:	//	INSTANCE METHODS
 								Specify false to transmit/encode a single RTP packet (the default).
 	**/
 	virtual inline void						SetAllowMultiRTPTransmit (const bool inAllow)		{m_xmitMultiRTP = inAllow;}
-
-#if !defined(NTV2_DEPRECATE_15_5)
-	/**
-		@deprecated	Use SetAllowMultiRTPTransmit with the 4-parameter version of this function.
-	**/
-	virtual NTV2_DEPRECATED_f(AJAStatus	GetIPTransmitData (NTV2Buffer & F1Buffer, NTV2Buffer & F2Buffer,
-															const bool inIsProgressive, const uint32_t inF2StartLine,
-															const bool inSingleRTPPkt))
-			{	const bool oldValue(AllowMultiRTPTransmit());
-				SetAllowMultiRTPTransmit(!inSingleRTPPkt);
-				const AJAStatus result(GetIPTransmitData(F1Buffer, F2Buffer, inIsProgressive, inF2StartLine));
-				SetAllowMultiRTPTransmit(oldValue);
-				return result;
-			}
-	/**
-		@deprecated	Use SetAllowMultiRTPTransmit with the 4-parameter version of this function.
-	**/
-	virtual NTV2_DEPRECATED_f(AJAStatus	GetIPTransmitDataLength (uint32_t & outF1ByteCount, uint32_t & outF2ByteCount,
-																const bool inIsProgressive, const uint32_t inF2StartLine,
-																const bool inSingleRTPPkt))
-			{	const bool oldValue(AllowMultiRTPTransmit());
-				SetAllowMultiRTPTransmit(!inSingleRTPPkt);
-				const AJAStatus result(GetIPTransmitDataLength(outF1ByteCount, outF2ByteCount, inIsProgressive, inF2StartLine));
-				SetAllowMultiRTPTransmit(oldValue);
-				return result;
-			}
-#endif	//	!defined(NTV2_DEPRECATE_15_5)
 	///@}
 
 
@@ -559,16 +527,6 @@ public:	//	INSTANCE METHODS
 		@param[in]	inIgnore	Specify true to ignore checksum errors;  otherwise use false.
 	**/
 	virtual inline void						SetIgnoreChecksumErrors (const bool inIgnore)		{m_ignoreCS = inIgnore;}
-
-
-#if !defined(NTV2_DEPRECATE_14_2)
-	/**
-		@deprecated	Use the 2-parameter version of this function instead.
-	**/
-	virtual NTV2_DEPRECATED_f(AJAStatus	AddVANCData (const UWordSequence & inPacketWords, const uint16_t inLineNum,
-													const AJAAncillaryDataVideoStream inStream = AJAAncDataChannel_Y));
-#endif	//	!defined(NTV2_DEPRECATE_14_2)
-
 
 	/**
 		@brief		Sends a "ParsePayloadData" command to all of my AJAAncillaryData objects.

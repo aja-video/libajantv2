@@ -4,7 +4,6 @@
 	@brief		Implementations of methods declared in 'ntv2publicinterface.h'.
 	@copyright	(C) 2016-2022 AJA Video Systems, Inc.
 **/
-
 #include "ntv2publicinterface.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
@@ -14,6 +13,7 @@
 #include "ajabase/common/common.h"
 #include "ntv2registerexpert.h"
 #include "ntv2nubtypes.h"
+#include "ntv2version.h"
 #include <iomanip>
 #include <locale>		//	For std::locale, std::numpunct, std::use_facet
 #include <string.h>		//	For memset, et al.
@@ -568,9 +568,7 @@ bool NTV2Buffer::GetU8s (UByteSequence & outUint8s, const size_t inU8Offset, con
 	{
 		outUint8s.reserve(maxSize);
 		for (size_t ndx(0);	 ndx < maxSize;	 ndx++)
-		{
 			outUint8s.push_back(*pU8++);
-		}
 	}
 	catch (...)
 	{
@@ -956,28 +954,26 @@ ostream & operator << (ostream & inOStream, const NTV2VideoFormatSet & inFormats
 
 
 //	Implementation of NTV2FrameBufferFormatSet's ostream writer...
-ostream & operator << (ostream & inOStream, const NTV2FrameBufferFormatSet & inFormats)
+ostream & operator << (ostream & inOStream, const NTV2PixelFormats & inFormats)
 {
-	NTV2FrameBufferFormatSetConstIter	iter	(inFormats.begin ());
+	NTV2PixelFormatsConstIter iter(inFormats.begin());
+	inOStream	<< inFormats.size()
+				<< (inFormats.size() == 1 ? " pixel format:  " : " pixel formats:	");
 
-	inOStream	<< inFormats.size ()
-				<< (inFormats.size () == 1 ? " pixel format:  " : " pixel formats:	");
-
-	while (iter != inFormats.end ())
+	while (iter != inFormats.end())
 	{
-		inOStream << ::NTV2FrameBufferFormatToString (*iter);
-		inOStream << (++iter == inFormats.end ()  ?	 ""	 :	", ");
+		inOStream << ::NTV2FrameBufferFormatToString(*iter);
+		inOStream << (++iter == inFormats.end()  ?	 ""	 :	", ");
 	}
-
 	return inOStream;
 
 }	//	operator <<
 
 
-NTV2FrameBufferFormatSet & operator += (NTV2FrameBufferFormatSet & inOutSet, const NTV2FrameBufferFormatSet inFBFs)
+NTV2PixelFormats & operator += (NTV2PixelFormats & inOutSet, const NTV2PixelFormats inFBFs)
 {
-	for (NTV2FrameBufferFormatSetConstIter iter (inFBFs.begin ());	iter != inFBFs.end ();	++iter)
-		inOutSet.insert (*iter);
+	for (NTV2PixelFormatsConstIter iter(inFBFs.begin());  iter != inFBFs.end();  ++iter)
+		inOutSet.insert(*iter);
 	return inOutSet;
 }
 
@@ -1077,6 +1073,59 @@ NTV2OutputDestinations & operator += (NTV2OutputDestinations & inOutSet, const N
 
 
 //	This needs to be moved into a C++ compatible "device features" module:
+bool NTV2DeviceGetSupportedVideoFormats (const NTV2DeviceID inDeviceID, NTV2VideoFormatSet & outFormats)
+{
+	bool isOkay(true);
+	outFormats.clear();
+
+    for (NTV2VideoFormat vf(NTV2_FORMAT_UNKNOWN);  vf < NTV2_MAX_NUM_VIDEO_FORMATS;  vf = NTV2VideoFormat(vf+1))
+	{
+		if (inDeviceID != DEVICE_ID_INVALID  &&  !::NTV2DeviceCanDoVideoFormat(inDeviceID, vf))
+			continue;	//	Valid devID specified and VF not supported on that device
+		if (inDeviceID == DEVICE_ID_INVALID  &&  !NTV2_IS_VALID_VIDEO_FORMAT(vf))
+			continue;	//	Invalid devID specified and invalid VF
+		try
+		{
+			outFormats.insert(vf);
+		}
+		catch (const std::bad_alloc &)
+		{
+			isOkay = false;
+			outFormats.clear();
+			break;
+		}
+	}	//	for each video format
+
+	NTV2_ASSERT ((isOkay && !outFormats.empty())  ||  (!isOkay && outFormats.empty()));
+	return isOkay;
+
+}	//	NTV2DeviceGetSupportedVideoFormats
+
+//	This needs to be moved into a C++ compatible "device features" module:
+bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2PixelFormats & outFormats)
+{
+	bool isOkay(true);
+	outFormats.clear();
+
+	for (NTV2PixelFormat pixelFormat(NTV2_FBF_FIRST);  pixelFormat < NTV2_FBF_LAST;  pixelFormat = NTV2PixelFormat(pixelFormat+1))
+		if (::NTV2DeviceCanDoFrameBufferFormat (inDeviceID, pixelFormat))
+			try
+			{
+				outFormats.insert(pixelFormat);
+			}
+			catch (const std::bad_alloc &)
+			{
+				isOkay = false;
+				outFormats.clear();
+				break;
+			}
+
+	NTV2_ASSERT ((isOkay && !outFormats.empty() ) || (!isOkay && outFormats.empty() ));
+	return isOkay;
+
+}	//	NTV2DeviceGetSupportedPixelFormats
+
+//	This needs to be moved into a C++ compatible "device features" module:
 bool NTV2DeviceGetSupportedStandards (const NTV2DeviceID inDeviceID, NTV2StandardSet & outStandards)
 {
 	NTV2VideoFormatSet	videoFormats;
@@ -1091,7 +1140,6 @@ bool NTV2DeviceGetSupportedStandards (const NTV2DeviceID inDeviceID, NTV2Standar
 	}
 	return true;
 }
-
 
 //	This needs to be moved into a C++ compatible "device features" module:
 bool NTV2DeviceGetSupportedGeometries (const NTV2DeviceID inDeviceID, NTV2GeometrySet & outGeometries)
@@ -1141,6 +1189,41 @@ bool NTV2DeviceGetSupportedOutputDests (const NTV2DeviceID inDeviceID, NTV2Outpu
 				||	(NTV2_OUTPUT_DEST_IS_HDMI(dst)		&&  (inKinds & NTV2_IOKINDS_HDMI))
 				||	(NTV2_OUTPUT_DEST_IS_ANALOG(dst)	&&  (inKinds & NTV2_IOKINDS_ANALOG))	)
 					outOutputDests.insert(dst);
+	}
+	return true;
+}
+
+ostream & operator << (ostream & oss, const NTV2FrameRateSet & inSet)
+{
+	NTV2FrameRateSetConstIter it(inSet.begin());
+	oss	<< inSet.size()
+		<< (inSet.size() == 1 ? " rate:  " : " rates:  ");
+	while (it != inSet.end())
+	{
+		oss << ::NTV2FrameRateToString(*it);
+		oss << (++it == inSet.end()	 ?	""	:  ", ");
+	}
+	return oss;
+}
+
+NTV2FrameRateSet & operator += (NTV2FrameRateSet & inOutSet, const NTV2FrameRateSet & inSet)
+{
+	for (NTV2FrameRateSetConstIter it(inSet.begin());  it != inSet.end();  ++it)
+		if (inOutSet.find(*it) == inOutSet.end())
+			inOutSet.insert(*it);
+	return inOutSet;
+}
+
+bool NTV2DeviceGetSupportedFrameRates (const NTV2DeviceID inDeviceID, NTV2FrameRateSet & outRates)
+{
+	outRates.clear();
+	NTV2VideoFormatSet vfs;
+	if (!::NTV2DeviceGetSupportedVideoFormats (inDeviceID, vfs))
+		return false;
+	for (NTV2VideoFormatSetConstIter it(vfs.begin());  it != vfs.end();  ++it)
+	{	const NTV2FrameRate fr (::GetNTV2FrameRateFromVideoFormat(*it));
+		if (NTV2_IS_VALID_NTV2FrameRate(fr))
+			outRates.insert(fr);
 	}
 	return true;
 }
@@ -1637,6 +1720,34 @@ bool NTV2Buffer::IsContentEqual (const NTV2Buffer & inBuffer, const ULWord inByt
 	return ::memcmp (pByte1, pByte2, byteCount) == 0;
 }
 
+bool NTV2Buffer::NextDifference (const NTV2Buffer & inBuffer, ULWord & byteOffset) const
+{
+	if (byteOffset == 0xFFFFFFFF)
+		return false;	//	bad offset
+	if (IsNULL() || inBuffer.IsNULL())
+		return false;	//	NULL or empty buffers
+	if (inBuffer.GetByteCount() != GetByteCount())
+		return false;	//	Different byte counts
+	if (inBuffer.GetHostPointer() == GetHostPointer())
+		{byteOffset = 0xFFFFFFFF;  return true;}	//	Same buffer
+
+	ULWord	totalBytesToCompare(GetByteCount());
+	if (byteOffset >= totalBytesToCompare)
+		return false;	//	Bad offset
+	totalBytesToCompare -= byteOffset;
+
+	const UByte * pByte1 (*this);
+	const UByte * pByte2 (inBuffer);
+	while (totalBytesToCompare)
+	{
+		if (pByte1[byteOffset] != pByte2[byteOffset])
+			return true;
+		totalBytesToCompare--;
+		byteOffset++;
+	}
+	byteOffset = 0xFFFFFFFF;
+	return true;
+}
 
 bool NTV2Buffer::GetRingChangedByteRange (const NTV2Buffer & inBuffer, ULWord & outByteOffsetFirst, ULWord & outByteOffsetLast) const
 {
@@ -2165,12 +2276,12 @@ bool AUTOCIRCULATE_STATUS::CopyFrom (const AUTOCIRCULATE_STATUS_STRUCT & inOldSt
 	acFramesDropped			= inOldStruct.framesDropped;
 	acBufferLevel			= inOldStruct.bufferLevel;
 	acAudioSystem			= NTV2_AUDIOSYSTEM_INVALID; //	NTV2_AUDIOSYSTEM_1;
-	acOptionFlags			=	inOldStruct.bWithRP188				? AUTOCIRCULATE_WITH_RP188			: 0		|
-								inOldStruct.bFbfChange				? AUTOCIRCULATE_WITH_FBFCHANGE		: 0		|
-								inOldStruct.bFboChange				? AUTOCIRCULATE_WITH_FBOCHANGE		: 0		|
-								inOldStruct.bWithColorCorrection	? AUTOCIRCULATE_WITH_COLORCORRECT	: 0		|
-								inOldStruct.bWithVidProc			? AUTOCIRCULATE_WITH_VIDPROC		: 0		|
-								inOldStruct.bWithCustomAncData		? AUTOCIRCULATE_WITH_ANC			: 0;
+	acOptionFlags			=	(inOldStruct.bWithRP188				? AUTOCIRCULATE_WITH_RP188			: 0) |
+								(inOldStruct.bFbfChange				? AUTOCIRCULATE_WITH_FBFCHANGE		: 0) |
+								(inOldStruct.bFboChange				? AUTOCIRCULATE_WITH_FBOCHANGE		: 0) |
+								(inOldStruct.bWithColorCorrection	? AUTOCIRCULATE_WITH_COLORCORRECT	: 0) |
+								(inOldStruct.bWithVidProc			? AUTOCIRCULATE_WITH_VIDPROC		: 0) |
+								(inOldStruct.bWithCustomAncData		? AUTOCIRCULATE_WITH_ANC			: 0);
 	return true;
 }
 

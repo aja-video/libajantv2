@@ -5,10 +5,10 @@ if (NOT AJA_QT_ENABLED)
     return()
 endif()
 
-find_package(Qt5 HINTS ${AJA_QT_DIR} COMPONENTS Core REQUIRED)
-set(QT_LIBRARIES Qt5::Core)
+include(QtHelpers)
+aja_find_qt_modules(Core)
 
-list(APPEND TARGET_LINK_LIBS ${QT_LIBRARIES})
+list(APPEND TARGET_LINK_LIBS ${TARGET_QT_LIBS})
 
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
@@ -54,12 +54,12 @@ install(TARGETS ${PROJECT_NAME}
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${DEMO_COMMON_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/demos)
-	install(FILES ${DEMO_APP_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2konaipj2ksetup)
+	install(FILES ${DEMO_COMMON_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos)
+	install(FILES ${DEMO_APP_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2konaipj2ksetup)
 endif()
 if (AJA_INSTALL_CMAKE)
-	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2konaipj2ksetup)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2konaipj2ksetup)
 endif()
 if (AJA_INSTALL_MISC)
-	install(FILES Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2konaipj2ksetup)
+	install(FILES Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2konaipj2ksetup)
 endif()

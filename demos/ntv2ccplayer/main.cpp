@@ -92,7 +92,6 @@ int main (int argc, const char ** argv)
 		{"noline21",	'n',	POPT_ARG_NONE,		&noLine21,		0,	"disable line 21 wvfrm?",	AJA_NULL					},
 		{"no608",		  0,	POPT_ARG_NONE,		&no608,			0,	"don't xmit 608 packets?",	AJA_NULL					},
 		{"no708",		  0,	POPT_ARG_NONE,		&no708,			0,	"don't xmit 708 packets?",	AJA_NULL					},
-		{"frames",		  0,	POPT_ARG_STRING,	&pFramesSpec,	0,	"frames to AutoCirculate",	"num[@min] or min-max"		},
 
 		//	Per-caption-channel options -- specify more than one by separating with comma (e.g., --end loop,idle,idle,loop  --608chan cc1,cc2,tx3,tx4)
 		{"end",			'e',	POPT_ARG_STRING,	&pEndAction,	0,	"end action",				"exit|loop|idle,..."		},
@@ -230,7 +229,7 @@ int main (int argc, const char ** argv)
 
 	for (NTV2StringListConstIter iter (sCaptionChannels.begin());  iter != sCaptionChannels.end();  ++iter, ++ndx)
 	{
-		CCGeneratorConfig	generatorConfig;
+		CCGenConfig	generatorConfig;
 
 		//	Caption Channel
 		generatorConfig.fCaptionChannel = ::StrToNTV2Line21Channel (*iter);
@@ -322,9 +321,8 @@ int main (int argc, const char ** argv)
 	//	Loop until we're told to stop...
 	do
 	{	//	Poll the player's encoder's status until stopped...
+		player.GetStatus (msgsQued, bytesQued, totMsgsEnq, totBytesEnq, totMsgsDeq, totBytesDeq, maxQueDepth, droppedFrames);
 		if (bEmitStats)
-		{
-			player.GetStatus (msgsQued, bytesQued, totMsgsEnq, totBytesEnq, totMsgsDeq, totBytesDeq, maxQueDepth, droppedFrames);
 			cout	<<	setw(9) << msgsQued
 					<<	setw(9) << bytesQued
 					<<	setw(9) << totMsgsEnq
@@ -333,8 +331,6 @@ int main (int argc, const char ** argv)
 					<<	setw(9) << totBytesDeq
 					<<	setw(9) << maxQueDepth
 					<<	setw(9) << droppedFrames  << "\r" << flush;
-		}
-		AJATime::Sleep (2000);
 	} while (!gGlobalQuit);	//	loop til done
 
 	//  Ask the player to stop...

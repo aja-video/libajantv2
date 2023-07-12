@@ -1139,6 +1139,10 @@ Standard behaviors:
 	-	On <b>SDI Output</b>s:
 		-	<b>Disable Output</b> or <b>Enable Output</b> — For bidirectional SDI connectors, immediately changes its direction.
 		-	<b>SDI Output Standard</b> — Sets the output’s video standard.
+		-	<b>Video Limiting</b> — Sets SDI output video limiting for all device SDI outputs.
+			-	<b>Off</b> — Disables output limiting.
+			-	<b>Legal SDI</b> — SDI video output is limited to legal SDI.
+			-	<b>Legal Broadcast</b> — SDI output is limited to legal broadcast.
 		-	<b>3Ga->3Gb Conversion</b> — (3G/6G/12G only) Enables or disables the output’s 3Ga-to-3Gb converter.
 		-	<b>RGB 3Ga Conversion</b> — (3G/6G/12G only) Enables or disables the output’s RGB 3Ga converter.
 		-	<b>3G Enabled</b> — (3G/6G/12G only) Enables or disables 3G output. If disabled, the output is restricted to 1.5G.

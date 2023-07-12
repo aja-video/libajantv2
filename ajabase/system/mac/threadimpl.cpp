@@ -4,17 +4,16 @@
 	@brief		Implements the AJAThreadImpl class on the Mac platform.
 	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
-
+#include "ajabase/system/mac/threadimpl.h"
+#include "ajabase/system/mac/pthreadsextra.h"
+#include "ajabase/common/timer.h"
+#include "ajabase/system/debug.h"
 #include <errno.h>
 #include <sched.h>
 #include <signal.h>
 #include <sys/resource.h>
 #include <sys/syscall.h>
 #include <sys/time.h>
-#include "ajabase/system/mac/pthreadsextra.h"
-#include "ajabase/system/mac/threadimpl.h"
-#include "ajabase/common/timer.h"
-
 #include <mach/mach_init.h>
 #include <mach/thread_policy.h>
 #include <mach/thread_act.h>

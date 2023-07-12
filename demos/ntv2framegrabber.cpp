@@ -855,16 +855,28 @@ void NTV2FrameGrabber::SetupAudio (void)
 	mNTV2Card.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, mAudioSystem);
 
 	//	Set up Qt's audio output...
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 	mFormat.setSampleRate (48000);
 	mFormat.setChannelCount (2);
 	mFormat.setSampleSize (16);
 	mFormat.setCodec ("audio/pcm");
 	mFormat.setByteOrder (QAudioFormat::LittleEndian);
 	mFormat.setSampleType (QAudioFormat::SignedInt);
+#else
+    mFormat.setSampleRate (48000);
+    mFormat.setChannelCount (2);
+    mFormat.setSampleFormat (QAudioFormat::Int16);
+#endif
 
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
 	QAudioDeviceInfo	audioDeviceInfo	(QAudioDeviceInfo::defaultOutputDevice ());
 	if (audioDeviceInfo.isFormatSupported (mFormat))
-		mAudioOutput = new QAudioOutput (mFormat, AJA_NULL);
+        mAudioOutput = new QAudioOutput (mFormat, AJA_NULL);
+#else
+    QAudioDevice    deviceInfo (QMediaDevices::defaultAudioOutput());
+    if (deviceInfo.isFormatSupported (mFormat))
+        mAudioOutput = new QAudioSink(deviceInfo, mFormat, AJA_NULL);
+#endif
 
 }	//	SetupAudio
 

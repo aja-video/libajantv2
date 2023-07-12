@@ -8,9 +8,8 @@
 #ifndef NTV2DEVICESCANNER_H
 #define NTV2DEVICESCANNER_H
 
-#include "ajaexport.h"
+#include "ntv2audiodefines.h"
 #include "ntv2card.h"
-#include "string.h"
 #include <vector>
 #include <algorithm>
 
@@ -98,13 +97,6 @@ typedef struct NTV2DeviceInfo
 	UWord							numDMAEngines;						///< @brief Total number of DMA engines
 	UWord							numSerialPorts;						///< @brief Total number of serial ports
 	ULWord							pingLED;
-	#if !defined (NTV2_DEPRECATE)
-		uint64_t		boardSerialNumber;				///< @deprecated	Use deviceSerialNumber instead
-		char			boardIdentifier[32];			///< @deprecated	Use deviceIdentifier instead
-		NTV2BoardType	boardType;						///< @deprecated	No longer used. Remove deviceType from the source code instead
-		NTV2BoardID		boardID;						///< @deprecated	Use deviceID instead
-		ULWord			boardNumber;					///< @deprecated	Use deviceIndex instead
-	#endif	//	!defined (NTV2_DEPRECATE)
 
 	AJAExport	bool operator == (const NTV2DeviceInfo & rhs) const;	///< @return	True if I'm equivalent to another ::NTV2DeviceInfo struct.
 	AJAExport	inline bool operator != (const NTV2DeviceInfo & rhs) const	{ return !(*this == rhs); } ///< @return	True if I'm different from another ::NTV2DeviceInfo struct.
@@ -389,19 +381,6 @@ public:
 	**/
 	virtual void								SortDeviceInfoList (void);
 
-	#if !defined (NTV2_DEPRECATE)
-		public:
-		static NTV2_DEPRECATED_f(void								DumpBoardInfo (const NTV2DeviceInfo & info));					///< @deprecated	Use the ostream operators instead.
-		static NTV2_DEPRECATED_f(void								DumpAudioFormatInfo (const NTV2AudioPhysicalFormat & audioPhysicalFormat)); ///< @deprecated	Use the ostream operators instead.
-		virtual NTV2_DEPRECATED_f(bool								BoardTypePresent (NTV2BoardType boardType, bool rescan = false));	///< @deprecated	NTV2BoardType is obsolete.
-		virtual inline NTV2_DEPRECATED_f(bool						BoardIDPresent (NTV2BoardID boardID, bool rescan = false))	{return DeviceIDPresent (boardID, rescan);} ///< @deprecated	Use DeviceIDPresent instead.
-		virtual inline NTV2_DEPRECATED_f(bool						GetBoardInfo (ULWord inDeviceIndexNumber, NTV2DeviceInfo & outDeviceInfo, bool inRescan))	{return GetDeviceInfo (inDeviceIndexNumber, outDeviceInfo, inRescan);}	///< @deprecated	Use GetDeviceInfo instead.
-		virtual inline NTV2_DEPRECATED_f(void						SortBoardInfoList (void))		{ SortDeviceInfoList (); }		///< @deprecated	Use SortDeviceInfoList instead.
-		virtual inline NTV2_DEPRECATED_f(size_t						GetNumBoards (void) const)		{ return GetNumDevices (); }	///< @deprecated	Use GetNumDevices instead.
-		virtual inline NTV2_DEPRECATED_f(NTV2DeviceInfoList &		GetBoardList (void))			{ return _deviceInfoList; }		///< @deprecated	Use GetDeviceInfoList instead.
-		virtual inline NTV2_DEPRECATED_f(const NTV2DeviceInfoList & GetBoardList (void) const)		{ return _deviceInfoList; }		///< @deprecated	Use GetDeviceInfoList instead.
-	#endif	//	NTV2_DEPRECATE
-
 	virtual inline		~CNTV2DeviceScanner ()						{ }
 
 
@@ -416,29 +395,5 @@ private:
 	NTV2DeviceInfoList					_deviceInfoList;		/// My device list
 
 };	//	CNTV2DeviceScanner
-
-
-#if !defined (NTV2_DEPRECATE)
-	typedef NTV2_DEPRECATED_TYPEDEF		NTV2DeviceInfo				NTV2BoardInfo;				/// @deprecated		Use NTV2DeviceInfo instead. Type names containing "board" are being phased out.
-	typedef NTV2_DEPRECATED_TYPEDEF		NTV2DeviceInfo				OurBoardInfo;				/// @deprecated		Use NTV2DeviceInfo instead. Type names containing "board" are being phased out.
-	typedef NTV2_DEPRECATED_TYPEDEF		NTV2DeviceInfoList			NTV2BoardInfoList;			/// @deprecated		Use NTV2DeviceInfoList instead. Type names containing "board" are being phased out.
-	typedef NTV2_DEPRECATED_TYPEDEF		NTV2DeviceInfoList			BoardInfoList;				/// @deprecated		Use NTV2DeviceInfoList instead. Type names containing "board" are being phased out.
-	typedef NTV2_DEPRECATED_TYPEDEF		NTV2AudioPhysicalFormat		AudioPhysicalFormat;		/// @deprecated		Use NTV2AudioPhysicalFormat instead. Type names without "NTV2" are being phased out.
-	typedef NTV2_DEPRECATED_TYPEDEF		NTV2AudioPhysicalFormatList AudioPhysicalFormatList;	/// @deprecated		Use NTV2AudioPhysicalFormatList instead. Type names without "NTV2" are being phased out.
-	typedef NTV2_DEPRECATED_TYPEDEF		CNTV2DeviceScanner			CNTV2BoardScan;				/// @deprecated		Use CNTV2DeviceScanner instead. Type names containing "board" are being phased out.
-#endif	//	NTV2_DEPRECATE
-
-
-#if !defined (AJADLL_BUILD) && !defined (AJASTATIC)
-	//	This code forces link/load errors if the SDK client was built with NTV2_DEPRECATE defined,
-	//	but the SDK lib/dylib/DLL was built without NTV2_DEPRECATE defined, ... or vice-versa...
-	#if defined (NTV2_DEPRECATE)
-		extern int gNTV2_DEPRECATE();
-		static int __AJA_trigger_link_error_if_incompatible__ = gNTV2_DEPRECATE();
-	#else
-		extern int gNTV2_NON_DEPRECATE();
-		static int __AJA_trigger_link_error_if_incompatible__  = gNTV2_NON_DEPRECATE();
-	#endif
-#endif	//	neither AJADLL_BUILD nor AJASTATIC
 
 #endif	//	NTV2DEVICESCANNER_H

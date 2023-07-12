@@ -12,6 +12,7 @@
 #include "ajabase/common/timecode.h"
 
 #include <iomanip>
+#include <sstream>
 #include <string>
 #include <vector>
 using namespace std;

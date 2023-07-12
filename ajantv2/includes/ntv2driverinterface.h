@@ -8,11 +8,9 @@
 #ifndef NTV2DRIVERINTERFACE_H
 #define NTV2DRIVERINTERFACE_H
 
-#include "ajaexport.h"
 #include "ajatypes.h"
 #include "ntv2enums.h"
-#include "ntv2videodefines.h"
-#include "ntv2audiodefines.h"
+#include "ntv2nubtypes.h"
 #include "ntv2nubaccess.h"
 #include "ntv2publicinterface.h"
 #include "ntv2utils.h"
@@ -38,12 +36,10 @@
 #endif
 
 #if defined(AJALinux ) || defined(AJAMac)
-	#include <sys/types.h>
-	#include <netinet/in.h>
-	#include <unistd.h>
-#endif
-
-#ifdef MSWindows
+//	#include <sys/types.h>	//	** MrBill **	Not needed for AJALinux, needed for AJAMac?
+//	#include <netinet/in.h>	//	** MrBill **	Not needed for AJALinux, needed for AJAMac?
+	#include <unistd.h>	//	for usleep
+#elif defined(MSWindows)
 	#include <WinSock2.h>
 	#include <assert.h>
 #endif
@@ -417,6 +413,37 @@ class AJAExport CNTV2DriverInterface
 		AJA_VIRTUAL bool BitstreamReset (const bool inConfiguration, const bool inInterface);
 		AJA_VIRTUAL bool BitstreamStatus (NTV2ULWordVector & outRegValues);
 		AJA_VIRTUAL bool BitstreamLoad (const bool inSuspend, const bool inResume);
+
+	/**
+		@name	Device Features
+	**/
+	///@{
+		/**
+			@return		True if the requested device feature is supported.
+			@param[in]	inParamID	The NTV2BoolParamID of interest.
+		**/
+		AJA_VIRTUAL bool		IsSupported (const NTV2BoolParamID inParamID)	//	New in SDK 17.0
+									{	ULWord value(0);
+										GetBoolParam (ULWord(inParamID), value);
+										return bool(value);
+									}
+		/**
+			@return		The requested quantity for the given device feature.
+			@param[in]	inParamID	The NTV2NumericParamID of interest.
+		**/
+		AJA_VIRTUAL ULWord		GetNumSupported (const NTV2NumericParamID inParamID)	//	New in SDK 17.0
+									{	ULWord value(0);
+										GetNumericParam (ULWord(inParamID), value);
+										return value;
+									}
+
+		/**
+			@param[in]	inEnumsID	The NTV2EnumsID of interest.
+			@return		The supported items.
+		**/
+		AJA_VIRTUAL ULWordSet	GetSupportedItems (const NTV2EnumsID inEnumsID);	//	New in SDK 17.0
+	///@}
+
 	/**
 		@name	Device Ownership
 	**/
@@ -533,47 +560,7 @@ class AJAExport CNTV2DriverInterface
 		AJA_VIRTUAL inline NTV2NubProtocolVersion	GetNubProtocolVersion (void) const	{return 0;}	///< @return	My nub protocol version.
 #endif
 
-		//	DEPRECATED FUNCTIONS	
-#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(NTV2BoardType	GetCompileFlag (void));
-		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool BoardOpened (void) const)		{return IsOpen();}
-#endif	//	!NTV2_DEPRECATE
-#if !defined(NTV2_DEPRECATE_12_7)
-		// For devices that support more than one bitfile
-		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SwitchBitfile (NTV2DeviceID boardID, NTV2BitfileType bitfile))	{ (void) boardID; (void) bitfile; return false; }	///< @deprecated	This function is obsolete.
-#endif
-#if !defined(NTV2_DEPRECATE_14_3)
-		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	ReadRegister (const ULWord inRegNum, ULWord * pOutValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0x0))
-		{
-			return pOutValue ? ReadRegister(inRegNum, *pOutValue, inRegMask, inRegShift) : false;
-		}
-		AJA_VIRTUAL bool	Open (const UWord inDeviceIndex, const bool inDisplayError, const NTV2DeviceType eDeviceType, const char * pInHostName);
-#endif	//	!defined(NTV2_DEPRECATE_14_3)
-#if !defined(NTV2_DEPRECATE_15_0)
-		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool IsKonaIPDevice(void))	{return IsIPDevice();}	///< @deprecated	Call CNTV2Card::IsIPDevice instead.
-#endif //	!defined(NTV2_DEPRECATE_15_0)
-#if !defined(NTV2_DEPRECATE_15_1)
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetOutputTimecodeOffset(ULWord frames))	{return WriteRegister(kVRegOutputTimecodeOffset, frames);}	///< @deprecated	Obsolete starting after SDK 15.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetOutputTimecodeOffset(ULWord* pFrames))	{return pFrames ? ReadRegister(kVRegOutputTimecodeOffset, *pFrames) : false;}	///< @deprecated	Obsolete starting after SDK 15.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetOutputTimecodeType(ULWord type))		{return WriteRegister(kVRegOutputTimecodeType, type);}	///< @deprecated	Obsolete starting after SDK 15.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetOutputTimecodeType(ULWord* pType))		{return pType ? ReadRegister(kVRegOutputTimecodeType, *pType) : false;}	///< @deprecated	Obsolete starting after SDK 15.0.
-#endif	//	!defined(NTV2_DEPRECATE_15_1)
-#if !defined(NTV2_DEPRECATE_15_6)
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool LockFormat(void))	{return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool StartDriver(DriverStartPhase phase))		{(void)phase; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetUserModeDebugLevel(ULWord level))		{(void)level; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetUserModeDebugLevel(ULWord*level))		{(void)level; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetKernelModeDebugLevel(ULWord level))	{(void)level; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetKernelModeDebugLevel(ULWord* level))	{(void)level; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetUserModePingLevel(ULWord level))		{(void)level; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetUserModePingLevel(ULWord* level))		{(void)level; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetKernelModePingLevel(ULWord level))		{(void)level; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetKernelModePingLevel(ULWord* level))	{(void)level; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetLatencyTimerValue (ULWord value))		{(void)value; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetLatencyTimerValue (ULWord* value))		{(void)value; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetDebugFilterStrings(const char* inclStr, const char* exclStr))	{(void)inclStr; (void)exclStr; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetDebugFilterStrings(char* inclStr, char* exclStr))	{(void)inclStr; (void)exclStr; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-#endif	//	!defined(NTV2_DEPRECATE_15_6)
+		//	DEPRECATED FUNCTIONS
 #if !defined(NTV2_DEPRECATE_16_0)
 	// SuspendAudio/ResumeAudio were only implemented on MacOS
 	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SuspendAudio(void))	{return true;}
@@ -618,9 +605,6 @@ class AJAExport CNTV2DriverInterface
 
 	//	PROTECTED METHODS
 	protected:
-#if !defined(NTV2_DEPRECATE_12_7)
-		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool DisplayNTV2Error(const char* pInStr))	{(void)pInStr; return false;}	///< @deprecated	This function is obsolete.
-#endif
 		/**
 			@brief		Peforms the housekeeping details of opening the specified local, remote or software device.
 			@param[in]	inURLSpec	Specifies the local, remote or software device to be opened.
@@ -631,6 +615,23 @@ class AJAExport CNTV2DriverInterface
 		AJA_VIRTUAL bool			OpenLocalPhysical (const UWord inDeviceIndex);	///< @brief	Opens the local/physical device connection.
 		AJA_VIRTUAL bool			CloseLocalPhysical (void);	///< @brief	Releases host resources associated with the local/physical device connection.
 		AJA_VIRTUAL bool			ParseFlashHeader (BITFILE_INFO_STRUCT & outBitfileInfo);
+		AJA_VIRTUAL bool			GetBoolParam (const ULWord inParamID,  ULWord & outValue);	//	New in SDK 17.0
+		AJA_VIRTUAL bool			GetNumericParam (const ULWord inParamID,  ULWord & outValue);	//	New in SDK 17.0
+
+		/**
+			@brief		Answers with the NTV2RegInfo of the register associated with the given boolean (i.e., "Can Do") device feature.
+			@param[in]	inParamID		Specifies the device features parameter of interest.
+			@param[out] outRegInfo		Receives the associated NTV2RegInfo.
+			@return		True if successful; otherwise false.
+		**/
+		AJA_VIRTUAL bool	GetRegInfoForBoolParam (const NTV2BoolParamID inParamID, NTV2RegInfo & outRegInfo);
+		/**
+			@brief		Answers with the NTV2RegInfo of the register associated with the given numeric (i.e., "Get Num") device feature.
+			@param[in]	inParamID		Specifies the device features parameter of interest.
+			@param[out] outRegInfo		Receives the associated NTV2RegInfo.
+			@return		True if successful; otherwise false.
+		**/
+		AJA_VIRTUAL bool	GetRegInfoForNumericParam (const NTV2NumericParamID inParamID, NTV2RegInfo & outRegInfo);
 
 		/**
 			@brief		Atomically increments the event count tally for the given interrupt type.

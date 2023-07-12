@@ -422,7 +422,7 @@ download page and/or the device firmware page in the <a href="https://sdksupport
 			@code
 			//#define NTV2_USE_CPLUSPLUS11
 			@endcode
-		-	Comment out the line that defines the macro <b>AJA_USE_CPLUSPLUS11</b> in ‘ajalibraries/ajabase/common/ajatypes.hʼ:
+		-	Comment out the line that defines the macro <b>AJA_USE_CPLUSPLUS11</b> in ‘ajalibraries/ajabase/common/types.hʼ:
 			@code
 			//#define AJA_USE_CPLUSPLUS11
 			@endcode

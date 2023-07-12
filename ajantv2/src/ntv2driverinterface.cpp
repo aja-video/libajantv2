@@ -6,19 +6,18 @@
 **/
 
 #include "ajatypes.h"
-#include "ajaexport.h"
 #include "ntv2enums.h"
 #include "ntv2debug.h"
 #include "ntv2driverinterface.h"
 #include "ntv2devicefeatures.h"
 #include "ntv2nubaccess.h"
 #include "ntv2bitfile.h"
-#include "ntv2registers2022.h"
+#include "ntv2registersmb.h"	//	for SAREK_REGS
 #include "ntv2spiinterface.h"
 #include "ntv2utils.h"
+#include "ntv2version.h"
 #include "ntv2devicescanner.h"	//	for IsHexDigit, IsAlphaNumeric, etc.
 #include "ajabase/system/debug.h"
-#include "ajabase/common/common.h"
 #include "ajabase/system/atomic.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/system/process.h"
@@ -182,17 +181,6 @@ bool CNTV2DriverInterface::Open (const std::string & inURLSpec)
 	}
 	return false;
 }
-
-#if !defined(NTV2_DEPRECATE_14_3)
-	bool CNTV2DriverInterface::Open (UWord boardNumber, bool displayError, NTV2DeviceType eBoardType, const char* hostname)
-	{	(void) eBoardType;	(void) displayError;	//	Ignored
-		const string host(hostname ? hostname : "");
-		if (host.empty())
-			return Open(boardNumber);
-		return Open(host);
-	}
-#endif	//	!defined(NTV2_DEPRECATE_14_3)
-
 
 bool CNTV2DriverInterface::Close (void)
 {
@@ -878,7 +866,7 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 	if (!IsDeviceReady(false))
 		return false;	// cannot read flash
 
-	if (::NTV2DeviceHasSPIv4(_boardID))
+	if (::NTV2DeviceGetSPIFlashVersion(_boardID) == 4)
 	{
 		uint32_t val;
 		ReadRegister((0x100000 + 0x08) / 4, val);
@@ -886,7 +874,7 @@ bool CNTV2DriverInterface::ParseFlashHeader (BITFILE_INFO_STRUCT & bitFileInfo)
 			return false;	// cannot read flash
 	}
 
-	if (::NTV2DeviceHasSPIv3(_boardID) || ::NTV2DeviceHasSPIv4(_boardID) || ::NTV2DeviceHasSPIv5(_boardID))
+	if (::NTV2DeviceGetSPIFlashVersion(_boardID) >= 3  &&  ::NTV2DeviceGetSPIFlashVersion(_boardID) <= 5)
 	{
 		WriteRegister(kRegXenaxFlashAddress, 0ULL);
 		WriteRegister(kRegXenaxFlashControlStatus, 0x17);
@@ -1299,36 +1287,367 @@ bool CNTV2DriverInterface::IsMBSystemReady (void)
 #endif	//	NTV2_WRITEREG_PROFILING
 
 
-#if !defined (NTV2_DEPRECATE)
-NTV2BoardType CNTV2DriverInterface::GetCompileFlag ()
+ULWordSet CNTV2DriverInterface::GetSupportedItems (const NTV2EnumsID inEnumsID)
 {
-	NTV2BoardType eBoardType = BOARDTYPE_UNKNOWN;
-
-#ifdef HDNTV
-	eBoardType = BOARDTYPE_HDNTV;
-#elif defined KSD
-	eBoardType = BOARDTYPE_KSD;
-#elif defined KHD
-	eBoardType = BOARDTYPE_KHD;
-#elif defined XENA2
-	eBoardType = BOARDTYPE_AJAXENA2;
-#elif defined BORG
-	eBoardType = BOARDTYPE_BORG;
-#endif
-
-	return eBoardType;
+	ULWordSet result;
+	const NTV2EnumsID enumsID (NTV2EnumsID(inEnumsID+0));
+	if (IsRemote()  &&  _pRPCAPI->NTV2GetSupportedRemote (inEnumsID, result))
+		return result;
+	const NTV2DeviceID devID(GetDeviceID());
+	switch (enumsID)
+	{
+		case kNTV2EnumsID_DeviceID:
+		{	const NTV2DeviceIDSet devIDs(::NTV2GetSupportedDevices());
+			for (NTV2DeviceIDSetConstIter it(devIDs.begin());  it != devIDs.end();  ++it)
+				result.insert(ULWord(*it));
+			break;
+		}
+		case kNTV2EnumsID_Standard:
+		{	NTV2StandardSet standards;
+			::NTV2DeviceGetSupportedStandards (devID, standards);
+			for (NTV2StandardSetConstIter it(standards.begin());  it != standards.end();  ++it)
+				result.insert(ULWord(*it));
+			break;
+		}
+		case kNTV2EnumsID_PixelFormat:
+		{	NTV2FrameBufferFormatSet pfs;
+			::NTV2DeviceGetSupportedPixelFormats (devID, pfs);
+			for (NTV2FrameBufferFormatSetConstIter it(pfs.begin());  it != pfs.end();  ++it)
+				result.insert(ULWord(*it));
+			break;
+		}
+		case kNTV2EnumsID_FrameGeometry:
+		{	NTV2GeometrySet fgs;
+			::NTV2DeviceGetSupportedGeometries (devID, fgs);
+			for (NTV2GeometrySetConstIter it(fgs.begin());  it != fgs.end();  ++it)
+				result.insert(ULWord(*it));
+			break;
+		}
+		case kNTV2EnumsID_FrameRate:
+		{	NTV2FrameRateSet frs;
+			::NTV2DeviceGetSupportedFrameRates (devID, frs);
+			for (NTV2FrameRateSetConstIter it(frs.begin());  it != frs.end();  ++it)
+				result.insert(ULWord(*it));
+			break;
+		}
+		case kNTV2EnumsID_ScanGeometry:
+		{	//	Needs implementation
+			break;
+		}
+		case kNTV2EnumsID_VideoFormat:
+		{	NTV2VideoFormatSet vfs;
+			::NTV2DeviceGetSupportedVideoFormats (devID, vfs);
+			for (NTV2VideoFormatSetConstIter it(vfs.begin());  it != vfs.end();  ++it)
+				result.insert(ULWord(*it));
+			break;
+		}
+		case kNTV2EnumsID_Mode:
+		{	if (IsSupported(kDeviceCanDoPlayback))	result.insert(ULWord(NTV2_MODE_OUTPUT));
+			if (IsSupported(kDeviceCanDoCapture))	result.insert(ULWord(NTV2_MODE_INPUT));
+			break;
+		}
+		case kNTV2EnumsID_InputSource:
+		{	NTV2InputSourceSet srcs;
+			::NTV2DeviceGetSupportedInputSources (devID, srcs);
+			for (NTV2InputSourceSetConstIter it(srcs.begin());  it != srcs.end();  ++it)
+				result.insert(ULWord(*it));
+			break;
+		}
+		case kNTV2EnumsID_OutputDest:
+		{	NTV2OutputDestinations dsts;
+			::NTV2DeviceGetSupportedOutputDests (devID, dsts);
+			for (NTV2OutputDestinationsConstIter it(dsts.begin());  it != dsts.end();  ++it)
+				result.insert(ULWord(*it));
+			break;
+		}
+		case kNTV2EnumsID_Channel:
+		{	for (ULWord ch(0);  ch < GetNumSupported(kDeviceGetNumFrameStores);  ch++)
+				result.insert(ch);
+			break;
+		}
+		case kNTV2EnumsID_RefSource:
+		{	if (!IsSupported(kDeviceCanDoPlayback))
+				break;
+			NTV2InputSourceSet inpSrcs;
+			::NTV2DeviceGetSupportedInputSources (devID, inpSrcs);
+			for (NTV2InputSourceSetConstIter it(inpSrcs.begin());  it != inpSrcs.end();  ++it)
+			{	const NTV2ReferenceSource refSrc (::NTV2InputSourceToReferenceSource(*it));
+				if (NTV2_IS_VALID_NTV2ReferenceSource(refSrc))
+					if (result.find(ULWord(refSrc)) == result.end())
+						result.insert(ULWord(refSrc));
+			}
+			result.insert(ULWord(NTV2_REFERENCE_FREERUN));	//	Always include Free-Run
+			if (GetNumSupported(kDeviceGetNumReferenceVideoInputs))
+				result.insert(ULWord(NTV2_REFERENCE_EXTERNAL));	//	Has external reference
+			break;
+		}
+		case kNTV2EnumsID_AudioRate:
+		{	result.insert(ULWord(NTV2_AUDIO_48K));	//	All boards support 48KHz PCM
+			if (IsSupported(kDeviceCanDoAudio96K))	result.insert(ULWord(NTV2_AUDIO_96K));
+			if (IsSupported(kDeviceCanDoAudio192K))	result.insert(ULWord(NTV2_AUDIO_192K));
+			break;
+		}
+		case kNTV2EnumsID_AudioSource:
+		{	if (!IsSupported(kDeviceCanDoCapture))
+				break;
+			NTV2InputSourceSet inpSrcs;
+			::NTV2DeviceGetSupportedInputSources (devID, inpSrcs);
+			for (NTV2InputSourceSetConstIter it(inpSrcs.begin());  it != inpSrcs.end();  ++it)
+			{	const NTV2AudioSource audSrc (::NTV2InputSourceToAudioSource(*it));
+				if (NTV2_IS_VALID_AUDIO_SOURCE(audSrc))
+					if (result.find(ULWord(audSrc)) == result.end())
+						result.insert(ULWord(audSrc));
+			}
+			break;
+		}
+		case kNTV2EnumsID_WidgetID:
+		{	NTV2WidgetIDSet wgts;
+			CNTV2SignalRouter::GetWidgetIDs (devID, wgts);
+			for (NTV2WidgetIDSetConstIter it(wgts.begin());  it != wgts.end();  ++it)
+				result.insert(ULWord(*it));
+			break;
+		}
+		case kNTV2EnumsID_ConversionMode:
+		{	for (NTV2ConversionMode cm(NTV2_1080i_5994to525_5994);  cm < NTV2_NUM_CONVERSIONMODES;  cm = NTV2ConversionMode(cm+1))
+				if (::NTV2DeviceCanDoConversionMode (devID, cm))
+					result.insert(ULWord(cm));
+			break;
+		}
+		default:	break;
+	}
+	return result;
 }
-#endif	//	!NTV2_DEPRECATE
+
+bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outValue)
+{
+	const NTV2BoolParamID paramID (NTV2BoolParamID(inParamID+0));
+
+	//	Is there a register/bit that will answer this query?
+	{	NTV2RegInfo regInfo;
+		bool value (false);
+		if (GetRegInfoForBoolParam (paramID, regInfo))
+		{
+			if (!ReadRegister (regInfo.registerNumber, value, regInfo.registerMask, regInfo.registerShift))
+				return false;
+			outValue = value ? 1 : 0;
+			return true;
+		}
+	}
+	//	Ask the remote/virtual device?
+	if (IsRemote()  &&  _pRPCAPI->NTV2GetBoolParamRemote (inParamID, outValue))
+		return true;
+
+	//	Call classic device features function...
+	const NTV2DeviceID devID (GetDeviceID());
+	switch (inParamID)
+	{
+		case kDeviceCanChangeEmbeddedAudioClock:		outValue = ::NTV2DeviceCanChangeEmbeddedAudioClock		(devID);	break;	//	Deprecate?
+		case kDeviceCanChangeFrameBufferSize:			outValue = ::NTV2DeviceCanChangeFrameBufferSize			(devID);	break;
+		case kDeviceCanDisableUFC:						outValue = ::NTV2DeviceCanDisableUFC					(devID);	break;
+		case kDeviceCanDo2KVideo:						outValue = ::NTV2DeviceCanDo2KVideo						(devID);	break;
+		case kDeviceCanDo3GLevelConversion:				outValue = ::NTV2DeviceCanDo3GLevelConversion			(devID);	break;
+		case kDeviceCanDoRGBLevelAConversion:			outValue = ::NTV2DeviceCanDoRGBLevelAConversion			(devID);	break;
+		case kDeviceCanDo425Mux:						outValue = ::NTV2DeviceCanDo425Mux						(devID);	break;
+		case kDeviceCanDo4KVideo:						outValue = ::NTV2DeviceCanDo4KVideo						(devID);	break;
+		case kDeviceCanDoAESAudioIn:					outValue = ::NTV2DeviceCanDoAESAudioIn					(devID);	break;
+		case kDeviceCanDoAnalogAudio:					outValue = ::NTV2DeviceCanDoAnalogAudio					(devID);	break;
+		case kDeviceCanDoAnalogVideoIn:					outValue = ::NTV2DeviceCanDoAnalogVideoIn				(devID);	break;
+		case kDeviceCanDoAnalogVideoOut:				outValue = ::NTV2DeviceCanDoAnalogVideoOut				(devID);	break;
+		case kDeviceCanDoAudio2Channels:	//	Deprecate?
+			{const ULWord maxAudChls(GetNumSupported(kDeviceGetMaxAudioChannels));  outValue = maxAudChls >= 2;  break;}
+		case kDeviceCanDoAudio6Channels:	//	Deprecated?
+			{const ULWord maxAudChls(GetNumSupported(kDeviceGetMaxAudioChannels));  outValue = maxAudChls >= 6;  break;}
+		case kDeviceCanDoAudio8Channels:	//	Deprecated?
+			{const ULWord maxAudChls(GetNumSupported(kDeviceGetMaxAudioChannels));  outValue = maxAudChls >= 8;  break;}
+		case kDeviceCanDoAudio96K:						outValue = ::NTV2DeviceCanDoAudio96K					(devID);	break;	//	Deprecate?
+		case kDeviceCanDoAudioDelay:					outValue = ::NTV2DeviceCanDoAudioDelay					(devID);	break;	//	Deprecate?
+		case kDeviceCanDoBreakoutBox:					outValue = ::NTV2DeviceCanDoBreakoutBox					(devID);	break;
+		case kDeviceCanDoCapture:						outValue = ::NTV2DeviceCanDoCapture						(devID);	break;
+		case kDeviceCanDoColorCorrection:				outValue = ::NTV2DeviceCanDoColorCorrection				(devID);	break;	//	Deprecate?
+		case kDeviceCanDoCustomAnc:						outValue = ::NTV2DeviceCanDoCustomAnc					(devID);	break;	//	Deprecate?
+		case kDeviceCanDoDSKOpacity:					outValue = ::NTV2DeviceCanDoDSKOpacity					(devID);	break;	//	Deprecate?
+		case kDeviceCanDoDualLink:						outValue = ::NTV2DeviceCanDoDualLink					(devID);	break;	//	Deprecate?
+		case kDeviceCanDoDVCProHD:						outValue = ::NTV2DeviceCanDoDVCProHD					(devID);	break;	//	Deprecate?
+		case kDeviceCanDoEnhancedCSC:					outValue = ::NTV2DeviceCanDoEnhancedCSC					(devID);	break;	//	Deprecate?
+		case kDeviceCanDoFrameStore1Display:			outValue = ::NTV2DeviceCanDoFrameStore1Display			(devID);	break;	//	Deprecate?
+		case kDeviceCanDoHDMIOutStereo:					outValue = ::NTV2DeviceCanDoHDMIOutStereo				(devID);	break;	//	Deprecate?
+		case kDeviceCanDoHDV:							outValue = ::NTV2DeviceCanDoHDV							(devID);	break;	//	Deprecate?
+		case kDeviceCanDoHDVideo:						outValue = ::NTV2DeviceCanDoHDVideo						(devID);	break;	//	Deprecate?
+		case kDeviceCanDoIsoConvert:					outValue = ::NTV2DeviceCanDoIsoConvert					(devID);	break;
+		case kDeviceCanDoLTC:							outValue = ::NTV2DeviceCanDoLTC							(devID);	break;
+		case kDeviceCanDoLTCInOnRefPort:				outValue = ::NTV2DeviceCanDoLTCInOnRefPort				(devID);	break;
+		case kDeviceCanDoMSI:							outValue = ::NTV2DeviceCanDoMSI							(devID);	break;
+		case kDeviceCanDoMultiFormat:					outValue = ::NTV2DeviceCanDoMultiFormat					(devID);	break;
+		case kDeviceCanDoPCMControl:					outValue = ::NTV2DeviceCanDoPCMControl					(devID);	break;
+		case kDeviceCanDoPCMDetection:					outValue = ::NTV2DeviceCanDoPCMDetection				(devID);	break;
+		case kDeviceCanDoPIO:							outValue = ::NTV2DeviceCanDoPIO							(devID);	break;	//	Deprecate?
+		case kDeviceCanDoPlayback:						outValue = ::NTV2DeviceCanDoPlayback					(devID);	break;
+		case kDeviceCanDoProgrammableCSC:				outValue = ::NTV2DeviceCanDoProgrammableCSC				(devID);	break;
+		case kDeviceCanDoProgrammableRS422:				outValue = ::NTV2DeviceCanDoProgrammableRS422			(devID);	break;
+		case kDeviceCanDoProRes:						outValue = ::NTV2DeviceCanDoProRes						(devID);	break;
+		case kDeviceCanDoQREZ:							outValue = ::NTV2DeviceCanDoQREZ						(devID);	break;
+		case kDeviceCanDoQuarterExpand:					outValue = ::NTV2DeviceCanDoQuarterExpand				(devID);	break;
+		case kDeviceCanDoRateConvert:					outValue = ::NTV2DeviceCanDoRateConvert					(devID);	break;	//	Deprecate?
+		case kDeviceCanDoRGBPlusAlphaOut:				outValue = ::NTV2DeviceCanDoRGBPlusAlphaOut				(devID);	break;	//	Deprecate?
+		case kDeviceCanDoRP188:							outValue = ::NTV2DeviceCanDoRP188						(devID);	break;	//	Deprecate?
+		case kDeviceCanDoSDVideo:						outValue = ::NTV2DeviceCanDoSDVideo						(devID);	break;	//	Deprecate?
+		case kDeviceCanDoSDIErrorChecks:				outValue = ::NTV2DeviceCanDoSDIErrorChecks				(devID);	break;
+		case kDeviceCanDoStackedAudio:					outValue = ::NTV2DeviceCanDoStackedAudio				(devID);	break;	//	Deprecate?
+		case kDeviceCanDoStereoIn:						outValue = ::NTV2DeviceCanDoStereoIn					(devID);	break;	//	Deprecate?
+		case kDeviceCanDoStereoOut:						outValue = ::NTV2DeviceCanDoStereoOut					(devID);	break;	//	Deprecate?
+		case kDeviceCanDoThunderbolt:					outValue = ::NTV2DeviceCanDoThunderbolt					(devID);	break;
+		case kDeviceCanDoVideoProcessing:				outValue = ::NTV2DeviceCanDoVideoProcessing				(devID);	break;
+		case kDeviceCanMeasureTemperature:				outValue = ::NTV2DeviceCanMeasureTemperature			(devID);	break;
+		case kDeviceCanReportFrameSize:					outValue = ::NTV2DeviceCanReportFrameSize				(devID);	break;
+		case kDeviceHasBiDirectionalSDI:				outValue = ::NTV2DeviceHasBiDirectionalSDI				(devID);	break;
+		case kDeviceHasColorSpaceConverterOnChannel2:	outValue = ::NTV2DeviceCanDoWidget(devID, NTV2_WgtCSC2);	break;	//	Deprecate?
+		case kDeviceHasNWL:								outValue = ::NTV2DeviceHasNWL							(devID);	break;
+		case kDeviceHasPCIeGen2:						outValue = ::NTV2DeviceHasPCIeGen2						(devID);	break;
+		case kDeviceHasRetailSupport:					outValue = ::NTV2DeviceHasRetailSupport					(devID);	break;
+		case kDeviceHasSDIRelays:						outValue = ::NTV2DeviceHasSDIRelays						(devID);	break;
+		case kDeviceHasSPIFlash:						outValue = ::NTV2DeviceHasSPIFlash						(devID);	break;	//	Deprecate?
+		case kDeviceHasSPIFlashSerial:					outValue = ::NTV2DeviceHasSPIFlashSerial				(devID);	break;	//	Deprecate?
+		case kDeviceHasSPIv2:							outValue = ::NTV2DeviceGetSPIFlashVersion(devID) == 2;	break;
+		case kDeviceHasSPIv3:							outValue = ::NTV2DeviceGetSPIFlashVersion(devID) == 3;	break;
+		case kDeviceHasSPIv4:							outValue = ::NTV2DeviceGetSPIFlashVersion(devID) == 4;	break;
+		case kDeviceIs64Bit:							outValue = ::NTV2DeviceIs64Bit							(devID);	break;	//	Deprecate?
+		case kDeviceIsDirectAddressable:				outValue = ::NTV2DeviceIsDirectAddressable				(devID);	break;	//	Deprecate?
+		case kDeviceIsExternalToHost:					outValue = ::NTV2DeviceIsExternalToHost					(devID);	break;
+		case kDeviceIsSupported:						outValue = ::NTV2DeviceIsSupported						(devID);	break;
+		case kDeviceNeedsRoutingSetup:					outValue = ::NTV2DeviceNeedsRoutingSetup				(devID);	break;	//	Deprecate?
+		case kDeviceSoftwareCanChangeFrameBufferSize:	outValue = ::NTV2DeviceSoftwareCanChangeFrameBufferSize (devID);	break;
+		case kDeviceCanThermostat:						outValue = ::NTV2DeviceCanThermostat					(devID);	break;
+		case kDeviceHasHEVCM31:							outValue = ::NTV2DeviceHasHEVCM31						(devID);	break;
+		case kDeviceHasHEVCM30:							outValue = ::NTV2DeviceHasHEVCM30						(devID);	break;
+		case kDeviceCanDoVITC2:							outValue = ::NTV2DeviceCanDoVITC2						(devID);	break;
+		case kDeviceCanDoHDMIHDROut:					outValue = ::NTV2DeviceCanDoHDMIHDROut					(devID);	break;
+		case kDeviceCanDoJ2K:							outValue = ::NTV2DeviceCanDoJ2K							(devID);	break;
+
+		case kDeviceCanDo12gRouting:				outValue = ::NTV2DeviceCanDo12gRouting					(devID);	break;
+		case kDeviceCanDo12GSDI:					outValue = ::NTV2DeviceCanDo12GSDI						(devID);	break;
+		case kDeviceCanDo2110:						outValue = ::NTV2DeviceCanDo2110						(devID);	break;
+		case kDeviceCanDo8KVideo:					outValue = ::NTV2DeviceCanDo8KVideo						(devID);	break;
+		case kDeviceCanDoAudio192K:					outValue = ::NTV2DeviceCanDoAudio192K					(devID);	break;
+		case kDeviceCanDoCustomAux:					outValue = ::NTV2DeviceCanDoCustomAux					(devID);	break;
+		case kDeviceCanDoFramePulseSelect:			outValue = ::NTV2DeviceCanDoFramePulseSelect			(devID);	break;
+		case kDeviceCanDoHDMIMultiView:				outValue = ::NTV2DeviceCanDoHDMIMultiView				(devID);	break;
+		case kDeviceCanDoHFRRGB:					outValue = ::NTV2DeviceCanDoHFRRGB						(devID);	break;
+		case kDeviceCanDoIP:						outValue = ::NTV2DeviceCanDoIP							(devID);	break;
+		case kDeviceCanDoMultiLinkAudio:			outValue = ::NTV2DeviceCanDoMultiLinkAudio				(devID);	break;
+		case kDeviceCanDoWarmBootFPGA:				outValue = ::NTV2DeviceCanDoWarmBootFPGA				(devID);	break;
+		case kDeviceCanReportFailSafeLoaded:		outValue = ::NTV2DeviceCanReportFailSafeLoaded			(devID);	break;
+		case kDeviceCanReportRunningFirmwareDate:	outValue = ::NTV2DeviceCanReportRunningFirmwareDate		(devID);	break;
+		case kDeviceHasAudioMonitorRCAJacks:		outValue = ::NTV2DeviceHasAudioMonitorRCAJacks			(devID);	break;
+		case kDeviceHasBiDirectionalAnalogAudio:	outValue = ::NTV2DeviceHasBiDirectionalAnalogAudio		(devID);	break;
+		case kDeviceHasGenlockv2:					outValue = ::NTV2DeviceGetGenlockVersion(devID) == 2;	break;
+		case kDeviceHasGenlockv3:					outValue = ::NTV2DeviceGetGenlockVersion(devID) == 3;	break;
+		case kDeviceHasHeadphoneJack:				outValue = ::NTV2DeviceHasHeadphoneJack					(devID);	break;
+		case kDeviceHasLEDAudioMeters:				outValue = ::NTV2DeviceHasLEDAudioMeters				(devID);	break;
+		case kDeviceHasRotaryEncoder:				outValue = ::NTV2DeviceHasRotaryEncoder					(devID);	break;
+		case kDeviceHasSPIv5:						outValue = ::NTV2DeviceGetSPIFlashVersion(devID) == 5;	break;
+		case kDeviceHasXilinxDMA:					outValue = ::NTV2DeviceHasXilinxDMA						(devID);	break;
+		case kDeviceCanDoAudioMixer:
+		case kDeviceHasMicrophoneInput:
+		default:										return false;	//	Bad param
+	}
+	return true;	//	Successfully used old ::NTV2DeviceCanDo function
+
+}	//	GetBoolParam
 
 
-#if defined (AJADLL_BUILD) || defined (AJASTATIC)
-	//	This code forces link/load errors if the SDK client was built with NTV2_DEPRECATE defined,
-	//	but the SDK lib/dylib/DLL was built without NTV2_DEPRECATE defined, ... or vice-versa...
-	#if defined (NTV2_DEPRECATE)
-		AJAExport	int gNTV2_DEPRECATE (void);
-		AJAExport	int gNTV2_DEPRECATE (void){return 0;}
-	#else
-		AJAExport	int gNTV2_NON_DEPRECATE (void);
-		AJAExport	int gNTV2_NON_DEPRECATE (void){return 0;}
-	#endif
-#endif	//	AJADLL_BUILD or AJASTATIC
+bool CNTV2DriverInterface::GetNumericParam (const ULWord inParamID, ULWord & outValue)
+{
+	const NTV2NumericParamID paramID (NTV2NumericParamID(inParamID+0));
+	outValue = 0;
+
+	//	Is there a register that will answer this query?
+	{	NTV2RegInfo regInfo;
+		if (GetRegInfoForNumericParam (paramID, regInfo))
+			return ReadRegister (regInfo.registerNumber, outValue, regInfo.registerMask, regInfo.registerShift);
+	}
+	//	Ask the remote/virtual device?
+	if (IsRemote()  &&  _pRPCAPI->NTV2GetNumericParamRemote (inParamID, outValue))
+		return true;
+
+	//	Call classic device features function...
+	const NTV2DeviceID devID (GetDeviceID());
+	switch (paramID)
+	{
+		case kDeviceGetActiveMemorySize:				outValue = ::NTV2DeviceGetActiveMemorySize					(devID);	break;
+		case kDeviceGetDACVersion:						outValue = ::NTV2DeviceGetDACVersion						(devID);	break;
+		case kDeviceGetDownConverterDelay:				outValue = ::NTV2DeviceGetDownConverterDelay				(devID);	break;
+		case kDeviceGetHDMIVersion:						outValue = ::NTV2DeviceGetHDMIVersion						(devID);	break;
+		case kDeviceGetLUTVersion:						outValue = ::NTV2DeviceGetLUTVersion						(devID);	break;
+		case kDeviceGetMaxAudioChannels:				outValue = ::NTV2DeviceGetMaxAudioChannels					(devID);	break;
+		case kDeviceGetMaxRegisterNumber:				outValue = ::NTV2DeviceGetMaxRegisterNumber					(devID);	break;
+		case kDeviceGetMaxTransferCount:				outValue = ::NTV2DeviceGetMaxTransferCount					(devID);	break;
+		case kDeviceGetNumDMAEngines:					outValue = ::NTV2DeviceGetNumDMAEngines						(devID);	break;
+		case kDeviceGetNumVideoChannels:				outValue = ::NTV2DeviceGetNumVideoChannels					(devID);	break;
+		case kDeviceGetPingLED:							outValue = ::NTV2DeviceGetPingLED							(devID);	break;
+		case kDeviceGetUFCVersion:						outValue = ::NTV2DeviceGetUFCVersion						(devID);	break;
+		case kDeviceGetNum4kQuarterSizeConverters:		outValue = ::NTV2DeviceGetNum4kQuarterSizeConverters		(devID);	break;
+		case kDeviceGetNumAESAudioInputChannels:		outValue = ::NTV2DeviceGetNumAESAudioInputChannels			(devID);	break;
+		case kDeviceGetNumAESAudioOutputChannels:		outValue = ::NTV2DeviceGetNumAESAudioOutputChannels			(devID);	break;
+		case kDeviceGetNumAnalogAudioInputChannels:		outValue = ::NTV2DeviceGetNumAnalogAudioInputChannels		(devID);	break;
+		case kDeviceGetNumAnalogAudioOutputChannels:	outValue = ::NTV2DeviceGetNumAnalogAudioOutputChannels		(devID);	break;
+		case kDeviceGetNumAnalogVideoInputs:			outValue = ::NTV2DeviceGetNumAnalogVideoInputs				(devID);	break;
+		case kDeviceGetNumAnalogVideoOutputs:			outValue = ::NTV2DeviceGetNumAnalogVideoOutputs				(devID);	break;
+		case kDeviceGetNumAudioSystems:					outValue = ::NTV2DeviceGetNumAudioSystems					(devID);	break;
+		case kDeviceGetNumCrossConverters:				outValue = ::NTV2DeviceGetNumCrossConverters				(devID);	break;
+		case kDeviceGetNumCSCs:							outValue = ::NTV2DeviceGetNumCSCs							(devID);	break;
+		case kDeviceGetNumDownConverters:				outValue = ::NTV2DeviceGetNumDownConverters					(devID);	break;
+		case kDeviceGetNumEmbeddedAudioInputChannels:	outValue = ::NTV2DeviceGetNumEmbeddedAudioInputChannels		(devID);	break;
+		case kDeviceGetNumEmbeddedAudioOutputChannels:	outValue = ::NTV2DeviceGetNumEmbeddedAudioOutputChannels	(devID);	break;
+		case kDeviceGetNumFrameStores:					outValue = ::NTV2DeviceGetNumFrameStores					(devID);	break;
+		case kDeviceGetNumFrameSyncs:					outValue = ::NTV2DeviceGetNumFrameSyncs						(devID);	break;
+		case kDeviceGetNumHDMIAudioInputChannels:		outValue = ::NTV2DeviceGetNumHDMIAudioInputChannels			(devID);	break;
+		case kDeviceGetNumHDMIAudioOutputChannels:		outValue = ::NTV2DeviceGetNumHDMIAudioOutputChannels		(devID);	break;
+		case kDeviceGetNumHDMIVideoInputs:				outValue = ::NTV2DeviceGetNumHDMIVideoInputs				(devID);	break;
+		case kDeviceGetNumHDMIVideoOutputs:				outValue = ::NTV2DeviceGetNumHDMIVideoOutputs				(devID);	break;
+		case kDeviceGetNumInputConverters:				outValue = ::NTV2DeviceGetNumInputConverters				(devID);	break;
+		case kDeviceGetNumLUTs:							outValue = ::NTV2DeviceGetNumLUTs							(devID);	break;
+		case kDeviceGetNumMixers:						outValue = ::NTV2DeviceGetNumMixers							(devID);	break;
+		case kDeviceGetNumOutputConverters:				outValue = ::NTV2DeviceGetNumOutputConverters				(devID);	break;
+		case kDeviceGetNumReferenceVideoInputs:			outValue = ::NTV2DeviceGetNumReferenceVideoInputs			(devID);	break;
+		case kDeviceGetNumSerialPorts:					outValue = ::NTV2DeviceGetNumSerialPorts					(devID);	break;
+		case kDeviceGetNumUpConverters:					outValue = ::NTV2DeviceGetNumUpConverters					(devID);	break;
+		case kDeviceGetNumVideoInputs:					outValue = ::NTV2DeviceGetNumVideoInputs					(devID);	break;
+		case kDeviceGetNumVideoOutputs:					outValue = ::NTV2DeviceGetNumVideoOutputs					(devID);	break;
+		case kDeviceGetNum2022ChannelsSFP1:				outValue = ::NTV2DeviceGetNum2022ChannelsSFP1				(devID);	break;
+		case kDeviceGetNum2022ChannelsSFP2:				outValue = ::NTV2DeviceGetNum2022ChannelsSFP2				(devID);	break;
+		case kDeviceGetNumLTCInputs:					outValue = ::NTV2DeviceGetNumLTCInputs						(devID);	break;
+		case kDeviceGetNumLTCOutputs:					outValue = ::NTV2DeviceGetNumLTCOutputs						(devID);	break;
+		case kDeviceGetTotalNumAudioSystems:			outValue = ::NTV2DeviceGetNumAudioSystems(devID)
+																	+ (IsSupported(kDeviceCanDoAudioMixer) ? 2 : 0);			break;
+		case kDeviceGetNumBufferedAudioSystems:			outValue = ::NTV2DeviceGetNumAudioSystems(devID)
+																	+ (IsSupported(kDeviceCanDoAudioMixer) ? 1 : 0);			break;
+		default:										return false;	//	Bad param
+	}
+	return true;	//	Successfully used old ::NTV2DeviceGetNum function
+
+}	//	GetNumericParam
+
+
+bool CNTV2DriverInterface::GetRegInfoForBoolParam (const NTV2BoolParamID inParamID, NTV2RegInfo & outRegInfo)
+{
+	outRegInfo.MakeInvalid();
+	switch (inParamID)
+	{
+		case kDeviceCanDoAudioMixer:		outRegInfo.Set(kRegGlobalControl2, 0, kRegMaskAudioMixerPresent, kRegShiftAudioMixerPresent);	break;
+		case kDeviceHasMultiRasterWidget:	outRegInfo.Set(kRegMRSupport, 0, kRegMaskMRSupport, kRegShiftMRSupport);						break;
+		default:	break;
+	}
+	return outRegInfo.IsValid();
+}
+
+
+bool CNTV2DriverInterface::GetRegInfoForNumericParam (const NTV2NumericParamID inParamID, NTV2RegInfo & outRegInfo)
+{
+	outRegInfo.MakeInvalid();
+	switch (inParamID)
+	{
+		case kDeviceGetNumMicInputs:	outRegInfo.Set(kRegGlobalControl2, 0, kRegMaskIsDNXIV, kRegShiftIsDNXIV);	break;
+		default:	break;
+	}
+	return outRegInfo.IsValid();
+}

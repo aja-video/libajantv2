@@ -16,12 +16,6 @@
 
 using namespace std;
 
-#if defined (NTV2_DEPRECATE)
-	#define	AJA_LOCAL_STATIC	static
-#else	//	!defined (NTV2_DEPRECATE)
-	#define	AJA_LOCAL_STATIC
-#endif	//	!defined (NTV2_DEPRECATE)
-
 #define	AJA_FD_BEGIN			NTV2FormatDescriptor (
 #define	AJA_FD_END				0)
 #define	AJA_FD_NOTSUPPORTED		NTV2FormatDescriptor ()
@@ -68,7 +62,7 @@ static const string	gPlaneLabels[NTV2_FBF_NUMFRAMEBUFFERFORMATS][4]	=
 };
 
 
-const AJA_LOCAL_STATIC NTV2FormatDescriptor	formatDescriptorTable [NTV2_NUM_STANDARDS] [NTV2_FBF_NUMFRAMEBUFFERFORMATS] =
+const static NTV2FormatDescriptor	formatDescriptorTable [NTV2_NUM_STANDARDS] [NTV2_FBF_NUMFRAMEBUFFERFORMATS] =
 {
 	{/////	NTV2_STANDARD_1080											inNumLines						inNumPixels							inLinePitch [ULWords per line]			inFirstActiveLine
 		/* NTV2_FBF_10BIT_YCBCR */				AJA_FD_BEGIN			HD_NUMACTIVELINES_1080,			HD_NUMCOMPONENTPIXELS_1080,			HD_YCBCRLINEPITCH_1080,					AJA_FD_END,
@@ -770,138 +764,6 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 		FinalizePlanar();
 
 }	//	construct from NTV2VideoFormat & NTV2VANCMode
-
-
-#if !defined (NTV2_DEPRECATE_13_0)
-	NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2Standard			inVideoStandard,
-												const NTV2FrameBufferFormat	inFrameBufferFormat,
-												const bool					inVANCenabled,
-												const bool					in2Kby1080,
-												const bool					inWideVANC)
-	{
-		(void) in2Kby1080;
-		MakeInvalid ();
-		if (!NTV2_IS_VALID_STANDARD (inVideoStandard))
-			return;	//	bad standard
-		if (!NTV2_IS_VALID_FRAME_BUFFER_FORMAT (inFrameBufferFormat))
-			return;	//	bad FBF
-		if (inWideVANC && !inVANCenabled)
-			return;	//	conflicting VANC params
-	
-		//	The 'formatDescriptorTable' handles everything but VANC...
-		const NTV2FormatDescriptor	&	result			(formatDescriptorTable[inVideoStandard][inFrameBufferFormat]);
-		const ULWord					numActiveLines	(result.numLines);
-		*this = result;
-
-		switch(inVideoStandard)
-		{
-		case NTV2_STANDARD_1080:
-		case NTV2_STANDARD_1080p:
-			mFrameGeometry = NTV2_FG_1920x1080;
-			if(inVANCenabled)
-			{
-				numLines = inWideVANC ? 1114 : 1112;
-				mFrameGeometry = inWideVANC ? NTV2_FG_1920x1114 : NTV2_FG_1920x1112;
-			}
-			break;
-		case NTV2_STANDARD_720:
-			mFrameGeometry = NTV2_FG_1280x720;
-			if(inVANCenabled)
-			{
-				numLines = 740;
-				mFrameGeometry = NTV2_FG_1280x740;
-			}
-			break;
-		case NTV2_STANDARD_525:
-			mFrameGeometry = NTV2_FG_720x486;
-			if(inVANCenabled)
-			{
-				numLines = inWideVANC ? 514 : 508;
-				mFrameGeometry = inWideVANC ? NTV2_FG_720x514 : NTV2_FG_720x508;
-			}
-			break;
-		case NTV2_STANDARD_625:
-			mFrameGeometry = NTV2_FG_720x576;
-			if(inVANCenabled)
-			{
-				numLines = inWideVANC ? 612 : 598;
-				mFrameGeometry = inWideVANC ? NTV2_FG_720x612 : NTV2_FG_720x598;
-			}
-			break;
-		case NTV2_STANDARD_2K:
-			mFrameGeometry = NTV2_FG_2048x1556;
-			if(inVANCenabled)
-			{
-				numLines = 1588;
-				mFrameGeometry = NTV2_FG_2048x1588;
-			}
-			break;
-		case NTV2_STANDARD_2Kx1080p:
-		case NTV2_STANDARD_2Kx1080i:
-			mFrameGeometry = NTV2_FG_2048x1080;
-			if(inVANCenabled)
-			{
-				numLines = inWideVANC ? 1114 : 1112;
-				mFrameGeometry = inWideVANC ? NTV2_FG_2048x1114 : NTV2_FG_2048x1112;
-			}
-			break;
-		case NTV2_STANDARD_3840x2160p:
-		case NTV2_STANDARD_3840HFR:
-		case NTV2_STANDARD_3840i:
-			mFrameGeometry = NTV2_FG_4x1920x1080;
-			break;
-		case NTV2_STANDARD_4096x2160p:
-		case NTV2_STANDARD_4096HFR:
-		case NTV2_STANDARD_4096i:
-			mFrameGeometry = NTV2_FG_4x2048x1080;
-			break;
-		case NTV2_NUM_STANDARDS:
-			break;
-		}
-
-		firstActiveLine = numLines - numActiveLines;
-		mStandard		= inVideoStandard;
-		mPixelFormat	= inFrameBufferFormat;
-		mVancMode		= NTV2VANCModeFromBools (inVANCenabled, inWideVANC);
-
-		if (NTV2_IS_FBF_PLANAR (inFrameBufferFormat))
-			FinalizePlanar();
-	
-	}	//	construct from NTV2Standard
-
-	NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat,
-												const NTV2FrameBufferFormat	inFrameBufferFormat,
-												const bool					inVANCenabled,
-												const bool					inWideVANC)
-	{
-		NTV2FormatDescriptor	result	(::GetNTV2StandardFromVideoFormat (inVideoFormat),
-											inFrameBufferFormat,
-											inVANCenabled,
-											NTV2_IS_2K_1080_VIDEO_FORMAT(inVideoFormat) || NTV2_IS_4K_4096_VIDEO_FORMAT(inVideoFormat),
-											inWideVANC);
-		*this = result;
-		mVideoFormat = inVideoFormat;
-		mFrameGeometry = GetNTV2FrameGeometryFromVideoFormat(inVideoFormat);
-	}	//	construct from NTV2VideoFormat
-
-	NTV2FormatDescriptor GetFormatDescriptor (	const NTV2Standard			inVideoStandard,
-												const NTV2FrameBufferFormat	inFrameBufferFormat,
-												const bool					inVANCenabled,
-												const bool					in2Kby1080,
-												const bool					inWideVANC)
-	{
-		return NTV2FormatDescriptor (inVideoStandard, inFrameBufferFormat, inVANCenabled, in2Kby1080, inWideVANC);
-	}
-
-
-NTV2FormatDescriptor GetFormatDescriptor (	const NTV2VideoFormat		inVideoFormat,
-											const NTV2FrameBufferFormat	inFrameBufferFormat,
-											const bool					inVANCenabled,
-											const bool					inWideVANC)
-{
-	return NTV2FormatDescriptor (inVideoFormat, inFrameBufferFormat, inVANCenabled, inWideVANC);
-}
-#endif	//	!defined (NTV2_DEPRECATE_13_0)
 
 
 NTV2FormatDescriptor::NTV2FormatDescriptor ()

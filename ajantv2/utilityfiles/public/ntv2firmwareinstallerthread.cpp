@@ -269,7 +269,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 
 		//	Sanity-check bitfile length...
 		const size_t	bitfileLength	(bitfile.GetFileStreamLength());
-		NTV2_POINTER	bitfileBuffer(bitfileLength + 512);
+		NTV2Buffer		bitfileBuffer(bitfileLength + 512);
 		if (!bitfileBuffer)
 		{
 			FITERR("CNTV2FirmwareInstallerThread:  Unable to allocate " << DEC(bitfileLength+512) << "-byte bitfile buffer");

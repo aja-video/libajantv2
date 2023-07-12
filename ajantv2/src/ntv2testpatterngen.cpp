@@ -2549,23 +2549,6 @@ NTV2TestPatternNames NTV2TestPatternGen::getTestPatternNames (void)
 	return result;
 }	//	getTestPatternNames
 
-
-#if !defined(NTV2_DEPRECATE_15_0)
-	NTV2TestPatternList & NTV2TestPatternGen::getTestPatternList (void)
-	{
-		static NTV2TestPatternList	result;
-		static AJALock				resultGuard;
-		if (result.empty())
-		{
-			AJAAutoLock locker(&resultGuard);
-			const NTV2TestPatternNames & names(getTestPatternNames());
-			for (size_t ndx(0);	 ndx < names.size();  ndx++)
-				result.push_back(names[ndx].c_str());
-		}
-		return result;
-	}
-#endif // NTV2_DEPRECATE_15_0
-
 NTV2StringList NTV2TestPatternGen::getColorNames (void)
 {
 	NTV2StringList result;
@@ -2683,9 +2666,14 @@ bool NTV2TestPatternGen::drawIt (void)
 }	//	drawIt
 
 #if !defined(NTV2_DEPRECATE_16_0)
-	bool NTV2TestPatternGen::DrawTestPattern (const NTV2TestPatternSelect inPattern, const NTV2FormatDescriptor & inDesc, NTV2TestPatBuffer & outBuffer)
+	bool NTV2TestPatternGen::DrawTestPattern (const NTV2TestPatternSelect inPattern,
+												const NTV2FormatDescriptor & inDesc,
+												NTV2TestPatBuffer & outBuffer)
 	{
-		return DrawTestPattern(inPattern, inDesc.GetRasterWidth(), inDesc.GetVisibleRasterHeight(), inDesc.GetPixelFormat(), outBuffer);
+		NTV2Buffer tmp(inDesc.GetTotalBytes());
+		outBuffer.resize(0);
+		return DrawTestPattern(inPattern, inDesc, tmp)
+				&&  tmp.GetU8s (outBuffer, /*U8Offset*/0, /*MaxSize*/0);
 	}
 
 	bool NTV2TestPatternGen::DrawTestPattern (const NTV2TestPatternSelect inPattern,
@@ -2792,7 +2780,7 @@ bool NTV2TestPatternGen::DrawTestPattern (const NTV2TestPatternSelect inPattern,
 	MakeUnPacked10BitYCbCrBuffer(mpUnpackedLineBuffer,CCIR601_10BIT_BLACK,CCIR601_10BIT_CHROMAOFFSET,CCIR601_10BIT_CHROMAOFFSET,mDstFrameWidth);
 	if (NTV2_IS_12B_PATTERN(inPattern))
 		HDRTPGeometry geom(mNumPixels, mNumLines);	//	setupHDRTestPatternGeometries();
-
+TPGDBUG("mpPackedLineBuff sz=" << DEC(mDstFrameWidth*2*4) << ", mpUnpackedLineBuff sz=" << DEC(mDstFrameWidth*4*2));
 	bool ok(drawIt());
 	if (ok	&&	setVANCToLegalBlack()  &&  inFormatDesc.IsVANC())
 	{	//	Set the VANC area, if any, to legal black...

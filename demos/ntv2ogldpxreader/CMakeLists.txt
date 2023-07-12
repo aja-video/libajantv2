@@ -3,8 +3,9 @@ project(ntv2ogldpxreader)
 find_package(OpenGL REQUIRED)
 set(OPENGL_LIBRARIES OpenGL::GL OpenGL::GLU)
 
-find_package(Qt5 HINTS ${AJA_QT_DIR} COMPONENTS Core OpenGL Widgets REQUIRED)
-set(QT_LIBRARIES Qt5::Core Qt5::OpenGL Qt5::Widgets)
+include(QtHelpers)
+aja_find_qt_modules(Core OpenGL Widgets)
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -17,7 +18,7 @@ set(TARGET_INCLUDE_DIRS
 )
 
 list(APPEND TARGET_LINK_LIBS
-	${QT_LIBRARIES}
+    ${TARGET_QT_LIBS}
 	${OPENGL_LIBRARIES})
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -58,12 +59,12 @@ install(TARGETS ${PROJECT_NAME}
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${DEMO_COMMON_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/demos)
-	install(FILES ${DEMO_APP_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2ogldpxreader)
+	install(FILES ${DEMO_COMMON_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos)
+	install(FILES ${DEMO_APP_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2ogldpxreader)
 endif()
 if (AJA_INSTALL_CMAKE)
-	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2ogldpxreader)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2ogldpxreader)
 endif()
 if (AJA_INSTALL_MISC)
-	install(FILES Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/ntv2ogldpxreader)
+	install(FILES Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2ogldpxreader)
 endif()

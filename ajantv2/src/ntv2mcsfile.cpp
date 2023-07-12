@@ -242,7 +242,7 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 
 		while (i < int(recordSize))
 		{
-			unsigned char dd = bitfileBuffer.U8(bitfileBufferNdx++);
+			unsigned char dd = bitfileBuffer.U8(int(bitfileBufferNdx++));
 			::sprintf(&iRecord[index], "%02X", dd);
 			checksum += dd;
 			i++;

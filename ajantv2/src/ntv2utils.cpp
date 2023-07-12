@@ -13,7 +13,8 @@
 #include "ntv2endian.h"
 #include "ntv2debug.h"
 #include "ntv2transcode.h"
-#include "ntv2devicefeatures.h"
+#include "ntv2version.h"
+#include "ntv2devicefeatures.h"	//	Required for NTV2DeviceCanDoVideoFormat
 #include "ajabase/system/lock.h"
 #include "ajabase/common/common.h"
 #if defined(AJALinux)
@@ -30,11 +31,6 @@
 
 using namespace std;
 
-#if defined (NTV2_DEPRECATE)
-	#define AJA_LOCAL_STATIC	static
-#else	//	!defined (NTV2_DEPRECATE)
-	#define AJA_LOCAL_STATIC
-#endif	//	!defined (NTV2_DEPRECATE)
 
 // Macros to simplify returning of strings for given enum
 #define NTV2UTILS_ENUM_CASE_RETURN_STR(enum_name) case(enum_name): return #enum_name
@@ -513,13 +509,6 @@ void CopyToQuadrant(uint8_t* srcBuffer, uint32_t srcHeight, uint32_t srcRowBytes
 
 
 void UnpackLine_10BitYUVto16BitYUV (const ULWord * pIn10BitYUVLine, UWord * pOut16BitYUVLine, const ULWord inNumPixels)
-#if !defined (NTV2_DEPRECATE)
-{
-	::UnPackLineData (pIn10BitYUVLine, pOut16BitYUVLine, inNumPixels);
-}
-
-void UnPackLineData (const ULWord * pIn10BitYUVLine, UWord * pOut16BitYUVLine, const ULWord inNumPixels)
-#endif	//	!defined (NTV2_DEPRECATE)
 {
 	NTV2_ASSERT (pIn10BitYUVLine && pOut16BitYUVLine && "UnpackLine_10BitYUVto16BitYUV -- NULL buffer pointer(s)");
 	NTV2_ASSERT (inNumPixels && "UnpackLine_10BitYUVto16BitYUV -- Zero pixel count");
@@ -536,13 +525,6 @@ void UnPackLineData (const ULWord * pIn10BitYUVLine, UWord * pOut16BitYUVLine, c
 
 
 void PackLine_16BitYUVto10BitYUV (const UWord * pIn16BitYUVLine, ULWord * pOut10BitYUVLine, const ULWord inNumPixels)
-#if !defined (NTV2_DEPRECATE)
-{
-	::PackLineData (pIn16BitYUVLine, pOut10BitYUVLine, inNumPixels);
-}
-
-void PackLineData (const UWord * pIn16BitYUVLine, ULWord * pOut10BitYUVLine, const ULWord inNumPixels)
-#endif	//	!defined (NTV2_DEPRECATE)
 {
 	NTV2_ASSERT (pIn16BitYUVLine && pOut10BitYUVLine && "PackLine_16BitYUVto10BitYUV -- NULL buffer pointer(s)");
 	NTV2_ASSERT (inNumPixels && "PackLine_16BitYUVto10BitYUV -- Zero pixel count");
@@ -813,26 +795,6 @@ void Make10BitLine (UWord* pOutLineData, const UWord Y, const UWord Cb, const UW
 	}
 }
 
-#if !defined(NTV2_DEPRECATE_13_0)
-	void Fill10BitYCbCrVideoFrame(PULWord _baseVideoAddress,
-								 const NTV2Standard standard,
-								 const NTV2FrameBufferFormat frameBufferFormat,
-								 const YCbCr10BitPixel color,
-								 const bool vancEnabled,
-								 const bool twoKby1080,
-								 const bool wideVANC)
-	{
-		NTV2FormatDescriptor fd (standard,frameBufferFormat,vancEnabled,twoKby1080,wideVANC);
-		UWord lineBuffer[2048*2];
-		Make10BitLine(lineBuffer,color.y,color.cb,color.cr,fd.numPixels);
-		for ( UWord i= 0; i<fd.numLines; i++)
-		{
-			::PackLine_16BitYUVto10BitYUV(lineBuffer,_baseVideoAddress,fd.numPixels);
-			_baseVideoAddress += fd.linePitch;
-		}
-	}
-#endif	//	!defined(NTV2_DEPRECATE_13_0)
-
 bool Fill10BitYCbCrVideoFrame (void * pBaseVideoAddress,
 								const NTV2Standard inStandard,
 								const NTV2FrameBufferFormat inFBF,
@@ -928,25 +890,6 @@ void Make8BitLine(UByte* lineData, UByte Y , UByte Cb , UByte Cr,ULWord numPixel
 
 	}
 }
-
-#if !defined(NTV2_DEPRECATE_13_0)
-	void Fill8BitYCbCrVideoFrame(PULWord _baseVideoAddress,
-								 NTV2Standard standard,
-								 NTV2FrameBufferFormat frameBufferFormat,
-								 YCbCrPixel color,
-								 bool vancEnabled,
-								 bool twoKby1080,
-								 bool wideVANC)
-	{
-		NTV2FormatDescriptor fd (standard,frameBufferFormat,vancEnabled,twoKby1080,wideVANC);
-	
-		for ( UWord i= 0; i<fd.numLines; i++)
-		{
-			Make8BitLine((UByte*)_baseVideoAddress,color.y,color.cb,color.cr,fd.numPixels,frameBufferFormat);
-			_baseVideoAddress += fd.linePitch;
-		}
-	}
-#endif	//	!defined(NTV2_DEPRECATE_13_0)
 
 bool Fill8BitYCbCrVideoFrame (void * pBaseVideoAddress,	 const NTV2Standard inStandard,	 const NTV2FrameBufferFormat inFBF,
 								const YCbCrPixel inPixelColor,	const NTV2VANCMode inVancMode)
@@ -1649,19 +1592,19 @@ static bool CopyRaster6BytesPerPixel (	UByte *			pDstBuffer,				//	Dest buffer t
 }	//	CopyRaster6BytesPerPixel
 
 
-bool CopyRaster (const NTV2FrameBufferFormat	inPixelFormat,			//	Pixel format of both src and dst buffers
-				UByte *							pDstBuffer,				//	Dest buffer to be modified
-				const ULWord						inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
-				const UWord						inDstTotalLines,		//	Dest buffer total lines in raster (max height)
-				const UWord						inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
-				const UWord						inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear
-				const UByte *					pSrcBuffer,				//	Src buffer
-				const ULWord						inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
-				const UWord						inSrcTotalLines,		//	Src buffer total lines in raster (max height)
-				const UWord						inSrcVertLineOffset,	//	Src image top edge
-				const UWord						inSrcVertLinesToCopy,	//	Src image height
-				const UWord						inSrcHorzPixelOffset,	//	Src image left edge
-				const UWord						inSrcHorzPixelsToCopy)	//	Src image width
+bool CopyRaster (const NTV2PixelFormat	inPixelFormat,			//	Pixel format of both src and dst buffers
+				UByte *					pDstBuffer,				//	Dest buffer to be modified
+				const ULWord			inDstBytesPerLine,		//	Dest buffer bytes per raster line (determines max width)
+				const UWord				inDstTotalLines,		//	Dest buffer total lines in raster (max height)
+				const UWord				inDstVertLineOffset,	//	Vertical line offset into the dest raster where the top edge of the src image will appear
+				const UWord				inDstHorzPixelOffset,	//	Horizontal pixel offset into the dest raster where the left edge of the src image will appear
+				const UByte *			pSrcBuffer,				//	Src buffer
+				const ULWord			inSrcBytesPerLine,		//	Src buffer bytes per raster line (determines max width)
+				const UWord				inSrcTotalLines,		//	Src buffer total lines in raster (max height)
+				const UWord				inSrcVertLineOffset,	//	Src image top edge
+				const UWord				inSrcVertLinesToCopy,	//	Src image height
+				const UWord				inSrcHorzPixelOffset,	//	Src image left edge
+				const UWord				inSrcHorzPixelsToCopy)	//	Src image width
 {
 	if (!pDstBuffer)					//	NULL buffer
 		return false;
@@ -2763,20 +2706,6 @@ NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat(const NTV2VideoFormat inVi
 
 	return result;
 }
-
-
-#if !defined(NTV2_DEPRECATE_13_0)
-	// GetVideoActiveSize: returns the number of bytes of active video (including VANC lines, if any)
-	ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameBufferFormat inFBFormat, const bool inTallVANC, const bool inTallerVANC)
-	{
-		return GetVideoActiveSize (inVideoFormat, inFBFormat, NTV2VANCModeFromBools (inTallVANC, inTallerVANC));
-	}	//	GetVideoActiveSize
-
-	ULWord GetVideoWriteSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameBufferFormat inFBFormat, const bool inTallVANC, const bool inTallerVANC)
-	{
-		return ::GetVideoWriteSize (inVideoFormat, inFBFormat, NTV2VANCModeFromBools (inTallVANC, inTallerVANC));
-	}
-#endif	//	!defined(NTV2_DEPRECATE_13_0)
 
 
 ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat, const NTV2FrameBufferFormat inFBFormat, const NTV2VANCMode inVancMode)
@@ -4255,220 +4184,9 @@ string NTV2ACFrameRange::toString (const bool inNormalized) const
 	return oss.str();
 }
 
-#if !defined (NTV2_DEPRECATE)
-	AJA_LOCAL_STATIC const char * NTV2VideoFormatStrings [NTV2_MAX_NUM_VIDEO_FORMATS] =
-	{
-		"",							//	NTV2_FORMAT_UNKNOWN						//	0		//	not used
-		"1080i 50.00",				//	NTV2_FORMAT_1080i_5000					//	1
-		"1080i 59.94",				//	NTV2_FORMAT_1080i_5994					//	2
-		"1080i 60.00",				//	NTV2_FORMAT_1080i_6000					//	3
-		"720p 59.94",				//	NTV2_FORMAT_720p_5994					//	4
-		"720p 60.00",				//	NTV2_FORMAT_720p_6000					//	5
-		"1080psf 23.98",			//	NTV2_FORMAT_1080psf_2398				//	6
-		"1080psf 24.00",			//	NTV2_FORMAT_1080psf_2400				//	7
-		"1080p 29.97",				//	NTV2_FORMAT_1080p_2997					//	8
-		"1080p 30.00",				//	NTV2_FORMAT_1080p_3000					//	9
-		"1080p 25.00",				//	NTV2_FORMAT_1080p_2500					//	10
-		"1080p 23.98",				//	NTV2_FORMAT_1080p_2398					//	11
-		"1080p 24.00",				//	NTV2_FORMAT_1080p_2400					//	12
-		"2048x1080p 23.98",			//	NTV2_FORMAT_1080p_2K_2398				//	13
-		"2048x1080p 24.00",			//	NTV2_FORMAT_1080p_2K_2400				//	14
-		"2048x1080psf 23.98",		//	NTV2_FORMAT_1080psf_2K_2398				//	15
-		"2048x1080psf 24.00",		//	NTV2_FORMAT_1080psf_2K_2400				//	16
-		"720p 50",					//	NTV2_FORMAT_720p_5000					//	17
-		"1080p 50.00b",				//	NTV2_FORMAT_1080p_5000					//	18
-		"1080p 59.94b",				//	NTV2_FORMAT_1080p_5994					//	19
-		"1080p 60.00b",				//	NTV2_FORMAT_1080p_6000					//	20
-		"720p 23.98",				//	NTV2_FORMAT_720p_2398					//	21
-		"720p 25.00",				//	NTV2_FORMAT_720p_2500					//	22
-		"1080p 50.00a",				//	NTV2_FORMAT_1080p_5000_A				//	23
-		"1080p 59.94a",				//	NTV2_FORMAT_1080p_5994_A				//	24
-		"1080p 60.00a",				//	NTV2_FORMAT_1080p_6000_A				//	25
-		"2048x1080p 25.00",			//	NTV2_FORMAT_1080p_2K_2500				//	26
-		"2048x1080psf 25.00",		//	NTV2_FORMAT_1080psf_2K_2500				//	27
-		"1080psf 25",				//	NTV2_FORMAT_1080psf_2500_2				//	28
-		"1080psf 29.97",			//	NTV2_FORMAT_1080psf_2997_2				//	29
-		"1080psf 30",				//	NTV2_FORMAT_1080psf_3000_2				//	30
-		"",							//	NTV2_FORMAT_END_HIGH_DEF_FORMATS		//	31		// not used
-		"525i 59.94",				//	NTV2_FORMAT_525_5994					//	32
-		"625i 50.00",				//	NTV2_FORMAT_625_5000					//	33
-		"525 23.98",				//	NTV2_FORMAT_525_2398					//	34
-		"525 24.00",				//	NTV2_FORMAT_525_2400					//	35		// not used
-		"525psf 29.97",				//	NTV2_FORMAT_525psf_2997					//	36
-		"625psf 25",				//	NTV2_FORMAT_625psf_2500					//	37
-		"",							//	NTV2_FORMAT_END_STANDARD_DEF_FORMATS	//	38		// not used
-		"",							//											//	39		// not used
-		"",							//											//	40		// not used
-		"",							//											//	41		// not used
-		"",							//											//	42		// not used
-		"",							//											//	43		// not used
-		"",							//											//	44		// not used
-		"",							//											//	45		// not used
-		"",							//											//	46		// not used
-		"",							//											//	47		// not used
-		"",							//											//	48		// not used
-		"",							//											//	49		// not used
-		"",							//											//	50		// not used
-		"",							//											//	51		// not used
-		"",							//											//	52		// not used
-		"",							//											//	53		// not used
-		"",							//											//	54		// not used
-		"",							//											//	55		// not used
-		"",							//											//	56		// not used
-		"",							//											//	57		// not used
-		"",							//											//	58		// not used
-		"",							//											//	59		// not used
-		"",							//											//	60		// not used
-		"",							//											//	61		// not used
-		"",							//											//	62		// not used
-		"",							//											//	63		// not used
-		"2048x1556psf 14.98",		//	NTV2_FORMAT_2K_1498						//	64
-		"2048x1556psf 15.00",		//	NTV2_FORMAT_2K_1500						//	65
-		"2048x1556psf 23.98",		//	NTV2_FORMAT_2K_2398						//	66
-		"2048x1556psf 24.00",		//	NTV2_FORMAT_2K_2400						//	67
-		"2048x1556psf 25.00",		//	NTV2_FORMAT_2K_2500						//	68
-		"",							//	NTV2_FORMAT_END_2K_DEF_FORMATS			//	69		// not used
-		"",							//											//	70		// not used
-		"",							//											//	71		// not used
-		"",							//											//	72		// not used
-		"",							//											//	73		// not used
-		"",							//											//	74		// not used
-		"",							//											//	75		// not used
-		"",							//											//	76		// not used
-		"",							//											//	77		// not used
-		"",							//											//	78		// not used
-		"",							//											//	79		// not used
-		"4x1920x1080psf 23.98",		//	NTV2_FORMAT_4x1920x1080psf_2398			//	80
-		"4x1920x1080psf 24.00",		//	NTV2_FORMAT_4x1920x1080psf_2400			//	81
-		"4x1920x1080psf 25.00",		//	NTV2_FORMAT_4x1920x1080psf_2500			//	82
-		"4x1920x1080p 23.98",		//	NTV2_FORMAT_4x1920x1080p_2398			//	83
-		"4x1920x1080p 24.00",		//	NTV2_FORMAT_4x1920x1080p_2400			//	84
-		"4x1920x1080p 25.00",		//	NTV2_FORMAT_4x1920x1080p_2500			//	85
-		"4x2048x1080psf 23.98",		//	NTV2_FORMAT_4x2048x1080psf_2398			//	86
-		"4x2048x1080psf 24.00",		//	NTV2_FORMAT_4x2048x1080psf_2400			//	87
-		"4x2048x1080psf 25.00",		//	NTV2_FORMAT_4x2048x1080psf_2500			//	88
-		"4x2048x1080p 23.98",		//	NTV2_FORMAT_4x2048x1080p_2398			//	89
-		"4x2048x1080p 24.00",		//	NTV2_FORMAT_4x2048x1080p_2400			//	90
-		"4x2048x1080p 25.00",		//	NTV2_FORMAT_4x2048x1080p_2500			//	91
-		"4x1920x1080p 29.97",		//	NTV2_FORMAT_4x1920x1080p_2997			//	92
-		"4x1920x1080p 30.00",		//	NTV2_FORMAT_4x1920x1080p_3000			//	93
-		"4x1920x1080psf 29.97",		//	NTV2_FORMAT_4x1920x1080psf_2997			//	94		//	not supported
-		"4x1920x1080psf 30.00",		//	NTV2_FORMAT_4x1920x1080psf_3000			//	95		//	not supported
-		"4x2048x1080p 29.97",		//	NTV2_FORMAT_4x2048x1080p_2997			//	96
-		"4x2048x1080p 30.00",		//	NTV2_FORMAT_4x2048x1080p_3000			//	97
-		"4x2048x1080psf 29.97",		//	NTV2_FORMAT_4x2048x1080psf_2997			//	98		//	not supported
-		"4x2048x1080psf 30.00",		//	NTV2_FORMAT_4x2048x1080psf_3000			//	99		//	not supported
-		"4x1920x1080p 50.00",		//	NTV2_FORMAT_4x1920x1080p_5000			//	100
-		"4x1920x1080p 59.94",		//	NTV2_FORMAT_4x1920x1080p_5994			//	101
-		"4x1920x1080p 60.00",		//	NTV2_FORMAT_4x1920x1080p_6000			//	102
-		"4x2048x1080p 50.00",		//	NTV2_FORMAT_4x2048x1080p_5000			//	103
-		"4x2048x1080p 59.94",		//	NTV2_FORMAT_4x2048x1080p_5994			//	104
-		"4x2048x1080p 60.00",		//	NTV2_FORMAT_4x2048x1080p_6000			//	105
-		"4x2048x1080p 47.95",		//	NTV2_FORMAT_4x2048x1080p_4795			//	106
-		"4x2048x1080p 48.00",		//	NTV2_FORMAT_4x2048x1080p_4800			//	107
-		"4x2048x1080p 119.88",		//	NTV2_FORMAT_4x2048x1080p_11988			//	108
-		"4x2048x1080p 120.00",		//	NTV2_FORMAT_4x2048x1080p_12000			//	109
-		"2048x1080p 60.00a",		//	NTV2_FORMAT_1080p_2K_6000_A				//	110 //	NTV2_FORMAT_FIRST_HIGH_DEF_FORMAT2
-		"2048x1080p 59.94a",		//	NTV2_FORMAT_1080p_2K_5994_A				//	111
-		"2048x1080p 29.97",			//	NTV2_FORMAT_1080p_2K_2997				//	112
-		"2048x1080p 30.00",			//	NTV2_FORMAT_1080p_2K_3000				//	113
-		"2048x1080p 50.00a",		//	NTV2_FORMAT_1080p_2K_5000_A				//	114
-		"2048x1080p 47.95a",		//	NTV2_FORMAT_1080p_2K_4795_A				//	115
-		"2048x1080p 48.00a",		//	NTV2_FORMAT_1080p_2K_4800_A				//	116
-		"2048x1080p 47.95b",		//	NTV2_FORMAT_1080p_2K_4795_B,			// 117
-		"2048x1080p 48.00b",		//	NTV2_FORMAT_1080p_2K_4800_B,			// 118
-		"2048x1080p 50.00b",		//	NTV2_FORMAT_1080p_2K_5000_B,			// 119
-		"2048x1080p 59.94b",		//	NTV2_FORMAT_1080p_2K_5994_B,			// 120
-		"2048x1080p 60.00b",		//	NTV2_FORMAT_1080p_2K_6000_B,			// 121
-	};
-
-	AJA_LOCAL_STATIC const char * NTV2VideoStandardStrings [NTV2_NUM_STANDARDS] =
-	{
-		"1080i",					//	NTV2_STANDARD_1080						//	0
-		"720p",						//	NTV2_STANDARD_720						//	1
-		"525",						//	NTV2_STANDARD_525						//	2
-		"625",						//	NTV2_STANDARD_625						//	3
-		"1080p",					//	NTV2_STANDARD_1080p						//	4
-		"2k"						//	NTV2_STANDARD_2K						//	5
-	};
-
-
-	AJA_LOCAL_STATIC const char * NTV2PixelFormatStrings [NTV2_FBF_NUMFRAMEBUFFERFORMATS] =
-	{
-		"10BIT_YCBCR",						//	NTV2_FBF_10BIT_YCBCR			//	0
-		"8BIT_YCBCR",						//	NTV2_FBF_8BIT_YCBCR				//	1
-		"ARGB",								//	NTV2_FBF_ARGB					//	2
-		"RGBA",								//	NTV2_FBF_RGBA					//	3
-		"10BIT_RGB",						//	NTV2_FBF_10BIT_RGB				//	4
-		"8BIT_YCBCR_YUY2",					//	NTV2_FBF_8BIT_YCBCR_YUY2		//	5
-		"ABGR",								//	NTV2_FBF_ABGR					//	6
-		"10BIT_DPX",						//	NTV2_FBF_10BIT_DPX				//	7
-		"10BIT_YCBCR_DPX",					//	NTV2_FBF_10BIT_YCBCR_DPX		//	8
-		"",									//	NTV2_FBF_8BIT_DVCPRO			//	9
-		"I420",								//	NTV2_FBF_8BIT_YCBCR_420PL3		//	10
-		"",									//	NTV2_FBF_8BIT_HDV				//	11
-		"24BIT_RGB",						//	NTV2_FBF_24BIT_RGB				//	12
-		"24BIT_BGR",						//	NTV2_FBF_24BIT_BGR				//	13
-		"",									//	NTV2_FBF_10BIT_YCBCRA			//	14
-		"DPX_LITTLEENDIAN",					//	NTV2_FBF_10BIT_DPX_LE			//	15
-		"48BIT_RGB",						//	NTV2_FBF_48BIT_RGB				//	16
-		"",									//	NTV2_FBF_PRORES					//	17
-		"",									//	NTV2_FBF_PRORES_DVCPRO			//	18
-		"",									//	NTV2_FBF_PRORES_HDV				//	19
-		"",									//	NTV2_FBF_10BIT_RGB_PACKED		//	20
-		"",									//	NTV2_FBF_10BIT_ARGB				//	21
-		"",									//	NTV2_FBF_16BIT_ARGB				//	22
-		"",									//	NTV2_FBF_8BIT_YCBCR_422PL3		//	23
-		"10BIT_RAW_RGB",					//	NTV2_FBF_10BIT_RAW_RGB			//	24
-		"10BIT_RAW_YCBCR"					//	NTV2_FBF_10BIT_RAW_YCBCR		//	25
-	};
-#endif	//	!defined (NTV2_DEPRECATE)
-
-
-
-#if !defined (NTV2_DEPRECATE)
-	//	More UI-friendly versions of above (used in Cables app)...
-	AJA_LOCAL_STATIC const char * frameBufferFormats [NTV2_FBF_NUMFRAMEBUFFERFORMATS+1] =
-	{
-		"10 Bit YCbCr",						//	NTV2_FBF_10BIT_YCBCR			//	0
-		"8 Bit YCbCr - UYVY",				//	NTV2_FBF_8BIT_YCBCR				//	1
-		"8 Bit ARGB",						//	NTV2_FBF_ARGB					//	2
-		"8 Bit RGBA",						//	NTV2_FBF_RGBA					//	3
-		"10 Bit RGB",						//	NTV2_FBF_10BIT_RGB				//	4
-		"8 Bit YCbCr - YUY2",				//	NTV2_FBF_8BIT_YCBCR_YUY2		//	5
-		"8 Bit ABGR",						//	NTV2_FBF_ABGR					//	6
-		"10 Bit RGB - DPX compatible",		//	NTV2_FBF_10BIT_DPX				//	7
-		"10 Bit YCbCr - DPX compatible",	//	NTV2_FBF_10BIT_YCBCR_DPX		//	8
-		"8 Bit DVCPro YCbCr - UYVY",		//	NTV2_FBF_8BIT_DVCPRO			//	9
-		"8 Bit YCbCr 420 3-plane [I420]",	//	NTV2_FBF_8BIT_YCBCR_420PL3		//	10
-		"8 Bit HDV YCbCr - UYVY",			//	NTV2_FBF_8BIT_HDV				//	11
-		"24 Bit RGB",						//	NTV2_FBF_24BIT_RGB				//	12
-		"24 Bit BGR",						//	NTV2_FBF_24BIT_BGR				//	13
-		"10 Bit YCbCrA",					//	NTV2_FBF_10BIT_YCBCRA			//	14
-		"10 Bit RGB - DPX LE",				//	NTV2_FBF_10BIT_DPX_LE			//	15
-		"48 Bit RGB",						//	NTV2_FBF_48BIT_RGB				//	16
-		"10 Bit YCbCr - Compressed",		//	NTV2_FBF_PRORES					//	17
-		"10 Bit YCbCr DVCPro - Compressed", //	NTV2_FBF_PRORES_DVCPRO			//	18
-		"10 Bit YCbCr HDV - Compressed",	//	NTV2_FBF_PRORES_HDV				//	19
-		"10 Bit RGB Packed",				//	NTV2_FBF_10BIT_RGB_PACKED		//	20
-		"10 Bit ARGB",						//	NTV2_FBF_10BIT_ARGB				//	21
-		"16 Bit ARGB",						//	NTV2_FBF_16BIT_ARGB				//	22
-		"8 Bit YCbCr 422 3-plane [Y42B]",	//	NTV2_FBF_8BIT_YCBCR_422PL3		//	23
-		"10 Bit Raw RGB",					//	NTV2_FBF_10BIT_RGB				//	24
-		"10 Bit Raw YCbCr",					//	NTV2_FBF_10BIT_YCBCR			//	25
-		"10 Bit YCbCr 420 3-plane LE",		//	NTV2_FBF_10BIT_YCBCR_420PL3_LE	//	26
-		"10 Bit YCbCr 422 3-plane LE",		//	NTV2_FBF_10BIT_YCBCR_422PL3_LE	//	27
-		"10 Bit YCbCr 420 2-Plane",			//	NTV2_FBF_10BIT_YCBCR_420PL2		//	28
-		"10 Bit YCbCr 422 2-Plane",			//	NTV2_FBF_10BIT_YCBCR_422PL2		//	29
-		"8 Bit YCbCr 420 2-Plane",			//	NTV2_FBF_8BIT_YCBCR_420PL2		//	30
-		"8 Bit YCbCr 422 2-Plane",			//	NTV2_FBF_8BIT_YCBCR_422PL2		//	31
-		""									//	NTV2_FBF_INVALID				//	32
-	};
-#endif	//	!defined (NTV2_DEPRECATE)
-
 
 //	More UI-friendly versions of above (used in Cables app)...
-AJA_LOCAL_STATIC const char * m31Presets [M31_NUMVIDEOPRESETS] =
+static const char * m31Presets [M31_NUMVIDEOPRESETS] =
 {
 	"FILE 720x480 420 Planar 8 Bit 59.94i",				// M31_FILE_720X480_420_8_5994i			// 0
 	"FILE 720x480 420 Planar 8 Bit 59.94p",				// M31_FILE_720X480_420_8_5994p			// 1
@@ -4632,31 +4350,6 @@ AJA_LOCAL_STATIC const char * m31Presets [M31_NUMVIDEOPRESETS] =
 	"VIF 3840x2160 422 Planar 10 Bit 59.94p",			// M31_VIF_3840X2160_422_10_5994p		// 141
 	"VIF 3840x2160 422 Planar 10 Bit 60p",				// M31_VIF_3840X2160_422_10_60p			// 142
 };
-
-#if !defined (NTV2_DEPRECATE)
-AJA_LOCAL_STATIC const char * NTV2FrameRateStrings [NTV2_NUM_FRAMERATES] =
-{
-	"Unknown",							//	NTV2_FRAMERATE_UNKNOWN			//	0
-	"60.00",							//	NTV2_FRAMERATE_6000				//	1
-	"59.94",							//	NTV2_FRAMERATE_5994				//	2
-	"30.00",							//	NTV2_FRAMERATE_3000				//	3
-	"29.97",							//	NTV2_FRAMERATE_2997				//	4
-	"25.00",							//	NTV2_FRAMERATE_2500				//	5
-	"24.00",							//	NTV2_FRAMERATE_2400				//	6
-	"23.98",							//	NTV2_FRAMERATE_2398				//	7
-	"50.00",							//	NTV2_FRAMERATE_5000				//	8
-	"48.00",							//	NTV2_FRAMERATE_4800				//	9
-	"47.95",							//	NTV2_FRAMERATE_4795				//	10
-	"120.00",							//	NTV2_FRAMERATE_12000			//	11
-	"119.88",							//	NTV2_FRAMERATE_11988			//	12
-	"15.00",							//	NTV2_FRAMERATE_1500				//	13
-	"14.98",							//	NTV2_FRAMERATE_1498				//	14
-	"19.00",							//	NTV2_FRAMERATE_1900				//	15
-	"18.98",							//	NTV2_FRAMERATE_1898				//	16
-	"18.00",							//	NTV2_FRAMERATE_1800				//	17
-	"17.98"								//	NTV2_FRAMERATE_1798				//	18
-};
-#endif
 
 // Extracts a channel pair or all channels from the
 // NTV2 channel buffer that is retrieved from the hardware.
@@ -5008,37 +4701,6 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 	}
 	return inForRetailDisplay ? "Unknown" : "???";
 }
-
-
-#if !defined (NTV2_DEPRECATE)
-	void GetNTV2RetailBoardString (NTV2BoardID inBoardID, std::string & outString)
-	{
-		outString = ::NTV2DeviceIDToString (inBoardID, true);
-	}
-
-	NTV2BoardType GetNTV2BoardTypeForBoardID (NTV2BoardID inBoardID)
-	{
-		return BOARDTYPE_NTV2;
-	}
-
-	void GetNTV2BoardString (NTV2BoardID inBoardID, string & outName)
-	{
-		outName = ::NTV2DeviceIDToString (inBoardID);
-	}
-
-	std::string NTV2BoardIDToString (const NTV2BoardID inValue, const bool inForRetailDisplay)
-	{
-		return NTV2DeviceIDToString (inValue, inForRetailDisplay);
-	}
-
-	string frameBufferFormatString (const NTV2FrameBufferFormat inFrameBufferFormat)
-	{
-		string	result;
-		if (inFrameBufferFormat >= 0 && inFrameBufferFormat < NTV2_FBF_NUMFRAMEBUFFERFORMATS)
-			result = frameBufferFormats [inFrameBufferFormat];
-		return result;
-	}
-#endif	//	!defined (NTV2_DEPRECATE)
 
 
 NTV2Channel GetNTV2ChannelForIndex (const ULWord inIndex)
@@ -5504,36 +5166,10 @@ NTV2Channel NTV2OutputDestinationToChannel (const NTV2OutputDestination inOutput
 	if (!NTV2_IS_VALID_OUTPUT_DEST (inOutputDest))
 		return NTV2_CHANNEL_INVALID;
 
-	#if defined (NTV2_DEPRECATE)
-		static const NTV2Channel	gOutputDestToChannel [] =	{	NTV2_CHANNEL1,	NTV2_CHANNEL1,
-																	NTV2_CHANNEL1,	NTV2_CHANNEL2,	NTV2_CHANNEL3,	NTV2_CHANNEL4,
-																	NTV2_CHANNEL5,	NTV2_CHANNEL6,	NTV2_CHANNEL7,	NTV2_CHANNEL8,	NTV2_CHANNEL_INVALID	};
-		return gOutputDestToChannel [inOutputDest];
-	#else	//	else !defined (NTV2_DEPRECATE)
-		switch (inOutputDest)
-		{
-			default:
-			case NTV2_OUTPUTDESTINATION_SDI1:		return NTV2_CHANNEL1;
-			case NTV2_OUTPUTDESTINATION_ANALOG:		return NTV2_CHANNEL1;
-			case NTV2_OUTPUTDESTINATION_SDI2:		return NTV2_CHANNEL2;
-			case NTV2_OUTPUTDESTINATION_HDMI:		return NTV2_CHANNEL1;
-			case NTV2_OUTPUTDESTINATION_DUALLINK1:	return NTV2_CHANNEL1;
-			case NTV2_OUTPUTDESTINATION_HDMI_14:	return NTV2_CHANNEL1;
-			case NTV2_OUTPUTDESTINATION_DUALLINK2:	return NTV2_CHANNEL2;
-			case NTV2_OUTPUTDESTINATION_SDI3:		return NTV2_CHANNEL3;
-			case NTV2_OUTPUTDESTINATION_SDI4:		return NTV2_CHANNEL4;
-			case NTV2_OUTPUTDESTINATION_SDI5:		return NTV2_CHANNEL5;
-			case NTV2_OUTPUTDESTINATION_SDI6:		return NTV2_CHANNEL6;
-			case NTV2_OUTPUTDESTINATION_SDI7:		return NTV2_CHANNEL7;
-			case NTV2_OUTPUTDESTINATION_SDI8:		return NTV2_CHANNEL8;
-			case NTV2_OUTPUTDESTINATION_DUALLINK3:	return NTV2_CHANNEL3;
-			case NTV2_OUTPUTDESTINATION_DUALLINK4:	return NTV2_CHANNEL4;
-			case NTV2_OUTPUTDESTINATION_DUALLINK5:	return NTV2_CHANNEL5;
-			case NTV2_OUTPUTDESTINATION_DUALLINK6:	return NTV2_CHANNEL6;
-			case NTV2_OUTPUTDESTINATION_DUALLINK7:	return NTV2_CHANNEL7;
-			case NTV2_OUTPUTDESTINATION_DUALLINK8:	return NTV2_CHANNEL8;
-		}
-	#endif	//	else !defined (NTV2_DEPRECATE)
+	static const NTV2Channel	gOutputDestToChannel [] =	{	NTV2_CHANNEL1,	NTV2_CHANNEL1,
+																NTV2_CHANNEL1,	NTV2_CHANNEL2,	NTV2_CHANNEL3,	NTV2_CHANNEL4,
+																NTV2_CHANNEL5,	NTV2_CHANNEL6,	NTV2_CHANNEL7,	NTV2_CHANNEL8,	NTV2_CHANNEL_INVALID	};
+	return gOutputDestToChannel [inOutputDest];
 }
 
 
@@ -5542,25 +5178,10 @@ NTV2OutputDestination NTV2ChannelToOutputDestination (const NTV2Channel inChanne
 	if (!NTV2_IS_VALID_CHANNEL (inChannel))
 		return NTV2_OUTPUTDESTINATION_INVALID;
 
-	#if defined (NTV2_DEPRECATE)
-		static const NTV2OutputDestination	gChannelToOutputDest [] =	{	NTV2_OUTPUTDESTINATION_SDI1,	NTV2_OUTPUTDESTINATION_SDI2,	NTV2_OUTPUTDESTINATION_SDI3,	NTV2_OUTPUTDESTINATION_SDI4,
-																			NTV2_OUTPUTDESTINATION_SDI5,	NTV2_OUTPUTDESTINATION_SDI6,	NTV2_OUTPUTDESTINATION_SDI7,	NTV2_OUTPUTDESTINATION_SDI8,
-																			NTV2_NUM_OUTPUTDESTINATIONS };
-		return gChannelToOutputDest [inChannel];
-	#else	//	else !defined (NTV2_DEPRECATE)
-		switch (inChannel)
-		{
-			default:
-			case NTV2_CHANNEL1:		return NTV2_OUTPUTDESTINATION_SDI1;
-			case NTV2_CHANNEL2:		return NTV2_OUTPUTDESTINATION_SDI2;
-			case NTV2_CHANNEL3:		return NTV2_OUTPUTDESTINATION_SDI3;
-			case NTV2_CHANNEL4:		return NTV2_OUTPUTDESTINATION_SDI4;
-			case NTV2_CHANNEL5:		return NTV2_OUTPUTDESTINATION_SDI5;
-			case NTV2_CHANNEL6:		return NTV2_OUTPUTDESTINATION_SDI6;
-			case NTV2_CHANNEL7:		return NTV2_OUTPUTDESTINATION_SDI7;
-			case NTV2_CHANNEL8:		return NTV2_OUTPUTDESTINATION_SDI8;
-		}
-	#endif	//	else !defined (NTV2_DEPRECATE)
+	static const NTV2OutputDestination	gChannelToOutputDest [] =	{	NTV2_OUTPUTDESTINATION_SDI1,	NTV2_OUTPUTDESTINATION_SDI2,	NTV2_OUTPUTDESTINATION_SDI3,	NTV2_OUTPUTDESTINATION_SDI4,
+																		NTV2_OUTPUTDESTINATION_SDI5,	NTV2_OUTPUTDESTINATION_SDI6,	NTV2_OUTPUTDESTINATION_SDI7,	NTV2_OUTPUTDESTINATION_SDI8,
+																		NTV2_NUM_OUTPUTDESTINATIONS };
+	return gChannelToOutputDest [inChannel];
 }
 
 
@@ -5832,808 +5453,6 @@ AJAExport bool IsVideoFormatJ2KSupported (const NTV2VideoFormat format)
 {
 	return NTV2_VIDEO_FORMAT_IS_J2K_SUPPORTED(format);
 }
-
-
-#if !defined (NTV2_DEPRECATE)
-	//
-	// BuildRoutingTableForOutput
-	// Relative to FrameStore
-	// NOTE: convert ignored for now do to excessive laziness
-	//
-	// Its possible that if you are using this for channel 1 and
-	// 2 you could use up resources and unexpected behavior will ensue.
-	// for instance, if channel 1 routing uses up both color space converters
-	// and then you try to setup channel 2 to use a color space converter.
-	// it will overwrite channel 1's routing.
-	bool BuildRoutingTableForOutput(CNTV2SignalRouter & outRouter,
-									NTV2Channel channel,
-									NTV2FrameBufferFormat fbf,
-									bool convert, // ignored
-									bool lut,
-									bool dualLink,
-									bool keyOut)	// only check for RGB Formats
-									// NOTE: maybe add key out???????
-	{
-		(void) convert;
-		bool status = false;
-		bool canHaveKeyOut = false;
-		switch (fbf)
-		{
-		case NTV2_FBF_8BIT_YCBCR_420PL3:
-			// not supported
-			break;
-
-		case NTV2_FBF_ARGB:
-		case NTV2_FBF_RGBA:
-		case NTV2_FBF_ABGR:
-		case NTV2_FBF_10BIT_ARGB:
-		case NTV2_FBF_16BIT_ARGB:
-			canHaveKeyOut = true;
-		case NTV2_FBF_10BIT_RGB:
-		case NTV2_FBF_10BIT_RGB_PACKED:
-		case NTV2_FBF_10BIT_DPX:
-		case NTV2_FBF_10BIT_DPX_LE:
-		case NTV2_FBF_24BIT_BGR:
-		case NTV2_FBF_24BIT_RGB:
-		case NTV2_FBF_48BIT_RGB:
-			if ( channel == NTV2_CHANNEL1)
-			{
-				if ( lut && dualLink )
-				{
-					// first hook up framestore 1 to lut1,
-					outRouter.addWithValue(GetXptLUTInputSelectEntry(),NTV2_XptFrameBuffer1RGB);
-
-					// then hook up lut1 to dualLink
-					outRouter.addWithValue(GetDuallinkOutInputSelectEntry(),NTV2_XptLUT1Out);
-
-					// then hook up dualLink to SDI 1 and SDI 2
-					outRouter.addWithValue(GetSDIOut1InputSelectEntry(),NTV2_XptDuallinkOut1);
-					status = outRouter.addWithValue(GetSDIOut2InputSelectEntry(),NTV2_XptDuallinkOut1);
-
-				}
-				else
-					if ( lut )
-					{
-						// first hook up framestore 1 to lut1,
-						outRouter.addWithValue(GetXptLUTInputSelectEntry(),NTV2_XptFrameBuffer1RGB);
-
-						// then hook up lut1 to csc1
-						outRouter.addWithValue(GetCSC1VidInputSelectEntry(),NTV2_XptLUT1Out);
-
-						// then hook up csc1 to sdi 1
-						status = outRouter.addWithValue(GetSDIOut1InputSelectEntry(),NTV2_XptCSC1VidYUV);
-						if ( keyOut && canHaveKeyOut)
-						{
-							status = outRouter.addWithValue(GetSDIOut1InputSelectEntry(),NTV2_XptCSC1KeyYUV);
-						}
-					}
-					else
-						if ( dualLink)
-						{
-							// hook up framestore 1 lut duallink
-							outRouter.addWithValue(GetDuallinkOutInputSelectEntry(),NTV2_XptFrameBuffer1RGB);
-
-							// then hook up dualLink to SDI 1 and SDI 2
-							outRouter.addWithValue(GetSDIOut1InputSelectEntry(),NTV2_XptDuallinkOut1);
-							status = outRouter.addWithValue(GetSDIOut2InputSelectEntry(),NTV2_XptDuallinkOut1);
-						}
-						else
-						{
-							outRouter.addWithValue(::GetCSC1VidInputSelectEntry(),NTV2_XptFrameBuffer1RGB);
-							status = outRouter.addWithValue(::GetSDIOut1InputSelectEntry(),NTV2_XptCSC1VidYUV);
-							if ( keyOut && canHaveKeyOut)
-							{
-								status = outRouter.addWithValue(::GetSDIOut1InputSelectEntry(),NTV2_XptCSC1KeyYUV);
-
-							}
-
-						}
-			}
-			else // if channel 2
-			{
-
-				// arbitrarily don't support duallink on channel 2
-				if ( lut )
-				{
-					// first hook up framestore 2 to lut2,
-					outRouter.addWithValue(::GetXptLUT2InputSelectEntry(),NTV2_XptFrameBuffer2RGB);
-
-					// then hook up lut2 to csc2
-					outRouter.addWithValue(::GetCSC2VidInputSelectEntry(),NTV2_XptLUT2Out);
-
-					// then hook up csc2 to sdi 2 and any other output
-					outRouter.addWithValue(::GetSDIOut1InputSelectEntry(), NTV2_XptCSC2VidYUV);
-					outRouter.addWithValue(::GetHDMIOutInputSelectEntry(), NTV2_XptCSC2VidYUV);
-					outRouter.addWithValue(::GetAnalogOutInputSelectEntry(), NTV2_XptCSC2VidYUV);
-					status = outRouter.addWithValue(::GetSDIOut2InputSelectEntry(),NTV2_XptCSC2VidYUV);
-				}
-				else
-				{
-					outRouter.addWithValue(::GetCSC2VidInputSelectEntry(),NTV2_XptFrameBuffer2RGB);
-					outRouter.addWithValue(::GetSDIOut1InputSelectEntry(), NTV2_XptCSC2VidRGB);
-					outRouter.addWithValue(::GetHDMIOutInputSelectEntry(), NTV2_XptCSC2VidRGB);
-					outRouter.addWithValue(::GetAnalogOutInputSelectEntry(), NTV2_XptCSC2VidRGB);
-					status = outRouter.addWithValue(::GetSDIOut2InputSelectEntry(),NTV2_XptCSC2VidRGB);
-				}
-			}
-			break;
-
-		case NTV2_FBF_8BIT_DVCPRO:
-		case NTV2_FBF_8BIT_HDV:
-			if ( channel == NTV2_CHANNEL1)
-			{
-				if ( lut && dualLink )
-				{
-					// first uncompress it.
-					outRouter.addWithValue(::GetCompressionModInputSelectEntry(),NTV2_XptFrameBuffer1YUV);
-
-					// then send it to color space converter 1
-					outRouter.addWithValue(::GetCSC1VidInputSelectEntry(),NTV2_XptCompressionModule);
-
-					// color space convert 1 to lut 1
-					outRouter.addWithValue(::GetXptLUTInputSelectEntry(),NTV2_XptCSC1VidRGB);
-
-					// lut 1 to duallink in
-					outRouter.addWithValue(::GetDuallinkOutInputSelectEntry(),NTV2_XptLUT1Out);
-
-					// then hook up dualLink to SDI 1 and SDI 2
-					outRouter.addWithValue(::GetSDIOut1InputSelectEntry(),NTV2_XptDuallinkOut1);
-					status = outRouter.addWithValue(::GetSDIOut2InputSelectEntry(),NTV2_XptDuallinkOut1);
-
-				}
-				else  // if channel 2
-					if ( lut )
-					{
-						// first uncompress it.
-						outRouter.addWithValue(::GetCompressionModInputSelectEntry(),NTV2_XptFrameBuffer1YUV);
-
-						// then send it to color space converter 1
-						outRouter.addWithValue(::GetCSC1VidInputSelectEntry(),NTV2_XptCompressionModule);
-
-						// color space convert 1 to lut 1
-						outRouter.addWithValue(::GetXptLUTInputSelectEntry(),NTV2_XptCSC1VidRGB);
-
-						// lut 1 to color space convert 2
-						outRouter.addWithValue(::GetCSC2VidInputSelectEntry(),NTV2_XptLUT1Out);
-
-						// color space converter 2 to outputs
-						outRouter.addWithValue(::GetSDIOut2InputSelectEntry(),NTV2_XptCSC2VidYUV);
-						outRouter.addWithValue(::GetHDMIOutInputSelectEntry(), NTV2_XptCSC2VidYUV);
-						outRouter.addWithValue(::GetAnalogOutInputSelectEntry(), NTV2_XptCSC2VidYUV);
-						status = outRouter.addWithValue(::GetSDIOut1InputSelectEntry(),NTV2_XptCSC2VidYUV);
-					}
-					else
-					{
-						// just send it straight out SDI 1 and other outputs
-						outRouter.addWithValue(::GetCompressionModInputSelectEntry(),NTV2_XptFrameBuffer1YUV);
-						outRouter.addWithValue(::GetSDIOut2InputSelectEntry(), NTV2_XptCompressionModule);
-						outRouter.addWithValue(::GetHDMIOutInputSelectEntry(), NTV2_XptCompressionModule);
-						outRouter.addWithValue(::GetAnalogOutInputSelectEntry(), NTV2_XptCompressionModule);
-						status = outRouter.addWithValue(::GetSDIOut1InputSelectEntry(),NTV2_XptCompressionModule);
-					}
-			}
-			else
-			{
-				// channel 2....an excersize for the user:)
-				outRouter.addWithValue(::GetCompressionModInputSelectEntry(),NTV2_XptFrameBuffer1YUV);
-				outRouter.addWithValue(::GetSDIOut2InputSelectEntry(), NTV2_XptFrameBuffer2YUV);
-				outRouter.addWithValue(::GetHDMIOutInputSelectEntry(), NTV2_XptFrameBuffer2YUV);
-				outRouter.addWithValue(::GetAnalogOutInputSelectEntry(), NTV2_XptFrameBuffer2YUV);
-				status = outRouter.addWithValue(::GetSDIOut2InputSelectEntry(),NTV2_XptFrameBuffer2YUV);
-			}
-			break;
-
-		default:
-			// YCbCr Stuff
-			if ( channel == NTV2_CHANNEL1)
-			{
-				if ( lut && dualLink )
-				{
-					// frame store 1 to color space converter 1
-					outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptFrameBuffer1YUV);
-
-					// color space convert 1 to lut 1
-					outRouter.addWithValue (::GetXptLUTInputSelectEntry (), NTV2_XptCSC1VidRGB);
-
-					// lut 1 to duallink in
-					outRouter.addWithValue (::GetDuallinkOutInputSelectEntry (), NTV2_XptLUT1Out);
-
-					// then hook up dualLink to SDI 1 and SDI 2
-					outRouter.addWithValue (::GetSDIOut1InputSelectEntry (), NTV2_XptDuallinkOut1);
-					status = outRouter.addWithValue (::GetSDIOut2InputSelectEntry (), NTV2_XptDuallinkOut1);
-
-				}
-				else
-				if ( lut )
-				{
-					// frame store 1 to color space converter 1
-					outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptFrameBuffer1YUV);
-
-					// color space convert 1 to lut 1
-					outRouter.addWithValue (::GetXptLUTInputSelectEntry (), NTV2_XptCSC1VidRGB);
-
-					// lut 1 to color space convert 2
-					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptLUT1Out);
-
-					// color space converter 2 to outputs
-					outRouter.addWithValue (::GetSDIOut2InputSelectEntry (), NTV2_XptCSC2VidYUV);
-					outRouter.addWithValue (::GetHDMIOutInputSelectEntry (), NTV2_XptCSC2VidYUV);
-					outRouter.addWithValue (::GetAnalogOutInputSelectEntry (), NTV2_XptCSC2VidYUV);
-					status = outRouter.addWithValue (::GetSDIOut1InputSelectEntry (), NTV2_XptCSC2VidYUV);
-				}
-				else
-				{
-					// just send it straight outputs
-					outRouter.addWithValue (::GetHDMIOutInputSelectEntry (), NTV2_XptFrameBuffer1YUV);
-					outRouter.addWithValue (::GetAnalogOutInputSelectEntry (), NTV2_XptFrameBuffer1YUV);
-					status = outRouter.addWithValue (::GetSDIOut1InputSelectEntry (), NTV2_XptFrameBuffer1YUV);
-				}
-			}
-
-			else if ( channel == NTV2_CHANNEL2)
-			{
-				// channel 2....an excersize for the user:)
-				outRouter.addWithValue (::GetAnalogOutInputSelectEntry (), NTV2_XptFrameBuffer2YUV);
-				outRouter.addWithValue (::GetHDMIOutInputSelectEntry (), NTV2_XptFrameBuffer2YUV);
-				status = outRouter.addWithValue (::GetSDIOut2InputSelectEntry (), NTV2_XptFrameBuffer2YUV);
-			}
-
-			else if ( channel == NTV2_CHANNEL3)
-			{
-				// channel 3....an excersize for the user:)
-				outRouter.addWithValue (::GetAnalogOutInputSelectEntry (), NTV2_XptFrameBuffer3YUV);
-				outRouter.addWithValue (::GetHDMIOutInputSelectEntry (), NTV2_XptFrameBuffer3YUV);
-				status = outRouter.addWithValue (::GetSDIOut3InputSelectEntry (), NTV2_XptFrameBuffer3YUV);
-			}
-
-			else if ( channel == NTV2_CHANNEL4)
-			{
-				// channel 4....an excersize for the user:)
-				outRouter.addWithValue (::GetAnalogOutInputSelectEntry (), NTV2_XptFrameBuffer4YUV);
-				outRouter.addWithValue (::GetHDMIOutInputSelectEntry (), NTV2_XptFrameBuffer4YUV);
-				status = outRouter.addWithValue (::GetSDIOut4InputSelectEntry (), NTV2_XptFrameBuffer4YUV);
-			}
-			break;
-		}
-
-
-		return status;
-	}
-
-	//
-	// BuildRoutingTableForInput
-	// Relative to FrameStore
-	//
-	bool BuildRoutingTableForInput(CNTV2SignalRouter & outRouter,
-								   NTV2Channel channel,
-								   NTV2FrameBufferFormat fbf,
-								   bool withKey,  // only supported for NTV2_CHANNEL1 for rgb formats with alpha
-								   bool lut,	  // not supported
-								   bool dualLink, // assume coming in RGB(only checked for NTV2_CHANNEL1
-								   bool EtoE)
-	{
-		(void) lut;
-		bool status = false;
-		if (fbf == NTV2_FBF_8BIT_YCBCR_420PL3)
-			return status;
-
-		if ( EtoE)
-		{
-			if ( dualLink )
-			{
-				outRouter.addWithValue (::GetSDIOut1InputSelectEntry (), NTV2_XptSDIIn1);
-				outRouter.addWithValue (::GetSDIOut2InputSelectEntry (), NTV2_XptSDIIn2);
-			}
-			else if ( channel == NTV2_CHANNEL1)
-			{
-				outRouter.addWithValue (::GetSDIOut1InputSelectEntry (), NTV2_XptSDIIn1);
-			}
-			else if ( channel == NTV2_CHANNEL2)
-			{
-				outRouter.addWithValue (::GetSDIOut2InputSelectEntry (), NTV2_XptSDIIn2);
-			}
-			else if ( channel == NTV2_CHANNEL3)
-			{
-				outRouter.addWithValue (::GetSDIOut2InputSelectEntry (), NTV2_XptSDIIn3);
-			}
-			else if ( channel == NTV2_CHANNEL4)
-			{
-				outRouter.addWithValue (::GetSDIOut2InputSelectEntry (), NTV2_XptSDIIn4);
-			}
-		}
-
-		switch (fbf)
-		{
-
-			case NTV2_FBF_ARGB:
-			case NTV2_FBF_RGBA:
-			case NTV2_FBF_ABGR:
-			case NTV2_FBF_10BIT_ARGB:
-			case NTV2_FBF_16BIT_ARGB:
-				if ( channel == NTV2_CHANNEL1)
-				{
-					if ( withKey)
-					{
-						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptSDIIn1);
-						outRouter.addWithValue (::GetCSC1KeyInputSelectEntry (), NTV2_XptSDIIn2);
-						outRouter.addWithValue (::GetCSC1KeyFromInput2SelectEntry (), 1);
-						status = outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptCSC1VidRGB);
-					}
-					else
-					{
-						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptSDIIn1);
-						outRouter.addWithValue (::GetCSC1KeyFromInput2SelectEntry (), 0);
-						status = outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptCSC1VidRGB);
-					}
-				}
-				else
-				{
-					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptSDIIn2);
-					status = outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptCSC2VidRGB);
-				}
-				break;
-			case NTV2_FBF_10BIT_RGB:
-			case NTV2_FBF_10BIT_RGB_PACKED:
-			case NTV2_FBF_10BIT_DPX:
-			case NTV2_FBF_10BIT_DPX_LE:
-			case NTV2_FBF_24BIT_BGR:
-			case NTV2_FBF_24BIT_RGB:
-				if ( channel == NTV2_CHANNEL1)
-				{
-					if ( dualLink )
-					{
-						status = outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptDuallinkIn1);
-					}
-					else
-					{
-						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptSDIIn1);
-						status = outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptCSC1VidRGB);
-					}
-				}
-				else
-				{
-					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptSDIIn2);
-					status = outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptCSC2VidRGB);
-				}
-				break;
-			case NTV2_FBF_8BIT_DVCPRO:
-			case NTV2_FBF_8BIT_HDV:
-				if ( channel == NTV2_CHANNEL1)
-				{
-					status = outRouter.addWithValue (::GetCompressionModInputSelectEntry (), NTV2_XptSDIIn1);
-					status = outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptCompressionModule);
-				}
-				else
-				{
-					status = outRouter.addWithValue (::GetCompressionModInputSelectEntry (), NTV2_XptSDIIn2);
-					status = outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptCompressionModule);
-				}
-				break;
-
-			default:
-				if( dualLink )
-				{
-					status = outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptSDIIn1);
-					status = outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptSDIIn2);
-				}
-				else if ( channel == NTV2_CHANNEL1)
-				{
-					status = outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptSDIIn1);
-				}
-				else if ( channel == NTV2_CHANNEL2)
-				{
-					status = outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptSDIIn2);
-				}
-				else if ( channel == NTV2_CHANNEL3)
-				{
-					status = outRouter.addWithValue (::GetFrameBuffer3InputSelectEntry (), NTV2_XptSDIIn3);
-				}
-				else if ( channel == NTV2_CHANNEL4)
-				{
-					status = outRouter.addWithValue (::GetFrameBuffer4InputSelectEntry (), NTV2_XptSDIIn4);
-				}
-				break;
-		}
-
-		return status;
-
-	}
-
-	//
-	// BuildRoutingTableForInput
-	// Relative to FrameStore
-	//
-	bool BuildRoutingTableForInput(CNTV2SignalRouter & outRouter,
-								   NTV2Channel channel,
-								   NTV2FrameBufferFormat fbf,
-								   bool convert,  // Turn on the conversion module
-								   bool withKey,  // only supported for NTV2_CHANNEL1 for rgb formats with alpha
-								   bool lut,	  // not supported
-								   bool dualLink, // assume coming in RGB(only checked for NTV2_CHANNEL1
-								   bool EtoE)
-	{
-		(void) convert;
-		(void) lut;
-		bool status = false;
-		if (fbf == NTV2_FBF_8BIT_YCBCR_420PL3)
-			return status;
-
-		if ( EtoE)
-		{
-			if ( dualLink)
-			{
-				outRouter.addWithValue (::GetSDIOut1InputSelectEntry (), NTV2_XptSDIIn1);
-				outRouter.addWithValue (::GetSDIOut2InputSelectEntry (), NTV2_XptSDIIn2);
-
-			}
-			else
-				if ( channel == NTV2_CHANNEL1)
-				{
-					outRouter.addWithValue (::GetSDIOut1InputSelectEntry (), NTV2_XptSDIIn1);
-				}
-				else
-				{
-					outRouter.addWithValue (::GetSDIOut2InputSelectEntry (), NTV2_XptSDIIn2);
-				}
-		}
-
-		switch (fbf)
-		{
-
-		case NTV2_FBF_ARGB:
-		case NTV2_FBF_RGBA:
-		case NTV2_FBF_ABGR:
-		case NTV2_FBF_10BIT_ARGB:
-		case NTV2_FBF_16BIT_ARGB:
-			if ( channel == NTV2_CHANNEL1)
-			{
-				if ( withKey)
-				{
-					outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptSDIIn1);
-					outRouter.addWithValue (::GetCSC1KeyInputSelectEntry (), NTV2_XptSDIIn2);
-					outRouter.addWithValue (::GetCSC1KeyFromInput2SelectEntry (), 1);
-					status = outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptCSC1VidRGB);
-
-				}
-				else
-				{
-					outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptSDIIn1);
-					outRouter.addWithValue (::GetCSC1KeyFromInput2SelectEntry (), 0);
-					status = outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptCSC1VidRGB);
-				}
-			}
-			else
-			{
-				outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptSDIIn2);
-				status = outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptCSC2VidRGB);
-			}
-			break;
-		case NTV2_FBF_10BIT_RGB:
-		case NTV2_FBF_10BIT_RGB_PACKED:
-		case NTV2_FBF_10BIT_DPX:
-		case NTV2_FBF_10BIT_DPX_LE:
-		case NTV2_FBF_24BIT_BGR:
-		case NTV2_FBF_24BIT_RGB:
-			if ( channel == NTV2_CHANNEL1)
-			{
-				if ( dualLink )
-				{
-					status = outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptDuallinkIn1);
-				}
-				else
-				{
-					outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptSDIIn1);
-					status = outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptCSC1VidRGB);
-				}
-			}
-			else
-			{
-				outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptSDIIn2);
-				status = outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptCSC2VidRGB);
-			}
-			break;
-		case NTV2_FBF_8BIT_DVCPRO:
-		case NTV2_FBF_8BIT_HDV:
-			if ( channel == NTV2_CHANNEL1)
-			{
-				status = outRouter.addWithValue (::GetCompressionModInputSelectEntry (), NTV2_XptSDIIn1);
-				status = outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptCompressionModule);
-			}
-			else
-			{
-				status = outRouter.addWithValue (::GetCompressionModInputSelectEntry (), NTV2_XptSDIIn2);
-				status = outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptCompressionModule);
-			}
-			break;
-
-		default:
-			if ( channel == NTV2_CHANNEL1)
-			{
-				status = outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptSDIIn1);
-			}
-			else
-			{
-				status = outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptSDIIn2);
-			}
-			break;
-		}
-
-		return status;
-
-	}
-
-	//
-	// BuildRoutingTableForInput
-	// Includes input and channel now
-	//
-	bool BuildRoutingTableForInput(CNTV2SignalRouter & outRouter,
-								   NTV2InputSource inputSource,
-								   NTV2Channel channel,
-								   NTV2FrameBufferFormat fbf,
-								   bool convert,  // Turn on the conversion module
-								   bool withKey,  // only supported for NTV2_CHANNEL1 for rgb formats with alpha
-								   bool lut,	  // not supported
-								   bool dualLink, // assume coming in RGB(only checked for NTV2_CHANNEL1
-								   bool EtoE)
-	{
-		(void) convert;
-		(void) lut;
-		bool status = false;
-		if (fbf == NTV2_FBF_8BIT_YCBCR_420PL3)
-			return status;
-
-		if ( EtoE)
-		{
-			if ( dualLink)
-			{
-				outRouter.addWithValue (::GetSDIOut1InputSelectEntry (), NTV2_XptSDIIn1);
-				outRouter.addWithValue (::GetSDIOut2InputSelectEntry (), NTV2_XptSDIIn2);
-
-			}
-			else
-			{
-				switch ( inputSource )
-				{
-				case NTV2_INPUTSOURCE_SDI1:
-					outRouter.addWithValue (::GetSDIOut1InputSelectEntry (), NTV2_XptSDIIn1);
-					break;
-				case NTV2_INPUTSOURCE_SDI2:
-					outRouter.addWithValue (::GetSDIOut2InputSelectEntry (), NTV2_XptSDIIn2);
-					break;
-				case NTV2_INPUTSOURCE_ANALOG1:
-					outRouter.addWithValue (::GetAnalogOutInputSelectEntry (), NTV2_XptAnalogIn);
-					break;
-				case NTV2_INPUTSOURCE_HDMI1:
-					outRouter.addWithValue (::GetHDMIOutInputSelectEntry (), NTV2_XptHDMIIn1);
-					break;
-				default:
-					return false;
-				}
-			}
-		}
-
-		switch (fbf)
-		{
-
-		case NTV2_FBF_ARGB:
-		case NTV2_FBF_RGBA:
-		case NTV2_FBF_ABGR:
-		case NTV2_FBF_10BIT_ARGB:
-		case NTV2_FBF_16BIT_ARGB:
-			if ( channel == NTV2_CHANNEL1)
-			{
-				if ( withKey)
-				{
-					outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptSDIIn1);
-					outRouter.addWithValue (::GetCSC1KeyInputSelectEntry (), NTV2_XptSDIIn2);
-					outRouter.addWithValue (::GetCSC1KeyFromInput2SelectEntry (), 1);
-					status = outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptCSC1VidRGB);
-
-				}
-				else
-				{
-					//outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptSDIIn1);
-					switch ( inputSource )
-					{
-					case NTV2_INPUTSOURCE_SDI1:
-						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptSDIIn1);
-						break;
-					case NTV2_INPUTSOURCE_SDI2:
-						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptSDIIn2);
-						break;
-					case NTV2_INPUTSOURCE_ANALOG1:
-						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptAnalogIn);
-						break;
-					case NTV2_INPUTSOURCE_HDMI1:
-						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptHDMIIn1);
-						break;
-					default:
-						return false;
-					}
-
-					outRouter.addWithValue (::GetCSC1KeyFromInput2SelectEntry (), 0);
-					status = outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptCSC1VidRGB);
-				}
-			}
-			else
-			{
-				switch ( inputSource )
-				{
-				case NTV2_INPUTSOURCE_SDI1:
-					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptSDIIn1);
-					break;
-				case NTV2_INPUTSOURCE_SDI2:
-					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptSDIIn2);
-					break;
-				case NTV2_INPUTSOURCE_ANALOG1:
-					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptAnalogIn);
-					break;
-				case NTV2_INPUTSOURCE_HDMI1:
-					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptHDMIIn1);
-					break;
-				default:
-					return false;
-				}
-
-				status = outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptCSC2VidRGB);
-			}
-			break;
-		case NTV2_FBF_10BIT_RGB:
-		case NTV2_FBF_10BIT_RGB_PACKED:
-		case NTV2_FBF_10BIT_DPX:
-		case NTV2_FBF_10BIT_DPX_LE:
-		case NTV2_FBF_24BIT_BGR:
-		case NTV2_FBF_24BIT_RGB:
-			if ( channel == NTV2_CHANNEL1)
-			{
-				if ( dualLink )
-				{
-					status = outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (),NTV2_XptDuallinkIn1);
-				}
-				else
-				{
-					switch ( inputSource )
-					{
-					case NTV2_INPUTSOURCE_SDI1:
-						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptSDIIn1);
-						break;
-					case NTV2_INPUTSOURCE_SDI2:
-						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptSDIIn2);
-						break;
-					case NTV2_INPUTSOURCE_ANALOG1:
-						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptAnalogIn);
-						break;
-					case NTV2_INPUTSOURCE_HDMI1:
-						outRouter.addWithValue (::GetCSC1VidInputSelectEntry (), NTV2_XptHDMIIn1);
-						break;
-					default:
-						return false;
-					}
-					status = outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptCSC1VidRGB);
-				}
-			}
-			else
-			{
-				switch ( inputSource )
-				{
-				case NTV2_INPUTSOURCE_SDI1:
-					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptSDIIn1);
-					break;
-				case NTV2_INPUTSOURCE_SDI2:
-					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptSDIIn2);
-					break;
-				case NTV2_INPUTSOURCE_ANALOG1:
-					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptAnalogIn);
-					break;
-				case NTV2_INPUTSOURCE_HDMI1:
-					outRouter.addWithValue (::GetCSC2VidInputSelectEntry (), NTV2_XptHDMIIn1);
-					break;
-				default:
-					return false;
-				}
-				status = outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptCSC2VidRGB);
-			}
-			break;
-		case NTV2_FBF_8BIT_DVCPRO:
-		case NTV2_FBF_8BIT_HDV:
-			switch ( inputSource )
-			{
-			case NTV2_INPUTSOURCE_SDI1:
-				outRouter.addWithValue (::GetCompressionModInputSelectEntry (), NTV2_XptSDIIn1);
-				break;
-			case NTV2_INPUTSOURCE_SDI2:
-				outRouter.addWithValue (::GetCompressionModInputSelectEntry (), NTV2_XptSDIIn2);
-				break;
-			case NTV2_INPUTSOURCE_ANALOG1:
-				outRouter.addWithValue (::GetCompressionModInputSelectEntry (), NTV2_XptAnalogIn);
-				break;
-			case NTV2_INPUTSOURCE_HDMI1:
-				outRouter.addWithValue (::GetCompressionModInputSelectEntry (), NTV2_XptHDMIIn1);
-				break;
-			default:
-				return false;
-			}
-			if ( channel == NTV2_CHANNEL1)
-			{
-				status = outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptCompressionModule);
-			}
-			else
-			{
-				status = outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptCompressionModule);
-			}
-			break;
-
-		default:
-			if ( channel == NTV2_CHANNEL1)
-			{
-				//status = outRouter.addWithValue(FrameBuffer1InputSelectEntry,NTV2_XptSDIIn1);
-				switch ( inputSource )
-				{
-				case NTV2_INPUTSOURCE_SDI1:
-					outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptSDIIn1);
-					break;
-				case NTV2_INPUTSOURCE_SDI2:
-					outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptSDIIn2);
-					break;
-				case NTV2_INPUTSOURCE_ANALOG1:
-					outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptAnalogIn);
-					break;
-				case NTV2_INPUTSOURCE_HDMI1:
-					outRouter.addWithValue (::GetFrameBuffer1InputSelectEntry (), NTV2_XptHDMIIn1);
-					break;
-				default:
-					return false;
-				}
-			}
-			else
-			{
-				switch ( inputSource )
-				{
-				case NTV2_INPUTSOURCE_SDI1:
-					outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptSDIIn1);
-					break;
-				case NTV2_INPUTSOURCE_SDI2:
-					outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptSDIIn2);
-					break;
-				case NTV2_INPUTSOURCE_ANALOG1:
-					outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptAnalogIn);
-					break;
-				case NTV2_INPUTSOURCE_HDMI1:
-					outRouter.addWithValue (::GetFrameBuffer2InputSelectEntry (), NTV2_XptHDMIIn1);
-					break;
-				default:
-					return false;
-				}
-			}
-			break;
-		}
-
-		return status;
-	 }
-
-
-	// The 10-bit value converted from hex to decimal represents degrees Kelvin.
-	// However, the system generates a value that is 5 deg C high. The decimal value
-	// minus 273 deg minus 5 deg should be the degrees Centigrade. This is only accurate
-	// to 5 deg C, supposedly.
-
-	// These functions used to be a lot more complicated.  Hardware changes
-	// reduced them to simple offset & scaling. - STC
-	//
-	ULWord ConvertFusionAnalogToTempCentigrade(ULWord adc10BitValue)
-	{
-		// Convert kelvin to centigrade and subtract 5 degrees hot part reports
-		// and add empirical 8 degree fudge factor.
-		return adc10BitValue -286;
-
-	}
-
-	ULWord ConvertFusionAnalogToMilliVolts(ULWord adc10BitValue, ULWord millivoltsResolution)
-	{
-		// Different rails have different mv/unit scales.
-		return adc10BitValue * millivoltsResolution;
-	}
-#endif	//	!defined (NTV2_DEPRECATE)
 
 
 NTV2ConversionMode GetConversionMode (const NTV2VideoFormat inFormat, const NTV2VideoFormat outFormat)
@@ -6937,10 +5756,6 @@ string NTV2AudioBufferSizeToString (const NTV2AudioBufferSize inValue, const boo
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "1MB", NTV2_AUDIO_BUFFER_STANDARD);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "4MB", NTV2_AUDIO_BUFFER_BIG);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "???", NTV2_MAX_NUM_AudioBufferSizes);
-#if !defined (NTV2_DEPRECATE)
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "2MB", NTV2_AUDIO_BUFFER_MEDIUM);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "8MB", NTV2_AUDIO_BUFFER_BIGGER);
-#endif	//	!defined (NTV2_DEPRECATE)
 	}
 	return "";
 }
@@ -8382,18 +7197,7 @@ string NTV2OutputDestinationToString (const NTV2OutputDestination inValue, const
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI6", NTV2_OUTPUTDESTINATION_SDI6);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI7", NTV2_OUTPUTDESTINATION_SDI7);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI8", NTV2_OUTPUTDESTINATION_SDI8);
-#if !defined (NTV2_DEPRECATE)
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "HDMI 1.4", NTV2_OUTPUTDESTINATION_HDMI_14);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI1 DL", NTV2_OUTPUTDESTINATION_DUALLINK1);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI2 DL", NTV2_OUTPUTDESTINATION_DUALLINK2);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI3 DL", NTV2_OUTPUTDESTINATION_DUALLINK3);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI4 DL", NTV2_OUTPUTDESTINATION_DUALLINK4);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI5 DL", NTV2_OUTPUTDESTINATION_DUALLINK5);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI6 DL", NTV2_OUTPUTDESTINATION_DUALLINK6);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI7 DL", NTV2_OUTPUTDESTINATION_DUALLINK7);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI8 DL", NTV2_OUTPUTDESTINATION_DUALLINK8);
-#endif	//	!defined (NTV2_DEPRECATE)
-		case NTV2_NUM_OUTPUTDESTINATIONS:			return "";	//special case
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "", NTV2_NUM_OUTPUTDESTINATIONS);
 	}
 	return "";
 }
@@ -8824,10 +7628,6 @@ std::string NTV2GetVersionString (const bool inDetailed)
 	oss << AJA_NTV2_SDK_VERSION_MAJOR << "." << AJA_NTV2_SDK_VERSION_MINOR << "." << AJA_NTV2_SDK_VERSION_POINT;
 	if (!string (AJA_NTV2_SDK_BUILD_TYPE).empty ())
 		oss << " " << AJA_NTV2_SDK_BUILD_TYPE << AJA_NTV2_SDK_BUILD_NUMBER;
-	#if defined (NTV2_DEPRECATE)
-		if (inDetailed)
-			oss << " (NTV2_DEPRECATE)";
-	#endif
 	if (inDetailed)
 		oss << " built on " << AJA_NTV2_SDK_BUILD_DATETIME;
 	return oss.str ();
@@ -8884,32 +7684,6 @@ string NTV2BitfileTypeToString (const NTV2BitfileType inValue, const bool inComp
 {
 	switch (inValue)
 	{
-		#if !defined (NTV2_DEPRECATE)
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"XenaHS SD",				NTV2_BITFILE_XENAHS_SD);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"XenaHS HD",				NTV2_BITFILE_XENAHS_HD);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Kona2 DownConvert",		NTV2_BITFILE_KONA2_DNCVT);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Kona2 UpConvert",			NTV2_BITFILE_KONA2_UPCVT);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"XenaLH SD",				NTV2_BITFILE_XENALH_SD);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"XenaLH HD",				NTV2_BITFILE_XENALH_HD);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"XenaLS UART",				NTV2_BITFILE_XENALS_UART);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"XenaLS 2Ch",				NTV2_BITFILE_XENALS_CH2);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"UpConvert",				NTV2_BITFILE_XENA2_UPCVT);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"UpConvert",				NTV2_BITFILE_MOAB_UPCVT);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"DownConvert",				NTV2_BITFILE_XENA2_DNCVT);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"DownConvert",				NTV2_BITFILE_MOAB_DNCVT);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Cross Convert 720->1080",	NTV2_BITFILE_XENA2_XUCVT);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Cross Convert 720->1080",	NTV2_BITFILE_MOAB_XUCVT);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Cross Convert 1080->720",	NTV2_BITFILE_XENA2_XDCVT);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Cross Convert 1080->720",	NTV2_BITFILE_MOAB_XDCVT);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"AutoDesk Main",			NTV2_BITFILE_XENA2_CSCVT);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Cross Convert 720->1080",	NTV2_BITFILE_XENALH_HDQRZ);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"XenaLH SD QRez",			NTV2_BITFILE_XENALH_SDQRZ);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Xena-HS2 SD",				NTV2_BITFILE_XENAHS2_SD);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Xena-HS2 HD",				NTV2_BITFILE_XENAHS2_HD);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Borg CoDec",				NTV2_BITFILE_BORG_CODEC);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Borg UFC",					NTV2_BITFILE_BORG_UFC);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"LHi DVI Main",				NTV2_BITFILE_LHI_DVI_MAIN);
-		#endif	//	!defined (NTV2_DEPRECATE)
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Corvid1 Main",				NTV2_BITFILE_CORVID1_MAIN);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Corvid22 Main",			NTV2_BITFILE_CORVID22_MAIN);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Kona 3G Main",				NTV2_BITFILE_KONA3G_MAIN);

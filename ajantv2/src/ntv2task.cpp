@@ -103,45 +103,6 @@ AutoCircGenericTask* CNTV2Task::AddRegisterReadTask(
 }
 
 
-#if !defined (NTV2_DEPRECATE)
-	AutoCircGenericTask* CNTV2Task::AddRoutingEntry (const NTV2RoutingEntry & inEntry)
-	{
-		return AddRegisterWriteTask (inEntry.registerNum, inEntry.value, inEntry.mask, inEntry.shift);
-	}
-
-
-	AutoCircGenericTask* CNTV2Task::AddRoutingEntryWithValue (const NTV2RoutingEntry & inEntry, const ULWord inValue)
-	{
-		return AddRegisterWriteTask (inEntry.registerNum, inValue, inEntry.mask, inEntry.shift);
-	}
-
-
-	void CNTV2Task::AddSignalRouting (const CNTV2SignalRouter & inRouter)
-	{
-		const unsigned	numRoutes	(inRouter.GetNumberOfConnections ());
-		for (unsigned ndx (0);  ndx < numRoutes;  ndx++)
-			AddRoutingEntry (inRouter.GetRoutingEntry (ndx));
-	}	//	AddSignalRouting
-
-
-	AutoCircGenericTask* CNTV2Task::AddXena2Routing (const NTV2RoutingEntry & inEntry)
-	{
-		return AddRoutingEntry (inEntry);
-	}
-
-	AutoCircGenericTask* CNTV2Task::AddXena2RoutingWithValue (const NTV2RoutingEntry & inEntry, const ULWord inValue)
-	{
-		return AddRoutingEntryWithValue (inEntry, inValue);
-	}
-
-	void CNTV2Task::CopyXena2Routing (const CNTV2SignalRouter * pInRoute)
-	{
-		if (pInRoute)
-			AddSignalRouting (*pInRoute);
-	}
-#endif	//	!defined (NTV2_DEPRECATE)
-
-
 AutoCircGenericTask* CNTV2Task::AddTimeCodeWriteTask(
 	RP188_STRUCT* pTCInOut1,
 	RP188_STRUCT* pTCInOut2,
@@ -329,48 +290,6 @@ PAUTOCIRCULATE_TASK_STRUCT CNTV2Task::GetTaskStruct()
 {
 	return &m_AutoCircTask;
 }
-
-#if !defined (NTV2_DEPRECATE)
-	void CNTV2Task::DumpTaskList (void) const
-	{
-		const int	numTasks	(GetNumTasks ());
-
-		odprintf("NTV2Task(%p): dump %d tasks\n", (void*)this, numTasks);
-		for (int i = 0; i < numTasks; i++)
-		{
-			const AutoCircGenericTask &	task	(GetTask (i));
-			switch (task.taskType)
-			{
-				case eAutoCircTaskRegisterWrite:
-					odprintf("NTV2Task: task %3d register write - reg %3d  value %08x  mask %08x  shift %3d\n",
-						i,
-						task.u.registerTask.regNum,
-						task.u.registerTask.value,
-						task.u.registerTask.mask,
-						task.u.registerTask.shift);
-					break;
-				case eAutoCircTaskRegisterRead:
-					odprintf("NTV2Task: task %3d register read  - reg %3d  value %08x  mask %08x  shift %3d\n",
-						i,
-						task.u.registerTask.regNum,
-						task.u.registerTask.value,
-						task.u.registerTask.mask,
-						task.u.registerTask.shift);
-					break;
-				case eAutoCircTaskTimeCodeWrite:
-					odprintf("NTV2Task: task %3d timecode write\n", i);
-					break;	
-				case eAutoCircTaskTimeCodeRead:
-					odprintf("NTV2Task: task %3d timecode read\n", i);
-					break;
-				default:
-					odprintf("NTV2Task: task %3d error - unknown task type: %d\n", i, task.taskType);
-					break;
-			}
-		}
-	}
-#endif	//	!defined (NTV2_DEPRECATE)
-
 
 static const string AutoCircTaskTypeToString (const AutoCircTaskType inTaskType)
 {

@@ -105,6 +105,7 @@ set(AJADRIVER_LINUX_BUILD_FILES
 	linux/Makefile
 	linux/nvidia-ko-to-module-symvers)
 set(AJADRIVER_LINUX_LOAD_FILES
+	${CMAKE_CURRENT_SOURCE_DIR}/bin/ajantv2.ko
 	${CMAKE_CURRENT_SOURCE_DIR}/bin/load_ajantv2
 	${CMAKE_CURRENT_SOURCE_DIR}/bin/unload_ajantv2)
 
@@ -144,10 +145,10 @@ set(NEEDED_NTV2_SOURCES
 
 if (AJANTV2_BUILD_DRIVER)
 	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-		aja_message(STATUS "Windows driver CMake build not yet implemented!")
+		message(STATUS "Windows driver CMake build not yet implemented!")
 		return()
 	elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-		aja_message(STATUS "macOS driver CMake build not yet implemented!")
+		message(STATUS "macOS driver CMake build not yet implemented!")
 		return()
 	elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 		set(BIN_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin")
@@ -230,6 +231,9 @@ if (AJA_INSTALL_SOURCES)
     install(FILES ${NEEDED_NTV2_SOURCES}
             DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2/src
             COMPONENT install_driver)
+endif()
+if (AJA_INSTALL_CMAKE)
+    install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/driver)
 endif()
 if (AJA_INSTALL_MISC)
 	if (CMAKE_SYSTEM_NAME STREQUAL "Linux")

@@ -10,7 +10,7 @@
 #include "ntv2debug.h"
 #include "ntv2utils.h"
 #include "ntv2registerexpert.h" //	For YesNo macro
-#include <string.h>
+#include <sstream>
 
 using namespace std;
 
@@ -572,20 +572,6 @@ NTV2VPIDRGBRange CNTV2VPID::GetRGBRange (void) const
 		return NTV2_VPID_Range_Narrow;
 	}
 }
-
-#if !defined (NTV2_DEPRECATE)
-void CNTV2VPID::SetDynamicRange (const VPIDDynamicRange inDynamicRange)
-{
-	m_uVPID = (m_uVPID & ~kRegMaskVPIDDynamicRange) |
-		(((ULWord)inDynamicRange << kRegShiftVPIDDynamicRange) & kRegMaskVPIDDynamicRange);
-}
-
-
-VPIDDynamicRange CNTV2VPID::GetDynamicRange (void) const
-{
-	return (VPIDDynamicRange)((m_uVPID & kRegMaskVPIDDynamicRange) >> kRegShiftVPIDDynamicRange); 
-}
-#endif
 
 
 //	static - this one doesn't support 3Gb

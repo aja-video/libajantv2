@@ -268,35 +268,6 @@ AJAStatus AJAAncillaryData::SetDataLocation (const AJAAncDataLoc & loc)
 }
 
 
-#if !defined(NTV2_DEPRECATE_15_2)
-	AJAStatus AJAAncillaryData::GetDataLocation (AJAAncDataLink &				outLink,
-												AJAAncillaryDataVideoStream &	outStream,
-												AJAAncDataSpace &				outAncSpace,
-												uint16_t &						outLineNum)
-	{
-		outLink		= m_location.GetDataLink();
-		outStream	= m_location.GetDataChannel();
-		outAncSpace = m_location.GetDataSpace();
-		outLineNum	= m_location.GetLineNumber();
-		return AJA_STATUS_SUCCESS;
-	}
-
-	AJAStatus AJAAncillaryData::SetDataLocation (const AJAAncDataLink inLink, const AJAAncDataChannel inChannel, const AJAAncDataSpace inAncSpace, const uint16_t inLineNum, const AJAAncDataStream inStream)
-	{
-		AJAStatus	status	(SetLocationVideoLink(inLink));
-		if (AJA_SUCCESS(status))
-			status = SetLocationDataStream(inStream);
-		if (AJA_SUCCESS(status))
-			status = SetLocationDataChannel(inChannel);
-		if (AJA_SUCCESS(status))
-			status = SetLocationVideoSpace(inAncSpace);
-		if (AJA_SUCCESS(status))
-			status = SetLocationLineNumber(inLineNum);
-		return status;
-	}
-#endif	//	!defined(NTV2_DEPRECATE_15_2)
-
-
 //-------------
 //
 AJAStatus AJAAncillaryData::SetLocationVideoLink (const AJAAncDataLink inLinkValue)
@@ -331,18 +302,6 @@ AJAStatus AJAAncillaryData::SetLocationDataChannel (const AJAAncDataChannel inCh
 	m_location.SetDataChannel(inChannel);
 	return AJA_STATUS_SUCCESS;
 }
-
-
-#if !defined(NTV2_DEPRECATE_15_2)
-	AJAStatus AJAAncillaryData::SetLocationVideoSpace (const AJAAncDataSpace inSpace)
-	{
-		if (!IS_VALID_AJAAncDataSpace(inSpace))
-			return AJA_STATUS_RANGE;
-	
-		m_location.SetDataSpace(inSpace);
-		return AJA_STATUS_SUCCESS;
-	}
-#endif	//	!defined(NTV2_DEPRECATE_15_2)
 
 
 //-------------
@@ -1482,7 +1441,7 @@ string AJAAncillaryData::CompareWithInfo (const AJAAncillaryData & inRHS, const 
 		ULWordSequence diffNdxs;
 		for (size_t ndx(0);  ndx < GetPayloadByteCount();  ndx++)
 			if (pLHS[ndx] != pRHS[ndx])
-				diffNdxs.push_back(ndx);
+				diffNdxs.push_back(ULWord(ndx));
 		if (!diffNdxs.empty())
 			oss	<< endl << DEC(diffNdxs.size()) << " of " << DEC(GetDC()) << " (" << fDEC(100.0*double(diffNdxs.size())/double(GetDC()), 5, 2)
 				<< "%) mismatched payload bytes, starting at offset " << DEC(diffNdxs.at(0));

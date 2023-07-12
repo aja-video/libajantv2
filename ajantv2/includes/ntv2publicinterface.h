@@ -1016,283 +1016,6 @@ typedef enum
 #define NTV2_HDMIAuxMaxFrames	8
 #define NTV2_HDMIAuxDataSize	32
 
-#if !defined (NTV2_DEPRECATE)
-	#define KRegDMA1HostAddr			kRegDMA1HostAddr			///< @deprecated		Use kRegDMA1HostAddr instead.
-	#define KRegDMA2HostAddr			kRegDMA2HostAddr			///< @deprecated		Use kRegDMA2HostAddr instead.
-	#define KRegDMA3HostAddr			kRegDMA3HostAddr			///< @deprecated		Use kRegDMA3HostAddr instead.
-	#define KRegDMA4HostAddr			kRegDMA4HostAddr			///< @deprecated		Use kRegDMA4HostAddr instead.
-	#define kRegPanControl				kRegReserved15				///< @deprecated		Do not use (not supported).
-	#define kRegReserved2				kRegReserved16				///< @deprecated		Do not use.
-	#define kRegVidProcControl			kRegVidProc1Control			///< @deprecated		Use kRegVidProc1Control instead.
-	#define kRegMixerCoefficient		kRegMixer1Coefficient		///< @deprecated		Use kRegMixer1Coefficient instead.
-	#define kRegAudDetect				kRegAud1Detect				///< @deprecated		Use kRegAud1Detect instead.
-	#define kRegAudControl				kRegAud1Control				///< @deprecated		Use kRegAud1Control instead.
-	#define kRegAudSourceSelect			kRegAud1SourceSelect		///< @deprecated		Use kRegAud1SourceSelect instead.
-	#define kRegAudOutputLastAddr		kRegAud1OutputLastAddr		///< @deprecated		Use kRegAud1OutputLastAddr instead.
-	#define kRegAudInputLastAddr		kRegAud1InputLastAddr		///< @deprecated		Use kRegAud1InputLastAddr instead.
-	#define kRegAudCounter				kRegAud1Counter				///< @deprecated		Use kRegAud1Counter instead.
-	#define kRegFlatMattleValue			kRegFlatMatteValue			///< @deprecated		Use kRegFlatMatteValue instead.
-	#define kRegFlatMattle2Value		kRegFlatMatte2Value			///< @deprecated		Use kRegFlatMatte2Value instead.
-
-	#define kK2RegAnalogOutControl		kRegAnalogOutControl		///< @deprecated		Use kRegAnalogOutControl instead.
-	#define kK2RegSDIOut1Control		kRegSDIOut1Control			///< @deprecated		Use kRegSDIOut1Control instead.
-	#define kK2RegSDIOut2Control		kRegSDIOut2Control			///< @deprecated		Use kRegSDIOut2Control instead.
-	#define kK2RegConversionControl		kRegConversionControl		///< @deprecated		Use kRegConversionControl instead.
-	#define kK2RegFrameSync1Control		kRegFrameSync1Control		///< @deprecated		Use kRegFrameSync1Control instead.
-	#define kK2RegFrameSync2Control		kRegFrameSync2Control		///< @deprecated		Use kRegFrameSync2Control instead.
-	#define kK2RegXptSelectGroup1		kRegXptSelectGroup1			///< @deprecated		Use kRegXptSelectGroup1 instead.
-	#define kK2RegXptSelectGroup2		kRegXptSelectGroup2			///< @deprecated		Use kRegXptSelectGroup2 instead.
-	#define kK2RegXptSelectGroup3		kRegXptSelectGroup3			///< @deprecated		Use kRegXptSelectGroup3 instead.
-	#define kK2RegXptSelectGroup4		kRegXptSelectGroup4			///< @deprecated		Use kRegXptSelectGroup4 instead.
-	#define kK2RegXptSelectGroup5		kRegXptSelectGroup5			///< @deprecated		Use kRegXptSelectGroup5 instead.
-	#define kK2RegXptSelectGroup6		kRegXptSelectGroup6			///< @deprecated		Use kRegXptSelectGroup6 instead.
-	#define kK2RegCSCoefficients1_2		kRegCSCoefficients1_2		///< @deprecated		Use kRegCSCoefficients1_2 instead.
-	#define kK2RegCSCoefficients3_4		kRegCSCoefficients3_4		///< @deprecated		Use kRegCSCoefficients3_4 instead.
-	#define kK2RegCSCoefficients5_6		kRegCSCoefficients5_6		///< @deprecated		Use kRegCSCoefficients5_6 instead.
-	#define kK2RegCSCoefficients7_8		kRegCSCoefficients7_8		///< @deprecated		Use kRegCSCoefficients7_8 instead.
-	#define kK2RegCSCoefficients9_10	kRegCSCoefficients9_10		///< @deprecated		Use kRegCSCoefficients9_10 instead.
-	#define kK2RegCS2Coefficients1_2	kRegCS2Coefficients1_2		///< @deprecated		Use kRegCS2Coefficients1_2 instead.
-	#define kK2RegCS2Coefficients3_4	kRegCS2Coefficients3_4		///< @deprecated		Use kRegCS2Coefficients3_4 instead.
-	#define kK2RegCS2Coefficients5_6	kRegCS2Coefficients5_6		///< @deprecated		Use kRegCS2Coefficients5_6 instead.
-	#define kK2RegCS2Coefficients7_8	kRegCS2Coefficients7_8		///< @deprecated		Use kRegCS2Coefficients7_8 instead.
-	#define kK2RegCS2Coefficients9_10	kRegCS2Coefficients9_10		///< @deprecated		Use kRegCS2Coefficients9_10 instead.
-	#define kK2RegXptSelectGroup7		kRegXptSelectGroup7			///< @deprecated		Use kRegXptSelectGroup7 instead.
-	#define kK2RegXptSelectGroup8		kRegXptSelectGroup8			///< @deprecated		Use kRegXptSelectGroup8 instead.
-	#define kK2RegSDIOut3Control		kRegSDIOut3Control			///< @deprecated		Use kRegSDIOut3Control instead.
-	#define kK2RegSDIOut4Control		kRegSDIOut4Control			///< @deprecated		Use kRegSDIOut4Control instead.
-	#define kK2RegXptSelectGroup11		kRegXptSelectGroup11		///< @deprecated		Use kRegXptSelectGroup11 instead.
-	#define kK2RegXptSelectGroup12		kRegXptSelectGroup12		///< @deprecated		Use kRegXptSelectGroup12 instead.
-	#define kK2RegXptSelectGroup9		kRegXptSelectGroup9			///< @deprecated		Use kRegXptSelectGroup9 instead.
-	#define kK2RegXptSelectGroup10		kRegXptSelectGroup10		///< @deprecated		Use kRegXptSelectGroup10 instead.
-	#define kK2RegXptSelectGroup13		kRegXptSelectGroup13		///< @deprecated		Use kRegXptSelectGroup13 instead.
-	#define kK2RegXptSelectGroup14		kRegXptSelectGroup14		///< @deprecated		Use kRegXptSelectGroup14 instead.
-	#define kK2RegCS3Coefficients1_2	kRegCS3Coefficients1_2		///< @deprecated		Use kRegCS3Coefficients1_2 instead.
-	#define kK2RegCS3Coefficients3_4	kRegCS3Coefficients3_4		///< @deprecated		Use kRegCS3Coefficients3_4 instead.
-	#define kK2RegCS3Coefficients5_6	kRegCS3Coefficients5_6		///< @deprecated		Use kRegCS3Coefficients5_6 instead.
-	#define kK2RegCS3Coefficients7_8	kRegCS3Coefficients7_8		///< @deprecated		Use kRegCS3Coefficients7_8 instead.
-	#define kK2RegCS3Coefficients9_10	kRegCS3Coefficients9_10		///< @deprecated		Use kRegCS3Coefficients9_10 instead.
-	#define kK2RegCS4Coefficients1_2	kRegCS4Coefficients1_2		///< @deprecated		Use kRegCS4Coefficients1_2 instead.
-	#define kK2RegCS4Coefficients3_4	kRegCS4Coefficients3_4		///< @deprecated		Use kRegCS4Coefficients3_4 instead.
-	#define kK2RegCS4Coefficients5_6	kRegCS4Coefficients5_6		///< @deprecated		Use kRegCS4Coefficients5_6 instead.
-	#define kK2RegCS4Coefficients7_8	kRegCS4Coefficients7_8		///< @deprecated		Use kRegCS4Coefficients7_8 instead.
-	#define kK2RegCS4Coefficients9_10	kRegCS4Coefficients9_10		///< @deprecated		Use kRegCS4Coefficients9_10 instead.
-	#define kK2RegXptSelectGroup17		kRegXptSelectGroup17		///< @deprecated		Use kRegXptSelectGroup17 instead.
-	#define kK2RegXptSelectGroup15		kRegXptSelectGroup15		///< @deprecated		Use kRegXptSelectGroup15 instead.
-	#define kK2RegXptSelectGroup16		kRegXptSelectGroup16		///< @deprecated		Use kRegXptSelectGroup16 instead.
-	#define kK2RegSDIOut5Control		kRegSDIOut5Control			///< @deprecated		Use kRegSDIOut5Control instead.
-	#define kK2RegCS5Coefficients1_2	kRegCS5Coefficients1_2		///< @deprecated		Use kRegCS5Coefficients1_2 instead.
-	#define kK2RegCS5Coefficients3_4	kRegCS5Coefficients3_4		///< @deprecated		Use kRegCS5Coefficients3_4 instead.
-	#define kK2RegCS5Coefficients5_6	kRegCS5Coefficients5_6		///< @deprecated		Use kRegCS5Coefficients5_6 instead.
-	#define kK2RegCS5Coefficients7_8	kRegCS5Coefficients7_8		///< @deprecated		Use kRegCS5Coefficients7_8 instead.
-	#define kK2RegCS5Coefficients9_10	kRegCS5Coefficients9_10		///< @deprecated		Use kRegCS5Coefficients9_10 instead.
-	#define kK2RegXptSelectGroup18		kRegXptSelectGroup18		///< @deprecated		Use kRegXptSelectGroup18 instead.
-	#define kK2RegXptSelectGroup19		kRegXptSelectGroup19		///< @deprecated		Use kRegXptSelectGroup19 instead.
-	#define kK2RegXptSelectGroup20		kRegXptSelectGroup20		///< @deprecated		Use kRegXptSelectGroup20 instead.
-	#define kK2RegCS6Coefficients1_2	kRegCS6Coefficients1_2		///< @deprecated		Use kRegCS6Coefficients1_2 instead.
-	#define kK2RegCS6Coefficients3_4	kRegCS6Coefficients3_4		///< @deprecated		Use kRegCS6Coefficients3_4 instead.
-	#define kK2RegCS6Coefficients5_6	kRegCS6Coefficients5_6		///< @deprecated		Use kRegCS6Coefficients5_6 instead.
-	#define kK2RegCS6Coefficients7_8	kRegCS6Coefficients7_8		///< @deprecated		Use kRegCS6Coefficients7_8 instead.
-	#define kK2RegCS6Coefficients9_10	kRegCS6Coefficients9_10		///< @deprecated		Use kRegCS6Coefficients9_10 instead.
-	#define kK2RegCS7Coefficients1_2	kRegCS7Coefficients1_2		///< @deprecated		Use kRegCS7Coefficients1_2 instead.
-	#define kK2RegCS7Coefficients3_4	kRegCS7Coefficients3_4		///< @deprecated		Use kRegCS7Coefficients3_4 instead.
-	#define kK2RegCS7Coefficients5_6	kRegCS7Coefficients5_6		///< @deprecated		Use kRegCS7Coefficients5_6 instead.
-	#define kK2RegCS7Coefficients7_8	kRegCS7Coefficients7_8		///< @deprecated		Use kRegCS7Coefficients7_8 instead.
-	#define kK2RegCS7Coefficients9_10	kRegCS7Coefficients9_10		///< @deprecated		Use kRegCS7Coefficients9_10 instead.
-	#define kK2RegCS8Coefficients1_2	kRegCS8Coefficients1_2		///< @deprecated		Use kRegCS8Coefficients1_2 instead.
-	#define kK2RegCS8Coefficients3_4	kRegCS8Coefficients3_4		///< @deprecated		Use kRegCS8Coefficients3_4 instead.
-	#define kK2RegCS8Coefficients5_6	kRegCS8Coefficients5_6		///< @deprecated		Use kRegCS8Coefficients5_6 instead.
-	#define kK2RegCS8Coefficients7_8	kRegCS8Coefficients7_8		///< @deprecated		Use kRegCS8Coefficients7_8 instead.
-	#define kK2RegCS8Coefficients9_10	kRegCS8Coefficients9_10		///< @deprecated		Use kRegCS8Coefficients9_10 instead.
-	#define kK2RegSDIOut6Control		kRegSDIOut6Control			///< @deprecated		Use kRegSDIOut6Control instead.
-	#define kK2RegSDIOut7Control		kRegSDIOut7Control			///< @deprecated		Use kRegSDIOut7Control instead.
-	#define kK2RegSDIOut8Control		kRegSDIOut8Control			///< @deprecated		Use kRegSDIOut8Control instead.
-
-
-	// Special Registers for the XENAX
-	#define XENAX_REG_START 256
-	#define XENAX_NUM_REGS	(119+36+41)
-	#define NUM_HW_REGS		(XENAX_REG_START + XENAX_NUM_REGS)
-
-	// Registers unique to a particular device with their own address space
-	// These are 16-bit registers
-	#define BORG_FUSION_REG_START 8000
-
-	typedef enum
-	{
-		kRegBorgFusionBootFPGAVerBoardID = BORG_FUSION_REG_START, // 0
-		kRegBorgFusionFPGAConfigCtrl,			// 1
-		kRegBorgFusionPanelPushButtonDebounced, // 2
-		kRegBorgFusionPanelPushButtonChanges,	// 3
-		kRegBorgFusionLEDPWMThreshholds,		// 4
-		kRegBorgFusionPowerCtrl,				// 5
-		kRegBorgFusionIRQ3nIntCtrl,				// 6
-		kRegBorgFusionIRQ3nIntSrc,				// 7
-		kRegBorgFusionDisplayCtrlStatus,		// 8
-		kRegBorgFusionDisplayWriteData,			// 9
-		kRegBorgFusionAnalogFlags,				// 10
-		kRegBorgFusionReserved11,				// 11 
-		kRegBonesActelCFSlots = kRegBorgFusionReserved11,			// Compact Flash S1 & S2 status
-		kRegBorgFusionReserved12,				// 12
-		kRegBonesActelCFSlotsChanges = kRegBorgFusionReserved12,	// Compact Flash Slot Changes Present
-		kRegBorgFusionReserved13,				// 13
-		kRegBorgFusionReserved14,				// 14
-		kRegBorgFusionReserved15,				// 15
-		kRegBorgFusionTempSensor1,				// 16
-		kRegBorgFusionTempSensor2,				// 17
-		kRegBorgFusion5_0vPowerRail,			// 18: +5.0 v power rail, 8mV res
-		kRegBorgFusion2_5vPowerRail,			// 19: +2.5v power rail, 4mV res
-		kRegBorgFusion1_95vPowerRail,			// 20: +1.95v power rail, 4mV res
-		kRegBorgFusion1_8vPowerRail,			// 21: +1.8v power rail, 2mV res
-		kRegBorgFusion1_5vPowerRail,			// 22: +1.5v power rail, 2mV res
-		kRegBorgFusion1_0vPowerRail,			// 23: +1.0v power rail, 2mV res
-		kRegBorgFusion12vPowerRail,				// 24: +12v input power, 8mV res
-		kRegBorgFusion3_3vPowerRail,			// 25: +3.3v power rail, 4mV res
-
-		kRegBorgFusionProdIdLo = BORG_FUSION_REG_START + 50,// 50, lo 16b of kRegBoardID data
-		kRegBorgFusionProdIdHi,								// 51, hi 16b of kRegBoardID data
-		kRegBorgFusionNumRegistersDummy,
-		kRegBorgFusionNumRegisters = kRegBorgFusionNumRegistersDummy - BORG_FUSION_REG_START + 1
-	} BorgFusionRegisterNum;
-
-	#define DNX_REG_START 8100
-
-	typedef enum
-	{
-		// The paragraph numbers following the Block and Section register
-		// descriptions refer to the "KiProMini: DNX Codec" document
-		// originally written by Avid and adapted by Paul Greaves.
-
-		// Block 1.1: Nestor Common
-		kRegDNX_DeviceID = DNX_REG_START,		// ro (read only)
-		kRegDNX_Revision,						// ro
-		kRegDNX_Diagnostics,
-		kRegDNX_Reset,
-		kRegDNX_NestorControl,
-		kRegDNX_NestorAutoloadControl,
-		kRegDNX_Status,
-		kRegDNX_NestorInterrupt,
-		kRegDNX_NestorInterruptEnable,
-		kRegDNX_EncoderM1AStatus,				// ro (Was Flash Addr)
-		kRegDNX_EncoderM2AStatus,				// ro (Was Flash Data)
-		kRegDNX_DecoderM1BStatus,				// ro (Was Temp Sensor Addr Ctl)
-		kRegDNX_DecoderM2BStatus,				// ro (Was Temp Sensor Wr Ctl)
-		kRegDNX_TempSensorReadData,				// ro (Unused)
-		kRegDNX_Timeout,
-
-		// Block 1.2: SMPTE Format
-		kRegDNX_Field1StartEnd,
-		kRegDNX_Field1ActiveStartEnd,
-		kRegDNX_Field2StartEnd,
-		kRegDNX_Field2ActiveStartEnd,
-		kRegDNX_HorizontalStartEnd,
-		kRegDNX_FormatChromaClipping,
-		kRegDNX_FormatLumaClipping,
-		kRegDNX_Reserved1,
-
-		// Section 1.2.9: Formatter
-		kRegDNX_A0Parameter,
-		kRegDNX_A1Parameter,
-		kRegDNX_A2Parameter,
-		kRegDNX_A3Parameter,
-		kRegDNX_A4Parameter,
-		kRegDNX_A5Parameter,
-		kRegDNX_A6Parameter,
-		kRegDNX_A7Parameter,
-		kRegDNX_A8Parameter,
-		kRegDNX_A9Parameter,
-		kRegDNX_TOFHorizontalResetValue,
-		kRegDNX_TOFVerticalResetValue,
-		kRegDNX_HorizontalStartOfHANCCode,
-		kRegDNX_HorizontalStartOfSAVCode,
-		kRegDNX_HorizontalStartOfActiveVideo,
-		kRegDNX_HorizontalEndOfLine,
-
-		// Block 1.5: Encoder
-		kRegDNX_EncoderInterrupt,
-		kRegDNX_EncoderControl,
-		kRegDNX_EncoderInterruptEnable,
-		kRegDNX_RateControlAddress,
-		kRegDNX_RateControlReadData,			// ro
-		kRegDNX_MacroblockLineNumber,			// ro
-		kRegDNX_RateControlIndex,				// ro
-		kRegDNX_DCTPackerIndex,					// ro
-		kRegDNX_EncodeTableWrite,
-		kRegDNX_EncoderDebug,					// ro
-
-		// Section 1.5.11: The VCID used for encoding
-		kRegDNX_EncoderVCIDRegister,
-
-		// Section 1.5.12.1/2: Encoder Parameter RAM
-		// We are only supporting seven VCID
-		// types at this time.
-		kRegDNX_EncoderParameterRAMLocation0_0,
-		kRegDNX_EncoderParameterRAMLocation1_0,
-
-		kRegDNX_EncoderParameterRAMLocation0_1,
-		kRegDNX_EncoderParameterRAMLocation1_1,
-
-		kRegDNX_EncoderParameterRAMLocation0_2,
-		kRegDNX_EncoderParameterRAMLocation1_2,
-
-		kRegDNX_EncoderParameterRAMLocation0_3,
-		kRegDNX_EncoderParameterRAMLocation1_3,
-
-		kRegDNX_EncoderParameterRAMLocation0_4,
-		kRegDNX_EncoderParameterRAMLocation1_4,
-
-		kRegDNX_EncoderParameterRAMLocation0_5,
-		kRegDNX_EncoderParameterRAMLocation1_5,
-
-		kRegDNX_EncoderParameterRAMLocation0_6,
-		kRegDNX_EncoderParameterRAMLocation1_6,
-
-		// Block 1.6: Decoder
-		kRegDNX_DecoderInterrupt,
-		kRegDNX_DecoderControl,
-		kRegDNX_DecoderInterruptEnable,
-		kRegDNX_DecodeTime,						// ro
-		kRegDNX_FrameCount,						// ro
-		kRegDNX_DecodeTableWrite,
-		kRegDNX_DecoderDebug,					// ro
-		kRegDNX_Pipe1StallStatus1,				// ro
-		kRegDNX_Pipe1StallStatus2,				// ro
-		kRegDNX_Pipe2StallStatus1,				// ro
-		kRegDNX_Pipe2StallStatus2,				// ro
-
-		// Section 1.6.12: The VCID to use regardless of the frame header
-		kRegDNX_DecoderVCIDRegister,
-
-		// Section 1.6.13: Decoder Parameter RAM
-		kRegDNX_DecoderParameterRAMLocation0_0,
-		kRegDNX_DecoderParameterRAMLocation1_0,
-
-		kRegDNX_DecoderParameterRAMLocation0_1,
-		kRegDNX_DecoderParameterRAMLocation1_1,
-
-		kRegDNX_DecoderParameterRAMLocation0_2,
-		kRegDNX_DecoderParameterRAMLocation1_2,
-
-		kRegDNX_DecoderParameterRAMLocation0_3,
-		kRegDNX_DecoderParameterRAMLocation1_3,
-
-		kRegDNX_DecoderParameterRAMLocation0_4,
-		kRegDNX_DecoderParameterRAMLocation1_4,
-
-		kRegDNX_DecoderParameterRAMLocation0_5,
-		kRegDNX_DecoderParameterRAMLocation1_5,
-
-		kRegDNX_DecoderParameterRAMLocation0_6,
-		kRegDNX_DecoderParameterRAMLocation1_6,
-
-		kRegDNX_MaximumRegister	  = kRegDNX_DecoderParameterRAMLocation1_6,
-		kRegDNX_NumberOfRegisters = ((kRegDNX_MaximumRegister - DNX_REG_START) + 1)
-	} DNXRegisterNum;
-#endif	//	!defined (NTV2_DEPRECATE)
-#if defined (NTV2_DEPRECATE_13_0)
-	#define kRegAuxInterruptDelay	kRegBitfileDate			///< @deprecated		Use kRegBitfileDate instead.
-	#define kRegReserved89			kRegBitfileTime			///< @deprecated		Use kRegBitfileTime instead.
-#endif	//	NTV2_DEPRECATE_13_0
-
 // Virtual registers
 #include "ntv2virtualregisters.h"
 
@@ -2175,9 +1898,6 @@ typedef enum
 	kRegMaskVPIDProgressiveTransport	= BIT(23),
 	kRegMaskVPIDStandard				= BIT(24)+BIT(25)+BIT(26)+BIT(27)+BIT(28)+BIT(29)+BIT(30)+BIT(31),
 	kRegMaskVPIDVersionID				= BIT(31),
-#if !defined (NTV2_DEPRECATE)
-	kRegMaskVPIDDynamicRange			= BIT(4)+BIT(3),
-#endif
 	
 	//Borg Test Pattern Generator
 	kRegMaskTPGChromaSample				= BIT(9)+BIT(8)+BIT(7)+BIT(6)+BIT(5)+BIT(4)+BIT(3)+BIT(2)+BIT(1)+BIT(0),
@@ -2407,163 +2127,6 @@ typedef enum
 	kRegMaskMRBypass = BIT(20),
 	kRegMaskMREnable = BIT(24),
 	kRegMaskMRSupport = BIT(2) + BIT(1) + BIT(0)
-
-#if !defined (NTV2_DEPRECATE)
-	,
-	// kRegSDIInput3GStatus
-	kLHIRegMaskSDIIn3GbpsMode = BIT(0),
-	kLHIRegMaskSDIIn3GbpsSMPTELevelBMode = BIT(1),
-	kLHIRegMaskSDIInVPIDLinkAValid = BIT(4),
-	kLHIRegMaskSDIInVPIDLinkBValid = BIT(5),
-	kLHIRegMaskSDIIn23GbpsMode = BIT(8),
-	kLHIRegMaskSDIIn23GbpsSMPTELevelBMode = BIT(9),
-	kLHIRegMaskSDIIn2VPIDLinkAValid = BIT(12),
-	kLHIRegMaskSDIIn2VPIDLinkBValid = BIT(13),
-
-	// kRegSDIInput3GStatus2
-	kLHIRegMaskSDIIn33GbpsMode = BIT(0),
-	kLHIRegMaskSDIIn33GbpsSMPTELevelBMode = BIT(1),
-	kLHIRegMaskSDIIn3VPIDLinkAValid = BIT(4),
-	kLHIRegMaskSDIIn3VPIDLinkBValid = BIT(5),
-	kLHIRegMaskSDIIn43GbpsMode = BIT(8),
-	kLHIRegMaskSDIIn43GbpsSMPTELevelBMode = BIT(9),
-	kLHIRegMaskSDIIn4VPIDLinkAValid = BIT(12),
-	kLHIRegMaskSDIIn4VPIDLinkBValid = BIT(13),
-	//
-	// Borg Fusion Registers
-	//
-
-	// Boot FPGA and BoardID
-	kRegMaskBorgFusionBootFPGAVer = BIT(4)+BIT(5)+BIT(6)+BIT(7),
-	kRegMaskBorgFusionBoardID = BIT(0)+BIT(1)+BIT(2),
-
-	// Codec and convert FPGA configuration control
-	kRegMaskBorgFusionCodecFPGAProgram = BIT(0),
-	kRegMaskBorgFusionCodecFPGAInit = BIT(1),
-	kRegMaskBorgFusionCodecFPGADone = BIT(2),
-
-	kRegMaskBorgFusionConvertFPGAProgram = BIT(4),
-	kRegMaskBorgFusionConvertFPGAInit = BIT(5),
-	kRegMaskBorgFusionConvertFPGADone = BIT(6),
-
-	// Panel Push buttons debounced and SATA drive present state
-	kRegMaskBorgFusionPushButtonSlotDebounced = BIT(0),
-	kRegMaskBorgFusionPushButtonAdjustDownDebounced = BIT(1),
-	kRegMaskBorgFusionPushButtonAdjustUpDebounced = BIT(2),
-	kRegMaskBorgFusionPushButtonDeleteClipDebounced = BIT(3),
-	kRegMaskBorgFusionPushButtonSelectDownDebounced = BIT(4),
-	kRegMaskBorgFusionPushButtonSelectUpDebounced = BIT(5),
-	kRegMaskBorgFusionPushButtonFastFwdDebounced = BIT(6),
-	kRegMaskBorgFusionPushButtonRecordDebounced = BIT(7),
-	kRegMaskBorgFusionPushButtonPlayDebounced = BIT(8),
-	kRegMaskBorgFusionPushButtonStopDebounced = BIT(9),
-	kRegMaskBorgFusionPushButtonRewindDebounced = BIT(10),
-	kRegMaskBorgFusionPushButtonMediaDebounced = BIT(11),
-	kRegMaskBorgFusionPushButtonConfigDebounced = BIT(12),
-	kRegMaskBorgFusionPushButtonStatusDebounced = BIT(13),
-	kRegMaskBorgFusionPushButtonSATADrivePresentDebounced = BIT(14),
-	kRegMaskBorgFusionPushButtonPowerDebounced = BIT(15),
-
-	// Panel Push buttons and SATA drive present changes
-	kRegMaskBorgFusionPushButtonSlotChange = BIT(0),
-	kRegMaskBorgFusionPushButtonAdjustDownChange = BIT(1),
-	kRegMaskBorgFusionPushButtonAdjustUpChange = BIT(2),
-	kRegMaskBorgFusionPushButtonDeleteClipChange = BIT(3),
-	kRegMaskBorgFusionPushButtonSelectDownChange = BIT(4),
-	kRegMaskBorgFusionPushButtonSelectUpChange = BIT(5),
-	kRegMaskBorgFusionPushButtonFastFwdChange = BIT(6),
-	kRegMaskBorgFusionPushButtonRecordChange = BIT(7),
-	kRegMaskBorgFusionPushButtonPlayChange = BIT(8),
-	kRegMaskBorgFusionPushButtonStopChange = BIT(9),
-	kRegMaskBorgFusionPushButtonRewindChange = BIT(10),
-	kRegMaskBorgFusionPushButtonMediaChange = BIT(11),
-	kRegMaskBorgFusionPushButtonConfigChange = BIT(12),
-	kRegMaskBorgFusionPushButtonStatusChange = BIT(13),
-	kRegMaskBorgFusionPushButtonSATADrivePresentChange = BIT(14),
-	kRegMaskBorgFusionPushButtonPowerButtonChange = BIT(15),
-
-	// LED Pulse Width Modulation Threshholds
-	kRegMaskBorgFusionPWMThreshExpressCard2 = BIT(0)+BIT(1)+BIT(2)+BIT(3),
-	kRegMaskBorgFusionPWMThreshExpressCard1 = BIT(4)+BIT(5)+BIT(6)+BIT(7),
-	kRegMaskBorgFusionPWMThreshPower = BIT(8)+BIT(9)+BIT(10)+BIT(11),
-	kRegMaskBonesFusionPWMThreshLCDBacklightLED = BIT(12)+BIT(13)+BIT(14)+BIT(15),
-
-	// Power control - System
-	kRegMaskBorgFusionPowerCtrlWiFiReset = BIT(0),
-	kRegMaskBorgFusionPowerCtrlFirewirePower = BIT(1),
-	kRegMaskBorgFusionPowerCtrlGigEthReset = BIT(2),
-	kRegMaskBorgFusionPowerCtrlPCIExpClockStop = BIT(3),
-
-	// Power control - Storage devices - Borg Fusion
-	kRegMaskBorgFusionPowerCtrlPCIExpCard1_3_3vPower = BIT(8),	// Express Card 1 3.3v power
-	kRegMaskBorgFusionPowerCtrlPCIExpCard1_1_5vPower = BIT(9),	// Express Card 1 1.5v power
-	kRegMaskBorgFusionPowerCtrlPCIExpCard2_3_3vPower = BIT(10), // Express Card 2 3.3v power
-	kRegMaskBorgFusionPowerCtrlPCIExpCard2_1_5vPower = BIT(11), // Express Card 2 1.5v power
-	kRegMaskBorgFusionPowerCtrlSata_12vPower = BIT(12),			// SATA Drive 12v power
-
-	// Power control - Storage devices - Bones Actel
-	kRegMaskBonesActelPowerCtrlCFSlot2_BridgeReset	 = BIT(8),	// Bones Actel CF Slot 2 (CPU) Bridge Reset
-	kRegMaskBonesActelPowerCtrlCFSlot2_Power		 = BIT(9),	// Bones Actel CF Slot 2 (CPU) Power
-	kRegMaskBonesActelPowerCtrlCFSlot1_Power		 = BIT(10), // Bones Actel CF Slot 1 (VIDeo) Power
-	kRegMaskBonesActelPowerCtrlCFSlot1_BridgeReset	 = BIT(11), // Bones Actel CF Slot 1 (VIDeo) Bridge Reset
-
-	// Power control - Storage devices - Barclay Actel Fusion
-	kRegMaskBarclayFusionPowerCtrlPS1Active = BIT(6),			// Barclay Fusion Power Supply 1 active bit
-	kRegMaskBarclayFusionPowerCtrlPS2Active = BIT(5),			// Barclay Fusion Power Supply 2 active bit
-
-	kRegMaskBarclayFusionIdentifyLEDCtrl = BIT(1),	//Barclay Identify LED On/Off bit, Rear LED //RS
-
-	// Power control - Pushbutton LEDs
-	kRegMaskBorgFusionPowerCtrlPCIExpCard2LED = BIT(13),
-	kRegMaskBorgFusionPowerCtrlPCIExpCard1LED = BIT(14),
-	kRegMaskBorgFusionPowerCtrlPowerButtonLED = BIT(15),
-
-	// IRQ3n Interrupt control
-	kRegMaskBorgFusionIRQ3nIntCtrlPushButtonChangeEnable = BIT(0),
-	kRegMaskBorgFusionIRQ3nIntCtrlInputVoltageLow9vEnable = BIT(1),
-	kRegMaskBorgFusionIRQ3nIntCtrlDisplayFIFOFullEnable = BIT(2),
-	kRegMaskBorgFusionIRQ3nIntCtrlSATAPresentChangeEnable = BIT(3),
-	kRegMaskBorgFusionIRQ3nIntCtrlTemp1HighEnable = BIT(4),
-	kRegMaskBorgFusionIRQ3nIntCtrlTemp2HighEnable = BIT(5),
-	kRegMaskBorgFusionIRQ3nIntCtrlPowerButtonChangeEnable = BIT(6),
-
-	// IRQ3n Interrupt source
-	kRegMaskBorgFusionIRQ3nIntSrcPushButtonChange= BIT(0),
-	kRegMaskBorgFusionIRQ3nIntSrcInputVoltageLow9v= BIT(1),
-	kRegMaskBorgFusionIRQ3nIntSrcDisplayFIFOFull= BIT(2),
-	kRegMaskBorgFusionIRQ3nIntSrcSATAPresentChange= BIT(3),
-	kRegMaskBorgFusionIRQ3nIntSrcTemp1High= BIT(4),
-	kRegMaskBorgFusionIRQ3nIntSrcTemp2High= BIT(5),
-	kRegMaskBorgFusionIRQ3nIntSrcPowerButtonChange= BIT(6),
-
-	// Noritake Display Control/Status
-	kRegMaskBorgFusionDisplayCtrlReset = BIT (0),
-	kRegMaskBorgFusionDisplayStatusBusyRaw = BIT (1),		// Not needed by CPU, used internally by FPGA
-	kRegMaskBorgFusionDisplayStatusInterfaceBusy = BIT (7), // FIFO full
-
-	// Analog ADC flags - battery
-	kRegMaskBorgFusionAnalogFlagsPowerLTE9v = BIT(0),	// +12 v supply <= 9.0 v battery critical
-	kRegMaskBorgFusionAnalogFlagsPowerLTE10v = BIT(1),	// +12 v supply <= 10.0 v battery depleting
-	kRegMaskBorgFusionAnalogFlagsPowerLTE11v = BIT(2),	// +12 v supply <= 11.0 v battery depleting
-	kRegMaskBorgFusionAnalogFlagsPowerGTE13v = BIT(3),	// +12 v supply >= 13.0 v battery charging
-
-	// Analog ADC flags - temperature sensor
-	kRegMaskBorgFusionAnalogFlagsPowerTemp1High = BIT(4),	// Temp sensor 1 > 65 C
-	kRegMaskBorgFusionAnalogFlagsPowerTemp2High = BIT(5),	// Temp sensor 2 > 65 C
-
-	// Bones Actel Compact Flash Slot Debounced Card Present
-	kRegMaskBonesActelCFSlot1_Present	= BIT(1)+BIT(0),
-	kRegMaskBonesActelCFSlot2_Present	= BIT(3)+BIT(2),
-
-	// Bones Actel Compact Flash Slot Changes Present
-	kRegMaskBonesActelCFSlot1_Changes	= BIT(1)+BIT(0),
-	kRegMaskBonesActelCFSlot2_Changes	= BIT(3)+BIT(2),
-	// Pan (2K crop) - Xena 2
-	kRegMaskPanMode			= BIT(30) + BIT(31),
-	kRegMaskPanOffsetH		= BIT(0)+BIT(1)+BIT(2)+BIT(3)+BIT(4)+BIT(5)+BIT(6)+BIT(7)+BIT(8)+BIT(9)+BIT(10)+BIT(11),
-	kRegMaskPanOffsetV		= BIT(12)+BIT(13)+BIT(14)+BIT(15)+BIT(16)+BIT(17)+BIT(18)+BIT(19)+BIT(20)+BIT(21)+BIT(22)+BIT(23)
-#endif	//	!defined (NTV2_DEPRECATE)
-
 } RegisterMask;
 
 typedef enum
@@ -3359,9 +2922,6 @@ typedef enum
 	kRegShiftVPIDProgressiveTransport	= 23,
 	kRegShiftVPIDStandard				= 24,
 	kRegShiftVPIDVersionID				= 31,
-#if !defined (NTV2_DEPRECATE)
-	kRegShiftVPIDDynamicRange			= 3,
-#endif
 
 	// Borg Test Pattern Generator
 	kRegShiftTPGChromaSample			= 0,
@@ -3588,147 +3148,6 @@ typedef enum
 	kRegShiftMRBypass = 20,
 	kRegShiftMREnable = 24,
 	kRegShiftMRSupport = 0
-
-#if !defined (NTV2_DEPRECATE)
-	,
-	// kRegSDIInput3GStatus
-	kLHIRegShiftSDIIn3GbpsMode				= 0,
-	kLHIRegShiftSDIIn3GbpsSMPTELevelBMode	= 1,
-	kLHIRegShiftSDIInVPIDLinkAValid			= 4,
-	kLHIRegShiftSDIInVPIDLinkBValid			= 5,
-	kLHIRegShiftSDIIn23GbpsMode				= 8,
-	kLHIRegShiftSDIIn23GbpsSMPTELevelBMode	= 9,
-	kLHIRegShiftSDIIn2VPIDLinkAValid		= 12,
-	kLHIRegShiftSDIIn2VPIDLinkBValid		= 13,
-
-	// kRegSDIInput3GStatus2
-	kLHIRegShiftSDIIn33GbpsMode				= 0,
-	kLHIRegShiftSDIIn33GbpsSMPTELevelBMode	= 1,
-	kLHIRegShiftSDIIn3VPIDLinkAValid		= 4,
-	kLHIRegShiftSDIIn3VPIDLinkBValid		= 5,
-	kLHIRegShiftSDIIn43GbpsMode				= 8,
-	kLHIRegShiftSDIIn43GbpsSMPTELevelBMode	= 9,
-	kLHIRegShiftSDIIn4VPIDLinkAValid		= 12,
-	kLHIRegShiftSDIIn4VPIDLinkBValid		= 13,
-	//
-	// Borg Fusion Registers
-	//
-
-	// Boot FPGA and BoardID
-	kRegShiftBorgFusionBootFPGAVer = 4,
-	kRegShiftBorgFusionBoardID = 0,
-
-	// Codec and convert FPGA configuration control
-	kRegShiftBorgFusionCodecFPGAProgram = 0,
-	kRegShiftBorgFusionCodecFPGAInit = 1,
-	kRegShiftBorgFusionCodecFPGADone = 2,
-
-	kRegShiftBorgFusionConvertFPGAProgram = 4,
-	kRegShiftBorgFusionConvertFPGAInit = 5,
-	kRegShiftBorgFusionConvertFPGADone = 6,
-
-	// Panel Push buttons debounced and SATA drive present state
-	kRegShiftBorgFusionPushButtonStatusDebounced = 0,
-	kRegShiftBorgFusionPushButtonConfigDebounced = 1,
-	kRegShiftBorgFusionPushButtonMediaDebounced = 2,
-	kRegShiftBorgFusionPushButtonRewindDebounced = 3,
-	kRegShiftBorgFusionPushButtonStopDebounced = 4,
-	kRegShiftBorgFusionPushButtonPlayDebounced = 5,
-	kRegShiftBorgFusionPushButtonRecordDebounced = 6,
-	kRegShiftBorgFusionPushButtonFastFwdDebounced = 7,
-	kRegShiftBorgFusionPushButtonSelectUpDebounced = 8,
-	kRegShiftBorgFusionPushButtonSelectDownDebounced = 9,
-	kRegShiftBorgFusionPushButtonDeleteClipDebounced = 10,
-	kRegShiftBorgFusionPushButtonAdjustUpDebounced = 11,
-	kRegShiftBorgFusionPushButtonAdjustDownDebounced = 12,
-	kRegShiftBorgFusionPushButtonSlotDebounced = 13,
-	kRegShiftBorgFusionPushButtonSATADrivePresentDebounced = 14,
-
-	// Panel Push buttons and SATA drive present changes
-	kRegShiftBorgFusionPushButtonStatusChange = 0,
-	kRegShiftBorgFusionPushButtonConfigChange = 1,
-	kRegShiftBorgFusionPushButtonMediaChange = 2,
-	kRegShiftBorgFusionPushButtonRewindChange = 3,
-	kRegShiftBorgFusionPushButtonStopChange = 4,
-	kRegShiftBorgFusionPushButtonPlayChange = 5,
-	kRegShiftBorgFusionPushButtonRecordChange = 6,
-	kRegShiftBorgFusionPushButtonFastFwdChange = 7,
-	kRegShiftBorgFusionPushButtonSelectUpChange = 8,
-	kRegShiftBorgFusionPushButtonSelectDownChange = 9,
-	kRegShiftBorgFusionPushButtonDeleteClipChange = 10,
-	kRegShiftBorgFusionPushButtonAdjustUpChange = 11,
-	kRegShiftBorgFusionPushButtonAdjustDownChange = 12,
-	kRegShiftBorgFusionPushButtonSlotChange = 13,
-	kRegShiftBorgFusionPushButtonSATADrivePresentChange = 14,
-
-	// LED Pulse Width Modulation Threshholds
-	kRegShiftBorgFusionPWMThreshExpressCard2 = 0,
-	kRegShiftBorgFusionPWMThreshExpressCard1 = 4,
-	kRegShiftBorgFusionPWMThreshPower = 8,
-	kRegShiftBorgFusionPWMThreshLCDBacklightLED = 12,
-
-
-	// Power control - System
-	kRegShiftBorgFusionPowerCtrlWiFiReset = 0,
-	kRegShiftBorgFusionPowerCtrlFirewirePower = 1,
-	kRegShiftBorgFusionPowerCtrlGigEthReset = 2,
-	kRegShiftBorgFusionPowerCtrlPCIExpClockStop = 3,
-
-	// Power control - Storage devices
-	kRegShiftBorgFusionPowerCtrlPCIExpCard1_3_3vPower = 8,	// Express Card 1 3.3v power
-	kRegShiftBorgFusionPowerCtrlPCIExpCard1_1_5vPower = 9,	// Express Card 1 1.5v power
-	kRegShiftBorgFusionPowerCtrlPCIExpCard2_3_3vPower = 10, // Express Card 2 3.3v power
-	kRegShiftBorgFusionPowerCtrlPCIExpCard2_1_5vPower = 11, // Express Card 2 1.5v power
-	kRegShiftBorgFusionPowerCtrlSata_12vPower = 12,			// SATA Drive 12v power
-
-	kRegShiftBonesActelPowerCtrlCFSlot2_BridgeReset = 8,
-	kRegShiftBonesActelPowerCtrlCFSlot2_Power = 9,	 // Compact Flash S2 Power
-	kRegShiftBonesActelPowerCtrlCFSlot1_Power = 10,	 // Compact Flash S1 Power
-	kRegShiftBonesActelPowerCtrlCFSlot1_BridgeReset = 11,
-
-	// Power control - Pushbutton LEDs
-	kRegShiftBorgFusionPowerCtrlPCIExpCard2LED = 13,
-	kRegShiftBorgFusionPowerCtrlPCIExpCard1LED = 14,
-	kRegShiftBorgFusionPowerCtrlPowerButtonLED = 15,
-
-	// IRQ3n Interrupt control
-	kRegShiftBorgFusionIRQ3nIntCtrlPushButtonChangeEnable = 0,
-	kRegShiftBorgFusionIRQ3nIntCtrlInputVoltageLow9vEnable = 1,
-	kRegShiftBorgFusionIRQ3nIntCtrlDisplayFIFOFullEnable = 2,
-	kRegShiftBorgFusionIRQ3nIntCtrlSATAPresentChangeEnable = 3,
-	kRegShiftBorgFusionIRQ3nIntCtrlTemp1HighEnable = 4,
-	kRegShiftBorgFusionIRQ3nIntCtrlTemp2HighEnable = 5,
-	kRegShiftBorgFusionIRQ3nIntCtrlPowerButtonChangeEnable = 6,
-
-	// IRQ3n Interrupt source
-	kRegShiftBorgFusionIRQ3nIntSrcPushButtonChange= 0,
-	kRegShiftBorgFusionIRQ3nIntSrcInputVoltageLow9v= 1,
-	kRegShiftBorgFusionIRQ3nIntSrcDisplayFIFOFull= 2,
-	kRegShiftBorgFusionIRQ3nIntSrcSATAPresentChange= 3,
-	kRegShiftBorgFusionIRQ3nIntSrcTemp1High= 4,
-	kRegShiftBorgFusionIRQ3nIntSrcTemp2High= 5,
-	kRegShiftBorgFusionIRQ3nIntSrcPowerButtonChange= 6,
-
-	// Noritake Display Control/Status
-	kRegShiftBorgFusionDisplayCtrlReset = 0,
-	kRegShiftBorgFusionDisplayStatusBusyRaw = 1,		// Not needed by CPU, used internally by FPGA
-	kRegShiftBorgFusionDisplayStatusInterfaceBusy = 7,	// FIFO full
-
-	// Analog ADC flags - battery
-	kRegShiftBorgFusionAnalogFlagsPowerLTE9v = 0,	// +12 v supply <= 9.0 v battery critical
-	kRegShiftBorgFusionAnalogFlagsPowerLTE10v = 1,	// +12 v supply <= 10.0 v battery depleting
-	kRegShiftBorgFusionAnalogFlagsPowerLTE11v = 2,	// +12 v supply <= 11.0 v battery depleting
-	kRegShiftBorgFusionAnalogFlagsPowerGTE13v = 3,	// +12 v supply >= 13.0 v battery charging
-
-	// Analog ADC flags - temperature sensor
-	kRegShiftBorgFusionAnalogFlagsPowerTemp1High = 4,	// Temp sensor 1 > 65 C
-	kRegShiftBorgFusionAnalogFlagsPowerTemp2High = 5,	// Temp sensor 2 > 65 C
-	// Pan (2K crop) - Xena 2
-	kRegShiftPanMode					= 30,
-	kRegShiftPanOffsetV					= 0,
-	kRegShiftPanOffsetH					= 12
-#endif	//	!defined (NTV2_DEPRECATE)
-
 } RegisterShift;
 
 
@@ -4124,128 +3543,6 @@ typedef enum
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-#if !defined (NTV2_DEPRECATE)
-	//----------------------- HDNTV ---------------------------------
-
-	// Board-type-specific defines	NOTE: Either KSD, KHD, or HDNTV needs to be defined.
-	#define HDNTV_NTV2_DEVICENAME				  ("hdntv")
-
-		// Offset in Base Address 1 Space to Channel 2 Frame Buffer
-	#define HDNTV_CHANNEL2_OFFSET				  (0x2000000)			   // 32 MBytes
-
-		// Size of each frame buffer
-	#define HDNTV_FRAMEBUFFER_SIZE				  (0x800000)			   //  8 MBytes
-
-	#define HDNTV_NUM_FRAMEBUFFERS				  (8)
-
-	#define HDNTV_NTV2_VERTICALINTERRUPT_GLOBAL_EVENT_NAME "_HDVerticalInterruptSignalEvent"
-		// the event name shared among all Windows NT
-		// This name to be appended to the actual Win32Name
-	#define HDNTV_NTV2_CHANGE_GLOBAL_EVENT_NAME "_HDChangeSignalEvent"
-
-
-	//----------------------- Xena KHD ---------------------------------
-
-		// Offset in Base Address 1 Space to Channel 2 Frame Buffer
-	#define KHD_CHANNEL2_OFFSET					(0x2000000)				 // 32 MBytes
-
-		// Size of each frame buffer
-	#define KHD_FRAMEBUFFER_SIZE				(0x800000)				 //	 8 MBytes
-
-	#define KHD_NUM_FRAMEBUFFERS				(32)
-
-	#define KHD_NTV2_VERTICALINTERRUPT_GLOBAL_EVENT_NAME "_HDVerticalInterruptSignalEvent"
-		// the event name shared among all Windows NT
-		// This name to be appended to the actual Win32Name
-	#define KHD_NTV2_CHANGE_GLOBAL_EVENT_NAME "_HDChangeSignalEvent"
-
-	//
-	// 2K Specific....only on HD22(for now) boards when in 2K standard
-	// 
-	#define XENA_FRAMEBUFFERSIZE_2K				(0x1000000) 
-	#define XENA_NUMFRAMEBUFFERS_2K				(16) 
-
-	//----------------------- Xena KSD ---------------------------------
-
-		// Offset in Base Address 1 Space to Channel 2 Frame Buffer
-	#define KSD_CHANNEL2_OFFSET					(0x800000)				 // 8 MBytes
-
-		// Size of each frame buffer
-	#define KSD_FRAMEBUFFER_SIZE				(0x200000)				 //	 2 MBytes
-
-	#define KSD_NUM_FRAMEBUFFERS				(64)
-
-	#define KSD_NTV2_VERTICALINTERRUPT_GLOBAL_EVENT_NAME "_SDVerticalInterruptSignalEvent"
-		// the event name shared among all Windows NT
-		// This name to be appended to the actual Win32Name
-	#define KSD_NTV2_CHANGE_GLOBAL_EVENT_NAME "_SDChangeSignalEvent"
-
-
-	//----------------------- AJA KONA ---------------------------------
-
-		// Offset in Base Address 1 Space to Channel 2 Frame Buffer
-	#define KONA_CHANNEL2_OFFSET				 (0x2000000)			  // 32 MBytes
-
-		// Size of each frame buffer
-	#define KONA_FRAMEBUFFER_SIZE				 (0x800000)				  //  8 MBytes
-
-	#define KONA_NUM_FRAMEBUFFERS				 (32)
-
-	#define KHD_NTV2_VERTICALINTERRUPT_GLOBAL_EVENT_NAME "_HDVerticalInterruptSignalEvent"
-		// the event name shared among all Windows NT
-		// This name to be appended to the actual Win32Name
-	#define KHD_NTV2_CHANGE_GLOBAL_EVENT_NAME "_HDChangeSignalEvent"
-
-
-	//----------------------- AJA XENALS ---------------------------------
-
-		// Offset in Base Address 1 Space to Channel 2 Frame Buffer
-	#define XENALS_CHANNEL2_OFFSET				   (0x2000000)				// 32 MBytes..not applicable
-
-		// Size of each frame buffer
-	#define XENALS_FRAMEBUFFER_SIZE				   (0x800000)				//	8 MBytes
-
-		// the event name shared among all Windows NT
-		// This name to be appended to the actual Win32Name
-	#define XENALS_NUM_FRAMEBUFFERS				   (32)
-
-	//----------------------- AJA FS1  ---------------------------------
-
-		// Offset in Base Address 1 Space to Channel 2 Frame Buffer
-	#define FS1_CHANNEL2_OFFSET					(0x0)						// Framebuffers not accessible to processor
-
-		// Size of each frame buffer
-	#define FS1_FRAMEBUFFER_SIZE				(0x0)						//	Framebuffers not accessible to processor
-
-		// the event name shared among all Windows NT
-		// This name to be appended to the actual Win32Name
-	#define FS1_NUM_FRAMEBUFFERS				(0)
-	#define FS1_NTV2_VERTICALINTERRUPT_GLOBAL_EVENT_NAME "_FS1VerticalInterruptSignalEvent"
-
-		// the event name shared among all Windows NT
-		// This name to be appended to the actual Win32Name
-	#define FS1_NTV2_CHANGE_GLOBAL_EVENT_NAME "_FS1ChangeSignalEvent"
-
-	//----------------------- AJA BORG ---------------------------------
-
-		// Offset in Base Address 1 Space to Channel 2 Frame Buffer
-	// #define BORG_CHANNEL2_OFFSET					(0)				 // not applicable
-
-	//-------------------- Defines for 32 1MB frame buffers (28 1MB video frame buffers and 1 4MB audio buffer)
-		// Size of each frame buffer
-	//#define BORG_FRAMEBUFFER_SIZE				   (0x100000)				//	1 MBytes
-	//#define BORG_NUM_FRAMEBUFFERS				   (32)
-
-	//-------------------- Defines for 24 1.125MB frame buffers (24 1.125MB video frame buffers and 1 4MB audio buffer)
-	//					   this totals 27 MB video frame, 1 MB unused gap, and 1 4MB audio buffer based 4 MB below top of memory
-
-	#define BORG_FRAMEBUFFER_SIZE				 (0x120000)					// 1.125 MBytes
-		// this define is left at 32 for practical purposes to locate audio buffer at 4 MB below top of memory (32 - 4 = 28)
-		// in reality, there are only 24 video frame buffers, but if you look at usage of this define, it is best left at 32
-	#define BORG_NUM_FRAMEBUFFERS				 (32)						// 32 * 1.125 = 36
-	#define BONES_NUM_FRAMEBUFFERS				 (99)						// 99 * 1.125 = ~112 MB
-#endif	//	NTV2_DEPRECATE
-
 //----------------------- AJA XENA2 ---------------------------------
 
 	// Offset in Base Address 1 Space to Channel 2 Frame Buffer
@@ -4613,11 +3910,6 @@ typedef struct
 	ULWord				numEntries;
 	NTV2RoutingEntry	routingEntry [MAX_ROUTING_ENTRIES];
 } NTV2RoutingTable; ///< @deprecated	Formerly used by the CNTV2SignalRouter
-
-#if !defined (NTV2_DEPRECATE)
-	typedef NTV2RoutingEntry	Xena2RoutingEntry;		///< @deprecated	'Xena' is obsolete.
-	typedef NTV2RoutingTable	Xena2RoutingTable;		///< @deprecated	'Xena' is obsolete.
-#endif	//	if !defined (NTV2_DEPRECATE)
 
 
 // Color Space Convert Custom Coefficients
@@ -5611,10 +4903,6 @@ typedef enum
 	kRP188SourceLTCPort			= 0xFE
 } RP188SourceFilterSelect;
 
-#if !defined(NTV2_DEPRECATE_15_2)
-	typedef RP188SourceFilterSelect		RP188SourceSelect;
-#endif	//	!defined(NTV2_DEPRECATE_15_2)
-
 
 // Masks
 enum
@@ -5660,20 +4948,6 @@ typedef struct
 	char excludeString[KONA_DEBUGFILTER_STRINGLENGTH];
 } KonaDebugFilterStringInfo;
 
-
-#if !defined(NTV2_DEPRECATE_15_6)
-	typedef struct
-	{
-		NTV2RelayState	manualControl12;
-		NTV2RelayState	manualControl34;
-		NTV2RelayState	relayPosition12;
-		NTV2RelayState	relayPosition34;
-		NTV2RelayState	watchdogStatus;
-		bool			watchdogEnable12;
-		bool			watchdogEnable34;
-		ULWord			watchdogTimeout;
-	} NTV2SDIWatchdogState;
-#endif	//	!defined(NTV2_DEPRECATE_15_6)
 
 typedef enum
 {
@@ -6727,6 +6001,16 @@ typedef enum
 					@param[in]	inByteCount		Specifies the maximum number of bytes to compare. Defaults to 0xFFFFFFFF (entire buffer).
 				**/
 				bool			IsContentEqual (const NTV2Buffer & inBuffer, const ULWord inByteOffset = 0, const ULWord inByteCount = 0xFFFFFFFF) const;
+
+				/**
+					@brief		Answers with the byte offset to the first or next difference.
+					@param[in]	inBuffer		Specifies the memory buffer whose contents are to be compared with mine.
+												The buffer sizes must match.
+					@param		byteOffset		On entry, specifies the byte offset where comparing starts (use zero to find the first difference);
+												on exit, receives the byte offset of the next difference found (or 0xFFFFFFFF if identical).
+					@return		True if successful; otherwise false.
+				**/
+				bool			NextDifference (const NTV2Buffer & inBuffer, ULWord & byteOffset) const;
 
 				/**
 					@brief		Assuming my contents and the contents of the given buffer comprise ring buffers that periodically get overwritten
@@ -9145,6 +8429,8 @@ typedef enum
 
 			typedef std::set <NTV2FrameBufferFormat>			NTV2FrameBufferFormatSet;			///< @brief A set of distinct NTV2FrameBufferFormat values.
 			typedef NTV2FrameBufferFormatSet::const_iterator	NTV2FrameBufferFormatSetConstIter;	///< @brief A handy const iterator for iterating over an NTV2FrameBufferFormatSet.
+			typedef NTV2FrameBufferFormatSet NTV2PixelFormats;	//	New in SDK 17.0
+			typedef NTV2FrameBufferFormatSetConstIter NTV2PixelFormatsConstIter;	//	New in SDK 17.0
 
 			typedef std::set <NTV2FrameGeometry>				NTV2GeometrySet;					///< @brief A set of distinct NTV2FrameGeometry values.
 			typedef NTV2GeometrySet::const_iterator				NTV2GeometrySetConstIter;			///< @brief A handy const iterator for iterating over an NTV2GeometrySet.
@@ -9157,6 +8443,9 @@ typedef enum
 
 			typedef std::set <NTV2OutputDestination>			NTV2OutputDestinations;				///< @brief A set of distinct NTV2OutputDestination values.
 			typedef NTV2OutputDestinations::const_iterator		NTV2OutputDestinationsConstIter;	///< @brief A handy const iterator for iterating over an NTV2OutputDestinations.
+
+			typedef std::set <NTV2FrameRate>					NTV2FrameRateSet;					///< @brief A set of distinct NTV2FrameRate values.  New in SDK 17.0.
+			typedef NTV2FrameRateSet::const_iterator			NTV2FrameRateSetConstIter;			///< @brief A handy const iterator for iterating over an NTV2FrameRateSet.
 
 			/**
 				@brief		Prints the given ::UWordSequence contents into the given output stream.
@@ -9191,7 +8480,8 @@ typedef enum
 			/**
 				@brief	Returns a set of distinct ::NTV2VideoFormat values supported on the given device.
 				@param[in]	inDeviceID	Specifies the ::NTV2DeviceID of the device of interest.
-				@param[out] outFormats	Receives the set of distinct ::NTV2VideoFormat values supported by the device.
+										Specify DEVICE_ID_INVALID to return ALL known video formats.
+				@param[out] outFormats	Receives the set of requested distinct ::NTV2VideoFormat values.
 				@return		True if successful;	 otherwise false.
 				@todo	This needs to be moved to a C++ compatible "device features" module.
 			**/
@@ -9212,7 +8502,7 @@ typedef enum
 				@return		True if successful;	 otherwise false.
 				@todo	This needs to be moved to a C++ compatible "device features" module.
 			**/
-			AJAExport bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2FrameBufferFormatSet & outFormats);
+			AJAExport bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2PixelFormats & outFormats);
 
 			/**
 				@brief		Prints the given ::NTV2FrameBufferFormatSet contents into the given output stream.
@@ -9220,7 +8510,7 @@ typedef enum
 				@param[in]	inFormats	Specifies the set of pixel formats to be streamed.
 				@return		The "inOStream" that was specified.
 			**/
-			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2FrameBufferFormatSet & inFormats);
+			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2PixelFormats & inFormats);
 
 			/**
 				@brief		Appends the given ::NTV2FrameBufferFormatSet contents into the given set.
@@ -9228,7 +8518,7 @@ typedef enum
 				@param[in]	inSet		Specifies the set whose contents will be appended.
 				@return		A reference to the modified set.
 			**/
-			AJAExport NTV2FrameBufferFormatSet & operator += (NTV2FrameBufferFormatSet & inOutSet, const NTV2FrameBufferFormatSet inSet);
+			AJAExport NTV2PixelFormats & operator += (NTV2PixelFormats & inOutSet, const NTV2PixelFormats inSet);
 
 			/**
 				@brief	Returns a set of distinct ::NTV2Standard values supported on the given device.
@@ -9333,6 +8623,32 @@ typedef enum
 				@todo		Needs to be moved to a C++ compatible "device features" module.
 			**/
 			AJAExport bool NTV2DeviceGetSupportedOutputDests (const NTV2DeviceID inDeviceID, NTV2OutputDestinations & outOutputDests, const NTV2IOKinds inKinds = NTV2_IOKINDS_ALL);	//	New in SDK 16.3
+
+			/**
+				@brief		Prints the given ::NTV2FrameRateSet into the given output stream.
+				@param		inOStream	The stream into which the human-readable list will be written.
+				@param[in]	inSet		Specifies the set to be streamed.
+				@return		The "inOStream" that was specified.
+			**/
+			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2FrameRateSet & inSet);	//	New in SDK 17.0
+
+			/**
+				@brief		Appends the given ::NTV2FrameRateSet into the given set.
+				@param		inOutSet	The set to which the other set will be appended.
+				@param[in]	inSet		Specifies the set whose contents will be appended.
+				@return		A reference to the modified set.
+			**/
+			AJAExport NTV2FrameRateSet & operator += (NTV2FrameRateSet & inOutSet, const NTV2FrameRateSet & inSet);	//	New in SDK 17.0
+
+			/**
+				@brief		Returns a set of distinct ::NTV2FrameRate values supported on the given device.
+				@param[in]	inDeviceID			Specifies the ::NTV2DeviceID of the device of interest.
+												Specify ::DEVICE_ID_INVALID to disable the "is supported" check.
+				@param[out] outRates			Receives the requested ::NTV2FrameRateSet.
+				@return		True if successful;	 otherwise false.
+				@todo		Needs to be moved to a C++ compatible "device features" module.
+			**/
+			AJAExport bool NTV2DeviceGetSupportedFrameRates (const NTV2DeviceID inDeviceID, NTV2FrameRateSet & outRates);	//	New in SDK 17.0
 
 
 			/**

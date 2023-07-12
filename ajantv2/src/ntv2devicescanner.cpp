@@ -180,27 +180,16 @@ void CNTV2DeviceScanner::ScanHardware (void)
 			{
 				ostringstream	oss;
 				NTV2DeviceInfo	info;
-				bool bRetail = tmpDevice.DeviceIsDNxIV();
-
 				info.deviceIndex		= boardNum;
 				info.deviceID			= deviceID;
 				info.pciSlot			= 0;
-#if !defined(NTV2_DEPRECATE_16_0)
-				info.pciSlot			= tmpDevice.GetPCISlotNumber();
-#endif	//	!defined(NTV2_DEPRECATE_16_0)
 				info.deviceSerialNumber	= tmpDevice.GetSerialNumber();
 
-				oss << ::NTV2DeviceIDToString (deviceID, bRetail) << " - " << boardNum;
+				oss << ::NTV2DeviceIDToString (deviceID, tmpDevice.features().IsDNxIV()) << " - " << boardNum;
 				if (info.pciSlot)
 					oss << ", Slot " << info.pciSlot;
 
 				info.deviceIdentifier = oss.str();
-#if !defined (NTV2_DEPRECATE)
-				strcpy(info.boardIdentifier, oss.str().c_str());
-				info.boardID = deviceID;
-				info.boardSerialNumber = tmpDevice.GetSerialNumber();
-				info.boardNumber = boardNum;
-#endif
 
 				SetVideoAttributes(info);
 				SetAudioAttributes(info, tmpDevice);
@@ -213,24 +202,6 @@ void CNTV2DeviceScanner::ScanHardware (void)
 	}	//	boardNum loop
 
 }	//	ScanHardware
-
-
-#if !defined (NTV2_DEPRECATE)
-	bool CNTV2DeviceScanner::BoardTypePresent (NTV2BoardType boardType, bool rescan)
-	{
-		if (rescan)
-			ScanHardware(true);
-
-		const NTV2DeviceInfoList & boardList(GetDeviceInfoList());
-		for (NTV2DeviceInfoListConstIter boardIter(boardList.begin());  boardIter != boardList.end();  ++boardIter)
-			if (boardIter->boardType == boardType)
-				return true;	//	Found!
-
-		return false;	//	Not found
-
-	}	//	BoardTypePresent
-
-#endif	//	else !defined (NTV2_DEPRECATE)
 
 
 bool CNTV2DeviceScanner::DeviceIDPresent (const NTV2DeviceID inDeviceID, const bool inRescan)
@@ -403,9 +374,6 @@ bool NTV2DeviceInfo::operator == (const NTV2DeviceInfo & second) const
 	//	its "boardIdentifier" field are indeterminate, making it worthless for accurate comparisons.
 	//	"boardSerialNumber" and boardNumber are the only required comparisons, but I also check boardType,
 	//	boardID, and pciSlot for good measure...
-	#if !defined (NTV2_DEPRECATE)
-	if (first.boardType							!=	second.boardType)						diffs++;
-	#endif	//	!defined (NTV2_DEPRECATE)
 	if (first.deviceID							!=	second.deviceID)						diffs++;
 	if (first.deviceIndex						!=	second.deviceIndex)						diffs++;
 	if (first.deviceSerialNumber				!=	second.deviceSerialNumber)				diffs++;
@@ -551,27 +519,10 @@ ostream &	operator << (ostream & inOutStr, const NTV2AudioBitsPerSampleList & in
 }
 
 
-#if !defined (NTV2_DEPRECATE)
-
-	void CNTV2DeviceScanner::DumpBoardInfo (const NTV2DeviceInfo & info)
-	{
-		#if defined (DEBUG) || defined (_DEBUG) || defined (AJA_DEBUG)
-			cout << info << endl;
-		#else
-			(void) info;
-		#endif
-	}	//	DumpBoardInfo
-
-#endif	//	!NTV2_DEPRECATE
-
-
 ostream &	operator << (ostream & inOutStr, const NTV2DeviceInfo & inInfo)
 {
 	inOutStr	<< "Device Info for '" << inInfo.deviceIdentifier << "'" << endl
 				<< "            Device Index Number: " << inInfo.deviceIndex << endl
-				#if !defined (NTV2_DEPRECATE)
-				<< "                    Device Type: 0x" << hex << inInfo.boardType << dec << endl
-				#endif	//	!defined (NTV2_DEPRECATE)
 				<< "                      Device ID: 0x" << hex << inInfo.deviceID << dec << endl
 				<< "                  Serial Number: 0x" << hex << inInfo.deviceSerialNumber << dec << endl
 				<< "                       PCI Slot: 0x" << hex << inInfo.pciSlot << dec << endl
@@ -666,20 +617,6 @@ std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioPhysicalForm
 }	//	AudioPhysicalFormatList ostream operator <<
 
 
-#if !defined (NTV2_DEPRECATE)
-
-	void CNTV2DeviceScanner::DumpAudioFormatInfo (const NTV2AudioPhysicalFormat & audioPhysicalFormat)
-	{
-		#if defined (DEBUG) || defined (AJA_DEBUG)
-			cout << audioPhysicalFormat << endl;
-		#else
-			(void) audioPhysicalFormat;
-		#endif
-	}	//	DumpAudioFormatInfo
-
-#endif	//	!NTV2_DEPRECATE
-
-
 // Private methods
 
 void CNTV2DeviceScanner::SetVideoAttributes (NTV2DeviceInfo & info)
@@ -705,7 +642,7 @@ void CNTV2DeviceScanner::SetVideoAttributes (NTV2DeviceInfo & info)
 	info.breakoutBoxSupport		= NTV2DeviceCanDoBreakoutBox		(info.deviceID);
 	info.vidProcSupport			= NTV2DeviceCanDoVideoProcessing	(info.deviceID);
 	info.dualLinkSupport		= NTV2DeviceCanDoDualLink			(info.deviceID);
-	info.numDMAEngines			= static_cast <UWord> (NTV2GetNumDMAEngines (info.deviceID));
+	info.numDMAEngines			= UWord(::NTV2DeviceGetNumDMAEngines(info.deviceID));
 	info.pingLED				= NTV2DeviceGetPingLED				(info.deviceID);
 	info.has2KSupport			= NTV2DeviceCanDo2KVideo			(info.deviceID);
 	info.has4KSupport			= NTV2DeviceCanDo4KVideo			(info.deviceID);
@@ -725,11 +662,7 @@ void CNTV2DeviceScanner::SetVideoAttributes (NTV2DeviceInfo & info)
 	info.stereoInSupport		= NTV2DeviceCanDoStereoIn			(info.deviceID);
 	info.multiFormat			= NTV2DeviceCanDoMultiFormat		(info.deviceID);
 	info.numSerialPorts			= NTV2DeviceGetNumSerialPorts		(info.deviceID);
-	#if !defined (NTV2_DEPRECATE)
-		info.procAmpSupport		= NTV2BoardCanDoProcAmp				(info.deviceID);
-	#else
-		info.procAmpSupport		= false;
-	#endif
+	info.procAmpSupport			= false;
 
 }	//	SetVideoAttributes
 
@@ -743,14 +676,14 @@ void CNTV2DeviceScanner::SetAudioAttributes(NTV2DeviceInfo & info, CNTV2Card & i
 	info.audioOutSourceList.clear();
 
 
-	if (::NTV2DeviceGetNumAudioSystems(info.deviceID))
+	if (inBoard.features().GetNumAudioSystems())
 	{
 		ULWord audioControl;
 		inBoard.ReadRegister(kRegAud1Control, audioControl);
 
 		//audioSampleRateList
 		info.audioSampleRateList.push_back(k48KHzSampleRate);
-		if (::NTV2DeviceCanDoAudio96K(info.deviceID))
+		if (inBoard.features().CanDoAudio96K())
 			info.audioSampleRateList.push_back(k96KHzSampleRate);
 
 		//audioBitsPerSampleList
@@ -760,31 +693,31 @@ void CNTV2DeviceScanner::SetAudioAttributes(NTV2DeviceInfo & info, CNTV2Card & i
 		info.audioInSourceList.push_back(kSourceSDI);
 		if (audioControl & BIT(21))
 			info.audioInSourceList.push_back(kSourceAES);
-		if (::NTV2DeviceCanDoAnalogAudio(info.deviceID))
+		if (inBoard.features().CanDoAnalogAudio())
 			info.audioInSourceList.push_back(kSourceAnalog);
 
 		//audioOutSourceList
 		info.audioOutSourceList.push_back(kSourceAll);
 
 		//audioNumChannelsList
-		if (::NTV2DeviceCanDoAudio2Channels(info.deviceID))
+		if (inBoard.features().CanDoAudio2Channels())
 			info.audioNumChannelsList.push_back(kNumAudioChannels2);
-		if (::NTV2DeviceCanDoAudio6Channels(info.deviceID))
+		if (inBoard.features().CanDoAudio6Channels())
 			info.audioNumChannelsList.push_back(kNumAudioChannels6);
-		if (::NTV2DeviceCanDoAudio8Channels(info.deviceID))
+		if (inBoard.features().CanDoAudio8Channels())
 			info.audioNumChannelsList.push_back(kNumAudioChannels8);
 
-		info.numAudioStreams = ::NTV2DeviceGetNumAudioSystems(info.deviceID);
+		info.numAudioStreams = inBoard.features().GetNumAudioSystems();
 	}
 
-	info.numAnalogAudioInputChannels = ::NTV2DeviceGetNumAnalogAudioInputChannels(info.deviceID);
-	info.numAESAudioInputChannels = ::NTV2DeviceGetNumAESAudioInputChannels(info.deviceID);
-	info.numEmbeddedAudioInputChannels = ::NTV2DeviceGetNumEmbeddedAudioInputChannels(info.deviceID);
-	info.numHDMIAudioInputChannels = ::NTV2DeviceGetNumHDMIAudioInputChannels(info.deviceID);
-	info.numAnalogAudioOutputChannels = ::NTV2DeviceGetNumAnalogAudioOutputChannels(info.deviceID);
-	info.numAESAudioOutputChannels = ::NTV2DeviceGetNumAESAudioOutputChannels(info.deviceID);
-	info.numEmbeddedAudioOutputChannels = ::NTV2DeviceGetNumEmbeddedAudioOutputChannels(info.deviceID);
-	info.numHDMIAudioOutputChannels = ::NTV2DeviceGetNumHDMIAudioOutputChannels(info.deviceID);
+	info.numAnalogAudioInputChannels = inBoard.features().GetNumAnalogAudioInputChannels();
+	info.numAESAudioInputChannels = inBoard.features().GetNumAESAudioInputChannels();
+	info.numEmbeddedAudioInputChannels = inBoard.features().GetNumEmbeddedAudioInputChannels();
+	info.numHDMIAudioInputChannels = inBoard.features().GetNumHDMIAudioInputChannels();
+	info.numAnalogAudioOutputChannels = inBoard.features().GetNumAnalogAudioOutputChannels();
+	info.numAESAudioOutputChannels = inBoard.features().GetNumAESAudioOutputChannels();
+	info.numEmbeddedAudioOutputChannels = inBoard.features().GetNumEmbeddedAudioOutputChannels();
+	info.numHDMIAudioOutputChannels = inBoard.features().GetNumHDMIAudioOutputChannels();
 
 }	//	SetAudioAttributes
 
@@ -801,58 +734,3 @@ void CNTV2DeviceScanner::SortDeviceInfoList (void)
 {
 	std::sort (_deviceInfoList.begin (), _deviceInfoList.end (), gCompareSlot);
 }
-
-
-//	This needs to be moved into a C++ compatible "device features" module:
-bool NTV2DeviceGetSupportedVideoFormats (const NTV2DeviceID inDeviceID, NTV2VideoFormatSet & outFormats)
-{
-	bool	isOkay	(true);
-
-	outFormats.clear();
-
-    for (NTV2VideoFormat videoFormat(NTV2_FORMAT_UNKNOWN);  videoFormat < NTV2_MAX_NUM_VIDEO_FORMATS;  videoFormat = NTV2VideoFormat(videoFormat + 1))
-	{
-		if (!::NTV2DeviceCanDoVideoFormat (inDeviceID, videoFormat))
-			continue;
-		try
-		{
-			outFormats.insert(videoFormat);
-		}
-		catch (const std::bad_alloc &)
-		{
-			isOkay = false;
-			outFormats.clear();
-			break;
-		}
-	}	//	for each video format
-
-	NTV2_ASSERT ((isOkay && !outFormats.empty())  ||  (!isOkay && outFormats.empty()));
-	return isOkay;
-
-}	//	NTV2DeviceGetSupportedVideoFormats
-
-
-//	This needs to be moved into a C++ compatible "device features" module:
-bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2FrameBufferFormatSet & outFormats)
-{
-	bool	isOkay	(true);
-
-	outFormats.clear ();
-
-	for (NTV2PixelFormat pixelFormat(NTV2_FBF_FIRST);  pixelFormat < NTV2_FBF_LAST;  pixelFormat = NTV2PixelFormat(pixelFormat+1))
-		if (::NTV2DeviceCanDoFrameBufferFormat (inDeviceID, pixelFormat))
-			try
-			{
-				outFormats.insert (pixelFormat);
-			}
-			catch (const std::bad_alloc &)
-			{
-				isOkay = false;
-				outFormats.clear ();
-				break;
-			}
-
-	NTV2_ASSERT ((isOkay && !outFormats.empty () ) || (!isOkay && outFormats.empty () ));
-	return isOkay;
-
-}	//	NTV2DeviceGetSupportedPixelFormats

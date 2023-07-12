@@ -7,9 +7,9 @@
 #include "ajabase/common/commandline.h"
 #include "ajabase/common/common.h"
 #include "ajabase/system/file_io.h"
-
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 static const char kAssignChar = '=';
 static const char kSingleDash = '-';

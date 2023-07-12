@@ -12,9 +12,9 @@
 #include "ntv2democommon.h"
 #include "ajabase/system/thread.h"
 #include "ajabase/system/info.h"
-#include "ajacc/includes/ntv2captionencoder608.h"
-#include "ajacc/includes/ntv2captionencoder708.h"
-#include "ajacc/includes/ntv2caption608types.h"
+#include "ntv2captionencoder608.h"
+#include "ntv2captionencoder708.h"
+#include "ntv2caption608types.h"
 #include <vector>
 #include <map>
 
@@ -40,21 +40,21 @@ void SignalHandler (int inSignal);
 /**
 	@brief	This class is used to configure a caption generator for a single caption channel.
 **/
-typedef struct CCGeneratorConfig
+typedef struct CCGenConfig
 {
 	public:
-		NTV2StringList			fFilesToPlay;			///< @brief	A list of zero or more strings containing paths to text files to be "played"
-		AtEndAction				fEndAction;				///< @brief	The action to take after the file list has finished playing
-		NTV2Line21Mode			fCaptionMode;			///< @brief	The CEA-608 caption mode to use
-		NTV2Line21Channel		fCaptionChannel;		///< @brief	The caption channel to use
-		bool					fNewLinesAreNewRows;	///< @brief	If true, newlines break caption rows; otherwise are treated as whitespace
-		double					fCharsPerMinute;		///< @brief	The rate at which caption characters get enqueued, in characters per minute
-		NTV2Line21Attributes	fAttributes;			///< @brief	The character attributes to use
+		NTV2StringList		fFilesToPlay;			///< @brief	A list of zero or more strings containing paths to text files to be "played"
+		AtEndAction			fEndAction;				///< @brief	The action to take after the file list has finished playing
+		NTV2Line21Mode		fCaptionMode;			///< @brief	The CEA-608 caption mode to use
+		NTV2Line21Channel	fCaptionChannel;		///< @brief	The caption channel to use
+		bool				fNewLinesAreNewRows;	///< @brief	If true, newlines break caption rows; otherwise are treated as whitespace
+		double				fCharsPerMinute;		///< @brief	The rate at which caption characters get enqueued, in characters per minute
+		NTV2Line21Attrs		fAttributes;			///< @brief	The character attributes to use
 
 		/**
 			@brief	Constructs a default generator configuration.
 		**/
-		inline explicit	CCGeneratorConfig ()
+		inline explicit	CCGenConfig ()
 			:	fFilesToPlay		(NTV2StringList()),
 				fEndAction			(AtEndAction_Quit),
 				fCaptionMode		(NTV2_CC608_CapModeRollUp4),
@@ -66,12 +66,12 @@ typedef struct CCGeneratorConfig
 		}
 
 		AJALabelValuePairs Get (void) const;
-}	CCGeneratorConfig;
+}	CCGenConfig;
 
 
-typedef std::map <NTV2Line21Channel, CCGeneratorConfig>		CaptionChanGenMap;
-typedef	CaptionChanGenMap::const_iterator					CaptionChanGenMapCIter;
-typedef CaptionChanGenMap::iterator							CaptionChanGenMapIter;
+typedef std::map <NTV2Line21Channel, CCGenConfig>	CaptionChanGenMap;
+typedef	CaptionChanGenMap::const_iterator			CaptionChanGenMapCIter;
+typedef CaptionChanGenMap::iterator					CaptionChanGenMapIter;
 
 
 /**
@@ -226,7 +226,7 @@ class NTV2CCPlayer
 		AJAThread					mPlayThread;			///< @brief	My playout (consumer) thread object
 		AJAThreadList				mGeneratorThreads;		///< @brief	My caption generator threads -- one per caption channel
 		AUTOCIRCULATE_STATUS		mACStatus;				///< @brief	My AutoCirculate status
-		CNTV2Card					mDevice;				///< @brief	My CNTV2Card instance
+		mutable CNTV2Card			mDevice;				///< @brief	My CNTV2Card instance
 		NTV2DeviceID				mDeviceID;				///< @brief	My device (model) identifier
 		NTV2TaskMode				mSavedTaskMode;			///< @brief	Used to restore the previous state
 		NTV2Standard				mVideoStandard;			///< @brief	Output video standard

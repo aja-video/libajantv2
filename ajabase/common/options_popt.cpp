@@ -228,12 +228,36 @@ extern unsigned int _poptGroupMask;
 #define LF_ISSET(_FLAG)		(argInfo & POPT_ARGFLAG_##_FLAG)
 #define CBF_ISSET(_opt, _FLAG)	((_opt)->argInfo & POPT_CBFLAG_##_FLAG)
 
+/**
+ * Auto help table options.
+ */
+#define		   _POPTHELP_MAXLINE	   ((size_t)79)
+
+static struct poptOption poptHelpOptions[] = {
+  { NULL, '\0', POPT_ARG_CALLBACK, (void *)displayArgs, 0, NULL, NULL },
+  { "help", '?', 0, NULL, (int)'?', N_("Show this help message"), NULL },
+  { "usage", '\0', 0, NULL, (int)'u', N_("Display brief usage message"), NULL },
+	POPT_TABLEEND
+} ;
+struct poptOption * poptHelpOptionsAutoHelp = poptHelpOptions;
+
 /* XXX sick hack to preserve pretense of a popt-1.x ABI. */
+static struct poptOption poptHelpOptions2[] = {
+	{ NULL, '\0', POPT_ARG_INTL_DOMAIN, (void*)"PACKAGE", 0, NULL, NULL},
+  { NULL, '\0', POPT_ARG_CALLBACK, (void *)displayArgs, 0, NULL, NULL },
+  { "help", '?', 0, NULL, (int)'?', N_("Show this help message"), NULL },
+  { "usage", '\0', 0, NULL, (int)'u', N_("Display brief usage message"), NULL },
+  { "", '\0',	0, NULL, 0, N_("Terminate options"), NULL },
+	POPT_TABLEEND
+} ;
+
+struct poptOption * poptHelpOptionsI18N = poptHelpOptions2;
+
 #define poptSubstituteHelpI18N(opt) \
   { \
 	if ((&opt) == poptHelpOptions) (opt) = *poptHelpOptionsI18N; \
   }
-// if ((opt) == poptHelpOptions) (opt) = poptHelpOptionsI18N;
+
 
 struct optionStackEntry {
 	int argc;
@@ -737,22 +761,6 @@ void displayArgs(poptContext con,
 struct poptOption poptAliasOptions[] = {
 	POPT_TABLEEND
 };
-
-/**
- * Auto help table options.
- */
-static struct poptOption poptHelpOptions2[] = {
-	{ NULL, '\0', POPT_ARG_INTL_DOMAIN, (void*)"PACKAGE", 0, NULL, NULL},
-  { NULL, '\0', POPT_ARG_CALLBACK, (void *)displayArgs, 0, NULL, NULL },
-  { "help", '?', 0, NULL, (int)'?', N_("Show this help message"), NULL },
-  { "usage", '\0', 0, NULL, (int)'u', N_("Display brief usage message"), NULL },
-  { "", '\0',	0, NULL, 0, N_("Terminate options"), NULL },
-	POPT_TABLEEND
-} ;
-
-struct poptOption * poptHelpOptionsI18N = poptHelpOptions2;
-
-#define		   _POPTHELP_MAXLINE	   ((size_t)79)
 
 typedef struct columns_s {
 	size_t cur;

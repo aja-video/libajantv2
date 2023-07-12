@@ -11,9 +11,10 @@
 #include <iostream>
 #include <iomanip>
 #include <IOKit/IOCFPlugIn.h>
-#include "ajatypes.h"
+#include "ajantv2/includes/ajatypes.h"
 #include "devicenotifier.h"
 #include "ajabase/common/common.h"
+#include "ajabase/system/debug.h"
 
 
 using namespace std;

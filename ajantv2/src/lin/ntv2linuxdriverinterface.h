@@ -8,9 +8,6 @@
 #define NTV2LINUXDRIVERINTERFACE_H
 
 #include "ntv2driverinterface.h"
-#include "ntv2linuxpublicinterface.h"
-#include "ntv2devicefeatures.h"
-
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>

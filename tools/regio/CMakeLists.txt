@@ -39,13 +39,13 @@ install(TARGETS ${PROJECT_NAME}
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if (AJA_INSTALL_SOURCES)
-	install(FILES ${REGIO_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/regio)
-	install(FILES ${REGIO_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/regio)
+	install(FILES ${REGIO_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/tools/regio)
+	install(FILES ${REGIO_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/tools/regio)
 endif()
 
 if (AJA_INSTALL_MISC)
-	install(FILES Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/regio)
+	install(FILES Makefile DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/tools/regio)
 endif()
 if (AJA_INSTALL_CMAKE)
-	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/ajaapps/crossplatform/regio)
+	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/tools/regio)
 endif()

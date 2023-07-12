@@ -112,7 +112,6 @@ class NTV2Player
 		AJAThread			mConsumerThread;	///< @brief	My playout (consumer) thread object
 		AJAThread			mProducerThread;	///< @brief	My generator (producer) thread object
 		CNTV2Card			mDevice;			///< @brief	My CNTV2Card instance
-		NTV2DeviceID		mDeviceID;			///< @brief	My device (model) identifier
 		NTV2TaskMode		mSavedTaskMode;		///< @brief	Used to restore the previous task mode
 		ULWord				mCurrentFrame;		///< @brief	My current frame number (for generating timecode)
 		ULWord				mCurrentSample;		///< @brief	My current audio sample (tone generator state)

@@ -18,15 +18,32 @@ endif()
 set(NTV2_DOXYGEN_SDK_VERSION "${AJA_NTV2_VER_STR}")
 
 # Attempt to locate qhelpgenerator for generation of Qt-related docs
-set(_qthelpgenerator_executable "qhelpgenerator")
+set(_qthelpgenerator_executable "")
 if (AJA_QT_ENABLED)
-    find_package(Qt5Core HINTS ${AJA_QT_DIR} REQUIRED)
-    get_target_property(_qmake_location Qt5::qmake IMPORTED_LOCATION)
-    get_filename_component(_qt_bin_dir "${_qmake_location}" DIRECTORY)
-    if (EXISTS ${_qt_bin_dir} AND EXISTS ${_qt_bin_dir}/qhelpgenerator)
-        set(QT_HELPGEN_PATH ${_qt_bin_dir}/qhelpgenerator)
+
+    # if a path contains both Qt5 and Qt6 versions, like some Linux distros do,
+    # set QT_DEFAULT_MAJOR_VERSION to 5 or 6 to specify the version to use.
+    # defaults to trying both 6 then 5 if QT_DEFAULT_MAJOR_VERSION is not set
+    set(PREF_QT_MAJORS Qt6 Qt5)
+    if (QT_DEFAULT_MAJOR_VERSION)
+	    set(PREF_QT_MAJORS Qt${QT_DEFAULT_MAJOR_VERSION})
+    endif()
+
+    find_package(QT NAMES ${PREF_QT_MAJORS} HINTS ${AJA_QT_DIR} COMPONENTS Core)
+    if (QT_VERSION_MAJOR STREQUAL "6")
+        find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Tools)
     else()
-        message(WARNING "qhelpgenerator not found in ${_qt_bin_dir}")
+        find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Help)
+    endif()
+
+    if (Qt${QT_VERSION_MAJOR}_FOUND)
+        get_target_property(_qthelpgenerator_executable Qt${QT_VERSION_MAJOR}::qhelpgenerator IMPORTED_LOCATION)
+    endif()
+
+    if (EXISTS ${_qthelpgenerator_executable})
+        set(QT_HELPGEN_PATH ${_qthelpgenerator_executable})
+    else()
+        message(WARNING "qhelpgenerator not found at '${_qthelpgenerator_executable}'")
     endif()
 endif()
 
@@ -65,4 +82,7 @@ if (AJA_INSTALL_SOURCES)
             USE_SOURCE_PERMISSIONS)
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ntv2.doxy 
             DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME})
+endif()
+if (AJA_INSTALL_CMAKE)
+    install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/docs)
 endif()
