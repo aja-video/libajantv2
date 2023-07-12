@@ -4636,18 +4636,14 @@ bool CNTV2Card::ReadSDIStatistics (NTV2SDIInStatistics & outStats)
 bool CNTV2Card::HasMultiRasterWidget (void)
 {
 	bool hasMultiRasterWidget(false);
-	if (NTV2DeviceCanDoHDMIMultiView(_boardID))
-	{
-		CNTV2DriverInterface::ReadRegister(kRegMRSupport, hasMultiRasterWidget, kRegMaskMRSupport, kRegShiftMRSupport);
-	}
-	return hasMultiRasterWidget;
+	return NTV2DeviceCanDoHDMIMultiView(_boardID)
+			&&  CNTV2DriverInterface::ReadRegister(kRegMRSupport, hasMultiRasterWidget, kRegMaskMRSupport, kRegShiftMRSupport)
+			&&  hasMultiRasterWidget;
 }
 
 bool CNTV2Card::SetMultiRasterBypassEnable (const bool inEnable)
 {
-	if (!HasMultiRasterWidget())
-		return false;
-	return WriteRegister(kRegMROutControl, inEnable, kRegMaskMRBypass, kRegShiftMRBypass);
+	return HasMultiRasterWidget() && WriteRegister(kRegMROutControl, inEnable, kRegMaskMRBypass, kRegShiftMRBypass);
 }
 
 bool CNTV2Card::GetMultiRasterBypassEnable (bool & outEnabled)
