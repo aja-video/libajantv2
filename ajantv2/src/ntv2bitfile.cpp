@@ -538,7 +538,7 @@ string CNTV2Bitfile::GetPrimaryHardwareDesignName (const NTV2DeviceID inDeviceID
 		case DEVICE_ID_TTAP:					return "t_tap_top";			//	t_tap_top.ncd
 		case DEVICE_ID_TTAP_PRO:				return "t_tap_pro";
 		case DEVICE_ID_KONAX:					return "konax";
-		case DEVICE_ID_KONAXR:					return "konaxr";
+		case DEVICE_ID_KONAXM:					return "konaxm";
 		case DEVICE_ID_NOTFOUND:				break;
 #if !defined(_DEBUG)
 		default:								break;
@@ -656,8 +656,8 @@ bool CNTV2Bitfile::CanFlashDevice (const NTV2DeviceID inDeviceID) const
 											|| designName == "c44_12g";		//	original 4x12g OEM used in 15.2 release
 		case DEVICE_ID_TTAP_PRO:		return GetPrimaryHardwareDesignName (DEVICE_ID_TTAP_PRO) == designName;
 		case DEVICE_ID_KONAX:
-		case DEVICE_ID_KONAXR:			return GetPrimaryHardwareDesignName (DEVICE_ID_KONAX) == designName
-											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_KONAXR);
+		case DEVICE_ID_KONAXM:			return GetPrimaryHardwareDesignName (DEVICE_ID_KONAX) == designName
+											|| designName == GetPrimaryHardwareDesignName (DEVICE_ID_KONAXM);
 		default:					break;
 	}
 	return false;
