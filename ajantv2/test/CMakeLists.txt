@@ -28,3 +28,7 @@ if (NOT TARGET ut_ajantv2)
 	target_link_libraries(ut_ajantv2 PUBLIC ajantv2 doctest::doctest_with_main ${TARGET_LINK_LIBS})
 	doctest_discover_tests(${PROJECT_NAME} JUNIT_OUTPUT_DIR ${TEST_XML_DIR})
 endif()
+
+if (AJA_INSTALL_CMAKE)
+    install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/ajantv2/test)
+endif()

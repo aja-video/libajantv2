@@ -827,14 +827,6 @@ AJAStatus AJAAncillaryList::AddVANCData (const UWordSequence & inPacketWords, co
 }	//	AddVANCData
 
 
-#if !defined(NTV2_DEPRECATE_14_2)
-	AJAStatus AJAAncillaryList::AddVANCData (const UWordSequence & inPacketWords, const uint16_t inLineNum, const AJAAncDataChannel inChannel)
-	{
-		return AddVANCData (inPacketWords, AJAAncDataLoc (AJAAncDataLink_A,  inChannel, AJAAncDataSpace_VANC,  inLineNum));
-	}	//	AddVANCData
-#endif	//	!defined(NTV2_DEPRECATE_14_2)
-
-
 AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2Buffer &				inFrameBuffer,
 											const NTV2FormatDescriptor &	inFormatDesc,
 											AJAAncillaryList &				outPackets,

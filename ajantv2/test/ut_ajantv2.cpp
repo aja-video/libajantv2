@@ -1026,6 +1026,16 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		CHECK(spain.GetU16s(u16s, 0, 3));
 		CHECK_EQ(u16s.size(), 3);
 
+		//	NextDifference
+		ULWord byteOffset(0);
+		CHECK(spain.NextDifference(japan, byteOffset));
+		CHECK_EQ(byteOffset, 12);
+		CHECK_EQ(spain.U8(byteOffset), 'S');
+		CHECK_EQ(japan.U8(byteOffset), 'J');
+		byteOffset += 4;
+		CHECK(spain.NextDifference(japan, byteOffset));
+		CHECK_EQ(byteOffset, 0xFFFFFFFF);	//	No other diffs
+
 		//	Test cast-to-pointer & cast-to-size_t operators:
 		const char * pConstChars = spain;
 		std::string s;

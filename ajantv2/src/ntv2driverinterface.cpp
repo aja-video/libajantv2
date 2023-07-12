@@ -182,17 +182,6 @@ bool CNTV2DriverInterface::Open (const std::string & inURLSpec)
 	return false;
 }
 
-#if !defined(NTV2_DEPRECATE_14_3)
-	bool CNTV2DriverInterface::Open (UWord boardNumber, bool displayError, NTV2DeviceType eBoardType, const char* hostname)
-	{	(void) eBoardType;	(void) displayError;	//	Ignored
-		const string host(hostname ? hostname : "");
-		if (host.empty())
-			return Open(boardNumber);
-		return Open(host);
-	}
-#endif	//	!defined(NTV2_DEPRECATE_14_3)
-
-
 bool CNTV2DriverInterface::Close (void)
 {
 	if (IsOpen())
@@ -1506,9 +1495,6 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanDoDVCProHD:						outValue = ::NTV2DeviceCanDoDVCProHD					(devID);	break;	//	Deprecate?
 		case kDeviceCanDoEnhancedCSC:					outValue = ::NTV2DeviceCanDoEnhancedCSC					(devID);	break;	//	Deprecate?
 		case kDeviceCanDoFrameStore1Display:			outValue = ::NTV2DeviceCanDoFrameStore1Display			(devID);	break;	//	Deprecate?
-#if !defined (NTV2_DEPRECATE_14_3)
-		case kDeviceCanDoFreezeOutput:					outValue = ::NTV2DeviceCanDoFreezeOutput				(devID);	break;	//	Deprecate?
-#endif	//	NTV2_DEPRECATE_14_3
 		case kDeviceCanDoHDMIOutStereo:					outValue = ::NTV2DeviceCanDoHDMIOutStereo				(devID);	break;	//	Deprecate?
 		case kDeviceCanDoHDV:							outValue = ::NTV2DeviceCanDoHDV							(devID);	break;	//	Deprecate?
 		case kDeviceCanDoHDVideo:						outValue = ::NTV2DeviceCanDoHDVideo						(devID);	break;	//	Deprecate?
@@ -1690,38 +1676,3 @@ bool CNTV2DriverInterface::GetRegInfoForNumericParam (const NTV2NumericParamID i
 	}
 	return outRegInfo.IsValid();
 }
-
-
-#if !defined (NTV2_DEPRECATE)
-NTV2BoardType CNTV2DriverInterface::GetCompileFlag ()
-{
-	NTV2BoardType eBoardType = BOARDTYPE_UNKNOWN;
-
-#ifdef HDNTV
-	eBoardType = BOARDTYPE_HDNTV;
-#elif defined KSD
-	eBoardType = BOARDTYPE_KSD;
-#elif defined KHD
-	eBoardType = BOARDTYPE_KHD;
-#elif defined XENA2
-	eBoardType = BOARDTYPE_AJAXENA2;
-#elif defined BORG
-	eBoardType = BOARDTYPE_BORG;
-#endif
-
-	return eBoardType;
-}
-#endif	//	!NTV2_DEPRECATE
-
-
-#if defined (AJADLL_BUILD) || defined (AJASTATIC)
-	//	This code forces link/load errors if the SDK client was built with NTV2_DEPRECATE defined,
-	//	but the SDK lib/dylib/DLL was built without NTV2_DEPRECATE defined, ... or vice-versa...
-	#if defined (NTV2_DEPRECATE)
-		AJAExport	int gNTV2_DEPRECATE (void);
-		AJAExport	int gNTV2_DEPRECATE (void){return 0;}
-	#else
-		AJAExport	int gNTV2_NON_DEPRECATE (void);
-		AJAExport	int gNTV2_NON_DEPRECATE (void){return 0;}
-	#endif
-#endif	//	AJADLL_BUILD or AJASTATIC

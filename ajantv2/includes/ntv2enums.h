@@ -10,26 +10,6 @@
 
 #include "ajatypes.h"		//	for NTV2_DEPRECATE & friends
 #include "ntv2version.h"	//	for AJA_NTV2_SDK_VERSION_MAJOR & friends
-#if !defined(NTV2_DEPRECATE_14_3)
-typedef enum
-{
-	DEVICETYPE_UNKNOWN=0,
-	DEVICETYPE_NTV2=256,
-	DEVICETYPE_MAX=256
-	#if !defined (NTV2_DEPRECATE)
-		,BOARDTYPE_UNKNOWN	= DEVICETYPE_UNKNOWN,
-		BOARDTYPE_NTV2		= DEVICETYPE_NTV2,
-		BOARDTYPE_MAX		= DEVICETYPE_MAX
-	#endif	//	!defined (NTV2_DEPRECATE)
-} NTV2DeviceType;		///< @deprecated	Obsolete.
-#endif	//	!defined(NTV2_DEPRECATE_14_3)
-
-
-#if !defined (NTV2_DEPRECATE)
-	typedef NTV2DeviceType	NTV2BoardType;
-	#define BOARDTYPE_SCANNABLE					(BOARDTYPE_NTV2)
-	#define BOARDTYPE_AS_COMPILED				(DEVICETYPE_NTV2)
-#endif
 
 
 /**
@@ -214,24 +194,6 @@ typedef enum
 	NTV2_NUM_STANDARDS,
 	NTV2_STANDARD_UNDEFINED = NTV2_NUM_STANDARDS,
 	NTV2_STANDARD_INVALID	= NTV2_NUM_STANDARDS
-#if !defined (NTV2_DEPRECATE)
-	,
-	NTV2_V2_STANDARD_1080		= NTV2_STANDARD_1080,		///< @deprecated	Use NTV2_STANDARD_1080 instead.
-	NTV2_V2_STANDARD_720		= NTV2_STANDARD_720,		///< @deprecated	Use NTV2_STANDARD_720 instead.
-	NTV2_V2_STANDARD_525		= NTV2_STANDARD_525,		///< @deprecated	Use NTV2_STANDARD_525 instead.
-	NTV2_V2_STANDARD_625		= NTV2_STANDARD_625,		///< @deprecated	Use NTV2_STANDARD_625 instead.
-	NTV2_V2_STANDARD_1080p		= NTV2_STANDARD_1080p,		///< @deprecated	Use NTV2_STANDARD_1080p instead.
-	NTV2_V2_STANDARD_2K			= NTV2_STANDARD_2K,			///< @deprecated	Use NTV2_STANDARD_2K instead.
-	NTV2_V2_STANDARD_2Kx1080p	= NTV2_STANDARD_2Kx1080p,	///< @deprecated	Use NTV2_STANDARD_2Kx1080p instead.
-	NTV2_V2_STANDARD_2Kx1080i	= NTV2_STANDARD_2Kx1080i,	///< @deprecated	Use NTV2_STANDARD_2Kx1080i instead.
-	NTV2_V2_STANDARD_3840x2160p = NTV2_STANDARD_3840x2160p, ///< @deprecated	Use NTV2_STANDARD_3840x2160p instead.
-	NTV2_V2_STANDARD_4096x2160p = NTV2_STANDARD_4096x2160p, ///< @deprecated	Use NTV2_STANDARD_4096x2160p instead.
-	NTV2_V2_STANDARD_3840HFR	= NTV2_STANDARD_3840HFR,	///< @deprecated	Use NTV2_STANDARD_3840HFR instead.
-	NTV2_V2_STANDARD_4096HFR	= NTV2_STANDARD_4096HFR,	///< @deprecated	Use NTV2_STANDARD_4096HFR instead.
-	NTV2_V2_NUM_STANDARDS		= NTV2_NUM_STANDARDS,		///< @deprecated	Use NTV2_NUM_STANDARDS instead.
-	NTV2_V2_STANDARD_UNDEFINED	= NTV2_STANDARD_UNDEFINED,	///< @deprecated	Use NTV2_STANDARD_UNDEFINED instead.
-	NTV2_V2_STANDARD_INVALID	= NTV2_STANDARD_INVALID		///< @deprecated	Use NTV2_STANDARD_INVALID instead.
-#endif	//	!defined (NTV2_DEPRECATE)
 } NTV2Standard;
 
 #define NTV2_IS_VALID_STANDARD(__s__)			((__s__) >= NTV2_STANDARD_1080 && (__s__) < NTV2_STANDARD_UNDEFINED)
@@ -260,14 +222,6 @@ typedef enum
 #define NTV2_IS_8K_STANDARD(__s__)				((__s__) == NTV2_STANDARD_8192)
 #define NTV2_IS_QUAD_QUAD_STANDARD(__s__)		(NTV2_IS_UHD2_STANDARD(__s__) || NTV2_IS_8K_STANDARD(__s__))
 #define NTV2_IS_HFR_STANDARD(__s__)				(NTV2_STANDARD_3840HFR == (__s__) || NTV2_STANDARD_4096HFR == (__s__))
-
-#if !defined (NTV2_DEPRECATE)
-	typedef NTV2Standard	NTV2V2Standard;		///< @deprecated	Use NTV2Standard instead.
-	#define IS_PROGRESSIVE_NTV2Standard			NTV2_IS_PROGRESSIVE_STANDARD
-	#define IS_PROGRESSIVE_STANDARD				NTV2_IS_PROGRESSIVE_STANDARD
-	#define NTV2_IS_VALID_NTV2Standard			NTV2_IS_VALID_STANDARD
-	#define NTV2_IS_VALID_NTV2V2Standard		NTV2_IS_VALID_STANDARD
-#endif	//	!defined (NTV2_DEPRECATE)
 
 
 /**
@@ -313,19 +267,6 @@ typedef enum
 	,NTV2_FBF_NUMFRAMEBUFFERFORMATS = NTV2_FBF_LAST
 	,NTV2_FBF_INVALID				= NTV2_FBF_NUMFRAMEBUFFERFORMATS
 } NTV2FrameBufferFormat;
-
-#if !defined(NTV2_DEPRECATE_14_0)
-	NTV2_DEPRECATED_vi(const NTV2FrameBufferFormat NTV2_FBF_8BIT_QREZ,					NTV2_FBF_8BIT_YCBCR_420PL3);		///< @deprecated	Use NTV2_FBF_8BIT_YCBCR_420PL3 instead.
-	NTV2_DEPRECATED_vi(const NTV2FrameBufferFormat NTV2_FBF_10BIT_DPX_LITTLEENDIAN, NTV2_FBF_10BIT_DPX_LE);			///< @deprecated	Use NTV2_FBF_10BIT_DPX_LE instead.
-	NTV2_DEPRECATED_vi(const NTV2FrameBufferFormat NTV2_FBF_UNUSED_23,					NTV2_FBF_8BIT_YCBCR_422PL3);		///< @deprecated	Use NTV2_FBF_8BIT_YCBCR_422PL3 instead.
-	NTV2_DEPRECATED_vi(const NTV2FrameBufferFormat NTV2_FBF_UNUSED_26,					NTV2_FBF_10BIT_YCBCR_420PL3_LE);	///< @deprecated	Use NTV2_FBF_10BIT_YCBCR_420PL3_LE instead.
-	NTV2_DEPRECATED_vi(const NTV2FrameBufferFormat NTV2_FBF_UNUSED_27,					NTV2_FBF_10BIT_YCBCR_422PL3_LE);	///< @deprecated	Use NTV2_FBF_10BIT_YCBCR_422PL3_LE instead.
-	NTV2_DEPRECATED_vi(const NTV2FrameBufferFormat NTV2_FBF_10BIT_YCBCR_420PL,			NTV2_FBF_10BIT_YCBCR_420PL2);		///< @deprecated	Use NTV2_FBF_10BIT_YCBCR_420PL2 instead.
-	NTV2_DEPRECATED_vi(const NTV2FrameBufferFormat NTV2_FBF_10BIT_YCBCR_422PL,			NTV2_FBF_10BIT_YCBCR_422PL2);		///< @deprecated	Use NTV2_FBF_10BIT_YCBCR_422PL2 instead.
-	NTV2_DEPRECATED_vi(const NTV2FrameBufferFormat NTV2_FBF_8BIT_YCBCR_420PL,			NTV2_FBF_8BIT_YCBCR_420PL2);		///< @deprecated	Use NTV2_FBF_8BIT_YCBCR_420PL2 instead.
-	NTV2_DEPRECATED_vi(const NTV2FrameBufferFormat NTV2_FBF_8BIT_YCBCR_422PL,			NTV2_FBF_8BIT_YCBCR_422PL2);		///< @deprecated	Use NTV2_FBF_8BIT_YCBCR_422PL2 instead.
-#endif	//	NTV2_DEPRECATE_14_0
-
 
 typedef NTV2FrameBufferFormat	NTV2PixelFormat;	///< @brief An alias for NTV2FrameBufferFormat.
 
@@ -766,24 +707,6 @@ typedef enum _NTV2VideoFormat
 
 	,NTV2_MAX_NUM_VIDEO_FORMATS = NTV2_FORMAT_END_UHD2_FULL_DEF_FORMATS
 } NTV2VideoFormat;
-
-
-#if !defined(NTV2_DEPRECATE_14_2)
-	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080psf_2500,			NTV2_FORMAT_1080i_5000);	///< @deprecated	Use NTV2_FORMAT_1080i_5000 instead.
-	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080psf_2997,			NTV2_FORMAT_1080i_5994);	///< @deprecated	Use NTV2_FORMAT_1080i_5994 instead.
-	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080psf_3000,			NTV2_FORMAT_1080i_6000);	///< @deprecated	Use NTV2_FORMAT_1080i_6000 instead.
-	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_DEPRECATED_525_5994,	NTV2_FORMAT_1080p_2K_2398); ///< @deprecated	Use NTV2_FORMAT_1080p_2K_2398 instead.
-	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_DEPRECATED_625_5000,	NTV2_FORMAT_1080p_2K_2400); ///< @deprecated	Use NTV2_FORMAT_1080p_2K_2400 instead.
-	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080p_5000,			NTV2_FORMAT_1080p_5000_B);	///< @deprecated	Use NTV2_FORMAT_1080p_5000_B instead.
-	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080p_5994,			NTV2_FORMAT_1080p_5994_B);	///< @deprecated	Use NTV2_FORMAT_1080p_5994_B instead.
-	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080p_6000,			NTV2_FORMAT_1080p_6000_B);	///< @deprecated	Use NTV2_FORMAT_1080p_6000_B instead.
-
-	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080p_2K_6000,		NTV2_FORMAT_1080p_2K_6000_A);	///< @deprecated	Use NTV2_FORMAT_1080p_2K_6000_A instead.
-	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080p_2K_5994,		NTV2_FORMAT_1080p_2K_5994_A);	///< @deprecated	Use NTV2_FORMAT_1080p_2K_5994_A instead.
-	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080p_2K_5000,		NTV2_FORMAT_1080p_2K_5000_A);	///< @deprecated	Use NTV2_FORMAT_1080p_2K_5000_A instead.
-	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080p_2K_4795,		NTV2_FORMAT_1080p_2K_4795_A);	///< @deprecated	Use NTV2_FORMAT_1080p_2K_4795_A instead.
-	NTV2_DEPRECATED_vi(const NTV2VideoFormat NTV2_FORMAT_1080p_2K_4800,		NTV2_FORMAT_1080p_2K_4800_A);	///< @deprecated	Use NTV2_FORMAT_1080p_2K_4800_A instead.
-#endif	//	NTV2_DEPRECATE_14_2
 
 #define NTV2_IS_VALID_VIDEO_FORMAT(__f__)							\
 	(	NTV2_IS_HD_VIDEO_FORMAT (__f__)		||						\
@@ -1309,15 +1232,6 @@ typedef enum
 #define NTV2_IS_OUTPUT_MODE(__mode__)			((__mode__) == NTV2_MODE_OUTPUT)
 
 
-#if !defined (NTV2_DEPRECATE)
-	typedef enum
-	{
-		NTV2_FRAMBUFFERMODE_FRAME,
-		NTV2_FRAMBUFFERMODE_FIELD
-	} NTV2FrameBufferMode;		///< @deprecated	Obsolete.
-#endif	//	!defined (NTV2_DEPRECATE)
-
-
 /**
 	@brief		Identifies a specific video input source.
 	@details	Always call ::NTV2DeviceCanDoInputSource to determine if a device has one of these input sources.
@@ -1346,54 +1260,10 @@ typedef enum
 	,NTV2_NUM_INPUTSOURCES = NTV2_INPUTSOURCE_INVALID
 } NTV2InputSource;
 
-#if !defined (NTV2_DEPRECATE_14_2)
-	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_ANALOG,	NTV2_INPUTSOURCE_ANALOG1);	///< @deprecated	Use NTV2_INPUTSOURCE_ANALOG1 instead.
-	NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_HDMI,		NTV2_INPUTSOURCE_HDMI1);	///< @deprecated	Use NTV2_INPUTSOURCE_HDMI1 instead.
-#endif
-#if !defined (NTV2_DEPRECATE)
-	#if defined(NTV2_BUILDING_DRIVER)
-		#define NTV2_INPUTSOURCE_DUALLINK	NTV2_INPUTSOURCE_SDI1
-		#define NTV2_INPUTSOURCE_DUALLINK1	NTV2_INPUTSOURCE_SDI1
-		#define NTV2_INPUTSOURCE_DUALLINK2	NTV2_INPUTSOURCE_SDI2
-		#define NTV2_INPUTSOURCE_DUALLINK3	NTV2_INPUTSOURCE_SDI3
-		#define NTV2_INPUTSOURCE_DUALLINK4	NTV2_INPUTSOURCE_SDI4
-		#define NTV2_INPUTSOURCE_DUALLINK5	NTV2_INPUTSOURCE_SDI5
-		#define NTV2_INPUTSOURCE_DUALLINK6	NTV2_INPUTSOURCE_SDI6
-		#define NTV2_INPUTSOURCE_DUALLINK7	NTV2_INPUTSOURCE_SDI7
-		#define NTV2_INPUTSOURCE_DUALLINK8	NTV2_INPUTSOURCE_SDI8
-		#define NTV2_INPUTSOURCE_SDI1_DS2	NTV2_INPUTSOURCE_SDI1
-		#define NTV2_INPUTSOURCE_SDI2_DS2	NTV2_INPUTSOURCE_SDI2
-		#define NTV2_INPUTSOURCE_SDI3_DS2	NTV2_INPUTSOURCE_SDI3
-		#define NTV2_INPUTSOURCE_SDI4_DS2	NTV2_INPUTSOURCE_SDI4
-		#define NTV2_INPUTSOURCE_SDI5_DS2	NTV2_INPUTSOURCE_SDI5
-		#define NTV2_INPUTSOURCE_SDI6_DS2	NTV2_INPUTSOURCE_SDI6
-		#define NTV2_INPUTSOURCE_SDI7_DS2	NTV2_INPUTSOURCE_SDI7
-		#define NTV2_INPUTSOURCE_SDI8_DS2	NTV2_INPUTSOURCE_SDI8
-	#else
-		NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK, NTV2_INPUTSOURCE_SDI1); ///< @deprecated	Use NTV2_INPUTSOURCE_SDI1 instead.
-		NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK1,	NTV2_INPUTSOURCE_SDI1); ///< @deprecated	Use NTV2_INPUTSOURCE_SDI1 instead.
-		NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK2,	NTV2_INPUTSOURCE_SDI2); ///< @deprecated	Use NTV2_INPUTSOURCE_SDI2 instead.
-		NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK3,	NTV2_INPUTSOURCE_SDI3); ///< @deprecated	Use NTV2_INPUTSOURCE_SDI3 instead.
-		NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK4,	NTV2_INPUTSOURCE_SDI4); ///< @deprecated	Use NTV2_INPUTSOURCE_SDI4 instead.
-		NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK5,	NTV2_INPUTSOURCE_SDI5); ///< @deprecated	Use NTV2_INPUTSOURCE_SDI5 instead.
-		NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK6,	NTV2_INPUTSOURCE_SDI6); ///< @deprecated	Use NTV2_INPUTSOURCE_SDI6 instead.
-		NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK7,	NTV2_INPUTSOURCE_SDI7); ///< @deprecated	Use NTV2_INPUTSOURCE_SDI7 instead.
-		NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_DUALLINK8,	NTV2_INPUTSOURCE_SDI8); ///< @deprecated	Use NTV2_INPUTSOURCE_SDI8 instead.
-		NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_SDI1_DS2, NTV2_INPUTSOURCE_SDI1); ///< @deprecated	Use NTV2_INPUTSOURCE_SDI1 instead.
-		NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_SDI2_DS2, NTV2_INPUTSOURCE_SDI2); ///< @deprecated	Use NTV2_INPUTSOURCE_SDI2 instead.
-		NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_SDI3_DS2, NTV2_INPUTSOURCE_SDI3); ///< @deprecated	Use NTV2_INPUTSOURCE_SDI3 instead.
-		NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_SDI4_DS2, NTV2_INPUTSOURCE_SDI4); ///< @deprecated	Use NTV2_INPUTSOURCE_SDI4 instead.
-		NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_SDI5_DS2, NTV2_INPUTSOURCE_SDI5); ///< @deprecated	Use NTV2_INPUTSOURCE_SDI5 instead.
-		NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_SDI6_DS2, NTV2_INPUTSOURCE_SDI6); ///< @deprecated	Use NTV2_INPUTSOURCE_SDI6 instead.
-		NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_SDI7_DS2, NTV2_INPUTSOURCE_SDI7); ///< @deprecated	Use NTV2_INPUTSOURCE_SDI7 instead.
-		NTV2_DEPRECATED_vi(const NTV2InputSource NTV2_INPUTSOURCE_SDI8_DS2, NTV2_INPUTSOURCE_SDI8); ///< @deprecated	Use NTV2_INPUTSOURCE_SDI8 instead.
-	#endif
-#endif
-
-#define NTV2_INPUT_SOURCE_IS_HDMI(_inpSrc_)				((_inpSrc_) >= NTV2_INPUTSOURCE_HDMI1 && (_inpSrc_) <= NTV2_INPUTSOURCE_HDMI4)
-#define NTV2_INPUT_SOURCE_IS_ANALOG(_inpSrc_)			((_inpSrc_) == NTV2_INPUTSOURCE_ANALOG1)
-#define NTV2_INPUT_SOURCE_IS_SDI(_inpSrc_)				((_inpSrc_) >= NTV2_INPUTSOURCE_SDI1 && (_inpSrc_) <= NTV2_INPUTSOURCE_SDI8)
-#define NTV2_IS_VALID_INPUT_SOURCE(_inpSrc_)			(((_inpSrc_) >= 0) && ((_inpSrc_) < NTV2_INPUTSOURCE_INVALID))
+#define NTV2_INPUT_SOURCE_IS_HDMI(_inpSrc_)			((_inpSrc_) >= NTV2_INPUTSOURCE_HDMI1 && (_inpSrc_) <= NTV2_INPUTSOURCE_HDMI4)
+#define NTV2_INPUT_SOURCE_IS_ANALOG(_inpSrc_)		((_inpSrc_) == NTV2_INPUTSOURCE_ANALOG1)
+#define NTV2_INPUT_SOURCE_IS_SDI(_inpSrc_)			((_inpSrc_) >= NTV2_INPUTSOURCE_SDI1 && (_inpSrc_) <= NTV2_INPUTSOURCE_SDI8)
+#define NTV2_IS_VALID_INPUT_SOURCE(_inpSrc_)		(((_inpSrc_) >= 0) && ((_inpSrc_) < NTV2_INPUTSOURCE_INVALID))
 
 /**
 	@brief		Used to classify or filter ::NTV2InputSource or ::NTV2OutputDest values.
@@ -1428,61 +1298,24 @@ typedef enum
 **/
 typedef enum
 {
-	#if defined (NTV2_DEPRECATE)
-		NTV2_OUTPUTDESTINATION_ANALOG,
-		NTV2_OUTPUTDESTINATION_HDMI,
-		NTV2_OUTPUTDESTINATION_SDI1,
-		NTV2_OUTPUTDESTINATION_SDI2,
-		NTV2_OUTPUTDESTINATION_SDI3,
-		NTV2_OUTPUTDESTINATION_SDI4,
-		NTV2_OUTPUTDESTINATION_SDI5,
-		NTV2_OUTPUTDESTINATION_SDI6,
-		NTV2_OUTPUTDESTINATION_SDI7,
-		NTV2_OUTPUTDESTINATION_SDI8,
-	#else
-		NTV2_OUTPUTDESTINATION_SDI1,
-		NTV2_OUTPUTDESTINATION_ANALOG,
-		NTV2_OUTPUTDESTINATION_SDI2,
-		NTV2_OUTPUTDESTINATION_HDMI,
-		NTV2_OUTPUTDESTINATION_DUALLINK,
-		NTV2_OUTPUTDESTINATION_DUALLINK1	= NTV2_OUTPUTDESTINATION_DUALLINK,
-		NTV2_OUTPUTDESTINATION_HDMI_14,
-		NTV2_OUTPUTDESTINATION_DUALLINK2,
-		NTV2_OUTPUTDESTINATION_SDI3,
-		NTV2_OUTPUTDESTINATION_SDI4,
-		NTV2_OUTPUTDESTINATION_SDI5,
-		NTV2_OUTPUTDESTINATION_SDI6,
-		NTV2_OUTPUTDESTINATION_SDI7,
-		NTV2_OUTPUTDESTINATION_SDI8,
-		NTV2_OUTPUTDESTINATION_DUALLINK3,
-		NTV2_OUTPUTDESTINATION_DUALLINK4,
-		NTV2_OUTPUTDESTINATION_DUALLINK5,
-		NTV2_OUTPUTDESTINATION_DUALLINK6,
-		NTV2_OUTPUTDESTINATION_DUALLINK7,
-		NTV2_OUTPUTDESTINATION_DUALLINK8,
-	#endif	//	!defined (NTV2_DEPRECATE)
+	NTV2_OUTPUTDESTINATION_ANALOG,
+	NTV2_OUTPUTDESTINATION_HDMI,
+	NTV2_OUTPUTDESTINATION_SDI1,
+	NTV2_OUTPUTDESTINATION_SDI2,
+	NTV2_OUTPUTDESTINATION_SDI3,
+	NTV2_OUTPUTDESTINATION_SDI4,
+	NTV2_OUTPUTDESTINATION_SDI5,
+	NTV2_OUTPUTDESTINATION_SDI6,
+	NTV2_OUTPUTDESTINATION_SDI7,
+	NTV2_OUTPUTDESTINATION_SDI8,
 	NTV2_OUTPUTDESTINATION_INVALID,
 	NTV2_NUM_OUTPUTDESTINATIONS = NTV2_OUTPUTDESTINATION_INVALID	//	Always last!
 } NTV2OutputDestination, NTV2OutputDest;
 
-#if !defined (NTV2_DEPRECATE)
-	#define NTV2_OUTPUT_DEST_IS_HDMI(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_HDMI || (_dest_) == NTV2_OUTPUTDESTINATION_HDMI_14)
-	#define NTV2_OUTPUT_DEST_IS_ANALOG(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_ANALOG)
-	#define NTV2_OUTPUT_DEST_IS_SDI(_dest_)				(!NTV2_OUTPUT_DEST_IS_HDMI(_dest_) && !NTV2_OUTPUT_DEST_IS_ANALOG(_dest_) && (_dest_) < NTV2_NUM_OUTPUTDESTINATIONS)
-	#define NTV2_OUTPUT_DEST_IS_DUAL_LINK(_dest_)		(	(_dest_) == NTV2_OUTPUTDESTINATION_DUALLINK1	||	\
-															(_dest_) == NTV2_OUTPUTDESTINATION_DUALLINK2	||	\
-															(_dest_) == NTV2_OUTPUTDESTINATION_DUALLINK3	||	\
-															(_dest_) == NTV2_OUTPUTDESTINATION_DUALLINK4	||	\
-															(_dest_) == NTV2_OUTPUTDESTINATION_DUALLINK5	||	\
-															(_dest_) == NTV2_OUTPUTDESTINATION_DUALLINK6	||	\
-															(_dest_) == NTV2_OUTPUTDESTINATION_DUALLINK7	||	\
-															(_dest_) == NTV2_OUTPUTDESTINATION_DUALLINK8	)
-#else
-	#define NTV2_OUTPUT_DEST_IS_HDMI(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_HDMI)
-	#define NTV2_OUTPUT_DEST_IS_ANALOG(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_ANALOG)
-	#define NTV2_OUTPUT_DEST_IS_SDI(_dest_)				((_dest_) >= NTV2_OUTPUTDESTINATION_SDI1 && (_dest_) <= NTV2_OUTPUTDESTINATION_SDI8)
-#endif	//	!defined (NTV2_DEPRECATE)
-#define NTV2_IS_VALID_OUTPUT_DEST(_dest_)				(((_dest_) >= 0) && ((_dest_) < NTV2_NUM_OUTPUTDESTINATIONS))
+#define NTV2_OUTPUT_DEST_IS_HDMI(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_HDMI)
+#define NTV2_OUTPUT_DEST_IS_ANALOG(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_ANALOG)
+#define NTV2_OUTPUT_DEST_IS_SDI(_dest_)				((_dest_) >= NTV2_OUTPUTDESTINATION_SDI1 && (_dest_) <= NTV2_OUTPUTDESTINATION_SDI8)
+#define NTV2_IS_VALID_OUTPUT_DEST(_dest_)			(((_dest_) >= 0) && ((_dest_) < NTV2_NUM_OUTPUTDESTINATIONS))
 
 
 /**
@@ -1916,13 +1749,6 @@ typedef enum
 
 #define NTV2_IS_VALID_MIXERINPUTCONTROL(__x__)		((__x__) >= NTV2MIXERINPUTCONTROL_FULLRASTER  &&  (__x__) < NTV2MIXERINPUTCONTROL_INVALID)
 
-#if !defined (NTV2_DEPRECATE)
-	typedef NTV2MixerKeyerInputControl	Xena2VidProcInputControl;
-	#define XENA2VIDPROCINPUTCONTROL_FULLRASTER		NTV2MIXERINPUTCONTROL_FULLRASTER
-	#define XENA2VIDPROCINPUTCONTROL_SHAPED			NTV2MIXERINPUTCONTROL_SHAPED
-	#define XENA2VIDPROCINPUTCONTROL_UNSHAPED		NTV2MIXERINPUTCONTROL_UNSHAPED
-#endif	//	!defined (NTV2_DEPRECATE)
-
 
 /**
 	@brief		These enum values identify the mixer mode.
@@ -1938,14 +1764,6 @@ typedef enum
 } NTV2MixerKeyerMode;
 
 #define NTV2_IS_VALID_MIXERMODE(__x__)		((__x__) >= NTV2MIXERMODE_FOREGROUND_ON	 &&	 (__x__) < NTV2MIXERMODE_INVALID)
-
-#if !defined (NTV2_DEPRECATE)
-	typedef NTV2MixerKeyerMode	Xena2VidProcMode;
-	#define		XENAVIDPROCMODE_FOREGROUND_ON		NTV2MIXERMODE_FOREGROUND_ON
-	#define		XENAVIDPROCMODE_MIX					NTV2MIXERMODE_MIX
-	#define		XENAVIDPROCMODE_SPLIT				NTV2MIXERMODE_SPLIT
-	#define		XENAVIDPROCMODE_FOREGROUND_OFF		NTV2MIXERMODE_FOREGROUND_OFF
-#endif	//	!defined (NTV2_DEPRECATE)
 
 typedef enum
 {
@@ -2065,12 +1883,6 @@ typedef enum
 	NTV2_AUDIO_BUFFER_SIZE_4MB	= 1,	//	0b01
 	NTV2_AUDIO_BUFFER_STANDARD	= NTV2_AUDIO_BUFFER_SIZE_1MB,
 	NTV2_AUDIO_BUFFER_BIG		= NTV2_AUDIO_BUFFER_SIZE_4MB,
-#if !defined (NTV2_DEPRECATE)
-	NTV2_AUDIO_BUFFER_SIZE_2MB	= 2,	//	0b10
-	NTV2_AUDIO_BUFFER_SIZE_8MB	= 3,	//	0b11
-	NTV2_AUDIO_BUFFER_MEDIUM	= NTV2_AUDIO_BUFFER_SIZE_2MB,
-	NTV2_AUDIO_BUFFER_BIGGER	= NTV2_AUDIO_BUFFER_SIZE_8MB,
-#endif	//	!defined (NTV2_DEPRECATE)
 	NTV2_AUDIO_BUFFER_INVALID,
 	NTV2_MAX_NUM_AudioBufferSizes	= NTV2_AUDIO_BUFFER_INVALID
 
@@ -2521,17 +2333,6 @@ typedef enum
 } NTV2AnalogBlackLevel;
 
 
-#if !defined(NTV2_DEPRECATE_15_1)
-	typedef enum
-	{
-		NTV2_YUVSelect,
-		NTV2_RGBSelect,
-		NTV2_Stereo3DSelect,
-		NTV2_NUM_SDIInputFormats
-	} NTV2SDIInputFormatSelect;
-#endif	//	!defined(NTV2_DEPRECATE_15_1)
-
-
 typedef enum								// Deprecated
 {
 	NTV2_DeviceUnavailable		= -1,
@@ -2619,24 +2420,6 @@ typedef enum								// Deprecated
 } NTV2PanMode;
 
 
-#if !defined(NTV2_DEPRECATE_15_1)
-	// note: Pause Mode is a "software" feature - not performed in hardware
-	typedef enum
-	{
-		NTV2_PauseOnFrame,
-		NTV2_PauseOnField
-	} NTV2PauseModeType;
-
-	// note: 24 fps <-> 30 fps Pulldown is a "software" feature - not performed in hardware
-	typedef enum
-	{
-		NTV2_Pulldown2323,
-		NTV2_Pulldown2332,
-		NTV2_Pulldown2224
-	} NTV2PulldownPatternType;
-#endif	//	!defined(NTV2_DEPRECATE_15_1)
-
-
 //	NOTE:	Timecode Burn-In Mode is a "software" feature - not performed in hardware
 typedef enum							// Deprecated
 {
@@ -2659,92 +2442,6 @@ typedef enum
 } NTV2RGB10Endian;
 
 #endif // R2_DEPRECATE
-
-
-
-#if !defined (NTV2_DEPRECATE)
-	// Audio Channel Mapping and Channel Gain/Phase controls used in FS1
-	typedef enum				// used in FS1
-	{
-		NTV2_AUDIOCHANNELMAPPING_EMB1CH1 = 0,
-		NTV2_AUDIOCHANNELMAPPING_EMB1CH2,
-		NTV2_AUDIOCHANNELMAPPING_EMB1CH3,
-		NTV2_AUDIOCHANNELMAPPING_EMB1CH4,
-		NTV2_AUDIOCHANNELMAPPING_EMB1CH5,
-		NTV2_AUDIOCHANNELMAPPING_EMB1CH6,
-		NTV2_AUDIOCHANNELMAPPING_EMB1CH7,
-		NTV2_AUDIOCHANNELMAPPING_EMB1CH8,
-		NTV2_AUDIOCHANNELMAPPING_EMB2CH1 = 8,
-		NTV2_AUDIOCHANNELMAPPING_EMB2CH2,
-		NTV2_AUDIOCHANNELMAPPING_EMB2CH3,
-		NTV2_AUDIOCHANNELMAPPING_EMB2CH4,
-		NTV2_AUDIOCHANNELMAPPING_EMB2CH5,
-		NTV2_AUDIOCHANNELMAPPING_EMB2CH6,
-		NTV2_AUDIOCHANNELMAPPING_EMB2CH7,
-		NTV2_AUDIOCHANNELMAPPING_EMB2CH8,
-		NTV2_AUDIOCHANNELMAPPING_ANALOGCH1 = 16,
-		NTV2_AUDIOCHANNELMAPPING_ANALOGCH2,
-		NTV2_AUDIOCHANNELMAPPING_ANALOGCH3,
-		NTV2_AUDIOCHANNELMAPPING_ANALOGCH4,
-		NTV2_AUDIOCHANNELMAPPING_ANALOGCH5,
-		NTV2_AUDIOCHANNELMAPPING_ANALOGCH6,
-		NTV2_AUDIOCHANNELMAPPING_ANALOGCH7,
-		NTV2_AUDIOCHANNELMAPPING_ANALOGCH8,
-		NTV2_AUDIOCHANNELMAPPING_AESCH1 = 24,
-		NTV2_AUDIOCHANNELMAPPING_AESCH2,
-		NTV2_AUDIOCHANNELMAPPING_AESCH3,
-		NTV2_AUDIOCHANNELMAPPING_AESCH4,
-		NTV2_AUDIOCHANNELMAPPING_AESCH5,
-		NTV2_AUDIOCHANNELMAPPING_AESCH6,
-		NTV2_AUDIOCHANNELMAPPING_AESCH7,
-		NTV2_AUDIOCHANNELMAPPING_AESCH8,
-		NTV2_AUDIOCHANNELMAPPING_EMB1CH9 = 32,
-		NTV2_AUDIOCHANNELMAPPING_EMB1CH10,
-		NTV2_AUDIOCHANNELMAPPING_EMB1CH11,
-		NTV2_AUDIOCHANNELMAPPING_EMB1CH12,
-		NTV2_AUDIOCHANNELMAPPING_EMB1CH13,
-		NTV2_AUDIOCHANNELMAPPING_EMB1CH14,
-		NTV2_AUDIOCHANNELMAPPING_EMB1CH15,
-		NTV2_AUDIOCHANNELMAPPING_EMB1CH16,
-		NTV2_AUDIOCHANNELMAPPING_EMB2CH9 = 40,
-		NTV2_AUDIOCHANNELMAPPING_EMB2CH10,
-		NTV2_AUDIOCHANNELMAPPING_EMB2CH11,
-		NTV2_AUDIOCHANNELMAPPING_EMB2CH12,
-		NTV2_AUDIOCHANNELMAPPING_EMB2CH13,
-		NTV2_AUDIOCHANNELMAPPING_EMB2CH14,
-		NTV2_AUDIOCHANNELMAPPING_EMB2CH15,
-		NTV2_AUDIOCHANNELMAPPING_EMB2CH16
-	} NTV2AudioChannelMapping;
-#endif	//	!defined (NTV2_DEPRECATE)
-
-
-#if !defined (NTV2_DEPRECATE)
-	typedef enum
-	{
-		NTV2FS1AFDInsertMode_Off,
-		NTV2FS1AFDInsertMode_Delete,
-		NTV2FS1AFDInsertMode_Pass,
-		NTV2FS1AFDInsertMode_Replace
-	} NTV2AFDInsertMode;
-
-	typedef enum
-	{
-		NTV2FS1AFD_InsertAR_4x3,
-		NTV2FS1AFD_InsertAR_16x9
-	} NTV2AFDInsertAspectRatio;
-
-	typedef enum
-	{
-		NTV2AFDInsert_LetterboxTo16x9	= 0x04,
-		NTV2AFDInsert_FullFrame			= 0x08,
-		NTV2AFDInsert_Pillarbox4x3		= 0x09,
-		NTV2AFDInsert_FullFrameProtected = 0x0A,
-		NTV2AFDInsert_14x9				= 0x0B,
-		NTV2AFDInsert_4x3Alt14x9		= 0x0D,
-		NTV2AFDInsert_16x9Alt14x9		= 0x0E,
-		NTV2AFDInsert_16x9Alt4x3		= 0x0F
-	} NTV2AFDInsertCode;
-#endif	//	!defined (NTV2_DEPRECATE)
 
 
 typedef enum
@@ -2984,53 +2681,14 @@ typedef enum NTV2OutputCrosspointID
 		,NTV2_XptWaterMarker2YUV		= NTV2_XptMultiLinkOut2DS1			///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptMultiLinkOut2DS1
 		,NTV2_XptWaterMarker2RGB		= NTV2_XptWaterMarker2YUV | 0x80	///< @deprecated	Removed in SDK 16.0
 	#endif
-	#if !defined(NTV2_DEPRECATE_15_3)
-		,NTV2_XptFrameBuffer1_425YUV	= NTV2_XptFrameBuffer1_DS2YUV		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer1_DS2YUV
-		,NTV2_XptFrameBuffer1_425RGB	= NTV2_XptFrameBuffer1_DS2RGB		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer1_DS2RGB
-		,NTV2_XptFrameBuffer2_425YUV	= NTV2_XptFrameBuffer2_DS2YUV		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer2_DS2YUV
-		,NTV2_XptFrameBuffer2_425RGB	= NTV2_XptFrameBuffer2_DS2RGB		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer2_DS2RGB
-		,NTV2_XptFrameBuffer3_425YUV	= NTV2_XptFrameBuffer3_DS2YUV		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer3_DS2YUV
-		,NTV2_XptFrameBuffer3_425RGB	= NTV2_XptFrameBuffer3_DS2RGB		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer3_DS2RGB
-		,NTV2_XptFrameBuffer4_425YUV	= NTV2_XptFrameBuffer4_DS2YUV		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer4_DS2YUV
-		,NTV2_XptFrameBuffer4_425RGB	= NTV2_XptFrameBuffer4_DS2RGB		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer4_DS2RGB
-		,NTV2_XptFrameBuffer5_425YUV	= NTV2_XptFrameBuffer5_DS2YUV		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer5_DS2YUV
-		,NTV2_XptFrameBuffer5_425RGB	= NTV2_XptFrameBuffer5_DS2RGB		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer5_DS2RGB
-		,NTV2_XptFrameBuffer6_425YUV	= NTV2_XptFrameBuffer6_DS2YUV		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer6_DS2YUV
-		,NTV2_XptFrameBuffer6_425RGB	= NTV2_XptFrameBuffer6_DS2RGB		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer6_DS2RGB
-		,NTV2_XptFrameBuffer7_425YUV	= NTV2_XptFrameBuffer7_DS2YUV		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer7_DS2YUV
-		,NTV2_XptFrameBuffer7_425RGB	= NTV2_XptFrameBuffer7_DS2RGB		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer7_DS2RGB
-		,NTV2_XptFrameBuffer8_425YUV	= NTV2_XptFrameBuffer8_DS2YUV		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer8_DS2YUV
-		,NTV2_XptFrameBuffer8_425RGB	= NTV2_XptFrameBuffer8_DS2RGB		///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer8_DS2RGB
-	#endif
-	#if !defined(NTV2_DEPRECATE_14_3)
-		,NTV2_XptHDMIIn					= NTV2_XptHDMIIn1					///< @deprecated	Renamed in SDK 14.3 as ::NTV2_XptHDMIIn1
-		,NTV2_XptHDMIInQ2				= NTV2_XptHDMIIn1Q2					///< @deprecated	Renamed in SDK 14.3 as ::NTV2_XptHDMIIn1Q2
-		,NTV2_XptHDMIInQ3				= NTV2_XptHDMIIn1Q3					///< @deprecated	Renamed in SDK 14.3 as ::NTV2_XptHDMIIn1Q3
-		,NTV2_XptHDMIInQ4				= NTV2_XptHDMIIn1Q4					///< @deprecated	Renamed in SDK 14.3 as ::NTV2_XptHDMIIn1Q4
-		,NTV2_XptHDMIInRGB				= NTV2_XptHDMIIn1RGB				///< @deprecated	Renamed in SDK 14.3 as ::NTV2_XptHDMIIn1RGB
-		,NTV2_XptHDMIInQ2RGB			= NTV2_XptHDMIIn1Q2RGB				///< @deprecated	Renamed in SDK 14.3 as ::NTV2_XptHDMIIn1Q2RGB
-		,NTV2_XptHDMIInQ3RGB			= NTV2_XptHDMIIn1Q3RGB				///< @deprecated	Renamed in SDK 14.3 as ::NTV2_XptHDMIIn1Q3RGB
-		,NTV2_XptHDMIInQ4RGB			= NTV2_XptHDMIIn1Q4RGB				///< @deprecated	Renamed in SDK 14.3 as ::NTV2_XptHDMIIn1Q4RGB
-	#endif
-	#if !defined (NTV2_DEPRECATE)
-		,NTV2_XptFS1SecondConverter		= 0x18						///< @deprecated	Obsolete, do not use.
-		,NTV2_XptFS1ProcAmp				= 0x19						///< @deprecated	Obsolete, do not use.
-		,NTV2_XptFS1TestSignalGenerator = 0x1D						///< @deprecated	Obsolete, do not use.
-		,NTV2_XptCSCYUV					= NTV2_XptCSC1VidYUV		///< @deprecated	Use NTV2_XptCSC1VidYUV instead.
-		,NTV2_XptLUT					= NTV2_XptLUT1Out			///< @deprecated	Use NTV2_XptLUT1Out instead.
-		,NTV2_XptCSCRGB					= NTV2_XptCSC1VidRGB		///< @deprecated	Use NTV2_XptCSC1VidRGB instead.
-		,NTV2_XptDuallinkIn				= NTV2_XptDuallinkIn1		///< @deprecated	Use NTV2_XptDuallinkIn1 instead.
-		,NTV2_XptDuallinkOut			= NTV2_XptDuallinkOut1		///< @deprecated	Use NTV2_XptDuallinkOut1 instead.
-		,NTV2_XptDuallinkOutDS2			= NTV2_XptDuallinkOut1DS2	///< @deprecated	Use NTV2_XptDuallinkOut1DS2 instead.
-	#endif	//	!defined (NTV2_DEPRECATE)
-		,NTV2_XptDuallinkIn1DS2 = 0x100
-		,NTV2_XptDuallinkIn2DS2 = 0x101
-		,NTV2_XptDuallinkIn3DS2 = 0x102
-		,NTV2_XptDuallinkIn4DS2 = 0x103
-		,NTV2_XptDuallinkIn5DS2 = 0x104
-		,NTV2_XptDuallinkIn6DS2 = 0x105
-		,NTV2_XptDuallinkIn7DS2 = 0x106
-		,NTV2_XptDuallinkIn8DS2 = 0x107
+	,NTV2_XptDuallinkIn1DS2 = 0x100
+	,NTV2_XptDuallinkIn2DS2 = 0x101
+	,NTV2_XptDuallinkIn3DS2 = 0x102
+	,NTV2_XptDuallinkIn4DS2 = 0x103
+	,NTV2_XptDuallinkIn5DS2 = 0x104
+	,NTV2_XptDuallinkIn6DS2 = 0x105
+	,NTV2_XptDuallinkIn7DS2 = 0x106
+	,NTV2_XptDuallinkIn8DS2 = 0x107
 } NTV2OutputCrosspointID, NTV2OutputXptID;
 
 #if !defined(NTV2_DEPRECATE_16_0)
@@ -3191,16 +2849,6 @@ typedef enum NTV2InputCrosspointID
 		,NTV2_XptSDIOut4Standard	= NTV2_XptMultiLinkOut2InputDS2 ///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_XptMultiLinkOut2InputDS2
 		,NTV2_XptIICT2Input			= NTV2_Xpt3DLUT1Input			///< @deprecated	Removed in SDK 16.0, redeployed as ::NTV2_Xpt3DLUT1Input
 	#endif	//	!defined(NTV2_DEPRECATE_16_0)
-	#if !defined(NTV2_DEPRECATE_15_3)
-		,NTV2_XptFrameBuffer1BInput = NTV2_XptFrameBuffer1DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer1DS2Input
-		,NTV2_XptFrameBuffer2BInput = NTV2_XptFrameBuffer2DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer2DS2Input
-		,NTV2_XptFrameBuffer3BInput = NTV2_XptFrameBuffer3DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer3DS2Input
-		,NTV2_XptFrameBuffer4BInput = NTV2_XptFrameBuffer4DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer4DS2Input
-		,NTV2_XptFrameBuffer5BInput = NTV2_XptFrameBuffer5DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer5DS2Input
-		,NTV2_XptFrameBuffer6BInput = NTV2_XptFrameBuffer6DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer6DS2Input
-		,NTV2_XptFrameBuffer7BInput = NTV2_XptFrameBuffer7DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer7DS2Input
-		,NTV2_XptFrameBuffer8BInput = NTV2_XptFrameBuffer8DS2Input	///< @deprecated	Renamed in SDK 15.3 as ::NTV2_XptFrameBuffer8DS2Input
-	#endif	//	!defined(NTV2_DEPRECATE_15_3)
 } NTV2InputCrosspointID, NTV2InputXptID;
 
 #define NTV2_IS_VALID_InputCrosspointID(__s__)			((__s__) >= NTV2_FIRST_INPUT_CROSSPOINT && (__s__) <= NTV2_LAST_INPUT_CROSSPOINT)
@@ -3386,17 +3034,6 @@ typedef enum {
 } NTV2WidgetType;
 
 #define NTV2_IS_VALID_WIDGET_TYPE(__w__)		(((__w__) >= NTV2WidgetType_First)	&&	((__w__) < NTV2WidgetType_Invalid))
-
-#if !defined (NTV2_DEPRECATE)
-	typedef enum
-	{
-		NTV2_FrameSync1Select,
-		NTV2_FrameSync2Select,
-		NTV2K2_FrameSync1Select		= NTV2_FrameSync1Select,
-		NTV2K2_FrameSync2Select		= NTV2_FrameSync2Select,
-		NTV2_MAX_NUM_FrameSyncSelect
-	} NTV2FrameSyncSelect;		//	FS1 ONLY
-#endif	//	!defined (NTV2_DEPRECATE)
 
 
 /**
@@ -3670,32 +3307,6 @@ typedef enum
 {
 	NTV2_BITFILE_NO_CHANGE		= 0,		// no bitfile change needed
 	NTV2_BITFILE_TYPE_INVALID	= 0,
-#if !defined (NTV2_DEPRECATE)
-	NTV2_BITFILE_XENAHS_SD		= 1,		// XENA_HS: load SD bitfile								//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_XENAHS_HD		= 2,		// XENA-HS: load HD bitfile								//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_KONA2_DNCVT	= 3,		// KONA2: load downconverter bitfile					//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_KONA2_UPCVT	= 4,		// KONA2: load upconverter bitfile						//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_XENALH_SD		= 5,		// XENA_LH: load SD bitfile								//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_XENALH_HD		= 6,		// XENA-LH: load HD bitfile								//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_XENALS_UART	= 7,		// XENA-LS: with UART Support							//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_XENALS_CH2		= 8,		// XENA-LS: with Video Processing and Channel 2 Support //	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_XENA2_DNCVT	= 9,		// XENA2: load downconverter bitfile					//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_XENA2_UPCVT	= 10,		// XENA2: load upconverter bitfile						//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_XENA2_XDCVT	= 11,		// XENA2: load cross downconverter (1080->720) bitfile	//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_XENA2_XUCVT	= 12,		// XENA2: load cross upconverter (720->1080) bitfile	//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_XENALH_HDQRZ	= 13,		// XENA-LH - HD Qrez bitfile							//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_XENALH_SDQRZ	= 14,		// XENA-LH - SD Qrez bitfile							//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_XENAHS2_SD		= 15,		// XENA_HS2: load SD bitfile							//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_XENAHS2_HD		= 16,		// XENA-HS2: load HD bitfile							//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_MOAB_DNCVT		= 17,		// MOAB: load downconverter bitfile						//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_MOAB_UPCVT		= 18,		// MOAB: load upconverter bitfile						//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_MOAB_XDCVT		= 19,		// MOAB: load cross downconverter (1080->720) bitfile	//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_MOAB_XUCVT		= 20,		// MOAB: load cross upconverter (720->1080) bitfile		//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_XENA2_CSCVT	= 21,		// XENA2: load color space converter bitfile			//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_BORG_CODEC		= 25,		// Borg CoDec bitfile									//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_BORG_UFC		= 26,		// Borg VidProc bitfile									//	DEPRECATION_CANDIDATE
-	NTV2_BITFILE_LHI_DVI_MAIN	= 34,		// LHi DVI main bitfile
-#endif	//	!defined (NTV2_DEPRECATE)
 	NTV2_BITFILE_CORVID1_MAIN	= 22,		// CORVID1 main bitfile
 	NTV2_BITFILE_CORVID22_MAIN	= 23,		// Corvid22 main bitfile
 	NTV2_BITFILE_KONA3G_MAIN	= 24,		// Kona3G main bitfile
@@ -3719,9 +3330,6 @@ typedef enum
 	NTV2_BITFILE_KONAIP_4CH_2SFP	= 45,
 	NTV2_BITFILE_KONAIP_1RX_1TX_1SFP_J2K= 46,
 	NTV2_BITFILE_KONAIP_2TX_1SFP_J2K= 47,
-#if !defined(NTV2_DEPRECATE_15_6)
-//	NTV2_BITFILE_KONAIP_2RX_1SFP_J2K= 48,	//	Never built or shipped
-#endif	//	NTV2_DEPRECATE_15_6
 	NTV2_BITFILE_KONAIP_1RX_1TX_2110= 49,
 	NTV2_BITFILE_IO4KPLUS_MAIN	= 50,
 	NTV2_BITFILE_IOIP_2022			= 51,
@@ -3770,25 +3378,6 @@ typedef enum
 } NTV2BitfileType;
 
 
-#if !defined (NTV2_DEPRECATE)
-	typedef enum
-	{
-		NTV2_BITFILE_K2					// KONA2: PCI firmware
-	} NTV2PCIBitFileType;
-
-	typedef enum
-	{
-		NTV2_BITFILE_MOABFW				// MOAB: firewire xilinx
-	} NTV2FWBitFileType;
-
-
-	typedef enum
-	{
-		NTV2_BITFILE_MOABPPC			// MOAB: PPC firmware
-	} NTV2FirmwareBitFileType;
-#endif	//	!defined (NTV2_DEPRECATE)
-
-
 typedef enum
 {
 	NTV2_CSC_Method_Unimplemented,
@@ -3833,10 +3422,6 @@ typedef enum
 	NTV2_YCbCr_to_GBRFull_Rec2020_Matrix,	// YCbCr -> RGB full  range Rec 2020
 	NTV2_YCbCr_to_GBRSMPTE_Rec2020_Matrix,	// YCbCr -> RGB SMPTE range Rec 2020
 
-	#if !defined (NTV2_DEPRECATE)
-		NTV2K2_Rec709Matrix		= NTV2_Rec709Matrix,
-		NTV2K2_Rec601Matrix		= NTV2_Rec601Matrix,
-	#endif	//	!defined (NTV2_DEPRECATE)
 	NTV2_MAX_NUM_ColorSpaceMatrixTypes,
 	NTV2_CSC_MATRIX_TYPE_INVALID = NTV2_MAX_NUM_ColorSpaceMatrixTypes
 } NTV2ColorSpaceMatrixType;
@@ -4058,16 +3643,6 @@ typedef enum
 } NTV2LHOutputSelect;
 
 
-#if !defined (NTV2_DEPRECATE)
-	//	Deprecated .. used only by Xena DXT application, which never shipped
-	typedef enum
-	{	DT_XENA_DXT_FIRMWARE_DESIRED_UNINITIALIZED,
-		DT_XENA_DXT_FIRMWARE_DESIRED_HD,
-		DT_XENA_DXT_FIRMWARE_DESIRED_SD
-	} DT_XENA_DXT_FIRMWARE_DESIRED;
-#endif	//	!defined (NTV2_DEPRECATE)
-
-
 typedef enum
 {
 	 NTV2_1080i_5994to525_5994		//	0
@@ -4128,12 +3703,16 @@ typedef NTV2_CSC_RGB_Range	NTV2RGBBlackRange;
 #define NTV2_IS_VALID_CSCRGBRANGE(__v__)		((__v__) >= NTV2_CSC_RGB_RANGE_FULL && (__v__) < NTV2_CSC_RGB_RANGE_INVALID)
 
 
+/**
+	@brief	These enum values identify the available SDI video output limiting modes.
+	@see	CNTV2Card::GetVideoLimiting, CNTV2Card::SetVideoLimiting
+**/
 typedef enum
 {
-	NTV2_VIDEOLIMITING_LEGALSDI,
-	NTV2_VIDEOLIMITING_OFF,
-	NTV2_VIDEOLIMITING_LEGALBROADCAST,
-	NTV2_MAX_NUM_VideoLimitingEnums,
+	NTV2_VIDEOLIMITING_LEGALSDI,		///< @brief Identifies the "Legal SDI" mode (Ymax=0x3AC, Cmax=0x3C0)
+	NTV2_VIDEOLIMITING_OFF,				///< @brief Disables normal FrameBuffer Y/C value read limiting (NOT RECOMMENDED).
+	NTV2_VIDEOLIMITING_LEGALBROADCAST,	///< @brief Identifies the "Legal Broadcast" mode (Ymax=0x340, Cmax=0x340)
+	NTV2_MAX_NUM_VideoLimitingEnums,	///< @brief Identifies the invalid (unspecified, uninitialized) video limiting.
 	NTV2_VIDEOLIMITING_INVALID	=	NTV2_MAX_NUM_VideoLimitingEnums
 } NTV2VideoLimiting;
 
@@ -4202,16 +3781,6 @@ typedef enum
 	eFPGACodec,
 	eFPGA_NUM_FPGAs
 } NTV2XilinxFPGA;
-
-
-#if !defined (NTV2_DEPRECATE)
-	typedef enum
-	{
-		eButtonReleased,
-		eButtonPressed,
-		eButtonNotSupported
-	} NTV2ButtonState;
-#endif	//	!defined (NTV2_DEPRECATE)
 
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -4289,9 +3858,6 @@ typedef enum
 	NTV2_SDI7AUDIO,
 	NTV2_SDI8AUDIO,
 	NTV2_MAX_NUM_SDIAudioSelectEnums
-	#if !defined (NTV2_DEPRECATE)
-		,NTV2_NUM_SDIAUDIO	= NTV2_MAX_NUM_SDIAudioSelectEnums
-	#endif	//	!defined (NTV2_DEPRECATE)
 } NTV2SDIAudioSelect;
 
 
@@ -4303,10 +3869,6 @@ typedef enum
 {
 	NTV2_DEVICE_BYPASSED,		///< @brief Input & output directly connected
 	NTV2_THROUGH_DEVICE,		///< @brief Input & output routed through device
-	#if !defined (NTV2_DEPRECATE)
-		NTV2_BYPASS				= NTV2_DEVICE_BYPASSED,
-		NTV2_STRAIGHT_THROUGH	= NTV2_THROUGH_DEVICE,
-	#endif	//	NTV2_DEPRECATE
 	NTV2_MAX_NUM_RelayStates,
 	NTV2_RELAY_STATE_INVALID	= NTV2_MAX_NUM_RelayStates
 } NTV2RelayState;
@@ -4349,9 +3911,6 @@ typedef enum
 	NTV2_TCINDEX_SDI8_2,		///< @brief SDI 8 embedded VITC 2
 	NTV2_MAX_NUM_TIMECODE_INDEXES,
 	NTV2_TCINDEX_INVALID	= NTV2_MAX_NUM_TIMECODE_INDEXES
-	#if !defined (NTV2_DEPRECATE)
-		,NTV2_NUM_TCSOURCES = NTV2_MAX_NUM_TIMECODE_INDEXES
-	#endif	//	!defined (NTV2_DEPRECATE)
 } NTV2TCIndex, NTV2TimecodeIndex;
 
 #define NTV2_IS_VALID_TIMECODE_INDEX(__x__)				(int32_t(__x__) >= int32_t(NTV2_TCINDEX_DEFAULT)  &&  int32_t(__x__) < int32_t(NTV2_MAX_NUM_TIMECODE_INDEXES))
@@ -4368,57 +3927,6 @@ typedef enum
 															||	((__x__) == NTV2_TCINDEX_SDI2_LTC)	)
 
 #define NTV2_IS_SDI_TIMECODE_INDEX(__x__)				(NTV2_IS_VALID_TIMECODE_INDEX(__x__)  &&  !NTV2_IS_ANALOG_TIMECODE_INDEX(__x__))
-
-
-#if !defined(NTV2_DEPRECATE)
-	typedef NTV2TCIndex						NTV2TCSource;					///< @deprecated	Use NTV2TCIndex instead.
-	#define NTV2_TCSOURCE_DEFAULT			NTV2_TCINDEX_DEFAULT			///< @deprecated	Use NTV2_TCINDEX_DEFAULT instead.
-	#define NTV2_TCSOURCE_SDI1				NTV2_TCINDEX_SDI1				///< @deprecated	Use NTV2_TCINDEX_SDI1 instead.
-	#define NTV2_TCSOURCE_SDI2				NTV2_TCINDEX_SDI2				///< @deprecated	Use NTV2_TCINDEX_SDI2 instead.
-	#define NTV2_TCSOURCE_SDI3				NTV2_TCINDEX_SDI3				///< @deprecated	Use NTV2_TCINDEX_SDI3 instead.
-	#define NTV2_TCSOURCE_SDI4				NTV2_TCINDEX_SDI4				///< @deprecated	Use NTV2_TCINDEX_SDI4 instead.
-	#define NTV2_TCSOURCE_SDI1_LTC			NTV2_TCINDEX_SDI1_LTC			///< @deprecated	Use NTV2_TCINDEX_SDI1_LTC instead.
-	#define NTV2_TCSOURCE_SDI2_LTC			NTV2_TCINDEX_SDI2_LTC			///< @deprecated	Use NTV2_TCINDEX_SDI2_LTC instead.
-	#define NTV2_TCSOURCE_LTC1				NTV2_TCINDEX_LTC1				///< @deprecated	Use NTV2_TCINDEX_LTC1 instead.
-	#define NTV2_TCSOURCE_LTC2				NTV2_TCINDEX_LTC2				///< @deprecated	Use NTV2_TCINDEX_LTC2 instead.
-	#define NTV2_TCSOURCE_SDI5				NTV2_TCINDEX_SDI5				///< @deprecated	Use NTV2_TCINDEX_SDI5 instead.
-	#define NTV2_TCSOURCE_SDI6				NTV2_TCINDEX_SDI6				///< @deprecated	Use NTV2_TCINDEX_SDI6 instead.
-	#define NTV2_TCSOURCE_SDI7				NTV2_TCINDEX_SDI7				///< @deprecated	Use NTV2_TCINDEX_SDI7 instead.
-	#define NTV2_TCSOURCE_SDI8				NTV2_TCINDEX_SDI8				///< @deprecated	Use NTV2_TCINDEX_SDI8 instead.
-	#define NTV2_TCSOURCE_SDI3_LTC			NTV2_TCINDEX_SDI3_LTC			///< @deprecated	Use NTV2_TCINDEX_SDI3_LTC instead.
-	#define NTV2_TCSOURCE_SDI4_LTC			NTV2_TCINDEX_SDI4_LTC			///< @deprecated	Use NTV2_TCINDEX_SDI4_LTC instead.
-	#define NTV2_TCSOURCE_SDI5_LTC			NTV2_TCINDEX_SDI5_LTC			///< @deprecated	Use NTV2_TCINDEX_SDI5_LTC instead.
-	#define NTV2_TCSOURCE_SDI6_LTC			NTV2_TCINDEX_SDI6_LTC			///< @deprecated	Use NTV2_TCINDEX_SDI6_LTC instead.
-	#define NTV2_TCSOURCE_SDI7_LTC			NTV2_TCINDEX_SDI7_LTC			///< @deprecated	Use NTV2_TCINDEX_SDI7_LTC instead.
-	#define NTV2_TCSOURCE_SDI8_LTC			NTV2_TCINDEX_SDI8_LTC			///< @deprecated	Use NTV2_TCINDEX_SDI8_LTC instead.
-	#define NTV2_MAX_NUM_TIMECODE_SOURCES	NTV2_MAX_NUM_TIMECODE_INDEXES	///< @deprecated	Use NTV2_MAX_NUM_TIMECODE_INDEXES instead.
-	#define NTV2_TCSOURCE_INVALID			NTV2_TCINDEX_INVALID			///< @deprecated	Use NTV2_TCINDEX_INVALID instead.
-	#define NTV2_NUM_TCSOURCES				NTV2_MAX_NUM_TIMECODE_INDEXES	///< @deprecated	Use NTV2_MAX_NUM_TIMECODE_INDEXES instead.
-
-	typedef NTV2TCIndex						NTV2TCDestination;				///< @deprecated	Use NTV2TCIndex instead.
-	#define NTV2_TCDEST_DEFAULT				NTV2_TCINDEX_DEFAULT			///< @deprecated	Use NTV2_TCINDEX_DEFAULT instead.
-	#define NTV2_TCDEST_SDI1				NTV2_TCINDEX_SDI1				///< @deprecated	Use NTV2_TCINDEX_SDI1 instead.
-	#define NTV2_TCDEST_SDI2				NTV2_TCINDEX_SDI2				///< @deprecated	Use NTV2_TCINDEX_SDI2 instead.
-	#define NTV2_TCDEST_SDI3				NTV2_TCINDEX_SDI3				///< @deprecated	Use NTV2_TCINDEX_SDI3 instead.
-	#define NTV2_TCDEST_SDI4				NTV2_TCINDEX_SDI4				///< @deprecated	Use NTV2_TCINDEX_SDI4 instead.
-	#define NTV2_TCDEST_SDI1_LTC			NTV2_TCINDEX_SDI1_LTC			///< @deprecated	Use NTV2_TCINDEX_SDI1_LTC instead.
-	#define NTV2_TCDEST_SDI2_LTC			NTV2_TCINDEX_SDI2_LTC			///< @deprecated	Use NTV2_TCINDEX_SDI2_LTC instead.
-	#define NTV2_TCDEST_LTC1				NTV2_TCINDEX_LTC1				///< @deprecated	Use NTV2_TCINDEX_LTC1 instead.
-	#define NTV2_TCDEST_LTC2				NTV2_TCINDEX_LTC2				///< @deprecated	Use NTV2_TCINDEX_LTC2 instead.
-	#define NTV2_TCDEST_SDI5				NTV2_TCINDEX_SDI5				///< @deprecated	Use NTV2_TCINDEX_SDI5 instead.
-	#define NTV2_TCDEST_SDI6				NTV2_TCINDEX_SDI6				///< @deprecated	Use NTV2_TCINDEX_SDI6 instead.
-	#define NTV2_TCDEST_SDI7				NTV2_TCINDEX_SDI7				///< @deprecated	Use NTV2_TCINDEX_SDI7 instead.
-	#define NTV2_TCDEST_SDI8				NTV2_TCINDEX_SDI8				///< @deprecated	Use NTV2_TCINDEX_SDI8 instead.
-	#define NTV2_TCDEST_SDI3_LTC			NTV2_TCINDEX_SDI3_LTC			///< @deprecated	Use NTV2_TCINDEX_SDI3_LTC instead.
-	#define NTV2_TCDEST_SDI4_LTC			NTV2_TCINDEX_SDI4_LTC			///< @deprecated	Use NTV2_TCINDEX_SDI4_LTC instead.
-	#define NTV2_TCDEST_SDI5_LTC			NTV2_TCINDEX_SDI5_LTC			///< @deprecated	Use NTV2_TCINDEX_SDI5_LTC instead.
-	#define NTV2_TCDEST_SDI6_LTC			NTV2_TCINDEX_SDI6_LTC			///< @deprecated	Use NTV2_TCINDEX_SDI6_LTC instead.
-	#define NTV2_TCDEST_SDI7_LTC			NTV2_TCINDEX_SDI7_LTC			///< @deprecated	Use NTV2_TCINDEX_SDI7_LTC instead.
-	#define NTV2_TCDEST_SDI8_LTC			NTV2_TCINDEX_SDI8_LTC			///< @deprecated	Use NTV2_TCINDEX_SDI8_LTC instead.
-	#define NTV2_MAX_NUM_TIMECODE_DESTS		NTV2_MAX_NUM_TIMECODE_INDEXES	///< @deprecated	Use NTV2_MAX_NUM_TIMECODE_INDEXES instead.
-	#define NTV2_TCDEST_INVALID				NTV2_TCINDEX_INVALID			///< @deprecated	Use NTV2_TCINDEX_INVALID instead.
-	#define NTV2_NUM_TCDESTS				NTV2_MAX_NUM_TIMECODE_INDEXES	///< @deprecated	Use NTV2_MAX_NUM_TIMECODE_INDEXES instead.
-#endif	//	!defined(NTV2_DEPRECATE)
 
 
 typedef enum
@@ -4730,452 +4238,6 @@ typedef enum {
 	READNONVOLATILECONFIGURATION_COMMAND = 0xB5
 } _FLASH_COMMAND;
 
-
-#if !defined (NTV2_DEPRECATE)
-	typedef		NTV2AnalogType						NTV2K2AnalogType;					///< @deprecated	Use NTV2AnalogType instead.
-	typedef		NTV2Audio2ChannelSelect				NTV2K2Audio2ChannelSelect;			///< @deprecated	Use NTV2Audio2ChannelSelect instead.
-	typedef		NTV2Audio4ChannelSelect				NTV2K2Audio4ChannelSelect;			///< @deprecated	Use NTV2Audio4ChannelSelect instead.
-	typedef		NTV2Audio8ChannelSelect				NTV2K2Audio8ChannelSelect;			///< @deprecated	Use NTV2Audio8ChannelSelect instead.
-	typedef		NTV2AudioMapSelect					NTV2K2AudioMapSelect;				///< @deprecated	Use NTV2AudioMapSelect instead.
-	typedef		NTV2AudioMonitorSelect				NTV2K2AudioMonitorSelect;			///< @deprecated	Use NTV2AudioMonitorSelect instead.
-	typedef		NTV2BitFileType						NTV2K2BitFileType;					///< @deprecated	Use NTV2BitFileType instead.
-	typedef		NTV2BreakoutType					NTV2K2BreakoutType;					///< @deprecated	Use NTV2BreakoutType instead.
-	typedef		NTV2ColorSpaceMatrixType			NTV2K2ColorSpaceMatrixType;			///< @deprecated	Use NTV2ColorSpaceMatrixType instead.
-	typedef		NTV2ColorSpaceMode					NTV2K2ColorSpaceMode;				///< @deprecated	Use NTV2ColorSpaceMode instead.
-	typedef		NTV2ConversionMode					NTV2K2ConversionMode;				///< @deprecated	Use NTV2ConversionMode instead.
-	typedef		NTV2CrosspointID					NTV2CrosspointSelections;			///< @deprecated	Use NTV2CrosspointID instead.
-	typedef		NTV2CrosspointSelections			NTV2K2CrosspointSelections;			///< @deprecated	Use NTV2CrosspointID instead.
-	typedef		NTV2DownConvertMode					NTV2K2DownConvertMode;				///< @deprecated	Use NTV2DownConvertMode instead.
-	typedef		NTV2EncodeAsPSF						NTV2K2EncodeAsPSF;					///< @deprecated	Use NTV2EncodeAsPSF instead.
-	typedef		NTV2FrameBufferQuality				NTV2K2FrameBufferQuality;			///< @deprecated	Use NTV2FrameBufferQuality instead.
-	typedef		NTV2Framesize						NTV2K2Framesize;					///< @deprecated	Use NTV2Framesize instead.
-	typedef		NTV2FrameSyncSelect					NTV2K2FrameSyncSelect;				///< @deprecated	Use NTV2FrameSyncSelect instead.
-	typedef		NTV2InputAudioSelect				NTV2K2InputAudioSelect;				///< @deprecated	Use NTV2InputAudioSelect instead.
-	typedef		NTV2InputVideoSelect				NTV2K2InputVideoSelect;				///< @deprecated	Use NTV2InputVideoSelect instead.
-	typedef		NTV2IsoConvertMode					NTV2K2IsoConvertMode;				///< @deprecated	Use NTV2IsoConvertMode instead.
-	typedef		NTV2OutputVideoSelect				NTV2K2OutputVideoSelect;			///< @deprecated	Use NTV2OutputVideoSelect instead.
-	typedef		NTV2QuarterSizeExpandMode			NTV2K2QuarterSizeExpandMode;		///< @deprecated	Use NTV2QuarterSizeExpandMode instead.
-	typedef		NTV2RegisterWriteMode				NTV2RegWriteMode;					///< @deprecated	Use NTV2RegisterWriteMode instead.
-	typedef		NTV2RGBBlackRange					NTV2K2RGBBlackRange;				///< @deprecated	Use NTV2RGBBlackRange instead.
-	typedef		NTV2SDIInputFormatSelect			NTV2K2SDIInputFormatSelect;			///< @deprecated	Use NTV2SDIInputFormatSelect instead.
-	typedef		NTV2Stereo3DMode					NTV2K2Stereo3DMode;					///< @deprecated	Use NTV2Stereo3DMode instead.
-	typedef		NTV2UpConvertMode					NTV2K2UpConvertMode;				///< @deprecated	Use NTV2UpConvertMode instead.
-	typedef		NTV2VideoDACMode					NTV2K2VideoDACMode;					///< @deprecated	Use NTV2VideoDACMode instead.
-
-	//	NTV2CrosspointSelections
-	#define		NTV2K2_XptBlack						NTV2_XptBlack						///< @deprecated	Use NTV2_XptBlack instead.
-	#define		NTV2K2_XptSDIIn1					NTV2_XptSDIIn1						///< @deprecated	Use NTV2_XptSDIIn1 instead.
-	#define		NTV2K2_XptSDIIn1DS2					NTV2_XptSDIIn1DS2					///< @deprecated	Use NTV2_XptSDIIn1DS2 instead.
-	#define		NTV2K2_XptSDIIn2					NTV2_XptSDIIn2						///< @deprecated	Use NTV2_XptSDIIn2 instead.
-	#define		NTV2K2_XptSDIIn2DS2					NTV2_XptSDIIn2DS2					///< @deprecated	Use NTV2_XptSDIIn2DS2 instead.
-	#define		NTV2K2_XptLUT1YUV					NTV2_XptLUT1YUV						///< @deprecated	Use NTV2_XptLUT1YUV instead.
-	#define		NTV2K2_XptCSCYUV					NTV2_XptCSC1VidYUV					///< @deprecated	Use NTV2_XptCSC1VidYUV instead.
-	#define		NTV2K2_XptCSC1VidYUV				NTV2_XptCSC1VidYUV					///< @deprecated	Use NTV2_XptCSC1VidYUV instead.
-	#define		NTV2K2_XptConversionModule			NTV2_XptConversionModule			///< @deprecated	Use NTV2_XptConversionModule instead.
-	#define		NTV2K2_XptCompressionModule			NTV2_XptCompressionModule			///< @deprecated	Use NTV2_XptCompressionModule instead.
-	#define		NTV2K2_XptFrameBuffer1YUV			NTV2_XptFrameBuffer1YUV				///< @deprecated	Use NTV2_XptFrameBuffer1YUV instead.
-	#define		NTV2K2_XptFrameSync1YUV				NTV2_XptFrameSync1YUV				///< @deprecated	Use NTV2_XptFrameSync1YUV instead.
-	#define		NTV2K2_XptFrameSync2YUV				NTV2_XptFrameSync2YUV				///< @deprecated	Use NTV2_XptFrameSync2YUV instead.
-	#define		NTV2K2_XptDuallinkOut				NTV2_XptDuallinkOut1				///< @deprecated	Use NTV2_XptDuallinkOut1 instead.
-	#define		NTV2K2_XptDuallinkOutDS2			NTV2_XptDuallinkOut1DS2				///< @deprecated	Use NTV2_XptDuallinkOut1DS2 instead.
-	#define		NTV2K2_XptDuallinkOut2				NTV2_XptDuallinkOut2				///< @deprecated	Use NTV2_XptDuallinkOut2 instead.
-	#define		NTV2K2_XptDuallinkOut2DS2			NTV2_XptDuallinkOut2DS2				///< @deprecated	Use NTV2_XptDuallinkOut2DS2 instead.
-	#define		NTV2K2_XptDuallinkOut3				NTV2_XptDuallinkOut3				///< @deprecated	Use NTV2_XptDuallinkOut3 instead.
-	#define		NTV2K2_XptDuallinkOut3DS2			NTV2_XptDuallinkOut3DS2				///< @deprecated	Use NTV2_XptDuallinkOut3DS2 instead.
-	#define		NTV2K2_XptDuallinkOut4				NTV2_XptDuallinkOut4				///< @deprecated	Use NTV2_XptDuallinkOut4 instead.
-	#define		NTV2K2_XptDuallinkOut4DS2			NTV2_XptDuallinkOut4DS2				///< @deprecated	Use NTV2_XptDuallinkOut4DS2 instead.
-	#define		NTV2K2_XptAlphaOut					NTV2_XptAlphaOut					///< @deprecated	Use NTV2_XptAlphaOut instead.
-	#define		NTV2K2_XptAnalogIn					NTV2_XptAnalogIn					///< @deprecated	Use NTV2_XptAnalogIn instead.
-	#define		NTV2K2_XptHDMIIn					NTV2_XptHDMIIn1						///< @deprecated	Use NTV2_XptHDMIIn1 instead.
-	#define		NTV2K2_XptHDMIInQ2					NTV2_XptHDMIIn1Q2					///< @deprecated	Use NTV2_XptHDMIIn1Q2 instead.
-	#define		NTV2K2_XptHDMIInQ3					NTV2_XptHDMIIn1Q3					///< @deprecated	Use NTV2_XptHDMIIn1Q3 instead.
-	#define		NTV2K2_XptHDMIInQ4					NTV2_XptHDMIIn1Q4					///< @deprecated	Use NTV2_XptHDMIIn1Q4 instead.
-	#define		NTV2K2_XptHDMIInRGB					NTV2_XptHDMIIn1RGB					///< @deprecated	Use NTV2_XptHDMIIn1RGB instead.
-	#define		NTV2K2_XptHDMIInQ2RGB				NTV2_XptHDMIIn1Q2RGB				///< @deprecated	Use NTV2_XptHDMIIn1Q2RGB instead.
-	#define		NTV2K2_XptHDMIInQ3RGB				NTV2_XptHDMIIn1Q3RGB				///< @deprecated	Use NTV2_XptHDMIIn1Q3RGB instead.
-	#define		NTV2K2_XptHDMIInQ4RGB				NTV2_XptHDMIIn1Q4RGB				///< @deprecated	Use NTV2_XptHDMIIn1Q4RGB instead.
-	#define		NTV2K2_XptFS1SecondConverter		NTV2_XptFS1SecondConverter			///< @deprecated	This is obsolete.
-	#define		NTV2KS_XptFS1ProcAmp				NTV2_XptFS1ProcAmp					///< @deprecated	This is obsolete.
-	#define		NTV2KS_XptFS1TestSignalGenerator	NTV2_XptFS1TestSignalGenerator		///< @deprecated	This is obsolete.
-	#define		NTV2K2_XptDuallinkIn				NTV2_XptDuallinkIn1					///< @deprecated	Use NTV2_XptDuallinkIn1 instead.
-	#define		NTV2K2_XptDuallinkIn2				NTV2_XptDuallinkIn2					///< @deprecated	Use NTV2_XptDuallinkIn2 instead.
-	#define		NTV2K2_XptDuallinkIn3				NTV2_XptDuallinkIn3					///< @deprecated	Use NTV2_XptDuallinkIn3 instead.
-	#define		NTV2K2_XptDuallinkIn4				NTV2_XptDuallinkIn4					///< @deprecated	Use NTV2_XptDuallinkIn4 instead.
-	#define		NTV2K2_XptLUT						NTV2_XptLUT1Out						///< @deprecated	Use NTV2_XptLUT1Out instead.
-	#define		NTV2K2_XptLUT1RGB					NTV2_XptLUT1Out						///< @deprecated	Use NTV2_XptLUT1Out instead.
-	#define		NTV2K2_XptCSCRGB					NTV2_XptCSC1VidRGB					///< @deprecated	Use NTV2_XptCSC1VidRGB instead.
-	#define		NTV2K2_XptCSC1VidRGB				NTV2_XptCSC1VidRGB					///< @deprecated	Use NTV2_XptCSC1VidRGB instead.
-	#define		NTV2K2_XptFrameBuffer1RGB			NTV2_XptFrameBuffer1RGB				///< @deprecated	Use NTV2_XptFrameBuffer1RGB instead.
-	#define		NTV2K2_XptFrameSync1RGB				NTV2_XptFrameSync1RGB				///< @deprecated	Use NTV2_XptFrameSync1RGB instead.
-	#define		NTV2K2_XptFrameSync2RGB				NTV2_XptFrameSync2RGB				///< @deprecated	Use NTV2_XptFrameSync2RGB instead.
-	#define		NTV2K2_XptLUT2RGB					NTV2_XptLUT2Out						///< @deprecated	Use NTV2_XptLUT2Out instead.
-	#define		NTV2K2_XptCSC1KeyYUV				NTV2_XptCSC1KeyYUV					///< @deprecated	Use NTV2_XptCSC1KeyYUV instead.
-	#define		NTV2K2_XptFrameBuffer2YUV			NTV2_XptFrameBuffer2YUV				///< @deprecated	Use NTV2_XptFrameBuffer2YUV instead.
-	#define		NTV2K2_XptFrameBuffer2RGB			NTV2_XptFrameBuffer2RGB				///< @deprecated	Use NTV2_XptFrameBuffer2RGB instead.
-	#define		NTV2K2_XptCSC2VidYUV				NTV2_XptCSC2VidYUV					///< @deprecated	Use NTV2_XptCSC2VidYUV instead.
-	#define		NTV2K2_XptCSC2VidRGB				NTV2_XptCSC2VidRGB					///< @deprecated	Use NTV2_XptCSC2VidRGB instead.
-	#define		NTV2K2_XptCSC2KeyYUV				NTV2_XptCSC2KeyYUV					///< @deprecated	Use NTV2_XptCSC2KeyYUV instead.
-	#define		NTV2K2_XptMixerVidYUV				NTV2_XptMixerVidYUV					///< @deprecated	Use NTV2_XptMixerVidYUV instead.
-	#define		NTV2K2_XptMixerKeyYUV				NTV2_XptMixerKeyYUV					///< @deprecated	Use NTV2_XptMixerKeyYUV instead.
-	#define		NTV2K2_XptWaterMarkerRGB			NTV2_XptWaterMarkerRGB				///< @deprecated	Use NTV2_XptWaterMarkerRGB instead.
-	#define		NTV2K2_XptWaterMarkerYUV			NTV2_XptWaterMarkerYUV				///< @deprecated	Use NTV2_XptWaterMarkerYUV instead.
-	#define		NTV2K2_XptWaterMarker2RGB			NTV2_XptWaterMarker2RGB				///< @deprecated	Use NTV2_XptWaterMarker2RGB instead.
-	#define		NTV2K2_XptWaterMarker2YUV			NTV2_XptWaterMarker2YUV				///< @deprecated	Use NTV2_XptWaterMarker2YUV instead.
-	#define		NTV2K2_XptIICTRGB					NTV2_XptIICTRGB						///< @deprecated	Use NTV2_XptIICTRGB instead.
-	#define		NTV2K2_XptIICT2RGB					NTV2_XptIICT2RGB					///< @deprecated	Use NTV2_XptIICT2RGB instead.
-	#define		NTV2K2_XptTestPatternYUV			NTV2_XptTestPatternYUV				///< @deprecated	Use NTV2_XptTestPatternYUV instead.
-	#define		NTV2K2_XptDCIMixerVidYUV			NTV2_XptDCIMixerVidYUV				///< @deprecated	Use NTV2_XptDCIMixerVidYUV instead.
-	#define		NTV2K2_XptDCIMixerVidRGB			NTV2_XptDCIMixerVidRGB				///< @deprecated	Use NTV2_XptDCIMixerVidRGB instead.
-	#define		NTV2K2_XptMixer2VidYUV				NTV2_XptMixer2VidYUV				///< @deprecated	Use NTV2_XptMixer2VidYUV instead.
-	#define		NTV2K2_XptMixer2KeyYUV				NTV2_XptMixer2KeyYUV				///< @deprecated	Use NTV2_XptMixer2KeyYUV instead.
-	#define		NTV2K2_XptStereoCompressorOut		NTV2_XptStereoCompressorOut			///< @deprecated	Use NTV2_XptStereoCompressorOut instead.
-	#define		NTV2K2_XptLUT3Out					NTV2_XptLUT3Out						///< @deprecated	Use NTV2_XptLUT3Out instead.
-	#define		NTV2K2_XptLUT4Out					NTV2_XptLUT4Out						///< @deprecated	Use NTV2_XptLUT4Out instead.
-	#define		NTV2K2_XptFrameBuffer3YUV			NTV2_XptFrameBuffer3YUV				///< @deprecated	Use NTV2_XptFrameBuffer3YUV instead.
-	#define		NTV2K2_XptFrameBuffer3RGB			NTV2_XptFrameBuffer3RGB				///< @deprecated	Use NTV2_XptFrameBuffer3RGB instead.
-	#define		NTV2K2_XptFrameBuffer4YUV			NTV2_XptFrameBuffer4YUV				///< @deprecated	Use NTV2_XptFrameBuffer4YUV instead.
-	#define		NTV2K2_XptFrameBuffer4RGB			NTV2_XptFrameBuffer4RGB				///< @deprecated	Use NTV2_XptFrameBuffer4RGB instead.
-	#define		NTV2K2_XptSDIIn3					NTV2_XptSDIIn3						///< @deprecated	Use NTV2_XptSDIIn3 instead.
-	#define		NTV2K2_XptSDIIn3DS2					NTV2_XptSDIIn3DS2					///< @deprecated	Use NTV2_XptSDIIn3DS2 instead.
-	#define		NTV2K2_XptSDIIn4					NTV2_XptSDIIn4						///< @deprecated	Use NTV2_XptSDIIn4 instead.
-	#define		NTV2K2_XptSDIIn4DS2					NTV2_XptSDIIn4DS2					///< @deprecated	Use NTV2_XptSDIIn4DS2 instead.
-	#define		NTV2K2_XptCSC3VidYUV				NTV2_XptCSC3VidYUV					///< @deprecated	Use NTV2_XptCSC3VidYUV instead.
-	#define		NTV2K2_XptCSC3VidRGB				NTV2_XptCSC3VidRGB					///< @deprecated	Use NTV2_XptCSC3VidRGB instead.
-	#define		NTV2K2_XptCSC3KeyYUV				NTV2_XptCSC3KeyYUV					///< @deprecated	Use NTV2_XptCSC3KeyYUV instead.
-	#define		NTV2K2_XptCSC4VidYUV				NTV2_XptCSC4VidYUV					///< @deprecated	Use NTV2_XptCSC4VidYUV instead.
-	#define		NTV2K2_XptCSC4VidRGB				NTV2_XptCSC4VidRGB					///< @deprecated	Use NTV2_XptCSC4VidRGB instead.
-	#define		NTV2K2_XptCSC4KeyYUV				NTV2_XptCSC4KeyYUV					///< @deprecated	Use NTV2_XptCSC4KeyYUV instead.
-	#define		NTV2K2_XptCSC5VidYUV				NTV2_XptCSC5VidYUV					///< @deprecated	Use NTV2_XptCSC5VidYUV instead.
-	#define		NTV2K2_XptCSC5VidRGB				NTV2_XptCSC5VidRGB					///< @deprecated	Use NTV2_XptCSC5VidRGB instead.
-	#define		NTV2K2_XptCSC5KeyYUV				NTV2_XptCSC5KeyYUV					///< @deprecated	Use NTV2_XptCSC5KeyYUV instead.
-	#define		NTV2K2_XptLUT5Out					NTV2_XptLUT5Out						///< @deprecated	Use NTV2_XptLUT5Out instead.
-	#define		NTV2K2_XptDuallinkOut5				NTV2_XptDuallinkOut5				///< @deprecated	Use NTV2_XptDuallinkOut5 instead.
-	#define		NTV2K2_XptDuallinkOut5DS2			NTV2_XptDuallinkOut5DS2				///< @deprecated	Use NTV2_XptDuallinkOut5DS2 instead.
-	#define		NTV2K2_Xpt4KDownConverterOut		NTV2_Xpt4KDownConverterOut			///< @deprecated	Use NTV2_Xpt4KDownConverterOut instead.
-	#define		NTV2K2_Xpt4KDownConverterOutRGB		NTV2_Xpt4KDownConverterOutRGB		///< @deprecated	Use NTV2_Xpt4KDownConverterOutRGB instead.
-	#define		NTV2K2_XptFrameBuffer5YUV			NTV2_XptFrameBuffer5YUV				///< @deprecated	Use NTV2_Xpt4KDownConverterOutRGB instead.
-	#define		NTV2K2_XptFrameBuffer5RGB			NTV2_XptFrameBuffer5RGB				///< @deprecated	Use NTV2_XptFrameBuffer5YUV instead.
-	#define		NTV2K2_XptFrameBuffer6YUV			NTV2_XptFrameBuffer6YUV				///< @deprecated	Use NTV2_XptFrameBuffer5RGB instead.
-	#define		NTV2K2_XptFrameBuffer6RGB			NTV2_XptFrameBuffer6RGB				///< @deprecated	Use NTV2_XptFrameBuffer6YUV instead.
-	#define		NTV2K2_XptFrameBuffer7YUV			NTV2_XptFrameBuffer7YUV				///< @deprecated	Use NTV2_XptFrameBuffer6RGB instead.
-	#define		NTV2K2_XptFrameBuffer7RGB			NTV2_XptFrameBuffer7RGB				///< @deprecated	Use NTV2_XptFrameBuffer7YUV instead.
-	#define		NTV2K2_XptFrameBuffer8YUV			NTV2_XptFrameBuffer8YUV				///< @deprecated	Use NTV2_XptFrameBuffer7RGB instead.
-	#define		NTV2K2_XptFrameBuffer8RGB			NTV2_XptFrameBuffer8RGB				///< @deprecated	Use NTV2_XptFrameBuffer8YUV instead.
-	#define		NTV2K2_XptSDIIn5					NTV2_XptSDIIn5						///< @deprecated	Use NTV2_XptFrameBuffer8RGB instead.
-	#define		NTV2K2_XptSDIIn5DS2					NTV2_XptSDIIn5DS2					///< @deprecated	Use NTV2_XptSDIIn5 instead.
-	#define		NTV2K2_XptSDIIn6					NTV2_XptSDIIn6						///< @deprecated	Use NTV2_XptSDIIn5DS2 instead.
-	#define		NTV2K2_XptSDIIn6DS2					NTV2_XptSDIIn6DS2					///< @deprecated	Use NTV2_XptSDIIn6 instead.
-	#define		NTV2K2_XptSDIIn7					NTV2_XptSDIIn7						///< @deprecated	Use NTV2_XptSDIIn6DS2 instead.
-	#define		NTV2K2_XptSDIIn7DS2					NTV2_XptSDIIn7DS2					///< @deprecated	Use NTV2_XptSDIIn7DS2 instead.
-	#define		NTV2K2_XptSDIIn8					NTV2_XptSDIIn8						///< @deprecated	Use NTV2_XptSDIIn8 instead.
-	#define		NTV2K2_XptSDIIn8DS2					NTV2_XptSDIIn8DS2					///< @deprecated	Use NTV2_XptSDIIn8DS2 instead.
-	#define		NTV2K2_XptCSC6VidYUV				NTV2_XptCSC6VidYUV					///< @deprecated	Use NTV2_XptCSC6VidYUV instead.
-	#define		NTV2K2_XptCSC6VidRGB				NTV2_XptCSC6VidRGB					///< @deprecated	Use NTV2_XptCSC6VidRGB instead.
-	#define		NTV2K2_XptCSC6KeyYUV				NTV2_XptCSC6KeyYUV					///< @deprecated	Use NTV2_XptCSC6KeyYUV instead.
-	#define		NTV2K2_XptCSC7VidYUV				NTV2_XptCSC7VidYUV					///< @deprecated	Use NTV2_XptCSC7VidYUV instead.
-	#define		NTV2K2_XptCSC7VidRGB				NTV2_XptCSC7VidRGB					///< @deprecated	Use NTV2_XptCSC7VidRGB instead.
-	#define		NTV2K2_XptCSC7KeyYUV				NTV2_XptCSC7KeyYUV					///< @deprecated	Use NTV2_XptCSC7KeyYUV instead.
-	#define		NTV2K2_XptCSC8VidYUV				NTV2_XptCSC8VidYUV					///< @deprecated	Use NTV2_XptCSC8VidYUV instead.
-	#define		NTV2K2_XptCSC8VidRGB				NTV2_XptCSC8VidRGB					///< @deprecated	Use NTV2_XptCSC8VidRGB instead.
-	#define		NTV2K2_XptCSC8KeyYUV				NTV2_XptCSC8KeyYUV					///< @deprecated	Use NTV2_XptCSC8KeyYUV instead.
-	#define		NTV2K2_XptLUT6Out					NTV2_XptLUT6Out						///< @deprecated	Use NTV2_XptLUT6Out instead.
-	#define		NTV2K2_XptLUT7Out					NTV2_XptLUT7Out						///< @deprecated	Use NTV2_XptLUT7Out instead.
-	#define		NTV2K2_XptLUT8Out					NTV2_XptLUT8Out						///< @deprecated	Use NTV2_XptLUT8Out instead.
-	#define		NTV2K2_XptDuallinkOut6				NTV2_XptDuallinkOut6				///< @deprecated	Use NTV2_XptDuallinkOut6 instead.
-	#define		NTV2K2_XptDuallinkOut6DS2			NTV2_XptDuallinkOut6DS2				///< @deprecated	Use NTV2_XptDuallinkOut6DS2 instead.
-	#define		NTV2K2_XptDuallinkOut7				NTV2_XptDuallinkOut7				///< @deprecated	Use NTV2_XptDuallinkOut7 instead.
-	#define		NTV2K2_XptDuallinkOut7DS2			NTV2_XptDuallinkOut7DS2				///< @deprecated	Use NTV2_XptDuallinkOut7DS2 instead.
-	#define		NTV2K2_XptDuallinkOut8				NTV2_XptDuallinkOut8				///< @deprecated	Use NTV2_XptDuallinkOut8 instead.
-	#define		NTV2K2_XptDuallinkOut8DS2			NTV2_XptDuallinkOut8DS2				///< @deprecated	Use NTV2_XptDuallinkOut8DS2 instead.
-	#define		NTV2K2_XptMixer3VidYUV				NTV2_XptMixer3VidYUV				///< @deprecated	Use NTV2_XptMixer3VidYUV instead.
-	#define		NTV2K2_XptMixer3KeyYUV				NTV2_XptMixer3KeyYUV				///< @deprecated	Use NTV2_XptMixer3KeyYUV instead.
-	#define		NTV2K2_XptMixer4VidYUV				NTV2_XptMixer4VidYUV				///< @deprecated	Use NTV2_XptMixer4VidYUV instead.
-	#define		NTV2K2_XptMixer4KeyYUV				NTV2_XptMixer4KeyYUV				///< @deprecated	Use NTV2_XptMixer4KeyYUV instead.
-	#define		NTV2K2_XptDuallinkIn5				NTV2_XptDuallinkIn5					///< @deprecated	Use NTV2_XptDuallinkIn5 instead.
-	#define		NTV2K2_XptDuallinkIn6				NTV2_XptDuallinkIn6					///< @deprecated	Use NTV2_XptDuallinkIn6 instead.
-	#define		NTV2K2_XptDuallinkIn7				NTV2_XptDuallinkIn7					///< @deprecated	Use NTV2_XptDuallinkIn7 instead.
-	#define		NTV2K2_XptDuallinkIn8				NTV2_XptDuallinkIn8					///< @deprecated	Use NTV2_XptDuallinkIn8 instead.
-	#define		NTV2K2_XptRuntimeCalc				NTV2_XptRuntimeCalc					///< @deprecated	Use NTV2_XptRuntimeCalc instead.
-	#define		NTV2_XptMixerVidYUV					NTV2_XptMixer1VidYUV				///< @deprecated	Use NTV2_XptMixer1VidYUV instead.
-	#define		NTV2_XptMixerKeyYUV					NTV2_XptMixer1KeyYUV				///< @deprecated	User NTV2_XptMixer1KeyYUV instead.
-
-	//	NTV2BitFileType
-	#define		NTV2K2_VideoProcBitFile				NTV2_VideoProcBitFile				///< @deprecated	Use NTV2_VideoProcBitFile instead.
-	#define		NTV2K2_PCIBitFile					NTV2_PCIBitFile						///< @deprecated	Use NTV2_PCIBitFile instead.
-	#define		NTV2K2_FWBitFile					NTV2_FWBitFile						///< @deprecated	Use NTV2_FWBitFile instead.
-	#define		NTV2K2_Firmware						NTV2_Firmware						///< @deprecated	Use NTV2_Firmware instead.
-	#define		NTV2K2_BitFile1						NTV2_BitFile1						///< @deprecated	Use NTV2_BitFile1 instead.
-	#define		NTV2K2_BitFile2						NTV2_BitFile2						///< @deprecated	Use NTV2_BitFile2 instead.
-	#define		NTV2K2_BitFile3						NTV2_BitFile3						///< @deprecated	Use NTV2_BitFile3 instead.
-	#define		NTV2K2_BitFile4						NTV2_BitFile4						///< @deprecated	Use NTV2_BitFile4 instead.
-	#define		NTV2K2_BitFile5						NTV2_BitFile5						///< @deprecated	Use NTV2_BitFile5 instead.
-	#define		NTV2K2_BitFile6						NTV2_BitFile6						///< @deprecated	Use NTV2_BitFile6 instead.
-	#define		NTV2K2_BitFile7						NTV2_BitFile7						///< @deprecated	Use NTV2_BitFile7 instead.
-	#define		NTV2K2_BitFile8						NTV2_BitFile8						///< @deprecated	Use NTV2_BitFile8 instead.
-
-	//	NTV2ConversionMode
-	#define		NTV2K2_1080i_5994to525_5994			NTV2_1080i_5994to525_5994			///< @deprecated	Use NTV2_1080i_5994to525_5994 instead.
-	#define		NTV2K2_1080i_2500to625_2500			NTV2_1080i_2500to625_2500			///< @deprecated	Use NTV2_1080i_2500to625_2500 instead.
-	#define		NTV2K2_720p_5994to525_5994			NTV2_720p_5994to525_5994			///< @deprecated	Use NTV2_720p_5994to525_5994 instead.
-	#define		NTV2K2_720p_5000to625_2500			NTV2_720p_5000to625_2500			///< @deprecated	Use NTV2_720p_5000to625_2500 instead.
-	#define		NTV2K2_525_5994to1080i_5994			NTV2_525_5994to1080i_5994			///< @deprecated	Use NTV2_525_5994to1080i_5994 instead.
-	#define		NTV2K2_525_5994to720p_5994			NTV2_525_5994to720p_5994			///< @deprecated	Use NTV2_525_5994to720p_5994 instead.
-	#define		NTV2K2_625_2500to1080i_2500			NTV2_625_2500to1080i_2500			///< @deprecated	Use NTV2_625_2500to1080i_2500 instead.
-	#define		NTV2K2_625_2500to720p_5000			NTV2_625_2500to720p_5000			///< @deprecated	Use NTV2_625_2500to720p_5000 instead.
-	#define		NTV2K2_720p_5000to1080i_2500		NTV2_720p_5000to1080i_2500			///< @deprecated	Use NTV2_720p_5000to1080i_2500 instead.
-	#define		NTV2K2_720p_5994to1080i_5994		NTV2_720p_5994to1080i_5994			///< @deprecated	Use NTV2_720p_5994to1080i_5994 instead.
-	#define		NTV2K2_720p_6000to1080i_3000		NTV2_720p_6000to1080i_3000			///< @deprecated	Use NTV2_720p_6000to1080i_3000 instead.
-	#define		NTV2K2_1080i2398to525_2398			NTV2_1080i2398to525_2398			///< @deprecated	Use NTV2_1080i2398to525_2398 instead.
-	#define		NTV2K2_1080i2398to525_2997			NTV2_1080i2398to525_2997			///< @deprecated	Use NTV2_1080i2398to525_2997 instead.
-	#define		NTV2K2_1080i2400to525_2400			NTV2_1080i2400to525_2400			///< @deprecated	Use NTV2_1080i2400to525_2400 instead.
-	#define		NTV2K2_1080p2398to525_2398			NTV2_1080p2398to525_2398			///< @deprecated	Use NTV2_1080p2398to525_2398 instead.
-	#define		NTV2K2_1080p2398to525_2997			NTV2_1080p2398to525_2997			///< @deprecated	Use NTV2_1080p2398to525_2997 instead.
-	#define		NTV2K2_1080p2400to525_2400			NTV2_1080p2400to525_2400			///< @deprecated	Use NTV2_1080p2400to525_2400 instead.
-	#define		NTV2K2_1080i_2500to720p_5000		NTV2_1080i_2500to720p_5000			///< @deprecated	Use NTV2_1080i_2500to720p_5000 instead.
-	#define		NTV2K2_1080i_5994to720p_5994		NTV2_1080i_5994to720p_5994			///< @deprecated	Use NTV2_1080i_5994to720p_5994 instead.
-	#define		NTV2K2_1080i_3000to720p_6000		NTV2_1080i_3000to720p_6000			///< @deprecated	Use NTV2_1080i_3000to720p_6000 instead.
-	#define		NTV2K2_1080i_2398to720p_2398		NTV2_1080i_2398to720p_2398			///< @deprecated	Use NTV2_1080i_2398to720p_2398 instead.
-	#define		NTV2K2_720p_2398to1080i_2398		NTV2_720p_2398to1080i_2398			///< @deprecated	Use NTV2_720p_2398to1080i_2398 instead.
-	#define		NTV2K2_525_2398to1080i_2398			NTV2_525_2398to1080i_2398			///< @deprecated	Use NTV2_525_2398to1080i_2398 instead.
-	#define		NTV2K2_525_5994to525_5994			NTV2_525_5994to525_5994				///< @deprecated	Use NTV2_525_5994to525_5994 instead.
-	#define		NTV2K2_625_2500to625_2500			NTV2_625_2500to625_2500				///< @deprecated	Use NTV2_625_2500to625_2500 instead.
-	#define		NTV2K2_525_5994to525psf_2997		NTV2_525_5994to525psf_2997			///< @deprecated	Use NTV2_525_5994to525psf_2997 instead.
-	#define		NTV2K2_625_5000to625psf_2500		NTV2_625_5000to625psf_2500			///< @deprecated	Use NTV2_625_5000to625psf_2500 instead.
-	#define		NTV2K2_1080i_5000to1080psf_2500		NTV2_1080i_5000to1080psf_2500		///< @deprecated	Use NTV2_1080i_5000to1080psf_2500 instead.
-	#define		NTV2K2_1080i_5994to1080psf_2997		NTV2_1080i_5994to1080psf_2997		///< @deprecated	Use NTV2_1080i_5994to1080psf_2997 instead.
-	#define		NTV2K2_1080i_6000to1080psf_3000		NTV2_1080i_6000to1080psf_3000		///< @deprecated	Use NTV2_1080i_6000to1080psf_3000 instead.
-	#define		NTV2K2_1080p_3000to720p_6000		NTV2_1080p_3000to720p_6000			///< @deprecated	Use NTV2_1080p_3000to720p_6000 instead.
-	#define		NTV2K2_1080psf_2398to1080i_5994		NTV2_1080psf_2398to1080i_5994		///< @deprecated	Use NTV2_1080psf_2398to1080i_5994 instead.
-	#define		NTV2K2_1080psf_2400to1080i_3000		NTV2_1080psf_2400to1080i_3000		///< @deprecated	Use NTV2_1080psf_2400to1080i_3000 instead.
-	#define		NTV2K2_1080psf_2500to1080i_2500		NTV2_1080psf_2500to1080i_2500		///< @deprecated	Use NTV2_1080psf_2500to1080i_2500 instead.
-	#define		NTV2K2_1080p_2398to1080i_5994		NTV2_1080p_2398to1080i_5994			///< @deprecated	Use NTV2_1080p_2398to1080i_5994 instead.
-	#define		NTV2K2_1080p_2400to1080i_3000		NTV2_1080p_2400to1080i_3000			///< @deprecated	Use NTV2_1080p_2400to1080i_3000 instead.
-	#define		NTV2K2_1080p_2500to1080i_2500		NTV2_1080p_2500to1080i_2500			///< @deprecated	Use NTV2_1080p_2500to1080i_2500 instead.
-	#define		NTV2K2_NUM_CONVERSIONMODES			NTV2_NUM_CONVERSIONMODES			///< @deprecated	Use NTV2_NUM_CONVERSIONMODES instead.
-	#define		NTV2K2_CONVERSIONMODE_UNKNOWN		NTV2_CONVERSIONMODE_UNKNOWN			///< @deprecated	Use NTV2_CONVERSIONMODE_UNKNOWN instead.
-
-	//	NTV2RGBBlackRange
-	#define		NTV2K2_RGBBLACKRANGE_0_0x3FF		NTV2_RGBBLACKRANGE_0_0x3FF			///< @deprecated	Use NTV2_RGBBLACKRANGE_0_0x3FF instead.
-	#define		NTV2K2_RGBBLACKRANGE_0x40_0x3C0		NTV2_RGBBLACKRANGE_0x40_0x3C0		///< @deprecated	Use NTV2_RGBBLACKRANGE_0x40_0x3C0 instead.
-
-	//	NTV2Framesize
-	#define		NTV2K2_FRAMESIZE_2MB				NTV2_FRAMESIZE_2MB					///< @deprecated	Use NTV2_FRAMESIZE_2MB instead.
-	#define		NTV2K2_FRAMESIZE_4MB				NTV2_FRAMESIZE_4MB					///< @deprecated	Use NTV2_FRAMESIZE_4MB instead.
-	#define		NTV2K2_FRAMESIZE_8MB				NTV2_FRAMESIZE_8MB					///< @deprecated	Use NTV2_FRAMESIZE_8MB instead.
-	#define		NTV2K2_FRAMESIZE_16MB				NTV2_FRAMESIZE_16MB					///< @deprecated	Use NTV2_FRAMESIZE_16MB instead.
-
-	//	NTV2VideoDACMode
-	#define		NTV2K2_480iRGB						NTV2_480iRGB						///< @deprecated	Use NTV2_480iRGB instead.
-	#define		NTV2K2_480iYPbPrSMPTE				NTV2_480iYPbPrSMPTE					///< @deprecated	Use NTV2_480iYPbPrSMPTE instead.
-	#define		NTV2K2_480iYPbPrBetacam525			NTV2_480iYPbPrBetacam525			///< @deprecated	Use NTV2_480iYPbPrBetacam525 instead.
-	#define		NTV2K2_480iYPbPrBetacamJapan		NTV2_480iYPbPrBetacamJapan			///< @deprecated	Use NTV2_480iYPbPrBetacamJapan instead.
-	#define		NTV2K2_480iNTSC_US_Composite		NTV2_480iNTSC_US_Composite			///< @deprecated	Use NTV2_480iNTSC_US_Composite instead.
-	#define		NTV2K2_480iNTSC_Japan_Composite		NTV2_480iNTSC_Japan_Composite		///< @deprecated	Use NTV2_480iNTSC_Japan_Composite instead.
-	#define		NTV2K2_576iRGB						NTV2_576iRGB						///< @deprecated	Use NTV2_576iRGB instead.
-	#define		NTV2K2_576iYPbPrSMPTE				NTV2_576iYPbPrSMPTE					///< @deprecated	Use NTV2_576iYPbPrSMPTE instead.
-	#define		NTV2K2_576iPAL_Composite			NTV2_576iPAL_Composite				///< @deprecated	Use NTV2_576iPAL_Composite instead.
-	#define		NTV2K2_1080iRGB						NTV2_1080iRGB						///< @deprecated	Use NTV2_1080iRGB instead.
-	#define		NTV2K2_1080psfRGB					NTV2_1080psfRGB						///< @deprecated	Use NTV2_1080psfRGB instead.
-	#define		NTV2K2_720pRGB						NTV2_720pRGB						///< @deprecated	Use NTV2_720pRGB instead.
-	#define		NTV2K2_1080iSMPTE					NTV2_1080iSMPTE						///< @deprecated	Use NTV2_1080iSMPTE instead.
-	#define		NTV2K2_1080psfSMPTE					NTV2_1080psfSMPTE					///< @deprecated	Use NTV2_1080psfSMPTE instead.
-	#define		NTV2K2_720pSMPTE					NTV2_720pSMPTE						///< @deprecated	Use NTV2_720pSMPTE instead.
-	#define		NTV2K2_1080iXVGA					NTV2_1080iXVGA						///< @deprecated	Use NTV2_1080iXVGA instead.
-	#define		NTV2K2_1080psfXVGA					NTV2_1080psfXVGA					///< @deprecated	Use NTV2_1080psfXVGA instead.
-	#define		NTV2K2_720pXVGA						NTV2_720pXVGA						///< @deprecated	Use NTV2_720pXVGA instead.
-	#define		NTV2K2_2Kx1080RGB					NTV2_2Kx1080RGB						///< @deprecated	Use NTV2_2Kx1080RGB instead.
-	#define		NTV2K2_2Kx1080SMPTE					NTV2_2Kx1080SMPTE					///< @deprecated	Use NTV2_2Kx1080SMPTE instead.
-	#define		NTV2K2_2Kx1080XVGA					NTV2_2Kx1080XVGA					///< @deprecated	Use NTV2_2Kx1080XVGA instead.
-
-	//	NTV2LSVideoADCMode
-	#define		NTV2K2_480iADCComponentBeta			NTV2_480iADCComponentBeta			///< @deprecated	Use NTV2_480iADCComponentBeta instead.
-	#define		NTV2K2_480iADCComponentSMPTE		NTV2_480iADCComponentSMPTE			///< @deprecated	Use NTV2_480iADCComponentSMPTE instead.
-	#define		NTV2K2_480iADCSVideoUS				NTV2_480iADCSVideoUS				///< @deprecated	Use NTV2_480iADCSVideoUS instead.
-	#define		NTV2K2_480iADCCompositeUS			NTV2_480iADCCompositeUS				///< @deprecated	Use NTV2_480iADCCompositeUS instead.
-	#define		NTV2K2_480iADCComponentBetaJapan	NTV2_480iADCComponentBetaJapan		///< @deprecated	Use NTV2_480iADCComponentBetaJapan instead.
-	#define		NTV2K2_480iADCComponentSMPTEJapan	NTV2_480iADCComponentSMPTEJapan		///< @deprecated	Use NTV2_480iADCComponentSMPTEJapan instead.
-	#define		NTV2K2_480iADCSVideoJapan			NTV2_480iADCSVideoJapan				///< @deprecated	Use NTV2_480iADCSVideoJapan instead.
-	#define		NTV2K2_480iADCCompositeJapan		NTV2_480iADCCompositeJapan			///< @deprecated	Use NTV2_480iADCCompositeJapan instead.
-	#define		NTV2K2_576iADCComponentBeta			NTV2_576iADCComponentBeta			///< @deprecated	Use NTV2_576iADCComponentBeta instead.
-	#define		NTV2K2_576iADCComponentSMPTE		NTV2_576iADCComponentSMPTE			///< @deprecated	Use NTV2_576iADCComponentSMPTE instead.
-	#define		NTV2K2_576iADCSVideo				NTV2_576iADCSVideo					///< @deprecated	Use NTV2_576iADCSVideo instead.
-	#define		NTV2K2_576iADCComposite				NTV2_576iADCComposite				///< @deprecated	Use NTV2_576iADCComposite instead.
-	#define		NTV2K2_720p_60						NTV2_720p_60						///< @deprecated	Use NTV2_720p_60 instead.
-	#define		NTV2K2_1080i_30						NTV2_1080i_30						///< @deprecated	Use NTV2_1080i_30 instead.
-	#define		NTV2K2_720p_50						NTV2_720p_50						///< @deprecated	Use NTV2_720p_50 instead.
-	#define		NTV2K2_1080i_25						NTV2_1080i_25						///< @deprecated	Use NTV2_1080i_25 instead.
-	#define		NTV2K2_1080pSF24					NTV2_1080pSF24						///< @deprecated	Use NTV2_1080pSF24 instead.
-
-	//	NTV2AnalogType
-	#define		NTV2K2_AnlgComposite				NTV2_AnlgComposite					///< @deprecated	Use NTV2_AnlgComposite instead.
-	#define		NTV2K2_AnlgComponentSMPTE			NTV2_AnlgComponentSMPTE				///< @deprecated	Use NTV2_AnlgComponentSMPTE instead.
-	#define		NTV2K2_AnlgComponentBetacam			NTV2_AnlgComponentBetacam			///< @deprecated	Use NTV2_AnlgComponentBetacam instead.
-	#define		NTV2K2_AnlgComponentRGB				NTV2_AnlgComponentRGB				///< @deprecated	Use NTV2_AnlgComponentRGB instead.
-	#define		NTV2K2_AnlgXVGA						NTV2_AnlgXVGA						///< @deprecated	Use NTV2_AnlgXVGA instead.
-	#define		NTV2K2_AnlgSVideo					NTV2_AnlgSVideo						///< @deprecated	Use NTV2_AnlgSVideo instead.
-
-	//	R2BlackLevel
-	#define		NTV2K2_Black75IRE					R2_Black_75IRE						///< @deprecated	Use R2_Black_75IRE instead.
-	#define		NTV2K2_Black0IRE					R2_Black_0IRE						///< @deprecated	Use R2_Black_0IRE instead.
-
-	//	NTV2InputVideoSelect
-	#define		NTV2K2_Input1Select					NTV2_Input1Select					///< @deprecated	Use NTV2_Input1Select instead.
-	#define		NTV2K2_Input2Select					NTV2_Input2Select					///< @deprecated	Use NTV2_Input2Select instead.
-	#define		NTV2K2_AnalogInputSelect			NTV2_AnalogInputSelect				///< @deprecated	Use NTV2_AnalogInputSelect instead.
-	#define		NTV2K2_Input3Select					NTV2_Input3Select					///< @deprecated	Use NTV2_Input3Select instead.
-	#define		NTV2K2_Input4Select					NTV2_Input4Select					///< @deprecated	Use NTV2_Input4Select instead.
-	#define		NTV2K2_Input5Select					NTV2_Input5Select					///< @deprecated	Use NTV2_Input5Select instead.
-	#define		NTV2K2_DualLinkInputSelect			NTV2_Input2xDLHDSelect				///< @deprecated	Use NTV2_Input2xDLHDSelect instead.
-	#define		NTV2K2_DualLink2xSdi4k				NTV2_Input2x4kSelect				///< @deprecated	Use NTV2_Input2x4kSelect instead.
-	#define		NTV2K2_DualLink4xSdi4k				NTV2_Input4x4kSelect				///< @deprecated	Use NTV2_Input4x4kSelect instead.
-	#define		NTV2K2_InputSelectMax				NTV2_MAX_NUM_InputVideoSelectEnums	///< @deprecated	Use NTV2_MAX_NUM_InputVideoSelectEnums instead.
-
-	//	NTV2SDIInputFormatSelect
-	#define		NTV2K2_YUVSelect					NTV2_RGBSelect						///< @deprecated	Use NTV2_RGBSelect instead.
-	#define		NTV2K2_RGBSelect					NTV2_RGBSelect						///< @deprecated	Use NTV2_RGBSelect instead.
-	#define		NTV2K2_Stereo3DSelect				NTV2_Stereo3DSelect					///< @deprecated	Use NTV2_Stereo3DSelect instead.
-
-	//	NTV2InputAudioSelect
-	#define		NTV2K2_AES_EBU_XLRSelect			NTV2_AES_EBU_XLRSelect				///< @deprecated	Use NTV2_AES_EBU_XLRSelect instead.
-	#define		NTV2K2_AES_EBU_BNCSelect			NTV2_AES_EBU_BNCSelect				///< @deprecated	Use NTV2_AES_EBU_BNCSelect instead.
-	#define		NTV2K2_Input1Embedded1_8Select		NTV2_Input1Embedded1_8Select		///< @deprecated	Use NTV2_Input1Embedded1_8Select instead.
-	#define		NTV2K2_Input1Embedded9_16Select		NTV2_Input1Embedded9_16Select		///< @deprecated	Use NTV2_Input1Embedded9_16Select instead.
-	#define		NTV2K2_Input2Embedded1_8Select		NTV2_Input2Embedded1_8Select		///< @deprecated	Use NTV2_Input2Embedded1_8Select instead.
-	#define		NTV2K2_Input2Embedded9_16Select		NTV2_Input2Embedded9_16Select		///< @deprecated	Use NTV2_Input2Embedded9_16Select instead.
-	#define		NTV2K2_AnalogSelect					NTV2_AnalogSelect					///< @deprecated	Use NTV2_AnalogSelect instead.
-	#define		NTV2K2_HDMISelect					NTV2_HDMISelect						///< @deprecated	Use NTV2_HDMISelect instead.
-	#define		NTV2K2_AudioInputOther				NTV2_AudioInputOther				///< @deprecated	Use NTV2_AudioInputOther instead.
-
-	//	NTV2AudioMapSelect
-	#define		NTV2K2_AudioMap12_12				NTV2_AudioMap12_12					///< @deprecated	Use NTV2_AudioMap12_12 instead.
-	#define		NTV2K2_AudioMap34_12				NTV2_AudioMap34_12					///< @deprecated	Use NTV2_AudioMap34_12 instead.
-	#define		NTV2K2_AudioMap56_12				NTV2_AudioMap56_12					///< @deprecated	Use NTV2_AudioMap56_12 instead.
-	#define		NTV2K2_AudioMap78_12				NTV2_AudioMap78_12					///< @deprecated	Use NTV2_AudioMap78_12 instead.
-	#define		NTV2K2_AudioMap910_12				NTV2_AudioMap910_12					///< @deprecated	Use NTV2_AudioMap910_12 instead.
-	#define		NTV2K2_AudioMap1112_12				NTV2_AudioMap1112_12				///< @deprecated	Use NTV2_AudioMap1112_12 instead.
-	#define		NTV2K2_AudioMap1314_12				NTV2_AudioMap1314_12				///< @deprecated	Use NTV2_AudioMap1314_12 instead.
-	#define		NTV2K2_AudioMap1516_12				NTV2_AudioMap1516_12				///< @deprecated	Use NTV2_AudioMap1516_12 instead.
-
-	//	NTV2OutputVideoSelect
-	#define		NTV2K2_PrimaryOutputSelect			NTV2_PrimaryOutputSelect			///< @deprecated	Use NTV2_PrimaryOutputSelect instead.
-	#define		NTV2K2_SecondaryOutputSelect		NTV2_SecondaryOutputSelect			///< @deprecated	Use NTV2_SecondaryOutputSelect instead.
-	#define		NTV2K2_DualLinkOutputSelect			NTV2_RgbOutputSelect				///< @deprecated	Use NTV2_RgbOutputSelect instead.
-	#define		NTV2K2_VideoPlusKeySelect			NTV2_VideoPlusKeySelect				///< @deprecated	Use NTV2_VideoPlusKeySelect instead.
-	#define		NTV2K2_StereoOutputSelect			NTV2_StereoOutputSelect				///< @deprecated	Use NTV2_StereoOutputSelect instead.
-	#define		NTV2K2_Quadrant1Select				NTV2_Quadrant1Select				///< @deprecated	Use NTV2_Quadrant1Select instead.
-	#define		NTV2K2_Quadrant2Select				NTV2_Quadrant2Select				///< @deprecated	Use NTV2_Quadrant2Select instead.
-	#define		NTV2K2_Quadrant3Select				NTV2_Quadrant3Select				///< @deprecated	Use NTV2_Quadrant3Select instead.
-	#define		NTV2K2_Quadrant4Select				NTV2_Quadrant4Select				///< @deprecated	Use NTV2_Quadrant4Select instead.
-	#define		NTV2k2_Quarter4k					NTV2_Quarter4k						///< @deprecated	Use NTV2_Quarter4k instead.
-
-	//	NTV2UpConvertMode
-	#define		NTV2K2_UpConvertAnamorphic			NTV2_UpConvertAnamorphic			///< @deprecated	Use NTV2_UpConvertAnamorphic instead.
-	#define		NTV2K2_UpConvertPillarbox4x3		NTV2_UpConvertPillarbox4x3			///< @deprecated	Use NTV2_UpConvertPillarbox4x3 instead.
-	#define		NTV2K2_UpConvertZoom14x9			NTV2_UpConvertZoom14x9				///< @deprecated	Use NTV2_UpConvertZoom14x9 instead.
-	#define		NTV2K2_UpConvertZoomLetterbox		NTV2_UpConvertZoomLetterbox			///< @deprecated	Use NTV2_UpConvertZoomLetterbox instead.
-	#define		NTV2K2_UpConvertZoomWide			NTV2_UpConvertZoomWide				///< @deprecated	Use NTV2_UpConvertZoomWide instead.
-
-	//	NTV2DownConvertMode
-	#define		NTV2K2_DownConvertLetterbox			NTV2_DownConvertLetterbox			///< @deprecated	Use NTV2_DownConvertLetterbox instead.
-	#define		NTV2K2_DownConvertCrop				NTV2_DownConvertCrop				///< @deprecated	Use NTV2_DownConvertCrop instead.
-	#define		NTV2K2_DownConvertAnamorphic		NTV2_DownConvertAnamorphic			///< @deprecated	Use NTV2_DownConvertAnamorphic instead.
-	#define		NTV2K2_DownConvert14x9				NTV2_DownConvert14x9				///< @deprecated	Use NTV2_DownConvert14x9 instead.
-
-	//	NTV2IsoConvertMode
-	#define		NTV2K2_IsoLetterBox					NTV2_IsoLetterBox					///< @deprecated	Use NTV2_IsoLetterBox instead.
-	#define		NTV2K2_IsoHCrop						NTV2_IsoHCrop						///< @deprecated	Use NTV2_IsoHCrop instead.
-	#define		NTV2K2_IsoPillarBox					NTV2_IsoPillarBox					///< @deprecated	Use NTV2_IsoPillarBox instead.
-	#define		NTV2K2_IsoVCrop						NTV2_IsoVCrop						///< @deprecated	Use NTV2_IsoVCrop instead.
-	#define		NTV2K2_Iso14x9						NTV2_Iso14x9						///< @deprecated	Use NTV2_Iso14x9 instead.
-	#define		NTV2K2_IsoPassThrough				NTV2_IsoPassThrough					///< @deprecated	Use NTV2_IsoPassThrough instead.
-
-	//	NTV2QuarterSizeExpandMode
-	#define		NTV2K2_QuarterSizeExpandOff			NTV2_QuarterSizeExpandOff			///< @deprecated	Use NTV2_QuarterSizeExpandOff instead.
-	#define		NTV2K2_QuarterSizeExpandOn			NTV2_QuarterSizeExpandOn			///< @deprecated	Use NTV2_QuarterSizeExpandOn instead.
-
-	//	NTV2FrameBufferQuality
-	#define		NTV2K2_StandardQuality				NTV2_StandardQuality				///< @deprecated	Use NTV2_StandardQuality instead.
-	#define		NTV2K2_HighQuality					NTV2_HighQuality					///< @deprecated	Use NTV2_HighQuality instead.
-	#define		NTV2K2_ProRes						NTV2_ProRes							///< @deprecated	Use NTV2_ProRes instead.
-	#define		NTV2K2_ProResHQ						NTV2_ProResHQ						///< @deprecated	Use NTV2_ProResHQ instead.
-	#define		NTV2K2_ProResLT						NTV2_ProResLT						///< @deprecated	Use NTV2_ProResLT instead.
-	#define		NTV2K2_ProResProxy					NTV2_ProResProxy					///< @deprecated	Use NTV2_ProResProxy instead.
-
-	//	NTV2EncodeAsPSF
-	#define		NTV2K2_NoPSF						NTV2_NoPSF							///< @deprecated	Use NTV2_NoPSF instead.
-	#define		NTV2K2_IsPSF						NTV2_IsPSF							///< @deprecated	Use NTV2_IsPSF instead.
-
-	//	NTV2BreakoutType
-	#define		NTV2K2_BreakoutNone					NTV2_BreakoutNone					///< @deprecated	Use NTV2_BreakoutNone instead.
-	#define		NTV2K2_BreakoutCableXLR				NTV2_BreakoutCableXLR				///< @deprecated	Use NTV2_BreakoutCableXLR instead.
-	#define		NTV2K2_BreakoutCableBNC				NTV2_BreakoutCableBNC				///< @deprecated	Use NTV2_BreakoutCableBNC instead.
-	#define		NTV2K2_KBox							NTV2_KBox							///< @deprecated	Use NTV2_KBox instead.
-	#define		NTV2K2_KLBox						NTV2_KLBox							///< @deprecated	Use NTV2_KLBox instead.
-	#define		NTV2K2_K3Box						NTV2_K3Box							///< @deprecated	Use NTV2_K3Box instead.
-	#define		NTV2K2_KLHiBox						NTV2_KLHiBox						///< @deprecated	Use NTV2_KLHiBox instead.
-	#define		NTV2K2_KLHePlusBox					NTV2_KLHePlusBox					///< @deprecated	Use NTV2_KLHePlusBox instead.
-	#define		NTV2K2_K3GBox						NTV2_K3GBox							///< @deprecated	Use NTV2_K3GBox instead.
-
-	//	NTV2AudioMonitorSelect
-	#define		NTV2K2_AudioMonitor1_2				NTV2_AudioMonitor1_2				///< @deprecated	Use NTV2_AudioMonitor1_2 instead.
-	#define		NTV2K2_AudioMonitor3_4				NTV2_AudioMonitor3_4				///< @deprecated	Use NTV2_AudioMonitor3_4 instead.
-	#define		NTV2K2_AudioMonitor5_6				NTV2_AudioMonitor5_6				///< @deprecated	Use NTV2_AudioMonitor5_6 instead.
-	#define		NTV2K2_AudioMonitor7_8				NTV2_AudioMonitor7_8				///< @deprecated	Use NTV2_AudioMonitor7_8 instead.
-	#define		NTV2K2_AudioMonitor9_10				NTV2_AudioMonitor9_10				///< @deprecated	Use NTV2_AudioMonitor9_10 instead.
-	#define		NTV2K2_AudioMonitor11_12			NTV2_AudioMonitor11_12				///< @deprecated	Use NTV2_AudioMonitor11_12 instead.
-	#define		NTV2K2_AudioMonitor13_14			NTV2_AudioMonitor13_14				///< @deprecated	Use NTV2_AudioMonitor13_14 instead.
-	#define		NTV2K2_AudioMonitor15_16			NTV2_AudioMonitor15_16				///< @deprecated	Use NTV2_AudioMonitor15_16 instead.
-
-	//	NTV2Audio2ChannelSelect
-	#define		NTV2K2_AudioChannel1_2				NTV2_AudioChannel1_2				///< @deprecated	Use NTV2_AudioChannel1_2 instead.
-	#define		NTV2K2_AudioChannel3_4				NTV2_AudioChannel3_4				///< @deprecated	Use NTV2_AudioChannel3_4 instead.
-	#define		NTV2K2_AudioChannel5_6				NTV2_AudioChannel5_6				///< @deprecated	Use NTV2_AudioChannel5_6 instead.
-	#define		NTV2K2_AudioChannel7_8				NTV2_AudioChannel7_8				///< @deprecated	Use NTV2_AudioChannel7_8 instead.
-	#define		NTV2K2_AudioChannel9_10				NTV2_AudioChannel9_10				///< @deprecated	Use NTV2_AudioChannel9_10 instead.
-	#define		NTV2K2_AudioChannel11_12			NTV2_AudioChannel11_12				///< @deprecated	Use NTV2_AudioChannel11_12 instead.
-	#define		NTV2K2_AudioChannel13_14			NTV2_AudioChannel13_14				///< @deprecated	Use NTV2_AudioChannel13_14 instead.
-	#define		NTV2K2_AudioChannel15_16			NTV2_AudioChannel15_16				///< @deprecated	Use NTV2_AudioChannel15_16 instead.
-	#define		NTV2_MAX_NUM_Audio2ChannelSelect	NTV2_MAX_NUM_AudioChannelPair		///< @deprecated	Use NTV2_MAX_NUM_AudioChannelPair instead.
-
-	//	NTV2Audio4ChannelSelect
-	#define		NTV2K2_AudioChannel1_4				NTV2_AudioChannel1_4				///< @deprecated	Use NTV2_AudioChannel1_4 instead.
-	#define		NTV2K2_AudioChannel5_8				NTV2_AudioChannel5_8				///< @deprecated	Use NTV2_AudioChannel5_8 instead.
-	#define		NTV2K2_AudioChannel9_12				NTV2_AudioChannel9_12				///< @deprecated	Use NTV2_AudioChannel9_12 instead.
-	#define		NTV2K2_AudioChannel13_16			NTV2_AudioChannel13_16				///< @deprecated	Use NTV2_AudioChannel13_16 instead.
-
-	//	NTV2Audio8ChannelSelect
-	#define		NTV2K2_AudioChannel1_8				NTV2_AudioChannel1_8				///< @deprecated	Use NTV2_AudioChannel1_8 instead.
-	#define		NTV2K2_AudioChannel9_16				NTV2_AudioChannel9_16				///< @deprecated	Use NTV2_AudioChannel9_16 instead.
-
-	//	NTV2ColorSpaceType
-	#define		NTV2_ColorSpaceAuto					NTV2_ColorSpaceTypeAuto				///< @deprecated	Use NTV2_ColorSpaceTypeAuto instead.
-	#define		NTV2_ColorSpaceRec601				NTV2_ColorSpaceTypeRec601			///< @deprecated	Use NTV2_ColorSpaceTypeRec601 instead.
-	#define		NTV2_ColorSpaceRec709				NTV2_ColorSpaceTypeRec709			///< @deprecated	Use NTV2_ColorSpaceTypeRec709 instead.
-
-	//	NTV2Stereo3DMode
-	#define		NTV2K2_Stereo3DOff					NTV2_Stereo3DOff					///< @deprecated	Use NTV2_Stereo3DOff instead.
-	#define		NTV2K2_Stereo3DSideBySide			NTV2_Stereo3DSideBySide				///< @deprecated	Use NTV2_Stereo3DSideBySide instead.
-	#define		NTV2K2_Stereo3DTopBottom			NTV2_Stereo3DTopBottom				///< @deprecated	Use NTV2_Stereo3DTopBottom instead.
-	#define		NTV2K2_Stereo3DDualStream			NTV2_Stereo3DDualStream				///< @deprecated	Use NTV2_Stereo3DDualStream instead.
-
-	//	NTV2ColorSpaceMode
-	#define		NTV2K2_ColorSpaceAuto				NTV2_ColorSpaceModeAuto				///< @deprecated	Use NTV2_ColorSpaceModeAuto instead.
-	#define		NTV2K2_ColorSpaceYCbCr				NTV2_ColorSpaceModeYCbCr			///< @deprecated	Use NTV2_ColorSpaceModeYCbCr instead.
-	#define		NTV2K2_ColorSpaceRGB				NTV2_ColorSpaceModeRGB				///< @deprecated	Use NTV2_ColorSpaceModeRGB instead.
-
-	#define NTV2_INPUT_SOURCE_IS_VALID(_inpSrc_)		(((_inpSrc_) >= 0) && ((_inpSrc_) < NTV2_NUM_INPUTSOURCES))
-	#define IS_VALID_NTV2FrameGeometry(__s__)			((__s__) >= NTV2_FG_1920x1080 && (__s__) < NTV2_FG_NUMFRAMEGEOMETRIES)
-	#define IS_VALID_NTV2FrameBufferFormat(__s__)		((__s__) >= NTV2_FBF_10BIT_YCBCR && (__s__) < NTV2_FBF_NUMFRAMEBUFFERFORMATS)
-	#define IS_VALID_NTV2V2Standard(__s__)				((__s__) >= NTV2_V2_STANDARD_1080 && (__s__) < NTV2_V2_STANDARD_UNDEFINED)
-	#define IS_VALID_NTV2Standard(__s__)				((__s__) >= NTV2_STANDARD_1080 && (__s__) < NTV2_STANDARD_UNDEFINED)
-	#define NTV2_IS_VALID_NTV2AudioSystem(__x__)		((__x__) >= NTV2_AUDIOSYSTEM_1 && (__x__) < NTV2_MAX_NUM_AudioSystemEnums)
-	#define NTV2_AUDIO_CHANNEL_PAIR_IS_VALID(__p__)		((__p__) >= NTV2_AudioChannel1_2 && (__p__) < NTV2_MAX_NUM_AudioChannelPair)
-	#define NTV2_IS_VALID_NTV2Crosspoint(__x__)			((__x__) >= NTV2CROSSPOINT_CHANNEL1 && (__x__) < NTV2_NUM_CROSSPOINTS)
-	#define NTV2_OUTPUT_DEST_IS_VALID(_dest_)			(((_dest_) >= 0) && ((_dest_) < NTV2_NUM_OUTPUTDESTINATIONS))
-	#define IS_VALID_NTV2Channel(__x__)					((__x__) >= NTV2_CHANNEL1 && (__x__) < NTV2_MAX_NUM_CHANNELS)
-	#define IS_VALID_NTV2ReferenceSource(__x__)			((__x__) >= NTV2_REFERENCE_EXTERNAL && (__x__) < NTV2_NUM_REFERENCE_INPUTS)
-
-#endif	//	!defined (NTV2_DEPRECATE)
 
 typedef enum
 {

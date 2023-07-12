@@ -2549,23 +2549,6 @@ NTV2TestPatternNames NTV2TestPatternGen::getTestPatternNames (void)
 	return result;
 }	//	getTestPatternNames
 
-
-#if !defined(NTV2_DEPRECATE_15_0)
-	NTV2TestPatternList & NTV2TestPatternGen::getTestPatternList (void)
-	{
-		static NTV2TestPatternList	result;
-		static AJALock				resultGuard;
-		if (result.empty())
-		{
-			AJAAutoLock locker(&resultGuard);
-			const NTV2TestPatternNames & names(getTestPatternNames());
-			for (size_t ndx(0);	 ndx < names.size();  ndx++)
-				result.push_back(names[ndx].c_str());
-		}
-		return result;
-	}
-#endif // NTV2_DEPRECATE_15_0
-
 NTV2StringList NTV2TestPatternGen::getColorNames (void)
 {
 	NTV2StringList result;

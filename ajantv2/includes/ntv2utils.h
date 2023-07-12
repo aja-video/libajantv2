@@ -110,12 +110,6 @@ AJAExport bool YUVComponentsTo10BitYUVPackedBuffer (const std::vector<uint16_t> 
 AJAExport bool UnpackLine_10BitYUVtoU16s (std::vector<uint16_t> & outYCbCrLine, const NTV2Buffer & inFrameBuffer,
 											const NTV2FormatDescriptor & inDescriptor, const UWord inLineOffset);
 
-
-#if !defined (NTV2_DEPRECATE)
-	AJAExport NTV2_DEPRECATED_f(void UnPackLineData (const ULWord * pIn10BitYUVLine, UWord * pOut16BitYUVLine, const ULWord inNumPixels));	///< @deprecated	Replaced by UnpackLine_10BitYUVto16BitYUV.
-	AJAExport NTV2_DEPRECATED_f(void PackLineData (const UWord * pIn16BitYUVLine, ULWord * pOut10BitYUVLine, const ULWord inNumPixels));		///< @deprecated	Replaced by PackLine_16BitYUVto10BitYUV.
-#endif	//	NTV2_DEPRECATE
-
 /**
 	@brief	Unpacks a line of 10-bit-per-component YCbCr video into 16-bit-per-component YCbCr (NTV2_FBF_10BIT_YCBCR) data.
 	@param[in]	pIn10BitYUVLine		A valid, non-NULL pointer to the input buffer that contains the packed 10-bit-per-component YUV data
@@ -150,15 +144,7 @@ AJAExport void MaskYCbCrLine(UWord* ycbcrLine, UWord signalMask , ULWord numPixe
 AJAExport void Make10BitBlackLine (UWord * pOutLineData, const ULWord inNumPixels = 1920);
 
 AJAExport void Make10BitWhiteLine(UWord* pOutLineData, const ULWord numPixels=1920);
-#if !defined(NTV2_DEPRECATE_13_0)
-	AJAExport NTV2_DEPRECATED_f(void Fill10BitYCbCrVideoFrame (PULWord _baseVideoAddress,
-																const NTV2Standard inStandard,
-																const NTV2FrameBufferFormat inPixelFormat,
-																const YCbCr10BitPixel inPixelColor,
-																const bool inVancEnabled = false,
-																const bool in2Kx1080 = false,
-																const bool inWideVANC = false));	///< @deprecated	Use the identical function that accepts an ::NTV2VANCMode parameter instead of two booleans.
-#endif	//	!defined(NTV2_DEPRECATE_13_0)
+
 /**
 	@return		True if successful;	 otherwise false.
 **/
@@ -172,15 +158,6 @@ AJAExport void Make8BitBlackLine(UByte* lineData,ULWord numPixels=1920,NTV2Frame
 AJAExport void Make8BitWhiteLine(UByte* lineData,ULWord numPixels=1920,NTV2FrameBufferFormat=NTV2_FBF_8BIT_YCBCR);
 AJAExport void Make10BitLine(UWord* lineData, const UWord Y, const UWord Cb, const UWord Cr, const ULWord numPixels = 1920);
 AJAExport void Make8BitLine(UByte* lineData, UByte Y , UByte Cb , UByte Cr,ULWord numPixels=1920,NTV2FrameBufferFormat=NTV2_FBF_8BIT_YCBCR);
-#if !defined(NTV2_DEPRECATE_13_0)
-	AJAExport NTV2_DEPRECATED_f(void Fill8BitYCbCrVideoFrame (PULWord _baseVideoAddress,
-																const NTV2Standard inStandard,
-																const NTV2FrameBufferFormat inFBF,
-																const YCbCrPixel inPixelColor,
-																const bool inVancEnabled = false,
-																const bool in2Kx1080 = false,
-																const bool inWideVanc = false));	///< @deprecated	Use the identical function that accepts an ::NTV2VANCMode parameter instead of two booleans.
-#endif	//	!defined(NTV2_DEPRECATE_13_0)
 AJAExport bool Fill8BitYCbCrVideoFrame (void * pBaseVideoAddress,  const NTV2Standard inStandard,  const NTV2FrameBufferFormat inFBF,
 										const YCbCrPixel inPixelColor,	const NTV2VANCMode inVancMode = NTV2_VANCMODE_OFF);
 AJAExport void Fill4k8BitYCbCrVideoFrame(PULWord _baseVideoAddress,
@@ -305,22 +282,7 @@ AJAExport NTV2Standard GetNTV2StandardFromVideoFormat (const NTV2VideoFormat inV
 **/
 AJAExport NTV2FrameGeometry GetNTV2FrameGeometryFromVideoFormat (const NTV2VideoFormat inVideoFormat);
 
-#if defined (NTV2_DEPRECATE)
-	#define GetHdmiV2StandardFromVideoFormat(__vf__)	::GetNTV2StandardFromVideoFormat (__vf__)
-#else
-	AJAExport NTV2V2Standard	GetHdmiV2StandardFromVideoFormat (NTV2VideoFormat videoFormat);
-#endif
-
-#if !defined(NTV2_DEPRECATE_13_0)
-	AJAExport NTV2_DEPRECATED_f(ULWord GetVideoActiveSize (const NTV2VideoFormat inVideoFormat,
-															const NTV2FrameBufferFormat inFBFormat,
-															const bool inVANCenabled,
-															const bool inWideVANC = false));	///< @deprecated	Use the same function that accepts an ::NTV2VANCMode instead of two booleans.
-	AJAExport NTV2_DEPRECATED_f(ULWord GetVideoWriteSize (const NTV2VideoFormat inVideoFormat,
-															const NTV2FrameBufferFormat inFBFormat,
-															const bool inVANCenabled,
-															const bool inWideVANC));	///< @deprecated	Use the same function that accepts an ::NTV2VANCMode instead of two booleans.
-#endif	//	!defined(NTV2_DEPRECATE_13_0)
+#define GetHdmiV2StandardFromVideoFormat(__vf__)	::GetNTV2StandardFromVideoFormat (__vf__)
 
 /**
 	@return		The minimum number of bytes required to store a single frame of video in the given frame buffer format
@@ -864,48 +826,6 @@ AJAExport ULWord	AddAudioTestPattern (ULWord *		pAudioBuffer,
 										 const bool		inEndianConvert,
 										 const ULWord	inNumChannels);
 
-#if !defined (NTV2_DEPRECATE)
-	AJAExport bool BuildRoutingTableForOutput (CNTV2SignalRouter &		outRouter,
-												NTV2Channel				channel,
-												NTV2FrameBufferFormat	fbf,
-												bool					convert		= false,	// ignored
-												bool					lut			= false,
-												bool					dualLink	= false,
-												bool					keyOut		= false);
-
-	AJAExport bool BuildRoutingTableForInput (CNTV2SignalRouter &		outRouter,
-											   NTV2Channel				channel,
-											   NTV2FrameBufferFormat	fbf,
-											   bool						withKey		= false,
-											   bool						lut			= false,
-											   bool						dualLink	= false,
-											   bool						EtoE		= true);
-
-	AJAExport bool BuildRoutingTableForInput (CNTV2SignalRouter &		outRouter,
-											   NTV2Channel				channel,
-											   NTV2FrameBufferFormat	fbf,
-											   bool						convert,  // Turn on the conversion module
-											   bool						withKey,  // only supported for ::NTV2_CHANNEL1 for rgb formats with alpha
-											   bool						lut,	  // not supported
-											   bool						dualLink, // assume coming in RGB(only checked for ::NTV2_CHANNEL1
-											   bool						EtoE);
-
-	AJAExport bool BuildRoutingTableForInput (CNTV2SignalRouter &		outRouter,
-											   NTV2InputSource			inputSource,
-											   NTV2Channel				channel,
-											   NTV2FrameBufferFormat	fbf,
-											   bool						convert,  // Turn on the conversion module
-											   bool						withKey,  // only supported for ::NTV2_CHANNEL1 for rgb formats with alpha
-											   bool						lut,	  // not supported
-											   bool						dualLink, // assume coming in RGB(only checked for ::NTV2_CHANNEL1
-											   bool						EtoE);
-
-	AJAExport ULWord ConvertFusionAnalogToTempCentigrade (ULWord adc10BitValue);
-
-	AJAExport ULWord ConvertFusionAnalogToMilliVolts (ULWord adc10BitValue, ULWord millivoltsResolution);
-#endif	//	!defined (NTV2_DEPRECATE)
-
-
 /**
 	@brief		Writes the given NTV2FrameDimensions to the specified output stream.
 	@param		inOutStream			Specifies the output stream to receive the human-readable representation of the NTV2FrameDimensions.
@@ -1210,21 +1130,6 @@ AJAExport std::string		SerialNum64ToString (const uint64_t & inSerNum);	//	New i
 
 //	FUTURE	** THESE WILL BE DISAPPEARING **		Deprecate in favor of the new "NTV2xxxxxxToString" functions...
 #define NTV2CrosspointIDToString	NTV2OutputCrosspointIDToString	///< @deprecated	Use NTV2OutputCrosspointIDToString
-#if !defined (NTV2_DEPRECATE)
-	AJAExport NTV2_DEPRECATED_f(std::string NTV2V2StandardToString	(const NTV2V2Standard inValue,	const bool inForRetailDisplay = false));
-	extern AJAExport NTV2_DEPRECATED_v(const char * NTV2VideoFormatStrings[]);		///< @deprecated	Use NTV2VideoFormatToString instead.
-	extern AJAExport NTV2_DEPRECATED_v(const char * NTV2VideoStandardStrings[]);	///< @deprecated	Use NTV2StandardToString instead.
-	extern AJAExport NTV2_DEPRECATED_v(const char * NTV2PixelFormatStrings[]);		///< @deprecated	Use NTV2FrameBufferFormatToString instead.
-	extern AJAExport NTV2_DEPRECATED_v(const char * NTV2FrameRateStrings[]);		///< @deprecated	Use NTV2FrameRateToString instead.
-	extern AJAExport NTV2_DEPRECATED_v(const char * frameBufferFormats[]);			///< @deprecated	Use NTV2FrameBufferFormatToString instead.
-
-	AJAExport NTV2_DEPRECATED_f(std::string		frameBufferFormatString		(NTV2FrameBufferFormat inFrameBufferFormat));		///< @deprecated	Use NTV2FrameBufferFormatToString and pass 'true' for 'inForRetailDisplay'
-	AJAExport NTV2_DEPRECATED_f(void			GetNTV2BoardString			(NTV2BoardID inBoardID, std::string & outString));	///< @deprecated	Use NTV2DeviceIDToString and concatenate a space instead
-
-	AJAExport NTV2_DEPRECATED_f(std::string		NTV2BoardIDToString			(const NTV2BoardID inValue, const bool inForRetailDisplay = false));	///< @deprecated	Use NTV2DeviceIDToString(NTV2DeviceID,bool) instead.
-	AJAExport NTV2_DEPRECATED_f(void			GetNTV2RetailBoardString	(NTV2BoardID inBoardID, std::string & outString));	///< @deprecated	Use NTV2DeviceIDToString(NTV2DeviceID,bool) instead.
-	AJAExport NTV2_DEPRECATED_f(NTV2BoardType	GetNTV2BoardTypeForBoardID	(NTV2BoardID inBoardID));							///< @deprecated	This function is obsolete because NTV2BoardType is obsolete.
-#endif	//	!defined (NTV2_DEPRECATE)
 #if defined (AJAMac)
 	AJAExport bool GetInstalledMacDriverVersion (UWord & outMaj, UWord & outMin, UWord & outPt, UWord & outBld, UWord & outType);
 #endif	//	AJAMac

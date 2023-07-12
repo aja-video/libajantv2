@@ -67,13 +67,7 @@ class AJAExport CNTV2EnhancedCSC
 //	Class Methods
 public:
 	//	Construction, Copying, Assigning
-	#if defined (NTV2_DEPRECATE)
-		explicit	CNTV2EnhancedCSC ()	{	};
-	#else
-		explicit	CNTV2EnhancedCSC (CNTV2Card & inCard)
-						:	mDevice (inCard)	{	};
-	#endif
-
+	explicit	CNTV2EnhancedCSC ()	{	};
 	virtual inline	~CNTV2EnhancedCSC ()		{	}
 
 
@@ -111,10 +105,6 @@ public:
 
 			bool								SendToHardware			(CNTV2Card & inDevice, const NTV2Channel inChannel) const;
 			bool								GetFromHardware			(CNTV2Card & inDevice, const NTV2Channel inChannel);
-	#if !defined (NTV2_DEPRECATE)
-	inline	bool								SendToHardware			(const NTV2Channel	inChannel)		{return SendToHardware (mDevice, inChannel);}
-	inline	bool								GetFromHardware			(const NTV2Channel	inChannel)		{return GetFromHardware (mDevice, inChannel);}
-	#endif	//	!defined (NTV2_DEPRECATE)
 
 //	Instance Data
 private:
@@ -128,9 +118,6 @@ private:
 	uint16_t									mKeyOutputOffset;
 	double										mKeyGain;
 	CNTV2CSCMatrix								mMatrix;
-	#if !defined (NTV2_DEPRECATE)
-		CNTV2Card &								mDevice;
-	#endif	//	!defined (NTV2_DEPRECATE)
 
 };	//	CNTV2EnhancedCSC
 

@@ -84,27 +84,6 @@ class CNTV2MacDriverInterface : public CNTV2DriverInterface
 	AJA_VIRTUAL bool	RestoreHardwareProcampRegisters (void);
 	///@}
 
-#if !defined(NTV2_DEPRECATE_14_3)
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadRegister (const ULWord inRegNum, ULWord * pOutValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0x0))
-												{return pOutValue ? ReadRegister(inRegNum, *pOutValue, inRegMask, inRegShift) : false;}
-#endif	//	!defined(NTV2_DEPRECATE_14_3)
-#if !defined(NTV2_DEPRECATE_15_6)
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetUserModeDebugLevel (ULWord  level));	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetUserModeDebugLevel (ULWord* level));	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetKernelModeDebugLevel (ULWord  level));///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetKernelModeDebugLevel (ULWord* level));///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetUserModePingLevel (ULWord  level));	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetUserModePingLevel (ULWord* level));	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetKernelModePingLevel (ULWord  level));	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetKernelModePingLevel (ULWord* level));	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetLatencyTimerValue (ULWord value));	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetLatencyTimerValue (ULWord* value));	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetDebugFilterStrings (const char* includeString,const char* excludeString));	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetDebugFilterStrings (char* includeString,char* excludeString));	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool LockFormat (void));		///< @deprecated	Obsolete after SDK 15.5.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetQuickTimeTime (UInt32 *time, UInt32 *scale));	//	Formerly called "GetTime" which shadowed CNTV2KonaFlashProgram::GetTime
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool	StartDriver (DriverStartPhase phase));
-#endif	//	!defined(NTV2_DEPRECATE_15_6)
 #if !defined(NTV2_DEPRECATE_16_0)
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetStreamingApplication(ULWord * pAppType, int32_t * pPID))	{return pAppType && pPID ? GetStreamingApplication(*pAppType,*pPID) : false;}	///< @deprecated	Deprecated starting in SDK 16.0.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SystemControl(void* dataPtr, SystemControlCode systemControlCode));		///< @deprecated	Obsolete starting in SDK 16.0.
@@ -126,11 +105,6 @@ class CNTV2MacDriverInterface : public CNTV2DriverInterface
 	AJA_VIRTUAL bool	KernelLog( void* dataPtr, UInt32 dataSize );
 	AJA_VIRTUAL bool	ConfigureInterrupt( bool /*bEnable*/, INTERRUPT_ENUMS /*eInterruptType*/ ) {return true;}
 	AJA_VIRTUAL std::string	GetConnectionType (void) const	{return IsOpen() && !IsRemote()  ?  (mIsDEXT ? "DEXT" : "KEXT")  :  "";}	//	New in SDK 17.0
-
-#if !defined(NTV2_DEPRECATE_14_3)
-public:
-	static void			SetDebugLogging (const uint64_t inWhichUserClientCommands);
-#endif	//	NTV2_DEPRECATE_14_3
 
 #if !defined(NTV2_NULL_DEVICE)
 	protected:

@@ -572,47 +572,7 @@ class AJAExport CNTV2DriverInterface
 		AJA_VIRTUAL inline NTV2NubProtocolVersion	GetNubProtocolVersion (void) const	{return 0;}	///< @return	My nub protocol version.
 #endif
 
-		//	DEPRECATED FUNCTIONS	
-#if !defined (NTV2_DEPRECATE)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(NTV2BoardType	GetCompileFlag (void));
-		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool BoardOpened (void) const)		{return IsOpen();}
-#endif	//	!NTV2_DEPRECATE
-#if !defined(NTV2_DEPRECATE_12_7)
-		// For devices that support more than one bitfile
-		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SwitchBitfile (NTV2DeviceID boardID, NTV2BitfileType bitfile))	{ (void) boardID; (void) bitfile; return false; }	///< @deprecated	This function is obsolete.
-#endif
-#if !defined(NTV2_DEPRECATE_14_3)
-		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool	ReadRegister (const ULWord inRegNum, ULWord * pOutValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0x0))
-		{
-			return pOutValue ? ReadRegister(inRegNum, *pOutValue, inRegMask, inRegShift) : false;
-		}
-		AJA_VIRTUAL bool	Open (const UWord inDeviceIndex, const bool inDisplayError, const NTV2DeviceType eDeviceType, const char * pInHostName);
-#endif	//	!defined(NTV2_DEPRECATE_14_3)
-#if !defined(NTV2_DEPRECATE_15_0)
-		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool IsKonaIPDevice(void))	{return IsIPDevice();}	///< @deprecated	Call CNTV2Card::IsIPDevice instead.
-#endif //	!defined(NTV2_DEPRECATE_15_0)
-#if !defined(NTV2_DEPRECATE_15_1)
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetOutputTimecodeOffset(ULWord frames))	{return WriteRegister(kVRegOutputTimecodeOffset, frames);}	///< @deprecated	Obsolete starting after SDK 15.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetOutputTimecodeOffset(ULWord* pFrames))	{return pFrames ? ReadRegister(kVRegOutputTimecodeOffset, *pFrames) : false;}	///< @deprecated	Obsolete starting after SDK 15.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetOutputTimecodeType(ULWord type))		{return WriteRegister(kVRegOutputTimecodeType, type);}	///< @deprecated	Obsolete starting after SDK 15.0.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetOutputTimecodeType(ULWord* pType))		{return pType ? ReadRegister(kVRegOutputTimecodeType, *pType) : false;}	///< @deprecated	Obsolete starting after SDK 15.0.
-#endif	//	!defined(NTV2_DEPRECATE_15_1)
-#if !defined(NTV2_DEPRECATE_15_6)
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool LockFormat(void))	{return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool StartDriver(DriverStartPhase phase))		{(void)phase; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetUserModeDebugLevel(ULWord level))		{(void)level; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetUserModeDebugLevel(ULWord*level))		{(void)level; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetKernelModeDebugLevel(ULWord level))	{(void)level; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetKernelModeDebugLevel(ULWord* level))	{(void)level; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetUserModePingLevel(ULWord level))		{(void)level; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetUserModePingLevel(ULWord* level))		{(void)level; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetKernelModePingLevel(ULWord level))		{(void)level; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetKernelModePingLevel(ULWord* level))	{(void)level; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetLatencyTimerValue (ULWord value))		{(void)value; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetLatencyTimerValue (ULWord* value))		{(void)value; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetDebugFilterStrings(const char* inclStr, const char* exclStr))	{(void)inclStr; (void)exclStr; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetDebugFilterStrings(char* inclStr, char* exclStr))	{(void)inclStr; (void)exclStr; return false;}	///< @deprecated	Obsolete starting after SDK 15.5.
-#endif	//	!defined(NTV2_DEPRECATE_15_6)
+		//	DEPRECATED FUNCTIONS
 #if !defined(NTV2_DEPRECATE_16_0)
 	// SuspendAudio/ResumeAudio were only implemented on MacOS
 	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool SuspendAudio(void))	{return true;}
@@ -657,9 +617,6 @@ class AJAExport CNTV2DriverInterface
 
 	//	PROTECTED METHODS
 	protected:
-#if !defined(NTV2_DEPRECATE_12_7)
-		AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool DisplayNTV2Error(const char* pInStr))	{(void)pInStr; return false;}	///< @deprecated	This function is obsolete.
-#endif
 		/**
 			@brief		Peforms the housekeeping details of opening the specified local, remote or software device.
 			@param[in]	inURLSpec	Specifies the local, remote or software device to be opened.

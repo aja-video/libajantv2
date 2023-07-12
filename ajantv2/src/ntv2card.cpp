@@ -20,9 +20,6 @@ CNTV2Card::CNTV2Card ()
 	:	mDevCap(*(reinterpret_cast<CNTV2DriverInterface*>(this)))
 {
 	_boardOpened = false;
-	#if defined (NTV2_DEPRECATE)
-		//InitNTV2ColorCorrection ();
-	#endif	//	defined (NTV2_DEPRECATE)
 }
 
 CNTV2Card::CNTV2Card (const UWord inDeviceIndex, const string & inHostName)
@@ -53,39 +50,6 @@ CNTV2Card::CNTV2Card (const UWord inDeviceIndex, const string & inHostName)
 		}
 	}
 }
-
-#if !defined(NTV2_DEPRECATE_14_3)
-CNTV2Card::CNTV2Card (const UWord boardNumber, const bool displayErrorMessage, const UWord ulBoardType, const char *hostname)
-	:	mDevCap(*(reinterpret_cast<CNTV2DriverInterface*>(this)))
-{
-	(void) displayErrorMessage;
-	(void) ulBoardType;
-	string hostName(hostname ? hostname : "");
-	aja::strip(hostName);
-	_boardOpened = false;
-	bool openOK = hostName.empty()	?  CNTV2DriverInterface::Open(boardNumber) :  CNTV2DriverInterface::Open(hostName);
-	if (openOK)
-	{
-		if (IsBufferSizeSetBySW())
-		{
-			NTV2Framesize fbSize;
-			GetFrameBufferSize (NTV2_CHANNEL1, fbSize);
-			SetFrameBufferSize (fbSize);
-		}
-		else
-		{
-			NTV2FrameGeometry fg;
-			NTV2FrameBufferFormat format;
-
-			GetFrameGeometry (fg);
-			GetFrameBufferFormat (NTV2_CHANNEL1, format);
-
-			_ulFrameBufferSize = ::NTV2DeviceGetFrameBufferSize (GetDeviceID (), fg, format);
-			_ulNumFrameBuffers = ::NTV2DeviceGetNumberFrameBuffers (GetDeviceID (), fg, format);
-		}
-	}
-}	//	constructor
-#endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 // Destructor
 CNTV2Card::~CNTV2Card ()
@@ -549,63 +513,6 @@ ostream &	operator << (ostream & inOutStr, const NTV2DIDSet & inDIDs)
 	}
 	return inOutStr;
 }
-
-
-#if !defined (NTV2_DEPRECATE)
-	bool CNTV2Card::GetBitFileInformation (ULWord & outNumBytes, string & outDateStr, string & outTimeStr, const NTV2XilinxFPGA inFPGA)
-	{
-		return inFPGA == eFPGAVideoProc ? GetInstalledBitfileInfo (outNumBytes, outDateStr, outTimeStr) : false;
-	}
-
-	Word CNTV2Card::GetFPGAVersion (const NTV2XilinxFPGA inFPGA)
-	{
-		(void) inFPGA;
-		return -1;
-	}
-
-	UWord CNTV2Card::GetNumNTV2Boards()
-	{
-		ULWord numBoards(0);
-		CNTV2Card ntv2Card;
-		for (ULWord boardCount(0);	boardCount < NTV2_MAXBOARDS;  boardCount++)
-		{
-			if (AsNTV2DriverInterfaceRef(ntv2Card).Open(boardCount))
-				numBoards++;	//	Opened, keep going
-			else
-				break;	//	Failed to open, we're done
-		}
-		return numBoards;
-	}
-
-	NTV2BoardType CNTV2Card::GetBoardType (void) const
-	{
-		return DEVICETYPE_NTV2;
-	}
-
-	NTV2BoardSubType CNTV2Card::GetBoardSubType (void)
-	{
-		return BOARDSUBTYPE_NONE;
-	}
-
-	bool CNTV2Card::SetBoard (UWord inDeviceIndexNumber)
-	{
-		return CNTV2DriverInterface::Open(inDeviceIndexNumber);
-	}
-
-	string CNTV2Card::GetBoardIDString (void)
-	{
-		const ULWord	boardID (static_cast <ULWord> (GetDeviceID ()));
-		ostringstream	oss;
-		oss << hex << boardID;
-		return oss.str ();
-	}
-
-	void CNTV2Card::GetBoardIDString(std::string & outString)
-	{
-		outString = GetBoardIDString();
-	}
-
-#endif	//	!defined (NTV2_DEPRECATE)
 
 
 NTV2Buffer CNTV2Card::NULL_POINTER (AJA_NULL, 0);

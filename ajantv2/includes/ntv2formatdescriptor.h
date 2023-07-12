@@ -61,18 +61,6 @@ public:
 											const ULWord inNumPixels,
 											const ULWord inLinePitch,
 											const ULWord inFirstActiveLine = 0);
-#if !defined (NTV2_DEPRECATE_13_0)
-	explicit	NTV2_DEPRECATED_f(NTV2FormatDescriptor (const NTV2Standard inVideoStandard,
-														const NTV2FrameBufferFormat inFrameBufferFormat,
-														const bool inVANCenabled,
-														const bool in2Kby1080 = false,
-														const bool inWideVANC = false));	///< @deprecated	Use the constructor that accepts an ::NTV2VANCMode parameter instead.
-
-	explicit	NTV2_DEPRECATED_f(NTV2FormatDescriptor (const NTV2VideoFormat inVideoFormat,
-														const NTV2FrameBufferFormat inFrameBufferFormat,
-														const bool inVANCenabled,
-														const bool inWideVANC = false));	///< @deprecated	Use the constructor that accepts an ::NTV2VANCMode parameter instead.
-#endif	//	!defined (NTV2_DEPRECATE_13_0)
 
 	/**
 		@brief		Constructs me from the given video standard, pixel format, and VANC settings.
@@ -363,7 +351,6 @@ public:
 
 typedef NTV2FormatDescriptor NTV2FormatDesc;	///< @brief Shorthand for ::NTV2FormatDescriptor
 
-
 /**
 	@brief		Writes the given NTV2FormatDescriptor to the specified output stream.
 	@param		inOutStream		Specifies the output stream to receive the human-readable representation of the NTV2FormatDescriptor.
@@ -372,19 +359,6 @@ typedef NTV2FormatDescriptor NTV2FormatDesc;	///< @brief Shorthand for ::NTV2For
 **/
 AJAExport inline std::ostream & operator << (std::ostream & inOutStream, const NTV2FormatDescriptor & inFormatDesc)	{return inFormatDesc.Print (inOutStream);}
 
-
-#if !defined (NTV2_DEPRECATE_13_0)
-	AJAExport NTV2FormatDescriptor GetFormatDescriptor (const NTV2Standard			inVideoStandard,
-														const NTV2FrameBufferFormat	inFrameBufferFormat,
-														const bool					inVANCenabled	= false,
-														const bool					in2Kby1080		= false,
-														const bool					inWideVANC		= false);
-
-AJAExport NTV2FormatDescriptor GetFormatDescriptor (const NTV2VideoFormat			inVideoFormat,
-													 const NTV2FrameBufferFormat	inFrameBufferFormat,
-													 const bool						inVANCenabled	= false,
-													 const bool						inWideVANC		= false);
-#endif	//	!defined (NTV2_DEPRECATE_12_6)
 
 /**
 	@brief		Unpacks a line of NTV2_FBF_10BIT_YCBCR video into 16-bit-per-component YUV data.
@@ -396,11 +370,5 @@ AJAExport NTV2FormatDescriptor GetFormatDescriptor (const NTV2VideoFormat			inVi
 	@return		True if successful;  otherwise false.
 **/
 AJAExport bool		UnpackLine_10BitYUVtoUWordSequence (const void * pIn10BitYUVLine, const NTV2FormatDescriptor & inFormatDesc, UWordSequence & out16BitYUVLine);
-
-
-#if !defined (NTV2_DEPRECATE)
-	extern AJAExport const NTV2FormatDescriptor formatDescriptorTable [NTV2_NUM_STANDARDS] [NTV2_FBF_NUMFRAMEBUFFERFORMATS];
-#endif	//	!defined (NTV2_DEPRECATE)
-
 
 #endif	//	NTV2FORMATDESC_H

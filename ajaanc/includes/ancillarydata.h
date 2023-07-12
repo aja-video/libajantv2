@@ -282,26 +282,6 @@ typedef struct AJAExport AJAAncDataLoc
 		**/
 		virtual std::string	CompareWithInfo (const AJAAncDataLoc & inRHS) const;
 
-#if !defined(NTV2_DEPRECATE_15_2)
-		/**
-			@deprecated		Use the individual SetXXX functions (below) instead.
-		**/
-		inline AJAAncDataLoc &	Set (	const AJAAncDataLink	inLink,
-										const AJAAncDataChannel	inChannel,
-										const AJAAncDataSpace	inIgnored,
-										const uint16_t			inLineNum,
-										const uint16_t			inHorizOffset = AJAAncDataHorizOffset_Unknown,
-										const AJAAncDataStream	inStream = AJAAncDataStream_1)
-		{	AJA_UNUSED(inIgnored);
-			link		= inLink;
-			stream		= inStream;
-			channel		= inChannel;
-			lineNum		= inLineNum;
-			horizOffset	= inHorizOffset;
-			return *this;
-		}
-#endif	//	!defined(NTV2_DEPRECATE_15_2)
-
 		/**
 			@brief		Resets all of my location elements to an unknown, invalid state.
 			@return		A reference to myself.
@@ -685,18 +665,6 @@ public:
 		@return		AJA_STATUS_SUCCESS if equal;  otherwise AJA_STATUS_FAIL.
 	**/
 	virtual AJAStatus						Compare (const AJAAncillaryData & inRHS, const bool inIgnoreLocation = true, const bool inIgnoreChecksum = true) const;
-
-
-#if !defined(NTV2_DEPRECATE_15_2)
-		virtual inline AJAStatus			GetDataLocation (AJAAncDataLoc & outLocInfo) const	///< @deprecated	Use the inline version instead.
-																								{outLocInfo = GetDataLocation();	return AJA_STATUS_SUCCESS;}
-		virtual AJAStatus					GetDataLocation (AJAAncDataLink & outLink,
-															AJAAncDataChannel & outChannel,
-															AJAAncDataSpace & outAncSpace,
-															uint16_t & outLineNum);		///< @deprecated	Use the inline GetDataLocation() instead.
-		virtual inline AJAAncDataChannel	GetLocationVideoStream (void) const			{return m_location.GetDataChannel();}	///< @deprecated	Use GetLocationDataChannel instead.
-		virtual inline bool					IsAnalog (void) const						{return GetDataCoding() == AJAAncDataCoding_Raw;}		///< @deprecated	Use IsRaw instead.
-#endif	//	!defined(NTV2_DEPRECATE_15_2)
 	///@}
 
 
@@ -744,23 +712,6 @@ public:
 	**/
 	virtual AJAStatus						SetDataLocation (const AJAAncDataLoc & inLoc);
 
-#if !defined(NTV2_DEPRECATE_15_2)
-	/**
-		@brief		Sets my ancillary data "location" within the video stream.
-		@param[in]	inLink		Specifies the video link (A or B).
-		@param[in]	inChannel	Specifies the video channel (Y or C or SD/both).
-		@param[in]	inAncSpace	Specifies the ancillary data space (HANC or VANC).
-		@param[in]	inLineNum	Specifies the frame line number (SMPTE line numbering).
-		@param[in]	inStream	Optionally specifies the data stream (DS1 or DS2 for link A, or DS3 or DS4 for link B). Defaults to DS1.
-		@return		AJA_STATUS_SUCCESS if successful.
-	**/
-	virtual AJAStatus						SetDataLocation (	const AJAAncDataLink	inLink,
-																const AJAAncDataChannel	inChannel,
-																const AJAAncDataSpace	inAncSpace,
-																const uint16_t			inLineNum,
-																const AJAAncDataStream	inStream  = AJAAncDataStream_1);
-#endif	//	!defined(NTV2_DEPRECATE_15_2)
-
 	/**
 		@brief		Sets my ancillary data "location" within the video stream.
 		@param[in]	inLink	Specifies the new video link value (A or B).
@@ -781,10 +732,6 @@ public:
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
 	virtual AJAStatus						SetLocationDataChannel (const AJAAncDataChannel inChannel);
-
-#if !defined(NTV2_DEPRECATE_15_2)
-	virtual AJAStatus						SetLocationVideoSpace (const AJAAncDataSpace inAncSpace);	///< @deprecated	Call SetLocationHorizOffset instead.
-#endif	//	NTV2_DEPRECATE_15_2
 
 	/**
 		@brief	Sets my ancillary data "location" frame line number.
@@ -822,14 +769,6 @@ public:
 	virtual inline AJAAncillaryData &		SetBufferFormat (const AJAAncBufferFormat inFmt)		{m_bufferFmt = inFmt;  return *this;}
 
 	virtual inline uint64_t &				UserData (void)			{return m_userData;}	///< @return	Returns a non-constant reference to my user data. (New in SDK 16.0)
-
-#if !defined(NTV2_DEPRECATE_14_2)
-		/**
-			@deprecated		Use SetLocationDataChannel function instead.
-		**/
-		virtual inline NTV2_DEPRECATED_f(AJAStatus	SetLocationVideoStream (const AJAAncDataChannel inChannel))
-													{return SetLocationDataChannel(inChannel);}
-#endif	//	!defined(NTV2_DEPRECATE_14_2)
 	///@}
 
 
@@ -1362,13 +1301,6 @@ class AJAExport AJARTPAncPayloadHeader
 		**/
 		virtual inline AJARTPAncPayloadHeader &	SetEndOfFieldOrFrame (const bool inIsLast = true)	{mMarkerBit			= inIsLast;			return *this;}
 	///@}
-
-	#if !defined(NTV2_DEPRECATE_15_5)
-		/**
-			@deprecated	To get the full RTP packet length, add GetPayloadLength and GetHeaderByteCount.
-		**/
-		virtual inline uint16_t	GetPacketLength (void) const		{return GetPayloadLength()+uint16_t(GetHeaderByteCount());}
-	#endif	//	!defined(NTV2_DEPRECATE_15_5)
 
 	protected:
 		/**

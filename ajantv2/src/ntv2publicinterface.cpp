@@ -1720,6 +1720,34 @@ bool NTV2Buffer::IsContentEqual (const NTV2Buffer & inBuffer, const ULWord inByt
 	return ::memcmp (pByte1, pByte2, byteCount) == 0;
 }
 
+bool NTV2Buffer::NextDifference (const NTV2Buffer & inBuffer, ULWord & byteOffset) const
+{
+	if (byteOffset == 0xFFFFFFFF)
+		return false;	//	bad offset
+	if (IsNULL() || inBuffer.IsNULL())
+		return false;	//	NULL or empty buffers
+	if (inBuffer.GetByteCount() != GetByteCount())
+		return false;	//	Different byte counts
+	if (inBuffer.GetHostPointer() == GetHostPointer())
+		{byteOffset = 0xFFFFFFFF;  return true;}	//	Same buffer
+
+	ULWord	totalBytesToCompare(GetByteCount());
+	if (byteOffset >= totalBytesToCompare)
+		return false;	//	Bad offset
+	totalBytesToCompare -= byteOffset;
+
+	const UByte * pByte1 (*this);
+	const UByte * pByte2 (inBuffer);
+	while (totalBytesToCompare)
+	{
+		if (pByte1[byteOffset] != pByte2[byteOffset])
+			return true;
+		totalBytesToCompare--;
+		byteOffset++;
+	}
+	byteOffset = 0xFFFFFFFF;
+	return true;
+}
 
 bool NTV2Buffer::GetRingChangedByteRange (const NTV2Buffer & inBuffer, ULWord & outByteOffsetFirst, ULWord & outByteOffsetLast) const
 {
@@ -2248,12 +2276,12 @@ bool AUTOCIRCULATE_STATUS::CopyFrom (const AUTOCIRCULATE_STATUS_STRUCT & inOldSt
 	acFramesDropped			= inOldStruct.framesDropped;
 	acBufferLevel			= inOldStruct.bufferLevel;
 	acAudioSystem			= NTV2_AUDIOSYSTEM_INVALID; //	NTV2_AUDIOSYSTEM_1;
-	acOptionFlags			=	inOldStruct.bWithRP188				? AUTOCIRCULATE_WITH_RP188			: 0		|
-								inOldStruct.bFbfChange				? AUTOCIRCULATE_WITH_FBFCHANGE		: 0		|
-								inOldStruct.bFboChange				? AUTOCIRCULATE_WITH_FBOCHANGE		: 0		|
-								inOldStruct.bWithColorCorrection	? AUTOCIRCULATE_WITH_COLORCORRECT	: 0		|
-								inOldStruct.bWithVidProc			? AUTOCIRCULATE_WITH_VIDPROC		: 0		|
-								inOldStruct.bWithCustomAncData		? AUTOCIRCULATE_WITH_ANC			: 0;
+	acOptionFlags			=	(inOldStruct.bWithRP188				? AUTOCIRCULATE_WITH_RP188			: 0) |
+								(inOldStruct.bFbfChange				? AUTOCIRCULATE_WITH_FBFCHANGE		: 0) |
+								(inOldStruct.bFboChange				? AUTOCIRCULATE_WITH_FBOCHANGE		: 0) |
+								(inOldStruct.bWithColorCorrection	? AUTOCIRCULATE_WITH_COLORCORRECT	: 0) |
+								(inOldStruct.bWithVidProc			? AUTOCIRCULATE_WITH_VIDPROC		: 0) |
+								(inOldStruct.bWithCustomAncData		? AUTOCIRCULATE_WITH_ANC			: 0);
 	return true;
 }
 

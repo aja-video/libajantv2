@@ -83,3 +83,6 @@ if (AJA_INSTALL_SOURCES)
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ntv2.doxy 
             DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME})
 endif()
+if (AJA_INSTALL_CMAKE)
+    install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/docs)
+endif()

@@ -319,12 +319,6 @@ void CNTV2Bitfile::Close (void)
 	mLastError.clear();
 }
 
-
-#if !defined (NTV2_DEPRECATE)
-	bool CNTV2Bitfile::Open (const char * const & inBitfilePath)		{ return Open (string (inBitfilePath)); }
-#endif	//	!defined (NTV2_DEPRECATE)
-
-
 bool CNTV2Bitfile::Open (const string & inBitfileName)
 {
 	Close();
