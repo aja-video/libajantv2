@@ -13,8 +13,11 @@ add_subdirectory(ntv2dolbyplayer)
 add_subdirectory(ntv2enumerateboards)
 add_subdirectory(ntv2fieldburn)
 add_subdirectory(ntv2hdrsetup)
-add_subdirectory(ntv2konaipj2ksetup)
-add_subdirectory(ntv2konaipjsonsetup)
+if(AJA_QT_ENABLED)
+    add_subdirectory(ntv2konaipj2ksetup)
+    add_subdirectory(ntv2konaipjsonsetup)
+endif()
+
 add_subdirectory(ntv2llburn)
 # # add_subdirectory(ntv2oglcapture) # requires gpustuff
 # # add_subdirectory(ntv2ogldpxreader) # requires gpustuff

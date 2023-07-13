@@ -2,8 +2,10 @@ project(ut_ajantv2)
 
 set(TEST_XML_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
+set(DOCTEST_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/doctest/doctest)
+
 set(TARGET_INCLUDE_DIRS
-	${doctest_SOURCE_DIR}/doctest
+	${DOCTEST_INCLUDE_DIR}
 	../ajantv2
 	../ajantv2/includes)
 
@@ -22,11 +24,11 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 if (NOT TARGET ut_ajantv2)
-	add_executable(ut_ajantv2 ut_ajantv2.cpp)
-	add_dependencies(ut_ajantv2 doctest::doctest ajantv2)
-	target_include_directories(ut_ajantv2 PUBLIC doctest::doctest ${TARGET_INCLUDE_DIRS})
-	target_link_libraries(ut_ajantv2 PUBLIC ajantv2 doctest::doctest_with_main ${TARGET_LINK_LIBS})
-	doctest_discover_tests(${PROJECT_NAME} JUNIT_OUTPUT_DIR ${TEST_XML_DIR})
+	add_executable(ut_ajantv2 ut_ajantv2.cpp ${DOCTEST_INCLUDE_DIR}/doctest.h)
+	add_dependencies(ut_ajantv2 ajantv2)
+	target_include_directories(ut_ajantv2 PUBLIC ${TARGET_INCLUDE_DIRS})
+	target_link_libraries(ut_ajantv2 PUBLIC ajantv2 ${TARGET_LINK_LIBS})
+	#doctest_discover_tests(${PROJECT_NAME} JUNIT_OUTPUT_DIR ${TEST_XML_DIR})
 endif()
 
 if (AJA_INSTALL_CMAKE)
