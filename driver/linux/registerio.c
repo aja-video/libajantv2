@@ -36,6 +36,7 @@
 #include "registerio.h"
 #include "ntv2devicefeatures.h"
 #include "../ntv2kona.h"
+#include "../ntv2videoraster.h"
 #include "../ntv2pciconfig.h"
 
 #include "driverdbg.h"
@@ -449,6 +450,60 @@ void WriteRegister(	ULWord deviceNumber,
 			ntv2_spin_unlock_irqrestore(&(pNTV2Params->_registerSpinLock), flags);
 #endif	// SOFTWARE_UART_FIFO
 
+        // handle ntv2->ntv4 frame store real-time frame buffer address update
+        switch(registerNumber) {
+        case kRegCh1OutputFrame:
+            ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 0, false, registerValue);
+            break;
+        case kRegCh1InputFrame:
+            ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 0, true, registerValue);
+            break;
+        case kRegCh2OutputFrame:
+            ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 1, false, registerValue);
+            break;
+        case kRegCh2InputFrame:
+            ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 1, true, registerValue);
+            break;
+        case kRegCh3OutputFrame:
+            ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 2, false, registerValue);
+            break;
+        case kRegCh3InputFrame:
+            ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 2, true, registerValue);
+            break;
+        case kRegCh4OutputFrame:
+            ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 3, false, registerValue);
+            break;
+        case kRegCh4InputFrame:
+            ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 3, true, registerValue);
+            break;
+        case kRegCh5OutputFrame:
+            ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 4, false, registerValue);
+            break;
+        case kRegCh5InputFrame:
+            ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 4, true, registerValue);
+            break;
+        case kRegCh6OutputFrame:
+            ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 5, false, registerValue);
+            break;
+        case kRegCh6InputFrame:
+            ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 5, true, registerValue);
+            break;
+        case kRegCh7OutputFrame:
+            ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 6, false, registerValue);
+            break;
+        case kRegCh7InputFrame:
+            ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 6, true, registerValue);
+            break;
+        case kRegCh8OutputFrame:
+            ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 7, false, registerValue);
+            break;
+        case kRegCh8InputFrame:
+            ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 7, true, registerValue);
+            break;
+        default:
+            break;
+        }
+        
 		return;
 	}
 

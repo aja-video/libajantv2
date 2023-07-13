@@ -290,7 +290,7 @@ struct ntv2_videoraster *ntv2_videoraster_open(Ntv2SystemContext* sys_con,
 #endif
 	ntv2_raster->system_context = sys_con;
 
-	ntv2SpinLockOpen(&ntv2_raster->state_lock, sys_con);
+	ntv2InterruptLockOpen(&ntv2_raster->state_lock, sys_con);
 	ntv2ThreadOpen(&ntv2_raster->monitor_task, sys_con, "video raster monitor");
 	ntv2EventOpen(&ntv2_raster->monitor_event, sys_con);
 
@@ -317,7 +317,7 @@ void ntv2_videoraster_close(struct ntv2_videoraster *ntv2_raster)
 
 	ntv2EventClose(&ntv2_raster->monitor_event);
 	ntv2ThreadClose(&ntv2_raster->monitor_task);
-	ntv2SpinLockClose(&ntv2_raster->state_lock);
+	ntv2InterruptLockClose(&ntv2_raster->state_lock);
 
 	memset(ntv2_raster, 0, sizeof(struct ntv2_videoraster));
 	ntv2MemoryFree(ntv2_raster, sizeof(struct ntv2_videoraster));
@@ -387,37 +387,67 @@ Ntv2Status ntv2_videoraster_disable(struct ntv2_videoraster *ntv2_raster)
 	return NTV2_STATUS_SUCCESS;
 }
 
-Ntv2Status ntv2_videoraster_update_input_frame(struct ntv2_videoraster *ntv2_raster, NTV2Channel channel, uint32_t frame_number)
+Ntv2Status ntv2_videoraster_update_frame(struct ntv2_videoraster *ntv2_raster, uint32_t index, bool input, uint32_t frame_number)
 {
-    uint32_t global_control = ntv2_raster->global_control[index];
-    uint32_t output_frame = ntv2_raster->output_frame[index];
-    uint32_t input_frame = ntv2_raster->input_frame[index];
+    uint32_t base = 0;
+    uint32_t global_control = 0;
     uint32_t standard = 0;
-    uint32_t geometry = 0;
-    uint32_t format = 0;
-    uint32_t frame_rate = 0;
-    uint32_t pixel_rate = 0;
-    uint32_t length = 0;
-    uint32_t pitch = 0;
-	uint32_t width = 0;
-	uint32_t height = 0;
-    uint32_t total_width = 0;
     uint32_t frame_size = 0;
+    uint32_t frame_pitch = 0;
+    uint32_t field1_address = 0;
+    uint32_t field2_address = 0;
+    bool progressive = false;
+    bool top_first = false;
 
+    if (ntv2_raster == NULL)
+        return NTV2_STATUS_SUCCESS;
+    if (input && (ntv2_raster->channel_mode[index] != ntv2_con_videoraster_mode_capture))
+        return NTV2_STATUS_SUCCESS;
+    if (!input && (ntv2_raster->channel_mode[index] != ntv2_con_videoraster_mode_display))
+        return NTV2_STATUS_SUCCESS;
+    if (index >= NTV2_VIDEORASTER_MAX_WIDGETS)
+        return NTV2_STATUS_SUCCESS;
+
+    ntv2InterruptLockAcquire(&ntv2_raster->state_lock);
+    
+    base = ntv2_raster->widget_base + index*ntv2_raster->widget_size;
+    global_control = ntv2_raster->global_control[index];
     standard = NTV2_FLD_GET(ntv2_fld_global_control_standard, global_control);
     if (standard >= s_standard_size) return false;
-    geometry = NTV2_FLD_GET(ntv2_fld_global_control_geometry, global_control);
-    if (geometry >= s_geometry_size) return false;
-
     progressive = c_standard_data[standard].video_scan == ntv2_video_scan_progressive;
     top_first = c_standard_data[standard].video_scan == ntv2_video_scan_top_first;
 
-    ntv2_raster->frame_size[index] = frame_size;
+    frame_size = ntv2_raster->frame_size[index];
+    frame_pitch = ntv2_raster->frame_pitch[index];
+    
+    ntv2_raster->input_frame[index] = frame_number;
 
-}
+    if (progressive)
+    {
+        field1_address = frame_number * frame_size;
+        field2_address = 0;
+    }
+    else if (top_first)
+    {
+        field1_address = frame_number * frame_size;
+        field2_address = frame_number * frame_size + frame_pitch;
+    }
+    else
+    {
+        field1_address = frame_number * frame_size + frame_pitch;
+        field2_address = frame_number * frame_size;
+    }
 
-Ntv2Status ntv2_videoraster_update_output_frame(struct ntv2_videoraster *ntv2_raster, NTV2Channel channel, uint32_t frame_number)
-{
+    ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_roifield1startaddress, field1_address);
+    ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_roifield2startaddress, field2_address);
+
+    ntv2InterruptLockRelease(&ntv2_raster->state_lock);
+
+    NTV2_MSG_VIDEORASTER_STATE("%s: chn %d  f1 address        %08x\n", ntv2_raster->name, index, field1_address);
+    NTV2_MSG_VIDEORASTER_STATE("%s: chn %d  f2 address        %08x\n", ntv2_raster->name, index, field2_address);
+    
+
+   	return NTV2_STATUS_SUCCESS;
 }
 
 static void ntv2_videoraster_monitor(void* data)
@@ -647,6 +677,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
             channel_mode = "display";
         }
     }
+    ntv2_raster->channel_mode[index] = mode;
 
     /* progressive / interlaced */
     progressive = c_standard_data[standard].video_scan == ntv2_video_scan_progressive;
@@ -665,7 +696,6 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     frame_size = get_frame_size(ntv2_raster, index);
 	if (quad)
 		frame_size *= 4;
-    ntv2_raster->frame_size[index] = frame_size;
 
     if (mode == ntv2_con_videoraster_mode_capture)
         frame_number = input_frame;
@@ -684,6 +714,12 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
 		length *= 2;
 		pitch *= 2;
 	}
+
+    ntv2InterruptLockAcquire(&ntv2_raster->state_lock);
+
+    ntv2_raster->frame_size[index] = frame_size;
+    ntv2_raster->frame_length[index] = length;
+    ntv2_raster->frame_pitch[index] = pitch;
 
 	/* frame buffer address and pitch correction */
     if (progressive)
@@ -707,11 +743,14 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     value = NTV2_FLD_SET(ntv2_fld_videoraster_linepitch_length, length);
     value |= NTV2_FLD_SET(ntv2_fld_videoraster_linepitch_pitch, pitch);
     ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_linepitch, value);
-    NTV2_MSG_VIDEORASTER_STATE("%s: chn %d  line length       %d\n", ntv2_raster->name, index, length);
-    NTV2_MSG_VIDEORASTER_STATE("%s: chn %d  line pitch        %d\n", ntv2_raster->name, index, pitch);
 
     ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_roifield1startaddress, field1_address);
     ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_roifield2startaddress, field2_address);
+
+    ntv2InterruptLockRelease(&ntv2_raster->state_lock);
+
+    NTV2_MSG_VIDEORASTER_STATE("%s: chn %d  line length       %d\n", ntv2_raster->name, index, length);
+    NTV2_MSG_VIDEORASTER_STATE("%s: chn %d  line pitch        %d\n", ntv2_raster->name, index, pitch);
     NTV2_MSG_VIDEORASTER_STATE("%s: chn %d  f1 address        %08x\n", ntv2_raster->name, index, field1_address);
     NTV2_MSG_VIDEORASTER_STATE("%s: chn %d  f2 address        %08x\n", ntv2_raster->name, index, field2_address);
 
