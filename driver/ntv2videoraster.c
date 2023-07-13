@@ -254,7 +254,6 @@ static const struct timing_offset_data c_offset_data[] =
     { ntv2_video_standard_none,         1,      0,      1,      0,      0,      0 }
 };
 
-static void ntv2_videoraster_monitor(void* data);
 static Ntv2Status ntv2_videoraster_initialize(struct ntv2_videoraster *ntv2_raster, uint32_t index);
 static bool has_config_changed(struct ntv2_videoraster *ntv2_raster, uint32_t index);
 static bool update_format(struct ntv2_videoraster *ntv2_raster, uint32_t index);
@@ -291,8 +290,6 @@ struct ntv2_videoraster *ntv2_videoraster_open(Ntv2SystemContext* sys_con,
 	ntv2_raster->system_context = sys_con;
 
 	ntv2InterruptLockOpen(&ntv2_raster->state_lock, sys_con);
-	ntv2ThreadOpen(&ntv2_raster->monitor_task, sys_con, "video raster monitor");
-	ntv2EventOpen(&ntv2_raster->monitor_event, sys_con);
 
     s_standard_size = sizeof(c_standard_data) / sizeof(struct standard_data);
     s_geometry_size = sizeof(c_geometry_data) / sizeof(struct geometry_data);
@@ -315,10 +312,7 @@ void ntv2_videoraster_close(struct ntv2_videoraster *ntv2_raster)
 
 	ntv2_videoraster_disable(ntv2_raster);
 
-	ntv2EventClose(&ntv2_raster->monitor_event);
-	ntv2ThreadClose(&ntv2_raster->monitor_task);
-	ntv2InterruptLockClose(&ntv2_raster->state_lock);
-
+    ntv2InterruptLockClose(&ntv2_raster->state_lock);
 	memset(ntv2_raster, 0, sizeof(struct ntv2_videoraster));
 	ntv2MemoryFree(ntv2_raster, sizeof(struct ntv2_videoraster));
 }
@@ -348,7 +342,7 @@ Ntv2Status ntv2_videoraster_configure(struct ntv2_videoraster *ntv2_raster,
 
 Ntv2Status ntv2_videoraster_enable(struct ntv2_videoraster *ntv2_raster)
 {
-	bool success ;
+	uint32_t i;
 
 	if (ntv2_raster == NULL)
 		return NTV2_STATUS_BAD_PARAMETER;
@@ -358,13 +352,12 @@ Ntv2Status ntv2_videoraster_enable(struct ntv2_videoraster *ntv2_raster)
 
 	NTV2_MSG_VIDEORASTER_STATE("%s: enable video raster monitor\n", ntv2_raster->name);
 
-	ntv2EventClear(&ntv2_raster->monitor_event);
-	ntv2_raster->monitor_enable = true;
+    for (i = 0; i < ntv2_raster->num_widgets; i++)
+    {
+        ntv2_videoraster_initialize(ntv2_raster, i);
+    }
 
-	success = ntv2ThreadRun(&ntv2_raster->monitor_task, ntv2_videoraster_monitor, (void*)ntv2_raster);
-	if (!success) {
-		return NTV2_STATUS_FAIL;
-	}
+	ntv2_raster->monitor_enable = true;
 
 	return NTV2_STATUS_SUCCESS;
 }
@@ -379,10 +372,48 @@ Ntv2Status ntv2_videoraster_disable(struct ntv2_videoraster *ntv2_raster)
 
 	NTV2_MSG_VIDEORASTER_STATE("%s: disable video raster monitor\n", ntv2_raster->name);
 
+    ntv2InterruptLockAcquire(&ntv2_raster->state_lock);
 	ntv2_raster->monitor_enable = false;
-	ntv2EventSignal(&ntv2_raster->monitor_event);
+    ntv2InterruptLockRelease(&ntv2_raster->state_lock);
 
-	ntv2ThreadStop(&ntv2_raster->monitor_task);
+	return NTV2_STATUS_SUCCESS;
+}
+
+Ntv2Status ntv2_videoraster_update_global(struct ntv2_videoraster *ntv2_raster)
+{
+    uint32_t i;
+
+	if (ntv2_raster == NULL)
+		return NTV2_STATUS_SUCCESS;
+	if (!ntv2_raster->monitor_enable)
+		return NTV2_STATUS_SUCCESS;
+
+	NTV2_MSG_VIDEORASTER_STATE("%s: video raster update globaln", ntv2_raster->name);
+
+    for (i = 0; i < ntv2_raster->num_widgets; i++)
+    {
+        if (has_config_changed(ntv2_raster, i))
+            update_format(ntv2_raster, i);
+    }
+
+	return NTV2_STATUS_SUCCESS;
+}
+
+Ntv2Status ntv2_videoraster_update_channel(struct ntv2_videoraster *ntv2_raster, uint32_t index)
+{
+	if (ntv2_raster == NULL)
+		return NTV2_STATUS_SUCCESS;
+	if (!ntv2_raster->monitor_enable)
+		return NTV2_STATUS_SUCCESS;
+    if (index >= ntv2_raster->num_widgets)
+        return NTV2_STATUS_SUCCESS;
+
+	NTV2_MSG_VIDEORASTER_STATE("%s: video raster update channel\n", ntv2_raster->name);
+
+    if (has_config_changed(ntv2_raster, index))
+    {
+        update_format(ntv2_raster, index);
+    }
 
 	return NTV2_STATUS_SUCCESS;
 }
@@ -400,12 +431,16 @@ Ntv2Status ntv2_videoraster_update_frame(struct ntv2_videoraster *ntv2_raster, u
     bool top_first = false;
 
     if (ntv2_raster == NULL)
+    {
+        return NTV2_STATUS_SUCCESS;
+    }
+	if (!ntv2_raster->monitor_enable)
+		return NTV2_STATUS_SUCCESS;
+    if (index >= ntv2_raster->num_widgets)
         return NTV2_STATUS_SUCCESS;
     if (input && (ntv2_raster->channel_mode[index] != ntv2_con_videoraster_mode_capture))
         return NTV2_STATUS_SUCCESS;
     if (!input && (ntv2_raster->channel_mode[index] != ntv2_con_videoraster_mode_display))
-        return NTV2_STATUS_SUCCESS;
-    if (index >= NTV2_VIDEORASTER_MAX_WIDGETS)
         return NTV2_STATUS_SUCCESS;
 
     ntv2InterruptLockAcquire(&ntv2_raster->state_lock);
@@ -448,39 +483,6 @@ Ntv2Status ntv2_videoraster_update_frame(struct ntv2_videoraster *ntv2_raster, u
     
 
    	return NTV2_STATUS_SUCCESS;
-}
-
-static void ntv2_videoraster_monitor(void* data)
-{
-	struct ntv2_videoraster *ntv2_raster = (struct ntv2_videoraster *)data;
-    uint32_t i;
-
-	if (ntv2_raster == NULL)
-		return;
-
-	NTV2_MSG_VIDEORASTER_STATE("%s: video raster monitor task start\n", ntv2_raster->name);
-
-    for (i = 0; i < NTV2_VIDEORASTER_MAX_WIDGETS; i++)
-    {
-        ntv2_videoraster_initialize(ntv2_raster, i);
-    }
-
-	while (!ntv2ThreadShouldStop(&ntv2_raster->monitor_task) && ntv2_raster->monitor_enable) 
-	{
-        for (i = 0; i < ntv2_raster->num_widgets; i++)
-        {
-            if (has_config_changed(ntv2_raster, i))
-                update_format(ntv2_raster, i);
-        }
-
-        // sleep
-		if (ntv2_raster->monitor_enable)
-			ntv2EventWaitForSignal(&ntv2_raster->monitor_event, c_default_timeout, true);
-	}
-
-	NTV2_MSG_VIDEORASTER_STATE("%s: video raster monitor task stop\n", ntv2_raster->name);
-	ntv2ThreadExit(&ntv2_raster->monitor_task);
-	return;
 }
 
 static Ntv2Status ntv2_videoraster_initialize(struct ntv2_videoraster *ntv2_raster, uint32_t index)

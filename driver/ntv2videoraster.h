@@ -22,10 +22,7 @@ struct ntv2_videoraster {
 	char				name[NTV2_VIDEORASTER_STRING_SIZE];
 	Ntv2SystemContext* 	system_context;
 	Ntv2InterruptLock   state_lock;
-
-	Ntv2Thread 			monitor_task;
 	bool				monitor_enable;
-	Ntv2Event			monitor_event;
 
     uint32_t            global_control[NTV2_VIDEORASTER_MAX_WIDGETS];
     uint32_t            global_control2[NTV2_VIDEORASTER_MAX_WIDGETS];
@@ -59,6 +56,8 @@ Ntv2Status ntv2_videoraster_configure(struct ntv2_videoraster *ntv2_raster, uint
 Ntv2Status ntv2_videoraster_enable(struct ntv2_videoraster *ntv2_raster);
 Ntv2Status ntv2_videoraster_disable(struct ntv2_videoraster *ntv2_raster);
 
+Ntv2Status ntv2_videoraster_update_global(struct ntv2_videoraster *ntv2_raster);
+Ntv2Status ntv2_videoraster_update_channel(struct ntv2_videoraster *ntv2_raster, uint32_t index);
 Ntv2Status ntv2_videoraster_update_frame(struct ntv2_videoraster *ntv2_raster, uint32_t index, bool input, uint32_t frame_number);
 
 #ifdef __cplusplus
