@@ -57,6 +57,7 @@ using namespace std;
 #define	AsFRAME_STAMP(_p_)				(reinterpret_cast <FRAME_STAMP *> (_p_))
 #define	AsNTV2BufferLock(_p_)      		(reinterpret_cast <NTV2BufferLock *> (_p_))
 
+static ULWord gIgnoredNTV2pkts(0);
 
 
 
@@ -630,8 +631,7 @@ int NTV2LegacyNubClient::OpenRemoteDeviceWithIndex (const UWord inDeviceIndex)
 							}
 							else // Not an open response packet, count it and discard it.
 							{
-								static ULWord ignoredNTV2pkts;
-								++ignoredNTV2pkts;
+								++gIgnoredNTV2pkts;
 								retcode = NTV2_REMOTE_ACCESS_NOT_OPEN_RESP;
 							}
 						}
@@ -735,8 +735,7 @@ bool NTV2LegacyNubClient::NTV2ReadRegisterRemote (const ULWord regNum, ULWord & 
 							}
 							else // Not an read register response packet, count it and discard it.
 							{
-								static unsigned long ignoredNTV2pkts;
-								++ignoredNTV2pkts;
+								++gIgnoredNTV2pkts;
 								retcode = NTV2_REMOTE_ACCESS_NOT_READ_REGISTER_RESP;
 							}
 						}
@@ -820,8 +819,7 @@ bool NTV2LegacyNubClient::NTV2WriteRegisterRemote (const ULWord regNum, const UL
 							}
 							else // Not a write register response packet, count it and discard it.
 							{
-								static unsigned long ignoredNTV2pkts;
-								++ignoredNTV2pkts;
+								++gIgnoredNTV2pkts;
 								retcode = NTV2_REMOTE_ACCESS_NOT_WRITE_REGISTER_RESP;
 							}
 						}
@@ -930,8 +928,7 @@ bool NTV2LegacyNubClient::NTV2AutoCirculateRemote (AUTOCIRCULATE_DATA & autoCirc
 							// Other autocirculate responses go here.
 							else // Not an autocirculate response packet, count it and discard it.
 							{
-								static unsigned long ignoredNTV2pkts;
-								++ignoredNTV2pkts;
+								++gIgnoredNTV2pkts;
 								retcode = NTV2_REMOTE_ACCESS_NOT_AUTOCIRC_RESP;
 							}
 						}	//	if deNBOifyNTV2NubPkt
@@ -1014,8 +1011,7 @@ bool NTV2LegacyNubClient::NTV2WaitForInterruptRemote (const INTERRUPT_ENUMS eInt
 								}
 								else // Not a write register response packet, count it and discard it.
 								{
-									static unsigned long ignoredNTV2pkts;
-									++ignoredNTV2pkts;
+									++gIgnoredNTV2pkts;
 									retcode = NTV2_REMOTE_ACCESS_NOT_WAIT_FOR_INTERRUPT_RESP;
 								}
 							}
@@ -1102,8 +1098,7 @@ bool NTV2LegacyNubClient::NTV2DriverGetBitFileInformationRemote (BITFILE_INFO_ST
 								}
 								else // Not a write register response packet, count it and discard it.
 								{
-									static unsigned long ignoredNTV2pkts;
-									++ignoredNTV2pkts;
+									++gIgnoredNTV2pkts;
 									retcode = NTV2_REMOTE_ACCESS_NOT_DRIVER_GET_BITFILE_INFO;
 								}
 							}
@@ -1188,8 +1183,7 @@ bool NTV2LegacyNubClient::NTV2DriverGetBuildInformationRemote (BUILD_INFO_STRUCT
 								}
 								else // Not a write register response packet, count it and discard it.
 								{
-									static unsigned long ignoredNTV2pkts;
-									++ignoredNTV2pkts;
+									++gIgnoredNTV2pkts;
 									retcode = NTV2_REMOTE_ACCESS_NOT_DRIVER_GET_BUILD_INFO;
 								}
 							}
@@ -1275,8 +1269,7 @@ bool NTV2LegacyNubClient::NTV2DownloadTestPatternRemote	(const NTV2Channel chann
 								}
 								else // Not a write register response packet, count it and discard it.
 								{
-									static unsigned long ignoredNTV2pkts;
-									++ignoredNTV2pkts;
+									++gIgnoredNTV2pkts;
 									retcode = NTV2_REMOTE_ACCESS_NOT_DOWNLOAD_TEST_PATTERN;
 								}
 							}
@@ -1392,10 +1385,9 @@ bool NTV2LegacyNubClient::NTV2ReadRegisterMultiRemote	(const ULWord numRegs, ULW
 								}
 								else // Not a write register response packet, count it and discard it.
 								{
-									static unsigned long ignoredNTV2pkts;
-									++ignoredNTV2pkts;
+									++gIgnoredNTV2pkts;
 									retcode = NTV2_REMOTE_ACCESS_NOT_READ_REG_MULTI;
-									NBWARN("Received non-ReadRegMulti response pkt, " << ignoredNTV2pkts << " ignored pkts");
+									NBWARN("Received non-ReadRegMulti response pkt, " << gIgnoredNTV2pkts << " ignored pkts");
 								}
 							}
 							else // Non ntv2 packet on our port.
