@@ -5,8 +5,12 @@ if (NOT AJA_QT_ENABLED)
     return()
 endif()
 
-include(QtHelpers)
-aja_find_qt_modules(Core Widgets)
+find_package(QT NAMES Qt6;Qt5 REQUIRED COMPONENTS Core Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets)
+
+list(APPEND TARGET_QT_LIBS 
+    "Qt${QT_VERSION_MAJOR}::Core"
+    "Qt${QT_VERSION_MAJOR}::Widgets")
 
 list(APPEND TARGET_LINK_LIBS ${TARGET_QT_LIBS})
 

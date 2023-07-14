@@ -1,9 +1,0 @@
-[submodule "thirdparty/doctest"]
-	path = thirdparty/doctest
-	url = ../../thirdparty/doctest
-	branch = ntv2
-[submodule "cmake"]
-	path = cmake
-	url = ../cmake
-	branch = main
-    

@@ -36,10 +36,12 @@ project(dvplowlatencydemo LANGUAGES CUDA CXX)
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
 	${CMAKE_CURRENT_SOURCE_DIR}/../common
-	${AJA_LIBRARIES_ROOT}
-	${AJA_LIBRARIES_ROOT}/gpustuff/include
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../thirdparty/nvidia/include
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../thirdparty/nvidia/gpudirect/include
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../ajantv2
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../ajantv2/includes
 	${CUDA_INCLUDE_DIRS}
-	${AJA_LIB_NTV2_ROOT}/includes)
+)
 
 set(DVPLOWLATENCYDEMO_BUILD_FILES
 	Makefile)
@@ -73,7 +75,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(TARGET_LINK_LIBS X11 OpenGL::GL OpenGL::GLU GLEW::GLEW dvp dl pthread rt)
 	set(TARGET_LINK_DIRS
 		${TARGET_LINK_DIRS}
-		${AJA_LIBRARIES_ROOT}/gpustuff/lib/linux/lib64)
+		${CMAKE_CURRENT_SOURCE_DIR}/../../../thirdparty/nvidia/gpudirect/lib/linux/lib64)
 endif()
 
 set(TARGET_SOURCES

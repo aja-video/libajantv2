@@ -2,7 +2,7 @@
 // CUDA array transfer class
 
 #include "ntv2cudaArrayTransferNV.h"
-#include "systemtime.h"
+#include "ajabase/system/systemtime.h"
 #include <assert.h>
 #include <string>
 #include <map>
