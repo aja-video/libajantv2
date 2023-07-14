@@ -17,3 +17,7 @@ RUN apt-get update \
        vim-tiny tzdata \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists*
+
+COPY ./container/build_qt_5_15_8.sh /tmp
+RUN chmod +x /tmp/build_qt_5_15_8.sh
+RUN /bin/sh -c "/tmp/build_qt_5_15_8.sh"

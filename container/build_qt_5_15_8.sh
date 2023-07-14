@@ -33,10 +33,8 @@ fi
 mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR" || exit 2
 
-rm $SRC_FILE
-
 printf "\n## Configuring Qt %s...\n" "$QT_VERSION"
-../$SRC_DIR/configure -prefix $INSTALL_DIR \
+../$SRC_DIR/configure -v -prefix $INSTALL_DIR \
     -ccache -opensource -confirm-license -nomake examples -nomake tests \
 	-qt-pcre -qt-zlib -qt-harfbuzz -qt-libjpeg -qt-libpng -qt-tiff -qt-webp \
 	-bundled-xcb-xinput -xcb -no-icu -plugin-sql-sqlite \
@@ -69,23 +67,24 @@ if [ "$?" != 0 ]; then
     cd - || exit 99
 fi
 
-printf "\n## Building Docs for Qt %s...\n" "$QT_VERSION"
-make -j "$NPROC" docs
+# NOTE: Uncomment below if you you want docs.
+# printf "\n## Building Docs for Qt %s...\n" "$QT_VERSION"
+# make -j "$NPROC" docs
 
-if [ "$?" != 0 ]; then
-    echo "error: problem with the 'make docs' step"
-    exit 6
-    cd - || exit 99
-fi
+# if [ "$?" != 0 ]; then
+#     echo "error: problem with the 'make docs' step"
+#     exit 6
+#     cd - || exit 99
+# fi
 
-printf "\n## Installing Docs for Qt %s...\n" "$QT_VERSION"
-make install_docs
+# printf "\n## Installing Docs for Qt %s...\n" "$QT_VERSION"
+# make install_docs
 
-if [ "$?" != 0 ]; then
-    echo "error: problem with the 'make install_docs' step"
-    exit 7
-    cd - || exit 99
-fi
+# if [ "$?" != 0 ]; then
+#     echo "error: problem with the 'make install_docs' step"
+#     exit 7
+#     cd - || exit 99
+# fi
 
 printf "\n## Copying config Summary and Options for Qt %s...\n" "$QT_VERSION"
 cp config.summary config.opt "$INSTALL_DIR"
@@ -98,4 +97,12 @@ printf "\n## Building of Qt %s was a success!\n" "$QT_VERSION"
 
 cd - || exit 20
 
+printf "\nMoving Qt to /opt...\n"
 mv /opt/aja/Qt /opt/Qt$QT_VERSION
+
+printf "\nCleaning up build dir and sources...\n"
+rm -rf $SRC_FILE
+rm -rf $SRC_DIR
+rm -rf $BUILD_DIR
+
+echo "\ngoodbye! -_~\n"
