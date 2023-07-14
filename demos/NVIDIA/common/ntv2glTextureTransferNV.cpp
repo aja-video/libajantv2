@@ -6,8 +6,8 @@
 
 
 #include "ntv2glTextureTransferNV.h"
-#include "gpustuff/include/DVPAPI.h"
-#include "gpustuff/include/dvpapi_gl.h"
+#include "DVPAPI.h"
+#include "dvpapi_gl.h"
 #include <assert.h>
 #include <string>
 #include <map>
