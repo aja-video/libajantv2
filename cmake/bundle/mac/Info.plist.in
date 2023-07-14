@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>@PROJECT_NAME@</string>
+	<key>CFBundleName</key>
+	<string>@AJA_BUNDLE_NAME@</string>
+	<key>CFBundlePackageType</key>
+	<string>@AJA_BUNDLE_PACKAGE_TYPE@</string>
+	<key>CFBundleIdentifier</key>
+	<string>@AJA_BUNDLE_IDENTIFIER@</string>
+	<key>CFBundleIconFile</key>
+	<string>@AJA_APP_ICON@</string>
+	<key>CFBundleSignature</key>
+	<string>@AJA_BUNDLE_SIGNATURE@</string>
+	<key>CFBundleVersion</key>
+	<string>@AJA_NTV2_VER_STR@</string>
+	<key>CFBundleShortVersionString</key>
+	<string>@AJA_NTV2_VER_SHORT_STR@</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © @AJA_COMPANY_NAME@ 2012-@AJA_BUILD_YEAR@</string>
+	<key>CFBundleGetInfoString</key>
+	<string>@AJA_NTV2_VER_STR@ Copyright © @AJA_COMPANY_NAME@ 2012-@AJA_BUILD_YEAR@</string>
+</dict>
+</plist>

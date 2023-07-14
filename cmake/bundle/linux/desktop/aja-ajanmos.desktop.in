@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=AJA NMOS
+Exec=/opt/aja/bin/ajanmos
+Icon=/opt/aja/icons/256x256/apps/ajanmos.png
+Terminal=false
+Categories=AudioVideo;
+Type=Application
+Version=@AJA_NTV2_VER_STR@
+StartupWMClass=controlpanel
+X-GNOME-SingleWindow=true
+SingleMainWindow=true

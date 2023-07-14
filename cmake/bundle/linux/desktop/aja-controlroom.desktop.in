@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=AJA ControlRoom
+Exec=/opt/aja/bin/controlroom.sh
+Icon=/opt/aja/icons/256x256/apps/controlroom.png
+Terminal=false
+Categories=AudioVideo;
+Type=Application
+Version=@AJA_NTV2_VER_STR@
+StartupWMClass=Control Room
+X-GNOME-SingleWindow=true
+SingleMainWindow=true
