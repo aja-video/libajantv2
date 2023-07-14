@@ -34,6 +34,8 @@ typedef enum
 	kVRegFlashProgramKey					= VIRTUALREG_START+4,
 	kVRegStrictTiming						= VIRTUALREG_START+5,		// Drift Correction requires Strict Frame Timing for Windows Media playback;Required for BackHaul;Correlate Presentation Time Stamp with Graph Clock;Turn off (default) to allow Playback even when Graph Manager gives us a Bogus Clcok!
 
+	kVRegDriverType							= VIRTUALREG_START+10,		// Driver type (MacOS only:  0 == KEXT, 'DEXT' == DEXT)
+
 	// COMMON_VIRTUAL_REGS_KONA2
 	kVRegInputSelect						= VIRTUALREG_START+20,		// Input 1, Input 2, DualLink
 	kVRegSecondaryFormatSelect				= VIRTUALREG_START+21,		// NTV2VideoFormats 
