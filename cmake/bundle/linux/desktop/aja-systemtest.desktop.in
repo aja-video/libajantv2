@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=AJA SystemTest
+Exec=/opt/aja/bin/systemtest
+Icon=/opt/aja/icons/256x256/apps/systemtest.png
+Terminal=false
+Categories=AudioVideo;
+Type=Application
+Version=@AJA_NTV2_VER_STR@
+StartupWMClass=systemtest
