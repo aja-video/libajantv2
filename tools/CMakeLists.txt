@@ -1,3 +1,8 @@
+if (NOT AJANTV2_BUILD_TOOLS)
+    message(STATUS "Skipping libajantv2 tools...")
+    return()
+endif()
+
 add_subdirectory(logjammer)
 add_subdirectory(logreader)
 add_subdirectory(ntv2firmwareinstaller)

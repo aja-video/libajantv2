@@ -1,6 +1,11 @@
 # https://stackoverflow.com/questions/34878276/build-doxygen-from-cmake-script
 project(ntv2docs)
 
+if (NOT AJANTV2_BUILD_DOCS)
+    message(STATUS "Skipping libajantv2 docs...")
+    return()
+endif()
+
 find_package(Doxygen COMPONENTS dot)
 if (NOT DOXYGEN_FOUND)
     message(WARNING "skipping docs (Doxygen not found!)")
