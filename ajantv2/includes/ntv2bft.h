@@ -2,11 +2,14 @@
 /**
 	@file		ntv2bft.h
 	@brief		Handy macros for Basic Functionality Tests.
+	@deprecated	This module was deprecated in SDK 17.0 ---  use DocTest instead.
+	@warning	This module will be removed in a future SDK.
 	@copyright	(C) 2014-2022 AJA Video Systems, Inc. All rights reserved.
 **/
 
 #ifndef _NTV2BFT_H_
 	#define	_NTV2BFT_H_
+	#if !defined(NTV2_DEPRECATE_17_0)
 
 	#include <iostream>
 	#include <assert.h>
@@ -193,4 +196,5 @@
 												STDOUT << "## NOTE:  '" << #_x_ << "' is not equal to '" << #_y_ << "' in '" << __FUNCTION__ << "'" << ENDL;		\
 										} while (false)
 
+	#endif	//	!defined(NTV2_DEPRECATE_17_0)
 #endif	//	_NTV2BFT_H_

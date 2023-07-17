@@ -1,3 +1,8 @@
+if (NOT AJANTV2_BUILD_DEMOS)
+    message(STATUS "Skipping libajantv2 demos...")
+    return()
+endif()
+
 add_subdirectory(ntv2burn)
 add_subdirectory(ntv2burn4kquadrant)
 add_subdirectory(ntv2capture)
@@ -58,4 +63,3 @@ endif()
 if(AJA_INSTALL_CMAKE)
     install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos)
 endif()
-

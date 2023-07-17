@@ -1,7 +1,22 @@
 include_guard(GLOBAL)
 
 include (Helpers)
-include (Version)
+
+set(AJA_COMPANY_NAME "AJA Video Systems, Inc.")
+set(AJA_WEBSITE "https://www.aja.com/")
+
+string(TIMESTAMP DATETIME_NOW UTC)
+# break appart the ISO-8601 UTC datetime
+# have to do this way because cmake does not support gettting
+# individual components when using UTC
+string(SUBSTRING ${DATETIME_NOW} 0 10 AJA_BUILD_DATE)
+string(SUBSTRING ${DATETIME_NOW} 11 8 AJA_BUILD_TIME)
+string(SUBSTRING ${DATETIME_NOW} 19 -1 AJA_BUILD_TIMEZONE)
+string(REGEX MATCHALL "([0-9]+)"
+	AJA_BUILD_DATE_PARTS ${AJA_BUILD_DATE})
+list(GET AJA_BUILD_DATE_PARTS 0 AJA_BUILD_YEAR)
+list(GET AJA_BUILD_DATE_PARTS 1 AJA_BUILD_MONTH)
+list(GET AJA_BUILD_DATE_PARTS 2 AJA_BUILD_DAY)
 
 if (NOT NTV2_VERSION_STRING)
     set(NTV2_VERSION_STRING 1.2.3)

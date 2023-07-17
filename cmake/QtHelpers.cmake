@@ -133,7 +133,7 @@ function(aja_deploy_qt_libs_to_dest target dest)
     if (WIN32)
         add_custom_command(TARGET ${target} POST_BUILD
             COMMAND ${Python3_EXECUTABLE}
-                \"${CMAKE_MODULE_PATH}scripts/qtdeploy.py\"
+                \"${CMAKE_MODULE_PATH}/scripts/qtdeploy.py\"
                 \"${_qt_bin_dir}/windeployqt.exe\"
                 \"$<TARGET_FILE:${target}>\"
                 \"${dest}\"
@@ -143,7 +143,7 @@ function(aja_deploy_qt_libs_to_dest target dest)
         if (CMAKE_BUILD_TYPE STREQUAL "Debug")
             add_custom_command(TARGET ${target} POST_BUILD
                 COMMAND ${Python3_EXECUTABLE}
-                    \"${CMAKE_MODULE_PATH}scripts/qtdeploy.py\"
+                    \"${CMAKE_MODULE_PATH}/scripts/qtdeploy.py\"
                     \"${_qt_bin_dir}/windeployqt.exe\"
                     \"$<TARGET_FILE:${target}>\"
                     \"${dest}\"

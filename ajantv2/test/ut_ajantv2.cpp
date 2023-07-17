@@ -2686,203 +2686,201 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		}
 	}
 
-	// TODO
-	// static bool NTV2SignalRouterBFT (void)
-	// {
-	// 	LOGNOTE("Started");
-	// 	if (true)
-	// 	{	//	Test GetFrameBufferOutputXptFromChannel
-	// 		const bool	kIsNotRGB	(false);
-	// 		const bool	kIsRGB		(true);
-	// 		const bool	kIsNot425	(false);
-	// 		const bool	kIs425		(true);
+	TEST_CASE("NTV2SignalRouterBFT")
+	{
+		SUBCASE("GetFrameBufferOutputXptFromChannel")
+		{
+	 		const bool kIsNotRGB(false), kIsRGB(true), kIsNot425(false), kIs425(true);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL1, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer1YUV);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL2, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer2YUV);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL3, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer3YUV);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL4, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer4YUV);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL5, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer5YUV);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL6, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer6YUV);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL7, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer7YUV);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL8, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer8YUV);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL1, kIsNotRGB, kIs425), NTV2_XptFrameBuffer1_DS2YUV);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL2, kIsNotRGB, kIs425), NTV2_XptFrameBuffer2_DS2YUV);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL3, kIsNotRGB, kIs425), NTV2_XptFrameBuffer3_DS2YUV);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL4, kIsNotRGB, kIs425), NTV2_XptFrameBuffer4_DS2YUV);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL5, kIsNotRGB, kIs425), NTV2_XptFrameBuffer5_DS2YUV);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL6, kIsNotRGB, kIs425), NTV2_XptFrameBuffer6_DS2YUV);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL7, kIsNotRGB, kIs425), NTV2_XptFrameBuffer7_DS2YUV);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL8, kIsNotRGB, kIs425), NTV2_XptFrameBuffer8_DS2YUV);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL1, kIsRGB, kIsNot425), NTV2_XptFrameBuffer1RGB);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL2, kIsRGB, kIsNot425), NTV2_XptFrameBuffer2RGB);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL3, kIsRGB, kIsNot425), NTV2_XptFrameBuffer3RGB);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL4, kIsRGB, kIsNot425), NTV2_XptFrameBuffer4RGB);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL5, kIsRGB, kIsNot425), NTV2_XptFrameBuffer5RGB);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL6, kIsRGB, kIsNot425), NTV2_XptFrameBuffer6RGB);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL7, kIsRGB, kIsNot425), NTV2_XptFrameBuffer7RGB);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL8, kIsRGB, kIsNot425), NTV2_XptFrameBuffer8RGB);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL1, kIsRGB, kIs425), NTV2_XptFrameBuffer1_DS2RGB);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL2, kIsRGB, kIs425), NTV2_XptFrameBuffer2_DS2RGB);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL3, kIsRGB, kIs425), NTV2_XptFrameBuffer3_DS2RGB);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL4, kIsRGB, kIs425), NTV2_XptFrameBuffer4_DS2RGB);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL5, kIsRGB, kIs425), NTV2_XptFrameBuffer5_DS2RGB);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL6, kIsRGB, kIs425), NTV2_XptFrameBuffer6_DS2RGB);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL7, kIsRGB, kIs425), NTV2_XptFrameBuffer7_DS2RGB);
+	 		CHECK_EQ(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL8, kIsRGB, kIs425), NTV2_XptFrameBuffer8_DS2RGB);
+		}	//	SUBCASE("GetFrameBufferOutputXptFromChannel")
 
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL1, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer1YUV);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL2, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer2YUV);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL3, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer3YUV);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL4, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer4YUV);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL5, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer5YUV);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL6, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer6YUV);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL7, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer7YUV);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL8, kIsNotRGB, kIsNot425), NTV2_XptFrameBuffer8YUV);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL1, kIsNotRGB, kIs425), NTV2_XptFrameBuffer1_DS2YUV);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL2, kIsNotRGB, kIs425), NTV2_XptFrameBuffer2_DS2YUV);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL3, kIsNotRGB, kIs425), NTV2_XptFrameBuffer3_DS2YUV);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL4, kIsNotRGB, kIs425), NTV2_XptFrameBuffer4_DS2YUV);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL5, kIsNotRGB, kIs425), NTV2_XptFrameBuffer5_DS2YUV);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL6, kIsNotRGB, kIs425), NTV2_XptFrameBuffer6_DS2YUV);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL7, kIsNotRGB, kIs425), NTV2_XptFrameBuffer7_DS2YUV);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL8, kIsNotRGB, kIs425), NTV2_XptFrameBuffer8_DS2YUV);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL1, kIsRGB, kIsNot425), NTV2_XptFrameBuffer1RGB);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL2, kIsRGB, kIsNot425), NTV2_XptFrameBuffer2RGB);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL3, kIsRGB, kIsNot425), NTV2_XptFrameBuffer3RGB);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL4, kIsRGB, kIsNot425), NTV2_XptFrameBuffer4RGB);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL5, kIsRGB, kIsNot425), NTV2_XptFrameBuffer5RGB);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL6, kIsRGB, kIsNot425), NTV2_XptFrameBuffer6RGB);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL7, kIsRGB, kIsNot425), NTV2_XptFrameBuffer7RGB);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL8, kIsRGB, kIsNot425), NTV2_XptFrameBuffer8RGB);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL1, kIsRGB, kIs425), NTV2_XptFrameBuffer1_DS2RGB);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL2, kIsRGB, kIs425), NTV2_XptFrameBuffer2_DS2RGB);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL3, kIsRGB, kIs425), NTV2_XptFrameBuffer3_DS2RGB);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL4, kIsRGB, kIs425), NTV2_XptFrameBuffer4_DS2RGB);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL5, kIsRGB, kIs425), NTV2_XptFrameBuffer5_DS2RGB);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL6, kIsRGB, kIs425), NTV2_XptFrameBuffer6_DS2RGB);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL7, kIsRGB, kIs425), NTV2_XptFrameBuffer7_DS2RGB);
-	// 		SHOULD_BE_EQUAL(::GetFrameBufferOutputXptFromChannel(NTV2_CHANNEL8, kIsRGB, kIs425), NTV2_XptFrameBuffer8_DS2RGB);
-	// 	}
-	// 	if (false)
-	// 	{	//	This generates the NTV2OutputCrosspointID enum declarations -- they should compare:
-	// 		NTV2OutputXptIDSet legitOutputXpts;
-	// 		for (UWord oxpt(NTV2_FIRST_OUTPUT_CROSSPOINT);  oxpt < UWord(NTV2_LAST_OUTPUT_CROSSPOINT);  oxpt++)
-	// 		{
-	// 			const string oxptName(::NTV2OutputCrosspointIDToString(NTV2OutputXptID(oxpt)));
-	// 			if (!oxptName.empty())
-	// 				legitOutputXpts.insert(NTV2OutputXptID(oxpt));
-	// 		}
-	// 		while (!legitOutputXpts.empty())
-	// 		{
-	// 			const NTV2OutputXptID yuvXpt(*legitOutputXpts.begin());
-	// 			const string yuvName(::NTV2OutputCrosspointIDToString(yuvXpt));
-	// 			SHOULD_BE_FALSE(yuvName.empty());
-	// 			legitOutputXpts.erase(yuvXpt);
-	// 			cout << yuvName << "= " << xHEX0N(yuvXpt,2) << "," << endl;
+		SUBCASE("GetFrameBufferOutputXptFromChannel")
+		{	//	This generates the NTV2OutputCrosspointID enum declarations -- they should compare:
+	 		NTV2OutputXptIDSet legitOutputXpts;
+	 		for (UWord oxpt(NTV2_FIRST_OUTPUT_CROSSPOINT);  oxpt < UWord(NTV2_LAST_OUTPUT_CROSSPOINT);  oxpt++)
+	 		{
+	 			const string oxptName(::NTV2OutputCrosspointIDToString(NTV2OutputXptID(oxpt)));
+	 			if (!oxptName.empty())
+	 				legitOutputXpts.insert(NTV2OutputXptID(oxpt));
+	 		}
+	 		while (!legitOutputXpts.empty())
+	 		{
+	 			const NTV2OutputXptID yuvXpt(*legitOutputXpts.begin());
+	 			const string yuvName(::NTV2OutputCrosspointIDToString(yuvXpt));
+	 			CHECK_FALSE(yuvName.empty());
+	 			legitOutputXpts.erase(yuvXpt);
+	 			//cout << yuvName << "= " << xHEX0N(yuvXpt,2) << "," << endl;
 
-	// 			const NTV2OutputXptID rgbXpt(NTV2OutputXptID(yuvXpt | 0x80));
-	// 			if (legitOutputXpts.find(rgbXpt) == legitOutputXpts.end())
-	// 				continue;
-	// 			const string rgbName(::NTV2OutputCrosspointIDToString(rgbXpt));
-	// 			SHOULD_BE_FALSE(rgbName.empty());
-	// 			legitOutputXpts.erase(rgbXpt);
-	// 			cout << rgbName << "= " << yuvName << " | 0x80," << endl;
-	// 		}
-	// 	}
-	// 	if (true)
-	// 	{	//	Test CNTV2SignalRouter
-	// 		CNTV2SignalRouter routerA, routerB;
-	// 		NTV2XptConnections adds, chgs, dels;
-	// 		SHOULD_BE_TRUE(routerA.IsEmpty());
-	// 		SHOULD_BE_EQUAL(routerA.GetNumberOfConnections(), 0);
-	// 		SHOULD_BE_FALSE(routerA.HasInput(NTV2_XptCSC3VidInput));
-	// 		SHOULD_BE_FALSE(routerA.HasConnection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer2YUV));
-	// 		SHOULD_BE_TRUE(routerA.Compare(routerB, adds, chgs, dels));
-	// 		SHOULD_BE_TRUE(adds.empty());	SHOULD_BE_TRUE(chgs.empty());	SHOULD_BE_TRUE(dels.empty());
-	// 		SHOULD_BE_TRUE(routerB.IsEmpty());
-	// 		SHOULD_BE_EQUAL(routerA.GetNumberOfConnections(), 0);
-	// 		SHOULD_BE_TRUE(routerB.Compare(routerA, adds, chgs, dels));
-	// 		SHOULD_BE_TRUE(adds.empty());	SHOULD_BE_TRUE(chgs.empty());	SHOULD_BE_TRUE(dels.empty());
+	 			const NTV2OutputXptID rgbXpt(NTV2OutputXptID(yuvXpt | 0x80));
+	 			if (legitOutputXpts.find(rgbXpt) == legitOutputXpts.end())
+	 				continue;
+	 			const string rgbName(::NTV2OutputCrosspointIDToString(rgbXpt));
+	 			CHECK_FALSE(rgbName.empty());
+	 			legitOutputXpts.erase(rgbXpt);
+	 			//cout << rgbName << "= " << yuvName << " | 0x80," << endl;
+	 		}
+	 	}	//	SUBCASE("GetFrameBufferOutputXptFromChannel")
 
-	// 		//	routerA connects CSC1 <== FB1,  routerB empty
-	// 		SHOULD_BE_TRUE(routerA.AddConnection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer1YUV));
-	// 		SHOULD_BE_FALSE(routerA.IsEmpty());
-	// 		SHOULD_BE_EQUAL(routerA.GetNumberOfConnections(), 1);
-	// 		SHOULD_BE_TRUE(routerA.HasInput(NTV2_XptCSC1VidInput));
-	// 		SHOULD_BE_TRUE(routerA.HasConnection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer1YUV));
-	// 		SHOULD_BE_FALSE(routerA.HasInput(NTV2_XptCSC3VidInput));
-	// 		SHOULD_BE_FALSE(routerA.HasConnection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer2YUV));
-	// 		SHOULD_BE_TRUE(routerA != routerB);
-	// 		SHOULD_BE_FALSE(routerA == routerB);
-	// 		SHOULD_BE_FALSE(routerA.Compare(routerB, adds, chgs, dels));
-	// 		SHOULD_BE_FALSE(adds.empty());	SHOULD_BE_TRUE(chgs.empty());	SHOULD_BE_TRUE(dels.empty());
-	// 		SHOULD_BE_TRUE(adds.size() == 1);
-	// 		SHOULD_BE_TRUE(adds.begin()->first == NTV2_XptCSC1VidInput);
-	// 		SHOULD_BE_TRUE(adds.begin()->second == NTV2_XptFrameBuffer1YUV);
-	// 		SHOULD_BE_FALSE(routerB.Compare(routerA, adds, chgs, dels));
-	// 		SHOULD_BE_TRUE(adds.empty());	SHOULD_BE_TRUE(chgs.empty());	SHOULD_BE_FALSE(dels.empty());
-	// 		SHOULD_BE_TRUE(dels.size() == 1);
-	// 		SHOULD_BE_TRUE(dels.begin()->first == NTV2_XptCSC1VidInput);
-	// 		SHOULD_BE_TRUE(dels.begin()->second == NTV2_XptFrameBuffer1YUV);
+		SUBCASE("CNTV2SignalRouter")
+		{
+			CNTV2SignalRouter routerA, routerB;
+			NTV2XptConnections adds, chgs, dels;
+			CHECK(routerA.IsEmpty());
+			CHECK_EQ(routerA.GetNumberOfConnections(), 0);
+			CHECK_FALSE(routerA.HasInput(NTV2_XptCSC3VidInput));
+			CHECK_FALSE(routerA.HasConnection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer2YUV));
+			CHECK(routerA.Compare(routerB, adds, chgs, dels));
+			CHECK(adds.empty());	CHECK(chgs.empty());	CHECK(dels.empty());
+			CHECK(routerB.IsEmpty());
+			CHECK_EQ(routerA.GetNumberOfConnections(), 0);
+			CHECK(routerB.Compare(routerA, adds, chgs, dels));
+			CHECK(adds.empty());	CHECK(chgs.empty());	CHECK(dels.empty());
 
-	// 		//	routerA & routerB both connect CSC1 <== FB1
-	// 		SHOULD_BE_TRUE(routerB.AddConnection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer1YUV));
-	// 		SHOULD_BE_EQUAL(routerA.IsEmpty(), routerB.IsEmpty());
-	// 		SHOULD_BE_EQUAL(routerA.GetNumberOfConnections(), routerB.GetNumberOfConnections());
-	// 		SHOULD_BE_TRUE(routerA == routerB);
-	// 		SHOULD_BE_FALSE(routerA != routerB);
-	// 		SHOULD_BE_TRUE(routerB.Compare(routerA, adds, chgs, dels));
-	// 		SHOULD_BE_TRUE(adds.empty());	SHOULD_BE_TRUE(chgs.empty());	SHOULD_BE_TRUE(dels.empty());
+			//	routerA connects CSC1 <== FB1,  routerB empty
+			CHECK(routerA.AddConnection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer1YUV));
+			CHECK_FALSE(routerA.IsEmpty());
+			CHECK_EQ(routerA.GetNumberOfConnections(), 1);
+			CHECK(routerA.HasInput(NTV2_XptCSC1VidInput));
+			CHECK(routerA.HasConnection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer1YUV));
+			CHECK_FALSE(routerA.HasInput(NTV2_XptCSC3VidInput));
+			CHECK_FALSE(routerA.HasConnection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer2YUV));
+			CHECK(routerA != routerB);
+			CHECK_FALSE(routerA == routerB);
+			CHECK_FALSE(routerA.Compare(routerB, adds, chgs, dels));
+			CHECK_FALSE(adds.empty());	CHECK(chgs.empty());	CHECK(dels.empty());
+			CHECK(adds.size() == 1);
+			CHECK_EQ(adds.begin()->first, NTV2_XptCSC1VidInput);
+			CHECK_EQ(adds.begin()->second, NTV2_XptFrameBuffer1YUV);
+			CHECK_FALSE(routerB.Compare(routerA, adds, chgs, dels));
+			CHECK(adds.empty());	CHECK(chgs.empty());	CHECK_FALSE(dels.empty());
+			CHECK(dels.size() == 1);
+			CHECK_EQ(dels.begin()->first, NTV2_XptCSC1VidInput);
+			CHECK_EQ(dels.begin()->second, NTV2_XptFrameBuffer1YUV);
 
-	// 		//	routerA connects CSC1 <== FB1,  routerB connects CSC1 <= FB2
-	// 		routerB.Reset();
-	// 		SHOULD_BE_TRUE(routerB.AddConnection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer2YUV));
-	// 		SHOULD_BE_EQUAL(routerA.IsEmpty(), routerB.IsEmpty());
-	// 		SHOULD_BE_EQUAL(routerA.GetNumberOfConnections(), routerB.GetNumberOfConnections());
-	// 		SHOULD_BE_TRUE(routerA != routerB);
-	// 		SHOULD_BE_FALSE(routerA == routerB);
-	// 		string	code;
-	// 		CNTV2SignalRouter::PrintCodeConfig	config;
-	// 		SHOULD_BE_FALSE(routerA.Compare(routerB, config.mNew, config.mChanged, config.mMissing));
-	// 		SHOULD_BE_TRUE(config.mNew.empty());	SHOULD_BE_FALSE(config.mChanged.empty());	SHOULD_BE_TRUE(config.mMissing.empty());
-	// 		cerr << config.mChanged << endl;
-	// 		routerA.PrintCode (code, config); cerr << code << endl;
-	// 	}
-	// 	if (true)
-	// 	{	//	Test NTV2XptConnections, CompareConnections
-	// 		NTV2XptConnections routingA, routingB, newConns, delConns;
-	// 		//	A == B
-	// 		routingA[NTV2_XptCSC1VidInput] = NTV2_XptFrameBuffer1YUV;
-	// 		routingB[NTV2_XptCSC1VidInput] = NTV2_XptFrameBuffer1YUV;
-	// 		SHOULD_BE_TRUE(CNTV2SignalRouter::CompareConnections(routingA, routingB, newConns, delConns));
-	// 		SHOULD_BE_TRUE(newConns.empty());	//	Nothing added
-	// 		SHOULD_BE_TRUE(delConns.empty());	//	Nothing removed
+			//	routerA & routerB both connect CSC1 <== FB1
+			CHECK(routerB.AddConnection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer1YUV));
+			CHECK_EQ(routerA.IsEmpty(), routerB.IsEmpty());
+			CHECK_EQ(routerA.GetNumberOfConnections(), routerB.GetNumberOfConnections());
+			CHECK(routerA == routerB);
+			CHECK_FALSE(routerA != routerB);
+			CHECK(routerB.Compare(routerA, adds, chgs, dels));
+			CHECK(adds.empty());	CHECK(chgs.empty());	CHECK(dels.empty());
 
-	// 		//	Change B's output xpt (same input xpt)
-	// 		routingB[NTV2_XptCSC1VidInput] = NTV2_XptFrameBuffer1RGB;
-	// 		SHOULD_BE_FALSE(CNTV2SignalRouter::CompareConnections(routingA, routingB, newConns, delConns));
-	// 		SHOULD_BE_EQUAL(routingB, newConns);	//	B's connection added
-	// 		SHOULD_BE_EQUAL(routingA, delConns);	//	A's connection removed
+			//	routerA connects CSC1 <== FB1,  routerB connects CSC1 <= FB2
+			routerB.Reset();
+			CHECK(routerB.AddConnection(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer2YUV));
+			CHECK_EQ(routerA.IsEmpty(), routerB.IsEmpty());
+			CHECK_EQ(routerA.GetNumberOfConnections(), routerB.GetNumberOfConnections());
+			CHECK_NE(routerA, routerB);
+			CHECK_FALSE(routerA == routerB);
+			string	code;
+			CNTV2SignalRouter::PrintCodeConfig	config;
+			CHECK_FALSE(routerA.Compare(routerB, config.mNew, config.mChanged, config.mMissing));
+			CHECK(config.mNew.empty());	CHECK_FALSE(config.mChanged.empty());	CHECK(config.mMissing.empty());
+			cerr << config.mChanged << endl;
+			routerA.PrintCode (code, config);
+			//cerr << code << endl;
+			CHECK_NE(code.find("(NTV2_XptCSC1VidInput, NTV2_XptFrameBuffer1YUV);\t// Changed from NTV2_XptFrameBuffer2YUV"), string::npos);
+		}	//	SUBCASE("CNTV2SignalRouter")
 
-	// 		//	B empty, A still has 1 entry
-	// 		routingB.clear();
-	// 		SHOULD_BE_FALSE(CNTV2SignalRouter::CompareConnections(routingA, routingB, newConns, delConns));
-	// 		SHOULD_BE_TRUE(newConns.empty());		//	Nothing added
-	// 		SHOULD_BE_EQUAL(routingA, delConns);	//	A's connection removed
+		SUBCASE("NTV2XptConnections")
+		{
+	//	Test NTV2XptConnections, CompareConnections
+	 		NTV2XptConnections routingA, routingB, newConns, delConns;
+	 		//	A == B
+	 		routingA[NTV2_XptCSC1VidInput] = NTV2_XptFrameBuffer1YUV;
+	 		routingB[NTV2_XptCSC1VidInput] = NTV2_XptFrameBuffer1YUV;
+	 		CHECK(CNTV2SignalRouter::CompareConnections(routingA, routingB, newConns, delConns));
+	 		CHECK(newConns.empty());	//	Nothing added
+	 		CHECK(delConns.empty());	//	Nothing removed
 
-	// 		//	A empty, B has 1 entry
-	// 		routingA.clear();
-	// 		routingB[NTV2_XptCSC1VidInput] = NTV2_XptFrameBuffer1RGB;
-	// 		SHOULD_BE_FALSE(CNTV2SignalRouter::CompareConnections(routingA, routingB, newConns, delConns));
-	// 		SHOULD_BE_EQUAL(routingB, newConns);	//	B's connection added
-	// 		SHOULD_BE_TRUE(delConns.empty());		//	Nothing removed
+	 		//	Change B's output xpt (same input xpt)
+	 		routingB[NTV2_XptCSC1VidInput] = NTV2_XptFrameBuffer1RGB;
+	 		CHECK_FALSE(CNTV2SignalRouter::CompareConnections(routingA, routingB, newConns, delConns));
+	 		CHECK_EQ(routingB, newConns);	//	B's connection added
+	 		CHECK_EQ(routingA, delConns);	//	A's connection removed
 
-	// 		//	B == A, except one route removed
-	// 		routingA[NTV2_XptCSC1VidInput]		= NTV2_XptLUT1Out;
-	// 		routingA[NTV2_XptCSC2VidInput]		= NTV2_XptFrameBuffer2YUV;
-	// 		routingA[NTV2_XptLUT1Input]			= NTV2_XptFrameBuffer1RGB;
-	// 		routingA[NTV2_XptLUT2Input]			= NTV2_XptCSC2VidRGB;
-	// 		routingA[NTV2_XptSDIOut3Input]		= NTV2_XptDuallinkOut3;
-	// 		routingA[NTV2_XptSDIOut3InputDS2]	= NTV2_XptDuallinkOut3DS2;
-	// 		routingA[NTV2_XptSDIOut4Input]		= NTV2_XptDuallinkOut4;
-	// 		routingA[NTV2_XptSDIOut4InputDS2]	= NTV2_XptDuallinkOut4DS2;
-	// 		routingA[NTV2_XptSDIOut5Input]		= NTV2_XptDuallinkOut5;
-	// 		routingA[NTV2_XptSDIOut5InputDS2]	= NTV2_XptDuallinkOut5DS2;
-	// 		routingA[NTV2_XptDualLinkOut3Input]	= NTV2_XptLUT1Out;
-	// 		routingA[NTV2_XptDualLinkOut4Input]	= NTV2_XptLUT1Out;
-	// 		routingA[NTV2_XptDualLinkOut5Input]	= NTV2_XptLUT1Out;
-	// 		routingB = routingA;
-	// 		NTV2XptConnection removedConnection(NTV2_XptSDIOut4InputDS2, NTV2_XptDuallinkOut4DS2);
-	// 		routingB.erase(routingB.find(removedConnection.first));
-	// 		cerr << "A:" << endl << routingA << endl << "B:" << endl << routingB << endl;
-	// 		SHOULD_BE_FALSE(CNTV2SignalRouter::CompareConnections(routingA, routingB, newConns, delConns));
-	// 		SHOULD_BE_TRUE(newConns.empty());
-	// 		SHOULD_BE_EQUAL(delConns.size(), 1);
-	// 		SHOULD_BE_EQUAL(delConns.begin()->first, removedConnection.first);
-	// 		SHOULD_BE_EQUAL(delConns.begin()->second, removedConnection.second);
+	 		//	B empty, A still has 1 entry
+	 		routingB.clear();
+	 		CHECK_FALSE(CNTV2SignalRouter::CompareConnections(routingA, routingB, newConns, delConns));
+	 		CHECK(newConns.empty());		//	Nothing added
+	 		CHECK_EQ(routingA, delConns);	//	A's connection removed
 
-	// 		//	B == A, except one route removed, and one route added
-	// 		NTV2XptConnection addedConnection(NTV2_XptFrameBuffer5Input, NTV2_XptSDIIn5);
-	// 		routingB[addedConnection.first] = addedConnection.second;
-	// 		SHOULD_BE_FALSE(CNTV2SignalRouter::CompareConnections(routingA, routingB, newConns, delConns));
-	// 		SHOULD_BE_EQUAL(newConns.size(), 1);
-	// 		SHOULD_BE_EQUAL(delConns.size(), 1);
-	// 		SHOULD_BE_EQUAL(newConns.begin()->first, addedConnection.first);
-	// 		SHOULD_BE_EQUAL(newConns.begin()->second, addedConnection.second);
-	// 		SHOULD_BE_EQUAL(delConns.begin()->first, removedConnection.first);
-	// 		SHOULD_BE_EQUAL(delConns.begin()->second, removedConnection.second);
-	// 		cerr << "New:" << endl << newConns << endl << "Removed:" << endl << delConns << endl;
-	// 	}
-	// 	LOGNOTE("Passed");
-	// 	return true;
-	// }
+	 		//	A empty, B has 1 entry
+	 		routingA.clear();
+	 		routingB[NTV2_XptCSC1VidInput] = NTV2_XptFrameBuffer1RGB;
+	 		CHECK_FALSE(CNTV2SignalRouter::CompareConnections(routingA, routingB, newConns, delConns));
+	 		CHECK_EQ(routingB, newConns);	//	B's connection added
+	 		CHECK(delConns.empty());		//	Nothing removed
+
+	 		//	B == A, except one route removed
+	 		routingA[NTV2_XptCSC1VidInput]		= NTV2_XptLUT1Out;
+	 		routingA[NTV2_XptCSC2VidInput]		= NTV2_XptFrameBuffer2YUV;
+	 		routingA[NTV2_XptLUT1Input]			= NTV2_XptFrameBuffer1RGB;
+	 		routingA[NTV2_XptLUT2Input]			= NTV2_XptCSC2VidRGB;
+	 		routingA[NTV2_XptSDIOut3Input]		= NTV2_XptDuallinkOut3;
+	 		routingA[NTV2_XptSDIOut3InputDS2]	= NTV2_XptDuallinkOut3DS2;
+	 		routingA[NTV2_XptSDIOut4Input]		= NTV2_XptDuallinkOut4;
+	 		routingA[NTV2_XptSDIOut4InputDS2]	= NTV2_XptDuallinkOut4DS2;
+	 		routingA[NTV2_XptSDIOut5Input]		= NTV2_XptDuallinkOut5;
+	 		routingA[NTV2_XptSDIOut5InputDS2]	= NTV2_XptDuallinkOut5DS2;
+	 		routingA[NTV2_XptDualLinkOut3Input]	= NTV2_XptLUT1Out;
+	 		routingA[NTV2_XptDualLinkOut4Input]	= NTV2_XptLUT1Out;
+	 		routingA[NTV2_XptDualLinkOut5Input]	= NTV2_XptLUT1Out;
+	 		routingB = routingA;
+	 		NTV2XptConnection removedConnection(NTV2_XptSDIOut4InputDS2, NTV2_XptDuallinkOut4DS2);
+	 		routingB.erase(routingB.find(removedConnection.first));
+	 		cerr << "A:" << endl << routingA << endl << "B:" << endl << routingB << endl;
+	 		CHECK_FALSE(CNTV2SignalRouter::CompareConnections(routingA, routingB, newConns, delConns));
+	 		CHECK(newConns.empty());
+	 		CHECK_EQ(delConns.size(), 1);
+	 		CHECK_EQ(delConns.begin()->first, removedConnection.first);
+	 		CHECK_EQ(delConns.begin()->second, removedConnection.second);
+
+	 		//	B == A, except one route removed, and one route added
+	 		NTV2XptConnection addedConnection(NTV2_XptFrameBuffer5Input, NTV2_XptSDIIn5);
+	 		routingB[addedConnection.first] = addedConnection.second;
+	 		CHECK_FALSE(CNTV2SignalRouter::CompareConnections(routingA, routingB, newConns, delConns));
+	 		CHECK_EQ(newConns.size(), 1);
+	 		CHECK_EQ(delConns.size(), 1);
+	 		CHECK_EQ(newConns.begin()->first, addedConnection.first);
+	 		CHECK_EQ(newConns.begin()->second, addedConnection.second);
+	 		CHECK_EQ(delConns.begin()->first, removedConnection.first);
+	 		CHECK_EQ(delConns.begin()->second, removedConnection.second);
+	 		cerr << "New:" << endl << newConns << endl << "Removed:" << endl << delConns << endl;
+		}	//	SUBCASE("NTV2XptConnections")
+	}	//	TEST_CASE("NTV2SignalRouterBFT")
 
 } //bft
 
@@ -3020,3 +3018,105 @@ TEST_SUITE("TestPatternGen" * doctest::description("NTV2TestPatternGen tests"))
 		}	//	for each video standard
 	}	//	TEST_CASE("Permutations")
 }	//	TEST_SUITE("TestPatternGen")
+
+
+void autocircmarker() {}
+TEST_SUITE("AutoCirculate" * doctest::description("AutoCirculate tests"))
+{
+	TEST_CASE("NTV2ACFrameRange")
+	{
+		NTV2ACFrameRange fRange(0);
+		CHECK_FALSE(fRange.valid());
+		cerr << fRange.setFromString("") << endl;
+		CHECK_FALSE(fRange.valid());	//	Nothing -- empty string
+		cerr << fRange.setFromString("    \t    ") << endl;
+		CHECK_FALSE(fRange.valid());	//	Nothing -- whitespace
+
+		cerr << fRange.setFromString("10") << endl;
+		CHECK(fRange.valid());
+		CHECK(fRange.isCountOnly());
+		CHECK_FALSE(fRange.isFrameRange());
+		CHECK_EQ(fRange.count(), 10);
+
+		CHECK_FALSE(fRange.makeInvalid().valid());
+
+		cerr << fRange.setFromString("   \t   15   \t   ") << endl;
+		CHECK(fRange.valid());
+		CHECK(fRange.isCountOnly());
+		CHECK_FALSE(fRange.isFrameRange());
+		CHECK_EQ(fRange.count(), 15);
+
+		cerr << fRange.setFromString("@") << endl;
+		CHECK_FALSE(fRange.valid());	//	Missing integer values
+		cerr << fRange.setFromString("20@") << endl;
+		CHECK_FALSE(fRange.valid());	//	Missing 2nd integer value
+		cerr << fRange.setFromString("@20") << endl;
+		CHECK_FALSE(fRange.valid());	//	Missing 1st integer value
+
+		cerr << fRange.setFromString("20@10") << endl;
+		CHECK(fRange.valid());
+		CHECK_FALSE(fRange.isCountOnly());
+		CHECK(fRange.isFrameRange());
+		CHECK_EQ(fRange.count(), 0);
+		CHECK_EQ(fRange.firstFrame(), 10);
+		CHECK_EQ(fRange.lastFrame(), 29);
+
+		cerr << fRange.setFromString("   \t   25   @   15   \t   ") << endl;
+		CHECK(fRange.valid());
+		CHECK_FALSE(fRange.isCountOnly());
+		CHECK(fRange.isFrameRange());
+		CHECK_EQ(fRange.count(), 0);
+		CHECK_EQ(fRange.firstFrame(), 15);
+		CHECK_EQ(fRange.lastFrame(), 39);
+
+		cerr << fRange.setFromString("   \t   2.5   @   1 $ 5   \t   ") << endl;
+		CHECK_FALSE(fRange.valid());
+		cerr << fRange.setFromString("~!@#$%^&*()_+{}|[]:;<>?/.,`") << endl;
+		CHECK_FALSE(fRange.valid());
+		cerr << fRange.setFromString("@@@@@@@@@--------") << endl;
+		CHECK_FALSE(fRange.valid());
+		cerr << fRange.setFromString("1@2@3@4@5@6@7@8@9@1") << endl;
+		CHECK_FALSE(fRange.valid());
+
+		cerr << fRange.setFromString("-") << endl;
+		CHECK_FALSE(fRange.valid());	//	Missing integer values
+		cerr << fRange.setFromString("10-") << endl;
+		CHECK_FALSE(fRange.valid());	//	Missing 2nd integer value
+		cerr << fRange.setFromString("-10") << endl;
+		CHECK_FALSE(fRange.valid());	//	Missing 1st integer value
+		cerr << fRange.setFromString("1-2-3-4-5-6-7-8-9-1") << endl;
+		CHECK_FALSE(fRange.valid());
+		cerr << fRange.setFromString("-1-2-3-4-5-6-7-8-9-") << endl;
+		CHECK_FALSE(fRange.valid());
+
+		cerr << fRange.setFromString("20-30") << endl;
+		CHECK(fRange.valid());
+		CHECK_FALSE(fRange.isCountOnly());
+		CHECK(fRange.isFrameRange());
+		CHECK_EQ(fRange.count(), 0);
+		CHECK_EQ(fRange.firstFrame(), 20);
+		CHECK_EQ(fRange.lastFrame(), 30);
+
+		cerr << fRange.setFromString("2.0-3#0") << endl;
+		CHECK_FALSE(fRange.valid());
+
+		cerr << fRange.setFromString("                   25            -                35         ") << endl;
+		CHECK(fRange.valid());
+		CHECK_FALSE(fRange.isCountOnly());
+		CHECK(fRange.isFrameRange());
+		CHECK_EQ(fRange.count(), 0);
+		CHECK_EQ(fRange.firstFrame(), 25);
+		CHECK_EQ(fRange.lastFrame(), 35);
+
+		cerr << fRange.setFromString("36-36") << endl;
+		CHECK(fRange.valid());
+		CHECK_FALSE(fRange.isCountOnly());
+		CHECK(fRange.isFrameRange());
+		CHECK_EQ(fRange.count(), 0);
+		CHECK_EQ(fRange.firstFrame(), 36);
+		CHECK_EQ(fRange.lastFrame(), 36);
+
+		cerr << fRange.setFromString("36-1") << endl;
+		CHECK_FALSE(fRange.valid());
+	}	//	TEST_CASE("NTV2ACFrameRange")
+}	//	TEST_SUITE("AutoCirculate")

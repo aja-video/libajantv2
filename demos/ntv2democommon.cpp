@@ -11,7 +11,6 @@
 #include "ntv2testpatterngen.h"
 #include "ntv2debug.h"
 #include "ntv2utils.h"
-#include "ntv2bft.h"
 #include "ajabase/common/common.h"
 #include <algorithm>
 #include <map>
@@ -1674,102 +1673,6 @@ bool CNTV2DemoCommon::BFT(void)
 		if (vFormat != vFormat2)
 			cerr << "'" << str << "': '" << ::NTV2VideoFormatString(vFormat) << "' (" << DEC(vFormat) << ") != '" << ::NTV2VideoFormatString(vFormat2) << "' (" << DEC(vFormat2) << ")" << endl;
 		//SHOULD_BE_EQUAL(vFormat, vFormat2);
-	}
-	if (true)
-	{
-		NTV2ACFrameRange fRange(0);
-		SHOULD_BE_FALSE(fRange.valid());
-		cerr << fRange.setFromString("") << endl;
-		SHOULD_BE_FALSE(fRange.valid());	//	Nothing -- empty string
-		cerr << fRange.setFromString("    \t    ") << endl;
-		SHOULD_BE_FALSE(fRange.valid());	//	Nothing -- whitespace
-
-		cerr << fRange.setFromString("10") << endl;
-		SHOULD_BE_TRUE(fRange.valid());
-		SHOULD_BE_TRUE(fRange.isCountOnly());
-		SHOULD_BE_FALSE(fRange.isFrameRange());
-		SHOULD_BE_EQUAL(fRange.count(), 10);
-
-		SHOULD_BE_FALSE(fRange.makeInvalid().valid());
-
-		cerr << fRange.setFromString("   \t   15   \t   ") << endl;
-		SHOULD_BE_TRUE(fRange.valid());
-		SHOULD_BE_TRUE(fRange.isCountOnly());
-		SHOULD_BE_FALSE(fRange.isFrameRange());
-		SHOULD_BE_EQUAL(fRange.count(), 15);
-
-		cerr << fRange.setFromString("@") << endl;
-		SHOULD_BE_FALSE(fRange.valid());	//	Missing integer values
-		cerr << fRange.setFromString("20@") << endl;
-		SHOULD_BE_FALSE(fRange.valid());	//	Missing 2nd integer value
-		cerr << fRange.setFromString("@20") << endl;
-		SHOULD_BE_FALSE(fRange.valid());	//	Missing 1st integer value
-
-		cerr << fRange.setFromString("20@10") << endl;
-		SHOULD_BE_TRUE(fRange.valid());
-		SHOULD_BE_FALSE(fRange.isCountOnly());
-		SHOULD_BE_TRUE(fRange.isFrameRange());
-		SHOULD_BE_EQUAL(fRange.count(), 0);
-		SHOULD_BE_EQUAL(fRange.firstFrame(), 10);
-		SHOULD_BE_EQUAL(fRange.lastFrame(), 29);
-
-		cerr << fRange.setFromString("   \t   25   @   15   \t   ") << endl;
-		SHOULD_BE_TRUE(fRange.valid());
-		SHOULD_BE_FALSE(fRange.isCountOnly());
-		SHOULD_BE_TRUE(fRange.isFrameRange());
-		SHOULD_BE_EQUAL(fRange.count(), 0);
-		SHOULD_BE_EQUAL(fRange.firstFrame(), 15);
-		SHOULD_BE_EQUAL(fRange.lastFrame(), 39);
-
-		cerr << fRange.setFromString("   \t   2.5   @   1 $ 5   \t   ") << endl;
-		SHOULD_BE_FALSE(fRange.valid());
-		cerr << fRange.setFromString("~!@#$%^&*()_+{}|[]:;<>?/.,`") << endl;
-		SHOULD_BE_FALSE(fRange.valid());
-		cerr << fRange.setFromString("@@@@@@@@@--------") << endl;
-		SHOULD_BE_FALSE(fRange.valid());
-		cerr << fRange.setFromString("1@2@3@4@5@6@7@8@9@1") << endl;
-		SHOULD_BE_FALSE(fRange.valid());
-
-		cerr << fRange.setFromString("-") << endl;
-		SHOULD_BE_FALSE(fRange.valid());	//	Missing integer values
-		cerr << fRange.setFromString("10-") << endl;
-		SHOULD_BE_FALSE(fRange.valid());	//	Missing 2nd integer value
-		cerr << fRange.setFromString("-10") << endl;
-		SHOULD_BE_FALSE(fRange.valid());	//	Missing 1st integer value
-		cerr << fRange.setFromString("1-2-3-4-5-6-7-8-9-1") << endl;
-		SHOULD_BE_FALSE(fRange.valid());
-		cerr << fRange.setFromString("-1-2-3-4-5-6-7-8-9-") << endl;
-		SHOULD_BE_FALSE(fRange.valid());
-
-		cerr << fRange.setFromString("20-30") << endl;
-		SHOULD_BE_TRUE(fRange.valid());
-		SHOULD_BE_FALSE(fRange.isCountOnly());
-		SHOULD_BE_TRUE(fRange.isFrameRange());
-		SHOULD_BE_EQUAL(fRange.count(), 0);
-		SHOULD_BE_EQUAL(fRange.firstFrame(), 20);
-		SHOULD_BE_EQUAL(fRange.lastFrame(), 30);
-
-		cerr << fRange.setFromString("2.0-3#0") << endl;
-		SHOULD_BE_FALSE(fRange.valid());
-
-		cerr << fRange.setFromString("                   25            -                35         ") << endl;
-		SHOULD_BE_TRUE(fRange.valid());
-		SHOULD_BE_FALSE(fRange.isCountOnly());
-		SHOULD_BE_TRUE(fRange.isFrameRange());
-		SHOULD_BE_EQUAL(fRange.count(), 0);
-		SHOULD_BE_EQUAL(fRange.firstFrame(), 25);
-		SHOULD_BE_EQUAL(fRange.lastFrame(), 35);
-
-		cerr << fRange.setFromString("36-36") << endl;
-		SHOULD_BE_TRUE(fRange.valid());
-		SHOULD_BE_FALSE(fRange.isCountOnly());
-		SHOULD_BE_TRUE(fRange.isFrameRange());
-		SHOULD_BE_EQUAL(fRange.count(), 0);
-		SHOULD_BE_EQUAL(fRange.firstFrame(), 36);
-		SHOULD_BE_EQUAL(fRange.lastFrame(), 36);
-
-		cerr << fRange.setFromString("36-1") << endl;
-		SHOULD_BE_FALSE(fRange.valid());
 	}
 	return true;
 }

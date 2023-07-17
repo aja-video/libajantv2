@@ -1,5 +1,10 @@
 project(ut_ajantv2)
 
+if (NOT AJANTV2_BUILD_TESTS)
+	message(STATUS "Skipping libajantv2 tests...")
+	return()
+endif()
+
 set(TEST_XML_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 set(DOCTEST_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/doctest/doctest)

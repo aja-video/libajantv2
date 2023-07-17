@@ -948,6 +948,7 @@ private:
 		DEF_REGNAME	(kVRegGlobalAudioPlaybackMode);
 		DEF_REGNAME	(kVRegFlashProgramKey);
 		DEF_REGNAME	(kVRegStrictTiming);
+		DEF_REG	(kVRegDriverType,	mDecodeDriverType, READWRITE, kRegClass_Virtual, kRegClass_NULL, kRegClass_NULL);
 		DEF_REGNAME	(kVRegInputSelect);
 		DEF_REGNAME	(kVRegSecondaryFormatSelect);
 		DEF_REGNAME	(kVRegDigitalOutput1Select);
@@ -3932,6 +3933,25 @@ private:
 			return oss.str();
 		}
 	}	mDecodeFourCC;
+
+	struct DecodeDriverType : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{	(void) inDeviceID;  (void) inRegNum;
+			ostringstream oss;
+			#if defined(AJAMac)
+				if (inRegValue == 0x44455854)	//	'DEXT'
+					oss << "DriverKit ('DEXT')";
+				else if (inRegValue)
+					oss << "(Unknown/Invalid " << xHEX0N(inRegValue,8) << ")";
+				else
+					oss << "Kernel Extension ('KEXT')";
+			#else
+				oss << "(Normal)";
+			#endif
+			return oss.str();
+		}
+	}	mDecodeDriverType;
 
 	static const int	NOREADWRITE =	0;
 	static const int	READONLY	=	1;
