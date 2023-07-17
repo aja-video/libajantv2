@@ -150,8 +150,6 @@ if (AJANTV2_BUILD_DRIVER)
 		message(STATUS "macOS driver CMake build not yet implemented!")
 		return()
 	elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-		list(APPEND AJADRIVER_LINUX_LOAD_FILES
-			${CMAKE_CURRENT_SOURCE_DIR}/bin/ajantv2.ko)
 		set(BIN_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 		add_custom_target(driver_linux ALL
 						  COMMENT "Building Linux driver"
