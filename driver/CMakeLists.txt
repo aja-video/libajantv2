@@ -20,6 +20,7 @@ set(AJADRIVER_COMMON_HEADERS
 	ntv2pciconfig.h
 	ntv2rp188.h
 	ntv2setup.h
+	ntv2stream.h
 	ntv2system.h
 	ntv2video.h
 	ntv2vpid.h
@@ -43,6 +44,7 @@ set(AJADRIVER_COMMON_SOURCES
 	ntv2rp188.c
 	ntv2setup.c
 	ntv2system.c
+	ntv2stream.c
 	ntv2video.c
 	ntv2vpid.c
 	ntv2xpt.c)
