@@ -2683,7 +2683,8 @@ private:
 			oss		<< "Audio Capture: "		<< EnabDisab(BIT(0) & inRegValue)	<< endl
 					<< "Audio Loopback: "		<< EnabDisab(BIT(3) & inRegValue)	<< endl
 					<< "Audio Input: "			<< DisabEnab(BIT(8) & inRegValue)	<< endl
-					<< "Audio Output: "			<< DisabEnab(BIT(9) & inRegValue)	<< endl;
+					<< "Audio Output: "			<< DisabEnab(BIT(9) & inRegValue)	<< endl
+					<< "Output Paused: "		<< YesNo(BIT(11) & inRegValue)		<< endl;
 			if (sdiOutput)
 				oss << "Audio Embedder SDIOut" << sdiOutput		<< ": " << DisabEnab(BIT(13) & inRegValue)	<< endl
 					<< "Audio Embedder SDIOut" << (sdiOutput+1) << ": " << DisabEnab(BIT(15) & inRegValue)	<< endl;
