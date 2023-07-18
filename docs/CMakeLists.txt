@@ -66,28 +66,26 @@ add_custom_target(
     COMMENT "Generating NTV2 SDK documentation with Doxygen"
     VERBATIM)
 
-if (AJA_INSTALL_SOURCES)
-    string(CONCAT AJA_NTV2_SDK_DOCS_URL
+string(CONCAT AJA_NTV2_SDK_DOCS_URL
         "https://sdksupport.aja.com/docs/NTV2SDK_docs_"
         "${AJA_NTV2_SDK_VERSION_MAJOR}_${AJA_NTV2_SDK_VERSION_MINOR}"
         "_${AJA_NTV2_SDK_VERSION_POINT}${AJA_NTV2_SDK_BUILD_TYPE_LONG}/")
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-        configure_file(${CMAKE_MODULE_PATH}/bundle/windows/aja_ntv2_documentation.url.in aja_ntv2_documentation.url)
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/aja_ntv2_documentation.url DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME})
+configure_file(${CMAKE_MODULE_PATH}/bundle/windows/aja_ntv2_documentation.url.in aja_ntv2_documentation.url)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/aja_ntv2_documentation.url DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME})
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        configure_file("${CMAKE_MODULE_PATH}/bundle/mac/AJA NTV2 Documentation.webloc.in" "AJA NTV2 Documentation.webloc")
-        install(FILES "${CMAKE_CURRENT_BINARY_DIR}/AJA NTV2 Documentation.webloc" DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME})
+    configure_file("${CMAKE_MODULE_PATH}/bundle/mac/AJA NTV2 Documentation.webloc.in" "AJA NTV2 Documentation.webloc")
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/AJA NTV2 Documentation.webloc" DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME})
     elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        configure_file(${CMAKE_MODULE_PATH}/bundle/linux/desktop/aja_ntv2_documentation.desktop.in aja_ntv2_documentation.desktop)
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/aja_ntv2_documentation.desktop DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME})
-    endif()
+configure_file(${CMAKE_MODULE_PATH}/bundle/linux/desktop/aja_ntv2_documentation.desktop.in aja_ntv2_documentation.desktop)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/aja_ntv2_documentation.desktop DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME})
+endif()
 
     install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html 
             DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}
             USE_SOURCE_PERMISSIONS)
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ntv2.doxy 
             DESTINATION ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME})
-endif()
 if (AJA_INSTALL_CMAKE)
     install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/docs)
 endif()
