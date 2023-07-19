@@ -631,7 +631,7 @@ static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uin
         tx_buffer[2] = 0x10;
         tx_buffer[3] = 0x20;
 
-		NTV2_MSG_GENLOCK_INFO("Read: Set Page");
+		//NTV2_MSG_GENLOCK_INFO("Read: Set Page");
 		spi_genlock2_write(ntv2_gen, 4, 0x7C, tx_buffer, true);
     }
 
