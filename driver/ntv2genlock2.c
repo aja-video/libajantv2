@@ -11,6 +11,7 @@
 #include "ntv2genlock2.h"
 #include "ntv2commonreg.h"
 #include "ntv2kona.h"
+#include "ntv2gen2regs.h"
 
 //#define MONITOR_STATE_CHANGES
 
@@ -561,9 +562,9 @@ static bool spi_wait_read_not_empty(struct ntv2_genlock2 *ntv2_gen)
 		if (count++ > c_spi_timeout) return false;
 		if (!ntv2_gen->monitor_enable) return false;
 		status = reg_read(ntv2_gen, ntv2_reg_spi_status);
-		NTV2_MSG_GENLOCK_INFO("READ FIFO EMPTY!");
+		//NTV2_MSG_GENLOCK_INFO("READ FIFO EMPTY!");
 	}
-	NTV2_MSG_GENLOCK_INFO("READ FIFO NOT EMPTY! %d", count);
+	//NTV2_MSG_GENLOCK_INFO("READ FIFO NOT EMPTY! %d", count);
 	return true;
 }
 
@@ -614,6 +615,7 @@ static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uin
 {
 	uint32_t  val, status;
     uint8_t   tx_buffer[10];
+	uint32_t i;
 
 	if (!spi_wait_write_empty(ntv2_gen))
 		return false;
@@ -643,7 +645,7 @@ static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uin
 	reg_write(ntv2_gen, ntv2_reg_spi_write, 0x80 | (addr & 0x7f));
 	wait_genlock2(ntv2_gen, 1000);
 
-	for (uint32_t i = 0; i < numBytes; i++)
+	for (i = 0; i < numBytes; i++)
 		reg_write(ntv2_gen, ntv2_reg_spi_write, 0);
 
 	reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x01);
