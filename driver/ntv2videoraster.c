@@ -359,7 +359,7 @@ Ntv2Status ntv2_videoraster_enable(struct ntv2_videoraster *ntv2_raster)
 
 	ntv2_raster->monitor_enable = true;
 
-	return NTV2_STATUS_SUCCESS;
+	return ntv2_videoraster_update_global(ntv2_raster);
 }
 
 Ntv2Status ntv2_videoraster_disable(struct ntv2_videoraster *ntv2_raster)
