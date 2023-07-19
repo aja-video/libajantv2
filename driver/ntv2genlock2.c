@@ -10,7 +10,6 @@
 
 #include "ntv2genlock2.h"
 #include "ntv2commonreg.h"
-#include "ntv2gen2regs.h"
 #include "ntv2kona.h"
 
 //#define MONITOR_STATE_CHANGES
@@ -93,13 +92,16 @@ static const uint32_t c_configure_error_limit  = 20;
 static void ntv2_genlock2_monitor(void* data);
 static Ntv2Status ntv2_genlock2_initialize(struct ntv2_genlock2 *ntv2_gen);
 static bool has_state_changed(struct ntv2_genlock2 *ntv2_gen);
-static struct ntv2_genlock2_data* get_genlock2_config(struct ntv2_genlock2 *ntv2_gen, uint32_t lines, uint32_t rate);
+static struct ntv2_genlock2_data* get_genlock2_config(struct ntv2_genlock2 *ntv2_gen, enum ntv2_genlock2_mode mode);
 static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlock2_data *config, bool check);
+static uint8_t device_id_read(struct ntv2_genlock2 *ntv2_gen);
+static bool wait_genlock2(struct ntv2_genlock2 *ntv2_gen, uint32_t numMicrosSeconds);
 
 static void spi_reset(struct ntv2_genlock2 *ntv2_gen);
 static void spi_reset_fifos(struct ntv2_genlock2 *ntv2_gen);
 static bool spi_wait_write_empty(struct ntv2_genlock2 *ntv2_gen);
-static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, uint8_t offset, char* data);
+static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, uint8_t offset, uint8_t* data, bool triggerWait);
+static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uint8_t* data, uint32_t numBytes);
 static void hex_to_bytes(char *hex, uint8_t *output, uint32_t array_length);
 
 static uint32_t reg_read(struct ntv2_genlock2 *ntv2_gen, const uint32_t *reg);
@@ -206,8 +208,7 @@ Ntv2Status ntv2_genlock2_disable(struct ntv2_genlock2 *ntv2_gen)
 	return NTV2_STATUS_SUCCESS;
 }
 
-Ntv2Status ntv2_genlock2_program(struct ntv2_genlock2 *ntv2_gen,
-								enum ntv2_genlock2_mode mode)
+Ntv2Status ntv2_genlock2_program(struct ntv2_genlock2 *ntv2_gen, enum ntv2_genlock2_mode mode)
 {
 	if (ntv2_gen == NULL)
 		return NTV2_STATUS_BAD_PARAMETER;
@@ -217,9 +218,12 @@ Ntv2Status ntv2_genlock2_program(struct ntv2_genlock2 *ntv2_gen,
 	switch (mode)
 	{
 	case ntv2_genlock2_mode_broadcast_1485:
-		if (!configure_genlock2(ntv2_gen, s_8a34045_broadcast_1485, false))
+	{
+		struct ntv2_genlock2_data* configData = get_genlock2_config(ntv2_gen, mode);
+		if (!configure_genlock2(ntv2_gen, configData, false))
 			return NTV2_STATUS_FAIL;
 		break;
+	}
 	default:
 		return NTV2_STATUS_BAD_PARAMETER;
 	}
@@ -295,7 +299,7 @@ static void ntv2_genlock2_monitor(void* data)
 		}
 
 		if (update) {
-			config = get_genlock2_config(ntv2_gen, ntv2_gen->gen_lines, ntv2_gen->gen_rate);
+			//config = get_genlock2_config(ntv2_gen, ntv2_gen->gen_lines, ntv2_gen->gen_rate);
 			if (config != NULL) {
 				NTV2_MSG_GENLOCK_CONFIG("%s: configure genlock2 lines %d  rate %s\n", 
 										ntv2_gen->name, ntv2_gen->gen_lines, ntv2_frame_rate_name(ntv2_gen->gen_rate));
@@ -410,44 +414,26 @@ static bool has_state_changed(struct ntv2_genlock2 *ntv2_gen)
 #endif
 }
 
-static struct ntv2_genlock2_data* get_genlock2_config(struct ntv2_genlock2 *ntv2_gen, uint32_t lines, uint32_t rate)
+static struct ntv2_genlock2_data* get_genlock2_config(struct ntv2_genlock2 *ntv2_gen, enum ntv2_genlock2_mode mode)
 {
-#if defined (MSWindows)
-	UNREFERENCED_PARAMETER(ntv2_gen);
-#endif
 	struct ntv2_genlock2_data* config = NULL;
-	uint32_t genlockDeviceID = 0x45;//reg_read(ntv2_gen, 0xc032);
+	uint32_t genlockDeviceID = device_id_read(ntv2_gen);
 
-	if (rate >= GENLOCK2_FRAME_RATE_SIZE) return NULL;
-
-	switch (lines)
+	switch (mode)
 	{
-	case 525:
-	case 625:
-	case 750:
-	case 1125:
-	case 2250:
-		switch (genlockDeviceID)
-		{
-		default:
-		case 0x45:
-			config = s_8a34045_broadcast_1485;
-			break;
-		//case 0x12:
-			//config = s_8A34045_broadcast_1485;
-		}
-		break;
 	default:
+	case ntv2_genlock2_mode_broadcast_1485:
 		switch (genlockDeviceID)
 		{
 		default:
 		case 0x45:
 			config = s_8a34045_broadcast_1485;
 			break;
-		//case 0x12:
-			//config = s_8A34045_broadcast_1485;
+		case 0x12:
+			config = s_rc32012a_broadcast_1485;
+			break;
 		}
-		break;
+	break;
 	}
 		
 	return config;
@@ -459,6 +445,7 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 	uint32_t count = 0;
 	uint32_t value;
 	uint32_t mask;
+	uint8_t writeBytes[256];
 
 	if (NTV2_DEBUG_ACTIVE(NTV2_DEBUG_GENLOCK_CHECK)) check = true;
 
@@ -470,7 +457,9 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 
 	while ((gdat->size != 0))
 	{
-		if (!spi_genlock2_write(ntv2_gen, gdat->size, gdat->offset, gdat->data)) {
+		NTV2_MSG_GENLOCK_INFO("Writing offset %02X %s", gdat->offset, gdat->data);
+		hex_to_bytes(gdat->data+2, writeBytes, gdat->size);
+		if (!spi_genlock2_write(ntv2_gen, gdat->size, gdat->offset, writeBytes, true)) {
 			NTV2_MSG_ERROR("%s: genlock spi write failed\n", ntv2_gen->name);
 		return false;
 		}
@@ -489,6 +478,41 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 		NTV2_MSG_GENLOCK_CHECK("%s: genlock write complete\n", ntv2_gen->name);
 	}
 
+	return true;
+}
+
+static uint8_t device_id_read(struct ntv2_genlock2 *ntv2_gen)
+{
+	uint8_t rxID[1];
+	spi_genlock2_read(ntv2_gen, 0xC032, rxID, 1);
+	return rxID[0];
+
+}
+
+static bool wait_genlock2(struct ntv2_genlock2 *ntv2_gen, uint32_t numMicrosSeconds)
+{
+	uint32_t usTicks = 0;
+	uint32_t timeoutCount = 0;
+
+	ntv2_regnum_write(ntv2_gen->system_context, 0x3606, 0);
+	while (usTicks < numMicrosSeconds)
+	{
+		usTicks = ntv2_regnum_read(ntv2_gen->system_context, 0x3606);
+#if 1
+		if(timeoutCount++ > 100) return false;
+#else
+		if (timeoutCount++ > 100)
+		{
+			NTV2_MSG_GENLOCK_INFO("Genlock2 200us wait TIMEDOUT");
+			return false;
+		}
+		else
+		{
+			NTV2_MSG_GENLOCK_INFO("Genlock2 timeout count: %d", timeoutCount);
+			return true;
+		}
+#endif
+	}
 	return true;
 }
 
@@ -526,13 +550,27 @@ static bool spi_wait_write_empty(struct ntv2_genlock2 *ntv2_gen)
 	return true;
 }
 
-static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, uint8_t offset, char* data)
+static bool spi_wait_read_not_empty(struct ntv2_genlock2 *ntv2_gen)
 {
-	uint8_t writeBytes[1000];
+	uint32_t status = 0;
+	uint32_t count = 0;
+
+	status = reg_read(ntv2_gen, ntv2_reg_spi_status);
+    while ((status & GENL_SPI_READ_FIFO_EMPTY) != 0)
+	{
+		if (count++ > c_spi_timeout) return false;
+		if (!ntv2_gen->monitor_enable) return false;
+		status = reg_read(ntv2_gen, ntv2_reg_spi_status);
+		NTV2_MSG_GENLOCK_INFO("READ FIFO EMPTY!");
+	}
+	NTV2_MSG_GENLOCK_INFO("READ FIFO NOT EMPTY! %d", count);
+	return true;
+}
+
+static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, uint8_t offset, uint8_t* data, bool triggerWait)
+{
     uint32_t controlVal;
     uint32_t i;
-	uint32_t usTicks;
-	uint32_t timeoutCount;
     
     if (!spi_wait_write_empty(ntv2_gen)) return false;
 
@@ -540,13 +578,12 @@ static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, ui
 	spi_reset_fifos(ntv2_gen);
 
 	// Step 2 load data
-	writeBytes[0] = offset;
-    hex_to_bytes(data+2, writeBytes+1, size);
-	NTV2_MSG_GENLOCK_INFO("Writing offset %02X %s", offset, data);
-	for (i = 0; i <= size; i++)
+	reg_write(ntv2_gen, ntv2_reg_spi_write, offset);
+	NTV2_MSG_GENLOCK_INFO("Wrote %02X", offset);
+	for (i = 0; i < size; i++)
 	{
-		reg_write(ntv2_gen, ntv2_reg_spi_write, writeBytes[i]);
-		//NTV2_MSG_GENLOCK_INFO("Wrote %02X", writeBytes[i]);
+		reg_write(ntv2_gen, ntv2_reg_spi_write, data[i]);
+		NTV2_MSG_GENLOCK_INFO("Wrote %02X", data[i]);
 	}
 
 	// Step 3 chip select low
@@ -567,25 +604,98 @@ static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, ui
 	controlVal |= 0x100;
 	reg_write(ntv2_gen, ntv2_reg_spi_control, controlVal);
 
-	ntv2_regnum_write(ntv2_gen->system_context, 0x3606, 0);
-
-	usTicks = 0;
-	timeoutCount = 0;
-	//NTV2_MSG_GENLOCK_INFO("Genlock2 timeout count: %d", timeoutCount);
-	while (usTicks < 200 && timeoutCount < 100)
-	{
-		usTicks = ntv2_regnum_read(ntv2_gen->system_context, 0x3606);
-		timeoutCount++;
-	}
-	if (timeoutCount == 100)
-	{
-	//	NTV2_MSG_GENLOCK_INFO("Genlock2 200us wait TIMEDOUT");
-	}
-	//else
-	//{
-	//	NTV2_MSG_GENLOCK_INFO("Genlock2 timeout count: %d", timeoutCount);
-	//}
+	if (triggerWait)
+		wait_genlock2(ntv2_gen, 200);
 	
+	return true;
+}
+
+static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uint8_t* data, uint32_t numBytes)
+{
+	uint32_t  val, status;
+    uint8_t   tx_buffer[10];
+
+	if (!spi_wait_write_empty(ntv2_gen))
+		return false;
+
+	// Step 1 reset FIFOs
+	spi_reset_fifos(ntv2_gen);
+
+    if (addr != 0x7c)
+    {
+        // set page
+        tx_buffer[0] = addr & 0x80;
+        tx_buffer[1] = addr >> 8;
+        tx_buffer[2] = 0x10;
+        tx_buffer[3] = 0x20;
+
+		NTV2_MSG_GENLOCK_INFO("Read: Set Page");
+		spi_genlock2_write(ntv2_gen, 4, 0x7C, tx_buffer, true);
+    }
+
+#if 1
+
+	reg_write(ntv2_gen, ntv2_reg_spi_control, 0xe6);
+	wait_genlock2(ntv2_gen, 1000);
+	reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x00);
+	wait_genlock2(ntv2_gen, 1000);
+
+	reg_write(ntv2_gen, ntv2_reg_spi_write, 0x80 | (addr & 0x7f));
+	wait_genlock2(ntv2_gen, 1000);
+
+	for (uint32_t i = 0; i < numBytes; i++)
+		reg_write(ntv2_gen, ntv2_reg_spi_write, 0);
+
+	reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x01);
+	wait_genlock2(ntv2_gen, 10000);
+
+	if(!spi_wait_read_not_empty(ntv2_gen))
+		return false;
+
+	//wait_genlock2(ntv2_gen, 1000);
+    
+	val = reg_read(ntv2_gen, ntv2_reg_spi_read); // dummy read for address sent
+	NTV2_MSG_GENLOCK_INFO("Read: Val: %02X", val);
+    for (uint32_t i=0; i < numBytes; i++)
+    {
+        status = reg_read(ntv2_gen, ntv2_reg_spi_status);
+		if(!spi_wait_read_not_empty(ntv2_gen))
+			return false;
+        val = reg_read(ntv2_gen, ntv2_reg_spi_read);
+		NTV2_MSG_GENLOCK_INFO("Read: Val: %02X", val);
+        data[i] = (uint8_t)val;
+    }
+
+	reg_write(ntv2_gen, ntv2_reg_spi_control, 0xe6);
+
+#else
+	
+
+	//Send address and dumy bytes
+	memset(tx_buffer, 0, 10);
+	NTV2_MSG_GENLOCK_INFO("Read: Send address and dummy bytes");
+	spi_genlock2_write(ntv2_gen, numBytes,  (0x80 | (addr & 0x7f)), tx_buffer, true);
+    
+	// read bytes
+	if(!spi_wait_read_not_empty(ntv2_gen))
+		return false;
+
+	//wait_genlock2(ntv2_gen, 1000);
+    
+	val = reg_read(ntv2_gen, ntv2_reg_spi_read); // dummy read for address sent
+	NTV2_MSG_GENLOCK_INFO("Read: Val: %02X", val);
+    for (uint32_t i=0; i < numBytes; i++)
+    {
+        status = reg_read(ntv2_gen, ntv2_reg_spi_status);
+		if(!spi_wait_read_not_empty(ntv2_gen))
+			return false;
+        val = reg_read(ntv2_gen, ntv2_reg_spi_read);
+		NTV2_MSG_GENLOCK_INFO("Read: Val: %02X", val);
+        data[i] = (uint8_t)val;
+    }
+
+	spi_reset_fifos(ntv2_gen);
+#endif
 	return true;
 }
 

@@ -13,6 +13,7 @@
 #define NTV2GENLOCK2_HEADER
 
 #include "ntv2system.h"
+#include "ntv2gen2regs.h"
 
 #define NTV2_GENLOCK2_STRING_SIZE	80
 
