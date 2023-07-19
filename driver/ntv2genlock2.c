@@ -484,7 +484,7 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 
 static uint8_t device_id_read(struct ntv2_genlock2 *ntv2_gen)
 {
-	uint8_t rxID[1];
+	uint8_t rxID[1] = {0};
 	spi_genlock2_read(ntv2_gen, 0xC032, rxID, 1);
 	return rxID[0];
 
