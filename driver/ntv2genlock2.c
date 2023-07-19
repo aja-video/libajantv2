@@ -658,7 +658,7 @@ static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uin
     
 	val = reg_read(ntv2_gen, ntv2_reg_spi_read); // dummy read for address sent
 	NTV2_MSG_GENLOCK_INFO("Read: Val: %02X", val);
-    for (uint32_t i=0; i < numBytes; i++)
+    for (i = 0; i < numBytes; i++)
     {
         status = reg_read(ntv2_gen, ntv2_reg_spi_status);
 		if(!spi_wait_read_not_empty(ntv2_gen))
