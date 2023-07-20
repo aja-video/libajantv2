@@ -696,8 +696,8 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
 
     /* frame size and number */
     frame_size = get_frame_size(ntv2_raster, index);
-	if (quad)
-		frame_size *= 4;
+//	if (quad)
+//		frame_size *= 4;
 
     if (mode == ntv2_con_videoraster_mode_capture)
         frame_number = input_frame;
