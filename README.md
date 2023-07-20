@@ -33,7 +33,9 @@ To build additional items, use these parameters:
 - **AJANTV2_BUILD_TESTS** — If defined, builds any/all unit test(s). By default, these test programs are _not_ built.
 - **AJANTV2_BUILD_PLUGINS** — If defined, builds the standard NTV2 plugins (i.e. **nublegacy**, **swdevice**, …). By default, plugins are _not_ built.
 
-###### Linux Example: Build the Static Library
+#### Examples
+
+###### Linux: Build the Static Library
 To build only the static library from the command line:
 1. Open a terminal window, and enter the **libajantv2** folder:\
 `$ cd libajantv2`
@@ -43,7 +45,7 @@ To build only the static library from the command line:
 `$ cmake --build _bld`
 4. Look for the finished **libajantv2.a** library inside **_bld/ajantv2**.
 
-###### MacOS Example: Build SDK & Demos Using Xcode
+###### MacOS: Build SDK & Demos Using Xcode
 To generate the Xcode project file, and then build from it:
 1. From the Terminal, enter the **libajantv2** folder:\
 `$ cd libajantv2`
@@ -60,18 +62,18 @@ For example, to run **ntv2enumerateboards**:\
 By default, **Xcode** will produce **Debug** artifacts.\
 To build **Release** artifacts, add `-configuration Release` to the **xcodebuild** command line.
 
-#### Docker Builds
+###### Docker:
 Using the Ubuntu 22.04 Dockerfile as an example, here is how to build libajantv2 from a Docker Container, and copy the build artifacts back to the Docker host system.
 
-1. Build Ubuntu 22.04 Docker Image
+1. Build Ubuntu 22.04 Docker Image:
 ```
 $ docker build -t libajantv2-ubuntu-22.04:latest -f container/ubuntu_22_04/Dockerfile .
 ```
-2. Run Ubuntu 22.04 Docker Container in interactive mode
+2. Run Ubuntu 22.04 Docker Container in interactive mode:
 ```
 $ docker run -i libajantv2-ubuntu-22.04:latest
 ```
-3. Shell in to Container and build libajantv2
+3. Shell in to Container and build **libajantv2**:
 ```
 $ docker exec -it <container-id> bash
 # cd /mnt/libajantv2
