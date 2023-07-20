@@ -31,9 +31,9 @@
 #define NTV2_MSG_VIDEORASTER_STATE(string, ...)		NTV2_MSG_PRINT(NTV2_DEBUG_VIDEORASTER_STATE, string, __VA_ARGS__)
 #define NTV2_MSG_VIDEORASTER_CONFIG(string, ...)	NTV2_MSG_PRINT(NTV2_DEBUG_VIDEORASTER_CONFIG, string, __VA_ARGS__)
 
-//static uint32_t ntv2_debug_mask = 0xffffffff;
-//static uint32_t ntv2_user_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
-static uint32_t ntv2_active_mask = 0xffffffff;
+static uint32_t ntv2_debug_mask = 0xffffffff;
+static uint32_t ntv2_user_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
+static uint32_t ntv2_active_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
 static const int64_t c_default_timeout		= 50000;
 
 static const uint32_t c_video_standard_size = 0x100000;
@@ -359,7 +359,7 @@ Ntv2Status ntv2_videoraster_enable(struct ntv2_videoraster *ntv2_raster)
 
 	ntv2_raster->monitor_enable = true;
 
-	return ntv2_videoraster_update_global(ntv2_raster);
+	return ntv2_videoraster_update_global(ntv2_raster, 0x12345678, 0x87654321);
 }
 
 Ntv2Status ntv2_videoraster_disable(struct ntv2_videoraster *ntv2_raster)
@@ -379,7 +379,7 @@ Ntv2Status ntv2_videoraster_disable(struct ntv2_videoraster *ntv2_raster)
 	return NTV2_STATUS_SUCCESS;
 }
 
-Ntv2Status ntv2_videoraster_update_global(struct ntv2_videoraster *ntv2_raster)
+Ntv2Status ntv2_videoraster_update_global(struct ntv2_videoraster *ntv2_raster, uint32_t reg, uint32_t value)
 {
     uint32_t i;
 
@@ -388,7 +388,7 @@ Ntv2Status ntv2_videoraster_update_global(struct ntv2_videoraster *ntv2_raster)
 	if (!ntv2_raster->monitor_enable)
 		return NTV2_STATUS_SUCCESS;
 
-	NTV2_MSG_VIDEORASTER_STATE("%s: video raster update globaln", ntv2_raster->name);
+	NTV2_MSG_VIDEORASTER_STATE("%s: video raster update global  reg %d  value %08x", ntv2_raster->name, reg, value);
 
     for (i = 0; i < ntv2_raster->num_widgets; i++)
     {
