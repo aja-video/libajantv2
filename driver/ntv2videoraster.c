@@ -31,8 +31,8 @@
 #define NTV2_MSG_VIDEORASTER_STATE(string, ...)		NTV2_MSG_PRINT(NTV2_DEBUG_VIDEORASTER_STATE, string, __VA_ARGS__)
 #define NTV2_MSG_VIDEORASTER_CONFIG(string, ...)	NTV2_MSG_PRINT(NTV2_DEBUG_VIDEORASTER_CONFIG, string, __VA_ARGS__)
 
-static uint32_t ntv2_debug_mask = 0xffffffff;
-static uint32_t ntv2_user_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
+//static uint32_t ntv2_debug_mask = 0xffffffff;
+//static uint32_t ntv2_user_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
 static uint32_t ntv2_active_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
 static const int64_t c_default_timeout		= 50000;
 

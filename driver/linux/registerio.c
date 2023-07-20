@@ -457,7 +457,7 @@ void WriteRegister(	ULWord deviceNumber,
             case kRegGlobalControl:
             case kRegGlobalControl2:
             case kRegGlobalControl3:
-                ntv2_videoraster_update_global(pNTV2Params->m_pRasterMonitor);
+                ntv2_videoraster_update_global(pNTV2Params->m_pRasterMonitor, registerNumber, registerValue);
                 break;
             case kRegCh1OutputFrame:
                 ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 0, false, registerValue);
