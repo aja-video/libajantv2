@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.15)
 
 # For CMAKE_MSVC_RUNTIME_LIBRARY compatability. Per note: This must be before the first project() 
 if(POLICY CMP0091)
