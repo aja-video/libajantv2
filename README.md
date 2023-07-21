@@ -62,6 +62,19 @@ For example, to run **ntv2enumerateboards**:\
 By default, **Xcode** will produce **Debug** artifacts.\
 To build **Release** artifacts, add `-configuration Release` to the **xcodebuild** command line.
 
+###### Windows: Build Static Library from CMD.EXE
+To build the static library using the installed Visual Studio compiler from a command line window:
+1. Launch **cmd.exe**, and enter the **libajantv2** directory:\
+`> cd libajantv2`
+2. Run CMake to configure the build:\
+`> cmake -S .  -B _bld`
+   - Build the library from the command line:\
+   `> cmake --build _bld`
+   - Open the project file in Visual Studio, and build it with the GUI:\
+   `> start _bld\ALL_BUILD.vcxproj`
+4. Look for the debug static libary inside the **_bld** folder:\
+`> dir _bld\ajantv2\Debug\ajantv2d.lib`
+
 ###### Docker:
 Using the Ubuntu 22.04 Dockerfile as an example, here is how to build libajantv2 from a Docker Container, and copy the build artifacts back to the Docker host system.
 
