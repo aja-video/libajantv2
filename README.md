@@ -68,9 +68,10 @@ To build the static library using the installed Visual Studio compiler from a co
 `> cd libajantv2`
 2. Run CMake to configure the build:\
 `> cmake -S .  -B _bld`
-   - Build the library from the command line:\
+3. Build the library:
+   - From the command line:\
    `> cmake --build _bld`
-   - Open the project file in Visual Studio, and build it with the GUI:\
+   - From Visual Studio IDE:\
    `> start _bld\ALL_BUILD.vcxproj`
 4. Look for the debug static libary inside the **_bld** folder:\
 `> dir _bld\ajantv2\Debug\ajantv2d.lib`
