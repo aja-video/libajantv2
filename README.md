@@ -28,10 +28,14 @@ AJA recommends using CMake version 3.15 or later.
 #### CMake Build Parameters
 By default — absent any parameters — only the static NTV2 library gets built.\
 To build additional items, use these parameters:
-- **AJANTV2_BUILD_DEMOS** — If defined, builds the demonstration programs (e.g. **ntv2capture**, **ntv2player**, …). By default, demo apps are _not_ built.
-- **AJANTV2_BUILD_TOOLS** — If defined, builds the command-line tools (e.g. **ntv2thermo**, **regio**, **supportlog**, …). By default, tools are _not_ built.
-- **AJANTV2_BUILD_TESTS** — If defined, builds any/all unit test(s). By default, these test programs are _not_ built.
-- **AJANTV2_BUILD_PLUGINS** — If defined, builds the standard NTV2 plugins (i.e. **nublegacy**, **swdevice**, …). By default, plugins are _not_ built.
+- **AJANTV2_BUILD_DEMOS** — If defined, builds the demonstration programs (e.g. **ntv2capture**, **ntv2player**, …).\
+By default, demo apps are _not_ built.
+- **AJANTV2_BUILD_TOOLS** — If defined, builds the command-line tools (e.g. **ntv2thermo**, **regio**, **supportlog**, …).\
+By default, tools are _not_ built.
+- **AJANTV2_BUILD_TESTS** — If defined, builds any/all unit test(s).\
+By default, these test programs are _not_ built.
+- **AJANTV2_BUILD_PLUGINS** — If defined, builds the standard NTV2 plugins (i.e. **nublegacy**, **swdevice**, …).\
+By default, plugins are _not_ built.
 
 #### Examples
 
