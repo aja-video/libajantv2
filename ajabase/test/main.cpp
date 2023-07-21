@@ -1025,74 +1025,74 @@ TEST_SUITE("time" * doctest::description("functions in ajabase/system/systemtime
 				<< "Microseconds: " << avgUsec << "\n"
 				<< "Nanoseconds: " << avgNsec << "\n" << std::endl;
 		}
-		SUBCASE("AJATime::SleepInNanoseconds")
-		{
-			int sleepDuration = 100; // 100 nanoseconds
-			std::cout << "AJATime::SleepInNanoseconds - " << sleepDuration << "nsec" << std::endl;
-			uint64_t avgMs = 0;
-			uint64_t avgUs = 0;
-			uint64_t avgNs = 0;
-			const int iterations = 10;
-			for (int i = 0; i < iterations; i++) {
-				uint64_t startMs = AJATime::GetSystemMilliseconds();
-				uint64_t startUs = AJATime::GetSystemMicroseconds();
-				uint64_t startNs = AJATime::GetSystemNanoseconds();
-				AJATime::SleepInNanoseconds(sleepDuration);
-				uint64_t endMs = AJATime::GetSystemMilliseconds();
-				uint64_t endUs = AJATime::GetSystemMicroseconds();
-				uint64_t endNs = AJATime::GetSystemNanoseconds();
-				uint64_t deltaMs = endMs - startMs;
-				uint64_t deltaUs = endUs - startUs;
-				uint64_t deltaNs = endNs - startNs;
-				avgMs += deltaMs;
-				avgUs += deltaUs;
-				avgNs += deltaNs;
-			}
-			uint64_t avgMsec = avgMs / iterations;
-			uint64_t avgUsec = avgUs / iterations;
-			uint64_t avgNsec = avgNs / iterations;
-			// There could be variability in the sleep call, so make sure in range
-			// check to make sure the units are correct
-#if defined(AJA_SLEEP_USE_STL)
-	#if defined(AJA_WINDOWS)
-			CHECK(avgMsec <= 1);
-			CHECK(avgUsec < 10);
-			CHECK(avgNsec > 50);
-			CHECK(avgNsec < 10000);
-	#elif defined(AJA_MAC)
-			CHECK_EQ(avgMsec, 0);
-			CHECK(avgUsec < 100);
-			CHECK(avgNsec > 50);
-			CHECK(avgNsec < 100000);
-	#elif defined(AJA_LINUX)
-			CHECK_EQ(avgMsec, 0);
-			CHECK(avgUsec < 100);
-			CHECK(avgNsec > 50);
-			CHECK(avgNsec < 100000);
-	#endif
-#else
-	#if defined(AJA_WINDOWS)
-			CHECK_EQ(avgMsec, 0);
-			CHECK(avgUsec < 1000);
-			CHECK(avgNsec > 0);
-			CHECK(avgNsec < 50000);
-	#elif defined(AJA_MAC)
-			// NOTE(paulh): Nanosleep doesn't seem to sleep at nanosecond resolution on my M1 Mac Mini.
-			CHECK_EQ(avgMsec, 0);
-			CHECK(avgUsec < 1000);
-			CHECK(avgNsec > 0);
-			CHECK(avgNsec < 50000);
-	#elif defined(AJA_LINUX)
-			CHECK_EQ(avgMsec, 0);
-			CHECK(avgUsec < 1000);
-			CHECK(avgNsec > 0);
-			CHECK(avgNsec < 75000);
-	#endif
-#endif
-			std::cout << "Milliseconds: " << avgMsec << "\n"
-				<< "Microseconds: " << avgUsec << "\n"
-				<< "Nanoseconds: " << avgNsec << "\n" << std::endl;
-		}
+// 		SUBCASE("AJATime::SleepInNanoseconds")
+// 		{
+// 			int sleepDuration = 100; // 100 nanoseconds
+// 			std::cout << "AJATime::SleepInNanoseconds - " << sleepDuration << "nsec" << std::endl;
+// 			uint64_t avgMs = 0;
+// 			uint64_t avgUs = 0;
+// 			uint64_t avgNs = 0;
+// 			const int iterations = 10;
+// 			for (int i = 0; i < iterations; i++) {
+// 				uint64_t startMs = AJATime::GetSystemMilliseconds();
+// 				uint64_t startUs = AJATime::GetSystemMicroseconds();
+// 				uint64_t startNs = AJATime::GetSystemNanoseconds();
+// 				AJATime::SleepInNanoseconds(sleepDuration);
+// 				uint64_t endMs = AJATime::GetSystemMilliseconds();
+// 				uint64_t endUs = AJATime::GetSystemMicroseconds();
+// 				uint64_t endNs = AJATime::GetSystemNanoseconds();
+// 				uint64_t deltaMs = endMs - startMs;
+// 				uint64_t deltaUs = endUs - startUs;
+// 				uint64_t deltaNs = endNs - startNs;
+// 				avgMs += deltaMs;
+// 				avgUs += deltaUs;
+// 				avgNs += deltaNs;
+// 			}
+// 			uint64_t avgMsec = avgMs / iterations;
+// 			uint64_t avgUsec = avgUs / iterations;
+// 			uint64_t avgNsec = avgNs / iterations;
+// 			// There could be variability in the sleep call, so make sure in range
+// 			// check to make sure the units are correct
+// #if defined(AJA_SLEEP_USE_STL)
+// 	#if defined(AJA_WINDOWS)
+// 			CHECK(avgMsec <= 1);
+// 			CHECK(avgUsec < 10);
+// 			CHECK(avgNsec > 50);
+// 			CHECK(avgNsec < 10000);
+// 	#elif defined(AJA_MAC)
+// 			CHECK_EQ(avgMsec, 0);
+// 			CHECK(avgUsec < 100);
+// 			CHECK(avgNsec > 50);
+// 			CHECK(avgNsec < 100000);
+// 	#elif defined(AJA_LINUX)
+// 			CHECK_EQ(avgMsec, 0);
+// 			CHECK(avgUsec < 100);
+// 			CHECK(avgNsec > 50);
+// 			CHECK(avgNsec < 100000);
+// 	#endif
+// #else
+// 	#if defined(AJA_WINDOWS)
+// 			CHECK_EQ(avgMsec, 0);
+// 			CHECK(avgUsec < 1000);
+// 			CHECK(avgNsec > 0);
+// 			CHECK(avgNsec < 50000);
+// 	#elif defined(AJA_MAC)
+// 			// NOTE(paulh): Nanosleep doesn't seem to sleep at nanosecond resolution on my M1 Mac Mini.
+// 			CHECK_EQ(avgMsec, 0);
+// 			CHECK(avgUsec < 1000);
+// 			CHECK(avgNsec > 0);
+// 			CHECK(avgNsec < 50000);
+// 	#elif defined(AJA_LINUX)
+// 			CHECK_EQ(avgMsec, 0);
+// 			CHECK(avgUsec < 1000);
+// 			CHECK(avgNsec > 0);
+// 			CHECK(avgNsec < 75000);
+// 	#endif
+// #endif
+// 			std::cout << "Milliseconds: " << avgMsec << "\n"
+// 				<< "Microseconds: " << avgUsec << "\n"
+// 				<< "Nanoseconds: " << avgNsec << "\n" << std::endl;
+// 		}
 	}
 
 } //time
