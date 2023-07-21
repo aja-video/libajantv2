@@ -187,7 +187,11 @@ endif()
 # installing
 
 add_custom_target(ajadriver_install ${AJADRIVER_TARGET_SOURCES})
-add_dependencies(ajadriver_install install)
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	add_dependencies(ajadriver_install install)
+endif()
 
 # Windows
 if (AJANTV2_BUILD_OPENSOURCE AND AJA_INSTALL_SOURCES)
