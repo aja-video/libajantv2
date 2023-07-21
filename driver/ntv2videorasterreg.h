@@ -174,9 +174,11 @@ NTV2_CON(ntv2_reg_videoraster_smpteframepulse,              18);    /**< SMPTE F
    NTV2_FLD(ntv2_fld_videoraster_smpteframepulse_pixelnumber,   16,  0);    /**< Pixel Number */
    NTV2_FLD(ntv2_fld_videoraster_smpteframepulse_linenumber,    16, 16);    /**< Line Number */
 
-NTV2_CON(ntv2_reg_videoraster_offsetgreen,                  19);    /**< Green playback component offset (signed 12 bit) */
-NTV2_CON(ntv2_reg_videoraster_offsetblue,                   20);    /**< Blue playback component offset (signed 12 bit) */
-NTV2_CON(ntv2_reg_videoraster_offsetred,                    21);    /**< Red playback component offset (signed 12 bit) */
-NTV2_CON(ntv2_reg_videoraster_offsetalpha,                  22);    /**< Alpha playback component offset (signed 12 bit) */
+NTV2_CON(ntv2_reg_videoraster_oddlinestartaddress,            19);    /**< UHD odd line addres*/
+
+//NTV2_CON(ntv2_reg_videoraster_offsetgreen,                  19);    /**< Green playback component offset (signed 12 bit) */
+//NTV2_CON(ntv2_reg_videoraster_offsetblue,                   20);    /**< Blue playback component offset (signed 12 bit) */
+//NTV2_CON(ntv2_reg_videoraster_offsetred,                    21);    /**< Red playback component offset (signed 12 bit) */
+//NTV2_CON(ntv2_reg_videoraster_offsetalpha,                  22);    /**< Alpha playback component offset (signed 12 bit) */
 
 #endif

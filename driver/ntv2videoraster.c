@@ -427,8 +427,10 @@ Ntv2Status ntv2_videoraster_update_frame(struct ntv2_videoraster *ntv2_raster, u
     uint32_t frame_pitch = 0;
     uint32_t field1_address = 0;
     uint32_t field2_address = 0;
+    uint32_t oddline_address = 0;
     bool progressive = false;
     bool top_first = false;
+	bool quad = false;
 
     if (ntv2_raster == NULL)
     {
@@ -449,18 +451,23 @@ Ntv2Status ntv2_videoraster_update_frame(struct ntv2_videoraster *ntv2_raster, u
     global_control = ntv2_raster->global_control[index];
     standard = NTV2_FLD_GET(ntv2_fld_global_control_standard, global_control);
     if (standard >= s_standard_size) return false;
+	quad = NTV2_FLD_GET(ntv2_fld_global_control_quad_tsi_enable, global_control) != 0;
     progressive = c_standard_data[standard].video_scan == ntv2_video_scan_progressive;
     top_first = c_standard_data[standard].video_scan == ntv2_video_scan_top_first;
 
     frame_size = ntv2_raster->frame_size[index];
     frame_pitch = ntv2_raster->frame_pitch[index];
-    
-    ntv2_raster->input_frame[index] = frame_number;
+
+    if (input)
+        ntv2_raster->input_frame[index] = frame_number;
+    else
+        ntv2_raster->output_frame[index] = frame_number;
 
     if (progressive)
     {
         field1_address = frame_number * frame_size;
-        field2_address = 0;
+        if (quad)
+            oddline_address = frame_number * frame_size + frame_pitch;            
     }
     else if (top_first)
     {
@@ -475,6 +482,7 @@ Ntv2Status ntv2_videoraster_update_frame(struct ntv2_videoraster *ntv2_raster, u
 
     ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_roifield1startaddress, field1_address);
     ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_roifield2startaddress, field2_address);
+    ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_oddlinestartaddress, oddline_address);
 
     ntv2InterruptLockRelease(&ntv2_raster->state_lock);
 
@@ -509,7 +517,7 @@ static bool has_config_changed(struct ntv2_videoraster *ntv2_raster, uint32_t in
     uint32_t channel_control_value = 0;
     uint32_t output_frame_value = 0;
     uint32_t input_frame_value = 0;
-    
+#if 0    
     uint32_t global_control_mask =
         NTV2_FLD_MASK(ntv2_fld_global_control_standard) |
         NTV2_FLD_MASK(ntv2_fld_global_control_frame_rate) |
@@ -526,14 +534,14 @@ static bool has_config_changed(struct ntv2_videoraster *ntv2_raster, uint32_t in
         NTV2_FLD_MASK(ntv2_fld_channel_control_pixel_format_high) |
         NTV2_FLD_MASK(ntv2_fld_channel_control_channel_disable) |
 		NTV2_FLD_MASK(ntv2_fld_channel_control_frame_size);
-
+#endif
     bool ret = true;
 
     /* read global control 2 to get check channel independent mode bit */
     if (index == 0)
     {
         global_control2_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control2, 0);
-        global_control2_value &= global_control2_mask;
+//        global_control2_value &= global_control2_mask;
     }
     else
     {
@@ -544,14 +552,14 @@ static bool has_config_changed(struct ntv2_videoraster *ntv2_raster, uint32_t in
     if (index == 0)
     {
         global_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control, 0);
-        global_control_value &= global_control_mask;
+//        global_control_value &= global_control_mask;
     }
     else
     {
         if (NTV2_FLD_GET(ntv2_fld_global_control_independent_mode, global_control2_value))
         {
             global_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control, index);
-            global_control_value &= global_control_mask;
+//            global_control_value &= global_control_mask;
         }
         else
         {
@@ -563,7 +571,7 @@ static bool has_config_changed(struct ntv2_videoraster *ntv2_raster, uint32_t in
     if (index == 0)
     {
         global_control3_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control3, 0);
-        global_control3_value &= global_control3_mask;
+//        global_control3_value &= global_control3_mask;
     }
     else
     {
@@ -571,7 +579,7 @@ static bool has_config_changed(struct ntv2_videoraster *ntv2_raster, uint32_t in
     }
     
     channel_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_channel_control, index);
-    channel_control_value &= channel_control_mask;
+//    channel_control_value &= channel_control_mask;
     
     output_frame_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_channel_output_frame, index);
     input_frame_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_channel_input_frame, index);
@@ -640,6 +648,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     uint32_t frame_number = 0;
     uint32_t field1_address = 0;
     uint32_t field2_address = 0;
+    uint32_t oddline_address = 0;
     uint32_t hoffset = 0;
     uint32_t voffset = 0;
     uint32_t fid_high = 0;
@@ -727,7 +736,11 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     if (progressive)
     {
         field1_address = frame_number * frame_size;
-        field2_address = 0;
+        if (quad)
+        {
+            oddline_address = frame_number * frame_size + pitch;
+            pitch *= 2;
+        }
     }
     else if (top_first)
     {
@@ -748,6 +761,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
 
     ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_roifield1startaddress, field1_address);
     ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_roifield2startaddress, field2_address);
+    ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_oddlinestartaddress, oddline_address);
 
     ntv2InterruptLockRelease(&ntv2_raster->state_lock);
 
@@ -950,10 +964,6 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     value = NTV2_FLD_SET(ntv2_fld_videoraster_smpteframepulse_pixelnumber, 1);
     value |= NTV2_FLD_SET(ntv2_fld_videoraster_smpteframepulse_linenumber, 1);
     ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_smpteframepulse, value);
-    ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_offsetgreen, 0);
-    ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_offsetblue, 0);
-    ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_offsetred, 0);
-    ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_offsetalpha, 0);
 
     if (ntv2_raster->mode_change[index])
     {
