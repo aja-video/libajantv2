@@ -40,24 +40,24 @@ To build only the static library from the command line:
 1. Open a terminal window, and enter the **libajantv2** folder:\
 `$ cd libajantv2`
 2. Generate the build configuration:\
-`$ cmake -S .  -B _bld`
+`$ cmake -S .  -B build`
 3. Run the build:\
-`$ cmake --build _bld`
-4. Look for the finished **libajantv2.a** library inside **_bld/ajantv2**.
+`$ cmake --build build`
+4. Look for the finished **libajantv2.a** library inside **build/ajantv2**.
 
 ###### MacOS: Build SDK & Demos Using Xcode
 To generate the Xcode project file, and then build from it:
 1. From the Terminal, enter the **libajantv2** folder:\
 `$ cd libajantv2`
 2. Generate the Xcode project:\
-`$ cmake -S .  -B _bld`
+`$ cmake -S .  -B build`
 3. Either open the project in **Xcode**:\
-`$ open _bld/libajantv2.xcodeproj`\
+`$ open build/libajantv2.xcodeproj`\
 …or build directly from the command line:\
-`$ xcrun xcodebuild -project _bld/libajantv2.xcodeproj -target ALL_BUILD`
-4. Look for the finished executables inside the **_bld** folder.\
+`$ xcrun xcodebuild -project build/libajantv2.xcodeproj -target ALL_BUILD`
+4. Look for the finished executables inside the **build** folder.\
 For example, to run **ntv2enumerateboards**:\
-`$ _bld/demos/ntv2enumerateboards/Debug/ntv2enumerateboards`
+`$ build/demos/ntv2enumerateboards/Debug/ntv2enumerateboards`
 
 By default, **Xcode** will produce **Debug** artifacts.\
 To build **Release** artifacts, add `-configuration Release` to the **xcodebuild** command line.
@@ -67,14 +67,14 @@ To build the static library using the installed Visual Studio compiler from a co
 1. Launch **cmd.exe**, and enter the **libajantv2** directory:\
 `> cd libajantv2`
 2. Run CMake to configure the build:\
-`> cmake -S .  -B _bld`
+`> cmake -S .  -B build`
 3. Build the library:
    - From the command line:\
-   `> cmake --build _bld`
+   `> cmake --build build`
    - From Visual Studio IDE:\
-   `> start _bld\ALL_BUILD.vcxproj`
-4. Look for the debug static libary inside the **_bld** folder:\
-`> dir _bld\ajantv2\Debug\ajantv2d.lib`
+   `> start build\ALL_BUILD.vcxproj`
+4. Look for the debug static libary inside the **build** folder:\
+`> dir build\ajantv2\Debug\ajantv2d.lib`
 
 ###### Docker:
 Using the Ubuntu 22.04 Dockerfile as an example, here is how to build libajantv2 from a Docker Container, and copy the build artifacts back to the Docker host system.
