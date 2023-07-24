@@ -73,6 +73,7 @@ if (NTV2_VERSION_BUILD)
     message(STATUS "NTV2 build number override: ${NTV2_VERSION_BUILD}")
     set(AJA_NTV2_SDK_BUILD_NUMBER ${NTV2_VERSION_BUILD})
 else()
+    message(WARNING "NTV2 build number not specified. Defaulting to 0.")
     set(AJA_NTV2_SDK_BUILD_NUMBER "0")
 endif()
 
