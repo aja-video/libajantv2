@@ -2905,7 +2905,11 @@ static int __init aja_ntv2_module_init(void)
 
 #if defined(AJA_CREATE_DEVICE_NODES)
 	// Create device class
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,4,0))
+	ntv2_class = class_create(getNTV2ModuleParams()->driverName);
+#else
 	ntv2_class = class_create(THIS_MODULE, getNTV2ModuleParams()->driverName);
+#endif
 	if (IS_ERR(ntv2_class))
 	{
 		res = PTR_ERR(ntv2_class);
