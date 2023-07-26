@@ -367,7 +367,7 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 							NTV2_FORMAT_4x4096x2160p_5000,
 							NTV2_FORMAT_4x4096x2160p_5994,
 							NTV2_FORMAT_4x4096x2160p_6000}, NTV2_STANDARD_8192);
-	}
+	}	//	TEST_CASE("GetNTV2StandardFromVideoFormat")
 
 	TEST_CASE("GetNTV2FrameGeometryFromVideoFormat")
 	{
@@ -535,7 +535,7 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 
 		check_fmts_are_geom({NTV2_FORMAT_625_5000,
 							 NTV2_FORMAT_625psf_2500}, NTV2_FG_720x576);
-	}
+	}	//	TEST_CASE("GetNTV2FrameGeometryFromVideoFormat")
 
 	TEST_CASE("GetVideoActiveSize")
 	{
@@ -562,9 +562,67 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 		CHECK(GetVideoActiveSize(NTV2_FORMAT_525_5994, NTV2_FBF_ARGB, NTV2_VANCMODE_OFF) == 1399680);
 		CHECK(GetVideoActiveSize(NTV2_FORMAT_525_5994, NTV2_FBF_10BIT_RGB, NTV2_VANCMODE_OFF) == 1399680);
 		CHECK(GetVideoActiveSize(NTV2_FORMAT_525_5994, NTV2_FBF_48BIT_RGB, NTV2_VANCMODE_OFF) == 2099520);
-	}
+	}	//	TEST_CASE("GetVideoActiveSize")
 
-} // ntv2utils
+	TEST_CASE("SetRasterLinesBlack")
+	{
+		static const NTV2PixelFormats pixFmtsToTest = {	NTV2_FBF_10BIT_YCBCR, NTV2_FBF_8BIT_YCBCR, NTV2_FBF_ARGB,
+														NTV2_FBF_RGBA, NTV2_FBF_10BIT_RGB, /* NTV2_FBF_8BIT_YCBCR_YUY2,*/
+														NTV2_FBF_ABGR	/*, NTV2_FBF_10BIT_DPX, NTV2_FBF_10BIT_YCBCR_DPX,
+														NTV2_FBF_10BIT_DPX_LE */ , NTV2_FBF_24BIT_RGB, NTV2_FBF_24BIT_BGR,
+														NTV2_FBF_48BIT_RGB /* , NTV2_FBF_10BIT_ARGB, NTV2_FBF_16BIT_ARGB */ };
+		static const NTV2StandardSet standardsToTest = {/*NTV2_STANDARD_1080, */ NTV2_STANDARD_720, NTV2_STANDARD_525,
+														NTV2_STANDARD_625, NTV2_STANDARD_1080p, // NTV2_STANDARD_2K,
+														//NTV2_STANDARD_2Kx1080p, NTV2_STANDARD_2Kx1080i,
+														NTV2_STANDARD_3840x2160p, //NTV2_STANDARD_4096x2160p,
+														NTV2_STANDARD_7680 /*, NTV2_STANDARD_8192 */ };
+		//	Permute by standard and pixel format...
+		for (NTV2StandardSetConstIter stIt(standardsToTest.begin());  stIt != standardsToTest.end();  ++stIt)
+		{
+			const NTV2Standard st(*stIt);
+			for (NTV2PixelFormatsConstIter pfIt(pixFmtsToTest.begin());  pfIt != pixFmtsToTest.end();  ++pfIt)
+			{
+				const NTV2PixelFormat pf(*pfIt);
+				const NTV2FormatDesc fd (st, pf);
+#if defined(_DEBUG)
+	cerr << ::NTV2StandardToString(st) << " " << ::NTV2FrameBufferFormatToString(pf) << endl;
+#endif
+				//	Make black test pattern buffer for comparison later...
+				NTV2TestPatternGen gen;
+				NTV2Buffer tpBuffer(fd.GetTotalBytes());	//	Allocate test pattern buffer
+				CHECK(gen.DrawTestPattern (NTV2_TestPatt_Black, fd, tpBuffer));	//	Black test pattern
+//CNTV2Card c(0); c.DMAWriteFrame(11, tpBuffer, fd.GetTotalBytes(), NTV2_CHANNEL5);
+
+				//	Check for buffer overruns --- so allocate twice the raster space...
+				NTV2Buffer buffer(fd.GetTotalBytes() * 2);	//	Allocate twice what's needed
+				buffer.Fill(0xBAADF00D);					//	Fill with "BAADF00D" pattern
+				//	'trailer' is 'buffer' portion that should remain untouched:
+				const NTV2Buffer trailer(buffer.GetHostAddress(fd.GetTotalBytes()),fd.GetTotalBytes());
+				const NTV2Buffer reference(trailer);		//	Make reference (comparison) buffer
+				CHECK(trailer.IsContentEqual(reference));	//	Confirm identical
+				CHECK(::SetRasterLinesBlack(fd.GetPixelFormat(), buffer, fd.GetBytesPerRow(), fd.GetFullRasterHeight()));
+				CHECK(trailer.IsContentEqual(reference));	//	Trailer should be identical to reference, else it overran
+//c.DMAWriteFrame(10, buffer, fd.GetTotalBytes(), NTV2_CHANNEL5);
+
+				//	Check if SetRasterLinesBlack matches black test pattern...
+				const NTV2Buffer buff(buffer, fd.GetTotalBytes());		//	Top half of 'buffer' has black raster lines
+				CHECK_EQ(buff.GetByteCount(), tpBuffer.GetByteCount());	//	Top half of 'buffer' should be same size as 'tpBuffer'
+				if (st == NTV2_STANDARD_720  &&  pf == NTV2_FBF_10BIT_YCBCR)
+				{	//	720p 10-bit YUV is a special case:  only check first 0xD55 of each line:
+					NTV2Buffer rowBuff(fd.GetBytesPerRow()), tpRowBuff(fd.GetBytesPerRow());
+					for (ULWord rowNdx(0);  rowNdx < fd.GetVisibleRasterHeight();  rowNdx++)
+					{
+						CHECK(fd.GetRowBuffer(tpBuffer, tpRowBuff, rowNdx));
+						CHECK(fd.GetRowBuffer(buff, rowBuff, rowNdx));
+						CHECK(rowBuff.IsContentEqual(tpRowBuff, /*byteOffset*/0, /*byteCount*/0xD55));
+					}	//	for each row
+				}
+				else
+					CHECK(buff.IsContentEqual(tpBuffer));					//	Content should match
+			}	//	for each pixel format
+		}	//	for each standard
+	}	//	TEST_CASE("SetRasterLinesBlack")
+}	//	TEST_SUITE("ntv2utils")
 
 void ntv2devicescanner_marker() {}
 TEST_SUITE("ntv2devicescanner" * doctest::description("ntv2 device scanner functions")) {

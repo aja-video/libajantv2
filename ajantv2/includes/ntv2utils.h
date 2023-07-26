@@ -135,15 +135,28 @@ AJAExport void UnPack10BitDPXtoForRP215(UWord* rawrp215Buffer,ULWord* DPXLinebuf
 AJAExport void MaskYCbCrLine(UWord* ycbcrLine, UWord signalMask , ULWord numPixels);
 
 /**
-	@brief		Writes a line of unpacked 10-bit Y/C legal SMPTE black values into the given UWord buffer.
+	@brief		Writes a line of unpacked, legal SMPTE 10-bit Y/C black values into the given buffer.
 	@param[in]	pOutLineData	A valid, non-NULL pointer to the destination UWord buffer.
 	@param[in]	inNumPixels		Specifies the width of the line, in pixels. Defaults to 1920.
-	@warning	This function performs no error checking. Memory corruption will occur if the destination buffer
-				is smaller than 4 x inNumPixels bytes (i.e. smaller than 2 x inNumPixels UWords).
+	@warning	This function performs no error checking. Memory corruption will occur if the
+				destination buffer is smaller than 4 x 'inNumPixels' bytes.
+	@note		This function writes UNPACKED Y/C values. When I return, the destination buffer
+				will NOT contain NTV2_FBF_10BIT_YCBCR-formatted pixel values.
+				Use PackLine_16BitYUVto10BitYUV to convert to NTV2_FBF_10BIT_YCBCR.
 **/
 AJAExport void Make10BitBlackLine (UWord * pOutLineData, const ULWord inNumPixels = 1920);
 
-AJAExport void Make10BitWhiteLine(UWord* pOutLineData, const ULWord numPixels=1920);
+/**
+	@brief		Writes a line of unpacked, legal SMPTE 10-bit Y/C white values into the given buffer.
+	@param[in]	pOutLineData	A valid, non-NULL pointer to the destination UWord buffer.
+	@param[in]	inNumPixels		Specifies the width of the line, in pixels. Defaults to 1920.
+	@warning	This function performs no error checking. Memory corruption will occur if the
+				destination buffer is smaller than 4 x 'inNumPixels' bytes.
+	@note		This function writes UNPACKED Y/C values. When I return, the destination buffer
+				will NOT contain NTV2_FBF_10BIT_YCBCR-formatted pixel values.
+				Use PackLine_16BitYUVto10BitYUV to convert to NTV2_FBF_10BIT_YCBCR.
+**/
+AJAExport void Make10BitWhiteLine (UWord * pOutLineData, const ULWord inNumPixels = 1920);
 
 /**
 	@return		True if successful;	 otherwise false.
@@ -171,7 +184,7 @@ AJAExport void CopyRGBAImageToFrame(ULWord* pSrcBuffer, ULWord srcHeight, ULWord
 
 /**
 	@brief	Sets all or part of a destination raster image to legal black.
-	@param[in]	inPixelFormat			Specifies the NTV2FrameBufferFormat of the destination buffer.
+	@param[in]	inPixelFormat			Specifies the NTV2PixelFormat of the destination buffer.
 										(Note that many pixel formats are not currently supported.)
 	@param		pDstBuffer				Specifies the address of the destination buffer to be modified. Must be non-NULL.
 	@param[in]	inDstBytesPerLine		The number of bytes per raster line of the destination buffer. Note that this value
@@ -180,18 +193,17 @@ AJAExport void CopyRGBAImageToFrame(ULWord* pSrcBuffer, ULWord srcHeight, ULWord
 										this be a multiple of 16, while NTV2_FBF_8BIT_YCBCR requires an even number).
 										Must exceed zero.
 	@param[in]	inDstTotalLines			The total number of raster lines to set to legal black. Must exceed zero.
-	@bug		Need implementations for NTV2_FBF_8BIT_YCBCR_YUY2, NTV2_FBF_10BIT_DPX, NTV2_FBF_10BIT_YCBCR_DPX, NTV2_FBF_24BIT_RGB,
-				NTV2_FBF_24BIT_BGR, NTV2_FBF_10BIT_YCBCRA, NTV2_FBF_10BIT_DPX_LE, NTV2_FBF_48BIT_RGB, NTV2_FBF_10BIT_RGB_PACKED,
-				NTV2_FBF_10BIT_ARGB, NTV2_FBF_16BIT_ARGB, the 3-plane planar formats NTV2_FBF_8BIT_YCBCR_420PL3,
-				NTV2_FBF_8BIT_YCBCR_422PL3, NTV2_FBF_10BIT_YCBCR_420PL3_LE, and NTV2_FBF_10BIT_YCBCR_422PL3_LE, plus the 2-plane
-				planar formats NTV2_FBF_10BIT_YCBCR_420PL2, NTV2_FBF_10BIT_YCBCR_422PL2, NTV2_FBF_8BIT_YCBCR_420PL2, and
-				NTV2_FBF_8BIT_YCBCR_422PL2.
+	@bug		Need implementations for NTV2_FBF_8BIT_YCBCR_YUY2, NTV2_FBF_10BIT_DPX, NTV2_FBF_10BIT_YCBCR_DPX,
+				NTV2_FBF_10BIT_YCBCRA, NTV2_FBF_10BIT_DPX_LE, NTV2_FBF_10BIT_RGB_PACKED, NTV2_FBF_10BIT_ARGB, NTV2_FBF_16BIT_ARGB,
+				the 3-plane planar formats NTV2_FBF_8BIT_YCBCR_420PL3, NTV2_FBF_8BIT_YCBCR_422PL3, NTV2_FBF_10BIT_YCBCR_420PL3_LE,
+				and NTV2_FBF_10BIT_YCBCR_422PL3_LE, plus the 2-plane planar formats NTV2_FBF_10BIT_YCBCR_420PL2,
+				NTV2_FBF_10BIT_YCBCR_422PL2, NTV2_FBF_8BIT_YCBCR_420PL2, and NTV2_FBF_8BIT_YCBCR_422PL2.
 	@return		True if successful;	 otherwise false.
 **/
-AJAExport bool	SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
-										UByte *						pDstBuffer,
-										const ULWord				inDstBytesPerLine,
-										const UWord					inDstTotalLines);
+AJAExport bool	SetRasterLinesBlack (const NTV2PixelFormat	inPixelFormat,
+										UByte *				pDstBuffer,
+										const ULWord		inDstBytesPerLine,
+										const UWord			inDstTotalLines);
 
 /**
 	@brief	Copies all or part of a source raster image into a destination raster at a given position.
