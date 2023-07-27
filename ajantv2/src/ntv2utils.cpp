@@ -1042,11 +1042,11 @@ bool SetRasterLinesBlack (const NTV2PixelFormat	inPixelFormat,
 							const ULWord		inDstBytesPerLine,
 							const UWord			inDstTotalLines)
 {
-	if (!pDstBuffer)					//	NULL buffer
+	if (!pDstBuffer)			//	NULL buffer
 		return false;
-	if (inDstBytesPerLine == 0)			//	zero rowbytes
+	if (inDstBytesPerLine == 0)	//	zero rowbytes
 		return false;
-	if (inDstTotalLines == 0)			//	zero height
+	if (inDstTotalLines == 0)	//	zero height
 		return false;
 
 	switch (inPixelFormat)
@@ -1061,9 +1061,12 @@ bool SetRasterLinesBlack (const NTV2PixelFormat	inPixelFormat,
 		case NTV2_FBF_24BIT_RGB:
 		case NTV2_FBF_24BIT_BGR:
 		case NTV2_FBF_48BIT_RGB:
-		case NTV2_FBF_10BIT_RGB:		{	NTV2Buffer dst(pDstBuffer, inDstBytesPerLine * ULWord(inDstTotalLines));
-											return dst.Fill(ULWord(0));	//	Zero all R/G/B/A components
-										}
+		case NTV2_FBF_10BIT_RGB:
+		case NTV2_FBF_10BIT_ARGB:
+		case NTV2_FBF_16BIT_ARGB:
+			{	NTV2Buffer dst(pDstBuffer, inDstBytesPerLine * ULWord(inDstTotalLines));
+				return dst.Fill(ULWord(0));	//	Zero all R/G/B/A components
+			}
 
 		case NTV2_FBF_8BIT_YCBCR_YUY2:
 		case NTV2_FBF_10BIT_DPX:
@@ -1077,8 +1080,6 @@ bool SetRasterLinesBlack (const NTV2PixelFormat	inPixelFormat,
 		case NTV2_FBF_PRORES_DVCPRO:
 		case NTV2_FBF_PRORES_HDV:
 		case NTV2_FBF_10BIT_RGB_PACKED:
-		case NTV2_FBF_10BIT_ARGB:
-		case NTV2_FBF_16BIT_ARGB:
 		case NTV2_FBF_8BIT_YCBCR_422PL3:
 		case NTV2_FBF_10BIT_RAW_RGB:
 		case NTV2_FBF_10BIT_RAW_YCBCR:
