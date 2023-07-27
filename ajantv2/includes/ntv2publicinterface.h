@@ -5972,12 +5972,12 @@ typedef enum
 				template<typename T> bool	Find (const T & inValue, int & inOutIndex) const	//	New in SDK 16.0
 				{
 					const bool isAscending(inOutIndex >= 0);
-					if (isAscending	 &&	 inOutIndex >= int(GetByteCount()))
+					const int maxNdx(int(GetByteCount()) / sizeof(T));
+					if (isAscending	 &&	 inOutIndex >= maxNdx)
 						return false;	//	Past end
-					if (!isAscending  &&  (1 - inOutIndex) >= int(GetByteCount()))
+					if (!isAscending  &&  (1 - inOutIndex) >= maxNdx)
 						return false;	//	Before start
 					const T * pValues(*this);
-					const int maxNdx(int(GetByteCount()) / sizeof(T));
 					if (isAscending)
 					{
 						for (int ndx(inOutIndex);  ndx < maxNdx;  ndx++)
