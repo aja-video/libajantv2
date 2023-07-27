@@ -8496,13 +8496,41 @@ typedef enum
 			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2VideoFormatSet & inFormats);
 
 			/**
-				@brief	Returns a set of distinct ::NTV2FrameBufferFormat values supported on the given device.
+				@brief		Returns a set of distinct ::NTV2FrameBufferFormat values supported on the given device.
 				@param[in]	inDeviceID	Specifies the ::NTV2DeviceID of the device of interest.
 				@param[out] outFormats	Receives the set of distinct ::NTV2FrameBufferFormat values supported by the device.
 				@return		True if successful;	 otherwise false.
-				@todo	This needs to be moved to a C++ compatible "device features" module.
+				@todo		This needs to be moved to a C++ compatible "device features" module.
 			**/
 			AJAExport bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2PixelFormats & outFormats);
+
+			/**
+				@brief		Returns a set of all ::NTV2PixelFormat values supported (used) by any/all supported NTV2 devices.
+				@param[out] outFormats	Receives the set of NTV2PixelFormats supported by any/all NTV2 devices.
+				@return		True if successful;	 otherwise false.
+			**/
+			AJAExport bool NTV2GetSupportedPixelFormats (NTV2PixelFormats & outFormats);	//	New in SDK 17.0
+
+			/**
+				@brief		Returns a set of ::NTV2PixelFormat values not suported by any NTV2 device.
+				@param[out] outFormats	Receives the set of NTV2PixelFormats not supported by any NTV2 device.
+				@return		True if successful;	 otherwise false.
+			**/
+			AJAExport bool NTV2GetUnsupportedPixelFormats (NTV2PixelFormats & outFormats);	//	New in SDK 17.0
+
+			/**
+				@brief		Returns a set of all ::NTV2Standard values supported (used) by any/all supported NTV2 devices.
+				@param[out] outStandards	Receives the set of NTV2Standards supported by any/all NTV2 devices.
+				@return		True if successful;	 otherwise false.
+			**/
+			AJAExport bool NTV2GetSupportedStandards (NTV2StandardSet & outStandards);	//	New in SDK 17.0
+
+			/**
+				@brief		Returns a set of ::NTV2Standard values not suported by any NTV2 device.
+				@param[out] outStandards	Receives the set of NTV2Standards not supported by any NTV2 device.
+				@return		True if successful;	 otherwise false.
+			**/
+			AJAExport bool NTV2GetUnsupportedStandards (NTV2StandardSet & outStandards);	//	New in SDK 17.0
 
 			/**
 				@brief		Prints the given ::NTV2FrameBufferFormatSet contents into the given output stream.
