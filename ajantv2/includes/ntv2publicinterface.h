@@ -5557,23 +5557,25 @@ typedef enum
 
 		#if !defined (NTV2_BUILDING_DRIVER)
 		/**
-			@brief		Describes a segmented data transfer (copy or move) from a source memory location to a destination location,
-						with independent pitch and direction attributes for source and destination.
-						The simplest transfer, of course, has a single segment.
+			@brief		Describes a segmented data transfer (copy or move) from a source memory location to a
+						destination location, with independent pitch and direction attributes for source and
+						destination. The simplest transfer, of course, has a single segment.
 			@details	A segmented transfer is described by these attributes:
 						-	A starting source and destination offset, in elements;
 						-	A source and destination pitch (span between segments, in elements);
 						-	A segment length, in elements;
 						-	A segment count.
-						The element size defaults to 1 byte per element, must be power-of-2, and cannot be larger than 8 bytes.
+						The element size defaults to 1 byte per element, must be a power-of-2, and cannot be
+						larger than 8 bytes.
 						There are also some optional attributes:
-						-	Optional "source vertical flip" flag to indicate that the source offset is interpreted as an offset,
-							in elements, from the bottom of the source buffer, and during the transfer, the source pitch is
-							subtracted instead of added. Defaults to normal "from top" source offset reference.
-						-	Optional "destination vertical flip" flag to indicate that the destination offset is interpreted as
-							an offset, in elements, from the bottom of the destination buffer, and during the transfer, the
-							destination pitch is subtracted instead of added. Defaults to normal "from top" destination offset
-							reference.
+						-	Optional "source vertical flip" flag to indicate that the source offset is
+							interpreted as an offset, in elements, from the bottom of the source buffer, and
+							during the transfer, the source pitch is subtracted instead of added. Defaults to
+							normal "from top" source offset reference.
+						-	Optional "destination vertical flip" flag to indicate that the destination offset
+							is interpreted as an offset, in elements, from the bottom of the destination buffer,
+							and during the transfer, the destination pitch is subtracted instead of added.
+							Defaults to normal "from top" destination offset reference.
 		**/
 		class AJAExport NTV2SegmentedXferInfo
 		{
