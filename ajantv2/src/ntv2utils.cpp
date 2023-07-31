@@ -765,21 +765,25 @@ void MaskYCbCrLine(UWord* ycbcrLine, UWord signalMask , ULWord numPixels)
 
 void Make10BitBlackLine (UWord * pOutLineData, const ULWord inNumPixels)
 {
-	// Assume 1080 format
-	for (ULWord count(0);  count < inNumPixels*2;  count+=2)
+	//	Write *UNPACKED* 10-bit YCbCr values into pOutLineData, assuming it can hold at least inNumPixels * 4 bytes
+	//	NOTE:	When I return, 'pOutLineData' will NOT contain NTV2_FBF_10BIT_YCBCR!
+	//			(Use ::PackLine_16BitYUVto10BitYUV to convert to NTV2_FBF_10BIT_YCBCR.)
+	for (ULWord count(0);  count < inNumPixels;  count++)
 	{
-		pOutLineData[count]	  = UWord(CCIR601_10BIT_CHROMAOFFSET);
-		pOutLineData[count+1] = UWord(CCIR601_10BIT_BLACK);
+		*pOutLineData++ = UWord(CCIR601_10BIT_CHROMAOFFSET);	//	512		0x200
+		*pOutLineData++ = UWord(CCIR601_10BIT_BLACK);			//	64		0x40
 	}
 }
 
 void Make10BitWhiteLine (UWord* pOutLineData, const ULWord inNumPixels)
 {
-	// assumes lineData is large enough for numPixels
-	for (ULWord count(0);  count < inNumPixels*2;  count+=2)
+	//	Write *UNPACKED* 10-bit YCbCr values into pOutLineData, assuming it can hold at least inNumPixels * 4 bytes
+	//	NOTE:	When I return, 'pOutLineData' will NOT contain NTV2_FBF_10BIT_YCBCR!
+	//			(Use ::PackLine_16BitYUVto10BitYUV to convert to NTV2_FBF_10BIT_YCBCR.)
+	for (ULWord count(0);  count < inNumPixels;  count++)
 	{
-		pOutLineData[count] = UWord(CCIR601_10BIT_CHROMAOFFSET);
-		pOutLineData[count+1] = UWord(CCIR601_10BIT_WHITE);
+		*pOutLineData++ = UWord(CCIR601_10BIT_CHROMAOFFSET);	//	512		0x200
+		*pOutLineData++ = UWord(CCIR601_10BIT_WHITE);			//	940		0x3AC
 	}
 }
 
@@ -997,7 +1001,7 @@ void CopyRGBAImageToFrame(ULWord* pSrcBuffer, ULWord srcWidth, ULWord srcHeight,
 
 
 static bool SetRasterLinesBlack8BitYCbCr (UByte *			pDstBuffer,
-											const ULWord		inDstBytesPerLine,
+											const ULWord	inDstBytesPerLine,
 											const UWord		inDstTotalLines)
 {
 	const ULWord	dstMaxPixelWidth	(inDstBytesPerLine / 2);	//	2 bytes per pixel for '2vuy'
@@ -1013,90 +1017,30 @@ static bool SetRasterLinesBlack8BitYCbCr (UByte *			pDstBuffer,
 
 
 static bool SetRasterLinesBlack10BitYCbCr (UByte *			pDstBuffer,
-											const ULWord		inDstBytesPerLine,
+											const ULWord	inDstBytesPerLine,
 											const UWord		inDstTotalLines)
 {
-	const ULWord	dstMaxPixelWidth	(inDstBytesPerLine / 16 * 6);
-	UByte *		pLine				(pDstBuffer);
-	for (UWord lineNum (0);	 lineNum < inDstTotalLines;	 lineNum++)
-	{
-		UWord *		pDstUWord	(reinterpret_cast <UWord *> (pLine));
-		ULWord *	pDstULWord	(reinterpret_cast <ULWord *> (pLine));
-		::Make10BitBlackLine (pDstUWord, dstMaxPixelWidth);
-		::PackLine_16BitYUVto10BitYUV (pDstUWord, pDstULWord, dstMaxPixelWidth);
-		pLine += inDstBytesPerLine;
-	}
+	//	In SDKs before 17.0, this function wrote past the end of the last line in
+	//	the destination raster buffer, because Make10BitBlackLine (which used to
+	//	be called once per line) always wrote 1.5 times inDstBytesPerLine.
+	const ULWord dstMaxPixelWidth (inDstBytesPerLine / 16 * 6);
+	NTV2Buffer dstBuffer (pDstBuffer, ULWord(inDstTotalLines) * inDstBytesPerLine);
+	::Make10BitBlackLine (dstBuffer, dstMaxPixelWidth);	//	Write unpacked SMPTE black Y/C values into line 0 of dstBuffer
+	::PackLine_16BitYUVto10BitYUV (dstBuffer, dstBuffer, dstMaxPixelWidth);	//	Pack in-place to '2vuy'
+	for (UWord lineNum(1);  lineNum < inDstTotalLines;  lineNum++)			//	Make copies of line 0...
+		if (!dstBuffer.CopyFrom (dstBuffer,									//	srcBuffer is line 0 of dstBuffer
+									0,										//	srcByteOffset
+									ULWord(lineNum) * inDstBytesPerLine,	//	dstByteOffset
+									inDstBytesPerLine))						//	numBytesToCopy
+			return false;	//	failed!
 	return true;
 }
 
 
-static bool SetRasterLinesBlack8BitRGBs (const NTV2FrameBufferFormat	inPixelFormat,
-											UByte *						pDstBuffer,
-											const ULWord					inDstBytesPerLine,
-											const UWord					inDstTotalLines,
-											const bool					inIsSD	= false)
-{
-	UByte *			pLine				(pDstBuffer);
-	const ULWord	dstMaxPixelWidth	(inDstBytesPerLine / 4);	//	4 bytes per pixel
-	YCbCrAlphaPixel YCbCr = {0 /*Alpha*/,	44/*cr*/,	10/*Y*/,	44/*cb*/};
-	RGBAlphaPixel	rgb;
-	if (inIsSD)
-		::SDConvertYCbCrtoRGBSmpte (&YCbCr, &rgb);
-	else
-		::HDConvertYCbCrtoRGBSmpte (&YCbCr, &rgb);
-
-	//	Set the first line...
-	for (ULWord pixNum (0);	 pixNum < dstMaxPixelWidth;	 pixNum++)
-	{
-		switch (inPixelFormat)
-		{
-			case NTV2_FBF_ARGB: pLine[0] = rgb.Alpha;	pLine[0] = rgb.Red;		pLine[0] = rgb.Green;	pLine[0] = rgb.Blue;	break;
-			case NTV2_FBF_RGBA: pLine[0] = rgb.Red;		pLine[0] = rgb.Green;	pLine[0] = rgb.Blue;	pLine[0] = rgb.Alpha;	break;
-			case NTV2_FBF_ABGR: pLine[0] = rgb.Alpha;	pLine[0] = rgb.Blue;	pLine[0] = rgb.Green;	pLine[0] = rgb.Red;		break;
-			default:			return false;
-		}
-		pLine += 4;		//	4 bytes per pixel
-	}
-
-	//	Set the rest...
-	pLine = pDstBuffer + inDstBytesPerLine;
-	for (UWord lineNum (1);	 lineNum < inDstTotalLines;	 lineNum++)
-	{
-		::memcpy (pLine, pDstBuffer, inDstBytesPerLine);
-		pLine += inDstBytesPerLine;
-	}
-	return true;
-}
-
-
-static bool SetRasterLinesBlack10BitRGB (UByte *			pDstBuffer,
-											const ULWord		inDstBytesPerLine,
-											const UWord		inDstTotalLines,
-											const bool		inIsSD	= false)
-{
-	UByte *			pLine				(pDstBuffer + inDstBytesPerLine);
-	ULWord *		pPixels				(reinterpret_cast <ULWord *> (pDstBuffer));
-	const ULWord		dstMaxPixelWidth	(inDstBytesPerLine / 4);	//	4 bytes per pixel
-	ULWord			blackOpaque			(0xC0400004);	(void) inIsSD;	//	For now
-
-	//	Set the first line...
-	for (ULWord pixNum(0);	pixNum < dstMaxPixelWidth;	pixNum++)
-		pPixels[pixNum] = blackOpaque;
-
-	//	Set the rest...
-	for (UWord lineNum(1);	lineNum < inDstTotalLines;	lineNum++)
-	{
-		::memcpy (pLine, pDstBuffer, inDstBytesPerLine);
-		pLine += inDstBytesPerLine;
-	}
-	return true;
-}
-
-
-bool SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
-							UByte *						pDstBuffer,
-							const ULWord					inDstBytesPerLine,
-							const UWord					inDstTotalLines)
+bool SetRasterLinesBlack (const NTV2PixelFormat	inPixelFormat,
+							UByte *				pDstBuffer,
+							const ULWord		inDstBytesPerLine,
+							const UWord			inDstTotalLines)
 {
 	if (!pDstBuffer)					//	NULL buffer
 		return false;
@@ -1113,9 +1057,13 @@ bool SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
 
 		case NTV2_FBF_ARGB:
 		case NTV2_FBF_RGBA:
-		case NTV2_FBF_ABGR:				return SetRasterLinesBlack8BitRGBs (inPixelFormat, pDstBuffer, inDstBytesPerLine, inDstTotalLines);
-
-		case NTV2_FBF_10BIT_RGB:		return SetRasterLinesBlack10BitRGB (pDstBuffer, inDstBytesPerLine, inDstTotalLines);
+		case NTV2_FBF_ABGR:
+		case NTV2_FBF_24BIT_RGB:
+		case NTV2_FBF_24BIT_BGR:
+		case NTV2_FBF_48BIT_RGB:
+		case NTV2_FBF_10BIT_RGB:		{	NTV2Buffer dst(pDstBuffer, inDstBytesPerLine * ULWord(inDstTotalLines));
+											return dst.Fill(ULWord(0));	//	Zero all R/G/B/A components
+										}
 
 		case NTV2_FBF_8BIT_YCBCR_YUY2:
 		case NTV2_FBF_10BIT_DPX:
@@ -1123,11 +1071,8 @@ bool SetRasterLinesBlack (const NTV2FrameBufferFormat	inPixelFormat,
 		case NTV2_FBF_8BIT_DVCPRO:
 		case NTV2_FBF_8BIT_YCBCR_420PL3:
 		case NTV2_FBF_8BIT_HDV:
-		case NTV2_FBF_24BIT_RGB:
-		case NTV2_FBF_24BIT_BGR:
 		case NTV2_FBF_10BIT_YCBCRA:
 		case NTV2_FBF_10BIT_DPX_LE:
-		case NTV2_FBF_48BIT_RGB:
 		case NTV2_FBF_12BIT_RGB_PACKED:
 		case NTV2_FBF_PRORES_DVCPRO:
 		case NTV2_FBF_PRORES_HDV:

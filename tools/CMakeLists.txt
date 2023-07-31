@@ -1,4 +1,8 @@
-add_subdirectory(logjammer)
+if (NOT AJANTV2_BUILD_TOOLS)
+    message(STATUS "Skipping libajantv2 tools...")
+    return()
+endif()
+
 add_subdirectory(logreader)
 add_subdirectory(ntv2firmwareinstaller)
 add_subdirectory(ntv2thermo)
@@ -6,12 +10,6 @@ add_subdirectory(pciwhacker)
 add_subdirectory(rdmawhacker)
 add_subdirectory(regio)
 add_subdirectory(supportlog)
-add_subdirectory(testaux)
-add_subdirectory(testcrc)
-add_subdirectory(testframe)
-add_subdirectory(testp2p)
-add_subdirectory(testrdma)
-add_subdirectory(vpidtool)
 
 
 if (AJA_INSTALL_CMAKE)

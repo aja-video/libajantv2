@@ -25,6 +25,8 @@
 #endif
 using namespace std;
 
+//#define NTV2BUFFER_NO_MEMCMP
+
 
 ostream & operator << (ostream & inOutStream, const UWordSequence & inData)
 {
@@ -304,7 +306,7 @@ static string print_address_offset (const size_t inRadix, const ULWord64 inOffse
 	else if (inRadix == 10)
 		oss << DEC0N(inOffset,maxAddrWidth) << ": ";
 	else
-		oss << HEX0N(inOffset,maxAddrWidth) << ": ";
+		oss << xHEX0N(inOffset,maxAddrWidth) << ": ";
 	return oss.str();
 }
 
@@ -1697,11 +1699,9 @@ set<ULWord> & NTV2Buffer::FindAll (set<ULWord> & outOffsets, const NTV2Buffer & 
 bool NTV2Buffer::IsContentEqual (const NTV2Buffer & inBuffer, const ULWord inByteOffset, const ULWord inByteCount) const
 {
 	if (IsNULL() || inBuffer.IsNULL())
-		return false;	//	NULL or empty
+		return false;	//	Buffer(s) are NULL/empty
 	if (inBuffer.GetByteCount() != GetByteCount())
-		return false;	//	Different byte counts
-	if (inBuffer.GetHostPointer() == GetHostPointer())
-		return true;	//	Same buffer
+		return false;	//	Buffers are different sizes
 
 	ULWord	totalBytes(GetByteCount());
 	if (inByteOffset >= totalBytes)
@@ -1713,11 +1713,33 @@ bool NTV2Buffer::IsContentEqual (const NTV2Buffer & inBuffer, const ULWord inByt
 	if (byteCount > totalBytes)
 		byteCount = totalBytes;
 
-	const UByte *	pByte1 (reinterpret_cast<const UByte*>(GetHostPointer()));
-	const UByte *	pByte2 (reinterpret_cast<const UByte*>(inBuffer.GetHostPointer()));
+	if (inBuffer.GetHostPointer() == GetHostPointer())
+		return true;	//	Same buffer
+
+	const UByte *	pByte1 (*this);
+	const UByte *	pByte2 (inBuffer);
 	pByte1 += inByteOffset;
 	pByte2 += inByteOffset;
+	#if !defined(NTV2BUFFER_NO_MEMCMP)
 	return ::memcmp (pByte1, pByte2, byteCount) == 0;
+	#else	//	NTV2BUFFER_NO_MEMCMP
+		ULWord offset(inByteOffset);
+		while (byteCount)
+		{
+			if (*pByte1 != *pByte2)
+			{
+				cerr << "## ERROR: IsContentEqual: miscompare at offset " << xHEX0N(offset,8)
+					<< " (" << DEC(offset) << "): " << xHEX0N(UWord(*pByte1),2) << " != "
+					<< xHEX0N(UWord(*pByte2),2) << ", " << xHEX0N(byteCount,8) << " ("
+					<< DEC(byteCount) << ") bytes left to compare" << endl;
+				return false;
+			}
+			pByte1++;  pByte2++;
+			byteCount--;
+			offset++;
+		}
+		return true;
+	#endif	//	NTV2BUFFER_NO_MEMCMP
 }
 
 bool NTV2Buffer::NextDifference (const NTV2Buffer & inBuffer, ULWord & byteOffset) const

@@ -38,6 +38,7 @@ typedef map <NTV2Channel, FrameToTCList>			ChannelToPerFrameTCList;
 typedef ChannelToPerFrameTCList::const_iterator		ChannelToPerFrameTCListConstIter;
 typedef pair <NTV2Channel, FrameToTCList>			ChannelToPerFrameTCListPair;
 #define AsMacDriverInterface(_x_)					reinterpret_cast<CNTV2MacDriverInterface*>(&(_x_))
+#define AsDriverInterface(_x_)						reinterpret_cast<CNTV2DriverInterface*>(&(_x_))
 
 static string makeHeader(ostringstream & oss, const string & inName)
 {
@@ -456,7 +457,23 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 	AJASystemInfo::append(infoTable, "NTV2 SDK Version",	::NTV2GetVersionString(true));
 	AJASystemInfo::append(infoTable, "supportlog Built",	string(__DATE__ " at " __TIME__));
 	if (mDevice.IsOpen())
+	{
 		AJASystemInfo::append(infoTable, "Driver Version",		mDevice.GetDriverVersionString());
+		#if defined(AJAMac)
+			ULWord drvrType(0), dextType(0x44455854);	//	'DEXT'
+			mDevice.ReadRegister(kVRegDriverType, drvrType);
+			if (!drvrType)
+				str = "Kernel Extension ('KEXT')";
+			else if (drvrType == dextType)
+				str = "DriverKit ('DEXT')";
+			else
+			{	ostringstream oss;
+				oss << "(Unknown/Invalid " << xHEX0N(drvrType,8) << ")";
+				str = oss.str();
+			}
+			AJASystemInfo::append(infoTable, "Driver Type",		str);
+		#endif	//	defined(AJAMac)
+	}
 	AJASystemInfo::append(infoTable, "Watcher Nub Protocol Version",	"Built-in RPC support");
 
 	if (mDevice.IsOpen())

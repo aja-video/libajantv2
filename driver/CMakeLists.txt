@@ -105,7 +105,6 @@ set(AJADRIVER_LINUX_BUILD_FILES
 	linux/Makefile
 	linux/nvidia-ko-to-module-symvers)
 set(AJADRIVER_LINUX_LOAD_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/bin/ajantv2.ko
 	${CMAKE_CURRENT_SOURCE_DIR}/bin/load_ajantv2
 	${CMAKE_CURRENT_SOURCE_DIR}/bin/unload_ajantv2)
 
@@ -188,7 +187,11 @@ endif()
 # installing
 
 add_custom_target(ajadriver_install ${AJADRIVER_TARGET_SOURCES})
-add_dependencies(ajadriver_install install)
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	add_dependencies(ajadriver_install install)
+endif()
 
 # Windows
 if (AJANTV2_BUILD_OPENSOURCE AND AJA_INSTALL_SOURCES)

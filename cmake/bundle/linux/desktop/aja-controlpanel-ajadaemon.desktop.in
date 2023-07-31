@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=AJA ControlPanel
+Exec="/opt/aja/bin/controlpanel" --hidden
+Icon=/opt/aja/icons/256x256/apps/controlpanel.png
+Terminal=false
+Categories=AudioVideo;
+Type=Application
+Version=@AJA_NTV2_VER_STR@
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Delay=5
+StartupWMClass=controlpanel
+X-GNOME-SingleWindow=true
+SingleMainWindow=true

@@ -1,4 +1,8 @@
-#project(ntv2plugins)
+if (NOT AJANTV2_BUILD_PLUGINS)
+    message(STATUS "Skipping libajantv2 plugins...")
+    return()
+endif()
+
 option(AJA_PLUGINS_DEPLOY_ON_DEBUG "Put the plug-ins in the correct location for local development" OFF)
 option(AJA_PLUGINS_BUILD_NTV2 "Build the AJA NTV2 Plug-ins" ON)
 

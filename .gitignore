@@ -7,3 +7,4 @@
 /driver/bin/*.ko
 /driver/win
 /driver/mac
+.DS_Store
