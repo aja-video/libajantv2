@@ -46,11 +46,18 @@ if "%BUILD_OPENSOURCE%" == "" (
 )
 
 if "%BUILD_DEMOS%" == "" (
-	set BUILD_DEMOS=ON
+	set BUILD_DEMOS=OFF
+)
+
+if "%BUILD_TOOLS%" == "" (
+	set BUILD_TOOLS=OFF
+)
+if "%BUILD_PLUGINS%" == "" (
+	set BUILD_PLUGINS=OFF
 )
 
 if "%BUILD_TESTS%" == "" (
-	set BUILD_TESTS=ON
+	set BUILD_TESTS=OFF
 )
 
 if "%BUILD_DOCS%" == "" (
@@ -58,27 +65,27 @@ if "%BUILD_DOCS%" == "" (
 )
 
 if "%INSTALL_HEADERS%" == "" (
-	set INSTALL_HEADERS=ON
+	set INSTALL_HEADERS=OFF
 )
 
 if "%INSTALL_SOURCES%" == "" (
-	set INSTALL_SOURCES=ON
+	set INSTALL_SOURCES=OFF
 )
 
 if "%INSTALL_CMAKE%" == "" (
-	set INSTALL_CMAKE=ON
+	set INSTALL_CMAKE=OFF
 )
 
 if "%INSTALL_MISC%" == "" (
-	set INSTALL_MISC=ON
+	set INSTALL_MISC=OFF
 )
 
 if "%QT_ENABLED%" == "" (
-	set QT_ENABLED=ON
+	set QT_ENABLED=OFF
 )
 
 if "%QT_DEPLOY%" == "" (
-	set QT_DEPLOY=ON
+	set QT_DEPLOY=OFF
 )
 
 echo Configured Options:
@@ -94,6 +101,8 @@ echo CODE_SIGN: %CODE_SIGN%
 echo BUILD_SHARED: %BUILD_SHARED%
 echo BUILD_OPENSOURCE: %BUILD_OPENSOURCE%
 echo BUILD_DEMOS: %BUILD_DEMOS%
+echo BUILD_TOOLS: %BUILD_TOOLS%
+echo BUILD_PLUGINS: %BUILD_PLUGINS%
 echo BUILD_TESTS: %BUILD_TESTS%
 echo BUILD_DOCS: %BUILD_DOCS%
 echo INSTALL_HEADERS: %INSTALL_HEADERS%
@@ -110,6 +119,14 @@ if not %errorlevel% == 0 (
 	exit 1
 )
 
+echo Removing old build/install directories
+if exist %BUILD_DIR% (
+    rmdir /s /q %BUILD_DIR%
+)
+if exist %INSTALL_DIR% (
+    rmdir /s /q %INSTALL_DIR%
+)
+
 REM Generate Makefiles
 cmake -S%ROOT_DIR% -B%BUILD_DIR% -G%GENERATOR% ^
 -DCMAKE_BUILD_TYPE=%BUILD_TYPE% ^
@@ -120,6 +137,8 @@ cmake -S%ROOT_DIR% -B%BUILD_DIR% -G%GENERATOR% ^
 -DAJA_BUILD_TESTS=%BUILD_TESTS% ^
 -DAJANTV2_BUILD_OPENSOURCE=%BUILD_OPENSOURCE% ^
 -DAJANTV2_BUILD_DEMOS=%BUILD_DEMOS% ^
+-DAJA_BUILD_TOOLS=%BUILD_TOOLS% ^
+-DAJA_BUILD_PLUGINS=%BUILD_PLUGINS% ^
 -DAJA_BUILD_DOCS=%BUILD_DOCS% ^
 -DAJA_INSTALL_HEADERS=%INSTALL_HEADERS% ^
 -DAJA_INSTALL_SOURCES=%INSTALL_SOURCES% ^
