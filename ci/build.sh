@@ -16,18 +16,18 @@ if [ -z ${BUILD_DIR} ]; then BUILD_DIR="$CHECKOUT_DIR/build"; fi
 if [ -z ${INSTALL_DIR} ]; then INSTALL_DIR="$CHECKOUT_DIR/install"; fi
 if [ -z ${BUILD_SHARED} ]; then BUILD_SHARED=OFF; fi
 if [ -z ${BUILD_OPENSOURCE} ]; then BUILD_OPENSOURCE=ON; fi
-if [ -z ${BUILD_DRIVER} ]; then BUILD_DRIVER=OFF; fi
-if [ -z ${BUILD_DOCS} ]; then BUILD_DOCS=OFF; fi
-if [ -z ${BUILD_DEMOS} ]; then BUILD_DEMOS=OFF; fi
-if [ -z ${BUILD_TESTS} ]; then BUILD_TESTS=OFF; fi
-if [ -z ${BUILD_TOOLS} ]; then BUILD_TOOLS=OFF; fi
-if [ -z ${BUILD_PLUGINS} ]; then BUILD_PLUGINS=OFF; fi
-if [ -z ${INSTALL_HEADERS} ]; then INSTALL_HEADERS=OFF; fi
-if [ -z ${INSTALL_SOURCES} ]; then INSTALL_SOURCES=OFF; fi
-if [ -z ${INSTALL_CMAKE} ]; then INSTALL_CMAKE=OFF; fi
-if [ -z ${INSTALL_MISC} ]; then INSTALL_MISC=OFF; fi
-if [ -z ${QT_ENABLED} ]; then QT_ENABLED=OFF; fi
-if [ -z ${QT_DEPLOY} ]; then QT_DEPLOY=OFF; fi
+if [ -z ${BUILD_DRIVER} ]; then BUILD_DRIVER=ON; fi
+if [ -z ${BUILD_DOCS} ]; then BUILD_DOCS=ON; fi
+if [ -z ${BUILD_DEMOS} ]; then BUILD_DEMOS=ON; fi
+if [ -z ${BUILD_TESTS} ]; then BUILD_TESTS=ON; fi
+if [ -z ${BUILD_TOOLS} ]; then BUILD_TOOLS=ON; fi
+if [ -z ${BUILD_PLUGINS} ]; then BUILD_PLUGINS=ON; fi
+if [ -z ${INSTALL_HEADERS} ]; then INSTALL_HEADERS=ON; fi
+if [ -z ${INSTALL_SOURCES} ]; then INSTALL_SOURCES=ON; fi
+if [ -z ${INSTALL_CMAKE} ]; then INSTALL_CMAKE=ON; fi
+if [ -z ${INSTALL_MISC} ]; then INSTALL_MISC=ON; fi
+if [ -z ${QT_ENABLED} ]; then QT_ENABLED=ON; fi
+if [ -z ${QT_DEPLOY} ]; then QT_DEPLOY=ON; fi
 
 echo Configured Options:
 echo -------------------
