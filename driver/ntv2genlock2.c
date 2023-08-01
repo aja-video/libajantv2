@@ -458,11 +458,12 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 
 	while ((gdat->size != 0))
 	{
-		NTV2_MSG_GENLOCK_INFO("Writing offset %02X %s", gdat->offset, gdat->data);
+		//NTV2_MSG_GENLOCK_INFO("Writing offset %02X %s", gdat->offset, gdat->data);
 		hex_to_bytes(gdat->data+2, writeBytes, gdat->size);
-		if (!spi_genlock2_write(ntv2_gen, gdat->size, gdat->offset, writeBytes, true)) {
+		if (!spi_genlock2_write(ntv2_gen, gdat->size, gdat->offset, writeBytes, true))
+		{
 			NTV2_MSG_ERROR("%s: genlock spi write failed\n", ntv2_gen->name);
-		return false;
+			return false;
 		}
 		count++;
 		gdat++;
@@ -580,11 +581,11 @@ static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, ui
 
 	// Step 2 load data
 	reg_write(ntv2_gen, ntv2_reg_spi_write, offset);
-	NTV2_MSG_GENLOCK_INFO("Wrote %02X", offset);
+	//NTV2_MSG_GENLOCK_INFO("Wrote %02X", offset);
 	for (i = 0; i < size; i++)
 	{
 		reg_write(ntv2_gen, ntv2_reg_spi_write, data[i]);
-		NTV2_MSG_GENLOCK_INFO("Wrote %02X", data[i]);
+		//NTV2_MSG_GENLOCK_INFO("Wrote %02X", data[i]);
 	}
 
 	// Step 3 chip select low
@@ -657,14 +658,14 @@ static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uin
 	//wait_genlock2(ntv2_gen, 1000);
     
 	val = reg_read(ntv2_gen, ntv2_reg_spi_read); // dummy read for address sent
-	NTV2_MSG_GENLOCK_INFO("Read: Val: %02X", val);
+	//NTV2_MSG_GENLOCK_INFO("Read: Val: %02X", val);
     for (i = 0; i < numBytes; i++)
     {
         status = reg_read(ntv2_gen, ntv2_reg_spi_status);
 		if(!spi_wait_read_not_empty(ntv2_gen))
 			return false;
         val = reg_read(ntv2_gen, ntv2_reg_spi_read);
-		NTV2_MSG_GENLOCK_INFO("Read: Val: %02X", val);
+		//NTV2_MSG_GENLOCK_INFO("Read: Val: %02X", val);
         data[i] = (uint8_t)val;
     }
 
