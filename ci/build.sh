@@ -17,7 +17,7 @@ if [ -z ${INSTALL_DIR} ]; then INSTALL_DIR="$CHECKOUT_DIR/install"; fi
 if [ -z ${BUILD_SHARED} ]; then BUILD_SHARED=OFF; fi
 if [ -z ${BUILD_OPENSOURCE} ]; then BUILD_OPENSOURCE=ON; fi
 if [ -z ${BUILD_DRIVER} ]; then BUILD_DRIVER=ON; fi
-if [ -z ${BUILD_DOCS} ]; then BUILD_DOCS=OFF; fi
+if [ -z ${BUILD_DOCS} ]; then BUILD_DOCS=ON; fi
 if [ -z ${BUILD_DEMOS} ]; then BUILD_DEMOS=ON; fi
 if [ -z ${BUILD_TESTS} ]; then BUILD_TESTS=ON; fi
 if [ -z ${BUILD_TOOLS} ]; then BUILD_TOOLS=ON; fi
@@ -52,6 +52,14 @@ echo INSTALL_MISC: $INSTALL_MISC
 echo QT_ENABLED: $QT_ENABLED
 echo QT_DEPLOY: $QT_DEPLOY
 echo -------------------
+
+echo "Removing old build/install directories"
+if [ -d $BUILD_DIR ]; then
+    rm -rf $BUILD_DIR
+fi
+if [ -d $INSTALL_DIR]; then 
+    rm -rf $INSTALL_DIR
+fi
 
 echo "Generating build"
 cmake -S"$CHECKOUT_DIR" -B"$BUILD_DIR" -G"$GENERATOR" \

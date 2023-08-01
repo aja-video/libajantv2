@@ -11,8 +11,11 @@ if [ -z ${OSX_ARCHITECTURE} ]; then OSX_ARCHITECTURE="arm64"; fi
 if [ -z ${BUILD_SHARED} ]; then BUILD_SHARED=OFF; fi
 if [ -z ${BUILD_OPENSOURCE} ]; then BUILD_OPENSOURCE=ON; fi
 if [ -z ${BUILD_DRIVER} ]; then BUILD_DRIVER=OFF; fi
-if [ -z ${BUILD_DOCS} ]; then BUILD_DOCS=OFF; fi
+if [ -z ${BUILD_DOCS} ]; then BUILD_DOCS=ON; fi
 if [ -z ${BUILD_DEMOS} ]; then BUILD_DEMOS=ON; fi
+if [ -z ${BUILD_DEMOS} ]; then BUILD_DEMOS=ON; fi
+if [ -z ${BUILD_TOOLS} ]; then BUILD_TOOLS=ON; fi
+if [ -z ${BUILD_PLUGINS} ]; then BUILD_PLUGINS=ON; fi
 if [ -z ${BUILD_TESTS} ]; then BUILD_TESTS=ON; fi
 if [ -z ${INSTALL_HEADERS} ]; then INSTALL_HEADERS=ON; fi
 if [ -z ${INSTALL_SOURCES} ]; then INSTALL_SOURCES=ON; fi
@@ -35,6 +38,8 @@ echo BUILD_OPENSOURCE: $BUILD_OPENSOURCE
 echo BUILD_DRIVER: $BUILD_DRIVER
 echo BUILD_DOCS: $BUILD_DOCS
 echo BUILD_DEMOS: $BUILD_DEMOS
+echo BUILD_TOOLS: $BUILD_TOOLS
+echo BUILD_PLUGINS: $BUILD_PLUGINS
 echo BUILD_TESTS: $BUILD_TESTS
 echo INSTALL_HEADERS: $INSTALL_HEADERS
 echo INSTALL_SOURCES: $INSTALL_SOURCES
@@ -43,6 +48,14 @@ echo INSTALL_MISC: $INSTALL_MISC
 echo QT_ENABLED: $QT_ENABLED
 echo QT_DEPLOY: $QT_DEPLOY
 echo -------------------
+
+echo "Removing old build/install directories"
+if [ -d $BUILD_DIR ]; then
+    rm -rf $BUILD_DIR
+fi
+if [ -d $INSTALL_DIR]; then 
+    rm -rf $INSTALL_DIR
+fi
 
 # Generate makefiles/ninja files
 echo "Generating build targets"
@@ -54,6 +67,8 @@ echo "Generating build targets"
         -DAJANTV2_BUILD_OPENSOURCE=$BUILD_OPENSOURCE \
         -DAJANTV2_BUILD_DOCS=$BUILD_DOCS \
         -DAJANTV2_BUILD_DEMOS="$BUILD_DEMOS" \
+        -DAJA_BUILD_TOOLS="$BUILD_TOOLS" \
+        -DAJA_BUILD_PLUGINS="$BUILD_PLUGINS" \
         -DAJA_BUILD_DOCS="$BUILD_DOCS" \
         -DAJA_BUILD_TESTS="$BUILD_TESTS" \
         -DAJA_INSTALL_HEADERS="$INSTALL_HEADERS" \
