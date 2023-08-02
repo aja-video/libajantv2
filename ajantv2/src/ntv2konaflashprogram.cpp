@@ -2004,7 +2004,7 @@ bool CNTV2KonaFlashProgram::ProgramCustom (const string &sCustomFileName, const 
 	if (_spiFlash)
 	{
 		vector<uint8_t> writeData;
-		size_t customSize(0),  sz(0),  maxFlashSize(_spiFlash->Size());
+		size_t sz(0),  maxFlashSize(_spiFlash->Size());
 		// open file and read data
 		if (!getFileSize(sCustomFileName, sz))
 			{outMsgs << "getFileSize failed for '" << sCustomFileName << "'" << endl;  return false;}
@@ -2016,11 +2016,9 @@ bool CNTV2KonaFlashProgram::ProgramCustom (const string &sCustomFileName, const 
 			{outMsgs << "Unable to open file '" << sCustomFileName << "'" << endl;  return false;}
 
 		writeData.resize(sz);
-		customSize = size_t(ifs.readsome(reinterpret_cast<char*>(&writeData[0]), streamsize(sz)));
-		if (!customSize)
-			{outMsgs << "No data read from custom file '" << sCustomFileName << "'" << endl;  return false;}
-		if (writeData.size() > customSize)
-			writeData.resize(customSize);
+		ifs.read(reinterpret_cast<char*>(&writeData[0]), streamsize(sz));
+		if (!ifs.good())
+			{outMsgs << "Error reading data from file '" << sCustomFileName << "'" << endl;  return false;}
 
 		// erase flash
 		uint32_t writeSize = uint32_t(writeData.size());
@@ -2030,6 +2028,13 @@ bool CNTV2KonaFlashProgram::ProgramCustom (const string &sCustomFileName, const 
 
 		// write flash
 		_spiFlash->Write(addr, writeData, writeSize);
+		
+		bool result = true, verify = true;
+		if (verify)
+        {
+            result = _spiFlash->Verify(addr, writeData);
+        }
+		return result;
 	}	//	if _spiFlash
 	else
 	{
