@@ -1443,7 +1443,11 @@ int64_t ntv2Time100ns(void)
 	uint64_t nanoTime = 0;
 	mach_timebase_info_data_t timebaseInfo;
 	uint64_t machTime = mach_absolute_time();
+#if defined(AJAMacDext)
 	mach_timebase_info(&timebaseInfo);
+#else
+	//mach_timebase_info(&timebaseInfo);
+#endif
 	nanoTime = machTime * timebaseInfo.numer / timebaseInfo.denom;
 	return nanoTime;
 }

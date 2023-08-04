@@ -269,13 +269,12 @@
 
 //endif	//	defined(MSWindows)
 #elif defined(AJAMac)
-
-	#include <string.h>
-	#include <stdio.h>
-	#include <stdatomic.h>
 	#include "ajatypes.h"
 	#if defined(NTV2_BUILDING_DRIVER)
 		#if defined(AJAMacDext)
+			#include <string.h>
+			#include <stdio.h>
+			#include <stdatomic.h>
 			#include <DriverKit/IOLib.h>
 			#define DebugLog(fmt, args...)  os_log(OS_LOG_DEFAULT, "NTV2PCIe::%s:  " fmt,  __FUNCTION__,##args)
 			#define DebugLog(fmt, args...)  os_log(OS_LOG_DEFAULT, "NTV2PCIe::%s:  " fmt,  __FUNCTION__,##args)
