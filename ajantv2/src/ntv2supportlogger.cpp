@@ -593,7 +593,7 @@ void CNTV2SupportLogger::FetchRegisterLog (ostringstream & oss) const
 	oss << endl << deviceRegs.size() << " Device Registers " << sDashes << endl << endl;
 	regs = ::FromRegNumSet (deviceRegs);
 	if (!mDevice.ReadRegisters (regs))
-		oss << "## NOTE:  One or more of these registers weren't returned by the driver -- these will have a zero value." << endl;
+		oss << "## NOTE:  Driver failed to return one or more registers (those will be zero)" << endl;
 	for (NTV2RegisterReadsConstIter it (regs.begin());	it != regs.end();  ++it)
 	{
 		const NTV2RegInfo & regInfo (*it);
@@ -611,7 +611,7 @@ void CNTV2SupportLogger::FetchRegisterLog (ostringstream & oss) const
 	regs = ::FromRegNumSet (virtualRegs);
 	oss << endl << virtualRegs.size() << " Virtual Registers " << sDashes << endl << endl;
 	if (!mDevice.ReadRegisters (regs))
-		oss << "## NOTE:  One or more of these registers weren't returned by the driver -- these will have a zero value." << endl;
+		oss << "## NOTE:  Driver failed to return one or more virtual registers (those will be zero)" << endl;
 	for (NTV2RegisterReadsConstIter it (regs.begin());	it != regs.end();  ++it)
 	{
 		const NTV2RegInfo & regInfo (*it);

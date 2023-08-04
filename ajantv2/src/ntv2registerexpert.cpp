@@ -82,6 +82,7 @@ private:
 		SetupDMARegs();			//	DMA
 		SetupTimecodeRegs();	//	Timecode
 		SetupAudioRegs();		//	Audio
+		SetupMRRegs();			//	MultiViewer/MultiRaster
 		SetupMixerKeyerRegs();	//	Mixer/Keyer
 		SetupHDMIRegs();		//	HDMI
 		SetupSDIErrorRegs();	//	SDIError
@@ -478,7 +479,18 @@ private:
 		DefineRegister (kRegAudioMixerMainOutputLevelsPair6,	"kRegAudioMixerMainOutputLevelsPair6",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL, kRegClass_NULL);
 		DefineRegister (kRegAudioMixerMainOutputLevelsPair7,	"kRegAudioMixerMainOutputLevelsPair7",		mAudMxrLevelDecoder,	READONLY,	kRegClass_Audio,	kRegClass_NULL, kRegClass_NULL);
 	}
-	
+
+	void SetupMRRegs(void)
+	{
+		AJAAutoLock lock(&mGuardMutex);
+		DefineRegister	(kRegMRQ1Control,		"kRegMRQ1Control",	mDefaultRegDecoder,	READWRITE,	kRegClass_NULL,	kRegClass_NULL, kRegClass_NULL);
+		DefineRegister	(kRegMRQ2Control,		"kRegMRQ2Control",	mDefaultRegDecoder,	READWRITE,	kRegClass_NULL,	kRegClass_NULL, kRegClass_NULL);
+		DefineRegister	(kRegMRQ3Control,		"kRegMRQ3Control",	mDefaultRegDecoder,	READWRITE,	kRegClass_NULL,	kRegClass_NULL, kRegClass_NULL);
+		DefineRegister	(kRegMRQ4Control,		"kRegMRQ4Control",	mDefaultRegDecoder,	READWRITE,	kRegClass_NULL,	kRegClass_NULL, kRegClass_NULL);
+		DefineRegister	(kRegMROutControl,		"kRegMROutControl",	mDefaultRegDecoder,	READWRITE,	kRegClass_NULL,	kRegClass_NULL, kRegClass_NULL);
+		DefineRegister	(kRegMRSupport,			"kRegMRSupport",	mDefaultRegDecoder,	READWRITE,	kRegClass_NULL,	kRegClass_NULL, kRegClass_NULL);
+	}
+
 	void SetupDMARegs(void)
 	{
 		AJAAutoLock lock(&mGuardMutex);
@@ -1698,6 +1710,16 @@ public:
 				result.insert(regNum);
 			for (ULWord regNum = 0x3C00; regNum <= 0x3C0A; regNum++)
 				result.insert(regNum);
+		}
+
+		if (inDeviceID == DEVICE_ID_IOX3  ||  inDeviceID == DEVICE_ID_KONA5_8K_MV_TX)
+		{	//	IoX3 and some Kona5 support MultiViewer/MultiRaster
+			result.insert(ULWord(kRegMRQ1Control));
+			result.insert(ULWord(kRegMRQ2Control));
+			result.insert(ULWord(kRegMRQ3Control));
+			result.insert(ULWord(kRegMRQ4Control));
+			result.insert(ULWord(kRegMROutControl));
+			result.insert(ULWord(kRegMRSupport));
 		}
 
 		if (inOtherRegsToInclude & kIncludeOtherRegs_VRegs)
