@@ -46,46 +46,46 @@ if "%BUILD_OPENSOURCE%" == "" (
 )
 
 if "%BUILD_DEMOS%" == "" (
-	set BUILD_DEMOS=OFF
+	set BUILD_DEMOS=ON
 )
 
 if "%BUILD_TOOLS%" == "" (
-	set BUILD_TOOLS=OFF
+	set BUILD_TOOLS=ON
 )
 if "%BUILD_PLUGINS%" == "" (
-	set BUILD_PLUGINS=OFF
+	set BUILD_PLUGINS=ON
 )
 
 if "%BUILD_TESTS%" == "" (
-	set BUILD_TESTS=OFF
+	set BUILD_TESTS=ON
 )
 
 if "%BUILD_DOCS%" == "" (
-	set BUILD_DOCS=OFF
+	set BUILD_DOCS=ON
 )
 
 if "%INSTALL_HEADERS%" == "" (
-	set INSTALL_HEADERS=OFF
+	set INSTALL_HEADERS=ON
 )
 
 if "%INSTALL_SOURCES%" == "" (
-	set INSTALL_SOURCES=OFF
+	set INSTALL_SOURCES=ON
 )
 
 if "%INSTALL_CMAKE%" == "" (
-	set INSTALL_CMAKE=OFF
+	set INSTALL_CMAKE=ON
 )
 
 if "%INSTALL_MISC%" == "" (
-	set INSTALL_MISC=OFF
+	set INSTALL_MISC=ON
 )
 
 if "%QT_ENABLED%" == "" (
-	set QT_ENABLED=OFF
+	set QT_ENABLED=ON
 )
 
 if "%QT_DEPLOY%" == "" (
-	set QT_DEPLOY=OFF
+	set QT_DEPLOY=ON
 )
 
 echo Configured Options:
