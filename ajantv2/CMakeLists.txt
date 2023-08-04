@@ -555,6 +555,17 @@ if (NOT TARGET ${PROJECT_NAME})
         target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS})
 
     endif()
+	
+	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+		aja_get_msvc_tools_version()
+		if(CMAKE_MSVC_RUNTIME_LIBRARY STREQUAL "MultiThreaded" OR 
+		   CMAKE_MSVC_RUNTIME_LIBRARY STREQUAL "MultiThreadedDebug")
+			set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}_vs${AJA_MSVC_TOOLSET_VERSION}_MT")
+		elseif(CMAKE_MSVC_RUNTIME_LIBRARY STREQUAL "MultiThreadedDLL" OR
+			   CMAKE_MSVC_RUNTIME_LIBRARY STREQUAL "MultiThreadedDebugDLL")
+			set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}_vs${AJA_MSVC_TOOLSET_VERSION}_MD")
+		endif()
+	endif()
     set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "d")
 endif()
 
