@@ -32,9 +32,9 @@ Starting in the NTV2 SDK version 17.0, AJA has standardized on [CMake](https://c
 
 The instructions for building the default static library are generally the same on each supported platform (Windows, macOS, Linux on x64 and aarch64). Note that the default "CMake Generator" varies by platform.
 
-**NOTE: By default — absent any parameters — only the static ajantv2 library is built.**
+**NOTE: By default — absent any parameters — only the target for the ajantv2 static library is built.**
 
-To build additional items, the following CMake variables must be set to 'ON' in your CMake build environment:
+To build additional targets, the following CMake variables must be set to 'ON' in your CMake build environment:
 - `AJANTV2_BUILD_DEMOS` — If enabled, builds the demonstration programs (e.g. **ntv2capture**, **ntv2player**, …).\
 By default, demo apps are _not_ built.
 - `AJANTV2_BUILD_TOOLS` — If enabled, builds the command-line tools (e.g. **ntv2thermo**, **regio**, **supportlog**, …).\
@@ -91,7 +91,7 @@ Follow these instructions to build libajantv2 via the Microsoft Visual Studio CM
 1. Open a Terminal and generate the XCode project files:
    ```
    $ cd libajantv2
-   $ cmake -S . -B build -G xcode
+   $ cmake -S . -B build -G Xcode
    ```
 2. Build libajantv2 static library from the terminal, via the generated XCode Project:
    ```
