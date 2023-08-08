@@ -2,7 +2,13 @@
 **libajantv2** is AJA’s open-source SDK for discovering, interrogating and 
 controlling AJA NTV2 professional video I/O devices.
 
-## Directory Organization
+# Table of Contents
+1. [Directory Layout](#directory-layout)
+1. [Obtaining libajantv2](#obtaining)
+1. [Building libajantv2](#building)
+1. [Building the Kernel Module Driver (Linux)](#building-kernel-module)
+
+## Directory Layout
 The **libajantv2** folder contains the following items:
 - **ajaanc** — Classes for encoding & decoding SDI ancillary data packets.
 - **ajabase** — Utility classes (e.g. threads, mutexes, files, etc.).
@@ -171,20 +177,22 @@ The libajantv2 repository can be opened as a directory in Visual Studio Code and
 ### Qt Creator
 The libajantv2 repository can be opened as a directory in Qt Creator and built with the Qt Creator CMake integration.
 
-## Building the NTV2 Kernel Module Driver (Linux)
+## Building the Kernel Module Driver (Linux) <a name="building-kernel-module"></a>
 
-Before building the driver please ensure that you have installed the Linux kernel headers for your current distro.
+### Prerequisites
+Before building the driver please ensure that you have installed the Linux kernel headers for your current distro:
 
-Ubuntu 20.04/22.04
+#### Ubuntu 20.04/22.04
 ```
 $ sudo apt install -y linux-headers-$(uname -r) linux-tools-$(uname -r)
 ```
 
-CentOS7
+#### CentOS7
 ```
 $ sudo yum install -y kernel-devel kernel-devel-$(uname -r)
 ```
 
+### Building
 1. Open a terminal window and cd into the linux driver directory:
 ```
 $ cd libajantv2/driver/linux
@@ -193,13 +201,12 @@ $ cd libajantv2/driver/linux
 ```
 $ make clean && make
 ```
-3. If the kernel module build succeeded, the ajantv2.ko file should appear in libajantv2/driver/bin. The kernel module can now be installed via the load_ajantv2 script from the same directory:
+3. If the kernel module build succeeded, the ajantv2.ko file should appear in `libajantv2/driver/bin`. The kernel module can now be installed via the load_ajantv2 script from the same directory:
 ```
-$ sudo libajantv2/driver/bin/load_ajantv2
+$ sudo ../bin/load_ajantv2
 ```
 
 Uninstallation of the kernel module can be accomplished via the unload_ajantv2 script:
 ```
-$ sudo libajantv2/driver/bin/unload_ajantv2
+$ sudo ../bin/unload_ajantv2
 ```
-
