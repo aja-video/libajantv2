@@ -1,6 +1,12 @@
+<center>
+  <a href="https://www.aja.com/">
+    <img src="aja_logo_white_text.svg" alt="AJA Video Systems" width="33%"/>
+  </a>
+</center>
+
 # libajantv2
-**libajantv2** is AJA’s open-source SDK for discovering, interrogating and 
-controlling AJA NTV2 professional video I/O devices.
+
+This is the open-source SDK for discovering, interrogating and controlling NTV2 professional video I/O devices from AJA Video Systems, Inc. All code herein is licensed under the MIT license.
 
 # Table of Contents
 1. [Directory Layout](#directory-layout)
