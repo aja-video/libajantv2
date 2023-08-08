@@ -1139,11 +1139,11 @@ ostream & NTV2FormatDescriptor::Print (ostream & oss, const bool inDetailed) con
 		if (NTV2_IS_VALID_FRAME_BUFFER_FORMAT(mPixelFormat))
 			oss << " " << ::NTV2FrameBufferFormatToString(mPixelFormat);
 		if (IsRGB())
-			oss << " bits C=" << DEC(GetNumBitsChroma());
+			oss << " bits C=" << DEC(UWord(GetNumBitsChroma()));
 		else
-			oss << " bits Y=" << DEC(GetNumBitsLuma());
+			oss << " bits Y=" << DEC(UWord(GetNumBitsLuma()));
 		if (HasAlpha())
-			oss << " A=" << DEC(GetNumBitsAlpha());
+			oss << " A=" << DEC(UWord(GetNumBitsAlpha()));
 	}
 	return oss;
 }
