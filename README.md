@@ -158,5 +158,15 @@ NOTE: The compiler toolset used by Ninja Build will vary depending which compile
 ### Visual Studio Code
 The libajantv2 repository can be opened as a directory in Visual Studio Code and built with the optional Microsoft CMake Extension for VSCode.
 
+1. Launch Visual Studio Code
+2. From the File menu select Open (or Open Folder on macOS) and navigate to the libajantv2 repo directory.
+3. In the left-hand sidebar click on the Extensions button or press Ctrl+Shift+P (Cmd+Shift+P on macOS) to open the Command Palette and search for "Extensions: Install Extensions".
+4. In the left-hand sidebar search for the "cmake" extension from developer "twxs" (also available in the CMake Tools extension from Microsoft) and install it.
+5. Open the Command Palette once again and search for "CMake: Configure".
+6. If the configuration completes successfully, open the Command Palette and search for "CMake: Build".
+7. If the build completes without errors, the libajantv2 static library should be available in `build/ajantv2`.
+
+   Other build target outputs (demos, tools, etc.) will be available in subdirectories under the build directory mirroring their original location in the libajantv2 source tree.
+
 ### Qt Creator
 The libajantv2 repository can be opened as a directory in Qt Creator and built with the Qt Creator CMake integration.
