@@ -1,8 +1,8 @@
-<center>
+<p align="center">
   <a href="https://www.aja.com/">
     <img src="aja_logo.svg" alt="AJA Video Systems" width="33%"/>
   </a>
-</center>
+</p>
 
 # libajantv2
 
