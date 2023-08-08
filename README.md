@@ -170,3 +170,36 @@ The libajantv2 repository can be opened as a directory in Visual Studio Code and
 
 ### Qt Creator
 The libajantv2 repository can be opened as a directory in Qt Creator and built with the Qt Creator CMake integration.
+
+## Building the NTV2 Kernel Module Driver (Linux)
+
+Before building the driver please ensure that you have installed the Linux kernel headers for your current distro.
+
+Ubuntu 20.04/22.04
+```
+$ sudo apt install -y linux-headers-$(uname -r) linux-tools-$(uname -r)
+```
+
+CentOS7
+```
+$ sudo yum install -y kernel-devel kernel-devel-$(uname -r)
+```
+
+1. Open a terminal window and cd into the linux driver directory:
+```
+$ cd libajantv2/driver/linux
+```
+2. Run make to build the driver
+```
+$ make clean && make
+```
+3. If the kernel module build succeeded, the ajantv2.ko file should appear in libajantv2/driver/bin. The kernel module can now be installed via the load_ajantv2 script from the same directory:
+```
+$ sudo libajantv2/driver/bin/load_ajantv2
+```
+
+Uninstallation of the kernel module can be accomplished via the unload_ajantv2 script:
+```
+$ sudo libajantv2/driver/bin/unload_ajantv2
+```
+
