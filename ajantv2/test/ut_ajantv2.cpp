@@ -2462,13 +2462,16 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 				CHECK(NTV2_IS_VALID_NTV2FrameGeometry(::GetNormalizedFrameGeometry(fg_vanc)));
 			}
 		}
+
 		//	Check raster sizes
+		NTV2PixelFormats pixFmtsToTest;
+		::NTV2GetSupportedPixelFormats (pixFmtsToTest);
 		for (NTV2FrameGeometry fg(NTV2_FG_1920x1080);  fg < NTV2_FG_NUMFRAMEGEOMETRIES;  fg = NTV2FrameGeometry(fg+1))
 		{
 			if (!NTV2_IS_VALID_NTV2FrameGeometry(fg))
 				continue;	//	Skip invalid FGs
-			for (NTV2PixelFormat fbf(NTV2_FBF_FIRST);  fbf < NTV2_FBF_NUMFRAMEBUFFERFORMATS;  fbf = NTV2PixelFormat(fbf+1))
-			{
+			for (NTV2PixelFormatsConstIter pfIt(pixFmtsToTest.begin());  pfIt != pixFmtsToTest.end();  ++pfIt)
+			{	const NTV2PixelFormat fbf (*pfIt);
 				if (!NTV2_IS_VALID_FRAME_BUFFER_FORMAT(fbf))
 					continue;	//	Skip invalid FBFs
 				if (NTV2_IS_FBF_PLANAR(fbf) || NTV2_FBF_IS_RAW(fbf) || NTV2_IS_FBF_PRORES(fbf))
@@ -2479,13 +2482,13 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 				CHECK(factor != 0);	//	Factor must never be zero
 				NTV2Standard	fs(::GetStandardFromGeometry(fg));
 				CHECK(NTV2_IS_VALID_STANDARD(fs));	//	Standard from valid FG must be valid
-				NTV2FormatDescriptor	fd (fs, fbf);
+				NTV2FormatDesc	fd (fs, fbf);
 				CHECK(fd.IsValid());	//	FD from Standard & FBF must be valid
 				ULWord	fdBytes (fd.GetTotalRasterBytes()),  factorBytes(ULWord(factor*8LL)*1024LL*1024LL);
 				CHECK(fdBytes <= factorBytes);
 			}
 		}
-	}
+	}	//		TEST_CASE("NTV2Utils")
 
 	TEST_CASE("NTV2Planar3Formats")
 	{
