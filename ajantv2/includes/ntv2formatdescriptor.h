@@ -33,8 +33,8 @@ typedef NTV2RasterLineOffsets::iterator			NTV2RasterLineOffsetsIter;			///< @bri
 AJAExport std::ostream & NTV2PrintRasterLineOffsets (const NTV2RasterLineOffsets & inObj, std::ostream & inOutStream = std::cout);
 
 /**
-	@brief	This provides additional information about a video frame for a given video standard or format and pixel format,
-			including the total number of lines, number of pixels per line, line pitch, and which line contains the start
+	@brief	Describes a video frame for a given video standard or format and pixel format, including the
+			total number of lines, number of pixels per line, line pitch, and which line contains the start
 			of active video.
 	@note	It is possible to construct a format descriptor that is not supported by the AJA device.
 **/
@@ -87,8 +87,13 @@ public:
 		@name	Inquiry
 	**/
 	///@{
-	inline bool		IsValid (void) const		{return numLines && numPixels && mNumPlanes && mLinePitch[0];}	///< @return	True if valid;  otherwise false.
-	inline bool		IsVANC (void) const			{return firstActiveLine > 0;}									///< @return	True if VANC geometry;  otherwise false.
+	/**
+		@return		True if valid -- i.e. non-zero line count, non-zero pixel count, non-zero plane count,
+					non-zero line pitch (1st plane), and a non-zero bit count (for luma or chroma).
+	**/
+	inline bool		IsValid (void) const		{return numLines && numPixels && mNumPlanes && mLinePitch[0]
+													&& (mNumBitsLuma || mNumBitsChroma);}
+	inline bool		IsVANC (void) const			{return GetFirstActiveLine() > 0;}	///< @return	True if VANC geometry;  otherwise false.
 	inline bool		IsPlanar (void) const		{return GetNumPlanes() > 1 || NTV2_IS_FBF_PLANAR (mPixelFormat);}	///< @return	True if planar format;  otherwise false.
 
 	/**
@@ -320,6 +325,11 @@ public:
 	inline bool						IsTallVanc (void) const			{return mVancMode == NTV2_VANCMODE_TALL;}	///< @return	True if I was created with just "tall" VANC.
 	inline bool						IsTallerVanc (void) const		{return mVancMode == NTV2_VANCMODE_TALLER;}	///< @return	True if I was created with "taller" VANC.
 	inline NTV2FrameGeometry		GetFrameGeometry (void) const	{return mFrameGeometry;}					///< @return	The frame geometry I was created with.
+	inline UByte					GetNumBitsLuma (void) const		{return mNumBitsLuma;}						///< @return	The number of bits per luminance (Y) component sample. New in SDK 17.0.
+	inline UByte					GetNumBitsChroma (void) const	{return mNumBitsChroma;}					///< @return	The number of bits per chroma component sample. New in SDK 17.0.
+	inline UByte					GetNumBitsAlpha (void) const	{return mNumBitsAlpha;}						///< @return	The number of bits per alpha component sample. New in SDK 17.0.
+	inline bool						HasAlpha (void) const			{return IsValid() && GetNumBitsAlpha();}	///< @return	True if I have an alpha channel. New in SDK 17.0.
+	inline bool						IsRGB (void) const				{return GetNumBitsLuma() ? false : true;}	///< @return	True if my pixel format is RGB. New in SDK 17.0.
 	bool							Is2KFormat (void) const;		///< @return	True if I was created with a 2Kx1080 video format.
 	///@}
 #if !defined(NTV2_DEPRECATE_16_3)
@@ -330,6 +340,7 @@ public:
 	private:
 		friend class CNTV2CaptionRenderer;	//	The caption renderer needs to call SetPixelFormat
 		inline void					SetPixelFormat (const NTV2PixelFormat inPixFmt)		{mPixelFormat = inPixFmt;}			///< @brief	Internal use only
+		inline void					SetBitsPerComponent (const UByte inLuma, const UByte inChroma, const UByte inAlpha)	{mNumBitsLuma = inLuma; mNumBitsChroma = inChroma; mNumBitsAlpha = inAlpha;}
 		void						FinalizePlanar (void);			///< @brief	Completes initialization for planar formats
 
 	//	Member Data
@@ -346,6 +357,9 @@ public:
 		ULWord					mLinePitch[4];		///< @brief	Number of bytes per row/line (per-plane)
 		UWord					mNumPlanes;			///< @brief	Number of planes
 		NTV2FrameGeometry		mFrameGeometry;		///< @brief My originating frame geometry
+		UByte					mNumBitsLuma;		///≤ @brief	Number of bits in luminance component (0 for RGB)
+		UByte					mNumBitsChroma;		///≤ @brief	Number of bits in chroma components
+		UByte					mNumBitsAlpha;		///≤ @brief	Number of bits in alpha component (0 if no alpha)
 
 };	//	NTV2FormatDescriptor
 

@@ -6305,8 +6305,9 @@ typedef enum
 				template<typename T>	operator T*() const				{return reinterpret_cast<T*>(GetHostPointer());}	//	New in SDK 16.0
 
 				/**
-					@brief		Resets an NTV2Buffer instance to reference a contiguous segment of my memory buffer.
+					@brief		Resets an NTV2Buffer instance to reference a contiguous segment (portion) of my memory buffer.
 					@param[out] outPtr			The NTV2Buffer to be reset to my sub-segment.
+												Note this receives a reference my segment, not a copy of it.
 					@param[in]	inByteOffset	Specifies the offset, in bytes, where the segment starts.
 					@param[in]	inByteCount		Specifies the segment length, in bytes.
 					@return		The specified NTV2Buffer.	 It will be set to null/empty upon failure.
