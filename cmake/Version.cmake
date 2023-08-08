@@ -20,6 +20,7 @@ list(GET AJA_BUILD_DATE_PARTS 2 AJA_BUILD_DAY)
 
 if (NOT NTV2_VERSION_STRING)
     set(NTV2_VERSION_STRING 1.2.3)
+    set(AJA_NTV2_SDK_BUILD_LETTER "d") # ""=release, "a"=alpha, "b"=beta, "d"=development
 endif()
 
 # Read libajantv2 version number from VERSION file
@@ -61,6 +62,13 @@ if (NTV2_VERSION_POINT)
 else()
     string(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)" "\\3"
         AJA_NTV2_SDK_VERSION_POINT ${NTV2_VERSION_STRING})
+endif()
+if(DEFINED ENV{NTV2_BUILD_LETTER})
+    message(STATUS "NTV2 build letter override from env: $ENV{NTV2_BUILD_LETTER}")
+    set(AJA_NTV2_SDK_BUILD_LETTER $ENV{NTV2_BUILD_LETTER})
+elseif (DEFINED ENV{BUILD_LETTER})
+    message(STATUS "NTV2 build letter override from TeamCity env: $ENV{BUILD_LETTER}")
+    set(AJA_NTV2_SDK_BUILD_LETTER $ENV{BUILD_LETTER})
 endif()
 if (DEFINED ENV{NTV2_VERSION_BUILD})
     message(STATUS "NTV2 build number override from env: $ENV{NTV2_VERSION_BUILD}")
@@ -123,10 +131,15 @@ string(CONCAT AJA_NTV2_VER_SHORT_STR
 
 string(REPLACE "." "," AJA_NTV2_VER_STR_COMMA
     "${AJA_NTV2_VER_STR}")
-set(AJA_NTV2_SDK_BUILD_TYPE "d") # ""=release, "a"=alpha, "b"=beta, "d"=development
-if (AJA_NTV2_SDK_BUILD_TYPE STREQUAL "a")
+
+string(CONCAT AJA_NTV2_VER_STR_WITH_LETTER
+    "${AJA_NTV2_SDK_VERSION_MAJOR}"
+    ".${AJA_NTV2_SDK_VERSION_MINOR}"
+    ".${AJA_NTV2_SDK_VERSION_POINT}${AJA_NTV2_SDK_BUILD_LETTER}${AJA_NTV2_SDK_BUILD_NUMBER}")
+
+if (AJA_NTV2_SDK_BUILD_LETTER STREQUAL "a")
     set(AJA_NTV2_SDK_BUILD_TYPE_LONG "alpha")
-elseif (AJA_NTV2_SDK_BUILD_TYPE STREQUAL "b")
+elseif (AJA_NTV2_SDK_BUILD_LETTER STREQUAL "b")
     set(AJA_NTV2_SDK_BUILD_TYPE_LONG "beta")
 else()
     set(AJA_NTV2_SDK_BUILD_TYPE_LONG "")

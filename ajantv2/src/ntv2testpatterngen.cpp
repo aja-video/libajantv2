@@ -2756,8 +2756,6 @@ bool NTV2TestPatternGen::DrawTestPattern (const NTV2TestPatternSelect inPattern,
 	mDstLinePitch = inFormatDesc.GetBytesPerRow();
 	if (!mDstLinePitch)
 		{TPGFAIL("Zero line pitch for pattern " << DEC(inPattern)); return false;}
-	if (mDstLinePitch != ::CalcRowBytesForFormat(mDstPixelFormat, mDstFrameWidth))
-		{TPGFAIL("Pattern " << DEC(inPattern) << ", " << inFormatDesc << ", linePitch " << DEC(mDstLinePitch) << " differs from CalcRowBytesForFormat result"); return false;}
 
 	// BYTES per line of test pattern data (always stored as 10-bit YCbCr)
 	mSrcLinePitch = CalcRowBytesForFormat(NTV2_FBF_10BIT_YCBCR, mDstFrameWidth);

@@ -45,6 +45,9 @@ bool CNTV2Card::DMAReadFrame (const ULWord inFrameNumber, ULWord * pFrameBuffer,
 
 bool CNTV2Card::DMAReadFrame (const ULWord inFrameNumber, ULWord * pFrameBuffer, const ULWord inByteCount, const NTV2Channel inChannel)
 {
+	if (!NTV2_IS_VALID_CHANNEL(inChannel))
+		return DMAReadFrame (inFrameNumber, pFrameBuffer, inByteCount);
+
 	NTV2Framesize hwFrameSize(NTV2_FRAMESIZE_INVALID);
 	GetFrameBufferSize(inChannel, hwFrameSize);
 	ULWord actualFrameSize (::NTV2FramesizeToByteCount(hwFrameSize));
@@ -66,6 +69,9 @@ bool CNTV2Card::DMAWriteFrame (const ULWord inFrameNumber, const ULWord * pFrame
 
 bool CNTV2Card::DMAWriteFrame (const ULWord inFrameNumber, const ULWord * pFrameBuffer, const ULWord inByteCount, const NTV2Channel inChannel)
 {
+	if (!NTV2_IS_VALID_CHANNEL(inChannel))
+		return DMAWriteFrame (inFrameNumber, pFrameBuffer, inByteCount);
+
 	NTV2Framesize hwFrameSize(NTV2_FRAMESIZE_INVALID);
 	GetFrameBufferSize(inChannel, hwFrameSize);
 	ULWord actualFrameSize (::NTV2FramesizeToByteCount(hwFrameSize));
