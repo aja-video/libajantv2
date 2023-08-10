@@ -5565,23 +5565,25 @@ typedef enum
 
 		#if !defined (NTV2_BUILDING_DRIVER)
 		/**
-			@brief		Describes a segmented data transfer (copy or move) from a source memory location to a destination location,
-						with independent pitch and direction attributes for source and destination.
-						The simplest transfer, of course, has a single segment.
+			@brief		Describes a segmented data transfer (copy or move) from a source memory location to a
+						destination location, with independent pitch and direction attributes for source and
+						destination. The simplest transfer, of course, has a single segment.
 			@details	A segmented transfer is described by these attributes:
 						-	A starting source and destination offset, in elements;
 						-	A source and destination pitch (span between segments, in elements);
 						-	A segment length, in elements;
 						-	A segment count.
-						The element size defaults to 1 byte per element, must be power-of-2, and cannot be larger than 8 bytes.
+						The element size defaults to 1 byte per element, must be a power-of-2, and cannot be
+						larger than 8 bytes.
 						There are also some optional attributes:
-						-	Optional "source vertical flip" flag to indicate that the source offset is interpreted as an offset,
-							in elements, from the bottom of the source buffer, and during the transfer, the source pitch is
-							subtracted instead of added. Defaults to normal "from top" source offset reference.
-						-	Optional "destination vertical flip" flag to indicate that the destination offset is interpreted as
-							an offset, in elements, from the bottom of the destination buffer, and during the transfer, the
-							destination pitch is subtracted instead of added. Defaults to normal "from top" destination offset
-							reference.
+						-	Optional "source vertical flip" flag to indicate that the source offset is
+							interpreted as an offset, in elements, from the bottom of the source buffer, and
+							during the transfer, the source pitch is subtracted instead of added. Defaults to
+							normal "from top" source offset reference.
+						-	Optional "destination vertical flip" flag to indicate that the destination offset
+							is interpreted as an offset, in elements, from the bottom of the destination buffer,
+							and during the transfer, the destination pitch is subtracted instead of added.
+							Defaults to normal "from top" destination offset reference.
 		**/
 		class AJAExport NTV2SegmentedXferInfo
 		{
@@ -6311,8 +6313,9 @@ typedef enum
 				template<typename T>	operator T*() const				{return reinterpret_cast<T*>(GetHostPointer());}	//	New in SDK 16.0
 
 				/**
-					@brief		Resets an NTV2Buffer instance to reference a contiguous segment of my memory buffer.
+					@brief		Resets an NTV2Buffer instance to reference a contiguous segment (portion) of my memory buffer.
 					@param[out] outPtr			The NTV2Buffer to be reset to my sub-segment.
+												Note this receives a reference my segment, not a copy of it.
 					@param[in]	inByteOffset	Specifies the offset, in bytes, where the segment starts.
 					@param[in]	inByteCount		Specifies the segment length, in bytes.
 					@return		The specified NTV2Buffer.	 It will be set to null/empty upon failure.
@@ -8709,13 +8712,41 @@ typedef enum
 			AJAExport std::ostream & operator << (std::ostream & inOStream, const NTV2VideoFormatSet & inFormats);
 
 			/**
-				@brief	Returns a set of distinct ::NTV2FrameBufferFormat values supported on the given device.
+				@brief		Returns a set of distinct ::NTV2FrameBufferFormat values supported on the given device.
 				@param[in]	inDeviceID	Specifies the ::NTV2DeviceID of the device of interest.
 				@param[out] outFormats	Receives the set of distinct ::NTV2FrameBufferFormat values supported by the device.
 				@return		True if successful;	 otherwise false.
-				@todo	This needs to be moved to a C++ compatible "device features" module.
+				@todo		This needs to be moved to a C++ compatible "device features" module.
 			**/
 			AJAExport bool NTV2DeviceGetSupportedPixelFormats (const NTV2DeviceID inDeviceID, NTV2PixelFormats & outFormats);
+
+			/**
+				@brief		Returns a set of all ::NTV2PixelFormat values supported (used) by any/all supported NTV2 devices.
+				@param[out] outFormats	Receives the set of NTV2PixelFormats supported by any/all NTV2 devices.
+				@return		True if successful;	 otherwise false.
+			**/
+			AJAExport bool NTV2GetSupportedPixelFormats (NTV2PixelFormats & outFormats);	//	New in SDK 17.0
+
+			/**
+				@brief		Returns a set of ::NTV2PixelFormat values not suported by any NTV2 device.
+				@param[out] outFormats	Receives the set of NTV2PixelFormats not supported by any NTV2 device.
+				@return		True if successful;	 otherwise false.
+			**/
+			AJAExport bool NTV2GetUnsupportedPixelFormats (NTV2PixelFormats & outFormats);	//	New in SDK 17.0
+
+			/**
+				@brief		Returns a set of all ::NTV2Standard values supported (used) by any/all supported NTV2 devices.
+				@param[out] outStandards	Receives the set of NTV2Standards supported by any/all NTV2 devices.
+				@return		True if successful;	 otherwise false.
+			**/
+			AJAExport bool NTV2GetSupportedStandards (NTV2StandardSet & outStandards);	//	New in SDK 17.0
+
+			/**
+				@brief		Returns a set of ::NTV2Standard values not suported by any NTV2 device.
+				@param[out] outStandards	Receives the set of NTV2Standards not supported by any NTV2 device.
+				@return		True if successful;	 otherwise false.
+			**/
+			AJAExport bool NTV2GetUnsupportedStandards (NTV2StandardSet & outStandards);	//	New in SDK 17.0
 
 			/**
 				@brief		Prints the given ::NTV2FrameBufferFormatSet contents into the given output stream.

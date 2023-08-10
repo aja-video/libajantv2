@@ -31,13 +31,13 @@
 #define HD_NUMCOMPONENTPIXELS_1080_2K	2048
 #define HD_NUMCOMPONENTPIXELS_1080		1920
 
-#define CCIR601_10BIT_BLACK				64
-#define CCIR601_10BIT_WHITE				940
-#define CCIR601_10BIT_CHROMAOFFSET		512
+#define CCIR601_10BIT_BLACK				64		//	0x040
+#define CCIR601_10BIT_WHITE				940		//	0x3AC
+#define CCIR601_10BIT_CHROMAOFFSET		512		//	0x200
 
-#define CCIR601_8BIT_BLACK				16
-#define CCIR601_8BIT_WHITE				235
-#define CCIR601_8BIT_CHROMAOFFSET		128
+#define CCIR601_8BIT_BLACK				16		//	0x10
+#define CCIR601_8BIT_WHITE				235		//	0xEB
+#define CCIR601_8BIT_CHROMAOFFSET		128		//	0x80
 
 // line pitch is in bytes.
 #define FRAME_0_BASE							(0x0)
@@ -193,14 +193,29 @@ AJAExport void CopyRGBAImageToFrame(ULWord* pSrcBuffer, ULWord srcHeight, ULWord
 										this be a multiple of 16, while NTV2_FBF_8BIT_YCBCR requires an even number).
 										Must exceed zero.
 	@param[in]	inDstTotalLines			The total number of raster lines to set to legal black. Must exceed zero.
-	@bug		Need implementations for NTV2_FBF_8BIT_YCBCR_YUY2, NTV2_FBF_10BIT_DPX, NTV2_FBF_10BIT_YCBCR_DPX,
-				NTV2_FBF_10BIT_YCBCRA, NTV2_FBF_10BIT_DPX_LE, NTV2_FBF_10BIT_RGB_PACKED, NTV2_FBF_10BIT_ARGB, NTV2_FBF_16BIT_ARGB,
-				the 3-plane planar formats NTV2_FBF_8BIT_YCBCR_420PL3, NTV2_FBF_8BIT_YCBCR_422PL3, NTV2_FBF_10BIT_YCBCR_420PL3_LE,
-				and NTV2_FBF_10BIT_YCBCR_422PL3_LE, plus the 2-plane planar formats NTV2_FBF_10BIT_YCBCR_420PL2,
-				NTV2_FBF_10BIT_YCBCR_422PL2, NTV2_FBF_8BIT_YCBCR_420PL2, and NTV2_FBF_8BIT_YCBCR_422PL2.
+	@bug		Need implementations for numerous pixel formats.
 	@return		True if successful;	 otherwise false.
 **/
 AJAExport bool	SetRasterLinesBlack (const NTV2PixelFormat	inPixelFormat,
+										UByte *				pDstBuffer,
+										const ULWord		inDstBytesPerLine,
+										const UWord			inDstTotalLines);
+
+/**
+	@brief	Sets all or part of a destination raster image to legal white.
+	@param[in]	inPixelFormat			Specifies the NTV2PixelFormat of the destination buffer.
+										(Note that many pixel formats are not currently supported.)
+	@param		pDstBuffer				Specifies the address of the destination buffer to be modified. Must be non-NULL.
+	@param[in]	inDstBytesPerLine		The number of bytes per raster line of the destination buffer. Note that this value
+										is used to compute the maximum pixel width of the destination raster. Also note that
+										some pixel formats set constraints on this value (e.g., NTV2_FBF_10BIT_YCBCR requires
+										this be a multiple of 16, while NTV2_FBF_8BIT_YCBCR requires an even number).
+										Must exceed zero.
+	@param[in]	inDstTotalLines			The total number of raster lines to set to legal white. Must exceed zero.
+	@bug		Need implementations for numerous pixel formats.
+	@return		True if successful;	 otherwise false.
+**/
+AJAExport bool	SetRasterLinesWhite (const NTV2PixelFormat	inPixelFormat,
 										UByte *				pDstBuffer,
 										const ULWord		inDstBytesPerLine,
 										const UWord			inDstTotalLines);

@@ -62,6 +62,43 @@ static const string	gPlaneLabels[NTV2_FBF_NUMFRAMEBUFFERFORMATS][4]	=
 };
 
 
+static const uint8_t	gBitsPerComponent[NTV2_FBF_NUMFRAMEBUFFERFORMATS][3]	=
+{	//										Luma		Chroma	Alpha
+	/* NTV2_FBF_10BIT_YCBCR */				{10,		10,		0},
+	/* NTV2_FBF_8BIT_YCBCR */				{8,			8,		0},
+	/* NTV2_FBF_ARGB */						{0,			8,		8},
+	/* NTV2_FBF_RGBA */						{0,			8,		8},
+	/* NTV2_FBF_10BIT_RGB */				{0,			10,		2},
+	/* NTV2_FBF_8BIT_YCBCR_YUY2 */			{8,			8,		0},
+	/* NTV2_FBF_ABGR */						{0,			8,		8},
+	/* NTV2_FBF_10BIT_DPX */				{0,			10,		0},
+	/* NTV2_FBF_10BIT_YCBCR_DPX */			{10,		10,		0},
+	/* NTV2_FBF_8BIT_DVCPRO */				{0,			0,		0},	//	Lossy
+	/* NTV2_FBF_8BIT_YCBCR_420PL3 */		{8,			8,		0},
+	/* NTV2_FBF_8BIT_HDV */					{0,			0,		0},	//	Lossy
+	/* NTV2_FBF_24BIT_RGB */				{0,			8,		0},
+	/* NTV2_FBF_24BIT_BGR */				{0,			8,		0},
+	/* NTV2_FBF_10BIT_YCBCRA */				{0,			0,		0},	//	Unused
+	/* NTV2_FBF_10BIT_DPX_LE */				{0,			10,		0},
+	/* NTV2_FBF_48BIT_RGB */				{0,			16,		0},
+	/* NTV2_FBF_12BIT_RGB_PACKED */			{0,			12,		0},
+	/* NTV2_FBF_PRORES_DVCPRO */			{0,			0,		0},	//	Unused
+	/* NTV2_FBF_PRORES_HDV */				{0,			0,		0},	//	Unused
+	/* NTV2_FBF_10BIT_RGB_PACKED */			{0,			0,		0},	//	Unused
+	/* NTV2_FBF_10BIT_ARGB */				{0,			0,		0},	//	Unused
+	/* NTV2_FBF_16BIT_ARGB */				{0,			0,		0},	//	Unused
+	/* NTV2_FBF_8BIT_YCBCR_422PL3 */		{8,			8,		0},
+	/* NTV2_FBF_10BIT_RAW_RGB */			{0,			10,		0},
+	/* NTV2_FBF_10BIT_RAW_YCBCR */			{10,		10,		0},
+	/* NTV2_FBF_10BIT_YCBCR_420PL3_LE */	{10,		10,		0},
+	/* NTV2_FBF_10BIT_YCBCR_422PL3_LE */	{10,		10,		0},
+	/* NTV2_FBF_10BIT_YCBCR_420PL2 */		{10,		10,		0},
+	/* NTV2_FBF_10BIT_YCBCR_422PL2 */		{10,		10,		0},
+	/* NTV2_FBF_8BIT_YCBCR_420PL2 */		{8,			8,		0},
+	/* NTV2_FBF_8BIT_YCBCR_422PL2 */		{8,			8,		0}
+};
+
+
 const static NTV2FormatDescriptor	formatDescriptorTable [NTV2_NUM_STANDARDS] [NTV2_FBF_NUMFRAMEBUFFERFORMATS] =
 {
 	{/////	NTV2_STANDARD_1080											inNumLines						inNumPixels							inLinePitch [ULWords per line]			inFirstActiveLine
@@ -633,6 +670,9 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2Standard			inStandard,
 	mPixelFormat	= inFrameBufferFormat;
 	mVancMode		= inVancMode;
 	mFrameGeometry	= ::GetVANCFrameGeometry(::GetGeometryFromStandard(mStandard), mVancMode);
+	mNumBitsLuma	= gBitsPerComponent[mPixelFormat][0];
+	mNumBitsChroma	= gBitsPerComponent[mPixelFormat][1];
+	mNumBitsAlpha	= gBitsPerComponent[mPixelFormat][2];
 
 	//	Account for VANC...
 	if (NTV2_IS_VANCMODE_ON(inVancMode))
@@ -736,6 +776,9 @@ NTV2FormatDescriptor::NTV2FormatDescriptor (const NTV2VideoFormat		inVideoFormat
 	mPixelFormat	= inFrameBufferFormat;
 	mVancMode		= inVancMode;
 	mFrameGeometry	= ::GetVANCFrameGeometry(::GetNTV2FrameGeometryFromVideoFormat(mVideoFormat), mVancMode);
+	mNumBitsLuma	= gBitsPerComponent[mPixelFormat][0];
+	mNumBitsChroma	= gBitsPerComponent[mPixelFormat][1];
+	mNumBitsAlpha	= gBitsPerComponent[mPixelFormat][2];
 
 	//	Account for VANC...
 	if (NTV2_IS_VANCMODE_ON(inVancMode))
@@ -802,6 +845,7 @@ void NTV2FormatDescriptor::MakeInvalid (void)
 	mLinePitch[0] = mLinePitch[1] = mLinePitch[2] = mLinePitch[3] = 0;
 	mNumPlanes		= 0;
 	mFrameGeometry	= NTV2_FG_INVALID;
+	mNumBitsLuma	= mNumBitsChroma = mNumBitsAlpha = 0;
 }
 
 ULWord NTV2FormatDescriptor::GetTotalBytes (void) const
@@ -1061,40 +1105,47 @@ bool NTV2FormatDescriptor::GetChangedLines (NTV2RasterLineOffsets & outDiffs, co
 }
 
 
-ostream & NTV2FormatDescriptor::Print (ostream & inOutStream, const bool inDetailed) const
+ostream & NTV2FormatDescriptor::Print (ostream & oss, const bool inDetailed) const
 {
 	UWord	plane	(0);
 	if (!IsValid ())
-		inOutStream << "INVALID: ";
-	inOutStream	<< DEC(GetFullRasterHeight()) << " lines, "
-				<< DEC(GetRasterWidth()) << " px/line,";
+		oss << "INVALID: ";
+	oss	<< "lines=" << DEC(GetFullRasterHeight())
+		<< " px/line=" << DEC(GetRasterWidth());
 	do
 	{
 		if (IsPlanar())
-			inOutStream << " PL" << plane << "=";
-		inOutStream << DEC(GetBytesPerRow(plane)) << " bytes/line";
+			oss << " PL" << plane << ":";
+		oss << " bytes/line=" << DEC(GetBytesPerRow(plane));
 	} while (++plane < GetNumPlanes());
-	inOutStream << ", 1stAct=" << DEC(firstActiveLine);
+	if (firstActiveLine)
+		oss << " 1stAct=" << DEC(firstActiveLine);
 	if (inDetailed)
 	{
 		plane = 0;
 		if (IsPlanar())
 			do
 			{
-				inOutStream << ", PL" << plane << " bytes=" << xHEX0N(GetTotalRasterBytes(plane),8);
+				oss << " PL" << plane << " bytes=" << xHEX0N(GetTotalRasterBytes(plane),8);
 			} while (++plane < GetNumPlanes());
 		else
-			inOutStream << ", bytes=" << xHEX0N(GetTotalRasterBytes(),8);
+			oss << " bytes=" << xHEX0N(GetTotalRasterBytes(),8);
 		if (NTV2_IS_VALID_VIDEO_FORMAT(mVideoFormat))
-			inOutStream << " '" << ::NTV2VideoFormatToString(mVideoFormat) << "'";
+			oss << " " << ::NTV2VideoFormatToString(mVideoFormat);
 		else
-			inOutStream << ", " << ::NTV2StandardToString(mStandard) << (Is2KFormat() ? " 2K" : "");
+			oss << " " << ::NTV2StandardToString(mStandard) << (Is2KFormat() ? " 2K" : "");
 		if (NTV2_IS_VANCMODE_ON(mVancMode))
-			inOutStream << (NTV2_IS_VANCMODE_TALLER(mVancMode) ? " TallerVANC" : " TallVANC");
+			oss << (NTV2_IS_VANCMODE_TALLER(mVancMode) ? " TallerVANC" : " TallVANC");
 		if (NTV2_IS_VALID_FRAME_BUFFER_FORMAT(mPixelFormat))
-			inOutStream << ", " << ::NTV2FrameBufferFormatToString (mPixelFormat);
+			oss << " " << ::NTV2FrameBufferFormatToString(mPixelFormat);
+		if (IsRGB())
+			oss << " bitsC" << DEC(UWord(GetNumBitsChroma()));
+		else
+			oss << " bitsY" << DEC(UWord(GetNumBitsLuma()));
+		if (HasAlpha())
+			oss << "A" << DEC(UWord(GetNumBitsAlpha()));
 	}
-	return inOutStream;
+	return oss;
 }
 
 

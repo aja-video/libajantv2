@@ -1073,6 +1073,56 @@ NTV2OutputDestinations & operator += (NTV2OutputDestinations & inOutSet, const N
 	return inOutSet;
 }
 
+bool NTV2GetSupportedPixelFormats (NTV2PixelFormats & outFormats)
+{
+	outFormats.clear();
+	const NTV2DeviceIDSet devIDs (::NTV2GetSupportedDevices());
+	for (NTV2DeviceIDSetConstIter it(devIDs.begin());  it != devIDs.end();  ++it)
+	{
+		NTV2PixelFormats fmts;
+		::NTV2DeviceGetSupportedPixelFormats(*it, fmts);
+		for (NTV2PixelFormatsConstIter fit(fmts.begin());  fit != fmts.end();  ++fit)
+			if (outFormats.find(*fit) == outFormats.end())
+				outFormats.insert(*fit);
+	}
+	return true;
+}
+
+bool NTV2GetUnsupportedPixelFormats (NTV2PixelFormats & outFormats)
+{
+	NTV2PixelFormats usedFormats;
+	::NTV2GetSupportedPixelFormats(usedFormats);
+	for (NTV2PixelFormat pf(NTV2_FBF_FIRST);  pf < NTV2_FBF_LAST;  pf = NTV2PixelFormat(pf+1))
+		if (usedFormats.find(pf) == usedFormats.end())	//	if unused
+			outFormats.insert(pf);
+	return true;
+}
+
+bool NTV2GetSupportedStandards (NTV2StandardSet & outStandards)
+{
+	outStandards.clear();
+	const NTV2DeviceIDSet devIDs (::NTV2GetSupportedDevices());
+	for (NTV2DeviceIDSetConstIter it(devIDs.begin());  it != devIDs.end();  ++it)
+	{
+		NTV2StandardSet stds;
+		::NTV2DeviceGetSupportedStandards(*it, stds);
+		for (NTV2StandardSetConstIter sit(stds.begin());  sit != stds.end();  ++sit)
+			if (outStandards.find(*sit) == outStandards.end())
+				outStandards.insert(*sit);
+	}
+	return true;
+}
+
+bool NTV2GetUnsupportedStandards (NTV2StandardSet & outStandards)
+{
+	NTV2StandardSet usedStandards;
+	::NTV2GetSupportedStandards(usedStandards);
+	for (NTV2Standard st(NTV2_STANDARD_1080);  st < NTV2_NUM_STANDARDS;  st = NTV2Standard(st+1))
+		if (usedStandards.find(st) == usedStandards.end())	//	if unused
+			outStandards.insert(st);
+	return true;
+}
+
 
 //	This needs to be moved into a C++ compatible "device features" module:
 bool NTV2DeviceGetSupportedVideoFormats (const NTV2DeviceID inDeviceID, NTV2VideoFormatSet & outFormats)
