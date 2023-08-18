@@ -103,7 +103,7 @@
 	Defined:	(Default) WriteRegister calls can be profiled, and the API that controls profiling and
 				retrieve results is available (e.g. the *RecordRegisterWrites API functions).
 **************************************************************************************************************/
-#define NTV2_WRITEREG_PROFILING		//	If defined, enables register write profiling
+//#define NTV2_WRITEREG_PROFILING		//	If defined, enables register write profiling
 
 
 /**************************************************************************************************************
