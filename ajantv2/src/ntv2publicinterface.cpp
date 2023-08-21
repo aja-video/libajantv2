@@ -2947,6 +2947,29 @@ bool NTV2GetRegisters::GetBadRegisters (NTV2RegNumSet & outBadRegNums) const
 	return true;
 }
 
+bool NTV2GetRegisters::PatchRegister (const ULWord inRegNum, const ULWord inValue)
+{
+	if (!mOutGoodRegisters)
+		return false;		//	Empty/null 'mOutGoodRegisters' array!
+	if (!mOutNumRegisters)
+		return false;		//	Driver says zero successfully read!
+	if (mOutNumRegisters > mInNumRegisters)
+		return false;		//	Sanity check failed:  mOutNumRegisters must be less than or equal to mInNumRegisters!
+	if (!mOutValues)
+		return false;		//	Empty/null 'mOutValues' array!
+	if (mOutGoodRegisters.GetByteCount() != mOutValues.GetByteCount())
+		return false;		//	Sanity check failed:  These sizes should match
+	const ULWord *	pRegArray	(mOutGoodRegisters);
+	ULWord *		pValArray	(mOutValues);
+	for (ULWord ndx(0);  ndx < mOutNumRegisters;  ndx++)
+		if (pRegArray[ndx] == inRegNum)
+		{
+			pValArray[ndx] = inValue;
+			return true;
+		}
+	return false;	//	Not found
+}
+
 
 bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterValueMap & outValues) const
 {

@@ -7303,6 +7303,14 @@ typedef enum
 				bool		GetBadRegisters (NTV2RegNumSet & outBadRegNums) const;	//	New in SDK 16.3
 
 				/**
+					@brief		Patches the given register value.
+					@param[in]	inRegNum	Specifies the register to be patched.
+					@param[in]	inValue		Specifies the new value.
+					@return		True if successful;	 otherwise false.
+				**/
+				bool		PatchRegister (const ULWord inRegNum, const ULWord inValue);	//	New in SDK 17.0
+
+				/**
 					@brief	Prints a human-readable representation of me to the given output stream.
 					@param	inOutStream		Specifies the output stream to use.
 					@return A reference to the output stream.
