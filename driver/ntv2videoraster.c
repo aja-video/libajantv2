@@ -517,69 +517,19 @@ static bool has_config_changed(struct ntv2_videoraster *ntv2_raster, uint32_t in
     uint32_t channel_control_value = 0;
     uint32_t output_frame_value = 0;
     uint32_t input_frame_value = 0;
-#if 0    
-    uint32_t global_control_mask =
-        NTV2_FLD_MASK(ntv2_fld_global_control_standard) |
-        NTV2_FLD_MASK(ntv2_fld_global_control_frame_rate) |
-        NTV2_FLD_MASK(ntv2_fld_global_control_frame_rate_high) |
-        NTV2_FLD_MASK(ntv2_fld_global_control_geometry) |
-		NTV2_FLD_MASK(ntv2_fld_global_control_quad_tsi_enable) |
-        NTV2_FLD_MASK(ntv2_fld_global_control_reg_sync);
-    uint32_t global_control2_mask =
-        NTV2_FLD_MASK(ntv2_fld_global_control_independent_mode);
-    uint32_t global_control3_mask = 0;
-    uint32_t channel_control_mask =
-        NTV2_FLD_MASK(ntv2_fld_channel_control_capture_enable) |
-        NTV2_FLD_MASK(ntv2_fld_channel_control_pixel_format) |
-        NTV2_FLD_MASK(ntv2_fld_channel_control_pixel_format_high) |
-        NTV2_FLD_MASK(ntv2_fld_channel_control_channel_disable) |
-		NTV2_FLD_MASK(ntv2_fld_channel_control_frame_size);
-#endif
     bool ret = true;
 
-    /* read global control 2 to get check channel independent mode bit */
-    if (index == 0)
-    {
-        global_control2_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control2, 0);
-//        global_control2_value &= global_control2_mask;
-    }
-    else
-    {
-        global_control2_value = ntv2_raster->global_control2[0];
-    }
+	global_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control, 0);
+    global_control2_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control2, 0);
+	global_control3_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control3, 0);
 
     /* find global control register value */
-    if (index == 0)
+    if (NTV2_FLD_GET(ntv2_fld_global_control_independent_mode, global_control2_value))
     {
-        global_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control, 0);
-//        global_control_value &= global_control_mask;
-    }
-    else
-    {
-        if (NTV2_FLD_GET(ntv2_fld_global_control_independent_mode, global_control2_value))
-        {
-            global_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control, index);
-//            global_control_value &= global_control_mask;
-        }
-        else
-        {
-            global_control_value = ntv2_raster->global_control[0];
-        }
+        global_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control, index);
     }
 
-    // read global control 3
-    if (index == 0)
-    {
-        global_control3_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control3, 0);
-//        global_control3_value &= global_control3_mask;
-    }
-    else
-    {
-        global_control3_value = ntv2_raster->global_control3[0];
-    }
-    
     channel_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_channel_control, index);
-//    channel_control_value &= channel_control_mask;
     
     output_frame_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_channel_output_frame, index);
     input_frame_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_channel_input_frame, index);
