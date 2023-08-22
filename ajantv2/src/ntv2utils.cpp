@@ -6305,6 +6305,7 @@ string NTV2WidgetIDToString (const NTV2WidgetID inValue, const bool inCompactDis
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv4In2", NTV2_WgtHDMIIn2v4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv4In3", NTV2_WgtHDMIIn3v4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv4In4", NTV2_WgtHDMIIn4v4);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv5In1", NTV2_WgtHDMIIn1v5);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv4Out1", NTV2_WgtHDMIOut1v4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv5Out1", NTV2_WgtHDMIOut1v5);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "MultiLinkOut1", NTV2_WgtMultiLinkOut1);
@@ -6340,6 +6341,7 @@ string NTV2WidgetTypeToString (const NTV2WidgetType inValue, const bool inCompac
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMI Input V2", NTV2WidgetType_HDMIInV2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMI Input V3", NTV2WidgetType_HDMIInV3);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMI Input V4", NTV2WidgetType_HDMIInV4);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMI Input V5", NTV2WidgetType_HDMIInV5);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "Up-Down Converter", NTV2WidgetType_UpDownConverter);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "Mixer", NTV2WidgetType_Mixer);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "DCI Mixer", NTV2WidgetType_DCIMixer);

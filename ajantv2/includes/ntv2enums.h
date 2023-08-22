@@ -2978,6 +2978,7 @@ typedef enum
 	,NTV2_Wgt3DLUT1
 	,NTV2_WgtMultiLinkOut2
 	,NTV2_WgtOE1
+	,NTV2_WgtHDMIIn1v5
 	,NTV2_WgtModuleTypeCount
 	,NTV2_WgtUndefined = NTV2_WgtModuleTypeCount
 	,NTV2_WIDGET_INVALID = NTV2_WgtModuleTypeCount
@@ -3007,6 +3008,7 @@ typedef enum {
 	,NTV2WidgetType_HDMIInV2
 	,NTV2WidgetType_HDMIInV3
 	,NTV2WidgetType_HDMIInV4
+	,NTV2WidgetType_HDMIInV5
 	,NTV2WidgetType_UpDownConverter
 	,NTV2WidgetType_Mixer
 	,NTV2WidgetType_DCIMixer

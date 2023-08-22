@@ -1029,6 +1029,8 @@ void RoutingExpert::InitOutputXpt2WidgetIDs(void)
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn3RGB,			NTV2_WgtHDMIIn3v4));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn4,				NTV2_WgtHDMIIn4v4));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn4RGB,			NTV2_WgtHDMIIn4v4));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn1,				NTV2_WgtHDMIIn1v5));
+	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_XptHDMIIn1RGB,			NTV2_WgtHDMIIn1v5));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt425Mux1ARGB,			NTV2_Wgt425Mux1));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt425Mux1AYUV,			NTV2_Wgt425Mux1));
 	gOutputXpt2WidgetIDs.insert (OutputXpt2WidgetIDPair (NTV2_Xpt425Mux1BRGB,			NTV2_Wgt425Mux1));
@@ -1282,6 +1284,7 @@ void RoutingExpert::InitWidgetIDToChannels(void)
 	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtHDMIIn3v4, NTV2_CHANNEL3));
 	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtHDMIIn4v4, NTV2_CHANNEL4));
 	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtHDMIOut1v4, NTV2_CHANNEL1));
+	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtHDMIIn1v5, NTV2_CHANNEL1));
 	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtHDMIOut1v5, NTV2_CHANNEL1));
 	gWidget2Channels.insert(Widget2ChannelPair(NTV2_WgtMultiLinkOut1, NTV2_CHANNEL1));
 	gWidget2Channels.insert(Widget2ChannelPair(NTV2_Wgt3DLUT1, NTV2_CHANNEL1));
@@ -1401,6 +1404,7 @@ void RoutingExpert::InitWidgetIDToWidgetTypes(void)
 	gWidget2Types.insert(Widget2TypePair(NTV2_WgtHDMIIn2v4, NTV2WidgetType_HDMIInV4));
 	gWidget2Types.insert(Widget2TypePair(NTV2_WgtHDMIIn3v4, NTV2WidgetType_HDMIInV4));
 	gWidget2Types.insert(Widget2TypePair(NTV2_WgtHDMIIn4v4, NTV2WidgetType_HDMIInV4));
+	gWidget2Types.insert(Widget2TypePair(NTV2_WgtHDMIIn1v5, NTV2WidgetType_HDMIInV5));
 	gWidget2Types.insert(Widget2TypePair(NTV2_WgtHDMIOut1v4, NTV2WidgetType_HDMIOutV4));
 	gWidget2Types.insert(Widget2TypePair(NTV2_WgtHDMIOut1v5, NTV2WidgetType_HDMIOutV5));
 	gWidget2Types.insert(Widget2TypePair(NTV2_WgtMultiLinkOut1, NTV2WidgetType_MultiLinkOut));
@@ -1447,6 +1451,7 @@ void RoutingExpert::InitWidgetIDToWidgetTypes(void)
 	gHDMIWidgetTypes.insert(NTV2WidgetType_HDMIInV2);
 	gHDMIWidgetTypes.insert(NTV2WidgetType_HDMIInV3);
 	gHDMIWidgetTypes.insert(NTV2WidgetType_HDMIInV4);
+	gHDMIWidgetTypes.insert(NTV2WidgetType_HDMIInV5);
 	gHDMIWidgetTypes.insert(NTV2WidgetType_HDMIOutV1);
 	gHDMIWidgetTypes.insert(NTV2WidgetType_HDMIOutV2);
 	gHDMIWidgetTypes.insert(NTV2WidgetType_HDMIOutV3);
@@ -1457,6 +1462,7 @@ void RoutingExpert::InitWidgetIDToWidgetTypes(void)
 	gHDMIInWidgetTypes.insert(NTV2WidgetType_HDMIInV2);
 	gHDMIInWidgetTypes.insert(NTV2WidgetType_HDMIInV3);
 	gHDMIInWidgetTypes.insert(NTV2WidgetType_HDMIInV4);
+	gHDMIInWidgetTypes.insert(NTV2WidgetType_HDMIInV5);
 	// HDMI Output Widget Types
 	gHDMIOutWidgetTypes.insert(NTV2WidgetType_HDMIOutV1);
 	gHDMIOutWidgetTypes.insert(NTV2WidgetType_HDMIOutV2);
