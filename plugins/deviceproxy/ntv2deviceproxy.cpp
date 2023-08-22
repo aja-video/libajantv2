@@ -279,9 +279,10 @@ bool NTV2DeviceProxy::NTV2Disconnect (void)
 string NTV2DeviceProxy::Name (void) const
 {
 	ostringstream oss;
-	oss << "proxy to " << mCard.GetDisplayName();
 	if (isSimulatedDevice())
-		oss << " as " << ::NTV2DeviceIDToString(simulatedDeviceID());
+		oss << "'" << ::NTV2DeviceIDToString(simulatedDeviceID()) << "' proxy to '" << mCard.GetDisplayName() << "'";
+	else
+		oss << "Proxy to '" << mCard.GetDisplayName() << "'";
 	return oss.str();
 }
 

@@ -175,7 +175,10 @@ AJAStatus NTV2Player8K::Init (void)
 
 	//	Ready to go...
 	#if defined(_DEBUG)
-		cerr << mConfig << endl;
+		cerr << mConfig;
+		if (mDevice.IsRemote())
+			cerr	<< "Device Description:  " << mDevice.GetDescription() << endl;
+		cerr << endl;
 	#endif	//	defined(_DEBUG)
 	return AJA_STATUS_SUCCESS;
 

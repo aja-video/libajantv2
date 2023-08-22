@@ -130,7 +130,10 @@ AJAStatus NTV2DolbyCapture::Init (void)
 	mDolbyState = 0;
 
 	#if defined(_DEBUG)
-		cerr << mConfig << endl;
+		cerr << mConfig;
+		if (mDevice.IsRemote())
+			cerr	<< "Device Description:  " << mDevice.GetDescription() << endl;
+		cerr << endl;
 	#endif	//	defined(_DEBUG)
 	return AJA_STATUS_SUCCESS;
 
