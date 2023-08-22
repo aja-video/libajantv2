@@ -8,7 +8,6 @@ add_subdirectory(ntv2burn4kquadrant)
 add_subdirectory(ntv2capture)
 add_subdirectory(ntv2capture4k)
 add_subdirectory(ntv2capture8k)
-# # add_subdirectory(ntv2cudacapture) # requires gpustuff
 add_subdirectory(ntv2dolbycapture)
 add_subdirectory(ntv2dolbyplayer)
 # # # add_subdirectory(ntv2encodehevc) # requires HEVC codecs
@@ -23,18 +22,11 @@ if(AJA_QT_ENABLED)
 endif()
 
 add_subdirectory(ntv2llburn)
-# # add_subdirectory(ntv2oglcapture) # requires gpustuff
-# # add_subdirectory(ntv2ogldpxreader) # requires gpustuff
-# # add_subdirectory(ntv2ogloutput) # requires gpustuff
 add_subdirectory(ntv2outputtestpattern)
-# # # add_subdirectory(ntv2playcorder)
 add_subdirectory(ntv2player)
 add_subdirectory(ntv2player4k)
 add_subdirectory(ntv2player8k)
 add_subdirectory(ntv2streamplayer)
-# # add_subdirectory(ntv2qtplaycorder)
-# # # add_subdirectory(ntv2qtrawcapture)
-# # # add_subdirectory(ntv2qtstereopreview)
 add_subdirectory(ntv2switchbitfile)
 
 if(NOT AJANTV2_BUILD_OPENSOURCE)
@@ -48,7 +40,6 @@ if(NOT AJANTV2_BUILD_OPENSOURCE)
     add_subdirectory(ntv2ccplayer)
 endif()
     
-# # add_subdirectory(ntv2testOGL)
 if (AJA_BUILD_AMD)
     add_subdirectory(AMD)
 endif()

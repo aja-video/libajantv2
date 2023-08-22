@@ -147,7 +147,10 @@ AJAStatus NTV2Capture::Init (void)
 		return AJA_STATUS_FAIL;
 
 	#if defined(_DEBUG)
-		cerr << mConfig << endl;
+		cerr << mConfig;
+		if (mDevice.IsRemote())
+			cerr	<< "Device Description:  " << mDevice.GetDescription() << endl;
+		cerr << endl;
 	#endif	//	defined(_DEBUG)
 	return AJA_STATUS_SUCCESS;
 

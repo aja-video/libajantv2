@@ -1204,12 +1204,13 @@ NTV2ChannelList CNTV2DemoCommon::GetTSIMuxesForFrameStore (const NTV2DeviceID in
 {
 	UWord totFrameStores(::NTV2DeviceGetNumFrameStores(inDeviceID));
 	UWord totTSIMuxers(::GetNumTSIMuxers(inDeviceID));
-	UWord tsiMux(in1stFrameStore);
+	UWord firstFramestoreIndex = UWord(::GetIndexForNTV2Channel(in1stFrameStore));
+	UWord tsiMux(firstFramestoreIndex);
 	NTV2ChannelList result;
 	if (totFrameStores > totTSIMuxers)
-		tsiMux = in1stFrameStore/2;
+		tsiMux = firstFramestoreIndex/2;
 	else if (totFrameStores < totTSIMuxers)
-		tsiMux = in1stFrameStore*2;
+		tsiMux = firstFramestoreIndex*2;
 	for (UWord num(0);  num < inCount;  num++)
 		result.push_back(NTV2Channel(tsiMux + num));
 	return result;
@@ -1261,7 +1262,7 @@ bool CNTV2DemoCommon::GetInputRouting4K (NTV2XptConnections & conns,
 		{	//	HDMI CH1234
 			if (isInputRGB == isFrameRGB)
 			{	//	HDMI CH1234 RGB SIGNAL AND RGB FBF  OR  YUV SIGNAL AND YUV FBF
-				for (UWord path(0);  path < 4;  path++)
+				for (path = 0;  path < 4;  path++)
 				{	//	MUX <== HDMIIn
 					in = ::GetTSIMuxInputXptFromChannel(NTV2Channel(mux+path/2), /*LinkB*/path & 1);
 					out = ::GetInputSourceOutputXpt(inConfig.fInputSource, /*DS2*/false, isInputRGB, /*quadrant*/path);

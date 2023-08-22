@@ -94,8 +94,11 @@ Follow these instructions to build libajantv2 via the Microsoft Visual Studio CM
 1. Open Microsoft Visual Studio 2019.
 2. From the initial splash page, select "Open a local folder..." and navigate to the libajantv2 repo directory.
 3. If CMake is installed and configured properly, the Output window should show the CMake configuration logs and end with a message saying "`CMake generation finished`".
-4. From the Build menu select "Build All".
-5. If the build completes without errors, the static library should be output to `out\build\<arch>-<build type>\ajantv2` under the libajantv2 directory.
+4. To reconfigure the build with custom settings for certain CMake variables, additional CMake or build flags, etc. go to the Project menu and select "CMake settings for libajantv2". Make any changes to the build flags, CMake flags, variables, etc. and then save the CMakeSettings.json document. The CMake configure step should automatically be re-run upon saving.
+   
+   _NOTE: To manually re-run the CMake configure step with new settings, go to the Project menu and select "Configure libajantv2". If you've added libajantv2 as a sub-folder in another project you may see a different project name in the Configure menu item.
+5. From the Build menu select "Build All".
+6. If the build completes without errors, the static library should be output to `out\build\<arch>-<build type>\ajantv2` under the libajantv2 directory.
 
    Other build target outputs (demos, tools, etc.) will be available in subdirectories under the build directory mirroring their original location in the libajantv2 source tree.
 

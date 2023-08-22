@@ -190,7 +190,12 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 																		mFormatDesc.numLines);
 	//	Ready to go...
 	#if defined(_DEBUG)
-		cerr << mConfig << endl;
+		cerr << mConfig;
+		if (mInputDevice.IsRemote())
+			cerr	<< "Input Device Desc:   " << mInputDevice.GetDescription() << endl;
+		if (mOutputDevice.IsRemote())
+			cerr	<< "Output Device Desc:  " << mOutputDevice.GetDescription() << endl;
+		cerr << endl;
 	#endif	//	not _DEBUG
 	BURNINFO("Configuration: " << mConfig);
 	return AJA_STATUS_SUCCESS;

@@ -566,8 +566,12 @@ class AJAExport CNTV2DriverInterface
 	///@}
 
 		AJA_VIRTUAL bool				ReadRP188Registers (const NTV2Channel inChannel, RP188_STRUCT * pRP188Data);
-		AJA_VIRTUAL inline std::string	GetHostName (void) const	{return _pRPCAPI ? _pRPCAPI->Name() : "";}	///< @return	String containing the name of the host (if connected to a remote device) or the name of the non-physical device;  otherwise an empty string.
-		AJA_VIRTUAL inline bool			IsRemote (void) const		{return _pRPCAPI ? true : false;}			///< @return	True if I'm connected to a non-local or non-physical device;  otherwise false.
+		AJA_VIRTUAL inline std::string	GetHostName (void) const	{return IsRemote() ? _pRPCAPI->Name() : "";}	///< @return	String containing the remote device host name (if any).
+		AJA_VIRTUAL inline bool			IsRemote (void) const		{return _pRPCAPI ? true : false;}	///< @return	True if I'm connected to a non-local or non-physical device;  otherwise false.
+		/**
+			@return		String containing remote device description.
+		**/
+		AJA_VIRTUAL inline std::string	GetDescription (void) const	{return IsRemote() ? _pRPCAPI->Description() : "";}	//	New in SDK 17.0
 #if defined(NTV2_NUB_CLIENT_SUPPORT)  &&  !defined(NTV2_DEPRECATE_16_0)
 		AJA_VIRTUAL inline NTV2NubProtocolVersion	GetNubProtocolVersion (void) const	{return 0;}	///< @return	My nub protocol version.
 #endif
@@ -604,13 +608,13 @@ class AJAExport CNTV2DriverInterface
 			@name	WriteRegister Profiling
 		**/
 		///@{
-		AJA_VIRTUAL bool			GetRecordedRegisterWrites (NTV2RegisterWrites & outRegWrites) const;	///< @brief	Answers with the recorded register writes.
-		AJA_VIRTUAL bool			StartRecordRegisterWrites (const bool inSkipActualWrites = false);	///< @brief	Starts recording all WriteRegister calls.
-		AJA_VIRTUAL bool			IsRecordingRegisterWrites (void) const;		///< @return	True if WriteRegister calls are currently being recorded (and not paused);  otherwise false.
-		AJA_VIRTUAL bool			StopRecordRegisterWrites (void);			///< @brief		Stops recording all WriteRegister calls.
-		AJA_VIRTUAL bool			PauseRecordRegisterWrites (void);			///< @brief		Pauses recording WriteRegister calls.
-		AJA_VIRTUAL bool			ResumeRecordRegisterWrites (void);			///< @brief		Resumes recording WriteRegister calls (after a prior call to PauseRecordRegisterWrites).
-		AJA_VIRTUAL ULWord			GetNumRecordedRegisterWrites (void) const;	///< @return	The number of recorded WriteRegister calls.
+		AJA_VIRTUAL bool	GetRecordedRegisterWrites (NTV2RegisterWrites & outRegWrites) const;	///< @brief	Answers with the recorded register writes.
+		AJA_VIRTUAL bool	StartRecordRegisterWrites (const bool inSkipActualWrites = false);	///< @brief	Starts recording all WriteRegister calls.
+		AJA_VIRTUAL bool	IsRecordingRegisterWrites (void) const;		///< @return	True if WriteRegister calls are currently being recorded (and not paused);  otherwise false.
+		AJA_VIRTUAL bool	StopRecordRegisterWrites (void);			///< @brief		Stops recording all WriteRegister calls.
+		AJA_VIRTUAL bool	PauseRecordRegisterWrites (void);			///< @brief		Pauses recording WriteRegister calls.
+		AJA_VIRTUAL bool	ResumeRecordRegisterWrites (void);			///< @brief		Resumes recording WriteRegister calls (after a prior call to PauseRecordRegisterWrites).
+		AJA_VIRTUAL ULWord	GetNumRecordedRegisterWrites (void) const;	///< @return	The number of recorded WriteRegister calls.
 		///@}
 #endif	//	NTV2_WRITEREG_PROFILING		//	Register Write Profiling
 
@@ -622,13 +626,13 @@ class AJAExport CNTV2DriverInterface
 			@param[in]	inURLSpec	Specifies the local, remote or software device to be opened.
 			@result		True if successful; otherwise false.
 		**/
-		AJA_VIRTUAL bool			OpenRemote (const std::string & inURLSpec);
-		AJA_VIRTUAL bool			CloseRemote (void);	///< @brief	Releases host resources associated with the remote/special device connection.
-		AJA_VIRTUAL bool			OpenLocalPhysical (const UWord inDeviceIndex);	///< @brief	Opens the local/physical device connection.
-		AJA_VIRTUAL bool			CloseLocalPhysical (void);	///< @brief	Releases host resources associated with the local/physical device connection.
-		AJA_VIRTUAL bool			ParseFlashHeader (BITFILE_INFO_STRUCT & outBitfileInfo);
-		AJA_VIRTUAL bool			GetBoolParam (const ULWord inParamID,  ULWord & outValue);	//	New in SDK 17.0
-		AJA_VIRTUAL bool			GetNumericParam (const ULWord inParamID,  ULWord & outValue);	//	New in SDK 17.0
+		AJA_VIRTUAL bool	OpenRemote (const std::string & inURLSpec);
+		AJA_VIRTUAL bool	CloseRemote (void);	///< @brief	Releases host resources associated with the remote/special device connection.
+		AJA_VIRTUAL bool	OpenLocalPhysical (const UWord inDeviceIndex);	///< @brief	Opens the local/physical device connection.
+		AJA_VIRTUAL bool	CloseLocalPhysical (void);	///< @brief	Releases host resources associated with the local/physical device connection.
+		AJA_VIRTUAL bool	ParseFlashHeader (BITFILE_INFO_STRUCT & outBitfileInfo);
+		AJA_VIRTUAL bool	GetBoolParam (const ULWord inParamID,  ULWord & outValue);	//	New in SDK 17.0
+		AJA_VIRTUAL bool	GetNumericParam (const ULWord inParamID,  ULWord & outValue);	//	New in SDK 17.0
 
 		/**
 			@brief		Answers with the NTV2RegInfo of the register associated with the given boolean (i.e., "Can Do") device feature.
@@ -649,13 +653,13 @@ class AJAExport CNTV2DriverInterface
 			@brief		Atomically increments the event count tally for the given interrupt type.
 			@param[in]	eInterruptType	Specifies the interrupt type of interest.
 		**/
-		AJA_VIRTUAL void			BumpEventCount (const INTERRUPT_ENUMS eInterruptType);
+		AJA_VIRTUAL void	BumpEventCount (const INTERRUPT_ENUMS eInterruptType);
 
 		/**
 			@brief		Initializes my member variables after a successful Open.
 		**/
-		AJA_VIRTUAL void			FinishOpen (void);
-		AJA_VIRTUAL bool			ReadFlashULWord (const ULWord inAddress, ULWord & outValue, const ULWord inRetryCount = 1000);
+		AJA_VIRTUAL void	FinishOpen (void);
+		AJA_VIRTUAL bool	ReadFlashULWord (const ULWord inAddress, ULWord & outValue, const ULWord inRetryCount = 1000);
 
 
 	//	PRIVATE TYPES

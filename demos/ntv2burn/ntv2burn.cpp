@@ -140,7 +140,10 @@ AJAStatus NTV2Burn::Init (void)
 																		mFormatDesc.numLines);
 	//	Ready to go...
 	#if defined(_DEBUG)
-		cerr << mConfig << endl;
+		cerr << mConfig;
+		if (mDevice.IsRemote())
+			cerr	<< "Device Description:  " << mDevice.GetDescription() << endl;
+		cerr << endl;
 	#endif	//	not _DEBUG
 	BURNINFO("Configuration: " << mConfig);
 	return AJA_STATUS_SUCCESS;
