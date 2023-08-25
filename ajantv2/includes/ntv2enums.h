@@ -87,18 +87,6 @@ typedef enum
 	DEVICE_ID_TTAP_PRO					= 0x10879000,	///< @brief See \ref ttappro
 	DEVICE_ID_KONAXM					= 0X10958500,	///< @brief See \ref gallifrey
 	DEVICE_ID_KONAX						= 0X10958501,	///< @brief See \ref gallifrey
-#if !defined (NTV2_DEPRECATE_12_6)
-	DEVICE_ID_CORVIDHDBT			= DEVICE_ID_CORVIDHBR,		 ///< @deprecated	Use ::DEVICE_ID_CORVIDHBR instead.
-#endif	//	NTV2_DEPRECATE_12_6
-#if !defined (NTV2_DEPRECATE_14_0)
-	DEVICE_ID_LHE_PLUS				= DEVICE_ID_KONALHEPLUS,	 ///< @deprecated	Use ::DEVICE_ID_KONALHEPLUS instead.
-	DEVICE_ID_LHI					= DEVICE_ID_KONALHI,		 ///< @deprecated	Use ::DEVICE_ID_KONALHI instead.
-	DEVICE_ID_LHI_DVI				= DEVICE_ID_KONALHIDVI,		 ///< @deprecated	Use ::DEVICE_ID_KONALHIDVI instead.
-	DEVICE_ID_KONAIP22				= DEVICE_ID_KONAIP_2022,	 ///< @deprecated	Use ::DEVICE_ID_KONAIP_2022 instead.
-	DEVICE_ID_KONAIP4I				= DEVICE_ID_KONAIP_4CH_2SFP, ///< @deprecated	Use ::DEVICE_ID_KONAIP_4CH_2SFP instead.
-	DEVICE_ID_KONAIP_2IN_2OUT		= DEVICE_ID_KONAIP_2022,	 ///< @deprecated	Use ::DEVICE_ID_KONAIP_2022 instead.
-	DEVICE_ID_KONAIP_4I				= DEVICE_ID_KONAIP_4CH_2SFP, ///< @deprecated	Use ::DEVICE_ID_KONAIP_4CH_2SFP instead.
-#endif	//	NTV2_DEPRECATE_14_0
 	DEVICE_ID_NOTFOUND				= 0xFFFFFFFF,		///< @brief Invalid or "not found"
 	DEVICE_ID_INVALID				= DEVICE_ID_NOTFOUND
 
@@ -148,17 +136,6 @@ typedef enum
 #define DEVICE_IS_KONAX(__d__)                                  \
     (   (__d__) == DEVICE_ID_KONAXM ||       					\
         (__d__) == DEVICE_ID_KONAX)
-
-#if !defined (NTV2_DEPRECATE)
-	typedef NTV2DeviceID	NTV2BoardID;	///< @deprecated	Use NTV2DeviceID instead. Identifiers with "board" in them are being phased out.
-
-	typedef enum
-	{
-		BOARDSUBTYPE_AES,		///< @deprecated	Obsolete.
-		BOARDSUBTYPE_22,		///< @deprecated	Obsolete.
-		BOARDSUBTYPE_NONE		///< @deprecated	Obsolete.
-	} NTV2BoardSubType;			///< @deprecated	This is obsolete.
-#endif	//	!defined (NTV2_DEPRECATE)
 
 #define NTV2_DEVICE_SUPPORTS_SMPTE2110(__d__)	(		(__d__) == DEVICE_ID_KONAIP_2110			\
 													||	(__d__) == DEVICE_ID_KONAIP_2110_RGB12		\

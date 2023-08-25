@@ -1208,6 +1208,42 @@ void ntv2SpinLockRelease(Ntv2SpinLock* pSpinLock)
 	IOSimpleLockUnlock(pSpinLock->lock);
 }
 
+bool ntv2InterruptLockOpen(Ntv2InterruptLock* pInterruptLock, Ntv2SystemContext* pSysCon)
+{
+	if((pInterruptLock == NULL) ||
+	   (pSysCon == NULL)) return false;
+	
+	memset(pInterruptLock, 0, sizeof(Ntv2InterruptLock));
+	pInterruptLock->lock = IOSimpleLockAlloc();
+	IOSimpleLockInit(pInterruptLock->lock);
+
+	return true;
+}
+
+void ntv2InterruptLockClose(Ntv2InterruptLock* pInterruptLock)
+{
+	if(pInterruptLock == NULL) return;
+	
+	IOSimpleLockFree(pInterruptLock->lock);
+	memset(pInterruptLock, 0, sizeof(Ntv2InterruptLock));
+}
+
+void ntv2InterruptLockAcquire(Ntv2InterruptLock* pInterruptLock)
+{
+	if(pInterruptLock == NULL) return;
+	
+	IOSimpleLockLock(pInterruptLock->lock);
+	pInterruptLock->locked = true;
+}
+
+void ntv2InterruptLockRelease(Ntv2InterruptLock* pInterruptLock)
+{
+	if(pInterruptLock == NULL) return;
+	
+	IOSimpleLockUnlock(pInterruptLock->lock);
+	pInterruptLock->locked = false;
+}
+
 // Mac memory functions
 
 void* ntv2MemoryAlloc(uint32_t size)

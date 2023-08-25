@@ -320,6 +320,12 @@
 		IOSimpleLock*			lock;
 	} Ntv2SpinLock;
 
+	typedef struct ntv2_interrupt_lock
+	{
+		IOSimpleLock*			lock;
+		bool					locked;
+	} Ntv2InterruptLock;
+
 	// Mac event abstraction
 	//class IORecursiveLock;
 	typedef struct ntv2_event
@@ -492,19 +498,22 @@ uint32_t ntv2ReadVirtualRegister(Ntv2SystemContext* context, uint32_t regNum);
 bool ntv2WriteVirtualRegister(Ntv2SystemContext* context, uint32_t regNum, uint32_t data);
 
 // spinlock functions
-
 bool		ntv2SpinLockOpen(Ntv2SpinLock* pSpinLock, Ntv2SystemContext* pSysCon);
 void		ntv2SpinLockClose(Ntv2SpinLock* pSpinLock);
 void		ntv2SpinLockAcquire(Ntv2SpinLock* pSpinLock);
 void		ntv2SpinLockRelease(Ntv2SpinLock* pSpinLock);
 
-// memory functions
+// interrupt lock functions
+bool		ntv2InterruptLockOpen(Ntv2InterruptLock* pInterruptLock, Ntv2SystemContext* pSysCon);
+void		ntv2InterruptLockClose(Ntv2InterruptLock* pInterruptLock);
+void		ntv2InterruptLockAcquire(Ntv2InterruptLock* pInterruptLock);
+void		ntv2InterruptLockRelease(Ntv2InterruptLock* pInterruptLock);
 
+// memory functions
 void*		ntv2MemoryAlloc(uint32_t size);
 void		ntv2MemoryFree(void* pAddress, uint32_t size);
 
 // event functions
-
 bool		ntv2EventOpen(Ntv2Event* pEvent, Ntv2SystemContext* pSysCon);
 void		ntv2EventClose(Ntv2Event* pEvent);
 void		ntv2EventSignal(Ntv2Event* pEvent);
@@ -512,11 +521,9 @@ void		ntv2EventClear(Ntv2Event* pEvent);
 bool		ntv2EventWaitForSignal(Ntv2Event* pEvent, int64_t timeout, bool alert);
 
 // sleep function
-
 void		ntv2TimeSleep(int64_t microseconds);
 
 // kernel thread
-
 bool		ntv2ThreadOpen(Ntv2Thread* pThread, Ntv2SystemContext* pSysCon, const char* pName);
 void		ntv2ThreadClose(Ntv2Thread* pThread);
 bool		ntv2ThreadRun(Ntv2Thread* pThread, Ntv2ThreadTask* pTask, void* pContext);
@@ -530,13 +537,6 @@ Ntv2Status	ntv2ReadPciConfig(Ntv2SystemContext* pSysCon, void* pData, int32_t of
 Ntv2Status	ntv2WritePciConfig(Ntv2SystemContext* pSysCon, void* pData, int32_t offset, int32_t size);
 
 #if defined(MSWindows) || defined(AJALinux) || defined(AJAVirtual)
-
-	// interrupt lock functions
-
-	bool		ntv2InterruptLockOpen(Ntv2InterruptLock* pInterruptLock, Ntv2SystemContext* pSysCon);
-	void		ntv2InterruptLockClose(Ntv2InterruptLock* pInterruptLock);
-	void		ntv2InterruptLockAcquire(Ntv2InterruptLock* pInterruptLock);
-	void		ntv2InterruptLockRelease(Ntv2InterruptLock* pInterruptLock);
 	
 	// dma functions
 	bool		ntv2DmaMemoryAlloc(Ntv2DmaMemory* pDmaMemory, Ntv2SystemContext* pSysCon, uint32_t size);
