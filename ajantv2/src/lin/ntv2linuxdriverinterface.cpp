@@ -66,12 +66,27 @@ bool CNTV2LinuxDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 	static const string kAJANTV2("ajantv2");
 	NTV2_ASSERT(!IsRemote());
 	NTV2_ASSERT(!IsOpen());
+    UWord maxCount(64);
 
-	ostringstream oss;	oss << "/dev/" << kAJANTV2 << DEC(inDeviceIndex);
-	string boardStr(oss.str());
-	_hDevice = HANDLE(open(boardStr.c_str(), O_RDWR));
+    string boardStr;
+    UWord count = 0;
+    for (UWord index = 0; index < maxCount; index++)
+    {
+        ostringstream oss;	oss << "/dev/" << kAJANTV2 << DEC(index);
+        boardStr = oss.str();
+		_hDevice = HANDLE(open(boardStr.c_str(), O_RDWR));
+        if (_hDevice != INVALID_HANDLE_VALUE)
+        {
+            if (count == inDeviceIndex)
+                break;
+            count++;
+            Close();
+            _hDevice = INVALID_HANDLE_VALUE;
+        }
+    }
+
 	if (_hDevice == INVALID_HANDLE_VALUE)
-		{LDIFAIL("Failed to open '" << boardStr << "'");  return false;}
+        {LDIFAIL("Failed to open device index '" << inDeviceIndex << "'");  return false;}
 
 	_boardNumber = inDeviceIndex;
 	if (!CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID))
