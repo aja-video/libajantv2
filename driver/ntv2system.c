@@ -1222,7 +1222,7 @@ bool ntv2InterruptLockOpen(Ntv2InterruptLock* pInterruptLock, Ntv2SystemContext*
 
 void ntv2InterruptLockClose(Ntv2InterruptLock* pInterruptLock)
 {
-	if(pInterruptLock == NULL) return;
+	if(pInterruptLock == NULL || pInterruptLock->lock == NULL) return;
 	
 	IOSimpleLockFree(pInterruptLock->lock);
 	memset(pInterruptLock, 0, sizeof(Ntv2InterruptLock));
@@ -1230,7 +1230,7 @@ void ntv2InterruptLockClose(Ntv2InterruptLock* pInterruptLock)
 
 void ntv2InterruptLockAcquire(Ntv2InterruptLock* pInterruptLock)
 {
-	if(pInterruptLock == NULL) return;
+	if(pInterruptLock == NULL || pInterruptLock->lock == NULL) return;
 	
 	IOSimpleLockLock(pInterruptLock->lock);
 	pInterruptLock->locked = true;
@@ -1238,7 +1238,7 @@ void ntv2InterruptLockAcquire(Ntv2InterruptLock* pInterruptLock)
 
 void ntv2InterruptLockRelease(Ntv2InterruptLock* pInterruptLock)
 {
-	if(pInterruptLock == NULL) return;
+	if(pInterruptLock == NULL || pInterruptLock->lock == NULL	) return;
 	
 	IOSimpleLockUnlock(pInterruptLock->lock);
 	pInterruptLock->locked = false;

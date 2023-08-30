@@ -305,7 +305,7 @@ struct ntv2_videoraster *ntv2_videoraster_open(Ntv2SystemContext* sys_con,
 
 void ntv2_videoraster_close(struct ntv2_videoraster *ntv2_raster)
 {
-	if (ntv2_raster == NULL) 
+	if (ntv2_raster == NULL)
 		return;
 
 	NTV2_MSG_VIDEORASTER_INFO("%s: close ntv2_videoraster\n", ntv2_raster->name);
