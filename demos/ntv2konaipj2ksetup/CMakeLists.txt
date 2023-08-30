@@ -1,15 +1,13 @@
 project(ntv2konaipj2ksetup)
 
-if (NOT AJA_QT_ENABLED)
-	message(STATUS "AJA_QT_ENABLED not set. Ignoring project ${PROJECT_NAME}...")
+include(QtHelpers)
+aja_find_qt_modules(Core)
+if (NOT AJA_QT_FOUND)
+    message(WARNING "One or more Qt modules not found!")
     return()
+else()
+    list(APPEND TARGET_LINK_LIBS ${TARGET_QT_LIBS})
 endif()
-
-find_package(QT NAMES Qt6;Qt5 REQUIRED COMPONENTS Core)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
-
-list(APPEND TARGET_QT_LIBS "Qt${QT_VERSION_MAJOR}::Core")
-list(APPEND TARGET_LINK_LIBS ${TARGET_QT_LIBS})
 
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../

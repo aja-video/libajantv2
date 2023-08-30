@@ -1,12 +1,13 @@
 project(ntv2qtpreview)
 
-if (NOT AJA_QT_ENABLED)
-	message(STATUS "AJA_QT_ENABLED not set. Ignoring project ${PROJECT_NAME}...")
-    return()
-endif()
-
 include(QtHelpers)
 aja_find_qt_modules(Core Multimedia Widgets)
+if (NOT AJA_QT_FOUND)
+    message(WARNING "One or more Qt modules not found!")
+    return()
+else()
+    list(APPEND TARGET_LINK_LIBS ${TARGET_QT_LIBS})
+endif()
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
