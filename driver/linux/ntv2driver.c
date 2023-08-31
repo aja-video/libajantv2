@@ -3447,15 +3447,13 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 		ntv2pp->m_pGenlock2Monitor = ntv2_genlock2_open(&ntv2pp->systemContext, "ntv2genlock2", 0);
 		if (ntv2pp->m_pGenlock2Monitor != NULL)
 		{
-			status = ntv2_genlock2_program(ntv2pp->m_pGenlock2Monitor, ntv2_genlock2_mode_broadcast_1485);
-			ntv2_genlock2_close(ntv2pp->m_pGenlock2Monitor);
-			ntv2pp->m_pGenlock2Monitor = NULL;
-			//status = ntv2_genlock2_configure(m_pGenlock2Monitor);
-			//if (status != NTV2_STATUS_SUCCESS)
-			//{
-			//	ntv2_genlock2_close(m_pGenlockMonitor);
-			//	m_pGenlock2Monitor = NULL;
-			//}
+			status = ntv2_genlock2_configure(ntv2pp->m_pGenlock2Monitor);
+			if (status != NTV2_STATUS_SUCCESS)
+			{
+				ntv2_genlock2_close(ntv2pp->m_pGenlock2Monitor);
+				ntv2pp->m_pGenlock2Monitor = NULL;
+			}
+			ntv2_genlock2_enable(ntv2pp->m_pGenlock2Monitor);
 		}
 		ntv2pp->m_pRasterMonitor = ntv2_videoraster_open(&ntv2pp->systemContext, "ntv2videoraster", 0);
 		if (ntv2pp->m_pRasterMonitor != NULL)
@@ -3680,6 +3678,7 @@ static void __exit aja_ntv2_module_cleanup(void)
 
         if (ntv2pp->m_pGenlock2Monitor != NULL)
         {
+			ntv2_genlock2_disable(ntv2pp->m_pGenlock2Monitor);
             ntv2_genlock2_close(ntv2pp->m_pGenlock2Monitor);
             ntv2pp->m_pGenlock2Monitor = NULL;
         }
@@ -5278,6 +5277,11 @@ static void suspend(ULWord deviceNumber)
     {
         ntv2_videoraster_disable(ntv2pp->m_pRasterMonitor);
     }
+	
+	if (ntv2pp->m_pGenlock2Monitor != NULL)
+	{
+		ntv2_genlock2_disable(ntv2pp->m_pGenlock2Monitor);
+	}
 
 	// shut down autocirculate
 	AutoCirculateInitialize(deviceNumber);
@@ -5385,6 +5389,11 @@ static void resume(ULWord deviceNumber)
     {
         ntv2_videoraster_enable(ntv2pp->m_pRasterMonitor);
     }
+	
+	if (ntv2pp->m_pGenlock2Monitor != NULL)
+	{
+		ntv2_genlock2_enable(ntv2pp->m_pGenlock2Monitor);
+	}
 
 	// Enable interrupts
 	EnableAllInterrupts(deviceNumber);
