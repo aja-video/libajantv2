@@ -13,8 +13,6 @@
 #include "ntv2kona.h"
 #include "ntv2gen2regs.h"
 
-//#define MONITOR_STATE_CHANGES
-
 /* debug messages */
 #define NTV2_DEBUG_INFO					0x00000001
 #define NTV2_DEBUG_ERROR				0x00000002
@@ -49,29 +47,21 @@ static uint32_t ntv2_debug_mask =
 
 #define GENLOCK2_FRAME_RATE_SIZE		11
 
+/* global control */
+NTV2_REG(ntv2_reg_global_control,							0, 267, 377, 378, 379, 380, 381, 382, 383);	/* global control */
+	NTV2_FLD(ntv2_fld_global_frame_rate_012,					3,	0);			/* frame rate 0-2 */
+	NTV2_FLD(ntv2_fld_global_frame_geometry,					4,	3);			/* frame geometry */
+	NTV2_FLD(ntv2_fld_global_video_standard,					3,	7);			/* video standard */
+	NTV2_FLD(ntv2_fld_global_reference_source,					3,	10);		/* user reference source */
+	NTV2_FLD(ntv2_fld_global_register_sync,						2,	20);		/* register updat sync */
+	NTV2_FLD(ntv2_fld_global_frame_rate_3,						1,	21);		/* frame rate 3 */
+
 /* control and status */
 NTV2_REG(ntv2_reg_control_status,							48);			/* control status */
 	NTV2_FLD(ntv2_fld_control_genlock_reset,					1,	6);			/* genlock reset */
 	NTV2_FLD(ntv2_fld_control_reference_source,					4,	24);		/* hardware reference source */
 	NTV2_FLD(ntv2_fld_control_reference_present,				1,	30);		/* reference source present */
 	NTV2_FLD(ntv2_fld_control_genlock_locked,					1,	31);		/* genlock locked */
-
-/* hdmi input status */
-NTV2_REG(ntv2_reg_hdmiin_input_status,						126);			/* hdmi input status register */
-	NTV2_FLD(ntv2_fld_hdmiin_locked,							1,	0);		
-	NTV2_FLD(ntv2_fld_hdmiin_stable,							1,	1);		
-	NTV2_FLD(ntv2_fld_hdmiin_rgb,								1,	2);		
-	NTV2_FLD(ntv2_fld_hdmiin_deep_color,						1,	3);		
-	NTV2_FLD(ntv2_fld_hdmiin_video_code,						6,	4);			/* ntv2 video standard v2 */
-	NTV2_FLD(ntv2_fld_hdmiin_audio_8ch,							1,	12);		/* 8 audio channels (vs 2) */
-	NTV2_FLD(ntv2_fld_hdmiin_progressive,						1,	13);	
-	NTV2_FLD(ntv2_fld_hdmiin_video_sd,							1,	14);		/* video pixel clock sd (not hd or 3g) */
-	NTV2_FLD(ntv2_fld_hdmiin_video_74_25,						1,	15);		/* not used */
-	NTV2_FLD(ntv2_fld_hdmiin_audio_rate,						4,	16);	
-	NTV2_FLD(ntv2_fld_hdmiin_audio_word_length,					4,	20);	
-	NTV2_FLD(ntv2_fld_hdmiin_video_format,						3,	24);		/* really ntv2 standard */
-	NTV2_FLD(ntv2_fld_hdmiin_dvi,								1,	27);		/* input dvi (vs hdmi) */
-	NTV2_FLD(ntv2_fld_hdmiin_video_rate,						4,	28);		/* ntv2 video rate */
 
 /* genlock spi control */
 NTV2_REG(ntv2_reg_spi_reset,				0x8010);
@@ -83,17 +73,15 @@ NTV2_REG(ntv2_reg_spi_slave,				0x801c);
 
 static const int64_t c_default_timeout		= 50000;
 static const int64_t c_spi_timeout			= 10000;
-static const int64_t c_genlock_reset_wait	= 300000;
 static const int64_t c_genlock_config_wait	= 500000;
 
-static const uint32_t c_default_lines = 525;
-static const uint32_t c_default_rate = ntv2_frame_rate_2997;
-static const uint32_t c_configure_error_limit  = 20;
+static const uint32_t c_ntsc_lines = 525;
+static const uint32_t c_ntsc_rate = ntv2_frame_rate_2997;
 
 static void ntv2_genlock2_monitor(void* data);
 static Ntv2Status ntv2_genlock2_initialize(struct ntv2_genlock2 *ntv2_gen);
 static bool has_state_changed(struct ntv2_genlock2 *ntv2_gen);
-static struct ntv2_genlock2_data* get_genlock2_config(struct ntv2_genlock2 *ntv2_gen, enum ntv2_genlock2_mode mode);
+static struct ntv2_genlock2_data* get_genlock2_config(struct ntv2_genlock2 *ntv2_gen, uint32_t lines, uint32_t rate);
 static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlock2_data *config, bool check);
 static uint8_t device_id_read(struct ntv2_genlock2 *ntv2_gen);
 static bool wait_genlock2(struct ntv2_genlock2 *ntv2_gen, uint32_t numMicrosSeconds);
@@ -132,9 +120,9 @@ struct ntv2_genlock2 *ntv2_genlock2_open(Ntv2SystemContext* sys_con,
 #endif
 	ntv2_gen->system_context = sys_con;
 
-	//ntv2SpinLockOpen(&ntv2_gen->state_lock, sys_con);
-	//ntv2ThreadOpen(&ntv2_gen->monitor_task, sys_con, "genlock2 monitor");
-	//ntv2EventOpen(&ntv2_gen->monitor_event, sys_con);
+	ntv2SpinLockOpen(&ntv2_gen->state_lock, sys_con);
+	ntv2ThreadOpen(&ntv2_gen->monitor_task, sys_con, "genlock2 monitor");
+	ntv2EventOpen(&ntv2_gen->monitor_event, sys_con);
 
 	NTV2_MSG_GENLOCK_INFO("%s: open ntv2_genlock2\n", ntv2_gen->name);
 
@@ -148,11 +136,11 @@ void ntv2_genlock2_close(struct ntv2_genlock2 *ntv2_gen)
 
 	NTV2_MSG_GENLOCK_INFO("%s: close ntv2_genlock2\n", ntv2_gen->name);
 
-	//ntv2_genlock2_disable(ntv2_gen);
+	ntv2_genlock2_disable(ntv2_gen);
 
-	//ntv2EventClose(&ntv2_gen->monitor_event);
-	//ntv2ThreadClose(&ntv2_gen->monitor_task);
-	//ntv2SpinLockClose(&ntv2_gen->state_lock);
+	ntv2EventClose(&ntv2_gen->monitor_event);
+	ntv2ThreadClose(&ntv2_gen->monitor_task);
+	ntv2SpinLockClose(&ntv2_gen->state_lock);
 
 	memset(ntv2_gen, 0, sizeof(struct ntv2_genlock2));
 	ntv2MemoryFree(ntv2_gen, sizeof(struct ntv2_genlock2));
@@ -220,7 +208,7 @@ Ntv2Status ntv2_genlock2_program(struct ntv2_genlock2 *ntv2_gen, enum ntv2_genlo
 	{
 	case ntv2_genlock2_mode_broadcast_1485:
 	{
-		struct ntv2_genlock2_data* configData = get_genlock2_config(ntv2_gen, mode);
+		struct ntv2_genlock2_data* configData = get_genlock2_config(ntv2_gen, c_ntsc_lines, c_ntsc_rate);
 		if (!configure_genlock2(ntv2_gen, configData, false))
 			return NTV2_STATUS_FAIL;
 		break;
@@ -266,8 +254,9 @@ static void ntv2_genlock2_monitor(void* data)
 									ntv2_gen->gen_locked?"locked":"unlocked",
 									ntv2_gen->ref_lines,
 									ntv2_frame_rate_name(ntv2_gen->ref_rate));
+			update = true;
 		}
-
+#if 0
 		if (ntv2_gen->ref_locked)
 		{
 			unlock_wait = 0;
@@ -286,21 +275,22 @@ static void ntv2_genlock2_monitor(void* data)
 		else
 		{
 			lock_wait = 0;
-			if ((ntv2_gen->gen_lines != c_default_lines) ||
-				(ntv2_gen->gen_rate != c_default_rate))
+			if ((ntv2_gen->gen_lines != c_ntsc_lines) ||
+				(ntv2_gen->gen_rate != c_ntsc_rate))
 			{
 				unlock_wait++;
 				if (unlock_wait > 5)
 				{
-					ntv2_gen->gen_lines = c_default_lines;
-					ntv2_gen->gen_rate = c_default_rate;
+					ntv2_gen->gen_lines = c_ntsc_lines;
+					ntv2_gen->gen_rate = c_ntsc_rate;
 					update = true;
 				}
 			}
 		}
+#endif
 
 		if (update) {
-			//config = get_genlock2_config(ntv2_gen, ntv2_gen->gen_lines, ntv2_gen->gen_rate);
+			config = get_genlock2_config(ntv2_gen, ntv2_gen->gen_lines, ntv2_gen->gen_rate);
 			if (config != NULL) {
 				NTV2_MSG_GENLOCK_CONFIG("%s: configure genlock2 lines %d  rate %s\n", 
 										ntv2_gen->name, ntv2_gen->gen_lines, ntv2_frame_rate_name(ntv2_gen->gen_rate));
@@ -342,88 +332,49 @@ static Ntv2Status ntv2_genlock2_initialize(struct ntv2_genlock2 *ntv2_gen)
 
 static bool has_state_changed(struct ntv2_genlock2 *ntv2_gen)
 {
-#ifndef MONITOR_STATE_CHANGES
-	(void)ntv2_gen;
-	return false;
-#else
 	uint32_t global;
-	uint32_t control;
-	uint32_t input;
-	uint32_t standard;
 	uint32_t ref_source;
-	uint32_t gen_source;
 	uint32_t ref_lines;
 	uint32_t ref_rate;
-	bool ref_locked;
-	bool gen_locked;
+	bool ref_locked = false;
 	bool changed = false;
 
 	global = reg_read(ntv2_gen, ntv2_reg_global_control);
 	ref_source = NTV2_FLD_GET(ntv2_fld_global_reference_source, global);
 
-	control = reg_read(ntv2_gen, ntv2_reg_control_status);
-	gen_source = NTV2_FLD_GET(ntv2_fld_control_reference_source, control);
-	ref_locked = (NTV2_FLD_GET(ntv2_fld_control_reference_present, control) == 1);
-	gen_locked = (NTV2_FLD_GET(ntv2_fld_control_genlock_locked, control) == 1);
-
 	switch (ref_source)
 	{
-	case ntv2_ref_source_external:
-		input = reg_read(ntv2_gen, ntv2_reg_sdiin_input_status);
-		standard = NTV2_FLD_GET(ntv2_fld_sdiin_standard_ref, input);
-		ref_lines = ntv2_ref_standard_lines(standard);
-		ref_rate = NTV2_FLD_GET(ntv2_fld_sdiin_frame_rate_ref, input);
-		break;
-	case ntv2_ref_source_hdmi:
-		input = reg_read(ntv2_gen, ntv2_reg_hdmiin_input_status);
-		standard = NTV2_FLD_GET(ntv2_fld_hdmiin_video_code, input);
-		ref_lines = ntv2_video_standard_lines(standard);
-		ref_rate = NTV2_FLD_GET(ntv2_fld_hdmiin_video_rate, input);
-		// special case 625i generates 525i ref
-		if ((ref_lines == 625) &&
-			(ref_rate == ntv2_frame_rate_2500))
-		{
-			ref_lines = 525;
-			ref_rate = ntv2_frame_rate_2997;
-		}
-		break;
 	default:
-		ref_lines = c_default_lines;
-		ref_rate = c_default_rate;
+		ref_lines = c_ntsc_lines;
+		ref_rate = c_ntsc_rate;
 		break;
 	}
 
 	if ((ref_lines == 0) || (ref_rate == ntv2_frame_rate_none))
 		ref_locked = false;
 
-	if ((ref_source != ntv2_gen->ref_source) ||
-		(gen_source != ntv2_gen->gen_source) ||
-		(ref_locked != ntv2_gen->ref_locked) ||
-		(gen_locked != ntv2_gen->gen_locked) ||
-		(ref_lines != ntv2_gen->ref_lines) || 
-		(ref_rate != ntv2_gen->ref_rate)) {
+	if ((ref_lines != ntv2_gen->ref_lines) ||
+		(ref_rate != ntv2_gen->ref_rate))
+	{
 		changed = true;
 	}
 	ntv2_gen->ref_source = ref_source;
-	ntv2_gen->gen_source = gen_source;
-	ntv2_gen->ref_locked = ref_locked;
-	ntv2_gen->gen_locked = gen_locked;
 	ntv2_gen->ref_lines = ref_lines;
 	ntv2_gen->ref_rate = ref_rate;
 
 	return changed;
-#endif
 }
 
-static struct ntv2_genlock2_data* get_genlock2_config(struct ntv2_genlock2 *ntv2_gen, enum ntv2_genlock2_mode mode)
+static struct ntv2_genlock2_data* get_genlock2_config(struct ntv2_genlock2 *ntv2_gen, uint32_t lines, uint32_t rate)
 {
+	(void)rate;
 	struct ntv2_genlock2_data* config = NULL;
 	uint32_t genlockDeviceID = device_id_read(ntv2_gen);
 
-	switch (mode)
+	switch (lines)
 	{
 	default:
-	case ntv2_genlock2_mode_broadcast_1485:
+	case c_ntsc_lines:
 		switch (genlockDeviceID)
 		{
 		default:
