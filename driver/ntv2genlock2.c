@@ -374,7 +374,7 @@ static struct ntv2_genlock2_data* get_genlock2_config(struct ntv2_genlock2 *ntv2
 	switch (lines)
 	{
 	default:
-	case c_ntsc_lines:
+	case 525:
 		switch (genlockDeviceID)
 		{
 		default:
