@@ -26,6 +26,7 @@
 #include "ntv2devicefeatures.h"
 
 #include "registerio.h"
+#include "ntv2stream.h"
 #include "ntv2dma.h"
 
 #ifdef AJA_RDMA
@@ -175,6 +176,7 @@ static PDMA_CONTEXT getDmaContext(ULWord deviceNumber, ULWord engIndex, ULWord c
 
 static void dmaFreeEngine(PDMA_ENGINE pDmaEngine);
 static PDMA_ENGINE dmaMapEngine(ULWord deviceNumber, NTV2DMAEngine eDMAEngine, bool bToHost);
+static PDMA_ENGINE dmaMapStream(ULWord deviceNumber, NTV2Channel eChannel);
 static bool dmaHardwareInit(PDMA_ENGINE pDmaEngine);
 static void dmaStatistics(PDMA_ENGINE pDmaEngine, bool dmaC2H);
 
@@ -225,6 +227,11 @@ static void dmaNwlInterrupt(PDMA_ENGINE pDmaEngine);
 static int dmaXlnxProgram(PDMA_CONTEXT pDmaContext);
 static void dmaXlnxAbort(PDMA_ENGINE pDmaEngine);
 static void dmaXlnxInterrupt(PDMA_ENGINE pDmaEngine);
+
+static int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuffer, uint32_t index);
+static int dmaXlnxStreamLink(PDMA_ENGINE pDmaEngine, uint32_t srcIndex, uint32_t dstIndex);
+static int dmaXlnxStreamStart(PDMA_ENGINE pDmaEngine, uint32_t startIndex);
+static int dmaXlnxStreamStop(PDMA_ENGINE pDmaEngine);
 static int dmaXlnxDescIndexToPage(uint32_t index, uint32_t* pageIndex, uint32_t* descIndex);
 
 static bool dmaVideoSegmentInit(PDMA_CONTEXT pDmaContext, PDMA_VIDEO_SEGMENT pDmaSegment);
@@ -293,6 +300,8 @@ int dmaInit(ULWord deviceNumber)
 	ULWord iEng;
 	ULWord iCon;
 	ULWord iDes;
+    ULWord numStreams;
+    Ntv2Status status;
 
 	if (pNTV2Params->_dmaNumEngines != 0)
 	{
@@ -306,7 +315,7 @@ int dmaInit(ULWord deviceNumber)
 	NTV2_MSG_INFO("%s%d: can do rdma\n", DMA_MSG_DEVICE);
 #endif	
 
-	for (iEng = 0; iEng < NTV2_NUM_DMA_ENGINES; iEng++)
+	for (iEng = 0; iEng < DMA_NUM_ENGINES; iEng++)
 	{
 		memset(&pNTV2Params->_dmaEngine[iEng], 0, sizeof(DMA_ENGINE));
 	}
@@ -337,7 +346,8 @@ int dmaInit(ULWord deviceNumber)
 		maxVideoPages = UHD2_MAX_PAGES;
 		maxDescriptors = UHD2_TOT_DESCRIPTORS;
 	}
-	
+
+    numStreams = 0;
 	for (iEng = 0; iEng < pNTV2Params->_dmaNumEngines; iEng++)
 	{
 		PDMA_ENGINE pDmaEngine = &pNTV2Params->_dmaEngine[iEng];
@@ -421,51 +431,56 @@ int dmaInit(ULWord deviceNumber)
 		// configure dma context
 		if (pDmaEngine->state == DmaStateConfigure)
 		{
-			for (iCon = 0; iCon < DMA_NUM_CONTEXTS; iCon++)
-			{
-				PDMA_CONTEXT pDmaContext = &pDmaEngine->dmaContext[iCon];
+            if (pDmaEngine->dmaStream)
+            {
+                pDmaEngine->maxDescriptors = DMA_DESCRIPTOR_PAGES_MAX * (PAGE_SIZE / DMA_DESCRIPTOR_SIZE);
+            }
 
-				// copy for convenience
-				pDmaContext->deviceNumber = pDmaEngine->deviceNumber;
-				pDmaContext->engIndex = pDmaEngine->engIndex;
-				pDmaContext->engName = pDmaEngine->engName;
-				pDmaContext->conIndex = iCon;
-				pDmaContext->dmaIndex = pDmaEngine->dmaIndex;
-				pDmaContext->dmaC2H = pDmaEngine->dmaC2H;
-				pDmaContext->conInit = true;
+            for (iCon = 0; iCon < DMA_NUM_CONTEXTS; iCon++)
+            {
+                PDMA_CONTEXT pDmaContext = &pDmaEngine->dmaContext[iCon];
 
-				NTV2_MSG_INFO("%s%d:%s%d:%s%d: dmaInit configure dma context\n",
-							  DMA_MSG_CONTEXT);
+                // copy for convenience
+                pDmaContext->deviceNumber = pDmaEngine->deviceNumber;
+                pDmaContext->engIndex = pDmaEngine->engIndex;
+                pDmaContext->engName = pDmaEngine->engName;
+                pDmaContext->conIndex = iCon;
+                pDmaContext->dmaIndex = pDmaEngine->dmaIndex;
+                pDmaContext->dmaC2H = pDmaEngine->dmaC2H;
+                pDmaContext->conInit = true;
 
-				// allocate the default page and scatter list buffers
-				if (dmaPageBufferInit(deviceNumber, &pDmaContext->videoPageBuffer, pDmaEngine->maxVideoPages, false) != 0)
-				{
-					NTV2_MSG_ERROR("%s%d:%s%d:%s%d: dmaInit allocate video page buffer failed\n",
-								   DMA_MSG_CONTEXT);
-					pDmaEngine->state = DmaStateDead;
-				}
+                NTV2_MSG_INFO("%s%d:%s%d:%s%d: dmaInit configure dma context\n",
+                              DMA_MSG_CONTEXT);
 
-				if (dmaPageBufferInit(deviceNumber, &pDmaContext->audioPageBuffer, pDmaEngine->maxAudioPages, false) != 0)
-				{
-					NTV2_MSG_ERROR("%s%d:%s%d:%s%d: dmaInit allocate audio page buffer failed\n",
-								   DMA_MSG_CONTEXT);
-					pDmaEngine->state = DmaStateDead;
-				}
+                // allocate the default page and scatter list buffers
+                if (dmaPageBufferInit(deviceNumber, &pDmaContext->videoPageBuffer, pDmaEngine->maxVideoPages, false) != 0)
+                {
+                    NTV2_MSG_ERROR("%s%d:%s%d:%s%d: dmaInit allocate video page buffer failed\n",
+                                   DMA_MSG_CONTEXT);
+                    pDmaEngine->state = DmaStateDead;
+                }
 
-				if (dmaPageBufferInit(deviceNumber, &pDmaContext->ancF1PageBuffer, pDmaEngine->maxAncPages, false) != 0)
-				{
-					NTV2_MSG_ERROR("%s%d:%s%d:%s%d: dmaInit allocate anc field 1 page buffer failed\n",
-								   DMA_MSG_CONTEXT);
-					pDmaEngine->state = DmaStateDead;
-				}
+                if (dmaPageBufferInit(deviceNumber, &pDmaContext->audioPageBuffer, pDmaEngine->maxAudioPages, false) != 0)
+                {
+                    NTV2_MSG_ERROR("%s%d:%s%d:%s%d: dmaInit allocate audio page buffer failed\n",
+                                   DMA_MSG_CONTEXT);
+                    pDmaEngine->state = DmaStateDead;
+                }
 
-				if (dmaPageBufferInit(deviceNumber, &pDmaContext->ancF2PageBuffer, pDmaEngine->maxAncPages, false) != 0)
-				{
-					NTV2_MSG_ERROR("%s%d:%s%d:%s%d: dmaInit allocate anc field 2 page buffer failed\n",
-								   DMA_MSG_CONTEXT);
-					pDmaEngine->state = DmaStateDead;
-				}
-			}
+                if (dmaPageBufferInit(deviceNumber, &pDmaContext->ancF1PageBuffer, pDmaEngine->maxAncPages, false) != 0)
+                {
+                    NTV2_MSG_ERROR("%s%d:%s%d:%s%d: dmaInit allocate anc field 1 page buffer failed\n",
+                                   DMA_MSG_CONTEXT);
+                    pDmaEngine->state = DmaStateDead;
+                }
+
+                if (dmaPageBufferInit(deviceNumber, &pDmaContext->ancF2PageBuffer, pDmaEngine->maxAncPages, false) != 0)
+                {
+                    NTV2_MSG_ERROR("%s%d:%s%d:%s%d: dmaInit allocate anc field 2 page buffer failed\n",
+                                   DMA_MSG_CONTEXT);
+                    pDmaEngine->state = DmaStateDead;
+                }
+            }
 		}
 
 		// allocate and map descriptor memory
@@ -723,6 +738,11 @@ static PDMA_ENGINE dmaMapEngine(ULWord deviceNumber, NTV2DMAEngine eDMAEngine, b
 	if (engIndex > pNTV2Params->_dmaNumEngines) return NULL;
 	
 	return getDmaEngine(deviceNumber, engIndex);
+}
+
+static PDMA_ENGINE dmaMapStream(ULWord deviceNumber, NTV2Channel eChannel)
+{
+    return NULL;
 }
 
 static bool dmaHardwareInit(PDMA_ENGINE pDmaEngine)
@@ -2289,7 +2309,7 @@ int dmaStreamStart(PDMA_PARAMS pDmaParams)
             if (dmaStatus == 0)
             {
                 spin_lock_irqsave(&pDmaParams->pPageRoot->bufferLock, flags);
-                dmaStatus = pDmaParams->pPageRoot->serialRef[pDmaEngine->engIndex];
+                dmaStatus = pDmaParams->pPageRoot->engineRef[pDmaEngine->engIndex];
                 if (dmaStatus == 0)
                 {
                     // start the dma engine
@@ -2297,7 +2317,7 @@ int dmaStreamStart(PDMA_PARAMS pDmaParams)
                     if (dmaStatus == 0)
                     {
                         // ref the resource
-                        pDmaParams->pPageRoot->serialRef[pDmaEngine->engIndex]++;
+                        pDmaParams->pPageRoot->engineRef[pDmaEngine->engIndex]++;
                         spin_unlock_irqrestore(&pDmaParams->pPageRoot->bufferLock, flags);
                     }
                     else
@@ -2377,7 +2397,7 @@ int dmaStreamStop(PDMA_PARAMS pDmaParams)
 	}
     
 	// check if we own the engine
-	if (pDmaParams->pPageRoot->serialRef[pDmaEngine->engIndex] == 0)
+	if (pDmaParams->pPageRoot->engineRef[pDmaEngine->engIndex] == 0)
 	{
 		NTV2_MSG_ERROR("%s%d: dmaStreamStop not engine owner\n", DMA_MSG_DEVICE);
 		return -EPERM;
@@ -2392,7 +2412,7 @@ int dmaStreamStop(PDMA_PARAMS pDmaParams)
     if (dmaStatus == 0)
     {
 		// deref the resource
-		pDmaParams->pPageRoot->serialRef[pDmaEngine->engIndex]--;
+		pDmaParams->pPageRoot->engineRef[pDmaEngine->engIndex]--;
         spin_unlock_irqrestore(&pDmaParams->pPageRoot->bufferLock, flags);
         NTV2_MSG_STATE("%s%d:%s%d:%s%d: dmaStreamStop dma state idle\n", DMA_MSG_CONTEXT);
         pDmaEngine->state = DmaStateIdle;
@@ -2614,7 +2634,7 @@ void dmaPageRootRelease(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot)
 	// stop all serial dma
 	for (i = 0; i < DMA_NUM_ENGINES; i++)
 	{
-		if (pRoot->serialRef[i] > 0)
+		if (pRoot->engineRef[i] > 0)
 		{
 			memset(&dmaParams, 0, sizeof(DMA_PARAMS));
             dmaParams.deviceNumber = deviceNumber;
@@ -4800,7 +4820,37 @@ static void dmaXlnxInterrupt(PDMA_ENGINE pDmaEngine)
 	wake_up(&pDmaEngine->transferEvent);
 }
 
-int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuffer, uint32_t index)
+int dmaOpsStreamInitialize(struct ntv2_stream *stream)
+{
+    return NTV2_STREAM_OPS_SUCCESS;
+}
+
+int dmaOpsStreamStart(struct ntv2_stream *stream)
+{
+    return NTV2_STREAM_OPS_SUCCESS;
+}
+
+int dmaOpsStreamStop(struct ntv2_stream *stream)
+{
+    return NTV2_STREAM_OPS_SUCCESS;
+}
+
+int dmaOpsStreamProgram(struct ntv2_stream *stream)
+{
+    return NTV2_STREAM_OPS_SUCCESS;
+}
+
+int dmaOpsBufferPrepare(struct ntv2_stream_buffer* buffer)
+{
+    return NTV2_STREAM_OPS_SUCCESS;
+}
+
+int dmaOpsBufferRelease(struct ntv2_stream_buffer* buffer)
+{
+    return NTV2_STREAM_OPS_SUCCESS;
+}
+
+static int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuffer, uint32_t index)
 {
 //	ULWord 					deviceNumber = pDmaEngine->deviceNumber;
 //	ULWord					xlnxIndex = pDmaEngine->dmaIndex;
@@ -4922,9 +4972,9 @@ int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuffer, uin
             dpIndex++;
             if (dpIndex >= pDmaEngine->numDescriptorPages)
             {
-                NTV2_MSG_DESCRIPTOR("%s%d:%s%d: dmaXlnxStreamBuild too many descriptor pages\n",
+                dpIndex = 0;
+                NTV2_MSG_DESCRIPTOR("%s%d:%s%d: dmaXlnxStreamBuild descriptor list wrap\n",
                                     DMA_MSG_ENGINE);
-                return -EPERM;
             }
             pDescriptor = (PXLNX_DESCRIPTOR)pDmaEngine->pDescriptorVirtual[dpIndex];
             physDescriptor = pDmaEngine->descriptorPhysical[dpIndex];
@@ -4982,7 +5032,7 @@ int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuffer, uin
     return 0;
 }
 
-int dmaXlnxStreamLink(PDMA_ENGINE pDmaEngine, uint32_t srcIndex, uint32_t dstIndex)
+static int dmaXlnxStreamLink(PDMA_ENGINE pDmaEngine, uint32_t srcIndex, uint32_t dstIndex)
 {
     PXLNX_DESCRIPTOR pDescriptor = NULL;
     ULWord srcPage = 0;
@@ -5014,7 +5064,7 @@ int dmaXlnxStreamLink(PDMA_ENGINE pDmaEngine, uint32_t srcIndex, uint32_t dstInd
     return 0;
 }
 
-int dmaXlnxStreamStart(PDMA_ENGINE pDmaEngine, uint32_t startIndex)
+static int dmaXlnxStreamStart(PDMA_ENGINE pDmaEngine, uint32_t startIndex)
 {
 	ULWord 	deviceNumber = pDmaEngine->deviceNumber;
 	ULWord	xlnxIndex = pDmaEngine->dmaIndex;

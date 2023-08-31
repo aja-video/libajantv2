@@ -31,13 +31,16 @@ enum ntv2_stream_state {
     ntv2_stream_state_error
 };
 
+#define NTV2_STREAM_OPS_FAIL    0
+#define NTV2_STREAM_OPS_SUCCESS 1
+
 struct ntv2_stream_ops {
-    Ntv2Status (*stream_initialize)(struct ntv2_stream *stream);
-    Ntv2Status (*stream_start)(struct ntv2_stream *stream);
-    Ntv2Status (*stream_stop)(struct ntv2_stream *stream);
-    Ntv2Status (*stream_program)(struct ntv2_stream *stream);
-    Ntv2Status (*buffer_prepare)(struct ntv2_stream_buffer* buffer);
-    Ntv2Status (*buffer_release)(struct ntv2_stream_buffer* buffer);
+    int (*stream_initialize)(struct ntv2_stream *stream);
+    int (*stream_start)(struct ntv2_stream *stream);
+    int (*stream_stop)(struct ntv2_stream *stream);
+    int (*stream_program)(struct ntv2_stream *stream);
+    int (*buffer_prepare)(struct ntv2_stream_buffer* buffer);
+    int (*buffer_release)(struct ntv2_stream_buffer* buffer);
 };
 
 struct ntv2_stream_buffer {
@@ -53,9 +56,8 @@ struct ntv2_stream {
 	int					index;
 	char				name[NTV2_STREAM_STRING_SIZE];
 	Ntv2SystemContext* 	system_context;
-    void*               kernel_stream;
+    NTV2Channel         channel;
     Ntv2Semaphore       state_sema;
-    int                 engineIndex;
     bool                to_host;
     bool                enabled;
 
