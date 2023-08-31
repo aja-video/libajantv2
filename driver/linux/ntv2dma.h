@@ -17,8 +17,11 @@ struct nvidia_p2p_page_table;
 struct nvidia_p2p_dma_mapping;
 #endif
 
-#define DMA_NUM_ENGINES		4
-#define DMA_NUM_CONTEXTS	2
+struct ntv2_stream;
+struct ntv2_stream_buffer;
+
+#define DMA_NUM_ENGINES     8
+#define DMA_NUM_CONTEXTS    2
 
 #define DMA_TRANSFERCOUNT_64     			0x10000000
 #define DMA_TRANSFERCOUNT_TOHOST 			0x80000000
@@ -96,7 +99,7 @@ typedef struct _dmaPageRoot
 	LWord64					lockCounter;		// lock access counter
 	LWord64					lockTotalSize;		// current locked bytes
 	LWord64					lockMaxSize;		// maximum locked bytes
-	ULWord					serialRef[DMA_NUM_ENGINES];
+	ULWord					engineRef[DMA_NUM_ENGINES];
 } DMA_PAGE_ROOT, *PDMA_PAGE_ROOT;
 
 typedef struct _dmaPageBuffer
@@ -339,11 +342,13 @@ int dmaTargetP2P(ULWord deviceNumber, NTV2_DMA_P2P_CONTROL_STRUCT* pParams);
 int dmaStreamStart(PDMA_PARAMS pDmaParams);
 int dmaStreamStop(PDMA_PARAMS pDmaParams);
 
-int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuffer, uint32_t index);
-int dmaXlnxStreamLink(PDMA_ENGINE pDmaEngine, uint32_t srcIndex, uint32_t dstIndex);
-int dmaXlnxStreamStart(PDMA_ENGINE pDmaEngine, uint32_t startIndex);
-int dmaXlnxStreamStop(PDMA_ENGINE pDmaEngine);
-
 void dmaInterrupt(ULWord deviceNumber, ULWord intStatus);
+
+int dmaOpsStreamInitialize(struct ntv2_stream *stream);
+int dmaOpsStreamStart(struct ntv2_stream *stream);
+int dmaOpsStreamStop(struct ntv2_stream *stream);
+int dmaOpsStreamProgram(struct ntv2_stream *stream);
+int dmaOpsBufferPrepare(struct ntv2_stream_buffer* buffer);
+int dmaOpsBufferRelease(struct ntv2_stream_buffer* buffer);
 
 #endif
