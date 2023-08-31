@@ -13,17 +13,39 @@ endif()
 # also sets QT_VERSION, QT_VERSION_MAJOR, QT_VERSION_MINOR, QT_VERSION_PATCH
 # NOTE: using a macro instead of a function so don't need to manually set variables in the parent scope
 macro(aja_find_qt_modules)
-	set(MODULE_ARGS "${ARGN}")
+	set(_module_args "${ARGN}")
 
 	# Qt changes the CMAKE_MODULE_PATH, save off the original to restore
 	set(old_CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 
-	find_package(QT NAMES ${PREF_QT_MAJORS} HINTS ${AJA_QT_DIR} REQUIRED COMPONENTS ${MODULE_ARGS})
-	find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${MODULE_ARGS})
+	find_package(QT NAMES ${PREF_QT_MAJORS} HINTS ${AJA_QT_DIR} COMPONENTS ${_module_args})
+	find_package(Qt${QT_VERSION_MAJOR} COMPONENTS ${_module_args})
 
-	foreach(m IN LISTS MODULE_ARGS)
+    message(STATUS "aja_find_qt_module(s): ${_module_args}")
+
+    foreach(m IN LISTS _module_args)
 		list(APPEND TARGET_QT_LIBS "Qt${QT_VERSION_MAJOR}::${m}")
+
+        # If a Qt module is found, CMake sets a "Qt<MAJOR_VERSION><MODULE_NAME>_FOUND" variable to TRUE, so check it here:
+        cmake_language(EVAL CODE "
+            if (NOT Qt${QT_VERSION_MAJOR}${m}_FOUND)
+                message(STATUS \"  ? ${m}\")
+            else()
+                message(STATUS \"  + ${m}\")
+                list(APPEND _modules_found ${m})
+            endif()
+            list(LENGTH _module_args _args_count)
+            list(LENGTH _modules_found _modules_found_count)
+            if (_args_count GREATER _modules_found_count)
+                set(AJA_QT_FOUND FALSE)
+            else()
+                set(AJA_QT_FOUND TRUE)
+            endif()
+        ")
 	endforeach()
+
+    message(STATUS "Found ${_modules_found_count}/${_args_count} Qt modules: ${_modules_found}")
+
 	list(REMOVE_DUPLICATES TARGET_QT_LIBS)
 
 	# restore CMAKE_MODULE_PATH
