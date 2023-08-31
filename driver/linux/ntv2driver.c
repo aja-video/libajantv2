@@ -66,10 +66,10 @@
 # include "hevcdriver.h"
 # include "hevcpublic.h"
 #endif
-#include "ntv2driverprocamp.h"
 #include "ntv2driver.h"
-#include "driverdbg.h"
 #include "registerio.h"
+#include "ntv2driverprocamp.h"
+#include "driverdbg.h"
 #include "ntv2dma.h"
 
 #include "ntv2driverdbgmsgctl.h"
@@ -3337,6 +3337,32 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 	// initialize dma
 	dmaInit(deviceNumber);
 
+    for (i = 0; i < NTV2_MAX_DMA_STREAMS; i++)
+    {
+        if (ntv2pp->m_pMapStream[i] == NULL)
+            break;
+        
+        ntv2pp->m_pDmaStream[i] = ntv2_stream_open(&ntv2pp->systemContext, "ntv2stream", i);
+        if (ntv2pp->m_pDmaStream[i] != NULL)
+        {
+            struct ntv2_stream_ops stream_ops =
+            {
+                .stream_initialize = dmaOpsStreamInitialize,
+                .stream_start = dmaOpsStreamStart,
+                .stream_stop = dmaOpsStreamStop,
+                .stream_program = dmaOpsStreamProgram,
+                .buffer_prepare = dmaOpsBufferPrepare,
+                .buffer_release = dmaOpsBufferRelease
+            };
+            status = ntv2_stream_configure(ntv2pp->m_pDmaStream[i], &stream_ops, ((i & 0x1) == 1));
+            if (status != NTV2_STATUS_SUCCESS)
+            {
+                ntv2_stream_close(ntv2pp->m_pDmaStream[i]);
+                ntv2pp->m_pDmaStream[i] = NULL;
+            }
+        }
+    }
+
 	ntv2pp->m_pGenlock2Monitor = NULL;
     ntv2pp->m_pRasterMonitor = NULL;
 
@@ -4507,13 +4533,13 @@ int DoMessageStreamChannel(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamChan
 		return -EINVAL;
 
     chn = (int)pChannel->mChannel;
-    if (chn >= NTV2_MAX_STREAMS)
+    if (chn >= NTV2_MAX_DMA_STREAMS)
     {
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_INVALID;
         return -EINVAL;
     }
 
-    pStr = pNTV2Params->m_pStream[chn];
+    pStr = pNTV2Params->m_pDmaStream[chn];
     if (pStr == NULL)
     {
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_INVALID;
@@ -4558,13 +4584,13 @@ int DoMessageStreamBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamBuffe
 		return -EINVAL;
 
     chn = (int)pBuffer->mChannel;
-    if (chn >= NTV2_MAX_STREAMS)
+    if (chn >= NTV2_MAX_DMA_STREAMS)
     {
         pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_INVALID;
         return -EINVAL;
     }
 
-    pStr = pNTV2Params->m_pStream[chn];
+    pStr = pNTV2Params->m_pDmaStream[chn];
     if (pStr == NULL)
     {
         pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_INVALID;

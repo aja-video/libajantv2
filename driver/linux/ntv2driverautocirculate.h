@@ -17,8 +17,8 @@
 #ifndef NTV2DRIVERAUTOCIRCULATE_H
 #define NTV2DRIVERAUTOCIRCULATE_H
 
-#include "ntv2dma.h"
 #include "../ntv2kona.h"
+#include "ntv2dma.h"
 
 
 //////////////////////////////////////////////////////////////////////////////////////

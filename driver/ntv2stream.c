@@ -219,7 +219,7 @@ Ntv2Status ntv2_stream_disable(struct ntv2_stream *ntv2_str)
 
 Ntv2Status ntv2_stream_channel_initialize(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel)
 {
-    Ntv2Status status;
+    int status;
     int i;
 
     // synchronize
@@ -245,7 +245,7 @@ Ntv2Status ntv2_stream_channel_initialize(struct ntv2_stream *ntv2_str, NTV2Stre
 
     // initialize stream engine
     status = (ntv2_str->stream_ops.stream_initialize)(ntv2_str);
-    if (status != NTV2_STATUS_SUCCESS)
+    if (status != NTV2_STREAM_OPS_SUCCESS)
     {
         if (pChannel != NULL)
         {
@@ -271,6 +271,7 @@ Ntv2Status ntv2_stream_channel_initialize(struct ntv2_stream *ntv2_str, NTV2Stre
     // report status
     if (pChannel != NULL)
     {
+        // get state
         channel_state(ntv2_str, pChannel);
         if (ntv2_str->stream_state == ntv2_stream_state_error)
         {
@@ -282,16 +283,13 @@ Ntv2Status ntv2_stream_channel_initialize(struct ntv2_stream *ntv2_str, NTV2Stre
         }
     }
    
-    // get state
-    channel_state(ntv2_str, pChannel);
-    pChannel->mStatus = NTV2_STREAM_STATUS_SUCCESS;
     ntv2SemaphoreUp(&ntv2_str->state_sema);
     return NTV2_STATUS_SUCCESS;
 }
 
 Ntv2Status ntv2_stream_channel_start(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel)
 {
-    Ntv2Status status;
+    int status;
 
     // synchronize
     if (!ntv2SemaphoreDown(&ntv2_str->state_sema, NTV2_STREAM_ACTION_TIMEOUT))
@@ -314,7 +312,7 @@ Ntv2Status ntv2_stream_channel_start(struct ntv2_stream *ntv2_str, NTV2StreamCha
     if (ntv2_str->stream_state != ntv2_stream_state_active)
     {
         status = (ntv2_str->stream_ops.stream_start)(ntv2_str);
-        if (status != NTV2_STATUS_SUCCESS)
+        if (status != NTV2_STREAM_OPS_SUCCESS)
         {
             channel_state(ntv2_str, pChannel);
             pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_MESSAGE;
@@ -332,7 +330,7 @@ Ntv2Status ntv2_stream_channel_start(struct ntv2_stream *ntv2_str, NTV2StreamCha
 
 Ntv2Status ntv2_stream_channel_stop(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel)
 {
-    Ntv2Status status;
+    int status;
 
     // synchronize
     if (!ntv2SemaphoreDown(&ntv2_str->state_sema, NTV2_STREAM_ACTION_TIMEOUT))
@@ -356,7 +354,7 @@ Ntv2Status ntv2_stream_channel_stop(struct ntv2_stream *ntv2_str, NTV2StreamChan
     if (ntv2_str->stream_state != ntv2_stream_state_idle)
     {
         status = (ntv2_str->stream_ops.stream_stop)(ntv2_str);
-        if (status != NTV2_STATUS_SUCCESS)
+        if (status != NTV2_STREAM_OPS_SUCCESS)
         {
             pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_MESSAGE;
             ntv2SemaphoreUp(&ntv2_str->state_sema);
@@ -373,7 +371,7 @@ Ntv2Status ntv2_stream_channel_stop(struct ntv2_stream *ntv2_str, NTV2StreamChan
 
 Ntv2Status ntv2_stream_channel_flush(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel)
 {
-    Ntv2Status status;
+    int status;
     uint32_t i;
     
     // synchronize
@@ -400,7 +398,7 @@ Ntv2Status ntv2_stream_channel_flush(struct ntv2_stream *ntv2_str, NTV2StreamCha
         {
             // release buffer
             status = (ntv2_str->stream_ops.buffer_release)(&ntv2_str->stream_buffers[i]);
-            if (status != NTV2_STATUS_SUCCESS)
+            if (status != NTV2_STREAM_OPS_SUCCESS)
             {
             }            
         }
@@ -413,7 +411,7 @@ Ntv2Status ntv2_stream_channel_flush(struct ntv2_stream *ntv2_str, NTV2StreamCha
     
     // program the transfer engine
     status = (ntv2_str->stream_ops.stream_program)(ntv2_str);
-    if (status != NTV2_STATUS_SUCCESS)
+    if (status != NTV2_STREAM_OPS_SUCCESS)
     {
         channel_state(ntv2_str, pChannel);
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL;
@@ -463,7 +461,6 @@ Ntv2Status ntv2_stream_channel_wait(struct ntv2_stream *ntv2_str, NTV2StreamChan
             break;
         }
     }
-    ntv2SemaphoreUp(&ntv2_str->state_sema);
     
     // wait for stream engine
     if (event_index != NTV2_STREAM_WAIT_CLIENTS)
@@ -500,7 +497,7 @@ Ntv2Status ntv2_stream_channel_wait(struct ntv2_stream *ntv2_str, NTV2StreamChan
 Ntv2Status ntv2_stream_buffer_add(struct ntv2_stream *ntv2_str, NTV2StreamBuffer* pBuffer)
 {
     struct ntv2_stream_buffer* str_buf = NULL;
-    Ntv2Status status;
+    int status;
 
     // synchronize
     if (!ntv2SemaphoreDown(&ntv2_str->state_sema, NTV2_STREAM_ACTION_TIMEOUT))
@@ -548,7 +545,7 @@ Ntv2Status ntv2_stream_buffer_add(struct ntv2_stream *ntv2_str, NTV2StreamBuffer
 
     // program the transfer engine
     status = (ntv2_str->stream_ops.stream_program)(ntv2_str);
-    if (status != NTV2_STATUS_SUCCESS)
+    if (status != NTV2_STREAM_OPS_SUCCESS)
     {
         buffer_state(str_buf, pBuffer);
         pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL;
