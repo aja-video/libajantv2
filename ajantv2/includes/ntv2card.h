@@ -3376,7 +3376,8 @@ public:
 		@note		For Multi-Channel or 4K/8K applications (i.e. where more than one channel is used for streaming video), AJA
 					recommends specifying zero for \c inFrameCount, and explicitly specifying a frame range using \c inStartFrameNumber
 					and \c inEndFrameNumber parameters.
-		@note		Fewer frames reduces latency, but increases the likelihood of frame drops. See \ref autocirculatelowlatency.
+		@note		Fewer frames reduces latency, but increases the likelihood of frame drops.
+					See \ref autocircfrmcnt.
 		@note		All \ref ntv2signalrouting should be completed prior to calling this function.
 		@note		This function logs \ref autocirculatemsgs to \ref usingajalogger or the \ref usinglogreader.
 					Be sure the <tt>AutoCirculate_39</tt> message group is enabled, and the client application has called AJADebug::Open.
@@ -3414,7 +3415,7 @@ public:
 		@param[in]	inOptionFlags		A bit mask that specifies additional AutoCirculate options (e.g., ::AUTOCIRCULATE_WITH_RP188,
 										::AUTOCIRCULATE_WITH_LTC, ::AUTOCIRCULATE_WITH_ANC, etc.). Defaults to zero (no options).
 		@param[in]	inNumChannels		Optionally specifies the number of channels to operate on when CNTV2Card::AutoCirculateStart or
-										CNTV2Card::AutoCirculateStop are called. Defaults to 1. Must be greater than zero.
+										CNTV2Card::AutoCirculateStop are called. Defaults to 7. Must be greater than zero.
 		@param[in]	inStartFrameNumber	Specifies the starting frame index number as a zero-based unsigned decimal integer. Defaults to zero.
 										This parameter always overrides \c inFrameCount if, when specified with \c inEndFrameNumber,
 										are both non-zero. If specified, must be less than \c inEndFrameNumber -- see \ref vidop-fbindexing
