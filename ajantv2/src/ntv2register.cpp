@@ -3498,12 +3498,13 @@ NTV2VideoFormat CNTV2Card::GetHDMIInputVideoFormat(NTV2Channel inChannel)
 			}
 			else if(hdmiVersion > 1)
 			{
+				bool squareDivision = hdmiVersion == 5 ? false : true;
 				NTV2FrameRate hdmiRate = NTV2FrameRate((status &kRegMaskInputStatusFPS) >> kRegShiftInputStatusFPS);
 				NTV2Standard hdmiStandard = NTV2Standard((status & kRegMaskHDMIInV2VideoStd) >> kRegShiftHDMIInV2VideoStd);
 				UByte inputGeometry = 0;
 				if (hdmiStandard == NTV2_STANDARD_2Kx1080i || hdmiStandard == NTV2_STANDARD_2Kx1080p)
 					inputGeometry = 8;
-				format = GetNTV2VideoFormat (hdmiRate,	hdmiStandard, false, inputGeometry, false);
+				format = GetNTV2VideoFormat (hdmiRate,	hdmiStandard, false, inputGeometry, false, squareDivision);
 			}
 		}
 	} 
