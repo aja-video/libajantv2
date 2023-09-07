@@ -214,6 +214,10 @@ class AJAExport DeviceCapabilities
 		inline UWord	GetTotalNumAudioSystems (void)			{return UWord(dev.GetNumSupported(kDeviceGetTotalNumAudioSystems));}
 		inline UWord	GetNumBufferedAudioSystems (void)		{return UWord(dev.GetNumSupported(kDeviceGetNumBufferedAudioSystems));}
 		inline ULWord	GetUFCVersion (void)					{return dev.GetNumSupported(kDeviceGetUFCVersion);}
+		bool			CanDoChannel (const NTV2Channel inChannel)
+						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_Channel));
+							return itms.find(ULWord(inChannel)) != itms.end();
+						}
 		bool			CanDoConversionMode (const NTV2ConversionMode inMode)
 						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_ConversionMode));
 							return itms.find(ULWord(inMode)) != itms.end();
@@ -229,6 +233,10 @@ class AJAExport DeviceCapabilities
 		bool			CanDoInputSource (const NTV2InputSource inSrc)
 						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_InputSource));
 							return itms.find(ULWord(inSrc)) != itms.end();
+						}
+		bool			CanDoOutputDestination (const NTV2OutputDestination inDest)
+						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_OutputDest));
+							return itms.find(ULWord(inDest)) != itms.end();
 						}
 		bool			CanDoVideoFormat (const NTV2VideoFormat inVF)
 						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_VideoFormat));
