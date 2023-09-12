@@ -1208,7 +1208,7 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context)
 	GetXptHDMIOutInputSelect(context, &tempXptSelect);
 	isSourceRGB = (tempXptSelect & 0x80) != 0 ? true : false;
 	useHDMI420Mode = false;
-	if (hdmiVersion == 2 || hdmiVersion == 4)
+	if (hdmiVersion == 2 || hdmiVersion == 4 || hdmiVersion == 5)
 	{
 		bool isQuadLink = false;
 		NTV2OutputXptID q2connection = NTV2_XptBlack;

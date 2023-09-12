@@ -607,6 +607,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     uint32_t value = 0;
     uint32_t total_lines = 0;
     uint32_t register_sync = 0;
+	uint32_t qRezMode = 0;
     bool progressive = false;
     bool top_first = false;
 	bool quad = false;
@@ -624,6 +625,8 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     if (frame_rate >= s_frame_rate_size) return false;
     pixel_rate = get_sdi_pixel_rate(standard, frame_rate);
     if (pixel_rate >= s_pixel_rate_size) return false;
+
+	qRezMode = NTV2_FLD_GET(ntv2_fld_channel_control_quarter_size_mode, channel_control);
 
     /* channel mode */
     mode = ntv2_con_videoraster_mode_disable;
@@ -837,7 +840,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
 
     /* raster control */
     value = NTV2_FLD_SET(ntv2_fld_videoraster_control_mode, mode);
-    value |= NTV2_FLD_SET(ntv2_fld_videoraster_control_double, 0);
+    value |= NTV2_FLD_SET(ntv2_fld_videoraster_control_double, qRezMode);
     value |= NTV2_FLD_SET(ntv2_fld_videoraster_control_fillbit, 0);
     value |= NTV2_FLD_SET(ntv2_fld_videoraster_control_dither, 0);
     value |= NTV2_FLD_SET(ntv2_fld_videoraster_control_8b10bconvert, 0);

@@ -209,7 +209,7 @@ Ntv2Status ntv2_genlock2_program(struct ntv2_genlock2 *ntv2_gen, enum ntv2_genlo
 	case ntv2_genlock2_mode_broadcast_1485:
 	{
 		struct ntv2_genlock2_data* configData = get_genlock2_config(ntv2_gen, c_ntsc_lines, c_ntsc_rate);
-		if (!configure_genlock2(ntv2_gen, configData, false))
+		if (!configure_genlock2(ntv2_gen, configData, true))
 			return NTV2_STATUS_FAIL;
 		break;
 	}
@@ -294,7 +294,7 @@ static void ntv2_genlock2_monitor(void* data)
 			if (config != NULL) {
 				NTV2_MSG_GENLOCK_CONFIG("%s: configure genlock2 lines %d  rate %s\n", 
 										ntv2_gen->name, ntv2_gen->gen_lines, ntv2_frame_rate_name(ntv2_gen->gen_rate));
-				if (!configure_genlock2(ntv2_gen, config, false)) goto sleep;
+				if (!configure_genlock2(ntv2_gen, config, true)) goto sleep;
 				ntv2EventWaitForSignal(&ntv2_gen->monitor_event, c_genlock_config_wait, true);
 				update = false;
 				lock_wait = 0;
@@ -379,9 +379,11 @@ static struct ntv2_genlock2_data* get_genlock2_config(struct ntv2_genlock2 *ntv2
 		{
 		default:
 		case 0x45:
+			NTV2_MSG_GENLOCK_INFO("%s: configure genlock2 device 0X45: 8a34045\n", ntv2_gen->name);
 			config = s_8a34045_broadcast_1485;
 			break;
 		case 0x12:
+			NTV2_MSG_GENLOCK_INFO("%s: configure genlock2 device 0X12: rc32012a\n", ntv2_gen->name);
 			config = s_rc32012a_broadcast_1485;
 			break;
 		}
@@ -404,7 +406,7 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 	spi_reset(ntv2_gen);
 
 	if (check) {
-		NTV2_MSG_GENLOCK_CHECK("%s: genlock write registers\n", ntv2_gen->name);
+		NTV2_MSG_GENLOCK_INFO("%s: genlock2 write registers\n", ntv2_gen->name);
 	}
 
 	while ((gdat->size != 0))
@@ -428,7 +430,7 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 	ntv2_reg_rmw(ntv2_gen->system_context, ntv2_reg_control_status, ntv2_gen->index, value, mask);
 
 	if (check) {
-		NTV2_MSG_GENLOCK_CHECK("%s: genlock write complete\n", ntv2_gen->name);
+		NTV2_MSG_GENLOCK_INFO("%s: genlock2 write complete\n", ntv2_gen->name);
 	}
 
 	return true;
