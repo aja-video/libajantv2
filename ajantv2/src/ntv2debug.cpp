@@ -160,6 +160,8 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
 		case DEVICE_ID_CORVID44_PLNR:				return "Corvid44_PLNR";
 		case DEVICE_ID_TTAP_PRO:					return "TTapPro";
 		case DEVICE_ID_IOX3:						return "IoX3";
+		case DEVICE_ID_KONAX:						return "KonaX";
+		case DEVICE_ID_KONAXM:						return "KonaXM";
 		case DEVICE_ID_NOTFOUND:					return "Unknown";
 	}
 
