@@ -13,6 +13,8 @@ This is the open-source SDK for discovering, interrogating and controlling NTV2 
 1. [Obtaining libajantv2](#obtaining)
 1. [Building libajantv2](#building)
 1. [Building the Kernel Module Driver (Linux)](#building-kernel-module)
+1. [Verifying the Kernel Module Driver (Linux)](#verifying-kernel-module)
+1. [Customizing NTV2](#customizing-ntv2)
 
 ## Directory Layout
 The **libajantv2** folder contains the following items:
@@ -220,7 +222,22 @@ Uninstallation of the kernel module can be accomplished via the unload_ajantv2 s
 $ sudo ../bin/unload_ajantv2
 ```
 
-## Customizing libajantv2
+## Verifying the Kernel Module Driver (Linux) <a name="verifying-kernel-module"></a>
+
+To confirm that the driver is loaded and running on a host that has an AJA NTV2 device installed or connected, issue
+an `lsmod` command, and look for **ajantv2** in the list.
+You can also issue an `ls /dev` command, and look for devices with names that start with **ajantv2**.
+
+If `lsmod` doesn’t report the device, or it doesn’t appear in `/dev`:
+-  Try disabling any/all “fast boot” options in the host BIOS.
+-  Try disabling any/all power management options in the host BIOS (e.g. ASPM).
+-  Be sure the AJA device shows up in `lspci -nn  -d f1d0:`.
+-  Be sure the installed AJA board(s) each have two green LEDs lit after host power-on.
+-  Check the `dmesg` log for error messages from the AJA NTV2 kernel driver.
+-  Try installing the AJA device in a different PCIe slot on the host motherboard.
+
+
+## Customizing libajantv2 <a name="customizing-ntv2"></a>
 There are a number of macros that control certain aspects of NTV2:
 - `NTV2_USE_CPLUSPLUS11` (in `ajantv2/includes/ajatypes.h`) — If defined (the default), assumes a C++11 compiler (or later) is being used, and C++11 language features will be used in 'ajantv2'.
 Note that this macro will automatically be defined or undefined as necessary by CMake depending on the `CMAKE_CXX_STANDARD` that's in use at build-time.
