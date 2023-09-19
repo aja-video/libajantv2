@@ -1941,8 +1941,9 @@ NTV2VideoFormat GetHDMIInputVideoFormat(Ntv2SystemContext* context)
 	NTV2Standard v2Standard;
 	NTV2FrameRate frameRate;
 	NTV2VideoFormat format;
-	ULWord status;
+	ULWord status, is2kx1080;
 	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
+	is2kx1080 = 0;
 
 	if(NTV2DeviceCanDoInputSource(deviceID, NTV2_INPUTSOURCE_HDMI1))
 	{
@@ -1967,6 +1968,7 @@ NTV2VideoFormat GetHDMIInputVideoFormat(Ntv2SystemContext* context)
 			}
 			frameRate = (NTV2FrameRate)((status &kRegMaskInputStatusFPS) >> kRegShiftInputStatusFPS);
 			v2Standard = (NTV2Standard)((status & kRegMaskHDMIInV2VideoStd) >> kRegShiftHDMIInV2VideoStd);
+			//ntv2Message("GHI rate = %d, standard = %d", frameRate, v2Standard);
 			switch(v2Standard)
 			{
 			case NTV2_STANDARD_1080:
@@ -1983,14 +1985,18 @@ NTV2VideoFormat GetHDMIInputVideoFormat(Ntv2SystemContext* context)
 				break;
 			case NTV2_STANDARD_1080p:
 			case NTV2_STANDARD_3840x2160p:
+				standard = NTV2_STANDARD_1080p;
+				break;
+			case NTV2_STANDARD_2Kx1080p:
 			case NTV2_STANDARD_4096x2160p:
 				standard = NTV2_STANDARD_1080p;
+				is2kx1080 = 1;
 				break;
 			default:
 				return NTV2_FORMAT_UNKNOWN;
 			}
 
-			format = GetVideoFormatFromState(standard, frameRate, 0, 0);
+			format = GetVideoFormatFromState(standard, frameRate, is2kx1080, 0);
 			if(NTV2_IS_QUAD_STANDARD(v2Standard))
 				format = GetQuadSizedVideoFormat(format);
 			return format;

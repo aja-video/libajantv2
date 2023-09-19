@@ -13,6 +13,8 @@ This is the open-source SDK for discovering, interrogating and controlling NTV2 
 1. [Obtaining libajantv2](#obtaining)
 1. [Building libajantv2](#building)
 1. [Building the Kernel Module Driver (Linux)](#building-kernel-module)
+1. [Verifying the Kernel Module Driver (Linux)](#verifying-kernel-module)
+1. [Customizing NTV2](#customizing-ntv2)
 
 ## Directory Layout
 The **libajantv2** folder contains the following items:
@@ -40,9 +42,9 @@ Clone the libajantv2 repository from GitHub:
 ```
 
 ## Building libajantv2
-Starting in the NTV2 SDK version 17.0, AJA has standardized on [CMake](https://cmake.org/) for describing how to build the libraries, demonstration applications, command-line tools, unit tests, and plugins. AJA requires using CMake version 3.15 or later.
+Starting in the NTV2 SDK version 17.0, AJA has standardized on [CMake](https://cmake.org/) for describing how to build the libraries, demonstration applications, command-line tools, unit tests, and plugins. AJA requires CMake version 3.15 or later.
 
-The instructions for building the default static library are generally the same on each supported platform (Windows, macOS, Linux on x64 and aarch64). Note that the default "CMake Generator" varies by platform.
+The instructions for building the default static library are generally the same on each supported platform (Windows, macOS, Linux). Note that the default "CMake Generator" varies by platform.
 
 **NOTE: By default — absent any parameters — only the target for the ajantv2 static library is built.**
 
@@ -210,12 +212,44 @@ $ cd libajantv2/driver/linux
 ```
 $ make clean && make
 ```
-3. If the kernel module build succeeded, the ajantv2.ko file should appear in `libajantv2/driver/bin`. The kernel module can now be installed via the load_ajantv2 script from the same directory:
+3. If the kernel module build succeeded, the ajantv2.ko file should appear in `libajantv2/driver/bin`. The kernel module can now be installed via the **load_ajantv2** script from the same directory:
 ```
 $ sudo ../bin/load_ajantv2
 ```
 
-Uninstallation of the kernel module can be accomplished via the unload_ajantv2 script:
+Note that on hosts with **Secure Boot** enabled, you’ll need to sign the **ajantv2.ko** kernel module after it’s been built.
+Check your Linux distro’s documentation for **Secure Boot** information.
+
+Uninstallation of the kernel module can be accomplished via the **unload_ajantv2** script:
 ```
 $ sudo ../bin/unload_ajantv2
 ```
+
+
+## Verifying the Kernel Module Driver (Linux) <a name="verifying-kernel-module"></a>
+
+To confirm that the driver is loaded and running on a host that has an AJA NTV2 device installed or connected, issue
+an `lsmod` command, and look for **ajantv2** in the list.
+You can also issue an `ls /dev` command, and look for devices with names that start with **ajantv2**.
+
+If `lsmod` doesn’t report the device, or it doesn’t appear in `/dev`:
+-  Try disabling any/all “fast boot” options in the host BIOS.
+-  Try disabling any/all power management options in the host BIOS (e.g. ASPM).
+-  Be sure the AJA device shows up in `lspci -nn  -d f1d0:`.
+-  Be sure the installed AJA board(s) each have two green LEDs lit after host power-on.
+-  Check the `dmesg` log for error messages from the AJA NTV2 kernel driver.
+-  Try installing the AJA device in a different PCIe slot on the host motherboard.
+
+
+## Customizing libajantv2 <a name="customizing-ntv2"></a>
+There are a number of macros that control certain aspects of NTV2:
+- `NTV2_USE_CPLUSPLUS11` (in `ajantv2/includes/ajatypes.h`) — If defined (the default), assumes a C++11 compiler (or later) is being used, and C++11 language features will be used in 'ajantv2'.
+Note that this macro will automatically be defined or undefined as necessary by CMake depending on the `CMAKE_CXX_STANDARD` that's in use at build-time.
+Also note that if this macro is defined, so must `AJA_USE_CPLUSPLUS11` (see below) … and vice-versa.
+- `AJA_USE_CPLUSPLUS11` (in `ajabase/common/types.h`) — If defined (the default), assumes a C++11 compiler (or later) is being used, and C++11 language features will be used in 'ajabase'.
+Note that this macro will automatically be defined or undefined as necessary by CMake depending on the `CMAKE_CXX_STANDARD` that's in use at build-time.
+Also note that if this macro is defined, so must `NTV2_USE_CPLUSPLUS11` (see above) … and vice-versa.
+- `NTV2_NULL_DEVICE` (in `ajantv2/includes/ajatypes.h`) — If defined, removes all linkage to the NTV2 kernel driver. This is used, for example, to build a “sandboxed” MacOS X application with no linkage to Apple’s IOKit framework. This has the side effect of having `CNTV2DriverInterface::OpenLocalPhysical` always fail, thus permitting only remote devices to be accessed. This macro is undefined by default.
+- `NTV2_NUB_CLIENT_SUPPORT` (in `ajantv2/includes/ajatypes.h`) — If defined (the default), the SDK will load plugins (DLLs, dylibs, .so’s) as necessary to connect to remote or virtual devices.
+For applications requiring higher security, this macro can be undefined to prevent dynamic plugin loading.
+- `NTV2_WRITEREG_PROFILING` (in `ajantv2/includes/ajatypes.h`) — If defined (the default), the `WriteRegister` profiling API in `CNTV2Card` is available.
