@@ -377,13 +377,13 @@ static struct ntv2_genlock2_data* get_genlock2_config(struct ntv2_genlock2 *ntv2
 	case 525:
 		switch (genlockDeviceID)
 		{
-		default:
 		case 0x45:
-			NTV2_MSG_GENLOCK_INFO("%s: configure genlock2 device 0X45: 8a34045\n", ntv2_gen->name);
+			NTV2_MSG_GENLOCK_INFO("%s: configure genlock2 device %02X: 8a34045\n", ntv2_gen->name, genlockDeviceID);
 			config = s_8a34045_broadcast_1485;
 			break;
 		case 0x12:
-			NTV2_MSG_GENLOCK_INFO("%s: configure genlock2 device 0X12: rc32012a\n", ntv2_gen->name);
+        default:
+			NTV2_MSG_GENLOCK_INFO("%s: configure genlock2 device %02X: rc32012a\n", ntv2_gen->name, genlockDeviceID);
 			config = s_rc32012a_broadcast_1485;
 			break;
 		}
@@ -601,7 +601,10 @@ static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uin
 
 	for (i = 0; i < numBytes; i++)
 		reg_write(ntv2_gen, ntv2_reg_spi_write, 0);
-
+    
+    if(!spi_wait_write_empty(ntv2_gen))
+        return false;
+    
 	reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x01);
 	wait_genlock2(ntv2_gen, 10000);
 

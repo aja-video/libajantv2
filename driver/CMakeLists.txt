@@ -7,6 +7,10 @@ set(AJADRIVER_COMMON_HEADERS
 	ntv2displayid.h
 	ntv2genlock.h
 	ntv2genregs.h
+	ntv2genlock2.h
+	ntv2gen2regs.h
+	ntv2gen2regs_8a34045.h
+	ntv2gen2regs_rc32012a.h
 	ntv2hdmiedid.h
 	ntv2hdmiin.h
 	ntv2hdmiin4.h
@@ -33,6 +37,7 @@ set(AJADRIVER_COMMON_SOURCES
 	ntv2commonreg.c
 	ntv2displayid.c
 	ntv2genlock.c
+	ntv2genlock2.c
 	ntv2hdmiedid.c
 	ntv2hdmiin.c
 	ntv2hdmiin4.c
