@@ -7,6 +7,7 @@
 
 #include "ntv2routingexpert.h"
 #include "ajabase/system/debug.h"
+#include "ajabase/common/common.h"
 
 // Logging helpers
 #define	HEX16(__x__)		"0x" << std::hex << std::setw(16) << std::setfill('0') << uint64_t(__x__)  << std::dec

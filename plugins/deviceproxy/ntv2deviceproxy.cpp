@@ -211,7 +211,7 @@ bool NTV2DeviceProxy::NTV2Connect (void)
 		NBWARN(Name() << " SDK version " << xHEX0N(mSDKVersion,8) << " doesn't match host SDK version " << xHEX0N(mHostSDKVersion,8));
 
 	//	Check config params:
-	string devSpec;
+	string devSpec, devID;
 	const NTV2StringSet keys(mConnectParams.keys());
 	NTV2StringList skippedParams;
 	for (NTV2StringSetConstIter it(keys.begin());  it != keys.end();  ++it)
@@ -230,15 +230,15 @@ bool NTV2DeviceProxy::NTV2Connect (void)
 		{
 			if (value.empty())
 				{NBWARN(Name() << " 'DevID' parameter value missing or empty");  continue;}
-			if (!devSpec.empty())
-				{NBFAIL(Name() << " 'DevID' parameter specified more than once, was '" << devSpec << "', now '" << value << "'"); return false;}
+			if (!devID.empty())
+				{NBFAIL(Name() << " 'DevID' parameter specified more than once, was '" << devID << "', now '" << value << "'"); return false;}
 			GetKnownDevices();
-			string valueLower(value);
-			aja::lower(valueLower);
-			if (mKnownDevs.find(value) != mKnownDevs.end())
-				mSimDeviceID = mKnownDevs[value];
-			if (!isSimulatedDevice()  &&  mKnownDevs.find(valueLower) != mKnownDevs.end())
-				mSimDeviceID = mKnownDevs[valueLower];
+			devID = value;
+			aja::lower(devID);
+			if (mKnownDevs.find(devID) != mKnownDevs.end())
+				mSimDeviceID = mKnownDevs[devID];
+			if (!isSimulatedDevice()  &&  mKnownDevs.find(devID) != mKnownDevs.end())
+				mSimDeviceID = mKnownDevs[devID];
 			if (!isSimulatedDevice())
 				{NBFAIL("'" << Name() << "' parameter '" << value << "' invalid, no such device or ID"); return false;}
 			NBINFO("'" << Name() << "' parameter '" << value << "' specified");
@@ -319,7 +319,7 @@ bool NTV2DeviceProxy::NTV2GetSupportedRemote (const ULWord inEnumsID, ULWordSet 
 bool NTV2DeviceProxy::NTV2ReadRegisterRemote (const ULWord inRegNum, ULWord & outRegValue, const ULWord inRegMask, const ULWord inRegShift)
 {
 	bool ok (mCard.ReadRegister(inRegNum, outRegValue, inRegMask, inRegShift));
-	if (ok  &&  inRegNum == kRegBoardID  &&  mSimDeviceID != DEVICE_ID_INVALID)
+	if (ok  &&  inRegNum == kRegBoardID  &&  isSimulatedDevice())
 	{
 		outRegValue = mSimDeviceID & inRegMask;
 		if (inRegShift)
@@ -356,11 +356,15 @@ bool NTV2DeviceProxy::NTV2DMATransferRemote (const NTV2DMAEngine inDMAEngine,	co
 bool NTV2DeviceProxy::NTV2MessageRemote (NTV2_HEADER * pInMessage)
 {
 	bool ok(mCard.NTV2Message(pInMessage));
-	if (ok  &&  mSimDeviceID != DEVICE_ID_INVALID  &&  pInMessage->GetType() == NTV2_TYPE_GETREGS)
+	if (ok  &&  isSimulatedDevice()  &&  pInMessage->GetType() == NTV2_TYPE_GETREGS)
 	{
 		NTV2GetRegisters * pGetRegs = AsNTV2GetRegisters(pInMessage);
 		if (pGetRegs)
-			pGetRegs->PatchRegister (kRegBoardID, mSimDeviceID);
+		{	ULWord regValue(0);
+			ok = NTV2ReadRegisterRemote (kRegBoardID, regValue);
+			if (ok)
+				ok = pGetRegs->PatchRegister (kRegBoardID, regValue);
+		}
 	}
 	return ok;
 }

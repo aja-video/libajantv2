@@ -500,11 +500,11 @@ bool NTV2DeviceSpecParser::ParseSerialNum (size_t & pos, string & outToken)
 		while (posAlphaNum < SpecLength())
 		{
 			const char ch(CharAt(posAlphaNum));
-			if (!IsLetter(ch) && !IsDecimalDigit(ch) && ch != '-' && ch != ' ')
+			if (!IsUpperLetter(ch) && !IsDecimalDigit(ch) && ch != '-' && ch != ' ')
 				break;
 			++posAlphaNum;  tokAlphaNum += ch;
 		}
-		if (tokAlphaNum.length() < 2)	//	At least 2 chars
+		if (tokAlphaNum.length() < 2)	//	At least 2 upper-case chars
 			tokAlphaNum.clear();
 		else if (tokAlphaNum.length() == 8  ||  tokAlphaNum.length() == 9)
 			{pos = posAlphaNum;   outToken = tokAlphaNum;  break;}

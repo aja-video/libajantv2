@@ -3893,8 +3893,8 @@ private:
 			if (::NTV2DeviceCanDoSDIErrorChecks(inDeviceID))
 				oss << "Unlock Tally: "			<< DEC(inRegValue & 0x7FFF)		<< endl
 					<< "Locked: "				<< YesNo(inRegValue & BIT(16))	<< endl
-					<< "Link A VID Valid: "		<< YesNo(inRegValue & BIT(20))	<< endl
-					<< "Link B VID Valid: "		<< YesNo(inRegValue & BIT(21))	<< endl
+					<< "Link A VPID Valid: "	<< YesNo(inRegValue & BIT(20))	<< endl
+					<< "Link B VPID Valid: "	<< YesNo(inRegValue & BIT(21))	<< endl
 					<< "TRS Error Detected: "	<< YesNo(inRegValue & BIT(24));
 			return oss.str();
 		}
