@@ -310,6 +310,19 @@ bool NTV2SoftwareDevice::NTV2Connect (void)
 				{NBFAIL(Name() << " 'SDRAM' file size is " << xHEX0N(mFBReqBytes,8) << " bytes -- expected " << xHEX0N(k128MB,8) << " (128MB) or larger");  return false;}
 			NBINFO(Name() << " 'SDRAM' parameter value '" << sdramPath << "' specified: " << DEC(mFBReqBytes) << "(" << xHEX0N(mFBReqBytes,8) << ") bytes");
 		}
+		else if (key == "help")
+		{
+			ostringstream oss;
+			oss << "ntv2swdevice:  This plugin simulates an NTV2 device completely in software." << endl
+				<< "CONFIG PARAMS:" << endl
+				<< "Name                Reqd    Default     Desc" << endl
+				<< "nosharedmemory      No      N/A         If specified, device memory is allocated privately instead of globally shared." << endl
+				<< "supportlog=fileurl  No      N/A         Specifies URL-encoded path to support log file to initialize registers." << endl
+				<< "sdram=fileurl       No      N/A         Specifies URL-encoded path to binary data file to initialize SDRAM.";
+			NBINFO(oss.str());
+			cerr << oss.str() << endl;
+			return false;
+		}
 		else
 			skippedParams.push_back(key);
 	}	//	for each connectParams key
