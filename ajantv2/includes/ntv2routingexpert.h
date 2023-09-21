@@ -11,7 +11,6 @@
 #include "ntv2signalrouter.h"
 
 #include "ajabase/system/lock.h"
-#include "ajabase/common/common.h"
 #include "ajabase/common/ajarefptr.h"
 
 class RoutingExpert;

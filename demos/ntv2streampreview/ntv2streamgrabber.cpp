@@ -600,7 +600,7 @@ bool NTV2StreamGrabber::SetupInput (void)
 			mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (NTV2_CHANNEL1), ::GetCSCOutputXptFromChannel (NTV2_CHANNEL1, false/*isKey*/, true/*isRGB*/));
 			mNTV2Card.SetFrameBufferFormat (NTV2_CHANNEL1, mFrameBufferFormat);
             if (!mbFixedReference)
-                mNTV2Card.SetReference (NTV2_REFERENCE_ANALOG_INPUT);
+                mNTV2Card.SetReference (NTV2_REFERENCE_ANALOG_INPUT1);
 			mChannel = NTV2_CHANNEL1;
             mNumChannels = 1;
 		}

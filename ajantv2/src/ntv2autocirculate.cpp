@@ -264,8 +264,7 @@ bool CNTV2Card::AutoCirculateInitForInput ( const NTV2Channel		inChannel,
 	}
 
 	//	Fill in our OS independent data structure...
-	AUTOCIRCULATE_DATA	autoCircData(eInitAutoCirc);
-	autoCircData.channelSpec = ::NTV2ChannelToInputChannelSpec (inChannel);
+	AUTOCIRCULATE_DATA	autoCircData (eInitAutoCirc, ::NTV2ChannelToInputChannelSpec(inChannel));
 	autoCircData.lVal1 = startFrameNumber;
 	autoCircData.lVal2 = endFrameNumber;
 	autoCircData.lVal3 = inAudioSystem;
@@ -407,8 +406,7 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 	}
 
 	//	Fill in our OS independent data structure...
-	AUTOCIRCULATE_DATA	autoCircData	(eInitAutoCirc);
-	autoCircData.channelSpec = NTV2ChannelToOutputChannelSpec (inChannel);
+	AUTOCIRCULATE_DATA	autoCircData (eInitAutoCirc, ::NTV2ChannelToOutputChannelSpec(inChannel));
 	autoCircData.lVal1 = startFrameNumber;
 	autoCircData.lVal2 = endFrameNumber;
 	autoCircData.lVal3 = inAudioSystem;
@@ -504,9 +502,9 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 
 bool CNTV2Card::AutoCirculateStart (const NTV2Channel inChannel, const ULWord64 inStartTime)
 {
-	AUTOCIRCULATE_DATA	autoCircData	(inStartTime ? eStartAutoCircAtTime : eStartAutoCirc);
-	autoCircData.lVal1 = static_cast <LWord> (inStartTime >> 32);
-	autoCircData.lVal2 = static_cast <LWord> (inStartTime & 0xFFFFFFFF);
+	AUTOCIRCULATE_DATA autoCircData (inStartTime ? eStartAutoCircAtTime : eStartAutoCirc);
+	autoCircData.lVal1 = LWord(inStartTime >> 32);
+	autoCircData.lVal2 = LWord(inStartTime & 0xFFFFFFFF);
 	if (!GetCurrentACChannelCrosspoint (*this, inChannel, autoCircData.channelSpec))
 		return false;
 	const bool result (AutoCirculate(autoCircData));
@@ -653,7 +651,7 @@ bool CNTV2Card::AutoCirculateGetStatus (const NTV2Channel inChannel, AUTOCIRCULA
 
 	if (!NTV2_IS_VALID_NTV2CROSSPOINT (outStatus.acCrosspoint))
 	{
-		AUTOCIRCULATE_STATUS	notRunningStatus (::NTV2ChannelToOutputCrosspoint (inChannel));
+		const AUTOCIRCULATE_STATUS notRunningStatus (::NTV2ChannelToOutputCrosspoint (inChannel));
 		outStatus = notRunningStatus;
 		return true;	//	AutoCirculate not running on this channel
 	}

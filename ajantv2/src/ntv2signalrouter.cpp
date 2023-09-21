@@ -11,6 +11,7 @@
 #include "ntv2devicefeatures.hh"
 #include "ntv2registerexpert.h"
 #include "ajabase/system/debug.h"
+#include "ajabase/common/common.h"
 #include <memory.h>
 #include <stdio.h>
 #include <assert.h>

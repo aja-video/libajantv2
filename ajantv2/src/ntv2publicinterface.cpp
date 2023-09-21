@@ -3144,6 +3144,7 @@ bool NTV2SetRegisters::GetRequestedRegisterWrites	(NTV2RegWrites & outRegWrites)
 	if (!mInRegInfos)
 		return false;
 
+	outRegWrites.reserve(size_t(mInNumRegisters));
 	const NTV2RegInfo *	pRegInfos(mInRegInfos);
 	for (ULWord ndx(0);  ndx < mInNumRegisters;  ndx++)
 		outRegWrites.push_back(pRegInfos[ndx]);
