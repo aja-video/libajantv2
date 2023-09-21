@@ -608,6 +608,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     uint32_t total_lines = 0;
     uint32_t register_sync = 0;
 	uint32_t qRezMode = 0;
+    uint32_t video_raster = 0;
     bool progressive = false;
     bool top_first = false;
 	bool quad = false;
@@ -621,10 +622,12 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     format = NTV2_FLD_GET(ntv2_fld_channel_control_pixel_format, channel_control);
     if (format >= s_format_size) return false;
     frame_rate = NTV2_FLD_GET(ntv2_fld_global_control_frame_rate, global_control);
-    frame_rate |= NTV2_FLD_GET(ntv2_fld_global_control_frame_rate_high, global_control) << NTV2_FLD_SIZE(ntv2_fld_global_control_frame_rate);
+    frame_rate |= NTV2_FLD_GET(ntv2_fld_global_control_frame_rate_high, global_control) <<
+        NTV2_FLD_SIZE(ntv2_fld_global_control_frame_rate);
     if (frame_rate >= s_frame_rate_size) return false;
     pixel_rate = get_sdi_pixel_rate(standard, frame_rate);
     if (pixel_rate >= s_pixel_rate_size) return false;
+    register_sync = NTV2_FLD_GET(ntv2_fld_global_control_reg_sync, global_control);
 
 	qRezMode = NTV2_FLD_GET(ntv2_fld_channel_control_quarter_size_mode, channel_control);
 
@@ -889,6 +892,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     }
 
     ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_control, value);
+    video_raster = value;
 
     /* extra parameters */
     ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_pixelskip, 0);
@@ -920,8 +924,11 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
 
     if (ntv2_raster->mode_change[index])
     {
+        /* toggle register sync immediate when changing between capture and playback*/
+        value = video_raster & ~NTV2_FLD_MASK(ntv2_fld_videoraster_control_regsync);
         value |= NTV2_FLD_SET(ntv2_fld_videoraster_control_regsync, ntv2_con_videoraster_regsync_immediate);
-
+        ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_control, value);
+        ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_control, video_raster);
         ntv2_raster->mode_change[index] = false;
     }
 
