@@ -135,7 +135,18 @@ bool CNTV2DriverInterface::Open (const UWord inDeviceIndex)
 	if (!OpenLocalPhysical(inDeviceIndex))
 		return false;
 
-	// Read driver version...
+#if !defined(NTV2_ALLOW_OPEN_UNSUPPORTED)
+	//	Check if device is officially supported...
+	const NTV2DeviceIDSet legalDeviceIDs(::NTV2GetSupportedDevices());
+	if (legalDeviceIDs.find(_boardID) == legalDeviceIDs.end())
+	{
+		DIFAIL("Device ID " << xHEX0N(_boardID,8) << " (at device index " << inDeviceIndex << ") is not in list of supported devices");
+		Close();
+		return false;
+	}
+#endif	//	NTV2_ALLOW_OPEN_UNSUPPORTED
+
+	//	Read driver version...
 	uint16_t	drvrVersComps[4]	=	{0, 0, 0, 0};
 	ULWord		driverVersionRaw	(0);
 	if (!IsRemote()	 &&	 !ReadRegister (kVRegDriverVersion, driverVersionRaw))
@@ -1315,11 +1326,10 @@ bool CNTV2DriverInterface::IsMBSystemReady (void)
 ULWordSet CNTV2DriverInterface::GetSupportedItems (const NTV2EnumsID inEnumsID)
 {
 	ULWordSet result;
-	const NTV2EnumsID enumsID (NTV2EnumsID(inEnumsID+0));
 	if (IsRemote()  &&  _pRPCAPI->NTV2GetSupportedRemote (inEnumsID, result))
 		return result;
 	const NTV2DeviceID devID(GetDeviceID());
-	switch (enumsID)
+	switch (inEnumsID)
 	{
 		case kNTV2EnumsID_DeviceID:
 		{	const NTV2DeviceIDSet devIDs(::NTV2GetSupportedDevices());

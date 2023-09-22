@@ -3469,7 +3469,7 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 		if (ntv2pp->m_pHDMIIn4Monitor[0] != NULL)
 		{
 			status = ntv2_hdmiin4_configure(ntv2pp->m_pHDMIIn4Monitor[0],
-											ntv2_edid_type_konahdmi_20, 0);
+											ntv2_edid_type_konax, 0);
 			if (status != NTV2_STATUS_SUCCESS)
 			{
 				ntv2_hdmiin4_close(ntv2pp->m_pHDMIIn4Monitor[0]);

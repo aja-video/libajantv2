@@ -204,7 +204,7 @@ typedef enum _NTV2NumericParamID
 #define NTV2_IS_VALID_NUMPARAMID(__x__)		((__x__) >= kNTV2NumericParam_FIRST  &&  (__x__) < kNTV2NumericParam_LAST)
 
 /**
-	@brief	Identifies NTV2 enumerated types, used in CNTV2DriverInterface::GetSupported.
+	@brief	Identifies NTV2 enumerated types, used in CNTV2DriverInterface::GetSupportedItems.
 **/
 typedef enum _NTV2EnumsID
 {
