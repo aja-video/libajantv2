@@ -305,6 +305,7 @@ static const ULWord gChannelToSDIIn3GbModeShift []		= { kRegShiftSDIIn3GbpsSMPTE
 static const ULWord gIndexToVidProcControlRegNum []		= { kRegVidProc1Control,	kRegVidProc2Control,	kRegVidProc3Control,	kRegVidProc4Control,	0};
 
 static const ULWord gIndexToVidProcMixCoeffRegNum []	= { kRegMixer1Coefficient,	kRegMixer2Coefficient,	kRegMixer3Coefficient,	kRegMixer4Coefficient,	0};
+static const ULWord gIndexToVidProcFlatMatteRegNum []	= { kRegFlatMatteValue,		kRegFlatMatte2Value,	kRegFlatMatte3Value,	kRegFlatMatte4Value,	0};
 
 static const ULWord gChannelToRP188ModeGCRegNum[]		= { kRegGlobalControl,			kRegGlobalControl,			kRegGlobalControl2,			kRegGlobalControl2,
 																kRegGlobalControl2,			kRegGlobalControl2,			kRegGlobalControl2,			kRegGlobalControl2,			0};
@@ -1140,6 +1141,7 @@ bool NTV2Kona1::NTV2ReadRegisterRemote (const ULWord inRegNum, ULWord & outRegVa
 		case kRegOutputTimingControl:		regNum = gChannelToOutputTimingCtrlRegNum[mChannel+1];	break;
 		case kRegVidProc1Control:			regNum = gIndexToVidProcControlRegNum[KonaToCardMixer(NTV2_CHANNEL1)];		break;
 		case kRegMixer1Coefficient:			regNum = gIndexToVidProcMixCoeffRegNum[KonaToCardMixer(NTV2_CHANNEL1)];		break;
+		case kRegFlatMatteValue:			regNum = gIndexToVidProcFlatMatteRegNum[KonaToCardMixer(NTV2_CHANNEL1)];	break;
 		case kRegRXSDI1Status:				regNum = gChannelToRXSDIStatusRegs[mChannel];			break;
 		case kRegRXSDI2Status:				regNum = gChannelToRXSDIStatusRegs[mChannel+1];			break;
 		case kRegRXSDI1CRCErrorCount:		regNum = gChannelToRXSDICRCErrorCountRegs[mChannel];	break;
@@ -1193,8 +1195,10 @@ bool NTV2Kona1::NTV2WriteRegisterRemote (const ULWord inRegNum, const ULWord inR
 		case kRegAud2OutputLastAddr:		regNum = gChannelToAudioOutLastAddrRegNum[mChannel+1];	break;
 		case kRegAud2InputLastAddr:			regNum = gChannelToAudioInLastAddrRegNum[mChannel+1];	break;
 		case kRegAud2Delay:					regNum = gAudioDelayRegisterNumbers[mChannel+1];		break;
+
 		case kRegVidProc1Control:			regNum = gIndexToVidProcControlRegNum[KonaToCardMixer(NTV2_CHANNEL1)];		break;
 		case kRegMixer1Coefficient:			regNum = gIndexToVidProcMixCoeffRegNum[KonaToCardMixer(NTV2_CHANNEL1)];		break;
+		case kRegFlatMatteValue:			regNum = gIndexToVidProcFlatMatteRegNum[KonaToCardMixer(NTV2_CHANNEL1)];	break;
 		default:	break;
 	}
 	return mCard.WriteRegister(regNum, inRegVal, regMask, regShift);
