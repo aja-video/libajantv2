@@ -5,8 +5,6 @@
 	@copyright	(C) 2010-2022 AJA Video Systems, Inc.
 **/
 #include "ntv2konaflashprogram.h"
-//#include "ntv2devicefeatures.h"
-//#include "ntv2devicescanner.h"
 #include "ntv2endian.h"
 #include "ntv2registersmb.h"
 #include "ajabase/system/debug.h"
@@ -25,10 +23,10 @@
 
 using namespace std;
 
-#define KFPDBUG(__x__)	do {ostringstream oss;  oss << AJAFUNC << ": " << __x__;  cerr << "## DEBUG:    " << oss.str() << endl;  AJA_sDEBUG  (AJA_DebugUnit_Firmware, oss.str());} while(false)
-#define KFPWARN(__x__)	do {ostringstream oss;  oss << AJAFUNC << ": " << __x__;  cerr << "## WARNING:  " << oss.str() << endl;  AJA_sWARNING(AJA_DebugUnit_Firmware, oss.str());} while(false)
+#define KFPDBUG(__x__)	AJA_sDEBUG (AJA_DebugUnit_Firmware, AJAFUNC << ": " << __x__)
+#define KFPWARN(__x__)	AJA_sWARNING (AJA_DebugUnit_Firmware, AJAFUNC << ": " << __x__)
 #define KFPERR(__x__)	do {ostringstream oss;  oss << AJAFUNC << ": " << __x__;  cerr << "## ERROR:    " << oss.str() << endl;  AJA_sERROR  (AJA_DebugUnit_Firmware, oss.str());} while(false)
-#define KFPNOTE(__x__)	do {ostringstream oss;  oss << AJAFUNC << ": " << __x__;  cout << "## NOTE:  "    << oss.str() << endl;  AJA_sNOTICE (AJA_DebugUnit_Firmware, oss.str());} while(false)
+#define KFPNOTE(__x__)	do {ostringstream oss;  oss << AJAFUNC << ": " << __x__;  if (!_bQuiet) cout << "## NOTE:  "    << oss.str() << endl;  AJA_sNOTICE (AJA_DebugUnit_Firmware, oss.str());} while(false)
 
 
 string MacAddr::AsString(void) const
@@ -1505,8 +1503,7 @@ bool CNTV2KonaFlashProgram::SetBankSelect( BankSelect bankNumber )
 		
 		WriteCommand(_hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND);
 		WaitForFlashNOTBusy();
-		if (!_bQuiet)
-			cout << "selected bank: " << ReadBankSelect() << endl;
+		KFPDBUG ("selected bank: " << ReadBankSelect());
 	}
 	return true;
 }
