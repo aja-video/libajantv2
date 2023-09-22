@@ -135,6 +135,17 @@
 #define	NTV2_INCLUDE_DEVICE_CAPABILITIES_API
 
 
+/**************************************************************************************************************
+	NTV2_ALLOW_OPEN_UNSUPPORTED				Controls whether unsupported devices can be opened.
+											Introduced in SDK 17.0.
+
+	Undefined:	(Default) Unsupported devices attached to the host cannot be opened.
+
+	Defined:	Unsupported devices attached to the host can be opened.
+**************************************************************************************************************/
+//#define	NTV2_ALLOW_OPEN_UNSUPPORTED
+
+
 
 /*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////	HELPER MACROS

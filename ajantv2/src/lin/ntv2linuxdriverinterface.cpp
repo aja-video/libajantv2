@@ -74,7 +74,6 @@ bool CNTV2LinuxDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 		{LDIFAIL("Failed to open '" << boardStr << "'");  return false;}
 
 	_boardNumber = inDeviceIndex;
-	const NTV2DeviceIDSet	legalDeviceIDs(::NTV2GetSupportedDevices());
 	if (!CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID))
 	{
 		LDIFAIL ("ReadRegister failed for 'kRegBoardID': ndx=" << inDeviceIndex << " hDev=" << _hDevice << " id=" << HEX8(_boardID));
@@ -85,12 +84,6 @@ bool CNTV2LinuxDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 			return false;
 		}
 		LDIDBG("Retry succeeded: ndx=" << _boardNumber << " hDev=" << _hDevice << " id=" << ::NTV2DeviceIDToString(_boardID));
-	}
-	if (legalDeviceIDs.find(_boardID) == legalDeviceIDs.end())
-	{
-		LDIFAIL("Unsupported boardID=" << HEX8(_boardID) << " ndx=" << inDeviceIndex << " hDev=" << _hDevice);
-		Close();
-		return false;
 	}
 	_boardOpened = true;
 	LDIINFO ("Opened '" << boardStr << "' devID=" << HEX8(_boardID) << " ndx=" << DEC(_boardNumber));

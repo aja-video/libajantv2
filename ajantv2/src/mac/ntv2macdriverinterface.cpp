@@ -472,7 +472,6 @@ CNTV2MacDriverInterface::~CNTV2MacDriverInterface (void)
 	//--------------------------------------------------------------------------------------------------------------------
 	bool CNTV2MacDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 	{
-		bool isLegal (false);
 	#if defined(USE_DEVICE_MAP)
 		// Local host open -- get a Mach connection
 		_boardOpened = gDeviceMap.GetConnection (inDeviceIndex) != 0;								
@@ -546,20 +545,6 @@ CNTV2MacDriverInterface::~CNTV2MacDriverInterface (void)
 			DIFAIL("ReadRegister(kRegBoardID) failed: ndx=" << inDeviceIndex << " con=" << HEX8(GetIOConnect()) << " boardID=" << HEX8(_boardID));
 			Close();
 			return false;
-		}
-
-#if !defined(OPEN_UNSUPPORTED_DEVICES)
-		{	//	Check if device is officially supported...
-			AJAAutoLock autoLock (&gLegalDevIDsLock);
-			if (gLegalDeviceIDs.empty())
-				gLegalDeviceIDs = ::NTV2GetSupportedDevices();
-			isLegal = gLegalDeviceIDs.find(_boardID) != gLegalDeviceIDs.end();
-		}
-#endif	//	!defined(OPEN_UNSUPPORTED_DEVICES)
-		if (!isLegal)
-		{
-			DIFAIL("Unsupported _boardID=" << HEX8(_boardID) << " ndx=" << inDeviceIndex << " con=" << HEX8(GetIOConnect()));
-			Close();  return false;
 		}
 
 		//	Good to go...
