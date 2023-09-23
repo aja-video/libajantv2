@@ -253,3 +253,132 @@ Also note that if this macro is defined, so must `NTV2_USE_CPLUSPLUS11` (see abo
 - `NTV2_NUB_CLIENT_SUPPORT` (in `ajantv2/includes/ajatypes.h`) — If defined (the default), the SDK will load plugins (DLLs, dylibs, .so’s) as necessary to connect to remote or virtual devices.
 For applications requiring higher security, this macro can be undefined to prevent dynamic plugin loading.
 - `NTV2_WRITEREG_PROFILING` (in `ajantv2/includes/ajatypes.h`) — If defined (the default), the `WriteRegister` profiling API in `CNTV2Card` is available.
+- `NTV2_ALLOW_OPEN_UNSUPPORTED` (in `ajantv2/includes/ajatypes.h`) — If defined, the SDK won’t check if the host-attached device being opened is supported; otherwise (the default), the SDK will fail the Open call if the host-attached device being opened is “unsupported”. (See the `NTV2GetSupportedDevices` function in `ntv2utils.h`.)
+
+## SDK Forward and Backward Compatibility <a name="fwdbackcompatibility"></a>
+The NTV2 source files originated many years ago from some of the earliest hardware products produced by AJA. These products ceased being dependent on NTV2 many years ago, but unfortunately, their legacy symbols remained in the SDK.
+
+In addition, when the first NTV2 SDK was released, the video capture/playout devices it supported were circuit boards fixed in a specific motherboard slot with barely enough I/O capability to handle a single stream of 4:2:2 YUV SD video. Today’s devices are hot-pluggable, support multiple channels, each with its own signal format, up to 4:4:4 8Kp60 and beyond. As the SDK expanded over the years to support newer, faster devices, the older functions, data types and constants remained, which resulted in a very unwieldy and confusing SDK that made it difficult for OEM developers to quickly get up to speed.
+
+### Deprecation History
+
+Starting with the 11.3 SDK, AJA introduced the first `NTV2_DEPRECATE` macro, and gathered many of the obsolete SDK functions, data types and constants under preprocessor `#ifdef` blocks: 
+```
+#if !defined(NTV2_DEPRECATE)
+    . . .
+    // Obsolete constants, data types and functions
+    . . .
+#endif  //  !defined(NTV2_DEPRECATE)
+```
+This means that if the `NTV2_DEPRECATE` macro is undefined, then existing code that relies on the old APIs will continue to compile, link and run. If the `NTV2_DEPRECATE` macro is defined, then the obsolete APIs disappear from the compilation, and build errors will result if they’re used.
+
+- **SDK 11.3:** `NTV2_DEPRECATE` macro introduced (but not defined anywhere).
+- **SDKs 11.3 - 12.3:** Shipped libraries built with old APIs intact (i.e. `NTV2_DEPRECATE` undefined, by default).
+- **SDK 12.4:** `NTV2_DEPRECATE` macro first defined in `ajatypes.h` header file. This was the first SDK that jettisoned the old APIs by default.
+- **SDK 12.5:** `NTV2_DEPRECATE_12_5` macro defined in `ajatypes.h`. Deprecated APIs:
+        **CNTV2SignalRouter**’s ‘**addWithValue**’ and ‘**AddConnection**’ methods that accepted **NTV2RoutingEntry**’s.
+- **SDK 12.6:** `NTV2_DEPRECATE_12_6` macro defined in `ajatypes.h`. Deprecated APIs:
+  - The old AutoCirculate APIs (**InitAutoCirculate**, **StartAutoCirculate**, etc.)
+  - Jettisoned some old **NTV2DeviceID**’s
+  - **GetFormatDescriptor** global functions.
+- **SDK 12.7:** `NTV2_DEPRECATE_12_7` macro defined in `ajatypes.h`. Deprecated APIs:
+  - **CNTV2Card**’s runtime bitfile-swapping functions.
+  - **CNTV2Card::DisplayNTV2Error**
+  - The old virtual register constant names (to force use of new `kVReg…` names).
+- **SDK 13.0:** `NTV2_DEPRECATE_13_0` macro defined in `ajatypes.h`. Deprecated APIs:
+  - **NTV2FormatDescriptor** constructors with bools for wide & tall VANC and 2Kx1080.
+  - **GetFormatDescriptor** global functions.
+  - `kRegAuxInterruptDelay` and `kRegReserved89` registers got redeployed as `kRegBitfileDate` and `kRegBitfileDate`, respectively.
+  - **Fill8BitYCbCrVideoFrame** and **Fill10BitYCbCrVideoFrame** utility functions.
+  - **CNTV2Card::GetVideoActiveSize** and **CNTV2Card::GetVideoWriteSize** utility functions that accept bools for wide & tall VANC.
+- **SDK 13.1:** `NTV2_DEPRECATE_13_1` macro defined in `ajatypes.h`.
+- **SDK 14.0:** `NTV2_DEPRECATE_14_0` macro defined in `ajatypes.h`. Deprecated APIs:
+  - **CNTV2Card**’s RP188 functions that use `RP188_STRUCT`s.
+  - Retired several mis-named **NTV2DeviceID**s.
+- **SDK 14.1:** `NTV2_DEPRECATE_14_1` macro defined in `ajatypes.h`.
+- **SDK 14.2:** `NTV2_DEPRECATE_14_2` macro defined in `ajatypes.h`. Deprecated APIs:
+  - **AJAAncillaryData::SetLocationVideoStream**
+  - The 3-parameter variant of **AJAAncillaryList::AddVANCData**.
+  - AJA CC library’s caption logging control flags.
+- **SDK 14.3:** `NTV2_DEPRECATE_14_3` macro defined in `ajatypes.h`. Deprecated APIs:
+  - The 4-parameter **CNTV2Card** constructor.
+  - The **CNTV2Card::GetFrameBufferSize** function that returns **NTV2FrameSize** via a pointer.
+  - Several **CNTV2Card GetHDMI**…/**SetHDMI**… member functions were replaced by **GetHDMIOut**…/**SetHDMIOut**… functions.
+  - Several **CNTV2Card GetAnc**…/**SetAnc**… member functions were replaced by **AncInsert**…/**AncExtract**… functions.
+  - Most **CNTV2Card** functions that returned data via a pointer-based parameter.
+  - The **NTV2DeviceType** data type.
+  - The **NTV2DeviceTypeString** debug function.
+  - The **NTV2DeviceCanDoFreezeOutput** device features function.
+  - The 4-parameter variants of **CNTV2DriverInterface::Open**, **CNTV2LinuxDriverInterface::Open**, **CNTV2MacDriverInterface::Open** and **CNTV2WinDriverInterface::Open**.
+  - The pointer-based variants of **CNTV2DriverInterface::ReadRegister**, **CNTV2LinuxDriverInterface::ReadRegister**
+  - The “un-numbered” **NTV2_XptHDMIIn**… output crosspoint IDs that were replaced by “numbered” ones (e.g. **NTV2_XptHDMIIn1**).
+  - The **AJATestPattern**… data types that were replaced by the **NTV2TestPattern**… ones.
+  - The `AJA_TestPattEx_`… enumerations that were replaced by the `NTV2_TestPatt_`… ones.
+- **SDK 15.0:** `NTV2_DEPRECATE_15_0` macro defined in `ajatypes.h`. Deprecated APIs:
+  - The entire **AJATestPatternGen** class that was replaced with **NTV2TestPatternGen**.
+  - **CNTV2Card::IsKonaIPDevice** was replaced with **CNTV2Card::IsIPDevice**.
+  - **NTV2TestPatternList** was replaced with **NTV2TestPatternNames**.
+  - **NTV2TestPatternGen::getTestPatternList** was replaced with **NTV2TestPatternGen::getTestPatternNames**.
+  - `kVRegLinuxDriverVersion` was replaced by `kVRegDriverVersion`.
+- **SDK 15.1:** `NTV2_DEPRECATE_15_1` macro defined in `ajatypes.h`. Deprecated APIs:
+  - `NTV2SDIInputFormatSelect`, `NTV2PauseModeType` and `NTV2PulldownPatternType` data types were removed.
+  - **CNTV2MacDriverInterface::SetOutputTimecodeOffset**, **CNTV2MacDriverInterface::GetOutputTimecodeOffset**, **CNTV2MacDriverInterface::SetOutputTimecodeType** and **CNTV2MacDriverInterface::GetOutputTimecodeType** functions were removed.
+- **SDK 15.2:** `NTV2_DEPRECATE_15_2` macro defined in `ajatypes.h`. Deprecated APIs:
+  - **AJAAncillaryDataLocation::Set** was removed.
+  - **AJAAncillaryDataLocation** instance data members were made private.
+  - **AJAAncillaryData::GetDataLocation** members having parameters were removed.
+  - **AJAAncillaryData::GetLocationVideoStream** was replaced by **AJAAncillaryData::GetLocationDataChannel**.
+  - The multi-parameter variant of **AJAAncillaryData::SetDataLocation** was removed.
+  - **AJAAncillaryData::SetLocationVideoSpace**
+  - **AJAAncillaryList::SetFromSDIAncData** and **AJAAncillaryList::SetFromIPAncData** were deprecated in favor of the generic **AJAAncillaryList::SetFromDeviceAncBuffers**.
+  - The `UByte*` versions of **CNTV2Card::DMAReadAnc** and **CNTV2Card::DMAWriteAnc**.
+  - **CNTV2Card::GetQuadFrameEnable** and **CNTV2Card::GetQuadQuadFrameEnable**.
+  - The `RP188_STRUCT`-based variants of **CNTV2Card**’s **Get**/**SetRP188Data** and **Get**/**SetRP188Source**.
+  - The `RP188SourceSelect` type definition was deprecated in favor of the more meaningful `RP188SourceFilterSelect`.
+- **SDK 15.5:** `NTV2_DEPRECATE_15_3` and `NTV2_DEPRECATE_15_5` macros defined in `ajatypes.h`. Deprecated APIs:
+  - **AJARTPAncPayloadHeader::GetPacketLength** was deprecated.
+  - An overloaded version of **AJAAncillaryList::GetIPTransmitData** was deprecated.
+  - An overloaded version of **AJAAncillaryList::GetIPTransmitDataLength** was deprecated.
+  - The original Audio Mixer API in **CNTV2Card** was deprecated and replaced with a new, improved API.
+- **SDK 16.0:** Defined macros `NTV2_DEPRECATE_15_6` and `NTV2_DEPRECATE_16_0` in `ajatypes.h`. As-shipped, all `NTV2_DEPRECATE_` macros preceding SDK 15.0 are defined in SDK 16.0 (making all symbols they deprecate unavailable). Here are the functions that have newly been marked for deprecation in SDK 16.0:
+  - In **CNTV2Card**:
+    - Deprecated the original SDI Relay APIs: **CNTV2Card::GetSDIRelayPosition12**, **CNTV2Card::GetSDIRelayPosition34**, **CNTV2Card::GetSDIRelayManualControl12**, **CNTV2Card::GetSDIRelayManualControl34**, **CNTV2Card::GetSDIWatchdogEnable12**, **CNTV2Card::GetSDIWatchdogEnable34**, **CNTV2Card::SetSDIRelayManualControl12**, **CNTV2Card::SetSDIRelayManualControl34**, **CNTV2Card::SetSDIWatchdogEnable12**, **CNTV2Card::SetSDIWatchdogEnable34**, **CNTV2Card::GetSDIWatchdogState**, and **CNTV2Card::SetSDIWatchdogState**. These have all been replaced with a new, much cleaner API.
+    - Deprecated these Audio API functions: **CNTV2Card::WriteAudioSource**, **CNTV2Card::ReadAudioSource**, **CNTV2Card::SetAudioOutputReset**, **CNTV2Card::GetAudioOutputReset**, **CNTV2Card::SetAudioInputReset**, and **CNTV2Card::GetAudioInputReset**
+    - Deprecated **CNTV2Card::GetBaseAddress**, **CNTV2Card::GetBaseAddress**, **CNTV2Card::GetRegisterBaseAddress**, and **CNTV2Card::GetXena2FlashBaseAddress**
+    - Deprecated **CNTV2Card::SetRegisterWritemode** and **CNTV2Card::GetRegisterWritemode**
+  - In **CNTV2DriverInterface**:
+    - Deprecated **CNTV2DriverInterface::LockFormat**, **CNTV2DriverInterface::StartDriver**, **CNTV2DriverInterface::SetUserModeDebugLevel**, **CNTV2DriverInterface::GetUserModeDebugLevel**, **CNTV2DriverInterface::SetKernelModeDebugLevel**, **CNTV2DriverInterface::GetKernelModeDebugLevel**, **CNTV2DriverInterface::SetUserModePingLevel**, **CNTV2DriverInterface::GetUserModePingLevel**, **CNTV2DriverInterface::SetKernelModePingLevel**, **CNTV2DriverInterface::GetKernelModePingLevel**, **CNTV2DriverInterface::SetLatencyTimerValue**, **CNTV2DriverInterface::GetLatencyTimerValue**, **CNTV2DriverInterface::SetDebugFilterStrings**, and **CNTV2DriverInterface::GetDebugFilterStrings**
+    - Deprecated **CNTV2DriverInterface::SuspendAudio**, **CNTV2DriverInterface::ResumeAudio**, **CNTV2DriverInterface::MapFrameBuffers**, **CNTV2DriverInterface::UnmapFrameBuffers**, **CNTV2DriverInterface::MapRegisters**, **CNTV2DriverInterface::UnmapRegisters**, **CNTV2DriverInterface::MapXena2Flash**, **CNTV2DriverInterface::UnmapXena2Flash**, **CNTV2DriverInterface::DmaUnlock**, **CNTV2DriverInterface::CompleteMemoryForDMA**, **CNTV2DriverInterface::PrepareMemoryForDMA**, **CNTV2DriverInterface::GetInterruptCount**, **CNTV2DriverInterface::ReadRegisterMulti**, **CNTV2DriverInterface::GetPCISlotNumber**, **CNTV2DriverInterface::SleepMs**, and **CNTV2DriverInterface::GetAudioFrameBufferNumber**
+  - In **CNTV2MacDriverInterface**:
+    - Deprecated **CNTV2MacDriverInterface::SetUserModeDebugLevel**, **CNTV2MacDriverInterface::GetUserModeDebugLevel**, **CNTV2MacDriverInterface::SetKernelModeDebugLevel**, **CNTV2MacDriverInterface::GetKernelModeDebugLevel**, **CNTV2MacDriverInterface::SetUserModePingLevel**, **CNTV2MacDriverInterface::GetUserModePingLevel**, **CNTV2MacDriverInterface::SetKernelModePingLevel**, **CNTV2MacDriverInterface::GetKernelModePingLevel**, **CNTV2MacDriverInterface::SetLatencyTimerValue**, **CNTV2MacDriverInterface::GetLatencyTimerValue**, **CNTV2MacDriverInterface::SetDebugFilterStrings**, **CNTV2MacDriverInterface::GetDebugFilterStrings**, **CNTV2MacDriverInterface::LockFormat**, and **CNTV2MacDriverInterface::GetQuickTimeTime**
+    - Deprecated **CNTV2MacDriverInterface::GetStreamingApplication**, **CNTV2MacDriverInterface::SystemControl**, **CNTV2MacDriverInterface::Sleep**, **CNTV2MacDriverInterface::MapFrameBuffers**, **CNTV2MacDriverInterface::UnmapFrameBuffers**, **CNTV2MacDriverInterface::MapRegisters**, **CNTV2MacDriverInterface::UnmapRegisters**, **CNTV2MacDriverInterface::MapXena2Flash**, **CNTV2MacDriverInterface::UnmapXena2Flash**, **CNTV2MacDriverInterface::GetPCISlotNumber**, and **CNTV2MacDriverInterface::MapMemory**
+  - In **CNTV2WinDriverInterface**:
+    - Deprecated **CNTV2WinDriverInterface::SetStrictTiming**, **CNTV2WinDriverInterface::GetStrictTiming**, **CNTV2WinDriverInterface::GetStreamingApplication**, and **CNTV2WinDriverInterface::GetStreamingApplication**
+    - Deprecated **CNTV2WinDriverInterface::MapFrameBuffers**, **CNTV2WinDriverInterface::UnmapFrameBuffers**, **CNTV2WinDriverInterface::MapRegisters**, **CNTV2WinDriverInterface::UnmapRegisters**, **CNTV2WinDriverInterface::MapXena2Flash**, **CNTV2WinDriverInterface::UnmapXena2Flash**, **CNTV2WinDriverInterface::MapMemory**, **CNTV2WinDriverInterface::DmaUnlock**, **CNTV2WinDriverInterface::CompleteMemoryForDMA**, and **CNTV2WinDriverInterface::PrepareMemoryForDMA**
+  - In **CNTV2LinuxDriverInterface**:
+    - Deprecated **CNTV2LinuxDriverInterface::GetStreamingApplication**, **CNTV2LinuxDriverInterface::GetStreamingApplication**, **CNTV2LinuxDriverInterface::MapFrameBuffers**, **CNTV2LinuxDriverInterface::UnmapFrameBuffers**, **CNTV2LinuxDriverInterface::MapRegisters**, **CNTV2LinuxDriverInterface::UnmapRegisters**, **CNTV2LinuxDriverInterface::GetBA0MemorySize**, **CNTV2LinuxDriverInterface::GetBA1MemorySize**, **CNTV2LinuxDriverInterface::GetBA2MemorySize**, **CNTV2LinuxDriverInterface::GetBA4MemorySize**, **CNTV2LinuxDriverInterface::MapXena2Flash**, **CNTV2LinuxDriverInterface::UnmapXena2Flash**, **MapDNXRegisters**, and **UnmapDNXRegisters** have all been deprecated.
+    - Deprecated **NTV2DeviceCanConnect**
+  - In **CNTV2CaptionDecoder608**:
+    - Deprecated an overloaded version of **CNTV2CaptionDecoder608::BurnCaptions**
+  - In **NTV2TestPatternGen**:
+    - Deprecated an overloaded version of **NTV2TestPatternGen::DrawTestPattern**
+  - In **CNTV2CaptionRenderer**:
+    - Deprecated these overloaded functions: **CNTV2CaptionRenderer::GetRenderer**, **CNTV2CaptionRenderer::BurnChar**, **CNTV2CaptionRenderer::BurnString**, **CNTV2CaptionRenderer::BurnStringAtXY**
+- **SDK 16.1:** Defined macro `NTV2_DEPRECATE_16_1` in `ajatypes.h`. Here are the functions that have newly been marked for deprecation in SDK 16.1:
+  - In **CNTV2Card**:
+    - Deprecated **CNTV2Card::WriteAudioLastOut**, **CNTV2Card::ReadAudioLastOut**, and **CNTV2Card::ReadAudioLastIn** functions that accept an `NTV2Channel` value, replacing them with identical functions that accept an `NTV2AudioSystem`.
+    - Deprecated **CNTV2Card::SetAudioOutputMonitorSource** and **CNTV2Card::GetAudioOutputMonitorSource** functions that accept the deprecated `NTV2AudioMonitorSelect` and `NTV2Channel` values, replacing them with identical functions that accept `NTV2AudioChannelPair` and `NTV2AudioSystem` values.
+    - Deprecated **CNTV2Card::SetAnalogAudioIOConfiguration**, **CNTV2Card::GetAnalogAudioIOConfiguration** functions, replacing them with **CNTV2Card::SetAnalogAudioTransmitEnable** and **CNTV2Card::GetAnalogAudioTransmitEnable**, respectively.
+    - Deprecated obsolete **CNTV2Card::GetSecondConverterOutStandard**, **CNTV2Card::SetSecondConverterOutStandard**, **CNTV2Card::GetSecondDownConvert**, and **CNTV2Card::GetSecondDownConvert** functions.
+  - Deprecated `NTV2AnalogAudioIO` and `NTV2AudioMonitorSelect` enum types.
+  - Deprecated `NTV2_AudioMonitor1_2` thru `NTV2_AudioMonitor15_16` in favor of `NTV2_AudioChannel1_2` thru `NTV2_AudioChannel17_18`.
+  - Deprecated **NTV2AudioMonitorSelectToString** utility.
+- **SDK 16.2:** Defined macro `NTV2_DEPRECATE_16_2` in `ajatypes.h`. Here are the functions that have newly been marked for deprecation in SDK 16.2:
+  - In **CNTV2Card**:
+    - Deprecated obsolete functions **CNTV2Card::GetActiveFrameDimensions** and **CNTV2Card::GetNumberActiveLines**.
+    - Deprecated obsolete functions **CNTV2Card::SetPCIAccessFrame**, **CNTV2Card::GetPCIAccessFrame** and **CNTV2Card::FlipFlopPage**.
+    - Member functions **CNTV2Card::GetBaseAddress**, **CNTV2Card::GetRegisterBaseAddress** and **CNTV2Card::GetXena2FlashBaseAddress** first deprecated in SDK 16.0 now produce compile-time warnings when used.
+    - Two overloaded member functions **NTV2TestPatternGen::DrawTestPattern** first deprecated in SDK 16.0 now produce compile-time warnings when used.
+  - In **libajacc** Closed-Caption Library, the deprecated **CNTV2CaptionRenderer** member functions (**GetRenderer**, **BurnChar**, **BurnString**, **BurnStringAtXY**) first deprecated in SDK 16.0 now produce compile-time warnings when used.
+
+To build the **ajantv2** library to include a deprecated API, comment out or remove its corresponding `#define NTV2_DEPRECATE`… line in `ajatypes.h`, then rebuild the library.
