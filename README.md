@@ -14,7 +14,8 @@ This is the open-source SDK for discovering, interrogating and controlling NTV2 
 1. [Building libajantv2](#building)
 1. [Building the Kernel Module Driver (Linux)](#building-kernel-module)
 1. [Verifying the Kernel Module Driver (Linux)](#verifying-kernel-module)
-1. [Customizing NTV2](#customizing-ntv2)
+1. [Customizing libajantv2](#customizing-ntv2)
+1. [SDK Forward & Backward Compatibility](#fwdbackcompatibility)
 
 ## Directory Layout
 The **libajantv2** folder contains the following items:
@@ -382,3 +383,45 @@ This means that if the `NTV2_DEPRECATE` macro is undefined, then existing code t
   - In **libajacc** Closed-Caption Library, the deprecated **CNTV2CaptionRenderer** member functions (**GetRenderer**, **BurnChar**, **BurnString**, **BurnStringAtXY**) first deprecated in SDK 16.0 now produce compile-time warnings when used.
 
 To build the **ajantv2** library to include a deprecated API, comment out or remove its corresponding `#define NTV2_DEPRECATE`… line in `ajatypes.h`, then rebuild the library.
+
+**Note:**
+It’s best to undefine macros from oldest-to-newest SDKs in contiguous blocks or unexpected results may occur. For example, do this:
+```
+    #define NTV2_DEPRECATE
+    #define NTV2_DEPRECATE_15_5
+    //#define NTV2_DEPRECATE_15_6
+    //#define NTV2_DEPRECATE_15_7
+```
+… and not this:
+```
+    #define NTV2_DEPRECATE
+    //#define NTV2_DEPRECATE_15_5
+    //#define NTV2_DEPRECATE_15_6
+    #define NTV2_DEPRECATE_15_7
+```
+AJA may jettison all deprecated symbols and APIs in a future SDK. Please prepare for this by porting your code to the latest SDK. AJA developer partners are encouraged to use the **NTV2 SDK Porting Guide**, available at **sdksupport.aja.com**.
+
+### Conditional Compilation Based on NTV2 SDK Version
+
+The NTV2 SDK contains its version information as symbols defined in `ajaversion.h` (located inside `libajantv2/ajantv2/includes`). It defines the following symbols:
+- `AJA_NTV2_SDK_VERSION_MAJOR` The SDK’s major version number (an unsigned numeric constant).
+- `AJA_NTV2_SDK_VERSION_MINOR` The SDK’s minor version number (an unsigned numeric constant).
+- `AJA_NTV2_SDK_VERSION_POINT` The SDK’s “point” version number (an unsigned numeric constant).
+- `AJA_NTV2_SDK_BUILD_NUMBER` The SDK build number (an unsigned numeric constant).
+- `AJA_NTV2_SDK_BUILD_DATETIME` The date and time the SDK was built, a string literal of the form `MM/DD/YYYY +/-Z:hh:mm:ss`, where `MM` is the 2-digit month (01 thru 12), `DD` is the 2-digit day number, `YYYY` is the 4-digit year, `+/-Z` is the number of hours relative to UTC, `hh` is the 2-digit hour (0 thru 23), `mm` is the number of minutes past the hour (0 thru 59), and `ss` is the number of seconds past the minute (0 thru 59).
+- `AJA_NTV2_SDK_BUILD_TYPE` The SDK build type, a string literal containing a single character, where `d` means “development”, `a` means “alpha”, `b` means “beta” and the empty string means “release”.
+- `AJA_NTV2_SDK_VERSION` An unsigned integer value built from the SDK version components that can be reliably compared with other version integer values. There’s also a convenient macro for testing which SDK version is being used at compile-time:
+  - `AJA_NTV2_SDK_VERSION_AT_LEAST(major, minor)` Yields “true” if the major and minor version numbers of the current SDK being compiled are at least (greater than or equal to) the specified major and minor values, respectively. To use this macro, call it with the minimum version of the required SDK: 
+```
+#if AJA_NTV2_SDK_VERSION_AT_LEAST (16, 2)
+  . . .
+#endif   //  if NTV2 SDK version >= 12.0
+```
+### Backward Compatibility
+AJA always recommends that NTV2-based applications be built from the same SDK version as the installed driver they will be using.
+
+> **Warning:** While AJA always tries to maintain backward compatibility between newer SDKs and older drivers, AJA cannot guarantee correct operation of applications built from an older SDK running on a newer version driver, nor applications built from a newer SDK running on an older version driver.
+
+### Firmware and Device Features
+
+For a given SDK release, the **CanDo**_XXXX_, **GetNum**_XXXX_, etc. Device Features API responses should be correct for all supported devices running the latest firmware available on or after the SDK release date. AJA will do its best to document any exceptions on the SDK’s download page and/or the device firmware page in the Knowledgebase.
