@@ -1199,6 +1199,9 @@ bool NTV2Kona1::NTV2WriteRegisterRemote (const ULWord inRegNum, const ULWord inR
 		case kRegVidProc1Control:			regNum = gIndexToVidProcControlRegNum[KonaToCardMixer(NTV2_CHANNEL1)];		break;
 		case kRegMixer1Coefficient:			regNum = gIndexToVidProcMixCoeffRegNum[KonaToCardMixer(NTV2_CHANNEL1)];		break;
 		case kRegFlatMatteValue:			regNum = gIndexToVidProcFlatMatteRegNum[KonaToCardMixer(NTV2_CHANNEL1)];	break;
+
+		case kRegCh1Control:				regNum = gChannelToControlRegNum[mChannel];		break;
+		case kRegCh2Control:				regNum = gChannelToControlRegNum[mChannel+1];	break;
 		default:	break;
 	}
 	return mCard.WriteRegister(regNum, inRegVal, regMask, regShift);
@@ -1237,9 +1240,14 @@ bool NTV2Kona1::NTV2DMATransferRemote (const NTV2DMAEngine inDMAEngine,		const b
 		cardOffsetBytes -= frameNum * 0x800000;
 	}
 	if (!cardOffsetBytes)
-		return mCard.DMAReadFrame (frameNum, inOutBuffer, inOutBuffer.GetByteCount());
-	else
-		return mCard.DmaTransfer (inDMAEngine, inRead, frameNum, inOutBuffer, cardOffsetBytes,
+	{
+		if (inRead)
+			return mCard.DMAReadFrame (frameNum, inOutBuffer, inOutBuffer.GetByteCount());
+		else
+			return mCard.DMAWriteFrame (frameNum, inOutBuffer, inOutBuffer.GetByteCount());
+	}
+//cout << "KON: " << inOutBuffer.AsString(128) << endl;
+	return mCard.DmaTransfer (inDMAEngine, inRead, frameNum, inOutBuffer, cardOffsetBytes,
 								inNumSegments, inSegmentHostPitch, inSegmentCardPitch, inSync);
 }
 
