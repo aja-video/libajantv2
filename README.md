@@ -16,6 +16,8 @@ This is the open-source SDK for discovering, interrogating and controlling NTV2 
 1. [Verifying the Kernel Module Driver (Linux)](#verifying-kernel-module)
 1. [Customizing libajantv2](#customizing-ntv2)
 1. [SDK Forward & Backward Compatibility](#fwdbackcompatibility)
+1. [Driver Compatibility](#drivercompat)
+1. [Firmware and Device Features](#fwdevicefeatures)
 
 ## Directory Layout
 The **libajantv2** folder contains the following items:
@@ -417,11 +419,11 @@ The NTV2 SDK contains its version information as symbols defined in `ajaversion.
   . . .
 #endif   //  if NTV2 SDK version >= 12.0
 ```
-### Backward Compatibility
-AJA always recommends that NTV2-based applications be built from the same SDK version as the installed driver they will be using.
+## Driver Compatibility <a name="drivercompat"></a>
+AJA always recommends that NTV2-based applications be built from the same SDK version as the installed driver that will be used.
 
 > **Warning:** While AJA always tries to maintain backward compatibility between newer SDKs and older drivers, AJA cannot guarantee correct operation of applications built from an older SDK running on a newer version driver, nor applications built from a newer SDK running on an older version driver.
 
-### Firmware and Device Features
+## Firmware and Device Features <a name="fwdevicefeatures"></a>
 
 For a given SDK release, the **CanDo**_XXXX_, **GetNum**_XXXX_, etc. Device Features API responses should be correct for all supported devices running the latest firmware available on or after the SDK release date. AJA will do its best to document any exceptions on the SDK’s download page and/or the device firmware page in the Knowledgebase.
