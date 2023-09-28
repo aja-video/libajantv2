@@ -3103,8 +3103,11 @@ static int dmaPageLock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer,
 #else
 		write? FOLL_WRITE : 0,
 #endif
-		pBuffer->pPageList,
-		NULL);
+		pBuffer->pPageList
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(6,5,0))
+		,NULL
+#endif
+		);
 	
 	// release the map semaphore
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,8,0))
