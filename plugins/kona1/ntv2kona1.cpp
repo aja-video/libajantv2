@@ -178,6 +178,8 @@ class NTV2Kona1 : public NTV2RPCAPI
 		virtual NTV2Channel			CardToKonaMixer (const NTV2Channel ch) const;
 		virtual NTV2AudioSystem		KonaToCardAudSys (const NTV2AudioSystem ch) const;
 		virtual NTV2AudioSystem		CardToKonaAudSys (const NTV2AudioSystem ch) const;
+		virtual bool				HasCardAudSys (const NTV2AudioSystem ch) const;
+		virtual bool				HasKonaAudSys (const NTV2AudioSystem ch) const;
 		virtual NTV2InputXptID		Kona1ToCardInputXpt (const NTV2InputXptID inKona1InputXpt) const;
 		virtual NTV2InputXptID		CardToKona1InputXpt (const NTV2InputXptID inCardInputXpt) const;
 		virtual NTV2OutputXptID		Kona1ToCardOutputXpt (const NTV2OutputXptID inKona1OutputXpt) const;
@@ -376,7 +378,7 @@ static const ULWord gChannelToSDIInputProgressiveShift []	= { kRegShiftInput1Pro
 //													NTV2_AUDIOSYSTEM_1		NTV2_AUDIOSYSTEM_2		NTV2_AUDIOSYSTEM_3		NTV2_AUDIOSYSTEM_4
 static const ULWord		sAudioDetectRegs []		= { kRegAud1Detect,			kRegAud1Detect,			kRegAudDetect2,			kRegAudDetect2,
 //													NTV2_AUDIOSYSTEM_5		NTV2_AUDIOSYSTEM_6		NTV2_AUDIOSYSTEM_7		NTV2_AUDIOSYSTEM_8
-													kRegAudioDetect5678,	kRegAudioDetect5678,	kRegAudioDetect5678,	kRegAudioDetect5678 };
+													kRegAudioDetect5678,	kRegAudioDetect5678,	kRegAudioDetect5678,	kRegAudioDetect5678, 0 };
 
 //static const ULWord sSignalRouterRegMasks[]		=	{	0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000	};
 //static const ULWord sSignalRouterRegShifts[]	=	{			 0,			 8,			16,			24	};
@@ -807,13 +809,22 @@ NTV2Channel NTV2Kona1::CardToKonaMixer (const NTV2Channel ch) const
 NTV2AudioSystem NTV2Kona1::KonaToCardAudSys (const NTV2AudioSystem aud) const
 {
 	AudSysMapCIter it(mKonaToCardAudSys.find(aud));
-	return it != mKonaToCardAudSys.end() ? it->second : NTV2_AUDIOSYSTEM_INVALID;
+	return it != mKonaToCardAudSys.end() ? it->second : NTV2_AUDIOSYSTEM_1;
 }
 NTV2AudioSystem NTV2Kona1::CardToKonaAudSys (const NTV2AudioSystem aud) const
 {
 	AudSysMapCIter it(mCardToKonaAudSys.find(aud));
-	return it != mCardToKonaAudSys.end() ? it->second : NTV2_AUDIOSYSTEM_INVALID;
+	return it != mCardToKonaAudSys.end() ? it->second : NTV2_AUDIOSYSTEM_1;
 }
+bool NTV2Kona1::HasCardAudSys (const NTV2AudioSystem aud) const
+{
+	return mCardToKonaAudSys.find(aud) != mCardToKonaAudSys.end();
+}
+bool NTV2Kona1::HasKonaAudSys (const NTV2AudioSystem aud) const
+{
+	return mKonaToCardAudSys.find(aud) != mKonaToCardAudSys.end();
+}
+
 
 NTV2InputXptID NTV2Kona1::Kona1ToCardInputXpt (const NTV2InputXptID inKona1InputXpt) const
 {	//	Map Kona1 input xpt to mCard's input xpt
@@ -1096,40 +1107,124 @@ bool NTV2Kona1::HandleReadChannelControl (const ULWord regNum, ULWord & outValue
 	return true;
 }
 
-bool NTV2Kona1::NTV2ReadRegisterRemote (const ULWord inRegNum, ULWord & outRegValue, const ULWord inRegMask, const ULWord inRegShift)
+static const ULWord kRegMaskPCMCtrlA1(kRegMaskPCMControlA1P1_2|kRegMaskPCMControlA1P3_4|kRegMaskPCMControlA1P5_6|kRegMaskPCMControlA1P7_8|kRegMaskPCMControlA1P9_10|kRegMaskPCMControlA1P11_12|kRegMaskPCMControlA1P13_14|kRegMaskPCMControlA1P15_16);
+static const ULWord kRegMaskPCMCtrlA2(kRegMaskPCMControlA2P1_2|kRegMaskPCMControlA2P3_4|kRegMaskPCMControlA2P5_6|kRegMaskPCMControlA2P7_8|kRegMaskPCMControlA2P9_10|kRegMaskPCMControlA2P11_12|kRegMaskPCMControlA2P13_14|kRegMaskPCMControlA2P15_16);
+
+bool NTV2Kona1::NTV2ReadRegisterRemote (const ULWord inRegNum, ULWord & outValue, const ULWord inRegMask, const ULWord inRegShift)
 {	//	Translate Kona1 register reads into underlying device's register reads...
 	ULWord regNum(inRegNum), regMask(inRegMask), regShift(inRegShift);
 	if (isMyAncExtRegister(regNum))
-		return HandleReadAncExt (regNum, outRegValue, regMask, regShift);	//	Handle my anc ext regs
+		return HandleReadAncExt (regNum, outValue, regMask, regShift);	//	Handle my anc ext regs
 	if (isMyAncInsRegister(regNum))
-		return HandleReadAncIns (regNum, outRegValue, regMask, regShift);	//	Handle my anc ins regs
+		return HandleReadAncIns (regNum, outValue, regMask, regShift);	//	Handle my anc ins regs
 	if (isMyXptSelectRegister(regNum))
-		return HandleReadXptSelectReg (inRegNum, outRegValue, inRegMask, inRegShift);	//	Handle my routing regs
+		return HandleReadXptSelectReg (inRegNum, outValue, inRegMask, inRegShift);	//	Handle my routing regs
 	switch (regNum)
 	{
 		case kRegBoardID:
-			outRegValue = mSimDeviceID & inRegMask;
+			outValue = mSimDeviceID & inRegMask;
 			if (inRegShift  &&  inRegShift < 31)
-				outRegValue >>= inRegShift;
+				outValue >>= inRegShift;
 			return true;
 
-		case kRegAud1Control:				regNum = gAudioSystemToAudioControlRegNum[mChannel];	break;
-		case kRegAud1SourceSelect:			regNum = gAudioSystemToSrcSelectRegNum[mChannel];		break;
-		case kRegAud1OutputLastAddr:		regNum = gChannelToAudioOutLastAddrRegNum[mChannel];	break;
-		case kRegAud1InputLastAddr:			regNum = gChannelToAudioInLastAddrRegNum[mChannel];		break;
-		case kRegAud1Delay:					regNum = gAudioDelayRegisterNumbers[mChannel];			break;
-		case kRegAud1Detect:				regNum = sAudioDetectRegs[mChannel];					break;
-		case kRegAud2Control:				regNum = gAudioSystemToAudioControlRegNum[mChannel+1];	break;
-		case kRegAud2SourceSelect:			regNum = gAudioSystemToSrcSelectRegNum[mChannel+1];		break;
-		case kRegAud2OutputLastAddr:		regNum = gChannelToAudioOutLastAddrRegNum[mChannel+1];	break;
-		case kRegAud2InputLastAddr:			regNum = gChannelToAudioInLastAddrRegNum[mChannel+1];	break;
-		case kRegAud2Delay:					regNum = gAudioDelayRegisterNumbers[mChannel+1];		break;
-		case kRegAudDetect2:				regNum = sAudioDetectRegs[mChannel+1];					break;
+		case kRegAud1Control:			regNum = gAudioSystemToAudioControlRegNum[KonaToCardAudSys(NTV2_AUDIOSYSTEM_1)];	break;
+		case kRegAud1SourceSelect:		regNum = gAudioSystemToSrcSelectRegNum[KonaToCardAudSys(NTV2_AUDIOSYSTEM_1)];		break;
+		case kRegAud1OutputLastAddr:	regNum = gChannelToAudioOutLastAddrRegNum[KonaToCardAudSys(NTV2_AUDIOSYSTEM_1)];	break;
+		case kRegAud1InputLastAddr:		regNum = gChannelToAudioInLastAddrRegNum[KonaToCardAudSys(NTV2_AUDIOSYSTEM_1)];		break;
+		case kRegAud1Delay:				regNum = gAudioDelayRegisterNumbers[KonaToCardAudSys(NTV2_AUDIOSYSTEM_1)];			break;
+		case kRegAud1Detect:			regNum = sAudioDetectRegs[KonaToCardAudSys(NTV2_AUDIOSYSTEM_1)];					break;
+		case kRegAud2Control:			regNum = gAudioSystemToAudioControlRegNum[KonaToCardAudSys(NTV2_AUDIOSYSTEM_2)];	break;
+		case kRegAud2SourceSelect:		regNum = gAudioSystemToSrcSelectRegNum[KonaToCardAudSys(NTV2_AUDIOSYSTEM_2)];		break;
+		case kRegAud2OutputLastAddr:	regNum = gChannelToAudioOutLastAddrRegNum[KonaToCardAudSys(NTV2_AUDIOSYSTEM_2)];	break;
+		case kRegAud2InputLastAddr:		regNum = gChannelToAudioInLastAddrRegNum[KonaToCardAudSys(NTV2_AUDIOSYSTEM_2)];		break;
+		case kRegAud2Delay:				regNum = gAudioDelayRegisterNumbers[KonaToCardAudSys(NTV2_AUDIOSYSTEM_2)];			break;
+		case kRegAudDetect2:			regNum = sAudioDetectRegs[KonaToCardAudSys(NTV2_AUDIOSYSTEM_2)];					break;
+
+		case kRegPCMControl4321:
+		{	NTV2AudioSystem cardAudSys(KonaToCardAudSys(NTV2_AUDIOSYSTEM_1));
+			//	Mask & Shift for AudSys1 is mapped to KonaToCardAudSys
+			if (cardAudSys == NTV2_AUDIOSYSTEM_1)
+				return mCard.ReadRegister(regNum, outValue, regMask, regShift);	//	No mapping necessary
+			if (cardAudSys > NTV2_AUDIOSYSTEM_4)
+			{
+				regNum = kRegPCMControl8765;
+				cardAudSys = NTV2AudioSystem(cardAudSys - 4);
+			}
+			//	Read raw reg value...
+			if (!mCard.ReadRegister(regNum, outValue))
+				return false;
+			if (regMask & kRegMaskPCMCtrlA1)
+			{	//	AudSys1 request
+				ULWord value(outValue);
+				value &= 0x000000FF << (cardAudSys * 8);
+				value >>= (cardAudSys - NTV2_AUDIOSYSTEM_1) * 8;
+				outValue &= 0xFFFFFF00;	//	clear Ch1 bits
+				outValue |= value;		//	set Ch1 bits
+			}
+			if (regMask & kRegMaskPCMCtrlA2)
+			{	//	AudSys2 request
+				cardAudSys = NTV2AudioSystem(cardAudSys + 1);
+				ULWord value(outValue);
+				value &= 0x000000FF << (cardAudSys * 8);
+				value >>= (cardAudSys - NTV2_AUDIOSYSTEM_2) * 8;
+				outValue &= 0xFFFF00FF;	//	clear Ch2 bits
+				outValue |= value;		//	set Ch2 bits
+			}
+			outValue &= inRegMask;
+			if (inRegShift  &&  inRegShift < 31)
+				outValue >>= inRegShift;
+			return true;
+		}
+
 		case kRegGlobalControl:
-		case kRegGlobalControl2:			return HandleReadGlobalControl(regNum, outRegValue, regMask, regShift);
-		case kRegSDIOut1Control:			regNum = gChannelToSDIOutControlRegNum[mChannel];		break;
+		case kRegGlobalControl2:		return HandleReadGlobalControl(regNum, outValue, regMask, regShift);
+
 		case kRegCh1Control:
-		case kRegCh2Control:				return HandleReadChannelControl (regNum, outRegValue, regMask, regShift);
+		case kRegCh2Control:			return HandleReadChannelControl (regNum, outValue, regMask, regShift);
+
+		case kRegSDIOut1Control:
+		regNum = gChannelToSDIOutControlRegNum[mChannel+1];
+		if (inRegMask & (BIT(18)|BIT(19)|BIT(28)|BIT(29)|BIT(30)|BIT(31)))	//	Any audio system bits set?
+		{
+			//	Bits 18|28|30 have DS1 AudioSystem;	Bits 19|29|31 have DS2 AudioSystem
+			//	Have to translate the AudioSystem values:
+			if (!mCard.ReadRegister(regNum, outValue))
+				return false;
+			NTV2AudioSystem cardAudSys(NTV2_AUDIOSYSTEM_INVALID), konaAudSys(NTV2_AUDIOSYSTEM_INVALID);
+			ULWord newBits(0);
+			//	DS1 audio system:
+			cardAudSys = NTV2AudioSystem( (outValue & BIT(18) ? 4 : 0)
+										+ (outValue & BIT(28) ? 2 : 0)
+										+ (outValue & BIT(30) ? 1 : 0));
+			if (HasCardAudSys(cardAudSys))
+			{
+				konaAudSys = CardToKonaAudSys(cardAudSys);
+				outValue &= 0xFFFFFFFF - BIT(30) - BIT(28) - BIT(18);	//	Clear those bits
+				newBits = (konaAudSys & 4 ? BIT(18) : 0)
+							| (konaAudSys & 2 ? BIT(28) : 0)
+							| (konaAudSys & 1 ? BIT(30) : 0);
+				outValue |= newBits;	//	Set those bits
+			}
+			//	DS2 audio system:
+			cardAudSys = NTV2AudioSystem( (outValue & BIT(19) ? 4 : 0)
+										+ (outValue & BIT(29) ? 2 : 0)
+										+ (outValue & BIT(31) ? 1 : 0));
+			if (HasCardAudSys(cardAudSys))
+			{
+				konaAudSys = CardToKonaAudSys(cardAudSys);
+				outValue &= 0xFFFFFFFF - BIT(31) - BIT(29) - BIT(19);	//	Clear those bits
+				newBits = (konaAudSys & 4 ? BIT(19) : 0)
+							| (konaAudSys & 2 ? BIT(29) : 0)
+							| (konaAudSys & 1 ? BIT(31) : 0);
+				outValue |= newBits;	//	Set those bits
+			}
+			outValue &= inRegMask;
+			if (inRegShift  &&  inRegShift < 31)
+				outValue >>= inRegShift;
+			return true;
+		}
+		break;
+		
 		case kRegCh1OutputFrame:			regNum = gChannelToOutputFrameRegNum[mChannel];			break;
 		case kRegCh2OutputFrame:			regNum = gChannelToOutputFrameRegNum[mChannel+1];		break;
 		case kRegCh1InputFrame:				regNum = gChannelToInputFrameRegNum[mChannel];			break;
@@ -1171,7 +1266,7 @@ bool NTV2Kona1::NTV2ReadRegisterRemote (const ULWord inRegNum, ULWord & outRegVa
 											break;
 		default:	break;
 	}
-	return mCard.ReadRegister(regNum, outRegValue, regMask, regShift);
+	return mCard.ReadRegister(regNum, outValue, regMask, regShift);
 }	//	NTV2ReadRegisterRemote
 
 bool NTV2Kona1::NTV2WriteRegisterRemote (const ULWord inRegNum, const ULWord inRegVal, const ULWord inRegMask, const ULWord inRegShift)
@@ -1185,23 +1280,112 @@ bool NTV2Kona1::NTV2WriteRegisterRemote (const ULWord inRegNum, const ULWord inR
 	ULWord regNum(inRegNum), regMask(inRegMask), regShift(inRegShift);
 	switch (regNum)
 	{
-		case kRegAud1Control:				regNum = gAudioSystemToAudioControlRegNum[mChannel];	break;
-		case kRegAud1SourceSelect:			regNum = gAudioSystemToSrcSelectRegNum[mChannel];		break;
-		case kRegAud1OutputLastAddr:		regNum = gChannelToAudioOutLastAddrRegNum[mChannel];	break;
-		case kRegAud1InputLastAddr:			regNum = gChannelToAudioInLastAddrRegNum[mChannel];		break;
-		case kRegAud1Delay:					regNum = gAudioDelayRegisterNumbers[mChannel];			break;
-		case kRegAud2Control:				regNum = gAudioSystemToAudioControlRegNum[mChannel+1];	break;
-		case kRegAud2SourceSelect:			regNum = gAudioSystemToSrcSelectRegNum[mChannel+1];		break;
-		case kRegAud2OutputLastAddr:		regNum = gChannelToAudioOutLastAddrRegNum[mChannel+1];	break;
-		case kRegAud2InputLastAddr:			regNum = gChannelToAudioInLastAddrRegNum[mChannel+1];	break;
-		case kRegAud2Delay:					regNum = gAudioDelayRegisterNumbers[mChannel+1];		break;
+		case kRegAud1Control:				regNum = gAudioSystemToAudioControlRegNum[KonaToCardAudSys(NTV2_AUDIOSYSTEM_1)];	break;
+		case kRegAud1SourceSelect:			regNum = gAudioSystemToSrcSelectRegNum[KonaToCardAudSys(NTV2_AUDIOSYSTEM_1)];		break;
+		case kRegAud1OutputLastAddr:		regNum = gChannelToAudioOutLastAddrRegNum[KonaToCardAudSys(NTV2_AUDIOSYSTEM_1)];	break;
+		case kRegAud1InputLastAddr:			regNum = gChannelToAudioInLastAddrRegNum[KonaToCardAudSys(NTV2_AUDIOSYSTEM_1)];		break;
+		case kRegAud1Delay:					regNum = gAudioDelayRegisterNumbers[KonaToCardAudSys(NTV2_AUDIOSYSTEM_1)];			break;
+		case kRegAud2Control:				regNum = gAudioSystemToAudioControlRegNum[KonaToCardAudSys(NTV2_AUDIOSYSTEM_2)];	break;
+		case kRegAud2SourceSelect:			regNum = gAudioSystemToSrcSelectRegNum[KonaToCardAudSys(NTV2_AUDIOSYSTEM_2)];		break;
+		case kRegAud2OutputLastAddr:		regNum = gChannelToAudioOutLastAddrRegNum[KonaToCardAudSys(NTV2_AUDIOSYSTEM_2)];	break;
+		case kRegAud2InputLastAddr:			regNum = gChannelToAudioInLastAddrRegNum[KonaToCardAudSys(NTV2_AUDIOSYSTEM_2)];		break;
+		case kRegAud2Delay:					regNum = gAudioDelayRegisterNumbers[KonaToCardAudSys(NTV2_AUDIOSYSTEM_2)];			break;
 
-		case kRegVidProc1Control:			regNum = gIndexToVidProcControlRegNum[KonaToCardMixer(NTV2_CHANNEL1)];		break;
-		case kRegMixer1Coefficient:			regNum = gIndexToVidProcMixCoeffRegNum[KonaToCardMixer(NTV2_CHANNEL1)];		break;
-		case kRegFlatMatteValue:			regNum = gIndexToVidProcFlatMatteRegNum[KonaToCardMixer(NTV2_CHANNEL1)];	break;
+		case kRegPCMControl4321:
+		{	NTV2AudioSystem cardAudSys(KonaToCardAudSys(NTV2_AUDIOSYSTEM_1));
+			if (cardAudSys == NTV2_AUDIOSYSTEM_1)
+				return mCard.WriteRegister(regNum, inRegVal, regMask, regShift);	//	No mapping necessary
+			if (inRegMask == kRegMaskPCMControlA1P1_2  &&  inRegShift == kRegShiftPCMControlA1P1_2)
+				return mCard.SetAudioPCMControl(cardAudSys, NTV2_AudioChannel1_2, inRegVal ? true : false);
+			if (inRegMask == kRegMaskPCMControlA1P3_4  &&  inRegShift == kRegShiftPCMControlA1P3_4)
+				return mCard.SetAudioPCMControl(cardAudSys, NTV2_AudioChannel3_4, inRegVal ? true : false);
+			if (inRegMask == kRegMaskPCMControlA1P5_6  &&  inRegShift == kRegShiftPCMControlA1P5_6)
+				return mCard.SetAudioPCMControl(cardAudSys, NTV2_AudioChannel5_6, inRegVal ? true : false);
+			if (inRegMask == kRegMaskPCMControlA1P7_8  &&  inRegShift == kRegShiftPCMControlA1P7_8)
+				return mCard.SetAudioPCMControl(cardAudSys, NTV2_AudioChannel7_8, inRegVal ? true : false);
+			if (inRegMask == kRegMaskPCMControlA1P9_10  &&  inRegShift == kRegShiftPCMControlA1P9_10)
+				return mCard.SetAudioPCMControl(cardAudSys, NTV2_AudioChannel9_10, inRegVal ? true : false);
+			if (inRegMask == kRegMaskPCMControlA1P11_12  &&  inRegShift == kRegShiftPCMControlA1P11_12)
+				return mCard.SetAudioPCMControl(cardAudSys, NTV2_AudioChannel11_12, inRegVal ? true : false);
+			if (inRegMask == kRegMaskPCMControlA1P13_14  &&  inRegShift == kRegShiftPCMControlA1P13_14)
+				return mCard.SetAudioPCMControl(cardAudSys, NTV2_AudioChannel13_14, inRegVal ? true : false);
+			if (inRegMask == kRegMaskPCMControlA1P15_16  &&  inRegShift == kRegShiftPCMControlA1P15_16)
+				return mCard.SetAudioPCMControl(cardAudSys, NTV2_AudioChannel15_16, inRegVal ? true : false);
 
-		case kRegCh1Control:				regNum = gChannelToControlRegNum[mChannel];		break;
-		case kRegCh2Control:				regNum = gChannelToControlRegNum[mChannel+1];	break;
+			cardAudSys = NTV2AudioSystem(cardAudSys+1);
+			if (inRegMask == kRegMaskPCMControlA2P1_2  &&  inRegShift == kRegShiftPCMControlA2P1_2)
+				return mCard.SetAudioPCMControl(cardAudSys, NTV2_AudioChannel1_2, inRegVal ? true : false);
+			if (inRegMask == kRegMaskPCMControlA2P3_4  &&  inRegShift == kRegShiftPCMControlA2P3_4)
+				return mCard.SetAudioPCMControl(cardAudSys, NTV2_AudioChannel3_4, inRegVal ? true : false);
+			if (inRegMask == kRegMaskPCMControlA2P5_6  &&  inRegShift == kRegShiftPCMControlA2P5_6)
+				return mCard.SetAudioPCMControl(cardAudSys, NTV2_AudioChannel5_6, inRegVal ? true : false);
+			if (inRegMask == kRegMaskPCMControlA2P7_8  &&  inRegShift == kRegShiftPCMControlA2P7_8)
+				return mCard.SetAudioPCMControl(cardAudSys, NTV2_AudioChannel7_8, inRegVal ? true : false);
+			if (inRegMask == kRegMaskPCMControlA2P9_10  &&  inRegShift == kRegShiftPCMControlA2P9_10)
+				return mCard.SetAudioPCMControl(cardAudSys, NTV2_AudioChannel9_10, inRegVal ? true : false);
+			if (inRegMask == kRegMaskPCMControlA2P11_12  &&  inRegShift == kRegShiftPCMControlA2P11_12)
+				return mCard.SetAudioPCMControl(cardAudSys, NTV2_AudioChannel11_12, inRegVal ? true : false);
+			if (inRegMask == kRegMaskPCMControlA2P13_14  &&  inRegShift == kRegShiftPCMControlA2P13_14)
+				return mCard.SetAudioPCMControl(cardAudSys, NTV2_AudioChannel13_14, inRegVal ? true : false);
+			if (inRegMask == kRegMaskPCMControlA2P15_16  &&  inRegShift == kRegShiftPCMControlA2P15_16)
+				return mCard.SetAudioPCMControl(cardAudSys, NTV2_AudioChannel15_16, inRegVal ? true : false);
+			return false;
+		}
+
+		case kRegVidProc1Control:	regNum = gIndexToVidProcControlRegNum[KonaToCardMixer(NTV2_CHANNEL1)];		break;
+		case kRegMixer1Coefficient:	regNum = gIndexToVidProcMixCoeffRegNum[KonaToCardMixer(NTV2_CHANNEL1)];		break;
+		case kRegFlatMatteValue:	regNum = gIndexToVidProcFlatMatteRegNum[KonaToCardMixer(NTV2_CHANNEL1)];	break;
+
+		case kRegCh1Control:		regNum = gChannelToControlRegNum[mChannel];		break;
+		case kRegCh2Control:		regNum = gChannelToControlRegNum[mChannel+1];	break;
+
+//		case kRegGlobalControl:
+//		case kRegGlobalControl2:	return HandleWriteGlobalControl(regNum, inRegVal, regMask, regShift);
+
+		case kRegSDIOut1Control:
+		{
+			ULWord regVal ((inRegVal << regShift) & regMask);
+			regNum = gChannelToSDIOutControlRegNum[mChannel+1];
+			if ((regMask & (BIT(18)|BIT(28)|BIT(30))) == (BIT(18)|BIT(28)|BIT(30)))	//	DS1 bits being set?
+			{	//	DS1 audio system:
+				//	Bits 18|28|30 have DS1 AudioSystem;	Bits 19|29|31 have DS2 AudioSystem
+				//	Have to translate the AudioSystem values:
+				NTV2AudioSystem cardAudSys(NTV2_AUDIOSYSTEM_INVALID), konaAudSys(NTV2_AUDIOSYSTEM_INVALID);
+				ULWord newBits(0);
+				konaAudSys = NTV2AudioSystem( (regVal & BIT(18) ? 4 : 0)
+											+ (regVal & BIT(28) ? 2 : 0)
+											+ (regVal & BIT(30) ? 1 : 0));
+				if (HasKonaAudSys(konaAudSys))
+				{
+					cardAudSys = KonaToCardAudSys(cardAudSys);
+					regVal &= 0xFFFFFFFF - BIT(30) - BIT(28) - BIT(18);	//	Clear those bits
+					newBits = (cardAudSys & 4 ? BIT(18) : 0)
+								| (cardAudSys & 2 ? BIT(28) : 0)
+								| (cardAudSys & 1 ? BIT(30) : 0);
+					regVal |= newBits;	//	Set those bits
+				}
+			}
+			if ((regMask & (BIT(19)|BIT(29)|BIT(31))) == (BIT(19)|BIT(29)|BIT(31)))	//	DS2 bits being set?
+			{	//	DS2 audio system:
+				NTV2AudioSystem cardAudSys(NTV2_AUDIOSYSTEM_INVALID), konaAudSys(NTV2_AUDIOSYSTEM_INVALID);
+				ULWord newBits(0);
+				konaAudSys = NTV2AudioSystem( (regVal & BIT(19) ? 4 : 0)
+											+ (regVal & BIT(29) ? 2 : 0)
+											+ (regVal & BIT(31) ? 1 : 0));
+				if (HasKonaAudSys(konaAudSys))
+				{
+					cardAudSys = KonaToCardAudSys(konaAudSys);
+					regVal &= 0xFFFFFFFF - BIT(31) - BIT(29) - BIT(19);	//	Clear those bits
+					newBits = (cardAudSys & 4 ? BIT(19) : 0)
+								| (cardAudSys & 2 ? BIT(29) : 0)
+								| (cardAudSys & 1 ? BIT(31) : 0);
+					regVal |= newBits;	//	Set those bits
+				}
+			}
+			return mCard.WriteRegister(regNum, regVal);
+		}
+		break;
+
 		default:	break;
 	}
 	return mCard.WriteRegister(regNum, inRegVal, regMask, regShift);
