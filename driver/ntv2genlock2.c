@@ -486,12 +486,13 @@ static void spi_reset(struct ntv2_genlock2 *ntv2_gen)
 
 	// configure spi & reset fifos
     reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x1);
-	reg_write(ntv2_gen, ntv2_reg_spi_control, 0x1e6);
+	reg_write(ntv2_gen, ntv2_reg_spi_control, 0x1fe);//0x1e6);
 }
 
 static void spi_reset_fifos(struct ntv2_genlock2 *ntv2_gen)
 {
-    reg_write(ntv2_gen, ntv2_reg_spi_control, 0x1e6);
+    //reg_write(ntv2_gen, ntv2_reg_spi_control, 0x1e6);
+	reg_write(ntv2_gen, ntv2_reg_spi_control, 0x1fe);
 }
 
 static bool spi_wait_write_empty(struct ntv2_genlock2 *ntv2_gen)
@@ -628,7 +629,7 @@ static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uin
 
 #if 1
 
-	reg_write(ntv2_gen, ntv2_reg_spi_control, 0xe6);
+	reg_write(ntv2_gen, ntv2_reg_spi_control, 0xfe);//0xe6);
 	wait_genlock2(ntv2_gen, 1000);
 	reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x00);
 	wait_genlock2(ntv2_gen, 1000);
@@ -662,7 +663,7 @@ static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uin
         data[i] = (uint8_t)val;
     }
 
-	reg_write(ntv2_gen, ntv2_reg_spi_control, 0xe6);
+	reg_write(ntv2_gen, ntv2_reg_spi_control, 0xfe);//0xe6);
 
 #else
 	
