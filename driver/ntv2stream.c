@@ -30,8 +30,8 @@
 #define NTV2_MSG_STREAM_STATE(string, ...)		    NTV2_MSG_PRINT(NTV2_DEBUG_STREAM_STATE, string, __VA_ARGS__)
 #define NTV2_MSG_STREAM_CONFIG(string, ...)		    NTV2_MSG_PRINT(NTV2_DEBUG_STREAM_CONFIG, string, __VA_ARGS__)
 
-static uint32_t ntv2_debug_mask = 0xffffffff;
-static uint32_t ntv2_user_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
+//static uint32_t ntv2_debug_mask = 0xffffffff;
+//static uint32_t ntv2_user_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
 static uint32_t ntv2_active_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
 
 static uint32_t queue_next(uint32_t index)
@@ -39,15 +39,15 @@ static uint32_t queue_next(uint32_t index)
     return (index + 1) % NTV2_STREAM_NUM_BUFFERS;
 }
 
-static uint32_t queue_prev(uint32_t index)
-{
-    return (index + NTV2_STREAM_NUM_BUFFERS - 1) % NTV2_STREAM_NUM_BUFFERS;
-}
+//static uint32_t queue_prev(uint32_t index)
+//{
+//    return (index + NTV2_STREAM_NUM_BUFFERS - 1) % NTV2_STREAM_NUM_BUFFERS;
+//}
 
-static bool queue_empty(uint32_t head_index, uint32_t tail_index)
-{
-    return head_index == tail_index;
-}
+//static bool queue_empty(uint32_t head_index, uint32_t tail_index)
+//{
+//    return head_index == tail_index;
+//}
 
 static bool queue_full(uint32_t head_index, uint32_t tail_index)
 {

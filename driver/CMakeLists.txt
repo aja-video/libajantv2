@@ -27,6 +27,8 @@ set(AJADRIVER_COMMON_HEADERS
 	ntv2stream.h
 	ntv2system.h
 	ntv2video.h
+	ntv2videoraster.h
+	ntv2videorasterreg.h
 	ntv2vpid.h
 	ntv2xpt.h
 	ntv2xptlookup.h)
@@ -51,6 +53,7 @@ set(AJADRIVER_COMMON_SOURCES
 	ntv2system.c
 	ntv2stream.c
 	ntv2video.c
+	ntv2videoraster.c
 	ntv2vpid.c
 	ntv2xpt.c)
 

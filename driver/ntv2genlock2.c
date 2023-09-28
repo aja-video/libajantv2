@@ -47,6 +47,8 @@ static uint32_t ntv2_debug_mask =
 
 #define GENLOCK2_FRAME_RATE_SIZE		11
 
+#define DTR_EMPTY	0x04
+
 /* global control */
 NTV2_REG(ntv2_reg_global_control,							0, 267, 377, 378, 379, 380, 381, 382, 383);	/* global control */
 	NTV2_FLD(ntv2_fld_global_frame_rate_012,					3,	0);			/* frame rate 0-2 */
@@ -64,6 +66,10 @@ NTV2_REG(ntv2_reg_control_status,							48);			/* control status */
 	NTV2_FLD(ntv2_fld_control_genlock_locked,					1,	31);		/* genlock locked */
 
 /* genlock spi control */
+NTV2_REG(ntv2_reg_spi_ip_status,						0x8008);
+	NTV2_FLD(ntv2_fld_ip_status_dtr_empty,					1,	2);
+//NTV2_REG(ntv2_reg_spi_ip_control,						0x800a);
+//	NTV2_FLD(ntv2_fld_ip_control_dtr_empty,					1,	2);
 NTV2_REG(ntv2_reg_spi_reset,				0x8010);
 NTV2_REG(ntv2_reg_spi_control,				0x8018);
 NTV2_REG(ntv2_reg_spi_status,				0x8019);
@@ -158,7 +164,7 @@ Ntv2Status ntv2_genlock2_configure(struct ntv2_genlock2 *ntv2_gen)
 
 Ntv2Status ntv2_genlock2_enable(struct ntv2_genlock2 *ntv2_gen)
 {
-	bool success ;
+	bool success;
 
 	if (ntv2_gen == NULL)
 		return NTV2_STATUS_BAD_PARAMETER;
@@ -180,7 +186,7 @@ Ntv2Status ntv2_genlock2_enable(struct ntv2_genlock2 *ntv2_gen)
 }
 
 Ntv2Status ntv2_genlock2_disable(struct ntv2_genlock2 *ntv2_gen)
-{
+{	
 	if (ntv2_gen == NULL)
 		return NTV2_STATUS_BAD_PARAMETER;
 
@@ -367,10 +373,10 @@ static bool has_state_changed(struct ntv2_genlock2 *ntv2_gen)
 
 static struct ntv2_genlock2_data* get_genlock2_config(struct ntv2_genlock2 *ntv2_gen, uint32_t lines, uint32_t rate)
 {
-	(void)rate;
-	struct ntv2_genlock2_data* config = NULL;
+	struct ntv2_genlock2_data* config;
 	uint32_t genlockDeviceID = device_id_read(ntv2_gen);
-
+	(void)rate;
+	
 	switch (lines)
 	{
 	default:
@@ -490,18 +496,30 @@ static void spi_reset_fifos(struct ntv2_genlock2 *ntv2_gen)
 
 static bool spi_wait_write_empty(struct ntv2_genlock2 *ntv2_gen)
 {
-	uint32_t status = 0;
+	//uint32_t status = 0;
+	uint32_t dtrStatus = 0;
 	uint32_t count = 0;
 
-	status = reg_read(ntv2_gen, ntv2_reg_spi_status);
+	/*status = reg_read(ntv2_gen, ntv2_reg_spi_status);
     while ((status & GENL_SPI_WRITE_FIFO_EMPTY) == 0)
 	{
 		if (count++ > c_spi_timeout) return false;
 		if (!ntv2_gen->monitor_enable) return false;
 		status = reg_read(ntv2_gen, ntv2_reg_spi_status);
-		//NTV2_MSG_GENLOCK_INFO("FIFO NOT EMPTY!");
+		NTV2_MSG_GENLOCK_INFO("%s: FIFO NOT EMPTY!\n", ntv2_gen->name);
 	}
-	//NTV2_MSG_GENLOCK_INFO("FIFO EMPTY! %d", count);
+*/
+	dtrStatus = reg_read(ntv2_gen, ntv2_reg_spi_ip_status);
+	count = 0;
+	while ((dtrStatus & DTR_EMPTY) == 0)
+	{
+		if (count++ > c_spi_timeout) return false;
+		if (!ntv2_gen->monitor_enable) return false;
+		dtrStatus = reg_read(ntv2_gen, ntv2_reg_spi_ip_status);
+		NTV2_MSG_GENLOCK_INFO("%s: DTR NOT EMPTY!\n", ntv2_gen->name);
+	}
+
+	NTV2_MSG_GENLOCK_INFO("%s: Transfer Complete! %d\n", ntv2_gen->name, count);
 	return true;
 }
 
@@ -522,12 +540,28 @@ static bool spi_wait_read_not_empty(struct ntv2_genlock2 *ntv2_gen)
 	return true;
 }
 
+static bool reset_dtr_status(struct ntv2_genlock2 *ntv2_gen)
+{
+	uint32_t dtrStatus = reg_read(ntv2_gen, ntv2_reg_spi_ip_status);
+	if ((dtrStatus & DTR_EMPTY) != 0)
+	{
+		uint32_t dtrReset = NTV2_FLD_SET(ntv2_fld_ip_status_dtr_empty, 1);
+		uint32_t dtrMask = NTV2_FLD_MASK(ntv2_fld_ip_status_dtr_empty);
+		//NTV2_MSG_GENLOCK_INFO("%s: DTR High!\n", ntv2_gen->name);
+		ntv2_reg_rmw(ntv2_gen->system_context, ntv2_reg_spi_ip_status, ntv2_gen->index, dtrReset, dtrMask);
+		dtrStatus = reg_read(ntv2_gen, ntv2_reg_spi_ip_status);
+		//NTV2_MSG_GENLOCK_INFO("%s: DTR Reset Value: %08X!\n", ntv2_gen->name, dtrStatus);
+		return true;
+	}
+	return false;
+}
+
 static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, uint8_t offset, uint8_t* data, bool triggerWait)
 {
     uint32_t controlVal;
     uint32_t i;
     
-    if (!spi_wait_write_empty(ntv2_gen)) return false;
+    //if (!spi_wait_write_empty(ntv2_gen)) return false;
 
 	// Step 1 reset FIFOs
 	spi_reset_fifos(ntv2_gen);
@@ -540,7 +574,10 @@ static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, ui
 		reg_write(ntv2_gen, ntv2_reg_spi_write, data[i]);
 		//NTV2_MSG_GENLOCK_INFO("Wrote %02X", data[i]);
 	}
-
+	
+	// Reset DRT Shift bit
+	reset_dtr_status(ntv2_gen);
+	
 	// Step 3 chip select low
 	reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x0);
 
@@ -571,8 +608,8 @@ static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uin
     uint8_t   tx_buffer[10];
 	uint32_t i;
 
-	if (!spi_wait_write_empty(ntv2_gen))
-		return false;
+	//if (!spi_wait_write_empty(ntv2_gen))
+		//return false;
 
 	// Step 1 reset FIFOs
 	spi_reset_fifos(ntv2_gen);
@@ -602,9 +639,9 @@ static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uin
 	for (i = 0; i < numBytes; i++)
 		reg_write(ntv2_gen, ntv2_reg_spi_write, 0);
     
-    if(!spi_wait_write_empty(ntv2_gen))
-        return false;
-    
+	if (!spi_wait_write_empty(ntv2_gen))
+		return false;
+
 	reg_write(ntv2_gen, ntv2_reg_spi_slave, 0x01);
 	wait_genlock2(ntv2_gen, 10000);
 

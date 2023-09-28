@@ -405,16 +405,16 @@ Ntv2Status ntv2_videoraster_update_channel(struct ntv2_videoraster *ntv2_raster,
 		return NTV2_STATUS_SUCCESS;
 	if (!ntv2_raster->monitor_enable)
 		return NTV2_STATUS_SUCCESS;
-    if (index >= ntv2_raster->num_widgets)
-        return NTV2_STATUS_SUCCESS;
+	if (index >= ntv2_raster->num_widgets)
+		return NTV2_STATUS_SUCCESS;
 
 	NTV2_MSG_VIDEORASTER_STATE("%s: video raster update channel\n", ntv2_raster->name);
 
-    if (has_config_changed(ntv2_raster, index))
-    {
-        update_format(ntv2_raster, index);
-    }
-
+	if (has_config_changed(ntv2_raster, index))
+	{
+		update_format(ntv2_raster, index);
+	}
+	
 	return NTV2_STATUS_SUCCESS;
 }
 
