@@ -1423,16 +1423,17 @@ bool NTV2Kona1::NTV2DMATransferRemote (const NTV2DMAEngine inDMAEngine,		const b
 		frameNum = cardOffsetBytes / 0x800000;
 		cardOffsetBytes -= frameNum * 0x800000;
 	}
-	if (!cardOffsetBytes)
+/*	if (!cardOffsetBytes)
 	{
 		if (inRead)
 			return mCard.DMAReadFrame (frameNum, inOutBuffer, inOutBuffer.GetByteCount());
 		else
 			return mCard.DMAWriteFrame (frameNum, inOutBuffer, inOutBuffer.GetByteCount());
 	}
-//cout << "KON: " << inOutBuffer.AsString(128) << endl;
+*///cout << "KON: " << inOutBuffer.AsString(128) << endl;
 	return mCard.DmaTransfer (inDMAEngine, inRead, frameNum, inOutBuffer, cardOffsetBytes,
-								inNumSegments, inSegmentHostPitch, inSegmentCardPitch, inSync);
+								inOutBuffer.GetByteCount(), inNumSegments, inSegmentHostPitch,
+								inSegmentCardPitch, inSync);
 }
 
 bool NTV2Kona1::NTV2MessageRemote (NTV2_HEADER * pMsg)
