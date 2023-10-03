@@ -214,7 +214,7 @@ ntv2vpidfromspec.c:
 .PHONY: clean cleandeps realclean
 
 clean:
-	rm -f $(A_UBER_BIN)/*.ko $(A_DRIVER_PATH)/*.o $(A_DRIVER_PATH)/.*o.cmd *.ko *.o .*o.cmd *.mod.c *~ errors.txt semantic.cache
+	rm -f $(A_DRIVER_PATH)/bin/$(NTV2TARGET).ko $(A_UBER_BIN)/*.ko $(A_DRIVER_PATH)/*.o $(A_DRIVER_PATH)/.*o.cmd *.ko *.o .*o.cmd *.mod.c *~ errors.txt semantic.cache
 	rm -f *.markers *.symvers *.order *.o.ur-safe *.mod
 	rm -f ntv2devicefeatures.*
 	rm -f ntv2driverprocamp.c
