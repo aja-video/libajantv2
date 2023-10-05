@@ -3031,6 +3031,7 @@ typedef enum
 	NTV2_KLHiBox,				// Kona LHI
 	NTV2_KLHePlusBox,			// Kona LHe+
 	NTV2_K3GBox,				// Kona3G
+	NTV2_BreakoutBoard,			// KonaX
 	NTV2_MAX_NUM_BreakoutTypes,
 	NTV2_BreakoutType_Invalid	= NTV2_BreakoutNone
 } NTV2BreakoutType;

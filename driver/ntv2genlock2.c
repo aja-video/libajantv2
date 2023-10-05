@@ -517,10 +517,10 @@ static bool spi_wait_write_empty(struct ntv2_genlock2 *ntv2_gen)
 		if (count++ > c_spi_timeout) return false;
 		if (!ntv2_gen->monitor_enable) return false;
 		dtrStatus = reg_read(ntv2_gen, ntv2_reg_spi_ip_status);
-		NTV2_MSG_GENLOCK_INFO("%s: DTR NOT EMPTY!\n", ntv2_gen->name);
+		//NTV2_MSG_GENLOCK_INFO("%s: DTR NOT EMPTY!\n", ntv2_gen->name);
 	}
 
-	NTV2_MSG_GENLOCK_INFO("%s: Transfer Complete! %d\n", ntv2_gen->name, count);
+	//NTV2_MSG_GENLOCK_INFO("%s: Transfer Complete! %d\n", ntv2_gen->name, count);
 	return true;
 }
 
@@ -670,7 +670,7 @@ static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uin
 
 	//Send address and dumy bytes
 	memset(tx_buffer, 0, 10);
-	NTV2_MSG_GENLOCK_INFO("Read: Send address and dummy bytes");
+	//NTV2_MSG_GENLOCK_INFO("Read: Send address and dummy bytes");
 	spi_genlock2_write(ntv2_gen, numBytes,  (0x80 | (addr & 0x7f)), tx_buffer, true);
     
 	// read bytes
@@ -680,14 +680,14 @@ static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uin
 	//wait_genlock2(ntv2_gen, 1000);
     
 	val = reg_read(ntv2_gen, ntv2_reg_spi_read); // dummy read for address sent
-	NTV2_MSG_GENLOCK_INFO("Read: Val: %02X", val);
+	//NTV2_MSG_GENLOCK_INFO("Read: Val: %02X", val);
     for (uint32_t i=0; i < numBytes; i++)
     {
         status = reg_read(ntv2_gen, ntv2_reg_spi_status);
 		if(!spi_wait_read_not_empty(ntv2_gen))
 			return false;
         val = reg_read(ntv2_gen, ntv2_reg_spi_read);
-		NTV2_MSG_GENLOCK_INFO("Read: Val: %02X", val);
+		//NTV2_MSG_GENLOCK_INFO("Read: Val: %02X", val);
         data[i] = (uint8_t)val;
     }
 

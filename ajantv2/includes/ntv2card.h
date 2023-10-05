@@ -2481,6 +2481,15 @@ public:
 		@note		This counter will overflow and wrap back to zero in 24:51:00 [hh:mm:ss].
 	**/
 	AJA_VIRTUAL bool		GetRawAudioTimer (ULWord & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);	//	New in SDK 15.5
+	
+	/**
+		@brief		Enables BOB analog audio XLR inputs.
+		@param[in]	inEnable		If true, specifies that the connectors are enabled.
+									If false, specifies audio from BOB is AES.
+		@return		True if successful;	 otherwise false.
+		@see		CNTV2Card::EnableBOBAnalogAudioIn
+	**/
+	AJA_VIRTUAL bool		EnableBOBAnalogAudioIn (bool inEnable);
 
 	/**
 		@return		True if the running device firmware supports audio start delay-til-VBI.
@@ -6361,6 +6370,8 @@ public:
 	AJA_VIRTUAL bool GetMultiRasterBypassEnable (bool & outEnabled);	//	New in SDK 16.1
 	AJA_VIRTUAL bool IsMultiRasterWidgetChannel (const NTV2Channel inChannel);	//	New in SDK 16.2
 	///@}
+	
+	AJA_VIRTUAL bool IsBreakoutBoardConnected (void);
 
 #if !defined(NTV2_DEPRECATE_16_1)
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioOutputMonitorSource (const NTV2AudioMonitorSelect inChannelPair, const NTV2Channel inAudioSystem = NTV2_CHANNEL1))	{return SetAudioOutputMonitorSource(inChannelPair, NTV2AudioSystem(inAudioSystem));}	///< @deprecated	Use the function that uses NTV2AudioChannelPair and NTV2AudioSystem params.

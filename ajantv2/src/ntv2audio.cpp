@@ -282,17 +282,21 @@ bool CNTV2Card::GetAudioBufferSize (NTV2AudioBufferSize & outSize, const NTV2Aud
 
 bool CNTV2Card::SetAudioAnalogLevel (const NTV2AudioLevel inLevel, const NTV2AudioSystem inAudioSystem)
 {
-	if (!NTV2_IS_VALID_AUDIO_SYSTEM(inAudioSystem))
-		return false;
-	return WriteRegister (gAudioSystemToAudioControlRegNum [inAudioSystem], inLevel, kFS1RegMaskAudioLevel, kFS1RegShiftAudioLevel);
+	(void)inAudioSystem;
+	if (IsBreakoutBoardConnected())
+		return WriteRegister (kRegBOBAudioControl, inLevel, kRegMaskBOBAnalogLevelControl, kRegShiftBOBAnalogLevelControl);
+	else
+		return WriteRegister (kRegAud1Control, inLevel, kFS1RegMaskAudioLevel, kFS1RegShiftAudioLevel);
 }
 
 
 bool CNTV2Card::GetAudioAnalogLevel (NTV2AudioLevel & outLevel, const NTV2AudioSystem inAudioSystem)
 {
-	if (!NTV2_IS_VALID_AUDIO_SYSTEM(inAudioSystem))
-		return false;
-	return CNTV2DriverInterface::ReadRegister (gAudioSystemToAudioControlRegNum[inAudioSystem], outLevel, kFS1RegMaskAudioLevel, kK2RegShiftAudioLevel);
+	(void)inAudioSystem;
+	if (IsBreakoutBoardConnected())
+		return CNTV2DriverInterface::ReadRegister (kRegBOBAudioControl, outLevel, kRegMaskBOBAnalogLevelControl, kRegShiftBOBAnalogLevelControl);
+	else
+		return CNTV2DriverInterface::ReadRegister (kRegAud1Control, outLevel, kFS1RegMaskAudioLevel, kK2RegShiftAudioLevel);
 }
 
 
@@ -1815,6 +1819,13 @@ bool CNTV2Card::GetRawAudioTimer (ULWord & outValue, const NTV2AudioSystem inAud
 	if (!NTV2_IS_VALID_AUDIO_SYSTEM(inAudioSystem))
 		return false;
 	return ReadRegister(kRegAud1Counter, outValue);
+}
+
+bool CNTV2Card::EnableBOBAnalogAudioIn(bool inEnable)
+{
+	if (!NTV2DeviceCanDoBreakoutBoard(_boardID))
+		return false;
+	return WriteRegister(kRegBOBAudioControl, inEnable ? 1 : 0, kRegMaskBOBAnalogInputSelect, kRegShiftBOBAnalogInputSelect);
 }
 
 #ifdef MSWindows

@@ -1013,6 +1013,38 @@ typedef enum
 	kRegRotaryEncoder = 0x940
 } NTV2RotaryEncoderRegister;
 
+typedef enum
+{
+	kRegIDSwitch = 0x40020
+} NTV2IDSwitchRegister;
+
+typedef enum
+{
+	kRegPWMFanControl = 0x40001,
+	kRegPWMFanStatus = 0x40021
+} NTV2PWMFanRegisters;
+
+typedef enum
+{
+	kRegBOBStatus = 0x3680,
+	kRegBOBGPIInControl,
+	kRegBOBGPIInterruptControl,
+	kRegBOBGPIOutControl,
+	kRegBOBAudioControl
+} NTV2BOBWidgetRegisters;
+
+typedef enum
+{
+	kRegLEDReserved0 = 0x3640,
+	kRegLEDClockDivide,
+	kRegLEDReserved2,
+	kRegLEDReserved3,
+	kRegLEDSDI1Control,
+	kRegLEDSDI2Control,
+	kRegLEDHDMIInControl,
+	kRegLEDHDMIOutControl
+} NTV2LEDWidgetRegisters;
+
 #define NTV2_HDMIAuxMaxFrames	8
 #define NTV2_HDMIAuxDataSize	32
 
@@ -2126,7 +2158,40 @@ typedef enum
 	kRegMaskMRFrameLocation = BIT(15) + BIT(14) + BIT(13) + BIT(12) + BIT(11) + BIT(10) + BIT(9) + BIT(8),
 	kRegMaskMRBypass = BIT(20),
 	kRegMaskMREnable = BIT(24),
-	kRegMaskMRSupport = BIT(2) + BIT(1) + BIT(0)
+	kRegMaskMRSupport = BIT(2) + BIT(1) + BIT(0),
+	
+	kRegMaskIDSwitch1 = BIT(0),
+	kRegMaskIDSwitch2 = BIT(1),
+	kRegMaskIDSwitch3 = BIT(2),
+	kRegMaskIDSwitch4 = BIT(3),
+	
+	kRegMaskPWMFanSpeed = BIT(7)+BIT(6)+BIT(5)+BIT(4)+BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kRegMaskPWMFanSpeedControl = BIT(8),
+	
+	kRegMaskPWMFanTachPeriodStatus = BIT(7)+BIT(6)+BIT(5)+BIT(4)+BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kRegMaskPWMFanStatus = BIT(8),
+	
+	kRegMaskBOBPresent = BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kRegMaskBOBADAV801UpdateStatus = BIT(7)+BIT(6)+BIT(5)+BIT(4),
+	kRegMaskBOBADAV801DIRLocked = BIT(11)+BIT(10)+BIT(9)+BIT(8),
+	
+	kRegMaskBOBGPIIn1Status = BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kRegMaskBOBGPIIn2Status = BIT(7)+BIT(6)+BIT(5)+BIT(4),
+	kRegMaskBOBGPIIn3Status = BIT(11)+BIT(10)+BIT(9)+BIT(8),
+	kRegMaskBOBGPIIn4Status = BIT(15)+BIT(14)+BIT(13)+BIT(12),
+	
+	kRegMaskBOBGPIOut1Control = BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kRegMaskBOBGPIOut2Control = BIT(7)+BIT(6)+BIT(5)+BIT(4),
+	kRegMaskBOBGPIOut3Control = BIT(11)+BIT(10)+BIT(9)+BIT(8),
+	kRegMaskBOBGPIOut4Control = BIT(15)+BIT(14)+BIT(13)+BIT(12),
+	
+	kRegMaskBOBADAV801Reset = BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kRegMaskBOBAnalogLevelControl = BIT(7)+BIT(6)+BIT(5)+BIT(4),
+	kRegMaskBOBAnalogInputSelect = BIT(11)+BIT(10)+BIT(9)+BIT(8),
+	
+	kRegMaskLEDBlueControl = BIT(7)+BIT(6)+BIT(5)+BIT(4)+BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kRegMaskLEDGreenControl = BIT(15)+BIT(14)+BIT(13)+BIT(12)+BIT(11)+BIT(10)+BIT(9)+BIT(8),
+	kRegMaskLEDRedControl = BIT(23)+BIT(22)+BIT(21)+BIT(20)+BIT(19)+BIT(18)+BIT(17)+BIT(16),
 } RegisterMask;
 
 typedef enum
@@ -3147,7 +3212,40 @@ typedef enum
 	kRegShiftMRFrameLocation = 8,
 	kRegShiftMRBypass = 20,
 	kRegShiftMREnable = 24,
-	kRegShiftMRSupport = 0
+	kRegShiftMRSupport = 0,
+	
+	kRegShiftIDSwitch1 = 0,
+	kRegShiftIDSwitch2 = 1,
+	kRegShiftIDSwitch3 = 2,
+	kRegShiftIDSwitch4 = 3,
+	
+	kRegShiftPWMFanSpeed = 0,
+	kRegShiftPWMFanSpeedControl = 8,
+	
+	kRegShiftPWMFanTachPeriodStatus = 0,
+	kRegShiftPWMFanStatus = 8,
+	
+	kRegShiftBOBPresent = 0,
+	kRegShiftBOBADAV801UpdateStatus = 4,
+	kRegShiftBOBADAV801DIRLocked = 8,
+	
+	kRegShiftBOBGPIIn1Status = 0,
+	kRegShiftBOBGPIIn2Status = 4,
+	kRegShiftBOBGPIIn3Status = 8,
+	kRegShiftBOBGPIIn4Status = 12,
+	
+	kRegShiftBOBGPIOut1Control = 0,
+	kRegShiftBOBGPIOut2Control = 4,
+	kRegShiftBOBGPIOut3Control = 8,
+	kRegShiftBOBGPIOut4Control = 12,
+	
+	kRegShiftBOBADAV801Reset = 0,
+	kRegShiftBOBAnalogLevelControl = 4,
+	kRegShiftBOBAnalogInputSelect = 8,
+	
+	kRegShiftLEDBlueControl = 0,
+	kRegShiftLEDGreenControl = 8,
+	kRegShiftLEDRedControl = 16,
 } RegisterShift;
 
 
