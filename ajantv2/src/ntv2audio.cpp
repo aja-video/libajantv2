@@ -502,9 +502,19 @@ bool CNTV2Card::SetAudioSystemInputSource (const NTV2AudioSystem inAudioSystem, 
 									sAudioSourceToRegValues [inAudioSource],
 									kRegMaskAudioSource, kRegShiftAudioSource);
 	if (result)
+	{
 		if ((inAudioSource == NTV2_AUDIO_EMBEDDED)	||	(inAudioSource == NTV2_AUDIO_HDMI))
 			if (SetEmbeddedAudioInput (inEmbeddedSource, inAudioSystem))	//	Use the specified input for grabbing embedded audio
 				result = SetEmbeddedAudioClock (NTV2_EMBEDDED_AUDIO_CLOCK_VIDEO_INPUT, inAudioSystem);	//	Use video input clock (not reference)
+		
+		if (NTV2DeviceCanDoBreakoutBoard(_boardID))
+		{
+			if(IsBreakoutBoardConnected() && inAudioSource == NTV2_AUDIO_ANALOG)
+				result = EnableBOBAnalogAudioIn(true);
+			else
+				result = EnableBOBAnalogAudioIn(false);
+		}
+	}
 	return result;
 
 }	//	SetAudioSystemInputSource
