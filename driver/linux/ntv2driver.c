@@ -3338,6 +3338,7 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 	// initialize dma
 	dmaInit(deviceNumber);
 
+    // inialize streams
     for (i = 0; i < NTV2_MAX_DMA_STREAMS; i++)
     {
         if (ntv2pp->m_pMapStream[i] == NULL)
@@ -3351,7 +3352,6 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
                 .stream_initialize = dmaOpsStreamInitialize,
                 .stream_start = dmaOpsStreamStart,
                 .stream_stop = dmaOpsStreamStop,
-                .stream_program = dmaOpsStreamProgram,
                 .buffer_prepare = dmaOpsBufferPrepare,
                 .buffer_release = dmaOpsBufferRelease
             };
@@ -4664,8 +4664,44 @@ int DoMessageStreamBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamBuffe
 
 	if ((pBuffer->mFlags & NTV2_STREAM_BUFFER_ADD) != 0)
 	{
+        PDMA_PAGE_ROOT pPageRoot = &pFile->dmaRoot;
+        PDMA_PAGE_BUFFER pPageBuffer = NULL;
+
+        // check page root
+        if (pPageRoot == NULL)
+            return -EPERM;
+
+        // check enabled
+        if (!pStr->enabled)
+        {
+            MSG("%s: DoMessageStreamBuffer - stream not enabled\n", getNTV2ModuleParams()->name);
+            return -EPERM;
+        }
+
+        // check for no video
+        if(((PVOID)(pBuffer->mBuffer.fUserSpacePtr) == NULL) || (pBuffer->mBuffer.fByteCount == 0))
+        {
+            MSG("%s: DoMessageStreamBuffer - user buffer empty\n", getNTV2ModuleParams()->name);
+            return -EPERM;
+        }
+
+        // check buffer cache
+        pPageBuffer = dmaPageRootFind(deviceNumber,
+                                      pPageRoot,
+                                      (PVOID)pBuffer->mBuffer.fUserSpacePtr,
+                                      pBuffer->mBuffer.fByteCount);
+        if (pPageBuffer == NULL)
+        {
+            MSG("%s: DoMessageStreamBuffer - kernel buffer not found\n", getNTV2ModuleParams()->name);
+            return -EPERM;
+        }
+
+        // save page buffer
+        pBuffer->mBuffer.fKernelHandle = (ULWord64)pPageBuffer;
+        
         ntv2_stream_buffer_add(pStr, pBuffer);
     }
+    
 	if ((pBuffer->mFlags & NTV2_STREAM_BUFFER_STATUS) != 0)
 	{
         ntv2_stream_buffer_status(pStr, pBuffer);
