@@ -301,7 +301,7 @@ int dmaInit(ULWord deviceNumber)
 	ULWord iCon;
 	ULWord iDes;
     ULWord numStreams;
-    Ntv2Status status;
+//    Ntv2Status status;
 
 	if (pNTV2Params->_dmaNumEngines != 0)
 	{
@@ -4840,13 +4840,46 @@ int dmaOpsStreamProgram(struct ntv2_stream *stream)
     return NTV2_STREAM_OPS_SUCCESS;
 }
 
-int dmaOpsBufferPrepare(struct ntv2_stream_buffer* buffer)
+int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index)
 {
+    ULWord deviceNumber = stream->system_context->devNum;
+    struct ntv2_stream_buffer* buffer = &stream->stream_buffers[index];
+    PDMA_PAGE_BUFFER pPageBuffer = (PDMA_PAGE_BUFFER)buffer->user_buffer.mBuffer.fKernelHandle;
+
+    if (pPageBuffer == NULL)
+        return NTV2_STREAM_OPS_FAIL;
+
+    if (!dmaPageLocked(pPageBuffer))
+        return NTV2_STREAM_OPS_FAIL;
+
+    if (!dmaSgMapped(pPageBuffer))
+    {
+        if (!dmaSgMap(deviceNumber, pPageBuffer))
+            return NTV2_STREAM_OPS_FAIL;
+        buffer->mapped = true;
+    }
+
+    buffer->prepared = true;
+    
     return NTV2_STREAM_OPS_SUCCESS;
 }
 
-int dmaOpsBufferRelease(struct ntv2_stream_buffer* buffer)
+int dmaOpsBufferRelease(struct ntv2_stream *stream, int index)
 {
+    ULWord deviceNumber = stream->system_context->devNum;
+    struct ntv2_stream_buffer* buffer = &stream->stream_buffers[index];
+    PDMA_PAGE_BUFFER pPageBuffer = (PDMA_PAGE_BUFFER)buffer->user_buffer.mBuffer.fKernelHandle;
+
+    if (!buffer->prepared)
+        return NTV2_STREAM_OPS_FAIL;
+
+    if (buffer->mapped)
+        dmaSgUnmap(deviceNumber, pPageBuffer);
+
+    buffer->mapped = false;
+    buffer->prepared = false;
+    buffer->released = true;
+    
     return NTV2_STREAM_OPS_SUCCESS;
 }
 
