@@ -39,15 +39,14 @@ struct ntv2_stream_ops {
     int (*stream_start)(struct ntv2_stream *stream);
     int (*stream_stop)(struct ntv2_stream *stream);
     int (*stream_program)(struct ntv2_stream *stream);
-    int (*buffer_prepare)(struct ntv2_stream_buffer* buffer);
-    int (*buffer_release)(struct ntv2_stream_buffer* buffer);
+    int (*buffer_prepare)(struct ntv2_stream *stream, int index);
+    int (*buffer_release)(struct ntv2_stream *stream, int index);
 };
 
 struct ntv2_stream_buffer {
     NTV2StreamBuffer    user_buffer;
-    void*               kernel_buffer;
+    bool                mapped;
     bool                prepared;
-    bool                programmed;
     bool                linked;
     bool                released;
 };
@@ -69,7 +68,7 @@ struct ntv2_stream {
     bool                        wait_inuse[NTV2_STREAM_WAIT_CLIENTS];
     uint32_t                    head_index;     // buffer queue head
     uint32_t                    tail_index;     // buffer queue tail
-    uint32_t                    build_index;    // next buffer for programming
+    uint32_t                    link_index;    // next buffer to link
     uint32_t                    active_index;   // currently active buffer
 };
 
