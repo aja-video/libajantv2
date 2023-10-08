@@ -63,6 +63,7 @@ static void channel_state(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChan
         return;
 
     // initialize status
+    pChannel->mStreamState = NTV2_STREAM_CHANNEL_STATE_DISABLED;
     pChannel->mQueueDepth = 0;
     pChannel->mBufferCookie = 0;
     pChannel->mStartTime = 0;
@@ -79,7 +80,7 @@ static void channel_state(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChan
         }
         else if (ntv2_str->stream_state == ntv2_stream_state_initialized)
         {
-            pChannel->mStreamState = NTV2_STREAM_CHANNEL_STATE_IDLE;
+            pChannel->mStreamState = NTV2_STREAM_CHANNEL_STATE_INITIALIZED;
         }
         else if (ntv2_str->stream_state == ntv2_stream_state_idle)
         {
@@ -180,6 +181,7 @@ void ntv2_stream_close(struct ntv2_stream *ntv2_str)
 
 Ntv2Status ntv2_stream_configure(struct ntv2_stream *ntv2_str,
                                  struct ntv2_stream_ops *stream_ops,
+                                 void* dma_engine,
                                  bool to_host)
 {
 	if (ntv2_str == NULL)
@@ -188,6 +190,7 @@ Ntv2Status ntv2_stream_configure(struct ntv2_stream *ntv2_str,
 	NTV2_MSG_STREAM_INFO("%s: configure stream engine\n", ntv2_str->name);
 
     ntv2_str->stream_ops = *stream_ops;
+    ntv2_str->dma_engine = dma_engine;
     ntv2_str->to_host = to_host;
 
 	return NTV2_STATUS_SUCCESS;
@@ -228,9 +231,12 @@ Ntv2Status ntv2_stream_channel_initialize(struct ntv2_stream *ntv2_str, NTV2Stre
     if (!ntv2SemaphoreDown(&ntv2_str->state_sema, NTV2_STREAM_ACTION_TIMEOUT))
     {
         if (pChannel != NULL)
+        {
+            channel_state(ntv2_str, pChannel);
             pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_TIMEOUT;
-        NTV2_MSG_STREAM_ERROR("%s: initialize timeout acquiring stream lock\n", ntv2_str->name);
-        return NTV2_STATUS_FAIL;
+            NTV2_MSG_STREAM_ERROR("%s: initialize timeout acquiring stream lock\n", ntv2_str->name);
+            return NTV2_STATUS_FAIL;
+        }
     }
 
     // check state
@@ -251,6 +257,7 @@ Ntv2Status ntv2_stream_channel_initialize(struct ntv2_stream *ntv2_str, NTV2Stre
     status = (ntv2_str->stream_ops.stream_initialize)(ntv2_str);
     if (status != NTV2_STREAM_OPS_SUCCESS)
     {
+        ntv2_str->stream_state = ntv2_stream_state_error;
         if (pChannel != NULL)
         {
             channel_state(ntv2_str, pChannel);
@@ -261,31 +268,26 @@ Ntv2Status ntv2_stream_channel_initialize(struct ntv2_stream *ntv2_str, NTV2Stre
         return status;
     }
 
-    // release all waiting clients
-    for (i = 0; i < NTV2_STREAM_WAIT_CLIENTS; i++)
-    {
-        ntv2EventSignal(&ntv2_str->wait_events[i]);
-    }
-
+    // set state
+    ntv2_str->stream_state = ntv2_stream_state_initialized;
+    
     // initialize buffer queue
     ntv2_str->head_index = 0;
     ntv2_str->tail_index = 0;
     ntv2_str->link_index = 0;
     ntv2_str->active_index = 0;
 
+    // release all waiting clients
+    for (i = 0; i < NTV2_STREAM_WAIT_CLIENTS; i++)
+    {
+        ntv2EventSignal(&ntv2_str->wait_events[i]);
+    }
+
     // report status
     if (pChannel != NULL)
     {
-        // get state
         channel_state(ntv2_str, pChannel);
-        if (ntv2_str->stream_state == ntv2_stream_state_error)
-        {
-            pChannel->mStatus = NTV2_STREAM_STATUS_FAIL;
-        }
-        else
-        {
-            pChannel->mStatus = NTV2_STREAM_STATUS_SUCCESS;
-        }
+        pChannel->mStatus = NTV2_STREAM_STATUS_SUCCESS;
     }
    
     ntv2SemaphoreUp(&ntv2_str->state_sema);
@@ -300,6 +302,7 @@ Ntv2Status ntv2_stream_channel_start(struct ntv2_stream *ntv2_str, NTV2StreamCha
     // synchronize
     if (!ntv2SemaphoreDown(&ntv2_str->state_sema, NTV2_STREAM_ACTION_TIMEOUT))
     {
+        channel_state(ntv2_str, pChannel);
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_TIMEOUT;
         NTV2_MSG_STREAM_ERROR("%s: start timeout acquiring stream lock\n", ntv2_str->name);
         return NTV2_STATUS_FAIL;
@@ -327,20 +330,19 @@ Ntv2Status ntv2_stream_channel_start(struct ntv2_stream *ntv2_str, NTV2StreamCha
     }
 
     // start stream engine
-    if (ntv2_str->stream_state != ntv2_stream_state_active)
+    status = (ntv2_str->stream_ops.stream_start)(ntv2_str);
+    if (status != NTV2_STREAM_OPS_SUCCESS)
     {
-        status = (ntv2_str->stream_ops.stream_start)(ntv2_str);
-        if (status != NTV2_STREAM_OPS_SUCCESS)
-        {
-            channel_state(ntv2_str, pChannel);
-            pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_MESSAGE;
-            ntv2SemaphoreUp(&ntv2_str->state_sema);
-            NTV2_MSG_STREAM_ERROR("%s: start failed\n", ntv2_str->name);
-            return status;
-        }
+        ntv2_str->stream_state = ntv2_stream_state_error;
+        channel_state(ntv2_str, pChannel);
+        pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_MESSAGE;
+        ntv2SemaphoreUp(&ntv2_str->state_sema);
+        NTV2_MSG_STREAM_ERROR("%s: start failed\n", ntv2_str->name);
+        return status;
     }
 
     // get state
+    ntv2_str->stream_state = ntv2_stream_state_active;
     channel_state(ntv2_str, pChannel);
     pChannel->mStatus = NTV2_STREAM_STATUS_SUCCESS;
     ntv2SemaphoreUp(&ntv2_str->state_sema);
@@ -355,15 +357,15 @@ Ntv2Status ntv2_stream_channel_stop(struct ntv2_stream *ntv2_str, NTV2StreamChan
     // synchronize
     if (!ntv2SemaphoreDown(&ntv2_str->state_sema, NTV2_STREAM_ACTION_TIMEOUT))
     {
+        channel_state(ntv2_str, pChannel);
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_TIMEOUT;
         NTV2_MSG_STREAM_ERROR("%s: stop timeout acquiring stream lock\n", ntv2_str->name);
         return NTV2_STATUS_FAIL;
     }
 
     // check stream state
-    if ((ntv2_str->stream_state == ntv2_stream_state_initialized) ||
-        (ntv2_str->stream_state == ntv2_stream_state_disabled) ||
-        (ntv2_str->stream_state == ntv2_stream_state_error))
+    if ((ntv2_str->stream_state == ntv2_stream_state_active) &&
+        (ntv2_str->stream_state == ntv2_stream_state_idle))
     {
         channel_state(ntv2_str, pChannel);
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_STATE;
@@ -373,19 +375,19 @@ Ntv2Status ntv2_stream_channel_stop(struct ntv2_stream *ntv2_str, NTV2StreamChan
     }
 
     // stop stream engine
-    if (ntv2_str->stream_state != ntv2_stream_state_idle)
+    status = (ntv2_str->stream_ops.stream_stop)(ntv2_str);
+    if (status != NTV2_STREAM_OPS_SUCCESS)
     {
-        status = (ntv2_str->stream_ops.stream_stop)(ntv2_str);
-        if (status != NTV2_STREAM_OPS_SUCCESS)
-        {
-            pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_MESSAGE;
-            ntv2SemaphoreUp(&ntv2_str->state_sema);
-            NTV2_MSG_STREAM_ERROR("%s: stop stream failed\n", ntv2_str->name);
-            return status;
-        }
+        ntv2_str->stream_state = ntv2_stream_state_error;
+        channel_state(ntv2_str, pChannel);
+        pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_MESSAGE;
+        ntv2SemaphoreUp(&ntv2_str->state_sema);
+        NTV2_MSG_STREAM_ERROR("%s: stop stream failed\n", ntv2_str->name);
+        return status;
     }
 
     // get state
+    ntv2_str->stream_state = ntv2_stream_state_idle;
     channel_state(ntv2_str, pChannel);
     pChannel->mStatus = NTV2_STREAM_STATUS_SUCCESS;
     ntv2SemaphoreUp(&ntv2_str->state_sema);
@@ -401,6 +403,7 @@ Ntv2Status ntv2_stream_channel_flush(struct ntv2_stream *ntv2_str, NTV2StreamCha
     // synchronize
     if (!ntv2SemaphoreDown(&ntv2_str->state_sema, NTV2_STREAM_ACTION_TIMEOUT))
     {
+        channel_state(ntv2_str, pChannel);
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_TIMEOUT;
         NTV2_MSG_STREAM_ERROR("%s: flush timeout acquiring stream lock\n", ntv2_str->name);
         return NTV2_STATUS_FAIL;
@@ -449,6 +452,7 @@ Ntv2Status ntv2_stream_channel_status(struct ntv2_stream *ntv2_str, NTV2StreamCh
     // synchronize
     if (!ntv2SemaphoreDown(&ntv2_str->state_sema, NTV2_STREAM_ACTION_TIMEOUT))
     {
+        channel_state(ntv2_str, pChannel);
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_TIMEOUT;
         NTV2_MSG_STREAM_ERROR("%s: status timeout acquiring stream lock\n", ntv2_str->name);
         return NTV2_STATUS_FAIL;
@@ -468,9 +472,20 @@ Ntv2Status ntv2_stream_channel_wait(struct ntv2_stream *ntv2_str, NTV2StreamChan
     // synchronize
     if (!ntv2SemaphoreDown(&ntv2_str->state_sema, NTV2_STREAM_ACTION_TIMEOUT))
     {
+        channel_state(ntv2_str, pChannel);
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_TIMEOUT;
         NTV2_MSG_STREAM_ERROR("%s: wait timeout acquiring stream lock\n", ntv2_str->name);
         return NTV2_STATUS_FAIL;
+    }
+
+    // check state
+    if (ntv2_str->stream_state == ntv2_stream_state_disabled)
+    {
+        channel_state(ntv2_str, pChannel);
+        pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_STATE;
+        ntv2SemaphoreUp(&ntv2_str->state_sema);
+        NTV2_MSG_STREAM_ERROR("%s: wait state disabled\n", ntv2_str->name);
+        return NTV2_STATUS_SUCCESS;
     }
 
     for (event_index = 0; event_index < NTV2_STREAM_WAIT_CLIENTS; event_index++)
@@ -481,7 +496,9 @@ Ntv2Status ntv2_stream_channel_wait(struct ntv2_stream *ntv2_str, NTV2StreamChan
             break;
         }
     }
-    
+
+    ntv2SemaphoreUp(&ntv2_str->state_sema);
+
     // wait for stream engine
     if (event_index != NTV2_STREAM_WAIT_CLIENTS)
     {
@@ -504,6 +521,7 @@ Ntv2Status ntv2_stream_channel_wait(struct ntv2_stream *ntv2_str, NTV2StreamChan
     // synchronize
     if (!ntv2SemaphoreDown(&ntv2_str->state_sema, NTV2_STREAM_ACTION_TIMEOUT))
     {
+        channel_state(ntv2_str, pChannel);
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_TIMEOUT;
         NTV2_MSG_STREAM_ERROR("%s: wait timeout acquiring stream lock 2\n", ntv2_str->name);
         return NTV2_STATUS_FAIL;
@@ -516,6 +534,32 @@ Ntv2Status ntv2_stream_channel_wait(struct ntv2_stream *ntv2_str, NTV2StreamChan
     return NTV2_STATUS_SUCCESS;
 }
 
+Ntv2Status ntv2_stream_channel_advance(struct ntv2_stream *ntv2_str)
+{
+    int status;
+    int next;
+
+    // update index
+    if (ntv2_str->stream_state == ntv2_stream_state_active)
+    {
+        next = queue_next(ntv2_str->active_index);
+        if (ntv2_str->stream_buffers[next].linked && !ntv2_str->stream_buffers[next].released)
+        {
+            ntv2_str->active_index = next;
+        }
+    }
+    
+    // advance hardware
+    status = (ntv2_str->stream_ops.stream_advance)(ntv2_str);
+    if (status != NTV2_STREAM_OPS_SUCCESS)
+    {
+        NTV2_MSG_STREAM_ERROR("%s: channel advance failed\n", ntv2_str->name);
+        return status;
+    }
+
+    return NTV2_STATUS_SUCCESS;
+}
+
 Ntv2Status ntv2_stream_buffer_add(struct ntv2_stream *ntv2_str, NTV2StreamBuffer* pBuffer)
 {
     struct ntv2_stream_buffer* str_buf = NULL;
@@ -524,6 +568,7 @@ Ntv2Status ntv2_stream_buffer_add(struct ntv2_stream *ntv2_str, NTV2StreamBuffer
     // synchronize
     if (!ntv2SemaphoreDown(&ntv2_str->state_sema, NTV2_STREAM_ACTION_TIMEOUT))
     {
+        buffer_state(NULL, pBuffer);
         pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_TIMEOUT;
         NTV2_MSG_STREAM_ERROR("%s: buffer add timeout acquiring stream lock\n", ntv2_str->name);
         return NTV2_STATUS_FAIL;
@@ -584,6 +629,7 @@ Ntv2Status ntv2_stream_buffer_status(struct ntv2_stream *ntv2_str, NTV2StreamBuf
     // synchronize
     if (!ntv2SemaphoreDown(&ntv2_str->state_sema, NTV2_STREAM_ACTION_TIMEOUT))
     {
+        buffer_state(NULL, pBuffer);
         pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_TIMEOUT;
         NTV2_MSG_STREAM_ERROR("%s: buffer release timeout acquiring stream lock\n", ntv2_str->name);
         return NTV2_STATUS_FAIL;
