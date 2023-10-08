@@ -38,7 +38,7 @@ struct ntv2_stream_ops {
     int (*stream_initialize)(struct ntv2_stream *stream);
     int (*stream_start)(struct ntv2_stream *stream);
     int (*stream_stop)(struct ntv2_stream *stream);
-    int (*stream_program)(struct ntv2_stream *stream);
+    int (*stream_advance)(struct ntv2_stream *stream);
     int (*buffer_prepare)(struct ntv2_stream *stream, int index);
     int (*buffer_release)(struct ntv2_stream *stream, int index);
 };
@@ -59,6 +59,7 @@ struct ntv2_stream {
     Ntv2Semaphore       state_sema;
     bool                to_host;
     bool                enabled;
+    void*               dma_engine;
 
     enum ntv2_stream_state      stream_state;
     enum ntv2_stream_state      engine_state;
@@ -68,7 +69,7 @@ struct ntv2_stream {
     bool                        wait_inuse[NTV2_STREAM_WAIT_CLIENTS];
     uint32_t                    head_index;     // buffer queue head
     uint32_t                    tail_index;     // buffer queue tail
-    uint32_t                    link_index;    // next buffer to link
+    uint32_t                    link_index;     // next buffer to link
     uint32_t                    active_index;   // currently active buffer
 };
 
@@ -79,6 +80,7 @@ void ntv2_stream_close(struct ntv2_stream *ntv2_str);
 
 Ntv2Status ntv2_stream_configure(struct ntv2_stream *ntv2_str,
                                  struct ntv2_stream_ops *stream_ops,
+                                 void* dma_engine,
                                  bool to_host);
 
 Ntv2Status ntv2_stream_enable(struct ntv2_stream *ntv2_str);
@@ -91,6 +93,7 @@ Ntv2Status ntv2_stream_channel_stop(struct ntv2_stream *ntv2_str, NTV2StreamChan
 Ntv2Status ntv2_stream_channel_flush(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel);
 Ntv2Status ntv2_stream_channel_status(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel);
 Ntv2Status ntv2_stream_channel_wait(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel);
+Ntv2Status ntv2_stream_channel_advance(struct ntv2_stream *ntv2_str);
 
 Ntv2Status ntv2_stream_buffer_add(struct ntv2_stream *ntv2_str, NTV2StreamBuffer* pBuffer);
 Ntv2Status ntv2_stream_buffer_status(struct ntv2_stream *ntv2_str, NTV2StreamBuffer* pBuffer);
