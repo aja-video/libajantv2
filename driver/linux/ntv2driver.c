@@ -3339,10 +3339,13 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 	dmaInit(deviceNumber);
 
     // inialize streams
-    for (i = 0; i < NTV2_MAX_DMA_STREAMS; i++)
+    for (i = 0; i < ntv2pp->_dmaNumEngines; i++)
     {
-        if (ntv2pp->m_pMapStream[i] == NULL)
+        if (i >= NTV2_MAX_DMA_STREAMS)
             break;
+
+        if (!ntv2pp->_dmaEngine[i].dmaStream)
+            continue;
         
         ntv2pp->m_pDmaStream[i] = ntv2_stream_open(&ntv2pp->systemContext, "ntv2stream", i);
         if (ntv2pp->m_pDmaStream[i] != NULL)
@@ -3352,11 +3355,19 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
                 .stream_initialize = dmaOpsStreamInitialize,
                 .stream_start = dmaOpsStreamStart,
                 .stream_stop = dmaOpsStreamStop,
+                .stream_advance = dmaOpsStreamAdvance,
                 .buffer_prepare = dmaOpsBufferPrepare,
                 .buffer_release = dmaOpsBufferRelease
             };
-            status = ntv2_stream_configure(ntv2pp->m_pDmaStream[i], &stream_ops, ((i & 0x1) == 1));
-            if (status != NTV2_STATUS_SUCCESS)
+            status = ntv2_stream_configure(ntv2pp->m_pDmaStream[i],
+                                           &stream_ops,
+                                           &ntv2pp->_dmaEngine[i],
+                                           ((i & 0x1) == 1));
+            if (status == NTV2_STATUS_SUCCESS)
+            {
+                ntv2pp->_dmaEngine[i].strIndex = i;
+            }
+            else
             {
                 ntv2_stream_close(ntv2pp->m_pDmaStream[i]);
                 ntv2pp->m_pDmaStream[i] = NULL;

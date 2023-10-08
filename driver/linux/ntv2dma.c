@@ -173,10 +173,11 @@ const ULWord dmaHardwareRateH2CReg[] = { kVRegDmaHardwareRateH2C1,
 
 static PDMA_ENGINE getDmaEngine(ULWord deviceNumber, ULWord engIndex);
 static PDMA_CONTEXT getDmaContext(ULWord deviceNumber, ULWord engIndex, ULWord conIndex);
+static struct ntv2_stream* getDmaStream(ULWord deviceNumber, ULWord engIndex);
 
 static void dmaFreeEngine(PDMA_ENGINE pDmaEngine);
 static PDMA_ENGINE dmaMapEngine(ULWord deviceNumber, NTV2DMAEngine eDMAEngine, bool bToHost);
-static PDMA_ENGINE dmaMapStream(ULWord deviceNumber, NTV2Channel eChannel);
+static PDMA_ENGINE dmaMapStream(ULWord deviceNumber, NTV2Channel eChannel, bool bToHost);
 static bool dmaHardwareInit(PDMA_ENGINE pDmaEngine);
 static void dmaStatistics(PDMA_ENGINE pDmaEngine, bool dmaC2H);
 
@@ -532,6 +533,19 @@ static PDMA_ENGINE getDmaEngine(ULWord deviceNumber, ULWord engIndex)
 	return pDmaEngine;
 }
 
+static struct ntv2_stream* getDmaStream(ULWord deviceNumber, ULWord engIndex)
+{
+	NTV2PrivateParams *pNTV2Params = getNTV2Params(deviceNumber);
+	PDMA_ENGINE pDmaEngine = &pNTV2Params->_dmaEngine[engIndex];
+    
+    if (!pDmaEngine->dmaStream)
+    {
+        return NULL;
+    }
+    
+	return pNTV2Params->m_pDmaStream[pDmaEngine->strIndex];
+}
+
 static PDMA_CONTEXT getDmaContext(ULWord deviceNumber, ULWord engIndex, ULWord conIndex)
 {
 	NTV2PrivateParams *pNTV2Params = getNTV2Params(deviceNumber);
@@ -740,7 +754,7 @@ static PDMA_ENGINE dmaMapEngine(ULWord deviceNumber, NTV2DMAEngine eDMAEngine, b
 	return getDmaEngine(deviceNumber, engIndex);
 }
 
-static PDMA_ENGINE dmaMapStream(ULWord deviceNumber, NTV2Channel eChannel)
+static PDMA_ENGINE dmaMapStream(ULWord deviceNumber, NTV2Channel eChannel, bool bToHost)
 {
     return NULL;
 }
@@ -2438,6 +2452,7 @@ void dmaInterrupt(ULWord deviceNumber, ULWord intStatus)
 {
 	NTV2PrivateParams* pNTV2Params = getNTV2Params(deviceNumber);
 	PDMA_ENGINE pDmaEngine = NULL;
+    struct ntv2_stream* pDmaStream = NULL;
 
 	if (pNTV2Params->_dmaMethod == DmaMethodAja)
 	{
@@ -2489,23 +2504,55 @@ void dmaInterrupt(ULWord deviceNumber, ULWord intStatus)
 	{
 		if (IsXlnxDmaInterrupt(deviceNumber, false, 0, intStatus))
 		{
-			pDmaEngine = getDmaEngine(deviceNumber, 0);
-			dmaXlnxInterrupt(pDmaEngine);
+            pDmaStream = getDmaStream(deviceNumber, 0);
+            if (pDmaStream != NULL)
+            {
+                ntv2_stream_channel_advance(pDmaStream);
+            }
+            else
+            {
+                pDmaEngine = getDmaEngine(deviceNumber, 0);
+                dmaXlnxInterrupt(pDmaEngine);
+            }
 		}
 		if (IsXlnxDmaInterrupt(deviceNumber, true, 0, intStatus))
 		{
-			pDmaEngine = getDmaEngine(deviceNumber, 1);
-			dmaXlnxInterrupt(pDmaEngine);
+            pDmaStream = getDmaStream(deviceNumber, 1);
+            if (pDmaStream != NULL)
+            {
+                ntv2_stream_channel_advance(pDmaStream);
+            }
+            else
+            {
+                pDmaEngine = getDmaEngine(deviceNumber, 1);
+                dmaXlnxInterrupt(pDmaEngine);
+            }
 		}
 		if (IsXlnxDmaInterrupt(deviceNumber, false, 1, intStatus))
 		{
-			pDmaEngine = getDmaEngine(deviceNumber, 2);
-			dmaXlnxInterrupt(pDmaEngine);
+            pDmaStream = getDmaStream(deviceNumber, 2);
+            if (pDmaStream != NULL)
+            {
+                ntv2_stream_channel_advance(pDmaStream);
+            }
+            else
+            {
+                pDmaEngine = getDmaEngine(deviceNumber, 2);
+                dmaXlnxInterrupt(pDmaEngine);
+            }
 		}
 		if (IsXlnxDmaInterrupt(deviceNumber, true, 1, intStatus))
 		{
-			pDmaEngine = getDmaEngine(deviceNumber, 3);
-			dmaXlnxInterrupt(pDmaEngine);
+            pDmaStream = getDmaStream(deviceNumber, 3);
+            if (pDmaStream != NULL)
+            {
+                ntv2_stream_channel_advance(pDmaStream);
+            }
+            else
+            {
+                pDmaEngine = getDmaEngine(deviceNumber, 3);
+                dmaXlnxInterrupt(pDmaEngine);
+            }
 		}
 	}
 	else
@@ -4743,8 +4790,8 @@ static void dmaXlnxInterrupt(PDMA_ENGINE pDmaEngine)
 	ULWord		valDmaStatus;
 	bool		done;
 
-	// disable interrupt and stop dma engine
-	if (!pDmaEngine->dmaStream)
+	// streaming should not get here 
+	if (pDmaEngine->dmaStream)
     {
         DisableXlnxDmaInterrupt(deviceNumber, xlnxC2H, xlnxIndex);
         StopXlnxDma(deviceNumber, xlnxC2H, xlnxIndex);
@@ -4766,17 +4813,6 @@ static void dmaXlnxInterrupt(PDMA_ENGINE pDmaEngine)
 	}
 
 	pDmaEngine->interruptCount++;
-
-	if (pDmaEngine->dmaStream)
-	{
-		valDmaStatus = ReadXlnxDmaStatus(deviceNumber, xlnxC2H, xlnxIndex);
-		if ((pDmaEngine->interruptCount < 10) || ((pDmaEngine->interruptCount % 60) == 0) || IsXlnxDmaError(valDmaStatus))
-		{
-			NTV2_MSG_PROGRAM("%s%d:%s%d: dmaXlnxInterrupt dma streaming count %lld  status %08x\n",
-                             DMA_MSG_ENGINE, pDmaEngine->interruptCount, valDmaStatus);
-		}
-		return;
-	}
 
 	// wait for engine stop (can take a couple of register reads)
 	done = WaitXlnxDmaActive(deviceNumber, xlnxC2H, xlnxIndex, false);
@@ -4822,21 +4858,44 @@ static void dmaXlnxInterrupt(PDMA_ENGINE pDmaEngine)
 
 int dmaOpsStreamInitialize(struct ntv2_stream *stream)
 {
+    // stop the dma engine synchonously
+
+    // reset counters
+    
     return NTV2_STREAM_OPS_SUCCESS;
 }
 
 int dmaOpsStreamStart(struct ntv2_stream *stream)
 {
+    // program the descriptors
+
+    // link the chain
+
+    // start the engine
+    
     return NTV2_STREAM_OPS_SUCCESS;
 }
 
 int dmaOpsStreamStop(struct ntv2_stream *stream)
 {
+    // relink the chain
+    
     return NTV2_STREAM_OPS_SUCCESS;
 }
 
-int dmaOpsStreamProgram(struct ntv2_stream *stream)
+int dmaOpsStreamAdvance(struct ntv2_stream *stream)
 {
+    PDMA_ENGINE pDmaEngine = (PDMA_ENGINE)stream->dma_engine;
+
+    // spinlock
+    if (stream->stream_state == ntv2_stream_state_active)
+    {
+        // program
+    }
+    
+    NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsStreamAdvance dma streaming count %lld\n",
+                     DMA_MSG_ENGINE, pDmaEngine->interruptCount);
+   
     return NTV2_STREAM_OPS_SUCCESS;
 }
 
@@ -4860,6 +4919,12 @@ int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index)
     }
 
     buffer->prepared = true;
+
+    // spinlock
+    if (stream->stream_state != ntv2_stream_state_active)
+    {
+        // program
+    }
     
     return NTV2_STREAM_OPS_SUCCESS;
 }
@@ -4869,9 +4934,6 @@ int dmaOpsBufferRelease(struct ntv2_stream *stream, int index)
     ULWord deviceNumber = stream->system_context->devNum;
     struct ntv2_stream_buffer* buffer = &stream->stream_buffers[index];
     PDMA_PAGE_BUFFER pPageBuffer = (PDMA_PAGE_BUFFER)buffer->user_buffer.mBuffer.fKernelHandle;
-
-    if (!buffer->prepared)
-        return NTV2_STREAM_OPS_FAIL;
 
     if (buffer->mapped)
         dmaSgUnmap(deviceNumber, pPageBuffer);

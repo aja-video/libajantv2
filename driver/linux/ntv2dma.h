@@ -257,6 +257,7 @@ typedef struct _dmaEngine_
 	ULWord					dmaIndex;				// dma index
 	bool					dmaC2H;					// dma to host
     bool                    dmaStream;              // streaming engine
+    ULWord                  strIndex;               // stream index
 	ULWord					maxVideoSize;			// maximum video transfer size
 	ULWord					maxVideoPages;			// maximum video pages
 	ULWord					maxAudioSize;			// maximum audio transfer size
@@ -347,7 +348,7 @@ void dmaInterrupt(ULWord deviceNumber, ULWord intStatus);
 int dmaOpsStreamInitialize(struct ntv2_stream *stream);
 int dmaOpsStreamStart(struct ntv2_stream *stream);
 int dmaOpsStreamStop(struct ntv2_stream *stream);
-int dmaOpsStreamProgram(struct ntv2_stream *stream);
+int dmaOpsStreamAdvance(struct ntv2_stream *stream);
 int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index);
 int dmaOpsBufferRelease(struct ntv2_stream *stream, int index);
 
