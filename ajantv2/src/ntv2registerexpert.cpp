@@ -1447,21 +1447,7 @@ private:
 		DEF_REG	(kVRegDmaHardwareRateH2C4,				mDMAXferRateRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
 
 		DEF_REG	(kVRegHDMIInAviInfo1,					mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_NULL);
-
-		DEF_REG	(kVRegMaskHDMIInColorimetry,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_HDR);
-		DEF_REG	(kVRegShiftHDMIInColorimetry,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_HDR);
-		DEF_REG	(kVRegMaskHDMIInDolbyVision,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_HDR);
-		DEF_REG	(kVRegShiftHDMIInDolbyVision,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_HDR);
-
 		DEF_REG	(kVRegHDMIInDrmInfo1,					mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_NULL);
-
-		DEF_REG	(kVRegMaskHDMIInPresent,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMIInPresent,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMIInEOTF,					mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMIInEOTF,					mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMIInMetadataID,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMIInMetadataID,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_NULL);
-
 		DEF_REG	(kVRegHDMIInDrmGreenPrimary1,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_HDR);
 		DEF_REG	(kVRegHDMIInDrmBluePrimary1,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_HDR);
 		DEF_REG	(kVRegHDMIInDrmRedPrimary1,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_HDR);
@@ -1481,26 +1467,6 @@ private:
 		DEF_REG	(kVRegBaseFirmwareDeviceID,				mDecodeBoardID,		READWRITE, kRegClass_NULL, kRegClass_NULL,	kRegClass_NULL);
 
 		DEF_REG	(kVRegHDMIOutStatus1,					mDecodeHDMIOutputStatus,READWRITE,	kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMOutVideoStandard,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMOutVideoStandard,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMOutVideoFrameRate,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMOutVideoFrameRate,		mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMOutBitDepth,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMOutBitDepth,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMOutColorRGB,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMOutColorRGB,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMOutRangeFull,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMOutRangeFull,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMOutPixel420,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMOutPixel420,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMOutProtocol,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMOutProtocol,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMOutAudioFormat,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_Audio);
-		DEF_REG	(kVRegShiftHDMOutAudioFormat,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_Audio);
-		DEF_REG	(kVRegMaskHDMOutAudioRate,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_Audio);
-		DEF_REG	(kVRegShiftHDMOutAudioRate,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_Audio);
-		DEF_REG	(kVRegMaskHDMOutAudioChannels,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_Audio);
-		DEF_REG	(kVRegShiftHDMOutAudioChannels,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_Audio);
 		DEF_REG	(kVRegAudioOutputToneSelect,			mDefaultRegDecoder, READWRITE, kRegClass_Audio,kRegClass_Output, kRegClass_NULL);
 		DEF_REG	(kVRegDynFirmwareUpdateCounts,			mDecodeDynFWUpdateCounts,READWRITE,kRegClass_NULL,kRegClass_NULL,kRegClass_NULL);
 

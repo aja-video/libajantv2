@@ -8,6 +8,7 @@
 #ifndef NTV2VIRTUALREGISTERS_H
 #define NTV2VIRTUALREGISTERS_H
 
+#include "ajatypes.h"
 #define VIRTUALREG_START			10000	//	Virtual registers start at register number 10000
 #define MAX_NUM_VIRTUAL_REGISTERS	1024	//	Starting in SDK 12.6, there's room for 1024 virtual registers
 
@@ -604,30 +605,14 @@ typedef enum
 	kVRegDmaHardwareRateC2H4				= VIRTUALREG_START+621,
 	kVRegDmaTransferRateH2C4				= VIRTUALREG_START+622,
 	kVRegDmaHardwareRateH2C4				= VIRTUALREG_START+623,
-
 	kVRegHDMIInAviInfo1						= VIRTUALREG_START+624,
-
-	kVRegMaskHDMIInColorimetry				= BIT(3)+BIT(2)+BIT(1)+BIT(0),
-	kVRegShiftHDMIInColorimetry				= 0,
-	kVRegMaskHDMIInDolbyVision				= BIT(4),
-	kVRegShiftHDMIInDolbyVision				= 4,
-
 	kVRegHDMIInDrmInfo1						= VIRTUALREG_START+625,
-
-	kVRegMaskHDMIInPresent					= BIT(0),
-	kVRegShiftHDMIInPresent					= 0,
-	kVRegMaskHDMIInEOTF						= BIT(11)+BIT(10)+BIT(9)+BIT(8),
-	kVRegShiftHDMIInEOTF					= 8,
-	kVRegMaskHDMIInMetadataID				= BIT(15)+BIT(14)+BIT(13)+BIT(12),
-	kVRegShiftHDMIInMetadataID				= 12,
-
 	kVRegHDMIInDrmGreenPrimary1				= VIRTUALREG_START+626,
 	kVRegHDMIInDrmBluePrimary1				= VIRTUALREG_START+627,
 	kVRegHDMIInDrmRedPrimary1				= VIRTUALREG_START+628,
 	kVRegHDMIInDrmWhitePoint1				= VIRTUALREG_START+629,
 	kVRegHDMIInDrmMasteringLuminence1		= VIRTUALREG_START+630,
 	kVRegHDMIInDrmLightLevel1				= VIRTUALREG_START+631,
-
 	kVRegHDMIInAviInfo2						= VIRTUALREG_START+632,
 	kVRegHDMIInDrmInfo2						= VIRTUALREG_START+633,
 	kVRegHDMIInDrmGreenPrimary2				= VIRTUALREG_START+634,
@@ -636,30 +621,8 @@ typedef enum
 	kVRegHDMIInDrmWhitePoint2				= VIRTUALREG_START+637,
 	kVRegHDMIInDrmMasteringLuminence2		= VIRTUALREG_START+638,
 	kVRegHDMIInDrmLightLevel2				= VIRTUALREG_START+639,
-	
 	kVRegBaseFirmwareDeviceID				= VIRTUALREG_START+640,
-
 	kVRegHDMIOutStatus1						= VIRTUALREG_START+641,
-	kVRegMaskHDMOutVideoStandard			= BIT(3)+BIT(2)+BIT(1)+BIT(0),
-	kVRegShiftHDMOutVideoStandard			= 0,
-	kVRegMaskHDMOutVideoFrameRate			= BIT(7)+BIT(6)+BIT(5)+BIT(4),
-	kVRegShiftHDMOutVideoFrameRate			= 4,
-	kVRegMaskHDMOutBitDepth					= BIT(11)+BIT(10)+BIT(9)+BIT(8),
-	kVRegShiftHDMOutBitDepth				= 8,
-	kVRegMaskHDMOutColorRGB					= BIT(12),
-	kVRegShiftHDMOutColorRGB				= 12,
-	kVRegMaskHDMOutRangeFull				= BIT(13),
-	kVRegShiftHDMOutRangeFull				= 13,
-	kVRegMaskHDMOutPixel420					= BIT(14),
-	kVRegShiftHDMOutPixel420				= 14,
-	kVRegMaskHDMOutProtocol					= BIT(15),
-	kVRegShiftHDMOutProtocol				= 15,
-	kVRegMaskHDMOutAudioFormat				= BIT(19)+BIT(18)+BIT(17)+BIT(16),
-	kVRegShiftHDMOutAudioFormat				= 16,
-	kVRegMaskHDMOutAudioRate				= BIT(23)+BIT(22)+BIT(21)+BIT(20),
-	kVRegShiftHDMOutAudioRate				= 20,
-	kVRegMaskHDMOutAudioChannels			= BIT(27)+BIT(26)+BIT(25)+BIT(24),
-	kVRegShiftHDMOutAudioChannels			= 24,
 	kVRegAudioOutputToneSelect				= VIRTUALREG_START+642,
 	kVRegDynFirmwareUpdateCounts			= VIRTUALREG_START+643,		//	MS 16 bits: # attempts;  LS 16 bits: # successful
 
@@ -667,6 +630,44 @@ typedef enum
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief Last virtual register slot
 
-} VirtualRegisterNum;
+} VirtualRegisterNum, NTV2VirtualRegisters;
+
+typedef enum
+{
+	kVRegMaskHDMIInColorimetry				= BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kVRegMaskHDMIInDolbyVision				= BIT(4),
+	kVRegMaskHDMIInPresent					= BIT(0),
+	kVRegMaskHDMIInEOTF						= BIT(11)+BIT(10)+BIT(9)+BIT(8),	
+	kVRegMaskHDMIInMetadataID				= BIT(15)+BIT(14)+BIT(13)+BIT(12),
+	kVRegMaskHDMOutVideoStandard			= BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kVRegMaskHDMOutVideoFrameRate			= BIT(7)+BIT(6)+BIT(5)+BIT(4),
+	kVRegMaskHDMOutBitDepth					= BIT(11)+BIT(10)+BIT(9)+BIT(8),
+	kVRegMaskHDMOutColorRGB					= BIT(12),
+	kVRegMaskHDMOutRangeFull				= BIT(13),
+	kVRegMaskHDMOutPixel420					= BIT(14),
+	kVRegMaskHDMOutProtocol					= BIT(15),
+	kVRegMaskHDMOutAudioFormat				= BIT(19)+BIT(18)+BIT(17)+BIT(16),
+	kVRegMaskHDMOutAudioRate				= BIT(23)+BIT(22)+BIT(21)+BIT(20),
+	kVRegMaskHDMOutAudioChannels			= BIT(27)+BIT(26)+BIT(25)+BIT(24)
+} NTV2VirtualRegisterMasks;
+
+typedef enum
+{
+	kVRegShiftHDMIInColorimetry				= 0,
+	kVRegShiftHDMIInDolbyVision				= 4,
+	kVRegShiftHDMIInPresent					= 0,
+	kVRegShiftHDMIInEOTF					= 8,
+	kVRegShiftHDMIInMetadataID				= 12,
+	kVRegShiftHDMOutVideoStandard			= 0,
+	kVRegShiftHDMOutVideoFrameRate			= 4,
+	kVRegShiftHDMOutBitDepth				= 8,
+	kVRegShiftHDMOutColorRGB				= 12,
+	kVRegShiftHDMOutRangeFull				= 13,
+	kVRegShiftHDMOutPixel420				= 14,
+	kVRegShiftHDMOutProtocol				= 15,
+	kVRegShiftHDMOutAudioFormat				= 16,
+	kVRegShiftHDMOutAudioRate				= 20,
+	kVRegShiftHDMOutAudioChannels			= 24
+} NTV2VirtualRegisterShifts;
 
 #endif// NTV2VIRTUALREGISTERS_H
