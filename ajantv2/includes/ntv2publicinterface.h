@@ -1027,9 +1027,9 @@ typedef enum
 typedef enum
 {
 	kRegBOBStatus = 0x3680,
-	kRegBOBGPIInControl,
+	kRegBOBGPIInData,
 	kRegBOBGPIInterruptControl,
-	kRegBOBGPIOutControl,
+	kRegBOBGPIOutData,
 	kRegBOBAudioControl
 } NTV2BOBWidgetRegisters;
 
