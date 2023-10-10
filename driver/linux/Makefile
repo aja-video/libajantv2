@@ -21,6 +21,10 @@ KDIR		?= /lib/modules/$(KVERSION)/build
 include $(DIR)/../configure.mk
 include $(DIR)/../sdkversion.mk
 
+# Create device nodes by default (load_ajantv2 no longer required)
+# Install: insmod ajantv2.ko   Remove: rmmod ajantv2
+AJA_CREATE_DEVICE_NODES = 1
+
 CC			 ?= gcc
 
 DRIVERTARGET = $(NTV2TARGET).o

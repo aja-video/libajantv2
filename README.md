@@ -215,17 +215,17 @@ $ cd libajantv2/driver/linux
 ```
 $ make clean && make
 ```
-3. If the kernel module build succeeded, the ajantv2.ko file should appear in `libajantv2/driver/bin`. The kernel module can now be installed via the **load_ajantv2** script from the same directory:
+3. If the kernel module build succeeds, the ajantv2.ko file will appear in `libajantv2/driver/bin`. Install the kernel module using insmod:
 ```
-$ sudo ../bin/load_ajantv2
+$ sudo insmod ajantv2.ko
 ```
 
 Note that on hosts with **Secure Boot** enabled, you’ll need to sign the **ajantv2.ko** kernel module after it’s been built.
 Check your Linux distro’s documentation for **Secure Boot** information.
 
-Uninstallation of the kernel module can be accomplished via the **unload_ajantv2** script:
+Uninstall the kernel module using rmmod (all applications using the driver must be closed):
 ```
-$ sudo ../bin/unload_ajantv2
+$ sudo rmmod ajantv2
 ```
 
 
