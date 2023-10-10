@@ -1,0 +1,25 @@
+#!/bin/sh
+SELF_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
+
+# set this if compatibility with the old /dev/oem2k* device nodes is needed
+AJA_LOAD_OLD_DEV_NAMES=0
+
+if [ `id -u` != "0" ]; then
+    echo "error: You must have superuser privileges to run this script."
+    exit 13
+fi
+
+# install module into kernel
+# Default install:
+/sbin/insmod "$SELF_DIR/ajantv2.ko" 2>/dev/null
+
+# To install without mapping framebuffers (driverbuffer-DMA only, 
+# see readme-linux.txt) do this instead:
+#/sbin/insmod "$SELF_DIR/ajantv2.ko" AJANTV2_MapFrameBuffers=0
+
+# To install with a particular number of driverbuffers, do this instead:
+# /sbin/insmod "$SELF_DIR/ajantv2.ko" AJANTV2_NumDmaDriverBuffers=2
+
+if [ $? -eq 0 ]; then
+    echo "loaded ajantv2 driver module"
+fi
