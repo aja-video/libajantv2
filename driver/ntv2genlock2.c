@@ -411,7 +411,8 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 
 	spi_reset(ntv2_gen);
 
-	if (check) {
+	if (check)
+	{
 		NTV2_MSG_GENLOCK_INFO("%s: genlock2 write registers\n", ntv2_gen->name);
 	}
 
@@ -428,6 +429,25 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 		gdat++;
 	}
 
+	wait_genlock2(ntv2_gen, 1000);
+	count = 0;
+	while ((NTV2_FLD_GET(ntv2_fld_control_genlock_locked, reg_read(ntv2_gen, ntv2_reg_control_status))) && count > 2000)
+	{
+		wait_genlock2(ntv2_gen, 1000);
+		count++;
+	}
+
+	if (count >= 2000)
+	{
+		NTV2_MSG_GENLOCK_INFO("%s: genlock2 initial lock check timeout\n", ntv2_gen->name);
+	}
+	else
+	{
+		NTV2_MSG_GENLOCK_INFO("%s: genlock2 initial lock check locked count: %d\n", ntv2_gen->name, count);
+	}
+
+
+
 	// reset genlock
 	value = NTV2_FLD_SET(ntv2_fld_control_genlock_reset, 1);
 	mask = NTV2_FLD_MASK(ntv2_fld_control_genlock_reset);
@@ -435,7 +455,8 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 	value = NTV2_FLD_SET(ntv2_fld_control_genlock_reset, 0);
 	ntv2_reg_rmw(ntv2_gen->system_context, ntv2_reg_control_status, ntv2_gen->index, value, mask);
 
-	if (check) {
+	if (check)
+	{
 		NTV2_MSG_GENLOCK_INFO("%s: genlock2 write complete\n", ntv2_gen->name);
 	}
 
