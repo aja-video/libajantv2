@@ -3,6 +3,7 @@ set(AJADRIVER_COMMON_HEADERS
 	ntv2audio.h
 	ntv2autocirc.h
 	ntv2autofunc.h
+	ntv2aux.h
 	ntv2commonreg.h
 	ntv2displayid.h
 	ntv2genlock.h
@@ -36,6 +37,7 @@ set(AJADRIVER_COMMON_SOURCES
 	ntv2anc.c
 	ntv2audio.c
 	ntv2autocirc.c
+	ntv2aux.c
 	ntv2commonreg.c
 	ntv2displayid.c
 	ntv2genlock.c

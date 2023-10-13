@@ -341,10 +341,27 @@ Ntv2Status AutoCirculateInit(NTV2AutoCirc* pAutoCirc,
 			{
 				if (NTV2_IS_VALID_CHANNEL(pAutoCirc->ancInputChannel[ACChannel]))
 				{
-					EnableAncInserter(pSysCon, pAutoCirc->ancInputChannel[ACChannel], false);
-					EnableAncExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], false);
-					SetupAncExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel]);
-					EnableAncExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], true);
+					if (pAuto->circulateWithHDMIAux)
+					{
+						if (NTV2DeviceCanDoCustomAux(deviceID))
+						{
+							EnableAuxExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], false);
+							SetupAuxExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel]);
+							EnableAuxExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], true);
+						}
+						else
+						{
+							pAuto->circulateWithHDMIAux = false;
+							pAuto->circulateWithCustomAncData = false;
+						}
+					}
+					else
+					{				
+						EnableAncInserter(pSysCon, pAutoCirc->ancInputChannel[ACChannel], false);
+						EnableAncExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], false);
+						SetupAncExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel]);
+						EnableAncExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], true);
+					}
 				}
 			}
 			else
@@ -394,6 +411,15 @@ Ntv2Status AutoCirculateInit(NTV2AutoCirc* pAutoCirc,
 					}
 				}
 
+			}
+		}
+
+		if (!pAuto->circulateWithHDMIAux)
+		{
+			if (NTV2_IS_INPUT_CROSSPOINT(pAuto->channelSpec) &&
+				NTV2DeviceCanDoCustomAux(DeviceID))
+			{
+				EnableAncExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], false);
 			}
 		}
 
@@ -507,7 +533,14 @@ Ntv2Status AutoCirculateStart(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpe
 			{
 				if (NTV2_IS_VALID_CHANNEL(pAutoCirc->ancInputChannel[ACChannel]))
 				{
-					SetAncExtWriteParams(pSysCon, pAutoCirc->ancInputChannel[ACChannel], pAuto->startFrame);
+					if (pAuto->circulateWithHDMIAux)
+					{
+						SetAuxExtWriteParams(pSysCon, pAutoCirc->ancInputChannel[ACChannel], pAuto->startFrame);
+					}
+					else
+					{
+						SetAncExtWriteParams(pSysCon, pAutoCirc->ancInputChannel[ACChannel], pAuto->startFrame);
+					}
 				}
 			}
 		}
@@ -646,7 +679,14 @@ Ntv2Status AutoCirculateAbort(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpe
 				{
 					if (NTV2_IS_VALID_CHANNEL(pAutoCirc->ancInputChannel[ACChannel]))
 					{
-						EnableAncExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], false);
+						if (pAuto->circulateWithHDMIAux)
+						{
+							EnableAuxExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], false);
+						}
+						else
+						{
+							EnableAncExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], false);
+						}
 					}
 				}
 			}
@@ -2337,7 +2377,14 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 				{
 					if (NTV2_IS_VALID_CHANNEL(pAutoCirc->ancInputChannel[acChannel]))
 					{
-						SetAncExtWriteParams(pSysCon, pAutoCirc->ancInputChannel[acChannel], nextFrame);
+						if (pAuto->circulateWithHDMIAux)
+						{
+							SetAuxExtWriteParams(pSysCon, pAutoCirc->ancInputChannel[acChannel], nextFrame);
+						}
+						else
+						{
+							SetAncExtWriteParams(pSysCon, pAutoCirc->ancInputChannel[acChannel], nextFrame);
+						}
 					}
 				}
 
@@ -2695,9 +2742,18 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 				{
 					if (NTV2_IS_VALID_CHANNEL(pAutoCirc->ancInputChannel[acChannel]))
 					{
-						pAuto->frameStamp[lastActiveFrame].ancTransferSize = GetAncExtField1Bytes(pSysCon, pAutoCirc->ancInputChannel[acChannel]);
-						pAuto->frameStamp[lastActiveFrame].ancField2TransferSize = GetAncExtField2Bytes(pSysCon, pAutoCirc->ancInputChannel[acChannel]);
-						SetAncExtWriteParams(pSysCon, pAutoCirc->ancInputChannel[acChannel], nextFrame);
+						if (pAuto->circulateWithHDMIAux)
+						{
+							pAuto->frameStamp[lastActiveFrame].ancTransferSize = GetAuxExtField1Bytes(pSysCon, pAutoCirc->ancInputChannel[acChannel]));
+							pAuto->frameStamp[lastActiveFrame].ancField2TransferSize = GetAuxExtField2Bytes(pSysCon, pAutoCirc->ancInputChannel[acChannel]));
+							SetAuxExtWriteParams(pSysCon, pAutoCirc->ancInputChannel[acChannel], nextFrame);
+						}
+						else
+						{
+							pAuto->frameStamp[lastActiveFrame].ancTransferSize = GetAncExtField1Bytes(pSysCon, pAutoCirc->ancInputChannel[acChannel]);
+							pAuto->frameStamp[lastActiveFrame].ancField2TransferSize = GetAncExtField2Bytes(pSysCon, pAutoCirc->ancInputChannel[acChannel]);
+							SetAncExtWriteParams(pSysCon, pAutoCirc->ancInputChannel[acChannel], nextFrame);
+						}
 					}
 					else
 					{
@@ -3002,7 +3058,14 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 				{
 					if (NTV2_IS_VALID_CHANNEL(pAutoCirc->ancInputChannel[acChannel]))
 					{
-						EnableAncExtractor(pSysCon, pAutoCirc->ancInputChannel[acChannel], false);
+						if (pAuto->circulateWithHDMIAux)
+						{
+							EnableAuxExtractor(pSysCon, pAutoCirc->ancInputChannel[acChannel], false);
+						}
+						else
+						{
+							EnableAncExtractor(pSysCon, pAutoCirc->ancInputChannel[acChannel], false);
+						}
 					}
 				}
 			}
@@ -3076,10 +3139,19 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 	{
 		if (pAuto->recording)
 		{
-			//Do someting on a field
-			SetAncExtField2WriteParams(pSysCon,
-									   acChannel,
-									   pAuto->nextFrame);
+			if (pAuto->circulateWithHDMIAux)
+			{
+				SetAuxExtField2WriteParams(pSysCon, 
+										acChannel, 
+										pAuto->nextFrame);
+			}
+			else
+			{
+				//Do someting on a field
+				SetAncExtField2WriteParams(pSysCon,
+										acChannel,
+										pAuto->nextFrame);
+			}
 		}
 		else
 		{

@@ -18,6 +18,7 @@
 #include "ntv2vpid.h"
 #include "ntv2rp188.h"
 #include "ntv2anc.h"
+#include "ntv2aux.h"
 
 
 ///////////////////////
