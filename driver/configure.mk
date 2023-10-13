@@ -87,8 +87,8 @@ export OBJDIR
 ifeq ($(wildcard /etc/os-release),/etc/os-release)
 	DISTRO_TYPE := $(shell awk 'BEGIN {FS = "="} $$1 == "ID" {gsub("\"",""); print $$2}' /etc/os-release)
 	DISTRO_IS_RHEL_LIKE := $(shell awk 'BEGIN {FS = "="} $$1 == "ID_LIKE" && $$2 ~ /rhel/ {print 1}' /etc/os-release)
-	DISTRO_MAJ_VERSION := $(shell awk 'BEGIN {FS = "="} $$1 == "VERSION_ID" {split($$2, subfield, "."); gsub("\"","",subfield[1]); print subfield[1]}' /etc/os-release)
-	DISTRO_MIN_VERSION := $(shell awk 'BEGIN {FS = "="} $$1 == "VERSION_ID" {split($$2, subfield, "."); gsub("\"","",subfield[2]); print subfield[2]}' /etc/os-release)
+	DISTRO_MAJ_VERSION := $(shell awk 'BEGIN {FS = "="} $$1 == "VERSION_ID" {split($$2, subfield, "."); gsub("\"","",subfield[1]); printf("%d", subfield[1])}' /etc/os-release)
+	DISTRO_MIN_VERSION := $(shell awk 'BEGIN {FS = "="} $$1 == "VERSION_ID" {split($$2, subfield, "."); gsub("\"","",subfield[2]); printf("%d", subfield[2])}' /etc/os-release)
 endif
 
 # set distro defaults if needed
