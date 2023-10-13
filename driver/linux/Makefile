@@ -83,6 +83,7 @@ DRIVERSRCS = ntv2devicefeatures.c \
 			../ntv2mcap.c \
 			../ntv2pciconfig.c \
 			../ntv2system.c \
+			../ntv2aux.c \
 			../ntv2anc.c \
 			../ntv2xpt.c \
 			../ntv2kona.c \
@@ -131,6 +132,7 @@ DRIVERINCS = $(A_LIB_NTV2_INC)/ntv2audiodefines.h \
 			$(A_DRIVER_PATH)/ntv2vpid.h \
 			$(A_DRIVER_PATH)/ntv2xpt.h \
 			$(A_DRIVER_PATH)/ntv2anc.h \
+			$(A_DRIVER_PATH)/ntv2aux.h \
 			$(A_DRIVER_PATH)/ntv2setup.h
 
 ifdef AJA_HEVC
