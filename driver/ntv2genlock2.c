@@ -96,7 +96,7 @@ static void spi_reset(struct ntv2_genlock2 *ntv2_gen);
 static void spi_reset_fifos(struct ntv2_genlock2 *ntv2_gen);
 static bool spi_wait_write_empty(struct ntv2_genlock2 *ntv2_gen);
 static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, uint8_t offset, uint8_t* data, bool triggerWait);
-static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uint8_t* data, uint32_t numBytes);
+static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uint8_t* data, uint32_t numBytes, bool setPage);
 static void hex_to_bytes(char *hex, uint8_t *output, uint32_t array_length);
 
 static uint32_t reg_read(struct ntv2_genlock2 *ntv2_gen, const uint32_t *reg);
@@ -402,7 +402,7 @@ static struct ntv2_genlock2_data* get_genlock2_config(struct ntv2_genlock2 *ntv2
 static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlock2_data *config, bool check)
 {
 	struct ntv2_genlock2_data* gdat = config;
-	uint32_t count = 0;
+	uint32_t count = 0, errorCount = 0, totalBytes = 0;
 	uint32_t value;
 	uint32_t mask;
 	uint8_t writeBytes[256];
@@ -425,13 +425,40 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 			NTV2_MSG_ERROR("%s: genlock spi write failed\n", ntv2_gen->name);
 			return false;
 		}
+		totalBytes += gdat->size;
+
+		if (check && gdat->offset != 0x7C)
+		{
+			uint8_t readBytes[256];
+			if (spi_genlock2_read(ntv2_gen, gdat->offset, readBytes, gdat->size, false))
+			{
+				for (uint32_t i = 0; i < gdat->size; i++)
+				{
+					if (readBytes[i] != writeBytes[i])
+					{
+						errorCount++;
+						NTV2_MSG_GENLOCK_INFO("%s: Set: %d, Offset: %02X, size: %d, data: %s", ntv2_gen->name, count, gdat->offset, gdat->size, gdat->data);
+						NTV2_MSG_GENLOCK_INFO("%s: Bytes did not match i : %d read : % 02X write : % 02X\n", ntv2_gen->name, i, readBytes[i], writeBytes[i]);
+					}
+					else
+					{
+						//NTV2_MSG_GENLOCK_INFO("%s: Bytes matched\n", ntv2_gen->name);
+					}
+				}
+			}
+		}
+		else
+		{
+			NTV2_MSG_GENLOCK_INFO("%s: Set: %d, Offset: %02X No check", ntv2_gen->name, count, gdat->offset);
+		}
 		count++;
 		gdat++;
 	}
+	NTV2_MSG_GENLOCK_INFO("%s: Total genlock error count: %d of %d", ntv2_gen->name, errorCount, totalBytes);
 
 	wait_genlock2(ntv2_gen, 1000);
 	count = 0;
-	while ((NTV2_FLD_GET(ntv2_fld_control_genlock_locked, reg_read(ntv2_gen, ntv2_reg_control_status))) && count > 2000)
+	while (!(NTV2_FLD_GET(ntv2_fld_control_genlock_locked, reg_read(ntv2_gen, ntv2_reg_control_status))) && count < 2000)
 	{
 		wait_genlock2(ntv2_gen, 1000);
 		count++;
@@ -466,7 +493,7 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 static uint8_t device_id_read(struct ntv2_genlock2 *ntv2_gen)
 {
 	uint8_t rxID[1] = {0};
-	spi_genlock2_read(ntv2_gen, 0xC032, rxID, 1);
+	spi_genlock2_read(ntv2_gen, 0xC032, rxID, 1, true);
 	return rxID[0];
 
 }
@@ -624,7 +651,7 @@ static bool spi_genlock2_write(struct ntv2_genlock2 *ntv2_gen, uint32_t size, ui
 	return true;
 }
 
-static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uint8_t* data, uint32_t numBytes)
+static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uint8_t* data, uint32_t numBytes, bool setPage)
 {
 	uint32_t  val, status;
     uint8_t   tx_buffer[10];
@@ -636,7 +663,7 @@ static bool spi_genlock2_read(struct ntv2_genlock2 *ntv2_gen, uint16_t addr, uin
 	// Step 1 reset FIFOs
 	spi_reset_fifos(ntv2_gen);
 
-    if (addr != 0x7c)
+    if (addr != 0x7c && setPage)
     {
         // set page
         tx_buffer[0] = addr & 0x80;
