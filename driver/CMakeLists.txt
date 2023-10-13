@@ -64,6 +64,7 @@ set(AJADRIVER_TARGET_SOURCES
 
 # ajadriver/linux
 set(AJADRIVER_LINUX_HEADERS
+	linux/buildenv.h
 	linux/driverdbg.h
 	linux/fs1wait.h
 	linux/ntv2dma.h

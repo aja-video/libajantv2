@@ -99,6 +99,7 @@ DRIVERINCS = $(A_LIB_NTV2_INC)/ntv2audiodefines.h \
 			$(A_LIB_NTV2_INC)/ntv2videodefines.h \
 			$(A_LIB_NTV2_INC)/ntv2devicefeatures.hh \
 			$(A_LIB_NTV2_INC)/ntv2driverprocamp.h \
+			$(A_LINUX_DRIVER_PATH)/buildenv.h \
 			$(A_LINUX_DRIVER_PATH)/driverdbg.h \
 			$(A_LINUX_DRIVER_PATH)/ntv2driver.h \
 			$(A_LINUX_DRIVER_PATH)/ntv2driverautocirculate.h \
