@@ -471,13 +471,12 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 	outFreq4 = reg_read(ntv2_gen, ntv2_reg_out_freq4);
 	outFreq5 = reg_read(ntv2_gen, ntv2_reg_out_freq5);
 	NTV2_MSG_GENLOCK_INFO("%s: Freq0: %08X, Freq1: %08X, Freq2: %08X, Freq3: %08X, Freq4: %08X\n", ntv2_gen->name, outFreq1, outFreq2, outFreq3, outFreq4, outFreq5);
-	while (!(NTV2_FLD_GET(ntv2_fld_control_genlock_locked, reg_read(ntv2_gen, ntv2_reg_control_status))) &&
-		(outFreq1 & 0xffffff00) != 0x08D9EE00 &&
-		(outFreq2 & 0xffffff00) != 0x08D7AA00 &&
-		(outFreq3 & 0xffffff00) != 0x019BFC00 &&
-		(outFreq4 & 0xffffff00) != 0x00BB8000 &&
-		(outFreq5 & 0xffffff00) != 0x08D9EE00 &&
-		count < 2000)
+	while (	(outFreq1 & 0xffffff00) != 0x08D9EE00 &&
+			(outFreq2 & 0xffffff00) != 0x08D7AA00 &&
+			(outFreq3 & 0xffffff00) != 0x019BFC00 &&
+			(outFreq4 & 0xffffff00) != 0x00BB8000 &&
+			(outFreq5 & 0xffffff00) != 0x08D9EE00 &&
+			count < 5000)
 	{
 		wait_genlock2(ntv2_gen, 1000);
 		outFreq1 = reg_read(ntv2_gen, ntv2_reg_out_freq1);
