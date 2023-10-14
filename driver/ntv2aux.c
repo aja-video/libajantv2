@@ -127,7 +127,7 @@ bool SetupAuxExtractor(Ntv2SystemContext* context, NTV2Channel channel)
 	SetAuxExtField1EndAddr(context, channel, 0);
 	SetAuxExtField2StartAddr(context, channel, 0);
 	SetAuxExtField2EndAddr(context, channel, 0);
-#if 1
+#if 0
 	KdPrint(("AUX status:\n"));
 	KdPrint(("reg 0: %08x\n", ntv2ReadRegister(context, gChannelToAuxExtOffset[channel] + 0)));
 	KdPrint(("reg 1: %08x\n", ntv2ReadRegister(context, gChannelToAuxExtOffset[channel] + 1)));
