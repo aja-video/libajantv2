@@ -463,6 +463,13 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 	}
 	NTV2_MSG_GENLOCK_INFO("%s: Total genlock error count: %d of %d", ntv2_gen->name, errorCount, totalBytes);
 
+	uint8_t dpll0Status[1] = { 0 };
+	spi_genlock2_read(ntv2_gen, 0xC054, dpll0Status, 1);
+
+	uint32_t gpioValue = NTV2_FLD_GET(ntv2_fld_control_genlock_locked, reg_read(ntv2_gen, ntv2_reg_control_status));
+
+	NTV2_MSG_GENLOCK_INFO("%s: Genlock dpll0: %d, gpio: %d", ntv2_gen->name, +dpll0Status[0], gpioValue);
+
 	wait_genlock2(ntv2_gen, 1000);
 	count = 0;
 	outFreq1 = reg_read(ntv2_gen, ntv2_reg_out_freq1);
@@ -476,7 +483,7 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 			(outFreq3 & 0xffffff00) != 0x019BFC00 &&
 			(outFreq4 & 0xffffff00) != 0x00BB8000 &&
 			(outFreq5 & 0xffffff00) != 0x08D9EE00 &&
-			count < 5000)
+			count < 10000)
 	{
 		wait_genlock2(ntv2_gen, 1000);
 		outFreq1 = reg_read(ntv2_gen, ntv2_reg_out_freq1);
@@ -484,16 +491,17 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 		outFreq3 = reg_read(ntv2_gen, ntv2_reg_out_freq3);
 		outFreq4 = reg_read(ntv2_gen, ntv2_reg_out_freq4);
 		outFreq5 = reg_read(ntv2_gen, ntv2_reg_out_freq5);
-		NTV2_MSG_GENLOCK_INFO("%s: Freq0: %08X, Freq1: %08X, Freq2: %08X, Freq3: %08X, Freq4: %08X\n", ntv2_gen->name, outFreq1, outFreq2, outFreq3, outFreq4, outFreq5);
+		//NTV2_MSG_GENLOCK_INFO("%s: Freq0: %08X, Freq1: %08X, Freq2: %08X, Freq3: %08X, Freq4: %08X\n", ntv2_gen->name, outFreq1, outFreq2, outFreq3, outFreq4, outFreq5);
 		count++;
 	}
 
-	if (count >= 2000)
+	if (count >= 10000)
 	{
 		NTV2_MSG_GENLOCK_INFO("%s: genlock2 initial lock check timeout\n", ntv2_gen->name);
 	}
 	else
 	{
+		NTV2_MSG_GENLOCK_INFO("%s: Freq0: %08X, Freq1: %08X, Freq2: %08X, Freq3: %08X, Freq4: %08X\n", ntv2_gen->name, outFreq1, outFreq2, outFreq3, outFreq4, outFreq5);
 		NTV2_MSG_GENLOCK_INFO("%s: genlock2 initial lock check locked count: %d\n", ntv2_gen->name, count);
 	}
 
