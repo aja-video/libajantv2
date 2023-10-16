@@ -79,10 +79,6 @@
 			  #define NULL (0)
 	  #endif
 
-		#if defined(AJA_USE_CPLUSPLUS11)
-			#undef AJA_USE_CPLUSPLUS11	//	Linux c++11-in-SDK TBD
-		#endif
-
 	  #define AJA_PAGE_SIZE (4096)
 
 	  #define AJA_MAX_PATH (4096)
