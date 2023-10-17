@@ -4590,6 +4590,7 @@ int DoMessageStreamBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamBuffe
 	NTV2PrivateParams * pNTV2Params = getNTV2Params(deviceNumber);
     int chn = 0;
     struct ntv2_stream* pStr = NULL;
+    
 	
 	if (pBuffer == NULL)
 		return -EINVAL;
@@ -4612,6 +4613,7 @@ int DoMessageStreamBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamBuffe
 	{
         PDMA_PAGE_ROOT pPageRoot = &pFile->dmaRoot;
         PDMA_PAGE_BUFFER pPageBuffer = NULL;
+        Ntv2Status status;
 
         // check page root
         if (pPageRoot == NULL)
@@ -4645,7 +4647,11 @@ int DoMessageStreamBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamBuffe
         // save page buffer
         pBuffer->mBuffer.fKernelHandle = (ULWord64)pPageBuffer;
         
-        ntv2_stream_buffer_add(pStr, pBuffer);
+        status = ntv2_stream_buffer_add(pStr, pBuffer);
+        if (status != NTV2_STATUS_SUCCESS)
+        {
+            dmaPageRootFree(deviceNumber, (PVOID)pBuffer->mBuffer.fUserSpacePtr);
+        }
     }
     
 	if ((pBuffer->mFlags & NTV2_STREAM_BUFFER_STATUS) != 0)
