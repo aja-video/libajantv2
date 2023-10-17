@@ -105,6 +105,7 @@ typedef struct _dmaPageRoot
 typedef struct _dmaPageBuffer
 {
 	struct list_head		bufferEntry;		// locked buffer list
+    PDMA_PAGE_ROOT          pPageRoot;          // owning root
 	LWord					refCount;			// reference count
 	void*					pUserAddress;		// user buffer address
 	ULWord					userSize;			// user buffer size
@@ -280,6 +281,7 @@ typedef struct _dmaEngine_
 	PVOID					pDescriptorVirtual[DMA_DESCRIPTOR_PAGES_MAX];		// virtual descriptor aligned address
 	dma_addr_t				descriptorPhysical[DMA_DESCRIPTOR_PAGES_MAX];		// physical descriptor aligned address
 	ULWord					numDescriptorPages;		// number of allocated descriptor pages
+    ULWord                  strDescriptorIndex;     // stream descriptor next available descriptor
 	LWord64					programStartCount;		// count program hardware dma starts
 	LWord64					programCompleteCount;	// count program hardware dma completes
 	LWord64					programDescriptorCount;	// count program hardware descriptors
@@ -332,7 +334,7 @@ void dmaPageRootAuto(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot,
 
 PDMA_PAGE_BUFFER dmaPageRootFind(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot,
 										PVOID pAddress, ULWord size);
-void dmaPageRootFree(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot, PDMA_PAGE_BUFFER pBuffer);
+void dmaPageRootFree(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer);
 
 int dmaEnable(ULWord deviceNumber);
 void dmaDisable(ULWord deviceNumber);
