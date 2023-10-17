@@ -81,11 +81,11 @@
 #define DMA_MSG_CONTEXT "ntv2dma", pDmaContext->deviceNumber, pDmaContext->engName, pDmaContext->engIndex, DMA_S2D(pDmaContext->dmaC2H), pDmaContext->conIndex
 
 static uint32_t ntv2_debug_mask =
-//	NTV2_DEBUG_STATE |
+	NTV2_DEBUG_STATE |
 	NTV2_DEBUG_STATISTICS |
-//    NTV2_DEBUG_TRANSFER |
-//	NTV2_DEBUG_PAGE_MAP |
-//	NTV2_DEBUG_PROGRAM |
+    NTV2_DEBUG_TRANSFER |
+	NTV2_DEBUG_PAGE_MAP |
+	NTV2_DEBUG_PROGRAM |
 //	NTV2_DEBUG_VIDEO_SEGMENT |
 //	NTV2_DEBUG_DESCRIPTOR |
 	NTV2_DEBUG_INFO | 
@@ -1787,19 +1787,19 @@ int dmaTransfer(PDMA_PARAMS pDmaParams)
 		
 		if (findVideo)
 		{
-			dmaPageRootFree(deviceNumber, pDmaParams->pPageRoot, pVideoPageBuffer);
+			dmaPageRootFree(deviceNumber, pVideoPageBuffer);
 		}
 		if (findAudio)
 		{
-			dmaPageRootFree(deviceNumber, pDmaParams->pPageRoot, pAudioPageBuffer);
+			dmaPageRootFree(deviceNumber, pAudioPageBuffer);
 		}
 		if (findAncF1)
 		{
-			dmaPageRootFree(deviceNumber, pDmaParams->pPageRoot, pAncF1PageBuffer);
+			dmaPageRootFree(deviceNumber, pAncF1PageBuffer);
 		}
 		if (findAncF2)
 		{
-			dmaPageRootFree(deviceNumber, pDmaParams->pPageRoot, pAncF2PageBuffer);
+			dmaPageRootFree(deviceNumber, pAncF2PageBuffer);
 		}
 
 		// done
@@ -2371,7 +2371,7 @@ int dmaStreamStart(PDMA_PARAMS pDmaParams)
             if (pDmaContext != NULL)
             {
                 pDmaContext->doVideo = false;
-                dmaPageRootFree(deviceNumber, pDmaParams->pPageRoot, pVideoPageBuffer);
+                dmaPageRootFree(deviceNumber, pVideoPageBuffer);
                 dmaContextRelease(pDmaContext);
             }
         }
@@ -2441,7 +2441,7 @@ int dmaStreamStop(PDMA_PARAMS pDmaParams)
     if (dmaStatus == 0)
     {
         pDmaContext->doVideo = false;
-        dmaPageRootFree(deviceNumber, pDmaParams->pPageRoot, pDmaContext->pVideoPageBuffer);
+        dmaPageRootFree(deviceNumber, pDmaContext->pVideoPageBuffer);
         dmaContextRelease(pDmaContext);
     }
 
@@ -2753,7 +2753,7 @@ int dmaPageRootAdd(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot,
 	pBuffer = dmaPageRootFind(deviceNumber, pRoot, pAddress, size);
 	if (pBuffer != NULL)
 	{
-		dmaPageRootFree(deviceNumber, pRoot, pBuffer);
+		dmaPageRootFree(deviceNumber, pBuffer);
 		return 0;
 	}
 
@@ -2795,6 +2795,7 @@ int dmaPageRootAdd(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot,
 	}
 	
 	spin_lock_irqsave(&pRoot->bufferLock, flags);
+    pBuffer->pPageRoot = pRoot;
 	pBuffer->refCount = 1;
 	pBuffer->lockCount = pRoot->lockCounter++;
 	pBuffer->lockSize = pBuffer->numPages * PAGE_SIZE;
@@ -2971,11 +2972,16 @@ PDMA_PAGE_BUFFER dmaPageRootFind(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot,
 	return NULL;
 }
 
-void dmaPageRootFree(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot, PDMA_PAGE_BUFFER pBuffer)
+void dmaPageRootFree(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 {
 	unsigned long flags;
+    PDMA_PAGE_ROOT pRoot;
+    
+	if (pBuffer == NULL)
+		return;
 
-	if ((pRoot == NULL) || (pBuffer == NULL))
+    pRoot = pBuffer->pPageRoot;
+	if (pRoot == NULL)
 		return;
 
 	NTV2_MSG_PAGE_MAP("%s%d: dmaPageRootFree  addr %016llx  size %d\n",
@@ -4858,39 +4864,88 @@ static void dmaXlnxInterrupt(PDMA_ENGINE pDmaEngine)
 
 int dmaOpsStreamInitialize(struct ntv2_stream *stream)
 {
+    PDMA_ENGINE pDmaEngine = (PDMA_ENGINE)stream->dma_engine;
+
     // stop the dma engine synchonously
+    NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsStreamInitialize stop the dma\n", DMA_MSG_ENGINE);
 
     // reset counters
+
+    // set state
+    stream->engine_state = ntv2_stream_state_initialized;
+    NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsStreamInitialize engine state initialized\n", DMA_MSG_ENGINE);
     
     return NTV2_STREAM_OPS_SUCCESS;
 }
 
 int dmaOpsStreamStart(struct ntv2_stream *stream)
 {
-    // program the descriptors
+    PDMA_ENGINE pDmaEngine = (PDMA_ENGINE)stream->dma_engine;
 
-    // link the chain
+    if(stream->engine_state == ntv2_stream_state_initialized)
+    {
+        // program the descriptors
 
-    // start the engine
+        // link the chain
+
+        // start the engine
+        NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsStreamStart start the dma\n", DMA_MSG_ENGINE);
+
+        stream->engine_state = ntv2_stream_state_idle;
+        NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsStreamStart engine state idle\n", DMA_MSG_ENGINE);
+    }
     
     return NTV2_STREAM_OPS_SUCCESS;
 }
 
 int dmaOpsStreamStop(struct ntv2_stream *stream)
-{
-    // relink the chain
-    
+{    
     return NTV2_STREAM_OPS_SUCCESS;
 }
 
 int dmaOpsStreamAdvance(struct ntv2_stream *stream)
 {
     PDMA_ENGINE pDmaEngine = (PDMA_ENGINE)stream->dma_engine;
+    int next;
+    struct ntv2_stream_buffer* stream_active;
+    struct ntv2_stream_buffer* stream_next;
+    PDMA_PAGE_BUFFER  page_active;
+    PDMA_PAGE_BUFFER  page_next;
 
     // spinlock
+    if ((stream->engine_state != ntv2_stream_state_idle) &&
+        (stream->engine_state != ntv2_stream_state_active))
+    {
+        return NTV2_STREAM_OPS_FAIL;
+    }
+    
+    // get current buffer
+    stream_active = &stream->stream_buffers[stream->active_index];
+    if (!stream_active->linked)
+    {
+        stream->engine_state = ntv2_stream_state_error;
+        return NTV2_STREAM_OPS_FAIL;
+    }
+    page_active = (PDMA_PAGE_BUFFER)stream_active->user_buffer.mBuffer.fKernelHandle;
+
     if (stream->stream_state == ntv2_stream_state_active)
     {
-        // program
+        
+//        next = (stream_active + 1) % NTV2_STREAM_NUM_BUFFERS;
+    
+        // build next buffer descriptors
+
+        // link descriptor chain
+
+        stream->engine_state = ntv2_stream_state_active;
+        NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsStreamAdvance engine state active\n", DMA_MSG_ENGINE);
+    }
+    else
+    {
+        // link descriptor chain
+        
+        stream->engine_state = ntv2_stream_state_idle;
+        NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsStreamAdvance engine state idle\n", DMA_MSG_ENGINE);
     }
     
     NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsStreamAdvance dma streaming count %lld\n",
@@ -4901,7 +4956,8 @@ int dmaOpsStreamAdvance(struct ntv2_stream *stream)
 
 int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index)
 {
-    ULWord deviceNumber = stream->system_context->devNum;
+    PDMA_ENGINE pDmaEngine = (PDMA_ENGINE)stream->dma_engine;
+//    ULWord deviceNumber = stream->system_context->devNum;
     struct ntv2_stream_buffer* buffer = &stream->stream_buffers[index];
     PDMA_PAGE_BUFFER pPageBuffer = (PDMA_PAGE_BUFFER)buffer->user_buffer.mBuffer.fKernelHandle;
 
@@ -4912,35 +4968,26 @@ int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index)
         return NTV2_STREAM_OPS_FAIL;
 
     if (!dmaSgMapped(pPageBuffer))
-    {
-        if (!dmaSgMap(deviceNumber, pPageBuffer))
-            return NTV2_STREAM_OPS_FAIL;
-        buffer->mapped = true;
-    }
+        return NTV2_STREAM_OPS_FAIL;
 
     buffer->prepared = true;
+    NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsBufferPrepare address %016llx\n",
+                     DMA_MSG_ENGINE, (ULWord64)buffer->user_buffer.mBuffer.fUserSpacePtr);
 
-    // spinlock
-    if (stream->stream_state != ntv2_stream_state_active)
-    {
-        // program
-    }
-    
     return NTV2_STREAM_OPS_SUCCESS;
 }
 
 int dmaOpsBufferRelease(struct ntv2_stream *stream, int index)
 {
+    PDMA_ENGINE pDmaEngine = (PDMA_ENGINE)stream->dma_engine;
     ULWord deviceNumber = stream->system_context->devNum;
     struct ntv2_stream_buffer* buffer = &stream->stream_buffers[index];
     PDMA_PAGE_BUFFER pPageBuffer = (PDMA_PAGE_BUFFER)buffer->user_buffer.mBuffer.fKernelHandle;
 
-    if (buffer->mapped)
-        dmaSgUnmap(deviceNumber, pPageBuffer);
-
-    buffer->mapped = false;
-    buffer->prepared = false;
+    dmaPageRootFree(deviceNumber, pPageBuffer);  
     buffer->released = true;
+    NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsBufferRelease address %016llx\n",
+                     DMA_MSG_ENGINE, (ULWord64)buffer->user_buffer.mBuffer.fUserSpacePtr);
     
     return NTV2_STREAM_OPS_SUCCESS;
 }

@@ -45,10 +45,11 @@ struct ntv2_stream_ops {
 
 struct ntv2_stream_buffer {
     NTV2StreamBuffer    user_buffer;
-    bool                mapped;
     bool                prepared;
     bool                linked;
     bool                released;
+    uint32_t            first_index;
+    uint32_t            last_index;
 };
 
 struct ntv2_stream {
@@ -69,7 +70,6 @@ struct ntv2_stream {
     bool                        wait_inuse[NTV2_STREAM_WAIT_CLIENTS];
     uint32_t                    head_index;     // buffer queue head
     uint32_t                    tail_index;     // buffer queue tail
-    uint32_t                    link_index;     // next buffer to link
     uint32_t                    active_index;   // currently active buffer
 };
 

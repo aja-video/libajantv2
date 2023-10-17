@@ -193,6 +193,10 @@ Ntv2Status ntv2_stream_configure(struct ntv2_stream *ntv2_str,
     ntv2_str->dma_engine = dma_engine;
     ntv2_str->to_host = to_host;
 
+    // set state
+    ntv2_str->stream_state = ntv2_stream_state_disabled;
+    ntv2_str->engine_state = ntv2_stream_state_disabled;
+
 	return NTV2_STATUS_SUCCESS;
 }
 
@@ -274,7 +278,6 @@ Ntv2Status ntv2_stream_channel_initialize(struct ntv2_stream *ntv2_str, NTV2Stre
     // initialize buffer queue
     ntv2_str->head_index = 0;
     ntv2_str->tail_index = 0;
-    ntv2_str->link_index = 0;
     ntv2_str->active_index = 0;
 
     // release all waiting clients
@@ -437,7 +440,6 @@ Ntv2Status ntv2_stream_channel_flush(struct ntv2_stream *ntv2_str, NTV2StreamCha
     // reset the indicies
     ntv2_str->head_index = ntv2_str->active_index;
     ntv2_str->tail_index = queue_next(ntv2_str->active_index);
-    ntv2_str->link_index = ntv2_str->tail_index;
     
     // get state
     channel_state(ntv2_str, pChannel);
@@ -545,6 +547,13 @@ Ntv2Status ntv2_stream_channel_advance(struct ntv2_stream *ntv2_str)
         next = queue_next(ntv2_str->active_index);
         if (ntv2_str->stream_buffers[next].linked && !ntv2_str->stream_buffers[next].released)
         {
+            // release previous buffer
+            status = (ntv2_str->stream_ops.buffer_release)(ntv2_str, ntv2_str->active_index);
+            if (status != NTV2_STREAM_OPS_SUCCESS)
+            {
+                NTV2_MSG_STREAM_ERROR("%s: channel buffer release failed\n", ntv2_str->name);
+            }
+            
             ntv2_str->active_index = next;
         }
     }
@@ -553,7 +562,7 @@ Ntv2Status ntv2_stream_channel_advance(struct ntv2_stream *ntv2_str)
     status = (ntv2_str->stream_ops.stream_advance)(ntv2_str);
     if (status != NTV2_STREAM_OPS_SUCCESS)
     {
-        NTV2_MSG_STREAM_ERROR("%s: channel advance failed\n", ntv2_str->name);
+        NTV2_MSG_STREAM_ERROR("%s: channel hardware advance failed\n", ntv2_str->name);
         return status;
     }
 
