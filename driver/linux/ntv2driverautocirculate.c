@@ -510,7 +510,14 @@ OemAutoCirculate(ULWord deviceNumber, NTV2Crosspoint channelSpec)
 
 				if (pAuto->circulateWithCustomAncData)
 				{
-					SetAncExtWriteParams(&systemContext, acChannel, nextFrame);
+					if (pAuto->circulateWithHDMIAux)
+					{
+						SetAuxExtWriteParams(&systemContext, acChannel, nextFrame);
+					}
+					else
+					{
+						SetAncExtWriteParams(&systemContext, acChannel, nextFrame);
+					}
 				}
 
 				if (MsgsEnabled(NTV2_DRIVER_AUTOCIRCULATE_DEBUG_MESSAGES))
@@ -899,11 +906,19 @@ OemAutoCirculate(ULWord deviceNumber, NTV2Crosspoint channelSpec)
 
 				if (pAuto->circulateWithCustomAncData)
 				{
-					pAuto->frameStamp[lastActiveFrame].ancTransferSize = GetAncExtField1Bytes(&systemContext, acChannel);
-					pAuto->frameStamp[lastActiveFrame].ancField2TransferSize = GetAncExtField2Bytes(&systemContext, acChannel);
-					SetAncExtWriteParams(&systemContext, acChannel, nextFrame);
+					if (pAuto->circulateWithHDMIAux)
+					{
+						pAuto->frameStamp[lastActiveFrame].ancTransferSize = GetAuxExtField1Bytes(&systemContext, acChannel);
+						pAuto->frameStamp[lastActiveFrame].ancField2TransferSize = GetAuxExtField2Bytes(&systemContext, acChannel);
+						SetAuxExtWriteParams(&systemContext, acChannel, nextFrame);
+					}
+					else
+					{
+						pAuto->frameStamp[lastActiveFrame].ancTransferSize = GetAncExtField1Bytes(&systemContext, acChannel);
+						pAuto->frameStamp[lastActiveFrame].ancField2TransferSize = GetAncExtField2Bytes(&systemContext, acChannel);
+						SetAncExtWriteParams(&systemContext, acChannel, nextFrame);
+					}
 				}
-
 				if ((pAuto->frameStamp[nextFrame].validCount == 0) && !dropFrame)
 				{
 					// Advance to next frame for capture.
@@ -1199,7 +1214,14 @@ OemAutoCirculate(ULWord deviceNumber, NTV2Crosspoint channelSpec)
 				}
 				if (pAuto->circulateWithCustomAncData)
 				{
-					EnableAncExtractor(&systemContext, acChannel, false);
+					if (pAuto->circulateWithHDMIAux)
+					{
+						EnableAuxExtractor(&systemContext, acChannel, false);
+					}
+					else
+					{
+						EnableAncExtractor(&systemContext, acChannel, false);
+					}
 				}
             }
             else
@@ -1263,7 +1285,14 @@ OemAutoCirculate(ULWord deviceNumber, NTV2Crosspoint channelSpec)
 	{
 		if (pAuto->recording)
 		{
-			SetAncExtField2WriteParams(&systemContext, acChannel, pAuto->nextFrame);
+			if (pAuto->circulateWithHDMIAux)
+			{
+				SetAuxExtField2WriteParams(&systemContext, acChannel, pAuto->nextFrame);
+			}
+			else
+			{
+				SetAncExtField2WriteParams(&systemContext, acChannel, pAuto->nextFrame);
+			}
 		}
 		else
 		{
@@ -3326,10 +3355,27 @@ OemAutoCirculateInit (ULWord deviceNumber,
 		{
 			if (NTV2_IS_INPUT_CROSSPOINT(pAuto->channelSpec))
 			{
-				EnableAncInserter(&systemContext, ACChannel, false);
-				EnableAncExtractor(&systemContext, ACChannel, false);
-				SetupAncExtractor(&systemContext, ACChannel);
-				EnableAncExtractor(&systemContext, ACChannel, true);
+				if (pAuto->circulateWithHDMIAux)
+				{
+					if (NTV2DeviceCanDoCustomAux(pNTV2Params->_DeviceID))
+					{
+						EnableAuxExtractor(&systemContext, ACChannel, false);
+						SetupAuxExtractor(&systemContext, ACChannel);
+						EnableAuxExtractor(&systemContext, ACChannel, true);
+					}
+					else
+					{
+						pAuto->circulateWithHDMIAux = false;
+						pAuto->circulateWithCustomAncData = false;
+					}
+				}
+				else
+				{				
+					EnableAncInserter(&systemContext, ACChannel, false);
+					EnableAncExtractor(&systemContext, ACChannel, false);
+					SetupAncExtractor(&systemContext, ACChannel);
+					EnableAncExtractor(&systemContext, ACChannel, true);
+				}
 			}
 			else
 			{
@@ -3349,6 +3395,15 @@ OemAutoCirculateInit (ULWord deviceNumber,
 			//	Not using custom ANC, so turn off the firmware for the channel
 			EnableAncExtractor(&systemContext, ACChannel, false);
 			EnableAncInserter(&systemContext, ACChannel, false);
+		}
+
+		if (!pAuto->circulateWithHDMIAux)
+		{
+			if (NTV2_IS_INPUT_CROSSPOINT(pAuto->channelSpec) &&
+				NTV2DeviceCanDoCustomAux(pNTV2Params->_DeviceID))
+			{
+				EnableAuxExtractor(&systemContext, ACChannel, false);
+			}
 		}
 
 		if (pAuto->circulateWithRP188)
@@ -3477,7 +3532,14 @@ OemAutoCirculateStart(ULWord deviceNumber, NTV2Crosspoint channelSpec, ULWord64 
 
 			if (pAuto->circulateWithCustomAncData)
 			{
-				SetAncExtWriteParams(&systemContext, ACChannel, pAuto->startFrame);
+				if (pAuto->circulateWithHDMIAux)
+				{
+					SetAuxExtWriteParams(&systemContext, ACChannel, pAuto->startFrame);
+				}
+				else
+				{
+					SetAncExtWriteParams(&systemContext, ACChannel, pAuto->startFrame);
+				}
 			}
 		}
 		else // NTV2_IS_INPUT_CROSSPOINT(pautoChannelSpec)
@@ -3628,7 +3690,14 @@ OemAutoCirculateAbort (ULWord deviceNumber, NTV2Crosspoint channelSpec)
 
 				if (pAuto->circulateWithCustomAncData)
 				{
-					EnableAncExtractor(&systemContext, GetNTV2ChannelForNTV2Crosspoint(pAuto->channelSpec), false);
+					if (pAuto->circulateWithHDMIAux)
+					{
+						EnableAuxExtractor(&systemContext, GetNTV2ChannelForNTV2Crosspoint(pAuto->channelSpec), false);
+					}
+					else
+					{
+						EnableAncExtractor(&systemContext, GetNTV2ChannelForNTV2Crosspoint(pAuto->channelSpec), false);
+					}
 				}
 	        }
 	        else

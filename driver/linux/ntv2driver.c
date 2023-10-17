@@ -55,6 +55,7 @@
 #endif
 
 #include "ajatypes.h"
+#include "buildenv.h"
 #include "ntv2enums.h"
 #include "ntv2videodefines.h"
 #include "ntv2audiodefines.h"
@@ -2003,7 +2004,7 @@ int ntv2_mmap(struct file *file,struct vm_area_struct* vma)
 		return -ENODEV;
 
 	// Don't try to swap out physical pages
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,3,0))
+#if defined(KERNEL_6_3_0_VM_FLAGS)
     vm_flags_set(vma, VM_IO);
 #elif (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
 	vma->vm_flags |= VM_IO;
@@ -2905,7 +2906,7 @@ static int reboot_handler(struct notifier_block *this, unsigned long code, void 
 static UWord deviceNumber;
 
 #if defined(AJA_CREATE_DEVICE_NODES)
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,2,0))
+#if defined(KERNEL_6_2_0_DEV_UEVENT)
 static int aja_ntv2_dev_uevent(const struct device *dev, struct kobj_uevent_env *env)
 #else
 static int aja_ntv2_dev_uevent(struct device *dev, struct kobj_uevent_env *env)
@@ -2969,7 +2970,7 @@ static int __init aja_ntv2_module_init(void)
 
 #if defined(AJA_CREATE_DEVICE_NODES)
 	// Create device class
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,4,0))
+#if defined(KERNEL_6_4_0_CLASS_CREATE)
 	ntv2_class = class_create(getNTV2ModuleParams()->driverName);
 #else
 	ntv2_class = class_create(THIS_MODULE, getNTV2ModuleParams()->driverName);

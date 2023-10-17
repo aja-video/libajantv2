@@ -16,6 +16,7 @@
 #include <linux/semaphore.h>
 #include <linux/pagemap.h>
 
+#include "buildenv.h"
 #include "ntv2enums.h"
 #include "ntv2audiodefines.h"
 #include "ntv2videodefines.h"
@@ -3088,6 +3089,9 @@ static int dmaPageLock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer,
 	down_read(&current->mm->mmap_sem);
 #endif	
 	// page in and lock the user buffer
+#if defined(KERNEL_6_5_0_GET_USER_PAGES)
+	numPinned = get_user_pages(address, numPages, write ? FOLL_WRITE : 0, pBuffer->pPageList);
+#else
 	numPinned = get_user_pages(
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(4,6,0))
 		current,
@@ -3103,11 +3107,9 @@ static int dmaPageLock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer,
 #else
 		write? FOLL_WRITE : 0,
 #endif
-		pBuffer->pPageList
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(6,5,0))
-		,NULL
+		pBuffer->pPageList,
+		NULL);
 #endif
-		);
 	
 	// release the map semaphore
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,8,0))

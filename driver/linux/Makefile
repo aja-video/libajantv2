@@ -29,8 +29,9 @@ CC			 ?= gcc
 
 DRIVERTARGET = $(NTV2TARGET).o
 INCLUDES 	 = -I$(A_LIB_NTV2_INC) -I$(A_LINUX_DRIVER_PATH) -I$(A_LIB_NTV2_SRC) -I$(A_LIB_NTV2_SRC)/lin -I$(A_DRIVER_PATH)
-VERSIONING 	 = -DSDKVER_MAJ=$(SDKVER_MAJ) -DSDKVER_MIN=$(SDKVER_MIN) -DSDKVER_PNT=$(SDKVER_PNT) -DSDKVER_BLD=$(SDKVER_BLD) -DAJA_BETA=$(AJA_BETA) -DAJA_DEBUG=$(AJA_DEBUG) 
-EXTRA_CFLAGS += -DAJALinux -DXENA2 $(DBG) -D$(NTV2TARGET) -D$(LINUX_DISTRO) -D$(A_ARCH) $(EXTRA_DEPS) $(VERSIONING) $(INCLUDES) -Wall -Wno-implicit-fallthrough
+VERSIONING 	 = -DSDKVER_MAJ=$(SDKVER_MAJ) -DSDKVER_MIN=$(SDKVER_MIN) -DSDKVER_PNT=$(SDKVER_PNT) -DSDKVER_BLD=$(SDKVER_BLD) -DAJA_BETA=$(AJA_BETA) -DAJA_DEBUG=$(AJA_DEBUG)
+DISTRO_INFO  = -DDISTRO_TYPE=$(DISTRO_TYPE) -DDISTRO_MAJ_VERSION=$(DISTRO_MAJ_VERSION) -DDISTRO_MIN_VERSION=$(DISTRO_MIN_VERSION) -DDISTRO_IS_RHEL_LIKE=$(DISTRO_IS_RHEL_LIKE)
+EXTRA_CFLAGS += -DAJALinux -DXENA2 $(DBG) -D$(NTV2TARGET) -D$(A_ARCH) $(EXTRA_DEPS) $(VERSIONING) $(DISTRO_INFO) $(INCLUDES) -Wall -Wno-implicit-fallthrough
 
 ifdef AJA_HEVC
 	EXTRA_CFLAGS += -DAJA_HEVC=$(AJA_HEVC)
@@ -82,6 +83,7 @@ DRIVERSRCS = ntv2devicefeatures.c \
 			../ntv2mcap.c \
 			../ntv2pciconfig.c \
 			../ntv2system.c \
+			../ntv2aux.c \
 			../ntv2anc.c \
 			../ntv2xpt.c \
 			../ntv2kona.c \
@@ -98,6 +100,7 @@ DRIVERINCS = $(A_LIB_NTV2_INC)/ntv2audiodefines.h \
 			$(A_LIB_NTV2_INC)/ntv2videodefines.h \
 			$(A_LIB_NTV2_INC)/ntv2devicefeatures.hh \
 			$(A_LIB_NTV2_INC)/ntv2driverprocamp.h \
+			$(A_LINUX_DRIVER_PATH)/buildenv.h \
 			$(A_LINUX_DRIVER_PATH)/driverdbg.h \
 			$(A_LINUX_DRIVER_PATH)/ntv2driver.h \
 			$(A_LINUX_DRIVER_PATH)/ntv2driverautocirculate.h \
@@ -129,6 +132,7 @@ DRIVERINCS = $(A_LIB_NTV2_INC)/ntv2audiodefines.h \
 			$(A_DRIVER_PATH)/ntv2vpid.h \
 			$(A_DRIVER_PATH)/ntv2xpt.h \
 			$(A_DRIVER_PATH)/ntv2anc.h \
+			$(A_DRIVER_PATH)/ntv2aux.h \
 			$(A_DRIVER_PATH)/ntv2setup.h
 
 ifdef AJA_HEVC
@@ -166,8 +170,9 @@ endif
 obj-m				:= $(DRIVERTARGET)
 $(NTV2TARGET)-objs 	:= $(DRIVEROBJS) $(HEVCOBJS)
 
-default: all 
-	@echo linux distro: $(LINUX_DISTRO)
+default: all
+	@echo linux distro: $(DISTRO_TYPE)
+	@echo linux distro flags: '$(DISTRO_INFO)'
 	@echo lib: $(LIB)
 ifdef AJA_RDMA
 ifdef AJA_IGPU

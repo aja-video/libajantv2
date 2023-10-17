@@ -2481,6 +2481,15 @@ public:
 		@note		This counter will overflow and wrap back to zero in 24:51:00 [hh:mm:ss].
 	**/
 	AJA_VIRTUAL bool		GetRawAudioTimer (ULWord & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);	//	New in SDK 15.5
+	
+	/**
+		@brief		Enables BOB analog audio XLR inputs.
+		@param[in]	inEnable		If true, specifies that the XLR connectors are enabled.
+									If false, breakout board audio reverts to digital AES inputs.
+		@return		True if successful;	 otherwise false.
+		@see		CNTV2Card::EnableBOBAnalogAudioIn
+	**/
+	AJA_VIRTUAL bool		EnableBOBAnalogAudioIn (bool inEnable);	//	New in SDK 17.0
 
 	/**
 		@return		True if the running device firmware supports audio start delay-til-VBI.
@@ -5268,6 +5277,17 @@ public:
 		@see		::NTV2DeviceHasBiDirectionalSDI, \ref devicesignalinputsoutputs
 	**/
 	AJA_VIRTUAL bool		GetSDITransmitEnable (const NTV2Channel inChannel, bool & outEnabled);
+
+	/**
+		@brief		Answers with the transmitting/output SDI connectors.
+		@param[out] outXmitSDIs		Receives the set of transmitting SDI connectors.
+		@return		True if successful; otherwise false.
+		@note		This function returns valid results for devices with or without bi-directional SDIs.
+		@note		This function does not take into account an SDI output that's designated as a "monitor"
+					(i.e. ::NTV2WidgetType_SDIMonOut or ::NTV2_WgtSDIMonOut1).
+		@see		::NTV2DeviceHasBiDirectionalSDI, \ref devicesignalinputsoutputs
+	**/
+	AJA_VIRTUAL bool		GetTransmitSDIs (NTV2ChannelSet & outXmitSDIs);	//	New in SDK 17.0
 	///@}
 
 	AJA_VIRTUAL bool		SetSDIOut2Kx1080Enable (const NTV2Channel inChannel, const bool inIsEnabled);
@@ -6361,6 +6381,8 @@ public:
 	AJA_VIRTUAL bool GetMultiRasterBypassEnable (bool & outEnabled);	//	New in SDK 16.1
 	AJA_VIRTUAL bool IsMultiRasterWidgetChannel (const NTV2Channel inChannel);	//	New in SDK 16.2
 	///@}
+	
+	AJA_VIRTUAL bool IsBreakoutBoardConnected (void);	//	New in SDK 17.0
 
 #if !defined(NTV2_DEPRECATE_16_1)
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioOutputMonitorSource (const NTV2AudioMonitorSelect inChannelPair, const NTV2Channel inAudioSystem = NTV2_CHANNEL1))	{return SetAudioOutputMonitorSource(inChannelPair, NTV2AudioSystem(inAudioSystem));}	///< @deprecated	Use the function that uses NTV2AudioChannelPair and NTV2AudioSystem params.

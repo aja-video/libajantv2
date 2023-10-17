@@ -343,10 +343,6 @@
 		#endif /* LINUX_VERSION_CODE */
 	#endif /* __KERNEL__ */
 
-	#if defined(NTV2_USE_CPLUSPLUS11)
-		#undef NTV2_USE_CPLUSPLUS11 //	Linux c++11-in-SDK TBD
-	#endif
-
 	#if defined (MODULE)
 		#define NTV2_BUILDING_DRIVER
 		#undef NTV2_USE_CPLUSPLUS11
