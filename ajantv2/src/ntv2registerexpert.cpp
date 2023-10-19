@@ -88,6 +88,9 @@ private:
 		SetupSDIErrorRegs();	//	SDIError
 		SetupCSCRegs();			//	CSCs
 		SetupLUTRegs();			//	LUTs
+		SetupBOBRegs();			//	Break Out Board
+		SetupLEDRegs();			//	Bracket LEDs
+		SetupCMWRegs();			//	Clock Monitor Out
 		SetupVRegs();			//	Virtuals
 		REiNOTE(DEC(gLivingInstances) << " extant, " << DEC(gInstanceTally) << " total");
 		if (LOGGING_MAPPINGS)
@@ -286,11 +289,45 @@ private:
 			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel7);
 			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel8);
 
-		DefineRegister (kRegConversionControl,	"", mConvControlRegDecoder,		READWRITE,	kRegClass_NULL,		kRegClass_Channel1, kRegClass_Channel2);
-		DefineRegister (kRegSDIWatchdogControlStatus,"", mDecodeRelayCtrlStat,	READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
-		DefineRegister (kRegSDIWatchdogTimeout, "", mDecodeWatchdogTimeout,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
-		DefineRegister (kRegSDIWatchdogKick1,	"", mDecodeWatchdogKick,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
-		DefineRegister (kRegSDIWatchdogKick2,	"", mDecodeWatchdogKick,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegConversionControl,			"",						mConvControlRegDecoder,		READWRITE,	kRegClass_NULL,		kRegClass_Channel1, kRegClass_Channel2);
+		DefineRegister (kRegSDIWatchdogControlStatus,	"",						mDecodeRelayCtrlStat,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegSDIWatchdogTimeout,			"",						mDecodeWatchdogTimeout,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegSDIWatchdogKick1,			"",						mDecodeWatchdogKick,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegSDIWatchdogKick2,			"",						mDecodeWatchdogKick,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegIDSwitch,					"kRegIDSwitch",			mDecodeIDSwitchStatus,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegPWMFanControl,				"kRegPWMFanControl",	mDecodePWMFanControl,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegPWMFanStatus,				"kRegPWMFanStatus",		mDecodePWMFanMonitor,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+	}
+	void SetupBOBRegs(void)
+	{
+		AJAAutoLock lock(&mGuardMutex);
+		DefineRegister (kRegBOBStatus,				"kRegBOBStatus",				mDecodeBOBStatus,					READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegBOBGPIInData,			"kRegBOBGPIInData",				mDecodeBOBGPIIn,					READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegBOBGPIInterruptControl,	"kRegBOBGPIInterruptControl",	mDecodeBOBGPIInInterruptControl,	READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegBOBGPIOutData,			"kRegBOBGPIOutData",			mDecodeBOBGPIOut,					READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegBOBAudioControl,		"kRegBOBAudioControl",			mDecodeBOBAudioControl,				READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+	}
+	void SetupLEDRegs(void)
+	{
+		AJAAutoLock lock(&mGuardMutex);
+		DefineRegister (kRegLEDReserved0,		"kRegLEDReserved0",			mDefaultRegDecoder,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegLEDClockDivide,		"kRegLEDClockDivide",		mDefaultRegDecoder,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegLEDReserved2,		"kRegLEDReserved2",			mDefaultRegDecoder,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegLEDReserved3,		"kRegLEDReserved3",			mDefaultRegDecoder,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegLEDSDI1Control,		"kRegLEDSDI1Control",		mDecodeLEDControl,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegLEDSDI2Control,		"kRegLEDSDI2Control",		mDecodeLEDControl,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegLEDHDMIInControl,	"kRegLEDHDMIInControl",		mDecodeLEDControl,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegLEDHDMIOutControl,	"kRegLEDHDMIOutControl",	mDecodeLEDControl,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+	}
+	void SetupCMWRegs(void)
+	{
+		AJAAutoLock lock(&mGuardMutex);
+		DefineRegister (kRegCMWControl,		"kRegCMWControl",		mDefaultRegDecoder,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegCMW1485Out,		"kRegCMW1485Out",		mDefaultRegDecoder,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegCMW14835Out,	"kRegCMW14835Out",		mDefaultRegDecoder,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegCMW27Out,		"kRegCMW27Out",			mDefaultRegDecoder,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegCMW12288Out,	"kRegCMW12288Out",		mDecodeLEDControl,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegCMWHDMIOut,		"kRegCMWHDMIOut",		mDecodeLEDControl,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 	}
 	void SetupVPIDRegs(void)
 	{
@@ -1686,6 +1723,48 @@ public:
 			result.insert(ULWord(kRegMRQ4Control));
 			result.insert(ULWord(kRegMROutControl));
 			result.insert(ULWord(kRegMRSupport));
+		}
+		
+		if (NTV2DeviceCanDoIDSwitch(inDeviceID))
+		{
+			result.insert(ULWord(kRegIDSwitch));
+		}
+		
+		if (NTV2DeviceHasPWMFanControl(inDeviceID))
+		{
+			result.insert(ULWord(kRegPWMFanControl));
+			result.insert(ULWord(kRegPWMFanStatus));
+		}
+		
+		if (NTV2DeviceCanDoBreakoutBoard(inDeviceID))
+		{
+			result.insert(ULWord(kRegBOBStatus));
+			result.insert(ULWord(kRegBOBGPIInData));
+			result.insert(ULWord(kRegBOBGPIInterruptControl));
+			result.insert(ULWord(kRegBOBGPIOutData));
+			result.insert(ULWord(kRegBOBAudioControl));
+		}
+		
+		if (NTV2DeviceHasBracketLED(inDeviceID))
+		{
+			result.insert(ULWord(kRegLEDReserved0));
+			result.insert(ULWord(kRegLEDClockDivide));
+			result.insert(ULWord(kRegLEDReserved2));
+			result.insert(ULWord(kRegLEDReserved3));
+			result.insert(ULWord(kRegLEDSDI1Control));
+			result.insert(ULWord(kRegLEDSDI2Control));
+			result.insert(ULWord(kRegLEDHDMIInControl));
+			result.insert(ULWord(kRegLEDHDMIOutControl));
+		}
+		
+		if (NTV2DeviceCanDoClockMonitor(inDeviceID))
+		{
+			result.insert(ULWord(kRegCMWControl));
+			result.insert(ULWord(kRegCMW1485Out));
+			result.insert(ULWord(kRegCMW14835Out));
+			result.insert(ULWord(kRegCMW27Out));
+			result.insert(ULWord(kRegCMW12288Out));
+			result.insert(ULWord(kRegCMWHDMIOut));
 		}
 
 		if (inOtherRegsToInclude & kIncludeOtherRegs_VRegs)
@@ -3941,6 +4020,167 @@ private:
 			return oss.str();
 		}
 	}	mDecodeDriverType;
+	
+	struct DecodeIDSwitchStatus : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			ostringstream	oss;
+			if (::NTV2DeviceCanDoIDSwitch(inDeviceID))
+			{
+				const uint32_t	switchEnableBits	(((inRegValue & 0x0F000000) >> 20) | ((inRegValue & 0xF0000000) >> 28));
+				for (UWord idSwitch(0);  idSwitch < 4;	 )
+				{
+					const uint32_t	switchEnabled	(switchEnableBits & BIT(idSwitch));
+					oss << "Switch " << DEC(++idSwitch) << ": " << (switchEnabled ? "Enabled" : "Disabled");
+					if (idSwitch < 4)
+						oss << endl;
+				}
+			}
+			else
+			{
+				oss << "(ID Switch not supported)";
+			}
+			
+			return oss.str();
+		}
+	}	mDecodeIDSwitchStatus;
+	
+	struct DecodePWMFanControl : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			ostringstream	oss;
+			if (::NTV2DeviceHasPWMFanControl(inDeviceID))
+				oss << "Fan Speed: "				<< DEC(inRegValue & kRegMaskPWMFanSpeed)			<< endl
+					<< "Fan Control Enabled: "		<< ((inRegValue & kRegMaskPWMFanSpeedControl) ? "Enabled" : "Disabled");
+			return oss.str();
+		}
+	}	mDecodePWMFanControl;
+	
+	struct DecodePWMFanMonitor : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			ostringstream	oss;
+			if (::NTV2DeviceHasPWMFanControl(inDeviceID))
+				oss << "Tach Period: "				<< DEC(inRegValue & kRegMaskPWMFanTachPeriodStatus)			<< endl
+					<< "Fan Status: "				<< ((inRegValue & kRegMaskPWMFanStatus) ? "Stopped" : "Running");
+			return oss.str();
+		}
+	}	mDecodePWMFanMonitor;
+	
+	struct DecodeBOBStatus : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			ostringstream	oss;
+			if (::NTV2DeviceCanDoBreakoutBoard(inDeviceID))
+				oss << "BOB : "							<< ((inRegValue & kRegMaskBOBAbsent) ? "Disconnected" : "Connected")			<< endl
+					<< "ADAV801 Initializatioin: "		<< ((inRegValue & kRegMaskBOBADAV801UpdateStatus) ? "Complete" : "In Progress") << endl
+					<< "ADAV801 DIR Locked(Debug): "	<< DEC(inRegValue & kRegMaskBOBADAV801DIRLocked);
+			else
+				oss << "Device does not support a breakout board";
+			return oss.str();
+		}
+	}	mDecodeBOBStatus;
+	
+	struct DecodeBOBGPIIn : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			ostringstream	oss;
+			if (::NTV2DeviceCanDoBreakoutBoard(inDeviceID))
+				oss << "GPI In 1: "	<< DEC(inRegValue & kRegMaskBOBGPIIn1Data)	<< endl
+					<< "GPI In 2: "	<< DEC(inRegValue & kRegMaskBOBGPIIn2Data)	<< endl
+					<< "GPI In 3: "	<< DEC(inRegValue & kRegMaskBOBGPIIn3Data)	<< endl
+					<< "GPI In 4: "	<< DEC(inRegValue & kRegMaskBOBGPIIn4Data)	;
+			else
+				oss << "Device does not support a breakout board";
+			return oss.str();
+		}
+	}	mDecodeBOBGPIIn;
+	
+	struct DecodeBOBGPIInInterruptControl : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			ostringstream	oss;
+			if (::NTV2DeviceCanDoBreakoutBoard(inDeviceID))
+				oss << "GPI In 1 Int: "	<< DEC(inRegValue & kRegMaskBOBGPIIn1InterruptControl)	<< endl
+					<< "GPI In 2 Int: "	<< DEC(inRegValue & kRegMaskBOBGPIIn2InterruptControl)	<< endl
+					<< "GPI In 3 Int: "	<< DEC(inRegValue & kRegMaskBOBGPIIn3InterruptControl)	<< endl
+					<< "GPI In 4 Int: "	<< DEC(inRegValue & kRegMaskBOBGPIIn4InterruptControl)	;
+			else
+				oss << "Device does not support a breakout board";
+			return oss.str();
+		}
+	}	mDecodeBOBGPIInInterruptControl;
+	
+	struct DecodeBOBGPIOut : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			ostringstream	oss;
+			if (::NTV2DeviceCanDoBreakoutBoard(inDeviceID))
+				oss << "GPI Out 1 Int: "	<< DEC(inRegValue & kRegMaskBOBGPIOut1Data)	<< endl
+					<< "GPI Out 2 Int: "	<< DEC(inRegValue & kRegMaskBOBGPIOut2Data)	<< endl
+					<< "GPI Out 3 Int: "	<< DEC(inRegValue & kRegMaskBOBGPIOut3Data)	<< endl
+					<< "GPI Out 4 Int: "	<< DEC(inRegValue & kRegMaskBOBGPIOut4Data)	;
+			else
+				oss << "Device does not support a breakout board";
+			return oss.str();
+		}
+	}	mDecodeBOBGPIOut;
+	
+	struct DecodeBOBAudioControl : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			ostringstream	oss;
+			if (::NTV2DeviceCanDoBreakoutBoard(inDeviceID))
+			{
+				string dBuLabel;
+				switch(inRegValue & kRegMaskBOBAnalogLevelControl)
+				{
+				case 0:
+					dBuLabel = "+24dBu";
+					break;
+				case 1:
+					dBuLabel = "+18dBu";
+					break;
+				case 2:
+					dBuLabel = "+12dBu";
+					break;
+				case 3:
+					dBuLabel = "+15dBu";
+					break;
+					
+				}
+				oss << "ADC/DAC Re-init: "		<< DEC(inRegValue & kRegMaskBOBADAV801Reset)	<< endl
+					<< "Analog Level Control: " << dBuLabel << endl
+					<< "Analog Select: "		<< DEC(inRegValue & kRegMaskBOBAnalogInputSelect);
+			}
+			else
+				oss << "Device does not support a breakout board";
+			return oss.str();
+		}
+	}	mDecodeBOBAudioControl;
+	
+	struct DecodeLEDControl : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			ostringstream	oss;
+			if (::NTV2DeviceHasBracketLED(inDeviceID))
+				oss << "Blue: "		<< DEC(inRegValue & kRegMaskLEDBlueControl)	<< endl
+					<< "Green: "	<< DEC(inRegValue & kRegMaskLEDGreenControl)	<< endl
+					<< "Red: "		<< DEC(inRegValue & kRegMaskLEDRedControl);
+			else
+				oss << "Device does not support a breakout board";
+			return oss.str();
+		}
+	}	mDecodeLEDControl;
 
 	static const int	NOREADWRITE =	0;
 	static const int	READONLY	=	1;

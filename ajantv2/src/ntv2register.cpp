@@ -4695,7 +4695,7 @@ bool CNTV2Card::IsBreakoutBoardConnected (void)
 {
 	bool BOBConnected(false);
 	return NTV2DeviceCanDoBreakoutBoard(_boardID)
-		   &&  CNTV2DriverInterface::ReadRegister(kRegBOBStatus, BOBConnected, kRegMaskBOBPresent, kRegShiftBOBPresent)
+		   &&  CNTV2DriverInterface::ReadRegister(kRegBOBStatus, BOBConnected, kRegMaskBOBAbsent, kRegShiftBOBAbsent)
 		   &&  (BOBConnected == 0);
 }
 
