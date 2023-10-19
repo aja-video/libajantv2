@@ -3992,7 +3992,7 @@ static void SetupBoard(ULWord deviceNumber)
 		WaitForFlashNOTBusy(deviceNumber);
 		deviceID = ReadRegister(deviceNumber, kRegXenaxFlashDOUT, NO_MASK, NO_SHIFT);
 
-		if(deviceID == 0x0020ba20)//Micron MT25QL512ABB
+		if((deviceID & 0x00ffffff) == 0x0020ba20)//Micron MT25QL512ABB
 			hasExtendedCommandSupport = true;
 
         if(NTV2DeviceROMHasBankSelect(ntv2pp->_DeviceID))
