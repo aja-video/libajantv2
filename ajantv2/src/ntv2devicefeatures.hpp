@@ -2562,6 +2562,8 @@ bool NTV2DeviceCanDoEnhancedCSC (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_SOJI_OE5:
 		case DEVICE_ID_SOJI_OE6:
 		case DEVICE_ID_SOJI_OE7:
+		case DEVICE_ID_KONAX:
+		case DEVICE_ID_KONAXM:
 			return true;
 	#if defined(_DEBUG)
 		case DEVICE_ID_CORVID1:
@@ -2604,8 +2606,6 @@ bool NTV2DeviceCanDoEnhancedCSC (const NTV2DeviceID inDeviceID)
 		case DEVICE_ID_KONALHEPLUS:
 		case DEVICE_ID_KONALHI:
 		case DEVICE_ID_KONALHIDVI:
-		case DEVICE_ID_KONAX:
-		case DEVICE_ID_KONAXM:
 		case DEVICE_ID_NOTFOUND:
 		case DEVICE_ID_TTAP:
 		case DEVICE_ID_TTAP_PRO:
