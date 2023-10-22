@@ -413,7 +413,9 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 	uint32_t mask;
 	uint8_t writeBytes[256];
 	uint32_t outFreq1 = 0, outFreq2 = 0, outFreq3 = 0, outFreq4 = 0, outFreq5 = 0;
-
+	uint8_t dpll0Status[1] = { 0 };
+    uint32_t gpioValue;
+    
 	if (NTV2_DEBUG_ACTIVE(NTV2_DEBUG_GENLOCK_CHECK)) check = true;
 
 	spi_reset(ntv2_gen);
@@ -437,15 +439,16 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 		if (check)
 		{
 			uint8_t readBytes[256];
+            uint32_t i;
 			if (spi_genlock2_read(ntv2_gen, gdat->addr, readBytes, gdat->size))
 			{
-				for (uint32_t i = 0; i < gdat->size; i++)
+				for (i = 0; i < gdat->size; i++)
 				{
 					if (readBytes[i] != writeBytes[i])
 					{
 						errorCount++;
 						NTV2_MSG_GENLOCK_INFO("%s: Set: %d, Offset: %04X, size: %d, data: %s", ntv2_gen->name, count, gdat->addr, gdat->size, gdat->data);
-						NTV2_MSG_GENLOCK_INFO("%s: Bytes did not match i : %d read : % 02X write : % 02X\n", ntv2_gen->name, i, readBytes[i], writeBytes[i]);
+						NTV2_MSG_GENLOCK_INFO("%s: Bytes did not match i : %d read : %02X write : %02X\n", ntv2_gen->name, i, readBytes[i], writeBytes[i]);
 					}
 					else
 					{
@@ -463,10 +466,10 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 	}
 	NTV2_MSG_GENLOCK_INFO("%s: Total genlock error count: %d of %d", ntv2_gen->name, errorCount, totalBytes);
 
-	uint8_t dpll0Status[1] = { 0 };
+	dpll0Status[0] = 0;
 	spi_genlock2_read(ntv2_gen, 0xC054, dpll0Status, 1);
 
-	uint32_t gpioValue = NTV2_FLD_GET(ntv2_fld_control_genlock_locked, reg_read(ntv2_gen, ntv2_reg_control_status));
+	gpioValue = NTV2_FLD_GET(ntv2_fld_control_genlock_locked, reg_read(ntv2_gen, ntv2_reg_control_status));
 
 	NTV2_MSG_GENLOCK_INFO("%s: Genlock dpll0: %d, gpio: %d", ntv2_gen->name, +dpll0Status[0], gpioValue);
 
