@@ -8675,7 +8675,7 @@ typedef enum
 		#define NTV2_STREAM_CHANNEL_STATE_ERROR			BIT(4)			///< @brief Used in ::NTV2StreamChannel stream error
 
 		// Stream buffer action flags
-		#define NTV2_STREAM_BUFFER_ADD					BIT(0)			///< @brief Used in ::NTV2StreamBuffer to add buffer to queue
+		#define NTV2_STREAM_BUFFER_QUEUE				BIT(0)			///< @brief Used in ::NTV2StreamBuffer to add buffer to queue
 		#define NTV2_STREAM_BUFFER_COMMIT				BIT(1)			///< @brief Used in ::NTV2StreamBuffer to commit added buffers
 		#define NTV2_STREAM_BUFFER_STATUS				BIT(3)			///< @brief Used in ::NTV2StreamBuffer to request buffer status
 		#define NTV2_STREAM_BUFFER_SIGNAL				BIT(4)			///< @brief Used in ::NTV2StreamBuffer to signal on complete
@@ -8704,12 +8704,13 @@ typedef enum
 				ULWord			mStatus;            ///< @brief Action status
 				ULWord64		mSteps;				///< @brief Stream number of steps
                 ULWord			mStreamState;		///< @brief Stream state
-				ULWord			mQueueDepth;		///< @brief Queue depth
 				ULWord64		mBufferCookie;		///< @brief Active buffer user cookie
 				LWord64			mStartTime;			///< @brief Stream start time
 				LWord64			mStopTime;			///< @brief Stream stop time
-				ULWord64		mBufferCount;		///< @brief Stream buffer count
-				ULWord64		mRepeatCount;		///< @brief Stream repeat count
+				ULWord64		mQueueCount;		///< @brief Number of buffers queued
+				ULWord64		mReleaseCount;		///< @brief Number of buffers released
+				ULWord64		mActiveCount;		///< @brief Number of buffers active
+				ULWord64		mRepeatCount;		///< @brief Number of buffer repeats
 				ULWord			mReserved[32];		///< @brief Reserved for future expansion.
 			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
 
@@ -8723,6 +8724,12 @@ typedef enum
 				///@}
 
 				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
+
+				/**
+					@brief	Gets the queue depth.
+					@return The depth of the queue.
+				**/
+				inline ULWord GetQueueDepth (void)		{return (ULWord)(mQueueCount - mReleaseCount);}
 
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
 

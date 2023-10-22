@@ -56,12 +56,12 @@ ULWord CNTV2Card::StreamChannelWait (const NTV2Channel inChannel,
 	return status.mStatus;
 }
 
-ULWord CNTV2Card::StreamBufferAdd (const NTV2Channel inChannel,
+ULWord CNTV2Card::StreamBufferQueue (const NTV2Channel inChannel,
 										NTV2_POINTER inBuffer,
 										ULWord64 bufferCookie,
 										NTV2StreamBuffer& status)
 {
-	if (!StreamBufferOps(inChannel, inBuffer, bufferCookie, NTV2_STREAM_BUFFER_ADD | NTV2_STREAM_BUFFER_SIGNAL, status))
+	if (!StreamBufferOps(inChannel, inBuffer, bufferCookie, NTV2_STREAM_BUFFER_QUEUE | NTV2_STREAM_BUFFER_SIGNAL, status))
 		return NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_MESSAGE;
 	return status.mStatus;
 }
