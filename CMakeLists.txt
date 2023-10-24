@@ -29,12 +29,12 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 option(AJANTV2_BUILD_OPENSOURCE "Build libajantv2 as open-source (MIT license)?" ON)
+option(AJANTV2_BUILD_DRIVER     "Build Linux driver?" ON)
 option(AJANTV2_BUILD_SHARED     "Build libajantv2 shared libraries?" OFF)
 option(AJANTV2_BUILD_DEMOS      "Build libajantv2 demo apps?" OFF)
 option(AJANTV2_BUILD_TOOLS      "Build libajantv2 tools?" OFF)
 option(AJANTV2_BUILD_TESTS      "Build libajantv2 tests?" OFF)
 option(AJANTV2_BUILD_PLUGINS    "Build libajantv2 plugins?" OFF)
-option(AJANTV2_BUILD_DRIVER     "Build Linux driver?" OFF)
 
 if(NOT AJANTV2_BUILD_OPENSOURCE)
     if (NOT NTV2_PROPRIETARY_DIR)

@@ -163,17 +163,29 @@ if (AJANTV2_BUILD_DRIVER)
 		message(STATUS "macOS driver CMake build not yet implemented!")
 		return()
 	elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-		set(BIN_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin")
-		add_custom_target(driver_linux ALL
-						  COMMENT "Building Linux driver"
-						  COMMAND make -C linux
-						  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-						  SOURCES ${AJADRIVER_TARGET_SOURCES}
-                          BYPRODUCTS ${BIN_PATH}/ajantv2.ko)
+        execute_process(COMMAND uname -r
+            OUTPUT_VARIABLE KERNEL_RELEASE
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-		set(LIN_LOAD_DRIVER_MSG
-			"         After building Linux driver can enable with: sudo .${BIN_PATH}/load_ajantv2")
-		message(STATUS "AJA:  added target: driver_linux...\n${LIN_LOAD_DRIVER_MSG}")
+        set(KERNEL_BUILD_DIR /lib/modules/${KERNEL_RELEASE}/build)
+
+        if(EXISTS ${KERNEL_BUILD_DIR})
+            set(BIN_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin")
+                add_custom_target(driver_linux ALL
+                    COMMENT "Building Linux driver"
+                    COMMAND make -C linux
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                    SOURCES ${AJADRIVER_TARGET_SOURCES}
+                    BYPRODUCTS ${BIN_PATH}/ajantv2.ko
+                    )
+
+            set(LIN_LOAD_DRIVER_MSG
+                "         After building Linux driver can enable with: sudo .${BIN_PATH}/load_ajantv2")
+            message(STATUS "AJA:  added target: driver_linux...\n${LIN_LOAD_DRIVER_MSG}")
+        else()
+            message(WARNING "AJA: Unable to add driver target: Please install kernel headers: ${KERNEL_BUILD_DIR}")
+        endif()
+
 	endif()
 
 endif()
