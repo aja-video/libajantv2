@@ -230,7 +230,7 @@ static void dmaXlnxAbort(PDMA_ENGINE pDmaEngine);
 static void dmaXlnxInterrupt(PDMA_ENGINE pDmaEngine);
 
 static int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuffer, uint32_t index);
-static int dmaXlnxStreamLink(PDMA_ENGINE pDmaEngine, uint32_t srcIndex, uint32_t dstIndex);
+static int dmaXlnxStreamLink(PDMA_ENGINE pDmaEngine, uint32_t descIndex, uint32_t nextIndex);
 static int dmaXlnxStreamStart(PDMA_ENGINE pDmaEngine, uint32_t startIndex);
 static int dmaXlnxStreamStop(PDMA_ENGINE pDmaEngine);
 static int dmaXlnxDescIndexToPage(uint32_t index, uint32_t* pageIndex, uint32_t* descIndex);
@@ -2304,7 +2304,7 @@ int dmaStreamStart(PDMA_PARAMS pDmaParams)
 
             // build the descriptor list
             dmaStatus = dmaXlnxStreamBuild(pDmaEngine, pVideoPageBuffer, 0);
-            if (dmaStatus == 0)
+            if (dmaStatus >= 0)
             {
                 // link the last descriptor to the start
                 dmaStatus = dmaXlnxStreamLink(pDmaEngine, pVideoPageBuffer->numSgs - 1, 0);
@@ -4865,8 +4865,15 @@ static void dmaXlnxInterrupt(PDMA_ENGINE pDmaEngine)
 int dmaOpsStreamInitialize(struct ntv2_stream *stream)
 {
     PDMA_ENGINE pDmaEngine = (PDMA_ENGINE)stream->dma_engine;
+    int status = 0;
 
     // stop the dma engine synchonously
+    status = dmaXlnxStreamStop(pDmaEngine);
+    if (status < 0)
+    {
+        stream->engine_state = ntv2_stream_state_error;
+        return NTV2_STREAM_OPS_FAIL;
+    }        
     NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsStreamInitialize stop the dma\n", DMA_MSG_ENGINE);
 
     // reset counters
@@ -4881,19 +4888,29 @@ int dmaOpsStreamInitialize(struct ntv2_stream *stream)
 int dmaOpsStreamStart(struct ntv2_stream *stream)
 {
     PDMA_ENGINE pDmaEngine = (PDMA_ENGINE)stream->dma_engine;
-
+    int start_index = 0;
+    int status = 0;
+    
     if(stream->engine_state == ntv2_stream_state_initialized)
     {
-        // program the descriptors
-
-        // link the chain
+        // program the engine
+        status = dmaOpsStreamAdvance(stream);
+        if (status != NTV2_STREAM_OPS_SUCCESS)
+        {
+            return status;
+        }
 
         // start the engine
+        status = dmaXlnxStreamStart(pDmaEngine, start_index);
+        if (status < 0)
+        {
+            stream->engine_state = ntv2_stream_state_error;
+            return NTV2_STREAM_OPS_FAIL;
+        }        
         NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsStreamStart start the dma\n", DMA_MSG_ENGINE);
-
-        stream->engine_state = ntv2_stream_state_idle;
-        NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsStreamStart engine state idle\n", DMA_MSG_ENGINE);
     }
+    
+    NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsStreamStart engine state active\n", DMA_MSG_ENGINE);
     
     return NTV2_STREAM_OPS_SUCCESS;
 }
@@ -4906,11 +4923,14 @@ int dmaOpsStreamStop(struct ntv2_stream *stream)
 int dmaOpsStreamAdvance(struct ntv2_stream *stream)
 {
     PDMA_ENGINE pDmaEngine = (PDMA_ENGINE)stream->dma_engine;
-    int next;
-    struct ntv2_stream_buffer* stream_active;
-    struct ntv2_stream_buffer* stream_next;
+    uint32_t next;
+    struct ntv2_stream_buffer* buffer_active;
+    struct ntv2_stream_buffer* buffer_next;
     PDMA_PAGE_BUFFER  page_active;
     PDMA_PAGE_BUFFER  page_next;
+    uint32_t desc_index;
+    uint32_t next_index;
+    int status;
 
     // spinlock
     if ((stream->engine_state != ntv2_stream_state_idle) &&
@@ -4919,30 +4939,94 @@ int dmaOpsStreamAdvance(struct ntv2_stream *stream)
         return NTV2_STREAM_OPS_FAIL;
     }
     
-    // get current buffer
-    stream_active = &stream->stream_buffers[stream->active_index];
-    if (!stream_active->linked)
+    // get current page buffer
+    buffer_active = &stream->stream_buffers[stream->active_index];
+    page_active = (PDMA_PAGE_BUFFER)buffer_active->user_buffer.mBuffer.fKernelHandle;
+    if (!buffer_active->prepared || (page_active == NULL))
     {
         stream->engine_state = ntv2_stream_state_error;
         return NTV2_STREAM_OPS_FAIL;
     }
-    page_active = (PDMA_PAGE_BUFFER)stream_active->user_buffer.mBuffer.fKernelHandle;
+
+    if (!buffer_active->linked)
+    {
+        // build active buffer descriptors
+        status = dmaXlnxStreamBuild(pDmaEngine, page_active, 0);
+        if (status <= 0)
+        {
+            stream->engine_state = ntv2_stream_state_error;
+            return NTV2_STREAM_OPS_FAIL;
+        }
+        buffer_active->ds_index = 0;
+        buffer_active->ds_count = (uint32_t)status;
+
+        // link active buffer to itself
+        desc_index = (buffer_active->ds_index + buffer_active->ds_count - 1) % pDmaEngine->maxDescriptors;
+        next_index = buffer_active->ds_index;
+        status = dmaXlnxStreamLink(pDmaEngine, desc_index, next_index);
+        if (status < 0)
+        {
+            stream->engine_state = ntv2_stream_state_error;
+            return NTV2_STREAM_OPS_FAIL;
+        }
+       
+        buffer_active->linked = true;
+    }
 
     if (stream->stream_state == ntv2_stream_state_active)
     {
-        
-//        next = (stream_active + 1) % NTV2_STREAM_NUM_BUFFERS;
+        // get next buffer
+        next = (stream->active_index + 1) % NTV2_STREAM_NUM_BUFFERS;
+        buffer_next = &stream->stream_buffers[next];
+        page_next = (PDMA_PAGE_BUFFER)buffer_next->user_buffer.mBuffer.fKernelHandle;
     
-        // build next buffer descriptors
+        if (buffer_next->prepared && !buffer_next->linked)
+        {
+            // check for pages
+            if (page_next == NULL)
+            {
+                stream->engine_state = ntv2_stream_state_error;
+                return NTV2_STREAM_OPS_FAIL;
+            }                
 
-        // link descriptor chain
+            // build next buffer descriptors
+            buffer_next->ds_index = buffer_active->ds_index + buffer_active->ds_count;
+            status = dmaXlnxStreamBuild(pDmaEngine, page_next, buffer_next->ds_index);
+            if (status <= 0)
+            {
+                stream->engine_state = ntv2_stream_state_error;
+                return NTV2_STREAM_OPS_FAIL;
+            }
+            buffer_next->ds_count = (uint32_t)status;
+
+            // link descriptor chain
+            desc_index = (buffer_active->ds_index + buffer_active->ds_count - 1) % pDmaEngine->maxDescriptors;
+            next_index = buffer_next->ds_index;
+            status = dmaXlnxStreamLink(pDmaEngine, desc_index, next_index);
+            if (status < 0)
+            {
+                stream->engine_state = ntv2_stream_state_error;
+                return NTV2_STREAM_OPS_FAIL;
+            }
+            buffer_next->linked = true;
+
+            // update active count
+            NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsStreamAdvance engine state active streaming\n", DMA_MSG_ENGINE);
+        }
+        else
+        {
+            // update drop count
+            NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsStreamAdvance engine state active dropping\n", DMA_MSG_ENGINE);
+        }
 
         stream->engine_state = ntv2_stream_state_active;
-        NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsStreamAdvance engine state active\n", DMA_MSG_ENGINE);
     }
     else
     {
         // link descriptor chain
+        buffer_next->linked = true;
+
+        // update idle count
         
         stream->engine_state = ntv2_stream_state_idle;
         NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsStreamAdvance engine state idle\n", DMA_MSG_ENGINE);
@@ -4961,6 +5045,11 @@ int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index)
     struct ntv2_stream_buffer* buffer = &stream->stream_buffers[index];
     PDMA_PAGE_BUFFER pPageBuffer = (PDMA_PAGE_BUFFER)buffer->user_buffer.mBuffer.fKernelHandle;
 
+    if (buffer->prepared)
+    {
+        return NTV2_STREAM_OPS_SUCCESS;
+    }
+
     if (pPageBuffer == NULL)
         return NTV2_STREAM_OPS_FAIL;
 
@@ -4971,6 +5060,8 @@ int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index)
         return NTV2_STREAM_OPS_FAIL;
 
     buffer->prepared = true;
+    buffer->linked = false;
+    buffer->released = false;
     NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsBufferPrepare address %016llx\n",
                      DMA_MSG_ENGINE, (ULWord64)buffer->user_buffer.mBuffer.fUserSpacePtr);
 
@@ -4984,7 +5075,14 @@ int dmaOpsBufferRelease(struct ntv2_stream *stream, int index)
     struct ntv2_stream_buffer* buffer = &stream->stream_buffers[index];
     PDMA_PAGE_BUFFER pPageBuffer = (PDMA_PAGE_BUFFER)buffer->user_buffer.mBuffer.fKernelHandle;
 
-    dmaPageRootFree(deviceNumber, pPageBuffer);  
+    if (buffer->released)
+    {
+        return NTV2_STREAM_OPS_SUCCESS;
+    }
+
+    dmaPageRootFree(deviceNumber, pPageBuffer);
+    buffer->prepared = false;
+    buffer->linked = false;
     buffer->released = true;
     NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsBufferRelease address %016llx\n",
                      DMA_MSG_ENGINE, (ULWord64)buffer->user_buffer.mBuffer.fUserSpacePtr);
@@ -5011,9 +5109,9 @@ static int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuff
 	ULWord					descTransferLast;
 	ULWord					programBytes;
 	ULWord					contigCount;
-	ULWord					dpIndex;
+	ULWord					dpPage;
 	ULWord					dpPageMask;
-	ULWord					dpPageCount;
+	ULWord					dpIndex;
 	ULWord					dpNumPerPage;
 	ULWord					dsIndex;
 	bool					done;
@@ -5030,7 +5128,7 @@ static int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuff
 	}
 	
 	// get first descriptor
-    if (dmaXlnxDescIndexToPage(index, &dpIndex, &dpPageCount) != 0)
+    if (dmaXlnxDescIndexToPage(index, &dpPage, &dpIndex) != 0)
     {
         return -EPERM;
     }
@@ -5039,9 +5137,9 @@ static int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuff
 	valControl = XLNX_CONTROL_DESC_MAGIC;
 	dpPageMask = PAGE_SIZE - 1;
 	dpNumPerPage = PAGE_SIZE / DMA_DESCRIPTOR_SIZE;
-	pDescriptor = (PXLNX_DESCRIPTOR)pDmaEngine->pDescriptorVirtual[dpIndex];
+	pDescriptor = (PXLNX_DESCRIPTOR)pDmaEngine->pDescriptorVirtual[dpPage];
 	pDescriptorLast = pDescriptor;
-	physDescriptor = pDmaEngine->descriptorPhysical[dpIndex];
+	physDescriptor = pDmaEngine->descriptorPhysical[dpPage];
 	descriptorCount = 0;
 	programBytes = 0;
 	sgIndex = 0;
@@ -5073,7 +5171,7 @@ static int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuff
         descTransferSize = dmaSgLength(pPageBuffer, sgIndex);
         
         // xlnx can fetch up to 16 descriptors at once if they are contiguous and do not span pages
-        contigCount = dpNumPerPage - dpPageCount - 1;
+        contigCount = dpNumPerPage - dpIndex - 1;
         if (contigCount > 0)
         {
             contigCount--;
@@ -5102,24 +5200,24 @@ static int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuff
         descSystemLast = descSystemAddress;
         descTransferLast = descTransferSize;
 
-        dpPageCount++;
-        if (dpPageCount < dpNumPerPage)
+        dpIndex++;
+        if (dpIndex < dpNumPerPage)
         {
             pDescriptor++;
             physDescriptor += sizeof(DMA_DESCRIPTOR64);
         }
         else
         {
-            dpPageCount = 0;
-            dpIndex++;
-            if (dpIndex >= pDmaEngine->numDescriptorPages)
+            dpIndex = 0;
+            dpPage++;
+            if (dpPage >= pDmaEngine->numDescriptorPages)
             {
-                dpIndex = 0;
+                dpPage = 0;
                 NTV2_MSG_DESCRIPTOR("%s%d:%s%d: dmaXlnxStreamBuild descriptor list wrap\n",
                                     DMA_MSG_ENGINE);
             }
-            pDescriptor = (PXLNX_DESCRIPTOR)pDmaEngine->pDescriptorVirtual[dpIndex];
-            physDescriptor = pDmaEngine->descriptorPhysical[dpIndex];
+            pDescriptor = (PXLNX_DESCRIPTOR)pDmaEngine->pDescriptorVirtual[dpPage];
+            physDescriptor = pDmaEngine->descriptorPhysical[dpPage];
         }
         pDescriptorLast->llNextAddress = physDescriptor;
 
@@ -5171,19 +5269,19 @@ static int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuff
 		return -EPERM;
 	}
 
-    return 0;
+    return (int)descriptorCount;
 }
 
-static int dmaXlnxStreamLink(PDMA_ENGINE pDmaEngine, uint32_t srcIndex, uint32_t dstIndex)
+static int dmaXlnxStreamLink(PDMA_ENGINE pDmaEngine, uint32_t descIndex, uint32_t nextIndex)
 {
     PXLNX_DESCRIPTOR pDescriptor = NULL;
     ULWord srcPage = 0;
-    ULWord srcCount = 0;
+    ULWord srcIndex = 0;
     ULWord dstPage = 0;
-    ULWord dstCount = 0;
+    ULWord dstIndex = 0;
     
-    NTV2_MSG_PROGRAM("%s%d:%s%d: dmaXlnxStreamLink() source index %d  destination index %d\n",
-                     DMA_MSG_ENGINE, srcIndex, dstIndex);
+    NTV2_MSG_PROGRAM("%s%d:%s%d: dmaXlnxStreamLink() descriptor index %d  next index %d\n",
+                     DMA_MSG_ENGINE, descIndex, nextIndex);
 
 	if (!pDmaEngine->dmaStream)
 	{
@@ -5191,14 +5289,14 @@ static int dmaXlnxStreamLink(PDMA_ENGINE pDmaEngine, uint32_t srcIndex, uint32_t
 		return -EPERM;
 	}
 
-    if (dmaXlnxDescIndexToPage(srcIndex, &srcPage, &srcCount) != 0)
+    if (dmaXlnxDescIndexToPage(descIndex, &srcPage, &srcIndex) != 0)
         return -EPERM;
 
-    if (dmaXlnxDescIndexToPage(dstIndex, &dstPage, &dstCount) != 0)
+    if (dmaXlnxDescIndexToPage(nextIndex, &dstPage, &dstIndex) != 0)
         return -EPERM;
 
-    pDescriptor = ((PXLNX_DESCRIPTOR)pDmaEngine->pDescriptorVirtual[srcPage]) + srcCount;
-    pDescriptor->llNextAddress = pDmaEngine->descriptorPhysical[dstPage] + (dstCount * sizeof(XLNX_DESCRIPTOR));
+    pDescriptor = ((PXLNX_DESCRIPTOR)pDmaEngine->pDescriptorVirtual[srcPage]) + srcIndex;
+    pDescriptor->llNextAddress = pDmaEngine->descriptorPhysical[dstPage] + (dstIndex * sizeof(XLNX_DESCRIPTOR));
 
     NTV2_MSG_DESCRIPTOR("%s%d:%s%d: dmaXlnxStreamLink con %08x cnt %08x src %016llx dst %016llx nxt %016llx\n",
                         DMA_MSG_ENGINE, pDescriptor->ulControl, pDescriptor->ulTransferCount,

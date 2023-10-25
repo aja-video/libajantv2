@@ -48,8 +48,8 @@ struct ntv2_stream_buffer {
     bool                prepared;
     bool                linked;
     bool                released;
-    uint32_t            first_index;
-    uint32_t            last_index;
+    uint32_t            ds_index;
+    uint32_t            ds_count;
 };
 
 struct ntv2_stream {
