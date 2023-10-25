@@ -270,6 +270,7 @@ clean:
 	rm -rf .tmp_versions
 	rm -rf .cache.mk
 	rm -rf nvidia.symvers
+	rm -rf tmp
 
 cleandeps: clean
 realclean: clean
