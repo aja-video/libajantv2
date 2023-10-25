@@ -205,6 +205,7 @@ obj-m				:= $(DRIVERTARGET)
 
 DKMSVER = $(SDKVER_MAJ).$(SDKVER_MIN).$(SDKVER_PNT)
 DKMSDIR = ajantv2-$(DKMSVER)
+DKMSTARBALL = $(DKMSDIR).tar.gz
 DKMSINSTALLED = $(shell command -v dkms 2> /dev/null)
 
 default: all
@@ -276,7 +277,8 @@ realclean: clean
 etags:
 	etags *.h *.c ../*.h ../*.c $(A_LIB_NTV2_INC)/*.h
 
-dkms-build:
+dkms-pkg:
+	@printf "\n## packaging up DKMS driver\n"
 	@mkdir -p tmp/$(DKMSDIR)/libajantv2/driver/linux
 	@mkdir -p tmp/$(DKMSDIR)/libajantv2/ajantv2/includes
 	@mkdir -p tmp/$(DKMSDIR)/libajantv2/ajantv2/src/lin
@@ -308,17 +310,25 @@ dkms-build:
 		cp $$i tmp/$(DKMSDIR)/libajantv2/driver/linux ; \
 	done
 	@awk '\
-		sub("AJA_DKMS_PKG_VERSION", "$(DKMSVER)") {print;next} \
+		sub("@AJA_DKMS_PKG_VERSION@", "$(DKMSVER)") {print;next} \
 		{print} \
 	' dkms.conf > "tmp/$(DKMSDIR)/dkms.conf"
-	@printf "\ngenerating DKMS tarball:\n"
-	@cd tmp; tar czf "$(DKMSDIR).tar.gz" "$(DKMSDIR)"
+	@printf "\n## generating DKMS tarball: %s\n" "tmp/$(DKMSTARBALL)"
+	@cd tmp; tar czf "$(DKMSTARBALL)" "$(DKMSDIR)"
 
-dkms-install: dkms-build
+dkms-install: dkms-pkg
 	@if [ -n "$(DKMSINSTALLED)" ]; then \
-		printf "\ninstalling DKMS tarball:\n"; \
-		sudo dkms ldtarball -m ajantv2/$DKMSVER "tmp/$(DKMSDIR).tar.gz"; \
+		printf "\n## installing DKMS driver:\n"; \
+		sudo dkms ldtarball -m ajantv2/$(DKMSVER) "tmp/$(DKMSTARBALL)"; \
 		sudo dkms autoinstall; \
 	else \
-		echo "DKMS system is not installed"; \
+		echo "!! DKMS system is not installed"; \
+	fi
+
+dkms-uninstall:
+	@if [ -n "$(DKMSINSTALLED)" ]; then \
+		printf "\n## uninstalling DKMS driver:\n"; \
+		sudo dkms remove ajantv2/$(DKMSVER); \
+	else \
+		echo "!! DKMS system is not installed"; \
 	fi
