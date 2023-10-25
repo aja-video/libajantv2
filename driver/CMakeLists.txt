@@ -117,9 +117,6 @@ endif()
 set(AJADRIVER_LINUX_BUILD_FILES
 	linux/Makefile
 	linux/nvidia-ko-to-module-symvers)
-set(AJADRIVER_LINUX_LOAD_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/bin/load_ajantv2
-	${CMAKE_CURRENT_SOURCE_DIR}/bin/unload_ajantv2)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(AJADRIVER_TARGET_SOURCES
@@ -201,7 +198,7 @@ if (AJANTV2_BUILD_OPENSOURCE)
 		"To build the MIT-licensed NTV2 device driver on Linux:\n"
 		"1. `cd driver/linux && make`\n"
 		"2. `cd driver/bin`\n"
-		"3. `sudo ./load_ajantv2`\n\n"
+		"3. `sudo insmod ajantv2.ko`\n\n"
 		"Alternately the Linux driver can be installed via the AJA Software Installer for Linux, available from: https://www.aja.com/support\n"
 	)
 
@@ -267,12 +264,6 @@ if (AJA_INSTALL_MISC)
 	if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 		install(FILES ${AJADRIVER_LINUX_BUILD_FILES}
                 DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/driver/linux
-                COMPONENT install_driver)
-		install(FILES ${AJADRIVER_LINUX_LOAD_FILES}
-                DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/driver/bin
-                PERMISSIONS OWNER_EXECUTE OWNER_READ OWNER_WRITE
-                            GROUP_EXECUTE GROUP_READ GROUP_WRITE
-                            WORLD_EXECUTE WORLD_READ
                 COMPONENT install_driver)
 		install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/configure.mk
                 DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/driver
