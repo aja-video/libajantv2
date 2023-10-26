@@ -207,8 +207,11 @@ obj-m				:= $(DRIVERTARGET)
 
 DKMSVER = $(SDKVER_MAJ).$(SDKVER_MIN).$(SDKVER_PNT)
 DKMSDIR = ajantv2-$(DKMSVER)
-DKMSTARBALL = $(DKMSDIR).tar.gz
-DKMSINSTALLED = $(shell command -v dkms 2> /dev/null)
+ifeq ($(wildcard /usr/sbin/dkms), /usr/sbin/dkms)
+	DKMSINSTALLED = 1
+else
+	DKMSINSTALLED = $(shell command -v dkms 2> /dev/null)
+endif
 
 default: all
 	@echo linux distro: $(DISTRO_TYPE)
@@ -282,6 +285,7 @@ etags:
 
 dkms-pkg:
 	@printf "\n## packaging up DKMS driver\n"
+	@rm -rf tmp/$(DKMSDIR)
 	@mkdir -p tmp/$(DKMSDIR)/libajantv2/driver/linux
 	@mkdir -p tmp/$(DKMSDIR)/libajantv2/ajantv2/includes
 	@mkdir -p tmp/$(DKMSDIR)/libajantv2/ajantv2/src/lin
@@ -316,14 +320,13 @@ dkms-pkg:
 		sub("@AJA_DKMS_PKG_VERSION@", "$(DKMSVER)") {print;next} \
 		{print} \
 	' dkms.conf > "tmp/$(DKMSDIR)/dkms.conf"
-	@printf "\n## generating DKMS tarball: %s\n" "tmp/$(DKMSTARBALL)"
-	@cd tmp; tar czf "$(DKMSTARBALL)" "$(DKMSDIR)"
 
 dkms-install: dkms-pkg
 	@if [ -n "$(DKMSINSTALLED)" ]; then \
 		printf "\n## installing DKMS driver:\n"; \
-		sudo dkms ldtarball -m ajantv2/$(DKMSVER) "tmp/$(DKMSTARBALL)"; \
-		sudo dkms autoinstall; \
+		sudo cp -a tmp/$(DKMSDIR) /usr/src/; \
+		sudo dkms install ajantv2/$(DKMSVER); \
+		sudo modprobe ajantv2; \
 	else \
 		echo "!! DKMS system is not installed"; \
 	fi
@@ -331,7 +334,9 @@ dkms-install: dkms-pkg
 dkms-uninstall:
 	@if [ -n "$(DKMSINSTALLED)" ]; then \
 		printf "\n## uninstalling DKMS driver:\n"; \
-		sudo dkms remove ajantv2/$(DKMSVER); \
+		sudo dkms remove ajantv2/$(DKMSVER) --all; \
+		sudo rm -rf /usr/src/ajantv2-$(DKMSVER); \
+		sudo rmmod ajantv2; \
 	else \
 		echo "!! DKMS system is not installed"; \
 	fi
