@@ -3700,40 +3700,74 @@ public:
 #define NTV2_STREAM_SUCCESS(__status__)  (__status__ == NTV2_STREAM_SUCCESS)
 #define NTV2_STREAM_FAIL(__status__)  (__status__ != NTV2_STREAM_SUCCESS)
 
-	// initialize the stream
+	/**
+		@brief		Initialize a stream.  Put the stream queue and hardware in a known good state ready for use.  Releases
+                    any buffers remaining in the queue.  At least one new buffer must be queued before starting the stream.
+    **/
 	AJA_VIRTUAL ULWord	StreamChannelInitialize (const NTV2Channel inChannel);
 
-	// start the stream
+	/**
+		@brief		Start a stream.  Put the stream is the active state to start processing queued buffers.  For frame
+                    based video, the stream will start with the current buffer on the next frame sync.
+		@return		The current stream status.
+    **/
 	AJA_VIRTUAL ULWord	StreamChannelStart (const NTV2Channel inChannel,
 												NTV2StreamChannel& status);
 
-	// stop the stream
+	/**
+		@brief		Stop a stream.  Put the stream is the idle state.  For frame based video, the stream will idle on 
+                    the buffer on air after the next frame sync.
+		@return		The current stream status.
+    **/
 	AJA_VIRTUAL ULWord	StreamChannelStop (const NTV2Channel inChannel,
 												NTV2StreamChannel& status);
 
-    // flush the buffers
+	/**
+		@brief		Flush a stream.  Remove all the buffers from the stream except a currently active idle buffer.
+                    The stream must be in the initialize or idle state.
+		@return		The current stream status.
+    **/
     AJA_VIRTUAL ULWord	StreamChannelFlush (const NTV2Channel inChannel,
                                             NTV2StreamChannel& status);
 
-    // current stream status
+	/**
+		@brief		Get the current stream status.
+		@return		The current stream status.
+    **/
 	AJA_VIRTUAL ULWord	StreamChannelStatus (const NTV2Channel inChannel,
 												NTV2StreamChannel& status);
 
-	// wait for a buffer interrupt
+	/**
+		@brief		Wait for any stream event.  Returns for any state or buffer change.
+		@return		The current stream status.
+    **/
 	AJA_VIRTUAL ULWord	StreamChannelWait (const NTV2Channel inChannel,
 											NTV2StreamChannel& status);
 
-	// add a buffer to the stream
+	/**
+		@brief		Queue a buffer to the stream.  The bufferCookie is a user defined identifier of the buffer
+                    used by the stream methods.
+		@return		The queued buffer status.
+    **/
 	AJA_VIRTUAL ULWord	StreamBufferQueue (const NTV2Channel inChannel,
 											NTV2_POINTER inBuffer,
 											ULWord64 bufferCookie,
 											NTV2StreamBuffer& status);
 
-	// request buffer status
+	/**
+		@brief		Get the status of the buffer identified by the bufferCookie.
+		@return		The buffer status.
+    **/
 	AJA_VIRTUAL ULWord	StreamBufferStatus (const NTV2Channel inChannel,
 											ULWord64 bufferCookie,
 											NTV2StreamBuffer& status);
 
+	/**
+		@brief		Remove the oldest buffer released by the streaming engine from the buffer queue.
+		@return		The removed buffer status.
+    **/
+//	AJA_VIRTUAL ULWord	StreamBufferRelease (const NTV2Channel inChannel,
+//                                             NTV2StreamBuffer& status);
 
 
 
