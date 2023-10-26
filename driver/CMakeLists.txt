@@ -176,6 +176,18 @@ if (AJANTV2_BUILD_DRIVER)
                     BYPRODUCTS ${BIN_PATH}/ajantv2.ko
                     )
 
+                add_custom_target(driver_linux_dkms_install
+                    COMMENT "Installing Linux DKMS driver"
+                    COMMAND make -C linux dkms-install
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                    )
+
+                add_custom_target(driver_linux_dkms_uninstall
+                    COMMENT "Uninstalling Linux DKMS driver"
+                    COMMAND make -C linux dkms-uninstall
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                    )
+
             set(LIN_LOAD_DRIVER_MSG
                 "         After building Linux driver can enable with: sudo .${BIN_PATH}/load_ajantv2")
             message(STATUS "AJA:  added target: driver_linux...\n${LIN_LOAD_DRIVER_MSG}")
