@@ -70,7 +70,7 @@ static const struct standard_data c_standard_data[] =
     // video standard                   awidth  ltot    vpid1   astart1 aend1   vpid2   astart2 aend2   flow    fhigh   align   sw1     sw2     video scan
     { ntv2_video_standard_1080i,        1920,   1125,   10,     21,     560,    572,    584,    1123,   1,      564,    1,      7,      569,    ntv2_video_scan_top_first },
     { ntv2_video_standard_720p,         1280,   750,    10,     26,     745,    0,      0,      0,      0,      0,      1,      7,      0,      ntv2_video_scan_progressive },
-    { ntv2_video_standard_525i,         720,    525,    13,     20,     263,    276,    283,    525,    4,      266,    4,      10,     273,    ntv2_video_scan_bottom_first },
+    { ntv2_video_standard_525i,         720,    525,    13,     18,     263,    276,    280,    525,    4,      266,    4,      10,     273,    ntv2_video_scan_bottom_first },
     { ntv2_video_standard_625i,         720,    625,    9,      23,     310,    322,    336,    623,    1,      313,    1,      6,      319,    ntv2_video_scan_top_first },
     { ntv2_video_standard_1080p,        1920,   1125,   10,     42,     1121,   0,      0,      0,      0,      0,      1,      7,      0,      ntv2_video_scan_progressive },
     { ntv2_video_standard_2048x1556,    2048,   1980,   195,    211,    988,    1185,   1201,   1978,   1,      991,    1,      7,      0,      ntv2_video_scan_top_first },
@@ -237,8 +237,8 @@ static const struct timing_offset_data c_offset_data[] =
     // video standard                   crh     crv     drh     drv     cf      df
     { ntv2_video_standard_1080i,        1,      0,      1,      0,      0,      0 },
     { ntv2_video_standard_720p,         1,      5,      1,      0,      0,      0 },
-    { ntv2_video_standard_525i,         1,      0,      1,      0,      0,      0 },
-    { ntv2_video_standard_625i,         1,      3,      1,      0,      0,      0 },
+    { ntv2_video_standard_525i,         1,      0,      1,      3,      0,      0 },
+    { ntv2_video_standard_625i,         1,      0,      1,      3,      0,      0 },
     { ntv2_video_standard_1080p,        1,      4,      1,      0,      0,      0 },
     { ntv2_video_standard_2048x1556,    1,      0,      1,      0,      0,      0 },
     { ntv2_video_standard_2048x1080p,   1,      0,      1,      0,      0,      0 },
