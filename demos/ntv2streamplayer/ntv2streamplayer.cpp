@@ -509,7 +509,6 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 		cerr << "## ERROR:  Stream initialize failed: " << status << endl;
 		return;
 	}
-	mDevice.WaitForOutputVerticalInterrupt(mConfig.fOutputChannel, 4);	//	Let it stop
 	PLNOTE("Thread started");
 
 	while (!mGlobalQuit)
@@ -522,7 +521,7 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 			return;
 		}
 
-		if (strStatus.GetQueueDepth() < 1)  // needs a GetQueueDepth
+		if (strStatus.GetQueueDepth() < 8)
 		{
 			//	Device has at least one free frame buffer that can be filled.
 			//	Wait for the next frame in our ring to become ready to "consume"...
@@ -545,7 +544,7 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 					cerr << "## ERROR:  Stream buffer add failed: " << status << endl;
 				}
 
-				if (goodQueue == 1000000)
+				if (goodQueue == 3)
 				{
 					// start the stream
 					status = mDevice.StreamChannelStart(mConfig.fOutputChannel, strStatus);
@@ -575,7 +574,7 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 		}
 
 		//	Wait for one or more buffers to become available on the device, which should occur at next VBI...
-		mDevice.WaitForOutputVerticalInterrupt(mConfig.fOutputChannel);
+		mDevice.StreamChannelWait(mConfig.fOutputChannel, strStatus);
 	}	//	loop til quit signaled
 
 	//	Stop streaming...

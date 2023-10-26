@@ -5023,11 +5023,17 @@ int dmaOpsStreamAdvance(struct ntv2_stream *stream)
     }
     else
     {
-        // link descriptor chain
-        buffer_next->linked = true;
+        // link active buffer to itself
+        desc_index = (buffer_active->ds_index + buffer_active->ds_count - 1) % pDmaEngine->maxDescriptors;
+        next_index = buffer_active->ds_index;
+        status = dmaXlnxStreamLink(pDmaEngine, desc_index, next_index);
+        if (status < 0)
+        {
+            stream->engine_state = ntv2_stream_state_error;
+            return NTV2_STREAM_OPS_FAIL;
+        }
 
-        // update idle count
-        
+        // update idle count        
         stream->engine_state = ntv2_stream_state_idle;
         NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsStreamAdvance engine state idle\n", DMA_MSG_ENGINE);
     }
