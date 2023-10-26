@@ -115,6 +115,7 @@ if (NOT AJANTV2_BUILD_OPENSOURCE)
 endif()
 
 set(AJADRIVER_LINUX_BUILD_FILES
+	linux/dkms.conf
 	linux/Makefile
 	linux/nvidia-ko-to-module-symvers)
 
