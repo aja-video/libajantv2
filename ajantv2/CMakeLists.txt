@@ -1,11 +1,6 @@
 project(ajantv2)
 
-if(CMAKE_CXX_STANDARD EQUAL 11)
-    message(STATUS "ajantv2 building for C++11")
-    list(APPEND TARGET_COMPILE_DEFS
-        -DAJA_USE_CPLUSPLUS11
-        -DNTV2_USE_CPLUSPLUS11)
-else()
+if (CMAKE_CXX_STANDARD EQUAL 98)
     message(STATUS "ajantv2 building for C++98")
     remove_definitions(
         -DAJA_USE_CPLUSPLUS11
@@ -22,6 +17,13 @@ else()
     STRING(REPLACE "#define NTV2_USE_CPLUSPLUS11" "//#define NTV2_USE_CPLUSPLUS11 " _ajatypes_file "${_ajatypes_file}")
     file(WRITE ${_ajantv2_ajatypes_path} "${_ajatypes_file}")
     message(STATUS "Overwrote ${_ajantv2_ajatypes_path} to remove NTV2_USE_CPLUSPLUS11 define!")
+elseif(CMAKE_CXX_STANDARD GREATER_EQUAL 11)
+    message(STATUS "ajantv2 building for C++11")
+    list(APPEND TARGET_COMPILE_DEFS
+        -DAJA_USE_CPLUSPLUS11
+        -DNTV2_USE_CPLUSPLUS11)
+else()
+    message(FATAL_ERROR "Unsupported C++ standard! NTV2 requires C++98 or higher. CMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}")
 endif()
 
 remove_definitions(
