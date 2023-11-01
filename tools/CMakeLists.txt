@@ -1,4 +1,4 @@
-if (NOT AJANTV2_BUILD_TOOLS)
+if (AJANTV2_DISABLE_TOOLS)
     message(STATUS "Skipping libajantv2 tools...")
     return()
 endif()

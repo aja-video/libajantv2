@@ -153,7 +153,7 @@ set(NEEDED_NTV2_SOURCES
     ${AJANTV2_ROOT}/src/ntv2devicefeatures.hpp
     )
 
-if (AJANTV2_BUILD_DRIVER)
+if (NOT AJANTV2_DISABLE_DRIVER)
 	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 		message(STATUS "Windows driver CMake build not yet implemented!")
 		return()
@@ -195,9 +195,7 @@ if (AJANTV2_BUILD_DRIVER)
         else()
             message(WARNING "AJA: Unable to add driver target: Please install kernel headers: ${KERNEL_BUILD_DIR}")
         endif()
-
 	endif()
-
 endif()
 
 if (AJANTV2_BUILD_OPENSOURCE)
@@ -220,7 +218,6 @@ if (AJANTV2_BUILD_OPENSOURCE)
 endif()
 
 # installing
-
 add_custom_target(ajadriver_install ${AJADRIVER_TARGET_SOURCES})
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")

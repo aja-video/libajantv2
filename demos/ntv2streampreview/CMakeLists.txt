@@ -1,7 +1,7 @@
 project(ntv2streampreview)
 
-if (NOT AJA_QT_ENABLED)
-	message(STATUS "AJA_QT_ENABLED not set. Ignoring project ${PROJECT_NAME}...")
+if (AJA_DISABLE_QT)
+    message(STATUS "AJA_DISABLE_QT is set. Ignoring project ${PROJECT_NAME}...")
     return()
 endif()
 

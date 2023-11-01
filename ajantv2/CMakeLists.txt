@@ -182,21 +182,21 @@ set(AJANTV2_UTILITY_PUBLIC_SOURCES
 
 if (NOT AJANTV2_BUILD_OPENSOURCE)
     # ajantv2 hevc codec sources
-    if (EXISTS ${NTV2_PROPRIETARY_DIR})
+    if (EXISTS ${LIBAJANTV2_PRIVATE_DIR})
         set(AJANTV2_HEVC_HEADERS
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31.h
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31cparam.h
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31ehparam.h
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31vaparam.h
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31vinparam.h
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31viparam.h)
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31.h
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31cparam.h
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31ehparam.h
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31vaparam.h
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31vinparam.h
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31viparam.h)
         set(AJANTV2_HEVC_SOURCES
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31.cpp
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31cparam.cpp
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31ehparam.cpp
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31vaparam.cpp
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31vinparam.cpp
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31viparam.cpp)
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31.cpp
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31cparam.cpp
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31ehparam.cpp
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31vaparam.cpp
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31vinparam.cpp
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31viparam.cpp)
         # `cmake --install` deployments
         if (AJA_INSTALL_HEADERS)
             install(FILES ${AJANTV2_HEVC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/codecs/hevc/m31)
@@ -204,9 +204,9 @@ if (NOT AJANTV2_BUILD_OPENSOURCE)
         if (AJA_INSTALL_SOURCES)
             install(FILES ${AJANTV2_HEVC_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/codecs/hevc/m31)
         endif()
-        message(STATUS "added ajantv2 HEVC/M31 codec sources from ${NTV2_PROPRIETARY_DIR}")
+        message(STATUS "added ajantv2 HEVC/M31 codec sources from ${LIBAJANTV2_PRIVATE_DIR}")
     else()
-        message(STATUS "ntv2 proprietary repo not found: ${NTV2_PROPRIETARY_DIR}")
+        message(STATUS "ajantv2 private repo sources not found: ${LIBAJANTV2_PRIVATE_DIR}")
     endif()
 endif()
 
@@ -644,4 +644,6 @@ install(TARGETS ${PROJECT_NAME}
     FRAMEWORK       DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-add_subdirectory(test)
+if (NOT AJANTV2_DISABLE_TESTS)
+    add_subdirectory(test)
+endif()
