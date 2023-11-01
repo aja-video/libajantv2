@@ -16,7 +16,7 @@ symvers_fn="$2"
 
 touch "${symvers_fn}"
 for sym in "${syms[@]}"; do
-	crc="$(objdump -t "${nvidia_ko_fn}" | grep "__crc_${sym}" | awk '{print $1}')"
+	crc="$(objdump -t "${nvidia_ko_fn}" | grep "__crc_${sym}$" | awk '{print $1}')"
 	if [ -z "${crc}" ]; then
 		echo "Warning: Can't find symbol ${sym} in ${nvidia_ko_fn}; assuming CONFIG_MODVERSIONS=n so setting CRC=0"
 		crc=00000000
