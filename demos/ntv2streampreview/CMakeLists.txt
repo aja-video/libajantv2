@@ -46,7 +46,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         ${PROJECT_NAME}
         app.ico
         "ntv2streampreview.exe"
-        ${CMAKE_MODULE_PATH}/bundle/windows/win-ver.rc.in
+		${LIBAJANTV2_CMAKE_DIR}/bundle/windows/win-ver.rc.in
         win-ver.rc)
     list(APPEND NTV2STREAMPREVIEW_SOURCES
         win-ver.rc)

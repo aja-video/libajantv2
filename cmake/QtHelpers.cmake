@@ -15,9 +15,6 @@ endif()
 macro(aja_find_qt_modules)
 	set(_module_args "${ARGN}")
 
-	# Qt changes the CMAKE_MODULE_PATH, save off the original to restore
-	set(old_CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
-
 	find_package(QT NAMES ${PREF_QT_MAJORS} HINTS ${AJA_QT_DIR} COMPONENTS ${_module_args})
 	find_package(Qt${QT_VERSION_MAJOR} COMPONENTS ${_module_args})
 
@@ -46,9 +43,6 @@ macro(aja_find_qt_modules)
     message(STATUS "Found ${_modules_found_count}/${_args_count} Qt modules: ${_modules_found}")
 
 	list(REMOVE_DUPLICATES TARGET_QT_LIBS)
-
-	# restore CMAKE_MODULE_PATH
-	set(CMAKE_MODULE_PATH ${old_CMAKE_MODULE_PATH})
 endmacro(aja_find_qt_modules)
 
 # https://stackoverflow.com/questions/60854495/qt5-cmake-include-all-libraries-into-executable
@@ -154,7 +148,7 @@ function(aja_deploy_qt_libs_to_dest target dest)
     if (WIN32)
         add_custom_command(TARGET ${target} POST_BUILD
             COMMAND ${Python3_EXECUTABLE}
-                \"${CMAKE_MODULE_PATH}/scripts/qtdeploy.py\"
+				\"${LIBAJANTV2_CMAKE_DIR}/scripts/qtdeploy.py\"
                 \"${_qt_bin_dir}/windeployqt.exe\"
                 \"$<TARGET_FILE:${target}>\"
                 \"${dest}\"
@@ -164,7 +158,7 @@ function(aja_deploy_qt_libs_to_dest target dest)
         if (CMAKE_BUILD_TYPE STREQUAL "Debug")
             add_custom_command(TARGET ${target} POST_BUILD
                 COMMAND ${Python3_EXECUTABLE}
-                    \"${CMAKE_MODULE_PATH}/scripts/qtdeploy.py\"
+					\"${LIBAJANTV2_CMAKE_DIR}/scripts/qtdeploy.py\"
                     \"${_qt_bin_dir}/windeployqt.exe\"
                     \"$<TARGET_FILE:${target}>\"
                     \"${dest}\"
