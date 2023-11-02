@@ -206,9 +206,9 @@ function(aja_deploy_qt_libs_to_dest target dest)
             # no longer matches what it sees at install time.
             set_target_properties(${target} PROPERTIES INSTALL_RPATH "$ORIGIN/qtlibs")
 
-            install(FILES $<TARGET_FILE_DIR:${target}>/qtlibs DESTINATION ${CMAKE_INSTALL_BINDIR})
-            install(FILES $<TARGET_FILE_DIR:${target}>/plugins DESTINATION ${CMAKE_INSTALL_BINDIR})
-            install(FILES $<TARGET_FILE_DIR:${target}>/qt.conf DESTINATION ${CMAKE_INSTALL_BINDIR})
+			install(FILES $<TARGET_FILE_DIR:${target}>/qtlibs DESTINATION ${dest})
+			install(FILES $<TARGET_FILE_DIR:${target}>/plugins DESTINATION ${dest})
+			install(FILES $<TARGET_FILE_DIR:${target}>/qt.conf DESTINATION ${dest})
         else()
             message(STATUS "WARNING -- AJA Linux Deploy Qt script not found: ${_lin_deploy_qt_path}")
         endif()
