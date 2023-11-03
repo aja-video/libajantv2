@@ -701,6 +701,85 @@ bool IsFieldID0(Ntv2SystemContext* context, NTV2Crosspoint xpt)
 	return bField0;
 }
 
+bool ProgramProductCode(Ntv2SystemContext* context)
+{
+	// NTV2DeviceHasSPIFlashSerial serial number is stored in the spiflash
+	// read it and put it into the correct registers
+	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
+
+	if (NTV2DeviceHasSPIFlashSerial(deviceID))
+	{
+		bool hasExtendedCommandSupport = false;
+		uint32_t flashDeviceID = 0;
+		int serialSize = 2, i = 0;
+		ULWord bankSelectNumber = 0x00;
+		ULWord serialNumber = 0;
+		ULONG serialRegister = kRegReserved54;
+		ULWord baseAddress = 0xFC0000; //This is defined in ntv2konaserializer.cpp from classes
+
+		ntv2Message("CNTV2::InitializeBoard Serial\n");
+		ntv2WriteRegister(context, kRegXenaxFlashControlStatus, READID_COMMAND);
+		WaitForFlashNOTBusy(context);
+		flashDeviceID = ntv2ReadRegister(context, kRegXenaxFlashDOUT);
+
+		if ((flashDeviceID & 0x00ffffff) == 0x0020ba20)//Micron MT25QL512ABB
+		{
+			hasExtendedCommandSupport = true;
+			ntv2Message("CNTV2::InitializeBoard Micron part detected\n");
+		}
+
+		if (NTV2DeviceROMHasBankSelect(deviceID))
+		{
+			ntv2WriteRegister(context, kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+			WaitForFlashNOTBusy(context);
+			bankSelectNumber = NTV2DeviceGetSPIFlashVersion(deviceID) >= 5 ? 0x03 : 0x01;
+			ntv2WriteRegister(context, kRegXenaxFlashAddress, bankSelectNumber);
+			ntv2WriteRegister(context, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND);
+			WaitForFlashNOTBusy(context);
+		}
+
+		if (NTV2DeviceGetSPIFlashVersion(deviceID) > 5)
+			serialSize = 4;
+		for (i = 0; i < serialSize; i++, baseAddress += 4, serialRegister++)
+		{
+			serialNumber = 0;
+			ntv2WriteRegister(context, kRegXenaxFlashAddress, baseAddress);
+			ntv2WriteRegister(context, kRegXenaxFlashControlStatus, READFAST_COMMAND);
+			WaitForFlashNOTBusy(context);
+			serialNumber = ntv2ReadRegister(context, kRegXenaxFlashDOUT);
+			ntv2WriteRegister(context, serialRegister, serialNumber);
+		}
+
+		if (NTV2DeviceROMHasBankSelect(deviceID))
+		{
+			ntv2WriteRegister(context, kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+			WaitForFlashNOTBusy(context);
+			bankSelectNumber = 0x00;
+			ntv2WriteRegister(context, kRegXenaxFlashAddress, bankSelectNumber);
+			ntv2WriteRegister(context, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND);
+			WaitForFlashNOTBusy(context);
+		}
+	}
+	return NTV2DeviceHasSPIFlashSerial(deviceID);
+}
+
+bool WaitForFlashNOTBusy(Ntv2SystemContext* context)
+{
+	bool busy = true;
+	int count = 0;
+	do
+	{
+		ULWord regValue = ntv2ReadRegister(context, kRegXenaxFlashControlStatus);
+		if (regValue & BIT(8))
+			busy = true;
+		else
+			busy = false;
+		ntv2TimeSleep(100);
+		count++;
+	} while ((busy == true) && (count < 100));
+	return count == 100 ? false : true;
+}
+
 bool SetVideoOutputStandard(Ntv2SystemContext* context, NTV2Channel channel)
 {
 	HDRDriverValues hdrRegValues;
