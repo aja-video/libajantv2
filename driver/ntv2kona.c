@@ -712,12 +712,11 @@ bool ProgramProductCode(Ntv2SystemContext* context)
 		bool hasExtendedCommandSupport = false;
 		uint32_t flashDeviceID = 0;
 		int serialSize = 2, i = 0;
-		ULWord bankSelectNumber = 0x00;
-		ULWord serialNumber = 0;
-		ULONG serialRegister = kRegReserved54;
-		ULWord baseAddress = 0xFC0000; //This is defined in ntv2konaserializer.cpp from classes
-
-		ntv2Message("CNTV2::InitializeBoard Serial\n");
+		uint32_t bankSelectNumber = 0x00;
+		uint32_t serialNumber = 0;
+		uint32_t serialRegister = kRegReserved54;
+		uint32_t baseAddress = 0xFC0000; //This is defined in ntv2konaserializer.cpp from classes
+		
 		ntv2WriteRegister(context, kRegXenaxFlashControlStatus, READID_COMMAND);
 		WaitForFlashNOTBusy(context);
 		flashDeviceID = ntv2ReadRegister(context, kRegXenaxFlashDOUT);
@@ -725,7 +724,6 @@ bool ProgramProductCode(Ntv2SystemContext* context)
 		if ((flashDeviceID & 0x00ffffff) == 0x0020ba20)//Micron MT25QL512ABB
 		{
 			hasExtendedCommandSupport = true;
-			ntv2Message("CNTV2::InitializeBoard Micron part detected\n");
 		}
 
 		if (NTV2DeviceROMHasBankSelect(deviceID))

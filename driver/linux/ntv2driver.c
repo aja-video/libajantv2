@@ -203,7 +203,6 @@ typedef struct _fileData
 
 static void SetupBoard(ULWord deviceNumber);
 static bool IsKonaIPDevice(ULWord deviceNumber, NTV2DeviceID deviceID);
-static bool WaitForFlashNOTBusy(ULWord deviceNumber);
 
 static int ValidateAjaNTV2Message(NTV2_HEADER * pHeaderIn);
 static int DoMessageSDIInStatictics(ULWord deviceNumber, NTV2Buffer * pInStatistics, void * pOutBuff);
@@ -3984,52 +3983,7 @@ static void SetupBoard(ULWord deviceNumber)
 	
 	if(NTV2DeviceHasSPIFlashSerial(ntv2pp->_DeviceID))
 	{
-		ULWord baseAddress		= 0xFC0000;	//Fixed offset #defined in ntv2konaserializer.cpp
-		ULWord serialRegister	= kRegReserved54;
-		bool hasExtendedCommandSupport = false;
-		ULWord deviceID = 0;
-		WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, READID_COMMAND, NO_MASK, NO_SHIFT);
-		WaitForFlashNOTBusy(deviceNumber);
-		deviceID = ReadRegister(deviceNumber, kRegXenaxFlashDOUT, NO_MASK, NO_SHIFT);
-
-		if((deviceID & 0x00ffffff) == 0x0020ba20)//Micron MT25QL512ABB
-			hasExtendedCommandSupport = true;
-
-        if(NTV2DeviceROMHasBankSelect(ntv2pp->_DeviceID))
-		{
-            ULWord bankSelectNumber = NTV2DeviceHasSPIv5(ntv2pp->_DeviceID) ? 0x03 : 0x01;
-			WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND, NO_MASK, NO_SHIFT);
-			WaitForFlashNOTBusy(deviceNumber);
-			WriteRegister(deviceNumber, kRegXenaxFlashAddress, bankSelectNumber, NO_MASK, NO_SHIFT);
-			WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND, NO_MASK, NO_SHIFT);
-
-			WaitForFlashNOTBusy(deviceNumber);
-		}
-
-		for( i = 0; i < 2; i++, baseAddress += 4, serialRegister++)
-		{
-			ULWord serialNumber = 0;
-
-			WriteRegister(deviceNumber, kRegXenaxFlashAddress, baseAddress, NO_MASK, NO_SHIFT);
-			WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, READFAST_COMMAND, NO_MASK, NO_SHIFT);
-
-			WaitForFlashNOTBusy(deviceNumber);
-
-			serialNumber = ReadRegister(deviceNumber, kRegXenaxFlashDOUT, NO_MASK, NO_SHIFT);
-			WriteRegister(deviceNumber, serialRegister, serialNumber, NO_MASK, NO_SHIFT);
-		}
-
-        if(NTV2DeviceROMHasBankSelect(ntv2pp->_DeviceID))
-		{
-			ULWord bankSelectNumber = 0x00;
-
-			WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND, NO_MASK, NO_SHIFT);
-			WaitForFlashNOTBusy(deviceNumber);
-			WriteRegister(deviceNumber, kRegXenaxFlashAddress, bankSelectNumber, NO_MASK, NO_SHIFT);
-			WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND, NO_MASK, NO_SHIFT);
-
-			WaitForFlashNOTBusy(deviceNumber);
-		}
+		ProgramProductCode(&systemContext);
 	}
 	
 	// Set default register clocking to match the video standard
@@ -4170,25 +4124,6 @@ static bool IsKonaIPDevice(ULWord deviceNumber, NTV2DeviceID deviceID)
 	default:
 		return false;
 	}
-}
-
-static bool WaitForFlashNOTBusy(ULWord boardNumber)
-{
-	bool busy  = true;
-	int  count = 0;
-	do 
-	{
-		ULWord regValue = ReadRegister(boardNumber, kRegXenaxFlashControlStatus, NO_MASK, NO_SHIFT);
-		if( !(regValue & BIT(8)) )
-		{
-			busy = false;
-			break;
-		}
-		udelay(100);
-		count++;
-	} while( (busy == true) && (count < 100) );
-
-	return busy;
 }
 
 int ValidateAjaNTV2Message(NTV2_HEADER * pHeaderIn)
