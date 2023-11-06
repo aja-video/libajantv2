@@ -191,11 +191,6 @@ struct VirtualDataNode
     ULWord          data;
 };
 
-typedef struct _fileData
-{
-	DMA_PAGE_ROOT dmaRoot;
-} FILE_DATA, *PFILE_DATA;
-
 
 /*********************************************/
 /* Prototypes for private utility functions. */
@@ -3355,8 +3350,10 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
                 .stream_initialize = dmaOpsStreamInitialize,
                 .stream_start = dmaOpsStreamStart,
                 .stream_stop = dmaOpsStreamStop,
+                .stream_release = dmaOpsStreamRelease,
                 .stream_advance = dmaOpsStreamAdvance,
                 .buffer_prepare = dmaOpsBufferPrepare,
+                .buffer_flush = dmaOpsBufferFlush,
                 .buffer_release = dmaOpsBufferRelease
             };
             status = ntv2_stream_configure(ntv2pp->m_pDmaStream[i],
@@ -4624,7 +4621,11 @@ int DoMessageStreamChannel(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamChan
 
     if ((pChannel->mFlags & NTV2_STREAM_CHANNEL_INITIALIZE) != 0)
     {
-        ntv2_stream_channel_initialize(pStr, pChannel);
+        ntv2_stream_channel_initialize(pStr, (void*)pFile, pChannel);
+    }
+	if ((pChannel->mFlags & NTV2_STREAM_CHANNEL_RELEASE) != 0)
+	{
+        ntv2_stream_channel_release(pStr, (void*)pFile, pChannel);
     }
     if ((pChannel->mFlags & NTV2_STREAM_CHANNEL_START) != 0)
     {
@@ -4676,49 +4677,12 @@ int DoMessageStreamBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamBuffe
 
 	if ((pBuffer->mFlags & NTV2_STREAM_BUFFER_QUEUE) != 0)
 	{
-        PDMA_PAGE_ROOT pPageRoot = &pFile->dmaRoot;
-        PDMA_PAGE_BUFFER pPageBuffer = NULL;
-        Ntv2Status status;
-
-        // check page root
-        if (pPageRoot == NULL)
-            return -EPERM;
-
-        // check enabled
-        if (!pStr->enabled)
-        {
-            MSG("%s: DoMessageStreamBuffer - stream not enabled\n", getNTV2ModuleParams()->name);
-            return -EPERM;
-        }
-
-        // check for no video
-        if(((PVOID)(pBuffer->mBuffer.fUserSpacePtr) == NULL) || (pBuffer->mBuffer.fByteCount == 0))
-        {
-            MSG("%s: DoMessageStreamBuffer - user buffer empty\n", getNTV2ModuleParams()->name);
-            return -EPERM;
-        }
-
-        // check buffer cache
-        pPageBuffer = dmaPageRootFind(deviceNumber,
-                                      pPageRoot,
-                                      (PVOID)pBuffer->mBuffer.fUserSpacePtr,
-                                      pBuffer->mBuffer.fByteCount);
-        if (pPageBuffer == NULL)
-        {
-            MSG("%s: DoMessageStreamBuffer - kernel buffer not found\n", getNTV2ModuleParams()->name);
-            return -EPERM;
-        }
-
-        // save page buffer
-        pBuffer->mBuffer.fKernelHandle = (ULWord64)pPageBuffer;
-        
-        status = ntv2_stream_buffer_queue(pStr, pBuffer);
-        if (status != NTV2_STATUS_SUCCESS)
-        {
-            dmaPageRootFree(deviceNumber, (PVOID)pBuffer->mBuffer.fUserSpacePtr);
-        }
-    }
-    
+        ntv2_stream_buffer_queue(pStr, (void*)pFile, pBuffer);
+    }    
+	if ((pBuffer->mFlags & NTV2_STREAM_BUFFER_RELEASE) != 0)
+	{
+        ntv2_stream_buffer_release(pStr, (void*)pFile, pBuffer);
+	}
 	if ((pBuffer->mFlags & NTV2_STREAM_BUFFER_STATUS) != 0)
 	{
         ntv2_stream_buffer_status(pStr, pBuffer);

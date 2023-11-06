@@ -8661,11 +8661,12 @@ typedef enum
 
 		// Stream channel action flags
 		#define NTV2_STREAM_CHANNEL_INITIALIZE			BIT(0)			///< @brief Used in ::NTV2StreamChannel to initialize the stream
-		#define NTV2_STREAM_CHANNEL_START				BIT(1)			///< @brief Used in ::NTV2StreamChannel to start streaming
-		#define NTV2_STREAM_CHANNEL_STOP				BIT(2)			///< @brief Used in ::NTV2StreamChannel to stop streaming
-        #define NTV2_STREAM_CHANNEL_FLUSH				BIT(3)			///< @brief Used in ::NTV2StreamChannel to flush buffer queue
-        #define NTV2_STREAM_CHANNEL_STATUS				BIT(4)			///< @brief Used in ::NTV2StreamChannel to request stream status
-        #define NTV2_STREAM_CHANNEL_WAIT				BIT(5)			///< @brief Used in ::NTV2StreamChannel to wait for signal
+        #define NTV2_STREAM_CHANNEL_RELEASE				BIT(1)			///< @brief Used in ::NTV2StreamChannel to release stream
+		#define NTV2_STREAM_CHANNEL_START				BIT(2)			///< @brief Used in ::NTV2StreamChannel to start streaming
+		#define NTV2_STREAM_CHANNEL_STOP				BIT(3)			///< @brief Used in ::NTV2StreamChannel to stop streaming
+        #define NTV2_STREAM_CHANNEL_FLUSH				BIT(4)			///< @brief Used in ::NTV2StreamChannel to flush buffer queue
+        #define NTV2_STREAM_CHANNEL_STATUS				BIT(5)			///< @brief Used in ::NTV2StreamChannel to request stream status
+        #define NTV2_STREAM_CHANNEL_WAIT				BIT(6)			///< @brief Used in ::NTV2StreamChannel to wait for signal
 
 		// Stream channel state flags
 		#define NTV2_STREAM_CHANNEL_STATE_DISABLED		BIT(0)			///< @brief Used in ::NTV2StreamChannel stream disabled
@@ -8675,10 +8676,9 @@ typedef enum
 		#define NTV2_STREAM_CHANNEL_STATE_ERROR			BIT(4)			///< @brief Used in ::NTV2StreamChannel stream error
 
 		// Stream buffer action flags
-		#define NTV2_STREAM_BUFFER_QUEUE				BIT(0)			///< @brief Used in ::NTV2StreamBuffer to add buffer to queue
-		#define NTV2_STREAM_BUFFER_COMMIT				BIT(1)			///< @brief Used in ::NTV2StreamBuffer to commit added buffers
+		#define NTV2_STREAM_BUFFER_QUEUE				BIT(1)			///< @brief Used in ::NTV2StreamBuffer to add buffer to queue
+		#define NTV2_STREAM_BUFFER_RELEASE				BIT(2)			///< @brief Used in ::NTV2StreamBuffer to signal on complete
 		#define NTV2_STREAM_BUFFER_STATUS				BIT(3)			///< @brief Used in ::NTV2StreamBuffer to request buffer status
-		#define NTV2_STREAM_BUFFER_SIGNAL				BIT(4)			///< @brief Used in ::NTV2StreamBuffer to signal on complete
 
 		// Stream buffer state flags
 		#define NTV2_STREAM_BUFFER_STATE_QUEUED			BIT(0)			///< @brief Used in ::NTV2StreamBuffer buffer queued
@@ -8696,6 +8696,7 @@ typedef enum
         #define NTV2_STREAM_STATUS_INVALID				BIT(4)			///< @brief Used in ::NTV2Stream invalid parameter
         #define NTV2_STREAM_STATUS_TIMEOUT				BIT(5)			///< @brief Used in ::NTV2Stream timeout
         #define NTV2_STREAM_STATUS_RESOURCE				BIT(6)			///< @brief Used in ::NTV2Stream insufficient resource
+        #define NTV2_STREAM_STATUS_OWNER				BIT(7)			///< @brief Used in ::NTV2Stream not the stream onwer
 
 		NTV2_STRUCT_BEGIN (NTV2StreamChannel)
 			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
