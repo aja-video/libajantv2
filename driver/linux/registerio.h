@@ -109,6 +109,11 @@ typedef struct ntv2_module_private
 
 } NTV2ModulePrivateParams;
 
+typedef struct _fileData
+{
+	DMA_PAGE_ROOT dmaRoot;
+} FILE_DATA, *PFILE_DATA;
+
 typedef enum
 {
 	eIrqFpga = 0,

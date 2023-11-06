@@ -26,6 +26,7 @@ enum ntv2_stream_state {
     ntv2_stream_state_unknown,
     ntv2_stream_state_disabled,
     ntv2_stream_state_initialized,
+    ntv2_stream_state_released,
     ntv2_stream_state_idle,
     ntv2_stream_state_active,
     ntv2_stream_state_error
@@ -39,14 +40,19 @@ struct ntv2_stream_ops {
     int (*stream_start)(struct ntv2_stream *stream);
     int (*stream_stop)(struct ntv2_stream *stream);
     int (*stream_advance)(struct ntv2_stream *stream);
+    int (*stream_release)(struct ntv2_stream *stream);
     int (*buffer_prepare)(struct ntv2_stream *stream, int index);
+    int (*buffer_flush)(struct ntv2_stream *stream, int index);
     int (*buffer_release)(struct ntv2_stream *stream, int index);
 };
 
 struct ntv2_stream_buffer {
     NTV2StreamBuffer    user_buffer;
+    void*               dma_buffer;
     bool                prepared;
     bool                linked;
+    bool                completed;
+    bool                flushed;
     bool                released;
     uint32_t            ds_index;
     uint32_t            ds_count;
@@ -59,7 +65,7 @@ struct ntv2_stream {
     NTV2Channel         channel;
     Ntv2Semaphore       state_sema;
     bool                to_host;
-    bool                enabled;
+    void*               owner;
     void*               dma_engine;
 
     enum ntv2_stream_state      stream_state;
@@ -89,7 +95,8 @@ Ntv2Status ntv2_stream_enable(struct ntv2_stream *ntv2_str);
 Ntv2Status ntv2_stream_disable(struct ntv2_stream *ntv2_str);
 Ntv2Status ntv2_stream_interrupt(struct ntv2_stream *ntv2_str, uint64_t stream_bytes);
 
-Ntv2Status ntv2_stream_channel_initialize(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel);
+Ntv2Status ntv2_stream_channel_initialize(struct ntv2_stream *ntv2_str, void* pOwner, NTV2StreamChannel* pChannel);
+Ntv2Status ntv2_stream_channel_release(struct ntv2_stream *ntv2_str, void* pOwner, NTV2StreamChannel* pChannel);
 Ntv2Status ntv2_stream_channel_start(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel);
 Ntv2Status ntv2_stream_channel_stop(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel);
 Ntv2Status ntv2_stream_channel_flush(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel);
@@ -97,7 +104,8 @@ Ntv2Status ntv2_stream_channel_status(struct ntv2_stream *ntv2_str, NTV2StreamCh
 Ntv2Status ntv2_stream_channel_wait(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel);
 Ntv2Status ntv2_stream_channel_advance(struct ntv2_stream *ntv2_str);
 
-Ntv2Status ntv2_stream_buffer_queue(struct ntv2_stream *ntv2_str, NTV2StreamBuffer* pBuffer);
+Ntv2Status ntv2_stream_buffer_queue(struct ntv2_stream *ntv2_str, void* pOwner, NTV2StreamBuffer* pBuffer);
+Ntv2Status ntv2_stream_buffer_release(struct ntv2_stream *ntv2_str, void* pOwner, NTV2StreamBuffer* pBuffer);
 Ntv2Status ntv2_stream_buffer_status(struct ntv2_stream *ntv2_str, NTV2StreamBuffer* pBuffer);
 
 #endif
