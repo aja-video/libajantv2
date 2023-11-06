@@ -99,6 +99,9 @@ DISTRO_KERNEL_PKG_PNT := $(shell uname -r | awk 'BEGIN {FS = "-"} {split($$2, pk
 ifeq ($(DISTRO_TYPE),)
 	DISTRO_TYPE := generic
 endif
+ifeq ($(DISTRO_TYPE),rhel)
+	DISTRO_IS_RHEL_LIKE := 1
+endif
 ifeq ($(DISTRO_IS_RHEL_LIKE),)
 	DISTRO_IS_RHEL_LIKE := 0
 endif
