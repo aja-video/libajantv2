@@ -238,7 +238,7 @@ static const struct timing_offset_data c_offset_data[] =
     { ntv2_video_standard_1080i,        1,      0,      1,      0,      0,      0 },
     { ntv2_video_standard_720p,         1,      5,      1,      0,      0,      0 },
     { ntv2_video_standard_525i,         1,      0,      1,      3,      0,      0 },
-    { ntv2_video_standard_625i,         1,      0,      1,      3,      0,      0 },
+    { ntv2_video_standard_625i,         1,      0,      1,      0,      0,      0 },
     { ntv2_video_standard_1080p,        1,      4,      1,      0,      0,      0 },
     { ntv2_video_standard_2048x1556,    1,      0,      1,      0,      0,      0 },
     { ntv2_video_standard_2048x1080p,   1,      0,      1,      0,      0,      0 },
