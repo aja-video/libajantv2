@@ -49,7 +49,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         ${PROJECT_NAME}
         app.ico
         "ntv2qtmultiinput.exe"
-        ${CMAKE_MODULE_PATH}/bundle/windows/win-ver.rc.in
+		${LIBAJANTV2_CMAKE_DIR}/bundle/windows/win-ver.rc.in
         win-ver.rc)
     list(APPEND NTV2QTMULTIINPUT_SOURCES
         win-ver.rc)

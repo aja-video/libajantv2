@@ -1,7 +1,7 @@
 project(ntv2streampreview)
 
-if (NOT AJA_QT_ENABLED)
-	message(STATUS "AJA_QT_ENABLED not set. Ignoring project ${PROJECT_NAME}...")
+if (AJA_DISABLE_QT)
+    message(STATUS "AJA_DISABLE_QT is set. Ignoring project ${PROJECT_NAME}...")
     return()
 endif()
 
@@ -46,7 +46,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         ${PROJECT_NAME}
         app.ico
         "ntv2streampreview.exe"
-        ${CMAKE_MODULE_PATH}/bundle/windows/win-ver.rc.in
+		${LIBAJANTV2_CMAKE_DIR}/bundle/windows/win-ver.rc.in
         win-ver.rc)
     list(APPEND NTV2STREAMPREVIEW_SOURCES
         win-ver.rc)
