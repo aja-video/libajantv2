@@ -5579,6 +5579,9 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inEnable	If true, sets the device in multi-format mode.
 								If false, sets the device in uni-format mode.
+		@deprecated	Uniformat mode is deprecated starting in SDK 17.0.
+					Passing false for inEnable will cause this function to return false (fail).
+					Eventually this function will be removed from the class.
 		@see		::NTV2DeviceCanDoMultiFormat, CNTV2Card::GetMultiFormatMode, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool	   SetMultiFormatMode (const bool inEnable);
@@ -5590,6 +5593,8 @@ public:
 		@return		True if successful; otherwise false.
 		@param[out] outIsEnabled	Receives true if the device is currently in multi-format mode,
 									or false if it's in uni-format mode.
+		@deprecated	Uniformat mode is deprecated starting in SDK 17.0.
+					Eventually this function will be removed from the class.
 		@see		::NTV2DeviceCanDoMultiFormat, CNTV2Card::SetMultiFormatMode, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool		GetMultiFormatMode (bool & outIsEnabled);
