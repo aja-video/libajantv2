@@ -242,10 +242,10 @@ bool CNTV2Card::GetSerialNumberString (string & outSerialNumberString)
     {
         ULWord serialArray[] = {0,0,0,0};
 		
-        ReadRegister(kRegReserved54, serialArray[2]);
-        ReadRegister(kRegReserved55, serialArray[3]);
-        ReadRegister(kRegReserved56, serialArray[0]);
-        ReadRegister(kRegReserved57, serialArray[1]);
+		ReadRegister(kRegReserved56, serialArray[0]);
+		ReadRegister(kRegReserved57, serialArray[1]);
+		ReadRegister(kRegReserved54, serialArray[2]);
+		ReadRegister(kRegReserved55, serialArray[3]);
         
         for (int serialIndex = 0; serialIndex < 4; serialIndex++)
         {
