@@ -218,23 +218,48 @@ string CNTV2Card::SerialNum64ToString (const uint64_t inSerialNumber)	//	Class m
 
 bool CNTV2Card::GetSerialNumberString (string & outSerialNumberString)
 {
-	outSerialNumberString = ::SerialNum64ToString(GetSerialNumber());
-	if (outSerialNumberString.empty())
-	{
-		outSerialNumberString = "INVALID?";
-		return false;
-	}
-
-	const NTV2DeviceID deviceID(GetDeviceID());
-	if (deviceID == DEVICE_ID_IO4KPLUS)							//	Io4K+/DNxIV?
-		outSerialNumberString = "5" + outSerialNumberString;	//		prepend with "5"
-	else if (deviceID == DEVICE_ID_IOIP_2022 ||
-			 deviceID == DEVICE_ID_IOIP_2110 ||
-			 deviceID == DEVICE_ID_IOIP_2110_RGB12)				//	IoIP/DNxIP?
-		outSerialNumberString = "6" + outSerialNumberString;	//		prepend with "6"
-	else if (deviceID == DEVICE_ID_IOX3)
-		outSerialNumberString = "7" + outSerialNumberString;	//		prepend with "7"
-	return true;
+    if (NTV2DeviceGetSPIFlashVersion(GetDeviceID()) <= 5)
+    {
+        outSerialNumberString = ::SerialNum64ToString(GetSerialNumber());
+        if (outSerialNumberString.empty())
+        {
+            outSerialNumberString = "INVALID?";
+            return false;
+        }
+    
+        const NTV2DeviceID deviceID(GetDeviceID());
+        if (deviceID == DEVICE_ID_IO4KPLUS)							//	Io4K+/DNxIV?
+            outSerialNumberString = "5" + outSerialNumberString;	//		prepend with "5"
+        else if (deviceID == DEVICE_ID_IOIP_2022 ||
+                 deviceID == DEVICE_ID_IOIP_2110 ||
+                 deviceID == DEVICE_ID_IOIP_2110_RGB12)				//	IoIP/DNxIP?
+            outSerialNumberString = "6" + outSerialNumberString;	//		prepend with "6"
+        else if (deviceID == DEVICE_ID_IOX3)
+            outSerialNumberString = "7" + outSerialNumberString;	//		prepend with "7"
+        return true;
+    }
+    else
+    {
+        ULWord serialArray[] = {0,0,0,0};
+		
+        ReadRegister(kRegReserved54, serialArray[2]);
+        ReadRegister(kRegReserved55, serialArray[3]);
+        ReadRegister(kRegReserved56, serialArray[0]);
+        ReadRegister(kRegReserved57, serialArray[1]);
+        
+        for (int serialIndex = 0; serialIndex < 4; serialIndex++)
+        {
+            if (serialArray[serialIndex] != 0xffffffff)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    char tempChar = ((serialArray[serialIndex] >> (i*8)) & 0xff);
+                    if (tempChar != '.')
+                        outSerialNumberString.push_back(tempChar);
+                }
+            }
+        }
+    }
 
 }	//	GetSerialNumberString
 
