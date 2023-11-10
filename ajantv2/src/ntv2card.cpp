@@ -236,7 +236,6 @@ bool CNTV2Card::GetSerialNumberString (string & outSerialNumberString)
             outSerialNumberString = "6" + outSerialNumberString;	//		prepend with "6"
         else if (deviceID == DEVICE_ID_IOX3)
             outSerialNumberString = "7" + outSerialNumberString;	//		prepend with "7"
-        return true;
     }
     else
     {
@@ -260,7 +259,7 @@ bool CNTV2Card::GetSerialNumberString (string & outSerialNumberString)
             }
         }
     }
-
+	return true;
 }	//	GetSerialNumberString
 
 
