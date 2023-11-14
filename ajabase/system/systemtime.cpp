@@ -65,6 +65,10 @@
 		// Use gettimeofday - this is not really desirable
 		#include <sys/time.h>
 	#endif
+
+#elif defined(AJA_BAREMETAL)
+	#include <unistd.h>
+
 #endif
 
 
@@ -288,6 +292,8 @@ void AJATime::Sleep (const int32_t inTime)
 		std::this_thread::sleep_for(std::chrono::milliseconds(inTime));
 	#elif defined(AJA_WINDOWS)
 		::Sleep(DWORD(inTime));
+  #elif defined(AJA_BAREMETAL)
+		usleep(inTime * 1000);
 	#else	//	POSIX
 		usleep(inTime * 1000);	//	NOTE: usleep is deprecated in POSIX
 	#endif
@@ -306,6 +312,8 @@ void AJATime::SleepInMicroseconds (const int32_t inTime)
 		std::this_thread::sleep_for(std::chrono::microseconds(inTime));
 	#elif defined(AJA_WINDOWS)
 		::Sleep(DWORD(inTime) / 1000);	//	Windows Sleep expects millisecs
+	#elif defined(AJA_BAREMETAL)
+    // TODO
 	#else	//	POSIX
 		usleep(inTime);	//	NOTE: usleep is deprecated in POSIX
 	#endif
@@ -339,6 +347,8 @@ void AJATime::SleepInNanoseconds (const uint64_t inTime)
 				YieldProcessor();
 			}
 		}
+	#elif defined(AJA_BAREMETAL)
+    // TODO
 	#else
 		timespec req, rm;
 		req.tv_sec = inTime / 1000000000;

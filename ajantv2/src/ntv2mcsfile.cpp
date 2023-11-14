@@ -18,7 +18,7 @@
 #include "ntv2utils.h"
 #include <string.h>
 #include <fcntl.h>
-#if !defined (AJAMac) && !defined (AJALinux)
+#if !defined (AJAMac) && !defined (AJALinux) && !defined(AJABareMetal)
 	#include <io.h>
 #endif
 #include <time.h>

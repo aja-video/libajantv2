@@ -246,6 +246,68 @@
 
 #endif	// defined(AJA_MAC)
 
+#if defined(AJA_BAREMETAL)
+
+	  #if !defined(NULL)
+			  #define NULL (0)
+	  #endif
+
+		#if defined(AJA_USE_CPLUSPLUS11)
+//			#undef AJA_USE_CPLUSPLUS11	//	Linux c++11-in-SDK TBD
+		#endif
+
+	  #define AJA_PAGE_SIZE (4096)
+
+	  #define AJA_MAX_PATH (4096)
+
+	  #if defined(MODULE)
+		 // We're building the code as a kernel module
+	  #else
+		#include <stdint.h>  // Pull in userland defines
+
+        #define AJA_OS_32
+
+        #define AJA_LITTLE_ENDIAN
+
+        #define	__bswap16(_x)	__builtin_bswap16(_x)
+        #define	__bswap32(_x)	__builtin_bswap32(_x)
+        #define	__bswap64(_x)	__builtin_bswap64(_x)
+
+        #define	htonl(_x)	__bswap32(_x)
+        #define	htons(_x)	__bswap16(_x)
+        #define	ntohl(_x)	__bswap32(_x)
+        #define	ntohs(_x)	__bswap16(_x)
+
+		// This adds the ability to format 64-bit entities
+		# define __PRI64_PREFIX	  "ll"
+		# define __PRIPTR_PREFIX
+
+		// Macros for printing format specifiers.
+		#ifndef PRId64
+			#define PRId64 __PRI64_PREFIX "d"
+		#endif
+		#ifndef PRIi64
+			#define PRIi64 __PRI64_PREFIX "i"
+		#endif
+		#ifndef PRIu64
+			#define PRIu64 __PRI64_PREFIX "u"
+		#endif
+		#ifndef PRIo64
+			#define PRIo64 __PRI64_PREFIX "o"
+		#endif
+		#ifndef PRIx64
+			#define PRIx64 __PRI64_PREFIX "x"
+		#endif
+	  #endif  // MODULE
+
+	// Synonyms for library functions with different names on different platforms
+	#define ajasnprintf(_str_, _maxbytes_, _format_, ...) snprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
+	#define ajavsnprintf(_str_, _maxbytes_, _format_, ...) vsnprintf( _str_, _maxbytes_, _format_, __VA_ARGS__ )
+	#define ajastrcasecmp(_str1_, _str2_) strcasecmp( _str1_, _str2_ )
+	#define ajawcscasecmp(_str1_, _str2_) wcscasecmp( _str1_, _str2_ )
+
+#endif	// defined(AJA_BAREMETAL)
+
 #if !defined(NULL_PTR)
 	#define NULL_PTR (0)
 #endif

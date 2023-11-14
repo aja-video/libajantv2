@@ -10,14 +10,16 @@
 #include "ntv2card.h"
 #include "ntv2utils.h"
 #include <sstream>
+#include <ajabase/network/network.h>
+#include <ajabase/system/systemtime.h>
 #include <algorithm>
+#include <math.h>
 
 #if defined (AJALinux) || defined (AJAMac)
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <math.h>
 #endif
 
 #define RESET_MILLISECONDS 5
@@ -165,11 +167,11 @@ bool CNTV2Config2110::SetNetworkConfiguration(const eSFP sfp, const IPVNetConfig
 	string ip, subnet, gateway;
 	struct in_addr addr;
 	addr.s_addr = (uint32_t)netConfig.ipc_ip;
-	ip = inet_ntoa(addr);
+	ip = AJANetwork::inet_ntoa(addr);
 	addr.s_addr = (uint32_t)netConfig.ipc_subnet;
-	subnet = inet_ntoa(addr);
+	subnet = AJANetwork::inet_ntoa(addr);
 	addr.s_addr = (uint32_t)netConfig.ipc_gateway;
-	gateway = inet_ntoa(addr);
+	gateway = AJANetwork::inet_ntoa(addr);
 
 	bool rv = SetNetworkConfiguration(sfp, ip, subnet, gateway);
 	return rv;
@@ -180,9 +182,9 @@ bool CNTV2Config2110::GetNetworkConfiguration(const eSFP sfp, IPVNetConfig & net
 	string ip, subnet, gateway;
 	GetNetworkConfiguration(sfp, ip, subnet, gateway);
 
-	netConfig.ipc_ip	  = NTV2EndianSwap32((uint32_t)inet_addr(ip.c_str()));
-	netConfig.ipc_subnet  = NTV2EndianSwap32((uint32_t)inet_addr(subnet.c_str()));
-	netConfig.ipc_gateway = NTV2EndianSwap32((uint32_t)inet_addr(gateway.c_str()));
+	netConfig.ipc_ip	  = NTV2EndianSwap32((uint32_t)AJANetwork::inet_addr(ip.c_str()));
+	netConfig.ipc_subnet  = NTV2EndianSwap32((uint32_t)AJANetwork::inet_addr(subnet.c_str()));
+	netConfig.ipc_gateway = NTV2EndianSwap32((uint32_t)AJANetwork::inet_addr(gateway.c_str()));
 
 	return true;
 }
@@ -201,7 +203,7 @@ bool CNTV2Config2110::SetNetworkConfiguration(const eSFP sfp, const std::string 
 		return false;
 	}
 
-	uint32_t addr = inet_addr(localIPAddress.c_str());
+	uint32_t addr = AJANetwork::inet_addr(localIPAddress.c_str());
 	addr = NTV2EndianSwap32(addr);
 
 	uint32_t macLo;
@@ -261,30 +263,30 @@ bool CNTV2Config2110::GetNetworkConfiguration(const eSFP sfp, std::string & loca
 		uint32_t val;
 		mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0, val);
 		addr.s_addr = val;
-		localIPAddress = inet_ntoa(addr);
+		localIPAddress = AJANetwork::inet_ntoa(addr);
 
 		mDevice.ReadRegister(SAREK_REGS + kRegSarekNET0, val);
 		addr.s_addr = val;
-		subnetMask = inet_ntoa(addr);
+		subnetMask = AJANetwork::inet_ntoa(addr);
 
 		mDevice.ReadRegister(SAREK_REGS + kRegSarekGATE0, val);
 		addr.s_addr = val;
-		gateway = inet_ntoa(addr);
+		gateway = AJANetwork::inet_ntoa(addr);
 	}
 	else
 	{
 		uint32_t val;
 		mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1, val);
 		addr.s_addr = val;
-		localIPAddress = inet_ntoa(addr);
+		localIPAddress = AJANetwork::inet_ntoa(addr);
 
 		mDevice.ReadRegister(SAREK_REGS + kRegSarekNET1, val);
 		addr.s_addr = val;
-		subnetMask = inet_ntoa(addr);
+		subnetMask = AJANetwork::inet_ntoa(addr);
 
 		mDevice.ReadRegister(SAREK_REGS + kRegSarekGATE1, val);
 		addr.s_addr = val;
-		gateway = inet_ntoa(addr);
+		gateway = AJANetwork::inet_ntoa(addr);
 	}
 	return true;
 }
@@ -332,12 +334,12 @@ void  CNTV2Config2110::SetupDecapsulatorStream(const eSFP sfp, const NTV2Stream 
 	uint32_t  decapBaseAddr = GetDecapsulatorAddress(sfp, stream);
 
 	// source ip address
-	uint32_t sourceIp = inet_addr(rxConfig.sourceIP.c_str());
+	uint32_t sourceIp = AJANetwork::inet_addr(rxConfig.sourceIP.c_str());
 	sourceIp = NTV2EndianSwap32(sourceIp);
 	mDevice.WriteRegister(kRegDecap_match_src_ip + decapBaseAddr, sourceIp);
 
 	// dest ip address
-	uint32_t destIp = inet_addr(rxConfig.destIP.c_str());
+	uint32_t destIp = AJANetwork::inet_addr(rxConfig.destIP.c_str());
 	destIp = NTV2EndianSwap32(destIp);
 	mDevice.WriteRegister(kRegDecap_match_dst_ip + decapBaseAddr, destIp);
 
@@ -438,11 +440,7 @@ void  CNTV2Config2110::ResetPacketizerStream(const NTV2Stream stream)
 		mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, val);
 
 		// Wait just a bit
-		#if defined(AJAWindows) || defined(MSWindows)
-			::Sleep (RESET_MILLISECONDS);
-		#else
-			usleep (RESET_MILLISECONDS * 1000);
-		#endif
+		AJATime::Sleep(RESET_MILLISECONDS);
 	}
 }
 
@@ -482,11 +480,7 @@ void  CNTV2Config2110::ResetDepacketizerStream(const NTV2Stream stream)
 		mDevice.WriteRegister(kRegSarekRxReset + SAREK_REGS, val);
 
 		// Wait just a bit
-		#if defined(AJAWindows) || defined(MSWindows)
-			::Sleep (RESET_MILLISECONDS);
-		#else
-			usleep (RESET_MILLISECONDS * 1000);
-		#endif
+		AJATime::Sleep(RESET_MILLISECONDS);
 	}
 }
 
@@ -598,13 +592,13 @@ bool  CNTV2Config2110::GetRxStreamConfiguration(const eSFP sfp, const NTV2Stream
 		mDevice.ReadRegister(kRegDecap_match_src_ip + decapBaseAddr, val);
 		struct in_addr in;
 		in.s_addr = NTV2EndianSwap32(val);
-		char * ip = inet_ntoa(in);
+		char * ip = AJANetwork::inet_ntoa(in);
 		rxConfig.sourceIP = ip;
 
 		// dest ip address
 		mDevice.ReadRegister(kRegDecap_match_dst_ip + decapBaseAddr, val);
 		in.s_addr = NTV2EndianSwap32(val);
-		ip = inet_ntoa(in);
+		ip = AJANetwork::inet_ntoa(in);
 		rxConfig.destIP = ip;
 
 		// source port
@@ -1071,7 +1065,7 @@ bool CNTV2Config2110::SetFramerStream(const eSFP sfp, const NTV2Stream stream, c
 
 	int index = (int)sfp;
 	// dest ip address
-	uint32_t destIp = inet_addr(txConfig.remoteIP[index].c_str());
+	uint32_t destIp = AJANetwork::inet_addr(txConfig.remoteIP[index].c_str());
 	destIp = NTV2EndianSwap32(destIp);
 	WriteChannelRegister(kRegFramer_dst_ip + baseAddrFramer,destIp);
 
@@ -1180,7 +1174,7 @@ void CNTV2Config2110::GetFramerStream(const eSFP sfp, const NTV2Stream stream, t
 	ReadChannelRegister(kRegFramer_dst_ip + baseAddrFramer,&val);
 	struct in_addr in;
 	in.s_addr = NTV2EndianSwap32(val);
-	char * ip = inet_ntoa(in);
+	char * ip = AJANetwork::inet_ntoa(in);
 	txConfig.remoteIP[index] = ip;
 
 	// source port
@@ -1651,7 +1645,7 @@ bool  CNTV2Config2110::ConfigurePTP (const eSFP sfp, const std::string localIPAd
 	uint32_t alignedMACHi = macHi >> 16;
 	uint32_t alignedMACLo = (macLo >> 16) | ( (macHi & 0xffff) << 16);
 
-	uint32_t addr = inet_addr(localIPAddress.c_str());
+	uint32_t addr = AJANetwork::inet_addr(localIPAddress.c_str());
 	addr = NTV2EndianSwap32(addr);
 
 	// configure pll
@@ -1725,11 +1719,7 @@ void CNTV2Config2110::AcquireFramerControlAccess(const uint32_t baseAddr)
 	while (val & BIT(1))
 	{
 		// Wait
-		#if defined(AJAWindows) || defined(MSWindows)
-			::Sleep (10);
-		#else
-			usleep (10 * 1000);
-		#endif
+		AJATime::Sleep(10);
 
 		mDevice.ReadRegister(kRegFramer_status + baseAddr, val);
 	}
@@ -1773,7 +1763,7 @@ uint32_t CNTV2Config2110::Get2110TxStreamIndex(NTV2Stream stream)
 
 bool CNTV2Config2110::GetMACAddress(const eSFP port, const NTV2Stream stream, string remoteIP, uint32_t & hi, uint32_t & lo)
 {
-	uint32_t destIp = inet_addr(remoteIP.c_str());
+	uint32_t destIp = AJANetwork::inet_addr(remoteIP.c_str());
 	destIp = NTV2EndianSwap32(destIp);
 
 	uint32_t	mac;
@@ -1805,7 +1795,7 @@ bool CNTV2Config2110::GetMACAddress(const eSFP port, const NTV2Stream stream, st
 		{
 			struct in_addr addr;
 			addr.s_addr	 = NTV2EndianSwap32(nc.ipc_gateway);
-			string gateIp = inet_ntoa(addr);
+			string gateIp = AJANetwork::inet_ntoa(addr);
 			rv = GetRemoteMAC(gateIp, port, stream, macAddr);
 		}
 		else
@@ -1912,7 +1902,7 @@ bool CNTV2Config2110::GenSDP(const bool enableSfp1, const bool enableSfp2,
 
 	struct in_addr addr;
 	addr.s_addr = val;
-	string localIPAddress = inet_ntoa(addr);
+	string localIPAddress = AJANetwork::inet_ntoa(addr);
 	sdp << localIPAddress << endl;
 
 	// session name
@@ -2061,7 +2051,7 @@ bool CNTV2Config2110::GenVideoStreamSDPInfo(stringstream & sdp, const eSFP sfp, 
 
 	struct in_addr addr;
 	addr.s_addr = val;
-	string localIPAddress = inet_ntoa(addr);
+	string localIPAddress = AJANetwork::inet_ntoa(addr);
 	sdp << ' ' << localIPAddress << endl;
 
 	// rtpmap
@@ -2194,7 +2184,7 @@ bool CNTV2Config2110::GenVideoStreamMultiSDPInfo(stringstream & sdp, char* gmInf
 
 		struct in_addr addr;
 		addr.s_addr = val;
-		string localIPAddress = inet_ntoa(addr);
+		string localIPAddress = AJANetwork::inet_ntoa(addr);
 		sdp << ' ' << localIPAddress << endl;
 
 		// rtpmap
@@ -2296,7 +2286,7 @@ bool CNTV2Config2110::GenAudioStreamSDPInfo(stringstream & sdp, const eSFP sfp, 
 
 	struct in_addr addr;
 	addr.s_addr = val;
-	string localIPAddress = inet_ntoa(addr);
+	string localIPAddress = AJANetwork::inet_ntoa(addr);
 	sdp << ' ' << localIPAddress << endl;
 
 	// rtpmap
@@ -2406,7 +2396,7 @@ bool CNTV2Config2110::GenAncStreamSDPInfo(stringstream & sdp, const eSFP sfp, co
 
 	struct in_addr addr;
 	addr.s_addr = val;
-	string localIPAddress = inet_ntoa(addr);
+	string localIPAddress = AJANetwork::inet_ntoa(addr);
 	sdp << ' ' << localIPAddress << endl;
 
 	// rtpmap

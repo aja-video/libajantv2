@@ -19,6 +19,8 @@
 	#include <string.h> //	for strerror
 #elif defined(MSWindows)
     #include "ajabase/system/system.h"  //  for Windows API #includes
+#elif defined(AJA_BAREMETAL)
+  #include <malloc.h>
 #endif
 #include <iostream>
 
@@ -123,6 +125,8 @@ AJAMemory::AllocateAligned(size_t size, size_t alignment)
 	// allocate aligned memory
 #if defined(AJA_WINDOWS)
 	pMemory = _aligned_malloc(size, alignment);
+#elif defined(AJA_BAREMETAL)
+	pMemory = memalign(alignment, size);
 #else
 	if (posix_memalign(&pMemory, alignment, size))
 		pMemory = NULL;
@@ -204,6 +208,9 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName, bool glob
 	(void) global;
 	name = "/";
 	name += pShareName;
+#elif defined(AJA_BAREMETAL)
+  // TODO
+  name = pShareName;
 #else //Mac
 	(void) global;
 	name = pShareName;
@@ -284,6 +291,9 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName, bool glob
 
 	// In User Mode: Global\somename
 	// In Kernel Mode: \BaseNamedObjects\somename
+#elif defined(AJA_BAREMETAL)
+  // TODO
+  return NULL;
 #else	 
 	// Mac and Linux
 	{
@@ -369,6 +379,8 @@ AJAMemory::FreeShared(void* pMemory)
 #if defined(AJA_WINDOWS)
 				UnmapViewOfFile(shareIter->pMemory);
 				CloseHandle(shareIter->fileMapHandle);
+#elif defined(AJA_BAREMETAL)
+  // TODO
 #else
 				munmap(shareIter->pMemory, shareIter->memorySize);
 				close(shareIter->fileDescriptor);

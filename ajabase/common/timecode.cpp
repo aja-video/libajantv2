@@ -17,7 +17,7 @@
 #include <vector>
 using namespace std;
 
-#if defined(AJA_MAC) || defined(AJA_LINUX)
+#if defined(AJA_MAC) || defined(AJA_LINUX) || defined(AJA_BAREMETAL)
 #include <stdlib.h>
 #include <string.h>
 #include <wctype.h>

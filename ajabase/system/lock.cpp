@@ -6,25 +6,25 @@
 **/
 
 #include "ajabase/system/lock.h"
-#if defined(AJA_USE_CPLUSPLUS11)
+#if defined(AJA_USE_CPLUSPLUS11) && !defined(AJA_BAREMETAL)
 	#include <chrono>
 #else
 	// include the system dependent implementation class
 	#if defined(AJA_WINDOWS)
 		#include "ajabase/system/windows/lockimpl.h"
-	#endif
-	#if defined(AJA_LINUX)
+	#elif defined(AJA_LINUX)
 		#include "ajabase/system/linux/lockimpl.h"
-	#endif
-	#if defined(AJA_MAC)
+	#elif defined(AJA_MAC)
 		#include "ajabase/system/mac/lockimpl.h"
+	#elif defined(AJA_BAREMETAL)
+		#include "ajabase/system/bm/lockimpl.h"
 	#endif
 #endif
 
 
 AJALock::AJALock(const char* pName)
 {
-#if defined(AJA_USE_CPLUSPLUS11)
+#if defined(AJA_USE_CPLUSPLUS11) && !defined(AJA_BAREMETAL)
 	mpMutex = new recursive_timed_mutex;
 	if (pName != nullptr)
 		name = pName;
@@ -36,7 +36,7 @@ AJALock::AJALock(const char* pName)
 
 AJALock::AJALock (const AJALock & inLock)
 {	//	Copy constructor -- only name is copied...
-#if defined(AJA_USE_CPLUSPLUS11)
+#if defined(AJA_USE_CPLUSPLUS11) && !defined(AJA_BAREMETAL)
 	mpMutex = new recursive_timed_mutex;
 	name = inLock.name;
 #else
@@ -54,7 +54,7 @@ AJALock & AJALock::operator = (const AJALock & inLock)
 
 AJALock::~AJALock()
 {
-#if defined(AJA_USE_CPLUSPLUS11)
+#if defined(AJA_USE_CPLUSPLUS11) && !defined(AJA_BAREMETAL)
 	delete mpMutex;
 	mpMutex = nullptr;
 #else
@@ -68,7 +68,7 @@ AJALock::~AJALock()
 AJAStatus
 AJALock::Lock(uint32_t timeout)
 {
-#if defined(AJA_USE_CPLUSPLUS11)
+#if defined(AJA_USE_CPLUSPLUS11) && !defined(AJA_BAREMETAL)
 	if (timeout != LOCK_TIME_INFINITE)
 	{
 		bool success = mpMutex->try_lock_for(std::chrono::milliseconds(timeout));
@@ -88,7 +88,7 @@ AJALock::Lock(uint32_t timeout)
 AJAStatus
 AJALock::Unlock()
 {
-#if defined(AJA_USE_CPLUSPLUS11)
+#if defined(AJA_USE_CPLUSPLUS11) && !defined(AJA_BAREMETAL)
 	mpMutex->unlock();
 	return AJA_STATUS_SUCCESS;
 #else

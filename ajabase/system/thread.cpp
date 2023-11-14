@@ -8,12 +8,12 @@
 // include the system dependent implementation class
 #if defined(AJA_WINDOWS)
 	#include "ajabase/system/windows/threadimpl.h"
-#endif
-#if defined(AJA_LINUX)
+#elif defined(AJA_LINUX)
 	#include "ajabase/system/linux/threadimpl.h"
-#endif
-#if defined(AJA_MAC)
+#elif defined(AJA_MAC)
 	#include "ajabase/system/mac/threadimpl.h"
+#elif defined(AJA_BAREMETAL)
+	#include "ajabase/system/bm/threadimpl.h"
 #endif
 #include "ajabase/system/debug.h"
 #include "ajabase/system/systemtime.h"

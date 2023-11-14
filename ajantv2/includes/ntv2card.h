@@ -14,6 +14,8 @@
 	#include "ntv2macdriverinterface.h"
 #elif defined (AJALinux)
 	#include "ntv2linuxdriverinterface.h"
+#elif defined (AJABareMetal)
+  #include "ntv2baremetaldriverinterface.h"
 #endif
 #include "ntv2signalrouter.h"
 #include "ntv2utils.h"
@@ -260,6 +262,8 @@ class AJAExport DeviceCapabilities
 	class CNTV2Card				: public CNTV2MacDriverInterface
 #elif defined (AJALinux)
 	class CNTV2Card				: public CNTV2LinuxDriverInterface
+#elif defined (AJABareMetal)
+	class CNTV2Card				: public CNTV2BareMetalDriverInterface
 #endif
 {
 public:

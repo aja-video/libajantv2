@@ -9,14 +9,12 @@
 
 #if defined(AJA_WINDOWS)
 	#include "ajabase/system/windows/processimpl.h"
-#endif
-
-#if defined(AJA_MAC)
+#elif defined(AJA_MAC)
 	#include "ajabase/system/mac/processimpl.h"
-#endif
-
-#if defined(AJA_LINUX)
+#elif defined(AJA_LINUX)
 	#include "ajabase/system/linux/processimpl.h"
+#elif defined(AJA_BAREMETAL)
+	#include "ajabase/system/bm/processimpl.h"
 #endif
 
 #include "process.h"

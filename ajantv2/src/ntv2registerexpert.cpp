@@ -23,6 +23,7 @@
 #include <map>
 #include <math.h>
 #include <ctype.h>	//	for isprint()
+#include <unistd.h>
 
 
 using namespace std;

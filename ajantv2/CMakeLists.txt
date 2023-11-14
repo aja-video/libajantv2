@@ -172,6 +172,11 @@ set(AJANTV2_LIN_HEADERS
     src/lin/ntv2linuxpublicinterface.h)
 set(AJANTV2_LIN_SOURCES
     src/lin/ntv2linuxdriverinterface.cpp)
+set(AJANTV2_BM_HEADERS
+    src/bm/ntv2baremetaldriverinterface.h
+    src/bm/ntv2baremetalpublicinterface.h)
+set(AJANTV2_BM_SOURCES
+    src/bm/ntv2baremetaldriverinterface.cpp)
 # ajantv2 utilityfiles
 set(AJANTV2_UTILITY_PUBLIC_HEADERS
     utilityfiles/public/ntv2firmwareinstallerthread.h
@@ -402,6 +407,14 @@ set(AJABASE_SYS_MAC_SOURCES
     ../ajabase/system/mac/processimpl.cpp
     ../ajabase/system/mac/pthreadsextra.cpp
     ../ajabase/system/mac/threadimpl.cpp)
+# ajabase baremetal
+set(AJABASE_SYS_BM_SOURCES
+    ../ajabase/system/bm/eventimpl.cpp
+    ../ajabase/system/bm/infoimpl.cpp
+    ../ajabase/system/bm/lockimpl.cpp
+    ../ajabase/system/bm/processimpl.cpp
+    ../ajabase/system/bm/threadimpl.cpp)
+
 set(AJABASE_HEADERS
     ${AJABASE_COMMON_HEADERS}
     ${AJABASE_NETWORK_HEADERS}
@@ -475,6 +488,38 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${AJABASE_SYS_LIN_SOURCES})
     list(APPEND TARGET_LINK_LIBS
         rt pthread dl)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "BareMetal")
+    list(APPEND TARGET_COMPILE_DEFS
+        -D_UNIX98_THREAD_MUTEX_ATTRIBUTES
+        -D_POSIX_THREADS
+        -DAJASTATIC)
+    list(APPEND TARGET_COMPILE_DEFS_STATIC
+        ${TARGET_COMPILE_DEFS})
+    list(APPEND TARGET_COMPILE_DEFS_DYNAMIC
+        ${TARGET_COMPILE_DEFS}
+        -DAJADLL_BUILD)
+    list(APPEND TARGET_INCLUDE_DIRS
+        src/bm
+        ../ajabase/pnp/bm
+        ../ajabase/system/bm)
+    set(AJABASE_HEADERS
+        ${AJABASE_COMMON_HEADERS})
+    list(REMOVE_ITEM ${AJABASE_HEADERS} 
+        ../ajabase/common/guid.h)
+#    set(AJABASE_SOURCES
+#        ${AJABASE_COMMON_SOURCES})
+    set(AJABASE_SOURCES
+        ${AJABASE_COMMON_SOURCES}
+        ${AJABASE_NETWORK_SOURCES}
+        #        ${AJABASE_PERSISTENCE_SOURCES}
+        #${AJABASE_PNP_SOURCES}
+        ${AJABASE_SYS_SOURCES}
+        ${AJABASE_SYS_BM_SOURCES})
+    list(REMOVE_ITEM AJABASE_SOURCES 
+        ../ajabase/common/guid.cpp)
+    message("${AJABASE_SOURCES}")
+#    list(APPEND TARGET_LINK_LIBS
+#        rt pthread dl)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     list(APPEND TARGET_COMPILE_DEFS_STATIC
         ${TARGET_COMPILE_DEFS}
@@ -530,6 +575,10 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         ${TARGET_SOURCES}
         ${AJANTV2_MAC_HEADERS}
         ${AJANTV2_MAC_SOURCES})
+elseif(CMAKE_SYSTEM_NAME STREQUAL "BareMetal")
+    list(APPEND TARGET_SOURCES
+        ${AJANTV2_BM_HEADERS}
+        ${AJANTV2_BM_SOURCES})
 endif()
 
 if (NOT TARGET ${PROJECT_NAME})
