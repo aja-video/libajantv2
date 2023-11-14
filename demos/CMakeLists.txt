@@ -3,7 +3,11 @@ if (AJANTV2_DISABLE_DEMOS)
     return()
 endif()
 
-add_subdirectory(gtest)
+if (AJA_BAREMETAL)
+  add_subdirectory(gtest)
+  return()
+endif()
+
 add_subdirectory(ntv2burn)
 add_subdirectory(ntv2burn4kquadrant)
 add_subdirectory(ntv2capture)
