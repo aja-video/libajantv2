@@ -26,6 +26,7 @@
 	#include <sys/socket.h>
 #elif defined(AJA_WINDOWS)
 	typedef int socklen_t;
+  typedef uint32_t in_addr_t;
 #endif
 
 /////////////////////////////
