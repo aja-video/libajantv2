@@ -2136,7 +2136,18 @@ int ntv2_release(struct inode *minode, struct file *mfile) {
 	pFileData = (PFILE_DATA)mfile->private_data;
 	if (pFileData != NULL)
 	{
+        NTV2StreamChannel channel;
+        int i;
+
+        // release any streams we own
+        for (i = 0; i < NTV2_MAX_DMA_STREAMS; i++)
+        {
+            ntv2_stream_channel_release(getNTV2Params(deviceNumber)->m_pDmaStream[i], pFileData, &channel);
+        }
+
+        // release all locked pages
 		dmaPageRootRelease(deviceNumber, &pFileData->dmaRoot);
+        
 		kfree(pFileData);
 		mfile->private_data = NULL;
 	}
@@ -3347,11 +3358,13 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
             struct ntv2_stream_ops stream_ops =
             {
                 .stream_initialize = dmaOpsStreamInitialize,
+                .stream_release = dmaOpsStreamRelease,
                 .stream_start = dmaOpsStreamStart,
                 .stream_stop = dmaOpsStreamStop,
-                .stream_release = dmaOpsStreamRelease,
                 .stream_advance = dmaOpsStreamAdvance,
                 .buffer_prepare = dmaOpsBufferPrepare,
+                .buffer_link = dmaOpsBufferLink,
+                .buffer_complete = dmaOpsBufferComplete,
                 .buffer_flush = dmaOpsBufferFlush,
                 .buffer_release = dmaOpsBufferRelease
             };

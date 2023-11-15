@@ -39,9 +39,11 @@ struct ntv2_stream_ops {
     int (*stream_initialize)(struct ntv2_stream *stream);
     int (*stream_start)(struct ntv2_stream *stream);
     int (*stream_stop)(struct ntv2_stream *stream);
-    int (*stream_advance)(struct ntv2_stream *stream);
     int (*stream_release)(struct ntv2_stream *stream);
+    int (*stream_advance)(struct ntv2_stream *stream);
     int (*buffer_prepare)(struct ntv2_stream *stream, int index);
+    int (*buffer_link)(struct ntv2_stream *stream, int from_index, int to_index);
+    int (*buffer_complete)(struct ntv2_stream *stream, int index);
     int (*buffer_flush)(struct ntv2_stream *stream, int index);
     int (*buffer_release)(struct ntv2_stream *stream, int index);
 };
@@ -77,6 +79,7 @@ struct ntv2_stream {
     uint32_t                    head_index;         // buffer queue head
     uint32_t                    tail_index;         // buffer queue tail
     uint32_t                    active_index;       // currently active buffer
+    uint32_t                    next_index;         // next active buffer
     uint64_t                    queue_count;        // buffers queued
     uint64_t                    release_count;      // buffers released
 };
