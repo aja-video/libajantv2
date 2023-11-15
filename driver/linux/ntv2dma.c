@@ -81,11 +81,11 @@
 #define DMA_MSG_CONTEXT "ntv2dma", pDmaContext->deviceNumber, pDmaContext->engName, pDmaContext->engIndex, DMA_S2D(pDmaContext->dmaC2H), pDmaContext->conIndex
 
 static uint32_t ntv2_debug_mask =
-	NTV2_DEBUG_STATE |
-	NTV2_DEBUG_STATISTICS |
-    NTV2_DEBUG_TRANSFER |
-	NTV2_DEBUG_PAGE_MAP |
-	NTV2_DEBUG_PROGRAM |
+//	NTV2_DEBUG_STATE |
+//	NTV2_DEBUG_STATISTICS |
+//  NTV2_DEBUG_TRANSFER |
+//	NTV2_DEBUG_PAGE_MAP |
+//	NTV2_DEBUG_PROGRAM |
 //	NTV2_DEBUG_VIDEO_SEGMENT |
 //	NTV2_DEBUG_DESCRIPTOR |
 	NTV2_DEBUG_INFO | 
@@ -177,7 +177,7 @@ static struct ntv2_stream* getDmaStream(ULWord deviceNumber, ULWord engIndex);
 
 static void dmaFreeEngine(PDMA_ENGINE pDmaEngine);
 static PDMA_ENGINE dmaMapEngine(ULWord deviceNumber, NTV2DMAEngine eDMAEngine, bool bToHost);
-static PDMA_ENGINE dmaMapStream(ULWord deviceNumber, NTV2Channel eChannel, bool bToHost);
+//static PDMA_ENGINE dmaMapStream(ULWord deviceNumber, NTV2Channel eChannel, bool bToHost);
 static bool dmaHardwareInit(PDMA_ENGINE pDmaEngine);
 static void dmaStatistics(PDMA_ENGINE pDmaEngine, bool dmaC2H);
 
@@ -753,12 +753,12 @@ static PDMA_ENGINE dmaMapEngine(ULWord deviceNumber, NTV2DMAEngine eDMAEngine, b
 	
 	return getDmaEngine(deviceNumber, engIndex);
 }
-
+#if 0
 static PDMA_ENGINE dmaMapStream(ULWord deviceNumber, NTV2Channel eChannel, bool bToHost)
 {
     return NULL;
 }
-
+#endif
 static bool dmaHardwareInit(PDMA_ENGINE pDmaEngine)
 {
 	ULWord deviceNumber = pDmaEngine->deviceNumber;
@@ -2422,7 +2422,8 @@ int dmaStreamStop(PDMA_PARAMS pDmaParams)
 
 	spin_lock_irqsave(&pDmaParams->pPageRoot->bufferLock, flags);
 
-    dmaStatus = 0; // dmaXlnxStreamStop(pDmaEngine);
+    dmaStatus = 0;
+    dmaXlnxStreamStop(pDmaEngine);
     if (dmaStatus == 0)
     {
 		// deref the resource
@@ -4865,13 +4866,14 @@ static void dmaXlnxInterrupt(PDMA_ENGINE pDmaEngine)
 int dmaOpsStreamInitialize(struct ntv2_stream *stream)
 {
     PDMA_ENGINE pDmaEngine = (PDMA_ENGINE)stream->dma_engine;
-    int status = 0;
+//    int status = 0;
 
     // lock the engine
     dmaEngineLock(pDmaEngine);
 
     // stop the dma engine synchonously
     NTV2_MSG_STATE("%s%d:%s%d: dmaOpsStreamInitialize stop the dma\n", DMA_MSG_ENGINE);
+#if 0    
     status = dmaXlnxStreamStop(pDmaEngine);
     if (status < 0)
     {
@@ -4879,7 +4881,7 @@ int dmaOpsStreamInitialize(struct ntv2_stream *stream)
         dmaEngineUnlock(pDmaEngine);        
         return NTV2_STREAM_OPS_FAIL;
     }        
-
+#endif
     // reset counters
 
     // set state
@@ -4896,13 +4898,14 @@ int dmaOpsStreamInitialize(struct ntv2_stream *stream)
 int dmaOpsStreamRelease(struct ntv2_stream *stream)
 {    
     PDMA_ENGINE pDmaEngine = (PDMA_ENGINE)stream->dma_engine;
-    int status = 0;
+//    int status = 0;
 
     // lock the engine
     dmaEngineLock(pDmaEngine);
 
     // stop the dma engine synchonously
     NTV2_MSG_STATE("%s%d:%s%d: dmaOpsStreamRelease stop the dma\n", DMA_MSG_ENGINE);
+#if 0
     status = dmaXlnxStreamStop(pDmaEngine);
     if (status < 0)
     {
@@ -4910,7 +4913,7 @@ int dmaOpsStreamRelease(struct ntv2_stream *stream)
         dmaEngineUnlock(pDmaEngine);        
         return NTV2_STREAM_OPS_FAIL;
     }        
-
+#endif
     // reset counters
 
     // set state
@@ -4927,8 +4930,8 @@ int dmaOpsStreamRelease(struct ntv2_stream *stream)
 int dmaOpsStreamStart(struct ntv2_stream *stream)
 {
     PDMA_ENGINE pDmaEngine = (PDMA_ENGINE)stream->dma_engine;
-    int start_index = 0;
-    int status = 0;
+//    int start_index = 0;
+//    int status = 0;
     
     // lock the engine
     dmaEngineLock(pDmaEngine);
@@ -4943,13 +4946,15 @@ int dmaOpsStreamStart(struct ntv2_stream *stream)
     {
         // start the engine
         NTV2_MSG_STATE("%s%d:%s%d: dmaOpsStreamStart start the dma\n", DMA_MSG_ENGINE);
+#if 0        
         status = dmaXlnxStreamStart(pDmaEngine, start_index);
         if (status < 0)
         {
             stream->engine_state = ntv2_stream_state_error;
             dmaEngineUnlock(pDmaEngine);
             return NTV2_STREAM_OPS_FAIL;
-        }        
+        }
+#endif        
     }
     
     // set state
@@ -5125,7 +5130,7 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
     PDMA_PAGE_BUFFER  page_to;
     uint32_t desc_index;
     uint32_t next_index;
-    int status;
+//    int status;
 
     // lock the engine
     dmaEngineLock(pDmaEngine);
@@ -5154,6 +5159,7 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
     {
         // build active buffer descriptors (stream starting)
         buffer_from->ds_index = 0;
+#if 0        
         status = dmaXlnxStreamBuild(pDmaEngine, page_from, buffer_from->ds_index);
         if (status <= 0)
         {
@@ -5173,7 +5179,7 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
             dmaEngineUnlock(pDmaEngine);
             return NTV2_STREAM_OPS_FAIL;
         }
-       
+#endif       
         buffer_from->linked = true;
     }
 
@@ -5195,6 +5201,7 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
     if (!buffer_to->linked)
     {
         buffer_to->ds_index = buffer_from->ds_index + buffer_from->ds_count;
+#if 0        
         status = dmaXlnxStreamBuild(pDmaEngine, page_to, buffer_to->ds_index);
         if (status <= 0)
         {
@@ -5214,7 +5221,7 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
             dmaEngineUnlock(pDmaEngine);
             return NTV2_STREAM_OPS_FAIL;
         }
-       
+#endif       
         buffer_to->linked = true;
     }
     
@@ -5223,6 +5230,7 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
     {
         desc_index = (buffer_from->ds_index + buffer_from->ds_count - 1) % pDmaEngine->maxDescriptors;
         next_index = buffer_to->ds_index;
+#if 0        
         status = dmaXlnxStreamLink(pDmaEngine, desc_index, next_index);
         if (status < 0)
         {
@@ -5230,6 +5238,7 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
             dmaEngineUnlock(pDmaEngine);
             return NTV2_STREAM_OPS_FAIL;
         }
+#endif        
     }
 
     dmaEngineUnlock(pDmaEngine);
