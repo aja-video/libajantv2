@@ -155,7 +155,6 @@ DRIVERLININCS = buildenv.h \
 				ntv2drivertask.h \
 				ntv2kona2.h \
 				ntv2serial.h \
-				ntv2streamops.h \
 				registerio.h
 
 DRIVERLINSRCS = ntv2dma.c \
@@ -166,7 +165,6 @@ DRIVERLINSRCS = ntv2dma.c \
 				ntv2drivertask.c \
 				ntv2kona2.c \
 				ntv2serial.c \
-				ntv2streamops.c \
 				registerio.c
 
 ifdef AJA_HEVC
