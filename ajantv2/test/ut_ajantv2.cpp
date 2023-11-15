@@ -1275,7 +1275,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 			CHECK(parser.IsLocalDevice());
 			LOGNOTE("scheme='" << parser.Scheme() << "' resource='" << parser.Resource() << "'");
 			LOGNOTE(parser.Results());
-			CHECK_EQ(parser.Scheme(), "ntv2kona12");
+			CHECK_EQ(parser.Scheme(), "ntv2local");
 /*		parser.Reset("ntv2local://blabber");
 		parser.Reset("ntv2local://blabber.foo.bar");
 		parser.Reset("ntv2local://blabber/");

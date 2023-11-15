@@ -1097,7 +1097,7 @@ NTV2AudioSystem NTV2DeviceGetHostAudioSystem(const NTV2DeviceID inDeviceID)
 
 bool NTV2DeviceROMHasBankSelect (const NTV2DeviceID inDeviceID)
 {
-	if (NTV2DeviceGetSPIFlashVersion(inDeviceID) >= 3  &&  NTV2DeviceGetSPIFlashVersion(inDeviceID) <= 5)
+	if (NTV2DeviceGetSPIFlashVersion(inDeviceID) >= 3  &&  NTV2DeviceGetSPIFlashVersion(inDeviceID) <= 6)
 		return true;
 	else
 		return false;

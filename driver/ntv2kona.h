@@ -64,6 +64,9 @@ ULWord GetFrameBufferSize(Ntv2SystemContext* context, NTV2Channel channel);
 bool FieldDenotesStartOfFrame(Ntv2SystemContext* context, NTV2Crosspoint channelSpec);
 bool IsFieldID0(Ntv2SystemContext* context, NTV2Crosspoint xpt);
 
+///////////////////////
+bool ProgramProductCode(Ntv2SystemContext* context);
+bool WaitForFlashNOTBusy(Ntv2SystemContext* context);
 
 ///////////////////////
 //sdi routines

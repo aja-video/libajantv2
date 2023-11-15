@@ -8,12 +8,12 @@
 // include the system dependent implementation class
 #if defined(AJA_WINDOWS)
 	#include "ajabase/system/windows/infoimpl.h"
-#endif
-#if defined(AJA_LINUX)
+#elif defined(AJA_LINUX)
 	#include "ajabase/system/linux/infoimpl.h"
-#endif
-#if defined(AJA_MAC)
+#elif defined(AJA_MAC)
 	#include "ajabase/system/mac/infoimpl.h"
+#elif defined(AJA_BAREMETAL)
+	#include "ajabase/system/bm/infoimpl.h"
 #endif
 #include "ajabase/system/info.h"
 #include <cstring>

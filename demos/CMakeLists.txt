@@ -1,6 +1,11 @@
-if (NOT AJANTV2_BUILD_DEMOS)
+if (AJANTV2_DISABLE_DEMOS)
     message(STATUS "Skipping libajantv2 demos...")
     return()
+endif()
+
+if (AJA_BAREMETAL)
+  add_subdirectory(gtest)   # just do test program for now
+  return()
 endif()
 
 add_subdirectory(ntv2burn)
@@ -10,13 +15,13 @@ add_subdirectory(ntv2capture4k)
 add_subdirectory(ntv2capture8k)
 add_subdirectory(ntv2dolbycapture)
 add_subdirectory(ntv2dolbyplayer)
-# # # add_subdirectory(ntv2encodehevc) # requires HEVC codecs
-# # # add_subdirectory(ntv2encodehevcfile) # requires HEVC codecs
-# # # add_subdirectory(ntv2encodehevcvif) # requires HEVC codecs
+# add_subdirectory(ntv2encodehevc) # requires HEVC codecs
+# add_subdirectory(ntv2encodehevcfile) # requires HEVC codecs
+# add_subdirectory(ntv2encodehevcvif) # requires HEVC codecs
 add_subdirectory(ntv2enumerateboards)
 add_subdirectory(ntv2fieldburn)
 add_subdirectory(ntv2hdrsetup)
-if(AJA_QT_ENABLED)
+if(NOT AJA_DISABLE_QT)
     add_subdirectory(ntv2konaipj2ksetup)
     add_subdirectory(ntv2konaipjsonsetup)
 endif()
@@ -30,7 +35,7 @@ add_subdirectory(ntv2streamplayer)
 add_subdirectory(ntv2switchbitfile)
 
 if(NOT AJANTV2_BUILD_OPENSOURCE)
-    if(AJA_QT_ENABLED)
+    if(NOT AJA_DISABLE_QT)
         add_subdirectory(ntv2qtmultiinput) 
         add_subdirectory(ntv2qtpreview) # optionally requires libajacc
         add_subdirectory(ntv2streampreview) # optionally requires libajacc

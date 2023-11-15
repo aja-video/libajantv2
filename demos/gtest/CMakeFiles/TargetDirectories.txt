@@ -1,0 +1,3 @@
+/home/jimg/work/gallifrey/top/libajantv2/demos/gtest/CMakeFiles/rebuild_cache.dir
+/home/jimg/work/gallifrey/top/libajantv2/demos/gtest/CMakeFiles/edit_cache.dir
+/home/jimg/work/gallifrey/top/libajantv2/demos/gtest/CMakeFiles/gtest.dir

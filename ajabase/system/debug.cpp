@@ -15,7 +15,7 @@
 #include "ajabase/system/systemtime.h"
 #include "ajabase/system/thread.h"
 
-#if defined(AJA_LINUX)
+#if defined(AJA_LINUX) || defined(AJA_BAREMETAL)
 	#include <stdarg.h>
 #endif
 #include <assert.h>

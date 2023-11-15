@@ -43,8 +43,8 @@
 	#if DISTRO_MAJ_VERSION >= 9
 		// RHEL 9 special cases
 
-		// This change was back-ported from kernel 6.1.0 for kernel 5.14.0
-		#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,14,0)
+		// This change was back-ported from kernel 6.1.0 for kernel 5.14.0-275
+		#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(5,14,0)) && DISTRO_KERNEL_PKG_MAJ >= 275)
 			#define KERNEL_6_1_0_SET_TERMIOS
 		#endif
 	#endif

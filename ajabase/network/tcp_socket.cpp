@@ -52,6 +52,9 @@ AJATCPSocket::~AJATCPSocket(void)
 AJAStatus
 AJATCPSocket::Open(const string& ipAddress, uint16_t port)
 {
+#if defined(AJA_BAREMETAL)
+	return (AJA_STATUS_FAIL);
+#else
 	if ((true == IsInstantiated()) && (-1 == mSocket))
 	{
 		if (-1 != (mSocket = (int) socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)))
@@ -102,6 +105,7 @@ AJATCPSocket::Open(const string& ipAddress, uint16_t port)
 		}
 	}
 	return (AJA_STATUS_FAIL);
+#endif
 }
 
 
@@ -111,6 +115,9 @@ AJATCPSocket::Open(const string& ipAddress, uint16_t port)
 AJAStatus
 AJATCPSocket::Connect(const string& ipAddress, uint16_t port)
 {
+#if defined(AJA_BAREMETAL)
+	return (AJA_STATUS_FAIL);
+#else
 	struct sockaddr_in serverAddress;
 
 	if ((-1 != mSocket) && (0 != ipAddress.length()))
@@ -129,6 +136,7 @@ AJATCPSocket::Connect(const string& ipAddress, uint16_t port)
 		}
 	}
 	return (AJA_STATUS_FAIL);
+#endif
 }
 
 
@@ -138,6 +146,9 @@ AJATCPSocket::Connect(const string& ipAddress, uint16_t port)
 AJAStatus
 AJATCPSocket::Listen(void)
 {
+#if defined(AJA_BAREMETAL)
+	return (AJA_STATUS_FAIL);
+#else
 	if (-1 != mSocket)
 	{
 		if (0 == listen(mSocket, MAX_PENDING))
@@ -146,6 +157,7 @@ AJATCPSocket::Listen(void)
 		}
 	}
 	return (AJA_STATUS_FAIL);
+#endif
 }
 
 
@@ -155,6 +167,9 @@ AJATCPSocket::Listen(void)
 int
 AJATCPSocket::Accept(void)
 {
+#if defined(AJA_BAREMETAL)
+	return -1;
+#else
 	if (-1 != mSocket)
 	{
 		struct sockaddr_in client;
@@ -198,6 +213,7 @@ AJATCPSocket::Accept(void)
 		}
 	}
 	return (-1);
+#endif
 }
 
 
@@ -207,6 +223,9 @@ AJATCPSocket::Accept(void)
 uint32_t
 AJATCPSocket::Read(uint8_t* pData, uint32_t dataLength)
 {
+#if defined(AJA_BAREMETAL)
+	return 0;
+#else
 	int bytesReceived = 0;
 
 	if (-1 != mSocket)
@@ -235,6 +254,7 @@ AJATCPSocket::Read(uint8_t* pData, uint32_t dataLength)
 		}
 	}
 	return uint32_t(bytesReceived);
+#endif
 }
 
 
@@ -244,6 +264,9 @@ AJATCPSocket::Read(uint8_t* pData, uint32_t dataLength)
 uint32_t
 AJATCPSocket::Write(const uint8_t* pData, uint32_t dataLength)
 {
+#if defined(AJA_BAREMETAL)
+	return 0;
+#else
 	int bytesSent = 0;
 
 	if (-1 != mSocket)
@@ -263,6 +286,7 @@ AJATCPSocket::Write(const uint8_t* pData, uint32_t dataLength)
 		}
 	}
 	return uint32_t(bytesSent);
+#endif
 }
 
 // These are here to silence the warning about hiding overloaded virtual functions

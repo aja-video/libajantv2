@@ -23,6 +23,9 @@
 #include <map>
 #include <math.h>
 #include <ctype.h>	//	for isprint()
+#if !defined(AJA_WINDOWS)
+#include <unistd.h>
+#endif
 
 
 using namespace std;

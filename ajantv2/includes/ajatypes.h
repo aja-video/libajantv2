@@ -469,6 +469,36 @@
 	#define POINTER_32
 	#define MAX_PATH	4096
 										//////////////////////////////////////////////////////////////////
+#elif defined (AJA_BAREMETAL)				////////////////////////	Bare Metal		//////////////////////////////
+									//////////////////////////////////////////////////////////////////
+	#include <stdint.h>
+	typedef short					HANDLE;
+	typedef void*					PVOID;
+	typedef unsigned int			BOOL_;
+	typedef ULWord					UWord_;
+	typedef int						Fixed_;
+	typedef int						AJASocket;
+
+	#define AJATargetBigEndian	0
+	#define AJAFUNC		__func__
+	#define NTV2_CPP_MIN(__x__,__y__)		std::min((__x__),(__y__))
+	#define NTV2_CPP_MAX(__x__,__y__)		std::max((__x__),(__y__))
+
+	#define MAX_PATH 4096
+
+  #undef NTV2_WRITEREG_PROFILING		//	disable register write profiling
+
+	#define INVALID_HANDLE_VALUE (0)
+
+	#if !defined (NTV2_DEPRECATE)
+		typedef struct {
+		  int cx;
+		  int cy;
+		} SIZE;		///< @deprecated	Use NTV2FrameDimensions instead.
+	#endif	//	!defined (NTV2_DEPRECATE)
+
+	#define POINTER_32
+
 #else									////////////////////////	(OTHER)		//////////////////////////
 										//////////////////////////////////////////////////////////////////
 	#error "IMPLEMENT OTHER PLATFORM"

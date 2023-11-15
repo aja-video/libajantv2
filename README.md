@@ -215,7 +215,11 @@ $ cd libajantv2/driver/linux
 ```
 $ make clean && make
 ```
-3. If the kernel module build succeeds, the ajantv2.ko file will appear in `libajantv2/driver/bin`. Install the kernel module using insmod:
+3. If the kernel module build succeeds, the ajantv2.ko file will appear in `libajantv2/driver/bin`. 
+
+4. The driver can be installed/uninstalled in 2 ways, the manual method:
+
+Install the kernel module using insmod:
 ```
 $ sudo insmod ajantv2.ko
 ```
@@ -228,6 +232,17 @@ Uninstall the kernel module using rmmod (all applications using the driver must 
 $ sudo rmmod ajantv2
 ```
 
+5. The alternate way to install the driver is via [DKMS](https://github.com/dell/dkms)
+
+Install the kernel module using DKMS:
+```
+$ make dkms-install
+```
+
+Uninstall the kernel module using DKMS:
+```
+$ make dkms-uninstall
+```
 
 ## Verifying the Kernel Module Driver (Linux) <a name="verifying-kernel-module"></a>
 

@@ -91,9 +91,16 @@ ifeq ($(wildcard /etc/os-release),/etc/os-release)
 	DISTRO_MIN_VERSION := $(shell awk 'BEGIN {FS = "="} $$1 == "VERSION_ID" {split($$2, subfield, "."); gsub("\"","",subfield[2]); printf("%d", subfield[2])}' /etc/os-release)
 endif
 
+DISTRO_KERNEL_PKG_MAJ := $(shell uname -r | awk 'BEGIN {FS = "-"} {split($$2, pkg, "."); printf("%d", pkg[1])}')
+DISTRO_KERNEL_PKG_MIN := $(shell uname -r | awk 'BEGIN {FS = "-"} {split($$2, pkg, "."); printf("%d", pkg[2])}')
+DISTRO_KERNEL_PKG_PNT := $(shell uname -r | awk 'BEGIN {FS = "-"} {split($$2, pkg, "."); printf("%d", pkg[3])}')
+
 # set distro defaults if needed
 ifeq ($(DISTRO_TYPE),)
 	DISTRO_TYPE := generic
+endif
+ifeq ($(DISTRO_TYPE),rhel)
+	DISTRO_IS_RHEL_LIKE := 1
 endif
 ifeq ($(DISTRO_IS_RHEL_LIKE),)
 	DISTRO_IS_RHEL_LIKE := 0
@@ -104,10 +111,23 @@ endif
 ifeq ($(DISTRO_MIN_VERSION),)
 	DISTRO_MIN_VERSION := 0
 endif
+ifeq ($(DISTRO_KERNEL_PKG_MAJ),)
+	DISTRO_KERNEL_PKG_MAJ := 0
+endif
+ifeq ($(DISTRO_KERNEL_PKG_MIN),)
+	DISTRO_KERNEL_PKG_MIN := 0
+endif
+ifeq ($(DISTRO_KERNEL_PKG_PNT),)
+	DISTRO_KERNEL_PKG_PNT := 0
+endif
+
 export DISTRO_TYPE
 export DISTRO_IS_RHEL_LIKE
 export DISTRO_MAJ_VERSION
 export DISTRO_MIN_VERSION
+export DISTRO_KERNEL_PKG_MAJ
+export DISTRO_KERNEL_PKG_MIN
+export DISTRO_KERNEL_PKG_PNT
 
 # set LIB based on 64 bitness or not
 ifeq (x86_64,$(A_ARCH))

@@ -1917,7 +1917,7 @@ bool NTV2Buffer::SetDefaultPageSize (const size_t inNewSize)
 
 size_t NTV2Buffer::HostPageSize (void)
 {
-#if defined(MSWindows)
+#if defined(MSWindows) || defined(AJABareMetal)
 	return AJA_PAGE_SIZE;
 #else
 	return size_t(::getpagesize());

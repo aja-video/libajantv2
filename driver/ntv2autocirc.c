@@ -417,7 +417,7 @@ Ntv2Status AutoCirculateInit(NTV2AutoCirc* pAutoCirc,
 		if (!pAuto->circulateWithHDMIAux)
 		{
 			if (NTV2_IS_INPUT_CROSSPOINT(pAuto->channelSpec) &&
-				NTV2DeviceCanDoCustomAux(DeviceID))
+				NTV2DeviceCanDoCustomAux(deviceID))
 			{
 				EnableAncExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], false);
 			}

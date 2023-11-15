@@ -11,6 +11,7 @@
 #include "ntv2utils.h"
 #include "ntv2formatdescriptor.h"
 
+#include <ajabase/system/systemtime.h>
 #include <sstream>
 
 #if defined (AJALinux) || defined (AJAMac)
@@ -69,11 +70,7 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
 	while (tries)
 	{
 		// Wait
-		#if defined(AJAWindows) || defined(MSWindows)
-			::Sleep (50);
-		#else
-			usleep (50 * 1000);
-		#endif
+		AJATime::Sleep(50);
 
 		currentFrameCount = J2kGetFrameCounter(channel, 2);
 		// See if t2 is still running
@@ -97,21 +94,13 @@ bool CNTV2ConfigTs2022::SetupJ2KEncoder(const NTV2Channel channel, const j2kEnco
 	SetEncoderReset( channel, true );
 
 	// Wait
-	#if defined(AJAWindows) || defined(MSWindows)
-		::Sleep (WAIT_RESET_MS/2);
-	#else
-		usleep (WAIT_RESET_MS/2 * 1000);
-	#endif
+	AJATime::Sleep(WAIT_RESET_MS/2);
 
 	// De-assert reset
 	SetEncoderReset( channel, false );
 
 	// Wait
-	#if defined(AJAWindows) || defined(MSWindows)
-		::Sleep (WAIT_RESET_MS);
-	#else
-		usleep (WAIT_RESET_MS * 1000);
-	#endif
+	AJATime::Sleep(WAIT_RESET_MS);
 
 	// Now proceed to configure the device	   
 	WriteJ2KConfigReg(channel, kRegSarekEncodeVideoFormat1, (uint32_t) config.videoFormat);
@@ -509,11 +498,7 @@ bool CNTV2ConfigTs2022::SetupEncodeTsJ2KEncoder(const NTV2Channel channel)
 	mDevice.WriteRegister(addr + (0x800*ENCODE_TS_J2K_ENCODER) + kRegTsJ2kEncoderHostEn, (0x6));
 
 	// Wait 60 ms
-	#if defined(AJAWindows) || defined(MSWindows)
-		::Sleep (60);
-	#else
-		usleep (60 * 1000);
-	#endif
+	AJATime::Sleep(60);
 
 	mDevice.WriteRegister(addr + (0x800*ENCODE_TS_J2K_ENCODER) + kRegTsJ2kEncoderHostEn, (0x1));
 

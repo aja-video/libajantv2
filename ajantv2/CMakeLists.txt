@@ -1,11 +1,6 @@
 project(ajantv2)
 
-if(CMAKE_CXX_STANDARD EQUAL 11)
-    message(STATUS "ajantv2 building for C++11")
-    list(APPEND TARGET_COMPILE_DEFS
-        -DAJA_USE_CPLUSPLUS11
-        -DNTV2_USE_CPLUSPLUS11)
-else()
+if (CMAKE_CXX_STANDARD EQUAL 98)
     message(STATUS "ajantv2 building for C++98")
     remove_definitions(
         -DAJA_USE_CPLUSPLUS11
@@ -22,6 +17,13 @@ else()
     STRING(REPLACE "#define NTV2_USE_CPLUSPLUS11" "//#define NTV2_USE_CPLUSPLUS11 " _ajatypes_file "${_ajatypes_file}")
     file(WRITE ${_ajantv2_ajatypes_path} "${_ajatypes_file}")
     message(STATUS "Overwrote ${_ajantv2_ajatypes_path} to remove NTV2_USE_CPLUSPLUS11 define!")
+elseif(CMAKE_CXX_STANDARD GREATER_EQUAL 11)
+    message(STATUS "ajantv2 building for C++11")
+    list(APPEND TARGET_COMPILE_DEFS
+        -DAJA_USE_CPLUSPLUS11
+        -DNTV2_USE_CPLUSPLUS11)
+else()
+    message(FATAL_ERROR "Unsupported C++ standard! NTV2 requires C++98 or higher. CMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}")
 endif()
 
 remove_definitions(
@@ -170,6 +172,11 @@ set(AJANTV2_LIN_HEADERS
     src/lin/ntv2linuxpublicinterface.h)
 set(AJANTV2_LIN_SOURCES
     src/lin/ntv2linuxdriverinterface.cpp)
+set(AJANTV2_BM_HEADERS
+    src/bm/ntv2baremetaldriverinterface.h
+    src/bm/ntv2baremetalpublicinterface.h)
+set(AJANTV2_BM_SOURCES
+    src/bm/ntv2baremetaldriverinterface.cpp)
 # ajantv2 utilityfiles
 set(AJANTV2_UTILITY_PUBLIC_HEADERS
     utilityfiles/public/ntv2firmwareinstallerthread.h
@@ -180,21 +187,21 @@ set(AJANTV2_UTILITY_PUBLIC_SOURCES
 
 if (NOT AJANTV2_BUILD_OPENSOURCE)
     # ajantv2 hevc codec sources
-    if (EXISTS ${NTV2_PROPRIETARY_DIR})
+    if (EXISTS ${LIBAJANTV2_PRIVATE_DIR})
         set(AJANTV2_HEVC_HEADERS
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31.h
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31cparam.h
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31ehparam.h
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31vaparam.h
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31vinparam.h
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31viparam.h)
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31.h
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31cparam.h
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31ehparam.h
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31vaparam.h
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31vinparam.h
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31viparam.h)
         set(AJANTV2_HEVC_SOURCES
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31.cpp
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31cparam.cpp
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31ehparam.cpp
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31vaparam.cpp
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31vinparam.cpp
-            ${NTV2_PROPRIETARY_DIR}/libajantv2-private/codecs/hevc/m31/ntv2m31viparam.cpp)
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31.cpp
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31cparam.cpp
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31ehparam.cpp
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31vaparam.cpp
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31vinparam.cpp
+            ${LIBAJANTV2_PRIVATE_DIR}/codecs/hevc/m31/ntv2m31viparam.cpp)
         # `cmake --install` deployments
         if (AJA_INSTALL_HEADERS)
             install(FILES ${AJANTV2_HEVC_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ajalibraries/ajantv2/codecs/hevc/m31)
@@ -202,9 +209,9 @@ if (NOT AJANTV2_BUILD_OPENSOURCE)
         if (AJA_INSTALL_SOURCES)
             install(FILES ${AJANTV2_HEVC_SOURCES} DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajantv2/codecs/hevc/m31)
         endif()
-        message(STATUS "added ajantv2 HEVC/M31 codec sources from ${NTV2_PROPRIETARY_DIR}")
+        message(STATUS "added ajantv2 HEVC/M31 codec sources from ${LIBAJANTV2_PRIVATE_DIR}")
     else()
-        message(STATUS "ntv2 proprietary repo not found: ${NTV2_PROPRIETARY_DIR}")
+        message(STATUS "ajantv2 private repo sources not found: ${LIBAJANTV2_PRIVATE_DIR}")
     endif()
 endif()
 
@@ -322,6 +329,7 @@ set(AJABASE_COMMON_SOURCES
 
 set(AJABASE_NETWORK_SOURCES
     ../ajabase/network/ip_socket.cpp
+    ../ajabase/network/network.cpp
     ../ajabase/network/tcp_socket.cpp
     ../ajabase/network/udp_socket.cpp)
 set(AJABASE_PERSISTENCE_SOURCES
@@ -400,6 +408,14 @@ set(AJABASE_SYS_MAC_SOURCES
     ../ajabase/system/mac/processimpl.cpp
     ../ajabase/system/mac/pthreadsextra.cpp
     ../ajabase/system/mac/threadimpl.cpp)
+# ajabase baremetal
+set(AJABASE_SYS_BM_SOURCES
+    ../ajabase/system/bm/eventimpl.cpp
+    ../ajabase/system/bm/infoimpl.cpp
+    ../ajabase/system/bm/lockimpl.cpp
+    ../ajabase/system/bm/processimpl.cpp
+    ../ajabase/system/bm/threadimpl.cpp)
+
 set(AJABASE_HEADERS
     ${AJABASE_COMMON_HEADERS}
     ${AJABASE_NETWORK_HEADERS}
@@ -473,6 +489,38 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${AJABASE_SYS_LIN_SOURCES})
     list(APPEND TARGET_LINK_LIBS
         rt pthread dl)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "BareMetal")
+    list(APPEND TARGET_COMPILE_DEFS
+        -D_UNIX98_THREAD_MUTEX_ATTRIBUTES
+        -D_POSIX_THREADS
+        -DAJASTATIC)
+    list(APPEND TARGET_COMPILE_DEFS_STATIC
+        ${TARGET_COMPILE_DEFS})
+    list(APPEND TARGET_COMPILE_DEFS_DYNAMIC
+        ${TARGET_COMPILE_DEFS}
+        -DAJADLL_BUILD)
+    list(APPEND TARGET_INCLUDE_DIRS
+        src/bm
+        ../ajabase/pnp/bm
+        ../ajabase/system/bm)
+    set(AJABASE_HEADERS
+        ${AJABASE_COMMON_HEADERS})
+    list(REMOVE_ITEM ${AJABASE_HEADERS} 
+        ../ajabase/common/guid.h)
+#    set(AJABASE_SOURCES
+#        ${AJABASE_COMMON_SOURCES})
+    set(AJABASE_SOURCES
+        ${AJABASE_COMMON_SOURCES}
+        ${AJABASE_NETWORK_SOURCES}
+        #        ${AJABASE_PERSISTENCE_SOURCES}
+        #${AJABASE_PNP_SOURCES}
+        ${AJABASE_SYS_SOURCES}
+        ${AJABASE_SYS_BM_SOURCES})
+    list(REMOVE_ITEM AJABASE_SOURCES 
+        ../ajabase/common/guid.cpp)
+    message("${AJABASE_SOURCES}")
+#    list(APPEND TARGET_LINK_LIBS
+#        rt pthread dl)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     list(APPEND TARGET_COMPILE_DEFS_STATIC
         ${TARGET_COMPILE_DEFS}
@@ -528,6 +576,10 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         ${TARGET_SOURCES}
         ${AJANTV2_MAC_HEADERS}
         ${AJANTV2_MAC_SOURCES})
+elseif(CMAKE_SYSTEM_NAME STREQUAL "BareMetal")
+    list(APPEND TARGET_SOURCES
+        ${AJANTV2_BM_HEADERS}
+        ${AJANTV2_BM_SOURCES})
 endif()
 
 if (NOT TARGET ${PROJECT_NAME})
@@ -642,4 +694,6 @@ install(TARGETS ${PROJECT_NAME}
     FRAMEWORK       DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-add_subdirectory(test)
+if (NOT AJANTV2_DISABLE_TESTS)
+    add_subdirectory(test)
+endif()

@@ -297,10 +297,10 @@ static int hevcPciConfigure(uint32_t devNum)
 		// we are a pci dma master
 		pci_set_master(pDevice);
 
-		result = pci_set_dma_mask(pDevice, DMA_BIT_MASK(64));
+		result = dma_set_mask(&pDevice->dev, DMA_BIT_MASK(64));
 		if(result == 0)
 		{
-			result = pci_set_consistent_dma_mask(pDevice, DMA_BIT_MASK(64));
+			result = dma_set_coherent_mask(&pDevice->dev, DMA_BIT_MASK(64));
 			if(result != 0)
 			{
 				HEVC_MSG_ERROR("%s(%d): could not set consistent dma mask to 64 bit (%08x)\n",
@@ -312,7 +312,7 @@ static int hevcPciConfigure(uint32_t devNum)
 		}
 		else
 		{
-			result = pci_set_dma_mask(pDevice, DMA_BIT_MASK(32));
+			result = dma_set_mask(&pDevice->dev, DMA_BIT_MASK(32));
 			if(result != 0)
 			{
 				HEVC_MSG_ERROR("%s(%d): could not set pci dma mask to 32 bit (%08x)\n",
@@ -320,7 +320,7 @@ static int hevcPciConfigure(uint32_t devNum)
 				return result;
 			}
 
-			result = pci_set_consistent_dma_mask(pDevice, DMA_BIT_MASK(32));
+			result = dma_set_coherent_mask(&pDevice->dev, DMA_BIT_MASK(32));
 			if(result != 0)
 			{
 				HEVC_MSG_ERROR("%s(%d): could not set consistent dma mask to 32 bit (%08x)\n",
