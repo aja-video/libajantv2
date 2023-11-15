@@ -2136,6 +2136,7 @@ int ntv2_release(struct inode *minode, struct file *mfile) {
 	pFileData = (PFILE_DATA)mfile->private_data;
 	if (pFileData != NULL)
 	{
+#if 0
         NTV2StreamChannel channel;
         int i;
 
@@ -2144,7 +2145,7 @@ int ntv2_release(struct inode *minode, struct file *mfile) {
         {
             ntv2_stream_channel_release(getNTV2Params(deviceNumber)->m_pDmaStream[i], pFileData, &channel);
         }
-
+#endif
         // release all locked pages
 		dmaPageRootRelease(deviceNumber, &pFileData->dmaRoot);
         
