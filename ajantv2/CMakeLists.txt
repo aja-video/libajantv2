@@ -329,6 +329,7 @@ set(AJABASE_COMMON_SOURCES
 
 set(AJABASE_NETWORK_SOURCES
     ../ajabase/network/ip_socket.cpp
+    ../ajabase/network/network.cpp
     ../ajabase/network/tcp_socket.cpp
     ../ajabase/network/udp_socket.cpp)
 set(AJABASE_PERSISTENCE_SOURCES

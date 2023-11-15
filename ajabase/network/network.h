@@ -31,6 +31,7 @@
 /////////////////////////////
 // Typedefs
 /////////////////////////////
+#if defined(AJA_BAREMETAL)
 typedef uint32_t in_addr_t;
 struct in_addr {
   in_addr_t       s_addr;
@@ -42,6 +43,7 @@ struct sockaddr_in {
   struct in_addr  sin_addr;
 };
 typedef uint32_t socklen_t;
+#endif
 
 /////////////////////////////
 // Declarations

@@ -15,9 +15,6 @@
 
 #if defined (AJALinux) || defined (AJAMac)
 	#include <stdlib.h>
-	#include <sys/socket.h>
-	#include <netinet/in.h>
-	#include <arpa/inet.h>
 #endif
 
 using namespace std;
