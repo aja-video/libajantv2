@@ -247,11 +247,11 @@ bool CNTV2Config2022::SetNetworkConfiguration(const eSFP sfp, const IPVNetConfig
 	string ip, subnet, gateway;
 	struct in_addr addr;
 	addr.s_addr = (uint32_t)netConfig.ipc_ip;
-	ip = AJANetwork::inet_ntoa(addr);
+	ip = AJANetwork::aja_inet_ntoa(addr);
 	addr.s_addr = (uint32_t)netConfig.ipc_subnet;
-	subnet = AJANetwork::inet_ntoa(addr);
+	subnet = AJANetwork::aja_inet_ntoa(addr);
 	addr.s_addr = (uint32_t)netConfig.ipc_gateway;
-	gateway = AJANetwork::inet_ntoa(addr);
+	gateway = AJANetwork::aja_inet_ntoa(addr);
 
 	bool rv = SetNetworkConfiguration(sfp, ip, subnet, gateway);
 	return rv;
@@ -262,9 +262,9 @@ bool CNTV2Config2022::GetNetworkConfiguration(const eSFP sfp, IPVNetConfig & net
 	string ip, subnet, gateway;
 	GetNetworkConfiguration(sfp, ip, subnet, gateway);
 
-	netConfig.ipc_ip	  = NTV2EndianSwap32((uint32_t)AJANetwork::inet_addr(ip.c_str()));
-	netConfig.ipc_subnet  = NTV2EndianSwap32((uint32_t)AJANetwork::inet_addr(subnet.c_str()));
-	netConfig.ipc_gateway = NTV2EndianSwap32((uint32_t)AJANetwork::inet_addr(gateway.c_str()));
+	netConfig.ipc_ip	  = NTV2EndianSwap32((uint32_t)AJANetwork::aja_inet_addr(ip.c_str()));
+	netConfig.ipc_subnet  = NTV2EndianSwap32((uint32_t)AJANetwork::aja_inet_addr(subnet.c_str()));
+	netConfig.ipc_gateway = NTV2EndianSwap32((uint32_t)AJANetwork::aja_inet_addr(gateway.c_str()));
 
 	return true;
 }
@@ -283,7 +283,7 @@ bool CNTV2Config2022::SetNetworkConfiguration(const eSFP sfp, const std::string 
 		return false;
 	}
 
-	uint32_t addr = AJANetwork::inet_addr(localIPAddress.c_str());
+	uint32_t addr = AJANetwork::aja_inet_addr(localIPAddress.c_str());
 	addr = NTV2EndianSwap32(addr);
 
 	uint32_t macLo;
@@ -361,30 +361,30 @@ bool CNTV2Config2022::GetNetworkConfiguration(const eSFP sfp, std::string & loca
 		uint32_t val;
 		mDevice.ReadRegister(SAREK_REGS + kRegSarekIP0, val);
 		addr.s_addr = val;
-		localIPAddress = AJANetwork::inet_ntoa(addr);
+		localIPAddress = AJANetwork::aja_inet_ntoa(addr);
 
 		mDevice.ReadRegister(SAREK_REGS + kRegSarekNET0, val);
 		addr.s_addr = val;
-		subnetMask = AJANetwork::inet_ntoa(addr);
+		subnetMask = AJANetwork::aja_inet_ntoa(addr);
 
 		mDevice.ReadRegister(SAREK_REGS + kRegSarekGATE0, val);
 		addr.s_addr = val;
-		gateway = AJANetwork::inet_ntoa(addr);
+		gateway = AJANetwork::aja_inet_ntoa(addr);
 	}
 	else
 	{
 		uint32_t val;
 		mDevice.ReadRegister(SAREK_REGS + kRegSarekIP1, val);
 		addr.s_addr = val;
-		localIPAddress = AJANetwork::inet_ntoa(addr);
+		localIPAddress = AJANetwork::aja_inet_ntoa(addr);
 
 		mDevice.ReadRegister(SAREK_REGS + kRegSarekNET1, val);
 		addr.s_addr = val;
-		subnetMask = AJANetwork::inet_ntoa(addr);
+		subnetMask = AJANetwork::aja_inet_ntoa(addr);
 
 		mDevice.ReadRegister(SAREK_REGS + kRegSarekGATE1, val);
 		addr.s_addr = val;
-		gateway = AJANetwork::inet_ntoa(addr);
+		gateway = AJANetwork::aja_inet_ntoa(addr);
 	}
 	return true;
 }
@@ -436,12 +436,12 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
 		SetRxMatch(channel, SFP_2, 0);		 // disable while configuring
 
 		// source ip address
-		uint32_t sourceIp = AJANetwork::inet_addr(rxConfig.sfp2SourceIP.c_str());
+		uint32_t sourceIp = AJANetwork::aja_inet_addr(rxConfig.sfp2SourceIP.c_str());
 		sourceIp = NTV2EndianSwap32(sourceIp);
 		WriteChannelRegister(kReg2022_6_rx_match_src_ip_addr + baseAddr, sourceIp);
 
 		// dest ip address
-		uint32_t destIp = AJANetwork::inet_addr(rxConfig.sfp2DestIP.c_str());
+		uint32_t destIp = AJANetwork::aja_inet_addr(rxConfig.sfp2DestIP.c_str());
 		destIp = NTV2EndianSwap32(destIp);
 		WriteChannelRegister(kReg2022_6_rx_match_dest_ip_addr + baseAddr, destIp);
 
@@ -494,12 +494,12 @@ bool CNTV2Config2022::SetRxChannelConfiguration(const NTV2Channel channel,const 
 	SetRxMatch(channel, SFP_1, 0);		// disable while configuring
 
 	// source ip address
-	uint32_t sourceIp = AJANetwork::inet_addr(rxConfig.sfp1SourceIP.c_str());
+	uint32_t sourceIp = AJANetwork::aja_inet_addr(rxConfig.sfp1SourceIP.c_str());
 	sourceIp = NTV2EndianSwap32(sourceIp);
 	WriteChannelRegister(kReg2022_6_rx_match_src_ip_addr + baseAddr, sourceIp);
 
 	// dest ip address
-	uint32_t destIp = AJANetwork::inet_addr(rxConfig.sfp1DestIP.c_str());
+	uint32_t destIp = AJANetwork::aja_inet_addr(rxConfig.sfp1DestIP.c_str());
 	destIp = NTV2EndianSwap32(destIp);
 	WriteChannelRegister(kReg2022_6_rx_match_dest_ip_addr + baseAddr, destIp);
 
@@ -599,13 +599,13 @@ bool  CNTV2Config2022::GetRxChannelConfiguration(const NTV2Channel channel, rx_2
 		ReadChannelRegister(kReg2022_6_rx_match_src_ip_addr + baseAddr, &val);
 		struct in_addr in;
 		in.s_addr = NTV2EndianSwap32(val);
-		char * ip = AJANetwork::inet_ntoa(in);
+		char * ip = AJANetwork::aja_inet_ntoa(in);
 		rxConfig.sfp2SourceIP = ip;
 
 		// dest ip address
 		ReadChannelRegister(kReg2022_6_rx_match_dest_ip_addr + baseAddr, &val);
 		in.s_addr = NTV2EndianSwap32(val);
-		ip = AJANetwork::inet_ntoa(in);
+		ip = AJANetwork::aja_inet_ntoa(in);
 		rxConfig.sfp2DestIP = ip;
 
 		// source port
@@ -635,13 +635,13 @@ bool  CNTV2Config2022::GetRxChannelConfiguration(const NTV2Channel channel, rx_2
 	ReadChannelRegister(kReg2022_6_rx_match_src_ip_addr + baseAddr, &val);
 	struct in_addr in;
 	in.s_addr = NTV2EndianSwap32(val);
-	char * ip = AJANetwork::inet_ntoa(in);
+	char * ip = AJANetwork::aja_inet_ntoa(in);
 	rxConfig.sfp1SourceIP = ip;
 
 	// dest ip address
 	ReadChannelRegister(kReg2022_6_rx_match_dest_ip_addr + baseAddr, &val);
 	in.s_addr = NTV2EndianSwap32(val);
-	ip = AJANetwork::inet_ntoa(in);
+	ip = AJANetwork::aja_inet_ntoa(in);
 	rxConfig.sfp1DestIP = ip;
 
 	// source port
@@ -875,7 +875,7 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
 		}
 
 		// dest ip address
-		destIp = AJANetwork::inet_addr(txConfig.sfp2RemoteIP.c_str());
+		destIp = AJANetwork::aja_inet_addr(txConfig.sfp2RemoteIP.c_str());
 		destIp = NTV2EndianSwap32(destIp);
 		WriteChannelRegister(kReg2022_6_tx_dest_ip_addr + baseAddr,destIp);
 
@@ -925,7 +925,7 @@ bool CNTV2Config2022::SetTxChannelConfiguration(const NTV2Channel channel, const
 	}
 
 	// dest ip address
-	destIp = AJANetwork::inet_addr(txConfig.sfp1RemoteIP.c_str());
+	destIp = AJANetwork::aja_inet_addr(txConfig.sfp1RemoteIP.c_str());
 	destIp = NTV2EndianSwap32(destIp);
 	WriteChannelRegister(kReg2022_6_tx_dest_ip_addr + baseAddr,destIp);
 
@@ -972,7 +972,7 @@ bool CNTV2Config2022::GetTxChannelConfiguration(const NTV2Channel channel, tx_20
 		ReadChannelRegister(kReg2022_6_tx_dest_ip_addr + baseAddr,&val);
 		struct in_addr in;
 		in.s_addr = NTV2EndianSwap32(val);
-		char * ip = AJANetwork::inet_ntoa(in);
+		char * ip = AJANetwork::aja_inet_ntoa(in);
 		txConfig.sfp2RemoteIP = ip;
 		// source port
 		ReadChannelRegister(kReg2022_6_tx_udp_src_port + baseAddr,&txConfig.sfp2LocalPort);
@@ -993,7 +993,7 @@ bool CNTV2Config2022::GetTxChannelConfiguration(const NTV2Channel channel, tx_20
 	ReadChannelRegister(kReg2022_6_tx_dest_ip_addr + baseAddr,&val);
 	struct in_addr in;
 	in.s_addr = NTV2EndianSwap32(val);
-	char * ip = AJANetwork::inet_ntoa(in);
+	char * ip = AJANetwork::aja_inet_ntoa(in);
 	txConfig.sfp1RemoteIP = ip;
 
 	// source port
@@ -1530,7 +1530,7 @@ void CNTV2Config2022::ChannelSemaphoreClear(uint32_t controlReg, uint32_t baseAd
 
 bool CNTV2Config2022::GetMACAddress(eSFP sfp, NTV2Stream stream, string remoteIP, uint32_t & hi, uint32_t & lo)
 {
-	uint32_t destIp = AJANetwork::inet_addr(remoteIP.c_str());
+	uint32_t destIp = AJANetwork::aja_inet_addr(remoteIP.c_str());
 	destIp = NTV2EndianSwap32(destIp);
 
 	uint32_t	mac;
@@ -1562,7 +1562,7 @@ bool CNTV2Config2022::GetMACAddress(eSFP sfp, NTV2Stream stream, string remoteIP
 		{
 			struct in_addr addr;
 			addr.s_addr	 = NTV2EndianSwap32(nc.ipc_gateway);
-			string gateIp = AJANetwork::inet_ntoa(addr);
+			string gateIp = AJANetwork::aja_inet_ntoa(addr);
 			rv = GetRemoteMAC(gateIp, sfp, stream, macAddr);
 		}
 		else
