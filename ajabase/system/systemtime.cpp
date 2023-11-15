@@ -68,7 +68,6 @@
 
 #elif defined(AJA_BAREMETAL)
 	#include <unistd.h>
-
 #endif
 
 
@@ -313,7 +312,7 @@ void AJATime::SleepInMicroseconds (const int32_t inTime)
 	#elif defined(AJA_WINDOWS)
 		::Sleep(DWORD(inTime) / 1000);	//	Windows Sleep expects millisecs
 	#elif defined(AJA_BAREMETAL)
-    // TODO
+		// TODO
 	#else	//	POSIX
 		usleep(inTime);	//	NOTE: usleep is deprecated in POSIX
 	#endif
@@ -348,7 +347,7 @@ void AJATime::SleepInNanoseconds (const uint64_t inTime)
 			}
 		}
 	#elif defined(AJA_BAREMETAL)
-    // TODO
+		// TODO
 	#else
 		timespec req, rm;
 		req.tv_sec = inTime / 1000000000;

@@ -376,7 +376,7 @@ int poptSaneFile(const char * fn)
 
 int poptReadFile(const char * fn, char ** bp, size_t * nbp, int flags)
 {
-  AJAFileIO file;
+ 	AJAFileIO file;
 	char * b = NULL;
 	off_t nb = 0;
 	char * s, * t, * se;
@@ -386,7 +386,7 @@ int poptReadFile(const char * fn, char ** bp, size_t * nbp, int flags)
 	goto exit;
 
 	if ((file.Seek(0, eAJASeekEnd)) != AJA_STATUS_SUCCESS
-   || (nb = file.Tell()) == (off_t)-1
+	 || (nb = file.Tell()) == (off_t)-1
 	 || file.Seek(0, eAJASeekSet) != AJA_STATUS_SUCCESS
 	 || (b = (char*)calloc(sizeof(*b), (size_t)nb + 1)) == NULL
 	 || file.Read((uint8_t *)b, (uint32_t)nb) != (uint32_t)nb)

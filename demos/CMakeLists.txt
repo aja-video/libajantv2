@@ -4,7 +4,7 @@ if (AJANTV2_DISABLE_DEMOS)
 endif()
 
 if (AJA_BAREMETAL)
-  add_subdirectory(gtest)
+  add_subdirectory(gtest)   # just do test program for now
   return()
 endif()
 

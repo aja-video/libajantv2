@@ -209,8 +209,8 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName, bool glob
 	name = "/";
 	name += pShareName;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  name = pShareName;
+	// TODO
+	name = pShareName;
 #else //Mac
 	(void) global;
 	name = pShareName;
@@ -292,8 +292,8 @@ AJAMemory::AllocateShared(size_t* pMemorySize, const char* pShareName, bool glob
 	// In User Mode: Global\somename
 	// In Kernel Mode: \BaseNamedObjects\somename
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return NULL;
+	// TODO
+	return NULL;
 #else	 
 	// Mac and Linux
 	{
@@ -380,7 +380,7 @@ AJAMemory::FreeShared(void* pMemory)
 				UnmapViewOfFile(shareIter->pMemory);
 				CloseHandle(shareIter->fileMapHandle);
 #elif defined(AJA_BAREMETAL)
-  // TODO
+	// TODO
 #else
 				munmap(shareIter->pMemory, shareIter->memorySize);
 				close(shareIter->fileDescriptor);

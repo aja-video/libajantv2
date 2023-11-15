@@ -17,7 +17,7 @@
 	#include <direct.h>
 	#include <io.h>
 #elif defined(AJA_BAREMETAL)
-  // TODO
+	// TODO
 #else
 	// Posix includes
 	#include <fcntl.h>
@@ -59,7 +59,7 @@ using std::vector;
 		return (int64_t)(date.QuadPart / 10000000);
 	}
 #elif defined(AJA_BAREMETAL)
-  // TODO
+	// TODO
 #else
 	// Posix helper functions
 	static string GetEnvVar(string const & key)
@@ -100,8 +100,8 @@ AJAFileIO::FileExists(const std::wstring& fileName)
 	struct _stat dummy;
 	return _wstat(fileName.c_str(), &dummy) != -1;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return false;
+	// TODO
+	return false;
 #else
 	string aString;
 	aja::wstring_to_string(fileName, aString);
@@ -117,8 +117,8 @@ AJAFileIO::FileExists(const std::string& fileName)
 	struct _stat dummy;
 	return _stat(fileName.c_str(), &dummy) != -1;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return false;
+	// TODO
+	return false;
 #else
 	struct stat dummy;
 	bool bExists = stat(fileName.c_str(), &dummy) != -1;
@@ -185,8 +185,8 @@ AJAFileIO::Open(
 	}
 	return status;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	string aString;
 	aja::wstring_to_string(fileName,aString);
@@ -210,8 +210,8 @@ AJAFileIO::Open(
 
 	return status;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	AJAStatus	status = AJA_STATUS_FAIL;
 	string		flagsAndAttributes;
@@ -293,8 +293,8 @@ AJAFileIO::Close()
 	}
 	return status;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	AJAStatus status = AJA_STATUS_FAIL;
 
@@ -336,8 +336,8 @@ AJAFileIO::Read(uint8_t* pBuffer, const uint32_t length)
 	}
 	return bytesRead;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return 0;
+	// TODO
+	return 0;
 #else
 	uint32_t retVal = 0;
 	if (NULL != mpFile)
@@ -365,8 +365,8 @@ AJAFileIO::Read(std::string& buffer, const uint32_t length)
 	buffer.resize(actual_bytes);
 	return actual_bytes;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return 0;
+	// TODO
+	return 0;
 #else
 	buffer.resize(length);
 	uint32_t actual_bytes = Read((uint8_t*) &buffer[0], length);
@@ -388,8 +388,8 @@ AJAFileIO::Write(const uint8_t* pBuffer, const uint32_t length) const
 	}
 	return bytesWritten;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return 0;
+	// TODO
+	return 0;
 #else
 	uint32_t retVal = 0;
 	if (NULL != mpFile)
@@ -438,8 +438,8 @@ AJAFileIO::Sync()
 	}
 	return status;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	AJAStatus status = AJA_STATUS_FAIL;
 	if (IsOpen())
@@ -479,8 +479,8 @@ AJAFileIO::Truncate(int32_t size)
 	}
 	return status;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	AJAStatus status = AJA_STATUS_FAIL;
 	if (IsOpen())
@@ -525,8 +525,8 @@ AJAFileIO::Tell()
 	}
 	return retVal;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return 0;
+	// TODO
+	return 0;
 #else
 	int64_t retVal = 0;
 	if (IsOpen())
@@ -581,8 +581,8 @@ AJAFileIO::Seek(const int64_t distance, const AJAFileSetFlag flag) const
 	}
 	return status;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	AJAStatus status = AJA_STATUS_FAIL;
 	int		  whence;
@@ -677,8 +677,8 @@ AJAFileIO::FileInfo(int64_t& createTime, int64_t& modTime, int64_t& size, std::s
 	}
 	return status;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	AJAStatus status = AJA_STATUS_FAIL;
 
@@ -755,8 +755,8 @@ AJAFileIO::Delete(const string& fileName)
 	}
 	return status;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	AJAStatus status = AJA_STATUS_FAIL;
 
@@ -787,8 +787,8 @@ AJAFileIO::Delete(const wstring& fileName)
 	}
 	return status;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	AJAStatus status = AJA_STATUS_FAIL;
 
@@ -841,8 +841,8 @@ AJAFileIO::ReadDirectory(
 	}
 	return status;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	AJAStatus		status = AJA_STATUS_FAIL;
 	struct dirent** ppNamelist;
@@ -948,8 +948,8 @@ AJAFileIO::ReadDirectory(
 	}
 	return status;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	AJAStatus status = AJA_STATUS_FAIL;
 
@@ -1001,8 +1001,8 @@ AJAFileIO::DoesDirectoryContain(
 	}
 	return status;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	AJAStatus		status = AJA_STATUS_FAIL;
 	vector<string>	fileList;
@@ -1052,8 +1052,8 @@ AJAFileIO::DoesDirectoryContain(
 	}
 	return (status);
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	AJAStatus status = AJA_STATUS_FAIL;
 	string aDir,aPat;
@@ -1072,8 +1072,8 @@ AJAFileIO::DoesDirectoryExist(const std::string& directory)
 #if defined(AJA_WINDOWS)
 	return( (::GetFileAttributesA(directory.c_str()) != INVALID_FILE_ATTRIBUTES) ? AJA_STATUS_SUCCESS : AJA_STATUS_FAIL);
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	AJAStatus status = AJA_STATUS_FAIL;
 
@@ -1097,8 +1097,8 @@ AJAFileIO::DoesDirectoryExist(const std::wstring& directory)
 #if defined(AJA_WINDOWS)
 	return( (::GetFileAttributesW(directory.c_str()) != INVALID_FILE_ATTRIBUTES) ? AJA_STATUS_SUCCESS : AJA_STATUS_FAIL);
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	AJAStatus status = AJA_STATUS_FAIL;
 	string aDir;
@@ -1131,8 +1131,8 @@ AJAFileIO::IsDirectoryEmpty(const std::string& directory)
 		status = AJA_STATUS_SUCCESS;
 	return status;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	AJAStatus status = AJA_STATUS_FAIL;
 	if (DoesDirectoryContain(directory, "*") != AJA_STATUS_SUCCESS)
@@ -1151,8 +1151,8 @@ AJAFileIO::IsDirectoryEmpty(const std::wstring& directory)
 		status = AJA_STATUS_SUCCESS;
 	return status;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	AJAStatus status = AJA_STATUS_FAIL;
 	if (DoesDirectoryContain(directory, L"*") != AJA_STATUS_SUCCESS)
@@ -1184,8 +1184,8 @@ AJAFileIO::TempDirectory(std::string& directory)
 	}
 	return status;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	AJAStatus status = AJA_STATUS_FAIL;
 	directory = "";
@@ -1248,8 +1248,8 @@ AJAFileIO::TempDirectory(std::wstring& directory)
 	}
 	return status;
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	string temp;
 	AJAStatus status = AJAFileIO::TempDirectory(temp);
@@ -1273,8 +1273,8 @@ AJAFileIO::GetWorkingDirectory(std::string& cwd)
 #if defined(AJA_WINDOWS)
 	_getcwd(buf, AJA_MAX_PATH);
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	getcwd(buf, AJA_MAX_PATH);
 #endif
@@ -1360,8 +1360,8 @@ AJAStatus
 AJAFileIO::GetExecutablePath(std::string& path)
 {
 #if defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	char buf[AJA_MAX_PATH];
 	memset((void*)buf, 0, AJA_MAX_PATH);
@@ -1398,8 +1398,8 @@ AJAFileIO::GetExecutablePath(std::wstring& path)
 		return AJA_STATUS_SUCCESS;
 	}
 #elif defined(AJA_BAREMETAL)
-  // TODO
-  return AJA_STATUS_FAIL;
+	// TODO
+	return AJA_STATUS_FAIL;
 #else
 	std::string pathStr;
 	if (AJAFileIO::GetExecutablePath(pathStr) == AJA_STATUS_SUCCESS) {
@@ -1416,7 +1416,7 @@ AJAFileIO::SetHandle(FILE *fp)
 #if defined(AJA_WINDOWS)
 	mFileDescriptor = (HANDLE)_get_osfhandle(fileno(fp));
 #elif defined(AJA_BAREMETAL)
-  // TODO
+	// TODO
 #else
 	mpFile = fp;
 #endif
