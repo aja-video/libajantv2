@@ -59,8 +59,8 @@ class AJA_EXPORT AJANetwork
 		virtual ~AJANetwork(void);
 
     static int aja_inet_aton(const char *cp, struct in_addr *inp);
-    static aja_in_addr_t inet_addr(const char *cp);
-    static aja_in_addr_t inet_network(const char *cp);
+    static in_addr_t aja_inet_addr(const char *cp);
+    static in_addr_t aja_inet_network(const char *cp);
     static char *aja_inet_ntoa(struct in_addr in);
     static struct in_addr aja_inet_makeaddr(int net, int host);
     static in_addr_t aja_inet_lnaof(struct in_addr in);
