@@ -65,13 +65,6 @@ class NTV2StreamPlayer
 		virtual void		StartProducerThread (void);		///< @brief	Starts my producer thread.
 		virtual void		ProduceFrames (void);			///< @brief	My producer thread that repeatedly produces video frames.
 
-		/**
-			@brief		Inserts audio tone (based on my current tone frequency) into the given NTV2FrameData's audio buffer.
-			@param		inFrameData		The NTV2FrameData object having the audio buffer to be filled.
-			@return		Total number of bytes written into the buffer.
-		**/
-		virtual uint32_t	AddTone (NTV2FrameData & inFrameData);
-
 	//	Protected Class Methods
 	protected:
 		/**
