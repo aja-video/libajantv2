@@ -502,7 +502,7 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 	ULWord				goodQueue(0), badQueue(0), goodRelease(0), starves(0), noRoomWaits(0);
 	ULWord				status;
 
-	//	Stop streaming, just in case someone else left it running...
+	//	Initialize and claim ownership of the stream
 	status = mDevice.StreamChannelInitialize(mConfig.fOutputChannel);
 	if (status != NTV2_STREAM_STATUS_SUCCESS)
 	{
@@ -513,7 +513,7 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 
 	while (!mGlobalQuit)
 	{
-        // get streaming status
+        //  Get stream status
 		status = mDevice.StreamChannelStatus(mConfig.fOutputChannel, strStatus);
 		if (status != NTV2_STREAM_STATUS_SUCCESS)
 		{
@@ -523,12 +523,10 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 
 		if (strStatus.GetQueueDepth() < 8)
 		{
-			//	Device has at least one free frame buffer that can be filled.
-			//	Wait for the next frame in our ring to become ready to "consume"...
 			NTV2FrameData *	pFrameData (mFrameDataRing.StartConsumeNextBuffer());
 			if (pFrameData)
             {
-				// Queue frame to stream
+				//  Queue frame to stream
 				NTV2_POINTER buffer(pFrameData->fVideoBuffer.GetHostAddress(0), pFrameData->fVideoBuffer.GetByteCount());
 				status = mDevice.StreamBufferQueue(mConfig.fOutputChannel,
 													buffer,
@@ -546,7 +544,7 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 
 				if (goodQueue == 3)
 				{
-					// start the stream
+					//  Start the stream
 					status = mDevice.StreamChannelStart(mConfig.fOutputChannel, strStatus);
 					if (status != NTV2_STREAM_STATUS_SUCCESS)
 					{
@@ -566,11 +564,13 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 			noRoomWaits++;
 		}
 
-		// look for released buffers
-		while (goodRelease < strStatus.mReleaseCount)
+		//  Look for buffers to release
+        status = mDevice.StreamBufferRelease(mConfig.fOutputChannel, bfrStatus);
+		while (status == NTV2_STREAM_STATUS_SUCCESS)
 		{
 			mFrameDataRing.EndConsumeNextBuffer();
 			goodRelease++;
+            status = mDevice.StreamBufferRelease(mConfig.fOutputChannel, bfrStatus);
 		}
 
 		//	Wait for one or more buffers to become available on the device, which should occur at next VBI...
@@ -584,6 +584,23 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 		cerr << "## ERROR:  Stream initialize failed: " << status << endl;
 		return;
 	}
+
+    //  Release all buffers
+    status = mDevice.StreamBufferRelease(mConfig.fOutputChannel, bfrStatus);
+    while (status == NTV2_STREAM_STATUS_SUCCESS)
+    {
+        mFrameDataRing.EndConsumeNextBuffer();
+        goodRelease++;
+        status = mDevice.StreamBufferRelease(mConfig.fOutputChannel, bfrStatus);
+    }
+
+    //  Release stream ownership
+	status = mDevice.StreamChannelRelease(mConfig.fOutputChannel);
+	if (status != NTV2_STREAM_STATUS_SUCCESS)
+	{
+		cerr << "## ERROR:  Stream release failed: " << status << endl;
+		return;
+	}    
 
 	PLNOTE("Thread completed: " << DEC(goodQueue) << " queued, " << DEC(badQueue) << " failed, "
 			<< DEC(starves) << " starves, " << DEC(noRoomWaits) << " VBI waits");
@@ -616,15 +633,10 @@ void NTV2StreamPlayer::ProducerThreadStatic (AJAThread * pThread, void * pContex
 
 void NTV2StreamPlayer::ProduceFrames (void)
 {
-	ULWord	freqNdx(0), testPatNdx(0), badTally(0);
-	double	timeOfLastSwitch	(0.0);
+	ULWord	testPatNdx(0), badTally(0);
 
 	const AJATimeBase		timeBase		(CNTV2DemoCommon::GetAJAFrameRate(::GetNTV2FrameRateFromVideoFormat(mConfig.fVideoFormat)));
 	const NTV2StringList	tpNames			(NTV2TestPatternGen::getTestPatternNames());
-	const bool				isInterlace		(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mConfig.fVideoFormat));
-	const bool				isPAL			(NTV2_IS_PAL_VIDEO_FORMAT(mConfig.fVideoFormat));
-	const NTV2FrameRate		ntv2FrameRate	(::GetNTV2FrameRateFromVideoFormat(mConfig.fVideoFormat));
-	const TimecodeFormat	tcFormat		(CNTV2DemoCommon::NTV2FrameRate2TimecodeFormat(ntv2FrameRate));
 
 	PLNOTE("Thread started");
 	NTV2FrameData *	pFrameData (mFrameDataRing.StartProduceNextBuffer());
@@ -646,87 +658,11 @@ void NTV2StreamPlayer::ProduceFrames (void)
 											/*byteCount*/ pFrameData->fVideoBuffer.GetByteCount());
 		testPatNdx = (testPatNdx + 1) % ULWord(mTestPatRasters.size());
 		AJATime::Sleep(5000);
-#if 0
-		const	CRP188	rp188Info (mCurrentFrame++, 0, 0, 10, tcFormat);
-		NTV2_RP188		tcF1, tcF2;
-		string			tcString;
-
-		rp188Info.GetRP188Reg(tcF1);
-		rp188Info.GetRP188Str(tcString);
-
-		//	Include timecode in output signal...
-		tcF2 = tcF1;
-		if (isInterlace)
-		{	//	Set bit 27 of Hi word (PAL) or Lo word (NTSC)
-			if (isPAL) tcF2.fHi |=  BIT(27);	else tcF2.fLo |=  BIT(27);
-		}
-
-		//	Add timecodes for each SDI output...
-		for (NTV2TCIndexesConstIter it(mTCIndexes.begin());  it != mTCIndexes.end();  ++it)
-			pFrameData->fTimecodes[*it] = NTV2_IS_ATC_VITC2_TIMECODE_INDEX(*it) ? tcF2 : tcF1;
-
-		if (pFrameData->VideoBuffer())	//	Burn current timecode into the video buffer...
-			mTCBurner.BurnTimeCode (pFrameData->VideoBuffer(), tcString.c_str(), 80);
-		TCDBG("F" << DEC0N(mCurrentFrame-1,6) << ": " << tcF1 << ": " << tcString);
-
-		//	If also playing audio...
-		if (pFrameData->AudioBuffer())	//	...then generate audio tone data for this frame...
-			pFrameData->fNumAudioBytes = AddTone(*pFrameData);	//	...and remember number of audio bytes to xfer
-
-		//	Every few seconds, change the test pattern and tone frequency...
-		const double currentTime (timeBase.FramesToSeconds(mCurrentFrame));
-		if (currentTime > timeOfLastSwitch + 4.0)
-		{
-			freqNdx = (freqNdx + 1) % gNumFrequencies;
-			testPatNdx = (testPatNdx + 1) % ULWord(mTestPatRasters.size());
-			mToneFrequency = gFrequencies[freqNdx];
-			timeOfLastSwitch = currentTime;
-			PLINFO("F" << DEC0N(mCurrentFrame,6) << ": " << tcString << ": tone=" << mToneFrequency << "Hz, pattern='" << tpNames.at(testPatNdx) << "'");
-		}	//	if time to switch test pattern & tone frequency
-
-		//	Signal that I'm done producing this FrameData, making it immediately available for transfer/playout...
-		mFrameDataRing.EndProduceNextBuffer();
-#endif
 	}	//	loop til mGlobalQuit goes true
 	PLNOTE("Thread completed: " << DEC(mCurrentFrame) << " frame(s) produced, " << DEC(badTally) << " failed");
 
 }	//	ProduceFrames
 
-
-uint32_t NTV2StreamPlayer::AddTone (NTV2FrameData & inFrameData)
-{
-	NTV2FrameRate	frameRate	(NTV2_FRAMERATE_INVALID);
-	NTV2AudioRate	audioRate	(NTV2_AUDIO_RATE_INVALID);
-	ULWord			numChannels	(0);
-
-	mDevice.GetFrameRate (frameRate, mConfig.fOutputChannel);
-	mDevice.GetAudioRate (audioRate, mAudioSystem);
-	mDevice.GetNumberAudioChannels (numChannels, mAudioSystem);
-
-	//	Set per-channel tone frequencies...
-	double	pFrequencies [kNumAudioChannelsMax];
-	pFrequencies[0] = (mToneFrequency / 2.0);
-	for (ULWord chan(1);  chan < numChannels;  chan++)
-		//	The 1.154782 value is the 16th root of 10, to ensure that if mToneFrequency is 2000,
-		//	that the calculated frequency of audio channel 16 will be 20kHz...
-		pFrequencies[chan] = pFrequencies[chan-1] * 1.154782;
-
-	//	Since audio on AJA devices use fixed sample rates (typically 48KHz), certain video frame rates will
-	//	necessarily result in some frames having more audio samples than others. GetAudioSamplesPerFrame is
-	//	called to calculate the correct sample count for the current frame...
-	const ULWord	numSamples		(::GetAudioSamplesPerFrame (frameRate, audioRate, mCurrentFrame));
-	const double	sampleRateHertz	(::GetAudioSamplesPerSecond(audioRate));
-
-	return ::AddAudioTone (	inFrameData.AudioBuffer(),	//	audio buffer to fill
-							mCurrentSample,				//	which sample for continuing the waveform
-							numSamples,					//	number of samples to generate
-							sampleRateHertz,			//	sample rate [Hz]
-							gAmplitudes,				//	per-channel amplitudes
-							pFrequencies,				//	per-channel tone frequencies [Hz]
-							31,							//	bits per sample
-							false,						//	don't byte-swap
-							numChannels);				//	number of audio channels to generate
-}	//	AddTone
 
 void NTV2StreamPlayer::GetStreamStatus (NTV2StreamChannel & outStatus)
 {
