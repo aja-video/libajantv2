@@ -82,7 +82,7 @@
 
 static uint32_t ntv2_debug_mask =
 //	NTV2_DEBUG_STATE |
-//	NTV2_DEBUG_STATISTICS |
+	NTV2_DEBUG_STATISTICS |
 //  NTV2_DEBUG_TRANSFER |
 //	NTV2_DEBUG_PAGE_MAP |
 //	NTV2_DEBUG_PROGRAM |
@@ -301,7 +301,6 @@ int dmaInit(ULWord deviceNumber)
 	ULWord iEng;
 	ULWord iCon;
 	ULWord iDes;
-    ULWord numStreams;
 //    Ntv2Status status;
 
 	if (pNTV2Params->_dmaNumEngines != 0)
@@ -348,7 +347,6 @@ int dmaInit(ULWord deviceNumber)
 		maxDescriptors = UHD2_TOT_DESCRIPTORS;
 	}
 
-    numStreams = 0;
 	for (iEng = 0; iEng < pNTV2Params->_dmaNumEngines; iEng++)
 	{
 		PDMA_ENGINE pDmaEngine = &pNTV2Params->_dmaEngine[iEng];
@@ -4797,8 +4795,8 @@ static void dmaXlnxInterrupt(PDMA_ENGINE pDmaEngine)
 	ULWord		valDmaStatus;
 	bool		done;
 
-	// streaming should not get here 
-	if (pDmaEngine->dmaStream)
+	// disable interrupt and stop dma engine
+	if (!pDmaEngine->dmaStream)
     {
         DisableXlnxDmaInterrupt(deviceNumber, xlnxC2H, xlnxIndex);
         StopXlnxDma(deviceNumber, xlnxC2H, xlnxIndex);
@@ -4820,6 +4818,17 @@ static void dmaXlnxInterrupt(PDMA_ENGINE pDmaEngine)
 	}
 
 	pDmaEngine->interruptCount++;
+
+	if (pDmaEngine->dmaStream)
+	{
+		valDmaStatus = ReadXlnxDmaStatus(deviceNumber, xlnxC2H, xlnxIndex);
+		if ((pDmaEngine->interruptCount < 10) || ((pDmaEngine->interruptCount % 60) == 0) || IsXlnxDmaError(valDmaStatus))
+		{
+			NTV2_MSG_PROGRAM("%s%d:%s%d: dmaXlnxInterrupt dma streaming count %lld  status %08x\n",
+                             DMA_MSG_ENGINE, pDmaEngine->interruptCount, valDmaStatus);
+		}
+		return;
+	}
 
 	// wait for engine stop (can take a couple of register reads)
 	done = WaitXlnxDmaActive(deviceNumber, xlnxC2H, xlnxIndex, false);
