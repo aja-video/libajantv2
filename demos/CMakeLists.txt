@@ -40,10 +40,10 @@ if(NOT AJANTV2_BUILD_OPENSOURCE)
     add_subdirectory(ntv2ccplayer)
 endif()
     
-if (AJA_BUILD_AMD)
+if (NOT AJA_DISABLE_AMD)
     add_subdirectory(AMD)
 endif()
-if (AJA_BUILD_NVIDIA)
+if (NOT AJA_DISABLE_NVIDIA)
     add_subdirectory(NVIDIA)
 endif()
 
