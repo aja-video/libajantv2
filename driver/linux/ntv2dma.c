@@ -81,13 +81,13 @@
 #define DMA_MSG_CONTEXT "ntv2dma", pDmaContext->deviceNumber, pDmaContext->engName, pDmaContext->engIndex, DMA_S2D(pDmaContext->dmaC2H), pDmaContext->conIndex
 
 static uint32_t ntv2_debug_mask =
-//	NTV2_DEBUG_STATE |
+	NTV2_DEBUG_STATE |
 	NTV2_DEBUG_STATISTICS |
-//  NTV2_DEBUG_TRANSFER |
-//	NTV2_DEBUG_PAGE_MAP |
-//	NTV2_DEBUG_PROGRAM |
-//	NTV2_DEBUG_VIDEO_SEGMENT |
-//	NTV2_DEBUG_DESCRIPTOR |
+    NTV2_DEBUG_TRANSFER |
+	NTV2_DEBUG_PAGE_MAP |
+	NTV2_DEBUG_PROGRAM |
+	NTV2_DEBUG_VIDEO_SEGMENT |
+	NTV2_DEBUG_DESCRIPTOR |
 	NTV2_DEBUG_INFO | 
 	NTV2_DEBUG_ERROR;
 
@@ -534,7 +534,12 @@ static PDMA_ENGINE getDmaEngine(ULWord deviceNumber, ULWord engIndex)
 static struct ntv2_stream* getDmaStream(ULWord deviceNumber, ULWord engIndex)
 {
 	NTV2PrivateParams *pNTV2Params = getNTV2Params(deviceNumber);
-	PDMA_ENGINE pDmaEngine = &pNTV2Params->_dmaEngine[engIndex];
+	PDMA_ENGINE pDmaEngine = getDmaEngine(deviceNumber, engIndex);
+
+    if (pDmaEngine == NULL)
+    {
+        return NULL;
+    }
     
     if (!pDmaEngine->dmaStream)
     {
@@ -626,6 +631,7 @@ int dmaEnable(ULWord deviceNumber)
 {
 	NTV2PrivateParams *pNTV2Params = getNTV2Params(deviceNumber);
 	PDMA_ENGINE pDmaEngine;
+    struct ntv2_stream* pDmaStream = NULL;
 	ULWord iEng;
 
 	if (pNTV2Params->_dmaNumEngines == 0)
@@ -646,6 +652,15 @@ int dmaEnable(ULWord deviceNumber)
 		}
 
 		pDmaEngine->dmaEnable = true;
+
+        if (pDmaEngine->dmaStream)
+        {
+            pDmaStream = getDmaStream(deviceNumber, iEng);
+            if (pDmaStream != NULL)
+            {
+                ntv2_stream_enable(pDmaStream);
+            }
+        }
 	}
 
 	NTV2_MSG_INFO("%s%d: dmaEnable end\n", DMA_MSG_DEVICE);
@@ -657,6 +672,7 @@ void dmaDisable(ULWord deviceNumber)
 {
 	NTV2PrivateParams *pNTV2Params = getNTV2Params(deviceNumber);
 	PDMA_ENGINE pDmaEngine;
+    struct ntv2_stream* pDmaStream = NULL;
 	ULWord timeoutJiffies = microsecondsToJiffies(DMA_TRANSFER_TIMEOUT/10);
 	ULWord iEng;
 
@@ -676,7 +692,16 @@ void dmaDisable(ULWord deviceNumber)
 		{
 			continue;
 		}
-
+#if 1
+        if (pDmaEngine->dmaStream)
+        {
+            pDmaStream = getDmaStream(deviceNumber, iEng);
+            if (pDmaStream != NULL)
+            {
+                ntv2_stream_disable(pDmaStream);
+            }
+        }
+#endif
 		// mark engine disabled
 		dmaEngineLock(pDmaEngine);
 		pDmaEngine->dmaEnable = false;
@@ -775,6 +800,7 @@ static bool dmaHardwareInit(PDMA_ENGINE pDmaEngine)
 		present = IsXlnxChannel(deviceNumber, pDmaEngine->dmaC2H, pDmaEngine->dmaIndex);
         value = XlnxReadChannelIdentifier(deviceNumber, pDmaEngine->dmaC2H, pDmaEngine->dmaIndex);
         pDmaEngine->dmaStream = IsXlnxChannelStream(value);
+        pDmaEngine->dmaStream = true; /* hack */
 #if 0 // does not work
         value = XlnxReadChannelAlignments(deviceNumber, pDmaEngine->dmaC2H, pDmaEngine->dmaIndex);
         if (value != 0)
@@ -5343,6 +5369,7 @@ int dmaOpsBufferRelease(struct ntv2_stream *stream, int index)
 
     if (buffer->released)
     {
+        dmaEngineUnlock(pDmaEngine);
         return NTV2_STREAM_OPS_SUCCESS;
     }
     
@@ -5362,9 +5389,12 @@ int dmaOpsBufferRelease(struct ntv2_stream *stream, int index)
     dmaEngineUnlock(pDmaEngine);
 
     dmaPageRootFree(deviceNumber, pPageBuffer);
-    
-    NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsBufferRelease address %016llx\n",
-                     DMA_MSG_ENGINE, (ULWord64)buffer->user_buffer.mBuffer.fUserSpacePtr);
+
+    if ((ULWord64)buffer->user_buffer.mBuffer.fUserSpacePtr != 0)
+    {
+        NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsBufferRelease address %016llx\n",
+                         DMA_MSG_ENGINE, (ULWord64)buffer->user_buffer.mBuffer.fUserSpacePtr);
+    }
     
     return NTV2_STREAM_OPS_SUCCESS;
 }
