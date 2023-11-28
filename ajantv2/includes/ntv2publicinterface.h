@@ -5498,7 +5498,9 @@ typedef enum
 													(_x_) == NTV2_TYPE_AJADEBUGLOGGING	||	\
 													(_x_) == NTV2_TYPE_AJABUFFERLOCK	||	\
 													(_x_) == NTV2_TYPE_AJABITSTREAM		||	\
-													(_x_) == NTV2_TYPE_AJADMASTREAM)
+													(_x_) == NTV2_TYPE_AJADMASTREAM		||	\
+													(_x_) == NTV2_TYPE_AJASTREAMCHANNEL	||	\
+													(_x_) == NTV2_TYPE_AJASTREAMBUFFER)
 
 		//	NTV2Buffer FLAGS
 		#define NTV2Buffer_ALLOCATED				BIT(0)		///< @brief Allocated using Allocate function?
@@ -8761,6 +8763,8 @@ typedef enum
 				**/
 				inline ULWord GetQueueDepth (void)		{return (ULWord)(mQueueCount - mReleaseCount);}
 
+				std::ostream &	Print (std::ostream & inOutStream) const;
+
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
 
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
@@ -8794,6 +8798,8 @@ typedef enum
 				///@}
 
 				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
+
+				std::ostream &	Print (std::ostream & inOutStream) const;
 
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
 

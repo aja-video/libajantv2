@@ -34,7 +34,7 @@
 
 //static uint32_t ntv2_debug_mask = 0xffffffff;
 //static uint32_t ntv2_user_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
-static uint32_t ntv2_active_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
+static uint32_t ntv2_active_mask = 0xffffffff; //NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
 
 static uint32_t queue_next(uint32_t index)
 {
@@ -244,7 +244,13 @@ Ntv2Status ntv2_stream_channel_initialize(struct ntv2_stream *ntv2_str, void* pO
     int status;
     uint32_t i;
 
-    if ((ntv2_str == NULL) || (pOwner == NULL) || (pChannel == NULL))
+    if (ntv2_str == NULL)
+    {
+        NTV2_MSG_STREAM_ERROR("%s: no stream\n", "ntv2_stream_channel_initialize");
+        return NTV2_STATUS_FAIL;        
+    }
+
+    if ((pOwner == NULL) || (pChannel == NULL))
     {
         NTV2_MSG_STREAM_ERROR("%s: initialize no owner or channel\n", ntv2_str->name);
         return NTV2_STATUS_FAIL;        
@@ -326,8 +332,14 @@ Ntv2Status ntv2_stream_channel_release(struct ntv2_stream *ntv2_str, void* pOwne
 {
     int status;
     int i;
+
+    if (ntv2_str == NULL)
+    {
+        NTV2_MSG_STREAM_ERROR("%s: no stream\n", "ntv2_stream_channel_release");
+        return NTV2_STATUS_FAIL;        
+    }
     
-    if ((ntv2_str == NULL) || (pChannel == NULL))
+    if (pChannel == NULL)
     {
         NTV2_MSG_STREAM_ERROR("%s: release no channel\n", ntv2_str->name);
         return NTV2_STATUS_FAIL;        
