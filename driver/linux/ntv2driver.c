@@ -1775,7 +1775,6 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 
             case NTV2_TYPE_AJASTREAMCHANNEL:
 				{
-                    MSG("%s: NTV2_TYPE_AJASTREAMCHANNEL\n", pNTV2Params->name);
 					returnCode = DoMessageStreamChannel (deviceNumber, pFileData, (NTV2StreamChannel*)pMessage);
 					if (returnCode)
 					{
@@ -4664,7 +4663,6 @@ int DoMessageStreamBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamBuffe
     int chn = 0;
     struct ntv2_stream* pStr = NULL;
     
-	
 	if (pBuffer == NULL)
 		return -EINVAL;
 

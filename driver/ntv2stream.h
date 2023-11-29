@@ -51,11 +51,13 @@ struct ntv2_stream_ops {
 struct ntv2_stream_buffer {
     NTV2StreamBuffer    user_buffer;
     void*               dma_buffer;
-    bool                prepared;
+    bool                queued;
     bool                linked;
+    bool                active;
     bool                completed;
     bool                flushed;
     bool                released;
+    bool                error;
     uint32_t            ds_index;
     uint32_t            ds_count;
 };

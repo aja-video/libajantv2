@@ -313,11 +313,6 @@ AJAStatus NTV2StreamPlayer::SetUpHostBuffers (void)
 				PLFAIL("Failed to allocate " << xHEX0N(mFormatDesc.GetTotalBytes(),8) << "-byte video buffer");
 				return AJA_STATUS_MEMORY;
 			}
-		if (frameData.fVideoBuffer)
-		{
-			frameData.fVideoBuffer.Fill(ULWord(0));
-            mDevice.DMABufferLock(frameData.fVideoBuffer, true);
-		}
 
 		//	Allocate a page-aligned audio buffer (if transmitting audio)
 		if (mConfig.WithAudio())
@@ -503,6 +498,15 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 	ULWord				goodQueue(0), badQueue(0), goodRelease(0), starves(0), noRoomWaits(0);
 	ULWord				status;
 
+	// clear lock and map the buffers
+	for (NTV2FrameDataArrayIter iterHost = mHostBuffers.begin(); iterHost != mHostBuffers.end(); iterHost++)
+	{
+		if (iterHost->fVideoBuffer)
+		{
+            mDevice.DMABufferLock(iterHost->fVideoBuffer, true);
+		}
+	}
+
 	//	Initialize and claim ownership of the stream
 	status = mDevice.StreamChannelInitialize(mConfig.fOutputChannel);
 	if (status != NTV2_STREAM_STATUS_SUCCESS)
@@ -529,6 +533,7 @@ void NTV2StreamPlayer::ConsumeFrames (void)
             {
 				//  Queue frame to stream
 				NTV2Buffer buffer(pFrameData->fVideoBuffer.GetHostAddress(0), pFrameData->fVideoBuffer.GetByteCount());
+//				cerr << "Host buffer: " << buffer << endl;
 				status = mDevice.StreamBufferQueue(mConfig.fOutputChannel,
 													buffer,
 													goodQueue,

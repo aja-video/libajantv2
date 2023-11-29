@@ -3470,7 +3470,7 @@ public:
 		@return		The queued buffer status.
     **/
 	AJA_VIRTUAL ULWord	StreamBufferQueue (const NTV2Channel inChannel,
-                                           NTV2Buffer inBuffer,
+                                           NTV2Buffer& inBuffer,
                                            ULWord64 bufferCookie,
                                            NTV2StreamBuffer& status);
 

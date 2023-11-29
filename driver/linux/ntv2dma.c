@@ -724,7 +724,7 @@ void dmaDisable(ULWord deviceNumber)
 		{
 			continue;
 		}
-#if 1
+
         if (pDmaEngine->dmaStream)
         {
             pDmaStream = getDmaStream(deviceNumber, iEng);
@@ -733,7 +733,7 @@ void dmaDisable(ULWord deviceNumber)
                 ntv2_stream_disable(pDmaStream);
             }
         }
-#endif
+
 		// mark engine disabled
 		dmaEngineLock(pDmaEngine);
 		pDmaEngine->dmaEnable = false;
@@ -5118,12 +5118,12 @@ int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index)
     PDMA_ENGINE pDmaEngine = (PDMA_ENGINE)stream->dma_engine;
     ULWord deviceNumber = stream->system_context->devNum;
     struct ntv2_stream_buffer* buffer = &stream->stream_buffers[index];
-    PFILE_DATA file = (PFILE_DATA)stream->owner;
+    PFILE_DATA file = NULL;
     PDMA_PAGE_ROOT page_root = NULL;
     PDMA_PAGE_BUFFER page_buffer = NULL;
 
-    // check prepared
-    if (buffer->prepared)
+    // check already queued
+    if (buffer->queued)
     {
         return NTV2_STREAM_OPS_SUCCESS;
     }
@@ -5131,23 +5131,28 @@ int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index)
     // lock the engine to reset the flags
     dmaEngineLock(pDmaEngine);
 
-    buffer->prepared = false;
+    buffer->queued = false;
     buffer->linked = false;
+    buffer->active = false;
     buffer->completed = false;
     buffer->flushed = false;
     buffer->released = false;
     buffer->dma_buffer = NULL;
+    buffer->ds_index = 0;
+    buffer->ds_count = 0;
 
     dmaEngineUnlock(pDmaEngine);
 
     // check file pointer
+    file = (PFILE_DATA)stream->owner;
     if (file == NULL)
     {
-        NTV2_MSG_ERROR("%s%d:%s%d: dmaOpsBufferPrepare null file pointer\n", DMA_MSG_ENGINE);
+        NTV2_MSG_ERROR("%s%d:%s%d: dmaOpsBufferPrepare null owner\n", DMA_MSG_ENGINE);
         return NTV2_STREAM_OPS_FAIL;
     }
 
     // check page root
+    page_root = &file->dmaRoot;
     if (page_root == NULL)
     {
         NTV2_MSG_ERROR("%s%d:%s%d: dmaOpsBufferPrepare null page root\n", DMA_MSG_ENGINE);
@@ -5187,14 +5192,8 @@ int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index)
     // lock the engine to set the flags
     dmaEngineLock(pDmaEngine);
 
-    buffer->prepared = true;
-    buffer->linked = false;
-    buffer->completed = false;
-    buffer->flushed = false;
-    buffer->released = false;
+    buffer->queued = true;
     buffer->dma_buffer = (void*)page_buffer;
-    buffer->ds_index = 0;
-    buffer->ds_count = 0;
     
     dmaEngineUnlock(pDmaEngine);
 
@@ -5227,7 +5226,7 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
     // get from page buffer
     buffer_from = &stream->stream_buffers[from_index];
     page_from = (PDMA_PAGE_BUFFER)buffer_from->dma_buffer;
-    if (!buffer_from->prepared ||
+    if (!buffer_from->queued ||
         buffer_from->flushed ||
         buffer_from->completed ||
         buffer_from->released ||
@@ -5270,7 +5269,7 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
     buffer_to = &stream->stream_buffers[to_index];
     page_to = (PDMA_PAGE_BUFFER)buffer_to->dma_buffer;
     
-    if (!buffer_to->prepared ||
+    if (!buffer_to->queued ||
         buffer_to->flushed ||
         buffer_to->completed ||
         buffer_to->released ||
@@ -5349,7 +5348,7 @@ int dmaOpsBufferComplete(struct ntv2_stream *stream, int index)
         return NTV2_STREAM_OPS_SUCCESS;
     }
 
-    if ((!buffer->prepared) || (buffer->flushed))
+    if ((!buffer->queued) || (buffer->flushed))
     {
         dmaEngineUnlock(pDmaEngine);
         return NTV2_STREAM_OPS_FAIL;
@@ -5380,7 +5379,7 @@ int dmaOpsBufferFlush(struct ntv2_stream *stream, int index)
         return NTV2_STREAM_OPS_SUCCESS;
     }
 
-    if (!buffer->prepared)
+    if (!buffer->queued)
     {
         dmaEngineUnlock(pDmaEngine);
         return NTV2_STREAM_OPS_FAIL;
