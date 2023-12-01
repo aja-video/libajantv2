@@ -245,7 +245,8 @@ bool CNTV2Card::GetSerialNumberString (string & outSerialNumberString)
 		ReadRegister(kRegReserved57, serialArray[1]);
 		ReadRegister(kRegReserved54, serialArray[2]);
 		ReadRegister(kRegReserved55, serialArray[3]);
-        
+
+		outSerialNumberString.clear();
         for (int serialIndex = 0; serialIndex < 4; serialIndex++)
         {
             if (serialArray[serialIndex] != 0xffffffff)
@@ -253,7 +254,7 @@ bool CNTV2Card::GetSerialNumberString (string & outSerialNumberString)
                 for (int i = 0; i < 4; i++)
                 {
                     char tempChar = ((serialArray[serialIndex] >> (i*8)) & 0xff);
-                    if (tempChar != '.')
+                    if (tempChar > 0 && tempChar != '.')
                         outSerialNumberString.push_back(tempChar);
                 }
             }
