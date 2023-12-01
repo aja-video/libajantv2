@@ -99,7 +99,7 @@ static void channel_status(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pCha
         }
         
         // get status
-        pChannel->mBufferCookie = 0;
+        pChannel->mBufferCookie = ntv2_str->stream_buffers[ntv2_str->active_index].user_buffer.mBufferCookie;
         pChannel->mStartTime = 0;
         pChannel->mStopTime = 0;
         pChannel->mQueueCount = ntv2_str->queue_count;
@@ -133,10 +133,6 @@ static void buffer_status(struct ntv2_stream_buffer *ntv2_buf, NTV2StreamBuffer*
         if (ntv2_buf->linked)
         {
             pBuffer->mBufferState |= NTV2_STREAM_BUFFER_STATE_LINKED;
-        }            
-        if (ntv2_buf->active)
-        {
-            pBuffer->mBufferState |= NTV2_STREAM_BUFFER_STATE_ACTIVE;
         }            
         if (ntv2_buf->completed)
         {
@@ -427,7 +423,7 @@ Ntv2Status ntv2_stream_channel_release(struct ntv2_stream *ntv2_str, void* pOwne
         if (status != NTV2_STREAM_OPS_SUCCESS)
         {
             NTV2_MSG_STREAM_ERROR("%s: release buffer failed\n", ntv2_str->name);
-        }            
+        }        
     }
 
     // release all waiting clients
@@ -988,12 +984,12 @@ Ntv2Status ntv2_stream_buffer_release(struct ntv2_stream *ntv2_str, void* pOwner
     }
 
     // check stream head for release
-    if (!ntv2_str->stream_buffers[ntv2_str->head_index].queued ||
-        !ntv2_str->stream_buffers[ntv2_str->head_index].completed ||
-        !ntv2_str->stream_buffers[ntv2_str->head_index].flushed)
+    if (ntv2_str->stream_buffers[ntv2_str->head_index].queued &&
+        !(ntv2_str->stream_buffers[ntv2_str->head_index].completed ||
+          ntv2_str->stream_buffers[ntv2_str->head_index].flushed))
     {
         buffer_status(NULL, pBuffer);
-        pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_RESOURCE;
+        pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_STATE;
         ntv2SemaphoreUp(&ntv2_str->state_sema);
         return NTV2_STATUS_SUCCESS;
     }
@@ -1003,7 +999,7 @@ Ntv2Status ntv2_stream_buffer_release(struct ntv2_stream *ntv2_str, void* pOwner
     if (status != NTV2_STREAM_OPS_SUCCESS)
     {
         buffer_status(NULL, pBuffer);
-        pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_RESOURCE;
+        pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_STATE;
         ntv2SemaphoreUp(&ntv2_str->state_sema);
         NTV2_MSG_STREAM_ERROR("%s: buffer release failed\n", ntv2_str->name);
         return status;
@@ -1013,17 +1009,9 @@ Ntv2Status ntv2_stream_buffer_release(struct ntv2_stream *ntv2_str, void* pOwner
     buffer_status(&ntv2_str->stream_buffers[ntv2_str->head_index], pBuffer);
     pBuffer->mStatus = NTV2_STREAM_STATUS_SUCCESS;
 
-    // clear buffer
-    ntv2_str->stream_buffers[ntv2_str->head_index].queued = false;
-    ntv2_str->stream_buffers[ntv2_str->head_index].linked = false;
-    ntv2_str->stream_buffers[ntv2_str->head_index].active = false;
-    ntv2_str->stream_buffers[ntv2_str->head_index].completed = false;
-    ntv2_str->stream_buffers[ntv2_str->head_index].flushed = false;
-    ntv2_str->stream_buffers[ntv2_str->head_index].released = true;
-    ntv2_str->stream_buffers[ntv2_str->head_index].error = false;
-
     // increment head
     ntv2_str->head_index = queue_next(ntv2_str->head_index);
+    ntv2_str->release_count++;
     
     ntv2SemaphoreUp(&ntv2_str->state_sema);
     return NTV2_STATUS_SUCCESS;

@@ -62,9 +62,6 @@ NTV2StreamPlayer::NTV2StreamPlayer (const PlayerConfig & inConfig)
 		mDeviceID			(DEVICE_ID_INVALID),
 		mSavedTaskMode		(NTV2_TASK_MODE_INVALID),
 		mCurrentFrame		(0),
-		mCurrentSample		(0),
-		mToneFrequency		(440.0),
-		mAudioSystem		(NTV2_AUDIOSYSTEM_INVALID),
 		mFormatDesc			(),
 		mGlobalQuit			(false),
 		mTCBurner			(),
@@ -148,9 +145,6 @@ AJAStatus NTV2StreamPlayer::Init (void)
 
 	//	Set up the video and audio...
 	status = SetUpVideo();
-	if (AJA_FAILURE(status))
-		return status;
-	status = mConfig.WithAudio() ? SetUpAudio() : AJA_STATUS_SUCCESS;
 	if (AJA_FAILURE(status))
 		return status;
 
@@ -248,6 +242,7 @@ AJAStatus NTV2StreamPlayer::SetUpVideo (void)
 }	//	SetUpVideo
 
 
+<<<<<<< HEAD
 AJAStatus NTV2StreamPlayer::SetUpAudio (void)
 {
 	uint16_t numAudioChannels (mDevice.features().GetMaxAudioChannels());
@@ -292,6 +287,8 @@ AJAStatus NTV2StreamPlayer::SetUpAudio (void)
 }	//	SetUpAudio
 
 
+=======
+>>>>>>> 2e26bb29 (testing streaming)
 AJAStatus NTV2StreamPlayer::SetUpHostBuffers (void)
 {
 	CNTV2DemoCommon::SetDefaultPageSize();	//	Set host-specific page size
@@ -308,24 +305,13 @@ AJAStatus NTV2StreamPlayer::SetUpHostBuffers (void)
 
 		//	Allocate a page-aligned video buffer
 		if (mConfig.WithVideo())
+		{
 			if (!frameData.fVideoBuffer.Allocate (mFormatDesc.GetTotalBytes(), BUFFER_PAGE_ALIGNED))
 			{
 				PLFAIL("Failed to allocate " << xHEX0N(mFormatDesc.GetTotalBytes(),8) << "-byte video buffer");
 				return AJA_STATUS_MEMORY;
 			}
-
-		//	Allocate a page-aligned audio buffer (if transmitting audio)
-		if (mConfig.WithAudio())
-			if (!frameData.fAudioBuffer.Allocate (gAudMaxSizeBytes, BUFFER_PAGE_ALIGNED))
-			{
-				PLFAIL("Failed to allocate " << xHEX0N(gAudMaxSizeBytes,8) << "-byte audio buffer");
-				return AJA_STATUS_MEMORY;
-			}
-		if (frameData.fAudioBuffer)
-		{
-			frameData.fAudioBuffer.Fill(ULWord(0));
-			mDevice.DMABufferLock(frameData.fAudioBuffer, /*alsoPreLockSGL*/true);
-        }
+		}
 		mFrameDataRing.Add (&frameData);
 	}	//	for each NTV2FrameData
 
@@ -433,9 +419,6 @@ bool NTV2StreamPlayer::RouteOutputSignal (void)
 				connectFailures++;
 			mDevice.SetSDIOutputStandard (chan, outputStandard);
 			//	NOTE: No need to send VITC2 with VITC1 (for "i" formats) -- firmware does this automatically
-
-			if (mConfig.WithAudio())
-				mDevice.SetSDIOutputAudioSystem (chan, mAudioSystem);	//	Ensure SDIOut embedder gets audio from mAudioSystem
 		}	//	for each SDI output spigot
 
 		//	And connect analog video output, if the device has one...
@@ -498,7 +481,7 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 	ULWord				goodQueue(0), badQueue(0), goodRelease(0), starves(0), noRoomWaits(0);
 	ULWord				status;
 
-	// clear lock and map the buffers
+	// lock and map the buffers
 	for (NTV2FrameDataArrayIter iterHost = mHostBuffers.begin(); iterHost != mHostBuffers.end(); iterHost++)
 	{
 		if (iterHost->fVideoBuffer)
@@ -526,7 +509,7 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 			return;
 		}
 
-		if (strStatus.GetQueueDepth() < 8)
+		if (strStatus.GetQueueDepth() < 6)
 		{
 			NTV2FrameData *	pFrameData (mFrameDataRing.StartConsumeNextBuffer());
 			if (pFrameData)
@@ -639,34 +622,68 @@ void NTV2StreamPlayer::ProducerThreadStatic (AJAThread * pThread, void * pContex
 
 void NTV2StreamPlayer::ProduceFrames (void)
 {
-	ULWord	testPatNdx(0), badTally(0);
+	ULWord	freqNdx(0), testPatNdx(0), badTally(0);
+	double	timeOfLastSwitch	(0.0);
 
 	const AJATimeBase		timeBase		(CNTV2DemoCommon::GetAJAFrameRate(::GetNTV2FrameRateFromVideoFormat(mConfig.fVideoFormat)));
 	const NTV2StringList	tpNames			(NTV2TestPatternGen::getTestPatternNames());
+	const bool				isInterlace		(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mConfig.fVideoFormat));
+	const bool				isPAL			(NTV2_IS_PAL_VIDEO_FORMAT(mConfig.fVideoFormat));
+	const NTV2FrameRate		ntv2FrameRate	(::GetNTV2FrameRateFromVideoFormat(mConfig.fVideoFormat));
+	const TimecodeFormat	tcFormat		(CNTV2DemoCommon::NTV2FrameRate2TimecodeFormat(ntv2FrameRate));
 
 	PLNOTE("Thread started");
-	NTV2FrameData *	pFrameData (mFrameDataRing.StartProduceNextBuffer());
-	mFrameDataRing.EndProduceNextBuffer();
+
 	while (!mGlobalQuit)
 	{
-#if 0
 		NTV2FrameData *	pFrameData (mFrameDataRing.StartProduceNextBuffer());
 		if (!pFrameData)
-		{	badTally++;			//	No frame available!
+		{	
+			badTally++;			//	No frame available!
 			AJATime::Sleep(10);	//	Wait a bit for the consumer thread to free one up for me...
 			continue;			//	...then try again
 		}
-#endif
+
 		//	Copy fresh, unmodified, pre-rendered test pattern into this frame's video buffer...
 		pFrameData->fVideoBuffer.CopyFrom (mTestPatRasters.at(testPatNdx),
 											/*srcOffset*/ 0,
 											/*dstOffset*/ 0,
 											/*byteCount*/ pFrameData->fVideoBuffer.GetByteCount());
-		testPatNdx = (testPatNdx + 1) % ULWord(mTestPatRasters.size());
-		AJATime::Sleep(5000);
-	}	//	loop til mGlobalQuit goes true
-	PLNOTE("Thread completed: " << DEC(mCurrentFrame) << " frame(s) produced, " << DEC(badTally) << " failed");
+	
+		const	CRP188	rp188Info (mCurrentFrame++, 0, 0, 10, tcFormat);
+		NTV2_RP188		tcF1, tcF2;
+		string			tcString;
 
+		rp188Info.GetRP188Reg(tcF1);
+		rp188Info.GetRP188Str(tcString);
+
+		//	Include timecode in output signal...
+		tcF2 = tcF1;
+		if (isInterlace)
+		{	//	Set bit 27 of Hi word (PAL) or Lo word (NTSC)
+			if (isPAL) tcF2.fHi |=  BIT(27);	else tcF2.fLo |=  BIT(27);
+		}
+
+		if (pFrameData->VideoBuffer())	//	Burn current timecode into the video buffer...
+			mTCBurner.BurnTimeCode (pFrameData->VideoBuffer(), tcString.c_str(), 80);
+		TCDBG("F" << DEC0N(mCurrentFrame-1,6) << ": " << tcF1 << ": " << tcString);
+
+		//	Every few seconds, change the test pattern and tone frequency...
+		const double currentTime (timeBase.FramesToSeconds(mCurrentFrame));
+		if (currentTime > timeOfLastSwitch + 4.0)
+		{
+			freqNdx = (freqNdx + 1) % gNumFrequencies;
+			testPatNdx = (testPatNdx + 1) % ULWord(mTestPatRasters.size());
+			mToneFrequency = gFrequencies[freqNdx];
+			timeOfLastSwitch = currentTime;
+			PLINFO("F" << DEC0N(mCurrentFrame,6) << ": " << tcString << "pattern='" << tpNames.at(testPatNdx) << "'");
+		}	//	if time to switch test pattern
+
+		//	Signal that I'm done producing this FrameData, making it immediately available for transfer/playout...
+		mFrameDataRing.EndProduceNextBuffer();
+	}	//	loop til mGlobalQuit goes true
+
+	PLNOTE("Thread completed: " << DEC(mCurrentFrame) << " frame(s) produced, " << DEC(badTally) << " failed");
 }	//	ProduceFrames
 
 

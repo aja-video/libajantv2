@@ -53,7 +53,6 @@ struct ntv2_stream_buffer {
     void*               dma_buffer;
     bool                queued;
     bool                linked;
-    bool                active;
     bool                completed;
     bool                flushed;
     bool                released;

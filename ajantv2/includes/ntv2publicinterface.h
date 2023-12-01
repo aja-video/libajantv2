@@ -8715,11 +8715,10 @@ typedef enum
 		// Stream buffer state flags
 		#define NTV2_STREAM_BUFFER_STATE_QUEUED			BIT(0)			///< @brief Used in ::NTV2StreamBuffer buffer queued
 		#define NTV2_STREAM_BUFFER_STATE_LINKED			BIT(1)			///< @brief Used in ::NTV2StreamBuffer buffer linked
-		#define NTV2_STREAM_BUFFER_STATE_ACTIVE			BIT(2)			///< @brief Used in ::NTV2StreamBuffer buffer transfering
-		#define NTV2_STREAM_BUFFER_STATE_COMPLETED		BIT(3)			///< @brief Used in ::NTV2StreamBuffer buffer completed
-		#define NTV2_STREAM_BUFFER_STATE_FLUSHED		BIT(4)			///< @brief Used in ::NTV2StreamBuffer buffer flushed
-		#define NTV2_STREAM_BUFFER_STATE_RELEASED		BIT(5)			///< @brief Used in ::NTV2StreamBuffer buffer released
-		#define NTV2_STREAM_BUFFER_STATE_ERROR			BIT(6)			///< @brief Used in ::NTV2StreamBuffer buffer error
+		#define NTV2_STREAM_BUFFER_STATE_COMPLETED		BIT(2)			///< @brief Used in ::NTV2StreamBuffer buffer completed
+		#define NTV2_STREAM_BUFFER_STATE_FLUSHED		BIT(3)			///< @brief Used in ::NTV2StreamBuffer buffer flushed
+		#define NTV2_STREAM_BUFFER_STATE_RELEASED		BIT(4)			///< @brief Used in ::NTV2StreamBuffer buffer released
+		#define NTV2_STREAM_BUFFER_STATE_ERROR			BIT(5)			///< @brief Used in ::NTV2StreamBuffer buffer error
 
 		// Stream action status flags
 		#define NTV2_STREAM_STATUS_SUCCESS				BIT(0)			///< @brief Used in ::NTV2Stream success

@@ -2554,6 +2554,15 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 					OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_CHANNEL4);
 				}
 			}
+/// HACK 
+            if ((pNTV2Params->_interruptCount[eVerticalInterrupt] % 100) == 0)
+            {
+                struct ntv2_stream* pDmaStream = pNTV2Params->m_pDmaStream[0];
+                if (pDmaStream != NULL)
+                {
+                    ntv2_stream_channel_advance(pDmaStream);
+                }
+            }
 		}
 
 		if ( statusRegister & kIntOutput2VBLActive )

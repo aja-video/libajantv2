@@ -56,7 +56,6 @@ class NTV2StreamPlayer
 	//	Protected Instance Methods
 	protected:
 		virtual AJAStatus	SetUpVideo (void);				///< @brief	Performs all video setup.
-		virtual AJAStatus	SetUpAudio (void);				///< @brief	Performs all audio setup.
 		virtual bool		RouteOutputSignal (void);		///< @brief	Performs all widget/signal routing for playout.
 		virtual AJAStatus	SetUpHostBuffers (void);		///< @brief	Sets up my host video & audio buffers.
 		virtual AJAStatus	SetUpTestPatternBuffers (void);	///< @brief	Creates my test pattern buffers.

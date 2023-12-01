@@ -5133,10 +5133,10 @@ int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index)
 
     buffer->queued = false;
     buffer->linked = false;
-    buffer->active = false;
     buffer->completed = false;
     buffer->flushed = false;
     buffer->released = false;
+    buffer->error = false;
     buffer->dma_buffer = NULL;
     buffer->ds_index = 0;
     buffer->ds_count = 0;
@@ -5430,8 +5430,14 @@ int dmaOpsBufferRelease(struct ntv2_stream *stream, int index)
         }
     }
 
-    buffer->released = true;
+    // clear buffer
     buffer->dma_buffer = NULL;
+    buffer->queued = false;
+    buffer->linked = false;
+    buffer->completed = false;
+    buffer->flushed = false;
+    buffer->released = true;
+    buffer->error = false;
 
     dmaEngineUnlock(pDmaEngine);
 
