@@ -83,6 +83,9 @@ struct ntv2_stream {
     uint32_t                    next_index;         // next active buffer
     uint64_t                    queue_count;        // buffers queued
     uint64_t                    release_count;      // buffers released
+    uint64_t                    active_count;       // buffers transferred while active
+    uint64_t                    repeat_count;       // buffers repeated while active
+    uint64_t                    idle_count;         // buffers transferred while idle
 };
 
 

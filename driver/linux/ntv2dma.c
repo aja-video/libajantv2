@@ -5079,21 +5079,21 @@ int dmaOpsStreamAdvance(struct ntv2_stream *stream)
     // lock the engine
     dmaEngineLock(pDmaEngine);
 
-    if ((stream->engine_state != ntv2_stream_state_idle) &&
-        (stream->engine_state != ntv2_stream_state_active))
+    // check the stream state
+    if ((stream->stream_state != ntv2_stream_state_idle) &&
+        (stream->stream_state != ntv2_stream_state_active))
     {
         dmaEngineUnlock(pDmaEngine);
         return NTV2_STREAM_OPS_FAIL;
     }
     
+    // update engine state
     if (stream->stream_state == ntv2_stream_state_active)
     {
         if (stream->engine_state != ntv2_stream_state_active)
         {
             NTV2_MSG_STATE("%s%d:%s%d: dmaOpsStreamAdvance engine state active\n", DMA_MSG_ENGINE);
-        }
-        
-        // update engine state
+        }       
         stream->engine_state = ntv2_stream_state_active;
     }
     else
@@ -5102,8 +5102,6 @@ int dmaOpsStreamAdvance(struct ntv2_stream *stream)
         {
             NTV2_MSG_STATE("%s%d:%s%d: dmaOpsStreamAdvance engine state idle\n", DMA_MSG_ENGINE);
         }
-
-        // update engine state
         stream->engine_state = ntv2_stream_state_idle;
     }
         

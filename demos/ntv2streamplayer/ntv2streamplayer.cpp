@@ -18,8 +18,6 @@
 
 using namespace std;
 
-#define NTV2_BUFFER_LOCKING		//	Define this to pre-lock video/audio buffers in kernel
-
 //	Convenience macros for EZ logging:
 #define	TCFAIL(_expr_)	AJA_sERROR  (AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
 #define	TCWARN(_expr_)	AJA_sWARNING(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
@@ -66,7 +64,6 @@ NTV2StreamPlayer::NTV2StreamPlayer (const PlayerConfig & inConfig)
 		mGlobalQuit			(false),
 		mTCBurner			(),
 		mHostBuffers		(),
-		mFrameDataRing		(),
 		mTestPatRasters		()
 {
 }
@@ -242,66 +239,16 @@ AJAStatus NTV2StreamPlayer::SetUpVideo (void)
 }	//	SetUpVideo
 
 
-<<<<<<< HEAD
-AJAStatus NTV2StreamPlayer::SetUpAudio (void)
-{
-	uint16_t numAudioChannels (mDevice.features().GetMaxAudioChannels());
-
-	//	If there are 2048 pixels on a line instead of 1920, reduce the number of audio channels
-	//	This is because HANC is narrower, and has space for only 8 channels
-	if (NTV2_IS_2K_1080_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  numAudioChannels > 8)
-		numAudioChannels = 8;
-
-	mAudioSystem = NTV2_AUDIOSYSTEM_1;										//	Use NTV2_AUDIOSYSTEM_1...
-	if (mDevice.features().GetNumAudioSystems() > 1)						//	...but if the device has more than one audio system...
-		mAudioSystem = ::NTV2ChannelToAudioSystem(mConfig.fOutputChannel);	//	...base it on the channel
-	//	However, there are a few older devices that have only 1 audio system,
-	//	yet 2 frame stores (or must use channel 2 for playout)...
-	if (!mDevice.features().CanDoFrameStore1Display())
-		mAudioSystem = NTV2_AUDIOSYSTEM_1;
-
-	mDevice.SetNumberAudioChannels (numAudioChannels, mAudioSystem);
-	mDevice.SetAudioRate (NTV2_AUDIO_48K, mAudioSystem);
-
-	//	How big should the on-device audio buffer be?   1MB? 2MB? 4MB? 8MB?
-	//	For this demo, 4MB will work best across all platforms (Windows, Mac & Linux)...
-	mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, mAudioSystem);
-
-	//	Set the SDI output audio embedders to embed audio samples from the output of mAudioSystem...
-	mDevice.SetSDIOutputAudioSystem (mConfig.fOutputChannel, mAudioSystem);
-	mDevice.SetSDIOutputDS2AudioSystem (mConfig.fOutputChannel, mAudioSystem);
-
-	//	If the last app using the device left it in E-E mode (input passthru), then loopback
-	//	must be disabled --- otherwise the output audio will be pass-thru SDI input audio...
-	mDevice.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_OFF, mAudioSystem);
-
-	if (!mConfig.fDoMultiFormat  &&  mDevice.features().GetNumHDMIVideoOutputs())
-	{
-		mDevice.SetHDMIOutAudioRate(NTV2_AUDIO_48K);
-		mDevice.SetHDMIOutAudioFormat(NTV2_AUDIO_FORMAT_LPCM);
-		mDevice.SetHDMIOutAudioSource8Channel(NTV2_AudioChannel1_8, mAudioSystem);
-	}
-
-	return AJA_STATUS_SUCCESS;
-
-}	//	SetUpAudio
-
-
-=======
->>>>>>> 2e26bb29 (testing streaming)
 AJAStatus NTV2StreamPlayer::SetUpHostBuffers (void)
 {
 	CNTV2DemoCommon::SetDefaultPageSize();	//	Set host-specific page size
-
-	//	Let my circular buffer know when it's time to quit...
-	mFrameDataRing.SetAbortFlag (&mGlobalQuit);
 
 	//	Allocate and add each in-host NTV2FrameData to my circular buffer member variable...
 	mHostBuffers.reserve(CIRCULAR_BUFFER_SIZE);
 	while (mHostBuffers.size() < CIRCULAR_BUFFER_SIZE)
 	{
-		mHostBuffers.push_back(NTV2FrameData());		//	Make a new NTV2FrameData...
-		NTV2FrameData & frameData(mHostBuffers.back());	//	...and get a reference to it
+		mHostBuffers.push_back(FrameData());		//	Make a new NTV2FrameData...
+		FrameData & frameData(mHostBuffers.back());	//	...and get a reference to it
 
 		//	Allocate a page-aligned video buffer
 		if (mConfig.WithVideo())
@@ -312,8 +259,11 @@ AJAStatus NTV2StreamPlayer::SetUpHostBuffers (void)
 				return AJA_STATUS_MEMORY;
 			}
 		}
-		mFrameDataRing.Add (&frameData);
+		frameData.fDataReady = false;
 	}	//	for each NTV2FrameData
+
+	mProducerIndex = 0;
+	mConsumerIndex = 0;
 
 	return AJA_STATUS_SUCCESS;
 
@@ -478,11 +428,11 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 {
 	NTV2StreamChannel	strStatus;
 	NTV2StreamBuffer	bfrStatus;
-	ULWord				goodQueue(0), badQueue(0), goodRelease(0), starves(0), noRoomWaits(0);
+	ULWord				goodQueue(0), badQueue(0), goodRelease(0), badRelease(0), starves(0), noRoomWaits(0);
 	ULWord				status;
 
 	// lock and map the buffers
-	for (NTV2FrameDataArrayIter iterHost = mHostBuffers.begin(); iterHost != mHostBuffers.end(); iterHost++)
+	for (FrameDataArrayIter iterHost = mHostBuffers.begin(); iterHost != mHostBuffers.end(); iterHost++)
 	{
 		if (iterHost->fVideoBuffer)
 		{
@@ -511,19 +461,19 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 
 		if (strStatus.GetQueueDepth() < 6)
 		{
-			NTV2FrameData *	pFrameData (mFrameDataRing.StartConsumeNextBuffer());
-			if (pFrameData)
+			FrameData *	pFrameData (&mHostBuffers[mConsumerIndex]);
+			if (pFrameData->fDataReady)
             {
 				//  Queue frame to stream
 				NTV2Buffer buffer(pFrameData->fVideoBuffer.GetHostAddress(0), pFrameData->fVideoBuffer.GetByteCount());
-//				cerr << "Host buffer: " << buffer << endl;
 				status = mDevice.StreamBufferQueue(mConfig.fOutputChannel,
 													buffer,
-													goodQueue,
+													mConsumerIndex,
 													bfrStatus);
 				if (status == NTV2_STREAM_STATUS_SUCCESS)
 				{
 					goodQueue++;
+					mConsumerIndex = (mConsumerIndex + 1) % CIRCULAR_BUFFER_SIZE;
 				}
 				else
 				{
@@ -557,8 +507,15 @@ void NTV2StreamPlayer::ConsumeFrames (void)
         status = mDevice.StreamBufferRelease(mConfig.fOutputChannel, bfrStatus);
 		while (status == NTV2_STREAM_STATUS_SUCCESS)
 		{
-			mFrameDataRing.EndConsumeNextBuffer();
-			goodRelease++;
+			if (bfrStatus.mBufferCookie < CIRCULAR_BUFFER_SIZE)
+			{
+				mHostBuffers[bfrStatus.mBufferCookie].fDataReady = false;
+				goodRelease++;
+			}
+			else
+			{
+				badRelease++;
+			}
             status = mDevice.StreamBufferRelease(mConfig.fOutputChannel, bfrStatus);
 		}
 
@@ -578,8 +535,16 @@ void NTV2StreamPlayer::ConsumeFrames (void)
     status = mDevice.StreamBufferRelease(mConfig.fOutputChannel, bfrStatus);
     while (status == NTV2_STREAM_STATUS_SUCCESS)
     {
-        mFrameDataRing.EndConsumeNextBuffer();
-        goodRelease++;
+		if (bfrStatus.mBufferCookie < CIRCULAR_BUFFER_SIZE)
+		{
+		//	Signal that I'm done consuming this FrameData, making it immediately available for more data...
+			mHostBuffers[bfrStatus.mBufferCookie].fDataReady = false;
+			goodRelease++;
+		}
+		else
+		{
+			badRelease++;
+		}
         status = mDevice.StreamBufferRelease(mConfig.fOutputChannel, bfrStatus);
     }
 
@@ -636,8 +601,8 @@ void NTV2StreamPlayer::ProduceFrames (void)
 
 	while (!mGlobalQuit)
 	{
-		NTV2FrameData *	pFrameData (mFrameDataRing.StartProduceNextBuffer());
-		if (!pFrameData)
+		FrameData *	pFrameData (&mHostBuffers[mProducerIndex]);
+		if (pFrameData->fDataReady)
 		{	
 			badTally++;			//	No frame available!
 			AJATime::Sleep(10);	//	Wait a bit for the consumer thread to free one up for me...
@@ -664,8 +629,10 @@ void NTV2StreamPlayer::ProduceFrames (void)
 			if (isPAL) tcF2.fHi |=  BIT(27);	else tcF2.fLo |=  BIT(27);
 		}
 
-		if (pFrameData->VideoBuffer())	//	Burn current timecode into the video buffer...
-			mTCBurner.BurnTimeCode (pFrameData->VideoBuffer(), tcString.c_str(), 80);
+		if (pFrameData->fVideoBuffer.GetHostAddress(0))
+		{	//	Burn current timecode into the video buffer...
+			mTCBurner.BurnTimeCode (pFrameData->fVideoBuffer.GetHostAddress(0), tcString.c_str(), 80);
+		}
 		TCDBG("F" << DEC0N(mCurrentFrame-1,6) << ": " << tcF1 << ": " << tcString);
 
 		//	Every few seconds, change the test pattern and tone frequency...
@@ -680,7 +647,8 @@ void NTV2StreamPlayer::ProduceFrames (void)
 		}	//	if time to switch test pattern
 
 		//	Signal that I'm done producing this FrameData, making it immediately available for transfer/playout...
-		mFrameDataRing.EndProduceNextBuffer();
+		pFrameData->fDataReady = true;
+		mProducerIndex = (mProducerIndex + 1) % CIRCULAR_BUFFER_SIZE;
 	}	//	loop til mGlobalQuit goes true
 
 	PLNOTE("Thread completed: " << DEC(mCurrentFrame) << " frame(s) produced, " << DEC(badTally) << " failed");

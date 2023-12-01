@@ -8742,8 +8742,9 @@ typedef enum
 				LWord64			mStopTime;			///< @brief Stream stop time
 				ULWord64		mQueueCount;		///< @brief Number of buffers queued
 				ULWord64		mReleaseCount;		///< @brief Number of buffers released
-				ULWord64		mActiveCount;		///< @brief Number of buffers active
-				ULWord64		mRepeatCount;		///< @brief Number of buffer repeats
+				ULWord64		mActiveCount;		///< @brief Number of active transfers
+				ULWord64		mRepeatCount;		///< @brief Number of repeated transfers
+				ULWord64		mIdleCount;			///< @brief Number of idle transfers
 				ULWord			mReserved[32];		///< @brief Reserved for future expansion.
 			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
 
@@ -8782,10 +8783,10 @@ typedef enum
 				ULWord			mBufferState;		///< @brief Buffer state
 				LWord64			mQueueTime;			///< @brief Queue time (queued to driver by app)
 				LWord64			mLinkTime;			///< @brief Link time (linked into stream by irq)
-				LWord64			mStartTime;			///< @brief Active start time (on air interrupt time)
-				LWord64			mStopTime;			///< @brief Active stop time (off air interrupt time)
+				LWord64			mStartTime;			///< @brief Transfer start time (on air interrupt time)
+				LWord64			mStopTime;			///< @brief Transfer stop time (off air interrupt time)
 				LWord64			mFlushTime;			///< @brief Flush time (if flushed before on air)
-				ULWord64		mRepeatCount;		///< @brief Number of repeat cycles
+				ULWord64		mTransferCount;		///< @brief Number of transfers
 				ULWord			mReserved[32];		///< @brief Reserved for future expansion.
 			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
 

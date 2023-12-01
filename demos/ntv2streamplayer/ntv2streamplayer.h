@@ -85,7 +85,14 @@ class NTV2StreamPlayer
 
 	//	Private Member Data
 	private:
-		typedef std::vector<NTV2Buffer>	NTV2Buffers;
+		struct FrameData
+		{
+			NTV2Buffer	fVideoBuffer;
+			bool		fDataReady;
+		};
+		typedef std::vector<FrameData> 		FrameDataArray;
+		typedef FrameDataArray::iterator	FrameDataArrayIter;
+		typedef std::vector<NTV2Buffer>		NTV2Buffers;
 
 		PlayerConfig		mConfig;			///< @brief	My operating configuration
 		AJAThread			mConsumerThread;	///< @brief	My playout (consumer) thread object
@@ -101,8 +108,9 @@ class NTV2StreamPlayer
 
 		bool				mGlobalQuit;		///< @brief	Set "true" to gracefully stop
 		AJATimeCodeBurn		mTCBurner;			///< @brief	My timecode burner
-		NTV2FrameDataArray	mHostBuffers;		///< @brief	My host buffers
-		FrameDataRingBuffer	mFrameDataRing;		///< @brief	AJACircularBuffer that controls frame data access by producer/consumer threads
+		FrameDataArray		mHostBuffers;		///< @brief	My host buffers
+		ULWord				mProducerIndex;		///< @brief	Producer frame index
+		ULWord				mConsumerIndex;		///< @brief	Consumer frame index
 		NTV2Buffers			mTestPatRasters;	///< @brief	Pre-rendered test pattern rasters
 
 };	//	NTV2StreamPlayer
