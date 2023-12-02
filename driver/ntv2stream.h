@@ -49,46 +49,42 @@ struct ntv2_stream_ops {
 };
 
 struct ntv2_stream_buffer {
-    NTV2StreamBuffer    user_buffer;
-    void*               dma_buffer;
-    bool                queued;
-    bool                linked;
-    bool                completed;
-    bool                flushed;
-    bool                released;
-    bool                error;
-    uint32_t            ds_index;
-    uint32_t            ds_count;
+    NTV2StreamBuffer    user_buffer;        // user mode stream buffer data
+    void*               dma_buffer;         // kernel mode buffer data
+    bool                queued;             // buffer has been queued
+    bool                linked;             // buffer has descriptors linked into chain
+    bool                completed;          // buffer transfer complete
+    bool                flushed;            // buffer flushed from queue
+    bool                released;           // buffer released from queue
+    bool                error;              // buffer transfer error
+    uint32_t            ds_index;           // buffer descriptor index
+    uint32_t            ds_count;           // buffer descriptor count
 };
 
 struct ntv2_stream {
-	int					index;
+	int					index;              // stream index
 	char				name[NTV2_STREAM_STRING_SIZE];
-	Ntv2SystemContext* 	system_context;
-    NTV2Channel         channel;
-    Ntv2Semaphore       state_sema;
-    bool                to_host;
-    void*               owner;
-    void*               dma_engine;
+	Ntv2SystemContext* 	system_context;     // system context for ops
+    NTV2Channel         channel;            // stream channel
+    Ntv2Semaphore       state_sema;         // stream action semaphore
+    bool                to_host;            // stream transfers to host
+    void*               owner;              // stream user mode owner
+    void*               dma_engine;         // stream dma engine
 
-    enum ntv2_stream_state      stream_state;
-    enum ntv2_stream_state      engine_state;
-    struct ntv2_stream_ops      stream_ops;
-    struct ntv2_stream_buffer   stream_buffers[NTV2_STREAM_NUM_BUFFERS];
-    Ntv2Event                   wait_events[NTV2_STREAM_WAIT_CLIENTS];
-    bool                        wait_inuse[NTV2_STREAM_WAIT_CLIENTS];
+    enum ntv2_stream_state      stream_state;       // stream desired state
+    enum ntv2_stream_state      engine_state;       // stream actual state
+    struct ntv2_stream_ops      stream_ops;         // stream kernel operations
+    struct ntv2_stream_buffer   stream_buffers[NTV2_STREAM_NUM_BUFFERS];    // stream buffer array
+    Ntv2Event                   wait_events[NTV2_STREAM_WAIT_CLIENTS];      // stream wait event array
+    bool                        wait_inuse[NTV2_STREAM_WAIT_CLIENTS];       // stream in use array
     uint32_t                    head_index;         // buffer queue head
     uint32_t                    tail_index;         // buffer queue tail
     uint32_t                    active_index;       // currently active buffer
     uint32_t                    next_index;         // next active buffer
-    uint64_t                    queue_count;        // buffers queued
-    uint64_t                    release_count;      // buffers released
-    uint64_t                    active_count;       // buffers transferred while active
-    uint64_t                    repeat_count;       // buffers repeated while active
-    uint64_t                    idle_count;         // buffers transferred while idle
+    NTV2StreamChannel           user_channel;       // user mode stream channel data
 };
 
-
+// stream management functions
 struct ntv2_stream *ntv2_stream_open(Ntv2SystemContext* sys_con,
                                      const char *name, int index);
 void ntv2_stream_close(struct ntv2_stream *ntv2_str);
@@ -102,6 +98,7 @@ Ntv2Status ntv2_stream_enable(struct ntv2_stream *ntv2_str);
 Ntv2Status ntv2_stream_disable(struct ntv2_stream *ntv2_str);
 Ntv2Status ntv2_stream_interrupt(struct ntv2_stream *ntv2_str, uint64_t stream_bytes);
 
+// stream io functions
 Ntv2Status ntv2_stream_channel_initialize(struct ntv2_stream *ntv2_str, void* pOwner, NTV2StreamChannel* pChannel);
 Ntv2Status ntv2_stream_channel_release(struct ntv2_stream *ntv2_str, void* pOwner, NTV2StreamChannel* pChannel);
 Ntv2Status ntv2_stream_channel_start(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel);
@@ -109,10 +106,11 @@ Ntv2Status ntv2_stream_channel_stop(struct ntv2_stream *ntv2_str, NTV2StreamChan
 Ntv2Status ntv2_stream_channel_flush(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel);
 Ntv2Status ntv2_stream_channel_status(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel);
 Ntv2Status ntv2_stream_channel_wait(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel);
-Ntv2Status ntv2_stream_channel_advance(struct ntv2_stream *ntv2_str);
 
 Ntv2Status ntv2_stream_buffer_queue(struct ntv2_stream *ntv2_str, void* pOwner, NTV2StreamBuffer* pBuffer);
 Ntv2Status ntv2_stream_buffer_release(struct ntv2_stream *ntv2_str, void* pOwner, NTV2StreamBuffer* pBuffer);
 Ntv2Status ntv2_stream_buffer_status(struct ntv2_stream *ntv2_str, NTV2StreamBuffer* pBuffer);
 
+// stream interrupt function
+Ntv2Status ntv2_stream_channel_advance(struct ntv2_stream *ntv2_str);
 #endif

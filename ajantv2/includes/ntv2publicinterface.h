@@ -8735,7 +8735,6 @@ typedef enum
 				NTV2Channel		mChannel;			///< @brief Stream channel
 				ULWord			mFlags;				///< @brief Action flags
 				ULWord			mStatus;            ///< @brief Action status
-				ULWord64		mSteps;				///< @brief Stream number of steps
                 ULWord			mStreamState;		///< @brief Stream state
 				ULWord64		mBufferCookie;		///< @brief Active buffer user cookie
 				LWord64			mStartTime;			///< @brief Stream start time
@@ -8782,9 +8781,8 @@ typedef enum
 				ULWord64		mBufferCookie;		///< @brief Buffer User cookie
 				ULWord			mBufferState;		///< @brief Buffer state
 				LWord64			mQueueTime;			///< @brief Queue time (queued to driver by app)
-				LWord64			mLinkTime;			///< @brief Link time (linked into stream by irq)
-				LWord64			mStartTime;			///< @brief Transfer start time (on air interrupt time)
-				LWord64			mStopTime;			///< @brief Transfer stop time (off air interrupt time)
+				LWord64			mActiveTime;		///< @brief Active time (on air interrupt time)
+				LWord64			mCompleteTime;		///< @brief Complete time (off air interrupt time)
 				LWord64			mFlushTime;			///< @brief Flush time (if flushed before on air)
 				ULWord64		mTransferCount;		///< @brief Number of transfers
 				ULWord			mReserved[32];		///< @brief Reserved for future expansion.
