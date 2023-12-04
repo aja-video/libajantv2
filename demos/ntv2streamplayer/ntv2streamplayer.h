@@ -102,8 +102,6 @@ class NTV2StreamPlayer
 		NTV2TaskMode		mSavedTaskMode;		///< @brief	Used to restore the previous task mode
 		ULWord				mCurrentFrame;		///< @brief	My current frame number (for generating timecode)
 		ULWord				mCurrentSample;		///< @brief	My current audio sample (tone generator state)
-		double				mToneFrequency;		///< @brief	My current audio tone frequency [Hz]
-		NTV2AudioSystem		mAudioSystem;		///< @brief	The audio system I'm using (if any)
 		NTV2FormatDesc		mFormatDesc;		///< @brief	Describes my video/pixel format
 
 		bool				mGlobalQuit;		///< @brief	Set "true" to gracefully stop

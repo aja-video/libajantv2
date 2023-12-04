@@ -5210,7 +5210,7 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
     PDMA_PAGE_BUFFER  page_to;
     uint32_t desc_index;
     uint32_t next_index;
-//    int status;
+    int status;
 
     // lock the engine
     dmaEngineLock(pDmaEngine);
@@ -5239,7 +5239,7 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
     {
         // build active buffer descriptors (stream starting)
         buffer_from->ds_index = 0;
-#if 0        
+#if 1        
         status = dmaXlnxStreamBuild(pDmaEngine, page_from, buffer_from->ds_index);
         if (status <= 0)
         {
@@ -5281,7 +5281,7 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
     if (!buffer_to->linked)
     {
         buffer_to->ds_index = buffer_from->ds_index + buffer_from->ds_count;
-#if 0        
+#if 1        
         status = dmaXlnxStreamBuild(pDmaEngine, page_to, buffer_to->ds_index);
         if (status <= 0)
         {
@@ -5310,7 +5310,7 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
     {
         desc_index = (buffer_from->ds_index + buffer_from->ds_count - 1) % pDmaEngine->maxDescriptors;
         next_index = buffer_to->ds_index;
-#if 0        
+#if 1        
         status = dmaXlnxStreamLink(pDmaEngine, desc_index, next_index);
         if (status < 0)
         {
@@ -5474,6 +5474,7 @@ static int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuff
 	ULWord					dpIndex;
 	ULWord					dpNumPerPage;
 	ULWord					dsIndex;
+    ULWord                  dsCount;
 	bool					done;
 
 	NTV2_MSG_PROGRAM("%s%d:%s%d: dmaXlnxStreamBuild index %d\n", 
@@ -5498,8 +5499,10 @@ static int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuff
 	dpPageMask = PAGE_SIZE - 1;
 	dpNumPerPage = PAGE_SIZE / DMA_DESCRIPTOR_SIZE;
 	pDescriptor = (PXLNX_DESCRIPTOR)pDmaEngine->pDescriptorVirtual[dpPage];
+    pDescriptor += dpIndex;
 	pDescriptorLast = pDescriptor;
 	physDescriptor = pDmaEngine->descriptorPhysical[dpPage];
+    physDescriptor += dpIndex * sizeof(DMA_DESCRIPTOR64);
 	descriptorCount = 0;
 	programBytes = 0;
 	sgIndex = 0;
@@ -5529,7 +5532,7 @@ static int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuff
         descSystemAddress = dmaSgAddress(pPageBuffer, sgIndex);
         descCardAddress = 0;
         descTransferSize = dmaSgLength(pPageBuffer, sgIndex);
-        
+
         // xlnx can fetch up to 16 descriptors at once if they are contiguous and do not span pages
         contigCount = dpNumPerPage - dpIndex - 1;
         if (contigCount > 0)
@@ -5544,6 +5547,11 @@ static int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuff
         // write descriptor
         pDescriptor->ulControl = valControl | (contigCount << 8);
         pDescriptor->ulTransferCount = descTransferSize;
+        if ((programBytes + descTransferSize) > pPageBuffer->userSize)
+        {
+            pDescriptor->ulTransferCount = pPageBuffer->userSize - programBytes;
+        }
+        
         if (xlnxC2H)
         {
             pDescriptor->llDstAddress = descSystemAddress;
@@ -5600,7 +5608,12 @@ static int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuff
 	if (((unsigned long)pDescriptorLast & (unsigned long)dpPageMask) != 0)
 	{
 		pDescriptor = pDescriptorLast - 1;
-		for (dsIndex = 0; dsIndex < XLNX_MAX_ADJACENT_COUNT; dsIndex++)
+        dsCount = XLNX_MAX_ADJACENT_COUNT;
+        if (dsCount > (descriptorCount - 1))
+        {
+            dsCount = descriptorCount - 1;
+        }
+		for (dsIndex = 0; dsIndex < dsCount; dsIndex++)
 		{
 			pDescriptor->ulControl = valControl;
 			NTV2_MSG_DESCRIPTOR("%s%d:%s%d: dmaXlnxStreamBuild con %08x cnt %08x src %016llx dst %016llx nxt %016llx clear adjacent\n",
