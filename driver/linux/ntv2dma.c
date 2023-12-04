@@ -5280,7 +5280,7 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
     // build to buffer descriptors
     if (!buffer_to->linked)
     {
-        buffer_to->ds_index = buffer_from->ds_index + buffer_from->ds_count;
+        buffer_to->ds_index = (buffer_from->ds_index + buffer_from->ds_count) % pDmaEngine->maxDescriptors;
 #if 1        
         status = dmaXlnxStreamBuild(pDmaEngine, page_to, buffer_to->ds_index);
         if (status <= 0)
