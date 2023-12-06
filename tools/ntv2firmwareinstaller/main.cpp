@@ -137,6 +137,7 @@ int main (int argc, const char** argv)
 {
 	char *			pDeviceSpec			(AJA_NULL);		//	Which device to use
 	char *			pFirmwareLicense	(AJA_NULL);
+	char *			konaxmbFile			(AJA_NULL);
 	int				bQuiet				(0);
 	int				bProgress			(0);
 	int				bWaitForEnterKey	(0);
@@ -156,6 +157,7 @@ int main (int argc, const char** argv)
 		{"progress",	'p',	POPT_ARG_NONE,		&bProgress,			0,	"show installation progress",	AJA_NULL},
 		{"quiet",		'q',	POPT_ARG_NONE,		&bQuiet,			0,	"quiet mode",					AJA_NULL},
 		{"wait",		'w',	POPT_ARG_NONE,		&bWaitForEnterKey,	0,	"press Enter when finished?",	AJA_NULL},
+		{"konaxmb",		'x',	POPT_ARG_STRING,	&konaxmbFile,		0,	"konax MB file name",			AJA_NULL },
 		{"info",		'i',	POPT_ARG_NONE,		&bBitfileInfo,		0,	"just show bitfile info",		AJA_NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
@@ -279,6 +281,14 @@ int main (int argc, const char** argv)
 		if (!konaFlasher.ProgramLicenseInfo(license))
 			return AJA_STATUS_FAIL;
 		cout << "Device license: OK" << endl;
+		return AJA_STATUS_SUCCESS;
+	}
+	else if (konaxmbFile)
+	{
+		CNTV2KonaFlashProgram konaFlasher(device.GetIndexNumber());
+		if (!konaFlasher.ProgramKonaxMB(konaxmbFile, 0, cerr))
+			return AJA_STATUS_FAIL;
+		cout << "MB File Programmed" << endl;
 		return AJA_STATUS_SUCCESS;
 	}
 
