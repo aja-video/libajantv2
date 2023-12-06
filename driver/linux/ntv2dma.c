@@ -832,6 +832,7 @@ static bool dmaHardwareInit(PDMA_ENGINE pDmaEngine)
 		present = IsXlnxChannel(deviceNumber, pDmaEngine->dmaC2H, pDmaEngine->dmaIndex);
         value = XlnxReadChannelIdentifier(deviceNumber, pDmaEngine->dmaC2H, pDmaEngine->dmaIndex);
         pDmaEngine->dmaStream = IsXlnxChannelStream(value);
+//        pDmaEngine->dmaStream = true; /* hack */
 #if 0 // does not work
         value = XlnxReadChannelAlignments(deviceNumber, pDmaEngine->dmaC2H, pDmaEngine->dmaIndex);
         if (value != 0)
@@ -4949,14 +4950,14 @@ static void dmaXlnxInterrupt(PDMA_ENGINE pDmaEngine)
 int dmaOpsStreamInitialize(struct ntv2_stream *stream)
 {
     PDMA_ENGINE pDmaEngine = (PDMA_ENGINE)stream->dma_engine;
-//    int status = 0;
+    int status = 0;
 
     // lock the engine
     dmaEngineLock(pDmaEngine);
 
     // stop the dma engine synchonously
     NTV2_MSG_STATE("%s%d:%s%d: dmaOpsStreamInitialize stop the dma\n", DMA_MSG_ENGINE);
-#if 0    
+#if 1
     status = dmaXlnxStreamStop(pDmaEngine);
     if (status < 0)
     {
@@ -4982,14 +4983,14 @@ int dmaOpsStreamInitialize(struct ntv2_stream *stream)
 int dmaOpsStreamRelease(struct ntv2_stream *stream)
 {    
     PDMA_ENGINE pDmaEngine = (PDMA_ENGINE)stream->dma_engine;
-//    int status = 0;
+    int status = 0;
 
     // lock the engine
     dmaEngineLock(pDmaEngine);
 
     // stop the dma engine synchonously
     NTV2_MSG_STATE("%s%d:%s%d: dmaOpsStreamRelease stop the dma\n", DMA_MSG_ENGINE);
-#if 0
+#if 1
     status = dmaXlnxStreamStop(pDmaEngine);
     if (status < 0)
     {
@@ -5014,8 +5015,8 @@ int dmaOpsStreamRelease(struct ntv2_stream *stream)
 int dmaOpsStreamStart(struct ntv2_stream *stream)
 {
     PDMA_ENGINE pDmaEngine = (PDMA_ENGINE)stream->dma_engine;
-//    int start_index = 0;
-//    int status = 0;
+    int start_index = 0;
+    int status = 0;
     
     // lock the engine
     dmaEngineLock(pDmaEngine);
@@ -5030,7 +5031,7 @@ int dmaOpsStreamStart(struct ntv2_stream *stream)
     {
         // start the engine
         NTV2_MSG_STATE("%s%d:%s%d: dmaOpsStreamStart start the dma\n", DMA_MSG_ENGINE);
-#if 0        
+#if 1        
         status = dmaXlnxStreamStart(pDmaEngine, start_index);
         if (status < 0)
         {
@@ -5702,7 +5703,8 @@ static int dmaXlnxStreamStart(PDMA_ENGINE pDmaEngine, uint32_t startIndex)
     ULWord  startCount = 0;
     ULWord64 startAddress = 0;
 
-    NTV2_MSG_PROGRAM("%s%d:%s%d: dmaXlnxStreamStart() start index %d\n", DMA_MSG_ENGINE, startIndex);
+    NTV2_MSG_PROGRAM("%s%d:%s%d: dmaXlnxStreamStart() tohost %d start index %d\n",
+                     DMA_MSG_ENGINE, xlnxC2H, startIndex);
 
 	if (!pDmaEngine->dmaStream)
 	{
@@ -5718,6 +5720,8 @@ static int dmaXlnxStreamStart(PDMA_ENGINE pDmaEngine, uint32_t startIndex)
 	WriteXlnxDmaEngineStartLow(deviceNumber, xlnxC2H, xlnxIndex, (ULWord)(startAddress & 0xffffffff));
 	WriteXlnxDmaEngineStartHigh(deviceNumber, xlnxC2H, xlnxIndex, (ULWord)(startAddress >> 32));
 	WriteXlnxDmaEngineStartAdjacent(deviceNumber, xlnxC2H, xlnxIndex, 0);
+
+    NTV2_MSG_DESCRIPTOR("%s%d:%s%d: dmaXlnxStreamStart() start address %016llx\n", DMA_MSG_ENGINE, startAddress);
 
 	// count the program starts
 	pDmaEngine->programStartCount++;

@@ -335,11 +335,7 @@ Ntv2Status ntv2_stream_channel_initialize(struct ntv2_stream *ntv2_str, void* pO
     // flush the queue
     for (i = 0; i < NTV2_STREAM_NUM_BUFFERS; i++)
     {
-        status = (ntv2_str->stream_ops.buffer_flush)(ntv2_str, i);
-        if (status != NTV2_STREAM_OPS_SUCCESS)
-        {
-            NTV2_MSG_STREAM_ERROR("%s: initialize buffer failed\n", ntv2_str->name);
-        }            
+        (ntv2_str->stream_ops.buffer_flush)(ntv2_str, i);
     }
 
     // initialize counts

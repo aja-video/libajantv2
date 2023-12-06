@@ -2554,7 +2554,7 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 					OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_CHANNEL4);
 				}
 			}
-/// HACK 
+#if 0 
             if ((pNTV2Params->_interruptCount[eVerticalInterrupt] % 100) == 0)
             {
                 struct ntv2_stream* pDmaStream = pNTV2Params->m_pDmaStream[0];
@@ -2563,6 +2563,7 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
                     ntv2_stream_channel_advance(pDmaStream);
                 }
             }
+#endif            
 		}
 
 		if ( statusRegister & kIntOutput2VBLActive )
@@ -2710,6 +2711,7 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 
 	if(XlnxStatusRegister != 0)
 	{
+        MSG("%s: Xilinx interrupt %08x\n", pNTV2Params->name, XlnxStatusRegister);
 		dmaInterrupt(deviceNumber, XlnxStatusRegister);
 		++handled;
 	}
