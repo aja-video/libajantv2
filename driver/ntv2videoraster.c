@@ -620,6 +620,8 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     if (geometry >= s_geometry_size) return false;
 	quad = NTV2_FLD_GET(ntv2_fld_global_control_quad_tsi_enable, global_control) != 0;
     format = NTV2_FLD_GET(ntv2_fld_channel_control_pixel_format, channel_control);
+	format |= NTV2_FLD_GET(ntv2_fld_channel_control_pixel_format_high, channel_control) <<
+		NTV2_FLD_SIZE(ntv2_fld_channel_control_pixel_format);;
     if (format >= s_format_size) return false;
     frame_rate = NTV2_FLD_GET(ntv2_fld_global_control_frame_rate, global_control);
     frame_rate |= NTV2_FLD_GET(ntv2_fld_global_control_frame_rate_high, global_control) <<
@@ -849,7 +851,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     value |= NTV2_FLD_SET(ntv2_fld_videoraster_control_8b10bconvert, 0);
     value |= NTV2_FLD_SET(ntv2_fld_videoraster_control_progressive, (progressive ? 1 : 0));
     value |= NTV2_FLD_SET(ntv2_fld_videoraster_control_twosampleinterleave, (quad? 1 : 0));
-    value |= NTV2_FLD_SET(ntv2_fld_videoraster_control_imageformat, NTV2_FLD_GET(ntv2_fld_channel_control_pixel_format, channel_control));
+    value |= NTV2_FLD_SET(ntv2_fld_videoraster_control_imageformat, format);
 
     switch (pixel_rate)
     {
