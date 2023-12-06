@@ -4965,7 +4965,8 @@ int dmaOpsStreamInitialize(struct ntv2_stream *stream)
         return NTV2_STREAM_OPS_FAIL;
     }        
 #endif
-    // reset counters
+    // reset descriptor index
+    pDmaEngine->strDescriptorIndex = 0;
 
     // set state
     stream->stream_state = ntv2_stream_state_initialized;
@@ -5111,7 +5112,7 @@ int dmaOpsStreamAdvance(struct ntv2_stream *stream)
     return NTV2_STREAM_OPS_SUCCESS;
 }
 
-int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index)
+int dmaOpsBufferQueue(struct ntv2_stream *stream, int index)
 {
     PDMA_ENGINE pDmaEngine = (PDMA_ENGINE)stream->dma_engine;
     ULWord deviceNumber = stream->system_context->devNum;
@@ -5129,6 +5130,7 @@ int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index)
     // lock the engine to reset the flags
     dmaEngineLock(pDmaEngine);
 
+    // initialize buffer state
     buffer->queued = false;
     buffer->linked = false;
     buffer->completed = false;
@@ -5145,7 +5147,7 @@ int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index)
     file = (PFILE_DATA)stream->owner;
     if (file == NULL)
     {
-        NTV2_MSG_ERROR("%s%d:%s%d: dmaOpsBufferPrepare null owner\n", DMA_MSG_ENGINE);
+        NTV2_MSG_ERROR("%s%d:%s%d: dmaOpsBufferQueue null owner\n", DMA_MSG_ENGINE);
         return NTV2_STREAM_OPS_FAIL;
     }
 
@@ -5153,14 +5155,14 @@ int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index)
     page_root = &file->dmaRoot;
     if (page_root == NULL)
     {
-        NTV2_MSG_ERROR("%s%d:%s%d: dmaOpsBufferPrepare null page root\n", DMA_MSG_ENGINE);
+        NTV2_MSG_ERROR("%s%d:%s%d: dmaOpsBufferQueue null page root\n", DMA_MSG_ENGINE);
         return NTV2_STREAM_OPS_FAIL;
     }
 
     // check for no video
     if(((PVOID)(buffer->user_buffer.mBuffer.fUserSpacePtr) == NULL) || (buffer->user_buffer.mBuffer.fByteCount == 0))
     {
-        NTV2_MSG_ERROR("%s%d:%s%d: dmaOpsBufferPrepare no buffer\n", DMA_MSG_ENGINE);
+        NTV2_MSG_ERROR("%s%d:%s%d: dmaOpsBufferQueue no buffer\n", DMA_MSG_ENGINE);
         return NTV2_STREAM_OPS_FAIL;
     }
 
@@ -5171,31 +5173,36 @@ int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index)
                                   buffer->user_buffer.mBuffer.fByteCount);
     if (page_buffer == NULL)
     {
-        NTV2_MSG_ERROR("%s%d:%s%d: dmaOpsBufferPrepare buffer not found\n", DMA_MSG_ENGINE);
+        NTV2_MSG_ERROR("%s%d:%s%d: dmaOpsBufferQueue buffer not found\n", DMA_MSG_ENGINE);
         return NTV2_STREAM_OPS_FAIL;
     }
 
+    // check the buffer is locked
     if (!dmaPageLocked(page_buffer))
     {
-        NTV2_MSG_ERROR("%s%d:%s%d: dmaOpsBufferPrepare buffer not locked\n", DMA_MSG_ENGINE);
+        dmaPageRootFree(deviceNumber, page_buffer);
+        NTV2_MSG_ERROR("%s%d:%s%d: dmaOpsBufferQueue buffer not locked\n", DMA_MSG_ENGINE);
         return NTV2_STREAM_OPS_FAIL;
     }
 
+    // check the buffer is mapped
     if (!dmaSgMapped(page_buffer))
     {
-        NTV2_MSG_ERROR("%s%d:%s%d: dmaOpsBufferPrepare buffer not mapped\n", DMA_MSG_ENGINE);
+        dmaPageRootFree(deviceNumber, page_buffer);
+        NTV2_MSG_ERROR("%s%d:%s%d: dmaOpsBufferQueue buffer not mapped\n", DMA_MSG_ENGINE);
         return NTV2_STREAM_OPS_FAIL;
     }
 
     // lock the engine to set the flags
     dmaEngineLock(pDmaEngine);
 
+    // mark the buffer queued
     buffer->queued = true;
     buffer->dma_buffer = (void*)page_buffer;
     
     dmaEngineUnlock(pDmaEngine);
 
-    NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsBufferPrepare address %016llx\n",
+    NTV2_MSG_PROGRAM("%s%d:%s%d: dmaOpsBufferQueue address %016llx\n",
                      DMA_MSG_ENGINE, (ULWord64)buffer->user_buffer.mBuffer.fUserSpacePtr);
 
     return NTV2_STREAM_OPS_SUCCESS;
@@ -5215,6 +5222,7 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
     // lock the engine
     dmaEngineLock(pDmaEngine);
 
+    // do not link buffers in the error state
     if (stream->engine_state == ntv2_stream_state_error)
     {
         dmaEngineUnlock(pDmaEngine);
@@ -5224,6 +5232,8 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
     // get from page buffer
     buffer_from = &stream->stream_buffers[from_index];
     page_from = (PDMA_PAGE_BUFFER)buffer_from->dma_buffer;
+
+    // these should not be true
     if (!buffer_from->queued ||
         buffer_from->flushed ||
         buffer_from->completed ||
@@ -5238,7 +5248,7 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
     if (!buffer_from->linked)
     {
         // build active buffer descriptors (stream starting)
-        buffer_from->ds_index = 0;
+        buffer_from->ds_index = pDmaEngine->strDescriptorIndex;
 #if 1        
         status = dmaXlnxStreamBuild(pDmaEngine, page_from, buffer_from->ds_index);
         if (status <= 0)
@@ -5248,8 +5258,9 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
             return NTV2_STREAM_OPS_FAIL;
         }
         buffer_from->ds_count = (uint32_t)status;
+        pDmaEngine->strDescriptorIndex = (pDmaEngine->strDescriptorIndex + buffer_from->ds_count) % pDmaEngine->maxDescriptors;
 
-        // link from buffer to itself
+        // always link from buffer to itself by default
         desc_index = (buffer_from->ds_index + buffer_from->ds_count - 1) % pDmaEngine->maxDescriptors;
         next_index = buffer_from->ds_index;
         status = dmaXlnxStreamLink(pDmaEngine, desc_index, next_index);
@@ -5266,7 +5277,8 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
     // get to page buffer
     buffer_to = &stream->stream_buffers[to_index];
     page_to = (PDMA_PAGE_BUFFER)buffer_to->dma_buffer;
-    
+
+    // these should not be true either
     if (!buffer_to->queued ||
         buffer_to->flushed ||
         buffer_to->completed ||
@@ -5277,10 +5289,11 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
         return NTV2_STREAM_OPS_FAIL;
     }
     
-    // build to buffer descriptors
+    // build to buffer descriptors if necessary
     if (!buffer_to->linked)
     {
-        buffer_to->ds_index = (buffer_from->ds_index + buffer_from->ds_count) % pDmaEngine->maxDescriptors;
+        // build next buffer descriptors when streaming
+        buffer_to->ds_index = pDmaEngine->strDescriptorIndex;
 #if 1        
         status = dmaXlnxStreamBuild(pDmaEngine, page_to, buffer_to->ds_index);
         if (status <= 0)
@@ -5290,8 +5303,9 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
             return NTV2_STREAM_OPS_FAIL;
         }
         buffer_to->ds_count = (uint32_t)status;
+        pDmaEngine->strDescriptorIndex = (pDmaEngine->strDescriptorIndex + buffer_to->ds_count) % pDmaEngine->maxDescriptors;
 
-        // link to buffer to itself
+        // always link to buffer to itself by default
         desc_index = (buffer_to->ds_index + buffer_to->ds_count - 1) % pDmaEngine->maxDescriptors;
         next_index = buffer_to->ds_index;
         status = dmaXlnxStreamLink(pDmaEngine, desc_index, next_index);
@@ -5304,10 +5318,11 @@ int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index)
 #endif       
         buffer_to->linked = true;
     }
-    
-    // link descriptor chain
+
+    // check to link the buffers
     if (from_index != to_index)
     {
+        // link descriptor chain when streaming
         desc_index = (buffer_from->ds_index + buffer_from->ds_count - 1) % pDmaEngine->maxDescriptors;
         next_index = buffer_to->ds_index;
 #if 1        
@@ -5340,18 +5355,14 @@ int dmaOpsBufferComplete(struct ntv2_stream *stream, int index)
     // lock the engine
     dmaEngineLock(pDmaEngine);
 
-    if ((buffer->released) || (buffer->flushed))
-    {
-        dmaEngineUnlock(pDmaEngine);
-        return NTV2_STREAM_OPS_SUCCESS;
-    }
-
-    if ((!buffer->queued) || (buffer->flushed))
+    // these should not be true
+    if (!buffer->queued || !buffer->linked || buffer->flushed || buffer->released)
     {
         dmaEngineUnlock(pDmaEngine);
         return NTV2_STREAM_OPS_FAIL;
     }
 
+    // mark the buffer complete
     buffer->completed = true;
 
     dmaEngineUnlock(pDmaEngine);
@@ -5371,18 +5382,20 @@ int dmaOpsBufferFlush(struct ntv2_stream *stream, int index)
     // lock the engine
     dmaEngineLock(pDmaEngine);
 
-    if ((buffer->released) || (buffer->flushed))
+    if (buffer->flushed)
     {
         dmaEngineUnlock(pDmaEngine);
         return NTV2_STREAM_OPS_SUCCESS;
     }
 
-    if (!buffer->queued)
+    // these should not be true
+    if ((!buffer->queued) || (buffer->completed) || (buffer->released))
     {
         dmaEngineUnlock(pDmaEngine);
         return NTV2_STREAM_OPS_FAIL;
     }
 
+    // if the engine is running do not flush linked buffers
     if ((stream->engine_state == ntv2_stream_state_active) ||
         (stream->engine_state == ntv2_stream_state_idle))
     {    
@@ -5392,6 +5405,8 @@ int dmaOpsBufferFlush(struct ntv2_stream *stream, int index)
             return NTV2_STREAM_OPS_FAIL;
         }
     }
+
+    // mark the buffer flushed
     buffer->flushed = true;
 
     dmaEngineUnlock(pDmaEngine);
@@ -5417,7 +5432,8 @@ int dmaOpsBufferRelease(struct ntv2_stream *stream, int index)
         dmaEngineUnlock(pDmaEngine);
         return NTV2_STREAM_OPS_SUCCESS;
     }
-    
+
+    // if the engine is running do not release a linked buffer not completed
     if ((stream->engine_state == ntv2_stream_state_active) ||
         (stream->engine_state == ntv2_stream_state_idle))
     {    
@@ -5428,7 +5444,7 @@ int dmaOpsBufferRelease(struct ntv2_stream *stream, int index)
         }
     }
 
-    // clear buffer
+    // release the buffer
     buffer->dma_buffer = NULL;
     buffer->queued = false;
     buffer->linked = false;

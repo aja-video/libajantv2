@@ -352,7 +352,7 @@ int dmaOpsStreamRelease(struct ntv2_stream *stream);
 int dmaOpsStreamStart(struct ntv2_stream *stream);
 int dmaOpsStreamStop(struct ntv2_stream *stream);
 int dmaOpsStreamAdvance(struct ntv2_stream *stream);
-int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index);
+int dmaOpsBufferQueue(struct ntv2_stream *stream, int index);
 int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index);
 int dmaOpsBufferComplete(struct ntv2_stream *stream, int index);
 int dmaOpsBufferFlush(struct ntv2_stream *stream, int index);

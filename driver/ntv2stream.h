@@ -41,7 +41,7 @@ struct ntv2_stream_ops {
     int (*stream_stop)(struct ntv2_stream *stream);
     int (*stream_release)(struct ntv2_stream *stream);
     int (*stream_advance)(struct ntv2_stream *stream);
-    int (*buffer_prepare)(struct ntv2_stream *stream, int index);
+    int (*buffer_queue)(struct ntv2_stream *stream, int index);
     int (*buffer_link)(struct ntv2_stream *stream, int from_index, int to_index);
     int (*buffer_complete)(struct ntv2_stream *stream, int index);
     int (*buffer_flush)(struct ntv2_stream *stream, int index);

@@ -3379,7 +3379,7 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
                 .stream_start = dmaOpsStreamStart,
                 .stream_stop = dmaOpsStreamStop,
                 .stream_advance = dmaOpsStreamAdvance,
-                .buffer_prepare = dmaOpsBufferPrepare,
+                .buffer_queue = dmaOpsBufferQueue,
                 .buffer_link = dmaOpsBufferLink,
                 .buffer_complete = dmaOpsBufferComplete,
                 .buffer_flush = dmaOpsBufferFlush,

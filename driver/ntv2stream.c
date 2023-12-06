@@ -934,7 +934,7 @@ Ntv2Status ntv2_stream_buffer_queue(struct ntv2_stream *ntv2_str, void* pOwner, 
     str_buf->user_buffer = *pBuffer;
 
     // prepare buffer
-    status = (ntv2_str->stream_ops.buffer_prepare)(ntv2_str, ntv2_str->tail_index);
+    status = (ntv2_str->stream_ops.buffer_queue)(ntv2_str, ntv2_str->tail_index);
     if (status != NTV2_STREAM_OPS_SUCCESS)
     {
         buffer_status(NULL, pBuffer);
