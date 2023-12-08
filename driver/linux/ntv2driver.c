@@ -3390,7 +3390,7 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
             status = ntv2_stream_configure(ntv2pp->m_pDmaStream[i],
                                            &stream_ops,
                                            &ntv2pp->_dmaEngine[i],
-                                           ((i & 0x1) == 1));
+                                           ntv2pp->_dmaEngine[i].dmaC2H);
             if (status == NTV2_STATUS_SUCCESS)
             {
                 ntv2pp->_dmaEngine[i].strIndex = i;

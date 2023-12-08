@@ -77,8 +77,8 @@ struct ntv2_stream {
     struct ntv2_stream_buffer   stream_buffers[NTV2_STREAM_NUM_BUFFERS];    // stream buffer array
     Ntv2Event                   wait_events[NTV2_STREAM_WAIT_CLIENTS];      // stream wait event array
     bool                        wait_inuse[NTV2_STREAM_WAIT_CLIENTS];       // stream in use array
-    uint32_t                    head_index;         // buffer queue head
-    uint32_t                    tail_index;         // buffer queue tail
+    uint32_t                    head_index;         // buffer queue head (add here)
+    uint32_t                    tail_index;         // buffer queue tail (remove here)
     uint32_t                    active_index;       // currently active buffer
     uint32_t                    next_index;         // next active buffer
     NTV2StreamChannel           user_channel;       // user mode stream channel data

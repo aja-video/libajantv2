@@ -2564,7 +2564,14 @@ void dmaInterrupt(ULWord deviceNumber, ULWord intStatus)
             pDmaStream = getDmaStream(deviceNumber, 0);
             if (pDmaStream != NULL)
             {
-                ntv2_stream_channel_advance(pDmaStream);
+                if ((ReadXlnxDmaStatus(deviceNumber, false, 0) & kRegMaskXlnxIntDescComplete) != 0)
+                {
+                    ntv2_stream_channel_advance(pDmaStream);
+                }
+                else
+                {
+                    ntv2Message("XILINX interrupt %08x\n", ReadXlnxDmaStatus(deviceNumber, false, 0));
+                }
             }
             else
             {
@@ -5194,6 +5201,9 @@ int dmaOpsBufferQueue(struct ntv2_stream *stream, int index)
         return NTV2_STREAM_OPS_FAIL;
     }
 
+    // configure buffer for dma access
+    dmaSgDevice(deviceNumber, page_buffer);
+
     // lock the engine to set the flags
     dmaEngineLock(pDmaEngine);
 
@@ -5423,7 +5433,7 @@ int dmaOpsBufferRelease(struct ntv2_stream *stream, int index)
     PDMA_ENGINE pDmaEngine = (PDMA_ENGINE)stream->dma_engine;
     ULWord deviceNumber = stream->system_context->devNum;
     struct ntv2_stream_buffer* buffer = &stream->stream_buffers[index];
-    PDMA_PAGE_BUFFER pPageBuffer = (PDMA_PAGE_BUFFER)buffer->dma_buffer;
+    PDMA_PAGE_BUFFER page_buffer = (PDMA_PAGE_BUFFER)buffer->dma_buffer;
 
     // lock the engine
     dmaEngineLock(pDmaEngine);
@@ -5456,7 +5466,10 @@ int dmaOpsBufferRelease(struct ntv2_stream *stream, int index)
 
     dmaEngineUnlock(pDmaEngine);
 
-    dmaPageRootFree(deviceNumber, pPageBuffer);
+    // configure buffer for host access
+    dmaSgHost(deviceNumber, page_buffer);
+
+    dmaPageRootFree(deviceNumber, page_buffer);
 
     if ((ULWord64)buffer->user_buffer.mBuffer.fUserSpacePtr != 0)
     {
@@ -5546,10 +5559,18 @@ static int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuff
 
     for (sgIndex = 0; sgIndex < sgCount; sgIndex++)
     {
+        if (programBytes >= pPageBuffer->userSize)
+        {
+            break;
+        }
         descSystemAddress = dmaSgAddress(pPageBuffer, sgIndex);
         descCardAddress = 0;
         descTransferSize = dmaSgLength(pPageBuffer, sgIndex);
-
+        if ((programBytes + descTransferSize) > pPageBuffer->userSize)
+        {
+            descTransferSize = pPageBuffer->userSize - programBytes;
+        }
+        
         // xlnx can fetch up to 16 descriptors at once if they are contiguous and do not span pages
         contigCount = dpNumPerPage - dpIndex - 1;
         if (contigCount > 0)
@@ -5564,11 +5585,6 @@ static int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuff
         // write descriptor
         pDescriptor->ulControl = valControl | (contigCount << 8);
         pDescriptor->ulTransferCount = descTransferSize;
-        if ((programBytes + descTransferSize) > pPageBuffer->userSize)
-        {
-            pDescriptor->ulTransferCount = pPageBuffer->userSize - programBytes;
-        }
-        
         if (xlnxC2H)
         {
             pDescriptor->llDstAddress = descSystemAddress;
@@ -5621,6 +5637,14 @@ static int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuff
         }
     }
 
+	// need at least one descriptor
+	if (descriptorCount == 0)
+	{
+		pDmaEngine->programErrorCount++;
+		NTV2_MSG_ERROR("%s%d:%s%d: dmaXlnxStreamBuild no descriptors generated\n", DMA_MSG_ENGINE);
+		return -EPERM;
+	}
+
 	// reset final contig counts
 	if (((unsigned long)pDescriptorLast & (unsigned long)dpPageMask) != 0)
 	{
@@ -5650,14 +5674,6 @@ static int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuff
 	NTV2_MSG_DESCRIPTOR("%s%d:%s%d: dmaXlnxStreamBuild con %08x cnt %08x src %016llx dst %016llx nxt %016llx repeat last\n",
 						DMA_MSG_ENGINE, pDescriptorLast->ulControl, pDescriptorLast->ulTransferCount,
 						pDescriptorLast->llSrcAddress, pDescriptorLast->llDstAddress, pDescriptorLast->llNextAddress);
-
-	// need at least one descriptor
-	if (descriptorCount == 0)
-	{
-		pDmaEngine->programErrorCount++;
-		NTV2_MSG_ERROR("%s%d:%s%d: dmaXlnxStreamBuild no descriptors generated\n", DMA_MSG_ENGINE);
-		return -EPERM;
-	}
 
     return (int)descriptorCount;
 }

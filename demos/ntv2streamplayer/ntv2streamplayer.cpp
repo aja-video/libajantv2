@@ -502,6 +502,8 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 		{
 			if (bfrStatus.mBufferCookie < CIRCULAR_BUFFER_SIZE)
 			{
+//				if (goodRelease != 0)
+//					mHostBuffers[(bfrStatus.mBufferCookie + CIRCULAR_BUFFER_SIZE - 1) % CIRCULAR_BUFFER_SIZE].fDataReady = false;
 				mHostBuffers[bfrStatus.mBufferCookie].fDataReady = false;
 				goodRelease++;
 			}
