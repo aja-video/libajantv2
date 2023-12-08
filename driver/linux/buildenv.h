@@ -47,6 +47,11 @@
 		#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(5,14,0)) && DISTRO_KERNEL_PKG_MAJ >= 275)
 			#define KERNEL_6_1_0_SET_TERMIOS
 		#endif
+
+		// This change was back-ported from kernel 6.2.0 for kernel 5.14.0-362
+		#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(5,14,0)) && DISTRO_KERNEL_PKG_MAJ >= 362)
+			#define KERNEL_6_2_0_DEV_UEVENT
+		#endif
 	#endif
 #endif
 
