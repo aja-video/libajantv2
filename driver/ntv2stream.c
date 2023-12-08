@@ -217,7 +217,8 @@ void ntv2_stream_close(struct ntv2_stream *ntv2_str)
 Ntv2Status ntv2_stream_configure(struct ntv2_stream *ntv2_str,
                                  struct ntv2_stream_ops *stream_ops,
                                  void* dma_engine,
-                                 bool to_host)
+                                 bool to_host,
+                                 uint32_t init_advance)
 {
 	if (ntv2_str == NULL)
 		return NTV2_STATUS_BAD_PARAMETER;
@@ -227,6 +228,7 @@ Ntv2Status ntv2_stream_configure(struct ntv2_stream *ntv2_str,
     ntv2_str->stream_ops = *stream_ops;
     ntv2_str->dma_engine = dma_engine;
     ntv2_str->to_host = to_host;
+    ntv2_str->init_advance = init_advance;
 
     // set state
     ntv2_str->stream_state = ntv2_stream_state_disabled;
@@ -454,6 +456,7 @@ Ntv2Status ntv2_stream_channel_release(struct ntv2_stream *ntv2_str, void* pOwne
 Ntv2Status ntv2_stream_channel_start(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel)
 {
     int i;
+//    int next;
     int status;
 
     if ((ntv2_str == NULL) || (pChannel == NULL))
@@ -493,7 +496,7 @@ Ntv2Status ntv2_stream_channel_start(struct ntv2_stream *ntv2_str, NTV2StreamCha
         return NTV2_STATUS_SUCCESS;
     }
 
-    // check active index linked
+    // check active index linked (condition after initialize)
     if (ntv2_str->stream_buffers[ntv2_str->active_index].queued &&
         !ntv2_str->stream_buffers[ntv2_str->active_index].linked)
     {
@@ -501,9 +504,20 @@ Ntv2Status ntv2_stream_channel_start(struct ntv2_stream *ntv2_str, NTV2StreamCha
         ntv2_str->user_channel.mActiveCount = 0;
         ntv2_str->user_channel.mRepeatCount = 0;
         ntv2_str->user_channel.mIdleCount = 0;
+        ntv2_str->init_count = 0;
 
+        // next same as first to start
+        ntv2_str->next_index = ntv2_str->active_index;
+#if 0
+        // if next is queue link it to the chain
+        next = queue_next(ntv2_str->next_index);
+        if (ntv2_str->stream_buffers[next].queued)
+        {
+            ntv2_str->next_index = next;
+        }
+#endif
         // link first buffer
-        status = (ntv2_str->stream_ops.buffer_link)(ntv2_str, ntv2_str->active_index, ntv2_str->active_index);
+        status = (ntv2_str->stream_ops.buffer_link)(ntv2_str, ntv2_str->active_index, ntv2_str->next_index);
         if (status != NTV2_STREAM_OPS_SUCCESS)
         {
             channel_status(ntv2_str, pChannel);
@@ -512,9 +526,6 @@ Ntv2Status ntv2_stream_channel_start(struct ntv2_stream *ntv2_str, NTV2StreamCha
             NTV2_MSG_STREAM_ERROR("%s: start stream active link failed\n", ntv2_str->name);
             return status;
         }
-
-        // next same as first to start
-        ntv2_str->next_index = ntv2_str->active_index;
     }
 
     // start stream engine
@@ -573,15 +584,29 @@ Ntv2Status ntv2_stream_channel_stop(struct ntv2_stream *ntv2_str, NTV2StreamChan
         return NTV2_STATUS_SUCCESS;
     }
 
-    // check stream state
-    if ((ntv2_str->stream_state != ntv2_stream_state_active) &&
-        (ntv2_str->stream_state != ntv2_stream_state_idle))
+    // check active index linked (condition after initialize)
+    if (ntv2_str->stream_buffers[ntv2_str->active_index].queued &&
+        !ntv2_str->stream_buffers[ntv2_str->active_index].linked)
     {
-        channel_status(ntv2_str, pChannel);
-        pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_STATE;
-        ntv2SemaphoreUp(&ntv2_str->state_sema);
-        NTV2_MSG_STREAM_ERROR("%s: stop stream state not active or idle\n", ntv2_str->name);
-        return NTV2_STATUS_SUCCESS;
+        // clear counts
+        ntv2_str->user_channel.mActiveCount = 0;
+        ntv2_str->user_channel.mRepeatCount = 0;
+        ntv2_str->user_channel.mIdleCount = 0;
+        ntv2_str->init_count = 0;
+
+        // next same as first to start
+        ntv2_str->next_index = ntv2_str->active_index;
+
+        // link first buffer
+        status = (ntv2_str->stream_ops.buffer_link)(ntv2_str, ntv2_str->active_index, ntv2_str->next_index);
+        if (status != NTV2_STREAM_OPS_SUCCESS)
+        {
+            channel_status(ntv2_str, pChannel);
+            pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_RESOURCE;
+            ntv2SemaphoreUp(&ntv2_str->state_sema);
+            NTV2_MSG_STREAM_ERROR("%s: start stream active link failed\n", ntv2_str->name);
+            return status;
+        }
     }
 
     // stop stream engine
@@ -786,6 +811,13 @@ Ntv2Status ntv2_stream_channel_advance(struct ntv2_stream *ntv2_str)
         return NTV2_STATUS_SUCCESS;
     }
 
+    if ((ntv2_str->engine_state == ntv2_stream_state_initialized) &&
+        (ntv2_str->init_count < ntv2_str->init_advance))
+    {
+        ntv2_str->init_count++;
+        return NTV2_STATUS_SUCCESS;
+    }
+    
     NTV2_MSG_STREAM_ACTIVE("%s: channel advance head %2d active %2d next %2d tail %2d\n",
                            ntv2_str->name,
                            ntv2_str->head_index,

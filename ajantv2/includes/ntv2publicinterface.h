@@ -8764,6 +8764,18 @@ typedef enum
 				**/
 				inline ULWord GetQueueDepth (void)		{return (ULWord)(mQueueCount - mReleaseCount);}
 
+				/**
+					@brief	Is the stream idle.
+					@return True if idle.
+				**/
+				inline bool IsIdle (void)		{return ((mStreamState & NTV2_STREAM_CHANNEL_STATE_IDLE) != 0);}
+
+				/**
+					@brief	Is the stream active.
+					@return True if active.
+				**/
+				inline bool IsActive (void)		{return ((mStreamState & NTV2_STREAM_CHANNEL_STATE_ACTIVE) != 0);}
+
 				std::ostream &	Print (std::ostream & inOutStream) const;
 
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)

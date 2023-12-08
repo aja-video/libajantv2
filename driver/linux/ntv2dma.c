@@ -2510,6 +2510,7 @@ void dmaInterrupt(ULWord deviceNumber, ULWord intStatus)
 	NTV2PrivateParams* pNTV2Params = getNTV2Params(deviceNumber);
 	PDMA_ENGINE pDmaEngine = NULL;
     struct ntv2_stream* pDmaStream = NULL;
+    ULWord dmaStatus;
 
 	if (pNTV2Params->_dmaMethod == DmaMethodAja)
 	{
@@ -2561,60 +2562,93 @@ void dmaInterrupt(ULWord deviceNumber, ULWord intStatus)
 	{
 		if (IsXlnxDmaInterrupt(deviceNumber, false, 0, intStatus))
 		{
+            pDmaEngine = getDmaEngine(deviceNumber, 0);
             pDmaStream = getDmaStream(deviceNumber, 0);
             if (pDmaStream != NULL)
             {
-                if ((ReadXlnxDmaStatus(deviceNumber, false, 0) & kRegMaskXlnxIntDescComplete) != 0)
+                dmaStatus = ReadXlnxDmaStatus(deviceNumber, false, 0);
+                if ((dmaStatus & kRegMaskXlnxIntDescComplete) != 0)
                 {
                     ntv2_stream_channel_advance(pDmaStream);
                 }
                 else
                 {
-                    ntv2Message("XILINX interrupt %08x\n", ReadXlnxDmaStatus(deviceNumber, false, 0));
+                    pDmaStream->stream_state = ntv2_stream_state_error;
+                    pDmaStream->engine_state = ntv2_stream_state_error;
+                    NTV2_MSG_ERROR("%s%d:%s%d: dmaInterrupt dma hardware error %08x\n", DMA_MSG_ENGINE, dmaStatus);
                 }
             }
             else
             {
-                pDmaEngine = getDmaEngine(deviceNumber, 0);
                 dmaXlnxInterrupt(pDmaEngine);
             }
 		}
 		if (IsXlnxDmaInterrupt(deviceNumber, true, 0, intStatus))
 		{
+            pDmaEngine = getDmaEngine(deviceNumber, 1);
             pDmaStream = getDmaStream(deviceNumber, 1);
             if (pDmaStream != NULL)
             {
-                ntv2_stream_channel_advance(pDmaStream);
+                dmaStatus = ReadXlnxDmaStatus(deviceNumber, false, 1);
+                if ((dmaStatus & kRegMaskXlnxIntDescComplete) != 0)
+                {
+                    ntv2_stream_channel_advance(pDmaStream);
+                }
+                else
+                {
+                    pDmaStream->stream_state = ntv2_stream_state_error;
+                    pDmaStream->engine_state = ntv2_stream_state_error;
+                    NTV2_MSG_ERROR("%s%d:%s%d: dmaInterrupt dma hardware error %08x\n", DMA_MSG_ENGINE, dmaStatus);
+                }
             }
             else
             {
-                pDmaEngine = getDmaEngine(deviceNumber, 1);
                 dmaXlnxInterrupt(pDmaEngine);
             }
 		}
 		if (IsXlnxDmaInterrupt(deviceNumber, false, 1, intStatus))
 		{
+            pDmaEngine = getDmaEngine(deviceNumber, 2);
             pDmaStream = getDmaStream(deviceNumber, 2);
             if (pDmaStream != NULL)
             {
-                ntv2_stream_channel_advance(pDmaStream);
+                dmaStatus = ReadXlnxDmaStatus(deviceNumber, false, 2);
+                if ((dmaStatus & kRegMaskXlnxIntDescComplete) != 0)
+                {
+                    ntv2_stream_channel_advance(pDmaStream);
+                }
+                else
+                {
+                    pDmaStream->stream_state = ntv2_stream_state_error;
+                    pDmaStream->engine_state = ntv2_stream_state_error;
+                    NTV2_MSG_ERROR("%s%d:%s%d: dmaInterrupt dma hardware error %08x\n", DMA_MSG_ENGINE, dmaStatus);
+                }
             }
             else
             {
-                pDmaEngine = getDmaEngine(deviceNumber, 2);
                 dmaXlnxInterrupt(pDmaEngine);
             }
 		}
 		if (IsXlnxDmaInterrupt(deviceNumber, true, 1, intStatus))
 		{
+            pDmaEngine = getDmaEngine(deviceNumber, 3);
             pDmaStream = getDmaStream(deviceNumber, 3);
             if (pDmaStream != NULL)
             {
-                ntv2_stream_channel_advance(pDmaStream);
+                dmaStatus = ReadXlnxDmaStatus(deviceNumber, false, 3);
+                if ((dmaStatus & kRegMaskXlnxIntDescComplete) != 0)
+                {
+                    ntv2_stream_channel_advance(pDmaStream);
+                }
+                else
+                {
+                    pDmaStream->stream_state = ntv2_stream_state_error;
+                    pDmaStream->engine_state = ntv2_stream_state_error;
+                    NTV2_MSG_ERROR("%s%d:%s%d: dmaInterrupt dma hardware error %08x\n", DMA_MSG_ENGINE, dmaStatus);
+                }
             }
             else
             {
-                pDmaEngine = getDmaEngine(deviceNumber, 3);
                 dmaXlnxInterrupt(pDmaEngine);
             }
 		}
@@ -5062,6 +5096,8 @@ int dmaOpsStreamStart(struct ntv2_stream *stream)
 int dmaOpsStreamStop(struct ntv2_stream *stream)
 {    
     PDMA_ENGINE pDmaEngine = (PDMA_ENGINE)stream->dma_engine;
+    int start_index = 0;
+    int status = 0;
 
     // sync with the engine
     dmaEngineLock(pDmaEngine);
@@ -5072,6 +5108,21 @@ int dmaOpsStreamStop(struct ntv2_stream *stream)
         return NTV2_STREAM_OPS_FAIL;
     }
 
+    if(stream->stream_state == ntv2_stream_state_initialized)
+    {
+        // start the engine
+        NTV2_MSG_STATE("%s%d:%s%d: dmaOpsStreamStart start the dma\n", DMA_MSG_ENGINE);
+#if 1        
+        status = dmaXlnxStreamStart(pDmaEngine, start_index);
+        if (status < 0)
+        {
+            stream->engine_state = ntv2_stream_state_error;
+            dmaEngineUnlock(pDmaEngine);
+            return NTV2_STREAM_OPS_FAIL;
+        }
+#endif        
+    }
+    
     // set state
     stream->stream_state = ntv2_stream_state_idle;
 
@@ -5691,7 +5742,7 @@ static int dmaXlnxStreamLink(PDMA_ENGINE pDmaEngine, uint32_t descIndex, uint32_
 
 	if (!pDmaEngine->dmaStream)
 	{
-		NTV2_MSG_PROGRAM("%s%d:%s%d: dmaXlnxStreamLink() not a streaming engine\n", DMA_MSG_ENGINE);
+		NTV2_MSG_ERROR("%s%d:%s%d: dmaXlnxStreamLink() not a streaming engine\n", DMA_MSG_ENGINE);
 		return -EPERM;
 	}
 
@@ -5718,15 +5769,22 @@ static int dmaXlnxStreamStart(PDMA_ENGINE pDmaEngine, uint32_t startIndex)
     ULWord  startPage = 0;
     ULWord  startCount = 0;
     ULWord64 startAddress = 0;
+    uint32_t status;
 
     NTV2_MSG_PROGRAM("%s%d:%s%d: dmaXlnxStreamStart() tohost %d start index %d\n",
                      DMA_MSG_ENGINE, xlnxC2H, startIndex);
 
 	if (!pDmaEngine->dmaStream)
 	{
-		NTV2_MSG_PROGRAM("%s%d:%s%d: dmaXlnxStreamStart() not a streaming engine\n", DMA_MSG_ENGINE);
+		NTV2_MSG_ERROR("%s%d:%s%d: dmaXlnxStreamStart() not a streaming engine\n", DMA_MSG_ENGINE);
 		return -EPERM;
 	}
+
+    status = ReadXlnxDmaStatus(deviceNumber, xlnxC2H, xlnxIndex);
+    if (IsXlnxDmaActive(status))
+    {
+		NTV2_MSG_PROGRAM("%s%d:%s%d: dmaXlnxStreamStart() engine  already running\n", DMA_MSG_ENGINE);
+    }
 
     if (dmaXlnxDescIndexToPage(startIndex, &startPage, &startCount) != 0)
         return -EPERM;
@@ -5761,7 +5819,7 @@ int dmaXlnxStreamStop(PDMA_ENGINE pDmaEngine)
 
 	if (!pDmaEngine->dmaStream)
 	{
-		NTV2_MSG_PROGRAM("%s%d:%s%d: dmaXlnxStreamStop() not a streaming engine\n", DMA_MSG_ENGINE);
+		NTV2_MSG_ERROR("%s%d:%s%d: dmaXlnxStreamStop() not a streaming engine\n", DMA_MSG_ENGINE);
 		return -EPERM;
 	}
 

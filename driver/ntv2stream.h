@@ -81,6 +81,8 @@ struct ntv2_stream {
     uint32_t                    tail_index;         // buffer queue tail (remove here)
     uint32_t                    active_index;       // currently active buffer
     uint32_t                    next_index;         // next active buffer
+    uint32_t                    init_advance;       // number of syncs to start stream
+    uint32_t                    init_count;         // current number of syncs
     NTV2StreamChannel           user_channel;       // user mode stream channel data
 };
 
@@ -92,7 +94,8 @@ void ntv2_stream_close(struct ntv2_stream *ntv2_str);
 Ntv2Status ntv2_stream_configure(struct ntv2_stream *ntv2_str,
                                  struct ntv2_stream_ops *stream_ops,
                                  void* dma_engine,
-                                 bool to_host);
+                                 bool to_host,
+                                 uint32_t init_advance);
 
 Ntv2Status ntv2_stream_enable(struct ntv2_stream *ntv2_str);
 Ntv2Status ntv2_stream_disable(struct ntv2_stream *ntv2_str);

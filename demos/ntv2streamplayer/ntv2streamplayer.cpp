@@ -476,11 +476,29 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 
 				if (goodQueue == 3)
 				{
-					//  Start the stream
+					//  Stop the stream (this will start streaming the first buffer to the output)
+					status = mDevice.StreamChannelStop(mConfig.fOutputChannel, strStatus);
+					if (status != NTV2_STREAM_STATUS_SUCCESS)
+					{
+						cerr << "## ERROR:  Stream stop failed: " << status << endl;
+						return;
+					}
+					//	Wait for stream to startup
+					mDevice.StreamChannelWait(mConfig.fOutputChannel, strStatus);
+					while(!strStatus.IsIdle())
+					{
+						mDevice.StreamChannelWait(mConfig.fOutputChannel, strStatus);
+					}
+					//	Wait a few more frames for output to stabilize
+					for (int i = 0; i < 30; i++)
+					{
+						mDevice.StreamChannelWait(mConfig.fOutputChannel, strStatus);
+					}
+					//  Now start the stream
 					status = mDevice.StreamChannelStart(mConfig.fOutputChannel, strStatus);
 					if (status != NTV2_STREAM_STATUS_SUCCESS)
 					{
-						cerr << "## ERROR:  Stream initialize failed: " << status << endl;
+						cerr << "## ERROR:  Stream start failed: " << status << endl;
 						return;
 					}
 				}
@@ -502,8 +520,6 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 		{
 			if (bfrStatus.mBufferCookie < CIRCULAR_BUFFER_SIZE)
 			{
-//				if (goodRelease != 0)
-//					mHostBuffers[(bfrStatus.mBufferCookie + CIRCULAR_BUFFER_SIZE - 1) % CIRCULAR_BUFFER_SIZE].fDataReady = false;
 				mHostBuffers[bfrStatus.mBufferCookie].fDataReady = false;
 				goodRelease++;
 			}
