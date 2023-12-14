@@ -20,7 +20,6 @@
 #include "ntv2card.h"
 #include "ntv2enums.h"
 #include "ntv2task.h"
-#include "ntv2rp188.h"
 #include "ajabase/common/types.h"
 #include "ajabase/system/process.h"
 #if defined (INCLUDE_AJACC)
@@ -60,41 +59,16 @@ class NTV2StreamGrabber : public QThread
 		void			SetInputSource (const NTV2InputSource inInputSource);
 
 		/**
-			@brief	Enables or disables host audio playback.
-			@param[in]	inWithAudio		If true, enables host audio playback;  otherwise disables it.
-		**/
-		inline void		SetWithAudio (const bool inWithAudio)							{mbWithAudio = inWithAudio;	mRestart = true;}
-
-		/**
 			@brief	Sets the AJA device to be used for capture.
 			@param[in]	inDeviceIndex	Specifies the zero-based index number of the device to be used.
 		**/
 		void			SetDeviceIndex (const UWord inDeviceIndex);
 
-		void			SetTimeCodeSource (const NTV2TCIndex inTCSource);
-
 		UWord			GetDeviceIndex (void) const;
-
-		/**
-			@brief	Enables or disables checking for 4K/UHD video (on devices that supported 4K/UHD).
-			@param[in]	inCheckFor4K	If true, enables checking for 4K/UHD video;  otherwise disables it.
-		**/
-		inline void		CheckFor4kInput (const bool inCheckFor4K)						{mCheckFor4K = inCheckFor4K;}
-
-		/**
-			@brief	Enables or disables deinterlacing of non-progressive video.
-			@param[in]	inDeinterlace	If true, enables deinterlacing of non-progressive video;  otherwise disables it.
-		**/
-		inline void		SetDeinterlaceNonProgressiveVideo (const bool inDeinterlace)	{mDeinterlace = inDeinterlace;}
-
-		inline bool		GetDeinterlaceNonProgressiveVideo (void) const					{return mDeinterlace;}	///< @return	True if deinterlacing is enabled;  otherwise false.
 
         void            SetFixedReference(bool fixed)                                   {mbFixedReference = fixed;}
 
 	protected:
-		void			ClearCaptionBuffer (const bool inSignalClients = false);
-		void			GrabCaptions (void);		///< @brief	Performs caption data extraction & decoding
-
 
 	signals:
 		/**
@@ -111,39 +85,13 @@ class NTV2StreamGrabber : public QThread
 		**/
 		void			newStatusString (const QString & inStatus);
 
-		/**
-			@brief	This is signaled (called) when my caption screen buffer changes.
-			@param[in]	pInScreen	Points to the (screen) array of Utf16 characters.
-		**/
-		void			captionScreenChanged (const ushort * pInScreen);
-
 	private slots:
-		void			changeCaptionChannel (int id);	///< @brief	This gets called when a different NTV2Line21Channel is requested.
-
 
 	protected:
 		virtual void	run (void);					///< @brief	My thread function.
 
 		bool			SetupInput (void);			///< @brief	Configures my AJA device for capture
-		void			StopAutoCirculate (void);	///< @brief	Stops capturing
-		void			SetupAudio (void);			///< @brief	Performs audio configuration
-
-		/**
-			@brief	Writes audio samples for channels 1 and 2 that are in the given audio buffer to my QAudioOutput device,
-					which should play out on the host.
-
-			@param	pInOutAudioBuffer	Specifies a valid, non-NULL pointer to a buffer containing the audio samples
-										that were captured from my AJA device for a single frame. This is not a 'const'
-										pointer because the buffer content will be changed.
-										On entry, the buffer will contain 6, 8 or 16 channels of 4-byte (32-bit) audio
-										samples:  0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF...
-										On exit, the buffer will contain unsigned 2-byte (16-bit) samples in LRLRLRLR order,
-										which is what Qt's QAudioOutput object is expecting. (The least significant 16 bits
-										of each sample from the AJA device are discarded.)
-
-			@param	inNumValidBytes		Specifies the number of valid bytes that are in the audio buffer.
-		**/
-		void OutputAudio (ULWord * pInOutAudioBuffer, const ULWord inNumValidBytes);
+		void			StopStream (void);			///< @brief	Stops capturing
 
 		bool CheckForValidInput (void);
 
@@ -156,16 +104,13 @@ class NTV2StreamGrabber : public QThread
 	private:
 		bool						mRestart;				///< @brief	Set true to reconfigure me and restart AutoCirculate
 		bool						mAbort;					///< @brief	Used in my destructor to immediately cause me to exit
-		bool						mCheckFor4K;			///< @brief	Check for 4K/UHD video?
-		bool						mDeinterlace;			///< @brief	De-interlace non-progressive video?
         bool                        mbFixedReference;
 
 		CNTV2Card					mNTV2Card;				///< @brief	Used to talk to monitor & control the device
 		UWord						mBoardNumber;			///< @brief	Index number of the device I'm using
 		NTV2DeviceID				mDeviceID;				///< @brief	Device ID of the device I'm using
-        NTV2Channel					mChannel;				///< @brief	AutoCirculate capture
+        NTV2Channel					mChannel;				///< @brief	Stream channel
         ULWord                      mNumChannels;           ///< @brief Number of capture frame channels
-        bool                        mTsi;                   ///< @brief Channels in tsi mode
 		NTV2VideoFormat				mCurrentVideoFormat;	///< @brief	Current video format seen on selected device input
         NTV2LHIHDMIColorSpace       mCurrentColorSpace;     ///< @brief Current color space seen on selected device input
 		NTV2VideoFormat				mLastVideoFormat;		///< @brief	Used to detect input video format changes
@@ -174,27 +119,8 @@ class NTV2StreamGrabber : public QThread
 		NTV2InputSource				mInputSource;			///< @brief	User-selected input source
 		NTV2FrameDimensions			mFrameDimensions;		///< @brief	Frame dimensions, pixels X lines
 		NTV2FrameBufferFormat		mFrameBufferFormat;		///< @brief	My frame buffer format
-		AUTOCIRCULATE_TRANSFER		mTransferStruct;		///< @brief	AutoCirculate transfer object
 		NTV2EveryFrameTaskMode		mSavedTaskMode;			///< @brief	Used to restore the previous task mode
 		bool						mDoMultiChannel;		///< @brief	Demonstrates how to configure the board for multi-format
-
-		bool						mbWithAudio;			///< @brief	Capture audio?
-		QAudioOutput *				mAudioOutput;			///< @brief	Used to play captured audio on host audio system
-		QAudioFormat				mFormat;				///< @brief	Output audio stream format information
-		QIODevice *					mAudioDevice;			///< @brief	Host audio device
-		ULWord						mNumAudioChannels;		///< @brief	Number of audio channels being captured on the AJA device
-		NTV2AudioSystem				mAudioSystem;			///< @brief	Audio subsystem to use
-
-		std::string					mTimeCode;				///< @brief	Currently displayed timecode
-		NTV2TCIndex					mTimeCodeSource;		///< @brief	Timecode source
-		#if defined (INCLUDE_AJACC)
-			CNTV2CaptionDecoder608Ptr	m608Decoder;		///< @brief	My 608 closed-caption decoder
-			CNTV2CaptionDecoder708Ptr	m708Decoder;		///< @brief	My 708 closed-caption decoder
-			ushort						mScreenBuffer [15][32];	///< @brief	My caption buffer
-
-			static void					Caption608Changed (void * pInstance, const NTV2Caption608ChangeInfo & inChangeInfo);
-			void						caption608Changed (const NTV2Caption608ChangeInfo & inChangeInfo);
-		#endif	//	defined (INCLUDE_AJACC)
 
 };	//	class NTV2StreamGrabber
 
