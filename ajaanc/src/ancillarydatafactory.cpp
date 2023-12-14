@@ -14,6 +14,7 @@
 #include "ancillarydata_cea608_line21.h"
 #include "ancillarydata_framestatusinfo524D.h"
 #include "ancillarydata_framestatusinfo5251.h"
+#include "ancillarydata_hdmi_aux.h"
 //#include "ancillarydata_smpte352.h"
 //#include "ancillarydata_smpte2016-3.h"
 //#include "ancillarydata_smpte2051.h"
@@ -45,6 +46,8 @@ AJAAncillaryData * AJAAncillaryDataFactory::Create (const AJAAncDataType inAncTy
  		case AJAAncDataType_HDR_SDR:				break;
  		case AJAAncDataType_HDR_HDR10:				break;
  		case AJAAncDataType_HDR_HLG:				break;
+
+		case AJAAncDataType_HDMI_Aux:				pResult = new AJAAncillaryData_HDMI_Aux(pAncData);	break;
 #if !defined(_DEBUG)
 		default:	break;
 #else

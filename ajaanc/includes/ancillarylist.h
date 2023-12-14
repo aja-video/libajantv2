@@ -99,6 +99,19 @@ public:	//	CLASS METHODS
 																	const uint32_t inFrameNum = 0);
 	///@}
 
+	/**
+		@brief		Returns all HDMI Aux data packets found in the given F1 and F2 aux data buffers.
+		@param[in]	inF1AuxBuffer		Specifies the F1 ancillary data buffer.
+		@param[in]	inF2AuxBuffer		Specifies the F2 ancillary data buffer.
+		@param[out]	outPackets			Receives the packet list.
+		@param[in]	inFrameNum			If non-zero, replaces the frame identifier of new packets that have a zero frame ID.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	static AJAStatus						SetFromDeviceAuxBuffers (const NTV2Buffer & inF1AuxBuffer,
+																	const NTV2Buffer & inF2AuxBuffer,
+																	AJAAncillaryList & outPackets,
+																	const uint32_t inFrameNum = 0);
+	///@}
 
 	/**
 		@name	Global Configuration
@@ -473,6 +486,18 @@ public:	//	INSTANCE METHODS
 	**/
 	virtual AJAStatus						AddReceivedAncillaryData (const uint8_t * pInReceivedData, const uint32_t inByteCount, const uint32_t inFrameNum = 0);
 
+	/**
+		@brief		Parse "raw" HDMI auxillary data bytes received from hardware (ingest) -- see \ref ancgumpformat --
+					into separate AJAAncillaryData objects and appends them to me.
+		@param[in]	pInReceivedData		Specifies a valid, non-NULL address of the first byte of "raw" ancillary data received by an AncExtractor widget.
+		@param[in]	inByteCount			Specifies the number of bytes of data in the specified buffer to process.
+		@param[in]	inFrameNum			If non-zero, replaces the frame identifier of new packets that have a zero frame ID.
+		@details	For each packet parsed from the received data, AJAAncillaryDataFactory::GuessAncillaryDataType
+					is called to ascertain the packet's AJAAncDataType, then AJAAncillaryDataFactory::Create
+					is used to instantiate the specific AJAAncillaryData subclass instance.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						AddReceivedAuxillaryData (const uint8_t * pInReceivedData, const uint32_t inByteCount, const uint32_t inFrameNum = 0);
 
 	/**
 		@brief		Parse a "raw" RTP packet received from hardware (ingest) in network byte order into separate
@@ -575,6 +600,18 @@ protected:
 		@return		AJA_STATUS_SUCCESS if successful, including if no Anc packets are found and added to the list.
 	**/
 	static AJAStatus						AddFromDeviceAncBuffer (const NTV2Buffer & inAncBuffer,
+																	AJAAncillaryList & outPacketList,
+																	const uint32_t inFrameNum = 0);
+
+	/**
+		@brief		Appends whatever can be decoded from the given device HDIM aux buffer to the AJAAncillaryList.
+		@param[in]	inAuxBuffer			Specifies the Anc buffer to be parsed.
+		@param		outPacketList		The AJAAncillaryList to be appended to, for whatever packets are found in the buffer.
+		@param[in]	inFrameNum			If non-zero, replaces the frame identifier of packets that have a zero frame ID.
+		@note		Called by SetFromDeviceAncBuffers, once for the F1 buffer, another time for the F2 buffer.
+		@return		AJA_STATUS_SUCCESS if successful, including if no Anc packets are found and added to the list.
+	**/
+	static AJAStatus						AddFromDeviceAuxBuffer (const NTV2Buffer & inAuxBuffer,
 																	AJAAncillaryList & outPacketList,
 																	const uint32_t inFrameNum = 0);
 

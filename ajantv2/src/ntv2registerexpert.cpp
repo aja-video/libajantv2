@@ -81,6 +81,7 @@ private:
 		SetupBasicRegs();		//	Basic registers
 		SetupVPIDRegs();		//	VPIDs
 		SetupAncInsExt();		//	Anc Ins/Ext
+		SetupAuxInsExt();		//	Aux Ins/Ext
 		SetupXptSelect();		//	Xpt Select
 		SetupDMARegs();			//	DMA
 		SetupTimecodeRegs();	//	Timecode
@@ -639,9 +640,9 @@ private:
 														"Ignore DID 1-4",		"Ignore DID 5-8",		"Ignore DID 9-12",
 														"Ignore DID 13-16",		"Ignore DID 17-20",		"Analog Start Line",
 														"Analog F1 Y Filter",	"Analog F2 Y Filter",	"Analog F1 C Filter",
-														"Analog F2 C Filter"	"",						"",
+														"Analog F2 C Filter",	"",						"",
 														"",						"",						"",
-														"Analog Act Line Len",	""};
+														"Analog Act Line Len"};
 		static const string AncInsRegNames []	=	{	"Field Bytes",			"Control",				"F1 Start Address",
 														"F2 Start Address",		"Pixel Delay",			"Active Start",
 														"Pixels Per Line",		"Lines Per Frame",		"Field ID Lines",
@@ -717,6 +718,86 @@ private:
 			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsIpChannel,						"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 		}
 	}	//	SetupAncInsExt
+
+	void SetupAuxInsExt(void)
+	{
+		static const string AuxExtRegNames []	=	{	"Control",				"F1 Start Address",		"F1 End Address",
+														"F2 Start Address",		"",						"",
+														"Memory Total",			"F1 Memory Usage",		"F2 Memory Usage",
+														"V Blank Lines",		"Lines Per Frame",		"Field ID Lines",
+														"Ignore DID 1-4",		"Ignore DID 5-8",		"Ignore DID 9-12",
+														"Ignore DID 13-16",		"Buffer Fill"};
+		// static const string AncInsRegNames []	=	{	"Field Bytes",			"Control",				"F1 Start Address",
+		// 												"F2 Start Address",		"Pixel Delay",			"Active Start",
+		// 												"Pixels Per Line",		"Lines Per Frame",		"Field ID Lines",
+		// 												"Payload ID Control",	"Payload ID",			"Chroma Blank Lines",
+		// 												"F1 C Blanking Mask",	"F2 C Blanking Mask",	"Field Bytes High",
+		// 												"Reserved 15",			"RTP Payload ID",		"RTP SSRC",
+		// 												"IP Channel"};
+		static const uint32_t	AuxExtPerChlRegBase []	=	{	7616,	7680,	7744,	7808	};
+		static const uint32_t	AuxInsPerChlRegBase []	=	{	4608,	4672,	4736,	4800	};
+		
+		NTV2_ASSERT(sizeof(AuxExtRegNames[0]) == sizeof(AuxExtRegNames[1]));
+		NTV2_ASSERT(size_t(regAuxExt_LAST) == sizeof(AuxExtRegNames)/sizeof(AuxExtRegNames[0]));
+		//NTV2_ASSERT(size_t(regAncIns_LAST) == sizeof(AncInsRegNames)/sizeof(string));
+
+		AJAAutoLock lock(&mGuardMutex);
+		for (ULWord offsetNdx (0);	offsetNdx < 4;	offsetNdx++)
+		{
+			for (ULWord reg(regAuxExtControl);	reg < regAuxExt_LAST;  reg++)
+			{
+				if (AuxExtRegNames[reg].empty())	continue;
+				ostringstream	oss;	oss << "Extract " << (offsetNdx+1) << " " << AuxExtRegNames[reg];
+				DefineRegName (AuxExtPerChlRegBase[offsetNdx] + reg,	oss.str());
+			}
+			// for (ULWord reg(regAncInsFieldBytes);  reg < regAncIns_LAST;  reg++)
+			// {
+			// 	ostringstream	oss;	oss << "Insert " << (offsetNdx+1) << " " << AncInsRegNames[reg];
+			// 	DefineRegName (AncInsPerChlRegBase[offsetNdx] + reg,	oss.str());
+			// }
+		}
+		for (ULWord ndx (0);  ndx < 4;	ndx++)
+		{
+			// Some of the decoders are shared with Anc
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtControl,				"", mDecodeAuxExtControlReg,		READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtField1StartAddress,		"", mDefaultRegDecoder,				READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtField1EndAddress,		"", mDefaultRegDecoder,				READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtField2StartAddress,		"", mDefaultRegDecoder,				READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			// DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExt4,             			"", mDefaultRegDecoder,				READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			// DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExt5,						"", mDefaultRegDecoder,				READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtTotalStatus,			"", mDecodeAncExtStatus,			READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtField1Status,			"", mDecodeAncExtStatus,			READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtField2Status,			"", mDecodeAncExtStatus,			READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtFieldVBLStartLine,		"", mDecodeAncExtFieldLines,		READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtTotalFrameLines,		"", mDefaultRegDecoder,				READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtFID,					"", mDecodeAncExtFieldLines,		READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtPacketMask0,			"", mDecodeAncExtIgnoreDIDs,		READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtPacketMask1,			"", mDecodeAncExtIgnoreDIDs,		READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtPacketMask2,			"", mDecodeAncExtIgnoreDIDs,		READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtPacketMask3,			"", mDecodeAncExtIgnoreDIDs,		READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtFillData,          		"", mDefaultRegDecoder,				READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+
+			
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsFieldBytes,						"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsControl,						"", mDecodeAncInsControlReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsField1StartAddr,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsField2StartAddr,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsPixelDelay,						"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsActiveStart,					"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsLinePixels,						"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsFrameLines,						"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsFieldIDLines,					"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsPayloadIDControl,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsPayloadID,						"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsBlankCStartLine,				"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsBlankField1CLines,				"", mDecodeAncInsChromaBlankReg,	READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsBlankField2CLines,				"", mDecodeAncInsChromaBlankReg,	READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsFieldBytesHigh,					"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsRtpPayloadID,					"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsRtpSSRC,						"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsIpChannel,						"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+		}
+	}	//	SetupAuxInsExt
 
 	void SetupHDMIRegs(void)
 	{
@@ -1658,6 +1739,21 @@ public:
 				allChanRegs.insert(chRegs.begin(), chRegs.end());
 			}
 			std::set_intersection (ancRegs.begin(), ancRegs.end(),	allChanRegs.begin(), allChanRegs.end(),	 std::inserter(result, result.begin()));
+		}
+
+		if (::NTV2DeviceCanDoCustomAux(inDeviceID))
+		{
+			const NTV2RegNumSet auxRegs			(GetRegistersForClass(kRegClass_Aux));
+			const UWord			numVideoInputs (::NTV2DeviceGetNumHDMIVideoInputs(inDeviceID));
+			const UWord			numVideoOutputs (::NTV2DeviceGetNumHDMIVideoOutputs(inDeviceID));
+			const UWord			numSpigots(numVideoInputs > numVideoOutputs ? numVideoInputs : numVideoOutputs);
+			NTV2RegNumSet		allChanRegs;	//	For just those channels it supports
+			for (UWord num(0);	num < numSpigots;	num++)
+			{
+				const NTV2RegNumSet chRegs (GetRegistersForClass(chanClasses[num]));
+				allChanRegs.insert(chRegs.begin(), chRegs.end());
+			}
+			std::set_intersection (auxRegs.begin(), auxRegs.end(),	allChanRegs.begin(), allChanRegs.end(),	 std::inserter(result, result.begin()));
 		}
 
 		if (::NTV2DeviceCanDoSDIErrorChecks(inDeviceID))
@@ -3027,7 +3123,24 @@ private:
 			return oss.str();
 		}
 	}	mDecodeAncExtControlReg;
+
+	struct DecodeAuxExtControlReg : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			(void) inDeviceID;
+			ostringstream	oss;
+			static const string SyncStrs [] =	{	"field",	"frame",	"immediate",	"unknown"	};
+			oss << "Progressive video: "	<< YesNo(inRegValue & BIT(16))	<< endl
+				<< "Synchronize: "			<< SyncStrs [(inRegValue & (BIT(24) | BIT(25))) >> 24]	<< endl
+				<< "Memory writes: "		<< EnabDisab(!(inRegValue & BIT(28)))					<< endl
+				<< "Filter inclusion: "		<< EnabDisab(inRegValue & BIT(29));
+			return oss.str();
+		}
+	}	mDecodeAuxExtControlReg;
 	
+	// Also used for HDMI Aux regs: regAuxExtFieldVBLStartLine, regAuxExtFID
 	struct DecodeAncExtFieldLinesReg : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -3035,8 +3148,8 @@ private:
 			(void) inDeviceID;
 			ostringstream	oss;
 			const uint32_t	which		(inRegNum & 0x1F);
-			const uint32_t	valueLow	(inRegValue & 0x7FF);
-			const uint32_t	valueHigh	((inRegValue >> 16) & 0x7FF);
+			const uint32_t	valueLow	(inRegValue & 0xFFF);
+			const uint32_t	valueHigh	((inRegValue >> 16) & 0xFFF);
 			switch (which)
 			{
 				case 5:		oss << "F1 cutoff line: "			<< valueLow << endl		//	regAncExtFieldCutoffLine
@@ -3059,6 +3172,7 @@ private:
 		}
 	}	mDecodeAncExtFieldLines;
 	
+	// Also used for HDMI Aux regs: regAuxExtTotalStatus, regAuxExtField1Status, regAuxExtField2Status
 	struct DecodeAncExtStatusReg : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -3081,6 +3195,7 @@ private:
 		}
 	}	mDecodeAncExtStatus;
 	
+	// Also used for HDMI Aux Packet filtering
 	struct DecodeAncExtIgnoreDIDReg : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const

@@ -57,6 +57,7 @@ typedef enum
 	AJAAncDataType_HDR_SDR,
 	AJAAncDataType_HDR_HDR10,
 	AJAAncDataType_HDR_HLG,
+	AJAAncDataType_HDMI_Aux,
 	AJAAncDataType_Size
 } AJAAncDataType;
 
@@ -503,6 +504,7 @@ typedef enum
 	AJAAncBufferFormat_FBVANC,		///< @brief	Frame buffer VANC line.
 	AJAAncBufferFormat_SDI,			///< @brief	SDI ("GUMP").
 	AJAAncBufferFormat_RTP,			///< @brief	RTP/IP.
+	AJAAncBufferFormat_HDMI,		///< @brief HDMI
 	AJAAncBufferFormat_Invalid,		///< @brief	Invalid.
 	AJAAncBufferFormat_Size	= AJAAncBufferFormat_Invalid
 
@@ -609,6 +611,10 @@ public:
 	virtual uint16_t						GetStreamInfo (void) const;																			///< @return	My 7-bit stream info (if relevant)
 	virtual inline const uint64_t &			UserData (void) const						{return m_userData;}					///< @return	My user data (if any).
 
+	virtual uint8_t							GetAuxType (void) const						{return m_auxType;}						///< @return	My 8-bit HDMI Aux Packet Type / Header Byte 0 (HB0).
+	virtual uint8_t							GetAuxHB1 (void) const						{return m_auxHB1;}						///< @return	My 8-bit HDMI Aux Header Byte 1 (HB1)
+	virtual uint8_t							GetAuxHB2 (void) const						{return m_auxHB2;}						///< @return	My 8-bit HDMI Aux Header Byte 2 (HB2)
+
 	/**
 		@return	True if I have valid DataLink/DataStream stream information (rather than unknown).
 	**/
@@ -620,6 +626,14 @@ public:
 	virtual inline bool						IsHanc (void) const							{return GetDataLocation().IsHanc ();}					///< @return	True if my location data space is HANC.
 	virtual inline bool						IsDigital (void) const						{return GetDataCoding() == AJAAncDataCoding_Digital;}	///< @return	True if my coding type is digital.
 	virtual inline bool						IsRaw (void) const							{return GetDataCoding() == AJAAncDataCoding_Raw;}		///< @return	True if my coding type is "raw" (i.e., from an digitized waveform).
+
+								
+		/**
+		@brief		Returns whether or not this is an HDMI Aux Info Frame Packet
+		@note		This abstract method is overridden if it is an HDMI Aux packet.
+		@return		Returns false unless there is a method override that determines otherwise.
+	**/
+	virtual bool 							isHDMIAuxInfoFrame(void) const				{return false;}
 
 	/**
 		@brief	Generates an 8-bit checksum from the DID + SID + DC + payload data.
@@ -902,6 +916,19 @@ public:
 																	uint32_t &				outPacketByteCount);
 	/**
 		@brief		Initializes me from "raw" ancillary data received from hardware (ingest) -- see \ref ancgumpformat.
+		@param[in]	pInData				Specifies the starting address of the "raw" packet data that was received from the AJA device.
+		@param[in]	inMaxBytes			Specifies the maximum number of bytes left in the source buffer.
+		@param[in]	inLocationInfo		Specifies the default location info.
+		@param[out]	outPacketByteCount	Receives the size (in bytes) of the parsed packet.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual AJAStatus						InitAuxWithReceivedData (	const uint8_t *			pInData,
+																	const size_t			inMaxBytes,
+																	//const AJAAncDataLoc &	inLocationInfo,
+																	uint32_t &				outPacketByteCount);
+
+	/**
+		@brief		Initializes me from "raw" ancillary data received from hardware (ingest) -- see \ref ancgumpformat.
 		@param[in]	inData				Specifies the "raw" packet data.
 		@param[in]	inLocationInfo		Specifies the default location info.
 		@return		AJA_STATUS_SUCCESS if successful.
@@ -1001,7 +1028,6 @@ public:
 	**/
 	virtual std::string						AsString (const uint16_t inDumpMaxBytes = 0) const;
 	
-
 	/**
 		@return	A string containing a human-readable representation of the given DID/SDID values,
 				or empty for invalid or unknown values.
@@ -1009,6 +1035,17 @@ public:
 		@param[in]	inSDID	Specifies the Secondary Data ID value.
 	**/
 	static std::string						DIDSIDToString (const uint8_t inDID, const uint8_t inSDID);
+
+	/**
+		@return	A string containing a human-readable representation of a given HDMI Aux Packet Type value,
+				or empty for invalid or unknown values.
+		@param[in]	inDID	Specifies the Data ID value.
+		@param[in]	inSDID	Specifies the Secondary Data ID value.
+	**/
+	static std::string						AuxPacketTypeToString (const uint8_t auxPacketType);
+
+
+
 	///@}
 
 	/**
@@ -1094,6 +1131,10 @@ public:
 		AJAAncBufferFormat	m_bufferFmt;	///< @brief	My originating buffer format, if known
 		uint32_t			m_frameID;		///< @brief	ID of my originating frame, if known
 		uint64_t			m_userData;		///< @brief	User data (for client use)
+		//HDMI Aux specific types	
+		uint8_t				m_auxType;		///< @brief	HDMI Aux Header Byte 0 (Packet Type)
+		uint8_t				m_auxHB1;		///< @brief	HDMI Aux Header Byte 1 (Header Data)
+		uint8_t				m_auxHB2;		///< @brief	HDMI Aux Header Byte 2 (Header Data)
 
 };	//	AJAAncillaryData
 

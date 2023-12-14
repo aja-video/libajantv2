@@ -201,6 +201,12 @@ bool CNTV2Card::IS_INPUT_SPIGOT_INVALID (const UWord inInputSpigot) const
 	return false;
 }
 
+bool CNTV2Card::IS_HDMI_INPUT_SPIGOT_INVALID (const UWord inInputHDMIPort) const
+{
+	if (inInputHDMIPort >= ::NTV2DeviceGetNumHDMIVideoInputs (_boardID))
+		return true;
+	return false;
+}
 
 uint64_t CNTV2Card::GetSerialNumber (void)
 {

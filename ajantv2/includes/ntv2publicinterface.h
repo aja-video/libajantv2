@@ -5252,7 +5252,7 @@ typedef enum
 	regAuxExtField2Status,						//	Reg 8 - mem_sz_overrun_f2[28], total_bytes_f2[23:0]
 	regAuxExtFieldVBLStartLine,					//	Reg 9 - f2_vbl_start[27:16], f1_vbl_start[11:0]
 	regAuxExtTotalFrameLines,					//	Reg 10 - total_lines[11:0]
-	regAuxExtFID,								//	Reg 11 - fid_low[27:26], fid_hi[11:0]
+	regAuxExtFID,								//	Reg 11 - fid_low[27:16], fid_hi[11:0]
 	regAuxExtPacketMask0,						//	Reg 12 - Packet Ignore bytes
 	regAuxExtPacketMask_First	= regAuxExtPacketMask0,
 	regAuxExtPacketMask1,						//	Reg 13 - Packet Ignore bytes
