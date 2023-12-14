@@ -34,7 +34,7 @@
 
 //static uint32_t ntv2_debug_mask = 0xffffffff;
 //static uint32_t ntv2_user_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
-static uint32_t ntv2_active_mask = 0xffffffff; //NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
+    static uint32_t ntv2_active_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR | NTV2_DEBUG_STREAM_STATE;
 
 static uint32_t queue_next(uint32_t index)
 {

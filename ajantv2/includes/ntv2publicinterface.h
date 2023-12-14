@@ -8776,6 +8776,12 @@ typedef enum
 				**/
 				inline bool IsActive (void)		{return ((mStreamState & NTV2_STREAM_CHANNEL_STATE_ACTIVE) != 0);}
 
+				/**
+					@brief	Has the stream encountered an error.
+					@return True if error.
+				**/
+				inline bool HasError (void)		{return ((mStreamState & NTV2_STREAM_CHANNEL_STATE_ERROR) != 0);}
+
 				std::ostream &	Print (std::ostream & inOutStream) const;
 
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)

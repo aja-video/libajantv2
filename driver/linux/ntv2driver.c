@@ -2711,7 +2711,6 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 
 	if(XlnxStatusRegister != 0)
 	{
-        MSG("%s: Xilinx interrupt %08x\n", pNTV2Params->name, XlnxStatusRegister);
 		dmaInterrupt(deviceNumber, XlnxStatusRegister);
 		++handled;
 	}

@@ -25,23 +25,6 @@ using namespace std;
 #define	TCINFO(_expr_)	AJA_sINFO	(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
 #define	TCDBG(_expr_)	AJA_sDEBUG	(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
 
-/**
-	@brief	The maximum number of bytes of ancillary data that can be transferred for a single field.
-			Each driver instance sets this maximum to the 8K default at startup.
-			It can be changed at runtime, so it's sampled and reset in SetUpVideo.
-**/
-static ULWord	gAncMaxSizeBytes (NTV2_ANCSIZE_MAX);	//	Max per-frame anc buffer size, in bytes
-
-/**
-	@brief	The maximum number of bytes of 48KHz audio that can be transferred for a single frame.
-			Worst case, assuming 16 channels of audio (max), 4 bytes per sample, and 67 msec per frame
-			(assuming the lowest possible frame rate of 14.98 fps)...
-			48,000 samples per second requires 3,204 samples x 4 bytes/sample x 16 = 205,056 bytes
-			201K min will suffice, with 768 bytes to spare
-			But it could be more efficient for page-aligned (and page-locked) memory to round to 256K.
-**/
-static const uint32_t	gAudMaxSizeBytes (256 * 1024);	//	Max per-frame audio buffer size, in bytes
-
 static const bool		BUFFER_PAGE_ALIGNED	(true);
 
 
@@ -66,8 +49,6 @@ NTV2StreamPlayer::~NTV2StreamPlayer (void)
 {
 	//	Stop my playout and producer threads, then destroy them...
 	Quit();
-
-	mDevice.UnsubscribeOutputVerticalEvent(mConfig.fOutputChannel);	//	Unsubscribe from output VBI event
 }	//	destructor
 
 
@@ -82,9 +63,6 @@ void NTV2StreamPlayer::Quit (void)
 	while (mConsumerThread.Active())
 		AJATime::Sleep(10);
 
-#if defined(NTV2_BUFFER_LOCKING)
-	mDevice.DMABufferUnlockAll();
-#endif	//	NTV2_BUFFER_LOCKING
 	if (!mConfig.fDoMultiFormat  &&  mDevice.IsOpen())
 	{
 		mDevice.ReleaseStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid()));
@@ -210,18 +188,10 @@ AJAStatus NTV2StreamPlayer::SetUpVideo (void)
 	//	Set the frame buffer pixel format for the device FrameStore...
 	mDevice.SetFrameBufferFormat (mConfig.fOutputChannel, mConfig.fPixelFormat);
 
-	//	The output interrupt is Enabled by default, but on some platforms, you must subscribe to it
-	//	in order to be able to wait on its event/semaphore...
-	mDevice.SubscribeOutputVerticalEvent (mConfig.fOutputChannel);
-
 	//	Check if HDR anc is permissible...
 	if (IS_KNOWN_AJAAncDataType(mConfig.fTransmitHDRType)  &&  !mDevice.features().CanDoCustomAnc())
 		{cerr << "## WARNING:  HDR Anc requested, but device can't do custom anc" << endl;
 			mConfig.fTransmitHDRType = AJAAncDataType_Unknown;}
-
-	//	Get current per-field maximum Anc buffer size...
-	if (!mDevice.GetAncRegionOffsetFromBottom (gAncMaxSizeBytes, NTV2_AncRgn_Field2))
-		gAncMaxSizeBytes = NTV2_ANCSIZE_MAX;
 
 	//	Set output clock reference...
 	mDevice.SetReference(mDevice.features().CanDo2110() ? NTV2_REFERENCE_SFP1_PTP : NTV2_REFERENCE_FREERUN);
@@ -302,12 +272,6 @@ AJAStatus NTV2StreamPlayer::SetUpTestPatternBuffers (void)
 			cerr << "## ERROR:  DrawTestPattern " << DEC(tpNdx) << " failed: " << mFormatDesc << endl;
 			return AJA_STATUS_FAIL;
 		}
-
-		#ifdef NTV2_BUFFER_LOCKING
-			//	Try to prelock the memory, including its scatter-gather list...
-//			if (!mDevice.DMABufferLock(mTestPatRasters.at(tpNdx), /*alsoLockSegmentMap=*/true))
-//				PLWARN("Test pattern buffer " << DEC(tpNdx+1) << " of " << DEC(testPatIDs.size()) << ": failed to pre-lock");
-		#endif
 	}	//	loop for each predefined pattern
 
 	return AJA_STATUS_SUCCESS;
