@@ -101,6 +101,7 @@ set(AJANTV2_HEADERS
     includes/ntv2vpidfromspec.h)
 set(AJANTV2_SOURCES
     src/ntv2anc.cpp
+    src/ntv2aux.cpp
     src/ntv2audio.cpp
     src/ntv2autocirculate.cpp
     src/ntv2bitfile.cpp
@@ -234,6 +235,7 @@ set(AJAANC_HEADERS
     ../ajaanc/includes/ancillarydata_timecode.h
     ../ajaanc/includes/ancillarydata_timecode_atc.h
     ../ajaanc/includes/ancillarydata_timecode_vitc.h
+    ../ajaanc/includes/ancillarydata_hdmi_aux.h
     ../ajaanc/includes/ancillarylist.h)
 set(AJAANC_SOURCES
     ../ajaanc/src/ancillarydata.cpp
@@ -250,6 +252,7 @@ set(AJAANC_SOURCES
     ../ajaanc/src/ancillarydata_timecode.cpp
     ../ajaanc/src/ancillarydata_timecode_atc.cpp
     ../ajaanc/src/ancillarydata_timecode_vitc.cpp
+    ../ajaanc/src/ancillarydata_hdmi_aux.cpp
     ../ajaanc/src/ancillarylist.cpp)
 
 # ajabase

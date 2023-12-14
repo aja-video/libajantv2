@@ -5796,7 +5796,7 @@ public:
 		@brief		Initializes the given SDI input's Anc extractor for custom Anc packet detection and de-embedding.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc extractor firmware.)
 		@return		True if successful; otherwise false.
-		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
+		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
 		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's fed from the SDI input,
 									if different from the SDI input. The default is to use the same ::NTV2Channel
 									that corresponds to the given SDI input (e.g., ::NTV2_CHANNEL1 == 0 == SDIIn1).
@@ -5853,7 +5853,7 @@ public:
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
-		@param[in]	inFrameNumber	Tells the Anc inserter where to write the received Anc data, specified as a
+		@param[in]	inFrameNumber	Tells the Anc extractor where to write the received Anc data, specified as a
 									frame number.
 		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's driving the SDI input,
 									if different from the SDI input. The default is to use the same ::NTV2Channel
@@ -5873,7 +5873,7 @@ public:
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
-		@param[in]	inFrameNumber	Tells the Anc inserter where to write the received Anc data, specified as a
+		@param[in]	inFrameNumber	Tells the Anc extractor where to write the received Anc data, specified as a
 									frame number.
 		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's driving the SDI input,
 									if different from the SDI input. The default is to use the same ::NTV2Channel
@@ -5960,6 +5960,15 @@ public:
 	AJA_VIRTUAL bool	AncExtractGetBufferOverrun (const UWord inSDIInput, bool & outIsOverrun, const UWord inField = 0);	//	New in SDK 15.0
 
 	/**
+		@brief		Answers whether or not the given SDI input's Anc extractor was configured with a progressive video format.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
+		@param[out] outIsProgressive Receives true if the extractor was configured with a progressive format. Otherwise false.
+	**/
+	AJA_VIRTUAL bool 	AncExtractIsProgressive (const UWord inSDIInput, bool & outIsProgressive); // New in SDK 17.1
+
+	/**
 		@return		The maximum number of distinct DIDs that the device Anc extractor filter can accommodate.
 		@see		CNTV2Card::AncExtractSetFilterDIDs, CNTV2Card::AncExtractGetDefaultDIDs, \ref anccapture-filter
 	**/
@@ -5974,6 +5983,325 @@ public:
 	**/
 	static NTV2DIDSet	AncExtractGetDefaultDIDs (const bool inHDAudio = true);	//	New in SDK 13.0
 	///@}
+
+	/**
+		@name	Auxillary Data
+	**/
+	///@{
+
+	/**
+		@brief		Sets the capacity of the AUX buffers in device frame memory.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inF1Size		Specifies the capacity of the Field 1 aux buffer, in bytes.
+		@param[in]	inF2Size		Specifies the capacity of the Field 2 aux buffer, in bytes.
+		@note		This function should be used before configuring the aux extractors/inserters.
+		@note		Size changes apply to all aux extractors/inserters.
+		@note		This function calls AncSetFrameBufferSize
+		@warning	Setting these values too large will result in aux data occupying the bottom of the video raster.
+		@see		CNTV2Card::GetAuxRegionOffsetAndSize, \ref anccapture-dataspace
+	**/
+	AJA_VIRTUAL bool	AuxSetFrameBufferSize (const ULWord inF1Size, const ULWord inF2Size);	//	New in SDK 17.1
+
+
+	/**
+		@brief		Initializes the given HDMI output's Aux inserter for custom Aux packet insertion.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIOutput		Specifies the HDMI output of interest (e.g., 0=HDMIOut1, 1=HDMIOut2, etc.).
+		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's driving the HDMI output,
+									if different from the HDMI output. The default is to use the same ::NTV2Channel
+									that corresponds to the given HDMI output (e.g., ::NTV2_CHANNEL1 == 0 == HDMIOut1).
+		@param[in]	inStandard		Optionally overrides the ::NTV2Standard used to initialize the Aux inserter.
+									Defaults to using the ::NTV2Standard of the ::NTV2Channel being used.
+		@note		This function is provided for playback methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
+	**/
+	AJA_VIRTUAL bool	AuxInsertInit (const UWord inHDMIOutput, const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
+										const NTV2Standard inStandard = NTV2_STANDARD_INVALID);	//	New in SDK #.#
+
+	/**
+		@brief		Enables or disables individual Aux insertion components for the given HDMI output.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIOutput		Specifies the HDMI output of interest (e.g., 0=HDMIOut1, 1=HDMIOut2, etc.).
+		@param[in]	inVauxY			Specify true to enable Vaux Y component insertion;	otherwise false to disable it.
+		@param[in]	inVauxC			Specify true to enable Vaux C component insertion;	otherwise false to disable it.
+		@param[in]	inHauxY			Specify true to enable Haux Y component insertion;	otherwise false to disable it.
+		@param[in]	inHauxC			Specify true to enable Haux C component insertion;	otherwise false to disable it.
+		@note		This function is provided for playback methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
+	**/
+	AJA_VIRTUAL bool	AuxInsertSetComponents (const UWord inHDMIOutput,
+												const bool inVauxY, const bool inVauxC,
+												const bool inHauxY, const bool inHauxC);	//	New in SDK #.#
+
+	/**
+		@brief		Enables or disables the given HDMI output's Aux inserter frame buffer reads.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIOutput		Specifies the HDMI output of interest (e.g., 0=HDMIOut1, 1=HDMIOut2, etc.).
+		@param[in]	inIsEnabled		Specify true to enable the Aux inserter;  otherwise false to disable it.
+		@note		This function is provided for playback methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
+	**/
+	AJA_VIRTUAL bool	AuxInsertSetEnable (const UWord inHDMIOutput, const bool inIsEnabled);	//	New in SDK #.#
+
+	/**
+		@brief		Answers with the run state of the given Aux inserter -- i.e. if its "memory reader" is enabled or not.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIOutput		Specifies the HDMI output of interest as a zero-based index value (e.g., 0 == HDMIOut1).
+		@param[out] outIsEnabled	Receives 'true' if the Aux inserter is enabled (running);  otherwise false.
+	**/
+	AJA_VIRTUAL bool	AuxInsertIsEnabled (const UWord inHDMIOutput, bool & outIsEnabled);	//	New in SDK #.#
+
+	/**
+		@brief		Configures the Aux inserter for the next frame's F1 Aux data to embed/transmit.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIOutput		Specifies the HDMI output of interest (e.g., 0=HDMIOut1, 1=HDMIOut2, etc.).
+		@param[in]	inFrameNumber	Tells the Aux inserter where to find the Aux data to transmit, specified as a
+									zero-based frame number.
+		@param[in]	inF1Size		Specifies the maximum number of F1 bytes to process in the Aux data buffer in the frame.
+		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's driving the HDMI output,
+									if different from the HDMI output. The default is to use the same ::NTV2Channel
+									that corresponds to the given HDMI output (e.g., ::NTV2_CHANNEL1 == 0 == HDMIOut1).
+		@param[in]	inFrameSize		Optionally overrides the ::NTV2Framesize used to calculate the Aux buffer location
+									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
+		@note		This function is provided for playback methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
+	**/
+	AJA_VIRTUAL bool	AuxInsertSetReadParams (const UWord inHDMIOutput, const ULWord inFrameNumber, const ULWord inF1Size,
+												const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
+												const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);	//	New in SDK #.#
+
+	/**
+		@brief		Configures the Aux inserter for the next frame's F2 Aux data to embed/transmit.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIOutput		Specifies the HDMI output of interest (e.g., 0=HDMIOut1, 1=HDMIOut2, etc.).
+		@param[in]	inFrameNumber	Tells the Aux inserter where to find the Aux data to transmit, specified as a
+									zero-based frame number.
+		@param[in]	inF2Size		Specifies the maximum number of F2 bytes to process in the Aux data buffer in the frame.
+		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's driving the HDMI output,
+									if different from the HDMI output. The default is to use the same ::NTV2Channel
+									that corresponds to the given HDMI output (e.g., ::NTV2_CHANNEL1 == 0 == HDMIOut1).
+		@param[in]	inFrameSize		Optionally overrides the ::NTV2Framesize used to calculate the Aux buffer location
+									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
+		@note		This function is provided for playback methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
+	**/
+	AJA_VIRTUAL bool	AuxInsertSetField2ReadParams (const UWord inHDMIOutput, const ULWord inFrameNumber, const ULWord inF2Size,
+														const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
+														const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);	//	New in SDK #.#
+
+	/**
+		@brief		Configures the Aux inserter IP specific params.
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIOutput		Specifies the HDMI output of interest (e.g., 0=HDMIOut1, 1=HDMIOut2, etc.).
+		@param[in]	auxChannel		Tells the IP packetizer which Aux inserter to use (4-7).
+		@param[in]	payloadID		Tells the IP packetizer what the RTP Payload Id is.
+		@param[in]	ssrc			Tells the IP packetizer what the RTP SSRC is.
+	**/
+	AJA_VIRTUAL bool	AuxInsertSetIPParams (const UWord inHDMIOutput, const UWord auxChannel, const ULWord payloadID, const ULWord ssrc);	//	New in SDK #.#
+
+	/**
+		@brief		Answers where, in device SDRAM, the given HDMI connector's Aux inserter is currently reading Aux data for playout.
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIOutput		Specifies the HDMI output of interest (e.g., 0=HDMIOut1, 1=HDMIOut2, etc.).
+		@param[out]	outF1StartAddr	Receives the Aux inserter's current F1 starting address.
+		@param[out]	outF2StartAddr	Receives the Aux inserter's current F2 starting address.
+	**/
+	AJA_VIRTUAL bool	AuxInsertGetReadInfo (const UWord inHDMIOutput, uint64_t & outF1StartAddr, uint64_t & outF2StartAddr);	//	New in SDK #.#
+
+
+	/**
+		@brief		Initializes the given HDMI input's Aux extractor for custom Aux packet detection and de-embedding.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's fed from the HDMI input,
+									if different from the HDMI input. The default is to use the same ::NTV2Channel
+									that corresponds to the given HDMI input (e.g., ::NTV2_CHANNEL1 == 0 == HDMIIn1).
+		@param[in]	inStandard		Optionally overrides the ::NTV2Standard used to initialize the Aux extractor.
+									Defaults to using the ::NTV2Standard of the ::NTV2Channel being used.
+		@note		This function is provided for capture methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
+		@see		CNTV2Card::AuxExtractSetEnable, CNTV2Card::AuxExtractSetWriteParams,
+					CNTV2Card::AuxExtractSetPacketFilters, \ref anccapture
+	**/
+	AJA_VIRTUAL bool	AuxExtractInit (const UWord inHDMIInput, const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
+										const NTV2Standard inStandard = NTV2_STANDARD_INVALID);	//	New in SDK 17.1
+	/**
+		@brief		Enables or disables the given HDMI input's Aux extractor.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		@param[in]	inIsEnabled		Specify true to enable the Aux extractor;  otherwise false to disable it.
+		@note		This function is provided for capture methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
+		@see		CNTV2Card::AuxExtractIsEnabled, \ref anccapture
+	**/
+	AJA_VIRTUAL bool	AuxExtractSetEnable (const UWord inHDMIInput, const bool inIsEnabled);	//	New in SDK 17.1
+
+	/**
+		@brief		Answers whether the given HDMI input's Aux extractor is enabled/active or not.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest as a zero-based index value (e.g., 0 == HDMIIn1).
+		@param[out] outIsEnabled	Receives 'true' if the Aux extractor is enabled (running);	otherwise false.
+		@see		CNTV2Card::AuxExtractSetEnable, \ref anccapture
+	**/
+	AJA_VIRTUAL bool	AuxExtractIsEnabled (const UWord inHDMIInput, bool & outIsEnabled);	//	New in SDK 17.1
+
+	/**
+		@brief		Configures the given HDMI input's Aux extractor to receive the next frame's F1 Aux data.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		// Question / TODO:  Needs accurate description for extraction, apply to Anc also. 
+		@param[in]	inFrameNumber	Tells the Aux extractor where to write the received Aux data, specified as a
+									frame number.
+		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's driving the HDMI input,
+									if different from the HDMI input. The default is to use the same ::NTV2Channel
+									that corresponds to the HDMI input (e.g., ::NTV2_CHANNEL1 == 0 == HDMIIn1).
+		@param[in]	inFrameSize		Optionally overrides the ::NTV2Framesize used to calculate the Aux buffer location
+									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
+		@note		This function is provided for capture methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
+		@see		CNTV2Card::AuxExtractSetField2WriteParams, \ref anccapture
+	**/
+	AJA_VIRTUAL bool	AuxExtractSetWriteParams (const UWord inHDMIInput, const ULWord inFrameNumber,
+													const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
+													const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);	//	New in SDK 17.1
+
+	/**
+		@brief		Configures the given HDMI input's Aux extractor to receive the next frame's F2 Aux data.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		// Question / TODO:  Needs accurate description for extraction, apply to Anc also. 
+		@param[in]	inFrameNumber	Tells the Aux extractor where to write the received Aux data, specified as a
+									frame number.
+		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's driving the HDMI input,
+									if different from the HDMI input. The default is to use the same ::NTV2Channel
+									that corresponds to the HDMI input (e.g., ::NTV2_CHANNEL1 == 0 == HDMIIn1).
+		@param[in]	inFrameSize		Optionally overrides the ::NTV2Framesize used to calculate the Aux buffer location
+									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
+		@note		This function is provided for capture methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
+		@see		CNTV2Card::AuxExtractSetWriteParams, \ref anccapture
+	**/
+	AJA_VIRTUAL bool	AuxExtractSetField2WriteParams (const UWord inHDMIInput, const ULWord inFrameNumber,
+														const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
+														const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);	//	New in SDK 17.1
+
+	/**
+		@brief		Answers with the given HDMI input's current Aux extractor info.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		@param[out]	outF1StartAddr	Receives the device SDRAM offset where the extractor starts writing F1 aux data.
+		@param[out]	outF1EndAddr	Receives the device SDRAM offset where the extractor will stop writing F1 aux data.
+		@param[out]	outF2StartAddr	Receives the device SDRAM offset where the extractor starts writing F2 aux data.
+		@param[out]	outF2EndAddr	Receives the device SDRAM offset where the extractor will stop writing F2 aux data.
+		@see		\ref anccapture
+	**/
+	AJA_VIRTUAL bool	AuxExtractGetWriteInfo	(const UWord inHDMIInput,
+												uint64_t & outF1StartAddr, uint64_t & outF1EndAddr,
+												uint64_t & outF2StartAddr, uint64_t & outF2EndAddr);	//	New in SDK 17.1
+
+	/**
+		@brief		Answers with the HDMI packet types currently being excluded (filtered) by the HDMI input's Aux extractor.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		@param[out] outDIDs			Receives the ::NTV2DIDSet that contain the packet types that are currently being
+									filtered (excluded).
+		@see		CNTV2Card::AuxExtractSetPacketFilters, \ref anccapture-filter
+	**/
+	AJA_VIRTUAL bool	AuxExtractGetPacketFilters (const UWord inHDMIInput, NTV2DIDSet & outDIDs);	//	New in SDK 17.1
+
+	/**
+		@brief		Replaces the HDMI packet types to be excluded (filtered) by the given HDMI input's Aux extractor.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		@param[in]	inDIDs			Specifies the DIDs to be filtered (excluded). Specify an empty set to
+									disable all packet filtering.
+		@note		DIDs having the value 0 (zero) are ignored.
+		@see		CNTV2Card::AuxExtractGetPacketFilters, \ref anccapture-filter
+	**/
+	AJA_VIRTUAL bool	AuxExtractSetPacketFilters (const UWord inHDMIInput, const NTV2DIDSet & inDIDs);	//	New in SDK 17.1
+
+	/**
+		@brief		Answers with the number of bytes of field 1 ANC extracted.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		@param[out] outF1Size		Receives the number of bytes of field 1 ANC extracted;
+	**/
+	AJA_VIRTUAL bool	AuxExtractGetField1Size (const UWord inHDMIInput, ULWord & outF1Size);	//	New in SDK 17.1
+
+
+	 //Todo: Add proper docmentation.
+	// Packet filters are excluded by default.  Set inFilterInclusion to true to include all data matching the filters instead.
+	// Set inFilterInclusion to false for the default behavior.
+	AJA_VIRTUAL bool	AuxExtractSetFilterInclusionMode (const UWord inHDMIInput, const bool inFilterInclusion);	//	New in SDK 17.1
+
+	//Todo: Add proper docmentation.
+	// Query for the Filter mode.  If the mode is Exclude (default), outIncludePackets will be false.  
+	// If the mode is Include, outIncludePackets will be true.
+	AJA_VIRTUAL bool	AuxExtractGetFilterInclusionMode (const UWord inHDMIInput, bool & outIncludePackets);	//	New in SDK 17.1
+
+	/**
+		@brief		Answers with the number of bytes of field 2 ANC extracted.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		@param[out] outF2Size		Receives the number of bytes of field 2 ANC extracted;
+	**/
+	AJA_VIRTUAL bool	AuxExtractGetField2Size (const UWord inHDMIInput, ULWord & outF2Size);	//	New in SDK 17.1
+
+	/**
+		@brief		Answers whether or not the given HDMI input's Aux extractor reached its buffer limits.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		@param[out] outIsOverrun	Receives true if the extractor is reporting that it overran its buffer limits;
+									otherwise false if it didn't.
+		@param[in]	inField			Optionally specifies the field of interest. Specify 0 for the "total" buffer
+									overflow between the F1 and F2 buffers;	 specify 1 for Field 1;	 specify 2 for Field 2.
+									Defaults to zero (the "total"). (Added in SDK 16.1)
+		@note		The extractor will not actually write any Aux bytes past its "stop" address, but it will
+					report that it was about to via this "overrun" flag.
+	**/
+	AJA_VIRTUAL bool	AuxExtractGetBufferOverrun (const UWord inHDMIInput, bool & outIsOverrun, const UWord inField = 0);	//	New in SDK 17.1
+
+	/**
+		@brief		Answers whether or not the given HDMI input's Aux extractor was configured with a progressive video format.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		@param[out] outIsProgressive Receives true if the extractor was configured with a progressive format. Otherwise false.
+	**/
+	AJA_VIRTUAL bool 	AuxExtractIsProgressive (const UWord inHDMIInput, bool & outIsProgressive); //	New in SDK 17.1
+
+
+	/**
+		@return		The maximum number of distinct packet filters that the device Aux extractor filter can accommodate.
+		@see		CNTV2Card::AuxExtractSetPacketFilters, CNTV2Card::AuxExtractGetDefaultPacketFilters, \ref anccapture-filter
+	**/
+	static UWord		AuxExtractGetMaxNumPacketFilters (void);	//	New in SDK 17.1
+
+	/**
+		@return		The default packet filters that the device Aux extractor filter is started with.
+		@see		CNTV2Card::AuxExtractSetPacketFilters, CNTV2Card::AuxExtractGetMaxNumPacketFilters, \ref anccapture-filter
+	**/
+	static NTV2DIDSet	AuxExtractGetDefaultPacketFilters (void);	//	New in SDK 17.1
+	///@}
+
 
 	/**
 		@name	TCP/IP
@@ -6405,6 +6733,7 @@ protected:
 	AJA_VIRTUAL bool			IS_CHANNEL_INVALID (const NTV2Channel inChannel) const;
 	AJA_VIRTUAL bool			IS_OUTPUT_SPIGOT_INVALID (const UWord inOutputSpigot) const;
 	AJA_VIRTUAL bool			IS_INPUT_SPIGOT_INVALID (const UWord inInputSpigot) const;
+	AJA_VIRTUAL bool			IS_HDMI_INPUT_SPIGOT_INVALID (const UWord inInputHDMIPort) const;
 	AJA_VIRTUAL bool			SetWarmBootFirmwareReload(bool enable);
 
 	//	Seamless Anc Playout & Capture

@@ -555,6 +555,11 @@ static bool SetAncExtProgressive (CNTV2Card & inDevice, const UWord inSDIInput, 
 	return inDevice.WriteRegister(AncExtRegNum(inSDIInput, regAncExtControl), bEnable ? 1 : 0, maskSetProgressive, shiftSetProgressive);
 }
 
+static bool IsAncExtProgressive (CNTV2DriverInterface & inDevice, const UWord inSDIInput, bool & outIsProgressive)
+{
+	return inDevice.ReadRegister(AncExtRegNum(inSDIInput, regAncExtControl), outIsProgressive, maskSetProgressive, shiftSetProgressive);
+}
+
 static bool SetAncExtSynchro (CNTV2Card & inDevice, const UWord inSDIInput)
 {
 	return inDevice.WriteRegister(AncExtRegNum(inSDIInput, regAncExtControl), 0x1, maskSyncro, shiftSyncro);
@@ -1036,6 +1041,17 @@ bool CNTV2Card::AncExtractGetBufferOverrun (const UWord inSDIInput, bool & outIs
 	return false;
 }
 
+bool CNTV2Card::AncExtractIsProgressive (const UWord inSDIInput, bool & outIsProgressive)
+{
+	if (!::NTV2DeviceCanDoCapture(_boardID))
+		return false;
+	if (!::NTV2DeviceCanDoCustomAnc(_boardID))
+		return false;
+	if (IS_INPUT_SPIGOT_INVALID(inSDIInput))
+		return false;
+
+	return IsAncExtProgressive (*this, inSDIInput, outIsProgressive);
+}
 
 
 /////////////////////////////////////////////////
