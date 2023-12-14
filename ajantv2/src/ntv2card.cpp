@@ -502,55 +502,6 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 #endif	//	!defined(NTV2_DEPRECATE_16_3)
 
 
-/////////// Stream Operators
-
-ostream & operator << (ostream & inOutStr, const NTV2AudioChannelPairs & inSet)
-{
-	if (inSet.empty())
-		inOutStr << "(none)";
-	else
-		for (NTV2AudioChannelPairsConstIter iter (inSet.begin ());	iter != inSet.end ();  ++iter)
-			inOutStr << (iter != inSet.begin() ? ", " : "") << ::NTV2AudioChannelPairToString (*iter, true);
-	return inOutStr;
-}
-
-
-ostream &	operator << (ostream & inOutStr, const NTV2AudioChannelQuads & inSet)
-{
-	for (NTV2AudioChannelQuadsConstIter iter (inSet.begin ());	iter != inSet.end ();  ++iter)
-		inOutStr << (iter != inSet.begin () ? ", " : "") << ::NTV2AudioChannelQuadToString (*iter, true);
-	return inOutStr;
-}
-
-
-ostream &	operator << (ostream & inOutStr, const NTV2AudioChannelOctets & inSet)
-{
-	for (NTV2AudioChannelOctetsConstIter iter (inSet.begin ());	 iter != inSet.end ();	++iter)
-		inOutStr << (iter != inSet.begin () ? ", " : "") << ::NTV2AudioChannelOctetToString (*iter, true);
-	return inOutStr;
-}
-
-
-ostream &	operator << (ostream & inOutStr, const NTV2DoubleArray & inVector)
-{
-	for (NTV2DoubleArrayConstIter iter (inVector.begin ());	 iter != inVector.end ();  ++iter)
-		inOutStr << *iter << endl;
-	return inOutStr;
-}
-
-
-ostream &	operator << (ostream & inOutStr, const NTV2DIDSet & inDIDs)
-{
-	for (NTV2DIDSetConstIter it (inDIDs.begin());  it != inDIDs.end();	)
-	{
-		inOutStr << xHEX0N(uint16_t(*it),2);
-		if (++it != inDIDs.end())
-			inOutStr << ", ";
-	}
-	return inOutStr;
-}
-
-
 NTV2Buffer CNTV2Card::NULL_POINTER (AJA_NULL, 0);
 
 

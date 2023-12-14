@@ -19,6 +19,7 @@
 	#include <iomanip>
 	#include <bitset>
 	#include <string>
+	#include <bitset>
 	#include "string.h"	//	for memcpy
 	#include "ajaexport.h"
 	#if defined(MSWindows)
@@ -53,6 +54,34 @@
 	typedef std::set<ULWord>					ULWordSet;					///< @brief A collection of unique ULWord (uint32_t) values.
 	typedef ULWordSet::const_iterator			ULWordSetConstIter;
 	typedef ULWordSet::iterator					ULWordSetIter;
+
+	typedef std::set <NTV2AudioChannelPair>			NTV2AudioChannelPairs;			///< @brief A set of distinct NTV2AudioChannelPair values.
+	typedef NTV2AudioChannelPairs::const_iterator	NTV2AudioChannelPairsConstIter; ///< @brief Handy const iterator to iterate over a set of distinct NTV2AudioChannelPair values.
+	AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioChannelPairs & inSet); ///<	@brief	Handy ostream writer for NTV2AudioChannelPairs.
+
+	typedef std::set <NTV2AudioChannelQuad>			NTV2AudioChannelQuads;			///< @brief A set of distinct NTV2AudioChannelQuad values.
+	typedef NTV2AudioChannelQuads::const_iterator	NTV2AudioChannelQuadsConstIter; ///< @brief Handy const iterator to iterate over a set of distinct NTV2AudioChannelQuad values.
+	AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioChannelQuads & inSet); ///<	@brief	Handy ostream writer for NTV2AudioChannelQuads.
+
+	typedef std::set <NTV2AudioChannelOctet>		NTV2AudioChannelOctets;			///< @brief A set of distinct NTV2AudioChannelOctet values.
+	typedef NTV2AudioChannelOctets::const_iterator	NTV2AudioChannelOctetsConstIter;///< @brief Handy const iterator to iterate over a set of distinct NTV2AudioChannelOctet values.
+	AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioChannelOctets & inSet); ///<	@brief	Handy ostream writer for NTV2AudioChannelOctets.
+
+	typedef std::vector <double>					NTV2DoubleArray;				///< @brief An array of double-precision floating-point values.
+	typedef NTV2DoubleArray::iterator				NTV2DoubleArrayIter;			///< @brief Handy non-const iterator to iterate over an NTV2DoubleArray.
+	typedef NTV2DoubleArray::const_iterator			NTV2DoubleArrayConstIter;		///< @brief Handy const iterator to iterate over an NTV2DoubleArray.
+	AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DoubleArray & inVector);	///<	@brief	Handy ostream writer for NTV2DoubleArray.
+
+	typedef UByte						NTV2DID;				///< @brief An ancillary Data IDentifier.
+	typedef std::set <UByte>			NTV2DIDSet;				///< @brief A set of distinct NTV2DID values.
+	typedef NTV2DIDSet::iterator		NTV2DIDSetIter;			///< @brief Handy non-const iterator to iterate over an NTV2DIDSet.
+	typedef NTV2DIDSet::const_iterator	NTV2DIDSetConstIter;	///< @brief Handy const iterator to iterate over an NTV2DIDSet.
+	AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DIDSet & inDIDs);	///<	@brief	Handy ostream writer for NTV2DIDSet.
+
+	typedef std::bitset<16>		NTV2AudioChannelsMuted16;		///< @brief Per-audio-channel mute state for up to 16 audio channels.
+	const NTV2AudioChannelsMuted16	NTV2AudioChannelsMuteAll = NTV2AudioChannelsMuted16(0xFFFF);	///< @brief All 16 audio channels muted/disabled.
+	const NTV2AudioChannelsMuted16	NTV2AudioChannelsEnableAll = NTV2AudioChannelsMuted16(0x0000);	///< @brief All 16 audio channels unmuted/enabled.
+	const ULWord LUTTablePartitionSize = ULWord(0x40000);
 #endif	//	NTV2_BUILDING_DRIVER
 
 
