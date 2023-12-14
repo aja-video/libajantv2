@@ -18,6 +18,12 @@ extern bool ntv2WriteRegMSCon32(Ntv2SystemContext* context, uint32_t regNum, uin
 
 #define NTV2_MAX_VIDEO_STANDARDS	16
 #define NTV2_MAX_FRAME_RATES		16
+#define NTV2_MAX_FRAME_GEOMETRIES   16
+#define NTV2_MAX_VIDEO_SCANS        4
+#define NTV2_MAX_PIXEL_FORMATS      32
+#define NTV2_MAX_FRAME_FORMATS      8
+#define NTV2_MAX_PIXEL_RATES        8
+#define NTV2_MAX_REG_SYNCS          4
 #define NTV2_MAX_COLOR_SPACES		4
 #define NTV2_MAX_COLOR_DEPTHS		4
 #define NTV2_MAX_REF_SOURCES		16
@@ -64,6 +70,95 @@ static const char *frame_rate_name[NTV2_MAX_FRAME_RATES] = {
 	/* ntv2_frame_rate_unknown */				"unknown"
 };
 
+static const char *frame_geometry_name[NTV2_MAX_FRAME_GEOMETRIES] = {
+    /* ntv2_frame_geometry_1920x1080 */         "1920x1080",
+    /* ntv2_frame_geometry_1280x720 */          "1280x720",
+    /* ntv2_frame_geometry_720x486 */           "720x486",
+    /* ntv2_frame_geometry_720x576 */           "720x576",
+    /* ntv2_frame_geometry_1920x1114 */         "1920x1114",
+    /* ntv2_frame_geometry_2048x1114 */         "2048x1114",
+    /* ntv2_frame_geometry_720x508 */           "720x508",
+    /* ntv2_frame_geometry_720x598 */           "720x598",
+    /* ntv2_frame_geometry_1920x1112 */         "1920x1112",
+    /* ntv2_frame_geometry_1280x740 */          "1280x740",
+    /* ntv2_frame_geometry_2048x1080 */         "2048x1080",
+    /* ntv2_frame_geometry_2048x1556 */         "2048x1556",
+    /* ntv2_frame_geometry_2048x1588 */         "2048x1558",
+    /* ntv2_frame_geometry_2048x1112 */         "2048x1112",
+    /* ntv2_frame_geometry_720x514 */           "720x514",
+    /* ntv2_frame_geometry_720x612 */           "720x612"
+};
+
+static const char *video_scan_name[NTV2_MAX_VIDEO_SCANS] = {
+    /* ntv2_video_scan_unknown */               "unknown",
+    /* ntv2_video_scan_progressive */           "progressive",
+    /* ntv2_video_scan_top_first */             "top first",
+    /* ntv2_video_scan_bottom_first */          "bottom first"
+};
+
+static const char *pixel_format_name[NTV2_MAX_PIXEL_FORMATS] = {
+    /* ntv2_pixel_format_10bit_ycbcr */         "10bit ycbcr",
+    /* ntv2_pixel_format_8bit_ycbcr */          "8bit ycbcr",
+    /* ntv2_pixel_format_argb */                "argb",
+    /* ntv2_pixel_format_rgba */                "rgba",
+    /* ntv2_pixel_format_10bit_rgb */           "10bit rgb",
+    /* ntv2_pixel_format_8bit_ycbcr_yuy2 */     "8bit yuy2",
+    /* ntv2_pixel_format_abgr */                "abgr",
+    /* ntv2_pixel_format_10bit_dpx */           "10bit dpx",
+    /* ntv2_pixel_format_10bit_ycbcr_dpx */     "10bit ycbcr dpx",
+    /* ntv2_pixel_format_8bit_dvcpro */         "8bit dvcpro",
+    /* ntv2_pixel_format_8bit_ycbcr_420pl3 */   "8bit ycbcr 420pl3",
+    /* ntv2_pixel_format_8bit_hdv */            "8bit hdv",
+    /* ntv2_pixel_format_24bit_rgb */           "24bit rgb",
+    /* ntv2_pixel_format_24bit_bgr */           "24bit bgr",
+    /* ntv2_pixel_format_10bit_ycbcra */        "10bit ycbcra",
+    /* ntv2_pixel_format_10bit_dpx_le */        "10bit dpx le",
+    /* ntv2_pixel_format_48bit_rgb */           "48bit rgb",
+    /* ntv2_pixel_format_12bit_rgb_packed */    "12bit rgb packed",
+    /* ntv2_pixel_format_prores_dvcpro */       "prores dvcpro",
+    /* ntv2_pixel_format_prores_hdv */          "prores hdv",
+    /* ntv2_pixel_format_10bit_rgb_packed */    "10bit rgb packed",
+    /* ntv2_pixel_format_10bit_argb */          "10bit argb",
+    /* ntv2_pixel_format_16bit_argb */          "16bit argb",
+    /* ntv2_pixel_format_8bit_ycbcr_422pl3 */   "8bit ycbcr 422pl3",
+    /* ntv2_pixel_format_10bit_raw_rgb */       "10bit raw rgb",
+    /* ntv2_pixel_format_10bit_raw_ycbcr */     "10bit raw ycbcr",
+    /* ntv2_pixel_format_10bit_ycbcr_420pl3_le */  "10bit ycbcr 420pl3 le",
+    /* ntv2_pixel_format_10bit_ycbcr_422pl3_le */  "10bit ycbcr 422pl3 le",
+    /* ntv2_pixel_format_10bit_ycbcr_420pl2 */  "10bit ycbcr 420pl2",
+    /* ntv2_pixel_format_10bit_ycbcr_422pl2 */  "10bit ycbcr 422pl2",
+    /* ntv2_pixel_format_8bit_ycbcr_420pl2 */   "8bit ycbcr 420pl2",
+    /* ntv2_pixel_format_8bit_ycbcr_422pl2 */   "8bit ycbcr 422pl2"
+};
+
+static const char *frame_format_name[NTV2_MAX_FRAME_FORMATS] = {
+    /* ntv2_frame_format_unknown */             "unknown",
+    /* ntv2_frame_format_packed */              "packed",
+    /* ntv2_frame_format_2plane */              "2 plane",
+    /* ntv2_frame_format_3plane */              "3 plane",
+    /* ntv2_frame_format_raw */                 "raw",
+    /*  */                                      "#5#",
+    /*  */                                      "#6#",
+    /*  */                                      "#7#"
+};
+
+static const char *pixel_rate_name[NTV2_MAX_PIXEL_RATES] = {
+    /* ntv2_pixel_rate_none */                  "none",
+    /* ntv2_pixel_rate_1350 */                  "1350",
+    /* ntv2_pixel_rate_2700 */                  "2700",
+    /* ntv2_pixel_rate_7418 */                  "7418",
+    /* ntv2_pixel_rate_7425 */                  "7425",
+    /* ntv2_pixel_rate_14835 */                 "14835",
+    /* ntv2_pixel_rate_14850 */                 "14850"
+};
+
+static const char *reg_sync_name[NTV2_MAX_REG_SYNCS] = {
+    /* ntv2_con_reg_sync_field */               "field",
+    /* ntv2_con_reg_sync_frame */               "frame",
+    /* ntv2_con_reg_sync_immediate */           "immediate",
+    /* ntv2_con_reg_sync_field_10_lines */      "field 10 lines"
+};
+
 static const char *color_space_name[NTV2_MAX_COLOR_SPACES] = {
 	/* ntv2_con_hdmiin4_colorspace_ycbcr422 */	"YUV 422",
 	/* ntv2_con_hdmiin4_colorspace_rgb444 */	"RGB 444",
@@ -75,7 +170,7 @@ static const char *color_depth_name[NTV2_MAX_COLOR_DEPTHS] = {
 	/* ntv2_con_hdmiin4_colordepth_8bit */		" 8",
 	/* ntv2_con_hdmiin4_colordepth_10bit */		"10",
 	/* ntv2_con_hdmiin4_colordepth_12bit */		"12",
-	/*  */										"##"
+	/*  */										"#3#"
 };
 
 static const char *ref_source_name[NTV2_MAX_REF_SOURCES] = {
@@ -103,9 +198,9 @@ static const char *ref_standard_name[NTV2_MAX_REF_STANDARDS] = {
 	/* ntv2_ref_standard_625 */					"625",
 	/* ntv2_ref_standard_750 */					"750",
 	/* ntv2_ref_standard_1125 */				"1125",
-	/* ntv2_ref_standard_unknown */				"unknown", 
-	/* ntv2_ref_standard_unknown */				"unknown", 
-	/* ntv2_ref_standard_unknown */				"unknown"
+	/*  */				                        "#5#", 
+	/*  */				                        "#6#", 
+	/*  */				                        "#7#"
 };
 
 static const char *hdr_eotf_name[NTV2_MAX_HDR_EOTFS] = {
@@ -113,24 +208,24 @@ static const char *hdr_eotf_name[NTV2_MAX_HDR_EOTFS] = {
 	/* ntv2_hdr_eotf_hdr */						"traditional hdr",
 	/* ntv2_hdr_eotf_st2084 */					"smpte st2084",
 	/* ntv2_hdr_eotf_hlg */						"hybrid log gamma",
-	/* unknown */								"unknown",
-	/* unknown */								"unknown",
-	/* unknown */								"unknown",
-	/* unknown */								"unknown"
+	/*  */								        "#4#",
+	/*  */								        "#5#",
+	/*  */								        "#6#",
+	/*  */								        "#7#"
 };
 
 static const char *audio_rate_name[NTV2_MAX_AUDIO_RATES] = {
 	/* ntv2_audio_rate_48 */					"48",
 	/* ntv2_audio_rate_96 */					"96",
 	/* ntv2_audio_rate_192 */					"192",
-	/*  */										"##"
+	/*  */										"#3#"
 };
 
 static const char *audio_format_name[NTV2_MAX_AUDIO_FORMATS] = {
 	/* ntv2_audio_format_lpcm */				"lpcm",
 	/* ntv2_audio_format_dolby */				"dolby",
-	/*  */										"unknown",
-	/*  */										"unknown"
+	/*  */										"#2#",
+	/*  */										"#3#"
 };
 
 static const uint32_t video_standard_info[NTV2_MAX_VIDEO_STANDARDS][4] = {
@@ -287,6 +382,48 @@ const char* ntv2_frame_rate_name(uint32_t rate)
 	if (rate >= NTV2_MAX_FRAME_RATES)
 		return "*bad frame rate*";
 	return frame_rate_name[rate];
+}
+
+const char* ntv2_frame_geometry_name(uint32_t geometry)
+{
+    if (geometry >= NTV2_MAX_FRAME_GEOMETRIES)
+        return "*bad frame geometry*";
+    return frame_geometry_name[geometry];
+}
+
+const char* ntv2_video_scan_name(uint32_t scan)
+{
+    if (scan >= NTV2_MAX_VIDEO_SCANS)
+        return "*bad video scan*";
+    return video_scan_name[scan];
+}
+
+const char* ntv2_pixel_format_name(uint32_t format)
+{
+    if (format >= NTV2_MAX_PIXEL_FORMATS)
+        return "*bad pixel format*";
+    return pixel_format_name[format];
+}
+
+const char* ntv2_frame_format_name(uint32_t format)
+{
+    if (format >= NTV2_MAX_FRAME_FORMATS)
+        return "*bad frame format*";
+    return frame_format_name[format];
+}
+
+const char* ntv2_pixel_rate_name(uint32_t rate)
+{
+    if (rate >= NTV2_MAX_PIXEL_RATES)
+        return "*bad pixel rate*";
+    return pixel_rate_name[rate];
+}
+
+const char* ntv2_reg_sync_name(uint32_t sync)
+{
+    if (sync >= NTV2_MAX_REG_SYNCS)
+        return "*bad register sync*";
+    return reg_sync_name[sync];
 }
 
 const char* ntv2_color_space_name(uint32_t color_space)

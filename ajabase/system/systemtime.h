@@ -8,7 +8,7 @@
 #ifndef AJA_TIME_H
 	#define AJA_TIME_H
 
-#if defined(AJA_USE_CPLUSPLUS11)
+#if defined(AJA_USE_CPLUSPLUS11) && !defined(AJA_BAREMETAL)
 	// If compiling with C++11, by default, implementation uses STL chrono & thread.
 	#ifndef AJA_SLEEP_USE_STL
 		#define	AJA_SLEEP_USE_STL	//	Sleep... functions use STL chrono/thread;  comment this out to use native impl

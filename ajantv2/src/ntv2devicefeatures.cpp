@@ -329,6 +329,7 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 	case DEVICE_ID_CORVID44_2X4K:
 	case DEVICE_ID_CORVID44_PLNR:
 	case DEVICE_ID_TTAP_PRO:
+    case DEVICE_ID_KONAX:
 		switch (inFrameGeometry)
 		{
 		case NTV2_FG_4x3840x2160:
@@ -1096,7 +1097,7 @@ NTV2AudioSystem NTV2DeviceGetHostAudioSystem(const NTV2DeviceID inDeviceID)
 
 bool NTV2DeviceROMHasBankSelect (const NTV2DeviceID inDeviceID)
 {
-	if (NTV2DeviceGetSPIFlashVersion(inDeviceID) >= 3  &&  NTV2DeviceGetSPIFlashVersion(inDeviceID) <= 5)
+	if (NTV2DeviceGetSPIFlashVersion(inDeviceID) >= 3  &&  NTV2DeviceGetSPIFlashVersion(inDeviceID) <= 6)
 		return true;
 	else
 		return false;

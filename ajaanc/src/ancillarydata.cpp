@@ -73,6 +73,7 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return AJA_ENDIAN_
 
 
 const uint32_t AJAAncillaryDataWrapperSize = 7;		// 3 bytes header + DID + SID + DC + Checksum: i.e. everything EXCEPT the payload
+const uint32_t AJAAuxillaryPacketSize = 32;  // HDMI Aux packets are always 32 bytes
 
 #if defined(_DEBUG)
 	static uint32_t gConstructCount(0); //	Number of constructor calls made
@@ -141,6 +142,11 @@ void AJAAncillaryData::Init()
 //				.SetDataSpace(AJAAncDataSpace_VANC)					//	VANC
 				.SetHorizontalOffset(AJAAncDataHorizOffset_AnyVanc) //	VANC
 				.SetLineNumber(AJAAncDataLineNumber_Unknown);		//	Unknown line number
+	
+	// HDMI Aux specific
+	m_auxType = 0;
+	m_auxHB1 = 0;
+	m_auxHB2 = 0;
 }
 
 
@@ -607,6 +613,101 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *			pInData,
 
 }	//	InitWithReceivedData
 
+//**********
+//	[Re]Initializes me from the buffer received from extractor (ingest)
+AJAStatus AJAAncillaryData::InitAuxWithReceivedData (const uint8_t *			pInData,
+													const size_t			inMaxBytes,
+													//const AJAAncDataLoc &	inLocationInfo,
+													uint32_t &				outPacketByteCount)
+{
+	AJAStatus status = AJA_STATUS_SUCCESS;
+	Clear();
+
+	// If all is well, pInData points to the beginning of an HDMI Aux packet:
+	//
+	//	pInData ->	0:	Packet Type		// 1st byte is Packet Type / HB0
+	//				1:	Header Data1	// location data byte #1
+	//				2:	Header Data2	// location data byte #2
+	//				3-32: Payload
+	//			   ...	  ...
+	//
+	// Note that this is the layout of the data as returned from the Aux Extractor hardware, and
+	// is NOT exactly the same as the HDMI Specificaiton.  (Error checking bytes are omitted)
+	//
+	// The inMaxBytes input gives us an indication of how many "valid" bytes remain in the caller's TOTAL
+	// ANC Data buffer. We use this as a sanity check to make sure we don't try to parse past the end
+	// of the captured data.
+	//
+	// The caller provides an AJAAncDataLoc struct with all of the information filled in
+	// except the line number.
+	//
+	// When we have extracted the useful data from the packet, we return the packet size, in bytes, so the
+	// caller can find the start of the next packet (if any).
+
+
+	if (pInData == AJA_NULL)
+	{
+		outPacketByteCount = 0;
+		LOGMYERROR("AJA_STATUS_NULL: NULL pointer");
+		return AJA_STATUS_NULL;
+	}
+
+	// The first byte should be a recognized Aux Packet type. 
+	// If it's not, we will assume we are at the end of the valid data
+	if (AuxPacketTypeToString(pInData[0]) == "")  
+	{
+		//	Let the caller try to resynchronize...
+		outPacketByteCount = 0;
+		LOGMYDEBUG("No data:  First Aux byte " << xHEX0N(uint16_t(pInData[0]),2) << " is not a recognized type");
+		return AJA_STATUS_SUCCESS;	//	Not necessarily an error (no data)
+	}
+
+	const uint32_t maxBytes(uint32_t(inMaxBytes+0));
+	//	The minimum size for a packet (i.e. no payload) is 7 bytes
+	if (maxBytes < AJAAuxillaryPacketSize)
+	{
+		outPacketByteCount = maxBytes;
+		LOGMYERROR("AJA_STATUS_RANGE: Buffer size " << maxBytes << " smaller than " << AJAAuxillaryPacketSize << " bytes");
+		return AJA_STATUS_RANGE;
+	}
+
+	//	So we have at least enough bytes for a minimum packet
+
+	const uint32_t	totalBytes	(AJAAuxillaryPacketSize);
+	//	OK... There's enough data in the buffer to contain the packet, and everything else checks out,
+	//	so continue parsing the data...
+	m_auxType  = pInData[0];				// HDMI Header Byte 0 / Packet Type
+	m_auxHB1   = pInData[1];				// HDMI Header Byte 1 / Haeder Data 1
+	m_auxHB2   = pInData[2];				// HDMI Header Byte 2 / Header Data 2
+	
+	//HDMI Aux InfoFrames have a checksum and packet length specifier, while other packet types do not
+	m_checksum = 0;
+	uint32_t		payloadSize (28);	//	HDMI Aux Maximum & Default payload. 
+	int payloadOffset = 3; // Default
+	if (m_auxType & 0x80) // Am I an InfoFrame?
+	{
+		m_checksum = pInData[3];		// Reported checksum
+		payloadSize =  m_auxHB2 & 0x0000001F;
+		payloadOffset = 4;
+	}
+
+	m_coding = AJAAncDataCoding_Digital;
+	SetBufferFormat(AJAAncBufferFormat_HDMI);
+
+	//	Allocate space for the payload and copy it in...
+	if (payloadSize)
+	{
+		status = AllocDataMemory(payloadSize);	//	NOTE:  This also sets my "DC" value
+		if (AJA_SUCCESS(status))
+			for (uint32_t ndx(0);  ndx < payloadSize;  ndx++)
+				m_payload[ndx] = pInData[ndx+payloadOffset];
+	}
+
+	outPacketByteCount = totalBytes;
+	LOGMYDEBUG("Set from HDMI buffer OK: " << AsString(32));
+	return status;
+
+}	//	InitWithReceivedData
 
 AJAStatus AJAAncillaryData::InitWithReceivedData (const ByteVector & inData, const AJAAncDataLoc & inLocationInfo)
 {
@@ -1278,9 +1379,9 @@ const string & AJAAncDataCodingToString (const AJAAncDataCoding inValue, const b
 
 const string &	AJAAncBufferFormatToString (const AJAAncBufferFormat inValue, const bool inCompact)
 {
-	static const string gAncBufFmtToStr []	= {"UNK", "FBVANC", "SDI", "RTP", ""};
+	static const string gAncBufFmtToStr []	= {"UNK", "FBVANC", "SDI", "RTP", "HDMI", ""};
 	static const string gDAncBufFmtToStr [] = {"AJAAncBufferFormat_Unknown", "AJAAncBufferFormat_FBVANC",
-												"AJAAncBufferFormat_SDI", "AJAAncBufferFormat_RTP", ""};
+												"AJAAncBufferFormat_SDI", "AJAAncBufferFormat_RTP","AJAAncBufferFormat_HDMI", ""};
 
 	return IS_VALID_AJAAncBufferFormat(inValue) ? (inCompact ? gAncBufFmtToStr[inValue] : gDAncBufFmtToStr[inValue]) : gEmptyString;
 }
@@ -1323,15 +1424,28 @@ ostream & AJAAncillaryData::Print (ostream & inOutStream, const bool inDumpPaylo
 
 string AJAAncillaryData::AsString (const uint16_t inMaxBytes) const
 {
+	bool isHDMI = (GetBufferFormat() == AJAAncBufferFormat_HDMI); 
+
 	ostringstream	oss;
-	oss << "[" << ::AJAAncDataCodingToString(GetDataCoding())
-		<< "|" << ::AJAAncDataLocToString(GetDataLocation())
-		<< "|" << GetDIDSIDPair() << "|CS" << HEX0N(uint16_t(GetChecksum()),2) << "|DC=" << DEC(GetDC());
+	oss << "[" << ::AJAAncDataCodingToString(GetDataCoding());
+	if (isHDMI)
+	{
+		oss << "|0x"	<< HEX0N(uint16_t(GetAuxType()),2) 
+					<< HEX0N(uint16_t(GetAuxHB1()),2) 
+					<< HEX0N(uint16_t(GetAuxHB2()),2);
+	}
+	else
+	{
+		oss << "|" << ::AJAAncDataLocToString(GetDataLocation())
+		<< "|" << GetDIDSIDPair() << "|CS" << HEX0N(uint16_t(GetChecksum()),2);
+	}
+	oss << "|DC=" << DEC(GetDC());
 	if (m_frameID)
 		oss << "|FRx" << HEX0N(GetFrameID(),8);
 	if (IS_KNOWN_AJAAncBufferFormat(m_bufferFmt))
 		oss << "|" << ::AJAAncBufferFormatToString(GetBufferFormat());
-	const string	typeStr (AJAAncillaryData::DIDSIDToString(m_DID, m_SID));
+	const string typeStr = (isHDMI) ? AJAAncillaryData::AuxPacketTypeToString(m_auxType) :
+										AJAAncillaryData::DIDSIDToString(m_DID, m_SID);
 	if (!typeStr.empty())
 		oss << "|" << typeStr;
 	oss << "]";
@@ -1349,13 +1463,11 @@ string AJAAncillaryData::AsString (const uint16_t inMaxBytes) const
 	return oss.str();
 }
 
-
 ostream & operator << (ostream & inOutStream, const AJAAncDIDSIDPair & inData)
 {
 	inOutStream << "x" << HEX0N(uint16_t(inData.first), 2) << "x" << HEX0N(uint16_t(inData.second), 2);
 	return inOutStream;
 }
-
 
 ostream & AJAAncillaryData::DumpPayload (ostream & inOutStream) const
 {
@@ -1467,6 +1579,11 @@ AJAAncillaryData & AJAAncillaryData::operator = (const AJAAncillaryData & inRHS)
 		m_bufferFmt		= inRHS.m_bufferFmt;
 		m_frameID		= inRHS.m_frameID;
 		m_userData		= inRHS.m_userData;
+
+		// HDMI Aux specific
+		m_auxType = inRHS.m_auxType;
+		m_auxHB1 = inRHS.m_auxHB1;
+		m_auxHB2 = inRHS.m_auxHB2;
 	}
 	return *this;
 }
@@ -1902,6 +2019,30 @@ string AJAAncillaryData::DIDSIDToString (const uint8_t inDID, const uint8_t inSI
 	return "";
 }	//	DIDSID2String
 
+string AJAAncillaryData::AuxPacketTypeToString (const uint8_t auxPacketType)
+{
+	switch (auxPacketType)
+	{
+
+		case 0x01: return "Audio Clock Regeneration (N/CTS)";
+		case 0x02: return "Audio Sample (L-PCM and IEC 61937 compressed)";
+		case 0x03: return "General Control";
+		case 0x04: return "ACP Packet";
+		case 0x05: return "ISRC1 Packet";
+		case 0x06: return "ISRC2 Packet";
+		case 0x07: return "One Bit Audio Sample Packet";
+		case 0x08: return "DST Audio Packet";
+		case 0x09: return "High Bitrate (HBR) Audio Stream Packet (IEC 61937)";
+		case 0x0A: return "Gamut Metada Packet";
+		case 0x80: return "General InfoFrame Packet";  // May not be valid
+		case 0x81: return "Vendor-Specific InfoFrame";
+		case 0x82: return "AVI InfoFrame";
+		case 0x83: return "Source Product Descriptor InfoFrame";
+		case 0x84: return "Audio InfoFrame";
+		case 0x85: return "MPEG Source InfoFrame";
+	}
+	return ""; 
+}	//	DIDSID2String
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //	AJARTPAncPayloadHeader

@@ -169,6 +169,8 @@ AJAStatus NTV2Capture4K::Init (void)
 	#if defined(_DEBUG)
 		cerr	<< mConfig << endl << "FrameStores: " << ::NTV2ChannelSetToStr(mActiveFrameStores) << endl
 				<< "Inputs: " << ::NTV2ChannelSetToStr(mActiveSDIs) << endl;
+		if (mDevice.IsRemote())
+			cerr	<< "Device Description:  " << mDevice.GetDescription() << endl << endl;
 	#endif	//	defined(_DEBUG)
 	return AJA_STATUS_SUCCESS;
 

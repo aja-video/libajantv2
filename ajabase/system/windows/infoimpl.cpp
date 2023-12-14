@@ -136,155 +136,141 @@ aja_getboottime()
 	return t.str();
 }
 
-// helper function if error encountered in getOSName_WMI
-// Creates a fall-back return string for OS Name while also embedding basic error information
-// Takes a code marker as argument, and optional HRESULT to output it's value.
-// Example:  "Windows (Edition not found) 3-x80012345".  The code marker is "3" and HRESULT is 80012345
-static std::string getOSName_WMI_error(const std::string codemarker, const HRESULT &hres=0)
-{
-	std::string ret_val = "Windows (Edition not found)"; //error code markers will be appended
-	char hr_errcode[9]; //8 Hex digits + null
-	sprintf(hr_errcode,"%lX",hres);
-	//std::string errcode(hr_errcode);
-	ret_val = ret_val + " "+ codemarker + "-x" + hr_errcode;
-	return ret_val;
-}
 // Uses WMI (Windows Management Instrumentation), to retrieve a pretty OS name complete with edition.
 //		WMI Object=Win32_OperatingSystem ; Property=Caption
 // The Method used below was largely taken from an MSDN example.  This method was chosen for it's use of native Win32 API
 // The same property can be retrieved with a single line powershell command: (Get-WmiObject Win32_OperatingSystem).Caption
 static std::string getOSName_WMI()
 {
-	std::string ret_val;
-	try {
+	std::string retVal = "Microsoft Windows";
 
-		//Following steps are as recommended on MSDN
-		HRESULT hres;
+	// Initialize COM
+	HRESULT hres = CoInitializeEx(0, COINIT_APARTMENTTHREADED);
+	if (!SUCCEEDED(hres) && hres != RPC_E_CHANGED_MODE) {
+		// Bail out...CoUninitialize should only be called if the call to CoInitialize was successful.
+		return retVal;
+	}
 
-		// Initialize COM
-		hres = CoInitializeEx(0, COINIT_MULTITHREADED);
-		if (FAILED(hres)){
-			if (hres != RPC_E_CHANGED_MODE)
-				return getOSName_WMI_error("1",hres);
-		}
+	// Obtain the initial locator
+	IWbemLocator *pLoc = NULL;
+	hres = CoCreateInstance(
+			CLSID_WbemLocator,
+			0,
+			CLSCTX_INPROC_SERVER,
+			IID_IWbemLocator, (LPVOID *) &pLoc);
+	if (FAILED(hres)){
+		goto cleanup;
+	}
 
-		// Set general COM security levels
-		hres = CoInitializeSecurity(
-			NULL,
-			-1,                          // COM authentication
-			NULL,                        // Authentication services
-			NULL,                        // Reserved
-			RPC_C_AUTHN_LEVEL_DEFAULT,   // Default authentication
-			RPC_C_IMP_LEVEL_IMPERSONATE, // Default Impersonation
-			NULL,                        // Authentication info
-			EOAC_NONE,                   // Additional capabilities
-			NULL                         // Reserved
+	// Connect to the root\cimv2 namespace with
+	// the current user and obtain pointer pSvc
+	// to make IWbemServices calls.
+	IWbemServices *pSvc = NULL;
+	hres = pLoc->ConnectServer(
+			_bstr_t(L"ROOT\\CIMV2"), // Object path of WMI namespace
+			NULL,                    // User name. NULL = current user
+			NULL,                    // User password. NULL = current
+			0,                       // Locale. NULL indicates current
+			NULL,                    // Security flags.
+			0,                       // Authority (for example, Kerberos)
+			0,                       // Context object
+			&pSvc                    // pointer to IWbemServices proxy
 			);
-		if (FAILED(hres)){
-			CoUninitialize();
-			return getOSName_WMI_error("2",hres);
-		}
-		// Obtain the initial locator
-		IWbemLocator *pLoc = NULL;
-		hres = CoCreateInstance(
-				CLSID_WbemLocator,
-				0,
-				CLSCTX_INPROC_SERVER,
-				IID_IWbemLocator, (LPVOID *) &pLoc);
-		if (FAILED(hres)){
-			CoUninitialize();
-			return getOSName_WMI_error("3",hres);
-		}
-		// Connect to the root\cimv2 namespace with
-		// the current user and obtain pointer pSvc
-		// to make IWbemServices calls.
-		IWbemServices *pSvc = NULL;
+	if (FAILED(hres)){
+		goto cleanup;
+	}
 
-		hres = pLoc->ConnectServer(
-			 _bstr_t(L"ROOT\\CIMV2"), // Object path of WMI namespace
-			 NULL,                    // User name. NULL = current user
-			 NULL,                    // User password. NULL = current
-			 0,                       // Locale. NULL indicates current
-			 NULL,                    // Security flags.
-			 0,                       // Authority (for example, Kerberos)
-			 0,                       // Context object
-			 &pSvc                    // pointer to IWbemServices proxy
-			 );
-		if (FAILED(hres)){
-			pLoc->Release();
-			CoUninitialize();
-			return getOSName_WMI_error("4",hres);
-		}
-		// Set security levels on the proxy
-		hres = CoSetProxyBlanket(
-		   pSvc,                        // Indicates the proxy to set
-		   RPC_C_AUTHN_WINNT,           // RPC_C_AUTHN_xxx
-		   RPC_C_AUTHZ_NONE,            // RPC_C_AUTHZ_xxx
-		   NULL,                        // Server principal name
-		   RPC_C_AUTHN_LEVEL_CALL,      // RPC_C_AUTHN_LEVEL_xxx
-		   RPC_C_IMP_LEVEL_IMPERSONATE, // RPC_C_IMP_LEVEL_xxx
-		   NULL,                        // client identity
-		   EOAC_NONE                    // proxy capabilities
-		);
-		if (FAILED(hres)){
-			pSvc->Release();
-			pLoc->Release();
-			CoUninitialize();
-			return getOSName_WMI_error("5",hres);
-		}
+	IClientSecurity* pSecurity = NULL;
+	hres = pSvc->QueryInterface(IID_IClientSecurity, (LPVOID*)&pSecurity);
+	if (FAILED(hres) || !pSecurity) {
+		goto cleanup;
+	}
 
-		//Execute Query agianst WMI Object: Win32_OperatingSystem
-		IEnumWbemClassObject* pEnumerator = NULL;
-		hres = pSvc->ExecQuery(
-			bstr_t("WQL"),
-			bstr_t("SELECT Caption FROM Win32_OperatingSystem"),
-			WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
-			NULL,
-			&pEnumerator);
-		if (FAILED(hres)){
-			pSvc->Release();
-			pLoc->Release();
-			CoUninitialize();
-			return getOSName_WMI_error("6",hres);
-		}
-		// Get the data from the query -------------------
-		IWbemClassObject *pclsObj = NULL;
-		ULONG uReturn = 0;
+	// Querying the current authentication information
+	DWORD authnSvc = 0;
+	DWORD authzSvc = 0;
+	LPOLESTR serverPrincName = NULL;
+	DWORD authnLevel = 0;
+	DWORD impLevel = 0;
+	RPC_AUTH_IDENTITY_HANDLE authInfo = NULL;
+	DWORD ifCapabilites = 0;
 
-		HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1, &pclsObj, &uReturn);
+	hres = pSecurity->QueryBlanket(pSvc,
+								&authnSvc,
+								&authzSvc,
+								&serverPrincName,
+								&authnLevel,
+								&impLevel,
+								&authInfo,
+								&ifCapabilites);
+	if (FAILED(hres)) {
+		goto cleanup;
+	}
 
-		if(0 == uReturn || FAILED(hr))
-		{
-			pSvc->Release();
-			pLoc->Release();
-			pEnumerator->Release();
-			CoUninitialize();
-			return getOSName_WMI_error("7",hr);
-		}
+	// Setting authentication information on proxy interface
+	hres = pSecurity->SetBlanket(pSvc,
+								authnSvc,
+								authzSvc,
+								serverPrincName,
+								RPC_C_AUTHN_LEVEL_DEFAULT,
+								RPC_C_IMP_LEVEL_IMPERSONATE,
+								authInfo,
+								EOAC_NONE);
 
-		VARIANT vtProp;
-		VariantInit(&vtProp);
-		// Get the value of the Name property
-		hr = pclsObj->Get(L"Caption", 0, &vtProp, 0, 0);
+	if (FAILED(hres)) {
+		goto cleanup;
+	}
 
-		ret_val = _bstr_t(vtProp.bstrVal);
-		VariantClear(&vtProp);
+	//Execute Query agianst WMI Object: Win32_OperatingSystem
+	IEnumWbemClassObject* pEnumerator = NULL;
+	hres = pSvc->ExecQuery(
+		bstr_t("WQL"),
+		bstr_t("SELECT Caption FROM Win32_OperatingSystem"),
+		WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY,
+		NULL,
+		&pEnumerator);
+	if (FAILED(hres)) {
+		goto cleanup;
+	}
 
-		pclsObj->Release();
+	// Get the data from the query -------------------
+	IWbemClassObject *pClsObj = NULL;
+	ULONG uReturn = 0;
+	hres = pEnumerator->Next(WBEM_INFINITE, 1, &pClsObj, &uReturn);
+	if(FAILED(hres) || 0 == uReturn) {
+		goto cleanup;
+	}
 
-		// Cleanup
+	// Get the value of the Name property
+	VARIANT vtProp;
+	VariantInit(&vtProp);
+	hres = pClsObj->Get(L"Caption", 0, &vtProp, 0, 0);
+	if (SUCCEEDED(hres)) {
+		retVal = _bstr_t(vtProp.bstrVal);
+	}
+	VariantClear(&vtProp);
+
+cleanup:
+	if (pSvc != NULL) {
 		pSvc->Release();
+		pSvc = NULL;
+	}
+	if (pLoc != NULL) {
 		pLoc->Release();
+		pLoc = NULL;
+	}
+	if (pEnumerator != NULL) {
 		pEnumerator->Release();
-		CoUninitialize();
+		pEnumerator = NULL;
+	}
+	if (pClsObj != NULL) {
+		pClsObj->Release();
+		pClsObj = NULL;
 	}
 
-	catch(...){
-		return getOSName_WMI_error("8",0x0);
-	}
+	CoUninitialize();
 
-	return ret_val;
-
+	return retVal;
 }
 
 std::string

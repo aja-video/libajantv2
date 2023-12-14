@@ -701,6 +701,83 @@ bool IsFieldID0(Ntv2SystemContext* context, NTV2Crosspoint xpt)
 	return bField0;
 }
 
+bool ProgramProductCode(Ntv2SystemContext* context)
+{
+	// NTV2DeviceHasSPIFlashSerial serial number is stored in the spiflash
+	// read it and put it into the correct registers
+	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
+
+	if (NTV2DeviceHasSPIFlashSerial(deviceID))
+	{
+		bool hasExtendedCommandSupport = false;
+		uint32_t flashDeviceID = 0;
+		int serialSize = 2, i = 0;
+		uint32_t bankSelectNumber = 0x00;
+		uint32_t serialNumber = 0;
+		uint32_t serialRegister = kRegReserved54;
+		uint32_t baseAddress = 0xFC0000; //This is defined in ntv2konaserializer.cpp from classes
+		
+		ntv2WriteRegister(context, kRegXenaxFlashControlStatus, READID_COMMAND);
+		WaitForFlashNOTBusy(context);
+		flashDeviceID = ntv2ReadRegister(context, kRegXenaxFlashDOUT);
+
+		if ((flashDeviceID & 0x00ffffff) == 0x0020ba20)//Micron MT25QL512ABB
+		{
+			hasExtendedCommandSupport = true;
+		}
+
+		if (NTV2DeviceROMHasBankSelect(deviceID))
+		{
+			ntv2WriteRegister(context, kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+			WaitForFlashNOTBusy(context);
+			bankSelectNumber = NTV2DeviceGetSPIFlashVersion(deviceID) >= 5 ? 0x03 : 0x01;
+			ntv2WriteRegister(context, kRegXenaxFlashAddress, bankSelectNumber);
+			ntv2WriteRegister(context, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND);
+			WaitForFlashNOTBusy(context);
+		}
+
+		if (NTV2DeviceGetSPIFlashVersion(deviceID) > 5)
+			serialSize = 4;
+		for (i = 0; i < serialSize; i++, baseAddress += 4, serialRegister++)
+		{
+			serialNumber = 0;
+			ntv2WriteRegister(context, kRegXenaxFlashAddress, baseAddress);
+			ntv2WriteRegister(context, kRegXenaxFlashControlStatus, READFAST_COMMAND);
+			WaitForFlashNOTBusy(context);
+			serialNumber = ntv2ReadRegister(context, kRegXenaxFlashDOUT);
+			ntv2WriteRegister(context, serialRegister, serialNumber);
+		}
+
+		if (NTV2DeviceROMHasBankSelect(deviceID))
+		{
+			ntv2WriteRegister(context, kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND);
+			WaitForFlashNOTBusy(context);
+			bankSelectNumber = 0x00;
+			ntv2WriteRegister(context, kRegXenaxFlashAddress, bankSelectNumber);
+			ntv2WriteRegister(context, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND);
+			WaitForFlashNOTBusy(context);
+		}
+	}
+	return NTV2DeviceHasSPIFlashSerial(deviceID);
+}
+
+bool WaitForFlashNOTBusy(Ntv2SystemContext* context)
+{
+	bool busy = true;
+	int count = 0;
+	do
+	{
+		ULWord regValue = ntv2ReadRegister(context, kRegXenaxFlashControlStatus);
+		if (regValue & BIT(8))
+			busy = true;
+		else
+			busy = false;
+		ntv2TimeSleep(100);
+		count++;
+	} while ((busy == true) && (count < 100));
+	return count == 100 ? false : true;
+}
+
 bool SetVideoOutputStandard(Ntv2SystemContext* context, NTV2Channel channel)
 {
 	HDRDriverValues hdrRegValues;
@@ -1208,7 +1285,7 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context)
 	GetXptHDMIOutInputSelect(context, &tempXptSelect);
 	isSourceRGB = (tempXptSelect & 0x80) != 0 ? true : false;
 	useHDMI420Mode = false;
-	if (hdmiVersion == 2 || hdmiVersion == 4)
+	if (hdmiVersion == 2 || hdmiVersion == 4 || hdmiVersion == 5)
 	{
 		bool isQuadLink = false;
 		NTV2OutputXptID q2connection = NTV2_XptBlack;
@@ -1745,6 +1822,7 @@ bool GetSourceVideoFormat(Ntv2SystemContext* context, NTV2VideoFormat* format, N
 	NTV2VideoFormat videoFormat = NTV2_FORMAT_UNKNOWN;
 	NTV2VideoFormat shadowFormat = NTV2_FORMAT_UNKNOWN;
 	NTV2Channel multiFormatModeChannel = NTV2_CHANNEL1;
+	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
 	bool multiFormatActive = IsMultiFormatActive(context);
 	memset(hdrRegValues, 0, sizeof(HDRDriverValues));
 
@@ -1779,6 +1857,7 @@ bool GetSourceVideoFormat(Ntv2SystemContext* context, NTV2VideoFormat* format, N
 	case NTV2_XptHDMIIn1Q3RGB:
 	case NTV2_XptHDMIIn1Q4RGB:
 		videoFormat = GetHDMIInputVideoFormat(context);
+		*quadMode = NTV2_IS_QUAD_FRAME_FORMAT(videoFormat) && NTV2DeviceCanDo12gRouting(deviceID);
 		ReadFSHDRRegValues(context, NTV2_CHANNEL1, hdrRegValues);
 		break;
 	case NTV2_XptAnalogIn:
@@ -1939,8 +2018,9 @@ NTV2VideoFormat GetHDMIInputVideoFormat(Ntv2SystemContext* context)
 	NTV2Standard v2Standard;
 	NTV2FrameRate frameRate;
 	NTV2VideoFormat format;
-	ULWord status;
+	ULWord status, is2kx1080;
 	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
+	is2kx1080 = 0;
 
 	if(NTV2DeviceCanDoInputSource(deviceID, NTV2_INPUTSOURCE_HDMI1))
 	{
@@ -1965,6 +2045,7 @@ NTV2VideoFormat GetHDMIInputVideoFormat(Ntv2SystemContext* context)
 			}
 			frameRate = (NTV2FrameRate)((status &kRegMaskInputStatusFPS) >> kRegShiftInputStatusFPS);
 			v2Standard = (NTV2Standard)((status & kRegMaskHDMIInV2VideoStd) >> kRegShiftHDMIInV2VideoStd);
+			//ntv2Message("GHI rate = %d, standard = %d", frameRate, v2Standard);
 			switch(v2Standard)
 			{
 			case NTV2_STANDARD_1080:
@@ -1981,14 +2062,18 @@ NTV2VideoFormat GetHDMIInputVideoFormat(Ntv2SystemContext* context)
 				break;
 			case NTV2_STANDARD_1080p:
 			case NTV2_STANDARD_3840x2160p:
+				standard = NTV2_STANDARD_1080p;
+				break;
+			case NTV2_STANDARD_2Kx1080p:
 			case NTV2_STANDARD_4096x2160p:
 				standard = NTV2_STANDARD_1080p;
+				is2kx1080 = 1;
 				break;
 			default:
 				return NTV2_FORMAT_UNKNOWN;
 			}
 
-			format = GetVideoFormatFromState(standard, frameRate, 0, 0);
+			format = GetVideoFormatFromState(standard, frameRate, is2kx1080, 0);
 			if(NTV2_IS_QUAD_STANDARD(v2Standard))
 				format = GetQuadSizedVideoFormat(format);
 			return format;

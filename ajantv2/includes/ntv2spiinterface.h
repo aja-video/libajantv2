@@ -64,6 +64,7 @@ private:
 	void SpiReset();
 	bool SpiResetFifos();
 	void SpiEnableWrite(bool enable);
+	void SpiSendFIFOData();
 	bool SpiTransfer(std::vector<uint8_t> commandSequence,
 					 const std::vector<uint8_t> inputData,
 					 std::vector<uint8_t>& outputData, uint32_t maxByteCutoff = 1);
@@ -84,6 +85,7 @@ private:
 
 	CNTV2Card	mDevice;
 
+	uint32_t	mManufactureID;
 	uint32_t	mSpiResetReg;
 	uint32_t	mSpiControlReg;
 	uint32_t	mSpiStatusReg;

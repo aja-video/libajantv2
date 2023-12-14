@@ -23,6 +23,9 @@
 #include <map>
 #include <math.h>
 #include <ctype.h>	//	for isprint()
+#if !defined(AJA_WINDOWS)
+#include <unistd.h>
+#endif
 
 
 using namespace std;
@@ -78,6 +81,7 @@ private:
 		SetupBasicRegs();		//	Basic registers
 		SetupVPIDRegs();		//	VPIDs
 		SetupAncInsExt();		//	Anc Ins/Ext
+		SetupAuxInsExt();		//	Aux Ins/Ext
 		SetupXptSelect();		//	Xpt Select
 		SetupDMARegs();			//	DMA
 		SetupTimecodeRegs();	//	Timecode
@@ -88,6 +92,9 @@ private:
 		SetupSDIErrorRegs();	//	SDIError
 		SetupCSCRegs();			//	CSCs
 		SetupLUTRegs();			//	LUTs
+		SetupBOBRegs();			//	Break Out Board
+		SetupLEDRegs();			//	Bracket LEDs
+		SetupCMWRegs();			//	Clock Monitor Out
 		SetupVRegs();			//	Virtuals
 		REiNOTE(DEC(gLivingInstances) << " extant, " << DEC(gInstanceTally) << " total");
 		if (LOGGING_MAPPINGS)
@@ -286,11 +293,45 @@ private:
 			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel7);
 			DefineRegClass (kRegSDITransmitControl, kRegClass_Channel8);
 
-		DefineRegister (kRegConversionControl,	"", mConvControlRegDecoder,		READWRITE,	kRegClass_NULL,		kRegClass_Channel1, kRegClass_Channel2);
-		DefineRegister (kRegSDIWatchdogControlStatus,"", mDecodeRelayCtrlStat,	READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
-		DefineRegister (kRegSDIWatchdogTimeout, "", mDecodeWatchdogTimeout,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
-		DefineRegister (kRegSDIWatchdogKick1,	"", mDecodeWatchdogKick,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
-		DefineRegister (kRegSDIWatchdogKick2,	"", mDecodeWatchdogKick,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegConversionControl,			"",						mConvControlRegDecoder,		READWRITE,	kRegClass_NULL,		kRegClass_Channel1, kRegClass_Channel2);
+		DefineRegister (kRegSDIWatchdogControlStatus,	"",						mDecodeRelayCtrlStat,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegSDIWatchdogTimeout,			"",						mDecodeWatchdogTimeout,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegSDIWatchdogKick1,			"",						mDecodeWatchdogKick,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegSDIWatchdogKick2,			"",						mDecodeWatchdogKick,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegIDSwitch,					"kRegIDSwitch",			mDecodeIDSwitchStatus,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegPWMFanControl,				"kRegPWMFanControl",	mDecodePWMFanControl,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegPWMFanStatus,				"kRegPWMFanStatus",		mDecodePWMFanMonitor,		READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+	}
+	void SetupBOBRegs(void)
+	{
+		AJAAutoLock lock(&mGuardMutex);
+		DefineRegister (kRegBOBStatus,				"kRegBOBStatus",				mDecodeBOBStatus,					READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegBOBGPIInData,			"kRegBOBGPIInData",				mDecodeBOBGPIIn,					READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegBOBGPIInterruptControl,	"kRegBOBGPIInterruptControl",	mDecodeBOBGPIInInterruptControl,	READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegBOBGPIOutData,			"kRegBOBGPIOutData",			mDecodeBOBGPIOut,					READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegBOBAudioControl,		"kRegBOBAudioControl",			mDecodeBOBAudioControl,				READWRITE,	kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+	}
+	void SetupLEDRegs(void)
+	{
+		AJAAutoLock lock(&mGuardMutex);
+		DefineRegister (kRegLEDReserved0,		"kRegLEDReserved0",			mDefaultRegDecoder,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegLEDClockDivide,		"kRegLEDClockDivide",		mDefaultRegDecoder,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegLEDReserved2,		"kRegLEDReserved2",			mDefaultRegDecoder,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegLEDReserved3,		"kRegLEDReserved3",			mDefaultRegDecoder,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegLEDSDI1Control,		"kRegLEDSDI1Control",		mDecodeLEDControl,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegLEDSDI2Control,		"kRegLEDSDI2Control",		mDecodeLEDControl,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegLEDHDMIInControl,	"kRegLEDHDMIInControl",		mDecodeLEDControl,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegLEDHDMIOutControl,	"kRegLEDHDMIOutControl",	mDecodeLEDControl,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+	}
+	void SetupCMWRegs(void)
+	{
+		AJAAutoLock lock(&mGuardMutex);
+		DefineRegister (kRegCMWControl,		"kRegCMWControl",		mDefaultRegDecoder,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegCMW1485Out,		"kRegCMW1485Out",		mDefaultRegDecoder,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegCMW14835Out,	"kRegCMW14835Out",		mDefaultRegDecoder,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegCMW27Out,		"kRegCMW27Out",			mDefaultRegDecoder,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegCMW12288Out,	"kRegCMW12288Out",		mDecodeLEDControl,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
+		DefineRegister (kRegCMWHDMIOut,		"kRegCMWHDMIOut",		mDecodeLEDControl,		READWRITE,		kRegClass_NULL,		kRegClass_NULL,		kRegClass_NULL);
 	}
 	void SetupVPIDRegs(void)
 	{
@@ -599,9 +640,9 @@ private:
 														"Ignore DID 1-4",		"Ignore DID 5-8",		"Ignore DID 9-12",
 														"Ignore DID 13-16",		"Ignore DID 17-20",		"Analog Start Line",
 														"Analog F1 Y Filter",	"Analog F2 Y Filter",	"Analog F1 C Filter",
-														"Analog F2 C Filter"	"",						"",
+														"Analog F2 C Filter",	"",						"",
 														"",						"",						"",
-														"Analog Act Line Len",	""};
+														"Analog Act Line Len"};
 		static const string AncInsRegNames []	=	{	"Field Bytes",			"Control",				"F1 Start Address",
 														"F2 Start Address",		"Pixel Delay",			"Active Start",
 														"Pixels Per Line",		"Lines Per Frame",		"Field ID Lines",
@@ -677,6 +718,86 @@ private:
 			DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsIpChannel,						"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
 		}
 	}	//	SetupAncInsExt
+
+	void SetupAuxInsExt(void)
+	{
+		static const string AuxExtRegNames []	=	{	"Control",				"F1 Start Address",		"F1 End Address",
+														"F2 Start Address",		"",						"",
+														"Memory Total",			"F1 Memory Usage",		"F2 Memory Usage",
+														"V Blank Lines",		"Lines Per Frame",		"Field ID Lines",
+														"Ignore DID 1-4",		"Ignore DID 5-8",		"Ignore DID 9-12",
+														"Ignore DID 13-16",		"Buffer Fill"};
+		// static const string AncInsRegNames []	=	{	"Field Bytes",			"Control",				"F1 Start Address",
+		// 												"F2 Start Address",		"Pixel Delay",			"Active Start",
+		// 												"Pixels Per Line",		"Lines Per Frame",		"Field ID Lines",
+		// 												"Payload ID Control",	"Payload ID",			"Chroma Blank Lines",
+		// 												"F1 C Blanking Mask",	"F2 C Blanking Mask",	"Field Bytes High",
+		// 												"Reserved 15",			"RTP Payload ID",		"RTP SSRC",
+		// 												"IP Channel"};
+		static const uint32_t	AuxExtPerChlRegBase []	=	{	7616,	7680,	7744,	7808	};
+		static const uint32_t	AuxInsPerChlRegBase []	=	{	4608,	4672,	4736,	4800	};
+		
+		NTV2_ASSERT(sizeof(AuxExtRegNames[0]) == sizeof(AuxExtRegNames[1]));
+		NTV2_ASSERT(size_t(regAuxExt_LAST) == sizeof(AuxExtRegNames)/sizeof(AuxExtRegNames[0]));
+		//NTV2_ASSERT(size_t(regAncIns_LAST) == sizeof(AncInsRegNames)/sizeof(string));
+
+		AJAAutoLock lock(&mGuardMutex);
+		for (ULWord offsetNdx (0);	offsetNdx < 4;	offsetNdx++)
+		{
+			for (ULWord reg(regAuxExtControl);	reg < regAuxExt_LAST;  reg++)
+			{
+				if (AuxExtRegNames[reg].empty())	continue;
+				ostringstream	oss;	oss << "Extract " << (offsetNdx+1) << " " << AuxExtRegNames[reg];
+				DefineRegName (AuxExtPerChlRegBase[offsetNdx] + reg,	oss.str());
+			}
+			// for (ULWord reg(regAncInsFieldBytes);  reg < regAncIns_LAST;  reg++)
+			// {
+			// 	ostringstream	oss;	oss << "Insert " << (offsetNdx+1) << " " << AncInsRegNames[reg];
+			// 	DefineRegName (AncInsPerChlRegBase[offsetNdx] + reg,	oss.str());
+			// }
+		}
+		for (ULWord ndx (0);  ndx < 4;	ndx++)
+		{
+			// Some of the decoders are shared with Anc
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtControl,				"", mDecodeAuxExtControlReg,		READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtField1StartAddress,		"", mDefaultRegDecoder,				READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtField1EndAddress,		"", mDefaultRegDecoder,				READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtField2StartAddress,		"", mDefaultRegDecoder,				READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			// DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExt4,             			"", mDefaultRegDecoder,				READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			// DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExt5,						"", mDefaultRegDecoder,				READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtTotalStatus,			"", mDecodeAncExtStatus,			READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtField1Status,			"", mDecodeAncExtStatus,			READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtField2Status,			"", mDecodeAncExtStatus,			READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtFieldVBLStartLine,		"", mDecodeAncExtFieldLines,		READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtTotalFrameLines,		"", mDefaultRegDecoder,				READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtFID,					"", mDecodeAncExtFieldLines,		READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtPacketMask0,			"", mDecodeAncExtIgnoreDIDs,		READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtPacketMask1,			"", mDecodeAncExtIgnoreDIDs,		READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtPacketMask2,			"", mDecodeAncExtIgnoreDIDs,		READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtPacketMask3,			"", mDecodeAncExtIgnoreDIDs,		READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+			DefineRegister (AuxExtPerChlRegBase[ndx] + regAuxExtFillData,          		"", mDefaultRegDecoder,				READWRITE,	kRegClass_Aux,	kRegClass_Input,	gChlClasses[ndx]);
+
+			
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsFieldBytes,						"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsControl,						"", mDecodeAncInsControlReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsField1StartAddr,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsField2StartAddr,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsPixelDelay,						"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsActiveStart,					"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsLinePixels,						"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsFrameLines,						"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsFieldIDLines,					"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsPayloadIDControl,				"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsPayloadID,						"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsBlankCStartLine,				"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsBlankField1CLines,				"", mDecodeAncInsChromaBlankReg,	READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsBlankField2CLines,				"", mDecodeAncInsChromaBlankReg,	READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsFieldBytesHigh,					"", mDecodeAncInsValuePairReg,		READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsRtpPayloadID,					"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsRtpSSRC,						"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+			// DefineRegister (AncInsPerChlRegBase[ndx] + regAncInsIpChannel,						"", mDefaultRegDecoder,				READWRITE,	kRegClass_Anc,	kRegClass_Output,	gChlClasses[ndx]);
+		}
+	}	//	SetupAuxInsExt
 
 	void SetupHDMIRegs(void)
 	{
@@ -1447,21 +1568,7 @@ private:
 		DEF_REG	(kVRegDmaHardwareRateH2C4,				mDMAXferRateRegDecoder, READONLY, kRegClass_DMA, kRegClass_NULL, kRegClass_NULL);
 
 		DEF_REG	(kVRegHDMIInAviInfo1,					mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_NULL);
-
-		DEF_REG	(kVRegMaskHDMIInColorimetry,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_HDR);
-		DEF_REG	(kVRegShiftHDMIInColorimetry,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_HDR);
-		DEF_REG	(kVRegMaskHDMIInDolbyVision,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_HDR);
-		DEF_REG	(kVRegShiftHDMIInDolbyVision,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_HDR);
-
 		DEF_REG	(kVRegHDMIInDrmInfo1,					mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_NULL);
-
-		DEF_REG	(kVRegMaskHDMIInPresent,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMIInPresent,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMIInEOTF,					mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMIInEOTF,					mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMIInMetadataID,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMIInMetadataID,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_NULL);
-
 		DEF_REG	(kVRegHDMIInDrmGreenPrimary1,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_HDR);
 		DEF_REG	(kVRegHDMIInDrmBluePrimary1,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_HDR);
 		DEF_REG	(kVRegHDMIInDrmRedPrimary1,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Input, kRegClass_HDR);
@@ -1481,26 +1588,6 @@ private:
 		DEF_REG	(kVRegBaseFirmwareDeviceID,				mDecodeBoardID,		READWRITE, kRegClass_NULL, kRegClass_NULL,	kRegClass_NULL);
 
 		DEF_REG	(kVRegHDMIOutStatus1,					mDecodeHDMIOutputStatus,READWRITE,	kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMOutVideoStandard,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMOutVideoStandard,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMOutVideoFrameRate,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMOutVideoFrameRate,		mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMOutBitDepth,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMOutBitDepth,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMOutColorRGB,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMOutColorRGB,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMOutRangeFull,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMOutRangeFull,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMOutPixel420,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMOutPixel420,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMOutProtocol,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegShiftHDMOutProtocol,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_NULL);
-		DEF_REG	(kVRegMaskHDMOutAudioFormat,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_Audio);
-		DEF_REG	(kVRegShiftHDMOutAudioFormat,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_Audio);
-		DEF_REG	(kVRegMaskHDMOutAudioRate,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_Audio);
-		DEF_REG	(kVRegShiftHDMOutAudioRate,				mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_Audio);
-		DEF_REG	(kVRegMaskHDMOutAudioChannels,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_Audio);
-		DEF_REG	(kVRegShiftHDMOutAudioChannels,			mDefaultRegDecoder, READWRITE, kRegClass_HDMI, kRegClass_Output, kRegClass_Audio);
 		DEF_REG	(kVRegAudioOutputToneSelect,			mDefaultRegDecoder, READWRITE, kRegClass_Audio,kRegClass_Output, kRegClass_NULL);
 		DEF_REG	(kVRegDynFirmwareUpdateCounts,			mDecodeDynFWUpdateCounts,READWRITE,kRegClass_NULL,kRegClass_NULL,kRegClass_NULL);
 
@@ -1654,6 +1741,21 @@ public:
 			std::set_intersection (ancRegs.begin(), ancRegs.end(),	allChanRegs.begin(), allChanRegs.end(),	 std::inserter(result, result.begin()));
 		}
 
+		if (::NTV2DeviceCanDoCustomAux(inDeviceID))
+		{
+			const NTV2RegNumSet auxRegs			(GetRegistersForClass(kRegClass_Aux));
+			const UWord			numVideoInputs (::NTV2DeviceGetNumHDMIVideoInputs(inDeviceID));
+			const UWord			numVideoOutputs (::NTV2DeviceGetNumHDMIVideoOutputs(inDeviceID));
+			const UWord			numSpigots(numVideoInputs > numVideoOutputs ? numVideoInputs : numVideoOutputs);
+			NTV2RegNumSet		allChanRegs;	//	For just those channels it supports
+			for (UWord num(0);	num < numSpigots;	num++)
+			{
+				const NTV2RegNumSet chRegs (GetRegistersForClass(chanClasses[num]));
+				allChanRegs.insert(chRegs.begin(), chRegs.end());
+			}
+			std::set_intersection (auxRegs.begin(), auxRegs.end(),	allChanRegs.begin(), allChanRegs.end(),	 std::inserter(result, result.begin()));
+		}
+
 		if (::NTV2DeviceCanDoSDIErrorChecks(inDeviceID))
 		{
 			const NTV2RegNumSet sdiErrRegs	(GetRegistersForClass(kRegClass_SDIError));
@@ -1720,6 +1822,48 @@ public:
 			result.insert(ULWord(kRegMRQ4Control));
 			result.insert(ULWord(kRegMROutControl));
 			result.insert(ULWord(kRegMRSupport));
+		}
+		
+		if (NTV2DeviceCanDoIDSwitch(inDeviceID))
+		{
+			result.insert(ULWord(kRegIDSwitch));
+		}
+		
+		if (NTV2DeviceHasPWMFanControl(inDeviceID))
+		{
+			result.insert(ULWord(kRegPWMFanControl));
+			result.insert(ULWord(kRegPWMFanStatus));
+		}
+		
+		if (NTV2DeviceCanDoBreakoutBoard(inDeviceID))
+		{
+			result.insert(ULWord(kRegBOBStatus));
+			result.insert(ULWord(kRegBOBGPIInData));
+			result.insert(ULWord(kRegBOBGPIInterruptControl));
+			result.insert(ULWord(kRegBOBGPIOutData));
+			result.insert(ULWord(kRegBOBAudioControl));
+		}
+		
+		if (NTV2DeviceHasBracketLED(inDeviceID))
+		{
+			result.insert(ULWord(kRegLEDReserved0));
+			result.insert(ULWord(kRegLEDClockDivide));
+			result.insert(ULWord(kRegLEDReserved2));
+			result.insert(ULWord(kRegLEDReserved3));
+			result.insert(ULWord(kRegLEDSDI1Control));
+			result.insert(ULWord(kRegLEDSDI2Control));
+			result.insert(ULWord(kRegLEDHDMIInControl));
+			result.insert(ULWord(kRegLEDHDMIOutControl));
+		}
+		
+		if (NTV2DeviceCanDoClockMonitor(inDeviceID))
+		{
+			result.insert(ULWord(kRegCMWControl));
+			result.insert(ULWord(kRegCMW1485Out));
+			result.insert(ULWord(kRegCMW14835Out));
+			result.insert(ULWord(kRegCMW27Out));
+			result.insert(ULWord(kRegCMW12288Out));
+			result.insert(ULWord(kRegCMWHDMIOut));
 		}
 
 		if (inOtherRegsToInclude & kIncludeOtherRegs_VRegs)
@@ -2979,7 +3123,24 @@ private:
 			return oss.str();
 		}
 	}	mDecodeAncExtControlReg;
+
+	struct DecodeAuxExtControlReg : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			(void) inRegNum;
+			(void) inDeviceID;
+			ostringstream	oss;
+			static const string SyncStrs [] =	{	"field",	"frame",	"immediate",	"unknown"	};
+			oss << "Progressive video: "	<< YesNo(inRegValue & BIT(16))	<< endl
+				<< "Synchronize: "			<< SyncStrs [(inRegValue & (BIT(24) | BIT(25))) >> 24]	<< endl
+				<< "Memory writes: "		<< EnabDisab(!(inRegValue & BIT(28)))					<< endl
+				<< "Filter inclusion: "		<< EnabDisab(inRegValue & BIT(29));
+			return oss.str();
+		}
+	}	mDecodeAuxExtControlReg;
 	
+	// Also used for HDMI Aux regs: regAuxExtFieldVBLStartLine, regAuxExtFID
 	struct DecodeAncExtFieldLinesReg : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -2987,8 +3148,8 @@ private:
 			(void) inDeviceID;
 			ostringstream	oss;
 			const uint32_t	which		(inRegNum & 0x1F);
-			const uint32_t	valueLow	(inRegValue & 0x7FF);
-			const uint32_t	valueHigh	((inRegValue >> 16) & 0x7FF);
+			const uint32_t	valueLow	(inRegValue & 0xFFF);
+			const uint32_t	valueHigh	((inRegValue >> 16) & 0xFFF);
 			switch (which)
 			{
 				case 5:		oss << "F1 cutoff line: "			<< valueLow << endl		//	regAncExtFieldCutoffLine
@@ -3011,6 +3172,7 @@ private:
 		}
 	}	mDecodeAncExtFieldLines;
 	
+	// Also used for HDMI Aux regs: regAuxExtTotalStatus, regAuxExtField1Status, regAuxExtField2Status
 	struct DecodeAncExtStatusReg : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -3033,6 +3195,7 @@ private:
 		}
 	}	mDecodeAncExtStatus;
 	
+	// Also used for HDMI Aux Packet filtering
 	struct DecodeAncExtIgnoreDIDReg : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
@@ -3893,8 +4056,8 @@ private:
 			if (::NTV2DeviceCanDoSDIErrorChecks(inDeviceID))
 				oss << "Unlock Tally: "			<< DEC(inRegValue & 0x7FFF)		<< endl
 					<< "Locked: "				<< YesNo(inRegValue & BIT(16))	<< endl
-					<< "Link A VID Valid: "		<< YesNo(inRegValue & BIT(20))	<< endl
-					<< "Link B VID Valid: "		<< YesNo(inRegValue & BIT(21))	<< endl
+					<< "Link A VPID Valid: "	<< YesNo(inRegValue & BIT(20))	<< endl
+					<< "Link B VPID Valid: "	<< YesNo(inRegValue & BIT(21))	<< endl
 					<< "TRS Error Detected: "	<< YesNo(inRegValue & BIT(24));
 			return oss.str();
 		}
@@ -3975,6 +4138,167 @@ private:
 			return oss.str();
 		}
 	}	mDecodeDriverType;
+	
+	struct DecodeIDSwitchStatus : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			ostringstream	oss;
+			if (::NTV2DeviceCanDoIDSwitch(inDeviceID))
+			{
+				const uint32_t	switchEnableBits	(((inRegValue & 0x0F000000) >> 20) | ((inRegValue & 0xF0000000) >> 28));
+				for (UWord idSwitch(0);  idSwitch < 4;	 )
+				{
+					const uint32_t	switchEnabled	(switchEnableBits & BIT(idSwitch));
+					oss << "Switch " << DEC(++idSwitch) << ": " << (switchEnabled ? "Enabled" : "Disabled");
+					if (idSwitch < 4)
+						oss << endl;
+				}
+			}
+			else
+			{
+				oss << "(ID Switch not supported)";
+			}
+			
+			return oss.str();
+		}
+	}	mDecodeIDSwitchStatus;
+	
+	struct DecodePWMFanControl : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			ostringstream	oss;
+			if (::NTV2DeviceHasPWMFanControl(inDeviceID))
+				oss << "Fan Speed: "				<< DEC(inRegValue & kRegMaskPWMFanSpeed)			<< endl
+					<< "Fan Control Enabled: "		<< ((inRegValue & kRegMaskPWMFanSpeedControl) ? "Enabled" : "Disabled");
+			return oss.str();
+		}
+	}	mDecodePWMFanControl;
+	
+	struct DecodePWMFanMonitor : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			ostringstream	oss;
+			if (::NTV2DeviceHasPWMFanControl(inDeviceID))
+				oss << "Tach Period: "				<< DEC(inRegValue & kRegMaskPWMFanTachPeriodStatus)			<< endl
+					<< "Fan Status: "				<< ((inRegValue & kRegMaskPWMFanStatus) ? "Stopped" : "Running");
+			return oss.str();
+		}
+	}	mDecodePWMFanMonitor;
+	
+	struct DecodeBOBStatus : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			ostringstream	oss;
+			if (::NTV2DeviceCanDoBreakoutBoard(inDeviceID))
+				oss << "BOB : "							<< ((inRegValue & kRegMaskBOBAbsent) ? "Disconnected" : "Connected")			<< endl
+					<< "ADAV801 Initializatioin: "		<< ((inRegValue & kRegMaskBOBADAV801UpdateStatus) ? "Complete" : "In Progress") << endl
+					<< "ADAV801 DIR Locked(Debug): "	<< DEC(inRegValue & kRegMaskBOBADAV801DIRLocked);
+			else
+				oss << "Device does not support a breakout board";
+			return oss.str();
+		}
+	}	mDecodeBOBStatus;
+	
+	struct DecodeBOBGPIIn : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			ostringstream	oss;
+			if (::NTV2DeviceCanDoBreakoutBoard(inDeviceID))
+				oss << "GPI In 1: "	<< DEC(inRegValue & kRegMaskBOBGPIIn1Data)	<< endl
+					<< "GPI In 2: "	<< DEC(inRegValue & kRegMaskBOBGPIIn2Data)	<< endl
+					<< "GPI In 3: "	<< DEC(inRegValue & kRegMaskBOBGPIIn3Data)	<< endl
+					<< "GPI In 4: "	<< DEC(inRegValue & kRegMaskBOBGPIIn4Data)	;
+			else
+				oss << "Device does not support a breakout board";
+			return oss.str();
+		}
+	}	mDecodeBOBGPIIn;
+	
+	struct DecodeBOBGPIInInterruptControl : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			ostringstream	oss;
+			if (::NTV2DeviceCanDoBreakoutBoard(inDeviceID))
+				oss << "GPI In 1 Int: "	<< DEC(inRegValue & kRegMaskBOBGPIIn1InterruptControl)	<< endl
+					<< "GPI In 2 Int: "	<< DEC(inRegValue & kRegMaskBOBGPIIn2InterruptControl)	<< endl
+					<< "GPI In 3 Int: "	<< DEC(inRegValue & kRegMaskBOBGPIIn3InterruptControl)	<< endl
+					<< "GPI In 4 Int: "	<< DEC(inRegValue & kRegMaskBOBGPIIn4InterruptControl)	;
+			else
+				oss << "Device does not support a breakout board";
+			return oss.str();
+		}
+	}	mDecodeBOBGPIInInterruptControl;
+	
+	struct DecodeBOBGPIOut : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			ostringstream	oss;
+			if (::NTV2DeviceCanDoBreakoutBoard(inDeviceID))
+				oss << "GPI Out 1 Int: "	<< DEC(inRegValue & kRegMaskBOBGPIOut1Data)	<< endl
+					<< "GPI Out 2 Int: "	<< DEC(inRegValue & kRegMaskBOBGPIOut2Data)	<< endl
+					<< "GPI Out 3 Int: "	<< DEC(inRegValue & kRegMaskBOBGPIOut3Data)	<< endl
+					<< "GPI Out 4 Int: "	<< DEC(inRegValue & kRegMaskBOBGPIOut4Data)	;
+			else
+				oss << "Device does not support a breakout board";
+			return oss.str();
+		}
+	}	mDecodeBOBGPIOut;
+	
+	struct DecodeBOBAudioControl : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			ostringstream	oss;
+			if (::NTV2DeviceCanDoBreakoutBoard(inDeviceID))
+			{
+				string dBuLabel;
+				switch(inRegValue & kRegMaskBOBAnalogLevelControl)
+				{
+				case 0:
+					dBuLabel = "+24dBu";
+					break;
+				case 1:
+					dBuLabel = "+18dBu";
+					break;
+				case 2:
+					dBuLabel = "+12dBu";
+					break;
+				case 3:
+					dBuLabel = "+15dBu";
+					break;
+					
+				}
+				oss << "ADC/DAC Re-init: "		<< DEC(inRegValue & kRegMaskBOBADAV801Reset)	<< endl
+					<< "Analog Level Control: " << dBuLabel << endl
+					<< "Analog Select: "		<< DEC(inRegValue & kRegMaskBOBAnalogInputSelect);
+			}
+			else
+				oss << "Device does not support a breakout board";
+			return oss.str();
+		}
+	}	mDecodeBOBAudioControl;
+	
+	struct DecodeLEDControl : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{
+			ostringstream	oss;
+			if (::NTV2DeviceHasBracketLED(inDeviceID))
+				oss << "Blue: "		<< DEC(inRegValue & kRegMaskLEDBlueControl)	<< endl
+					<< "Green: "	<< DEC(inRegValue & kRegMaskLEDGreenControl)	<< endl
+					<< "Red: "		<< DEC(inRegValue & kRegMaskLEDRedControl);
+			else
+				oss << "Device does not support a breakout board";
+			return oss.str();
+		}
+	}	mDecodeLEDControl;
 
 	static const int	NOREADWRITE =	0;
 	static const int	READONLY	=	1;

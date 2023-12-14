@@ -38,6 +38,7 @@
 #define kRegClass_AES		std::string ("kRegClass_AES")
 #define kRegClass_Analog	std::string ("kRegClass_Analog")
 #define kRegClass_Anc		std::string ("kRegClass_Anc")
+#define kRegClass_Aux		std::string ("kRegClass_Aux")
 #define kRegClass_Audio		std::string ("kRegClass_Audio")
 #define kRegClass_Channel1	std::string ("kRegClass_Channel1")
 #define kRegClass_Channel2	std::string ("kRegClass_Channel2")

@@ -4740,6 +4740,8 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_SOJI_DIAGS:				return "SOJI-DIAGS";
 		case DEVICE_ID_TTAP:					return inForRetailDisplay ? "T-TAP"						: "TTap";
 		case DEVICE_ID_TTAP_PRO:				return inForRetailDisplay ? "T-TAP Pro"					: "TTapPro";
+		case DEVICE_ID_KONAX:					return "KonaX";
+		case DEVICE_ID_KONAXM:					return "KonaXM";
 		case DEVICE_ID_NOTFOUND:				return inForRetailDisplay ? "AJA Device"				: "(Not Found)";
 #if defined(_DEBUG)
 #else
@@ -5078,7 +5080,7 @@ NTV2Crosspoint NTV2InputSourceToChannelSpec (const NTV2InputSource inInputSource
 
 NTV2ReferenceSource NTV2InputSourceToReferenceSource (const NTV2InputSource inInputSource)
 {
-	static const NTV2ReferenceSource	gInputSourceToReferenceSource []	= { /* NTV2_INPUTSOURCE_ANALOG1 */		NTV2_REFERENCE_ANALOG_INPUT,
+	static const NTV2ReferenceSource	gInputSourceToReferenceSource []	= { /* NTV2_INPUTSOURCE_ANALOG1 */		NTV2_REFERENCE_ANALOG_INPUT1,
 																				/* NTV2_INPUTSOURCE_HDMI1 */		NTV2_REFERENCE_HDMI_INPUT1,
 																				/* NTV2_INPUTSOURCE_HDMI2 */		NTV2_REFERENCE_HDMI_INPUT2,
 																				/* NTV2_INPUTSOURCE_HDMI3 */		NTV2_REFERENCE_HDMI_INPUT3,
@@ -6303,6 +6305,7 @@ string NTV2WidgetIDToString (const NTV2WidgetID inValue, const bool inCompactDis
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv4In2", NTV2_WgtHDMIIn2v4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv4In3", NTV2_WgtHDMIIn3v4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv4In4", NTV2_WgtHDMIIn4v4);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv5In1", NTV2_WgtHDMIIn1v5);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv4Out1", NTV2_WgtHDMIOut1v4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMIv5Out1", NTV2_WgtHDMIOut1v5);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "MultiLinkOut1", NTV2_WgtMultiLinkOut1);
@@ -6338,6 +6341,7 @@ string NTV2WidgetTypeToString (const NTV2WidgetType inValue, const bool inCompac
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMI Input V2", NTV2WidgetType_HDMIInV2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMI Input V3", NTV2WidgetType_HDMIInV3);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMI Input V4", NTV2WidgetType_HDMIInV4);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "HDMI Input V5", NTV2WidgetType_HDMIInV5);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "Up-Down Converter", NTV2WidgetType_UpDownConverter);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "Mixer", NTV2WidgetType_Mixer);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "DCI Mixer", NTV2WidgetType_DCIMixer);
@@ -6580,6 +6584,7 @@ string NTV2BreakoutTypeToString (const NTV2BreakoutType inValue, const bool inCo
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "KLHiBox", NTV2_KLHiBox);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "KLHePlusBox", NTV2_KLHePlusBox);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "K3GBox", NTV2_K3GBox);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "KBOB", NTV2_BreakoutBoard);
 		case NTV2_MAX_NUM_BreakoutTypes:			break;	//special case
 	}
 	return "";
@@ -7258,8 +7263,8 @@ string NTV2ReferenceSourceToString (const NTV2ReferenceSource inValue, const boo
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI In 1", NTV2_REFERENCE_INPUT1);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI In 2", NTV2_REFERENCE_INPUT2);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Free Run", NTV2_REFERENCE_FREERUN);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Analog In", NTV2_REFERENCE_ANALOG_INPUT);
-		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "HDMI In 1", NTV2_REFERENCE_HDMI_INPUT);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "Analog In", NTV2_REFERENCE_ANALOG_INPUT1);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "HDMI In 1", NTV2_REFERENCE_HDMI_INPUT1);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI In 3", NTV2_REFERENCE_INPUT3);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI In 4", NTV2_REFERENCE_INPUT4);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inForRetailDisplay, "SDI In 5", NTV2_REFERENCE_INPUT5);
@@ -7470,6 +7475,8 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_CORVID44_PLNR:				return "c44_12g_plnr_tprom.bit";
 	case DEVICE_ID_TTAP_PRO:					return "t_tap_pro.bit";
 	case DEVICE_ID_IOX3:						return "iox3.bit";
+	case DEVICE_ID_KONAX:						return "konax.bit";
+	case DEVICE_ID_KONAXM:						return "konaxm.bit";
 	default:									return "";
 	}
 	return "";
@@ -7511,7 +7518,7 @@ NTV2DeviceID NTV2GetDeviceIDFromBitfileName (const string & inBitfileName)
 													DEVICE_ID_CORVID3G,		DEVICE_ID_IOXT,		DEVICE_ID_IOEXPRESS,	DEVICE_ID_IO4K,		DEVICE_ID_IO4KUFC,
 													DEVICE_ID_KONA1,		DEVICE_ID_KONAHDMI, DEVICE_ID_KONA5,		DEVICE_ID_KONA5_8KMK,DEVICE_ID_CORVID44_8KMK,
 													DEVICE_ID_KONA5_8K,		DEVICE_ID_CORVID44_8K,	DEVICE_ID_TTAP_PRO, DEVICE_ID_KONA5_2X4K,	DEVICE_ID_CORVID44_2X4K,
-													DEVICE_ID_CORVID44_PLNR,DEVICE_ID_IOX3,		DEVICE_ID_KONA5_8K_MV_TX,
+													DEVICE_ID_CORVID44_PLNR,DEVICE_ID_IOX3,		DEVICE_ID_KONA5_8K_MV_TX, DEVICE_ID_KONAX, DEVICE_ID_KONAXM,
 													DEVICE_ID_NOTFOUND };
 		for (unsigned ndx (0);	ndx < sizeof (sDeviceIDs) / sizeof (NTV2DeviceID);	ndx++)
 			sBitfileName2DeviceID [::NTV2GetBitfileName (sDeviceIDs [ndx])] = sDeviceIDs [ndx];
@@ -7610,6 +7617,8 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_SOJI_DIAGS,
 														DEVICE_ID_TTAP_PRO,
 														DEVICE_ID_TTAP,
+														DEVICE_ID_KONAX,
+														DEVICE_ID_KONAXM,
 														DEVICE_ID_NOTFOUND	};
 	if (inKinds == NTV2_DEVICEKIND_NONE)
 		return NTV2DeviceIDSet();
@@ -7796,6 +7805,8 @@ string NTV2BitfileTypeToString (const NTV2BitfileType inValue, const bool inComp
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Kona5 8K MV TX",			NTV2_BITFILE_KONA5_8K_MV_TX_MAIN);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaIP 2110 RGB12",		NTV2_BITFILE_KONAIP_2110_RGB12);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"IoIP 2110 RGB12",			NTV2_BITFILE_IOIP_2110_RGB12);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaX",					NTV2_BITFILE_KONAX);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaXM",					NTV2_BITFILE_KONAXM);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"(Invalid)",				NTV2_BITFILE_TYPE_INVALID);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"(Illegal)",				NTV2_BITFILE_NUMBITFILETYPES);
 	}

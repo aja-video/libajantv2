@@ -12,7 +12,7 @@
 #include <time.h>
 #include <assert.h>
 
-#ifdef AJA_LINUX
+#if defined(AJA_LINUX) || defined(AJA_BAREMETAL)
 #include <string.h>
 #include <stdint.h>
 #ifndef UINT32_C

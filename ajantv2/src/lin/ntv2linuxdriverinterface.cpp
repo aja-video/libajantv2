@@ -74,7 +74,6 @@ bool CNTV2LinuxDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 		{LDIFAIL("Failed to open '" << boardStr << "'");  return false;}
 
 	_boardNumber = inDeviceIndex;
-	const NTV2DeviceIDSet	legalDeviceIDs(::NTV2GetSupportedDevices());
 	if (!CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID))
 	{
 		LDIFAIL ("ReadRegister failed for 'kRegBoardID': ndx=" << inDeviceIndex << " hDev=" << _hDevice << " id=" << HEX8(_boardID));
@@ -85,12 +84,6 @@ bool CNTV2LinuxDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 			return false;
 		}
 		LDIDBG("Retry succeeded: ndx=" << _boardNumber << " hDev=" << _hDevice << " id=" << ::NTV2DeviceIDToString(_boardID));
-	}
-	if (legalDeviceIDs.find(_boardID) == legalDeviceIDs.end())
-	{
-		LDIFAIL("Unsupported boardID=" << HEX8(_boardID) << " ndx=" << inDeviceIndex << " hDev=" << _hDevice);
-		Close();
-		return false;
 	}
 	_boardOpened = true;
 	LDIINFO ("Opened '" << boardStr << "' devID=" << HEX8(_boardID) << " ndx=" << DEC(_boardNumber));
@@ -206,6 +199,8 @@ bool CNTV2LinuxDriverInterface::RestoreHardwareProcampRegisters (void)
 // Purpose: Provides a 1 point connection to driver for interrupt calls
 bool CNTV2LinuxDriverInterface::ConfigureInterrupt (const bool bEnable, const INTERRUPT_ENUMS eInterruptType)
 {
+	if (IsRemote())
+		return false;
 	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 	NTV2_INTERRUPT_CONTROL_STRUCT intrControlStruct;
 	memset(&intrControlStruct, 0, sizeof(NTV2_INTERRUPT_CONTROL_STRUCT));	// Suppress valgrind error
@@ -224,6 +219,8 @@ bool CNTV2LinuxDriverInterface::ConfigureInterrupt (const bool bEnable, const IN
 // Output: ULWord or equivalent(i.e. ULWord).
 bool CNTV2LinuxDriverInterface::GetInterruptCount (const INTERRUPT_ENUMS eInterruptType, ULWord & outCount)
 {
+	if (IsRemote())
+		return false;
 	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 	if (   eInterruptType != eVerticalInterrupt
 		&& eInterruptType != eInput1
@@ -309,6 +306,8 @@ bool CNTV2LinuxDriverInterface::WaitForInterrupt (const INTERRUPT_ENUMS eInterru
 // Output: True on successs, false on failure (ioctl failed or interrupt didn't happen)
 bool CNTV2LinuxDriverInterface::ControlDriverDebugMessages (NTV2_DriverDebugMessageSet msgSet, bool enable)
 {
+	if (IsRemote())
+		return false;
 	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 	NTV2_CONTROL_DRIVER_DEBUG_MESSAGES_STRUCT cddmStruct;
 	cddmStruct.msgSet = msgSet;
@@ -325,6 +324,8 @@ bool CNTV2LinuxDriverInterface::ControlDriverDebugMessages (NTV2_DriverDebugMess
 // Output: True on successs, false on failure (ioctl failed or interrupt didn't happen)
 bool CNTV2LinuxDriverInterface::SetupBoard (void)
 {
+	if (IsRemote())
+		return false;
 	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
 	if (ioctl(int(_hDevice), IOCTL_NTV2_SETUP_BOARD, 0, 0))		// Suppress valgrind errors
 	{

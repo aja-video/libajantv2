@@ -32,4 +32,9 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         -DAJAMac
         -DAJA_MAC
         -D__STDC_CONSTANT_MACROS)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "BareMetal")
+    list(APPEND AJANTV2_TARGET_COMPILE_DEFS
+      -DNTV2_USE_STDINT
+      -DAJABareMetal
+      -DAJA_BAREMETAL)
 endif()

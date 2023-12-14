@@ -76,12 +76,26 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 				)
 		endif()
 	endif()
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	if(AJA_PLUGINS_DEPLOY_ON_DEBUG AND CMAKE_BUILD_TYPE STREQUAL Debug)
+		# put the plug-in in the correct location for NTV2 SDK to find it at runtime
+		set(PLUGIN_OUTPATH /opt/aja/)
+		if(EXISTS ${PLUGIN_OUTPATH})
+			set_target_properties(${PROJECT_NAME} PROPERTIES
+				PREFIX ""
+				LIBRARY_OUTPUT_NAME "swdevice"
+				LIBRARY_OUTPUT_DIRECTORY ${PLUGIN_OUTPATH}
+				)
+		endif()
+	endif()
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	if(AJA_PLUGINS_DEPLOY_ON_DEBUG AND CMAKE_BUILD_TYPE STREQUAL Debug)
 		# put the plug-in in the correct location for NTV2 SDK to find it at runtime
 		set(BUNDLE_OUTPUT_DIR /Library/Application\ Support/AJA)
 		if(EXISTS ${BUNDLE_OUTPUT_DIR})
 			set_target_properties(${PROJECT_NAME} PROPERTIES
+				PREFIX ""
+				LIBRARY_OUTPUT_NAME "swdevice"
 				LIBRARY_OUTPUT_DIRECTORY ${BUNDLE_OUTPUT_DIR}
 				)
 		endif()

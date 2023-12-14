@@ -23,6 +23,7 @@
 #include "ntv2version.h"
 #include "ntv2testpatterngen.h"
 #include "ajabase/system/debug.h"
+#include "ajabase/common/common.h"
 #include <vector>
 #include <algorithm>
 #include <iomanip>
@@ -1240,49 +1241,78 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		std::cout << std::endl << A.GetString(0, 16*1024) << std::endl;
 	}
 
-	// TODO(paulh): Ask Mr. Bill how to test this...
-	// TEST_CASE("NTV2Card Remote Device")
-	// {
-	// 	CNTV2Card card;
-	// 	CNTV2DriverInterface & device(AsNTV2DriverInterfaceRef(card));
-	// 	LOGNOTE("Legal schemes: " << aja::join(device.GetLegalSchemeNames(),", "));
-	// 	device.Open("ntv2local://blabber");
-	// 	device.Open("ntv2local://blabber.foo.bar");
-	// 	device.Open("ntv2local://blabber/");
-	// 	device.Open("ntv2local://blabber.foo.bar/");
-	// 	device.Open("ntv2local://127.0.0.1");
-	// 	device.Open("ntv2local://localhost");
-	// 	device.Open("ntv2local://127.0.0.1/");
-	// 	device.Open("ntv2local://localhost/");
-	// 	device.Open("badscheme://localhost/");
-	// 	device.Open("127.0.0.1");
-	// 	device.Open("localhost");
-	// 	device.Open("127.0.0.1:54321");
-	// 	device.Open("localhost:6221");
-	// 	device.Open("corvid24");
-	// 	device.Open("ntv2nub://127.0.0.1");
-	// 	device.Open("ntv2nub://localhost");
-	// 	device.Open("ntv2nub://127.0.0.1/");
-	// 	device.Open("ntv2nub://localhost/");
-	// 	device.Open("ntv2local://corvid24;");
-	// 	device.Open("ntv2local://corvid24:/");
-	// 	device.Open("ntv2local://corvid24:4/");
-	// 	device.Open("ntv2local://corvid24:4goof");
-	// 	device.Open("ntv2local://corvid24:4;goof");
-	// 	device.Open("ntv2local://corvid24:4/goof");
-	// 	device.Open("ntv2local://kona4");
-	// 	device.Open("ntv2local://0x10402100");
-	// 	device.Open("ntv2local://0x12345678");
-	// 	device.Open("ntv2local://0x1234567890");
-	// 	device.Open("ntv2local://0x12345678:");
-	// 	device.Open("ntv2local://0x12345678;");
-	// 	device.Open("ntv2local://0x12345678:/");
-	// 	device.Open("ntv2local://0x12345678:goof/");
-	// 	device.Open("ntv2local://0x12345678:goof/query");
-	// 	device.Open("ntv2://foobar:4/query");
-	// 	device.Open("ntv2://ntv2-shm-dev/");
-	// 	device.Open("ntv2://ntv2shmdev/");
-	// 	/*
+	TEST_CASE("devicespecparser")
+	{
+		AJADebug::Open();
+		NTV2DeviceSpecParser parser;
+		LOGNOTE("Legal schemes: " << aja::join(CNTV2DriverInterface::GetLegalSchemeNames(),", "));
+		parser.Reset("ntv2kona1://localhost/?devspec=0&channel=3");
+			CHECK(parser.HasDeviceSpec());
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+			CHECK_FALSE(parser.IsLocalDevice());
+			LOGNOTE("scheme='" << parser.Scheme() << "' resource='" << parser.Resource() << "'");
+			LOGNOTE(parser.Results());
+			CHECK_EQ(parser.Scheme(), "ntv2kona1");
+		parser.Reset("ntv2kona12://localhost/?devspec=0&channel=3");
+			CHECK(parser.HasDeviceSpec());
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+			CHECK_FALSE(parser.IsLocalDevice());
+			LOGNOTE("scheme='" << parser.Scheme() << "' resource='" << parser.Resource() << "'");
+			LOGNOTE(parser.Results());
+			CHECK_EQ(parser.Scheme(), "ntv2kona12");
+	 	parser.Reset("0x10402100");
+			CHECK(parser.HasDeviceSpec());
+			CHECK(parser.Successful());
+			CHECK_FALSE(parser.Failed());
+			CHECK(parser.HasScheme());
+			CHECK_FALSE(parser.HasErrors());
+			CHECK(parser.IsLocalDevice());
+			LOGNOTE("scheme='" << parser.Scheme() << "' resource='" << parser.Resource() << "'");
+			LOGNOTE(parser.Results());
+			CHECK_EQ(parser.Scheme(), "ntv2local");
+/*		parser.Reset("ntv2local://blabber");
+		parser.Reset("ntv2local://blabber.foo.bar");
+		parser.Reset("ntv2local://blabber/");
+		parser.Reset("ntv2local://blabber.foo.bar/");
+		parser.Reset("ntv2local://127.0.0.1");
+		parser.Reset("ntv2local://localhost");
+		parser.Reset("ntv2local://127.0.0.1/");
+		parser.Reset("ntv2local://localhost/");
+		parser.Reset("badscheme://localhost/");
+		parser.Reset("127.0.0.1");
+		parser.Reset("localhost");
+		parser.Reset("127.0.0.1:54321");
+		parser.Reset("localhost:6221");
+		parser.Reset("corvid24");
+		parser.Reset("ntv2nub://127.0.0.1");
+		parser.Reset("ntv2nub://localhost");
+		parser.Reset("ntv2nub://127.0.0.1/");
+		parser.Reset("ntv2nub://localhost/");
+		parser.Reset("ntv2local://corvid24;");
+		parser.Reset("ntv2local://corvid24:/");
+		parser.Reset("ntv2local://corvid24:4/");
+		parser.Reset("ntv2local://corvid24:4goof");
+		parser.Reset("ntv2local://corvid24:4;goof");
+		parser.Reset("ntv2local://corvid24:4/goof");
+		parser.Reset("ntv2local://kona4");
+		parser.Reset("ntv2local://0x10402100");
+		parser.Reset("ntv2local://0x12345678");
+		parser.Reset("ntv2local://0x1234567890");
+		parser.Reset("ntv2local://0x12345678:");
+		parser.Reset("ntv2local://0x12345678;");
+		parser.Reset("ntv2local://0x12345678:/");
+		parser.Reset("ntv2local://0x12345678:goof/");
+		parser.Reset("ntv2local://0x12345678:goof/query");
+		parser.Reset("ntv2://foobar:4/query");
+		parser.Reset("ntv2://ntv2-shm-dev/");
+		parser.Reset("ntv2://ntv2shmdev/");
+*/	// 	
 	// 	CHECK_FALSE(device.Open(""));
 	// 	CHECK_FALSE(device.Open("blabber"));
 	// 	CHECK(device.Open("0"));
@@ -1321,8 +1351,7 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678:/"));
 	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678:goof/"));
 	// 	CHECK_FALSE(device.Open("ntv2local://0x12345678:goof/query"));
-	// 	*/
-	// }
+	}	//	TEST_CASE("devicespecparser")
 
 	TEST_CASE("Copy Raster")
 	{

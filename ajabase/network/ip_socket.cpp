@@ -75,6 +75,9 @@ AJAIPSocket::~AJAIPSocket(void)
 bool
 AJAIPSocket::Initialize(void)
 {
+#if defined(AJA_BAREMETAL)
+	return false;
+#else
 	mMutex.Lock();
 
 #if defined(AJA_WINDOWS)
@@ -120,6 +123,7 @@ AJAIPSocket::Initialize(void)
 
 	mMutex.Unlock();
 	return (0 != mInstantiationCount) ? true : false;
+#endif
 }
 
 
@@ -130,6 +134,9 @@ AJAIPSocket::Initialize(void)
 bool
 AJAIPSocket::Deinitialize(void)
 {
+#if defined(AJA_BAREMETAL)
+	return false;
+#else
 	mMutex.Lock();
 
 	if (0 != mInstantiationCount)
@@ -153,6 +160,7 @@ AJAIPSocket::Deinitialize(void)
 	}
 	mMutex.Unlock();
 	return true;
+#endif
 }
 
 
@@ -185,6 +193,9 @@ bool AJAIPSocket::IsOpen(void)
 bool
 AJAIPSocket::Shutdown(int how)
 {
+#if defined(AJA_BAREMETAL)
+	return false;
+#else
 	if (-1 != mSocket)
 	{
 		if (0 == shutdown(mSocket, how))
@@ -199,6 +210,7 @@ AJAIPSocket::Shutdown(int how)
 #endif
 	}
 	return false;
+#endif
 }
 
 
@@ -208,6 +220,9 @@ AJAIPSocket::Shutdown(int how)
 bool
 AJAIPSocket::Close(void)
 {
+#if defined(AJA_BAREMETAL)
+	return false;
+#else
 	if (-1 != mSocket)
 	{
 		CLOSE_SOCKET(mSocket);
@@ -215,6 +230,7 @@ AJAIPSocket::Close(void)
 		return true;
 	}
 	return false;
+#endif
 }
 
 
@@ -224,6 +240,9 @@ AJAIPSocket::Close(void)
 bool
 AJAIPSocket::SetSocketOption(int option, const void* pValue)
 {
+#if defined(AJA_BAREMETAL)
+	return false;
+#else
 	bool status = false;
 
 	if ((-1 != mSocket) && (NULL != pValue))
@@ -316,6 +335,7 @@ AJAIPSocket::SetSocketOption(int option, const void* pValue)
 		}
 	}
 	return (status);
+#endif
 }
 
 
@@ -327,7 +347,9 @@ AJAIPSocket::GetHostIPAddresses(
 				IPAddressContainerType& ipv4AddressContainer,
 				IPAddressContainerType& ipv6AddressContainer)
 {
-#if defined(AJA_WINDOWS)
+#if defined(AJA_BAREMETAL)
+	return false;
+#elif defined(AJA_WINDOWS)
 	// ToDo
 #else
 	struct ifaddrs* pIFAddrContainer = NULL;

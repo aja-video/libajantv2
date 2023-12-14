@@ -53,6 +53,10 @@ bool ntv2WriteVirtualRegister(Ntv2SystemContext* context, uint32_t regNum, uint3
 
 #if defined (AJAVirtual)
 
+#ifdef AJALinux
+#include <unistd.h>
+#endif
+
 // virtual spinlock functions
 
 bool ntv2SpinLockOpen(Ntv2SpinLock* pSpinLock, Ntv2SystemContext* pSysCon)
@@ -109,12 +113,14 @@ void* ntv2MemoryAlloc(uint32_t size)
 {
 	if(size == 0) return NULL;
 
-	return NULL;
+	return malloc(size);
 }
 
 void ntv2MemoryFree(void* pAddress, uint32_t size)
 {
 	if(pAddress == NULL) return;
+
+    free(pAddress);
 }
 
 bool ntv2DmaMemoryAlloc(Ntv2DmaMemory* pDmaMemory, Ntv2SystemContext* pSysCon, uint32_t size)
@@ -284,6 +290,12 @@ bool ntv2EventWaitForSignal(Ntv2Event* pEvent, int64_t timeout, bool alert)
 
 	if(pEvent == NULL) return false;
 
+#if defined (MSWindows)
+    Sleep(timeout/1000);
+#elif defined (AJALinux)
+    usleep(timeout);
+#endif
+
 	return false;
 }
 
@@ -342,6 +354,10 @@ int64_t ntv2Time100ns(void)
 void ntv2TimeSleep(int64_t microseconds)
 {
 	if(microseconds == 0) return;
+
+#ifdef AJALinux
+    usleep(microseconds);
+#endif    
 }
 
 bool ntv2ThreadOpen(Ntv2Thread* pThread, Ntv2SystemContext* pSysCon, const char* pName)
@@ -389,6 +405,8 @@ bool ntv2ThreadRun(Ntv2Thread* pThread, Ntv2ThreadTask* pTask, void* pContext)
 	pThread->pFunc = pTask;
 	pThread->pContext = pContext;
 	pThread->run = true;
+
+    (pTask)(pContext);
 
 	return false;
 }
@@ -1203,6 +1221,42 @@ void ntv2SpinLockRelease(Ntv2SpinLock* pSpinLock)
 #else
 	IOSimpleLockUnlock(pSpinLock->lock);
 #endif
+}
+
+bool ntv2InterruptLockOpen(Ntv2InterruptLock* pInterruptLock, Ntv2SystemContext* pSysCon)
+{
+	if((pInterruptLock == NULL) ||
+	   (pSysCon == NULL)) return false;
+	
+	memset(pInterruptLock, 0, sizeof(Ntv2InterruptLock));
+	pInterruptLock->lock = IOSimpleLockAlloc();
+	IOSimpleLockInit(pInterruptLock->lock);
+
+	return true;
+}
+
+void ntv2InterruptLockClose(Ntv2InterruptLock* pInterruptLock)
+{
+	if(pInterruptLock == NULL || pInterruptLock->lock == NULL) return;
+	
+	IOSimpleLockFree(pInterruptLock->lock);
+	memset(pInterruptLock, 0, sizeof(Ntv2InterruptLock));
+}
+
+void ntv2InterruptLockAcquire(Ntv2InterruptLock* pInterruptLock)
+{
+	if(pInterruptLock == NULL || pInterruptLock->lock == NULL) return;
+	
+	IOSimpleLockLock(pInterruptLock->lock);
+	pInterruptLock->locked = true;
+}
+
+void ntv2InterruptLockRelease(Ntv2InterruptLock* pInterruptLock)
+{
+	if(pInterruptLock == NULL || pInterruptLock->lock == NULL	) return;
+	
+	IOSimpleLockUnlock(pInterruptLock->lock);
+	pInterruptLock->locked = false;
 }
 
 // Mac memory functions

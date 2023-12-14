@@ -44,6 +44,8 @@ in this Software without prior written authorization from the X Consortium.
 
 #undef	MYDEBUG
 
+#include "ajabase/system/file_io.h"
+
 /* This section handles platform differences
 */
 
@@ -119,6 +121,20 @@ inline char * stpcpy (char *dest, const char * src) {
 	#pragma GCC diagnostic ignored "-Wmisleading-indentation"
 #endif
 #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#endif
+
+#if defined(AJA_BAREMETAL)
+static uid_t getuid() { return 0; }
+#define POPT_SYSCONFDIR "."
+#define X_OK 0
+static bool access(char* t, int x) {return true;}
+#include <limits.h>
+#    undef LLONG_MIN
+#    define LLONG_MIN (-LLONG_MAX-1)
+#    undef LLONG_MAX
+#    define LLONG_MAX __LONG_LONG_MAX__
+//TODO
+#define execvp(a, b) 
 #endif
 
 /* End of platform differences section
@@ -360,27 +376,27 @@ int poptSaneFile(const char * fn)
 
 int poptReadFile(const char * fn, char ** bp, size_t * nbp, int flags)
 {
-	int fdno;
+ 	AJAFileIO file;
 	char * b = NULL;
 	off_t nb = 0;
 	char * s, * t, * se;
 	int rc = POPT_ERROR_ERRNO;	/* assume failure */
 
-	fdno = open(fn, O_RDONLY);
-	if (fdno < 0)
+	if (file.Open(fn, eAJAReadOnly, 0) != AJA_STATUS_SUCCESS)
 	goto exit;
 
-	if ((nb = lseek(fdno, 0, SEEK_END)) == (off_t)-1
-	 || lseek(fdno, 0, SEEK_SET) == (off_t)-1
+	if ((file.Seek(0, eAJASeekEnd)) != AJA_STATUS_SUCCESS
+	 || (nb = file.Tell()) == (off_t)-1
+	 || file.Seek(0, eAJASeekSet) != AJA_STATUS_SUCCESS
 	 || (b = (char*)calloc(sizeof(*b), (size_t)nb + 1)) == NULL
-	 || read(fdno, (char *)b, (size_t)nb) != (ssize_t)nb)
+	 || file.Read((uint8_t *)b, (uint32_t)nb) != (uint32_t)nb)
 	{
 	int oerrno = errno;
-	(void) close(fdno);
+	(void) file.Close();
 	errno = oerrno;
 	goto exit;
 	}
-	if (close(fdno) == -1)
+	if (file.Close() != AJA_STATUS_SUCCESS)
 	goto exit;
 	if (b == NULL) {
 	rc = POPT_ERROR_MALLOC;

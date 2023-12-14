@@ -3498,12 +3498,13 @@ NTV2VideoFormat CNTV2Card::GetHDMIInputVideoFormat(NTV2Channel inChannel)
 			}
 			else if(hdmiVersion > 1)
 			{
+				bool squareDivision = hdmiVersion == 5 ? false : true;
 				NTV2FrameRate hdmiRate = NTV2FrameRate((status &kRegMaskInputStatusFPS) >> kRegShiftInputStatusFPS);
 				NTV2Standard hdmiStandard = NTV2Standard((status & kRegMaskHDMIInV2VideoStd) >> kRegShiftHDMIInV2VideoStd);
 				UByte inputGeometry = 0;
 				if (hdmiStandard == NTV2_STANDARD_2Kx1080i || hdmiStandard == NTV2_STANDARD_2Kx1080p)
 					inputGeometry = 8;
-				format = GetNTV2VideoFormat (hdmiRate,	hdmiStandard, false, inputGeometry, false);
+				format = GetNTV2VideoFormat (hdmiRate,	hdmiStandard, false, inputGeometry, false, squareDivision);
 			}
 		}
 	} 
@@ -3810,7 +3811,11 @@ static const ULWord sSDIXmitEnableShifts[] = {	kRegShiftSDI1Transmit, kRegShiftS
 bool CNTV2Card::SetSDITransmitEnable (const NTV2Channel inChannel, const bool inEnable)
 {
 	if (IS_CHANNEL_INVALID(inChannel))
-		return false;
+		return false;	//	bad channel
+	if (!::NTV2DeviceHasBiDirectionalSDI(_boardID))
+		return true;	//	no bidirectional SDI, OK
+	if (UWord(inChannel) >= ::NTV2DeviceGetNumVideoOutputs(_boardID))
+		return false;	//	no such SDI connector
 	const ULWord mask(sSDIXmitEnableMasks[inChannel]), shift(sSDIXmitEnableShifts[inChannel]);
 	return WriteRegister(kRegSDITransmitControl, ULWord(inEnable), mask, shift);
 }
@@ -3827,9 +3832,25 @@ bool CNTV2Card::SetSDITransmitEnable (const NTV2ChannelSet & inSDIConnectors, co
 bool CNTV2Card::GetSDITransmitEnable (const NTV2Channel inChannel, bool & outIsEnabled)
 {
 	if (IS_CHANNEL_INVALID(inChannel))
-		return false;
+		return false;	//	invalid channel
+	if (UWord(inChannel) >= ::NTV2DeviceGetNumVideoOutputs(_boardID))
+		return false;	//	no such SDI connector
+	if (!::NTV2DeviceHasBiDirectionalSDI(_boardID))
+		{outIsEnabled = true;  return true;}	//	no bidirectional SDI, enabled, OK
 	const ULWord mask(sSDIXmitEnableMasks[inChannel]), shift(sSDIXmitEnableShifts[inChannel]);
 	return CNTV2DriverInterface::ReadRegister (kRegSDITransmitControl, outIsEnabled, mask, shift);
+}
+
+bool CNTV2Card::GetTransmitSDIs (NTV2ChannelSet & outXmitSDIs)
+{
+	outXmitSDIs.clear();
+	const bool biDirectionalSDI (::NTV2DeviceHasBiDirectionalSDI(_boardID));
+	const NTV2Channel maxCh(NTV2Channel(::NTV2DeviceGetNumVideoOutputs(_boardID)));
+	bool isXmit(false);
+	for (NTV2Channel ch(NTV2_CHANNEL1);  ch < maxCh;  ch = NTV2Channel(ch+1))
+		if (!biDirectionalSDI  ||  (GetSDITransmitEnable(ch, isXmit)  &&  isXmit))
+			outXmitSDIs.insert(ch);
+	return true;
 }
 
 
@@ -4668,6 +4689,14 @@ bool CNTV2Card::GetMultiRasterBypassEnable (bool & outEnabled)
 bool CNTV2Card::IsMultiRasterWidgetChannel (const NTV2Channel inChannel)
 {
 	return HasMultiRasterWidget() && inChannel == NTV2Channel(::NTV2DeviceGetNumVideoChannels(GetDeviceID()));
+}
+
+bool CNTV2Card::IsBreakoutBoardConnected (void)
+{
+	bool BOBConnected(false);
+	return NTV2DeviceCanDoBreakoutBoard(_boardID)
+		   &&  CNTV2DriverInterface::ReadRegister(kRegBOBStatus, BOBConnected, kRegMaskBOBAbsent, kRegShiftBOBAbsent)
+		   &&  (BOBConnected == 0);
 }
 
 

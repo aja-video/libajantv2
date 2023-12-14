@@ -7,7 +7,7 @@ ARG AJA_DRIVER_KVERSION=5.15.0-73
 ENV TZ=America/Los_Angeles
 
 RUN apt-get update \
-    && apt-get install -y bash bash-completion make ccache cmake wget ninja-build python3 \
+    && apt-get install -y bash bash-completion make ccache cmake git wget ninja-build python3 \
        linux-headers-$AJA_DRIVER_KVERSION linux-tools-$AJA_DRIVER_KVERSION linux-tools-generic \
        llvm libclang-dev clang-11 \
        libfontconfig1-dev libfreetype6-dev libx11-dev libx11-xcb-dev libxext-dev \

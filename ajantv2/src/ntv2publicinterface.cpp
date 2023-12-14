@@ -28,6 +28,50 @@ using namespace std;
 //#define NTV2BUFFER_NO_MEMCMP
 
 
+/////////// Stream Operators
+
+ostream & operator << (ostream & inOutStr, const NTV2AudioChannelPairs & inSet)
+{
+	if (inSet.empty())
+		inOutStr << "(none)";
+	else
+		for (NTV2AudioChannelPairsConstIter iter (inSet.begin ());	iter != inSet.end ();  ++iter)
+			inOutStr << (iter != inSet.begin() ? ", " : "") << ::NTV2AudioChannelPairToString (*iter, true);
+	return inOutStr;
+}
+
+ostream &	operator << (ostream & inOutStr, const NTV2AudioChannelQuads & inSet)
+{
+	for (NTV2AudioChannelQuadsConstIter iter (inSet.begin ());	iter != inSet.end ();  ++iter)
+		inOutStr << (iter != inSet.begin () ? ", " : "") << ::NTV2AudioChannelQuadToString (*iter, true);
+	return inOutStr;
+}
+
+ostream &	operator << (ostream & inOutStr, const NTV2AudioChannelOctets & inSet)
+{
+	for (NTV2AudioChannelOctetsConstIter iter (inSet.begin ());	 iter != inSet.end ();	++iter)
+		inOutStr << (iter != inSet.begin () ? ", " : "") << ::NTV2AudioChannelOctetToString (*iter, true);
+	return inOutStr;
+}
+
+ostream &	operator << (ostream & inOutStr, const NTV2DoubleArray & inVector)
+{
+	for (NTV2DoubleArrayConstIter iter (inVector.begin ());	 iter != inVector.end ();  ++iter)
+		inOutStr << *iter << endl;
+	return inOutStr;
+}
+
+ostream &	operator << (ostream & inOutStr, const NTV2DIDSet & inDIDs)
+{
+	for (NTV2DIDSetConstIter it (inDIDs.begin());  it != inDIDs.end();	)
+	{
+		inOutStr << xHEX0N(uint16_t(*it),2);
+		if (++it != inDIDs.end())
+			inOutStr << ", ";
+	}
+	return inOutStr;
+}
+
 ostream & operator << (ostream & inOutStream, const UWordSequence & inData)
 {
 	inOutStream << DEC(inData.size()) << " UWords: ";
@@ -1917,7 +1961,7 @@ bool NTV2Buffer::SetDefaultPageSize (const size_t inNewSize)
 
 size_t NTV2Buffer::HostPageSize (void)
 {
-#if defined(MSWindows)
+#if defined(MSWindows) || defined(AJABareMetal)
 	return AJA_PAGE_SIZE;
 #else
 	return size_t(::getpagesize());
@@ -2851,6 +2895,70 @@ ostream & NTV2Bitstream::Print (ostream & inOutStream) const
 }
 
 
+NTV2DmaStream::NTV2DmaStream()
+	:	mHeader (NTV2_TYPE_AJADMASTREAM, sizeof(NTV2DmaStream))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+}
+
+NTV2DmaStream::NTV2DmaStream (const NTV2_POINTER & inBuffer, const NTV2Channel inChannel, const ULWord inFlags)
+	:	mHeader (NTV2_TYPE_AJADMASTREAM, sizeof(NTV2DmaStream))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	SetBuffer (inBuffer);
+	SetChannel (inChannel);
+	SetFlags (inFlags);
+}
+
+NTV2DmaStream::NTV2DmaStream(const ULWord * pInBuffer, const ULWord inByteCount, const NTV2Channel inChannel, const ULWord inFlags)
+	:	mHeader (NTV2_TYPE_AJADMASTREAM, sizeof(NTV2DmaStream))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	SetBuffer (NTV2_POINTER(pInBuffer, inByteCount));
+	SetChannel (inChannel);
+	SetFlags (inFlags);
+}
+
+NTV2DmaStream::NTV2DmaStream(const NTV2Channel inChannel, const ULWord inFlags)
+	:	mHeader (NTV2_TYPE_AJADMASTREAM, sizeof(NTV2DmaStream))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	SetChannel (inChannel);
+	SetFlags (inFlags);
+}
+
+bool NTV2DmaStream::SetBuffer (const NTV2_POINTER & inBuffer)
+{	//	Just use address & length (don't deep copy)...
+	NTV2_ASSERT_STRUCT_VALID;
+	return mBuffer.Set (inBuffer.GetHostPointer(), inBuffer.GetByteCount());
+}
+
+bool NTV2DmaStream::SetChannel (const NTV2Channel inChannel)
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	mChannel = inChannel;
+	return true;
+}
+
+ostream & NTV2DmaStream::Print (ostream & inOutStream) const
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	inOutStream << mHeader << mBuffer << " flags=" << xHEX0N(mFlags,8) << " " << mTrailer;
+	return inOutStream;
+}
+
+NTV2StreamChannel::NTV2StreamChannel()
+	:	mHeader (NTV2_TYPE_AJASTREAMCHANNEL, sizeof(NTV2StreamChannel))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+}
+
+NTV2StreamBuffer::NTV2StreamBuffer()
+	:	mHeader (NTV2_TYPE_AJASTREAMBUFFER, sizeof(NTV2StreamBuffer))
+{
+	NTV2_ASSERT_STRUCT_VALID;
+}
+
 NTV2GetRegisters::NTV2GetRegisters (const NTV2RegNumSet & inRegisterNumbers)
 	:	mHeader				(NTV2_TYPE_GETREGS, sizeof(NTV2GetRegisters)),
 		mInNumRegisters		(ULWord (inRegisterNumbers.size ())),
@@ -2945,6 +3053,29 @@ bool NTV2GetRegisters::GetBadRegisters (NTV2RegNumSet & outBadRegNums) const
 						goodRegNums.begin(), goodRegNums.end(),
 						std::inserter(outBadRegNums, outBadRegNums.begin()));
 	return true;
+}
+
+bool NTV2GetRegisters::PatchRegister (const ULWord inRegNum, const ULWord inValue)
+{
+	if (!mOutGoodRegisters)
+		return false;		//	Empty/null 'mOutGoodRegisters' array!
+	if (!mOutNumRegisters)
+		return false;		//	Driver says zero successfully read!
+	if (mOutNumRegisters > mInNumRegisters)
+		return false;		//	Sanity check failed:  mOutNumRegisters must be less than or equal to mInNumRegisters!
+	if (!mOutValues)
+		return false;		//	Empty/null 'mOutValues' array!
+	if (mOutGoodRegisters.GetByteCount() != mOutValues.GetByteCount())
+		return false;		//	Sanity check failed:  These sizes should match
+	const ULWord *	pRegArray	(mOutGoodRegisters);
+	ULWord *		pValArray	(mOutValues);
+	for (ULWord ndx(0);  ndx < mOutNumRegisters;  ndx++)
+		if (pRegArray[ndx] == inRegNum)
+		{
+			pValArray[ndx] = inValue;
+			return true;
+		}
+	return false;	//	Not found
 }
 
 
@@ -3057,6 +3188,7 @@ bool NTV2SetRegisters::GetRequestedRegisterWrites	(NTV2RegWrites & outRegWrites)
 	if (!mInRegInfos)
 		return false;
 
+	outRegWrites.reserve(size_t(mInNumRegisters));
 	const NTV2RegInfo *	pRegInfos(mInRegInfos);
 	for (ULWord ndx(0);  ndx < mInNumRegisters;  ndx++)
 		outRegWrites.push_back(pRegInfos[ndx]);

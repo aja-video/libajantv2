@@ -13,21 +13,36 @@ endif()
 # also sets QT_VERSION, QT_VERSION_MAJOR, QT_VERSION_MINOR, QT_VERSION_PATCH
 # NOTE: using a macro instead of a function so don't need to manually set variables in the parent scope
 macro(aja_find_qt_modules)
-	set(MODULE_ARGS "${ARGN}")
+	set(_module_args "${ARGN}")
 
-	# Qt changes the CMAKE_MODULE_PATH, save off the original to restore
-	set(old_CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
+	find_package(QT NAMES ${PREF_QT_MAJORS} HINTS ${AJA_QT_DIR} COMPONENTS ${_module_args})
+	find_package(Qt${QT_VERSION_MAJOR} COMPONENTS ${_module_args})
 
-	find_package(QT NAMES ${PREF_QT_MAJORS} HINTS ${AJA_QT_DIR} REQUIRED COMPONENTS ${MODULE_ARGS})
-	find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${MODULE_ARGS})
+    message(STATUS "aja_find_qt_module(s): ${_module_args}")
 
-	foreach(m IN LISTS MODULE_ARGS)
+    foreach(m IN LISTS _module_args)
 		list(APPEND TARGET_QT_LIBS "Qt${QT_VERSION_MAJOR}::${m}")
-	endforeach()
-	list(REMOVE_DUPLICATES TARGET_QT_LIBS)
 
-	# restore CMAKE_MODULE_PATH
-	set(CMAKE_MODULE_PATH ${old_CMAKE_MODULE_PATH})
+        if (NOT Qt${QT_VERSION_MAJOR}${m}_FOUND)
+            message(STATUS "  ? ${m}")
+        else()
+            message(STATUS "  + ${m}")
+            list(APPEND _modules_found ${m})
+        endif()
+
+        list(LENGTH _module_args _args_count)
+        list(LENGTH _modules_found _modules_found_count)
+
+        if (_args_count GREATER _modules_found_count)
+            set(AJA_QT_FOUND FALSE)
+        else()
+            set(AJA_QT_FOUND TRUE)
+        endif()
+	endforeach()
+
+    message(STATUS "Found ${_modules_found_count}/${_args_count} Qt modules: ${_modules_found}")
+
+	list(REMOVE_DUPLICATES TARGET_QT_LIBS)
 endmacro(aja_find_qt_modules)
 
 # https://stackoverflow.com/questions/60854495/qt5-cmake-include-all-libraries-into-executable
@@ -133,7 +148,7 @@ function(aja_deploy_qt_libs_to_dest target dest)
     if (WIN32)
         add_custom_command(TARGET ${target} POST_BUILD
             COMMAND ${Python3_EXECUTABLE}
-                \"${CMAKE_MODULE_PATH}/scripts/qtdeploy.py\"
+				\"${LIBAJANTV2_CMAKE_DIR}/scripts/qtdeploy.py\"
                 \"${_qt_bin_dir}/windeployqt.exe\"
                 \"$<TARGET_FILE:${target}>\"
                 \"${dest}\"
@@ -143,7 +158,7 @@ function(aja_deploy_qt_libs_to_dest target dest)
         if (CMAKE_BUILD_TYPE STREQUAL "Debug")
             add_custom_command(TARGET ${target} POST_BUILD
                 COMMAND ${Python3_EXECUTABLE}
-                    \"${CMAKE_MODULE_PATH}/scripts/qtdeploy.py\"
+					\"${LIBAJANTV2_CMAKE_DIR}/scripts/qtdeploy.py\"
                     \"${_qt_bin_dir}/windeployqt.exe\"
                     \"$<TARGET_FILE:${target}>\"
                     \"${dest}\"
@@ -191,9 +206,9 @@ function(aja_deploy_qt_libs_to_dest target dest)
             # no longer matches what it sees at install time.
             set_target_properties(${target} PROPERTIES INSTALL_RPATH "$ORIGIN/qtlibs")
 
-            install(FILES $<TARGET_FILE_DIR:${target}>/qtlibs DESTINATION ${CMAKE_INSTALL_BINDIR})
-            install(FILES $<TARGET_FILE_DIR:${target}>/plugins DESTINATION ${CMAKE_INSTALL_BINDIR})
-            install(FILES $<TARGET_FILE_DIR:${target}>/qt.conf DESTINATION ${CMAKE_INSTALL_BINDIR})
+			install(FILES $<TARGET_FILE_DIR:${target}>/qtlibs DESTINATION ${dest})
+			install(FILES $<TARGET_FILE_DIR:${target}>/plugins DESTINATION ${dest})
+			install(FILES $<TARGET_FILE_DIR:${target}>/qt.conf DESTINATION ${dest})
         else()
             message(STATUS "WARNING -- AJA Linux Deploy Qt script not found: ${_lin_deploy_qt_path}")
         endif()

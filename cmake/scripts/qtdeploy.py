@@ -43,14 +43,20 @@ if __name__ == "__main__":
         qtdeploy_args.insert(1, "--debug")
     else:
         qtdeploy_args.insert(1, "--release")
+
     res = subprocess.run(qtdeploy_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
     if res.returncode == 0:
         blob = json.loads(res.stdout)
         if not blob or not "files" in blob:
             print("Invalid json parsed from Qt deploy command!")
             sys.exit(1)
-        num_deploy_files = len(blob["files"])
+
         num_copied_files = 0
+        num_deploy_files = len(blob["files"])
+        if num_deploy_files == 0:
+            print("No Qt deploy files specified!")
+            sys.exit(1)
+
         for elem in blob["files"]:
             if not "source" in elem or not "target" in elem:
                 print("Error parsing Qt deploy command JSON output!")
@@ -72,8 +78,13 @@ if __name__ == "__main__":
                 print(f"Error copying {src_path} to {install_tgt_path}")
                 sys.exit(1)
             num_copied_files += 1
-    if num_copied_files != num_deploy_files:
-        print(f"Error copying all Qt deploy sources ({num_copied_files}/{num_deploy_files})")
-        sys.exit(1)
-    print(f"Successfully copied all Qt deploy sources to {install_path} ({num_copied_files}/{num_deploy_files})")
+
+        if num_copied_files == num_deploy_files:
+            print(f"Successfully copied all Qt deploy sources to {install_path} ({num_copied_files}/{num_deploy_files})")
+        else:
+            print(f"Error copying all Qt deploy sources ({num_copied_files}/{num_deploy_files})")
+            sys.exit(1)
+    else:
+        print(f"Error calling Qt deploy tools! Exit code: {res.returncode}")
+
     sys.exit(res.returncode)

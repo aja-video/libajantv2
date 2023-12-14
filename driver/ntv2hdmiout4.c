@@ -764,6 +764,7 @@ static bool configure_hardware(struct ntv2_hdmiout4 *ntv2_hout)
 		ntv2_color_depth_10bit : ntv2_color_depth_8bit;
 	bool full_range = NTV2_FLD_GET(ntv2_fld_hdmiout_full_range, ntv2_hout->hdmi_config) != 0;
 	bool sd_wide = false;
+	uint32_t audio_format = NTV2_FLD_GET(ntv2_fld_hdmiout_audio_format, ntv2_hout->hdmi_config);
 	uint32_t audio_channels = (NTV2_FLD_GET(ntv2_fld_hdmiout_audio_8ch, ntv2_hout->hdmi_config) != 0)? 8 : 2;
 	bool dvi_mode = NTV2_FLD_GET(ntv2_fld_hdmiout_dvi, ntv2_hout->hdmi_config) != 0;
 	uint32_t vobd = NTV2_FLD_GET(ntv2_fld_hdmiout_vobd, ntv2_hout->hdmi_config);
@@ -777,7 +778,6 @@ static bool configure_hardware(struct ntv2_hdmiout4 *ntv2_hout)
 		ntv2_color_depth_12bit : deep_color;
 	bool force_config = NTV2_FLD_GET(ntv2_fld_hdmiout_force_config, ntv2_hout->hdmi_control) != 0;
 	bool prefer_420 = NTV2_FLD_GET(ntv2_fld_hdmiout_prefer_420, ntv2_hout->hdmi_control) != 0;
-	uint32_t audio_format = NTV2_FLD_GET(ntv2_fld_hdmiout_audio_format, ntv2_hout->hdmi_control);
 	uint32_t audio_input = NTV2_FLD_GET(ntv2_fld_hdmiout_source_select, ntv2_hout->hdmi_control);
 	bool crop_enable = NTV2_FLD_GET(ntv2_fld_hdmiout_crop_enable, ntv2_hout->hdmi_control) != 0;
 	bool audio_swap = NTV2_FLD_GET(ntv2_fld_hdmiout_channel34_swap_disable, ntv2_hout->hdmi_control) == 0;

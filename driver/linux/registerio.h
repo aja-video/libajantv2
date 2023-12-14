@@ -53,6 +53,8 @@
 #include "../ntv2hdmiin4.h"
 #include "../ntv2kona.h"
 #include "../ntv2setup.h"
+#include "../ntv2genlock2.h"
+#include "../ntv2videoraster.h"
 
 // clean old stuff
 #define FGVCROSSPOINTMASK (BIT_0+BIT_1+BIT_2+BIT_3)
@@ -88,6 +90,8 @@
 //#define NTV2_MAX_FPGA		(eFPGAVideoProc)
 
 #define NTV2_MAX_HDMI_MONITOR	4
+
+#define NTV2_MAX_STREAMS	4
 
 // Singleton module params
 typedef struct ntv2_module_private
@@ -534,12 +538,15 @@ typedef struct ntv2_private
 
 	Ntv2SystemContext		systemContext;
 //    struct ntv2_genlock		*m_pGenlockMonitor;
+    struct ntv2_genlock2	*m_pGenlock2Monitor;
+    struct ntv2_videoraster *m_pRasterMonitor;
 	struct ntv2_hdmiin		*m_pHDMIInputMonitor[NTV2_MAX_HDMI_MONITOR];
 	struct ntv2_hdmiin4		*m_pHDMIIn4Monitor[NTV2_MAX_HDMI_MONITOR];
 	struct ntv2_hdmiout4	*m_pHDMIOut4Monitor[NTV2_MAX_HDMI_MONITOR];
 	struct ntv2_serial		*m_pSerialPort;
 	struct ntv2_mcap		*m_pBitstream;
 	struct ntv2_setup		*m_pSetupMonitor;
+	struct ntv2_stream  	*m_pStream[NTV2_MAX_STREAMS];
 
 	bool registerEnable;
 	bool serialActive;
@@ -736,6 +743,12 @@ ULWord XlnxSgdmaRegBase(ULWord deviceNumber, bool bC2H, int index);
 ULWord XlnxConfigRegBase(ULWord deviceNumber);
 ULWord XlnxIrqRegBase(ULWord deviceNumber);
 ULWord XlnxIrqBitMask(ULWord deviceNumber, bool bC2H, int index);
+ULWord XlnxReadChannelIdentifier(ULWord deviceNumber, bool bC2H, ULWord index);
+bool IsXlnxChannelStream(ULWord idReg);
+bool IsXlnxChannelMapped(ULWord idReg);
+ULWord XlnxReadChannelAlignments(ULWord deviceNumber, bool bC2H, ULWord index);
+ULWord GetXlnxAddressAlignment(ULWord alReg);
+ULWord GetXlnxTransferAlignment(ULWord alReg);
 void EnableXlnxUserInterrupt(ULWord deviceNumber, int index);
 void DisableXlnxUserInterrupt(ULWord deviceNumber, int index);
 ULWord ReadXlnxUserInterrupt(ULWord deviceNumber);

@@ -95,6 +95,8 @@ AJADiskStatus::GetFreeAndTotalSpace(const char* dirPath, double& freeSpace, doub
 	freeSpace = static_cast<double>( static_cast<__int64>(free.QuadPart) ) / unitConv;
 	totalSpace = static_cast<double>( static_cast<__int64>(total.QuadPart) ) / unitConv;
 
+#elif defined(AJABareMetal)
+  //TODO
 #else
 
 	struct stat stst;

@@ -5,8 +5,6 @@
 	@copyright	(C) 2010-2022 AJA Video Systems, Inc.
 **/
 #include "ntv2konaflashprogram.h"
-//#include "ntv2devicefeatures.h"
-//#include "ntv2devicescanner.h"
 #include "ntv2endian.h"
 #include "ntv2registersmb.h"
 #include "ajabase/system/debug.h"
@@ -25,10 +23,10 @@
 
 using namespace std;
 
-#define KFPDBUG(__x__)	do {ostringstream oss;  oss << AJAFUNC << ": " << __x__;  cerr << "## DEBUG:    " << oss.str() << endl;  AJA_sDEBUG  (AJA_DebugUnit_Firmware, oss.str());} while(false)
-#define KFPWARN(__x__)	do {ostringstream oss;  oss << AJAFUNC << ": " << __x__;  cerr << "## WARNING:  " << oss.str() << endl;  AJA_sWARNING(AJA_DebugUnit_Firmware, oss.str());} while(false)
+#define KFPDBUG(__x__)	AJA_sDEBUG (AJA_DebugUnit_Firmware, AJAFUNC << ": " << __x__)
+#define KFPWARN(__x__)	AJA_sWARNING (AJA_DebugUnit_Firmware, AJAFUNC << ": " << __x__)
 #define KFPERR(__x__)	do {ostringstream oss;  oss << AJAFUNC << ": " << __x__;  cerr << "## ERROR:    " << oss.str() << endl;  AJA_sERROR  (AJA_DebugUnit_Firmware, oss.str());} while(false)
-#define KFPNOTE(__x__)	do {ostringstream oss;  oss << AJAFUNC << ": " << __x__;  cout << "## NOTE:  "    << oss.str() << endl;  AJA_sNOTICE (AJA_DebugUnit_Firmware, oss.str());} while(false)
+#define KFPNOTE(__x__)	do {ostringstream oss;  oss << AJAFUNC << ": " << __x__;  if (!_bQuiet) cout << "## NOTE:  "    << oss.str() << endl;  AJA_sNOTICE (AJA_DebugUnit_Firmware, oss.str());} while(false)
 
 
 string MacAddr::AsString(void) const
@@ -228,6 +226,7 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 {
 	bool knownChip = false;
 	bool status = false;
+	
 	_deviceID = ReadDeviceID();
 
 //	  case 0x00202018://STMircro
@@ -335,18 +334,30 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 
 	if(!knownChip)
 		return false;
-
-	if (::NTV2DeviceGetSPIFlashVersion(GetDeviceID()) == 2)
+	
+	switch(::NTV2DeviceGetSPIFlashVersion(GetDeviceID()))
 	{
+	default:
+	case 1:
+		//This includes legacy boards such as LHi, Corvid 1...
+		//SPI is devided up into 4 logical blocks of 4M each
+		//Without history explained main is at offset 0 and failsafe is at offset 12
+		_numSectorsMain = _flashSize / _sectorSize / 4;
+		_numSectorsFailSafe = (_flashSize / _sectorSize / 4) - 1;
+		_mainOffset = 0;
+		_failSafeOffset = 12 * 1024 * 1024;
+		_macOffset = _bankSize - (2 * _sectorSize);
+		status = true;
+		break;
+	case 2:
 		_numSectorsMain = _flashSize / _sectorSize / 2;
 		_numSectorsFailSafe = (_flashSize / _sectorSize / 2) - _failSafePadding;
 		_mainOffset = 0;
 		_failSafeOffset = 8 * 1024 * 1024;
 		_macOffset = _bankSize - (2 * _sectorSize);
 		status = true;
-	}
-	else if (::NTV2DeviceGetSPIFlashVersion(GetDeviceID()) == 3)
-	{
+		break;
+	case 3:
 		if (_deviceID == 0x010220)
 		{
 			//This is actually SPI v4 but needed this for spoofing Kona4
@@ -376,9 +387,8 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 			_licenseOffset = _bankSize - (4* _sectorSize);
 			status = true;
 		}
-	}
-	else if (::NTV2DeviceGetSPIFlashVersion(GetDeviceID()) == 4)
-	{
+		break;
+	case 4:
 		//SPIV4 is a bigger SPIv3 2x
 		_numSectorsMain = _flashSize / _sectorSize / 4;
 		_numSectorsFailSafe = (_flashSize / _sectorSize / 4) - 4;
@@ -392,31 +402,15 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 		_mcsInfoOffset = _bankSize - (3 * _sectorSize);
 		_licenseOffset = _bankSize - (4* _sectorSize);
 		status = true;
-	}
-	else if (::NTV2DeviceGetSPIFlashVersion(GetDeviceID()) == 5)
-	{
+		break;
+	case 5:
+	case 6:
 		_numSectorsMain = _flashSize / _sectorSize / 2;
 		_numSectorsFailSafe = (_flashSize / _sectorSize / 2) - _failSafePadding;
 		_mainOffset = 0;
 		_failSafeOffset = 0;// but is really 32*1024*1024;
 		status = true;
-	}
-	else
-	{
-		if(NTV2DeviceHasSPIFlash(GetDeviceID()))
-		{
-			//This includes legacy boards such as LHi, Corvid 1...
-			//SPI is devided up into 4 logical blocks of 4M each
-			//Without history explained main is at offset 0 and failsafe is at offset 12
-			_numSectorsMain = _flashSize / _sectorSize / 4;
-			_numSectorsFailSafe = (_flashSize / _sectorSize / 4) - 1;
-			_mainOffset = 0;
-			_failSafeOffset = 12 * 1024 * 1024;
-			_macOffset = _bankSize - (2 * _sectorSize);
-			status = true;
-		}
-		else
-			status = false;
+		break;
 	}
 
 	if (_spiFlash)
@@ -425,7 +419,7 @@ bool CNTV2KonaFlashProgram::SetDeviceProperties()
 		_spiFlash = AJA_NULL;
 	}
 
-	if (CNTV2AxiSpiFlash::DeviceSupported(GetDeviceID()))
+	if (DEVICE_IS_IOIP(_boardID))
 	{
 		_spiFlash = new CNTV2AxiSpiFlash(GetIndexNumber(), !_bQuiet);
 	}
@@ -573,7 +567,7 @@ std::string CNTV2KonaFlashProgram::Program(bool fullVerify)
 	WriteRegister(kVRegFlashSize, twoFixtysixBlockSizeCount);
 	for (uint32_t count(0);  count < twoFixtysixBlockSizeCount;  count++, baseAddress += 256, bitFilePtr += 64)
 	{
-		if (::NTV2DeviceGetSPIFlashVersion(_boardID) == 5  &&  baseAddress == _bankSize)
+		if (::NTV2DeviceGetSPIFlashVersion(_boardID) >= 5  &&  baseAddress == _bankSize)
 		{
 			baseAddress = 0;
 			SetBankSelect(_flashID == FAILSAFE_FLASHBLOCK ? BANK_3 : BANK_1);
@@ -672,7 +666,7 @@ bool CNTV2KonaFlashProgram::EraseBlock (FlashBlockID blockID)
 	uint32_t bankCount = 0;
 	for (uint32_t sectorCount = 0; sectorCount < numSectors; sectorCount++ )
 	{
-		if (::NTV2DeviceGetSPIFlashVersion(_boardID) == 5  &&  sectorCount*_sectorSize == _bankSize)
+		if (::NTV2DeviceGetSPIFlashVersion(_boardID) >= 5  &&  sectorCount*_sectorSize == _bankSize)
 		{
 			switch(blockID)
 			{
@@ -730,13 +724,13 @@ bool CNTV2KonaFlashProgram::VerifyFlash (FlashBlockID flashID, bool fullVerify)
 	uint32_t* bitFilePtr = _bitFileBuffer;
 	uint32_t dwordSizeCount ((_bitFileSize + 4) / 4);
 	uint32_t percentComplete(0), lastPercentComplete(999);
-
-	SetBankSelect(_flashID == FAILSAFE_FLASHBLOCK  ?  (::NTV2DeviceGetSPIFlashVersion(_boardID) == 5 ? BANK_2 : BANK_1)  :  BANK_0);
+	
+	SetBankSelect(_flashID == FAILSAFE_FLASHBLOCK  ?  (::NTV2DeviceGetSPIFlashVersion(_boardID) >= 5 ? BANK_2 : BANK_1)  :  BANK_0);
 	WriteRegister(kVRegFlashState, kProgramStateVerifyFlash);
 	WriteRegister(kVRegFlashSize, dwordSizeCount);
-	for (uint32_t count = 0; count < dwordSizeCount; /*count += 64, baseAddress += 256, bitFilePtr += 64*/)//count++, baseAddress += 4 )
+	for (uint32_t count = 0; count < dwordSizeCount; )
 	{
-		if (::NTV2DeviceGetSPIFlashVersion(_boardID) == 5  &&  baseAddress == _bankSize)
+		if (::NTV2DeviceGetSPIFlashVersion(_boardID) >= 5  &&  baseAddress == _bankSize)
 		{
 			baseAddress = 0;
 			SetBankSelect(_flashID == FAILSAFE_FLASHBLOCK  ?  BANK_3  :  BANK_1);
@@ -746,7 +740,7 @@ bool CNTV2KonaFlashProgram::VerifyFlash (FlashBlockID flashID, bool fullVerify)
 		WaitForFlashNOTBusy();
 		uint32_t flashValue;
 		ReadRegister(kRegXenaxFlashDOUT, flashValue);
-		uint32_t bitFileValue = *bitFilePtr;//*bitFilePtr++;
+		uint32_t bitFileValue = *bitFilePtr;
 		if (flashValue != bitFileValue)
 		{
 			cerr << "Error " << DEC(count) << " E(" << HEX0N(bitFileValue,8) << "),R(" << HEX0N(flashValue,8) << ")" << endl;
@@ -803,7 +797,7 @@ bool CNTV2KonaFlashProgram::ReadFlash (NTV2Buffer & outBuffer, const FlashBlockI
 			SetBankSelect(BANK_0);
 			break;
 		case FAILSAFE_FLASHBLOCK:
-			SetBankSelect(::NTV2DeviceGetSPIFlashVersion(_boardID) == 5 ? BANK_2 : BANK_1);
+			SetBankSelect(::NTV2DeviceGetSPIFlashVersion(_boardID) >= 5 ? BANK_2 : BANK_1);
 			break;
 	}
 	WriteRegister(kVRegFlashState, kProgramStateVerifyFlash);
@@ -811,7 +805,7 @@ bool CNTV2KonaFlashProgram::ReadFlash (NTV2Buffer & outBuffer, const FlashBlockI
 	KFPDBUG("About to read " << xHEX0N(numDWords*4,8) << "(" << DEC(numDWords*4) << ") bytes from '" << FlashBlockIDToString(inFlashID, /*compact*/true) << "' address " << xHEX0N(baseAddress,8));
 	for (uint32_t dword(0);	 dword < numDWords;	 )
 	{
-		if (::NTV2DeviceGetSPIFlashVersion(_boardID) == 5  &&  baseAddress == _bankSize)
+			if (::NTV2DeviceGetSPIFlashVersion(_boardID) >= 5  &&  baseAddress == _bankSize)
 		{
 			baseAddress = 0;
 			switch (_flashID)
@@ -867,7 +861,7 @@ bool CNTV2KonaFlashProgram::WaitForFlashNOTBusy()
 			busy = false;
 			break;
 		}
-	} while (busy);//( (busy == true) && (count < 100) );
+	} while (busy);
 
 	return !busy;  // Return true if wait was successful
 }
@@ -1505,8 +1499,7 @@ bool CNTV2KonaFlashProgram::SetBankSelect( BankSelect bankNumber )
 		
 		WriteCommand(_hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND);
 		WaitForFlashNOTBusy();
-		if (!_bQuiet)
-			cout << "selected bank: " << ReadBankSelect() << endl;
+		KFPDBUG ("selected bank: " << ReadBankSelect());
 	}
 	return true;
 }
@@ -2004,7 +1997,7 @@ bool CNTV2KonaFlashProgram::ProgramCustom (const string &sCustomFileName, const 
 	if (_spiFlash)
 	{
 		vector<uint8_t> writeData;
-		size_t customSize(0),  sz(0),  maxFlashSize(_spiFlash->Size());
+		size_t sz(0),  maxFlashSize(_spiFlash->Size());
 		// open file and read data
 		if (!getFileSize(sCustomFileName, sz))
 			{outMsgs << "getFileSize failed for '" << sCustomFileName << "'" << endl;  return false;}
@@ -2016,11 +2009,9 @@ bool CNTV2KonaFlashProgram::ProgramCustom (const string &sCustomFileName, const 
 			{outMsgs << "Unable to open file '" << sCustomFileName << "'" << endl;  return false;}
 
 		writeData.resize(sz);
-		customSize = size_t(ifs.readsome(reinterpret_cast<char*>(&writeData[0]), streamsize(sz)));
-		if (!customSize)
-			{outMsgs << "No data read from custom file '" << sCustomFileName << "'" << endl;  return false;}
-		if (writeData.size() > customSize)
-			writeData.resize(customSize);
+		ifs.read(reinterpret_cast<char*>(&writeData[0]), streamsize(sz));
+		if (!ifs.good())
+			{outMsgs << "Error reading data from file '" << sCustomFileName << "'" << endl;  return false;}
 
 		// erase flash
 		uint32_t writeSize = uint32_t(writeData.size());
@@ -2030,6 +2021,13 @@ bool CNTV2KonaFlashProgram::ProgramCustom (const string &sCustomFileName, const 
 
 		// write flash
 		_spiFlash->Write(addr, writeData, writeSize);
+		
+		bool result = true, verify = true;
+		if (verify)
+        {
+            result = _spiFlash->Verify(addr, writeData);
+        }
+		return result;
 	}	//	if _spiFlash
 	else
 	{
@@ -2153,6 +2151,18 @@ bool CNTV2KonaFlashProgram::ProgramCustom (const string &sCustomFileName, const 
 	return true;
 }
 
+bool CNTV2KonaFlashProgram::ProgramKonaxMB (const string &sCustomFileName, const uint32_t addr, ostream & outMsgs)
+{
+    if (DEVICE_IS_KONAX(_boardID))
+    {
+        _spiFlash = new CNTV2AxiSpiFlash(GetIndexNumber(), !_bQuiet);
+    }
+    else
+        return false;
+    
+    return ProgramCustom(sCustomFileName, addr, outMsgs);
+}
+
 bool CNTV2KonaFlashProgram::SetFlashBlockIDBank(FlashBlockID blockID)
 {
 	BankSelect bankID = BANK_0;
@@ -2162,7 +2172,7 @@ bool CNTV2KonaFlashProgram::SetFlashBlockIDBank(FlashBlockID blockID)
 		bankID = BANK_0;
 		break;
 	case FAILSAFE_FLASHBLOCK:
-		bankID = ::NTV2DeviceGetSPIFlashVersion(_boardID) == 5  ?  BANK_2 : BANK_1;
+		bankID = ::NTV2DeviceGetSPIFlashVersion(_boardID) >= 5  ?  BANK_2 : BANK_1;
 		break;
 	case MCS_INFO_BLOCK:
 	case MAC_FLASHBLOCK:

@@ -10,7 +10,7 @@
 
 #include "ajabase/common/public.h"
 #include <assert.h>
-#if defined(AJA_USE_CPLUSPLUS11)
+#if defined(AJA_USE_CPLUSPLUS11) && !defined(AJA_BAREMETAL)
 	#include <mutex>
 	#include <string>
 	using std::recursive_timed_mutex;
@@ -66,7 +66,7 @@ public:
 	 */
 	virtual inline bool IsValid(void) const
 		{
-			#if defined(AJA_USE_CPLUSPLUS11)
+			#if defined(AJA_USE_CPLUSPLUS11) && !defined(AJA_BAREMETAL)
 				return mpMutex != nullptr;
 			#else
 				return mpImpl != NULL;
@@ -77,7 +77,7 @@ public:
 	virtual AJALock &	operator = (const AJALock & inLock);
 
 private:
-#if defined(AJA_USE_CPLUSPLUS11)
+#if defined(AJA_USE_CPLUSPLUS11) && !defined(AJA_BAREMETAL)
 	recursive_timed_mutex* mpMutex={nullptr};
 	string name;
 #else

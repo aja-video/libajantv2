@@ -63,15 +63,6 @@ typedef enum
 	DEVICE_ID_KONA5_OE11				= 0x1079840F,	///< @brief See \ref kona5
 	DEVICE_ID_KONA5_OE12				= 0x10798410,	///< @brief See \ref kona5
 	DEVICE_ID_KONA5_8K_MV_TX			= 0x10798420,	///< @brief See \ref kona5
-	DEVICE_ID_SOJI_3DLUT				= 0x10922400,
-	DEVICE_ID_SOJI_OE1					= 0x10922401,
-	DEVICE_ID_SOJI_OE2					= 0x10922402,
-	DEVICE_ID_SOJI_OE3					= 0x10922403,
-	DEVICE_ID_SOJI_OE4					= 0x10922404,
-	DEVICE_ID_SOJI_OE5					= 0x10922405,
-	DEVICE_ID_SOJI_OE6					= 0x10922406,
-	DEVICE_ID_SOJI_OE7					= 0x10922407,
-    DEVICE_ID_SOJI_DIAGS                = 0x10922499,
 	DEVICE_ID_KONAHDMI					= 0x10767400,	///< @brief See \ref konahdmi
 	DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K	= 0x10646702,	///< @brief See \ref konaip
 	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,	///< @brief See \ref konaip
@@ -83,6 +74,17 @@ typedef enum
 	DEVICE_ID_KONALHEPLUS				= 0x10352300,	///< @brief See \ref konalheplus
 	DEVICE_ID_KONALHI					= 0x10266400,	///< @brief See \ref konalhi
 	DEVICE_ID_KONALHIDVI				= 0x10266401,	///< @brief See \ref konalhi
+	DEVICE_ID_KONAX						= 0X10958501,	///< @brief See \ref konax
+	DEVICE_ID_KONAXM					= 0X10958500,	///< @brief See \ref konaxm
+	DEVICE_ID_SOJI_3DLUT				= 0x10922400,
+	DEVICE_ID_SOJI_OE1					= 0x10922401,
+	DEVICE_ID_SOJI_OE2					= 0x10922402,
+	DEVICE_ID_SOJI_OE3					= 0x10922403,
+	DEVICE_ID_SOJI_OE4					= 0x10922404,
+	DEVICE_ID_SOJI_OE5					= 0x10922405,
+	DEVICE_ID_SOJI_OE6					= 0x10922406,
+	DEVICE_ID_SOJI_OE7					= 0x10922407,
+    DEVICE_ID_SOJI_DIAGS                = 0x10922499,
 	DEVICE_ID_TTAP						= 0x10416000,	///< @brief See \ref ttap
 	DEVICE_ID_TTAP_PRO					= 0x10879000,	///< @brief See \ref ttappro
 	DEVICE_ID_NOTFOUND				= 0xFFFFFFFF,		///< @brief Invalid or "not found"
@@ -125,6 +127,15 @@ typedef enum
 		(__d__) == DEVICE_ID_SOJI_OE6	||						\
 		(__d__) == DEVICE_ID_SOJI_OE7   ||                      \
         (__d__) == DEVICE_ID_SOJI_DIAGS)
+
+#define DEVICE_IS_IOIP(__d__)                                   \
+    (   (__d__) == DEVICE_ID_IOIP_2022 ||						\
+        (__d__) == DEVICE_ID_IOIP_2110 ||						\
+        (__d__) == DEVICE_ID_IOIP_2110_RGB12)
+
+#define DEVICE_IS_KONAX(__d__)                                  \
+    (   (__d__) == DEVICE_ID_KONAXM ||       					\
+        (__d__) == DEVICE_ID_KONAX)
 
 #define NTV2_DEVICE_SUPPORTS_SMPTE2110(__d__)	(		(__d__) == DEVICE_ID_KONAIP_2110			\
 													||	(__d__) == DEVICE_ID_KONAIP_2110_RGB12		\
@@ -1406,10 +1417,12 @@ typedef enum
 	NTV2_REFERENCE_HDMI_INPUT2		= 16,	///< @brief Specifies the HDMI In 2 connector.
 	NTV2_REFERENCE_HDMI_INPUT3		= 17,	///< @brief Specifies the HDMI In 3 connector.
 	NTV2_REFERENCE_HDMI_INPUT4		= 18,	///< @brief Specifies the HDMI In 4 connector.
-	NTV2_NUM_REFERENCE_INPUTS,			//	Always last!
+	NTV2_NUM_REFERENCE_INPUTS,				//	Always last!
+#if !defined(NTV2_DEPRECATE_17_0)
 	NTV2_REFERENCE_HDMI_INPUT		= NTV2_REFERENCE_HDMI_INPUT1,	///< @deprecated	Use NTV2_REFERENCE_HDMI_INPUT1 instead.
 	NTV2_REFERENCE_ANALOG_INPUT		= NTV2_REFERENCE_ANALOG_INPUT1, ///< @deprecated	Use NTV2_REFERENCE_ANALOG_INPUT1 instead.
-	NTV2_REFERENCE_INVALID = NTV2_NUM_REFERENCE_INPUTS
+#endif	//	defined(NTV2_DEPRECATE_17_0)
+	NTV2_REFERENCE_INVALID			= NTV2_NUM_REFERENCE_INPUTS
 } NTV2ReferenceSource, NTV2RefSource;
 
 #define NTV2_IS_VALID_NTV2ReferenceSource(__x__)		((__x__) >= NTV2_REFERENCE_EXTERNAL && (__x__) < NTV2_NUM_REFERENCE_INPUTS)
@@ -2944,6 +2957,7 @@ typedef enum
 	,NTV2_Wgt3DLUT1
 	,NTV2_WgtMultiLinkOut2
 	,NTV2_WgtOE1
+	,NTV2_WgtHDMIIn1v5
 	,NTV2_WgtModuleTypeCount
 	,NTV2_WgtUndefined = NTV2_WgtModuleTypeCount
 	,NTV2_WIDGET_INVALID = NTV2_WgtModuleTypeCount
@@ -2973,6 +2987,7 @@ typedef enum {
 	,NTV2WidgetType_HDMIInV2
 	,NTV2WidgetType_HDMIInV3
 	,NTV2WidgetType_HDMIInV4
+	,NTV2WidgetType_HDMIInV5
 	,NTV2WidgetType_UpDownConverter
 	,NTV2WidgetType_Mixer
 	,NTV2WidgetType_DCIMixer
@@ -3016,6 +3031,7 @@ typedef enum
 	NTV2_KLHiBox,				// Kona LHI
 	NTV2_KLHePlusBox,			// Kona LHe+
 	NTV2_K3GBox,				// Kona3G
+	NTV2_BreakoutBoard,			// KonaX
 	NTV2_MAX_NUM_BreakoutTypes,
 	NTV2_BreakoutType_Invalid	= NTV2_BreakoutNone
 } NTV2BreakoutType;
@@ -3338,6 +3354,8 @@ typedef enum
 	NTV2_BITFILE_SOJI_3DLUT_MAIN	= 88,
 	NTV2_BITFILE_KONA5_8K_MV_TX_MAIN		= 89,
 	NTV2_BITFILE_SOJI_DIAGS_MAIN	= 90,
+	NTV2_BITFILE_KONAX				= 91,
+	NTV2_BITFILE_KONAXM				= 92,
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
 

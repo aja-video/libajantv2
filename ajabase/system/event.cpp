@@ -16,6 +16,9 @@
 #if defined(AJA_MAC)
 	#include "ajabase/system/mac/eventimpl.h"
 #endif
+#if defined(AJA_BAREMETAL)
+	#include "ajabase/system/bm/eventimpl.h"
+#endif
 
 using std::string;
 

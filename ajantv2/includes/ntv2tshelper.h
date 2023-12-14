@@ -51,6 +51,18 @@
 		#define kipdprintf(_format_...) printf(_format_)
 	#endif
 
+#elif defined(AJABareMetal)
+
+	#if (KIPDPRINT==0)
+		// no log
+		#define kipdprintf(_format_...)
+
+	#elif (KIPDPRINT==1)
+		// printf
+		#include <stdio.h>
+		#define kipdprintf(_format_...) printf(_format_)
+	#endif
+
 #endif
 
 

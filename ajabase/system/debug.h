@@ -114,7 +114,7 @@
 		#define AJA_PRINT(_format_,...)
 	#endif
 
-	#define AJA_REPORT(_index_, _severity_, _format_) \
+	#define AJA_REPORT(_index_, _severity_, _format_, ...) \
 		AJADebug::Report(_index_, _severity_, NULL, 0, _format_);
 
 #endif

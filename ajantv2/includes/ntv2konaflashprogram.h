@@ -62,6 +62,7 @@ public:
 	bool			ProgramFromMCS(bool verify);
 	bool			ProgramSOC(bool verify = true);
 	bool			ProgramCustom (const std::string & sCustomFileName, const uint32_t addr, std::ostream & outMsgs);
+    bool			ProgramKonaxMB (const std::string & sCustomFileName, const uint32_t addr, std::ostream & outMsgs);
 	bool			EraseBlock (FlashBlockID blockNumber);
 	bool			EraseChip (UWord chip = 0);
 	bool			CreateSRecord (bool bChangeEndian);

@@ -11,6 +11,7 @@
 #include "ntv2devicefeatures.hh"
 #include "ntv2registerexpert.h"
 #include "ajabase/system/debug.h"
+#include "ajabase/common/common.h"
 #include <memory.h>
 #include <stdio.h>
 #include <assert.h>
@@ -687,10 +688,10 @@ bool CNTV2SignalRouter::CreateFromString (const string & inString, NTV2XptConnec
 
 	if (lines.front().find("<==") != string::npos)
 	{
-		SRDBG(lines.size() << " lines");
+//		SRDBG(lines.size() << " lines");
 		for (NTV2StringListConstIter pEachLine(lines.begin());	pEachLine != lines.end();  ++pEachLine)
 		{
-			SRDBG("	 line '" << *pEachLine << "'");
+//			SRDBG("	 line '" << *pEachLine << "'");
 			size_t	pos (pEachLine->find("<=="));
 			if (pos == string::npos)
 				{SRFAIL("Parse error: '<==' missing in line '" << *pEachLine << "'");  return false;}
@@ -714,7 +715,7 @@ bool CNTV2SignalRouter::CreateFromString (const string & inString, NTV2XptConnec
 			string line(*pLine);  aja::strip(line);
 			if (line.empty())
 				continue;
-			SRDBG("	 line '" << line << "'");
+//			SRDBG("	 line '" << line << "'");
 			size_t	openParenPos(line.find("(")), closedParenPos(line.find(");"));
 			if (openParenPos == string::npos  ||  closedParenPos == string::npos  ||  openParenPos > closedParenPos)
 				{SRFAIL("Parse error: '(' or ');' missing in line '" << line << "'");  return false;}

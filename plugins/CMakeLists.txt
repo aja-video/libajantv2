@@ -1,4 +1,4 @@
-if (NOT AJANTV2_BUILD_PLUGINS)
+if (AJANTV2_DISABLE_PLUGINS)
     message(STATUS "Skipping libajantv2 plugins...")
     return()
 endif()
@@ -10,6 +10,7 @@ if (AJA_PLUGINS_BUILD_NTV2)
     message(STATUS "Adding swdevice & nublegacy")
     aja_add_subdirectory(swdevice "AJA SWDevice Plugin")
     aja_add_subdirectory(nublegacy "Legacy Nub Plugin")
+    aja_add_subdirectory(deviceproxy "Device Proxy")
 endif()
 
 if (AJA_INSTALL_CMAKE)

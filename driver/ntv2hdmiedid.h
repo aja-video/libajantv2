@@ -25,6 +25,7 @@ enum ntv2_edid_type {
 	ntv2_edid_type_io4k,
 	ntv2_edid_type_io4kplus,
 	ntv2_edid_type_iox3,
+    ntv2_edid_type_konax,
 	ntv2_edid_type_size
 };
 

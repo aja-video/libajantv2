@@ -201,6 +201,12 @@ bool CNTV2Card::IS_INPUT_SPIGOT_INVALID (const UWord inInputSpigot) const
 	return false;
 }
 
+bool CNTV2Card::IS_HDMI_INPUT_SPIGOT_INVALID (const UWord inInputHDMIPort) const
+{
+	if (inInputHDMIPort >= ::NTV2DeviceGetNumHDMIVideoInputs (_boardID))
+		return true;
+	return false;
+}
 
 uint64_t CNTV2Card::GetSerialNumber (void)
 {
@@ -218,24 +224,49 @@ string CNTV2Card::SerialNum64ToString (const uint64_t inSerialNumber)	//	Class m
 
 bool CNTV2Card::GetSerialNumberString (string & outSerialNumberString)
 {
-	outSerialNumberString = ::SerialNum64ToString(GetSerialNumber());
-	if (outSerialNumberString.empty())
-	{
-		outSerialNumberString = "INVALID?";
-		return false;
-	}
+    if (NTV2DeviceGetSPIFlashVersion(GetDeviceID()) <= 5)
+    {
+        outSerialNumberString = ::SerialNum64ToString(GetSerialNumber());
+        if (outSerialNumberString.empty())
+        {
+            outSerialNumberString = "INVALID?";
+            return false;
+        }
+    
+        const NTV2DeviceID deviceID(GetDeviceID());
+        if (deviceID == DEVICE_ID_IO4KPLUS)							//	Io4K+/DNxIV?
+            outSerialNumberString = "5" + outSerialNumberString;	//		prepend with "5"
+        else if (deviceID == DEVICE_ID_IOIP_2022 ||
+                 deviceID == DEVICE_ID_IOIP_2110 ||
+                 deviceID == DEVICE_ID_IOIP_2110_RGB12)				//	IoIP/DNxIP?
+            outSerialNumberString = "6" + outSerialNumberString;	//		prepend with "6"
+        else if (deviceID == DEVICE_ID_IOX3)
+            outSerialNumberString = "7" + outSerialNumberString;	//		prepend with "7"
+    }
+    else
+    {
+        ULWord serialArray[] = {0,0,0,0};
+		
+		ReadRegister(kRegReserved56, serialArray[0]);
+		ReadRegister(kRegReserved57, serialArray[1]);
+		ReadRegister(kRegReserved54, serialArray[2]);
+		ReadRegister(kRegReserved55, serialArray[3]);
 
-	const NTV2DeviceID deviceID(GetDeviceID());
-	if (deviceID == DEVICE_ID_IO4KPLUS)							//	Io4K+/DNxIV?
-		outSerialNumberString = "5" + outSerialNumberString;	//		prepend with "5"
-	else if (deviceID == DEVICE_ID_IOIP_2022 ||
-			 deviceID == DEVICE_ID_IOIP_2110 ||
-			 deviceID == DEVICE_ID_IOIP_2110_RGB12)				//	IoIP/DNxIP?
-		outSerialNumberString = "6" + outSerialNumberString;	//		prepend with "6"
-	else if (deviceID == DEVICE_ID_IOX3)
-		outSerialNumberString = "7" + outSerialNumberString;	//		prepend with "7"
+		outSerialNumberString.clear();
+        for (int serialIndex = 0; serialIndex < 4; serialIndex++)
+        {
+            if (serialArray[serialIndex] != 0xffffffff)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    char tempChar = ((serialArray[serialIndex] >> (i*8)) & 0xff);
+                    if (tempChar > 0 && tempChar != '.')
+                        outSerialNumberString.push_back(tempChar);
+                }
+            }
+        }
+    }
 	return true;
-
 }	//	GetSerialNumberString
 
 
@@ -341,6 +372,11 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 					result = NTV2_KLHiBox;
 				else
 					result = NTV2_BreakoutCableXLR;		// no BNC breakout cable available
+				break;
+			case DEVICE_ID_KONAX:
+				// Do we have a BOB?
+				if(IsBreakoutBoardConnected())
+					result = NTV2_BreakoutBoard;
 				break;
 			default:
 				break;
@@ -464,55 +500,6 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 		return GetNumSupported(kDeviceGetNumMicInputs) > 0;
 	}
 #endif	//	!defined(NTV2_DEPRECATE_16_3)
-
-
-/////////// Stream Operators
-
-ostream & operator << (ostream & inOutStr, const NTV2AudioChannelPairs & inSet)
-{
-	if (inSet.empty())
-		inOutStr << "(none)";
-	else
-		for (NTV2AudioChannelPairsConstIter iter (inSet.begin ());	iter != inSet.end ();  ++iter)
-			inOutStr << (iter != inSet.begin() ? ", " : "") << ::NTV2AudioChannelPairToString (*iter, true);
-	return inOutStr;
-}
-
-
-ostream &	operator << (ostream & inOutStr, const NTV2AudioChannelQuads & inSet)
-{
-	for (NTV2AudioChannelQuadsConstIter iter (inSet.begin ());	iter != inSet.end ();  ++iter)
-		inOutStr << (iter != inSet.begin () ? ", " : "") << ::NTV2AudioChannelQuadToString (*iter, true);
-	return inOutStr;
-}
-
-
-ostream &	operator << (ostream & inOutStr, const NTV2AudioChannelOctets & inSet)
-{
-	for (NTV2AudioChannelOctetsConstIter iter (inSet.begin ());	 iter != inSet.end ();	++iter)
-		inOutStr << (iter != inSet.begin () ? ", " : "") << ::NTV2AudioChannelOctetToString (*iter, true);
-	return inOutStr;
-}
-
-
-ostream &	operator << (ostream & inOutStr, const NTV2DoubleArray & inVector)
-{
-	for (NTV2DoubleArrayConstIter iter (inVector.begin ());	 iter != inVector.end ();  ++iter)
-		inOutStr << *iter << endl;
-	return inOutStr;
-}
-
-
-ostream &	operator << (ostream & inOutStr, const NTV2DIDSet & inDIDs)
-{
-	for (NTV2DIDSetConstIter it (inDIDs.begin());  it != inDIDs.end();	)
-	{
-		inOutStr << xHEX0N(uint16_t(*it),2);
-		if (++it != inDIDs.end())
-			inOutStr << ", ";
-	}
-	return inOutStr;
-}
 
 
 NTV2Buffer CNTV2Card::NULL_POINTER (AJA_NULL, 0);

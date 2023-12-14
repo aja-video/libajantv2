@@ -535,6 +535,13 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 				AJASystemInfo::append(infoTable, "License Enable Mask", xHEX0NStr(licenseStatus & 0xff,2));
 			}
 		}	//	if IsIPDevice
+		if (mDevice.IsRemote())
+		{
+			if (!mDevice.GetHostName().empty())
+				AJASystemInfo::append(infoTable, "Host Name", mDevice.GetHostName());
+			if (!mDevice.GetDescription().empty())
+				AJASystemInfo::append(infoTable, "Device Description", mDevice.GetDescription());
+		}	//	if remote/fake device
 		#if defined(AJAMac)
 			connType = AsMacDriverInterface(mDevice)->GetConnectionType();
 			if (!connType.empty())
@@ -624,7 +631,7 @@ void CNTV2SupportLogger::FetchRegisterLog (ostringstream & oss) const
 			<< "VReg Value: " << value << " : " << xHEX0N(value,8) << endl
 			<< CNTV2RegisterExpert::GetDisplayValue (regNum, value, deviceID)	<< endl;
 	}
-}
+}	//	FetchRegisterLog
 
 
 void CNTV2SupportLogger::FetchAutoCirculateLog (ostringstream & oss) const
@@ -866,7 +873,7 @@ void CNTV2SupportLogger::FetchAudioLog (ostringstream & oss) const
 			}
 		}
 	}
-}
+}	//	FetchAudioLog
 
 void CNTV2SupportLogger::FetchRoutingLog (ostringstream & oss) const
 {
