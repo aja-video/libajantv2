@@ -9,15 +9,42 @@
 #ifndef _NTV2DOLBYPLAYER_H
 #define _NTV2DOLBYPLAYER_H
 
-#include "ntv2enums.h"
+
 #include "ntv2democommon.h"
-#include "ajabase/common/circularbuffer.h"
-#include "ajabase/common/timecodeburn.h"
 #include "ajabase/system/thread.h"
+#include "ajabase/common/timecodeburn.h"
 #include "ajabase/system/file_io.h"
 
 
 #define DOLBY_FULL_PARSER	//	If defined, parse EC3 files with multiple sync frames per HDMI burst;  otherwise parse with single sync frame per HDMI burst.
+
+
+/**
+	@brief	Configures an NTV2DolbyPlayer instance.
+**/
+typedef struct DolbyPlayerConfig : public PlayerConfig
+{
+	public:
+		bool				fdoRamp;					///< @brief	If true, replaces audio data with data values which ramp up
+		std::string			fDolbyFilePath;				///< @brief	Optional path to Dolby audio source file;		
+		AJAFileIO *         fDolbyFile;                 ///< @brief	The AJAFileIO created from the Dolby File Path
+
+		/**
+			@brief	Constructs a default DolbyPlayer configuration.
+		**/
+		inline explicit	DolbyPlayerConfig (const std::string & inDeviceSpecifier	= "0")
+			:	PlayerConfig		(inDeviceSpecifier),
+				fdoRamp				(false),
+				fDolbyFile			(NULL)
+		{
+		}
+
+		AJALabelValuePairs Get (const bool inCompact = false) const;
+
+}	DolbyPlayerConfig;
+
+// Takes DolbyPlayerConfig << operator overload takes precedence over the PlayConfig one declared in ntv2democommon.h
+AJAExport std::ostream &	operator << (std::ostream & ioStrm, const DolbyPlayerConfig & inObj);
 
 /**
 	@brief	I am an object that can play out a test pattern (with timecode) to an output of an AJA device
@@ -31,57 +58,33 @@ class NTV2DolbyPlayer
 {
 	//	Public Instance Methods
 	public:
+
 		/**
 			@brief	Constructs me using the given configuration settings.
 			@note	I'm not completely initialized and ready for use until after my Init method has been called.
-			@param[in]	inDeviceSpecifier	Specifies the AJA device to use. Defaults to "0", the first device found.
-			@param[in]	inWithAudio			If true, include audio tone in the output signal;  otherwise, omit it.
-											Defaults to "true".
-			@param[in]	inChannel			Specifies the channel to use. Defaults to NTV2_CHANNEL1.
-			@param[in]	inPixelFormat		Specifies the pixel format to use for the device's frame buffers.
-											Defaults to 8-bit YUV.
-			@param[in]	inVideoFormat		Specifies the video format to use. Defaults to 1080i5994.
-			@param[in]	inDoMultiFormat		If true, use multi-format mode; otherwise use uniformat mode. Defaults to false (uniformat mode).
+			@param[in]	inConfigData		Specifies the player configuration.
 		**/
-								NTV2DolbyPlayer (const std::string &			inDeviceSpecifier	= "0",
-                                                 const bool                     inWithAudio			= true,
-                                                 const NTV2Channel              inChannel			= NTV2_CHANNEL1,
-												 const NTV2FrameBufferFormat	inPixelFormat		= NTV2_FBF_8BIT_YCBCR,
-                                                 const NTV2VideoFormat          inVideoFormat		= NTV2_FORMAT_1080i_5994,
-                                                 const bool                     inDoMultiFormat		= false,
-												 const bool						inDoRamp			= false,
-                                                 AJAFileIO*                     inDolbyFile         = NULL);
+								NTV2DolbyPlayer (const DolbyPlayerConfig & inConfigData);
 
 		virtual					~NTV2DolbyPlayer (void);
 
-		/**
-			@brief	Initializes me and prepares me to Run.
-		**/
-		virtual AJAStatus		Init (void);
+		virtual AJAStatus	Init (void);					///< @brief	Initializes me and prepares me to Run.
 
 		/**
 			@brief	Runs me.
 			@note	Do not call this method without first calling my Init method.
 		**/
-		virtual AJAStatus		Run (void);
+		virtual AJAStatus	Run (void);
 
-		/**
-			@brief	Gracefully stops me from running.
-		**/
-		virtual void			Quit (void);
+		virtual void		Quit (void);					///< @brief	Gracefully stops me from running.
 
-		/**
-			@return	True if I'm running;  otherwise false.
-		**/
-		virtual bool			IsRunning (void) const				{return !mGlobalQuit;}
+		virtual bool		IsRunning (void) const	{return !mGlobalQuit;}	///< @return	True if I'm running;  otherwise false.
 
 		/**
 			@brief	Provides status information about my output (playout) process.
-			@param[out]	outGoodFrames		Receives the number of successfully played frames.
-			@param[out]	outDroppedFrames	Receives the number of dropped frames.
-			@param[out]	outBufferLevel		Receives the driver's current buffer level.
+			@param[out]	outStatus	Receives the ::AUTOCIRCULATE_STATUS information.
 		**/
-		virtual void			GetACStatus (ULWord & outGoodFrames, ULWord & outDroppedFrames, ULWord & outBufferLevel);
+		virtual void		GetACStatus (AUTOCIRCULATE_STATUS & outStatus);
 
 
 	//	Protected Instance Methods
@@ -187,78 +190,42 @@ class NTV2DolbyPlayer
 			uint8_t addbsibuffer[64];
 		};
 
-		/**
-			@brief	Sets up everything I need to play video.
-		**/
-		virtual AJAStatus		SetUpVideo (void);
+		virtual AJAStatus	SetUpVideo (void);				///< @brief	Performs all video setup.
+		virtual AJAStatus	SetUpAudio (void);				///< @brief	Performs all audio setup.
+		virtual bool		RouteOutputSignal (void);		///< @brief	Performs all widget/signal routing for playout.
+		virtual AJAStatus	SetUpHostBuffers (void);		///< @brief	Sets up my host video & audio buffers.
+		virtual AJAStatus	SetUpTestPatternBuffers (void);	///< @brief	Creates my test pattern buffers.
+		virtual void		StartConsumerThread (void);		///< @brief	Starts my consumer thread.
+		virtual void		ConsumeFrames (void);			///< @brief	My consumer thread that repeatedly plays frames using AutoCirculate (until quit).
+		virtual void		StartProducerThread (void);		///< @brief	Starts my producer thread.
+		virtual void		ProduceFrames (void);			///< @brief	My producer thread that repeatedly produces video frames.
 
 		/**
-			@brief	Sets up everything I need to play audio.
+			@brief		Inserts audio tone (based on my current tone frequency) into the given NTV2FrameData's audio buffer.
+			@param		inFrameData		The NTV2FrameData object having the audio buffer to be filled.
+			@return		Total number of bytes written into the buffer.
 		**/
-		virtual AJAStatus		SetUpAudio (void);
+		virtual uint32_t	AddTone (NTV2FrameData & inFrameData);
 
 		/**
-			@brief	Sets up device routing for playout.
-		**/
-		virtual void			RouteOutputSignal (void);
-
-		/**
-			@brief	Sets up my circular buffers.
-		**/
-		virtual void			SetUpHostBuffers (void);
-
-		/**
-			@brief	Creates my test pattern buffers.
-		**/
-		virtual AJAStatus		SetUpTestPatternVideoBuffers (void);
-
-		/**
-			@brief	Starts my playout thread.
-		**/
-		virtual void			StartConsumerThread (void);
-
-		/**
-			@brief	Repeatedly plays out frames using AutoCirculate (until quit).
-		**/
-		virtual void			PlayFrames (void);
-
-		/**
-			@brief	Starts my test pattern producer thread.
-		**/
-		virtual void			StartProducerThread (void);
-
-		/**
-			@brief	Repeatedly produces test pattern frames (until global quit flag set).
-		**/
-		virtual void			ProduceFrames (void);
-
-		/**
-			@brief	Inserts audio tone (based on my current tone frequency) into the given audio buffer.
-			@param[out]	audioBuffer		Specifies a valid, non-NULL pointer to the buffer that is to receive
-										the audio tone data.
-			@return	Total number of bytes written into the buffer.
-		**/
-		virtual uint32_t		AddTone (ULWord * audioBuffer);
-
-		/**
-			@brief	Inserts audio test ramp into the given audio buffer.
-			@param[out]	audioBuffer		Specifies a valid, non-NULL pointer to the buffer that is to receive
+			@brief	Inserts audio test ramp into the given NTV2FrameData's audio buffer.
+			@param		inFrameData		The NTV2FrameData object having the audio buffer that is to receive 
 										the audio ramp data.
 			@return	Total number of bytes written into the buffer.
 		**/
-		virtual uint32_t		AddRamp (ULWord * audioBuffer);
+		virtual uint32_t	AddRamp (NTV2FrameData & inFrameData);
 
 		/**
-             @brief	Inserts dolby audio into the given audio buffer.
+             @brief	Inserts dolby audio into the given NTV2FrameData's audio buffer.
              @param[out]	audioBuffer		Specifies a valid, non-NULL pointer to the buffer that is to receive
                                             the audio tone data.
              @return	Total number of bytes written into the buffer.
 		 **/
-		virtual uint32_t		AddDolby (ULWord * audioBuffer);
+		virtual uint32_t	AddDolby (NTV2FrameData & inFrameData);
 
 #ifdef DOLBY_FULL_PARSER
 		/**
-			@brief	Get a dolby audio audio frame from the input file.
+			@brief	Get a dolby audio frame from the input file.
 			@param[out]	pInDolbyBuffer		Specifies a valid, non-NULL pointer to the buffer that is to receive
 												the dolby frame data.
 			@param[out]	numSamples			Number of samples in the buffer.
@@ -313,66 +280,43 @@ class NTV2DolbyPlayer
 		**/
 		static void				ProducerThreadStatic (AJAThread * pThread, void * pContext);
 
-		/**
-			@brief	Returns the RP188 DBB register number to use for the given ::NTV2OutputDestination.
-			@param[in]	inOutputSource	Specifies the NTV2OutputDestination of interest.
-			@return	The number of the RP188 DBB register to use for the given output destination.
-		**/
-		static ULWord			GetRP188RegisterForOutput (const NTV2OutputDestination inOutputSource);
-
 
 	//	Private Member Data
 	private:
-		typedef AJACircularBuffer <AVDataBuffer *>		MyCirculateBuffer;
+		//typedef AJACircularBuffer <AVDataBuffer *>		MyCirculateBuffer;
+		typedef std::vector<NTV2Buffer>	NTV2Buffers;
 
-		AJAThread *					mConsumerThread;			///< @brief	My playout (consumer) thread object
-		AJAThread *					mProducerThread;			///< @brief	My generator (producer) thread object
+		DolbyPlayerConfig	mConfig;			///< @brief	My operating configuration
+		AJAThread			mConsumerThread;	///< @brief	My playout (consumer) thread object
+		AJAThread			mProducerThread;	///< @brief	My generator (producer) thread object
+		CNTV2Card			mDevice;			///< @brief	My CNTV2Card instance
+		NTV2TaskMode		mSavedTaskMode;		///< @brief	Used to restore the previous task mode
+		ULWord				mCurrentFrame;		///< @brief	My current frame number (for generating timecode)
+		ULWord				mCurrentSample;		///< @brief	My current audio sample (tone generator state)
+		double				mToneFrequency;		///< @brief	My current audio tone frequency [Hz]
+		NTV2AudioSystem		mAudioSystem;		///< @brief	The audio system I'm using (if any)
+		NTV2FormatDesc		mFormatDesc;		///< @brief	Describes my video/pixel format
+		NTV2TCIndexes		mTCIndexes;			///< @brief	Timecode indexes to use
+		bool				mGlobalQuit;		///< @brief	Set "true" to gracefully stop
+		AJATimeCodeBurn		mTCBurner;			///< @brief	My timecode burner
+		NTV2FrameDataArray	mHostBuffers;		///< @brief	My host buffers
+		FrameDataRingBuffer	mFrameDataRing;		///< @brief	AJACircularBuffer that controls frame data access by producer/consumer threads
+		NTV2Buffers			mTestPatRasters;	///< @brief	Pre-rendered test pattern rasters
 
-		uint32_t					mCurrentFrame;				///< @brief	My current frame number (used to generate timecode)
-		ULWord						mCurrentSample;				///< @brief	My current audio sample (maintains audio tone generator state)
-		double						mToneFrequency;				///< @brief	My current audio tone frequency [Hz]
-
-		uint16_t					mRampSample;				///< @brief	My current audio sample (maintains audio ramp generator state)
-
-		const std::string			mDeviceSpecifier;			///< @brief	Specifies the device I should use
-		CNTV2Card					mDevice;					///< @brief	My CNTV2Card instance
-		NTV2DeviceID				mDeviceID;					///< @brief	My device (model) identifier
-		NTV2Channel					mOutputChannel;				///< @brief	The channel I'm using
-		NTV2VideoFormat				mVideoFormat;				///< @brief	My video format
-		NTV2FrameBufferFormat		mPixelFormat;				///< @brief	My pixel format
-		NTV2EveryFrameTaskMode		mSavedTaskMode;				///< @brief	Used to restore the prior task mode
-		NTV2AudioSystem				mAudioSystem;				///< @brief	The audio system I'm using
-        NTV2AudioRate               mAudioRate;                 ///< @brief	My audio rate
-		const bool					mWithAudio;					///< @brief	Playout audio?
-		bool						mGlobalQuit;				///< @brief	Set "true" to gracefully stop
-		bool						mDoMultiChannel;			///< @brief	Demonstrates how to configure the board for multi-format
-		bool						mDoRamp;					///< @brief	Output audio test ramp
-		AJATimeCodeBurn				mTCBurner;					///< @brief	My timecode burner
-		uint32_t					mVideoBufferSize;			///< @brief	My video buffer size, in bytes
-		uint32_t					mAudioBufferSize;			///< @brief	My audio buffer size, in bytes
-
-		uint8_t **					mTestPatternVideoBuffers;	///< @brief	My test pattern buffers
-		uint32_t					mNumTestPatterns;			///< @brief	Number of test patterns to cycle through
-
-		AVDataBuffer				mAVHostBuffer [CIRCULAR_BUFFER_SIZE];	///< @brief	My host buffers
-		MyCirculateBuffer			mAVCircularBuffer;						///< @brief	My ring buffer
-
-		uint32_t                    mBurstIndex;				///< @brief	HDMI burst sample index
-		uint32_t                    mBurstSamples;				///< @brief	HDMI burst sample size
-
-		uint16_t *                  mBurstBuffer;               ///< @brief	HDMI burst audio data buffer
-		uint32_t                    mBurstSize;                 ///< @brief	HDMI burst audio data size
-		uint32_t                    mBurstOffset;               ///< @brief	HDMI burst audio data offset
-		uint32_t                    mBurstMax;			        ///< @brief	HDMI burst and dolby max size
-
-		AJAFileIO *                 mDolbyFile;                 ///< @brief	Dolby audio source file
-		uint16_t *                  mDolbyBuffer;               ///< @brief	Dolby audio data buffer
-		uint32_t                    mDolbySize;                 ///< @brief	Dolby audio data size
-		uint32_t					mDolbyBlocks;				///< @brief	Dolby audio block count
-
-		uint8_t *					mBitBuffer;
-		ULWord						mBitSize;
-		ULWord						mBitIndex;
+        NTV2AudioRate		mAudioRate;                 ///< @brief	My audio rate
+		uint16_t			mRampSample;				///< @brief	My current audio sample (maintains audio ramp generator st			
+		uint32_t   			mBurstIndex;				///< @brief	HDMI burst sample index
+		uint32_t   			mBurstSamples;				///< @brief	HDMI burst sample 			
+		uint16_t * 			mBurstBuffer;               ///< @brief	HDMI burst audio data buffer
+		uint32_t   			mBurstSize;                 ///< @brief	HDMI burst audio data size
+		uint32_t   			mBurstOffset;               ///< @brief	HDMI burst audio data offset
+		uint32_t   			mBurstMax;			        ///< @brief	HDMI burst and dolby max 			
+		uint16_t * 			mDolbyBuffer;               ///< @brief	Dolby audio data buffer
+		uint32_t   			mDolbySize;                 ///< @brief	Dolby audio data size
+		uint32_t			mDolbyBlocks;				///< @brief	Dolby audio block c			
+		uint8_t *			mBitBuffer;
+		ULWord				mBitSize;
+		ULWord				mBitIndex;
 };	//	NTV2DolbyPlayer
 
 #endif	//	_NTV2DOLBY_H
