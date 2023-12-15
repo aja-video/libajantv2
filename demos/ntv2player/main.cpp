@@ -52,7 +52,7 @@ int main (int argc, const char ** argv)
 		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,	0,	"video format to produce",	"'?' or 'list' to list"		},
 		{"anc",			'a',	POPT_ARG_STRING,	&pAncFilePath,	0,	"play prerecorded anc",		"path/to/binary/data/file"	},
 		{"noaudio",		  0,	POPT_ARG_NONE,		&noAudio,		0,	"disable audio tone",		AJA_NULL					},
-		{"novideo",		  0,	POPT_ARG_NONE,		&noVideo,		0,	"disable video tone",		AJA_NULL					},
+		{"novideo",		  0,	POPT_ARG_NONE,		&noVideo,		0,	"disable video",		AJA_NULL					},
 		{"ltc",			'l',	POPT_ARG_NONE,		&xmitLTC,		0,	"xmit LTC instead of VITC",	AJA_NULL					},
 		POPT_AUTOHELP
 		POPT_TABLEEND
