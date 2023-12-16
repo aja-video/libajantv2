@@ -86,7 +86,7 @@ bool CNTV2Card::SetColorCorrectionOutputBank (const NTV2Channel inChannel, const
 {
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	if (::NTV2DeviceGetLUTVersion(_boardID) == 2)
+	if (GetNumSupported(kDeviceGetLUTVersion) == 2)
 		return SetLUTV2OutputBank(inChannel, inBank);
 	switch(inChannel)
 	{
@@ -121,7 +121,7 @@ bool CNTV2Card::GetColorCorrectionOutputBank (const NTV2Channel inChannel, ULWor
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
-	if(::NTV2DeviceGetLUTVersion(_boardID) == 2)
+	if (GetNumSupported(kDeviceGetLUTVersion) == 2)
 		return GetLUTV2OutputBank(inChannel, outBank);
 	switch(inChannel)
 	{
@@ -154,7 +154,7 @@ bool CNTV2Card::GetLUTV2OutputBank (const NTV2Channel inChannel, ULWord & outBan
 
 bool CNTV2Card::SetColorCorrectionHostAccessBank (const NTV2ColorCorrectionHostAccessBank inValue)
 {
-	if(::NTV2DeviceGetLUTVersion(_boardID) == 2)
+	if (GetNumSupported(kDeviceGetLUTVersion) == 2)
 		return SetLUTV2HostAccessBank(inValue);
 
 	switch(inValue)
@@ -228,7 +228,7 @@ bool CNTV2Card::GetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessB
 {
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
-	if(::NTV2DeviceGetLUTVersion(_boardID) == 2)
+	if (GetNumSupported(kDeviceGetLUTVersion) == 2)
 		return GetLUTV2HostAccessBank(outValue, inChannel);
 
 	bool	result	(false);
@@ -1135,7 +1135,7 @@ bool CNTV2Card::SetLUTEnable (const bool inEnable, const NTV2Channel inLUT)
 
 	if (IS_CHANNEL_INVALID(inLUT))
 		{LUTFAIL("Bad LUT number (> 7): " << DEC(inLUT)); return false;}
-	if (::NTV2DeviceGetLUTVersion(_boardID) != 2)
+	if (GetNumSupported(kDeviceGetLUTVersion) != 2)
 		return true;	//	LUT init not needed
 
 	//	Sanity check...
