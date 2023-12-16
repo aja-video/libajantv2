@@ -182,11 +182,11 @@ bool CNTV2Card::IS_CHANNEL_INVALID (const NTV2Channel inChannel) const
 }
 
 
-bool CNTV2Card::IS_OUTPUT_SPIGOT_INVALID (const UWord inOutputSpigot) const
+bool CNTV2Card::IS_OUTPUT_SPIGOT_INVALID (const UWord inOutputSpigot)
 {
-	if (inOutputSpigot >= ::NTV2DeviceGetNumVideoOutputs(_boardID))
-	{
-		if (NTV2DeviceCanDoWidget(_boardID, NTV2_WgtSDIMonOut1) && inOutputSpigot == 4)
+	if (inOutputSpigot >= UWord(GetNumSupported(kDeviceGetNumVideoOutputs)))
+	{   const ULWordSet itms (GetSupportedItems(kNTV2EnumsID_WidgetID));
+		if (itms.find(ULWord(NTV2_WgtSDIMonOut1)) != itms.end()  &&  inOutputSpigot == 4)
 			return false;	//	Io4K Monitor Output exception
 		return true;		//	Invalid
 	}
@@ -194,16 +194,16 @@ bool CNTV2Card::IS_OUTPUT_SPIGOT_INVALID (const UWord inOutputSpigot) const
 }
 
 
-bool CNTV2Card::IS_INPUT_SPIGOT_INVALID (const UWord inInputSpigot) const
+bool CNTV2Card::IS_INPUT_SPIGOT_INVALID (const UWord inInputSpigot)
 {
-	if (inInputSpigot >= ::NTV2DeviceGetNumVideoInputs (_boardID))
+	if (inInputSpigot >= UWord(GetNumSupported(kDeviceGetNumVideoInputs)))
 		return true;
 	return false;
 }
 
-bool CNTV2Card::IS_HDMI_INPUT_SPIGOT_INVALID (const UWord inInputHDMIPort) const
+bool CNTV2Card::IS_HDMI_INPUT_SPIGOT_INVALID (const UWord inInputHDMIPort)
 {
-	if (inInputHDMIPort >= ::NTV2DeviceGetNumHDMIVideoInputs (_boardID))
+	if (inInputHDMIPort >= UWord(GetNumSupported(kDeviceGetNumHDMIVideoInputs)))
 		return true;
 	return false;
 }
@@ -309,7 +309,7 @@ string CNTV2Card::GetBitfileInfoString (const BITFILE_INFO_STRUCT & inBitFileInf
 bool CNTV2Card::IsFailSafeBitfileLoaded (bool & outIsSafeBoot)
 {
 	outIsSafeBoot = false;
-	if (!::NTV2DeviceCanReportFailSafeLoaded(_boardID))
+	if (!IsSupported(kDeviceCanReportFailSafeLoaded))
 		return false;
 	return CNTV2DriverInterface::ReadRegister(kRegCPLDVersion, outIsSafeBoot, BIT(4), 4);
 }
@@ -318,7 +318,7 @@ bool CNTV2Card::IsFailSafeBitfileLoaded (bool & outIsSafeBoot)
 bool CNTV2Card::CanWarmBootFPGA (bool & outCanWarmBoot)
 {
 	outCanWarmBoot = false; //	Definitely can't
-	if (!::NTV2DeviceCanDoWarmBootFPGA(_boardID))
+	if (!IsSupported(kDeviceCanDoWarmBootFPGA))
 		return false;
 
 	ULWord	version(0);
@@ -445,33 +445,33 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 	}
 
 	bool CNTV2Card::DeviceCanDoVideoFormat (const NTV2VideoFormat inVideoFormat)
-	{
-		return ::NTV2DeviceCanDoVideoFormat (GetDeviceID(), inVideoFormat);
+	{	const ULWordSet itms (GetSupportedItems(kNTV2EnumsID_VideoFormat));
+		return itms.find(ULWord(inVideoFormat)) != itms.end();
 	}
 
 	bool CNTV2Card::DeviceCanDoFrameBufferFormat (const NTV2FrameBufferFormat inFBFormat)
-	{
-		return ::NTV2DeviceCanDoFrameBufferFormat (GetDeviceID(), inFBFormat);
+	{	const ULWordSet itms (GetSupportedItems(kNTV2EnumsID_PixelFormat));
+		return itms.find(ULWord(inFBFormat)) != itms.end();
 	}
 
 	bool CNTV2Card::DeviceCanDoWidget (const NTV2WidgetID inWidgetID)
-	{
-		return ::NTV2DeviceCanDoWidget (GetDeviceID(), inWidgetID);
+	{	const ULWordSet itms (GetSupportedItems(kNTV2EnumsID_WidgetID));
+		return itms.find(ULWord(inWidgetID)) != itms.end();
 	}
 	
 	bool CNTV2Card::DeviceCanDoConversionMode (const NTV2ConversionMode inConversionMode)
-	{
-		return ::NTV2DeviceCanDoConversionMode (GetDeviceID(), inConversionMode);
+	{	const ULWordSet itms (GetSupportedItems(kNTV2EnumsID_ConversionMode));
+		return itms.find(ULWord(inConversionMode)) != itms.end();
 	}
 
 	bool CNTV2Card::DeviceCanDoDSKMode (const NTV2DSKMode inDSKMode)
-	{
-		return ::NTV2DeviceCanDoDSKMode (GetDeviceID(), inDSKMode);
+	{	const ULWordSet itms (GetSupportedItems(kNTV2EnumsID_DSKMode));
+		return itms.find(ULWord(inDSKMode)) != itms.end();
 	}
 
 	bool CNTV2Card::DeviceCanDoInputSource (const NTV2InputSource inInputSource)
-	{
-		return ::NTV2DeviceCanDoInputSource (GetDeviceID(), inInputSource);
+	{	const ULWordSet itms (GetSupportedItems(kNTV2EnumsID_InputSource));
+		return itms.find(ULWord(inInputSource)) != itms.end();
 	}
 
 	bool CNTV2Card::DeviceCanDoAudioMixer (void)
@@ -485,7 +485,7 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 			return false;	//	Must have at least one HDMI input or output
 		if (GetDeviceID() == DEVICE_ID_KONAHDMI)
 			return false;	//	Can't be KonaHDMI
-		if (IsSupported(kDeviceCanDoAudioMixer))
+		if (DeviceCanDoAudioMixer())
 			return false;	//	Can't have audio mixer
 		return true;
 	}
@@ -701,7 +701,7 @@ bool SDRAMAuditor::TagAudioBuffers (CNTV2Card & inDevice, const bool inMarkStopp
 
 bool SDRAMAuditor::TagVideoFrames (CNTV2Card & inDevice)
 {
-	const UWord numChannels	(UWord(::NTV2DeviceGetNumVideoChannels(mDeviceID)) + (inDevice.HasMultiRasterWidget() ? 1 : 0));
+	const UWord numChannels	(UWord(inDevice.GetNumSupported(kDeviceGetNumVideoChannels)) + (inDevice.HasMultiRasterWidget() ? 1 : 0));
 	NTV2ChannelSet skipChannels;
 	for (NTV2Channel chan(NTV2_CHANNEL1);  chan < NTV2Channel(numChannels);  chan = NTV2Channel(chan+1))
 	{

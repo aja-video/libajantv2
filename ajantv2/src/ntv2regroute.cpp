@@ -28,7 +28,7 @@ static const ULWord sShifts[]	=	{			 0,			 8,			16,			24	};
 
 bool CNTV2Card::GetConnectedOutput (const NTV2InputCrosspointID inInputXpt, NTV2OutputCrosspointID & outOutputXpt)
 {
-	const ULWord	maxRegNum	(::NTV2DeviceGetMaxRegisterNumber (_boardID));
+	const ULWord	maxRegNum	(GetNumSupported(kDeviceGetMaxRegisterNumber));
 	uint32_t		regNum		(0);
 	uint32_t		ndx			(0);
 
@@ -89,7 +89,7 @@ bool CNTV2Card::Connect (const NTV2InputCrosspointID inInputXpt, const NTV2Outpu
 	if (inOutputXpt == NTV2_XptBlack)
 		return Disconnect (inInputXpt);
 
-	const ULWord	maxRegNum	(::NTV2DeviceGetMaxRegisterNumber(_boardID));
+	const ULWord	maxRegNum	(GetNumSupported(kDeviceGetMaxRegisterNumber));
 	uint32_t		regNum		(0);
 	uint32_t		ndx			(0);
 	bool			canConnect	(true);
@@ -133,7 +133,7 @@ bool CNTV2Card::Connect (const NTV2InputCrosspointID inInputXpt, const NTV2Outpu
 
 bool CNTV2Card::Disconnect (const NTV2InputCrosspointID inInputXpt)
 {
-	const ULWord	maxRegNum	(::NTV2DeviceGetMaxRegisterNumber(_boardID));
+	const ULWord	maxRegNum	(GetNumSupported(kDeviceGetMaxRegisterNumber));
 	uint32_t		regNum		(0);
 	uint32_t		ndx			(0);
 	ULWord			outputXpt	(0);
@@ -278,7 +278,7 @@ bool CNTV2Card::RemoveConnections (const NTV2XptConnections & inConnections)
 bool CNTV2Card::ClearRouting (void)
 {
 	const NTV2RegNumSet routingRegisters	(CNTV2RegisterExpert::GetRegistersForClass (kRegClass_Routing));
-	const ULWord		maxRegisterNumber	(::NTV2DeviceGetMaxRegisterNumber (_boardID));
+	const ULWord		maxRegisterNumber	(GetNumSupported(kDeviceGetMaxRegisterNumber));
 	unsigned			nFailures			(0);
 	ULWord				tally				(0);
 
@@ -364,23 +364,24 @@ bool CNTV2Card::GetRoutingForChannel (const NTV2Channel inChannel, CNTV2SignalRo
 	NTV2InputCrosspointQueue			inputXptQueue;	//	List of inputs to trace backward from
 	static const NTV2InputCrosspointID	SDIOutInputs [] = { NTV2_XptSDIOut1Input,	NTV2_XptSDIOut2Input,	NTV2_XptSDIOut3Input,	NTV2_XptSDIOut4Input,
 															NTV2_XptSDIOut5Input,	NTV2_XptSDIOut6Input,	NTV2_XptSDIOut7Input,	NTV2_XptSDIOut8Input};
-	outRouting.Reset ();
+	const ULWordSet wgts (GetSupportedItems(kNTV2EnumsID_WidgetID));
+	outRouting.Reset();
 
-	if (IS_CHANNEL_INVALID (inChannel))
+	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
 
 	//	Seed the input crosspoint queue...
-	inputXptQueue.push_back (SDIOutInputs [inChannel]);
+	inputXptQueue.push_back(SDIOutInputs[inChannel]);
 
 	//	Process all queued inputs...
-	while (!inputXptQueue.empty ())
+	while (!inputXptQueue.empty())
 	{
-		NTV2InputCrosspointID		inputXpt	(inputXptQueue.front ());
+		NTV2InputCrosspointID		inputXpt	(inputXptQueue.front());
 		NTV2OutputCrosspointID		outputXpt	(NTV2_XptBlack);
 		NTV2WidgetID				widgetID	(NTV2_WIDGET_INVALID);
 		NTV2InputCrosspointIDSet	inputXpts;
 
-		inputXptQueue.pop_front ();
+		inputXptQueue.pop_front();
 
 		if (inputXpt == NTV2_INPUT_CROSSPOINT_INVALID)
 			continue;
@@ -396,16 +397,15 @@ bool CNTV2Card::GetRoutingForChannel (const NTV2Channel inChannel, CNTV2SignalRo
 
 			//	Find out what widget this output belongs to...
 			CNTV2SignalRouter::GetWidgetForOutput (outputXpt, widgetID);
-			assert (NTV2_IS_VALID_WIDGET (widgetID));	//	FIXFIXFIX	I want to know of any missing NTV2OutputCrosspointID ==> NTV2WidgetID links
-			if (!NTV2_IS_VALID_WIDGET (widgetID))
+			if (!NTV2_IS_VALID_WIDGET(widgetID))
 				continue;	//	Keep processing input crosspoints, even if no such widget
-			if (!::NTV2DeviceCanDoWidget (GetDeviceID (), widgetID))
+			if (wgts.find(ULWord(widgetID)) == wgts.end())
 				continue;	//	Keep processing input crosspoints, even if no such widget on this device
 
 			//	Add every input of the output's widget to the queue...
 			CNTV2SignalRouter::GetWidgetInputs (widgetID, inputXpts);
 			for (NTV2InputCrosspointIDSetConstIter it (inputXpts.begin ());	 it != inputXpts.end ();  ++it)
-				inputXptQueue.push_back (*it);
+				inputXptQueue.push_back(*it);
 		}	//	if connected to something other than "black" output crosspoint
 	}	//	loop til inputXptQueue empty
 

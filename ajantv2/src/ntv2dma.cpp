@@ -164,10 +164,10 @@ bool CNTV2Card::GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outA
 	if (ULWord(inAudioSystem) >= GetNumSupported(kDeviceGetNumBufferedAudioSystems))
 		return false;	//	Invalid audio system
 
-	if (::NTV2DeviceCanDoStackedAudio(deviceID))
+	if (IsSupported(kDeviceCanDoStackedAudio))
 	{
 		const ULWord	EIGHT_MEGABYTES (0x800000);
-		const ULWord	memSize			(::NTV2DeviceGetActiveMemorySize(deviceID));
+		const ULWord	memSize			(GetNumSupported(kDeviceGetActiveMemorySize));
 		const ULWord	engineOffset	(memSize  -	 EIGHT_MEGABYTES * ULWord(inAudioSystem+1));
 		outAbsByteOffset = inOffsetBytes + engineOffset;
 	}
@@ -235,7 +235,7 @@ bool CNTV2Card::DMAReadAnc (const ULWord		inFrameNumber,
 	ULWord			F1Offset(0),  F2Offset(0), inByteCount(0), bytesToTransfer(0), byteOffsetToAncData(0);
 	NTV2Framesize	hwFrameSize(NTV2_FRAMESIZE_INVALID);
 	bool			result(true);
-	if (!::NTV2DeviceCanDoCustomAnc(GetDeviceID()))
+	if (!IsSupported(kDeviceCanDoCustomAnc))
 		return false;
 	if (!ReadRegister (kVRegAncField1Offset, F1Offset))
 		return false;
@@ -274,7 +274,7 @@ bool CNTV2Card::DMAReadAnc (const ULWord		inFrameNumber,
 								reinterpret_cast <ULWord *> (outAncF2Buffer.GetHostPointer()),
 								byteOffsetToAncData, bytesToTransfer, true);
 	}
-	if (result	&&	::NTV2DeviceCanDo2110(_boardID))
+	if (result	&&	IsSupported(kDeviceCanDo2110))
 		//	S2110 Capture:	So that most OEM ingest apps "just work" with S2110 RTP Anc streams, our
 		//					classic SDI Anc data that device firmware normally de-embeds into registers
 		//					e.g. VPID & RP188 -- the SDK here will automatically try to do the same.
@@ -291,7 +291,7 @@ bool CNTV2Card::DMAWriteAnc (const ULWord		inFrameNumber,
 	ULWord			F1Offset(0),  F2Offset(0), inByteCount(0), bytesToTransfer(0), byteOffsetToAncData(0);
 	NTV2Framesize	hwFrameSize(NTV2_FRAMESIZE_INVALID);
 	bool			result(true);
-	if (!::NTV2DeviceCanDoCustomAnc(GetDeviceID()))
+	if (!IsSupported(kDeviceCanDoCustomAnc))
 		return false;
 	if (!ReadRegister (kVRegAncField1Offset, F1Offset))
 		return false;
@@ -313,7 +313,7 @@ bool CNTV2Card::DMAWriteAnc (const ULWord		inFrameNumber,
 
 	//	Seamless Anc playout...
 	bool	tmpLocalRP188F1AncBuffer(false), tmpLocalRP188F2AncBuffer(false);
-	if (::NTV2DeviceCanDo2110(_boardID)	 &&	 NTV2_IS_VALID_CHANNEL(inChannel))
+	if (IsSupported(kDeviceCanDo2110)	 &&	 NTV2_IS_VALID_CHANNEL(inChannel))
 		//	S2110 Playout:	So that most Retail & OEM playout apps "just work" with S2110 RTP Anc streams,
 		//					our classic SDI Anc data that device firmware normally embeds into SDI output
 		//					as derived from registers -- e.g. VPID & RP188 -- the SDK here will automatically
@@ -383,14 +383,14 @@ bool CNTV2Card::GetDeviceFrameInfo (const UWord inFrameNumber, const NTV2Channel
 	outIntrinsicSize = 0;
 	outMultiFormat = outQuad = outQuadQuad = outSquares = outTSI = false;
 	NTV2Channel	chan (inChannel);
-	if (!::NTV2DeviceCanDoMultiFormat(GetDeviceID()))
+	if (!IsSupported(kDeviceCanDoMultiFormat))
 		chan = NTV2_CHANNEL1;	//	Older uniformat-only device:  use Ch1
 	else if (GetMultiFormatMode(outMultiFormat) && !outMultiFormat  &&  !isMRWidgetChannel)
 		chan = NTV2_CHANNEL1;	//	Uniformat mode:  Use Ch1
 
 	CNTV2DriverInterface::ReadRegister (kRegCh1Control, frameSizeNdx,	  kK2RegMaskFrameSize,		kK2RegShiftFrameSize);
 	outIntrinsicSize = frameSizes[frameSizeNdx] * 1024 * 1024;
-	if (::NTV2DeviceCanReportFrameSize(GetDeviceID()))
+	if (IsSupported(kDeviceCanReportFrameSize))
 	{	//	All modern devices
 		ULWord quadMultiplier(1);
 		if (GetQuadFrameEnable(outQuad, chan) && outQuad)
@@ -444,14 +444,14 @@ bool CNTV2Card::DeviceAddressToFrameNumber (const uint64_t inAddress,  UWord & o
 	bool				quadEnabled(false), isMultiFormatMode(false);
 	uint64_t			frameBytes(0);
 	NTV2Channel	chan (inChannel);
-	if (!::NTV2DeviceCanDoMultiFormat(GetDeviceID()))
+	if (!IsSupported(kDeviceCanDoMultiFormat))
 		chan = NTV2_CHANNEL1;	//	Older uniformat-only device:  use Ch1
 	else if (GetMultiFormatMode(isMultiFormatMode) && !isMultiFormatMode)
 		chan = NTV2_CHANNEL1;	//	Uniformat mode:  Use Ch1
 
 	outFrameNumber = 0;
 	CNTV2DriverInterface::ReadRegister (kRegCh1Control, frameSizeNdx,	  kK2RegMaskFrameSize,		kK2RegShiftFrameSize);
-	if (::NTV2DeviceCanReportFrameSize(GetDeviceID()))
+	if (IsSupported(kDeviceCanReportFrameSize))
 	{	//	All modern devices
 		ULWord quadMultiplier(1);
 		if (GetQuadFrameEnable(quadEnabled, chan) && quadEnabled)
@@ -553,7 +553,7 @@ typedef pair<NTV2AncDataRgn,ULWord> AncRgnOffset, AncRgnSize;
 bool CNTV2Card::DMAClearAncRegion (const UWord inStartFrameNumber,	const UWord inEndFrameNumber,
 									const NTV2AncillaryDataRegion inAncRegion, const NTV2Channel inChannel)
 {
-	if (!::NTV2DeviceCanDoCustomAnc(GetDeviceID()))
+	if (!IsSupported(kDeviceCanDoCustomAnc))
 		return false;	//	no anc inserters/extractors
 
 	ULWord offsetInBytes(0), sizeInBytes(0);
@@ -574,7 +574,7 @@ bool CNTV2Card::DMAClearAncRegion (const UWord inStartFrameNumber,	const UWord i
 bool CNTV2Card::GetAncRegionOffsetAndSize (ULWord & outByteOffset,	ULWord & outByteCount, const NTV2AncillaryDataRegion inAncRegion)
 {
 	outByteOffset = outByteCount = 0;
-	if (!::NTV2DeviceCanDoCustomAnc(GetDeviceID()))
+	if (!IsSupported(kDeviceCanDoCustomAnc))
 		return false;
 	if (!NTV2_IS_VALID_ANC_RGN(inAncRegion))
 		return false;	//	Bad param
@@ -660,7 +660,7 @@ bool CNTV2Card::GetAncRegionOffsetFromBottom (ULWord & bytesFromBottom, const NT
 {
 	bytesFromBottom = 0;
 
-	if (!::NTV2DeviceCanDoCustomAnc(GetDeviceID()))
+	if (!IsSupported(kDeviceCanDoCustomAnc))
 		return false;	//	No custom anc support
 
 	//	IoIP SDIOut5 monitor anc support added in SDK/driver 15.3...

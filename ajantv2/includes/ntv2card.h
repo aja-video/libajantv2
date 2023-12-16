@@ -6500,9 +6500,9 @@ protected:
 	AJA_VIRTUAL ULWord			GetSerialNumberHigh (void);			//	From CNTV2Status
 	AJA_VIRTUAL inline bool		IS_CHANNEL_VALID (const NTV2Channel inChannel) const	{return !IS_CHANNEL_INVALID(inChannel);}	//	New in SDK 16.2
 	AJA_VIRTUAL bool			IS_CHANNEL_INVALID (const NTV2Channel inChannel) const;
-	AJA_VIRTUAL bool			IS_OUTPUT_SPIGOT_INVALID (const UWord inOutputSpigot) const;
-	AJA_VIRTUAL bool			IS_INPUT_SPIGOT_INVALID (const UWord inInputSpigot) const;
-	AJA_VIRTUAL bool			IS_HDMI_INPUT_SPIGOT_INVALID (const UWord inInputHDMIPort) const;
+	AJA_VIRTUAL bool			IS_OUTPUT_SPIGOT_INVALID (const UWord inOutputSpigot);
+	AJA_VIRTUAL bool			IS_INPUT_SPIGOT_INVALID (const UWord inInputSpigot);
+	AJA_VIRTUAL bool			IS_HDMI_INPUT_SPIGOT_INVALID (const UWord inInputHDMIPort);
 	AJA_VIRTUAL bool			SetWarmBootFirmwareReload(bool enable);
 
 	//	Seamless Anc Playout & Capture
