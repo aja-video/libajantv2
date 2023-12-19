@@ -133,26 +133,38 @@ bool CNTV2Card::DmaP2PTransferFrame (NTV2DMAEngine DMAEngine,
 }
 
 
-bool CNTV2Card::DMAStreamStart  (ULWord * inBuffer, const ULWord inByteCount, const NTV2Channel inChannel, const bool inToHost)
+bool CNTV2Card::GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outAbsByteOffset,
+										const NTV2AudioSystem inAudioSystem, const bool inCaptureBuffer)
 {
-	if (!_boardOpened)
-		return false;		//	Device not open!
+	outAbsByteOffset = 0;
+	const NTV2DeviceID	deviceID(GetDeviceID());
+	if (ULWord(inAudioSystem) >= GetNumSupported(kDeviceGetNumBufferedAudioSystems))
+		return false;	//	Invalid audio system
 
-	if (!inBuffer)
-		return false;
+	if (IsSupported(kDeviceCanDoStackedAudio))
+	{
+		const ULWord	EIGHT_MEGABYTES (0x800000);
+		const ULWord	memSize			(GetNumSupported(kDeviceGetActiveMemorySize));
+		const ULWord	engineOffset	(memSize  -	 EIGHT_MEGABYTES * ULWord(inAudioSystem+1));
+		outAbsByteOffset = inOffsetBytes + engineOffset;
+	}
+	else
+	{
+		NTV2FrameGeometry		fg	(NTV2_FG_INVALID);
+		NTV2FrameBufferFormat	fbf (NTV2_FBF_INVALID);
+		if (!GetFrameGeometry (fg, NTV2Channel(inAudioSystem)) || !GetFrameBufferFormat (NTV2Channel(inAudioSystem), fbf))
+			return false;
 
-	NTV2DmaStream streamMsg (inBuffer, inByteCount, inChannel, DMASTREAM_START | (inToHost? DMASTREAM_TO_HOST : 0));
-	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&streamMsg));
-}
+		const ULWord	audioFrameBuffer	(::NTV2DeviceGetNumberFrameBuffers(deviceID, fg, fbf) - 1);
+		outAbsByteOffset = inOffsetBytes  +	 audioFrameBuffer * ::NTV2DeviceGetFrameBufferSize(deviceID, fg, fbf);
+	}
 
-
-bool CNTV2Card::DMAStreamStop  (const NTV2Channel inChannel, const bool inToHost)
-{
-	if (!_boardOpened)
-		return false;		//	Device not open!
-
-	NTV2DmaStream streamMsg (inChannel, DMASTREAM_STOP | (inToHost? DMASTREAM_TO_HOST : 0));
-	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&streamMsg));
+	if (inCaptureBuffer)	//	Capture mode?
+	{	ULWord rdBufOffset(0x400000);	//	4MB
+		GetAudioReadOffset (rdBufOffset, inAudioSystem);
+		outAbsByteOffset += rdBufOffset;	//	Add offset to point to capture buffer
+	}
+	return true;
 }
 
 

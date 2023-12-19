@@ -342,9 +342,6 @@ void dmaDisable(ULWord deviceNumber);
 int dmaTransfer(PDMA_PARAMS pDmaParams);
 int dmaTargetP2P(ULWord deviceNumber, NTV2_DMA_P2P_CONTROL_STRUCT* pParams);
 
-int dmaStreamStart(PDMA_PARAMS pDmaParams);
-int dmaStreamStop(PDMA_PARAMS pDmaParams);
-
 void dmaInterrupt(ULWord deviceNumber, ULWord intStatus);
 
 int dmaOpsStreamInitialize(struct ntv2_stream *stream);

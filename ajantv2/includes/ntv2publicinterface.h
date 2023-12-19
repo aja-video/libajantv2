@@ -5471,7 +5471,6 @@ typedef enum
 		#define NTV2_TYPE_AJADEBUGLOGGING		NTV2_FOURCC ('d', 'b', 'l', 'g')	///< @brief Identifies NTV2DebugLogging struct
 		#define NTV2_TYPE_AJABUFFERLOCK			NTV2_FOURCC ('b', 'f', 'l', 'k')	///< @brief Identifies NTV2BufferLock struct
 		#define NTV2_TYPE_AJABITSTREAM			NTV2_FOURCC ('b', 't', 's', 't')	///< @brief Identifies NTV2Bitstream struct
-		#define NTV2_TYPE_AJADMASTREAM			NTV2_FOURCC ('d', 'm', 's', 't')	///< @brief Identifies NTV2DmaStream struct
 		#define NTV2_TYPE_AJASTREAMCHANNEL		NTV2_FOURCC ('s', 't', 'c', 'h')	///< @brief Identifies NTV2StreamChannel struct
 		#define NTV2_TYPE_AJASTREAMBUFFER		NTV2_FOURCC ('s', 't', 'b', 'u')	///< @brief Identifies NTV2StreamBuffer struct
 		#if defined(NTV2_DEPRECATE_16_3)
@@ -5498,7 +5497,6 @@ typedef enum
 													(_x_) == NTV2_TYPE_AJADEBUGLOGGING	||	\
 													(_x_) == NTV2_TYPE_AJABUFFERLOCK	||	\
 													(_x_) == NTV2_TYPE_AJABITSTREAM		||	\
-													(_x_) == NTV2_TYPE_AJADMASTREAM		||	\
 													(_x_) == NTV2_TYPE_AJASTREAMCHANNEL	||	\
 													(_x_) == NTV2_TYPE_AJASTREAMBUFFER)
 
@@ -5569,11 +5567,6 @@ typedef enum
 		#define BITSTREAM_MCAP_CONTROL				5			///< @brief MCAP control register
 		#define BITSTREAM_MCAP_DATA					6			///< @brief MCAP data register
 		#define BITSTREAM_NUM_REGISTERS				7			///< @brief Number of MCAP registes
-	
-		// DMA Stream flags
-		#define DMASTREAM_START						BIT(0)		///< @brief Used in ::NTV2DmaStream to start DMA streaming
-		#define DMASTREAM_STOP						BIT(1)		///< @brief Used in ::NTV2DmaStream to stop DMA streaming
-		#define DMASTREAM_TO_HOST					BIT(2)		///< @brief Used in ::NTV2DmaStream to host
 	
 		#if !defined (NTV2_BUILDING_DRIVER)
 			/**
@@ -8589,105 +8582,6 @@ typedef enum
 
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
 		NTV2_STRUCT_END (NTV2Bitstream)
-
-
-		/**
-			@brief	This is used for streaming dma.
-			@note	This struct uses a constructor to properly initialize itself.
-					Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
-		**/
-		NTV2_STRUCT_BEGIN (NTV2DmaStream)
-			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
-				NTV2Buffer		mBuffer;			///< @brief Virtual address of a DMA stream buffer and its length.
-				NTV2Channel		mChannel;			///< @brief Video stream channel
-				ULWord			mFlags;				///< @brief Action flags (lock, unlock, etc)
-				ULWord			mStatus;			///< @brief Action status
-				ULWord			mReserved[32];		///< @brief Reserved for future expansion.
-			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
-
-			#if !defined (NTV2_BUILDING_DRIVER)
-				/**
-					@name	Construction & Destruction
-				**/
-				///@{
-				explicit	NTV2DmaStream ();		///< @brief Constructs a default NTV2DmaStream struct.
-				inline		~NTV2DmaStream ()	{}	///< @brief My default destructor, which frees all allocatable fields that I own.
-
-				/**
-					@brief	Constructs an NTV2DmaStream object to use to specify a streaming buffer.
-					@param	inBuffer		Specifies the memory to use for streaming.
-					@param	inChannel		Specifies the video channel to use for streaming.
-					@param	inFlags			Specifies action flags (start, stop, etc.).
-				**/
-				explicit	NTV2DmaStream (const NTV2Buffer & inBuffer, const NTV2Channel inChannel, const ULWord inFlags);
-
-				/**
-					@brief	Constructs an NTV2DmaStream object to use in a CNTV2Card::StartDmaStream.
-					@param	pInBuffer		Specifies a pointer to the host buffer to stream to or from.
-					@param	inByteCount		Specifies a the length of the buffer in bytes.
-					@param	inChannel		Specifies the video channel to use for streaming.
-					@param	inFlags			Specifies action flags (start, stop etc)
-				**/
-				explicit	NTV2DmaStream (const ULWord * pInBuffer, const ULWord inByteCount, const NTV2Channel inChannel, const ULWord inFlags);
-				///@}
-
-				/**
-					@brief	Constructs an NTV2DmaStream object to use to specify a streaming flags.
-					@param	inChannel		Specifies the video channel to use for streaming.
-					@param	inFlags			Specifies action flags (start, stop, etc.).
-				**/
-				explicit	NTV2DmaStream (const NTV2Channel inChannel, const ULWord inFlags);
-
-				/**
-					@name	Changing
-				**/
-				///@{
-				/**
-					@brief	Sets the buffer to use for streaming.
-					@param	inBuffer		Specifies the memory containing the DMA buffer.
-					@return True if successful;	 otherwise false.
-				**/
-				bool		SetBuffer (const NTV2Buffer & inBuffer);
-
-				/**
-					@brief	Sets the buffer to use for streaming.
-					@param	pInBuffer			Specifies a pointer to the host buffer.
-					@param	inByteCount			Specifies a the length of the buffer in bytes.
-					@return True if successful;	 otherwise false.
-				**/
-				inline bool SetBuffer (const ULWord * pInBuffer, const ULWord inByteCount)	{return SetBuffer(NTV2Buffer(pInBuffer, inByteCount));}
-
-				///@{
-				/**
-					@brief	Sets the video channel to use for streaming.
-					@param	inChannel		Specifies the video channel.
-					@return True if successful;	 otherwise false.
-				**/
-				bool		SetChannel (const NTV2Channel inChannel);
-
-				/**
-					@brief	Sets the action flags.
-					@param	inFlags			Specifies action flags (fragment, swap, etc)
-				**/
-				inline void SetFlags (const ULWord inFlags)		{NTV2_ASSERT_STRUCT_VALID;	mFlags = inFlags;}
-
-				/**
-					@brief	Resets the struct to its initialized state.
-				**/
-				inline void Clear (void)		{SetBuffer(NTV2Buffer());}
-				///@}
-
-				/**
-					@brief	Prints a human-readable representation of me to the given output stream.
-					@param	inOutStream		Specifies the output stream to use.
-					@return A reference to the output stream.
-				**/
-				std::ostream &	Print (std::ostream & inOutStream) const;
-
-				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
-
-			#endif	//	!defined (NTV2_BUILDING_DRIVER)
-		NTV2_STRUCT_END (NTV2DmaStream)
 
 
 		// Stream channel action flags
