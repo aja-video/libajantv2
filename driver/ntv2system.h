@@ -334,7 +334,11 @@
 
 	typedef struct ntv2_interrupt_lock
 	{
+#if defined(AJAMacDext)
+		atomic_flag*			lock;
+#else
 		IOSimpleLock*			lock;
+#endif
 		bool					locked;
 	} Ntv2InterruptLock;
 

@@ -2753,8 +2753,8 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 					{
 						if (pAuto->circulateWithHDMIAux)
 						{
-							pAuto->frameStamp[lastActiveFrame].ancTransferSize = GetAuxExtField1Bytes(pSysCon, pAutoCirc->ancInputChannel[acChannel]));
-							pAuto->frameStamp[lastActiveFrame].ancField2TransferSize = GetAuxExtField2Bytes(pSysCon, pAutoCirc->ancInputChannel[acChannel]));
+							pAuto->frameStamp[lastActiveFrame].ancTransferSize = GetAuxExtField1Bytes(pSysCon, pAutoCirc->ancInputChannel[acChannel]);
+							pAuto->frameStamp[lastActiveFrame].ancField2TransferSize = GetAuxExtField2Bytes(pSysCon, pAutoCirc->ancInputChannel[acChannel]);
 							SetAuxExtWriteParams(pSysCon, pAutoCirc->ancInputChannel[acChannel], nextFrame);
 						}
 						else
