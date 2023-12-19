@@ -254,9 +254,9 @@ bool CNTV2Card::AutoCirculateInitForInput ( const NTV2Channel		inChannel,
 		{ACFAIL("Output Ch" << DEC(inChannel+1) << ": Start frame " << DEC(startFrameNumber) << " exceeds max " << DEC(MAX_FRAMEBUFFERS-1)); return false;}
 	if (endFrameNumber >= MAX_FRAMEBUFFERS)
 		{ACFAIL("Output Ch" << DEC(inChannel+1) << ": End frame " << DEC(endFrameNumber) << " exceeds max " << DEC(MAX_FRAMEBUFFERS-1)); return false;}
-	if (inOptionFlags & (AUTOCIRCULATE_WITH_MULTILINK_AUDIO1 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO2 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO3)  &&  !::NTV2DeviceCanDoMultiLinkAudio(GetDeviceID()))
+	if (inOptionFlags & (AUTOCIRCULATE_WITH_MULTILINK_AUDIO1 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO2 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO3)  &&  !IsSupported(kDeviceCanDoMultiLinkAudio))
 		ACWARN("Input Ch" << DEC(inChannel+1) << ": MultiLink Audio requested, but device doesn't support it");
-	const UWord numAudSystems(::NTV2DeviceGetNumAudioSystems(GetDeviceID()));	//	AutoCirc cannot use AudioMixer or HostAudio
+	const UWord numAudSystems(UWord(GetNumSupported(kDeviceGetNumAudioSystems)));	//	AutoCirc cannot use AudioMixer or HostAudio
 	if (inAudioSystem != NTV2_AUDIOSYSTEM_INVALID)
 	{
 		if (numAudSystems  &&  UWord(inAudioSystem) >= numAudSystems)
@@ -387,9 +387,9 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 		{ACFAIL("Output Ch" << DEC(inChannel+1) << ": Start frame " << DEC(startFrameNumber) << " exceeds max " << DEC(MAX_FRAMEBUFFERS-1)); return false;}
 	if (endFrameNumber >= MAX_FRAMEBUFFERS)
 		{ACFAIL("Output Ch" << DEC(inChannel+1) << ": End frame " << DEC(endFrameNumber) << " exceeds max " << DEC(MAX_FRAMEBUFFERS-1)); return false;}
-	if (inOptionFlags & (AUTOCIRCULATE_WITH_MULTILINK_AUDIO1 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO2 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO3)  &&  !::NTV2DeviceCanDoMultiLinkAudio(GetDeviceID()))
+	if (inOptionFlags & (AUTOCIRCULATE_WITH_MULTILINK_AUDIO1 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO2 | AUTOCIRCULATE_WITH_MULTILINK_AUDIO3)  &&  !IsSupported(kDeviceCanDoMultiLinkAudio))
 		ACWARN("Output Ch" << DEC(inChannel+1) << ": MultiLink Audio requested, but device doesn't support it");
-	const UWord numAudSystems(::NTV2DeviceGetNumAudioSystems(GetDeviceID()));	//	AutoCirc cannot use AudioMixer or HostAudio
+	const UWord numAudSystems(UWord(GetNumSupported(kDeviceGetNumAudioSystems)));	//	AutoCirc cannot use AudioMixer or HostAudio
 	if (inAudioSystem != NTV2_AUDIOSYSTEM_INVALID)
 	{
 		if (numAudSystems  &&  UWord(inAudioSystem) >= numAudSystems)
@@ -432,7 +432,7 @@ bool CNTV2Card::AutoCirculateInitForOutput (const NTV2Channel		inChannel,
 	autoCircData.bVal6 = (inOptionFlags & AUTOCIRCULATE_WITH_VIDPROC)		? true : false;
 	autoCircData.bVal7 = (inOptionFlags & AUTOCIRCULATE_WITH_ANC)			? true : false;
 	autoCircData.bVal8 = (inOptionFlags & AUTOCIRCULATE_WITH_LTC)			? true : false;
-	if (::NTV2DeviceCanDo2110(_boardID))					//	If S2110 IP device...
+	if (IsSupported(kDeviceCanDo2110))					//	If S2110 IP device...
 		if (inOptionFlags & AUTOCIRCULATE_WITH_RP188)		//	and caller wants RP188
 			if (!(inOptionFlags & AUTOCIRCULATE_WITH_ANC))	//	but caller failed to enable Anc playout
 			{
@@ -724,7 +724,7 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 
 	bool		tmpLocalF1AncBuffer(false),	 tmpLocalF2AncBuffer(false);
 	NTV2Buffer	savedAncF1,	 savedAncF2;
-	if (::NTV2DeviceCanDo2110(_boardID)	 &&	 NTV2_IS_OUTPUT_CROSSPOINT(crosspoint))
+	if (IsSupported(kDeviceCanDo2110)  &&  NTV2_IS_OUTPUT_CROSSPOINT(crosspoint))
 	{
 		//	S2110 Playout:	So that most Retail & OEM playout apps "just work" with S2110 RTP Anc streams,
 		//					our classic SDI Anc data that device firmware normally embeds into SDI output
@@ -790,7 +790,7 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 		}	//	else KonaIP 2110 playout
 		S2110DeviceAncToXferBuffers(inChannel, inOutXferInfo);
 	}	//	if SMPTE 2110 playout
-	else if (::NTV2DeviceCanDo2110(_boardID)  &&  NTV2_IS_INPUT_CROSSPOINT(crosspoint))
+	else if (IsSupported(kDeviceCanDo2110)  &&  NTV2_IS_INPUT_CROSSPOINT(crosspoint))
 	{	//	Need local host buffers to receive 2110 Anc VPID & ATC
 		if (inOutXferInfo.acANCBuffer.IsNULL())
 			tmpLocalF1AncBuffer = inOutXferInfo.acANCBuffer.Allocate(2048);
@@ -806,7 +806,7 @@ bool CNTV2Card::AutoCirculateTransfer (const NTV2Channel inChannel, AUTOCIRCULAT
 
 	if (result	&&	NTV2_IS_INPUT_CROSSPOINT(crosspoint))
 	{
-		if (::NTV2DeviceCanDo2110(_boardID))
+		if (IsSupported(kDeviceCanDo2110))
 		{	//	S2110:	decode VPID and timecode anc packets from RTP, and put into A/C Xfer and device regs
 			S2110DeviceAncFromXferBuffers(inChannel, inOutXferInfo);
 		}
@@ -1465,7 +1465,7 @@ bool CNTV2Card::S2110DeviceAncToBuffers (const NTV2Channel inChannel, NTV2Buffer
 	if (!pkts.CountAncillaryDataWithType(AJAAncDataType_Timecode_ATC)		//	if no caller-specified ATC timecodes...
 		&& !pkts.CountAncillaryDataWithType(AJAAncDataType_Timecode_VITC))	//	...and no caller-specified VITC timecodes...
 	{
-		if (::NTV2DeviceHasBiDirectionalSDI(_boardID) && ::NTV2DeviceCanDoStackedAudio(_boardID))	//	if newer device with bidirectional SDI
+		if (IsSupported(kDeviceHasBiDirectionalSDI) && IsSupported(kDeviceCanDoStackedAudio))	//	if newer device with bidirectional SDI
 		{
 			const AJA_FrameRate ajaRate		(sNTV2Rate2AJARate[ntv2Rate]);
 			const AJATimeBase	ajaTB		(ajaRate);

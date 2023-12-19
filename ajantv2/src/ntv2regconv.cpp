@@ -200,7 +200,7 @@ bool CNTV2Card::SetConversionMode (NTV2ConversionMode mode)
 
 	SetConverterInStandard(inStandard);
 	SetConverterOutStandard(outStandard);
-	if(::NTV2DeviceGetUFCVersion(GetDeviceID()) == 2)
+	if (GetNumSupported(kDeviceGetUFCVersion) == 2)
 	{
 		NTV2VideoFormat format = GetInputForConversionMode(mode);
 		SetConverterInRate(GetNTV2FrameRateFromVideoFormat(format));
