@@ -35,7 +35,8 @@ NTV2StreamGrabber::NTV2StreamGrabber (QObject * parent)
     	mbFixedReference        (false),
 		mBoardNumber			(0),
 		mDeviceID				(DEVICE_ID_NOTFOUND),
-		mChannel				(NTV2_CHANNEL2),
+		mChannel				(NTV2_CHANNEL1),
+		mStream					(NTV2_CHANNEL2),
 		mCurrentVideoFormat		(NTV2_FORMAT_UNKNOWN),
         mCurrentColorSpace      (NTV2_LHIHDMIColorSpaceYCbCr),
 		mLastVideoFormat		(NTV2_FORMAT_UNKNOWN),
@@ -98,15 +99,9 @@ UWord NTV2StreamGrabber::GetDeviceIndex (void) const
 void NTV2StreamGrabber::run (void)
 {
 	//	Set up 2 images to ping-pong between capture and display...
-	QImage *	images [NTV2_NUM_IMAGES];
+	NTV2Buffer	buffers[NTV2_NUM_IMAGES];
 	ULWord		framesCaptured	(0);
 	FGNOTE("Thread started");
-
-	// initialize images
-	for (int i = 0; i < NTV2_NUM_IMAGES; i++)
-	{
-		images[i] = new QImage(STREAMPREVIEW_WIDGET_X, STREAMPREVIEW_WIDGET_Y, QImage::Format_RGB32);
-	}
 
 	// Make sure all Bidirectionals are set to Inputs.
 	if (mNTV2Card.Open(mBoardNumber))
@@ -133,10 +128,10 @@ void NTV2StreamGrabber::run (void)
 		if (!NTV2_IS_VALID_INPUT_SOURCE (mInputSource))
 		{
 			//	No input chosen, so display banner...
-			QImage *	currentImage = images [0];
-			currentImage->load (":/resources/splash.png");
+			QImage	currentImage	(STREAMPREVIEW_WIDGET_X, STREAMPREVIEW_WIDGET_Y, QImage::Format_RGB32);
+			currentImage.load (":/resources/splash.png");
 			emit newStatusString ("");
-			emit newFrame (*currentImage, true);
+			emit newFrame (currentImage, true);
 			if (::NTV2DeviceHasBiDirectionalSDI (mNTV2Card.GetDeviceID()))		//	If device has bidirectional SDI connectors...
 			{
 				bool waitForInput = false;
@@ -206,9 +201,9 @@ void NTV2StreamGrabber::run (void)
 					ULWord				status = 0;
 
 					gMutex.lock ();
-					if (!mNTV2Card.StreamChannelInitialize (mChannel))
+					if (!mNTV2Card.StreamChannelInitialize (mStream))
 					{
-						qDebug() << "## WARNING:  Cannot acquire stream channel " << (int)(mChannel + 1);
+						qDebug() << "## WARNING:  Cannot acquire stream channel " << (int)(mStream);
 						continue;
 					}
 					gMutex.unlock ();
@@ -219,33 +214,31 @@ void NTV2StreamGrabber::run (void)
 					//	Configure new buffers for streaming
 					for (ULWord i = 0; i < NTV2_NUM_IMAGES; i++)
 					{
-						//	Delete the current image buffer
-						delete images[i];
-
 						//	Create a new buffer of the correct size
-						images[i] = new QImage (mFrameDimensions.Width (), mFrameDimensions.Height (), QImage::Format_RGB32);
+						buffers[i].Allocate (mFrameDimensions.Width () * mFrameDimensions.Height () * 4, true);
 
 						//	Prelock and map the buffer
-						if (!mNTV2Card.DMABufferLock(reinterpret_cast<PULWord>(images[i]->bits()), ULWord(images[i]->sizeInBytes()), true))
+						if (!mNTV2Card.DMABufferLock(reinterpret_cast<PULWord>(buffers[i].GetHostAddress (0)), 
+														buffers[i].GetByteCount(), 
+														true))
 						{
 							qDebug() << "## WARNING:  Cannot DMA lock input buffer";
 							continue;
 						}
 
 						//	Queue the buffer for streaming capture
-						NTV2Buffer buffer(reinterpret_cast<PULWord>(images[i]->bits()), ULWord(images[i]->sizeInBytes()));
-						status = mNTV2Card.StreamBufferQueue(mChannel,
-															buffer,
+						status = mNTV2Card.StreamBufferQueue(mStream,
+															buffers[i],
 															i,
 															bfrStatus);
-						if (status == NTV2_STREAM_STATUS_SUCCESS)
+						if (status != NTV2_STREAM_STATUS_SUCCESS)
 						{
 							qDebug() << "## WARNING:  Cannot add buffer to stream: " << bfrStatus.mStatus;
 						}
 					}
 
 					//  Now start the stream capture
-					status = mNTV2Card.StreamChannelStart(mChannel, strStatus);
+					status = mNTV2Card.StreamChannelStart(mStream, strStatus);
 					if (status != NTV2_STREAM_STATUS_SUCCESS)
 					{
 						qDebug() << "## WARNING:  Stream start failed: " << bfrStatus.mStatus;
@@ -271,12 +264,14 @@ void NTV2StreamGrabber::run (void)
 
 		if (CheckForValidInput () == false && NTV2_IS_VALID_INPUT_SOURCE (mInputSource))
 		{
-			QImage *	currentImage	(images [0]);
-			currentImage->fill (qRgba (40, 40, 40, 255));
+			QImage	currentImage	(mFrameDimensions.Width (), 
+										mFrameDimensions.Height (), 
+										QImage::Format_RGB32);
+			currentImage.fill (qRgba (40, 40, 40, 255));
 
 			QString	status	(QString("%1: No Detected Input").arg(::NTV2InputSourceToString(mInputSource, true).c_str()));
 			emit newStatusString (status);
-			emit newFrame (*currentImage, true);
+			emit newFrame (currentImage, true);
 			msleep (200);
 			continue;
 		}
@@ -288,7 +283,7 @@ void NTV2StreamGrabber::run (void)
 			ULWord				status = 0;
 
 			//  Look for captured buffers
-        	status = mNTV2Card.StreamBufferRelease(mChannel, bfrStatus);
+        	status = mNTV2Card.StreamBufferRelease(mStream, bfrStatus);
 			if ((status == NTV2_STREAM_STATUS_SUCCESS) && (bfrStatus.mBufferCookie < NTV2_NUM_IMAGES))
 			{
 				ULWord index = bfrStatus.mBufferCookie;
@@ -300,15 +295,19 @@ void NTV2StreamGrabber::run (void)
 				emit newStatusString (outString);
 
 				//	Output the new video
-				emit newFrame (*images[index], (framesCaptured == 0) ? true : false);
+				QImage img = QImage((uchar*)(buffers[index].GetHostAddress (0)), 
+													mFrameDimensions.Width (), 
+													mFrameDimensions.Height (), 
+													QImage::Format_RGB32);
+
+				emit newFrame (img, false);
 
 				//	Queue the buffer back to the stream
-				NTV2Buffer buffer(reinterpret_cast<PULWord>(images[index]->bits()), ULWord(images[index]->sizeInBytes()));
-				status = mNTV2Card.StreamBufferQueue(mChannel,
-													buffer,
+				status = mNTV2Card.StreamBufferQueue(mStream,
+													buffers[index],
 													index,
 													bfrStatus);
-				if (status == NTV2_STREAM_STATUS_SUCCESS)
+				if (status != NTV2_STREAM_STATUS_SUCCESS)
 				{
 					qDebug() << "## WARNING:  Cannot add buffer to stream";
 				}
@@ -318,7 +317,12 @@ void NTV2StreamGrabber::run (void)
 			else
 			{
 				//	Wait for one or more buffers to become available on the device, which should occur at next VBI...
-				mNTV2Card.StreamChannelWait(mChannel, strStatus);
+				status = mNTV2Card.StreamChannelWait(mStream, strStatus);
+				if (status != NTV2_STREAM_STATUS_SUCCESS)
+				{
+					qDebug() << "## WARNING:  stream wait failed";
+					break;
+				}
 			}
 		}
 	}	//	loop til break
@@ -338,7 +342,9 @@ void NTV2StreamGrabber::run (void)
 	}
 
 	for (int i = 0;  i < NTV2_NUM_IMAGES;  i++)
-		delete images[i];
+	{
+		buffers[i].Deallocate();
+	}
 
 	FGNOTE("Thread completed, will exit for device" << mNTV2Card.GetDisplayName() << " input source " << ::NTV2InputSourceToString(mInputSource));
 
@@ -443,7 +449,7 @@ void NTV2StreamGrabber::StopStream (void)
 	if (mNTV2Card.IsOpen ())
 	{
     	//  Release stream ownership
-		mNTV2Card.StreamChannelRelease(mChannel);
+		mNTV2Card.StreamChannelRelease(mStream);
 	}
 }	//	StopStream
 

@@ -184,6 +184,7 @@ AJAStatus NTV2StreamPlayer::SetUpVideo (void)
 
 	//	Set the FrameStore video format...
 	mDevice.SetVideoFormat (mConfig.fVideoFormat, false, false, mConfig.fOutputChannel);
+	mDevice.SetTsiFrameEnable(true, mConfig.fOutputChannel);
 
 	//	Set the frame buffer pixel format for the device FrameStore...
 	mDevice.SetFrameBufferFormat (mConfig.fOutputChannel, mConfig.fPixelFormat);
@@ -495,7 +496,11 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 		}
 
 		//	Wait for one or more buffers to become available on the device, which should occur at next VBI...
-		mDevice.StreamChannelWait(mConfig.fOutputChannel, strStatus);
+		status = mDevice.StreamChannelWait(mConfig.fOutputChannel, strStatus);
+		if (status != NTV2_STREAM_STATUS_SUCCESS)
+		{
+			break;
+		}
 	}	//	loop til quit signaled
 
 	//	Stop streaming...

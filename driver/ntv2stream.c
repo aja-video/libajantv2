@@ -34,7 +34,7 @@
 
 //static uint32_t ntv2_debug_mask = 0xffffffff;
 //static uint32_t ntv2_user_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
-    static uint32_t ntv2_active_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR | NTV2_DEBUG_STREAM_STATE;
+static uint32_t ntv2_active_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR | NTV2_DEBUG_STREAM_STATE;
 
 static uint32_t queue_next(uint32_t index)
 {
@@ -306,7 +306,7 @@ Ntv2Status ntv2_stream_channel_initialize(struct ntv2_stream *ntv2_str, void* pO
         channel_status(ntv2_str, pChannel);
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_STATE;
         ntv2SemaphoreUp(&ntv2_str->state_sema);
-        NTV2_MSG_STREAM_ERROR("%s: initialize stream state disabled\n", ntv2_str->name);
+//        NTV2_MSG_STREAM_ERROR("%s: initialize stream state disabled\n", ntv2_str->name);
         return NTV2_STATUS_SUCCESS;
     }
 
@@ -316,7 +316,7 @@ Ntv2Status ntv2_stream_channel_initialize(struct ntv2_stream *ntv2_str, void* pO
         channel_status(ntv2_str, pChannel);
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_OWNER;
         ntv2SemaphoreUp(&ntv2_str->state_sema);
-        NTV2_MSG_STREAM_ERROR("%s: initialize stream not owner\n", ntv2_str->name);
+//        NTV2_MSG_STREAM_ERROR("%s: initialize stream not owner\n", ntv2_str->name);
         return NTV2_STATUS_SUCCESS;
     }
 
@@ -398,7 +398,7 @@ Ntv2Status ntv2_stream_channel_release(struct ntv2_stream *ntv2_str, void* pOwne
         channel_status(ntv2_str, pChannel);
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_OWNER;
         ntv2SemaphoreUp(&ntv2_str->state_sema);
-        NTV2_MSG_STREAM_ERROR("%s: release stream not owner\n", ntv2_str->name);
+//        NTV2_MSG_STREAM_ERROR("%s: release stream not owner\n", ntv2_str->name);
         return NTV2_STATUS_SUCCESS;
     }
 
@@ -818,12 +818,12 @@ Ntv2Status ntv2_stream_channel_advance(struct ntv2_stream *ntv2_str)
         return NTV2_STATUS_SUCCESS;
     }
     
-    NTV2_MSG_STREAM_ACTIVE("%s: channel advance head %2d active %2d next %2d tail %2d\n",
-                           ntv2_str->name,
-                           ntv2_str->head_index,
-                           ntv2_str->active_index,
-                           ntv2_str->next_index,
-                           ntv2_str->tail_index);
+//    NTV2_MSG_STREAM_INFO("%s: channel advance head %2d active %2d next %2d tail %2d\n",
+//                         ntv2_str->name,
+//                         ntv2_str->head_index,
+//                         ntv2_str->active_index,
+//                         ntv2_str->next_index,
+//                         ntv2_str->tail_index);
 
     // count transfers
     ntv2_str->stream_buffers[ntv2_str->active_index].user_buffer.mTransferCount++;

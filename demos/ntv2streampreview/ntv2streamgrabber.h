@@ -109,8 +109,8 @@ class NTV2StreamGrabber : public QThread
 		CNTV2Card					mNTV2Card;				///< @brief	Used to talk to monitor & control the device
 		UWord						mBoardNumber;			///< @brief	Index number of the device I'm using
 		NTV2DeviceID				mDeviceID;				///< @brief	Device ID of the device I'm using
-        NTV2Channel					mChannel;				///< @brief	Stream channel
-        ULWord                      mNumChannels;           ///< @brief Number of capture frame channels
+        NTV2Channel					mChannel;				///< @brief	Video channel
+        NTV2Channel					mStream;				///< @brief	Stream channel
 		NTV2VideoFormat				mCurrentVideoFormat;	///< @brief	Current video format seen on selected device input
         NTV2LHIHDMIColorSpace       mCurrentColorSpace;     ///< @brief Current color space seen on selected device input
 		NTV2VideoFormat				mLastVideoFormat;		///< @brief	Used to detect input video format changes

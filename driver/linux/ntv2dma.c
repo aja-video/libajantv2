@@ -2566,7 +2566,7 @@ void dmaInterrupt(ULWord deviceNumber, ULWord intStatus)
             pDmaStream = getDmaStream(deviceNumber, 0);
             if (pDmaStream != NULL)
             {
-                dmaStatus = ReadXlnxDmaStatus(deviceNumber, false, 0);
+                dmaStatus = ClearXlnxDmaStatus(deviceNumber, false, 0);
                 if ((dmaStatus & kRegMaskXlnxIntDescComplete) != 0)
                 {
                     ntv2_stream_channel_advance(pDmaStream);
@@ -2589,7 +2589,7 @@ void dmaInterrupt(ULWord deviceNumber, ULWord intStatus)
             pDmaStream = getDmaStream(deviceNumber, 1);
             if (pDmaStream != NULL)
             {
-                dmaStatus = ReadXlnxDmaStatus(deviceNumber, false, 1);
+                dmaStatus = ClearXlnxDmaStatus(deviceNumber, true, 0);
                 if ((dmaStatus & kRegMaskXlnxIntDescComplete) != 0)
                 {
                     ntv2_stream_channel_advance(pDmaStream);
@@ -2612,7 +2612,7 @@ void dmaInterrupt(ULWord deviceNumber, ULWord intStatus)
             pDmaStream = getDmaStream(deviceNumber, 2);
             if (pDmaStream != NULL)
             {
-                dmaStatus = ReadXlnxDmaStatus(deviceNumber, false, 2);
+                dmaStatus = ClearXlnxDmaStatus(deviceNumber, false, 1);
                 if ((dmaStatus & kRegMaskXlnxIntDescComplete) != 0)
                 {
                     ntv2_stream_channel_advance(pDmaStream);
@@ -2635,7 +2635,7 @@ void dmaInterrupt(ULWord deviceNumber, ULWord intStatus)
             pDmaStream = getDmaStream(deviceNumber, 3);
             if (pDmaStream != NULL)
             {
-                dmaStatus = ReadXlnxDmaStatus(deviceNumber, false, 3);
+                dmaStatus = ClearXlnxDmaStatus(deviceNumber, true, 1);
                 if ((dmaStatus & kRegMaskXlnxIntDescComplete) != 0)
                 {
                     ntv2_stream_channel_advance(pDmaStream);
@@ -2773,8 +2773,8 @@ void dmaPageRootRelease(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot)
 	if (pRoot == NULL)
 		return;
 
-	NTV2_MSG_PAGE_MAP("%s%d: dmaPageRootRelease  release %lld bytes\n",
-					  DMA_MSG_DEVICE, pRoot->lockTotalSize);
+//	NTV2_MSG_PAGE_MAP("%s%d: dmaPageRootRelease  release %lld bytes\n",
+//					  DMA_MSG_DEVICE, pRoot->lockTotalSize);
 
 	// stop all serial dma
 	for (i = 0; i < DMA_NUM_ENGINES; i++)
