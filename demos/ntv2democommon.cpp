@@ -567,7 +567,7 @@ string CNTV2DemoCommon::GetVideoFormatStrings (const NTV2VideoFormatKinds inKind
 			if (*iter == it->second)
 			{
 				oss << setw(25) << left << formatName << "\t" << setw(16) << left << it->first;
-				if (!inDeviceSpecifier.empty()  &&  theDevice.IsOpen()  &&  !::NTV2DeviceCanDoVideoFormat(theDevice.GetDeviceID(), *iter))
+				if (!inDeviceSpecifier.empty()  &&  theDevice.IsOpen()  &&  !theDevice.features().CanDoVideoFormat(*iter))
 					oss << "\t## Incompatible with " << theDevice.GetDisplayName();
 				oss << endl;
 				formatName.clear();
@@ -602,20 +602,16 @@ NTV2FrameBufferFormatSet CNTV2DemoCommon::GetSupportedPixelFormats (const NTV2Pi
 
 string CNTV2DemoCommon::GetPixelFormatStrings (const NTV2PixelFormatKinds inKinds, const string inDeviceSpecifier)
 {
-	const NTV2FrameBufferFormatSet &	formatSet	(GetSupportedPixelFormats (inKinds));
-	NTV2DeviceID						deviceID	(DEVICE_ID_NOTFOUND);
-	string								displayName;
-	ostringstream						oss;
+	const NTV2FrameBufferFormatSet & formatSet (GetSupportedPixelFormats(inKinds));
+	string			displayName;
+	CNTV2Card		device;
+	ostringstream	oss;
 
-	if (!inDeviceSpecifier.empty ())
+	if (!inDeviceSpecifier.empty())
 	{
-		CNTV2Card	device;
 		CNTV2DeviceScanner::GetFirstDeviceFromArgument (inDeviceSpecifier, device);
 		if (device.IsOpen ())
-		{
-			deviceID = device.GetDeviceID ();
-			displayName = device.GetDisplayName ();
-		}
+			displayName = device.GetDisplayName();
 	}
 
 
@@ -627,15 +623,15 @@ string CNTV2DemoCommon::GetPixelFormatStrings (const NTV2PixelFormatKinds inKind
 		for (String2PixelFormatMapConstIter it (gString2PixelFormatMap.begin ());  it != gString2PixelFormatMap.end ();  ++it)
 			if (*iter == it->second)
 			{
-				oss << setw (35) << left << formatName << "\t" << setw (25) << left << it->first;
-				if (!displayName.empty ()  &&  !::NTV2DeviceCanDoFrameBufferFormat (deviceID, *iter))
+				oss << setw(35) << left << formatName << "\t" << setw(25) << left << it->first;
+				if (!displayName.empty()  &&  !device.features().CanDoFrameBufferFormat(*iter))
 					oss << "\t## Incompatible with " << displayName;
 				oss << endl;
 				formatName.clear ();
 			}
 		oss << endl;
 	}
-	return oss.str ();
+	return oss.str();
 }
 
 
@@ -692,17 +688,17 @@ string CNTV2DemoCommon::GetInputSourceStrings (const NTV2IOKinds inKinds,  const
 
 	oss	<< setw (25) << left << "Input Source"				<< "\t" << setw (16) << left << "Legal -i Values" << endl
 		<< setw (25) << left << "------------------------"	<< "\t" << setw (16) << left << "----------------" << endl;
-	for (NTV2InputSourceSetConstIter iter (sourceSet.begin ());  iter != sourceSet.end ();  ++iter)
+	for (NTV2InputSourceSetConstIter iter(sourceSet.begin());  iter != sourceSet.end();  ++iter)
 	{
 		string	sourceName	(::NTV2InputSourceToString (*iter));
-		for (String2InputSourceMapConstIter it (gString2InputSourceMap.begin ());  it != gString2InputSourceMap.end ();  ++it)
+		for (String2InputSourceMapConstIter it(gString2InputSourceMap.begin());  it != gString2InputSourceMap.end();  ++it)
 			if (*iter == it->second)
 			{
 				oss << setw (25) << left << sourceName << "\t" << setw (16) << left << it->first;
-				if (!inDeviceSpecifier.empty ()  &&  theDevice.IsOpen ()  &&  !::NTV2DeviceCanDoInputSource (theDevice.GetDeviceID (), *iter))
-					oss << "\t## Incompatible with " << theDevice.GetDisplayName ();
+				if (!inDeviceSpecifier.empty ()  &&  theDevice.IsOpen()  &&  !theDevice.features().CanDoInputSource(*iter))
+					oss << "\t## Incompatible with " << theDevice.GetDisplayName();
 				oss << endl;
-				sourceName.clear ();
+				sourceName.clear();
 			}
 		oss << endl;
 	}
@@ -732,18 +728,18 @@ string CNTV2DemoCommon::GetOutputDestinationStrings (const string inDeviceSpecif
 	for (NTV2OutputDestinationsConstIter iter(dests.begin());  iter != dests.end();  ++iter)
 	{
 		string	destName(::NTV2OutputDestinationToString(*iter));
-		for (String2OutputDestMapConstIter it(gString2OutputDestMap.begin ());  it != gString2OutputDestMap.end ();  ++it)
+		for (String2OutputDestMapConstIter it(gString2OutputDestMap.begin());  it != gString2OutputDestMap.end();  ++it)
 			if (*iter == it->second)
 			{
 				oss << setw(25) << left << destName << "\t" << setw(16) << left << it->first;
-				if (!inDeviceSpecifier.empty()  &&  theDevice.IsOpen()  &&  !::NTV2DeviceCanDoOutputDestination(theDevice.GetDeviceID(), *iter))
+				if (!inDeviceSpecifier.empty()  &&  theDevice.IsOpen()  &&  !theDevice.features().CanDoOutputDestination(*iter))
 					oss << "\t## Incompatible with " << theDevice.GetDisplayName();
 				oss << endl;
 				destName.clear();
 			}
 		oss << endl;
 	}
-	return oss.str ();
+	return oss.str();
 }
 
 
@@ -781,35 +777,35 @@ string CNTV2DemoCommon::GetTCIndexStrings (const NTV2TCIndexKinds inKinds,
 											const string inDeviceSpecifier,
 											const bool inIsInputOnly)
 {
-	const NTV2TCIndexes &	tcIndexes	(GetSupportedTCIndexes (inKinds));
+	const NTV2TCIndexes &	tcIndexes	(GetSupportedTCIndexes(inKinds));
 	ostringstream			oss;
 	CNTV2Card				theDevice;
-	if (!inDeviceSpecifier.empty ())
+	if (!inDeviceSpecifier.empty())
 		CNTV2DeviceScanner::GetFirstDeviceFromArgument (inDeviceSpecifier, theDevice);
 
 	oss	<< setw (25) << left << "Timecode Index"			<< "\t" << setw (16) << left << "Legal Values    " << endl
 		<< setw (25) << left << "------------------------"	<< "\t" << setw (16) << left << "----------------" << endl;
-	for (NTV2TCIndexesConstIter iter (tcIndexes.begin ());  iter != tcIndexes.end ();  ++iter)
+	for (NTV2TCIndexesConstIter iter (tcIndexes.begin());  iter != tcIndexes.end();  ++iter)
 	{
-		string	tcNdxName	(::NTV2TCIndexToString (*iter));
-		for (String2TCIndexMapConstIter it (gString2TCIndexMap.begin ());  it != gString2TCIndexMap.end ();  ++it)
+		string	tcNdxName(::NTV2TCIndexToString(*iter));
+		for (String2TCIndexMapConstIter it (gString2TCIndexMap.begin());  it != gString2TCIndexMap.end();  ++it)
 			if (*iter == it->second)
 			{
 				oss << setw (25) << left << tcNdxName << "\t" << setw (16) << left << it->first;
-				if (!inDeviceSpecifier.empty ()  &&  theDevice.IsOpen ())
+				if (!inDeviceSpecifier.empty()  &&  theDevice.IsOpen())
 				{
-					const NTV2DeviceID	deviceID(theDevice.GetDeviceID());
-					const bool canDoTCIndex	(inIsInputOnly	? ::NTV2DeviceCanDoInputTCIndex(deviceID, *iter)
-															: ::NTV2DeviceCanDoTCIndex(deviceID, *iter));
+//					const NTV2DeviceID	deviceID(theDevice.GetDeviceID());
+					const bool canDoTCIndex	(inIsInputOnly	? theDevice.DeviceCanDoInputTCIndex(*iter)
+															: theDevice.DeviceCanDoTCIndex(*iter));
 					if (!canDoTCIndex)
 						oss << "\t## Incompatible with " << theDevice.GetDisplayName();
 				}
 				oss << endl;
-				tcNdxName.clear ();
+				tcNdxName.clear();
 			}
 		oss << endl;
 	}
-	return oss.str ();
+	return oss.str();
 }
 
 
@@ -824,22 +820,18 @@ NTV2TCIndex CNTV2DemoCommon::GetTCIndexFromString (const string & inStr)
 
 string CNTV2DemoCommon::GetAudioSystemStrings (const string inDeviceSpecifier)
 {
-	NTV2DeviceID	deviceID (DEVICE_ID_NOTFOUND);
+	CNTV2Card		device;
 	string			displayName;
 	ostringstream	oss;
 
 	if (!inDeviceSpecifier.empty())
 	{
-		CNTV2Card	device;
 		CNTV2DeviceScanner::GetFirstDeviceFromArgument (inDeviceSpecifier, device);
 		if (device.IsOpen())
-		{
-			deviceID = device.GetDeviceID();
 			displayName = device.GetDisplayName();
-		}
 	}
 
-	const UWord		numAudioSystems	(::NTV2DeviceGetNumAudioSystems(deviceID));
+	const UWord numAudioSystems	(device.features().GetNumAudioSystems());
 	oss << setw(12) << left << "Audio System"	<< endl
 		<< setw(12) << left << "------------"	<< endl;
 	for (UWord ndx(0);  ndx < 8;  ndx++)
@@ -1190,20 +1182,10 @@ const char * CNTV2DemoCommon::GetGlobalMutexName (void)
 	return gGlobalMutexName.c_str();
 }
 
-static UWord GetNumTSIMuxers (const NTV2DeviceID inDeviceID)
+NTV2ChannelList CNTV2DemoCommon::GetTSIMuxesForFrameStore (CNTV2Card & inDevice, const NTV2Channel in1stFrameStore, const UWord inCount)
 {
-	UWord result(0);
-	static const NTV2WidgetID s425MuxerIDs[] = {NTV2_Wgt425Mux1, NTV2_Wgt425Mux2, NTV2_Wgt425Mux3, NTV2_Wgt425Mux4};
-	for (size_t ndx(0);  ndx < sizeof(s425MuxerIDs)/sizeof(NTV2WidgetID);  ndx++)
-		if (::NTV2DeviceCanDoWidget(inDeviceID, s425MuxerIDs[ndx]))
-			result++;
-	return result;
-}
-
-NTV2ChannelList CNTV2DemoCommon::GetTSIMuxesForFrameStore (const NTV2DeviceID inDeviceID, const NTV2Channel in1stFrameStore, const UWord inCount)
-{
-	UWord totFrameStores(::NTV2DeviceGetNumFrameStores(inDeviceID));
-	UWord totTSIMuxers(::GetNumTSIMuxers(inDeviceID));
+	UWord totFrameStores(inDevice.features().GetNumFrameStores());
+	UWord totTSIMuxers(inDevice.features().GetNumTSIMuxers());
 	UWord firstFramestoreIndex = UWord(::GetIndexForNTV2Channel(in1stFrameStore));
 	UWord tsiMux(firstFramestoreIndex);
 	NTV2ChannelList result;
@@ -1484,7 +1466,7 @@ bool CNTV2DemoCommon::GetInputRouting8K (NTV2XptConnections & conns,
 bool CNTV2DemoCommon::ConfigureAudioSystems (CNTV2Card & inDevice, const CaptureConfig & inConfig, const NTV2AudioSystemSet inAudioSystems)
 {
     UWord failures(0);
-    UWord numAudChannels(::NTV2DeviceGetMaxAudioChannels(inDevice.GetDeviceID()));
+    UWord numAudChannels(inDevice.features().GetMaxAudioChannels());
     for (NTV2AudioSystemSetConstIter it(inAudioSystems.begin());  it != inAudioSystems.end();  ++it)
     {	const NTV2AudioSystem audSys(*it);
 		//	Have the audio system capture audio from the designated device input...

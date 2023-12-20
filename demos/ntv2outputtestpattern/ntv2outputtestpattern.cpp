@@ -64,12 +64,12 @@ AJAStatus NTV2OutputTestPattern::Init (void)
 
     if (!mDevice.IsDeviceReady(false))
 		{cerr << "## ERROR:  Device '" << mDevice.GetDisplayName() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
-	if (!::NTV2DeviceCanDoPlayback(mDeviceID))
+	if (!mDevice.features().CanDoPlayback())
 		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
 
-	const UWord maxNumChannels (::NTV2DeviceGetNumFrameStores(mDeviceID));
+	const UWord maxNumChannels (mDevice.features().GetNumFrameStores());
 
-	if ((mConfig.fOutputChannel == NTV2_CHANNEL1) && (!::NTV2DeviceCanDoFrameStore1Display(mDeviceID)))
+	if ((mConfig.fOutputChannel == NTV2_CHANNEL1) && (!mDevice.features().CanDoFrameStore1Display()))
 	{	//	Some older devices (e.g. Corvid1) can only output from FrameStore 2...
 		mConfig.fOutputChannel = NTV2_CHANNEL2;
 		cerr << "## WARNING:  '" << mDevice.GetDisplayName() << "' switched to Ch2 (Ch1 is input-only)" << endl;
@@ -90,7 +90,7 @@ AJAStatus NTV2OutputTestPattern::Init (void)
 	}
 	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Set OEM service level
 
-	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
+	if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
 	else
 		mConfig.fDoMultiFormat = false;
@@ -128,7 +128,7 @@ AJAStatus NTV2OutputTestPattern::SetUpVideo (void)
 	if (mConfig.fVideoFormat != NTV2_FORMAT_UNKNOWN)
 	{
 		//	User specified a video format -- is it legal for this device?
-		if (!::NTV2DeviceCanDoVideoFormat(mDeviceID, mConfig.fVideoFormat))
+		if (!mDevice.features().CanDoVideoFormat(mConfig.fVideoFormat))
 		{	cerr << "## ERROR: '" << mDevice.GetDisplayName() << "' cannot do " << ::NTV2VideoFormatToString(mConfig.fVideoFormat) << endl;
 			return AJA_STATUS_UNSUPPORTED;
 		}
@@ -168,7 +168,7 @@ AJAStatus NTV2OutputTestPattern::SetUpVideo (void)
 		return AJA_STATUS_FAIL;
 
 	//	Enable SDI output from the channel being used, but only if the device supports bi-directional SDI...
-	if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID))
+	if (mDevice.features().HasBiDirectionalSDI())
 		mDevice.SetSDITransmitEnable (mConfig.fOutputChannel, true);
 
 	return AJA_STATUS_SUCCESS;
@@ -193,12 +193,12 @@ void NTV2OutputTestPattern::RouteOutputSignal (void)
 	}
 
 	//	Route all SDI outputs to the outputXpt...
-	const NTV2ChannelSet	sdiOutputs	(::NTV2MakeChannelSet(NTV2_CHANNEL1, ::NTV2DeviceGetNumVideoOutputs(mDeviceID)));
+	const NTV2ChannelSet	sdiOutputs	(::NTV2MakeChannelSet(NTV2_CHANNEL1, mDevice.features().GetNumVideoOutputs()));
 	const NTV2Standard		videoStd	(::GetNTV2StandardFromVideoFormat(mConfig.fVideoFormat));
 	const NTV2ChannelList	sdiOuts		(::NTV2MakeChannelList(sdiOutputs));
 
 	//	Some devices have bi-directional SDI connectors...
-	if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID))
+	if (mDevice.features().HasBiDirectionalSDI())
 		mDevice.SetSDITransmitEnable (sdiOutputs, true);	//	Set to "transmit"
 
 	//	For every SDI output, set video standard, and disable level A/B conversion...
@@ -214,11 +214,11 @@ void NTV2OutputTestPattern::RouteOutputSignal (void)
 	}
 
 	//	And connect analog video output, if the device has one...
-	if (::NTV2DeviceGetNumAnalogVideoOutputs(mDeviceID))
+	if (mDevice.features().GetNumAnalogVideoOutputs())
 		connections.insert(NTV2Connection(::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_ANALOG), outputXpt));
 
 	//	And connect HDMI video output, if the device has one...
-	if (::NTV2DeviceGetNumHDMIVideoOutputs(mDeviceID))
+	if (mDevice.features().GetNumHDMIVideoOutputs())
 		connections.insert(NTV2Connection(::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_HDMI), outputXpt));
 
 	//	Apply all the accumulated connections...

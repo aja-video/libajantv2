@@ -77,7 +77,7 @@ int main (int argc, const char ** argv)
 	if (!device.IsDeviceReady(false))
 		{cerr << "## ERROR:  Device '" << pDeviceSpec << "' not ready" << endl; return 4;}
 
-	if (!NTV2DeviceCanDoHDMIHDROut(device.GetDeviceID()))
+	if (!device.features().CanDoHDMIHDROut())
 		{cerr << "## ERROR:  Device '" << pDeviceSpec << "' does not support HDMI HDR" << endl; return 5;}
 
 	//	Acquire the device...

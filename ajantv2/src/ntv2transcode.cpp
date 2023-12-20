@@ -53,12 +53,12 @@ bool ConvertLine_v210_to_2vuy (const ULWord * pSrcv210Line, UByte * pDst2vuyLine
 
 	for (ULWord sampleCount = 0, dataCount = 0;	  sampleCount < (inNumPixels * 2);	 sampleCount += 3, dataCount++)
 	{
-		const UByte *	pByte	(reinterpret_cast <const UByte *> (&pSrcv210Line [dataCount]));
+		const UByte * pByte (reinterpret_cast<const UByte*>(&pSrcv210Line[dataCount]));
 
 		//	Endian-agnostic bit shifting...
-		pDst2vuyLine [sampleCount	 ] = ((pByte [1] & 0x03) << 6) + (pByte [0] >> 2);		//	High-order 8 bits
-		pDst2vuyLine [sampleCount + 1] = ((pByte [2] & 0x0F) << 4) + (pByte [1] >> 4);
-		pDst2vuyLine [sampleCount + 2] = ((pByte [3] & 0x3F) << 2) + (pByte [2] >> 6);
+		pDst2vuyLine[sampleCount    ] = ((pByte[1] & 0x03) << 6) + (pByte[0] >> 2);		//	High-order 8 bits
+		pDst2vuyLine[sampleCount + 1] = ((pByte[2] & 0x0F) << 4) + (pByte[1] >> 4);
+		pDst2vuyLine[sampleCount + 2] = ((pByte[3] & 0x3F) << 2) + (pByte[2] >> 6);
 	}
 	
 	return true;
@@ -76,7 +76,7 @@ bool ConvertLine_v210_to_2vuy (const void * pInSrcLine_v210, std::vector<uint8_t
 	outDstLine2vuy.reserve(inNumPixels * 2);
 	for (ULWord sampleCount = 0, dataCount = 0;	  sampleCount < (inNumPixels * 2);	 sampleCount += 3, dataCount++)
 	{
-		const UByte *	pByte	(reinterpret_cast <const UByte*>(&pInSrcLine[dataCount]));
+		const UByte * pByte (reinterpret_cast<const UByte*>(&pInSrcLine[dataCount]));
 
 		//	Endian-agnostic bit shifting...
 		outDstLine2vuy.push_back(UByte((pByte[1] & 0x03) << 6) | (pByte[0] >> 2));		//	High-order 8 bits

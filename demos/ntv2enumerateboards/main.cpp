@@ -34,18 +34,18 @@ static int ShowDeviceInfo (CNTV2Card & inCard)
 			<< "\t" << "Serial Number: '" << (inCard.GetSerialNumberString(serial) ? serial : serial) << "'" << endl
 
 			//	Print additional info gleaned from the device features API...
-			<< "\t" << ::NTV2DeviceGetNumVideoInputs(deviceID) << " SDI Input(s)" << endl
-			<< "\t" << ::NTV2DeviceGetNumVideoOutputs(deviceID) << " SDI Output(s)" << endl
-			<< "\t" << ::NTV2DeviceGetNumHDMIVideoInputs(deviceID) << " HDMI Input(s)" << endl
-			<< "\t" << ::NTV2DeviceGetNumHDMIVideoOutputs(deviceID) << " HDMI Output(s)" << endl
-			<< "\t" << ::NTV2DeviceGetNumAnalogVideoInputs(deviceID) << " Analog Input(s)" << endl
-			<< "\t" << ::NTV2DeviceGetNumAnalogVideoOutputs(deviceID) << " Analog Output(s)" << endl
-			<< "\t" << ::NTV2DeviceGetNumEmbeddedAudioInputChannels(deviceID) << " channel(s) of Embedded Audio Input" << endl
-			<< "\t" << ::NTV2DeviceGetNumEmbeddedAudioOutputChannels(deviceID) << " channel(s) of Embedded Audio Output" << endl;
+			<< "\t" << inCard.features().GetNumVideoInputs() << " SDI Input(s)" << endl
+			<< "\t" << inCard.features().GetNumVideoOutputs() << " SDI Output(s)" << endl
+			<< "\t" << inCard.features().GetNumHDMIVideoInputs() << " HDMI Input(s)" << endl
+			<< "\t" << inCard.features().GetNumHDMIVideoOutputs() << " HDMI Output(s)" << endl
+			<< "\t" << inCard.features().GetNumAnalogVideoInputs() << " Analog Input(s)" << endl
+			<< "\t" << inCard.features().GetNumAnalogVideoOutputs() << " Analog Output(s)" << endl
+			<< "\t" << inCard.features().GetNumEmbeddedAudioInputChannels() << " channel(s) of Embedded Audio Input" << endl
+			<< "\t" << inCard.features().GetNumEmbeddedAudioOutputChannels() << " channel(s) of Embedded Audio Output" << endl;
 
 	//	Show its video and pixel format capabilities:
 	inCard.GetSupportedVideoFormats(videoFormats);
-	NTV2DeviceGetSupportedPixelFormats (deviceID, pixelFormats);
+	inCard.GetSupportedPixelFormats(pixelFormats);
 	cout	<< "\t" << videoFormats << endl
 			<< "\t" << pixelFormats << endl;
 	return 0;

@@ -158,14 +158,12 @@ void NTV2QtPreview::inputChanged (int inputRadioButtonId)
 	CNTV2Card	device;
 	CNTV2DeviceScanner::GetDeviceAtIndex (mBoardChoiceCombo->currentIndex (), device);
 
-	const NTV2DeviceID		deviceID			(device.GetDeviceID ());
-
 	if (!NTV2_IS_VALID_INPUT_SOURCE (chosenInputSource))
 	{
 		mFrameGrabber->SetInputSource (NTV2_INPUTSOURCE_INVALID);
 		qDebug ("## DEBUG:  NTV2QtPreview::inputChanged:  off");
 	}
-	else if (::NTV2DeviceCanDoInputSource (deviceID, chosenInputSource))
+	else if (device.features().CanDoInputSource(chosenInputSource))
 	{
 		mFrameGrabber->SetInputSource (chosenInputSource);
 		cerr << "## DEBUG:  NTV2QtPreview::inputChanged:  " << ::NTV2InputSourceToString (chosenInputSource) << endl;
@@ -200,26 +198,24 @@ void NTV2QtPreview::updateInputs (void)
 	CNTV2Card	ntv2Card (mBoardChoiceCombo->currentIndex());
 	if (ntv2Card.IsOpen())
 	{
-		const NTV2DeviceID	deviceID	(ntv2Card.GetDeviceID());
-
-		for (QButtonIterator iter (mInputButtonGroup->buttons());  iter.hasNext ();  )
+		for (QButtonIterator iter(mInputButtonGroup->buttons());  iter.hasNext();  )
 		{
-			QRadioButton *			pButton			(reinterpret_cast <QRadioButton*> (iter.next ()));
-			const NTV2InputSource	inputSource		(static_cast <NTV2InputSource> (mInputButtonGroup->id (pButton)));
-			if (NTV2_IS_VALID_INPUT_SOURCE (inputSource))
+			QRadioButton *			pButton			(reinterpret_cast<QRadioButton*>(iter.next()));
+			const NTV2InputSource	inputSource		(NTV2InputSource(mInputButtonGroup->id(pButton)));
+			if (NTV2_IS_VALID_INPUT_SOURCE(inputSource))
 			{
-				const bool				hasInputSource	(::NTV2DeviceCanDoInputSource (deviceID, inputSource));
-				const string			videoFormatStr	(hasInputSource ? ::NTV2VideoFormatToString (ntv2Card.GetInputVideoFormat (inputSource)) : "");
-				const QString			buttonLabel		(QString ("%1   %2").arg (::NTV2InputSourceToString (inputSource, true).c_str(), videoFormatStr.empty() ? "No Detected Input" : videoFormatStr.c_str()));
+				const bool		hasInputSource	(ntv2Card.features().CanDoInputSource(inputSource));
+				const string	videoFormatStr	(hasInputSource ? ::NTV2VideoFormatToString(ntv2Card.GetInputVideoFormat(inputSource)) : "");
+				const QString	buttonLabel		(QString("%1   %2").arg(::NTV2InputSourceToString(inputSource, true).c_str(), videoFormatStr.empty() ? "No Detected Input" : videoFormatStr.c_str()));
 				pButton->setText (buttonLabel);
 				pButton->setEnabled (hasInputSource);
 			}
 		}
 
 		#if defined (INCLUDE_AJACC)
-			const bool	hasCustomAnc	(::NTV2DeviceCanDoCustomAnc (deviceID));
-			for (QButtonIterator iter (mCaptionButtonGroup->buttons());  iter.hasNext ();  )
-				iter.next()->setEnabled (hasCustomAnc);
+			const bool hasCustomAnc (mDevice.features().CanDoCustomAnc());
+			for (QButtonIterator iter (mCaptionButtonGroup->buttons());  iter.hasNext();  )
+				iter.next()->setEnabled(hasCustomAnc);
 		#endif	//	defined (INCLUDE_AJACC)
 
 	}	//	if board opened ok

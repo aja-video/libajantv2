@@ -149,10 +149,7 @@ public:
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoFormat (const NTV2FrameRate inFR,
 														const NTV2FrameGeometry	inFG, 
 														const NTV2Standard inStd));	///< @deprecated	This function is obsolete. Do not use it.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDo3GOut (const UWord index0));	///< @deprecated	This function is obsolete. Do not use it.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoLTCEmbeddedN (const UWord index0));	///< @deprecated	This function is obsolete. Do not use it.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetFrameBufferSize(void));	///< @deprecated	This function is obsolete. Do not use it.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetNumberFrameBuffers(void));	///< @deprecated	This function is obsolete. Do not use it.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetAudioFrameBuffer(void));	///< @deprecated	This function is obsolete. Do not use it.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetAudioFrameBuffer2(void));	///< @deprecated	This function is obsolete. Do not use it.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetFrameBufferSize (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat));	///< @deprecated	This function is obsolete. Do not use it.
@@ -166,10 +163,28 @@ public:
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoDSKMode (const NTV2DSKMode inDSKM));	///< @deprecated	This function is obsolete. Do not use it.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoInputSource (const NTV2InputSource inSrc));	///< @deprecated	Use DeviceCapabilities::CanDoInputSource instead.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoAudioMixer(void));	///< @deprecated	Use CNTV2DriverInterface::IsSupported with kDeviceCanDoAudioMixer instead.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoHDMIQuadRasterConversion(void));	///< @deprecated	This function is obsolete. Do not use it.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceIsDNxIV(void));	///< @deprecated	Use DeviceCapabilities::IsDNxIV instead.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceHasMicInput(void));	///< @deprecated	Use CNTV2DriverInterface::IsSupported with kDeviceHasMicrophoneInput instead.
 #endif	//	defined(NTV2_DEPRECATE_16_3)
+
+	//	Per-instance replacements for global NTV2DeviceCanDo... functions:
+	AJA_VIRTUAL bool	IsWidgetIDSupported (const NTV2WidgetID inWgtID);	//	New in SDK 17.1
+	AJA_VIRTUAL ULWord	DeviceGetNumberFrameBuffers (void);		//	Deprecated in SDK 16.3, restored in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDo292In (const UWord ndx0);	//	New in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDo3GIn (const UWord ndx0);		//	New in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDo12GIn (const UWord ndx0);	//	New in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDo292Out (const UWord ndx0);	//	New in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDo3GOut (const UWord ndx0);	//	Deprecated in SDK 16.3, restored in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDo12GOut (const UWord ndx0);	//	New in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDoLTCEmbeddedN (const UWord ndx0);	//	Deprecated in SDK 16.3, restored in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDoOutputDestination (const NTV2OutputDest dst);	//	New in SDK 17.1
+	AJA_VIRTUAL inline bool	DeviceCanDoColorCorrection (void)	{return GetNumSupported(kDeviceGetNumLUTs) > 0;}	//	New in SDK 17.1
+	AJA_VIRTUAL inline bool	DeviceCanDoProgrammableCSC (void)	{return GetNumSupported(kDeviceGetNumCSCs) > 0;}	//	New in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDoHDMIQuadRasterConversion(void);	//	Deprecated in SDK 16.3, restored in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDoTCIndex (const NTV2TCIndex inTCIndex);		//	New in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDoInputTCIndex (const NTV2TCIndex inTCIndex);	//	New in SDK 17.1
+	AJA_VIRTUAL bool	GetSupportedVideoFormats (NTV2VideoFormatSet & outVFs);
+	AJA_VIRTUAL bool	GetSupportedPixelFormats (NTV2PixelFormats & outPFs);	//	New in SDK 17.1
 	///@}
 
 
@@ -809,14 +824,6 @@ public:
 					between the host and the AJA device, the frame data format is presumed to be identical.
 	**/
 	AJA_VIRTUAL bool		GetFrameBufferFormat (NTV2Channel inChannel, NTV2FrameBufferFormat & outValue);
-
-
-	/**
-		@brief		Returns a std::set of ::NTV2VideoFormat values that I support.
-		@param[out] outFormats	Receives the set of ::NTV2VideoFormat values, or empty upon failure.
-		@return		True if successful;	 otherwise false.
-	**/
-	AJA_VIRTUAL bool		GetSupportedVideoFormats (NTV2VideoFormatSet & outFormats);
 
 
 	// The rest of the routines
@@ -6487,8 +6494,8 @@ public:
 	AJA_VIRTUAL bool GetMultiRasterBypassEnable (bool & outEnabled);	//	New in SDK 16.1
 	AJA_VIRTUAL bool IsMultiRasterWidgetChannel (const NTV2Channel inChannel);	//	New in SDK 16.2
 	///@}
-	
-	AJA_VIRTUAL bool IsBreakoutBoardConnected (void);	//	New in SDK 17.0
+
+	AJA_VIRTUAL bool	IsBreakoutBoardConnected (void);	//	New in SDK 17.0
 
 #if !defined(NTV2_DEPRECATE_16_1)
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioOutputMonitorSource (const NTV2AudioMonitorSelect inChannelPair, const NTV2Channel inAudioSystem = NTV2_CHANNEL1))	{return SetAudioOutputMonitorSource(inChannelPair, NTV2AudioSystem(inAudioSystem));}	///< @deprecated	Use the function that uses NTV2AudioChannelPair and NTV2AudioSystem params.
@@ -6528,7 +6535,11 @@ private:
 
 	AJA_VIRTUAL bool	IsMultiFormatActive (void); ///< @return	True if the device supports the multi format feature and it's enabled; otherwise false.
 	AJA_VIRTUAL bool	CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFirst, const NTV2Channel inLast);
+	ULWordSet			mSupportedWgts;			///< @brief	Cache my supported NTV2WidgetIDs
+	mutable AJALock		mSupportedWgtsLock;		///< @brief	Guard mutex for mSupportedWgts
+#if defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
 	class DeviceCapabilities	mDevCap;
+#endif	//	defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
 };	//	CNTV2Card
 
 

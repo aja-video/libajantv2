@@ -19,138 +19,153 @@
 //	The rest of the non-sdkgen-generated function implementations follow...
 ///////////////////////////////////////////////////////////////////////////
 
-bool NTV2DeviceCanDoAudioOut(const NTV2DeviceID inDeviceID)
-{
-	UWord outputs = 0;
-	outputs += NTV2DeviceGetNumVideoOutputs(inDeviceID);
-	outputs += NTV2DeviceGetNumHDMIAudioOutputChannels(inDeviceID);
-	outputs += NTV2DeviceGetNumAnalogAudioOutputChannels(inDeviceID);
-	return outputs > 0 ? true : false;
-}
-
-bool NTV2DeviceCanDoAudioIn(const NTV2DeviceID inDeviceID)
-{
-	UWord inputs = 0;
-	inputs += NTV2DeviceGetNumVideoInputs(inDeviceID);
-	inputs += NTV2DeviceGetNumHDMIAudioInputChannels(inDeviceID);
-	inputs += NTV2DeviceGetNumAnalogAudioInputChannels(inDeviceID);
-	return inputs > 0 ? true : false;
-}
-
-bool NTV2DeviceCanDo292Out(NTV2DeviceID boardID, UWord index0)
-{
-	switch (index0)
+#if !defined(NTV2_DEPRECATE_17_1)
+	bool NTV2DeviceCanDoAudioOut (const NTV2DeviceID inDeviceID)
 	{
-	case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIOut1);
-	case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIOut2);
-	case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIOut3);
-	case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIOut4);
-	default:	return false;
+		UWord outputs = 0;
+		outputs += NTV2DeviceGetNumVideoOutputs(inDeviceID);
+		outputs += NTV2DeviceGetNumHDMIAudioOutputChannels(inDeviceID);
+		outputs += NTV2DeviceGetNumAnalogAudioOutputChannels(inDeviceID);
+		return outputs > 0 ? true : false;
 	}
-}	//	NTV2DeviceCanDo292Out
 
-bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
-{
-	switch (index0)
+	bool NTV2DeviceCanDoAudioIn (const NTV2DeviceID inDeviceID)
 	{
-		case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut1);
-		case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut2);
-		case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut3);
-		case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut4);
-		case 4:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut5);
-		case 5:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut6);
-		case 6:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut7);
-		case 7:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut8);
-		default:	return false;
+		UWord inputs = 0;
+		inputs += NTV2DeviceGetNumVideoInputs(inDeviceID);
+		inputs += NTV2DeviceGetNumHDMIAudioInputChannels(inDeviceID);
+		inputs += NTV2DeviceGetNumAnalogAudioInputChannels(inDeviceID);
+		return inputs > 0 ? true : false;
 	}
-}	//	NTV2DeviceCanDo3GOut
 
-bool NTV2DeviceCanDo12GOut(NTV2DeviceID boardID, UWord index0)
-{
-	switch (index0)
+	bool NTV2DeviceCanDo292Out (NTV2DeviceID boardID, UWord index0)
 	{
-		case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut1);
-		case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut2);
-		case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut3);
-		case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut4);
-		default:	return false;
-	}
-}	//	NTV2DeviceCanDo12GOut
+		switch (index0)
+		{
+			case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIOut1);
+			case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIOut2);
+			case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIOut3);
+			case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIOut4);
+			default:	return false;
+		}
+	}	//	NTV2DeviceCanDo292Out
 
-bool NTV2DeviceCanDo292In(NTV2DeviceID boardID, UWord index0)
-{
-	switch (index0)
+	bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0)
 	{
-		case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn1);
-		case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn2);
-		default:	return false;
-	}
-}	//	NTV2DeviceCanDo292In
+		switch (index0)
+		{
+			case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut1);
+			case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut2);
+			case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut3);
+			case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut4);
+			case 4:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut5);
+			case 5:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut6);
+			case 6:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut7);
+			case 7:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut8);
+			default:	return false;
+		}
+	}	//	NTV2DeviceCanDo3GOut
 
-bool NTV2DeviceCanDo3GIn(NTV2DeviceID boardID, UWord index0)
-{
-	switch (index0)
+	bool NTV2DeviceCanDo12GOut (NTV2DeviceID boardID, UWord index0)
 	{
-		case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn1);
-		case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn2);
-		case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn3);
-		case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn4);
-		case 4:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn5);
-		case 5:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn6);
-		case 6:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn7);
-		case 7:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn8);
-		default:	return false;
-	}
-}	//	NTV2DeviceCanDo3GIn
+		switch (index0)
+		{
+			case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut1);
+			case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut2);
+			case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut3);
+			case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIOut4);
+			default:	return false;
+		}
+	}	//	NTV2DeviceCanDo12GOut
 
-bool NTV2DeviceCanDo12GIn(NTV2DeviceID boardID, UWord index0)
-{
-	switch (index0)
+	bool NTV2DeviceCanDo292In (NTV2DeviceID boardID, UWord index0)
 	{
-		case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn1);
-		case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn2);
-		case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn3);
-		case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn4);
-		default:	return false;
-	}
-}	//	NTV2DeviceCanDo12GIn
+		switch (index0)
+		{
+			case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn1);
+			case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn2);
+			default:	return false;
+		}
+	}	//	NTV2DeviceCanDo292In
 
-bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0)
-{
-	switch (index0)
+	bool NTV2DeviceCanDo3GIn (NTV2DeviceID boardID, UWord index0)
 	{
-		case 0:		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn1) || NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn1) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn1));
-		case 1:		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn2) || NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn2) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn2));
-		case 2:		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn3) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn3));
-		case 3:		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn4) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn4));
-		case 4:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn5);
-		case 5:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn6);
-		case 6:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn7);
-		case 7:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn8);
-		default:	return false;
-	}
-}	//	NTV2DeviceCanDoLTCEmbeddedN
+		switch (index0)
+		{
+			case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn1);
+			case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn2);
+			case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn3);
+			case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn4);
+			case 4:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn5);
+			case 5:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn6);
+			case 6:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn7);
+			case 7:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn8);
+			default:	return false;
+		}
+	}	//	NTV2DeviceCanDo3GIn
 
-bool NTV2DeviceCanDoOutputDestination (const NTV2DeviceID inDeviceID, const NTV2OutputDestination inOutputDest)
-{
-	const UWord numSDIs = NTV2DeviceGetNumVideoOutputs(inDeviceID);
-	switch(inOutputDest)
+	bool NTV2DeviceCanDo12GIn (NTV2DeviceID boardID, UWord index0)
 	{
-		case NTV2_OUTPUTDESTINATION_ANALOG: return NTV2DeviceGetNumAnalogVideoOutputs(inDeviceID) > 0;
-		case NTV2_OUTPUTDESTINATION_HDMI:	return NTV2DeviceGetNumHDMIVideoOutputs(inDeviceID) > 0;
-		case NTV2_OUTPUTDESTINATION_SDI1:	return numSDIs > 0;
-		case NTV2_OUTPUTDESTINATION_SDI2:	return numSDIs > 1;
-		case NTV2_OUTPUTDESTINATION_SDI3:	return numSDIs > 2;
-		case NTV2_OUTPUTDESTINATION_SDI4:	return numSDIs > 3;
-		case NTV2_OUTPUTDESTINATION_SDI5:	return numSDIs > 4;
-		case NTV2_OUTPUTDESTINATION_SDI6:	return numSDIs > 5;
-		case NTV2_OUTPUTDESTINATION_SDI7:	return numSDIs > 6;
-		case NTV2_OUTPUTDESTINATION_SDI8:	return numSDIs > 7;
-		default:							break;
-	}
-	return false;
-}
+		switch (index0)
+		{
+			case 0:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn1);
+			case 1:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn2);
+			case 2:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn3);
+			case 3:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn4);
+			default:	return false;
+		}
+	}	//	NTV2DeviceCanDo12GIn
 
+	bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0)
+	{
+		switch (index0)
+		{
+			case 0:		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn1) || NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn1) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn1));
+			case 1:		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn2) || NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn2) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn2));
+			case 2:		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn3) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn3));
+			case 3:		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn4) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn4));
+			case 4:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn5);
+			case 5:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn6);
+			case 6:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn7);
+			case 7:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn8);
+			default:	return false;
+		}
+	}	//	NTV2DeviceCanDoLTCEmbeddedN
+
+	bool NTV2DeviceCanDoOutputDestination (const NTV2DeviceID inDeviceID, const NTV2OutputDest inOutputDest)
+	{
+		const UWord numSDIs = NTV2DeviceGetNumVideoOutputs(inDeviceID);
+		switch(inOutputDest)
+		{
+			case NTV2_OUTPUTDESTINATION_ANALOG: return NTV2DeviceGetNumAnalogVideoOutputs(inDeviceID) > 0;
+			case NTV2_OUTPUTDESTINATION_HDMI:	return NTV2DeviceGetNumHDMIVideoOutputs(inDeviceID) > 0;
+			case NTV2_OUTPUTDESTINATION_SDI1:	return numSDIs > 0;
+			case NTV2_OUTPUTDESTINATION_SDI2:	return numSDIs > 1;
+			case NTV2_OUTPUTDESTINATION_SDI3:	return numSDIs > 2;
+			case NTV2_OUTPUTDESTINATION_SDI4:	return numSDIs > 3;
+			case NTV2_OUTPUTDESTINATION_SDI5:	return numSDIs > 4;
+			case NTV2_OUTPUTDESTINATION_SDI6:	return numSDIs > 5;
+			case NTV2_OUTPUTDESTINATION_SDI7:	return numSDIs > 6;
+			case NTV2_OUTPUTDESTINATION_SDI8:	return numSDIs > 7;
+			default:							break;
+		}
+		return false;
+	}
+
+	bool NTV2DeviceCanDoColorCorrection (const NTV2DeviceID inDeviceID)
+	{
+		if (NTV2DeviceGetNumLUTs(inDeviceID) > 0)
+			return true;
+		return false;
+	}
+
+	bool NTV2DeviceCanDoProgrammableCSC (const NTV2DeviceID inDeviceID)
+	{
+		if (NTV2DeviceGetNumCSCs(inDeviceID) > 0)
+			return true;
+		return false;
+	}
+#endif	//	!defined(NTV2_DEPRECATE_17_1)
 
 UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBufferFormat inFBF)
 {
@@ -423,7 +438,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers(NTV2DeviceID boardID)
 ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
 #endif
 {
-	if(NTV2DeviceCanDoStackedAudio(boardID))
+	if (NTV2DeviceCanDoStackedAudio(boardID))
 	{
 		ULWord totalFrames = NTV2DeviceGetActiveMemorySize(boardID)/0x800000;
 		totalFrames -= NTV2DeviceGetNumAudioSystems(boardID)*(NTV2DeviceCanDo12gRouting(boardID) ? 4 : 1);
@@ -431,54 +446,25 @@ ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID)
 			totalFrames -= 6;
 		return totalFrames;
 	}
-	else
+	else switch (boardID)
 	{
-		switch (boardID)
-		{
-		case DEVICE_ID_IOEXPRESS:
+		case DEVICE_ID_IOEXPRESS:	//	EOL
 		case DEVICE_ID_KONALHEPLUS:
-		case DEVICE_ID_TTAP:
+		case DEVICE_ID_TTAP:		//	EOL
 			return 16;
-		case DEVICE_ID_KONALHIDVI:
+		case DEVICE_ID_KONALHIDVI:	//	EOL
 		case DEVICE_ID_KONALHI:
-		case DEVICE_ID_CORVID1:
-		case DEVICE_ID_CORVID3G:
+		case DEVICE_ID_CORVID1:		//	EOL
+		case DEVICE_ID_CORVID3G:	//	EOL
 			return 32;
-		case DEVICE_ID_IOXT:
+		case DEVICE_ID_IOXT:		//	EOL
 			return 24;
-		case DEVICE_ID_CORVID22:
-		case DEVICE_ID_KONA3GQUAD: //Took this from below quad has no ufc but it still reserves 8 buffers for 3D feature.
-		case DEVICE_ID_CORVID24:
+		case DEVICE_ID_CORVID22:	//	EOL
 			return 64;
-		case DEVICE_ID_IO4K:
-		case DEVICE_ID_IO4KUFC:
-		case DEVICE_ID_KONA4:
-		case DEVICE_ID_KONA4UFC:
-		case DEVICE_ID_CORVID88:
-		case DEVICE_ID_CORVID44:
-		case DEVICE_ID_CORVIDHEVC:
-		case DEVICE_ID_KONAIP_2022:
-		case DEVICE_ID_KONAIP_4CH_2SFP:
-		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
-		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
-		case DEVICE_ID_KONAIP_1RX_1TX_2110:
-		case DEVICE_ID_IO4KPLUS:
-		case DEVICE_ID_IOIP_2022:
-		case DEVICE_ID_IOIP_2110:
-		case DEVICE_ID_IOIP_2110_RGB12:
-		case DEVICE_ID_KONAIP_2110:
-		case DEVICE_ID_KONAIP_2110_RGB12:
-		case DEVICE_ID_KONA1:
-		case DEVICE_ID_KONAHDMI:
-		case DEVICE_ID_KONA5:
-			return 111;
-		case DEVICE_ID_KONA3G:
+		case DEVICE_ID_KONA3G:		//	EOL
 			return 56; // ufc uses 8 
-		case DEVICE_ID_CORVIDHBR:
-			return 56;
 		default:
 			return 0;
-		}
 	}
 }
 
@@ -1101,20 +1087,6 @@ bool NTV2DeviceROMHasBankSelect (const NTV2DeviceID inDeviceID)
 		return true;
 	else
 		return false;
-}
-
-bool NTV2DeviceCanDoColorCorrection (const NTV2DeviceID inDeviceID)
-{
-	if (NTV2DeviceGetNumLUTs(inDeviceID) > 0)
-		return true;
-	return false;
-}
-
-bool NTV2DeviceCanDoProgrammableCSC (const NTV2DeviceID inDeviceID)
-{
-	if (NTV2DeviceGetNumCSCs(inDeviceID) > 0)
-		return true;
-	return false;
 }
 
 #if !defined(NTV2_DEPRECATE_17_0)

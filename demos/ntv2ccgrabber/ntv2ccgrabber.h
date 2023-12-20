@@ -275,11 +275,6 @@ class NTV2CCGrabber
 		**/
 		virtual void			CaptioningChanged (const NTV2Caption608ChangeInfo & inChangeInfo);
 
-		/**
-			@return	True if the device supports ancillary data extraction.
-		**/
-		virtual bool			DeviceAncExtractorIsAvailable (void) const;
-
 
 	//	Protected Class Methods
 	protected:

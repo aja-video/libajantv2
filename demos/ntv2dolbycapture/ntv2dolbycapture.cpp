@@ -80,10 +80,10 @@ AJAStatus NTV2DolbyCapture::Init (void)
 		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
 	mDeviceID = mDevice.GetDeviceID();						//	Keep the device ID handy, as it's used frequently
-	if (!::NTV2DeviceCanDoCapture(mDeviceID))
+	if (!mDevice.features().CanDoCapture())
 		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is playback-only" << endl;  return AJA_STATUS_FEATURE;}
 
-	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
+	if (!mDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
 	{	cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' doesn't support '"
 				<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, true) << "' ("
 				<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, false) << ", " << DEC(mConfig.fPixelFormat) << ")" << endl;
@@ -105,7 +105,7 @@ AJAStatus NTV2DolbyCapture::Init (void)
 	}
 	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Prevent interference from AJA retail services
 
-	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
+	if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
 
 	//	This demo permits input source and channel to be specified independently.
@@ -116,15 +116,15 @@ AJAStatus NTV2DolbyCapture::Init (void)
 	else if (NTV2_IS_VALID_CHANNEL(mConfig.fInputChannel)  &&  !NTV2_IS_VALID_INPUT_SOURCE(mConfig.fInputSource))
 		mConfig.fInputSource = ::NTV2ChannelToInputSource(mConfig.fInputChannel, NTV2_IOKINDS_HDMI);
 	//	On KonaHDMI, map specified SDI input to equivalent HDMI input...
-	if (::NTV2DeviceGetNumHDMIVideoInputs(mDeviceID) > 1  &&  NTV2_INPUT_SOURCE_IS_HDMI(mConfig.fInputSource))
+	if (mDevice.features().GetNumHDMIVideoInputs() > 1  &&  NTV2_INPUT_SOURCE_IS_HDMI(mConfig.fInputSource))
 		mConfig.fInputSource = ::NTV2ChannelToInputSource(::NTV2InputSourceToChannel(mConfig.fInputSource), NTV2_IOKINDS_HDMI);
-	if (!::NTV2DeviceCanDoInputSource(mDeviceID, mConfig.fInputSource))
+	if (!mDevice.features().CanDoInputSource(mConfig.fInputSource))
 	{
 		cerr	<< "## ERROR:  No such input '" << ::NTV2InputSourceToString(mConfig.fInputSource, /*compact?*/true)
 				<< "' on '" << mDevice.GetDisplayName() << "'" << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
-	if (mConfig.fWithAnc  &&  !::NTV2DeviceCanDoCustomAnc(mDeviceID))
+	if (mConfig.fWithAnc  &&  !mDevice.features().CanDoCustomAnc())
 		{cerr << "## ERROR: Anc capture requested, but '" << mDevice.GetDisplayName() << "' has no anc extractors";  return AJA_STATUS_UNSUPPORTED;}
 
 	//	Set up the video and audio...
@@ -167,7 +167,7 @@ AJAStatus NTV2DolbyCapture::SetupVideo (void)
 	mVideoFormat = mDevice.GetInputVideoFormat(mConfig.fInputSource);
 	if (mVideoFormat == NTV2_FORMAT_UNKNOWN)
 		{cerr << "## ERROR:  No input signal or unknown format" << endl;  return AJA_STATUS_NOINPUT;}
-	if (!::NTV2DeviceCanDoVideoFormat(mDeviceID, mVideoFormat))
+	if (!mDevice.features().CanDoVideoFormat(mVideoFormat))
 	{
 		cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' cannot handle " << ::NTV2VideoFormatToString(mVideoFormat) << endl;
 		return AJA_STATUS_UNSUPPORTED;	//	Device can't handle this format

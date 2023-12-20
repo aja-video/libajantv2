@@ -1656,6 +1656,13 @@ bool CNTV2DriverInterface::GetNumericParam (const ULWord inParamID, ULWord & out
 																	+ (IsSupported(kDeviceCanDoAudioMixer) ? 2 : 0);			break;
 		case kDeviceGetNumBufferedAudioSystems:			outValue = ::NTV2DeviceGetNumAudioSystems(devID)
 																	+ (IsSupported(kDeviceCanDoAudioMixer) ? 1 : 0);			break;
+		case kDeviceGetNumTSIMuxers:
+		{	static const NTV2WidgetID s425MuxerIDs[] = {NTV2_Wgt425Mux1, NTV2_Wgt425Mux2, NTV2_Wgt425Mux3, NTV2_Wgt425Mux4};
+			const ULWordSet wgtIDs(GetSupportedItems(kNTV2EnumsID_WidgetID));
+			for (size_t ndx(0);  ndx < sizeof(s425MuxerIDs)/sizeof(NTV2WidgetID);  ndx++)
+				if (wgtIDs.find(s425MuxerIDs[ndx]) != wgtIDs.end())
+					outValue++;
+		}
 		default:										return false;	//	Bad param
 	}
 	return true;	//	Successfully used old ::NTV2DeviceGetNum function

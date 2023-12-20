@@ -364,7 +364,6 @@ bool CNTV2Card::GetRoutingForChannel (const NTV2Channel inChannel, CNTV2SignalRo
 	NTV2InputCrosspointQueue			inputXptQueue;	//	List of inputs to trace backward from
 	static const NTV2InputCrosspointID	SDIOutInputs [] = { NTV2_XptSDIOut1Input,	NTV2_XptSDIOut2Input,	NTV2_XptSDIOut3Input,	NTV2_XptSDIOut4Input,
 															NTV2_XptSDIOut5Input,	NTV2_XptSDIOut6Input,	NTV2_XptSDIOut7Input,	NTV2_XptSDIOut8Input};
-	const ULWordSet wgts (GetSupportedItems(kNTV2EnumsID_WidgetID));
 	outRouting.Reset();
 
 	if (IS_CHANNEL_INVALID(inChannel))
@@ -399,7 +398,7 @@ bool CNTV2Card::GetRoutingForChannel (const NTV2Channel inChannel, CNTV2SignalRo
 			CNTV2SignalRouter::GetWidgetForOutput (outputXpt, widgetID);
 			if (!NTV2_IS_VALID_WIDGET(widgetID))
 				continue;	//	Keep processing input crosspoints, even if no such widget
-			if (wgts.find(ULWord(widgetID)) == wgts.end())
+			if (!IsWidgetIDSupported(widgetID))
 				continue;	//	Keep processing input crosspoints, even if no such widget on this device
 
 			//	Add every input of the output's widget to the queue...

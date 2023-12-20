@@ -78,12 +78,12 @@ AJAStatus NTV2Capture8K::Init (void)
 		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
 	mDeviceID = mDevice.GetDeviceID();						//	Keep the device ID handy, as it's used frequently
-	if (!::NTV2DeviceCanDoCapture(mDeviceID))
+	if (!mDevice.features().CanDoCapture())
 		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is playback-only" << endl;  return AJA_STATUS_FEATURE;}
-	if (!::NTV2DeviceCanDo12gRouting(mDeviceID))
+	if (!mDevice.features().CanDo12gRouting())
         {cerr << "## ERROR: '" << ::NTV2DeviceIDToString(mDeviceID,true) << "' lacks 12G SDI";  return AJA_STATUS_FEATURE;}
 
-	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
+	if (!mDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
 	{	cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' doesn't support '"
 				<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, true) << "' ("
 				<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, false) << ", " << DEC(mConfig.fPixelFormat) << ")" << endl;
@@ -105,12 +105,12 @@ AJAStatus NTV2Capture8K::Init (void)
 	}
 	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Prevent interference from AJA retail services
 
-	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
+	if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
 
 	//	This demo permits only the input channel/frameStore to be specified.  Set the input source here...
 	const NTV2Channel origCh (mConfig.fInputChannel);
-	if (UWord(origCh) >= ::NTV2DeviceGetNumFrameStores(mDeviceID))
+	if (UWord(origCh) >= mDevice.features().GetNumFrameStores())
 	{
 		cerr << "## ERROR: No such Ch" << DEC(origCh+1) << " for '" << ::NTV2DeviceIDToString(mDeviceID,true) << "'" << endl;
 		return AJA_STATUS_BAD_PARAM;
@@ -166,7 +166,7 @@ AJAStatus NTV2Capture8K::SetupVideo (void)
 
 	//	If the device supports bi-directional SDI and the requested input is SDI,
 	//	ensure the SDI connector(s) are configured to receive...
-	if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID) && NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource))
+	if (mDevice.features().HasBiDirectionalSDI() && NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource))
 	{
 		mDevice.SetSDITransmitEnable (mActiveSDIs, false);				//	Set SDI connector(s) to receive
 		mDevice.WaitForOutputVerticalInterrupt (NTV2_CHANNEL1, 10);		//	Wait 10 VBIs to allow reciever to lock
@@ -205,8 +205,8 @@ AJAStatus NTV2Capture8K::SetupAudio (void)
 {
 	//	In multiformat mode, base the audio system on the channel...
 	if (mConfig.fDoMultiFormat)
-		if (::NTV2DeviceGetNumAudioSystems(mDeviceID) > 1)
-			if (UWord(mConfig.fInputChannel) < ::NTV2DeviceGetNumAudioSystems(mDeviceID))
+		if (mDevice.features().GetNumAudioSystems() > 1)
+			if (UWord(mConfig.fInputChannel) < mDevice.features().GetNumAudioSystems())
 				mAudioSystem = ::NTV2ChannelToAudioSystem(mConfig.fInputChannel);
 
 	NTV2AudioSystemSet audSystems (::NTV2MakeAudioSystemSet (mAudioSystem, 1));
