@@ -68,9 +68,11 @@ struct ntv2_stream {
     struct ntv2_stream_buffer   stream_buffers[NTV2_STREAM_NUM_BUFFERS];
     Ntv2Event                   wait_events[NTV2_STREAM_WAIT_CLIENTS];
     bool                        wait_inuse[NTV2_STREAM_WAIT_CLIENTS];
-    uint32_t                    head_index;     // buffer queue head
-    uint32_t                    tail_index;     // buffer queue tail
-    uint32_t                    active_index;   // currently active buffer
+    uint32_t                    head_index;         // buffer queue head
+    uint32_t                    tail_index;         // buffer queue tail
+    uint32_t                    active_index;       // currently active buffer
+    uint64_t                    queue_count;        // buffers queued
+    uint64_t                    release_count;      // buffers released
 };
 
 
@@ -95,7 +97,7 @@ Ntv2Status ntv2_stream_channel_status(struct ntv2_stream *ntv2_str, NTV2StreamCh
 Ntv2Status ntv2_stream_channel_wait(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel);
 Ntv2Status ntv2_stream_channel_advance(struct ntv2_stream *ntv2_str);
 
-Ntv2Status ntv2_stream_buffer_add(struct ntv2_stream *ntv2_str, NTV2StreamBuffer* pBuffer);
+Ntv2Status ntv2_stream_buffer_queue(struct ntv2_stream *ntv2_str, NTV2StreamBuffer* pBuffer);
 Ntv2Status ntv2_stream_buffer_status(struct ntv2_stream *ntv2_str, NTV2StreamBuffer* pBuffer);
 
 #endif

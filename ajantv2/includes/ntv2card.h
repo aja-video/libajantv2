@@ -3504,7 +3504,7 @@ public:
 											NTV2StreamChannel& status);
 
 	// add a buffer to the stream
-	AJA_VIRTUAL ULWord	StreamBufferAdd (const NTV2Channel inChannel,
+	AJA_VIRTUAL ULWord	StreamBufferQueue (const NTV2Channel inChannel,
 											NTV2_POINTER inBuffer,
 											ULWord64 bufferCookie,
 											NTV2StreamBuffer& status);

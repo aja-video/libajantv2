@@ -152,11 +152,11 @@ int main (int argc, const char ** argv)
 			<< "   Played  Dropped    Level" << endl;
 	do
 	{	//	Poll its status until stopped...
-		AUTOCIRCULATE_STATUS outputStatus;
-		player.GetACStatus(outputStatus);
-		cout	<< setw(9) << outputStatus.GetProcessedFrameCount()
-				<< setw(9) << outputStatus.GetDroppedFrameCount()
-				<< setw(9) << outputStatus.GetBufferLevel() << "\r" << flush;
+		NTV2StreamChannel strStatus;
+		player.GetStreamStatus(strStatus);
+		cout	<< setw(9) << strStatus.mActiveCount
+				<< setw(9) << strStatus.mRepeatCount
+				<< setw(9) << strStatus.GetQueueDepth() << "\r" << flush;
 		AJATime::Sleep(2000);
 	} while (player.IsRunning() && !gGlobalQuit);	//	loop til done
 
