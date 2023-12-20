@@ -148,301 +148,6 @@ static const string		sNTV2PCIDEXTName		("NTV2PCIe");			//	AJA NTV2 DEXT's IOServ
 	}
 #endif	//	NTV2_NULL_DEVICE defined
 
-
-#if defined(USE_DEVICE_MAP)
-static unsigned		gnBoardMaps				(0);		//	Instance counter -- should never exceed one
-static const UWord	kMaxNumDevices			(32);		//	Limit to 32 devices
-static uint64_t		RECHECK_INTERVAL		(1024LL);	//	Number of calls to DeviceMap::GetConnection before connection recheck performed
-static unsigned int	TWO_SECONDS				(2);		//	Max wait times for IORegistry to settle for hot plug/unplug
-#define				NTV2_IGNORE_IOREG_BUSY	(true)		//	If defined, ignore IORegistry busy state;
-														//	otherwise wait for non-busy IORegistry before making new connections
-
-/**
-	@details	The DeviceMap global singleton maintains the underlying Mach connection handles used to talk
-				to the NTV2 driver instances for each device on the host.
-**/
-class DeviceMap
-{
-	public:
-		DeviceMap ()
-			:	//mIOConnections,
-				//mRecheckTally,
-				//mMutex,
-				mMasterPort		(0),
-				mStopping		(false),
-				mDriverVersion	(0)
-		{
-			NTV2_ASSERT (gnBoardMaps == 0  &&  "Attempt to create more than one DeviceMap");
-			AJAAtomic::Increment(&gnBoardMaps);
-			::memset (&mIOConnections, 0, sizeof (mIOConnections));
-			::memset (&mRecheckTally, 0, sizeof (mRecheckTally));
-			mDrvrVersComps[0] = mDrvrVersComps[1] = mDrvrVersComps[2] = mDrvrVersComps[3] = 0;
-
-			//	Get the master mach port for talking to IOKit...
-			IOReturn	error	(OS_IOMasterPort (MACH_PORT_NULL, &mMasterPort));
-			if (error != kIOReturnSuccess)
-			{
-				MDIFAIL (KR(error) << "Unable to get master port");
-				return;
-			}
-			NTV2_ASSERT (mMasterPort && "No MasterPort!");
-			MDINOTE ("DeviceMap singleton created");
-		}
-
-
-		~DeviceMap ()
-		{
-			mStopping = true;
-			AJAAutoLock autoLock (&mMutex);
-			Reset ();
-			MDINOTE ("DeviceMap singleton destroyed");
-			AJAAtomic::Decrement(&gnBoardMaps);
-		}
-
-
-		void Reset (const bool inResetMasterPort = false)
-		{
-			AJAAutoLock autoLock (&mMutex);
-			//	Clear the device map...
-			for (UWord ndx (0);	 ndx < kMaxNumDevices;	++ndx)
-			{
-				io_connect_t	connection	(mIOConnections [ndx]);
-				if (connection)
-				{
-					OS_IOServiceClose (connection);
-					mIOConnections [ndx] = 0;
-					MDINOTE ("Device " << ndx << " connection " << HEX8(connection) << " closed");
-				}
-			}	//	for each connection in the map
-			if (inResetMasterPort)
-			{
-				IOReturn	error	(OS_IOMasterPort (MACH_PORT_NULL, &mMasterPort));
-				if (error != kIOReturnSuccess)
-					MDIFAIL (KR(error) << "Unable to reset master port");
-				else
-					MDINOTE ("reset mMasterPort=" << HEX8(mMasterPort));
-			}
-		}
-
-
-		io_connect_t GetConnection (const UWord inDeviceIndex, const bool inDoNotAllocate = false)
-		{
-			if (inDeviceIndex >= kMaxNumDevices)
-			{
-				MDIWARN ("Bad device index " << inDeviceIndex << ", GetConnection fail");
-				return 0;
-			}
-
-			AJAAutoLock autoLock (&mMutex);
-			const io_connect_t	connection	(mIOConnections [inDeviceIndex]);
-			if (connection	&&	RECHECK_INTERVAL)
-			{
-				uint64_t &	recheckTally	(mRecheckTally [inDeviceIndex]);
-				if (++recheckTally % RECHECK_INTERVAL == 0)
-				{
-//					MDIDBG ("Device " << inDeviceIndex << " connection " << HEX8(connection) << " expired, checking connection");
-					if (!ConnectionIsStillOkay (inDeviceIndex))
-					{
-						MDIFAIL ("Device " << inDeviceIndex << " connection " << HEX8(connection) << " invalid, resetting DeviceMap");
-						Reset ();
-						return 0;
-					}
-				}
-				return connection;
-			}
-
-			if (inDoNotAllocate)
-				return connection;
-
-			if (mStopping)
-			{
-				MDIWARN ("Request to Open device " << inDeviceIndex << " denied because DeviceMap closing");
-				return 0;	//	No new connections if my destructor was called
-			}
-
-			//	Wait for IORegistry to settle down (if busy)...
-			if (!WaitForBusToSettle ())
-			{
-				MDIWARN ("IORegistry unstable, resetting DeviceMap");
-				Reset ();
-				return 0;
-			}
-
-			//	Make a new connection...
-			UWord			ndx			(inDeviceIndex);
-			io_iterator_t	ioIterator	(0);
-			IOReturn		error		(kIOReturnSuccess);
-			io_object_t		ioObject	(0);
-			io_connect_t	ioConnect	(0);
-			const string &	className	(sNTV2PCIKEXTClassName);
-
-			NTV2_ASSERT (mMasterPort && "No MasterPort!");
-
-			//	Create an iterator to search for our driver...
-			error = OS_IOServiceGetMatchingServices (mMasterPort, OS_IOServiceMatching(className.c_str()), &ioIterator);
-			if (error != kIOReturnSuccess)
-			{
-				MDIFAIL (KR(error) << " -- IOServiceGetMatchingServices failed, no match for '" << className << "', device index " << inDeviceIndex << " requested");
-				return 0;
-			}
-
-			//	Use ndx to find nth device -- and only open that one...
-			for ( ; (ioObject = OS_IOIteratorNext(ioIterator));  OS_IOObjectRelease(ioObject))
-				if (ndx == 0)
-					break;		//	Found it!
-				else
-					--ndx;
-
-			if (ioIterator)
-				OS_IOObjectRelease (ioIterator);
-			if (ioObject == 0)
-				return 0;		//	No devices found at all
-			if (ndx)
-				return 0;		//	Requested device index exceeds number of devices found
-
-			//	Found the device we want -- open it...
-			error = OS_IOServiceOpen (ioObject, ::mach_task_self(), 0, &ioConnect);
-			OS_IOObjectRelease (ioObject);
-			if (error != kIOReturnSuccess)
-			{
-				MDIFAIL (KR(error) << " -- IOServiceOpen failed on device " << inDeviceIndex);
-				return 0;
-			}
-
-			//	All good -- cache the connection handle...
-			mIOConnections [inDeviceIndex] = ioConnect;
-			mRecheckTally [inDeviceIndex] = 0;
-			MDINOTE ("Device " << inDeviceIndex << " connection " << HEX8(ioConnect) << " opened");
-			return ioConnect;
-
-		}	//	GetConnection
-
-
-		void Dump (const UWord inMaxNumDevices = 10) const
-		{
-			AJAAutoLock autoLock (&mMutex);
-			for (UWord ndx (0);	 ndx < inMaxNumDevices;	 ++ndx)
-				MDIDBG ("	 [" << ndx << "]:  con=" << HEX8(mIOConnections [ndx]));
-		}
-
-
-		UWord GetConnectionCount (void) const
-		{
-			UWord	tally	(0);
-			AJAAutoLock autoLock (&mMutex);
-			for (UWord ndx (0);	 ndx < kMaxNumDevices;	++ndx)
-				if (mIOConnections [ndx])
-					tally++;
-				else
-					break;
-			return tally;
-		}
-
-
-		ULWord GetConnectionChecksum (void) const
-		{
-			ULWord	checksum	(0);
-			AJAAutoLock autoLock (&mMutex);
-			for (UWord ndx (0);	 ndx < kMaxNumDevices;	++ndx)
-				if (mIOConnections [ndx])
-					checksum += mIOConnections [ndx];
-				else
-					break;
-			return checksum;
-		}
-
-
-		uint32_t	GetDriverVersion (void) const			{ return mDriverVersion; }
-
-
-		bool	ConnectionIsStillOkay (const UWord inDeviceIndex)
-		{
-			if (inDeviceIndex >= kMaxNumDevices)
-			{
-				MDIWARN ("ConnectionIsStillOkay:  bad 'inDeviceIndex' parameter " << inDeviceIndex);
-				return 0;
-			}
-
-			const io_connect_t	connection	(mIOConnections [inDeviceIndex]);
-			if (connection)
-			{
-				uint64_t		scalarO_64 [2]	= {0, 0};
-				uint32_t		outputCount		= 2;
-				kern_return_t	kernResult		= OS_IOConnectCallScalarMethod (connection, kDriverGetStreamForApplication, AJA_NULL, 0, scalarO_64, &outputCount);
-				if (kernResult == KERN_SUCCESS)
-					return true;
-			}
-			return false;
-		}
-
-		uint64_t	SetConnectionCheckInterval (const uint64_t inNewInterval)
-		{
-			uint64_t	oldValue	(RECHECK_INTERVAL);
-			if (oldValue != inNewInterval)
-			{
-				RECHECK_INTERVAL = inNewInterval;
-				if (RECHECK_INTERVAL)
-					MDINOTE ("connection recheck interval changed to" << HEX16(RECHECK_INTERVAL) << ", was" << HEX16(oldValue));
-				else
-					MDINOTE ("connection rechecking disabled, was" << HEX16(oldValue));
-			}
-			return oldValue;
-		}
-
-	private:
-		bool WaitForBusToSettle (void)
-		{
-			uint32_t	busyState	(0);
-			IOReturn	kr			(OS_IOKitGetBusyState (mMasterPort, &busyState));
-
-			if (kr != kIOReturnSuccess)
-				MDIFAIL ("IOKitGetBusyState failed -- " << KR(kr));
-			else if (busyState)
-			{
-				#if defined (NTV2_IGNORE_IOREG_BUSY)
-					MDINOTE ("IOKitGetBusyState reported BUSY");
-					return true;	//	IORegistry busy, but so what?
-				#else
-					mach_timespec_t maxWaitTime = {TWO_SECONDS, 0};
-					MDINOTE ("IOKitGetBusyState reported BUSY -- waiting for IORegistry to stabilize...");
-
-					kr = OS_IOKitWaitQuiet (mMasterPort, &maxWaitTime);
-					if (kr == kIOReturnSuccess)
-						return true;
-					MDIFAIL ("IOKitWaitQuiet timed out -- " << KR(kr));
-				#endif	//	defined (NTV2_IGNORE_IOREG_BUSY)
-			}
-			else
-				return true;
-			return false;
-		}
-
-	private:
-		io_connect_t	mIOConnections	[kMaxNumDevices];	//	My io_connect_t map
-		uint64_t		mRecheckTally	[kMaxNumDevices];	//	Used to calc when it's time to test if connection still ok
-		mutable AJALock mMutex;								//	My guard mutex
-		mach_port_t		mMasterPort;						//	Handy master port
-		bool			mStopping;							//	Don't open new connections if I'm stopping
-		uint32_t		mDriverVersion;						//	Handy (packed) driver version
-		uint16_t		mDrvrVersComps[4];					//	Handy (unpacked) driver version components
-
-};	//	DeviceMap
-
-
-static DeviceMap	gDeviceMap;		//	The DeviceMap singleton
-
-
-io_connect_t CNTV2MacDriverInterface::GetIOConnect (const bool inDoNotAllocate) const
-{
-	return gDeviceMap.GetConnection (_boardNumber, inDoNotAllocate);
-}
-#endif	//	defined(USE_DEVICE_MAP)
-
-
-#if defined(_DEBUG)
-////////#define	AJA_MULTIRASTER_TEST
-#endif
-
 //--------------------------------------------------------------------------------------------------------------------
 //	CNTV2MacDriverInterface
 //
@@ -451,9 +156,7 @@ io_connect_t CNTV2MacDriverInterface::GetIOConnect (const bool inDoNotAllocate) 
 CNTV2MacDriverInterface::CNTV2MacDriverInterface (void)
 {
 	mIsDEXT = false;
-#if !defined(USE_DEVICE_MAP)
 	mConnection = 0;
-#endif
 }
 
 
@@ -472,21 +175,6 @@ CNTV2MacDriverInterface::~CNTV2MacDriverInterface (void)
 	//--------------------------------------------------------------------------------------------------------------------
 	bool CNTV2MacDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 	{
-	#if defined(USE_DEVICE_MAP)
-		// Local host open -- get a Mach connection
-		_boardOpened = gDeviceMap.GetConnection (inDeviceIndex) != 0;								
-	
-		// When device is unplugged, saved static io_connect_t value goes stale, yet remains non-zero.
-		// This resets it it to zero, reestablishes a connection on replug. Fixes many pnp/sleep issues.
-		if (IsOpen())
-		{
-			if (!gDeviceMap.ConnectionIsStillOkay(inDeviceIndex))
-			{
-				gDeviceMap.Reset();
-				_boardOpened = gDeviceMap.GetConnection(inDeviceIndex) != 0;
-			}
-		}
-	#else	//	!defined(USE_DEVICE_MAP)
 		//	Make a new connection...
 		io_iterator_t	ioIterator	(0);
 		IOReturn		error		(kIOReturnSuccess);
@@ -534,11 +222,9 @@ CNTV2MacDriverInterface::~CNTV2MacDriverInterface (void)
 		_boardOpened = mConnection != 0;
 		if (IsOpen())
 			DIDBG((mIsDEXT ? "DEXT" : "KEXT") << " ndx=" << inDeviceIndex << " conn=" << HEX8(GetIOConnect()) << " opened");
-	#endif	//	!defined(USE_DEVICE_MAP)
-		if (!IsOpen())
+		else
 			{DIFAIL(INSTP(this) << ": No connection: ndx=" << inDeviceIndex);  return false;}
 
-		//	If USE_DEVICE_MAP defined, _boardNumber must be set before first ReadReg call, or it won't work:
 		_boardNumber = inDeviceIndex;
 		if (!CNTV2DriverInterface::ReadRegister (kRegBoardID, _boardID))
 		{
@@ -560,11 +246,9 @@ CNTV2MacDriverInterface::~CNTV2MacDriverInterface (void)
 		DIDBG("Closed " << (mIsDEXT ? "DEXT" : "KEXT") << " ndx=" << _boardNumber << " con=" << HEX8(GetIOConnect()) << " id=" << ::NTV2DeviceIDToString(_boardID));
 		_boardOpened = false;
 		_boardNumber = 0;
-	#if !defined(USE_DEVICE_MAP)
 		if (mConnection)
 			OS_IOServiceClose(mConnection);
 		mConnection = 0;
-	#endif	//	!defined(USE_DEVICE_MAP)
 		mIsDEXT = false;
 		return true;
 
@@ -696,10 +380,6 @@ CNTV2MacDriverInterface::~CNTV2MacDriverInterface (void)
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 
 #pragma mark - New Driver Calls
-#if defined(AJA_MULTIRASTER_TEST)
-	//							kRegMRQ1Control	kRegMRQ2Control	kRegMRQ3Control	kRegMRQ4Control	kRegMROutControl							kRegMRSupport
-	static ULWord gMRRegs[] = {	0x01000004,		0x01000004,		0x01000004,		0x01000004,		0x01101D48,			0x00444400,	0x00000000,	0x00000001};
-#endif
 
 //--------------------------------------------------------------------------------------------------------------------
 //	ReadRegister
@@ -717,10 +397,6 @@ bool CNTV2MacDriverInterface::ReadRegister (const ULWord inRegNum, ULWord & outV
 	if (IsRemote())
 		return CNTV2DriverInterface::ReadRegister(inRegNum, outValue, inMask, inShift);
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-#if defined(AJA_MULTIRASTER_TEST)
-	if (inRegNum >= kRegMRQ1Control  &&  inRegNum <= kRegMRSupport)
-		{outValue = (gMRRegs[inRegNum - kRegMRQ1Control] & inMask) >> inShift;	return true;}
-#endif
 	kern_return_t kernResult(KERN_FAILURE);
 	uint64_t	scalarI_64[3] = {inRegNum, inMask, inShift};
 	uint64_t	scalarO_64 = outValue;
@@ -771,10 +447,6 @@ bool CNTV2MacDriverInterface::WriteRegister (const ULWord inRegNum, const ULWord
 	if (IsRemote())
 		return CNTV2DriverInterface::WriteRegister(inRegNum, inValue, inMask, inShift);
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
-#if defined(AJA_MULTIRASTER_TEST)
-	if (inRegNum >= kRegMRQ1Control  &&  inRegNum <= kRegMRSupport)
-		{gMRRegs[inRegNum - kRegMRQ1Control] = ((inValue << inShift) & inMask) | ((~inMask) & gMRRegs[inRegNum - kRegMRQ1Control]);	return true;}
-#endif
 	kern_return_t kernResult(KERN_FAILURE);
 	uint64_t	scalarI_64[4] = {inRegNum, inValue, inMask, inShift};
 	uint32_t	outputCount = 0;
