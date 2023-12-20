@@ -184,7 +184,7 @@ AJAStatus NTV2StreamPlayer::SetUpVideo (void)
 
 	//	Set the FrameStore video format...
 	mDevice.SetVideoFormat (mConfig.fVideoFormat, false, false, mConfig.fOutputChannel);
-	mDevice.SetTsiFrameEnable(true, mConfig.fOutputChannel);
+//	mDevice.SetTsiFrameEnable(true, mConfig.fOutputChannel);
 
 	//	Set the frame buffer pixel format for the device FrameStore...
 	mDevice.SetFrameBufferFormat (mConfig.fOutputChannel, mConfig.fPixelFormat);
