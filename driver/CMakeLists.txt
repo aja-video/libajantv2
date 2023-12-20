@@ -3,6 +3,7 @@ set(AJADRIVER_COMMON_HEADERS
 	ntv2audio.h
 	ntv2autocirc.h
 	ntv2autofunc.h
+	ntv2aux.h
 	ntv2commonreg.h
 	ntv2displayid.h
 	ntv2genlock.h
@@ -27,6 +28,8 @@ set(AJADRIVER_COMMON_HEADERS
 	ntv2stream.h
 	ntv2system.h
 	ntv2video.h
+	ntv2videoraster.h
+	ntv2videorasterreg.h
 	ntv2vpid.h
 	ntv2xpt.h
 	ntv2xptlookup.h)
@@ -34,6 +37,7 @@ set(AJADRIVER_COMMON_SOURCES
 	ntv2anc.c
 	ntv2audio.c
 	ntv2autocirc.c
+	ntv2aux.c
 	ntv2commonreg.c
 	ntv2displayid.c
 	ntv2genlock.c
@@ -51,6 +55,7 @@ set(AJADRIVER_COMMON_SOURCES
 	ntv2system.c
 	ntv2stream.c
 	ntv2video.c
+	ntv2videoraster.c
 	ntv2vpid.c
 	ntv2xpt.c)
 
@@ -61,6 +66,7 @@ set(AJADRIVER_TARGET_SOURCES
 
 # ajadriver/linux
 set(AJADRIVER_LINUX_HEADERS
+	linux/buildenv.h
 	linux/driverdbg.h
 	linux/fs1wait.h
 	linux/ntv2dma.h
@@ -109,11 +115,9 @@ if (NOT AJANTV2_BUILD_OPENSOURCE)
 endif()
 
 set(AJADRIVER_LINUX_BUILD_FILES
+	linux/dkms.conf
 	linux/Makefile
 	linux/nvidia-ko-to-module-symvers)
-set(AJADRIVER_LINUX_LOAD_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/bin/load_ajantv2
-	${CMAKE_CURRENT_SOURCE_DIR}/bin/unload_ajantv2)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(AJADRIVER_TARGET_SOURCES
@@ -149,7 +153,7 @@ set(NEEDED_NTV2_SOURCES
     ${AJANTV2_ROOT}/src/ntv2devicefeatures.hpp
     )
 
-if (AJANTV2_BUILD_DRIVER)
+if (NOT AJANTV2_DISABLE_DRIVER)
 	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 		message(STATUS "Windows driver CMake build not yet implemented!")
 		return()
@@ -157,19 +161,41 @@ if (AJANTV2_BUILD_DRIVER)
 		message(STATUS "macOS driver CMake build not yet implemented!")
 		return()
 	elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-		set(BIN_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin")
-		add_custom_target(driver_linux ALL
-						  COMMENT "Building Linux driver"
-						  COMMAND make -C linux
-						  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-						  SOURCES ${AJADRIVER_TARGET_SOURCES}
-                          BYPRODUCTS ${BIN_PATH}/ajantv2.ko)
+        execute_process(COMMAND uname -r
+            OUTPUT_VARIABLE KERNEL_RELEASE
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-		set(LIN_LOAD_DRIVER_MSG
-			"         After building Linux driver can enable with: sudo .${BIN_PATH}/load_ajantv2")
-		message(STATUS "AJA:  added target: driver_linux...\n${LIN_LOAD_DRIVER_MSG}")
+        set(KERNEL_BUILD_DIR /lib/modules/${KERNEL_RELEASE}/build)
+
+        if(EXISTS ${KERNEL_BUILD_DIR})
+            set(BIN_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin")
+                add_custom_target(driver_linux ALL
+                    COMMENT "Building Linux driver"
+                    COMMAND make -C linux
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                    SOURCES ${AJADRIVER_TARGET_SOURCES}
+                    BYPRODUCTS ${BIN_PATH}/ajantv2.ko
+                    )
+
+                add_custom_target(driver_linux_dkms_install
+                    COMMENT "Installing Linux DKMS driver"
+                    COMMAND make -C linux dkms-install
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                    )
+
+                add_custom_target(driver_linux_dkms_uninstall
+                    COMMENT "Uninstalling Linux DKMS driver"
+                    COMMAND make -C linux dkms-uninstall
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                    )
+
+            set(LIN_LOAD_DRIVER_MSG
+                "         After building Linux driver can enable with: sudo .${BIN_PATH}/load_ajantv2")
+            message(STATUS "AJA:  added target: driver_linux...\n${LIN_LOAD_DRIVER_MSG}")
+        else()
+            message(WARNING "AJA: Unable to add driver target: Please install kernel headers: ${KERNEL_BUILD_DIR}")
+        endif()
 	endif()
-
 endif()
 
 if (AJANTV2_BUILD_OPENSOURCE)
@@ -183,7 +209,7 @@ if (AJANTV2_BUILD_OPENSOURCE)
 		"To build the MIT-licensed NTV2 device driver on Linux:\n"
 		"1. `cd driver/linux && make`\n"
 		"2. `cd driver/bin`\n"
-		"3. `sudo ./load_ajantv2`\n\n"
+		"3. `sudo insmod ajantv2.ko`\n\n"
 		"Alternately the Linux driver can be installed via the AJA Software Installer for Linux, available from: https://www.aja.com/support\n"
 	)
 
@@ -192,7 +218,6 @@ if (AJANTV2_BUILD_OPENSOURCE)
 endif()
 
 # installing
-
 add_custom_target(ajadriver_install ${AJADRIVER_TARGET_SOURCES})
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
@@ -249,12 +274,6 @@ if (AJA_INSTALL_MISC)
 	if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 		install(FILES ${AJADRIVER_LINUX_BUILD_FILES}
                 DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/driver/linux
-                COMPONENT install_driver)
-		install(FILES ${AJADRIVER_LINUX_LOAD_FILES}
-                DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/driver/bin
-                PERMISSIONS OWNER_EXECUTE OWNER_READ OWNER_WRITE
-                            GROUP_EXECUTE GROUP_READ GROUP_WRITE
-                            WORLD_EXECUTE WORLD_READ
                 COMPONENT install_driver)
 		install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/configure.mk
                 DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/driver

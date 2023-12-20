@@ -7,16 +7,9 @@
 
 
 //	Includes
-#include "ntv2utils.h"
-#include "ajatypes.h"
-#include "ajabase/common/options_popt.h"
-#include "ajabase/system/systemtime.h"
-#include "ajabase/system/process.h"
-#include "ajabase/common/common.h"
 #include "ntv2dolbycapture.h"
+#include "ajabase/system/process.h"
 #include <signal.h>
-#include <iostream>
-#include <iomanip>
 
 using namespace std;
 
@@ -34,60 +27,54 @@ static void SignalHandler (int inSignal)
 
 int main (int argc, const char ** argv)
 {
-	AJAStatus		status			(AJA_STATUS_SUCCESS);
+	int			showVersion		(0);			//	Show version?
 	char *		pDeviceSpec		(AJA_NULL);		//	Device specifier string, if any
-	char *		pInputSrcSpec	(AJA_NULL);		//	SDI source spec
 	char *		pPixelFormat	(AJA_NULL);		//	Pixel format argument
 	char *		pFramesSpec		(AJA_NULL);		//	AutoCirculate frames spec
-	int			doRecordAnc		(0);    		//	Record anc
-	int			doRecordAudio	(0);    		//	Record audio
-	int			doRecordDolby	(0);    		//	Record dolby
+	char *		pInputSrcSpec	(AJA_NULL);		//	SDI source spec
 	uint32_t	channelNumber	(1);			//	Channel/FrameStore to use
+	int			doMultiFormat	(0);			//	Enable multi-format?
+	int			doRecordAnc		(0);			//	Record anc
+	int			doRecordAudio	(0);			//	Record audio
+	int			doRecordDolby	(0);			//	Record dolby
 	int			doAudioFilter	(0);			//	Enable anc audio filter?
 	int			doFrameData		(0);			//	Output per frame data?
-	int			doMultiFormat	(0);			//	Enable multi-format?
+
+	AJAStatus	status			(AJA_STATUS_SUCCESS);
 	AJADebug::Open();
 
 	//	Command line option descriptions:
-        const CNTV2DemoCommon::PoptOpts optionsTable [] =
-        {
-    #if !defined(NTV2_DEPRECATE_16_0)	//	--board option is deprecated!
-            {"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"device to use",			"(deprecated)"				},
-    #endif
-            {"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"device to use",			"index#, serial#, or model"	},
-            {"input",		'i',	POPT_ARG_STRING,	&pInputSrcSpec,	0,	"which HDMI input",			"?=list"                	},
-            {"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",		"'?' or 'list' to list"		},
-			{"frames",		0,		POPT_ARG_STRING,	&pFramesSpec,	0,	"frames to AutoCirculate",	"num[@min] or min-max"		},
-			{"anc",			'a',	POPT_ARG_NONE,		&doRecordAnc,	0,	"record anc to file",		AJA_NULL    				},
-			{"audio",		'f',	POPT_ARG_NONE,		&doRecordAudio,	0,	"record audio to file",		AJA_NULL    				},
-			{"dolby",		'g',	POPT_ARG_NONE,		&doRecordDolby,	0,	"record dolby to file",		AJA_NULL    				},
-			{"audioFilter",	'x',	POPT_ARG_NONE,		&doAudioFilter,	0,	"only capture audio anc",	AJA_NULL    				},
-			{"frameData",	'y',	POPT_ARG_NONE,		&doFrameData,	0,	"show per-frame stats",		AJA_NULL    				},
-			{"channel",		'c',	POPT_ARG_INT,		&channelNumber,	0,	"channel to use",			"1-8"						},
-            {"multiFormat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"use multi-format/channel",	AJA_NULL					},
-            POPT_AUTOHELP
-            POPT_TABLEEND
-        };
-        CNTV2DemoCommon::Popt popt(argc, argv, optionsTable);
+	const CNTV2DemoCommon::PoptOpts optionsTable [] =
+	{
+		{"version",		  0,	POPT_ARG_NONE,		&showVersion,	0,	"show version",				AJA_NULL					},
+		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"device to use",			"index#, serial#, or model"	},
+		{"channel",		'c',	POPT_ARG_INT,		&channelNumber,	0,	"channel to use",			"1-8"						},
+		{"multiFormat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"use multi-format/channel",	AJA_NULL					},
+		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",		"'?' or 'list' to list"		},
+		{"frames",		0,		POPT_ARG_STRING,	&pFramesSpec,	0,	"frames to AutoCirculate",	"num[@min] or min-max"		},
+		{"input",		'i',	POPT_ARG_STRING,	&pInputSrcSpec,	0,	"which HDMI input",			"?=list"					},
+		{"anc",			'a',	POPT_ARG_NONE,		&doRecordAnc,	0,	"record all aux to file",	AJA_NULL					},
+		{"audio",		'f',	POPT_ARG_NONE,		&doRecordAudio,	0,	"record aux audio only to file",	AJA_NULL			},
+		{"dolby",		'g',	POPT_ARG_NONE,		&doRecordDolby,	0,	"record dolby to file",		AJA_NULL					},
+		{"audioFilter",	'x',	POPT_ARG_NONE,		&doAudioFilter,	0,	"only capture audio anc",	AJA_NULL					},
+		{"frameData",	'y',	POPT_ARG_NONE,		&doFrameData,	0,	"show per-frame dolby stats",		AJA_NULL			},
+
+		POPT_AUTOHELP
+		POPT_TABLEEND
+	};
+
+	CNTV2DemoCommon::Popt popt(argc, argv, optionsTable);
 	if (!popt)
 		{cerr << "## ERROR: " << popt.errorStr() << endl;  return 2;}
-
-	const string	deviceSpec		(pDeviceSpec   ? pDeviceSpec : "0");
-	const string	inputSourceStr	(pInputSrcSpec ? CNTV2DemoCommon::ToLower(string(pInputSrcSpec)) : "");
-	const string	pixelFormatStr	(pPixelFormat  ? pPixelFormat :  "");
-	const string	framesSpec		(pFramesSpec   ? pFramesSpec  :  "");
-    string			recordAncFile	("disabled");
-	string			recordAudioFile	("disabled");
-	string			recordDolbyFile	("disabled");
+	if (showVersion)
+		{cout << argv[0] << ", NTV2 SDK " << ::NTV2Version() << endl;  return 0;}
 
 	//	Device
-	const string	legalDevices(CNTV2DemoCommon::GetDeviceStrings());
-	if (deviceSpec == "?" || deviceSpec == "list")
-		{cout << legalDevices << endl;  return 0;}
+	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "0");
 	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
-		{cout << "## ERROR:  No such device '" << deviceSpec << "'" << endl << legalDevices;  return 1;}
+		return 1;
 
-        DolbyConfig config(deviceSpec);
+	DolbyCaptureConfig config(deviceSpec);
 
 	//	Channel
 	if ((channelNumber < 1)  ||  (channelNumber > 8))
@@ -95,7 +82,8 @@ int main (int argc, const char ** argv)
 	config.fInputChannel = NTV2Channel(channelNumber - 1);
 
 	//	Input source
-    const string legalSources(CNTV2DemoCommon::GetInputSourceStrings(NTV2_IOKINDS_HDMI, deviceSpec));
+	const string legalSources (CNTV2DemoCommon::GetInputSourceStrings(NTV2_IOKINDS_HDMI, deviceSpec));
+	const string inputSourceStr	(pInputSrcSpec ? CNTV2DemoCommon::ToLower(string(pInputSrcSpec)) : "");
 	if (inputSourceStr == "?" || inputSourceStr == "list")
 		{cout << legalSources << endl;  return 0;}
 	if (!inputSourceStr.empty())
@@ -104,12 +92,12 @@ int main (int argc, const char ** argv)
 		if (!NTV2_IS_VALID_INPUT_SOURCE(config.fInputSource))
 			{cerr << "## ERROR:  Input source '" << inputSourceStr << "' not one of:" << endl << legalSources << endl;	return 1;}
 	}	//	if input source specified
-
 	//	Pixel Format
-	const NTV2PixelFormat	pixelFormat		(pixelFormatStr.empty() ? NTV2_FBF_8BIT_YCBCR : CNTV2DemoCommon::GetPixelFormatFromString(pixelFormatStr));
+	const string pixelFormatStr	(pPixelFormat  ? pPixelFormat :  "");
+	config.fPixelFormat = pixelFormatStr.empty() ? NTV2_FBF_8BIT_YCBCR : CNTV2DemoCommon::GetPixelFormatFromString(pixelFormatStr);
 	if (pixelFormatStr == "?"  ||  pixelFormatStr == "list")
 		{cout << CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 0;}
-	else if (!pixelFormatStr.empty()  &&  !NTV2_IS_VALID_FRAME_BUFFER_FORMAT(pixelFormat))
+	else if (!pixelFormatStr.empty()  &&  !NTV2_IS_VALID_FRAME_BUFFER_FORMAT(config.fPixelFormat))
 	{
 		cerr	<< "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl
 				<< CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec) << endl;
@@ -118,6 +106,7 @@ int main (int argc, const char ** argv)
 
 	//	AutoCirculate Frames
 	static const string	legalFramesSpec("{frameCount}[@{firstFrameNum}]  or  {firstFrameNum}-{lastFrameNum}");
+	const string framesSpec (pFramesSpec ? pFramesSpec : "");
 	if (!framesSpec.empty())
 	{
 		const string parseResult(config.fFrames.setFromString(framesSpec));
@@ -127,9 +116,13 @@ int main (int argc, const char ** argv)
 	if (!config.fFrames.valid())
 		{cerr << "## ERROR:  Bad 'frames' spec '" << framesSpec << "'\n## Expected " << legalFramesSpec << endl;  return 1;}
 
+	string			recordAncFile	("disabled");
+	string			recordAudioFile	("disabled");
+	string			recordDolbyFile	("disabled");
+
 	//	Anc Capture
-    if (doRecordAnc)
-	{	//	User specified an empty filePath -- invent a file name...
+	if (doRecordAnc)
+	{	// invent a file name...
 		ostringstream fileName;  fileName << "ntv2dolbycapture-" << deviceSpec << "-"
 				<< ::NTV2ChannelToString(config.fInputChannel,true) << "-" << AJAProcess::GetPid() << ".anc";
 		recordAncFile = fileName.str();
@@ -137,33 +130,35 @@ int main (int argc, const char ** argv)
 
 	//	Audio Capture
 	if (doRecordAudio)
-	{	//	User specified an empty filePath -- invent a file name...
+	{	// invent a file name...
 		ostringstream fileName;  fileName << "ntv2dolbycapture-" << deviceSpec << "-"
 				<< ::NTV2ChannelToString(config.fInputChannel,true) << "-" << AJAProcess::GetPid() << ".raw";
 		recordAudioFile = fileName.str();
 	}
 
 	//	Dolby Capture
-    if (doRecordDolby)
-    {	//	User specified an empty filePath -- invent a file name...
-        ostringstream fileName;  fileName << "ntv2dolbycapture-" << deviceSpec << "-"
+	if (doRecordDolby)
+	{	// invent a file name...
+		ostringstream fileName;  fileName << "ntv2dolbycapture-" << deviceSpec << "-"
 				<< ::NTV2ChannelToString(config.fInputChannel,true) << "-" << AJAProcess::GetPid() << ".ec3";
-        recordDolbyFile = fileName.str();
-    }
+		recordDolbyFile = fileName.str();
+	}
 
-    //	Instantiate the ntv2dolbycapture object, using the specified AJA device...
-    config.fDeviceSpec          = deviceSpec;
-    config.fPixelFormat         = pixelFormat;
-    config.fAncDataFilePath     = recordAncFile;
+	config.fAncDataFilePath     = recordAncFile;
 	config.fAudioDataFilePath   = recordAudioFile;
 	config.fDolbyDataFilePath	= recordDolbyFile;
 	config.fDoAudioFilter       = doAudioFilter ? true : false;
 	config.fDoFrameData			= doFrameData ? true : false;
 	config.fDoMultiFormat       = doMultiFormat ? true : false;
-    config.fWithAnc             = doRecordAnc ? true : false;
+	config.fWithAnc             = doRecordAnc ? true : false;
 	config.fWithAudio           = doRecordAudio ? true : false;
 	config.fWithDolby           = doRecordDolby ? true : false;
-	//cerr << "Specified Configuration:" << endl << config << endl;
+
+	//	Instantiate and initialize the ntv2dolbycapture object
+	NTV2DolbyCapture	capturer(config);
+	status = capturer.Init();
+	if (AJA_FAILURE(status))
+		{cout << "## ERROR:  Initialization failed: " << ::AJAStatusToString(status) << endl;	return 1;}
 
 	::signal (SIGINT, SignalHandler);
 	#if defined (AJAMac)
@@ -171,22 +166,14 @@ int main (int argc, const char ** argv)
 		::signal (SIGQUIT, SignalHandler);
 	#endif
 
-	NTV2DolbyCapture	capturer(config);
-
-	//	Initialize the ntv2dolbycapture instance...
-	status = capturer.Init();
-	if (AJA_FAILURE(status))
-		{cout << "## ERROR:  Capture initialization failed with status " << status << endl;	return 1;}
-
 	//	Run the capturer...
 	capturer.Run();
 
-	cout	<< "           Capture  Capture" << endl
-			<< "   Frames   Frames   Buffer" << endl
-			<< "Processed  Dropped    Level" << endl;
-	//	Poll its status until stopped...
+	cout	<< "   Frames   Frames   Buffer" << endl
+			<< " Captured  Dropped    Level" << endl;
 	do
 	{
+	//	Poll its status until stopped...
 		ULWord	framesProcessed, framesDropped, bufferLevel;
 		capturer.GetACStatus (framesProcessed, framesDropped, bufferLevel);
 		cout << setw(9) << framesProcessed << setw(9) << framesDropped << setw(9) << bufferLevel << "\r" << flush;
@@ -194,7 +181,6 @@ int main (int argc, const char ** argv)
 	} while (!gGlobalQuit);	//	loop til quit time
 
 	cout << endl;
-
-	return AJA_SUCCESS(status) ? 0 : 1;
+	return 0;
 
 }	//	main

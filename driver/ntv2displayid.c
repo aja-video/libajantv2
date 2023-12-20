@@ -223,8 +223,13 @@ void ntv2_displayid_clear(struct ntv2_displayid* ntv2_did)
 {
 	if (ntv2_did == NULL) return;
 
+#ifdef AJAMacDext
+	bzero((void*)&ntv2_did->video, sizeof(struct ntv2_displayid_video));
+	bzero((void*)&ntv2_did->audio, sizeof(struct ntv2_displayid_audio));
+#else
 	memset(&ntv2_did->video, 0, sizeof(struct ntv2_displayid_video));
 	memset(&ntv2_did->audio, 0, sizeof(struct ntv2_displayid_audio));
+#endif
 }
 
 bool ntv2_displayid_update(struct ntv2_displayid* ntv2_did)

@@ -1,12 +1,13 @@
 project(ntv2streampreview)
 
-if (NOT AJA_QT_ENABLED)
-	message(STATUS "AJA_QT_ENABLED not set. Ignoring project ${PROJECT_NAME}...")
-    return()
-endif()
-
 include(QtHelpers)
 aja_find_qt_modules(Core Multimedia Widgets)
+if (NOT AJA_QT_FOUND)
+    message(WARNING "One or more Qt modules not found!")
+    return()
+else()
+    list(APPEND TARGET_LINK_LIBS ${TARGET_QT_LIBS})
+endif()
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -46,12 +47,12 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         ${PROJECT_NAME}
         app.ico
         "ntv2streampreview.exe"
-        ${CMAKE_MODULE_PATH}/bundle/windows/win-ver.rc.in
+		${LIBAJANTV2_CMAKE_DIR}/bundle/windows/win-ver.rc.in
         win-ver.rc)
     list(APPEND NTV2STREAMPREVIEW_SOURCES
         win-ver.rc)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(TARGET_LINK_LIBS dl pthread rt)
+	list(APPEND TARGET_LINK_LIBS dl pthread rt)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(CMAKE_MACOSX_BUNDLE ON)
     set(NTV2STREAMPREVIEW_SOURCES ${NTV2STREAMPREVIEW_SOURCES} app.icns)
@@ -59,16 +60,14 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_library(APPLICATION_SERVICES_FRAMEWORK ApplicationServices)
     find_library(IOKIT_FRAMEWORK IoKit)
 
-    set(TARGET_LINK_LIBS
+    list(APPEND TARGET_LINK_LIBS
         ${APPLICATION_SERVICES_FRAMEWORK}
         ${IOKIT_FRAMEWORK})
 endif()
 
-set(TARGET_SOURCES
-	${NTV2STREAMPREVIEW_SOURCES})
+set(TARGET_SOURCES ${NTV2STREAMPREVIEW_SOURCES})
 set(TARGET_DEPS ajantv2)
-set(TARGET_LINK_LIBS ${TARGET_LINK_LIBS}
-    ajantv2 ${TARGET_QT_LIBS})
+list(APPEND TARGET_LINK_LIBS ajantv2)
 
 add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
 add_dependencies(${PROJECT_NAME} ${TARGET_DEPS})

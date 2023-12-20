@@ -8,6 +8,7 @@
 #include "ntv2serialcontrol.h"
 #include "ntv2devicescanner.h"
 #include "ntv2devicefeatures.h"
+#include <ajabase/system/systemtime.h>
 #include <assert.h>
 
 
@@ -293,11 +294,7 @@ bool CNTV2SerialControl::WriteCommand (const UByte * txBuffer, bool response)
 			if (val & BIT_4)
 			{
 				//	Wait for all the data...
-				#if defined(AJAWindows) || defined(MSWindows)
-					::Sleep (NTV2_SERIAL_RESPONSE_SIZE);
-				#else
-					usleep (NTV2_SERIAL_RESPONSE_SIZE * 1000);
-				#endif
+				AJATime::Sleep(NTV2_SERIAL_RESPONSE_SIZE);
 				break;
 			}
 		}

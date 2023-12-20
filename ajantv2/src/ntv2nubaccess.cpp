@@ -26,6 +26,9 @@
 #elif defined(MSWindows)
 	#define	DLL_EXTENSION	".dll"
 	#define	FIRMWARE_FOLDER	"Firmware\\"
+#elif defined(AJABareMetal)
+	#define	DLL_EXTENSION	".dll"
+	#define	FIRMWARE_FOLDER	"Firmware\\"
 #endif
 
 using namespace std;
@@ -1024,6 +1027,10 @@ static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, con
 	HMODULE pHandle = ::LoadLibraryExA(LPCSTR(pluginPath.c_str()), AJA_NULL, LOAD_LIBRARY_SEARCH_USER_DIRS);
 	if (!pHandle)
 		err << "Unable to open '" << pluginPath << "' in '" << dllsFolder << "': " << WinErrStr(::GetLastError());
+	#elif defined(AJABareMetal)
+	// TODO
+	void *pHandle = AJA_NULL;
+	uint64_t *pFunc = AJA_NULL;
 	#else	//	MacOS or Linux
 	//	Open the .dylib (MacOS) or .so (Linux)...
 	void* pHandle = ::dlopen(pluginPath.c_str(), RTLD_LAZY);
@@ -1042,6 +1049,8 @@ static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, con
 	uint64_t * pFunc = reinterpret_cast<uint64_t*>(::GetProcAddress(pHandle, inFuncName.c_str()));
 	if (!pFunc)
 		err << "'GetProcAddress' failed for '" << inFuncName << "' in '" << pluginPath << "': " << WinErrStr(::GetLastError());
+	#elif defined(AJABareMetal)
+	// TODO
 	#else	//	MacOS or Linux
 	uint64_t * pFunc = reinterpret_cast<uint64_t*>(::dlsym(pHandle, inFuncName.c_str()));
 	if (!pFunc)
@@ -1053,7 +1062,9 @@ static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, con
 	if (!pFunc)
 	{
 		NBCFAIL(err.str());
-		#if !defined(MSWindows)
+		#if defined(AJABareMetal)
+		// TODO
+		#elif !defined(MSWindows)
 		::dlclose(pHandle);
 		#else	//	MSWindows
 		::FreeLibrary(pHandle);

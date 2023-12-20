@@ -51,6 +51,9 @@ AJAUDPSocket::~AJAUDPSocket(void)
 AJAStatus
 AJAUDPSocket::Open(const string& ipAddress, uint16_t port)
 {
+#if defined(AJA_BAREMETAL)
+	return (AJA_STATUS_FAIL);
+#else
 	if ((true == IsInstantiated()) && (-1 == mSocket))
 	{
 		if (-1 != (mSocket = (int) socket(AF_INET, SOCK_DGRAM, 0)))
@@ -101,6 +104,7 @@ AJAUDPSocket::Open(const string& ipAddress, uint16_t port)
 		}
 	}
 	return AJA_STATUS_FAIL;
+#endif
 }
 
 
@@ -114,6 +118,9 @@ AJAUDPSocket::Poll(
 				struct sockaddr_in& client,
 				int					timeout)
 {
+#if defined(AJA_BAREMETAL)
+	return 0;
+#else
 	int retVal = 0;
 
 	if (-1 != mSocket)
@@ -174,6 +181,7 @@ AJAUDPSocket::Poll(
 #endif
 	}
 	return uint32_t(retVal);
+#endif
 }
 
 
@@ -183,6 +191,9 @@ AJAUDPSocket::Poll(
 uint32_t
 AJAUDPSocket::Read(uint8_t* pData, uint32_t dataLength, struct sockaddr_in& client)
 {
+#if defined(AJA_BAREMETAL)
+	return 0;
+#else
 	socklen_t socketLength = sizeof(struct sockaddr_in);
 	int		  bytesReceived = 0;
 
@@ -214,6 +225,7 @@ AJAUDPSocket::Read(uint8_t* pData, uint32_t dataLength, struct sockaddr_in& clie
 		}
 	}
 	return uint32_t(bytesReceived);
+#endif
 }
 
 
@@ -226,6 +238,9 @@ AJAUDPSocket::Write(
 					uint32_t			dataLength,
 					struct sockaddr_in& targetAddress)
 {
+#if defined(AJA_BAREMETAL)
+	return 0;
+#else
 	int bytesSent = 0;
 
 	if (-1 != mSocket)
@@ -247,4 +262,5 @@ AJAUDPSocket::Write(
 		}
 	}
 	return uint32_t(bytesSent);
+#endif
 }

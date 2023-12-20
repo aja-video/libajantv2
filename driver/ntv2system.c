@@ -1173,15 +1173,18 @@ Ntv2Status ntv2WritePciConfig(Ntv2SystemContext* pSysCon, void* pData, int32_t o
 #elif defined (AJAMac)
 
 // Mac spinlock functions
-
 bool ntv2SpinLockOpen(Ntv2SpinLock* pSpinLock, Ntv2SystemContext* pSysCon)
 {
 	if((pSpinLock == NULL) ||
 	   (pSysCon == NULL)) return false;
 	
+#if defined(AJAMacDext)
+	atomic_flag_clear(pSpinLock->lock);
+#else
 	memset(pSpinLock, 0, sizeof(Ntv2SpinLock));
 	pSpinLock->lock = IOSimpleLockAlloc();
 	IOSimpleLockInit(pSpinLock->lock);
+#endif
 
 	return true;
 }
@@ -1190,7 +1193,11 @@ void ntv2SpinLockClose(Ntv2SpinLock* pSpinLock)
 {
 	if(pSpinLock == NULL) return;
 	
+#if defined(AJAMacDext)
+	atomic_flag_clear(pSpinLock->lock);
+#else
 	IOSimpleLockFree(pSpinLock->lock);
+#endif
 	memset(pSpinLock, 0, sizeof(Ntv2SpinLock));
 }
 
@@ -1198,14 +1205,22 @@ void ntv2SpinLockAcquire(Ntv2SpinLock* pSpinLock)
 {
 	if(pSpinLock == NULL) return;
 	
+#if defined(AJAMacDext)
+	while(atomic_flag_test_and_set(pSpinLock->lock)) {;}
+#else
 	IOSimpleLockLock(pSpinLock->lock);
+#endif
 }
 
 void ntv2SpinLockRelease(Ntv2SpinLock* pSpinLock)
 {
 	if(pSpinLock == NULL) return;
 	
+#if defined(AJAMacDext)
+	atomic_flag_clear(pSpinLock->lock);
+#else
 	IOSimpleLockUnlock(pSpinLock->lock);
+#endif
 }
 
 bool ntv2InterruptLockOpen(Ntv2InterruptLock* pInterruptLock, Ntv2SystemContext* pSysCon)
@@ -1292,7 +1307,12 @@ void ntv2EventSignal(Ntv2Event* pEvent)
 	if(pEventMac == NULL) return;
 	
 	pEventMac->flag = true;
+	
+#if defined(AJAMacDext)
+	//I do not see a replacement for this in DriverKit
+#else
 	IORecursiveLockWakeup(pEventMac->pRecursiveLock, pEventMac->pRecursiveLock, false);
+#endif
 }
 
 void ntv2EventClear(Ntv2Event* pEvent)
@@ -1316,6 +1336,7 @@ bool ntv2EventWaitForSignal(Ntv2Event* pEvent, int64_t timeout, bool alert)
 	// if flag is true, event has been "signaled", returns immediately until it is cleared
 	if(pEventMac->flag) return true;
 
+#ifdef NEEDS_TO_BE_REVISITED
 	// Get the current time
 	clock_get_uptime(&currentTime);
 	nanoseconds_to_absolutetime(timeout*1000, &timeoutNanos);
@@ -1333,6 +1354,7 @@ bool ntv2EventWaitForSignal(Ntv2Event* pEvent, int64_t timeout, bool alert)
 	
 	// non zero value indicates failure or timeout
 	if (result) return false;
+#endif
 	
 	return true;
 }
@@ -1394,7 +1416,11 @@ bool ntv2ThreadRun(Ntv2Thread* pThread, Ntv2ThreadTask* pTask, void* pContext)
 	pThread->pContext = pContext;
 	pThread->run = true;
 	
+#ifdef NEEDS_TO_BE_REVISITED
 	result = kernel_thread_start((thread_continue_t)pThread->pFunc, (void*)pContext, &pThread->pTask);
+#else
+	result = kIOReturnUnsupported;
+#endif
 	if (result != KERN_SUCCESS)
 	{
 		pThread->pTask = NULL;
@@ -1403,7 +1429,7 @@ bool ntv2ThreadRun(Ntv2Thread* pThread, Ntv2ThreadTask* pTask, void* pContext)
 		pThread->run = false;
 		return false;
 	}
-
+	
 	return true;
 }
 
@@ -1425,8 +1451,8 @@ void ntv2ThreadStop(Ntv2Thread* pThread)
 		timeOutMs -= 10;
 	}
 	
-	if (timeOutMs <= 0 && pThread->pTask != NULL)
-		DebugLog("ntv2ThreadStop - fail to exit thread\n");
+	//if (timeOutMs <= 0 && pThread->pTask != NULL)
+		//DebugLog("ntv2ThreadStop - fail to exit thread\n");
     
 	return;
 }
@@ -1449,7 +1475,9 @@ void ntv2ThreadExit(Ntv2Thread* pThread)
 	pThread->pContext = NULL;
 	
 	// no code is executed after this line
+#ifdef NEEDS_TO_BE_REVISITED
 	(void) thread_terminate(current_thread());
+#endif
 }
 extern Ntv2Status ntv2ReadPCIConfigCon(Ntv2SystemContext* pSysCon, void* pData, int32_t offset, int32_t size);
 extern Ntv2Status ntv2WritePCIConfigCon(Ntv2SystemContext* pSysCon, void* pData, int32_t offset, int32_t size);
@@ -1462,6 +1490,80 @@ Ntv2Status ntv2ReadPciConfig(Ntv2SystemContext* pSysCon, void* pData, int32_t of
 Ntv2Status ntv2WritePciConfig(Ntv2SystemContext* pSysCon, void* pData, int32_t offset, int32_t size)
 {
 	return ntv2WritePCIConfigCon(pSysCon, pData, offset, size);
+}
+
+int64_t ntv2Time100ns(void)
+{
+	uint64_t nanoTime = 0;
+	mach_timebase_info_data_t timebaseInfo;
+	uint64_t machTime = mach_absolute_time();
+#if defined(AJAMacDext)
+	mach_timebase_info(&timebaseInfo);
+#else
+	//mach_timebase_info(&timebaseInfo);
+#endif
+	nanoTime = machTime * timebaseInfo.numer / timebaseInfo.denom;
+	return nanoTime;
+}
+
+bool ntv2UserBufferPrepare(Ntv2UserBuffer* pUserBuffer, Ntv2SystemContext* pSysCon,
+						   uint64_t address, uint32_t size, bool write)
+{
+	if((pUserBuffer == NULL) ||
+	   (pSysCon == NULL) ||
+	   (address == 0) ||
+	   (size == 0)) return false;
+
+	bzero((void*)pUserBuffer, sizeof(Ntv2UserBuffer));
+
+	pUserBuffer->pAddress = (void*)((uintptr_t)(address));
+	pUserBuffer->size = size;
+	pUserBuffer->write = write;
+
+	return true;
+}
+
+void ntv2UserBufferRelease(Ntv2UserBuffer* pUserBuffer)
+{
+	if(pUserBuffer == NULL) return;
+
+	memset(pUserBuffer, 0, sizeof(Ntv2UserBuffer));
+}
+
+bool ntv2UserBufferCopyTo(Ntv2UserBuffer* pDstBuffer, uint32_t dstOffset, void* pSrcAddress, uint32_t size)
+{
+	uint8_t* pDst;
+
+	if((pDstBuffer == NULL) ||
+	   (pSrcAddress == NULL) ||
+	   (size == 0)) return false;
+
+	if(!pDstBuffer->write) return false;
+
+	if((dstOffset+size) > pDstBuffer->size) return false;
+
+	pDst = (uint8_t*)pDstBuffer->pAddress;
+
+	memcpy(pDst+dstOffset, pSrcAddress, size);
+
+	return true;
+}
+
+bool ntv2UserBufferCopyFrom(Ntv2UserBuffer* pSrcBuffer, uint32_t srcOffset, void* pDstAddress, uint32_t size)
+{
+	uint8_t* pSrc;
+
+	if((pSrcBuffer == NULL) ||
+	   (pDstAddress == NULL) ||
+	   (size == 0)) return false;
+
+	if((srcOffset+size) > pSrcBuffer->size) return false;
+
+	pSrc = (uint8_t*)pSrcBuffer->pAddress;
+
+	memcpy(pDstAddress, pSrc+srcOffset, size);
+
+	return true;
 }
 
 #elif defined (AJALinux)

@@ -34,7 +34,6 @@ int main (int argc, const char ** argv)
 	int				channelNumber	(1);			//	Channel/FrameStore to use
 	int				doMultiFormat	(0);			//	MultiFormat mode?
 	int				showVersion		(0);			//	Show version?
-	int				hdrType			(0);			//	Transmit HDR anc?
 	int				numAudioLinks	(1);			//	Number of audio systems for multi-link audio
 	int				useHDMIOut		(0);			//	Enable HDMI output?
 	int				doRGBOnWire		(0);			//	Route the output to put RGB on the wire
@@ -52,7 +51,6 @@ int main (int argc, const char ** argv)
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",		"'?' or 'list' to list"		},
 		{"frames",		  0,	POPT_ARG_STRING,	&pFramesSpec,	0,	"frames to AutoCirculate",	"num[@min] or min-max"		},
 		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,	0,	"video format to produce",	"'?' or 'list' to list"		},
-		{"hdrType",		't',	POPT_ARG_INT,		&hdrType,		0,	"HDR pkt to send",			"0=none 1=SDR 2=HDR10 3=HLG"},
 		{"audioLinks",	'a',	POPT_ARG_INT,		&numAudioLinks,	0,	"# audio systems to link",	"1-4  0=silence"			},
 		{"hdmi",		'h',	POPT_ARG_NONE,		&useHDMIOut,	0,	"enable HDMI output?",		AJA_NULL					},
 		{"rgb",			'r',	POPT_ARG_NONE,		&doRGBOnWire,	0,	"RGB on SDI?",				AJA_NULL					},
@@ -115,18 +113,13 @@ int main (int argc, const char ** argv)
 	if (!config.fFrames.valid())
 		{cerr << "## ERROR:  Bad 'frames' spec '" << framesSpec << "'\n## Expected " << legalFramesSpec << endl;  return 1;}
 
-	//	Anc Playback & HDRType
-	config.fTransmitHDRType	= hdrType == 1	? AJAAncDataType_HDR_SDR
-											: (hdrType == 2	? AJAAncDataType_HDR_HDR10
-															: (hdrType == 3	? AJAAncDataType_HDR_HLG
-																			: AJAAncDataType_Unknown));
-
-	config.fDoMultiFormat		= doMultiFormat	? true	: false;			//	Multiformat mode?
-	config.fDoHDMIOutput		= useHDMIOut	? true	: false;
-	config.fDoTsiRouting		= doSquares		? false	: true;
-	config.fDoRGBOnWire			= doRGBOnWire	? true	: false;
-	config.fDoLinkGrouping		= doLinkGrping	? true	: false;
-	config.fNumAudioLinks		= UWord(numAudioLinks);
+	//	Anc Playback
+	config.fDoMultiFormat	= doMultiFormat	? true	: false;	//	Multiformat mode?
+	config.fDoHDMIOutput	= useHDMIOut	? true	: false;
+	config.fDoTsiRouting	= doSquares		? false	: true;
+	config.fDoRGBOnWire		= doRGBOnWire	? true	: false;
+	config.fDoLinkGrouping	= doLinkGrping	? true	: false;
+	config.fNumAudioLinks	= UWord(numAudioLinks);
 
 	//	Instantiate and initialize the NTV2Player4K object...
 	NTV2Player4K player(config);

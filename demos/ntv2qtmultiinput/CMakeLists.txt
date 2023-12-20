@@ -49,12 +49,12 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         ${PROJECT_NAME}
         app.ico
         "ntv2qtmultiinput.exe"
-        ${CMAKE_MODULE_PATH}/bundle/windows/win-ver.rc.in
+		${LIBAJANTV2_CMAKE_DIR}/bundle/windows/win-ver.rc.in
         win-ver.rc)
     list(APPEND NTV2QTMULTIINPUT_SOURCES
         win-ver.rc)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(TARGET_LINK_LIBS dl pthread rt)
+	list(APPEND TARGET_LINK_LIBS dl pthread rt)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(CMAKE_MACOSX_BUNDLE ON)
     set(NTV2QTMULTIINPUT_SOURCES ${NTV2QTMULTIINPUT_SOURCES} app.icns)
@@ -62,16 +62,14 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_library(APPLICATION_SERVICES_FRAMEWORK ApplicationServices)
     find_library(IOKIT_FRAMEWORK IoKit)
 
-    set(TARGET_LINK_LIBS
+    list(APPEND TARGET_LINK_LIBS
         ${APPLICATION_SERVICES_FRAMEWORK}
         ${IOKIT_FRAMEWORK})
 endif()
 
-set(TARGET_SOURCES
-	${NTV2QTMULTIINPUT_SOURCES})
+set(TARGET_SOURCES ${NTV2QTMULTIINPUT_SOURCES})
 set(TARGET_DEPS ajagui ajantv2)
-set(TARGET_LINK_LIBS ${TARGET_LINK_LIBS}
-    ajantv2 ajagui ${TARGET_QT_LIBS})
+list(APPEND TARGET_LINK_LIBS ajantv2 ajagui)
 
 add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
 add_dependencies(${PROJECT_NAME} ${TARGET_DEPS})
@@ -101,7 +99,7 @@ endif()
 if (AJA_QT_DEPLOY)
     aja_deploy_qt_libs_to_dest(ntv2qtmultiinput ${CMAKE_INSTALL_FULL_BINDIR})
 endif()
-install(TARGETS ${BUILD_TARGETS}
+install(TARGETS ${PROJECT_NAME}
     BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

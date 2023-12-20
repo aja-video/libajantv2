@@ -24,8 +24,8 @@
 
 typedef struct {
 	NTV2ColorCorrectionMode		mode;
-	uint32_t		saturationValue;    /// only used in 3way color correction mode
-	uint32_t		ccLookupTables[NTV2_COLORCORRECTOR_TABLESIZE/4]; /// R,G,B lookup tables formated for hardware
+	uint32_t					saturationValue;    /// only used in 3way color correction mode
+	uint32_t					ccLookupTables[NTV2_COLORCORRECTOR_TABLESIZE/4]; /// R,G,B lookup tables formated for hardware
 } INTERNAL_COLOR_CORRECTION_STRUCT;
 
 typedef struct {
@@ -72,7 +72,7 @@ typedef struct {
 	INTERNAL_COLOR_CORRECTION_STRUCT	colorCorrectionInfo;
 	AutoCircVidProcInfo					vidProcInfo;
 	CUSTOM_ANC_STRUCT					customAncInfo;
-	NTV2RoutingTable					xena2RoutingTable;
+	NTV2RoutingTable					routingTable;
 	INTERNAL_TIMECODE_STRUCT			internalTCArray;
 	INTERNAL_SDI_STATUS_STRUCT			internalSDIStatusArray;
 	// Anc frame info
@@ -151,69 +151,67 @@ typedef struct ntv2autocirc
 	bool				bMultiChannel;
 } NTV2AutoCirc;
 
-Ntv2Status AutoCirculateControl(NTV2AutoCirc* pAutoCirc, AUTOCIRCULATE_DATA* psControl);
-Ntv2Status AutoCirculateInit(NTV2AutoCirc* pAutoCirc,
-							 NTV2Crosspoint lChannelSpec, int32_t lStartFrameNum,
-							 int32_t lEndFrameNum, NTV2AudioSystem lAudioSystem,
-							 int32_t lChannelCount, bool bWithAudio,
-							 bool bWithRP188, bool bFbfChange,
-							 bool bFboChange , bool bWithColorCorrection,
-							 bool bWithVidProc, bool bWithCustomAncData, 
-							 bool bWithLTC, bool bWithFields,
-							 bool bWithHDMIAux);
-Ntv2Status AutoCirculateStart(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int64_t startTime);
-Ntv2Status AutoCirculateStop(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec);
-Ntv2Status AutoCirculateAbort(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec);
-Ntv2Status AutoCirculatePause(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, bool bPlay, bool bClearDF);
-Ntv2Status AutoCirculateFlush(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, bool bClearDF);
-Ntv2Status AutoCirculatePreroll(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t lPrerollFrames);
-Ntv2Status AutoCirculateSetActiveFrame(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t lActiveFrame);
-void AutoCirculateReset(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec);
-Ntv2Status AutoCirculateGetStatus(NTV2AutoCirc* pAutoCirc, AUTOCIRCULATE_STATUS* pUserOutBuffer);
-Ntv2Status AutoCirculateGetFrameStamp(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t ulFrameNum,
+Ntv2Status AutoCircControl(NTV2AutoCirc* pAutoCirc, AUTOCIRCULATE_DATA_64* psControl);
+Ntv2Status AutoCircInit(NTV2AutoCirc* pAutoCirc,
+						 NTV2Crosspoint lChannelSpec, int32_t lStartFrameNum,
+						 int32_t lEndFrameNum, NTV2AudioSystem lAudioSystem,
+						 int32_t lChannelCount, bool bWithAudio,
+						 bool bWithRP188, bool bFbfChange,
+						 bool bFboChange , bool bWithColorCorrection,
+						 bool bWithVidProc, bool bWithCustomAncData,
+						 bool bWithLTC, bool bWithFields,
+						 bool bWithHDMIAux);
+Ntv2Status AutoCircStart(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int64_t startTime);
+Ntv2Status AutoCircStop(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec);
+Ntv2Status AutoCircAbort(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec);
+Ntv2Status AutoCircPause(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, bool bPlay, bool bClearDF);
+Ntv2Status AutoCircFlush(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, bool bClearDF);
+Ntv2Status AutoCircPreroll(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t lPrerollFrames);
+Ntv2Status AutoCircSetActiveFrame(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t lActiveFrame);
+void AutoCircReset(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec);
+Ntv2Status AutoCircGetStatus(NTV2AutoCirc* pAutoCirc, AUTOCIRCULATE_STATUS* pUserOutBuffer);
+Ntv2Status AutoCircGetFrameStamp(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t ulFrameNum,
 									  FRAME_STAMP_STRUCT *pFrameStamp);
-Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
+Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 								 AUTOCIRCULATE_TRANSFER* pTransferStruct);
-Ntv2Status AutoCirclateAudioPlaybackMode(NTV2AutoCirc* pAutoCirc,
-										 NTV2AudioSystem audioSystem,
-										 NTV2_GlobalAudioPlaybackMode mode);
-uint32_t AutoCirculateGetBufferLevel(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto);
-bool AutoCirculateFindNextAvailFrame(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto);
-void AutoBeginAutoCirculateTransfer(uint32_t frameNumber,
-									AUTOCIRCULATE_TRANSFER *pTransferStruct,
-									INTERNAL_AUTOCIRCULATE_STRUCT *pAuto);
-void AutoCompleteAutoCirculateTransfer(uint32_t frameNumber, AUTOCIRCULATE_TRANSFER_STATUS *pUserOutBuffer,
-									   INTERNAL_AUTOCIRCULATE_STRUCT *pAuto,
-									   bool updateValid, bool transferPending);
-void AutoCirculateMessage(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, uint32_t frameNumber);
-void AutoCirculateTransferFields(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto, 
-								 AUTOCIRCULATE_TRANSFER* pTransfer, 
-								 uint32_t frameNumber, bool drop);
+Ntv2Status AutoCircAudioPlaybackMode(NTV2AutoCirc* pAutoCirc,
+									 NTV2AudioSystem audioSystem,
+									 NTV2_GlobalAudioPlaybackMode mode);
+uint32_t AutoCircGetBufferLevel(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto);
+bool AutoCircFindNextAvailFrame(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto);
+void BeginAutoCircTransfer(uint32_t frameNumber,
+							AUTOCIRCULATE_TRANSFER *pTransferStruct,
+							INTERNAL_AUTOCIRCULATE_STRUCT *pAuto);
+void CompleteAutoCircTransfer(uint32_t frameNumber, AUTOCIRCULATE_TRANSFER_STATUS *pUserOutBuffer,
+							INTERNAL_AUTOCIRCULATE_STRUCT *pAuto,
+							bool updateValid, bool transferPending);
+void AutoCircTransferFields(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto, 
+							 AUTOCIRCULATE_TRANSFER* pTransfer,
+							 uint32_t frameNumber, bool drop);
 
 bool AutoCirculate(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t isrTimeStamp);
-bool AutoIsAutoCirculateInterrupt(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec);
+bool IsAutoCircInterrupt(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec);
 int32_t KAUTO_NEXTFRAME(int32_t __dwCurFrame_, INTERNAL_AUTOCIRCULATE_STRUCT* __pAuto_);
 int32_t KAUTO_PREVFRAME(int32_t __dwCurFrame_, INTERNAL_AUTOCIRCULATE_STRUCT* __pAuto_);
-void AutoCirculateSetupColorCorrector(NTV2AutoCirc* pAutoCirc,
-									  NTV2Crosspoint channelSpec,
-									  INTERNAL_COLOR_CORRECTION_STRUCT *ccInfo);
-void AutoCirculateSetupXena2Routing(NTV2AutoCirc* pAutoCirc, NTV2RoutingTable* pXena2Routing);
-void AutoCirculateWriteHDMIAux(NTV2AutoCirc* pAutoCirc, uint32_t* pAuxData, uint32_t auxDataSize);
-bool AutoCirculateDmaAudioSetup(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto);
-bool AutoCirculateCanDoFieldMode(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto);
+void AutoCircSetupColorCorrector(NTV2AutoCirc* pAutoCirc,
+								NTV2Crosspoint channelSpec,
+								INTERNAL_COLOR_CORRECTION_STRUCT *ccInfo);
+void AutoCircSetupRouting(NTV2AutoCirc* pAutoCirc, NTV2RoutingTable* pRoutingTable);
+void AutoCircWriteHDMIAux(NTV2AutoCirc* pAutoCirc, uint32_t* pAuxData, uint32_t auxDataSize);
+bool AutoCircDmaAudioSetup(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto);
+bool AutoCircCanDoFieldMode(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto);
 
-bool AutoDropSyncFrame(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec);
-void AutoCirculateSetupVidProc(NTV2AutoCirc* pAutoCirc,
-							   NTV2Crosspoint channelSpec,
-							   AutoCircVidProcInfo* vidProcInfo);
-void AutoCirculateTransferColorCorrectorInfo(NTV2AutoCirc* pAutoCirc,
-											 INTERNAL_COLOR_CORRECTION_STRUCT* ccInternalInfo,
-											 NTV2ColorCorrectionInfo* ccTransferInfo);
-bool AutoCirculateP2PCopy(NTV2AutoCirc* pAutoCirc,
-						  PAUTOCIRCULATE_P2P_STRUCT pDriverBuffer,
-						  PAUTOCIRCULATE_P2P_STRUCT pUserBuffer,
-						  bool bToDriver);
-void AutoCopyFrameStampOldToNew(const FRAME_STAMP_STRUCT * pInOldStruct, FRAME_STAMP * pOutNewStruct);
-bool AutoCirculateFrameStampImmediate(NTV2AutoCirc* pAutoCirc, FRAME_STAMP * pInOutFrameStamp);
+bool AutoCircDropSyncFrame(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec);
+void AutoCircSetupVidProc(NTV2AutoCirc* pAutoCirc,
+						   NTV2Crosspoint channelSpec,
+						   AutoCircVidProcInfo* vidProcInfo);
+void AutoCircTransferColorCorrectorInfo(NTV2AutoCirc* pAutoCirc,
+										 INTERNAL_COLOR_CORRECTION_STRUCT* ccInternalInfo,
+										 NTV2ColorCorrectionInfo* ccTransferInfo);
+bool AutoCircP2PCopy(NTV2AutoCirc* pAutoCirc,
+					  PAUTOCIRCULATE_P2P_STRUCT pDriverBuffer,
+					  PAUTOCIRCULATE_P2P_STRUCT pUserBuffer,
+					  bool bToDriver);
+bool AutoCircFrameStampImmediate(NTV2AutoCirc* pAutoCirc, FRAME_STAMP * pInOutFrameStamp);
 
 #endif

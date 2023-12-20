@@ -28,6 +28,7 @@ static void SignalHandler (int inSignal)
 
 int main (int argc, const char ** argv)
 {
+	int				showVersion		(0);			//	Show version?
 	char *			pDeviceSpec		(AJA_NULL);		//	Device specifier string, if any
 	char *			pPixelFormat	(AJA_NULL);		//	Pixel format argument
 	char *			pFramesSpec		(AJA_NULL);		//	AutoCirculate frames spec
@@ -35,7 +36,6 @@ int main (int argc, const char ** argv)
 	char *			pInputSrcSpec	(AJA_NULL);		//	SDI source spec
 	int				channelNumber	(1);			//	Channel/FrameStore to use
 	int				doMultiFormat	(0);			//	MultiFormat mode?
-	int				showVersion		(0);			//	Show version?
 	int				noAudio			(0);			//	Disable audio capture?
 	int				captureAnc		(0);			//	Capture anc?
 	AJADebug::Open();

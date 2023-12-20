@@ -26,6 +26,8 @@
 	#include <sys/socket.h>
 #elif defined(AJA_WINDOWS)
 	typedef int socklen_t;
+#elif defined(AJA_BAREMETAL)
+  #include "ajabase/network/network.h"
 #endif
 
 /////////////////////////////

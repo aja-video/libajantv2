@@ -204,6 +204,7 @@ void SetColorCorrectionHostAccessBank(Ntv2SystemContext* context, NTV2ColorCorre
 								kRegShiftCC5HostAccessBankSelect);
 		}
 		break;
+		default:	break;
 		}
 	}
 }
@@ -275,6 +276,7 @@ NTV2ColorCorrectionHostAccessBank GetColorCorrectionHostAccessBank(Ntv2SystemCon
 			regValue &= kRegMaskLUT8HostAccessBankSelect;
 			value = (NTV2ColorCorrectionHostAccessBank)((regValue+NTV2_CCHOSTACCESS_CH8BANK0) >>kRegShiftLUT8HostAccessBankSelect);
 			break;
+		default:	break;
 		}
 	}
 	return value;
@@ -530,6 +532,7 @@ void SetLUTV2OutputBank(Ntv2SystemContext* context, NTV2Channel channel, uint32_
 		if(numLUT > 7)
 			ntv2WriteRegisterMS(context, kRegLUTV2Control, bank, kRegMaskLUT8OutputBankSelect, kRegShiftLUT8OutputBankSelect);
 		break;
+	default:	break;
 	}
 }
 

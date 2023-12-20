@@ -12,7 +12,6 @@
 
 # Vars we need to set
 A_ARCH      := $(shell uname -m)
-LINUX_DISTRO  := GENERIC
 AJA_BETA 		  ?= 0
 AJA_DEBUG 		  ?= 0
 AJA_CROSS_COMPILE ?= 0
@@ -84,30 +83,51 @@ export A_LIBCMD
 export A_LIBCMD_SO
 export OBJDIR
 
-# look for the magic file that says we're RedHat and infer RHELness
-ifeq ($(wildcard /etc/redhat-release),/etc/redhat-release)
-  IS_REDHAT := 1
-  RH_REL := $(shell cat /etc/redhat-release)
-  RHEL_REL := $(findstring release 4,$(RH_REL))
-  ifeq (release 4,$(RHEL_REL))
-    LINUX_DISTRO := RHEL4
-  else
-    RHEL_REL := $(findstring release 5,$(RH_REL))
-    ifeq (release 5, $(RHEL_REL))
-      LINUX_DISTRO := RHEL5
-    else
-      LINUX_DISTRO := RHEL
-    endif
-  endif
-  X11LIBDIR := /usr/X11R6
-else ifeq ($(wildcard /etc/debian_version),/etc/debian_version)
-  IS_REDHAT := 0
-  LINUX_DISTRO := debian
-else
-  X11LIBDIR    := /usr/X11
-  IS_REDHAT    := 0
-  LINUX_DISTRO := GENERIC
+# Figure out info about the distro, specifically if a RHEL like: (CentOS, Rocky, Alma, RHEL, etc)
+ifeq ($(wildcard /etc/os-release),/etc/os-release)
+	DISTRO_TYPE := $(shell awk 'BEGIN {FS = "="} $$1 == "ID" {gsub("\"",""); print $$2}' /etc/os-release)
+	DISTRO_IS_RHEL_LIKE := $(shell awk 'BEGIN {FS = "="} $$1 == "ID_LIKE" && $$2 ~ /rhel/ {print 1}' /etc/os-release)
+	DISTRO_MAJ_VERSION := $(shell awk 'BEGIN {FS = "="} $$1 == "VERSION_ID" {split($$2, subfield, "."); gsub("\"","",subfield[1]); printf("%d", subfield[1])}' /etc/os-release)
+	DISTRO_MIN_VERSION := $(shell awk 'BEGIN {FS = "="} $$1 == "VERSION_ID" {split($$2, subfield, "."); gsub("\"","",subfield[2]); printf("%d", subfield[2])}' /etc/os-release)
 endif
+
+DISTRO_KERNEL_PKG_MAJ := $(shell uname -r | awk 'BEGIN {FS = "-"} {split($$2, pkg, "."); printf("%d", pkg[1])}')
+DISTRO_KERNEL_PKG_MIN := $(shell uname -r | awk 'BEGIN {FS = "-"} {split($$2, pkg, "."); printf("%d", pkg[2])}')
+DISTRO_KERNEL_PKG_PNT := $(shell uname -r | awk 'BEGIN {FS = "-"} {split($$2, pkg, "."); printf("%d", pkg[3])}')
+
+# set distro defaults if needed
+ifeq ($(DISTRO_TYPE),)
+	DISTRO_TYPE := generic
+endif
+ifeq ($(DISTRO_TYPE),rhel)
+	DISTRO_IS_RHEL_LIKE := 1
+endif
+ifeq ($(DISTRO_IS_RHEL_LIKE),)
+	DISTRO_IS_RHEL_LIKE := 0
+endif
+ifeq ($(DISTRO_MAJ_VERSION),)
+	DISTRO_MAJ_VERSION := 0
+endif
+ifeq ($(DISTRO_MIN_VERSION),)
+	DISTRO_MIN_VERSION := 0
+endif
+ifeq ($(DISTRO_KERNEL_PKG_MAJ),)
+	DISTRO_KERNEL_PKG_MAJ := 0
+endif
+ifeq ($(DISTRO_KERNEL_PKG_MIN),)
+	DISTRO_KERNEL_PKG_MIN := 0
+endif
+ifeq ($(DISTRO_KERNEL_PKG_PNT),)
+	DISTRO_KERNEL_PKG_PNT := 0
+endif
+
+export DISTRO_TYPE
+export DISTRO_IS_RHEL_LIKE
+export DISTRO_MAJ_VERSION
+export DISTRO_MIN_VERSION
+export DISTRO_KERNEL_PKG_MAJ
+export DISTRO_KERNEL_PKG_MIN
+export DISTRO_KERNEL_PKG_PNT
 
 # set LIB based on 64 bitness or not
 ifeq (x86_64,$(A_ARCH))
@@ -118,6 +138,4 @@ else
 endif
 
 LIB_OR_LIB64 := $(LIB)
-X11LIBDIR := $(X11LIBDIR)/$(LIB)
-export X11LIBDIR 
 

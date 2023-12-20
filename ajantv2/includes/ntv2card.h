@@ -14,242 +14,13 @@
 	#include "ntv2macdriverinterface.h"
 #elif defined (AJALinux)
 	#include "ntv2linuxdriverinterface.h"
+#elif defined (AJABareMetal)
+  #include "ntv2baremetaldriverinterface.h"
 #endif
 #include "ntv2signalrouter.h"
 #include "ntv2utils.h"
-#include <set>
-#include <string>
-#include <iostream>
-#include <vector>
-#include <bitset>
+#include "ntv2devicecapabilities.h"
 
-
-typedef std::set <NTV2AudioChannelPair>			NTV2AudioChannelPairs;			///< @brief A set of distinct NTV2AudioChannelPair values.
-typedef NTV2AudioChannelPairs::const_iterator	NTV2AudioChannelPairsConstIter; ///< @brief Handy const iterator to iterate over a set of distinct NTV2AudioChannelPair values.
-AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioChannelPairs & inSet); ///<	@brief	Handy ostream writer for NTV2AudioChannelPairs.
-
-typedef std::set <NTV2AudioChannelQuad>			NTV2AudioChannelQuads;			///< @brief A set of distinct NTV2AudioChannelQuad values.
-typedef NTV2AudioChannelQuads::const_iterator	NTV2AudioChannelQuadsConstIter; ///< @brief Handy const iterator to iterate over a set of distinct NTV2AudioChannelQuad values.
-AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioChannelQuads & inSet); ///<	@brief	Handy ostream writer for NTV2AudioChannelQuads.
-
-typedef std::set <NTV2AudioChannelOctet>		NTV2AudioChannelOctets;			///< @brief A set of distinct NTV2AudioChannelOctet values.
-typedef NTV2AudioChannelOctets::const_iterator	NTV2AudioChannelOctetsConstIter;///< @brief Handy const iterator to iterate over a set of distinct NTV2AudioChannelOctet values.
-AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioChannelOctets & inSet); ///<	@brief	Handy ostream writer for NTV2AudioChannelOctets.
-
-typedef std::vector <double>					NTV2DoubleArray;				///< @brief An array of double-precision floating-point values.
-typedef NTV2DoubleArray::iterator				NTV2DoubleArrayIter;			///< @brief Handy non-const iterator to iterate over an NTV2DoubleArray.
-typedef NTV2DoubleArray::const_iterator			NTV2DoubleArrayConstIter;		///< @brief Handy const iterator to iterate over an NTV2DoubleArray.
-AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DoubleArray & inVector);	///<	@brief	Handy ostream writer for NTV2DoubleArray.
-
-typedef UByte						NTV2DID;				///< @brief An ancillary Data IDentifier.
-typedef std::set <UByte>			NTV2DIDSet;				///< @brief A set of distinct NTV2DID values.
-typedef NTV2DIDSet::iterator		NTV2DIDSetIter;			///< @brief Handy non-const iterator to iterate over an NTV2DIDSet.
-typedef NTV2DIDSet::const_iterator	NTV2DIDSetConstIter;	///< @brief Handy const iterator to iterate over an NTV2DIDSet.
-AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DIDSet & inDIDs);	///<	@brief	Handy ostream writer for NTV2DIDSet.
-
-
-typedef std::bitset<16>		NTV2AudioChannelsMuted16;		///< @brief Per-audio-channel mute state for up to 16 audio channels.
-const NTV2AudioChannelsMuted16	NTV2AudioChannelsMuteAll = NTV2AudioChannelsMuted16(0xFFFF);	///< @brief All 16 audio channels muted/disabled.
-const NTV2AudioChannelsMuted16	NTV2AudioChannelsEnableAll = NTV2AudioChannelsMuted16(0x0000);	///< @brief All 16 audio channels unmuted/enabled.
-const ULWord LUTTablePartitionSize = ULWord(0x40000);
-
-#if defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
-/**
-	@brief	Convenience class/API for inquiring about device capabilities of physical and virtual devices.
-			Instead of calling the old global ::NTV2DeviceCanDoXXX(mDeviceID) functions,
-			call mCard.features().CanDoXXX().
-			Instead of calling ::NTV2DeviceGetNumYYY(mDeviceID), call mCard.features().GetNumYYY().
-**/
-class AJAExport DeviceCapabilities
-{
-	public:
-		explicit inline	DeviceCapabilities (CNTV2DriverInterface & inDev)	: dev(inDev)	{}
-		inline bool	CanChangeEmbeddedAudioClock (void)		{return dev.IsSupported(kDeviceCanChangeEmbeddedAudioClock);}
-		inline bool	CanChangeFrameBufferSize (void)			{return dev.IsSupported(kDeviceCanChangeFrameBufferSize);}
-		inline bool	CanDisableUFC (void)					{return dev.IsSupported(kDeviceCanDisableUFC);}
-		inline bool	CanDo12gRouting (void)					{return dev.IsSupported(kDeviceCanDo12gRouting);}
-		inline bool	CanDo12GSDI (void)						{return dev.IsSupported(kDeviceCanDo12GSDI);}
-		inline bool	CanDo2110 (void)						{return dev.IsSupported(kDeviceCanDo2110);}
-		inline bool	CanDo2KVideo (void)						{return dev.IsSupported(kDeviceCanDo2KVideo);}
-		inline bool	CanDo3GLevelConversion (void)			{return dev.IsSupported(kDeviceCanDo3GLevelConversion);}
-		inline bool	CanDo425Mux (void)						{return dev.IsSupported(kDeviceCanDo425Mux);}
-		inline bool	CanDo4KVideo (void)						{return dev.IsSupported(kDeviceCanDo4KVideo);}
-		inline bool	CanDo8KVideo (void)						{return dev.IsSupported(kDeviceCanDo8KVideo);}
-		inline bool	CanDoAESAudioIn (void)					{return dev.IsSupported(kDeviceCanDoAESAudioIn);}
-		inline bool	CanDoAnalogAudio (void)					{return dev.IsSupported(kDeviceCanDoAnalogAudio);}
-		inline bool	CanDoAnalogVideoIn (void)				{return dev.IsSupported(kDeviceCanDoAnalogVideoIn);}
-		inline bool	CanDoAnalogVideoOut (void)				{return dev.IsSupported(kDeviceCanDoAnalogVideoOut);}
-		inline bool	CanDoAudio192K (void)					{return dev.IsSupported(kDeviceCanDoAudio192K);}
-		inline bool	CanDoAudio2Channels (void)				{return dev.IsSupported(kDeviceCanDoAudio2Channels);}
-		inline bool	CanDoAudio6Channels (void)				{return dev.IsSupported(kDeviceCanDoAudio6Channels);}
-		inline bool	CanDoAudio8Channels (void)				{return dev.IsSupported(kDeviceCanDoAudio8Channels);}
-		inline bool	CanDoAudio96K (void)					{return dev.IsSupported(kDeviceCanDoAudio96K);}
-		inline bool	CanDoAudioDelay (void)					{return dev.IsSupported(kDeviceCanDoAudioDelay);}
-		inline bool	CanDoAudioMixer (void)					{return dev.IsSupported(kDeviceCanDoAudioMixer);}
-		inline bool	CanDoBreakoutBox (void)					{return dev.IsSupported(kDeviceCanDoBreakoutBox);}
-		inline bool	CanDoCapture (void)						{return dev.IsSupported(kDeviceCanDoCapture);}
-		inline bool	CanDoCustomAnc (void)					{return dev.IsSupported(kDeviceCanDoCustomAnc);}
-		inline bool	CanDoCustomAux (void)					{return dev.IsSupported(kDeviceCanDoCustomAux);}
-		inline bool	CanDoDSKOpacity (void)					{return dev.IsSupported(kDeviceCanDoDSKOpacity);}
-		inline bool	CanDoDualLink (void)					{return dev.IsSupported(kDeviceCanDoDualLink);}
-		inline bool	CanDoDVCProHD (void)					{return dev.IsSupported(kDeviceCanDoDVCProHD);}
-		inline bool	CanDoEnhancedCSC (void)					{return dev.IsSupported(kDeviceCanDoEnhancedCSC);}
-		inline bool	CanDoFramePulseSelect (void)			{return dev.IsSupported(kDeviceCanDoFramePulseSelect);}
-		inline bool	CanDoFrameStore1Display (void)			{return dev.IsSupported(kDeviceCanDoFrameStore1Display);}
-		inline bool	CanDoHDMIHDROut (void)					{return dev.IsSupported(kDeviceCanDoHDMIHDROut);}
-		inline bool	CanDoHDMIMultiView (void)				{return dev.IsSupported(kDeviceCanDoHDMIMultiView);}
-		inline bool	CanDoHDMIOutStereo (void)				{return dev.IsSupported(kDeviceCanDoHDMIOutStereo);}
-		inline bool	CanDoHDV (void)							{return dev.IsSupported(kDeviceCanDoHDV);}
-		inline bool	CanDoHDVideo (void)						{return dev.IsSupported(kDeviceCanDoHDVideo);}
-		inline bool	CanDoHFRRGB (void)						{return dev.IsSupported(kDeviceCanDoHFRRGB);}
-		inline bool	CanDoIP (void)							{return dev.IsSupported(kDeviceCanDoIP);}
-		inline bool	CanDoIsoConvert (void)					{return dev.IsSupported(kDeviceCanDoIsoConvert);}
-		inline bool	CanDoJ2K (void)							{return dev.IsSupported(kDeviceCanDoJ2K);}
-		inline bool	CanDoLTC (void)							{return dev.IsSupported(kDeviceCanDoLTC);}
-		inline bool	CanDoLTCInOnRefPort (void)				{return dev.IsSupported(kDeviceCanDoLTCInOnRefPort);}
-		inline bool	CanDoMSI (void)							{return dev.IsSupported(kDeviceCanDoMSI);}
-		inline bool	CanDoMultiFormat (void)					{return dev.IsSupported(kDeviceCanDoMultiFormat);}
-		inline bool	CanDoMultiLinkAudio (void)				{return dev.IsSupported(kDeviceCanDoMultiLinkAudio);}
-		inline bool	CanDoPCMControl (void)					{return dev.IsSupported(kDeviceCanDoPCMControl);}
-		inline bool	CanDoPCMDetection (void)				{return dev.IsSupported(kDeviceCanDoPCMDetection);}
-		inline bool	CanDoPIO (void)							{return dev.IsSupported(kDeviceCanDoPIO);}
-		inline bool	CanDoPlayback (void)					{return dev.IsSupported(kDeviceCanDoPlayback);}
-		inline bool	CanDoProgrammableRS422 (void)			{return dev.IsSupported(kDeviceCanDoProgrammableRS422);}
-		inline bool	CanDoProRes (void)						{return dev.IsSupported(kDeviceCanDoProRes);}
-		inline bool	CanDoQREZ (void)						{return dev.IsSupported(kDeviceCanDoQREZ);}
-		inline bool	CanDoQuarterExpand (void)				{return dev.IsSupported(kDeviceCanDoQuarterExpand);}
-		inline bool	CanDoRateConvert (void)					{return dev.IsSupported(kDeviceCanDoRateConvert);}
-		inline bool	CanDoRGBLevelAConversion (void)			{return dev.IsSupported(kDeviceCanDoRGBLevelAConversion);}
-		inline bool	CanDoRGBPlusAlphaOut (void)				{return dev.IsSupported(kDeviceCanDoRGBPlusAlphaOut);}
-		inline bool	CanDoRP188 (void)						{return dev.IsSupported(kDeviceCanDoRP188);}
-		inline bool	CanDoSDIErrorChecks (void)				{return dev.IsSupported(kDeviceCanDoSDIErrorChecks);}
-		inline bool	CanDoSDVideo (void)						{return dev.IsSupported(kDeviceCanDoSDVideo);}
-		inline bool	CanDoStackedAudio (void)				{return dev.IsSupported(kDeviceCanDoStackedAudio);}
-		inline bool	CanDoStereoIn (void)					{return dev.IsSupported(kDeviceCanDoStereoIn);}
-		inline bool	CanDoStereoOut (void)					{return dev.IsSupported(kDeviceCanDoStereoOut);}
-		inline bool	CanDoThunderbolt (void)					{return dev.IsSupported(kDeviceCanDoThunderbolt);}
-		inline bool	CanDoVideoProcessing (void)				{return dev.IsSupported(kDeviceCanDoVideoProcessing);}
-		inline bool	CanDoVITC2 (void)						{return dev.IsSupported(kDeviceCanDoVITC2);}
-		inline bool	CanDoWarmBootFPGA (void)				{return dev.IsSupported(kDeviceCanDoWarmBootFPGA);}
-		inline bool	CanMeasureTemperature (void)			{return dev.IsSupported(kDeviceCanMeasureTemperature);}
-		inline bool	CanReportFailSafeLoaded (void)			{return dev.IsSupported(kDeviceCanReportFailSafeLoaded);}
-		inline bool	CanReportFrameSize (void)				{return dev.IsSupported(kDeviceCanReportFrameSize);}
-		inline bool	CanReportRunningFirmwareDate (void)		{return dev.IsSupported(kDeviceCanReportRunningFirmwareDate);}
-		inline bool	CanThermostat (void)					{return dev.IsSupported(kDeviceCanThermostat);}
-		inline bool	HasAudioMonitorRCAJacks (void)			{return dev.IsSupported(kDeviceHasAudioMonitorRCAJacks);}
-		inline bool	HasBiDirectionalAnalogAudio (void)		{return dev.IsSupported(kDeviceHasBiDirectionalAnalogAudio);}
-		inline bool	HasBiDirectionalSDI (void)				{return dev.IsSupported(kDeviceHasBiDirectionalSDI);}
-		inline bool	HasColorSpaceConverterOnChannel2 (void)	{return dev.IsSupported(kDeviceHasColorSpaceConverterOnChannel2);}
-		inline bool	HasGenlockv2 (void)						{return dev.IsSupported(kDeviceHasGenlockv2);}
-		inline bool	HasGenlockv3 (void)						{return dev.IsSupported(kDeviceHasGenlockv3);}
-		inline bool	HasHeadphoneJack (void)					{return dev.IsSupported(kDeviceHasHeadphoneJack);}
-		inline bool	HasHEVCM30 (void)						{return dev.IsSupported(kDeviceHasHEVCM30);}
-		inline bool	HasHEVCM31 (void)						{return dev.IsSupported(kDeviceHasHEVCM31);}
-		inline bool	HasLEDAudioMeters (void)				{return dev.IsSupported(kDeviceHasLEDAudioMeters);}
-		inline bool	HasMicInput (void)						{return dev.IsSupported(kDeviceHasMicrophoneInput);}
-		inline bool	HasNWL (void)							{return dev.IsSupported(kDeviceHasNWL);}
-		inline bool	HasPCIeGen2 (void)						{return dev.IsSupported(kDeviceHasPCIeGen2);}
-		inline bool	HasRetailSupport (void)					{return dev.IsSupported(kDeviceHasRetailSupport);}
-		inline bool	HasRotaryEncoder (void)					{return dev.IsSupported(kDeviceHasRotaryEncoder);}
-		inline bool	HasSDIRelays (void)						{return dev.IsSupported(kDeviceHasSDIRelays);}
-		inline bool	HasSPIFlash (void)						{return dev.IsSupported(kDeviceHasSPIFlash);}
-		inline bool	HasSPIFlashSerial (void)				{return dev.IsSupported(kDeviceHasSPIFlashSerial);}
-		inline bool	HasSPIv2 (void)							{return dev.IsSupported(kDeviceHasSPIv2);}
-		inline bool	HasSPIv3 (void)							{return dev.IsSupported(kDeviceHasSPIv3);}
-		inline bool	HasSPIv4 (void)							{return dev.IsSupported(kDeviceHasSPIv4);}
-		inline bool	HasSPIv5 (void)							{return dev.IsSupported(kDeviceHasSPIv5);}
-		inline bool	HasXilinxDMA (void)						{return dev.IsSupported(kDeviceHasXilinxDMA);}
-		inline bool	Is64Bit (void)							{return dev.IsSupported(kDeviceIs64Bit);}
-		inline bool	IsDirectAddressable (void)				{return dev.IsSupported(kDeviceIsDirectAddressable);}
-		inline bool	IsDNxIV (void)							{return dev.IsSupported(kDeviceHasMicrophoneInput);}
-		inline bool	IsExternalToHost (void)					{return dev.IsSupported(kDeviceIsExternalToHost);}
-		inline bool	IsSupported (void)						{return dev.IsSupported(kDeviceIsSupported);}
-		inline bool	NeedsRoutingSetup (void)				{return dev.IsSupported(kDeviceNeedsRoutingSetup);}
-		inline bool	SoftwareCanChangeFrameBufferSize (void)	{return dev.IsSupported(kDeviceSoftwareCanChangeFrameBufferSize);}
-		inline ULWord	GetActiveMemorySize (void)				{return dev.GetNumSupported(kDeviceGetActiveMemorySize);}
-		inline UWord	GetDACVersion (void)					{return UWord(dev.GetNumSupported(kDeviceGetDACVersion));}
-		inline UWord	GetDownConverterDelay (void)			{return UWord(dev.GetNumSupported(kDeviceGetDownConverterDelay));}
-		inline ULWord	GetHDMIVersion (void)					{return dev.GetNumSupported(kDeviceGetHDMIVersion);}
-		inline ULWord	GetLUTVersion (void)					{return dev.GetNumSupported(kDeviceGetLUTVersion);}
-		inline UWord	GetMaxAudioChannels (void)				{return UWord(dev.GetNumSupported(kDeviceGetMaxAudioChannels));}
-		inline ULWord	GetMaxRegisterNumber (void)				{return dev.GetNumSupported(kDeviceGetMaxRegisterNumber);}
-		inline ULWord	GetMaxTransferCount (void)				{return dev.GetNumSupported(kDeviceGetMaxTransferCount);}
-		inline UWord	GetNum2022ChannelsSFP1 (void)			{return UWord(dev.GetNumSupported(kDeviceGetNum2022ChannelsSFP1));}
-		inline UWord	GetNum2022ChannelsSFP2 (void)			{return UWord(dev.GetNumSupported(kDeviceGetNum2022ChannelsSFP2));}
-		inline UWord	GetNum4kQuarterSizeConverters (void)	{return UWord(dev.GetNumSupported(kDeviceGetNum4kQuarterSizeConverters));}
-		inline UWord	GetNumAESAudioInputChannels (void)		{return UWord(dev.GetNumSupported(kDeviceGetNumAESAudioInputChannels));}
-		inline UWord	GetNumAESAudioOutputChannels (void)		{return UWord(dev.GetNumSupported(kDeviceGetNumAESAudioOutputChannels));}
-		inline UWord	GetNumAnalogAudioInputChannels (void)	{return UWord(dev.GetNumSupported(kDeviceGetNumAnalogAudioInputChannels));}
-		inline UWord	GetNumAnalogAudioOutputChannels (void)	{return UWord(dev.GetNumSupported(kDeviceGetNumAnalogAudioOutputChannels));}
-		inline UWord	GetNumAnalogVideoInputs (void)			{return UWord(dev.GetNumSupported(kDeviceGetNumAnalogVideoInputs));}
-		inline UWord	GetNumAnalogVideoOutputs (void)			{return UWord(dev.GetNumSupported(kDeviceGetNumAnalogVideoOutputs));}
-		inline UWord	GetNumAudioSystems (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumAudioSystems));}
-		inline UWord	GetNumCrossConverters (void)			{return UWord(dev.GetNumSupported(kDeviceGetNumCrossConverters));}
-		inline UWord	GetNumCSCs (void)						{return UWord(dev.GetNumSupported(kDeviceGetNumCSCs));}
-		inline ULWord	GetNumDMAEngines (void)					{return dev.GetNumSupported(kDeviceGetNumDMAEngines);}
-		inline UWord	GetNumDownConverters (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumDownConverters));}
-		inline UWord	GetNumEmbeddedAudioInputChannels (void)	{return UWord(dev.GetNumSupported(kDeviceGetNumEmbeddedAudioInputChannels));}
-		inline UWord	GetNumEmbeddedAudioOutputChannels (void){return UWord(dev.GetNumSupported(kDeviceGetNumEmbeddedAudioOutputChannels));}
-		inline UWord	GetNumFrameStores (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumFrameStores));}
-		inline UWord	GetNumFrameSyncs (void)					{return UWord(dev.GetNumSupported(kDeviceGetNumFrameSyncs));}
-		inline UWord	GetNumHDMIAudioInputChannels (void)		{return UWord(dev.GetNumSupported(kDeviceGetNumHDMIAudioInputChannels));}
-		inline UWord	GetNumHDMIAudioOutputChannels (void)	{return UWord(dev.GetNumSupported(kDeviceGetNumHDMIAudioOutputChannels));}
-		inline UWord	GetNumHDMIVideoInputs (void)			{return UWord(dev.GetNumSupported(kDeviceGetNumHDMIVideoInputs));}
-		inline UWord	GetNumHDMIVideoOutputs (void)			{return UWord(dev.GetNumSupported(kDeviceGetNumHDMIVideoOutputs));}
-		inline UWord	GetNumInputConverters (void)			{return UWord(dev.GetNumSupported(kDeviceGetNumInputConverters));}
-		inline UWord	GetNumLTCInputs (void)					{return UWord(dev.GetNumSupported(kDeviceGetNumLTCInputs));}
-		inline UWord	GetNumLTCOutputs (void)					{return UWord(dev.GetNumSupported(kDeviceGetNumLTCOutputs));}
-		inline UWord	GetNumLUTBanks (void)					{return UWord(dev.GetNumSupported(kDeviceGetNumLUTBanks));}
-		inline UWord	GetNumLUTs (void)						{return UWord(dev.GetNumSupported(kDeviceGetNumLUTs));}
-		inline UWord	GetNumMicInputs (void)					{return UWord(dev.GetNumSupported(kDeviceGetNumMicInputs));}
-		inline UWord	GetNumMixers (void)						{return UWord(dev.GetNumSupported(kDeviceGetNumMixers));}
-		inline UWord	GetNumOutputConverters (void)			{return UWord(dev.GetNumSupported(kDeviceGetNumOutputConverters));}
-		inline UWord	GetNumReferenceVideoInputs (void)		{return UWord(dev.GetNumSupported(kDeviceGetNumReferenceVideoInputs));}
-		inline UWord	GetNumSerialPorts (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumSerialPorts));}
-		inline UWord	GetNumUpConverters (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumUpConverters));}
-		inline ULWord	GetNumVideoChannels (void)				{return dev.GetNumSupported(kDeviceGetNumVideoChannels);}
-		inline UWord	GetNumVideoInputs (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumVideoInputs));}
-		inline UWord	GetNumVideoOutputs (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumVideoOutputs));}
-		inline ULWord	GetPingLED (void)						{return dev.GetNumSupported(kDeviceGetPingLED);}
-		inline UWord	GetTotalNumAudioSystems (void)			{return UWord(dev.GetNumSupported(kDeviceGetTotalNumAudioSystems));}
-		inline UWord	GetNumBufferedAudioSystems (void)		{return UWord(dev.GetNumSupported(kDeviceGetNumBufferedAudioSystems));}
-		inline ULWord	GetUFCVersion (void)					{return dev.GetNumSupported(kDeviceGetUFCVersion);}
-		bool			CanDoChannel (const NTV2Channel inChannel)
-						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_Channel));
-							return itms.find(ULWord(inChannel)) != itms.end();
-						}
-		bool			CanDoConversionMode (const NTV2ConversionMode inMode)
-						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_ConversionMode));
-							return itms.find(ULWord(inMode)) != itms.end();
-						}
-		bool			CanDoDSKMode (const NTV2DSKMode inMode)
-						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_DSKMode));
-							return itms.find(ULWord(inMode)) != itms.end();
-						}
-		bool			CanDoFrameBufferFormat (const NTV2PixelFormat inPF)
-						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_PixelFormat));
-							return itms.find(ULWord(inPF)) != itms.end();
-						}
-		bool			CanDoInputSource (const NTV2InputSource inSrc)
-						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_InputSource));
-							return itms.find(ULWord(inSrc)) != itms.end();
-						}
-		bool			CanDoOutputDestination (const NTV2OutputDestination inDest)
-						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_OutputDest));
-							return itms.find(ULWord(inDest)) != itms.end();
-						}
-		bool			CanDoVideoFormat (const NTV2VideoFormat inVF)
-						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_VideoFormat));
-							return itms.find(ULWord(inVF)) != itms.end();
-						}
-		bool			CanDoWidget (const NTV2WidgetID inWgtID)
-						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_WidgetID));
-							return itms.find(ULWord(inWgtID)) != itms.end();
-						}
-	private:
-		CNTV2DriverInterface &	dev;	//	My reference to the physical or virtual NTV2 device
-};	//	DeviceCapabilities
-#endif	//	defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
 
 /**
 	@brief	I interrogate and control an AJA video/audio capture/playout device.
@@ -260,6 +31,8 @@ class AJAExport DeviceCapabilities
 	class CNTV2Card				: public CNTV2MacDriverInterface
 #elif defined (AJALinux)
 	class CNTV2Card				: public CNTV2LinuxDriverInterface
+#elif defined (AJABareMetal)
+	class CNTV2Card				: public CNTV2BareMetalDriverInterface
 #endif
 {
 public:
@@ -2481,6 +2254,15 @@ public:
 		@note		This counter will overflow and wrap back to zero in 24:51:00 [hh:mm:ss].
 	**/
 	AJA_VIRTUAL bool		GetRawAudioTimer (ULWord & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);	//	New in SDK 15.5
+	
+	/**
+		@brief		Enables BOB analog audio XLR inputs.
+		@param[in]	inEnable		If true, specifies that the XLR connectors are enabled.
+									If false, breakout board audio reverts to digital AES inputs.
+		@return		True if successful;	 otherwise false.
+		@see		CNTV2Card::EnableBOBAnalogAudioIn
+	**/
+	AJA_VIRTUAL bool		EnableBOBAnalogAudioIn (bool inEnable);	//	New in SDK 17.0
 
 	/**
 		@return		True if the running device firmware supports audio start delay-til-VBI.
@@ -3691,36 +3473,76 @@ public:
 #define NTV2_STREAM_SUCCESS(__status__)  (__status__ == NTV2_STREAM_SUCCESS)
 #define NTV2_STREAM_FAIL(__status__)  (__status__ != NTV2_STREAM_SUCCESS)
 
-	// initialize the stream
+	/**
+		@brief		Initialize a stream.  Put the stream queue and hardware in a known good state ready for use.  Releases
+                    all buffers remaining in the queue.  At least one new buffer must be queued before starting the stream.
+    **/
 	AJA_VIRTUAL ULWord	StreamChannelInitialize (const NTV2Channel inChannel);
 
-	// start the stream
+   	/**
+		@brief		Release a stream.  Releases all buffers remaining in the queue.
+    **/
+	AJA_VIRTUAL ULWord	StreamChannelRelease (const NTV2Channel inChannel);
+
+	/**
+		@brief		Start a stream.  Put the stream is the active state to start processing queued buffers.  For frame
+                    based video, the stream will start with the current buffer on the next frame sync.
+		@return		The current stream status.
+    **/
 	AJA_VIRTUAL ULWord	StreamChannelStart (const NTV2Channel inChannel,
-												NTV2StreamChannel& status);
+                                            NTV2StreamChannel& status);
 
-	// stop the stream
+	/**
+		@brief		Stop a stream.  Put the stream is the idle state.  For frame based video, the stream will idle on 
+                    the buffer on air after the next frame sync.
+		@return		The current stream status.
+    **/
 	AJA_VIRTUAL ULWord	StreamChannelStop (const NTV2Channel inChannel,
-												NTV2StreamChannel& status);
+                                           NTV2StreamChannel& status);
 
-    // flush the buffers
+	/**
+		@brief		Flush a stream.  Remove all the buffers from the stream except a currently active idle buffer.
+                    The stream must be in the initialize or idle state.
+		@return		The current stream status.
+    **/
     AJA_VIRTUAL ULWord	StreamChannelFlush (const NTV2Channel inChannel,
                                             NTV2StreamChannel& status);
 
-    // current stream status
+	/**
+		@brief		Get the current stream status.
+		@return		The current stream status.
+    **/
 	AJA_VIRTUAL ULWord	StreamChannelStatus (const NTV2Channel inChannel,
-												NTV2StreamChannel& status);
+                                             NTV2StreamChannel& status);
 
-	// wait for a buffer interrupt
+	/**
+		@brief		Wait for any stream event.  Returns for any state or buffer change.
+		@return		The current stream status.
+    **/
 	AJA_VIRTUAL ULWord	StreamChannelWait (const NTV2Channel inChannel,
-											NTV2StreamChannel& status);
+                                           NTV2StreamChannel& status);
 
-	// add a buffer to the stream
-	AJA_VIRTUAL ULWord	StreamBufferAdd (const NTV2Channel inChannel,
-											NTV2_POINTER inBuffer,
-											ULWord64 bufferCookie,
-											NTV2StreamBuffer& status);
+	/**
+		@brief		Queue a buffer to the stream.  The bufferCookie is a user defined identifier of the buffer
+                    used by the stream methods.
+		@return		The queued buffer status.
+    **/
+	AJA_VIRTUAL ULWord	StreamBufferQueue (const NTV2Channel inChannel,
+                                           NTV2_POINTER inBuffer,
+                                           ULWord64 bufferCookie,
+                                           NTV2StreamBuffer& status);
 
-	// request buffer status
+	/**
+		@brief		Remove the oldest buffer released by the streaming engine from the buffer queue.
+		@return		The removed buffer status.
+    **/
+	AJA_VIRTUAL ULWord	StreamBufferRelease (const NTV2Channel inChannel,
+                                             NTV2StreamBuffer& status);
+
+	/**
+		@brief		Get the status of the buffer identified by the bufferCookie.
+		@return		The buffer status.
+    **/
 	AJA_VIRTUAL ULWord	StreamBufferStatus (const NTV2Channel inChannel,
 											ULWord64 bufferCookie,
 											NTV2StreamBuffer& status);
@@ -5268,6 +5090,17 @@ public:
 		@see		::NTV2DeviceHasBiDirectionalSDI, \ref devicesignalinputsoutputs
 	**/
 	AJA_VIRTUAL bool		GetSDITransmitEnable (const NTV2Channel inChannel, bool & outEnabled);
+
+	/**
+		@brief		Answers with the transmitting/output SDI connectors.
+		@param[out] outXmitSDIs		Receives the set of transmitting SDI connectors.
+		@return		True if successful; otherwise false.
+		@note		This function returns valid results for devices with or without bi-directional SDIs.
+		@note		This function does not take into account an SDI output that's designated as a "monitor"
+					(i.e. ::NTV2WidgetType_SDIMonOut or ::NTV2_WgtSDIMonOut1).
+		@see		::NTV2DeviceHasBiDirectionalSDI, \ref devicesignalinputsoutputs
+	**/
+	AJA_VIRTUAL bool		GetTransmitSDIs (NTV2ChannelSet & outXmitSDIs);	//	New in SDK 17.0
 	///@}
 
 	AJA_VIRTUAL bool		SetSDIOut2Kx1080Enable (const NTV2Channel inChannel, const bool inIsEnabled);
@@ -5559,6 +5392,9 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inEnable	If true, sets the device in multi-format mode.
 								If false, sets the device in uni-format mode.
+		@deprecated	Uniformat mode is deprecated starting in SDK 17.0.
+					Passing false for inEnable will cause this function to return false (fail).
+					Eventually this function will be removed from the class.
 		@see		::NTV2DeviceCanDoMultiFormat, CNTV2Card::GetMultiFormatMode, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool	   SetMultiFormatMode (const bool inEnable);
@@ -5570,6 +5406,8 @@ public:
 		@return		True if successful; otherwise false.
 		@param[out] outIsEnabled	Receives true if the device is currently in multi-format mode,
 									or false if it's in uni-format mode.
+		@deprecated	Uniformat mode is deprecated starting in SDK 17.0.
+					Eventually this function will be removed from the class.
 		@see		::NTV2DeviceCanDoMultiFormat, CNTV2Card::SetMultiFormatMode, \ref deviceclockingandsync
 	**/
 	AJA_VIRTUAL bool		GetMultiFormatMode (bool & outIsEnabled);
@@ -5767,7 +5605,7 @@ public:
 		@brief		Initializes the given SDI input's Anc extractor for custom Anc packet detection and de-embedding.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc extractor firmware.)
 		@return		True if successful; otherwise false.
-		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
+		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
 		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's fed from the SDI input,
 									if different from the SDI input. The default is to use the same ::NTV2Channel
 									that corresponds to the given SDI input (e.g., ::NTV2_CHANNEL1 == 0 == SDIIn1).
@@ -5824,7 +5662,7 @@ public:
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
-		@param[in]	inFrameNumber	Tells the Anc inserter where to write the received Anc data, specified as a
+		@param[in]	inFrameNumber	Tells the Anc extractor where to write the received Anc data, specified as a
 									frame number.
 		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's driving the SDI input,
 									if different from the SDI input. The default is to use the same ::NTV2Channel
@@ -5844,7 +5682,7 @@ public:
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
-		@param[in]	inFrameNumber	Tells the Anc inserter where to write the received Anc data, specified as a
+		@param[in]	inFrameNumber	Tells the Anc extractor where to write the received Anc data, specified as a
 									frame number.
 		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's driving the SDI input,
 									if different from the SDI input. The default is to use the same ::NTV2Channel
@@ -5931,6 +5769,15 @@ public:
 	AJA_VIRTUAL bool	AncExtractGetBufferOverrun (const UWord inSDIInput, bool & outIsOverrun, const UWord inField = 0);	//	New in SDK 15.0
 
 	/**
+		@brief		Answers whether or not the given SDI input's Anc extractor was configured with a progressive video format.
+					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
+		@param[out] outIsProgressive Receives true if the extractor was configured with a progressive format. Otherwise false.
+	**/
+	AJA_VIRTUAL bool 	AncExtractIsProgressive (const UWord inSDIInput, bool & outIsProgressive); // New in SDK 17.1
+
+	/**
 		@return		The maximum number of distinct DIDs that the device Anc extractor filter can accommodate.
 		@see		CNTV2Card::AncExtractSetFilterDIDs, CNTV2Card::AncExtractGetDefaultDIDs, \ref anccapture-filter
 	**/
@@ -5945,6 +5792,325 @@ public:
 	**/
 	static NTV2DIDSet	AncExtractGetDefaultDIDs (const bool inHDAudio = true);	//	New in SDK 13.0
 	///@}
+
+	/**
+		@name	Auxillary Data
+	**/
+	///@{
+
+	/**
+		@brief		Sets the capacity of the AUX buffers in device frame memory.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inF1Size		Specifies the capacity of the Field 1 aux buffer, in bytes.
+		@param[in]	inF2Size		Specifies the capacity of the Field 2 aux buffer, in bytes.
+		@note		This function should be used before configuring the aux extractors/inserters.
+		@note		Size changes apply to all aux extractors/inserters.
+		@note		This function calls AncSetFrameBufferSize
+		@warning	Setting these values too large will result in aux data occupying the bottom of the video raster.
+		@see		CNTV2Card::GetAuxRegionOffsetAndSize, \ref anccapture-dataspace
+	**/
+	AJA_VIRTUAL bool	AuxSetFrameBufferSize (const ULWord inF1Size, const ULWord inF2Size);	//	New in SDK 17.1
+
+
+	/**
+		@brief		Initializes the given HDMI output's Aux inserter for custom Aux packet insertion.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIOutput		Specifies the HDMI output of interest (e.g., 0=HDMIOut1, 1=HDMIOut2, etc.).
+		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's driving the HDMI output,
+									if different from the HDMI output. The default is to use the same ::NTV2Channel
+									that corresponds to the given HDMI output (e.g., ::NTV2_CHANNEL1 == 0 == HDMIOut1).
+		@param[in]	inStandard		Optionally overrides the ::NTV2Standard used to initialize the Aux inserter.
+									Defaults to using the ::NTV2Standard of the ::NTV2Channel being used.
+		@note		This function is provided for playback methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
+	**/
+	AJA_VIRTUAL bool	AuxInsertInit (const UWord inHDMIOutput, const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
+										const NTV2Standard inStandard = NTV2_STANDARD_INVALID);	//	New in SDK #.#
+
+	/**
+		@brief		Enables or disables individual Aux insertion components for the given HDMI output.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIOutput		Specifies the HDMI output of interest (e.g., 0=HDMIOut1, 1=HDMIOut2, etc.).
+		@param[in]	inVauxY			Specify true to enable Vaux Y component insertion;	otherwise false to disable it.
+		@param[in]	inVauxC			Specify true to enable Vaux C component insertion;	otherwise false to disable it.
+		@param[in]	inHauxY			Specify true to enable Haux Y component insertion;	otherwise false to disable it.
+		@param[in]	inHauxC			Specify true to enable Haux C component insertion;	otherwise false to disable it.
+		@note		This function is provided for playback methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
+	**/
+	AJA_VIRTUAL bool	AuxInsertSetComponents (const UWord inHDMIOutput,
+												const bool inVauxY, const bool inVauxC,
+												const bool inHauxY, const bool inHauxC);	//	New in SDK #.#
+
+	/**
+		@brief		Enables or disables the given HDMI output's Aux inserter frame buffer reads.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIOutput		Specifies the HDMI output of interest (e.g., 0=HDMIOut1, 1=HDMIOut2, etc.).
+		@param[in]	inIsEnabled		Specify true to enable the Aux inserter;  otherwise false to disable it.
+		@note		This function is provided for playback methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
+	**/
+	AJA_VIRTUAL bool	AuxInsertSetEnable (const UWord inHDMIOutput, const bool inIsEnabled);	//	New in SDK #.#
+
+	/**
+		@brief		Answers with the run state of the given Aux inserter -- i.e. if its "memory reader" is enabled or not.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIOutput		Specifies the HDMI output of interest as a zero-based index value (e.g., 0 == HDMIOut1).
+		@param[out] outIsEnabled	Receives 'true' if the Aux inserter is enabled (running);  otherwise false.
+	**/
+	AJA_VIRTUAL bool	AuxInsertIsEnabled (const UWord inHDMIOutput, bool & outIsEnabled);	//	New in SDK #.#
+
+	/**
+		@brief		Configures the Aux inserter for the next frame's F1 Aux data to embed/transmit.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIOutput		Specifies the HDMI output of interest (e.g., 0=HDMIOut1, 1=HDMIOut2, etc.).
+		@param[in]	inFrameNumber	Tells the Aux inserter where to find the Aux data to transmit, specified as a
+									zero-based frame number.
+		@param[in]	inF1Size		Specifies the maximum number of F1 bytes to process in the Aux data buffer in the frame.
+		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's driving the HDMI output,
+									if different from the HDMI output. The default is to use the same ::NTV2Channel
+									that corresponds to the given HDMI output (e.g., ::NTV2_CHANNEL1 == 0 == HDMIOut1).
+		@param[in]	inFrameSize		Optionally overrides the ::NTV2Framesize used to calculate the Aux buffer location
+									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
+		@note		This function is provided for playback methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
+	**/
+	AJA_VIRTUAL bool	AuxInsertSetReadParams (const UWord inHDMIOutput, const ULWord inFrameNumber, const ULWord inF1Size,
+												const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
+												const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);	//	New in SDK #.#
+
+	/**
+		@brief		Configures the Aux inserter for the next frame's F2 Aux data to embed/transmit.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIOutput		Specifies the HDMI output of interest (e.g., 0=HDMIOut1, 1=HDMIOut2, etc.).
+		@param[in]	inFrameNumber	Tells the Aux inserter where to find the Aux data to transmit, specified as a
+									zero-based frame number.
+		@param[in]	inF2Size		Specifies the maximum number of F2 bytes to process in the Aux data buffer in the frame.
+		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's driving the HDMI output,
+									if different from the HDMI output. The default is to use the same ::NTV2Channel
+									that corresponds to the given HDMI output (e.g., ::NTV2_CHANNEL1 == 0 == HDMIOut1).
+		@param[in]	inFrameSize		Optionally overrides the ::NTV2Framesize used to calculate the Aux buffer location
+									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
+		@note		This function is provided for playback methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
+	**/
+	AJA_VIRTUAL bool	AuxInsertSetField2ReadParams (const UWord inHDMIOutput, const ULWord inFrameNumber, const ULWord inF2Size,
+														const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
+														const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);	//	New in SDK #.#
+
+	/**
+		@brief		Configures the Aux inserter IP specific params.
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIOutput		Specifies the HDMI output of interest (e.g., 0=HDMIOut1, 1=HDMIOut2, etc.).
+		@param[in]	auxChannel		Tells the IP packetizer which Aux inserter to use (4-7).
+		@param[in]	payloadID		Tells the IP packetizer what the RTP Payload Id is.
+		@param[in]	ssrc			Tells the IP packetizer what the RTP SSRC is.
+	**/
+	AJA_VIRTUAL bool	AuxInsertSetIPParams (const UWord inHDMIOutput, const UWord auxChannel, const ULWord payloadID, const ULWord ssrc);	//	New in SDK #.#
+
+	/**
+		@brief		Answers where, in device SDRAM, the given HDMI connector's Aux inserter is currently reading Aux data for playout.
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIOutput		Specifies the HDMI output of interest (e.g., 0=HDMIOut1, 1=HDMIOut2, etc.).
+		@param[out]	outF1StartAddr	Receives the Aux inserter's current F1 starting address.
+		@param[out]	outF2StartAddr	Receives the Aux inserter's current F2 starting address.
+	**/
+	AJA_VIRTUAL bool	AuxInsertGetReadInfo (const UWord inHDMIOutput, uint64_t & outF1StartAddr, uint64_t & outF2StartAddr);	//	New in SDK #.#
+
+
+	/**
+		@brief		Initializes the given HDMI input's Aux extractor for custom Aux packet detection and de-embedding.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's fed from the HDMI input,
+									if different from the HDMI input. The default is to use the same ::NTV2Channel
+									that corresponds to the given HDMI input (e.g., ::NTV2_CHANNEL1 == 0 == HDMIIn1).
+		@param[in]	inStandard		Optionally overrides the ::NTV2Standard used to initialize the Aux extractor.
+									Defaults to using the ::NTV2Standard of the ::NTV2Channel being used.
+		@note		This function is provided for capture methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
+		@see		CNTV2Card::AuxExtractSetEnable, CNTV2Card::AuxExtractSetWriteParams,
+					CNTV2Card::AuxExtractSetPacketFilters, \ref anccapture
+	**/
+	AJA_VIRTUAL bool	AuxExtractInit (const UWord inHDMIInput, const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
+										const NTV2Standard inStandard = NTV2_STANDARD_INVALID);	//	New in SDK 17.1
+	/**
+		@brief		Enables or disables the given HDMI input's Aux extractor.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		@param[in]	inIsEnabled		Specify true to enable the Aux extractor;  otherwise false to disable it.
+		@note		This function is provided for capture methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
+		@see		CNTV2Card::AuxExtractIsEnabled, \ref anccapture
+	**/
+	AJA_VIRTUAL bool	AuxExtractSetEnable (const UWord inHDMIInput, const bool inIsEnabled);	//	New in SDK 17.1
+
+	/**
+		@brief		Answers whether the given HDMI input's Aux extractor is enabled/active or not.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest as a zero-based index value (e.g., 0 == HDMIIn1).
+		@param[out] outIsEnabled	Receives 'true' if the Aux extractor is enabled (running);	otherwise false.
+		@see		CNTV2Card::AuxExtractSetEnable, \ref anccapture
+	**/
+	AJA_VIRTUAL bool	AuxExtractIsEnabled (const UWord inHDMIInput, bool & outIsEnabled);	//	New in SDK 17.1
+
+	/**
+		@brief		Configures the given HDMI input's Aux extractor to receive the next frame's F1 Aux data.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		// Question / TODO:  Needs accurate description for extraction, apply to Anc also. 
+		@param[in]	inFrameNumber	Tells the Aux extractor where to write the received Aux data, specified as a
+									frame number.
+		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's driving the HDMI input,
+									if different from the HDMI input. The default is to use the same ::NTV2Channel
+									that corresponds to the HDMI input (e.g., ::NTV2_CHANNEL1 == 0 == HDMIIn1).
+		@param[in]	inFrameSize		Optionally overrides the ::NTV2Framesize used to calculate the Aux buffer location
+									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
+		@note		This function is provided for capture methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
+		@see		CNTV2Card::AuxExtractSetField2WriteParams, \ref anccapture
+	**/
+	AJA_VIRTUAL bool	AuxExtractSetWriteParams (const UWord inHDMIInput, const ULWord inFrameNumber,
+													const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
+													const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);	//	New in SDK 17.1
+
+	/**
+		@brief		Configures the given HDMI input's Aux extractor to receive the next frame's F2 Aux data.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		// Question / TODO:  Needs accurate description for extraction, apply to Anc also. 
+		@param[in]	inFrameNumber	Tells the Aux extractor where to write the received Aux data, specified as a
+									frame number.
+		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's driving the HDMI input,
+									if different from the HDMI input. The default is to use the same ::NTV2Channel
+									that corresponds to the HDMI input (e.g., ::NTV2_CHANNEL1 == 0 == HDMIIn1).
+		@param[in]	inFrameSize		Optionally overrides the ::NTV2Framesize used to calculate the Aux buffer location
+									in device SDRAM. Defaults to using the ::NTV2Framesize of the ::NTV2Channel being used.
+		@note		This function is provided for capture methods that don't use \ref aboutautocirculate.
+					\ref aboutautocirculate based applications should not call this function.
+		@see		CNTV2Card::AuxExtractSetWriteParams, \ref anccapture
+	**/
+	AJA_VIRTUAL bool	AuxExtractSetField2WriteParams (const UWord inHDMIInput, const ULWord inFrameNumber,
+														const NTV2Channel inChannel = NTV2_CHANNEL_INVALID,
+														const NTV2Framesize inFrameSize = NTV2_FRAMESIZE_INVALID);	//	New in SDK 17.1
+
+	/**
+		@brief		Answers with the given HDMI input's current Aux extractor info.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports custom Aux inserter firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		@param[out]	outF1StartAddr	Receives the device SDRAM offset where the extractor starts writing F1 aux data.
+		@param[out]	outF1EndAddr	Receives the device SDRAM offset where the extractor will stop writing F1 aux data.
+		@param[out]	outF2StartAddr	Receives the device SDRAM offset where the extractor starts writing F2 aux data.
+		@param[out]	outF2EndAddr	Receives the device SDRAM offset where the extractor will stop writing F2 aux data.
+		@see		\ref anccapture
+	**/
+	AJA_VIRTUAL bool	AuxExtractGetWriteInfo	(const UWord inHDMIInput,
+												uint64_t & outF1StartAddr, uint64_t & outF1EndAddr,
+												uint64_t & outF2StartAddr, uint64_t & outF2EndAddr);	//	New in SDK 17.1
+
+	/**
+		@brief		Answers with the HDMI packet types currently being excluded (filtered) by the HDMI input's Aux extractor.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		@param[out] outDIDs			Receives the ::NTV2DIDSet that contain the packet types that are currently being
+									filtered (excluded).
+		@see		CNTV2Card::AuxExtractSetPacketFilters, \ref anccapture-filter
+	**/
+	AJA_VIRTUAL bool	AuxExtractGetPacketFilters (const UWord inHDMIInput, NTV2DIDSet & outDIDs);	//	New in SDK 17.1
+
+	/**
+		@brief		Replaces the HDMI packet types to be excluded (filtered) by the given HDMI input's Aux extractor.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		@param[in]	inDIDs			Specifies the DIDs to be filtered (excluded). Specify an empty set to
+									disable all packet filtering.
+		@note		DIDs having the value 0 (zero) are ignored.
+		@see		CNTV2Card::AuxExtractGetPacketFilters, \ref anccapture-filter
+	**/
+	AJA_VIRTUAL bool	AuxExtractSetPacketFilters (const UWord inHDMIInput, const NTV2DIDSet & inDIDs);	//	New in SDK 17.1
+
+	/**
+		@brief		Answers with the number of bytes of field 1 ANC extracted.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		@param[out] outF1Size		Receives the number of bytes of field 1 ANC extracted;
+	**/
+	AJA_VIRTUAL bool	AuxExtractGetField1Size (const UWord inHDMIInput, ULWord & outF1Size);	//	New in SDK 17.1
+
+
+	 //Todo: Add proper docmentation.
+	// Packet filters are excluded by default.  Set inFilterInclusion to true to include all data matching the filters instead.
+	// Set inFilterInclusion to false for the default behavior.
+	AJA_VIRTUAL bool	AuxExtractSetFilterInclusionMode (const UWord inHDMIInput, const bool inFilterInclusion);	//	New in SDK 17.1
+
+	//Todo: Add proper docmentation.
+	// Query for the Filter mode.  If the mode is Exclude (default), outIncludePackets will be false.  
+	// If the mode is Include, outIncludePackets will be true.
+	AJA_VIRTUAL bool	AuxExtractGetFilterInclusionMode (const UWord inHDMIInput, bool & outIncludePackets);	//	New in SDK 17.1
+
+	/**
+		@brief		Answers with the number of bytes of field 2 ANC extracted.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		@param[out] outF2Size		Receives the number of bytes of field 2 ANC extracted;
+	**/
+	AJA_VIRTUAL bool	AuxExtractGetField2Size (const UWord inHDMIInput, ULWord & outF2Size);	//	New in SDK 17.1
+
+	/**
+		@brief		Answers whether or not the given HDMI input's Aux extractor reached its buffer limits.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		@param[out] outIsOverrun	Receives true if the extractor is reporting that it overran its buffer limits;
+									otherwise false if it didn't.
+		@param[in]	inField			Optionally specifies the field of interest. Specify 0 for the "total" buffer
+									overflow between the F1 and F2 buffers;	 specify 1 for Field 1;	 specify 2 for Field 2.
+									Defaults to zero (the "total"). (Added in SDK 16.1)
+		@note		The extractor will not actually write any Aux bytes past its "stop" address, but it will
+					report that it was about to via this "overrun" flag.
+	**/
+	AJA_VIRTUAL bool	AuxExtractGetBufferOverrun (const UWord inHDMIInput, bool & outIsOverrun, const UWord inField = 0);	//	New in SDK 17.1
+
+	/**
+		@brief		Answers whether or not the given HDMI input's Aux extractor was configured with a progressive video format.
+					(Call ::NTV2DeviceCanDoCustomAux to determine if the device supports Aux extractor firmware.)
+		@return		True if successful; otherwise false.
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
+		@param[out] outIsProgressive Receives true if the extractor was configured with a progressive format. Otherwise false.
+	**/
+	AJA_VIRTUAL bool 	AuxExtractIsProgressive (const UWord inHDMIInput, bool & outIsProgressive); //	New in SDK 17.1
+
+
+	/**
+		@return		The maximum number of distinct packet filters that the device Aux extractor filter can accommodate.
+		@see		CNTV2Card::AuxExtractSetPacketFilters, CNTV2Card::AuxExtractGetDefaultPacketFilters, \ref anccapture-filter
+	**/
+	static UWord		AuxExtractGetMaxNumPacketFilters (void);	//	New in SDK 17.1
+
+	/**
+		@return		The default packet filters that the device Aux extractor filter is started with.
+		@see		CNTV2Card::AuxExtractSetPacketFilters, CNTV2Card::AuxExtractGetMaxNumPacketFilters, \ref anccapture-filter
+	**/
+	static NTV2DIDSet	AuxExtractGetDefaultPacketFilters (void);	//	New in SDK 17.1
+	///@}
+
 
 	/**
 		@name	TCP/IP
@@ -6361,6 +6527,8 @@ public:
 	AJA_VIRTUAL bool GetMultiRasterBypassEnable (bool & outEnabled);	//	New in SDK 16.1
 	AJA_VIRTUAL bool IsMultiRasterWidgetChannel (const NTV2Channel inChannel);	//	New in SDK 16.2
 	///@}
+	
+	AJA_VIRTUAL bool IsBreakoutBoardConnected (void);	//	New in SDK 17.0
 
 #if !defined(NTV2_DEPRECATE_16_1)
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioOutputMonitorSource (const NTV2AudioMonitorSelect inChannelPair, const NTV2Channel inAudioSystem = NTV2_CHANNEL1))	{return SetAudioOutputMonitorSource(inChannelPair, NTV2AudioSystem(inAudioSystem));}	///< @deprecated	Use the function that uses NTV2AudioChannelPair and NTV2AudioSystem params.
@@ -6372,8 +6540,9 @@ protected:
 	AJA_VIRTUAL ULWord			GetSerialNumberHigh (void);			//	From CNTV2Status
 	AJA_VIRTUAL inline bool		IS_CHANNEL_VALID (const NTV2Channel inChannel) const	{return !IS_CHANNEL_INVALID(inChannel);}	//	New in SDK 16.2
 	AJA_VIRTUAL bool			IS_CHANNEL_INVALID (const NTV2Channel inChannel) const;
-	AJA_VIRTUAL bool			IS_OUTPUT_SPIGOT_INVALID (const UWord inOutputSpigot) const;
-	AJA_VIRTUAL bool			IS_INPUT_SPIGOT_INVALID (const UWord inInputSpigot) const;
+	AJA_VIRTUAL bool			IS_OUTPUT_SPIGOT_INVALID (const UWord inOutputSpigot);
+	AJA_VIRTUAL bool			IS_INPUT_SPIGOT_INVALID (const UWord inInputSpigot);
+	AJA_VIRTUAL bool			IS_HDMI_INPUT_SPIGOT_INVALID (const UWord inInputHDMIPort);
 	AJA_VIRTUAL bool			SetWarmBootFirmwareReload(bool enable);
 
 	//	Seamless Anc Playout & Capture

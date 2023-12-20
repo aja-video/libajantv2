@@ -1,4 +1,4 @@
-if (NOT AJANTV2_BUILD_PLUGINS)
+if (AJANTV2_DISABLE_PLUGINS)
     message(STATUS "Skipping libajantv2 plugins...")
     return()
 endif()

@@ -413,6 +413,7 @@ uint32_t GetAudioSamplesPerFrame(Ntv2SystemContext* context, NTV2AudioSystem aud
 		case NTV2_FRAMERATE_UNKNOWN:
 			audioSamplesPerFrame = 0;
 			break;
+		default:	break;
 		}
 		break;
 		
@@ -499,6 +500,7 @@ uint32_t GetAudioSamplesPerFrame(Ntv2SystemContext* context, NTV2AudioSystem aud
 		case NTV2_FRAMERATE_UNKNOWN:
 			audioSamplesPerFrame = 0*2; //haha
 			break;
+		default:	break;
 		}
 
 		break;
@@ -606,6 +608,7 @@ uint32_t GetAudioSamplesPerFrame(Ntv2SystemContext* context, NTV2AudioSystem aud
 			break;
 		}
 		break;
+	default:	break;
 	}
 
 	return audioSamplesPerFrame;

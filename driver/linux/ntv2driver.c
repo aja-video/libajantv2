@@ -55,6 +55,7 @@
 #endif
 
 #include "ajatypes.h"
+#include "buildenv.h"
 #include "ntv2enums.h"
 #include "ntv2videodefines.h"
 #include "ntv2audiodefines.h"
@@ -65,10 +66,10 @@
 # include "hevcdriver.h"
 # include "hevcpublic.h"
 #endif
-#include "ntv2driverprocamp.h"
 #include "ntv2driver.h"
-#include "driverdbg.h"
 #include "registerio.h"
+#include "ntv2driverprocamp.h"
+#include "driverdbg.h"
 #include "ntv2dma.h"
 
 #include "ntv2driverdbgmsgctl.h"
@@ -190,11 +191,6 @@ struct VirtualDataNode
     ULWord          data;
 };
 
-typedef struct _fileData
-{
-	DMA_PAGE_ROOT dmaRoot;
-} FILE_DATA, *PFILE_DATA;
-
 
 /*********************************************/
 /* Prototypes for private utility functions. */
@@ -202,7 +198,6 @@ typedef struct _fileData
 
 static void SetupBoard(ULWord deviceNumber);
 static bool IsKonaIPDevice(ULWord deviceNumber, NTV2DeviceID deviceID);
-static bool WaitForFlashNOTBusy(ULWord deviceNumber);
 
 static int ValidateAjaNTV2Message(NTV2_HEADER * pHeaderIn);
 static int DoMessageSDIInStatictics(ULWord deviceNumber, NTV2Buffer * pInStatistics, void * pOutBuff);
@@ -1777,6 +1772,7 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 
             case NTV2_TYPE_AJASTREAMCHANNEL:
 				{
+                    MSG("%s: NTV2_TYPE_AJASTREAMCHANNEL\n", pNTV2Params->name);
 					returnCode = DoMessageStreamChannel (deviceNumber, pFileData, (NTV2StreamChannel*)pMessage);
 					if (returnCode)
 					{
@@ -2003,7 +1999,7 @@ int ntv2_mmap(struct file *file,struct vm_area_struct* vma)
 		return -ENODEV;
 
 	// Don't try to swap out physical pages
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,3,0))
+#if defined(KERNEL_6_3_0_VM_FLAGS)
     vm_flags_set(vma, VM_IO);
 #elif (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
 	vma->vm_flags |= VM_IO;
@@ -2141,7 +2137,19 @@ int ntv2_release(struct inode *minode, struct file *mfile) {
 	pFileData = (PFILE_DATA)mfile->private_data;
 	if (pFileData != NULL)
 	{
+#if 1
+        NTV2StreamChannel channel;
+        int i;
+
+        // release any streams we own
+        for (i = 0; i < NTV2_MAX_DMA_STREAMS; i++)
+        {
+            ntv2_stream_channel_release(getNTV2Params(deviceNumber)->m_pDmaStream[i], pFileData, &channel);
+        }
+#endif
+        // release all locked pages
 		dmaPageRootRelease(deviceNumber, &pFileData->dmaRoot);
+        
 		kfree(pFileData);
 		mfile->private_data = NULL;
 	}
@@ -2905,7 +2913,7 @@ static int reboot_handler(struct notifier_block *this, unsigned long code, void 
 static UWord deviceNumber;
 
 #if defined(AJA_CREATE_DEVICE_NODES)
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,2,0))
+#if defined(KERNEL_6_2_0_DEV_UEVENT)
 static int aja_ntv2_dev_uevent(const struct device *dev, struct kobj_uevent_env *env)
 #else
 static int aja_ntv2_dev_uevent(struct device *dev, struct kobj_uevent_env *env)
@@ -2969,7 +2977,7 @@ static int __init aja_ntv2_module_init(void)
 
 #if defined(AJA_CREATE_DEVICE_NODES)
 	// Create device class
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,4,0))
+#if defined(KERNEL_6_4_0_CLASS_CREATE)
 	ntv2_class = class_create(getNTV2ModuleParams()->driverName);
 #else
 	ntv2_class = class_create(THIS_MODULE, getNTV2ModuleParams()->driverName);
@@ -3336,6 +3344,47 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 
 	// initialize dma
 	dmaInit(deviceNumber);
+
+    // inialize streams
+    for (i = 0; i < ntv2pp->_dmaNumEngines; i++)
+    {
+        if (i >= NTV2_MAX_DMA_STREAMS)
+            break;
+
+        if (!ntv2pp->_dmaEngine[i].dmaStream)
+            continue;
+        
+        ntv2pp->m_pDmaStream[i] = ntv2_stream_open(&ntv2pp->systemContext, "ntv2stream", i);
+        if (ntv2pp->m_pDmaStream[i] != NULL)
+        {
+            struct ntv2_stream_ops stream_ops =
+            {
+                .stream_initialize = dmaOpsStreamInitialize,
+                .stream_release = dmaOpsStreamRelease,
+                .stream_start = dmaOpsStreamStart,
+                .stream_stop = dmaOpsStreamStop,
+                .stream_advance = dmaOpsStreamAdvance,
+                .buffer_prepare = dmaOpsBufferPrepare,
+                .buffer_link = dmaOpsBufferLink,
+                .buffer_complete = dmaOpsBufferComplete,
+                .buffer_flush = dmaOpsBufferFlush,
+                .buffer_release = dmaOpsBufferRelease
+            };
+            status = ntv2_stream_configure(ntv2pp->m_pDmaStream[i],
+                                           &stream_ops,
+                                           &ntv2pp->_dmaEngine[i],
+                                           ((i & 0x1) == 1));
+            if (status == NTV2_STATUS_SUCCESS)
+            {
+                ntv2pp->_dmaEngine[i].strIndex = i;
+            }
+            else
+            {
+                ntv2_stream_close(ntv2pp->m_pDmaStream[i]);
+                ntv2pp->m_pDmaStream[i] = NULL;
+            }
+        }
+    }
 
 	ntv2pp->m_pGenlock2Monitor = NULL;
     ntv2pp->m_pRasterMonitor = NULL;
@@ -3983,52 +4032,7 @@ static void SetupBoard(ULWord deviceNumber)
 	
 	if(NTV2DeviceHasSPIFlashSerial(ntv2pp->_DeviceID))
 	{
-		ULWord baseAddress		= 0xFC0000;	//Fixed offset #defined in ntv2konaserializer.cpp
-		ULWord serialRegister	= kRegReserved54;
-		bool hasExtendedCommandSupport = false;
-		ULWord deviceID = 0;
-		WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, READID_COMMAND, NO_MASK, NO_SHIFT);
-		WaitForFlashNOTBusy(deviceNumber);
-		deviceID = ReadRegister(deviceNumber, kRegXenaxFlashDOUT, NO_MASK, NO_SHIFT);
-
-		if(deviceID == 0x0020ba20)//Micron MT25QL512ABB
-			hasExtendedCommandSupport = true;
-
-        if(NTV2DeviceROMHasBankSelect(ntv2pp->_DeviceID))
-		{
-            ULWord bankSelectNumber = NTV2DeviceHasSPIv5(ntv2pp->_DeviceID) ? 0x03 : 0x01;
-			WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND, NO_MASK, NO_SHIFT);
-			WaitForFlashNOTBusy(deviceNumber);
-			WriteRegister(deviceNumber, kRegXenaxFlashAddress, bankSelectNumber, NO_MASK, NO_SHIFT);
-			WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND, NO_MASK, NO_SHIFT);
-
-			WaitForFlashNOTBusy(deviceNumber);
-		}
-
-		for( i = 0; i < 2; i++, baseAddress += 4, serialRegister++)
-		{
-			ULWord serialNumber = 0;
-
-			WriteRegister(deviceNumber, kRegXenaxFlashAddress, baseAddress, NO_MASK, NO_SHIFT);
-			WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, READFAST_COMMAND, NO_MASK, NO_SHIFT);
-
-			WaitForFlashNOTBusy(deviceNumber);
-
-			serialNumber = ReadRegister(deviceNumber, kRegXenaxFlashDOUT, NO_MASK, NO_SHIFT);
-			WriteRegister(deviceNumber, serialRegister, serialNumber, NO_MASK, NO_SHIFT);
-		}
-
-        if(NTV2DeviceROMHasBankSelect(ntv2pp->_DeviceID))
-		{
-			ULWord bankSelectNumber = 0x00;
-
-			WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, WRITEENABLE_COMMAND, NO_MASK, NO_SHIFT);
-			WaitForFlashNOTBusy(deviceNumber);
-			WriteRegister(deviceNumber, kRegXenaxFlashAddress, bankSelectNumber, NO_MASK, NO_SHIFT);
-			WriteRegister(deviceNumber, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND, NO_MASK, NO_SHIFT);
-
-			WaitForFlashNOTBusy(deviceNumber);
-		}
+		ProgramProductCode(&systemContext);
 	}
 	
 	// Set default register clocking to match the video standard
@@ -4169,25 +4173,6 @@ static bool IsKonaIPDevice(ULWord deviceNumber, NTV2DeviceID deviceID)
 	default:
 		return false;
 	}
-}
-
-static bool WaitForFlashNOTBusy(ULWord boardNumber)
-{
-	bool busy  = true;
-	int  count = 0;
-	do 
-	{
-		ULWord regValue = ReadRegister(boardNumber, kRegXenaxFlashControlStatus, NO_MASK, NO_SHIFT);
-		if( !(regValue & BIT(8)) )
-		{
-			busy = false;
-			break;
-		}
-		udelay(100);
-		count++;
-	} while( (busy == true) && (count < 100) );
-
-	return busy;
 }
 
 int ValidateAjaNTV2Message(NTV2_HEADER * pHeaderIn)
@@ -4571,13 +4556,13 @@ int DoMessageStreamChannel(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamChan
 		return -EINVAL;
 
     chn = (int)pChannel->mChannel;
-    if (chn >= NTV2_MAX_STREAMS)
+    if (chn >= NTV2_MAX_DMA_STREAMS)
     {
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_INVALID;
         return -EINVAL;
     }
 
-    pStr = pNTV2Params->m_pStream[chn];
+    pStr = pNTV2Params->m_pDmaStream[chn];
     if (pStr == NULL)
     {
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_INVALID;
@@ -4586,7 +4571,11 @@ int DoMessageStreamChannel(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamChan
 
     if ((pChannel->mFlags & NTV2_STREAM_CHANNEL_INITIALIZE) != 0)
     {
-        ntv2_stream_channel_initialize(pStr, pChannel);
+        ntv2_stream_channel_initialize(pStr, (void*)pFile, pChannel);
+    }
+	if ((pChannel->mFlags & NTV2_STREAM_CHANNEL_RELEASE) != 0)
+	{
+        ntv2_stream_channel_release(pStr, (void*)pFile, pChannel);
     }
     if ((pChannel->mFlags & NTV2_STREAM_CHANNEL_START) != 0)
     {
@@ -4617,28 +4606,33 @@ int DoMessageStreamBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamBuffe
 	NTV2PrivateParams * pNTV2Params = getNTV2Params(deviceNumber);
     int chn = 0;
     struct ntv2_stream* pStr = NULL;
+    
 	
 	if (pBuffer == NULL)
 		return -EINVAL;
 
     chn = (int)pBuffer->mChannel;
-    if (chn >= NTV2_MAX_STREAMS)
+    if (chn >= NTV2_MAX_DMA_STREAMS)
     {
         pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_INVALID;
         return -EINVAL;
     }
 
-    pStr = pNTV2Params->m_pStream[chn];
+    pStr = pNTV2Params->m_pDmaStream[chn];
     if (pStr == NULL)
     {
         pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_INVALID;
         return -EINVAL;
     }
 
-	if ((pBuffer->mFlags & NTV2_STREAM_BUFFER_ADD) != 0)
+	if ((pBuffer->mFlags & NTV2_STREAM_BUFFER_QUEUE) != 0)
 	{
-        ntv2_stream_buffer_add(pStr, pBuffer);
-    }
+        ntv2_stream_buffer_queue(pStr, (void*)pFile, pBuffer);
+    }    
+	if ((pBuffer->mFlags & NTV2_STREAM_BUFFER_RELEASE) != 0)
+	{
+        ntv2_stream_buffer_release(pStr, (void*)pFile, pBuffer);
+	}
 	if ((pBuffer->mFlags & NTV2_STREAM_BUFFER_STATUS) != 0)
 	{
         ntv2_stream_buffer_status(pStr, pBuffer);

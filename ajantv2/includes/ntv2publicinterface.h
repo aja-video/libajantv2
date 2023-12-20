@@ -19,6 +19,7 @@
 	#include <iomanip>
 	#include <bitset>
 	#include <string>
+	#include <bitset>
 	#include "string.h"	//	for memcpy
 	#include "ajaexport.h"
 	#if defined(MSWindows)
@@ -53,6 +54,34 @@
 	typedef std::set<ULWord>					ULWordSet;					///< @brief A collection of unique ULWord (uint32_t) values.
 	typedef ULWordSet::const_iterator			ULWordSetConstIter;
 	typedef ULWordSet::iterator					ULWordSetIter;
+
+	typedef std::set <NTV2AudioChannelPair>			NTV2AudioChannelPairs;			///< @brief A set of distinct NTV2AudioChannelPair values.
+	typedef NTV2AudioChannelPairs::const_iterator	NTV2AudioChannelPairsConstIter; ///< @brief Handy const iterator to iterate over a set of distinct NTV2AudioChannelPair values.
+	AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioChannelPairs & inSet); ///<	@brief	Handy ostream writer for NTV2AudioChannelPairs.
+
+	typedef std::set <NTV2AudioChannelQuad>			NTV2AudioChannelQuads;			///< @brief A set of distinct NTV2AudioChannelQuad values.
+	typedef NTV2AudioChannelQuads::const_iterator	NTV2AudioChannelQuadsConstIter; ///< @brief Handy const iterator to iterate over a set of distinct NTV2AudioChannelQuad values.
+	AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioChannelQuads & inSet); ///<	@brief	Handy ostream writer for NTV2AudioChannelQuads.
+
+	typedef std::set <NTV2AudioChannelOctet>		NTV2AudioChannelOctets;			///< @brief A set of distinct NTV2AudioChannelOctet values.
+	typedef NTV2AudioChannelOctets::const_iterator	NTV2AudioChannelOctetsConstIter;///< @brief Handy const iterator to iterate over a set of distinct NTV2AudioChannelOctet values.
+	AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioChannelOctets & inSet); ///<	@brief	Handy ostream writer for NTV2AudioChannelOctets.
+
+	typedef std::vector <double>					NTV2DoubleArray;				///< @brief An array of double-precision floating-point values.
+	typedef NTV2DoubleArray::iterator				NTV2DoubleArrayIter;			///< @brief Handy non-const iterator to iterate over an NTV2DoubleArray.
+	typedef NTV2DoubleArray::const_iterator			NTV2DoubleArrayConstIter;		///< @brief Handy const iterator to iterate over an NTV2DoubleArray.
+	AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DoubleArray & inVector);	///<	@brief	Handy ostream writer for NTV2DoubleArray.
+
+	typedef UByte						NTV2DID;				///< @brief An ancillary Data IDentifier.
+	typedef std::set <UByte>			NTV2DIDSet;				///< @brief A set of distinct NTV2DID values.
+	typedef NTV2DIDSet::iterator		NTV2DIDSetIter;			///< @brief Handy non-const iterator to iterate over an NTV2DIDSet.
+	typedef NTV2DIDSet::const_iterator	NTV2DIDSetConstIter;	///< @brief Handy const iterator to iterate over an NTV2DIDSet.
+	AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2DIDSet & inDIDs);	///<	@brief	Handy ostream writer for NTV2DIDSet.
+
+	typedef std::bitset<16>		NTV2AudioChannelsMuted16;		///< @brief Per-audio-channel mute state for up to 16 audio channels.
+	const NTV2AudioChannelsMuted16	NTV2AudioChannelsMuteAll = NTV2AudioChannelsMuted16(0xFFFF);	///< @brief All 16 audio channels muted/disabled.
+	const NTV2AudioChannelsMuted16	NTV2AudioChannelsEnableAll = NTV2AudioChannelsMuted16(0x0000);	///< @brief All 16 audio channels unmuted/enabled.
+	const ULWord LUTTablePartitionSize = ULWord(0x40000);
 #endif	//	NTV2_BUILDING_DRIVER
 
 
@@ -1012,6 +1041,48 @@ typedef enum
 {
 	kRegRotaryEncoder = 0x940
 } NTV2RotaryEncoderRegister;
+
+typedef enum
+{
+	kRegIDSwitch = 0x40020
+} NTV2IDSwitchRegister;
+
+typedef enum
+{
+	kRegPWMFanControl = 0x40001,
+	kRegPWMFanStatus = 0x40021
+} NTV2PWMFanRegisters;
+
+typedef enum
+{
+	kRegBOBStatus = 0x3680,
+	kRegBOBGPIInData,
+	kRegBOBGPIInterruptControl,
+	kRegBOBGPIOutData,
+	kRegBOBAudioControl
+} NTV2BOBWidgetRegisters;
+
+typedef enum
+{
+	kRegLEDReserved0 = 0x3640,
+	kRegLEDClockDivide,
+	kRegLEDReserved2,
+	kRegLEDReserved3,
+	kRegLEDSDI1Control,
+	kRegLEDSDI2Control,
+	kRegLEDHDMIInControl,
+	kRegLEDHDMIOutControl
+} NTV2LEDWidgetRegisters;
+
+typedef enum
+{
+	kRegCMWControl = 0x36c0,
+	kRegCMW1485Out,
+	kRegCMW14835Out,
+	kRegCMW27Out,
+	kRegCMW12288Out,
+	kRegCMWHDMIOut
+} NTV2ClockMonitorWidgetRegisters;
 
 #define NTV2_HDMIAuxMaxFrames	8
 #define NTV2_HDMIAuxDataSize	32
@@ -2126,7 +2197,45 @@ typedef enum
 	kRegMaskMRFrameLocation = BIT(15) + BIT(14) + BIT(13) + BIT(12) + BIT(11) + BIT(10) + BIT(9) + BIT(8),
 	kRegMaskMRBypass = BIT(20),
 	kRegMaskMREnable = BIT(24),
-	kRegMaskMRSupport = BIT(2) + BIT(1) + BIT(0)
+	kRegMaskMRSupport = BIT(2) + BIT(1) + BIT(0),
+	
+	kRegMaskIDSwitch1 = BIT(0),
+	kRegMaskIDSwitch2 = BIT(1),
+	kRegMaskIDSwitch3 = BIT(2),
+	kRegMaskIDSwitch4 = BIT(3),
+	
+	kRegMaskPWMFanSpeed = BIT(7)+BIT(6)+BIT(5)+BIT(4)+BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kRegMaskPWMFanSpeedControl = BIT(8),
+	
+	kRegMaskPWMFanTachPeriodStatus = BIT(7)+BIT(6)+BIT(5)+BIT(4)+BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kRegMaskPWMFanStatus = BIT(8),
+	
+	kRegMaskBOBAbsent = BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kRegMaskBOBADAV801UpdateStatus = BIT(7)+BIT(6)+BIT(5)+BIT(4),
+	kRegMaskBOBADAV801DIRLocked = BIT(11)+BIT(10)+BIT(9)+BIT(8),
+	
+	kRegMaskBOBGPIIn1Data = BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kRegMaskBOBGPIIn2Data = BIT(7)+BIT(6)+BIT(5)+BIT(4),
+	kRegMaskBOBGPIIn3Data = BIT(11)+BIT(10)+BIT(9)+BIT(8),
+	kRegMaskBOBGPIIn4Data = BIT(15)+BIT(14)+BIT(13)+BIT(12),
+	
+	kRegMaskBOBGPIIn1InterruptControl = BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kRegMaskBOBGPIIn2InterruptControl = BIT(7)+BIT(6)+BIT(5)+BIT(4),
+	kRegMaskBOBGPIIn3InterruptControl = BIT(11)+BIT(10)+BIT(9)+BIT(8),
+	kRegMaskBOBGPIIn4InterruptControl = BIT(15)+BIT(14)+BIT(13)+BIT(12),
+	
+	kRegMaskBOBGPIOut1Data = BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kRegMaskBOBGPIOut2Data = BIT(7)+BIT(6)+BIT(5)+BIT(4),
+	kRegMaskBOBGPIOut3Data = BIT(11)+BIT(10)+BIT(9)+BIT(8),
+	kRegMaskBOBGPIOut4Data = BIT(15)+BIT(14)+BIT(13)+BIT(12),
+	
+	kRegMaskBOBADAV801Reset = BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kRegMaskBOBAnalogLevelControl = BIT(7)+BIT(6)+BIT(5)+BIT(4),
+	kRegMaskBOBAnalogInputSelect = BIT(11)+BIT(10)+BIT(9)+BIT(8),
+	
+	kRegMaskLEDBlueControl = BIT(7)+BIT(6)+BIT(5)+BIT(4)+BIT(3)+BIT(2)+BIT(1)+BIT(0),
+	kRegMaskLEDGreenControl = BIT(15)+BIT(14)+BIT(13)+BIT(12)+BIT(11)+BIT(10)+BIT(9)+BIT(8),
+	kRegMaskLEDRedControl = BIT(23)+BIT(22)+BIT(21)+BIT(20)+BIT(19)+BIT(18)+BIT(17)+BIT(16),
 } RegisterMask;
 
 typedef enum
@@ -3147,7 +3256,45 @@ typedef enum
 	kRegShiftMRFrameLocation = 8,
 	kRegShiftMRBypass = 20,
 	kRegShiftMREnable = 24,
-	kRegShiftMRSupport = 0
+	kRegShiftMRSupport = 0,
+	
+	kRegShiftIDSwitch1 = 0,
+	kRegShiftIDSwitch2 = 1,
+	kRegShiftIDSwitch3 = 2,
+	kRegShiftIDSwitch4 = 3,
+	
+	kRegShiftPWMFanSpeed = 0,
+	kRegShiftPWMFanSpeedControl = 8,
+	
+	kRegShiftPWMFanTachPeriodStatus = 0,
+	kRegShiftPWMFanStatus = 8,
+	
+	kRegShiftBOBAbsent = 0,
+	kRegShiftBOBADAV801UpdateStatus = 4,
+	kRegShiftBOBADAV801DIRLocked = 8,
+	
+	kRegShiftBOBGPIIn1Data = 0,
+	kRegShiftBOBGPIIn2Data = 4,
+	kRegShiftBOBGPIIn3Data = 8,
+	kRegShiftBOBGPIIn4Data = 12,
+	
+	kRegShiftBOBGPIIn1InterruptControl = 0,
+	kRegShiftBOBGPIIn2InterruptControl = 4,
+	kRegShiftBOBGPIIn3InterruptControl = 8,
+	kRegShiftBOBGPIIn4InterruptControl = 12,
+	
+	kRegShiftBOBGPIOut1Data = 0,
+	kRegShiftBOBGPIOut2Data = 4,
+	kRegShiftBOBGPIOut3Data = 8,
+	kRegShiftBOBGPIOut4Data = 12,
+	
+	kRegShiftBOBADAV801Reset = 0,
+	kRegShiftBOBAnalogLevelControl = 4,
+	kRegShiftBOBAnalogInputSelect = 8,
+	
+	kRegShiftLEDBlueControl = 0,
+	kRegShiftLEDGreenControl = 8,
+	kRegShiftLEDRedControl = 16,
 } RegisterShift;
 
 
@@ -5134,7 +5281,7 @@ typedef enum
 	regAuxExtField2Status,						//	Reg 8 - mem_sz_overrun_f2[28], total_bytes_f2[23:0]
 	regAuxExtFieldVBLStartLine,					//	Reg 9 - f2_vbl_start[27:16], f1_vbl_start[11:0]
 	regAuxExtTotalFrameLines,					//	Reg 10 - total_lines[11:0]
-	regAuxExtFID,								//	Reg 11 - fid_low[27:26], fid_hi[11:0]
+	regAuxExtFID,								//	Reg 11 - fid_low[27:16], fid_hi[11:0]
 	regAuxExtPacketMask0,						//	Reg 12 - Packet Ignore bytes
 	regAuxExtPacketMask_First	= regAuxExtPacketMask0,
 	regAuxExtPacketMask1,						//	Reg 13 - Packet Ignore bytes
@@ -5351,7 +5498,9 @@ typedef enum
 													(_x_) == NTV2_TYPE_AJADEBUGLOGGING	||	\
 													(_x_) == NTV2_TYPE_AJABUFFERLOCK	||	\
 													(_x_) == NTV2_TYPE_AJABITSTREAM		||	\
-													(_x_) == NTV2_TYPE_AJADMASTREAM)
+													(_x_) == NTV2_TYPE_AJADMASTREAM		||	\
+													(_x_) == NTV2_TYPE_AJASTREAMCHANNEL	||	\
+													(_x_) == NTV2_TYPE_AJASTREAMBUFFER)
 
 		//	NTV2Buffer FLAGS
 		#define NTV2Buffer_ALLOCATED				BIT(0)		///< @brief Allocated using Allocate function?
@@ -8543,11 +8692,12 @@ typedef enum
 
 		// Stream channel action flags
 		#define NTV2_STREAM_CHANNEL_INITIALIZE			BIT(0)			///< @brief Used in ::NTV2StreamChannel to initialize the stream
-		#define NTV2_STREAM_CHANNEL_START				BIT(1)			///< @brief Used in ::NTV2StreamChannel to start streaming
-		#define NTV2_STREAM_CHANNEL_STOP				BIT(2)			///< @brief Used in ::NTV2StreamChannel to stop streaming
-        #define NTV2_STREAM_CHANNEL_FLUSH				BIT(3)			///< @brief Used in ::NTV2StreamChannel to flush buffer queue
-        #define NTV2_STREAM_CHANNEL_STATUS				BIT(4)			///< @brief Used in ::NTV2StreamChannel to request stream status
-        #define NTV2_STREAM_CHANNEL_WAIT				BIT(5)			///< @brief Used in ::NTV2StreamChannel to wait for signal
+        #define NTV2_STREAM_CHANNEL_RELEASE				BIT(1)			///< @brief Used in ::NTV2StreamChannel to release stream
+		#define NTV2_STREAM_CHANNEL_START				BIT(2)			///< @brief Used in ::NTV2StreamChannel to start streaming
+		#define NTV2_STREAM_CHANNEL_STOP				BIT(3)			///< @brief Used in ::NTV2StreamChannel to stop streaming
+        #define NTV2_STREAM_CHANNEL_FLUSH				BIT(4)			///< @brief Used in ::NTV2StreamChannel to flush buffer queue
+        #define NTV2_STREAM_CHANNEL_STATUS				BIT(5)			///< @brief Used in ::NTV2StreamChannel to request stream status
+        #define NTV2_STREAM_CHANNEL_WAIT				BIT(6)			///< @brief Used in ::NTV2StreamChannel to wait for signal
 
 		// Stream channel state flags
 		#define NTV2_STREAM_CHANNEL_STATE_DISABLED		BIT(0)			///< @brief Used in ::NTV2StreamChannel stream disabled
@@ -8557,10 +8707,9 @@ typedef enum
 		#define NTV2_STREAM_CHANNEL_STATE_ERROR			BIT(4)			///< @brief Used in ::NTV2StreamChannel stream error
 
 		// Stream buffer action flags
-		#define NTV2_STREAM_BUFFER_ADD					BIT(0)			///< @brief Used in ::NTV2StreamBuffer to add buffer to queue
-		#define NTV2_STREAM_BUFFER_COMMIT				BIT(1)			///< @brief Used in ::NTV2StreamBuffer to commit added buffers
+		#define NTV2_STREAM_BUFFER_QUEUE				BIT(1)			///< @brief Used in ::NTV2StreamBuffer to add buffer to queue
+		#define NTV2_STREAM_BUFFER_RELEASE				BIT(2)			///< @brief Used in ::NTV2StreamBuffer to signal on complete
 		#define NTV2_STREAM_BUFFER_STATUS				BIT(3)			///< @brief Used in ::NTV2StreamBuffer to request buffer status
-		#define NTV2_STREAM_BUFFER_SIGNAL				BIT(4)			///< @brief Used in ::NTV2StreamBuffer to signal on complete
 
 		// Stream buffer state flags
 		#define NTV2_STREAM_BUFFER_STATE_QUEUED			BIT(0)			///< @brief Used in ::NTV2StreamBuffer buffer queued
@@ -8578,6 +8727,7 @@ typedef enum
         #define NTV2_STREAM_STATUS_INVALID				BIT(4)			///< @brief Used in ::NTV2Stream invalid parameter
         #define NTV2_STREAM_STATUS_TIMEOUT				BIT(5)			///< @brief Used in ::NTV2Stream timeout
         #define NTV2_STREAM_STATUS_RESOURCE				BIT(6)			///< @brief Used in ::NTV2Stream insufficient resource
+        #define NTV2_STREAM_STATUS_OWNER				BIT(7)			///< @brief Used in ::NTV2Stream not the stream onwer
 
 		NTV2_STRUCT_BEGIN (NTV2StreamChannel)
 			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
@@ -8586,12 +8736,13 @@ typedef enum
 				ULWord			mStatus;            ///< @brief Action status
 				ULWord64		mSteps;				///< @brief Stream number of steps
                 ULWord			mStreamState;		///< @brief Stream state
-				ULWord			mQueueDepth;		///< @brief Queue depth
 				ULWord64		mBufferCookie;		///< @brief Active buffer user cookie
 				LWord64			mStartTime;			///< @brief Stream start time
 				LWord64			mStopTime;			///< @brief Stream stop time
-				ULWord64		mBufferCount;		///< @brief Stream buffer count
-				ULWord64		mRepeatCount;		///< @brief Stream repeat count
+				ULWord64		mQueueCount;		///< @brief Number of buffers queued
+				ULWord64		mReleaseCount;		///< @brief Number of buffers released
+				ULWord64		mActiveCount;		///< @brief Number of buffers active
+				ULWord64		mRepeatCount;		///< @brief Number of buffer repeats
 				ULWord			mReserved[32];		///< @brief Reserved for future expansion.
 			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
 
@@ -8605,6 +8756,14 @@ typedef enum
 				///@}
 
 				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
+
+				/**
+					@brief	Gets the queue depth.
+					@return The depth of the queue.
+				**/
+				inline ULWord GetQueueDepth (void)		{return (ULWord)(mQueueCount - mReleaseCount);}
+
+				std::ostream &	Print (std::ostream & inOutStream) const;
 
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
 
@@ -8639,6 +8798,8 @@ typedef enum
 				///@}
 
 				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
+
+				std::ostream &	Print (std::ostream & inOutStream) const;
 
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
 

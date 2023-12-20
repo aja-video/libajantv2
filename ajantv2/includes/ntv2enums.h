@@ -63,15 +63,6 @@ typedef enum
 	DEVICE_ID_KONA5_OE11				= 0x1079840F,	///< @brief See \ref kona5
 	DEVICE_ID_KONA5_OE12				= 0x10798410,	///< @brief See \ref kona5
 	DEVICE_ID_KONA5_8K_MV_TX			= 0x10798420,	///< @brief See \ref kona5
-	DEVICE_ID_SOJI_3DLUT				= 0x10922400,
-	DEVICE_ID_SOJI_OE1					= 0x10922401,
-	DEVICE_ID_SOJI_OE2					= 0x10922402,
-	DEVICE_ID_SOJI_OE3					= 0x10922403,
-	DEVICE_ID_SOJI_OE4					= 0x10922404,
-	DEVICE_ID_SOJI_OE5					= 0x10922405,
-	DEVICE_ID_SOJI_OE6					= 0x10922406,
-	DEVICE_ID_SOJI_OE7					= 0x10922407,
-    DEVICE_ID_SOJI_DIAGS                = 0x10922499,
 	DEVICE_ID_KONAHDMI					= 0x10767400,	///< @brief See \ref konahdmi
 	DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K	= 0x10646702,	///< @brief See \ref konaip
 	DEVICE_ID_KONAIP_1RX_1TX_2110		= 0x10646705,	///< @brief See \ref konaip
@@ -83,10 +74,19 @@ typedef enum
 	DEVICE_ID_KONALHEPLUS				= 0x10352300,	///< @brief See \ref konalheplus
 	DEVICE_ID_KONALHI					= 0x10266400,	///< @brief See \ref konalhi
 	DEVICE_ID_KONALHIDVI				= 0x10266401,	///< @brief See \ref konalhi
+	DEVICE_ID_KONAX						= 0X10958501,	///< @brief See \ref konax
+	DEVICE_ID_KONAXM					= 0X10958500,	///< @brief See \ref konaxm
+	DEVICE_ID_SOJI_3DLUT				= 0x10922400,
+	DEVICE_ID_SOJI_OE1					= 0x10922401,
+	DEVICE_ID_SOJI_OE2					= 0x10922402,
+	DEVICE_ID_SOJI_OE3					= 0x10922403,
+	DEVICE_ID_SOJI_OE4					= 0x10922404,
+	DEVICE_ID_SOJI_OE5					= 0x10922405,
+	DEVICE_ID_SOJI_OE6					= 0x10922406,
+	DEVICE_ID_SOJI_OE7					= 0x10922407,
+    DEVICE_ID_SOJI_DIAGS                = 0x10922499,
 	DEVICE_ID_TTAP						= 0x10416000,	///< @brief See \ref ttap
 	DEVICE_ID_TTAP_PRO					= 0x10879000,	///< @brief See \ref ttappro
-	DEVICE_ID_KONAXM					= 0X10958500,	///< @brief See \ref gallifrey
-	DEVICE_ID_KONAX						= 0X10958501,	///< @brief See \ref gallifrey
 	DEVICE_ID_NOTFOUND				= 0xFFFFFFFF,		///< @brief Invalid or "not found"
 	DEVICE_ID_INVALID				= DEVICE_ID_NOTFOUND
 
@@ -3031,6 +3031,7 @@ typedef enum
 	NTV2_KLHiBox,				// Kona LHI
 	NTV2_KLHePlusBox,			// Kona LHe+
 	NTV2_K3GBox,				// Kona3G
+	NTV2_BreakoutBoard,			// KonaX
 	NTV2_MAX_NUM_BreakoutTypes,
 	NTV2_BreakoutType_Invalid	= NTV2_BreakoutNone
 } NTV2BreakoutType;

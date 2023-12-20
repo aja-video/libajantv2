@@ -53,33 +53,33 @@ static const uint32_t gNTV2InputSourceToANCChannel[NTV2_NUM_INPUTSOURCES+1] = {
 //-------------------------------------------------------------------------------------------------------
 //	AutoCirculateControl
 //-------------------------------------------------------------------------------------------------------
-Ntv2Status AutoCirculateControl(NTV2AutoCirc* pAutoCirc, AUTOCIRCULATE_DATA* psControl)
+Ntv2Status AutoCircControl(NTV2AutoCirc* pAutoCirc, AUTOCIRCULATE_DATA_64* psControl)
 {
 	Ntv2Status status = NTV2_STATUS_SUCCESS;
 
 	switch (psControl->eCommand)
 	{
 	case eInitAutoCirc:
-		status = AutoCirculateInit (pAutoCirc,
-									   psControl->channelSpec, 
-									   psControl->lVal1, 
-									   psControl->lVal2,
-									   (NTV2AudioSystem)psControl->lVal3,
-									   psControl->lVal4,
-									   psControl->bVal1, 
-									   psControl->bVal2, 
-									   psControl->bVal3, 
-									   psControl->bVal4, 
-									   psControl->bVal5, 
-									   psControl->bVal6, 
-									   psControl->bVal7,
-									   psControl->bVal8,
-									   ((psControl->lVal6 & AUTOCIRCULATE_WITH_FIELDS) != 0),
-									   ((psControl->lVal6 & AUTOCIRCULATE_WITH_HDMIAUX) != 0));
+		status = AutoCircInit (pAutoCirc,
+							   psControl->channelSpec,
+							   psControl->lVal1,
+							   psControl->lVal2,
+							   (NTV2AudioSystem)psControl->lVal3,
+							   psControl->lVal4,
+							   psControl->bVal1,
+							   psControl->bVal2,
+							   psControl->bVal3,
+							   psControl->bVal4,
+							   psControl->bVal5,
+							   psControl->bVal6,
+							   psControl->bVal7,
+							   psControl->bVal8,
+							   ((psControl->lVal6 & AUTOCIRCULATE_WITH_FIELDS) != 0),
+							   ((psControl->lVal6 & AUTOCIRCULATE_WITH_HDMIAUX) != 0));
 		break;
 
 	case eStartAutoCirc:
-		status = AutoCirculateStart(pAutoCirc, psControl->channelSpec, 0);
+		status = AutoCircStart(pAutoCirc, psControl->channelSpec, 0);
 		break;
 
 	case eStartAutoCircAtTime:
@@ -87,32 +87,32 @@ Ntv2Status AutoCirculateControl(NTV2AutoCirc* pAutoCirc, AUTOCIRCULATE_DATA* psC
 			uint64_t ulHigh = (uint32_t)psControl->lVal1;
 			uint64_t ulLow = (uint32_t)psControl->lVal2;
 			int64_t startTime = (int64_t)((ulHigh << 32) | ulLow);
-			status = AutoCirculateStart(pAutoCirc, psControl->channelSpec, startTime);
+			status = AutoCircStart(pAutoCirc, psControl->channelSpec, startTime);
 			break;
 		}
 
 	case eStopAutoCirc:
-		status = AutoCirculateStop(pAutoCirc, psControl->channelSpec);
+		status = AutoCircStop(pAutoCirc, psControl->channelSpec);
 		break;
 
 	case eAbortAutoCirc:
-		status = AutoCirculateAbort(pAutoCirc, psControl->channelSpec);
+		status = AutoCircAbort(pAutoCirc, psControl->channelSpec);
 		break;
 
 	case ePauseAutoCirc:
-		status = AutoCirculatePause(pAutoCirc, psControl->channelSpec, psControl->bVal1, psControl->bVal2);
+		status = AutoCircPause(pAutoCirc, psControl->channelSpec, psControl->bVal1, psControl->bVal2);
 		break;
 
 	case eFlushAutoCirculate:
-        status = AutoCirculateFlush(pAutoCirc, psControl->channelSpec, psControl->bVal1);
+        status = AutoCircFlush(pAutoCirc, psControl->channelSpec, psControl->bVal1);
 		break;
 
 	case ePrerollAutoCirculate:
-		status = AutoCirculatePreroll(pAutoCirc, psControl->channelSpec, psControl->lVal1);
+		status = AutoCircPreroll(pAutoCirc, psControl->channelSpec, psControl->lVal1);
 		break;
 
 	case eSetActiveFrame:
-		status = AutoCirculateSetActiveFrame(pAutoCirc, psControl->channelSpec, psControl->lVal1);
+		status = AutoCircSetActiveFrame(pAutoCirc, psControl->channelSpec, psControl->lVal1);
 		break;
 
 	default:
@@ -149,7 +149,7 @@ Ntv2Status AutoCirculateControl(NTV2AutoCirc* pAutoCirc, AUTOCIRCULATE_DATA* psC
 		switch (psControl->eCommand)
 		{
 		case eStartAutoCirc:
-			status = AutoCirculateStart(pAutoCirc, channel, 0);
+			status = AutoCircStart(pAutoCirc, channel, 0);
 			break;
 
 		case eStartAutoCircAtTime:
@@ -157,32 +157,32 @@ Ntv2Status AutoCirculateControl(NTV2AutoCirc* pAutoCirc, AUTOCIRCULATE_DATA* psC
 				uint64_t ulHigh = (uint32_t)psControl->lVal1;
 				uint64_t ulLow = (uint32_t)psControl->lVal2;
 				int64_t startTime = (int64_t)((ulHigh << 32) | ulLow);
-				status = AutoCirculateStart(pAutoCirc, channel, startTime);
+				status = AutoCircStart(pAutoCirc, channel, startTime);
 				break;
 			}
 
 		case eStopAutoCirc:
-			status = AutoCirculateStop(pAutoCirc,channel);
+			status = AutoCircStop(pAutoCirc,channel);
 			break;
 
 		case eAbortAutoCirc:
-			status = AutoCirculateAbort(pAutoCirc,channel);
+			status = AutoCircAbort(pAutoCirc,channel);
 			break;
 
 		case ePauseAutoCirc:
-			status = AutoCirculatePause(pAutoCirc,channel, psControl->bVal1, psControl->bVal2);
+			status = AutoCircPause(pAutoCirc,channel, psControl->bVal1, psControl->bVal2);
 			break;
 
 		case eFlushAutoCirculate:
-            status = AutoCirculateFlush(pAutoCirc,channel, psControl->bVal1);
+            status = AutoCircFlush(pAutoCirc,channel, psControl->bVal1);
 			break;
 
 		case ePrerollAutoCirculate:
-			status = AutoCirculatePreroll(pAutoCirc,channel, psControl->lVal1);
+			status = AutoCircPreroll(pAutoCirc,channel, psControl->lVal1);
 			break;
 
 		case eSetActiveFrame:
-			status = AutoCirculateSetActiveFrame(pAutoCirc, channel, psControl->lVal1);
+			status = AutoCircSetActiveFrame(pAutoCirc, channel, psControl->lVal1);
 
 		default:
 			status = NTV2_STATUS_BAD_PARAMETER;
@@ -199,32 +199,41 @@ Ntv2Status AutoCirculateControl(NTV2AutoCirc* pAutoCirc, AUTOCIRCULATE_DATA* psC
 }
 
 //-------------------------------------------------------------------------------------------------------
-//	AutoCirculateInit
+//	AutoCircInit
 //-------------------------------------------------------------------------------------------------------
-Ntv2Status AutoCirculateInit(NTV2AutoCirc* pAutoCirc,
-								NTV2Crosspoint lChannelSpec, 
-								int32_t lStartFrameNum,
-								int32_t lEndFrameNum, 
-								NTV2AudioSystem lAudioSystem,
-								int32_t lChannelCount,
-								bool bWithAudio, 
-								bool bWithRP188, 
-								bool bFbfChange, 
-								bool bFboChange , 
-								bool bWithColorCorrection, 
-								bool bWithVidProc,
-								bool bWithCustomAncData,
-								bool bWithLTC,
-								bool bWithFields,
-								bool bWithHDMIAux)
+Ntv2Status AutoCircInit(NTV2AutoCirc* pAutoCirc,
+						NTV2Crosspoint lChannelSpec,
+						int32_t lStartFrameNum,
+						int32_t lEndFrameNum,
+						NTV2AudioSystem lAudioSystem,
+						int32_t lChannelCount,
+						bool bWithAudio,
+						bool bWithRP188, 
+						bool bFbfChange,
+						bool bFboChange ,
+						bool bWithColorCorrection,
+						bool bWithVidProc,
+						bool bWithCustomAncData,
+						bool bWithLTC,
+						bool bWithFields,
+						bool bWithHDMIAux)
 {
 	if (ILLEGAL_CHANNELSPEC(lChannelSpec))
         return NTV2_STATUS_BAD_PARAMETER;
 
 	NTV2DeviceID deviceID = pAutoCirc->deviceID;
 	Ntv2SystemContext* pSysCon = pAutoCirc->pSysCon;
+	
+	if (lStartFrameNum >= MAX_FRAMEBUFFERS)
+		return NTV2_STATUS_BAD_PARAMETER;
+	
+	if (lEndFrameNum >= MAX_FRAMEBUFFERS)
+		return NTV2_STATUS_BAD_PARAMETER;
 
 	uint32_t channelRange = lEndFrameNum - lStartFrameNum + 1;
+	if (channelRange >= MAX_FRAMEBUFFERS)
+		return NTV2_STATUS_BAD_PARAMETER;
+	
 	uint32_t csIndex = GetIndexForNTV2Crosspoint(lChannelSpec);
 	if(lChannelCount > 1)
 		pAutoCirc->bMultiChannel = true;
@@ -246,7 +255,7 @@ Ntv2Status AutoCirculateInit(NTV2AutoCirc* pAutoCirc,
 		if (pAuto->state != NTV2_AUTOCIRCULATE_DISABLED)
 			return NTV2_STATUS_BUSY;
 
-		AutoCirculateReset(pAutoCirc, channelSpecAtIndex);  // Reset AutoCirculate Database
+		AutoCircReset(pAutoCirc, channelSpecAtIndex);  // Reset AutoCirculate Database
 
 		pAuto->pSysCon						= pAutoCirc->pSysCon;
 		pAuto->pFunCon						= pAutoCirc->pFunCon;
@@ -268,7 +277,7 @@ Ntv2Status AutoCirculateInit(NTV2AutoCirc* pAutoCirc,
 		pAuto->audioSystem					= lAudioSystem;
 
 		// Setup register so next frame interrupt will clock in frame values.
-		ntv2Message("CNTV2Device::AutoCirculateInit - Auto %s: using frames %d to %d\n",
+		ntv2Message("CNTV2Device::AutoCircInit - Auto %s: using frames %d to %d\n",
 			CrosspointName[pAuto->channelSpec], pAuto->startFrame, pAuto->endFrame);
 
 		SetMode(pSysCon, ACChannel, NTV2_IS_INPUT_CROSSPOINT(pAuto->channelSpec) ? NTV2_MODE_CAPTURE : NTV2_MODE_DISPLAY);
@@ -325,7 +334,7 @@ Ntv2Status AutoCirculateInit(NTV2AutoCirc* pAutoCirc,
 				pAuto->audioDropsCompleted = 0;
 				StopAudioPlayback(pSysCon, pAuto->audioSystem);
 			}
-			ntv2Message("CNTV2Device::AutoCirculateInit - Auto %s: circulateWithAudio%d\n",
+			ntv2Message("CNTV2Device::AutoCircInit - Auto %s: circulateWithAudio%d\n",
 						CrosspointName[pAuto->channelSpec], pAuto->audioSystem);
 		}
 
@@ -341,10 +350,27 @@ Ntv2Status AutoCirculateInit(NTV2AutoCirc* pAutoCirc,
 			{
 				if (NTV2_IS_VALID_CHANNEL(pAutoCirc->ancInputChannel[ACChannel]))
 				{
-					EnableAncInserter(pSysCon, pAutoCirc->ancInputChannel[ACChannel], false);
-					EnableAncExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], false);
-					SetupAncExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel]);
-					EnableAncExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], true);
+					if (pAuto->circulateWithHDMIAux)
+					{
+						if (NTV2DeviceCanDoCustomAux(deviceID))
+						{
+							EnableAuxExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], false);
+							SetupAuxExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel]);
+							EnableAuxExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], true);
+						}
+						else
+						{
+							pAuto->circulateWithHDMIAux = false;
+							pAuto->circulateWithCustomAncData = false;
+						}
+					}
+					else
+					{				
+						EnableAncInserter(pSysCon, pAutoCirc->ancInputChannel[ACChannel], false);
+						EnableAncExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], false);
+						SetupAncExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel]);
+						EnableAncExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], true);
+					}
 				}
 			}
 			else
@@ -367,7 +393,7 @@ Ntv2Status AutoCirculateInit(NTV2AutoCirc* pAutoCirc,
 				
 			}
 
-			ntv2Message("CNTV2Device::AutoCirculateInit - Auto %s: circulateWithANC\n",
+			ntv2Message("CNTV2Device::AutoCircInit - Auto %s: circulateWithANC\n",
 						CrosspointName[pAuto->channelSpec]);
 		}
 		else if (NTV2DeviceCanDoCustomAnc(deviceID))
@@ -397,6 +423,15 @@ Ntv2Status AutoCirculateInit(NTV2AutoCirc* pAutoCirc,
 			}
 		}
 
+		if (!pAuto->circulateWithHDMIAux)
+		{
+			if (NTV2_IS_INPUT_CROSSPOINT(pAuto->channelSpec) &&
+				NTV2DeviceCanDoCustomAux(deviceID))
+			{
+				EnableAncExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], false);
+			}
+		}
+
 		if (pAuto->circulateWithRP188 || pAuto->circulateWithLTC)
 		{
 			SetRP188Mode(pSysCon, ACChannel, NTV2_RP188_OUTPUT);
@@ -420,7 +455,7 @@ Ntv2Status AutoCirculateInit(NTV2AutoCirc* pAutoCirc,
 					SetRP188Mode(pSysCon, (NTV2Channel)i, NTV2_RP188_OUTPUT);
 				}
 			}
-			ntv2Message("CNTV2Device::AutoCirculateInit - Auto %s: circulateWithRP188\n",
+			ntv2Message("CNTV2Device::AutoCircInit - Auto %s: circulateWithRP188\n",
 						CrosspointName[pAuto->channelSpec]);
 		}
    
@@ -441,9 +476,9 @@ Ntv2Status AutoCirculateInit(NTV2AutoCirc* pAutoCirc,
 }
 
 //-------------------------------------------------------------------------------------------------------
-//	AutoCirculateStart
+//	AutoCircStart
 //-------------------------------------------------------------------------------------------------------
-Ntv2Status AutoCirculateStart(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int64_t startTime)
+Ntv2Status AutoCircStart(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int64_t startTime)
 {
 	if (ILLEGAL_CHANNELSPEC(channelSpec))
         return NTV2_STATUS_BAD_PARAMETER;
@@ -507,7 +542,14 @@ Ntv2Status AutoCirculateStart(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpe
 			{
 				if (NTV2_IS_VALID_CHANNEL(pAutoCirc->ancInputChannel[ACChannel]))
 				{
-					SetAncExtWriteParams(pSysCon, pAutoCirc->ancInputChannel[ACChannel], pAuto->startFrame);
+					if (pAuto->circulateWithHDMIAux)
+					{
+						SetAuxExtWriteParams(pSysCon, pAutoCirc->ancInputChannel[ACChannel], pAuto->startFrame);
+					}
+					else
+					{
+						SetAncExtWriteParams(pSysCon, pAutoCirc->ancInputChannel[ACChannel], pAuto->startFrame);
+					}
 				}
 			}
 		}
@@ -527,19 +569,19 @@ Ntv2Status AutoCirculateStart(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpe
 			}
 			if (pAuto->circulateWithHDMIAux)
 			{
-				AutoCirculateWriteHDMIAux(pAutoCirc, pInternalFrameStamp->auxData, pInternalFrameStamp->auxDataSize);
+				AutoCircWriteHDMIAux(pAutoCirc, pInternalFrameStamp->auxData, pInternalFrameStamp->auxDataSize);
 			}
 			if (pAuto->circulateWithColorCorrection)
 			{
-				AutoCirculateSetupColorCorrector(pAutoCirc, pautoChannelSpec, &pAuto->frameStamp[pAuto->startFrame].colorCorrectionInfo);
+				AutoCircSetupColorCorrector(pAutoCirc, pautoChannelSpec, &pAuto->frameStamp[pAuto->startFrame].colorCorrectionInfo);
 			}
 			if (pAuto->circulateWithVidProc)
 			{
-				AutoCirculateSetupVidProc(pAutoCirc, pautoChannelSpec, &pAuto->frameStamp[pAuto->startFrame].vidProcInfo);
+				AutoCircSetupVidProc(pAutoCirc, pautoChannelSpec, &pAuto->frameStamp[pAuto->startFrame].vidProcInfo);
 			}
-			if (pInternalFrameStamp->xena2RoutingTable.numEntries > 0)
+			if (pInternalFrameStamp->routingTable.numEntries > 0)
 			{
-				AutoCirculateSetupXena2Routing(pAutoCirc, &pInternalFrameStamp->xena2RoutingTable);
+				AutoCircSetupRouting(pAutoCirc, &pInternalFrameStamp->routingTable);
 			}
 		}
 
@@ -550,13 +592,13 @@ Ntv2Status AutoCirculateStart(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpe
 	    
 		if(pAuto->startTime == 0)
 		{
-			ntv2Message("CNTV2Device:AutoCirculateStart - Auto %s: AutoCirculateStart completed\n",
+			ntv2Message("CNTV2Device:AutoCircStart - Auto %s: AutoCircStart completed\n",
 						CrosspointName[pAuto->channelSpec]);
 		}
 		else
 		{
 			int64_t currentTime = ntv2Time100ns();
-			ntv2Message("CNTV2Device:AutoCirculateStart - Auto %s: AutoCirculateStartAtTime %lld  current %lld\n",
+			ntv2Message("CNTV2Device:AutoCircStart - Auto %s: AutoCircStartAtTime %lld  current %lld\n",
 						CrosspointName[pAuto->channelSpec],
 						(long long)startTime, (long long)currentTime);
 		}
@@ -568,9 +610,9 @@ Ntv2Status AutoCirculateStart(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpe
 }
 
 //-------------------------------------------------------------------------------------------------------
-//	AutoCirculateStop
+//	AutoCircStop
 //-------------------------------------------------------------------------------------------------------
-Ntv2Status AutoCirculateStop(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec)
+Ntv2Status AutoCircStop(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec)
 {
 
     if (ILLEGAL_CHANNELSPEC(channelSpec))
@@ -604,16 +646,16 @@ Ntv2Status AutoCirculateStop(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec
 
 	//Mac SpinlockRelease
     
-	ntv2Message("CNTV2Device:AutoCirculateStop - Auto %s: stop completed\n",
+	ntv2Message("CNTV2Device:AutoCircStop - Auto %s: stop completed\n",
 				CrosspointName[pAutoPrimary->channelSpec]);
 
 	return NTV2_STATUS_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------------
-//	AutoCirculateAbort
+//	AutoCircAbort
 //-------------------------------------------------------------------------------------------------------
-Ntv2Status AutoCirculateAbort(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec)
+Ntv2Status AutoCircAbort(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec)
 {
     if (ILLEGAL_CHANNELSPEC(channelSpec))
 		return NTV2_STATUS_BAD_PARAMETER;
@@ -646,7 +688,14 @@ Ntv2Status AutoCirculateAbort(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpe
 				{
 					if (NTV2_IS_VALID_CHANNEL(pAutoCirc->ancInputChannel[ACChannel]))
 					{
-						EnableAncExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], false);
+						if (pAuto->circulateWithHDMIAux)
+						{
+							EnableAuxExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], false);
+						}
+						else
+						{
+							EnableAncExtractor(pSysCon, pAutoCirc->ancInputChannel[ACChannel], false);
+						}
 					}
 				}
 			}
@@ -690,16 +739,16 @@ Ntv2Status AutoCirculateAbort(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpe
 
 	//Mac SpinlockRelease
     
-	ntv2Message("CNTV2Device::AutoCirculateAbort - Auto %s: abort completed\n",
+	ntv2Message("CNTV2Device::AutoCircAbort - Auto %s: abort completed\n",
 				CrosspointName[pAutoPrimary->channelSpec]);
 
 	return NTV2_STATUS_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------------
-//	AutoCirculatePause - Only works for playback
+//	AutoCircPause - Only works for playback
 //-------------------------------------------------------------------------------------------------------
-Ntv2Status AutoCirculatePause(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, bool bPlay, bool bClearDF)
+Ntv2Status AutoCircPause(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, bool bPlay, bool bClearDF)
 {
     if (ILLEGAL_CHANNELSPEC(channelSpec))
         return NTV2_STATUS_BAD_PARAMETER;
@@ -731,16 +780,16 @@ Ntv2Status AutoCirculatePause(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpe
 
 	//Mac SpinlockRelease
     
-	ntv2Message("CNTV2Device::AutoCirculatePause - Auto %s: AutoCirculatePause, bPlay=%d\n", 
+	ntv2Message("CNTV2Device::AutoCircPause - Auto %s: AutoCircPause, bPlay=%d\n", 
 				CrosspointName[pAutoPrimary->channelSpec], (int) bPlay);
 
 	return NTV2_STATUS_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------------
-//	AutoCirculateFlush
+//	AutoCircFlush
 //-------------------------------------------------------------------------------------------------------
-Ntv2Status AutoCirculateFlush(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, bool bClearDF)
+Ntv2Status AutoCircFlush(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, bool bClearDF)
 {
     if (ILLEGAL_CHANNELSPEC(channelSpec))
         return NTV2_STATUS_BAD_PARAMETER;
@@ -792,7 +841,7 @@ Ntv2Status AutoCirculateFlush(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpe
 		}	
 		else 
 		{
-			ntv2Message("CNTV2Device::AutoCirculateFlush - Auto %s: flush active=%d, first flush=%d\n", 
+			ntv2Message("CNTV2Device::AutoCircFlush - Auto %s: flush active=%d, first flush=%d\n", 
 						CrosspointName[pAuto->channelSpec], lCurFrame, KAUTO_NEXTFRAME(lCurFrame, pAuto));
 			// Flush and frames queued for playback (normally
 			// occurs in pause mode, but play would work as well
@@ -816,7 +865,7 @@ Ntv2Status AutoCirculateFlush(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpe
 				pAuto->frameStamp[lStartFrame].videoTransferPending = false;
 			}
 
-			ntv2Message("CNTV2Device::AutoCirculateFlush - Auto %s: flushEnd active=%d, start flush=%d\n", 
+			ntv2Message("CNTV2Device::AutoCircFlush - Auto %s: flushEnd active=%d, start flush=%d\n", 
 						CrosspointName[pAuto->channelSpec], lCurFrame, lStartFrame);
 
 			if (pAuto->circulateWithAudio)
@@ -833,9 +882,9 @@ Ntv2Status AutoCirculateFlush(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpe
 }
 
 //-------------------------------------------------------------------------------------------------------
-//	AutoCirculatePreroll
+//	AutoCircPreroll
 //-------------------------------------------------------------------------------------------------------
-Ntv2Status AutoCirculatePreroll(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t lPrerollFrames)
+Ntv2Status AutoCircPreroll(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t lPrerollFrames)
 {	   
 	Ntv2SystemContext* pSysCon = pAutoCirc->pSysCon;
 
@@ -867,7 +916,7 @@ Ntv2Status AutoCirculatePreroll(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelS
 		if (!pAuto->recording) 
 		{
 			// Always preroll last frame (rev->fwd transitions)
-			bool bRet = AutoCirculateFindNextAvailFrame(pAuto);
+			bool bRet = AutoCircFindNextAvailFrame(pAuto);
 			if (bRet)
 				lCurFrame = pAuto->nextTransferFrame;
 			else
@@ -893,7 +942,7 @@ Ntv2Status AutoCirculatePreroll(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelS
 			// Use signed arithmetic to all reduction of preroll as well as addition
 			pAuto->frameStamp[lCurFrame].validCount = 
 				(int32_t)pAuto->frameStamp[lCurFrame].validCount + lPrerollFrames;
-			ntv2Message("CNTV2Device::AutoCirculatePreroll - Auto %s: preroll %d frame (%d) == %d\n", 
+			ntv2Message("CNTV2Device::AutoCircPreroll - Auto %s: preroll %d frame (%d) == %d\n", 
 						CrosspointName[pAuto->channelSpec], lCurFrame, lPrerollFrames, pAuto->frameStamp[lCurFrame].validCount);	
 		}
 	}
@@ -904,9 +953,9 @@ Ntv2Status AutoCirculatePreroll(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelS
 }
 
 //-------------------------------------------------------------------------------------------------------
-//	AutoCirculateSetActiveFrame
+//	AutoCircSetActiveFrame
 //-------------------------------------------------------------------------------------------------------
-Ntv2Status AutoCirculateSetActiveFrame(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t lActiveFrame)
+Ntv2Status AutoCircSetActiveFrame(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t lActiveFrame)
 {
 	NTV2DeviceID deviceID = pAutoCirc->deviceID;
 	Ntv2SystemContext* pSysCon = pAutoCirc->pSysCon;
@@ -915,7 +964,7 @@ Ntv2Status AutoCirculateSetActiveFrame(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint c
 		return NTV2_STATUS_BAD_PARAMETER;
 
 	//if (GetKernelModeDebugLevel() > 6)
-	//DebugLog("AutoCirculateSetActiveFrame %s activeFrame %d\n", CrosspointName[channelSpec], lActiveFrame);
+	//DebugLog("AutoCircSetActiveFrame %s activeFrame %d\n", CrosspointName[channelSpec], lActiveFrame);
 
 	// Use the primay channelSpec to get params in the event we are ganging channels
 	INTERNAL_AUTOCIRCULATE_STRUCT* pAutoPrimary = &pAutoCirc->autoCirculate[channelSpec];
@@ -936,7 +985,7 @@ Ntv2Status AutoCirculateSetActiveFrame(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint c
 	uint32_t csIndex = GetIndexForNTV2Crosspoint(channelSpec);
 	uint32_t activeFrame = lActiveFrame;
 
-	//MAC LockAcquire(mPAutoCirculateLock, "AutoCirculatePreroll");
+	//MAC LockAcquire(mPAutoCirculateLock, "AutoCircPreroll");
 
 	for (uint32_t loopCount = 0; loopCount < (uint32_t)pAutoPrimary->channelCount; loopCount++)
 	{
@@ -960,9 +1009,9 @@ Ntv2Status AutoCirculateSetActiveFrame(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint c
 	return NTV2_STATUS_SUCCESS;
 }
 //-------------------------------------------------------------------------------------------------------
-//	AutoCirculateReset
+//	AutoCircReset
 //-------------------------------------------------------------------------------------------------------
-void AutoCirculateReset(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec)
+void AutoCircReset(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec)
 {
 	Ntv2SystemContext* pSysCon = pAutoCirc->pSysCon;
 
@@ -995,11 +1044,11 @@ void AutoCirculateReset(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec)
 	ntv2WriteVirtualRegister(pSysCon, kVRegChannelCrosspointFirst + (uint32_t)ACChannel, NTV2CROSSPOINT_INVALID);
 }
 
-Ntv2Status AutoCirculateGetStatus(NTV2AutoCirc* pAutoCirc, AUTOCIRCULATE_STATUS* pUserOutBuffer)
+Ntv2Status AutoCircGetStatus(NTV2AutoCirc* pAutoCirc, AUTOCIRCULATE_STATUS* pUserOutBuffer)
 {
 	Ntv2SystemContext* pSysCon = pAutoCirc->pSysCon;
 
-	//ntv2Message("CNTV2Device::AutoCirculateGetStatus %08x\n", pUserOutBuffer);
+	//ntv2Message("CNTV2Device::AutoCircGetStatus %08x\n", pUserOutBuffer);
 	if (ILLEGAL_CHANNELSPEC(pUserOutBuffer->acCrosspoint))
 		return NTV2_STATUS_BAD_PARAMETER;
 
@@ -1016,7 +1065,7 @@ Ntv2Status AutoCirculateGetStatus(NTV2AutoCirc* pAutoCirc, AUTOCIRCULATE_STATUS*
 	pUserOutBuffer->acAudioClockCurrentTime = AutoGetAudioClock(pAutoCirc->pFunCon);
 	pUserOutBuffer->acFramesProcessed = pAuto->framesProcessed;
 	pUserOutBuffer->acFramesDropped = pAuto->droppedFrames;
-	pUserOutBuffer->acBufferLevel = AutoCirculateGetBufferLevel(pAuto);
+	pUserOutBuffer->acBufferLevel = AutoCircGetBufferLevel(pAuto);
 
 	pUserOutBuffer->acAudioSystem = pAuto->circulateWithAudio ? pAuto->audioSystem : NTV2_AUDIOSYSTEM_INVALID;
 
@@ -1033,7 +1082,7 @@ Ntv2Status AutoCirculateGetStatus(NTV2AutoCirc* pAutoCirc, AUTOCIRCULATE_STATUS*
 	return NTV2_STATUS_SUCCESS;
 }
 
-Ntv2Status AutoCirculateGetFrameStamp (NTV2AutoCirc* pAutoCirc,
+Ntv2Status AutoCircGetFrameStamp (NTV2AutoCirc* pAutoCirc,
 										NTV2Crosspoint channelSpec,
 										int32_t ulFrameNum,
 									   FRAME_STAMP_STRUCT *pFrameStamp)
@@ -1133,7 +1182,7 @@ Ntv2Status AutoCirculateGetFrameStamp (NTV2AutoCirc* pAutoCirc,
 	return NTV2_STATUS_SUCCESS;
 }
 
-Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
+Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 									AUTOCIRCULATE_TRANSFER* pTransferStruct)
 {
 	NTV2DeviceID deviceID = pAutoCirc->deviceID;
@@ -1142,7 +1191,7 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 	NTV2Crosspoint channelSpec = pTransferStruct->acCrosspoint;
 	if (ILLEGAL_CHANNELSPEC(channelSpec))
 	{
-		ntv2Message("AutoCirculateTransfer invalid crosspoint channel %d\n", channelSpec);
+		ntv2Message("AutoCircTransfer invalid crosspoint channel %d\n", channelSpec);
 		return NTV2_STATUS_BAD_PARAMETER;
 	}
 
@@ -1170,7 +1219,7 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 	{
 		// -1 indicates we should automatically choose the next frame.
 		// We will increment pAuto->NextFrame, and use that value.
-		bool bRet = AutoCirculateFindNextAvailFrame(pAuto);
+		bool bRet = AutoCircFindNextAvailFrame(pAuto);
 		if (bRet)
 			frameNumber = pAuto->nextTransferFrame;
 		else
@@ -1189,7 +1238,7 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 	{
 		// Must be first transfer
 		frameNumber = pAuto->startFrame;
-		ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: could not find valid transfer frame, setting to %d\n",
+		ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: could not find valid transfer frame, setting to %d\n",
 					CrosspointName[pAuto->channelSpec], frameNumber);
 	}
 
@@ -1201,7 +1250,7 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 		if ((ulFrameOffset + pTransferStruct->acVideoBuffer.fByteCount >= GetFrameBufferSize(pSysCon, channel)) &&
 			(ntv2ReadVirtualRegister(pSysCon, kVRegAdvancedIndexing) == 0))
 		{
-			ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: OutofRange vbs(%08X) fo(%08X)\n",
+			ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: OutofRange vbs(%08X) fo(%08X)\n",
 						CrosspointName[pAuto->channelSpec], pTransferStruct->acVideoBuffer.fByteCount, ulFrameOffset);
 			pTransferStruct->acTransferStatus.acTransferFrame = NTV2_INVALID_FRAME;
 			return NTV2_STATUS_FAIL;
@@ -1243,23 +1292,23 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 		{
 			if (pAutoPrimary->channelCount != 1)
 			{
-				ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: DMA frame %d P2P multiple channels not supported (prepare)\n",
+				ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA frame %d P2P multiple channels not supported (prepare)\n",
 							CrosspointName[pAuto->channelSpec], frameNumber);
 				return NTV2_STATUS_BAD_PARAMETER;
 			}
 
-			AutoBeginAutoCirculateTransfer(frameNumber, pTransferStruct, pAuto);
+			BeginAutoCircTransfer(frameNumber, pTransferStruct, pAuto);
 			updateValid = true;
 
 			if (pAuto->recording)
 			{
-				ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: DMA frame %d P2P video dma from host transfer not supported (prepare)\n",
+				ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA frame %d P2P video dma from host transfer not supported (prepare)\n",
 					CrosspointName[pAuto->channelSpec], frameNumber);
 				status = NTV2_STATUS_BAD_PARAMETER;
 			}
 			else if (!AutoBoardCanDoP2P(pAutoCirc->pFunCon))
 			{
-				ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: DMA frame %d P2P target not supported (prepare)\n",
+				ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA frame %d P2P target not supported (prepare)\n",
 							CrosspointName[pAuto->channelSpec], frameNumber);
 
 				status = NTV2_STATUS_BAD_PARAMETER;
@@ -1293,7 +1342,7 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 						}
 						else
 						{
-							ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: DMA frame %d error - message register physical address is 0 (prepare)\n",
+							ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA frame %d error - message register physical address is 0 (prepare)\n",
 										CrosspointName[pAuto->channelSpec], frameNumber);
 							status = NTV2_STATUS_BAD_PARAMETER;
 						}
@@ -1301,12 +1350,12 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 				}
 				else
 				{
-					ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: DMA frame %d error - no P2P target memory aperture (prepare)\n",
+					ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA frame %d error - no P2P target memory aperture (prepare)\n",
 								CrosspointName[pAuto->channelSpec], frameNumber);
 					status = NTV2_STATUS_BAD_PARAMETER;
 				}
 
-				if (AutoCirculateP2PCopy(pAutoCirc,
+				if (AutoCircP2PCopy(pAutoCirc,
 											&dmaData,
 											(PAUTOCIRCULATE_P2P_STRUCT)pTransferStruct->acVideoBuffer.fUserSpacePtr,
 											false))
@@ -1316,7 +1365,7 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 				}
 				else
 				{
-					ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: DMA frame %d P2P buffer mapping error (prepare)\n",
+					ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA frame %d P2P buffer mapping error (prepare)\n",
 								CrosspointName[pAuto->channelSpec], frameNumber);
 					status = NTV2_STATUS_BAD_PARAMETER;
 				}
@@ -1326,46 +1375,46 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 		{
 			if (pAuto->recording)
 			{
-				ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: DMA frame %d P2P video dma from host transfer not supported (complete)\n",
+				ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA frame %d P2P video dma from host transfer not supported (complete)\n",
 							CrosspointName[pAuto->channelSpec], frameNumber);
 				status = NTV2_STATUS_BAD_PARAMETER;
 			}
 			else if (!AutoBoardCanDoP2P(pAutoCirc->pFunCon))
 			{
-				ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: DMA frame %d P2P target not supported (complete)\n",
+				ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA frame %d P2P target not supported (complete)\n",
 							CrosspointName[pAuto->channelSpec], frameNumber);
 				status = NTV2_STATUS_BAD_PARAMETER;
 			}
-			AutoBeginAutoCirculateTransfer(frameNumber, pTransferStruct, pAuto);
+			BeginAutoCircTransfer(frameNumber, pTransferStruct, pAuto);
 		}
 		else if ((pTransferStruct->acPeerToPeerFlags & AUTOCIRCULATE_P2P_TRANSFER) == AUTOCIRCULATE_P2P_TRANSFER)
 		{
 			if (pAutoPrimary->channelCount != 1)
 			{
-				ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: DMA frame %d P2P multiple channels not supported (transfer)\n",
+				ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA frame %d P2P multiple channels not supported (transfer)\n",
 							CrosspointName[pAuto->channelSpec], frameNumber);
 				return NTV2_STATUS_BAD_PARAMETER;
 			}
 
-			AutoBeginAutoCirculateTransfer(frameNumber, pTransferStruct, pAuto);
+			BeginAutoCircTransfer(frameNumber, pTransferStruct, pAuto);
 			updateValid = true;
 
 			if (!pAuto->recording)
 			{
-				ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: DMA frame %d P2P video dma from host transfer not supported (transfer)\n",
+				ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA frame %d P2P video dma from host transfer not supported (transfer)\n",
 							CrosspointName[pAuto->channelSpec], frameNumber);
 				status = NTV2_STATUS_BAD_PARAMETER;
 			}
 			else if (!AutoBoardCanDoP2P(pAutoCirc->pFunCon))
 			{
-				ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: DMA frame %d P2P transfer not supported (transfer)\n",
+				ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA frame %d P2P transfer not supported (transfer)\n",
 							CrosspointName[pAuto->channelSpec], frameNumber);
 				status = NTV2_STATUS_BAD_PARAMETER;
 			}
 			else
 			{
 				AUTOCIRCULATE_P2P_STRUCT dmaData;
-				if (AutoCirculateP2PCopy(pAutoCirc,
+				if (AutoCircP2PCopy(pAutoCirc,
 											&dmaData,
 											(PAUTOCIRCULATE_P2P_STRUCT)pTransferStruct->acVideoBuffer.fUserSpacePtr,
 											true))
@@ -1390,7 +1439,7 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 				}
 				else
 				{
-					ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: DMA frame %d P2P buffer mapping error (transfer)\n",
+					ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA frame %d P2P buffer mapping error (transfer)\n",
 								CrosspointName[pAuto->channelSpec], frameNumber);
 					status = NTV2_STATUS_BAD_PARAMETER;
 				}
@@ -1404,7 +1453,7 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 				csIndex++;
 
 				INTERNAL_AUTOCIRCULATE_STRUCT* pAutoTemp = &pAutoCirc->autoCirculate[channelSpecAtIndex];
-				AutoBeginAutoCirculateTransfer((stride * loopCount) + frameNumber, pTransferStruct, pAutoTemp);
+				BeginAutoCircTransfer((stride * loopCount) + frameNumber, pTransferStruct, pAutoTemp);
 			}
 			updateValid = true;
 			//Mac SpinlockRelease
@@ -1416,10 +1465,10 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 				bool bRet = true;
 				// synchronize audio setup with interrupt
 				if (withAudio)
-					bRet = AutoCirculateDmaAudioSetup(pAuto);
+					bRet = AutoCircDmaAudioSetup(pAuto);
 				if (!bRet)
 				{
-					ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: DMA frame %d  audio dma setup failed\n",
+					ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA frame %d  audio dma setup failed\n",
 								CrosspointName[pAuto->channelSpec], frameNumber);
 					return NTV2_STATUS_FAIL;
 				}
@@ -1460,7 +1509,7 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 					}
 
 					// transfer the active field
-					AutoCirculateTransferFields(pAuto, &transfer, frameNumber, false);
+					AutoCircTransferFields(pAuto, &transfer, frameNumber, false);
 
 					AUTO_DMA_PARAMS dmaParams;
 					memset(&dmaParams, 0, sizeof(AUTO_DMA_PARAMS));
@@ -1497,7 +1546,7 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 					{
 						// transfer the drop field
 						transfer = *pTransferStruct;
-						AutoCirculateTransferFields(pAuto, &transfer, frameNumber, true);
+						AutoCircTransferFields(pAuto, &transfer, frameNumber, true);
 
 						AUTO_DMA_PARAMS dmaParams;
 						memset(&dmaParams, 0, sizeof(AUTO_DMA_PARAMS));
@@ -1553,7 +1602,7 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 
 		if (status != NTV2_STATUS_SUCCESS)
 		{
-			ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: DMA frame %d  transfer failed  Ntv2Status = %d\n",
+			ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA frame %d  transfer failed  Ntv2Status = %d\n",
 						CrosspointName[pAuto->channelSpec], frameNumber, status);
 			return status;
 		}
@@ -1566,10 +1615,10 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 			}
 
 			// synchronize audio setup with interrupt
-			bool bRet = AutoCirculateDmaAudioSetup(pAuto);
+			bool bRet = AutoCircDmaAudioSetup(pAuto);
 			if (!bRet)
 			{
-				ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: DMA frame %d  audio dma setup failed\n",
+				ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA frame %d  audio dma setup failed\n",
 							CrosspointName[pAuto->channelSpec], frameNumber);
 				return NTV2_STATUS_FAIL;
 			}
@@ -1588,7 +1637,7 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 			status = AutoDmaTransfer(pAutoCirc->pFunCon, &dmaParams);
 			if (status != NTV2_STATUS_SUCCESS)
 			{
-				ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: DMA audio transfer failed  Ntv2Status = %d\n",
+				ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA audio transfer failed  Ntv2Status = %d\n",
 							CrosspointName[pAuto->channelSpec], status);
 				return status;
 			}
@@ -1619,7 +1668,7 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 			status = AutoDmaTransfer(pAutoCirc->pFunCon, &dmaParams);
 			if (status != NTV2_STATUS_SUCCESS)
 			{
-				ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: DMA ANC transfer failed  Ntv2Status = %d\n",
+				ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA ANC transfer failed  Ntv2Status = %d\n",
 							CrosspointName[pAuto->channelSpec], status);
 				return status;
 			}
@@ -1633,14 +1682,14 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 
 			INTERNAL_AUTOCIRCULATE_STRUCT* pAutoTemp = &pAutoCirc->autoCirculate[channelSpecAtIndex];
 
-			AutoCompleteAutoCirculateTransfer((stride * loopCount) + frameNumber,
+			CompleteAutoCircTransfer((stride * loopCount) + frameNumber,
 											  &(pTransferStruct->acTransferStatus),
 											  pAutoTemp, updateValid, transferPending);
 		}
 	}
 	else
 	{
-		ntv2Message("CNTV2Device::AutoCirculateTransfer - Auto %s: NTV2_INVALID_FRAME error\n",
+		ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: NTV2_INVALID_FRAME error\n",
 					CrosspointName[pAuto->channelSpec]);
 		pTransferStruct->acTransferStatus.acTransferFrame = NTV2_INVALID_FRAME;
 		status = NTV2_STATUS_FAIL;
@@ -1648,7 +1697,7 @@ Ntv2Status AutoCirculateTransfer(NTV2AutoCirc* pAutoCirc,
 	return status;
 }
 
-Ntv2Status AutoCirclateAudioPlaybackMode(NTV2AutoCirc* pAutoCirc,
+Ntv2Status AutoCircAudioPlaybackMode(NTV2AutoCirc* pAutoCirc,
 											NTV2AudioSystem audioSystem,
 											NTV2_GlobalAudioPlaybackMode mode)
 {
@@ -1674,11 +1723,11 @@ Ntv2Status AutoCirclateAudioPlaybackMode(NTV2AutoCirc* pAutoCirc,
 }
 
 //-------------------------------------------------------------------------------------------------------
-//	AutoCirculateGetBufferLevel
+//	AutoCircGetBufferLevel
 //  recording - how many frames ready to record
 //  playback - how many frames buffered up
 //-------------------------------------------------------------------------------------------------------
-uint32_t AutoCirculateGetBufferLevel (INTERNAL_AUTOCIRCULATE_STRUCT* pAuto)
+uint32_t AutoCircGetBufferLevel (INTERNAL_AUTOCIRCULATE_STRUCT* pAuto)
 {
 	int32_t   lRange = (pAuto->endFrame - pAuto->startFrame) + 1;
 	uint32_t  dwBufferLevel = 0;
@@ -1745,10 +1794,10 @@ uint32_t AutoCirculateGetBufferLevel (INTERNAL_AUTOCIRCULATE_STRUCT* pAuto)
 }
 
 //-------------------------------------------------------------------------------------------------------
-//	AutoCirculateFindNextAvailFrame
+//	AutoCircFindNextAvailFrame
 //-------------------------------------------------------------------------------------------------------
 // Adjusts pAuto->nextFrame (based on validCount), and returns true (or returns FALSE for failure)
-bool AutoCirculateFindNextAvailFrame(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto)
+bool AutoCircFindNextAvailFrame(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto)
 {
 	int32_t lRange = (pAuto->endFrame - pAuto->startFrame) + 1;
 	int32_t lStart = 0;
@@ -1818,9 +1867,9 @@ bool AutoCirculateFindNextAvailFrame(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto)
 }
 
 //-------------------------------------------------------------------------------------------------------
-//	oemBeginAutoCirculateTransfer
+//	BeginAutoCircTransfer
 //-------------------------------------------------------------------------------------------------------
-void AutoBeginAutoCirculateTransfer(uint32_t frameNumber,
+void BeginAutoCircTransfer(uint32_t frameNumber,
 									AUTOCIRCULATE_TRANSFER *pTransferStruct,
 									INTERNAL_AUTOCIRCULATE_STRUCT *pAuto)
 {
@@ -1842,7 +1891,7 @@ void AutoBeginAutoCirculateTransfer(uint32_t frameNumber,
 		pAuto->ancField2TransferOffset = frameSize - ntv2ReadVirtualRegister(pSysCon, kVRegAncField2Offset);
 	}
 
-	//ntv2Message("CNTV2Device::oemBeginAutoCirculateTransfer - Begin FrameNumber %d\n", frameNumber);
+	//ntv2Message("CNTV2Device::BeginAutoCircTransfer - Begin FrameNumber %d\n", frameNumber);
 	if (pAuto->recording)
 	{
 		if (pAuto->circulateWithCustomAncData)
@@ -1926,16 +1975,16 @@ void AutoBeginAutoCirculateTransfer(uint32_t frameNumber,
 }
 
 //-------------------------------------------------------------------------------------------------------
-//	oemCompleteAutoCirculateTransfer
+//	CompleteAutoCircTransfer
 //-------------------------------------------------------------------------------------------------------
-void AutoCompleteAutoCirculateTransfer(uint32_t frameNumber, 
+void CompleteAutoCircTransfer(uint32_t frameNumber,
 									   AUTOCIRCULATE_TRANSFER_STATUS *pUserOutBuffer,
 									   INTERNAL_AUTOCIRCULATE_STRUCT *pAuto,
 									   bool updateValid, bool transferPending)
 {
 	Ntv2SystemContext* pSysCon = pAuto->pSysCon;
 
-	//ntv2Message("CNTV2Device::oemCompleteAutoCirculateTransfer - Complete FrameNumber %d\n", frameNumber);
+	//ntv2Message("CNTV2Device::CompleteAutoCircTransfer - Complete FrameNumber %d\n", frameNumber);
 	// Settings relevant to the app specified frameNumber
 	if (frameNumber >= (uint32_t)pAuto->startFrame && frameNumber <= (uint32_t)pAuto->endFrame)
 	{
@@ -1987,7 +2036,7 @@ void AutoCompleteAutoCirculateTransfer(uint32_t frameNumber,
 	// Global settings
 	int64_t RDTSC = ntv2Time100ns();
 	pUserOutBuffer->acFrameStamp.acCurrentTime = RDTSC;
-	pUserOutBuffer->acBufferLevel = AutoCirculateGetBufferLevel(pAuto);
+	pUserOutBuffer->acBufferLevel = AutoCircGetBufferLevel(pAuto);
 	pUserOutBuffer->acState = pAuto->state;
 	pUserOutBuffer->acFramesDropped = pAuto->droppedFrames;
 	pUserOutBuffer->acFramesProcessed = pAuto->framesProcessed;
@@ -2032,7 +2081,7 @@ void AutoCompleteAutoCirculateTransfer(uint32_t frameNumber,
 	}
 }
 
-void AutoCirculateTransferFields(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto, 
+void AutoCircTransferFields(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto, 
 									AUTOCIRCULATE_TRANSFER* pTransfer, 
 									uint32_t frameNumber, bool drop)
 {
@@ -2042,7 +2091,7 @@ void AutoCirculateTransferFields(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto,
 		(pTransfer->acInSegmentedDMAInfo.acNumSegments > 1))
 		return;
 
-	if (!AutoCirculateCanDoFieldMode(pAuto))
+	if (!AutoCircCanDoFieldMode(pAuto))
 		return;
 
 	// get the format channel
@@ -2182,7 +2231,7 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 		syncField0 = IsFieldID0(pSysCon, pAuto->channelSpec);
 		if (pAuto->circulateWithFields)
 		{
-			fieldMode = AutoCirculateCanDoFieldMode(pAuto);
+			fieldMode = AutoCircCanDoFieldMode(pAuto);
 		}
 	}
 
@@ -2337,7 +2386,14 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 				{
 					if (NTV2_IS_VALID_CHANNEL(pAutoCirc->ancInputChannel[acChannel]))
 					{
-						SetAncExtWriteParams(pSysCon, pAutoCirc->ancInputChannel[acChannel], nextFrame);
+						if (pAuto->circulateWithHDMIAux)
+						{
+							SetAuxExtWriteParams(pSysCon, pAutoCirc->ancInputChannel[acChannel], nextFrame);
+						}
+						else
+						{
+							SetAncExtWriteParams(pSysCon, pAutoCirc->ancInputChannel[acChannel], nextFrame);
+						}
 					}
 				}
 
@@ -2390,7 +2446,7 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 					// if synced channel is dropping frames then drop this one
 					if (!bDropFrame && (ntv2ReadVirtualRegister(pSysCon, kVRegSyncChannels) != 0))
 					{
-						if (AutoDropSyncFrame(pAutoCirc, pAuto->channelSpec))
+						if (AutoCircDropSyncFrame(pAutoCirc, pAuto->channelSpec))
 						{
 							bDropFrame = true;
 						}
@@ -2475,13 +2531,13 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 
 						if (pAuto->circulateWithColorCorrection)
 						{
-							AutoCirculateSetupColorCorrector(pAutoCirc,
+							AutoCircSetupColorCorrector(pAutoCirc,
 																pAuto->channelSpec,
 																&pAuto->frameStamp[nextFrame].colorCorrectionInfo);
 						}
 						if (pAuto->circulateWithVidProc)
 						{
-							AutoCirculateSetupVidProc(pAutoCirc,
+							AutoCircSetupVidProc(pAutoCirc,
 														 pAuto->channelSpec,
 														 &pAuto->frameStamp[nextFrame].vidProcInfo);
 						}
@@ -2491,11 +2547,11 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 						}
 						if (pAuto->circulateWithHDMIAux)
 						{
-							AutoCirculateWriteHDMIAux(pAutoCirc,
-														 pAuto->frameStamp[nextFrame].auxData,
-														 pAuto->frameStamp[nextFrame].auxDataSize);
+							AutoCircWriteHDMIAux(pAutoCirc,
+												pAuto->frameStamp[nextFrame].auxData,
+												pAuto->frameStamp[nextFrame].auxDataSize);
 						}
-						AutoCirculateSetupXena2Routing(pAutoCirc, &pAuto->frameStamp[nextFrame].xena2RoutingTable);
+						AutoCircSetupRouting(pAutoCirc, &pAuto->frameStamp[nextFrame].routingTable);
 
 						pAuto->state = NTV2_AUTOCIRCULATE_RUNNING;
 					}
@@ -2664,7 +2720,7 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 
 				//ntv2Message("CNTV2Device::AutoCirculate - Auto %s:  frame %d  drops %d  level %d\n", 
 				//		 CrosspointName[pAuto->channelSpec], pAuto->framesProcessed, pAuto->droppedFrames, 
-				//		 AutoCirculateGetBufferLevel(pAuto));
+				//		 AutoCircGetBufferLevel(pAuto));
 
 				// get the next frame to record
 				int32_t nextFrame = KAUTO_NEXTFRAME(pAuto->activeFrame, pAuto);
@@ -2695,9 +2751,18 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 				{
 					if (NTV2_IS_VALID_CHANNEL(pAutoCirc->ancInputChannel[acChannel]))
 					{
-						pAuto->frameStamp[lastActiveFrame].ancTransferSize = GetAncExtField1Bytes(pSysCon, pAutoCirc->ancInputChannel[acChannel]);
-						pAuto->frameStamp[lastActiveFrame].ancField2TransferSize = GetAncExtField2Bytes(pSysCon, pAutoCirc->ancInputChannel[acChannel]);
-						SetAncExtWriteParams(pSysCon, pAutoCirc->ancInputChannel[acChannel], nextFrame);
+						if (pAuto->circulateWithHDMIAux)
+						{
+							pAuto->frameStamp[lastActiveFrame].ancTransferSize = GetAuxExtField1Bytes(pSysCon, pAutoCirc->ancInputChannel[acChannel]));
+							pAuto->frameStamp[lastActiveFrame].ancField2TransferSize = GetAuxExtField2Bytes(pSysCon, pAutoCirc->ancInputChannel[acChannel]));
+							SetAuxExtWriteParams(pSysCon, pAutoCirc->ancInputChannel[acChannel], nextFrame);
+						}
+						else
+						{
+							pAuto->frameStamp[lastActiveFrame].ancTransferSize = GetAncExtField1Bytes(pSysCon, pAutoCirc->ancInputChannel[acChannel]);
+							pAuto->frameStamp[lastActiveFrame].ancField2TransferSize = GetAncExtField2Bytes(pSysCon, pAutoCirc->ancInputChannel[acChannel]);
+							SetAncExtWriteParams(pSysCon, pAutoCirc->ancInputChannel[acChannel], nextFrame);
+						}
 					}
 					else
 					{
@@ -2755,7 +2820,7 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 
 				//ntv2Message("Auto %s:  frame %d  drops %d  level %d\n", 
 				//		 CrosspointName[pAuto->channelSpec], pAuto->framesProcessed, pAuto->droppedFrames, 
-				//		 AutoCirculateGetBufferLevel(pAuto));
+				//		 AutoCircGetBufferLevel(pAuto));
 
 				// check for frame complete
 				if (pActiveFrameStamp->validCount == 0)
@@ -2783,7 +2848,7 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 					// if synced channel is dropping frames then drop this one
 					if (!bDropFrame && (ntv2ReadVirtualRegister(pSysCon, kVRegSyncChannels) != 0))
 					{
-						if (AutoDropSyncFrame(pAutoCirc, pAuto->channelSpec))
+						if (AutoCircDropSyncFrame(pAutoCirc, pAuto->channelSpec))
 						{
 							bDropFrame = true;
 						}
@@ -2917,13 +2982,13 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 
 						if (pAuto->circulateWithColorCorrection)
 						{
-							AutoCirculateSetupColorCorrector(pAutoCirc,
+							AutoCircSetupColorCorrector(pAutoCirc,
 																pAuto->channelSpec,
 																&pAuto->frameStamp[nextFrame].colorCorrectionInfo);
 						}
 						if (pAuto->circulateWithVidProc)
 						{
-							AutoCirculateSetupVidProc(pAutoCirc,
+							AutoCircSetupVidProc(pAutoCirc,
 														 pAuto->channelSpec,
 														 &pAuto->frameStamp[nextFrame].vidProcInfo);
 						}
@@ -2936,11 +3001,11 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 						}
 						if (pAuto->circulateWithHDMIAux)
 						{
-							AutoCirculateWriteHDMIAux(pAutoCirc,
-														 pAuto->frameStamp[nextFrame].auxData,
-														 pAuto->frameStamp[nextFrame].auxDataSize);
+							AutoCircWriteHDMIAux(pAutoCirc,
+												pAuto->frameStamp[nextFrame].auxData,
+												pAuto->frameStamp[nextFrame].auxDataSize);
 						}
-						AutoCirculateSetupXena2Routing(pAutoCirc, &pAuto->frameStamp[nextFrame].xena2RoutingTable);
+						AutoCircSetupRouting(pAutoCirc, &pAuto->frameStamp[nextFrame].routingTable);
 					}
 					else
 					{
@@ -3002,7 +3067,14 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 				{
 					if (NTV2_IS_VALID_CHANNEL(pAutoCirc->ancInputChannel[acChannel]))
 					{
-						EnableAncExtractor(pSysCon, pAutoCirc->ancInputChannel[acChannel], false);
+						if (pAuto->circulateWithHDMIAux)
+						{
+							EnableAuxExtractor(pSysCon, pAutoCirc->ancInputChannel[acChannel], false);
+						}
+						else
+						{
+							EnableAncExtractor(pSysCon, pAutoCirc->ancInputChannel[acChannel], false);
+						}
 					}
 				}
 			}
@@ -3065,7 +3137,7 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 		if (pAuto->state != NTV2_AUTOCIRCULATE_DISABLED)
 		{
 			ntv2Message("CNTV2Device::AutoCirculate - Count:ST(%d) LAF(%d) AF(%d) FP(%d) BL(%d)",pAuto->state,lastActiveFrame,pAuto->activeFrame,pAuto->framesProcessed,
-						AutoCirculateGetBufferLevel (pAuto));
+						AutoCircGetBufferLevel (pAuto));
 		}
 #endif
 		}
@@ -3076,10 +3148,19 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 	{
 		if (pAuto->recording)
 		{
-			//Do someting on a field
-			SetAncExtField2WriteParams(pSysCon,
-									   acChannel,
-									   pAuto->nextFrame);
+			if (pAuto->circulateWithHDMIAux)
+			{
+				SetAuxExtField2WriteParams(pSysCon, 
+										acChannel, 
+										pAuto->nextFrame);
+			}
+			else
+			{
+				//Do someting on a field
+				SetAncExtField2WriteParams(pSysCon,
+										acChannel,
+										pAuto->nextFrame);
+			}
 		}
 		else
 		{
@@ -3106,7 +3187,7 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 }
 
 bool
-oemIsAutoCirculateInterrupt(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec)
+IsAutoCircInterrupt(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec)
 {
 	Ntv2SystemContext* pSysCon = pAutoCirc->pSysCon;
 	NTV2Channel channel = NTV2_CHANNEL1;
@@ -3149,7 +3230,7 @@ int32_t KAUTO_PREVFRAME(int32_t __dwCurFrame_, INTERNAL_AUTOCIRCULATE_STRUCT* __
 	return __pAuto_->endFrame;
 }
 
-bool AutoDropSyncFrame(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec)
+bool AutoCircDropSyncFrame(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec)
 {
 	INTERNAL_AUTOCIRCULATE_STRUCT* pAuto = &pAutoCirc->autoCirculate[channelSpec];
 	uint32_t syncChannel1 = pAutoCirc->syncChannel1;
@@ -3248,9 +3329,9 @@ bool AutoDropSyncFrame(NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec)
 	return false;
 }
 
-void AutoCirculateSetupColorCorrector(NTV2AutoCirc* pAutoCirc,
-										 NTV2Crosspoint channelSpec,
-										 INTERNAL_COLOR_CORRECTION_STRUCT *ccInfo)
+void AutoCircSetupColorCorrector(NTV2AutoCirc* pAutoCirc,
+								NTV2Crosspoint channelSpec,
+								INTERNAL_COLOR_CORRECTION_STRUCT *ccInfo)
 {
 	NTV2DeviceID deviceID = pAutoCirc->deviceID;
 	Ntv2SystemContext* pSysCon = pAutoCirc->pSysCon;
@@ -3362,6 +3443,7 @@ void AutoCirculateSetupColorCorrector(NTV2AutoCirc* pAutoCirc,
 			SetColorCorrectionOutputBank(pSysCon, NTV2_CHANNEL8, 1);				// happens next frame
 		}
 		break;
+	default:	break;
 	}
 
 	// Now fill color correction buffer
@@ -3372,12 +3454,12 @@ void AutoCirculateSetupColorCorrector(NTV2AutoCirc* pAutoCirc,
 }
 
 //-------------------------------------------------------------------------------------------------------
-//	AutoCirculateSetupVidProc
+//	AutoCircSetupVidProc
 //  Unfortunately only updates hardware every frame even in interlaced modes.
 //-------------------------------------------------------------------------------------------------------
-void AutoCirculateSetupVidProc(NTV2AutoCirc* pAutoCirc,
-								  NTV2Crosspoint channelSpec,
-								  AutoCircVidProcInfo* vidProcInfo)
+void AutoCircSetupVidProc(NTV2AutoCirc* pAutoCirc,
+						NTV2Crosspoint channelSpec,
+						AutoCircVidProcInfo* vidProcInfo)
 {
 	NTV2DeviceID deviceID = pAutoCirc->deviceID;
 	Ntv2SystemContext* pSysCon = pAutoCirc->pSysCon;
@@ -3456,6 +3538,7 @@ void AutoCirculateSetupVidProc(NTV2AutoCirc* pAutoCirc,
 	case AUTOCIRCVIDPROCMODE_KEY:
 		regValue |= (BIT_0);
 		break;
+	default:	break;
 	}
 
 	ntv2WriteRegister(pSysCon, kRegVidProc1Control, regValue);
@@ -3506,10 +3589,10 @@ void AutoCirculateSetupVidProc(NTV2AutoCirc* pAutoCirc,
 	ntv2WriteRegister(pSysCon, kRegSplitControl,splitModeValue | (softnessSlope<<16) | ((positionValue+offset)<<2));
 }
 
-void AutoCirculateSetupXena2Routing(NTV2AutoCirc* pAutoCirc, NTV2RoutingTable* pXena2Routing)
+void AutoCircSetupRouting(NTV2AutoCirc* pAutoCirc, NTV2RoutingTable* pRoutingTable)
 {
 	Ntv2SystemContext* pSysCon = pAutoCirc->pSysCon;
-	uint32_t numEntries = pXena2Routing->numEntries;
+	uint32_t numEntries = pRoutingTable->numEntries;
 	uint32_t i;
 
 	if (numEntries == 0 || numEntries >= MAX_ROUTING_ENTRIES)
@@ -3517,7 +3600,7 @@ void AutoCirculateSetupXena2Routing(NTV2AutoCirc* pAutoCirc, NTV2RoutingTable* p
 
 	for (i = 0; i < numEntries; i++)
 	{
-		NTV2RoutingEntry* entry = &pXena2Routing->routingEntry[i];
+		NTV2RoutingEntry* entry = &pRoutingTable->routingEntry[i];
 //		if (m_pRegisters->IsSaveRecallRegister(entry->registerNum))
 		{
 			ntv2WriteRegisterMS(pSysCon,
@@ -3529,7 +3612,7 @@ void AutoCirculateSetupXena2Routing(NTV2AutoCirc* pAutoCirc, NTV2RoutingTable* p
 	}
 }
 
-void AutoCirculateWriteHDMIAux(NTV2AutoCirc* pAutoCirc, uint32_t* pAuxData, uint32_t auxDataSize)
+void AutoCircWriteHDMIAux(NTV2AutoCirc* pAutoCirc, uint32_t* pAuxData, uint32_t auxDataSize)
 {
 	NTV2DeviceID deviceID = pAutoCirc->deviceID;
 	Ntv2SystemContext* pSysCon = pAutoCirc->pSysCon;
@@ -3564,9 +3647,9 @@ void AutoCirculateWriteHDMIAux(NTV2AutoCirc* pAutoCirc, uint32_t* pAuxData, uint
 }
 
 //-------------------------------------------------------------------------------------------------------
-//	AutoCirculateDmaAudioSetup
+//	AutoCircDmaAudioSetup
 //-------------------------------------------------------------------------------------------------------
-bool AutoCirculateDmaAudioSetup(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto)
+bool AutoCircDmaAudioSetup(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto)
 {
 	Ntv2SystemContext* pSysCon = pAuto->pSysCon;
 	
@@ -3598,7 +3681,7 @@ bool AutoCirculateDmaAudioSetup(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto)
 			ulPostWrapSize = 0;
 		}
 
-		// save this for oemCompleteAutoCirculateTransfer
+		// save this for CompleteAutoCircTransfer
 		pAuto->audioTransferSize = ulPreWrapSize + ulPostWrapSize;
 		pAuto->audioStartSample = 0;
 	}
@@ -3611,7 +3694,7 @@ bool AutoCirculateDmaAudioSetup(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto)
 			pAuto->nextAudioOutputAddress = 0;
 			pAuto->audioDropsCompleted++;
 #ifdef OEM_DROP_FRAME
-			ntv2Message("CNTV2Device::AutoCirculateDmaAudioSetup - Auto %s: drop audio output required %d  completed %d\n", 
+			ntv2Message("CNTV2Device::AutoCircDmaAudioSetup - Auto %s: drop audio output required %d  completed %d\n", 
 						CrosspointName[pAuto->channelSpec], pAuto->audioDropsRequired, pAuto->audioDropsCompleted);
 #endif
 		}
@@ -3645,9 +3728,9 @@ bool AutoCirculateDmaAudioSetup(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto)
 }
 
 //-------------------------------------------------------------------------------------------------------
-//	AutoCirculateP2PCopy
+//	AutoCircP2PCopy
 //-------------------------------------------------------------------------------------------------------
-bool AutoCirculateP2PCopy(NTV2AutoCirc* pAutoCirc,
+bool AutoCircP2PCopy(NTV2AutoCirc* pAutoCirc,
 							 PAUTOCIRCULATE_P2P_STRUCT pDriverBuffer, 
 							 PAUTOCIRCULATE_P2P_STRUCT pUserBuffer,
 							 bool bToDriver)
@@ -3657,20 +3740,20 @@ bool AutoCirculateP2PCopy(NTV2AutoCirc* pAutoCirc,
 
 	if((pDriverBuffer == NULL) || (pUserBuffer == NULL))
 	{
-		ntv2Message("CNTV2Device::AutoCirculateP2PCopy - NULL buffer %s\n", "");
+		ntv2Message("CNTV2Device::AutoCircP2PCopy - NULL buffer %s\n", "");
 		return false;
 	}
 
 	if(!bToDriver && (pDriverBuffer->p2pSize != sizeof(AUTOCIRCULATE_P2P_STRUCT)))
 	{
-		ntv2Message("CNTV2Device::AutoCirculateP2PCopy - bad driver P2P struct size %d\n",
+		ntv2Message("CNTV2Device::AutoCircP2PCopy - bad driver P2P struct size %d\n",
 					pDriverBuffer->p2pSize);
 		return false;
 	}
 
 	if(bToDriver && (pUserBuffer->p2pSize != sizeof(AUTOCIRCULATE_P2P_STRUCT)))
 	{
-		ntv2Message("CNTV2Device::AutoCirculateP2PCopy - bad user P2P struct size %d\n",
+		ntv2Message("CNTV2Device::AutoCircP2PCopy - bad user P2P struct size %d\n",
 					pUserBuffer->p2pSize);
 		return false;
 	}
@@ -3680,7 +3763,7 @@ bool AutoCirculateP2PCopy(NTV2AutoCirc* pAutoCirc,
 							   sizeof(AUTOCIRCULATE_P2P_STRUCT),
 							   !bToDriver))
 	{	
-		ntv2Message("CNTV2Device::AutoCirculateP2PCopy - prepare user buffer size %d failed\n",
+		ntv2Message("CNTV2Device::AutoCircP2PCopy - prepare user buffer size %d failed\n",
 					(int)sizeof(AUTOCIRCULATE_P2P_STRUCT));
 		return false;
 	}
@@ -3727,7 +3810,7 @@ void CopyFrameStampOldToNew(const FRAME_STAMP_STRUCT * pInOldStruct, FRAME_STAMP
 	NTV2_RP188_from_RP188_STRUCT(pOutNewStruct->acRP188, pInOldStruct->currentRP188);
 }
 
-bool AutoCirculateFrameStampImmediate(NTV2AutoCirc* pAutoCirc, FRAME_STAMP * pInOutFrameStamp)
+bool AutoCircFrameStampImmediate(NTV2AutoCirc* pAutoCirc, FRAME_STAMP * pInOutFrameStamp)
 {
 	Ntv2SystemContext*	pSysCon = pAutoCirc->pSysCon;
 	NTV2Channel			channel;
@@ -3766,15 +3849,15 @@ bool AutoCirculateFrameStampImmediate(NTV2AutoCirc* pAutoCirc, FRAME_STAMP * pIn
 
 	pAuto = &pAutoCirc->autoCirculate[crosspoint];
 // 	if (pAuto->recording  &&  modeValue != NTV2_MODE_CAPTURE)
-// 		ntv2Message("AutoCirculateFrameStampImmediate: pAuto->recording=true, but mode=output for crosspoint %d channel %d\n", crosspoint, channel);
+// 		ntv2Message("AutoCircFrameStampImmediate: pAuto->recording=true, but mode=output for crosspoint %d channel %d\n", crosspoint, channel);
 // 	else if (!pAuto->recording  &&  modeValue != NTV2_MODE_DISPLAY)
-// 		ntv2Message("AutoCirculateFrameStampImmediate: pAuto->recording=false, but mode=input for crosspoint %d channel %d\n", crosspoint, channel);
+// 		ntv2Message("AutoCircFrameStampImmediate: pAuto->recording=false, but mode=input for crosspoint %d channel %d\n", crosspoint, channel);
 
 	memset(&oldFrameStampStruct, 0x00, sizeof(oldFrameStampStruct));
 
 	//	Call the old GetFrameStamp API, then convert old FRAME_STAMP_STRUCT to new FRAME_STAMP struct...
 	oldFrameStampStruct.channelSpec = crosspoint;
-	status = AutoCirculateGetFrameStamp(pAutoCirc,
+	status = AutoCircGetFrameStamp(pAutoCirc,
 										crosspoint,
 										pInOutFrameStamp->acRequestedFrame,
 										&oldFrameStampStruct);
@@ -3795,14 +3878,14 @@ bool AutoCirculateFrameStampImmediate(NTV2AutoCirc* pAutoCirc, FRAME_STAMP * pIn
 												  (NTV2_RP188*)pInOutFrameStamp->acTimeCodes.fUserSpacePtr,
 												  pInOutFrameStamp->acTimeCodes.fByteCount))
 	{
-		//("AutoCirculateFrameStampImmediate: CopyFrameStampTCArrayToNTV2TimeCodeArray failed, frame=%d, byteCount=%d\n", frameNumber, pInOutFrameStamp->acTimeCodes.fByteCount);
+		//("AutoCircFrameStampImmediate: CopyFrameStampTCArrayToNTV2TimeCodeArray failed, frame=%d, byteCount=%d\n", frameNumber, pInOutFrameStamp->acTimeCodes.fByteCount);
 		return false;
 	}
 	
 	return true;
 }
 
-bool AutoCirculateCanDoFieldMode(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto)
+bool AutoCircCanDoFieldMode(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto)
 {
 	Ntv2SystemContext* pSysCon = pAuto->pSysCon;
 	NTV2Channel syncChannel = NTV2_CHANNEL1;
@@ -3828,4 +3911,42 @@ bool AutoCirculateCanDoFieldMode(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto)
 	}
 
 	return fieldMode;
+}
+
+
+//	STUBS -
+//	Real device drivers and fake devices must implement:
+Ntv2Status	AutoDmaTransfer(void* pContext, PAUTO_DMA_PARAMS pDmaParams)
+{
+	return NTV2_STATUS_SUCCESS;
+}
+
+int64_t		AutoGetAudioClock(void* pContext)
+{
+	return 0;
+}
+
+bool		AutoBoardCanDoP2P(void* pContext)
+{
+	return false;
+}
+
+uint64_t	AutoGetFrameAperturePhysicalAddress(void* pContext)
+{
+	return 0;
+}
+
+uint32_t	AutoGetFrameApertureBaseSize(void* pContext)
+{
+	return 0;
+}
+
+void		AutoWriteFrameApertureOffset(void* pContext, uint32_t value)
+{
+	return;
+}
+
+uint64_t	AutoGetMessageAddress(void* pContext, NTV2Channel channel)
+{
+	return 0;
 }

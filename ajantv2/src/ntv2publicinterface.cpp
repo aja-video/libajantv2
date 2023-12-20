@@ -28,6 +28,50 @@ using namespace std;
 //#define NTV2BUFFER_NO_MEMCMP
 
 
+/////////// Stream Operators
+
+ostream & operator << (ostream & inOutStr, const NTV2AudioChannelPairs & inSet)
+{
+	if (inSet.empty())
+		inOutStr << "(none)";
+	else
+		for (NTV2AudioChannelPairsConstIter iter (inSet.begin ());	iter != inSet.end ();  ++iter)
+			inOutStr << (iter != inSet.begin() ? ", " : "") << ::NTV2AudioChannelPairToString (*iter, true);
+	return inOutStr;
+}
+
+ostream &	operator << (ostream & inOutStr, const NTV2AudioChannelQuads & inSet)
+{
+	for (NTV2AudioChannelQuadsConstIter iter (inSet.begin ());	iter != inSet.end ();  ++iter)
+		inOutStr << (iter != inSet.begin () ? ", " : "") << ::NTV2AudioChannelQuadToString (*iter, true);
+	return inOutStr;
+}
+
+ostream &	operator << (ostream & inOutStr, const NTV2AudioChannelOctets & inSet)
+{
+	for (NTV2AudioChannelOctetsConstIter iter (inSet.begin ());	 iter != inSet.end ();	++iter)
+		inOutStr << (iter != inSet.begin () ? ", " : "") << ::NTV2AudioChannelOctetToString (*iter, true);
+	return inOutStr;
+}
+
+ostream &	operator << (ostream & inOutStr, const NTV2DoubleArray & inVector)
+{
+	for (NTV2DoubleArrayConstIter iter (inVector.begin ());	 iter != inVector.end ();  ++iter)
+		inOutStr << *iter << endl;
+	return inOutStr;
+}
+
+ostream &	operator << (ostream & inOutStr, const NTV2DIDSet & inDIDs)
+{
+	for (NTV2DIDSetConstIter it (inDIDs.begin());  it != inDIDs.end();	)
+	{
+		inOutStr << xHEX0N(uint16_t(*it),2);
+		if (++it != inDIDs.end())
+			inOutStr << ", ";
+	}
+	return inOutStr;
+}
+
 ostream & operator << (ostream & inOutStream, const UWordSequence & inData)
 {
 	inOutStream << DEC(inData.size()) << " UWords: ";
@@ -1917,7 +1961,7 @@ bool NTV2Buffer::SetDefaultPageSize (const size_t inNewSize)
 
 size_t NTV2Buffer::HostPageSize (void)
 {
-#if defined(MSWindows)
+#if defined(MSWindows) || defined(AJABareMetal)
 	return AJA_PAGE_SIZE;
 #else
 	return size_t(::getpagesize());
@@ -2909,10 +2953,24 @@ NTV2StreamChannel::NTV2StreamChannel()
 	NTV2_ASSERT_STRUCT_VALID;
 }
 
+ostream & NTV2StreamChannel::Print (ostream & inOutStream) const
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	inOutStream << mHeader << mChannel << " flags=" << xHEX0N(mFlags,8) << xHEX0N(mStatus, 8) << " " << mTrailer;
+	return inOutStream;
+}
+
 NTV2StreamBuffer::NTV2StreamBuffer()
 	:	mHeader (NTV2_TYPE_AJASTREAMBUFFER, sizeof(NTV2StreamBuffer))
 {
 	NTV2_ASSERT_STRUCT_VALID;
+}
+
+ostream & NTV2StreamBuffer::Print (ostream & inOutStream) const
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	inOutStream << mHeader << mChannel << " flags=" << xHEX0N(mFlags,8) << xHEX0N(mStatus, 8) << " " << mTrailer;
+	return inOutStream;
 }
 
 NTV2GetRegisters::NTV2GetRegisters (const NTV2RegNumSet & inRegisterNumbers)

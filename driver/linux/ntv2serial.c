@@ -20,9 +20,7 @@
 #include "ntv2devicefeatures.h"
 #include "registerio.h"
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,17,0))
-#define NTV2_USE_TTY_GROUP
-#endif
+#include "buildenv.h"
 
 /* debug messages */
 #define NTV2_DEBUG_INFO					0x00000001
@@ -168,7 +166,7 @@ static void ntv2_uartops_shutdown(struct uart_port *port)
 	ntv2_serial_disable(ntv2_ser);
 }
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,1,0))
+#if defined(KERNEL_6_1_0_SET_TERMIOS)
 static void ntv2_uartops_set_termios(struct uart_port *port,
 									 struct ktermios *termios,
 									 const struct ktermios *old)

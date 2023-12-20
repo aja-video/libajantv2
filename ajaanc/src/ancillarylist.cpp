@@ -668,6 +668,67 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
 
 }	//	AddReceivedAncillaryData
 
+// Parse a stream of "raw" ancillary data as collected by an AJAAncExtractorWidget.
+// Break the stream into separate AJAAncillaryData objects and add them to the list.
+//
+AJAStatus AJAAncillaryList::AddReceivedAuxillaryData (const uint8_t * pRcvData,
+														const uint32_t dataSize,
+														const uint32_t inFrameNum)
+{
+	AJAStatus	status	(AJA_STATUS_SUCCESS);
+
+	if (!pRcvData || !dataSize)
+		return AJA_STATUS_NULL;
+
+	//	Use this as an uninitialized template...
+	AJAAncillaryData	newAncData;
+	//AJAAncDataLoc		defaultLoc		(AJAAncDataLink_A, AJAAncDataChannel_Y, AJAAncDataSpace_VANC, 9);
+	int32_t				remainingSize	(int32_t(dataSize + 0));
+	const uint8_t *		pInputData		(pRcvData);
+	bool				bMoreData		(true);
+
+	while (bMoreData)
+	{
+		//bool bInsertNew (false);	//	We'll set this 'true' if/when we find a new Anc packet to insert
+		AJAAncDataType newAncType (AJAAncDataType_HDMI_Aux); 
+		uint32_t packetSize (0);	//	This is where the AncillaryData object returns the number of bytes that were "consumed" from the input stream
+
+		status = newAncData.InitAuxWithReceivedData (pInputData, size_t(remainingSize), packetSize);
+		if (AJA_FAILURE(status))
+		{
+			//	TODO:	Someday, let's try to recover and process subsequent packets.
+			break;		//	NOTE:	For now, bail on errors in the stream
+		}
+		else if (packetSize == 0)
+			break;		//	Nothing to do
+		
+		//	Create an AJAAncillaryData object of the appropriate type, and init it with our raw data...
+		AJAAncillaryData *	pData	(AJAAncillaryDataFactory::Create (newAncType, &newAncData));
+		if (pData)
+		{
+			pData->SetBufferFormat(AJAAncBufferFormat_HDMI);
+			if (IsIncludingZeroLengthPackets()	||	pData->GetDC())
+			{
+				try {m_ancList.push_back(pData);}	//	Append to my list
+				catch(...)	{status = AJA_STATUS_FAIL;}
+			}
+			else ::BumpZeroLengthPacketCount();
+			if (inFrameNum	&&	!pData->GetFrameID())
+				pData->SetFrameID(inFrameNum);
+		}
+		else
+			status = AJA_STATUS_FAIL;
+
+
+		remainingSize -= packetSize;	//	Decrease the remaining data size by the amount we just "consumed"
+		pInputData += packetSize;		//	Advance the input data pointer by the same amount
+		if (remainingSize <= 0)			//	All of the input data consumed?
+			bMoreData = false;
+	}	// while (bMoreData)
+
+	return status;
+
+}	//	AddReceivedAncillaryData
 
 //	Parse a "raw" RTP packet received from hardware (ingest) in network byte order into separate
 //	AJAAncillaryData objects and append them to me. 'inReceivedData' includes the RTP header.
@@ -997,6 +1058,29 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2Buffer & inAncBuff
 
 }	//	AddFromDeviceAncBuffer
 
+//	STATIC
+AJAStatus AJAAncillaryList::AddFromDeviceAuxBuffer (const NTV2Buffer & inAuxBuffer,
+													AJAAncillaryList & outPackets,
+													const uint32_t inFrameNum)
+{
+	//uint32_t		RTPPacketCount	(0);	//	Number of packets encountered
+	const uint32_t	origPktCount	(outPackets.CountAncillaryData());
+	AJAStatus		result			(AJA_STATUS_SUCCESS);
+
+
+	result = outPackets.AddReceivedAuxillaryData (inAuxBuffer, inAuxBuffer.GetByteCount(), inFrameNum);
+	if (result == AJA_STATUS_NULL)
+		result = AJA_STATUS_SUCCESS;	//	A NULL/empty buffer is not an error
+
+	const uint32_t	pktsAdded (outPackets.CountAncillaryData() - origPktCount);
+	if (AJA_SUCCESS(result))
+		LOGMYDEBUG("Success:  " << DEC(pktsAdded) << " pkts added");
+	else
+		LOGMYERROR(AJAStatusToString(result) << ": " << DEC(pktsAdded) << " pkts added");
+	return result;
+
+}	//	AddFromDeviceAuxBuffer
+
 
 //	STATIC
 AJAStatus AJAAncillaryList::SetFromDeviceAncBuffers (const NTV2Buffer & inF1AncBuffer,
@@ -1005,8 +1089,11 @@ AJAStatus AJAAncillaryList::SetFromDeviceAncBuffers (const NTV2Buffer & inF1AncB
 													const uint32_t inFrameNum)		//	STATIC
 {
 	outPackets.Clear();
-	const AJAStatus resultF1 (AddFromDeviceAncBuffer(inF1AncBuffer, outPackets, inFrameNum));
-	const AJAStatus resultF2 (AddFromDeviceAncBuffer(inF2AncBuffer, outPackets, inFrameNum));
+	AJAStatus resultF1,resultF2;
+	resultF1 = resultF2 = AJA_STATUS_SUCCESS;
+	resultF1 = AddFromDeviceAncBuffer(inF1AncBuffer, outPackets, inFrameNum);
+	if (inF2AncBuffer) //Unnecessary to extract from empty buffer, and prevents 0 Packets debug message.
+		resultF2 = AddFromDeviceAncBuffer(inF2AncBuffer, outPackets, inFrameNum);
 	if (AJA_FAILURE(resultF1))
 		return resultF1;
 	if (AJA_FAILURE(resultF2))
@@ -1014,6 +1101,23 @@ AJAStatus AJAAncillaryList::SetFromDeviceAncBuffers (const NTV2Buffer & inF1AncB
 	return AJA_STATUS_SUCCESS;
 }
 
+AJAStatus AJAAncillaryList::SetFromDeviceAuxBuffers (const NTV2Buffer & inF1AuxBuffer,
+													const NTV2Buffer & inF2AuxBuffer,
+													AJAAncillaryList & outPackets,
+													const uint32_t inFrameNum)		//	STATIC
+{
+	outPackets.Clear();
+	AJAStatus resultF1,resultF2;
+	resultF1 = resultF2 = AJA_STATUS_SUCCESS;
+	resultF1 = AddFromDeviceAuxBuffer(inF1AuxBuffer, outPackets, inFrameNum);
+	if (inF2AuxBuffer) //Unnecessary to extract from empty buffer, and prevents 0 Packets debug message.
+		resultF2 = AddFromDeviceAuxBuffer(inF2AuxBuffer, outPackets, inFrameNum);
+	if (AJA_FAILURE(resultF1))
+		return resultF1;
+	if (AJA_FAILURE(resultF2))
+		return resultF2;
+	return AJA_STATUS_SUCCESS;
+}
 
 bool AJAAncillaryList::BufferHasGUMPData (const NTV2Buffer & inBuffer)
 {

@@ -65,7 +65,6 @@ NTV2StreamPlayer::NTV2StreamPlayer (const PlayerConfig & inConfig)
 		mToneFrequency		(440.0),
 		mAudioSystem		(NTV2_AUDIOSYSTEM_INVALID),
 		mFormatDesc			(),
-		mTCIndexes			(),
 		mGlobalQuit			(false),
 		mTCBurner			(),
 		mHostBuffers		(),
@@ -399,11 +398,6 @@ bool NTV2StreamPlayer::RouteOutputSignal (void)
 	const bool			canVerify		(mDevice.HasCanConnectROM());
 	UWord				connectFailures	(0);
 
-	//	Since this function figures out which SDI spigots will be set up for output,
-	//	it also sets the "mTCIndexes" member, which determines which timecodes will
-	//	be transmitted (and on which SDI spigots)...
-	mTCIndexes.clear();
-
 	const NTV2OutputXptID	cscVidOutXpt(::GetCSCOutputXptFromChannel(mConfig.fOutputChannel,  false/*isKey*/,  !isRGB/*isRGB*/));
 	const NTV2OutputXptID	fsVidOutXpt (::GetFrameBufferOutputXptFromChannel(mConfig.fOutputChannel,  isRGB/*isRGB*/,  false/*is425*/));
 	const NTV2InputXptID	cscInputXpt (isRGB ? ::GetCSCInputXptFromChannel(mConfig.fOutputChannel, false/*isKeyInput*/) : NTV2_INPUT_CROSSPOINT_INVALID);
@@ -419,7 +413,6 @@ bool NTV2StreamPlayer::RouteOutputSignal (void)
 
 		if (!mDevice.Connect (::GetSDIOutputInputXpt (mConfig.fOutputChannel, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
 			connectFailures++;
-		mTCIndexes.insert (::NTV2ChannelToTimecodeIndex(mConfig.fOutputChannel, /*inEmbeddedLTC=*/mConfig.fTransmitLTC));
 		//	NOTE: No need to send VITC2 with VITC1 (for "i" formats) -- firmware does this automatically
 		mDevice.SetSDIOutputStandard (mConfig.fOutputChannel, outputStandard);
 	}
@@ -440,14 +433,9 @@ bool NTV2StreamPlayer::RouteOutputSignal (void)
 			if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID))
 				mDevice.SetSDITransmitEnable (chan, true);	//	Make it an output
 
-			const NTV2OutputDestination sdiOutput(::NTV2ChannelToOutputDestination(chan));
-			if (NTV2_OUTPUT_DEST_IS_SDI(sdiOutput))
-				if (OutputDestHasRP188BypassEnabled(sdiOutput))
-					DisableRP188Bypass(sdiOutput);
 			if (!mDevice.Connect (::GetSDIOutputInputXpt (chan, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
 				connectFailures++;
 			mDevice.SetSDIOutputStandard (chan, outputStandard);
-			mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (chan, /*inEmbeddedLTC=*/mConfig.fTransmitLTC));	//	Add SDI spigot's TC index
 			//	NOTE: No need to send VITC2 with VITC1 (for "i" formats) -- firmware does this automatically
 
 			if (mConfig.WithAudio())
@@ -464,7 +452,6 @@ bool NTV2StreamPlayer::RouteOutputSignal (void)
 			if (!mDevice.Connect (::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_HDMI),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
 				connectFailures++;
 	}
-	TCNOTE(mTCIndexes);
 	if (connectFailures)
 		PLWARN(DEC(connectFailures) << " 'Connect' call(s) failed");
 	return connectFailures == 0;
@@ -510,151 +497,113 @@ void NTV2StreamPlayer::ConsumerThreadStatic (AJAThread * pThread, void * pContex
 
 void NTV2StreamPlayer::ConsumeFrames (void)
 {
-	ULWord					acOptions (AUTOCIRCULATE_WITH_RP188);
-	AUTOCIRCULATE_TRANSFER	outputXfer;
-	AUTOCIRCULATE_STATUS	outputStatus;
-	AJAAncillaryData *		pPkt (AJA_NULL);
-	ULWord					goodXfers(0), badXfers(0), starves(0), noRoomWaits(0);
-	ifstream *				pAncStrm (AJA_NULL);
+	NTV2StreamChannel	strStatus;
+	NTV2StreamBuffer	bfrStatus;
+	ULWord				goodQueue(0), badQueue(0), goodRelease(0), starves(0), noRoomWaits(0);
+	ULWord				status;
 
-	//	Stop AutoCirculate, just in case someone else left it running...
-//	mDevice.AutoCirculateStop(mConfig.fOutputChannel);
-	mDevice.WaitForOutputVerticalInterrupt(mConfig.fOutputChannel, 4);	//	Let it stop
+	//	Initialize and claim ownership of the stream
+	status = mDevice.StreamChannelInitialize(mConfig.fOutputChannel);
+	if (status != NTV2_STREAM_STATUS_SUCCESS)
+	{
+		cerr << "## ERROR:  Stream initialize failed: " << status << endl;
+		return;
+	}
 	PLNOTE("Thread started");
-#if 0
-	if (IS_KNOWN_AJAAncDataType(mConfig.fTransmitHDRType))
-	{	//	HDR anc doesn't change per-frame, so fill outputXfer.acANCBuffer with the packet data...
-		static AJAAncillaryData_HDR_SDR		sdrPkt;
-		static AJAAncillaryData_HDR_HDR10	hdr10Pkt;
-		static AJAAncillaryData_HDR_HLG		hlgPkt;
 
-		switch (mConfig.fTransmitHDRType)
-		{
-			case AJAAncDataType_HDR_SDR:	pPkt = &sdrPkt;		break;
-			case AJAAncDataType_HDR_HDR10:	pPkt = &hdr10Pkt;	break;
-			case AJAAncDataType_HDR_HLG:	pPkt = &hlgPkt;		break;
-			default:											break;
-		}
-	}
-	if (pPkt)
-	{	//	Allocate page-aligned host Anc buffer...
-		uint32_t hdrPktSize	(0);
-		if (!outputXfer.acANCBuffer.Allocate(gAncMaxSizeBytes, BUFFER_PAGE_ALIGNED)  ||  !outputXfer.acANCBuffer.Fill(0LL))
-			PLWARN("Anc buffer " << xHEX0N(gAncMaxSizeBytes,8) << "(" << DEC(gAncMaxSizeBytes) << ")-byte allocate failed -- HDR anc insertion disabled");
-		else if (AJA_FAILURE(pPkt->GenerateTransmitData (outputXfer.acANCBuffer, outputXfer.acANCBuffer,  hdrPktSize)))
-		{
-			PLWARN("HDR anc insertion disabled -- GenerateTransmitData failed");
-			outputXfer.acANCBuffer.Deallocate();
-		}
-		else
-			acOptions |= AUTOCIRCULATE_WITH_ANC;
-	}
-	else if (!mConfig.fAncDataFilePath.empty())
-	{	//	Open raw anc file for reading...
-		pAncStrm = new ifstream(mConfig.fAncDataFilePath.c_str(), ios::binary);
-		if (pAncStrm->good())
-		{
-			bool ancOK = outputXfer.acANCBuffer.Allocate(gAncMaxSizeBytes, BUFFER_PAGE_ALIGNED);
-			if (NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mConfig.fVideoFormat)  &&  ancOK)
-				ancOK = outputXfer.acANCField2Buffer.Allocate(gAncMaxSizeBytes, BUFFER_PAGE_ALIGNED);
-			if (ancOK)
-				acOptions |= AUTOCIRCULATE_WITH_ANC;
-			else
-			{
-				PLWARN("Anc buffer " << xHEX0N(gAncMaxSizeBytes,8) << "(" << DEC(gAncMaxSizeBytes) << ")-byte allocate failed -- anc insertion from file disabled");
-				outputXfer.acANCBuffer.Deallocate();
-				outputXfer.acANCField2Buffer.Deallocate();
-			}
-		}
-		else
-			PLWARN("Unable to open anc data file '" << mConfig.fAncDataFilePath << "' -- anc insertion disabled");
-	}
-//#ifdef NTV2_BUFFER_LOCKING
-	if (outputXferInfo.acANCBuffer)
-		mDevice.DMABufferLock(outputXfer.acANCBuffer, /*alsoLockSGL*/true);
-	if (outputXferInfo.acANCField2Buffer)
-		mDevice.DMABufferLock(outputXfer.acANCField2Buffer, /*alsoLockSGL*/true);
-//#endif
-	//	Initialize & start AutoCirculate...
-	bool initOK = mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  mConfig.fFrames.count(),  mAudioSystem,  acOptions,
-														1 /*numChannels*/,  mConfig.fFrames.firstFrame(),  mConfig.fFrames.lastFrame());
-	if (!initOK)
-		{PLFAIL("AutoCirculateInitForOutput failed");  mGlobalQuit = true;}
-	else if (!mConfig.WithVideo())
-	{	//	Video suppressed --
-		//	Clear device frame buffers being AutoCirculated (prevent garbage output frames)
-		NTV2Buffer tmpFrame (mFormatDesc.GetVideoWriteSize());
-		NTV2TestPatternGen blackPatternGen;
-		blackPatternGen.DrawTestPattern (NTV2_TestPatt_Black, mFormatDesc, tmpFrame);
-		mDevice.AutoCirculateGetStatus (mConfig.fOutputChannel, outputStatus);
-		for (uint16_t frmNum(outputStatus.GetStartFrame());  frmNum <= outputStatus.GetEndFrame();  frmNum++)
-			mDevice.DMAWriteFrame(ULWord(frmNum), tmpFrame, mFormatDesc.GetTotalBytes());
-	}	//	else if --novideo
-#endif
 	while (!mGlobalQuit)
 	{
-//		mDevice.AutoCirculateGetStatus (mConfig.fOutputChannel, outputStatus);
-
-		//	Check if there's room for another frame on the card...
-//		if (outputStatus.CanAcceptMoreOutputFrames())
+        //  Get stream status
+		status = mDevice.StreamChannelStatus(mConfig.fOutputChannel, strStatus);
+		if (status != NTV2_STREAM_STATUS_SUCCESS)
 		{
-#if 0
-			//	Device has at least one free frame buffer that can be filled.
-			//	Wait for the next frame in our ring to become ready to "consume"...
+			cerr << "## ERROR:  Stream status failed: " << status << endl;
+			return;
+		}
+
+		if (strStatus.GetQueueDepth() < 8)
+		{
 			NTV2FrameData *	pFrameData (mFrameDataRing.StartConsumeNextBuffer());
-			if (!pFrameData)
-				{starves++;  continue;}
-
-			outputXfer.SetOutputTimeCodes(pFrameData->fTimecodes);
-
-			if (pFrameData->VideoBuffer())	//	Transfer the timecode-burned frame to the device for playout...
-				outputXfer.SetVideoBuffer (pFrameData->VideoBuffer(), pFrameData->VideoBufferSize());
-			if (pFrameData->AudioBuffer())	//	If also playing audio...
-				outputXfer.SetAudioBuffer (pFrameData->AudioBuffer(), pFrameData->fNumAudioBytes);
-
-			if (pAncStrm  &&  pAncStrm->good()  &&  outputXfer.acANCBuffer)
-			{	//	Read pre-recorded anc from binary data file, and inject it into this frame...
-				pAncStrm->read(outputXfer.acANCBuffer, streamsize(outputXfer.acANCBuffer.GetByteCount()));
-				if (pAncStrm->good()  &&  outputXfer.acANCField2Buffer)
-					pAncStrm->read(outputXfer.acANCField2Buffer, streamsize(outputXfer.acANCField2Buffer.GetByteCount()));
-			}
-
-			//	Perform the DMA transfer to the device...
-			if (mDevice.AutoCirculateTransfer (mConfig.fOutputChannel, outputXfer))
-				goodXfers++;
-			else
-				badXfers++;
-#endif
-			if (goodXfers == 0)
-			{
-				NTV2FrameData *	pFrameData (mFrameDataRing.StartConsumeNextBuffer());
-				if (pFrameData)
+			if (pFrameData)
+            {
+				//  Queue frame to stream
+				NTV2_POINTER buffer(pFrameData->fVideoBuffer.GetHostAddress(0), pFrameData->fVideoBuffer.GetByteCount());
+				status = mDevice.StreamBufferQueue(mConfig.fOutputChannel,
+													buffer,
+													goodQueue,
+													bfrStatus);
+				if (status == NTV2_STREAM_STATUS_SUCCESS)
 				{
-					mDevice.DMAStreamStart (reinterpret_cast<PULWord>(pFrameData->VideoBuffer().GetHostAddress(0)),
-											ULWord(pFrameData->VideoBuffer().GetByteCount()), NTV2_CHANNEL1, false);
-					mFrameDataRing.EndConsumeNextBuffer();
-					goodXfers++;
+					goodQueue++;
+				}
+				else
+				{
+					badQueue++;
+					cerr << "## ERROR:  Stream buffer add failed: " << status << endl;
+				}
+
+				if (goodQueue == 3)
+				{
+					//  Start the stream
+					status = mDevice.StreamChannelStart(mConfig.fOutputChannel, strStatus);
+					if (status != NTV2_STREAM_STATUS_SUCCESS)
+					{
+						cerr << "## ERROR:  Stream initialize failed: " << status << endl;
+						return;
+					}
 				}
 			}
-//				mDevice.AutoCirculateStart(mConfig.fOutputChannel);
+			else
+			{
+                starves++;
+            }
+			continue;	//	Back to top of while loop
+		}
+		else
+		{
+			noRoomWaits++;
+		}
 
-			//	Signal that the frame has been "consumed"...
-//			mFrameDataRing.EndConsumeNextBuffer();
-//			continue;	//	Back to top of while loop
-		}	//	if CanAcceptMoreOutputFrames
+		//  Look for buffers to release
+        status = mDevice.StreamBufferRelease(mConfig.fOutputChannel, bfrStatus);
+		while (status == NTV2_STREAM_STATUS_SUCCESS)
+		{
+			mFrameDataRing.EndConsumeNextBuffer();
+			goodRelease++;
+            status = mDevice.StreamBufferRelease(mConfig.fOutputChannel, bfrStatus);
+		}
 
 		//	Wait for one or more buffers to become available on the device, which should occur at next VBI...
-		noRoomWaits++;
-		mDevice.WaitForOutputVerticalInterrupt(mConfig.fOutputChannel);
+		mDevice.StreamChannelWait(mConfig.fOutputChannel, strStatus);
 	}	//	loop til quit signaled
 
-	//	Stop AutoCirculate...
-	mDevice.DMAStreamStop (NTV2_CHANNEL1, false);
-//	mDevice.AutoCirculateStop(mConfig.fOutputChannel);
-	PLNOTE("Thread completed: " << DEC(goodXfers) << " xfers, " << DEC(badXfers) << " failed, "
+	//	Stop streaming...
+	status = mDevice.StreamChannelInitialize(mConfig.fOutputChannel);
+	if (status != NTV2_STREAM_STATUS_SUCCESS)
+	{
+		cerr << "## ERROR:  Stream initialize failed: " << status << endl;
+		return;
+	}
+
+    //  Release all buffers
+    status = mDevice.StreamBufferRelease(mConfig.fOutputChannel, bfrStatus);
+    while (status == NTV2_STREAM_STATUS_SUCCESS)
+    {
+        mFrameDataRing.EndConsumeNextBuffer();
+        goodRelease++;
+        status = mDevice.StreamBufferRelease(mConfig.fOutputChannel, bfrStatus);
+    }
+
+    //  Release stream ownership
+	status = mDevice.StreamChannelRelease(mConfig.fOutputChannel);
+	if (status != NTV2_STREAM_STATUS_SUCCESS)
+	{
+		cerr << "## ERROR:  Stream release failed: " << status << endl;
+		return;
+	}    
+
+	PLNOTE("Thread completed: " << DEC(goodQueue) << " queued, " << DEC(badQueue) << " failed, "
 			<< DEC(starves) << " starves, " << DEC(noRoomWaits) << " VBI waits");
-	if (pAncStrm)
-		delete pAncStrm;
 
 }	//	ConsumeFrames
 
@@ -684,15 +633,10 @@ void NTV2StreamPlayer::ProducerThreadStatic (AJAThread * pThread, void * pContex
 
 void NTV2StreamPlayer::ProduceFrames (void)
 {
-	ULWord	freqNdx(0), testPatNdx(0), badTally(0);
-	double	timeOfLastSwitch	(0.0);
+	ULWord	testPatNdx(0), badTally(0);
 
 	const AJATimeBase		timeBase		(CNTV2DemoCommon::GetAJAFrameRate(::GetNTV2FrameRateFromVideoFormat(mConfig.fVideoFormat)));
 	const NTV2StringList	tpNames			(NTV2TestPatternGen::getTestPatternNames());
-	const bool				isInterlace		(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mConfig.fVideoFormat));
-	const bool				isPAL			(NTV2_IS_PAL_VIDEO_FORMAT(mConfig.fVideoFormat));
-	const NTV2FrameRate		ntv2FrameRate	(::GetNTV2FrameRateFromVideoFormat(mConfig.fVideoFormat));
-	const TimecodeFormat	tcFormat		(CNTV2DemoCommon::NTV2FrameRate2TimecodeFormat(ntv2FrameRate));
 
 	PLNOTE("Thread started");
 	NTV2FrameData *	pFrameData (mFrameDataRing.StartProduceNextBuffer());
@@ -714,134 +658,14 @@ void NTV2StreamPlayer::ProduceFrames (void)
 											/*byteCount*/ pFrameData->fVideoBuffer.GetByteCount());
 		testPatNdx = (testPatNdx + 1) % ULWord(mTestPatRasters.size());
 		AJATime::Sleep(5000);
-#if 0
-		const	CRP188	rp188Info (mCurrentFrame++, 0, 0, 10, tcFormat);
-		NTV2_RP188		tcF1, tcF2;
-		string			tcString;
-
-		rp188Info.GetRP188Reg(tcF1);
-		rp188Info.GetRP188Str(tcString);
-
-		//	Include timecode in output signal...
-		tcF2 = tcF1;
-		if (isInterlace)
-		{	//	Set bit 27 of Hi word (PAL) or Lo word (NTSC)
-			if (isPAL) tcF2.fHi |=  BIT(27);	else tcF2.fLo |=  BIT(27);
-		}
-
-		//	Add timecodes for each SDI output...
-		for (NTV2TCIndexesConstIter it(mTCIndexes.begin());  it != mTCIndexes.end();  ++it)
-			pFrameData->fTimecodes[*it] = NTV2_IS_ATC_VITC2_TIMECODE_INDEX(*it) ? tcF2 : tcF1;
-
-		if (pFrameData->VideoBuffer())	//	Burn current timecode into the video buffer...
-			mTCBurner.BurnTimeCode (pFrameData->VideoBuffer(), tcString.c_str(), 80);
-		TCDBG("F" << DEC0N(mCurrentFrame-1,6) << ": " << tcF1 << ": " << tcString);
-
-		//	If also playing audio...
-		if (pFrameData->AudioBuffer())	//	...then generate audio tone data for this frame...
-			pFrameData->fNumAudioBytes = AddTone(*pFrameData);	//	...and remember number of audio bytes to xfer
-
-		//	Every few seconds, change the test pattern and tone frequency...
-		const double currentTime (timeBase.FramesToSeconds(mCurrentFrame));
-		if (currentTime > timeOfLastSwitch + 4.0)
-		{
-			freqNdx = (freqNdx + 1) % gNumFrequencies;
-			testPatNdx = (testPatNdx + 1) % ULWord(mTestPatRasters.size());
-			mToneFrequency = gFrequencies[freqNdx];
-			timeOfLastSwitch = currentTime;
-			PLINFO("F" << DEC0N(mCurrentFrame,6) << ": " << tcString << ": tone=" << mToneFrequency << "Hz, pattern='" << tpNames.at(testPatNdx) << "'");
-		}	//	if time to switch test pattern & tone frequency
-
-		//	Signal that I'm done producing this FrameData, making it immediately available for transfer/playout...
-		mFrameDataRing.EndProduceNextBuffer();
-#endif
 	}	//	loop til mGlobalQuit goes true
 	PLNOTE("Thread completed: " << DEC(mCurrentFrame) << " frame(s) produced, " << DEC(badTally) << " failed");
 
 }	//	ProduceFrames
 
 
-uint32_t NTV2StreamPlayer::AddTone (NTV2FrameData & inFrameData)
+void NTV2StreamPlayer::GetStreamStatus (NTV2StreamChannel & outStatus)
 {
-	NTV2FrameRate	frameRate	(NTV2_FRAMERATE_INVALID);
-	NTV2AudioRate	audioRate	(NTV2_AUDIO_RATE_INVALID);
-	ULWord			numChannels	(0);
-
-	mDevice.GetFrameRate (frameRate, mConfig.fOutputChannel);
-	mDevice.GetAudioRate (audioRate, mAudioSystem);
-	mDevice.GetNumberAudioChannels (numChannels, mAudioSystem);
-
-	//	Set per-channel tone frequencies...
-	double	pFrequencies [kNumAudioChannelsMax];
-	pFrequencies[0] = (mToneFrequency / 2.0);
-	for (ULWord chan(1);  chan < numChannels;  chan++)
-		//	The 1.154782 value is the 16th root of 10, to ensure that if mToneFrequency is 2000,
-		//	that the calculated frequency of audio channel 16 will be 20kHz...
-		pFrequencies[chan] = pFrequencies[chan-1] * 1.154782;
-
-	//	Since audio on AJA devices use fixed sample rates (typically 48KHz), certain video frame rates will
-	//	necessarily result in some frames having more audio samples than others. GetAudioSamplesPerFrame is
-	//	called to calculate the correct sample count for the current frame...
-	const ULWord	numSamples		(::GetAudioSamplesPerFrame (frameRate, audioRate, mCurrentFrame));
-	const double	sampleRateHertz	(::GetAudioSamplesPerSecond(audioRate));
-
-	return ::AddAudioTone (	inFrameData.AudioBuffer(),	//	audio buffer to fill
-							mCurrentSample,				//	which sample for continuing the waveform
-							numSamples,					//	number of samples to generate
-							sampleRateHertz,			//	sample rate [Hz]
-							gAmplitudes,				//	per-channel amplitudes
-							pFrequencies,				//	per-channel tone frequencies [Hz]
-							31,							//	bits per sample
-							false,						//	don't byte-swap
-							numChannels);				//	number of audio channels to generate
-}	//	AddTone
-
-
-void NTV2StreamPlayer::GetACStatus (AUTOCIRCULATE_STATUS & outStatus)
-{
-	mDevice.AutoCirculateGetStatus (mConfig.fOutputChannel, outStatus);
+	mDevice.StreamChannelStatus(mConfig.fOutputChannel, outStatus);
 }
 
-
-ULWord GetRP188RegisterForOutput (const NTV2OutputDestination inOutputDest)
-{
-	switch (inOutputDest)
-	{
-		case NTV2_OUTPUTDESTINATION_SDI1:	return kRegRP188InOut1DBB;	//	reg 29
-		case NTV2_OUTPUTDESTINATION_SDI2:	return kRegRP188InOut2DBB;	//	reg 64
-		case NTV2_OUTPUTDESTINATION_SDI3:	return kRegRP188InOut3DBB;	//	reg 268
-		case NTV2_OUTPUTDESTINATION_SDI4:	return kRegRP188InOut4DBB;	//	reg 273
-		case NTV2_OUTPUTDESTINATION_SDI5:	return kRegRP188InOut5DBB;	//	reg 29
-		case NTV2_OUTPUTDESTINATION_SDI6:	return kRegRP188InOut6DBB;	//	reg 64
-		case NTV2_OUTPUTDESTINATION_SDI7:	return kRegRP188InOut7DBB;	//	reg 268
-		case NTV2_OUTPUTDESTINATION_SDI8:	return kRegRP188InOut8DBB;	//	reg 273
-		default:							return 0;
-	}	//	switch on output destination
-
-}	//	GetRP188RegisterForOutput
-
-
-bool NTV2StreamPlayer::OutputDestHasRP188BypassEnabled (const NTV2OutputDestination inOutputDest)
-{
-	bool			result	(false);
-	const ULWord	regNum	(GetRP188RegisterForOutput(inOutputDest));
-	ULWord			regValue(0);
-
-	//	Bit 23 of the RP188 DBB register will be set if output timecode is pulled
-	//	directly from an SDI input (bypass source)...
-	if (regNum  &&  mDevice.ReadRegister(regNum, regValue)  &&  regValue & BIT(23))
-		result = true;
-
-	return result;
-
-}	//	OutputDestHasRP188BypassEnabled
-
-
-void NTV2StreamPlayer::DisableRP188Bypass (const NTV2OutputDestination inOutputDest)
-{
-	//	Clear bit 23 of SDI output's RP188 DBB register...
-	const ULWord regNum (GetRP188RegisterForOutput(inOutputDest));
-	if (regNum)
-		mDevice.WriteRegister (regNum, 0, BIT(23), 23);
-
-}	//	DisableRP188Bypass

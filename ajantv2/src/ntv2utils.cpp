@@ -6584,6 +6584,7 @@ string NTV2BreakoutTypeToString (const NTV2BreakoutType inValue, const bool inCo
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "KLHiBox", NTV2_KLHiBox);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "KLHePlusBox", NTV2_KLHePlusBox);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "K3GBox", NTV2_K3GBox);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay, "KBOB", NTV2_BreakoutBoard);
 		case NTV2_MAX_NUM_BreakoutTypes:			break;	//special case
 	}
 	return "";

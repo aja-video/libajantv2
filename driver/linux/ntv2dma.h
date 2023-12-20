@@ -17,8 +17,11 @@ struct nvidia_p2p_page_table;
 struct nvidia_p2p_dma_mapping;
 #endif
 
-#define DMA_NUM_ENGINES		4
-#define DMA_NUM_CONTEXTS	2
+struct ntv2_stream;
+struct ntv2_stream_buffer;
+
+#define DMA_NUM_ENGINES     8
+#define DMA_NUM_CONTEXTS    2
 
 #define DMA_TRANSFERCOUNT_64     			0x10000000
 #define DMA_TRANSFERCOUNT_TOHOST 			0x80000000
@@ -96,12 +99,13 @@ typedef struct _dmaPageRoot
 	LWord64					lockCounter;		// lock access counter
 	LWord64					lockTotalSize;		// current locked bytes
 	LWord64					lockMaxSize;		// maximum locked bytes
-	ULWord					serialRef[DMA_NUM_ENGINES];
+	ULWord					engineRef[DMA_NUM_ENGINES];
 } DMA_PAGE_ROOT, *PDMA_PAGE_ROOT;
 
 typedef struct _dmaPageBuffer
 {
 	struct list_head		bufferEntry;		// locked buffer list
+    PDMA_PAGE_ROOT          pPageRoot;          // owning root
 	LWord					refCount;			// reference count
 	void*					pUserAddress;		// user buffer address
 	ULWord					userSize;			// user buffer size
@@ -254,6 +258,7 @@ typedef struct _dmaEngine_
 	ULWord					dmaIndex;				// dma index
 	bool					dmaC2H;					// dma to host
     bool                    dmaStream;              // streaming engine
+    ULWord                  strIndex;               // stream index
 	ULWord					maxVideoSize;			// maximum video transfer size
 	ULWord					maxVideoPages;			// maximum video pages
 	ULWord					maxAudioSize;			// maximum audio transfer size
@@ -276,6 +281,7 @@ typedef struct _dmaEngine_
 	PVOID					pDescriptorVirtual[DMA_DESCRIPTOR_PAGES_MAX];		// virtual descriptor aligned address
 	dma_addr_t				descriptorPhysical[DMA_DESCRIPTOR_PAGES_MAX];		// physical descriptor aligned address
 	ULWord					numDescriptorPages;		// number of allocated descriptor pages
+    ULWord                  strDescriptorIndex;     // stream descriptor next available descriptor
 	LWord64					programStartCount;		// count program hardware dma starts
 	LWord64					programCompleteCount;	// count program hardware dma completes
 	LWord64					programDescriptorCount;	// count program hardware descriptors
@@ -328,7 +334,7 @@ void dmaPageRootAuto(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot,
 
 PDMA_PAGE_BUFFER dmaPageRootFind(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot,
 										PVOID pAddress, ULWord size);
-void dmaPageRootFree(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot, PDMA_PAGE_BUFFER pBuffer);
+void dmaPageRootFree(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer);
 
 int dmaEnable(ULWord deviceNumber);
 void dmaDisable(ULWord deviceNumber);
@@ -339,11 +345,17 @@ int dmaTargetP2P(ULWord deviceNumber, NTV2_DMA_P2P_CONTROL_STRUCT* pParams);
 int dmaStreamStart(PDMA_PARAMS pDmaParams);
 int dmaStreamStop(PDMA_PARAMS pDmaParams);
 
-int dmaXlnxStreamBuild(PDMA_ENGINE pDmaEngine, PDMA_PAGE_BUFFER pPageBuffer, uint32_t index);
-int dmaXlnxStreamLink(PDMA_ENGINE pDmaEngine, uint32_t srcIndex, uint32_t dstIndex);
-int dmaXlnxStreamStart(PDMA_ENGINE pDmaEngine, uint32_t startIndex);
-int dmaXlnxStreamStop(PDMA_ENGINE pDmaEngine);
-
 void dmaInterrupt(ULWord deviceNumber, ULWord intStatus);
+
+int dmaOpsStreamInitialize(struct ntv2_stream *stream);
+int dmaOpsStreamRelease(struct ntv2_stream *stream);
+int dmaOpsStreamStart(struct ntv2_stream *stream);
+int dmaOpsStreamStop(struct ntv2_stream *stream);
+int dmaOpsStreamAdvance(struct ntv2_stream *stream);
+int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index);
+int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index);
+int dmaOpsBufferComplete(struct ntv2_stream *stream, int index);
+int dmaOpsBufferFlush(struct ntv2_stream *stream, int index);
+int dmaOpsBufferRelease(struct ntv2_stream *stream, int index);
 
 #endif

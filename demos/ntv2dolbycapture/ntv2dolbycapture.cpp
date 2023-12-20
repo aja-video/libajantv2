@@ -5,37 +5,33 @@
 	@copyright	(C) 2012-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
 
-//#define AJA_RAW_AUDIO_RECORD	//	Uncomment to record raw audio file
-//#define AJA_WAV_AUDIO_RECORD	//	Uncomment to record WAV audio file
+
 #include "ntv2dolbycapture.h"
-#include "ntv2utils.h"
-#include "ntv2debug.h"	//	for NTV2DeviceString
-#include "ntv2devicefeatures.h"
+#include "ntv2devicescanner.h"
 #include "ajabase/system/process.h"
-#include "ajabase/system/systemtime.h"
-#include <iterator>	//	for inserter
 #include <fstream>	//	for ofstream
 
 using namespace std;
 
+#define NTV2_BUFFER_LOCK
+
 #define NTV2_AUDIOSIZE_MAX	(401 * 1024)
 #define NTV2_ANCILLARYSIZE_MAX	(256 * 1024)
-//#define NTV2_BUFFER_LOCK
 
 
 //////////////////////////////////////////////////////////////////////////////////////	NTV2DolbyCapture IMPLEMENTATION
 
-NTV2DolbyCapture::NTV2DolbyCapture (const DolbyConfig & inConfig)
+NTV2DolbyCapture::NTV2DolbyCapture (const DolbyCaptureConfig & inConfig)
 	:	mConsumerThread		(AJAThread()),
 		mProducerThread		(AJAThread()),
 		mDeviceID			(DEVICE_ID_NOTFOUND),
 		mConfig				(inConfig),
 		mVideoFormat		(NTV2_FORMAT_UNKNOWN),
 		mSavedTaskMode		(NTV2_DISABLE_TASKS),
-        mAudioSystem        (NTV2_AUDIOSYSTEM_1),
-		mGlobalQuit			(false),
+		mAudioSystem		(NTV2_AUDIOSYSTEM_1),
 		mHostBuffers		(),
-		mAVCircularBuffer	()
+		mAVCircularBuffer	(),
+		mGlobalQuit			(false)
 {
 }	//	constructor
 
@@ -62,9 +58,10 @@ void NTV2DolbyCapture::Quit (void)
 	while (mProducerThread.Active())
 		AJATime::Sleep(10);
 
+	//	Restore some of the device's former state...
 	if (!mConfig.fDoMultiFormat)
 	{
-		mDevice.ReleaseStreamForApplication (kDemoAppSignature, static_cast<int32_t>(AJAProcess::GetPid()));
+		mDevice.ReleaseStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid()));
 		mDevice.SetEveryFrameServices(mSavedTaskMode);		//	Restore prior task mode
 	}
 
@@ -79,12 +76,19 @@ AJAStatus NTV2DolbyCapture::Init (void)
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
 		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
 
-    if (!mDevice.IsDeviceReady(false))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
+	if (!mDevice.IsDeviceReady(false))
+		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
 	mDeviceID = mDevice.GetDeviceID();						//	Keep the device ID handy, as it's used frequently
 	if (!::NTV2DeviceCanDoCapture(mDeviceID))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' cannot capture" << endl;  return AJA_STATUS_FEATURE;}
+		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is playback-only" << endl;  return AJA_STATUS_FEATURE;}
+
+	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
+	{	cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' doesn't support '"
+				<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, true) << "' ("
+				<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, false) << ", " << DEC(mConfig.fPixelFormat) << ")" << endl;
+		return AJA_STATUS_UNSUPPORTED;
+	}
 
 	ULWord	appSignature	(0);
 	int32_t	appPID			(0);
@@ -92,40 +96,50 @@ AJAStatus NTV2DolbyCapture::Init (void)
 	mDevice.GetEveryFrameServices(mSavedTaskMode);			//	Save the current device state
 	if (!mConfig.fDoMultiFormat)
 	{
-		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, static_cast<int32_t>(AJAProcess::GetPid())))
+		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
 		{
-			cerr << "## ERROR:  Unable to acquire device because another app (pid " << appPID << ") owns it" << endl;
+			cerr << "## ERROR:  Unable to acquire '" << mDevice.GetDisplayName() << "' because another app (pid " << appPID << ") owns it" << endl;
 			return AJA_STATUS_BUSY;		//	Another app is using the device
 		}
 		mDevice.GetEveryFrameServices(mSavedTaskMode);		//	Save the current state before we change it
 	}
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Since this is an OEM demo, use the OEM service level
+	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Prevent interference from AJA retail services
 
 	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
 
+	//	This demo permits input source and channel to be specified independently.
 	if (!NTV2_IS_VALID_CHANNEL(mConfig.fInputChannel)  &&  !NTV2_IS_VALID_INPUT_SOURCE(mConfig.fInputSource))
 		mConfig.fInputChannel = NTV2_CHANNEL1;
 	else if (!NTV2_IS_VALID_CHANNEL(mConfig.fInputChannel)  &&  NTV2_IS_VALID_INPUT_SOURCE(mConfig.fInputSource))
 		mConfig.fInputChannel = ::NTV2InputSourceToChannel(mConfig.fInputSource);
 	else if (NTV2_IS_VALID_CHANNEL(mConfig.fInputChannel)  &&  !NTV2_IS_VALID_INPUT_SOURCE(mConfig.fInputSource))
-        mConfig.fInputSource = ::NTV2ChannelToInputSource(mConfig.fInputChannel, NTV2_IOKINDS_HDMI);
+		mConfig.fInputSource = ::NTV2ChannelToInputSource(mConfig.fInputChannel, NTV2_IOKINDS_HDMI);
 	//	On KonaHDMI, map specified SDI input to equivalent HDMI input...
-    if (::NTV2DeviceGetNumHDMIVideoInputs(mDeviceID) > 1  &&  NTV2_INPUT_SOURCE_IS_HDMI(mConfig.fInputSource))
+	if (::NTV2DeviceGetNumHDMIVideoInputs(mDeviceID) > 1  &&  NTV2_INPUT_SOURCE_IS_HDMI(mConfig.fInputSource))
 		mConfig.fInputSource = ::NTV2ChannelToInputSource(::NTV2InputSourceToChannel(mConfig.fInputSource), NTV2_IOKINDS_HDMI);
+	if (!::NTV2DeviceCanDoInputSource(mDeviceID, mConfig.fInputSource))
+	{
+		cerr	<< "## ERROR:  No such input '" << ::NTV2InputSourceToString(mConfig.fInputSource, /*compact?*/true)
+				<< "' on '" << mDevice.GetDisplayName() << "'" << endl;
+		return AJA_STATUS_UNSUPPORTED;
+	}
+	if (mConfig.fWithAnc  &&  !::NTV2DeviceCanDoCustomAnc(mDeviceID))
+		{cerr << "## ERROR: Anc capture requested, but '" << mDevice.GetDisplayName() << "' has no anc extractors";  return AJA_STATUS_UNSUPPORTED;}
 
 	//	Set up the video and audio...
 	status = SetupVideo();
 	if (AJA_FAILURE(status))
 		return status;
 
-    status = SetupAudio();
+	status = SetupAudio();
 	if (AJA_FAILURE(status))
 		return status;
 
 	//	Set up the circular buffers, the device signal routing, and both playout and capture AutoCirculate...
 	SetupHostBuffers();
-	RouteInputSignal();
+	if (!RouteInputSignal())
+		return AJA_STATUS_FAIL;
 
 	mDolbyState = 0;
 
@@ -150,23 +164,16 @@ AJAStatus NTV2DolbyCapture::SetupVideo (void)
 	mDevice.SubscribeInputVerticalEvent(mConfig.fInputChannel);
 
 	//	Determine the input video signal format...
-	mVideoFormat = mDevice.GetInputVideoFormat (mConfig.fInputSource);
+	mVideoFormat = mDevice.GetInputVideoFormat(mConfig.fInputSource);
 	if (mVideoFormat == NTV2_FORMAT_UNKNOWN)
+		{cerr << "## ERROR:  No input signal or unknown format" << endl;  return AJA_STATUS_NOINPUT;}
+	if (!::NTV2DeviceCanDoVideoFormat(mDeviceID, mVideoFormat))
 	{
-		cerr << "## ERROR:  No input signal or unknown format" << endl;
-		return AJA_STATUS_NOINPUT;	//	Sorry, can't handle this format
+		cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' cannot handle " << ::NTV2VideoFormatToString(mVideoFormat) << endl;
+		return AJA_STATUS_UNSUPPORTED;	//	Device can't handle this format
 	}
-	mProgressive = NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mVideoFormat);
-
-	//	Set the frame buffer pixel format for all the channels on the device
-	//	(assuming it supports that pixel format -- otherwise default to 8-bit YCbCr)...
-	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
-	{
-		cerr	<< "## WARNING:  " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat)
-				<< " unsupported, using " << ::NTV2FrameBufferFormatToString(NTV2_FBF_8BIT_YCBCR)
-				<< " instead" << endl;
-		mConfig.fPixelFormat = NTV2_FBF_8BIT_YCBCR;
-	}
+	CAPNOTE(::NTV2VideoFormatToString(mVideoFormat) << " detected on " << ::NTV2InputSourceToString(mConfig.fInputSource,true) << " on " << mDevice.GetDisplayName());
+	mFormatDesc = NTV2FormatDescriptor(mVideoFormat, mConfig.fPixelFormat);
 
 	//	Set the device video format to whatever we detected at the input...
 	if (NTV2_IS_4K_VIDEO_FORMAT(mVideoFormat))
@@ -198,34 +205,34 @@ AJAStatus NTV2DolbyCapture::SetupAudio (void)
 
 void NTV2DolbyCapture::SetupHostBuffers (void)
 {
-	NTV2VANCMode	vancMode(NTV2_VANCMODE_INVALID);
-	NTV2Standard	standard(NTV2_STANDARD_INVALID);
-	ULWord			F1AncSize(0), F2AncSize(0);
-	mDevice.GetVANCMode (vancMode);
-	mDevice.GetStandard (standard);
-
 	//	Let my circular buffer know when it's time to quit...
 	mAVCircularBuffer.SetAbortFlag (&mGlobalQuit);
 
-	// configure anc buffers
-	mDevice.AncSetFrameBufferSize(NTV2_ANCILLARYSIZE_MAX, NTV2_ANCILLARYSIZE_MAX);
-	F1AncSize = NTV2_ANCILLARYSIZE_MAX;
-	F2AncSize = NTV2_ANCILLARYSIZE_MAX;
+	bool isProgressive = NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mVideoFormat);
+	if (isProgressive)
+		mDevice.AncSetFrameBufferSize(NTV2_ANCILLARYSIZE_MAX, 0);
+	else
+		mDevice.AncSetFrameBufferSize(NTV2_ANCILLARYSIZE_MAX / 2, NTV2_ANCILLARYSIZE_MAX / 2);
 
-	mFormatDesc = NTV2FormatDescriptor (standard, mConfig.fPixelFormat, vancMode);
+	ULWord F1AncSize(0), F2AncSize(0);
+	ULWord	F1OffsetFromEnd(0), F2OffsetFromEnd(0);
+	mDevice.ReadRegister(kVRegAncField1Offset, F1OffsetFromEnd);	//	# bytes from end of 8MB/16MB frame
+	mDevice.ReadRegister(kVRegAncField2Offset, F2OffsetFromEnd);	//	# bytes from end of 8MB/16MB frame
+	//	Based on the offsets, calculate the max anc capacity
+	F1AncSize = F2OffsetFromEnd > F1OffsetFromEnd ? 0 : F1OffsetFromEnd - F2OffsetFromEnd;
+	F2AncSize = F2OffsetFromEnd > F1OffsetFromEnd ? F2OffsetFromEnd - F1OffsetFromEnd : F2OffsetFromEnd;
 
 	//	Allocate and add each in-host NTV2FrameData to my circular buffer member variable...
+	const size_t audioBufferSize (NTV2_AUDIOSIZE_MAX);
 	mHostBuffers.reserve(size_t(CIRCULAR_BUFFER_SIZE));
 	while (mHostBuffers.size() < size_t(CIRCULAR_BUFFER_SIZE))
 	{
 		mHostBuffers.push_back(NTV2FrameData());
 		NTV2FrameData & frameData(mHostBuffers.back());
-		frameData.fVideoBuffer.Allocate(::GetVideoWriteSize (mVideoFormat, mConfig.fPixelFormat, vancMode));
-		frameData.fAudioBuffer.Allocate(NTV2_AUDIOSIZE_MAX);
-		if (F1AncSize)
-			frameData.fAncBuffer.Allocate(F1AncSize);
-		if (!mProgressive && F2AncSize)
-			frameData.fAncBuffer2.Allocate(F2AncSize);
+		frameData.fVideoBuffer.Allocate(mFormatDesc.GetVideoWriteSize());
+		frameData.fAudioBuffer.Allocate(audioBufferSize);
+		frameData.fAncBuffer.Allocate(F1AncSize);
+		frameData.fAncBuffer2.Allocate(F2AncSize);
 		mAVCircularBuffer.Add(&frameData);
 
 #ifdef NTV2_BUFFER_LOCK
@@ -242,106 +249,18 @@ void NTV2DolbyCapture::SetupHostBuffers (void)
 }	//	SetupHostBuffers
 
 
-void NTV2DolbyCapture::RouteInputSignal (void)
+bool NTV2DolbyCapture::RouteInputSignal (void)
 {
-	//	For this simple example, tie the user-selected input to frame buffer 1.
-	//	Is this user-selected input supported on the device?
-	if (!::NTV2DeviceCanDoInputSource (mDeviceID, mConfig.fInputSource))
-		mConfig.fInputSource = NTV2_INPUTSOURCE_SDI1;
 
-	NTV2LHIHDMIColorSpace	inputColor	(NTV2_LHIHDMIColorSpaceYCbCr);
+	NTV2LHIHDMIColorSpace inputColorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
 	if (NTV2_INPUT_SOURCE_IS_HDMI(mConfig.fInputSource))
-		mDevice.GetHDMIInputColor (inputColor, mConfig.fInputChannel);
+		mDevice.GetHDMIInputColor (inputColorSpace, mConfig.fInputChannel);
 
-	const bool						canVerify				(mDevice.HasCanConnectROM());
-	const bool						isInputRGB				(inputColor == NTV2_LHIHDMIColorSpaceRGB);
-	const bool						isFrameRGB				(::IsRGBFormat(mConfig.fPixelFormat));
-	const NTV2OutputCrosspointID	inputWidgetOutputXpt	(::GetInputSourceOutputXpt(mConfig.fInputSource, false, isInputRGB, 0));
-	const NTV2InputCrosspointID		frameBufferInputXpt		(::GetFrameBufferInputXptFromChannel(mConfig.fInputChannel));
-	const NTV2InputCrosspointID		cscWidgetVideoInputXpt	(::GetCSCInputXptFromChannel(mConfig.fInputChannel));
-	const NTV2OutputCrosspointID	cscWidgetRGBOutputXpt	(::GetCSCOutputXptFromChannel(mConfig.fInputChannel, /*inIsKey*/ false, /*inIsRGB*/ true));
-	const NTV2OutputCrosspointID	cscWidgetYUVOutputXpt	(::GetCSCOutputXptFromChannel(mConfig.fInputChannel, /*inIsKey*/ false, /*inIsRGB*/ false));
+	const bool isInputRGB (inputColorSpace == NTV2_LHIHDMIColorSpaceRGB);
+	NTV2XptConnections connections;
 
-
-	if (!mConfig.fDoMultiFormat)
-		mDevice.ClearRouting();
-
-	if (NTV2_IS_4K_VIDEO_FORMAT(mVideoFormat))
-	{
-		if (isInputRGB && !isFrameRGB)
-		{
-			mDevice.Connect(NTV2_XptCSC1VidInput, NTV2_XptHDMIIn1RGB, canVerify);
-			mDevice.Connect(NTV2_XptCSC2VidInput, NTV2_XptHDMIIn1Q2RGB, canVerify);
-			mDevice.Connect(NTV2_XptCSC3VidInput, NTV2_XptHDMIIn1Q3RGB, canVerify);
-			mDevice.Connect(NTV2_XptCSC4VidInput, NTV2_XptHDMIIn1Q4RGB, canVerify);
-
-			mDevice.Connect(NTV2_Xpt425Mux1AInput, NTV2_XptCSC1VidYUV, canVerify);
-			mDevice.Connect(NTV2_Xpt425Mux1BInput, NTV2_XptCSC2VidYUV, canVerify);
-			mDevice.Connect(NTV2_Xpt425Mux2AInput, NTV2_XptCSC3VidYUV, canVerify);
-			mDevice.Connect(NTV2_Xpt425Mux2BInput, NTV2_XptCSC4VidYUV, canVerify);
-
-			mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_Xpt425Mux1AYUV, canVerify);
-			mDevice.Connect(NTV2_XptFrameBuffer1DS2Input, NTV2_Xpt425Mux1BYUV, canVerify);
-			mDevice.Connect(NTV2_XptFrameBuffer2Input, NTV2_Xpt425Mux2AYUV, canVerify);
-			mDevice.Connect(NTV2_XptFrameBuffer2DS2Input, NTV2_Xpt425Mux2BYUV, canVerify);
-		}
-		else if (!isInputRGB && isFrameRGB)
-		{
-			mDevice.Connect(NTV2_XptCSC1VidInput, NTV2_XptHDMIIn1, canVerify);
-			mDevice.Connect(NTV2_XptCSC2VidInput, NTV2_XptHDMIIn1Q2, canVerify);
-			mDevice.Connect(NTV2_XptCSC3VidInput, NTV2_XptHDMIIn1Q3, canVerify);
-			mDevice.Connect(NTV2_XptCSC4VidInput, NTV2_XptHDMIIn1Q4, canVerify);
-
-			mDevice.Connect(NTV2_Xpt425Mux1AInput, NTV2_XptCSC1VidRGB, canVerify);
-			mDevice.Connect(NTV2_Xpt425Mux1BInput, NTV2_XptCSC2VidRGB, canVerify);
-			mDevice.Connect(NTV2_Xpt425Mux2AInput, NTV2_XptCSC3VidRGB, canVerify);
-			mDevice.Connect(NTV2_Xpt425Mux2BInput, NTV2_XptCSC4VidRGB, canVerify);
-
-			mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_Xpt425Mux1ARGB, canVerify);
-			mDevice.Connect(NTV2_XptFrameBuffer1DS2Input, NTV2_Xpt425Mux1BRGB, canVerify);
-			mDevice.Connect(NTV2_XptFrameBuffer2Input, NTV2_Xpt425Mux2ARGB, canVerify);
-			mDevice.Connect(NTV2_XptFrameBuffer2DS2Input, NTV2_Xpt425Mux2BRGB, canVerify);
-		}
-		else if (isInputRGB && isFrameRGB)
-		{
-			mDevice.Connect(NTV2_Xpt425Mux1AInput, NTV2_XptHDMIIn1RGB, canVerify);
-			mDevice.Connect(NTV2_Xpt425Mux1BInput, NTV2_XptHDMIIn1Q2RGB, canVerify);
-			mDevice.Connect(NTV2_Xpt425Mux2AInput, NTV2_XptHDMIIn1Q3RGB, canVerify);
-			mDevice.Connect(NTV2_Xpt425Mux2BInput, NTV2_XptHDMIIn1Q4RGB, canVerify);
-
-			mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_Xpt425Mux1ARGB, canVerify);
-			mDevice.Connect(NTV2_XptFrameBuffer1DS2Input, NTV2_Xpt425Mux1BRGB, canVerify);
-			mDevice.Connect(NTV2_XptFrameBuffer2Input, NTV2_Xpt425Mux2ARGB, canVerify);
-			mDevice.Connect(NTV2_XptFrameBuffer2DS2Input, NTV2_Xpt425Mux2BRGB, canVerify);
-		}
-		else
-		{
-			mDevice.Connect(NTV2_Xpt425Mux1AInput, NTV2_XptHDMIIn1, canVerify);
-			mDevice.Connect(NTV2_Xpt425Mux1BInput, NTV2_XptHDMIIn1Q2, canVerify);
-			mDevice.Connect(NTV2_Xpt425Mux2AInput, NTV2_XptHDMIIn1Q3, canVerify);
-			mDevice.Connect(NTV2_Xpt425Mux2BInput, NTV2_XptHDMIIn1Q4, canVerify);
-
-			mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_Xpt425Mux1AYUV, canVerify);
-			mDevice.Connect(NTV2_XptFrameBuffer1DS2Input, NTV2_Xpt425Mux1BYUV, canVerify);
-			mDevice.Connect(NTV2_XptFrameBuffer2Input, NTV2_Xpt425Mux2AYUV, canVerify);
-			mDevice.Connect(NTV2_XptFrameBuffer2DS2Input, NTV2_Xpt425Mux2BYUV, canVerify);
-		}
-	}
-	else
-	{
-		if (isInputRGB && !isFrameRGB)
-		{
-			mDevice.Connect (frameBufferInputXpt,		cscWidgetYUVOutputXpt,	canVerify);	//	Frame store input to CSC widget's YUV output
-			mDevice.Connect (cscWidgetVideoInputXpt,	inputWidgetOutputXpt,	canVerify);	//	CSC widget's RGB input to input widget's output
-		}
-		else if (!isInputRGB && isFrameRGB)
-		{
-			mDevice.Connect (frameBufferInputXpt,		cscWidgetRGBOutputXpt,	canVerify);	//	Frame store input to CSC widget's RGB output
-			mDevice.Connect (cscWidgetVideoInputXpt,	inputWidgetOutputXpt,	canVerify);	//	CSC widget's YUV input to input widget's output
-		}
-		else
-			mDevice.Connect (frameBufferInputXpt,		inputWidgetOutputXpt,	canVerify);	//	Frame store input to input widget's output
-	}
+	return CNTV2DemoCommon::GetInputRouting (connections, mConfig, isInputRGB)
+		&&  mDevice.ApplySignalRoute(connections, !mConfig.fDoMultiFormat);
 
 }	//	RouteInputSignal
 
@@ -377,14 +296,15 @@ void NTV2DolbyCapture::ConsumerThreadStatic (AJAThread * pThread, void * pContex
 	//	Grab the NTV2DolbyCapture instance pointer from the pContext parameter,
 	//	then call its ConsumeFrames method...
 	NTV2DolbyCapture *	pApp	(reinterpret_cast <NTV2DolbyCapture *> (pContext));
-	pApp->ConsumeFrames ();
+	pApp->ConsumeFrames();
 
 }	//	ConsumerThreadStatic
 
 
 void NTV2DolbyCapture::ConsumeFrames (void)
 {
-    uint64_t ancTally(0);
+	CAPNOTE("Thread started");
+	uint64_t ancTally(0);
 	uint64_t audioTally(0);
 	uint64_t dolbyTally(0);
 	ofstream * pOFS(mConfig.fWithAnc ? new ofstream(mConfig.fAncDataFilePath.c_str(), ios::binary) : AJA_NULL);
@@ -396,6 +316,10 @@ void NTV2DolbyCapture::ConsumeFrames (void)
 		NTV2FrameData *	pFrameData	(mAVCircularBuffer.StartConsumeNextBuffer ());
 		if (pFrameData)
 		{
+			//	Do something useful with the frame data...
+			//	. . .		. . .		. . .		. . .
+			//		. . .		. . .		. . .		. . .
+			//			. . .		. . .		. . .		. . .
 			if (mConfig.fDoFrameData && pFrameData->AncBuffer())
 			{
 				uint8_t* pData = (uint8_t*)pFrameData->AncBuffer().GetHostAddress(0);
@@ -410,7 +334,7 @@ void NTV2DolbyCapture::ConsumeFrames (void)
 				fflush(stdout);
 			}
 
-			if (mConfig.fDoFrameData && !mProgressive && pFrameData->AncBuffer2())
+			if (mConfig.fDoFrameData && /*!mProgressive &&*/ pFrameData->AncBuffer2())
 			{
 				uint8_t* pData = (uint8_t*)pFrameData->AncBuffer2().GetHostAddress(0);
 				uint32_t i;
@@ -426,9 +350,11 @@ void NTV2DolbyCapture::ConsumeFrames (void)
 
 			if (pOFS && pFrameData->AncBuffer())
 			{
+				if (pOFS  &&  !ancTally++)
+					CAPNOTE("Writing raw anc to '" + mConfig.fAncDataFilePath + "'");
 				pOFS->write(pFrameData->AncBuffer(), streamsize(pFrameData->NumCapturedAncBytes()));
 				ancTally++;
-				if (!mProgressive && pFrameData->AncBuffer2())
+				if (/*!mProgressive && */ pFrameData->AncBuffer2())
 				{
 					if (pOFS  &&  pFrameData->AncBuffer2())
 						pOFS->write(pFrameData->AncBuffer2(), streamsize(pFrameData->NumCapturedAnc2Bytes()));
@@ -437,10 +363,12 @@ void NTV2DolbyCapture::ConsumeFrames (void)
 
 			if (pAFS && pFrameData->AncBuffer() && pFrameData->AudioBuffer())
 			{
+				if (pAFS  &&  !audioTally++)
+					CAPNOTE("Writing raw audio to '" + mConfig.fAudioDataFilePath + "'");
 				uint32_t audioSize = RecoverAudio(pFrameData->AncBuffer(), pFrameData->NumCapturedAncBytes(), pFrameData->AudioBuffer());
 				pAFS->write(pFrameData->AudioBuffer(), streamsize(audioSize));
 				audioTally++;
-				if (!mProgressive && pFrameData->AncBuffer2())
+				if (/*!mProgressive &&*/ pFrameData->AncBuffer2())
 				{
 					audioSize = RecoverAudio(pFrameData->AncBuffer2(), pFrameData->NumCapturedAnc2Bytes(), pFrameData->AudioBuffer());
 					pAFS->write(pFrameData->AudioBuffer(), streamsize(audioSize));
@@ -449,18 +377,19 @@ void NTV2DolbyCapture::ConsumeFrames (void)
 
 			if (pDFS && pFrameData->AncBuffer() && pFrameData->AudioBuffer())
 			{
+				if (pDFS  &&  !dolbyTally++)
+					CAPNOTE("Writing dolby file to '" + mConfig.fDolbyDataFilePath + "'");
 				uint32_t audioSize = RecoverAudio(pFrameData->AncBuffer(), pFrameData->NumCapturedAncBytes(), pFrameData->AudioBuffer());
 				uint32_t dolbySize = RecoverDolby(pFrameData->AudioBuffer(), audioSize, pFrameData->AncBuffer());
 				pDFS->write(pFrameData->AncBuffer(), streamsize(dolbySize));
 				dolbyTally++;
-				if (!mProgressive && pFrameData->AncBuffer2())
+				if (/*!mProgressive &&*/ pFrameData->AncBuffer2())
 				{
 					audioSize = RecoverAudio(pFrameData->AncBuffer2(), pFrameData->NumCapturedAnc2Bytes(), pFrameData->AudioBuffer());
 					dolbySize = RecoverDolby(pFrameData->AudioBuffer(), audioSize, pFrameData->AncBuffer2());
 					pDFS->write(pFrameData->AncBuffer2(), streamsize(dolbySize));
 				}
 			}
-
 			//	Now release and recycle the buffer...
 			mAVCircularBuffer.EndConsumeNextBuffer ();
 		}	//	if pFrameData
@@ -471,13 +400,14 @@ void NTV2DolbyCapture::ConsumeFrames (void)
 		{ delete pAFS; cerr << "Wrote " << DEC(audioTally) << " frames of raw audio data" << endl; }
 	if (pDFS)
 		{ delete pDFS; cerr << "Wrote " << DEC(dolbyTally) << " frames of dolby data" << endl; }
+	CAPNOTE("Thread completed, will exit");
 
 }	//	ConsumeFrames
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//	This is where we start the capture thread
+//	This starts the capture (producer) thread
 void NTV2DolbyCapture::StartProducerThread (void)
 {
 	//	Create and start the capture thread...
@@ -495,7 +425,7 @@ void NTV2DolbyCapture::ProducerThreadStatic (AJAThread * pThread, void * pContex
 
 	//	Grab the NTV2DolbyCapture instance pointer from the pContext parameter,
 	//	then call its CaptureFrames method...
-	NTV2DolbyCapture *	pApp	(reinterpret_cast <NTV2DolbyCapture *> (pContext));
+	NTV2DolbyCapture * pApp (reinterpret_cast <NTV2DolbyCapture*>(pContext));
 	pApp->CaptureFrames ();
 
 }	//	ProducerThreadStatic
@@ -503,35 +433,42 @@ void NTV2DolbyCapture::ProducerThreadStatic (AJAThread * pThread, void * pContex
 
 void NTV2DolbyCapture::CaptureFrames (void)
 {
-	AUTOCIRCULATE_TRANSFER	inputXfer;	//	My A/C input transfer info
-	ULWord					acOptions (0);
+	AUTOCIRCULATE_TRANSFER	inputXfer;	//	AutoCirculate input transfer info
+	ULWord					acOptions (0), overruns(0);
+	UWord					hdmiSpigot (UWord(::NTV2InputSourceToChannel(mConfig.fInputSource)));
 	acOptions |= AUTOCIRCULATE_WITH_ANC;
 	acOptions |= AUTOCIRCULATE_WITH_HDMIAUX;
 
 	CAPNOTE("Thread started");
 	//	Initialize and start capture AutoCirculate...
 	mDevice.AutoCirculateStop(mConfig.fInputChannel);	//	Just in case
-	mDevice.AutoCirculateInitForInput (	mConfig.fInputChannel,		//	primary channel
+	if (!mDevice.AutoCirculateInitForInput (mConfig.fInputChannel,		//	primary channel
 										mConfig.fFrames.count(),	//	numFrames (zero if specifying range)
-										mAudioSystem,				//	audio system
-										acOptions,					//	flags
+										mAudioSystem,				//	audio system (if any)
+										acOptions,					//	AutoCirculate options
 										1,							//	numChannels to gang
-										mConfig.fFrames.firstFrame(), mConfig.fFrames.lastFrame());
-
-	//	This needs an ntv2card api
+										mConfig.fFrames.firstFrame(), mConfig.fFrames.lastFrame()))
+		mGlobalQuit = true;
+	
+	// The user can opt to INCLUDE only Audio Packets
+	// AuxExtractGetDefaultPacketFilters() retrieves Audio Packet filters DIDs
 	if (mConfig.fDoAudioFilter)
 	{
-		mDevice.WriteRegister(7616, 0x1, maskAuxFilterInvert, shiftAuxFilterInvert);
-		mDevice.WriteRegister(7628, 0x2);
+		mDevice.AuxExtractSetFilterInclusionMode(hdmiSpigot, /*include?*/true);
+		mDevice.AuxExtractSetPacketFilters(hdmiSpigot, mDevice.AuxExtractGetDefaultPacketFilters());
 	}
 	else
-	{
-		mDevice.WriteRegister(7616, 0x0, maskAuxFilterInvert, shiftAuxFilterInvert);
-		mDevice.WriteRegister(7628, 0x0);
+	{   //Otherwise, exclude only 00 Values (excludes nothing / shows all)
+		mDevice.AuxExtractSetFilterInclusionMode(hdmiSpigot,/*include?*/false);
+		NTV2DIDSet zeroSet;
+		zeroSet.insert(0);
+		mDevice.AuxExtractSetPacketFilters(hdmiSpigot, zeroSet);
 	}
 
-	mDevice.AutoCirculateStart(mConfig.fInputChannel);
+	if (!mGlobalQuit  &&  !mDevice.AutoCirculateStart(mConfig.fInputChannel))
+		mGlobalQuit = true;
 
+	//	Ingest frames til Quit signaled...
 	while (!mGlobalQuit)
 	{
 		AUTOCIRCULATE_STATUS acStatus;
@@ -542,27 +479,37 @@ void NTV2DolbyCapture::CaptureFrames (void)
 			//	At this point, there's at least one fully-formed frame available in the device's
 			//	frame buffer to transfer to the host. Reserve an NTV2FrameData to "produce", and
 			//	use it in the next transfer from the device...
-			NTV2FrameData *	pCaptureData(mAVCircularBuffer.StartProduceNextBuffer());
+			NTV2FrameData *	pFrameData(mAVCircularBuffer.StartProduceNextBuffer());
+			if (!pFrameData)
+				continue;
 
-			inputXfer.SetVideoBuffer (pCaptureData->VideoBuffer(), pCaptureData->VideoBufferSize());
+			NTV2FrameData & frameData (*pFrameData);
+			inputXfer.SetVideoBuffer (frameData.VideoBuffer(), frameData.VideoBufferSize());
 			if (acStatus.WithCustomAnc())
-				inputXfer.SetAncBuffers (pCaptureData->AncBuffer(), pCaptureData->AncBufferSize(),
-										 pCaptureData->AncBuffer2(), pCaptureData->AncBuffer2Size());
-
-			//	Clear anc buffers
-			if (pCaptureData->AncBuffer())
-				pCaptureData->AncBuffer().Fill(uint8_t(0));
-			if (pCaptureData->AncBuffer2())
-				pCaptureData->AncBuffer2().Fill(uint8_t(0));
+				inputXfer.SetAncBuffers (frameData.AncBuffer(), frameData.AncBufferSize(),
+										 frameData.AncBuffer2(), frameData.AncBuffer2Size());
 
 			//	Transfer video/audio/anc from the device into our host buffers...
 			mDevice.AutoCirculateTransfer (mConfig.fInputChannel, inputXfer);
 
-			//	Get number of anc bytes
-			if (pCaptureData->AncBuffer())
-				pCaptureData->fNumAncBytes = inputXfer.GetCapturedAncByteCount(/*isF2*/false);
-			if (pCaptureData->AncBuffer2())
-				pCaptureData->fNumAnc2Bytes = inputXfer.GetCapturedAncByteCount(/*isF2*/true);
+			//	If capturing Anc, clear stale anc data from the anc buffers...
+			if (acStatus.WithCustomAnc()  &&  frameData.AncBuffer())
+			{	bool overrun(false);
+				mDevice.AuxExtractGetBufferOverrun (hdmiSpigot, overrun);
+				if (overrun)
+					{overruns++;  CAPWARN(overruns << " aux overrun(s)");}
+				frameData.fNumAncBytes = inputXfer.GetCapturedAncByteCount(/*isF2*/false);
+				NTV2Buffer stale (frameData.fAncBuffer.GetHostAddress(frameData.fNumAncBytes),
+									frameData.fAncBuffer.GetByteCount() - frameData.fNumAncBytes);
+				stale.Fill(uint8_t(0));
+			}
+			if (acStatus.WithCustomAnc()  &&  frameData.AncBuffer2())
+			{
+				frameData.fNumAnc2Bytes = inputXfer.GetCapturedAncByteCount(/*isF2*/true);
+				NTV2Buffer stale (frameData.fAncBuffer2.GetHostAddress(frameData.fNumAnc2Bytes),
+									frameData.fAncBuffer2.GetByteCount() - frameData.fNumAnc2Bytes);
+				stale.Fill(uint8_t(0));
+			}
 
 			//	Signal that we're done "producing" the frame, making it available for future "consumption"...
 			mAVCircularBuffer.EndProduceNextBuffer();
@@ -586,11 +533,11 @@ void NTV2DolbyCapture::CaptureFrames (void)
 
 void NTV2DolbyCapture::GetACStatus (ULWord & outGoodFrames, ULWord & outDroppedFrames, ULWord & outBufferLevel)
 {
-	AUTOCIRCULATE_STATUS	status;
-	mDevice.AutoCirculateGetStatus (mConfig.fInputChannel, status);
-	outGoodFrames = status.acFramesProcessed;
-	outDroppedFrames = status.acFramesDropped;
-	outBufferLevel = status.acBufferLevel;
+	AUTOCIRCULATE_STATUS status;
+	mDevice.AutoCirculateGetStatus(mConfig.fInputChannel, status);
+	outGoodFrames    = status.GetProcessedFrameCount();
+	outDroppedFrames = status.GetDroppedFrameCount();
+	outBufferLevel   = status.GetBufferLevel();
 }
 
 uint32_t NTV2DolbyCapture::RecoverAudio(NTV2Buffer & anc, uint32_t ancSize, NTV2Buffer & audio)
@@ -756,7 +703,7 @@ uint32_t NTV2DolbyCapture::RecoverDolby(NTV2Buffer & audio, uint32_t audioSize, 
 //////////////////////////////////////////////
 
 
-AJALabelValuePairs DolbyConfig::Get (const bool inCompact) const
+AJALabelValuePairs DolbyCaptureConfig::Get (const bool inCompact) const
 {
 	AJALabelValuePairs result;
 	AJASystemInfo::append(result, "Capture Config");
@@ -773,7 +720,7 @@ AJALabelValuePairs DolbyConfig::Get (const bool inCompact) const
 }
 
 
-std::ostream & operator << (std::ostream & ioStrm,  const DolbyConfig & inObj)
+std::ostream & operator << (std::ostream & ioStrm,  const DolbyCaptureConfig & inObj)
 {
 	ioStrm	<< AJASystemInfo::ToString(inObj.Get());
 	return ioStrm;

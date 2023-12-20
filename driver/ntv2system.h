@@ -20,6 +20,11 @@
 #define NTV2_MEMORY_ALIGN_DEFAULT	64
 #define NTV2_MEMORY_ALIGN_MAX		4096
 
+// try/catch
+
+#define NTV2_TRY	if (true)
+#define NTV2_CATCH	if (false)
+
 #if defined(AJAVirtual)
 
 	#include <stdbool.h>
@@ -45,11 +50,6 @@
 	#define NTV2_STATUS_IO_ERROR		(-7)
 	#define NTV2_STATUS_TIMEOUT			(-8)
 	#define NTV2_STATUS_NO_RESOURCES	(-9)
-
-	// virtual try/catch
-
-	#define NTV2_TRY	if (true)
-	#define NTV2_CATCH	if (false)
 
 	// virtual system context
 
@@ -275,12 +275,20 @@
 
 //endif	//	defined(MSWindows)
 #elif defined(AJAMac)
-
 	#include "ajatypes.h"
 	#if defined(NTV2_BUILDING_DRIVER)
-		#include <IOKit/IOLocks.h>
-		#include <IOKit/IOLib.h>
-		#include "MacLog.h"
+		#if defined(AJAMacDext)
+			#include <string.h>
+			#include <stdio.h>
+			#include <stdatomic.h>
+			#include <DriverKit/IOLib.h>
+			#define DebugLog(fmt, args...)  os_log(OS_LOG_DEFAULT, "NTV2PCIe::%s:  " fmt,  __FUNCTION__,##args)
+			#define DebugLog(fmt, args...)  os_log(OS_LOG_DEFAULT, "NTV2PCIe::%s:  " fmt,  __FUNCTION__,##args)
+		#else
+			#include <IOKit/IOLocks.h>
+			#include <IOKit/IOLib.h>
+			#include "MacLog.h"
+		#endif
 	#endif
 
 	// Mac return codes
@@ -317,7 +325,11 @@
 	//class IOSimpleLock;
 	typedef struct ntv2_spinlock
 	{
+#if defined(AJAMacDext)
+		atomic_flag*			lock;
+#else
 		IOSimpleLock*			lock;
+#endif
 	} Ntv2SpinLock;
 
 	typedef struct ntv2_interrupt_lock
@@ -330,7 +342,11 @@
 	//class IORecursiveLock;
 	typedef struct ntv2_event
 	{
+#if defined(AJAMacDext)
+		struct IORecursiveLock*	pRecursiveLock;
+#else
 		IORecursiveLock*	pRecursiveLock;
+#endif
 		bool				flag;
 	} Ntv2Event;
 
@@ -340,12 +356,23 @@
 	typedef void Ntv2ThreadTask(void* pContext);
 	typedef struct ntv2_thread
 	{
+#if defined(AJAMacDext)
+		struct task_struct* pTask;
+#else
 		thread_t			pTask;
+#endif
 		const char			*pName;
 		Ntv2ThreadTask*		pFunc;
 		void				*pContext;
 		bool				run;
 	} Ntv2Thread;
+
+	typedef struct ntv2_user_buffer
+	{
+		void*				pAddress;
+		uint32_t			size;
+		bool				write;
+	} Ntv2UserBuffer;
 
 //endif	//	defined(AJAMac)
 #elif defined(AJALinux)
@@ -536,7 +563,21 @@ void		ntv2ThreadExit(Ntv2Thread* pThread);
 Ntv2Status	ntv2ReadPciConfig(Ntv2SystemContext* pSysCon, void* pData, int32_t offset, int32_t size);
 Ntv2Status	ntv2WritePciConfig(Ntv2SystemContext* pSysCon, void* pData, int32_t offset, int32_t size);
 
+// user buffer functions
+bool		ntv2UserBufferPrepare(Ntv2UserBuffer* pUserBuffer, Ntv2SystemContext* pSysCon, uint64_t address, uint32_t size, bool write);
+void		ntv2UserBufferRelease(Ntv2UserBuffer* pUserBuffer);
+bool		ntv2UserBufferCopyTo(Ntv2UserBuffer* pDstBuffer, uint32_t dstOffset, void* pSrcAddress, uint32_t size);
+bool		ntv2UserBufferCopyFrom(Ntv2UserBuffer* pSrcBuffer, uint32_t srcOffset, void* pDstAddress, uint32_t size);
+
+int64_t		ntv2Time100ns(void);
+
 #if defined(MSWindows) || defined(AJALinux) || defined(AJAVirtual)
+
+	// interrupt lock functions
+	bool		ntv2InterruptLockOpen(Ntv2InterruptLock* pInterruptLock, Ntv2SystemContext* pSysCon);
+	void		ntv2InterruptLockClose(Ntv2InterruptLock* pInterruptLock);
+	void		ntv2InterruptLockAcquire(Ntv2InterruptLock* pInterruptLock);
+	void		ntv2InterruptLockRelease(Ntv2InterruptLock* pInterruptLock);
 	
 	// dma functions
 	bool		ntv2DmaMemoryAlloc(Ntv2DmaMemory* pDmaMemory, Ntv2SystemContext* pSysCon, uint32_t size);
@@ -545,15 +586,7 @@ Ntv2Status	ntv2WritePciConfig(Ntv2SystemContext* pSysCon, void* pData, int32_t o
 	Ntv2DmaAddress ntv2DmaMemoryPhysical(Ntv2DmaMemory* pDmaMemory);
 	uint32_t	ntv2DmaMemorySize(Ntv2DmaMemory* pDmaMemory);
 
-	// user buffer functions
-
-	bool		ntv2UserBufferPrepare(Ntv2UserBuffer* pUserBuffer, Ntv2SystemContext* pSysCon, uint64_t address, uint32_t size, bool write);
-	void		ntv2UserBufferRelease(Ntv2UserBuffer* pUserBuffer);
-	bool		ntv2UserBufferCopyTo(Ntv2UserBuffer* pDstBuffer, uint32_t dstOffset, void* pSrcAddress, uint32_t size);
-	bool		ntv2UserBufferCopyFrom(Ntv2UserBuffer* pSrcBuffer, uint32_t srcOffset, void* pDstAddress, uint32_t size);
-
 	// dpc task functions
-
 	bool		ntv2DpcOpen(Ntv2Dpc* pDpc, Ntv2SystemContext* pSysCon, Ntv2DpcTask* pDpcTask, Ntv2DpcData dpcData);
 	void		ntv2DpcClose(Ntv2Dpc* pDpc);
 	void		ntv2DpcSchedule(Ntv2Dpc* pDpc);
@@ -569,7 +602,6 @@ Ntv2Status	ntv2WritePciConfig(Ntv2SystemContext* pSysCon, void* pData, int32_t o
 
 	int64_t		ntv2TimeCounter(void);
 	int64_t		ntv2TimeFrequency(void);
-	int64_t		ntv2Time100ns(void);
 #endif	//	defined(MSWindows) || defined(AJALinux)
 
 #endif	//	NTV2SYSTEM_H
