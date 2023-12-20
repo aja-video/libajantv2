@@ -1348,7 +1348,8 @@ bool ntv2EventWaitForSignal(Ntv2Event* pEvent, int64_t timeout, bool alert)
 	// if flag is true, event has been "signaled", returns immediately until it is cleared
 	if(pEventMac->flag) return true;
 
-#ifdef NEEDS_TO_BE_REVISITED
+#if defined(AJAMacDext)
+#else
 	// Get the current time
 	clock_get_uptime(&currentTime);
 	nanoseconds_to_absolutetime(timeout*1000, &timeoutNanos);
@@ -1428,10 +1429,10 @@ bool ntv2ThreadRun(Ntv2Thread* pThread, Ntv2ThreadTask* pTask, void* pContext)
 	pThread->pContext = pContext;
 	pThread->run = true;
 	
-#ifdef NEEDS_TO_BE_REVISITED
-	result = kernel_thread_start((thread_continue_t)pThread->pFunc, (void*)pContext, &pThread->pTask);
-#else
+#if defined(AJAMacDext)
 	result = kIOReturnUnsupported;
+#else
+	result = kernel_thread_start((thread_continue_t)pThread->pFunc, (void*)pContext, &pThread->pTask);
 #endif
 	if (result != KERN_SUCCESS)
 	{
@@ -1487,7 +1488,8 @@ void ntv2ThreadExit(Ntv2Thread* pThread)
 	pThread->pContext = NULL;
 	
 	// no code is executed after this line
-#ifdef NEEDS_TO_BE_REVISITED
+#if defined(AJAMacDext)
+#else
 	(void) thread_terminate(current_thread());
 #endif
 }
