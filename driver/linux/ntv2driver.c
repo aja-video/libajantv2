@@ -2122,7 +2122,6 @@ int ntv2_release(struct inode *minode, struct file *mfile) {
 	pFileData = (PFILE_DATA)mfile->private_data;
 	if (pFileData != NULL)
 	{
-#if 1
         NTV2StreamChannel channel;
         int i;
 
@@ -2131,7 +2130,7 @@ int ntv2_release(struct inode *minode, struct file *mfile) {
         {
             ntv2_stream_channel_release(getNTV2Params(deviceNumber)->m_pDmaStream[i], pFileData, &channel);
         }
-#endif
+
         // release all locked pages
 		dmaPageRootRelease(deviceNumber, &pFileData->dmaRoot);
         
@@ -2537,16 +2536,6 @@ ntv2_fpga_irq(int irq,void *dev_id,struct pt_regs *regs)
 					OemAutoCirculate(deviceNumber, NTV2CROSSPOINT_CHANNEL4);
 				}
 			}
-#if 0 
-            if ((pNTV2Params->_interruptCount[eVerticalInterrupt] % 100) == 0)
-            {
-                struct ntv2_stream* pDmaStream = pNTV2Params->m_pDmaStream[0];
-                if (pDmaStream != NULL)
-                {
-                    ntv2_stream_channel_advance(pDmaStream);
-                }
-            }
-#endif            
 		}
 
 		if ( statusRegister & kIntOutput2VBLActive )
@@ -3372,7 +3361,6 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
             status = ntv2_stream_configure(ntv2pp->m_pDmaStream[i],
                                            &stream_ops,
                                            &ntv2pp->_dmaEngine[i],
-                                           ntv2pp->_dmaEngine[i].dmaC2H,
                                            3);
             if (status == NTV2_STATUS_SUCCESS)
             {
@@ -3719,6 +3707,14 @@ static void __exit aja_ntv2_module_cleanup(void)
 		MSG("%s: device release\n", ntv2pp->name);
 
 		// TODO: Shut down autocirculate if it is active.
+
+        
+        // close all streams
+        for (j = 0; j < NTV2_MAX_DMA_STREAMS; j++)
+        {
+            ntv2_stream_close(ntv2pp->m_pDmaStream[i]);
+            ntv2pp->m_pDmaStream[i] = NULL;
+        }
 
 		// stop all dma engines
 		dmaRelease(i);

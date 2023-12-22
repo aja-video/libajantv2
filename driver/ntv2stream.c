@@ -217,7 +217,6 @@ void ntv2_stream_close(struct ntv2_stream *ntv2_str)
 Ntv2Status ntv2_stream_configure(struct ntv2_stream *ntv2_str,
                                  struct ntv2_stream_ops *stream_ops,
                                  void* dma_engine,
-                                 bool to_host,
                                  uint32_t init_advance)
 {
 	if (ntv2_str == NULL)
@@ -227,7 +226,6 @@ Ntv2Status ntv2_stream_configure(struct ntv2_stream *ntv2_str,
 
     ntv2_str->stream_ops = *stream_ops;
     ntv2_str->dma_engine = dma_engine;
-    ntv2_str->to_host = to_host;
     ntv2_str->init_advance = init_advance;
 
     // set state
@@ -801,7 +799,7 @@ Ntv2Status ntv2_stream_channel_wait(struct ntv2_stream *ntv2_str, NTV2StreamChan
 Ntv2Status ntv2_stream_channel_advance(struct ntv2_stream *ntv2_str)
 {
     int i;
-    int next;
+    uint32_t next;
     int status;
 
     if ((ntv2_str == NULL) ||

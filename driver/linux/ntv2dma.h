@@ -26,7 +26,7 @@ struct ntv2_stream_buffer;
 #define DMA_TRANSFERCOUNT_64     			0x10000000
 #define DMA_TRANSFERCOUNT_TOHOST 			0x80000000
 #define DMA_TRANSFERCOUNT_BYTES  			4
-#define DMA_DESCRIPTOR_PAGES_MAX			1024
+#define DMA_DESCRIPTOR_PAGES_MAX			4096
 
 typedef enum _NTV2DmaMethod
 {

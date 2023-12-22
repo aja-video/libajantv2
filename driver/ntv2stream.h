@@ -67,7 +67,6 @@ struct ntv2_stream {
 	Ntv2SystemContext* 	system_context;     // system context for ops
     NTV2Channel         channel;            // stream channel
     Ntv2Semaphore       state_sema;         // stream action semaphore
-    bool                to_host;            // stream transfers to host
     void*               owner;              // stream user mode owner
     void*               dma_engine;         // stream dma engine
 
@@ -86,7 +85,12 @@ struct ntv2_stream {
     NTV2StreamChannel           user_channel;       // user mode stream channel data
 };
 
-// stream management functions
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+	// stream management functions
 struct ntv2_stream *ntv2_stream_open(Ntv2SystemContext* sys_con,
                                      const char *name, int index);
 void ntv2_stream_close(struct ntv2_stream *ntv2_str);
@@ -94,7 +98,6 @@ void ntv2_stream_close(struct ntv2_stream *ntv2_str);
 Ntv2Status ntv2_stream_configure(struct ntv2_stream *ntv2_str,
                                  struct ntv2_stream_ops *stream_ops,
                                  void* dma_engine,
-                                 bool to_host,
                                  uint32_t init_advance);
 
 Ntv2Status ntv2_stream_enable(struct ntv2_stream *ntv2_str);
@@ -116,4 +119,9 @@ Ntv2Status ntv2_stream_buffer_status(struct ntv2_stream *ntv2_str, NTV2StreamBuf
 
 // stream interrupt function
 Ntv2Status ntv2_stream_channel_advance(struct ntv2_stream *ntv2_str);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif
