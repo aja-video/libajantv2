@@ -8690,6 +8690,9 @@ typedef enum
 				ULWord			mFlags;				///< @brief Action flags
 				ULWord			mStatus;            ///< @brief Action status
 				NTV2Buffer		mBuffer;			///< @brief Virtual address of a stream buffer and its length.
+				ULWord			mSegmentSize;		///< @brief Segmented transfer size
+				LWord			mSegmentPitch;		///< @brief Segmented transfer pitch
+				ULWord			mNumSegments;		///< @brief Number of segments
 				ULWord64		mBufferCookie;		///< @brief Buffer User cookie
 				ULWord			mBufferState;		///< @brief Buffer state
 				LWord64			mQueueTime;			///< @brief Queue time (queued to driver by app)
