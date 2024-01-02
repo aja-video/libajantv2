@@ -52,6 +52,11 @@
 		#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(5,14,0)) && DISTRO_KERNEL_PKG_MAJ >= 362)
 			#define KERNEL_6_2_0_DEV_UEVENT
 		#endif
+
+		// This change was back-ported from kernel 6.4.0 for kernel 5.14.0-387
+		#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(5,14,0)) && DISTRO_KERNEL_PKG_MAJ >= 387)
+			#define KERNEL_6_4_0_CLASS_CREATE
+		#endif
 	#endif
 #endif
 
