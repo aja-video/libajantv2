@@ -4729,6 +4729,8 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONALHEPLUS:				return inForRetailDisplay ? "KONA LHe+"					: "KonaLHe+";
 		case DEVICE_ID_KONALHI:					return inForRetailDisplay ? "KONA LHi"					: "KonaLHi";
 		case DEVICE_ID_KONALHIDVI:				return inForRetailDisplay ? "KONA LHi DVI"				: "KonaLHiDVI";
+		case DEVICE_ID_KONAX:					return inForRetailDisplay ? "KONA X"					: "KonaX";
+		case DEVICE_ID_KONAXM:					return inForRetailDisplay ? "KONA XM"					: "KonaXM";
 		case DEVICE_ID_SOJI_3DLUT:				return "SOJI-3DLUT";
 		case DEVICE_ID_SOJI_OE1:				return "SOJI-OE1";
 		case DEVICE_ID_SOJI_OE2:				return "SOJI-OE2";
@@ -4740,8 +4742,6 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_SOJI_DIAGS:				return "SOJI-DIAGS";
 		case DEVICE_ID_TTAP:					return inForRetailDisplay ? "T-TAP"						: "TTap";
 		case DEVICE_ID_TTAP_PRO:				return inForRetailDisplay ? "T-TAP Pro"					: "TTapPro";
-		case DEVICE_ID_KONAX:					return "KonaX";
-		case DEVICE_ID_KONAXM:					return "KonaXM";
 		case DEVICE_ID_NOTFOUND:				return inForRetailDisplay ? "AJA Device"				: "(Not Found)";
 #if defined(_DEBUG)
 #else

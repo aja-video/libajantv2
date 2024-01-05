@@ -1670,6 +1670,7 @@ bool CNTV2DriverInterface::GetRegInfoForBoolParam (const NTV2BoolParamID inParam
 	{
 		case kDeviceCanDoAudioMixer:		outRegInfo.Set(kRegGlobalControl2, 0, kRegMaskAudioMixerPresent, kRegShiftAudioMixerPresent);	break;
 		case kDeviceHasMultiRasterWidget:	outRegInfo.Set(kRegMRSupport, 0, kRegMaskMRSupport, kRegShiftMRSupport);						break;
+		case kDeviceHasMicrophoneInput:		outRegInfo.Set(kRegGlobalControl2, 0, kRegMaskIsDNXIV, kRegShiftIsDNXIV);						break;
 		default:	break;
 	}
 	return outRegInfo.IsValid();
