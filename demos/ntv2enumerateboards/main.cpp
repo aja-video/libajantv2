@@ -82,7 +82,7 @@ int main (int argc, const char ** argv)
 	if (!deviceSpec.empty())
 	{
 		if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
-			return 0;
+			return 2;
 		else if (CNTV2DeviceScanner::GetFirstDeviceFromArgument(deviceSpec, device))
 			return ShowDeviceInfo(device);	//	Show info for a single device
 		else
@@ -111,6 +111,6 @@ int main (int argc, const char ** argv)
 	else
 		cout << "No AJA devices found" << endl;
 
-	return 0;
+	return deviceCount ? 0 : 1;
 
 }	//	main
