@@ -38,20 +38,21 @@ static void SignalHandler (int inSignal)
 int main(int argc, const char ** argv)
 {
 	char	*pDeviceSpec(AJA_NULL), *pInputFileName(AJA_NULL);
-	int		doStdout(0), doSDRAM(0), waitSeconds(0), forceLoad(0), isVerbose(0);
+	int		doStdout(0), doSDRAM(0), waitSeconds(0), forceLoad(0), isVerbose(0), showVersion(0);
 	CNTV2Card device;
 	poptContext	optionsContext;	//	Context for parsing command line arguments
 
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
-		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"Which device",						"index#, serial#, or model"},
-		{"load",		'l',	POPT_ARG_STRING,	&pInputFileName,	0,	"Loads some regs from log file",	AJA_NULL},
-		{"forceload",	'f',	POPT_ARG_NONE,		&forceLoad,			0,	"Load onto different device",		AJA_NULL},
-		{"stdout",		's',	POPT_ARG_NONE,		&doStdout,			0,	"Dump to stdout instead of file?",	AJA_NULL},
-		{"sdram",		'r',	POPT_ARG_NONE,		&doSDRAM,			0,	"Dump device SDRAM to .raw file?",	AJA_NULL},
-		{"verbose",		'v',	POPT_ARG_NONE,		&isVerbose,			0,	"Verbose mode?",					AJA_NULL},
-		{"wait",		'w',	POPT_ARG_INT,		&waitSeconds,		0,	"Time to wait before capturing",	"seconds"},
+		{"version",		0,		POPT_ARG_NONE,		&showVersion,		0,	"show version & exit",				AJA_NULL},
+		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"device to use",					"index#, serial#, or model"},
+		{"load",		'l',	POPT_ARG_STRING,	&pInputFileName,	0,	"load some regs from supportlog",	"path to log file"},
+		{"forceload",	'f',	POPT_ARG_NONE,		&forceLoad,			0,	"load onto different device",		AJA_NULL},
+		{"stdout",		's',	POPT_ARG_NONE,		&doStdout,			0,	"dump to stdout instead of file?",	AJA_NULL},
+		{"sdram",		'r',	POPT_ARG_NONE,		&doSDRAM,			0,	"dump device SDRAM to .raw file?",	AJA_NULL},
+		{"verbose",		'v',	POPT_ARG_NONE,		&isVerbose,			0,	"verbose mode?",					AJA_NULL},
+		{"wait",		'w',	POPT_ARG_INT,		&waitSeconds,		0,	"time to wait before capture",		"seconds"},
 		POPT_AUTOHELP
 		POPT_TABLEEND
     };
@@ -61,6 +62,8 @@ int main(int argc, const char ** argv)
     if (::poptGetNextOpt(optionsContext) != -1)
 		{cerr << "## ERROR: Syntax error in command line" << endl;  return 2;}
     optionsContext = ::poptFreeContext (optionsContext);
+	if (showVersion)
+		{cout << argv[0] << ", NTV2 SDK " << ::NTV2Version() << endl;  return 0;}
 
 	const string inputFile (pInputFileName ? pInputFileName : "");
 	const string deviceSpec	(pDeviceSpec ? pDeviceSpec : "0");

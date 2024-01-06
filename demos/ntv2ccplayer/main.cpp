@@ -72,7 +72,7 @@ int main (int argc, const char ** argv)
 	//	Command line option descriptions:
 	const CNTV2DemoCommon::PoptOpts optionsTable [] =
 	{
-		{"version",		  0,	POPT_ARG_NONE,		&showVersion,	0,	"show version",				AJA_NULL					},
+		{"version",		  0,	POPT_ARG_NONE,		&showVersion,	0,	"show version & exit",		AJA_NULL					},
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"device to use",			"index#, serial#, or model"	},
 		{"channel",		'c',	POPT_ARG_INT,		&channelNumber,	0,	"channel to use",			"1-8"						},
 		{"multiFormat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"use multi-format/channel",	AJA_NULL					},
