@@ -986,6 +986,9 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2Buffer & inAncBuff
 	const uint32_t	origPktCount	(outPackets.CountAncillaryData());
 	AJAStatus		result			(AJA_STATUS_SUCCESS);
 
+	if (inAncBuffer.GetByteCount() == 0)
+		return result;
+
 	//	Try GUMP first...
 	if (BufferHasGUMPData(inAncBuffer))
 	{	//	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP
