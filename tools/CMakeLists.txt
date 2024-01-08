@@ -7,9 +7,11 @@ add_subdirectory(logreader)
 add_subdirectory(ntv2firmwareinstaller)
 add_subdirectory(ntv2thermo)
 add_subdirectory(pciwhacker)
-add_subdirectory(rdmawhacker)
 add_subdirectory(regio)
 add_subdirectory(supportlog)
+if (NOT AJA_DISABLE_NVIDIA)
+    add_subdirectory(rdmawhacker)
+endif()
 
 
 if (AJA_INSTALL_CMAKE)
