@@ -115,10 +115,10 @@ AJAStatus NTV2Player8K::Init (void)
 
     if (!mDevice.IsDeviceReady(false))
 		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
-	if (!::NTV2DeviceCanDoPlayback(mDeviceID))
+	if (!mDevice.features().CanDoPlayback())
 		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
 
-	const UWord maxNumChannels (::NTV2DeviceGetNumFrameStores(mDeviceID));
+	const UWord maxNumChannels (mDevice.features().GetNumFrameStores());
 
 	//	Check for an invalid configuration
 	if (NTV2_IS_QUAD_QUAD_HFR_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  mConfig.fDoRGBOnWire)
@@ -145,7 +145,7 @@ AJAStatus NTV2Player8K::Init (void)
 	}
 	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Set OEM service level
 
-	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
+	if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
 	else
 		mConfig.fDoMultiFormat = false;
@@ -190,12 +190,12 @@ AJAStatus NTV2Player8K::SetUpVideo (void)
 	//	Configure the device to output the requested video format...
  	if (mConfig.fVideoFormat == NTV2_FORMAT_UNKNOWN)
 		return AJA_STATUS_BAD_PARAM;
-	if (!::NTV2DeviceCanDoVideoFormat (mDeviceID, mConfig.fVideoFormat))
+	if (!mDevice.features().CanDoVideoFormat(mConfig.fVideoFormat))
 	{	cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' doesn't support "
 				<< ::NTV2VideoFormatToString(mConfig.fVideoFormat) << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
-	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
+	if (!mDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
 	{	cerr	<< "## ERROR: '" << mDevice.GetDisplayName() << "' doesn't support "
 				<< ::NTV2FrameBufferFormatString(mConfig.fPixelFormat) << endl;
 		return AJA_STATUS_UNSUPPORTED;
@@ -240,7 +240,7 @@ AJAStatus NTV2Player8K::SetUpVideo (void)
 	mDevice.SubscribeOutputVerticalEvent (mConfig.fOutputChannel);
 
 	//	Check if HDR anc is permissible...
-	if (IS_KNOWN_AJAAncDataType(mConfig.fTransmitHDRType)  &&  !::NTV2DeviceCanDoCustomAnc(mDeviceID))
+	if (IS_KNOWN_AJAAncDataType(mConfig.fTransmitHDRType)  &&  !mDevice.features().CanDoCustomAnc())
 		{cerr << "## WARNING:  HDR Anc requested, but device can't do custom anc" << endl;
 			mConfig.fTransmitHDRType = AJAAncDataType_Unknown;}
 
@@ -249,7 +249,7 @@ AJAStatus NTV2Player8K::SetUpVideo (void)
 		gAncMaxSizeBytes = NTV2_ANCSIZE_MAX;
 
 	//	Set output clock reference...
-	mDevice.SetReference(::NTV2DeviceCanDo2110(mDeviceID) ? NTV2_REFERENCE_SFP1_PTP : NTV2_REFERENCE_FREERUN);
+	mDevice.SetReference(mDevice.features().CanDo2110() ? NTV2_REFERENCE_SFP1_PTP : NTV2_REFERENCE_FREERUN);
 
 	//	At this point, video setup is complete (except for widget signal routing).
 	return AJA_STATUS_SUCCESS;
@@ -259,7 +259,7 @@ AJAStatus NTV2Player8K::SetUpVideo (void)
 
 AJAStatus NTV2Player8K::SetUpAudio (void)
 {
-	uint16_t numAudioChannels (::NTV2DeviceGetMaxAudioChannels(mDeviceID));
+	uint16_t numAudioChannels (mDevice.features().GetMaxAudioChannels());
 
 	//	If there are 8192 pixels on a line instead of 7680, reduce the number of audio channels
 	//	This is because HANC is narrower, and has space for only 8 channels

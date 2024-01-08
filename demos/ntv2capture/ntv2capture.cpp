@@ -82,12 +82,12 @@ AJAStatus NTV2Capture::Init (void)
 		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
 	mDeviceID = mDevice.GetDeviceID();						//	Keep the device ID handy, as it's used frequently
-	const bool isKonaHDMI (::NTV2DeviceGetNumHDMIVideoInputs(mDeviceID) > 1);
+	const bool isKonaHDMI (mDevice.features().GetNumHDMIVideoInputs() > 1);
 	const NTV2IOKinds inputType (isKonaHDMI ? NTV2_IOKINDS_HDMI : NTV2_IOKINDS_SDI);
-	if (!::NTV2DeviceCanDoCapture(mDeviceID))
+	if (!mDevice.features().CanDoCapture())
 		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is playback-only" << endl;  return AJA_STATUS_FEATURE;}
 
-	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
+	if (!mDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
 	{	cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' doesn't support '"
 				<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, true) << "' ("
 				<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, false) << ", " << DEC(mConfig.fPixelFormat) << ")" << endl;
@@ -109,7 +109,7 @@ AJAStatus NTV2Capture::Init (void)
 	}
 	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Prevent interference from AJA retail services
 
-	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
+	if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
 
 	//	This demo permits input source and channel to be specified independently.
@@ -122,13 +122,13 @@ AJAStatus NTV2Capture::Init (void)
 	//	On KonaHDMI, map specified SDI input to equivalent HDMI input...
 	if (isKonaHDMI  &&  NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource))
 		mConfig.fInputSource = ::NTV2ChannelToInputSource(::NTV2InputSourceToChannel(mConfig.fInputSource), inputType);
-	if (!::NTV2DeviceCanDoInputSource(mDeviceID, mConfig.fInputSource))
+	if (!mDevice.features().CanDoInputSource(mConfig.fInputSource))
 	{
 		cerr	<< "## ERROR:  No such input '" << ::NTV2InputSourceToString(mConfig.fInputSource, /*compact?*/true)
 				<< "' on '" << mDevice.GetDisplayName() << "'" << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
-	if (mConfig.fWithAnc  &&  !::NTV2DeviceCanDoCustomAnc(mDeviceID))
+	if (mConfig.fWithAnc  &&  !mDevice.features().CanDoCustomAnc())
 		{cerr << "## ERROR: Anc capture requested, but '" << mDevice.GetDisplayName() << "' has no anc extractors";  return AJA_STATUS_UNSUPPORTED;}
 
 	//	Set up the video and audio...
@@ -169,7 +169,7 @@ AJAStatus NTV2Capture::SetupVideo (void)
 
 	//	If the device supports bi-directional SDI and the requested input is SDI,
 	//	ensure the SDI connector(s) are configured to receive...
-	if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID) && NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource))
+	if (mDevice.features().HasBiDirectionalSDI() && NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource))
 	{
 		mDevice.SetSDITransmitEnable (mConfig.fInputChannel, false);	//	Set SDI connector(s) to receive
 		mDevice.WaitForOutputVerticalInterrupt (NTV2_CHANNEL1, 10);		//	Wait 10 VBIs to allow reciever to lock
@@ -179,7 +179,7 @@ AJAStatus NTV2Capture::SetupVideo (void)
 	mVideoFormat = mDevice.GetInputVideoFormat(mConfig.fInputSource);
 	if (mVideoFormat == NTV2_FORMAT_UNKNOWN)
 		{cerr << "## ERROR:  No input signal or unknown format" << endl;  return AJA_STATUS_NOINPUT;}
-	if (!::NTV2DeviceCanDoVideoFormat(mDeviceID, mVideoFormat))
+	if (!mDevice.features().CanDoVideoFormat(mVideoFormat))
 	{
 		cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' cannot handle " << ::NTV2VideoFormatToString(mVideoFormat) << endl;
 		return AJA_STATUS_UNSUPPORTED;	//	Device can't handle this format
@@ -212,8 +212,8 @@ AJAStatus NTV2Capture::SetupAudio (void)
 {
 	//	In multiformat mode, base the audio system on the channel...
 	if (mConfig.fDoMultiFormat)
-		if (::NTV2DeviceGetNumAudioSystems(mDeviceID) > 1)
-			if (UWord(mConfig.fInputChannel) < ::NTV2DeviceGetNumAudioSystems(mDeviceID))
+		if (mDevice.features().GetNumAudioSystems() > 1)
+			if (UWord(mConfig.fInputChannel) < mDevice.features().GetNumAudioSystems())
 				mAudioSystem = ::NTV2ChannelToAudioSystem(mConfig.fInputChannel);
 
 	NTV2AudioSystemSet audSystems (::NTV2MakeAudioSystemSet (mAudioSystem, 1));
@@ -481,7 +481,7 @@ void NTV2Capture::CaptureFrames (void)
 		}
 
 		//	Log SDI input CRC/VPID/TRS errors...
-		if (::NTV2DeviceCanDoSDIErrorChecks(mDeviceID) && NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource))
+		if (mDevice.features().CanDoSDIErrorChecks() && NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource))
 		{
 			NTV2SDIInStatistics	sdiStats;
 			NTV2SDIInputStatus	inputStatus;

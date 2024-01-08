@@ -142,6 +142,7 @@ int main (int argc, const char** argv)
 	int				bWaitForEnterKey	(0);
 	int				bBitfileInfo		(0);
 	int				bForce				(0);
+	int				showVersion			(0);
 	StringList		bitfilePaths;
 	poptContext		optionsContext;
 	AJADebug::Open();
@@ -149,8 +150,8 @@ int main (int argc, const char** argv)
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
-		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device",					"index#, serial#, or model"	},
-		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device",					"index#, serial#, or model"	},
+		{"version",		0,		POPT_ARG_NONE,		&showVersion,		0,	"show version & exit",			AJA_NULL},
+		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"device to use",				"index#, serial#, or model"	},
 		{"force",		'f',	POPT_ARG_NONE,		&bForce,			0,	"Warning: force the program",	AJA_NULL},
 		{"license",     'l',	POPT_ARG_STRING,	&pFirmwareLicense,	0,	"install firmware license",		"license"},
 		{"progress",	'p',	POPT_ARG_NONE,		&bProgress,			0,	"show installation progress",	AJA_NULL},
@@ -172,6 +173,8 @@ int main (int argc, const char** argv)
 			sBitfilePath = ::poptGetArg (optionsContext);
 		}
 		optionsContext = ::poptFreeContext (optionsContext);
+		if (showVersion)
+			{cout << argv[0] << ", NTV2 SDK " << ::NTV2Version() << endl;  return 0;}
 	}
 
 	//	Get device info...

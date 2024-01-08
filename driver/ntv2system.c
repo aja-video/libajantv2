@@ -1227,10 +1227,13 @@ bool ntv2InterruptLockOpen(Ntv2InterruptLock* pInterruptLock, Ntv2SystemContext*
 {
 	if((pInterruptLock == NULL) ||
 	   (pSysCon == NULL)) return false;
-	
+#if defined(AJAMacDext)
+	atomic_flag_clear(pInterruptLock->lock);
+#else
 	memset(pInterruptLock, 0, sizeof(Ntv2InterruptLock));
 	pInterruptLock->lock = IOSimpleLockAlloc();
 	IOSimpleLockInit(pInterruptLock->lock);
+#endif
 
 	return true;
 }
@@ -1238,25 +1241,34 @@ bool ntv2InterruptLockOpen(Ntv2InterruptLock* pInterruptLock, Ntv2SystemContext*
 void ntv2InterruptLockClose(Ntv2InterruptLock* pInterruptLock)
 {
 	if(pInterruptLock == NULL || pInterruptLock->lock == NULL) return;
-	
+#if defined(AJAMacDext)
+	atomic_flag_clear(pInterruptLock->lock);
+#else
 	IOSimpleLockFree(pInterruptLock->lock);
 	memset(pInterruptLock, 0, sizeof(Ntv2InterruptLock));
+#endif
 }
 
 void ntv2InterruptLockAcquire(Ntv2InterruptLock* pInterruptLock)
 {
 	if(pInterruptLock == NULL || pInterruptLock->lock == NULL) return;
-	
+#if defined(AJAMacDext)
+	while(atomic_flag_test_and_set(pInterruptLock->lock)) {;}
+#else
 	IOSimpleLockLock(pInterruptLock->lock);
 	pInterruptLock->locked = true;
+#endif
 }
 
 void ntv2InterruptLockRelease(Ntv2InterruptLock* pInterruptLock)
 {
 	if(pInterruptLock == NULL || pInterruptLock->lock == NULL	) return;
-	
+#if defined(AJAMacDext)
+	atomic_flag_clear(pInterruptLock->lock);
+#else
 	IOSimpleLockUnlock(pInterruptLock->lock);
 	pInterruptLock->locked = false;
+#endif
 }
 
 // Mac memory functions
@@ -1336,7 +1348,8 @@ bool ntv2EventWaitForSignal(Ntv2Event* pEvent, int64_t timeout, bool alert)
 	// if flag is true, event has been "signaled", returns immediately until it is cleared
 	if(pEventMac->flag) return true;
 
-#ifdef NEEDS_TO_BE_REVISITED
+#if defined(AJAMacDext)
+#else
 	// Get the current time
 	clock_get_uptime(&currentTime);
 	nanoseconds_to_absolutetime(timeout*1000, &timeoutNanos);
@@ -1416,10 +1429,10 @@ bool ntv2ThreadRun(Ntv2Thread* pThread, Ntv2ThreadTask* pTask, void* pContext)
 	pThread->pContext = pContext;
 	pThread->run = true;
 	
-#ifdef NEEDS_TO_BE_REVISITED
-	result = kernel_thread_start((thread_continue_t)pThread->pFunc, (void*)pContext, &pThread->pTask);
-#else
+#if defined(AJAMacDext)
 	result = kIOReturnUnsupported;
+#else
+	result = kernel_thread_start((thread_continue_t)pThread->pFunc, (void*)pContext, &pThread->pTask);
 #endif
 	if (result != KERN_SUCCESS)
 	{
@@ -1475,7 +1488,8 @@ void ntv2ThreadExit(Ntv2Thread* pThread)
 	pThread->pContext = NULL;
 	
 	// no code is executed after this line
-#ifdef NEEDS_TO_BE_REVISITED
+#if defined(AJAMacDext)
+#else
 	(void) thread_terminate(current_thread());
 #endif
 }

@@ -50,13 +50,15 @@ int main (int argc, const char ** argv)
 	int				doCapture			(0);			//	Do a capture (read from device)
     int				doLock              (0);			//	Prelock the buffer
     int				doShareDevice		(0);			//	Share device with other apps?
+    int				showVersion			(0);			//	Show version info?
 	poptContext		optionsContext;						//	Context for parsing command line arguments
 	AJADebug::Open();
 
     //	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
-		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device",				"index#, serial#, or model"},
+		{"version",		0,		POPT_ARG_NONE,		&showVersion,	0,	"show version & exit",		AJA_NULL},
+		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"device to use",			"index#, serial#, or model"},
 		{"engine",		'e',	POPT_ARG_INT,       &dmaEngine,		0,	"which DMA engine",			"1-6, 7=1stAvail"},
 		{"capture",     'c',	POPT_ARG_NONE,		&doCapture,		0,	"read? (default is write)",	AJA_NULL},
         {"lock",        'l',	POPT_ARG_NONE,		&doLock,		0,	"prelock buffer?",			AJA_NULL},
@@ -70,6 +72,8 @@ int main (int argc, const char ** argv)
 	optionsContext = ::poptGetContext (AJA_NULL, argc, argv, userOptionsTable, 0);
 	::poptGetNextOpt (optionsContext);
 	optionsContext = ::poptFreeContext (optionsContext);
+	if (showVersion)
+		{cout << argv[0] << ", NTV2 SDK " << ::NTV2Version() << endl;  return 0;}
 
 	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "0");
     CNTV2Card device;

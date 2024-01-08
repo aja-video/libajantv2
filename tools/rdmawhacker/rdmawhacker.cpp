@@ -56,12 +56,12 @@ int main(int argc, const char ** argv)
     //	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
-		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device",				"index#, serial#, or model"},
-		{"engine",		'e',	POPT_ARG_INT,       &dmaEngine,			0,	"which DMA engine",			"1-6, 7=1stAvail"},
-		{"capture",     'c',	POPT_ARG_NONE,		&doCapture,			0,	"capture/read instead of play/write default", NULL},
-        {"multi",		'm',	POPT_ARG_NONE,		&doMultiInstance,	0,	"multi-instance",			NULL},
-        {"numbuf",		'n',	POPT_ARG_INT,       &dmaNum,			0,	"number of buffers", NULL},
-        {"size",		's',	POPT_ARG_INT,       &dmaSize,			0,	"DMA transfer size", NULL},
+		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"device to use",		"index#, serial#, or model"},
+		{"engine",		'e',	POPT_ARG_INT,       &dmaEngine,			0,	"which DMA engine",		"1-6, 7=1stAvail"},
+		{"capture",     'c',	POPT_ARG_NONE,		&doCapture,			0,	"read instead of write default", AJA_NULL},
+        {"multi",		'm',	POPT_ARG_NONE,		&doMultiInstance,	0,	"multi-instance",		AJA_NULL},
+        {"numbuf",		'n',	POPT_ARG_INT,       &dmaNum,			0,	"number of buffers",	AJA_NULL},
+        {"size",		's',	POPT_ARG_INT,       &dmaSize,			0,	"DMA transfer size",	AJA_NULL},
         POPT_AUTOHELP
 		POPT_TABLEEND
 	};

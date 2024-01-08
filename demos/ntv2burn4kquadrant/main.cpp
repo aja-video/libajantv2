@@ -42,10 +42,10 @@ int main (int argc, const char ** argv)
 	//	Command line option descriptions:
 	const struct poptOption optionsTable [] =
 	{
-		{"version",		  0,	POPT_ARG_NONE,		&showVersion,	0,	"show version",				AJA_NULL					},
-		{"input",		'i',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"input device to use",		"index#, serial#, or model"	},
-		{"output",		'o',	POPT_ARG_STRING,	&pOutDevSpec,	0,	"output device",			"index#, serial#, or model"	},
-		{"tcsource",	't',	POPT_ARG_STRING,	&pTcSource,		0,	"time code source",			"'?' to list"				},
+		{"version",		  0,	POPT_ARG_NONE,		&showVersion,	0,	"show version & exit",	AJA_NULL					},
+		{"input",		'i',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"input device to use",	"index#, serial#, or model"	},
+		{"output",		'o',	POPT_ARG_STRING,	&pOutDevSpec,	0,	"output device",		"index#, serial#, or model"	},
+		{"tcsource",	't',	POPT_ARG_STRING,	&pTcSource,		0,	"time code source",		"'?' to list"				},
 		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio?",		AJA_NULL					},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",	"'?' or 'list' to list"		},
 		POPT_AUTOHELP
