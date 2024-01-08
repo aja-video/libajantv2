@@ -591,7 +591,10 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 	if (!::NTV2DeviceHasSPIFlash(_boardID))
 		return false;
 
-	ParseFlashHeader(bitFileInfo);
+	if (!ParseFlashHeader(bitFileInfo)) {
+		return false;
+	}
+
 	bitFileInfo.bitFileType = 0;
 	switch (_boardID)
 	{
