@@ -8,16 +8,7 @@ DIR := $(strip $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 #DRIVERDIR	?= $(DIR)
 
-# Allow specifying kernel version manually so it is possible to build in a containerized environment.
-ifdef AJA_DRIVER_KVERSION
-	KVERSION = $(AJA_DRIVER_KVERSION)
-else
-	KVERSION ?= $(shell uname -r)
-endif
-KDIR		?= /lib/modules/$(KVERSION)/build
-
 # EXTRA_DEPS = -DNTV2_DEPRECATE_14_0 -DNTV2_DEPRECATE_14_1 
-
 include $(DIR)/../configure.mk
 include $(DIR)/../sdkversion.mk
 

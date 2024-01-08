@@ -10,6 +10,14 @@
 # a makefile to do all the sniffing, configuring and path setting for
 # the assorted flavors of distros and bitedness
 
+# Allow specifying kernel version manually so it is possible to build in a containerized environment.
+ifdef AJA_DRIVER_KVERSION
+	KVERSION = $(AJA_DRIVER_KVERSION)
+else
+	KVERSION ?= $(shell uname -r)
+endif
+KDIR		?= /lib/modules/$(KVERSION)/build
+
 # Vars we need to set
 A_ARCH      := $(shell uname -m)
 AJA_BETA 		  ?= 0
@@ -82,6 +90,8 @@ export DBG
 export A_LIBCMD
 export A_LIBCMD_SO
 export OBJDIR
+export KVERSION
+export KDIR
 
 # Figure out info about the distro, specifically if a RHEL like: (CentOS, Rocky, Alma, RHEL, etc)
 ifeq ($(wildcard /etc/os-release),/etc/os-release)
@@ -91,9 +101,9 @@ ifeq ($(wildcard /etc/os-release),/etc/os-release)
 	DISTRO_MIN_VERSION := $(shell awk 'BEGIN {FS = "="} $$1 == "VERSION_ID" {split($$2, subfield, "."); gsub("\"","",subfield[2]); printf("%d", subfield[2])}' /etc/os-release)
 endif
 
-DISTRO_KERNEL_PKG_MAJ := $(shell uname -r | awk 'BEGIN {FS = "-"} {split($$2, pkg, "."); printf("%d", pkg[1])}')
-DISTRO_KERNEL_PKG_MIN := $(shell uname -r | awk 'BEGIN {FS = "-"} {split($$2, pkg, "."); printf("%d", pkg[2])}')
-DISTRO_KERNEL_PKG_PNT := $(shell uname -r | awk 'BEGIN {FS = "-"} {split($$2, pkg, "."); printf("%d", pkg[3])}')
+DISTRO_KERNEL_PKG_MAJ := $(shell echo $(KVERSION) | awk 'BEGIN {FS = "-"} {split($$2, pkg, "."); printf("%d", pkg[1])}')
+DISTRO_KERNEL_PKG_MIN := $(shell echo $(KVERSION) | awk 'BEGIN {FS = "-"} {split($$2, pkg, "."); printf("%d", pkg[2])}')
+DISTRO_KERNEL_PKG_PNT := $(shell echo $(KVERSION) | awk 'BEGIN {FS = "-"} {split($$2, pkg, "."); printf("%d", pkg[3])}')
 
 # set distro defaults if needed
 ifeq ($(DISTRO_TYPE),)
