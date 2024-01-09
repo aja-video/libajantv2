@@ -268,24 +268,19 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 	mDevice.SetMode	(mConfig.fInputChannel,  NTV2_MODE_CAPTURE);
 	mDevice.SetMode (mConfig.fOutputChannel, NTV2_MODE_DISPLAY);
 
-	if (!NTV2_IS_SD_VIDEO_FORMAT(mVideoFormat))
-	{
-		//	Enable VANC for non-SD formats, to pass thru captions, etc.
-		mDevice.SetEnableVANCData (false);
-		if (::Is8BitFrameBufferFormat (mConfig.fPixelFormat))
-		{
-			//	8-bit FBFs require VANC bit shift...
-			mDevice.SetVANCShiftMode (mConfig.fInputChannel, NTV2_VANCDATA_8BITSHIFT_ENABLE);
-			mDevice.SetVANCShiftMode (mConfig.fOutputChannel, NTV2_VANCDATA_8BITSHIFT_ENABLE);
-		}
-	}	//	if not SD video
-
-	//	Set the format descriptor
-	mFormatDesc = NTV2FormatDescriptor (mVideoFormat, mConfig.fPixelFormat);
-
 	//	Set up the device signal routing, and both playout and capture AutoCirculate...
 	RouteInputSignal();
 	RouteOutputSignal();
+
+	//	Now that newer AJA devices can capture/play anc data from separate buffers,
+	//	there's no need to enable VANC frame geometries...
+	mDevice.SetVANCMode (NTV2_VANCMODE_OFF, mConfig.fInputChannel);
+	mDevice.SetVANCMode (NTV2_VANCMODE_OFF, mConfig.fOutputChannel);
+	if (::Is8BitFrameBufferFormat(mConfig.fPixelFormat))
+	{	//	8-bit FBFs:  since not using VANC geometries, disable bit shift...
+		mDevice.SetVANCShiftMode (mConfig.fInputChannel, NTV2_VANCDATA_NORMAL);
+		mDevice.SetVANCShiftMode (mConfig.fOutputChannel, NTV2_VANCDATA_NORMAL);
+	}
 
 	//	Be sure the RP188 mode for the SDI input (expressed as an NTV2Channel),
 	//	is set to NTV2_RP188_INPUT...
@@ -309,6 +304,8 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 	mDevice.SetInputFrame (mConfig.fInputChannel,  0);
 	mDevice.SetOutputFrame(mConfig.fOutputChannel, 2);
 
+	//	Now that the video is set up, get information about the current frame geometry...
+	mFormatDesc = NTV2FormatDescriptor (mVideoFormat, mConfig.fPixelFormat);
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetupVideo

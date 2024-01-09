@@ -253,6 +253,8 @@ AJAStatus NTV2Burn4KQuadrant::SetupInputVideo (void)
 
 	mInputDevice.SetEnableVANCData (false, false);
 
+	//	Now that the video is set up, get information about the current frame geometry...
+	mFormatDesc = NTV2FormatDescriptor (mVideoFormat, mConfig.fPixelFormat);
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetupInputVideo
@@ -337,7 +339,6 @@ AJAStatus NTV2Burn4KQuadrant::SetupOutputVideo (void)
 		mOutputDevice.EnableOutputInterrupt(NTV2_CHANNEL1);
 		mOutputDevice.SubscribeOutputVerticalEvent (NTV2_CHANNEL1);
 	}
-		
 
 	mOutputDevice.SetEnableVANCData (false, false);
 
