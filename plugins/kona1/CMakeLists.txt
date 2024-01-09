@@ -92,6 +92,8 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 		set(BUNDLE_OUTPUT_DIR /Library/Application\ Support/AJA)
 		if(EXISTS ${BUNDLE_OUTPUT_DIR})
 			set_target_properties(${PROJECT_NAME} PROPERTIES
+				PREFIX ""
+				LIBRARY_OUTPUT_NAME "kona1"
 				LIBRARY_OUTPUT_DIRECTORY ${BUNDLE_OUTPUT_DIR}
 				)
 		endif()
