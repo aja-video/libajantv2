@@ -155,7 +155,6 @@ AJAStatus NTV2LLBurn::Init (void)
 		mDevice.SetLTCInputEnable(true);	//	Enable analog LTC input (some LTC inputs are shared with reference input)
 
 	//	Lastly, prepare my AJATimeCodeBurn instance...
-	mFormatDesc = NTV2FormatDescriptor (mVideoFormat, mConfig.fPixelFormat);
 	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat (mConfig.fPixelFormat), mFormatDesc.numPixels, mFormatDesc.numLines);
 
 	return AJA_STATUS_SUCCESS;
@@ -280,6 +279,9 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 			mDevice.SetVANCShiftMode (mConfig.fOutputChannel, NTV2_VANCDATA_8BITSHIFT_ENABLE);
 		}
 	}	//	if not SD video
+
+	//	Set the format descriptor
+	mFormatDesc = NTV2FormatDescriptor (mVideoFormat, mConfig.fPixelFormat);
 
 	//	Set up the device signal routing, and both playout and capture AutoCirculate...
 	RouteInputSignal();
