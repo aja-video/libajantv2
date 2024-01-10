@@ -35,7 +35,7 @@ static const char *		GetKernErrStr (const kern_return_t inError);
 static AJALock			gLegalDevIDsLock;
 static NTV2DeviceIDSet	gLegalDeviceIDs;
 static const string		sNTV2PCIKEXTClassName	("com_aja_iokit_ntv2");	//	AJA NTV2 KEXT's IOService class name
-static const string		sNTV2PCIDEXTName		("NTV2PCIe");			//	AJA NTV2 DEXT's IOService name
+static const string		sNTV2PCIDEXTName		("AJANTV2");			//	AJA NTV2 DEXT's IOService name
 
 
 //	MacDriverInterface-specific Logging Macros
