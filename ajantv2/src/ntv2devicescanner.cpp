@@ -185,13 +185,53 @@ void CNTV2DeviceScanner::ScanHardware (void)
 				info.pciSlot			= 0;
 				info.deviceSerialNumber	= tmpDevice.GetSerialNumber();
 
-				oss << ::NTV2DeviceIDToString (deviceID, tmpDevice.features().IsDNxIV()) << " - " << boardNum;
+				oss << ::NTV2DeviceIDToString (deviceID, tmpDevice.IsSupported(kDeviceHasMicrophoneInput)) << " - " << boardNum;
 				if (info.pciSlot)
 					oss << ", Slot " << info.pciSlot;
 
-				info.deviceIdentifier = oss.str();
-
-				SetVideoAttributes(info);
+				info.deviceIdentifier		= oss.str();
+				info.numVidInputs			= NTV2DeviceGetNumVideoInputs		(info.deviceID);
+				info.numVidOutputs			= NTV2DeviceGetNumVideoOutputs		(info.deviceID);
+				info.numAnlgVidOutputs		= NTV2DeviceGetNumAnalogVideoOutputs(info.deviceID);
+				info.numAnlgVidInputs		= NTV2DeviceGetNumAnalogVideoInputs	(info.deviceID);
+				info.numHDMIVidOutputs		= NTV2DeviceGetNumHDMIVideoOutputs	(info.deviceID);
+				info.numHDMIVidInputs		= NTV2DeviceGetNumHDMIVideoInputs	(info.deviceID);
+				info.numInputConverters		= NTV2DeviceGetNumInputConverters	(info.deviceID);
+				info.numOutputConverters	= NTV2DeviceGetNumOutputConverters	(info.deviceID);
+				info.numUpConverters		= NTV2DeviceGetNumUpConverters		(info.deviceID);
+				info.numDownConverters		= NTV2DeviceGetNumDownConverters	(info.deviceID);
+				info.downConverterDelay		= NTV2DeviceGetDownConverterDelay	(info.deviceID);
+				info.dvcproHDSupport		= NTV2DeviceCanDoDVCProHD			(info.deviceID);
+				info.qrezSupport			= NTV2DeviceCanDoQREZ				(info.deviceID);
+				info.hdvSupport				= NTV2DeviceCanDoHDV				(info.deviceID);
+				info.quarterExpandSupport	= NTV2DeviceCanDoQuarterExpand		(info.deviceID);
+				info.colorCorrectionSupport	= tmpDevice.DeviceCanDoColorCorrection();
+				info.programmableCSCSupport	= tmpDevice.DeviceCanDoProgrammableCSC();
+				info.rgbAlphaOutputSupport	= NTV2DeviceCanDoRGBPlusAlphaOut	(info.deviceID);
+				info.breakoutBoxSupport		= NTV2DeviceCanDoBreakoutBox		(info.deviceID);
+				info.vidProcSupport			= NTV2DeviceCanDoVideoProcessing	(info.deviceID);
+				info.dualLinkSupport		= NTV2DeviceCanDoDualLink			(info.deviceID);
+				info.numDMAEngines			= UWord(::NTV2DeviceGetNumDMAEngines(info.deviceID));
+				info.pingLED				= NTV2DeviceGetPingLED				(info.deviceID);
+				info.has2KSupport			= NTV2DeviceCanDo2KVideo			(info.deviceID);
+				info.has4KSupport			= NTV2DeviceCanDo4KVideo			(info.deviceID);
+				info.has8KSupport			= NTV2DeviceCanDo8KVideo			(info.deviceID);
+				info.has3GLevelConversion   = NTV2DeviceCanDo3GLevelConversion  (info.deviceID);
+				info.isoConvertSupport		= NTV2DeviceCanDoIsoConvert			(info.deviceID);
+				info.rateConvertSupport		= NTV2DeviceCanDoRateConvert		(info.deviceID);
+				info.proResSupport			= NTV2DeviceCanDoProRes				(info.deviceID);
+				info.sdi3GSupport			= tmpDevice.IsWidgetIDSupported(NTV2_Wgt3GSDIOut1);
+				info.sdi12GSupport			= NTV2DeviceCanDo12GSDI				(info.deviceID);
+				info.ipSupport				= NTV2DeviceCanDoIP					(info.deviceID);
+				info.biDirectionalSDI		= NTV2DeviceHasBiDirectionalSDI		(info.deviceID);
+				info.ltcInSupport			= NTV2DeviceGetNumLTCInputs			(info.deviceID) > 0;
+				info.ltcOutSupport			= NTV2DeviceGetNumLTCOutputs		(info.deviceID) > 0;
+				info.ltcInOnRefPort			= NTV2DeviceCanDoLTCInOnRefPort		(info.deviceID);
+				info.stereoOutSupport		= NTV2DeviceCanDoStereoOut			(info.deviceID);
+				info.stereoInSupport		= NTV2DeviceCanDoStereoIn			(info.deviceID);
+				info.multiFormat			= NTV2DeviceCanDoMultiFormat		(info.deviceID);
+				info.numSerialPorts			= NTV2DeviceGetNumSerialPorts		(info.deviceID);
+				info.procAmpSupport			= false;
 				SetAudioAttributes(info, tmpDevice);
 				GetDeviceInfoList().push_back(info);
 			}
@@ -619,53 +659,6 @@ std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioPhysicalForm
 
 // Private methods
 
-void CNTV2DeviceScanner::SetVideoAttributes (NTV2DeviceInfo & info)
-{	
-	info.numVidInputs			= NTV2DeviceGetNumVideoInputs		(info.deviceID);
-	info.numVidOutputs			= NTV2DeviceGetNumVideoOutputs		(info.deviceID);
-	info.numAnlgVidOutputs		= NTV2DeviceGetNumAnalogVideoOutputs	(info.deviceID);
-	info.numAnlgVidInputs		= NTV2DeviceGetNumAnalogVideoInputs	(info.deviceID);
-	info.numHDMIVidOutputs		= NTV2DeviceGetNumHDMIVideoOutputs	(info.deviceID);
-	info.numHDMIVidInputs		= NTV2DeviceGetNumHDMIVideoInputs	(info.deviceID);
-	info.numInputConverters		= NTV2DeviceGetNumInputConverters	(info.deviceID);
-	info.numOutputConverters	= NTV2DeviceGetNumOutputConverters	(info.deviceID);
-	info.numUpConverters		= NTV2DeviceGetNumUpConverters		(info.deviceID);
-	info.numDownConverters		= NTV2DeviceGetNumDownConverters	(info.deviceID);
-	info.downConverterDelay		= NTV2DeviceGetDownConverterDelay	(info.deviceID);
-	info.dvcproHDSupport		= NTV2DeviceCanDoDVCProHD			(info.deviceID);
-	info.qrezSupport			= NTV2DeviceCanDoQREZ				(info.deviceID);
-	info.hdvSupport				= NTV2DeviceCanDoHDV				(info.deviceID);
-	info.quarterExpandSupport	= NTV2DeviceCanDoQuarterExpand		(info.deviceID);
-	info.colorCorrectionSupport	= NTV2DeviceCanDoColorCorrection	(info.deviceID);
-	info.programmableCSCSupport	= NTV2DeviceCanDoProgrammableCSC	(info.deviceID);
-	info.rgbAlphaOutputSupport	= NTV2DeviceCanDoRGBPlusAlphaOut	(info.deviceID);
-	info.breakoutBoxSupport		= NTV2DeviceCanDoBreakoutBox		(info.deviceID);
-	info.vidProcSupport			= NTV2DeviceCanDoVideoProcessing	(info.deviceID);
-	info.dualLinkSupport		= NTV2DeviceCanDoDualLink			(info.deviceID);
-	info.numDMAEngines			= UWord(::NTV2DeviceGetNumDMAEngines(info.deviceID));
-	info.pingLED				= NTV2DeviceGetPingLED				(info.deviceID);
-	info.has2KSupport			= NTV2DeviceCanDo2KVideo			(info.deviceID);
-	info.has4KSupport			= NTV2DeviceCanDo4KVideo			(info.deviceID);
-	info.has8KSupport			= NTV2DeviceCanDo8KVideo			(info.deviceID);
-    info.has3GLevelConversion   = NTV2DeviceCanDo3GLevelConversion  (info.deviceID);
-	info.isoConvertSupport		= NTV2DeviceCanDoIsoConvert			(info.deviceID);
-	info.rateConvertSupport		= NTV2DeviceCanDoRateConvert		(info.deviceID);
-	info.proResSupport			= NTV2DeviceCanDoProRes				(info.deviceID);
-	info.sdi3GSupport			= NTV2DeviceCanDo3GOut				(info.deviceID, 0);
-    info.sdi12GSupport			= NTV2DeviceCanDo12GSDI				(info.deviceID);
-    info.ipSupport				= NTV2DeviceCanDoIP					(info.deviceID);
-    info.biDirectionalSDI		= NTV2DeviceHasBiDirectionalSDI		(info.deviceID);
-	info.ltcInSupport			= NTV2DeviceGetNumLTCInputs			(info.deviceID) > 0;
-	info.ltcOutSupport			= NTV2DeviceGetNumLTCOutputs		(info.deviceID) > 0;
-	info.ltcInOnRefPort			= NTV2DeviceCanDoLTCInOnRefPort		(info.deviceID);
-	info.stereoOutSupport		= NTV2DeviceCanDoStereoOut			(info.deviceID);
-	info.stereoInSupport		= NTV2DeviceCanDoStereoIn			(info.deviceID);
-	info.multiFormat			= NTV2DeviceCanDoMultiFormat		(info.deviceID);
-	info.numSerialPorts			= NTV2DeviceGetNumSerialPorts		(info.deviceID);
-	info.procAmpSupport			= false;
-
-}	//	SetVideoAttributes
-
 void CNTV2DeviceScanner::SetAudioAttributes(NTV2DeviceInfo & info, CNTV2Card & inBoard) const
 {
 	//	Start with empty lists...
@@ -676,14 +669,14 @@ void CNTV2DeviceScanner::SetAudioAttributes(NTV2DeviceInfo & info, CNTV2Card & i
 	info.audioOutSourceList.clear();
 
 
-	if (inBoard.features().GetNumAudioSystems())
+	if (inBoard.GetNumSupported(kDeviceGetNumAudioSystems))
 	{
 		ULWord audioControl;
 		inBoard.ReadRegister(kRegAud1Control, audioControl);
 
 		//audioSampleRateList
 		info.audioSampleRateList.push_back(k48KHzSampleRate);
-		if (inBoard.features().CanDoAudio96K())
+		if (inBoard.IsSupported(kDeviceCanDoAudio96K))
 			info.audioSampleRateList.push_back(k96KHzSampleRate);
 
 		//audioBitsPerSampleList
@@ -693,31 +686,31 @@ void CNTV2DeviceScanner::SetAudioAttributes(NTV2DeviceInfo & info, CNTV2Card & i
 		info.audioInSourceList.push_back(kSourceSDI);
 		if (audioControl & BIT(21))
 			info.audioInSourceList.push_back(kSourceAES);
-		if (inBoard.features().CanDoAnalogAudio())
+		if (inBoard.IsSupported(kDeviceCanDoAnalogAudio))
 			info.audioInSourceList.push_back(kSourceAnalog);
 
 		//audioOutSourceList
 		info.audioOutSourceList.push_back(kSourceAll);
 
 		//audioNumChannelsList
-		if (inBoard.features().CanDoAudio2Channels())
+		if (inBoard.IsSupported(kDeviceCanDoAudio2Channels))
 			info.audioNumChannelsList.push_back(kNumAudioChannels2);
-		if (inBoard.features().CanDoAudio6Channels())
+		if (inBoard.IsSupported(kDeviceCanDoAudio6Channels))
 			info.audioNumChannelsList.push_back(kNumAudioChannels6);
-		if (inBoard.features().CanDoAudio8Channels())
+		if (inBoard.IsSupported(kDeviceCanDoAudio8Channels))
 			info.audioNumChannelsList.push_back(kNumAudioChannels8);
 
-		info.numAudioStreams = inBoard.features().GetNumAudioSystems();
+		info.numAudioStreams = inBoard.GetNumSupported(kDeviceGetNumAudioSystems);
 	}
 
-	info.numAnalogAudioInputChannels = inBoard.features().GetNumAnalogAudioInputChannels();
-	info.numAESAudioInputChannels = inBoard.features().GetNumAESAudioInputChannels();
-	info.numEmbeddedAudioInputChannels = inBoard.features().GetNumEmbeddedAudioInputChannels();
-	info.numHDMIAudioInputChannels = inBoard.features().GetNumHDMIAudioInputChannels();
-	info.numAnalogAudioOutputChannels = inBoard.features().GetNumAnalogAudioOutputChannels();
-	info.numAESAudioOutputChannels = inBoard.features().GetNumAESAudioOutputChannels();
-	info.numEmbeddedAudioOutputChannels = inBoard.features().GetNumEmbeddedAudioOutputChannels();
-	info.numHDMIAudioOutputChannels = inBoard.features().GetNumHDMIAudioOutputChannels();
+	info.numAnalogAudioInputChannels	= inBoard.GetNumSupported(kDeviceGetNumAnalogAudioInputChannels);
+	info.numAESAudioInputChannels		= inBoard.GetNumSupported(kDeviceGetNumAESAudioInputChannels);
+	info.numEmbeddedAudioInputChannels	= inBoard.GetNumSupported(kDeviceGetNumEmbeddedAudioInputChannels);
+	info.numHDMIAudioInputChannels		= inBoard.GetNumSupported(kDeviceGetNumHDMIAudioInputChannels);
+	info.numAnalogAudioOutputChannels	= inBoard.GetNumSupported(kDeviceGetNumAnalogAudioOutputChannels);
+	info.numAESAudioOutputChannels		= inBoard.GetNumSupported(kDeviceGetNumAESAudioOutputChannels);
+	info.numEmbeddedAudioOutputChannels	= inBoard.GetNumSupported(kDeviceGetNumEmbeddedAudioOutputChannels);
+	info.numHDMIAudioOutputChannels		= inBoard.GetNumSupported(kDeviceGetNumHDMIAudioOutputChannels);
 
 }	//	SetAudioAttributes
 

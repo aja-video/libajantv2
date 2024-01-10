@@ -2953,10 +2953,24 @@ NTV2StreamChannel::NTV2StreamChannel()
 	NTV2_ASSERT_STRUCT_VALID;
 }
 
+ostream & NTV2StreamChannel::Print (ostream & inOutStream) const
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	inOutStream << mHeader << mChannel << " flags=" << xHEX0N(mFlags,8) << xHEX0N(mStatus, 8) << " " << mTrailer;
+	return inOutStream;
+}
+
 NTV2StreamBuffer::NTV2StreamBuffer()
 	:	mHeader (NTV2_TYPE_AJASTREAMBUFFER, sizeof(NTV2StreamBuffer))
 {
 	NTV2_ASSERT_STRUCT_VALID;
+}
+
+ostream & NTV2StreamBuffer::Print (ostream & inOutStream) const
+{
+	NTV2_ASSERT_STRUCT_VALID;
+	inOutStream << mHeader << mChannel << " flags=" << xHEX0N(mFlags,8) << xHEX0N(mStatus, 8) << " " << mTrailer;
+	return inOutStream;
 }
 
 NTV2GetRegisters::NTV2GetRegisters (const NTV2RegNumSet & inRegisterNumbers)

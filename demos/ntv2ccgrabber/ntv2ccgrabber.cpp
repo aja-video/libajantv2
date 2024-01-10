@@ -128,31 +128,31 @@ AJAStatus NTV2CCGrabber::Init (void)
 		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
 	mDeviceID = mDevice.GetDeviceID();	//	Keep this handy because it's used frequently
-	const string	deviceStr(::NTV2DeviceIDToString(mDeviceID));
+	const string deviceStr(::NTV2DeviceIDToString(mDeviceID));
 
 	if (mConfig.fBurnCaptions)
 	{
-		if (::NTV2DeviceGetNumFrameStores(mDeviceID) < 2)						//	Need 2+ frame stores
+		if (mDevice.features().GetNumFrameStores() < 2)						//	Need 2+ frame stores
 		{
 			cerr	<< "## ERROR:  Device '" << deviceStr << "' can't burn-in captions because at least 2 frame stores are required" << endl;
 			return AJA_STATUS_FAIL;
 		}
-		if (!::NTV2DeviceCanDoPlayback(mDeviceID))
+		if (!mDevice.features().CanDoPlayback())
 		{
 			cerr	<< "## ERROR:  Device '" << deviceStr << "' can't burn-in captions because device can only capture/ingest" << endl;
 			return AJA_STATUS_FAIL;
 		}
-		if (::NTV2DeviceGetNumVideoInputs(mDeviceID) < 1  ||  ::NTV2DeviceGetNumVideoOutputs(mDeviceID) < 1)	//	Need 1 input & 1 output
+		if (mDevice.features().GetNumVideoInputs() < 1  ||  mDevice.features().GetNumVideoOutputs() < 1)	//	Need 1 input & 1 output
 		{
 			cerr	<< "## ERROR:  Device '" << deviceStr << "' can't be used -- at least 1 SDI input and 1 SDI output required" << endl;
 			return AJA_STATUS_FAIL;
 		}
-		if (!::NTV2DeviceGetNumMixers(mDeviceID))								//	Need 1 or more mixers
+		if (!mDevice.features().GetNumMixers())								//	Need 1 or more mixers
 		{
 			cerr	<< "## ERROR:  Device '" << deviceStr << "' can't burn-in captions because a mixer/keyer widget is required" << endl;
 			return AJA_STATUS_FAIL;
 		}
-		if (!::NTV2DeviceCanDoFrameBufferFormat(mDeviceID, mPlayoutFBF))		//	FrameStore must handle 8-bit RGB with alpha
+		if (!mDevice.features().CanDoFrameBufferFormat(mPlayoutFBF))		//	FrameStore must handle 8-bit RGB with alpha
 		{
 			cerr	<< "## ERROR:  Device '" << deviceStr << "' can't burn-in captions because it can't do 8-bit RGB (with alpha)" << endl;
 			return AJA_STATUS_FAIL;
@@ -168,10 +168,10 @@ AJAStatus NTV2CCGrabber::Init (void)
 
 	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);		//	Use the OEM service level
 
-	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
+	if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
 
-	if (!mConfig.fUseVanc  &&  !DeviceAncExtractorIsAvailable())	//	--vanc not specified  &&  no anc extractors?
+	if (!mConfig.fUseVanc  &&  !mDevice.features().CanDoCustomAnc())	//	--vanc not specified  &&  no anc extractors?
 	{
 		cerr << "## WARNING:  Enabling VANC because no Anc extractors" << endl;
 		mConfig.fUseVanc = true;
@@ -219,7 +219,7 @@ AJAStatus NTV2CCGrabber::SetupHostBuffers (const NTV2VideoFormat inVideoFormat)
 			if (!frameData.fAudioBuffer.Allocate(NTV2_AUDIOSIZE_MAX, /*pageAlign?*/true))
 				return AJA_STATUS_MEMORY;
 		//	Anc data buffers --- only used if Anc extractors supported...
-		if (DeviceAncExtractorIsAvailable())
+		if (mDevice.features().CanDoCustomAnc())
 		{
 			if (!frameData.fAncBuffer.Allocate(NTV2_ANCSIZE_MAX, /*pageAlign?*/true))
 				return AJA_STATUS_MEMORY;
@@ -257,7 +257,7 @@ void NTV2CCGrabber::ReleaseHostBuffers (void)
 AJAStatus NTV2CCGrabber::SetupInputVideo (void)
 {
 	bool				isTransmit		(false);
-	const UWord			numFrameStores	(::NTV2DeviceGetNumFrameStores(mDeviceID));
+	const UWord			numFrameStores	(mDevice.features().GetNumFrameStores());
 	const NTV2DeviceID	deviceID		(mDevice.GetDeviceID());
 	const string		deviceName		(::NTV2DeviceIDToString(deviceID));
 	const string		channelName		(::NTV2ChannelToString(mConfig.fInputChannel, true));
@@ -273,7 +273,7 @@ AJAStatus NTV2CCGrabber::SetupInputVideo (void)
 
 	//	Check input source
 	const string	inputName	(::NTV2InputSourceToString(mConfig.fInputSource,true));
-	if (!::NTV2DeviceCanDoInputSource(mDeviceID, mConfig.fInputSource))
+	if (!mDevice.features().CanDoInputSource(mConfig.fInputSource))
 		{cerr << "## ERROR:  '" << deviceName << "' cannot grab captions from '" << inputName << "'" << endl;  return AJA_STATUS_FAIL;}
 	if (!NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource))
 		{cerr << "## ERROR:  Input '" << inputName << "' not SDI" << endl;  return AJA_STATUS_FAIL;}
@@ -284,7 +284,7 @@ AJAStatus NTV2CCGrabber::SetupInputVideo (void)
 
 	const NTV2Channel sdiInput(::NTV2InputSourceToChannel(mConfig.fInputSource));
 	mActiveSDIInputs.insert(sdiInput);
-	if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID))								//	If device has bidirectional SDI connectors...
+	if (mDevice.features().HasBiDirectionalSDI())								//	If device has bidirectional SDI connectors...
 		if (mDevice.GetSDITransmitEnable(sdiInput, isTransmit))					//	...and GetSDITransmitEnable succeeds...
 			if (isTransmit)														//	...and input is set to "transmit"...
 			{
@@ -317,7 +317,7 @@ AJAStatus NTV2CCGrabber::SetupInputVideo (void)
 			case NTV2_CHANNEL_INVALID:	return AJA_STATUS_BAD_PARAM;
 		}
 
-	if (!::NTV2DeviceCanDoFrameBufferFormat(mDeviceID, mConfig.fPixelFormat))
+	if (!mDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
 		{cerr << "## ERROR:  '" << deviceName << "' doesn't support '" << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat) << "'" << endl;  return AJA_STATUS_FAIL;}
 
 	//	"Tune" the 608 decoder to the desired channel...
@@ -339,13 +339,13 @@ AJAStatus NTV2CCGrabber::SetupAudio (void)
 {
 	if (NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem))
 	{
-		const UWord	numAudioSystems	(::NTV2DeviceGetNumAudioSystems(mDeviceID));
+		const UWord	numAudioSystems	(mDevice.features().GetNumAudioSystems());
 		if (numAudioSystems > 1  &&  UWord(mConfig.fInputChannel) < numAudioSystems)
 			mAudioSystem = ::NTV2ChannelToAudioSystem(mConfig.fInputChannel);
 
 		//	Configure the audio system...
 		mDevice.SetAudioSystemInputSource (mAudioSystem, NTV2_AUDIO_EMBEDDED, ::NTV2InputSourceToEmbeddedAudioInput(mConfig.fInputSource));
-		mDevice.SetNumberAudioChannels (::NTV2DeviceGetMaxAudioChannels(mDeviceID), mAudioSystem);
+		mDevice.SetNumberAudioChannels (mDevice.features().GetMaxAudioChannels(), mAudioSystem);
 		mDevice.SetAudioRate (NTV2_AUDIO_48K, mAudioSystem);
 		mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, mAudioSystem);
 
@@ -355,13 +355,13 @@ AJAStatus NTV2CCGrabber::SetupAudio (void)
 			if (mConfig.fDoMultiFormat)
 			{
 				UWord sdiOutput(mOutputChannel);
-				if (sdiOutput >= ::NTV2DeviceGetNumVideoOutputs(mDeviceID))		//	Kona1 has 2 FrameStores/Channels, but only 1 SDI output
-					sdiOutput = ::NTV2DeviceGetNumVideoOutputs(mDeviceID) - 1;
+				if (sdiOutput >= mDevice.features().GetNumVideoOutputs())		//	Kona1 has 2 FrameStores/Channels, but only 1 SDI output
+					sdiOutput = mDevice.features().GetNumVideoOutputs() - 1;
 				mDevice.SetSDIOutputAudioSystem(NTV2Channel(sdiOutput), mAudioSystem);
 			}
 			else	//	Have all device outputs use the same audio system...
-				for (unsigned sdiOutput(0);  sdiOutput < ::NTV2DeviceGetNumVideoOutputs(mDeviceID);  sdiOutput++)
-					if (!::NTV2DeviceHasBiDirectionalSDI(mDeviceID)
+				for (unsigned sdiOutput(0);  sdiOutput < mDevice.features().GetNumVideoOutputs();  sdiOutput++)
+					if (!mDevice.features().HasBiDirectionalSDI()
 						||  NTV2Channel(sdiOutput) != ::NTV2InputSourceToChannel(mConfig.fInputSource))
 							mDevice.SetSDIOutputAudioSystem(NTV2Channel(sdiOutput), mAudioSystem);
 		}
@@ -418,7 +418,7 @@ bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 		{
 			NTV2ChannelSet sdiIns	= ::NTV2MakeChannelSet(sdiInput, UWord(2*frameStores.size()));
 			sdiInputs	= ::NTV2MakeChannelList(sdiIns);
-			NTV2ChannelList tsiMuxes = CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDeviceID, frameStores.at(0),
+			NTV2ChannelList tsiMuxes = CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDevice, frameStores.at(0),
 																				UWord(frameStores.size()*2));
 			mDevice.SetSDITransmitEnable(sdiIns, true);	//	Gotta do this again, since sdiInputs changed
 			for (size_t ndx(0);  ndx < sdiInputs.size();  ndx++)
@@ -453,7 +453,7 @@ bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 			sdiInputs					= ::NTV2MakeChannelList(sdiIns);
 			NTV2ChannelList cscs		= ::NTV2MakeChannelList(frameStores.at(0) > NTV2_CHANNEL4 ? NTV2_CHANNEL5 : NTV2_CHANNEL1,
 																UWord(2*sdiInputs.size()));
-			NTV2ChannelList tsiMuxes	= CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDeviceID, frameStores.at(0),
+			NTV2ChannelList tsiMuxes	= CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDevice, frameStores.at(0),
 																					UWord(frameStores.size()));
 			cerr	<< "FrameStores: "	<< ::NTV2ChannelListToStr(frameStores)	<< endl
 					<< "SDIInputs: "	<< ::NTV2ChannelListToStr(sdiInputs)	<< endl
@@ -509,7 +509,7 @@ bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 		{
 			NTV2XptConnections & mConnections(mInputConnections);
 			sdiInputs	= ::NTV2MakeChannelList(sdiInputs.at(0), is4KHFR ? 4 : UWord(frameStores.size()));
-			NTV2ChannelList tsiMuxes	= CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDeviceID, frameStores.at(0),
+			NTV2ChannelList tsiMuxes	= CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDevice, frameStores.at(0),
 																					UWord(frameStores.size()));
 			cerr	<< (is4KHFR ? "4KHFR" : "")	<< endl	<< "FrameStores: " << ::NTV2ChannelListToStr(frameStores) << endl
 					<< "SDIInputs:   " << ::NTV2ChannelListToStr(sdiInputs) << endl << "TSIMuxes:    "	<< ::NTV2ChannelListToStr(tsiMuxes) << endl;
@@ -539,9 +539,9 @@ bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 	if ((false) /* not ready for prime-time */ &&  !mConfig.fBurnCaptions  &&  !mConfig.fDoMultiFormat)
 	{	//	Not doing caption burn-in:  route E-E pass-thru...
 		NTV2ChannelList sdiOutputs;
-		if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID))
+		if (mDevice.features().HasBiDirectionalSDI())
 		{
-			const NTV2ChannelSet allSDIs (::NTV2MakeChannelSet(NTV2_CHANNEL1, ::NTV2DeviceGetNumVideoOutputs(mDeviceID)));
+			const NTV2ChannelSet allSDIs (::NTV2MakeChannelSet(NTV2_CHANNEL1, mDevice.features().GetNumVideoOutputs()));
 			NTV2ChannelSet sdiOuts;
 			set_difference (allSDIs.begin(), allSDIs.end(),						//	allSDIs
 							mActiveSDIInputs.begin(), mActiveSDIInputs.end(),	//		- mActiveSDIInputs
@@ -550,12 +550,12 @@ bool NTV2CCGrabber::RouteInputSignal (const NTV2VideoFormat inVideoFormat)
 			cerr << "allSDIs: " << ::NTV2ChannelSetToStr(allSDIs) << endl << "actSDIIns: " << ::NTV2ChannelSetToStr(mActiveSDIInputs) << endl;	//	DEBUG
 		}
 		else
-			sdiOutputs = ::NTV2MakeChannelList(NTV2_CHANNEL1, ::NTV2DeviceGetNumVideoOutputs(mDeviceID));
+			sdiOutputs = ::NTV2MakeChannelList(NTV2_CHANNEL1, mDevice.features().GetNumVideoOutputs());
 		cerr << "SDIOuts: " << ::NTV2ChannelListToStr(sdiOutputs) << endl << "SDIIns: " << ::NTV2ChannelListToStr(sdiInputs) << endl;	//	DEBUG
 		for (size_t sdiNdx(0);  sdiNdx < sdiOutputs.size();  sdiNdx++)
 		{	const NTV2Channel sdiOut(sdiOutputs.at(sdiNdx));
 			const NTV2Channel sdiIn(sdiInputs.at(sdiNdx < sdiInputs.size() ? sdiNdx : sdiInputs.size()-1));
-			if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID)  &&  mActiveSDIInputs.find(sdiOut) == mActiveSDIInputs.end())
+			if (mDevice.features().HasBiDirectionalSDI()  &&  mActiveSDIInputs.find(sdiOut) == mActiveSDIInputs.end())
 			{
 				cerr << "Switching SDI " << (sdiOut+1) << " to output" << endl;	//	DEBUG
 				mDevice.SetSDITransmitEnable(sdiOut, true);
@@ -592,10 +592,10 @@ void NTV2CCGrabber::SetOutputStandards (const NTV2VideoFormat inVideoFormat)
 
 	for (NTV2Channel chan(startNum);  chan < endNum;  chan = NTV2Channel(chan + 1))
 	{
-		if (ULWord(chan) >= ::NTV2DeviceGetNumVideoChannels(mDeviceID))
+		if (ULWord(chan) >= mDevice.features().GetNumVideoChannels())
 			break;
 		if (chan != sdiInputAsChan)
-			if (::NTV2DeviceCanDoWidget(mDeviceID, g3GSDIOutputs[chan])  ||  ::NTV2DeviceCanDoWidget(mDeviceID, gSDIOutputs [chan]))
+			if (mDevice.features().CanDoWidget(g3GSDIOutputs[chan])  ||  mDevice.features().CanDoWidget(gSDIOutputs[chan]))
 				mDevice.SetSDIOutputStandard(chan, outputStandard);
 	}	//	for each output spigot
 
@@ -677,7 +677,7 @@ void NTV2CCGrabber::CaptureFrames (void)
 		mDevice.SetVideoFormat (mInputFrameStores, currentVF, /*retailMode*/false);
 		if (NTV2_IS_4K_VIDEO_FORMAT(currentVF))
 		{
-			if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+			if (mDevice.features().CanDo12gRouting())
 				mDevice.SetTsiFrameEnable(true, mConfig.fInputChannel);
 			else if (mSquares)
 				mDevice.Set4kSquaresEnable(true, mConfig.fInputChannel);
@@ -709,7 +709,7 @@ void NTV2CCGrabber::CaptureFrames (void)
 												mConfig.fFrames.count(),	//	numFrames (zero if specifying range)
 												mAudioSystem,				//	audio system
 												AUTOCIRCULATE_WITH_RP188
-													| (DeviceAncExtractorIsAvailable() ? AUTOCIRCULATE_WITH_ANC : 0),	//	flags
+													| (mDevice.features().CanDoCustomAnc() ? AUTOCIRCULATE_WITH_ANC : 0),	//	flags
 												1,	//	numChannels to gang
 												mConfig.fFrames.firstFrame(), mConfig.fFrames.lastFrame()))
 			{CAPFAIL("Failed to init Ch" << DEC(mConfig.fInputChannel+1) << " for input"); break;}
@@ -885,9 +885,9 @@ NTV2VideoFormat NTV2CCGrabber::WaitForStableInputSignal (void)
 		}
 
 		ostringstream osserr;
-		if (!::NTV2DeviceCanDoVideoFormat(mDeviceID, result))	//	Can this device handle this video format?
+		if (!mDevice.features().CanDoVideoFormat(result))	//	Can this device handle this video format?
 			osserr << mDevice.GetModelName() << " can't handle " << ::NTV2VideoFormatToString(result);
-		else if (mVPIDInfoDS1.IsValid()  &&  mVPIDInfoDS1.IsStandardTwoSampleInterleave()  &&  !::NTV2DeviceCanDo425Mux(mDeviceID))
+		else if (mVPIDInfoDS1.IsValid()  &&  mVPIDInfoDS1.IsStandardTwoSampleInterleave()  &&  !mDevice.features().CanDo425Mux())
 			osserr << mDevice.GetModelName() << " can't handle TSI";
 		if (!osserr.str().empty())
 		{
@@ -930,12 +930,6 @@ NTV2VideoFormat NTV2CCGrabber::WaitForStableInputSignal (void)
 //////////////////////////////////////////////
 
 
-bool NTV2CCGrabber::DeviceAncExtractorIsAvailable (void) const
-{
-	return ::NTV2DeviceCanDoCustomAnc(mDeviceID);
-}
-
-
 void NTV2CCGrabber::ToggleVANC (void)
 {
 	mConfig.fUseVanc = !mConfig.fUseVanc;
@@ -973,7 +967,7 @@ void NTV2CCGrabber::SwitchPixelFormat (void)
 		pf = NTV2PixelFormat(pf+1);
 		if (pf == NTV2_FBF_LAST)
 			pf = NTV2_FBF_FIRST;
-	} while (NTV2_IS_FBF_PLANAR(pf)  ||  !::NTV2DeviceCanDoFrameBufferFormat(mDeviceID, pf));
+	} while (NTV2_IS_FBF_PLANAR(pf)  ||  !mDevice.features().CanDoFrameBufferFormat(pf));
 	if (mConfig.fPixelFormat != pf)
 		cerr << endl << "## NOTE: Pixel format changed to " << ::NTV2FrameBufferFormatToString(pf) << endl;
 	mConfig.fPixelFormat = pf;
@@ -985,7 +979,7 @@ void NTV2CCGrabber::ExtractClosedCaptionData (const uint32_t inFrameNum, const N
 	CaptionData			captionData708Anc, captionData708Vanc, captionData608Anc, captionData608Vanc, captionDataL21Anc, captionDataL21;	//	The 608 caption byte pairs (one pair per field)
 	const NTV2FormatDescriptor formatDesc (inVideoFormat, mConfig.fPixelFormat, mVancMode);
 
-	if (NTV2_IS_VANCMODE_ON(mVancMode) || DeviceAncExtractorIsAvailable())	//	Gotta have at least VANC or AncExt
+	if (NTV2_IS_VANCMODE_ON(mVancMode) || mDevice.features().CanDoCustomAnc())	//	Gotta have at least VANC or AncExt
 	{
 		//	Get all VANC packets...
 		if (NTV2_IS_VANCMODE_ON(mVancMode))
@@ -995,7 +989,7 @@ void NTV2CCGrabber::ExtractClosedCaptionData (const uint32_t inFrameNum, const N
 		}
 
 		//	Get all anc extractor packets...
-		if (DeviceAncExtractorIsAvailable())
+		if (mDevice.features().CanDoCustomAnc())
 		{
 			const NTV2Buffer validAncF1 (mInputXferInfo.acANCBuffer.GetHostAddress(0), mInputXferInfo.GetCapturedAncByteCount(false));
 			const NTV2Buffer validAncF2 (mInputXferInfo.acANCField2Buffer.GetHostAddress(0), mInputXferInfo.GetCapturedAncByteCount(true));
@@ -1329,9 +1323,9 @@ bool NTV2CCGrabber::RouteOutputSignal (const NTV2VideoFormat inVideoFormat)
 	if (mConfig.fDoMultiFormat)
 	{
 		//	Multiformat --- route the one SDI output to the mixer's YUV output, and set its output standard...
-		if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID))
+		if (mDevice.features().HasBiDirectionalSDI())
 			mDevice.SetSDITransmitEnable (mOutputChannel, true);
-		if (::NTV2DeviceCanDoWidget(mDeviceID, g3GSDIOutputs[mOutputChannel]) || ::NTV2DeviceCanDoWidget(mDeviceID, gSDIOutputs[mOutputChannel]))
+		if (mDevice.features().CanDoWidget(g3GSDIOutputs[mOutputChannel]) || mDevice.features().CanDoWidget(gSDIOutputs[mOutputChannel]))
 		{
 			if (!mDevice.Connect (::GetSDIOutputInputXpt(mOutputChannel), mixerOutputYUV, canVerify)) connectFailures++;
 			mDevice.SetSDIOutputStandard (mOutputChannel, outputStandard);
@@ -1340,7 +1334,7 @@ bool NTV2CCGrabber::RouteOutputSignal (const NTV2VideoFormat inVideoFormat)
 	else
 	{
 		//	If not multiformat:  Route all SDI outputs to the mixer's YUV output...
-		const ULWord		numVideoOutputs	(::NTV2DeviceGetNumVideoOutputs(mDeviceID));
+		const ULWord		numVideoOutputs	(mDevice.features().GetNumVideoOutputs());
 		const NTV2Channel	startNum		(NTV2_CHANNEL1);
 		const NTV2Channel	endNum			(NTV2_CHANNEL_INVALID);
 		const NTV2Channel	sdiInputAsChan	(::NTV2InputSourceToChannel(mConfig.fInputSource));
@@ -1349,13 +1343,13 @@ bool NTV2CCGrabber::RouteOutputSignal (const NTV2VideoFormat inVideoFormat)
 		{
 			if (ULWord(chan) >= numVideoOutputs)
 				break;
-			if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID))
+			if (mDevice.features().HasBiDirectionalSDI())
 			{
 				if (chan == sdiInputAsChan)
 					continue;	//	Skip the input
 				mDevice.SetSDITransmitEnable (chan, true);
 			}
-			if (::NTV2DeviceCanDoWidget(mDeviceID, g3GSDIOutputs[chan]) || ::NTV2DeviceCanDoWidget(mDeviceID, gSDIOutputs[chan]))
+			if (mDevice.features().CanDoWidget(g3GSDIOutputs[chan]) || mDevice.features().CanDoWidget(gSDIOutputs[chan]))
 			{
 				if (!mDevice.Connect (::GetSDIOutputInputXpt(chan), mixerOutputYUV, canVerify)) connectFailures++;
 				mDevice.SetSDIOutputStandard (chan, outputStandard);
@@ -1375,13 +1369,13 @@ bool NTV2CCGrabber::RouteOutputSignal (const NTV2VideoFormat inVideoFormat)
 	if (!mConfig.fDoMultiFormat)
 	{
 		//	Connect more outputs -- HDMI, analog, SDI monitor, etc...	(Don't bother to verify these connections)
-		if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1))
+		if (mDevice.features().CanDoWidget(NTV2_WgtHDMIOut1))
 			mDevice.Connect (NTV2_XptHDMIOutInput, mixerOutputYUV);
-		if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v2))
+		if (mDevice.features().CanDoWidget(NTV2_WgtHDMIOut1v2))
 			mDevice.Connect (NTV2_XptHDMIOutQ1Input, mixerOutputYUV);
-		if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtAnalogOut1))
+		if (mDevice.features().CanDoWidget(NTV2_WgtAnalogOut1))
 			mDevice.Connect (NTV2_XptAnalogOutInput, mixerOutputYUV);
-		if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtSDIMonOut1))
+		if (mDevice.features().CanDoWidget(NTV2_WgtSDIMonOut1))
 			mDevice.Connect (::GetSDIOutputInputXpt (NTV2_CHANNEL5), mixerOutputYUV);
 	}
 	return connectFailures == 0;

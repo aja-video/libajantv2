@@ -66,10 +66,10 @@
 # include "hevcdriver.h"
 # include "hevcpublic.h"
 #endif
-#include "ntv2driverprocamp.h"
 #include "ntv2driver.h"
-#include "driverdbg.h"
 #include "registerio.h"
+#include "ntv2driverprocamp.h"
+#include "driverdbg.h"
 #include "ntv2dma.h"
 
 #include "ntv2driverdbgmsgctl.h"
@@ -190,11 +190,6 @@ struct VirtualDataNode
     ULWord          size;
     ULWord          data;
 };
-
-typedef struct _fileData
-{
-	DMA_PAGE_ROOT dmaRoot;
-} FILE_DATA, *PFILE_DATA;
 
 
 /*********************************************/
@@ -1777,6 +1772,7 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 
             case NTV2_TYPE_AJASTREAMCHANNEL:
 				{
+                    MSG("%s: NTV2_TYPE_AJASTREAMCHANNEL\n", pNTV2Params->name);
 					returnCode = DoMessageStreamChannel (deviceNumber, pFileData, (NTV2StreamChannel*)pMessage);
 					if (returnCode)
 					{
@@ -2141,7 +2137,19 @@ int ntv2_release(struct inode *minode, struct file *mfile) {
 	pFileData = (PFILE_DATA)mfile->private_data;
 	if (pFileData != NULL)
 	{
+#if 1
+        NTV2StreamChannel channel;
+        int i;
+
+        // release any streams we own
+        for (i = 0; i < NTV2_MAX_DMA_STREAMS; i++)
+        {
+            ntv2_stream_channel_release(getNTV2Params(deviceNumber)->m_pDmaStream[i], pFileData, &channel);
+        }
+#endif
+        // release all locked pages
 		dmaPageRootRelease(deviceNumber, &pFileData->dmaRoot);
+        
 		kfree(pFileData);
 		mfile->private_data = NULL;
 	}
@@ -3337,6 +3345,47 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 	// initialize dma
 	dmaInit(deviceNumber);
 
+    // inialize streams
+    for (i = 0; i < ntv2pp->_dmaNumEngines; i++)
+    {
+        if (i >= NTV2_MAX_DMA_STREAMS)
+            break;
+
+        if (!ntv2pp->_dmaEngine[i].dmaStream)
+            continue;
+        
+        ntv2pp->m_pDmaStream[i] = ntv2_stream_open(&ntv2pp->systemContext, "ntv2stream", i);
+        if (ntv2pp->m_pDmaStream[i] != NULL)
+        {
+            struct ntv2_stream_ops stream_ops =
+            {
+                .stream_initialize = dmaOpsStreamInitialize,
+                .stream_release = dmaOpsStreamRelease,
+                .stream_start = dmaOpsStreamStart,
+                .stream_stop = dmaOpsStreamStop,
+                .stream_advance = dmaOpsStreamAdvance,
+                .buffer_prepare = dmaOpsBufferPrepare,
+                .buffer_link = dmaOpsBufferLink,
+                .buffer_complete = dmaOpsBufferComplete,
+                .buffer_flush = dmaOpsBufferFlush,
+                .buffer_release = dmaOpsBufferRelease
+            };
+            status = ntv2_stream_configure(ntv2pp->m_pDmaStream[i],
+                                           &stream_ops,
+                                           &ntv2pp->_dmaEngine[i],
+                                           ((i & 0x1) == 1));
+            if (status == NTV2_STATUS_SUCCESS)
+            {
+                ntv2pp->_dmaEngine[i].strIndex = i;
+            }
+            else
+            {
+                ntv2_stream_close(ntv2pp->m_pDmaStream[i]);
+                ntv2pp->m_pDmaStream[i] = NULL;
+            }
+        }
+    }
+
 	ntv2pp->m_pGenlock2Monitor = NULL;
     ntv2pp->m_pRasterMonitor = NULL;
 
@@ -4507,13 +4556,13 @@ int DoMessageStreamChannel(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamChan
 		return -EINVAL;
 
     chn = (int)pChannel->mChannel;
-    if (chn >= NTV2_MAX_STREAMS)
+    if (chn >= NTV2_MAX_DMA_STREAMS)
     {
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_INVALID;
         return -EINVAL;
     }
 
-    pStr = pNTV2Params->m_pStream[chn];
+    pStr = pNTV2Params->m_pDmaStream[chn];
     if (pStr == NULL)
     {
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_INVALID;
@@ -4522,7 +4571,11 @@ int DoMessageStreamChannel(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamChan
 
     if ((pChannel->mFlags & NTV2_STREAM_CHANNEL_INITIALIZE) != 0)
     {
-        ntv2_stream_channel_initialize(pStr, pChannel);
+        ntv2_stream_channel_initialize(pStr, (void*)pFile, pChannel);
+    }
+	if ((pChannel->mFlags & NTV2_STREAM_CHANNEL_RELEASE) != 0)
+	{
+        ntv2_stream_channel_release(pStr, (void*)pFile, pChannel);
     }
     if ((pChannel->mFlags & NTV2_STREAM_CHANNEL_START) != 0)
     {
@@ -4553,28 +4606,33 @@ int DoMessageStreamBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamBuffe
 	NTV2PrivateParams * pNTV2Params = getNTV2Params(deviceNumber);
     int chn = 0;
     struct ntv2_stream* pStr = NULL;
+    
 	
 	if (pBuffer == NULL)
 		return -EINVAL;
 
     chn = (int)pBuffer->mChannel;
-    if (chn >= NTV2_MAX_STREAMS)
+    if (chn >= NTV2_MAX_DMA_STREAMS)
     {
         pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_INVALID;
         return -EINVAL;
     }
 
-    pStr = pNTV2Params->m_pStream[chn];
+    pStr = pNTV2Params->m_pDmaStream[chn];
     if (pStr == NULL)
     {
         pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_INVALID;
         return -EINVAL;
     }
 
-	if ((pBuffer->mFlags & NTV2_STREAM_BUFFER_ADD) != 0)
+	if ((pBuffer->mFlags & NTV2_STREAM_BUFFER_QUEUE) != 0)
 	{
-        ntv2_stream_buffer_add(pStr, pBuffer);
-    }
+        ntv2_stream_buffer_queue(pStr, (void*)pFile, pBuffer);
+    }    
+	if ((pBuffer->mFlags & NTV2_STREAM_BUFFER_RELEASE) != 0)
+	{
+        ntv2_stream_buffer_release(pStr, (void*)pFile, pBuffer);
+	}
 	if ((pBuffer->mFlags & NTV2_STREAM_BUFFER_STATUS) != 0)
 	{
         ntv2_stream_buffer_status(pStr, pBuffer);

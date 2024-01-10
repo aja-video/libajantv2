@@ -28,57 +28,42 @@ static const NTV2InputSource	gInputNumberToInputSource [] =
 NTV2QtMultiInput::NTV2QtMultiInput (QWidget * parent, Qt::WindowFlags flags)
 	:	QDialog			(parent, flags)
 {
-	ULWord				initialBoardIndex	(0);
-	CNTV2DeviceScanner	deviceScanner;
-	const ULWord		numDevicesFound		(ULWord(deviceScanner.GetNumDevices()));
+	::memset (mDeviceInputCounts, 0, sizeof(mDeviceInputCounts));
+	::memset (mFrameGrabbers, 0, sizeof(mFrameGrabbers));
 
-	::memset (mDeviceInputCounts, 0, sizeof (mDeviceInputCounts));
-	::memset (mFrameGrabbers, 0, sizeof (mFrameGrabbers));
-
-	//
 	//	Build the device selector popup menu...
-	//
+	CNTV2Card card;
 	mDeviceChoicePopupMenu = new QComboBox;
-	if (numDevicesFound == 0)
-		mDeviceChoicePopupMenu->addItem (tr ("No Devices Found"));
-	else
+	for (ULWord ndx(0);  CNTV2DeviceScanner::GetDeviceAtIndex(ndx, card);  ndx++)
 	{
-		NTV2DeviceInfoList & boardList	(deviceScanner.GetDeviceInfoList ());
-		for (NTV2DeviceInfoListConstIter iter (boardList.begin ());  iter != boardList.end ();  iter++)
-		{
-			mDeviceInputCounts [iter->deviceIndex] = ::NTV2DeviceGetNumVideoInputs (iter->deviceID);
-			mDeviceChoicePopupMenu->addItem (tr (iter->deviceIdentifier.c_str ()));
-		}	//	 for each AJA device found
-	}	//	else at least one AJA device found
+		mDeviceInputCounts[ndx] = card.features().GetNumVideoInputs();
+		mDeviceChoicePopupMenu->addItem(card.GetDisplayName().c_str());
+	}	//	 for each AJA device found
+	if (!mDeviceChoicePopupMenu->count())
+		mDeviceChoicePopupMenu->addItem("No Devices Found");
 
-	//
 	//	Default to the first quad-input device (if any)...
-	//
-	uint32_t numInputs = 4;
+	uint32_t numInputs(4);
 
-	for (ULWord ndx (0);  ndx < numDevicesFound;  ndx++)
-		if (mDeviceInputCounts [ndx] == 8)
+	for (ULWord ndx(0);  ndx < ULWord(mDeviceChoicePopupMenu->count());  ndx++)
+		if (mDeviceInputCounts[ndx] == 8)
 			numInputs = 8;	//	NOTE: hardcode for now
-	initialBoardIndex = 0;
-	QObject::connect (mDeviceChoicePopupMenu, SIGNAL (currentIndexChanged (int)), this, SLOT (RequestDeviceChange (const int)));
-	mDeviceChoicePopupMenu->setCurrentIndex (initialBoardIndex);
+	QObject::connect (mDeviceChoicePopupMenu, SIGNAL(currentIndexChanged(int)),
+						this, SLOT(RequestDeviceChange(const int)));
+	mDeviceChoicePopupMenu->setCurrentIndex(0);
 
-	//
 	//	Set up each of the preview widgets and frame grabber threads...
-	//
-    QSignalMapper * signalMapper = new QSignalMapper (this);
-	for (uint32_t inputNumber = 0;  inputNumber < numInputs;  inputNumber++)
+	QSignalMapper * signalMapper = new QSignalMapper(this);
+	for (uint32_t inputNumber(0);  inputNumber < numInputs;  inputNumber++)
 	{
-		mPreviewGroupBoxes [inputNumber] = new QGroupBox (this);
-
-		mPreviewWidgets [inputNumber] = new AJAPreviewWidget (this);
-		mPreviewWidgets [inputNumber]->setMinimumWidth  (AJAPREVIEW_WIDGET_X / (numInputs/2));
-		mPreviewWidgets [inputNumber]->setMinimumHeight  (AJAPREVIEW_WIDGET_Y / (numInputs/2));
-		mPreviewWidgets [inputNumber]->setSizePolicy(QSizePolicy ::Expanding, QSizePolicy ::Expanding);
- 
-		mFrameGrabbers [inputNumber] = new NTV2FrameGrabber (this);
-		mInputLabels [inputNumber] = new QLabel("",this);
-		mWithAudioCheckBoxes [inputNumber] = new QCheckBox ("Audio", this);
+		mPreviewGroupBoxes[inputNumber]   = new QGroupBox(this);
+		mPreviewWidgets[inputNumber]      = new AJAPreviewWidget(this);
+		mPreviewWidgets[inputNumber]->setMinimumWidth (AJAPREVIEW_WIDGET_X / (numInputs/2));
+		mPreviewWidgets[inputNumber]->setMinimumHeight (AJAPREVIEW_WIDGET_Y / (numInputs/2));
+		mPreviewWidgets[inputNumber]->setSizePolicy (QSizePolicy ::Expanding, QSizePolicy ::Expanding);
+ 		mFrameGrabbers[inputNumber]       = new NTV2FrameGrabber(this);
+		mInputLabels[inputNumber]         = new QLabel("", this);
+		mWithAudioCheckBoxes[inputNumber] = new QCheckBox("Audio", this);
 		signalMapper->setMapping (mWithAudioCheckBoxes [inputNumber], inputNumber);
 		#if defined (INCLUDE_AJACC)
 			mWithCaptionsCheckBoxes [inputNumber] = new QCheckBox ("CC", this);
@@ -88,7 +73,7 @@ NTV2QtMultiInput::NTV2QtMultiInput (QWidget * parent, Qt::WindowFlags flags)
 		layout->addWidget (mPreviewWidgets [inputNumber]);
 		layout->addWidget (mInputLabels [inputNumber]);
 
-		QHBoxLayout *	bottomLayout		(new QHBoxLayout);
+		QHBoxLayout *	bottomLayout (new QHBoxLayout);
 		bottomLayout->setContentsMargins (0, 0, 0, 0);
 		bottomLayout->addWidget (mWithAudioCheckBoxes [inputNumber]);
 		#if defined (INCLUDE_AJACC)
@@ -96,32 +81,29 @@ NTV2QtMultiInput::NTV2QtMultiInput (QWidget * parent, Qt::WindowFlags flags)
 		#endif
 		layout->addLayout (bottomLayout);
 
-		mPreviewGroupBoxes [inputNumber]->setLayout (layout);
+		mPreviewGroupBoxes[inputNumber]->setLayout (layout);
 
-		connect (mFrameGrabbers [inputNumber], SIGNAL (newFrame (const QImage &, bool)),
-					mPreviewWidgets [inputNumber], SLOT (updateFrame (const QImage &, bool)));
+		connect (mFrameGrabbers[inputNumber], SIGNAL(newFrame(const QImage&, bool)),
+				mPreviewWidgets[inputNumber], SLOT(updateFrame(const QImage&, bool)));
 
-		connect (mFrameGrabbers [inputNumber], SIGNAL (newStatusString (const QString)),
-			mInputLabels [inputNumber], SLOT (setText (const QString)));
+		connect (mFrameGrabbers[inputNumber], SIGNAL(newStatusString(const QString)),
+				mInputLabels[inputNumber], SLOT(setText(const QString)));
 
-		connect (mWithAudioCheckBoxes [inputNumber], SIGNAL (clicked ()), signalMapper, SLOT (map ()));
+		connect (mWithAudioCheckBoxes [inputNumber], SIGNAL(clicked()),
+				signalMapper, SLOT(map()));
 		#if defined (INCLUDE_AJACC)
 			//connect (mWithCaptionsCheckBoxes [inputNumber], SIGNAL (clicked ()), signalMapper, SLOT (map ()));
 		#endif
 	}	//	for each video input
 
-    //
-    //	Map all "with audio" checkbox clicks to a single handler...
-    //
+	//	Map all "with audio" checkbox clicks to a single handler...
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
     connect (signalMapper, SIGNAL (mappedInt (int)), this, SLOT (SlotAudioCheckBox (int)));
 #else
     connect (signalMapper, SIGNAL (mapped (int)), this, SLOT (SlotAudioCheckBox (int)));
 #endif
 
-	//
 	//	Lay out everything...
-	//
 	QGridLayout * glayout = new QGridLayout;
 	if (numInputs == 4)
 	{
@@ -148,10 +130,7 @@ NTV2QtMultiInput::NTV2QtMultiInput (QWidget * parent, Qt::WindowFlags flags)
 
 	setLayout (vlayout);
 
-
-	//
 	//	Set up the frame grabber threads...
-	//
 	for (uint32_t inputNumber (0);  inputNumber < numInputs;  inputNumber++)
 	{
 		mFrameGrabbers [inputNumber]->SetInputSource (gInputNumberToInputSource [inputNumber]);
@@ -159,7 +138,7 @@ NTV2QtMultiInput::NTV2QtMultiInput (QWidget * parent, Qt::WindowFlags flags)
 		mFrameGrabbers [inputNumber]->start ();
 	}
 
-	RequestDeviceChange (initialBoardIndex);
+	RequestDeviceChange(0);
 
 }	//	constructor
 

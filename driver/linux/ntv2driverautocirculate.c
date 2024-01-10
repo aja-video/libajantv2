@@ -4782,7 +4782,7 @@ GetAudioClock(ULWord deviceNumber)
 	ullRetVal=ullRetVal*10000;
 	if (NTV2DeviceCanDoAudio96K(pNTV2Params->_DeviceID))
 		// May need to change if a 2 channel 48/96 board exists in the future
-		do_div(ullRetVal, (ULWord64)(GetAudioSamplesPerSecond(deviceNumber, NTV2CROSSPOINT_CHANNEL1)/1000));
+		do_div(ullRetVal, (ULWord64)(GetAudioSamplesPerSecond(deviceNumber, NTV2_AUDIOSYSTEM_1)/1000));
 	else
 		do_div(ullRetVal, (ULWord64)(48));
 
@@ -5002,7 +5002,7 @@ SetAudioPlaybackMode(ULWord deviceNumber, NTV2_GlobalAudioPlaybackMode mode)
 	{
 	case NTV2_AUDIOPLAYBACK_NOW:
 		// Hardwire channel to match windriver/vidfilter.cpp
-		StartAudioPlayback(deviceNumber, NTV2CROSSPOINT_CHANNEL1);
+		StartAudioPlayback(deviceNumber, NTV2_AUDIOSYSTEM_1);
 		break;
 	case NTV2_AUDIOPLAYBACK_NEXTFRAME:
 		pNTV2Params->_startAudioNextFrame = true;

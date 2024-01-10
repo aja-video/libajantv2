@@ -197,6 +197,7 @@ typedef enum _NTV2NumericParamID
 	kDeviceGetNumLUTBanks,						///< @brief The number of LUT banks on the device. New in SDK 17.0
 	kDeviceGetTotalNumAudioSystems,				///< @brief The total number of audio systems on the device, including host audio and mixer audio systems, if present. New in SDK 17.0
 	kDeviceGetNumBufferedAudioSystems,			///< @brief The total number of audio systems on the device that can read/write audio buffer memory. Includes host audio system, if present. New in SDK 17.0
+	kDeviceGetNumTSIMuxers,						///< @brief	The number of TSI muxers on the device. New in SDK 17.1
 	kNTV2NumericParam_LAST,
 	kDeviceGetNum_INVALID	= kNTV2NumericParam_LAST
 } NTV2NumericParamID;
@@ -239,31 +240,21 @@ typedef enum _NTV2EnumsID
 extern "C"
 {
 #endif
-/*
-	@return True if the device having the given ID can do audio output;	 otherwise false.
-	@param[in]	inDeviceID	Specifies the NTV2DeviceID of the device of interest.
-*/
-AJAExport bool NTV2DeviceCanDoAudioOut(const NTV2DeviceID inDeviceID);
-/*
-	@return True if the device having the given ID can do audio input;	otherwise false.
-	@param[in]	inDeviceID	Specifies the NTV2DeviceID of the device of interest.
-*/
-AJAExport bool NTV2DeviceCanDoAudioIn(const NTV2DeviceID inDeviceID);
 
-AJAExport bool NTV2DeviceCanDo292Out(NTV2DeviceID boardID, UWord index0);
-AJAExport bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0);
-AJAExport bool NTV2DeviceCanDo12GOut(NTV2DeviceID boardID, UWord index0);
-AJAExport bool NTV2DeviceCanDo292In(NTV2DeviceID boardID, UWord index0);
-AJAExport bool NTV2DeviceCanDo3GIn(NTV2DeviceID boardID, UWord index0);
-AJAExport bool NTV2DeviceCanDo12GIn(NTV2DeviceID boardID, UWord index0);
-AJAExport bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0);
-
-/**
-	@return True if the device having the given ID supports the given output destination connector;	 otherwise false.
-	@param[in]	inDeviceID		Specifies the NTV2DeviceID of the device of interest.
-	@param[in]	inOutputDest	Specifies the NTV2OutputDestination of interest.
-**/
-AJAExport bool NTV2DeviceCanDoOutputDestination (const NTV2DeviceID inDeviceID, const NTV2OutputDestination inOutputDest);
+#if !defined(NTV2_DEPRECATE_17_1)
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudioOut(const NTV2DeviceID inDeviceID));		///< @deprecated	This function has been declared obsolete starting in SDK 17.1
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudioIn(const NTV2DeviceID inDeviceID));		///< @deprecated	This function has been declared obsolete starting in SDK 17.1
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo292Out(NTV2DeviceID boardID, UWord index0));	///< @deprecated	Starting in SDK 17.1. Use CNTV2Card::deviceCanDo292Out instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0));	///< @deprecated	Starting in SDK 17.1. Use CNTV2Card::deviceCanDo3GOut instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo12GOut(NTV2DeviceID boardID, UWord index0));	///< @deprecated	Starting in SDK 17.1. Use CNTV2Card::deviceCanDo12GOut instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo292In(NTV2DeviceID boardID, UWord index0));		///< @deprecated	Starting in SDK 17.1. Use CNTV2Card::deviceCanDo292In instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo3GIn(NTV2DeviceID boardID, UWord index0));		///< @deprecated	Starting in SDK 17.1. Use CNTV2Card::deviceCanDo3GIn instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo12GIn(NTV2DeviceID boardID, UWord index0));		///< @deprecated	Starting in SDK 17.1. Use CNTV2Card::deviceCanDo12GIn instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0));		///< @deprecated	Starting in SDK 17.1
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoOutputDestination (const NTV2DeviceID inDeviceID, const NTV2OutputDest inOutputDest));	///< @deprecated	Starting in SDK 17.1
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoColorCorrection (const NTV2DeviceID inDeviceID));///< @deprecated	Starting in SDK 17.1
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoProgrammableCSC (const NTV2DeviceID inDeviceID));///< @deprecated	Starting in SDK 17.1
+#endif	//	defined(NTV2_DEPRECATE_17_0)
 
 /**
 	@return The minimum number of 8MB chunks that will accommodate a raster having the given frame geometry and pixel format.
@@ -271,19 +262,6 @@ AJAExport bool NTV2DeviceCanDoOutputDestination (const NTV2DeviceID inDeviceID, 
 	@param[in]	inFBF	A valid frame buffer format.
 **/
 AJAExport UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBufferFormat inFBF);
-
-/**
-	@return		True if the device having the given ID has at least one programmable LUT.
-	@param[in]	inDeviceID		Specifies the NTV2DeviceID of interest.
-**/
-AJAExport bool NTV2DeviceCanDoColorCorrection (const NTV2DeviceID inDeviceID);
-
-/**
-	@return		True if the device having the given ID has at least one color space converter widget - all CSCs are programable.
-	@param[in]	inDeviceID		Specifies the NTV2DeviceID of interest.
-**/
-AJAExport bool NTV2DeviceCanDoProgrammableCSC (const NTV2DeviceID inDeviceID);
-
 
 // Overloading not supported by the ANSI C compiler used for Linux drivers.
 // 

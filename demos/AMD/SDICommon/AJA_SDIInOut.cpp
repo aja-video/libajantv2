@@ -93,34 +93,18 @@ unsigned int AJA_SDIInOut::getNumBoards()
 bool AJA_SDIInOut::openCard(unsigned int uiNumBuffers, bool bUseAutoCirculate, bool bUseP2P)
 {
     
-    CNTV2DeviceScanner ntv2BoardScan;
-
-    if (m_uiBoardNumber >= ntv2BoardScan.GetNumDevices())
-    {
-        return false;
-    }
-
-    if (!m_ntv2Card.Open((UWord)m_uiBoardNumber))
+    if (!CNTV2DeviceScanner::GetDeviceAtIndex(m_uiBoardNumber, m_ntv2Card))
         return false;
 
-	if (!m_ntv2Card.AcquireStreamForApplication (FCC('D', 'E', 'M', 'O'), static_cast <uint32_t> (GetCurrentProcessId ())))
+	if (!m_ntv2Card.AcquireStreamForApplication (FCC('D', 'E', 'M', 'O'), uint32_t(GetCurrentProcessId())))
 		return false;		//	Device is in use by another app -- fail
 
 	m_ntv2Card.GetEveryFrameServices (&m_savedTaskMode);	//	Save the current service level
 	m_ntv2Card.SetEveryFrameServices(NTV2_OEM_TASKS);	
-
-	// verify the board can be a p2p target
-    m_DeviceID = m_ntv2Card.GetDeviceID();
-
-    // define if the AutoCirculate Interface should be used
-    m_bUseAutoCirculate = bUseAutoCirculate;
-
-    // define if a peer to peer copy should be used
-    m_bUseP2P = bUseP2P;
-
-    // define how many buffers to use
-    m_uiNumBuffers = uiNumBuffers;
-
+    m_DeviceID = m_ntv2Card.GetDeviceID();		// verify the board can be a p2p target
+    m_bUseAutoCirculate = bUseAutoCirculate;	// define if the AutoCirculate Interface should be used
+    m_bUseP2P = bUseP2P;						// define if a peer to peer copy should be used
+    m_uiNumBuffers = uiNumBuffers;				// define how many buffers to use
     return true;
 }
 
@@ -164,7 +148,7 @@ bool AJA_SDIInOut::setupInputChannel(unsigned int uiSDIChannel, NTV2FrameBufferF
         // Use SDI 1 (IN 1) 
         m_pChannels[m_uiNumChannels].SDIChannel  = NTV2_CHANNEL1;
 
-		if (::NTV2DeviceHasBiDirectionalSDI (m_DeviceID))
+		if (m_ntv2Card.features().HasBiDirectionalSDI())
 		{
 			m_ntv2Card.SetSDITransmitEnable (m_pChannels[m_uiNumChannels].SDIChannel, false);
 			Sleep(500);
@@ -178,7 +162,7 @@ bool AJA_SDIInOut::setupInputChannel(unsigned int uiSDIChannel, NTV2FrameBufferF
         // Use SDI 2 (IN 2)
         m_pChannels[m_uiNumChannels].SDIChannel  = NTV2_CHANNEL2;
 
-		if (::NTV2DeviceHasBiDirectionalSDI (m_DeviceID))
+		if (m_ntv2Card.features().HasBiDirectionalSDI())
 		{
 			m_ntv2Card.SetSDITransmitEnable (m_pChannels[m_uiNumChannels].SDIChannel, false);
 			Sleep(500);
@@ -192,7 +176,7 @@ bool AJA_SDIInOut::setupInputChannel(unsigned int uiSDIChannel, NTV2FrameBufferF
         // Use SDI 2 (IN 2)
         m_pChannels[m_uiNumChannels].SDIChannel  = NTV2_CHANNEL3;
 
-		if (::NTV2DeviceHasBiDirectionalSDI (m_DeviceID))
+		if (m_ntv2Card.features().HasBiDirectionalSDI())
 		{
 			m_ntv2Card.SetSDITransmitEnable (m_pChannels[m_uiNumChannels].SDIChannel, false);
 			Sleep(500);
@@ -206,7 +190,7 @@ bool AJA_SDIInOut::setupInputChannel(unsigned int uiSDIChannel, NTV2FrameBufferF
         // Use SDI 2 (IN 2)
         m_pChannels[m_uiNumChannels].SDIChannel  = NTV2_CHANNEL4;
 
-		if (::NTV2DeviceHasBiDirectionalSDI (m_DeviceID))
+		if (m_ntv2Card.features().HasBiDirectionalSDI())
 		{
 			m_ntv2Card.SetSDITransmitEnable (m_pChannels[m_uiNumChannels].SDIChannel, false);
 			Sleep(500);
@@ -252,7 +236,7 @@ bool AJA_SDIInOut::setupInputChannel(unsigned int uiSDIChannel, NTV2FrameBufferF
 		for (int i = 0; i < 4; i++)
 		{
 			// disable transmitter
-			if (::NTV2DeviceHasBiDirectionalSDI (m_DeviceID))
+			if (m_ntv2Card.features().HasBiDirectionalSDI())
 			{
 				m_ntv2Card.SetSDITransmitEnable ((NTV2Channel)i, false);
 			}
@@ -269,7 +253,7 @@ bool AJA_SDIInOut::setupInputChannel(unsigned int uiSDIChannel, NTV2FrameBufferF
 				return false;
 
 			// cross point routing
-			if (::NTV2DeviceNeedsRoutingSetup(m_DeviceID))
+			if (m_ntv2Card.features().NeedsRoutingSetup())
 			{
 				if(isRGBFormat(FBFormat))
 				{
@@ -301,7 +285,7 @@ bool AJA_SDIInOut::setupInputChannel(unsigned int uiSDIChannel, NTV2FrameBufferF
 			return false;
 
 		// cross point routing
-		if (::NTV2DeviceNeedsRoutingSetup(m_DeviceID))
+		if (m_ntv2Card.features().NeedsRoutingSetup())
 		{
 			if(isRGBFormat(FBFormat))
 			{
@@ -406,7 +390,7 @@ bool AJA_SDIInOut::setupOutputChannel(unsigned int uiSDIChannel, NTV2FrameBuffer
 				return false;
 
 			// enable transmitter
-			if (::NTV2DeviceHasBiDirectionalSDI (m_DeviceID))
+			if (m_ntv2Card.features().HasBiDirectionalSDI())
 				m_ntv2Card.SetSDITransmitEnable ((NTV2Channel)i, true);
 
 			// route video
@@ -438,7 +422,7 @@ bool AJA_SDIInOut::setupOutputChannel(unsigned int uiSDIChannel, NTV2FrameBuffer
 			return false;
 
 		// enable transmitter
-		if (::NTV2DeviceHasBiDirectionalSDI (m_DeviceID))
+		if (m_ntv2Card.features().HasBiDirectionalSDI())
 			m_ntv2Card.SetSDITransmitEnable (m_pChannels[m_uiNumChannels].SDIChannel, true);
 
 		// route video

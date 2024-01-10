@@ -50,7 +50,7 @@ class NTV2StreamPlayer
 			@brief	Provides status information about my output (playout) process.
 			@param[out]	outStatus	Receives the ::AUTOCIRCULATE_STATUS information.
 		**/
-		virtual void		GetACStatus (AUTOCIRCULATE_STATUS & outStatus);
+		virtual void		GetStreamStatus (NTV2StreamChannel & outStatus);
 
 
 	//	Protected Instance Methods
@@ -64,26 +64,6 @@ class NTV2StreamPlayer
 		virtual void		ConsumeFrames (void);			///< @brief	My consumer thread that repeatedly plays frames using AutoCirculate (until quit).
 		virtual void		StartProducerThread (void);		///< @brief	Starts my producer thread.
 		virtual void		ProduceFrames (void);			///< @brief	My producer thread that repeatedly produces video frames.
-
-		/**
-			@brief		Inserts audio tone (based on my current tone frequency) into the given NTV2FrameData's audio buffer.
-			@param		inFrameData		The NTV2FrameData object having the audio buffer to be filled.
-			@return		Total number of bytes written into the buffer.
-		**/
-		virtual uint32_t	AddTone (NTV2FrameData & inFrameData);
-
-		/**
-			@return		True if the given output destination's RP188 bypass is enabled; otherwise false.
-			@param[in]	inOutputDest	Specifies the NTV2OutputDestination of interest.
-		**/
-		virtual bool		OutputDestHasRP188BypassEnabled (const NTV2OutputDestination inOutputDest);
-
-		/**
-			@brief	Disables the given SDI output's RP188 bypass.
-			@param[in]	inOutputDest	Specifies the NTV2OutputDestination of interest.
-		**/
-		virtual void		DisableRP188Bypass (const NTV2OutputDestination inOutputDest);
-
 
 	//	Protected Class Methods
 	protected:
@@ -119,7 +99,6 @@ class NTV2StreamPlayer
 		double				mToneFrequency;		///< @brief	My current audio tone frequency [Hz]
 		NTV2AudioSystem		mAudioSystem;		///< @brief	The audio system I'm using (if any)
 		NTV2FormatDesc		mFormatDesc;		///< @brief	Describes my video/pixel format
-		NTV2TCIndexes		mTCIndexes;			///< @brief	Timecode indexes to use
 
 		bool				mGlobalQuit;		///< @brief	Set "true" to gracefully stop
 		AJATimeCodeBurn		mTCBurner;			///< @brief	My timecode burner

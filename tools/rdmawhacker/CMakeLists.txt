@@ -1,3 +1,8 @@
+if (AJA_DISABLE_NVIDIA)
+	message(STATUS "AJA_DISABLE_NVIDIA enabled. Skipping rdmawhacker...")
+	return()
+endif()
+
 find_package(CUDA 11.1)
 if (NOT CUDA_FOUND)
 	message(STATUS "skipping rdmawhacker (CUDA not found)")

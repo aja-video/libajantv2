@@ -90,8 +90,7 @@
 //#define NTV2_MAX_FPGA		(eFPGAVideoProc)
 
 #define NTV2_MAX_HDMI_MONITOR	4
-
-#define NTV2_MAX_STREAMS	4
+#define NTV2_MAX_DMA_STREAMS    8
 
 // Singleton module params
 typedef struct ntv2_module_private
@@ -109,6 +108,11 @@ typedef struct ntv2_module_private
 	atomic_t					uart_index;
 
 } NTV2ModulePrivateParams;
+
+typedef struct _fileData
+{
+	DMA_PAGE_ROOT dmaRoot;
+} FILE_DATA, *PFILE_DATA;
 
 typedef enum
 {
@@ -546,8 +550,11 @@ typedef struct ntv2_private
 	struct ntv2_serial		*m_pSerialPort;
 	struct ntv2_mcap		*m_pBitstream;
 	struct ntv2_setup		*m_pSetupMonitor;
-	struct ntv2_stream  	*m_pStream[NTV2_MAX_STREAMS];
+    struct ntv2_stream  	*m_pDmaStream[NTV2_MAX_DMA_STREAMS];
 
+    DMA_ENGINE              *m_pMapEngine[DMA_NUM_ENGINES];
+    DMA_ENGINE              *m_pMapStream[DMA_NUM_ENGINES];
+    
 	bool registerEnable;
 	bool serialActive;
 	

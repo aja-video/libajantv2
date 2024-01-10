@@ -420,7 +420,7 @@ AJAStatus NTV2EncodeHEVC::SetupVideo (void)
 			return AJA_STATUS_FAIL;
 
 		//	Disable multiformat
-		if (::NTV2DeviceCanDoMultiFormat (mDeviceID))
+		if (mDevice.features().CanDoMultiFormat())
 			mDevice.SetMultiFormatMode (false);
 
 		//	Set the board video format
@@ -476,7 +476,7 @@ AJAStatus NTV2EncodeHEVC::SetupVideo (void)
     else if (mMultiStream)
 	{
 		//	Configure for multiformat
-		if (::NTV2DeviceCanDoMultiFormat (mDeviceID))
+		if (mDevice.features().CanDoMultiFormat())
 			mDevice.SetMultiFormatMode (true);
 
 		//	Set the channel video format
@@ -500,7 +500,7 @@ AJAStatus NTV2EncodeHEVC::SetupVideo (void)
 	else
 	{
 		//	Disable multiformat mode
-		if (::NTV2DeviceCanDoMultiFormat (mDeviceID))
+		if (mDevice.features().CanDoMultiFormat())
 			mDevice.SetMultiFormatMode (false);
 
 		//	Set the board format
@@ -559,13 +559,13 @@ AJAStatus NTV2EncodeHEVC::SetupVideo (void)
 AJAStatus NTV2EncodeHEVC::SetupAudio (void)
 {
     //	In multiformat mode, base the audio system on the channel...
-    if (mMultiStream && ::NTV2DeviceGetNumAudioSystems(mDeviceID) > 1 && UWord(mInputChannel) < ::NTV2DeviceGetNumAudioSystems(mDeviceID))
-		mAudioSystem = ::NTV2ChannelToAudioSystem (mInputChannel);
+    if (mMultiStream && mDevice.features().GetNumAudioSystems() > 1 && UWord(mInputChannel) < mDevice.features().GetNumAudioSystems())
+		mAudioSystem = ::NTV2ChannelToAudioSystem(mInputChannel);
 
 	//	Have the audio system capture audio from the designated device input (i.e., ch1 uses SDIIn1, ch2 uses SDIIn2, etc.)...
 	mDevice.SetAudioSystemInputSource (mAudioSystem, NTV2_AUDIO_EMBEDDED, ::NTV2ChannelToEmbeddedAudioInput (mInputChannel));
 
-    mNumAudioChannels = ::NTV2DeviceGetMaxAudioChannels (mDeviceID);
+    mNumAudioChannels = mDevice.features().GetMaxAudioChannels();
     mDevice.SetNumberAudioChannels (mNumAudioChannels, mAudioSystem);
 	mDevice.SetAudioRate (NTV2_AUDIO_48K, mAudioSystem);
     mDevice.SetEmbeddedAudioClock (NTV2_EMBEDDED_AUDIO_CLOCK_VIDEO_INPUT, mAudioSystem);

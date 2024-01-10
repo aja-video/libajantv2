@@ -79,7 +79,7 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 
 	//	Store the input device ID in a member because it will be used frequently...
 	mInputDeviceID = mInputDevice.GetDeviceID ();
-	if (!::NTV2DeviceCanDo4KVideo (mInputDeviceID))
+	if (!mInputDevice.features().CanDo4KVideo())
 		{cerr << "## ERROR:  Input device '" << mConfig.fDeviceSpec << "' cannot do 4K/UHD video" << endl;  return AJA_STATUS_UNSUPPORTED;}
 
     if (!mInputDevice.IsDeviceReady (false))
@@ -91,7 +91,7 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 
 	//	Store the output device ID in a member because it will be used frequently...
 	mOutputDeviceID = mOutputDevice.GetDeviceID ();
-	if (!::NTV2DeviceCanDo4KVideo (mOutputDeviceID))
+	if (!mOutputDevice.features().CanDo4KVideo())
 		{cerr << "## ERROR:  Output device '" << mConfig.fDeviceSpec2 << "' cannot do 4K/UHD video" << endl;  return AJA_STATUS_UNSUPPORTED;}
 
     if (!mOutputDevice.IsDeviceReady(false))
@@ -99,7 +99,7 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 
 	if (mSingleDevice)
 	{
-		if (::NTV2DeviceGetNumFrameStores (mInputDeviceID) < 8)
+		if (mInputDevice.features().GetNumFrameStores() < 8)
 			{cerr << "## ERROR:  Single device '" << mConfig.fDeviceSpec2 << "' requires 8 video channels" << endl;  return AJA_STATUS_UNSUPPORTED;}
 		mOutputAudioSystem = NTV2_AUDIOSYSTEM_5;
 		mConfig.fOutputChannel = NTV2_CHANNEL5;
@@ -119,13 +119,13 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 		mOutputDevice.SetEveryFrameServices (NTV2_OEM_TASKS);			//	Since this is an OEM demo, use the OEM service level
 	}
 
-	if (::NTV2DeviceCanDoMultiFormat (mInputDeviceID))
+	if (mInputDevice.features().CanDoMultiFormat())
 		mInputDevice.SetMultiFormatMode (false);
-	if (::NTV2DeviceCanDoMultiFormat (mOutputDeviceID))
+	if (mOutputDevice.features().CanDoMultiFormat())
 		mOutputDevice.SetMultiFormatMode (false);
 
 	//	Sometimes other applications disable some or all of the frame buffers, so turn them all on here...
-	switch (::NTV2DeviceGetNumFrameStores (mInputDeviceID))
+	switch (mInputDevice.features().GetNumFrameStores())
 	{
 		case 8:	mInputDevice.EnableChannel (NTV2_CHANNEL8);
 				mInputDevice.EnableChannel (NTV2_CHANNEL7);
@@ -142,7 +142,7 @@ AJAStatus NTV2Burn4KQuadrant::Init (void)
 	}
 
 	if (!mSingleDevice)		//	Don't do this twice if Input & Output devices are same device!
-		switch (::NTV2DeviceGetNumFrameStores (mOutputDeviceID))
+		switch (mOutputDevice.features().GetNumFrameStores())
 		{
 			case 8:	mOutputDevice.EnableChannel (NTV2_CHANNEL8);
 					mOutputDevice.EnableChannel (NTV2_CHANNEL7);
@@ -220,7 +220,7 @@ AJAStatus NTV2Burn4KQuadrant::SetupInputVideo (void)
 	//	Turn multiformat off for this demo -- all multiformat devices will follow channel 1 configuration...
 
 	//	For devices with bi-directional SDI connectors, their transmitter must be turned off before we can read a format...
-	if (::NTV2DeviceHasBiDirectionalSDI (mInputDeviceID))
+	if (mInputDevice.features().HasBiDirectionalSDI())
 	{
 		mInputDevice.SetSDITransmitEnable (NTV2_CHANNEL1, false);
 		mInputDevice.SetSDITransmitEnable (NTV2_CHANNEL2, false);
@@ -242,7 +242,7 @@ AJAStatus NTV2Burn4KQuadrant::SetupInputVideo (void)
 
 	//	Set the frame buffer pixel format for all the channels on the device
 	//	(assuming the device supports that pixel format -- otherwise default to 8-bit YCbCr)...
-	if (!::NTV2DeviceCanDoFrameBufferFormat (mInputDeviceID, mConfig.fPixelFormat))
+	if (!mInputDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
 		mConfig.fPixelFormat = NTV2_FBF_8BIT_YCBCR;
 
 	//	...and set all buffers pixel format...
@@ -253,6 +253,8 @@ AJAStatus NTV2Burn4KQuadrant::SetupInputVideo (void)
 
 	mInputDevice.SetEnableVANCData (false, false);
 
+	//	Now that the video is set up, get information about the current frame geometry...
+	mFormatDesc = NTV2FormatDescriptor (mVideoFormat, mConfig.fPixelFormat);
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetupInputVideo
@@ -261,7 +263,7 @@ AJAStatus NTV2Burn4KQuadrant::SetupInputVideo (void)
 AJAStatus NTV2Burn4KQuadrant::SetupOutputVideo (void)
 {
 	//	We turned off the transmit for the capture device, so now turn them on for the playback device...
-	if (::NTV2DeviceHasBiDirectionalSDI (mOutputDeviceID))
+	if (mOutputDevice.features().HasBiDirectionalSDI())
 	{
 		//	Devices having bidirectional SDI must be set to "transmit"...
 		if (mSingleDevice)
@@ -289,7 +291,7 @@ AJAStatus NTV2Burn4KQuadrant::SetupOutputVideo (void)
 
 	//	Set the frame buffer pixel format for all the channels on the device
 	//	(assuming the device supports that pixel format -- otherwise default to 8-bit YCbCr)...
-	if (!::NTV2DeviceCanDoFrameBufferFormat (mOutputDeviceID, mConfig.fPixelFormat))
+	if (!mOutputDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
 		mConfig.fPixelFormat = NTV2_FBF_8BIT_YCBCR;
 
 	//	...and set the pixel format for all frame stores...
@@ -337,7 +339,6 @@ AJAStatus NTV2Burn4KQuadrant::SetupOutputVideo (void)
 		mOutputDevice.EnableOutputInterrupt(NTV2_CHANNEL1);
 		mOutputDevice.SubscribeOutputVerticalEvent (NTV2_CHANNEL1);
 	}
-		
 
 	mOutputDevice.SetEnableVANCData (false, false);
 
@@ -350,7 +351,7 @@ AJAStatus NTV2Burn4KQuadrant::SetupInputAudio (void)
 {
 	//	We will be capturing and playing back with audio system 1.
 	//	First, determine how many channels the device is capable of capturing or playing out...
-	const uint16_t	numberOfAudioChannels	(::NTV2DeviceGetMaxAudioChannels (mInputDeviceID));
+	const uint16_t numberOfAudioChannels (mInputDevice.features().GetMaxAudioChannels());
 
 	//	Have the input audio system grab audio from the designated input source...
 	mInputDevice.SetAudioSystemInputSource (mInputAudioSystem, NTV2_AUDIO_EMBEDDED, NTV2_EMBEDDED_AUDIO_INPUT_VIDEO_1);
@@ -378,7 +379,7 @@ AJAStatus NTV2Burn4KQuadrant::SetupOutputAudio (void)
 {
 	//	Audio system 1 will be used to capture and playback audio.
 	//	First, determine how many channels the device is capable of capturing or playing out...
-	const uint16_t	numberOfAudioChannels	(::NTV2DeviceGetMaxAudioChannels (mOutputDeviceID));
+	const uint16_t numberOfAudioChannels (mOutputDevice.features().GetMaxAudioChannels());
 
 	mOutputDevice.SetNumberAudioChannels (numberOfAudioChannels, mOutputAudioSystem);
 	mOutputDevice.SetAudioRate (NTV2_AUDIO_48K, mOutputAudioSystem);

@@ -11,6 +11,7 @@ if (AJA_PLUGINS_BUILD_NTV2)
     aja_add_subdirectory(swdevice "AJA SWDevice Plugin")
     aja_add_subdirectory(nublegacy "Legacy Nub Plugin")
     aja_add_subdirectory(deviceproxy "Device Proxy")
+    aja_add_subdirectory(kona1 "Kona1 Virtual Device")
 endif()
 
 if (AJA_INSTALL_CMAKE)

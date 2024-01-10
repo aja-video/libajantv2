@@ -934,7 +934,7 @@ bool NTV2CCPlayer::DeviceAncExtractorIsAvailable (void)
 	//	Device Anc extraction requires driver version 12.3 minimum  (or 0.0.0.0 for internal development)...
 	if ((majorVersion == 12 && minorVersion >= 3) || (majorVersion >= 13) || (majorVersion == 0 && minorVersion == 0 && pointVersion == 0 && buildNumber == 0))
 		//	The device must also support it...
-		if (::NTV2DeviceCanDoCustomAnc(mDeviceID))
+		if (mDevice.features().CanDoCustomAnc())
 			//	And perhaps even do firmware version/date checks??
 			return true;
 	return false;
@@ -953,7 +953,7 @@ AJAStatus NTV2CCPlayer::Init (void)
 
     if (!mDevice.IsDeviceReady(false))
 		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
-	if (!::NTV2DeviceCanDoPlayback(mDeviceID))
+	if (!mDevice.features().CanDoPlayback())
 		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
 
 	if (!mConfig.fDoMultiFormat)
@@ -983,9 +983,9 @@ AJAStatus NTV2CCPlayer::Init (void)
 	}
 #endif	//	defined(_DEBUG)
 
-	if (::NTV2DeviceCanDoMultiFormat(mDeviceID)  &&  mConfig.fDoMultiFormat)
+	if (mDevice.features().CanDoMultiFormat()  &&  mConfig.fDoMultiFormat)
 		mDevice.SetMultiFormatMode(true);
-	else if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
+	else if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(false);
 
 	if (NTV2_IS_VANCMODE_OFF(mConfig.fVancMode))		//	if user didn't use --vanc option...
@@ -1050,16 +1050,16 @@ AJAStatus NTV2CCPlayer::SetUpBackgroundPatternBuffer (void)
 AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 {
 	//	Preflight checks...
-	if (::NTV2DeviceGetNumVideoOutputs(mDeviceID) < 1)
+	if (mDevice.features().GetNumVideoOutputs() < 1)
 		{cerr << "## ERROR:  Device cannot playout" << endl;  return AJA_STATUS_UNSUPPORTED;}
-	if ((mConfig.fOutputChannel == NTV2_CHANNEL1)  &&  !::NTV2DeviceCanDoFrameStore1Display(mDeviceID))
+	if ((mConfig.fOutputChannel == NTV2_CHANNEL1)  &&  !mDevice.features().CanDoFrameStore1Display())
 		{cerr << "## ERROR:  Device cannot playout thru FrameStore 1" << endl;  return AJA_STATUS_UNSUPPORTED;}
 	if (!NTV2_OUTPUT_DEST_IS_SDI(mConfig.fOutputDest))
 	{
 		cerr << "## ERROR:  CCPlayer uses SDI only, not '" << ::NTV2OutputDestinationToString(mConfig.fOutputDest,true) << "'" << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
-	if (!::NTV2DeviceCanDoOutputDestination(mDeviceID, mConfig.fOutputDest))
+	if (!mDevice.features().CanDoOutputDestination(mConfig.fOutputDest))
 	{
 		cerr << "## ERROR:  No such output connector '" << ::NTV2OutputDestinationToString(mConfig.fOutputDest,true) << "'" << endl;
 		return AJA_STATUS_UNSUPPORTED;
@@ -1100,8 +1100,8 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 	if (NTV2_IS_SD_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  !mConfig.fSuppressLine21)
 		if (mConfig.fPixelFormat != NTV2_FBF_8BIT_YCBCR  &&  mConfig.fPixelFormat != NTV2_FBF_10BIT_YCBCR)
 			{cerr << "## ERROR:  SD/line21 in " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat) << "' not '2vuy'|'v210'" << endl;  return AJA_STATUS_UNSUPPORTED;}
-	if (UWord(mConfig.fOutputChannel) >= ::NTV2DeviceGetNumFrameStores(mDeviceID))
-		{cerr << "## ERROR:  Device has " << DEC(::NTV2DeviceGetNumFrameStores(mDeviceID)) << " FrameStore(s), no channel " << DEC(mConfig.fOutputChannel+1) << endl;  return AJA_STATUS_UNSUPPORTED;}
+	if (UWord(mConfig.fOutputChannel) >= mDevice.features().GetNumFrameStores())
+		{cerr << "## ERROR:  Device has " << DEC(mDevice.features().GetNumFrameStores()) << " FrameStore(s), no channel " << DEC(mConfig.fOutputChannel+1) << endl;  return AJA_STATUS_UNSUPPORTED;}
 
 	const NTV2FrameRate	frameRate(::GetNTV2FrameRateFromVideoFormat(mConfig.fVideoFormat));
 	if (!NTV2_IS_SD_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  !mConfig.fSuppress708)
@@ -1121,7 +1121,7 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 	//
 	//	Set video format/standard...
 	//
-	if (!::NTV2DeviceCanDoVideoFormat(mDeviceID, mConfig.fVideoFormat))
+	if (!mDevice.features().CanDoVideoFormat(mConfig.fVideoFormat))
 		{cerr << "## ERROR:  '" << ::NTV2VideoFormatToString(mConfig.fVideoFormat) << "' not supported" << endl;  return AJA_STATUS_UNSUPPORTED;}
 	mVideoStandard = ::GetNTV2StandardFromVideoFormat(mConfig.fVideoFormat);
 	mDevice.SetVideoFormat (mActiveFrameStores, mConfig.fVideoFormat, AJA_RETAIL_DEFAULT);
@@ -1135,7 +1135,7 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 	//
 	//	Set frame buffer pixel format...
 	//
-	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
+	if (!mDevice.features().CanDoFrameBufferFormat (mConfig.fPixelFormat))
 		{cerr << "## ERROR:  '" << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat) << "' not supported" << endl;  return AJA_STATUS_UNSUPPORTED;}
 	if (NTV2_IS_VANCMODE_ON(mConfig.fVancMode)  &&  ::IsRGBFormat(mConfig.fPixelFormat) != mConfig.fDoRGBOnWire)
 		{cerr << "## ERROR:  Routing thru CSC may corrupt VANC in frame buffer" << endl;  return AJA_STATUS_UNSUPPORTED;}
@@ -1168,7 +1168,7 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 	if (!CNTV2CaptionEncoder708::Create(m708Encoder))
 		{cerr << "## ERROR:  Cannot create 708 encoder" << endl;  return AJA_STATUS_MEMORY;}
 
-	mDevice.SetReference (NTV2DeviceCanDo2110(mDeviceID) ? NTV2_REFERENCE_SFP1_PTP : NTV2_REFERENCE_FREERUN);
+	mDevice.SetReference (mDevice.features().CanDo2110() ? NTV2_REFERENCE_SFP1_PTP : NTV2_REFERENCE_FREERUN);
 
 	//
 	//	Subscribe to the output interrupt(s)...
@@ -1201,7 +1201,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 
 	//	Does device have RGB conversion capability for the desired channel?
 	if (isRGBFBF != isRGBWire	//	if any CSC(s) are needed
-		&& UWord(mConfig.fOutputChannel) > ::NTV2DeviceGetNumCSCs(mDeviceID))
+		&& UWord(mConfig.fOutputChannel) > mDevice.features().GetNumCSCs())
 			{cerr << "## ERROR:  No CSC for channel " << (mConfig.fOutputChannel+1) << endl;  return AJA_STATUS_UNSUPPORTED;}
 	//*UNCOMMENT TO SHOW ROUTING PROGRESS WHILE DEBUGGING*/mDevice.ClearRouting();
 
@@ -1223,7 +1223,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 		{								//	RGBFrameStore ==> 425MUX ==> 2x DLOut ==> 2x SDIOut
 			sdiOuts		= ::NTV2MakeChannelSet(sdiOutput, UWord(2*mActiveFrameStores.size()));
 			sdiOutputs	= ::NTV2MakeChannelList(sdiOuts);
-			tsiMuxes = CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDeviceID, frameStores.at(0), UWord(frameStores.size()*2));
+			tsiMuxes = CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDevice, frameStores.at(0), UWord(frameStores.size()*2));
 			mDevice.SetSDITransmitEnable(sdiOuts, true);	//	Gotta do this again, since sdiOuts changed
 			for (size_t ndx(0);  ndx < sdiOutputs.size();  ndx++)
 			{	NTV2Channel frmSt(frameStores.at(ndx/2)), tsiMux(tsiMuxes.at(ndx/2)), sdiOut(sdiOutputs.at(ndx));
@@ -1254,7 +1254,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 		{	//	TSI			//	RGBFrameStore  ==>  425MUX  ==>  LFR: 2 x CSC ==> 2 x SDIOut    HFR: 4 x CSC ==> 4 x SDI
 			sdiOuts		= ::NTV2MakeChannelSet(sdiOutput, is4KHFR ? 4 : UWord(mActiveFrameStores.size()));
 			sdiOutputs	= ::NTV2MakeChannelList(sdiOuts);
-			tsiMuxes	= CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDeviceID, frameStores.at(0), UWord(frameStores.size()));
+			tsiMuxes	= CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDevice, frameStores.at(0), UWord(frameStores.size()));
 			cscs		= ::NTV2MakeChannelList(mConfig.fOutputChannel > NTV2_CHANNEL4 ? NTV2_CHANNEL5 : NTV2_CHANNEL1, isQuadFmt ? 4 : 2);
 			//cerr	<< " FrmSt: "	<< ::NTV2ChannelListToStr(frameStores)	<< endl		<< " TSIMx: "	<< ::NTV2ChannelListToStr(tsiMuxes)		<< endl
 			//		<< "  CSCs: "	<< ::NTV2ChannelListToStr(cscs)			<< endl		<< "SDIOut: "	<< ::NTV2ChannelListToStr(sdiOutputs)	<< endl;
@@ -1290,7 +1290,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 		{								//	YUVFrameStore ==> 425MUX ==> 2x CSC ==> 2x DLOut ==> 2x SDIOut
 			sdiOuts		= ::NTV2MakeChannelSet(sdiOutput, UWord(2*mActiveFrameStores.size()));
 			sdiOutputs	= ::NTV2MakeChannelList(sdiOuts);
-			tsiMuxes = CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDeviceID, frameStores.at(0), UWord(frameStores.size()*2));
+			tsiMuxes = CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDevice, frameStores.at(0), UWord(frameStores.size()*2));
 			mDevice.SetSDITransmitEnable(sdiOuts, true);	//	Gotta do this again, since sdiOuts changed
 			for (size_t ndx(0);  ndx < sdiOutputs.size();  ndx++)
 			{	NTV2Channel frmSt(frameStores.at(ndx/2)), tsiMux(tsiMuxes.at(ndx/2)), sdiOut(sdiOutputs.at(ndx));
@@ -1320,7 +1320,7 @@ AJAStatus NTV2CCPlayer::RouteOutputSignal (void)
 		{	// TSI						//	YUVFrameStore ==> 425MUX ==> SDIOut (LFR: 2 x DS1&DS2, 4KHFR: 4 x DS1)
 			sdiOuts		= ::NTV2MakeChannelSet(sdiOutput, is4KHFR ? 4 : UWord(mActiveFrameStores.size()));
 			sdiOutputs	= ::NTV2MakeChannelList(sdiOuts);
-			tsiMuxes	= CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDeviceID, frameStores.at(0), UWord(frameStores.size()));
+			tsiMuxes	= CNTV2DemoCommon::GetTSIMuxesForFrameStore(mDevice, frameStores.at(0), UWord(frameStores.size()));
 			//cerr	<< "FrameStores: "	<< ::NTV2ChannelListToStr(frameStores)	<< endl		<< "SDIOutputs: "	<< ::NTV2ChannelListToStr(sdiOutputs)	<< endl
 			//		<< "TSIMuxers: "	<< ::NTV2ChannelListToStr(tsiMuxes)		<< endl;
 			mDevice.SetSDITransmitEnable(sdiOuts, true);	//	Do this again, since sdiOuts changed
@@ -1610,8 +1610,8 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	if (!mConfig.fSuppressAudio)
 	{
 		//	Audio setup...
-		audioSystem = (::NTV2DeviceGetNumAudioSystems(mDeviceID) > 1)  ?  ::NTV2ChannelToAudioSystem(mConfig.fOutputChannel)  :  NTV2_AUDIOSYSTEM_1;
-		numAudioChannels = ::NTV2DeviceGetMaxAudioChannels(mDeviceID);
+		audioSystem = (mDevice.features().GetNumAudioSystems() > 1)  ?  ::NTV2ChannelToAudioSystem(mConfig.fOutputChannel)  :  NTV2_AUDIOSYSTEM_1;
+		numAudioChannels = mDevice.features().GetMaxAudioChannels();
 		if (NTV2_IS_4K_4096_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  numAudioChannels > 8)
 			numAudioChannels = 8;	//	2K/4096-pixel lines have narrower HANC space & can't handle 16 channels
 		mDevice.SetNumberAudioChannels (numAudioChannels, audioSystem);		//	Config audio: # channels
@@ -1623,12 +1623,12 @@ void NTV2CCPlayer::PlayoutFrames (void)
 		audioBuffer.Allocate(AUDIOBYTES_MAX_48K);							//	Allocate audio buffer (large enough for one frame's audio)
 		if (!mConfig.fDoMultiFormat)
 		{
-			for (UWord chan (0);  chan < ::NTV2DeviceGetNumVideoOutputs (mDeviceID);  chan++)
+			for (UWord chan (0);  chan < mDevice.features().GetNumVideoOutputs();  chan++)
 			{
 				mDevice.SetSDIOutputAudioSystem (NTV2Channel (chan), audioSystem);
 				mDevice.SetSDIOutputDS2AudioSystem (NTV2Channel (chan), audioSystem);
 			}
-			if (::NTV2DeviceGetNumHDMIAudioOutputChannels (mDeviceID) == 8)
+			if (mDevice.features().GetNumHDMIAudioOutputChannels() == 8)
 			{
 				mDevice.SetHDMIOutAudioChannels (NTV2_HDMIAudio8Channels);
 				mDevice.SetHDMIOutAudioSource8Channel (NTV2_AudioChannel1_8, audioSystem);
@@ -1652,7 +1652,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 		acOptionFlags |= AUTOCIRCULATE_WITH_ANC;
 	if (!mConfig.fSuppressTimecode)
 		acOptionFlags |= AUTOCIRCULATE_WITH_RP188;
-	if (!mConfig.fSuppressTimecode  &&  !mConfig.fDoMultiFormat  &&  ::NTV2DeviceGetNumLTCOutputs(mDeviceID))
+	if (!mConfig.fSuppressTimecode  &&  !mConfig.fDoMultiFormat  &&  mDevice.features().GetNumLTCOutputs())
 		acOptionFlags |= AUTOCIRCULATE_WITH_LTC;		//	Emit analog LTC if we "own" the device
 	mDevice.AutoCirculateStop (mConfig.fOutputChannel);	//	Maybe some other app left this A/C channel running
 	if (NTV2_IS_SD_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  mConfig.fSuppressLine21  &&  mConfig.fSuppress608)
@@ -1754,7 +1754,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 		else	//	Else use the Anc inserter firmware:
 			packetList.GetTransmitData (xferInfo.acANCBuffer, xferInfo.acANCField2Buffer, isProgressive, F2StartLine);
 
-		if (mConfig.fForceRTP  &&  mConfig.fForceRTP & BIT(1)  &&  ::NTV2DeviceCanDo2110(mDeviceID))
+		if (mConfig.fForceRTP  &&  mConfig.fForceRTP & BIT(1)  &&  mDevice.features().CanDo2110())
 			xferInfo.acTransferStatus.acState = NTV2_AUTOCIRCULATE_INVALID;	//	Signal MultiPkt RTP to AutoCirculateTransfer/S2110DeviceAncToXferBuffers
 
 		if (!mConfig.fSuppressTimecode)
@@ -1784,7 +1784,7 @@ void NTV2CCPlayer::PlayoutFrames (void)
 					if (acOptionFlags & AUTOCIRCULATE_WITH_LTC)
 					{
 						timecodes[NTV2_TCINDEX_LTC1] = tc;
-						if (::NTV2DeviceGetNumLTCOutputs(mDeviceID) > 1)
+						if (mDevice.features().GetNumLTCOutputs() > 1)
 							timecodes[NTV2_TCINDEX_LTC2] = tc;
 					}
 					if (!NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))

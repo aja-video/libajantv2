@@ -777,11 +777,11 @@ class AJAExport CNTV2DemoCommon
 
 		/**
 			@return		The TSIMuxes to use given the first FrameStore on the device and a count.
-			@param[in]	inDeviceID		Specifies the device being used.
+			@param[in]	inDevice		Specifies the device being used.
 			@param[in]	in1stFrameStore	Specifies the first FrameStore of interest.
 			@param[in]	inCount			Specifies the number of Muxes.
 		**/
-		static NTV2ChannelList				GetTSIMuxesForFrameStore (const NTV2DeviceID inDeviceID, const NTV2Channel in1stFrameStore, const UWord inCount);
+		static NTV2ChannelList				GetTSIMuxesForFrameStore (CNTV2Card & inDevice, const NTV2Channel in1stFrameStore, const UWord inCount);
 
 		/**
 			@brief		Configures capture audio systems.
@@ -850,13 +850,13 @@ class AJAExport CNTV2DemoCommon
 	#include "ajabase/common/wavewriter.h"	//	For AJAWavWriter
 	#define		AJA_NTV2_AUDIO_RECORD_BEGIN		ostringstream	_wavfilename;														\
 												_wavfilename	<< ::NTV2DeviceString(mDeviceID) << "-" << mDevice.GetIndexNumber()	\
-																<< "." << ::NTV2ChannelToString(mConfig.fInputChannel,true)					\
-																<< "." << ::NTV2InputSourceToString(mConfig.fInputSource, true)				\
+																<< "." << ::NTV2ChannelToString(mConfig.fInputChannel,true)			\
+																<< "." << ::NTV2InputSourceToString(mConfig.fInputSource, true)		\
 																<< "." << ::NTV2VideoFormatToString(mVideoFormat)					\
 																<< "." << ::NTV2AudioSystemToString(mAudioSystem, true)				\
 																<< "." << AJAProcess::GetPid()										\
 																<< ".wav";															\
-												const int		_wavMaxNumAudChls(::NTV2DeviceGetMaxAudioChannels(mDeviceID));		\
+												const int		_wavMaxNumAudChls(mDevice.features().GetMaxAudioChannels());		\
 												AJAWavWriter	_wavWriter (_wavfilename.str(),										\
 																			AJAWavWriterAudioFormat(_wavMaxNumAudChls, 48000, 32));	\
 												_wavWriter.open();

@@ -80,11 +80,11 @@ AJAStatus NTV2Capture4K::Init (void)
 		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 
 	mDeviceID = mDevice.GetDeviceID();						//	Keep the device ID handy, as it's used frequently
-	const bool isKonaHDMI (::NTV2DeviceGetNumHDMIVideoInputs(mDeviceID) > 1);
-	if (!::NTV2DeviceCanDoCapture(mDeviceID))
+	const bool isKonaHDMI (mDevice.features().GetNumHDMIVideoInputs() > 1);
+	if (!mDevice.features().CanDoCapture())
 		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is playback-only" << endl;  return AJA_STATUS_FEATURE;}
 
-	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
+	if (!mDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
 	{	cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' doesn't support '"
 				<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, true) << "' ("
 				<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, false) << ", " << DEC(mConfig.fPixelFormat) << ")" << endl;
@@ -106,7 +106,7 @@ AJAStatus NTV2Capture4K::Init (void)
 	}
 	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Prevent interference from AJA retail services
 
-	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
+	if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
 
 	//	This demo permits only the input channel/frameStore to be specified.  Set the input source here...
@@ -119,10 +119,10 @@ AJAStatus NTV2Capture4K::Init (void)
 			mConfig.fInputChannel = NTV2_CHANNEL3;
 		mConfig.fInputSource = mConfig.fInputChannel ? NTV2_INPUTSOURCE_HDMI2 : NTV2_INPUTSOURCE_HDMI1;
 	}
-	else if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+	else if (mDevice.features().CanDo12gRouting())
 	{
 		mConfig.fDoTSIRouting = false;	//	TSI Mux/Demux built-in to FrameStores
-		if (UWord(origCh) >= ::NTV2DeviceGetNumFrameStores(mDeviceID))
+		if (UWord(origCh) >= mDevice.features().GetNumFrameStores())
 		{
 			cerr << "## ERROR: No such channel Ch" << DEC(origCh) << " for '" << ::NTV2DeviceIDToString(mDeviceID,true) << "'";
 			return AJA_STATUS_BAD_PARAM;
@@ -147,7 +147,7 @@ AJAStatus NTV2Capture4K::Init (void)
 				<< DEC(mConfig.fInputChannel+1) << " to work for UHD/4K on '" << mDevice.GetDisplayName() << "'" << endl;
 
 	//	Determine input connectors and frameStores to be used...
-	const UWord numSpigots (::NTV2DeviceCanDo12gRouting(mDeviceID) ? 1 : (mConfig.fDoTSIRouting ? 2 : 4));
+	const UWord numSpigots (mDevice.features().CanDo12gRouting() ? 1 : (mConfig.fDoTSIRouting ? 2 : 4));
 	mActiveSDIs        = ::NTV2MakeChannelSet (::NTV2InputSourceToChannel(mConfig.fInputSource), numSpigots);
 	mActiveFrameStores = ::NTV2MakeChannelSet (mConfig.fInputChannel, numSpigots);
 
@@ -189,7 +189,7 @@ AJAStatus NTV2Capture4K::SetupVideo (void)
 
 	//	If the device supports bi-directional SDI and the requested input is SDI,
 	//	ensure the SDI connector(s) are configured to receive...
-	if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID) && NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource))
+	if (mDevice.features().HasBiDirectionalSDI() && NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource))
 	{
 		mDevice.SetSDITransmitEnable (mActiveSDIs, false);				//	Set SDI connector(s) to receive
 		mDevice.WaitForOutputVerticalInterrupt (NTV2_CHANNEL1, 10);		//	Wait 10 VBIs to allow reciever to lock
@@ -209,7 +209,7 @@ AJAStatus NTV2Capture4K::SetupVideo (void)
 	//	Set the device video format to whatever was detected at the input(s)...
 	mDevice.SetVideoFormat (mVideoFormat, false, false, mConfig.fInputChannel);
 	mDevice.SetVANCMode (mActiveFrameStores, NTV2_VANCMODE_OFF);	//	Disable VANC
-	if (::NTV2DeviceCanDo12gRouting(mDeviceID)  ||  mConfig.fDoTSIRouting)
+	if (mDevice.features().CanDo12gRouting()  ||  mConfig.fDoTSIRouting)
 		mDevice.SetTsiFrameEnable (true, mConfig.fInputChannel);
 	else
 		mDevice.Set4kSquaresEnable (true, mConfig.fInputChannel);
@@ -225,8 +225,8 @@ AJAStatus NTV2Capture4K::SetupAudio (void)
 {
 	//	In multiformat mode, base the audio system on the channel...
 	if (mConfig.fDoMultiFormat)
-		if (::NTV2DeviceGetNumAudioSystems(mDeviceID) > 1)
-			if (UWord(mConfig.fInputChannel) < ::NTV2DeviceGetNumAudioSystems(mDeviceID))
+		if (mDevice.features().GetNumAudioSystems() > 1)
+			if (UWord(mConfig.fInputChannel) < mDevice.features().GetNumAudioSystems())
 				mAudioSystem = ::NTV2ChannelToAudioSystem(mConfig.fInputChannel);
 
 	NTV2AudioSystemSet audSystems (::NTV2MakeAudioSystemSet (mAudioSystem, 1));
@@ -406,7 +406,7 @@ void NTV2Capture4K::CaptureFrames (void)
 	static const UWord startFrame12g[]	= {0, 7, 64, 71};
 	static const UWord startFrame[]		= {0, 7, 14, 21};
 
-	if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+	if (mDevice.features().CanDo12gRouting())
 		mConfig.fFrames.setRangeWithCount(7, startFrame12g[mConfig.fInputChannel]);
 	else	//	TSI or Squares
 		mConfig.fFrames.setRangeWithCount(7, startFrame[mConfig.fInputChannel / 2]);

@@ -481,17 +481,17 @@ int main(int argc, const char *argv[])
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
-		{"unit",		'u',	POPT_ARG_STRING,	&pUnits,			0,		"Debug unit filter",			"[*|?]{{+|-}{0-84}}[...]"					},
-		{"severity",	's',	POPT_ARG_STRING,	&pSeverity,			0,		"Severity level filter",		"[*|?]{{+|-}{deb|inf|not|warn|err}}[...]"	},
-		{"threshold",	't',	POPT_ARG_STRING,	&pSevThreshold,		8,		"Stderr severity threshold",	"debug|info|notice|warn|err|assert|alert|emerg"},
-		{"pid",			0,		POPT_ARG_INT,		&pidFilter,			0,		"Process ID filter",			"process ID"},
-		{"tid",			0,		POPT_ARG_INT,		&tidFilter,			0,		"Thread ID filter",				"thread ID"},
-		{"enable",		0,		POPT_ARG_NONE,		&enableDebugUnits,	0,		"Enable debug units",			""},
-		{"format",		'f',	POPT_ARG_STRING,	&pFormatStr,		0,		"Custom formatting",			"%I|%P|%T|%t|%D|%S|%F|%L|%M|%%"},
-//		{"rate",		'r',	POPT_ARG_INT,		&samplesPerSec,		0,		"Polling rate",					"samples per second"					},
-		{"verbose",		'v',	POPT_ARG_NONE,		&gIsVerbose,		0,		"Verbose output",				""},
-		{"version",		'V',	POPT_ARG_NONE,		&showVersion,		0,		"Display version info",			""},
-		{"stats",		0,		POPT_ARG_NONE,		&listStats,			0,		"List active stats",			""},
+		{"unit",		'u',	POPT_ARG_STRING,	&pUnits,			0,		"debug unit filter",			"[*|?]{{+|-}{0-84}}[...]"					},
+		{"severity",	's',	POPT_ARG_STRING,	&pSeverity,			0,		"severity level filter",		"[*|?]{{+|-}{deb|inf|not|warn|err}}[...]"	},
+		{"threshold",	't',	POPT_ARG_STRING,	&pSevThreshold,		8,		"stderr severity threshold",	"debug|info|notice|warn|err|assert|alert|emerg"},
+		{"pid",			0,		POPT_ARG_INT,		&pidFilter,			0,		"process ID filter",			"process ID"},
+		{"tid",			0,		POPT_ARG_INT,		&tidFilter,			0,		"thread ID filter",				"thread ID"},
+		{"enable",		0,		POPT_ARG_NONE,		&enableDebugUnits,	0,		"enable debug units",			""},
+		{"format",		'f',	POPT_ARG_STRING,	&pFormatStr,		0,		"custom formatting",			"%I|%P|%T|%t|%D|%S|%F|%L|%M|%%"},
+//		{"rate",		'r',	POPT_ARG_INT,		&samplesPerSec,		0,		"polling rate",					"samples per second"					},
+		{"verbose",		'v',	POPT_ARG_NONE,		&gIsVerbose,		0,		"verbose output",				""},
+		{"version",		0,		POPT_ARG_NONE,		&showVersion,		0,		"show version & exit",			""},
+		{"stats",		0,		POPT_ARG_NONE,		&listStats,			0,		"list active stats",			""},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};

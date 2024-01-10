@@ -115,10 +115,10 @@ AJAStatus NTV2Player4K::Init (void)
 
     if (!mDevice.IsDeviceReady(false))
 		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
-	if (!::NTV2DeviceCanDoPlayback(mDeviceID))
+	if (!mDevice.features().CanDoPlayback())
 		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
 
-	const UWord maxNumChannels (::NTV2DeviceGetNumFrameStores(mDeviceID));
+	const UWord maxNumChannels (mDevice.features().GetNumFrameStores());
 
 	//	Check for an invalid configuration
 	if (NTV2_IS_4K_HFR_VIDEO_FORMAT(mConfig.fVideoFormat)  &&  mConfig.fDoRGBOnWire)
@@ -131,7 +131,7 @@ AJAStatus NTV2Player4K::Init (void)
 				<< (maxNumChannels > 1  ?  string(" thru ") + string(1, char(maxNumChannels+'0'))  :  "") << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
-	if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+	if (mDevice.features().CanDo12gRouting())
 	{
 		if (mConfig.fDoTsiRouting)
 			cerr	<< "## WARNING:  '--tsi' option used with device that has 12G FrameStores with integral Tsi muxers" << endl;
@@ -159,7 +159,7 @@ AJAStatus NTV2Player4K::Init (void)
 	}
 	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Set OEM service level
 
-	if (::NTV2DeviceCanDoMultiFormat(mDeviceID))
+	if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
 	else
 		mConfig.fDoMultiFormat = false;
@@ -205,12 +205,12 @@ AJAStatus NTV2Player4K::SetUpVideo (void)
 	//	Configure the device to output the requested video format...
  	if (mConfig.fVideoFormat == NTV2_FORMAT_UNKNOWN)
 		return AJA_STATUS_BAD_PARAM;
-	if (!::NTV2DeviceCanDoVideoFormat (mDeviceID, mConfig.fVideoFormat))
+	if (!mDevice.features().CanDoVideoFormat(mConfig.fVideoFormat))
 	{	cerr	<< "## ERROR:  '" << mDevice.GetDisplayName() << "' doesn't support "
 				<< ::NTV2VideoFormatToString(mConfig.fVideoFormat) << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
-	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
+	if (!mDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
 	{	cerr	<< "## ERROR: '" << mDevice.GetDisplayName() << "' doesn't support "
 				<< ::NTV2FrameBufferFormatString(mConfig.fPixelFormat) << endl;
 		return AJA_STATUS_UNSUPPORTED;
@@ -219,7 +219,7 @@ AJAStatus NTV2Player4K::SetUpVideo (void)
 	NTV2ChannelSet channels1357, channels15, frameStores;
 	channels1357.insert(NTV2_CHANNEL1);  channels1357.insert(NTV2_CHANNEL3);  channels1357.insert(NTV2_CHANNEL5);  channels1357.insert(NTV2_CHANNEL7);
 	channels15.insert(NTV2_CHANNEL1);  channels15.insert(NTV2_CHANNEL5);
-	if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+	if (mDevice.features().CanDo12gRouting())
 		frameStores = ::NTV2MakeChannelSet (mConfig.fOutputChannel, 1);	//	1 x 12G FrameStore (fOutputChannel)
 	else if (mConfig.fDoTsiRouting)
 	{	//	"Tsi" routing requires 2 FrameStores
@@ -260,7 +260,7 @@ AJAStatus NTV2Player4K::SetUpVideo (void)
 	mDevice.SubscribeOutputVerticalEvent (mConfig.fOutputChannel);
 
 	//	Check if HDR anc is permissible...
-	if (IS_KNOWN_AJAAncDataType(mConfig.fTransmitHDRType)  &&  !::NTV2DeviceCanDoCustomAnc(mDeviceID))
+	if (IS_KNOWN_AJAAncDataType(mConfig.fTransmitHDRType)  &&  !mDevice.features().CanDoCustomAnc())
 		{cerr << "## WARNING:  HDR Anc requested, but device can't do custom anc" << endl;
 			mConfig.fTransmitHDRType = AJAAncDataType_Unknown;}
 
@@ -269,7 +269,7 @@ AJAStatus NTV2Player4K::SetUpVideo (void)
 		gAncMaxSizeBytes = NTV2_ANCSIZE_MAX;
 
 	//	Set output clock reference...
-	mDevice.SetReference(::NTV2DeviceCanDo2110(mDeviceID) ? NTV2_REFERENCE_SFP1_PTP : NTV2_REFERENCE_FREERUN);
+	mDevice.SetReference(mDevice.features().CanDo2110() ? NTV2_REFERENCE_SFP1_PTP : NTV2_REFERENCE_FREERUN);
 
 	//	At this point, video setup is complete (except for widget signal routing).
 	return AJA_STATUS_SUCCESS;
@@ -279,7 +279,7 @@ AJAStatus NTV2Player4K::SetUpVideo (void)
 
 AJAStatus NTV2Player4K::SetUpAudio (void)
 {
-	uint16_t numAudioChannels (::NTV2DeviceGetMaxAudioChannels(mDeviceID));
+	uint16_t numAudioChannels (mDevice.features().GetMaxAudioChannels());
 
 	//	If there are 4096 pixels on a line instead of 3840, reduce the number of audio channels
 	//	This is because HANC is narrower, and has space for only 8 channels
@@ -311,7 +311,7 @@ AJAStatus NTV2Player4K::SetUpAudio (void)
 	else
 	{
 		NTV2ChannelSet sdiSpigots (::NTV2MakeChannelSet (mConfig.fOutputChannel, 1));
-		if (!::NTV2DeviceCanDo12gRouting(mDeviceID))
+		if (!mDevice.features().CanDo12gRouting())
 			sdiSpigots = ::NTV2MakeChannelSet (mAudioSystem == NTV2_AUDIOSYSTEM_1 || mAudioSystem == NTV2_AUDIOSYSTEM_3
 												? NTV2_CHANNEL1
 												: NTV2_CHANNEL5,  4);
@@ -458,7 +458,7 @@ bool NTV2Player4K::RouteOutputSignal (void)
 		switchValue += 2;
 	if (mConfig.fDoRGBOnWire)
 		switchValue += 1;
-	if (NTV2DeviceCanDo12GSDI(mDeviceID) && !NTV2DeviceCanDo12gRouting(mDeviceID))
+	if (mDevice.features().CanDo12GSDI() && !mDevice.features().CanDo12gRouting())
 	{
 		mDevice.SetSDIOut6GEnable(NTV2_CHANNEL3, false);
 		mDevice.SetSDIOut12GEnable(NTV2_CHANNEL3, false);
@@ -584,7 +584,7 @@ bool NTV2Player4K::RouteOutputSignal (void)
 			return false;	//	Fail
 	}
 
-	if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+	if (mDevice.features().CanDo12gRouting())
 		mDevice.SetTsiFrameEnable  (true,  mConfig.fOutputChannel);
 	else if (mConfig.fDoTsiRouting)
 		mDevice.SetTsiFrameEnable  (true,  mConfig.fOutputChannel);
@@ -601,15 +601,15 @@ bool NTV2Player4K::RouteOutputSignal (void)
 
 void NTV2Player4K::SetupSDITransmitters (const NTV2Channel inFirstSDI, const UWord inNumSDIs)
 {
-	if (::NTV2DeviceHasBiDirectionalSDI(mDeviceID))
-		mDevice.SetSDITransmitEnable(::NTV2MakeChannelSet (inFirstSDI, ::NTV2DeviceCanDo12gRouting(mDeviceID) ? 1 : inNumSDIs),
+	if (mDevice.features().HasBiDirectionalSDI())
+		mDevice.SetSDITransmitEnable(::NTV2MakeChannelSet (inFirstSDI, mDevice.features().CanDo12gRouting() ? 1 : inNumSDIs),
 									/*transmit=*/true);
 }
 
 
 bool NTV2Player4K::Route4KDownConverter (void)
 {
-	if (!::NTV2DeviceCanDoWidget(mDeviceID, NTV2_Wgt4KDownConverter)  ||  !::NTV2DeviceCanDoWidget(mDeviceID, NTV2_WgtSDIMonOut1))
+	if (!mDevice.features().CanDoWidget(NTV2_Wgt4KDownConverter)  ||  !mDevice.features().CanDoWidget(NTV2_WgtSDIMonOut1))
 		return true;
 
 	const bool	canVerify		(mDevice.HasCanConnectROM());
@@ -674,12 +674,12 @@ bool NTV2Player4K::RouteHDMIOutput (void)
 	UWord		connectFailures (0);
 
 	if (mConfig.fDoHDMIOutput &&
-		(::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v2)
-			|| ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v3)
-			|| ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v4)
-			|| ::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v5)) )
+		(mDevice.features().CanDoWidget(NTV2_WgtHDMIOut1v2)
+			|| mDevice.features().CanDoWidget(NTV2_WgtHDMIOut1v3)
+			|| mDevice.features().CanDoWidget(NTV2_WgtHDMIOut1v4)
+			|| mDevice.features().CanDoWidget(NTV2_WgtHDMIOut1v5)) )
 	{
-		if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+		if (mDevice.features().CanDo12gRouting())
 		{
 			if (!mDevice.Connect (NTV2_XptHDMIOutInput, ::GetFrameBufferOutputXptFromChannel (mConfig.fOutputChannel,  isRGB,  false/*is425*/), canVerify))
 				connectFailures++;
@@ -857,7 +857,7 @@ bool NTV2Player4K::RouteFsToSDIOut (void)
 {
 	const bool	canVerify (mDevice.HasCanConnectROM());
 	UWord		connectFailures (0);
-	if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+	if (mDevice.features().CanDo12gRouting())
 	{
 		if (!mDevice.Connect (	::GetSDIOutputInputXpt (mConfig.fOutputChannel, false/*isDS2*/),
 								::GetFrameBufferOutputXptFromChannel (mConfig.fOutputChannel,  false/*isRGB*/,  false/*is425*/),
@@ -1270,7 +1270,7 @@ void NTV2Player4K::ConsumeFrames (void)
 
 	//	Calculate start & end frame numbers (if mConfig.fFrames not used)...
 	UWord startNum(0), endNum(0);
-    if (::NTV2DeviceCanDo12gRouting(mDeviceID))
+    if (mDevice.features().CanDo12gRouting())
 		startNum = numACFramesPerChannel * mConfig.fOutputChannel;
     else switch (mConfig.fOutputChannel)
 	{	default:

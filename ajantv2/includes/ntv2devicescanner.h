@@ -386,7 +386,6 @@ public:
 
 private:
 	virtual void	SetAudioAttributes(NTV2DeviceInfo & inDeviceInfo, CNTV2Card & inDevice) const;
-	virtual void	SetVideoAttributes (NTV2DeviceInfo & inDevicInfo);
 	virtual void	DeepCopy (const CNTV2DeviceScanner & inDeviceScanner);
 
 

@@ -364,15 +364,6 @@ bool CNTV2Card::GetVideoFormat (NTV2VideoFormat & outValue, NTV2Channel inChanne
 	return ::NTV2DeviceGetVideoFormatFromState_Ex2 (&outValue, frameRate, frameGeometry, standard, smpte372Enabled, progressivePicture, isSquares);
 }
 
-bool CNTV2Card::GetSupportedVideoFormats (NTV2VideoFormatSet & outFormats)
-{
-	const ULWordSet itms (GetSupportedItems(kNTV2EnumsID_VideoFormat));
-	outFormats.clear();
-	for (ULWordSetConstIter it(itms.begin());  it != itms.end();  ++it)
-        outFormats.insert(NTV2VideoFormat(*it));
-	return !outFormats.empty();
-}
-
 //	--------------------------------------------	BEGIN BLOCK
 //	GetNTV2VideoFormat functions
 //		These static functions don't work correctly, and are subject to deprecation. They remain here only by our fiat.
@@ -1734,12 +1725,7 @@ bool CNTV2Card::GetFBSizeAndCountFromHW(ULWord* size, ULWord* count)
 		*size = sizeMultiplier * 1024 * 1024;
 
 	if (count)
-	{
-		if (multiplier == 0)
-			*count = ::NTV2DeviceGetNumberFrameBuffers(_boardID) / 2;
-		else
-			*count = multiplier * ::NTV2DeviceGetNumberFrameBuffers(_boardID);
-	}
+		*count = multiplier  ?  multiplier * DeviceGetNumberFrameBuffers()  :  DeviceGetNumberFrameBuffers() / 2;
 
 	NTV2FrameGeometry geometry = NTV2_FG_NUMFRAMEGEOMETRIES;
 	GetFrameGeometry(geometry);
@@ -3432,7 +3418,7 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 	if(inputRate == NTV2_FRAMERATE_INVALID)
 		return NTV2_FORMAT_UNKNOWN;
 	
-	if (::NTV2DeviceCanDo3GIn(_boardID, inChannel) || ::NTV2DeviceCanDo12GIn(_boardID, inChannel))
+	if (DeviceCanDo3GIn(inChannel) || DeviceCanDo12GIn(inChannel))
 	{
 		GetSDIInput3GPresent(isInput3G, inChannel);
 		NTV2VideoFormat format = isValidVPID ? inputVPID.GetVideoFormat() : GetNTV2VideoFormat(inputRate, inputGeometry, isProgressiveTrans, isInput3G, isProgressivePic);
@@ -3443,7 +3429,7 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 			isProgressivePic = inIsProgressivePicture;
 			format = GetNTV2VideoFormat(inputRate, inputGeometry, isProgressiveTrans, isInput3G, isProgressivePic);
 		}
-		if (::NTV2DeviceCanDo12GIn(_boardID, inChannel) && format != NTV2_FORMAT_UNKNOWN && !isValidVPID)
+		if (DeviceCanDo12GIn(inChannel) && format != NTV2_FORMAT_UNKNOWN && !isValidVPID)
 		{
 			bool is6G(false), is12G(false);
 			GetSDIInput6GPresent(is6G, inChannel);
@@ -3460,7 +3446,7 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 		return format;
 	}
 
-	if (::NTV2DeviceCanDo292In(_boardID, inChannel))
+	if (DeviceCanDo292In(inChannel))
 	{
 		if (_boardID == DEVICE_ID_KONALHI || _boardID == DEVICE_ID_KONALHIDVI)
 		{

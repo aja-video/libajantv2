@@ -149,10 +149,7 @@ public:
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoFormat (const NTV2FrameRate inFR,
 														const NTV2FrameGeometry	inFG, 
 														const NTV2Standard inStd));	///< @deprecated	This function is obsolete. Do not use it.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDo3GOut (const UWord index0));	///< @deprecated	This function is obsolete. Do not use it.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoLTCEmbeddedN (const UWord index0));	///< @deprecated	This function is obsolete. Do not use it.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetFrameBufferSize(void));	///< @deprecated	This function is obsolete. Do not use it.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetNumberFrameBuffers(void));	///< @deprecated	This function is obsolete. Do not use it.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetAudioFrameBuffer(void));	///< @deprecated	This function is obsolete. Do not use it.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetAudioFrameBuffer2(void));	///< @deprecated	This function is obsolete. Do not use it.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(ULWord DeviceGetFrameBufferSize (const NTV2FrameGeometry inFrameGeometry, const NTV2FrameBufferFormat inFBFormat));	///< @deprecated	This function is obsolete. Do not use it.
@@ -166,10 +163,28 @@ public:
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoDSKMode (const NTV2DSKMode inDSKM));	///< @deprecated	This function is obsolete. Do not use it.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoInputSource (const NTV2InputSource inSrc));	///< @deprecated	Use DeviceCapabilities::CanDoInputSource instead.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoAudioMixer(void));	///< @deprecated	Use CNTV2DriverInterface::IsSupported with kDeviceCanDoAudioMixer instead.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoHDMIQuadRasterConversion(void));	///< @deprecated	This function is obsolete. Do not use it.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceIsDNxIV(void));	///< @deprecated	Use DeviceCapabilities::IsDNxIV instead.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceHasMicInput(void));	///< @deprecated	Use CNTV2DriverInterface::IsSupported with kDeviceHasMicrophoneInput instead.
 #endif	//	defined(NTV2_DEPRECATE_16_3)
+
+	//	Per-instance replacements for global NTV2DeviceCanDo... functions:
+	AJA_VIRTUAL bool	IsWidgetIDSupported (const NTV2WidgetID inWgtID);	//	New in SDK 17.1
+	AJA_VIRTUAL ULWord	DeviceGetNumberFrameBuffers (void);		//	Deprecated in SDK 16.3, restored in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDo292In (const UWord ndx0);	//	New in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDo3GIn (const UWord ndx0);		//	New in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDo12GIn (const UWord ndx0);	//	New in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDo292Out (const UWord ndx0);	//	New in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDo3GOut (const UWord ndx0);	//	Deprecated in SDK 16.3, restored in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDo12GOut (const UWord ndx0);	//	New in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDoLTCEmbeddedN (const UWord ndx0);	//	Deprecated in SDK 16.3, restored in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDoOutputDestination (const NTV2OutputDest dst);	//	New in SDK 17.1
+	AJA_VIRTUAL inline bool	DeviceCanDoColorCorrection (void)	{return GetNumSupported(kDeviceGetNumLUTs) > 0;}	//	New in SDK 17.1
+	AJA_VIRTUAL inline bool	DeviceCanDoProgrammableCSC (void)	{return GetNumSupported(kDeviceGetNumCSCs) > 0;}	//	New in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDoHDMIQuadRasterConversion(void);	//	Deprecated in SDK 16.3, restored in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDoTCIndex (const NTV2TCIndex inTCIndex);		//	New in SDK 17.1
+	AJA_VIRTUAL bool	DeviceCanDoInputTCIndex (const NTV2TCIndex inTCIndex);	//	New in SDK 17.1
+	AJA_VIRTUAL bool	GetSupportedVideoFormats (NTV2VideoFormatSet & outVFs);
+	AJA_VIRTUAL bool	GetSupportedPixelFormats (NTV2PixelFormats & outPFs);	//	New in SDK 17.1
 	///@}
 
 
@@ -809,14 +824,6 @@ public:
 					between the host and the AJA device, the frame data format is presumed to be identical.
 	**/
 	AJA_VIRTUAL bool		GetFrameBufferFormat (NTV2Channel inChannel, NTV2FrameBufferFormat & outValue);
-
-
-	/**
-		@brief		Returns a std::set of ::NTV2VideoFormat values that I support.
-		@param[out] outFormats	Receives the set of ::NTV2VideoFormat values, or empty upon failure.
-		@return		True if successful;	 otherwise false.
-	**/
-	AJA_VIRTUAL bool		GetSupportedVideoFormats (NTV2VideoFormatSet & outFormats);
 
 
 	// The rest of the routines
@@ -3473,36 +3480,76 @@ public:
 #define NTV2_STREAM_SUCCESS(__status__)  (__status__ == NTV2_STREAM_SUCCESS)
 #define NTV2_STREAM_FAIL(__status__)  (__status__ != NTV2_STREAM_SUCCESS)
 
-	// initialize the stream
+	/**
+		@brief		Initialize a stream.  Put the stream queue and hardware in a known good state ready for use.  Releases
+                    all buffers remaining in the queue.  At least one new buffer must be queued before starting the stream.
+    **/
 	AJA_VIRTUAL ULWord	StreamChannelInitialize (const NTV2Channel inChannel);
 
-	// start the stream
+   	/**
+		@brief		Release a stream.  Releases all buffers remaining in the queue.
+    **/
+	AJA_VIRTUAL ULWord	StreamChannelRelease (const NTV2Channel inChannel);
+
+	/**
+		@brief		Start a stream.  Put the stream is the active state to start processing queued buffers.  For frame
+                    based video, the stream will start with the current buffer on the next frame sync.
+		@return		The current stream status.
+    **/
 	AJA_VIRTUAL ULWord	StreamChannelStart (const NTV2Channel inChannel,
-												NTV2StreamChannel& status);
+                                            NTV2StreamChannel& status);
 
-	// stop the stream
+	/**
+		@brief		Stop a stream.  Put the stream is the idle state.  For frame based video, the stream will idle on 
+                    the buffer on air after the next frame sync.
+		@return		The current stream status.
+    **/
 	AJA_VIRTUAL ULWord	StreamChannelStop (const NTV2Channel inChannel,
-												NTV2StreamChannel& status);
+                                           NTV2StreamChannel& status);
 
-    // flush the buffers
+	/**
+		@brief		Flush a stream.  Remove all the buffers from the stream except a currently active idle buffer.
+                    The stream must be in the initialize or idle state.
+		@return		The current stream status.
+    **/
     AJA_VIRTUAL ULWord	StreamChannelFlush (const NTV2Channel inChannel,
                                             NTV2StreamChannel& status);
 
-    // current stream status
+	/**
+		@brief		Get the current stream status.
+		@return		The current stream status.
+    **/
 	AJA_VIRTUAL ULWord	StreamChannelStatus (const NTV2Channel inChannel,
-												NTV2StreamChannel& status);
+                                             NTV2StreamChannel& status);
 
-	// wait for a buffer interrupt
+	/**
+		@brief		Wait for any stream event.  Returns for any state or buffer change.
+		@return		The current stream status.
+    **/
 	AJA_VIRTUAL ULWord	StreamChannelWait (const NTV2Channel inChannel,
-											NTV2StreamChannel& status);
+                                           NTV2StreamChannel& status);
 
-	// add a buffer to the stream
-	AJA_VIRTUAL ULWord	StreamBufferAdd (const NTV2Channel inChannel,
-											NTV2_POINTER inBuffer,
-											ULWord64 bufferCookie,
+	/**
+		@brief		Queue a buffer to the stream.  The bufferCookie is a user defined identifier of the buffer
+                    used by the stream methods.
+		@return		The queued buffer status.
+    **/
+	AJA_VIRTUAL ULWord	StreamBufferQueue (const NTV2Channel inChannel,
+                                           NTV2_POINTER inBuffer,
+                                           ULWord64 bufferCookie,
+                                           NTV2StreamBuffer& status);
+
+	/**
+		@brief		Remove the oldest buffer released by the streaming engine from the buffer queue.
+		@return		The removed buffer status.
+	**/
+	AJA_VIRTUAL ULWord	StreamBufferRelease (const NTV2Channel inChannel,
 											NTV2StreamBuffer& status);
 
-	// request buffer status
+	/**
+		@brief		Get the status of the buffer identified by the bufferCookie.
+		@return		The buffer status.
+    **/
 	AJA_VIRTUAL ULWord	StreamBufferStatus (const NTV2Channel inChannel,
 											ULWord64 bufferCookie,
 											NTV2StreamBuffer& status);
@@ -6487,8 +6534,8 @@ public:
 	AJA_VIRTUAL bool GetMultiRasterBypassEnable (bool & outEnabled);	//	New in SDK 16.1
 	AJA_VIRTUAL bool IsMultiRasterWidgetChannel (const NTV2Channel inChannel);	//	New in SDK 16.2
 	///@}
-	
-	AJA_VIRTUAL bool IsBreakoutBoardConnected (void);	//	New in SDK 17.0
+
+	AJA_VIRTUAL bool	IsBreakoutBoardConnected (void);	//	New in SDK 17.0
 
 #if !defined(NTV2_DEPRECATE_16_1)
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioOutputMonitorSource (const NTV2AudioMonitorSelect inChannelPair, const NTV2Channel inAudioSystem = NTV2_CHANNEL1))	{return SetAudioOutputMonitorSource(inChannelPair, NTV2AudioSystem(inAudioSystem));}	///< @deprecated	Use the function that uses NTV2AudioChannelPair and NTV2AudioSystem params.
@@ -6528,7 +6575,11 @@ private:
 
 	AJA_VIRTUAL bool	IsMultiFormatActive (void); ///< @return	True if the device supports the multi format feature and it's enabled; otherwise false.
 	AJA_VIRTUAL bool	CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFirst, const NTV2Channel inLast);
+	ULWordSet			mSupportedWgts;			///< @brief	Cache my supported NTV2WidgetIDs
+	mutable AJALock		mSupportedWgtsLock;		///< @brief	Guard mutex for mSupportedWgts
+#if defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
 	class DeviceCapabilities	mDevCap;
+#endif	//	defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
 };	//	CNTV2Card
 
 

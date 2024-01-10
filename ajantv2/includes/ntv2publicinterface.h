@@ -5498,7 +5498,9 @@ typedef enum
 													(_x_) == NTV2_TYPE_AJADEBUGLOGGING	||	\
 													(_x_) == NTV2_TYPE_AJABUFFERLOCK	||	\
 													(_x_) == NTV2_TYPE_AJABITSTREAM		||	\
-													(_x_) == NTV2_TYPE_AJADMASTREAM)
+													(_x_) == NTV2_TYPE_AJADMASTREAM		||	\
+													(_x_) == NTV2_TYPE_AJASTREAMCHANNEL	||	\
+													(_x_) == NTV2_TYPE_AJASTREAMBUFFER)
 
 		//	NTV2Buffer FLAGS
 		#define NTV2Buffer_ALLOCATED				BIT(0)		///< @brief Allocated using Allocate function?
@@ -8690,11 +8692,12 @@ typedef enum
 
 		// Stream channel action flags
 		#define NTV2_STREAM_CHANNEL_INITIALIZE			BIT(0)			///< @brief Used in ::NTV2StreamChannel to initialize the stream
-		#define NTV2_STREAM_CHANNEL_START				BIT(1)			///< @brief Used in ::NTV2StreamChannel to start streaming
-		#define NTV2_STREAM_CHANNEL_STOP				BIT(2)			///< @brief Used in ::NTV2StreamChannel to stop streaming
-        #define NTV2_STREAM_CHANNEL_FLUSH				BIT(3)			///< @brief Used in ::NTV2StreamChannel to flush buffer queue
-        #define NTV2_STREAM_CHANNEL_STATUS				BIT(4)			///< @brief Used in ::NTV2StreamChannel to request stream status
-        #define NTV2_STREAM_CHANNEL_WAIT				BIT(5)			///< @brief Used in ::NTV2StreamChannel to wait for signal
+        #define NTV2_STREAM_CHANNEL_RELEASE				BIT(1)			///< @brief Used in ::NTV2StreamChannel to release stream
+		#define NTV2_STREAM_CHANNEL_START				BIT(2)			///< @brief Used in ::NTV2StreamChannel to start streaming
+		#define NTV2_STREAM_CHANNEL_STOP				BIT(3)			///< @brief Used in ::NTV2StreamChannel to stop streaming
+        #define NTV2_STREAM_CHANNEL_FLUSH				BIT(4)			///< @brief Used in ::NTV2StreamChannel to flush buffer queue
+        #define NTV2_STREAM_CHANNEL_STATUS				BIT(5)			///< @brief Used in ::NTV2StreamChannel to request stream status
+        #define NTV2_STREAM_CHANNEL_WAIT				BIT(6)			///< @brief Used in ::NTV2StreamChannel to wait for signal
 
 		// Stream channel state flags
 		#define NTV2_STREAM_CHANNEL_STATE_DISABLED		BIT(0)			///< @brief Used in ::NTV2StreamChannel stream disabled
@@ -8704,10 +8707,9 @@ typedef enum
 		#define NTV2_STREAM_CHANNEL_STATE_ERROR			BIT(4)			///< @brief Used in ::NTV2StreamChannel stream error
 
 		// Stream buffer action flags
-		#define NTV2_STREAM_BUFFER_ADD					BIT(0)			///< @brief Used in ::NTV2StreamBuffer to add buffer to queue
-		#define NTV2_STREAM_BUFFER_COMMIT				BIT(1)			///< @brief Used in ::NTV2StreamBuffer to commit added buffers
+		#define NTV2_STREAM_BUFFER_QUEUE				BIT(1)			///< @brief Used in ::NTV2StreamBuffer to add buffer to queue
+		#define NTV2_STREAM_BUFFER_RELEASE				BIT(2)			///< @brief Used in ::NTV2StreamBuffer to signal on complete
 		#define NTV2_STREAM_BUFFER_STATUS				BIT(3)			///< @brief Used in ::NTV2StreamBuffer to request buffer status
-		#define NTV2_STREAM_BUFFER_SIGNAL				BIT(4)			///< @brief Used in ::NTV2StreamBuffer to signal on complete
 
 		// Stream buffer state flags
 		#define NTV2_STREAM_BUFFER_STATE_QUEUED			BIT(0)			///< @brief Used in ::NTV2StreamBuffer buffer queued
@@ -8725,6 +8727,7 @@ typedef enum
         #define NTV2_STREAM_STATUS_INVALID				BIT(4)			///< @brief Used in ::NTV2Stream invalid parameter
         #define NTV2_STREAM_STATUS_TIMEOUT				BIT(5)			///< @brief Used in ::NTV2Stream timeout
         #define NTV2_STREAM_STATUS_RESOURCE				BIT(6)			///< @brief Used in ::NTV2Stream insufficient resource
+        #define NTV2_STREAM_STATUS_OWNER				BIT(7)			///< @brief Used in ::NTV2Stream not the stream onwer
 
 		NTV2_STRUCT_BEGIN (NTV2StreamChannel)
 			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
@@ -8733,12 +8736,13 @@ typedef enum
 				ULWord			mStatus;            ///< @brief Action status
 				ULWord64		mSteps;				///< @brief Stream number of steps
                 ULWord			mStreamState;		///< @brief Stream state
-				ULWord			mQueueDepth;		///< @brief Queue depth
 				ULWord64		mBufferCookie;		///< @brief Active buffer user cookie
 				LWord64			mStartTime;			///< @brief Stream start time
 				LWord64			mStopTime;			///< @brief Stream stop time
-				ULWord64		mBufferCount;		///< @brief Stream buffer count
-				ULWord64		mRepeatCount;		///< @brief Stream repeat count
+				ULWord64		mQueueCount;		///< @brief Number of buffers queued
+				ULWord64		mReleaseCount;		///< @brief Number of buffers released
+				ULWord64		mActiveCount;		///< @brief Number of buffers active
+				ULWord64		mRepeatCount;		///< @brief Number of buffer repeats
 				ULWord			mReserved[32];		///< @brief Reserved for future expansion.
 			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
 
@@ -8752,6 +8756,14 @@ typedef enum
 				///@}
 
 				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
+
+				/**
+					@brief	Gets the queue depth.
+					@return The depth of the queue.
+				**/
+				inline ULWord GetQueueDepth (void)		{return (ULWord)(mQueueCount - mReleaseCount);}
+
+				std::ostream &	Print (std::ostream & inOutStream) const;
 
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
 
@@ -8786,6 +8798,8 @@ typedef enum
 				///@}
 
 				inline		operator NTV2_HEADER*()		{return reinterpret_cast<NTV2_HEADER*>(this);}	//	New in SDK 16.3
+
+				std::ostream &	Print (std::ostream & inOutStream) const;
 
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
 

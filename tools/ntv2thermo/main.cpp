@@ -100,6 +100,7 @@ static int ReadTempAndFanState (CNTV2Card & inDevice, const string & inTempScale
 int main (int argc, const char ** argv)
 {
 	int			result			(0);
+	int			showVersion		(0);
 	char *		pDeviceSpec		(AJA_NULL);	//	Which device?
 	char *		pFormat			(AJA_NULL);	//	What format is desired?
 	char *		pScale			(AJA_NULL);	//	What scale is desired?
@@ -110,12 +111,12 @@ int main (int argc, const char ** argv)
 	//	Command line option descriptions:
 	const struct poptOption userOptionsTable [] =
 	{
-		{"board",		'b',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"index#|serial#|model"				},
-		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"which device to use",			"index#|serial#|model"				},
-		{"format",		'f',	POPT_ARG_STRING,	&pFormat,		0,	"desired format",				"brief|verbose|json"				},
-		{"scale",		's',	POPT_ARG_STRING,	&pScale,		0,	"desired scale",				"celsius|fahrenheit|kelvin|rankine"	},
-		{"fan",			0,		POPT_ARG_STRING,	&pFan,			0,	"desired fan operation",		"read|off|on|lo|med|hi|auto"		},
-		{"log",			'l',	POPT_ARG_STRING,	&pLogInterval,	0,	"log temp & fan state",			"log interval in seconds"			},
+		{"version",		0,		POPT_ARG_NONE,		&showVersion,	0,	"show version & exit",		AJA_NULL							},
+		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"device to use",			"index#|serial#|model"				},
+		{"format",		'f',	POPT_ARG_STRING,	&pFormat,		0,	"desired format",			"brief|verbose|json"				},
+		{"scale",		's',	POPT_ARG_STRING,	&pScale,		0,	"desired scale",			"celsius|fahrenheit|kelvin|rankine"	},
+		{"fan",			0,		POPT_ARG_STRING,	&pFan,			0,	"desired fan operation",	"read|off|on|lo|med|hi|auto"		},
+		{"log",			'l',	POPT_ARG_STRING,	&pLogInterval,	0,	"log temp & fan state",		"log interval in seconds"			},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -125,6 +126,8 @@ int main (int argc, const char ** argv)
 	if (::poptGetNextOpt (optionsContext) < -1)
 		{cerr << "## ERROR:  Bad command line argument(s)" << endl;		return 1;}
 	optionsContext = ::poptFreeContext (optionsContext);
+	if (showVersion)
+		{cout << argv[0] << ", NTV2 SDK " << ::NTV2Version() << endl;  return 0;}
 
 	//	Find the requested device...
 	const string	deviceSpec	(pDeviceSpec ? pDeviceSpec : "0");

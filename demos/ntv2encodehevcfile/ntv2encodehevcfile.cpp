@@ -211,7 +211,7 @@ AJAStatus NTV2EncodeHEVCFile::Init (void)
     mDeviceID = mDevice.GetDeviceID ();						//	Keep the device ID handy, as it's used frequently
     
     // Make sure this device has an M31
-    if (!NTV2DeviceHasHEVCM31 (mDeviceID))
+    if (!mDevice.features().HasHEVCM31())
 	{
   	 	cerr << "## ERROR:  M31 not found" << endl;
         return AJA_STATUS_FAIL;

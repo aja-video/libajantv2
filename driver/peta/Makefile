@@ -7,10 +7,8 @@
 DIR := $(strip $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST)))))
 
 #DRIVERDIR	?= $(DIR)
-KVERSION	?= $(shell uname -r)
-KDIR		?= /lib/modules/$(KVERSION)/build
-# EXTRA_DEPS = -DNTV2_DEPRECATE_14_0 -DNTV2_DEPRECATE_14_1 
 
+# EXTRA_DEPS = -DNTV2_DEPRECATE_14_0 -DNTV2_DEPRECATE_14_1 
 include $(DIR)/../configure.mk
 include $(DIR)/../sdkversion.mk
 

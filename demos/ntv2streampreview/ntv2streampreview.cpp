@@ -28,17 +28,17 @@ typedef QListIterator <QAbstractButton *>	QButtonIterator;
 NTV2StreamPreview::NTV2StreamPreview (QWidget * parent, Qt::WindowFlags flags)
 	:	QDialog (parent, flags)
 {
-	if (objectName ().isEmpty ())
-		setObjectName (QString::fromUtf8 ("Dialog"));
+	if (objectName().isEmpty())
+		setObjectName(QString::fromUtf8("Dialog"));
 
 	mBoardChoiceCombo = new QComboBox;
-	for (ULWord ndx (0);  ndx < 100;  ndx++)
+	for (ULWord ndx(0);  ndx < 100;  ndx++)
 	{
-		CNTV2Card	device;
+		CNTV2Card device;
 		if (CNTV2DeviceScanner::GetDeviceAtIndex (ndx, device))
-			mBoardChoiceCombo->addItem (tr (device.GetDisplayName ().c_str ()));
+			mBoardChoiceCombo->addItem(device.GetDisplayName().c_str());
 		else if (ndx == 0)
-			{mBoardChoiceCombo->addItem (tr ("No Devices Found"));	break;}
+			{mBoardChoiceCombo->addItem("No Devices Found");  break;}
 		else
 			break;
 	}
@@ -156,16 +156,14 @@ void NTV2StreamPreview::inputChanged (int inputRadioButtonId)
 	const NTV2InputSource	chosenInputSource	(static_cast <NTV2InputSource> (inputRadioButtonId));
 
 	CNTV2Card	device;
-	CNTV2DeviceScanner::GetDeviceAtIndex (mBoardChoiceCombo->currentIndex (), device);
-
-	const NTV2DeviceID		deviceID			(device.GetDeviceID ());
+	CNTV2DeviceScanner::GetDeviceAtIndex (mBoardChoiceCombo->currentIndex(), device);
 
 	if (!NTV2_IS_VALID_INPUT_SOURCE (chosenInputSource))
 	{
 		mStreamGrabber->SetInputSource (NTV2_INPUTSOURCE_INVALID);
 		qDebug ("## DEBUG:  NTV2StreamPreview::inputChanged:  off");
 	}
-	else if (::NTV2DeviceCanDoInputSource (deviceID, chosenInputSource))
+	else if (device.features().CanDoInputSource(chosenInputSource))
 	{
 		mStreamGrabber->SetInputSource (chosenInputSource);
 		cerr << "## DEBUG:  NTV2StreamPreview::inputChanged:  " << ::NTV2InputSourceToString (chosenInputSource) << endl;
@@ -199,25 +197,23 @@ void NTV2StreamPreview::updateInputs (void)
 	CNTV2Card	ntv2Card (mBoardChoiceCombo->currentIndex());
 	if (ntv2Card.IsOpen())
 	{
-		const NTV2DeviceID	deviceID	(ntv2Card.GetDeviceID());
-
-		for (QButtonIterator iter (mInputButtonGroup->buttons());  iter.hasNext ();  )
+		for (QButtonIterator iter (mInputButtonGroup->buttons());  iter.hasNext();  )
 		{
-			QRadioButton *			pButton			(reinterpret_cast <QRadioButton*> (iter.next ()));
-			const NTV2InputSource	inputSource		(static_cast <NTV2InputSource> (mInputButtonGroup->id (pButton)));
+			QRadioButton * pButton (reinterpret_cast<QRadioButton*>(iter.next()));
+			const NTV2InputSource inputSource (NTV2InputSource(mInputButtonGroup->id(pButton)));
 			if (NTV2_IS_VALID_INPUT_SOURCE (inputSource))
 			{
-				const bool				hasInputSource	(::NTV2DeviceCanDoInputSource (deviceID, inputSource));
-				const string			videoFormatStr	(hasInputSource ? ::NTV2VideoFormatToString (ntv2Card.GetInputVideoFormat (inputSource)) : "");
-				const QString			buttonLabel		(QString ("%1   %2").arg (::NTV2InputSourceToString (inputSource, true).c_str(), videoFormatStr.empty() ? "No Detected Input" : videoFormatStr.c_str()));
+				const bool		hasInputSource	(ntv2Card.features().CanDoInputSource(inputSource));
+				const string	videoFormatStr	(hasInputSource ? ::NTV2VideoFormatToString(ntv2Card.GetInputVideoFormat(inputSource)) : "");
+				const QString	buttonLabel		(QString("%1   %2").arg(::NTV2InputSourceToString(inputSource, true).c_str(), videoFormatStr.empty() ? "No Detected Input" : videoFormatStr.c_str()));
 				pButton->setText (buttonLabel);
 				pButton->setEnabled (hasInputSource);
 			}
 		}
 
 		#if defined (INCLUDE_AJACC)
-			const bool	hasCustomAnc	(::NTV2DeviceCanDoCustomAnc (deviceID));
-			for (QButtonIterator iter (mCaptionButtonGroup->buttons());  iter.hasNext ();  )
+			const bool hasCustomAnc (mDevice.features().CanDoCustomAnc());
+			for (QButtonIterator iter(mCaptionButtonGroup->buttons());  iter.hasNext();  )
 				iter.next()->setEnabled (hasCustomAnc);
 		#endif	//	defined (INCLUDE_AJACC)
 
@@ -228,10 +224,10 @@ void NTV2StreamPreview::updateInputs (void)
 
 void NTV2StreamPreview::timerEvent (QTimerEvent * event)
 {
-	if (event->timerId () == mTimerID)
-		updateInputs ();
+	if (event->timerId() == mTimerID)
+		updateInputs();
 	else
-		QWidget::timerEvent (event);
+		QWidget::timerEvent(event);
 
 }	//	timerEvent
 

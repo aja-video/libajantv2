@@ -180,7 +180,7 @@ void NTV2StreamGrabber::GrabCaptions (void)
 		NTV2_ASSERT (mNTV2Card.IsOpen ());
 		NTV2_ASSERT (mDeviceID != DEVICE_ID_NOTFOUND);
 
-		if (::NTV2DeviceCanDoCustomAnc (mDeviceID))
+		if (mDevice.features().CanDoCustomAnc())
 		{
 			bool			gotCaptionPacket	(false);
 			CaptionData		captionData;		//	The two byte pairs (one pair per field) our 608 decoder is looking for
@@ -302,7 +302,7 @@ void NTV2StreamGrabber::run (void)
 			mNTV2Card.GetEveryFrameServices (mSavedTaskMode);	//	Save the current state before we change it
 			mNTV2Card.SetEveryFrameServices (NTV2_OEM_TASKS);	//	Since this is an OEM demo we will set the OEM service level
 
-			if (::NTV2DeviceHasBiDirectionalSDI (mNTV2Card.GetDeviceID()))		//	If device has bidirectional SDI connectors...
+			if (mNTV2Card.features().HasBiDirectionalSDI())		//	If device has bidirectional SDI connectors...
 			{
 				bool waitForInput = false;
 				for (unsigned offset (0);  offset < 8;  offset++)
@@ -373,7 +373,7 @@ void NTV2StreamGrabber::run (void)
 				mNTV2Card.SetEveryFrameServices (NTV2_OEM_TASKS);	//	Since this is an OEM demo we will set the OEM service level
 
 				mDeviceID = mNTV2Card.GetDeviceID ();
-//				if (::NTV2DeviceCanDoMultiFormat (mDeviceID))
+//				if (mDevice.features().CanDoMultiFormat())
 					mNTV2Card.SetMultiFormatMode (false);
 
                 if (!mNTV2Card.IsDeviceReady (false))
@@ -385,9 +385,8 @@ void NTV2StreamGrabber::run (void)
 				{
 					mTransferStruct.acVideoBuffer.Allocate(mFrameDimensions.Width()*mFrameDimensions.Height()*4, true);
 					mTransferStruct.acVideoBuffer.Fill(0);
-					mTransferStruct.acANCBuffer.Allocate (::NTV2DeviceCanDoCustomAnc (mNTV2Card.GetDeviceID ()) ? NTV2_ANCSIZE_MAX : 0);		//	Reserve space for anc data
-					mTransferStruct.acANCField2Buffer.Allocate (::NTV2DeviceCanDoCustomAnc (mNTV2Card.GetDeviceID ()) ? NTV2_ANCSIZE_MAX : 0);	//	Reserve space for anc data
-					const ULWord	acOptions(AUTOCIRCULATE_WITH_RP188  |  (mTransferStruct.acANCBuffer.IsNULL() && mTransferStruct.acANCField2Buffer.IsNULL() ? 0 : AUTOCIRCULATE_WITH_ANC));
+					mTransferStruct.acANCBuffer.Allocate(mNTV2Card.features().CanDoCustomAnc() ? NTV2_ANCSIZE_MAX : 0);		//	Reserve space for anc data
+					mTransferStruct.acANCField2Buffer.Allocate(mNTV2Card.features().CanDoCustomAnc() ? NTV2_ANCSIZE_MAX : 0);	//	Reserve space for anc data
 					gMutex.lock ();
 					mNTV2Card.DMAStreamStop (mChannel, true);
 					gMutex.unlock ();
@@ -497,7 +496,7 @@ bool NTV2StreamGrabber::SetupInput (void)
 	mTimeCodeSource = ::NTV2InputSourceToTimecodeIndex (mInputSource);
 
 	bool waitForInput(false);
-	if (::NTV2DeviceHasBiDirectionalSDI (mNTV2Card.GetDeviceID()))	//	If device has bidirectional SDIs...
+	if (mNTV2Card.features().HasBiDirectionalSDI())	//	If device has bidirectional SDIs...
 		for (unsigned offset (0);  offset < 4;  offset++)
 		{
 			mNTV2Card.EnableChannel (NTV2Channel(mChannel+offset));
@@ -555,7 +554,7 @@ bool NTV2StreamGrabber::SetupInput (void)
 			for (unsigned offset (0);  offset < 1;  offset++)
 			{
                 mNumChannels++;
-				if (::NTV2DeviceGetNumCSCs (mDeviceID) > (UWord)mChannel)
+				if (mNTV2Card.features().GetNumCSCs() > UWord(mChannel))
 				{
 					mNTV2Card.Connect (::GetCSCInputXptFromChannel (NTV2Channel (mChannel + offset)), ::GetSDIInputOutputXptFromChannel (NTV2Channel (mChannel + offset)));
 					mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (NTV2Channel (mChannel + offset)), ::GetCSCOutputXptFromChannel (NTV2Channel (mChannel + offset), false/*isKey*/, true/*isRGB*/));
@@ -614,7 +613,7 @@ bool NTV2StreamGrabber::SetupInput (void)
 
 #if 0
             // configure hdmi with 2.0 support
-            if (NTV2_IS_4K_VIDEO_FORMAT (mCurrentVideoFormat) && !mNTV2Card.DeviceCanDoHDMIQuadRasterConversion ())
+            if (NTV2_IS_4K_VIDEO_FORMAT (mCurrentVideoFormat) && !mNTV2Card.DeviceCanDoHDMIQuadRasterConversion())
             {
                 //	Set two sample interleave
                 mChannel = NTV2_CHANNEL1;
@@ -659,7 +658,7 @@ bool NTV2StreamGrabber::SetupInput (void)
                 mNumChannels = 2;
                 mTsi = true;
 			}
-			else if (NTV2_IS_4K_VIDEO_FORMAT (mCurrentVideoFormat) && mNTV2Card.DeviceCanDoHDMIQuadRasterConversion ())
+			else if (NTV2_IS_4K_VIDEO_FORMAT (mCurrentVideoFormat) && mNTV2Card.DeviceCanDoHDMIQuadRasterConversion())
             {
                 mNumChannels = 0;
 				mNTV2Card.SetTsiFrameEnable(false, NTV2_CHANNEL1);
@@ -705,7 +704,7 @@ bool NTV2StreamGrabber::SetupInput (void)
 			}
 
             // configure the qrc if present
-            if (NTV2DeviceGetHDMIVersion(mDeviceID) == 2)
+            if (mNTV2Card.features().GetHDMIVersion() == 2)
                 mNTV2Card.SetHDMIV2Mode (NTV2_IS_4K_VIDEO_FORMAT(mCurrentVideoFormat) ? NTV2_HDMI_V2_4K_CAPTURE : NTV2_HDMI_V2_HDSD_BIDIRECTIONAL);
 
 			// configure passthrough
@@ -887,7 +886,7 @@ void NTV2StreamGrabber::SetupAudio (void)
 		audioSource = NTV2_AUDIO_ANALOG;
 
 	//	Set up AJA device audio...
-	mNumAudioChannels = ::NTV2DeviceGetMaxAudioChannels (mDeviceID);
+	mNumAudioChannels = mNTV2Card.features().GetMaxAudioChannels();
 	mAudioSystem = ::NTV2ChannelToAudioSystem (mChannel);
     mNTV2Card.SetAudioSystemInputSource (mAudioSystem, audioSource, ::NTV2InputSourceToEmbeddedAudioInput (mInputSource));
 	mNTV2Card.SetNumberAudioChannels (mNumAudioChannels, mAudioSystem);

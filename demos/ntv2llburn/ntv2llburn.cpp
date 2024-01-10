@@ -90,7 +90,7 @@ AJAStatus NTV2LLBurn::Init (void)
 	mDeviceID = mDevice.GetDeviceID ();		//	Keep the device ID handy since it will be used frequently
 
 	//	Burn requires device capable of capturing and playing video...
-	if (!(::NTV2DeviceCanDoCapture(mDeviceID)  &&  ::NTV2DeviceCanDoPlayback(mDeviceID)))
+	if (!(mDevice.features().CanDoCapture()  &&  mDevice.features().CanDoPlayback()))
 		{cerr << "## ERROR:  Device cannot both capture & play video" << endl;	return AJA_STATUS_BAD_PARAM; }
 
 	ULWord	appSignature	(0);
@@ -111,7 +111,7 @@ AJAStatus NTV2LLBurn::Init (void)
 		mDevice.SetEveryFrameServices (NTV2_OEM_TASKS);			//	Force OEM tasks
 
 	//	Configure the SDI relays if present
-	if (::NTV2DeviceHasSDIRelays (mDeviceID))
+	if (mDevice.features().HasSDIRelays())
 	{
 		//	Note that if the board's jumpers are not set in the position
 		//	to enable the watchdog timer, these calls will have no effect.
@@ -134,7 +134,7 @@ AJAStatus NTV2LLBurn::Init (void)
 		mConfig.fSuppressAudio = true;
 	}
 
-	if (mConfig.WithAnc() && !::NTV2DeviceCanDoCustomAnc(mDeviceID))
+	if (mConfig.WithAnc() && !mDevice.features().CanDoCustomAnc())
 		{cerr << "## WARNING: Device doesn't support custom Anc, '-a -h' option ignored" << endl;  mConfig.fWithAnc = false; mConfig.fWithHanc = false;}
 
 	//	Set up the video and audio...
@@ -155,7 +155,6 @@ AJAStatus NTV2LLBurn::Init (void)
 		mDevice.SetLTCInputEnable(true);	//	Enable analog LTC input (some LTC inputs are shared with reference input)
 
 	//	Lastly, prepare my AJATimeCodeBurn instance...
-	mFormatDesc = NTV2FormatDescriptor (mVideoFormat, mConfig.fPixelFormat);
 	mTCBurner.RenderTimeCodeFont (CNTV2DemoCommon::GetAJAPixelFormat (mConfig.fPixelFormat), mFormatDesc.numPixels, mFormatDesc.numLines);
 
 	return AJA_STATUS_SUCCESS;
@@ -165,11 +164,11 @@ AJAStatus NTV2LLBurn::Init (void)
 
 AJAStatus NTV2LLBurn::SetupVideo (void)
 {
-	const uint16_t	numFrameStores	(::NTV2DeviceGetNumFrameStores (mDeviceID));
-	const uint16_t	numSDIOutputs	(::NTV2DeviceGetNumVideoOutputs(mDeviceID));
+	const uint16_t	numFrameStores	(mDevice.features().GetNumFrameStores());
+	const uint16_t	numSDIOutputs	(mDevice.features().GetNumVideoOutputs());
 
 	//	Can the device support the desired input source?
-	if (!::NTV2DeviceCanDoInputSource (mDeviceID, mConfig.fInputSource))
+	if (!mDevice.features().CanDoInputSource(mConfig.fInputSource))
 		{cerr << "## ERROR:  This device cannot receive input from the specified source" << endl;	return AJA_STATUS_BAD_PARAM;}
 
 	//	Pick an input NTV2Channel from the input source, and enable its frame buffer...
@@ -203,14 +202,14 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 		case NTV2_INPUTSOURCE_INVALID:	cerr << "## ERROR:  Bad input source" << endl;  return AJA_STATUS_BAD_PARAM;
 	}
 
-	bool	isTransmit	(false);
-	if (::NTV2DeviceHasBiDirectionalSDI (mDevice.GetDeviceID ())			//	If device has bidirectional SDI connectors...
-		&& NTV2_INPUT_SOURCE_IS_SDI (mConfig.fInputSource)							//	...and desired input source is SDI...
-			&& mDevice.GetSDITransmitEnable (mConfig.fInputChannel, isTransmit)		//	...and GetSDITransmitEnable succeeds...
-				&& isTransmit)												//	...and input is set to "transmit"...
+	bool isTransmit (false);
+	if (mDevice.features().HasBiDirectionalSDI()								//	If device has bidirectional SDI connectors...
+		&& NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource)						//	...and desired input source is SDI...
+			&& mDevice.GetSDITransmitEnable (mConfig.fInputChannel, isTransmit)	//	...and GetSDITransmitEnable succeeds...
+				&& isTransmit)													//	...and input is set to "transmit"...
 	{
-		mDevice.SetSDITransmitEnable (mConfig.fInputChannel, false);				//	...then disable transmit mode...
-		mDevice.WaitForInputVerticalInterrupt(mConfig.fInputChannel, 20);			//	...and give the device a dozen frames or so to lock to the input signal
+		mDevice.SetSDITransmitEnable (mConfig.fInputChannel, false);			//	...then disable transmit mode...
+		mDevice.WaitForInputVerticalInterrupt(mConfig.fInputChannel, 20);		//	...and give the device a dozen frames or so to lock to the input signal
 	}	//	if input SDI connector needs to switch from transmit mode
 
 	if (mConfig.WithAnc() && !NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource))
@@ -228,8 +227,8 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 	mAudioSystem	= ::NTV2InputSourceToAudioSystem (mConfig.fInputSource);
 	mOutputDest		= ::NTV2ChannelToOutputDestination (mConfig.fOutputChannel);
 
-	if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID)					//	If device has bidirectional SDI connectors...
-		&& NTV2_OUTPUT_DEST_IS_SDI (mOutputDest))			//	...and output destination is SDI...
+	if (mDevice.features().HasBiDirectionalSDI()			//	If device has bidirectional SDI connectors...
+		&& NTV2_OUTPUT_DEST_IS_SDI(mOutputDest))			//	...and output destination is SDI...
 			mDevice.SetSDITransmitEnable (mConfig.fOutputChannel, true);	//	...then enable transmit mode
 
 	if (mConfig.WithAnc() && !NTV2_OUTPUT_DEST_IS_SDI(mOutputDest))
@@ -238,19 +237,19 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 	mDevice.EnableChannel (mConfig.fInputChannel);		//	Enable the input frame buffer
 	mDevice.EnableChannel (mConfig.fOutputChannel);		//	Enable the output frame buffer
 
-	if(::NTV2DeviceCanDoMultiFormat (mDeviceID) && mConfig.fDoMultiFormat)
+	if (mDevice.features().CanDoMultiFormat() && mConfig.fDoMultiFormat)
 		mDevice.SetMultiFormatMode (true);
-	else if(::NTV2DeviceCanDoMultiFormat (mDeviceID))
+	else if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode (false);
 
 	//	Set the input channel format to the detected input format...
-	mDevice.SetVideoFormat (mVideoFormat, false, false, ::NTV2DeviceCanDoMultiFormat(mDeviceID) ? mConfig.fInputChannel : NTV2_CHANNEL1);
-	if (::NTV2DeviceCanDoMultiFormat (mDeviceID))									//	If device supports multiple formats per-channel...
-		mDevice.SetVideoFormat (mVideoFormat, false, false, mConfig.fOutputChannel);		//	...then also set the output channel format to the detected input format
+	mDevice.SetVideoFormat (mVideoFormat, false, false, mDevice.features().CanDoMultiFormat() ? mConfig.fInputChannel : NTV2_CHANNEL1);
+	if (mDevice.features().CanDoMultiFormat())											//	If device supports multiple formats per-channel...
+		mDevice.SetVideoFormat (mVideoFormat, false, false, mConfig.fOutputChannel);	//	...then also set the output channel format to the detected input format
 
 	//	Set the frame buffer pixel format for both channels on the device, assuming it
 	//	supports that pixel format . . . otherwise default to 8-bit YCbCr...
-	if (!::NTV2DeviceCanDoFrameBufferFormat (mDeviceID, mConfig.fPixelFormat))
+	if (!mDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
 		mConfig.fPixelFormat = NTV2_FBF_8BIT_YCBCR;
 
 	//	Set the pixel format for both device frame buffers...
@@ -269,21 +268,19 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 	mDevice.SetMode	(mConfig.fInputChannel,  NTV2_MODE_CAPTURE);
 	mDevice.SetMode (mConfig.fOutputChannel, NTV2_MODE_DISPLAY);
 
-	if (!NTV2_IS_SD_VIDEO_FORMAT(mVideoFormat))
-	{
-		//	Enable VANC for non-SD formats, to pass thru captions, etc.
-		mDevice.SetEnableVANCData (false);
-		if (::Is8BitFrameBufferFormat (mConfig.fPixelFormat))
-		{
-			//	8-bit FBFs require VANC bit shift...
-			mDevice.SetVANCShiftMode (mConfig.fInputChannel, NTV2_VANCDATA_8BITSHIFT_ENABLE);
-			mDevice.SetVANCShiftMode (mConfig.fOutputChannel, NTV2_VANCDATA_8BITSHIFT_ENABLE);
-		}
-	}	//	if not SD video
-
 	//	Set up the device signal routing, and both playout and capture AutoCirculate...
 	RouteInputSignal();
 	RouteOutputSignal();
+
+	//	Now that newer AJA devices can capture/play anc data from separate buffers,
+	//	there's no need to enable VANC frame geometries...
+	mDevice.SetVANCMode (NTV2_VANCMODE_OFF, mConfig.fInputChannel);
+	mDevice.SetVANCMode (NTV2_VANCMODE_OFF, mConfig.fOutputChannel);
+	if (::Is8BitFrameBufferFormat(mConfig.fPixelFormat))
+	{	//	8-bit FBFs:  since not using VANC geometries, disable bit shift...
+		mDevice.SetVANCShiftMode (mConfig.fInputChannel, NTV2_VANCDATA_NORMAL);
+		mDevice.SetVANCShiftMode (mConfig.fOutputChannel, NTV2_VANCDATA_NORMAL);
+	}
 
 	//	Be sure the RP188 mode for the SDI input (expressed as an NTV2Channel),
 	//	is set to NTV2_RP188_INPUT...
@@ -307,6 +304,8 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 	mDevice.SetInputFrame (mConfig.fInputChannel,  0);
 	mDevice.SetOutputFrame(mConfig.fOutputChannel, 2);
 
+	//	Now that the video is set up, get information about the current frame geometry...
+	mFormatDesc = NTV2FormatDescriptor (mVideoFormat, mConfig.fPixelFormat);
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetupVideo
@@ -318,7 +317,7 @@ AJAStatus NTV2LLBurn::SetupAudio (void)
 	mDevice.SetAudioSystemInputSource (mAudioSystem, ::NTV2InputSourceToAudioSource (mConfig.fInputSource), ::NTV2InputSourceToEmbeddedAudioInput (mConfig.fInputSource));
 
 	//	It's best to use all available audio channels...
-	mDevice.SetNumberAudioChannels (::NTV2DeviceGetMaxAudioChannels (mDeviceID), mAudioSystem);
+	mDevice.SetNumberAudioChannels (mDevice.features().GetMaxAudioChannels(), mAudioSystem);
 
 	//	Assume 48kHz PCM...
 	mDevice.SetAudioRate (NTV2_AUDIO_48K, mAudioSystem);
@@ -327,13 +326,13 @@ AJAStatus NTV2LLBurn::SetupAudio (void)
 	mDevice.SetAudioBufferSize (NTV2_AUDIO_BUFFER_BIG, mAudioSystem);
 
 	//	Set up the output audio embedders...
-	if (::NTV2DeviceGetNumAudioSystems (mDeviceID) > 1)
+	if (mDevice.features().GetNumAudioSystems() > 1)
 	{
 		//	Some devices, like the Kona1, have 2 FrameStores but only 1 SDI output,
 		//	which makes mConfig.fOutputChannel == NTV2_CHANNEL2, but need SDIoutput to be NTV2_CHANNEL1...
 		UWord	SDIoutput(mConfig.fOutputChannel);
-		if (SDIoutput >= ::NTV2DeviceGetNumVideoOutputs(mDeviceID))
-			SDIoutput = ::NTV2DeviceGetNumVideoOutputs(mDeviceID) - 1;
+		if (SDIoutput >= mDevice.features().GetNumVideoOutputs())
+			SDIoutput = mDevice.features().GetNumVideoOutputs() - 1;
 		mDevice.SetSDIOutputAudioSystem (NTV2Channel(SDIoutput), mAudioSystem);
 	}
 
@@ -427,7 +426,7 @@ void NTV2LLBurn::RouteOutputSignal (void)
 	{
 		//	Route all SDI outputs to the outputXpt...
 		const NTV2Channel	startNum		(NTV2_CHANNEL1);
-		const NTV2Channel	endNum			(NTV2Channel(::NTV2DeviceGetNumVideoChannels(mDeviceID)));
+		const NTV2Channel	endNum			(NTV2Channel(mDevice.features().GetNumVideoChannels()));
 		NTV2WidgetID		outputWidgetID	(NTV2_WIDGET_INVALID);
 
 		for (NTV2Channel chan(startNum);  chan < endNum;  chan = NTV2Channel(chan+1))
@@ -436,21 +435,21 @@ void NTV2LLBurn::RouteOutputSignal (void)
 			if (chan == mConfig.fInputChannel  ||  chan == mConfig.fOutputChannel)
 				continue;	//	Skip the input & output channel, already routed
 			mRP188Outputs.insert(chan);	//	Add this SDI spigot to those we'll push timecode into
-			if (::NTV2DeviceHasBiDirectionalSDI (mDeviceID))
+			if (mDevice.features().HasBiDirectionalSDI())
 				mDevice.SetSDITransmitEnable (chan, true);
-			if (CNTV2SignalRouter::GetWidgetForInput (::GetSDIOutputInputXpt (chan, ::NTV2DeviceCanDoDualLink(mDeviceID)), outputWidgetID))
-				if (::NTV2DeviceCanDoWidget (mDeviceID, outputWidgetID))
+			if (CNTV2SignalRouter::GetWidgetForInput (::GetSDIOutputInputXpt (chan, mDevice.features().CanDoDualLink()), outputWidgetID))
+				if (mDevice.features().CanDoWidget(outputWidgetID))
 					mDevice.Connect (::GetSDIOutputInputXpt(chan), outputXpt);
 		}	//	for each output spigot
 
 		//	If HDMI and/or analog video outputs are available, route them, too...
-		if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1))
+		if (mDevice.features().CanDoWidget(NTV2_WgtHDMIOut1))
 			mDevice.Connect (NTV2_XptHDMIOutInput, outputXpt);			//	Route the output signal to the HDMI output
-		if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtHDMIOut1v2))
+		if (mDevice.features().CanDoWidget(NTV2_WgtHDMIOut1v2))
 			mDevice.Connect (NTV2_XptHDMIOutQ1Input, outputXpt);		//	Route the output signal to the HDMI output
-		if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtAnalogOut1))
+		if (mDevice.features().CanDoWidget(NTV2_WgtAnalogOut1))
 			mDevice.Connect (NTV2_XptAnalogOutInput, outputXpt);		//	Route the output signal to the Analog output
-		if (::NTV2DeviceCanDoWidget (mDeviceID, NTV2_WgtSDIMonOut1))
+		if (mDevice.features().CanDoWidget(NTV2_WgtSDIMonOut1))
 			mDevice.Connect (::GetSDIOutputInputXpt (NTV2_CHANNEL5), outputXpt);	//	Route the output signal to the SDI monitor output
 	}
 

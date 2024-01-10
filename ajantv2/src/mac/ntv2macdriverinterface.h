@@ -13,7 +13,6 @@
 #include "ntv2macpublicinterface.h"
 #include "ntv2driverinterface.h"
 
-//#define USE_DEVICE_MAP			//	Define to use one io_connect_t for all CNTV2Card instances (per device)
 //#define OPEN_UNSUPPORTED_DEVICES	//	Define to open device, even if it's not support (see NTV2GetSupportedDevices)
 
 
@@ -114,12 +113,8 @@ class CNTV2MacDriverInterface : public CNTV2DriverInterface
 
 private:
 	bool			mIsDEXT;		//	Uses DEXT interface?
-#if defined(USE_DEVICE_MAP)
-	AJA_VIRTUAL io_connect_t	GetIOConnect (const bool inDoNotAllocate = false) const;	//	For internal use only
-#else
 	AJA_VIRTUAL inline io_connect_t	GetIOConnect (void) const	{return mConnection;}	//	For internal use only
 	io_connect_t	mConnection;	//	My io_connect_t
-#endif
 
 	// 64 bit thunking - only for structures that contain pointers
 	AJA_VIRTUAL void CopyTo_AUTOCIRCULATE_DATA_64 (AUTOCIRCULATE_DATA *p, AUTOCIRCULATE_DATA_64 *p64);

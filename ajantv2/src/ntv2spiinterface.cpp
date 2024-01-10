@@ -730,7 +730,6 @@ bool CNTV2AxiSpiFlash::SpiTransfer(std::vector<uint8_t> commandSequence,
 	SpiResetFifos();
 
 	// 2 issue the command & arguments
-	uint32_t dummyVal = 0;
 	uint32_t numDummyBytes = 0;
 	for(unsigned i=0;i<commandSequence.size();++i)
 	{
