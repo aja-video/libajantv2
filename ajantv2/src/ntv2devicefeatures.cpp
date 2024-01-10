@@ -569,6 +569,7 @@ ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID boardID, NTV2FrameGeometry 
 	case DEVICE_ID_CORVID44_2X4K:
 	case DEVICE_ID_CORVID44_PLNR:
 	case DEVICE_ID_TTAP_PRO:
+	case DEVICE_ID_KONAX:
 		switch (inFrameGeometry)
 		{
 		case NTV2_FG_4x1920x1080:
