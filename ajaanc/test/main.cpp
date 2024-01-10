@@ -7,16 +7,18 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 #include "ajantv2/includes/ntv2endian.h"
+#include "ajabase/common/common.h"
 #include "ajabase/common/options_popt.h"
 #include "ajabase/common/performance.h"
+#include "ajabase/system/debug.h"
 #include "ancillarydata_cea608_line21.h"
 #include "ancillarydata_cea608_vanc.h"
 #include "ancillarydata_cea708.h"
 #include "ancillarydata_hdr_hlg.h"
 #include "ancillarydata_timecode_atc.h"
 #include "ancillarylist.h"
-#include "ajacc/includes/ntv2smpteancdata.h"
-#include "ajacc/includes/ntv2captionlogging.h"
+#include "ntv2smpteancdata.h"
+#include "ntv2captionlogging.h"
 #include <iomanip>
 #include <utility>	//	std::rel_ops
 #include <random>	//	std::uniform_int_distribution

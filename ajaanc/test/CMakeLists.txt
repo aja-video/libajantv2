@@ -1,10 +1,14 @@
 project(ut_ajaanc)
 
+set(TEST_XML_DIR ${CMAKE_CURRENT_BINARY_DIR})
+set(DOCTEST_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/doctest/doctest)
+
 set(TARGET_INCLUDE_DIRS
-	${APP_ROOT}/..
-	${AJALIBRARIES_ROOT}
-	${NON_AJA_ROOT}
-	${NON_AJA_ROOT}/doctest)
+	${DOCTEST_INCLUDE_DIR}
+	../../ajantv2
+	../../ajantv2/includes
+	${LIBAJACC_DIR}/includes
+)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# noop
@@ -20,10 +24,9 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	set(TARGET_LINK_LIBS dl pthread rt)
 endif()
 
-set(APP_TARGET_SOURCES
-	main.cpp)
-
-add_executable(ut_ajaanc ${APP_TARGET_SOURCES})
-add_dependencies(ut_ajaanc ajacc ajantv2)
-target_include_directories(ut_ajaanc PUBLIC ${TARGET_INCLUDE_DIRS})
-target_link_libraries(ut_ajaanc PUBLIC ajacc ajantv2 ${TARGET_LINK_LIBS})
+if (NOT TARGET ut_ajaanc)
+	add_executable(ut_ajaanc main.cpp ${DOCTEST_INCLUDE_DIR}/doctest.h)
+	add_dependencies(ut_ajaanc ajacc ajantv2)
+	target_include_directories(ut_ajaanc PUBLIC ${TARGET_INCLUDE_DIRS})
+	target_link_libraries(ut_ajaanc PUBLIC ajacc ajantv2 ${TARGET_LINK_LIBS})
+endif()
