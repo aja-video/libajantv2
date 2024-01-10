@@ -73,6 +73,6 @@ if(AJA_INSTALL_CMAKE)
     install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2)
 endif()
 
-if (NOT AJANTV2_DISABLE_TESTS)
+if (NOT AJANTV2_DISABLE_TESTS AND NOT AJANTV2_BUILD_OPENSOURCE)
     add_subdirectory(ajaanc/test)
 endif()
