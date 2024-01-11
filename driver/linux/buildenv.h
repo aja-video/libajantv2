@@ -40,6 +40,15 @@
 #endif
 
 #if DISTRO_IS_RHEL_LIKE == 1
+	#if DISTRO_MAJ_VERSION == 8
+		// RHEL 8 special cases
+
+		// This change was back-ported from kernel 6.2.0 for kernel 4.18.0-504
+        #if ((LINUX_VERSION_CODE >= KERNEL_VERSION(4,18,0)) && DISTRO_KERNEL_PKG_MAJ >= 504)
+			#define KERNEL_6_2_0_DEV_UEVENT
+        #endif
+	#endif
+
 	#if DISTRO_MAJ_VERSION >= 9
 		// RHEL 9 special cases
 
