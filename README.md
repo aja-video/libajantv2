@@ -8,6 +8,8 @@
 
 This is the open-source SDK for discovering, interrogating and controlling NTV2 professional video I/O devices from AJA Video Systems, Inc. All code herein is licensed under the MIT license.
 
+## NOTE: Only the "release" branch will have ongoing support for AJA Video Systems, Inc. Official releases will be tagged from the release branch going forward. The main branch should be considered unstable and is for ongoing development.
+
 # Table of Contents
 1. [Directory Layout](#directory-layout)
 1. [Obtaining libajantv2](#obtaining)
