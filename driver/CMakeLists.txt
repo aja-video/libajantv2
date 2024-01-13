@@ -1,3 +1,8 @@
+if (AJANTV2_DISABLE_DRIVER)
+    message(STATUS "Skipping libajantv2 driver...")
+    return()
+endif()
+
 set(AJADRIVER_COMMON_HEADERS
 	ntv2anc.h
 	ntv2audio.h
