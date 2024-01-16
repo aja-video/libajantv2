@@ -281,8 +281,6 @@ The NTV2 source files originated many years ago from some of the earliest hardwa
 
 In addition, when the first NTV2 SDK was released, the video capture/playout devices it supported were circuit boards fixed in a specific motherboard slot with barely enough I/O capability to handle a single stream of 4:2:2 YUV SD video. Today’s devices are hot-pluggable, support multiple channels, each with its own signal format, up to 4:4:4 8Kp60 and beyond. As the SDK expanded over the years to support newer, faster devices, the older functions, data types and constants remained, which resulted in a very unwieldy and confusing SDK that made it difficult for OEM developers to quickly get up to speed.
 
-### Deprecation History
-
 Starting with the 11.3 SDK, AJA introduced the first `NTV2_DEPRECATE` macro, and gathered many of the obsolete SDK functions, data types and constants under preprocessor `#ifdef` blocks: 
 ```
 #if !defined(NTV2_DEPRECATE)
@@ -293,6 +291,9 @@ Starting with the 11.3 SDK, AJA introduced the first `NTV2_DEPRECATE` macro, and
 ```
 This means that if the `NTV2_DEPRECATE` macro is undefined, then existing code that relies on the old APIs will continue to compile, link and run. If the `NTV2_DEPRECATE` macro is defined, then the obsolete APIs disappear from the compilation, and build errors will result if they’re used.
 
+### Deprecation History
+
+<details><summary>Click to expand</summary>
 - **SDK 11.3:** `NTV2_DEPRECATE` macro introduced (but not defined anywhere).
 - **SDKs 11.3 - 12.3:** Shipped libraries built with old APIs intact (i.e. `NTV2_DEPRECATE` undefined, by default).
 - **SDK 12.4:** `NTV2_DEPRECATE` macro first defined in `ajatypes.h` header file. This was the first SDK that jettisoned the old APIs by default.
@@ -401,6 +402,7 @@ This means that if the `NTV2_DEPRECATE` macro is undefined, then existing code t
     - Member functions **CNTV2Card::GetBaseAddress**, **CNTV2Card::GetRegisterBaseAddress** and **CNTV2Card::GetXena2FlashBaseAddress** first deprecated in SDK 16.0 now produce compile-time warnings when used.
     - Two overloaded member functions **NTV2TestPatternGen::DrawTestPattern** first deprecated in SDK 16.0 now produce compile-time warnings when used.
   - In **libajacc** Closed-Caption Library, the deprecated **CNTV2CaptionRenderer** member functions (**GetRenderer**, **BurnChar**, **BurnString**, **BurnStringAtXY**) first deprecated in SDK 16.0 now produce compile-time warnings when used.
+</details>
 
 To build the **ajantv2** library to include a deprecated API, comment out or remove its corresponding `#define NTV2_DEPRECATE`… line in `ajatypes.h`, then rebuild the library.
 
