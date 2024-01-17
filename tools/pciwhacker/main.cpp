@@ -46,6 +46,7 @@ int main (int argc, const char ** argv)
 {
 	uint32_t		dmaEngine			(NTV2_DMA1);	//  DMA engine argument
     uint32_t		dmaSize 			(0);        	//  DMA size argument
+    uint32_t		dmaCount 			(0);        	//  DMA count argument
     char *			pDeviceSpec			(AJA_NULL);		//	Device argument
 	int				doCapture			(0);			//	Do a capture (read from device)
     int				doLock              (0);			//	Prelock the buffer
@@ -64,6 +65,7 @@ int main (int argc, const char ** argv)
         {"lock",        'l',	POPT_ARG_NONE,		&doLock,		0,	"prelock buffer?",			AJA_NULL},
         {"multi",		'm',	POPT_ARG_NONE,		&doShareDevice,	0,	"multi-instance?",			"if specified, share device"},
         {"size",		's',	POPT_ARG_INT,       &dmaSize,		0,	"DMA transfer size",		AJA_NULL},
+        {"count",		'n',	POPT_ARG_INT,       &dmaCount,		0,	"max xfer count",			AJA_NULL},
         POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -164,6 +166,9 @@ int main (int argc, const char ** argv)
             updateTimer.Start(); // reset output delay
 		}
 		loopCount++;
+		if (dmaCount)							//	If dmaCount arg non-zero...
+			if (ULWord(loopCount) >= dmaCount)	//	... and if loopCount >= dmaCount...
+				break;							//	... then reached dmaCount limit -- exit
 	}
 
 	if (doLock)
