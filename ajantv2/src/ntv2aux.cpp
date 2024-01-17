@@ -1008,7 +1008,7 @@ UWord CNTV2Card::AuxExtractGetMaxNumPacketFilters (void)
 
 NTV2DIDSet CNTV2Card::AuxExtractGetDefaultPacketFilters (void)
 {						
-	static const NTV2DID	sDefaultHDDIDs[]	=	{0x02}; 
+	static const NTV2DID	sDefaultHDDIDs[]	=	{0x02, 0x00};
 	// Packet type 0x02: Audio Sample (L-PCM and IEC 61937 compressed formats)
 
 	NTV2DIDSet	result;
