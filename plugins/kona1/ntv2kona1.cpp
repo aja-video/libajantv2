@@ -658,7 +658,7 @@ bool NTV2Kona1::SetupOutputXptMapping (void)
 		CNTV2SignalRouter::GetWidgetOutputs (it->second, cardOxpts);
 		if (konaOxpts.find(NTV2_XptMixer1VidRGB) != konaOxpts.end())
 			konaOxpts.erase(konaOxpts.find(NTV2_XptMixer1VidRGB));	//	remove special case
-		if (konaOxpts.size() != cardOxpts.size())
+		if (konaOxpts.size() > cardOxpts.size())
 		{	NBFAIL("Kona1 " << ::NTV2WidgetIDToString(it->first) << " " << DEC(konaOxpts.size())
 					<< " output(s) != " << DEC(cardOxpts.size()) << " output(s) from '" << mCard.GetDisplayName()
 					<< "' " << ::NTV2WidgetIDToString(it->second));
