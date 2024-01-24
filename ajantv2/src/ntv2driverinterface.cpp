@@ -1496,6 +1496,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 			{const ULWord maxAudChls(GetNumSupported(kDeviceGetMaxAudioChannels));  outValue = maxAudChls >= 8;  break;}
 		case kDeviceCanDoAudio96K:						outValue = ::NTV2DeviceCanDoAudio96K					(devID);	break;	//	Deprecate?
 		case kDeviceCanDoAudioDelay:					outValue = ::NTV2DeviceCanDoAudioDelay					(devID);	break;	//	Deprecate?
+		case kDeviceCanDoBreakoutBoard:					outValue = ::NTV2DeviceCanDoBreakoutBoard				(devID);	break;
 		case kDeviceCanDoBreakoutBox:					outValue = ::NTV2DeviceCanDoBreakoutBox					(devID);	break;
 		case kDeviceCanDoCapture:						outValue = ::NTV2DeviceCanDoCapture						(devID);	break;
 		case kDeviceCanDoColorCorrection:				outValue = ::NTV2DeviceCanDoColorCorrection				(devID);	break;	//	Deprecate?
@@ -1678,6 +1679,7 @@ bool CNTV2DriverInterface::GetRegInfoForBoolParam (const NTV2BoolParamID inParam
 		case kDeviceCanDoAudioMixer:		outRegInfo.Set(kRegGlobalControl2, 0, kRegMaskAudioMixerPresent, kRegShiftAudioMixerPresent);	break;
 		case kDeviceHasMultiRasterWidget:	outRegInfo.Set(kRegMRSupport, 0, kRegMaskMRSupport, kRegShiftMRSupport);						break;
 		case kDeviceHasMicrophoneInput:		outRegInfo.Set(kRegGlobalControl2, 0, kRegMaskIsDNXIV, kRegShiftIsDNXIV);						break;
+		case kDeviceHasBreakoutBoard:		outRegInfo.Set(kRegBOBStatus, 0, kRegMaskBOBAbsent, kRegShiftBOBAbsent);						break;
 		default:	break;
 	}
 	return outRegInfo.IsValid();

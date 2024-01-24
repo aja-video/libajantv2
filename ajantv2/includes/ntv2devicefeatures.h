@@ -137,6 +137,8 @@ typedef enum _NTV2BoolParamID
 	kDeviceHasSPIv5,							///< @brief Use kDeviceGetSPIVersion instead.
 	kDeviceHasXilinxDMA,						///< @brief True if device has Xilinx DMA hardware.
 	kDeviceHasMicrophoneInput,					///< @brief True if device has a microphone input connector.
+	kDeviceCanDoBreakoutBoard,					///< @brief True if device supports an AJA breakout board. (New in SDK 17.1)
+	kDeviceHasBreakoutBoard,					///< @brief True if device has attached breakout board. (New in SDK 17.1)
 	kNTV2BoolParam_LAST,
 	kDeviceCanDo_INVALID	= kNTV2BoolParam_LAST
 } NTV2BoolParamID;
