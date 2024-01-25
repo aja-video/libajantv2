@@ -337,6 +337,16 @@ static const ULWord gChannelToSDIIn3GModeMask []	= { kRegMaskSDIIn3GbpsMode,		kR
 
 static const ULWord gChannelToSDIIn3GModeShift []	= { kRegShiftSDIIn3GbpsMode,	kRegShiftSDIIn23GbpsMode,	kRegShiftSDIIn33GbpsMode,	kRegShiftSDIIn43GbpsMode,
 														kRegShiftSDIIn53GbpsMode,	kRegShiftSDIIn63GbpsMode,	kRegShiftSDIIn73GbpsMode,	kRegShiftSDIIn83GbpsMode,	0};
+
+static const ULWord	gChannelToSDIInVPIDLinkAValidMask[]	= {	kRegMaskSDIInVPIDLinkAValid,	kRegMaskSDIIn2VPIDLinkAValid,	kRegMaskSDIIn3VPIDLinkAValid,	kRegMaskSDIIn4VPIDLinkAValid,
+															kRegMaskSDIIn5VPIDLinkAValid,	kRegMaskSDIIn6VPIDLinkAValid,	kRegMaskSDIIn7VPIDLinkAValid,	kRegMaskSDIIn8VPIDLinkAValid,	0};
+
+static const ULWord	gChannelToSDIInVPIDARegNum []		= {	kRegSDIIn1VPIDA,			kRegSDIIn2VPIDA,			kRegSDIIn3VPIDA,			kRegSDIIn4VPIDA,
+															kRegSDIIn5VPIDA,			kRegSDIIn6VPIDA,			kRegSDIIn7VPIDA,			kRegSDIIn8VPIDA,			0};
+
+static const ULWord	gChannelToSDIInVPIDBRegNum []		= {	kRegSDIIn1VPIDB,			kRegSDIIn2VPIDB,			kRegSDIIn3VPIDB,			kRegSDIIn4VPIDB,
+															kRegSDIIn5VPIDB,			kRegSDIIn6VPIDB,			kRegSDIIn7VPIDB,			kRegSDIIn8VPIDB,			0};
+
 static const ULWord gChannelToSDIIn6GModeMask []	= { kRegMaskSDIIn16GbpsMode,		kRegMaskSDIIn26GbpsMode,	kRegMaskSDIIn36GbpsMode,	kRegMaskSDIIn46GbpsMode,
 														kRegMaskSDIIn56GbpsMode,	kRegMaskSDIIn66GbpsMode,	kRegMaskSDIIn76GbpsMode,	kRegMaskSDIIn86GbpsMode,	0};
 
@@ -658,7 +668,7 @@ bool NTV2Kona1::SetupOutputXptMapping (void)
 		CNTV2SignalRouter::GetWidgetOutputs (it->second, cardOxpts);
 		if (konaOxpts.find(NTV2_XptMixer1VidRGB) != konaOxpts.end())
 			konaOxpts.erase(konaOxpts.find(NTV2_XptMixer1VidRGB));	//	remove special case
-		if (konaOxpts.size() != cardOxpts.size())
+		if (konaOxpts.size() > cardOxpts.size())
 		{	NBFAIL("Kona1 " << ::NTV2WidgetIDToString(it->first) << " " << DEC(konaOxpts.size())
 					<< " output(s) != " << DEC(cardOxpts.size()) << " output(s) from '" << mCard.GetDisplayName()
 					<< "' " << ::NTV2WidgetIDToString(it->second));
@@ -1097,7 +1107,8 @@ bool NTV2Kona1::HandleReadChannelControl (const ULWord regNum, ULWord & outValue
 		if ((mask & kK2RegMaskFrameSize) == kK2RegMaskFrameSize)	//	Reading intrinsic frame size?
 		{	//	Must pull this from kRegCh1Control
 			ULWord val(0);
-			if (!mCard.ReadRegister(regNum, val, kK2RegMaskFrameSize))
+			// if (!mCard.ReadRegister(regNum, val, kK2RegMaskFrameSize))   On Mac, this is returning a "shifted" value (not expected)
+			if (!mCard.ReadRegister(regNum, val))
 				return false;
 			outValue = (outValue & ~(kK2RegMaskFrameSize))  |  val;
 		}
@@ -1240,6 +1251,9 @@ bool NTV2Kona1::NTV2ReadRegisterRemote (const ULWord inRegNum, ULWord & outValue
 		case kRegRXSDI1Status:				regNum = gChannelToRXSDIStatusRegs[mChannel];			break;
 		case kRegRXSDI2Status:				regNum = gChannelToRXSDIStatusRegs[mChannel+1];			break;
 		case kRegRXSDI1CRCErrorCount:		regNum = gChannelToRXSDICRCErrorCountRegs[mChannel];	break;
+		case kRegSDIIn1VPIDA:				regNum = gChannelToSDIInVPIDARegNum[mChannel];			break;
+		case kRegSDIIn1VPIDB:				regNum = gChannelToSDIInVPIDBRegNum[mChannel];			break;
+
 		case kRegInputStatus:				regNum = gChannelToSDIInputStatusRegNum[mChannel];
 											if (regMask == kRegMaskInput1FrameRate)					regMask = gChannelToSDIInputRateMask[mChannel];
 											else if (regMask == kRegMaskInput2FrameRate)			regMask = gChannelToSDIInputRateMask[mChannel+1];
@@ -1259,11 +1273,31 @@ bool NTV2Kona1::NTV2ReadRegisterRemote (const ULWord inRegNum, ULWord & outValue
 											else if (regMask == kRegMaskSDIIn23GbpsSMPTELevelBMode)		regMask = gChannelToSDIIn3GbModeMask[mChannel+1];
 											else if (regMask == kRegMaskSDIIn3GbpsMode)					regMask = gChannelToSDIIn3GModeMask[mChannel];
 											else if (regMask == kRegMaskSDIIn23GbpsMode)				regMask = gChannelToSDIIn3GModeMask[mChannel+1];
-											if (regShift == kRegShiftSDIIn3GbpsSMPTELevelBMode)			regMask = gChannelToSDIIn3GbModeShift[mChannel];
-											else if (regShift == kRegShiftSDIIn23GbpsSMPTELevelBMode)	regMask = gChannelToSDIIn3GbModeShift[mChannel+1];
-											else if (regShift == kRegShiftSDIIn3GbpsMode)				regMask = gChannelToSDIIn3GModeShift[mChannel];
-											else if (regShift == kRegShiftSDIIn23GbpsMode)				regMask = gChannelToSDIIn3GModeShift[mChannel+1];
+											else if (regMask == kRegMaskSDIInVPIDLinkAValid)			regMask = gChannelToSDIInVPIDLinkAValidMask[mChannel];
+ 											// Caller did not use a mask, pass along all relevant data to mChannel, shifted back to channel 1
+											else if (regMask == 0xFFFFFFFF) {
+												if (regNum == kRegSDIInput3GStatus || regNum == kRegSDIInput3GStatus2 )
+												{
+													regMask =  (mChannel % 2 == 0 ) ? 0xFFFFFFFF : 0xFF00;
+													regShift =  (mChannel % 2 == 0 ) ? 0 : 8;
+												}
+												else if (regNum == kRegSDI5678Input3GStatus)
+												{
+													regMask =  0x000000FF << (mChannel - 4) * 8;
+													regShift =  8 * (mChannel-4);
+												}
+											}
+
+											if( regMask == kRegMaskSDIIn3GbpsSMPTELevelBMode ||  regMask == kRegMaskSDIIn23GbpsSMPTELevelBMode ||
+												regMask == kRegMaskSDIIn3GbpsMode ||  regMask == kRegMaskSDIIn23GbpsMode)
+											{
+												if (regShift == kRegShiftSDIIn3GbpsSMPTELevelBMode)			regShift = gChannelToSDIIn3GbModeShift[mChannel];
+												else if (regShift == kRegShiftSDIIn23GbpsSMPTELevelBMode)	regShift = gChannelToSDIIn3GbModeShift[mChannel+1];
+												else if (regShift == kRegShiftSDIIn3GbpsMode)				regShift = gChannelToSDIIn3GModeShift[mChannel];
+												else if (regShift == kRegShiftSDIIn23GbpsMode)				regShift = gChannelToSDIIn3GModeShift[mChannel+1];
+											}
 											break;
+
 		default:	break;
 	}
 	return mCard.ReadRegister(regNum, outValue, regMask, regShift);
