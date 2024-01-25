@@ -1282,10 +1282,10 @@ bool NTV2Kona1::NTV2ReadRegisterRemote (const ULWord inRegNum, ULWord & outValue
 											if( regMask == kRegMaskSDIIn3GbpsSMPTELevelBMode ||  regMask == kRegMaskSDIIn23GbpsSMPTELevelBMode ||
 												regMask == kRegMaskSDIIn3GbpsMode ||  regMask == kRegMaskSDIIn23GbpsMode)
 											{
-												if (regShift == kRegShiftSDIIn3GbpsSMPTELevelBMode)			regMask = gChannelToSDIIn3GbModeShift[mChannel];
-												else if (regShift == kRegShiftSDIIn23GbpsSMPTELevelBMode)	regMask = gChannelToSDIIn3GbModeShift[mChannel+1];
-												else if (regShift == kRegShiftSDIIn3GbpsMode)				regMask = gChannelToSDIIn3GModeShift[mChannel];
-												else if (regShift == kRegShiftSDIIn23GbpsMode)				regMask = gChannelToSDIIn3GModeShift[mChannel+1];
+												if (regShift == kRegShiftSDIIn3GbpsSMPTELevelBMode)			regShift = gChannelToSDIIn3GbModeShift[mChannel];
+												else if (regShift == kRegShiftSDIIn23GbpsSMPTELevelBMode)	regShift = gChannelToSDIIn3GbModeShift[mChannel+1];
+												else if (regShift == kRegShiftSDIIn3GbpsMode)				regShift = gChannelToSDIIn3GModeShift[mChannel];
+												else if (regShift == kRegShiftSDIIn23GbpsMode)				regShift = gChannelToSDIIn3GModeShift[mChannel+1];
 											}
 											break;
 
