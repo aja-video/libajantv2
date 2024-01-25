@@ -1274,10 +1274,19 @@ bool NTV2Kona1::NTV2ReadRegisterRemote (const ULWord inRegNum, ULWord & outValue
 											else if (regMask == kRegMaskSDIIn3GbpsMode)					regMask = gChannelToSDIIn3GModeMask[mChannel];
 											else if (regMask == kRegMaskSDIIn23GbpsMode)				regMask = gChannelToSDIIn3GModeMask[mChannel+1];
 											else if (regMask == kRegMaskSDIInVPIDLinkAValid)			regMask = gChannelToSDIInVPIDLinkAValidMask[mChannel];
-
-											// May also want to add masking for kRegSDI5678Input3GStatus
-											if (regMask == 0xFFFFFFFF && (regNum == kRegSDIInput3GStatus || regNum == kRegSDIInput3GStatus2 ))
-												regMask =  (mChannel % 2 == 0 ) ? 0xFFFFFFFF : 0xFF00;   
+ 											// Caller did not use a mask, pass along all relevant data to mChannel, shifted back to channel 1
+											else if (regMask == 0xFFFFFFFF) {
+												if (regNum == kRegSDIInput3GStatus || regNum == kRegSDIInput3GStatus2 )
+												{
+													regMask =  (mChannel % 2 == 0 ) ? 0xFFFFFFFF : 0xFF00;
+													regShift =  (mChannel % 2 == 0 ) ? 0 : 8;
+												}
+												else if (regNum == kRegSDI5678Input3GStatus)
+												{
+													regMask =  0x000000FF << (mChannel - 4) * 8;
+													regShift =  8 * (mChannel-4);
+												}
+											}
 
 											if( regMask == kRegMaskSDIIn3GbpsSMPTELevelBMode ||  regMask == kRegMaskSDIIn23GbpsSMPTELevelBMode ||
 												regMask == kRegMaskSDIIn3GbpsMode ||  regMask == kRegMaskSDIIn23GbpsMode)
