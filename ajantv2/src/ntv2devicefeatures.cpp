@@ -14,6 +14,7 @@
 //	Most of the device features functions are generated using a Python script from files inside 'ntv2projects/sdkgen/device'.
 //	The script writes the declarations into 'ntv2devicefeatures.hh', and implementations into 'ntv2devicefeatures.hpp'...
 #include "ntv2devicefeatures.hpp"
+#include "ntv2utils.h"
 
 ///////////////////////////////////////////////////////////////////////////
 //	The rest of the non-sdkgen-generated function implementations follow...
@@ -416,6 +417,21 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 #endif
 }
 
+ULWord NTV2DeviceGetNumberVideoFrameBuffers (NTV2DeviceID inDeviceID, NTV2FrameGeometry inFrameGeometry, NTV2Framesize inFramesize)
+{
+	ULWord activeMemorySize = NTV2DeviceGetActiveMemorySize(inDeviceID);
+	ULWord numAudioSystems = NTV2DeviceGetNumAudioSystems(inDeviceID);
+	ULWord numAudioBytes = 0;
+	ULWord hwBytesPerFrame = NTV2FramesizeToByteCount(inFramesize);
+	ULWord videoMemorySize = 0;
+	numAudioSystems += NTV2DeviceCanDoAudioMixer(inDeviceID) ? 2 : 0;
+	numAudioBytes = numAudioSystems * (NTV2DeviceCanDoStackedAudio(inDeviceID) ? 0x800000 : hwBytesPerFrame);
+	videoMemorySize = activeMemorySize - numAudioBytes;
+	hwBytesPerFrame *= NTV2_IS_QUAD_FRAME_GEOMETRY(inFrameGeometry) ? 4 : 1;
+	hwBytesPerFrame *= NTV2_IS_QUAD_QUAD_FRAME_GEOMETRY(inFrameGeometry) ? 8 : 1;
+	assert(hwBytesPerFrame > 0);
+	return videoMemorySize/hwBytesPerFrame;
+}
 
 #if (defined(__CPLUSPLUS__) || defined(__cplusplus)) && !defined(NTV2_BUILDING_DRIVER)
 ULWord NTV2DeviceGetNumberFrameBuffers(NTV2DeviceID boardID)
