@@ -37,7 +37,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         set(CMAKE_OSX_DEPLOYMENT_TARGET $ENV{MACOSX_DEPLOYMENT_TARGET} CACHE STRING "Minimum macOS deployment version" FORCE)
     else()
         if (NOT CMAKE_OSX_DEPLOYMENT_TARGET)
-            set(CMAKE_OSX_DEPLOYMENT_TARGET "10.12" CACHE STRING "Minimum macOS deployment version" FORCE)
+            set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum macOS deployment version" FORCE)
         endif()
     endif()
     # Get the macOS SDK version
