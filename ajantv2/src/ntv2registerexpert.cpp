@@ -43,10 +43,67 @@ using namespace std;
 #define DEF_REG(_num_, _dec_, _rw_, _c1_, _c2_, _c3_)	DefineRegister((_num_), #_num_, _dec_, _rw_, _c1_, _c2_, _c3_)
 
 
-static const string gChlClasses[8]	=	{	kRegClass_Channel1, kRegClass_Channel2, kRegClass_Channel3, kRegClass_Channel4,
+static const string gChlClasses[]	=	{	kRegClass_Channel1, kRegClass_Channel2, kRegClass_Channel3, kRegClass_Channel4,
 											kRegClass_Channel5, kRegClass_Channel6, kRegClass_Channel7, kRegClass_Channel8	};
 static const string sSpace(" ");
 static const string sNull;
+
+typedef enum
+{
+	regNTV4FS_FIRST,
+	regNTV4FS_LineLengthPitch	=	regNTV4FS_FIRST,	//	Reg 0 - Raster bytes/line[31:16] & pitch[15:0]
+	regNTV4FS_ROIVHSize,								//	Reg 1 - ROI size: vert[27:16] horz[11:0]
+	regNTV4FS_ROIF1StartAddr,							//	Reg 2 - ROI F1 start address [31:0]
+	regNTV4FS_ROIF2StartAddr,							//	Reg 3 - ROI F2 end address [31:0]
+	regNTV4FS_ROIF1VHOffsets,							//	Reg 4 - ROI F1 byte offsets: vert[26:16] horz[11:0]
+	regNTV4FS_ROIF2VHOffsets,							//	Reg 5 - ROI F2 byte offsets: vert[26:16] horz[11:0]
+	regNTV4FS_DisplayHorzPixelsPerLine,					//	Reg 6 - Horiz display: total[27:16] active[11:0]
+	regNTV4FS_DisplayFID,								//	Reg 7 - FID bit transition lines: FID lo[26:16] hi[10:0]
+	regNTV4FS_F1ActiveLines,							//	Reg 8 - Disp F1 active lines: end[26:16] start[10:0]
+	regNTV4FS_F2ActiveLines,							//	Reg 9 - Disp F2 active lines: end[26:16] start[10:0]
+	regNTV4FS_RasterControl,							//	Reg 10 - Control: sync[21:20] pixclk[18:16] pixfmt[12:8] p[6] rgb8cvt[5] dither[4] fill[3] DRT[2] disable[1] capture[0]
+	regNTV4FS_RasterPixelSkip,							//	Reg 11 - Raster pixel skip (or unpacker H offset?)
+	regNTV4FS_RasterVideoFill_YCb_GB,					//	Reg 12 - Raster video fill YorG[31:16] CbOrB[15:0]
+	regNTV4FS_RasterVideoFill_Cr_AR,					//	Reg 13 - Raster video fill A[31:16] CrOrR[15:0]
+	regNTV4FS_RasterROIFillAlpha,						//	Reg 14 - ROI Fill Alpha[15:0]
+	regNTV4FS_Status,									//	Reg 15 - Status lineCount[31:16] oddField[0]
+	regNTV4FS_RasterOutputTimingPreset,					//	Reg 16 - Output timing preset[23:0]
+	regNTV4FS_RasterVTotalLines,						//	Reg 17 - Total lines
+	regNTV4FS_RasterSmpteFramePulse,					//	Reg 18 - SMPTE frame pulse
+	regNTV4FS_RasterOddLineStartAddress,				//	Reg 19 - UHD odd line start addr | Green playback component offset (int12_t)
+	regNTV4FS_RasterOffsetBlue,							//	Reg 20 - Blue playback component offset[12:0] (int12_t)
+	regNTV4FS_RasterOffsetRed,							//	Reg 21 - Red playback component offset[12:0] (int12_t)
+	regNTV4FS_RasterOffsetAlpha,						//	Reg 22 - Alpha playback component offset[12:0] (int12_t)
+	regNTV4FS_InputSourceSelect	= 63,					//	Reg 63 - Input source select[7:0]
+	regNTV4FS_LAST				= regNTV4FS_InputSourceSelect,
+	regNTV4FS_REGISTER_COUNT
+} NTV4FrameStoreRegs;
+
+static const std::string sNTV4FrameStoreRegNames[]	= {	"LineLengthPitch",
+														"ROIVHSize",
+														"ROIF1StartAddr",
+														"ROIF2StartAddr",
+														"ROIF1VHOffsets",
+														"ROIF2VHOffsets",
+														"DisplayHorzPixelsPerLine",
+														"DisplayFID",
+														"F1ActiveLines",
+														"F2ActiveLines",
+														"RasterControl",
+														"RasterPixelSkip",
+														"RasterVideoFill_YCb_GB",
+														"RasterVideoFill_Cr_AR",
+														"RasterROIFillAlpha",
+														"Status",
+														"RasterOutputTimingPreset",
+														"RasterVTotalLines",
+														"RasterSmpteFramePulse",
+														"RasterOddLineStartAddress",
+														"RasterOffsetBlue",
+														"RasterOffsetRed",
+														"RasterOffsetAlpha"};
+static const ULWord kNTV4FrameStoreFirstRegNum (0x0000D000 / sizeof(ULWord));	//	First FS reg num 13,312
+static const ULWord kNumNTV4FrameStoreRegisters(regNTV4FS_REGISTER_COUNT);		//	64 registers
 
 
 class RegisterExpert;
@@ -94,6 +151,7 @@ private:
 		SetupBOBRegs();			//	Break Out Board
 		SetupLEDRegs();			//	Bracket LEDs
 		SetupCMWRegs();			//	Clock Monitor Out
+		SetupNTV4FrameStoreRegs();	//	NTV4 FrameStores
 		SetupVRegs();			//	Virtuals
 		REiNOTE(DEC(gLivingInstances) << " extant, " << DEC(gInstanceTally) << " total");
 		if (LOGGING_MAPPINGS)
@@ -991,6 +1049,55 @@ private:
 		DefineRegister	(kRegMixer4Coefficient, "", mDefaultRegDecoder,			READWRITE,	kRegClass_Mixer,	kRegClass_Channel7, kRegClass_Channel8);
 	}
 
+	void SetupNTV4FrameStoreRegs(void)
+	{
+		for (ULWord fsNdx(0);  fsNdx < 4;  fsNdx++)
+		{
+			for (ULWord regNdx(0);  regNdx < ULWord(regNTV4FS_LAST);  regNdx++)
+			{
+				ostringstream regName;  regName << "kRegNTV4FS" << DEC(fsNdx+1) << "_";
+				const ULWord registerNumber (kNTV4FrameStoreFirstRegNum  +  fsNdx * kNumNTV4FrameStoreRegisters  +  regNdx);
+				switch (NTV4FrameStoreRegs(regNdx))
+				{
+					case regNTV4FS_LineLengthPitch:
+					case regNTV4FS_ROIVHSize:
+					case regNTV4FS_ROIF1StartAddr:
+					case regNTV4FS_ROIF2StartAddr:
+					case regNTV4FS_ROIF1VHOffsets:
+					case regNTV4FS_ROIF2VHOffsets:
+					case regNTV4FS_DisplayHorzPixelsPerLine:
+					case regNTV4FS_DisplayFID:
+					case regNTV4FS_F1ActiveLines:
+					case regNTV4FS_F2ActiveLines:
+					case regNTV4FS_RasterControl:
+					case regNTV4FS_RasterPixelSkip:
+					case regNTV4FS_RasterVideoFill_YCb_GB:
+					case regNTV4FS_RasterVideoFill_Cr_AR:
+					case regNTV4FS_RasterROIFillAlpha:
+					case regNTV4FS_Status:
+					case regNTV4FS_RasterOutputTimingPreset:
+					case regNTV4FS_RasterVTotalLines:
+					case regNTV4FS_RasterSmpteFramePulse:
+					case regNTV4FS_RasterOddLineStartAddress:
+					case regNTV4FS_RasterOffsetBlue:
+					case regNTV4FS_RasterOffsetRed:
+					case regNTV4FS_RasterOffsetAlpha:
+						regName << sNTV4FrameStoreRegNames[regNdx];
+						DefineRegister(registerNumber, regName.str(), mDecodeNTV4FSReg, READWRITE, kRegClass_NTV4FrameStore, gChlClasses[fsNdx], kRegClass_NULL);
+						break;
+					case regNTV4FS_InputSourceSelect:
+						regName << "InputSourceSelect";
+						DefineRegister(registerNumber, regName.str(), mDecodeNTV4FSReg, READWRITE, kRegClass_NTV4FrameStore, gChlClasses[fsNdx], kRegClass_NULL);
+						break;
+					default:
+						regName << DEC(regNdx);
+						DefineRegister(registerNumber, regName.str(), mDefaultRegDecoder, READWRITE, kRegClass_NTV4FrameStore, gChlClasses[fsNdx], kRegClass_NULL);
+						break;
+				}
+			}	//	for each FrameStore register
+		}	//	for each FrameStore widget
+	}
+
 	void SetupVRegs(void)
 	{
 		AJAAutoLock lock(&mGuardMutex);
@@ -1575,8 +1682,8 @@ public:
 	string RegValueToString (const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
 	{
 		AJAAutoLock lock(&mGuardMutex);
-		RegNumToDecoderMap::const_iterator	iter	(mRegNumToDecoderMap.find (inRegNum));
-		ostringstream	oss;
+		RegNumToDecoderMap::const_iterator iter(mRegNumToDecoderMap.find(inRegNum));
+		ostringstream oss;
 		if (iter != mRegNumToDecoderMap.end()  &&  iter->second)
 		{
 			const Decoder * pDecoder (iter->second);
@@ -1588,22 +1695,22 @@ public:
 	bool	IsRegInClass (const uint32_t inRegNum, const string & inClassName) const
 	{
 		AJAAutoLock lock(&mGuardMutex);
-		for (RegClassToRegNumConstIter	it	(mRegClassToRegNumMMap.find (inClassName));	 it != mRegClassToRegNumMMap.end() && it->first == inClassName;	 ++it)
+		for (RegClassToRegNumConstIter	it(mRegClassToRegNumMMap.find(inClassName));  it != mRegClassToRegNumMMap.end() && it->first == inClassName;  ++it)
 			if (it->second == inRegNum)
 				return true;
 		return false;
 	}
 	
-	inline bool		IsRegisterWriteOnly (const uint32_t inRegNum) const				{return IsRegInClass (inRegNum, kRegClass_WriteOnly);}
-	inline bool		IsRegisterReadOnly (const uint32_t inRegNum) const				{return IsRegInClass (inRegNum, kRegClass_ReadOnly);}
+	inline bool		IsRegisterWriteOnly (const uint32_t inRegNum) const		{return IsRegInClass (inRegNum, kRegClass_WriteOnly);}
+	inline bool		IsRegisterReadOnly (const uint32_t inRegNum) const		{return IsRegInClass (inRegNum, kRegClass_ReadOnly);}
 
 	NTV2StringSet	GetAllRegisterClasses (void) const
 	{
 		AJAAutoLock lock(&mGuardMutex);
 		if (mAllRegClasses.empty())
-			for (RegClassToRegNumConstIter	it	(mRegClassToRegNumMMap.begin ());  it != mRegClassToRegNumMMap.end();  ++it)
-				if (mAllRegClasses.find (it->first) == mAllRegClasses.end())
-					mAllRegClasses.insert (it->first);
+			for (RegClassToRegNumConstIter it(mRegClassToRegNumMMap.begin());  it != mRegClassToRegNumMMap.end();  ++it)
+				if (mAllRegClasses.find(it->first) == mAllRegClasses.end())
+					mAllRegClasses.insert(it->first);
 		return mAllRegClasses;
 	}
 
@@ -1612,7 +1719,7 @@ public:
 		AJAAutoLock lock(&mGuardMutex);
 		NTV2StringSet	result;
 		NTV2StringSet	allClasses	(GetAllRegisterClasses());
-		for (NTV2StringSetConstIter it	(allClasses.begin ());	it != allClasses.end();	 ++it)
+		for (NTV2StringSetConstIter it(allClasses.begin());  it != allClasses.end();  ++it)
 			if (IsRegInClass (inRegNum, *it))
 			{
 				string str(*it);
@@ -1628,7 +1735,7 @@ public:
 	{
 		AJAAutoLock lock(&mGuardMutex);
 		NTV2RegNumSet	result;
-		for (RegClassToRegNumConstIter	it(mRegClassToRegNumMMap.find(inClassName));  it != mRegClassToRegNumMMap.end() && it->first == inClassName;  ++it)
+		for (RegClassToRegNumConstIter it(mRegClassToRegNumMMap.find(inClassName));  it != mRegClassToRegNumMMap.end() && it->first == inClassName;  ++it)
 			if (result.find(it->second) == result.end())
 				result.insert(it->second);
 		return result;
@@ -1636,7 +1743,6 @@ public:
 
 	NTV2RegNumSet	GetRegistersForDevice (const NTV2DeviceID inDeviceID, const int inOtherRegsToInclude) const
 	{
-		static const string chanClasses[] = {kRegClass_Channel1, kRegClass_Channel2, kRegClass_Channel3, kRegClass_Channel4, kRegClass_Channel5, kRegClass_Channel6, kRegClass_Channel7, kRegClass_Channel8};
 		NTV2RegNumSet		result;
 		const uint32_t		maxRegNum	(::NTV2DeviceGetMaxRegisterNumber(inDeviceID));
 
@@ -1654,7 +1760,7 @@ public:
 			NTV2RegNumSet		allChanRegs;	//	For just those channels it supports
 			for (UWord num(0);	num < numSpigots;	num++)
 			{
-				const NTV2RegNumSet chRegs (GetRegistersForClass(chanClasses[num]));
+				const NTV2RegNumSet chRegs (GetRegistersForClass(gChlClasses[num]));
 				allChanRegs.insert(chRegs.begin(), chRegs.end());
 			}
 			std::set_intersection (ancRegs.begin(), ancRegs.end(),	allChanRegs.begin(), allChanRegs.end(),	 std::inserter(result, result.begin()));
@@ -1685,7 +1791,7 @@ public:
 			NTV2RegNumSet		allChanRegs;	//	For just those CSCs it supports
 			for (UWord num(0);	num < numCSCs;	num++)
 			{
-				const NTV2RegNumSet chRegs (GetRegistersForClass(chanClasses[num]));
+				const NTV2RegNumSet chRegs (GetRegistersForClass(gChlClasses[num]));
 				allChanRegs.insert(chRegs.begin(), chRegs.end());
 			}
 			std::set_intersection (ecscRegs.begin(), ecscRegs.end(),  allChanRegs.begin(), allChanRegs.end(),  std::inserter(result, result.begin()));
@@ -1727,18 +1833,31 @@ public:
 			result.insert(ULWord(kRegMROutControl));
 			result.insert(ULWord(kRegMRSupport));
 		}
-		
+
+		if (inDeviceID == DEVICE_ID_KONAX  ||  inDeviceID == DEVICE_ID_KONAXM)
+		{
+			const NTV2RegNumSet ntv4FSRegs (GetRegistersForClass(kRegClass_NTV4FrameStore));
+			const UWord numFrameStores (::NTV2DeviceGetNumFrameStores(inDeviceID));
+			NTV2RegNumSet chanRegs;	//	Just the supported NTV4 FrameStores
+			for (UWord num(0);  num < numFrameStores;  num++)
+			{
+				const NTV2RegNumSet chRegs (GetRegistersForClass(gChlClasses[num]));
+				chanRegs.insert(chRegs.begin(), chRegs.end());
+			}
+			std::set_intersection (ntv4FSRegs.begin(), ntv4FSRegs.end(),  chanRegs.begin(), chanRegs.end(),  std::inserter(result, result.begin()));
+		}
+
 		if (NTV2DeviceCanDoIDSwitch(inDeviceID))
 		{
 			result.insert(ULWord(kRegIDSwitch));
 		}
-		
+
 		if (NTV2DeviceHasPWMFanControl(inDeviceID))
 		{
 			result.insert(ULWord(kRegPWMFanControl));
 			result.insert(ULWord(kRegPWMFanStatus));
 		}
-		
+
 		if (NTV2DeviceCanDoBreakoutBoard(inDeviceID))
 		{
 			result.insert(ULWord(kRegBOBStatus));
@@ -1747,7 +1866,7 @@ public:
 			result.insert(ULWord(kRegBOBGPIOutData));
 			result.insert(ULWord(kRegBOBAudioControl));
 		}
-		
+
 		if (NTV2DeviceHasBracketLED(inDeviceID))
 		{
 			result.insert(ULWord(kRegLEDReserved0));
@@ -1759,7 +1878,7 @@ public:
 			result.insert(ULWord(kRegLEDHDMIInControl));
 			result.insert(ULWord(kRegLEDHDMIOutControl));
 		}
-		
+
 		if (NTV2DeviceCanDoClockMonitor(inDeviceID))
 		{
 			result.insert(ULWord(kRegCMWControl));
@@ -3264,6 +3383,116 @@ private:
 				return Decoder::operator()(inRegNum, inRegValue, inDeviceID);
 		}
 	}	mDecodeXptValidReg;
+
+	struct DecodeNTV4FSReg : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{	(void) inDeviceID;
+			static const string sPixClkSelects[] = {"27", "74.1758", "74.25", "148.3516", "148.5", "inv5", "inv6", "inv7"};
+			static const string sSyncs[] = {"Sync to Frame", "Sync to Field", "Immediate", "Sync to External"};
+			const ULWord ntv4RegNum ((inRegNum - kNTV4FrameStoreFirstRegNum)  %  kNumNTV4FrameStoreRegisters);
+			ostringstream oss;
+			switch (NTV4FrameStoreRegs(ntv4RegNum))
+			{
+				case regNTV4FS_RasterControl:
+				{	const ULWord sync ((inRegValue & (BIT(20)|BIT(21))) >> 20);
+					const ULWord pixClkSel((inRegValue & (BIT(16)|BIT(17)|BIT(18))) >> 16);
+					const ULWord pixFmt((inRegValue & (BIT(8)|BIT(9)|BIT(10)|BIT(11)|BIT(12))) >> 8);
+					if (inRegValue & BIT(1))
+						oss	<< "Enabled: "		<< YesNo(inRegValue & BIT( 1))							<< endl
+							<< "Mode: "			<< ((inRegValue & BIT( 0)) ? "Capture" : "Display")		<< endl
+							<< "DRT_DISP: "		<< OnOff(inRegValue & BIT( 2))							<< endl
+							<< "Fill Bit: "		<< DEC((inRegValue & BIT( 3)) ? 1 : 0)					<< endl
+							<< "Dither: "		<< EnabDisab(inRegValue & BIT( 4))						<< endl
+							<< "RGB8 Convert: "	<< ((inRegValue & BIT( 5)) ? "Use '00'" : "Copy MSBs")	<< endl
+							<< "Progressive: "	<< YesNo(inRegValue & BIT( 6))							<< endl
+							<< "Pixel Format: "	<< DEC(pixFmt) << " " << ::NTV2FrameBufferFormatToString(NTV2PixelFormat(pixFmt)) << endl
+							<< "Pix Clk Sel: "	<< sPixClkSelects[pixClkSel] << " MHz"					<< endl
+							<< "Sync: "			<< sSyncs[sync];
+					else
+						oss	<< "Enabled: "		<< YesNo(inRegValue & BIT( 1));
+					break;
+				}
+				case regNTV4FS_Status:
+				{	const ULWord lineCnt ((inRegValue & (0xFFFF0000)) >> 16);
+					oss	<< "Field ID: "		<< OddEven(inRegValue & BIT( 0))	<< endl
+						<< "Line Count: "	<< DEC(lineCnt);
+					break;
+				}
+				case regNTV4FS_LineLengthPitch:
+				{	const int32_t xferByteCnt((inRegValue & 0xFFFF0000) >> 16), linePitch(inRegValue & 0x0000FFFF);
+					oss	<< "Line Pitch: "		<< linePitch << (linePitch < 0 ? " (flipped)" : "")	<< endl
+						<< "Xfer Byte Count: "	<< xferByteCnt << " [bytes/line]" << (linePitch < 0 ? " (flipped)" : "");
+					break;
+				}
+				case regNTV4FS_ROIVHSize:
+				{	const ULWord ROIVSize((inRegValue & (0x0FFF0000)) >> 16), ROIHSize(inRegValue & 0x00000FFF);
+					oss	<< "ROI Horz Size: "	<< DEC(ROIHSize) << " [pixels]"		<< endl
+						<< "ROI Vert Size: "	<< DEC(ROIVSize) << " [lines]";
+					break;
+				}
+				case regNTV4FS_ROIF1VHOffsets:
+				case regNTV4FS_ROIF2VHOffsets:
+				{	const ULWord ROIVOff((inRegValue & (0x0FFF0000)) >> 16), ROIHOff(inRegValue & 0x00000FFF);
+					const string fld(ntv4RegNum == regNTV4FS_ROIF1VHOffsets ? "F1" : "F2");
+					oss	<< "ROI " << fld << " Horz Offset: "	<< DEC(ROIHOff)		<< endl
+						<< "ROI " << fld << " Vert Offset: "	<< DEC(ROIVOff);
+					break;
+				}
+				case regNTV4FS_DisplayHorzPixelsPerLine:
+				{	const ULWord tot((inRegValue & (0x0FFF0000)) >> 16), act(inRegValue & 0x00000FFF);
+					oss	<< "Disp Horz Active: "	<< DEC(act)		<< endl
+						<< "Disp Horz Total: "	<< DEC(tot);
+					break;
+				}
+				case regNTV4FS_DisplayFID:
+				{	const ULWord lo((inRegValue & (0x07FF0000)) >> 16), hi(inRegValue & 0x000007FF);
+					oss	<< "Disp FID Lo: "	<< DEC(lo)		<< endl
+						<< "Disp FID Hi: "	<< DEC(hi);
+					break;
+				}
+				case regNTV4FS_F1ActiveLines:
+				case regNTV4FS_F2ActiveLines:
+				{	const ULWord actEnd((inRegValue & (0x07FF0000)) >> 16), actStart(inRegValue & 0x000007FF);
+					const string fld(ntv4RegNum == regNTV4FS_F1ActiveLines ? "F1" : "F2");
+					oss	<< "Disp " << fld << " Active Start: "	<< DEC(actStart)	<< endl
+						<< "Disp " << fld << " Active End: "	<< DEC(actEnd);
+					break;
+				}
+				case regNTV4FS_RasterPixelSkip:
+					oss	<< "Unpacker Horz Offset: "	<< DEC(inRegValue & 0x0000FFFF);
+					break;
+				case regNTV4FS_RasterVideoFill_YCb_GB:
+				case regNTV4FS_RasterVideoFill_Cr_AR:
+				{	const ULWord hi((inRegValue & (0xFFFF0000)) >> 16), lo(inRegValue & 0x0000FFFF);
+					const string YGorA(ntv4RegNum == regNTV4FS_RasterVideoFill_YCb_GB ? "Y|G" : "A");
+					const string CbBorCrR(ntv4RegNum == regNTV4FS_RasterVideoFill_YCb_GB ? "Cb|B" : "Cr|R");
+					oss	<< "Disp Fill "	<< CbBorCrR	<< ": " << DEC(lo)	<< " " << xHEX0N(lo,4)	<< endl
+						<< "Disp Fill "	<< YGorA	<< ": " << DEC(hi)	<< " " << xHEX0N(hi,4);
+					break;
+				}
+				case regNTV4FS_RasterROIFillAlpha:
+				{	const ULWord lo(inRegValue & 0x0000FFFF);
+					oss	<< "ROI Fill Alpha: "	<< DEC(lo)	<< " " << xHEX0N(lo,4);
+					break;
+				}
+				case regNTV4FS_RasterOutputTimingPreset:
+					oss	<< "Output Timing Frame Pulse Preset: " << DEC(inRegValue & 0x00FFFFFF) << " "
+																<< xHEX0N(inRegValue & 0x00FFFFFF,6);
+					break;
+				case regNTV4FS_RasterOffsetBlue:
+				case regNTV4FS_RasterOffsetRed:
+				case regNTV4FS_RasterOffsetAlpha:
+				{	const int32_t lo (inRegValue & 0x00001FFF);
+					oss	<< "Output Video Offset: " << lo << " " << xHEX0N(lo,6);
+					break;
+				}
+				default:
+					return Decoder::operator()(inRegNum, inRegValue, inDeviceID);
+			}
+			return oss.str();
+		}
+	}	mDecodeNTV4FSReg;
 
 	struct DecodeHDMIOutputControl : public Decoder
 	{
