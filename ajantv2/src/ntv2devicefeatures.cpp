@@ -429,7 +429,7 @@ ULWord NTV2DeviceGetNumberVideoFrameBuffers (NTV2DeviceID inDeviceID, NTV2FrameG
 	videoMemorySize = activeMemorySize - numAudioBytes;
 	hwBytesPerFrame *= NTV2_IS_QUAD_FRAME_GEOMETRY(inFrameGeometry) ? 4 : 1;
 	hwBytesPerFrame *= NTV2_IS_QUAD_QUAD_FRAME_GEOMETRY(inFrameGeometry) ? 8 : 1;
-	assert(hwBytesPerFrame > 0);
+	NTV2_ASSERT(hwBytesPerFrame > 0);
 	return videoMemorySize/hwBytesPerFrame;
 }
 
