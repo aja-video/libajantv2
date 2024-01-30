@@ -431,6 +431,30 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 #endif
 }
 
+ULWord NTV2DeviceGetNumberVideoFrameBuffers (NTV2DeviceID inDeviceID, NTV2FrameGeometry inFrameGeometry, NTV2Framesize inFrameSize)
+{
+	ULWord activeMemorySize = NTV2DeviceGetActiveMemorySize(inDeviceID);
+	ULWord numAudioSystems = NTV2DeviceGetNumAudioSystems(inDeviceID);
+	ULWord numAudioBytes = 0;
+	ULWord hwBytesPerFrame = 0;
+	ULWord videoMemorySize = 0;
+	
+	static const ULWord	gFrameSizeToByteCount[NTV2_MAX_NUM_Framesizes]	= { 2 /* NTV2_FRAMESIZE_2MB */,		4 /* NTV2_FRAMESIZE_4MB */,		8 /* NTV2_FRAMESIZE_8MB */,		16 /* NTV2_FRAMESIZE_16MB */,
+												   6 /* NTV2_FRAMESIZE_6MB */,		10 /* NTV2_FRAMESIZE_10MB */,	12 /* NTV2_FRAMESIZE_12MB */,	14 /* NTV2_FRAMESIZE_14MB */,
+												   18 /* NTV2_FRAMESIZE_18MB */,	20 /* NTV2_FRAMESIZE_20MB */,	22 /* NTV2_FRAMESIZE_22MB */,	24 /* NTV2_FRAMESIZE_24MB */,
+												   26 /* NTV2_FRAMESIZE_26MB */,	28 /* NTV2_FRAMESIZE_28MB */,	30 /* NTV2_FRAMESIZE_30MB */,	32 /* NTV2_FRAMESIZE_32MB */};
+	if (inFrameSize < NTV2_MAX_NUM_Framesizes)
+		hwBytesPerFrame = gFrameSizeToByteCount [inFrameSize] * 1024 * 1024;
+	
+	
+	numAudioSystems += NTV2DeviceCanDoAudioMixer(inDeviceID) ? 2 : 0;
+	numAudioBytes = numAudioSystems * (NTV2DeviceCanDoStackedAudio(inDeviceID) ? 0x800000 : hwBytesPerFrame);
+	videoMemorySize = activeMemorySize - numAudioBytes;
+	hwBytesPerFrame *= NTV2_IS_QUAD_FRAME_GEOMETRY(inFrameGeometry) ? 4 : 1;
+	hwBytesPerFrame *= NTV2_IS_QUAD_QUAD_FRAME_GEOMETRY(inFrameGeometry) ? 8 : 1;
+	NTV2_ASSERT(hwBytesPerFrame > 0);
+	return videoMemorySize/hwBytesPerFrame;
+}
 
 #if (defined(__CPLUSPLUS__) || defined(__cplusplus)) && !defined(NTV2_BUILDING_DRIVER)
 ULWord NTV2DeviceGetNumberFrameBuffers(NTV2DeviceID boardID)

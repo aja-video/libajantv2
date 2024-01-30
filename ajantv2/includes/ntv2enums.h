@@ -367,7 +367,7 @@ typedef enum
 	(geom == NTV2_FG_4x3840x2160 || geom == NTV2_FG_4x4096x2160)
 	
 #define NTV2_IS_QUAD_FRAME_GEOMETRY(geom) \
-	( geom >= NTV2_FG_4x1920x1080 && geom <= NTV2_FG_4x2048x1080 )
+	( geom == NTV2_FG_4x1920x1080 || geom == NTV2_FG_4x2048x1080 )
 
 #define NTV2_IS_2K_1080_FRAME_GEOMETRY(geom) \
 	(	geom == NTV2_FG_2048x1114 || \
