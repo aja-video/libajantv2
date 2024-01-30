@@ -61,7 +61,7 @@ if "%DISABLE_PLUGINS%" == "" (
 )
 
 if "%DISABLE_TESTS%" == "" (
-	set DISABLE_TESTS=ON
+	set DISABLE_TESTS=OFF
 )
 
 if "%INSTALL_HEADERS%" == "" (
