@@ -110,6 +110,7 @@ class AJAExport DeviceCapabilities
 		inline bool		HasHEVCM31 (void)						{return dev.IsSupported(kDeviceHasHEVCM31);}
 		inline bool		HasLEDAudioMeters (void)				{return dev.IsSupported(kDeviceHasLEDAudioMeters);}
 		inline bool		HasMicInput (void)						{return dev.IsSupported(kDeviceHasMicrophoneInput);}
+		inline bool		HasNTV4FrameStores (void)				{return dev.IsSupported(kDeviceHasNTV4FrameStores);}
 		inline bool		HasNWL (void)							{return dev.IsSupported(kDeviceHasNWL);}
 		inline bool		HasPCIeGen2 (void)						{return dev.IsSupported(kDeviceHasPCIeGen2);}
 		inline bool		HasRetailSupport (void)					{return dev.IsSupported(kDeviceHasRetailSupport);}
