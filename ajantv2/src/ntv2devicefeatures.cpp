@@ -14,7 +14,6 @@
 //	Most of the device features functions are generated using a Python script from files inside 'ntv2projects/sdkgen/device'.
 //	The script writes the declarations into 'ntv2devicefeatures.hh', and implementations into 'ntv2devicefeatures.hpp'...
 #include "ntv2devicefeatures.hpp"
-#include "ntv2utils.h"
 
 ///////////////////////////////////////////////////////////////////////////
 //	The rest of the non-sdkgen-generated function implementations follow...
@@ -417,13 +416,23 @@ ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID boardID, NTV2FrameGeometry inF
 #endif
 }
 
-ULWord NTV2DeviceGetNumberVideoFrameBuffers (NTV2DeviceID inDeviceID, NTV2FrameGeometry inFrameGeometry, NTV2Framesize inFramesize)
+ULWord NTV2DeviceGetNumberVideoFrameBuffers (NTV2DeviceID inDeviceID, NTV2FrameGeometry inFrameGeometry, NTV2Framesize inFrameSize)
 {
 	ULWord activeMemorySize = NTV2DeviceGetActiveMemorySize(inDeviceID);
 	ULWord numAudioSystems = NTV2DeviceGetNumAudioSystems(inDeviceID);
 	ULWord numAudioBytes = 0;
-	ULWord hwBytesPerFrame = NTV2FramesizeToByteCount(inFramesize);
+	ULWord hwBytesPerFrame = 0;
 	ULWord videoMemorySize = 0;
+	
+	static const ULWord	gFrameSizeToByteCount[]	= { 2 /* NTV2_FRAMESIZE_2MB */,		4 /* NTV2_FRAMESIZE_4MB */,		8 /* NTV2_FRAMESIZE_8MB */,		16 /* NTV2_FRAMESIZE_16MB */,
+												   6 /* NTV2_FRAMESIZE_6MB */,		10 /* NTV2_FRAMESIZE_10MB */,	12 /* NTV2_FRAMESIZE_12MB */,	14 /* NTV2_FRAMESIZE_14MB */,
+												   18 /* NTV2_FRAMESIZE_18MB */,	20 /* NTV2_FRAMESIZE_20MB */,	22 /* NTV2_FRAMESIZE_22MB */,	24 /* NTV2_FRAMESIZE_24MB */,
+												   26 /* NTV2_FRAMESIZE_26MB */,	28 /* NTV2_FRAMESIZE_28MB */,	30 /* NTV2_FRAMESIZE_30MB */,	32 /* NTV2_FRAMESIZE_32MB */,
+												   0	};
+	if (inFrameSize < NTV2_MAX_NUM_Framesizes  &&  inFrameSize < NTV2Framesize(sizeof(gFrameSizeToByteCount) / sizeof(ULWord)))
+		hwBytesPerFrame = gFrameSizeToByteCount [inFrameSize] * 1024 * 1024;
+	
+	
 	numAudioSystems += NTV2DeviceCanDoAudioMixer(inDeviceID) ? 2 : 0;
 	numAudioBytes = numAudioSystems * (NTV2DeviceCanDoStackedAudio(inDeviceID) ? 0x800000 : hwBytesPerFrame);
 	videoMemorySize = activeMemorySize - numAudioBytes;
