@@ -7,16 +7,24 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.h"
 #include "ajantv2/includes/ntv2endian.h"
+#include "ajantv2/includes/ntv2utils.h"
+#include "ajabase/common/common.h"
 #include "ajabase/common/options_popt.h"
 #include "ajabase/common/performance.h"
+#include "ajabase/system/debug.h"
 #include "ancillarydata_cea608_line21.h"
 #include "ancillarydata_cea608_vanc.h"
 #include "ancillarydata_cea708.h"
 #include "ancillarydata_hdr_hlg.h"
 #include "ancillarydata_timecode_atc.h"
 #include "ancillarylist.h"
-#include "ajacc/includes/ntv2smpteancdata.h"
-#include "ajacc/includes/ntv2captionlogging.h"
+
+#ifdef AJANTV2_PROPRIETARY
+// includes from proprietary libajacc library
+#include "ntv2smpteancdata.h"
+#include "ntv2captionlogging.h"
+#endif
+
 #include <iomanip>
 #include <utility>	//	std::rel_ops
 #include <random>	//	std::uniform_int_distribution
@@ -1092,6 +1100,7 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 		}	//	TEST_CASE("BFT_AncillaryData")
 
 
+#ifdef AJANTV2_PROPRIETARY
 		//	We now test SMPTEAncData from the AJACC library here
 		//	because it's now used extensively by AJAANC.
 		TEST_CASE("BFT_SMPTEAncData")
@@ -1418,7 +1427,7 @@ cerr << __FUNCTION__ << ": " << (bFound?"FOUND":"NOT FOUND") << ": srchCh=" << s
 				DBG_CHECK_EQ(numDest, 11);
 			}
 		}	//	TEST_CASE("BFT_SMPTEAncData")
-
+#endif // AJANTV2_PROPRIETARY
 
 #if 0	//	** MrBill **	NOT READY FOR PRIME-TIME
 		TEST_CASE("BFT_SDSetFromVANCData")
