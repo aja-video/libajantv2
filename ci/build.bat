@@ -116,7 +116,7 @@ REM Set up VS Environment
 call "C:\Program Files (x86)\Microsoft Visual Studio\%VS_YEAR%\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" x64
 if not %errorlevel% == 0 (
 	echo Error calling vcvarsall.bat
-	exit 1
+	exit /b 1
 )
 
 echo Removing old build/install directories
@@ -155,12 +155,12 @@ REM Build Project
 cmake --build %BUILD_DIR%
 if not %errorlevel% == 0 (
 	echo Error building targets
-	exit 1
+	exit /b 1
 )
 
 REM Install Project
 cmake --install %BUILD_DIR% 
 if not %errorlevel% == 0 (
 	echo Error installing targets
-	exit 1
+	exit /b 1
 )
