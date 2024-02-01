@@ -198,7 +198,7 @@ bool CNTV2DriverInterface::Close (void)
 	if (IsOpen())
 	{
 		//	Unsubscribe all...
-		for (INTERRUPT_ENUMS eInt(eNumInterruptTypes);	eInt < eNumInterruptTypes;	eInt = INTERRUPT_ENUMS(eInt+1))
+		for (INTERRUPT_ENUMS eInt(eVerticalInterrupt);  eInt < eNumInterruptTypes;  eInt = INTERRUPT_ENUMS(eInt+1))
 			ConfigureSubscription (false, eInt, mInterruptEventHandles[eInt]);
 
 		const bool closeOK(IsRemote() ? CloseRemote() : CloseLocalPhysical());
