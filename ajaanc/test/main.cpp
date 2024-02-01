@@ -2452,11 +2452,10 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			CHECK (isValid);
 		}	//	TEST_CASE("BFT_AncDataCEA608Vanc")
 
-#if 0
-		//	This test case proved the firmware anc extractor was putting the wrong line number
-		//	in the first Line284 (Field2) "analog" packet it wrote into the anc region.
-		//	The anc buffer content here came from a Corvid88 that was receiving SD from an Io4K+.
-		//	It explained why we saw three "analog" packets in Field2, and one in Field1.
+		//	This test case reproduces a long-standing bug in which we'd see 3 "analog" packets of size 255, 255, 210
+		//	in the Field2 anc buffer, instead of just one "analog" packet of size 720, as is expected.
+		//	The anc buffer content here originated in a Corvid88 that was receiving SD from an Io4K+:
+		//		$ ./path/to/ntv2ccplayer -d2 -m -vsd -c3 --no608 --stats --end loop,loop --rate 1200,1200 --608mode roll4,roll4 --608chan cc1,cc3  cc1.txt cc3.txt
 		TEST_CASE("AnalogTest")
 		{
 			static const UByteSequence sCORVID880Ch1Input720x4868BITYCBCRFrm3F1 = {
@@ -2724,11 +2723,115 @@ for (unsigned lineOffset(0);  lineOffset < fd.GetFirstActiveLine();  lineOffset+
 			const NTV2Buffer F1Buffer(&sCORVID880Ch1Input720x4868BITYCBCRFrm3F1[0], sCORVID880Ch1Input720x4868BITYCBCRFrm3F1.size()),
 							 F2Buffer(&sCORVID880Ch1Input720x4868BITYCBCRFrm3F2[0], sCORVID880Ch1Input720x4868BITYCBCRFrm3F2.size());
 			AJAAncillaryList pkts;
-			CHECK(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers (F1Buffer, F2Buffer, pkts)));
-			cout	<< "AnalogTest" << endl
-					<< pkts << endl;
+			CHECK(AJA_SUCCESS(AJAAncillaryList::SetFromDeviceAncBuffers (F1Buffer, F2Buffer, pkts, 1234)));
+//cout << "AnalogTest -- " << pkts << endl;
+			CHECK_EQ(pkts.CountAncillaryData(),7);	//	There should be 7 packets
+//0: [Dig|A|DS1|Y|L9|HANC|xF4x00|CS50|DC=16|SDI|RP-165 Error Detect/Checkwords]: 70C49030B4A400000000000000000000
+			AJAAncillaryData & pkt = *(pkts.GetAncillaryDataAtIndex(0));
+				CHECK_EQ(pkt.GetDataCoding(), AJAAncDataCoding_Digital);
+				CHECK_EQ(pkt.GetLocationVideoLink(), AJAAncDataLink_A);
+				CHECK_EQ(pkt.GetLocationDataStream(), AJAAncDataStream_1);
+				CHECK_EQ(pkt.GetLocationDataChannel(), AJAAncDataChannel_Y);
+				CHECK_EQ(pkt.GetLocationLineNumber(), 9);
+				CHECK_EQ(pkt.GetLocationVideoSpace(), AJAAncDataSpace_HANC);
+				CHECK_EQ(pkt.GetDID(), 0xF4);
+				CHECK_EQ(pkt.GetSID(), 0x00);
+				CHECK_EQ(pkt.GetChecksum(), 0x50);
+				CHECK_EQ(pkt.GetPayloadByteCount(), 16);
+				CHECK_EQ(pkt.GetBufferFormat(), AJAAncBufferFormat_SDI);
+				CHECK_EQ(pkt.GetFrameID(), 1234);
+				CHECK_NE(pkt.AsString(16).find("70C49030B4A400000000000000000000"), string::npos);
+//1: [Dig|A|DS1|Y|L11|HANC|x60x60|CS30|DC=16|SDI|SMPTE-12M ATC Timecode]: 30004000400010302000500000000000
+			pkt = *(pkts.GetAncillaryDataAtIndex(1));
+				CHECK_EQ(pkt.GetDataCoding(), AJAAncDataCoding_Digital);
+				CHECK_EQ(pkt.GetLocationVideoLink(), AJAAncDataLink_A);
+				CHECK_EQ(pkt.GetLocationDataStream(), AJAAncDataStream_1);
+				CHECK_EQ(pkt.GetLocationDataChannel(), AJAAncDataChannel_Y);
+				CHECK_EQ(pkt.GetLocationLineNumber(), 11);
+				CHECK_EQ(pkt.GetLocationVideoSpace(), AJAAncDataSpace_HANC);
+				CHECK_EQ(pkt.GetDID(), 0x60);
+				CHECK_EQ(pkt.GetSID(), 0x60);
+				CHECK_EQ(pkt.GetChecksum(), 0x30);
+				CHECK_EQ(pkt.GetPayloadByteCount(), 16);
+				CHECK_EQ(pkt.GetBufferFormat(), AJAAncBufferFormat_SDI);
+				CHECK_EQ(pkt.GetFrameID(), 1234);
+				CHECK_NE(pkt.AsString(16).find("30004000400010302000500000000000"), string::npos);
+//2: [Dig|A|DS1|Y|L13|HANC|x41x01|CSCE|DC=4|SDI|SMPTE-352M Payload ID]: 81060001
+			pkt = *(pkts.GetAncillaryDataAtIndex(2));
+				CHECK_EQ(pkt.GetDataCoding(), AJAAncDataCoding_Digital);
+				CHECK_EQ(pkt.GetLocationVideoLink(), AJAAncDataLink_A);
+				CHECK_EQ(pkt.GetLocationDataStream(), AJAAncDataStream_1);
+				CHECK_EQ(pkt.GetLocationDataChannel(), AJAAncDataChannel_Y);
+				CHECK_EQ(pkt.GetLocationLineNumber(), 13);
+				CHECK_EQ(pkt.GetLocationVideoSpace(), AJAAncDataSpace_HANC);
+				CHECK_EQ(pkt.GetDID(), 0x41);
+				CHECK_EQ(pkt.GetSID(), 0x01);
+				CHECK_EQ(pkt.GetChecksum(), 0xCE);
+				CHECK_EQ(pkt.GetPayloadByteCount(), 4);
+				CHECK_EQ(pkt.GetBufferFormat(), AJAAncBufferFormat_SDI);
+				CHECK_EQ(pkt.GetFrameID(), 1234);
+				CHECK_NE(pkt.AsString(16).find("81060001"), string::npos);
+//3: [Ana|A|DS1|Y|L21|VANC|x00x00|CS00|DC=720|SDI|SMPTE-291 Control Packet]: 10101010101010101010101010101011...
+			pkt = *(pkts.GetAncillaryDataAtIndex(3));
+				CHECK_EQ(pkt.GetDataCoding(), AJAAncDataCoding_Raw);
+				CHECK_EQ(pkt.GetLocationVideoLink(), AJAAncDataLink_A);
+				CHECK_EQ(pkt.GetLocationDataStream(), AJAAncDataStream_1);
+				CHECK_EQ(pkt.GetLocationDataChannel(), AJAAncDataChannel_Y);
+				CHECK_EQ(pkt.GetLocationLineNumber(), 21);
+				CHECK_EQ(pkt.GetLocationVideoSpace(), AJAAncDataSpace_VANC);
+				CHECK_EQ(pkt.GetDID(), 0);
+				CHECK_EQ(pkt.GetSID(), 0);
+				CHECK_EQ(pkt.GetChecksum(), 0);
+				CHECK_EQ(pkt.GetPayloadByteCount(), 720);
+				CHECK_EQ(pkt.GetBufferFormat(), AJAAncBufferFormat_SDI);
+				CHECK_EQ(pkt.GetFrameID(), 1234);
+				CHECK_NE(pkt.AsString(16).find("10101010101010101010101010101011"), string::npos);
+//4: [Dig|A|DS1|Y|L272|HANC|xF4x00|CS4C|DC=16|SDI|RP-165 Error Detect/Checkwords]: 8CA8A4C41C9000000000000000000000
+			pkt = *(pkts.GetAncillaryDataAtIndex(4));
+				CHECK_EQ(pkt.GetDataCoding(), AJAAncDataCoding_Digital);
+				CHECK_EQ(pkt.GetLocationVideoLink(), AJAAncDataLink_A);
+				CHECK_EQ(pkt.GetLocationDataStream(), AJAAncDataStream_1);
+				CHECK_EQ(pkt.GetLocationDataChannel(), AJAAncDataChannel_Y);
+				CHECK_EQ(pkt.GetLocationLineNumber(), 272);
+				CHECK_EQ(pkt.GetLocationVideoSpace(), AJAAncDataSpace_HANC);
+				CHECK_EQ(pkt.GetDID(), 0xF4);
+				CHECK_EQ(pkt.GetSID(), 0x00);
+				CHECK_EQ(pkt.GetChecksum(), 0x4C);
+				CHECK_EQ(pkt.GetPayloadByteCount(), 16);
+				CHECK_EQ(pkt.GetBufferFormat(), AJAAncBufferFormat_SDI);
+				CHECK_EQ(pkt.GetFrameID(), 1234);
+				CHECK_NE(pkt.AsString(16).find("8CA8A4C41C9000000000000000000000"), string::npos);
+//5: [Dig|A|DS1|Y|L276|HANC|x41x01|CSCE|DC=4|SDI|SMPTE-352M Payload ID]: 81060001
+			pkt = *(pkts.GetAncillaryDataAtIndex(5));
+				CHECK_EQ(pkt.GetDataCoding(), AJAAncDataCoding_Digital);
+				CHECK_EQ(pkt.GetLocationVideoLink(), AJAAncDataLink_A);
+				CHECK_EQ(pkt.GetLocationDataStream(), AJAAncDataStream_1);
+				CHECK_EQ(pkt.GetLocationDataChannel(), AJAAncDataChannel_Y);
+				CHECK_EQ(pkt.GetLocationLineNumber(), 276);
+				CHECK_EQ(pkt.GetLocationVideoSpace(), AJAAncDataSpace_HANC);
+				CHECK_EQ(pkt.GetDID(), 0x41);
+				CHECK_EQ(pkt.GetSID(), 0x01);
+				CHECK_EQ(pkt.GetChecksum(), 0xCE);
+				CHECK_EQ(pkt.GetPayloadByteCount(), 4);
+				CHECK_EQ(pkt.GetBufferFormat(), AJAAncBufferFormat_SDI);
+				CHECK_EQ(pkt.GetFrameID(), 1234);
+				CHECK_NE(pkt.AsString(16).find("81060001"), string::npos);
+//6: [Ana|A|DS1|Y|L284|VANC|x00x00|CS00|DC=720|SDI|SMPTE-291 Control Packet]: 10101010101010101010101010101011...
+			pkt = *(pkts.GetAncillaryDataAtIndex(6));
+				CHECK_EQ(pkt.GetDataCoding(), AJAAncDataCoding_Raw);
+				CHECK_EQ(pkt.GetLocationVideoLink(), AJAAncDataLink_A);
+				CHECK_EQ(pkt.GetLocationDataStream(), AJAAncDataStream_1);
+				CHECK_EQ(pkt.GetLocationDataChannel(), AJAAncDataChannel_Y);
+				CHECK_EQ(pkt.GetLocationLineNumber(), 284);
+				CHECK_EQ(pkt.GetLocationVideoSpace(), AJAAncDataSpace_VANC);
+				CHECK_EQ(pkt.GetDID(), 0);
+				CHECK_EQ(pkt.GetSID(), 0);
+				CHECK_EQ(pkt.GetChecksum(), 0);
+				CHECK_EQ(pkt.GetPayloadByteCount(), 720);
+				CHECK_EQ(pkt.GetBufferFormat(), AJAAncBufferFormat_SDI);
+				CHECK_EQ(pkt.GetFrameID(), 1234);
+				CHECK_NE(pkt.AsString(16).find("10101010101010101010101010101011"), string::npos);
 		}	//	TEST_CASE("AnalogTest")
-#endif	//	0
 
 #if 0	//	** MrBill **	NOT READY FOR PRIME-TIME
 		TEST_CASE("BFT_AncDataCEA608Analog")	
