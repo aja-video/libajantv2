@@ -528,33 +528,6 @@ bool AJAAncillaryList::CompareWithInfo (vector<string> & outDiffInfo, const AJAA
 }
 
 
-static bool TestForAnalogContinuation (AJAAncillaryData * pPrevData, AJAAncillaryData * pNewData)
-{
-	if (!pPrevData || !pNewData)
-		return false;
-
-	//	Get coding type and location for the previous ancillary packet...
-	AJAAncDataCoding	prevCoding	(pPrevData->GetDataCoding ());
-	AJAAncDataLoc		prevLoc		(pPrevData->GetDataLocation ());
-
-	//	Get coding type and location for the new ancillary packet...
-	AJAAncDataCoding	newCoding	(pNewData->GetDataCoding ());
-	AJAAncDataLoc		newLoc		(pNewData->GetDataLocation ());
-
-	//	Compare...
-	if (   (prevCoding == AJAAncDataCoding_Raw)
-		&& (newCoding  == AJAAncDataCoding_Raw)
-		&& (prevLoc.GetLineNumber()	 == newLoc.GetLineNumber())
-		&& (prevLoc.GetHorizontalOffset()  == newLoc.GetHorizontalOffset()) // technically, these should ALWAYS be the same for "analog"...?
-		&& (prevLoc.GetDataSpace()	 == newLoc.GetDataSpace())		//	Should always be VANC
-		&& (prevLoc.GetDataLink()	 == newLoc.GetDataLink())		//	Link A or B -- should match
-		&& (prevLoc.GetDataStream()	 == newLoc.GetDataStream())		//	DS1 or DS2 -- should match
-		&& (prevLoc.GetDataChannel() == newLoc.GetDataChannel()) )	//	Y or C -- should match
-			return true;
-	return false;
-}
-
-
 /////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////	R E C E I V E
 /////////////////////////////////////////////////////////////////
@@ -571,8 +544,8 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
 	if (!pRcvData || !dataSize)
 		return AJA_STATUS_NULL;
 
-	//	Use this as an uninitialized template...
-	AJAAncillaryData	newAncData;
+	AJAAncillaryDataList rawPkts;		//	Accumulate "analog/raw" packets separately
+	AJAAncillaryData	newAncData;		//	Use this as an uninitialized template
 	AJAAncDataLoc		defaultLoc		(AJAAncDataLink_A, AJAAncDataChannel_Y, AJAAncDataSpace_VANC, 9);
 	int32_t				remainingSize	(int32_t(dataSize + 0));
 	const uint8_t *		pInputData		(pRcvData);
@@ -611,28 +584,30 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
 			//		ID. Instead, we rely on the user to tell us what lines are expected to contain
 			//		what kind of data (e.g. "expect line 21 to carry 608 captioning...").
 
-			//	First, see if the LAST AJAAncillaryData object came from analog space and the same
-			//	location as this new one. If so, assume that the new data is simply a continuation
-			//	of the previous packet, and append the payload data accordingly.
-			bool bAppendAnalog (false);
+			//	This function used to assume that analog packets always were in succession in the buffer.
+			//	This isn't true, however, if packet filtering is disabled. Audio packets can be interspersed
+			//	between successive analog packets. We now accumulate analog packets separately in "rawPkts",
+			//	then add them all to my "m_ancList" member last.
 
-			if (!m_ancList.empty())
-			{
-				AJAAncillaryData *	pPrevData (m_ancList.back());
-				if (::TestForAnalogContinuation (pPrevData, &newAncData))
-				{	//	The new data is just a continuation of the previous packet:
-					//	simply append the new payload data to the previous payload...
-					pPrevData->AppendPayload(newAncData);
-					bAppendAnalog = true;
+			//	Look for a pkt in "rawPkts" that has the same location...
+			const uint64_t desiredLocation (newAncData.GetDataLocation().OrdinalValue());
+			AJAAncillaryData * pContinuationPkt (AJA_NULL);
+			for (AJAAncDataListConstIter pRaw(rawPkts.begin());  pRaw != rawPkts.end();  ++pRaw)
+				if ((*pRaw)->GetDataLocation().OrdinalValue() == desiredLocation)
+				{	//	Found one!
+					//	"newAncData" must be a continuation of the "pRaw" pkt.
+					//	Simply append the new payload data to it...
+					pContinuationPkt = *pRaw;
+					pContinuationPkt->AppendPayload(newAncData);
+					break;
 				}
-			}
 
-			if (!bAppendAnalog)
+			if (!pContinuationPkt)
 			{	//	If this is NOT a "continuation" packet, then this is a new analog packet.
 				//	See if the user has specified an expected Anc data type that matches the
 				//	location of the new data...
 				newAncType = GetAnalogAncillaryDataType(newAncData);
-				bInsertNew = true;
+				bInsertNew = true;	//	Create the new raw pkt, and add it to "rawPkts" queue (below)
 			}
 		}	// analog anc data
 //			else 
@@ -641,14 +616,18 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
 		if (bInsertNew)
 		{
 			//	Create an AJAAncillaryData object of the appropriate type, and init it with our raw data...
-			AJAAncillaryData *	pData	(AJAAncillaryDataFactory::Create (newAncType, &newAncData));
+			AJAAncillaryData * pData (AJAAncillaryDataFactory::Create (newAncType, &newAncData));
 			if (pData)
 			{
 				pData->SetBufferFormat(AJAAncBufferFormat_SDI);
 				if (IsIncludingZeroLengthPackets()	||	pData->GetDC())
 				{
-					try {m_ancList.push_back(pData);}	//	Append to my list
-					catch(...)	{status = AJA_STATUS_FAIL;}
+					try {
+						if (pData->IsRaw())
+							rawPkts.push_back(pData);	//	New analog pkts go onto my rawPkts queue
+						else
+							m_ancList.push_back(pData);	//	New digital pkts are immediately appended to my list
+					} catch(...) {status = AJA_STATUS_FAIL;}
 				}
 				else ::BumpZeroLengthPacketCount();
 				if (inFrameNum	&&	!pData->GetFrameID())
@@ -663,6 +642,19 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
 		if (remainingSize <= 0)			//	All of the input data consumed?
 			bMoreData = false;
 	}	// while (bMoreData)
+
+	if (AJA_SUCCESS(status)  &&  !rawPkts.empty())
+	{	//	Append accumulated analog/raw packets...
+		while (AJA_SUCCESS(status)  &&  !rawPkts.empty())
+		{
+			try {
+				m_ancList.push_back(rawPkts.back());
+			} catch(...) {status = AJA_STATUS_FAIL;}
+			rawPkts.pop_back();
+		}
+		if (AJA_SUCCESS(status))
+			status = SortListByLocation();	//	Re-sort by location
+	}
 
 	return status;
 
