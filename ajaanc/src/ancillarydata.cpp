@@ -1404,48 +1404,55 @@ const string & AJAAncDataTypeToString (const AJAAncDataType inValue, const bool 
 }
 
 
-ostream & AJAAncillaryData::Print (ostream & inOutStream, const bool inDumpPayload) const
+ostream & AJAAncillaryData::Print (ostream & oss, const bool inDumpPayload) const
 {
-	inOutStream << "Type:\t\t"	<< AJAAncillaryData::DIDSIDToString(m_DID, m_SID)	<< endl
-				<< "DID:\t\t"	<< xHEX0N(uint32_t(m_DID),2)						<< endl
-				<< "SID:\t\t"	<< xHEX0N(uint32_t(m_SID),2)						<< endl
-				<< "DC:\t\t"	<< DEC(GetDC())										<< endl
-				<< "CS:\t\t"	<< xHEX0N(uint32_t(m_checksum),2)					<< endl
-				<< "Loc:\t\t"	<< m_location										<< endl
-				<< "Coding:\t\t"<< ::AJAAncDataCodingToString(m_coding)				<< endl
-				<< "Frame:\t\t" << xHEX0N(GetFrameID(),8)							<< endl
-				<< "Format:\t\t"<< ::AJAAncBufferFormatToString(GetBufferFormat())	<< endl
-				<< "Valid:\t\t" << (GotValidReceiveData() ? "Yes" : "No");
+	oss << "Type:\t\t"		<< IDAsString()										<< endl;
+	if (!IsHDMI())
+		oss	<< "DID:\t\t"	<< xHEX0N(uint32_t(GetDID()),2)	<< endl
+			<< "SID:\t\t"	<< xHEX0N(uint32_t(GetSID()),2)	<< endl;
+	oss	<< "DC:\t\t"		<< DEC(GetDC())										<< endl;
+	if (!IsHDMI())
+		oss	<< "CS:\t\t"	<< xHEX0N(uint32_t(m_checksum),2)					<< endl
+			<< "Loc:\t\t"	<< GetDataLocation()								<< endl;
+	oss	<< "Coding:\t\t"	<< ::AJAAncDataCodingToString(m_coding)				<< endl
+		<< "Frame:\t\t"		<< xHEX0N(GetFrameID(),8)							<< endl
+		<< "Format:\t\t"	<< ::AJAAncBufferFormatToString(GetBufferFormat())	<< endl
+		<< "Valid:\t\t"		<< (GotValidReceiveData() ? "Yes" : "No");
 	if (inDumpPayload)
-		{inOutStream << endl;  DumpPayload (inOutStream);}
-	return inOutStream;
+		{oss << endl;  DumpPayload(oss);}
+	return oss;
 }
 
+string AJAAncillaryData::IDAsString (void) const
+{
+	ostringstream oss;
+	if (IsRaw())
+		oss << "Analog/Raw Line " << DEC(GetDataLocation().GetLineNumber()) << " Packet";
+	else if (IsHDMI())
+		oss << AuxPacketTypeToString(GetAuxType());
+	else
+		oss << DIDSIDToString(GetDID(), GetSID());
+	return oss.str();
+}
 
 string AJAAncillaryData::AsString (const uint16_t inMaxBytes) const
 {
-	bool isHDMI = (GetBufferFormat() == AJAAncBufferFormat_HDMI); 
-
-	ostringstream	oss;
+	ostringstream oss;
 	oss << "[" << ::AJAAncDataCodingToString(GetDataCoding());
-	if (isHDMI)
-	{
-		oss << "|0x"	<< HEX0N(uint16_t(GetAuxType()),2) 
-					<< HEX0N(uint16_t(GetAuxHB1()),2) 
-					<< HEX0N(uint16_t(GetAuxHB2()),2);
-	}
+	if (IsHDMI())
+		oss << "|" << xHEX0N(uint16_t(GetAuxType()),2) 
+			<< HEX0N(uint16_t(GetAuxHB1()),2) 
+			<< HEX0N(uint16_t(GetAuxHB2()),2);
 	else
-	{
 		oss << "|" << ::AJAAncDataLocToString(GetDataLocation())
-		<< "|" << GetDIDSIDPair() << "|CS" << HEX0N(uint16_t(GetChecksum()),2);
-	}
+			<< "|" << GetDIDSIDPair() << "|CS" << HEX0N(uint16_t(GetChecksum()),2);
 	oss << "|DC=" << DEC(GetDC());
 	if (m_frameID)
 		oss << "|FRx" << HEX0N(GetFrameID(),8);
 	if (IS_KNOWN_AJAAncBufferFormat(m_bufferFmt))
 		oss << "|" << ::AJAAncBufferFormatToString(GetBufferFormat());
-	const string typeStr = (isHDMI) ? AJAAncillaryData::AuxPacketTypeToString(m_auxType) :
-										AJAAncillaryData::DIDSIDToString(m_DID, m_SID);
+	const string typeStr (IsHDMI()  ?  AuxPacketTypeToString(GetAuxType())
+									:	DIDSIDToString(GetDID(), GetSID()));
 	if (!typeStr.empty())
 		oss << "|" << typeStr;
 	oss << "]";
@@ -2025,15 +2032,15 @@ string AJAAncillaryData::AuxPacketTypeToString (const uint8_t auxPacketType)
 	{
 
 		case 0x01: return "Audio Clock Regeneration (N/CTS)";
-		case 0x02: return "Audio Sample (L-PCM and IEC 61937 compressed)";
+		case 0x02: return "Audio Sample (L-PCM & IEC-61937 compressed)";
 		case 0x03: return "General Control";
 		case 0x04: return "ACP Packet";
 		case 0x05: return "ISRC1 Packet";
 		case 0x06: return "ISRC2 Packet";
 		case 0x07: return "One Bit Audio Sample Packet";
 		case 0x08: return "DST Audio Packet";
-		case 0x09: return "High Bitrate (HBR) Audio Stream Packet (IEC 61937)";
-		case 0x0A: return "Gamut Metada Packet";
+		case 0x09: return "High Bitrate Audio Stream Packet (IEC-61937)";
+		case 0x0A: return "Gamut Metadata Packet";
 		case 0x80: return "General InfoFrame Packet";  // May not be valid
 		case 0x81: return "Vendor-Specific InfoFrame";
 		case 0x82: return "AVI InfoFrame";
@@ -2042,7 +2049,7 @@ string AJAAncillaryData::AuxPacketTypeToString (const uint8_t auxPacketType)
 		case 0x85: return "MPEG Source InfoFrame";
 	}
 	return ""; 
-}	//	DIDSID2String
+}	//	AuxPacketTypeToString
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //	AJARTPAncPayloadHeader

@@ -261,9 +261,9 @@ typedef struct AJAExport AJAAncDataLoc
 
 		inline bool		IsValid (void) const
 		{
-			return IS_VALID_AJAAncDataLink(link)
-					&& IS_VALID_AJAAncDataStream(stream)
-						&& IS_VALID_AJAAncDataChannel(channel)
+			return IS_VALID_AJAAncDataLink(mLink)
+					&& IS_VALID_AJAAncDataStream(mStream)
+						&& IS_VALID_AJAAncDataChannel(mChannel)
 							&& (IS_VALID_AJAAncDataSpace(GetDataSpace())
 									|| (GetDataSpace() == AJAAncDataSpace_Unknown));
 		}
@@ -289,23 +289,23 @@ typedef struct AJAExport AJAAncDataLoc
 		**/
 		inline AJAAncDataLoc &	Reset (void)
 		{
-			link		= AJAAncDataLink_Unknown;
-			stream		= AJAAncDataStream_Unknown;
-			channel		= AJAAncDataChannel_Unknown;
-			lineNum		= AJAAncDataLineNumber_Unknown;
-			horizOffset	= AJAAncDataHorizOffset_Unknown;
+			mLink			= AJAAncDataLink_Unknown;
+			mStream			= AJAAncDataStream_Unknown;
+			mChannel		= AJAAncDataChannel_Unknown;
+			mLineNum		= AJAAncDataLineNumber_Unknown;
+			mHorizOffset	= AJAAncDataHorizOffset_Unknown;
 			return *this;
 		}
 
-		inline AJAAncDataLink			GetDataLink (void) const				{return link;}		///< @return	My data link.
-		inline bool						IsDataLinkA (void) const				{return link == AJAAncDataLink_A;}
-		inline bool						IsDataLinkB (void) const				{return link == AJAAncDataLink_B;}
+		inline AJAAncDataLink			GetDataLink (void) const				{return mLink;}		///< @return	My data link.
+		inline bool						IsDataLinkA (void) const				{return mLink == AJAAncDataLink_A;}
+		inline bool						IsDataLinkB (void) const				{return mLink == AJAAncDataLink_B;}
 
-		inline AJAAncDataStream			GetDataStream (void) const				{return stream;}		///< @return	My data stream.
+		inline AJAAncDataStream			GetDataStream (void) const				{return mStream;}		///< @return	My data stream.
 
-		inline AJAAncDataChannel		GetDataChannel (void) const				{return channel;}		///< @return	My data channel.
-		inline bool						IsLumaChannel (void) const				{return channel == AJAAncDataChannel_Y;}
-		inline bool						IsChromaChannel (void) const			{return channel == AJAAncDataChannel_C;}
+		inline AJAAncDataChannel		GetDataChannel (void) const				{return mChannel;}		///< @return	My data channel.
+		inline bool						IsLumaChannel (void) const				{return mChannel == AJAAncDataChannel_Y;}
+		inline bool						IsChromaChannel (void) const			{return mChannel == AJAAncDataChannel_C;}
 
 		/**
 			@return	"VANC" if my horizontal offset is "Any VANC", or "HANC" if my H offset is "Any HANC";
@@ -315,16 +315,16 @@ typedef struct AJAExport AJAAncDataLoc
 		**/
 		inline AJAAncDataSpace	GetDataSpace (void) const
 		{
-			if (horizOffset == AJAAncDataHorizOffset_AnyVanc)
+			if (mHorizOffset == AJAAncDataHorizOffset_AnyVanc)
 				return AJAAncDataSpace_VANC;
-			if (horizOffset == AJAAncDataHorizOffset_AnyHanc)
+			if (mHorizOffset == AJAAncDataHorizOffset_AnyHanc)
 				return AJAAncDataSpace_HANC;
 			return AJAAncDataSpace_Unknown;
 		}
 		inline bool				IsVanc (void) const						{return GetDataSpace() == AJAAncDataSpace_VANC;}
 		inline bool				IsHanc (void) const						{return GetDataSpace() == AJAAncDataSpace_HANC;}
 
-		inline uint16_t			GetLineNumber (void) const				{return lineNum;}		///< @return	My SMPTE line number.
+		inline uint16_t			GetLineNumber (void) const				{return mLineNum;}		///< @return	My SMPTE line number.
 
 		/**
 			@return		The 12-bit horizontal offset of the packet.
@@ -336,7 +336,7 @@ typedef struct AJAExport AJAAncDataLoc
 						-	::AJAAncDataHorizOffset_AnyHanc -- i.e., any legal area of the raster line after EAV.
 						-	::AJAAncDataHorizOffset_AnyVanc -- i.e., any legal area of raster line after SAV, but before EAV.
 		**/
-		inline uint16_t			GetHorizontalOffset (void) const		{return horizOffset & 0x0FFF;}
+		inline uint16_t			GetHorizontalOffset (void) const		{return mHorizOffset & 0x0FFF;}
 
 		/**
 			@brief		Writes a human-readable rendition of me into the given output stream.
@@ -351,21 +351,21 @@ typedef struct AJAExport AJAAncDataLoc
 			@param[in]	inLink		Specifies the new data link value to use. Must be valid.
 			@return	A non-const reference to myself.
 		**/
-		inline AJAAncDataLoc &	SetDataLink (const AJAAncDataLink inLink)						{link = inLink;	return *this;}
+		inline AJAAncDataLoc &	SetDataLink (const AJAAncDataLink inLink)						{mLink = inLink;	return *this;}
 
 		/**
 			@brief	Sets my data link value to the given value (if valid).
 			@param[in]	inStream		Specifies the new data stream value to use. Must be valid.
 			@return	A non-const reference to myself.
 		**/
-		inline AJAAncDataLoc &	SetDataStream (const AJAAncDataStream inStream)					{stream = inStream;	return *this;}
+		inline AJAAncDataLoc &	SetDataStream (const AJAAncDataStream inStream)					{mStream = inStream;	return *this;}
 
 		/**
 			@brief	Sets my data video stream value to the given value (if valid).
 			@param[in]	inChannel	Specifies the new data channel value to use. Must be valid.
 			@return	A non-const reference to myself.
 		**/
-		inline AJAAncDataLoc &	SetDataChannel (const AJAAncDataChannel inChannel)				{channel = inChannel; return *this;}
+		inline AJAAncDataLoc &	SetDataChannel (const AJAAncDataChannel inChannel)				{mChannel = inChannel; return *this;}
 #if AJA_NTV2_SDK_VERSION_AT_LEAST(16,3)
 		inline AJAAncDataLoc &	SetDataVideoStream (const AJAAncDataChannel inChannel)			{return SetDataChannel(inChannel);}
 #endif
@@ -378,9 +378,9 @@ typedef struct AJAExport AJAAncDataLoc
 		inline AJAAncDataLoc &	SetDataSpace (const AJAAncDataSpace inSpace)
 		{
 			if (IS_VANC_AJAAncDataSpace(inSpace))
-				horizOffset = AJAAncDataHorizOffset_AnyVanc;
+				mHorizOffset = AJAAncDataHorizOffset_AnyVanc;
 			else if (IS_HANC_AJAAncDataSpace(inSpace))
-				horizOffset = AJAAncDataHorizOffset_AnyHanc;
+				mHorizOffset = AJAAncDataHorizOffset_AnyHanc;
 			return *this;
 		}
 
@@ -390,7 +390,7 @@ typedef struct AJAExport AJAAncDataLoc
 										Can also be AJAAncDataLineNumber_DontCare.
 			@return		A non-const reference to myself.
 		**/
-		inline AJAAncDataLoc &	SetLineNumber (const uint16_t inLineNum)							{lineNum = inLineNum; return *this;}
+		inline AJAAncDataLoc &	SetLineNumber (const uint16_t inLineNum)							{mLineNum = inLineNum; return *this;}
 
 
 		/**
@@ -408,19 +408,16 @@ typedef struct AJAExport AJAAncDataLoc
 		inline AJAAncDataLoc &	SetHorizontalOffset (uint16_t inHOffset)
 		{	inHOffset &= 0x0FFF;
 			if (inHOffset == AJAAncDataHorizOffset_AnyVanc)
-				horizOffset = inHOffset;	//	Force [any] VANC
+				mHorizOffset = inHOffset;	//	Force [any] VANC
 			else if (inHOffset == AJAAncDataHorizOffset_AnyHanc)
-				horizOffset = inHOffset;	//	Force [any] HANC
+				mHorizOffset = inHOffset;	//	Force [any] HANC
 			else if (inHOffset == AJAAncDataHorizOffset_Anywhere)
-				horizOffset = inHOffset;	//	Anywhere (unknown DataSpace)
+				mHorizOffset = inHOffset;	//	Anywhere (unknown DataSpace)
 			else
-				horizOffset = inHOffset;	//	Trust the caller;  don't mess with existing DataSpace
+				mHorizOffset = inHOffset;	//	Trust the caller;  don't mess with existing DataSpace
 			return *this;
 		}
 
-#if AJA_NTV2_SDK_VERSION_AT_LEAST(16,3)
-	private:	//	Ordinarily, this is a private API
-#endif	//	defined(_DEBUG)
 		/**
 			@return		A 64-bit unsigned ordinal value used for sorting/comparing.
 						In highest to lowest order of magnitude:
@@ -433,23 +430,21 @@ typedef struct AJAExport AJAAncDataLoc
 		**/
 		inline uint64_t			OrdinalValue (void) const
 		{	//	64-bit unsigned compare:					LLLLLLLLLLLLSSSHHHHHHHHHHHHCCCDDDDDDDKK
-			const uint64_t	hOffset	(horizOffset == AJAAncDataHorizOffset_AnyVanc || horizOffset == AJAAncDataHorizOffset_Anywhere ? 0 : horizOffset);
-			return ((uint64_t(lineNum) << 27)			//	LLLLLLLLLLLL
+			const uint64_t	hOffset	(mHorizOffset == AJAAncDataHorizOffset_AnyVanc || mHorizOffset == AJAAncDataHorizOffset_Anywhere ? 0 : mHorizOffset);
+			return ((uint64_t(mLineNum) << 27)			//	LLLLLLLLLLLL
 					| (uint64_t(GetDataSpace()) << 24)	//	            SSS
 					| (hOffset << 12)					//	               HHHHHHHHHHHH
-					| (uint64_t(channel) << 9)			//	                           CCC
-					| (uint64_t(stream) << 2)			//	                              DDDDDDD
-					| uint64_t(link));					//	                                     KK
+					| (uint64_t(mChannel) << 9)			//	                           CCC
+					| (uint64_t(mStream) << 2)			//	                              DDDDDDD
+					| uint64_t(mLink));					//	                                     KK
 		}
 
-#if AJA_NTV2_SDK_VERSION_AT_LEAST(15,2)
-	private:	//	First proposed to make my member data private in SDK 15.2
-#endif
-		AJAAncDataLink		link;			///< @brief	Which data link (A or B)?
-		AJAAncDataStream	stream;			///< @brief	Which data stream (DS1, DS2... etc.)?
-		AJAAncDataChannel	channel;		///< @brief	Which channel (Y or C)?
-		uint16_t			lineNum;		///< @brief	Which SMPTE line number?
-		uint16_t			horizOffset;	///< @brief	12-bit horizontal offset in raster line
+	private:	//	Made private in SDK 15.2
+		AJAAncDataLink		mLink;			///< @brief	Which data link (A or B)?
+		AJAAncDataStream	mStream;		///< @brief	Which data stream (DS1, DS2... etc.)?
+		AJAAncDataChannel	mChannel;		///< @brief	Which channel (Y or C)?
+		uint16_t			mLineNum;		///< @brief	Which SMPTE line number?
+		uint16_t			mHorizOffset;	///< @brief	12-bit horizontal offset in raster line
 
 } AJAAncDataLoc;
 
@@ -625,10 +620,13 @@ public:
 	virtual inline bool						IsVanc (void) const							{return GetDataLocation().IsVanc ();}					///< @return	True if my location data space is VANC.
 	virtual inline bool						IsHanc (void) const							{return GetDataLocation().IsHanc ();}					///< @return	True if my location data space is HANC.
 	virtual inline bool						IsDigital (void) const						{return GetDataCoding() == AJAAncDataCoding_Digital;}	///< @return	True if my coding type is digital.
-	virtual inline bool						IsRaw (void) const							{return GetDataCoding() == AJAAncDataCoding_Raw;}		///< @return	True if my coding type is "raw" (i.e., from an digitized waveform).
-
+	virtual inline bool						IsRaw (void) const							{return GetDataCoding() == AJAAncDataCoding_Raw;}		///< @return	True if my coding type is "raw" (i.e., from a digitized waveform).
+	virtual inline bool						IsFBVANC (void) const						{return GetBufferFormat() == AJAAncBufferFormat_FBVANC;}	///< @return	True if my buffer format was VANC
+	virtual inline bool						IsSDI (void) const							{return GetBufferFormat() == AJAAncBufferFormat_SDI;}		///< @return	True if my buffer format is SDI
+	virtual inline bool						IsRTP (void) const							{return GetBufferFormat() == AJAAncBufferFormat_RTP;}		///< @return	True if my buffer format is RTP
+	virtual inline bool						IsHDMI (void) const							{return GetBufferFormat() == AJAAncBufferFormat_HDMI;}		///< @return	True if my buffer format is HDMI
 								
-		/**
+	/**
 		@brief		Returns whether or not this is an HDMI Aux Info Frame Packet
 		@note		This abstract method is overridden if it is an HDMI Aux packet.
 		@return		Returns false unless there is a method override that determines otherwise.
@@ -1020,7 +1018,7 @@ public:
 	**/
 	virtual std::string						CompareWithInfo (const AJAAncillaryData & inRHS, const bool inIgnoreLocation = true, const bool inIgnoreChecksum = true) const;
 
-	virtual inline std::string				IDAsString (void) const	{return DIDSIDToString (GetDID(), GetSID());}	///< @return	A string representing my DID/SID.
+	virtual std::string						IDAsString (void) const;	///< @return	A string that describes what kind of packet I am.
 
 	/**
 		@return		Converts me into a compact, human-readable string.
