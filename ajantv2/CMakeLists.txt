@@ -30,10 +30,10 @@ remove_definitions(
     -DQT_LARGEFILE_SUPPORT)
 
 set(TARGET_INCLUDE_DIRS
-    ../
-    ../ajaanc/includes
-    ../ajabase
-    includes
+    ${LIBAJANTV2_DIR}
+    ${LIBAJANTV2_DIR}/ajaanc/includes
+    ${LIBAJANTV2_DIR}/ajabase
+    ${LIBAJANTV2_DIR}/ajantv2/includes
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -460,9 +460,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         -DAJADLL_BUILD)
 
     list(APPEND TARGET_INCLUDE_DIRS
-        src/win
-        ../ajabase/pnp/windows
-        ../ajabase/system/windows)
+        ${LIBAJANTV2_DIR}/ajantv2/src/win
+        ${LIBAJANTV2_DIR}/ajabase/pnp/windows
+        ${LIBAJANTV2_DIR}/ajabase/system/windows)
 
     set(AJABASE_HEADERS
         ${AJABASE_HEADERS}
@@ -486,9 +486,9 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${TARGET_COMPILE_DEFS}
         -DAJADLL_BUILD)
     list(APPEND TARGET_INCLUDE_DIRS
-        src/lin
-        ../ajabase/pnp/linux
-        ../ajabase/system/linux)
+        ${LIBAJANTV2_DIR}/ajantv2/src/lin
+        ${LIBAJANTV2_DIR}/ajabase/pnp/linux
+        ${LIBAJANTV2_DIR}/ajabase/system/linux)
     list(APPEND AJABASE_HEADERS
         ${AJABASE_PNP_LIN_HEADERS}
         ${AJABASE_SYS_LIN_HEADERS})
@@ -508,9 +508,9 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "BareMetal")
         ${TARGET_COMPILE_DEFS}
         -DAJADLL_BUILD)
     list(APPEND TARGET_INCLUDE_DIRS
-        src/bm
-        ../ajabase/pnp/bm
-        ../ajabase/system/bm)
+        ${LIBAJANTV2_DIR}/ajantv2/src/bm
+        ${LIBAJANTV2_DIR}/ajabase/pnp/bm
+        ${LIBAJANTV2_DIR}/ajabase/system/bm)
     set(AJABASE_HEADERS
         ${AJABASE_COMMON_HEADERS})
     list(REMOVE_ITEM ${AJABASE_HEADERS} 
@@ -537,9 +537,9 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         ${TARGET_COMPILE_DEFS}
         -DAJADLL_BUILD)
     list(APPEND TARGET_INCLUDE_DIRS
-        src/mac
-        ../ajabase/pnp/mac
-        ../ajabase/system/mac
+        ${LIBAJANTV2_DIR}/ajantv2/src/mac
+        ${LIBAJANTV2_DIR}/ajabase/pnp/mac
+        ${LIBAJANTV2_DIR}/ajabase/system/mac
         /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include)
     list(APPEND AJABASE_HEADERS
         ${AJABASE_PNP_MAC_HEADERS}
@@ -598,8 +598,7 @@ if (NOT TARGET ${PROJECT_NAME})
         target_compile_definitions(${PROJECT_NAME} PUBLIC
             ${TARGET_COMPILE_DEFS_DYNAMIC}
             ${AJANTV2_TARGET_COMPILE_DEFS})
-        target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
-        target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS})
+
         set_target_properties(${PROJECT_NAME} PROPERTIES VERSION "${AJA_NTV2_VER_STR}")
 
         if (AJA_CODE_SIGN)
@@ -612,11 +611,15 @@ if (NOT TARGET ${PROJECT_NAME})
         target_compile_definitions(${PROJECT_NAME} PUBLIC
             ${TARGET_COMPILE_DEFS_STATIC}
             ${AJANTV2_TARGET_COMPILE_DEFS})
-        target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
-        target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS})
-
     endif()
-	
+
+    target_include_directories(${PROJECT_NAME} PRIVATE ${TARGET_INCLUDE_DIRS})
+    target_include_directories(${PROJECT_NAME} INTERFACE
+        "$<BUILD_INTERFACE:${TARGET_INCLUDE_DIRS}>")
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${TARGET_LINK_LIBS})
+    target_link_libraries(${PROJECT_NAME} INTERFACE
+        "$<BUILD_INTERFACE:${TARGET_LINK_LIBS}>")
+
 	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 		aja_get_msvc_tools_version()
 		if(CMAKE_MSVC_RUNTIME_LIBRARY STREQUAL "MultiThreaded" OR 
