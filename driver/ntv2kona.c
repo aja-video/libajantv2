@@ -748,7 +748,7 @@ bool ProgramProductCode(Ntv2SystemContext* context)
 			//We might have a misprogrammed io4k+ check it
 			if (deviceID == DEVICE_ID_IO4KPLUS && serialNumber == 0xFFFFFFFF)
 			{
-				ntv2Message("CNTV2::InitializeBoard Io4K+ incorrect serial location\n");
+				ntv2Message("CNTV2::InitializeBoard Io4K+ %08X incorrect serial location\n", serialNumber);
 				ntv2WriteRegister(context, kRegXenaxFlashAddress, 0x2);
 				ntv2WriteRegister(context, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND);
 				WaitForFlashNOTBusy(context);
