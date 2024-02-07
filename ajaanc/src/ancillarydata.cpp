@@ -9,6 +9,7 @@
 #include "ancillarydata.h"
 #include "ajabase/system/debug.h"	//	This makes 'ajaanc' dependent upon 'ajabase'
 #include "ajabase/system/atomic.h"
+#include "ajabase/system/lock.h"
 #if defined(AJA_LINUX)
 	#include <string.h>				// For memcpy
 	#include <stdlib.h>				// For realloc
@@ -1922,115 +1923,128 @@ uint32_t AJAAncillaryData::GetNumDestructed (void)
 #endif
 }
 
+typedef map<uint8_t, string>	DIDToStringMap;
+typedef DIDToStringMap::const_iterator	DIDToStringMapCI;
+typedef pair<uint8_t, string>	DIDToStringPair;
+typedef map<AJAAncDIDSIDPair, string>	DIDSIDToStringMap;
+typedef DIDSIDToStringMap::const_iterator	DIDSIDToStringMapCI;
+typedef pair<AJAAncDIDSIDPair, string>	DIDSIDToStringPair;
+static AJALock				sDIDToStringLock;
+static DIDToStringMap		sDIDToStringMap;
+static DIDSIDToStringMap	sDIDSIDToStringMap;
+
 string AJAAncillaryData::DIDSIDToString (const uint8_t inDID, const uint8_t inSID)
 {
-	switch (inDID)
+	AJAAutoLock tmp(&sDIDToStringLock);
+	if (sDIDSIDToStringMap.empty())
 	{
-		case 0x00:	return "SMPTE-291 Control Packet";
-		case 0x08:	if (inSID == 0x08) return "SMPTE-291 Control Packet";
-					break;
-		case 0x40:	switch (inSID)
-					{
-						case 0x01:	return "RP-305 SDTI Header Data";
-						case 0x02:	return "RP-348 HD-SDTI Header Data";
-						case 0x04:	return "SMPTE-427 Link Encryp Key Msg 1";
-						case 0x05:	return "SMPTE-427 Link Encryp Key Msg 2";
-						case 0x06:	return "SMPTE-427 Link Encryp MetaD";
-					}
-					break;
-		case 0x41:	switch (inSID)
-					{
-						case 0x01:	return "SMPTE-352M Payload ID";
-						case 0x05:	return "SMPTE-2016-3 ADF/Bar Data";
-						case 0x06:	return "SMPTE-2016-4 Pan & Scan Data";
-						case 0x07:	return "SMPTE-2010 ANSI/SCTE 104 Msgs";
-						case 0x08:	return "SMPTE-2031 DVB/SCTE VBI Data";
-					}
-					break;
-		case 0x43:	switch (inSID)
-					{
-						case 0x01:	return "BT.1685 Inter-Station Ctrl Data";
-						case 0x02:	return "RDD08/OP-47 Teletext Subtitling";
-						case 0x03:	return "RDD08/OP-47 VANC Multipacket";
-						case 0x04:	return "ARIB TR-B29 AV Sig Error Mon MetaD";
-						case 0x05:	return "RDD18 Camera Params";
-					}
-					break;
-		case 0x44:	if (inSID == 0x04 || inSID == 0x14) return "RP-214 KLV Encoded MetaD & Essence";
-					else if (inSID == 0x44)				return "RP-223 UMID & Prog ID Label Data";
-					break;
-		case 0x45:	if (inSID > 0  &&  inSID < 0x0A)	return "RP-2020 Compr/Dolby Aud MetaD";
-					break;
-	//	case 0x46:	if (inSID == 0x01)
-		case 0x50:	if (inSID == 0x01)		return "RDD08 WSS Data";
-					else if (inSID == 0x51) return "CineLink-2 Link Encryp MetaD";
-					break;
-		case 0x51:	if (inSID == 0x01)		return "RP-215 Film Transfer Info";
-					else if (inSID == 0x02) return "RDD-18 Cam Param MetaD Set Acq";
-					break;
-		case 0x5F:	if (inSID == 0xDF)		return "ARIB STD-B37 HD Captions";
-					else if (inSID == 0xDE) return "ARIB STD-B37 SD Captions";
-					else if (inSID == 0xDD) return "ARIB STD-B37 Analog Captions";
-					else if (inSID == 0xDC) return "ARIB STD-B37 Mobile Captions";
-					else if ((inSID & 0xF0) == 0xD0)	return "ARIB STD-B37 ??? Captions";
-					return "ARIB STD-B37 ???";
-		case 0x60:	if (inSID == 0x60)		return "SMPTE-12M ATC Timecode";
-					break;
-		case 0x61:	if (inSID == 0x01)		return "SMPTE-334 HD CEA-708 CC";
-					else if (inSID == 0x02) return "SMPTE-334 SD CEA-608 CC";
-					break;
-		case 0x62:	if (inSID == 0x01)		return "RP-207 DTV Program Desc";
-					else if (inSID == 0x02) return "SMPTE-334 Data Broadcast";
-					else if (inSID == 0x03) return "RP-208 VBI Data";
-					break;
-		case 0x64:	if (inSID == 0x64)		return "RP-196 LTC in HANC (Obs)";
-					else if (inSID == 0x7F) return "RP-196 VITC in HANC (Obs)";
-					break;
-		case 0x80:	return "SMPTE-291 Ctrl Pkt 'Marked for Deletion'";
-		case 0x84:	return "SMPTE-291 Ctrl Pkt 'End Marker'";
-		case 0x88:	return "SMPTE-291 Ctrl Pkt 'Start Marker'";
-		case 0xA0:	return "SMPTE-299M 3G HD Aud Ctrl 8";
-		case 0xA1:	return "SMPTE-299M 3G HD Aud Ctrl 7";
-		case 0xA2:	return "SMPTE-299M 3G HD Aud Ctrl 6";
-		case 0xA3:	return "SMPTE-299M 3G HD Aud Ctrl 5";
-		case 0xA4:	return "SMPTE-299M 3G HD Aud Data 8";
-		case 0xA5:	return "SMPTE-299M 3G HD Aud Data 7";
-		case 0xA6:	return "SMPTE-299M 3G HD Aud Data 6";
-		case 0xA7:	return "SMPTE-299M 3G HD Aud Data 5";
-		case 0xD1:
-		case 0xD2:	return "AJA QA F1 Test Packet";
-		case 0xD3:	return "AJA QA F2 Test Packet";
-		case 0xE0:	return "SMPTE-299M HD Aud Ctrl 4";
-		case 0xE1:	return "SMPTE-299M HD Aud Ctrl 3";
-		case 0xE2:	return "SMPTE-299M HD Aud Ctrl 2";
-		case 0xE3:	return "SMPTE-299M HD Aud Ctrl 1";
-		case 0xE4:	return "SMPTE-299M HD Aud Data 4";
-		case 0xE5:	return "SMPTE-299M HD Aud Data 3";
-		case 0xE6:	return "SMPTE-299M HD Aud Data 2";
-		case 0xE7:	return "SMPTE-299M HD Aud Data 1";
-		case 0xEC:	return "SMPTE-272M SD Aud Ctrl 4";
-		case 0xED:	return "SMPTE-272M SD Aud Ctrl 3";
-		case 0xEE:	return "SMPTE-272M SD Aud Ctrl 2";
-		case 0xEF:	return "SMPTE-272M SD Aud Ctrl 1";
-		case 0xF0:	return "SMPTE-315 Camera Position";
-		case 0xF4:	return "RP-165 Error Detect/Checkwords";
-		case 0xF8:	return "SMPTE-272M SD Aud Ext Data 4";
-		case 0xF9:	return "SMPTE-272M SD Aud Data 4";
-		case 0xFA:	return "SMPTE-272M SD Aud Ext Data 3";
-		case 0xFB:	return "SMPTE-272M SD Aud Data 3";
-		case 0xFC:	return "SMPTE-272M SD Aud Ext Data 2";
-		case 0xFD:	return "SMPTE-272M SD Aud Data 2";
-		case 0xFE:	return "SMPTE-272M SD Aud Ext Data 1";
-		case 0xFF:	return "SMPTE-272M SD Aud Data 1";
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x08,0x08), "SMPTE-291 Control Packet"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x40,0x01), "RP-305 SDTI Header Data"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x40,0x02), "RP-348 HD-SDTI Header Data"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x40,0x04), "SMPTE-427 Link Encryp Key Msg 1"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x40,0x05), "SMPTE-427 Link Encryp Key Msg 2"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x40,0x06), "SMPTE-427 Link Encryp MetaD"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x41,0x01), "SMPTE-352M Payload ID"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x41,0x05), "SMPTE-2016-3 ADF/Bar Data"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x41,0x06), "SMPTE-2016-4 Pan & Scan Data"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x41,0x07), "SMPTE-2010 ANSI/SCTE 104 Msgs"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x41,0x08), "SMPTE-2031 DVB/SCTE VBI Data"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x43,0x01), "BT.1685 Inter-Station Ctrl Data"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x43,0x02), "RDD08/OP-47 Teletext Subtitling"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x43,0x03), "RDD08/OP-47 VANC Multipacket"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x43,0x04), "ARIB TR-B29 AV Sig Error Mon MetaD"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x43,0x05), "RDD18 Camera Params"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x44,0x04), "RP-214 KLV-Encoded MetaData"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x44,0x14), "RP-214 KLV-Encoded MetaData"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x44,0x44), "RP-223 UMID & Prog ID Label Data"));
+		for (uint8_t sid(1);  sid < 0x0A;  sid++)
+			sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x45,sid), "RP-2020 Compr/Dolby Aud MetaD"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x50,0x01), "RDD08 WSS Data"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x50,0x51), "CineLink-2 Link Encryp MetaD"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x51,0x01), "RP-215 Film Transfer Info"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x51,0x02), "RDD-18 Cam Param MetaD Set Acq"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x5F,0xDF), "ARIB STD-B37 HD Captions"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x5F,0xDE), "ARIB STD-B37 SD Captions"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x5F,0xDD), "ARIB STD-B37 Analog Captions"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x5F,0xDC), "ARIB STD-B37 Mobile Captions"));
+		for (uint8_t sid(0xD0);  sid < 0xE0;  sid++)
+			sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x5F,sid), "ARIB STD-B37 ??? Captions"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x60,0x60), "SMPTE-12M ATC Timecode"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x61,0x01), "SMPTE-334 HD CEA-708 CC"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x61,0x02), "SMPTE-334 SD CEA-608 CC"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x62,0x01), "RP-207 DTV Program Desc"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x62,0x02), "SMPTE-334 Data Broadcast"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x62,0x03), "RP-208 VBI Data"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x64,0x64), "RP-196 LTC in HANC (Obs)"));
+		sDIDSIDToStringMap.insert(DIDSIDToStringPair(AJAAncDIDSIDPair(0x64,0x7F), "RP-196 VITC in HANC (Obs)"));
 	}
+	if (sDIDToStringMap.empty())
+	{
+		sDIDToStringMap.insert(DIDToStringPair(0x00, "SMPTE-291 Control Packet"));
+		sDIDToStringMap.insert(DIDToStringPair(0x08, "SMPTE-291 Ctrl Pkt"));
+		sDIDToStringMap.insert(DIDToStringPair(0x40, "RP-305 SDTI / RP-348 HD-SDTI / SMPTE-427 Link Encrypt"));
+		sDIDToStringMap.insert(DIDToStringPair(0x41, "SMPTE-352M / SMPTE-2016 / SMPTE-2010 / SMPTE-2031"));
+		sDIDToStringMap.insert(DIDToStringPair(0x43, "BT.1685 / RDD08/OP-47 / ARIB TR-B29 / RDD18"));
+		sDIDToStringMap.insert(DIDToStringPair(0x44, "RP-214 KLV / RP-223 UMID+ProgramID Labels"));
+		sDIDToStringMap.insert(DIDToStringPair(0x45, "RP-2020 Compressed/Dolby Audio"));
+		sDIDToStringMap.insert(DIDToStringPair(0x50, "RDD08 WSS Data / CineLink-2 Link Encryption"));
+		sDIDToStringMap.insert(DIDToStringPair(0x51, "RP-215 Film Xfer Info / RDD-18 Camera Params"));
+		sDIDToStringMap.insert(DIDToStringPair(0x5F, "ARIB STD-B37 Captions"));
+		sDIDToStringMap.insert(DIDToStringPair(0x60, "SMPTE-12M ATC Timecode"));
+		sDIDToStringMap.insert(DIDToStringPair(0x61, "SMPTE-334 Captions"));
+		sDIDToStringMap.insert(DIDToStringPair(0x62, "RP-207 DTV Prog / SMPTE-334 Data / RP-208 VBI"));
+		sDIDToStringMap.insert(DIDToStringPair(0x64, "RP-196 LTC/VITC in HANC"));
+		sDIDToStringMap.insert(DIDToStringPair(0x80, "SMPTE-291 Ctrl Pkt 'Marked for Deletion'"));
+		sDIDToStringMap.insert(DIDToStringPair(0x84, "SMPTE-291 Ctrl Pkt 'End Marker'"));
+		sDIDToStringMap.insert(DIDToStringPair(0x88, "SMPTE-291 Ctrl Pkt 'Start Marker'"));
+		sDIDToStringMap.insert(DIDToStringPair(0xA0, "SMPTE-299M 3G HD Audio Ctrl Grp8 (Ch 29-32)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xA1, "SMPTE-299M 3G HD Audio Ctrl Grp7 (Ch 25-28)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xA2, "SMPTE-299M 3G HD Audio Ctrl Grp6 (Ch 21-24)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xA3, "SMPTE-299M 3G HD Audio Ctrl Grp5 (Ch 17-20)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xA4, "SMPTE-299M 3G HD Audio Data Grp8 (Ch 29-32)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xA5, "SMPTE-299M 3G HD Audio Data Grp7 (Ch 25-28)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xA6, "SMPTE-299M 3G HD Audio Data Grp6 (Ch 21-24)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xA7, "SMPTE-299M 3G HD Audio Data Grp5 (Ch 17-20)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xD1, "AJA QA F1 Test Packet"));
+		sDIDToStringMap.insert(DIDToStringPair(0xD2, "AJA QA F1 Test Packet"));
+		sDIDToStringMap.insert(DIDToStringPair(0xD3, "AJA QA F2 Test Packet"));
+		sDIDToStringMap.insert(DIDToStringPair(0xE0, "SMPTE-299M HD Audio Ctrl Grp4 (Ch 13-16)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xE1, "SMPTE-299M HD Audio Ctrl Grp3 (Ch 9-12)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xE2, "SMPTE-299M HD Audio Ctrl Grp2 (Ch 5-8)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xE3, "SMPTE-299M HD Audio Ctrl Grp1 (Ch 1-4)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xE4, "SMPTE-299M HD Audio Grp4 (Ch 13-16)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xE5, "SMPTE-299M HD Audio Grp3 (Ch 9-12)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xE6, "SMPTE-299M HD Audio Grp2 (Ch 5-8)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xE7, "SMPTE-299M HD Audio Grp1 (Ch 1-4)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xEC, "SMPTE-272M SD Audio Ctrl Grp4 (Ch 13-16)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xED, "SMPTE-272M SD Audio Ctrl Grp3 (Ch 9-12)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xEE, "SMPTE-272M SD Audio Ctrl Grp2 (Ch 5-8"));
+		sDIDToStringMap.insert(DIDToStringPair(0xEF, "SMPTE-272M SD Audio Ctrl Grp1 (Ch 1-4)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xF0, "SMPTE-315 Camera Position"));
+		sDIDToStringMap.insert(DIDToStringPair(0xF4, "RP-165 Error Detect/Checkwords"));
+		sDIDToStringMap.insert(DIDToStringPair(0xF8, "SMPTE-272M SD Audio Ext Data Grp4 (Ch 13-16)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xF9, "SMPTE-272M SD Audio Data Grp4 (Ch 13-16)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xFA, "SMPTE-272M SD Audio Ext Data Grp3 (Ch 9-12)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xFB, "SMPTE-272M SD Audio Data Grp3 (Ch 9-12)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xFC, "SMPTE-272M SD Audio Ext Data Grp2 (Ch 5-8"));
+		sDIDToStringMap.insert(DIDToStringPair(0xFD, "SMPTE-272M SD Audio Data Grp2 (Ch 5-8"));
+		sDIDToStringMap.insert(DIDToStringPair(0xFE, "SMPTE-272M SD Audio Ext Data Grp1 (Ch 1-4)"));
+		sDIDToStringMap.insert(DIDToStringPair(0xFF, "SMPTE-272M SD Audio Data Grp1 (Ch 1-4)"));
+	}
+	const AJAAncDIDSIDPair didsid(inDID, inSID);
+	DIDSIDToStringMapCI it(sDIDSIDToStringMap.find(didsid));
+	if (it != sDIDSIDToStringMap.end())
+		return it->second;
+	DIDToStringMapCI didIt(sDIDToStringMap.find(inDID));
+	if (didIt != sDIDToStringMap.end())
+		return didIt->second;
 	return "";
-}	//	DIDSID2String
+}	//	DIDSIDToString
 
 string AJAAncillaryData::AuxPacketTypeToString (const uint8_t auxPacketType)
 {
 	switch (auxPacketType)
 	{
-
 		case 0x01: return "Audio Clock Regeneration (N/CTS)";
 		case 0x02: return "Audio Sample (L-PCM & IEC-61937 compressed)";
 		case 0x03: return "General Control";
