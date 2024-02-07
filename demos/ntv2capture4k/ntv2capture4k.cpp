@@ -142,6 +142,10 @@ AJAStatus NTV2Capture4K::Init (void)
 	}
 	else  //  quad mode:  force Ch1 (or Ch5 on Corvid88)
 		mConfig.fInputChannel = mConfig.fInputChannel < NTV2_CHANNEL5  ?  NTV2_CHANNEL1  :  NTV2_CHANNEL5;
+	
+	if (!NTV2_IS_VALID_INPUT_SOURCE(mConfig.fInputSource))
+		mConfig.fInputSource = ::NTV2ChannelToInputSource(mConfig.fInputChannel);
+	
 	if (mConfig.fInputChannel != origCh)
 		cerr	<< "## WARNING:  Specified channel Ch" << DEC(origCh+1) << " corrected to use Ch"
 				<< DEC(mConfig.fInputChannel+1) << " to work for UHD/4K on '" << mDevice.GetDisplayName() << "'" << endl;
