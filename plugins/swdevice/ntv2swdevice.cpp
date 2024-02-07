@@ -539,7 +539,8 @@ bool NTV2SoftwareDevice::NTV2WriteRegisterRemote (const ULWord inRegNum, const U
 	ULWord newValue(inRegVal & inRegMask);
 	if (inRegShift)
 		newValue <<= inRegShift;
-	reg = newValue;
+	reg &= ~inRegMask;
+	reg |= newValue;
 	return true;
 }
 
