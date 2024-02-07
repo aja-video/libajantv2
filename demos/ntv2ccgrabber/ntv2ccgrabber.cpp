@@ -1317,7 +1317,7 @@ bool NTV2CCGrabber::RouteOutputSignal (const NTV2VideoFormat inVideoFormat)
 	const NTV2OutputCrosspointID	mixerOutputYUV		(::GetMixerOutputXptFromChannel (mOutputChannel));
 	const NTV2OutputCrosspointID	signalInput			(::GetSDIInputOutputXptFromChannel (mConfig.fInputChannel));
 	const NTV2Standard				outputStandard		(::GetNTV2StandardFromVideoFormat (inVideoFormat));
-	const bool						canVerify			(mDevice.HasCanConnectROM());
+	const bool						canVerify			(mDevice.features().HasCrosspointConnectROM());
 	UWord							connectFailures		(0);
 
 	if (mConfig.fDoMultiFormat)

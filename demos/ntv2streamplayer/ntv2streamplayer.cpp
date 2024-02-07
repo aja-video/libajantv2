@@ -395,7 +395,7 @@ bool NTV2StreamPlayer::RouteOutputSignal (void)
 	const NTV2Standard	outputStandard	(::GetNTV2StandardFromVideoFormat(mConfig.fVideoFormat));
 	const UWord			numSDIOutputs	(mDevice.features().GetNumVideoOutputs());
 	const bool			isRGB			(::IsRGBFormat(mConfig.fPixelFormat));
-	const bool			canVerify		(mDevice.HasCanConnectROM());
+	const bool			canVerify		(mDevice.features().HasCrosspointConnectROM());
 	UWord				connectFailures	(0);
 
 	const NTV2OutputXptID	cscVidOutXpt(::GetCSCOutputXptFromChannel(mConfig.fOutputChannel,  false/*isKey*/,  !isRGB/*isRGB*/));

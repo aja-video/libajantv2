@@ -612,7 +612,7 @@ bool NTV2Player4K::Route4KDownConverter (void)
 	if (!mDevice.features().CanDoWidget(NTV2_Wgt4KDownConverter)  ||  !mDevice.features().CanDoWidget(NTV2_WgtSDIMonOut1))
 		return true;
 
-	const bool	canVerify		(mDevice.HasCanConnectROM());
+	const bool	canVerify		(mDevice.features().HasCrosspointConnectROM());
 	UWord		connectFailures	(0);
 	if (::IsRGBFormat(mConfig.fPixelFormat))
 	{
@@ -670,7 +670,7 @@ bool NTV2Player4K::Route4KDownConverter (void)
 bool NTV2Player4K::RouteHDMIOutput (void)
 {
 	const bool	isRGB (::IsRGBFormat(mConfig.fPixelFormat));
-	const bool	canVerify (mDevice.HasCanConnectROM());
+	const bool	canVerify (mDevice.features().HasCrosspointConnectROM());
 	UWord		connectFailures (0);
 
 	if (mConfig.fDoHDMIOutput &&
@@ -791,7 +791,7 @@ bool NTV2Player4K::RouteHDMIOutput (void)
 
 bool NTV2Player4K::RouteFsToDLOut (void)
 {
-	const bool	canVerify (mDevice.HasCanConnectROM());
+	const bool	canVerify (mDevice.features().HasCrosspointConnectROM());
 	UWord		connectFailures (0);
 	if (mConfig.fOutputChannel == NTV2_CHANNEL1)
 	{
@@ -813,7 +813,7 @@ bool NTV2Player4K::RouteFsToDLOut (void)
 
 bool NTV2Player4K::RouteFsToCsc (void)
 {
-	const bool	canVerify (mDevice.HasCanConnectROM());
+	const bool	canVerify (mDevice.features().HasCrosspointConnectROM());
 	UWord		connectFailures (0);
 	if (mConfig.fOutputChannel == NTV2_CHANNEL1)
 	{
@@ -855,7 +855,7 @@ bool NTV2Player4K::RouteFsToCsc (void)
 
 bool NTV2Player4K::RouteFsToSDIOut (void)
 {
-	const bool	canVerify (mDevice.HasCanConnectROM());
+	const bool	canVerify (mDevice.features().HasCrosspointConnectROM());
 	UWord		connectFailures (0);
 	if (mDevice.features().CanDo12gRouting())
 	{
@@ -887,7 +887,7 @@ bool NTV2Player4K::RouteFsToSDIOut (void)
 
 bool NTV2Player4K::RouteFsToTsiMux (void)
 {
-	const bool	canVerify (mDevice.HasCanConnectROM());
+	const bool	canVerify (mDevice.features().HasCrosspointConnectROM());
 	UWord		connectFailures (0);
 	if (mConfig.fOutputChannel == NTV2_CHANNEL1)
 	{
@@ -946,7 +946,7 @@ bool NTV2Player4K::RouteFsToTsiMux (void)
 
 bool NTV2Player4K::RouteDLOutToSDIOut (void)
 {
-	const bool	canVerify (mDevice.HasCanConnectROM());
+	const bool	canVerify (mDevice.features().HasCrosspointConnectROM());
 	UWord		connectFailures (0);
 	if (mConfig.fOutputChannel == NTV2_CHANNEL1)
 	{
@@ -976,7 +976,7 @@ bool NTV2Player4K::RouteDLOutToSDIOut (void)
 
 bool NTV2Player4K::RouteCscTo2xSDIOut (void)
 {
-	const bool	canVerify (mDevice.HasCanConnectROM());
+	const bool	canVerify (mDevice.features().HasCrosspointConnectROM());
 	UWord		connectFailures (0);
 	if (mConfig.fOutputChannel == NTV2_CHANNEL1)
 	{
@@ -998,7 +998,7 @@ bool NTV2Player4K::RouteCscTo2xSDIOut (void)
 
 bool NTV2Player4K::RouteCscTo4xSDIOut (void)
 {
-	const bool	canVerify (mDevice.HasCanConnectROM());
+	const bool	canVerify (mDevice.features().HasCrosspointConnectROM());
 	UWord		connectFailures (0);
     if (mConfig.fOutputChannel == NTV2_CHANNEL1)
 	{
@@ -1020,7 +1020,7 @@ bool NTV2Player4K::RouteCscTo4xSDIOut (void)
 
 bool NTV2Player4K::RouteCscToDLOut (void)
 {
-	const bool	canVerify (mDevice.HasCanConnectROM());
+	const bool	canVerify (mDevice.features().HasCrosspointConnectROM());
 	UWord		connectFailures (0);
 	if (mConfig.fOutputChannel == NTV2_CHANNEL1)
 	{
@@ -1042,7 +1042,7 @@ bool NTV2Player4K::RouteCscToDLOut (void)
 
 bool NTV2Player4K::RouteTsiMuxToDLOut (void)
 {
-	const bool	canVerify (mDevice.HasCanConnectROM());
+	const bool	canVerify (mDevice.features().HasCrosspointConnectROM());
 	UWord		connectFailures (0);
 	if (mConfig.fOutputChannel == NTV2_CHANNEL1)
 	{
@@ -1071,7 +1071,7 @@ bool NTV2Player4K::RouteTsiMuxToDLOut (void)
 
 bool NTV2Player4K::RouteTsiMuxToCsc (void)
 {
-	const bool	canVerify (mDevice.HasCanConnectROM());
+	const bool	canVerify (mDevice.features().HasCrosspointConnectROM());
 	UWord		connectFailures (0);
 	if (mConfig.fOutputChannel == NTV2_CHANNEL1)
 	{
@@ -1130,7 +1130,7 @@ bool NTV2Player4K::RouteTsiMuxToCsc (void)
 
 bool NTV2Player4K::RouteTsiMuxTo2xSDIOut (void)
 {
-	const bool	canVerify (mDevice.HasCanConnectROM());
+	const bool	canVerify (mDevice.features().HasCrosspointConnectROM());
 	UWord		connectFailures (0);
 	if (mConfig.fOutputChannel == NTV2_CHANNEL1)
 	{
@@ -1159,7 +1159,7 @@ bool NTV2Player4K::RouteTsiMuxTo2xSDIOut (void)
 
 bool NTV2Player4K::RouteTsiMuxTo4xSDIOut (void)
 {
-	const bool	canVerify (mDevice.HasCanConnectROM());
+	const bool	canVerify (mDevice.features().HasCrosspointConnectROM());
 	UWord		connectFailures (0);
     if (mConfig.fOutputChannel == NTV2_CHANNEL1)
 	{
