@@ -103,6 +103,7 @@ class AJAExport DeviceCapabilities
 		inline bool		HasBiDirectionalSDI (void)				{return dev.IsSupported(kDeviceHasBiDirectionalSDI);}
 		inline bool		HasBreakoutBoard (void)					{return dev.IsSupported(kDeviceHasBreakoutBoard);}
 		inline bool		HasColorSpaceConverterOnChannel2 (void)	{return dev.IsSupported(kDeviceHasColorSpaceConverterOnChannel2);}
+		inline bool		HasCrosspointConnectROM (void)			{return dev.IsSupported(kDeviceHasXptConnectROM);}
 		inline bool		HasGenlockv2 (void)						{return dev.IsSupported(kDeviceHasGenlockv2);}
 		inline bool		HasGenlockv3 (void)						{return dev.IsSupported(kDeviceHasGenlockv3);}
 		inline bool		HasHeadphoneJack (void)					{return dev.IsSupported(kDeviceHasHeadphoneJack);}
@@ -170,7 +171,7 @@ class AJAExport DeviceCapabilities
 		inline UWord	GetNumOutputConverters (void)			{return UWord(dev.GetNumSupported(kDeviceGetNumOutputConverters));}
 		inline UWord	GetNumReferenceVideoInputs (void)		{return UWord(dev.GetNumSupported(kDeviceGetNumReferenceVideoInputs));}
 		inline UWord	GetNumSerialPorts (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumSerialPorts));}
-		inline UWord	GetNumTSIMuxers (void)					{return UWord(dev.GetNumSupported(kDeviceGetNumTSIMuxers));}	//	New in SDK 17.1
+		inline UWord	GetNumTSIMuxers (void)					{return UWord(dev.GetNumSupported(kDeviceGetNumTSIMuxers));}
 		inline UWord	GetNumUpConverters (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumUpConverters));}
 		inline ULWord	GetNumVideoChannels (void)				{return dev.GetNumSupported(kDeviceGetNumVideoChannels);}
 		inline UWord	GetNumVideoInputs (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumVideoInputs));}

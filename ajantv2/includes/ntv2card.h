@@ -2307,9 +2307,9 @@ public:
 #if !defined(NTV2_DEPRECATE_16_3)
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool WriteAudioLastOut (const ULWord inValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1)) {(void)inValue;(void)inAudioSystem; return false;}	///< @deprecated	This function is obsolete.
 #endif	//	!defined(NTV2_DEPRECATE_16_1)
-#if !defined(NTV2_DEPRECATE_17_1)
+#if !defined(NTV2_DEPRECATE_17_0)
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool CanDoAudioWaitForVBI(void)) {return IsSupported(kDeviceAudioCanWaitForVBI);}	///< @deprecated	Use CNTV2DriverInterface::IsSupported instead. (Was new in SDK 16.0)
-#endif	//	!defined(NTV2_DEPRECATE_17_1)
+#endif	//	!defined(NTV2_DEPRECATE_17_0)
 	///@}
 
 	/**
@@ -4453,7 +4453,9 @@ public:
 	**/
 	AJA_VIRTUAL bool	GetRoutingForChannel (const NTV2Channel inChannel, CNTV2SignalRouter & outRouting);
 
-	AJA_VIRTUAL bool	HasCanConnectROM (void);	///< @return	True if the device firmware has ROM containing legal xpt routes
+#if !defined(NTV2_DEPRECATE_17_0)
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool HasCanConnectROM(void)) {return IsSupported(kDeviceHasXptConnectROM);}	///< @deprecated	Call IsSupported(kDeviceHasXptConnectROM) or features().HasCrosspointConnectROM() instead
+#endif	//	!defined(NTV2_DEPRECATE_17_0)
 	/**
 		@brief		Answers with the implemented crosspoint connections (if known).
 		@param[out] outConnections	Receives the device's ::NTV2PossibleConnections.

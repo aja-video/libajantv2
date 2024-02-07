@@ -27,7 +27,7 @@
 #endif
 
 /**
-	@brief	Used with CNTV2Card::GetBoolParam to determine device capabilities.
+	@brief	Used with CNTV2DriverInterface::GetBoolParam to determine device capabilities.
 **/
 typedef enum _NTV2BoolParamID
 {
@@ -137,18 +137,20 @@ typedef enum _NTV2BoolParamID
 	kDeviceHasSPIv5,							///< @brief Use kDeviceGetSPIVersion instead.
 	kDeviceHasXilinxDMA,						///< @brief True if device has Xilinx DMA hardware.
 	kDeviceHasMicrophoneInput,					///< @brief True if device has a microphone input connector.
-	kDeviceCanDoBreakoutBoard,					///< @brief True if device supports an AJA breakout board. (New in SDK 17.1)
-	kDeviceHasBreakoutBoard,					///< @brief True if device has attached breakout board. (New in SDK 17.1)
-	kDeviceAudioCanWaitForVBI,					///< @brief True if device audio systems can wait for VBI before starting. (New in SDK 17.1)
-	kDeviceHasNTV4FrameStores,					///< @brief True if device has NTV4 FrameStores. (New in SDK 17.1)
+	kDeviceCanDoBreakoutBoard,					///< @brief True if device supports an AJA breakout board. (New in SDK 17.0)
+	kDeviceHasBreakoutBoard,					///< @brief True if device has attached breakout board. (New in SDK 17.0)
+	kDeviceAudioCanWaitForVBI,					///< @brief True if device audio systems can wait for VBI before starting. (New in SDK 17.0)
+	kDeviceHasNTV4FrameStores,					///< @brief True if device has NTV4 FrameStores. (New in SDK 17.0)
+	kDeviceHasXptConnectROM,					///< @brief True if device has a crosspoint connection ROM (New in SDK 17.0)
 	kNTV2BoolParam_LAST,
+	kNTV2BoolParam_COUNT	= kNTV2BoolParam_LAST-kNTV2BoolParam_FIRST,
 	kDeviceCanDo_INVALID	= kNTV2BoolParam_LAST
 } NTV2BoolParamID;
 
 #define NTV2_IS_VALID_BOOLPARAMID(__x__)		((__x__) >= kNTV2BoolParam_FIRST  &&  (__x__) < kNTV2BoolParam_LAST)
 
 /**
-	@brief	Used with CNTV2Card::GetNumericParam to determine device capabilities.
+	@brief	Used with CNTV2DriverInterface::GetNumericParam to determine device capabilities.
 **/
 typedef enum _NTV2NumericParamID
 {
@@ -198,11 +200,12 @@ typedef enum _NTV2NumericParamID
 	kDeviceGetNumLTCInputs,						///< @brief The number of analog LTC inputs on the device.
 	kDeviceGetNumLTCOutputs,					///< @brief The number of analog LTC outputs on the device.
 	kDeviceGetNumMicInputs,						///< @brief The number of microphone inputs on the device.
-	kDeviceGetNumLUTBanks,						///< @brief The number of LUT banks on the device. New in SDK 17.0
-	kDeviceGetTotalNumAudioSystems,				///< @brief The total number of audio systems on the device, including host audio and mixer audio systems, if present. New in SDK 17.0
-	kDeviceGetNumBufferedAudioSystems,			///< @brief The total number of audio systems on the device that can read/write audio buffer memory. Includes host audio system, if present. New in SDK 17.0
-	kDeviceGetNumTSIMuxers,						///< @brief	The number of TSI muxers on the device. New in SDK 17.1
+	kDeviceGetNumLUTBanks,						///< @brief The number of LUT banks on the device. (New in SDK 17.0)
+	kDeviceGetTotalNumAudioSystems,				///< @brief The total number of audio systems on the device, including host audio and mixer audio systems, if present. (New in SDK 17.0)
+	kDeviceGetNumBufferedAudioSystems,			///< @brief The total number of audio systems on the device that can read/write audio buffer memory. Includes host audio system, if present. (New in SDK 17.0)
+	kDeviceGetNumTSIMuxers,						///< @brief	The number of TSI muxers on the device. (New in SDK 17.0)
 	kNTV2NumericParam_LAST,
+	kNTV2NumericParam_COUNT	= kNTV2NumericParam_LAST-kNTV2NumericParam_FIRST,
 	kDeviceGetNum_INVALID	= kNTV2NumericParam_LAST
 } NTV2NumericParamID;
 
@@ -213,27 +216,30 @@ typedef enum _NTV2NumericParamID
 **/
 typedef enum _NTV2EnumsID
 {
-	kNTV2EnumsID_DeviceID,					///< @brief Identifies the NTV2DeviceID enumerated type
-	kNTV2EnumsID_Standard,					///< @brief Identifies the NTV2Standard enumerated type
-	kNTV2EnumsID_PixelFormat,				///< @brief Identifies the NTV2PixelFormat enumerated type
-	kNTV2EnumsID_FrameGeometry,				///< @brief Identifies the NTV2FrameGeometry enumerated type
-	kNTV2EnumsID_FrameRate,					///< @brief Identifies the NTV2FrameRate enumerated type
-	kNTV2EnumsID_ScanGeometry,				///< @brief Identifies the NTV2ScanGeometry enumerated type
-	kNTV2EnumsID_VideoFormat,				///< @brief Identifies the NTV2VideoFormat enumerated type
-	kNTV2EnumsID_Mode,						///< @brief Identifies the NTV2Mode enumerated type
-	kNTV2EnumsID_InputSource,				///< @brief Identifies the NTV2InputSource enumerated type
-	kNTV2EnumsID_OutputDest,				///< @brief Identifies the NTV2OutputDest enumerated type
-	kNTV2EnumsID_Channel,					///< @brief Identifies the NTV2Channel enumerated type
-	kNTV2EnumsID_RefSource,					///< @brief Identifies the NTV2RefSource enumerated type
-	kNTV2EnumsID_AudioRate,					///< @brief Identifies the NTV2AudioRate enumerated type
-	kNTV2EnumsID_AudioSource,				///< @brief Identifies the NTV2AudioSource enumerated type
-	kNTV2EnumsID_WidgetID,					///< @brief Identifies the NTV2AudioWidgetID enumerated type
-	kNTV2EnumsID_ConversionMode,			///< @brief Identifies the NTV2ConversionMode enumerated type
-	kNTV2EnumsID_DSKMode,					///< @brief	Identifies the NTV2DSKMode enumerated type
-	kNTV2EnumsID_INVALID
+	kNTV2EnumsID_FIRST,
+	kNTV2EnumsID_DeviceID = kNTV2EnumsID_FIRST,	///< @brief Identifies the NTV2DeviceID enumerated type
+	kNTV2EnumsID_Standard,						///< @brief Identifies the NTV2Standard enumerated type
+	kNTV2EnumsID_PixelFormat,					///< @brief Identifies the NTV2PixelFormat enumerated type
+	kNTV2EnumsID_FrameGeometry,					///< @brief Identifies the NTV2FrameGeometry enumerated type
+	kNTV2EnumsID_FrameRate,						///< @brief Identifies the NTV2FrameRate enumerated type
+	kNTV2EnumsID_ScanGeometry,					///< @brief Identifies the NTV2ScanGeometry enumerated type
+	kNTV2EnumsID_VideoFormat,					///< @brief Identifies the NTV2VideoFormat enumerated type
+	kNTV2EnumsID_Mode,							///< @brief Identifies the NTV2Mode enumerated type
+	kNTV2EnumsID_InputSource,					///< @brief Identifies the NTV2InputSource enumerated type
+	kNTV2EnumsID_OutputDest,					///< @brief Identifies the NTV2OutputDest enumerated type
+	kNTV2EnumsID_Channel,						///< @brief Identifies the NTV2Channel enumerated type
+	kNTV2EnumsID_RefSource,						///< @brief Identifies the NTV2RefSource enumerated type
+	kNTV2EnumsID_AudioRate,						///< @brief Identifies the NTV2AudioRate enumerated type
+	kNTV2EnumsID_AudioSource,					///< @brief Identifies the NTV2AudioSource enumerated type
+	kNTV2EnumsID_WidgetID,						///< @brief Identifies the NTV2AudioWidgetID enumerated type
+	kNTV2EnumsID_ConversionMode,				///< @brief Identifies the NTV2ConversionMode enumerated type
+	kNTV2EnumsID_DSKMode,						///< @brief	Identifies the NTV2DSKMode enumerated type
+	kNTV2EnumsID_LAST,
+	kNTV2EnumsID_COUNT		= kNTV2EnumsID_LAST-kNTV2EnumsID_FIRST,
+	kNTV2EnumsID_INVALID	= kNTV2EnumsID_LAST,
 } NTV2EnumsID;
 
-#define NTV2_IS_VALID_ENUMSID(__x__)		((__x__) >= kNTV2EnumsID_DeviceID  &&  (__x__) < kNTV2EnumsID_INVALID)
+#define NTV2_IS_VALID_ENUMSID(__x__)		((__x__) >= kNTV2EnumsID_FIRST  &&  (__x__) < kNTV2EnumsID_LAST)
 
 
 //	Most of the device features functions are generated from a Python script.
