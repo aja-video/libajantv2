@@ -1537,6 +1537,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanReportFrameSize:					outValue = ::NTV2DeviceCanReportFrameSize				(devID);	break;
 		case kDeviceHasBiDirectionalSDI:				outValue = ::NTV2DeviceHasBiDirectionalSDI				(devID);	break;
 		case kDeviceHasColorSpaceConverterOnChannel2:	outValue = ::NTV2DeviceCanDoWidget(devID, NTV2_WgtCSC2);	break;	//	Deprecate?
+		case kDeviceHasNTV4FrameStores:					outValue = (devID == DEVICE_ID_KONAX) || (devID == DEVICE_ID_KONAXM) ? 1 : 0; break;
 		case kDeviceHasNWL:								outValue = ::NTV2DeviceHasNWL							(devID);	break;
 		case kDeviceHasPCIeGen2:						outValue = ::NTV2DeviceHasPCIeGen2						(devID);	break;
 		case kDeviceHasRetailSupport:					outValue = ::NTV2DeviceHasRetailSupport					(devID);	break;

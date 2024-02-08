@@ -140,6 +140,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoBreakoutBoard,					///< @brief True if device supports an AJA breakout board. (New in SDK 17.0)
 	kDeviceHasBreakoutBoard,					///< @brief True if device has attached breakout board. (New in SDK 17.0)
 	kDeviceAudioCanWaitForVBI,					///< @brief True if device audio systems can wait for VBI before starting. (New in SDK 17.0)
+	kDeviceHasNTV4FrameStores,					///< @brief True if device has NTV4 FrameStores. (New in SDK 17.0)
 	kNTV2BoolParam_LAST,
 	kDeviceCanDo_INVALID	= kNTV2BoolParam_LAST
 } NTV2BoolParamID;
