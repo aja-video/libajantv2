@@ -133,6 +133,12 @@ Ntv2Status ntv2_setup_disable(struct ntv2_setup *ntv2_setterupper)
 static void ntv2_setup_monitor(void* data)
 {
 	struct ntv2_setup *ntv2_setterupper = (struct ntv2_setup *)data;
+	ntv2_setup_monitor_shared(ntv2_setterupper);
+}
+
+void ntv2_setup_monitor_shared(struct ntv2_setup *data)
+{
+	struct ntv2_setup *ntv2_setterupper = (struct ntv2_setup *)data;
 	Ntv2SystemContext *systemContext;
 	NTV2DeviceID deviceID;
 	ULWord thermalSamplingCount = 100;
