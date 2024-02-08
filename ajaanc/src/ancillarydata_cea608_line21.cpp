@@ -155,14 +155,6 @@ AJAAncDataType AJAAncillaryData_Cea608_Line21::RecognizeThisAncillaryData (const
 }
 
 
-ostream & AJAAncillaryData_Cea608_Line21::Print (ostream & debugStream, const bool bShowDetail) const
-{
-	debugStream << IDAsString() << "(" << ::AJAAncDataCodingToString(m_coding) << ")" << endl;
-	return AJAAncillaryData_Cea608::Print (debugStream, bShowDetail);
-
-}
-
-
 //-------------------------------------------------------------
 // Line 21 Encode code (ported/stolen from ntv2closedcaptioning.cpp)
 

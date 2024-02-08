@@ -74,14 +74,6 @@ public:
 	virtual AJAStatus				GeneratePayloadData (void);
 
 	/**
-		@brief		Streams a human-readable representation of me to the given output stream.
-		@param		inOutStream		Specifies the output stream.
-		@param[in]	inDetailed		Specify 'true' for a detailed representation;  otherwise use 'false' for a brief one.
-		@return		The given output stream.
-	**/
-	virtual std::ostream &			Print (std::ostream & inOutStream, const bool inDetailed = false) const;
-
-	/**
 		@param[in]	pInAncData	A valid pointer to a base AJAAncillaryData object that contains the Anc data to inspect.
 		@return		AJAAncDataType if I recognize this Anc data (or AJAAncDataType_Unknown if unrecognized).
 	**/

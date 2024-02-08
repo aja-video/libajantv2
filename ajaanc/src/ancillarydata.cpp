@@ -1303,35 +1303,45 @@ const string & AJAAncDataTypeToString (const AJAAncDataType inValue, const bool 
 }
 
 
-ostream & AJAAncillaryData::Print (ostream & inOutStream, const bool inDumpPayload) const
+ostream & AJAAncillaryData::Print (ostream & oss, const bool inDumpPayload) const
 {
-	inOutStream << "Type:\t\t"	<< AJAAncillaryData::DIDSIDToString(m_DID, m_SID)	<< endl
-				<< "DID:\t\t"	<< xHEX0N(uint32_t(m_DID),2)						<< endl
-				<< "SID:\t\t"	<< xHEX0N(uint32_t(m_SID),2)						<< endl
-				<< "DC:\t\t"	<< DEC(GetDC())										<< endl
-				<< "CS:\t\t"	<< xHEX0N(uint32_t(m_checksum),2)					<< endl
-				<< "Loc:\t\t"	<< m_location										<< endl
-				<< "Coding:\t\t"<< ::AJAAncDataCodingToString(m_coding)				<< endl
-				<< "Frame:\t\t" << xHEX0N(GetFrameID(),8)							<< endl
-				<< "Format:\t\t"<< ::AJAAncBufferFormatToString(GetBufferFormat())	<< endl
-				<< "Valid:\t\t" << (GotValidReceiveData() ? "Yes" : "No");
+	oss << "Type:\t\t"		<< IDAsString()										<< endl;
+	oss	<< "DID:\t\t"		<< xHEX0N(uint32_t(GetDID()),2)	<< endl
+		<< "SID:\t\t"		<< xHEX0N(uint32_t(GetSID()),2)	<< endl;
+	oss	<< "DC:\t\t"		<< DEC(GetDC())										<< endl;
+	oss	<< "CS:\t\t"		<< xHEX0N(uint32_t(m_checksum),2)					<< endl
+		<< "Loc:\t\t"		<< GetDataLocation()								<< endl;
+	oss	<< "Coding:\t\t"	<< ::AJAAncDataCodingToString(m_coding)				<< endl
+		<< "Frame:\t\t"		<< xHEX0N(GetFrameID(),8)							<< endl
+		<< "Format:\t\t"	<< ::AJAAncBufferFormatToString(GetBufferFormat())	<< endl
+		<< "Valid:\t\t"		<< (GotValidReceiveData() ? "Yes" : "No");
 	if (inDumpPayload)
-		{inOutStream << endl;  DumpPayload (inOutStream);}
-	return inOutStream;
+		{oss << endl;  DumpPayload(oss);}
+	return oss;
 }
 
+string AJAAncillaryData::IDAsString (void) const
+{
+	ostringstream oss;
+	if (IsRaw())
+		oss << "Analog/Raw Line " << DEC(GetDataLocation().GetLineNumber()) << " Packet";
+	else
+		oss << DIDSIDToString(GetDID(), GetSID());
+	return oss.str();
+}
 
 string AJAAncillaryData::AsString (const uint16_t inMaxBytes) const
 {
-	ostringstream	oss;
-	oss << "[" << ::AJAAncDataCodingToString(GetDataCoding())
-		<< "|" << ::AJAAncDataLocToString(GetDataLocation())
-		<< "|" << GetDIDSIDPair() << "|CS" << HEX0N(uint16_t(GetChecksum()),2) << "|DC=" << DEC(GetDC());
+	ostringstream oss;
+	oss << "[" << ::AJAAncDataCodingToString(GetDataCoding());
+	oss << "|" << ::AJAAncDataLocToString(GetDataLocation())
+		<< "|" << GetDIDSIDPair() << "|CS" << HEX0N(uint16_t(GetChecksum()),2);
+	oss << "|DC=" << DEC(GetDC());
 	if (m_frameID)
 		oss << "|FRx" << HEX0N(GetFrameID(),8);
 	if (IS_KNOWN_AJAAncBufferFormat(m_bufferFmt))
 		oss << "|" << ::AJAAncBufferFormatToString(GetBufferFormat());
-	const string	typeStr (AJAAncillaryData::DIDSIDToString(m_DID, m_SID));
+	const string typeStr (AJAAncillaryData::DIDSIDToString(m_DID, m_SID));
 	if (!typeStr.empty())
 		oss << "|" << typeStr;
 	oss << "]";
