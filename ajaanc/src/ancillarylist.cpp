@@ -1005,8 +1005,10 @@ AJAStatus AJAAncillaryList::SetFromDeviceAncBuffers (const NTV2Buffer & inF1AncB
 													const uint32_t inFrameNum)		//	STATIC
 {
 	outPackets.Clear();
-	const AJAStatus resultF1 (AddFromDeviceAncBuffer(inF1AncBuffer, outPackets, inFrameNum));
-	const AJAStatus resultF2 (AddFromDeviceAncBuffer(inF2AncBuffer, outPackets, inFrameNum));
+	AJAStatus resultF1(AJA_STATUS_SUCCESS), resultF2(AJA_STATUS_SUCCESS);
+	resultF1 = AddFromDeviceAncBuffer(inF1AncBuffer, outPackets, inFrameNum);
+	if (inF2AncBuffer) //Unnecessary to extract from empty buffer, and prevents 0 Packets debug message.
+		resultF2 = AddFromDeviceAncBuffer(inF2AncBuffer, outPackets, inFrameNum);
 	if (AJA_FAILURE(resultF1))
 		return resultF1;
 	if (AJA_FAILURE(resultF2))
