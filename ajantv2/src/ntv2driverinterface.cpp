@@ -36,18 +36,18 @@ using namespace std;
 #define DINOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #define DIINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #define DIDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#if defined(_DEBUG)
-	#define DIDBGX(__x__)	AJA_sDEBUG	(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
-#else
-	#define DIDBGX(__x__)	
-#endif
 
 //	Stats
 static uint32_t gConstructCount(0); //	Number of constructor calls made
 static uint32_t gDestructCount(0);	//	Number of destructor calls made
 static uint32_t gOpenCount(0);		//	Number of successful Open calls made
 static uint32_t gCloseCount(0);		//	Number of Close calls made
-
+//#define	_DEBUGSTATS_			//	Define this to log above construct/destruct & open/close tallies
+#if defined(_DEBUGSTATS_)
+	#define DIDBGX(__x__)	AJA_sDEBUG	(AJA_DebugUnit_DriverInterface, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
+#else
+	#define DIDBGX(__x__)	
+#endif
 
 /////////////// CLASS METHODS
 
@@ -360,7 +360,7 @@ bool CNTV2DriverInterface::ConfigureSubscription (const bool bSubscribe, const I
 	}
 	else
 	{
-		DIDBG("Unsubscribing '" << ::NTV2InterruptEnumString(eInterruptType) << "' (" << UWord(eInterruptType) << "), "
+		DIDBGX("Unsubscribing '" << ::NTV2InterruptEnumString(eInterruptType) << "' (" << UWord(eInterruptType) << "), "
 				<< mEventCounts[eInterruptType] << " event(s) received");
 	}
 	return true;
@@ -1488,17 +1488,16 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanDoAnalogAudio:					outValue = ::NTV2DeviceCanDoAnalogAudio					(devID);	break;
 		case kDeviceCanDoAnalogVideoIn:					outValue = ::NTV2DeviceCanDoAnalogVideoIn				(devID);	break;
 		case kDeviceCanDoAnalogVideoOut:				outValue = ::NTV2DeviceCanDoAnalogVideoOut				(devID);	break;
-		case kDeviceCanDoAudio2Channels:	//	Deprecate?
-			{const ULWord maxAudChls(GetNumSupported(kDeviceGetMaxAudioChannels));  outValue = maxAudChls >= 2;  break;}
-		case kDeviceCanDoAudio6Channels:	//	Deprecated?
-			{const ULWord maxAudChls(GetNumSupported(kDeviceGetMaxAudioChannels));  outValue = maxAudChls >= 6;  break;}
-		case kDeviceCanDoAudio8Channels:	//	Deprecated?
-			{const ULWord maxAudChls(GetNumSupported(kDeviceGetMaxAudioChannels));  outValue = maxAudChls >= 8;  break;}
+		case kDeviceCanDoAudio2Channels:				outValue = GetNumSupported(kDeviceGetMaxAudioChannels) >= 2;		break;	//	Deprecate?
+		case kDeviceCanDoAudio6Channels:				outValue = GetNumSupported(kDeviceGetMaxAudioChannels) >= 6;		break;	//	Deprecate?
+		case kDeviceCanDoAudio8Channels:				outValue = GetNumSupported(kDeviceGetMaxAudioChannels) >= 8;		break;	//	Deprecate?
 		case kDeviceCanDoAudio96K:						outValue = ::NTV2DeviceCanDoAudio96K					(devID);	break;	//	Deprecate?
 		case kDeviceCanDoAudioDelay:					outValue = ::NTV2DeviceCanDoAudioDelay					(devID);	break;	//	Deprecate?
 		case kDeviceCanDoBreakoutBoard:					outValue = ::NTV2DeviceCanDoBreakoutBoard				(devID);	break;
 		case kDeviceCanDoBreakoutBox:					outValue = ::NTV2DeviceCanDoBreakoutBox					(devID);	break;
-		case kDeviceCanDoCapture:						outValue = ::NTV2DeviceCanDoCapture						(devID);	break;
+		case kDeviceCanDoCapture:						outValue =	(GetNumSupported(kDeviceGetNumVideoInputs)
+																	+ GetNumSupported(kDeviceGetNumHDMIVideoInputs)
+																	+ GetNumSupported(kDeviceGetNumAnalogVideoInputs)) > 0;	break;
 		case kDeviceCanDoColorCorrection:				outValue = ::NTV2DeviceCanDoColorCorrection				(devID);	break;	//	Deprecate?
 		case kDeviceCanDoCustomAnc:						outValue = ::NTV2DeviceCanDoCustomAnc					(devID);	break;	//	Deprecate?
 		case kDeviceCanDoDSKOpacity:					outValue = ::NTV2DeviceCanDoDSKOpacity					(devID);	break;	//	Deprecate?
@@ -1517,7 +1516,9 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanDoPCMControl:					outValue = ::NTV2DeviceCanDoPCMControl					(devID);	break;
 		case kDeviceCanDoPCMDetection:					outValue = ::NTV2DeviceCanDoPCMDetection				(devID);	break;
 		case kDeviceCanDoPIO:							outValue = ::NTV2DeviceCanDoPIO							(devID);	break;	//	Deprecate?
-		case kDeviceCanDoPlayback:						outValue = ::NTV2DeviceCanDoPlayback					(devID);	break;
+		case kDeviceCanDoPlayback:						outValue =	(GetNumSupported(kDeviceGetNumVideoOutputs)
+																	+ GetNumSupported(kDeviceGetNumHDMIVideoOutputs)
+																	+ GetNumSupported(kDeviceGetNumAnalogVideoOutputs)) > 0;break;
 		case kDeviceCanDoProgrammableCSC:				outValue = ::NTV2DeviceCanDoProgrammableCSC				(devID);	break;
 		case kDeviceCanDoProgrammableRS422:				outValue = ::NTV2DeviceCanDoProgrammableRS422			(devID);	break;
 		case kDeviceCanDoProRes:						outValue = ::NTV2DeviceCanDoProRes						(devID);	break;
@@ -1675,6 +1676,7 @@ bool CNTV2DriverInterface::GetRegInfoForBoolParam (const NTV2BoolParamID inParam
 		case kDeviceHasMicrophoneInput:		outRegInfo.Set(kRegGlobalControl2, 0, kRegMaskIsDNXIV, kRegShiftIsDNXIV);							break;
 		case kDeviceHasBreakoutBoard:		outRegInfo.Set(kRegBOBStatus, 0, kRegMaskBOBAbsent, kRegShiftBOBAbsent);							break;
 		case kDeviceAudioCanWaitForVBI:		outRegInfo.Set(kRegCanDoStatus, 0, kRegMaskCanDoAudioWaitForVBI, kRegShiftCanDoAudioWaitForVBI);	break;
+		case kDeviceHasXptConnectROM:		outRegInfo.Set(kRegCanDoStatus, 0, kRegMaskCanDoValidXptROM, kRegShiftCanDoValidXptROM);			break;
 		default:	break;
 	}
 	return outRegInfo.IsValid();

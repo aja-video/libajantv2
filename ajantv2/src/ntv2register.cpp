@@ -1808,16 +1808,10 @@ bool CNTV2Card::IsMultiFormatActive (void)
 	return isEnabled;
 }
 
-bool CNTV2Card::HasCanConnectROM (void)
-{
-	ULWord hasCanConnectROM(0);
-	return ReadRegister(kRegCanDoStatus, hasCanConnectROM, kRegMaskCanDoValidXptROM, kRegShiftCanDoValidXptROM)	 &&	 (hasCanConnectROM ? true : false);
-}
-
 bool CNTV2Card::GetPossibleConnections (NTV2PossibleConnections & outConnections)
 {
 	outConnections.clear();
-	if (!HasCanConnectROM())
+	if (!IsSupported(kDeviceHasXptConnectROM))
 		return false;
 
 	NTV2RegReads ROMregs;

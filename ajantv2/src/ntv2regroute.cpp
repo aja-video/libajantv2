@@ -192,7 +192,7 @@ bool CNTV2Card::IsConnected (const NTV2InputCrosspointID inInputXpt, bool & outI
 bool CNTV2Card::CanConnect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, bool & outCanConnect)
 {
 	outCanConnect = false;
-	if (!HasCanConnectROM())
+	if (!IsSupported(kDeviceHasXptConnectROM))
 		return false;	//	No CanConnect ROM -- can't say
 
 	//	NOTE:	This is not a very efficient implementation, but CanConnect probably isn't being
@@ -260,7 +260,7 @@ bool CNTV2Card::ApplySignalRoute (const NTV2XptConnections & inConnections, cons
 
 	unsigned failures(0);
 	for (NTV2XptConnectionsConstIter iter(inConnections.begin());  iter != inConnections.end();	 ++iter)
-		if (!Connect(iter->first, iter->second, HasCanConnectROM()))
+		if (!Connect(iter->first, iter->second, IsSupported(kDeviceHasXptConnectROM)))
 			failures++;
 	return failures == 0;
 }
