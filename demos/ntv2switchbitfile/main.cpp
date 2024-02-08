@@ -36,6 +36,7 @@ int main(int argc, const char ** argv)
 {
     char *			pDeviceSpec 	(AJA_NULL);			//	Device argument
     char *			pDeviceID	 	(AJA_NULL);			//	Device ID argument
+    int				showVersion		(0);				//	Show version?
     int				isVerbose		(0);				//	Verbose output?
 	int				isInfo			(0);				//	Info output?
 	NTV2DeviceID	deviceID		(NTV2DeviceID(0));	//	Desired device ID to be loaded
@@ -44,7 +45,8 @@ int main(int argc, const char ** argv)
 
 	const struct poptOption userOptionsTable[] =
 	{
-		{ "device",	'd', POPT_ARG_STRING | POPT_ARGFLAG_OPTIONAL, &pDeviceSpec,	0,	"which device to use",	"index#, serial#, or model"	},
+		{"version",	 0,  POPT_ARG_NONE   | POPT_ARGFLAG_OPTIONAL, &showVersion,	0,	"show version & exit",	AJA_NULL },
+		{ "device",	'd', POPT_ARG_STRING | POPT_ARGFLAG_OPTIONAL, &pDeviceSpec,	0,	"device to use",		"index#, serial#, or model"	},
 		{ "info",	'i', POPT_ARG_NONE   | POPT_ARGFLAG_OPTIONAL, &isInfo,		0,	"bitfile info?",		AJA_NULL },
 		{ "load",	'l', POPT_ARG_STRING | POPT_ARGFLAG_OPTIONAL, &pDeviceID,	'l',"device ID to load",	"index# or hex32value" },
 		{ "verbose",'v', POPT_ARG_NONE   | POPT_ARGFLAG_OPTIONAL, &isVerbose,	0,	"verbose output?",		AJA_NULL },
@@ -56,6 +58,8 @@ int main(int argc, const char ** argv)
 	optionsContext = ::poptGetContext (AJA_NULL, argc, argv, userOptionsTable, 0);
 	::poptGetNextOpt (optionsContext);
 	optionsContext = ::poptFreeContext (optionsContext);
+	if (showVersion)
+		{cout << argv[0] << ", NTV2 SDK " << ::NTV2Version() << endl;  return 0;}
 
 	CNTV2Card device;
 	const string deviceSpec(pDeviceSpec ? pDeviceSpec : "0");

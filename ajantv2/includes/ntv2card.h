@@ -3763,9 +3763,9 @@ public:
 	/**
 		@brief		Remove the oldest buffer released by the streaming engine from the buffer queue.
 		@return		The removed buffer status.
-    **/
+	**/
 	AJA_VIRTUAL ULWord	StreamBufferRelease (const NTV2Channel inChannel,
-                                             NTV2StreamBuffer& status);
+											NTV2StreamBuffer& status);
 
 	/**
 		@brief		Get the status of the buffer identified by the bufferCookie.
@@ -5835,7 +5835,7 @@ public:
 		@brief		Initializes the given SDI input's Anc extractor for custom Anc packet detection and de-embedding.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc extractor firmware.)
 		@return		True if successful; otherwise false.
-		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIOut1, 1=SDIOut2, etc.).
+		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
 		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's fed from the SDI input,
 									if different from the SDI input. The default is to use the same ::NTV2Channel
 									that corresponds to the given SDI input (e.g., ::NTV2_CHANNEL1 == 0 == SDIIn1).
@@ -5892,7 +5892,7 @@ public:
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
-		@param[in]	inFrameNumber	Tells the Anc inserter where to write the received Anc data, specified as a
+		@param[in]	inFrameNumber	Tells the Anc extractor where to write the received Anc data, specified as a
 									frame number.
 		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's driving the SDI input,
 									if different from the SDI input. The default is to use the same ::NTV2Channel
@@ -5912,7 +5912,7 @@ public:
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports custom Anc inserter firmware.)
 		@return		True if successful; otherwise false.
 		@param[in]	inSDIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
-		@param[in]	inFrameNumber	Tells the Anc inserter where to write the received Anc data, specified as a
+		@param[in]	inFrameNumber	Tells the Anc extractor where to write the received Anc data, specified as a
 									frame number.
 		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's driving the SDI input,
 									if different from the SDI input. The default is to use the same ::NTV2Channel
@@ -6429,8 +6429,8 @@ public:
 	AJA_VIRTUAL bool GetMultiRasterBypassEnable (bool & outEnabled);	//	New in SDK 16.1
 	AJA_VIRTUAL bool IsMultiRasterWidgetChannel (const NTV2Channel inChannel);	//	New in SDK 16.2
 	///@}
-	
-	AJA_VIRTUAL bool IsBreakoutBoardConnected (void);	//	New in SDK 17.0
+
+	AJA_VIRTUAL bool	IsBreakoutBoardConnected (void);	//	New in SDK 17.0
 
 #if !defined(NTV2_DEPRECATE_16_1)
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioOutputMonitorSource (const NTV2AudioMonitorSelect inChannelPair, const NTV2Channel inAudioSystem = NTV2_CHANNEL1))	{return SetAudioOutputMonitorSource(inChannelPair, NTV2AudioSystem(inAudioSystem));}	///< @deprecated	Use the function that uses NTV2AudioChannelPair and NTV2AudioSystem params.

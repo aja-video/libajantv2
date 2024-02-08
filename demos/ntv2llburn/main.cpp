@@ -49,9 +49,9 @@ int main (int argc, const char ** argv)
 	//	Command line option descriptions:
 	const struct poptOption optionsTable [] =
 	{
-		{"version",		  0,	POPT_ARG_NONE,		&showVersion,	0,	"show version",					AJA_NULL					},
+		{"version",		  0,	POPT_ARG_NONE,		&showVersion,	0,	"show version & exit",			AJA_NULL					},
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"device to use",				"index#, serial#, or model"	},
-		{"multiFormat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"use multi-format/channel",	AJA_NULL					},
+		{"multiFormat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"use multi-format/channel",		AJA_NULL					},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",			"'?' or 'list' to list"		},
 		{"input",		'i',	POPT_ARG_STRING,	&pInputSrcSpec,	0,	"SDI input to use",				"1-8, ?=list"				},
 		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio?",				AJA_NULL					},

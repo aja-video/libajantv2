@@ -50,13 +50,13 @@ int main (int argc, const char ** argv)
 	//	Command line option descriptions:
 	const CNTV2DemoCommon::PoptOpts optionsTable [] =
 	{
-		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"which device to use",		"index#, serial#, or model"},
+		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,		0,	"device to use",			"index#, serial#, or model"},
 		{"eotf",		'e',	POPT_ARG_INT,		&eotf,				0,	"0=TradGammaSDR 1=TradGammaHDR 2=ST2084 3=HLG",	"EOTF to use"},
 		{"luminance",	'l',	POPT_ARG_NONE,		&constLuminance,	0,	"constant luminance?",		AJA_NULL	},
 		{"dolbyvision",	 0,		POPT_ARG_NONE,		&dolbyVision,		0,	"enable DolbyVision bit?",	AJA_NULL	},
 		{"nohdr",		 0,		POPT_ARG_NONE,		&noHDR,				0,	"disable HDMI HDR output?",	AJA_NULL	},
 		{"verbose",		'v',	POPT_ARG_NONE,		&verbose,			0,	"verbose output?",			AJA_NULL	},
-		{"version",		 0,		POPT_ARG_NONE,		&showVersion,		0,	"show version",				AJA_NULL	},
+		{"version",		 0,		POPT_ARG_NONE,		&showVersion,		0,	"show version & exit",		AJA_NULL	},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};

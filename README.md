@@ -20,6 +20,7 @@ This is the open-source SDK for discovering, interrogating and controlling NTV2 
 1. [SDK Forward & Backward Compatibility](#fwdbackcompatibility)
 1. [Driver Compatibility](#drivercompat)
 1. [Firmware and Device Features](#fwdevicefeatures)
+1. [libajantv2 Dynamic (Shared) Libary](#dynamiclib)
 
 ## Directory Layout
 The **libajantv2** folder contains the following items:
@@ -51,17 +52,17 @@ Starting in the NTV2 SDK version 17.0, AJA has standardized on [CMake](https://c
 
 The instructions for building the default static library are generally the same on each supported platform (Windows, macOS, Linux). Note that the default "CMake Generator" varies by platform.
 
-**NOTE: By default — absent any parameters — only the target for the ajantv2 static library is built.**
+**NOTE: By default — absent any parameters — all standard targets are built (static library, demos, tools, tests, plugins).**
 
-To build additional targets, the following CMake variables must be set to 'ON' in your CMake build environment:
-- `AJANTV2_BUILD_DEMOS` — If enabled, builds the demonstration programs (e.g. **ntv2capture**, **ntv2player**, …).\
-By default, demo apps are _not_ built.
-- `AJANTV2_BUILD_TOOLS` — If enabled, builds the command-line tools (e.g. **ntv2thermo**, **regio**, **supportlog**, …).\
-By default, tools are _not_ built.
-- `AJANTV2_BUILD_TESTS` — If enabled, builds any/all unit test(s).\
-By default, these test programs are _not_ built.
-- `AJANTV2_BUILD_PLUGINS` — If enabled, builds the standard NTV2 plugins (i.e. **nublegacy**, **swdevice**, …).\
-By default, plugins are _not_ built.
+To prevent building certain targets, these CMake variables can be set to 'ON' in your CMake build environment:
+- `AJANTV2_DISABLE_DEMOS` — If ON, prevents building the demonstration programs (e.g. **ntv2capture**, **ntv2player**, …).\
+Demo apps are normally built by default.
+- `AJANTV2_DISABLE_TOOLS` — If ON, prevents building the command-line tools (e.g. **ntv2thermo**, **regio**, **supportlog**, …).\
+Command-line tools are normally built by default.
+- `AJANTV2_DISABLE_TESTS` — If ON, prevents building the unit test(s).\
+The test programs are normally built by default.
+- `AJANTV2_DISABLE_PLUGINS` — If ON, builds the standard NTV2 plugins (i.e. **nublegacy**, **swdevice**, …).\
+The standard NTV2 plugins are normally built by default.
 
 Please follow the instructions below to build libajantv2 on the supported platform and development environment of your preference.
 
@@ -280,8 +281,6 @@ The NTV2 source files originated many years ago from some of the earliest hardwa
 
 In addition, when the first NTV2 SDK was released, the video capture/playout devices it supported were circuit boards fixed in a specific motherboard slot with barely enough I/O capability to handle a single stream of 4:2:2 YUV SD video. Today’s devices are hot-pluggable, support multiple channels, each with its own signal format, up to 4:4:4 8Kp60 and beyond. As the SDK expanded over the years to support newer, faster devices, the older functions, data types and constants remained, which resulted in a very unwieldy and confusing SDK that made it difficult for OEM developers to quickly get up to speed.
 
-### Deprecation History
-
 Starting with the 11.3 SDK, AJA introduced the first `NTV2_DEPRECATE` macro, and gathered many of the obsolete SDK functions, data types and constants under preprocessor `#ifdef` blocks: 
 ```
 #if !defined(NTV2_DEPRECATE)
@@ -291,6 +290,10 @@ Starting with the 11.3 SDK, AJA introduced the first `NTV2_DEPRECATE` macro, and
 #endif  //  !defined(NTV2_DEPRECATE)
 ```
 This means that if the `NTV2_DEPRECATE` macro is undefined, then existing code that relies on the old APIs will continue to compile, link and run. If the `NTV2_DEPRECATE` macro is defined, then the obsolete APIs disappear from the compilation, and build errors will result if they’re used.
+
+### Deprecation History
+
+<details><summary>Click to expand</summary>
 
 - **SDK 11.3:** `NTV2_DEPRECATE` macro introduced (but not defined anywhere).
 - **SDKs 11.3 - 12.3:** Shipped libraries built with old APIs intact (i.e. `NTV2_DEPRECATE` undefined, by default).
@@ -401,6 +404,8 @@ This means that if the `NTV2_DEPRECATE` macro is undefined, then existing code t
     - Two overloaded member functions **NTV2TestPatternGen::DrawTestPattern** first deprecated in SDK 16.0 now produce compile-time warnings when used.
   - In **libajacc** Closed-Caption Library, the deprecated **CNTV2CaptionRenderer** member functions (**GetRenderer**, **BurnChar**, **BurnString**, **BurnStringAtXY**) first deprecated in SDK 16.0 now produce compile-time warnings when used.
 
+</details>
+
 To build the **ajantv2** library to include a deprecated API, comment out or remove its corresponding `#define NTV2_DEPRECATE`… line in `ajatypes.h`, then rebuild the library.
 
 **Note:**
@@ -444,3 +449,41 @@ AJA always recommends that NTV2-based applications be built from the same SDK ve
 ## Firmware and Device Features <a name="fwdevicefeatures"></a>
 
 For a given SDK release, the **CanDo**_XXXX_, **GetNum**_XXXX_, etc. Device Features API responses should be correct for all supported devices running the latest firmware available on or after the SDK release date. AJA will do its best to document any exceptions on the SDK’s download page and/or the device firmware page in the Knowledgebase.
+
+# libajantv2 Dynamic (Shared) Libary <a name="dynamiclib"></a>
+
+Starting in SDK 16.1, AJA started to distribute libajantv2 as a dynamic library both on public forums, and in AJA’s MacOS, Windows, and Linux “retail” desktop software installers.
+
+libajantv2 is publically-distributed as a dynamic library.
+AJA’s retail desktop installers install the NTV2 dynamic libraries into the following host locations:
+  - **Linux** — `/opt/aja`
+    - **ajantv2_**_MM_**.so** (…where _MM_ is a two-digit major version number)
+  - **macOS** — `/Library/Application Support/AJA`
+    - **ajantv2_**_MM_**.dylib**
+    - **ajantv2d_**_MM_**.dylib** — if present, the debug version of the library
+  - **Windows** — `…\Program Files\AJA`
+    - _MM_**AJANTV2.DLL**
+
+**File Name:** The libary’s file name includes the SDK major version number in the name (e.g. `ajantv2_16.dylib`).
+-	All public, non-static symbols are exported as intended for “strong” linkage.
+-	The dynamic library is intended for “tight” integration with client applications. Changing even one NTV2 data type, class
+	definition or function signature without rebuilding both the SDK library and the client application(s) will likely
+	yield dynamic loader failures at launch-time, or unexpected results at runtime (including crashes).
+
+## Determining dynamic library SDK version
+
+When dynamically loading the NTV2 library at runtime (as opposed to having it automatically loaded by the host operating
+system at launch time), the library can be queried for more specific version information by two utility functions:
+-	`NTV2GetVersionString` – returns a string that starts with “_major_**.**_minor_**.**_point_”
+	that includes the _major_, _minor_, and _point_ version number values in decimal form.
+-	`NTV2GetSDKVersionComponent` – returns any of the _major_, _minor_, and _point_ version number values by passing 0, 1, 2 or 3, respectively, for the _version component_ being requested.
+
+**NOTE:** It is strongly recommended that the SDK client software operates with the SDK dynamic library that has the same version.
+
+**WARNING:** Do not use an SDK dynamic library whose _major_ version number differs from the SDK _major_ version number when the SDK client was compiled.
+
+## Building the libajantv2 Dynamic (Shared) Libary
+
+To build the libajantv2 dynamic library, set the `AJANTV2_BUILD_SHARED` CMake variable to 'ON' in your build environment.
+- `AJANTV2_BUILD_SHARED` — If ON, produces the libajantv2 dynamic library.\
+By default, the libajantv2 dynamic library is _not_ built.

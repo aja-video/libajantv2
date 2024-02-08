@@ -167,8 +167,8 @@ template <typename T> class AJAMovingAvg
 			if (isValid())
 			{
 				if (inDetailed)
-					oss << averageF() << " (avg) for last " << numStoredSamples() << " of " << totalSamples() << " samples, "
-						<< minimum() << " (min), " << maximum() << " (max)";
+					oss << averageF() << " (avg) for last " << numStoredSamples() << " of " << totalSamples() << " samples" << std::endl
+						<< recentMinimum() << " (min), " << recentMaximum() << " (max)";
 				else oss << averageF();
 			}
 			else oss << "n/a";

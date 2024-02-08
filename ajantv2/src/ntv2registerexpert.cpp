@@ -697,9 +697,9 @@ private:
 														"Ignore DID 1-4",		"Ignore DID 5-8",		"Ignore DID 9-12",
 														"Ignore DID 13-16",		"Ignore DID 17-20",		"Analog Start Line",
 														"Analog F1 Y Filter",	"Analog F2 Y Filter",	"Analog F1 C Filter",
-														"Analog F2 C Filter"	"",						"",
+														"Analog F2 C Filter",	"",						"",
 														"",						"",						"",
-														"Analog Act Line Len",	""};
+														"Analog Act Line Len"};
 		static const string AncInsRegNames []	=	{	"Field Bytes",			"Control",				"F1 Start Address",
 														"F2 Start Address",		"Pixel Delay",			"Active Start",
 														"Pixels Per Line",		"Lines Per Frame",		"Field ID Lines",
@@ -3154,8 +3154,8 @@ private:
 			(void) inDeviceID;
 			ostringstream	oss;
 			const uint32_t	which		(inRegNum & 0x1F);
-			const uint32_t	valueLow	(inRegValue & 0x7FF);
-			const uint32_t	valueHigh	((inRegValue >> 16) & 0x7FF);
+			const uint32_t	valueLow	(inRegValue & 0xFFF);
+			const uint32_t	valueHigh	((inRegValue >> 16) & 0xFFF);
 			switch (which)
 			{
 				case 5:		oss << "F1 cutoff line: "			<< valueLow << endl		//	regAncExtFieldCutoffLine

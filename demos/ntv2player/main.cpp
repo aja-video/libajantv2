@@ -43,7 +43,7 @@ int main (int argc, const char ** argv)
 	//	Command line option descriptions:
 	const CNTV2DemoCommon::PoptOpts optionsTable [] =
 	{
-		{"version",		  0,	POPT_ARG_NONE,		&showVersion,	0,	"show version",				AJA_NULL					},
+		{"version",		  0,	POPT_ARG_NONE,		&showVersion,	0,	"show version & exit",		AJA_NULL					},
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"device to use",			"index#, serial#, or model"	},
 		{"channel",		'c',	POPT_ARG_INT,		&channelNumber,	0,	"channel to use",			"1-8"						},
 		{"multiFormat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"use multi-format/channel",	AJA_NULL					},
@@ -52,7 +52,7 @@ int main (int argc, const char ** argv)
 		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,	0,	"video format to produce",	"'?' or 'list' to list"		},
 		{"anc",			'a',	POPT_ARG_STRING,	&pAncFilePath,	0,	"play prerecorded anc",		"path/to/binary/data/file"	},
 		{"noaudio",		  0,	POPT_ARG_NONE,		&noAudio,		0,	"disable audio tone",		AJA_NULL					},
-		{"novideo",		  0,	POPT_ARG_NONE,		&noVideo,		0,	"disable video tone",		AJA_NULL					},
+		{"novideo",		  0,	POPT_ARG_NONE,		&noVideo,		0,	"disable video",			AJA_NULL					},
 		{"ltc",			'l',	POPT_ARG_NONE,		&xmitLTC,		0,	"xmit LTC instead of VITC",	AJA_NULL					},
 		POPT_AUTOHELP
 		POPT_TABLEEND

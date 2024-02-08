@@ -1000,7 +1000,6 @@ public:
 	**/
 	virtual std::string						AsString (const uint16_t inDumpMaxBytes = 0) const;
 	
-
 	/**
 		@return	A string containing a human-readable representation of the given DID/SDID values,
 				or empty for invalid or unknown values.
