@@ -1078,22 +1078,48 @@ public:
 																		U16Packets &					outRawPackets,
 																		U16Packet &						outWordOffsets);
 	/**
-		@brief		Converts a single line of ::NTV2_FBF_8BIT_YCBCR data from the given source buffer into an ordered sequence of uint16_t
-					values that contain the resulting 10-bit even-parity data.
-		@param[in]	pInYUV8Line			A valid, non-NULL pointer to the start of the VANC line in an ::NTV2_FBF_8BIT_YCBCR video buffer.
-		@param[out]	outU16YUVLine		Receives the converted 10-bit-per-component values as an ordered sequence of uint16_t values,
-										which will include even parity and valid checksums.
+		@brief		Converts a single line of ::NTV2_FBF_8BIT_YCBCR data from the given source buffer into an ordered
+					sequence of uint16_t values that contain the resulting 10-bit even-parity data.
+		@param[in]	pInYUV8Line			A valid, non-NULL pointer to the start of the VANC line in an ::NTV2_FBF_8BIT_YCBCR
+										video buffer.
+		@param[out]	outU16YUVLine		Receives the converted 10-bit-per-component values as an ordered sequence of
+										uint16_t values, which will include even parity and valid checksums.
 		@param[in]	inNumPixels			Specifies the length of the line to be converted, in pixels.
 		@return		True if successful;  otherwise false.
-		@note		If SMPTE ancillary data is detected in the video, this routine "intelligently" stretches it by copying the 8-bits to
-					the LS 8-bits of the 10-bit output, recalculating parity and checksums as needed. (This emulates what NTV2 device
-					firmware does during playout of ::NTV2_FBF_8BIT_YCBCR frame buffers with ::NTV2_VANCDATA_8BITSHIFT_ENABLE.)
-		@note		NTV2 firmware is expected to start the first anc packet at the first pixel position in the VANC line, and place
-					subsequent packets, if any, in immediate succession, without any gaps. Therefore, a line that does not start with
-					the 0x00/0xFF/0xFF packet header is assumed to not contain any packets. This saves a substantial amount of CPU time.
+		@warning	Do not use this function for SD rasters!
+		@note		If SMPTE ancillary data is detected in the video, this routine "intelligently" stretches it by copying
+					the 8-bits to the LS 8-bits of the 10-bit output, recalculating parity and checksums as needed.
+					(This emulates what NTV2 device firmware does during playout of ::NTV2_FBF_8BIT_YCBCR frame buffers
+					with ::NTV2_VANCDATA_8BITSHIFT_ENABLE.)
+		@note		This function assumes any line that doesn't start with 0x00/0xFF/0xFF has no anc packets. This is done
+					not only to save CPU time, but also because NTV2 firmware anc embedders/inserters always start the
+					first anc packet at the first pixel position in the VANC line, and place subsequent packets, if any,
+					in immediate succession, without gaps.
 	**/
 	static bool								Unpack8BitYCbCrToU16sVANCLine (const void * pInYUV8Line,
 																			U16Packet & outU16YUVLine,
+																			const uint32_t inNumPixels);
+	/**
+		@brief		SD version of Unpack8BitYCbCrToU16sVANCLine.
+		@param[in]	pInYUV8Line			A valid, non-NULL pointer to the start of the VANC line in an ::NTV2_FBF_8BIT_YCBCR
+										video buffer.
+		@param[out]	outU16YUVLine		Receives the converted 10-bit-per-component values as an ordered sequence of
+										uint16_t values. Anc packets begin with a 0x000/0xFFF/0xFFF sequence. Packet
+										data includes even parity and valid checksums.
+		@param[in]	inNumPixels			Specifies the length of the line to be converted, in pixels.
+		@return		True if successful;  otherwise false.
+		@warning	Do not use this function for HD rasters!
+		@note		If SMPTE ancillary data is detected in the video, this routine "intelligently" stretches it by copying
+					the 8-bits to the LS 8-bits of the 10-bit output, recalculating parity and checksums as needed.
+					(This emulates what NTV2 device firmware does during playout of ::NTV2_FBF_8BIT_YCBCR frame buffers
+					with ::NTV2_VANCDATA_8BITSHIFT_ENABLE.)
+		@note		This function assumes any line that doesn't start with 0x00/0xFF/0xFF has no anc packets. This is done
+					not only to save CPU time, but also because NTV2 firmware anc embedders/inserters always start the
+					first anc packet at the first pixel position in the VANC line, and place subsequent packets, if any,
+					in immediate succession, without gaps.
+	**/
+	static bool								Unpack8BitYCbCrToU16sVANCLineSD (const void * pInYUV8Line,
+																			UWordSequence & outU16YUVLine,
 																			const uint32_t inNumPixels);
 
 	static void								GetInstanceCounts (uint32_t & outConstructed, uint32_t & outDestructed);

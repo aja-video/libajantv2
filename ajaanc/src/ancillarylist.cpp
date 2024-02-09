@@ -880,35 +880,34 @@ AJAStatus AJAAncillaryList::AddVANCData (const UWordSequence & inPacketWords, co
 }	//	AddVANCData
 
 
-AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2Buffer &				inFrameBuffer,
-											const NTV2FormatDescriptor &	inFormatDesc,
-											AJAAncillaryList &				outPackets,
-											const uint32_t					inFrameNum)
+AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2Buffer &		inFB,
+											const NTV2FormatDesc &	inFD,
+											AJAAncillaryList &		outPkts,
+											const uint32_t			inFrameNum)
 {
-	outPackets.Clear();
-
-	if (inFrameBuffer.IsNULL())
+	outPkts.Clear();
+	if (inFB.IsNULL())
 	{
 		LOGMYERROR("AJA_STATUS_NULL: NULL frame buffer pointer");
 		return AJA_STATUS_NULL;
 	}
-	if (!inFormatDesc.IsValid())
+	if (!inFD.IsValid())
 	{
 		LOGMYERROR("AJA_STATUS_BAD_PARAM: bad NTV2FormatDescriptor");
 		return AJA_STATUS_BAD_PARAM;
 	}
-	if (!inFormatDesc.IsVANC())
+	if (!inFD.IsVANC())
 	{
 		LOGMYERROR("AJA_STATUS_BAD_PARAM: format descriptor has no VANC lines");
 		return AJA_STATUS_BAD_PARAM;
 	}
 
-	const ULWord			vancBytes	(inFormatDesc.GetTotalRasterBytes() - inFormatDesc.GetVisibleRasterBytes());
-	const NTV2PixelFormat	fbf			(inFormatDesc.GetPixelFormat());
-	const bool				isSD		(NTV2_IS_SD_STANDARD(inFormatDesc.GetVideoStandard()));
-	if (inFrameBuffer.GetByteCount() < vancBytes)
+	const ULWord			vancBytes	(inFD.GetTotalRasterBytes() - inFD.GetVisibleRasterBytes());
+	const NTV2PixelFormat	fbf			(inFD.GetPixelFormat());
+	const bool				isSD		(NTV2_IS_SD_STANDARD(inFD.GetVideoStandard()));
+	if (inFB.GetByteCount() < vancBytes)
 	{
-		LOGMYERROR("AJA_STATUS_FAIL: " << inFrameBuffer.GetByteCount() << "-byte frame buffer smaller than " << vancBytes << "-byte VANC region");
+		LOGMYERROR("AJA_STATUS_FAIL: " << inFB.GetByteCount() << "-byte frame buffer smaller than " << vancBytes << "-byte VANC region");
 		return AJA_STATUS_FAIL;
 	}
 	if (fbf != NTV2_FBF_10BIT_YCBCR	 &&	 fbf != NTV2_FBF_8BIT_YCBCR)
@@ -917,7 +916,7 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2Buffer &				inFrameBuffer
 		return AJA_STATUS_UNSUPPORTED;	//	Only 'v210' and '2vuy' currently supported
 	}
 
-	for (ULWord lineOffset (0);	 lineOffset < inFormatDesc.GetFirstActiveLine();  lineOffset++)
+	for (ULWord lineOffset (0);	 lineOffset < inFD.GetFirstActiveLine();  lineOffset++)
 	{
 		UWordSequence	uwords;
 		bool			isF2			(false);
@@ -925,13 +924,15 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2Buffer &				inFrameBuffer
 		unsigned		ndx				(0);
 		const AJAAncDataLink	defaultLink (AJAAncDataLink_A);	//	This is most common
 
-		inFormatDesc.GetSMPTELineNumber (lineOffset, smpteLineNum, isF2);
+		inFD.GetSMPTELineNumber (lineOffset, smpteLineNum, isF2);
 		if (fbf == NTV2_FBF_10BIT_YCBCR)
-			::UnpackLine_10BitYUVtoUWordSequence (inFormatDesc.GetRowAddress(inFrameBuffer.GetHostAddress(0), lineOffset),
-													inFormatDesc, uwords);
+			::UnpackLine_10BitYUVtoUWordSequence (inFD.GetRowAddress(inFB.GetHostAddress(0), lineOffset), inFD, uwords);
+		else if (isSD)
+			AJAAncillaryData::Unpack8BitYCbCrToU16sVANCLineSD (inFD.GetRowAddress(inFB.GetHostAddress(0), lineOffset),
+																uwords, inFD.GetRasterWidth());
 		else
-			AJAAncillaryData::Unpack8BitYCbCrToU16sVANCLine (inFormatDesc.GetRowAddress(inFrameBuffer.GetHostAddress(0), lineOffset),
-															uwords,	 inFormatDesc.GetRasterWidth());
+			AJAAncillaryData::Unpack8BitYCbCrToU16sVANCLine (inFD.GetRowAddress(inFB.GetHostAddress(0), lineOffset),
+															uwords,	 inFD.GetRasterWidth());
 		if (isSD)
 		{
 			AJAAncillaryData::U16Packets	ycPackets;
@@ -942,7 +943,7 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2Buffer &				inFrameBuffer
 			NTV2_ASSERT(ycPackets.size() == ycHOffsets.size());
 
 			for (AJAAncillaryData::U16Packets::const_iterator it(ycPackets.begin());  it != ycPackets.end();  ++it, ndx++)
-				outPackets.AddVANCData (*it, loc.SetHorizontalOffset(ycHOffsets[ndx]), inFrameNum);
+				outPkts.AddVANCData (*it, loc.SetHorizontalOffset(ycHOffsets[ndx]), inFrameNum);
 		}
 		else
 		{
@@ -950,7 +951,7 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2Buffer &				inFrameBuffer
 			UWordSequence					yHOffsets, cHOffsets;
 			AJAAncDataLoc					yLoc	(defaultLink, AJAAncDataChannel_Y, AJAAncDataSpace_VANC, uint16_t(smpteLineNum));
 			AJAAncDataLoc					cLoc	(defaultLink, AJAAncDataChannel_C, AJAAncDataSpace_VANC, uint16_t(smpteLineNum));
-			//cerr << endl << "SetFromVANCData: +" << DEC0N(lineOffset,2) << ": ";	inFormatDesc.PrintSMPTELineNumber(cerr, lineOffset);  cerr << ":" << endl << uwords << endl;
+			//cerr << endl << "SetFromVANCData: +" << DEC0N(lineOffset,2) << ": ";	inFD.PrintSMPTELineNumber(cerr, lineOffset);  cerr << ":" << endl << uwords << endl;
 			AJAAncillaryData::GetAncPacketsFromVANCLine (uwords, AncChannelSearch_Y, yPackets, yHOffsets);
 			AJAAncillaryData::GetAncPacketsFromVANCLine (uwords, AncChannelSearch_C, cPackets, cHOffsets);
 			NTV2_ASSERT(yPackets.size() == yHOffsets.size());
@@ -958,14 +959,14 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2Buffer &				inFrameBuffer
 
 			unsigned	ndxx(0);
 			for (AJAAncillaryData::U16Packets::const_iterator it(yPackets.begin());	 it != yPackets.end();	++it, ndxx++)
-				outPackets.AddVANCData (*it, yLoc.SetHorizontalOffset(yHOffsets[ndxx]), inFrameNum);
+				outPkts.AddVANCData (*it, yLoc.SetHorizontalOffset(yHOffsets[ndxx]), inFrameNum);
 
 			ndxx = 0;
 			for (AJAAncillaryData::U16Packets::const_iterator it(cPackets.begin());	 it != cPackets.end();	++it, ndxx++)
-				outPackets.AddVANCData (*it, cLoc.SetHorizontalOffset(cHOffsets[ndxx]), inFrameNum);
+				outPkts.AddVANCData (*it, cLoc.SetHorizontalOffset(cHOffsets[ndxx]), inFrameNum);
 		}
 	}	//	for each VANC line
-	LOGMYDEBUG("returning " << outPackets);
+	LOGMYDEBUG("returning " << outPkts);
 	return AJA_STATUS_SUCCESS;
 }
 

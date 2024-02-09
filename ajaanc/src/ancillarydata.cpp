@@ -1818,11 +1818,12 @@ bool AJAAncillaryData::Unpack8BitYCbCrToU16sVANCLine (const void * pInYUV8Line,
 				//	Just do a simple 8-bit -> 10-bit expansion with the remaining data on the line...
 				const ULWord	index		(2 * pixNum	 +	comp);
 				const UWord		dataValue	(UWord(UWord(pInYUV8Buffer[index]) << 2));	//	Pad 2 LSBs with zeros
+
 				NTV2_ASSERT (index <= ULWord(outU16YUVLine.size()));
 				if (index < ULWord(outU16YUVLine.size()))
-					outU16YUVLine [index] = dataValue;
+					outU16YUVLine[index] = dataValue;
 				else
-					outU16YUVLine.push_back (dataValue);
+					outU16YUVLine.push_back(dataValue);
 				pixNum++;
 			}
 			else
@@ -1877,6 +1878,96 @@ bool AJAAncillaryData::Unpack8BitYCbCrToU16sVANCLine (const void * pInYUV8Line,
 
 	return true;
 }	//	Unpack8BitYCbCrToU16sVANCLine
+
+
+bool AJAAncillaryData::Unpack8BitYCbCrToU16sVANCLineSD (const void * pInYUV8Line,
+														UWordSequence & outU16YUVLine,
+														const uint32_t inNumPixels)
+{
+	const UByte * pInYUV8Buffer (reinterpret_cast<const UByte*>(pInYUV8Line));
+	const ULWord  maxNumElements(inNumPixels * 2);
+
+	outU16YUVLine.clear ();
+	outU16YUVLine.reserve (maxNumElements);
+	while (outU16YUVLine.size() < size_t(maxNumElements))
+		outU16YUVLine.push_back(0);
+
+	if (!pInYUV8Buffer)
+		{LOGMYERROR("NULL/empty YUV8 buffer");	return false;}	//	NULL pointer
+	if (inNumPixels < 12)
+		{LOGMYERROR("width in pixels " << DEC(inNumPixels) << " too small (< 12)"); return false;}	//	Invalid width
+	if (inNumPixels % 4)
+		{LOGMYERROR("width in pixels " << DEC(inNumPixels) << " not multiple of 4"); return false;} //	Width not evenly divisible by 4
+
+	//	In SD, anc data appears in both Y & C...
+	bool bNoMoreAnc(false);	//	Assume all ANC packets (if any) begin at the first pixel
+							//	and are contiguous (i.e. no gaps between packets). Once a
+							//	"gap" is seen, this flag is set, and the rest of the line
+							//	is simply copied.
+	ULWord ancCount(0);	//	Number of bytes to shift and copy (once an ANC packet is
+						//	found).  Zero at the start of a potential new Anc packet.
+	ULWord ndx(0);		//	The current pixel being inspected
+	UWord  checksum(0);	//	Accumulator for checksum calculations
+
+	while (ndx < maxNumElements)
+	{
+		if (bNoMoreAnc)
+		{	//	NoMoreAnc -- there's a gap in the Anc data -- which is assumed to mean there are
+			//	no more packets on this line.  Just do a simple 8-bit -> 10-bit expansion with the
+			//	remaining data on the line...
+			const UWord dataValue (UWord(UWord(pInYUV8Buffer[ndx]) << 2));	//	Pad 2 LSBs with zeros
+			NTV2_ASSERT (ndx <= ULWord(outU16YUVLine.size()));
+			if (ndx < ULWord(outU16YUVLine.size()))
+				outU16YUVLine[ndx] = dataValue;
+			else
+				outU16YUVLine.push_back(dataValue);
+			ndx++;
+		}
+		else
+		{	//	Still processing (possible) Anc data...
+			if (ancCount == 0)
+			{	//	AncCount == 0 means we're at the beginning of an Anc packet -- or not...
+				if ((ndx + 7) < maxNumElements)
+				{	//	An Anc packet has to be at least 7 pixels long to be real...
+					if (   pInYUV8Buffer [ndx+0] == 0x00
+						&& pInYUV8Buffer [ndx+1] == 0xFF
+						&& pInYUV8Buffer [ndx+2] == 0xFF)
+					{	//	"00-FF-FF" means a new Anc packet is being started...
+						//	Stuff "000-3FF-3FF" into the output buffer...
+						outU16YUVLine [ndx++] = 0x000;
+						outU16YUVLine [ndx++] = 0x3ff;
+						outU16YUVLine [ndx++] = 0x3ff;
+						ancCount = pInYUV8Buffer[ndx+2] + 3 + 1;	//	Number of data words + DID + SID + DC + checksum
+						checksum = 0;								//	Reset checksum accumulator
+					}
+					else
+						bNoMoreAnc = true;	//	No anc here -- assume there's no more for the rest of the line
+				}
+				else
+					bNoMoreAnc = true;	//	Not enough room for another anc packet here -- assume no more for the rest of the line
+			}	//	if ancCount == 0
+			else if (ancCount == 1)
+			{	//	This is the last byte of an anc packet -- the checksum. Since the original conversion to 8 bits
+				//	wiped out part of the original checksum, we've been recalculating it all along until now...
+				outU16YUVLine[ndx] = checksum & 0x1ff;			//	LS 9 bits of checksum
+				outU16YUVLine[ndx] |= (~checksum & 0x100) << 1;	//	bit 9 = ~bit 8;
+				ndx++;
+				ancCount--;
+			}	//	else if end of valid Anc packet
+			else
+			{	//	ancCount > 0 means an Anc packet is being processed.
+				//	Copy 8-bit data into LS 8 bits, add even parity to bit 8, and ~bit 8 to bit 9...
+				const UByte ancByte (pInYUV8Buffer[ndx]);
+				const UWord ancWord (AddEvenParity(ancByte));
+				outU16YUVLine[ndx] = ancWord;
+				checksum += (ancWord & 0x1ff);	//	Add LS 9 bits to checksum
+				ndx++;
+				ancCount--;
+			}	//	else copying actual Anc packet
+		}	//	else processing an Anc packet
+	}	//	for each byte in the line
+	return true;
+}	//	Unpack8BitYCbCrToU16sVANCLineSD
 
 
 void AJAAncillaryData::GetInstanceCounts (uint32_t & outConstructed, uint32_t & outDestructed)
