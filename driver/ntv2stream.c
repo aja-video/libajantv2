@@ -335,7 +335,7 @@ Ntv2Status ntv2_stream_channel_release(struct ntv2_stream *ntv2_str, void* pOwne
 
     if (ntv2_str == NULL)
     {
-        NTV2_MSG_STREAM_ERROR("%s: no stream\n", "ntv2_stream_channel_release");
+//        NTV2_MSG_STREAM_ERROR("%s: no stream\n", "ntv2_stream_channel_release");
         return NTV2_STATUS_FAIL;        
     }
     
