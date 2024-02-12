@@ -81,13 +81,13 @@
 #define DMA_MSG_CONTEXT "ntv2dma", pDmaContext->deviceNumber, pDmaContext->engName, pDmaContext->engIndex, DMA_S2D(pDmaContext->dmaC2H), pDmaContext->conIndex
 
 static uint32_t ntv2_debug_mask =
-	NTV2_DEBUG_STATE |
+//	NTV2_DEBUG_STATE |
 	NTV2_DEBUG_STATISTICS |
-    NTV2_DEBUG_TRANSFER |
-	NTV2_DEBUG_PAGE_MAP |
-	NTV2_DEBUG_PROGRAM |
-	NTV2_DEBUG_VIDEO_SEGMENT |
-	NTV2_DEBUG_DESCRIPTOR |
+//  NTV2_DEBUG_TRANSFER |
+//	NTV2_DEBUG_PAGE_MAP |
+//	NTV2_DEBUG_PROGRAM |
+//	NTV2_DEBUG_VIDEO_SEGMENT |
+//	NTV2_DEBUG_DESCRIPTOR |
 	NTV2_DEBUG_INFO | 
 	NTV2_DEBUG_ERROR;
 
@@ -800,7 +800,6 @@ static bool dmaHardwareInit(PDMA_ENGINE pDmaEngine)
 		present = IsXlnxChannel(deviceNumber, pDmaEngine->dmaC2H, pDmaEngine->dmaIndex);
         value = XlnxReadChannelIdentifier(deviceNumber, pDmaEngine->dmaC2H, pDmaEngine->dmaIndex);
         pDmaEngine->dmaStream = IsXlnxChannelStream(value);
-        pDmaEngine->dmaStream = true; /* hack */
 #if 0 // does not work
         value = XlnxReadChannelAlignments(deviceNumber, pDmaEngine->dmaC2H, pDmaEngine->dmaIndex);
         if (value != 0)
