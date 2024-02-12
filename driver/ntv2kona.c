@@ -745,6 +745,18 @@ bool ProgramProductCode(Ntv2SystemContext* context)
 			ntv2WriteRegister(context, kRegXenaxFlashControlStatus, READFAST_COMMAND);
 			WaitForFlashNOTBusy(context);
 			serialNumber = ntv2ReadRegister(context, kRegXenaxFlashDOUT);
+			//We might have a misprogrammed io4k+ check it
+			if (deviceID == DEVICE_ID_IO4KPLUS && serialNumber == 0xFFFFFFFF)
+			{
+				ntv2Message("CNTV2::InitializeBoard Io4K+ %08X incorrect serial location\n", serialNumber);
+				ntv2WriteRegister(context, kRegXenaxFlashAddress, 0x2);
+				ntv2WriteRegister(context, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND);
+				WaitForFlashNOTBusy(context);
+				ntv2WriteRegister(context, kRegXenaxFlashAddress, baseAddress);
+				ntv2WriteRegister(context, kRegXenaxFlashControlStatus, READFAST_COMMAND);
+				WaitForFlashNOTBusy(context);
+				serialNumber = ntv2ReadRegister(context, kRegXenaxFlashDOUT);
+			}
 			ntv2WriteRegister(context, serialRegister, serialNumber);
 		}
 

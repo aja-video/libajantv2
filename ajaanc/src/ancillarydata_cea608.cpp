@@ -146,19 +146,21 @@ AJAAncDataType AJAAncillaryData_Cea608::RecognizeThisAncillaryData (const AJAAnc
 	return AJAAncDataType_Unknown;
 }
 
-ostream & AJAAncillaryData_Cea608::Print (ostream & debugStream, const bool bShowDetail) const
+ostream & AJAAncillaryData_Cea608::Print (ostream & oss, const bool bShowDetail) const
 {
-	AJAAncillaryData::Print (debugStream, bShowDetail);
+	AJAAncillaryData::Print (oss, bShowDetail);
 	const uint8_t	char1	(m_char1 & 0x7F);	// strip parity and see if we can print it a an ASCII character
 	const uint8_t	char2	(m_char2 & 0x7F);
 
-	debugStream << endl
-				<< "Byte1=0x" << hex << setw(2) << setfill('0') << uint16_t(m_char1);
+	oss << endl
+		<< "CEA608";
+	if (IsRaw()  &&  GetDataLocation().GetLineNumber())	//	If analog/raw and valid line number
+		oss << (GetDataLocation().GetLineNumber() > 264 ? " F2" : " F1");
+	oss	<< " Caption Byte1=" << xHEX0N(uint16_t(m_char1),2);
 	if (char1 >= 0x20 && char1 < 0x7F)
-		debugStream << " ('" << char1 << "')";
-
-	debugStream << " Byte2=0x" << hex << setw(2) << setfill('0') << uint16_t(m_char2);
+		oss << " ('" << char1 << "')";
+	oss << "  Byte2=" << xHEX0N(uint16_t(m_char2),2);
 	if (char2 >= 0x20 && char2 < 0x7F)
-		debugStream << " ('" << char2 << "')";
-	return debugStream;
+		oss << " ('" << char2 << "')";
+	return oss;
 }

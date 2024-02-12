@@ -593,7 +593,7 @@ void CNTV2SupportLogger::FetchRegisterLog (ostringstream & oss) const
 	static const string sDashes		(96, '-');
 
 	//	Dang, GetRegistersForDevice doesn't/can't read kRegCanDoRegister, so add the CanConnectROM regs here...
-	if (mDevice.HasCanConnectROM())
+	if (mDevice.IsSupported(kDeviceHasXptConnectROM))
 		for (ULWord regNum(kRegFirstValidXptROMRegister);  regNum < ULWord(kRegInvalidValidXptROMRegister);	 regNum++)
 			deviceRegs.insert(regNum);
 

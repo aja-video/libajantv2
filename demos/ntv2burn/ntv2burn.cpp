@@ -716,22 +716,51 @@ void NTV2Burn::CaptureFrames (void)
 			pFrameData->fNumAncBytes	= pFrameData->AncBuffer()	? inputXferInfo.GetCapturedAncByteCount(false/*F1*/): 0;
 			pFrameData->fNumAnc2Bytes	= pFrameData->AncBuffer2()	? inputXferInfo.GetCapturedAncByteCount(true/*F2*/)	: 0;
 
+			//	Determine which timecode value should be burned in to the video frame
+			string timeCodeString;
+			NTV2_RP188	timecodeValue;
+			if (!NTV2_IS_ANALOG_TIMECODE_INDEX(mConfig.fTimecodeSource)  &&  InputSignalHasTimecode())
+			{
+				//	Use the embedded input time code...
+				mDevice.GetRP188Data (mConfig.fInputChannel, timecodeValue);
+				CRP188	inputRP188Info	(timecodeValue);
+				inputRP188Info.GetRP188Str(timeCodeString);
+			}
+			else if (NTV2_IS_ANALOG_TIMECODE_INDEX(mConfig.fTimecodeSource)  &&  AnalogLTCInputHasTimecode())
+			{
+				//	Use the analog input time code...
+				mDevice.ReadAnalogLTCInput (mConfig.fTimecodeSource == NTV2_TCINDEX_LTC1 ? 0 : 1, timecodeValue);
+				CRP188	analogRP188Info	(timecodeValue);
+				analogRP188Info.GetRP188Str(timeCodeString);
+			}
+			else
+			{
+				//	Invent a timecode (based on the number of frames procesed)...
+				const	NTV2FrameRate	ntv2FrameRate	(GetNTV2FrameRateFromVideoFormat (mVideoFormat));
+				const	TimecodeFormat	tcFormat		(CNTV2DemoCommon::NTV2FrameRate2TimecodeFormat(ntv2FrameRate));
+				const	CRP188			frameRP188Info	(inputXferInfo.GetTransferStatus().GetProcessedFrameCount(), 0, 0, 10, tcFormat);
+
+				frameRP188Info.GetRP188Reg(timecodeValue);
+				frameRP188Info.GetRP188Str(timeCodeString);
+			}
+
 			//	Get a timecode to use for burn-in...
 			NTV2_RP188	thisFrameTC;
 			inputXferInfo.GetInputTimeCodes (pFrameData->fTimecodes, mConfig.fInputChannel);
-			if (!pFrameData->HasValidTimecode(mConfig.fTimecodeSource))
+			if (pFrameData->HasValidTimecode(mConfig.fTimecodeSource))
+			{
+				thisFrameTC = pFrameData->fTimecodes[mConfig.fTimecodeSource];
+			}
+			else
 			{	//	Invent a timecode (based on frame count)...
 				const	NTV2FrameRate	ntv2FrameRate	(::GetNTV2FrameRateFromVideoFormat (mVideoFormat));
 				const	TimecodeFormat	tcFormat		(CNTV2DemoCommon::NTV2FrameRate2TimecodeFormat(ntv2FrameRate));
 				const	CRP188			inventedTC		(inputXferInfo.GetTransferStatus().GetProcessedFrameCount(), 0, 0, 10, tcFormat);
 				inventedTC.GetRP188Reg(thisFrameTC);
 			}
-			CRP188 tc(thisFrameTC);
-			string tcStr;
-			tc.GetRP188Str(tcStr);
 
 			//	While this NTV2FrameData's buffers are locked, "burn" timecode into the raster...
-			mTCBurner.BurnTimeCode (pFrameData->VideoBuffer(), tcStr.c_str(), yPercent.Next());
+			mTCBurner.BurnTimeCode (pFrameData->VideoBuffer(), timeCodeString.c_str(), yPercent.Next());
 
 			//	Signal that we're done "producing" this frame, making it available for future "consumption"...
 			mFrameDataRing.EndProduceNextBuffer();

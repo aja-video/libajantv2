@@ -122,9 +122,6 @@ static AJANTV2FakeDevice *	spFakeDevice		(AJA_NULL);
 static AJALock				sLock;
 
 
-typedef map<string, string>				AJADictionary;
-typedef AJADictionary::const_iterator	AJADictionaryConstIter;
-
 //	Specific NTV2RPCAPI implementation to talk to software device
 class NTV2SoftwareDevice : public NTV2RPCAPI
 {
@@ -542,7 +539,8 @@ bool NTV2SoftwareDevice::NTV2WriteRegisterRemote (const ULWord inRegNum, const U
 	ULWord newValue(inRegVal & inRegMask);
 	if (inRegShift)
 		newValue <<= inRegShift;
-	reg = newValue;
+	reg &= ~inRegMask;
+	reg |= newValue;
 	return true;
 }
 

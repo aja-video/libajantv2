@@ -528,33 +528,6 @@ bool AJAAncillaryList::CompareWithInfo (vector<string> & outDiffInfo, const AJAA
 }
 
 
-static bool TestForAnalogContinuation (AJAAncillaryData * pPrevData, AJAAncillaryData * pNewData)
-{
-	if (!pPrevData || !pNewData)
-		return false;
-
-	//	Get coding type and location for the previous ancillary packet...
-	AJAAncDataCoding	prevCoding	(pPrevData->GetDataCoding ());
-	AJAAncDataLoc		prevLoc		(pPrevData->GetDataLocation ());
-
-	//	Get coding type and location for the new ancillary packet...
-	AJAAncDataCoding	newCoding	(pNewData->GetDataCoding ());
-	AJAAncDataLoc		newLoc		(pNewData->GetDataLocation ());
-
-	//	Compare...
-	if (   (prevCoding == AJAAncDataCoding_Raw)
-		&& (newCoding  == AJAAncDataCoding_Raw)
-		&& (prevLoc.GetLineNumber()	 == newLoc.GetLineNumber())
-		&& (prevLoc.GetHorizontalOffset()  == newLoc.GetHorizontalOffset()) // technically, these should ALWAYS be the same for "analog"...?
-		&& (prevLoc.GetDataSpace()	 == newLoc.GetDataSpace())		//	Should always be VANC
-		&& (prevLoc.GetDataLink()	 == newLoc.GetDataLink())		//	Link A or B -- should match
-		&& (prevLoc.GetDataStream()	 == newLoc.GetDataStream())		//	DS1 or DS2 -- should match
-		&& (prevLoc.GetDataChannel() == newLoc.GetDataChannel()) )	//	Y or C -- should match
-			return true;
-	return false;
-}
-
-
 /////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////	R E C E I V E
 /////////////////////////////////////////////////////////////////
@@ -571,8 +544,8 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
 	if (!pRcvData || !dataSize)
 		return AJA_STATUS_NULL;
 
-	//	Use this as an uninitialized template...
-	AJAAncillaryData	newAncData;
+	AJAAncillaryDataList rawPkts;		//	Accumulate "analog/raw" packets separately
+	AJAAncillaryData	newAncData;		//	Use this as an uninitialized template
 	AJAAncDataLoc		defaultLoc		(AJAAncDataLink_A, AJAAncDataChannel_Y, AJAAncDataSpace_VANC, 9);
 	int32_t				remainingSize	(int32_t(dataSize + 0));
 	const uint8_t *		pInputData		(pRcvData);
@@ -611,28 +584,30 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
 			//		ID. Instead, we rely on the user to tell us what lines are expected to contain
 			//		what kind of data (e.g. "expect line 21 to carry 608 captioning...").
 
-			//	First, see if the LAST AJAAncillaryData object came from analog space and the same
-			//	location as this new one. If so, assume that the new data is simply a continuation
-			//	of the previous packet, and append the payload data accordingly.
-			bool bAppendAnalog (false);
+			//	This function used to assume that analog packets always were in succession in the buffer.
+			//	This isn't true, however, if packet filtering is disabled. Audio packets can be interspersed
+			//	between successive analog packets. We now accumulate analog packets separately in "rawPkts",
+			//	then add them all to my "m_ancList" member last.
 
-			if (!m_ancList.empty())
-			{
-				AJAAncillaryData *	pPrevData (m_ancList.back());
-				if (::TestForAnalogContinuation (pPrevData, &newAncData))
-				{	//	The new data is just a continuation of the previous packet:
-					//	simply append the new payload data to the previous payload...
-					pPrevData->AppendPayload(newAncData);
-					bAppendAnalog = true;
+			//	Look for a pkt in "rawPkts" that has the same location...
+			const uint64_t desiredLocation (newAncData.GetDataLocation().OrdinalValue());
+			AJAAncillaryData * pContinuationPkt (AJA_NULL);
+			for (AJAAncDataListConstIter pRaw(rawPkts.begin());  pRaw != rawPkts.end();  ++pRaw)
+				if ((*pRaw)->GetDataLocation().OrdinalValue() == desiredLocation)
+				{	//	Found one!
+					//	"newAncData" must be a continuation of the "pRaw" pkt.
+					//	Simply append the new payload data to it...
+					pContinuationPkt = *pRaw;
+					pContinuationPkt->AppendPayload(newAncData);
+					break;
 				}
-			}
 
-			if (!bAppendAnalog)
+			if (!pContinuationPkt)
 			{	//	If this is NOT a "continuation" packet, then this is a new analog packet.
 				//	See if the user has specified an expected Anc data type that matches the
 				//	location of the new data...
 				newAncType = GetAnalogAncillaryDataType(newAncData);
-				bInsertNew = true;
+				bInsertNew = true;	//	Create the new raw pkt, and add it to "rawPkts" queue (below)
 			}
 		}	// analog anc data
 //			else 
@@ -641,14 +616,18 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
 		if (bInsertNew)
 		{
 			//	Create an AJAAncillaryData object of the appropriate type, and init it with our raw data...
-			AJAAncillaryData *	pData	(AJAAncillaryDataFactory::Create (newAncType, &newAncData));
+			AJAAncillaryData * pData (AJAAncillaryDataFactory::Create (newAncType, &newAncData));
 			if (pData)
 			{
 				pData->SetBufferFormat(AJAAncBufferFormat_SDI);
 				if (IsIncludingZeroLengthPackets()	||	pData->GetDC())
 				{
-					try {m_ancList.push_back(pData);}	//	Append to my list
-					catch(...)	{status = AJA_STATUS_FAIL;}
+					try {
+						if (pData->IsRaw())
+							rawPkts.push_back(pData);	//	New analog pkts go onto my rawPkts queue
+						else
+							m_ancList.push_back(pData);	//	New digital pkts are immediately appended to my list
+					} catch(...) {status = AJA_STATUS_FAIL;}
 				}
 				else ::BumpZeroLengthPacketCount();
 				if (inFrameNum	&&	!pData->GetFrameID())
@@ -663,6 +642,19 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
 		if (remainingSize <= 0)			//	All of the input data consumed?
 			bMoreData = false;
 	}	// while (bMoreData)
+
+	if (AJA_SUCCESS(status)  &&  !rawPkts.empty())
+	{	//	Append accumulated analog/raw packets...
+		while (AJA_SUCCESS(status)  &&  !rawPkts.empty())
+		{
+			try {
+				m_ancList.push_back(rawPkts.back());
+			} catch(...) {status = AJA_STATUS_FAIL;}
+			rawPkts.pop_back();
+		}
+		if (AJA_SUCCESS(status))
+			status = SortListByLocation();	//	Re-sort by location
+	}
 
 	return status;
 
@@ -888,35 +880,34 @@ AJAStatus AJAAncillaryList::AddVANCData (const UWordSequence & inPacketWords, co
 }	//	AddVANCData
 
 
-AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2Buffer &				inFrameBuffer,
-											const NTV2FormatDescriptor &	inFormatDesc,
-											AJAAncillaryList &				outPackets,
-											const uint32_t					inFrameNum)
+AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2Buffer &		inFB,
+											const NTV2FormatDesc &	inFD,
+											AJAAncillaryList &		outPkts,
+											const uint32_t			inFrameNum)
 {
-	outPackets.Clear();
-
-	if (inFrameBuffer.IsNULL())
+	outPkts.Clear();
+	if (inFB.IsNULL())
 	{
 		LOGMYERROR("AJA_STATUS_NULL: NULL frame buffer pointer");
 		return AJA_STATUS_NULL;
 	}
-	if (!inFormatDesc.IsValid())
+	if (!inFD.IsValid())
 	{
 		LOGMYERROR("AJA_STATUS_BAD_PARAM: bad NTV2FormatDescriptor");
 		return AJA_STATUS_BAD_PARAM;
 	}
-	if (!inFormatDesc.IsVANC())
+	if (!inFD.IsVANC())
 	{
 		LOGMYERROR("AJA_STATUS_BAD_PARAM: format descriptor has no VANC lines");
 		return AJA_STATUS_BAD_PARAM;
 	}
 
-	const ULWord			vancBytes	(inFormatDesc.GetTotalRasterBytes() - inFormatDesc.GetVisibleRasterBytes());
-	const NTV2PixelFormat	fbf			(inFormatDesc.GetPixelFormat());
-	const bool				isSD		(NTV2_IS_SD_STANDARD(inFormatDesc.GetVideoStandard()));
-	if (inFrameBuffer.GetByteCount() < vancBytes)
+	const ULWord			vancBytes	(inFD.GetTotalRasterBytes() - inFD.GetVisibleRasterBytes());
+	const NTV2PixelFormat	fbf			(inFD.GetPixelFormat());
+	const bool				isSD		(NTV2_IS_SD_STANDARD(inFD.GetVideoStandard()));
+	if (inFB.GetByteCount() < vancBytes)
 	{
-		LOGMYERROR("AJA_STATUS_FAIL: " << inFrameBuffer.GetByteCount() << "-byte frame buffer smaller than " << vancBytes << "-byte VANC region");
+		LOGMYERROR("AJA_STATUS_FAIL: " << inFB.GetByteCount() << "-byte frame buffer smaller than " << vancBytes << "-byte VANC region");
 		return AJA_STATUS_FAIL;
 	}
 	if (fbf != NTV2_FBF_10BIT_YCBCR	 &&	 fbf != NTV2_FBF_8BIT_YCBCR)
@@ -925,7 +916,7 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2Buffer &				inFrameBuffer
 		return AJA_STATUS_UNSUPPORTED;	//	Only 'v210' and '2vuy' currently supported
 	}
 
-	for (ULWord lineOffset (0);	 lineOffset < inFormatDesc.GetFirstActiveLine();  lineOffset++)
+	for (ULWord lineOffset (0);	 lineOffset < inFD.GetFirstActiveLine();  lineOffset++)
 	{
 		UWordSequence	uwords;
 		bool			isF2			(false);
@@ -933,13 +924,15 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2Buffer &				inFrameBuffer
 		unsigned		ndx				(0);
 		const AJAAncDataLink	defaultLink (AJAAncDataLink_A);	//	This is most common
 
-		inFormatDesc.GetSMPTELineNumber (lineOffset, smpteLineNum, isF2);
+		inFD.GetSMPTELineNumber (lineOffset, smpteLineNum, isF2);
 		if (fbf == NTV2_FBF_10BIT_YCBCR)
-			::UnpackLine_10BitYUVtoUWordSequence (inFormatDesc.GetRowAddress(inFrameBuffer.GetHostAddress(0), lineOffset),
-													inFormatDesc, uwords);
+			::UnpackLine_10BitYUVtoUWordSequence (inFD.GetRowAddress(inFB.GetHostAddress(0), lineOffset), inFD, uwords);
+		else if (isSD)
+			AJAAncillaryData::Unpack8BitYCbCrToU16sVANCLineSD (inFD.GetRowAddress(inFB.GetHostAddress(0), lineOffset),
+																uwords, inFD.GetRasterWidth());
 		else
-			AJAAncillaryData::Unpack8BitYCbCrToU16sVANCLine (inFormatDesc.GetRowAddress(inFrameBuffer.GetHostAddress(0), lineOffset),
-															uwords,	 inFormatDesc.GetRasterWidth());
+			AJAAncillaryData::Unpack8BitYCbCrToU16sVANCLine (inFD.GetRowAddress(inFB.GetHostAddress(0), lineOffset),
+															uwords,	 inFD.GetRasterWidth());
 		if (isSD)
 		{
 			AJAAncillaryData::U16Packets	ycPackets;
@@ -950,7 +943,7 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2Buffer &				inFrameBuffer
 			NTV2_ASSERT(ycPackets.size() == ycHOffsets.size());
 
 			for (AJAAncillaryData::U16Packets::const_iterator it(ycPackets.begin());  it != ycPackets.end();  ++it, ndx++)
-				outPackets.AddVANCData (*it, loc.SetHorizontalOffset(ycHOffsets[ndx]), inFrameNum);
+				outPkts.AddVANCData (*it, loc.SetHorizontalOffset(ycHOffsets[ndx]), inFrameNum);
 		}
 		else
 		{
@@ -958,7 +951,7 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2Buffer &				inFrameBuffer
 			UWordSequence					yHOffsets, cHOffsets;
 			AJAAncDataLoc					yLoc	(defaultLink, AJAAncDataChannel_Y, AJAAncDataSpace_VANC, uint16_t(smpteLineNum));
 			AJAAncDataLoc					cLoc	(defaultLink, AJAAncDataChannel_C, AJAAncDataSpace_VANC, uint16_t(smpteLineNum));
-			//cerr << endl << "SetFromVANCData: +" << DEC0N(lineOffset,2) << ": ";	inFormatDesc.PrintSMPTELineNumber(cerr, lineOffset);  cerr << ":" << endl << uwords << endl;
+			//cerr << endl << "SetFromVANCData: +" << DEC0N(lineOffset,2) << ": ";	inFD.PrintSMPTELineNumber(cerr, lineOffset);  cerr << ":" << endl << uwords << endl;
 			AJAAncillaryData::GetAncPacketsFromVANCLine (uwords, AncChannelSearch_Y, yPackets, yHOffsets);
 			AJAAncillaryData::GetAncPacketsFromVANCLine (uwords, AncChannelSearch_C, cPackets, cHOffsets);
 			NTV2_ASSERT(yPackets.size() == yHOffsets.size());
@@ -966,14 +959,14 @@ AJAStatus AJAAncillaryList::SetFromVANCData (const NTV2Buffer &				inFrameBuffer
 
 			unsigned	ndxx(0);
 			for (AJAAncillaryData::U16Packets::const_iterator it(yPackets.begin());	 it != yPackets.end();	++it, ndxx++)
-				outPackets.AddVANCData (*it, yLoc.SetHorizontalOffset(yHOffsets[ndxx]), inFrameNum);
+				outPkts.AddVANCData (*it, yLoc.SetHorizontalOffset(yHOffsets[ndxx]), inFrameNum);
 
 			ndxx = 0;
 			for (AJAAncillaryData::U16Packets::const_iterator it(cPackets.begin());	 it != cPackets.end();	++it, ndxx++)
-				outPackets.AddVANCData (*it, cLoc.SetHorizontalOffset(cHOffsets[ndxx]), inFrameNum);
+				outPkts.AddVANCData (*it, cLoc.SetHorizontalOffset(cHOffsets[ndxx]), inFrameNum);
 		}
 	}	//	for each VANC line
-	LOGMYDEBUG("returning " << outPackets);
+	LOGMYDEBUG("returning " << outPkts);
 	return AJA_STATUS_SUCCESS;
 }
 
@@ -1089,8 +1082,7 @@ AJAStatus AJAAncillaryList::SetFromDeviceAncBuffers (const NTV2Buffer & inF1AncB
 													const uint32_t inFrameNum)		//	STATIC
 {
 	outPackets.Clear();
-	AJAStatus resultF1,resultF2;
-	resultF1 = resultF2 = AJA_STATUS_SUCCESS;
+	AJAStatus resultF1(AJA_STATUS_SUCCESS), resultF2(AJA_STATUS_SUCCESS);
 	resultF1 = AddFromDeviceAncBuffer(inF1AncBuffer, outPackets, inFrameNum);
 	if (inF2AncBuffer) //Unnecessary to extract from empty buffer, and prevents 0 Packets debug message.
 		resultF2 = AddFromDeviceAncBuffer(inF2AncBuffer, outPackets, inFrameNum);

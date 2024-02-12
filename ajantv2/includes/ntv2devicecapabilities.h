@@ -21,6 +21,10 @@ class AJAExport DeviceCapabilities
 {
 	public:
 		explicit inline	DeviceCapabilities (CNTV2DriverInterface & inDev)	: dev(inDev)	{}
+		/**
+			@returns	True if valid/open.
+		**/
+		inline			operator bool() const					{return dev.IsOpen();}	//	New in SDK 17.1
 		inline bool		CanChangeEmbeddedAudioClock (void)		{return dev.IsSupported(kDeviceCanChangeEmbeddedAudioClock);}
 		inline bool		CanChangeFrameBufferSize (void)			{return dev.IsSupported(kDeviceCanChangeFrameBufferSize);}
 		inline bool		CanDisableUFC (void)					{return dev.IsSupported(kDeviceCanDisableUFC);}
@@ -43,6 +47,7 @@ class AJAExport DeviceCapabilities
 		inline bool		CanDoAudio96K (void)					{return dev.IsSupported(kDeviceCanDoAudio96K);}
 		inline bool		CanDoAudioDelay (void)					{return dev.IsSupported(kDeviceCanDoAudioDelay);}
 		inline bool		CanDoAudioMixer (void)					{return dev.IsSupported(kDeviceCanDoAudioMixer);}
+		inline bool		CanDoBreakoutBoard (void)				{return dev.IsSupported(kDeviceCanDoBreakoutBoard);}
 		inline bool		CanDoBreakoutBox (void)					{return dev.IsSupported(kDeviceCanDoBreakoutBox);}
 		inline bool		CanDoCapture (void)						{return dev.IsSupported(kDeviceCanDoCapture);}
 		inline bool		CanDoCustomAnc (void)					{return dev.IsSupported(kDeviceCanDoCustomAnc);}
@@ -96,7 +101,9 @@ class AJAExport DeviceCapabilities
 		inline bool		HasAudioMonitorRCAJacks (void)			{return dev.IsSupported(kDeviceHasAudioMonitorRCAJacks);}
 		inline bool		HasBiDirectionalAnalogAudio (void)		{return dev.IsSupported(kDeviceHasBiDirectionalAnalogAudio);}
 		inline bool		HasBiDirectionalSDI (void)				{return dev.IsSupported(kDeviceHasBiDirectionalSDI);}
+		inline bool		HasBreakoutBoard (void)					{return dev.IsSupported(kDeviceHasBreakoutBoard);}
 		inline bool		HasColorSpaceConverterOnChannel2 (void)	{return dev.IsSupported(kDeviceHasColorSpaceConverterOnChannel2);}
+		inline bool		HasCrosspointConnectROM (void)			{return dev.IsSupported(kDeviceHasXptConnectROM);}
 		inline bool		HasGenlockv2 (void)						{return dev.IsSupported(kDeviceHasGenlockv2);}
 		inline bool		HasGenlockv3 (void)						{return dev.IsSupported(kDeviceHasGenlockv3);}
 		inline bool		HasHeadphoneJack (void)					{return dev.IsSupported(kDeviceHasHeadphoneJack);}
@@ -104,6 +111,7 @@ class AJAExport DeviceCapabilities
 		inline bool		HasHEVCM31 (void)						{return dev.IsSupported(kDeviceHasHEVCM31);}
 		inline bool		HasLEDAudioMeters (void)				{return dev.IsSupported(kDeviceHasLEDAudioMeters);}
 		inline bool		HasMicInput (void)						{return dev.IsSupported(kDeviceHasMicrophoneInput);}
+		inline bool		HasNTV4FrameStores (void)				{return dev.IsSupported(kDeviceHasNTV4FrameStores);}
 		inline bool		HasNWL (void)							{return dev.IsSupported(kDeviceHasNWL);}
 		inline bool		HasPCIeGen2 (void)						{return dev.IsSupported(kDeviceHasPCIeGen2);}
 		inline bool		HasRetailSupport (void)					{return dev.IsSupported(kDeviceHasRetailSupport);}
@@ -163,7 +171,7 @@ class AJAExport DeviceCapabilities
 		inline UWord	GetNumOutputConverters (void)			{return UWord(dev.GetNumSupported(kDeviceGetNumOutputConverters));}
 		inline UWord	GetNumReferenceVideoInputs (void)		{return UWord(dev.GetNumSupported(kDeviceGetNumReferenceVideoInputs));}
 		inline UWord	GetNumSerialPorts (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumSerialPorts));}
-		inline UWord	GetNumTSIMuxers (void)					{return UWord(dev.GetNumSupported(kDeviceGetNumTSIMuxers));}	//	New in SDK 17.1
+		inline UWord	GetNumTSIMuxers (void)					{return UWord(dev.GetNumSupported(kDeviceGetNumTSIMuxers));}
 		inline UWord	GetNumUpConverters (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumUpConverters));}
 		inline ULWord	GetNumVideoChannels (void)				{return dev.GetNumSupported(kDeviceGetNumVideoChannels);}
 		inline UWord	GetNumVideoInputs (void)				{return UWord(dev.GetNumSupported(kDeviceGetNumVideoInputs));}

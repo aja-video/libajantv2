@@ -54,7 +54,8 @@ void AJAAncillaryData_Cea608_Line21::Init (void)
 	m_SID	  = AJAAncillaryData_Cea608_Line21_SID;
 	m_bEncodeBufferInitialized = false;
 	m_dataStartOffset = 0;
-	SetLocationLineNumber(21);	//	Assume F1	otherwise SetLocationLineNumber(284);
+	if (GetLocationLineNumber() == 0)	//	If not already set...
+		SetLocationLineNumber(21);		//	...then assume F1, otherwise SetLocationLineNumber(284);
 }
 
 
@@ -151,14 +152,6 @@ AJAAncDataType AJAAncillaryData_Cea608_Line21::RecognizeThisAncillaryData (const
 		if (pInAncData->GetLocationLineNumber() == 21 || pInAncData->GetLocationLineNumber() == 284)
 			return AJAAncDataType_Cea608_Line21;
 	return AJAAncDataType_Unknown;
-}
-
-
-ostream & AJAAncillaryData_Cea608_Line21::Print (ostream & debugStream, const bool bShowDetail) const
-{
-	debugStream << IDAsString() << "(" << ::AJAAncDataCodingToString(m_coding) << ")" << endl;
-	return AJAAncillaryData_Cea608::Print (debugStream, bShowDetail);
-
 }
 
 

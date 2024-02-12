@@ -37,6 +37,10 @@ option(AJANTV2_DISABLE_TESTS      "Disable building libajantv2 tests?"          
 option(AJANTV2_DISABLE_TOOLS      "Disable building libajantv2 tools?"               OFF)
 option(AJANTV2_DISABLE_PLUGINS    "Disable building libajantv2 plugins?"             OFF)
 
+if (NOT DEFINED LIBAJANTV2_DIR)
+    set(LIBAJANTV2_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
+
 if(NOT AJANTV2_BUILD_OPENSOURCE)
     if (NOT DEFINED LIBAJANTV2_PRIVATE_DIR)
         set(LIBAJANTV2_PRIVATE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../libajantv2-private)
@@ -73,6 +77,6 @@ if(AJA_INSTALL_CMAKE)
     install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2)
 endif()
 
-if (NOT AJANTV2_DISABLE_TESTS AND NOT AJANTV2_BUILD_OPENSOURCE)
+if (NOT AJANTV2_DISABLE_TESTS)
     add_subdirectory(ajaanc/test)
 endif()

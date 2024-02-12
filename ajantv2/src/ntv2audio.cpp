@@ -1126,14 +1126,6 @@ bool CNTV2Card::GetAudioOutputMonitorSource (NTV2AudioChannelPair & outChannelPa
 	return result;
 }
 
-
-bool CNTV2Card::CanDoAudioWaitForVBI (void)
-{
-	ULWord canDo(0);
-	return ReadRegister(kRegCanDoStatus, canDo, kRegMaskCanDoAudioWaitForVBI, kRegShiftCanDoAudioWaitForVBI)
-			&&	(canDo ? true : false);
-}
-
 bool CNTV2Card::StartAudioOutput (const NTV2AudioSystem inAudioSystem, const bool inWaitForVBI)
 {
 	if (inAudioSystem >= NTV2_NUM_AUDIOSYSTEMS)
@@ -1141,7 +1133,7 @@ bool CNTV2Card::StartAudioOutput (const NTV2AudioSystem inAudioSystem, const boo
 	const ULWord audioCtrlRegNum(gAudioSystemToAudioControlRegNum[inAudioSystem]);
 	if (inWaitForVBI)
 	{
-		if (!CanDoAudioWaitForVBI())
+		if (!IsSupported(kDeviceAudioCanWaitForVBI))
 			return false;	//	Caller requested wait-til-VBI, but firmware doesn't support it
 		//	Set or clear the start-at-VBI bit...
 		if (!WriteRegister(audioCtrlRegNum, inWaitForVBI ? 1UL : 0UL,  kRegMaskOutputStartAtVBI, kRegShiftOutputStartAtVBI))
@@ -1230,7 +1222,7 @@ bool CNTV2Card::StartAudioInput (const NTV2AudioSystem inAudioSystem, const bool
 	const ULWord audioCtrlRegNum(gAudioSystemToAudioControlRegNum[inAudioSystem]);
 	if (inWaitForVBI)
 	{
-		if (!CanDoAudioWaitForVBI())
+		if (!IsSupported(kDeviceAudioCanWaitForVBI))
 			return false;	//	Caller requested wait-til-VBI, but firmware doesn't support it
 		//	Set or clear the start-at-VBI bit...
 		if (!WriteRegister(audioCtrlRegNum, inWaitForVBI ? 1UL : 0UL,  kRegMaskInputStartAtVBI, kRegShiftInputStartAtVBI))

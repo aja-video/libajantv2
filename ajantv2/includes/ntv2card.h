@@ -2263,19 +2263,13 @@ public:
 	AJA_VIRTUAL bool		GetRawAudioTimer (ULWord & outValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);	//	New in SDK 15.5
 	
 	/**
-		@brief		Enables BOB analog audio XLR inputs.
+		@brief		Enables breakout board analog audio XLR inputs.
 		@param[in]	inEnable		If true, specifies that the XLR connectors are enabled.
 									If false, breakout board audio reverts to digital AES inputs.
 		@return		True if successful;	 otherwise false.
-		@see		CNTV2Card::EnableBOBAnalogAudioIn
+		@see		kDeviceCanDoBreakoutBoard, kDeviceHasBreakoutBoard
 	**/
 	AJA_VIRTUAL bool		EnableBOBAnalogAudioIn (bool inEnable);	//	New in SDK 17.0
-
-	/**
-		@return		True if the running device firmware supports audio start delay-til-VBI.
-		@see		CNTV2Card::StartAudioOutput, \ref audioplayout
-	**/
-	AJA_VIRTUAL bool		CanDoAudioWaitForVBI (void);	//	New in SDK 16.0
 	
 	/**
 		@brief		Sets the multi-link audio mode for the given audio system.
@@ -2313,6 +2307,9 @@ public:
 #if !defined(NTV2_DEPRECATE_16_3)
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool WriteAudioLastOut (const ULWord inValue, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1)) {(void)inValue;(void)inAudioSystem; return false;}	///< @deprecated	This function is obsolete.
 #endif	//	!defined(NTV2_DEPRECATE_16_1)
+#if !defined(NTV2_DEPRECATE_17_0)
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool CanDoAudioWaitForVBI(void)) {return IsSupported(kDeviceAudioCanWaitForVBI);}	///< @deprecated	Use CNTV2DriverInterface::IsSupported instead. (Was new in SDK 16.0)
+#endif	//	!defined(NTV2_DEPRECATE_17_0)
 	///@}
 
 	/**
@@ -4456,7 +4453,9 @@ public:
 	**/
 	AJA_VIRTUAL bool	GetRoutingForChannel (const NTV2Channel inChannel, CNTV2SignalRouter & outRouting);
 
-	AJA_VIRTUAL bool	HasCanConnectROM (void);	///< @return	True if the device firmware has ROM containing legal xpt routes
+#if !defined(NTV2_DEPRECATE_17_0)
+	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool HasCanConnectROM(void)) {return IsSupported(kDeviceHasXptConnectROM);}	///< @deprecated	Call IsSupported(kDeviceHasXptConnectROM) or features().HasCrosspointConnectROM() instead
+#endif	//	!defined(NTV2_DEPRECATE_17_0)
 	/**
 		@brief		Answers with the implemented crosspoint connections (if known).
 		@param[out] outConnections	Receives the device's ::NTV2PossibleConnections.
