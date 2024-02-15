@@ -173,7 +173,7 @@
 				#define AJA_CXX11_NULLPTR_AVAILABLE
 			#endif
 		#elif defined(__GNUC__)
-			#if __GNUC__ >= 6
+			#if __cplusplus >= 201103L // C++11 or later
 				#define AJA_CXX11_NULLPTR_AVAILABLE
 			#endif
 		#endif
