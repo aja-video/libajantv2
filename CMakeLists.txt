@@ -74,5 +74,6 @@ if(AJA_INSTALL_CMAKE)
 endif()
 
 if (NOT AJANTV2_DISABLE_TESTS)
+    add_subdirectory(ajabase/test)
     add_subdirectory(ajaanc/test)
 endif()
