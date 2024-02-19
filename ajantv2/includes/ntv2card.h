@@ -97,6 +97,8 @@ public:
 	**/
 	AJA_VIRTUAL std::string			GetDriverVersionString (void);
 
+	AJA_VIRTUAL std::string			GetDescription (void) const;	///< @return	String containing device description
+
 	/**
 		@brief	Answers with the individual version components of this device's driver.
 		@param[out] outMajor	Receives the driver's major version number.

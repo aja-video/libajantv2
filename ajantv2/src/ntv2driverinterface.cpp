@@ -1101,6 +1101,17 @@ bool CNTV2DriverInterface::GetStreamingApplication (ULWord & outAppType, int32_t
 	return CNTV2DriverInterface::ReadRegister(kVRegApplicationPID, outProcessID);
 }
 
+string CNTV2DriverInterface::GetDescription (void) const
+{
+	return IsRemote() ? _pRPCAPI->Description() : "";
+}
+
+const NTV2Dictionary & CNTV2DriverInterface::ConnectParams (void) const
+{
+	static const NTV2Dictionary sEmptyDict;
+	return IsRemote() ? _pRPCAPI->ConnectParams() : sEmptyDict;
+}
+
 //	This function is used by the retail ControlPanel.
 //	Read the current RP188 registers (which typically give you the timecode corresponding to the LAST frame).
 //	NOTE:	This is a hack to avoid making a "real" driver call! Since the RP188 data requires three ReadRegister()

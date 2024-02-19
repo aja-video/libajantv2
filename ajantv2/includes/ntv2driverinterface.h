@@ -571,10 +571,14 @@ class AJAExport CNTV2DriverInterface
 		/**
 			@return		String containing remote device description.
 		**/
-		AJA_VIRTUAL inline std::string	GetDescription (void) const	{return IsRemote() ? _pRPCAPI->Description() : "";}	//	New in SDK 17.0
+		AJA_VIRTUAL std::string			GetDescription (void) const;	//	New in SDK 17.0
 #if defined(NTV2_NUB_CLIENT_SUPPORT)  &&  !defined(NTV2_DEPRECATE_16_0)
 		AJA_VIRTUAL inline NTV2NubProtocolVersion	GetNubProtocolVersion (void) const	{return 0;}	///< @return	My nub protocol version.
 #endif
+		/**
+			@return		Const reference to my connection parameters dictionary (currently valid only for remote/software devices).
+		**/
+		virtual const NTV2Dictionary &	ConnectParams (void) const;		//	New in SDK 17.1
 
 		//	DEPRECATED FUNCTIONS
 #if !defined(NTV2_DEPRECATE_16_0)
