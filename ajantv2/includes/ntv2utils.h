@@ -1084,7 +1084,7 @@ AJAExport std::string NTV2AudioRateToString				(const NTV2AudioRate			inValue,	c
 AJAExport std::string NTV2AudioBufferSizeToString		(const NTV2AudioBufferSize		inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
 AJAExport std::string NTV2AudioLoopBackToString			(const NTV2AudioLoopBack		inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
 AJAExport std::string NTV2EmbeddedAudioClockToString	(const NTV2EmbeddedAudioClock	inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
-AJAExport std::string NTV2GetBitfileName				(const NTV2DeviceID				inValue,	const bool useOemNameOnWindows = false);
+AJAExport std::string NTV2GetBitfileName				(const NTV2DeviceID				inValue);
 AJAExport bool		  NTV2IsCompatibleBitfileName		(const std::string & inBitfileName, const NTV2DeviceID inDeviceID);
 AJAExport NTV2DeviceID NTV2GetDeviceIDFromBitfileName	(const std::string & inBitfileName);
 AJAExport std::string NTV2GetFirmwareFolderPath			(void);
