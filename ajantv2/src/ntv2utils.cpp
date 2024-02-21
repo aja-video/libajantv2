@@ -7402,46 +7402,42 @@ ostream & operator << (ostream & inOutStream, const RP188_STRUCT & inObj)
 }	//	RP188_STRUCT ostream operator
 
 
-string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOnWindows)
+string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 {
-	bool useWindowsName = !useOemNameOnWindows;
-#if defined (AJAMac) || defined (AJALinux)
-	useWindowsName = false;
-#endif
 	switch (inBoardID)
 	{
 	case DEVICE_ID_NOTFOUND:					break;
-	case DEVICE_ID_CORVID1:						return useWindowsName ? "corvid1_pcie.bit"			: "corvid1pcie.bit";
-	case DEVICE_ID_CORVID22:					return useWindowsName ? "corvid22_pcie.bit"			: "Corvid22.bit";
-	case DEVICE_ID_CORVID24:					return useWindowsName ? "corvid24_pcie.bit"			: "corvid24_quad.bit";
-	case DEVICE_ID_CORVID3G:					return useWindowsName ? "corvid3G_pcie.bit"			: "corvid1_3gpcie.bit";
-	case DEVICE_ID_CORVID44:					return useWindowsName ? "corvid44_pcie.bit"			: "corvid_44.bit";
-	case DEVICE_ID_CORVID88:					return useWindowsName ? "corvid88_pcie.bit"			: "corvid_88.bit";
-	case DEVICE_ID_CORVIDHEVC:					return useWindowsName ? "corvid_hevc.bit"			: "corvid_hevc.bit";
-	case DEVICE_ID_IO4K:						return useWindowsName ? "io4k_pcie.bit"				: "IO_XT_4K.bit";
-	case DEVICE_ID_IO4KUFC:						return useWindowsName ? "io4k_ufc_pcie.bit"			: "IO_XT_4K_UFC.bit";
-	case DEVICE_ID_IOEXPRESS:					return useWindowsName ? "ioexpress_pcie.bit"		: "chekov_00_pcie.bit";
-	case DEVICE_ID_IOXT:						return useWindowsName ? "ioxt_pcie.bit"				: "top_io_tx.bit";
-	case DEVICE_ID_KONA3G:						return useWindowsName ? "kona3g_pcie.bit"			: "k3g_top.bit";
-	case DEVICE_ID_KONA3GQUAD:					return useWindowsName ? "kona3g_quad_pcie.bit"		: "k3g_quad.bit";
-	case DEVICE_ID_KONA4:						return useWindowsName ? "kona4_pcie.bit"			: "kona_4_quad.bit";
-	case DEVICE_ID_KONA4UFC:					return useWindowsName ? "kona4_ufc_pcie.bit"		: "kona_4_ufc.bit";
-	case DEVICE_ID_KONAIP_2022:					return useWindowsName ? "kip_s2022.mcs"				: "kip_s2022.mcs";
-	case DEVICE_ID_KONAIP_4CH_2SFP:				return useWindowsName ? "s2022_56_2p2ch_rxtx.mcs"	: "s2022_56_2p2ch_rxtx.mcs";
-	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return useWindowsName ? "kip_j2k_1i1o.mcs"			: "kip_j2k_1i1o.mcs";
-	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return useWindowsName ? "kip_j2k_2o.mcs"			: "kip_j2k_2o.mcs";
-	case DEVICE_ID_KONAIP_1RX_1TX_2110:			return useWindowsName ? "s2110_1rx_1tx.mcs"			: "s2110_1rx_1tx.mcs";
-	case DEVICE_ID_KONALHEPLUS:					return useWindowsName ? "lheplus_pcie.bit"			: "lhe_12_pcie.bit";
-	case DEVICE_ID_KONALHI:						return useWindowsName ? "lhi_pcie.bit"				: "top_pike.bit";
-	case DEVICE_ID_TTAP:						return useWindowsName ? "ttap_pcie.bit"				: "t_tap_top.bit";
-	case DEVICE_ID_IO4KPLUS:					return useWindowsName ? "io4kplus_pcie.bit"			: "io4kp.bit";
-	case DEVICE_ID_IOIP_2022:					return useWindowsName ? "ioip_s2022.mcs"			: "ioip_s2022.mcs";
-	case DEVICE_ID_IOIP_2110:					return useWindowsName ? "ioip_s2110.mcs"			: "ioip_s2110.mcs";
-	case DEVICE_ID_IOIP_2110_RGB12:				return useWindowsName ? "ioip_s2110_rgb.mcs"		: "ioip_s2110_rgb.mcs";
-	case DEVICE_ID_KONAIP_2110:					return useWindowsName ? "kip_s2110.mcs"				: "kip_s2110.mcs";
-	case DEVICE_ID_KONAIP_2110_RGB12:			return useWindowsName ? "kip_s2110_rgb.mcs"			: "kip_s2110_rgb.mcs";
-	case DEVICE_ID_KONAHDMI:					return useWindowsName ? "kona_hdmi_4rx.bit"			: "kona_hdmi_4rx.bit";
-	case DEVICE_ID_KONA1:						return useWindowsName ? "kona1_pcie.bit"			: "kona1.bit";
+	case DEVICE_ID_CORVID1:						return "corvid1.bit";
+	case DEVICE_ID_CORVID22:					return "corvid22.bit";
+	case DEVICE_ID_CORVID24:					return "corvid24.bit";
+	case DEVICE_ID_CORVID3G:					return "corvid3G.bit";
+	case DEVICE_ID_CORVID44:					return "corvid44.bit";
+	case DEVICE_ID_CORVID88:					return "corvid88.bit";
+	case DEVICE_ID_CORVIDHEVC:					return "corvid.bit";
+	case DEVICE_ID_IO4K:						return "io4k.bit";
+	case DEVICE_ID_IO4KUFC:						return "io4kufc.bit";
+	case DEVICE_ID_IOEXPRESS:					return "ioexpress.bit";
+	case DEVICE_ID_IOXT:						return "ioxt.bit";
+	case DEVICE_ID_KONA3G:						return "kona3g.bit";
+	case DEVICE_ID_KONA3GQUAD:					return "kona3gquad.bit";
+	case DEVICE_ID_KONA4:						return "kona4.bit";
+	case DEVICE_ID_KONA4UFC:					return "kona4ufc.bit";
+	case DEVICE_ID_KONAIP_2022:					return "konaips2022.mcs";
+	case DEVICE_ID_KONAIP_4CH_2SFP:				return "s2022_56_2p2ch_rxtx.mcs";
+	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "kip_j2k_1i1o.mcs";
+	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "kip_j2k_2o.mcs";
+	case DEVICE_ID_KONAIP_1RX_1TX_2110:			return "s2110_1rx_1tx.mcs";
+	case DEVICE_ID_KONALHEPLUS:					return "konalheplus.bit";
+	case DEVICE_ID_KONALHI:						return "konalhi.bit";
+	case DEVICE_ID_TTAP:						return "ttap.bit";
+	case DEVICE_ID_IO4KPLUS:					return "io4kplus.bit";
+	case DEVICE_ID_IOIP_2022:					return "ioip2022.mcs";
+	case DEVICE_ID_IOIP_2110:					return "ioip2110.mcs";
+	case DEVICE_ID_IOIP_2110_RGB12:				return "ioip2110rgb.mcs";
+	case DEVICE_ID_KONAIP_2110:					return "kip2110.mcs";
+	case DEVICE_ID_KONAIP_2110_RGB12:			return "kis211rgb.mcs";
+	case DEVICE_ID_KONAHDMI:					return "konahdmi4rx.bit";
+	case DEVICE_ID_KONA1:						return "kona1.bit";
 	case DEVICE_ID_KONA5:						return "kona5_retail_tprom.bit";
 	case DEVICE_ID_KONA5_2X4K:					return "kona5_2x4k_tprom.bit";
 	case DEVICE_ID_KONA5_8KMK:					return "kona5_8k_mk_tprom.bit";
@@ -7470,10 +7466,10 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID, const bool useOemNameOn
 	case DEVICE_ID_SOJI_DIAGS:					return "soji_diags.bit";
 	case DEVICE_ID_KONA5_8K_MV_TX:				return "kona5_8k_mv_tx_tprom.bit";
 	case DEVICE_ID_CORVID44_8KMK:				return "c44_12g_8k_mk_tprom.bit";
-	case DEVICE_ID_CORVID44_8K:					return "c44_12g_8k_tprom.bit";
+	case DEVICE_ID_CORVID44_8K:					return "corvid44_12g_8k.bit";
 	case DEVICE_ID_CORVID44_2X4K:				return "c44_12g_2x4k_tprom.bit";
 	case DEVICE_ID_CORVID44_PLNR:				return "c44_12g_plnr_tprom.bit";
-	case DEVICE_ID_TTAP_PRO:					return "t_tap_pro.bit";
+	case DEVICE_ID_TTAP_PRO:					return "ttappro.bit";
 	case DEVICE_ID_IOX3:						return "iox3.bit";
 	case DEVICE_ID_KONAX:						return "konax.bit";
 	case DEVICE_ID_KONAXM:						return "konaxm.bit";
