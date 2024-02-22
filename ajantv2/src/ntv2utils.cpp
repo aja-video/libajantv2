@@ -7418,11 +7418,11 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 	case DEVICE_ID_IO4KUFC:						return "io4kufc.bit";
 	case DEVICE_ID_IOEXPRESS:					return "ioexpress.bit";
 	case DEVICE_ID_IOXT:						return "ioxt.bit";
-	case DEVICE_ID_KONA3G:						return "kona3g.bit";
+	case DEVICE_ID_KONA3G:						return "kona3gufc.bit";
 	case DEVICE_ID_KONA3GQUAD:					return "kona3gquad.bit";
 	case DEVICE_ID_KONA4:						return "kona4.bit";
 	case DEVICE_ID_KONA4UFC:					return "kona4ufc.bit";
-	case DEVICE_ID_KONAIP_2022:					return "konaips2022.mcs";
+	case DEVICE_ID_KONAIP_2022:					return "konaip2022.mcs";
 	case DEVICE_ID_KONAIP_4CH_2SFP:				return "s2022_56_2p2ch_rxtx.mcs";
 	case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:		return "kip_j2k_1i1o.mcs";
 	case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "kip_j2k_2o.mcs";
@@ -7434,8 +7434,8 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 	case DEVICE_ID_IOIP_2022:					return "ioip2022.mcs";
 	case DEVICE_ID_IOIP_2110:					return "ioip2110.mcs";
 	case DEVICE_ID_IOIP_2110_RGB12:				return "ioip2110rgb.mcs";
-	case DEVICE_ID_KONAIP_2110:					return "kip2110.mcs";
-	case DEVICE_ID_KONAIP_2110_RGB12:			return "kis211rgb.mcs";
+	case DEVICE_ID_KONAIP_2110:					return "konaip2110.mcs";
+	case DEVICE_ID_KONAIP_2110_RGB12:			return "konaip2110rgb.mcs";
 	case DEVICE_ID_KONAHDMI:					return "konahdmi4rx.bit";
 	case DEVICE_ID_KONA1:						return "kona1.bit";
 	case DEVICE_ID_KONA5:						return "kona5_retail_tprom.bit";
