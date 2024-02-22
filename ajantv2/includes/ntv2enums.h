@@ -1884,9 +1884,13 @@ typedef enum
 
 typedef enum
 {
-	NTV2_ENCODED_AUDIO_NORMAL,	// Normal, Sample Rate Converter enabled
-	NTV2_ENCODED_AUDIO_SRC_DISABLED // AES ch. 1/2 encoded audio mode (SRC disabled)
+	NTV2_ENCODED_AUDIO_NORMAL,			//	Normal, Sample Rate Converter enabled
+	NTV2_ENCODED_AUDIO_SRC_DISABLED,	//	AES ch. 1/2 encoded audio mode (SRC disabled)
+	NTV2_MAX_NUM_EncodedAudioModes,
+	NTV2_ENCODED_AUDIO_MODE_INVALID = NTV2_MAX_NUM_EncodedAudioModes
 } NTV2EncodedAudioMode;
+
+#define NTV2_IS_VALID_ENCODED_AUDIO_MODE(_x_)	((_x_) >= NTV2_ENCODED_AUDIO_NORMAL  &&  (_x_) < NTV2_MAX_NUM_EncodedAudioModes)
 
 
 typedef enum

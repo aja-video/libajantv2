@@ -22,8 +22,6 @@ static int ShowDeviceInfo (CNTV2Card & inCard)
 {
 	//	Get detailed device information...
 	const NTV2DeviceID deviceID (inCard.GetDeviceID());
-	NTV2VideoFormatSet videoFormats;
-	NTV2PixelFormats pixelFormats;
 	string serial;
 
 			//	Print the display name...
@@ -46,6 +44,8 @@ static int ShowDeviceInfo (CNTV2Card & inCard)
 			<< "\t" << inCard.features().GetNumEmbeddedAudioOutputChannels() << " channel(s) of Embedded Audio Output" << endl;
 
 	//	Show its video and pixel format capabilities:
+	NTV2VideoFormatSet videoFormats;
+	NTV2PixelFormats pixelFormats;
 	inCard.GetSupportedVideoFormats(videoFormats);
 	inCard.GetSupportedPixelFormats(pixelFormats);
 	cout	<< "\t" << videoFormats << endl

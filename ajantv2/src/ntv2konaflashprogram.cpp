@@ -209,7 +209,7 @@ bool CNTV2KonaFlashProgram::IsInstalledFWRunning (bool & outIsRunning, ostream &
 
 bool CNTV2KonaFlashProgram::SetBoard(UWord boardNumber, uint32_t index)
 {
-	if (!AsNTV2DriverInterfaceRef(*this).Open(boardNumber))
+	if (!Open(boardNumber))
 		return false;
 
 	if (!SetDeviceProperties())

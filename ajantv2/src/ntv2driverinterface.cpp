@@ -1711,3 +1711,9 @@ bool CNTV2DriverInterface::GetRegInfoForNumericParam (const NTV2NumericParamID i
 	}
 	return outRegInfo.IsValid();
 }
+
+
+bool CNTV2DriverInterface::ControlDriverDebugMessages (NTV2_DriverDebugMessageSet msgSet,  bool enable)
+{	(void)msgSet; (void) enable;
+	return false;
+}

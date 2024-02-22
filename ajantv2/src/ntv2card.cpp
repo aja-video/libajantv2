@@ -1,7 +1,8 @@
 /* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2card.cpp
-	@brief		Implements several CNTV2Card methods. Other implementation files are 'ntv2audio.cpp', 'ntv2dma.cpp', 'ntv2register.cpp', ...
+	@brief		Implements several CNTV2Card methods. Other implementation files are 'ntv2audio.cpp',
+				'ntv2dma.cpp', 'ntv2register.cpp', ...
 	@copyright	(C) 2004-2022 AJA Video Systems, Inc.
 **/
 
@@ -19,7 +20,7 @@ using namespace std;
 // Default Constructor
 CNTV2Card::CNTV2Card ()
 #if defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
-	:	mDevCap(*(reinterpret_cast<CNTV2DriverInterface*>(this)))
+	:	mDevCap(driverInterface())
 #endif	//	defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
 {
 	_boardOpened = false;
@@ -27,7 +28,7 @@ CNTV2Card::CNTV2Card ()
 
 CNTV2Card::CNTV2Card (const UWord inDeviceIndex, const string & inHostName)
 #if defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
-	:	mDevCap(*(reinterpret_cast<CNTV2DriverInterface*>(this)))
+	:	mDevCap(driverInterface())
 #endif	//	defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
 {
 	string hostName(inHostName);

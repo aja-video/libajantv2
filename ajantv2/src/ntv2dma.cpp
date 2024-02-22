@@ -156,41 +156,6 @@ bool CNTV2Card::DMAStreamStop  (const NTV2Channel inChannel, const bool inToHost
 }
 
 
-bool CNTV2Card::GetAudioMemoryOffset (const ULWord inOffsetBytes,  ULWord & outAbsByteOffset,
-										const NTV2AudioSystem inAudioSystem, const bool inCaptureBuffer)
-{
-	outAbsByteOffset = 0;
-	const NTV2DeviceID	deviceID(GetDeviceID());
-	if (ULWord(inAudioSystem) >= GetNumSupported(kDeviceGetNumBufferedAudioSystems))
-		return false;	//	Invalid audio system
-
-	if (IsSupported(kDeviceCanDoStackedAudio))
-	{
-		const ULWord	EIGHT_MEGABYTES (0x800000);
-		const ULWord	memSize			(GetNumSupported(kDeviceGetActiveMemorySize));
-		const ULWord	engineOffset	(memSize  -	 EIGHT_MEGABYTES * ULWord(inAudioSystem+1));
-		outAbsByteOffset = inOffsetBytes + engineOffset;
-	}
-	else
-	{
-		NTV2FrameGeometry		fg	(NTV2_FG_INVALID);
-		NTV2FrameBufferFormat	fbf (NTV2_FBF_INVALID);
-		if (!GetFrameGeometry (fg, NTV2Channel(inAudioSystem)) || !GetFrameBufferFormat (NTV2Channel(inAudioSystem), fbf))
-			return false;
-
-		const ULWord	audioFrameBuffer	(::NTV2DeviceGetNumberFrameBuffers(deviceID, fg, fbf) - 1);
-		outAbsByteOffset = inOffsetBytes  +	 audioFrameBuffer * ::NTV2DeviceGetFrameBufferSize(deviceID, fg, fbf);
-	}
-
-	if (inCaptureBuffer)	//	Capture mode?
-	{	ULWord rdBufOffset(0x400000);	//	4MB
-		GetAudioReadOffset (rdBufOffset, inAudioSystem);
-		outAbsByteOffset += rdBufOffset;	//	Add offset to point to capture buffer
-	}
-	return true;
-}
-
-
 bool CNTV2Card::DMAReadAudio (	const NTV2AudioSystem	inAudioSystem,
 								ULWord *				pOutAudioBuffer,
 								const ULWord			inOffsetBytes,

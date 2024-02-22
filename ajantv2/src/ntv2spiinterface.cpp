@@ -199,7 +199,7 @@ CNTV2AxiSpiFlash::CNTV2AxiSpiFlash(int index, bool verbose)
 	mSpiReadReg		 = (mBaseByteAddress + 0x6c) / 4;
 	mSpiSlaveReg	 = (mBaseByteAddress + 0x70) / 4;
 	mSpiGlobalIntReg = (mBaseByteAddress + 0x1c) / 4;
-	AsNTV2DriverInterfaceRef(mDevice).Open(UWord(index));
+	mDevice.Open(UWord(index));
 
 	SpiReset();
 
