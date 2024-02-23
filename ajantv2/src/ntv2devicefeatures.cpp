@@ -322,7 +322,7 @@
 
 	ULWord NTV2DeviceGetFrameBufferSize (NTV2DeviceID id, NTV2FrameGeometry fg, NTV2FrameBufferFormat fbf)
 	{
-		ULWord multiplier(1); // default
+		ULWord multiplier = 1; // default
 		switch (id)
 		{
 			case DEVICE_ID_TTAP:
@@ -496,7 +496,7 @@
 
 	ULWord NTV2DeviceGetNumberFrameBuffers (NTV2DeviceID id, NTV2FrameGeometry fg, NTV2FrameBufferFormat fbf)
 	{
-		ULWord divisor(1); // default
+		ULWord divisor = 1; // default
 		switch (id)
 		{
 			case DEVICE_ID_TTAP:
