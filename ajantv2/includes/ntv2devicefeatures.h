@@ -252,45 +252,35 @@ extern "C"
 #endif
 
 #if !defined(NTV2_DEPRECATE_17_1)
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudioOut(const NTV2DeviceID inDeviceID));		///< @deprecated	This function has been declared obsolete starting in SDK 17.1
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudioIn(const NTV2DeviceID inDeviceID));		///< @deprecated	This function has been declared obsolete starting in SDK 17.1
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo292Out(NTV2DeviceID boardID, UWord index0));	///< @deprecated	Starting in SDK 17.1. Use CNTV2Card::deviceCanDo292Out instead
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo3GOut (NTV2DeviceID boardID, UWord index0));	///< @deprecated	Starting in SDK 17.1. Use CNTV2Card::deviceCanDo3GOut instead
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo12GOut(NTV2DeviceID boardID, UWord index0));	///< @deprecated	Starting in SDK 17.1. Use CNTV2Card::deviceCanDo12GOut instead
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo292In(NTV2DeviceID boardID, UWord index0));		///< @deprecated	Starting in SDK 17.1. Use CNTV2Card::deviceCanDo292In instead
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo3GIn(NTV2DeviceID boardID, UWord index0));		///< @deprecated	Starting in SDK 17.1. Use CNTV2Card::deviceCanDo3GIn instead
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo12GIn(NTV2DeviceID boardID, UWord index0));		///< @deprecated	Starting in SDK 17.1. Use CNTV2Card::deviceCanDo12GIn instead
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID boardID, UWord index0));		///< @deprecated	Starting in SDK 17.1
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoOutputDestination (const NTV2DeviceID inDeviceID, const NTV2OutputDest inOutputDest));	///< @deprecated	Starting in SDK 17.1
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoColorCorrection (const NTV2DeviceID inDeviceID));///< @deprecated	Starting in SDK 17.1
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoProgrammableCSC (const NTV2DeviceID inDeviceID));///< @deprecated	Starting in SDK 17.1
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudioOut(const NTV2DeviceID id));		///< @deprecated	This function has been declared obsolete starting in SDK 17.1
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudioIn(const NTV2DeviceID id));		///< @deprecated	This function has been declared obsolete starting in SDK 17.1
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo292Out(NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.1. Use CNTV2Card::deviceCanDo292Out instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo3GOut (NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.1. Use CNTV2Card::deviceCanDo3GOut instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo12GOut(NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.1. Use CNTV2Card::deviceCanDo12GOut instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo292In(NTV2DeviceID id, UWord ndx));		///< @deprecated	Starting in SDK 17.1. Use CNTV2Card::deviceCanDo292In instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo3GIn(NTV2DeviceID id, UWord ndx));		///< @deprecated	Starting in SDK 17.1. Use CNTV2Card::deviceCanDo3GIn instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo12GIn(NTV2DeviceID id, UWord ndx));		///< @deprecated	Starting in SDK 17.1. Use CNTV2Card::deviceCanDo12GIn instead
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID id, UWord ndx));		///< @deprecated	Starting in SDK 17.1
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoOutputDestination (const NTV2DeviceID id, const NTV2OutputDest od));	///< @deprecated	Starting in SDK 17.1
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoColorCorrection (const NTV2DeviceID id));///< @deprecated	Starting in SDK 17.1
+	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoProgrammableCSC (const NTV2DeviceID id));///< @deprecated	Starting in SDK 17.1
+	AJAExport NTV2_DEPRECATED_f(UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBufferFormat inFBF));	///< @deprecated	Starting in SDK 17.1
+
+	#if (defined(__CPLUSPLUS__) || defined(__cplusplus)) && !defined(NTV2_BUILDING_DRIVER)
+		AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetFrameBufferSize(NTV2DeviceID id));		///< @deprecated	Starting in SDK 17.1
+		AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetNumberFrameBuffers(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
+		AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetAudioFrameBuffer(NTV2DeviceID id));		///< @deprecated	Starting in SDK 17.1
+		AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetAudioFrameBuffer2(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
+	#else
+		AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetFrameBufferSize_Ex(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
+		AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID id));///< @deprecated	Starting in SDK 17.1
+		AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetAudioFrameBuffer_Ex(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
+	#endif
+	AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetFrameBufferSize(NTV2DeviceID id, NTV2FrameGeometry fg, NTV2FrameBufferFormat fbf));		///< @deprecated	Starting in SDK 17.1
+	AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetNumberFrameBuffers(NTV2DeviceID id, NTV2FrameGeometry fg, NTV2FrameBufferFormat fbf));	///< @deprecated	Starting in SDK 17.1
 #endif	//	defined(NTV2_DEPRECATE_17_0)
-
-/**
-	@return The minimum number of 8MB chunks that will accommodate a raster having the given frame geometry and pixel format.
-	@param[in]	inFG	A valid frame geometry.
-	@param[in]	inFBF	A valid frame buffer format.
-**/
-AJAExport UWord Get8MBFrameSizeFactor (const NTV2FrameGeometry inFG, const NTV2FrameBufferFormat inFBF);
-
-// Overloading not supported by the ANSI C compiler used for Linux drivers.
-// 
-// TODO: Audit all platforms and switch all the original calls to the _Ex
-// versions.
-#if (defined(__CPLUSPLUS__) || defined(__cplusplus)) && !defined(NTV2_BUILDING_DRIVER)
-	AJAExport ULWord NTV2DeviceGetFrameBufferSize(NTV2DeviceID boardID);		//	Revisit for 2MB granularity
-	AJAExport ULWord NTV2DeviceGetNumberFrameBuffers(NTV2DeviceID boardID);		//	Revisit for 2MB granularity
-	AJAExport ULWord NTV2DeviceGetAudioFrameBuffer(NTV2DeviceID boardID);		//	Revisit for 2MB granularity
-	AJAExport ULWord NTV2DeviceGetAudioFrameBuffer2(NTV2DeviceID boardID);		//	Revisit for 2MB granularity
-#else
-	AJAExport ULWord NTV2DeviceGetFrameBufferSize_Ex(NTV2DeviceID boardID);		//	Revisit for 2MB granularity
-	AJAExport ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID boardID);	//	Revisit for 2MB granularity
-	AJAExport ULWord NTV2DeviceGetAudioFrameBuffer_Ex(NTV2DeviceID boardID);	//	Revisit for 2MB granularity
-#endif
 	
 AJAExport ULWord NTV2DeviceGetNumberVideoFrameBuffers(NTV2DeviceID inDeviceID, NTV2FrameGeometry inFrameGeometry, NTV2Framesize inFramesize);
-AJAExport ULWord NTV2DeviceGetFrameBufferSize(NTV2DeviceID boardID, NTV2FrameGeometry frameGeometry, NTV2FrameBufferFormat frameFormat);	//	Revisit for 2MB granularity
-AJAExport ULWord NTV2DeviceGetNumberFrameBuffers(NTV2DeviceID boardID, NTV2FrameGeometry frameGeometry, NTV2FrameBufferFormat frameFormat); //	Revisit for 2MB granularity
 AJAExport ULWord NTV2DeviceGetAudioFrameBuffer(NTV2DeviceID boardID, NTV2FrameGeometry frameGeometry, NTV2FrameBufferFormat frameFormat);	//	Revisit for 2MB granularity
 AJAExport ULWord NTV2DeviceGetAudioFrameBuffer2(NTV2DeviceID boardID, NTV2FrameGeometry frameGeometry, NTV2FrameBufferFormat frameFormat);	//	Revisit for 2MB granularity
 

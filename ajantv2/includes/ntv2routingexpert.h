@@ -58,6 +58,46 @@ class RoutingExpert
 		bool				IsHDMIInWidget(const NTV2WidgetType inWidgetType) const;
 		bool				IsHDMIOutWidget(const NTV2WidgetType inWidgetType) const;
 
+	protected:
+		typedef std::map <std::string, NTV2InputXptID>			String2InputXpt;
+		typedef String2InputXpt::const_iterator					String2InputXptConstIter;
+
+		typedef std::map <NTV2InputXptID, std::string>			InputXpt2String;
+		typedef InputXpt2String::const_iterator					InputXpt2StringConstIter;
+
+		typedef std::map <std::string, NTV2OutputXptID>			String2OutputXpt;
+		typedef String2OutputXpt::const_iterator				String2OutputXptConstIter;
+
+		typedef std::map <NTV2OutputXptID, std::string>			OutputXpt2String;
+		typedef OutputXpt2String::const_iterator				OutputXpt2StringConstIter;
+
+		typedef std::set<NTV2WidgetType>						NTV2WidgetTypeSet;
+		typedef NTV2WidgetTypeSet::const_iterator				NTV2WidgetTypeSetConstIter;
+
+		typedef std::pair <NTV2WidgetID, NTV2WidgetType>		Widget2TypePair;
+		typedef std::multimap <NTV2WidgetID, NTV2WidgetType>	Widget2Types;
+		typedef Widget2Types::const_iterator					Widget2TypesConstIter;
+
+		typedef std::pair <NTV2WidgetID, NTV2Channel>			Widget2ChannelPair;
+		typedef std::multimap <NTV2WidgetID, NTV2Channel>		Widget2Channels;
+		typedef Widget2Channels::const_iterator					Widget2ChannelsConstIter;
+
+		typedef std::pair <NTV2WidgetID, NTV2InputXptID>		Widget2InputXptPair;
+		typedef std::multimap <NTV2WidgetID, NTV2InputXptID>	Widget2InputXpts;
+		typedef Widget2InputXpts::const_iterator				Widget2InputXptsConstIter;
+
+		typedef std::pair <NTV2WidgetID, NTV2OutputXptID>		Widget2OutputXptPair;
+		typedef std::multimap <NTV2WidgetID, NTV2OutputXptID>	Widget2OutputXpts;
+		typedef Widget2OutputXpts::const_iterator				Widget2OutputXptsConstIter;
+
+		typedef std::multimap <NTV2InputXptID, NTV2WidgetID>	InputXpt2WidgetIDs;
+		typedef std::pair <NTV2InputXptID, NTV2WidgetID>		InputXpt2WidgetIDPair;
+		typedef InputXpt2WidgetIDs::const_iterator				InputXpt2WidgetIDsConstIter;
+
+		typedef std::multimap <NTV2OutputXptID, NTV2WidgetID>	OutputXpt2WidgetIDs;
+		typedef std::pair <NTV2OutputXptID, NTV2WidgetID>		OutputXpt2WidgetIDPair;
+		typedef OutputXpt2WidgetIDs::const_iterator				OutputXpt2WidgetIDsConstIter;
+
 		private:
 			void InitInputXpt2String(void);
 			void InitOutputXpt2String(void);

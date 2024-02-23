@@ -37,10 +37,6 @@ class AJAExport CNTV2WinDriverInterface : public CNTV2DriverInterface
 	public:
 		AJA_VIRTUAL bool	WriteRegister (const ULWord inRegNum,  const ULWord inValue,  const ULWord inMask = 0xFFFFFFFF,  const ULWord inShift = 0);	///< @brief	Physical device implementation of CNTV2DriverInterface::WriteRegister.
 		AJA_VIRTUAL bool	ReadRegister (const ULWord inRegNum,  ULWord & outValue,  const ULWord inMask = 0xFFFFFFFF,  const ULWord inShift = 0);	///< @brief	Physical device implementation of CNTV2DriverInterface::ReadRegister.
-#if !defined(NTV2_DEPRECATE_14_3)
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadRegister (const ULWord inRegNum, ULWord * pOutValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0x0))
-															{return pOutValue && ReadRegister(inRegNum, *pOutValue, inRegMask, inRegShift);}
-#endif	//	NTV2_DEPRECATE_14_3
 		AJA_VIRTUAL bool	DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 										const bool				inIsRead,
 										const ULWord			inFrameNumber,
@@ -81,14 +77,6 @@ class AJAExport CNTV2WinDriverInterface : public CNTV2DriverInterface
 		AJA_VIRTUAL bool	HevcSendMessage (HevcMessageHeader* pMessage);
 		AJA_VIRTUAL bool	ControlDriverDebugMessages(NTV2_DriverDebugMessageSet msgSet, bool enable)	{(void)msgSet; (void)enable; return false;}
 
-#if !defined(NTV2_DEPRECATE_13_0)
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetRelativeVideoPlaybackDelay (ULWord frmDelay))		{(void)frmDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetRelativeVideoPlaybackDelay (ULWord* frmDelay))	{(void)frmDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetAudioPlaybackPinDelay (ULWord msDelay))	{(void)msDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetAudioPlaybackPinDelay (ULWord* msDelay))	{(void)msDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetAudioRecordPinDelay (ULWord msDelay))		{(void)msDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
-		AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetAudioRecordPinDelay (ULWord* msDelay))	{(void)msDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
-#endif	//	!defined(NTV2_DEPRECATE_13_0)
 		AJA_VIRTUAL bool	SetAudioOutputMode (NTV2_GlobalAudioPlaybackMode mode);
 		AJA_VIRTUAL bool	GetAudioOutputMode (NTV2_GlobalAudioPlaybackMode* mode);
 

@@ -8598,7 +8598,7 @@ typedef enum
 		**/
 		NTV2_STRUCT_BEGIN (NTV2DmaStream)
 			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
-				NTV2_POINTER	mBuffer;			///< @brief Virtual address of a DMA stream buffer and its length.
+				NTV2Buffer		mBuffer;			///< @brief Virtual address of a DMA stream buffer and its length.
 				NTV2Channel		mChannel;			///< @brief Video stream channel
 				ULWord			mFlags;				///< @brief Action flags (lock, unlock, etc)
 				ULWord			mStatus;			///< @brief Action status
@@ -8619,7 +8619,7 @@ typedef enum
 					@param	inChannel		Specifies the video channel to use for streaming.
 					@param	inFlags			Specifies action flags (start, stop, etc.).
 				**/
-				explicit	NTV2DmaStream (const NTV2_POINTER & inBuffer, const NTV2Channel inChannel, const ULWord inFlags);
+				explicit	NTV2DmaStream (const NTV2Buffer & inBuffer, const NTV2Channel inChannel, const ULWord inFlags);
 
 				/**
 					@brief	Constructs an NTV2DmaStream object to use in a CNTV2Card::StartDmaStream.
@@ -8647,7 +8647,7 @@ typedef enum
 					@param	inBuffer		Specifies the memory containing the DMA buffer.
 					@return True if successful;	 otherwise false.
 				**/
-				bool		SetBuffer (const NTV2_POINTER & inBuffer);
+				bool		SetBuffer (const NTV2Buffer & inBuffer);
 
 				/**
 					@brief	Sets the buffer to use for streaming.
@@ -8655,7 +8655,7 @@ typedef enum
 					@param	inByteCount			Specifies a the length of the buffer in bytes.
 					@return True if successful;	 otherwise false.
 				**/
-				inline bool SetBuffer (const ULWord * pInBuffer, const ULWord inByteCount)	{return SetBuffer(NTV2_POINTER(pInBuffer, inByteCount));}
+				inline bool SetBuffer (const ULWord * pInBuffer, const ULWord inByteCount)	{return SetBuffer(NTV2Buffer(pInBuffer, inByteCount));}
 
 				///@{
 				/**
@@ -8674,7 +8674,7 @@ typedef enum
 				/**
 					@brief	Resets the struct to its initialized state.
 				**/
-				inline void Clear (void)		{SetBuffer(NTV2_POINTER());}
+				inline void Clear (void)		{SetBuffer(NTV2Buffer());}
 				///@}
 
 				/**
@@ -8776,7 +8776,7 @@ typedef enum
 				NTV2Channel		mChannel;			///< @brief Stream channel
 				ULWord			mFlags;				///< @brief Action flags
 				ULWord			mStatus;            ///< @brief Action status
-				NTV2_POINTER	mBuffer;			///< @brief Virtual address of a stream buffer and its length.
+				NTV2Buffer		mBuffer;			///< @brief Virtual address of a stream buffer and its length.
 				ULWord64		mBufferCookie;		///< @brief Buffer User cookie
 				ULWord			mBufferState;		///< @brief Buffer state
 				LWord64			mQueueTime;			///< @brief Queue time (queued to driver by app)

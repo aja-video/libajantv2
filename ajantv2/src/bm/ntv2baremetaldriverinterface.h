@@ -30,10 +30,6 @@ class CNTV2BareMetalDriverInterface : public CNTV2DriverInterface
 
 		AJA_VIRTUAL bool	WriteRegister (const ULWord inRegNum, const ULWord inValue, const ULWord inMask = 0xFFFFFFFF, const ULWord inShift = 0);
 		AJA_VIRTUAL bool	ReadRegister (const ULWord inRegNum,  ULWord & outValue,  const ULWord inMask = 0xFFFFFFFF, const ULWord inShift = 0);
-#if !defined(NTV2_DEPRECATE_14_3)
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool ReadRegister (const ULWord inRegNum, ULWord * pOutValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0x0))
-												{return pOutValue && ReadRegister(inRegNum, *pOutValue, inRegMask, inRegShift);}
-#endif	//	!defined(NTV2_DEPRECATE_14_3)
 
 		AJA_VIRTUAL bool	RestoreHardwareProcampRegisters (void);
 
@@ -88,14 +84,6 @@ class CNTV2BareMetalDriverInterface : public CNTV2DriverInterface
 																	ULWord offsetSrc, ULWord offsetDest, ULWord bytes);
 
 public:
-#if !defined(NTV2_DEPRECATE_13_0)
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetRelativeVideoPlaybackDelay (ULWord frmDelay)) {(void)frmDelay; return false;} ///< @deprecated	Obsolete starting in SDK 13.0.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetRelativeVideoPlaybackDelay (ULWord* frmDelay)){(void)frmDelay; return false;} ///< @deprecated	Obsolete starting in SDK 13.0.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetAudioPlaybackPinDelay (ULWord msDelay))	{(void)msDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetAudioPlaybackPinDelay (ULWord* msDelay))	{(void)msDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool SetAudioRecordPinDelay (ULWord msDelay))		{(void)msDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
-	AJA_VIRTUAL NTV2_DEPRECATED_f(bool GetAudioRecordPinDelay (ULWord* msDelay))	{(void)msDelay; return false;}	///< @deprecated	Obsolete starting in SDK 13.0.
-#endif	//	!defined(NTV2_DEPRECATE_13_0)
 #if !defined(NTV2_DEPRECATE_16_0)
 	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetStreamingApplication(ULWord & outAppType, int32_t & outPID))	{return CNTV2DriverInterface::GetStreamingApplication(outAppType,outPID);}	///< @deprecated	Deprecated starting in SDK 16.0.
 	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetStreamingApplication(ULWord * pAppType, int32_t * pPID))		{return pAppType && pPID ? CNTV2DriverInterface::GetStreamingApplication(*pAppType,*pPID) : false;} ///< @deprecated	Deprecated starting in SDK 16.0.
