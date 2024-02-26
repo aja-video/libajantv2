@@ -544,6 +544,7 @@ void CNTV2AxiSpiFlash::SpiReset()
 
 	// make sure in 32bit mode
 	uint8_t bankAddressVal=0;
+	NTV2_UNUSED(bankAddressVal);
 }
 
 bool CNTV2AxiSpiFlash::SpiResetFifos()

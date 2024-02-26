@@ -794,6 +794,7 @@ private:
 		// 												"IP Channel"};
 		static const uint32_t	AuxExtPerChlRegBase []	=	{	7616,	7680,	7744,	7808	};
 		static const uint32_t	AuxInsPerChlRegBase []	=	{	4608,	4672,	4736,	4800	};
+		NTV2_UNUSED(AuxInsPerChlRegBase);
 		
 		NTV2_ASSERT(sizeof(AuxExtRegNames[0]) == sizeof(AuxExtRegNames[1]));
 		NTV2_ASSERT(size_t(regAuxExt_LAST) == sizeof(AuxExtRegNames)/sizeof(AuxExtRegNames[0]));

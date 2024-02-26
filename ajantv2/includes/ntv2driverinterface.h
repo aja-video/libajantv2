@@ -95,7 +95,7 @@ class AJAExport CNTV2DriverInterface
 			@param[in]	inRHS	The rvalue to be assigned to the lvalue.
 			@return	A non-constant reference to the lvalue.
 		**/
-		AJA_VIRTUAL CNTV2DriverInterface & operator = (const CNTV2DriverInterface & inRHS);
+		CNTV2DriverInterface & operator = (const CNTV2DriverInterface & inRHS);
 
 		/**
 			@brief	My copy constructor.
