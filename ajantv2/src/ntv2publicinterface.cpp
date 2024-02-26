@@ -2901,7 +2901,7 @@ NTV2DmaStream::NTV2DmaStream()
 	NTV2_ASSERT_STRUCT_VALID;
 }
 
-NTV2DmaStream::NTV2DmaStream (const NTV2_POINTER & inBuffer, const NTV2Channel inChannel, const ULWord inFlags)
+NTV2DmaStream::NTV2DmaStream (const NTV2Buffer & inBuffer, const NTV2Channel inChannel, const ULWord inFlags)
 	:	mHeader (NTV2_TYPE_AJADMASTREAM, sizeof(NTV2DmaStream))
 {
 	NTV2_ASSERT_STRUCT_VALID;
@@ -2914,7 +2914,7 @@ NTV2DmaStream::NTV2DmaStream(const ULWord * pInBuffer, const ULWord inByteCount,
 	:	mHeader (NTV2_TYPE_AJADMASTREAM, sizeof(NTV2DmaStream))
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	SetBuffer (NTV2_POINTER(pInBuffer, inByteCount));
+	SetBuffer (NTV2Buffer(pInBuffer, inByteCount));
 	SetChannel (inChannel);
 	SetFlags (inFlags);
 }
@@ -2927,7 +2927,7 @@ NTV2DmaStream::NTV2DmaStream(const NTV2Channel inChannel, const ULWord inFlags)
 	SetFlags (inFlags);
 }
 
-bool NTV2DmaStream::SetBuffer (const NTV2_POINTER & inBuffer)
+bool NTV2DmaStream::SetBuffer (const NTV2Buffer & inBuffer)
 {	//	Just use address & length (don't deep copy)...
 	NTV2_ASSERT_STRUCT_VALID;
 	return mBuffer.Set (inBuffer.GetHostPointer(), inBuffer.GetByteCount());

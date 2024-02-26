@@ -618,9 +618,9 @@
 			divisor *= 2;
 
 		#if (defined(__CPLUSPLUS__) || defined(__cplusplus)) && !defined(NTV2_BUILDING_DRIVER)
-		return (NTV2DeviceGetNumberFrameBuffers(id)/divisor);
+		return divisor  ?  NTV2DeviceGetNumberFrameBuffers(id) / divisor  :  0;
 		#else
-		return (NTV2DeviceGetNumberFrameBuffers_Ex(id)/divisor);
+		return divisor  ?  NTV2DeviceGetNumberFrameBuffers_Ex(id) / divisor  :  0;
 		#endif
 	}   //  NTV2DeviceGetNumberFrameBuffers
 #endif	//	!defined(NTV2_DEPRECATE_17_1)
@@ -646,8 +646,7 @@ ULWord NTV2DeviceGetNumberVideoFrameBuffers (NTV2DeviceID inDeviceID, NTV2FrameG
 	videoMemorySize = activeMemorySize - numAudioBytes;
 	hwBytesPerFrame *= NTV2_IS_QUAD_FRAME_GEOMETRY(inFrameGeometry) ? 4 : 1;
 	hwBytesPerFrame *= NTV2_IS_QUAD_QUAD_FRAME_GEOMETRY(inFrameGeometry) ? 8 : 1;
-	NTV2_ASSERT(hwBytesPerFrame > 0);
-	return videoMemorySize/hwBytesPerFrame;
+	return hwBytesPerFrame  ?  videoMemorySize / hwBytesPerFrame  :  0;
 }
 
 

@@ -527,7 +527,7 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 			if (pFrameData)
             {
 				//  Queue frame to stream
-				NTV2_POINTER buffer(pFrameData->fVideoBuffer.GetHostAddress(0), pFrameData->fVideoBuffer.GetByteCount());
+				NTV2Buffer buffer(pFrameData->fVideoBuffer.GetHostAddress(0), pFrameData->fVideoBuffer.GetByteCount());
 				status = mDevice.StreamBufferQueue(mConfig.fOutputChannel,
 													buffer,
 													goodQueue,
