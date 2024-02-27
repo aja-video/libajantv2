@@ -257,6 +257,10 @@ NTV2RPCClientAPI * CreateClient (void * pInDLLHandle, const NTV2ConnectParams & 
 	return pResult;
 }
 
+#if defined(AJA_LINUX) || defined(AJA_MAC)
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wunused-const-variable"
+#endif
 //	ALL THESE WERE COPIED FROM ntv2register.cpp:
 static const ULWord gChannelToGlobalControlRegNum []	= { kRegGlobalControl, kRegGlobalControlCh2, kRegGlobalControlCh3, kRegGlobalControlCh4,
 															kRegGlobalControlCh5, kRegGlobalControlCh6, kRegGlobalControlCh7, kRegGlobalControlCh8, 0};
@@ -392,6 +396,10 @@ static const ULWord		sAudioDetectRegs []		= { kRegAud1Detect,			kRegAud1Detect,	
 
 //static const ULWord sSignalRouterRegMasks[]		=	{	0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000	};
 //static const ULWord sSignalRouterRegShifts[]	=	{			 0,			 8,			16,			24	};
+
+#if defined(AJA_LINUX) || defined(AJA_MAC)
+	#pragma GCC diagnostic pop
+#endif
 
 NTV2Kona1::NTV2Kona1 (void * pInDLLHandle, const NTV2ConnectParams & inParams, const uint32_t inCallingVersion)
 	:	NTV2RPCAPI		(inParams),

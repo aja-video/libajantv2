@@ -453,7 +453,8 @@ bool CNTV2KonaFlashProgram::SetBitFile (const string & inBitfileName, ostream & 
 	_bitFileBuffer.Fill(0xFFFFFFFF);
 
 	fseek(pFile, 0, SEEK_SET);
-	fread(_bitFileBuffer, 1, _bitFileSize, pFile);
+	size_t bytesRead = fread(_bitFileBuffer, 1, _bitFileSize, pFile);
+	NTV2_UNUSED(bytesRead);
 	fclose(pFile);
 
 	// Parse header to make sure this is a xilinx bitfile.

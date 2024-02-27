@@ -47,11 +47,12 @@ static const uint32_t	gAudMaxSizeBytes (256 * 1024);	//	Max per-frame audio buff
 static const bool		BUFFER_PAGE_ALIGNED	(true);
 
 //	Audio tone generator data
+#if 0
 static const double		gFrequencies []	=	{250.0, 500.0, 1000.0, 2000.0};
 static const ULWord		gNumFrequencies		(sizeof(gFrequencies) / sizeof(double));
 static const double		gAmplitudes []	=	{	0.10, 0.15,		0.20, 0.25,		0.30, 0.35,		0.40, 0.45,		0.50, 0.55,		0.60, 0.65,		0.70, 0.75,		0.80, 0.85,
 												0.85, 0.80,		0.75, 0.70,		0.65, 0.60,		0.55, 0.50,		0.45, 0.40,		0.35, 0.30,		0.25, 0.20,		0.15, 0.10};
-
+#endif
 
 NTV2StreamPlayer::NTV2StreamPlayer (const PlayerConfig & inConfig)
 	:	mConfig				(inConfig),

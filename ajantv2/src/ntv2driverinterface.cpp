@@ -869,7 +869,7 @@ bool CNTV2DriverInterface::StreamBufferOps (const NTV2Channel inChannel,
 void CNTV2DriverInterface::FinishOpen (void)
 {
 	// HACK! FinishOpen needs frame geometry to determine frame buffer size and number.
-	NTV2FrameGeometry fg;
+	NTV2FrameGeometry fg(NTV2_FG_INVALID);
 	ULWord val1(0), val2(0);
 	ReadRegister (kRegGlobalControl, fg, kRegMaskGeometry, kRegShiftGeometry);	//	Read FrameGeometry
 	ReadRegister (kRegCh1Control, val1, kRegMaskFrameFormat, kRegShiftFrameFormat); //	Read PixelFormat
@@ -1509,7 +1509,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanDoCapture:						outValue =	(GetNumSupported(kDeviceGetNumVideoInputs)
 																	+ GetNumSupported(kDeviceGetNumHDMIVideoInputs)
 																	+ GetNumSupported(kDeviceGetNumAnalogVideoInputs)) > 0;	break;
-		case kDeviceCanDoColorCorrection:				outValue = ::NTV2DeviceCanDoColorCorrection				(devID);	break;	//	Deprecate?
+		case kDeviceCanDoColorCorrection:				outValue = GetNumSupported(kDeviceGetNumLUTs) > 0;					break;	//	Deprecate?
 		case kDeviceCanDoCustomAnc:						outValue = ::NTV2DeviceCanDoCustomAnc					(devID);	break;	//	Deprecate?
 		case kDeviceCanDoDSKOpacity:					outValue = ::NTV2DeviceCanDoDSKOpacity					(devID);	break;	//	Deprecate?
 		case kDeviceCanDoDualLink:						outValue = ::NTV2DeviceCanDoDualLink					(devID);	break;	//	Deprecate?
@@ -1530,7 +1530,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanDoPlayback:						outValue =	(GetNumSupported(kDeviceGetNumVideoOutputs)
 																	+ GetNumSupported(kDeviceGetNumHDMIVideoOutputs)
 																	+ GetNumSupported(kDeviceGetNumAnalogVideoOutputs)) > 0;break;
-		case kDeviceCanDoProgrammableCSC:				outValue = ::NTV2DeviceCanDoProgrammableCSC				(devID);	break;
+		case kDeviceCanDoProgrammableCSC:				outValue = GetNumSupported(kDeviceGetNumCSCs) > 0;					break;
 		case kDeviceCanDoProgrammableRS422:				outValue = ::NTV2DeviceCanDoProgrammableRS422			(devID);	break;
 		case kDeviceCanDoProRes:						outValue = ::NTV2DeviceCanDoProRes						(devID);	break;
 		case kDeviceCanDoQREZ:							outValue = ::NTV2DeviceCanDoQREZ						(devID);	break;

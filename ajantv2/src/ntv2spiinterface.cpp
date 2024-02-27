@@ -80,7 +80,7 @@ inline void print_flash_status_final(const string& label)
 // Cypress/Spansion commands
 
 //const uint32_t CYPRESS_FLASH_WRITE_STATUS_COMMAND	 = 0x01;
-const uint32_t CYPRESS_FLASH_WRITEDISABLE_COMMAND  = 0x04;
+//const uint32_t CYPRESS_FLASH_WRITEDISABLE_COMMAND  = 0x04;
 const uint32_t CYPRESS_FLASH_READ_STATUS_COMMAND   = 0x05;
 const uint32_t CYPRESS_FLASH_WRITEENABLE_COMMAND   = 0x06;
 const uint32_t CYPRESS_FLASH_READFAST_COMMAND	   = 0x0C; //4 byte address
