@@ -284,6 +284,7 @@ void ConvertLinetoRGB(UByte * ycbcrBuffer,
 					  bool fUseSMPTERange)
 {
 	YCbCrAlphaPixel ycbcrPixel;
+	ycbcrPixel.Alpha = 0;
 	UWord Cb1,Y1,Cr1,Cb2,Y2,Cr2;
 
 	// take a line(CbYCrYCbYCrY....) to RGBAlphaPixels.
