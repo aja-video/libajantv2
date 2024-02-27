@@ -1676,6 +1676,7 @@ bool CNTV2DriverInterface::GetNumericParam (const ULWord inParamID, ULWord & out
 			for (size_t ndx(0);  ndx < sizeof(s425MuxerIDs)/sizeof(NTV2WidgetID);  ndx++)
 				if (wgtIDs.find(s425MuxerIDs[ndx]) != wgtIDs.end())
 					outValue++;
+			break;
 		}
 		default:										return false;	//	Bad param
 	}
