@@ -251,7 +251,7 @@ void AJAWavWriter::writeHeader()
 	// data chunk
 	wtn += writeRawData("data", 4);
 	wtn += writeRaw_uint32_t(0);							   // Placeholder for the data chunk size (filled by close())
-	
+	AJA_UNUSED(wtn);
 	assert(Tell() == mSizeOfHeader);
 }
 

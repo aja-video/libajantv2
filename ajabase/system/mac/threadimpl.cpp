@@ -383,6 +383,7 @@ AJAThreadImpl::SetPriority(AJAThreadPriority threadPriority)
 
 		ioReturn = thread_policy_set(machThread, THREAD_TIME_CONSTRAINT_POLICY,
 				reinterpret_cast<thread_policy_t>(&timeConstraint), THREAD_TIME_CONSTRAINT_POLICY_COUNT);
+		AJA_UNUSED(ioReturn);
 	}
 
 	return AJA_STATUS_SUCCESS;
