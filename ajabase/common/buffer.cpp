@@ -73,10 +73,10 @@ AJABuffer::AllocateBuffer(size_t size, size_t alignment, char* pName)
 
 		ComputeAlignment();
 		
-		size_t nameLen = strlen(pName);
-		mpAllocateName = new char[nameLen + 1];
+		size_t bytesForNameStr = strlen(pName) + 1;
+		mpAllocateName = new char[bytesForNameStr];
 		AJA_ASSERT(mpAllocateName != NULL);
-		strncpy(mpAllocateName, pName, nameLen);
+		strncpy(mpAllocateName, pName, bytesForNameStr);
 	}
 	// allocate a non shared buffer
 	else
