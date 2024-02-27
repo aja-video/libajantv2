@@ -798,6 +798,8 @@ TEST_SUITE("variant" * doctest::description("functions in ajabase/common/variant
 			CHECK_EQ(v1.AsBool(), true);
 			float f = v1.AsFloat();
 			double d = v1.AsDouble();
+			(void)f;
+			(void)d;
 			CHECK_EQ(v1.AsFloat(), doctest::Approx(1.84467441e+19));
 			CHECK_EQ(v1.AsDouble(), doctest::Approx(1.8446744073709552e+19));
 			CHECK_EQ(v1.AsInt8(), -1);

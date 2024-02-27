@@ -710,6 +710,8 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 		if (!inIsSynchronous)
 			return false;	//	Async mode requires kernel-allocated buffer
 	}
+#else
+	NTV2_UNUSED(inIsSynchronous);
 #endif	//	defined(NTV2_DRIVER_ALLOCATED_BUFFERS)
 
 	int request(0);

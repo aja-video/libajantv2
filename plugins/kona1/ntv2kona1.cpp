@@ -147,9 +147,9 @@ class NTV2Kona1 : public NTV2RPCAPI
 		virtual inline bool			IsConnected					(void) const	{return mCard.IsOpen();}
 		virtual bool				NTV2Connect					(void);
 		virtual	bool				NTV2Disconnect				(void);
-		virtual inline bool			NTV2GetBoolParamRemote		(const ULWord inParamID,  ULWord & outValue)		{return false;}
-		virtual inline bool			NTV2GetNumericParamRemote	(const ULWord inParamID,  ULWord & outValue)		{return false;}
-		virtual inline bool			NTV2GetSupportedRemote		(const ULWord inEnumsID, ULWordSet & outSupported)	{return false;}
+		virtual inline bool			NTV2GetBoolParamRemote		(const ULWord inParamID,  ULWord & outValue)		{NTV2_UNUSED(inParamID);NTV2_UNUSED(outValue);return false;}
+		virtual inline bool			NTV2GetNumericParamRemote	(const ULWord inParamID,  ULWord & outValue)		{NTV2_UNUSED(inParamID);NTV2_UNUSED(outValue);return false;}
+		virtual inline bool			NTV2GetSupportedRemote		(const ULWord inEnumsID, ULWordSet & outSupported)	{NTV2_UNUSED(inEnumsID);NTV2_UNUSED(outSupported);return false;}
 		virtual	bool				NTV2ReadRegisterRemote		(const ULWord regNum, ULWord & outRegValue, const ULWord regMask = 0xFFFFFFFF, const ULWord regShift = 0);
 		virtual	bool				NTV2WriteRegisterRemote		(const ULWord regNum, const ULWord regValue, const ULWord regMask = 0xFFFFFFFF, const ULWord regShift = 0);
 		virtual	bool				NTV2AutoCirculateRemote		(AUTOCIRCULATE_DATA & autoCircData);
@@ -920,6 +920,7 @@ bool NTV2Kona1::DATKonaToCardFrmOffset (ULWord & inOutFrameNum, ULWord & inOutCa
 //	(particularly when byteCount spans 1 or more 8MB boundaries)
 bool NTV2Kona1::DATKonaToCard (ULWord & byteAddress, ULWord & byteCount) const
 {
+	NTV2_UNUSED(byteCount);
 	const ULWord devAddrNearest8MB (byteAddress & 0xFF800000);
 	DATMapCIter it (mKonaToCardDAT.find(devAddrNearest8MB));
 	if (it == mKonaToCardDAT.end())

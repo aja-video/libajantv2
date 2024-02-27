@@ -95,6 +95,8 @@ const uint32_t CYPRESS_FLASH_SECTOR_ERASE_COMMAND  = 0xDC; //4 byte address
 
 inline bool has_4k_start_sectors(const uint32_t reportedSectorSize)
 {
+	NTV2_UNUSED(reportedSectorSize);
+
 	return false;
 //	if (reportedSectorSize <= 0x20000)
 //		return true;

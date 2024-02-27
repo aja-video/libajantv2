@@ -4363,6 +4363,7 @@ private:
 				else
 					oss << "Kernel Extension ('KEXT')";
 			#else
+				(void) inRegValue;
 				oss << "(Normal)";
 			#endif
 			return oss.str();
@@ -4372,7 +4373,7 @@ private:
 	struct DecodeIDSwitchStatus : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
-		{
+		{	(void) inRegNum;
 			ostringstream	oss;
 			if (::NTV2DeviceCanDoIDSwitch(inDeviceID))
 			{
@@ -4397,7 +4398,7 @@ private:
 	struct DecodePWMFanControl : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
-		{
+		{	(void) inRegNum;
 			ostringstream	oss;
 			if (::NTV2DeviceHasPWMFanControl(inDeviceID))
 				oss << "Fan Speed: "				<< DEC(inRegValue & kRegMaskPWMFanSpeed)			<< endl
@@ -4409,7 +4410,7 @@ private:
 	struct DecodePWMFanMonitor : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
-		{
+		{	(void) inRegNum;
 			ostringstream	oss;
 			if (::NTV2DeviceHasPWMFanControl(inDeviceID))
 				oss << "Tach Period: "				<< DEC(inRegValue & kRegMaskPWMFanTachPeriodStatus)			<< endl
@@ -4421,7 +4422,7 @@ private:
 	struct DecodeBOBStatus : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
-		{
+		{	(void) inRegNum;
 			ostringstream	oss;
 			if (::NTV2DeviceCanDoBreakoutBoard(inDeviceID))
 				oss << "BOB : "							<< ((inRegValue & kRegMaskBOBAbsent) ? "Disconnected" : "Connected")			<< endl
@@ -4436,7 +4437,7 @@ private:
 	struct DecodeBOBGPIIn : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
-		{
+		{	(void) inRegNum;
 			ostringstream	oss;
 			if (::NTV2DeviceCanDoBreakoutBoard(inDeviceID))
 				oss << "GPI In 1: "	<< DEC(inRegValue & kRegMaskBOBGPIIn1Data)	<< endl
@@ -4452,7 +4453,7 @@ private:
 	struct DecodeBOBGPIInInterruptControl : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
-		{
+		{	(void) inRegNum;
 			ostringstream	oss;
 			if (::NTV2DeviceCanDoBreakoutBoard(inDeviceID))
 				oss << "GPI In 1 Int: "	<< DEC(inRegValue & kRegMaskBOBGPIIn1InterruptControl)	<< endl
@@ -4468,7 +4469,7 @@ private:
 	struct DecodeBOBGPIOut : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
-		{
+		{	(void) inRegNum;
 			ostringstream	oss;
 			if (::NTV2DeviceCanDoBreakoutBoard(inDeviceID))
 				oss << "GPI Out 1 Int: "	<< DEC(inRegValue & kRegMaskBOBGPIOut1Data)	<< endl
@@ -4484,7 +4485,7 @@ private:
 	struct DecodeBOBAudioControl : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
-		{
+		{	(void) inRegNum;
 			ostringstream	oss;
 			if (::NTV2DeviceCanDoBreakoutBoard(inDeviceID))
 			{
@@ -4518,7 +4519,7 @@ private:
 	struct DecodeLEDControl : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
-		{
+		{	(void) inRegNum;
 			ostringstream	oss;
 			if (::NTV2DeviceHasBracketLED(inDeviceID))
 				oss << "Blue: "		<< DEC(inRegValue & kRegMaskLEDBlueControl)	<< endl
