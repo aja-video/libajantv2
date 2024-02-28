@@ -950,7 +950,7 @@ ostream & operator << (ostream & inOutStream, const NTV2RegisterValueMap & inObj
 	inOutStream << "RegValues:" << inObj.size () << "[";
 	while (iter != inObj.end ())
 	{
-		const NTV2RegisterNumber	registerNumber	(static_cast <const NTV2RegisterNumber> (iter->first));
+		const NTV2RegisterNumber	registerNumber	(static_cast <NTV2RegisterNumber> (iter->first));
 		const ULWord				registerValue	(iter->second);
 		inOutStream << ::NTV2RegisterNumberToString (registerNumber) << "=0x" << hex << registerValue << dec;
 		if (++iter != inObj.end ())
@@ -2686,7 +2686,7 @@ bool AUTOCIRCULATE_TRANSFER::SetOutputTimeCodes (const NTV2TimeCodes & inValues)
 
 	for (UWord ndx (0);	 ndx < UWord(maxNumValues);	 ndx++)
 	{
-		const NTV2TCIndex		tcIndex (static_cast<const NTV2TCIndex>(ndx));
+		const NTV2TCIndex		tcIndex (static_cast<NTV2TCIndex>(ndx));
 		NTV2TimeCodesConstIter	iter	(inValues.find(tcIndex));
 		pArray[ndx] = (iter != inValues.end())	?  iter->second	 :	INVALID_TIMECODE_VALUE;
 	}	//	for each possible NTV2TCSource value
@@ -2901,7 +2901,7 @@ NTV2DmaStream::NTV2DmaStream()
 	NTV2_ASSERT_STRUCT_VALID;
 }
 
-NTV2DmaStream::NTV2DmaStream (const NTV2_POINTER & inBuffer, const NTV2Channel inChannel, const ULWord inFlags)
+NTV2DmaStream::NTV2DmaStream (const NTV2Buffer & inBuffer, const NTV2Channel inChannel, const ULWord inFlags)
 	:	mHeader (NTV2_TYPE_AJADMASTREAM, sizeof(NTV2DmaStream))
 {
 	NTV2_ASSERT_STRUCT_VALID;
@@ -2914,7 +2914,7 @@ NTV2DmaStream::NTV2DmaStream(const ULWord * pInBuffer, const ULWord inByteCount,
 	:	mHeader (NTV2_TYPE_AJADMASTREAM, sizeof(NTV2DmaStream))
 {
 	NTV2_ASSERT_STRUCT_VALID;
-	SetBuffer (NTV2_POINTER(pInBuffer, inByteCount));
+	SetBuffer (NTV2Buffer(pInBuffer, inByteCount));
 	SetChannel (inChannel);
 	SetFlags (inFlags);
 }
@@ -2927,7 +2927,7 @@ NTV2DmaStream::NTV2DmaStream(const NTV2Channel inChannel, const ULWord inFlags)
 	SetFlags (inFlags);
 }
 
-bool NTV2DmaStream::SetBuffer (const NTV2_POINTER & inBuffer)
+bool NTV2DmaStream::SetBuffer (const NTV2Buffer & inBuffer)
 {	//	Just use address & length (don't deep copy)...
 	NTV2_ASSERT_STRUCT_VALID;
 	return mBuffer.Set (inBuffer.GetHostPointer(), inBuffer.GetByteCount());
@@ -4361,7 +4361,12 @@ using namespace ntv2nub;
 	}
 
 	bool AUTOCIRCULATE_DATA::RPCDecode (const UByteSequence & inBlob, size_t & inOutIndex)
-	{	uint16_t v16(0);	uint32_t v32(0);
+	{
+#if defined(AJA_LINUX)
+		#pragma GCC diagnostic push
+		#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
+		uint16_t v16(0);	uint32_t v32(0);
 		POPU16(v16, inBlob, inOutIndex);						//	AUTO_CIRC_COMMAND		eCommand
 		eCommand = AUTO_CIRC_COMMAND(v16);
 		POPU16(v16, inBlob, inOutIndex);						//	NTV2Crosspoint			channelSpec
@@ -4384,6 +4389,9 @@ using namespace ntv2nub;
 		POPU64(AsU64Ref(pvVal2), inBlob, inOutIndex);			//	void*					pvVal2
 		POPU64(AsU64Ref(pvVal3), inBlob, inOutIndex);			//	void*					pvVal3
 		POPU64(AsU64Ref(pvVal4), inBlob, inOutIndex);			//	void*					pvVal4
+#if defined(AJA_LINUX)
+	#pragma GCC diagnostic pop
+#endif
 		if (eCommand == eGetAutoCirc  &&  pvVal1)
 			reinterpret_cast<AUTOCIRCULATE_STATUS_STRUCT*>(pvVal1)->RPCDecode(inBlob, inOutIndex);
 		if ((eCommand == eGetFrameStamp  ||  eCommand == eGetFrameStampEx2)  &&  pvVal1)

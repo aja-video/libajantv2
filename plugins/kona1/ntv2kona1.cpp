@@ -147,9 +147,9 @@ class NTV2Kona1 : public NTV2RPCAPI
 		virtual inline bool			IsConnected					(void) const	{return mCard.IsOpen();}
 		virtual bool				NTV2Connect					(void);
 		virtual	bool				NTV2Disconnect				(void);
-		virtual inline bool			NTV2GetBoolParamRemote		(const ULWord inParamID,  ULWord & outValue)		{return false;}
-		virtual inline bool			NTV2GetNumericParamRemote	(const ULWord inParamID,  ULWord & outValue)		{return false;}
-		virtual inline bool			NTV2GetSupportedRemote		(const ULWord inEnumsID, ULWordSet & outSupported)	{return false;}
+		virtual inline bool			NTV2GetBoolParamRemote		(const ULWord inParamID,  ULWord & outValue)		{NTV2_UNUSED(inParamID);NTV2_UNUSED(outValue);return false;}
+		virtual inline bool			NTV2GetNumericParamRemote	(const ULWord inParamID,  ULWord & outValue)		{NTV2_UNUSED(inParamID);NTV2_UNUSED(outValue);return false;}
+		virtual inline bool			NTV2GetSupportedRemote		(const ULWord inEnumsID, ULWordSet & outSupported)	{NTV2_UNUSED(inEnumsID);NTV2_UNUSED(outSupported);return false;}
 		virtual	bool				NTV2ReadRegisterRemote		(const ULWord regNum, ULWord & outRegValue, const ULWord regMask = 0xFFFFFFFF, const ULWord regShift = 0);
 		virtual	bool				NTV2WriteRegisterRemote		(const ULWord regNum, const ULWord regValue, const ULWord regMask = 0xFFFFFFFF, const ULWord regShift = 0);
 		virtual	bool				NTV2AutoCirculateRemote		(AUTOCIRCULATE_DATA & autoCircData);
@@ -257,6 +257,10 @@ NTV2RPCClientAPI * CreateClient (void * pInDLLHandle, const NTV2ConnectParams & 
 	return pResult;
 }
 
+#if defined(AJA_LINUX) || defined(AJA_MAC)
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wunused-const-variable"
+#endif
 //	ALL THESE WERE COPIED FROM ntv2register.cpp:
 static const ULWord gChannelToGlobalControlRegNum []	= { kRegGlobalControl, kRegGlobalControlCh2, kRegGlobalControlCh3, kRegGlobalControlCh4,
 															kRegGlobalControlCh5, kRegGlobalControlCh6, kRegGlobalControlCh7, kRegGlobalControlCh8, 0};
@@ -392,6 +396,10 @@ static const ULWord		sAudioDetectRegs []		= { kRegAud1Detect,			kRegAud1Detect,	
 
 //static const ULWord sSignalRouterRegMasks[]		=	{	0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000	};
 //static const ULWord sSignalRouterRegShifts[]	=	{			 0,			 8,			16,			24	};
+
+#if defined(AJA_LINUX) || defined(AJA_MAC)
+	#pragma GCC diagnostic pop
+#endif
 
 NTV2Kona1::NTV2Kona1 (void * pInDLLHandle, const NTV2ConnectParams & inParams, const uint32_t inCallingVersion)
 	:	NTV2RPCAPI		(inParams),
@@ -920,6 +928,7 @@ bool NTV2Kona1::DATKonaToCardFrmOffset (ULWord & inOutFrameNum, ULWord & inOutCa
 //	(particularly when byteCount spans 1 or more 8MB boundaries)
 bool NTV2Kona1::DATKonaToCard (ULWord & byteAddress, ULWord & byteCount) const
 {
+	NTV2_UNUSED(byteCount);
 	const ULWord devAddrNearest8MB (byteAddress & 0xFF800000);
 	DATMapCIter it (mKonaToCardDAT.find(devAddrNearest8MB));
 	if (it == mKonaToCardDAT.end())

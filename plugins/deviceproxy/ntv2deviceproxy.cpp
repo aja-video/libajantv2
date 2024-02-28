@@ -303,16 +303,22 @@ bool NTV2DeviceProxy::NTV2OpenRemote (void)
 
 bool NTV2DeviceProxy::NTV2GetBoolParamRemote (const ULWord inParamID,  ULWord & outValue)
 {
+	NTV2_UNUSED(inParamID);
+	NTV2_UNUSED(outValue);
 	return false;//mCard.GetBoolParam(inParamID, outValue);
 }
 
 bool NTV2DeviceProxy::NTV2GetNumericParamRemote (const ULWord inParamID,  ULWord & outValue)
 {
+	NTV2_UNUSED(inParamID);
+	NTV2_UNUSED(outValue);
 	return false;//mCard.GetNumericParam(inParamID, outValue);
 }
 
 bool NTV2DeviceProxy::NTV2GetSupportedRemote (const ULWord inEnumsID, ULWordSet & outSupported)
 {
+	NTV2_UNUSED(inEnumsID);
+	NTV2_UNUSED(outSupported);
 	return false;//return mCard.features().GetSupported(inEnumsID, outSupported);
 }
 

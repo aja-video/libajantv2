@@ -25,14 +25,15 @@
 /**
 	@brief	I interrogate and control an AJA video/audio capture/playout device.
 **/
+class AJAExport CNTV2Card
 #if defined (MSWindows)
-	class AJAExport CNTV2Card	: public CNTV2WinDriverInterface
+	: public CNTV2WinDriverInterface
 #elif defined (AJAMac)
-	class CNTV2Card				: public CNTV2MacDriverInterface
+	: public CNTV2MacDriverInterface
 #elif defined (AJALinux)
-	class CNTV2Card				: public CNTV2LinuxDriverInterface
+	: public CNTV2LinuxDriverInterface
 #elif defined (AJABareMetal)
-	class CNTV2Card				: public CNTV2BareMetalDriverInterface
+	: public CNTV2BareMetalDriverInterface
 #endif
 {
 public:
@@ -43,7 +44,7 @@ public:
 	/**
 		@brief	My default constructor.
 	**/
-										CNTV2Card ();
+									CNTV2Card ();
 
 	/**
 		@brief	Constructor that opens the device.
@@ -53,13 +54,13 @@ public:
 									AJA devices. Defaults to empty string (the local host).
 		@nosubgrouping
 	**/
-	explicit							CNTV2Card ( const UWord		inDeviceIndex,
-													const std::string & inHostName		= std::string());
+	explicit						CNTV2Card ( const UWord		inDeviceIndex,
+												const std::string & inHostName		= std::string());
 
 	/**
 		@brief	My destructor.
 	**/
-	virtual								~CNTV2Card();
+	virtual							~CNTV2Card();
 	///@}
 
 
@@ -96,6 +97,8 @@ public:
 		@return A string containing this device's driver's version as a human-readable string.
 	**/
 	AJA_VIRTUAL std::string			GetDriverVersionString (void);
+
+	AJA_VIRTUAL std::string			GetDescription (void) const;	///< @return	String containing device description
 
 	/**
 		@brief	Answers with the individual version components of this device's driver.
@@ -2014,73 +2017,6 @@ public:
 	AJA_VIRTUAL bool		GetEmbeddedAudioInput (NTV2EmbeddedAudioInput & outEmbeddedSource, const NTV2AudioSystem inAudioSystem = NTV2_AUDIOSYSTEM_1);
 
 	/**
-		@brief		Sets the device's ::NTV2AudioSystem that will provide audio for the given SDI output's audio embedder.
-					For 3G-capable SDI outputs, this affects Data Stream 1 (or Link A).
-		@param[in]	inSDIOutputConnector	Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
-		@param[in]	inAudioSystem			Specifies the Audio System to be used (e.g., ::NTV2_AUDIOSYSTEM_1).
-		@return		True if successful; otherwise false.
-		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
-		@note		Use the ::NTV2DeviceGetNumVideoOutputs function to determine the number of SDI output jacks the device has.
-		@note		The \ref corvid88 has a firmware limitation where audio systems 5/6/7/8 cannot playback embedded audio on SDIs 1/2/3/4,
-					nor can audio systems 1/2/3/4 playback embedded audio on SDIs 5/6/7/8.
-		@see		CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, \ref audioplayout
-	**/
-	AJA_VIRTUAL bool		SetSDIOutputAudioSystem (const NTV2Channel inSDIOutputConnector, const NTV2AudioSystem inAudioSystem);
-
-	/**
-		@brief		Sets the device's ::NTV2AudioSystem that will provide audio for the given SDI outputs' audio embedders.
-					For 3G-capable SDI outputs, this affects Data Stream 1 (or Link A).
-		@param[in]	inSDIOutputs	Specifies the SDI output connectors of interest as an ::NTV2ChannelSet (a set of zero-based index numbers).
-		@param[in]	inAudioSystem	Specifies the Audio System to be used (e.g., ::NTV2_AUDIOSYSTEM_1).
-		@param[in]	inDS2			Optionally specifies if Data Stream 2 should be configured. Defaults to false (DS1).
-		@return		True if successful; otherwise false.
-		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
-		@note		Use the ::NTV2DeviceGetNumVideoOutputs function to determine the number of SDI output jacks the device has.
-		@note		The \ref corvid88 has a firmware limitation where audio systems 5/6/7/8 cannot playback embedded audio on SDIs 1/2/3/4,
-					nor can audio systems 1/2/3/4 playback embedded audio on SDIs 5/6/7/8.
-		@see		CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, \ref audioplayout
-	**/
-	AJA_VIRTUAL bool		SetSDIOutputAudioSystem (const NTV2ChannelSet & inSDIOutputs, const NTV2AudioSystem inAudioSystem, const bool inDS2 = false);	//	New in SDK 16.2
-
-	/**
-		@brief		Answers with the device's ::NTV2AudioSystem that is currently providing audio for the given SDI output's audio embedder.
-					(For 3G-capable SDI outputs, this is for Data Stream 1, or Link A.)
-		@param[in]	inSDIOutputConnector	Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
-		@param[out] outAudioSystem			Receives the Audio System that's currently being used (e.g., ::NTV2_AUDIOSYSTEM_1).
-		@return		True if successful; otherwise false.
-		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
-		@note		Use the ::NTV2DeviceGetNumVideoOutputs function to determine the number of SDI output jacks the device has.
-		@see		CNTV2Card::SetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, \ref audioplayout
-	**/
-	AJA_VIRTUAL bool		GetSDIOutputAudioSystem (const NTV2Channel inSDIOutputConnector, NTV2AudioSystem & outAudioSystem);
-
-	/**
-		@brief		Sets the Audio System that will supply audio for the given SDI output's audio embedder for Data Stream 2
-					(Link B) for dual-link playout.
-		@param[in]	inSDIOutputConnector	Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
-		@param[in]	inAudioSystem			Specifies the Audio System that is to be used by the SDI output's embedder (e.g., ::NTV2_AUDIOSYSTEM_1).
-		@return		True if successful; otherwise false.
-		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
-		@note		The \ref corvid88 has a firmware limitation where audio systems 5/6/7/8 cannot playback embedded audio on SDIs 1/2/3/4,
-					nor can audio systems 1/2/3/4 playback embedded audio on SDIs 5/6/7/8.
-		@see		CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, \ref audioplayout
-	**/
-	AJA_VIRTUAL bool		SetSDIOutputDS2AudioSystem (const NTV2Channel inSDIOutputConnector, const NTV2AudioSystem inAudioSystem);
-
-	/**
-		@brief		Answers with the device's Audio System that is currently providing audio for the given SDI output's audio
-					embedder for Data Stream 2 (Link B) for dual-link output.
-		@param[in]	inSDIOutputConnector	Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
-		@param[out] outAudioSystem			Receives the Audio System that's currently being used (e.g., ::NTV2_AUDIOSYSTEM_1).
-		@return		True if successful; otherwise false.
-		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
-		@note		The \ref corvid88 has a firmware limitation where audio systems 5/6/7/8 cannot playback embedded audio on SDIs 1/2/3/4,
-					nor can audio systems 1/2/3/4 playback embedded audio on SDIs 5/6/7/8.
-		@see		CNTV2Card::SetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, \ref audioplayout
-	**/
-	AJA_VIRTUAL bool		GetSDIOutputDS2AudioSystem (const NTV2Channel inSDIOutputConnector, NTV2AudioSystem & outAudioSystem);
-
-	/**
 		@brief		For the given SDI input (specified as a channel number), answers if the specified audio channel pair is currently PCM-encoded or not.
 		@param[in]	inSDIInputConnector Specifies the SDI input connector of interest as an ::NTV2Channel (a zero-based index number).
 		@param[in]	inAudioChannelPair	Specifies the audio channel pair of interest.
@@ -3532,7 +3468,7 @@ public:
 		@return		The queued buffer status.
     **/
 	AJA_VIRTUAL ULWord	StreamBufferQueue (const NTV2Channel inChannel,
-                                           NTV2_POINTER inBuffer,
+                                           NTV2Buffer inBuffer,
                                            ULWord64 bufferCookie,
                                            NTV2StreamBuffer& status);
 
@@ -5055,7 +4991,7 @@ public:
 	///@}
 
 	/**
-		@name	Bi-directional SDI
+		@name	SDI Connectors
 	**/
 	///@{
 	/**
@@ -5123,6 +5059,73 @@ public:
 
 	AJA_VIRTUAL bool		SetSDIOut12GEnable(const NTV2Channel inChannel, const bool inEnable);
 	AJA_VIRTUAL bool		GetSDIOut12GEnable(const NTV2Channel inChannel, bool & outIsEnabled);
+
+	/**
+		@brief		Sets the device's ::NTV2AudioSystem that will provide audio for the given SDI output's audio embedder.
+					For 3G-capable SDI outputs, this affects Data Stream 1 (or Link A).
+		@param[in]	inSDIOutputConnector	Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
+		@param[in]	inAudioSystem			Specifies the Audio System to be used (e.g., ::NTV2_AUDIOSYSTEM_1).
+		@return		True if successful; otherwise false.
+		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
+		@note		Use the ::NTV2DeviceGetNumVideoOutputs function to determine the number of SDI output jacks the device has.
+		@note		The \ref corvid88 has a firmware limitation where audio systems 5/6/7/8 cannot playback embedded audio on SDIs 1/2/3/4,
+					nor can audio systems 1/2/3/4 playback embedded audio on SDIs 5/6/7/8.
+		@see		CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, \ref audioplayout
+	**/
+	AJA_VIRTUAL bool		SetSDIOutputAudioSystem (const NTV2Channel inSDIOutputConnector, const NTV2AudioSystem inAudioSystem);
+
+	/**
+		@brief		Sets the device's ::NTV2AudioSystem that will provide audio for the given SDI outputs' audio embedders.
+					For 3G-capable SDI outputs, this affects Data Stream 1 (or Link A).
+		@param[in]	inSDIOutputs	Specifies the SDI output connectors of interest as an ::NTV2ChannelSet (a set of zero-based index numbers).
+		@param[in]	inAudioSystem	Specifies the Audio System to be used (e.g., ::NTV2_AUDIOSYSTEM_1).
+		@param[in]	inDS2			Optionally specifies if Data Stream 2 should be configured. Defaults to false (DS1).
+		@return		True if successful; otherwise false.
+		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
+		@note		Use the ::NTV2DeviceGetNumVideoOutputs function to determine the number of SDI output jacks the device has.
+		@note		The \ref corvid88 has a firmware limitation where audio systems 5/6/7/8 cannot playback embedded audio on SDIs 1/2/3/4,
+					nor can audio systems 1/2/3/4 playback embedded audio on SDIs 5/6/7/8.
+		@see		CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, \ref audioplayout
+	**/
+	AJA_VIRTUAL bool		SetSDIOutputAudioSystem (const NTV2ChannelSet & inSDIOutputs, const NTV2AudioSystem inAudioSystem, const bool inDS2 = false);	//	New in SDK 16.2
+
+	/**
+		@brief		Answers with the device's ::NTV2AudioSystem that is currently providing audio for the given SDI output's audio embedder.
+					(For 3G-capable SDI outputs, this is for Data Stream 1, or Link A.)
+		@param[in]	inSDIOutputConnector	Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
+		@param[out] outAudioSystem			Receives the Audio System that's currently being used (e.g., ::NTV2_AUDIOSYSTEM_1).
+		@return		True if successful; otherwise false.
+		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
+		@note		Use the ::NTV2DeviceGetNumVideoOutputs function to determine the number of SDI output jacks the device has.
+		@see		CNTV2Card::SetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, \ref audioplayout
+	**/
+	AJA_VIRTUAL bool		GetSDIOutputAudioSystem (const NTV2Channel inSDIOutputConnector, NTV2AudioSystem & outAudioSystem);
+
+	/**
+		@brief		Sets the Audio System that will supply audio for the given SDI output's audio embedder for Data Stream 2
+					(Link B) for dual-link playout.
+		@param[in]	inSDIOutputConnector	Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
+		@param[in]	inAudioSystem			Specifies the Audio System that is to be used by the SDI output's embedder (e.g., ::NTV2_AUDIOSYSTEM_1).
+		@return		True if successful; otherwise false.
+		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
+		@note		The \ref corvid88 has a firmware limitation where audio systems 5/6/7/8 cannot playback embedded audio on SDIs 1/2/3/4,
+					nor can audio systems 1/2/3/4 playback embedded audio on SDIs 5/6/7/8.
+		@see		CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputDS2AudioSystem, \ref audioplayout
+	**/
+	AJA_VIRTUAL bool		SetSDIOutputDS2AudioSystem (const NTV2Channel inSDIOutputConnector, const NTV2AudioSystem inAudioSystem);
+
+	/**
+		@brief		Answers with the device's Audio System that is currently providing audio for the given SDI output's audio
+					embedder for Data Stream 2 (Link B) for dual-link output.
+		@param[in]	inSDIOutputConnector	Specifies the SDI output connector of interest as an ::NTV2Channel (a zero-based index number).
+		@param[out] outAudioSystem			Receives the Audio System that's currently being used (e.g., ::NTV2_AUDIOSYSTEM_1).
+		@return		True if successful; otherwise false.
+		@note		Use the ::NTV2DeviceGetNumAudioSystems function to determine how many independent Audio Systems are available on the device.
+		@note		The \ref corvid88 has a firmware limitation where audio systems 5/6/7/8 cannot playback embedded audio on SDIs 1/2/3/4,
+					nor can audio systems 1/2/3/4 playback embedded audio on SDIs 5/6/7/8.
+		@see		CNTV2Card::SetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, \ref audioplayout
+	**/
+	AJA_VIRTUAL bool		GetSDIOutputDS2AudioSystem (const NTV2Channel inSDIOutputConnector, NTV2AudioSystem & outAudioSystem);
 
 
 	/**
@@ -6148,8 +6151,12 @@ public:
 	///@}
 
 public:
-	AJA_VIRTUAL std::string		GetFPGAVersionString (const NTV2XilinxFPGA inFPGA = eFPGAVideoProc);
+	/**
+		@return		Convenience method for accessing my CNTV2DriverInterface.
+	**/
+	AJA_VIRTUAL inline CNTV2DriverInterface & driverInterface (void)	{return *this;}	//	New in SDK 17.1
 
+	AJA_VIRTUAL std::string		GetFPGAVersionString (const NTV2XilinxFPGA inFPGA = eFPGAVideoProc);
 	AJA_VIRTUAL Word			GetPCIFPGAVersion (void);		//	From CNTV2Status
 	AJA_VIRTUAL std::string		GetPCIFPGAVersionString (void);
 

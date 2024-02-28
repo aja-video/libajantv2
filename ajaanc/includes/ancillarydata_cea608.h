@@ -47,7 +47,7 @@ public:
 		@param[in]	inRHS	The value to be assigned to me.
 		@return		A reference to myself.
 	**/
-	virtual AJAAncillaryData_Cea608 &			operator = (const AJAAncillaryData_Cea608 & inRHS);
+	AJAAncillaryData_Cea608 &					operator = (const AJAAncillaryData_Cea608 & inRHS);
 
 
 	virtual inline AJAAncillaryData_Cea608 *	Clone (void) const	{return new AJAAncillaryData_Cea608 (this);}	///< @return	A clone of myself.

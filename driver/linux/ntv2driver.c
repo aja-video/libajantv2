@@ -3461,6 +3461,56 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 			}
 		}
 	}
+	
+	if (ntv2pp->_DeviceID == DEVICE_ID_IO4KPLUS)
+	{
+		ntv2pp->m_pGenlockMonitor = ntv2_genlock_open(&ntv2pp->systemContext, "ntv2genlock", 0);
+		if (ntv2pp->m_pGenlockMonitor != NULL)
+		{
+			status = ntv2_genlock_configure(ntv2pp->m_pGenlockMonitor);
+			if (status != NTV2_STATUS_SUCCESS)
+			{
+				ntv2_genlock_close(ntv2pp->m_pGenlockMonitor);
+				ntv2pp->m_pGenlockMonitor = NULL;
+			}
+		}
+		
+		ntv2pp->m_pHDMIIn4Monitor[0] = ntv2_hdmiin4_open(&ntv2pp->systemContext, "ntv2hdmiin4", 0);
+		if (ntv2pp->m_pHDMIIn4Monitor[0] != NULL)
+		{
+			status = ntv2_hdmiin4_configure(ntv2pp->m_pHDMIIn4Monitor[0], ntv2_edid_type_io4kplus, 0);
+			if (status != NTV2_STATUS_SUCCESS)
+			{
+				ntv2_hdmiin4_close(ntv2pp->m_pHDMIIn4Monitor[0]);
+				ntv2pp->m_pHDMIIn4Monitor[0] = NULL;
+			}
+		}
+		
+		ntv2pp->m_pHDMIOut4Monitor[0] = ntv2_hdmiout4_open(&ntv2pp->systemContext, "ntv2hdmiout4", 0);
+		if (ntv2pp->m_pHDMIOut4Monitor[0] != NULL)
+		{
+			status = ntv2_hdmiout4_configure(ntv2pp->m_pHDMIOut4Monitor[0]);
+			if (status != NTV2_STATUS_SUCCESS)
+			{
+				ntv2_hdmiout4_close(ntv2pp->m_pHDMIOut4Monitor[0]);
+				ntv2pp->m_pHDMIOut4Monitor[0] = NULL;
+			}
+		}
+	}
+	
+	if (ntv2pp->_DeviceID == DEVICE_ID_IOX3)
+	{
+		ntv2pp->m_pHDMIInputMonitor[0] = ntv2_hdmiin_open(&ntv2pp->systemContext, "ntv2hdmiin", 0);
+		if (ntv2pp->m_pHDMIInputMonitor[0] != NULL)
+		{
+			status = ntv2_hdmiin_configure(ntv2pp->m_pHDMIInputMonitor[0], ntv2_edid_type_iox3, 0);
+			if (status != NTV2_STATUS_SUCCESS)
+			{
+				ntv2_hdmiin_close(ntv2pp->m_pHDMIInputMonitor[0]);
+				ntv2pp->m_pHDMIInputMonitor[0] = NULL;
+			}
+		}
+	}
 
     if ((DEVICE_IS_KONA5(ntv2pp->_DeviceID)) ||
 		(DEVICE_IS_KONA5_OE(ntv2pp->_DeviceID)) ||
@@ -3514,7 +3564,7 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 				ntv2pp->m_pRasterMonitor = NULL;
 			}
 		}
-		ntv2pp->m_pHDMIIn4Monitor[0] = ntv2_hdmiin4_open(&ntv2pp->systemContext, "ntv2hdmi4in", 1);
+		ntv2pp->m_pHDMIIn4Monitor[0] = ntv2_hdmiin4_open(&ntv2pp->systemContext, "ntv2hdmi4in", 0);
 		if (ntv2pp->m_pHDMIIn4Monitor[0] != NULL)
 		{
 			status = ntv2_hdmiin4_configure(ntv2pp->m_pHDMIIn4Monitor[0],

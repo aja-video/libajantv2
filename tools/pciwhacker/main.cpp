@@ -37,7 +37,8 @@ void clearConsole()
 #if defined (MSWindows)
     system("cls");
 #else
-    system("clear");
+	int result = system("clear");
+	AJA_UNUSED(result);
 #endif
 }
 

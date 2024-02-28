@@ -278,7 +278,9 @@ bool CNTV2DeviceScanner::GetDeviceAtIndex (const ULWord inDeviceIndexNumber, CNT
 {
 	outDevice.Close();
 	CNTV2DeviceScanner	scanner;
-	return size_t(inDeviceIndexNumber) < scanner.GetDeviceInfoList().size() ? AsNTV2DriverInterfaceRef(outDevice).Open(UWord(inDeviceIndexNumber)) : false;
+	return size_t(inDeviceIndexNumber) < scanner.GetDeviceInfoList().size()
+				? outDevice.Open(UWord(inDeviceIndexNumber))
+				: false;
 
 }	//	GetDeviceAtIndex
 
@@ -290,7 +292,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithID (const NTV2DeviceID inDeviceID, CN
 	const NTV2DeviceInfoList &	deviceInfoList(scanner.GetDeviceInfoList());
 	for (NTV2DeviceInfoListConstIter iter(deviceInfoList.begin());  iter != deviceInfoList.end();  ++iter)
 		if (iter->deviceID == inDeviceID)
-			return AsNTV2DriverInterfaceRef(outDevice).Open(UWord(iter->deviceIndex));	//	Found!
+			return outDevice.Open(UWord(iter->deviceIndex));	//	Found!
 	return false;	//	Not found
 
 }	//	GetFirstDeviceWithID
@@ -314,7 +316,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithName (const string & inNameSubString,
 	{
 		const string	deviceName(::ToLower(iter->deviceIdentifier));
 		if (deviceName.find(nameSubString) != string::npos)
-			return AsNTV2DriverInterfaceRef(outDevice).Open(UWord(iter->deviceIndex));	//	Found!
+			return outDevice.Open(UWord(iter->deviceIndex));	//	Found!
 	}
 	if (nameSubString == "io4kplus")
 	{	//	Io4K+ == DNXIV...
@@ -323,7 +325,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithName (const string & inNameSubString,
 		{
 			const string	deviceName(::ToLower(iter->deviceIdentifier));
 			if (deviceName.find(nameSubString) != string::npos)
-				return AsNTV2DriverInterfaceRef(outDevice).Open(UWord(iter->deviceIndex));	//	Found!
+				return outDevice.Open(UWord(iter->deviceIndex));	//	Found!
 		}
 	}
 	return false;	//	Not found
@@ -345,7 +347,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithSerial (const string & inSerialStr, C
 		{
 			aja::lower(serNumStr);
 			if (serNumStr.find(searchSerialStr) != string::npos)
-				return AsNTV2DriverInterfaceRef(outDevice).Open(UWord(iter->deviceIndex));
+				return outDevice.Open(UWord(iter->deviceIndex));
 		}
 	}
 	return false;
@@ -359,7 +361,7 @@ bool CNTV2DeviceScanner::GetDeviceWithSerial (const uint64_t inSerialNumber, CNT
 	const NTV2DeviceInfoList &	deviceInfos(scanner.GetDeviceInfoList());
 	for (NTV2DeviceInfoListConstIter iter(deviceInfos.begin());  iter != deviceInfos.end();  ++iter)
 		if (iter->deviceSerialNumber == inSerialNumber)
-			return AsNTV2DriverInterfaceRef(outDevice).Open(UWord(iter->deviceIndex));
+			return outDevice.Open(UWord(iter->deviceIndex));
 	return false;
 }
 
@@ -391,7 +393,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 		return false;
 	}
 
-	return reinterpret_cast<CNTV2DriverInterface&>(outDevice).Open(inArgument);
+	return outDevice.Open(inArgument);
 
 }	//	GetFirstDeviceFromArgument
 

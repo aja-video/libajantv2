@@ -1,7 +1,8 @@
 /* SPDX-License-Identifier: MIT */
 /**
 	@file		ntv2card.cpp
-	@brief		Implements several CNTV2Card methods. Other implementation files are 'ntv2audio.cpp', 'ntv2dma.cpp', 'ntv2register.cpp', ...
+	@brief		Implements several CNTV2Card methods. Other implementation files are 'ntv2audio.cpp',
+				'ntv2dma.cpp', 'ntv2register.cpp', ...
 	@copyright	(C) 2004-2022 AJA Video Systems, Inc.
 **/
 
@@ -11,6 +12,7 @@
 #include "ntv2utils.h"
 #include <sstream>
 #include "ajabase/common/common.h"
+//#include "ajabase/system/info.h"	//	for AJASystemInfo
 
 using namespace std;
 
@@ -18,7 +20,7 @@ using namespace std;
 // Default Constructor
 CNTV2Card::CNTV2Card ()
 #if defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
-	:	mDevCap(*(reinterpret_cast<CNTV2DriverInterface*>(this)))
+	:	mDevCap(driverInterface())
 #endif	//	defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
 {
 	_boardOpened = false;
@@ -26,7 +28,7 @@ CNTV2Card::CNTV2Card ()
 
 CNTV2Card::CNTV2Card (const UWord inDeviceIndex, const string & inHostName)
 #if defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
-	:	mDevCap(*(reinterpret_cast<CNTV2DriverInterface*>(this)))
+	:	mDevCap(driverInterface())
 #endif	//	defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
 {
 	string hostName(inHostName);
@@ -123,6 +125,28 @@ string CNTV2Card::GetPCIFPGAVersionString (void)
 	return oss.str ();
 }
 
+string CNTV2Card::GetDescription (void) const
+{
+	if (!IsOpen())
+		return string();
+	if (IsRemote())
+		return CNTV2DriverInterface::GetDescription();
+
+	CNTV2Card * pCard = (CNTV2Card*)(this);	//	Ugly: *sigh* If only most CNTV2Card member functions were 'const'
+	ostringstream oss;
+	string hostName("localhost"), snStr;
+//	AJASystemInfo sysInfo (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_System);
+//	sysInfo.GetValue(AJA_SystemInfoTag_System_Name, hostName);
+	oss << pCard->GetModelName();
+	if (!pCard->GetSerialNumberString(snStr))
+		snStr.clear();
+	if (!snStr.empty())
+		oss << " '" << snStr << "'";
+	if (!hostName.empty())
+		oss << " on '" << hostName << "'";
+	oss << " at index " << DEC(GetIndexNumber());
+	return oss.str();
+}
 
 string CNTV2Card::GetDriverVersionString (void)
 {
@@ -176,6 +200,61 @@ ULWord CNTV2Card::GetSerialNumberHigh (void)
 	ULWord	serialNum	(0);
 	return ReadRegister (kRegReserved55, serialNum) ? serialNum : 0;	//	Read EEPROM shadow of Serial Number
 }
+
+uint64_t CNTV2Card::GetSerialNumber (void)
+{
+	const uint64_t	lo(GetSerialNumberLow()),	hi(GetSerialNumberHigh());
+	const uint64_t	result((hi << 32) | lo);
+	return result;
+}
+
+
+string CNTV2Card::SerialNum64ToString (const uint64_t inSerialNumber)	//	Class method
+{
+	return ::SerialNum64ToString(inSerialNumber);
+}	//	SerialNum64ToString
+
+
+bool CNTV2Card::GetSerialNumberString (string & outSerialNumberString)
+{
+    if (NTV2DeviceGetSPIFlashVersion(GetDeviceID()) <= 5)
+    {
+        outSerialNumberString = ::SerialNum64ToString(GetSerialNumber());
+        if (outSerialNumberString.empty())
+        {
+            outSerialNumberString = "INVALID?";
+            return false;
+        }
+    
+        const NTV2DeviceID deviceID(GetDeviceID());
+        if (deviceID == DEVICE_ID_IO4KPLUS)							//	Io4K+/DNxIV?
+            outSerialNumberString = "5" + outSerialNumberString;	//		prepend with "5"
+        else if (deviceID == DEVICE_ID_IOIP_2022 ||
+                 deviceID == DEVICE_ID_IOIP_2110 ||
+                 deviceID == DEVICE_ID_IOIP_2110_RGB12)				//	IoIP/DNxIP?
+            outSerialNumberString = "6" + outSerialNumberString;	//		prepend with "6"
+        else if (deviceID == DEVICE_ID_IOX3)
+            outSerialNumberString = "7" + outSerialNumberString;	//		prepend with "7"
+    }
+    else
+    {
+        ULWord serialArray[] = {0,0,0,0};
+		ReadRegister(kRegReserved56, serialArray[0]);
+		ReadRegister(kRegReserved57, serialArray[1]);
+		ReadRegister(kRegReserved54, serialArray[2]);
+		ReadRegister(kRegReserved55, serialArray[3]);
+		outSerialNumberString.clear();
+		for (int serialIndex(0);  serialIndex < 4;  serialIndex++)
+			if (serialArray[serialIndex] != 0xffffffff)
+				for (int i(0);  i < 4;  i++)
+				{
+					const char tempChar(((serialArray[serialIndex] >> (i*8)) & 0xff));
+					if (tempChar > 0 && tempChar != '.')
+						outSerialNumberString.push_back(tempChar);
+				}
+	}
+	return true;
+}	//	GetSerialNumberString
 
 
 bool CNTV2Card::IS_CHANNEL_INVALID (const NTV2Channel inChannel) const
@@ -442,67 +521,6 @@ bool CNTV2Card::DeviceCanDoInputTCIndex (const NTV2TCIndex inTCIndex)
 	}
 	return false;
 }
-
-uint64_t CNTV2Card::GetSerialNumber (void)
-{
-	const uint64_t	lo(GetSerialNumberLow()),	hi(GetSerialNumberHigh());
-	const uint64_t	result((hi << 32) | lo);
-	return result;
-}
-
-
-string CNTV2Card::SerialNum64ToString (const uint64_t inSerialNumber)	//	Class method
-{
-	return ::SerialNum64ToString(inSerialNumber);
-}	//	SerialNum64ToString
-
-
-bool CNTV2Card::GetSerialNumberString (string & outSerialNumberString)
-{
-    if (NTV2DeviceGetSPIFlashVersion(GetDeviceID()) <= 5)
-    {
-        outSerialNumberString = ::SerialNum64ToString(GetSerialNumber());
-        if (outSerialNumberString.empty())
-        {
-            outSerialNumberString = "INVALID?";
-            return false;
-        }
-    
-        const NTV2DeviceID deviceID(GetDeviceID());
-        if (deviceID == DEVICE_ID_IO4KPLUS)							//	Io4K+/DNxIV?
-            outSerialNumberString = "5" + outSerialNumberString;	//		prepend with "5"
-        else if (deviceID == DEVICE_ID_IOIP_2022 ||
-                 deviceID == DEVICE_ID_IOIP_2110 ||
-                 deviceID == DEVICE_ID_IOIP_2110_RGB12)				//	IoIP/DNxIP?
-            outSerialNumberString = "6" + outSerialNumberString;	//		prepend with "6"
-        else if (deviceID == DEVICE_ID_IOX3)
-            outSerialNumberString = "7" + outSerialNumberString;	//		prepend with "7"
-    }
-    else
-    {
-        ULWord serialArray[] = {0,0,0,0};
-		
-		ReadRegister(kRegReserved56, serialArray[0]);
-		ReadRegister(kRegReserved57, serialArray[1]);
-		ReadRegister(kRegReserved54, serialArray[2]);
-		ReadRegister(kRegReserved55, serialArray[3]);
-
-		outSerialNumberString.clear();
-        for (int serialIndex = 0; serialIndex < 4; serialIndex++)
-        {
-            if (serialArray[serialIndex] != 0xffffffff)
-            {
-                for (int i = 0; i < 4; i++)
-                {
-                    char tempChar = ((serialArray[serialIndex] >> (i*8)) & 0xff);
-                    if (tempChar > 0 && tempChar != '.')
-                        outSerialNumberString.push_back(tempChar);
-                }
-            }
-        }
-    }
-	return true;
-}	//	GetSerialNumberString
 
 
 bool CNTV2Card::GetInstalledBitfileInfo (ULWord & outNumBytes, std::string & outDateStr, std::string & outTimeStr)

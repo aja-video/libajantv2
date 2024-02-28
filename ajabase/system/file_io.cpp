@@ -1276,7 +1276,8 @@ AJAFileIO::GetWorkingDirectory(std::string& cwd)
 	// TODO
 	return AJA_STATUS_FAIL;
 #else
-	getcwd(buf, AJA_MAX_PATH);
+	char* result = getcwd(buf, AJA_MAX_PATH);
+	AJA_UNUSED(result);
 #endif
 
 	cwd = std::string(buf);

@@ -80,7 +80,7 @@ inline void print_flash_status_final(const string& label)
 // Cypress/Spansion commands
 
 //const uint32_t CYPRESS_FLASH_WRITE_STATUS_COMMAND	 = 0x01;
-const uint32_t CYPRESS_FLASH_WRITEDISABLE_COMMAND  = 0x04;
+//const uint32_t CYPRESS_FLASH_WRITEDISABLE_COMMAND  = 0x04;
 const uint32_t CYPRESS_FLASH_READ_STATUS_COMMAND   = 0x05;
 const uint32_t CYPRESS_FLASH_WRITEENABLE_COMMAND   = 0x06;
 const uint32_t CYPRESS_FLASH_READFAST_COMMAND	   = 0x0C; //4 byte address
@@ -95,6 +95,8 @@ const uint32_t CYPRESS_FLASH_SECTOR_ERASE_COMMAND  = 0xDC; //4 byte address
 
 inline bool has_4k_start_sectors(const uint32_t reportedSectorSize)
 {
+	NTV2_UNUSED(reportedSectorSize);
+
 	return false;
 //	if (reportedSectorSize <= 0x20000)
 //		return true;
@@ -199,7 +201,7 @@ CNTV2AxiSpiFlash::CNTV2AxiSpiFlash(int index, bool verbose)
 	mSpiReadReg		 = (mBaseByteAddress + 0x6c) / 4;
 	mSpiSlaveReg	 = (mBaseByteAddress + 0x70) / 4;
 	mSpiGlobalIntReg = (mBaseByteAddress + 0x1c) / 4;
-	AsNTV2DriverInterfaceRef(mDevice).Open(UWord(index));
+	mDevice.Open(UWord(index));
 
 	SpiReset();
 
@@ -544,6 +546,7 @@ void CNTV2AxiSpiFlash::SpiReset()
 
 	// make sure in 32bit mode
 	uint8_t bankAddressVal=0;
+	NTV2_UNUSED(bankAddressVal);
 }
 
 bool CNTV2AxiSpiFlash::SpiResetFifos()

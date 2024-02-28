@@ -3562,13 +3562,14 @@ NTV2FrameRate CNTV2Card::GetSDIInputRate (const NTV2Channel channel)
 
 	ULWord rateLow (0), rateHigh (0);
 	NTV2FrameRate currentRate (NTV2_FRAMERATE_INVALID);
-	bool result = ReadRegister(gChannelToSDIInputStatusRegNum[channel], rateLow, gChannelToSDIInputRateMask[channel], gChannelToSDIInputRateShift[channel]);
-	result = ReadRegister(gChannelToSDIInputStatusRegNum[channel], rateHigh, gChannelToSDIInputRateHighMask[channel], gChannelToSDIInputRateHighShift[channel]);
-	AJA_UNUSED(result)
+	if (!ReadRegister(gChannelToSDIInputStatusRegNum[channel], rateLow,
+						gChannelToSDIInputRateMask[channel], gChannelToSDIInputRateShift[channel]))
+		return NTV2_FRAMERATE_INVALID;
+	if (!ReadRegister(gChannelToSDIInputStatusRegNum[channel], rateHigh,
+						gChannelToSDIInputRateHighMask[channel], gChannelToSDIInputRateHighShift[channel]))
+		return NTV2_FRAMERATE_INVALID;
 	currentRate = NTV2FrameRate(((rateHigh << 3) & BIT_3) | rateLow);
-	if(NTV2_IS_VALID_NTV2FrameRate(currentRate))
-		return currentRate;
-	return NTV2_FRAMERATE_INVALID;
+	return NTV2_IS_VALID_NTV2FrameRate(currentRate) ? currentRate : NTV2_FRAMERATE_INVALID;
 }	//	GetSDIInputRate
 
 NTV2FrameGeometry CNTV2Card::GetSDIInputGeometry (const NTV2Channel channel)
@@ -3578,13 +3579,14 @@ NTV2FrameGeometry CNTV2Card::GetSDIInputGeometry (const NTV2Channel channel)
 
 	ULWord geometryLow (0), geometryHigh (0);
 	NTV2FrameGeometry currentGeometry (NTV2_FG_INVALID);
-	bool result = ReadRegister(gChannelToSDIInputStatusRegNum[channel], geometryLow, gChannelToSDIInputGeometryMask[channel], gChannelToSDIInputGeometryShift[channel]);
-	result = ReadRegister(gChannelToSDIInputStatusRegNum[channel], geometryHigh, gChannelToSDIInputGeometryHighMask[channel], gChannelToSDIInputGeometryHighShift[channel]);
-	AJA_UNUSED(result)
+	if (!ReadRegister(gChannelToSDIInputStatusRegNum[channel], geometryLow,
+						gChannelToSDIInputGeometryMask[channel], gChannelToSDIInputGeometryShift[channel]))
+		return NTV2_FG_INVALID;
+	if (!ReadRegister(gChannelToSDIInputStatusRegNum[channel], geometryHigh,
+						gChannelToSDIInputGeometryHighMask[channel], gChannelToSDIInputGeometryHighShift[channel]))
+		return NTV2_FG_INVALID;
 	currentGeometry = NTV2FrameGeometry(((geometryHigh << 3) & BIT_3) | geometryLow);
-	if(NTV2_IS_VALID_NTV2FrameGeometry(currentGeometry))
-		return currentGeometry;
-	return NTV2_FG_INVALID;
+	return NTV2_IS_VALID_NTV2FrameGeometry(currentGeometry) ? currentGeometry : NTV2_FG_INVALID;
 }	//	GetSDIInputGeometry
 
 bool CNTV2Card::GetSDIInputIsProgressive (const NTV2Channel channel)
@@ -3922,6 +3924,113 @@ bool CNTV2Card::GetSDIOut12GEnable(const NTV2Channel inChannel, bool & outIsEnab
 	NTV2Channel channel (IsSupported(kDeviceCanDo12gRouting) ? inChannel : NTV2_CHANNEL3);
 	return CNTV2DriverInterface::ReadRegister(gChannelToSDIOutControlRegNum[channel], outIsEnabled, kRegMaskSDIOut12GbpsMode, kRegShiftSDIOut12GbpsMode);
 }
+
+
+bool CNTV2Card::GetSDIOutputAudioSystem (const NTV2Channel inChannel, NTV2AudioSystem & outAudioSystem)
+{
+	outAudioSystem = NTV2_AUDIOSYSTEM_INVALID;
+	if (ULWord(inChannel) >= GetNumSupported(kDeviceGetNumVideoOutputs))
+		return false;	//	illegal channel
+
+	ULWord	b2(0),	b1(0),	b0(0);	//	The three bits that determine which audio system feeds the SDI output
+	const ULWord regNum (gChannelToSDIOutControlRegNum[inChannel]);
+	if (!ReadRegister (regNum, b2, BIT(18), 18))	//	bit 18 is MSB
+		return false;
+	if (!ReadRegister (regNum, b1, BIT(28), 28))
+		return false;
+	if (!ReadRegister (regNum, b0, BIT(30), 30))	//	bit 30 is LSB
+		return false;
+	outAudioSystem = NTV2AudioSystem(b2 * 4	+  b1 * 2  +  b0);
+	return true;
+
+}	//	GetSDIOutputAudioSystem
+
+
+bool CNTV2Card::SetSDIOutputAudioSystem (const NTV2Channel inChannel, const NTV2AudioSystem inAudioSystem)
+{
+	if (ULWord(inChannel) >= GetNumSupported(kDeviceGetNumVideoOutputs))
+		return false;	//	Invalid channel
+	if (ULWord(inAudioSystem) >= GetNumSupported(kDeviceGetTotalNumAudioSystems))
+		return false;	//	Invalid audio system
+
+	ULWord	value	(inAudioSystem);
+	ULWord	b2		(value / 4);
+	if (!WriteRegister (gChannelToSDIOutControlRegNum [inChannel], b2, BIT(18), 18))	//	bit 18 is MSB
+		return false;
+
+	value -= b2 * 4;
+	ULWord	b1		(value / 2);
+	if (!WriteRegister (gChannelToSDIOutControlRegNum [inChannel], b1, BIT(28), 28))
+		return false;
+
+	value -= b1 * 2;
+	ULWord	b0		(value);
+	if (!WriteRegister (gChannelToSDIOutControlRegNum [inChannel], b0, BIT(30), 30))	//	bit 30 is LSB
+		return false;
+
+	return true;
+
+}	//	SetSDIOutputAudioSystem
+
+
+bool CNTV2Card::SetSDIOutputAudioSystem (const NTV2ChannelSet & inSDIOutputs, const NTV2AudioSystem inAudioSystem, const bool inDS2)
+{
+	size_t numFailures(0);
+	for (NTV2ChannelSet::const_iterator it(inSDIOutputs.begin());  it != inSDIOutputs.end();  ++it)
+		if (!(inDS2 ? SetSDIOutputDS2AudioSystem(*it, inAudioSystem) : SetSDIOutputAudioSystem(*it, inAudioSystem)))
+			numFailures++;
+	return numFailures == 0;
+}
+
+
+bool CNTV2Card::GetSDIOutputDS2AudioSystem (const NTV2Channel inChannel, NTV2AudioSystem & outAudioSystem)
+{
+	outAudioSystem = NTV2_AUDIOSYSTEM_INVALID;
+	if (ULWord(inChannel) >= GetNumSupported(kDeviceGetNumVideoOutputs))
+		return false;	//	illegal channel
+
+	ULWord			b2(0),	b1(0),	b0(0);		//	The three bits that determine which audio system feeds the SDI output's DS2
+	const ULWord	regNum	(gChannelToSDIOutControlRegNum[inChannel]);
+	if (!ReadRegister (regNum, b2, BIT(19), 19))	//	bit 19 is MSB
+		return false;
+	if (!ReadRegister (regNum, b1, BIT(29), 29))
+		return false;
+	if (!ReadRegister (regNum, b0, BIT(31), 31))	//	bit 31 is LSB
+		return false;
+	outAudioSystem = NTV2AudioSystem(b2 * 4  +  b1 * 2  +  b0);
+	return true;
+
+}	//	GetSDIOutputDS2AudioSystem
+
+
+bool CNTV2Card::SetSDIOutputDS2AudioSystem (const NTV2Channel inChannel, const NTV2AudioSystem inAudioSystem)
+{
+	if (ULWord(inChannel) >= GetNumSupported(kDeviceGetNumVideoOutputs))
+		return false;	//	Invalid channel
+	if (ULWord(inAudioSystem) >= GetNumSupported(kDeviceGetTotalNumAudioSystems))
+		return false;	//	Invalid audio system
+
+	ULWord	value	(inAudioSystem);
+	ULWord	b2		(value / 4);
+	if (!WriteRegister (gChannelToSDIOutControlRegNum [inChannel], b2, BIT(19), 19))	//	bit 19 is MSB
+		return false;
+
+	value -= b2 * 4;
+	ULWord	b1		(value / 2);
+	if (!WriteRegister (gChannelToSDIOutControlRegNum [inChannel], b1, BIT(29), 29))
+		return false;
+
+	value -= b1 * 2;
+	ULWord	b0		(value);
+	if (!WriteRegister (gChannelToSDIOutControlRegNum [inChannel], b0, BIT(31), 31))	//	bit 31 is LSB
+		return false;
+
+	//NTV2AudioSystem	compareA;
+	//GetSDIOutputDS2AudioSystem (inChannel, compareA);
+	//NTV2_ASSERT(compareA == inAudioSystem);
+	return true;
+
+}	//	SetSDIOutputDS2AudioSystem
 
 
 // SDI bypass relay control

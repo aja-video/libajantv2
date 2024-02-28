@@ -309,6 +309,9 @@ static bool GetAuxOffsets (CNTV2Card & inDevice, ULWord & outF1Offset, ULWord & 
 
 bool CNTV2Card::AuxInsertInit (const UWord inSDIOutput, const NTV2Channel inChannel, const NTV2Standard inStandard)
 {
+	NTV2_UNUSED(inSDIOutput);
+	NTV2_UNUSED(inChannel);
+	NTV2_UNUSED(inStandard);
 	// if (!IsSupported(kDeviceCanDoPlayback))
 	// 	return false;
 	// if (!IsSupported(kDeviceCanDoCustomAux))
@@ -367,6 +370,11 @@ bool CNTV2Card::AuxInsertSetComponents (const UWord inSDIOutput,
 										const bool inVauxY, const bool inVauxC,
 										const bool inHauxY, const bool inHauxC)
 {
+	NTV2_UNUSED(inSDIOutput);
+	NTV2_UNUSED(inVauxY);
+	NTV2_UNUSED(inVauxC);
+	NTV2_UNUSED(inHauxY);
+	NTV2_UNUSED(inHauxC);
 	// bool ok(true);
 	// bool extendedMode(false);
 	// if (ok) ok = EnableAuxInsVauxY(*this, inSDIOutput, inVauxY);
@@ -384,6 +392,8 @@ bool CNTV2Card::AuxInsertSetComponents (const UWord inSDIOutput,
 
 bool CNTV2Card::AuxInsertSetEnable (const UWord inSDIOutput, const bool inIsEnabled)
 {
+	NTV2_UNUSED(inSDIOutput);
+	NTV2_UNUSED(inIsEnabled);
 	// if (!IsSupported(kDeviceCanDoPlayback))
 	// 	return false;
 	// if (!IsSupported(kDeviceCanDoCustomAux))
@@ -409,6 +419,8 @@ bool CNTV2Card::AuxInsertSetEnable (const UWord inSDIOutput, const bool inIsEnab
 
 bool CNTV2Card::AuxInsertIsEnabled (const UWord inSDIOutput, bool & outIsRunning)
 {
+	NTV2_UNUSED(inSDIOutput);
+	NTV2_UNUSED(outIsRunning);
 	// outIsRunning = false;
 	// if (!IsSupported(kDeviceCanDoPlayback))
 	// 	return false;
@@ -429,6 +441,11 @@ bool CNTV2Card::AuxInsertIsEnabled (const UWord inSDIOutput, bool & outIsRunning
 bool CNTV2Card::AuxInsertSetReadParams (const UWord inSDIOutput, const ULWord inFrameNumber, const ULWord inF1Size,
 										const NTV2Channel inChannel, const NTV2Framesize inFrameSize)
 {
+	NTV2_UNUSED(inSDIOutput);
+	NTV2_UNUSED(inFrameNumber);
+	NTV2_UNUSED(inF1Size);
+	NTV2_UNUSED(inChannel);
+	NTV2_UNUSED(inFrameSize);
 	// if (!IsSupported(kDeviceCanDoPlayback))
 	// 	return false;
 	// if (!IsSupported(kDeviceCanDoCustomAux))
@@ -473,6 +490,11 @@ bool CNTV2Card::AuxInsertSetReadParams (const UWord inSDIOutput, const ULWord in
 bool CNTV2Card::AuxInsertSetField2ReadParams (const UWord inSDIOutput, const ULWord inFrameNumber, const ULWord inF2Size,
 												const NTV2Channel inChannel, const NTV2Framesize inFrameSize)
 {
+	NTV2_UNUSED(inSDIOutput);
+	NTV2_UNUSED(inFrameNumber);
+	NTV2_UNUSED(inF2Size);
+	NTV2_UNUSED(inChannel);
+	NTV2_UNUSED(inFrameSize);
 	// if (!IsSupported(kDeviceCanDoPlayback))
 	// 	return false;
 	// if (!IsSupported(kDeviceCanDoCustomAux))
@@ -516,6 +538,10 @@ bool CNTV2Card::AuxInsertSetField2ReadParams (const UWord inSDIOutput, const ULW
 
 bool CNTV2Card::AuxInsertSetIPParams (const UWord inSDIOutput, const UWord auxChannel, const ULWord payloadID, const ULWord ssrc)
 {
+	NTV2_UNUSED(inSDIOutput);
+	NTV2_UNUSED(auxChannel);
+	NTV2_UNUSED(payloadID);
+	NTV2_UNUSED(ssrc);
 	// bool ok(false);
 
 	// if (IsSupported(kDeviceCanDoIP))
@@ -531,6 +557,9 @@ bool CNTV2Card::AuxInsertSetIPParams (const UWord inSDIOutput, const UWord auxCh
 
 bool CNTV2Card::AuxInsertGetReadInfo (const UWord inSDIOutput, uint64_t & outF1StartAddr, uint64_t & outF2StartAddr)
 {
+	NTV2_UNUSED(inSDIOutput);
+	NTV2_UNUSED(outF1StartAddr);
+	NTV2_UNUSED(outF2StartAddr);
 	// outF1StartAddr = outF2StartAddr = 0;
 	// if (!IsSupported(kDeviceCanDoPlayback))
 	// 	return false;
@@ -802,6 +831,8 @@ bool CNTV2Card::AuxExtractSetField2WriteParams (const UWord inHDMIInput, const U
 	const ULWord	AUXStartMemory	(frameLocation - F2Offset);
 	//const ULWord	AUXStopMemory	(frameLocation - 1);  
 	if (ok) ok = SetAuxExtField2StartAddr (*this, inHDMIInput, AUXStartMemory);
+
+	NTV2_UNUSED(ok);
 	// For HDMI Aux, we do not have a register defined to store the end of Field 2 Aux Buffer.  
 	// It is assumed to be the same size as field 1.
 	// if (ok) ok = SetAuxExtField2EndAddr (*this, inHDMIInput, AUXStopMemory);

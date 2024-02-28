@@ -1419,6 +1419,16 @@ bool NTV2LegacyNubClient::NTV2DMATransferRemote(	const NTV2DMAEngine inDMAEngine
 											const ULWord inSegmentHostPitch,	const ULWord inSegmentCardPitch,
 											const bool inSynchronous)
 {
+	NTV2_UNUSED(inDMAEngine);
+	NTV2_UNUSED(inIsRead);
+	NTV2_UNUSED(inFrameNumber);
+	NTV2_UNUSED(inOutBuffer);
+	NTV2_UNUSED(inCardOffsetBytes);
+	NTV2_UNUSED(inNumSegments);
+	NTV2_UNUSED(inSegmentHostPitch);
+	NTV2_UNUSED(inSegmentCardPitch);
+	NTV2_UNUSED(inSynchronous);
+
 	if (!IsConnected())
 		return false;	//	No connection
 	return false;

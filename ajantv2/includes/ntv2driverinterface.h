@@ -45,10 +45,6 @@
 #endif
 
 
-#define	AsNTV2DriverInterfaceRef(_x_)	reinterpret_cast<CNTV2DriverInterface&>(_x_)
-#define	AsNTV2DriverInterfacePtr(_x_)	reinterpret_cast<CNTV2DriverInterface*>(_x_)
-
-
 typedef struct
 {
 	std::string		buildNumber;
@@ -99,7 +95,7 @@ class AJAExport CNTV2DriverInterface
 			@param[in]	inRHS	The rvalue to be assigned to the lvalue.
 			@return	A non-constant reference to the lvalue.
 		**/
-		AJA_VIRTUAL CNTV2DriverInterface & operator = (const CNTV2DriverInterface & inRHS);
+		CNTV2DriverInterface & operator = (const CNTV2DriverInterface & inRHS);
 
 		/**
 			@brief	My copy constructor.
@@ -237,7 +233,7 @@ class AJAExport CNTV2DriverInterface
 		**/
 		AJA_VIRTUAL bool	ReadRegisters (NTV2RegisterReads & inOutValues);
 #endif	//	!defined(READREGMULTICHANGE)
-		AJA_VIRTUAL bool	RestoreHardwareProcampRegisters() = 0;
+		AJA_VIRTUAL inline bool	RestoreHardwareProcampRegisters (void) {return false;}
 	///@}
 
 	/**
@@ -305,7 +301,7 @@ class AJAExport CNTV2DriverInterface
 										const ULWord			inNumSegments,
 										const ULWord			inHostPitchPerSeg,
 										const ULWord			inCardPitchPerSeg,
-										const bool				inSynchronous = true)	= 0;
+										const bool				inSynchronous = true);
 
 		AJA_VIRTUAL bool	DmaTransfer (const NTV2DMAEngine		inDMAEngine,
 										const NTV2Channel			inDMAChannel,
@@ -316,7 +312,7 @@ class AJAExport CNTV2DriverInterface
 										const ULWord				inNumSegments,
 										const ULWord				inSegmentHostPitch,
 										const ULWord				inSegmentCardPitch,
-										const PCHANNEL_P2P_STRUCT &	inP2PData)	= 0;
+										const PCHANNEL_P2P_STRUCT &	inP2PData);
 	///@}
 
 	/**
@@ -324,14 +320,14 @@ class AJAExport CNTV2DriverInterface
 	**/
 	///@{
 		AJA_VIRTUAL bool	ConfigureSubscription (const bool bSubscribe, const INTERRUPT_ENUMS inInterruptType, PULWord & outSubcriptionHdl);
-		AJA_VIRTUAL bool	ConfigureInterrupt (const bool bEnable,  const INTERRUPT_ENUMS eInterruptType) = 0;
+		AJA_VIRTUAL bool	ConfigureInterrupt (const bool bEnable,  const INTERRUPT_ENUMS eInterruptType);
 		/**
 			@brief	Answers with the number of interrupts of the given type processed by the driver.
 			@param[in]	eInterrupt	The interrupt type of interest.
 			@param[out]	outCount	Receives the count value.
 			@return	True if successful;  otherwise false.
 		**/
-		AJA_VIRTUAL bool	GetInterruptCount (const INTERRUPT_ENUMS eInterrupt,  ULWord & outCount) = 0;
+		AJA_VIRTUAL bool	GetInterruptCount (const INTERRUPT_ENUMS eInterrupt,  ULWord & outCount);
 
 		AJA_VIRTUAL bool	WaitForInterrupt (const INTERRUPT_ENUMS eInterrupt, const ULWord timeOutMs = 68);
 
@@ -381,7 +377,7 @@ class AJAExport CNTV2DriverInterface
 		**/
 		AJA_VIRTUAL inline bool	HevcSendMessage (HevcMessageHeader * pMessage)		{(void) pMessage; return false;}
 
-		AJA_VIRTUAL bool	ControlDriverDebugMessages (NTV2_DriverDebugMessageSet msgSet,  bool enable) = 0;
+		AJA_VIRTUAL bool	ControlDriverDebugMessages (NTV2_DriverDebugMessageSet msgSet,  bool enable);
 	///@}
 
 		AJA_VIRTUAL inline ULWord	GetNumFrameBuffers (void) const				{return _ulNumFrameBuffers;}
@@ -451,7 +447,7 @@ class AJAExport CNTV2DriverInterface
 
 		// stream buffer operations
 		AJA_VIRTUAL bool	StreamBufferOps (const NTV2Channel inChannel,
-												NTV2_POINTER inBuffer,
+												NTV2Buffer inBuffer,
 												ULWord64 bufferCookie,
 												ULWord flags,
 												NTV2StreamBuffer& status);
@@ -571,10 +567,14 @@ class AJAExport CNTV2DriverInterface
 		/**
 			@return		String containing remote device description.
 		**/
-		AJA_VIRTUAL inline std::string	GetDescription (void) const	{return IsRemote() ? _pRPCAPI->Description() : "";}	//	New in SDK 17.0
-#if defined(NTV2_NUB_CLIENT_SUPPORT)  &&  !defined(NTV2_DEPRECATE_16_0)
-		AJA_VIRTUAL inline NTV2NubProtocolVersion	GetNubProtocolVersion (void) const	{return 0;}	///< @return	My nub protocol version.
+		AJA_VIRTUAL std::string			GetDescription (void) const;	//	New in SDK 17.0
+#if defined(NTV2_NUB_CLIENT_SUPPORT)  &&  !defined(NTV2_DEPRECATE_16_3)
+		AJA_VIRTUAL inline NTV2NubProtocolVersion GetNubProtocolVersion (void) const	{return 0;}	///< @return	My nub protocol version.
 #endif
+		/**
+			@return		Const reference to my connection parameters dictionary (currently valid only for remote/software devices).
+		**/
+		virtual const NTV2Dictionary &	ConnectParams (void) const;		//	New in SDK 17.1
 
 		//	DEPRECATED FUNCTIONS
 #if !defined(NTV2_DEPRECATE_16_0)

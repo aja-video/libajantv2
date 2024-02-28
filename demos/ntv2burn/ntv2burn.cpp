@@ -829,7 +829,7 @@ bool NTV2Burn::AnalogLTCInputHasTimecode (void)
 		return false;
 	const ULWord regMask(mConfig.fTimecodeSource == NTV2_TCINDEX_LTC1 ? kRegMaskLTC1InPresent : kRegMaskLTC2InPresent);
 	bool result(false);
-	reinterpret_cast<CNTV2DriverInterface&>(mDevice).ReadRegister(kRegLTCStatusControl, result, regMask);
+	mDevice.driverInterface().ReadRegister(kRegLTCStatusControl, result, regMask);
 	return result;
 
 }	//	AnalogLTCInputHasTimecode

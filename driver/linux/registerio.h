@@ -541,7 +541,7 @@ typedef struct ntv2_private
 	ULWord _PCIDeviceControlOffset;
 
 	Ntv2SystemContext		systemContext;
-//    struct ntv2_genlock		*m_pGenlockMonitor;
+    struct ntv2_genlock		*m_pGenlockMonitor;
     struct ntv2_genlock2	*m_pGenlock2Monitor;
     struct ntv2_videoraster *m_pRasterMonitor;
 	struct ntv2_hdmiin		*m_pHDMIInputMonitor[NTV2_MAX_HDMI_MONITOR];

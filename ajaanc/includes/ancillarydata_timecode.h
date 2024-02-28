@@ -50,7 +50,7 @@ public:
 		@param[in]	inRHS	The value to be assigned to me.
 		@return		A reference to myself.
 	**/
-	virtual AJAAncillaryData_Timecode &		operator = (const AJAAncillaryData_Timecode & inRHS);
+	AJAAncillaryData_Timecode &				operator = (const AJAAncillaryData_Timecode & inRHS);
 
 	virtual inline AJAAncillaryData_Timecode *		Clone (void) const	{return new AJAAncillaryData_Timecode (this);}	///< @return	A clone of myself.
 

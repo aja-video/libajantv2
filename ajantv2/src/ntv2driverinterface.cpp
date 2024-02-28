@@ -851,7 +851,7 @@ bool CNTV2DriverInterface::StreamChannelOps (const NTV2Channel inChannel,
 }
 
 bool CNTV2DriverInterface::StreamBufferOps (const NTV2Channel inChannel,
-												NTV2_POINTER inBuffer,
+												NTV2Buffer inBuffer,
 												ULWord64 bufferCookie,
 												ULWord flags,
 												NTV2StreamBuffer& status)
@@ -869,7 +869,7 @@ bool CNTV2DriverInterface::StreamBufferOps (const NTV2Channel inChannel,
 void CNTV2DriverInterface::FinishOpen (void)
 {
 	// HACK! FinishOpen needs frame geometry to determine frame buffer size and number.
-	NTV2FrameGeometry fg;
+	NTV2FrameGeometry fg(NTV2_FG_INVALID);
 	ULWord val1(0), val2(0);
 	ReadRegister (kRegGlobalControl, fg, kRegMaskGeometry, kRegShiftGeometry);	//	Read FrameGeometry
 	ReadRegister (kRegCh1Control, val1, kRegMaskFrameFormat, kRegShiftFrameFormat); //	Read PixelFormat
@@ -1099,6 +1099,17 @@ bool CNTV2DriverInterface::GetStreamingApplication (ULWord & outAppType, int32_t
 	if (!ReadRegister(kVRegApplicationCode, outAppType))
 		return false;
 	return CNTV2DriverInterface::ReadRegister(kVRegApplicationPID, outProcessID);
+}
+
+string CNTV2DriverInterface::GetDescription (void) const
+{
+	return IsRemote() ? _pRPCAPI->Description() : "";
+}
+
+const NTV2Dictionary & CNTV2DriverInterface::ConnectParams (void) const
+{
+	static const NTV2Dictionary sEmptyDict;
+	return IsRemote() ? _pRPCAPI->ConnectParams() : sEmptyDict;
 }
 
 //	This function is used by the retail ControlPanel.
@@ -1498,7 +1509,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanDoCapture:						outValue =	(GetNumSupported(kDeviceGetNumVideoInputs)
 																	+ GetNumSupported(kDeviceGetNumHDMIVideoInputs)
 																	+ GetNumSupported(kDeviceGetNumAnalogVideoInputs)) > 0;	break;
-		case kDeviceCanDoColorCorrection:				outValue = ::NTV2DeviceCanDoColorCorrection				(devID);	break;	//	Deprecate?
+		case kDeviceCanDoColorCorrection:				outValue = GetNumSupported(kDeviceGetNumLUTs) > 0;					break;	//	Deprecate?
 		case kDeviceCanDoCustomAnc:						outValue = ::NTV2DeviceCanDoCustomAnc					(devID);	break;	//	Deprecate?
 		case kDeviceCanDoDSKOpacity:					outValue = ::NTV2DeviceCanDoDSKOpacity					(devID);	break;	//	Deprecate?
 		case kDeviceCanDoDualLink:						outValue = ::NTV2DeviceCanDoDualLink					(devID);	break;	//	Deprecate?
@@ -1519,7 +1530,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanDoPlayback:						outValue =	(GetNumSupported(kDeviceGetNumVideoOutputs)
 																	+ GetNumSupported(kDeviceGetNumHDMIVideoOutputs)
 																	+ GetNumSupported(kDeviceGetNumAnalogVideoOutputs)) > 0;break;
-		case kDeviceCanDoProgrammableCSC:				outValue = ::NTV2DeviceCanDoProgrammableCSC				(devID);	break;
+		case kDeviceCanDoProgrammableCSC:				outValue = GetNumSupported(kDeviceGetNumCSCs) > 0;					break;
 		case kDeviceCanDoProgrammableRS422:				outValue = ::NTV2DeviceCanDoProgrammableRS422			(devID);	break;
 		case kDeviceCanDoProRes:						outValue = ::NTV2DeviceCanDoProRes						(devID);	break;
 		case kDeviceCanDoQREZ:							outValue = ::NTV2DeviceCanDoQREZ						(devID);	break;
@@ -1665,6 +1676,7 @@ bool CNTV2DriverInterface::GetNumericParam (const ULWord inParamID, ULWord & out
 			for (size_t ndx(0);  ndx < sizeof(s425MuxerIDs)/sizeof(NTV2WidgetID);  ndx++)
 				if (wgtIDs.find(s425MuxerIDs[ndx]) != wgtIDs.end())
 					outValue++;
+			break;
 		}
 		default:										return false;	//	Bad param
 	}
@@ -1699,4 +1711,10 @@ bool CNTV2DriverInterface::GetRegInfoForNumericParam (const NTV2NumericParamID i
 		default:	break;
 	}
 	return outRegInfo.IsValid();
+}
+
+
+bool CNTV2DriverInterface::ControlDriverDebugMessages (NTV2_DriverDebugMessageSet msgSet,  bool enable)
+{	(void)msgSet; (void) enable;
+	return false;
 }

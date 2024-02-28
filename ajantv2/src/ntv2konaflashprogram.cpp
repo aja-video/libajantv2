@@ -209,7 +209,7 @@ bool CNTV2KonaFlashProgram::IsInstalledFWRunning (bool & outIsRunning, ostream &
 
 bool CNTV2KonaFlashProgram::SetBoard(UWord boardNumber, uint32_t index)
 {
-	if (!AsNTV2DriverInterfaceRef(*this).Open(boardNumber))
+	if (!Open(boardNumber))
 		return false;
 
 	if (!SetDeviceProperties())
@@ -453,7 +453,8 @@ bool CNTV2KonaFlashProgram::SetBitFile (const string & inBitfileName, ostream & 
 	_bitFileBuffer.Fill(0xFFFFFFFF);
 
 	fseek(pFile, 0, SEEK_SET);
-	fread(_bitFileBuffer, 1, _bitFileSize, pFile);
+	size_t bytesRead = fread(_bitFileBuffer, 1, _bitFileSize, pFile);
+	NTV2_UNUSED(bytesRead);
 	fclose(pFile);
 
 	// Parse header to make sure this is a xilinx bitfile.

@@ -174,7 +174,7 @@
 				#define AJA_CXX11_NULLPTR_AVAILABLE
 			#endif
 		#elif defined(__GNUC__)
-			#if __GNUC__ >= 6
+			#if __cplusplus >= 201103L // C++11 or later
 				#define AJA_CXX11_NULLPTR_AVAILABLE
 			#endif
 		#endif
@@ -391,64 +391,6 @@
 	#define AJATargetBigEndian	0
 	#define AJAFUNC		__func__
 
-	#if !defined (NTV2_BUILDING_DRIVER)
-		#if defined (NTV2_DEPRECATE)
-			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
-			#define NTV2_DEPRECATED		//	Disable deprecate warnings (for now)
-		#else
-			#define NTV2_DEPRECATED
-		#endif
-
-		#if defined (NTV2_DEPRECATE_12_5)
-			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
-			#define NTV2_DEPRECATED_12_5		//	Disable deprecate warnings (for now)
-		#else
-			#define NTV2_DEPRECATED_12_5
-		#endif
-
-		#if defined (NTV2_DEPRECATE_12_6)
-			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
-			#define NTV2_DEPRECATED_12_6		//	Disable deprecate warnings (for now)
-		#else
-			#define NTV2_DEPRECATED_12_6
-		#endif
-
-		#if defined (NTV2_DEPRECATE_12_7)
-			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
-			#define NTV2_DEPRECATED_12_7		//	Disable deprecate warnings (for now)
-		#else
-			#define NTV2_DEPRECATED_12_7
-		#endif
-
-		#if defined (NTV2_DEPRECATE_13_0)
-			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
-			#define NTV2_DEPRECATED_13_0		//	Disable deprecate warnings (for now)
-		#else
-			#define NTV2_DEPRECATED_13_0
-		#endif
-
-		#if defined (NTV2_DEPRECATE_13_1)
-			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
-			#define NTV2_DEPRECATED_13_1		//	Disable deprecate warnings (for now)
-		#else
-			#define NTV2_DEPRECATED_13_1
-		#endif
-
-		#if defined (NTV2_DEPRECATE_14_0)
-			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
-			#define NTV2_DEPRECATED_14_0		//	Disable deprecate warnings (for now)
-		#else
-			#define NTV2_DEPRECATED_14_0
-		#endif
-
-		#if defined (NTV2_DEPRECATE_14_1)
-			//	The gcc compiler used for Linux NTV2 builds doesn't like __declspec(deprecated)
-			#define NTV2_DEPRECATED_14_1		//	Disable deprecate warnings (for now)
-		#else
-			#define NTV2_DEPRECATED_14_1
-		#endif
-	#endif
-
 	#if !defined (NTV2_DEPRECATE)
 		typedef struct {
 		  int cx;
@@ -508,54 +450,6 @@
 
 #if defined (NTV2_BUILDING_DRIVER)
 	//	The AJA NTV2 driver is always built without any deprecated types or functions:
-	#if !defined(NTV2_DEPRECATE)
-		#define NTV2_DEPRECATE
-	#endif
-	#if !defined(NTV2_DEPRECATE_12_5)
-		#define NTV2_DEPRECATE_12_5
-	#endif
-	#if !defined(NTV2_DEPRECATE_12_6)
-		#define NTV2_DEPRECATE_12_6
-	#endif
-	#if !defined(NTV2_DEPRECATE_12_7)
-		#define NTV2_DEPRECATE_12_7
-	#endif
-	#if !defined(NTV2_DEPRECATE_13_0)
-		#define NTV2_DEPRECATE_13_0
-	#endif
-	#if !defined(NTV2_DEPRECATE_13_1)
-		#define NTV2_DEPRECATE_13_1
-	#endif
-	#if !defined(NTV2_DEPRECATE_14_0)
-		#define NTV2_DEPRECATE_14_0
-	#endif
-	#if !defined(NTV2_DEPRECATE_14_1)
-		#define NTV2_DEPRECATE_14_1		//	(never released)
-	#endif
-	#if !defined(NTV2_DEPRECATE_14_2)
-		#define NTV2_DEPRECATE_14_2
-	#endif
-	#if !defined(NTV2_DEPRECATE_14_3)
-		#define NTV2_DEPRECATE_14_3
-	#endif
-	#if !defined(NTV2_DEPRECATE_15_0)
-		#define NTV2_DEPRECATE_15_0
-	#endif
-	#if !defined(NTV2_DEPRECATE_15_1)
-		#define NTV2_DEPRECATE_15_1
-	#endif
-	#if !defined(NTV2_DEPRECATE_15_2)
-		#define NTV2_DEPRECATE_15_2
-	#endif
-	#if !defined(NTV2_DEPRECATE_15_3)
-		#define NTV2_DEPRECATE_15_3
-	#endif
-	#if !defined(NTV2_DEPRECATE_15_5)
-		#define NTV2_DEPRECATE_15_5
-	#endif
-	#if !defined(NTV2_DEPRECATE_15_6)
-		#define NTV2_DEPRECATE_15_6
-	#endif
 	#if !defined(NTV2_DEPRECATE_16_0)
 		#define NTV2_DEPRECATE_16_0
 	#endif

@@ -798,6 +798,8 @@ TEST_SUITE("variant" * doctest::description("functions in ajabase/common/variant
 			CHECK_EQ(v1.AsBool(), true);
 			float f = v1.AsFloat();
 			double d = v1.AsDouble();
+			(void)f;
+			(void)d;
 			CHECK_EQ(v1.AsFloat(), doctest::Approx(1.84467441e+19));
 			CHECK_EQ(v1.AsDouble(), doctest::Approx(1.8446744073709552e+19));
 			CHECK_EQ(v1.AsInt8(), -1);
@@ -1948,7 +1950,8 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 				{
 					chmod(tempDir.c_str(), ACCESSPERMS);
 				}
-				getcwd(cwdBuf, AJA_MAX_PATH);
+				char* result = getcwd(cwdBuf, AJA_MAX_PATH);
+				AJA_UNUSED(result);
 	#endif
 				// prepend full working directory path so rest of tests complete
 				std::string cwdStr = cwdBuf;
@@ -1983,7 +1986,8 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 			// Check GetWorkingDirectory path values
 			std::string tempDirCwd;
 			std::wstring tempDirCwdWStr;
-			chdir(tempDir.c_str());
+			int result = chdir(tempDir.c_str());
+			AJA_UNUSED(result);
 
 			status = AJAFileIO::GetWorkingDirectory(tempDirCwd);
 			aja::rstrip(tempDir, pathSepStr);
@@ -1993,7 +1997,8 @@ TEST_SUITE("file" * doctest::description("functions in ajabase/system/file_io.h"
 #else
 			CHECK_EQ(tempDir, tempDirCwd);
 #endif
-			chdir(cwdStr.c_str());
+			result = chdir(cwdStr.c_str());
+			AJA_UNUSED(result);
 		}
 		SUBCASE("::GetExecutablePath")
 		{

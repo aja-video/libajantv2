@@ -15,8 +15,10 @@
 #include <set>
 #include <string>
 
-typedef std::vector <uint8_t>	NTV2TestPatternBuffer, NTV2TestPatBuffer;	///< @brief	A byte vector that stores a complete video frame.
-typedef NTV2StringList			NTV2TestPatternNames;	///< @brief	A list (std::vector) of pattern names.
+#if !defined(NTV2_DEPRECATE_16_0)
+	typedef std::vector <uint8_t>	NTV2TestPatternBuffer, NTV2TestPatBuffer;	///< @deprecated	Do not use
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
+typedef NTV2StringList	NTV2TestPatternNames;	///< @brief	An ordered sequence of pattern names.
 
 /**
 	@brief	Identifies a predefined NTV2 test pattern.
@@ -161,11 +163,11 @@ class AJAExport NTV2TestPatternGen
 		/**
 			@deprecated	Use the DrawTestPattern method that requires an NTV2Buffer to specify the buffer to fill.
 		**/
-		virtual NTV2_DEPRECATED_f(bool DrawTestPattern (const NTV2TestPatternSelect inPattern, const NTV2FormatDescriptor & inDesc, NTV2TestPatBuffer & outBuffer));
+		virtual NTV2_DEPRECATED_f(bool DrawTestPattern (const NTV2TestPatternID tp, const NTV2FormatDesc & fd, NTV2TestPatBuffer & buf));
 		/**
 			@deprecated	Use the DrawTestPattern method that requires an NTV2Buffer to specify the buffer to fill.
 		**/
-		virtual NTV2_DEPRECATED_f(bool DrawTestPattern (const NTV2TestPatternSelect inPat, const uint32_t inWdth, const uint32_t inHght, const NTV2FrameBufferFormat inPF, NTV2TestPatBuffer & outBuf));
+		virtual NTV2_DEPRECATED_f(bool DrawTestPattern (const NTV2TestPatternID tp, const uint32_t w, const uint32_t h, const NTV2PixelFormat pf, NTV2TestPatBuffer & buf));
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 		///@}
 
