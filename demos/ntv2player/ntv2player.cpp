@@ -11,6 +11,7 @@
 #include "ntv2testpatterngen.h"
 #include "ajabase/common/timebase.h"
 #include "ajabase/system/process.h"
+#include "ajabase/system/file_io.h"
 #include "ajaanc/includes/ancillarydata_hdr_sdr.h"
 #include "ajaanc/includes/ancillarydata_hdr_hdr10.h"
 #include "ajaanc/includes/ancillarydata_hdr_hlg.h"
@@ -130,6 +131,13 @@ AJAStatus NTV2Player::Init (void)
 				<< " -- only supports Ch1" << (maxNumChannels > 1  ?  string("-Ch") + string(1, char(maxNumChannels+'0'))  :  "") << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
+
+	if (!mConfig.fAncDataFilePath.empty())
+		if (!AJAFileIO::FileExists (mConfig.fAncDataFilePath))
+		{
+			cerr	<< "## ERROR:  Anc data file '" << mConfig.fAncDataFilePath << "' not found" << endl;
+			return AJA_STATUS_NOT_FOUND;
+		}
 
 	if (!mConfig.fDoMultiFormat)
 	{
@@ -505,6 +513,9 @@ void NTV2Player::ConsumerThreadStatic (AJAThread * pThread, void * pContext)		//
 }	//	ConsumerThreadStatic
 
 
+static uint64_t sTotalAncFileBytes(0), sCurrentAncFileBytes(0);
+
+
 void NTV2Player::ConsumeFrames (void)
 {
 	ULWord					acOptions (AUTOCIRCULATE_WITH_RP188);
@@ -549,22 +560,44 @@ void NTV2Player::ConsumeFrames (void)
 	else if (!mConfig.fAncDataFilePath.empty())
 	{	//	Open raw anc file for reading...
 		pAncStrm = new ifstream(mConfig.fAncDataFilePath.c_str(), ios::binary);
-		if (pAncStrm->good())
+		do
 		{
+			if (!pAncStrm->good())
+			{	PLFAIL("Cannot open anc file '" << mConfig.fAncDataFilePath << "' -- anc insertion disabled");
+				delete pAncStrm;  pAncStrm = AJA_NULL;
+				break;
+			}
+			pAncStrm->seekg(0, std::ios_base::end);
+			if (pAncStrm->tellg() == -1)
+			{	PLFAIL("Cannot determine anc file size -- anc insertion disabled");
+				delete pAncStrm;  pAncStrm = AJA_NULL;
+				break;
+			}
+			sTotalAncFileBytes = uint64_t(pAncStrm->tellg());
+			pAncStrm->seekg(0);	//	Rewind to start
+			if (sTotalAncFileBytes < gAncMaxSizeBytes*2)
+			{	PLFAIL("anc buffer size " << DEC(gAncMaxSizeBytes*2) << " exceeds anc file size " << DEC(sTotalAncFileBytes)
+						<< " -- anc insertion disabled");
+				delete pAncStrm;  pAncStrm = AJA_NULL;
+				break;
+			}
+			//	Allocate anc buffers...
 			bool ancOK = outputXfer.acANCBuffer.Allocate(gAncMaxSizeBytes, BUFFER_PAGE_ALIGNED);
 			if (NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mConfig.fVideoFormat)  &&  ancOK)
 				ancOK = outputXfer.acANCField2Buffer.Allocate(gAncMaxSizeBytes, BUFFER_PAGE_ALIGNED);
-			if (ancOK)
-				acOptions |= AUTOCIRCULATE_WITH_ANC;
-			else
+			if (!ancOK)
 			{
-				PLWARN("Anc buffer " << xHEX0N(gAncMaxSizeBytes,8) << "(" << DEC(gAncMaxSizeBytes) << ")-byte allocate failed -- anc insertion from file disabled");
+				PLFAIL("Anc buffer " << xHEX0N(gAncMaxSizeBytes,8) << "(" << DEC(gAncMaxSizeBytes) << ")-byte"
+						" allocation failed -- anc insertion disabled");
 				outputXfer.acANCBuffer.Deallocate();
 				outputXfer.acANCField2Buffer.Deallocate();
+				delete pAncStrm;
+				pAncStrm = AJA_NULL;
+				break;
 			}
-		}
-		else
-			PLWARN("Unable to open anc data file '" << mConfig.fAncDataFilePath << "' -- anc insertion disabled");
+			acOptions |= AUTOCIRCULATE_WITH_ANC;
+			break;	//	Good to go!
+		} while (false);	//	Once thru
 	}
 #ifdef NTV2_BUFFER_LOCKING
 	if (outputXferInfo.acANCBuffer)
@@ -612,9 +645,19 @@ void NTV2Player::ConsumeFrames (void)
 			if (pAncStrm  &&  pAncStrm->good()  &&  outputXfer.acANCBuffer)
 			{	//	Read pre-recorded anc from binary data file, and inject it into this frame...
 				pAncStrm->read(outputXfer.acANCBuffer, streamsize(outputXfer.acANCBuffer.GetByteCount()));
+				sCurrentAncFileBytes += pAncStrm->good() ? outputXfer.acANCBuffer.GetByteCount() : 0;
 				if (pAncStrm->good()  &&  outputXfer.acANCField2Buffer)
+				{
 					pAncStrm->read(outputXfer.acANCField2Buffer, streamsize(outputXfer.acANCField2Buffer.GetByteCount()));
-			}
+					sCurrentAncFileBytes += pAncStrm->good() ? outputXfer.acANCField2Buffer.GetByteCount() : 0;
+				}
+				if (pAncStrm->eof())
+				{	pAncStrm->clear();
+					pAncStrm->seekg(0);	//	Rewind upon EOF
+					sCurrentAncFileBytes = 0;
+					PLDBG("Anc file rewound: " << DEC(goodXfers) << " goodXfers, " << DEC(badXfers) << " badXfers");
+				}
+			}	//	if playing anc from binary data file
 
 			//	Perform the DMA transfer to the device...
 			if (mDevice.AutoCirculateTransfer (mConfig.fOutputChannel, outputXfer))
@@ -730,7 +773,12 @@ void NTV2Player::ProduceFrames (void)
 			testPatNdx = (testPatNdx + 1) % ULWord(mTestPatRasters.size());
 			mToneFrequency = gFrequencies[freqNdx];
 			timeOfLastSwitch = currentTime;
-			PLINFO("F" << DEC0N(mCurrentFrame,6) << ": " << tcString << ": tone=" << mToneFrequency << "Hz, pattern='" << tpNames.at(testPatNdx) << "'");
+			if (sTotalAncFileBytes)
+				PLINFO("F" << DEC0N(mCurrentFrame,6) << ": " << tcString << ": tone=" << mToneFrequency << "Hz, pattern='"
+						<< tpNames.at(testPatNdx) << "', anc file " << DEC(sCurrentAncFileBytes * 100ULL / sTotalAncFileBytes) << "%");
+			else
+				PLINFO("F" << DEC0N(mCurrentFrame,6) << ": " << tcString << ": tone=" << mToneFrequency << "Hz, pattern='"
+						<< tpNames.at(testPatNdx) << "'");
 		}	//	if time to switch test pattern & tone frequency
 
 		//	Signal that I'm done producing this FrameData, making it immediately available for transfer/playout...
