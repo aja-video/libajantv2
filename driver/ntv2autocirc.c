@@ -1335,7 +1335,7 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 					// for target transfers (vs prepare) the source will also do a message transfer
 					if ((pTransferStruct->acPeerToPeerFlags & AUTOCIRCULATE_P2P_TARGET) == AUTOCIRCULATE_P2P_TARGET)
 					{
-						dmaData.messageBusAddress = AutoGetMessageAddress(pAutoCirc->pFunCon, channelSpec);
+						dmaData.messageBusAddress = AutoGetMessageAddress(pAutoCirc->pFunCon, channel);
 						if (dmaData.messageBusAddress != 0)
 						{
 							dmaData.messageData = frameNumber;
@@ -2645,9 +2645,7 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 						// if the time difference is larger than the tolerance correct the expected start address
 						if (time > (uint64_t)(ntv2ReadVirtualRegister(pSysCon, kVRegAudioSyncTolerance) * 10))
 						{
-							newStartAddress = oemAudioSampleAlign(
-								pAutoCirc->pFunCon,
-								pAuto->audioSystem, actualLastIn) + GetAudioReadOffset(pSysCon, pAuto->audioSystem);
+							newStartAddress = oemAudioSampleAlign(pSysCon, pAuto->audioSystem, actualLastIn) + GetAudioReadOffset(pSysCon, pAuto->audioSystem);
 							ntv2Message("CNTV2Device::AutoCirculate - Auto %s:  frame %d  correct audio sync start %d  actual %d  time %lld\n",
 										CrosspointName[pAuto->channelSpec], pAuto->framesProcessed,
 										startAddress, actualLastIn, (long long)time);
