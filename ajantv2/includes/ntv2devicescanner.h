@@ -13,6 +13,27 @@
 #include <vector>
 #include <algorithm>
 
+//#define VIRTUAL_DEVICES_SUPPORT		0
+
+#if defined VIRTUAL_DEVICES_SUPPORT
+
+#include "ajabase/common/json.hpp"
+#include <fstream>
+
+using json = nlohmann::json;
+
+//Temporary, must manually define the path here
+#define CP2_CONFIG_PATH  			"/Users/shane.gidley/Library/Preferences/aja/controlpanelConfigPrimary.json"
+
+typedef struct VirtualDeviceInfo
+{
+	std::string				vdID;
+	std::string				vdName;
+} VirtualDeviceInfo;
+
+typedef std::map<string, std::vector<VirtualDeviceInfo>> 	NTV2SerialToVirtualDevices;	/// Serial number to Virtual Device Names
+
+#endif
 
 typedef std::vector <AudioSampleRateEnum>				NTV2AudioSampleRateList;
 typedef NTV2AudioSampleRateList::const_iterator			NTV2AudioSampleRateListConstIter;
@@ -97,6 +118,11 @@ typedef struct NTV2DeviceInfo
 	UWord							numDMAEngines;						///< @brief Total number of DMA engines
 	UWord							numSerialPorts;						///< @brief Total number of serial ports
 	ULWord							pingLED;
+#if defined VIRTUAL_DEVICES_SUPPORT
+	bool							isVirtualDevice=false;
+	std::string						virtualDeviceName;
+	std::string						virtualDeviceID;
+#endif
 
 	AJAExport	bool operator == (const NTV2DeviceInfo & rhs) const;	///< @return	True if I'm equivalent to another ::NTV2DeviceInfo struct.
 	AJAExport	inline bool operator != (const NTV2DeviceInfo & rhs) const	{ return !(*this == rhs); } ///< @return	True if I'm different from another ::NTV2DeviceInfo struct.
@@ -387,6 +413,9 @@ public:
 private:
 	virtual void	SetAudioAttributes(NTV2DeviceInfo & inDeviceInfo, CNTV2Card & inDevice) const;
 	virtual void	DeepCopy (const CNTV2DeviceScanner & inDeviceScanner);
+#if defined VIRTUAL_DEVICES_SUPPORT
+	virtual bool	GetSerialToVirtualDeviceMap(NTV2SerialToVirtualDevices & outSerialToVirtualDevMap);
+#endif
 
 
 //	Instance Data
