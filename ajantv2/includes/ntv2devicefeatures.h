@@ -204,6 +204,7 @@ typedef enum _NTV2NumericParamID
 	kDeviceGetTotalNumAudioSystems,				///< @brief The total number of audio systems on the device, including host audio and mixer audio systems, if present. (New in SDK 17.0)
 	kDeviceGetNumBufferedAudioSystems,			///< @brief The total number of audio systems on the device that can read/write audio buffer memory. Includes host audio system, if present. (New in SDK 17.0)
 	kDeviceGetNumTSIMuxers,						///< @brief	The number of TSI muxers on the device. (New in SDK 17.0)
+	kDeviceGetSPIFlashVersion,					///< @brief	The SPI-flash version on the device. (New in SDK 17.1)
 	kNTV2NumericParam_LAST,
 	kNTV2NumericParam_COUNT	= kNTV2NumericParam_LAST-kNTV2NumericParam_FIRST,
 	kDeviceGetNum_INVALID	= kNTV2NumericParam_LAST

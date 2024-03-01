@@ -1556,9 +1556,9 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceHasSDIRelays:						outValue = ::NTV2DeviceHasSDIRelays						(devID);	break;
 		case kDeviceHasSPIFlash:						outValue = ::NTV2DeviceHasSPIFlash						(devID);	break;	//	Deprecate?
 		case kDeviceHasSPIFlashSerial:					outValue = ::NTV2DeviceHasSPIFlashSerial				(devID);	break;	//	Deprecate?
-		case kDeviceHasSPIv2:							outValue = ::NTV2DeviceGetSPIFlashVersion(devID) == 2;	break;
-		case kDeviceHasSPIv3:							outValue = ::NTV2DeviceGetSPIFlashVersion(devID) == 3;	break;
-		case kDeviceHasSPIv4:							outValue = ::NTV2DeviceGetSPIFlashVersion(devID) == 4;	break;
+		case kDeviceHasSPIv2:							outValue = GetNumSupported(kDeviceGetSPIFlashVersion) == 2;	break;
+		case kDeviceHasSPIv3:							outValue = GetNumSupported(kDeviceGetSPIFlashVersion) == 3;	break;
+		case kDeviceHasSPIv4:							outValue = GetNumSupported(kDeviceGetSPIFlashVersion) == 4;	break;
 		case kDeviceIs64Bit:							outValue = ::NTV2DeviceIs64Bit							(devID);	break;	//	Deprecate?
 		case kDeviceIsDirectAddressable:				outValue = ::NTV2DeviceIsDirectAddressable				(devID);	break;	//	Deprecate?
 		case kDeviceIsExternalToHost:					outValue = ::NTV2DeviceIsExternalToHost					(devID);	break;
@@ -1627,6 +1627,7 @@ bool CNTV2DriverInterface::GetNumericParam (const ULWord inParamID, ULWord & out
 		case kDeviceGetDownConverterDelay:				outValue = ::NTV2DeviceGetDownConverterDelay				(devID);	break;
 		case kDeviceGetHDMIVersion:						outValue = ::NTV2DeviceGetHDMIVersion						(devID);	break;
 		case kDeviceGetLUTVersion:						outValue = ::NTV2DeviceGetLUTVersion						(devID);	break;
+		case kDeviceGetSPIFlashVersion:					outValue = ::NTV2DeviceGetSPIFlashVersion					(devID);	break;
 		case kDeviceGetMaxAudioChannels:				outValue = ::NTV2DeviceGetMaxAudioChannels					(devID);	break;
 		case kDeviceGetMaxRegisterNumber:				outValue = ::NTV2DeviceGetMaxRegisterNumber					(devID);	break;
 		case kDeviceGetMaxTransferCount:				outValue = ::NTV2DeviceGetMaxTransferCount					(devID);	break;
