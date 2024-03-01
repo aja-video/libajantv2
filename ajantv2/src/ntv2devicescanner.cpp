@@ -444,6 +444,9 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 #if defined VIRTUAL_DEVICES_SUPPORT
 	// See if any virtual devices are being referenced by their Index or VD Name. 
 	// If so, convert the argument to the RPC URL and open it.
+	string cp2ConfigPath;
+	GetCP2ConfigPath(cp2ConfigPath);  
+	std::ifstream cfgJsonfile(cp2ConfigPath);  //VDTODO, error handling
 	for (NTV2DeviceInfoListConstIter iter(infoList.begin());  iter != infoList.end();  ++iter)
 	{
 		if (iter->isVirtualDevice)
@@ -452,7 +455,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 				iter->virtualDeviceName == inArgument ||
 				iter->virtualDeviceID == inArgument)
 			{
-				string inVDSpec = "ntv2virtualdev://localhost/?CP2ConfigPath=" + std::string(CP2_CONFIG_PATH) +
+				string inVDSpec = "ntv2virtualdev://localhost/?CP2ConfigPath=" + cp2ConfigPath +
 						  "&DeviceSN=" +  CNTV2Card::SerialNum64ToString(iter->deviceSerialNumber) + 
 						  "&vdid=" + iter->virtualDeviceID + 
 						  "&verbose";
@@ -802,10 +805,12 @@ void CNTV2DeviceScanner::SortDeviceInfoList (void)
 #if defined VIRTUAL_DEVICES_SUPPORT
 bool CNTV2DeviceScanner::GetSerialToVirtualDeviceMap (NTV2SerialToVirtualDevices & outSerialToVirtualDevMap)
 {
-	std::ifstream cfgJsonfile(CP2_CONFIG_PATH);
+	string cp2ConfigPath;
+	GetCP2ConfigPath(cp2ConfigPath);  
+	std::ifstream cfgJsonfile(cp2ConfigPath); 
 	json cp2Json;
 	if (cfgJsonfile.is_open())
-		//VDTODO: Sent to debug sucessful open
+		//VDTODO: Send to debug sucessful open
 		cp2Json = json::parse(cfgJsonfile);   //VDTODO  handle any parse_error exception, send to error
 	else
 		//VDTODO: Send to debug fail to open
@@ -827,6 +832,14 @@ bool CNTV2DeviceScanner::GetSerialToVirtualDeviceMap (NTV2SerialToVirtualDevices
 			outSerialToVirtualDevMap[hwdev["serial"]] = vdevs;
 	}
 
+	return true;
+}
+
+bool CNTV2DeviceScanner::GetCP2ConfigPath(string & outCP2ConfigPath)
+{
+	AJASystemInfo info;
+	info.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreUser,outCP2ConfigPath);
+	outCP2ConfigPath = outCP2ConfigPath + "aja/controlpanelConfigPrimary.json";
 	return true;
 }
 #endif
