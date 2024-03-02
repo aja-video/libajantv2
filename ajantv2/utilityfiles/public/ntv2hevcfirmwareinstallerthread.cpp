@@ -54,7 +54,7 @@ AJAStatus CNTV2HEVCFirmwareInstallerThread::ThreadInit()
 	m_device.Open (m_deviceInfo.deviceIndex);
 	if (!m_device.IsOpen ())
 	{
-		cerr << "## ERROR:	CNTV2FirmwareInstallerThread: Device not open" << endl;
+		cerr << "## ERROR:	CNTV2HEVCFirmwareInstallerThread: Device not open" << endl;
 		return AJA_STATUS_OPEN;
 	}
 	
@@ -76,12 +76,12 @@ AJAStatus CNTV2HEVCFirmwareInstallerThread::ThreadRun()
 	m_device.Open (m_deviceInfo.deviceIndex);
 	if (!m_device.IsOpen ())
 	{
-		cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Device not open" << endl;
+		cerr << "## ERROR:	CNTV2HEVCFirmwareInstallerThread:  Device not open" << endl;
 		return AJA_STATUS_OPEN;
 	}
 	if (m_bitfilePath.empty ())
 	{
-		cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Bitfile path is empty!" << endl;
+		cerr << "## ERROR:	CNTV2HEVCFirmwareInstallerThread:  Bitfile path is empty!" << endl;
 		return AJA_STATUS_BAD_PARAM;
 	}
 

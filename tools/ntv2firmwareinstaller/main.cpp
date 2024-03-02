@@ -309,10 +309,9 @@ int main (int argc, const char** argv)
 		ReportDeviceFlashStatus(device);
 
 	//	Flash the device...
-	CNTV2DeviceScanner				scanner;
-	const NTV2DeviceInfo &			info			(scanner.GetDeviceInfoList()[device.GetIndexNumber()]);
-	CNTV2FirmwareInstallerThread	installThread	(info, bitfilePaths.front(), bQuiet ? false : true, bForce ? true : false);
-
+	CNTV2FirmwareInstallerThread installThread (device, bitfilePaths.front(),
+												bQuiet ? false : true,
+												bForce ? true : false);
 	AJAStatus result = installThread.Start();
 	if (AJA_FAILURE (result))
 	{
