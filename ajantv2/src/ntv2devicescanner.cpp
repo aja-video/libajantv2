@@ -242,6 +242,32 @@ void CNTV2DeviceScanner::ScanHardware (void)
 			break;
 	}	//	boardNum loop
 
+
+#if defined VIRTUAL_DEVICES_SUPPORT 
+	NTV2SerialToVirtualDevices vdMap;
+	GetSerialToVirtualDeviceMap(vdMap);
+	NTV2DeviceInfoList hwList = GetDeviceInfoList();
+	int vdIndex = 100;
+	for (auto hwInfo : hwList)
+	{
+		string hwSN = CNTV2Card::SerialNum64ToString(hwInfo.deviceSerialNumber);
+		auto it = vdMap.find(hwSN);
+		if (it != vdMap.end())
+		{
+			std::vector<VirtualDeviceInfo> vdevs = it->second;
+			for (const auto& vdev : vdevs)
+			{
+				hwInfo.deviceIndex = vdIndex++;
+				hwInfo.isVirtualDevice = true;
+				hwInfo.virtualDeviceID = vdev.vdID;
+				hwInfo.virtualDeviceName =  vdev.vdName;
+				GetDeviceInfoList().push_back(hwInfo);
+			}
+		}
+	}
+
+#endif
+
 }	//	ScanHardware
 
 
@@ -383,7 +409,12 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 			cout << "No devices detected" << endl;
 		else
 			cout << DEC(infoList.size()) << " available " << (infoList.size() == 1 ? "device:" : "devices:") << endl;
+#if defined VIRTUAL_DEVICES_SUPPORT
+		NTV2DeviceInfoListConstIter iter;
+		for (iter = infoList.begin(); iter != infoList.end() && iter->deviceIndex < 100;  ++iter)
+#else
 		for (NTV2DeviceInfoListConstIter iter(infoList.begin());  iter != infoList.end();  ++iter)
+#endif
 		{
 			const string serNum(CNTV2Card::SerialNum64ToString(iter->deviceSerialNumber));
 			cout << DECN(iter->deviceIndex,2) << " | " << setw(8) << ::NTV2DeviceIDToString(iter->deviceID);
@@ -391,9 +422,50 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 				cout << " | " << setw(9) << serNum << " | " << HEX0N(iter->deviceSerialNumber,8);
 			cout << endl;
 		}
+#if defined VIRTUAL_DEVICES_SUPPORT
+		if (iter != infoList.end())
+		{
+			cout << "*** Virtual Devices ***" << endl;
+			while (iter != infoList.end())
+			{
+				const string serNum(CNTV2Card::SerialNum64ToString(iter->deviceSerialNumber));
+				cout << DECN(iter->deviceIndex,2) << " | " << setw(15) << iter->virtualDeviceName;// NTV2DeviceIDToString(iter->deviceID);
+				cout << " | " << iter->virtualDeviceID;
+				cout << " (" << NTV2DeviceIDToString(iter->deviceID); 
+				if (!serNum.empty())
+					cout << " " << serNum;
+				cout << ")" << endl;
+				iter++;
+			}
+		}
+#endif
 		return false;
 	}
 
+#if defined VIRTUAL_DEVICES_SUPPORT
+	// See if any virtual devices are being referenced by their Index or VD Name. 
+	// If so, convert the argument to the RPC URL and open it.
+	string cp2ConfigPath;
+	GetCP2ConfigPath(cp2ConfigPath);  
+	std::ifstream cfgJsonfile(cp2ConfigPath);  //VDTODO, error handling
+	for (NTV2DeviceInfoListConstIter iter(infoList.begin());  iter != infoList.end();  ++iter)
+	{
+		if (iter->isVirtualDevice)
+		{
+			if ( (std::to_string(iter->deviceIndex) == inArgument ) ||
+				iter->virtualDeviceName == inArgument ||
+				iter->virtualDeviceID == inArgument)
+			{
+				string inVDSpec = "ntv2virtualdev://localhost/?CP2ConfigPath=" + cp2ConfigPath +
+						  "&DeviceSN=" +  CNTV2Card::SerialNum64ToString(iter->deviceSerialNumber) + 
+						  "&vdid=" + iter->virtualDeviceID + 
+						  "&verbose";
+				return outDevice.Open(inVDSpec);
+			}
+		}
+	}
+
+#endif
 	return outDevice.Open(inArgument);
 
 }	//	GetFirstDeviceFromArgument
@@ -730,3 +802,45 @@ void CNTV2DeviceScanner::SortDeviceInfoList (void)
 {
 	std::sort (_deviceInfoList.begin (), _deviceInfoList.end (), gCompareSlot);
 }
+
+#if defined VIRTUAL_DEVICES_SUPPORT
+bool CNTV2DeviceScanner::GetSerialToVirtualDeviceMap (NTV2SerialToVirtualDevices & outSerialToVirtualDevMap)
+{
+	string cp2ConfigPath;
+	GetCP2ConfigPath(cp2ConfigPath);  
+	std::ifstream cfgJsonfile(cp2ConfigPath); 
+	json cp2Json;
+	if (cfgJsonfile.is_open())
+		//VDTODO: Send to debug sucessful open
+		cp2Json = json::parse(cfgJsonfile);   //VDTODO  handle any parse_error exception, send to error
+	else
+		//VDTODO: Send to debug fail to open
+		return false;
+	cfgJsonfile.close();
+
+	for (const auto& hwdev : cp2Json["v2"]["deviceConfigList"]) 
+	{
+		std::vector<VirtualDeviceInfo> vdevs;
+		json hwdevice = hwdev;
+		for (const auto& vdev : hwdevice["virtualDevices"]) 
+		{
+			VirtualDeviceInfo newVDev;
+			newVDev.vdID = vdev["id"];
+			newVDev.vdName = vdev["name"];
+			vdevs.push_back(newVDev);
+		}
+		if (!vdevs.empty())
+			outSerialToVirtualDevMap[hwdev["serial"]] = vdevs;
+	}
+
+	return true;
+}
+
+bool CNTV2DeviceScanner::GetCP2ConfigPath(string & outCP2ConfigPath)
+{
+	AJASystemInfo info;
+	info.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreUser,outCP2ConfigPath);
+	outCP2ConfigPath = outCP2ConfigPath + "aja/controlpanelConfigPrimary.json";
+	return true;
+}
+#endif
