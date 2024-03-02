@@ -44,10 +44,8 @@ static int ShowDeviceInfo (CNTV2Card & inCard)
 			<< "\t" << inCard.features().GetNumEmbeddedAudioOutputChannels() << " channel(s) of Embedded Audio Output" << endl;
 
 	//	Show its video and pixel format capabilities:
-	NTV2VideoFormatSet videoFormats;
-	NTV2PixelFormats pixelFormats;
-	inCard.GetSupportedVideoFormats(videoFormats);
-	inCard.GetSupportedPixelFormats(pixelFormats);
+	const NTV2VideoFormatSet videoFormats(inCard.features().VideoFormats());
+	const NTV2PixelFormats pixelFormats(inCard.features().PixelFormats());
 	cout	<< "\t" << videoFormats << endl
 			<< "\t" << pixelFormats << endl;
 	return 0;

@@ -601,7 +601,7 @@ bool NTV2FrameGrabber::SetupInput (void)
 				mNTV2Card.SetReference (::NTV2InputSourceToReferenceSource(mInputSource));
 
             // configure hdmi with 2.0 support
-            if (NTV2_IS_4K_VIDEO_FORMAT(mCurrentVideoFormat) && !mNTV2Card.DeviceCanDoHDMIQuadRasterConversion())
+            if (NTV2_IS_4K_VIDEO_FORMAT(mCurrentVideoFormat) && !mNTV2Card.features().CanDoHDMIQuadRasterConversion())
             {
                 //	Set two sample interleave
                 mChannel = NTV2_CHANNEL1;
@@ -645,8 +645,8 @@ bool NTV2FrameGrabber::SetupInput (void)
 
                 mNumChannels = 2;
                 mTsi = true;
-            }
-			else if (NTV2_IS_4K_VIDEO_FORMAT(mCurrentVideoFormat) && mNTV2Card.DeviceCanDoHDMIQuadRasterConversion())
+            }	//	if 4K and can't do HDMI quad raster conversion
+			else if (NTV2_IS_4K_VIDEO_FORMAT(mCurrentVideoFormat) && mNTV2Card.features().CanDoHDMIQuadRasterConversion())
             {
                 mNumChannels = 0;
 				mNTV2Card.SetTsiFrameEnable(false, NTV2_CHANNEL1);
@@ -669,7 +669,7 @@ bool NTV2FrameGrabber::SetupInput (void)
                                             ::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, true/*isHDMI_RGB*/, channel/*hdmiQuadrant*/));
                     }
                 }	//	loop once for each channel (4 times for 4K/UHD)
-			}
+			}	//	else if 4K and can do HDMI quad raster conversion
 			else
 			{
 				mNumChannels = 1;
@@ -688,7 +688,7 @@ bool NTV2FrameGrabber::SetupInput (void)
 					mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (mChannel),
 										::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, true/*isHDMI_RGB*/, 0/*hdmiQuadrant*/));
 				}
-			}
+			}	//	else not 4K
 
             // configure the qrc if present
             if (mNTV2Card.features().GetHDMIVersion() == 2)

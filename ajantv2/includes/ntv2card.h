@@ -170,9 +170,10 @@ public:
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceHasMicInput(void));	///< @deprecated	Use CNTV2DriverInterface::IsSupported with kDeviceHasMicrophoneInput instead.
 #endif	//	defined(NTV2_DEPRECATE_16_3)
 
+	AJA_VIRTUAL ULWord	DeviceGetNumberFrameBuffers (void);		//	Deprecated in SDK 16.3, restored in SDK 17.1
+#if 0 // MrBill
 	//	Per-instance replacements for global NTV2DeviceCanDo... functions:
 	AJA_VIRTUAL bool	IsWidgetIDSupported (const NTV2WidgetID inWgtID);	//	New in SDK 17.1
-	AJA_VIRTUAL ULWord	DeviceGetNumberFrameBuffers (void);		//	Deprecated in SDK 16.3, restored in SDK 17.1
 	AJA_VIRTUAL bool	DeviceCanDo292In (const UWord ndx0);	//	New in SDK 17.1
 	AJA_VIRTUAL bool	DeviceCanDo3GIn (const UWord ndx0);		//	New in SDK 17.1
 	AJA_VIRTUAL bool	DeviceCanDo12GIn (const UWord ndx0);	//	New in SDK 17.1
@@ -188,6 +189,7 @@ public:
 	AJA_VIRTUAL bool	DeviceCanDoInputTCIndex (const NTV2TCIndex inTCIndex);	//	New in SDK 17.1
 	AJA_VIRTUAL bool	GetSupportedVideoFormats (NTV2VideoFormatSet & outVFs);
 	AJA_VIRTUAL bool	GetSupportedPixelFormats (NTV2PixelFormats & outPFs);	//	New in SDK 17.1
+#endif // MrBill
 	///@}
 
 
@@ -6577,12 +6579,14 @@ private:
 													NTV2FrameBufferFormat format);
 	AJA_VIRTUAL bool	IsBufferSizeChangeRequired(NTV2Channel channel, NTV2FrameGeometry geometry,
 									NTV2FrameBufferFormat currentFormat, NTV2FrameBufferFormat newFormat);
-	AJA_VIRTUAL bool	GetFBSizeAndCountFromHW(ULWord* size, ULWord* count);
+	AJA_VIRTUAL bool	GetFBSizeAndCountFromHW(ULWord & outSize, ULWord & outCount);
 
 	AJA_VIRTUAL bool	IsMultiFormatActive (void); ///< @return	True if the device supports the multi format feature and it's enabled; otherwise false.
 	AJA_VIRTUAL bool	CopyVideoFormat(const NTV2Channel inSrc, const NTV2Channel inFirst, const NTV2Channel inLast);
+#if 0 // MrBill
 	ULWordSet			mSupportedWgts;			///< @brief	Cache my supported NTV2WidgetIDs
 	mutable AJALock		mSupportedWgtsLock;		///< @brief	Guard mutex for mSupportedWgts
+#endif//MrBill
 #if defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
 	class DeviceCapabilities	mDevCap;
 #endif	//	defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)

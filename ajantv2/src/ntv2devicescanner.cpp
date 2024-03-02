@@ -171,10 +171,10 @@ void CNTV2DeviceScanner::ScanHardware (void)
 
 	for (UWord boardNum(0);   ;   boardNum++)
 	{
-		CNTV2Card tmpDevice(boardNum);
-		if (tmpDevice.IsOpen())
+		CNTV2Card tmpDev(boardNum);
+		if (tmpDev.IsOpen())
 		{
-			const NTV2DeviceID	deviceID (tmpDevice.GetDeviceID());
+			const NTV2DeviceID	deviceID (tmpDev.GetDeviceID());
 
 			if (deviceID != DEVICE_ID_NOTFOUND)
 			{
@@ -183,59 +183,60 @@ void CNTV2DeviceScanner::ScanHardware (void)
 				info.deviceIndex		= boardNum;
 				info.deviceID			= deviceID;
 				info.pciSlot			= 0;
-				info.deviceSerialNumber	= tmpDevice.GetSerialNumber();
+				info.deviceSerialNumber	= tmpDev.GetSerialNumber();
 
-				oss << ::NTV2DeviceIDToString (deviceID, tmpDevice.IsSupported(kDeviceHasMicrophoneInput)) << " - " << boardNum;
+				oss << ::NTV2DeviceIDToString (deviceID, tmpDev.IsSupported(kDeviceHasMicrophoneInput)) << " - " << boardNum;
 				if (info.pciSlot)
 					oss << ", Slot " << info.pciSlot;
 
+				const ULWordSet wgtIDs (tmpDev.GetSupportedItems(kNTV2EnumsID_WidgetID));
 				info.deviceIdentifier		= oss.str();
-				info.numVidInputs			= NTV2DeviceGetNumVideoInputs		(info.deviceID);
-				info.numVidOutputs			= NTV2DeviceGetNumVideoOutputs		(info.deviceID);
-				info.numAnlgVidOutputs		= NTV2DeviceGetNumAnalogVideoOutputs(info.deviceID);
-				info.numAnlgVidInputs		= NTV2DeviceGetNumAnalogVideoInputs	(info.deviceID);
-				info.numHDMIVidOutputs		= NTV2DeviceGetNumHDMIVideoOutputs	(info.deviceID);
-				info.numHDMIVidInputs		= NTV2DeviceGetNumHDMIVideoInputs	(info.deviceID);
-				info.numInputConverters		= NTV2DeviceGetNumInputConverters	(info.deviceID);
-				info.numOutputConverters	= NTV2DeviceGetNumOutputConverters	(info.deviceID);
-				info.numUpConverters		= NTV2DeviceGetNumUpConverters		(info.deviceID);
-				info.numDownConverters		= NTV2DeviceGetNumDownConverters	(info.deviceID);
-				info.downConverterDelay		= NTV2DeviceGetDownConverterDelay	(info.deviceID);
-				info.dvcproHDSupport		= NTV2DeviceCanDoDVCProHD			(info.deviceID);
-				info.qrezSupport			= NTV2DeviceCanDoQREZ				(info.deviceID);
-				info.hdvSupport				= NTV2DeviceCanDoHDV				(info.deviceID);
-				info.quarterExpandSupport	= NTV2DeviceCanDoQuarterExpand		(info.deviceID);
-				info.colorCorrectionSupport	= tmpDevice.DeviceCanDoColorCorrection();
-				info.programmableCSCSupport	= tmpDevice.DeviceCanDoProgrammableCSC();
-				info.rgbAlphaOutputSupport	= NTV2DeviceCanDoRGBPlusAlphaOut	(info.deviceID);
-				info.breakoutBoxSupport		= NTV2DeviceCanDoBreakoutBox		(info.deviceID);
-				info.vidProcSupport			= NTV2DeviceCanDoVideoProcessing	(info.deviceID);
-				info.dualLinkSupport		= NTV2DeviceCanDoDualLink			(info.deviceID);
-				info.numDMAEngines			= UWord(::NTV2DeviceGetNumDMAEngines(info.deviceID));
-				info.pingLED				= NTV2DeviceGetPingLED				(info.deviceID);
-				info.has2KSupport			= NTV2DeviceCanDo2KVideo			(info.deviceID);
-				info.has4KSupport			= NTV2DeviceCanDo4KVideo			(info.deviceID);
-				info.has8KSupport			= NTV2DeviceCanDo8KVideo			(info.deviceID);
-				info.has3GLevelConversion   = NTV2DeviceCanDo3GLevelConversion  (info.deviceID);
-				info.isoConvertSupport		= NTV2DeviceCanDoIsoConvert			(info.deviceID);
-				info.rateConvertSupport		= NTV2DeviceCanDoRateConvert		(info.deviceID);
-				info.proResSupport			= NTV2DeviceCanDoProRes				(info.deviceID);
-				info.sdi3GSupport			= tmpDevice.IsWidgetIDSupported(NTV2_Wgt3GSDIOut1);
-				info.sdi12GSupport			= NTV2DeviceCanDo12GSDI				(info.deviceID);
-				info.ipSupport				= NTV2DeviceCanDoIP					(info.deviceID);
-				info.biDirectionalSDI		= NTV2DeviceHasBiDirectionalSDI		(info.deviceID);
-				info.ltcInSupport			= NTV2DeviceGetNumLTCInputs			(info.deviceID) > 0;
-				info.ltcOutSupport			= NTV2DeviceGetNumLTCOutputs		(info.deviceID) > 0;
-				info.ltcInOnRefPort			= NTV2DeviceCanDoLTCInOnRefPort		(info.deviceID);
-				info.stereoOutSupport		= NTV2DeviceCanDoStereoOut			(info.deviceID);
-				info.stereoInSupport		= NTV2DeviceCanDoStereoIn			(info.deviceID);
-				info.multiFormat			= NTV2DeviceCanDoMultiFormat		(info.deviceID);
-				info.numSerialPorts			= NTV2DeviceGetNumSerialPorts		(info.deviceID);
+				info.numVidInputs			= tmpDev.GetNumSupported(kDeviceGetNumVideoInputs);
+				info.numVidOutputs			= tmpDev.GetNumSupported(kDeviceGetNumVideoOutputs);
+				info.numAnlgVidOutputs		= tmpDev.GetNumSupported(kDeviceGetNumAnalogVideoOutputs);
+				info.numAnlgVidInputs		= tmpDev.GetNumSupported(kDeviceGetNumAnalogVideoInputs);
+				info.numHDMIVidOutputs		= tmpDev.GetNumSupported(kDeviceGetNumHDMIVideoOutputs);
+				info.numHDMIVidInputs		= tmpDev.GetNumSupported(kDeviceGetNumHDMIVideoInputs);
+				info.numInputConverters		= tmpDev.GetNumSupported(kDeviceGetNumInputConverters);
+				info.numOutputConverters	= tmpDev.GetNumSupported(kDeviceGetNumOutputConverters);
+				info.numUpConverters		= tmpDev.GetNumSupported(kDeviceGetNumUpConverters);
+				info.numDownConverters		= tmpDev.GetNumSupported(kDeviceGetNumDownConverters);
+				info.downConverterDelay		= tmpDev.GetNumSupported(kDeviceGetDownConverterDelay);
+				info.dvcproHDSupport		= tmpDev.IsSupported(kDeviceCanDoDVCProHD);
+				info.qrezSupport			= tmpDev.IsSupported(kDeviceCanDoQREZ);
+				info.hdvSupport				= tmpDev.IsSupported(kDeviceCanDoHDV);
+				info.quarterExpandSupport	= tmpDev.IsSupported(kDeviceCanDoQuarterExpand);
+				info.colorCorrectionSupport	= tmpDev.IsSupported(kDeviceCanDoColorCorrection);
+				info.programmableCSCSupport	= tmpDev.IsSupported(kDeviceCanDoProgrammableCSC);
+				info.rgbAlphaOutputSupport	= tmpDev.IsSupported(kDeviceCanDoRGBPlusAlphaOut);
+				info.breakoutBoxSupport		= tmpDev.IsSupported(kDeviceCanDoBreakoutBox);
+				info.vidProcSupport			= tmpDev.IsSupported(kDeviceCanDoVideoProcessing);
+				info.dualLinkSupport		= tmpDev.IsSupported(kDeviceCanDoDualLink);
+				info.numDMAEngines			= UWord(tmpDev.GetNumSupported(kDeviceGetNumDMAEngines));
+				info.pingLED				= tmpDev.GetNumSupported(kDeviceGetPingLED);
+				info.has2KSupport			= tmpDev.IsSupported(kDeviceCanDo2KVideo);
+				info.has4KSupport			= tmpDev.IsSupported(kDeviceCanDo4KVideo);
+				info.has8KSupport			= tmpDev.IsSupported(kDeviceCanDo8KVideo);
+				info.has3GLevelConversion   = tmpDev.IsSupported(kDeviceCanDo3GLevelConversion);
+				info.isoConvertSupport		= tmpDev.IsSupported(kDeviceCanDoIsoConvert);
+				info.rateConvertSupport		= tmpDev.IsSupported(kDeviceCanDoRateConvert);
+				info.proResSupport			= tmpDev.IsSupported(kDeviceCanDoProRes);
+				info.sdi3GSupport			= wgtIDs.find(NTV2_Wgt3GSDIOut1) != wgtIDs.end();
+				info.sdi12GSupport			= tmpDev.IsSupported(kDeviceCanDo12GSDI);
+				info.ipSupport				= tmpDev.IsSupported(kDeviceCanDoIP);
+				info.biDirectionalSDI		= tmpDev.IsSupported(kDeviceHasBiDirectionalSDI);
+				info.ltcInSupport			= tmpDev.GetNumSupported(kDeviceGetNumLTCInputs) > 0;
+				info.ltcOutSupport			= tmpDev.GetNumSupported(kDeviceGetNumLTCOutputs) > 0;
+				info.ltcInOnRefPort			= tmpDev.IsSupported(kDeviceCanDoLTCInOnRefPort);
+				info.stereoOutSupport		= tmpDev.IsSupported(kDeviceCanDoStereoOut);
+				info.stereoInSupport		= tmpDev.IsSupported(kDeviceCanDoStereoIn);
+				info.multiFormat			= tmpDev.IsSupported(kDeviceCanDoMultiFormat);
+				info.numSerialPorts			= tmpDev.GetNumSupported(kDeviceGetNumSerialPorts);
 				info.procAmpSupport			= false;
-				SetAudioAttributes(info, tmpDevice);
+				SetAudioAttributes(info, tmpDev);
 				GetDeviceInfoList().push_back(info);
 			}
-			tmpDevice.Close();
+			tmpDev.Close();
 		}	//	if Open succeeded
 		else
 			break;
