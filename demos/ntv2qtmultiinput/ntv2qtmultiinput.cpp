@@ -164,17 +164,13 @@ void NTV2QtMultiInput::SlotCaptionsCheckBox (const int inputNum)
 
 void NTV2QtMultiInput::RequestDeviceChange (const int inDeviceIndexNum)
 {
-	//	Get the board number and type...
-	CNTV2DeviceScanner	scanner;
-	if (scanner.GetNumDevices ())
+	//	Notify each frame grabber to change devices...
+	CNTV2Card dev;
+	if (CNTV2DeviceScanner::GetDeviceAtIndex(inDeviceIndexNum, dev))
 	{
-		NTV2DeviceInfo	deviceInfo	(scanner.GetDeviceInfoList () [inDeviceIndexNum]);
-
-		//	Notify each frame grabber to change devices...
-		for (uint32_t inputNumber (0);  inputNumber < mDeviceInputCounts [inDeviceIndexNum];  inputNumber++)
-			if (mFrameGrabbers [inputNumber])
-				mFrameGrabbers [inputNumber]->SetDeviceIndex (deviceInfo.deviceIndex);
+		for (uint32_t inputNumber(0);  inputNumber < mDeviceInputCounts[inDeviceIndexNum];  inputNumber++)
+			if (mFrameGrabbers[inputNumber])
+				mFrameGrabbers[inputNumber]->SetDeviceIndex (dev.GetIndexNumber());
 		qDebug ("## NOTE:  Device changed to %d", inDeviceIndexNum);
 	}
-
 }	//	RequestDeviceChange
