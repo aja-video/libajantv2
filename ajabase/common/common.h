@@ -371,6 +371,42 @@ AJA_EXPORT std::string join (const std::set<std::string> & parts, const std::str
  */
 AJA_EXPORT char* safer_strncpy(char* target, const char* source, size_t num, size_t maxSize);
 
+/**
+ *	@param[in]		inChr	The character of interest.
+ *	@return true if the given character is a hexadecimal digit (i.e. '0'-'9' or 'A'-'F' or 'a'-'f')
+ */
+AJA_EXPORT bool is_hex_digit(const char inChr);	//	New in SDK 17.1
+
+/**
+ *	@param[in]		inChr	The character of interest.
+ *	@return true if the given character is a decimal digit (i.e. '0'-'9')
+ */
+AJA_EXPORT bool is_decimal_digit (const char inChr);	//	New in SDK 17.1
+
+/**
+ *	@param[in]		inChr	The character of interest.
+ *	@return true if the given character is alphanumeric (i.e. '0'-'9' or 'A'-'Z' or 'a'-'z')
+ */
+AJA_EXPORT bool is_alpha_numeric (const char inChr);	//	New in SDK 17.1
+
+/**
+ *	@param[in]		inStr			The character string of interest.
+ *	@param[in]		inMaxLength		The maximum number of decimal digits allowed. Defaults to 2.
+ *	@return true if the given string is a decimal number (and does not exceed the maximum length)
+ */
+AJA_EXPORT bool is_legal_decimal_number (const std::string & inStr, const size_t inMaxLength = 2);	//	New in SDK 17.1
+
+/**
+ *	@param[in]		inStr	The character string of interest.
+ *	@return true if the given string contains a legal hexadecimal AJA device serial number
+ */
+AJA_EXPORT uint64_t is_legal_hex_serial_number (const std::string & inStr);	//	New in SDK 17.1
+
+/**
+ *	@param[in]		inStr	The character string of interest.
+ *	@return true if every character in the given string is alphanumeric 
+ */
+AJA_EXPORT bool is_alpha_numeric (const std::string & inStr);	//	New in SDK 17.1
 } //end aja namespace
 
 #endif	//	AJA_COMMON_H
