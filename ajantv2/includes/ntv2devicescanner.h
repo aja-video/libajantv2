@@ -15,8 +15,7 @@
 
 //#define VIRTUAL_DEVICES_SUPPORT		0
 
-#if defined VIRTUAL_DEVICES_SUPPORT
-
+#if defined(VIRTUAL_DEVICES_SUPPORT)
 #include "ajabase/system/info.h"
 #include "ajabase/common/json.hpp"
 #include <fstream>
@@ -30,8 +29,7 @@ typedef struct VirtualDeviceInfo
 } VirtualDeviceInfo;
 
 typedef std::map<string, std::vector<VirtualDeviceInfo>> 	NTV2SerialToVirtualDevices;	/// Serial number to Virtual Device Names
-
-#endif
+#endif	//	defined(VIRTUAL_DEVICES_SUPPORT)
 
 typedef std::vector <AudioSampleRateEnum>				NTV2AudioSampleRateList;
 typedef NTV2AudioSampleRateList::const_iterator			NTV2AudioSampleRateListConstIter;
@@ -116,11 +114,11 @@ typedef struct NTV2DeviceInfo
 	UWord							numDMAEngines;						///< @brief Total number of DMA engines
 	UWord							numSerialPorts;						///< @brief Total number of serial ports
 	ULWord							pingLED;
-#if defined VIRTUAL_DEVICES_SUPPORT
+#if defined(VIRTUAL_DEVICES_SUPPORT)
 	bool							isVirtualDevice=false;
 	std::string						virtualDeviceName;
 	std::string						virtualDeviceID;
-#endif
+#endif	//	defined(VIRTUAL_DEVICES_SUPPORT)
 
 	AJAExport	bool operator == (const NTV2DeviceInfo & rhs) const;	///< @return	True if I'm equivalent to another ::NTV2DeviceInfo struct.
 	AJAExport	inline bool operator != (const NTV2DeviceInfo & rhs) const	{ return !(*this == rhs); } ///< @return	True if I'm different from another ::NTV2DeviceInfo struct.
@@ -308,21 +306,14 @@ public:
 	**/
 	static std::string							GetDeviceRefName (CNTV2Card & inDevice);	//	New in SDK 16.0
 
-	/**
-		@return True if the string contains a legal decimal number.
-		@param[in]	inStr	The string to be tested.
-	**/
-	static bool			IsLegalDecimalNumber (const std::string & inStr, const size_t inMaxLength = 2); //	New in SDK 16.0
-	static uint64_t		IsLegalHexSerialNumber (const std::string & inStr); //	New in SDK 16.0		//	e.g. "0x3236333331375458"
-	static bool			IsHexDigit (const char inChr);	//	New in SDK 16.0
-	static bool			IsDecimalDigit (const char inChr);	//	New in SDK 16.0
-	static bool			IsAlphaNumeric (const char inStr);	//	New in SDK 16.0
-
-	/**
-		@return True if the string contains letters and/or decimal digits.
-		@param[in]	inStr	The string to be tested.
-	**/
-	static bool			IsAlphaNumeric (const std::string & inStr); //	New in SDK 16.0
+#if !defined(NTV2_DEPRECATE_17_1)
+	static NTV2_DEPRECATED_f(bool IsLegalDecimalNumber (const std::string & inStr, const size_t maxLen = 2)); ///< @deprecated	Use aja::is_legal_decimal_number instead
+	static NTV2_DEPRECATED_f(uint64_t IsLegalHexSerialNumber (const std::string & inStr)); ///< @deprecated	Use aja::is_legal_hex_serial_number instead
+	static NTV2_DEPRECATED_f(bool IsHexDigit (const char inChr));	///< @deprecated	Use aja::is_hex_digit instead
+	static NTV2_DEPRECATED_f(bool IsDecimalDigit (const char inChr));	///< @deprecated	Use aja::is_decimal_digit instead
+	static NTV2_DEPRECATED_f(bool IsAlphaNumeric (const char inStr));	///< @deprecated	Use aja::is_alpha_numeric instead
+	static NTV2_DEPRECATED_f(bool IsAlphaNumeric (const std::string & inStr)); ///< @deprecated	Use aja::is_alpha_numeric instead
+#endif	//	!defined(NTV2_DEPRECATE_17_1)
 
 	/**
 		@return True if the string contains a legal serial number.
@@ -358,8 +349,10 @@ public:
 	/**
 		@brief	Re-scans the local host for connected AJA devices.
 	**/
-	virtual void	ScanHardware (void);
-	virtual void	ScanHardware (UWord inDeviceMask);
+	void			ScanHardware (void);
+#if !defined(NTV2_DEPRECATE_17_1)
+	inline NTV2_DEPRECATED_f(void ScanHardware (const UWord inMask))	{(void)inMask;  ScanHardware();}
+#endif	//	!defined(NTV2_DEPRECATE_17_1)
 
 
 	//	Inquiry
@@ -390,13 +383,13 @@ public:
 		@brief	Returns an NTV2DeviceInfoList that can be "walked" using standard C++ vector iteration techniques.
 		@return A non-constant reference to my NTV2DeviceInfoList.
 	**/
-	virtual inline NTV2DeviceInfoList &			GetDeviceInfoList (void)			{ return _deviceInfoList; }
+	inline NTV2DeviceInfoList &					GetDeviceInfoList (void)			{ return _deviceInfoList; }
 
 	/**
 		@brief	Returns an NTV2DeviceInfoList that can be "walked" using standard C++ vector iteration techniques.
 		@return A constant reference to my NTV2DeviceInfoList.
 	**/
-	virtual inline const NTV2DeviceInfoList &	GetDeviceInfoList (void) const		{ return _deviceInfoList; }
+	inline const NTV2DeviceInfoList &			GetDeviceInfoList (void) const		{ return _deviceInfoList; }
 
 
 	//	Sorting
@@ -411,10 +404,10 @@ public:
 private:
 	virtual void	SetAudioAttributes(NTV2DeviceInfo & inDeviceInfo, CNTV2Card & inDevice) const;
 	virtual void	DeepCopy (const CNTV2DeviceScanner & inDeviceScanner);
-#if defined VIRTUAL_DEVICES_SUPPORT
+#if defined(VIRTUAL_DEVICES_SUPPORT)
 	virtual bool	GetSerialToVirtualDeviceMap(NTV2SerialToVirtualDevices & outSerialToVirtualDevMap);
 	static bool 	GetCP2ConfigPath(string & outCP2ConfigPath);
-#endif
+#endif	//	defined(VIRTUAL_DEVICES_SUPPORT)
 
 
 //	Instance Data

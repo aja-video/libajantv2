@@ -14,76 +14,66 @@
 using namespace std;
 
 
-static string ToLower (const string & inStr)
-{
-	string	result(inStr);
-	return aja::lower(result);
-}
+#if !defined(NTV2_DEPRECATE_17_1)
+	bool CNTV2DeviceScanner::IsHexDigit (const char inChr)
+	{	static const string sHexDigits("0123456789ABCDEFabcdef");
+		return sHexDigits.find(inChr) != string::npos;
+	}
 
-static string ToUpper (const string & inStr)
-{
-	string	result(inStr);
-	return aja::upper(result);
-}
+	bool CNTV2DeviceScanner::IsDecimalDigit (const char inChr)
+	{	static const string sDecDigits("0123456789");
+		return sDecDigits.find(inChr) != string::npos;
+	}
 
-bool CNTV2DeviceScanner::IsHexDigit (const char inChr)
-{	static const string sHexDigits("0123456789ABCDEFabcdef");
-	return sHexDigits.find(inChr) != string::npos;
-}
+	bool CNTV2DeviceScanner::IsAlphaNumeric (const char inChr)
+	{	static const string sLegalChars("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+		return sLegalChars.find(inChr) != string::npos;
+	}
 
-bool CNTV2DeviceScanner::IsDecimalDigit (const char inChr)
-{	static const string sDecDigits("0123456789");
-	return sDecDigits.find(inChr) != string::npos;
-}
+	bool CNTV2DeviceScanner::IsLegalDecimalNumber (const string & inStr, const size_t inMaxLength)
+	{
+		if (inStr.length() > inMaxLength)
+			return false;	//	Too long
+		for (size_t ndx(0);  ndx < inStr.size();  ndx++)
+			if (!aja::is_decimal_digit(inStr.at(ndx)))
+				return false;
+		return true;
+	}
 
-bool CNTV2DeviceScanner::IsAlphaNumeric (const char inChr)
-{	static const string sLegalChars("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
-	return sLegalChars.find(inChr) != string::npos;
-}
+	uint64_t CNTV2DeviceScanner::IsLegalHexSerialNumber (const string & inStr)	//	0x3236333331375458
+	{
+		if (inStr.length() < 3)
+			return 0ULL;	//	Too small
+		string hexStr(inStr); aja::lower(hexStr);
+		if (hexStr[0] == '0'  &&  hexStr[1] == 'x')
+			hexStr.erase(0, 2);	//	Remove '0x' if present
+		if (hexStr.length() > 16)
+			return 0ULL;	//	Too big
+		for (size_t ndx(0);  ndx < hexStr.size();  ndx++)
+			if (!aja::is_hex_digit(hexStr.at(ndx)))
+				return 0ULL;	//	Invalid hex digit
+		while (hexStr.length() != 16)
+			hexStr = '0' + hexStr;	//	prepend another '0'
+		istringstream iss(hexStr);
+		uint64_t u64(0);
+		iss >> hex >> u64;
+		return u64;
+	}
 
-bool CNTV2DeviceScanner::IsLegalDecimalNumber (const string & inStr, const size_t inMaxLength)
-{
-	if (inStr.length() > inMaxLength)
-		return false;	//	Too long
-	for (size_t ndx(0);  ndx < inStr.size();  ndx++)
-		if (!IsDecimalDigit(inStr.at(ndx)))
-			return false;
-	return true;
-}
-
-uint64_t CNTV2DeviceScanner::IsLegalHexSerialNumber (const string & inStr)	//	0x3236333331375458
-{
-	if (inStr.length() < 3)
-		return 0ULL;	//	Too small
-	string hexStr(::ToLower(inStr));
-	if (hexStr[0] == '0'  &&  hexStr[1] == 'x')
-		hexStr.erase(0, 2);	//	Remove '0x' if present
-	if (hexStr.length() > 16)
-		return 0ULL;	//	Too big
-	for (size_t ndx(0);  ndx < hexStr.size();  ndx++)
-		if (!IsHexDigit(hexStr.at(ndx)))
-			return 0ULL;	//	Invalid hex digit
-	while (hexStr.length() != 16)
-		hexStr = '0' + hexStr;	//	prepend another '0'
-	istringstream iss(hexStr);
-	uint64_t u64(0);
-	iss >> hex >> u64;
-	return u64;
-}
-
-bool CNTV2DeviceScanner::IsAlphaNumeric (const string & inStr)
-{
-	for (size_t ndx(0);  ndx < inStr.size();  ndx++)
-		if (!IsAlphaNumeric(inStr.at(ndx)))
-			return false;
-	return true;
-}
+	bool CNTV2DeviceScanner::IsAlphaNumeric (const string & inStr)
+	{
+		for (size_t ndx(0);  ndx < inStr.size();  ndx++)
+			if (!aja::is_alpha_numeric(inStr.at(ndx)))
+				return false;
+		return true;
+	}
+#endif	//	!defined(NTV2_DEPRECATE_17_1)
 
 bool CNTV2DeviceScanner::IsLegalSerialNumber (const string & inStr)
 {
 	if (inStr.length() != 8  &&  inStr.length() != 9)
 		return false;
-	return IsAlphaNumeric(inStr);
+	return aja::is_alpha_numeric(inStr);
 }
 
 
@@ -161,10 +151,6 @@ void CNTV2DeviceScanner::DeepCopy (const CNTV2DeviceScanner & boardScan)
 }	//	DeepCopy
 
 
-void CNTV2DeviceScanner::ScanHardware (UWord inDeviceMask)
-{	(void) inDeviceMask;
-	ScanHardware();
-}
 void CNTV2DeviceScanner::ScanHardware (void)
 {
 	GetDeviceInfoList().clear();
@@ -242,8 +228,7 @@ void CNTV2DeviceScanner::ScanHardware (void)
 			break;
 	}	//	boardNum loop
 
-
-#if defined VIRTUAL_DEVICES_SUPPORT 
+#if defined(VIRTUAL_DEVICES_SUPPORT)
 	NTV2SerialToVirtualDevices vdMap;
 	GetSerialToVirtualDeviceMap(vdMap);
 	NTV2DeviceInfoList hwList = GetDeviceInfoList();
@@ -265,9 +250,7 @@ void CNTV2DeviceScanner::ScanHardware (void)
 			}
 		}
 	}
-
-#endif
-
+#endif	//	defined(VIRTUAL_DEVICES_SUPPORT)
 }	//	ScanHardware
 
 
@@ -328,7 +311,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithID (const NTV2DeviceID inDeviceID, CN
 bool CNTV2DeviceScanner::GetFirstDeviceWithName (const string & inNameSubString, CNTV2Card & outDevice)
 {
 	outDevice.Close();
-	if (!IsAlphaNumeric(inNameSubString))
+	if (!aja::is_alpha_numeric(inNameSubString))
 	{
 		if (inNameSubString.find(":") != string::npos)
 			return outDevice.Open(inNameSubString);
@@ -336,12 +319,12 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithName (const string & inNameSubString,
 	}
 
 	CNTV2DeviceScanner	scanner;
-	string				nameSubString(::ToLower(inNameSubString));
+	string	nameSubString(inNameSubString);  aja::lower(nameSubString);
 	const NTV2DeviceInfoList &	deviceInfoList(scanner.GetDeviceInfoList ());
 
 	for (NTV2DeviceInfoListConstIter iter(deviceInfoList.begin());  iter != deviceInfoList.end();  ++iter)
 	{
-		const string	deviceName(::ToLower(iter->deviceIdentifier));
+		string deviceName(iter->deviceIdentifier);  aja::lower(deviceName);
 		if (deviceName.find(nameSubString) != string::npos)
 			return outDevice.Open(UWord(iter->deviceIndex));	//	Found!
 	}
@@ -350,7 +333,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithName (const string & inNameSubString,
 		nameSubString = "avid dnxiv";
 		for (NTV2DeviceInfoListConstIter iter(deviceInfoList.begin());  iter != deviceInfoList.end();  ++iter)
 		{
-			const string	deviceName(::ToLower(iter->deviceIdentifier));
+			string deviceName(iter->deviceIdentifier);  aja::lower(deviceName);
 			if (deviceName.find(nameSubString) != string::npos)
 				return outDevice.Open(UWord(iter->deviceIndex));	//	Found!
 		}
@@ -364,7 +347,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithSerial (const string & inSerialStr, C
 {
 	CNTV2DeviceScanner	scanner;
 	outDevice.Close();
-	const string searchSerialStr(::ToLower(inSerialStr));
+	string searchSerialStr(inSerialStr);  aja::lower(searchSerialStr);
 	const NTV2DeviceInfoList &	deviceInfos(scanner.GetDeviceInfoList());
 	for (NTV2DeviceInfoListConstIter iter(deviceInfos.begin());  iter != deviceInfos.end();  ++iter)
 	{
@@ -402,19 +385,19 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 	//	Special case:  'LIST' or '?'
 	CNTV2DeviceScanner	scanner;
 	const NTV2DeviceInfoList &	infoList (scanner.GetDeviceInfoList());
-	string upperArg(::ToUpper(inArgument));
+	string upperArg(inArgument);  aja::upper(upperArg);
 	if (upperArg == "LIST" || upperArg == "?")
 	{
 		if (infoList.empty())
 			cout << "No devices detected" << endl;
 		else
 			cout << DEC(infoList.size()) << " available " << (infoList.size() == 1 ? "device:" : "devices:") << endl;
-#if defined VIRTUAL_DEVICES_SUPPORT
+#if defined(VIRTUAL_DEVICES_SUPPORT)
 		NTV2DeviceInfoListConstIter iter;
 		for (iter = infoList.begin(); iter != infoList.end() && iter->deviceIndex < 100;  ++iter)
-#else
+#else	//	defined(VIRTUAL_DEVICES_SUPPORT)
 		for (NTV2DeviceInfoListConstIter iter(infoList.begin());  iter != infoList.end();  ++iter)
-#endif
+#endif	//	else !defined(VIRTUAL_DEVICES_SUPPORT)
 		{
 			const string serNum(CNTV2Card::SerialNum64ToString(iter->deviceSerialNumber));
 			cout << DECN(iter->deviceIndex,2) << " | " << setw(8) << ::NTV2DeviceIDToString(iter->deviceID);
@@ -422,7 +405,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 				cout << " | " << setw(9) << serNum << " | " << HEX0N(iter->deviceSerialNumber,8);
 			cout << endl;
 		}
-#if defined VIRTUAL_DEVICES_SUPPORT
+#if defined(VIRTUAL_DEVICES_SUPPORT)
 		if (iter != infoList.end())
 		{
 			cout << "*** Virtual Devices ***" << endl;
@@ -438,11 +421,11 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 				iter++;
 			}
 		}
-#endif
+#endif	//	defined(VIRTUAL_DEVICES_SUPPORT)
 		return false;
 	}
 
-#if defined VIRTUAL_DEVICES_SUPPORT
+#if defined(VIRTUAL_DEVICES_SUPPORT)
 	// See if any virtual devices are being referenced by their Index or VD Name. 
 	// If so, convert the argument to the RPC URL and open it.
 	string cp2ConfigPath;
@@ -465,7 +448,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 		}
 	}
 
-#endif
+#endif	//	defined(VIRTUAL_DEVICES_SUPPORT)
 	return outDevice.Open(inArgument);
 
 }	//	GetFirstDeviceFromArgument
@@ -803,7 +786,7 @@ void CNTV2DeviceScanner::SortDeviceInfoList (void)
 	std::sort (_deviceInfoList.begin (), _deviceInfoList.end (), gCompareSlot);
 }
 
-#if defined VIRTUAL_DEVICES_SUPPORT
+#if defined(VIRTUAL_DEVICES_SUPPORT)
 bool CNTV2DeviceScanner::GetSerialToVirtualDeviceMap (NTV2SerialToVirtualDevices & outSerialToVirtualDevMap)
 {
 	string cp2ConfigPath;
@@ -843,4 +826,4 @@ bool CNTV2DeviceScanner::GetCP2ConfigPath(string & outCP2ConfigPath)
 	outCP2ConfigPath = outCP2ConfigPath + "aja/controlpanelConfigPrimary.json";
 	return true;
 }
-#endif
+#endif	//	defined(VIRTUAL_DEVICES_SUPPORT)
