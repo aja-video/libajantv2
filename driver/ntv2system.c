@@ -1179,7 +1179,7 @@ bool ntv2SpinLockOpen(Ntv2SpinLock* pSpinLock, Ntv2SystemContext* pSysCon)
 	   (pSysCon == NULL)) return false;
 	
 #if defined(AJAMacDext)
-	atomic_flag_clear(pSpinLock->lock);
+	//atomic_flag_clear(pSpinLock->lock);
 #else
 	memset(pSpinLock, 0, sizeof(Ntv2SpinLock));
 	pSpinLock->lock = IOSimpleLockAlloc();
@@ -1356,7 +1356,8 @@ bool ntv2EventWaitForSignal(Ntv2Event* pEvent, int64_t timeout, bool alert)
 	if(pEventMac->flag) return true;
 
 #if defined(AJAMacDext)
-	pEventMac->pDispatchQueue->SleepWithTimeout(pEvent, timeout);
+	IOSleep(100);
+	//pEventMac->pDispatchQueue->SleepWithTimeout(pEvent, timeout);
 #else
 	// Get the current time
 	clock_get_uptime(&currentTime);
@@ -1413,7 +1414,7 @@ bool ntv2ThreadOpen(Ntv2Thread* pThread, Ntv2SystemContext* pSysCon, const char*
 	}
 	
 #if defined(AJAMacDext)
-	IODispatchQueue::Create(pThread->pName, 0, 0, &pThread->pTask);
+	IODispatchQueue::Create(pThread->pName, kIODispatchQueueReentrant, 0, &pThread->pTask);
 #endif
 	
 	return true;
@@ -1446,6 +1447,7 @@ bool ntv2ThreadRun(Ntv2Thread* pThread, Ntv2ThreadTask* pTask, void* pContext)
 	
 #if defined(AJAMacDext)
 	pThread->pTask->DispatchAsync_f(pContext, (IODispatchFunction)pTask);
+	result = KERN_SUCCESS;
 #else
 	result = kernel_thread_start((thread_continue_t)pThread->pFunc, (void*)pContext, &pThread->pTask);
 #endif
