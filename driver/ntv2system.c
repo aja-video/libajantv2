@@ -1296,8 +1296,11 @@ bool ntv2EventOpen(Ntv2Event* pEvent, Ntv2SystemContext* pSysCon)
 	
 	// initialize event data structure
 	memset(pEvent, 0, sizeof(Ntv2Event));
-	
+#if defined(AJAMacDext)
+	IODispatchQueue::Create("", kIODispatchQueueReentrant, 0, &pEvent->pDispatchQueue);
+#else
 	pEvent->pRecursiveLock = IORecursiveLockAlloc();
+#endif
 
 	return true;
 }
@@ -1306,8 +1309,12 @@ void ntv2EventClose(Ntv2Event* pEvent)
 {
 	if(pEvent == NULL) return;
 	
+#if defined(AJAMacDext)
+	pEvent->pDispatchQueue->free();
+#else
 	IORecursiveLockFree(pEvent->pRecursiveLock);
-
+#endif
+	
 	// initialize event data structure
 	memset(pEvent, 0, sizeof(Ntv2Event));
 }
@@ -1321,7 +1328,7 @@ void ntv2EventSignal(Ntv2Event* pEvent)
 	pEventMac->flag = true;
 	
 #if defined(AJAMacDext)
-	//I do not see a replacement for this in DriverKit
+	pEvent->pDispatchQueue->Wakeup(pEvent);
 #else
 	IORecursiveLockWakeup(pEventMac->pRecursiveLock, pEventMac->pRecursiveLock, false);
 #endif
@@ -1349,6 +1356,7 @@ bool ntv2EventWaitForSignal(Ntv2Event* pEvent, int64_t timeout, bool alert)
 	if(pEventMac->flag) return true;
 
 #if defined(AJAMacDext)
+	pEventMac->pDispatchQueue->SleepWithTimeout(pEvent, timeout);
 #else
 	// Get the current time
 	clock_get_uptime(&currentTime);
@@ -1404,6 +1412,10 @@ bool ntv2ThreadOpen(Ntv2Thread* pThread, Ntv2SystemContext* pSysCon, const char*
 		pThread->pName = "aja worker";
 	}
 	
+#if defined(AJAMacDext)
+	IODispatchQueue::Create(pThread->pName, 0, 0, &pThread->pTask);
+#endif
+	
 	return true;
 }
 
@@ -1412,6 +1424,9 @@ void ntv2ThreadClose(Ntv2Thread* pThread)
 	if(pThread == NULL) return;
 	
 	ntv2ThreadStop(pThread);
+#if defined(AJAMacDext)
+	pThread->pTask->free();
+#endif
 	
 	memset(pThread, 0, sizeof(Ntv2Thread));
 }
@@ -1430,7 +1445,7 @@ bool ntv2ThreadRun(Ntv2Thread* pThread, Ntv2ThreadTask* pTask, void* pContext)
 	pThread->run = true;
 	
 #if defined(AJAMacDext)
-	result = kIOReturnUnsupported;
+	pThread->pTask->DispatchAsync_f(pContext, (IODispatchFunction)pTask);
 #else
 	result = kernel_thread_start((thread_continue_t)pThread->pFunc, (void*)pContext, &pThread->pTask);
 #endif

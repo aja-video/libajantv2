@@ -348,7 +348,8 @@
 	typedef struct ntv2_event
 	{
 #if defined(AJAMacDext)
-		struct IORecursiveLock*	pRecursiveLock;
+		//struct IORecursiveLock*	pRecursiveLock;
+		IODispatchQueue*	pDispatchQueue;
 #else
 		IORecursiveLock*	pRecursiveLock;
 #endif
@@ -362,7 +363,7 @@
 	typedef struct ntv2_thread
 	{
 #if defined(AJAMacDext)
-		struct task_struct* pTask;
+		IODispatchQueue* 	pTask;
 #else
 		thread_t			pTask;
 #endif
