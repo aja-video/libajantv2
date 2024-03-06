@@ -259,15 +259,15 @@ extern "C"
 {
 #endif
 
-#if !defined(NTV2_DEPRECATE_17_1)
+#if !defined(NTV2_DEPRECATE_17_2)
 	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudioOut(const NTV2DeviceID id));		///< @deprecated	This function has been declared obsolete starting in SDK 17.1
 	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoAudioIn(const NTV2DeviceID id));		///< @deprecated	This function has been declared obsolete starting in SDK 17.1
 	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo292Out(NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.1. Call mCard.CanDoWidget(NTV2WidgetType_SDIOut, ndx) instead
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo3GOut (NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.1. Call mCard.CanDoWidget(NTV2WidgetType_SDIOut3G, ndx) instead
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo12GOut(NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.1. Call mCard.CanDoWidget(NTV2WidgetType_SDIOut12G, ndx) instead
+	AJAExport NTV2_SHOULD_DEPRECATE(bool NTV2DeviceCanDo3GOut (NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.1. Call mCard.CanDoWidget(NTV2WidgetType_SDIOut3G, ndx) instead
+	AJAExport NTV2_SHOULD_DEPRECATE(bool NTV2DeviceCanDo12GOut(NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.1. Call mCard.CanDoWidget(NTV2WidgetType_SDIOut12G, ndx) instead
 	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo292In(NTV2DeviceID id, UWord ndx));		///< @deprecated	Starting in SDK 17.1. Call mCard.CanDoWidget(NTV2WidgetType_SDIIn, ndx) instead
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo3GIn(NTV2DeviceID id, UWord ndx));		///< @deprecated	Starting in SDK 17.1. Call mCard.CanDoWidget(NTV2WidgetType_SDIIn3G, ndx) instead
-	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDo12GIn(NTV2DeviceID id, UWord ndx));		///< @deprecated	Starting in SDK 17.1. Call mCard.CanDoWidget(NTV2WidgetType_SDIIn12G, ndx) instead
+	AJAExport NTV2_SHOULD_DEPRECATE(bool NTV2DeviceCanDo3GIn(NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.1. Call mCard.CanDoWidget(NTV2WidgetType_SDIIn3G, ndx) instead
+	AJAExport NTV2_SHOULD_DEPRECATE(bool NTV2DeviceCanDo12GIn(NTV2DeviceID id, UWord ndx));	///< @deprecated	Starting in SDK 17.1. Call mCard.CanDoWidget(NTV2WidgetType_SDIIn12G, ndx) instead
 	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoLTCEmbeddedN (NTV2DeviceID id, UWord ndx));		///< @deprecated	Starting in SDK 17.1
 	AJAExport NTV2_SHOULD_DEPRECATE(bool NTV2DeviceCanDoOutputDestination (const NTV2DeviceID id, const NTV2OutputDest od));	///< @deprecated	Starting in SDK 17.1
 	AJAExport NTV2_DEPRECATED_f(bool NTV2DeviceCanDoColorCorrection (const NTV2DeviceID id));///< @deprecated	Starting in SDK 17.1
@@ -286,7 +286,7 @@ extern "C"
 	#endif
 	AJAExport NTV2_SHOULD_DEPRECATE(ULWord NTV2DeviceGetFrameBufferSize(NTV2DeviceID id, NTV2FrameGeometry fg, NTV2FrameBufferFormat fbf));		///< @deprecated	Starting in SDK 17.1
 	AJAExport NTV2_SHOULD_DEPRECATE(ULWord NTV2DeviceGetNumberFrameBuffers(NTV2DeviceID id, NTV2FrameGeometry fg, NTV2FrameBufferFormat fbf));	///< @deprecated	Starting in SDK 17.1
-#endif	//	defined(NTV2_DEPRECATE_17_0)
+#endif	//	defined(NTV2_DEPRECATE_17_2)
 	
 AJAExport ULWord NTV2DeviceGetNumberVideoFrameBuffers(NTV2DeviceID inDeviceID, NTV2FrameGeometry inFrameGeometry, NTV2Framesize inFramesize);
 AJAExport ULWord NTV2DeviceGetAudioFrameBuffer(NTV2DeviceID boardID, NTV2FrameGeometry frameGeometry, NTV2FrameBufferFormat frameFormat);	//	Revisit for 2MB granularity

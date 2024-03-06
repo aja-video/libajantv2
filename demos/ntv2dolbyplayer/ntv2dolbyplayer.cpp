@@ -9,6 +9,7 @@
 #include "ntv2debug.h"
 #include "ntv2devicescanner.h"
 #include "ntv2testpatterngen.h"
+#include "ntv2audiodefines.h"
 #include "ajabase/common/timebase.h"
 #include "ajabase/system/process.h"
 

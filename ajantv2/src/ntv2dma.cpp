@@ -437,7 +437,7 @@ bool CNTV2Card::DeviceAddressToFrameNumber (const uint64_t inAddress,  UWord & o
 		}
 	}
 	if (!frameBytes)
-	{
+	{	//	Corvid1, Corvid22, Corvid3G, IoExpress, Kona3G, Kona3GQuad, KonaLHe+, KonaLHi, TTap
 		NTV2FrameBufferFormat frameBufferFormat(NTV2_FBF_10BIT_YCBCR);
 		GetFrameBufferFormat(NTV2_CHANNEL1, frameBufferFormat);
 		NTV2FrameGeometry frameGeometry;

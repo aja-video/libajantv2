@@ -8,7 +8,10 @@
 #ifndef NTV2DEVICESCANNER_H
 #define NTV2DEVICESCANNER_H
 
-#include "ntv2audiodefines.h"
+#include "ajatypes.h"
+#if !defined(NTV2_DEPRECATE_17_1)
+	#include "ntv2audiodefines.h"
+#endif	//	!defined(NTV2_DEPRECATE_17_1)
 #include "ntv2card.h"
 #include <vector>
 #include <algorithm>
@@ -31,6 +34,7 @@ typedef struct VirtualDeviceInfo
 typedef std::map<string, std::vector<VirtualDeviceInfo>> 	NTV2SerialToVirtualDevices;	/// Serial number to Virtual Device Names
 #endif	//	defined(VIRTUAL_DEVICES_SUPPORT)
 
+#if !defined(NTV2_DEPRECATE_17_1)
 typedef std::vector <AudioSampleRateEnum>				NTV2AudioSampleRateList;
 typedef NTV2AudioSampleRateList::const_iterator			NTV2AudioSampleRateListConstIter;
 typedef NTV2AudioSampleRateList::iterator				NTV2AudioSampleRateListIter;
@@ -47,9 +51,8 @@ typedef std::vector <AudioBitsPerSampleEnum>			NTV2AudioBitsPerSampleList;
 typedef NTV2AudioBitsPerSampleList::const_iterator		NTV2AudioBitsPerSampleListConstIter;
 typedef NTV2AudioBitsPerSampleList::iterator			NTV2AudioBitsPerSampleListIter;
 
-
 /**
-	@deprecated Please use the functions provided in 'ntv2devicefeatures.h' and 'ntv2devicefeatures.hh' instead.
+	@deprecated Use the DeviceCapabilities from CNTV2Card::features instead.
 **/
 typedef struct NTV2DeviceInfo
 {
@@ -222,6 +225,7 @@ typedef NTV2AudioPhysicalFormatList::iterator			NTV2AudioPhysicalFormatListIter;
 **/
 AJAExport	std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioPhysicalFormatList & inList);
 
+#endif	//	!defined(NTV2_DEPRECATE_17_1)
 
 
 /**
@@ -287,24 +291,19 @@ public:
 	**/
 	static bool									GetFirstDeviceFromArgument (const std::string & inArgument, CNTV2Card & outDevice);
 
-	/**
-		@brief	Compares two NTV2DeviceInfoLists and returns a list of additions and a list of removals.
-		@param[in]	inOldList			Specifies the "old" list to be compared with a "newer" list.
-		@param[in]	inNewList			Specifies the "new" list to be compared with the "older" list.
-		@param[out] outDevicesAdded		Receives a list of devices that exist in the "new" list that don't exist in the "old" list.
-		@param[out] outDevicesRemoved	Receives a list of devices that exist in the "old" list that don't exist in the "new" list.
-		@return		True if the two lists differ in any way; otherwise false if they match.
-	**/
-	static bool									CompareDeviceInfoLists (const NTV2DeviceInfoList & inOldList,
-																		const NTV2DeviceInfoList & inNewList,
-																		NTV2DeviceInfoList & outDevicesAdded,
-																		NTV2DeviceInfoList & outDevicesRemoved);
+	static size_t		GetNumDevices (void);	///< @deprecated	Do not use
 
 	/**
 		@param[in]	inDevice			The CNTV2Card instance that's open for the device of interest.
 		@return		A string containing the device name that will find the same given device using CNTV2DeviceScanner::GetFirstDeviceFromArgument.
 	**/
 	static std::string							GetDeviceRefName (CNTV2Card & inDevice);	//	New in SDK 16.0
+
+	/**
+		@return True if the string contains a legal serial number.
+		@param[in]	inStr	The string to be tested.
+	**/
+	static bool			IsLegalSerialNumber (const std::string & inStr);	//	New in SDK 16.0
 
 #if !defined(NTV2_DEPRECATE_17_1)
 	static NTV2_DEPRECATED_f(bool IsLegalDecimalNumber (const std::string & inStr, const size_t maxLen = 2)); ///< @deprecated	Use aja::is_legal_decimal_number instead
@@ -315,105 +314,34 @@ public:
 	static NTV2_DEPRECATED_f(bool IsAlphaNumeric (const std::string & inStr)); ///< @deprecated	Use aja::is_alpha_numeric instead
 #endif	//	!defined(NTV2_DEPRECATE_17_1)
 
-	/**
-		@return True if the string contains a legal serial number.
-		@param[in]	inStr	The string to be tested.
-	**/
-	static bool			IsLegalSerialNumber (const std::string & inStr);	//	New in SDK 16.0
-
+#if !defined(NTV2_DEPRECATE_17_1)
 //	Instance Methods
 public:
-	//	Construction, Copying, Assigning
-	/**
-		@brief		Constructs me.
-		@param[in]	inScanNow	Specifies if a scan should be made right away. Defaults to true.
-								If false is specified, the client must explicitly call ScanHardware to enumerate NTV2 devices.
-	**/
-	explicit							CNTV2DeviceScanner (const bool inScanNow = true);
-	explicit							CNTV2DeviceScanner (bool inScanNow, UWord inDeviceMask);
-
-	/**
-		@brief		Constructs me from an existing CNTV2DeviceScanner instance.
-		@param[in]	inDeviceScanner		Specifies the CNTV2DeviceScanner instance to be copied.
-	**/
-	explicit							CNTV2DeviceScanner (const CNTV2DeviceScanner & inDeviceScanner);
-
-	/**
-		@brief		Assigns an existing CNTV2DeviceScanner instance to me.
-		@param[in]	inDeviceScanner		Specifies the CNTV2DeviceScanner instance to be copied.
-	**/
-	virtual		CNTV2DeviceScanner &	operator = (const CNTV2DeviceScanner & inDeviceScanner);
+	explicit			CNTV2DeviceScanner (const bool inScanNow = true);
+#if !defined(NTV2_DEPRECATE_16_3)
+	explicit			CNTV2DeviceScanner (bool inScanNow, UWord inDeviceMask);
+#endif	//	!defined(NTV2_DEPRECATE_16_3)
 
 
-	//	Scanning
-	/**
-		@brief	Re-scans the local host for connected AJA devices.
-	**/
-	void			ScanHardware (void);
+	static void			ScanHardware (void);	///< @deprecated	Do not use
 #if !defined(NTV2_DEPRECATE_17_1)
-	inline NTV2_DEPRECATED_f(void ScanHardware (const UWord inMask))	{(void)inMask;  ScanHardware();}
+	static NTV2_DEPRECATED_f(void ScanHardware (const UWord inMask))	{(void)inMask;  ScanHardware();}	///< @deprecated	Do not use
 #endif	//	!defined(NTV2_DEPRECATE_17_1)
-
-
-	//	Inquiry
-	/**
-		@brief		Returns the number of AJA devices found on the local host.
-		@return		Number of AJA devices found on the local host.
-	**/
-	virtual inline size_t						GetNumDevices (void) const			{ return GetDeviceInfoList ().size (); }
-
-	/**
-		@brief		Returns true if one or more AJA devices having the specified device identifier are attached and known to the host.
-		@return		True if at least one AJA device having the specified device identifier is present on the host system; otherwise false.
-		@param[in]	inDeviceID		Specifies the device identifier of interest.
-		@param[in]	inRescan		Specifies if the host should be rescanned or not. Defaults to false.
-	**/
-	virtual bool								DeviceIDPresent (const NTV2DeviceID inDeviceID, const bool inRescan = false);
-
-	/**
-		@brief		Returns detailed information about the AJA device having the given zero-based index number.
-		@return		True if successful; otherwise false.
-		@param[in]	inDeviceIndexNumber Specifies the AJA device to retrieve information about using a zero-based index number.
-		@param[out] outDeviceInfo		Specifies the NTV2DeviceInfo structure that will receive the device information.
-		@param[in]	inRescan			Specifies if the host should be rescanned or not.
-	**/
-	virtual bool								GetDeviceInfo (const ULWord inDeviceIndexNumber, NTV2DeviceInfo & outDeviceInfo, const bool inRescan = false);
-
-	/**
-		@brief	Returns an NTV2DeviceInfoList that can be "walked" using standard C++ vector iteration techniques.
-		@return A non-constant reference to my NTV2DeviceInfoList.
-	**/
-	inline NTV2DeviceInfoList &					GetDeviceInfoList (void)			{ return _deviceInfoList; }
-
-	/**
-		@brief	Returns an NTV2DeviceInfoList that can be "walked" using standard C++ vector iteration techniques.
-		@return A constant reference to my NTV2DeviceInfoList.
-	**/
-	inline const NTV2DeviceInfoList &			GetDeviceInfoList (void) const		{ return _deviceInfoList; }
-
-
-	//	Sorting
-	/**
-		@brief	Sorts my device list by ascending PCI slot number.
-	**/
-	virtual void								SortDeviceInfoList (void);
-
-	virtual inline		~CNTV2DeviceScanner ()						{ }
-
-
+	static bool		DeviceIDPresent (const NTV2DeviceID inDeviceID, const bool inRescan = false);	///< @deprecated	Do not use
+	static bool		GetDeviceInfo (const ULWord inDeviceIndexNumber, NTV2DeviceInfo & outDeviceInfo, const bool inRescan = false);	///< @deprecated	Do not use
+	static NTV2DeviceInfoList	GetDeviceInfoList (void);	///< @deprecated	Do not use
+	static void		SortDeviceInfoList (void)	{}	///< @deprecated	Obsolete
+	static bool		CompareDeviceInfoLists (const NTV2DeviceInfoList & inOldList,
+											const NTV2DeviceInfoList & inNewList,
+											NTV2DeviceInfoList & outDevicesAdded,
+											NTV2DeviceInfoList & outDevicesRemoved);
 private:
-	virtual void	SetAudioAttributes(NTV2DeviceInfo & inDeviceInfo, CNTV2Card & inDevice) const;
-	virtual void	DeepCopy (const CNTV2DeviceScanner & inDeviceScanner);
+	static void		SetAudioAttributes (NTV2DeviceInfo & inDeviceInfo, CNTV2Card & inDevice);
 #if defined(VIRTUAL_DEVICES_SUPPORT)
-	virtual bool	GetSerialToVirtualDeviceMap(NTV2SerialToVirtualDevices & outSerialToVirtualDevMap);
+	static bool		GetSerialToVirtualDeviceMap(NTV2SerialToVirtualDevices & outSerialToVirtualDevMap);
 	static bool 	GetCP2ConfigPath(string & outCP2ConfigPath);
 #endif	//	defined(VIRTUAL_DEVICES_SUPPORT)
-
-
-//	Instance Data
-private:
-	NTV2DeviceInfoList					_deviceInfoList;		/// My device list
-
+#endif	//	!defined(NTV2_DEPRECATE_17_1)
 };	//	CNTV2DeviceScanner
 
 #endif	//	NTV2DEVICESCANNER_H

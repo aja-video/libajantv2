@@ -19,7 +19,7 @@
 //	The rest of the non-sdkgen-generated function implementations follow...
 ///////////////////////////////////////////////////////////////////////////
 
-#if !defined(NTV2_DEPRECATE_17_1)
+#if !defined(NTV2_DEPRECATE_17_2)
 	bool NTV2DeviceCanDoAudioOut (const NTV2DeviceID inDeviceID)
 	{
 		UWord outputs = 0;
@@ -619,7 +619,7 @@
 		return divisor  ?  NTV2DeviceGetNumberFrameBuffers_Ex(id) / divisor  :  0;
 		#endif
 	}   //  NTV2DeviceGetNumberFrameBuffers
-#endif	//	!defined(NTV2_DEPRECATE_17_1)
+#endif	//	!defined(NTV2_DEPRECATE_17_2)
 
 ULWord NTV2DeviceGetNumberVideoFrameBuffers (NTV2DeviceID inDeviceID, NTV2FrameGeometry inFrameGeometry, NTV2Framesize inFrameSize)
 {

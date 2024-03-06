@@ -9,12 +9,29 @@
 #include "ntv2devicefeatures.h"
 #include "ntv2utils.h"
 #include "ajabase/common/common.h"
+#include "ajabase/system/lock.h"
 #include <sstream>
 
 using namespace std;
 
 
-#if !defined(NTV2_DEPRECATE_17_1)
+#if defined(NTV2_DEPRECATE_17_1)
+	//	Abbreviated device info struct
+	typedef struct NTV2DeviceInfo
+	{
+		NTV2DeviceID	deviceID;
+		uint64_t		deviceSerialNumber;
+		string			deviceIdentifier;
+	#if defined(VIRTUAL_DEVICES_SUPPORT)
+		bool			isVirtualDevice=false;
+		std::string		virtualDeviceName;
+		std::string		virtualDeviceID;
+	#endif	//	defined(VIRTUAL_DEVICES_SUPPORT)
+	} NTV2DeviceInfo;
+
+	typedef vector <NTV2DeviceInfo>		NTV2DeviceInfoList;
+	typedef NTV2DeviceInfoList::const_iterator	NTV2DeviceInfoListConstIter;
+#else
 	bool CNTV2DeviceScanner::IsHexDigit (const char inChr)
 	{	static const string sHexDigits("0123456789ABCDEFabcdef");
 		return sHexDigits.find(inChr) != string::npos;
@@ -76,156 +93,126 @@ bool CNTV2DeviceScanner::IsLegalSerialNumber (const string & inStr)
 	return aja::is_alpha_numeric(inStr);
 }
 
+static NTV2DeviceInfoList	sDevInfoList;
+static AJALock				sDevInfoListLock;
 
+size_t CNTV2DeviceScanner::GetNumDevices (void)
+{
+	AJAAutoLock tmpLock(&sDevInfoListLock);
+	return sDevInfoList.size();
+}
+
+#if defined(NTV2_DEPRECATE_17_1)
+	void ScanHardware (void)
+	{
+		AJAAutoLock tmpLock(&sDevInfoListLock);
+		sDevInfoList.clear();
+		UWord ndx(0);
+		do
+		{
+			CNTV2Card tmpDev(ndx);
+			if (!tmpDev.IsOpen())
+				break;
+			NTV2DeviceInfo info;
+			info.deviceID = tmpDev.GetDeviceID();
+			info.deviceSerialNumber = tmpDev.GetSerialNumber();
+			info.deviceIdentifier = tmpDev.GetDisplayName();
+			sDevInfoList.push_back(info);
+		} while (ndx < 16);
+	}
+#else	//	!defined(NTV2_DEPRECATE_17_1)
 CNTV2DeviceScanner::CNTV2DeviceScanner (const bool inScanNow)
 {
 	if (inScanNow)
 		ScanHardware();
 }
-CNTV2DeviceScanner::CNTV2DeviceScanner (bool inScanNow, UWord inDeviceMask)
+
+	#if !defined(NTV2_DEPRECATE_16_3)
+		CNTV2DeviceScanner::CNTV2DeviceScanner (bool inScanNow, UWord inDeviceMask)
+		{
+			(void)inDeviceMask;
+			if (inScanNow)
+				ScanHardware();
+		}
+	#endif	//	!defined(NTV2_DEPRECATE_16_3)
+
+NTV2DeviceInfoList	GetDeviceInfoList (void)
 {
-	(void)inDeviceMask;
-	if (inScanNow)
-		ScanHardware();
+	AJAAutoLock tmpLock(&sDevInfoListLock);
+	return sDevInfoList;
 }
-
-
-CNTV2DeviceScanner & CNTV2DeviceScanner::operator = (const CNTV2DeviceScanner & boardScan)
-{
-	//	Avoid self-assignment...
-	if (this != &boardScan)
-		DeepCopy(boardScan);
-
-	return *this;	//	operator= must return self reference
-
-}	//	operator=
-
-
-CNTV2DeviceScanner::CNTV2DeviceScanner (const CNTV2DeviceScanner & boardScan)
-{
-	DeepCopy(boardScan);
-}
-
-
-void CNTV2DeviceScanner::DeepCopy (const CNTV2DeviceScanner & boardScan)
-{
-	// Begin with a clear list
-	_deviceInfoList.clear();
-	
-	// Copy over _deviceInfoList
-	for (NTV2DeviceInfoListConstIter bilIter (boardScan._deviceInfoList.begin ());  bilIter != boardScan._deviceInfoList.end ();  ++bilIter)
-	{
-		NTV2DeviceInfo boardInfo;
-		
-		//	Move over all the easy stuff...
-		boardInfo.deviceIndex = bilIter->deviceIndex;
-		boardInfo.deviceID = bilIter->deviceID;
-		boardInfo.pciSlot = bilIter->pciSlot;
-		boardInfo.deviceIdentifier = bilIter->deviceIdentifier;
-		boardInfo.deviceSerialNumber = bilIter->deviceSerialNumber;
-
-		//	Now copy over each list within the list...
-		boardInfo.audioSampleRateList.clear();
-		for (NTV2AudioSampleRateList::const_iterator asrIter (bilIter->audioSampleRateList.begin());  asrIter != bilIter->audioSampleRateList.end();  ++asrIter)
-			boardInfo.audioSampleRateList.push_back(*asrIter);
-
-		boardInfo.audioNumChannelsList.clear();
-		for (NTV2AudioChannelsPerFrameList::const_iterator ncIter (bilIter->audioNumChannelsList.begin());  ncIter != bilIter->audioNumChannelsList.end();  ++ncIter)
-			boardInfo.audioNumChannelsList.push_back(*ncIter);
-
-		boardInfo.audioBitsPerSampleList.clear();
-		for (NTV2AudioBitsPerSampleList::const_iterator bpsIter (bilIter->audioBitsPerSampleList.begin());  bpsIter != bilIter->audioBitsPerSampleList.end();  ++bpsIter)
-			boardInfo.audioBitsPerSampleList.push_back(*bpsIter);
-
-		boardInfo.audioInSourceList.clear();
-		for (NTV2AudioSourceList::const_iterator aslIter (bilIter->audioInSourceList.begin());  aslIter != bilIter->audioInSourceList.end();  ++aslIter)
-			boardInfo.audioInSourceList.push_back(*aslIter);
-
-		boardInfo.audioOutSourceList.clear();
-		for (NTV2AudioSourceList::const_iterator aoslIter (bilIter->audioOutSourceList.begin());  aoslIter != bilIter->audioOutSourceList.end();  ++aoslIter)
-			boardInfo.audioOutSourceList.push_back(*aoslIter);
-
-		//	Add this boardInfo struct to the _deviceInfoList...
-		_deviceInfoList.push_back(boardInfo);
-	}
-}	//	DeepCopy
 
 
 void CNTV2DeviceScanner::ScanHardware (void)
 {
-	GetDeviceInfoList().clear();
+	AJAAutoLock tmpLock(&sDevInfoListLock);
+	sDevInfoList.clear();
 
 	for (UWord boardNum(0);   ;   boardNum++)
 	{
 		CNTV2Card tmpDev(boardNum);
-		if (tmpDev.IsOpen())
-		{
-			const NTV2DeviceID	deviceID (tmpDev.GetDeviceID());
-
-			if (deviceID != DEVICE_ID_NOTFOUND)
-			{
-				ostringstream	oss;
-				NTV2DeviceInfo	info;
-				info.deviceIndex		= boardNum;
-				info.deviceID			= deviceID;
-				info.pciSlot			= 0;
-				info.deviceSerialNumber	= tmpDev.GetSerialNumber();
-
-				oss << ::NTV2DeviceIDToString (deviceID, tmpDev.IsSupported(kDeviceHasMicrophoneInput)) << " - " << boardNum;
-				if (info.pciSlot)
-					oss << ", Slot " << info.pciSlot;
-
-				const ULWordSet wgtIDs (tmpDev.GetSupportedItems(kNTV2EnumsID_WidgetID));
-				info.deviceIdentifier		= oss.str();
-				info.numVidInputs			= tmpDev.GetNumSupported(kDeviceGetNumVideoInputs);
-				info.numVidOutputs			= tmpDev.GetNumSupported(kDeviceGetNumVideoOutputs);
-				info.numAnlgVidOutputs		= tmpDev.GetNumSupported(kDeviceGetNumAnalogVideoOutputs);
-				info.numAnlgVidInputs		= tmpDev.GetNumSupported(kDeviceGetNumAnalogVideoInputs);
-				info.numHDMIVidOutputs		= tmpDev.GetNumSupported(kDeviceGetNumHDMIVideoOutputs);
-				info.numHDMIVidInputs		= tmpDev.GetNumSupported(kDeviceGetNumHDMIVideoInputs);
-				info.numInputConverters		= tmpDev.GetNumSupported(kDeviceGetNumInputConverters);
-				info.numOutputConverters	= tmpDev.GetNumSupported(kDeviceGetNumOutputConverters);
-				info.numUpConverters		= tmpDev.GetNumSupported(kDeviceGetNumUpConverters);
-				info.numDownConverters		= tmpDev.GetNumSupported(kDeviceGetNumDownConverters);
-				info.downConverterDelay		= tmpDev.GetNumSupported(kDeviceGetDownConverterDelay);
-				info.dvcproHDSupport		= tmpDev.IsSupported(kDeviceCanDoDVCProHD);
-				info.qrezSupport			= tmpDev.IsSupported(kDeviceCanDoQREZ);
-				info.hdvSupport				= tmpDev.IsSupported(kDeviceCanDoHDV);
-				info.quarterExpandSupport	= tmpDev.IsSupported(kDeviceCanDoQuarterExpand);
-				info.colorCorrectionSupport	= tmpDev.IsSupported(kDeviceCanDoColorCorrection);
-				info.programmableCSCSupport	= tmpDev.IsSupported(kDeviceCanDoProgrammableCSC);
-				info.rgbAlphaOutputSupport	= tmpDev.IsSupported(kDeviceCanDoRGBPlusAlphaOut);
-				info.breakoutBoxSupport		= tmpDev.IsSupported(kDeviceCanDoBreakoutBox);
-				info.vidProcSupport			= tmpDev.IsSupported(kDeviceCanDoVideoProcessing);
-				info.dualLinkSupport		= tmpDev.IsSupported(kDeviceCanDoDualLink);
-				info.numDMAEngines			= UWord(tmpDev.GetNumSupported(kDeviceGetNumDMAEngines));
-				info.pingLED				= tmpDev.GetNumSupported(kDeviceGetPingLED);
-				info.has2KSupport			= tmpDev.IsSupported(kDeviceCanDo2KVideo);
-				info.has4KSupport			= tmpDev.IsSupported(kDeviceCanDo4KVideo);
-				info.has8KSupport			= tmpDev.IsSupported(kDeviceCanDo8KVideo);
-				info.has3GLevelConversion   = tmpDev.IsSupported(kDeviceCanDo3GLevelConversion);
-				info.isoConvertSupport		= tmpDev.IsSupported(kDeviceCanDoIsoConvert);
-				info.rateConvertSupport		= tmpDev.IsSupported(kDeviceCanDoRateConvert);
-				info.proResSupport			= tmpDev.IsSupported(kDeviceCanDoProRes);
-				info.sdi3GSupport			= wgtIDs.find(NTV2_Wgt3GSDIOut1) != wgtIDs.end();
-				info.sdi12GSupport			= tmpDev.IsSupported(kDeviceCanDo12GSDI);
-				info.ipSupport				= tmpDev.IsSupported(kDeviceCanDoIP);
-				info.biDirectionalSDI		= tmpDev.IsSupported(kDeviceHasBiDirectionalSDI);
-				info.ltcInSupport			= tmpDev.GetNumSupported(kDeviceGetNumLTCInputs) > 0;
-				info.ltcOutSupport			= tmpDev.GetNumSupported(kDeviceGetNumLTCOutputs) > 0;
-				info.ltcInOnRefPort			= tmpDev.IsSupported(kDeviceCanDoLTCInOnRefPort);
-				info.stereoOutSupport		= tmpDev.IsSupported(kDeviceCanDoStereoOut);
-				info.stereoInSupport		= tmpDev.IsSupported(kDeviceCanDoStereoIn);
-				info.multiFormat			= tmpDev.IsSupported(kDeviceCanDoMultiFormat);
-				info.numSerialPorts			= tmpDev.GetNumSupported(kDeviceGetNumSerialPorts);
-				info.procAmpSupport			= false;
-				SetAudioAttributes(info, tmpDev);
-				GetDeviceInfoList().push_back(info);
-			}
-			tmpDev.Close();
-		}	//	if Open succeeded
-		else
+		if (!tmpDev.IsOpen())
 			break;
+		const NTV2DeviceID	deviceID (tmpDev.GetDeviceID());
+
+		if (deviceID != DEVICE_ID_NOTFOUND)
+		{
+			ostringstream	oss;
+			NTV2DeviceInfo	info;
+			info.deviceIndex		= boardNum;
+			info.deviceID			= deviceID;
+			info.deviceSerialNumber	= tmpDev.GetSerialNumber();
+
+			oss << ::NTV2DeviceIDToString (deviceID, tmpDev.IsSupported(kDeviceHasMicrophoneInput)) << " - " << boardNum;
+
+			const ULWordSet wgtIDs (tmpDev.GetSupportedItems(kNTV2EnumsID_WidgetID));
+			info.deviceIdentifier		= oss.str();
+			info.numVidInputs			= tmpDev.GetNumSupported(kDeviceGetNumVideoInputs);
+			info.numVidOutputs			= tmpDev.GetNumSupported(kDeviceGetNumVideoOutputs);
+			info.numAnlgVidOutputs		= tmpDev.GetNumSupported(kDeviceGetNumAnalogVideoOutputs);
+			info.numAnlgVidInputs		= tmpDev.GetNumSupported(kDeviceGetNumAnalogVideoInputs);
+			info.numHDMIVidOutputs		= tmpDev.GetNumSupported(kDeviceGetNumHDMIVideoOutputs);
+			info.numHDMIVidInputs		= tmpDev.GetNumSupported(kDeviceGetNumHDMIVideoInputs);
+			info.numInputConverters		= tmpDev.GetNumSupported(kDeviceGetNumInputConverters);
+			info.numOutputConverters	= tmpDev.GetNumSupported(kDeviceGetNumOutputConverters);
+			info.numUpConverters		= tmpDev.GetNumSupported(kDeviceGetNumUpConverters);
+			info.numDownConverters		= tmpDev.GetNumSupported(kDeviceGetNumDownConverters);
+			info.downConverterDelay		= tmpDev.GetNumSupported(kDeviceGetDownConverterDelay);
+			info.dvcproHDSupport		= tmpDev.IsSupported(kDeviceCanDoDVCProHD);
+			info.qrezSupport			= tmpDev.IsSupported(kDeviceCanDoQREZ);
+			info.hdvSupport				= tmpDev.IsSupported(kDeviceCanDoHDV);
+			info.quarterExpandSupport	= tmpDev.IsSupported(kDeviceCanDoQuarterExpand);
+			info.colorCorrectionSupport	= tmpDev.IsSupported(kDeviceCanDoColorCorrection);
+			info.programmableCSCSupport	= tmpDev.IsSupported(kDeviceCanDoProgrammableCSC);
+			info.rgbAlphaOutputSupport	= tmpDev.IsSupported(kDeviceCanDoRGBPlusAlphaOut);
+			info.breakoutBoxSupport		= tmpDev.IsSupported(kDeviceCanDoBreakoutBox);
+			info.vidProcSupport			= tmpDev.IsSupported(kDeviceCanDoVideoProcessing);
+			info.dualLinkSupport		= tmpDev.IsSupported(kDeviceCanDoDualLink);
+			info.numDMAEngines			= UWord(tmpDev.GetNumSupported(kDeviceGetNumDMAEngines));
+			info.pingLED				= tmpDev.GetNumSupported(kDeviceGetPingLED);
+			info.has2KSupport			= tmpDev.IsSupported(kDeviceCanDo2KVideo);
+			info.has4KSupport			= tmpDev.IsSupported(kDeviceCanDo4KVideo);
+			info.has8KSupport			= tmpDev.IsSupported(kDeviceCanDo8KVideo);
+			info.has3GLevelConversion   = tmpDev.IsSupported(kDeviceCanDo3GLevelConversion);
+			info.isoConvertSupport		= tmpDev.IsSupported(kDeviceCanDoIsoConvert);
+			info.rateConvertSupport		= tmpDev.IsSupported(kDeviceCanDoRateConvert);
+			info.proResSupport			= tmpDev.IsSupported(kDeviceCanDoProRes);
+			info.sdi3GSupport			= wgtIDs.find(NTV2_Wgt3GSDIOut1) != wgtIDs.end();
+			info.sdi12GSupport			= tmpDev.IsSupported(kDeviceCanDo12GSDI);
+			info.ipSupport				= tmpDev.IsSupported(kDeviceCanDoIP);
+			info.biDirectionalSDI		= tmpDev.IsSupported(kDeviceHasBiDirectionalSDI);
+			info.ltcInSupport			= tmpDev.GetNumSupported(kDeviceGetNumLTCInputs) > 0;
+			info.ltcOutSupport			= tmpDev.GetNumSupported(kDeviceGetNumLTCOutputs) > 0;
+			info.ltcInOnRefPort			= tmpDev.IsSupported(kDeviceCanDoLTCInOnRefPort);
+			info.stereoOutSupport		= tmpDev.IsSupported(kDeviceCanDoStereoOut);
+			info.stereoInSupport		= tmpDev.IsSupported(kDeviceCanDoStereoIn);
+			info.multiFormat			= tmpDev.IsSupported(kDeviceCanDoMultiFormat);
+			info.numSerialPorts			= tmpDev.GetNumSupported(kDeviceGetNumSerialPorts);
+			info.procAmpSupport			= false;
+			SetAudioAttributes(info, tmpDev);
+			sDevInfoList.push_back(info);
+		}
+		tmpDev.Close();
 	}	//	boardNum loop
 
 #if defined(VIRTUAL_DEVICES_SUPPORT)
@@ -253,14 +240,13 @@ void CNTV2DeviceScanner::ScanHardware (void)
 #endif	//	defined(VIRTUAL_DEVICES_SUPPORT)
 }	//	ScanHardware
 
-
 bool CNTV2DeviceScanner::DeviceIDPresent (const NTV2DeviceID inDeviceID, const bool inRescan)
 {
+	AJAAutoLock tmpLock(&sDevInfoListLock);
 	if (inRescan)
 		ScanHardware();
 
-	const NTV2DeviceInfoList & deviceInfoList(GetDeviceInfoList());
-	for (NTV2DeviceInfoListConstIter iter(deviceInfoList.begin());  iter != deviceInfoList.end();  ++iter)
+	for (NTV2DeviceInfoListConstIter iter(sDevInfoList.begin());  iter != sDevInfoList.end();  ++iter)
 		if (iter->deviceID == inDeviceID)
 			return true;	//	Found!
 	return false;	//	Not found
@@ -270,25 +256,26 @@ bool CNTV2DeviceScanner::DeviceIDPresent (const NTV2DeviceID inDeviceID, const b
 
 bool CNTV2DeviceScanner::GetDeviceInfo (const ULWord inDeviceIndexNumber, NTV2DeviceInfo & outDeviceInfo, const bool inRescan)
 {
+	AJAAutoLock tmpLock(&sDevInfoListLock);
 	if (inRescan)
 		ScanHardware();
 
-	const NTV2DeviceInfoList & deviceList(GetDeviceInfoList());
-
-	if (inDeviceIndexNumber < deviceList.size())
+	if (inDeviceIndexNumber < sDevInfoList.size())
 	{
-		outDeviceInfo = deviceList[inDeviceIndexNumber];
+		outDeviceInfo = sDevInfoList[inDeviceIndexNumber];
 		return outDeviceInfo.deviceIndex == inDeviceIndexNumber;
 	}
 	return false;	//	No devices with this index number
 
 }	//	GetDeviceInfo
+#endif	//	!defined(NTV2_DEPRECATE_17_1)
 
 bool CNTV2DeviceScanner::GetDeviceAtIndex (const ULWord inDeviceIndexNumber, CNTV2Card & outDevice)
 {
 	outDevice.Close();
-	CNTV2DeviceScanner	scanner;
-	return size_t(inDeviceIndexNumber) < scanner.GetDeviceInfoList().size()
+	AJAAutoLock tmpLock(&sDevInfoListLock);
+	ScanHardware();
+	return size_t(inDeviceIndexNumber) < sDevInfoList.size()
 				? outDevice.Open(UWord(inDeviceIndexNumber))
 				: false;
 
@@ -298,11 +285,11 @@ bool CNTV2DeviceScanner::GetDeviceAtIndex (const ULWord inDeviceIndexNumber, CNT
 bool CNTV2DeviceScanner::GetFirstDeviceWithID (const NTV2DeviceID inDeviceID, CNTV2Card & outDevice)
 {
 	outDevice.Close();
-	CNTV2DeviceScanner	scanner;
-	const NTV2DeviceInfoList &	deviceInfoList(scanner.GetDeviceInfoList());
-	for (NTV2DeviceInfoListConstIter iter(deviceInfoList.begin());  iter != deviceInfoList.end();  ++iter)
-		if (iter->deviceID == inDeviceID)
-			return outDevice.Open(UWord(iter->deviceIndex));	//	Found!
+	AJAAutoLock tmpLock(&sDevInfoListLock);
+	ScanHardware();
+	for (size_t ndx(0);  ndx < sDevInfoList.size();  ndx++)
+		if (sDevInfoList.at(ndx).deviceID == inDeviceID)
+			return outDevice.Open(UWord(ndx));	//	Found!
 	return false;	//	Not found
 
 }	//	GetFirstDeviceWithID
@@ -318,24 +305,23 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithName (const string & inNameSubString,
 		return false;
 	}
 
-	CNTV2DeviceScanner	scanner;
+	AJAAutoLock tmpLock(&sDevInfoListLock);
+	ScanHardware();
 	string	nameSubString(inNameSubString);  aja::lower(nameSubString);
-	const NTV2DeviceInfoList &	deviceInfoList(scanner.GetDeviceInfoList ());
-
-	for (NTV2DeviceInfoListConstIter iter(deviceInfoList.begin());  iter != deviceInfoList.end();  ++iter)
+	for (size_t ndx(0);  ndx < sDevInfoList.size();  ndx++)
 	{
-		string deviceName(iter->deviceIdentifier);  aja::lower(deviceName);
+		string deviceName(sDevInfoList.at(ndx).deviceIdentifier);  aja::lower(deviceName);
 		if (deviceName.find(nameSubString) != string::npos)
-			return outDevice.Open(UWord(iter->deviceIndex));	//	Found!
+			return outDevice.Open(UWord(ndx));	//	Found!
 	}
 	if (nameSubString == "io4kplus")
 	{	//	Io4K+ == DNXIV...
 		nameSubString = "avid dnxiv";
-		for (NTV2DeviceInfoListConstIter iter(deviceInfoList.begin());  iter != deviceInfoList.end();  ++iter)
+		for (size_t ndx(0);  ndx < sDevInfoList.size();  ndx++)
 		{
-			string deviceName(iter->deviceIdentifier);  aja::lower(deviceName);
+			string deviceName(sDevInfoList.at(ndx).deviceIdentifier);  aja::lower(deviceName);
 			if (deviceName.find(nameSubString) != string::npos)
-				return outDevice.Open(UWord(iter->deviceIndex));	//	Found!
+				return outDevice.Open(UWord(ndx));	//	Found!
 		}
 	}
 	return false;	//	Not found
@@ -345,19 +331,19 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithName (const string & inNameSubString,
 
 bool CNTV2DeviceScanner::GetFirstDeviceWithSerial (const string & inSerialStr, CNTV2Card & outDevice)
 {
-	CNTV2DeviceScanner	scanner;
 	outDevice.Close();
+	AJAAutoLock tmpLock(&sDevInfoListLock);
+	ScanHardware();
 	string searchSerialStr(inSerialStr);  aja::lower(searchSerialStr);
-	const NTV2DeviceInfoList &	deviceInfos(scanner.GetDeviceInfoList());
-	for (NTV2DeviceInfoListConstIter iter(deviceInfos.begin());  iter != deviceInfos.end();  ++iter)
+	for (size_t ndx(0);  ndx < sDevInfoList.size();  ndx++)
 	{
-		CNTV2Card dev(UWord(iter->deviceIndex));
+		CNTV2Card dev(UWord(ndx+0));
 		string serNumStr;
 		if (dev.GetSerialNumberString(serNumStr))
 		{
 			aja::lower(serNumStr);
 			if (serNumStr.find(searchSerialStr) != string::npos)
-				return outDevice.Open(UWord(iter->deviceIndex));
+				return outDevice.Open(UWord(ndx));
 		}
 	}
 	return false;
@@ -367,11 +353,11 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithSerial (const string & inSerialStr, C
 bool CNTV2DeviceScanner::GetDeviceWithSerial (const uint64_t inSerialNumber, CNTV2Card & outDevice)
 {
 	outDevice.Close();
-	CNTV2DeviceScanner	scanner;
-	const NTV2DeviceInfoList &	deviceInfos(scanner.GetDeviceInfoList());
-	for (NTV2DeviceInfoListConstIter iter(deviceInfos.begin());  iter != deviceInfos.end();  ++iter)
-		if (iter->deviceSerialNumber == inSerialNumber)
-			return outDevice.Open(UWord(iter->deviceIndex));
+	AJAAutoLock tmpLock(&sDevInfoListLock);
+	ScanHardware();
+	for (size_t ndx(0);  ndx < sDevInfoList.size();  ndx++)
+		if (sDevInfoList.at(ndx).deviceSerialNumber == inSerialNumber)
+			return outDevice.Open(UWord(ndx));
 	return false;
 }
 
@@ -382,34 +368,29 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 	if (inArgument.empty())
 		return false;
 
-	//	Special case:  'LIST' or '?'
-	CNTV2DeviceScanner	scanner;
-	const NTV2DeviceInfoList &	infoList (scanner.GetDeviceInfoList());
+	//	Special case:  'LIST' or '?'  ---  print an enumeration of available devices to stdout, then bail
+	AJAAutoLock tmpLock(&sDevInfoListLock);
+	ScanHardware();
 	string upperArg(inArgument);  aja::upper(upperArg);
 	if (upperArg == "LIST" || upperArg == "?")
 	{
-		if (infoList.empty())
+		if (sDevInfoList.empty())
 			cout << "No devices detected" << endl;
 		else
-			cout << DEC(infoList.size()) << " available " << (infoList.size() == 1 ? "device:" : "devices:") << endl;
-#if defined(VIRTUAL_DEVICES_SUPPORT)
-		NTV2DeviceInfoListConstIter iter;
-		for (iter = infoList.begin(); iter != infoList.end() && iter->deviceIndex < 100;  ++iter)
-#else	//	defined(VIRTUAL_DEVICES_SUPPORT)
-		for (NTV2DeviceInfoListConstIter iter(infoList.begin());  iter != infoList.end();  ++iter)
-#endif	//	else !defined(VIRTUAL_DEVICES_SUPPORT)
+			cout << DEC(sDevInfoList.size()) << " available " << (sDevInfoList.size() == 1 ? "device:" : "devices:") << endl;
+		for (size_t ndx(0);  ndx < sDevInfoList.size();  ndx++)
 		{
-			const string serNum(CNTV2Card::SerialNum64ToString(iter->deviceSerialNumber));
-			cout << DECN(iter->deviceIndex,2) << " | " << setw(8) << ::NTV2DeviceIDToString(iter->deviceID);
+			cout << DECN(ndx,2) << " | " << setw(8) << ::NTV2DeviceIDToString(sDevInfoList.at(ndx).deviceID);
+			const string serNum(CNTV2Card::SerialNum64ToString(sDevInfoList.at(ndx).deviceSerialNumber));
 			if (!serNum.empty())
-				cout << " | " << setw(9) << serNum << " | " << HEX0N(iter->deviceSerialNumber,8);
+				cout << " | " << setw(9) << serNum << " | " << HEX0N(sDevInfoList.at(ndx).deviceSerialNumber,8);
 			cout << endl;
 		}
 #if defined(VIRTUAL_DEVICES_SUPPORT)
-		if (iter != infoList.end())
+		if (iter != sDevInfoList.end())
 		{
 			cout << "*** Virtual Devices ***" << endl;
-			while (iter != infoList.end())
+			while (iter != sDevInfoList.end())
 			{
 				const string serNum(CNTV2Card::SerialNum64ToString(iter->deviceSerialNumber));
 				cout << DECN(iter->deviceIndex,2) << " | " << setw(15) << iter->virtualDeviceName;// NTV2DeviceIDToString(iter->deviceID);
@@ -431,7 +412,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 	string cp2ConfigPath;
 	GetCP2ConfigPath(cp2ConfigPath);  
 	std::ifstream cfgJsonfile(cp2ConfigPath);  //VDTODO, error handling
-	for (NTV2DeviceInfoListConstIter iter(infoList.begin());  iter != infoList.end();  ++iter)
+	for (NTV2DeviceInfoListConstIter iter(sDevInfoList.begin());  iter != sDevInfoList.end();  ++iter)
 	{
 		if (iter->isVirtualDevice)
 		{
@@ -454,6 +435,31 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 }	//	GetFirstDeviceFromArgument
 
 
+string CNTV2DeviceScanner::GetDeviceRefName (CNTV2Card & inDevice)
+{	//	Name that will find given device via CNTV2DeviceScanner::GetFirstDeviceFromArgument
+	if (!inDevice.IsOpen())
+		return string();
+	//	Nub address 1st...
+	if (!inDevice.GetHostName().empty()  &&  inDevice.IsRemote())
+		return inDevice.GetHostName();	//	Nub host/device
+
+	//	Serial number 2nd...
+	string str;
+	if (inDevice.GetSerialNumberString(str))
+		return str;
+
+	//	Model name 3rd...
+	str = ::NTV2DeviceIDToString(inDevice.GetDeviceID(), false);
+	if (!str.empty() &&  str != "???")
+		return str;
+
+	//	Index number last...
+	ostringstream oss;  oss << DEC(inDevice.GetIndexNumber());
+	return oss.str();
+}
+
+
+#if !defined(NTV2_DEPRECATE_17_1)
 ostream &	operator << (ostream & inOutStr, const NTV2DeviceInfoList & inList)
 {
 	for (NTV2DeviceInfoListConstIter iter(inList.begin());  iter != inList.end();  ++iter)
@@ -548,30 +554,6 @@ bool CNTV2DeviceScanner::CompareDeviceInfoLists (const NTV2DeviceInfoList & inOl
 	return !outBoardsAdded.empty () || !outBoardsRemoved.empty ();
 
 }	//	CompareDeviceInfoLists
-
-
-string CNTV2DeviceScanner::GetDeviceRefName (CNTV2Card & inDevice)
-{	//	Name that will find given device via CNTV2DeviceScanner::GetFirstDeviceFromArgument
-	if (!inDevice.IsOpen())
-		return string();
-	//	Nub address 1st...
-	if (!inDevice.GetHostName().empty()  &&  inDevice.IsRemote())
-		return inDevice.GetHostName();	//	Nub host/device
-
-	//	Serial number 2nd...
-	string str;
-	if (inDevice.GetSerialNumberString(str))
-		return str;
-
-	//	Model name 3rd...
-	str = ::NTV2DeviceIDToString(inDevice.GetDeviceID(), false);
-	if (!str.empty() &&  str != "???")
-		return str;
-
-	//	Index number last...
-	ostringstream oss;  oss << DEC(inDevice.GetIndexNumber());
-	return oss.str();
-}
 
 
 ostream &	operator << (ostream & inOutStr, const NTV2AudioSampleRateList & inList)
@@ -717,7 +699,7 @@ std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioPhysicalForm
 
 // Private methods
 
-void CNTV2DeviceScanner::SetAudioAttributes(NTV2DeviceInfo & info, CNTV2Card & inBoard) const
+void CNTV2DeviceScanner::SetAudioAttributes (NTV2DeviceInfo & info, CNTV2Card & inBoard)
 {
 	//	Start with empty lists...
 	info.audioSampleRateList.clear();
@@ -773,19 +755,6 @@ void CNTV2DeviceScanner::SetAudioAttributes(NTV2DeviceInfo & info, CNTV2Card & i
 }	//	SetAudioAttributes
 
 
-//	Sort functor based on PCI slot number...
-static bool gCompareSlot (const NTV2DeviceInfo & b1, const NTV2DeviceInfo & b2)
-{
-	return b1.deviceIndex < b2.deviceIndex;
-}
-
-
-//	Sort boards in boardInfoList
-void CNTV2DeviceScanner::SortDeviceInfoList (void)
-{
-	std::sort (_deviceInfoList.begin (), _deviceInfoList.end (), gCompareSlot);
-}
-
 #if defined(VIRTUAL_DEVICES_SUPPORT)
 bool CNTV2DeviceScanner::GetSerialToVirtualDeviceMap (NTV2SerialToVirtualDevices & outSerialToVirtualDevMap)
 {
@@ -827,3 +796,4 @@ bool CNTV2DeviceScanner::GetCP2ConfigPath(string & outCP2ConfigPath)
 	return true;
 }
 #endif	//	defined(VIRTUAL_DEVICES_SUPPORT)
+#endif	//	!defined(NTV2_DEPRECATE_17_1)
