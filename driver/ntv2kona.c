@@ -816,7 +816,6 @@ bool WaitForFlashNOTBusy(Ntv2SystemContext* context)
 
 bool SetVideoOutputStandard(Ntv2SystemContext* context, NTV2Channel channel)
 {
-	ntv2Message("SetVideoOutputStandard %d\n", channel);
 	HDRDriverValues hdrRegValues;
 	NTV2OutputXptID xptSelect;
 	NTV2Standard standard = NTV2_NUM_STANDARDS;
