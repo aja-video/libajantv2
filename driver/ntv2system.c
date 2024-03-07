@@ -1328,7 +1328,7 @@ void ntv2EventSignal(Ntv2Event* pEvent)
 	pEventMac->flag = true;
 	
 #if defined(AJAMacDext)
-	pEvent->pDispatchQueue->Wakeup(pEvent);
+	//pEvent->pDispatchQueue->Wakeup(pEvent);
 #else
 	IORecursiveLockWakeup(pEventMac->pRecursiveLock, pEventMac->pRecursiveLock, false);
 #endif
