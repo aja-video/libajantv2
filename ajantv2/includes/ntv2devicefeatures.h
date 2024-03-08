@@ -276,6 +276,7 @@ extern "C"
 		AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetFrameBufferSize_Ex(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
 		AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID id));///< @deprecated	Starting in SDK 17.1
 		AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetAudioFrameBuffer_Ex(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
+		AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetAudioFrameBuffer2_Ex(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
 	#endif
 	AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetFrameBufferSize(NTV2DeviceID id, NTV2FrameGeometry fg, NTV2FrameBufferFormat fbf));		///< @deprecated	Starting in SDK 17.1
 	AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetNumberFrameBuffers(NTV2DeviceID id, NTV2FrameGeometry fg, NTV2FrameBufferFormat fbf));	///< @deprecated	Starting in SDK 17.1
