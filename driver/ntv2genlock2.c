@@ -444,6 +444,7 @@ static bool configure_genlock2(struct ntv2_genlock2 *ntv2_gen, struct ntv2_genlo
 			{
 				for (i = 0; i < gdat->size; i++)
 				{
+					spi_genlock2_read(ntv2_gen, gdat->addr+i, readBytes+i, 1);
 					if (readBytes[i] != writeBytes[i])
 					{
 						errorCount++;
