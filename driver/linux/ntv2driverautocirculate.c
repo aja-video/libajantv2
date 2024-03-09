@@ -56,6 +56,8 @@
 /* Local defines and types */
 /***************************/
 
+void get100nsTime(LWord64 *time);
+
 //#define AUTO_REPORT
 void get100nsTime(LWord64 *time)
 {

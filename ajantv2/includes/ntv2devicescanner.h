@@ -17,13 +17,11 @@
 
 #if defined VIRTUAL_DEVICES_SUPPORT
 
+#include "ajabase/system/info.h"
 #include "ajabase/common/json.hpp"
 #include <fstream>
 
 using json = nlohmann::json;
-
-//Temporary, must manually define the path here
-#define CP2_CONFIG_PATH  			"/Users/shane.gidley/Library/Preferences/aja/controlpanelConfigPrimary.json"
 
 typedef struct VirtualDeviceInfo
 {
@@ -415,6 +413,7 @@ private:
 	virtual void	DeepCopy (const CNTV2DeviceScanner & inDeviceScanner);
 #if defined VIRTUAL_DEVICES_SUPPORT
 	virtual bool	GetSerialToVirtualDeviceMap(NTV2SerialToVirtualDevices & outSerialToVirtualDevMap);
+	static bool 	GetCP2ConfigPath(string & outCP2ConfigPath);
 #endif
 
 
