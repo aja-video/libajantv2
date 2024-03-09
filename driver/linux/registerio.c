@@ -51,6 +51,8 @@
 /*********************************************/
 /* Prototypes for private utility functions. */
 /*********************************************/
+void EnableDMAInterrupts(ULWord deviceNumber);
+void DisableDMAInterrupts(ULWord deviceNumber);
 
 /********************/
 /* Static variables */

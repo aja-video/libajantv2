@@ -230,10 +230,13 @@ static bool testHevcControl(NTV2PrivateParams* ntv2pp, unsigned long devNum);
 
 static int readVirtualData(ULWord tag, UByte *buf, ULWord size);
 static int writeVirtualData(ULWord tag, UByte *buf, ULWord size);
+void deleteVirtualDataNode(VirtualDataNode *node);
 static void deleteAllVirtualDataNodes(void);
 
 static void suspend(ULWord deviceNumber);
 static void resume(ULWord deviceNumber);
+
+void InitInterruptBitLUT(void);
 
 /********************/
 /* Static variables */

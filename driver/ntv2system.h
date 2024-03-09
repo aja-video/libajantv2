@@ -562,6 +562,7 @@ void		ntv2ThreadStop(Ntv2Thread* pThread);
 const char* ntv2ThreadGetName(Ntv2Thread* pThread);
 bool		ntv2ThreadShouldStop(Ntv2Thread* pThread);
 void		ntv2ThreadExit(Ntv2Thread* pThread);
+int 		ntv2ThreadFunc(void* pData);
 
 // pci configuration space
 Ntv2Status	ntv2ReadPciConfig(Ntv2SystemContext* pSysCon, void* pData, int32_t offset, int32_t size);
