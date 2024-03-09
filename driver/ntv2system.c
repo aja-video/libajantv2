@@ -1179,7 +1179,7 @@ bool ntv2SpinLockOpen(Ntv2SpinLock* pSpinLock, Ntv2SystemContext* pSysCon)
 	   (pSysCon == NULL)) return false;
 	
 #if defined(AJAMacDext)
-	//atomic_flag_clear(pSpinLock->lock);
+	atomic_flag_clear(&pSpinLock->lock);
 #else
 	memset(pSpinLock, 0, sizeof(Ntv2SpinLock));
 	pSpinLock->lock = IOSimpleLockAlloc();
@@ -1194,7 +1194,7 @@ void ntv2SpinLockClose(Ntv2SpinLock* pSpinLock)
 	if(pSpinLock == NULL) return;
 	
 #if defined(AJAMacDext)
-	atomic_flag_clear(pSpinLock->lock);
+	atomic_flag_clear(&pSpinLock->lock);
 #else
 	IOSimpleLockFree(pSpinLock->lock);
 #endif
@@ -1206,7 +1206,7 @@ void ntv2SpinLockAcquire(Ntv2SpinLock* pSpinLock)
 	if(pSpinLock == NULL) return;
 	
 #if defined(AJAMacDext)
-	while(atomic_flag_test_and_set(pSpinLock->lock)) {;}
+	while(atomic_flag_test_and_set(&pSpinLock->lock)) {;}
 #else
 	IOSimpleLockLock(pSpinLock->lock);
 #endif
@@ -1217,7 +1217,7 @@ void ntv2SpinLockRelease(Ntv2SpinLock* pSpinLock)
 	if(pSpinLock == NULL) return;
 	
 #if defined(AJAMacDext)
-	atomic_flag_clear(pSpinLock->lock);
+	atomic_flag_clear(&pSpinLock->lock);
 #else
 	IOSimpleLockUnlock(pSpinLock->lock);
 #endif
@@ -1228,7 +1228,7 @@ bool ntv2InterruptLockOpen(Ntv2InterruptLock* pInterruptLock, Ntv2SystemContext*
 	if((pInterruptLock == NULL) ||
 	   (pSysCon == NULL)) return false;
 #if defined(AJAMacDext)
-	atomic_flag_clear(pInterruptLock->lock);
+	atomic_flag_clear(&pInterruptLock->lock);
 #else
 	memset(pInterruptLock, 0, sizeof(Ntv2InterruptLock));
 	pInterruptLock->lock = IOSimpleLockAlloc();
@@ -1240,10 +1240,11 @@ bool ntv2InterruptLockOpen(Ntv2InterruptLock* pInterruptLock, Ntv2SystemContext*
 
 void ntv2InterruptLockClose(Ntv2InterruptLock* pInterruptLock)
 {
-	if(pInterruptLock == NULL || pInterruptLock->lock == NULL) return;
+	if(pInterruptLock == NULL) return;
 #if defined(AJAMacDext)
-	atomic_flag_clear(pInterruptLock->lock);
+	atomic_flag_clear(&pInterruptLock->lock);
 #else
+	if(pInterruptLock->lock == NULL) return;
 	IOSimpleLockFree(pInterruptLock->lock);
 	memset(pInterruptLock, 0, sizeof(Ntv2InterruptLock));
 #endif
@@ -1251,10 +1252,11 @@ void ntv2InterruptLockClose(Ntv2InterruptLock* pInterruptLock)
 
 void ntv2InterruptLockAcquire(Ntv2InterruptLock* pInterruptLock)
 {
-	if(pInterruptLock == NULL || pInterruptLock->lock == NULL) return;
+	if(pInterruptLock == NULL) return;
 #if defined(AJAMacDext)
-	while(atomic_flag_test_and_set(pInterruptLock->lock)) {;}
+	while(atomic_flag_test_and_set(&pInterruptLock->lock)) {;}
 #else
+	if(pInterruptLock->lock == NULL) return;
 	IOSimpleLockLock(pInterruptLock->lock);
 	pInterruptLock->locked = true;
 #endif
@@ -1262,10 +1264,11 @@ void ntv2InterruptLockAcquire(Ntv2InterruptLock* pInterruptLock)
 
 void ntv2InterruptLockRelease(Ntv2InterruptLock* pInterruptLock)
 {
-	if(pInterruptLock == NULL || pInterruptLock->lock == NULL	) return;
+	if(pInterruptLock == NULL) return;
 #if defined(AJAMacDext)
-	atomic_flag_clear(pInterruptLock->lock);
+	atomic_flag_clear(&pInterruptLock->lock);
 #else
+	if(pInterruptLock->lock == NULL) return;
 	IOSimpleLockUnlock(pInterruptLock->lock);
 	pInterruptLock->locked = false;
 #endif

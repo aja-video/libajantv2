@@ -283,6 +283,7 @@
 			#include <stdatomic.h>
 			#include <DriverKit/IOLib.h>
 			#include <DriverKit/IODispatchQueue.h>
+			#include <DriverKit/IOLib.h>
 			#define DebugLog(fmt, args...)  os_log(OS_LOG_DEFAULT, "NTV2PCIe::%s:  " fmt,  __FUNCTION__,##args)
 			#define DebugLog(fmt, args...)  os_log(OS_LOG_DEFAULT, "NTV2PCIe::%s:  " fmt,  __FUNCTION__,##args)
 		#else
@@ -327,7 +328,7 @@
 	typedef struct ntv2_spinlock
 	{
 #if defined(AJAMacDext)
-		atomic_flag*			lock;
+		atomic_flag			lock;
 #else
 		IOSimpleLock*			lock;
 #endif
@@ -336,7 +337,7 @@
 	typedef struct ntv2_interrupt_lock
 	{
 #if defined(AJAMacDext)
-		atomic_flag*			lock;
+		atomic_flag			lock;
 #else
 		IOSimpleLock*			lock;
 #endif
