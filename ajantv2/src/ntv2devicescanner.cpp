@@ -118,6 +118,7 @@ size_t CNTV2DeviceScanner::GetNumDevices (void)
 			info.deviceSerialNumber = tmpDev.GetSerialNumber();
 			info.deviceIdentifier = tmpDev.GetDisplayName();
 			sDevInfoList.push_back(info);
+			ndx++;
 		} while (ndx < 16);
 	}
 #else	//	!defined(NTV2_DEPRECATE_17_1)
