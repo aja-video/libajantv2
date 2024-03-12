@@ -257,6 +257,8 @@ void SetAudioPlaybackMode(ULWord boardNumber, NTV2_GlobalAudioPlaybackMode mode)
 
 NTV2_GlobalAudioPlaybackMode GetAudioPlaybackMode(ULWord boardNumber);
 
+ULWord GetFPGARevision(ULWord deviceNumber);
+
 ULWord GetNumFrameBuffers(ULWord boardNumber, ULWord boardID);
 
 void OemAutoCirculateSetupNTV2Routing(ULWord boardNumber, NTV2RoutingTable* pNTV2RoutingTable);

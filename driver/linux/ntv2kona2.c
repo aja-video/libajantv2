@@ -27,6 +27,13 @@
 #include "driverdbg.h"
 #include "../ntv2kona.h"
 
+/*********************************************/
+/* Prototypes for private utility functions. */
+/*********************************************/
+void SetXpt8SDIOut4InputSelect (ULWord boardNumber, NTV2OutputXptID value);
+void GetXpt8SDIOut4InputSelect(ULWord boardNumber, NTV2OutputXptID* value);
+void SetXpt8SDIOut3InputSelect (ULWord boardNumber, NTV2OutputXptID value);
+void GetXpt8SDIOut3InputSelect(ULWord boardNumber, NTV2OutputXptID* value);
 
 void SetXpt8SDIOut4InputSelect (ULWord boardNumber, NTV2OutputXptID value)
 {

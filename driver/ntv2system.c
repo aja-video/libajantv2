@@ -1048,13 +1048,14 @@ void ntv2ThreadExit(Ntv2Thread* pThread)
 	UNREFERENCED_PARAMETER(pThread);
 }
 
-void ntv2ThreadFunc(void* pData)
+int ntv2ThreadFunc(void* pData)
 {
 	Ntv2Thread* pThread = (Ntv2Thread*)pData;
 
 	(*pThread->pFunc)(pThread->pContext);
 
 	PsTerminateSystemThread(STATUS_SUCCESS);
+	return 0;
 }
 
 bool ntv2ThreadRun(Ntv2Thread* pThread, Ntv2ThreadTask* pTask, void* pContext)
