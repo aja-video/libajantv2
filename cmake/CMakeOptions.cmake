@@ -49,7 +49,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(MACOS_FRAMEWORKS_DIR ${CMAKE_OSX_SYSROOT}/System/Library/Frameworks)
 endif()
 
-option (AJA_FORCE_ANSI_COLORS "Force ANSI terminal coloration when building with Ninja and GNU/Clang?" ON)
+option (AJA_FORCE_ANSI_COLORS "Force ANSI terminal coloration when building with Ninja and GNU/Clang?" OFF)
 if (${AJA_FORCE_ANSI_COLORS} AND ${CMAKE_GENERATOR} STREQUAL "Ninja")
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         add_compile_options(-fdiagnostics-color=always)
