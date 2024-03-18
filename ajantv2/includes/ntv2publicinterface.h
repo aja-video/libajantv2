@@ -6822,8 +6822,8 @@ typedef enum
 			typedef std::map <NTV2TCIndex, NTV2_RP188>	NTV2TimeCodes;				///< @brief A mapping of NTV2TCIndex enum values to NTV2_RP188 structures.
 			typedef NTV2TimeCodes::const_iterator		NTV2TimeCodesConstIter;		///< @brief A handy const interator for iterating over NTV2TCIndex/NTV2TimeCodeList pairs.
 
-			typedef std::set <NTV2TCIndex>				NTV2TCIndexes;				///< @brief A set of distinct NTV2TCIndex values.
-			typedef NTV2TCIndexes::const_iterator		NTV2TCIndexesConstIter;		///< @brief A handy const interator for iterating over an NTV2TCIndexes set.
+			typedef std::set <NTV2TCIndex>				NTV2TCIndexes, NTV2TCIndexSet;	///< @brief A set of distinct NTV2TCIndex values.
+			typedef NTV2TCIndexes::const_iterator		NTV2TCIndexesConstIter, NTV2TCIndexSetConstIter;	///< @brief A handy const interator for iterating over an NTV2TCIndexes set.
 
 			/**
 				@brief	Appends the given NTV2_RP188 struct to the specified NTV2TimeCodeList.

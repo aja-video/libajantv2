@@ -51,26 +51,25 @@ static string GetFirmwarePath (const NTV2DeviceID inDeviceID)
 }
 
 
-int NeedsFirmwareUpdate (const NTV2DeviceInfo & inDeviceInfo, string & outReason)
+int NeedsFirmwareUpdate (CNTV2Card & inDevice, string & outReason)
 {
 	string			installedDate, installedTime, serialNumStr, newFirmwareDescription;
 	ULWord			numBytes		(0);
-	const string	firmwarePath	(::GetFirmwarePath(inDeviceInfo.deviceID));
-	CNTV2Card		device			(UWord(inDeviceInfo.deviceIndex));
 	CNTV2Bitfile	bitfile;
 	CNTV2MCSfile	mcsFile;
 
 	outReason.clear();
-	if (!device.IsOpen())
-		{outReason = "device '" + inDeviceInfo.deviceIdentifier + "' not open";		return kFirmwareUpdateCheckFailed;}
-	if (!device.IsDeviceReady(false))
-		{outReason = "device '" + inDeviceInfo.deviceIdentifier + "' not ready";	return kFirmwareUpdateCheckFailed;}
-	if (device.IsRemote())
-		{outReason = "device '" + inDeviceInfo.deviceIdentifier + "' not local physical";	return kFirmwareUpdateCheckFailed;}
+	if (!inDevice.IsOpen())
+		{outReason = "device '" + inDevice.GetDescription() + "' not open";		return kFirmwareUpdateCheckFailed;}
+	if (!inDevice.IsDeviceReady(false))
+		{outReason = "device '" + inDevice.GetDescription() + "' not ready";	return kFirmwareUpdateCheckFailed;}
+	if (inDevice.IsRemote())
+		{outReason = "device '" + inDevice.GetDescription() + "' not local physical";	return kFirmwareUpdateCheckFailed;}
+	const string firmwarePath (::GetFirmwarePath(inDevice.GetDeviceID()));
 	if (firmwarePath.find(".mcs") != std::string::npos)
 	{
-		//	We have an mcs file?
-		CNTV2KonaFlashProgram kfp (device.GetIndexNumber());
+		//	.MCS file?
+		CNTV2KonaFlashProgram kfp (inDevice.GetIndexNumber());
 		kfp.GetMCSInfo();
 		if (!mcsFile.GetMCSHeaderInfo(firmwarePath))
 			{outReason = "MCS File open failed";	return kFirmwareUpdateCheckFailed;}
@@ -78,7 +77,7 @@ int NeedsFirmwareUpdate (const NTV2DeviceInfo & inDeviceInfo, string & outReason
 		string fileDate = mcsFile.GetMCSPackageDateString();
 		string fileVersion = mcsFile.GetMCSPackageVersionString();
 		PACKAGE_INFO_STRUCT currentInfo;
-		device.GetPackageInformation(currentInfo);
+		inDevice.GetPackageInformation(currentInfo);
 		if (fileDate == currentInfo.date)
 			return 0;	//	All good
 		if (currentInfo.date > fileDate)
@@ -90,14 +89,14 @@ int NeedsFirmwareUpdate (const NTV2DeviceInfo & inDeviceInfo, string & outReason
 		return -1;	//	on-device firmware older than on-disk bitfile firmware
 	}
 
-	if (device.GetInstalledBitfileInfo (numBytes, installedDate, installedTime))
+	if (inDevice.GetInstalledBitfileInfo (numBytes, installedDate, installedTime))
 	{
 		if (bitfile.Open (firmwarePath))
 		{
 			//	If we can dynamically reconfig return true
-			if(device.IsDynamicDevice())
+			if (inDevice.IsDynamicDevice())
 			{
-				device.AddDynamicDirectory((::NTV2GetFirmwareFolderPath()));
+				inDevice.AddDynamicDirectory((::NTV2GetFirmwareFolderPath()));
 #ifdef AJA_WINDOWS
 				NTV2DeviceID desiredID (bitfile.GetDeviceID());
 				if (device.CanLoadDynamicDevice(desiredID))
@@ -120,24 +119,24 @@ int NeedsFirmwareUpdate (const NTV2DeviceInfo & inDeviceInfo, string & outReason
 			outReason = bitfile.GetLastError();
 	}
 	else
-		outReason = "GetInstalledBitfileInfo failed for device '" + inDeviceInfo.deviceIdentifier + "'";
+		outReason = "GetInstalledBitfileInfo failed for " + inDevice.GetDescription();
 	return kFirmwareUpdateCheckFailed;	//	failure
 }
 
 
-int NeedsFirmwareUpdate (const NTV2DeviceInfo & inDeviceInfo)
+int NeedsFirmwareUpdate (CNTV2Card & inDevice)
 {
 	string	notUsed;
-	return NeedsFirmwareUpdate (inDeviceInfo, notUsed);
+	return NeedsFirmwareUpdate (inDevice, notUsed);
 }
 
 
 
-CNTV2FirmwareInstallerThread::CNTV2FirmwareInstallerThread (const NTV2DeviceInfo & inDeviceInfo,
+CNTV2FirmwareInstallerThread::CNTV2FirmwareInstallerThread (CNTV2Card & inDevice,
 															const string & inBitfilePath,
 															const bool inVerbose,
 															const bool inForceUpdate)
-	:	m_deviceInfo		(inDeviceInfo),
+	:	m_device			(inDevice),
 		m_bitfilePath		(inBitfilePath),
 		m_updateSuccessful	(false),
 		m_verbose			(inVerbose),
@@ -147,11 +146,11 @@ CNTV2FirmwareInstallerThread::CNTV2FirmwareInstallerThread (const NTV2DeviceInfo
 	::memset (&m_statusStruct, 0, sizeof (m_statusStruct));
 }
 
-CNTV2FirmwareInstallerThread::CNTV2FirmwareInstallerThread (const NTV2DeviceInfo & inDeviceInfo,
+CNTV2FirmwareInstallerThread::CNTV2FirmwareInstallerThread (CNTV2Card & inDevice,
 															const string & inDRFilesPath,
 															const NTV2DeviceID inDesiredID,
 															const bool inVerbose)
-	:	m_deviceInfo		(inDeviceInfo),
+	:	m_device			(inDevice),
 		m_desiredID			(inDesiredID),
 		m_drFilesPath		(inDRFilesPath),
 		m_updateSuccessful	(false),
@@ -166,10 +165,9 @@ CNTV2FirmwareInstallerThread::CNTV2FirmwareInstallerThread (const NTV2DeviceInfo
 AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 {
 	ostringstream ossNote, ossWarn, ossErr;
-	m_device.Open(UWord(m_deviceInfo.deviceIndex));
 	if (!m_device.IsOpen())
 	{
-		FITERR("CNTV2FirmwareInstallerThread:  Device '" << DEC(m_deviceInfo.deviceIndex) << "' not open");
+		FITERR("CNTV2FirmwareInstallerThread:  Device not open");
 		return AJA_STATUS_OPEN;
 	}
 	if (m_bitfilePath.empty() && !m_useDynamicReconfig)
@@ -207,7 +205,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 
 		CNTV2MCSfile mcsFile;
 		mcsFile.GetMCSHeaderInfo(m_bitfilePath);
-		if (!m_forceUpdate  &&  !ShouldUpdateIPDevice(m_deviceInfo.deviceID, mcsFile.GetBitfileDesignString()))
+		if (!m_forceUpdate  &&  !ShouldUpdateIPDevice(m_device.GetDeviceID(), mcsFile.GetBitfileDesignString()))
 		{
 			FITERR("CNTV2FirmwareInstallerThread:  Invalid MCS update");
 			m_updateSuccessful = false;
@@ -245,13 +243,13 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 		m_device.AddDynamicDirectory(::NTV2GetFirmwareFolderPath());
 		if (!m_device.CanLoadDynamicDevice(m_desiredID))
 		{
-			FITERR("CNTV2FirmwareInstallerThread: '" << m_desiredID << "' is not compatible with device '"
-					<< m_deviceInfo.deviceIdentifier << "'");
+			FITERR("CNTV2FirmwareInstallerThread: '" << m_desiredID << "' is not compatible with "
+					<< m_device.GetDescription());
 			return AJA_STATUS_FAIL;
 		}
 		if (m_verbose)
 			FITNOTE("CNTV2FirmwareInstallerThread:  Dynamic Reconfig started" << endl
-					<< "     device: " << m_deviceInfo.deviceIdentifier << ", S/N " << serialNumStr << endl
+					<< "     device: " << m_device.GetDescription() << ", S/N " << serialNumStr << endl
 					<< "  new devID: " << xHEX0N(m_desiredID,8));
 	}
 	else	//	NOT DYNAMIC RECONFIG
@@ -291,10 +289,10 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 		}
 
 		//	Verify that this bitfile is compatible with this device...
-		if (!m_forceUpdate  &&  !bitfile.CanFlashDevice(m_deviceInfo.deviceID))
+		if (!m_forceUpdate  &&  !bitfile.CanFlashDevice(m_device.GetDeviceID()))
 		{
-			FITERR("CNTV2FirmwareInstallerThread:  Bitfile design '" << designName << "' is not compatible with device '"
-					<< m_deviceInfo.deviceIdentifier << "'");
+			FITERR("CNTV2FirmwareInstallerThread:  Bitfile design '" << designName << "' is not compatible with "
+					<< m_device.GetDescription());
 			return AJA_STATUS_FAIL;
 		}
 
@@ -302,7 +300,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 		if (m_verbose)
 			FITNOTE("CNTV2FirmwareInstallerThread:  Firmware update started" << endl
 					<< "    bitfile: " << m_bitfilePath << endl
-					<< "     device: " << m_deviceInfo.deviceIdentifier << ", S/N " << serialNumStr << endl
+					<< "     device: " << m_device.GetDescription() << ", S/N " << serialNumStr << endl
 					<< "   firmware: " << newFirmwareDescription);
 	}	//	not dynamic reconfig
 
@@ -321,7 +319,7 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 			if (!m_updateSuccessful)
 				FITNOTE("CNTV2FirmwareInstallerThread:  'ProgramMainFlash' failed" << endl
 						<< "	 bitfile: " << m_bitfilePath << endl
-						<< "	  device: " << m_deviceInfo.deviceIdentifier << ", S/N " << serialNumStr << endl
+						<< "	  device: " << m_device.GetDescription() << ", S/N " << serialNumStr << endl
 						<< "   serialNum: " << serialNumStr << endl
 						<< "	firmware: " << newFirmwareDescription);
 		}
@@ -352,16 +350,15 @@ AJAStatus CNTV2FirmwareInstallerThread::ThreadRun (void)
 	{
 		FITERR("CNTV2FirmwareInstallerThread:  " << (SIMULATE_UPDATE?"SIMULATED ":"") << "Firmware update failed" << endl
 				<< "	bitfile: " << m_bitfilePath << endl
-				<< "	 device: " << m_deviceInfo.deviceIdentifier << ", S/N " << serialNumStr << endl
+				<< "	 device: " << m_device.GetDescription() << ", S/N " << serialNumStr << endl
 				<< "   firmware: " << newFirmwareDescription);
 		return AJA_STATUS_FAIL;
 	}
 	if (m_verbose)
 		FITNOTE("CNTV2FirmwareInstallerThread:  " << (SIMULATE_UPDATE?"SIMULATED ":"") << "Firmware update completed" << endl
 				<< "	bitfile: " << m_bitfilePath << endl
-				<< "	 device: " << m_deviceInfo.deviceIdentifier << ", S/N " << serialNumStr << endl
+				<< "	 device: " << m_device.GetDescription() << ", S/N " << serialNumStr << endl
 				<< "   firmware: " << newFirmwareDescription);
-
 	return AJA_STATUS_SUCCESS;
 
 }	//	run
@@ -415,9 +412,10 @@ void CNTV2FirmwareInstallerThread::InternalUpdateStatus (void) const
 		m_device.GetProgramStatus (&m_statusStruct);
 }
 
+static CNTV2Card sNullDevice;
 
 CNTV2FirmwareInstallerThread::CNTV2FirmwareInstallerThread ()
-	:	m_deviceInfo		(),
+	:	m_device			(sNullDevice),
 		m_bitfilePath		(),
 		m_updateSuccessful	(false),
 		m_verbose			(false),
@@ -428,7 +426,7 @@ CNTV2FirmwareInstallerThread::CNTV2FirmwareInstallerThread ()
 }
 
 CNTV2FirmwareInstallerThread::CNTV2FirmwareInstallerThread (const CNTV2FirmwareInstallerThread & inObj)
-	:	m_deviceInfo		(),
+	:	m_device			(inObj.m_device),
 		m_bitfilePath		(),
 		m_updateSuccessful	(false),
 		m_verbose			(false),

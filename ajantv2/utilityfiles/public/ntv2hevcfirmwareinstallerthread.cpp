@@ -6,9 +6,6 @@
 **/
 
 #include "ntv2hevcfirmwareinstallerthread.h"
-#include "ntv2bitfile.h"
-#include "ntv2utils.h"
-#include "ajabase/system/file_io.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/common/timer.h"
 
@@ -37,10 +34,10 @@ static const M31FlashParams m_flashTable[] =
 };
 
 
-CNTV2HEVCFirmwareInstallerThread::CNTV2HEVCFirmwareInstallerThread (const NTV2DeviceInfo & inDeviceInfo,
+CNTV2HEVCFirmwareInstallerThread::CNTV2HEVCFirmwareInstallerThread (CNTV2Card & inDevice,
 															const string & inBitfilePath,
 															const bool inVerbose)
-	:	m_deviceInfo		(inDeviceInfo),
+	:	m_device			(inDevice),
 		m_bitfilePath		(inBitfilePath),
 		m_updateSuccessful	(false),
 		m_verbose			(inVerbose)
@@ -51,10 +48,9 @@ CNTV2HEVCFirmwareInstallerThread::CNTV2HEVCFirmwareInstallerThread (const NTV2De
 
 AJAStatus CNTV2HEVCFirmwareInstallerThread::ThreadInit()
 {
-	m_device.Open (m_deviceInfo.deviceIndex);
 	if (!m_device.IsOpen ())
 	{
-		cerr << "## ERROR:	CNTV2FirmwareInstallerThread: Device not open" << endl;
+		cerr << "## ERROR:	CNTV2HEVCFirmwareInstallerThread: Device not open" << endl;
 		return AJA_STATUS_OPEN;
 	}
 	
@@ -73,15 +69,14 @@ AJAStatus CNTV2HEVCFirmwareInstallerThread::ThreadRun()
 	AJAStatus status = AJA_STATUS_SUCCESS;
 	bool loop = true;
 
-	m_device.Open (m_deviceInfo.deviceIndex);
 	if (!m_device.IsOpen ())
 	{
-		cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Device not open" << endl;
+		cerr << "## ERROR:	CNTV2HEVCFirmwareInstallerThread:  Device not open" << endl;
 		return AJA_STATUS_OPEN;
 	}
 	if (m_bitfilePath.empty ())
 	{
-		cerr << "## ERROR:	CNTV2FirmwareInstallerThread:  Bitfile path is empty!" << endl;
+		cerr << "## ERROR:	CNTV2HEVCFirmwareInstallerThread:  Bitfile path is empty!" << endl;
 		return AJA_STATUS_BAD_PARAM;
 	}
 
@@ -140,8 +135,10 @@ void CNTV2HEVCFirmwareInstallerThread::InternalUpdateStatus (void) const
 }
 
 
+static CNTV2Card sNullDevice;
+
 CNTV2HEVCFirmwareInstallerThread::CNTV2HEVCFirmwareInstallerThread ()
-	:	m_deviceInfo		(),
+	:	m_device			(sNullDevice),
 		m_bitfilePath		(),
 		m_updateSuccessful	(false),
 		m_verbose			(false)
@@ -150,7 +147,7 @@ CNTV2HEVCFirmwareInstallerThread::CNTV2HEVCFirmwareInstallerThread ()
 }
 
 CNTV2HEVCFirmwareInstallerThread::CNTV2HEVCFirmwareInstallerThread (const CNTV2HEVCFirmwareInstallerThread & inObj)
-	:	m_deviceInfo		(),
+	:	m_device			(sNullDevice),
 		m_bitfilePath		(),
 		m_updateSuccessful	(false),
 		m_verbose			(false)
