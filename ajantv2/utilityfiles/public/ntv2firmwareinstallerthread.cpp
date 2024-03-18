@@ -99,7 +99,7 @@ int NeedsFirmwareUpdate (CNTV2Card & inDevice, string & outReason)
 				inDevice.AddDynamicDirectory((::NTV2GetFirmwareFolderPath()));
 #ifdef AJA_WINDOWS
 				NTV2DeviceID desiredID (bitfile.GetDeviceID());
-				if (device.CanLoadDynamicDevice(desiredID))
+				if (inDevice.CanLoadDynamicDevice(desiredID))
 					return false;
 #endif
 			}
