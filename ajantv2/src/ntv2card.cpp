@@ -269,7 +269,8 @@ bool CNTV2Card::IS_OUTPUT_SPIGOT_INVALID (const UWord inOutputSpigot)
 {
 	if (inOutputSpigot >= UWord(GetNumSupported(kDeviceGetNumVideoOutputs)))
 	{
-		if (IsWidgetIDSupported(NTV2_WgtSDIMonOut1)  &&  inOutputSpigot == 4)
+		const ULWordSet itms (GetSupportedItems(kNTV2EnumsID_WidgetID));
+		if (itms.find(ULWord(NTV2_WgtSDIMonOut1)) != itms.end()  &&  inOutputSpigot == 4)
 			return false;	//	Io4K Monitor Output exception
 		return true;		//	Invalid
 	}
@@ -291,14 +292,6 @@ bool CNTV2Card::IS_HDMI_INPUT_SPIGOT_INVALID (const UWord inInputHDMIPort)
 	return false;
 }
 
-bool CNTV2Card::IsWidgetIDSupported (const NTV2WidgetID inWgtID)
-{
-	AJAAutoLock tmp(&mSupportedWgtsLock);
-	if (mSupportedWgts.empty())
-		mSupportedWgts = GetSupportedItems(kNTV2EnumsID_WidgetID);
-	return mSupportedWgts.find(ULWord(inWgtID)) != mSupportedWgts.end();
-}
-
 ULWord CNTV2Card::DeviceGetNumberFrameBuffers (void)
 {
 	if (IsSupported(kDeviceCanDoStackedAudio))
@@ -310,6 +303,15 @@ ULWord CNTV2Card::DeviceGetNumberFrameBuffers (void)
 		return totalFrames;
 	}
 	return ::NTV2DeviceGetNumberFrameBuffers(_boardID); //  Handle non-stacked-audio devices
+}
+
+#if 0 // MrBill
+bool CNTV2Card::IsWidgetIDSupported (const NTV2WidgetID inWgtID)
+{
+	AJAAutoLock tmp(&mSupportedWgtsLock);
+	if (mSupportedWgts.empty())
+		mSupportedWgts = GetSupportedItems(kNTV2EnumsID_WidgetID);
+	return mSupportedWgts.find(ULWord(inWgtID)) != mSupportedWgts.end();
 }
 
 bool CNTV2Card::DeviceCanDo292In (const UWord ndx0)
@@ -521,6 +523,7 @@ bool CNTV2Card::DeviceCanDoInputTCIndex (const NTV2TCIndex inTCIndex)
 	}
 	return false;
 }
+#endif // MrBill
 
 
 bool CNTV2Card::GetInstalledBitfileInfo (ULWord & outNumBytes, std::string & outDateStr, std::string & outTimeStr)
@@ -694,7 +697,8 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 
 	bool CNTV2Card::DeviceCanDoWidget (const NTV2WidgetID inWidgetID)
 	{
-		return IsWidgetIDSupported(inWidgetID);
+		const ULWordSet wgtIDs (GetSupportedItems(kNTV2EnumsID_WidgetID));
+		return wgtIDs.find(inWidgetID) != wgtIDs.end();
 	}
 	
 	bool CNTV2Card::DeviceCanDoConversionMode (const NTV2ConversionMode inConversionMode)
@@ -730,6 +734,17 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 
 
 NTV2Buffer CNTV2Card::NULL_POINTER (AJA_NULL, 0);
+
+
+#if defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
+	bool DeviceCapabilities::CanDoWidget (const NTV2WidgetType inWgtType, const UWord index0)
+	{
+		return CanDoWidget(CNTV2SignalRouter::WidgetIDFromTypeAndChannel(inWgtType, NTV2Channel(index0)));
+	}
+#endif	//	defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////	SDRAMAuditor
 
 
 bool SDRAMAuditor::AssessDevice (CNTV2Card & inDevice, const bool inMarkStoppedAudioBuffersFree)

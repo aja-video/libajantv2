@@ -371,6 +371,7 @@ bool CNTV2Card::GetRoutingForChannel (const NTV2Channel inChannel, CNTV2SignalRo
 
 	//	Seed the input crosspoint queue...
 	inputXptQueue.push_back(SDIOutInputs[inChannel]);
+	const ULWordSet wgtIDs (GetSupportedItems(kNTV2EnumsID_WidgetID));
 
 	//	Process all queued inputs...
 	while (!inputXptQueue.empty())
@@ -398,7 +399,7 @@ bool CNTV2Card::GetRoutingForChannel (const NTV2Channel inChannel, CNTV2SignalRo
 			CNTV2SignalRouter::GetWidgetForOutput (outputXpt, widgetID);
 			if (!NTV2_IS_VALID_WIDGET(widgetID))
 				continue;	//	Keep processing input crosspoints, even if no such widget
-			if (!IsWidgetIDSupported(widgetID))
+			if (wgtIDs.find(widgetID) == wgtIDs.end())	//	widget not present?
 				continue;	//	Keep processing input crosspoints, even if no such widget on this device
 
 			//	Add every input of the output's widget to the queue...

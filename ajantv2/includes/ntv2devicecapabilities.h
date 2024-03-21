@@ -37,6 +37,7 @@ class AJAExport DeviceCapabilities
 		inline bool		CanDo4KVideo (void)						{return dev.IsSupported(kDeviceCanDo4KVideo);}
 		inline bool		CanDo8KVideo (void)						{return dev.IsSupported(kDeviceCanDo8KVideo);}
 		inline bool		CanDoAESAudioIn (void)					{return dev.IsSupported(kDeviceCanDoAESAudioIn);}
+		inline bool		CanDoAESAudioOut (void)					{return dev.IsSupported(kDeviceCanDoAESAudioOut);}
 		inline bool		CanDoAnalogAudio (void)					{return dev.IsSupported(kDeviceCanDoAnalogAudio);}
 		inline bool		CanDoAnalogVideoIn (void)				{return dev.IsSupported(kDeviceCanDoAnalogVideoIn);}
 		inline bool		CanDoAnalogVideoOut (void)				{return dev.IsSupported(kDeviceCanDoAnalogVideoOut);}
@@ -46,10 +47,13 @@ class AJAExport DeviceCapabilities
 		inline bool		CanDoAudio8Channels (void)				{return dev.IsSupported(kDeviceCanDoAudio8Channels);}
 		inline bool		CanDoAudio96K (void)					{return dev.IsSupported(kDeviceCanDoAudio96K);}
 		inline bool		CanDoAudioDelay (void)					{return dev.IsSupported(kDeviceCanDoAudioDelay);}
+		inline bool		CanDoAudioInput (void)					{return dev.IsSupported(kDeviceCanDoAudioInput);}
 		inline bool		CanDoAudioMixer (void)					{return dev.IsSupported(kDeviceCanDoAudioMixer);}
+		inline bool		CanDoAudioOutput (void)					{return dev.IsSupported(kDeviceCanDoAudioOutput);}
 		inline bool		CanDoBreakoutBoard (void)				{return dev.IsSupported(kDeviceCanDoBreakoutBoard);}
 		inline bool		CanDoBreakoutBox (void)					{return dev.IsSupported(kDeviceCanDoBreakoutBox);}
 		inline bool		CanDoCapture (void)						{return dev.IsSupported(kDeviceCanDoCapture);}
+		inline bool		CanDoColorCorrection (void)				{return dev.IsSupported(kDeviceCanDoColorCorrection);}
 		inline bool		CanDoCustomAnc (void)					{return dev.IsSupported(kDeviceCanDoCustomAnc);}
 		inline bool		CanDoCustomAux (void)					{return dev.IsSupported(kDeviceCanDoCustomAux);}
 		inline bool		CanDoDSKOpacity (void)					{return dev.IsSupported(kDeviceCanDoDSKOpacity);}
@@ -61,6 +65,7 @@ class AJAExport DeviceCapabilities
 		inline bool		CanDoHDMIHDROut (void)					{return dev.IsSupported(kDeviceCanDoHDMIHDROut);}
 		inline bool		CanDoHDMIMultiView (void)				{return dev.IsSupported(kDeviceCanDoHDMIMultiView);}
 		inline bool		CanDoHDMIOutStereo (void)				{return dev.IsSupported(kDeviceCanDoHDMIOutStereo);}
+		inline bool		CanDoHDMIQuadRasterConversion (void)	{return dev.IsSupported(kDeviceCanDoHDMIQuadRasterConversion);}
 		inline bool		CanDoHDV (void)							{return dev.IsSupported(kDeviceCanDoHDV);}
 		inline bool		CanDoHDVideo (void)						{return dev.IsSupported(kDeviceCanDoHDVideo);}
 		inline bool		CanDoHFRRGB (void)						{return dev.IsSupported(kDeviceCanDoHFRRGB);}
@@ -109,6 +114,7 @@ class AJAExport DeviceCapabilities
 		inline bool		HasHeadphoneJack (void)					{return dev.IsSupported(kDeviceHasHeadphoneJack);}
 		inline bool		HasHEVCM30 (void)						{return dev.IsSupported(kDeviceHasHEVCM30);}
 		inline bool		HasHEVCM31 (void)						{return dev.IsSupported(kDeviceHasHEVCM31);}
+		inline bool		HasIDSwitch (void)						{return dev.IsSupported(kDeviceHasIDSwitch);}
 		inline bool		HasLEDAudioMeters (void)				{return dev.IsSupported(kDeviceHasLEDAudioMeters);}
 		inline bool		HasMicInput (void)						{return dev.IsSupported(kDeviceHasMicrophoneInput);}
 		inline bool		HasNTV4FrameStores (void)				{return dev.IsSupported(kDeviceHasNTV4FrameStores);}
@@ -197,6 +203,7 @@ class AJAExport DeviceCapabilities
 						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_PixelFormat));
 							return itms.find(ULWord(inPF)) != itms.end();
 						}
+		inline bool		CanDoPixelFormat (const NTV2PixelFormat inPF)		{return CanDoFrameBufferFormat(inPF);}
 		inline bool		CanDoInputSource (const NTV2InputSource inSrc)
 						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_InputSource));
 							return itms.find(ULWord(inSrc)) != itms.end();
@@ -212,6 +219,43 @@ class AJAExport DeviceCapabilities
 		inline bool		CanDoWidget (const NTV2WidgetID inWgtID)
 						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_WidgetID));
 							return itms.find(ULWord(inWgtID)) != itms.end();
+						}
+		bool			CanDoWidget (const NTV2WidgetType inWgtType, const UWord index0);
+		inline NTV2PixelFormats	PixelFormats (void)
+						{	NTV2PixelFormats result;
+							const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_PixelFormat));
+							for (ULWordSetConstIter it(itms.begin());  it != itms.end();  ++it)
+								result.insert(NTV2PixelFormat(*it));
+							return result;
+						}
+		inline NTV2VideoFormatSet	VideoFormats (void)
+						{	NTV2VideoFormatSet result;
+							const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_VideoFormat));
+							for (ULWordSetConstIter it(itms.begin());  it != itms.end();  ++it)
+								result.insert(NTV2VideoFormat(*it));
+							return result;
+						}
+		inline NTV2TCIndexes	InputTCIndexes (void)
+						{	NTV2TCIndexes result;
+							const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_InputTCIndex));
+							for (ULWordSetConstIter it(itms.begin());  it != itms.end();  ++it)
+								result.insert(NTV2TCIndex(*it));
+							return result;
+						}
+		inline NTV2TCIndexes	OutputTCIndexes (void)
+						{	NTV2TCIndexes result;
+							const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_OutputTCIndex));
+							for (ULWordSetConstIter it(itms.begin());  it != itms.end();  ++it)
+								result.insert(NTV2TCIndex(*it));
+							return result;
+						}
+		inline bool		CanDoInputTCIndex (const NTV2TCIndex inTCNdx)
+						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_InputTCIndex));
+							return itms.find(ULWord(inTCNdx)) != itms.end();
+						}
+		inline bool		CanDoOutputTCIndex (const NTV2TCIndex inTCNdx)
+						{	const ULWordSet itms (dev.GetSupportedItems(kNTV2EnumsID_OutputTCIndex));
+							return itms.find(ULWord(inTCNdx)) != itms.end();
 						}
 	private:
 		CNTV2DriverInterface &	dev;	//	My reference to the physical or virtual NTV2 device

@@ -22,9 +22,6 @@
 
 using namespace std;
 
-typedef NTV2TCIndexes							NTV2TCIndexSet;				///< @brief	An alias to NTV2TCIndexes.
-typedef NTV2TCIndexesConstIter					NTV2TCIndexSetConstIter;	///< @brief	An alias to NTV2TCIndexesConstIter.
-
 typedef	map <string, NTV2VideoFormat>			String2VideoFormatMap;
 typedef	String2VideoFormatMap::const_iterator	String2VideoFormatMapConstIter;
 
@@ -795,8 +792,8 @@ string CNTV2DemoCommon::GetTCIndexStrings (const NTV2TCIndexKinds inKinds,
 				if (!inDeviceSpecifier.empty()  &&  theDevice.IsOpen())
 				{
 //					const NTV2DeviceID	deviceID(theDevice.GetDeviceID());
-					const bool canDoTCIndex	(inIsInputOnly	? theDevice.DeviceCanDoInputTCIndex(*iter)
-															: theDevice.DeviceCanDoTCIndex(*iter));
+					const bool canDoTCIndex	(inIsInputOnly	? theDevice.features().CanDoInputTCIndex(*iter)
+															: theDevice.features().CanDoOutputTCIndex(*iter));
 					if (!canDoTCIndex)
 						oss << "\t## Incompatible with " << theDevice.GetDisplayName();
 				}

@@ -146,8 +146,6 @@ void sigchld_handler(int s)
 //////////////////////////////////////////////////////////////////////////////
 static void InventoryBoards (NTV2DiscoverRespPayload *boardInventory)
 {
-	CNTV2DeviceScanner	ntv2BoardScan;
-	ntv2BoardScan.ScanHardware();
 	CNTV2Card	device;
 	UWord		deviceNdx(0);
 	while (CNTV2DeviceScanner::GetDeviceAtIndex(deviceNdx, device))
