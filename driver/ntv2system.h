@@ -284,8 +284,8 @@
 			#include <DriverKit/IOLib.h>
 			#include <DriverKit/IODispatchQueue.h>
 			#include <DriverKit/IOLib.h>
-			#define DebugLog(fmt, args...)  os_log(OS_LOG_DEFAULT, "NTV2PCIe::%s:  " fmt,  __FUNCTION__,##args)
-			#define DebugLog(fmt, args...)  os_log(OS_LOG_DEFAULT, "NTV2PCIe::%s:  " fmt,  __FUNCTION__,##args)
+			#define DebugLog(fmt, args...)  os_log(OS_LOG_DEFAULT, "NTV2PCIe::%{public}s:  " fmt, __FUNCTION__,##args)
+			//#define DebugLog(fmt, args...)  os_log(OS_LOG_DEFAULT, "NTV2PCIe::%{public}s:  " fmt,  __FUNCTION__,##args)
 		#else
 			#include <IOKit/IOLocks.h>
 			#include <IOKit/IOLib.h>

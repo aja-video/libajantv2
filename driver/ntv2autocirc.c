@@ -14,7 +14,7 @@
 #include "ntv2autofunc.h"
 #include "ntv2fixed.h"
 
-static char* CrosspointName[] =
+static const char* CrosspointName[] =
 {
 	"Channel 1",
 	"Channel 2",
