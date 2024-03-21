@@ -130,7 +130,7 @@ Ntv2Status ntv2_setup_disable(struct ntv2_setup *ntv2_setterupper)
 
 static void ntv2_setup_monitor(void* data)
 {
-	return ntv2_setup_monitor_shared(data);
+	ntv2_setup_monitor_shared(data);
 }
 
 void ntv2_setup_monitor_shared(void* data)
