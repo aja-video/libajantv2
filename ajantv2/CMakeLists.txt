@@ -1,6 +1,7 @@
 project(ajantv2)
 
 include(ExternalProject)
+include(CMakePackageConfigHelpers)
 
 if (CMAKE_CXX_STANDARD EQUAL 98)
     message(STATUS "ajantv2 building for C++98")
@@ -37,6 +38,11 @@ set(TARGET_INCLUDE_DIRS
     ${LIBAJANTV2_DIR}/ajabase
     ${LIBAJANTV2_DIR}/ajantv2/includes
     ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+set(INSTALL_INCLUDE_DIRS
+    ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2
+    ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/includes
 )
 
 if (AJANTV2_DISABLE_PLUGIN_LOAD)
@@ -513,6 +519,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         ${LIBAJANTV2_DIR}/ajabase/pnp/windows
         ${LIBAJANTV2_DIR}/ajabase/system/windows)
 
+    list(APPEND INSTALL_INCLUDE_DIRS
+        ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/src/win)
+
     set(AJABASE_HEADERS
         ${AJABASE_HEADERS}
         ${AJABASE_PNP_WIN_HEADERS}
@@ -538,6 +547,8 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${LIBAJANTV2_DIR}/ajantv2/src/lin
         ${LIBAJANTV2_DIR}/ajabase/pnp/linux
         ${LIBAJANTV2_DIR}/ajabase/system/linux)
+    list(APPEND INSTALL_INCLUDE_DIRS
+        ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/src/lin)
     list(APPEND AJABASE_HEADERS
         ${AJABASE_PNP_LIN_HEADERS}
         ${AJABASE_SYS_LIN_HEADERS})
@@ -590,6 +601,8 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         ${LIBAJANTV2_DIR}/ajabase/pnp/mac
         ${LIBAJANTV2_DIR}/ajabase/system/mac
         /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include)
+    list(APPEND INSTALL_INCLUDE_DIRS
+        ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/src/mac)
     list(APPEND AJABASE_HEADERS
         ${AJABASE_PNP_MAC_HEADERS}
         ${AJABASE_SYS_MAC_HEADERS})
@@ -693,7 +706,8 @@ if (NOT TARGET ${PROJECT_NAME})
     )
 
     target_include_directories(${PROJECT_NAME} PUBLIC
-        "$<BUILD_INTERFACE:${TARGET_INCLUDE_DIRS}>")
+        "$<BUILD_INTERFACE:${TARGET_INCLUDE_DIRS}>"
+        "$<INSTALL_INTERFACE:${INSTALL_INCLUDE_DIRS}>")
 
     target_link_libraries(${PROJECT_NAME} PUBLIC
         "$<BUILD_INTERFACE:${TARGET_LINK_LIBS}>")
@@ -777,11 +791,28 @@ if (AJA_INSTALL_MISC)
 endif()
 
 install(TARGETS ${PROJECT_NAME}
+    EXPORT          ajantv2-targets
     ARCHIVE         DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY         DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME         DESTINATION ${CMAKE_INSTALL_BINDIR}
     FRAMEWORK       DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+set(AJANTV2_INSTALL_CMAKECONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/ajantv2)
+install(EXPORT ajantv2-targets
+    NAMESPACE AJA::
+    DESTINATION ${AJANTV2_INSTALL_CMAKECONFIGDIR})
+configure_package_config_file(ajantv2Config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/cmake/ajantv2Config.cmake
+    INSTALL_DESTINATION ${AJANTV2_INSTALL_CMAKECONFIGDIR})
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/cmake/ajantv2ConfigVersion.cmake
+    VERSION ${AJA_NTV2_VER_SHORT_STR}
+    COMPATIBILITY SameMajorVersion)
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/cmake/ajantv2Config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/cmake/ajantv2ConfigVersion.cmake
+    DESTINATION ${AJANTV2_INSTALL_CMAKECONFIGDIR})
 
 if (NOT AJANTV2_DISABLE_TESTS)
     add_subdirectory(test)
