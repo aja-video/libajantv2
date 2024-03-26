@@ -1,0 +1,6 @@
+set(AJANTV2_VERSION x.y.z)
+
+@PACKAGE_INIT@
+
+get_filename_component(AJANTV2_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+include(${AJANTV2_CMAKE_DIR}/ajantv2-targets.cmake)
