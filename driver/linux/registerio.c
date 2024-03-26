@@ -461,6 +461,9 @@ void WriteRegister(	ULWord deviceNumber,
             case kRegGlobalControl3:
                 ntv2_videoraster_update_global(pNTV2Params->m_pRasterMonitor, registerNumber, registerValue);
                 break;
+            case kRegCh1Control:
+                ntv2_videoraster_update_channel(pNTV2Params->m_pRasterMonitor, 0);
+                break;
             case kRegCh1OutputFrame:
                 ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 0, false, registerValue);
                 break;
@@ -468,6 +471,7 @@ void WriteRegister(	ULWord deviceNumber,
                 ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 0, true, registerValue);
                 break;
             case kRegGlobalControlCh2:
+            case kRegCh2Control:
                 ntv2_videoraster_update_channel(pNTV2Params->m_pRasterMonitor, 1);
                 break;
             case kRegCh2OutputFrame:
@@ -477,6 +481,7 @@ void WriteRegister(	ULWord deviceNumber,
                 ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 1, true, registerValue);
                 break;
             case kRegGlobalControlCh3:
+            case kRegCh3Control:
                 ntv2_videoraster_update_channel(pNTV2Params->m_pRasterMonitor, 2);
                 break;
             case kRegCh3OutputFrame:
@@ -486,6 +491,7 @@ void WriteRegister(	ULWord deviceNumber,
                 ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 2, true, registerValue);
                 break;
             case kRegGlobalControlCh4:
+            case kRegCh4Control:
                 ntv2_videoraster_update_channel(pNTV2Params->m_pRasterMonitor, 3);
                 break;
             case kRegCh4OutputFrame:
@@ -495,6 +501,7 @@ void WriteRegister(	ULWord deviceNumber,
                 ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 3, true, registerValue);
                 break;
             case kRegGlobalControlCh5:
+            case kRegCh5Control:
                 ntv2_videoraster_update_channel(pNTV2Params->m_pRasterMonitor, 4);
                 break;
             case kRegCh5OutputFrame:
@@ -504,6 +511,7 @@ void WriteRegister(	ULWord deviceNumber,
                 ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 4, true, registerValue);
                 break;
             case kRegGlobalControlCh6:
+            case kRegCh6Control:
                 ntv2_videoraster_update_channel(pNTV2Params->m_pRasterMonitor, 5);
                 break;
             case kRegCh6OutputFrame:
@@ -513,6 +521,7 @@ void WriteRegister(	ULWord deviceNumber,
                 ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 5, true, registerValue);
                 break;
             case kRegGlobalControlCh7:
+            case kRegCh7Control:
                 ntv2_videoraster_update_channel(pNTV2Params->m_pRasterMonitor, 6);
                 break;
             case kRegCh7OutputFrame:
@@ -522,6 +531,7 @@ void WriteRegister(	ULWord deviceNumber,
                 ntv2_videoraster_update_frame(pNTV2Params->m_pRasterMonitor, 6, true, registerValue);
                 break;
             case kRegGlobalControlCh8:
+            case kRegCh8Control:
                 ntv2_videoraster_update_channel(pNTV2Params->m_pRasterMonitor, 7);
                 break;
             case kRegCh8OutputFrame:

@@ -131,7 +131,8 @@ NTV2_CON(ntv2_reg_videoraster_control,                      10);    /**< Control
    NTV2_FLD(ntv2_fld_videoraster_control_twosampleinterleave,   1,   7);    /**< Two-pixel interleave mode */
        NTV2_CON(ntv2_con_videoraster_twosampleinterleave_disable,   0x0);       /**< Disable two-pixel interleave */
        NTV2_CON(ntv2_con_videoraster_twosampleinterleave_enable,    0x1);       /**< Enable two-pixel interleave */
-   NTV2_FLD(ntv2_fld_videoraster_control_imageformat,           8,   8);    /**< image format */
+   NTV2_FLD(ntv2_fld_videoraster_control_imageformat,           6,   8);    /**< image format */
+   NTV2_FLD(ntv2_fld_videoraster_control_negpitch,              1,   14);   /**< negative pitch to invert frame */
    NTV2_FLD(ntv2_fld_videoraster_control_pixelclock,            3,   16);   /**< pixel clock select */
        NTV2_CON(ntv2_con_videoraster_pixelclock_2700,               0x0);           /**< Pixel clock 27 MHz */
        NTV2_CON(ntv2_con_videoraster_pixelclock_7418,               0x1);           /**< Pixel clock 74.1758 MHz */
