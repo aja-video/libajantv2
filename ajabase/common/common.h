@@ -14,6 +14,7 @@
 #endif
 
 #include "ajabase/common/export.h"
+#include <cstdint>
 #include <set>
 #include <string>
 #include <vector>
