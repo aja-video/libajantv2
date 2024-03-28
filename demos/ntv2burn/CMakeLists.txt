@@ -28,8 +28,6 @@ set(TARGET_SOURCES
 )
 
 add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
-add_dependencies(${PROJECT_NAME} ajantv2)
-target_compile_definitions(${PROJECT_NAME} PUBLIC ${AJANTV2_TARGET_COMPILE_DEFS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS} ajantv2)
 
