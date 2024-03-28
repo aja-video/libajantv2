@@ -94,6 +94,7 @@ int         ntv2_release(struct inode *minode, struct file *mfile);
 #define smp_mb__after_clear_bit  smp_mb__after_atomic
 #endif
 
+void ntv2_set_rdma_callback(void);
 
 #endif	// NTV2_DRIVER_HEADER
 
