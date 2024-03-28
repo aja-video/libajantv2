@@ -431,6 +431,7 @@ Ntv2Status ntv2_videoraster_update_frame(struct ntv2_videoraster *ntv2_raster, u
     uint32_t field1_address = 0;
     uint32_t field2_address = 0;
     uint32_t oddline_address = 0;
+    uint32_t vid_control = 0;
     bool invert = false;
     bool progressive = false;
     bool top_first = false;
@@ -462,7 +463,7 @@ Ntv2Status ntv2_videoraster_update_frame(struct ntv2_videoraster *ntv2_raster, u
     if (geometry >= s_geometry_size) return false;
 	height = c_geometry_data[geometry].frame_height;
     channel_control = ntv2_raster->channel_control[index];
-    invert = (NTV2_FLD_GET(ntv2_fld_channel_control_frame_orientation, channel_control) == 1);
+    invert = (NTV2_FLD_GET(ntv2_fld_channel_control_frame_orientation, channel_control) != 0);
 
     frame_size = ntv2_raster->frame_size[index];
     pitch = ntv2_raster->frame_pitch[index];
@@ -521,9 +522,9 @@ Ntv2Status ntv2_videoraster_update_frame(struct ntv2_videoraster *ntv2_raster, u
     ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_roifield1startaddress, field1_address);
     ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_roifield2startaddress, field2_address);
     ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_oddlinestartaddress, oddline_address);
-    channel_control = channel_control & ~NTV2_FLD_MASK(ntv2_fld_videoraster_control_negpitch);
-    channel_control |= NTV2_FLD_SET(ntv2_fld_videoraster_control_negpitch, (invert? 1 : 0));
-    ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_control, channel_control);
+    vid_control = ntv2_raster->videoraster_control[index] & ~NTV2_FLD_MASK(ntv2_fld_videoraster_control_negpitch);
+    vid_control |= NTV2_FLD_SET(ntv2_fld_videoraster_control_negpitch, (invert? 1 : 0));
+    ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_control, vid_control);
 
     ntv2InterruptLockRelease(&ntv2_raster->state_lock);
 
@@ -546,6 +547,7 @@ static Ntv2Status ntv2_videoraster_initialize(struct ntv2_videoraster *ntv2_rast
     ntv2_raster->output_frame[index] = 0;
     ntv2_raster->input_frame[index] = 0;
     ntv2_raster->master_index[index] = 0;
+    ntv2_raster->videoraster_control[index] = 0;
     ntv2_raster->negative_pitch[index] = false;
     ntv2_raster->mode_change[index] = true;
 
@@ -674,7 +676,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     pixel_rate = get_sdi_pixel_rate(standard, frame_rate);
     if (pixel_rate >= s_pixel_rate_size) return false;
     register_sync = NTV2_FLD_GET(ntv2_fld_global_control_reg_sync, global_control);
-    invert = (NTV2_FLD_GET(ntv2_fld_channel_control_frame_orientation, channel_control) == 1);
+    invert = (NTV2_FLD_GET(ntv2_fld_channel_control_frame_orientation, channel_control) != 0);
 
 	qRezMode = NTV2_FLD_GET(ntv2_fld_channel_control_quarter_size_mode, channel_control);
 
@@ -975,6 +977,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     }
 
     ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_control, value);
+    ntv2_raster->videoraster_control[index] = value;
     video_raster = value;
 
     /* extra parameters */
