@@ -103,5 +103,3 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             set(BUNDLE_OUTPUT_DIR ".")
         endif()
 endif()
-
-add_dependencies(${PROJECT_NAME} ajantv2)
