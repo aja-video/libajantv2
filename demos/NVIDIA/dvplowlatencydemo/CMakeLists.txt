@@ -83,7 +83,6 @@ set(TARGET_SOURCES
 	${NVIDIA_COMMON_SOURCES})
 
 add_executable(dvplowlatencydemo ${TARGET_SOURCES})
-add_dependencies(dvplowlatencydemo ajantv2)
 target_include_directories(dvplowlatencydemo PRIVATE ${TARGET_INCLUDE_DIRS})
 target_link_directories(dvplowlatencydemo PRIVATE ${TARGET_LINK_DIRS})
 target_link_libraries(dvplowlatencydemo PRIVATE ajantv2 ${TARGET_LINK_LIBS})

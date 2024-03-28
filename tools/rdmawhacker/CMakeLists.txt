@@ -47,7 +47,6 @@ set(TARGET_SOURCES
 message(STATUS "CUDA Libs: ${CUDA_LIBRARIES}")
 
 add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
-add_dependencies(${PROJECT_NAME} ajantv2)
 target_compile_definitions(${PROJECT_NAME} PRIVATE ${TARGET_COMPILE_DEFS})
 target_include_directories(${PROJECT_NAME} PRIVATE ${TARGET_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE ${TARGET_LINK_LIBS} ajantv2)

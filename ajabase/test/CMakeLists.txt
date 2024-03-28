@@ -29,7 +29,6 @@ endif()
 
 if (NOT TARGET ut_ajabase)
 	add_executable(ut_ajabase main.cpp ${DOCTEST_INCLUDE_DIR}/doctest.h)
-	add_dependencies(ut_ajabase ajantv2)
 	target_compile_definitions(ut_ajabase PRIVATE ${TARGET_COMPILE_DEFS})
 	target_include_directories(ut_ajabase PRIVATE ${TARGET_INCLUDE_DIRS})
 	target_link_libraries(ut_ajabase PRIVATE ajantv2 ${TARGET_LINK_LIBS})
