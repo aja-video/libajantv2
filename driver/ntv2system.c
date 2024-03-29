@@ -1292,6 +1292,14 @@ void ntv2MemoryFree(void* pAddress, uint32_t size)
 }
 
 // Mac event functions
+#if defined(AJAMacDext)
+typedef struct _Ntv2EventContext
+{
+	Ntv2Event*	pNtv2Event;
+	uint64_t	timeout;
+	bool		pEventSignaled;
+}Ntv2EventContext;
+#endif
 
 bool ntv2EventOpen(Ntv2Event* pEvent, Ntv2SystemContext* pSysCon)
 {
@@ -1323,6 +1331,15 @@ void ntv2EventClose(Ntv2Event* pEvent)
 	memset(pEvent, 0, sizeof(Ntv2Event));
 }
 
+#if defined(AJAMacDext)
+static void ntv2EventSignalCallback (void* context)
+{
+	Ntv2EventContext* thisContext = (Ntv2EventContext*)context;
+	Ntv2Event* thisEvent = thisContext->pNtv2Event;
+	thisEvent->pDispatchQueue->WakeupWithOptions((void*)thisEvent, kIODispatchQueueWakeupAll);
+}
+#endif
+
 void ntv2EventSignal(Ntv2Event* pEvent)
 {
 	Ntv2Event* pEventMac = pEvent;
@@ -1332,7 +1349,9 @@ void ntv2EventSignal(Ntv2Event* pEvent)
 	pEventMac->flag = true;
 	
 #if defined(AJAMacDext)
-	//pEvent->pDispatchQueue->Wakeup(pEvent);
+	Ntv2EventContext thisContext;
+	thisContext.pNtv2Event = pEvent;
+	pEvent->pDispatchQueue->DispatchSync_f((void*)&thisContext, (IODispatchFunction)&ntv2EventSignalCallback);
 #else
 	IORecursiveLockWakeup(pEventMac->pRecursiveLock, pEventMac->pRecursiveLock, false);
 #endif
@@ -1347,11 +1366,27 @@ void ntv2EventClear(Ntv2Event* pEvent)
 	pEventMac->flag = false;
 }
 
+#if defined(AJAMacDext)
+void ntv2EventWaitCallback (void* context)
+{
+	Ntv2EventContext* thisEventContext = (Ntv2EventContext*)context;
+	Ntv2Event* thisEvent = thisEventContext->pNtv2Event;
+	kern_return_t returnCode = thisEvent->pDispatchQueue->SleepWithTimeout((void*)thisEvent, thisEventContext->timeout * kMicrosecondScale);
+	if(returnCode == kIOReturnTimeout)
+		thisEventContext->pEventSignaled = false;
+	else
+	{
+		thisEventContext->pEventSignaled = true;
+		DebugLog("Signaled Event\n");
+	}
+}
+#endif
+
 bool ntv2EventWaitForSignal(Ntv2Event* pEvent, int64_t timeout, bool alert)
 {
 	uint64_t currentTime;
 	uint64_t timeoutNanos;
-	
+		
 	Ntv2Event* pEventMac = pEvent;
 
 	if(pEventMac == NULL) return false;
@@ -1360,8 +1395,10 @@ bool ntv2EventWaitForSignal(Ntv2Event* pEvent, int64_t timeout, bool alert)
 	if(pEventMac->flag) return true;
 
 #if defined(AJAMacDext)
-	IOSleep(100);
-	//pEventMac->pDispatchQueue->SleepWithTimeout(pEvent, timeout);
+	Ntv2EventContext thisContext;
+	thisContext.pNtv2Event = pEvent;
+	thisContext.timeout = timeout;
+	pEvent->pDispatchQueue->DispatchSync_f((void*)&thisContext, (IODispatchFunction)&ntv2EventWaitCallback);
 #else
 	// Get the current time
 	clock_get_uptime(&currentTime);
@@ -1381,7 +1418,6 @@ bool ntv2EventWaitForSignal(Ntv2Event* pEvent, int64_t timeout, bool alert)
 	// non zero value indicates failure or timeout
 	if (result) return false;
 #endif
-	
 	return true;
 }
 
@@ -1470,6 +1506,9 @@ bool ntv2ThreadRun(Ntv2Thread* pThread, Ntv2ThreadTask* pTask, void* pContext)
 void ntv2ThreadStop(Ntv2Thread* pThread)
 {
 	int timeOutMs = 250;
+#if defined(AJAMacDext)
+	timeOutMs = timeOutMs*1000;//synthetic delay because IOSleep causes crash on exit
+#endif
 	
 	if(pThread == NULL) return;
 	
@@ -1481,13 +1520,18 @@ void ntv2ThreadStop(Ntv2Thread* pThread)
 	{
 		if (pThread->pTask == NULL)
 			break;
+#if defined(AJAMacDext)
+		//IOSleep(10);//This causes a crash on exit?
+#else
 		IOSleep(10);
+#endif
 		timeOutMs -= 10;
 	}
 	
-	//if (timeOutMs <= 0 && pThread->pTask != NULL)
-		//DebugLog("ntv2ThreadStop - fail to exit thread\n");
+	if (timeOutMs <= 0 && pThread->pTask != NULL)
+		DebugLog("ntv2ThreadStop - fail to exit thread\n");
     
+	DebugLog("ntv2ThreadStop - Exit thread\n");
 	return;
 }
 
@@ -1510,6 +1554,7 @@ void ntv2ThreadExit(Ntv2Thread* pThread)
 	
 	// no code is executed after this line
 #if defined(AJAMacDext)
+	DebugLog("Exit thread!!!!\n");
 #else
 	(void) thread_terminate(current_thread());
 #endif

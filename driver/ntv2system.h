@@ -284,8 +284,7 @@
 			#include <DriverKit/IOLib.h>
 			#include <DriverKit/IODispatchQueue.h>
 			#include <DriverKit/IOLib.h>
-			#define DebugLog(fmt, args...)  os_log(OS_LOG_DEFAULT, "NTV2PCIe::%{public}s:  " fmt, __FUNCTION__,##args)
-			//#define DebugLog(fmt, args...)  os_log(OS_LOG_DEFAULT, "NTV2PCIe::%{public}s:  " fmt,  __FUNCTION__,##args)
+			#define DebugLog(fmt, args...)  os_log(OS_LOG_DEFAULT, "NTV2Shared.c::%{public}s:  " fmt, __FUNCTION__,##args)
 		#else
 			#include <IOKit/IOLocks.h>
 			#include <IOKit/IOLib.h>
@@ -308,7 +307,7 @@
 
 	// windows message abstraction
 
-	#define ntv2Message(string, ...) 			DebugLog(string, __VA_ARGS__)
+#define ntv2Message(string, args...) 			DebugLog(string, ##args)
 
 	// Mac system context
 
