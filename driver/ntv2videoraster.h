@@ -35,6 +35,8 @@ struct ntv2_videoraster {
     uint32_t            frame_length[NTV2_VIDEORASTER_MAX_WIDGETS];
     uint32_t            frame_pitch[NTV2_VIDEORASTER_MAX_WIDGETS];
     uint32_t            channel_mode[NTV2_VIDEORASTER_MAX_WIDGETS];
+    uint32_t            videoraster_control[NTV2_VIDEORASTER_MAX_WIDGETS];
+    bool                negative_pitch[NTV2_VIDEORASTER_MAX_WIDGETS];
     bool                mode_change[NTV2_VIDEORASTER_MAX_WIDGETS];
 
     uint32_t            widget_base;

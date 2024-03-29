@@ -559,6 +559,7 @@ bool CNTV2DriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 			case eGetAutoCirc:
 			case eStopAutoCirc:
 			case eInitAutoCirc:
+			case eSetActiveFrame:
 				return _pRPCAPI->NTV2AutoCirculateRemote(autoCircData);
 			default:	// Others not handled
 				return false;
