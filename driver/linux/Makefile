@@ -40,12 +40,6 @@ endif
 	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=$(AJA_RDMA)
 ifdef AJA_IGPU
 	EXTRA_CFLAGS += -DAJA_IGPU=$(AJA_IGPU)
-else
-ifeq ($(NVIDIA_SYMVERS),)
-	NVIDIA_KO ?= $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia*.ko'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
-	NVIDIA_GEN_SYMVERS := ./nvidia-ko-to-module-symvers $(NVIDIA_KO) $(DIR)/nvidia.symvers
-	NVIDIA_SYMVERS := $(DIR)/nvidia.symvers
-endif
 endif
 endif
 
@@ -206,16 +200,7 @@ default: all
 	@echo linux distro: $(DISTRO_TYPE)
 	@echo linux distro flags: '$(DISTRO_INFO)'
 	@echo lib: $(LIB)
-ifdef AJA_RDMA
-ifdef AJA_IGPU
 	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules
-else
-	${NVIDIA_GEN_SYMVERS}
-	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules KBUILD_EXTRA_SYMBOLS=$(NVIDIA_SYMVERS)
-endif
-else
-	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules
-endif
 	$(call ensure_dir_exists, $(A_DRIVER_PATH)/bin)
 	cp $(NTV2TARGET).ko $(A_DRIVER_PATH)/bin
 

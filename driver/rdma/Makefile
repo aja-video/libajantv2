@@ -1,21 +1,30 @@
+# SPDX-License-Identifier: MIT
+#
+# Copyright (C) 2004 - 2024 AJA Video Systems, Inc.
+#
 
-PWD			= $(shell pwd)
-DRIVERDIR 		?= $(PWD)
+# Makefile for AJA Linux Video RDMA Driver
+DIR := $(strip $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST)))))
+
+include $(DIR)/../configure.mk
+include $(DIR)/../sdkversion.mk
+
+DRIVERDIR		?= $(DIR)
 KDIR  	  		?= /lib/modules/$(shell uname -r)/build
 BINDIR 		  	= ../bin
-DRIVERTARGET  		= ajardma.o
-INCLUDES      		= -I. -I$(DRIVERDIR) -I$(DRIVERDIR)/..
-EXTRA_CFLAGS    	+= $(INCLUDES) -Wall
+DRIVERTARGET  	= $(RDMATARGET).o
+INCLUDES      	= -I. -I$(DRIVERDIR) -I$(DRIVERDIR)/..
+EXTRA_CFLAGS    += $(INCLUDES) -Wall
 LDFLAGS 		:= 
 export LDFLAGS
 NTV2_SYMVERS	= $(DRIVERDIR)/../linux/Module.symvers
 
 DRIVERSRCS = main.c
 DRIVEROBJS = main.o
-#DRIVERINCS = 
+DRIVERINCS = $(DRIVERDIR)/../linux/ntv2rdma.h
 
-obj-m		:= $(DRIVERTARGET)
-ajardma-y	:= $(DRIVEROBJS)
+$(RDMATARGET)-y	:= $(DRIVEROBJS)
+obj-m			:= $(DRIVERTARGET)
 
 ifdef AJA_RDMA
 ifeq ($(NVIDIA_SRC_DIR),)
@@ -42,7 +51,7 @@ else
 RDMAINCS =
 endif
 
-default: $(DRIVERSRCS) $(DRIVERINCS) 
+default: $(DRIVERSRCS) $(DRIVERINCS) $(RDMAINCS)
 	@echo linux distro: $(DISTRO_TYPE)
 	@echo linux distro flags: '$(DISTRO_INFO)'
 	@echo lib: $(LIB)
@@ -57,14 +66,14 @@ else
 	$(MAKE) -C $(KDIR) M=$(DRIVERDIR) DRIVERDIR=$(DRIVERDIR) modules
 endif
 	$(call ensure_dir_exists, $(A_DRIVER_PATH)/bin)
-	cp $(NTV2TARGET).ko $(A_DRIVER_PATH)/bin
+	cp $(RDMATARGET).ko $(A_DRIVER_PATH)/bin
 
 all: default
 
 .PHONY: clean reload all
 
 clean:
-	rm -f $(BINDIR)/*.ko *.ko *.o .*o.cmd *.mod *.mod.c *~ errors.txt semantic.cache
+	rm -f $(A_DRIVER_PATH)/bin/ajardma.ko ajardma.ko *.o .*o.cmd *.mod *.mod.c *~ errors.txt semantic.cache
 	rm -rf .tmp_versions
 	rm -f ../*.o ../.*o.cmd
 	rm -f *.markers *.symvers *.order
