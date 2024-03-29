@@ -191,10 +191,6 @@ struct VirtualDataNode
     ULWord          data;
 };
 
-void ntv2_set_rdma_callback(void)
-{
-}
-EXPORT_SYMBOL(ntv2_set_rdma_callback);
 
 /*********************************************/
 /* Prototypes for private utility functions. */

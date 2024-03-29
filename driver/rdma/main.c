@@ -25,18 +25,33 @@
 #include <linux/device.h>
 #include <linux/poll.h>
 #include <linux/sched.h>
-#include <linux/ntv2driver.h>
 
-//static void* callback;
-extern void ntv2_set_rdma_callback(void);
+#ifdef AJA_RDMA
+#include <linux/ntv2rdma.h>
 
+extern void ntv2_set_rdma_fops(struct ntv2_rdma_fops* fops);
+
+static struct ntv2_rdma_fops rdma_fops = 
+{
+    .get_pages = nvidia_p2p_get_pages,
+    .put_pages = nvidia_p2p_put_pages,
+    .free_page_table = nvidia_p2p_free_page_table,
+    .dma_map_pages = nvidia_p2p_dma_map_pages,
+    .dma_unmap_pages = nvidia_p2p_dma_unmap_pages
+};
+
+#endif
 
 MODULE_LICENSE("Proprietary");
 
 int ntv2_rdma_init(void)
 {
-    printk(KERN_INFO "ntv2_rmda_init\n");
-    ntv2_set_rdma_callback();
+#ifdef AJA_RDMA
+    printk(KERN_INFO "ntv2_rmda_init: configure rdma fops\n");
+    ntv2_set_rdma_fops(&rdma_fops);
+#else
+    printk(KERN_INFO "ntv2_rmda_init: AJA_RDMA not defined\n");
+#endif
     return 0;
 }	
 
