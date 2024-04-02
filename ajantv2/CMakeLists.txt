@@ -595,6 +595,8 @@ if (NOT TARGET ${PROJECT_NAME})
         aja_ntv2_log_build_info()
 
         add_library(${PROJECT_NAME} SHARED ${TARGET_SOURCES})
+        target_compile_definitions(${PROJECT_NAME} PRIVATE
+            ${AJANTV2_PRIVATE_TARGET_COMPILE_DEFS})
         target_compile_definitions(${PROJECT_NAME} PUBLIC
             ${TARGET_COMPILE_DEFS_DYNAMIC}
             ${AJANTV2_TARGET_COMPILE_DEFS})
@@ -608,6 +610,8 @@ if (NOT TARGET ${PROJECT_NAME})
         aja_ntv2_log_build_info()
 
         add_library(${PROJECT_NAME} STATIC ${TARGET_SOURCES})
+        target_compile_definitions(${PROJECT_NAME} PRIVATE
+            ${AJANTV2_PRIVATE_TARGET_COMPILE_DEFS})
         target_compile_definitions(${PROJECT_NAME} PUBLIC
             ${TARGET_COMPILE_DEFS_STATIC}
             ${AJANTV2_TARGET_COMPILE_DEFS})
@@ -651,14 +655,14 @@ if (AJA_INSTALL_HEADERS)
     install(FILES ${AJABASE_SYS_WIN_HEADERS}                            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajabase/system/windows)
     install(FILES ${AJABASE_SYS_MAC_HEADERS}                            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajabase/system/mac)
     install(FILES ${AJABASE_SYS_LIN_HEADERS}                            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajabase/system/linux)
-    install(FILES ${AJAANC_HEADERS}                                     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajaanc/includes)
-    install(FILES ${AJANTV2_HEADERS}                                    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/includes)
+    install(FILES ${AJAANC_HEADERS}                                     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajaanc)
+    install(FILES ${AJANTV2_HEADERS}                                    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2)
     install(FILES ${AJANTV2_WIN_HEADERS}                                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/src/win)
     install(FILES ${AJANTV2_MAC_HEADERS}                                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/src/mac)
     install(FILES ${AJANTV2_LIN_HEADERS}                                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/src/lin)
     install(FILES ${AJANTV2_UTILITY_PUBLIC_HEADERS}                     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/utilityfiles/public)
-    install(FILES includes/ntv2version.h                                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/includes)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/includes/ntv2version.h    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2/includes)
+    install(FILES includes/ntv2version.h                                DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/includes/ntv2version.h    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/libajantv2/ajantv2)
 endif()
 if (AJA_INSTALL_SOURCES)
     list(APPEND AJANTV2_SOURCES src/ntv2devicefeatures.hpp)
@@ -698,11 +702,31 @@ if (AJA_INSTALL_MISC)
 endif()
 
 install(TARGETS ${PROJECT_NAME}
+    EXPORT ${PROJECT_NAME}
     ARCHIVE         DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY         DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME         DESTINATION ${CMAKE_INSTALL_BINDIR}
     FRAMEWORK       DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+target_include_directories(${PROJECT_NAME}
+                           INTERFACE
+                            $<INSTALL_INTERFACE:include/libajantv2/>
+                            $<INSTALL_INTERFACE:include/libajantv2/ajantv2/src/win/>
+                            $<INSTALL_INTERFACE:include/libajantv2/ajantv2/src/mac/>
+                            $<INSTALL_INTERFACE:include/libajantv2/ajantv2/src/lin/>
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/includes/>
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/win/>
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/mac/>
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/lin/>
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../>
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../ajaanc/includes/>
+                           )
+
+install(EXPORT ${PROJECT_NAME}
+    FILE aja-ntv2Config.cmake
+    NAMESPACE aja::
+    DESTINATION share/aja-ntv2)
 
 if (NOT AJANTV2_DISABLE_TESTS)
     add_subdirectory(test)
