@@ -18,7 +18,8 @@ AJA_CREATE_DEVICE_NODES = 1
 
 CC			 ?= gcc
 
-DRIVERTARGET = $(NTV2TARGET).o
+NTV2_DRIVER_TARGET = $(NTV2TARGET).o
+RDMA_DRIVER_TARGET = $(RDMATARGET).o
 INCLUDES 	 = -I$(A_LIB_NTV2_INC) -I$(A_LINUX_DRIVER_PATH) -I$(A_LIB_NTV2_SRC) -I$(A_LIB_NTV2_SRC)/lin -I$(A_DRIVER_PATH)
 VERSIONING 	 = -DSDKVER_MAJ=$(SDKVER_MAJ) -DSDKVER_MIN=$(SDKVER_MIN) -DSDKVER_PNT=$(SDKVER_PNT) -DSDKVER_BLD=$(SDKVER_BLD) -DAJA_BETA=$(AJA_BETA) -DAJA_DEBUG=$(AJA_DEBUG)
 DISTRO_INFO  = -DDISTRO_TYPE=$(DISTRO_TYPE) -DDISTRO_IS_RHEL_LIKE=$(DISTRO_IS_RHEL_LIKE) \
@@ -40,6 +41,12 @@ endif
 	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=$(AJA_RDMA)
 ifdef AJA_IGPU
 	EXTRA_CFLAGS += -DAJA_IGPU=$(AJA_IGPU)
+else
+ifeq ($(NVIDIA_SYMVERS),)
+	NVIDIA_KO ?= $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia*.ko'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
+	NVIDIA_GEN_SYMVERS := ./nvidia-ko-to-module-symvers $(NVIDIA_KO) $(A_LINUX_DRIVER_PATH)/nvidia.symvers
+	NVIDIA_SYMVERS := $(A_LINUX_DRIVER_PATH)/nvidia.symvers
+endif
 endif
 endif
 
@@ -132,6 +139,7 @@ DRIVERLININCS = buildenv.h \
 				driverdbg.h \
 				fs1wait.h \
 				ntv2dma.h \
+				ntv2rdma.h \
 				ntv2driverautocirculate.h \
 				ntv2driverbigphysarea.h \
 				ntv2driverdbgmsgctl.h \
@@ -177,16 +185,25 @@ endif
 
 ifdef AJA_RDMA
 RDMAINCS = $(NVIDIA_SRC_DIR)/nv-p2p.h
+RDMASRCS = ntv2rdma.c
 else
 RDMAINCS =
+RDMASRCS =
 endif
 
 ALLDRIVERINCS =$(AJANTV2_INCS) $(AJANTV2SRCLIN) $(DRIVERINCS) $(DRIVERLININCS) $(HEVCSINCS) $(RDMAINCS)
 ALLDRIVERSRCS =$(DRIVERSRCS) $(DRIVERLINSRCS) $(HEVCSRCS) ntv2devicefeatures.c ntv2driverprocamp.c ntv2vpidfromspec.c
 ALLDRIVEROBJS =$(patsubst %.c,%.o,$(ALLDRIVERSRCS))
+RDMADRIVEROBJS =$(patsubst %.c,%.o,$(RDMASRCS))
 
-$(NTV2TARGET)-objs := $(ALLDRIVEROBJS)
-obj-m				:= $(DRIVERTARGET)
+ifdef AJA_RDMA
+$(NTV2TARGET)-objs	:= $(ALLDRIVEROBJS)
+$(RDMATARGET)-objs	:= $(RDMADRIVEROBJS)
+obj-m				:= $(NTV2_DRIVER_TARGET) $(RDMA_DRIVER_TARGET) 
+else
+$(NTV2TARGET)-objs	:= $(ALLDRIVEROBJS)
+obj-m				:= $(NTV2_DRIVER_TARGET)
+endif
 
 DKMSVER = $(SDKVER_MAJ).$(SDKVER_MIN).$(SDKVER_PNT)
 DKMSDIR = ajantv2-$(DKMSVER)
@@ -200,9 +217,21 @@ default: all
 	@echo linux distro: $(DISTRO_TYPE)
 	@echo linux distro flags: '$(DISTRO_INFO)'
 	@echo lib: $(LIB)
+ifdef AJA_RDMA
+ifdef AJA_IGPU
 	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules
+else
+	${NVIDIA_GEN_SYMVERS}
+	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules KBUILD_EXTRA_SYMBOLS='$(NVIDIA_SYMVERS)'
+endif
+else
+	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules
+endif
 	$(call ensure_dir_exists, $(A_DRIVER_PATH)/bin)
 	cp $(NTV2TARGET).ko $(A_DRIVER_PATH)/bin
+ifdef AJA_RDMA
+	cp $(RDMATARGET).ko $(A_DRIVER_PATH)/bin
+endif
 
 modules_install:
 	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) modules_install
@@ -240,7 +269,7 @@ ntv2vpidfromspec.c:
 .PHONY: clean cleandeps realclean
 
 clean:
-	rm -f $(A_DRIVER_PATH)/bin/$(NTV2TARGET).ko $(A_UBER_BIN)/*.ko $(A_DRIVER_PATH)/*.o $(A_DRIVER_PATH)/.*o.cmd *.ko *.o .*o.cmd *.mod.c *~ errors.txt semantic.cache
+	rm -f $(A_DRIVER_PATH)/bin/$(NTV2TARGET).ko $(A_DRIVER_PATH)/bin/$(RDMATARGET).ko $(A_UBER_BIN)/*.ko $(A_DRIVER_PATH)/*.o $(A_DRIVER_PATH)/.*o.cmd *.ko *.o .*o.cmd *.mod.c *~ errors.txt semantic.cache
 	rm -f *.markers *.symvers *.order *.o.ur-safe *.mod
 	rm -f ntv2devicefeatures.*
 	rm -f ntv2driverprocamp.c
@@ -290,12 +319,32 @@ dkms-pkg:
 	@for i in "$(DRIVERLINSRCS)" ; do \
 		cp $$i tmp/$(DKMSDIR)/libajantv2/driver/linux ; \
 	done
+ifdef AJA_RDMA
+	@for i in "$(RDMASRCS)" ; do \
+		cp $$i tmp/$(DKMSDIR)/libajantv2/driver/linux ; \
+	done
+	@awk '\
+		sub("@AJA_DKMS_PKG_VERSION@", "$(DKMSVER)") {print;next} \
+		{print} \
+	' rdma.conf > "tmp/$(DKMSDIR)/dkms.conf"
+else
 	@awk '\
 		sub("@AJA_DKMS_PKG_VERSION@", "$(DKMSVER)") {print;next} \
 		{print} \
 	' dkms.conf > "tmp/$(DKMSDIR)/dkms.conf"
+endif
 
 dkms-install: dkms-pkg
+ifdef AJA_RDMA
+	@if [ -n "$(DKMSINSTALLED)" ]; then \
+		printf "\n## installing DKMS driver:\n"; \
+		sudo cp -a tmp/$(DKMSDIR) /usr/src/; \
+		sudo dkms install ajantv2/$(DKMSVER); \
+		sudo modprobe ajardma; \
+	else \
+		echo "!! DKMS system is not installed"; \
+	fi
+else
 	@if [ -n "$(DKMSINSTALLED)" ]; then \
 		printf "\n## installing DKMS driver:\n"; \
 		sudo cp -a tmp/$(DKMSDIR) /usr/src/; \
@@ -304,8 +353,20 @@ dkms-install: dkms-pkg
 	else \
 		echo "!! DKMS system is not installed"; \
 	fi
+endif
 
 dkms-uninstall:
+ifdef AJA_RDMA
+	@if [ -n "$(DKMSINSTALLED)" ]; then \
+		printf "\n## uninstalling DKMS driver:\n"; \
+		sudo dkms remove ajantv2/$(DKMSVER) --all; \
+		sudo rm -rf /usr/src/ajantv2-$(DKMSVER); \
+		sudo rmmod ajardma; \
+		sudo rmmod ajantv2; \
+	else \
+		echo "!! DKMS system is not installed"; \
+	fi
+else
 	@if [ -n "$(DKMSINSTALLED)" ]; then \
 		printf "\n## uninstalling DKMS driver:\n"; \
 		sudo dkms remove ajantv2/$(DKMSVER) --all; \
@@ -314,3 +375,4 @@ dkms-uninstall:
 	else \
 		echo "!! DKMS system is not installed"; \
 	fi
+endif
