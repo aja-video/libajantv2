@@ -25,13 +25,13 @@ This is the open-source SDK for discovering, interrogating and controlling NTV2 
 
 ## Branch Overview
 ### Release 
-This is the branch is only updated to track with releases of our [Control Room software package](https://www.aja.com/products/aja-control-room).
+This branch is only updated for official, tested releases of [AJA’s “retail” software](https://www.aja.com/products/aja-control-room).
 
 ### NTV2_xx_x
-`Example: NTV2_17_0` This branch tracks weekly changes made to a major point branch of our driver. In this example, you can find changes in the NTV2_17_0 branch that are slated to be included in future v17.0.x releases. This code has only had minimal testing and should be considered alpha code.
+`Example: NTV2_17_0` This branch tracks weekly changes to the 17.0.x major release branch of the SDK. In this example, you can find changes in the NTV2_17_0 branch that are slated to be included in future v17.0.x releases. This code has only had minimal testing and should be considered alpha code.
 
 ### Main 
-This is the dev branch. Changes are synced weekly and is to be considered unstable. No QA testing has been done on this branch.
+This is the “bleeding edge” development branch. Changes are synced weekly and is to be considered unstable. No QA testing has been done on this branch.
 
 ## Directory Layout
 The **libajantv2** folder contains the following items:
