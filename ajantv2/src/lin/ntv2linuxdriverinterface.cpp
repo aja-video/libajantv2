@@ -693,6 +693,7 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 	// NOTE: Linux driver assumes driver buffers to be used if pFrameBuffer < numDmaDriverBuffers
 	NTV2_DMA_SEGMENT_CONTROL_STRUCT dmaControlBuf;
 	dmaControlBuf.engine				= inDMAEngine;
+	dmaControlBuf.dmaChannel		    = NTV2_CHANNEL1;
 	dmaControlBuf.frameNumber			= inFrameNumber;
 	dmaControlBuf.frameBuffer			= pFrameBuffer;
 	dmaControlBuf.frameOffsetSrc		= inIsRead ? inOffsetBytes : 0;
