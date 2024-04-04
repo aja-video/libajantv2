@@ -11,8 +11,9 @@ This is the open-source SDK for discovering, interrogating and controlling NTV2 
 ## NOTE: Only the "release" branch will have ongoing support for AJA Video Systems, Inc. Official releases will be tagged from the release branch going forward. The main branch should be considered unstable and is for ongoing development.
 
 # Table of Contents
+1. [Branch Overview](#branch-overview)
 1. [Directory Layout](#directory-layout)
-1. [Obtaining libajantv2](#obtaining)
+1. [Obtaining libajantv2](#obtaining-libajantv2)
 1. [Building libajantv2](#building)
 1. [Building the Kernel Module Driver (Linux)](#building-kernel-module)
 1. [Verifying the Kernel Module Driver (Linux)](#verifying-kernel-module)
@@ -21,6 +22,16 @@ This is the open-source SDK for discovering, interrogating and controlling NTV2 
 1. [Driver Compatibility](#drivercompat)
 1. [Firmware and Device Features](#fwdevicefeatures)
 1. [libajantv2 Dynamic (Shared) Libary](#dynamiclib)
+
+## Branch Overview
+### Release 
+This branch is only updated for official, tested releases of [AJA’s “retail” software](https://www.aja.com/products/aja-control-room).
+
+### NTV2_xx_x
+`Example: NTV2_17_0` This branch tracks weekly changes to the 17.0.x major release branch of the SDK. In this example, you can find changes in the NTV2_17_0 branch that are slated to be included in future v17.0.x releases. This code has only had minimal testing and should be considered alpha code.
+
+### Main 
+This is the “bleeding edge” development branch. Changes are synced weekly and is to be considered unstable. No QA testing has been done on this branch.
 
 ## Directory Layout
 The **libajantv2** folder contains the following items:
