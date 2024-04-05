@@ -356,13 +356,13 @@ else
 endif
 
 dkms-uninstall:
-@if [ -n "$(DKMSINSTALLED)" ]; then \
-	printf "\n## uninstalling DKMS driver:\n"; \
-	sudo dkms remove ajantv2/$(DKMSVER) --all; \
-	sudo rm -rf /usr/src/ajantv2-$(DKMSVER); \
-	sudo rmmod -s ajardma; \
-	sudo rmmod -s ajantv2; \
-else \
-	echo "!! DKMS system is not installed"; \
-fi
+	@if [ -n "$(DKMSINSTALLED)" ]; then \
+		printf "\n## uninstalling DKMS driver:\n"; \
+		sudo dkms remove ajantv2/$(DKMSVER) --all; \
+		sudo rm -rf /usr/src/ajantv2-$(DKMSVER); \
+		sudo rmmod -s ajardma; \
+		sudo rmmod -s ajantv2; \
+	else \
+		echo "!! DKMS system is not installed"; \
+	fi
 
