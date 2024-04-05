@@ -4609,93 +4609,40 @@ bool CNTV2Card::WriteRegisters (const NTV2RegisterWrites & inRegWrites)
 
 bool CNTV2Card::BankSelectWriteRegister (const NTV2RegInfo & inBankSelect, const NTV2RegInfo & inRegInfo)
 {
-	bool					result	(false);
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (IsRemote())
-	{
-		// NOTE: DO NOT REMOVE THIS
-		// It's needed for the nub client to work
-		// TODO: Make an 'atomic bank-select op.---
-		// For now, we just do 2 ops and hope nobody else clobbers the
-		// bank select register
-		if (!WriteRegister(inBankSelect.registerNumber, inBankSelect.registerValue, inBankSelect.registerMask,	inBankSelect.registerShift))
-			return false;
-		return WriteRegister(inRegInfo.registerNumber, inRegInfo.registerValue, inRegInfo.registerMask, inRegInfo.registerShift);
-	}
-	else
-#endif	//	NTV2_NUB_CLIENT_SUPPORT
-	{
-		NTV2BankSelGetSetRegs	bankSelGetSetMsg	(inBankSelect, inRegInfo, true);
-		//cerr << "## DEBUG:  CNTV2Card::BankSelectWriteRegister:  " << bankSelGetSetMsg << endl;
-		result = NTV2Message(bankSelGetSetMsg);
-		return result;
-	}
+	NTV2BankSelGetSetRegs bankSelGetSetMsg (inBankSelect, inRegInfo, true);
+	//cerr << "## DEBUG:  CNTV2Card::BankSelectWriteRegister:  " << bankSelGetSetMsg << endl;
+	if (!NTV2Message(bankSelGetSetMsg))
+		//	Fall back to doing 2 ops & hope nobody else clobbers the bank select register...
+		return WriteRegister(inBankSelect.registerNumber, inBankSelect.registerValue, inBankSelect.registerMask, inBankSelect.registerShift)
+			&& WriteRegister(inRegInfo.registerNumber, inRegInfo.registerValue, inRegInfo.registerMask, inRegInfo.registerShift);
+	return true;
 }
 
 bool CNTV2Card::BankSelectReadRegister (const NTV2RegInfo & inBankSelect, NTV2RegInfo & inOutRegInfo)
 {
-	bool					result	(false);
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (IsRemote())
-	{
-		// NOTE: DO NOT REMOVE THIS
-		// It's needed for the nub client to work
-
-		// TODO: Make an 'atomic bank-select op.
-		// For now, we just do 2 ops and hope nobody else clobbers the
-		// bank select register
-		if (!WriteRegister(inBankSelect.registerNumber, inBankSelect.registerValue, inBankSelect.registerMask, inBankSelect.registerShift))
-			return false;
-		return ReadRegister(inOutRegInfo.registerNumber, inOutRegInfo.registerValue, inOutRegInfo.registerMask, inOutRegInfo.registerShift);
-	}
-	else
-#endif	//	NTV2_NUB_CLIENT_SUPPORT
-	{
-		NTV2BankSelGetSetRegs	bankSelGetSetMsg	(inBankSelect, inOutRegInfo);
-		//cerr << "## DEBUG:  CNTV2Card::BankSelectReadRegister:  " << bankSelGetSetMsg << endl;
-		result = NTV2Message(bankSelGetSetMsg);
-		if (result && !bankSelGetSetMsg.mInRegInfos.IsNULL ())
-			inOutRegInfo = bankSelGetSetMsg.GetRegInfo ();
-		return result;
-	}
+	NTV2BankSelGetSetRegs	bankSelGetSetMsg	(inBankSelect, inOutRegInfo);
+	//cerr << "## DEBUG:  CNTV2Card::BankSelectReadRegister:  " << bankSelGetSetMsg << endl;
+	if (!NTV2Message(bankSelGetSetMsg))
+		//	Fall back to doing 2 ops & hope nobody else clobbers the bank select register...
+		return WriteRegister(inBankSelect.registerNumber, inBankSelect.registerValue, inBankSelect.registerMask, inBankSelect.registerShift)
+			&& ReadRegister(inOutRegInfo.registerNumber, inOutRegInfo.registerValue, inOutRegInfo.registerMask, inOutRegInfo.registerShift);
+	if (bankSelGetSetMsg.mInRegInfos)
+		inOutRegInfo = bankSelGetSetMsg.GetRegInfo();
+	return true;
 }
 
 bool CNTV2Card::WriteVirtualData (const ULWord inTag, const void* inVirtualData, const ULWord inVirtualDataSize)
 {
-	bool	result	(false);
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (IsRemote())
-	{
-		// NOTE: DO NOT REMOVE THIS
-		// It's needed for the nub client to work
-	}
-	else
-#endif	//	NTV2_NUB_CLIENT_SUPPORT
-	{
-		NTV2VirtualData virtualDataMsg	(inTag, inVirtualData, inVirtualDataSize, true);
-		//cerr << "## DEBUG:  CNTV2Card::WriteVirtualData:	" << virtualDataMsg << endl;
-		result = NTV2Message(virtualDataMsg);
-	}
-	return result;
+	NTV2VirtualData virtualDataMsg	(inTag, inVirtualData, inVirtualDataSize, true);
+	//cerr << "## DEBUG:  CNTV2Card::WriteVirtualData:	" << virtualDataMsg << endl;
+	return NTV2Message(virtualDataMsg);
 }
 
 bool CNTV2Card::ReadVirtualData (const ULWord inTag, void* outVirtualData, const ULWord inVirtualDataSize)
 {
-	bool	result	(false);
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (IsRemote())
-	{
-		// NOTE: DO NOT REMOVE THIS
-		// It's needed for the nub client to work
-	}
-	else
-#endif	//	NTV2_NUB_CLIENT_SUPPORT
-	{
-		NTV2VirtualData virtualDataMsg	(inTag, outVirtualData, inVirtualDataSize, false);
-		//cerr << "## DEBUG:  CNTV2Card::ReadVirtualData:  " << virtualDataMsg << endl;
-		result = NTV2Message(virtualDataMsg);
-	}
-	return result;
+	NTV2VirtualData virtualDataMsg	(inTag, outVirtualData, inVirtualDataSize, false);
+	//cerr << "## DEBUG:  CNTV2Card::ReadVirtualData:  " << virtualDataMsg << endl;
+	return NTV2Message(virtualDataMsg);
 }
 
 bool CNTV2Card::ReadSDIStatistics (NTV2SDIInStatistics & outStats)
