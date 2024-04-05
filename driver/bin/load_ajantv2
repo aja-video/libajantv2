@@ -12,6 +12,9 @@ fi
 # install module into kernel
 # Default install:
 /sbin/insmod "$SELF_DIR/ajantv2.ko" 2>/dev/null
+if [ -n "${AJA_RDMA}" ]; then
+    /sbin/insmod "$SELF_DIR/ajardma.ko" 2>/dev/null
+fi
 
 # To install without mapping framebuffers (driverbuffer-DMA only, 
 # see readme-linux.txt) do this instead:
