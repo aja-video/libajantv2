@@ -1,0 +1,4 @@
+#!/bin/bash
+
+/sbin/modprobe ajantv2 2>/dev/null
+

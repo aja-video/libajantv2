@@ -2981,7 +2981,7 @@ static struct file_operations ntv2_proc_fops =
 
 static int reboot_handler(struct notifier_block *this, unsigned long code, void *x)
 {
-	ULWord  i;
+//	ULWord  i;
 
 #if defined(AJA_HEVC)
 	hevc_reboot_handler(this, code, x);
@@ -2990,12 +2990,13 @@ static int reboot_handler(struct notifier_block *this, unsigned long code, void 
 	// We don't want to generate interrupts if the system is rebooting
 	// This could confuse the BIOS and cause the system to hang
 	// Disable interrupts on all boards so we'll come up quietly
+#if 0    
 	for ( i = 0; NTV2_MAXBOARDS; i++ )
 	{
         if (getNTV2Params(i) != NULL)
 			DisableAllInterrupts(i);
 	}
-
+#endif
 	return NOTIFY_DONE;
 }
 
