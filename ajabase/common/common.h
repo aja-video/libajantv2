@@ -17,6 +17,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <cstdint>
 
 namespace aja
 {
