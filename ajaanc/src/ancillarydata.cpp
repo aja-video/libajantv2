@@ -17,7 +17,25 @@
 #include <ios>
 
 using namespace std;
+#if defined(AJA_DISABLE_ALL_ANC_LOGGING)
+#define LOGMYERROR(__x__)	
+#define LOGMYWARN(__x__)	
+#define LOGMYNOTE(__x__)	
+#define LOGMYINFO(__x__)	
+#define LOGMYDEBUG(__x__)	
 
+#define RCV2110ERR(__x__)	
+#define RCV2110WARN(__x__)	
+#define RCV2110NOTE(__x__)	
+#define RCV2110INFO(__x__)	
+#define RCV2110DBG(__x__)	
+
+#define XMT2110ERR(__x__)	
+#define XMT2110WARN(__x__)	
+#define XMT2110NOTE(__x__)	
+#define XMT2110INFO(__x__)	
+#define XMT2110DBG(__x__)	
+#else   //  AJA_DISABLE_ALL_ANC_LOGGING
 #define LOGMYERROR(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Error,		AJAFUNC << ":  " << __x__)
 #define LOGMYWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Warning,	AJAFUNC << ":  " << __x__)
 #define LOGMYNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Notice,		AJAFUNC << ":  " << __x__)
@@ -35,6 +53,7 @@ using namespace std;
 #define XMT2110NOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Notice,	AJAFUNC << ":  " << __x__)
 #define XMT2110INFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Info,		AJAFUNC << ":  " << __x__)
 #define XMT2110DBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Debug,		AJAFUNC << ":  " << __x__)
+#endif  //  AJA_DISABLE_ALL_ANC_LOGGING
 #if defined(AJA_WINDOWS)
 	const size_t sENDL(2);	//	CRLF
 #else

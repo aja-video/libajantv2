@@ -16,6 +16,9 @@
 #include <vector>
 
 
+//#define AJA_DISABLE_ALL_ANC_LOGGING
+
+
 // Default Packet IDs used when building "analog" packets
 // NOTE:	There's NO guarantee that the Anc Extractor hardware will use these codes - nor does the
 //			Anc Inserter hardware care. To determine if a given packet is "analog" or "digital", check

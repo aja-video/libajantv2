@@ -168,7 +168,7 @@ public:
  		@param[out]	outTimeBase		Receives the time base (frame rate).
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus GetTimecode (AJATimeCode & outTimecode, AJATimeBase & outTimeBase) const;
+	virtual AJAStatus GetTimecode (AJATimeCode & outTimecode, const AJATimeBase & outTimeBase) const;
 
 
 	/**

@@ -19,7 +19,25 @@
 #endif
 
 using namespace std;
+#if defined(AJA_DISABLE_ALL_ANC_LOGGING)
+#define LOGMYERROR(__x__)	
+#define LOGMYWARN(__x__)	
+#define LOGMYNOTE(__x__)	
+#define LOGMYINFO(__x__)	
+#define LOGMYDEBUG(__x__)	
 
+#define RCVFAIL(__x__)		
+#define RCVWARN(__x__)		
+#define RCVNOTE(__x__)		
+#define RCVINFO(__x__)		
+#define RCVDBG(__x__)		
+
+#define XMTFAIL(__x__)		
+#define XMTWARN(__x__)		
+#define XMTNOTE(__x__)		
+#define XMTINFO(__x__)		
+#define XMTDBG(__x__)		
+#else   //  AJA_DISABLE_ALL_ANC_LOGGING
 #define LOGMYERROR(__x__)	AJA_sERROR	(AJA_DebugUnit_AJAAncList,		AJAFUNC << ": " << __x__)
 #define LOGMYWARN(__x__)	AJA_sWARNING(AJA_DebugUnit_AJAAncList,		AJAFUNC << ": " << __x__)
 #define LOGMYNOTE(__x__)	AJA_sNOTICE (AJA_DebugUnit_AJAAncList,		AJAFUNC << ": " << __x__)
@@ -37,7 +55,7 @@ using namespace std;
 #define XMTNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_Anc2110Xmit,		AJAFUNC << ": " << __x__)
 #define XMTINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_Anc2110Xmit,		AJAFUNC << ": " << __x__)
 #define XMTDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_Anc2110Xmit,		AJAFUNC << ": " << __x__)
-
+#endif  //  AJA_DISABLE_ALL_ANC_LOGGING
 #if defined(AJAHostIsBigEndian)
 	//	Host is BigEndian (BE)
 	#define AJA_ENDIAN_16NtoH(__val__)		(__val__)
@@ -1109,16 +1127,6 @@ AJAStatus AJAAncillaryList::SetFromDeviceAuxBuffers (const NTV2Buffer & inF1AuxB
 	if (AJA_FAILURE(resultF2))
 		return resultF2;
 	return AJA_STATUS_SUCCESS;
-}
-
-bool AJAAncillaryList::BufferHasGUMPData (const NTV2Buffer & inBuffer)
-{
-	if (!inBuffer)
-		return false;
-	const uint8_t * pBytes (reinterpret_cast <const uint8_t*>(inBuffer.GetHostPointer()));
-	if (!pBytes)
-		return false;
-	return *pBytes == 0xFF;
 }
 
 static const size_t		MAX_RTP_PKT_LENGTH_BYTES	(0x0000FFFF);	//	65535 max
