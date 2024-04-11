@@ -333,7 +333,6 @@ bool IsMultiFormatActive (Ntv2SystemContext* context)
 
 	if(!NTV2DeviceCanDoMultiFormat(deviceID))
 		return false;
-
 	ntv2ReadRegisterMS(context, kRegGlobalControl2, &returnVal, kRegMaskIndependentMode, kRegShiftIndependentMode);
 	return (returnVal ? true : false);
 }

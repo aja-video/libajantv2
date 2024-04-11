@@ -2192,7 +2192,6 @@ void AutoCircTransferFields(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto,
 
 bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t isrTimeStamp)
 {
-	return true;
 	NTV2DeviceID deviceID = pAutoCirc->deviceID;
 	Ntv2SystemContext* pSysCon = pAutoCirc->pSysCon;
 	uint64_t    audioCounter = 0;
@@ -2224,6 +2223,7 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 	{
 		syncChannel = GetNTV2ChannelForNTV2Crosspoint(pautoChannelSpec);
 	}
+	
 	bool syncProgressive = IsProgressiveStandard(pSysCon, syncChannel);
 	bool fieldMode = false;
 	bool syncField0 = true;
