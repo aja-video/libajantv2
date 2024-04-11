@@ -19,6 +19,7 @@
 #include "ntv2rp188.h"
 #include "ntv2anc.h"
 #include "ntv2aux.h"
+#include "ntv2video.h"
 
 #if defined(NTV2_DEPRECATE_17_0)
 	//	Copied from ntv2devicefeatures.c, deprecated in SDK 17.0
@@ -42,7 +43,6 @@
 	bool NTV2DeviceCanDoLTCInN(const NTV2DeviceID devID, UWord index0);
 	bool NTV2DeviceCanDoRS422N(const NTV2DeviceID devID, const NTV2Channel ch);
 #endif	//	!defined(NTV2_DEPRECATE_17_0)
-
 
 ///////////////////////
 //board format routines

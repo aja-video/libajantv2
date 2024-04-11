@@ -364,6 +364,7 @@
 	{
 #if defined(AJAMacDext)
 		IODispatchQueue* 	pTask;
+		Ntv2SystemContext*	pSystemContext;
 #else
 		thread_t			pTask;
 #endif

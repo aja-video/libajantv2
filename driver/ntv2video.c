@@ -110,6 +110,170 @@ int64_t GetFramePeriod(Ntv2SystemContext* context, NTV2Channel channel)
 	return period;
 }
 
+//-------------------------------------------------------------------------------------------------------
+//	InitLUTRegs
+//
+//	Called at launch to load something reasonable into the color correction tables
+//-------------------------------------------------------------------------------------------------------
+void InitLUTRegs(Ntv2SystemContext* context)
+{
+	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
+	
+	// LUTs already initialized by firmware with 12bit support
+	if (Has12BitLUTSupport(context))
+		return;
+	
+	if ( NTV2DeviceCanDoColorCorrection(deviceID) )
+	{
+		DebugLog("Initializing LUTs\n");
+		switch( NTV2DeviceGetNumLUTs(deviceID) )
+		{
+		case 8:
+			DownloadLinearLUTToHW (context, NTV2_CHANNEL8, 0);
+			DownloadLinearLUTToHW (context, NTV2_CHANNEL8, 1);
+			// Fall through
+		case 7:
+			DownloadLinearLUTToHW (context, NTV2_CHANNEL7, 0);
+			DownloadLinearLUTToHW (context, NTV2_CHANNEL7, 1);
+			// Fall through
+		case 6:
+			DownloadLinearLUTToHW (context, NTV2_CHANNEL6, 0);
+			DownloadLinearLUTToHW (context, NTV2_CHANNEL6, 1);
+			// Fall through
+		case 5:
+			DownloadLinearLUTToHW (context, NTV2_CHANNEL5, 0);
+			DownloadLinearLUTToHW (context, NTV2_CHANNEL5, 1);
+			// Fall through
+		case 4:
+			DownloadLinearLUTToHW (context, NTV2_CHANNEL4, 0);
+			DownloadLinearLUTToHW (context, NTV2_CHANNEL4, 1);
+			// Fall through
+		case 3:
+			DownloadLinearLUTToHW (context, NTV2_CHANNEL3, 0);
+			DownloadLinearLUTToHW (context, NTV2_CHANNEL3, 1);
+			// Fall through
+		case 2:
+			DownloadLinearLUTToHW (context, NTV2_CHANNEL2, 0);
+			DownloadLinearLUTToHW (context, NTV2_CHANNEL2, 1);
+			// Fall through
+		case 1:
+			DownloadLinearLUTToHW (context, NTV2_CHANNEL1, 0);
+			DownloadLinearLUTToHW (context, NTV2_CHANNEL1, 1);
+			break;
+		default:
+			break;
+		}
+	}
+
+	ntv2WriteRegister(context, kVRegLUTType, NTV2_LUTUnknown);
+}
+
+bool Has12BitLUTSupport(Ntv2SystemContext* context)
+{
+	uint32_t has12BitLUTSupport(0);
+	return ntv2ReadRegisterMS(context, kRegLUTV2Control, &has12BitLUTSupport, kRegMask12BitLUTSupport, kRegShift12BitLUTSupport)  &&  (has12BitLUTSupport ? true : false);
+}
+
+bool DownloadLinearLUTToHW(Ntv2SystemContext* context, NTV2Channel inChannel, int inBank)
+{
+	bool			bResult = true;
+	NTV2DeviceID 	deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
+
+	if (NTV2DeviceCanDoColorCorrection(deviceID) )
+	{
+		NTV2ColorCorrectionHostAccessBank savedBank = GetColorCorrectionHostAccessBank(context, inChannel);
+
+		SetLUTEnable(context, true, inChannel);
+		// setup Host Access
+		switch(inChannel)
+		{
+		case NTV2_CHANNEL1:
+			SetColorCorrectionHostAccessBank(context, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH1BANK0 + inBank) );
+			LoadLUTValues(context);
+			break;
+		case NTV2_CHANNEL2:
+			SetColorCorrectionHostAccessBank(context, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH2BANK0 + inBank) );
+			LoadLUTValues(context);
+			break;
+		case NTV2_CHANNEL3:
+			SetColorCorrectionHostAccessBank(context, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH3BANK0 + inBank) );
+			LoadLUTValues(context);
+			break;
+		case NTV2_CHANNEL4:
+			SetColorCorrectionHostAccessBank(context, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH4BANK0 + inBank) );
+			LoadLUTValues(context);
+			break;
+		case NTV2_CHANNEL5:
+			SetColorCorrectionHostAccessBank(context, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH5BANK0 + inBank) );
+			LoadLUTValues(context);
+			break;
+		case NTV2_CHANNEL6:
+			SetColorCorrectionHostAccessBank(context, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH6BANK0 + inBank) );
+			LoadLUTValues(context);
+			break;
+		case NTV2_CHANNEL7:
+			SetColorCorrectionHostAccessBank(context, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH7BANK0 + inBank) );
+			LoadLUTValues(context);
+			break;
+		case NTV2_CHANNEL8:
+			SetColorCorrectionHostAccessBank(context, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH8BANK0 + inBank) );
+			LoadLUTValues(context);
+			break;
+		default:
+			break;
+		}
+
+		SetLUTEnable(context, false, inChannel);
+
+		SetColorCorrectionHostAccessBank(context, savedBank);
+	}
+
+	return bResult;
+}
+
+void LoadLUTValues(Ntv2SystemContext* context)
+{
+	uint32_t lutValue;
+	for (uint32_t i = 0; i < 1024;  i+=2)
+	{
+		// Tables are already converted to ints and endian swapped for the Mac
+		lutValue = ((i+1)<<22) + (i<<6) ;
+		ntv2WriteRegister(context, (kColorCorrectionLUTOffset_Red/4) + (i/2), lutValue);
+		ntv2WriteRegister(context, (kColorCorrectionLUTOffset_Green/4) + (i/2), lutValue);
+		ntv2WriteRegister(context, (kColorCorrectionLUTOffset_Blue/4) + (i/2), lutValue);
+	}
+}
+
+bool SetLUTEnable(Ntv2SystemContext* context, bool inEnable, NTV2Channel inChannel)
+{
+	NTV2DeviceID 	deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
+	if(NTV2DeviceGetLUTVersion(deviceID) == 2)
+	{
+		switch(inChannel)
+		{
+			case NTV2_CHANNEL1:
+				return ntv2WriteRegisterMS(context, kRegLUTV2Control, inEnable,  kRegMaskLUT1Enable, kRegShiftLUT1Enable);
+			case NTV2_CHANNEL2:
+				return ntv2WriteRegisterMS(context, kRegLUTV2Control, inEnable,  kRegMaskLUT2Enable, kRegShiftLUT2Enable);
+			case NTV2_CHANNEL3:
+				return ntv2WriteRegisterMS(context, kRegLUTV2Control, inEnable,  kRegMaskLUT3Enable, kRegShiftLUT3Enable);
+			case NTV2_CHANNEL4:
+				return ntv2WriteRegisterMS(context, kRegLUTV2Control, inEnable,  kRegMaskLUT4Enable, kRegShiftLUT4Enable);
+			case NTV2_CHANNEL5:
+				return ntv2WriteRegisterMS(context, kRegLUTV2Control, inEnable,  kRegMaskLUT5Enable, kRegShiftLUT5Enable);
+			case NTV2_CHANNEL6:
+				return ntv2WriteRegisterMS(context, kRegLUTV2Control, inEnable,  kRegMaskLUT6Enable, kRegShiftLUT6Enable);
+			case NTV2_CHANNEL7:
+				return ntv2WriteRegisterMS(context, kRegLUTV2Control, inEnable,  kRegMaskLUT7Enable, kRegShiftLUT7Enable);
+			case NTV2_CHANNEL8:
+				return ntv2WriteRegisterMS(context, kRegLUTV2Control, inEnable,  kRegMaskLUT8Enable, kRegShiftLUT8Enable);
+			default:
+				return false;
+		}
+	}
+	return false;
+}
+
 void SetColorCorrectionHostAccessBank(Ntv2SystemContext* context, NTV2ColorCorrectionHostAccessBank value)
 {
 	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(context, kRegBoardID);
@@ -491,6 +655,58 @@ void SetLUTV2HostAccessBank(Ntv2SystemContext* context, NTV2ColorCorrectionHostA
 								kRegShiftLUT8HostAccessBankSelect);
 		break;
 	}
+}
+
+uint32_t GetLUTV2HostAccessBank(Ntv2SystemContext* context, NTV2Channel inChannel)
+{
+	NTV2ColorCorrectionHostAccessBank outValue = NTV2_CCHOSTACCESS_CH1BANK0;
+
+	uint32_t tempVal = 0;
+	switch(inChannel)
+	{
+		case NTV2_CHANNEL1:
+			ntv2ReadRegisterMS(context, kRegLUTV2Control, &tempVal,  kRegMaskLUT1HostAccessBankSelect,  kRegShiftLUT1HostAccessBankSelect);
+			outValue = NTV2ColorCorrectionHostAccessBank(tempVal);
+			break;
+
+		case NTV2_CHANNEL2:
+			ntv2ReadRegisterMS(context, kRegLUTV2Control, &tempVal,  kRegMaskLUT2HostAccessBankSelect,  kRegShiftLUT2HostAccessBankSelect);
+			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH2BANK0);
+			break;
+
+		case NTV2_CHANNEL3:
+			ntv2ReadRegisterMS(context, kRegLUTV2Control,  &tempVal,  kRegMaskLUT3HostAccessBankSelect,  kRegShiftLUT3HostAccessBankSelect);
+			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH3BANK0);
+			break;
+
+		case NTV2_CHANNEL4:
+			ntv2ReadRegisterMS(context, kRegLUTV2Control,  &tempVal,  kRegMaskLUT4HostAccessBankSelect,  kRegShiftLUT4HostAccessBankSelect);
+			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH4BANK0);
+			break;
+
+		case NTV2_CHANNEL5:
+			ntv2ReadRegisterMS(context, kRegLUTV2Control,  &tempVal,  kRegMaskLUT5HostAccessBankSelect,  kRegShiftLUT5HostAccessBankSelect);
+			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH5BANK0);
+			break;
+
+		case NTV2_CHANNEL6:
+			ntv2ReadRegisterMS(context, kRegLUTV2Control,  &tempVal,  kRegMaskLUT6HostAccessBankSelect,  kRegShiftLUT6HostAccessBankSelect);
+			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH6BANK0);
+			break;
+
+		case NTV2_CHANNEL7:
+			ntv2ReadRegisterMS(context, kRegLUTV2Control,  &tempVal,  kRegMaskLUT7HostAccessBankSelect,  kRegShiftLUT7HostAccessBankSelect);
+			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH7BANK0);
+			break;
+
+		case NTV2_CHANNEL8:
+			ntv2ReadRegisterMS(context, kRegLUTV2Control,  &tempVal,  kRegMaskLUT8HostAccessBankSelect,  kRegShiftLUT8HostAccessBankSelect);
+			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH8BANK0);
+			break;
+
+		default:	break;
+	}
+	return outValue;
 }
 
 void SetLUTV2OutputBank(Ntv2SystemContext* context, NTV2Channel channel, uint32_t bank)

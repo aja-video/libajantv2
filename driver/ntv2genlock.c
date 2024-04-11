@@ -37,7 +37,7 @@
 #define NTV2_MSG_GENLOCK_CHECK(string, ...)			NTV2_MSG_PRINT(NTV2_DEBUG_GENLOCK_CHECK, string, __VA_ARGS__)
 
 static uint32_t ntv2_debug_mask =
-//	NTV2_DEBUG_GENLOCK_STATE |
+	NTV2_DEBUG_GENLOCK_STATE |
 //	NTV2_DEBUG_GENLOCK_DETECT | 
 //	NTV2_DEBUG_GENLOCK_CONFIG |
 //	NTV2_DEBUG_GENLOCK_CHECK |
@@ -272,7 +272,7 @@ Ntv2Status ntv2_genlock_disable(struct ntv2_genlock *ntv2_gen)
 	if (!ntv2_gen->monitor_enable)
 		return NTV2_STATUS_SUCCESS;
 
-	NTV2_MSG_GENLOCK_STATE("%s: disable genlock monitor\n", ntv2_gen->name);
+	NTV2_MSG_GENLOCK_STATE("%{public}s: disable genlock monitor\n", ntv2_gen->name);
 
 	ntv2_gen->monitor_enable = false;
 	ntv2EventSignal(&ntv2_gen->monitor_event);
