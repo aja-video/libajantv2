@@ -42,15 +42,13 @@ static struct ntv2_rdma_fops rdma_fops =
 
 #endif
 
-MODULE_LICENSE("Proprietary");
-
 int ntv2_rdma_init(void)
 {
 #ifdef AJA_RDMA
-    printk(KERN_INFO "ntv2_rmda_init: configure rdma fops\n");
+    printk(KERN_INFO "ntv2_rmda_init: configuring RDMA\n");
     ntv2_set_rdma_fops(&rdma_fops);
 #else
-    printk(KERN_INFO "ntv2_rmda_init: AJA_RDMA not defined\n");
+    printk(KERN_INFO "ntv2_rmda_init: RDMA not supported\n");
 #endif
     return 0;
 }	
@@ -64,7 +62,7 @@ void ntv2_rdma_exit(void)
 module_init(ntv2_rdma_init);
 module_exit(ntv2_rdma_exit);
 
-MODULE_LICENSE("GPL");
+MODULE_LICENSE("Proprietary");
 MODULE_AUTHOR("AJA");
 MODULE_DESCRIPTION("Interface between AJA NTV2 driver and NVidia RDMA");
 

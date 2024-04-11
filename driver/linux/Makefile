@@ -31,17 +31,45 @@ ifdef AJA_HEVC
 	EXTRA_CFLAGS += -DAJA_HEVC=$(AJA_HEVC)
 endif
 
-ifdef AJA_RDMA
+# try to find the nvidia p2p include file
 ifeq ($(NVIDIA_SRC_DIR),)
 	NVIDIA_SRC_DIR := $(shell find /usr/src/nvidia-* -name nv-p2p.h 2>/dev/null|head -1|xargs dirname 2>/dev/null)
 endif
 ifeq ($(NVIDIA_SRC_DIR),)
 	NVIDIA_SRC_DIR := $(shell find /usr/src/linux-* -name nv-p2p.h 2>/dev/null|head -1|xargs dirname 2>/dev/null)
 endif
-	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=$(AJA_RDMA)
+
+# if rdma is set
+ifdef AJA_RDMA
+# force rdma build
+	NVIDIA_RDMA = 1
+else
+# if not no rdma
+ifndef AJA_NORDMA
+# if file rdma is present
+ifneq (,$(wildcard /etc/ajantv2/rdma))
+	NVIDIA_RDMA = 1
+else
+# if file nordma is not preset
+ifeq (,$(wildcard /etc/ajantv2/nordma))
+# if nvidia p2p include file found
+ifneq ($(NVIDIA_SRC_DIR),)
+# do rdma build
+	NVIDIA_RDMA = 1
+endif
+endif
+endif
+endif
+endif
+
+# if doing rdma build
+ifdef NVIDIA_RDMA
 ifdef AJA_IGPU
+# configure for igpu
 	EXTRA_CFLAGS += -DAJA_IGPU=$(AJA_IGPU)
 else
+# configure to find the nvidia p2p entry point addresses
+	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=$(AJA_RDMA)
 ifeq ($(NVIDIA_SYMVERS),)
 	NVIDIA_KO ?= $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia*.ko'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
 	NVIDIA_GEN_SYMVERS := ./nvidia-ko-to-module-symvers $(NVIDIA_KO) $(A_LINUX_DRIVER_PATH)/nvidia.symvers
@@ -183,12 +211,12 @@ HEVCSRCS =
 HEVCINCS =
 endif
 
-ifdef AJA_RDMA
-RDMAINCS = $(NVIDIA_SRC_DIR)/nv-p2p.h
+ifdef NVIDIA_RDMA
 RDMASRCS = ntv2rdma.c
+RDMAINCS = $(NVIDIA_SRC_DIR)/nv-p2p.h
 else
+RDMASRCS = ntv2rdma.c
 RDMAINCS =
-RDMASRCS =
 endif
 
 ALLDRIVERINCS =$(AJANTV2_INCS) $(AJANTV2SRCLIN) $(DRIVERINCS) $(DRIVERLININCS) $(HEVCSINCS) $(RDMAINCS)
@@ -196,14 +224,9 @@ ALLDRIVERSRCS =$(DRIVERSRCS) $(DRIVERLINSRCS) $(HEVCSRCS) ntv2devicefeatures.c n
 ALLDRIVEROBJS =$(patsubst %.c,%.o,$(ALLDRIVERSRCS))
 RDMADRIVEROBJS =$(patsubst %.c,%.o,$(RDMASRCS))
 
-ifdef AJA_RDMA
 $(NTV2TARGET)-objs	:= $(ALLDRIVEROBJS)
 $(RDMATARGET)-objs	:= $(RDMADRIVEROBJS)
 obj-m				:= $(NTV2_DRIVER_TARGET) $(RDMA_DRIVER_TARGET) 
-else
-$(NTV2TARGET)-objs	:= $(ALLDRIVEROBJS)
-obj-m				:= $(NTV2_DRIVER_TARGET)
-endif
 
 DKMSVER = $(SDKVER_MAJ).$(SDKVER_MIN).$(SDKVER_PNT)
 DKMSDIR = ajantv2-$(DKMSVER)
@@ -217,7 +240,7 @@ default: all
 	@echo linux distro: $(DISTRO_TYPE)
 	@echo linux distro flags: '$(DISTRO_INFO)'
 	@echo lib: $(LIB)
-ifdef AJA_RDMA
+ifdef NVIDIA_RDMA
 ifdef AJA_IGPU
 	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules
 else
@@ -229,9 +252,7 @@ else
 endif
 	$(call ensure_dir_exists, $(A_DRIVER_PATH)/bin)
 	cp $(NTV2TARGET).ko $(A_DRIVER_PATH)/bin
-ifdef AJA_RDMA
 	cp $(RDMATARGET).ko $(A_DRIVER_PATH)/bin
-endif
 
 modules_install:
 	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) modules_install
@@ -253,7 +274,7 @@ ntv2version_gen:
 	fi
 
 .PHONY: all
-all: ntv2version_gen $(ALLDRIVERINCS) $(ALLDRIVERSRCS)
+all: ntv2version_gen $(ALLDRIVERINCS) $(ALLDRIVERSRCS) $(RDMAINCS) $(RDMASRCS)
 
 # Make a symlink to the C-only CPP files we need in classes.
 
@@ -319,23 +340,16 @@ dkms-pkg:
 	@for i in "$(DRIVERLINSRCS)" ; do \
 		cp $$i tmp/$(DKMSDIR)/libajantv2/driver/linux ; \
 	done
-ifdef AJA_RDMA
 	@for i in "$(RDMASRCS)" ; do \
 		cp $$i tmp/$(DKMSDIR)/libajantv2/driver/linux ; \
 	done
 	@awk '\
 		sub("@AJA_DKMS_PKG_VERSION@", "$(DKMSVER)") {print;next} \
 		{print} \
-	' rdma.conf > "tmp/$(DKMSDIR)/dkms.conf"
-else
-	@awk '\
-		sub("@AJA_DKMS_PKG_VERSION@", "$(DKMSVER)") {print;next} \
-		{print} \
 	' dkms.conf > "tmp/$(DKMSDIR)/dkms.conf"
-endif
 
 dkms-install: dkms-pkg
-ifdef AJA_RDMA
+ifdef NVIDIA_RDMA
 	@if [ -n "$(DKMSINSTALLED)" ]; then \
 		printf "\n## installing DKMS driver:\n"; \
 		sudo cp -a tmp/$(DKMSDIR) /usr/src/; \
