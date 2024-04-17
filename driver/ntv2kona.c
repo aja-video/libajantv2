@@ -726,7 +726,6 @@ void InitializeVirtualRegisters(Ntv2SystemContext* pSystemContext)
 bool IsKonaIPDevice(Ntv2SystemContext* inSystemContext)
 {
 	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(inSystemContext, kRegBoardID);
-	uint32_t val = 0;
 	
 	switch (deviceID)
 	{
