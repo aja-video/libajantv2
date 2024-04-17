@@ -44,21 +44,9 @@ ifdef AJA_RDMA
 # force rdma build
 	NVIDIA_RDMA = 1
 else
-# if not no rdma
-ifndef AJA_NORDMA
 # if file rdma is present
 ifneq (,$(wildcard /etc/ajantv2/rdma))
 	NVIDIA_RDMA = 1
-else
-# if file nordma is not preset
-ifeq (,$(wildcard /etc/ajantv2/nordma))
-# if nvidia p2p include file found
-ifneq ($(NVIDIA_SRC_DIR),)
-# do rdma build
-	NVIDIA_RDMA = 1
-endif
-endif
-endif
 endif
 endif
 
@@ -351,8 +339,10 @@ dkms-pkg:
 dkms-install: dkms-pkg
 ifdef NVIDIA_RDMA
 	@if [ -n "$(DKMSINSTALLED)" ]; then \
-		printf "\n## installing DKMS driver:\n"; \
+		printf "\n## installing DKMS NTV2 RMDA driver:\n"; \
 		sudo cp -a tmp/$(DKMSDIR) /usr/src/; \
+		sudo mkdir -p /etc/ajantv2; \
+		sudo touch /etc/ajantv2/rdma; \
 		sudo dkms install ajantv2/$(DKMSVER); \
 		sudo modprobe ajardma; \
 	else \
@@ -360,8 +350,9 @@ ifdef NVIDIA_RDMA
 	fi
 else
 	@if [ -n "$(DKMSINSTALLED)" ]; then \
-		printf "\n## installing DKMS driver:\n"; \
+		printf "\n## installing DKMS NTV2 driver:\n"; \
 		sudo cp -a tmp/$(DKMSDIR) /usr/src/; \
+		sudo rm -f /etc/ajantv2/rdma; \
 		sudo dkms install ajantv2/$(DKMSVER); \
 		sudo modprobe ajantv2; \
 	else \
@@ -374,6 +365,7 @@ dkms-uninstall:
 		printf "\n## uninstalling DKMS driver:\n"; \
 		sudo dkms remove ajantv2/$(DKMSVER) --all; \
 		sudo rm -rf /usr/src/ajantv2-$(DKMSVER); \
+		sudo rm -f /etc/ajantv2/rdma; \
 		sudo rmmod -s ajardma; \
 		sudo rmmod -s ajantv2; \
 	else \
