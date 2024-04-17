@@ -589,7 +589,7 @@ protected:
 
 	virtual inline AJAAncDataType					GetAnalogAncillaryDataType (const AJAAncillaryData & inAncData)	{return GetAnalogAncillaryDataTypeForLine(inAncData.GetLocationLineNumber());}
 
-	static bool								BufferHasGUMPData (const NTV2Buffer & inBuffer);
+	static inline bool          			BufferHasGUMPData (const NTV2Buffer & inBuffer) {return inBuffer ? inBuffer.U8(0) == 0xFF : false;}
 
 	/**
 		@brief		Appends whatever can be decoded from the given device Anc buffer to the AJAAncillaryList.

@@ -20,23 +20,27 @@
 
 using namespace std;
 
-#define LOGMYERROR(__x__)	AJA_sERROR	(AJA_DebugUnit_AJAAncList,		AJAFUNC << ": " << __x__)
-#define LOGMYWARN(__x__)	AJA_sWARNING(AJA_DebugUnit_AJAAncList,		AJAFUNC << ": " << __x__)
-#define LOGMYNOTE(__x__)	AJA_sNOTICE (AJA_DebugUnit_AJAAncList,		AJAFUNC << ": " << __x__)
-#define LOGMYINFO(__x__)	AJA_sINFO	(AJA_DebugUnit_AJAAncList,		AJAFUNC << ": " << __x__)
-#define LOGMYDEBUG(__x__)	AJA_sDEBUG	(AJA_DebugUnit_AJAAncList,		AJAFUNC << ": " << __x__)
+#define LOGGING_ANCLIST		AJADebug::IsActive(AJA_DebugUnit_AJAAncList)
+#define LOGGING_ANC2110RX	AJADebug::IsActive(AJA_DebugUnit_Anc2110Rcv)
+#define LOGGING_ANC2110TX	AJADebug::IsActive(AJA_DebugUnit_Anc2110Xmit)
 
-#define RCVFAIL(__x__)		AJA_sERROR	(AJA_DebugUnit_Anc2110Rcv,		AJAFUNC << ": " << __x__)
-#define RCVWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_Anc2110Rcv,		AJAFUNC << ": " << __x__)
-#define RCVNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_Anc2110Rcv,		AJAFUNC << ": " << __x__)
-#define RCVINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_Anc2110Rcv,		AJAFUNC << ": " << __x__)
-#define RCVDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_Anc2110Rcv,		AJAFUNC << ": " << __x__)
+#define LOGMYERROR(__x__)	{if (LOGGING_ANCLIST) AJA_sERROR  (AJA_DebugUnit_AJAAncList, AJAFUNC << ": " << __x__);}
+#define LOGMYWARN(__x__)	{if (LOGGING_ANCLIST) AJA_sWARNING(AJA_DebugUnit_AJAAncList, AJAFUNC << ": " << __x__);}
+#define LOGMYNOTE(__x__)	{if (LOGGING_ANCLIST) AJA_sNOTICE (AJA_DebugUnit_AJAAncList, AJAFUNC << ": " << __x__);}
+#define LOGMYINFO(__x__)	{if (LOGGING_ANCLIST) AJA_sINFO   (AJA_DebugUnit_AJAAncList, AJAFUNC << ": " << __x__);}
+#define LOGMYDEBUG(__x__)	{if (LOGGING_ANCLIST) AJA_sDEBUG  (AJA_DebugUnit_AJAAncList, AJAFUNC << ": " << __x__);}
 
-#define XMTFAIL(__x__)		AJA_sERROR	(AJA_DebugUnit_Anc2110Xmit,		AJAFUNC << ": " << __x__)
-#define XMTWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_Anc2110Xmit,		AJAFUNC << ": " << __x__)
-#define XMTNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_Anc2110Xmit,		AJAFUNC << ": " << __x__)
-#define XMTINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_Anc2110Xmit,		AJAFUNC << ": " << __x__)
-#define XMTDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_Anc2110Xmit,		AJAFUNC << ": " << __x__)
+#define RCVFAIL(__x__)		{if (LOGGING_ANC2110RX) AJA_sERROR  (AJA_DebugUnit_Anc2110Rcv, AJAFUNC << ": " << __x__);}
+#define RCVWARN(__x__)		{if (LOGGING_ANC2110RX) AJA_sWARNING(AJA_DebugUnit_Anc2110Rcv, AJAFUNC << ": " << __x__);}
+#define RCVNOTE(__x__)		{if (LOGGING_ANC2110RX) AJA_sNOTICE (AJA_DebugUnit_Anc2110Rcv, AJAFUNC << ": " << __x__);}
+#define RCVINFO(__x__)		{if (LOGGING_ANC2110RX) AJA_sINFO   (AJA_DebugUnit_Anc2110Rcv, AJAFUNC << ": " << __x__);}
+#define RCVDBG(__x__)		{if (LOGGING_ANC2110RX) AJA_sDEBUG  (AJA_DebugUnit_Anc2110Rcv, AJAFUNC << ": " << __x__);}
+
+#define XMTFAIL(__x__)		{if (LOGGING_ANC2110TX) AJA_sERROR  (AJA_DebugUnit_Anc2110Xmit, AJAFUNC << ": " << __x__);}
+#define XMTWARN(__x__)		{if (LOGGING_ANC2110TX) AJA_sWARNING(AJA_DebugUnit_Anc2110Xmit, AJAFUNC << ": " << __x__);}
+#define XMTNOTE(__x__)		{if (LOGGING_ANC2110TX) AJA_sNOTICE (AJA_DebugUnit_Anc2110Xmit, AJAFUNC << ": " << __x__);}
+#define XMTINFO(__x__)		{if (LOGGING_ANC2110TX) AJA_sINFO   (AJA_DebugUnit_Anc2110Xmit, AJAFUNC << ": " << __x__);}
+#define XMTDBG(__x__)		{if (LOGGING_ANC2110TX) AJA_sDEBUG  (AJA_DebugUnit_Anc2110Xmit, AJAFUNC << ": " << __x__);}
 
 #if defined(AJAHostIsBigEndian)
 	//	Host is BigEndian (BE)
@@ -784,7 +788,7 @@ LOGMYDEBUG(RTPheader);
 	if (AJA_FAILURE(status))
 		LOGMYERROR(::AJAStatusToString(status) << ": Failed at pkt[" << DEC(pktNum) << "] of " << DEC(numPackets));
 	if (CountAncillaryData() < numPackets)
-		LOGMYWARN(DEC(pktsAdded) << " of " << DEC(numPackets) << " anc pkt(s) decoded from RTP pkt");
+		{LOGMYWARN(DEC(pktsAdded) << " of " << DEC(numPackets) << " anc pkt(s) decoded from RTP pkt");}
 	else
 		LOGMYINFO(DEC(numPackets) << " pkts added from RTP pkt: " << *this);
 	return status;
@@ -1044,7 +1048,7 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2Buffer & inAncBuff
 
 	const uint32_t	pktsAdded (outPackets.CountAncillaryData() - origPktCount);
 	if (AJA_SUCCESS(result))
-		LOGMYDEBUG("Success:  " << DEC(pktsAdded) << " pkts added");
+		{LOGMYDEBUG("Success:  " << DEC(pktsAdded) << " pkts added");}
 	else
 		LOGMYERROR(AJAStatusToString(result) << ": " << DEC(pktsAdded) << " pkts added");
 	return result;
@@ -1067,7 +1071,7 @@ AJAStatus AJAAncillaryList::AddFromDeviceAuxBuffer (const NTV2Buffer & inAuxBuff
 
 	const uint32_t	pktsAdded (outPackets.CountAncillaryData() - origPktCount);
 	if (AJA_SUCCESS(result))
-		LOGMYDEBUG("Success:  " << DEC(pktsAdded) << " pkts added");
+		{LOGMYDEBUG("Success:  " << DEC(pktsAdded) << " pkts added");}
 	else
 		LOGMYERROR(AJAStatusToString(result) << ": " << DEC(pktsAdded) << " pkts added");
 	return result;
@@ -1109,16 +1113,6 @@ AJAStatus AJAAncillaryList::SetFromDeviceAuxBuffers (const NTV2Buffer & inF1AuxB
 	if (AJA_FAILURE(resultF2))
 		return resultF2;
 	return AJA_STATUS_SUCCESS;
-}
-
-bool AJAAncillaryList::BufferHasGUMPData (const NTV2Buffer & inBuffer)
-{
-	if (!inBuffer)
-		return false;
-	const uint8_t * pBytes (reinterpret_cast <const uint8_t*>(inBuffer.GetHostPointer()));
-	if (!pBytes)
-		return false;
-	return *pBytes == 0xFF;
 }
 
 static const size_t		MAX_RTP_PKT_LENGTH_BYTES	(0x0000FFFF);	//	65535 max
@@ -1224,7 +1218,7 @@ AJAStatus AJAAncillaryList::GetRTPPackets (AJAU32Pkts & outF1U32Pkts,  AJAU32Pkt
 	}	//	for each SMPTE Anc packet
 
 	if (AJA_FAILURE(result))
-		LOGMYERROR(::AJAStatusToString(result) << ": Pkt " << DEC(pktNdx+1) << " of " << DEC(CountAncillaryData()) << " failed in GenerateTransmitData: " << ::AJAStatusToString(result));
+		{LOGMYERROR(::AJAStatusToString(result) << ": Pkt " << DEC(pktNdx+1) << " of " << DEC(CountAncillaryData()) << " failed in GenerateTransmitData: " << ::AJAStatusToString(result));}
 	else if (!AllowMultiRTPTransmit())
 	{	//	SINGLE RTP PKT
 		outF1U32Pkts.push_back(F1U32s);					//	Append all F1
@@ -1233,9 +1227,9 @@ AJAStatus AJAAncillaryList::GetRTPPackets (AJAU32Pkts & outF1U32Pkts,  AJAU32Pkt
 		outF2AncCounts.push_back(uint8_t(actF2PktCnt)); //	Total F2 SMPTE Anc packets in this one F2 RTP packet
 	}
 	if (overflowWords && countOverflows)
-		LOGMYWARN("Overflow: " << DEC(countOverflows) << " pkts skipped, " << DEC(overflowWords) << " U32s dropped");
+		{LOGMYWARN("Overflow: " << DEC(countOverflows) << " pkts skipped, " << DEC(overflowWords) << " U32s dropped");}
 	else if (overflowWords)
-		LOGMYWARN("Data overflow: " << DEC(overflowWords) << " U32s dropped");
+		{LOGMYWARN("Data overflow: " << DEC(overflowWords) << " U32s dropped");}
 	else if (countOverflows)
 		LOGMYWARN("Packet overflow: " << DEC(countOverflows) << " pkts skipped");
 	XMTDBG("F1 (Content Only): " << outF1U32Pkts);

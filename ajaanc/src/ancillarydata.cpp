@@ -18,23 +18,28 @@
 
 using namespace std;
 
-#define LOGMYERROR(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Error,		AJAFUNC << ":  " << __x__)
-#define LOGMYWARN(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Warning,	AJAFUNC << ":  " << __x__)
-#define LOGMYNOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Notice,		AJAFUNC << ":  " << __x__)
-#define LOGMYINFO(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Info,		AJAFUNC << ":  " << __x__)
-#define LOGMYDEBUG(__x__)	AJA_sREPORT(AJA_DebugUnit_AJAAncData, AJA_DebugSeverity_Debug,		AJAFUNC << ":  " << __x__)
+#define LOGGING_ANCDATA		AJADebug::IsActive(AJA_DebugUnit_AJAAncData)
+#define LOGGING_ANC2110RX	AJADebug::IsActive(AJA_DebugUnit_Anc2110Rcv)
+#define LOGGING_ANC2110TX	AJADebug::IsActive(AJA_DebugUnit_Anc2110Xmit)
 
-#define RCV2110ERR(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Error,		AJAFUNC << ":  " << __x__)
-#define RCV2110WARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Warning,	AJAFUNC << ":  " << __x__)
-#define RCV2110NOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Notice,		AJAFUNC << ":  " << __x__)
-#define RCV2110INFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Info,		AJAFUNC << ":  " << __x__)
-#define RCV2110DBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Rcv, AJA_DebugSeverity_Debug,		AJAFUNC << ":  " << __x__)
+#define LOGMYERROR(__x__)	{if (LOGGING_ANCDATA) AJA_sERROR  (AJA_DebugUnit_AJAAncData, AJAFUNC << ":  " << __x__);}
+#define LOGMYWARN(__x__)	{if (LOGGING_ANCDATA) AJA_sWARNING(AJA_DebugUnit_AJAAncData, AJAFUNC << ":  " << __x__);}
+#define LOGMYNOTE(__x__)	{if (LOGGING_ANCDATA) AJA_sNOTICE (AJA_DebugUnit_AJAAncData, AJAFUNC << ":  " << __x__);}
+#define LOGMYINFO(__x__)	{if (LOGGING_ANCDATA) AJA_sINFO   (AJA_DebugUnit_AJAAncData, AJAFUNC << ":  " << __x__);}
+#define LOGMYDEBUG(__x__)	{if (LOGGING_ANCDATA) AJA_sDEBUG  (AJA_DebugUnit_AJAAncData, AJAFUNC << ":  " << __x__);}
 
-#define XMT2110ERR(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Error,		AJAFUNC << ":  " << __x__)
-#define XMT2110WARN(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Warning,	AJAFUNC << ":  " << __x__)
-#define XMT2110NOTE(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Notice,	AJAFUNC << ":  " << __x__)
-#define XMT2110INFO(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Info,		AJAFUNC << ":  " << __x__)
-#define XMT2110DBG(__x__)	AJA_sREPORT(AJA_DebugUnit_Anc2110Xmit, AJA_DebugSeverity_Debug,		AJAFUNC << ":  " << __x__)
+#define RCV2110ERR(__x__)	{if (LOGGING_ANC2110RX) AJA_sERROR  (AJA_DebugUnit_Anc2110Rcv, AJAFUNC << ":  " << __x__);}
+#define RCV2110WARN(__x__)	{if (LOGGING_ANC2110RX) AJA_sWARNING(AJA_DebugUnit_Anc2110Rcv, AJAFUNC << ":  " << __x__);}
+#define RCV2110NOTE(__x__)	{if (LOGGING_ANC2110RX) AJA_sNOTICE (AJA_DebugUnit_Anc2110Rcv, AJAFUNC << ":  " << __x__);}
+#define RCV2110INFO(__x__)	{if (LOGGING_ANC2110RX) AJA_sINFO   (AJA_DebugUnit_Anc2110Rcv, AJAFUNC << ":  " << __x__);}
+#define RCV2110DBG(__x__)	{if (LOGGING_ANC2110RX) AJA_sDEBUG  (AJA_DebugUnit_Anc2110Rcv, AJAFUNC << ":  " << __x__);}
+
+#define XMT2110ERR(__x__)	{if (LOGGING_ANC2110TX) AJA_sERROR  (AJA_DebugUnit_Anc2110Xmit, AJAFUNC << ":  " << __x__);}
+#define XMT2110WARN(__x__)	{if (LOGGING_ANC2110TX) AJA_sWARNING(AJA_DebugUnit_Anc2110Xmit, AJAFUNC << ":  " << __x__);}
+#define XMT2110NOTE(__x__)	{if (LOGGING_ANC2110TX) AJA_sNOTICE (AJA_DebugUnit_Anc2110Xmit, AJAFUNC << ":  " << __x__);}
+#define XMT2110INFO(__x__)	{if (LOGGING_ANC2110TX) AJA_sINFO   (AJA_DebugUnit_Anc2110Xmit, AJAFUNC << ":  " << __x__);}
+#define XMT2110DBG(__x__)	{if (LOGGING_ANC2110TX) AJA_sDEBUG  (AJA_DebugUnit_Anc2110Xmit, AJAFUNC << ":  " << __x__);}
+
 #if defined(AJA_WINDOWS)
 	const size_t sENDL(2);	//	CRLF
 #else
@@ -913,7 +918,7 @@ AJAStatus AJAAncillaryData::GenerateTransmitData (UWordSequence & outRawComponen
 		outRawComponents.push_back(Calculate9BitChecksum());	//	CS
 
 	if (AJA_SUCCESS(status))
-		LOGMYDEBUG((origSize ? "Appended " : "Generated ")	<< (outRawComponents.size() - origSize)	 << " UWords from " << AsString(32) << endl << UWordSequence(outRawComponents));
+		{LOGMYDEBUG((origSize ? "Appended " : "Generated ")	<< (outRawComponents.size() - origSize)	 << " UWords from " << AsString(32) << endl << UWordSequence(outRawComponents));}
 	else
 		LOGMYERROR("Failed: " << ::AJAStatusToString(status) << ": origSize=" << origSize << ", " << AsString(32));
 	return status;

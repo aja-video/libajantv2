@@ -232,7 +232,7 @@ AJAStatus AJAAncillaryData_Timecode::SetTimecode (const AJATimeCode & inTimecode
 }
 
 
-AJAStatus AJAAncillaryData_Timecode::GetTimecode (AJATimeCode& timecode, AJATimeBase& timeBase) const
+AJAStatus AJAAncillaryData_Timecode::GetTimecode (AJATimeCode& timecode, const AJATimeBase & timeBase) const
 {
 	AJAAncillaryData_Timecode_Format tcFmt = GetTimecodeFormatFromTimeBase(timeBase);
 
