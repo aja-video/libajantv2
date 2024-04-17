@@ -520,16 +520,17 @@
 
 #if defined (AJAMac)
 	// Mac register read/write
-	uint32_t	ntv2ReadRegister32(Ntv2SystemContext* context, uint32_t regNum);
-	void		ntv2WriteRegister32(Ntv2SystemContext* context, uint32_t regNum, uint32_t regValue);
+	uint32_t	ntv2ReadRegister32(Ntv2SystemContext* pContext, uint32_t regNum);
+	void		ntv2WriteRegister32(Ntv2SystemContext* pContext, uint32_t regNum, uint32_t regValue);
 #endif
 
-uint32_t ntv2ReadRegister(Ntv2SystemContext* context, uint32_t regnNum);
-bool ntv2ReadRegisterMS(Ntv2SystemContext* context, uint32_t regnum, uint32_t* data, uint32_t regMask, uint32_t regShift);
-bool ntv2WriteRegister(Ntv2SystemContext* context, uint32_t regnum, uint32_t data);
-bool ntv2WriteRegisterMS(Ntv2SystemContext* context, uint32_t regnum, uint32_t data, uint32_t regMask, uint32_t regShift);
-uint32_t ntv2ReadVirtualRegister(Ntv2SystemContext* context, uint32_t regNum);
-bool ntv2WriteVirtualRegister(Ntv2SystemContext* context, uint32_t regNum, uint32_t data);
+uint32_t ntv2ReadRegister(Ntv2SystemContext* pContext, uint32_t regnNum);
+bool ntv2ReadRegisterMS(Ntv2SystemContext* pContext, uint32_t regnum, uint32_t* data, uint32_t regMask, uint32_t regShift);
+bool ntv2WriteRegister(Ntv2SystemContext* pContext, uint32_t regnum, uint32_t data);
+bool ntv2WriteRegisterMS(Ntv2SystemContext* pContext, uint32_t regnum, uint32_t data, uint32_t regMask, uint32_t regShift);
+uint32_t ntv2ReadVirtualRegister(Ntv2SystemContext* pContext, uint32_t regNum);
+bool ntv2WriteVirtualRegister(Ntv2SystemContext* pContext, uint32_t regNum, uint32_t data);
+bool ntv2WriteXlnxRegister(Ntv2SystemContext* pContext, uint32_t regNum, uint32_t data);
 
 // spinlock functions
 bool		ntv2SpinLockOpen(Ntv2SpinLock* pSpinLock, Ntv2SystemContext* pSysCon);

@@ -17,6 +17,7 @@ extern uint32_t ntv2ReadRegCon32(Ntv2SystemContext* context, uint32_t regNum);
 extern bool ntv2ReadRegMSCon32(Ntv2SystemContext* context, uint32_t regNum, uint32_t* regValue, uint32_t regMask, uint32_t regShift);
 extern bool ntv2WriteRegCon32(Ntv2SystemContext* context, uint32_t regNum, uint32_t regValue);
 extern bool ntv2WriteRegMSCon32(Ntv2SystemContext* context, uint32_t regNum, uint32_t regValue, uint32_t regMask, uint32_t regShift);
+extern bool ntv2WriteXlnxRegCon32(Ntv2SystemContext* context, uint32_t regNum, uint32_t regValue);
 extern uint32_t ntv2ReadVirtRegCon32(Ntv2SystemContext* context, uint32_t regNum);
 extern bool ntv2WriteVirtRegCon32(Ntv2SystemContext* context, uint32_t regNum, uint32_t data);
 
@@ -48,6 +49,11 @@ uint32_t ntv2ReadVirtualRegister(Ntv2SystemContext* context, uint32_t regNum)
 bool ntv2WriteVirtualRegister(Ntv2SystemContext* context, uint32_t regNum, uint32_t data)
 {
 	return ntv2WriteVirtRegCon32(context, regNum, data);
+}
+
+bool ntv2WriteXlnxRegister(Ntv2SystemContext* context, uint32_t regNum, uint32_t data)
+{
+	return ntv2WriteXlnxRegCon32(context, regNum, data);
 }
 
 #if defined (AJAVirtual)
