@@ -183,6 +183,8 @@ enum
 	kRegFlashDataMask		= BIT (7) + BIT (6) + BIT (5) + BIT (4) + BIT (3) + BIT (2) + BIT (1) + BIT (0)
 };
 
+#if defined(AJAMacDext)
+
 #define NTV2_MAX_HDMI_MONITOR	4
 typedef struct Ntv2DriverProcessContext
 {
@@ -209,6 +211,8 @@ void EnableXlnxUserInterrupt(Ntv2SystemContext* pSystemContext, int inIndex);
 void DisableXlnxUserInterrupt(Ntv2SystemContext* pSystemContext, int inIndex);
 void InitializeVirtualRegisters(Ntv2SystemContext* inSystemContext);
 bool IsKonaIPDevice(Ntv2SystemContext* inSystemContext);
+
+#endif
 
 ///////////////////////
 //board format routines

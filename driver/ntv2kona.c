@@ -90,6 +90,7 @@ static const ULWord    gChannelToVPIDColorimetry[]			= {	kVRegNTV2VPIDColorimetr
 static const ULWord    gChannelToVPIDLuminance[]			= {	kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance,
 																kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, 0 };
 
+#if defined(AJAMacDext)
 bool InitializeNtv2Driver(Ntv2DriverProcessContext* inProcessContext)
 {
 	ntv2Message("-> Enter\n");
@@ -720,6 +721,7 @@ void InitializeVirtualRegisters(Ntv2SystemContext* pSystemContext)
 
 	ntv2Message("<- Exit\n");
 }
+#endif
 
 bool IsKonaIPDevice(Ntv2SystemContext* inSystemContext)
 {
