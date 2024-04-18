@@ -37,28 +37,91 @@
 #define AJA_RASTERIZER
 
 
-#if defined(NTV2_DEPRECATE_17_0)
-	//	Copied from ntv2devicefeatures.c, deprecated in SDK 17.0
-	bool NTV2DeviceHasSPIv2 (const NTV2DeviceID inDeviceID);
-	bool NTV2DeviceHasSPIv3(const NTV2DeviceID inDeviceID);
-	bool NTV2DeviceHasSPIv4(const NTV2DeviceID inDeviceID);
-	bool NTV2DeviceHasSPIv5(const NTV2DeviceID inDeviceID);
 
-	bool NTV2DeviceHasGenlockv2(const NTV2DeviceID devID);
-	bool NTV2DeviceHasGenlockv3(const NTV2DeviceID devID);
 
-	bool NTV2DeviceHasColorSpaceConverterOnChannel2(const NTV2DeviceID devID);
 
-	bool NTV2DeviceCanDoAudio2Channels(const NTV2DeviceID devID);
-	bool NTV2DeviceCanDoAudio6Channels(const NTV2DeviceID devID);
-	bool NTV2DeviceCanDoAudio8Channels(const NTV2DeviceID devID);
-
-	UWord NTV2DeviceGetNumAudioStreams(const NTV2DeviceID devID);
-	bool NTV2DeviceCanDoAudioN(const NTV2DeviceID devID, UWord index0);
-	bool NTV2DeviceCanDoLTCOutN(const NTV2DeviceID devID, UWord index0);
-	bool NTV2DeviceCanDoLTCInN(const NTV2DeviceID devID, UWord index0);
-	bool NTV2DeviceCanDoRS422N(const NTV2DeviceID devID, const NTV2Channel ch);
-#endif	//	!defined(NTV2_DEPRECATE_17_0)
+enum
+{
+	kIntAudioWrapEnable             = BIT (3),
+	kIntAuxVerticalEnable   = BIT (11),
+	
+	// Status register
+	kIntOutput1VBLActive    = BIT (31),
+	kIntOutput1VBLClear             = BIT (31),
+	
+	kIntInput1VBLActive             = BIT (30),
+	kintInput1VBLClear              = BIT (30),
+	
+	kIntInput2VBLActive             = BIT (29),
+	kIntInput2VBLClear              = BIT (29),
+	
+	kIntAudioWrapActive             = BIT (28),
+	kIntAudioWrapClear              = BIT (28),
+	
+	kIntAudioOutWrapActive  = BIT (27),
+	kIntAudioOutWrapClear   = BIT (27),
+	
+	kIntUartTx2Active               = BIT (26),
+	kIntUartTx2Clear                = BIT (26),
+	
+	kIntOutput2VBLActive    = BIT (8),
+	kIntOutput2VBLClear             = BIT (23),
+	
+	kIntOutput3VBLActive    = BIT (7),
+	kIntOutput3VBLClear             = BIT (22),
+	
+	kIntOutput4VBLActive    = BIT (6),
+	kIntOutput4VBL                  = BIT (21),
+	
+	kIntAuxVerticalActive   = BIT (12),
+	kIntAuxVerticalClear    = BIT (12),
+	
+	kIntI2C2Active                  = BIT (13),
+	kIntI2C2Clear                   = BIT (13),
+	
+	kIntI2C1Active                  = BIT (14),
+	kIntI2C1Clear                   = BIT (14),
+	
+	// Status register 2
+	kIntInput3VBLActive             = BIT (30),
+	kIntInput3VBLClear              = BIT (30),
+	
+	kIntInput4VBLActive             = BIT (29),
+	kIntInput4VBLClear              = BIT (29),
+	
+	kIntInput5VBLActive             = BIT (28),
+	kIntInput5VBLClear              = BIT (28),
+	
+	kIntInput6VBLActive             = BIT (27),
+	kIntInput6VBLClear              = BIT (27),
+	
+	kIntInput7VBLActive             = BIT (26),
+	kIntInput7VBLClear              = BIT (26),
+	
+	kIntInput8VBLActive             = BIT (25),
+	kIntInput8VBLClear              = BIT (25),
+	
+	kIntOutput5VBLActive    = BIT (31),
+	kIntOutput5VBLClear             = BIT (19),
+	
+	kIntOutput6VBLActive    = BIT (24),
+	kIntOutput6VBLClear             = BIT (18),
+	
+	kIntOutput7VBLActive    = BIT (23),
+	kIntOutput7VBLClear             = BIT (17),
+	
+	kIntOutput8VBLActive    = BIT (22),
+	kIntOutput8VBLClear             = BIT (16),
+	
+	kIntPBChange                    = BIT (0),
+	kIntLowPower                    = BIT (1),
+	kIntDisplayFifo                 = BIT (2),
+	kIntSATAChange                  = BIT (3),                      // CF Presence Detect Change in Bones product ....
+	kIntTemp1High                   = BIT (4),
+	kIntTemp2High                   = BIT (5),
+	kIntPowerButtonChange   = BIT (6),
+	kIntCPLDMask                    = BIT (0) + BIT (1) + BIT (2) + BIT (3) + BIT (4) + BIT(5) + BIT(6),
+};
 
 // Define interrupt control, dma, and flash register bits here because it's private to the driver
 enum

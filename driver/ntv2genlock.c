@@ -272,7 +272,7 @@ Ntv2Status ntv2_genlock_disable(struct ntv2_genlock *ntv2_gen)
 	if (!ntv2_gen->monitor_enable)
 		return NTV2_STATUS_SUCCESS;
 
-	NTV2_MSG_GENLOCK_STATE("%{public}s: disable genlock monitor\n", ntv2_gen->name);
+	NTV2_MSG_GENLOCK_STATE("%s: disable genlock monitor\n", ntv2_gen->name);
 
 	ntv2_gen->monitor_enable = false;
 	ntv2EventSignal(&ntv2_gen->monitor_event);

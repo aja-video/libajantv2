@@ -198,7 +198,6 @@ static inline ULWord oemAudioSampleAlignIn (ULWord deviceNumber,
 static inline ULWord oemAudioSampleAlignOut (ULWord deviceNumber,
 											 NTV2AudioSystem audioSystem,
 											 ULWord ulReadSample);
-static LWord GetFramePeriod(ULWord deviceNumber, NTV2Channel channel);
 
 int oemAutoCirculateDmaAudioSetup(ULWord deviceNumber, INTERNAL_AUTOCIRCULATE_STRUCT* pAuto);
 
@@ -736,7 +735,7 @@ OemAutoCirculate(ULWord deviceNumber, NTV2Crosspoint channelSpec)
 				timeDiff = (LWord64)pAuto->lastInterruptTime - (LWord64)pAuto->prevInterruptTime;
 
 				// get the current interrupt period
-				framePeriod = (LWord)GetFramePeriod(deviceNumber, channel);
+				framePeriod = (LWord)GetFramePeriod(&systemContext, channel);
 				if (GetSmpte372(&systemContext, channel) || fieldMode)
 				{
 					framePeriod /= 2;
@@ -1077,7 +1076,7 @@ OemAutoCirculate(ULWord deviceNumber, NTV2Crosspoint channelSpec)
 							{
 								// calculate the error in the video interrupt period
 								ULWord64 time = 0;
-								LWord framePeriod = (LWord)GetFramePeriod(deviceNumber, syncChannel);
+								LWord framePeriod = (LWord)GetFramePeriod(&systemContext, syncChannel);
 								LWord discontinuityTime = 10000000;
 								if (GetSmpte372(&systemContext, syncChannel) || fieldMode)
 								{
@@ -5370,110 +5369,113 @@ OemAutoCirculateSetupColorCorrector(ULWord deviceNumber,
 									NTV2Crosspoint channelSpec,
 									INTERNAL_ColorCorrectionInfo *ccInfo)
 {
-	if (!NTV2DeviceCanDoColorCorrection(getNTV2Params(deviceNumber)->_DeviceID))
+	NTV2PrivateParams* ntv2pp = getNTV2Params(deviceNumber);
+	Ntv2SystemContext* systemContext = &ntv2pp->systemContext;
+	
+	if (!NTV2DeviceCanDoColorCorrection(ntv2pp->_DeviceID))
 		return;
 
 	// Find current output bank and make host access bank the other bank.
 	switch (channelSpec)
 	{
 	case NTV2CROSSPOINT_CHANNEL1:
-		if (GetColorCorrectionOutputBank(deviceNumber, NTV2_CHANNEL1) == 1)
+		if (GetColorCorrectionOutputBank(systemContext, NTV2_CHANNEL1) == 1)
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH1BANK0);  // happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL1, 0)	;				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH1BANK0);  // happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL1, 0)	;				// happens next frame
 		}
 		else
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH1BANK1);  // happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL1, 1)	;				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH1BANK1);  // happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL1, 1)	;				// happens next frame
 		}
-		SetColorCorrectionSaturation (deviceNumber, NTV2_CHANNEL1, ccInfo->saturationValue);
-		SetColorCorrectionMode(deviceNumber, NTV2_CHANNEL1, ccInfo->mode);
+		SetColorCorrectionSaturation (systemContext, NTV2_CHANNEL1, ccInfo->saturationValue);
+		SetColorCorrectionMode(systemContext, NTV2_CHANNEL1, ccInfo->mode);
 		break;
 	case NTV2CROSSPOINT_CHANNEL2:
-		if (GetColorCorrectionOutputBank(deviceNumber, NTV2_CHANNEL2) == 1)
+		if (GetColorCorrectionOutputBank(systemContext, NTV2_CHANNEL2) == 1)
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH2BANK0);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL2, 0)	;				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH2BANK0);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL2, 0)	;				// happens next frame
 		}
 		else
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH2BANK1);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL2, 1);				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH2BANK1);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL2, 1);				// happens next frame
 		}
-		SetColorCorrectionSaturation (deviceNumber, NTV2_CHANNEL2, ccInfo->saturationValue);
-		SetColorCorrectionMode(deviceNumber, NTV2_CHANNEL2, ccInfo->mode);
+		SetColorCorrectionSaturation (systemContext, NTV2_CHANNEL2, ccInfo->saturationValue);
+		SetColorCorrectionMode(systemContext, NTV2_CHANNEL2, ccInfo->mode);
 		break;
 	case NTV2CROSSPOINT_CHANNEL3:
-		if (GetColorCorrectionOutputBank(deviceNumber, NTV2_CHANNEL3) == 1)
+		if (GetColorCorrectionOutputBank(systemContext, NTV2_CHANNEL3) == 1)
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH3BANK0);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL3, 0)	;				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH3BANK0);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL3, 0)	;				// happens next frame
 		}
 		else
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH3BANK1);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL3, 1);				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH3BANK1);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL3, 1);				// happens next frame
 		}
 		break;
 	case NTV2CROSSPOINT_CHANNEL4:
-		if (GetColorCorrectionOutputBank(deviceNumber, NTV2_CHANNEL4) == 1)
+		if (GetColorCorrectionOutputBank(systemContext, NTV2_CHANNEL4) == 1)
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH4BANK0);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL4, 0)	;				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH4BANK0);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL4, 0)	;				// happens next frame
 		}
 		else
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH4BANK1);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL4, 1);				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH4BANK1);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL4, 1);				// happens next frame
 		}
 		break;
 	case NTV2CROSSPOINT_CHANNEL5:
-		if (GetColorCorrectionOutputBank(deviceNumber, NTV2_CHANNEL5) == 1)
+		if (GetColorCorrectionOutputBank(systemContext, NTV2_CHANNEL5) == 1)
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH5BANK0);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL5, 0)	;				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH5BANK0);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL5, 0)	;				// happens next frame
 		}
 		else
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH5BANK1);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL5, 1);				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH5BANK1);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL5, 1);				// happens next frame
 		}
 		break;
 	case NTV2CROSSPOINT_CHANNEL6:
-		if (GetColorCorrectionOutputBank(deviceNumber, NTV2_CHANNEL6) == 1)
+		if (GetColorCorrectionOutputBank(systemContext, NTV2_CHANNEL6) == 1)
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH6BANK0);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL6, 0)	;				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH6BANK0);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL6, 0)	;				// happens next frame
 		}
 		else
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH6BANK1);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL6, 1);				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH6BANK1);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL6, 1);				// happens next frame
 		}
 		break;
 	case NTV2CROSSPOINT_CHANNEL7:
-		if (GetColorCorrectionOutputBank(deviceNumber, NTV2_CHANNEL7) == 1)
+		if (GetColorCorrectionOutputBank(systemContext, NTV2_CHANNEL7) == 1)
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH7BANK0);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL7, 0)	;				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH7BANK0);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL7, 0)	;				// happens next frame
 		}
 		else
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH7BANK1);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL7, 1);				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH7BANK1);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL7, 1);				// happens next frame
 		}
 		break;
 	case NTV2CROSSPOINT_CHANNEL8:
-		if (GetColorCorrectionOutputBank(deviceNumber, NTV2_CHANNEL8) == 1)
+		if (GetColorCorrectionOutputBank(systemContext, NTV2_CHANNEL8) == 1)
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH8BANK0);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL8, 0)	;				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH8BANK0);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL8, 0)	;				// happens next frame
 		}
 		else
 		{
-			SetColorCorrectionHostAccessBank (deviceNumber, NTV2_CCHOSTACCESS_CH8BANK1);	// happens immediatedly
-			SetColorCorrectionOutputBank (deviceNumber, NTV2_CHANNEL8, 1);				// happens next frame
+			SetColorCorrectionHostAccessBank (systemContext, NTV2_CCHOSTACCESS_CH8BANK1);	// happens immediatedly
+			SetColorCorrectionOutputBank (systemContext, NTV2_CHANNEL8, 1);				// happens next frame
 		}
 		break;
 	default:
@@ -5516,84 +5518,6 @@ OemAutoCirculateTransferColorCorrectorInfo(ULWord deviceNumber,
 	} else {
 		return 0;
 	}
-}
-
-// this assumes we have one 1024-entry LUT that we're going to download to all three channels
-ULWord
-DownloadLinearLUTToHW (ULWord deviceNumber, NTV2Channel channel, int bank)
-{
-	ULWord bResult;
-	ULWord lutValue;
-	ULWord i;
-	unsigned long address;
-	NTV2ColorCorrectionHostAccessBank savedBank;
-
-	bResult = 1;
-	if (NTV2DeviceCanDoColorCorrection(getNTV2Params(deviceNumber)->_DeviceID))
-	{
-		savedBank = GetColorCorrectionHostAccessBank(deviceNumber, channel);
-
-		SetLUTEnable(deviceNumber, channel, true);
-		// setup Host Access
-		switch (channel)
-		{
-		case NTV2_CHANNEL1:
-			SetColorCorrectionHostAccessBank(
-				deviceNumber, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH1BANK0 + bank));
-			break;
-		case NTV2_CHANNEL2:
-			SetColorCorrectionHostAccessBank(
-				deviceNumber, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH2BANK0 + bank));
-			break;
-		case NTV2_CHANNEL3:
-			SetColorCorrectionHostAccessBank(
-				deviceNumber, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH3BANK0 + bank));
-			break;
-		case NTV2_CHANNEL4:
-			SetColorCorrectionHostAccessBank(
-				deviceNumber, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH4BANK0 + bank));
-			break;
-		case NTV2_CHANNEL5:
-			SetColorCorrectionHostAccessBank(
-				deviceNumber, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH5BANK0 + bank));
-			break;
-		case NTV2_CHANNEL6:
-			SetColorCorrectionHostAccessBank(
-				deviceNumber, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH6BANK0 + bank));
-			break;
-		case NTV2_CHANNEL7:
-			SetColorCorrectionHostAccessBank(
-				deviceNumber, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH7BANK0 + bank));
-			break;
-		case NTV2_CHANNEL8:
-			SetColorCorrectionHostAccessBank(
-				deviceNumber, (NTV2ColorCorrectionHostAccessBank)((int)NTV2_CCHOSTACCESS_CH8BANK0 + bank));
-			break;
-		default:
-			MSG("Download linear LUT bad channel %d\n", channel);
-			return 0;
-		}
-
-		for (i = 0; i < 1024;  i += 2)
-		{
-			// Tables are already converted to ints and endian swapped for the Mac
-			lutValue = ((i+1)<<22) + (i<<6);
-
-			address = (unsigned long)(getNTV2Params(deviceNumber)->_pGlobalControl + (kColorCorrectionLUTOffset_Red)   + (i*2));
-			WRITE_REGISTER_ULWord(address, lutValue);
-
-			address = (unsigned long)(getNTV2Params(deviceNumber)->_pGlobalControl + (kColorCorrectionLUTOffset_Green) + (i*2));
-			WRITE_REGISTER_ULWord(address, lutValue);
-
-			address = (unsigned long)(getNTV2Params(deviceNumber)->_pGlobalControl + (kColorCorrectionLUTOffset_Blue)  + (i*2));
-			WRITE_REGISTER_ULWord(address, lutValue);
-		}
-		SetLUTEnable(deviceNumber, channel, false);
-
-		SetColorCorrectionHostAccessBank(deviceNumber, savedBank);
-	}
-
-	return bResult;
 }
 
 static void
@@ -5690,14 +5614,17 @@ OemAutoCirculateSetupVidProc(ULWord deviceNumber,
 	ULWord softnessPixels;
 	ULWord softnessSlope;
 	ULWord regValue;
+	
+	NTV2PrivateParams* ntv2pp = getNTV2Params(deviceNumber);
+	Ntv2SystemContext* systemContext = &ntv2pp->systemContext;
 
-	if (!NTV2DeviceCanDoVideoProcessing(getNTV2Params(deviceNumber)->_DeviceID))
+	if (!NTV2DeviceCanDoVideoProcessing(ntv2pp->_DeviceID))
 		return;
 
-	SetForegroundVideoCrosspoint(deviceNumber, vidProcInfo->foregroundVideoCrosspoint);
-	SetForegroundKeyCrosspoint(deviceNumber, vidProcInfo->foregroundKeyCrosspoint);
-	SetBackgroundVideoCrosspoint(deviceNumber, vidProcInfo->backgroundVideoCrosspoint);
-	SetBackgroundKeyCrosspoint(deviceNumber, vidProcInfo->backgroundKeyCrosspoint);
+	SetForegroundVideoCrosspoint(systemContext, vidProcInfo->foregroundVideoCrosspoint);
+	SetForegroundKeyCrosspoint(systemContext, vidProcInfo->foregroundKeyCrosspoint);
+	SetBackgroundVideoCrosspoint(systemContext, vidProcInfo->backgroundVideoCrosspoint);
+	SetBackgroundKeyCrosspoint(systemContext, vidProcInfo->backgroundKeyCrosspoint);
 
 	regValue = ReadRegister(deviceNumber, kRegVidProc1Control, NO_MASK, NO_SHIFT);
 	regValue &= ~(VIDPROCMUX1MASK + VIDPROCMUX2MASK + VIDPROCMUX3MASK);
@@ -5962,81 +5889,6 @@ GetNTV2VideoFormat(UByte status, UByte frameRateHiBit)
 	}
 
 	return videoFormat;
-}
-
-static LWord
-GetFramePeriod(ULWord deviceNumber, NTV2Channel channel)
-{
-	Ntv2SystemContext systemContext;
-	NTV2FrameRate frameRate;
-	LWord period;
-	systemContext.devNum = deviceNumber;
-	frameRate = GetFrameRate(&systemContext, channel);
-
-	switch (frameRate)
-	{
-	case NTV2_FRAMERATE_12000:
-		period = 10000000/120;
-		break;
-	case NTV2_FRAMERATE_11988:
-		period = 10010000/120;
-		break;
-	case NTV2_FRAMERATE_6000:
-		period = 10000000/60;
-		break;
-	case NTV2_FRAMERATE_5994:
-		period = 10010000/60;
-		break;
-	case NTV2_FRAMERATE_4800:
-		period = 10000000/48;
-		break;
-	case NTV2_FRAMERATE_4795:
-		period = 10010000/48;
-		break;
-	case NTV2_FRAMERATE_3000:
-		period = 10000000/30;
-		break;
-	case NTV2_FRAMERATE_2997:
-		period = 10010000/30;
-		break;
-	case NTV2_FRAMERATE_2500:
-		period = 10000000/25;
-		break;
-	case NTV2_FRAMERATE_2400:
-		period = 10000000/24;
-		break;
-	case NTV2_FRAMERATE_2398:
-		period = 10010000/24;
-		break;
-	case NTV2_FRAMERATE_5000:
-		period = 10000000/50;
-		break;
-#if !defined(NTV2_DEPRECATE_16_0)
-	case NTV2_FRAMERATE_1900:
-		period = 10000000/19;
-		break;
-	case NTV2_FRAMERATE_1898:
-		period = 10010000/19;
-		break;
-	case NTV2_FRAMERATE_1800:
-		period = 10000000/18;
-		break;
-	case NTV2_FRAMERATE_1798:
-		period = 10010000/18;
-		break;
-#endif	//	!defined(NTV2_DEPRECATE_16_0)
-	case NTV2_FRAMERATE_1500:
-		period = 10000000/15;
-		break;
-	case NTV2_FRAMERATE_1498:
-		period = 10010000/15;
-		break;
-	case NTV2_FRAMERATE_UNKNOWN:
-	default:
-		period = 10000000;
-	}
-
-	return period;
 }
 
 static ULWord

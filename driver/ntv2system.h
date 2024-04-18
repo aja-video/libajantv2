@@ -441,8 +441,8 @@
 	#define ntv2ReadRegister32(reg)				ioread32((void*)(reg))
 
 	// linux message abstraction
-
-	#define ntv2Message(string, ...) 			printk(KERN_ALERT string, __VA_ARGS__)
+	
+#define ntv2Message(string, args...) 			printk(KERN_ALERT string, ##args)
 
 	// linux spinlock abstraction
 

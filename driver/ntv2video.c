@@ -30,10 +30,11 @@ static const uint32_t	gChannelToGlobalControlRegNum []	= {	kRegGlobalControl, kR
 
 void SetRegisterWritemode(Ntv2SystemContext* context, NTV2RegisterWriteMode value, NTV2Channel channel)
 {
+	uint32_t regNum = 0;
 	if (!IsMultiFormatActive(context))
 		channel = NTV2_CHANNEL1;
 
-	uint32_t regNum = gChannelToGlobalControlRegNum[channel];
+	regNum = gChannelToGlobalControlRegNum[channel];
 
 	ntv2WriteRegisterMS(context, regNum, value, NTV2REGWRITEMODEMASK, NTV2REGWRITEMODESHIFT);
 }
@@ -125,7 +126,7 @@ void InitLUTRegs(Ntv2SystemContext* context)
 	
 	if ( NTV2DeviceCanDoColorCorrection(deviceID) )
 	{
-		DebugLog("Initializing LUTs\n");
+		ntv2Message("Initializing LUTs\n");
 		switch( NTV2DeviceGetNumLUTs(deviceID) )
 		{
 		case 8:
@@ -170,7 +171,7 @@ void InitLUTRegs(Ntv2SystemContext* context)
 
 bool Has12BitLUTSupport(Ntv2SystemContext* context)
 {
-	uint32_t has12BitLUTSupport(0);
+	uint32_t has12BitLUTSupport = 0;
 	return ntv2ReadRegisterMS(context, kRegLUTV2Control, &has12BitLUTSupport, kRegMask12BitLUTSupport, kRegShift12BitLUTSupport)  &&  (has12BitLUTSupport ? true : false);
 }
 
@@ -234,7 +235,8 @@ bool DownloadLinearLUTToHW(Ntv2SystemContext* context, NTV2Channel inChannel, in
 void LoadLUTValues(Ntv2SystemContext* context)
 {
 	uint32_t lutValue;
-	for (uint32_t i = 0; i < 1024;  i+=2)
+	uint32_t i = 0;
+	for (i = 0; i < 1024;  i+=2)
 	{
 		// Tables are already converted to ints and endian swapped for the Mac
 		lutValue = ((i+1)<<22) + (i<<6) ;
@@ -666,42 +668,42 @@ uint32_t GetLUTV2HostAccessBank(Ntv2SystemContext* context, NTV2Channel inChanne
 	{
 		case NTV2_CHANNEL1:
 			ntv2ReadRegisterMS(context, kRegLUTV2Control, &tempVal,  kRegMaskLUT1HostAccessBankSelect,  kRegShiftLUT1HostAccessBankSelect);
-			outValue = NTV2ColorCorrectionHostAccessBank(tempVal);
+			outValue = (NTV2ColorCorrectionHostAccessBank)tempVal;
 			break;
 
 		case NTV2_CHANNEL2:
 			ntv2ReadRegisterMS(context, kRegLUTV2Control, &tempVal,  kRegMaskLUT2HostAccessBankSelect,  kRegShiftLUT2HostAccessBankSelect);
-			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH2BANK0);
+			outValue = (NTV2ColorCorrectionHostAccessBank)(tempVal + NTV2_CCHOSTACCESS_CH2BANK0);
 			break;
 
 		case NTV2_CHANNEL3:
 			ntv2ReadRegisterMS(context, kRegLUTV2Control,  &tempVal,  kRegMaskLUT3HostAccessBankSelect,  kRegShiftLUT3HostAccessBankSelect);
-			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH3BANK0);
+			outValue = (NTV2ColorCorrectionHostAccessBank)(tempVal + NTV2_CCHOSTACCESS_CH3BANK0);
 			break;
 
 		case NTV2_CHANNEL4:
 			ntv2ReadRegisterMS(context, kRegLUTV2Control,  &tempVal,  kRegMaskLUT4HostAccessBankSelect,  kRegShiftLUT4HostAccessBankSelect);
-			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH4BANK0);
+			outValue = (NTV2ColorCorrectionHostAccessBank)(tempVal + NTV2_CCHOSTACCESS_CH4BANK0);
 			break;
 
 		case NTV2_CHANNEL5:
 			ntv2ReadRegisterMS(context, kRegLUTV2Control,  &tempVal,  kRegMaskLUT5HostAccessBankSelect,  kRegShiftLUT5HostAccessBankSelect);
-			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH5BANK0);
+			outValue = (NTV2ColorCorrectionHostAccessBank)(tempVal + NTV2_CCHOSTACCESS_CH5BANK0);
 			break;
 
 		case NTV2_CHANNEL6:
 			ntv2ReadRegisterMS(context, kRegLUTV2Control,  &tempVal,  kRegMaskLUT6HostAccessBankSelect,  kRegShiftLUT6HostAccessBankSelect);
-			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH6BANK0);
+			outValue = (NTV2ColorCorrectionHostAccessBank)(tempVal + NTV2_CCHOSTACCESS_CH6BANK0);
 			break;
 
 		case NTV2_CHANNEL7:
 			ntv2ReadRegisterMS(context, kRegLUTV2Control,  &tempVal,  kRegMaskLUT7HostAccessBankSelect,  kRegShiftLUT7HostAccessBankSelect);
-			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH7BANK0);
+			outValue = (NTV2ColorCorrectionHostAccessBank)(tempVal + NTV2_CCHOSTACCESS_CH7BANK0);
 			break;
 
 		case NTV2_CHANNEL8:
 			ntv2ReadRegisterMS(context, kRegLUTV2Control,  &tempVal,  kRegMaskLUT8HostAccessBankSelect,  kRegShiftLUT8HostAccessBankSelect);
-			outValue = NTV2ColorCorrectionHostAccessBank(tempVal + NTV2_CCHOSTACCESS_CH8BANK0);
+			outValue = (NTV2ColorCorrectionHostAccessBank)(tempVal + NTV2_CCHOSTACCESS_CH8BANK0);
 			break;
 
 		default:	break;
