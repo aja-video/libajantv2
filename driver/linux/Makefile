@@ -347,7 +347,7 @@ ifdef NVIDIA_RDMA
 		sudo mkdir -p /etc/ajantv2; \
 		sudo touch /etc/ajantv2/rdma; \
 		sudo dkms install ajantv2/$(DKMSVER); \
-		sudo modprobe ajardma; \
+		sudo modprobe ajantv2; \
 	else \
 		echo "!! DKMS system is not installed"; \
 	fi
