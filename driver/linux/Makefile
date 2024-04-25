@@ -52,14 +52,17 @@ endif
 
 # if doing rdma build
 ifdef NVIDIA_RDMA
+	NVIDIA_KO ?= $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia*.ko'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
+ifeq ($(shell modinfo $(NVIDIA_KO) | grep license: | grep GPL),)
+	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1 -DNVIDIA_PROPRIETARY=1
+else
+	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1
+endif
 ifdef AJA_IGPU
 # configure for igpu
-	EXTRA_CFLAGS += -DAJA_IGPU=$(AJA_IGPU)
+	EXTRA_CFLAGS += -DAJA_IGPU=1
 else
-# configure to find the nvidia p2p entry point addresses
-	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=$(AJA_RDMA)
 ifeq ($(NVIDIA_SYMVERS),)
-	NVIDIA_KO ?= $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia*.ko'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
 	NVIDIA_GEN_SYMVERS := ./nvidia-ko-to-module-symvers $(NVIDIA_KO) $(A_LINUX_DRIVER_PATH)/nvidia.symvers
 	NVIDIA_SYMVERS := $(A_LINUX_DRIVER_PATH)/nvidia.symvers
 endif

@@ -27,6 +27,7 @@
 #include <linux/sched.h>
 
 #ifdef AJA_RDMA
+#ifdef NVIDIA_PROPRIETARY
 #include <linux/ntv2rdma.h>
 
 extern void ntv2_set_rdma_fops(struct ntv2_rdma_fops* fops);
@@ -41,12 +42,17 @@ static struct ntv2_rdma_fops rdma_fops =
 };
 
 #endif
+#endif
 
 int ntv2_rdma_init(void)
 {
 #ifdef AJA_RDMA
+#ifdef NVIDIA_PROPRIETARY
     printk(KERN_INFO "ntv2_rmda_init: configuring RDMA\n");
     ntv2_set_rdma_fops(&rdma_fops);
+#else
+    printk(KERN_INFO "ntv2_rmda_init: RDMA open source\n");
+#endif    
 #else
     printk(KERN_INFO "ntv2_rmda_init: RDMA not supported\n");
 #endif

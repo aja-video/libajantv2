@@ -42,13 +42,35 @@
 #define GPU_PAGE_OFFSET	(GPU_PAGE_SIZE - 1)
 #define GPU_PAGE_MASK	(~GPU_PAGE_OFFSET)
 
-static struct ntv2_rdma_fops* rdma_fops = NULL;
+#ifdef NVIDIA_PROPRIETARY
+
+static struct ntv2_rdma_fops rdma_fops = 
+{
+    .get_pages = NULL,
+    .put_pages = NULL,
+    .free_page_table = NULL,
+    .dma_map_pages = NULL,
+    .dma_unmap_pages = NULL
+};
 
 void ntv2_set_rdma_fops(struct ntv2_rdma_fops* fops)
 {
-    rdma_fops = fops;
+    rdma_fops = *fops;
 }
 EXPORT_SYMBOL(ntv2_set_rdma_fops);
+
+#else
+
+static struct ntv2_rdma_fops rdma_fops = 
+{
+    .get_pages = nvidia_p2p_get_pages,
+    .put_pages = nvidia_p2p_put_pages,
+    .free_page_table = nvidia_p2p_free_page_table,
+    .dma_map_pages = nvidia_p2p_dma_map_pages,
+    .dma_unmap_pages = nvidia_p2p_dma_unmap_pages
+};
+
+#endif
 
 #endif
 
@@ -3128,9 +3150,9 @@ static int dmaPageLock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer,
 		struct nvidia_p2p_page_table* rdmaPage = NULL;
 		int ret = -1;
 
-        if (rdma_fops != NULL)
+        if (rdma_fops.get_pages != NULL)
         {
-            ret = rdma_fops->get_pages(
+            ret = rdma_fops.get_pages(
 #ifndef AJA_IGPU				
                 0, 0,
 #endif				
@@ -3305,9 +3327,9 @@ static void dmaPageUnlock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 			NTV2_MSG_PAGE_MAP("%s%d: dmaPageUnlock rdma unlock %d pages\n", 
 							  DMA_MSG_DEVICE, pBuffer->numPages); 
 
-            if (rdma_fops != NULL)
+            if (rdma_fops.put_pages != NULL)
             {
-                rdma_fops->put_pages(
+                rdma_fops.put_pages(
 #ifndef AJA_IGPU				
                     0, 0,
                     pBuffer->rdmaAddress,
@@ -3361,9 +3383,9 @@ static void rdmaFreeCallback(void* data)
 	rdmaPage = xchg(&pBuffer->rdmaPage, NULL);
 	if (rdmaPage != NULL)
     {
-        if (rdma_fops != NULL)
+        if (rdma_fops.free_page_table != NULL)
         {
-            rdma_fops->free_page_table(rdmaPage);
+            rdma_fops.free_page_table(rdmaPage);
         }
     }
 
@@ -3450,18 +3472,18 @@ static int dmaSgMap(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 			ULWord64 count;
 			int i;
 			int ret = -1;
-            if (rdma_fops != NULL)
+            if (rdma_fops.dma_map_pages != NULL)
             {
 
 #ifdef AJA_IGPU
-                ret = rdma_fops->dma_map_pages(&(pNTV2Params->pci_dev)->dev,
-                                               pBuffer->rdmaPage,
-                                               &pBuffer->rdmaMap,
-                                               (pBuffer->direction == PCI_DMA_TODEVICE)? DMA_TO_DEVICE : DMA_FROM_DEVICE);
+                ret = rdma_fops.dma_map_pages(&(pNTV2Params->pci_dev)->dev,
+                                              pBuffer->rdmaPage,
+                                              &pBuffer->rdmaMap,
+                                              (pBuffer->direction == PCI_DMA_TODEVICE)? DMA_TO_DEVICE : DMA_FROM_DEVICE);
 #else
-                ret = rdma_fops->dma_map_pages(pNTV2Params->pci_dev,
-                                               pBuffer->rdmaPage,
-                                               &pBuffer->rdmaMap);
+                ret = rdma_fops.dma_map_pages(pNTV2Params->pci_dev,
+                                              pBuffer->rdmaPage,
+                                              &pBuffer->rdmaMap);
 #endif
             }
 			if (ret < 0)
@@ -3562,14 +3584,14 @@ static void dmaSgUnmap(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 			{
 				NTV2_MSG_PAGE_MAP("%s%d: dmaSgUnmap rdma unmap %d segments\n", 
 								  DMA_MSG_DEVICE, pBuffer->numSgs);
-                if (rdma_fops != NULL)
+                if (rdma_fops.dma_unmap_pages != NULL)
                 {
 #ifdef AJA_IGPU
-                    rdma_fops->dma_unmap_pages(pBuffer->rdmaMap);
+                    rdma_fops.dma_unmap_pages(pBuffer->rdmaMap);
 #else
-                    rdma_fops->dma_unmap_pages(pNTV2Params->pci_dev,
-                                               pBuffer->rdmaPage,
-                                               pBuffer->rdmaMap);
+                    rdma_fops.dma_unmap_pages(pNTV2Params->pci_dev,
+                                              pBuffer->rdmaPage,
+                                              pBuffer->rdmaMap);
 #endif
                 }
 			}
