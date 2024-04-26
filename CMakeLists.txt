@@ -35,7 +35,6 @@ option(AJANTV2_DISABLE_DEMOS      "Disable building libajantv2 demo apps?"      
 option(AJANTV2_DISABLE_DRIVER     "Disable building libajantv2 driver (Linux-only)?" OFF)
 option(AJANTV2_DISABLE_TESTS      "Disable building libajantv2 tests?"               OFF)
 option(AJANTV2_DISABLE_TOOLS      "Disable building libajantv2 tools?"               OFF)
-option(AJANTV2_DISABLE_PLUGINS    "Disable building libajantv2 plugins?"             OFF)
 
 if (NOT DEFINED LIBAJANTV2_DIR)
     set(LIBAJANTV2_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -63,13 +62,9 @@ endif()
 if(DEFINED AJA_DISABLE_TOOLS)
     set(AJANTV2_DISABLE_TOOLS ${AJA_DISABLE_TOOLS})
 endif()
-if(DEFINED AJA_DISABLE_PLUGINS)
-    set(AJANTV2_DISABLE_PLUGINS ${AJA_DISABLE_PLUGINS})
-endif()
 
 add_subdirectory(ajantv2)
 add_subdirectory(demos)
-add_subdirectory(plugins)
 add_subdirectory(tools)
 add_subdirectory(driver)
 

@@ -1,10 +1,11 @@
 <p align="center">
   <a href="https://www.aja.com/">
-    <img src="aja_logo.svg" alt="AJA Video Systems" width="33%"/>
+    <img src="aja_sdk_icon.svg" alt="AJA Video Systems" width="25%"/>
   </a>
 </p>
 
-# libajantv2
+<h1 style="text-align: center;">libajantv2</h1>
+
 
 This is the open-source SDK for discovering, interrogating and controlling NTV2 professional video I/O devices from AJA Video Systems, Inc. All code herein is licensed under the MIT license.
 
@@ -61,8 +62,6 @@ Demo apps are normally built by default.
 Command-line tools are normally built by default.
 - `AJANTV2_DISABLE_TESTS` — If ON, prevents building the unit test(s).\
 The test programs are normally built by default.
-- `AJANTV2_DISABLE_PLUGINS` — If ON, builds the standard NTV2 plugins (i.e. **nublegacy**, **swdevice**, …).\
-The standard NTV2 plugins are normally built by default.
 
 Please follow the instructions below to build libajantv2 on the supported platform and development environment of your preference.
 

@@ -446,7 +446,7 @@ void CNTV2SupportLogger::ToString (string & outString) const
 
 static inline string HEX0NStr (const uint32_t inNum, const uint16_t inWidth)	{ostringstream	oss;  oss << HEX0N(inNum,inWidth);	return oss.str();}
 static inline string xHEX0NStr(const uint32_t inNum, const uint16_t inWidth)	{ostringstream	oss;  oss << xHEX0N(inNum,inWidth);	 return oss.str();}
-template <class T> string DECStr (const T & inT)								{ostringstream	oss;  oss << DEC(inT);	return oss.str();}
+template <typename T> string DECStr (const T inT)								{ostringstream	oss;  oss << DEC(inT);	return oss.str();}
 
 void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 {
@@ -497,8 +497,8 @@ void CNTV2SupportLogger::FetchInfoLog (ostringstream & oss) const
 			PACKAGE_INFO_STRUCT pkgInfo;
 			if (mDevice.GetPackageInformation(pkgInfo))
 			{
-				AJASystemInfo::append(infoTable, "Package",		DECStr(pkgInfo.packageNumber));
-				AJASystemInfo::append(infoTable, "Build",		DECStr(pkgInfo.buildNumber));
+				AJASystemInfo::append(infoTable, "Package",		pkgInfo.packageNumber);
+				AJASystemInfo::append(infoTable, "Build",		pkgInfo.buildNumber);
 				AJASystemInfo::append(infoTable, "Build Date",	pkgInfo.date);
 				AJASystemInfo::append(infoTable, "Build Time",	pkgInfo.time);
 			}

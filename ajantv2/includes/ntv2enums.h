@@ -2685,6 +2685,7 @@ typedef enum NTV2OutputCrosspointID
 	@brief	Identifies a widget input that potentially can accept a signal emitted
 			from another widget's output (identified by ::NTV2OutputCrosspointID).
 	@see	CNTV2Card::Connect and also \ref ntv2signalrouting
+	@warning	Firmware now depends on the order of these values.
 **/
 typedef enum NTV2InputCrosspointID
 {
