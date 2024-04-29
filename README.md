@@ -62,8 +62,6 @@ Demo apps are normally built by default.
 Command-line tools are normally built by default.
 - `AJANTV2_DISABLE_TESTS` — If ON, prevents building the unit test(s).\
 The test programs are normally built by default.
-- `AJANTV2_DISABLE_PLUGINS` — If ON, builds the standard NTV2 plugins (i.e. **nublegacy**, **swdevice**, …).\
-The standard NTV2 plugins are normally built by default.
 
 Please follow the instructions below to build libajantv2 on the supported platform and development environment of your preference.
 
