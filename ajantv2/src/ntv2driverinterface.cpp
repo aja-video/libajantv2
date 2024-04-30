@@ -852,11 +852,7 @@ bool CNTV2DriverInterface::StreamChannelOps (const NTV2Channel inChannel,
 }
 
 bool CNTV2DriverInterface::StreamBufferOps (const NTV2Channel inChannel,
-<<<<<<< HEAD
-												NTV2Buffer inBuffer,
-=======
 												NTV2Buffer& inBuffer,
->>>>>>> 4734cae1 (stream buffer adding working)
 												ULWord64 bufferCookie,
 												ULWord flags,
 												NTV2StreamBuffer& status)
