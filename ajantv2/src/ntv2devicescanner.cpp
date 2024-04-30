@@ -495,6 +495,77 @@ bool NTV2DeviceInfo::operator == (const NTV2DeviceInfo & second) const
 
 }	//	equality operator
 
+NTV2DeviceInfo::NTV2DeviceInfo()
+{
+	deviceID						= DEVICE_ID_INVALID;
+	deviceIndex						= 0;
+	pciSlot							= 0;
+	deviceSerialNumber				= 0;
+	numVidInputs					= 0;
+	numVidOutputs					= 0;
+	numAnlgVidInputs				= 0;
+	numAnlgVidOutputs				= 0;
+	numHDMIVidInputs				= 0;
+	numHDMIVidOutputs				= 0;
+	numInputConverters				= 0;
+	numOutputConverters				= 0;
+	numUpConverters					= 0;
+	numDownConverters				= 0;
+	downConverterDelay				= 0;
+	isoConvertSupport				= false;
+	rateConvertSupport				= false;
+	dvcproHDSupport					= false;
+	qrezSupport						= false;
+	hdvSupport						= false;
+	quarterExpandSupport			= false;
+	vidProcSupport					= false;
+	dualLinkSupport					= false;
+	colorCorrectionSupport			= false;
+	programmableCSCSupport			= false;
+	rgbAlphaOutputSupport			= false;
+	breakoutBoxSupport				= false;
+	procAmpSupport					= false;
+	has2KSupport					= false;
+	has4KSupport					= false;
+	has8KSupport					= false;
+	has3GLevelConversion			= false;
+	proResSupport					= false;
+	sdi3GSupport					= false;
+	sdi12GSupport					= false;
+	ipSupport						= false;
+	biDirectionalSDI				= false;
+	ltcInSupport					= false;
+	ltcOutSupport					= false;
+	ltcInOnRefPort					= false;
+	stereoOutSupport				= false;
+	stereoInSupport					= false;
+	multiFormat						= false;
+	numAudioStreams					= 0;
+	numAnalogAudioInputChannels		= 0;
+	numAESAudioInputChannels		= 0;
+	numEmbeddedAudioInputChannels	= 0;
+	numHDMIAudioInputChannels		= 0;
+	numAnalogAudioOutputChannels	= 0;
+	numAESAudioOutputChannels		= 0;
+	numEmbeddedAudioOutputChannels	= 0;
+	numHDMIAudioOutputChannels		= 0;
+	numDMAEngines					= 0;
+	numSerialPorts					= 0;
+	pingLED							= 0;
+	deviceIdentifier.clear();
+	audioSampleRateList.clear();
+	audioNumChannelsList.clear();
+	audioBitsPerSampleList.clear();
+	audioInSourceList.clear();
+	audioOutSourceList.clear();
+}
+
+NTV2DeviceInfo::NTV2DeviceInfo (const NTV2DeviceInfo & info)
+{
+	if (&info != this)
+		*this = info;
+}
+
 
 bool CNTV2DeviceScanner::CompareDeviceInfoLists (const NTV2DeviceInfoList & inOldList,
 											const NTV2DeviceInfoList & inNewList,

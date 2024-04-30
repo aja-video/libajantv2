@@ -3667,7 +3667,8 @@ static void ConvertRGBLineTo10BitYCbCr422 (AJA_RGB16BitPixel* lineBuffer, const 
 
 void NTV2TestPatternGen::PrepareForOutput()
 {
-	uint16_t* rgb16BitBuffer = new uint16_t[mNumPixels*mNumLines * 3];
+	NTV2Buffer tmpBuffer (mNumPixels * mNumLines * 3 * sizeof(uint16_t));
+	uint16_t* rgb16BitBuffer = tmpBuffer;
 	uint16_t* rgb12Buffer = mRGBBuffer.data();
 	ULWord* buffer = AsULWordPtr(rgb16BitBuffer);
 	for (uint32_t i(0);	 i < mNumPixels*mNumLines;	i++)

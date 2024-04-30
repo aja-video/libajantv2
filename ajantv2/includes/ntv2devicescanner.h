@@ -125,6 +125,8 @@ typedef struct NTV2DeviceInfo
 
 	AJAExport	bool operator == (const NTV2DeviceInfo & rhs) const;	///< @return	True if I'm equivalent to another ::NTV2DeviceInfo struct.
 	AJAExport	inline bool operator != (const NTV2DeviceInfo & rhs) const	{ return !(*this == rhs); } ///< @return	True if I'm different from another ::NTV2DeviceInfo struct.
+	AJAExport	NTV2DeviceInfo();
+	AJAExport	NTV2DeviceInfo(const NTV2DeviceInfo & info);
 
 } NTV2DeviceInfo;
 
