@@ -55,6 +55,7 @@ class AJAExport DeviceCapabilities
 		inline bool		CanDoCapture (void)						{return dev.IsSupported(kDeviceCanDoCapture);}
 		inline bool		CanDoColorCorrection (void)				{return dev.IsSupported(kDeviceCanDoColorCorrection);}
 		inline bool		CanDoCustomAnc (void)					{return dev.IsSupported(kDeviceCanDoCustomAnc);}
+		inline bool		CanDoCustomHancInsertion (void)			{return dev.IsSupported(kDeviceCanDoCustomHancInsertion);}
 		inline bool		CanDoCustomAux (void)					{return dev.IsSupported(kDeviceCanDoCustomAux);}
 		inline bool		CanDoDSKOpacity (void)					{return dev.IsSupported(kDeviceCanDoDSKOpacity);}
 		inline bool		CanDoDualLink (void)					{return dev.IsSupported(kDeviceCanDoDualLink);}
