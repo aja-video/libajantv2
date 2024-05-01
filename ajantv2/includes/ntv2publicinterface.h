@@ -1376,6 +1376,7 @@ typedef enum
 	//	kRegCanDoStatus
 	kRegMaskCanDoValidXptROM			= BIT(0),
 	kRegMaskCanDoAudioWaitForVBI		= BIT(1),
+	kRegMaskCanDoHancInsertion			= BIT(2),
 
 	//	kRegLUTV2Control
 	kRegMaskLUT1Enable					= BIT(0),
@@ -2459,6 +2460,7 @@ typedef enum
 	//	kRegCanDoStatus
 	kRegShiftCanDoValidXptROM			= 0,
 	kRegShiftCanDoAudioWaitForVBI		= 1,
+	kRegShiftCanDoHancInsertion			= 2,
 
 	//	kRegLUTV2Control
 	kRegShiftLUT1Enable					= 0,
@@ -5607,7 +5609,7 @@ typedef enum
 			#define xHEXN(__x__,__n__)		"0x" << HEXN((__x__),(__n__))
 			#define HEX0N(__x__,__n__)		std::hex << std::uppercase << std::setw(int(__n__)) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ') << std::nouppercase
 			#define xHEX0N(__x__,__n__)		"0x" << HEX0N((__x__),(__n__))
-			#define DEC(__x__)				std::dec << std::right << (__x__)
+			#define DEC(__x__)				std::dec << std::right << (int(__x__))
 			#define DECN(__x__,__n__)		std::dec << std::setw(int(__n__)) << std::right << (__x__)
 			#define DEC0N(__x__,__n__)		std::dec << std::setw(int(__n__)) << std::setfill('0') << std::right << (__x__) << std::dec << std::setfill(' ')
 			#define OCT(__x__)				std::oct << (__x__) << std::dec

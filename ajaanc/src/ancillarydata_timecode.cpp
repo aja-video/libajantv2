@@ -232,9 +232,9 @@ AJAStatus AJAAncillaryData_Timecode::SetTimecode (const AJATimeCode & inTimecode
 }
 
 
-AJAStatus AJAAncillaryData_Timecode::GetTimecode (AJATimeCode& timecode, AJATimeBase& timeBase) const
+AJAStatus AJAAncillaryData_Timecode::GetTimecode (AJATimeCode & outTimecode, const AJATimeBase & inTimeBase) const
 {
-	AJAAncillaryData_Timecode_Format tcFmt = GetTimecodeFormatFromTimeBase(timeBase);
+	AJAAncillaryData_Timecode_Format tcFmt = GetTimecodeFormatFromTimeBase(inTimeBase);
 
 	uint32_t hours, minutes, seconds, frames;
 	GetTime(tcFmt, hours, minutes, seconds, frames);
@@ -242,7 +242,7 @@ AJAStatus AJAAncillaryData_Timecode::GetTimecode (AJATimeCode& timecode, AJATime
 	bool bDropFrame = false;
 	GetDropFrameFlag(bDropFrame, tcFmt);
 
-	timecode.SetHmsf(hours, minutes, seconds, frames, timeBase, bDropFrame);
+	outTimecode.SetHmsf(hours, minutes, seconds, frames, inTimeBase, bDropFrame);
 
 	return AJA_STATUS_SUCCESS;
 }

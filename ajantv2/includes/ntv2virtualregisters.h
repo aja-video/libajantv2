@@ -121,7 +121,7 @@ typedef enum
 	kVRegDSKForegroundFade					= VIRTUALREG_START+127,
 	kVRegCaptureReferenceSelect				= VIRTUALREG_START+128,		// deprecated
 
-	kVReg2XTransferMode						= VIRTUALREG_START+130,		// deprecated
+	kVRegUnfilterAnc						= VIRTUALREG_START+130,
 	kVRegSDIOutput1RGBRange					= VIRTUALREG_START+131,
 	kVRegSDIInput1FormatSelect				= VIRTUALREG_START+132,
 	kVRegSDIInput2FormatSelect				= VIRTUALREG_START+133,

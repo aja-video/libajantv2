@@ -1262,7 +1262,7 @@ private:
 		DEF_REGNAME	(kVRegDSKForegroundMode);
 		DEF_REGNAME	(kVRegDSKForegroundFade);
 		DEF_REGNAME	(kVRegCaptureReferenceSelect);
-		DEF_REGNAME	(kVReg2XTransferMode);
+		DEF_REGNAME	(kVRegUnfilterAnc);
 		DEF_REGNAME	(kVRegSDIOutput1RGBRange);
 		DEF_REGNAME	(kVRegSDIInput1FormatSelect);
 		DEF_REGNAME	(kVRegSDIInput2FormatSelect);

@@ -1531,6 +1531,17 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 																+ GetNumSupported(kDeviceGetNumAnalogVideoInputs)) > 0;	break;
 		case kDeviceCanDoColorCorrection:			outValue = GetNumSupported(kDeviceGetNumLUTs) > 0;					break;	//	Deprecate?
 		case kDeviceCanDoCustomAnc:					outValue = ::NTV2DeviceCanDoCustomAnc(devID);						break;	//	Deprecate?
+
+		//	FOR NOW:	kDeviceCanDoCustomHancInsertion
+		//				REMOVE THIS CASE ONCE ALL KONA5 & CORVID44/12G & KONAX FIRMWARE SETS kRegCanDoStatus BIT(2):
+		case kDeviceCanDoCustomHancInsertion:		outValue =	   devID == DEVICE_ID_IO4KPLUS
+																|| devID == DEVICE_ID_KONA5				|| devID == DEVICE_ID_KONA5_2X4K
+																|| devID == DEVICE_ID_KONA5_8K			|| devID == DEVICE_ID_KONA5_3DLUT
+																|| devID == DEVICE_ID_KONA5_8K_MV_TX	|| devID == DEVICE_ID_CORVID44_8KMK
+																|| devID == DEVICE_ID_CORVID44_8K		|| devID == DEVICE_ID_CORVID44_2X4K
+																|| devID == DEVICE_ID_CORVID44_PLNR		|| devID == DEVICE_ID_KONAX;
+													break;
+
 		case kDeviceCanDoDSKOpacity:				outValue = ::NTV2DeviceCanDoDSKOpacity(devID);						break;	//	Deprecate?
 		case kDeviceCanDoDualLink:					outValue = ::NTV2DeviceCanDoDualLink(devID);						break;	//	Deprecate?
 		case kDeviceCanDoDVCProHD:					outValue = ::NTV2DeviceCanDoDVCProHD(devID);						break;	//	Deprecate?
@@ -1718,12 +1729,14 @@ bool CNTV2DriverInterface::GetRegInfoForBoolParam (const NTV2BoolParamID inParam
 	outRegInfo.MakeInvalid();
 	switch (inParamID)
 	{
-		case kDeviceCanDoAudioMixer:		outRegInfo.Set(kRegGlobalControl2, 0, kRegMaskAudioMixerPresent, kRegShiftAudioMixerPresent);		break;
-		case kDeviceHasMultiRasterWidget:	outRegInfo.Set(kRegMRSupport, 0, kRegMaskMRSupport, kRegShiftMRSupport);							break;
-		case kDeviceHasMicrophoneInput:		outRegInfo.Set(kRegGlobalControl2, 0, kRegMaskIsDNXIV, kRegShiftIsDNXIV);							break;
-		case kDeviceHasBreakoutBoard:		outRegInfo.Set(kRegBOBStatus, 0, kRegMaskBOBAbsent, kRegShiftBOBAbsent);							break;
-		case kDeviceAudioCanWaitForVBI:		outRegInfo.Set(kRegCanDoStatus, 0, kRegMaskCanDoAudioWaitForVBI, kRegShiftCanDoAudioWaitForVBI);	break;
-		case kDeviceHasXptConnectROM:		outRegInfo.Set(kRegCanDoStatus, 0, kRegMaskCanDoValidXptROM, kRegShiftCanDoValidXptROM);			break;
+		case kDeviceCanDoAudioMixer:			outRegInfo.Set(kRegGlobalControl2, 0, kRegMaskAudioMixerPresent, kRegShiftAudioMixerPresent);		break;
+		case kDeviceHasMultiRasterWidget:		outRegInfo.Set(kRegMRSupport, 0, kRegMaskMRSupport, kRegShiftMRSupport);							break;
+		case kDeviceHasMicrophoneInput:			outRegInfo.Set(kRegGlobalControl2, 0, kRegMaskIsDNXIV, kRegShiftIsDNXIV);							break;
+		case kDeviceHasBreakoutBoard:			outRegInfo.Set(kRegBOBStatus, 0, kRegMaskBOBAbsent, kRegShiftBOBAbsent);							break;
+		case kDeviceAudioCanWaitForVBI:			outRegInfo.Set(kRegCanDoStatus, 0, kRegMaskCanDoAudioWaitForVBI, kRegShiftCanDoAudioWaitForVBI);	break;
+		case kDeviceHasXptConnectROM:			outRegInfo.Set(kRegCanDoStatus, 0, kRegMaskCanDoValidXptROM, kRegShiftCanDoValidXptROM);			break;
+//	BIT(2) IN kRegCanDoStatus NOT YET IN ALL KONA5, CORVID44/12G, KONAX FIRMWARE:
+//		case kDeviceCanDoCustomHancInsertion:	outRegInfo.Set(kRegCanDoStatus, 0, kRegMaskCanDoHancInsertion, kRegShiftCanDoHancInsertion);		break;
 		default:	break;
 	}
 	return outRegInfo.IsValid();

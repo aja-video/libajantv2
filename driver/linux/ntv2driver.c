@@ -3021,6 +3021,10 @@ static int __init aja_ntv2_module_init(void)
 	struct class *ntv2_class = NULL;
 #endif
 
+#if defined(AJA_RDMA)
+    request_module_nowait("ajardma");
+#endif    
+
 	for (i = 0; i < NTV2_MAXBOARDS; i++)
 	{
 		NTV2Params[i] = NULL;
