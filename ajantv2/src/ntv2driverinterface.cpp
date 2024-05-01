@@ -1534,7 +1534,8 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 
 		//	FOR NOW:	kDeviceCanDoCustomHancInsertion
 		//				REMOVE THIS CASE ONCE ALL KONA5 & CORVID44/12G & KONAX FIRMWARE SETS kRegCanDoStatus BIT(2):
-		case kDeviceCanDoCustomHancInsertion:		outValue =	   devID == DEVICE_ID_KONA5				|| devID == DEVICE_ID_KONA5_2X4K
+		case kDeviceCanDoCustomHancInsertion:		outValue =	   devID == DEVICE_ID_IO4KPLUS
+																|| devID == DEVICE_ID_KONA5				|| devID == DEVICE_ID_KONA5_2X4K
 																|| devID == DEVICE_ID_KONA5_8K			|| devID == DEVICE_ID_KONA5_3DLUT
 																|| devID == DEVICE_ID_KONA5_8K_MV_TX	|| devID == DEVICE_ID_CORVID44_8KMK
 																|| devID == DEVICE_ID_CORVID44_8K		|| devID == DEVICE_ID_CORVID44_2X4K
