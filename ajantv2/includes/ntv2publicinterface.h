@@ -1376,6 +1376,7 @@ typedef enum
 	//	kRegCanDoStatus
 	kRegMaskCanDoValidXptROM			= BIT(0),
 	kRegMaskCanDoAudioWaitForVBI		= BIT(1),
+	kRegMaskCanDoHancInsertion			= BIT(2),
 
 	//	kRegLUTV2Control
 	kRegMaskLUT1Enable					= BIT(0),
@@ -2459,6 +2460,7 @@ typedef enum
 	//	kRegCanDoStatus
 	kRegShiftCanDoValidXptROM			= 0,
 	kRegShiftCanDoAudioWaitForVBI		= 1,
+	kRegShiftCanDoHancInsertion			= 2,
 
 	//	kRegLUTV2Control
 	kRegShiftLUT1Enable					= 0,
