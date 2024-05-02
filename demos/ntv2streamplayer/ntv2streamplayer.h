@@ -56,7 +56,6 @@ class NTV2StreamPlayer
 	//	Protected Instance Methods
 	protected:
 		virtual AJAStatus	SetUpVideo (void);				///< @brief	Performs all video setup.
-		virtual AJAStatus	SetUpAudio (void);				///< @brief	Performs all audio setup.
 		virtual bool		RouteOutputSignal (void);		///< @brief	Performs all widget/signal routing for playout.
 		virtual AJAStatus	SetUpHostBuffers (void);		///< @brief	Sets up my host video & audio buffers.
 		virtual AJAStatus	SetUpTestPatternBuffers (void);	///< @brief	Creates my test pattern buffers.
@@ -86,7 +85,14 @@ class NTV2StreamPlayer
 
 	//	Private Member Data
 	private:
-		typedef std::vector<NTV2Buffer>	NTV2Buffers;
+		struct FrameData
+		{
+			NTV2Buffer	fVideoBuffer;
+			bool		fDataReady;
+		};
+		typedef std::vector<FrameData> 		FrameDataArray;
+		typedef FrameDataArray::iterator	FrameDataArrayIter;
+		typedef std::vector<NTV2Buffer>		NTV2Buffers;
 
 		PlayerConfig		mConfig;			///< @brief	My operating configuration
 		AJAThread			mConsumerThread;	///< @brief	My playout (consumer) thread object
@@ -96,14 +102,13 @@ class NTV2StreamPlayer
 		NTV2TaskMode		mSavedTaskMode;		///< @brief	Used to restore the previous task mode
 		ULWord				mCurrentFrame;		///< @brief	My current frame number (for generating timecode)
 		ULWord				mCurrentSample;		///< @brief	My current audio sample (tone generator state)
-		double				mToneFrequency;		///< @brief	My current audio tone frequency [Hz]
-		NTV2AudioSystem		mAudioSystem;		///< @brief	The audio system I'm using (if any)
 		NTV2FormatDesc		mFormatDesc;		///< @brief	Describes my video/pixel format
 
 		bool				mGlobalQuit;		///< @brief	Set "true" to gracefully stop
 		AJATimeCodeBurn		mTCBurner;			///< @brief	My timecode burner
-		NTV2FrameDataArray	mHostBuffers;		///< @brief	My host buffers
-		FrameDataRingBuffer	mFrameDataRing;		///< @brief	AJACircularBuffer that controls frame data access by producer/consumer threads
+		FrameDataArray		mHostBuffers;		///< @brief	My host buffers
+		ULWord				mProducerIndex;		///< @brief	Producer frame index
+		ULWord				mConsumerIndex;		///< @brief	Consumer frame index
 		NTV2Buffers			mTestPatRasters;	///< @brief	Pre-rendered test pattern rasters
 
 };	//	NTV2StreamPlayer

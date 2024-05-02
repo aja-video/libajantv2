@@ -34,7 +34,7 @@
 
 //static uint32_t ntv2_debug_mask = 0xffffffff;
 //static uint32_t ntv2_user_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
-static uint32_t ntv2_active_mask = 0xffffffff; //NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
+static uint32_t ntv2_active_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR | NTV2_DEBUG_STREAM_STATE;
 
 static uint32_t queue_next(uint32_t index)
 {
@@ -54,7 +54,7 @@ static bool queue_empty(uint32_t head_index, uint32_t tail_index)
 static bool queue_full(uint32_t head_index, uint32_t tail_index)
 {
     // leave and emtpy slot
-    return head_index == queue_next(queue_next(tail_index));
+    return queue_next(head_index) == tail_index;
 }
 
 static void channel_status(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel)
@@ -64,7 +64,7 @@ static void channel_status(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pCha
         return;
 
     // initialize status
-    pChannel->mStreamState = NTV2_STREAM_CHANNEL_STATE_DISABLED;
+    pChannel->mStreamState = NTV2_STREAM_CHANNEL_STATE_ERROR;
     pChannel->mBufferCookie = 0;
     pChannel->mStartTime = 0;
     pChannel->mStopTime = 0;
@@ -75,50 +75,82 @@ static void channel_status(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pCha
 
     if (ntv2_str != NULL)
     {
-        // get stream state
-        if (ntv2_str->stream_state == ntv2_stream_state_disabled)
-        {
-            pChannel->mStreamState = NTV2_STREAM_CHANNEL_STATE_DISABLED;
-        }
-        else if (ntv2_str->stream_state == ntv2_stream_state_initialized)
-        {
-            pChannel->mStreamState = NTV2_STREAM_CHANNEL_STATE_INITIALIZED;
-        }
-        else if (ntv2_str->stream_state == ntv2_stream_state_idle)
-        {
-            pChannel->mStreamState = NTV2_STREAM_CHANNEL_STATE_IDLE;
-        }
-        else if (ntv2_str->stream_state == ntv2_stream_state_active)
-        {
-            pChannel->mStreamState = NTV2_STREAM_CHANNEL_STATE_ACTIVE;
-        }
-        else
-        {
-            pChannel->mStreamState = NTV2_STREAM_CHANNEL_STATE_ERROR;
-        }
+        // copy stream data
+        ntv2_str->user_channel.mChannel = pChannel->mChannel;
+        ntv2_str->user_channel.mFlags = pChannel->mFlags;
+        *pChannel = ntv2_str->user_channel;
 
-        // get status
-        pChannel->mBufferCookie = 0;
-        pChannel->mStartTime = 0;
-        pChannel->mStopTime = 0;
-        pChannel->mQueueCount = ntv2_str->queue_count;
-        pChannel->mReleaseCount = ntv2_str->release_count;
-        pChannel->mActiveCount = 0;
-        pChannel->mRepeatCount = 0;
+        // get stream state
+        switch (ntv2_str->engine_state)
+        {
+        case ntv2_stream_state_disabled:
+            pChannel->mStreamState = NTV2_STREAM_CHANNEL_STATE_DISABLED;
+            break;
+        case ntv2_stream_state_initialized:
+            pChannel->mStreamState = NTV2_STREAM_CHANNEL_STATE_INITIALIZED;
+            break;
+        case ntv2_stream_state_released:
+            pChannel->mStreamState = NTV2_STREAM_CHANNEL_STATE_RELEASED;
+            break;
+        case ntv2_stream_state_idle:
+            pChannel->mStreamState = NTV2_STREAM_CHANNEL_STATE_IDLE;
+            break;
+        case ntv2_stream_state_active:
+            pChannel->mStreamState = NTV2_STREAM_CHANNEL_STATE_ACTIVE;
+            break;
+        default:
+            pChannel->mStreamState = NTV2_STREAM_CHANNEL_STATE_ERROR;
+            break;
+        }
     }
 }
 
-static void buffer_status(struct ntv2_stream_buffer *ntv2_buf, NTV2StreamBuffer* pBuffer)
+static void buffer_status(struct ntv2_stream_buffer *str_buf, NTV2StreamBuffer* pBuffer)
 {
     // initialize status
     if (pBuffer == NULL)
         return;
 
     // initialize buffer status
+    pBuffer->mBufferState = 0;
+    pBuffer->mQueueTime = 0;
+	pBuffer->mActiveTime = 0;
+	pBuffer->mCompleteTime = 0;
+	pBuffer->mFlushTime = 0;
+	pBuffer->mTransferCount = 0;
 
-    // get buffer status
-    if (ntv2_buf != NULL)
+    if (str_buf != NULL)
     {
+        // copy buffer data
+        str_buf->user_buffer.mChannel = pBuffer->mChannel;
+        str_buf->user_buffer.mFlags = pBuffer->mFlags;        
+        *pBuffer = str_buf->user_buffer;
+
+        // update the buffer state
+        if (str_buf->queued)
+        {
+            pBuffer->mBufferState |= NTV2_STREAM_BUFFER_STATE_QUEUED;
+        }            
+        if (str_buf->linked)
+        {
+            pBuffer->mBufferState |= NTV2_STREAM_BUFFER_STATE_LINKED;
+        }            
+        if (str_buf->completed)
+        {
+            pBuffer->mBufferState |= NTV2_STREAM_BUFFER_STATE_COMPLETED;
+        }            
+        if (str_buf->flushed)
+        {
+            pBuffer->mBufferState |= NTV2_STREAM_BUFFER_STATE_FLUSHED;
+        }            
+        if (str_buf->released)
+        {
+            pBuffer->mBufferState |= NTV2_STREAM_BUFFER_STATE_RELEASED;
+        }
+        if (str_buf->error)
+        {
+            pBuffer->mBufferState |= NTV2_STREAM_BUFFER_STATE_ERROR;
+        }   
     }
 }
 
@@ -185,7 +217,7 @@ void ntv2_stream_close(struct ntv2_stream *ntv2_str)
 Ntv2Status ntv2_stream_configure(struct ntv2_stream *ntv2_str,
                                  struct ntv2_stream_ops *stream_ops,
                                  void* dma_engine,
-                                 bool to_host)
+                                 uint32_t init_advance)
 {
 	if (ntv2_str == NULL)
 		return NTV2_STATUS_BAD_PARAMETER;
@@ -194,7 +226,7 @@ Ntv2Status ntv2_stream_configure(struct ntv2_stream *ntv2_str,
 
     ntv2_str->stream_ops = *stream_ops;
     ntv2_str->dma_engine = dma_engine;
-    ntv2_str->to_host = to_host;
+    ntv2_str->init_advance = init_advance;
 
     // set state
     ntv2_str->stream_state = ntv2_stream_state_disabled;
@@ -272,7 +304,7 @@ Ntv2Status ntv2_stream_channel_initialize(struct ntv2_stream *ntv2_str, void* pO
         channel_status(ntv2_str, pChannel);
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_STATE;
         ntv2SemaphoreUp(&ntv2_str->state_sema);
-        NTV2_MSG_STREAM_ERROR("%s: initialize stream state disabled\n", ntv2_str->name);
+//        NTV2_MSG_STREAM_ERROR("%s: initialize stream state disabled\n", ntv2_str->name);
         return NTV2_STATUS_SUCCESS;
     }
 
@@ -282,7 +314,7 @@ Ntv2Status ntv2_stream_channel_initialize(struct ntv2_stream *ntv2_str, void* pO
         channel_status(ntv2_str, pChannel);
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_OWNER;
         ntv2SemaphoreUp(&ntv2_str->state_sema);
-        NTV2_MSG_STREAM_ERROR("%s: initialize stream not owner\n", ntv2_str->name);
+//        NTV2_MSG_STREAM_ERROR("%s: initialize stream not owner\n", ntv2_str->name);
         return NTV2_STATUS_SUCCESS;
     }
 
@@ -303,15 +335,18 @@ Ntv2Status ntv2_stream_channel_initialize(struct ntv2_stream *ntv2_str, void* pO
     // flush the queue
     for (i = 0; i < NTV2_STREAM_NUM_BUFFERS; i++)
     {
-        status = (ntv2_str->stream_ops.buffer_flush)(ntv2_str, i);
-        if (status != NTV2_STREAM_OPS_SUCCESS)
-        {
-            NTV2_MSG_STREAM_ERROR("%s: initialize buffer failed\n", ntv2_str->name);
-        }            
+        (ntv2_str->stream_ops.buffer_flush)(ntv2_str, i);
     }
 
     // initialize counts
-    ntv2_str->queue_count = 0;
+    ntv2_str->user_channel = *pChannel;
+    ntv2_str->user_channel.mStartTime = 0;
+    ntv2_str->user_channel.mStopTime = 0;
+    ntv2_str->user_channel.mQueueCount = 0;
+    ntv2_str->user_channel.mReleaseCount = 0;
+    ntv2_str->user_channel.mActiveCount = 0;
+    ntv2_str->user_channel.mRepeatCount = 0;
+    ntv2_str->user_channel.mIdleCount = 0;
 
     // release all waiting clients
     for (i = 0; i < NTV2_STREAM_WAIT_CLIENTS; i++)
@@ -361,7 +396,7 @@ Ntv2Status ntv2_stream_channel_release(struct ntv2_stream *ntv2_str, void* pOwne
         channel_status(ntv2_str, pChannel);
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_OWNER;
         ntv2SemaphoreUp(&ntv2_str->state_sema);
-        NTV2_MSG_STREAM_ERROR("%s: release stream not owner\n", ntv2_str->name);
+//        NTV2_MSG_STREAM_ERROR("%s: release stream not owner\n", ntv2_str->name);
         return NTV2_STATUS_SUCCESS;
     }
 
@@ -384,7 +419,7 @@ Ntv2Status ntv2_stream_channel_release(struct ntv2_stream *ntv2_str, void* pOwne
         if (status != NTV2_STREAM_OPS_SUCCESS)
         {
             NTV2_MSG_STREAM_ERROR("%s: release buffer failed\n", ntv2_str->name);
-        }            
+        }        
     }
 
     // release all waiting clients
@@ -398,8 +433,11 @@ Ntv2Status ntv2_stream_channel_release(struct ntv2_stream *ntv2_str, void* pOwne
     ntv2_str->tail_index = 0;
     ntv2_str->active_index = 0;
     ntv2_str->next_index = 0;
-    ntv2_str->queue_count = 0;
-    ntv2_str->release_count = 0;
+    ntv2_str->user_channel.mQueueCount = 0;
+    ntv2_str->user_channel.mReleaseCount = 0;
+    ntv2_str->user_channel.mActiveCount = 0;
+    ntv2_str->user_channel.mRepeatCount = 0;
+    ntv2_str->user_channel.mIdleCount = 0;
 
     // clear the owner
     ntv2_str->owner = NULL;
@@ -416,7 +454,7 @@ Ntv2Status ntv2_stream_channel_release(struct ntv2_stream *ntv2_str, void* pOwne
 Ntv2Status ntv2_stream_channel_start(struct ntv2_stream *ntv2_str, NTV2StreamChannel* pChannel)
 {
     int i;
-    int next;
+//    int next;
     int status;
 
     if ((ntv2_str == NULL) || (pChannel == NULL))
@@ -447,7 +485,7 @@ Ntv2Status ntv2_stream_channel_start(struct ntv2_stream *ntv2_str, NTV2StreamCha
     }
 
     // check for queue empty
-    if (queue_empty(ntv2_str->head_index, ntv2_str->tail_index))
+    if (queue_empty(ntv2_str->active_index, ntv2_str->head_index))
     {
         channel_status(ntv2_str, pChannel);
         pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_RESOURCE;
@@ -456,11 +494,28 @@ Ntv2Status ntv2_stream_channel_start(struct ntv2_stream *ntv2_str, NTV2StreamCha
         return NTV2_STATUS_SUCCESS;
     }
 
-    // check active index linked
-    if (ntv2_str->stream_buffers[ntv2_str->active_index].prepared &&
+    // check active index linked (condition after initialize)
+    if (ntv2_str->stream_buffers[ntv2_str->active_index].queued &&
         !ntv2_str->stream_buffers[ntv2_str->active_index].linked)
     {
-        status = (ntv2_str->stream_ops.buffer_link )(ntv2_str, ntv2_str->active_index, ntv2_str->active_index);
+        // clear counts
+        ntv2_str->user_channel.mActiveCount = 0;
+        ntv2_str->user_channel.mRepeatCount = 0;
+        ntv2_str->user_channel.mIdleCount = 0;
+        ntv2_str->init_count = 0;
+
+        // next same as first to start
+        ntv2_str->next_index = ntv2_str->active_index;
+#if 0
+        // if next is queue link it to the chain
+        next = queue_next(ntv2_str->next_index);
+        if (ntv2_str->stream_buffers[next].queued)
+        {
+            ntv2_str->next_index = next;
+        }
+#endif
+        // link first buffer
+        status = (ntv2_str->stream_ops.buffer_link)(ntv2_str, ntv2_str->active_index, ntv2_str->next_index);
         if (status != NTV2_STREAM_OPS_SUCCESS)
         {
             channel_status(ntv2_str, pChannel);
@@ -468,36 +523,6 @@ Ntv2Status ntv2_stream_channel_start(struct ntv2_stream *ntv2_str, NTV2StreamCha
             ntv2SemaphoreUp(&ntv2_str->state_sema);
             NTV2_MSG_STREAM_ERROR("%s: start stream active link failed\n", ntv2_str->name);
             return status;
-        }
-        ntv2_str->next_index = ntv2_str->active_index;
-
-        // link to next buffer if present
-        if (ntv2_str->active_index != ntv2_str->tail_index)
-        {
-            next = queue_next(ntv2_str->active_index);
-            while (ntv2_str->stream_buffers[next].prepared)
-            {
-                if (!ntv2_str->stream_buffers[next].flushed)
-                {
-                    // advance hardware
-                    status = (ntv2_str->stream_ops.buffer_link)(ntv2_str, ntv2_str->active_index, next);
-                    if (status != NTV2_STREAM_OPS_SUCCESS)
-                    {
-                        channel_status(ntv2_str, pChannel);
-                        pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_RESOURCE;
-                        ntv2SemaphoreUp(&ntv2_str->state_sema);
-                        NTV2_MSG_STREAM_ERROR("%s: channel hardware advance failed\n", ntv2_str->name);
-                        return status;
-                    }
-                    ntv2_str->next_index = next;
-                    break;
-                }
-                if (next == ntv2_str->tail_index)
-                {
-                    break;
-                }
-                next = queue_next(next);
-            }
         }
     }
 
@@ -557,15 +582,29 @@ Ntv2Status ntv2_stream_channel_stop(struct ntv2_stream *ntv2_str, NTV2StreamChan
         return NTV2_STATUS_SUCCESS;
     }
 
-    // check stream state
-    if ((ntv2_str->stream_state != ntv2_stream_state_active) &&
-        (ntv2_str->stream_state != ntv2_stream_state_idle))
+    // check active index linked (condition after initialize)
+    if (ntv2_str->stream_buffers[ntv2_str->active_index].queued &&
+        !ntv2_str->stream_buffers[ntv2_str->active_index].linked)
     {
-        channel_status(ntv2_str, pChannel);
-        pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_STATE;
-        ntv2SemaphoreUp(&ntv2_str->state_sema);
-        NTV2_MSG_STREAM_ERROR("%s: stop stream state not active or idle\n", ntv2_str->name);
-        return NTV2_STATUS_SUCCESS;
+        // clear counts
+        ntv2_str->user_channel.mActiveCount = 0;
+        ntv2_str->user_channel.mRepeatCount = 0;
+        ntv2_str->user_channel.mIdleCount = 0;
+        ntv2_str->init_count = 0;
+
+        // next same as first to start
+        ntv2_str->next_index = ntv2_str->active_index;
+
+        // link first buffer
+        status = (ntv2_str->stream_ops.buffer_link)(ntv2_str, ntv2_str->active_index, ntv2_str->next_index);
+        if (status != NTV2_STREAM_OPS_SUCCESS)
+        {
+            channel_status(ntv2_str, pChannel);
+            pChannel->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_RESOURCE;
+            ntv2SemaphoreUp(&ntv2_str->state_sema);
+            NTV2_MSG_STREAM_ERROR("%s: start stream active link failed\n", ntv2_str->name);
+            return status;
+        }
     }
 
     // stop stream engine
@@ -628,16 +667,18 @@ Ntv2Status ntv2_stream_channel_flush(struct ntv2_stream *ntv2_str, NTV2StreamCha
     // check for queue empty
     if (!queue_empty(ntv2_str->head_index, ntv2_str->tail_index))
     {
-        // try to flush queue from newest (tail) to oldest buffer (head)
-        for (i = ntv2_str->tail_index; i != ntv2_str->head_index; i = queue_prev(i))
+        // try to flush queue from newest (head) to oldest buffer (tail)
+        for (i = ntv2_str->head_index; i != ntv2_str->tail_index; i = queue_prev(i))
         {
             // flush buffer
-            status = (ntv2_str->stream_ops.buffer_flush)(ntv2_str, queue_prev(i));
+            int prev = queue_prev(i);
+            status = (ntv2_str->stream_ops.buffer_flush)(ntv2_str, prev);
             if (status != NTV2_STREAM_OPS_SUCCESS)
             {
                 // done when no more to flush
                 break;
-            }            
+            }
+            ntv2_str->stream_buffers[prev].user_buffer.mFlushTime = ntv2Time100ns();
         }
     }
 
@@ -758,17 +799,33 @@ Ntv2Status ntv2_stream_channel_wait(struct ntv2_stream *ntv2_str, NTV2StreamChan
 Ntv2Status ntv2_stream_channel_advance(struct ntv2_stream *ntv2_str)
 {
     int i;
-    int next;
+    uint32_t next;
     int status;
 
     if ((ntv2_str == NULL) ||
-        (ntv2_str->stream_state == ntv2_stream_state_disabled) ||
-        (ntv2_str->stream_state == ntv2_stream_state_released) ||
-        (ntv2_str->stream_state == ntv2_stream_state_error))
+        ((ntv2_str->stream_state != ntv2_stream_state_active) &&
+         (ntv2_str->stream_state != ntv2_stream_state_idle)))
     {
         return NTV2_STATUS_SUCCESS;
     }
 
+    if ((ntv2_str->engine_state == ntv2_stream_state_initialized) &&
+        (ntv2_str->init_count < ntv2_str->init_advance))
+    {
+        ntv2_str->init_count++;
+        return NTV2_STATUS_SUCCESS;
+    }
+    
+//    NTV2_MSG_STREAM_INFO("%s: channel advance head %2d active %2d next %2d tail %2d\n",
+//                         ntv2_str->name,
+//                         ntv2_str->head_index,
+//                         ntv2_str->active_index,
+//                         ntv2_str->next_index,
+//                         ntv2_str->tail_index);
+
+    // count transfers
+    ntv2_str->stream_buffers[ntv2_str->active_index].user_buffer.mTransferCount++;
+    
     // complete current active
     if (ntv2_str->active_index != ntv2_str->next_index)
     {
@@ -776,24 +833,56 @@ Ntv2Status ntv2_stream_channel_advance(struct ntv2_stream *ntv2_str)
         status = (ntv2_str->stream_ops.buffer_complete)(ntv2_str, ntv2_str->active_index);
         if (status != NTV2_STREAM_OPS_SUCCESS)
         {
-            NTV2_MSG_STREAM_ERROR("%s: channel hardware advance failed\n", ntv2_str->name);
+            NTV2_MSG_STREAM_ERROR("%s: channel advance complete failed\n", ntv2_str->name);
             return status;
-        }            
+        }
+        ntv2_str->stream_buffers[ntv2_str->active_index].user_buffer.mCompleteTime = ntv2Time100ns();
+    }
+
+    // update counts
+    if (ntv2_str->engine_state == ntv2_stream_state_active)
+    {    
+        if (ntv2_str->active_index != ntv2_str->next_index)
+        {
+            // count active transfers
+            ntv2_str->user_channel.mActiveCount++;
+        }
+        else
+        {
+            // count repeated transfers
+            ntv2_str->user_channel.mRepeatCount++;
+        }
+    }
+    else
+    {
+        // count idle transfers
+        ntv2_str->user_channel.mIdleCount++;
     }
 
     // update active index
     ntv2_str->active_index = ntv2_str->next_index;
+    if (ntv2_str->stream_buffers[ntv2_str->active_index].user_buffer.mActiveTime == 0)
+    {
+        ntv2_str->stream_buffers[ntv2_str->active_index].user_buffer.mActiveTime = ntv2Time100ns();
+    }
+    
+    // update engine state
+    status = (ntv2_str->stream_ops.stream_advance)(ntv2_str);
+    if (status != NTV2_STREAM_OPS_SUCCESS)
+    {
+        NTV2_MSG_STREAM_ERROR("%s: channel hardware advance failed\n", ntv2_str->name);
+    }
 
     // update next index
-    if (ntv2_str->stream_state == ntv2_stream_state_active)
+    if (ntv2_str->engine_state == ntv2_stream_state_active)
     {
         next = queue_next(ntv2_str->active_index);
-        while (ntv2_str->stream_buffers[next].prepared &&
-               !ntv2_str->stream_buffers[next].released)
+        while (next != ntv2_str->head_index)
         {
+            // skip flushed buffers
             if (!ntv2_str->stream_buffers[next].flushed)
             {
-                // advance hardware
+                // link the next buffer to the chain
                 status = (ntv2_str->stream_ops.buffer_link)(ntv2_str, ntv2_str->active_index, next);
                 if (status != NTV2_STREAM_OPS_SUCCESS)
                 {
@@ -869,8 +958,8 @@ Ntv2Status ntv2_stream_buffer_queue(struct ntv2_stream *ntv2_str, void* pOwner, 
     }
     
     // get next free buffer slot
-    str_buf = &ntv2_str->stream_buffers[ntv2_str->tail_index];
-    if (str_buf->prepared)
+    str_buf = &ntv2_str->stream_buffers[ntv2_str->head_index];
+    if (str_buf->queued)
     {
         buffer_status(NULL, pBuffer);
         pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_RESOURCE;
@@ -881,7 +970,7 @@ Ntv2Status ntv2_stream_buffer_queue(struct ntv2_stream *ntv2_str, void* pOwner, 
     str_buf->user_buffer = *pBuffer;
 
     // prepare buffer
-    status = (ntv2_str->stream_ops.buffer_prepare)(ntv2_str, ntv2_str->tail_index);
+    status = (ntv2_str->stream_ops.buffer_queue)(ntv2_str, ntv2_str->head_index);
     if (status != NTV2_STREAM_OPS_SUCCESS)
     {
         buffer_status(NULL, pBuffer);
@@ -891,9 +980,12 @@ Ntv2Status ntv2_stream_buffer_queue(struct ntv2_stream *ntv2_str, void* pOwner, 
         return status;
     }
 
+    // update time stamp
+    str_buf->user_buffer.mQueueTime = ntv2Time100ns();
+
     // update queue index
-    ntv2_str->tail_index = queue_next(ntv2_str->tail_index);
-    ntv2_str->queue_count++;
+    ntv2_str->head_index = queue_next(ntv2_str->head_index);
+    ntv2_str->user_channel.mQueueCount++;
 
     // get state
     buffer_status(str_buf, pBuffer);
@@ -944,41 +1036,35 @@ Ntv2Status ntv2_stream_buffer_release(struct ntv2_stream *ntv2_str, void* pOwner
         return NTV2_STATUS_SUCCESS;
     }
 
-    // check stream head for release
-    if (!ntv2_str->stream_buffers[ntv2_str->head_index].prepared ||
-        !ntv2_str->stream_buffers[ntv2_str->head_index].completed ||
-        !ntv2_str->stream_buffers[ntv2_str->head_index].flushed)
+    // check stream tail for release
+    if (!ntv2_str->stream_buffers[ntv2_str->tail_index].queued ||
+        !(ntv2_str->stream_buffers[ntv2_str->tail_index].completed ||
+          ntv2_str->stream_buffers[ntv2_str->tail_index].flushed))
     {
         buffer_status(NULL, pBuffer);
-        pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_RESOURCE;
+        pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_STATE;
         ntv2SemaphoreUp(&ntv2_str->state_sema);
         return NTV2_STATUS_SUCCESS;
     }
 
     // release buffer
-    status = (ntv2_str->stream_ops.buffer_release)(ntv2_str, ntv2_str->head_index);
+    status = (ntv2_str->stream_ops.buffer_release)(ntv2_str, ntv2_str->tail_index);
     if (status != NTV2_STREAM_OPS_SUCCESS)
     {
         buffer_status(NULL, pBuffer);
-        pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_RESOURCE;
+        pBuffer->mStatus = NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_STATE;
         ntv2SemaphoreUp(&ntv2_str->state_sema);
         NTV2_MSG_STREAM_ERROR("%s: buffer release failed\n", ntv2_str->name);
         return status;
     }
 
     // report final status
-    buffer_status(&ntv2_str->stream_buffers[ntv2_str->head_index], pBuffer);
+    buffer_status(&ntv2_str->stream_buffers[ntv2_str->tail_index], pBuffer);
     pBuffer->mStatus = NTV2_STREAM_STATUS_SUCCESS;
 
-    // clear buffer
-    ntv2_str->stream_buffers[ntv2_str->head_index].prepared = false;
-    ntv2_str->stream_buffers[ntv2_str->head_index].linked = false;
-    ntv2_str->stream_buffers[ntv2_str->head_index].completed = false;
-    ntv2_str->stream_buffers[ntv2_str->head_index].flushed = false;
-    ntv2_str->stream_buffers[ntv2_str->head_index].released = true;
-
-    // increment head
-    ntv2_str->head_index = queue_next(ntv2_str->head_index);
+    // increment tail
+    ntv2_str->tail_index = queue_next(ntv2_str->tail_index);
+    ntv2_str->user_channel.mReleaseCount++;
     
     ntv2SemaphoreUp(&ntv2_str->state_sema);
     return NTV2_STATUS_SUCCESS;
@@ -1004,12 +1090,12 @@ Ntv2Status ntv2_stream_buffer_status(struct ntv2_stream *ntv2_str, NTV2StreamBuf
     }
 
     // find the buffer
-    for (i = ntv2_str->head_index; i != ntv2_str->tail_index; i = queue_next(i))
+    for (i = ntv2_str->tail_index; i != ntv2_str->head_index; i = queue_next(i))
     {
         if (pBuffer->mBufferCookie == ntv2_str->stream_buffers[i].user_buffer.mBufferCookie)
             break;
     }
-    if (i == ntv2_str->tail_index)
+    if (i == ntv2_str->head_index)
     {
         // get state
         buffer_status(NULL, pBuffer);

@@ -358,17 +358,6 @@ public:
 											 PCHANNEL_P2P_STRUCT pP2PData);		// p2p target data
 
 	/**
-		@brief		Streaming transfers
-	**/
-	AJA_VIRTUAL bool	DMAStreamStart  (ULWord * inBuffer,
-										 const ULWord inByteCount,
-										 const NTV2Channel inChannel,
-										 const bool inToHost);
-
-	AJA_VIRTUAL bool	DMAStreamStop  (const NTV2Channel inChannel,
-										const bool inToHost);
-
-	/**
 		@brief		Synchronously transfers audio data from a given Audio System's buffer memory on the AJA device to the specified host
 					buffer, blocking until the transfer has completed.
 		@param[in]	inAudioSystem		Specifies the Audio System on the device that is to supply the audio data.
@@ -3470,7 +3459,7 @@ public:
 		@return		The queued buffer status.
     **/
 	AJA_VIRTUAL ULWord	StreamBufferQueue (const NTV2Channel inChannel,
-                                           NTV2Buffer inBuffer,
+                                           NTV2Buffer& inBuffer,
                                            ULWord64 bufferCookie,
                                            NTV2StreamBuffer& status);
 

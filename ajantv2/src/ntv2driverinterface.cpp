@@ -852,13 +852,13 @@ bool CNTV2DriverInterface::StreamChannelOps (const NTV2Channel inChannel,
 }
 
 bool CNTV2DriverInterface::StreamBufferOps (const NTV2Channel inChannel,
-												NTV2Buffer inBuffer,
+												NTV2Buffer& inBuffer,
 												ULWord64 bufferCookie,
 												ULWord flags,
 												NTV2StreamBuffer& status)
 {
 	status.mChannel = inChannel;
-	status.mBuffer = inBuffer;
+	status.mBuffer.Set (inBuffer.GetHostPointer(), inBuffer.GetByteCount());
 	status.mBufferCookie = bufferCookie;
 	status.mFlags = flags;
 
