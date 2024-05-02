@@ -3769,7 +3769,7 @@ static void remove(struct pci_dev *pdev)
 	// TODO: Shut down autocirculate if it is active.
 
     // close all streams
-    for (j = 0; j < NTV2_MAX_DMA_STREAMS; j++)
+    for (i = 0; i < NTV2_MAX_DMA_STREAMS; i++)
     {
         ntv2_stream_close(ntv2pp->m_pDmaStream[i]);
         ntv2pp->m_pDmaStream[i] = NULL;
