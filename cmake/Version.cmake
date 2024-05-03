@@ -82,7 +82,7 @@ if (NTV2_VERSION_BUILD)
     set(AJA_NTV2_SDK_BUILD_NUMBER ${NTV2_VERSION_BUILD})
 endif()
 if (NOT AJA_NTV2_SDK_BUILD_NUMBER)
-    message(WARNING "NTV2 build number not specified. Defaulting to 0.")
+    message(STATUS "NTV2 build number not specified. Defaulting to 0.")
     set(AJA_NTV2_SDK_BUILD_NUMBER "0")
 endif()
 
