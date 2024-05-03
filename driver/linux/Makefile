@@ -152,8 +152,7 @@ DRIVERSRCS = ../ntv2anc.c \
 			../ntv2xpt.c
 
 DRIVERLINMK = Makefile \
-				nvidia-ko-to-module-symvers \
-				ntv2modprobe
+				nvidia-ko-to-module-symvers
 
 DRIVERLININCS = buildenv.h \
 				driverdbg.h \

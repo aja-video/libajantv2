@@ -246,6 +246,7 @@ void InitInterruptBitLUT(void);
 
 static NTV2PrivateParams * NTV2Params[NTV2_MAXBOARDS];
 static NTV2ModulePrivateParams NTV2ModuleParams;
+static spinlock_t NTV2ParamsLock;
 
 // the uart driver
 static struct uart_driver ntv2_uart_driver;
@@ -492,7 +493,9 @@ VirtualDataNode *gVirtualDataHead = NULL;
 int
 allocNTV2DeviceNumber(unsigned int* pDeviceNumber)
 {
-    unsigned int deviceNumber;
+    NTV2PrivateParams* pParams = NULL;
+    unsigned int deviceNumber = 0;
+    unsigned long flags;
     int i;
 
     if (pDeviceNumber == NULL)
@@ -503,32 +506,37 @@ allocNTV2DeviceNumber(unsigned int* pDeviceNumber)
         getNTV2ModuleParams()->name = "Unknown OEM board type";
     }
 
+    pParams = vmalloc(sizeof(NTV2PrivateParams));
+    if (pParams == NULL)
+    {
+        MSG("%s: allocation of device state failed\n",
+            getNTV2ModuleParams()->name);
+        return -ENOMEM;
+    }
+    
+	ntv2_spin_lock_irqsave(&NTV2ParamsLock, flags);
     for (i = 0; i < NTV2_MAXBOARDS; i++)
     {
         if (NTV2Params[i] == NULL)
             break;           
     }
-
+    
     if (i == NTV2_MAXBOARDS)
     {
+        ntv2_spin_unlock_irqrestore(&NTV2ParamsLock, flags);
+        vfree(pParams);
         MSG("%s: allocation of device state exceeds max boards (%d)\n",
             getNTV2ModuleParams()->name, NTV2_MAXBOARDS);
         return -ENOMEM;
     }
 
     deviceNumber = i;
-    
-    NTV2Params[deviceNumber] = vmalloc(sizeof(NTV2PrivateParams));
-    if (NTV2Params[deviceNumber] == NULL)
-    {
-        MSG("%s: allocation of device state failed for device %d\n",
-            getNTV2ModuleParams()->name, deviceNumber);
-        return -ENOMEM;
-    }
+    NTV2Params[deviceNumber] = pParams;
+    getNTV2ModuleParams()->numNTV2Devices++;
+    ntv2_spin_unlock_irqrestore(&NTV2ParamsLock, flags);
     
     memset(NTV2Params[deviceNumber], 0, sizeof(NTV2PrivateParams));
     NTV2Params[deviceNumber]->deviceNumber = deviceNumber;
-    getNTV2ModuleParams()->numNTV2Devices++;
     
     *pDeviceNumber = deviceNumber;
 
@@ -538,6 +546,8 @@ allocNTV2DeviceNumber(unsigned int* pDeviceNumber)
 void
 freeNTV2DeviceNumber(unsigned int deviceNumber)
 {
+    unsigned long flags;
+
     if (getNTV2ModuleParams()->name == NULL)
     {
         getNTV2ModuleParams()->name = "Unknown OEM board type";
@@ -559,9 +569,11 @@ freeNTV2DeviceNumber(unsigned int deviceNumber)
 
     memset(NTV2Params[deviceNumber], 0, sizeof(NTV2PrivateParams));
     vfree(NTV2Params[deviceNumber]);
-    NTV2Params[deviceNumber] = NULL;
 
+	ntv2_spin_lock_irqsave(&NTV2ParamsLock, flags);
+    NTV2Params[deviceNumber] = NULL;
     getNTV2ModuleParams()->numNTV2Devices--;
+    ntv2_spin_unlock_irqrestore(&NTV2ParamsLock, flags);
 }    
 
 NTV2PrivateParams *
@@ -569,7 +581,7 @@ getNTV2Params(unsigned int deviceNumber)
 {
     if (getNTV2ModuleParams()->name == NULL)
 	{
-			getNTV2ModuleParams()->name = "Unknown OEM board type";
+        getNTV2ModuleParams()->name = "Unknown OEM board type";
     }
 
 	if (deviceNumber >= NTV2_MAXBOARDS)
@@ -3002,14 +3014,11 @@ static int __init aja_ntv2_module_init(void)
 	struct class *ntv2_class = NULL;
 #endif
 
-#if defined(AJA_RDMA)
-    request_module_nowait("ajardma");
-#endif    
-
 	for (i = 0; i < NTV2_MAXBOARDS; i++)
 	{
 		NTV2Params[i] = NULL;
 	}
+    spin_lock_init(&NTV2ParamsLock);
 
 	memset(getNTV2ModuleParams(), 0, sizeof(*getNTV2ModuleParams()));
 
@@ -3044,7 +3053,7 @@ static int __init aja_ntv2_module_init(void)
 	if (res < 0) {
 		MSG("%s: *error* uart_register_driver failed code %d\n",
 			getNTV2ModuleParams()->name, res);
-		goto fail;
+		goto fail_uart;
 	}
 	getNTV2ModuleParams()->uart_driver = &ntv2_uart_driver;
 	getNTV2ModuleParams()->uart_max = NTV2_MAXBOARDS;
@@ -3062,7 +3071,7 @@ static int __init aja_ntv2_module_init(void)
 		res = PTR_ERR(ntv2_class);
 		MSG("%s: Failed to create device class; code %d\n",
 			getNTV2ModuleParams()->name, res);
-		goto fail;
+		goto fail_class;
 	}
 	ntv2_class->dev_uevent = aja_ntv2_dev_uevent;
 	getNTV2ModuleParams()->class = ntv2_class;
@@ -3078,7 +3087,7 @@ static int __init aja_ntv2_module_init(void)
 	{
 		MSG("%s: Can't register device with kernel\n",
 			getNTV2ModuleParams()->name);
-		goto fail;
+		goto fail_chr;
 	}
 
 	getNTV2ModuleParams()->NTV2Major = res;
@@ -3089,12 +3098,8 @@ static int __init aja_ntv2_module_init(void)
 	if (res != 0) {
 		MSG("%s: NTV2_LINUX_PCI_REG_DRIVER_FUNC failed with code %d",
 			getNTV2ModuleParams()->name, res);
-		goto fail;
+		goto fail_pci;
 	}
-
-	// Set all autocirculators to disabled
-	for (i = 0; i < getNTV2ModuleParams()->numNTV2Devices; i++)
-		AutoCirculateInitialize(i);
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,6,0))
@@ -3119,17 +3124,22 @@ static int __init aja_ntv2_module_init(void)
 	// Ask to be notified before the system reboots
 	register_reboot_notifier(&reboot_notifier);
 
+#if defined(AJA_RDMA)
+    request_module_nowait("ajardma");
+#endif    
+
 	MSG("%s: module init end\n", getNTV2ModuleParams()->name);
 
 	return 0;
 
-fail:
+fail_pci:
 	if (getNTV2ModuleParams()->NTV2Major)
 	{
 		unregister_chrdev(getNTV2ModuleParams()->NTV2Major,
 			getNTV2ModuleParams()->driverName);
 	}
 
+fail_chr:
 #if defined(AJA_CREATE_DEVICE_NODES)
 	if (getNTV2ModuleParams()->class)
 	{
@@ -3137,11 +3147,13 @@ fail:
 	}
 #endif
 
+fail_class:
 	if (getNTV2ModuleParams()->uart_driver)
 	{
 		uart_unregister_driver(getNTV2ModuleParams()->uart_driver);
 	}
 
+fail_uart:
 	return res;
 }
 
@@ -3403,6 +3415,9 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
 
 	// initialize dma
 	dmaInit(deviceNumber);
+
+	// initialize autocirculate
+    AutoCirculateInitialize(deviceNumber);
 
     // inialize streams
     for (i = 0; i < ntv2pp->_dmaNumEngines; i++)
@@ -3764,9 +3779,18 @@ static void remove(struct pci_dev *pdev)
     dev_t dev;
 #endif
 
+#if defined(AJA_HEVC)
+	if (pdev->vendor == HEVC_VENDOR_ID)
+	{
+        MSG("%s: ignore HEVC device remove\n", getNTV2ModuleParams()->name);
+		return;
+	}
+#endif
+
 	MSG("%s: device remove\n", ntv2pp->name);
 
-	// TODO: Shut down autocirculate if it is active.
+	// shut down autocirculate
+    AutoCirculateInitialize(deviceNumber);
 
     // close all streams
     for (i = 0; i < NTV2_MAX_DMA_STREAMS; i++)
@@ -3885,11 +3909,10 @@ static void remove(struct pci_dev *pdev)
 	{
 		pci_disable_msi(ntv2pp->pci_dev);
 	}
-#if 1
+
 	pci_resources_release(ntv2pp);
 
     freeNTV2DeviceNumber(deviceNumber);
-#endif
 }
 
 /* Function to clean up and unload the module */
@@ -3897,25 +3920,24 @@ static void __exit aja_ntv2_module_cleanup(void)
 {
 	MSG("%s: module exit begin - %d devices\n", getNTV2ModuleParams()->name, getNTV2ModuleParams()->numNTV2Devices);
 	
-	unregister_reboot_notifier(&reboot_notifier);
-
 #if defined(AJA_HEVC)
 	hevc_module_cleanup();
 #endif
 
-	unregister_chrdev( getNTV2ModuleParams()->NTV2Major, getNTV2ModuleParams()->driverName);
+	unregister_reboot_notifier(&reboot_notifier);
+
 	remove_proc_entry("driver/aja", NULL /* parent dir */);
 
 	MSG("%s: unregister the pci driver\n", getNTV2ModuleParams()->name);
-
    	pci_unregister_driver(&ntv2_driver);
 
+	unregister_chrdev( getNTV2ModuleParams()->NTV2Major, getNTV2ModuleParams()->driverName);
+    
 #if defined(AJA_CREATE_DEVICE_NODES)
 	class_destroy(getNTV2ModuleParams()->class);
 #endif
 
 	MSG("%s: unregister the uart driver\n", getNTV2ModuleParams()->name);
-
 	uart_unregister_driver(&ntv2_uart_driver);
 
     // clean up any VirtualData nodes that were allocated

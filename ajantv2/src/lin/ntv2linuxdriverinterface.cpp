@@ -66,11 +66,10 @@ bool CNTV2LinuxDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 	static const string kAJANTV2("ajantv2");
 	NTV2_ASSERT(!IsRemote());
 	NTV2_ASSERT(!IsOpen());
-    UWord maxCount(64);
 
     string boardStr;
     UWord count = 0;
-    for (UWord index = 0; index < maxCount; index++)
+    for (UWord index = 0; index < NTV2_MAXBOARDS; index++)
     {
         ostringstream oss;	oss << "/dev/" << kAJANTV2 << DEC(index);
         boardStr = oss.str();
