@@ -76,7 +76,7 @@ AJAStatus AJAPnpImpl::Uninstall(void)
 // static - translate a PCIDeviceNotifierCallback/message to a AJAPnpCallback/message
 void PCIDeviceNotifierCallback	(unsigned long message, void *refcon)
 {
-	PNPLOGS(AJA_DebugSeverity_Debug, "msg=" << HEX8(message));
+//	PNPLOGS(AJA_DebugSeverity_Debug, "msg=" << HEX8(message));
 
 	AJAPnpImpl* pnpObj = (AJAPnpImpl*) refcon;
 	if (pnpObj == NULL)
