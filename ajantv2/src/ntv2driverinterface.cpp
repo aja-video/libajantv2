@@ -664,6 +664,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 		case DEVICE_ID_IOX3:						bitFileInfo.bitFileType = NTV2_BITFILE_IOX3_MAIN;					break;
 		case DEVICE_ID_KONAX:						bitFileInfo.bitFileType = NTV2_BITFILE_KONAX;						break;
 		case DEVICE_ID_KONAXM:						bitFileInfo.bitFileType = NTV2_BITFILE_KONAXM;						break;
+        case DEVICE_ID_KONAIP_25G:					bitFileInfo.bitFileType = NTV2_BITFILE_KONAIP_25G;					break;
 		case DEVICE_ID_NOTFOUND:					bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;				break;
 	#if !defined (_DEBUG)
 		default:					break;
@@ -1539,7 +1540,8 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 																|| devID == DEVICE_ID_KONA5_8K			|| devID == DEVICE_ID_KONA5_3DLUT
 																|| devID == DEVICE_ID_KONA5_8K_MV_TX	|| devID == DEVICE_ID_CORVID44_8KMK
 																|| devID == DEVICE_ID_CORVID44_8K		|| devID == DEVICE_ID_CORVID44_2X4K
-																|| devID == DEVICE_ID_CORVID44_PLNR		|| devID == DEVICE_ID_KONAX;
+																|| devID == DEVICE_ID_CORVID44_PLNR		|| devID == DEVICE_ID_KONAX
+                                                                || devID == DEVICE_ID_KONAIP_25G;
 													break;
 
 		case kDeviceCanDoDSKOpacity:				outValue = ::NTV2DeviceCanDoDSKOpacity(devID);						break;	//	Deprecate?
@@ -1581,8 +1583,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceHasBiDirectionalSDI:			outValue = ::NTV2DeviceHasBiDirectionalSDI(devID);					break;
 		case kDeviceHasColorSpaceConverterOnChannel2:	outValue = ::NTV2DeviceCanDoWidget(devID, NTV2_WgtCSC2);		break;	//	Deprecate?
 		case kDeviceHasIDSwitch:					outValue = ::NTV2DeviceCanDoIDSwitch(devID);						break;
-		case kDeviceHasNTV4FrameStores:				outValue =		(devID == DEVICE_ID_KONAX)
-																||	(devID == DEVICE_ID_KONAXM) ? 1 : 0;				break;
+        case kDeviceHasNTV4FrameStores:				outValue = ::NTV2DeviceHasNTV4FrameStores(devID);                   break;
 		case kDeviceHasNWL:							outValue = ::NTV2DeviceHasNWL(devID);								break;
 		case kDeviceHasPCIeGen2:					outValue = ::NTV2DeviceHasPCIeGen2(devID);							break;
 		case kDeviceHasRetailSupport:				outValue = ::NTV2DeviceHasRetailSupport(devID);						break;

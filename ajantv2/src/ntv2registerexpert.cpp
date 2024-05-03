@@ -1931,7 +1931,7 @@ public:
 			result.insert(ULWord(kRegMRSupport));
 		}
 
-		if (inDeviceID == DEVICE_ID_KONAX  ||  inDeviceID == DEVICE_ID_KONAXM)
+		if (NTV2DeviceHasNTV4FrameStores(inDeviceID))
 		{
 			const NTV2RegNumSet ntv4FSRegs (GetRegistersForClass(kRegClass_NTV4FrameStore));
 			const UWord numFrameStores (::NTV2DeviceGetNumFrameStores(inDeviceID));

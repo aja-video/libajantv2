@@ -76,6 +76,7 @@ typedef enum
 	DEVICE_ID_KONALHIDVI				= 0x10266401,	///< @brief See \ref konalhi
 	DEVICE_ID_KONAX						= 0X10958501,	///< @brief See \ref konax
 	DEVICE_ID_KONAXM					= 0X10958500,	///< @brief See \ref konaxm
+    DEVICE_ID_KONAIP_25G				= 0X11001400,	///< @brief See \ref konaip25g
 	DEVICE_ID_SOJI_3DLUT				= 0x10922400,
 	DEVICE_ID_SOJI_OE1					= 0x10922401,
 	DEVICE_ID_SOJI_OE2					= 0x10922402,
@@ -3361,6 +3362,7 @@ typedef enum
 	NTV2_BITFILE_SOJI_DIAGS_MAIN	= 90,
 	NTV2_BITFILE_KONAX				= 91,
 	NTV2_BITFILE_KONAXM				= 92,
+    NTV2_BITFILE_KONAIP_25G			= 923
 	NTV2_BITFILE_NUMBITFILETYPES
 } NTV2BitfileType;
 

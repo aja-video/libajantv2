@@ -4731,6 +4731,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONALHIDVI:				return inForRetailDisplay ? "KONA LHi DVI"				: "KonaLHiDVI";
 		case DEVICE_ID_KONAX:					return inForRetailDisplay ? "KONA X"					: "KonaX";
 		case DEVICE_ID_KONAXM:					return inForRetailDisplay ? "KONA XM"					: "KonaXM";
+		case DEVICE_ID_KONAIP_25G:				return "KonaIP-25G";
 		case DEVICE_ID_SOJI_3DLUT:				return "SOJI-3DLUT";
 		case DEVICE_ID_SOJI_OE1:				return "SOJI-OE1";
 		case DEVICE_ID_SOJI_OE2:				return "SOJI-OE2";
@@ -7473,6 +7474,7 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 	case DEVICE_ID_IOX3:						return "iox3.bit";
 	case DEVICE_ID_KONAX:						return "konax.bit";
 	case DEVICE_ID_KONAXM:						return "konaxm.bit";
+	case DEVICE_ID_KONAIP_25G:					return "konaip_25g.bit";
 	default:									return "";
 	}
 	return "";
@@ -7515,7 +7517,7 @@ NTV2DeviceID NTV2GetDeviceIDFromBitfileName (const string & inBitfileName)
 													DEVICE_ID_KONA1,		DEVICE_ID_KONAHDMI, DEVICE_ID_KONA5,		DEVICE_ID_KONA5_8KMK,DEVICE_ID_CORVID44_8KMK,
 													DEVICE_ID_KONA5_8K,		DEVICE_ID_CORVID44_8K,	DEVICE_ID_TTAP_PRO, DEVICE_ID_KONA5_2X4K,	DEVICE_ID_CORVID44_2X4K,
 													DEVICE_ID_CORVID44_PLNR,DEVICE_ID_IOX3,		DEVICE_ID_KONA5_8K_MV_TX, DEVICE_ID_KONAX, DEVICE_ID_KONAXM,
-													DEVICE_ID_NOTFOUND };
+													DEVICE_ID_KONAIP_25G, DEVICE_ID_NOTFOUND };
 		for (unsigned ndx (0);	ndx < sizeof (sDeviceIDs) / sizeof (NTV2DeviceID);	ndx++)
 			sBitfileName2DeviceID [::NTV2GetBitfileName (sDeviceIDs [ndx])] = sDeviceIDs [ndx];
 	}
@@ -7615,6 +7617,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_TTAP,
 														DEVICE_ID_KONAX,
 														DEVICE_ID_KONAXM,
+														DEVICE_ID_KONAIP_25G,
 														DEVICE_ID_NOTFOUND	};
 	if (inKinds == NTV2_DEVICEKIND_NONE)
 		return NTV2DeviceIDSet();

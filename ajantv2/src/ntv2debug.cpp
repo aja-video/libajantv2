@@ -84,6 +84,7 @@ const char * NTV2DeviceIDString (const NTV2DeviceID id)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_IOX3)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_KONAX)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_KONAXM)
+        NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_KONAIP_25G)
 		NTV2DEBUG_ENUM_CASE_RETURN_STR(DEVICE_ID_NOTFOUND)
 	}
 	return "";
@@ -162,6 +163,7 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
 		case DEVICE_ID_IOX3:						return "IoX3";
 		case DEVICE_ID_KONAX:						return "KonaX";
 		case DEVICE_ID_KONAXM:						return "KonaXM";
+        case DEVICE_ID_KONAIP_25G:						return "KonaIP_25G";
 		case DEVICE_ID_NOTFOUND:					return "Unknown";
 	}
 
