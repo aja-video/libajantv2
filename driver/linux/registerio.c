@@ -2336,6 +2336,7 @@ bool StartXlnxDma(ULWord deviceNumber, bool bC2H, int index)
 	value |= kRegMaskXlnxIntReadError;
 	value |= kRegMaskXlnxIntMagicStop;
 	value |= kRegMaskXlnxIntAlignMismatch;
+    value |= kRegMaskXlnxIntDescComplete;
 	value |= kRegMaskXlnxIntDescStop;
 	WriteXlnxRegister(deviceNumber, base + kRegXlnxChannelInterruptEnable, value);
 
@@ -2345,6 +2346,7 @@ bool StartXlnxDma(ULWord deviceNumber, bool bC2H, int index)
 	value |= kRegMaskXlnxIntReadError;
 	value |= kRegMaskXlnxIntMagicStop;
 	value |= kRegMaskXlnxIntAlignMismatch;
+    value |= kRegMaskXlnxIntDescComplete;
 	value |= kRegMaskXlnxIntDescStop;
 	WriteXlnxRegister(deviceNumber, base + kRegXlnxChannelControl, value);
 

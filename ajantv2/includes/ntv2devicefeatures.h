@@ -147,6 +147,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoAESAudioOut,					///< @brief	True if device has any AES audio output channels	(New in SDK 17.1)
 	kDeviceHasIDSwitch,							///< @brief	True if device has a mechanical identification switch.	(New in SDK 17.1)
 	kDeviceCanDoHDMIQuadRasterConversion,		///< @brief	True if HDMI in/out supports square-division (quad) raster conversion.	(New in SDK 17.1)
+	kDeviceCanDoCustomHancInsertion,			///< @brief	True if device supports custom HANC packet insertion.	(New in SDK 17.1)
 	kNTV2BoolParam_LAST,
 	kNTV2BoolParam_COUNT	= kNTV2BoolParam_LAST-kNTV2BoolParam_FIRST,
 	kDeviceCanDo_INVALID	= kNTV2BoolParam_LAST

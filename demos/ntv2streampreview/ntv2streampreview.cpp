@@ -55,8 +55,6 @@ NTV2StreamPreview::NTV2StreamPreview (QWidget * parent, Qt::WindowFlags flags)
 	mInputButtonGroup->button (NTV2_INPUTSOURCE_INVALID)->setChecked (true);
 
 	//	Checkboxes...
-	mWithAudioCheckBox = new QCheckBox ("With Audio", this);
-    mCheckFor4kCheckBox = new QCheckBox ("Check for 4K Input", this);
     mCheckFixedReference = new QCheckBox ("Fixed Reference", this);
 
  	mVideoPreviewWidget = new AJAPreviewWidget (this);
@@ -71,58 +69,18 @@ NTV2StreamPreview::NTV2StreamPreview (QWidget * parent, Qt::WindowFlags flags)
 	layout->addWidget (mBoardChoiceCombo);
 	layout->addWidget (mVideoPreviewWidget);
 
-	#if defined (INCLUDE_AJACC)
-		QVBoxLayout *	bottomLeftLayout	(new QVBoxLayout);
-		bottomLeftLayout->setContentsMargins (0, 0, 0, 0);
-
-		for (QButtonIterator iter (mInputButtonGroup->buttons());  iter.hasNext ();  )
-			bottomLeftLayout->addWidget (iter.next());
-
-		bottomLeftLayout->addWidget (mWithAudioCheckBox);
-		bottomLeftLayout->addWidget (mCheckFor4kCheckBox);
-		bottomLeftLayout->addStretch (1);
-
-		QVBoxLayout *	bottomRightLayout	(new QVBoxLayout);
-		bottomRightLayout->setContentsMargins (0, 0, 0, 0);
-
-		mCaptionButtonGroup = new QButtonGroup ();
-		mCaptionButtonGroup->addButton (new QRadioButton (tr ("CC Off")), NTV2_CC608_ChannelInvalid);
-		for (unsigned ndx (1);  ndx <= 8;  ndx++)
-			mCaptionButtonGroup->addButton (new QRadioButton (QString ("%1%2").arg (string (ndx < 5 ? "CC" : "TXT").c_str(), string (1, char ((ndx < 5 ? ndx : ndx - 4) + '0')).c_str())),
-											NTV2Line21Channel (ndx-1));
-		mCaptionButtonGroup->button (NTV2_CC608_ChannelInvalid)->setChecked (true);
-
-		for (QButtonIterator iter (mCaptionButtonGroup->buttons());  iter.hasNext ();  )
-			bottomRightLayout->addWidget (iter.next());
-
-		QHBoxLayout *	bottomLayout		(new QHBoxLayout);
-		bottomLayout->setContentsMargins (0, 0, 0, 0);
-
-		bottomLayout->addLayout (bottomLeftLayout);
-		bottomLayout->addLayout (bottomRightLayout);
-		layout->addLayout (bottomLayout);
-	#else	//	!defined (INCLUDE_AJACC)
-		for (QButtonIterator iter (mInputButtonGroup->buttons());  iter.hasNext ();  )
-			layout->addWidget (iter.next());
-		layout->addWidget (mWithAudioCheckBox);
-        layout->addWidget (mCheckFor4kCheckBox);
-        layout->addWidget (mCheckFixedReference);
-	#endif	//	!defined (INCLUDE_AJACC)
+	for (QButtonIterator iter (mInputButtonGroup->buttons());  iter.hasNext ();  )
+		layout->addWidget (iter.next());
+    layout->addWidget (mCheckFixedReference);
 
 	layout->addStretch (1);
 	setLayout (layout);
 
     QObject::connect (mBoardChoiceCombo,	SIGNAL (currentIndexChanged (int)),				this,					SLOT (RequestDeviceChange (const int)));
 	QObject::connect (mInputButtonGroup,	SIGNAL (buttonReleased (int)),					this,					SLOT (inputChanged (int)));
-	QObject::connect (mWithAudioCheckBox,	SIGNAL (stateChanged (int)),					this,					SLOT (withAudioChanged (int)));
     QObject::connect (mCheckFixedReference,	SIGNAL (toggled (bool)),                        this,					SLOT (fixedRefChanged (bool)));
-	QObject::connect (mCheckFor4kCheckBox,	SIGNAL (stateChanged (int)),					this,					SLOT (checkFor4kChanged (int)));
 			 connect (mStreamGrabber,		SIGNAL (newFrame (const QImage &, bool)),		mVideoPreviewWidget,	SLOT (updateFrame (const QImage &, bool)));
 			 connect (mStreamGrabber,		SIGNAL (newStatusString (const QString)),		mVideoPreviewWidget,	SLOT (updateStatusString (const QString)));
-	#if defined (INCLUDE_AJACC)
-			 connect (mFrameGrabber,		SIGNAL (captionScreenChanged (const ushort *)),	mVideoPreviewWidget,	SLOT (updateCaptionScreen (const ushort *)));
-	QObject::connect (mCaptionButtonGroup,	SIGNAL (buttonReleased (int)),					mFrameGrabber,			SLOT (changeCaptionChannel (int)));
-	#endif	//	defined (INCLUDE_AJACC)
 
 	mStreamGrabber->SetInputSource (NTV2_NUM_INPUTSOURCES);
 	mStreamGrabber->start ();
@@ -171,25 +129,11 @@ void NTV2StreamPreview::inputChanged (int inputRadioButtonId)
 }	//	inputChanged
 
 
-void NTV2StreamPreview::withAudioChanged (int state)
-{
-	mStreamGrabber->SetWithAudio (state == Qt::Checked ? true : false);
-
-}	//	withAudioChanged
-
-
 void NTV2StreamPreview::fixedRefChanged (bool checked)
 {
     mStreamGrabber->SetFixedReference(checked);
 
-}
-
-
-void NTV2StreamPreview::checkFor4kChanged (int state)
-{
-	mStreamGrabber->CheckFor4kInput (state == Qt::Checked ? true : false);
-
-}	//	checkFor4kChanged
+}	//	fixedRefChanged
 
 
 void NTV2StreamPreview::updateInputs (void)
@@ -210,13 +154,6 @@ void NTV2StreamPreview::updateInputs (void)
 				pButton->setEnabled (hasInputSource);
 			}
 		}
-
-		#if defined (INCLUDE_AJACC)
-			const bool hasCustomAnc (mDevice.features().CanDoCustomAnc());
-			for (QButtonIterator iter(mCaptionButtonGroup->buttons());  iter.hasNext();  )
-				iter.next()->setEnabled (hasCustomAnc);
-		#endif	//	defined (INCLUDE_AJACC)
-
 	}	//	if board opened ok
 
 }	//	updateInputs

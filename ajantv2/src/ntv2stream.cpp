@@ -65,7 +65,7 @@ ULWord CNTV2Card::StreamChannelWait (const NTV2Channel inChannel,
 }
 
 ULWord CNTV2Card::StreamBufferQueue (const NTV2Channel inChannel,
-										NTV2Buffer inBuffer,
+										NTV2Buffer& inBuffer,
 										ULWord64 bufferCookie,
 										NTV2StreamBuffer& status)
 {
@@ -77,7 +77,8 @@ ULWord CNTV2Card::StreamBufferQueue (const NTV2Channel inChannel,
 ULWord CNTV2Card::StreamBufferRelease (const NTV2Channel inChannel,
 										NTV2StreamBuffer& status)
 {
-	if (!StreamBufferOps(inChannel, NTV2Buffer(), 0, NTV2_STREAM_BUFFER_RELEASE, status))
+	NTV2_POINTER buffer;
+	if (!StreamBufferOps(inChannel, buffer, 0, NTV2_STREAM_BUFFER_RELEASE, status))
 		return NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_MESSAGE;
 	return status.mStatus;
 }
@@ -86,7 +87,8 @@ ULWord CNTV2Card::StreamBufferStatus (const NTV2Channel inChannel,
 										ULWord64 bufferCookie,
 										NTV2StreamBuffer& status)
 {
-	if (!StreamBufferOps(inChannel, NTV2Buffer(), bufferCookie, NTV2_STREAM_BUFFER_STATUS, status))
+	NTV2_POINTER buffer;
+	if (!StreamBufferOps(inChannel, buffer, bufferCookie, NTV2_STREAM_BUFFER_STATUS, status))
 		return NTV2_STREAM_STATUS_FAIL | NTV2_STREAM_STATUS_MESSAGE;
 	return status.mStatus;
 }

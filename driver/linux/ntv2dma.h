@@ -26,7 +26,7 @@ struct ntv2_stream_buffer;
 #define DMA_TRANSFERCOUNT_64     			0x10000000
 #define DMA_TRANSFERCOUNT_TOHOST 			0x80000000
 #define DMA_TRANSFERCOUNT_BYTES  			4
-#define DMA_DESCRIPTOR_PAGES_MAX			1024
+#define DMA_DESCRIPTOR_PAGES_MAX			4096
 
 typedef enum _NTV2DmaMethod
 {
@@ -342,9 +342,6 @@ void dmaDisable(ULWord deviceNumber);
 int dmaTransfer(PDMA_PARAMS pDmaParams);
 int dmaTargetP2P(ULWord deviceNumber, NTV2_DMA_P2P_CONTROL_STRUCT* pParams);
 
-int dmaStreamStart(PDMA_PARAMS pDmaParams);
-int dmaStreamStop(PDMA_PARAMS pDmaParams);
-
 void dmaInterrupt(ULWord deviceNumber, ULWord intStatus);
 
 int dmaOpsStreamInitialize(struct ntv2_stream *stream);
@@ -352,7 +349,7 @@ int dmaOpsStreamRelease(struct ntv2_stream *stream);
 int dmaOpsStreamStart(struct ntv2_stream *stream);
 int dmaOpsStreamStop(struct ntv2_stream *stream);
 int dmaOpsStreamAdvance(struct ntv2_stream *stream);
-int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index);
+int dmaOpsBufferQueue(struct ntv2_stream *stream, int index);
 int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index);
 int dmaOpsBufferComplete(struct ntv2_stream *stream, int index);
 int dmaOpsBufferFlush(struct ntv2_stream *stream, int index);

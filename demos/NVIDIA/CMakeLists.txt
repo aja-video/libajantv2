@@ -1,2 +1,4 @@
 add_subdirectory(cudalowlatencydemo)
-add_subdirectory(dvplowlatencydemo)
+if(NOT AJA_DISABLE_DVP)
+    add_subdirectory(dvplowlatencydemo)
+endif()

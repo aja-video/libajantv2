@@ -67,11 +67,25 @@ bool CNTV2LinuxDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 	NTV2_ASSERT(!IsRemote());
 	NTV2_ASSERT(!IsOpen());
 
-	ostringstream oss;	oss << "/dev/" << kAJANTV2 << DEC(inDeviceIndex);
-	string boardStr(oss.str());
-	_hDevice = HANDLE(open(boardStr.c_str(), O_RDWR));
+    string boardStr;
+    UWord count = 0;
+    for (UWord index = 0; index < NTV2_MAXBOARDS; index++)
+    {
+        ostringstream oss;	oss << "/dev/" << kAJANTV2 << DEC(index);
+        boardStr = oss.str();
+		_hDevice = HANDLE(open(boardStr.c_str(), O_RDWR));
+        if (_hDevice != INVALID_HANDLE_VALUE)
+        {
+            if (count == inDeviceIndex)
+                break;
+            count++;
+            Close();
+            _hDevice = INVALID_HANDLE_VALUE;
+        }
+    }
+
 	if (_hDevice == INVALID_HANDLE_VALUE)
-		{LDIFAIL("Failed to open '" << boardStr << "'");  return false;}
+        {LDIFAIL("Failed to open device index '" << inDeviceIndex << "'");  return false;}
 
 	_boardNumber = inDeviceIndex;
 	if (!CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID))
@@ -693,6 +707,7 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 	// NOTE: Linux driver assumes driver buffers to be used if pFrameBuffer < numDmaDriverBuffers
 	NTV2_DMA_SEGMENT_CONTROL_STRUCT dmaControlBuf;
 	dmaControlBuf.engine				= inDMAEngine;
+	dmaControlBuf.dmaChannel		    = NTV2_CHANNEL1;
 	dmaControlBuf.frameNumber			= inFrameNumber;
 	dmaControlBuf.frameBuffer			= pFrameBuffer;
 	dmaControlBuf.frameOffsetSrc		= inIsRead ? inOffsetBytes : 0;

@@ -821,7 +821,7 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 			AJAAncillaryData::ResetInstanceCounts();
 			{
 				AJAAncillaryList pkts;
-				CHECK(AJA_SUCCESS(pkts.AddReceivedAncillaryData (GumpBuffer, sizeof(GumpBuffer))));
+				CHECK(AJA_SUCCESS(pkts.AddReceivedAncillaryData (NTV2Buffer(GumpBuffer, sizeof(GumpBuffer)))));
 				DBG_CHECK_EQ(AJAAncillaryData::GetNumActiveInstances(), 2);	//	2 alive
 				cerr << pkts << endl << "C" << DEC(AJAAncillaryData::GetNumConstructed()) << " D" << DEC(AJAAncillaryData::GetNumDestructed()) << endl;
 				pkts.Clear();

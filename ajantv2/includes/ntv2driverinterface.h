@@ -447,7 +447,7 @@ class AJAExport CNTV2DriverInterface
 
 		// stream buffer operations
 		AJA_VIRTUAL bool	StreamBufferOps (const NTV2Channel inChannel,
-												NTV2Buffer inBuffer,
+												NTV2Buffer& inBuffer,
 												ULWord64 bufferCookie,
 												ULWord flags,
 												NTV2StreamBuffer& status);

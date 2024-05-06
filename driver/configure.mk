@@ -42,6 +42,7 @@ endif
 OBJDIR := $(OBJ)
 
 NTV2TARGET ?= ajantv2
+RDMATARGET ?= ajardma
 
 # some common paths to use in all the makefiles
 DIR_HERE 			:= $(strip $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST)))))

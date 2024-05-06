@@ -6,7 +6,8 @@ if [ `id -u` != "0" ]; then
 fi
 
 # invoke rmmod with all arguments we got
-/sbin/rmmod ajantv2 2>/dev/null
+/sbin/rmmod -s ajardma
+/sbin/rmmod -s ajantv2
 if [ $? -eq 0 ]; then 
     echo "unloaded ajantv2 driver module"
 fi
