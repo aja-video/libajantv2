@@ -33,7 +33,7 @@ endif
 
 # try to find the nvidia p2p include file
 ifeq ($(NVIDIA_SRC_DIR),)
-	NVIDIA_SRC_DIR := $(shell find /usr/src/nvidia-* -name nv-p2p.h 2>/dev/null|head -1|xargs dirname 2>/dev/null)
+	NVIDIA_SRC_DIR := $(shell find /usr/src/nvidia* -name nv-p2p.h 2>/dev/null|head -1|xargs dirname 2>/dev/null)
 endif
 ifeq ($(NVIDIA_SRC_DIR),)
 	NVIDIA_SRC_DIR := $(shell find /usr/src/linux-* -name nv-p2p.h 2>/dev/null|head -1|xargs dirname 2>/dev/null)
@@ -52,20 +52,21 @@ endif
 
 # if doing rdma build
 ifdef NVIDIA_RDMA
+ifdef AJA_IGPU
+# configure for igpu to use the nvidia-p2p.ko module
+	EXTRA_CFLAGS += -DAJA_IGPU=1
+	NVIDIA_KO ?= $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia-p2p.ko'|head -1)
+else
 	NVIDIA_KO ?= $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia*.ko'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
+endif
 ifeq ($(shell modinfo $(NVIDIA_KO) | grep license: | grep GPL),)
 	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1 -DNVIDIA_PROPRIETARY=1
 else
 	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1
 endif
-ifdef AJA_IGPU
-# configure for igpu
-	EXTRA_CFLAGS += -DAJA_IGPU=1
-else
 ifeq ($(NVIDIA_SYMVERS),)
 	NVIDIA_GEN_SYMVERS := ./nvidia-ko-to-module-symvers $(NVIDIA_KO) $(A_LINUX_DRIVER_PATH)/nvidia.symvers
 	NVIDIA_SYMVERS := $(A_LINUX_DRIVER_PATH)/nvidia.symvers
-endif
 endif
 endif
 
@@ -232,12 +233,8 @@ default: all
 	@echo linux distro flags: '$(DISTRO_INFO)'
 	@echo lib: $(LIB)
 ifdef NVIDIA_RDMA
-ifdef AJA_IGPU
-	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules
-else
 	${NVIDIA_GEN_SYMVERS}
 	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules KBUILD_EXTRA_SYMBOLS='$(NVIDIA_SYMVERS)'
-endif
 else
 	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules
 endif
