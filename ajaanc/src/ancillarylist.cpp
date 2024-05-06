@@ -539,20 +539,17 @@ bool AJAAncillaryList::CompareWithInfo (vector<string> & outDiffInfo, const AJAA
 // Parse a stream of "raw" ancillary data as collected by an AJAAncExtractorWidget.
 // Break the stream into separate AJAAncillaryData objects and add them to the list.
 //
-AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
-														const uint32_t dataSize,
-														const uint32_t inFrameNum)
+AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const NTV2Buffer & inReceivedData, const uint32_t inFrameNum)
 {
 	AJAStatus	status	(AJA_STATUS_SUCCESS);
-
-	if (!pRcvData || !dataSize)
+	if (!inReceivedData)
 		return AJA_STATUS_NULL;
 
 	AJAAncillaryDataList rawPkts;		//	Accumulate "analog/raw" packets separately
 	AJAAncillaryData	newAncData;		//	Use this as an uninitialized template
 	AJAAncDataLoc		defaultLoc		(AJAAncDataLink_A, AJAAncDataChannel_Y, AJAAncDataSpace_VANC, 9);
-	int32_t				remainingSize	(int32_t(dataSize + 0));
-	const uint8_t *		pInputData		(pRcvData);
+	int32_t				remainingSize	(int32_t(inReceivedData.GetByteCount()));
+	const uint8_t *		pInputData		(inReceivedData);
 	bool				bMoreData		(true);
 
 	while (bMoreData)
@@ -667,12 +664,12 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
 // Parse a stream of "raw" ancillary data as collected by an AJAAncExtractorWidget.
 // Break the stream into separate AJAAncillaryData objects and add them to the list.
 //
-AJAStatus AJAAncillaryList::AddReceivedAuxillaryData (const uint8_t * pRcvData,
-														const uint32_t dataSize,
+AJAStatus AJAAncillaryList::AddReceivedAuxiliaryData (const NTV2Buffer & inReceivedData,
 														const uint32_t inFrameNum)
 {
 	AJAStatus	status	(AJA_STATUS_SUCCESS);
-
+	const uint8_t * pRcvData = inReceivedData;
+	const uint32_t dataSize = inReceivedData.GetByteCount();
 	if (!pRcvData || !dataSize)
 		return AJA_STATUS_NULL;
 
@@ -986,7 +983,7 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2Buffer & inAncBuff
 	//	Try GUMP first...
 	if (BufferHasGUMPData(inAncBuffer))
 	{	//	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP
-		result = outPackets.AddReceivedAncillaryData (inAncBuffer, inAncBuffer.GetByteCount(), inFrameNum);
+		result = outPackets.AddReceivedAncillaryData (inAncBuffer, inFrameNum);
 		if (result == AJA_STATUS_NULL)
 			result = AJA_STATUS_SUCCESS;	//	A NULL/empty buffer is not an error
 	}	//	if GUMP
@@ -1065,7 +1062,7 @@ AJAStatus AJAAncillaryList::AddFromDeviceAuxBuffer (const NTV2Buffer & inAuxBuff
 	AJAStatus		result			(AJA_STATUS_SUCCESS);
 
 
-	result = outPackets.AddReceivedAuxillaryData (inAuxBuffer, inAuxBuffer.GetByteCount(), inFrameNum);
+	result = outPackets.AddReceivedAuxiliaryData (inAuxBuffer, inFrameNum);
 	if (result == AJA_STATUS_NULL)
 		result = AJA_STATUS_SUCCESS;	//	A NULL/empty buffer is not an error
 
@@ -1656,6 +1653,69 @@ ostream & AJAAncillaryList::Print (ostream & inOutStream, const bool inDumpPaylo
 	}
 	return inOutStream;
 }
+
+//	Copies GUMP from inSrc to outDst buffers, but removes ATC, VPID & VITC packets
+bool AJAAncillaryList::StripNativeInserterGUMPPackets (const NTV2Buffer & inSrc, NTV2Buffer outDst)
+{
+	if (!inSrc || !outDst)
+		return false;	//	Buffers must be valid
+	if (inSrc.GetByteCount() > outDst.GetByteCount())
+		return false;	//	Target buffer must be at least as large as source buffer
+
+	uint8_t * srcPtr	= inSrc;
+	uint8_t * ptr		= srcPtr;
+	size_t srcBufSize	= inSrc;
+	uint8_t * tgtPtr	= outDst;
+	size_t uncopied		= 0;
+	const size_t kGUMPHeaderSize(7);
+
+	for (size_t i(0);  i < srcBufSize;  ) 
+	{	
+		if (ptr[0] == 0xff  &&  (i+kGUMPHeaderSize) < srcBufSize) 
+		{
+			bool bFiltered{false};
+			uint8_t payloadSize = ptr[5];
+
+			//	ATC
+			if (ptr[3] == 0x60 && ptr[4] == 0x60 && payloadSize == 16)
+				bFiltered  = true;
+
+			//	SMPTE 352 - VPID
+			else if (ptr[3] == 0x41 && ptr[4] == 0x01 && payloadSize == 4)
+				bFiltered = true;
+
+			//	VITC
+			else
+			{
+				AJAAncDataCoding coding = ((ptr[1] & 0x40) == 0) ? AJAAncDataCoding_Digital : AJAAncDataCoding_Raw;
+				const uint16_t lineNum = uint16_t((ptr[1] & 0x0F) << 7) + uint16_t(ptr[2] & 0x7F);
+				bFiltered = (coding == AJAAncDataCoding_Raw)  &&  (lineNum == 14 || lineNum == 277);
+			}
+			
+			if (bFiltered)
+			{
+				//	Copy everything that came before filtered content...
+				::memcpy(tgtPtr, srcPtr, uncopied);
+
+				//	Skip srcPtr past the filtered content...
+				srcPtr		+= uncopied + payloadSize + kGUMPHeaderSize;
+				tgtPtr		+= uncopied;
+				i			+= payloadSize + kGUMPHeaderSize;
+				ptr			= srcPtr;
+				uncopied	= 0;
+			}
+			else
+				{ptr++; i++; uncopied++;}
+		}
+		else
+			{ptr++; i++; uncopied++;}
+	}	//	for each byte in source buffer
+		
+	// copy last bits if remainder
+	if (uncopied > 0)
+		::memcpy(tgtPtr, srcPtr, uncopied);
+	return true;
+}	//	StripNativeInserterPackets
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
