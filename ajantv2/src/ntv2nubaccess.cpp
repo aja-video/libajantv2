@@ -993,6 +993,7 @@ bool NTV2RPCClientAPI::NTV2CloseRemote (void)
 //	Loads NTV2 plugin, and returns address of given function
 static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, const string & inFuncName)
 {
+	uint64_t * pFunc (AJA_NULL);
 	//	Scheme dictates which plugin to load...
 	if (!inParams.hasKey(kConnectParamScheme))
 		{NBCFAIL("Missing scheme -- params: " << inParams);  return AJA_NULL;}	//	No scheme
@@ -1015,6 +1016,7 @@ static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, con
 	dllsFolder.erase(dllsFolder.length()-1,1);	//	Lop off trailing slash or backslash
 	pluginPath += pluginName + DLL_EXTENSION;	//	Append plugin name + extension...
 
+#if !defined(NTV2_PREVENT_PLUGIN_LOAD)
 	ostringstream err;
 	#if defined(MSWindows)
 	//	Open the DLL (Windows)...
@@ -1030,7 +1032,6 @@ static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, con
 	#elif defined(AJABareMetal)
 	// TODO
 	void *pHandle = AJA_NULL;
-	uint64_t *pFunc = AJA_NULL;
 	#else	//	MacOS or Linux
 	//	Open the .dylib (MacOS) or .so (Linux)...
 	void* pHandle = ::dlopen(pluginPath.c_str(), RTLD_LAZY);
@@ -1046,13 +1047,13 @@ static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, con
 
 	//	Get pointer to its CreateClient function...
 	#if defined(MSWindows)
-	uint64_t * pFunc = reinterpret_cast<uint64_t*>(::GetProcAddress(pHandle, inFuncName.c_str()));
+	pFunc = reinterpret_cast<uint64_t*>(::GetProcAddress(pHandle, inFuncName.c_str()));
 	if (!pFunc)
 		err << "'GetProcAddress' failed for '" << inFuncName << "' in '" << pluginPath << "': " << WinErrStr(::GetLastError());
 	#elif defined(AJABareMetal)
 	// TODO
 	#else	//	MacOS or Linux
-	uint64_t * pFunc = reinterpret_cast<uint64_t*>(::dlsym(pHandle, inFuncName.c_str()));
+	pFunc = reinterpret_cast<uint64_t*>(::dlsym(pHandle, inFuncName.c_str()));
 	if (!pFunc)
 	{	const char * pErrorStr(::dlerror());
 		errStr =  pErrorStr ? pErrorStr : "";
@@ -1071,6 +1072,9 @@ static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, con
 		#endif	//	MSWindows
 	}
 	else NBCDBG("Calling '" << inFuncName << "' in '" << pluginPath << "'");
+#else	//	else if defined(NTV2_PREVENT_PLUGIN_LOAD)
+	NBCFAIL("This SDK was built without the ability to load 3rd party plugins");
+#endif	//	defined(NTV2_PREVENT_PLUGIN_LOAD)
 	return pFunc;
 }	//	GetNTV2PluginFunction
 
@@ -1078,7 +1082,7 @@ static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, con
 NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inParams)	//	CLASS METHOD
 {
 	const string funcName(kFuncNameCreateClient);
-	uint64_t * pFunc = GetNTV2PluginFunction(inParams, funcName);
+	uint64_t * pFunc = ::GetNTV2PluginFunction(inParams, funcName);
 	fpCreateClient pCreateFunc = reinterpret_cast<fpCreateClient>(pFunc);
 	if (!pCreateFunc)
 		return AJA_NULL;
@@ -1100,7 +1104,7 @@ NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inP
 NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const NTV2ConfigParams & inParams)	//	CLASS METHOD
 {
 	const string funcName(kFuncNameCreateServer);
-	uint64_t * pFunc = GetNTV2PluginFunction(inParams, funcName);
+	uint64_t * pFunc = ::GetNTV2PluginFunction(inParams, funcName);
 	fpCreateServer pCreateFunc = reinterpret_cast<fpCreateServer>(pFunc);
 	if (!pCreateFunc)
 		return AJA_NULL;

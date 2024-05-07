@@ -37,6 +37,20 @@ set(TARGET_INCLUDE_DIRS
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
+if (AJANTV2_DISABLE_PLUGIN_LOAD)
+    message(STATUS "NTV2 SDK will NOT load 3rd-party plugins")
+    list(APPEND TARGET_COMPILE_DEFS
+        -DNTV2_PREVENT_PLUGIN_LOAD)
+else()
+    message(STATUS "NTV2 SDK will load signed 3rd-party plugins")
+    message(STATUS "3rd Party Dir:  ${THIRDPARTY_DIR}")
+    set(MbedTLS_DIR "${THIRDPARTY_DIR}/mbedtls")
+    add_subdirectory(${MbedTLS_DIR})
+    find_package(MbedTLS REQUIRED)
+    include(${MbedTLS_DIR}/MbedTLSConfig.cmake.in)
+#   target_link_libraries(${target_lib} PUBLIC mbedtls::mbedtls)
+endif()
+
 # ajantv2
 set(AJANTV2_HEADERS
     includes/ajaexport.h
