@@ -82,6 +82,8 @@ AJAStatus NTV2StreamPlayer::Init (void)
 		{cerr << "## ERROR:  Device '" << mDevice.GetDisplayName() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 	if (!mDevice.features().CanDoPlayback())
 		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
+	if (!mDevice.features().CanDoStreamingDMA())
+		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' does not support streaming DMA" << endl;  return AJA_STATUS_FEATURE;}
 
 	const UWord maxNumChannels (mDevice.features().GetNumFrameStores());
 
@@ -384,6 +386,7 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 	NTV2StreamChannel	strStatus;
 	NTV2StreamBuffer	bfrStatus;
 	ULWord				goodQueue(0), badQueue(0), goodRelease(0), badRelease(0), starves(0), noRoomWaits(0), status(0);
+	PLNOTE("Thread started");
 
 	//	Lock and map the buffers...
 	for (FrameDataArrayIter iterHost (mHostBuffers.begin());  iterHost != mHostBuffers.end();  ++iterHost)
@@ -395,9 +398,8 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 	if (status != NTV2_STREAM_STATUS_SUCCESS)
 	{
 		cerr << "## ERROR:  Stream initialize failed: " << status << endl;
-		return;
+		mGlobalQuit = true;
 	}
-	PLNOTE("Thread started");
 
 	while (!mGlobalQuit)
 	{
