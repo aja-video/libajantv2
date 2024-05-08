@@ -1,5 +1,7 @@
 project(ajantv2)
 
+include(ExternalProject)
+
 if (CMAKE_CXX_STANDARD EQUAL 98)
     message(STATUS "ajantv2 building for C++98")
     remove_definitions(
@@ -43,12 +45,13 @@ if (AJANTV2_DISABLE_PLUGIN_LOAD)
         -DNTV2_PREVENT_PLUGIN_LOAD)
 else()
     message(STATUS "NTV2 SDK will load signed 3rd-party plugins")
-    message(STATUS "3rd Party Dir:  ${THIRDPARTY_DIR}")
-    set(MbedTLS_DIR "${THIRDPARTY_DIR}/mbedtls")
-    add_subdirectory(${MbedTLS_DIR})
-    find_package(MbedTLS REQUIRED)
-    include(${MbedTLS_DIR}/MbedTLSConfig.cmake.in)
-#   target_link_libraries(${target_lib} PUBLIC mbedtls::mbedtls)
+
+    ExternalProject_Add(mbedtls
+        GIT_REPOSITORY https://github.com/Mbed-TLS/mbedtls.git
+        GIT_TAG        v3.6.0
+        STEP_TARGETS   build
+    )
+#   set(LIB_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/lib)
 endif()
 
 # ajantv2
@@ -645,6 +648,10 @@ if (NOT TARGET ${PROJECT_NAME})
 		endif()
 	endif()
     set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "d")
+
+#   if (NOT AJANTV2_DISABLE_PLUGIN_LOAD)
+#       target_link_libraries(${PROJECT_NAME} PUBLIC MbedTLS::mbedtls  MbedTLS::mbedcrypto  MbedTLS::mbedx509)
+#   endif()
 endif()
 
 if (NOT TARGET ajabase)
