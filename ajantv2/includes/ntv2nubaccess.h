@@ -37,6 +37,7 @@ static const std::string	kLegalSchemeNTV2Local	("ntv2local");
 // Exported Function Names:
 static const std::string	kFuncNameCreateClient	("CreateClient");	///< @brief	Create an NTV2RPCClientAPI instance
 static const std::string	kFuncNameCreateServer	("CreateServer");	///< @brief	Create an NTV2RPCServerAPI instance
+static const std::string	kFuncNameGetRegInfo	("GetRegistrationInfo");	///< @brief	Answers with plugin registration info
 
 /**
 	@brief	A simple set of zero or more key/value pairs. (New in SDK 16.3)
