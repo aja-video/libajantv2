@@ -59,35 +59,14 @@ typedef struct rdma_page_buffer {
 
 extern void ntv2_set_rdma_fops(struct ntv2_page_fops* fops);
 
-static int ntv2_rdma_get_pages(PDMA_PAGE_BUFFER pBuffer,
-                               PVOID pAddress, ULWord size, ULWord direction);
-static void ntv2_rdma_put_pages(PDMA_PAGE_BUFFER pBuffer);
-static int ntv2_rdma_map_pages(struct pci_dev* pci_dev, PDMA_PAGE_BUFFER pBuffer);
-static void ntv2_rdma_unmap_pages(struct pci_dev* pci_dev, PDMA_PAGE_BUFFER pBuffer);
-
 static void rdmaFreeCallback(void* data);
 static void dmaSgSetRdmaPage(struct scatterlist* pSg, struct nvidia_p2p_dma_mapping	*rdmaMap,
 							 int index, ULWord64 length, ULWord64 offset);
 
-static struct ntv2_page_fops rdma_fops = 
-{
-    ntv2_rdma_get_pages,
-    ntv2_rdma_put_pages,
-    ntv2_rdma_map_pages,
-    ntv2_rdma_unmap_pages
-};
-
-
 int ntv2_rdma_get_pages(PDMA_PAGE_BUFFER pBuffer,
                         PVOID pAddress, ULWord size, ULWord direction)
 {
-    PRDMA_PAGE_BUFFER pRdmaBuffer = vmalloc(sizeof(struct rdma_page_buffer));
-    if (pRdmaBuffer == NULL)
-    {
-        return -ENOMEM;
-    }
-    pBuffer->rdmaContext = (void*)pRdmaBuffer;
-    
+    PRDMA_PAGE_BUFFER pRdmaBuffer = NULL;
 	ULWord64 address = (unsigned long)pAddress;
 	ULWord64 rdmaAddress = address & GPU_PAGE_MASK;
 	ULWord64 rdmaOffset = address & GPU_PAGE_OFFSET;
@@ -99,6 +78,13 @@ int ntv2_rdma_get_pages(PDMA_PAGE_BUFFER pBuffer,
 #endif		
 	struct nvidia_p2p_page_table* rdmaPage = NULL;
 	int ret = -1;
+
+    pRdmaBuffer = vmalloc(sizeof(struct rdma_page_buffer));
+    if (pRdmaBuffer == NULL)
+    {
+        return -ENOMEM;
+    }
+    pBuffer->rdmaContext = (void*)pRdmaBuffer;
 
     ret = nvidia_p2p_get_pages(
 #ifndef AJA_IGPU				
@@ -288,9 +274,17 @@ static void dmaSgSetRdmaPage(struct scatterlist* pSg, struct nvidia_p2p_dma_mapp
 int ntv2_rdma_init(void)
 {
 #ifdef AJA_RDMA
+    struct ntv2_page_fops rdma_fops = 
+    {
+        ntv2_rdma_get_pages,
+        ntv2_rdma_put_pages,
+        ntv2_rdma_map_pages,
+        ntv2_rdma_unmap_pages
+    };
+
+    ntv2_set_rdma_fops(&rdma_fops);
 #ifdef NVIDIA_PROPRIETARY
     printk(KERN_INFO "ntv2_rmda_init: RDMA proprietary\n");
-    ntv2_set_rdma_fops(&rdma_fops);
 #else
     printk(KERN_INFO "ntv2_rmda_init: RDMA open source\n");
 #endif    
