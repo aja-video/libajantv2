@@ -95,6 +95,7 @@ class AJAExport DeviceCapabilities
 		inline bool		CanDoStackedAudio (void)				{return dev.IsSupported(kDeviceCanDoStackedAudio);}
 		inline bool		CanDoStereoIn (void)					{return dev.IsSupported(kDeviceCanDoStereoIn);}
 		inline bool		CanDoStereoOut (void)					{return dev.IsSupported(kDeviceCanDoStereoOut);}
+		inline bool		CanDoStreamingDMA (void)				{return dev.IsSupported(kDeviceCanDoStreamingDMA);}
 		inline bool		CanDoThunderbolt (void)					{return dev.IsSupported(kDeviceCanDoThunderbolt);}
 		inline bool		CanDoVideoProcessing (void)				{return dev.IsSupported(kDeviceCanDoVideoProcessing);}
 		inline bool		CanDoVITC2 (void)						{return dev.IsSupported(kDeviceCanDoVITC2);}

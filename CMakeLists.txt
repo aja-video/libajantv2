@@ -35,6 +35,7 @@ option(AJANTV2_DISABLE_DEMOS      "Disable building libajantv2 demo apps?"      
 option(AJANTV2_DISABLE_DRIVER     "Disable building libajantv2 driver (Linux-only)?" OFF)
 option(AJANTV2_DISABLE_TESTS      "Disable building libajantv2 tests?"               OFF)
 option(AJANTV2_DISABLE_TOOLS      "Disable building libajantv2 tools?"               OFF)
+option(AJANTV2_DISABLE_PLUGIN_LOAD  "Disable NTV2 3rd party plugin loading?"         ON)
 
 if (NOT DEFINED LIBAJANTV2_DIR)
     set(LIBAJANTV2_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -47,6 +48,9 @@ if(NOT AJANTV2_BUILD_OPENSOURCE)
 endif()
 
 # Cascade top-level options
+if(DEFINED BUILD_SHARED_LIBS)
+    set(AJANTV2_BUILD_SHARED ${BUILD_SHARED_LIBS})
+endif()
 if(DEFINED AJA_BUILD_SHARED)
     set(AJANTV2_BUILD_SHARED ${AJA_BUILD_SHARED})
 endif()
@@ -61,6 +65,9 @@ if(DEFINED AJA_DISABLE_TESTS)
 endif()
 if(DEFINED AJA_DISABLE_TOOLS)
     set(AJANTV2_DISABLE_TOOLS ${AJA_DISABLE_TOOLS})
+endif()
+if(DEFINED AJA_DISABLE_PLUGIN_LOAD)
+    set(AJANTV2_DISABLE_PLUGIN_LOAD ${AJA_DISABLE_PLUGIN_LOAD})
 endif()
 
 add_subdirectory(ajantv2)
