@@ -639,7 +639,10 @@ if (NOT TARGET ${PROJECT_NAME})
 
         add_library(${PROJECT_NAME} SHARED ${TARGET_SOURCES})
 
-        add_dependencies(${PROJECT_NAME} mbedtls)
+        
+        if (NOT AJANTV2_DISABLE_PLUGIN_LOAD)
+            add_dependencies(${PROJECT_NAME} mbedtls)
+        endif()
 
         target_compile_definitions(${PROJECT_NAME} PUBLIC
             ${TARGET_COMPILE_DEFS_DYNAMIC}
@@ -654,7 +657,9 @@ if (NOT TARGET ${PROJECT_NAME})
         aja_ntv2_log_build_info()
 
         add_library(${PROJECT_NAME} STATIC ${TARGET_SOURCES})
-        add_dependencies(${PROJECT_NAME} mbedtls)
+        if (NOT AJANTV2_DISABLE_PLUGIN_LOAD)
+            add_dependencies(${PROJECT_NAME} mbedtls)
+        endif()
         target_compile_definitions(${PROJECT_NAME} PUBLIC
             ${TARGET_COMPILE_DEFS_STATIC}
             ${AJANTV2_TARGET_COMPILE_DEFS})
