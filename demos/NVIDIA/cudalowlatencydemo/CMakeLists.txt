@@ -1,7 +1,7 @@
 # NOTE: Ensure that the CUDA Toolkit v11.1 or later is installed and in your PATH.
 
-if (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	message(STATUS "skipping cudalowlatencydemo (requires Linux)")
+if (AJA_DISABLE_NVIDIA OR NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	message(STATUS "skipping cudalowlatencydemo...")
 	return()
 endif()
 
