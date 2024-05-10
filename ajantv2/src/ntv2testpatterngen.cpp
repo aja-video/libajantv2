@@ -2291,7 +2291,7 @@ bool NTV2TestPatternGen::canDrawTestPattern (const NTV2TestPatternSelect inPatte
 	{
 		if (inDesc.GetRasterWidth() % 1920)
 			return false;	//	Pixel width must be evenly divisible by 1920
-		if (inDesc.GetPixelFormat() != NTV2_FBF_48BIT_RGB && inDesc.GetPixelFormat() != NTV2_FBF_12BIT_RGB_PACKED)
+		if (inDesc.GetPixelFormat() != NTV2_FBF_48BIT_RGB) //&& inDesc.GetPixelFormat() != NTV2_FBF_12BIT_RGB_PACKED)
 			return false;	//	Pixel format must be RGB-12b
 		return true;
 	}
@@ -3667,20 +3667,56 @@ static void ConvertRGBLineTo10BitYCbCr422 (AJA_RGB16BitPixel* lineBuffer, const 
 
 void NTV2TestPatternGen::PrepareForOutput()
 {
-	NTV2Buffer tmpBuffer (mNumPixels * mNumLines * 3 * sizeof(uint16_t));
-	uint16_t* rgb16BitBuffer = tmpBuffer;
-	uint16_t* rgb12Buffer = mRGBBuffer.data();
-	ULWord* buffer = AsULWordPtr(rgb16BitBuffer);
-	for (uint32_t i(0);	 i < mNumPixels*mNumLines;	i++)
+	if (mDstPixelFormat == NTV2_FBF_12BIT_RGB_PACKED)
 	{
-		uint16_t r = uint16_t((*rgb12Buffer++) << 4);
-		uint16_t g = uint16_t((*rgb12Buffer++) << 4);
-		uint16_t b = uint16_t((*rgb12Buffer++) << 4);
-		*rgb16BitBuffer++ = b;	// b
-		*rgb16BitBuffer++ = g; //g
-		*rgb16BitBuffer++ = r;
+		// Not sure why we don't just cache the mDstFormatDesc??
+		size_t tmpBufSize = mNumPixels * mNumLines * 18; // memory format is w * h * 36px / 8px * 4 bytes;
+		NTV2Buffer tmpBuf (tmpBufSize);
+		uint16_t* pSrc16 = mRGBBuffer.data();
+		uint8_t* pTmp8 = tmpBuf;
+		for (int y = 0; y < mNumLines; y++) {
+			int loops = mNumPixels/2;
+			int srcAdv = 6; // 6 bytes * 2px
+			int dstAdv = 9;  // 9 bytes per 2px
+			for (int i = 0; i < loops; i++) {
+				uint16_t r1 = pSrc16[0];
+				uint16_t g1 = pSrc16[1];
+				uint16_t b1 = pSrc16[2];
+				uint16_t r2 = pSrc16[3];
+				uint16_t g2 = pSrc16[4];
+				uint16_t b2 = pSrc16[5];
+				pTmp8[0] = (r1 & 0xFF0) >> 4;
+				pTmp8[1] = ((r1 & 0x00F) << 4) + ((g1 & 0xF00) >> 8);
+				pTmp8[2] = (g1 & 0x0FF);
+				pTmp8[3] = ((b1 & 0xFF0) >> 4);
+				pTmp8[4] = ((b1 & 0x00F) << 4) + ((r2 & 0xF00) >> 8);
+				pTmp8[5] = (r2 & 0x0FF);
+				pTmp8[6] = ((g2 & 0xFF0) >> 4);
+				pTmp8[7] = ((g2 & 0x00F) << 4) + ((b2 & 0xF00) >> 8);
+				pTmp8[8] = (b2 & 0x0FF);
+				pSrc16 += srcAdv;
+				pTmp8 += dstAdv;
+			}
+		}
+		::memcpy(mpDstBuffer, AsUInt8Ptr(tmpBuf.GetHostPointer()), mDstBufferSize);
 	}
-	::memcpy(mpDstBuffer, AsUInt8Ptr(buffer), mDstBufferSize);
+	else
+	{
+		NTV2Buffer tmpBuffer (mNumPixels * mNumLines * 3 * sizeof(uint16_t));
+		uint16_t* rgb16BitBuffer = tmpBuffer;
+		uint16_t* rgb12Buffer = mRGBBuffer.data();
+		ULWord* buffer = AsULWordPtr(rgb16BitBuffer);
+		for (uint32_t i(0);	 i < mNumPixels*mNumLines;	i++)
+		{
+			uint16_t r = uint16_t((*rgb12Buffer++) << 4);
+			uint16_t g = uint16_t((*rgb12Buffer++) << 4);
+			uint16_t b = uint16_t((*rgb12Buffer++) << 4);
+			*rgb16BitBuffer++ = b;	// b
+			*rgb16BitBuffer++ = g; //g
+			*rgb16BitBuffer++ = r;
+		}
+		::memcpy(mpDstBuffer, AsUInt8Ptr(buffer), mDstBufferSize);
+	}
 }
 
 
@@ -4036,7 +4072,7 @@ bool NTV2TestPatternGen::Draw12BitRamp()
 			mRGBBuffer.at(ndx++) = ivalue;
 		}
 	PrepareForOutput();
-	return true;
+ 	return true;
 }
 
 
