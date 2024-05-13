@@ -16,15 +16,12 @@
 #include <iomanip>
 #if !defined(NTV2_PREVENT_PLUGIN_LOAD)
 	#include <fstream>
-	#include "mbedtls/mbedtls_config.h"
-	#include "mbedtls/platform.h"
-	#include "mbedtls/error.h"
-	#include "mbedtls/md.h"
-	#include "mbedtls/pk.h"
-	#include "mbedtls/ssl.h"
 	#include "mbedtls/x509.h"
-	#include "/home/bills/dev/dev-git/sw/thirdparty/json/single_include/nlohmann/json.hpp"
-	using nlohmann::json;
+//	#include "mbedtls/platform.h"
+//	#include "mbedtls/error.h"
+//	#include "mbedtls/md.h"
+//	#include "mbedtls/pk.h"
+	#include "mbedtls/ssl.h"
 #endif	//	defined(NTV2_PREVENT_PLUGIN_LOAD)
 #if defined(AJAMac)
 	#include <CoreFoundation/CoreFoundation.h>
@@ -1077,13 +1074,19 @@ static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, con
 
 	//	Open the dylib/so/DLL & signature files...
 	ifstream sigF(sigPath.c_str(), std::ios::in), dllF(pluginPath.c_str(), std::ios::in);
-	if (dllF.good() && !sigF.good())
-		{NBSFAIL("'" << sigPath << "' missing");  return AJA_NULL;}
-	else if (!dllF.good() && sigF.good())
-		{NBSFAIL("'" << pluginPath << "' missing");  return AJA_NULL;}
-	else if (!dllF.good() && !sigF.good())
-		{NBSFAIL("'" << pluginPath << "' and '" << sigPath << "' both missing");  return AJA_NULL;}
-	json data (json::parse(sigF));
+	if (!dllF.good())
+		{NBSFAIL("Plugin file '" << pluginPath << "' missing");  return AJA_NULL;}
+	if (!sigF.good())
+		{NBSFAIL("Signature file '" << sigPath << "' missing");  return AJA_NULL;}
+
+	mbedtls_x509_crt crt;			//	Container for X509 certificate
+	mbedtls_x509_crt_init(&crt);	//	Initialize it as empty
+	int ret = mbedtls_x509_crt_parse_file(&crt, sigPath.c_str());	//	Load from .sig file
+	if (ret)
+	{	NBSFAIL("'mbedtls_x509_crt_parse_file' returned " << ret << " for '" << sigPath << "'");
+		mbedtls_x509_crt_free(&crt);
+		return AJA_NULL;
+	}
 
 	//	Open the shared library...
 	uint64_t * pFunc (AJA_NULL);
@@ -1125,7 +1128,7 @@ static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, con
 
 		//	Call GetRegInfo to obtain registration info...
 		NTV2Dictionary regInfo;
-		fpGetRegistrationInfo pRegInfo = reinterpret_cast<fpGetRegistrationInfo>(pFunc);
+		fpGetRegistrationInfo pRegInfo = reinterpret_cast<fpGetRegistrationInfo>(pInfoJSON);
 		NTV2_ASSERT(pRegInfo);
 		if (!(*pRegInfo)(pHandle, 0, regInfo))
 			{NBCFAIL("'" << pluginPath << "': '" << kFuncNameGetRegInfo << "' failed");  break;}
@@ -1165,18 +1168,16 @@ static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, con
 
 NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inParams)	//	CLASS METHOD
 {
-	const string funcName(kFuncNameCreateClient);
-	uint64_t * pFunc = ::GetNTV2PluginFunction(inParams, funcName);
-	fpCreateClient pCreateFunc = reinterpret_cast<fpCreateClient>(pFunc);
-	if (!pCreateFunc)
+	fpCreateClient pFunc (reinterpret_cast<fpCreateClient>(::GetNTV2PluginFunction(inParams, kFuncNameCreateClient)));
+	if (!pFunc)
 		return AJA_NULL;
 
-	//	Call its Create function to instantiate the NTV2RPCClientAPI object...
-	NTV2RPCClientAPI * pRPCObject = (*pCreateFunc) (AJA_NULL, inParams, AJA_NTV2_SDK_VERSION);
+	//	Call plugin's Create function to instantiate the NTV2RPCClientAPI object...
+	NTV2RPCClientAPI * pRPCObject = (*pFunc) (AJA_NULL, inParams, AJA_NTV2_SDK_VERSION);
 	if (!pRPCObject)
-		NBCFAIL("'" << funcName << "' failed to return NTV2RPCClientAPI instance using: " << inParams);
+		NBCFAIL("'" << kFuncNameCreateClient << "' returned NULL client instance from: " << inParams);
 	else
-		NBCINFO("'" << funcName << "' created instance " << xHEX0N(uint64_t(pRPCObject),16));
+		NBCINFO("'" << kFuncNameCreateClient << "' created client instance " << xHEX0N(uint64_t(pRPCObject),16));
 	return pRPCObject;
 }	//	CreateClient
 
@@ -1187,20 +1188,17 @@ NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inP
 
 NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const NTV2ConfigParams & inParams)	//	CLASS METHOD
 {
-	const string funcName(kFuncNameCreateServer);
-	uint64_t * pFunc = ::GetNTV2PluginFunction(inParams, funcName);
-	fpCreateServer pCreateFunc = reinterpret_cast<fpCreateServer>(pFunc);
-	if (!pCreateFunc)
+	fpCreateServer pFunc (reinterpret_cast<fpCreateServer>(::GetNTV2PluginFunction(inParams, kFuncNameCreateServer)));
+	if (!pFunc)
 		return AJA_NULL;
 
-	//	Call its Create function to instantiate the NTV2RPCServerAPI object...
-	NTV2RPCServerAPI * pRPCObject = (*pCreateFunc) (AJA_NULL, inParams, AJA_NTV2_SDK_VERSION);
+	//	Call plugin's Create function to instantiate the NTV2RPCServerAPI object...
+	NTV2RPCServerAPI * pRPCObject = (*pFunc) (AJA_NULL, inParams, AJA_NTV2_SDK_VERSION);
 	if (!pRPCObject)
-		NBSFAIL("'" << funcName << "' failed to return NTV2RPCServerAPI instance using: " << inParams);
+		NBSFAIL("'" << kFuncNameCreateServer << "' returned NULL server instance from: " << inParams);
 	else
-		NBSINFO("'" << funcName << "' created instance " << xHEX0N(uint64_t(pRPCObject),16));
+		NBSINFO("'" << kFuncNameCreateServer << "' created server instance " << xHEX0N(uint64_t(pRPCObject),16));
 	return pRPCObject;	//	It's caller's responsibility to delete pRPCObject
-
 }	//	CreateServer
 
 NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const string & inURL)	//	CLASS METHOD

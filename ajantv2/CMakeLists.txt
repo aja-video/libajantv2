@@ -601,6 +601,11 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         ${FOUNDATION_FRAMEWORK})
 endif()
 
+if (NOT AJANTV2_DISABLE_PLUGIN_LOAD)
+    list(APPEND TARGET_INCLUDE_DIRS
+        ${LIBAJANTV2_DIR}/thirdparty/include)
+endif()
+
 set(TARGET_SOURCES
     ${AJAANC_SOURCES}
     ${AJAANC_HEADERS}
