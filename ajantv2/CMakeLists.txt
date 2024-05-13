@@ -136,7 +136,7 @@ set(AJANTV2_HEADERS
     includes/ntv2testpatterngen.h
     includes/ntv2transcode.h
     includes/ntv2tshelper.h
-    includes/ntv2utf8.h
+#   includes/ntv2utf8.h	# removed in SDK 17.1
     includes/ntv2utils.h
     includes/ntv2verticalfilter.h
     includes/ntv2videodefines.h
@@ -194,7 +194,7 @@ set(AJANTV2_SOURCES
     src/ntv2task.cpp
     src/ntv2testpatterngen.cpp
     src/ntv2transcode.cpp
-    src/ntv2utf8.cpp
+#   src/ntv2utf8.cpp			# removed in SDK 17.1
     src/ntv2utils.cpp
     src/ntv2version.cpp
     src/ntv2verticalfilter.cpp
