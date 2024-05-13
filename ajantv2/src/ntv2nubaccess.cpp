@@ -1009,7 +1009,8 @@ static uint64_t* GetSymbolAddress (void * pHandle, const string & inSymbolName, 
 	if (inSymbolName.empty())
 		return result;
 	#if defined(MSWindows)
-		result = reinterpret_cast<uint64_t*>(::GetProcAddress(pHandle, inSymbolName.c_str()));
+		result = reinterpret_cast<uint64_t*>(::GetProcAddress(
+			reinterpret_cast<HMODULE>(pHandle), inSymbolName.c_str()));
 		if (!result)
 			err << "'GetProcAddress' failed for '" << inSymbolName << "': " << WinErrStr(::GetLastError());
 	#elif defined(AJABareMetal)
