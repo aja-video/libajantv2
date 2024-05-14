@@ -643,7 +643,6 @@ if (NOT TARGET ${PROJECT_NAME})
         aja_ntv2_log_build_info()
 
         add_library(${PROJECT_NAME} SHARED ${TARGET_SOURCES})
-
         
         if (NOT AJANTV2_DISABLE_PLUGIN_LOAD)
             add_dependencies(${PROJECT_NAME} mbedtls)
@@ -662,13 +661,33 @@ if (NOT TARGET ${PROJECT_NAME})
         aja_ntv2_log_build_info()
 
         add_library(${PROJECT_NAME} STATIC ${TARGET_SOURCES})
+
         if (NOT AJANTV2_DISABLE_PLUGIN_LOAD)
             add_dependencies(${PROJECT_NAME} mbedtls)
         endif()
+
         target_compile_definitions(${PROJECT_NAME} PUBLIC
             ${TARGET_COMPILE_DEFS_STATIC}
             ${AJANTV2_TARGET_COMPILE_DEFS})
     endif()
+
+    set(_compiler_id_c_or_cxx_msvc $<OR:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>)
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc}>:/MP /Zm200>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc},$<CONFIG:Release>>:/O2 /W3>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc},$<CONFIG:Debug,RelWithDebInfo>>:/Od /RTC1 /W3>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>>:-fPIC>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,$<CONFIG:Release>>:-O2 -Wall -Wextra>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,$<CONFIG:Debug,RelWithDebInfo>>:-O0 -Wall>
+    )
+    target_compile_options(${PROJECT_NAME} INTERFACE
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc}>:/MP /Zm200>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc},$<CONFIG:Release>>:/O2 /W3>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc},$<CONFIG:Debug,RelWithDebInfo>>:/Od /RTC1 /W3>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>>:-fPIC>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,$<CONFIG:Release>>:-O2 -Wall -Wextra>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,$<CONFIG:Debug,RelWithDebInfo>>:-O0 -Wall>
+    )
 
     target_include_directories(${PROJECT_NAME} PRIVATE ${TARGET_INCLUDE_DIRS})
     target_include_directories(${PROJECT_NAME} INTERFACE
