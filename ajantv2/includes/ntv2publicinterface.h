@@ -6302,6 +6302,16 @@ typedef enum
 				bool			SetFrom (const NTV2Buffer & inBuffer);
 
 				/**
+					@brief		Replaces my contents from the given hex-encoded string, resizing me if necessary.
+					@param[in]	inStr		Specifies the hex-encoded string whose contents will be
+											decoded and used to resize and fill me. Any whitespace
+											characters are skipped and ignored. All other characters
+											must be a hexadecimal digit (upper or lower case).
+					@return		True if successful; otherwise false.
+				**/
+				bool			SetFromHexString (const std::string & inStr);
+
+				/**
 					@brief		Replaces my contents from the given memory buffer, resizing me to the new byte count.
 					@param[in]	pInSrcBuffer	Specifies the memory buffer whose contents are to be copied into my own.
 					@param[in]	inByteCount		Specifies the number of bytes to be copied.
@@ -6379,6 +6389,15 @@ typedef enum
 					@return A string containing a human-readable representation of me.
 				**/
 				std::string		AsString (UWord inDumpMaxBytes = 0) const;
+
+				/**
+					@brief	Converts my contents into a hex-encoded string.
+					@param[out]	outStr		Receives the hexadecimal-encoded string representation of my contents.
+					@param[in]	inLineBreakInterval	Optionally specifies the number of bytes to encode before
+													inserting a newline. Defaults to zero (no newline insertion).
+					@return True if successful; otherwise false.
+				**/
+				bool			toHexString (std::string & outStr, const size_t inLineBreakInterval = 0) const;
 
 				/**
 					@brief	Dumps me in hex/octal/decimal, with/without Ascii, to the given output stream.

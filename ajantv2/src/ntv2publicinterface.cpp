@@ -325,7 +325,7 @@ ostream & NTV2Buffer::Print (ostream & inOutStream) const
 
 string NTV2Buffer::AsString (UWord inDumpMaxBytes) const
 {
-	ostringstream	oss;
+	ostringstream oss;
 	oss << xHEX0N(GetRawHostPointer(),16) << ":" << DEC(GetByteCount()) << " bytes";
 	if (inDumpMaxBytes	&&	GetHostPointer())
 	{
@@ -341,10 +341,25 @@ string NTV2Buffer::AsString (UWord inDumpMaxBytes) const
 	return oss.str();
 }
 
+bool NTV2Buffer::toHexString (std::string & outStr, const size_t inLineBreakInterval) const
+{
+	outStr.clear();
+	ostringstream oss;
+	if (GetHostPointer() && GetByteCount())
+		for (int ndx(0);  ndx < int(GetByteCount());  )
+		{
+			oss << HEX0N(uint16_t(U8(ndx++)),2);
+			if (inLineBreakInterval  &&  ((size_t(ndx) % inLineBreakInterval) == 0))
+				oss << endl;
+		}
+	outStr = oss.str();
+	return !outStr.empty();
+}
+
 static string print_address_offset (const size_t inRadix, const ULWord64 inOffset)
 {
-	const streamsize	maxAddrWidth (sizeof(ULWord64) * 2);
-	ostringstream		oss;
+	const streamsize maxAddrWidth (sizeof(ULWord64) * 2);
+	ostringstream oss;
 	if (inRadix == 8)
 		oss << OCT0N(inOffset,maxAddrWidth) << ": ";
 	else if (inRadix == 10)
@@ -354,15 +369,15 @@ static string print_address_offset (const size_t inRadix, const ULWord64 inOffse
 	return oss.str();
 }
 
-ostream & NTV2Buffer::Dump (	ostream &		inOStream,
-								const size_t	inStartOffset,
-								const size_t	inByteCount,
-								const size_t	inRadix,
-								const size_t	inBytesPerGroup,
-								const size_t	inGroupsPerRow,
-								const size_t	inAddressRadix,
-								const bool		inShowAscii,
-								const size_t	inAddrOffset) const
+ostream & NTV2Buffer::Dump (ostream &		inOStream,
+							const size_t	inStartOffset,
+							const size_t	inByteCount,
+							const size_t	inRadix,
+							const size_t	inBytesPerGroup,
+							const size_t	inGroupsPerRow,
+							const size_t	inAddressRadix,
+							const bool		inShowAscii,
+							const size_t	inAddrOffset) const
 {
 	if (IsNULL())
 		return inOStream;
@@ -1745,6 +1760,32 @@ bool NTV2Buffer::CopyFrom (const NTV2Buffer & inSrcBuffer, const NTV2SegmentedXf
 	return true;
 }
 
+bool NTV2Buffer::SetFromHexString (const string & inStr)
+{
+	string str(inStr);
+
+	//	Remove all whitespace...
+	const string newline("\n"), tab("\t");
+	aja::replace(str, newline, string());
+	aja::replace(str, tab, string());
+	aja::upper(str);
+
+	//	Fail if any non-hex found...
+	for (size_t ndx(0);  ndx < str.size();  ndx++)
+		if (!aja::is_hex_digit(str.at(ndx)))
+			return false;
+
+	if (str.size() & 1)
+		return false;	//	Remaining length must be even
+	if (!Allocate(str.size() / 2))
+		return false;	//	Resize failed
+
+	//	Decode and copy in the data...
+	for (size_t srcNdx(0), dstNdx(0);  srcNdx < str.size();  srcNdx += 2)
+		U8(dstNdx++) = uint8_t(aja::stoul (str.substr(srcNdx,2), AJA_NULL, 16));
+
+	return true;
+}
 
 bool NTV2Buffer::SwapWith (NTV2Buffer & inBuffer)
 {

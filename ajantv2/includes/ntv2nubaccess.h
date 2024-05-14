@@ -40,7 +40,7 @@ static const std::string	kFuncNameCreateServer	("CreateServer");	///< @brief	Cre
 static const std::string	kFuncNameGetRegInfo	("GetRegistrationInfo");	///< @brief	Answers with plugin registration info
 
 /**
-	@brief	A simple set of zero or more key/value pairs. (New in SDK 16.3)
+	@brief	A simple (not thread-safe) set of key/value pairs. (New in SDK 16.3)
 **/
 class AJAExport NTV2Dictionary
 {
@@ -58,6 +58,7 @@ class AJAExport NTV2Dictionary
 		size_t				largestKeySize (void) const;	///< @return	The length of my largest key, in bytes
 		size_t				largestValueSize (void) const;	///< @return	The length of my largest value, in bytes
 		std::ostream &		Print (std::ostream & oss, const bool inCompact = true) const;	///< @brief	Prints human-readable representation to ostream
+		bool				toString (std::string & outStr) const;	///< @brief	Serializes my contents into the given string
 		///@}
 
 		/**
@@ -65,10 +66,15 @@ class AJAExport NTV2Dictionary
 		**/
 		///@{
 		inline void			clear (void)	{mDict.clear();}		///< @brief	Removes all of my key/value pairs
-		inline bool			insert (const std::string & inKey, const std::string & inValue) {mDict[inKey] = inValue; return true;}	///< @return	Stores the given value using the given key; overwrites existing value if already present
+		bool				insert (const std::string & inKey, const std::string & inValue);	///< @brief	Stores the given value using the given key; overwrites existing value if already present
 		inline size_t		erase (const std::string & inKey)	{return mDict.erase(inKey);}	///< @brief	Erases the given key and its corresponding value from me, returns 1 if successful, 0 if not
-		size_t				UpdateFrom (const NTV2Dictionary & inDict);	///< @brief	Updates all values from inDict with matching keys, ignoring all non-matching keys
-		size_t				AddFrom (const NTV2Dictionary & inDict);	///< @brief	Adds all values from inDict with non-matching keys, ignoring all matching keys
+		size_t				updateFrom (const NTV2Dictionary & inDict);	///< @brief	Updates all values from inDict with matching keys, ignoring all non-matching keys
+		size_t				addFrom (const NTV2Dictionary & inDict);	///< @brief	Adds all values from inDict with non-matching keys, ignoring all matching keys
+		bool				resetFromString (const std::string & inStr);	///< @brief	Resets me from the given string/stream
+	#if !defined(NTV2_DEPRECATE_17_1)
+		inline NTV2_DEPRECATED_f(size_t UpdateFrom (const NTV2Dictionary & inDict)) {return updateFrom(inDict);}	///< @deprecated	Use updateFrom instead.
+		inline NTV2_DEPRECATED_f(size_t AddFrom (const NTV2Dictionary & inDict)) {return addFrom(inDict);}	///< @deprecated	Use addFrom instead.
+	#endif	//	!defined(NTV2_DEPRECATE_17_1)
 		///@}
 
 	protected:

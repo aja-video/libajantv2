@@ -132,6 +132,37 @@ ostream & NTV2Dictionary::Print (ostream & oss, const bool inCompact) const
 	return oss;
 }
 
+bool NTV2Dictionary::resetFromString (const string & inStr)
+{
+	size_t badKVPairs(0), insertFailures(0);
+	clear();
+	const NTV2StringList keyValPairs (aja::split(inStr, "\n"));
+	for (NTV2StringListConstIter it(keyValPairs.begin());  it != keyValPairs.end();  ++it)
+	{
+		const NTV2StringList keyValPair (aja::split(*it, "\t"));
+		if (keyValPair.size() != 2)
+			{badKVPairs++;  continue;}
+		const string k(keyValPair.at(0)), v(keyValPair.at(1));
+		if (!insert(k, v))
+			insertFailures++;
+	}
+	return !empty()  &&  !badKVPairs  &&  !insertFailures;
+}
+
+bool NTV2Dictionary::toString (string & outStr) const
+{
+	outStr.clear();
+	ostringstream oss;
+	for (DictConstIter it(mDict.begin());  it != mDict.end();  )
+	{
+		oss << it->first << "\t" << it->second;
+		if (++it != mDict.end())
+			oss << "\n";
+	}
+	outStr = oss.str();
+	return !outStr.empty();
+}
+
 NTV2StringSet NTV2Dictionary::keys (void) const
 {
 	NTV2StringSet result;
@@ -158,7 +189,23 @@ size_t NTV2Dictionary::largestValueSize (void) const
 	return result;
 }
 
-size_t NTV2Dictionary::UpdateFrom (const NTV2Dictionary & inDict)
+bool NTV2Dictionary::insert (const string & inKey, const string & inValue)
+{
+	if (inKey.empty())
+		return false;
+	if (inKey.find("\t") != string::npos)
+		return false;
+	if (inKey.find("\n") != string::npos)
+		return false;
+	if (inValue.find("\t") != string::npos)
+		return false;
+	if (inValue.find("\n") != string::npos)
+		return false;
+	mDict[inKey] = inValue;
+	return true;
+}
+
+size_t NTV2Dictionary::updateFrom (const NTV2Dictionary & inDict)
 {
 	size_t numUpdated(0);
 	for (DictConstIter it(inDict.mDict.begin());  it != inDict.mDict.end();  ++it)
@@ -167,7 +214,7 @@ size_t NTV2Dictionary::UpdateFrom (const NTV2Dictionary & inDict)
 	return numUpdated;
 }
 
-size_t NTV2Dictionary::AddFrom (const NTV2Dictionary & inDict)
+size_t NTV2Dictionary::addFrom (const NTV2Dictionary & inDict)
 {
 	size_t numAdded(0);
 	for (DictConstIter it(inDict.mDict.begin());  it != inDict.mDict.end();  ++it)
@@ -866,8 +913,8 @@ bool NTV2RPCClientAPI::SetConnectParams (const NTV2ConnectParams & inNewParams, 
 	size_t oldCount(mConnectParams.size()), updated(0), added(0);
 	if (inAugment)
 	{
-		updated = mConnectParams.UpdateFrom(inNewParams);
-		added = mConnectParams.AddFrom(inNewParams);
+		updated = mConnectParams.updateFrom(inNewParams);
+		added = mConnectParams.addFrom(inNewParams);
 		NBDBG(DEC(updated) << " connect param(s) updated, " << DEC(added) << " added: " << mConnectParams);
 	}
 	else
@@ -1241,8 +1288,8 @@ bool NTV2RPCServerAPI::SetConfigParams (const NTV2ConnectParams & inNewParams, c
 	size_t oldCount(mConfigParams.size()), updated(0), added(0);
 	if (inAugment)
 	{
-		updated = mConfigParams.UpdateFrom(inNewParams);
-		added = mConfigParams.AddFrom(inNewParams);
+		updated = mConfigParams.updateFrom(inNewParams);
+		added = mConfigParams.addFrom(inNewParams);
         NBSDBG(DEC(updated) << " config param(s) updated, " << DEC(added) << " added: " << mConfigParams);
 	}
 	else
