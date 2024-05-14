@@ -672,15 +672,7 @@ if (NOT TARGET ${PROJECT_NAME})
     endif()
 
     set(_compiler_id_c_or_cxx_msvc $<OR:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>)
-    target_compile_options(${PROJECT_NAME} PRIVATE
-        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc}>:/MP /Zm200>
-        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc},$<CONFIG:Release>>:/O2 /W3>
-        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc},$<CONFIG:Debug,RelWithDebInfo>>:/Od /RTC1 /W3>
-        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>>:-fPIC>
-        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,$<CONFIG:Release>>:-O2 -Wall -Wextra>
-        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,$<CONFIG:Debug,RelWithDebInfo>>:-O0 -Wall>
-    )
-    target_compile_options(${PROJECT_NAME} INTERFACE
+    target_compile_options(${PROJECT_NAME} PUBLIC
         $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc}>:/MP /Zm200>
         $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc},$<CONFIG:Release>>:/O2 /W3>
         $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc},$<CONFIG:Debug,RelWithDebInfo>>:/Od /RTC1 /W3>
@@ -689,11 +681,10 @@ if (NOT TARGET ${PROJECT_NAME})
         $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,$<CONFIG:Debug,RelWithDebInfo>>:-O0 -Wall>
     )
 
-    target_include_directories(${PROJECT_NAME} PRIVATE ${TARGET_INCLUDE_DIRS})
-    target_include_directories(${PROJECT_NAME} INTERFACE
+    target_include_directories(${PROJECT_NAME} PUBLIC
         "$<BUILD_INTERFACE:${TARGET_INCLUDE_DIRS}>")
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${TARGET_LINK_LIBS})
-    target_link_libraries(${PROJECT_NAME} INTERFACE
+
+    target_link_libraries(${PROJECT_NAME} PUBLIC
         "$<BUILD_INTERFACE:${TARGET_LINK_LIBS}>")
 
 	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
