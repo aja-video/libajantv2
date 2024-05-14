@@ -18,7 +18,6 @@ endif()
 
 include(GNUInstallDirs)
 include(CMakeOptions)
-include(CompilerFlags)
 include(Defines)
 include(Version)
 
