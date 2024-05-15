@@ -574,7 +574,7 @@ class AJAExport CNTV2DriverInterface
 		/**
 			@return		Const reference to my connection parameters dictionary (currently valid only for remote/software devices).
 		**/
-		virtual const NTV2Dictionary &	ConnectParams (void) const;		//	New in SDK 17.1
+		virtual NTV2Dictionary			ConnectParams (void) const;		//	New in SDK 17.1
 
 		//	DEPRECATED FUNCTIONS
 #if !defined(NTV2_DEPRECATE_16_0)
