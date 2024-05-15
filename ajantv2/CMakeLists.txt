@@ -49,7 +49,7 @@ else()
     set(ENABLE_TESTING OFF)
     set(LIB_INSTALL_DIR ${CMAKE_INSTALL_FULL_LIBDIR})
 
-    set(MBEDTLS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/mbedtls/include)
+    set(MBEDTLS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/mbedtls/src/mbedtls/include)
     set(MBEDTLS_LIBRARY_DIR ${CMAKE_BINARY_DIR}/mbedtls/src/mbedtls-build/library)
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         set(MBEDTLS_LIBRARY ${MBEDTLS_LIBRARY_DIR}/mbedtls.lib)
@@ -67,7 +67,11 @@ else()
         PREFIX ${CMAKE_BINARY_DIR}/mbedtls
         GIT_REPOSITORY https://github.com/Mbed-TLS/mbedtls.git
         GIT_TAG v3.6.0
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DENABLE_TESTING=OFF
+        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} 
+                   -DENABLE_TESTING=OFF 
+                   -DENABLE_PROGRAMS=OFF
+                   -DCMAKE_CXX_FLAGS=-fPIC 
+                   -DCMAKE_C_FLAGS=-fPIC
         BUILD_ALWAYS TRUE
         BUILD_BYPRODUCTS ${MBEDTLS_LIBRARY} ${MBEDX509_LIBRARY} ${MBEDCRYPTO_LIBRARY}
     )
