@@ -894,7 +894,7 @@ bool NTV2DeviceSpecParser::IsLegalSerialNumChar (const char inChar)
 	NTV2RPCClientAPI
 *****************************************************************************************************************************************************/
 
-NTV2RPCClientAPI::NTV2RPCClientAPI (const NTV2ConnectParams & inParams)
+NTV2RPCClientAPI::NTV2RPCClientAPI (NTV2ConnectParams inParams)
 	:	mConnectParams	(inParams)
 {
 	AJADebug::Open();
@@ -906,10 +906,34 @@ NTV2RPCClientAPI::~NTV2RPCClientAPI ()
 		NTV2Disconnect();
 }
 
+NTV2ConnectParams NTV2RPCClientAPI::ConnectParams (void) const
+{
+	AJAAutoLock tmp(&mParamLock);
+	return mConnectParams;
+}
+
+bool NTV2RPCClientAPI::HasConnectParam (const string & inParam) const
+{
+	AJAAutoLock tmp(&mParamLock);
+	return mConnectParams.hasKey(inParam);
+}
+
+string NTV2RPCClientAPI::ConnectParam (const string & inParam) const
+{
+	AJAAutoLock tmp(&mParamLock);
+	return mConnectParams.valueForKey(inParam);
+}
+
+bool NTV2RPCClientAPI::ConnectHasScheme (void) const
+{
+	return HasConnectParam(kConnectParamScheme);
+}
+
 bool NTV2RPCClientAPI::SetConnectParams (const NTV2ConnectParams & inNewParams, const bool inAugment)
 {
 	if (IsConnected())
 		{NBFAIL("Cannot set connect params while connected");  return false;}
+	AJAAutoLock tmp(&mParamLock);
 	size_t oldCount(mConnectParams.size()), updated(0), added(0);
 	if (inAugment)
 	{
@@ -1043,6 +1067,7 @@ bool NTV2RPCClientAPI::NTV2OpenRemote (void)
 
 bool NTV2RPCClientAPI::NTV2CloseRemote (void)
 {
+	AJAAutoLock tmp(&mParamLock);
 	mConnectParams.clear();
 	return true;
 }
@@ -1074,28 +1099,15 @@ static uint64_t* GetSymbolAddress (void * pHandle, const string & inSymbolName, 
 	return result;
 }
 
-extern "C"
-{
-	/**
-		A function that answers with a plugin's registration info.
-			pHandle:			Specifies the handle to the open DLL/dylib/so.
-			inHostSDKVersion:	Specifies the NTV2 SDK version the caller was compiled with.
-			outInfo:			Receives the NTV2Dictionary that contains the registration info.
-		Returns true if successful; otherwise false.
-		Logs lots of messages to the AJA_DebugUnit_RPCClient group.
-	**/
-	typedef bool (*fpGetRegistrationInfo) (void * pHandle, const uint32_t inHostSDKVers, NTV2Dictionary & /*outInfo*/);
-}
-
 //	Loads NTV2 plugin (specified in 'inParams'), and returns address of given function
-static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, const string & inFuncName)
+static uint64_t * GetNTV2PluginFunction (NTV2ConnectParams & params, const string & inFuncName)
 {
 	//	URL scheme dictates which plugin to load...
-	if (!inParams.hasKey(kConnectParamScheme))
-		{NBCFAIL("Missing scheme -- params: " << inParams);  return AJA_NULL;}	//	No scheme
-	string scheme(inParams.valueForKey(kConnectParamScheme));
+	if (!params.hasKey(kConnectParamScheme))
+		{NBCFAIL("Missing scheme -- params: " << params);  return AJA_NULL;}	//	No scheme
+	string scheme(params.valueForKey(kConnectParamScheme));
 	if (scheme.find("ntv2"))	//	Scheme must start with "ntv2"
-		{NBCFAIL("Scheme '" << inParams.valueForKey(kConnectParamScheme) << "' results in empty plugin name");  return AJA_NULL;}	//	No "host"
+		{NBCFAIL("Scheme '" << params.valueForKey(kConnectParamScheme) << "' results in empty plugin name");  return AJA_NULL;}	//	No "host"
 	scheme.erase(0,4);	//	Remainder of scheme yields DLL/dylib/so name...
 
 	//	Look for plugins in the "AJA" folder (parent folder of our "firmware" folder)...
@@ -1137,7 +1149,6 @@ static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, con
 	}
 
 	//	Open the shared library...
-	uint64_t * pFunc (AJA_NULL);
 	ostringstream loadErr;
 	#if defined(MSWindows)
 		//	Open the DLL (Windows)...
@@ -1167,7 +1178,8 @@ static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, con
 		{NBCFAIL(loadErr.str());  return AJA_NULL;}
 	NBCDBG("'" << pluginPath << "' opened");
 
-	do
+	uint64_t * pResult (AJA_NULL);
+	do	//	do only once
 	{
 		//	Get address of required GetRegInfo function...
 		uint64_t * pInfoJSON(::GetSymbolAddress(pHandle, kFuncNameGetRegInfo, errStr));
@@ -1178,25 +1190,39 @@ static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, con
 		NTV2Dictionary regInfo;
 		fpGetRegistrationInfo pRegInfo = reinterpret_cast<fpGetRegistrationInfo>(pInfoJSON);
 		NTV2_ASSERT(pRegInfo);
-		if (!(*pRegInfo)(pHandle, 0, regInfo))
+		if (!(*pRegInfo)(uint32_t(AJA_NTV2_SDK_VERSION), regInfo))
 			{NBCFAIL("'" << pluginPath << "': '" << kFuncNameGetRegInfo << "' failed");  break;}
 		NBCDBG("'" << pluginPath << "': '" << kFuncNameGetRegInfo << "': " << regInfo);
 
-		//	Check registration info...
+		//	Some registration info keys are required...
 		if (regInfo.empty())
 			{NBCFAIL("'" << pluginPath << "': no registration info (empty)");  break;}
-		if (!regInfo.hasKey("Vendor"))
-			{NBCFAIL("'" << pluginPath << "': no 'Vendor' key in registration info");  break;}
-		if (!regInfo.hasKey("PluginName"))
-			{NBCFAIL("'" << pluginPath << "': no 'PluginName' key in registration info");  break;}
-		const string vendor(regInfo.valueForKey("Vendor")), pluginName(regInfo.valueForKey("PluginName"));
+		NTV2StringList missingRegInfoKeys;
+		static const NTV2StringList reqKeys = {kNTV2PluginRegInfoKey_Vendor, kNTV2PluginRegInfoKey_CommonName,
+												kNTV2PluginRegInfoKey_ShortName, kNTV2PluginRegInfoKey_LongName,
+												kNTV2PluginRegInfoKey_Description, kNTV2PluginRegInfoKey_Copyright};
+		for (size_t ndx(0);  ndx < reqKeys.size();  ndx++)
+			if (!regInfo.hasKey(reqKeys.at(ndx)))
+				missingRegInfoKeys.push_back(reqKeys.at(ndx));
+		if (!missingRegInfoKeys.empty())
+		{	NBCFAIL("'" << pluginPath << "': missing key(s) in registration info: '"
+					<< aja::join(missingRegInfoKeys, "','") << "'");
+			break;
+		}
+
+		//	Make sure vendor matches common name in signature...
+		//	TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD
+
+		//	Add regInfo to params passed into new client or server instance...
+		const size_t numParamsAdded (params.addFrom(regInfo));
+		NBCDBG("'" << pluginPath << "': " << DEC(numParamsAdded) << " reg info params added");
 
 		//	Finally, the last step ---- get address of requested function...
-		pFunc = ::GetSymbolAddress(pHandle, inFuncName, errStr);
-		if (!pFunc)
+		pResult = ::GetSymbolAddress(pHandle, inFuncName, errStr);
+		if (!pResult)
 			{NBCFAIL("'" << pluginPath << "': " << errStr);  break;}
 	} while (false);	//	One time only
-	if (!pFunc)
+	if (!pResult)
 	{	//	Close the dylib/so/DLL...
 		#if defined(AJABareMetal)
 			// TODO
@@ -1209,12 +1235,12 @@ static uint64_t * GetNTV2PluginFunction (const NTV2ConnectParams & inParams, con
 	}
 	else
 		NBCDBG("Calling '" << inFuncName << "' in '" << pluginPath << "'");
-	return pFunc;
+	return pResult;
 #endif	//	!defined(NTV2_PREVENT_PLUGIN_LOAD)
 }	//	GetNTV2PluginFunction
 
 
-NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inParams)	//	CLASS METHOD
+NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (NTV2ConnectParams inParams)	//	CLASS METHOD
 {
 	fpCreateClient pFunc (reinterpret_cast<fpCreateClient>(::GetNTV2PluginFunction(inParams, kFuncNameCreateClient)));
 	if (!pFunc)
@@ -1234,7 +1260,7 @@ NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (const NTV2ConnectParams & inP
 	NTV2RPCServerAPI
 *****************************************************************************************************************************************************/
 
-NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const NTV2ConfigParams & inParams)	//	CLASS METHOD
+NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (NTV2ConfigParams inParams)	//	CLASS METHOD
 {
 	fpCreateServer pFunc (reinterpret_cast<fpCreateServer>(::GetNTV2PluginFunction(inParams, kFuncNameCreateServer)));
 	if (!pFunc)
@@ -1257,7 +1283,7 @@ NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const string & inURL)	//	CLAS
 	return CreateServer(parser.Results());
 }
 
-NTV2RPCServerAPI::NTV2RPCServerAPI (const NTV2ConnectParams & inParams)
+NTV2RPCServerAPI::NTV2RPCServerAPI (NTV2ConnectParams inParams)
 	:	mConfigParams	(inParams)
 {
 	NTV2Buffer spare(&mSpare, sizeof(mSpare));  spare.Fill(0ULL);
@@ -1283,8 +1309,27 @@ ostream & NTV2RPCServerAPI::Print (ostream & oss) const
 	return oss;
 }
 
+NTV2ConfigParams NTV2RPCServerAPI::ConfigParams (void) const
+{
+	AJAAutoLock tmp(&mParamLock);
+	return mConfigParams;
+}
+
+bool NTV2RPCServerAPI::HasConfigParam (const string & inParam) const
+{
+	AJAAutoLock tmp(&mParamLock);
+	return mConfigParams.hasKey(inParam);
+}
+
+string NTV2RPCServerAPI::ConfigParam (const string & inParam) const
+{
+	AJAAutoLock tmp(&mParamLock);
+	return mConfigParams.valueForKey(inParam);
+}
+
 bool NTV2RPCServerAPI::SetConfigParams (const NTV2ConnectParams & inNewParams, const bool inAugment)
 {
+	AJAAutoLock tmp(&mParamLock);
 	size_t oldCount(mConfigParams.size()), updated(0), added(0);
 	if (inAugment)
 	{
