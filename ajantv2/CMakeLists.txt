@@ -678,6 +678,7 @@ if (NOT TARGET ${PROJECT_NAME})
     endif()
 
     set(_compiler_id_c_or_cxx_msvc $<OR:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>)
+    set(_compiler_is_gnu_or_clang $<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>)
     set(_compile_options_win_debug /Od /RTC1 /W3)
     set(_compile_options_mac_lin_debug -O0 -Wall)
     target_compile_options(${PROJECT_NAME} PUBLIC
@@ -685,10 +686,10 @@ if (NOT TARGET ${PROJECT_NAME})
         $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc},$<CONFIG:Release>>:/O2 /W3>
         $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc},$<CONFIG:RelWithDebInfo>>:${_compile_options_win_debug}>
         $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc},$<CONFIG:Debug>>:${_compile_options_win_debug}>
-        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>>:-fPIC>
-        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,$<CONFIG:Release>>:-O2 -Wall -Wextra>
-        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,$<CONFIG:RelWithDebInfo>>:${_compile_options_mac_lin_debug}>
-        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,$<CONFIG:Debug>>:${_compile_options_mac_lin_debug}>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,${_compiler_is_gnu_or_clang}>:-fPIC>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,${_compiler_is_gnu_or_clang},$<CONFIG:Release>>:-O2 -Wall -Wextra>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,${_compiler_is_gnu_or_clang},$<CONFIG:RelWithDebInfo>>:${_compile_options_mac_lin_debug}>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,${_compiler_is_gnu_or_clang},$<CONFIG:Debug>>:${_compile_options_mac_lin_debug}>
     )
 
     target_include_directories(${PROJECT_NAME} PUBLIC
