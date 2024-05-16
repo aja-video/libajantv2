@@ -9,7 +9,7 @@
 #define NTV2NUBACCESS_H
 
 #include "ntv2utils.h"		//	NTV2StringList
-#include "system/lock.h"	//	AJALock
+#include "ajabase/system/lock.h"	//	AJALock
 #include <string>
 #include <vector>
 #include <map>
