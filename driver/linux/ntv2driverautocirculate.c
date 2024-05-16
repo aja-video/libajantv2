@@ -4875,15 +4875,15 @@ StartAudioCapture(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 	address = GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, &pSpinLock);
 
 	ntv2_spin_lock_irqsave(pSpinLock, flags);
-	value = READ_REGISTER_ULWord(address);
+	value = READ_REGISTER_ULWord(deviceNumber, address);
 	value |= BIT_8;
 	value &= ~BIT_0;
-	WRITE_REGISTER_ULWord(address, value);
+	WRITE_REGISTER_ULWord(deviceNumber, address, value);
 
-	value = READ_REGISTER_ULWord(address);
+	value = READ_REGISTER_ULWord(deviceNumber, address);
 	value |= BIT_0;
 	value &= ~BIT_8;
-	WRITE_REGISTER_ULWord(address, value);
+	WRITE_REGISTER_ULWord(deviceNumber, address, value);
 	ntv2_spin_unlock_irqrestore(pSpinLock, flags);
 }
 
@@ -4908,10 +4908,10 @@ StopAudioCapture(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 	address = GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, &pSpinLock);
 
 	ntv2_spin_lock_irqsave(pSpinLock, flags);
-	value = READ_REGISTER_ULWord(address);
+	value = READ_REGISTER_ULWord(deviceNumber, address);
 	value |= BIT_8;
 	value &= ~BIT_0;
-	WRITE_REGISTER_ULWord(address, value);
+	WRITE_REGISTER_ULWord(deviceNumber, address, value);
 	ntv2_spin_unlock_irqrestore(pSpinLock, flags);
 }
 
@@ -4937,9 +4937,9 @@ StopAudioPlayback(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 
     // Reset Audio Playback... basically stops it.
 	ntv2_spin_lock_irqsave(pSpinLock, flags);
-	value = READ_REGISTER_ULWord(address);
+	value = READ_REGISTER_ULWord(deviceNumber, address);
 	value |= BIT_9; //Set the Audio Output reset bit!
-	WRITE_REGISTER_ULWord(address, value);
+	WRITE_REGISTER_ULWord(deviceNumber, address, value);
 	ntv2_spin_unlock_irqrestore(pSpinLock, flags);
 	if (MsgsEnabled(NTV2_DRIVER_AUDIO_DEBUG_MESSAGES))
 	{
@@ -4970,10 +4970,10 @@ StartAudioPlayback(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 	address = GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, &pSpinLock);
 
 	ntv2_spin_lock_irqsave(pSpinLock, flags);
-	value = READ_REGISTER_ULWord(address);
+	value = READ_REGISTER_ULWord(deviceNumber, address);
 
 	value &= (~BIT_9); //Clear the Audio Output reset bit!
-	WRITE_REGISTER_ULWord(address, value);
+	WRITE_REGISTER_ULWord(deviceNumber, address, value);
     udelay(30); //30us
 
 	ntv2_spin_unlock_irqrestore(pSpinLock, flags);
@@ -5206,10 +5206,10 @@ PauseAudioPlayback(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 	address = GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, & pSpinLock);
 
 	ntv2_spin_lock_irqsave(pSpinLock, flags);
-	value = READ_REGISTER_ULWord(address);
+	value = READ_REGISTER_ULWord(deviceNumber, address);
 
 	value |= BIT_11; 	// Set the pause bit
-	WRITE_REGISTER_ULWord(address, value);
+	WRITE_REGISTER_ULWord(deviceNumber, address, value);
 	ntv2_spin_unlock_irqrestore(pSpinLock, flags);
 }
 
@@ -5235,10 +5235,10 @@ UnPauseAudioPlayback(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 	address = GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, &pSpinLock);
 
 	ntv2_spin_lock_irqsave(pSpinLock, flags);
-	value = READ_REGISTER_ULWord(address);
+	value = READ_REGISTER_ULWord(deviceNumber, address);
 
 	value &= ~ (BIT_11);  // Clear the pause bit
-	WRITE_REGISTER_ULWord(address, value);
+	WRITE_REGISTER_ULWord(deviceNumber, address, value);
 	ntv2_spin_unlock_irqrestore(pSpinLock, flags);
 }
 
@@ -5247,7 +5247,7 @@ IsAudioPlaybackPaused(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 {
 	bool paused = 0;
 
-	if ((READ_REGISTER_ULWord(GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, NULL)) & BIT_11))
+	if ((READ_REGISTER_ULWord(deviceNumber, GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, NULL)) & BIT_11))
 	{
 		paused = 1;
 	}
@@ -5266,7 +5266,7 @@ static bool
 IsAudioPlaybackStopped(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 {
 	// Audio is (supposed) to be playing if BIT_9 is cleared (not in reset)
-	if ((READ_REGISTER_ULWord(GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, NULL)) & BIT_9) != 0)
+	if ((READ_REGISTER_ULWord(deviceNumber, GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, NULL)) & BIT_9) != 0)
 		return 1;
 
 	return 0;
@@ -5276,7 +5276,7 @@ static ULWord
 IsAudioPlaying(ULWord deviceNumber, NTV2AudioSystem audioSystem)
 {
 	// Audio is (supposed) to be playing if BIT_9 is cleared (not in reset)
-	if ((READ_REGISTER_ULWord(GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, NULL)) & BIT_9) == 0)
+	if ((READ_REGISTER_ULWord(deviceNumber, GetAudioControlRegisterAddressAndLock(deviceNumber, audioSystem, NULL)) & BIT_9) == 0)
 		return 1;
 
 	return 0;
@@ -5580,13 +5580,13 @@ DownloadLinearLUTToHW (ULWord deviceNumber, NTV2Channel channel, int bank)
 			lutValue = ((i+1)<<22) + (i<<6);
 
 			address = (unsigned long)(getNTV2Params(deviceNumber)->_pGlobalControl + (kColorCorrectionLUTOffset_Red)   + (i*2));
-			WRITE_REGISTER_ULWord(address, lutValue);
+			WRITE_REGISTER_ULWord(deviceNumber, address, lutValue);
 
 			address = (unsigned long)(getNTV2Params(deviceNumber)->_pGlobalControl + (kColorCorrectionLUTOffset_Green) + (i*2));
-			WRITE_REGISTER_ULWord(address, lutValue);
+			WRITE_REGISTER_ULWord(deviceNumber, address, lutValue);
 
 			address = (unsigned long)(getNTV2Params(deviceNumber)->_pGlobalControl + (kColorCorrectionLUTOffset_Blue)  + (i*2));
-			WRITE_REGISTER_ULWord(address, lutValue);
+			WRITE_REGISTER_ULWord(deviceNumber, address, lutValue);
 		}
 		SetLUTEnable(deviceNumber, channel, false);
 
