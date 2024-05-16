@@ -6262,6 +6262,14 @@ typedef enum
 				}
 
 				/**
+					@brief		Truncates me to the given length (provided I'm not page-aligned).
+					@param[in]	inByteCount		Specifies my new length. Must be greater than zero and less
+												than my current length.
+					@return		True if successful; otherwise false.
+				**/
+				bool			Truncate (const size_t inByteCount);
+
+				/**
 					@brief		Assigns me from another NTV2Buffer instance.
 					@param[in]	inRHS		Specifies the NTV2Buffer instance to assign ("deep" copy) to me.
 				**/

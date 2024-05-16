@@ -1073,6 +1073,33 @@ bool NTV2RPCClientAPI::NTV2CloseRemote (void)
 }
 
 
+static bool GetChecksumSHA256 (const NTV2Buffer inContent, NTV2Buffer & outChecksum)
+{
+	if (!inContent)
+		{NBCFAIL("Empty or NULL content buffer");  return false;}
+	if (outChecksum.GetByteCount() < MBEDTLS_MD_MAX_SIZE)
+		{NBCFAIL("Output buffer size " << outChecksum.GetByteCount() << " < " << MBEDTLS_MD_MAX_SIZE);  return false;}
+	const mbedtls_md_info_t * mdi (mbedtls_md_info_from_type(MBEDTLS_MD_SHA256));
+	if (!mdi)
+	{
+		NBCFAIL("digest init failed -- 'mbedtls_md_info_from_type' return NULL");
+		return false;
+	}
+	mbedtls_md_context_t mdctx;
+	::memset(&mdctx, 0, sizeof(mdctx));
+	int rc (mbedtls_md_setup(&mdctx, mdi, 0));
+	if (rc)
+		NBCFAIL("digest init failed -- 'mbedtls_md_setup' returned " << rc);
+	if (!rc  &&  (rc = mbedtls_md_starts(&mdctx)))
+		NBCFAIL("'mbedtls_md_starts' returned " << rc);
+	if (!rc  &&  (rc = mbedtls_md_update(&mdctx, inContent, inContent.GetByteCount())))
+		NBCFAIL("'mbedtls_md_update' returned " << rc);
+    if (!rc  &&  (rc = mbedtls_md_finish(&mdctx, outChecksum)))
+		NBCFAIL("'mbedtls_md_finish' returned " << rc);
+    mbedtls_md_free(&mdctx);
+	return !rc;
+}
+
 static uint64_t* GetSymbolAddress (void * pHandle, const string & inSymbolName, string & outErrorMsg)
 {
 	uint64_t * result(0);
@@ -1132,16 +1159,41 @@ static uint64_t * GetNTV2PluginFunction (NTV2ConnectParams & params, const strin
 	return AJA_NULL;
 #else	//	!defined(NTV2_PREVENT_PLUGIN_LOAD)
 
-	//	Open the dylib/so/DLL & signature files...
-	ifstream sigF(sigPath.c_str(), std::ios::in), dllF(pluginPath.c_str(), std::ios::in);
-	if (!dllF.good())
-		{NBSFAIL("Plugin file '" << pluginPath << "' missing");  return AJA_NULL;}
-	if (!sigF.good())
-		{NBSFAIL("Signature file '" << sigPath << "' missing");  return AJA_NULL;}
+	//	Load entire plugin & sig files...
+	NTV2Buffer sigContent, dllContent;
+	{	NTV2Buffer tmp(512*1024*1024);	//	500MB
+		ifstream dllF(pluginPath.c_str(), std::ios::in);
+		if (!dllF.good())
+			{NBSFAIL("Plugin file '" << pluginPath << "' missing");  return AJA_NULL;}
+		dllF.read(tmp, tmp.GetByteCount());
+		tmp.Truncate(size_t(dllF.gcount()));
+		dllContent = tmp;
+
+		tmp.Allocate(512*1024*1024);	//	500MB
+		ifstream sigF(sigPath.c_str(), std::ios::in);
+		if (!sigF.good())
+			{NBSFAIL("Signature file '" << sigPath << "' missing");  return AJA_NULL;}
+		sigF.read(tmp, tmp.GetByteCount());
+		tmp.Truncate(size_t(sigF.gcount()));
+		sigContent = tmp;
+	}
+
+	//	Decode sigContent...
+	NTV2Dictionary dict;
+	{	const string dictStr (reinterpret_cast<const char*>(sigContent.GetHostPointer()), size_t(sigContent.GetByteCount()));
+		if (!dict.resetFromString(dictStr))
+			{NBSFAIL("Unable to decode signature file '" << sigPath << "'");  return AJA_NULL;}
+	}
+	NBSDBG(DEC(dict.keys().size()) << " keys found in signature file '" << sigPath << "': " << dict.keys());
+
+	//	Compute SHA256 checksum of plugin...
+	NTV2Buffer sha256Checksum(MBEDTLS_MD_MAX_SIZE);
+	if (!GetChecksumSHA256 (dllContent, sha256Checksum))
+		return AJA_NULL;
 
 	mbedtls_x509_crt crt;			//	Container for X509 certificate
 	mbedtls_x509_crt_init(&crt);	//	Initialize it as empty
-	int ret = mbedtls_x509_crt_parse_file(&crt, sigPath.c_str());	//	Load from .sig file
+	int ret = mbedtls_x509_crt_parse_file(&crt, pluginPath.c_str());	//	Load from .sig file
 	if (ret)
 	{	NBSFAIL("'mbedtls_x509_crt_parse_file' returned " << ret << " for '" << sigPath << "'");
 		mbedtls_x509_crt_free(&crt);

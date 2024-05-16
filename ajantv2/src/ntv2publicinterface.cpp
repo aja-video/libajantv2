@@ -1535,6 +1535,19 @@ NTV2Buffer::NTV2Buffer (const NTV2Buffer & inObj)
 		SetFrom(inObj);
 }
 
+bool NTV2Buffer::Truncate (const size_t inByteCount)
+{
+	if (inByteCount == GetByteCount())
+		return true;	//	Same size -- okay
+	if (inByteCount > GetByteCount())
+		return false;	//	Can't be larger than my current size
+	if (!inByteCount)
+		return false;	//	Can't use zero
+	if (IsPageAligned())
+		return false;	//	Don't truncate if page-aligned
+	fByteCount = inByteCount;
+	return true;
+}
 
 NTV2Buffer & NTV2Buffer::operator = (const NTV2Buffer & inRHS)
 {

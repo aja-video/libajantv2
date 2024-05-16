@@ -114,12 +114,14 @@ static bool signItem (const string & inItemPath)
 	//	Make the key/value pair dictionary (maybe JSON later)...
 	NTV2Dictionary dict;
 	string infoStr;
-	dict.insert("Vendor", "AJA Video Systems, Inc.");
-	dict.insert("PluginName", "Software Device");
-	dict.insert("PluginShortName", "swdevice");
-	dict.insert("PluginDescription", "Implements an NTV2 device in software");
+	dict.insert(kNTV2PluginRegInfoKey_Vendor, "AJA Video Systems, Inc.");
+	dict.insert(kNTV2PluginRegInfoKey_CommonName, "aja.com");
+	dict.insert(kNTV2PluginRegInfoKey_LongName, "Software Device");
+	dict.insert(kNTV2PluginRegInfoKey_ShortName, "swdevice");
+	dict.insert(kNTV2PluginRegInfoKey_Description, "Implements an NTV2 device in software");
+	dict.insert(kNTV2PluginRegInfoKey_Copyright, "Copyright (C) 2024 AJA Video Systems");
 	NTV2Buffer phonySig(4096);  for (int ndx(0); ndx < 4096; ndx++) phonySig.U8(ndx) = uint8_t(ndx);
-	string hexStr, fakeFingerprint("1A2B3C4D5E6F1A2B3C4D5E6F1A2B3C4D5E6F1A2B3C4D5E6F");
+	string hexStr, fakeFingerprint("1A2B3C4D5E6F1A2B3C4D5E6F1A2B3C4D5E6F1A2B3C4D5E6F6F6F6F6F6F6F6F6F");
 	phonySig.toHexString(hexStr);
 	dict.insert("DigitalSignature", hexStr);
 	dict.insert("Fingerprint", fakeFingerprint);
@@ -144,6 +146,11 @@ static bool certIsValid (const string & inCertPath)
 	NTV2Buffer certContents;
 	if (!certPath.readFile(certContents))
 		{cerr << "## ERROR:  Cannot read certificate '" << inCertPath << "' contents" << endl;  return false;}
+
+	//	TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD
+	//	Validate the cert was created with (signed by) AJA's CA cert...
+	//	TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD
+
 	if (gIsVerbose)
 		cout << "## NOTE:  Checking certificate file '" << inCertPath << "'" << endl;
 	return true;
