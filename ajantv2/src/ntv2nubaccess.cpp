@@ -1073,6 +1073,7 @@ bool NTV2RPCClientAPI::NTV2CloseRemote (void)
 }
 
 
+#if !defined(NTV2_PREVENT_PLUGIN_LOAD)
 static bool GetChecksumSHA256 (const NTV2Buffer inContent, NTV2Buffer & outChecksum)
 {
 	if (!inContent)
@@ -1099,6 +1100,7 @@ static bool GetChecksumSHA256 (const NTV2Buffer inContent, NTV2Buffer & outCheck
     mbedtls_md_free(&mdctx);
 	return !rc;
 }
+#endif  //  !defined(NTV2_PREVENT_PLUGIN_LOAD)
 
 static uint64_t* GetSymbolAddress (void * pHandle, const string & inSymbolName, string & outErrorMsg)
 {
