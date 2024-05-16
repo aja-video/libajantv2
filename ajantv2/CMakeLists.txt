@@ -59,6 +59,8 @@ else()
         set(MBEDTLS_LIBRARY ${MBEDTLS_LIBRARY_DIR}/libmbedtls.a)
         set(MBEDX509_LIBRARY ${MBEDTLS_LIBRARY_DIR}/libmbedx509.a)
         set(MBEDCRYPTO_LIBRARY ${MBEDTLS_LIBRARY_DIR}/libmbedcrypto.a)
+        set(MBEDTLS_CXX_FLAGS -fPIC)
+        set(MBEDTLS_C_FLAGS -fPIC)
     endif()
 
     # BUILD_BYPRODUCTS informing CMake where the .a files are located is required to make Ninja build work
@@ -70,8 +72,8 @@ else()
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} 
                    -DENABLE_TESTING=OFF 
                    -DENABLE_PROGRAMS=OFF
-                   -DCMAKE_CXX_FLAGS=-fPIC 
-                   -DCMAKE_C_FLAGS=-fPIC
+                   -DCMAKE_CXX_FLAGS=${MBEDTLS_CXX_FLAGS}
+                   -DCMAKE_C_FLAGS=${MBEDTLS_C_FLAGS}
         BUILD_ALWAYS TRUE
         BUILD_BYPRODUCTS ${MBEDTLS_LIBRARY} ${MBEDX509_LIBRARY} ${MBEDCRYPTO_LIBRARY}
     )
