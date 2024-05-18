@@ -24,6 +24,8 @@ public:
 	uint32_t GetPnpDevices();
 
 private:
+
+    static void* Worker(void* refCon);
 	
 	void*				mRefCon;
 	AJAPnpCallback		mCallback;

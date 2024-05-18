@@ -560,11 +560,15 @@ freeNTV2DeviceNumber(unsigned int deviceNumber)
         return;
     }
     
+    if (NTV2Params[deviceNumber] == NULL)
+    {
+        return;
+    }  
+
     if (NTV2Params[deviceNumber]->deviceNumber != deviceNumber)
     {
-        MSG("%s: attempt to free unallocated device number %d\n",
+        MSG("%s: freeing bad device number %d\n",
             getNTV2ModuleParams()->name, deviceNumber);
-        return;
     }
 
     memset(NTV2Params[deviceNumber], 0, sizeof(NTV2PrivateParams));
@@ -590,9 +594,14 @@ getNTV2Params(unsigned int deviceNumber)
 		return NULL;
 	}
 
+    if (NTV2Params[deviceNumber] == NULL)
+    {
+        return NULL;
+    }  
+
     if (NTV2Params[deviceNumber]->deviceNumber != deviceNumber)
     {
-        MSG("%s: device number %d not allocated\n",
+        MSG("%s: bad device number %d\n",
             getNTV2ModuleParams()->name, deviceNumber);
 		return NULL;
 	}
@@ -3830,7 +3839,7 @@ static void remove(struct pci_dev *pdev)
             ioDone = true;
         }
         spin_unlock_irqrestore (&ntv2pp->ioLock, flags);
-        udelay(10000);
+        msleep(10);
     }
 
 #if defined(AJA_CREATE_DEVICE_NODES)
