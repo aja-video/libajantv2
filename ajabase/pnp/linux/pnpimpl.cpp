@@ -122,7 +122,7 @@ AJAPnpImpl::Worker(void* refCon)
 	char buf[4096];
     int count = 0;
 
-    printf("worker start\n");
+//    printf("worker start\n");
 
     if (pPnP == NULL)
         return NULL;
@@ -166,10 +166,12 @@ AJAPnpImpl::Worker(void* refCon)
 
             if ((action != AJA_Pnp_DeviceOffline) && (strstr(buf + i, "DEVNAME=ajantv2"/*"PCI_ID=F1D0"*/) != NULL))
             {
+#if 0                
                 if (action == AJA_Pnp_DeviceAdded)
                     printf("hotplug add %d\n", count++);
                 else
                     printf("hotplug remove %d\n", count++);
+#endif                
                 if (pPnP->mCallback)
                     (*(pPnP->mCallback))(action, pPnP->mRefCon);
             }
@@ -177,7 +179,7 @@ AJAPnpImpl::Worker(void* refCon)
         }
     }
 
-    printf("worker stop %d\n", errno);
+//    printf("worker stop %d\n", errno);
 
     return NULL;
 }
