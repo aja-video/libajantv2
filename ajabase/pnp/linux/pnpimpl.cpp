@@ -10,15 +10,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <math.h>
-#include <time.h>
-
-#include <sys/poll.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <unistd.h>
-
-#include <linux/types.h>
-#include <linux/netlink.h>
+#include <libudev.h>
 
 #include "ajabase/pnp/linux/pnpimpl.h"
 
@@ -48,8 +40,6 @@ AJAPnpImpl::Install(AJAPnpCallback callback, void* refCon, uint32_t devices)
 {
     pthread_t child;
 
-    printf("install\n");
-    
 	mCallback = callback;
 	mRefCon = refCon;
 	mDevices = devices;
@@ -113,77 +103,68 @@ AJAPnpImpl::GetPnpDevices()
 	return mDevices;
 }
 
+
 void*
 AJAPnpImpl::Worker(void* refCon)
 {
     AJAPnpImpl* pPnP = (AJAPnpImpl*)refCon;
-	struct sockaddr_nl nls;
-	struct pollfd pfd;
-	char buf[4096];
+    struct udev *udev;
+	struct udev_device *dev;
+   	struct udev_monitor *mon;
+	int fd;
     int count = 0;
 
-//    printf("worker start\n");
-
-    if (pPnP == NULL)
-        return NULL;
-
-	// Open hotplug event netlink socket
-	memset(&nls,0,sizeof(struct sockaddr_nl));
-	nls.nl_family = AF_NETLINK;
-	nls.nl_pid = getpid();
-	nls.nl_groups = -1;
-
-	pfd.events = POLLIN;
-	pfd.fd = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_KOBJECT_UEVENT);
-	if (pfd.fd == -1)
+	udev = udev_new();
+	if (udev == NULL)
+    {
 		return NULL;
+	}
 
-	// Listen to netlink socket
-	if (bind(pfd.fd, (struct sockaddr *)&nls, sizeof(struct sockaddr_nl)))
-		return NULL;;
+	mon = udev_monitor_new_from_netlink(udev, "udev");
+	udev_monitor_filter_add_match_subsystem_devtype(mon, "ajantv2", NULL);
+	udev_monitor_enable_receiving(mon);
+	fd = udev_monitor_get_fd(mon);
 
 	while (run)
     {
-        poll(&pfd, 1, 100);
-        
-        int i, len = recv(pfd.fd, buf, sizeof(buf), MSG_DONTWAIT);
-//        printf("length %d\n", len);
-        if (len <= 0)
-        {
-            sleep(0.1);
-            continue;
-        }
+		fd_set fds;
+		struct timeval tv;
+		int ret;
 
-        i = 0;
-        AJAPnpMessage action = AJA_Pnp_DeviceOffline;
-        while (i < len)
-        {
-//            printf("%s\n", buf + i);
-            if (strstr(buf + i, "ACTION=add") != NULL)
-                action = AJA_Pnp_DeviceAdded;
-            if (strstr(buf + i, "ACTION=remove") != NULL)
-                action = AJA_Pnp_DeviceRemoved;
+		FD_ZERO(&fds);
+		FD_SET(fd, &fds);
+		tv.tv_sec = 0;
+		tv.tv_usec = 1000000;
 
-            if ((action != AJA_Pnp_DeviceOffline) && (strstr(buf + i, "DEVNAME=ajantv2"/*"PCI_ID=F1D0"*/) != NULL))
-            {
-#if 0                
-                if (action == AJA_Pnp_DeviceAdded)
-                    printf("hotplug add %d\n", count++);
-                else
-                    printf("hotplug remove %d\n", count++);
-#endif                
-                if (pPnP->mCallback)
+		ret = select(fd+1, &fds, NULL, NULL, &tv);
+		if (ret > 0 && FD_ISSET(fd, &fds)) {
+			dev = udev_monitor_receive_device(mon);
+			if (dev) {
+//				printf("I: ACTION=%s\n", udev_device_get_action(dev));
+//				printf("I: DEVNAME=%s\n", udev_device_get_sysname(dev));
+//				printf("I: DEVPATH=%s\n", udev_device_get_devpath(dev));
+                AJAPnpMessage action = AJA_Pnp_DeviceOffline;
+                if (strstr(udev_device_get_action(dev), "add") != NULL)
+                {
+                    action = AJA_Pnp_DeviceAdded;
+//                    printf("hotplug add %d\n", count++);
+                }
+                if (strstr(udev_device_get_action(dev), "remove") != NULL)
+                {
+                    action = AJA_Pnp_DeviceRemoved;
+//                    printf("hotplug remove %d\n", count++);
+                }
+                if ((action != AJA_Pnp_DeviceOffline) && (pPnP->mCallback != NULL))
                     (*(pPnP->mCallback))(action, pPnP->mRefCon);
-            }
-            i += strlen(buf + i) + 1;
-        }
-    }
+                
+				udev_device_unref(dev);
+			}
+		}
+	}
 
-//    printf("worker stop %d\n", errno);
+	udev_unref(udev);
 
     return NULL;
 }
-
-
 
 

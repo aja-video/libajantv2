@@ -539,7 +539,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${AJABASE_PNP_LIN_SOURCES}
         ${AJABASE_SYS_LIN_SOURCES})
     list(APPEND TARGET_LINK_LIBS
-        rt pthread dl)
+        rt pthread dl udev)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "BareMetal")
     list(APPEND TARGET_COMPILE_DEFS
         -D_UNIX98_THREAD_MUTEX_ATTRIBUTES
