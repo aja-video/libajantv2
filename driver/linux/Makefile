@@ -158,7 +158,6 @@ DRIVERLININCS = buildenv.h \
 				driverdbg.h \
 				fs1wait.h \
 				ntv2dma.h \
-				ntv2rdma.h \
 				ntv2driverautocirculate.h \
 				ntv2driverbigphysarea.h \
 				ntv2driverdbgmsgctl.h \

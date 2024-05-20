@@ -1,5 +1,7 @@
 project(ajantv2)
 
+include(ExternalProject)
+
 if (CMAKE_CXX_STANDARD EQUAL 98)
     message(STATUS "ajantv2 building for C++98")
     remove_definitions(
@@ -36,6 +38,53 @@ set(TARGET_INCLUDE_DIRS
     ${LIBAJANTV2_DIR}/ajantv2/includes
     ${CMAKE_CURRENT_BINARY_DIR}
 )
+
+if (AJANTV2_DISABLE_PLUGIN_LOAD)
+    message(STATUS "NTV2 SDK will NOT load 3rd-party plugins")
+    list(APPEND TARGET_COMPILE_DEFS
+        -DNTV2_PREVENT_PLUGIN_LOAD)
+else()
+    message(STATUS "NTV2 SDK will load signed 3rd-party plugins")
+
+    set(ENABLE_TESTING OFF)
+    set(LIB_INSTALL_DIR ${CMAKE_INSTALL_FULL_LIBDIR})
+
+    set(MBEDTLS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/mbedtls/src/mbedtls/include)
+    set(MBEDTLS_LIBRARY_DIR ${CMAKE_BINARY_DIR}/mbedtls/src/mbedtls-build/library)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        set(MBEDTLS_LIBRARY ${MBEDTLS_LIBRARY_DIR}/mbedtls.lib)
+        set(MBEDX509_LIBRARY ${MBEDTLS_LIBRARY_DIR}/mbedx509.lib)
+        set(MBEDCRYPTO_LIBRARY ${MBEDTLS_LIBRARY_DIR}/mbedcrypto.lib)
+    elseif (CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin)$")
+        set(MBEDTLS_LIBRARY ${MBEDTLS_LIBRARY_DIR}/libmbedtls.a)
+        set(MBEDX509_LIBRARY ${MBEDTLS_LIBRARY_DIR}/libmbedx509.a)
+        set(MBEDCRYPTO_LIBRARY ${MBEDTLS_LIBRARY_DIR}/libmbedcrypto.a)
+        set(MBEDTLS_CXX_FLAGS -fPIC)
+        set(MBEDTLS_C_FLAGS -fPIC)
+    endif()
+
+    # BUILD_BYPRODUCTS informing CMake where the .a files are located is required to make Ninja build work
+    ExternalProject_Add(
+        mbedtls
+        PREFIX ${CMAKE_BINARY_DIR}/mbedtls
+        GIT_REPOSITORY https://github.com/Mbed-TLS/mbedtls.git
+        GIT_TAG v3.6.0
+        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} 
+                   -DENABLE_TESTING=OFF 
+                   -DENABLE_PROGRAMS=OFF
+                   -DCMAKE_CXX_FLAGS=${MBEDTLS_CXX_FLAGS}
+                   -DCMAKE_C_FLAGS=${MBEDTLS_C_FLAGS}
+        BUILD_ALWAYS TRUE
+        BUILD_BYPRODUCTS ${MBEDTLS_LIBRARY} ${MBEDX509_LIBRARY} ${MBEDCRYPTO_LIBRARY}
+    )
+
+    list(APPEND TARGET_INCLUDE_DIRS
+            ${MBEDTLS_INCLUDE_DIR})
+    list(APPEND TARGET_LINK_LIBS
+            ${MBEDTLS_LIBRARY}
+            ${MBEDX509_LIBRARY}
+            ${MBEDCRYPTO_LIBRARY})
+endif()
 
 # ajantv2
 set(AJANTV2_HEADERS
@@ -93,7 +142,7 @@ set(AJANTV2_HEADERS
     includes/ntv2testpatterngen.h
     includes/ntv2transcode.h
     includes/ntv2tshelper.h
-    includes/ntv2utf8.h
+#   includes/ntv2utf8.h	# removed in SDK 17.1
     includes/ntv2utils.h
     includes/ntv2verticalfilter.h
     includes/ntv2videodefines.h
@@ -151,7 +200,7 @@ set(AJANTV2_SOURCES
     src/ntv2task.cpp
     src/ntv2testpatterngen.cpp
     src/ntv2transcode.cpp
-    src/ntv2utf8.cpp
+#   src/ntv2utf8.cpp			# removed in SDK 17.1
     src/ntv2utils.cpp
     src/ntv2version.cpp
     src/ntv2verticalfilter.cpp
@@ -441,9 +490,9 @@ if (NOT AJANTV2_BUILD_OPENSOURCE)
     list(APPEND TARGET_COMPILE_DEFS -DAJANTV2_PROPRIETARY)
 endif()
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows")	
-	list(REMOVE_ITEM AJANTV2_TARGET_COMPILE_DEFS 
-		-DUNICODE 
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	list(REMOVE_ITEM AJANTV2_TARGET_COMPILE_DEFS
+		-DUNICODE
 		-D_UNICODE)
     list(APPEND TARGET_COMPILE_DEFS
         -D_MBCS
@@ -513,7 +562,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "BareMetal")
         ${LIBAJANTV2_DIR}/ajabase/system/bm)
     set(AJABASE_HEADERS
         ${AJABASE_COMMON_HEADERS})
-    list(REMOVE_ITEM ${AJABASE_HEADERS} 
+    list(REMOVE_ITEM ${AJABASE_HEADERS}
         ../ajabase/common/guid.h)
 #    set(AJABASE_SOURCES
 #        ${AJABASE_COMMON_SOURCES})
@@ -524,7 +573,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "BareMetal")
         #${AJABASE_PNP_SOURCES}
         ${AJABASE_SYS_SOURCES}
         ${AJABASE_SYS_BM_SOURCES})
-    list(REMOVE_ITEM AJABASE_SOURCES 
+    list(REMOVE_ITEM AJABASE_SOURCES
         ../ajabase/common/guid.cpp)
     message("${AJABASE_SOURCES}")
 #    list(APPEND TARGET_LINK_LIBS
@@ -556,6 +605,11 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         ${CORE_FOUNDATION_FRAMEWORK}
         ${IOKIT_FRAMEWORK}
         ${FOUNDATION_FRAMEWORK})
+endif()
+
+if (NOT AJANTV2_DISABLE_PLUGIN_LOAD)
+    list(APPEND TARGET_INCLUDE_DIRS
+        ${LIBAJANTV2_DIR}/thirdparty/include)
 endif()
 
 set(TARGET_SOURCES
@@ -595,6 +649,11 @@ if (NOT TARGET ${PROJECT_NAME})
         aja_ntv2_log_build_info()
 
         add_library(${PROJECT_NAME} SHARED ${TARGET_SOURCES})
+        
+        if (NOT AJANTV2_DISABLE_PLUGIN_LOAD)
+            add_dependencies(${PROJECT_NAME} mbedtls)
+        endif()
+
         target_compile_definitions(${PROJECT_NAME} PUBLIC
             ${TARGET_COMPILE_DEFS_DYNAMIC}
             ${AJANTV2_TARGET_COMPILE_DEFS})
@@ -608,21 +667,40 @@ if (NOT TARGET ${PROJECT_NAME})
         aja_ntv2_log_build_info()
 
         add_library(${PROJECT_NAME} STATIC ${TARGET_SOURCES})
+
+        if (NOT AJANTV2_DISABLE_PLUGIN_LOAD)
+            add_dependencies(${PROJECT_NAME} mbedtls)
+        endif()
+
         target_compile_definitions(${PROJECT_NAME} PUBLIC
             ${TARGET_COMPILE_DEFS_STATIC}
             ${AJANTV2_TARGET_COMPILE_DEFS})
     endif()
 
-    target_include_directories(${PROJECT_NAME} PRIVATE ${TARGET_INCLUDE_DIRS})
-    target_include_directories(${PROJECT_NAME} INTERFACE
+    set(_compiler_id_c_or_cxx_msvc $<OR:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>)
+    set(_compiler_is_gnu_or_clang $<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>)
+    set(_compile_options_win_debug /Od /RTC1 /W3)
+    set(_compile_options_mac_lin_debug -O0 -Wall)
+    target_compile_options(${PROJECT_NAME} PUBLIC
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc}>:/MP /Zm200>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc},$<CONFIG:Release>>:/O2 /W3>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc},$<CONFIG:RelWithDebInfo>>:${_compile_options_win_debug}>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc},$<CONFIG:Debug>>:${_compile_options_win_debug}>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,${_compiler_is_gnu_or_clang}>:-fPIC>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,${_compiler_is_gnu_or_clang},$<CONFIG:Release>>:-O2 -Wall -Wextra>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,${_compiler_is_gnu_or_clang},$<CONFIG:RelWithDebInfo>>:${_compile_options_mac_lin_debug}>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,${_compiler_is_gnu_or_clang},$<CONFIG:Debug>>:${_compile_options_mac_lin_debug}>
+    )
+
+    target_include_directories(${PROJECT_NAME} PUBLIC
         "$<BUILD_INTERFACE:${TARGET_INCLUDE_DIRS}>")
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${TARGET_LINK_LIBS})
-    target_link_libraries(${PROJECT_NAME} INTERFACE
+
+    target_link_libraries(${PROJECT_NAME} PUBLIC
         "$<BUILD_INTERFACE:${TARGET_LINK_LIBS}>")
 
 	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 		aja_get_msvc_tools_version()
-		if(CMAKE_MSVC_RUNTIME_LIBRARY STREQUAL "MultiThreaded" OR 
+		if(CMAKE_MSVC_RUNTIME_LIBRARY STREQUAL "MultiThreaded" OR
 		   CMAKE_MSVC_RUNTIME_LIBRARY STREQUAL "MultiThreadedDebug")
 			set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}_vs${AJA_MSVC_TOOLSET_VERSION}_MT")
 		elseif(CMAKE_MSVC_RUNTIME_LIBRARY STREQUAL "MultiThreadedDLL" OR
@@ -631,6 +709,7 @@ if (NOT TARGET ${PROJECT_NAME})
 		endif()
 	endif()
     set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX "d")
+
 endif()
 
 if (NOT TARGET ajabase)

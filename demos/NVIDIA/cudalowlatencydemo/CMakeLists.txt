@@ -1,7 +1,7 @@
 # NOTE: Ensure that the CUDA Toolkit v11.1 or later is installed and in your PATH.
 
-if (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	message(STATUS "skipping cudalowlatencydemo (requires Linux)")
+if (AJA_DISABLE_NVIDIA OR NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	message(STATUS "skipping cudalowlatencydemo...")
 	return()
 endif()
 
@@ -29,6 +29,7 @@ endif()
 
 if (NOT CMAKE_CUDA_COMPILER)
 	set(CMAKE_CUDA_COMPILER ${CUDA_NVCC_EXECUTABLE})
+	message(STATUS "CUDA Compiler: ${CUDA_NVCC_EXECUTABLE}")
 endif()
 
 project(cudalowlatencydemo LANGUAGES CUDA CXX)

@@ -5,6 +5,7 @@ endif()
 
 add_subdirectory(logreader)
 add_subdirectory(ntv2firmwareinstaller)
+add_subdirectory(ntv2sign)
 add_subdirectory(ntv2thermo)
 add_subdirectory(pciwhacker)
 add_subdirectory(regio)

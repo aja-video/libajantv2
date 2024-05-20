@@ -729,7 +729,7 @@ AJAFileIO::FileInfo(int64_t& createTime, int64_t& modTime, int64_t& size, std::s
 				}
 			}
 #else
-			#warning "'AJAFileIO::FileInfo' does not support path retreval."
+			#warning "'AJAFileIO::FileInfo' does not support path retrieval."
 			filePath = "";
 			status = AJA_STATUS_SUCCESS;
 #endif

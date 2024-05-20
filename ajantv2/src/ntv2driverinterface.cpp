@@ -1108,10 +1108,9 @@ string CNTV2DriverInterface::GetDescription (void) const
 	return IsRemote() ? _pRPCAPI->Description() : "";
 }
 
-const NTV2Dictionary & CNTV2DriverInterface::ConnectParams (void) const
+NTV2Dictionary CNTV2DriverInterface::ConnectParams (void) const
 {
-	static const NTV2Dictionary sEmptyDict;
-	return IsRemote() ? _pRPCAPI->ConnectParams() : sEmptyDict;
+	return IsRemote() ? _pRPCAPI->ConnectParams() : NTV2Dictionary();
 }
 
 //	This function is used by the retail ControlPanel.
@@ -1629,11 +1628,13 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceHasRotaryEncoder:				outValue = ::NTV2DeviceHasRotaryEncoder(devID);						break;
 		case kDeviceHasSPIv5:						outValue = ::NTV2DeviceGetSPIFlashVersion(devID) == 5;				break;
 		case kDeviceHasXilinxDMA:					outValue = ::NTV2DeviceHasXilinxDMA(devID);							break;
+		case kDeviceCanDoStreamingDMA:				outValue = GetDeviceID() == DEVICE_ID_KONAXM;						break;
 		case kDeviceCanDoHDMIQuadRasterConversion:	outValue = (GetNumSupported(kDeviceGetNumHDMIVideoInputs)
 																	||  GetNumSupported(kDeviceGetNumHDMIVideoOutputs))	//	At least 1 HDMI in/out
 																&& (GetDeviceID() != DEVICE_ID_KONAHDMI)				//	Not a KonaHDMI
 																&& (!IsSupported(kDeviceCanDoAudioMixer));				//	No audio mixer
 													break;
+
 		case kDeviceCanDoAudioMixer:
 		case kDeviceHasMicrophoneInput:
 		default:									return false;	//	Bad param

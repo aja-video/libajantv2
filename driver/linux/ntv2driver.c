@@ -210,7 +210,8 @@ static int DoMessageStreamChannel(ULWord deviceNumber, PFILE_DATA pFile, NTV2Str
 static int DoMessageStreamBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamBuffer* pStreamBuffer);
 
 /* PCI Device Module functions */
-static int probe( struct pci_dev *dev, const struct pci_device_id *id);	/* New device inserted */
+static int probe(struct pci_dev *pdev, const struct pci_device_id *id);	/* New device inserted */
+static void remove(struct pci_dev *pdev);
 
 	// pci configuration access methods
 static int pci_resources_config (struct pci_dev *pdev, NTV2PrivateParams * ntv2pp);
@@ -232,8 +233,8 @@ static int writeVirtualData(ULWord tag, UByte *buf, ULWord size);
 void deleteVirtualDataNode(VirtualDataNode *node);
 static void deleteAllVirtualDataNodes(void);
 
-static void suspend(ULWord deviceNumber);
-static void resume(ULWord deviceNumber);
+static int suspend(struct pci_dev *pdev, pm_message_t state);
+static int resume(struct pci_dev *pdev);
 
 void InitInterruptBitLUT(void);
 
@@ -245,6 +246,7 @@ void InitInterruptBitLUT(void);
 
 static NTV2PrivateParams * NTV2Params[NTV2_MAXBOARDS];
 static NTV2ModulePrivateParams NTV2ModuleParams;
+static spinlock_t NTV2ParamsLock;
 
 // the uart driver
 static struct uart_driver ntv2_uart_driver;
@@ -488,16 +490,110 @@ VirtualDataNode *gVirtualDataHead = NULL;
 /* Functions */
 /*************/
 
+int
+allocNTV2DeviceNumber(unsigned int* pDeviceNumber)
+{
+    NTV2PrivateParams* pParams = NULL;
+    unsigned int deviceNumber = 0;
+    unsigned long flags;
+    int i;
+
+    if (pDeviceNumber == NULL)
+        return -EINVAL;
+
+    if (getNTV2ModuleParams()->name == NULL)
+    {
+        getNTV2ModuleParams()->name = "Unknown OEM board type";
+    }
+
+    pParams = vmalloc(sizeof(NTV2PrivateParams));
+    if (pParams == NULL)
+    {
+        MSG("%s: allocation of device state failed\n",
+            getNTV2ModuleParams()->name);
+        return -ENOMEM;
+    }
+    
+	ntv2_spin_lock_irqsave(&NTV2ParamsLock, flags);
+    for (i = 0; i < NTV2_MAXBOARDS; i++)
+    {
+        if (NTV2Params[i] == NULL)
+            break;           
+    }
+    
+    if (i == NTV2_MAXBOARDS)
+    {
+        ntv2_spin_unlock_irqrestore(&NTV2ParamsLock, flags);
+        vfree(pParams);
+        MSG("%s: allocation of device state exceeds max boards (%d)\n",
+            getNTV2ModuleParams()->name, NTV2_MAXBOARDS);
+        return -ENOMEM;
+    }
+
+    deviceNumber = i;
+    NTV2Params[deviceNumber] = pParams;
+    getNTV2ModuleParams()->numNTV2Devices++;
+    ntv2_spin_unlock_irqrestore(&NTV2ParamsLock, flags);
+    
+    memset(NTV2Params[deviceNumber], 0, sizeof(NTV2PrivateParams));
+    NTV2Params[deviceNumber]->deviceNumber = deviceNumber;
+    
+    *pDeviceNumber = deviceNumber;
+
+    return 0;
+}
+
+void
+freeNTV2DeviceNumber(unsigned int deviceNumber)
+{
+    unsigned long flags;
+
+    if (getNTV2ModuleParams()->name == NULL)
+    {
+        getNTV2ModuleParams()->name = "Unknown OEM board type";
+    }
+
+    if (deviceNumber >= NTV2_MAXBOARDS)
+    {
+        MSG("%s: attempt to free bad device number %d\n",
+            getNTV2ModuleParams()->name, deviceNumber);
+        return;
+    }
+    
+    if (NTV2Params[deviceNumber]->deviceNumber != deviceNumber)
+    {
+        MSG("%s: attempt to free unallocated device number %d\n",
+            getNTV2ModuleParams()->name, deviceNumber);
+        return;
+    }
+
+    memset(NTV2Params[deviceNumber], 0, sizeof(NTV2PrivateParams));
+    vfree(NTV2Params[deviceNumber]);
+
+	ntv2_spin_lock_irqsave(&NTV2ParamsLock, flags);
+    NTV2Params[deviceNumber] = NULL;
+    getNTV2ModuleParams()->numNTV2Devices--;
+    ntv2_spin_unlock_irqrestore(&NTV2ParamsLock, flags);
+}    
+
 NTV2PrivateParams *
 getNTV2Params(unsigned int deviceNumber)
 {
-	if ( deviceNumber >= getNTV2ModuleParams()->numNTV2Devices )
+    if (getNTV2ModuleParams()->name == NULL)
 	{
-	    if ( getNTV2ModuleParams()->name == NULL)
-			getNTV2ModuleParams()->name = "Unknown OEM board type";
+        getNTV2ModuleParams()->name = "Unknown OEM board type";
+    }
 
+	if (deviceNumber >= NTV2_MAXBOARDS)
+	{
 		MSG("%s: bad board number %d\n", getNTV2ModuleParams()->name, deviceNumber);
+		return NULL;
+	}
 
+    if (NTV2Params[deviceNumber]->deviceNumber != deviceNumber)
+    {
+        MSG("%s: device number %d not allocated\n",
+            getNTV2ModuleParams()->name, deviceNumber);
 		return NULL;
 	}
 
@@ -2072,7 +2168,7 @@ int ntv2_open(struct inode *minode, struct file *mfile)
 #endif
 	PFILE_DATA pFileData;
 
-	if (deviceNumber >= getNTV2ModuleParams()->numNTV2Devices)
+	if (getNTV2Params(deviceNumber) == NULL)
 	{
 		// Remove this message since scanning for boards will eventually try to open one that doesn't exist
 		// Also, we now have apps that scan for boards in their timer routines, causing a message flood
@@ -2110,7 +2206,7 @@ int ntv2_release(struct inode *minode, struct file *mfile) {
 #endif
 	PFILE_DATA pFileData;
 
-	if (deviceNumber >= getNTV2ModuleParams()->numNTV2Devices)
+	if (getNTV2Params(deviceNumber) == NULL)
 	{
 		MSG("%s: release: device %d not present (num devices %d)\n",
 				getNTV2ModuleParams()->name, deviceNumber, getNTV2ModuleParams()->numNTV2Devices);
@@ -2708,7 +2804,6 @@ static int aja_read_procmem( char *buf, char **start, off_t offset,
 		int count, int *eof, void *data )
 #endif
 {
-	int  numberOfBoards =0;
 	int  channelCount;
 	char tmpBuf[STRMAX];
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0))
@@ -2716,19 +2811,21 @@ static int aja_read_procmem( char *buf, char **start, off_t offset,
 #endif
 	int  i;
 	NTV2PrivateParams* pNTV2Params;
+    ULWord boardID;
 
 //	len += snprintf( buf + len, STRMAX, "AJA Driver Name: %s\n", getNTV2ModuleParams()->name);
 	P_PRE "AJA Driver Name: %s\n", getNTV2ModuleParams()->name P_SUFF
 	getDriverVersionString( tmpBuf, STRMAX );
 	P_PRE "Version: %s\n", tmpBuf P_SUFF
 
-	// get number of boards
-	numberOfBoards = getNTV2ModuleParams()->numNTV2Devices;
 	// for each board we get the BITFILE_INFO_STRUCT
-	for ( i = 0; i < numberOfBoards; i++ )
+	for ( i = 0; i < NTV2_MAXBOARDS; i++ )
 	{
-		ULWord boardID = (ULWord)getDeviceID(i);
 		pNTV2Params = getNTV2Params(i);
+        if (pNTV2Params == NULL)
+            continue;
+        
+		boardID = (ULWord)getDeviceID(i);
 
 		P_PRE "\nCard #: %d\n", i P_SUFF
 		getDeviceVersionString(i, tmpBuf, STRMAX );
@@ -2738,7 +2835,7 @@ static int aja_read_procmem( char *buf, char **start, off_t offset,
 		P_PRE "Firmware Version: %s\n", tmpBuf P_SUFF
 		// PCI DMA Mask
 		P_PRE "PCI DMA Mask: 0x%0llx\n",
-		      getNTV2Params(i)->pci_dev->dma_mask P_SUFF
+		      pNTV2Params->pci_dev->dma_mask P_SUFF
 		getDeviceIDString( i, tmpBuf, STRMAX );
 		P_PRE "Board ID: %s\n", tmpBuf P_SUFF
 
@@ -2877,7 +2974,7 @@ static struct file_operations ntv2_proc_fops =
 
 static int reboot_handler(struct notifier_block *this, unsigned long code, void *x)
 {
-	ULWord  i;
+//	ULWord  i;
 
 #if defined(AJA_HEVC)
 	hevc_reboot_handler(this, code, x);
@@ -2886,15 +2983,15 @@ static int reboot_handler(struct notifier_block *this, unsigned long code, void 
 	// We don't want to generate interrupts if the system is rebooting
 	// This could confuse the BIOS and cause the system to hang
 	// Disable interrupts on all boards so we'll come up quietly
-	for ( i=0; i< getNTV2ModuleParams()->numNTV2Devices; i++ )
+#if 0    
+	for ( i = 0; NTV2_MAXBOARDS; i++ )
 	{
-		DisableAllInterrupts(i);
+        if (getNTV2Params(i) != NULL)
+			DisableAllInterrupts(i);
 	}
-
+#endif
 	return NOTIFY_DONE;
 }
-
-static UWord deviceNumber;
 
 #if defined(AJA_CREATE_DEVICE_NODES)
 #if defined(KERNEL_6_2_0_DEV_UEVENT)
@@ -2917,14 +3014,11 @@ static int __init aja_ntv2_module_init(void)
 	struct class *ntv2_class = NULL;
 #endif
 
-#if defined(AJA_RDMA)
-    request_module_nowait("ajardma");
-#endif    
-
 	for (i = 0; i < NTV2_MAXBOARDS; i++)
 	{
 		NTV2Params[i] = NULL;
 	}
+    spin_lock_init(&NTV2ParamsLock);
 
 	memset(getNTV2ModuleParams(), 0, sizeof(*getNTV2ModuleParams()));
 
@@ -2948,7 +3042,9 @@ static int __init aja_ntv2_module_init(void)
 	ntv2_driver.name = getNTV2ModuleParams()->driverName;
 	ntv2_driver.id_table = pci_device_id_tab;
 	ntv2_driver.probe = probe;
-	ntv2_driver.remove = NULL;	/* Not hot-plug capable driver */
+	ntv2_driver.remove = remove;
+    ntv2_driver.suspend = suspend;
+    ntv2_driver.resume = resume;
 
 	/* register uart driver */
 	MSG("%s: register driver %s\n",
@@ -2957,7 +3053,7 @@ static int __init aja_ntv2_module_init(void)
 	if (res < 0) {
 		MSG("%s: *error* uart_register_driver failed code %d\n",
 			getNTV2ModuleParams()->name, res);
-		goto fail;
+		goto fail_uart;
 	}
 	getNTV2ModuleParams()->uart_driver = &ntv2_uart_driver;
 	getNTV2ModuleParams()->uart_max = NTV2_MAXBOARDS;
@@ -2975,7 +3071,7 @@ static int __init aja_ntv2_module_init(void)
 		res = PTR_ERR(ntv2_class);
 		MSG("%s: Failed to create device class; code %d\n",
 			getNTV2ModuleParams()->name, res);
-		goto fail;
+		goto fail_class;
 	}
 	ntv2_class->dev_uevent = aja_ntv2_dev_uevent;
 	getNTV2ModuleParams()->class = ntv2_class;
@@ -2991,7 +3087,7 @@ static int __init aja_ntv2_module_init(void)
 	{
 		MSG("%s: Can't register device with kernel\n",
 			getNTV2ModuleParams()->name);
-		goto fail;
+		goto fail_chr;
 	}
 
 	getNTV2ModuleParams()->NTV2Major = res;
@@ -3002,12 +3098,8 @@ static int __init aja_ntv2_module_init(void)
 	if (res != 0) {
 		MSG("%s: NTV2_LINUX_PCI_REG_DRIVER_FUNC failed with code %d",
 			getNTV2ModuleParams()->name, res);
-		goto fail;
+		goto fail_pci;
 	}
-
-	// Set all autocirculators to disabled
-	for (i = 0; i < getNTV2ModuleParams()->numNTV2Devices; i++)
-		AutoCirculateInitialize(i);
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0))
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,6,0))
@@ -3032,17 +3124,22 @@ static int __init aja_ntv2_module_init(void)
 	// Ask to be notified before the system reboots
 	register_reboot_notifier(&reboot_notifier);
 
+#if defined(AJA_RDMA)
+    request_module_nowait("ajardma");
+#endif    
+
 	MSG("%s: module init end\n", getNTV2ModuleParams()->name);
 
 	return 0;
 
-fail:
+fail_pci:
 	if (getNTV2ModuleParams()->NTV2Major)
 	{
 		unregister_chrdev(getNTV2ModuleParams()->NTV2Major,
 			getNTV2ModuleParams()->driverName);
 	}
 
+fail_chr:
 #if defined(AJA_CREATE_DEVICE_NODES)
 	if (getNTV2ModuleParams()->class)
 	{
@@ -3050,18 +3147,21 @@ fail:
 	}
 #endif
 
+fail_class:
 	if (getNTV2ModuleParams()->uart_driver)
 	{
 		uart_unregister_driver(getNTV2ModuleParams()->uart_driver);
 	}
 
+fail_uart:
 	return res;
 }
 
-static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New device inserted */
+static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New device inserted */
 {
 	int res;
 	int i;
+    unsigned int deviceNumber = NTV2_MAXBOARDS;
 	NTV2PrivateParams *ntv2pp;
 	int irqIndex;
 	int intrIndex;
@@ -3082,38 +3182,21 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 	}
 #endif
 
-	if ( deviceNumber >= NTV2_MAXBOARDS )
+    res = allocNTV2DeviceNumber(&deviceNumber);
+    if (res != 0)
 	{
-		MSG("%s: only %d boards supported\n",
-			getNTV2ModuleParams()->name, NTV2_MAXBOARDS);
-		return -EPERM;
+		MSG("%s: device params allocation failed\n",
+			getNTV2ModuleParams()->name);
+        return res;
 	}
 
-	if (NTV2Params[deviceNumber])
-	{
-		MSG("%s: attempt to probe previously allocated device %d\n",
-			getNTV2ModuleParams()->name, deviceNumber);
-		return -EPERM;
-	}
-
-	// Allocate space for keeping track of the device state
-	NTV2Params[deviceNumber] = vmalloc( sizeof(NTV2PrivateParams) );
-	if( NTV2Params[deviceNumber] == NULL)
-	{
-		MSG("%s: allocation of device state failed for device %d\n",
-			getNTV2ModuleParams()->name, deviceNumber);
-		return -ENOMEM;
-	}
-
-	ntv2pp = NTV2Params[deviceNumber];
-	memset(ntv2pp, 0, sizeof(NTV2PrivateParams));
-	ntv2pp->deviceNumber = deviceNumber;
-	getNTV2ModuleParams()->numNTV2Devices = deviceNumber + 1;
+	ntv2pp = getNTV2Params(deviceNumber);
 	InitInterruptBitLUT();
 	snprintf(ntv2pp->name, STRMAX, "ntv2dev%u", deviceNumber);
 
 	MSG("%s: probe begin\n", ntv2pp->name);
 
+    pci_set_drvdata(pdev, ntv2pp);
 	ntv2pp->pci_device = id->device;
 
 	// enable register access
@@ -3332,6 +3415,9 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 
 	// initialize dma
 	dmaInit(deviceNumber);
+
+	// initialize autocirculate
+    AutoCirculateInitialize(deviceNumber);
 
     // inialize streams
     for (i = 0; i < ntv2pp->_dmaNumEngines; i++)
@@ -3678,172 +3764,180 @@ static int __init probe(struct pci_dev *pdev, const struct pci_device_id *id)	/*
 		getNTV2ModuleParams()->name, deviceNumber);
 #endif
 
-	deviceNumber++;
-
 	MSG("%s: probe end\n", ntv2pp->name);
 
 	return 0;
 }
 
+/* Function to remove a device */
+static void remove(struct pci_dev *pdev)
+{
+    NTV2PrivateParams *ntv2pp = pci_get_drvdata(pdev);
+    ULWord deviceNumber = ntv2pp->deviceNumber;
+    int i;
+#if defined(AJA_CREATE_DEVICE_NODES)
+    dev_t dev;
+#endif
+
+#if defined(AJA_HEVC)
+	if (pdev->vendor == HEVC_VENDOR_ID)
+	{
+        MSG("%s: ignore HEVC device remove\n", getNTV2ModuleParams()->name);
+		return;
+	}
+#endif
+
+	MSG("%s: device remove\n", ntv2pp->name);
+
+	// shut down autocirculate
+    AutoCirculateInitialize(deviceNumber);
+
+    // close all streams
+    for (i = 0; i < NTV2_MAX_DMA_STREAMS; i++)
+    {
+        ntv2_stream_close(ntv2pp->m_pDmaStream[i]);
+        ntv2pp->m_pDmaStream[i] = NULL;
+    }
+
+    // stop all dma engines
+    dmaRelease(deviceNumber);
+
+	//Disable and unregister interrupts,
+    DisableAllInterrupts(deviceNumber);
+    
+#if 0
+    for(i = 0; i < eNumNTV2IRQDevices; ++i)
+    {
+        // synchronize
+        synchronize_irq(ntv2pp->_ntv2IRQ[i]);
+    }
+#endif
+		// disable hdmi monitor
+    for (i= 0; i < NTV2_MAX_HDMI_MONITOR; i++)
+	{
+        if (ntv2pp->m_pHDMIInputMonitor[i] != NULL)
+		{
+            ntv2_hdmiin_disable(ntv2pp->m_pHDMIInputMonitor[i]);
+		}
+        if (ntv2pp->m_pHDMIIn4Monitor[i] != NULL)
+		{
+            ntv2_hdmiin4_disable(ntv2pp->m_pHDMIIn4Monitor[i]);
+		}
+        if (ntv2pp->m_pHDMIOut4Monitor[i] != NULL)
+		{
+            ntv2_hdmiout4_disable(ntv2pp->m_pHDMIOut4Monitor[i]);
+		}	
+	}
+		
+	// close hdmi monitor
+    for (i = 0; i < NTV2_MAX_HDMI_MONITOR; i++)
+	{
+        if (ntv2pp->m_pHDMIInputMonitor[i] != NULL)
+		{
+            ntv2_hdmiin_close(ntv2pp->m_pHDMIInputMonitor[i]);
+            ntv2pp->m_pHDMIInputMonitor[i] = NULL;
+		}
+        if (ntv2pp->m_pHDMIIn4Monitor[i] != NULL)
+		{
+            ntv2_hdmiin4_close(ntv2pp->m_pHDMIIn4Monitor[i]);
+            ntv2pp->m_pHDMIIn4Monitor[i] = NULL;
+		}
+        if (ntv2pp->m_pHDMIOut4Monitor[i] != NULL)
+		{
+            ntv2_hdmiout4_close(ntv2pp->m_pHDMIOut4Monitor[i]);
+            ntv2pp->m_pHDMIOut4Monitor[i] = NULL;
+           }
+	}
+
+    // disable raster monitor
+    if (ntv2pp->m_pRasterMonitor != NULL)
+    {
+        ntv2_videoraster_disable(ntv2pp->m_pRasterMonitor);
+    }
+    
+	if (ntv2pp->m_pSetupMonitor != NULL)
+	{
+		ntv2_setup_disable(ntv2pp->m_pSetupMonitor);
+		ntv2_setup_close(ntv2pp->m_pSetupMonitor);
+		ntv2pp->m_pSetupMonitor = NULL;
+	}
+
+    if (ntv2pp->m_pGenlock2Monitor != NULL)
+    {
+        ntv2_genlock2_disable(ntv2pp->m_pGenlock2Monitor);
+        ntv2_genlock2_close(ntv2pp->m_pGenlock2Monitor);
+        ntv2pp->m_pGenlock2Monitor = NULL;
+    }
+
+    if (ntv2pp->m_pRasterMonitor != NULL)
+    {
+        ntv2_videoraster_close(ntv2pp->m_pRasterMonitor);
+        ntv2pp->m_pRasterMonitor = NULL;
+    }
+
+	// close the serial port
+	if (ntv2pp->m_pSerialPort != NULL)
+	{
+		ntv2_serial_close(ntv2pp->m_pSerialPort);
+		ntv2pp->m_pSerialPort = NULL;
+	}
+
+	if (ntv2pp->m_pBitstream != NULL)
+	{
+		ntv2_mcap_close(ntv2pp->m_pBitstream);
+		ntv2pp->m_pBitstream = NULL;
+	}
+
+	// disable register access
+	ntv2pp->registerEnable = false;
+
+#if defined(AJA_CREATE_DEVICE_NODES)
+    dev = MKDEV(getNTV2ModuleParams()->NTV2Major, deviceNumber);
+    device_destroy(getNTV2ModuleParams()->class, dev);
+    cdev_del(&ntv2pp->cdev);
+#endif
+
+    for(i = 0; i < eNumNTV2IRQDevices; ++i)
+	{
+		MSG("%s: free irq 0x%x, dev_id %p\n",
+            ntv2pp->name, ntv2pp->_ntv2IRQ[i], (void *)ntv2pp);
+
+        free_irq(ntv2pp->_ntv2IRQ[i], ntv2pp);
+	}
+
+	if (NTV2DeviceCanDoMSI(ntv2pp->_DeviceID))
+	{
+		pci_disable_msi(ntv2pp->pci_dev);
+	}
+
+	pci_resources_release(ntv2pp);
+
+    freeNTV2DeviceNumber(deviceNumber);
+}
+
 /* Function to clean up and unload the module */
 static void __exit aja_ntv2_module_cleanup(void)
 {
-	ULWord  i;
-	ULWord  j;
-	int irqIndex;
-
-	MSG("%s: module exit begin\n", getNTV2ModuleParams()->name);
+	MSG("%s: module exit begin - %d devices\n", getNTV2ModuleParams()->name, getNTV2ModuleParams()->numNTV2Devices);
 	
-	unregister_reboot_notifier(&reboot_notifier);
-
 #if defined(AJA_HEVC)
 	hevc_module_cleanup();
 #endif
 
-	for ( i=0; i< getNTV2ModuleParams()->numNTV2Devices; i++ )
-	{
-		NTV2PrivateParams *ntv2pp = getNTV2Params(i);
+	unregister_reboot_notifier(&reboot_notifier);
 
-		MSG("%s: device release\n", ntv2pp->name);
-
-		// TODO: Shut down autocirculate if it is active.
-
-        
-        // close all streams
-        for (j = 0; j < NTV2_MAX_DMA_STREAMS; j++)
-        {
-            ntv2_stream_close(ntv2pp->m_pDmaStream[i]);
-            ntv2pp->m_pDmaStream[i] = NULL;
-        }
-
-		// stop all dma engines
-		dmaRelease(i);
-
-		//Disable and unregister interrupts,
-		DisableAllInterrupts(i);
-
-		// disable hdmi monitor
-		for (j = 0; j < NTV2_MAX_HDMI_MONITOR; j++)
-		{
-			if (ntv2pp->m_pHDMIInputMonitor[j] != NULL)
-			{
-				ntv2_hdmiin_disable(ntv2pp->m_pHDMIInputMonitor[j]);
-			}
-			if (ntv2pp->m_pHDMIIn4Monitor[j] != NULL)
-			{
-				ntv2_hdmiin4_disable(ntv2pp->m_pHDMIIn4Monitor[j]);
-			}
-			if (ntv2pp->m_pHDMIOut4Monitor[j] != NULL)
-			{
-				ntv2_hdmiout4_disable(ntv2pp->m_pHDMIOut4Monitor[j]);
-			}	
-		}
-		
-        if (ntv2pp->m_pRasterMonitor != NULL)
-        {
-            ntv2_videoraster_disable(ntv2pp->m_pRasterMonitor);
-        }
-
-		// close hdmi monitor
-		for (j = 0; j < NTV2_MAX_HDMI_MONITOR; j++)
-		{
-			if (ntv2pp->m_pHDMIInputMonitor[j] != NULL)
-			{
-				ntv2_hdmiin_close(ntv2pp->m_pHDMIInputMonitor[j]);
-				ntv2pp->m_pHDMIInputMonitor[j] = NULL;
-			}
-			if (ntv2pp->m_pHDMIIn4Monitor[j] != NULL)
-			{
-				ntv2_hdmiin4_close(ntv2pp->m_pHDMIIn4Monitor[j]);
-				ntv2pp->m_pHDMIIn4Monitor[j] = NULL;
-			}
-			if (ntv2pp->m_pHDMIOut4Monitor[j] != NULL)
-			{
-				ntv2_hdmiout4_close(ntv2pp->m_pHDMIOut4Monitor[j]);
-				ntv2pp->m_pHDMIOut4Monitor[j] = NULL;
-            }
-		}
-		
-		if (ntv2pp->m_pSetupMonitor != NULL)
-		{
-			ntv2_setup_disable(ntv2pp->m_pSetupMonitor);
-			ntv2_setup_close(ntv2pp->m_pSetupMonitor);
-			ntv2pp->m_pSetupMonitor = NULL;
-		}
-
-        if (ntv2pp->m_pGenlock2Monitor != NULL)
-        {
-			ntv2_genlock2_disable(ntv2pp->m_pGenlock2Monitor);
-            ntv2_genlock2_close(ntv2pp->m_pGenlock2Monitor);
-            ntv2pp->m_pGenlock2Monitor = NULL;
-        }
-
-        if (ntv2pp->m_pRasterMonitor != NULL)
-        {
-            ntv2_videoraster_close(ntv2pp->m_pRasterMonitor);
-            ntv2pp->m_pRasterMonitor = NULL;
-        }
-
-		// close the serial port
-		if (ntv2pp->m_pSerialPort != NULL)
-		{
-			ntv2_serial_close(ntv2pp->m_pSerialPort);
-			ntv2pp->m_pSerialPort = NULL;
-		}
-
-		if (ntv2pp->m_pBitstream != NULL)
-		{
-			ntv2_mcap_close(ntv2pp->m_pBitstream);
-			ntv2pp->m_pBitstream = NULL;
-		}
-
-		for(irqIndex = 0; irqIndex < eNumNTV2IRQDevices; ++irqIndex)
-		{
-			MSG("%s: free irq 0x%x, dev_id %p\n",
-				ntv2pp->name, ntv2pp->_ntv2IRQ[irqIndex], (void *)ntv2pp);
-
-			free_irq(ntv2pp->_ntv2IRQ[irqIndex], ntv2pp);
-		}
-
-		if (NTV2DeviceCanDoMSI(ntv2pp->_DeviceID))
-		{
-			pci_disable_msi(ntv2pp->pci_dev);
-		}
-
-		pci_resources_release(ntv2pp);
-	}		// end of for i loop
-
-#if defined(AJA_CREATE_DEVICE_NODES)
-	// Destroy the device nodes
-	for (i = 0; i < NTV2_MAXBOARDS; i++)
-	{
-		if (NTV2Params[i] != NULL)
-		{
-			dev_t dev = MKDEV(getNTV2ModuleParams()->NTV2Major, i);
-			device_destroy(getNTV2ModuleParams()->class, dev);
-			cdev_del(&NTV2Params[i]->cdev);
-		}
-	}
-#endif
-
-	unregister_chrdev( getNTV2ModuleParams()->NTV2Major, getNTV2ModuleParams()->driverName);
 	remove_proc_entry("driver/aja", NULL /* parent dir */);
 
-	for (i = 0; i < NTV2_MAXBOARDS; i++)
-	{
-		if (NTV2Params[i] != NULL)
-		{
-			vfree(NTV2Params[i]);
-			NTV2Params[i] = NULL;
-		}
-	}
-
+	MSG("%s: unregister the pci driver\n", getNTV2ModuleParams()->name);
    	pci_unregister_driver(&ntv2_driver);
 
+	unregister_chrdev( getNTV2ModuleParams()->NTV2Major, getNTV2ModuleParams()->driverName);
+    
 #if defined(AJA_CREATE_DEVICE_NODES)
 	class_destroy(getNTV2ModuleParams()->class);
 #endif
 
+	MSG("%s: unregister the uart driver\n", getNTV2ModuleParams()->name);
 	uart_unregister_driver(&ntv2_uart_driver);
 
     // clean up any VirtualData nodes that were allocated
@@ -4430,6 +4524,7 @@ int DoMessageBufferLock(ULWord deviceNumber, PDMA_PAGE_ROOT pRoot, NTV2BufferLoc
 int DoMessageBitstream(ULWord deviceNumber, NTV2Bitstream* pBitstream)
 {
 	NTV2PrivateParams * pNTV2Params = getNTV2Params(deviceNumber);
+    struct pm_message pmm = { .event = PM_EVENT_SUSPEND };
 	
 	if (pBitstream == NULL)
 		return -EINVAL;
@@ -4481,7 +4576,7 @@ int DoMessageBitstream(ULWord deviceNumber, NTV2Bitstream* pBitstream)
 		
 		// stop board activity
 		if (pNTV2Params->registerEnable)
-			suspend(deviceNumber);
+			suspend(pNTV2Params->pci_dev, pmm);
 		
 		pBitstream->mStatus = ntv2_mcap_write_bitstream(pNTV2Params->m_pBitstream,
 														pBuffer,
@@ -4490,7 +4585,7 @@ int DoMessageBitstream(ULWord deviceNumber, NTV2Bitstream* pBitstream)
 														(pBitstream->mFlags & BITSTREAM_SWAP) != 0);
 		// resume board activity
 		if ((pBitstream->mFlags & BITSTREAM_FRAGMENT) == 0)
-			resume(deviceNumber);
+			resume(pNTV2Params->pci_dev);
 
 		// release buffer
 		vfree(pBuffer);
@@ -4631,8 +4726,7 @@ int DoMessageStreamBuffer(ULWord deviceNumber, PFILE_DATA pFile, NTV2StreamBuffe
 // function : pci_resources_config - driver init configure of pci resources
 //
 //-----------------------------------------------------------------------------
-static int __init
-pci_resources_config (struct pci_dev *pdev, NTV2PrivateParams * ntv2pp)
+static int pci_resources_config (struct pci_dev *pdev, NTV2PrivateParams * ntv2pp)
 {
 	const struct pci_bus *pbus = pdev->bus;
 	ULWord pciLen0 = 0;
@@ -4821,8 +4915,7 @@ pci_resources_release (NTV2PrivateParams * ntv2pp)
 // function : pci_FPGARegisters_map - memory map fpga register space
 //
 //-----------------------------------------------------------------------------
-static int __init
-pci_VideoRegisters_map (struct pci_dev *pdev, NTV2PrivateParams * ntv2pp)
+static int pci_VideoRegisters_map (struct pci_dev *pdev, NTV2PrivateParams * ntv2pp)
 {
 	int res;
 
@@ -4928,8 +5021,7 @@ err_release:
 // function : pci_P2PAperture_map - memory map the Peer to Peer DMA Aperture
 //
 //-----------------------------------------------------------------------------
-static int __init
-pci_P2PAperture_map (struct pci_dev *pdev, NTV2PrivateParams * ntv2pp)
+static int pci_P2PAperture_map (struct pci_dev *pdev, NTV2PrivateParams * ntv2pp)
 {
 	// Is BAR2 supported?
 	if (ntv2pp->_unmappedBAR2Address == 0)
@@ -4963,8 +5055,7 @@ pci_P2PAperture_map (struct pci_dev *pdev, NTV2PrivateParams * ntv2pp)
 // function : dma_registers_init - init fpga register based dma registers
 //
 //-----------------------------------------------------------------------------
-static void __init
-dma_registers_init (struct pci_dev *pdev, NTV2PrivateParams * ntv2pp)
+static void dma_registers_init (struct pci_dev *pdev, NTV2PrivateParams * ntv2pp)
 {
 	// Check whether card can use 64-bit DMA addresses.
 
@@ -5223,10 +5314,13 @@ static int writeVirtualData(ULWord tag, UByte *buf, ULWord size)
     return 0;
 }
 
-static void suspend(ULWord deviceNumber)
+static int suspend(struct pci_dev *pdev, pm_message_t state)
 {
-	NTV2PrivateParams *ntv2pp = getNTV2Params(deviceNumber);
+    NTV2PrivateParams *ntv2pp = pci_get_drvdata(pdev);
+    ULWord deviceNumber = ntv2pp->deviceNumber;
 	int j;
+
+    (void)state;
 
 	MSG("%s: device suspend\n", ntv2pp->name);
 
@@ -5280,16 +5374,26 @@ static void suspend(ULWord deviceNumber)
 
 	// disable register access
 	ntv2pp->registerEnable = false;
+
+//    pci_disable_device(pdev);
+//    pci_save_state(pdev);
+
+    return 0;
 }
 
-static void resume(ULWord deviceNumber)
+static int resume(struct pci_dev *pdev)
 {
-	NTV2PrivateParams *ntv2pp = getNTV2Params(deviceNumber);
+    NTV2PrivateParams *ntv2pp = pci_get_drvdata(pdev);
+    ULWord deviceNumber = ntv2pp->deviceNumber;
 	int intrIndex;
 	char versionString[STRMAX];
 	int i;
 
 	MSG("%s: device resume\n", ntv2pp->name);
+
+//    pci_restore_state(pdev);
+//    pci_enable_device(pdev);
+//    pci_set_master(pdev);
 
 	// enable register access
 	ntv2pp->registerEnable = true;
@@ -5379,6 +5483,8 @@ static void resume(ULWord deviceNumber)
 
 	// enable all dma engines
 	dmaEnable(deviceNumber);
+
+    return 0;
 }
 
 module_init(aja_ntv2_module_init);

@@ -11,9 +11,6 @@
 #include "ntv2testpatterngen.h"
 #include "ajabase/common/timebase.h"
 #include "ajabase/system/process.h"
-#include "ajaanc/includes/ancillarydata_hdr_sdr.h"
-#include "ajaanc/includes/ancillarydata_hdr_hdr10.h"
-#include "ajaanc/includes/ancillarydata_hdr_hlg.h"
 #include <fstream>	//	For ifstream
 
 using namespace std;
@@ -85,6 +82,8 @@ AJAStatus NTV2StreamPlayer::Init (void)
 		{cerr << "## ERROR:  Device '" << mDevice.GetDisplayName() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 	if (!mDevice.features().CanDoPlayback())
 		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
+	if (!mDevice.features().CanDoStreamingDMA())
+		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' does not support streaming DMA" << endl;  return AJA_STATUS_FEATURE;}
 
 	const UWord maxNumChannels (mDevice.features().GetNumFrameStores());
 
@@ -386,36 +385,28 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 {
 	NTV2StreamChannel	strStatus;
 	NTV2StreamBuffer	bfrStatus;
-	ULWord				goodQueue(0), badQueue(0), goodRelease(0), badRelease(0), starves(0), noRoomWaits(0);
-	ULWord				status;
+	ULWord				goodQueue(0), badQueue(0), goodRelease(0), badRelease(0), starves(0), noRoomWaits(0), status(0);
+	PLNOTE("Thread started");
 
-	// lock and map the buffers
-	for (FrameDataArrayIter iterHost = mHostBuffers.begin(); iterHost != mHostBuffers.end(); iterHost++)
-	{
+	//	Lock and map the buffers...
+	for (FrameDataArrayIter iterHost (mHostBuffers.begin());  iterHost != mHostBuffers.end();  ++iterHost)
 		if (iterHost->fVideoBuffer)
-		{
             mDevice.DMABufferLock(iterHost->fVideoBuffer, true);
-		}
-	}
 
 	//	Initialize and claim ownership of the stream
 	status = mDevice.StreamChannelInitialize(mConfig.fOutputChannel);
 	if (status != NTV2_STREAM_STATUS_SUCCESS)
 	{
 		cerr << "## ERROR:  Stream initialize failed: " << status << endl;
-		return;
+		mGlobalQuit = true;
 	}
-	PLNOTE("Thread started");
 
 	while (!mGlobalQuit)
 	{
         //  Get stream status
 		status = mDevice.StreamChannelStatus(mConfig.fOutputChannel, strStatus);
 		if (status != NTV2_STREAM_STATUS_SUCCESS)
-		{
-			cerr << "## ERROR:  Stream status failed: " << status << endl;
-			return;
-		}
+			{cerr << "## ERROR:  Stream status failed: " << status << endl;  return;}
 
 		if (strStatus.GetQueueDepth() < 6)
 		{
@@ -423,11 +414,7 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 			if (pFrameData->fDataReady)
             {
 				//  Queue frame to stream
-				NTV2Buffer buffer(pFrameData->fVideoBuffer.GetHostAddress(0), pFrameData->fVideoBuffer.GetByteCount());
-				status = mDevice.StreamBufferQueue(mConfig.fOutputChannel,
-													buffer,
-													mConsumerIndex,
-													bfrStatus);
+				status = mDevice.StreamBufferQueue (mConfig.fOutputChannel, pFrameData->fVideoBuffer, mConsumerIndex, bfrStatus);
 				if (status == NTV2_STREAM_STATUS_SUCCESS)
 				{
 					goodQueue++;
@@ -442,42 +429,31 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 				if (goodQueue == 3)
 				{
 					//  Stop the stream (this will start streaming the first buffer to the output)
-					status = mDevice.StreamChannelStop(mConfig.fOutputChannel, strStatus);
+					status = mDevice.StreamChannelStop (mConfig.fOutputChannel, strStatus);
 					if (status != NTV2_STREAM_STATUS_SUCCESS)
-					{
-						cerr << "## ERROR:  Stream stop failed: " << status << endl;
-						return;
-					}
-					//	Wait for stream to startup
-					mDevice.StreamChannelWait(mConfig.fOutputChannel, strStatus);
-					while(!strStatus.IsIdle())
-					{
-						mDevice.StreamChannelWait(mConfig.fOutputChannel, strStatus);
-					}
-					//	Wait a few more frames for output to stabilize
-					for (int i = 0; i < 30; i++)
-					{
-						mDevice.StreamChannelWait(mConfig.fOutputChannel, strStatus);
-					}
-					//  Now start the stream
-					status = mDevice.StreamChannelStart(mConfig.fOutputChannel, strStatus);
+						{cerr << "## ERROR:  Stream stop failed: " << status << endl;  return;}
+
+					//	Wait for stream to start...
+					mDevice.StreamChannelWait (mConfig.fOutputChannel, strStatus);
+					while (!strStatus.IsIdle())
+						mDevice.StreamChannelWait (mConfig.fOutputChannel, strStatus);
+
+					//	Wait a few more frames for output to stabilize...
+					for (int i = 0;  i < 30;  i++)
+						mDevice.StreamChannelWait (mConfig.fOutputChannel, strStatus);
+
+					//  Now start the stream...
+					status = mDevice.StreamChannelStart (mConfig.fOutputChannel, strStatus);
 					if (status != NTV2_STREAM_STATUS_SUCCESS)
-					{
-						cerr << "## ERROR:  Stream start failed: " << status << endl;
-						return;
-					}
+						{cerr << "## ERROR:  Stream start failed: " << status << endl;  return;}
 				}
 			}
 			else
-			{
                 starves++;
-            }
 			continue;	//	Back to top of while loop
 		}
 		else
-		{
 			noRoomWaits++;
-		}
 
 		//  Look for buffers to release
         status = mDevice.StreamBufferRelease(mConfig.fOutputChannel, bfrStatus);
@@ -496,40 +472,29 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 		}
 
 		//	Wait for one or more buffers to become available on the device, which should occur at next VBI...
-		status = mDevice.StreamChannelWait(mConfig.fOutputChannel, strStatus);
-		if (status != NTV2_STREAM_STATUS_SUCCESS)
-		{
+		if (mDevice.StreamChannelWait(mConfig.fOutputChannel, strStatus) != NTV2_STREAM_STATUS_SUCCESS)
 			break;
-		}
 	}	//	loop til quit signaled
 
 	//	Stop streaming...
-	status = mDevice.StreamChannelInitialize(mConfig.fOutputChannel);
+	status = mDevice.StreamChannelInitialize (mConfig.fOutputChannel);
 	if (status != NTV2_STREAM_STATUS_SUCCESS)
-	{
-		cerr << "## ERROR:  Stream initialize failed: " << status << endl;
-		return;
-	}
+		{cerr << "## ERROR:  Stream initialize failed: " << status << endl;  return;}
 
     //  Release all buffers
-    status = mDevice.StreamBufferRelease(mConfig.fOutputChannel, bfrStatus);
-    while (status == NTV2_STREAM_STATUS_SUCCESS)
+    while (mDevice.StreamBufferRelease (mConfig.fOutputChannel, bfrStatus) == NTV2_STREAM_STATUS_SUCCESS)
     {
 		if (bfrStatus.mBufferCookie < CIRCULAR_BUFFER_SIZE)
-		{
-		//	Signal that I'm done consuming this FrameData, making it immediately available for more data...
+		{	//	Signal that I'm done consuming this FrameData, making it immediately available for more data...
 			mHostBuffers[bfrStatus.mBufferCookie].fDataReady = false;
 			goodRelease++;
 		}
 		else
-		{
 			badRelease++;
-		}
-        status = mDevice.StreamBufferRelease(mConfig.fOutputChannel, bfrStatus);
     }
 
     //  Release stream ownership
-	status = mDevice.StreamChannelRelease(mConfig.fOutputChannel);
+	status = mDevice.StreamChannelRelease (mConfig.fOutputChannel);
 	if (status != NTV2_STREAM_STATUS_SUCCESS)
 	{
 		cerr << "## ERROR:  Stream release failed: " << status << endl;
@@ -537,7 +502,8 @@ void NTV2StreamPlayer::ConsumeFrames (void)
 	}    
 
 	PLNOTE("Thread completed: " << DEC(goodQueue) << " queued, " << DEC(badQueue) << " failed, "
-			<< DEC(starves) << " starves, " << DEC(noRoomWaits) << " VBI waits");
+			<< DEC(starves) << " starves, " << DEC(noRoomWaits) << " waits, "
+			<< DEC(goodRelease) << " releases (" << DEC(badRelease) << " failed)");
 
 }	//	ConsumeFrames
 
