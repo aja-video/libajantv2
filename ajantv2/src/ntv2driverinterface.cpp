@@ -1107,10 +1107,9 @@ string CNTV2DriverInterface::GetDescription (void) const
 	return IsRemote() ? _pRPCAPI->Description() : "";
 }
 
-const NTV2Dictionary & CNTV2DriverInterface::ConnectParams (void) const
+NTV2Dictionary CNTV2DriverInterface::ConnectParams (void) const
 {
-	static const NTV2Dictionary sEmptyDict;
-	return IsRemote() ? _pRPCAPI->ConnectParams() : sEmptyDict;
+	return IsRemote() ? _pRPCAPI->ConnectParams() : NTV2Dictionary();
 }
 
 //	This function is used by the retail ControlPanel.

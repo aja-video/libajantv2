@@ -49,7 +49,7 @@ else()
     set(ENABLE_TESTING OFF)
     set(LIB_INSTALL_DIR ${CMAKE_INSTALL_FULL_LIBDIR})
 
-    set(MBEDTLS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/mbedtls/include)
+    set(MBEDTLS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/mbedtls/src/mbedtls/include)
     set(MBEDTLS_LIBRARY_DIR ${CMAKE_BINARY_DIR}/mbedtls/src/mbedtls-build/library)
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         set(MBEDTLS_LIBRARY ${MBEDTLS_LIBRARY_DIR}/mbedtls.lib)
@@ -59,6 +59,8 @@ else()
         set(MBEDTLS_LIBRARY ${MBEDTLS_LIBRARY_DIR}/libmbedtls.a)
         set(MBEDX509_LIBRARY ${MBEDTLS_LIBRARY_DIR}/libmbedx509.a)
         set(MBEDCRYPTO_LIBRARY ${MBEDTLS_LIBRARY_DIR}/libmbedcrypto.a)
+        set(MBEDTLS_CXX_FLAGS -fPIC)
+        set(MBEDTLS_C_FLAGS -fPIC)
     endif()
 
     # BUILD_BYPRODUCTS informing CMake where the .a files are located is required to make Ninja build work
@@ -67,7 +69,11 @@ else()
         PREFIX ${CMAKE_BINARY_DIR}/mbedtls
         GIT_REPOSITORY https://github.com/Mbed-TLS/mbedtls.git
         GIT_TAG v3.6.0
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DENABLE_TESTING=OFF
+        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} 
+                   -DENABLE_TESTING=OFF 
+                   -DENABLE_PROGRAMS=OFF
+                   -DCMAKE_CXX_FLAGS=${MBEDTLS_CXX_FLAGS}
+                   -DCMAKE_C_FLAGS=${MBEDTLS_C_FLAGS}
         BUILD_ALWAYS TRUE
         BUILD_BYPRODUCTS ${MBEDTLS_LIBRARY} ${MBEDX509_LIBRARY} ${MBEDCRYPTO_LIBRARY}
     )
@@ -643,7 +649,6 @@ if (NOT TARGET ${PROJECT_NAME})
         aja_ntv2_log_build_info()
 
         add_library(${PROJECT_NAME} SHARED ${TARGET_SOURCES})
-
         
         if (NOT AJANTV2_DISABLE_PLUGIN_LOAD)
             add_dependencies(${PROJECT_NAME} mbedtls)
@@ -662,19 +667,35 @@ if (NOT TARGET ${PROJECT_NAME})
         aja_ntv2_log_build_info()
 
         add_library(${PROJECT_NAME} STATIC ${TARGET_SOURCES})
+
         if (NOT AJANTV2_DISABLE_PLUGIN_LOAD)
             add_dependencies(${PROJECT_NAME} mbedtls)
         endif()
+
         target_compile_definitions(${PROJECT_NAME} PUBLIC
             ${TARGET_COMPILE_DEFS_STATIC}
             ${AJANTV2_TARGET_COMPILE_DEFS})
     endif()
 
-    target_include_directories(${PROJECT_NAME} PRIVATE ${TARGET_INCLUDE_DIRS})
-    target_include_directories(${PROJECT_NAME} INTERFACE
+    set(_compiler_id_c_or_cxx_msvc $<OR:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>)
+    set(_compiler_is_gnu_or_clang $<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>)
+    set(_compile_options_win_debug /Od /RTC1 /W3)
+    set(_compile_options_mac_lin_debug -O0 -Wall)
+    target_compile_options(${PROJECT_NAME} PUBLIC
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc}>:/MP /Zm200>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc},$<CONFIG:Release>>:/O2 /W3>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc},$<CONFIG:RelWithDebInfo>>:${_compile_options_win_debug}>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Windows>,${_compiler_id_c_or_cxx_msvc},$<CONFIG:Debug>>:${_compile_options_win_debug}>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,${_compiler_is_gnu_or_clang}>:-fPIC>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,${_compiler_is_gnu_or_clang},$<CONFIG:Release>>:-O2 -Wall -Wextra>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,${_compiler_is_gnu_or_clang},$<CONFIG:RelWithDebInfo>>:${_compile_options_mac_lin_debug}>
+        $<$<AND:$<COMPILE_LANGUAGE:C,CXX>,$<PLATFORM_ID:Darwin,Linux>,${_compiler_is_gnu_or_clang},$<CONFIG:Debug>>:${_compile_options_mac_lin_debug}>
+    )
+
+    target_include_directories(${PROJECT_NAME} PUBLIC
         "$<BUILD_INTERFACE:${TARGET_INCLUDE_DIRS}>")
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${TARGET_LINK_LIBS})
-    target_link_libraries(${PROJECT_NAME} INTERFACE
+
+    target_link_libraries(${PROJECT_NAME} PUBLIC
         "$<BUILD_INTERFACE:${TARGET_LINK_LIBS}>")
 
 	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
