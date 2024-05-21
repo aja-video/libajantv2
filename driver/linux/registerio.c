@@ -117,10 +117,18 @@ ULWord READ_REGISTER_ULWord( ULWord deviceNumber, unsigned long address)
 
     if (pNTV2Params->hotplug)
     {
+#if (LINUX_VERSION_CODE > KERNEL_VERSION(3,13,0))
         if (!pci_device_is_present(pNTV2Params->pci_dev))
         {
             return 0xffffffff;
         }
+#else
+        value = readl((void *)(pNTV2Params->_pDeviceID));
+        if(value == 0xffffffff)
+        {
+            return 0xffffffff;
+        }
+#endif        
     }
     else
     {

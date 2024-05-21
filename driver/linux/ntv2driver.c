@@ -332,6 +332,18 @@ static struct pci_device_id pci_device_id_tab[] =
 	   0, 0,											// Class, class_mask
 	   0												// Opaque data
 	},
+	{  // IO4K
+	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_IO4K, 			// Vendor and device IDs
+	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
+	   0, 0,											// Class, class_mask
+	   0												// Opaque data
+	},
+	{  // IO4K_UFC
+       NTV2_VENDOR_ID, NTV2_DEVICE_ID_IO4K_UFC, 			// Vendor and device IDs
+	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
+	   0, 0,											// Class, class_mask
+	   0												// Opaque data
+	},
 	{  // CORVID88
 	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_CORVID88,			// Vendor and device IDs
 	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
@@ -3232,8 +3244,27 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
 
     spin_lock_init(&ntv2pp->ioLock);
     ntv2pp->ioCount = 0;
-    ntv2pp->ioRemove = false;    
+    ntv2pp->ioRemove = false;
+
+    // default to no hotplug for performance
+    ntv2pp->hotplug = false;
+#if (LINUX_VERSION_CODE > KERNEL_VERSION(5,14,0))
+    // this can catch devices in io expansion chassis
     ntv2pp->hotplug = dev_is_removable(&(pdev->dev));
+#endif
+    // known to be hotplug
+	if ((id->device == NTV2_DEVICE_ID_IOEXPRESS) ||
+        (id->device == NTV2_DEVICE_ID_IOXT) ||
+        (id->device == NTV2_DEVICE_ID_TTAP) ||
+		(id->device == NTV2_DEVICE_ID_IO4K) ||
+		(id->device == NTV2_DEVICE_ID_IO4K_UFC) ||
+		(id->device == NTV2_DEVICE_ID_IO4KPLUS) ||
+		(id->device == NTV2_DEVICE_ID_IOIP) ||
+		(id->device == NTV2_DEVICE_ID_TTAPPRO) ||
+		(id->device == NTV2_DEVICE_ID_IOX3))
+	{
+        ntv2pp->hotplug = true;
+    }
 
 	// enable register access
 	ntv2pp->registerEnable = true;
