@@ -3248,7 +3248,7 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
 
     // default to no hotplug for performance
     ntv2pp->hotplug = false;
-#if (LINUX_VERSION_CODE > KERNEL_VERSION(5,14,0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,14,0))
     // this can catch devices in io expansion chassis
     ntv2pp->hotplug = dev_is_removable(&(pdev->dev));
 #endif
