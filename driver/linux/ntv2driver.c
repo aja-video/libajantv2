@@ -332,6 +332,18 @@ static struct pci_device_id pci_device_id_tab[] =
 	   0, 0,											// Class, class_mask
 	   0												// Opaque data
 	},
+	{  // IO4K
+	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_IO4K, 			// Vendor and device IDs
+	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
+	   0, 0,											// Class, class_mask
+	   0												// Opaque data
+	},
+	{  // IO4K_UFC
+       NTV2_VENDOR_ID, NTV2_DEVICE_ID_IO4K_UFC, 			// Vendor and device IDs
+	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
+	   0, 0,											// Class, class_mask
+	   0												// Opaque data
+	},
 	{  // CORVID88
 	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_CORVID88,			// Vendor and device IDs
 	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
@@ -560,11 +572,15 @@ freeNTV2DeviceNumber(unsigned int deviceNumber)
         return;
     }
     
+    if (NTV2Params[deviceNumber] == NULL)
+    {
+        return;
+    }  
+
     if (NTV2Params[deviceNumber]->deviceNumber != deviceNumber)
     {
-        MSG("%s: attempt to free unallocated device number %d\n",
+        MSG("%s: freeing bad device number %d\n",
             getNTV2ModuleParams()->name, deviceNumber);
-        return;
     }
 
     memset(NTV2Params[deviceNumber], 0, sizeof(NTV2PrivateParams));
@@ -590,9 +606,14 @@ getNTV2Params(unsigned int deviceNumber)
 		return NULL;
 	}
 
+    if (NTV2Params[deviceNumber] == NULL)
+    {
+        return NULL;
+    }  
+
     if (NTV2Params[deviceNumber]->deviceNumber != deviceNumber)
     {
-        MSG("%s: device number %d not allocated\n",
+        MSG("%s: bad device number %d\n",
             getNTV2ModuleParams()->name, deviceNumber);
 		return NULL;
 	}
@@ -806,6 +827,11 @@ int ntv2_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigne
 	// Find out which board
 	if ( !(pNTV2Params = getNTV2Params(deviceNumber)) )
 		return -ENODEV;
+
+    if (pNTV2Params->ioRemove)
+    {
+        return -ENODEV;
+    }
 
 	if (_IOC_TYPE(cmd) != NTV2_DEVICE_TYPE)
 	{
@@ -2166,9 +2192,11 @@ int ntv2_open(struct inode *minode, struct file *mfile)
 #else
 	UWord deviceNumber = MINOR(mfile->f_dentry->d_inode->i_rdev);
 #endif
+	NTV2PrivateParams * pNTV2Params = getNTV2Params(deviceNumber);
 	PFILE_DATA pFileData;
+	unsigned long flags;    
 
-	if (getNTV2Params(deviceNumber) == NULL)
+	if (pNTV2Params == NULL)
 	{
 		// Remove this message since scanning for boards will eventually try to open one that doesn't exist
 		// Also, we now have apps that scan for boards in their timer routines, causing a message flood
@@ -2179,7 +2207,16 @@ int ntv2_open(struct inode *minode, struct file *mfile)
 		return -ENODEV;
 	}
 
-	pFileData = (PFILE_DATA)kmalloc(sizeof (FILE_DATA), GFP_ATOMIC);
+  	spin_lock_irqsave (&pNTV2Params->ioLock, flags);
+    if (pNTV2Params->ioRemove)
+    {
+        spin_unlock_irqrestore (&pNTV2Params->ioLock, flags);
+        return -ENODEV;
+    }
+    pNTV2Params->ioCount++;
+    spin_unlock_irqrestore (&pNTV2Params->ioLock, flags);
+
+    pFileData = (PFILE_DATA)kmalloc(sizeof (FILE_DATA), GFP_ATOMIC);
 	if (pFileData != NULL)
 	{
 		if (dmaPageRootInit(deviceNumber, &pFileData->dmaRoot) == 0)
@@ -2204,9 +2241,11 @@ int ntv2_release(struct inode *minode, struct file *mfile) {
 #else
 	UWord deviceNumber = MINOR(mfile->f_dentry->d_inode->i_rdev);
 #endif
+	NTV2PrivateParams * pNTV2Params = getNTV2Params(deviceNumber);
 	PFILE_DATA pFileData;
+	unsigned long flags;    
 
-	if (getNTV2Params(deviceNumber) == NULL)
+	if (pNTV2Params == NULL)
 	{
 		MSG("%s: release: device %d not present (num devices %d)\n",
 				getNTV2ModuleParams()->name, deviceNumber, getNTV2ModuleParams()->numNTV2Devices);
@@ -2224,7 +2263,7 @@ int ntv2_release(struct inode *minode, struct file *mfile) {
         // release any streams we own
         for (i = 0; i < NTV2_MAX_DMA_STREAMS; i++)
         {
-            ntv2_stream_channel_release(getNTV2Params(deviceNumber)->m_pDmaStream[i], pFileData, &channel);
+            ntv2_stream_channel_release(pNTV2Params->m_pDmaStream[i], pFileData, &channel);
         }
 
         // release all locked pages
@@ -2234,6 +2273,10 @@ int ntv2_release(struct inode *minode, struct file *mfile) {
 		mfile->private_data = NULL;
 	}
 
+  	spin_lock_irqsave (&pNTV2Params->ioLock, flags);
+    pNTV2Params->ioCount--;
+    spin_unlock_irqrestore (&pNTV2Params->ioLock, flags);
+    
 	return 0;
 }
 
@@ -3199,6 +3242,30 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
     pci_set_drvdata(pdev, ntv2pp);
 	ntv2pp->pci_device = id->device;
 
+    spin_lock_init(&ntv2pp->ioLock);
+    ntv2pp->ioCount = 0;
+    ntv2pp->ioRemove = false;
+
+    // default to no hotplug for performance
+    ntv2pp->hotplug = false;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,14,0))
+    // this can catch devices in io expansion chassis
+    ntv2pp->hotplug = dev_is_removable(&(pdev->dev));
+#endif
+    // known to be hotplug
+	if ((id->device == NTV2_DEVICE_ID_IOEXPRESS) ||
+        (id->device == NTV2_DEVICE_ID_IOXT) ||
+        (id->device == NTV2_DEVICE_ID_TTAP) ||
+		(id->device == NTV2_DEVICE_ID_IO4K) ||
+		(id->device == NTV2_DEVICE_ID_IO4K_UFC) ||
+		(id->device == NTV2_DEVICE_ID_IO4KPLUS) ||
+		(id->device == NTV2_DEVICE_ID_IOIP) ||
+		(id->device == NTV2_DEVICE_ID_TTAPPRO) ||
+		(id->device == NTV2_DEVICE_ID_IOX3))
+	{
+        ntv2pp->hotplug = true;
+    }
+
 	// enable register access
 	ntv2pp->registerEnable = true;
 
@@ -3412,6 +3479,7 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
 	MSG("%s: serial number %s\n", ntv2pp->name, versionString);
 	getPCIFPGAVersionString(deviceNumber, versionString, STRMAX);
 	MSG("%s: firmware version %s\n", ntv2pp->name, versionString);
+	MSG("%s: hotplug %s\n", ntv2pp->name, ntv2pp->hotplug? "enabled":"disabled");
 
 	// initialize dma
 	dmaInit(deviceNumber);
@@ -3778,6 +3846,8 @@ static void remove(struct pci_dev *pdev)
 #if defined(AJA_CREATE_DEVICE_NODES)
     dev_t dev;
 #endif
+    unsigned long flags;
+    bool ioDone;
 
 #if defined(AJA_HEVC)
 	if (pdev->vendor == HEVC_VENDOR_ID)
@@ -3788,6 +3858,26 @@ static void remove(struct pci_dev *pdev)
 #endif
 
 	MSG("%s: device remove\n", ntv2pp->name);
+
+    // wait for io to close
+    ntv2pp->ioRemove = true;
+    ioDone = false;
+    while (!ioDone)
+    {
+        spin_lock_irqsave (&ntv2pp->ioLock, flags);
+        if (ntv2pp->ioCount == 0)
+        {
+            ioDone = true;
+        }
+        spin_unlock_irqrestore (&ntv2pp->ioLock, flags);
+        msleep(10);
+    }
+
+#if defined(AJA_CREATE_DEVICE_NODES)
+    dev = MKDEV(getNTV2ModuleParams()->NTV2Major, deviceNumber);
+    device_destroy(getNTV2ModuleParams()->class, dev);
+    cdev_del(&ntv2pp->cdev);
+#endif
 
 	// shut down autocirculate
     AutoCirculateInitialize(deviceNumber);
@@ -3890,12 +3980,6 @@ static void remove(struct pci_dev *pdev)
 
 	// disable register access
 	ntv2pp->registerEnable = false;
-
-#if defined(AJA_CREATE_DEVICE_NODES)
-    dev = MKDEV(getNTV2ModuleParams()->NTV2Major, deviceNumber);
-    device_destroy(getNTV2ModuleParams()->class, dev);
-    cdev_del(&ntv2pp->cdev);
-#endif
 
     for(i = 0; i < eNumNTV2IRQDevices; ++i)
 	{
