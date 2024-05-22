@@ -198,9 +198,20 @@ void WRITE_REGISTER_ULWord( ULWord deviceNumber, unsigned long address, ULWord r
 	NTV2PrivateParams* pNTV2Params;
 	pNTV2Params = getNTV2Params(deviceNumber);
 
-    if (pNTV2Params->hotplug && !pci_device_is_present(pNTV2Params->pci_dev))
+    if (pNTV2Params->hotplug)
     {
-        return;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3,13,0))
+        if (!pci_device_is_present(pNTV2Params->pci_dev))
+        {
+            return;
+        }
+#else
+        value = readl((void *)(pNTV2Params->_pDeviceID));
+        if(value == 0xffffffff)
+        {
+            return;
+        }
+#endif        
     }
     
 	//	printk("WR_: r(%lx) v(%x)\n", (address-pNTV2Params->_BAR0Address)/4, regValue);

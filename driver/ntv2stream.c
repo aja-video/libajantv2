@@ -800,7 +800,7 @@ Ntv2Status ntv2_stream_channel_advance(struct ntv2_stream *ntv2_str)
 {
     int i;
     uint32_t next;
-    int status;
+    int status = NTV2_STATUS_SUCCESS;
 
     if ((ntv2_str == NULL) ||
         ((ntv2_str->stream_state != ntv2_stream_state_active) &&
@@ -833,8 +833,8 @@ Ntv2Status ntv2_stream_channel_advance(struct ntv2_stream *ntv2_str)
         status = (ntv2_str->stream_ops.buffer_complete)(ntv2_str, ntv2_str->active_index);
         if (status != NTV2_STREAM_OPS_SUCCESS)
         {
-            NTV2_MSG_STREAM_ERROR("%s: channel advance complete failed\n", ntv2_str->name);
-            return status;
+            NTV2_MSG_STREAM_ERROR("%s: channel buffer complete failed\n", ntv2_str->name);
+            ntv2_str->engine_state = ntv2_stream_state_error;
         }
         ntv2_str->stream_buffers[ntv2_str->active_index].user_buffer.mCompleteTime = ntv2Time100ns();
     }
@@ -871,6 +871,7 @@ Ntv2Status ntv2_stream_channel_advance(struct ntv2_stream *ntv2_str)
     if (status != NTV2_STREAM_OPS_SUCCESS)
     {
         NTV2_MSG_STREAM_ERROR("%s: channel hardware advance failed\n", ntv2_str->name);
+        ntv2_str->engine_state = ntv2_stream_state_error;
     }
 
     // update next index
@@ -887,7 +888,7 @@ Ntv2Status ntv2_stream_channel_advance(struct ntv2_stream *ntv2_str)
                 if (status != NTV2_STREAM_OPS_SUCCESS)
                 {
                     NTV2_MSG_STREAM_ERROR("%s: channel advance link failed\n", ntv2_str->name);
-                    return status;
+                    ntv2_str->engine_state = ntv2_stream_state_error;
                 }
                 ntv2_str->next_index = next;
                 break;
@@ -902,7 +903,7 @@ Ntv2Status ntv2_stream_channel_advance(struct ntv2_stream *ntv2_str)
         ntv2EventSignal(&ntv2_str->wait_events[i]);
     }
 
-    return NTV2_STATUS_SUCCESS;
+    return status;
 }
 
 Ntv2Status ntv2_stream_buffer_queue(struct ntv2_stream *ntv2_str, void* pOwner, NTV2StreamBuffer* pBuffer)
