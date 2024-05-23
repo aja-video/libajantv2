@@ -88,7 +88,7 @@ AJAStatus NTV2OutputTestPattern::Init (void)
 		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
 			return AJA_STATUS_BUSY;		//	Device is in use by another app -- fail
 	}
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Set OEM service level
+	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);		//	Set OEM service level
 
 	if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
@@ -102,6 +102,12 @@ AJAStatus NTV2OutputTestPattern::Init (void)
 
 	#if defined(_DEBUG)
 		cerr << mConfig << endl;
+		const string desc(mDevice.GetDescription());
+		if (!desc.empty())
+			cerr << "Description:\t" << desc << endl;
+		const NTV2Dictionary parms(mDevice.ConnectParams());
+		if (!parms.empty())
+			{cerr << "Plugin Info:" << endl; parms.Print(cerr, false); cerr << endl;}
 	#endif	//	defined(_DEBUG)
 	return AJA_STATUS_SUCCESS;
 

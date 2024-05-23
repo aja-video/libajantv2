@@ -18,8 +18,8 @@
 	#include <fstream>
 	#include "mbedtls/x509.h"
 //	#include "mbedtls/platform.h"
-//	#include "mbedtls/error.h"
-//	#include "mbedtls/md.h"
+	#include "mbedtls/error.h"
+	#include "mbedtls/md.h"
 //	#include "mbedtls/pk.h"
 	#include "mbedtls/ssl.h"
 #endif	//	defined(NTV2_PREVENT_PLUGIN_LOAD)
@@ -59,6 +59,23 @@ using namespace std;
 #define	NBSNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_RPCServer, AJAFUNC << ": " << __x__)
 #define	NBSINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_RPCServer, AJAFUNC << ": " << __x__)
 #define	NBSDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_RPCServer, AJAFUNC << ": " << __x__)
+
+#define	PLGFAIL(__x__)		AJA_sERROR  (AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
+#define	PLGWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
+#define	PLGNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
+#define	PLGINFO(__x__)		AJA_sINFO   (AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
+#define	PLGDBG(__x__)		AJA_sDEBUG  (AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
+
+#define	P_FAIL(__x__)		if (useStdout) cout << "## ERROR: " << AJAFUNC << ": " << __x__ << endl;    \
+							AJA_sERROR  (AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
+#define	P_WARN(__x__)		if (useStdout) cout << "## WARNING: " << AJAFUNC << ": " << __x__ << endl;    \
+							AJA_sWARNING(AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
+#define	P_NOTE(__x__)		if (useStdout) cout << "## NOTE: " << AJAFUNC << ": " << __x__ << endl;    \
+							AJA_sNOTICE (AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
+#define	P_INFO(__x__)		if (useStdout) cout << "## INFO: " << AJAFUNC << ": " << __x__ << endl;    \
+							AJA_sINFO   (AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
+#define	P_DBG(__x__)		if (useStdout) cout << "## DEBUG: " << AJAFUNC << ": " << __x__ << endl;    \
+							AJA_sDEBUG  (AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
 
 
 string NTV2Dictionary::valueForKey (const string & inKey) const
@@ -132,7 +149,7 @@ ostream & NTV2Dictionary::Print (ostream & oss, const bool inCompact) const
 	return oss;
 }
 
-bool NTV2Dictionary::resetFromString (const string & inStr)
+bool NTV2Dictionary::deserialize (const string & inStr)
 {
 	size_t badKVPairs(0), insertFailures(0);
 	clear();
@@ -149,7 +166,7 @@ bool NTV2Dictionary::resetFromString (const string & inStr)
 	return !empty()  &&  !badKVPairs  &&  !insertFailures;
 }
 
-bool NTV2Dictionary::toString (string & outStr) const
+bool NTV2Dictionary::serialize (string & outStr) const
 {
 	outStr.clear();
 	ostringstream oss;
@@ -1072,33 +1089,121 @@ bool NTV2RPCClientAPI::NTV2CloseRemote (void)
 	return true;
 }
 
+bool NTV2RPCClientAPI::ParseQueryParam (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams)
+{
+	if (!inParams.hasKey(kConnectParamQuery))
+		return false;
+	string queryStr(inParams.valueForKey(kConnectParamQuery));
+	if (!queryStr.empty())
+		if (queryStr[0] == '?')
+			queryStr.erase(0,1);	//	Remove leading '?'
+	const NTV2StringList strs(aja::split(queryStr, "&"));
+	for (NTV2StringListConstIter it(strs.begin());  it != strs.end();  ++it)
+	{
+		string str(*it), key, value;
+		if (str.find("=") == string::npos)
+		{	//	No assignment (i.e. no '=') --- just insert key with empty value...
+			key = aja::lower(str);
+			outQueryParams.insert(key, value);
+			PLGDBG("'" << key << "' = ''");
+			continue;
+		}
+		NTV2StringList pieces(aja::split(str,"="));
+		if (pieces.empty())
+			continue;
+		key = aja::lower(pieces.at(0));
+		if (pieces.size() > 1)
+			value = pieces.at(1);
+		if (key.empty())
+			{PLGWARN("Empty key '" << key << "'");  continue;}
+		if (outQueryParams.hasKey(key))
+			PLGDBG("Param '" << key << "' value '" << outQueryParams.valueForKey(key) << "' to be replaced with '" << value << "'");
+		outQueryParams.insert(key, ::PercentDecode(value));
+		PLGDBG("'" << key << "' = '" << outQueryParams.valueForKey(key) << "'");
+	}	//	for each &param
+	return true;
+}
+
 
 #if !defined(NTV2_PREVENT_PLUGIN_LOAD)
-static bool GetChecksumSHA256 (const NTV2Buffer inContent, NTV2Buffer & outChecksum)
+static string mbedErrStr (const int returnCode)
 {
-	if (!inContent)
-		{NBCFAIL("Empty or NULL content buffer");  return false;}
-	if (outChecksum.GetByteCount() < MBEDTLS_MD_MAX_SIZE)
-		{NBCFAIL("Output buffer size " << outChecksum.GetByteCount() << " < " << MBEDTLS_MD_MAX_SIZE);  return false;}
-	const mbedtls_md_info_t * mdi (mbedtls_md_info_from_type(MBEDTLS_MD_SHA256));
-	if (!mdi)
-	{
-		NBCFAIL("digest init failed -- 'mbedtls_md_info_from_type' return NULL");
+	static NTV2Buffer sErrBuff(4096);
+	string str;
+	mbedtls_strerror(returnCode, sErrBuff, sErrBuff);
+	sErrBuff.GetString (str, /*U8Offset*/0, /*maxSize*/sErrBuff);
+	return str;
+}
+
+static bool ExtractCertInfo (NTV2Dictionary & outInfo, const string & inStr)
+{
+	outInfo.clear();
+	if (inStr.empty())
 		return false;
-	}
-	mbedtls_md_context_t mdctx;
-	::memset(&mdctx, 0, sizeof(mdctx));
-	int rc (mbedtls_md_setup(&mdctx, mdi, 0));
-	if (rc)
-		NBCFAIL("digest init failed -- 'mbedtls_md_setup' returned " << rc);
-	if (!rc  &&  (rc = mbedtls_md_starts(&mdctx)))
-		NBCFAIL("'mbedtls_md_starts' returned " << rc);
-	if (!rc  &&  (rc = mbedtls_md_update(&mdctx, inContent, inContent.GetByteCount())))
-		NBCFAIL("'mbedtls_md_update' returned " << rc);
-    if (!rc  &&  (rc = mbedtls_md_finish(&mdctx, outChecksum)))
-		NBCFAIL("'mbedtls_md_finish' returned " << rc);
-    mbedtls_md_free(&mdctx);
-	return !rc;
+	string keyPrefix;
+	NTV2StringList lines(aja::split(inStr, "\n"));
+	for (size_t lineNdx(0);  lineNdx < lines.size();  lineNdx++)
+	{
+		string line (lines.at(lineNdx));
+		const bool indented (line.empty() ? false : line.at(0) == ' ');
+		aja::strip(line);
+		if (line.empty())	//	there shouldn't be empty lines...
+			continue;		//	...but skip them anyway if they happen to appear
+		NTV2StringList keyValPair (aja::split(line, " : "));
+		if (keyValPair.size() != 2)
+		{
+			if (keyValPair.size() == 1)
+			{
+				keyPrefix = keyValPair.at(0);
+				aja::replace(keyPrefix, ":", "");
+				aja::strip(keyPrefix);
+				continue;	//	next line
+			}
+			PLGFAIL("cert info line " << DEC(lineNdx+1) << " '" << line << "' has "
+					<< DEC(keyValPair.size()) << " column(s) -- expected 2");
+			return false;
+		}
+		string key(keyValPair.at(0)), val(keyValPair.at(1));
+		if (key.empty())
+			{PLGFAIL("cert info line " << DEC(lineNdx+1) << " '" << line << "' empty key for value '" << val << "'"); continue;}
+		if (indented  &&  !keyPrefix.empty())
+			{aja::strip(key); key = keyPrefix + ": " + key;}
+		else
+			{aja::strip(key);  keyPrefix.clear();}
+		if (outInfo.hasKey(key))
+			val = outInfo.valueForKey(key) + ", " + val;
+		outInfo.insert(key, aja::strip(val));	//	ignore errors for now
+	}	//	for each info line
+	return true;
+}
+
+static bool ExtractIssuerInfo (NTV2Dictionary & outInfo, const string & inStr, const string & inParentKey)
+{
+	outInfo.clear();
+	if (inStr.empty())
+		return false;
+	string str(inStr);
+	NTV2StringList pairs(aja::split(aja::replace(str, "\\,", ","), ", ")), normalized;
+	string lastKey;
+	for (size_t ndx(0);  ndx < pairs.size();  ndx++)
+	{
+		string assignment (pairs.at(ndx));
+		if (assignment.find('=') == string::npos)
+		{
+			if (!lastKey.empty())
+				outInfo.insert (lastKey, outInfo.valueForKey(lastKey) + ", " + assignment);
+		}
+		else
+		{
+			NTV2StringList pieces (aja::split(assignment, "="));
+			if (pieces.size() != 2)
+				{PLGFAIL("'" << inParentKey << "' assignment '" << assignment << "' has " << pieces.size() << " component(s) -- expected 2"); continue;}
+			lastKey = pieces.at(0);
+			string val(pieces.at(1));
+			outInfo.insert (aja::strip(lastKey), val);
+		}
+	}	//	for each key/val assignment
+	return true;
 }
 #endif  //  !defined(NTV2_PREVENT_PLUGIN_LOAD)
 
@@ -1131,22 +1236,32 @@ static uint64_t* GetSymbolAddress (void * pHandle, const string & inSymbolName, 
 //	Loads NTV2 plugin (specified in 'inParams'), and returns address of given function
 static uint64_t * GetNTV2PluginFunction (NTV2ConnectParams & params, const string & inFuncName)
 {
+	NTV2Dictionary	queryParams;
+	NTV2RPCClientAPI::ParseQueryParam (params, queryParams);
+	const bool showX509Cert(queryParams.hasKey("showx509cert"));
+	const bool isVerbose(queryParams.hasKey("verbose"));
+	const bool useStdout(queryParams.hasKey("cout") || queryParams.hasKey("stdout"));
+	if (isVerbose)
+	{	cout << "## NOTE: Original params:" << endl;
+		params.Print(cout, false) << endl;
+	}
+
 	//	URL scheme dictates which plugin to load...
 	if (!params.hasKey(kConnectParamScheme))
-		{NBCFAIL("Missing scheme -- params: " << params);  return AJA_NULL;}	//	No scheme
+		{P_FAIL("Missing scheme -- params: " << params);  return AJA_NULL;}	//	No scheme
 	string scheme(params.valueForKey(kConnectParamScheme));
 	if (scheme.find("ntv2"))	//	Scheme must start with "ntv2"
-		{NBCFAIL("Scheme '" << params.valueForKey(kConnectParamScheme) << "' results in empty plugin name");  return AJA_NULL;}	//	No "host"
+		{P_FAIL("Scheme '" << params.valueForKey(kConnectParamScheme) << "' results in empty plugin name");  return AJA_NULL;}	//	No "host"
 	scheme.erase(0,4);	//	Remainder of scheme yields DLL/dylib/so name...
 
 	//	Look for plugins in the "AJA" folder (parent folder of our "firmware" folder)...
 	string pluginName(scheme), pluginPath, sigPath, dllsFolder, errStr;
 	AJASystemInfo sysInfo (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path);
 	if (AJA_FAILURE(sysInfo.GetValue(AJA_SystemInfoTag_Path_Firmware, pluginPath)))
-		{NBCFAIL("AJA_SystemInfoTag_Path_Firmware failed");  return AJA_NULL;}	//	Can't get firmware folder
-	NBCDBG("AJA firmware path is '" << pluginPath << "', seeking '" << pluginName << DLL_EXTENSION "'");
+		{P_FAIL("AJA_SystemInfoTag_Path_Firmware failed");  return AJA_NULL;}	//	Can't get firmware folder
+	PLGDBG("AJA firmware path is '" << pluginPath << "', seeking '" << pluginName << DLL_EXTENSION "'");
 	if (pluginPath.find(FIRMWARE_FOLDER) == string::npos)
-		{NBSFAIL("'" << pluginPath << "' doesn't end with '" << FIRMWARE_FOLDER << "'");  return AJA_NULL;}
+		{P_FAIL("'" << pluginPath << "' doesn't end with '" << FIRMWARE_FOLDER << "'");  return AJA_NULL;}
 
 	//	Determine full path to plugin & signature files...
 	pluginPath.erase(pluginPath.find(FIRMWARE_FOLDER), 9);	//	Lop off trailing "Firmware/"
@@ -1157,25 +1272,26 @@ static uint64_t * GetNTV2PluginFunction (NTV2ConnectParams & params, const strin
 	pluginPath += DLL_EXTENSION;				//	Append extension
 
 #if defined(NTV2_PREVENT_PLUGIN_LOAD)
-	NBCFAIL("This SDK was built without the ability to load 3rd party plugins");
+	P_FAIL("This SDK was built without the ability to load 3rd party plugins");
 	return AJA_NULL;
 #else	//	!defined(NTV2_PREVENT_PLUGIN_LOAD)
-
-	//	Load entire plugin & sig files...
+	//	Load contents of plugin & sig files into sigContent & dllContent buffers...
 	NTV2Buffer sigContent, dllContent;
-	{	NTV2Buffer tmp(512*1024*1024);	//	500MB
-		ifstream dllF(pluginPath.c_str(), std::ios::in);
+	{	NTV2Buffer tmp(512*1024*1024);	//	no more than 500MB
+		ifstream dllF(pluginPath.c_str(), std::ios::in | std::ios::binary);
 		if (!dllF.good())
-			{NBSFAIL("Plugin file '" << pluginPath << "' missing");  return AJA_NULL;}
-		dllF.read(tmp, tmp.GetByteCount());
+			{P_FAIL("Plugin file '" << pluginPath << "' missing");  return AJA_NULL;}
+		if (!dllF.read(tmp, tmp.GetByteCount()).eof())
+			{P_WARN("EOF not reached in plugin file '" << pluginPath << "' -- over 500MB in size?");  return AJA_NULL;}
 		tmp.Truncate(size_t(dllF.gcount()));
 		dllContent = tmp;
 
-		tmp.Allocate(512*1024*1024);	//	500MB
-		ifstream sigF(sigPath.c_str(), std::ios::in);
+		tmp.Allocate(512*1024*1024);	//	no more than 500MB
+		ifstream sigF(sigPath.c_str(), std::ios::in | std::ios::binary);
 		if (!sigF.good())
-			{NBSFAIL("Signature file '" << sigPath << "' missing");  return AJA_NULL;}
-		sigF.read(tmp, tmp.GetByteCount());
+			{P_FAIL("Signature file '" << sigPath << "' missing");  return AJA_NULL;}
+		if (!sigF.read(tmp, tmp.GetByteCount()).eof())
+			{P_WARN("EOF not reached in signature file '" << sigPath << "' -- over 500MB in size?");  return AJA_NULL;}
 		tmp.Truncate(size_t(sigF.gcount()));
 		sigContent = tmp;
 	}
@@ -1183,33 +1299,102 @@ static uint64_t * GetNTV2PluginFunction (NTV2ConnectParams & params, const strin
 	//	Decode sigContent...
 	NTV2Dictionary dict;
 	{	const string dictStr (reinterpret_cast<const char*>(sigContent.GetHostPointer()), size_t(sigContent.GetByteCount()));
-		if (!dict.resetFromString(dictStr))
-			{NBSFAIL("Unable to decode signature file '" << sigPath << "'");  return AJA_NULL;}
+		if (!dict.deserialize(dictStr))
+			{P_FAIL("Unable to decode signature file '" << sigPath << "'");  return AJA_NULL;}
 	}
-	NBSDBG(DEC(dict.keys().size()) << " keys found in signature file '" << sigPath << "': " << dict.keys());
+	PLGDBG(DEC(dict.keys().size()) << " keys found in signature file '" << sigPath << "': " << dict.keys());
+	NTV2Buffer checksumFromSigFile, x509CertFromSigFile, signature;
+	if (!dict.hasKey(kNTV2PluginSigFileKey_X509Certificate))
+		{P_FAIL("Signature file '" << sigPath << "' missing '" << kNTV2PluginSigFileKey_X509Certificate << "' key");  return AJA_NULL;}
+	if (!dict.hasKey(kNTV2PluginSigFileKey_Signature))
+		{P_FAIL("Signature file '" << sigPath << "' missing '" << kNTV2PluginSigFileKey_Signature << "' key");  return AJA_NULL;}
+	if (!x509CertFromSigFile.SetFromHexString(dict.valueForKey(kNTV2PluginSigFileKey_X509Certificate)))
+		{P_FAIL("'SetFromHexString' failed to decode X509 certificate extracted from '" << sigPath << "' key '" << kNTV2PluginSigFileKey_X509Certificate << "'");  return AJA_NULL;}
+	if (!signature.SetFromHexString(dict.valueForKey(kNTV2PluginSigFileKey_Signature)))
+		{P_FAIL("'SetFromHexString' failed to decode signature extracted from '" << sigPath << "' key '" << kNTV2PluginSigFileKey_Signature << "'");  return AJA_NULL;}
 
-	//	Compute SHA256 checksum of plugin...
-	NTV2Buffer sha256Checksum(MBEDTLS_MD_MAX_SIZE);
-	if (!GetChecksumSHA256 (dllContent, sha256Checksum))
-		return AJA_NULL;
-
+	//	Grab the signing certificate found in the .sig file...
 	mbedtls_x509_crt crt;			//	Container for X509 certificate
 	mbedtls_x509_crt_init(&crt);	//	Initialize it as empty
-	int ret = mbedtls_x509_crt_parse_file(&crt, pluginPath.c_str());	//	Load from .sig file
+	int ret = mbedtls_x509_crt_parse(&crt, x509CertFromSigFile, x509CertFromSigFile);
 	if (ret)
-	{	NBSFAIL("'mbedtls_x509_crt_parse_file' returned " << ret << " for '" << sigPath << "'");
+	{	P_FAIL("'mbedtls_x509_crt_parse' returned " << ret << " (" << mbedErrStr(ret) << ") for X509 cert found in '" << sigPath << "'");
 		mbedtls_x509_crt_free(&crt);
 		return AJA_NULL;
 	}
 
-	//	Open the shared library...
+	//	Extract certificate info...
+	NTV2Dictionary certInfo, issuerInfo, subjectInfo;
+	{
+		NTV2Buffer msgBuff(4096);
+		int msgLength (mbedtls_x509_crt_info (msgBuff, msgBuff, /*prefixString*/"", &crt));
+		string msg (msgBuff, size_t(msgLength));
+		if (msg.empty())
+		{	P_FAIL("'mbedtls_x509_crt_info' returned no info for X509 cert found in '" << sigPath << "'");
+			return AJA_NULL;
+		}
+		if (showX509Cert)
+			cout	<< "## DEBUG: Raw X509 certificate info extracted from signature file '" << sigPath << "':" << endl
+					<< "          " << msg << endl;
+		if (!ExtractCertInfo (certInfo, msg))
+			return AJA_NULL;
+		if (isVerbose)
+		{	cout << "## NOTE: X509 certificate info extracted from signature file '" << sigPath << "':" << endl;
+			certInfo.Print(cout, false) << endl;
+		}
+		if (certInfo.hasKey("issuer name"))
+			if (!ExtractIssuerInfo (issuerInfo, certInfo.valueForKey("issuer name"), "issuer name"))
+				return AJA_NULL;
+		if (certInfo.hasKey("subject name"))
+			if (!ExtractIssuerInfo (subjectInfo, certInfo.valueForKey("subject name"), "subject name"))
+				return AJA_NULL;
+		if (isVerbose  &&  !issuerInfo.empty())
+		{	cout << "## NOTE: 'issuer name' info:" << endl;
+			issuerInfo.Print(cout, false) << endl;
+		}
+		if (isVerbose  &&  !subjectInfo.empty())
+		{	cout << "## NOTE: 'subject name' info:" << endl;
+			subjectInfo.Print(cout, false) << endl;
+		}
+		if (!issuerInfo.hasKey(kNTV2PluginX500AttrKey_CommonName))
+		{	P_FAIL("Missing issuer key '" << kNTV2PluginX500AttrKey_CommonName << "' in X509 certificate from '" << sigPath << "'");
+			return AJA_NULL;
+		}
+		if (!issuerInfo.hasKey(kNTV2PluginX500AttrKey_OrganizationName))
+		{	P_FAIL("Missing issuer key '" << kNTV2PluginX500AttrKey_OrganizationName << "' in X509 certificate from '" << sigPath << "'");
+			return AJA_NULL;
+		}
+		params.addFrom(certInfo);	//	Store certInfo key/value pairs into client/server instance's params...
+	}
+
+	//	Compute SHA256 hash of plugin...
+	NTV2Buffer checksumFromDLL(32);
+	ret = mbedtls_md_file (mbedtls_md_info_from_type(MBEDTLS_MD_SHA256), pluginPath.c_str(), checksumFromDLL);
+	if (ret)
+	{	P_FAIL("'mbedtls_md_file' returned " << ret << " (" << mbedErrStr(ret) << ") for '" << pluginPath << "'");
+		return AJA_NULL;
+	}
+	if (isVerbose)   {string str; if (checksumFromDLL.toHexString(str)) cout << "## DEBUG: Digest: " << str << endl;}
+
+	//	Verify the dylib/DLL/so signature...
+	ret = mbedtls_pk_verify (&crt.pk, MBEDTLS_MD_SHA256,
+							/*msgHash*/checksumFromDLL, /*msgHashLength*/0,//checksumFromDLL,
+							/*signatureToVerify*/signature, /*signatureLength*/signature);
+	if (ret)
+	{	P_FAIL("'mbedtls_pk_verify' returned " << ret << " (" << mbedErrStr(ret) << ") for '" << sigPath << "'");
+		return AJA_NULL;
+	}
+	mbedtls_x509_crt_free(&crt);	//	Done using the mbedtls_x509_crt struct
+	P_DBG("'" << pluginPath << "' is properly signed");
+
+	//	Load/open the shared library...
 	ostringstream loadErr;
 	#if defined(MSWindows)
 		//	Open the DLL (Windows)...
 		std::wstring dllsFolderW;
 		aja::string_to_wstring(dllsFolder, dllsFolderW);
 		if (!AddDllDirectory(dllsFolderW.c_str()))
-		{	NBCFAIL("AddDllDirectory '" << pluginPath << "' failed: " << WinErrStr(::GetLastError()));
+		{	P_FAIL("AddDllDirectory '" << pluginPath << "' failed: " << WinErrStr(::GetLastError()));
 			return AJA_NULL;
 		}	//	AddDllDirectory failed
 		HMODULE pHandle = ::LoadLibraryExA(LPCSTR(pluginPath.c_str()), AJA_NULL, LOAD_LIBRARY_SEARCH_USER_DIRS);
@@ -1229,8 +1414,8 @@ static uint64_t * GetNTV2PluginFunction (NTV2ConnectParams & params, const strin
 		}	//	dlopen failed
 	#endif	//	MacOS or Linux
 	if (!pHandle)
-		{NBCFAIL(loadErr.str());  return AJA_NULL;}
-	NBCDBG("'" << pluginPath << "' opened");
+		{P_FAIL(loadErr.str());  return AJA_NULL;}
+	PLGDBG("'" << pluginPath << "' opened");
 
 	uint64_t * pResult (AJA_NULL);
 	do	//	do only once
@@ -1238,19 +1423,19 @@ static uint64_t * GetNTV2PluginFunction (NTV2ConnectParams & params, const strin
 		//	Get address of required GetRegInfo function...
 		uint64_t * pInfoJSON(::GetSymbolAddress(pHandle, kFuncNameGetRegInfo, errStr));
 		if (!pInfoJSON)
-			{NBCFAIL("'" << pluginPath << "': " << errStr);  break;}
+			{P_FAIL("'" << pluginPath << "': " << errStr);  break;}
 
 		//	Call GetRegInfo to obtain registration info...
 		NTV2Dictionary regInfo;
 		fpGetRegistrationInfo pRegInfo = reinterpret_cast<fpGetRegistrationInfo>(pInfoJSON);
 		NTV2_ASSERT(pRegInfo);
 		if (!(*pRegInfo)(uint32_t(AJA_NTV2_SDK_VERSION), regInfo))
-			{NBCFAIL("'" << pluginPath << "': '" << kFuncNameGetRegInfo << "' failed");  break;}
-		NBCDBG("'" << pluginPath << "': '" << kFuncNameGetRegInfo << "': " << regInfo);
+			{P_FAIL("'" << pluginPath << "': '" << kFuncNameGetRegInfo << "' failed");  break;}
+		PLGDBG("'" << pluginPath << "': '" << kFuncNameGetRegInfo << "': " << regInfo);
 
-		//	Some registration info keys are required...
+		//	Check for required registration info keys...
 		if (regInfo.empty())
-			{NBCFAIL("'" << pluginPath << "': no registration info (empty)");  break;}
+			{P_FAIL("'" << pluginPath << "': no registration info (empty)");  break;}
 		NTV2StringList missingRegInfoKeys;
 		static const NTV2StringList reqKeys = {kNTV2PluginRegInfoKey_Vendor, kNTV2PluginRegInfoKey_CommonName,
 												kNTV2PluginRegInfoKey_ShortName, kNTV2PluginRegInfoKey_LongName,
@@ -1259,22 +1444,34 @@ static uint64_t * GetNTV2PluginFunction (NTV2ConnectParams & params, const strin
 			if (!regInfo.hasKey(reqKeys.at(ndx)))
 				missingRegInfoKeys.push_back(reqKeys.at(ndx));
 		if (!missingRegInfoKeys.empty())
-		{	NBCFAIL("'" << pluginPath << "': missing key(s) in registration info: '"
+		{	P_FAIL("'" << pluginPath << "': missing key(s) in registration info: '"
 					<< aja::join(missingRegInfoKeys, "','") << "'");
-			break;
+			break;	//	fail
 		}
 
-		//	Make sure vendor matches common name in signature...
-		//	TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD
-
-		//	Add regInfo to params passed into new client or server instance...
-		const size_t numParamsAdded (params.addFrom(regInfo));
-		NBCDBG("'" << pluginPath << "': " << DEC(numParamsAdded) << " reg info params added");
+		//	Check that vendor matches common name in signature...
+		const string	cnReg(regInfo.valueForKey(kNTV2PluginRegInfoKey_CommonName)),
+						cnCert(issuerInfo.valueForKey(kNTV2PluginX500AttrKey_CommonName));
+		const string	onReg(regInfo.valueForKey(kNTV2PluginRegInfoKey_Vendor)),
+						onCert(issuerInfo.valueForKey(kNTV2PluginX500AttrKey_OrganizationName));
+		if (onReg != onCert)
+		{	P_FAIL("Vendor name (key='" << kNTV2PluginRegInfoKey_Vendor << "') \"" << onReg << "\" from plugin \""
+					<< pluginPath << "\" doesn't match organization name (key='" << kNTV2PluginX500AttrKey_OrganizationName
+					<< "') \"" << onCert << "\" from X509 certificate in '" << sigPath << "'");
+			break;	//	fail
+		}
+		if (cnReg != cnCert)
+		{	P_FAIL("Common name (key='" << kNTV2PluginRegInfoKey_CommonName << "') \"" << cnReg << "\" from plugin \""
+					<< pluginPath << "\" doesn't match common name (key='" << kNTV2PluginX500AttrKey_CommonName
+					<< "') \"" << cnCert << "\" from X509 certificate in '" << sigPath << "'");
+			break;	//	fail
+		}
+		params.addFrom(regInfo);	//	Add regInfo key/val pairs into 'params'
 
 		//	Finally, the last step ---- get address of requested function...
 		pResult = ::GetSymbolAddress(pHandle, inFuncName, errStr);
 		if (!pResult)
-			{NBCFAIL("'" << pluginPath << "': " << errStr);  break;}
+			{P_FAIL("'" << pluginPath << "': " << errStr);  break;}
 	} while (false);	//	One time only
 	if (!pResult)
 	{	//	Close the dylib/so/DLL...
@@ -1285,25 +1482,29 @@ static uint64_t * GetNTV2PluginFunction (NTV2ConnectParams & params, const strin
 		#else	//	macOS or Linux
 			::FreeLibrary(pHandle);
 		#endif
-		NBCDBG("'" << pluginPath << "' closed");
+		P_DBG("'" << pluginPath << "' closed");
 	}
 	else
-		NBCDBG("Calling '" << inFuncName << "' in '" << pluginPath << "'");
+		P_DBG("Calling '" << inFuncName << "' in '" << pluginPath << "'");
+	if (isVerbose)
+	{	cout << "## NOTE: Final params for '" << pluginPath << "':" << endl;
+		params.Print(cout, false) << endl;
+	}
 	return pResult;
 #endif	//	!defined(NTV2_PREVENT_PLUGIN_LOAD)
 }	//	GetNTV2PluginFunction
 
 
-NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (NTV2ConnectParams inParams)	//	CLASS METHOD
+NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (NTV2ConnectParams & params)	//	CLASS METHOD
 {
-	fpCreateClient pFunc (reinterpret_cast<fpCreateClient>(::GetNTV2PluginFunction(inParams, kFuncNameCreateClient)));
+	fpCreateClient pFunc (reinterpret_cast<fpCreateClient>(::GetNTV2PluginFunction(params, kFuncNameCreateClient)));
 	if (!pFunc)
 		return AJA_NULL;
 
 	//	Call plugin's Create function to instantiate the NTV2RPCClientAPI object...
-	NTV2RPCClientAPI * pRPCObject = (*pFunc) (AJA_NULL, inParams, AJA_NTV2_SDK_VERSION);
+	NTV2RPCClientAPI * pRPCObject = (*pFunc) (AJA_NULL, params, AJA_NTV2_SDK_VERSION);
 	if (!pRPCObject)
-		NBCFAIL("'" << kFuncNameCreateClient << "' returned NULL client instance from: " << inParams);
+		NBCFAIL("'" << kFuncNameCreateClient << "' returned NULL client instance from: " << params);
 	else
 		NBCINFO("'" << kFuncNameCreateClient << "' created client instance " << xHEX0N(uint64_t(pRPCObject),16));
 	return pRPCObject;
@@ -1314,7 +1515,7 @@ NTV2RPCClientAPI * NTV2RPCClientAPI::CreateClient (NTV2ConnectParams inParams)	/
 	NTV2RPCServerAPI
 *****************************************************************************************************************************************************/
 
-NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (NTV2ConfigParams inParams)	//	CLASS METHOD
+NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (NTV2ConfigParams & inParams)	//	CLASS METHOD
 {
 	fpCreateServer pFunc (reinterpret_cast<fpCreateServer>(::GetNTV2PluginFunction(inParams, kFuncNameCreateServer)));
 	if (!pFunc)
@@ -1334,7 +1535,8 @@ NTV2RPCServerAPI * NTV2RPCServerAPI::CreateServer (const string & inURL)	//	CLAS
 	NTV2DeviceSpecParser parser(inURL);
 	if (parser.HasErrors())
 		return AJA_NULL;
-	return CreateServer(parser.Results());
+	NTV2ConfigParams parms(parser.Results());
+	return CreateServer(parms);
 }
 
 NTV2RPCServerAPI::NTV2RPCServerAPI (NTV2ConnectParams inParams)

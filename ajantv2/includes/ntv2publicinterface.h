@@ -6262,9 +6262,9 @@ typedef enum
 				}
 
 				/**
-					@brief		Truncates me to the given length (provided I'm not page-aligned).
-					@param[in]	inByteCount		Specifies my new length. Must be greater than zero and less
-												than my current length.
+					@brief		Truncates me to the given length. No reallocation takes place.
+					@param[in]	inByteCount		Specifies my new length. Specify zero to Deallocate.
+												Otherwise must be less than my current length.
 					@return		True if successful; otherwise false.
 				**/
 				bool			Truncate (const size_t inByteCount);
@@ -6316,6 +6316,7 @@ typedef enum
 											characters are skipped and ignored. All other characters
 											must be a hexadecimal digit (upper or lower case).
 					@return		True if successful; otherwise false.
+					@see		NTV2Buffer::toHexString
 				**/
 				bool			SetFromHexString (const std::string & inStr);
 
@@ -6400,10 +6401,11 @@ typedef enum
 
 				/**
 					@brief	Converts my contents into a hex-encoded string.
-					@param[out]	outStr		Receives the hexadecimal-encoded string representation of my contents.
-					@param[in]	inLineBreakInterval	Optionally specifies the number of bytes to encode before
-													inserting a newline. Defaults to zero (no newline insertion).
+					@param[out]	outStr				Receives the hexadecimal-encoded string representation of my contents.
+					@param[in]	inLineBreakInterval	Optionally inserts a newline into the resulting string at the specified
+													byte count interval. Defaults to zero (no newlines are inserted).
 					@return True if successful; otherwise false.
+					@see	NTV2Buffer::SetFromHexString
 				**/
 				bool			toHexString (std::string & outStr, const size_t inLineBreakInterval = 0) const;
 
@@ -6656,14 +6658,14 @@ typedef enum
 
 				/**
 					@brief		Answers with my contents as a character string.
-					@param[out] outString		Receives the character string copied verbatim from my contents.
+					@param[out] outString		Receives the character string copied from my contents.
 					@param[in]	inU8Offset		The starting offset, in bytes, where copying will commence.
 					@param[in]	inMaxSize		Specifies the maximum number of 8-bit values to be returned.
 												Use zero for unlimited.
 												The actual number of returned 8-bit values may be less than this, depending on my size.
 												Defaults to 128.
 					@return						True if successful;	 otherwise false.
-					@note		This function blindly copies my contents into the outgoing string, without checking for validity.
+					@note		Byte copying terminates at the first zero byte that's encountered in my buffer.
 				**/
 				bool						GetString (std::string & outString, const size_t inU8Offset = 0, const size_t inMaxSize = 128) const;
 
@@ -6674,7 +6676,7 @@ typedef enum
 												Use zero for unlimited.
 												The actual number of returned 8-bit values may be less than this, depending on my size.
 												Defaults to 128.
-					@note		This function blindly copies my contents into the outgoing string, without checking for validity.
+					@note		Byte copying terminates at the first zero byte that's encountered in my buffer.
 				**/
 				inline std::string			GetString (const size_t inU8Offset = 0, const size_t inMaxSize = 128) const {std::string result; GetString(result, inU8Offset, inMaxSize); return result;}
 

@@ -41,12 +41,27 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 #define	kFuncNameGetRegInfo		"GetRegistrationInfo"	///< @brief	Answers with plugin registration info
 
 //	Plugin Registration Info Keys:
-#define	kNTV2PluginRegInfoKey_Vendor		"Vendor"
-#define	kNTV2PluginRegInfoKey_CommonName	"CommonName"
-#define	kNTV2PluginRegInfoKey_ShortName		"ShortName"
-#define	kNTV2PluginRegInfoKey_LongName		"LongName"
-#define	kNTV2PluginRegInfoKey_Description	"Description"
-#define	kNTV2PluginRegInfoKey_Copyright		"Copyright"
+#define	kNTV2PluginRegInfoKey_Vendor			"Vendor"			///< @brief	Plugin vendor (manufacturer) name
+#define	kNTV2PluginRegInfoKey_CommonName		"CommonName"		///< @brief	Plugin vendor domain name
+#define	kNTV2PluginRegInfoKey_ShortName			"ShortName"			///< @brief	Plugin short name
+#define	kNTV2PluginRegInfoKey_LongName			"LongName"			///< @brief	Plugin long name
+#define	kNTV2PluginRegInfoKey_Description		"Description"		///< @brief	Brief plugin description
+#define	kNTV2PluginRegInfoKey_Copyright			"Copyright"			///< @brief	Plugin copyright notice
+#define	kNTV2PluginRegInfoKey_NTV2SDKVersion	"NTV2SDKVersion"	///< @brief	NTV2 SDK version that plugin was compiled with
+#define	kNTV2PluginRegInfoKey_Version			"Version"			///< @brief	Plugin version (string)
+#define	kNTV2PluginRegInfoKey_CommitSHA			"CommitSHA"			///< @brief	Plugin last commit SHA
+
+//	Plugin Signature File Keys:
+#define	kNTV2PluginSigFileKey_X509Certificate	"X509Certificate"	///< @brief	X509 certificate (encoded as hex string)
+#define	kNTV2PluginSigFileKey_Signature			"Signature"			///< @brief	X509 digital signature (encoded as hex string)
+
+//	X509 Issuer LDAP Keys:
+#define	kNTV2PluginX500AttrKey_CommonName				"CN"
+#define	kNTV2PluginX500AttrKey_LocalityName				"L"
+#define	kNTV2PluginX500AttrKey_StateOrProvinceName		"ST"
+#define	kNTV2PluginX500AttrKey_OrganizationName			"O"
+#define	kNTV2PluginX500AttrKey_OrgranizationalUnitName	"OU"
+#define	kNTV2PluginX500AttrKey_CountryName				"C"
 
 
 /**
@@ -68,7 +83,7 @@ class AJAExport NTV2Dictionary
 		size_t				largestKeySize (void) const;	///< @return	The length of my largest key, in bytes
 		size_t				largestValueSize (void) const;	///< @return	The length of my largest value, in bytes
 		std::ostream &		Print (std::ostream & oss, const bool inCompact = true) const;	///< @brief	Prints human-readable representation to ostream
-		bool				toString (std::string & outStr) const;	///< @brief	Serializes my contents into the given string
+		bool				serialize (std::string & outStr) const;	///< @brief	Serializes my contents into the given string
 		///@}
 
 		/**
@@ -80,7 +95,7 @@ class AJAExport NTV2Dictionary
 		inline size_t		erase (const std::string & inKey)	{return mDict.erase(inKey);}	///< @brief	Erases the given key and its corresponding value from me, returns 1 if successful, 0 if not
 		size_t				updateFrom (const NTV2Dictionary & inDict);	///< @brief	Updates all values from inDict with matching keys, ignoring all non-matching keys
 		size_t				addFrom (const NTV2Dictionary & inDict);	///< @brief	Adds all values from inDict with non-matching keys, ignoring all matching keys
-		bool				resetFromString (const std::string & inStr);	///< @brief	Resets me from the given string/stream
+		bool				deserialize (const std::string & inStr);	///< @brief	Resets me from the given string
 	#if !defined(NTV2_DEPRECATE_17_1)
 		inline NTV2_DEPRECATED_f(size_t UpdateFrom (const NTV2Dictionary & inDict)) {return updateFrom(inDict);}	///< @deprecated	Use updateFrom instead.
 		inline NTV2_DEPRECATED_f(size_t AddFrom (const NTV2Dictionary & inDict)) {return addFrom(inDict);}	///< @deprecated	Use addFrom instead.
@@ -194,7 +209,8 @@ class AJAExport NTV2DeviceSpecParser
 class AJAExport NTV2RPCClientAPI
 {
 	public:
-		static NTV2RPCClientAPI *	CreateClient (NTV2ConnectParams inParams);
+		static NTV2RPCClientAPI *	CreateClient (NTV2ConnectParams & inParams);
+		static bool					ParseQueryParam (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams);	//	New in SDK 17.1
 
 	public:
 		/**
@@ -307,7 +323,7 @@ class AJAExport NTV2RPCServerAPI
 									The "Scheme" parameter (required) determines the plugin to load.
 			@return		If successful, a non-zero pointer to the new NTV2RPCServerAPI instance;  otherwise nullptr (zero).
 		**/
-		static NTV2RPCServerAPI *	CreateServer (NTV2ConfigParams inParams);
+		static NTV2RPCServerAPI *	CreateServer (NTV2ConfigParams & inParams);
 
 		/**
 			@brief		Factory method that instantiates a new NTV2RPCServerAPI instance using a plugin based on the

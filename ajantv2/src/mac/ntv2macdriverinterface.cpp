@@ -479,6 +479,10 @@ bool CNTV2MacDriverInterface::WriteRegister (const ULWord inRegNum, const ULWord
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::AcquireStreamForApplication (ULWord appType, int32_t pid)
 {
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+		return CNTV2DriverInterface::AcquireStreamForApplication (appType, pid);
+#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
@@ -503,6 +507,10 @@ bool CNTV2MacDriverInterface::AcquireStreamForApplication (ULWord appType, int32
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::ReleaseStreamForApplication (ULWord appType, int32_t pid)
 {
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+		return CNTV2DriverInterface::ReleaseStreamForApplication (appType, pid);
+#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
@@ -534,6 +542,10 @@ bool CNTV2MacDriverInterface::ReleaseStreamForApplication (ULWord appType, int32
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::AcquireStreamForApplicationWithReference (ULWord appType, int32_t pid)
 {
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+		return CNTV2DriverInterface::AcquireStreamForApplicationWithReference (appType, pid);
+#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
@@ -561,6 +573,10 @@ bool CNTV2MacDriverInterface::AcquireStreamForApplicationWithReference (ULWord a
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::ReleaseStreamForApplicationWithReference (ULWord appType, int32_t pid)
 {
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+		return CNTV2DriverInterface::ReleaseStreamForApplicationWithReference (appType, pid);
+#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
@@ -591,6 +607,10 @@ bool CNTV2MacDriverInterface::ReleaseStreamForApplicationWithReference (ULWord a
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::SetStreamingApplication (ULWord appType, int32_t pid)
 {
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+		return CNTV2DriverInterface::SetStreamingApplication (appType, pid);
+#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
@@ -615,6 +635,10 @@ bool CNTV2MacDriverInterface::SetStreamingApplication (ULWord appType, int32_t p
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::GetStreamingApplication (ULWord & outAppType, int32_t & outProcessID)
 {
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+		return CNTV2DriverInterface::GetStreamingApplication (outAppType, outProcessID);
+#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarO_64[2]	= {0, 0};
 	uint32_t	outputCount(2);
