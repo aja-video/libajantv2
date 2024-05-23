@@ -104,9 +104,8 @@ GetRegisterAddress(	ULWord deviceNumber,
 
 ULWord READ_REGISTER_ULWord( ULWord deviceNumber, unsigned long address)
 {
+	NTV2PrivateParams* pNTV2Params = getNTV2Params(deviceNumber);
 	ULWord value = 0xffffffff;
-	NTV2PrivateParams* pNTV2Params;
-	pNTV2Params = getNTV2Params(deviceNumber);
 
 	if(address == (pNTV2Params->_VideoAddress+0x118) ) {
 #ifdef DEBUG_UART
@@ -195,8 +194,7 @@ ULWord READ_REGISTER_UByte( ULWord deviceNumber, unsigned long address)
 
 void WRITE_REGISTER_ULWord( ULWord deviceNumber, unsigned long address, ULWord regValue)
 {
-	NTV2PrivateParams* pNTV2Params;
-	pNTV2Params = getNTV2Params(deviceNumber);
+	NTV2PrivateParams* pNTV2Params = getNTV2Params(deviceNumber);
 
     if (pNTV2Params->hotplug)
     {
@@ -206,10 +204,12 @@ void WRITE_REGISTER_ULWord( ULWord deviceNumber, unsigned long address, ULWord r
             return;
         }
 #else
-        value = readl((void *)(pNTV2Params->_pDeviceID));
-        if(value == 0xffffffff)
         {
-            return;
+            ULWord value = readl((void *)(pNTV2Params->_pDeviceID));
+            if(value == 0xffffffff)
+            {
+                return;
+            }
         }
 #endif        
     }
