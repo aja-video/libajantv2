@@ -107,10 +107,6 @@ bool CNTV2LinuxDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 
 bool CNTV2LinuxDriverInterface::CloseLocalPhysical (void)
 {
-	NTV2_ASSERT(!IsRemote());
-	NTV2_ASSERT(IsOpen());
-	NTV2_ASSERT(_hDevice);
-
 #if !defined(NTV2_DEPRECATE_16_0)
 	UnmapXena2Flash();
 	UnmapDMADriverBuffer();
@@ -121,6 +117,8 @@ bool CNTV2LinuxDriverInterface::CloseLocalPhysical (void)
 		close(int(_hDevice));
 	_hDevice = INVALID_HANDLE_VALUE;
 	_boardOpened = false;
+	_boardID = DEVICE_ID_NOTFOUND;
+	_boardNumber = NTV2_MAXBOARDS;
 	return true;
 }
 #endif	//	!defined(NTV2_NULL_DEVICE)
