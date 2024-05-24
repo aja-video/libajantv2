@@ -79,7 +79,7 @@ bool CNTV2LinuxDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
             if (count == inDeviceIndex)
                 break;
             count++;
-            Close();
+            close(int(_hDevice));
             _hDevice = INVALID_HANDLE_VALUE;
         }
     }
@@ -94,7 +94,7 @@ bool CNTV2LinuxDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 		if (!CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID))
 		{
 			LDIFAIL ("ReadReg retry failed for 'kRegBoardID': ndx=" << inDeviceIndex << " hDev=" << _hDevice << " id=" << HEX8(_boardID));
-			Close();
+			close(int(_hDevice));
 			return false;
 		}
 		LDIDBG("Retry succeeded: ndx=" << _boardNumber << " hDev=" << _hDevice << " id=" << ::NTV2DeviceIDToString(_boardID));
