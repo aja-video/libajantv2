@@ -33,6 +33,15 @@ static struct ntv2_page_fops rdma_fops = { NULL, NULL, NULL, NULL};
 
 void ntv2_set_rdma_fops(struct ntv2_page_fops* fops)
 {
+    if (fops == NULL)
+    {
+        rdma_fops.get_pages = NULL;
+        rdma_fops.put_pages = NULL;
+        rdma_fops.map_pages = NULL;
+        rdma_fops.unmap_pages = NULL;
+        return;
+    }
+
     rdma_fops = *fops;
 }
 EXPORT_SYMBOL(ntv2_set_rdma_fops);

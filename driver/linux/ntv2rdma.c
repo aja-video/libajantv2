@@ -296,6 +296,7 @@ int ntv2_rdma_init(void)
 
 void ntv2_rdma_exit(void)
 {
+    ntv2_set_rdma_fops(NULL);
     printk(KERN_INFO "ntv2_rmda_exit\n");
     return;
 }
