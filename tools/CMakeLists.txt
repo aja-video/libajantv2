@@ -5,7 +5,7 @@ endif()
 
 add_subdirectory(logreader)
 add_subdirectory(ntv2firmwareinstaller)
-if (NOT DEFINED AJA_DISABLE_PLUGIN_LOAD)
+if (NOT AJA_DISABLE_PLUGIN_LOAD)
     add_subdirectory(ntv2sign)
 endif()
 add_subdirectory(ntv2thermo)
