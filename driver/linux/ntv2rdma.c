@@ -296,7 +296,9 @@ int ntv2_rdma_init(void)
 
 void ntv2_rdma_exit(void)
 {
+#ifdef AJA_RDMA
     ntv2_set_rdma_fops(NULL);
+#endif    
     printk(KERN_INFO "ntv2_rmda_exit\n");
     return;
 }
