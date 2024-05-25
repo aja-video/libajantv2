@@ -50,6 +50,10 @@ static const uint32_t gNTV2InputSourceToANCChannel[NTV2_NUM_INPUTSOURCES+1] = {
 	NTV2_CHANNEL1, NTV2_CHANNEL2, NTV2_CHANNEL3, NTV2_CHANNEL4,
 	NTV2_CHANNEL5, NTV2_CHANNEL6, NTV2_CHANNEL7, NTV2_CHANNEL8, NTV2_CHANNEL_INVALID};
 
+#if defined(AJAMacDext)
+	extern uint32_t Ntv2DMATransferCon(Ntv2SystemContext* context, PAUTO_DMA_PARAMS pDmaParams);
+#endif
+
 //-------------------------------------------------------------------------------------------------------
 //	AutoCirculateControl
 //-------------------------------------------------------------------------------------------------------
@@ -1517,6 +1521,8 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 					dmaParams.dmaEngine = eVideoDmaEngine;
 					dmaParams.videoChannel = channel;
 					dmaParams.pVidUserVa = (PVOID)transfer.acVideoBuffer.fUserSpacePtr;
+					dmaParams.pVidDesc = (PVOID)transfer.acVideoBuffer.fIOMemoryDesc;
+					dmaParams.pVidMap = (PVOID)transfer.acVideoBuffer.fIOMemoryMap;
 					dmaParams.videoFrame = frameNumber;
 					dmaParams.vidNumBytes = transfer.acVideoBuffer.fByteCount;
 					dmaParams.frameOffset = transfer.acInVideoDMAOffset;
@@ -1524,14 +1530,20 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 					dmaParams.vidFramePitch = transfer.acInSegmentedDMAInfo.acSegmentDevicePitch;
 					dmaParams.numSegments = transfer.acInSegmentedDMAInfo.acNumSegments;
 					dmaParams.pAudUserVa = withAudio ? (PVOID)transfer.acAudioBuffer.fUserSpacePtr : NULL;
+					dmaParams.pAudDesc = withAudio ? (PVOID)transfer.acAudioBuffer.fIOMemoryDesc : NULL;
+					dmaParams.pAudMap = withAudio ? (PVOID)transfer.acAudioBuffer.fIOMemoryMap : NULL;
 					dmaParams.audioSystem = pAuto->audioSystem;
 					dmaParams.audNumBytes = withAudio ? pAuto->audioTransferSize : 0;
 					dmaParams.audOffset = withAudio ? pAuto->audioTransferOffset : 0;
 					dmaParams.pAncF1UserVa = withAnc ? (PVOID)transfer.acANCBuffer.fUserSpacePtr : NULL;
+					dmaParams.pAncF1Desc = withAnc ? (PVOID)transfer.acANCBuffer.fIOMemoryDesc : NULL;
+					dmaParams.pAncF1Map = withAnc ? (PVOID)transfer.acANCBuffer.fIOMemoryMap : NULL;
 					dmaParams.ancF1Frame = frameNumber;
 					dmaParams.ancF1NumBytes = withAnc ? pAuto->ancTransferSize : 0;
 					dmaParams.ancF1Offset = withAnc ? pAuto->ancTransferOffset : 0;
 					dmaParams.pAncF2UserVa = withAnc ? (PVOID)transfer.acANCField2Buffer.fUserSpacePtr : NULL;
+					dmaParams.pAncF2Desc = withAnc ? (PVOID)transfer.acANCField2Buffer.fIOMemoryDesc : NULL;
+					dmaParams.pAncF2Map = withAnc ? (PVOID)transfer.acANCField2Buffer.fIOMemoryMap : NULL;
 					dmaParams.ancF2Frame = frameNumber;
 					dmaParams.ancF2NumBytes = withAnc ? pAuto->ancField2TransferSize : 0;
 					dmaParams.ancF2Offset = withAnc ? pAuto->ancField2TransferOffset : 0;
@@ -1554,6 +1566,8 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 						dmaParams.dmaEngine = eVideoDmaEngine;
 						dmaParams.videoChannel = channel;
 						dmaParams.pVidUserVa = (PVOID)transfer.acVideoBuffer.fUserSpacePtr;
+						dmaParams.pVidDesc = (PVOID)transfer.acVideoBuffer.fIOMemoryDesc;
+						dmaParams.pVidMap = (PVOID)transfer.acVideoBuffer.fIOMemoryMap;
 						dmaParams.videoFrame = frameNumber;
 						dmaParams.vidNumBytes = transfer.acVideoBuffer.fByteCount;
 						dmaParams.frameOffset = transfer.acInVideoDMAOffset;
@@ -1572,6 +1586,8 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 					dmaParams.dmaEngine = eVideoDmaEngine;
 					dmaParams.videoChannel = channel;
 					dmaParams.pVidUserVa = (PVOID)pTransferStruct->acVideoBuffer.fUserSpacePtr;
+					dmaParams.pVidDesc = (PVOID)pTransferStruct->acVideoBuffer.fIOMemoryDesc;
+					dmaParams.pVidMap = (PVOID)pTransferStruct->acVideoBuffer.fIOMemoryMap;
 					dmaParams.videoFrame = frameNumber;
 					dmaParams.vidNumBytes = pTransferStruct->acVideoBuffer.fByteCount;
 					dmaParams.frameOffset = pTransferStruct->acInVideoDMAOffset;
@@ -1579,14 +1595,20 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 					dmaParams.vidFramePitch = pTransferStruct->acInSegmentedDMAInfo.acSegmentDevicePitch;
 					dmaParams.numSegments = pTransferStruct->acInSegmentedDMAInfo.acNumSegments;
 					dmaParams.pAudUserVa = withAudio ? (PVOID)pTransferStruct->acAudioBuffer.fUserSpacePtr : NULL;
+					dmaParams.pAudDesc = withAudio ? (PVOID)pTransferStruct->acAudioBuffer.fIOMemoryDesc : NULL;
+					dmaParams.pAudMap = withAudio ? (PVOID)pTransferStruct->acAudioBuffer.fIOMemoryMap : NULL;
 					dmaParams.audioSystem = pAuto->audioSystem;
 					dmaParams.audNumBytes = withAudio ? pAuto->audioTransferSize : 0;
 					dmaParams.audOffset = withAudio ? pAuto->audioTransferOffset : 0;
 					dmaParams.pAncF1UserVa = withAnc ? (PVOID)pTransferStruct->acANCBuffer.fUserSpacePtr : NULL;
+					dmaParams.pAncF1Desc = withAnc ? (PVOID)pTransferStruct->acANCBuffer.fIOMemoryDesc : NULL;
+					dmaParams.pAncF1Map = withAnc ? (PVOID)pTransferStruct->acANCBuffer.fIOMemoryMap : NULL;
 					dmaParams.ancF1Frame = frameNumber;
 					dmaParams.ancF1NumBytes = withAnc ? pAuto->ancTransferSize : 0;
 					dmaParams.ancF1Offset = withAnc ? pAuto->ancTransferOffset : 0;
 					dmaParams.pAncF2UserVa = withAnc ? (PVOID)pTransferStruct->acANCField2Buffer.fUserSpacePtr : NULL;
+					dmaParams.pAncF2Desc = withAnc ? (PVOID)pTransferStruct->acANCField2Buffer.fIOMemoryDesc : NULL;
+					dmaParams.pAncF2Map = withAnc ? (PVOID)pTransferStruct->acANCField2Buffer.fIOMemoryMap : NULL;
 					dmaParams.ancF2Frame = frameNumber;
 					dmaParams.ancF2NumBytes = withAnc ? pAuto->ancField2TransferSize : 0;
 					dmaParams.ancF2Offset = withAnc ? pAuto->ancField2TransferOffset : 0;
@@ -1630,6 +1652,8 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 			dmaParams.dmaEngine = eAudioDmaEngine;
 			dmaParams.videoChannel = channel;
 			dmaParams.pAudUserVa = (PVOID)pTransferStruct->acAudioBuffer.fUserSpacePtr;
+			dmaParams.pAudDesc = (PVOID)pTransferStruct->acAudioBuffer.fIOMemoryDesc;
+			dmaParams.pAudMap = (PVOID)pTransferStruct->acAudioBuffer.fIOMemoryMap;
 			dmaParams.audioSystem = pAuto->audioSystem;
 			dmaParams.audNumBytes = pAuto->audioTransferSize;
 			dmaParams.audOffset = pAuto->audioTransferOffset;
@@ -3917,6 +3941,10 @@ bool AutoCircCanDoFieldMode(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto)
 //	Real device drivers and fake devices must implement:
 Ntv2Status	AutoDmaTransfer(void* pContext, PAUTO_DMA_PARAMS pDmaParams)
 {
+#if defined(AJAMacDext)
+	extern Ntv2Status ntv2DMATransferCon(Ntv2SystemContext* pSysCon, PAUTO_DMA_PARAMS pDmaParams);
+	return ntv2DMATransferCon((Ntv2SystemContext*) pContext, pDmaParams);
+#endif
 	return NTV2_STATUS_SUCCESS;
 }
 
