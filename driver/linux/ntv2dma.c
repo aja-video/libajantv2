@@ -29,50 +29,22 @@
 #include "ntv2stream.h"
 #include "ntv2dma.h"
 
-#ifdef AJA_RDMA
-#include "ntv2rdma.h"
+static struct ntv2_page_fops rdma_fops = { NULL, NULL, NULL, NULL};
 
-#ifdef AJA_IGPU
-#define GPU_PAGE_SHIFT	12
-#else
-#define GPU_PAGE_SHIFT	16
-#endif
-
-#define GPU_PAGE_SIZE	(((ULWord64)1) << GPU_PAGE_SHIFT)
-#define GPU_PAGE_OFFSET	(GPU_PAGE_SIZE - 1)
-#define GPU_PAGE_MASK	(~GPU_PAGE_OFFSET)
-
-#ifdef NVIDIA_PROPRIETARY
-
-static struct ntv2_rdma_fops rdma_fops = 
+void ntv2_set_rdma_fops(struct ntv2_page_fops* fops)
 {
-    .get_pages = NULL,
-    .put_pages = NULL,
-    .free_page_table = NULL,
-    .dma_map_pages = NULL,
-    .dma_unmap_pages = NULL
-};
+    if (fops == NULL)
+    {
+        rdma_fops.get_pages = NULL;
+        rdma_fops.put_pages = NULL;
+        rdma_fops.map_pages = NULL;
+        rdma_fops.unmap_pages = NULL;
+        return;
+    }
 
-void ntv2_set_rdma_fops(struct ntv2_rdma_fops* fops)
-{
     rdma_fops = *fops;
 }
 EXPORT_SYMBOL(ntv2_set_rdma_fops);
-
-#else
-
-static struct ntv2_rdma_fops rdma_fops = 
-{
-    .get_pages = nvidia_p2p_get_pages,
-    .put_pages = nvidia_p2p_put_pages,
-    .free_page_table = nvidia_p2p_free_page_table,
-    .dma_map_pages = nvidia_p2p_dma_map_pages,
-    .dma_unmap_pages = nvidia_p2p_dma_unmap_pages
-};
-
-#endif
-
-#endif
 
 /* debug messages */
 #define NTV2_DEBUG_INFO					0x00000001
@@ -231,11 +203,7 @@ static void dmaPageBufferRelease(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer);
 static int dmaPageLock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer,
 					   PVOID pAddress, ULWord size, ULWord direction);
 static void dmaPageUnlock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer);
-#ifdef AJA_RDMA
-static void rdmaFreeCallback(void* data);
-static void dmaSgSetRdmaPage(struct scatterlist* pSg, struct nvidia_p2p_dma_mapping	*rdmaMap,
-							 int index, ULWord64 length, ULWord64 offset);
-#endif
+
 static int dmaBusMap(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer,
 					 ULWord64 videoBusAddress, ULWord videoBusSize);
 static int dmaSgMap(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer);
@@ -342,10 +310,6 @@ int dmaInit(ULWord deviceNumber)
 	}
 
 	NTV2_MSG_INFO("%s%d: dmaInit begin\n", DMA_MSG_DEVICE);
-
-#ifdef AJA_RDMA
-	NTV2_MSG_INFO("%s%d: can do rdma\n", DMA_MSG_DEVICE);
-#endif	
 
 	for (iEng = 0; iEng < DMA_NUM_ENGINES; iEng++)
 	{
@@ -2700,17 +2664,10 @@ static int dmaPageBufferInit(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer,
 	memset(pBuffer, 0, sizeof(DMA_PAGE_BUFFER));
 	INIT_LIST_HEAD(&pBuffer->bufferEntry);
 
-#ifdef AJA_RDMA
 	if (rdma)
 	{
 		pBuffer->rdma = true;
 		return 0;
-	}
-#endif
-	if (rdma)
-	{
-		NTV2_MSG_ERROR("%s%d: dmaPageLock driver does not support rdma\n", DMA_MSG_DEVICE); 
-		return -EINVAL;
 	}
 	
 	// alloc page list
@@ -2764,6 +2721,7 @@ static int dmaPageLock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer,
 	int numPinned;
 	int pageOffset;
 	int count;
+    int ret;
 	int i;
 
 	if ((pBuffer == NULL) || (pAddress == NULL) || (size == 0) || pBuffer->busMap)
@@ -2778,54 +2736,26 @@ static int dmaPageLock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer,
 		dmaPageBufferRelease(deviceNumber, pBuffer);
 	}
 
-#ifdef AJA_RDMA
 	if (pBuffer->rdma)
-	{
-		ULWord64 rdmaAddress = address & GPU_PAGE_MASK;
-		ULWord64 rdmaOffset = address & GPU_PAGE_OFFSET;
-		ULWord64 rdmaLen = size;
-#ifdef AJA_IGPU		
-		ULWord64 rdmaAlignedLen = (rdmaOffset + rdmaLen + GPU_PAGE_SIZE - 1) & GPU_PAGE_MASK;
-#else
-		ULWord64 rdmaAlignedLen = address + size - rdmaAddress;
-#endif		
-		struct nvidia_p2p_page_table* rdmaPage = NULL;
-		int ret = -1;
-
+    {
         if (rdma_fops.get_pages != NULL)
         {
-            ret = rdma_fops.get_pages(
-#ifndef AJA_IGPU				
-                0, 0,
-#endif				
-                rdmaAddress,
-                rdmaAlignedLen,
-                &rdmaPage,
-                rdmaFreeCallback,
-                pBuffer);
+            ret = rdma_fops.get_pages(pBuffer, pAddress, size, direction);
+            if (ret < 0)
+            {
+                NTV2_MSG_ERROR("%s%d: dmaPageLock rdma lock failed %d  addr %016llx  len %08llx\n",
+                               DMA_MSG_DEVICE, ret, (ULWord64)pAddress, (ULWord64)size);
+                return ret;
+            }
+            
+            return 0;
         }
-        if (ret < 0)
+        else
         {
-            NTV2_MSG_ERROR("%s%d: dmaPageLock rdma lock failed %d  addr %016llx  len %08llx\n",
-                           DMA_MSG_DEVICE, ret, rdmaAddress, rdmaAlignedLen);
-            return ret;
+            NTV2_MSG_ERROR("%s%d: dmaPageLock rdma not supported", DMA_MSG_DEVICE);
+            return -EPERM;
         }
-
-		pBuffer->pUserAddress = pAddress;
-		pBuffer->userSize = size;
-		pBuffer->direction = direction;
-		pBuffer->rdmaAddress = rdmaAddress;
-		pBuffer->rdmaOffset = rdmaOffset;
-		pBuffer->rdmaLen = rdmaLen;
-		pBuffer->rdmaAlignedLen = rdmaAlignedLen;
-		pBuffer->rdmaPage = rdmaPage;
-		pBuffer->numPages = rdmaPage->entries;
-		pBuffer->pageLock = true;
-		
-		NTV2_MSG_PAGE_MAP("%s%d: dmaPageLock rdma locked %d pages\n", DMA_MSG_DEVICE, pBuffer->numPages);		
-		return 0;
-	}
-#endif
+    }
 
 	if (pBuffer->rdma || (pBuffer->pPageList == NULL) || (pBuffer->pSgList == NULL))
 		return -EINVAL;
@@ -2960,28 +2890,23 @@ static void dmaPageUnlock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 
 	if (pBuffer->pageLock)
 	{
-#ifdef AJA_RDMA
 		if (pBuffer->rdma)
-		{
-			if ((pBuffer->rdmaAddress == 0) || (pBuffer->rdmaPage == NULL))
-				return;
-			
-			NTV2_MSG_PAGE_MAP("%s%d: dmaPageUnlock rdma unlock %d pages\n", 
-							  DMA_MSG_DEVICE, pBuffer->numPages); 
-
+        {
             if (rdma_fops.put_pages != NULL)
             {
-                rdma_fops.put_pages(
-#ifndef AJA_IGPU				
-                    0, 0,
-                    pBuffer->rdmaAddress,
-#endif								
-                    pBuffer->rdmaPage);
+                NTV2_MSG_PAGE_MAP("%s%d: dmaPageUnlock rdma unlock %d pages\n", 
+                                  DMA_MSG_DEVICE, pBuffer->numPages); 
+                
+                rdma_fops.put_pages(pBuffer);
+                return;
             }
-            rdmaFreeCallback(pBuffer);
-            return;
+            else
+            {
+                NTV2_MSG_ERROR("%s%d: dmaPageUnlock rdma not supported", DMA_MSG_DEVICE);
+                return;
+            }
         }
-#endif
+
 		if (pBuffer->rdma || (pBuffer->pPageList == NULL))
 			return;
 
@@ -3014,52 +2939,6 @@ static void dmaPageUnlock(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 	pBuffer->numSgs = 0;
 }
 
-#ifdef AJA_RDMA
-static void rdmaFreeCallback(void* data)
-{
-	PDMA_PAGE_BUFFER pBuffer = (PDMA_PAGE_BUFFER)data;
-	struct nvidia_p2p_page_table* rdmaPage;
-
-//	ntv2Message("rdmaFreeCallback %llx\n", (long long)data);
-
-	rdmaPage = xchg(&pBuffer->rdmaPage, NULL);
-	if (rdmaPage != NULL)
-    {
-        if (rdma_fops.free_page_table != NULL)
-        {
-            rdma_fops.free_page_table(rdmaPage);
-        }
-    }
-
-	pBuffer->rdmaAddress = 0;
-	pBuffer->rdmaOffset = 0;
-	pBuffer->rdmaLen = 0;
-	pBuffer->rdmaAlignedLen = 0;
-	pBuffer->rdmaPage = NULL;
-	pBuffer->pageLock = false;
-}
-
-static void dmaSgSetRdmaPage(struct scatterlist* pSg, struct nvidia_p2p_dma_mapping	*rdmaMap,
-							 int index, ULWord64 length, ULWord64 offset)
-{
-	if ((pSg == NULL) || (rdmaMap == NULL) || (index >= rdmaMap->entries))
-		return;
-
-	pSg->offset = (unsigned int)offset;
-#ifdef AJA_IGPU
-	(void)length;
-	pSg->dma_address = (dma_addr_t)rdmaMap->hw_address[index];
-	pSg->length = (unsigned int)rdmaMap->hw_len[index];
-#else
-	pSg->dma_address = (dma_addr_t)rdmaMap->dma_addresses[index];
-	pSg->length = (unsigned int)length;
-#endif	
-#ifdef CONFIG_NEED_SG_DMA_LENGTH
-	pSg->dma_length = pSg->length;
-#endif
-}
-#endif
-
 static int dmaBusMap(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer,
 					 ULWord64 videoBusAddress, ULWord videoBusSize)
 {
@@ -3074,6 +2953,12 @@ static int dmaBusMap(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer,
 					   DMA_MSG_DEVICE);
 		return -EPERM;
 	}
+    
+    if (pBuffer->rdma)
+    {
+        NTV2_MSG_ERROR("%s%d: dmaBusMap rdma not supported", DMA_MSG_DEVICE);
+        return -EPERM;
+    }
 
 	// clear segment list
 	NTV2_LINUX_SG_INIT_TABLE_FUNC(pBuffer->pSgList, pBuffer->sgListSize);
@@ -3100,91 +2985,35 @@ static int dmaSgMap(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 {
 	NTV2PrivateParams *pNTV2Params = getNTV2Params(deviceNumber);
 	int count;
+    int ret = -1;
 	
 	if (pBuffer == NULL)
 		return -EINVAL;
 
 	if (pBuffer->pageLock && !pBuffer->sgMap)
 	{
-#ifdef AJA_RDMA
 		if (pBuffer->rdma)
-		{
-			ULWord numEntries;
-			ULWord64 pageOffset;
-			ULWord64 count;
-			int i;
-			int ret = -1;
-            if (rdma_fops.dma_map_pages != NULL)
+        {
+            if (rdma_fops.map_pages != NULL)
             {
+                ret = rdma_fops.map_pages(pNTV2Params->pci_dev, pBuffer);
+                if (ret < 0)
+                {
+                    NTV2_MSG_ERROR("%s%d: dmaSgMap rdma map failed %d\n",
+                                   DMA_MSG_DEVICE, ret); 
+                    return ret;
+                }
 
-#ifdef AJA_IGPU
-                ret = rdma_fops.dma_map_pages(&(pNTV2Params->pci_dev)->dev,
-                                              pBuffer->rdmaPage,
-                                              &pBuffer->rdmaMap,
-                                              (pBuffer->direction == PCI_DMA_TODEVICE)? DMA_TO_DEVICE : DMA_FROM_DEVICE);
-#else
-                ret = rdma_fops.dma_map_pages(pNTV2Params->pci_dev,
-                                              pBuffer->rdmaPage,
-                                              &pBuffer->rdmaMap);
-#endif
+                NTV2_MSG_PAGE_MAP("%s%d: dmaSgMap rdma mapped\n", DMA_MSG_DEVICE);
+                return 0;
             }
-			if (ret < 0)
-			{
-				NTV2_MSG_ERROR("%s%d: dmaSgMap rdma map failed %d\n",
-							   DMA_MSG_DEVICE, ret); 
-				return ret;
-			}
+            else
+            {
+                NTV2_MSG_ERROR("%s%d: dmaSgMap rdma not supported", DMA_MSG_DEVICE);
+                return -EPERM;
+            }
+        }
 
-			if ((pBuffer->rdmaMap == NULL) || (pBuffer->rdmaMap->entries == 0))
-			{
-				NTV2_MSG_ERROR("%s%d: dmaSgMap rdma map failed - no map\n",
-							   DMA_MSG_DEVICE); 
-				return -EPERM;
-			}
-				
-			// alloc scatter list
-			numEntries = pBuffer->rdmaMap->entries;
-			pBuffer->pSgList = vmalloc(numEntries * sizeof(struct scatterlist));
-			if (pBuffer->pSgList == NULL)
-			{
-				NTV2_MSG_ERROR("%s%d: dmaSgMap allocate rdma scatter buffer failed - entries %d\n",
-							   DMA_MSG_DEVICE, numEntries);
-				return -ENOMEM;
-			}
-			pBuffer->sgListSize = numEntries;
-
-			// clear segment list
-			NTV2_LINUX_SG_INIT_TABLE_FUNC(pBuffer->pSgList, pBuffer->sgListSize);
-
-			// offset on first page
-			pageOffset = pBuffer->rdmaOffset;
-
-			// build scatter list
-			count = pBuffer->rdmaLen;
-			for (i = 0; i < numEntries; i++)
-			{
-				if (count > 0)
-				{
-					dmaSgSetRdmaPage(&pBuffer->pSgList[i],
-									 pBuffer->rdmaMap,
-									 i,
-									 count < (GPU_PAGE_SIZE - pageOffset)? count : (GPU_PAGE_SIZE - pageOffset),
-									 pageOffset);
-				}
-				count = (count < GPU_PAGE_SIZE)? 0 : (count - GPU_PAGE_SIZE);
-				pageOffset = 0;
-			}
-
-			NTV2_MSG_PAGE_MAP("%s%d: dmaSgMap rdma mapped %d segment(s)\n", 
-							  DMA_MSG_DEVICE, numEntries);
-
-			pBuffer->numSgs = (ULWord)numEntries;
-			pBuffer->sgMap = true;
-			pBuffer->sgHost = false;
-			
-			return 0;
-		}
-#endif
 		if (pBuffer->pSgList == NULL)
 			return -EINVAL;
 			
@@ -3219,34 +3048,21 @@ static void dmaSgUnmap(ULWord deviceNumber, PDMA_PAGE_BUFFER pBuffer)
 
 	if (pBuffer->sgMap)
 	{
-#ifdef AJA_RDMA
 		if (pBuffer->rdma)
-		{
-			if ((pBuffer->rdmaPage != NULL) && (pBuffer->rdmaMap != NULL))
-			{
-				NTV2_MSG_PAGE_MAP("%s%d: dmaSgUnmap rdma unmap %d segments\n", 
-								  DMA_MSG_DEVICE, pBuffer->numSgs);
-                if (rdma_fops.dma_unmap_pages != NULL)
-                {
-#ifdef AJA_IGPU
-                    rdma_fops.dma_unmap_pages(pBuffer->rdmaMap);
-#else
-                    rdma_fops.dma_unmap_pages(pNTV2Params->pci_dev,
-                                              pBuffer->rdmaPage,
-                                              pBuffer->rdmaMap);
-#endif
-                }
-			}
-			if (pBuffer->pSgList != NULL)
-				vfree(pBuffer->pSgList);
-			pBuffer->pSgList = NULL;
-			pBuffer->sgListSize = 0;
-			pBuffer->numSgs = 0;
-			pBuffer->sgMap = false;
-			pBuffer->sgHost = false;
-			return;
-		}
-#endif
+        {
+            if (rdma_fops.unmap_pages != NULL)
+            {
+                NTV2_MSG_PAGE_MAP("%s%d: dmaSgUnmap rdma unmap %d segments\n", 
+                                  DMA_MSG_DEVICE, pBuffer->numSgs);
+                rdma_fops.unmap_pages(pNTV2Params->pci_dev, pBuffer);
+                return;
+            }
+            else
+            {
+                NTV2_MSG_ERROR("%s%d: dmaBusUnmap rdma not supported", DMA_MSG_DEVICE);
+                return;
+            }
+        }
 
 		NTV2_MSG_PAGE_MAP("%s%d: dmaSgUnmap unmap %d segments\n", 
 						  DMA_MSG_DEVICE, pBuffer->numSgs); 
@@ -4701,7 +4517,7 @@ int dmaOpsStreamStop(struct ntv2_stream *stream)
 
     // sync with the engine
     dmaEngineLock(pDmaEngine);
-    
+
     if (stream->engine_state == ntv2_stream_state_error)
     {
         dmaEngineUnlock(pDmaEngine);
@@ -4738,6 +4554,17 @@ int dmaOpsStreamAdvance(struct ntv2_stream *stream)
     // lock the engine
     dmaEngineLock(pDmaEngine);
 
+    // check dma state
+    
+    if(stream->stream_state == ntv2_stream_state_error)
+    {
+        // abort the dma
+        NTV2_MSG_STATE("%s%d:%s%d: dmaOpsStreamAdvance stop engine\n", DMA_MSG_ENGINE);
+        dmaXlnxStreamStop(pDmaEngine);
+        dmaEngineUnlock(pDmaEngine);
+        return NTV2_STREAM_OPS_FAIL;
+    }
+    
     // check the stream state
     if ((stream->stream_state != ntv2_stream_state_idle) &&
         (stream->stream_state != ntv2_stream_state_active))

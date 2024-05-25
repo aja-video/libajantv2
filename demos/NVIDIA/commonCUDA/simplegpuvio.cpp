@@ -45,7 +45,7 @@ CGpuVideoIO::CGpuVideoIO(vioDesc *desc) :
 
 	// Set video format
 	mBoard->SetVideoFormat(desc->videoFormat, false, false, mChannel);
-	mBoard->SetQuadFrameEnable(0, mChannel);
+//	mBoard->SetQuadFrameEnable(0, mChannel);
 
 	// Get source video info
 	NTV2VANCMode vancMode;

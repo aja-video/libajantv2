@@ -434,7 +434,7 @@ bool CNTV2DemoCommon::IsValidDevice (const string & inDeviceSpec)
 	if (! CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, device))
 	{
 		if (deviceSpec != "LIST" && deviceSpec != "list" && deviceSpec != "?")
-			cerr << "## ERROR: Device spec '" << deviceSpec << "' not valid" << endl;
+			cerr << "## ERROR: Failed to open device spec '" << deviceSpec << "'" << endl;
 		return false;
 	}
 	return true;

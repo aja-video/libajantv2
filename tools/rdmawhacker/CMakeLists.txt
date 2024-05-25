@@ -1,5 +1,5 @@
-if (AJA_DISABLE_NVIDIA)
-	message(STATUS "AJA_DISABLE_NVIDIA enabled. Skipping rdmawhacker...")
+if (AJA_DISABLE_NVIDIA OR NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	message(STATUS "skipping rdmawhacker...")
 	return()
 endif()
 

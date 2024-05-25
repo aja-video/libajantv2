@@ -361,7 +361,11 @@ typedef struct ntv2_private
 #  endif
 # endif	// SOFTWARE_UART_FIFO
 
-
+    spinlock_t ioLock;        // lock for io reference count
+    uint32_t   ioCount;       // io reference count for device removal
+    bool       ioRemove;      // device has been removed
+    bool       hotplug;       // device is hotpluggable
+    
 	unsigned int _ntv2IRQ[eNumNTV2IRQDevices];
 
 	ULWord _audioSyncTolerance;
@@ -464,13 +468,13 @@ NTV2PrivateParams * getNTV2Params(unsigned int deviceNumber);
 
 // Billions and billions of prototypes for reading and writing registers
 //
-ULWord READ_REGISTER_ULWord( unsigned long address);
-ULWord READ_REGISTER_UWord( unsigned long address);
-ULWord READ_REGISTER_UByte( unsigned long address);
+ULWord READ_REGISTER_ULWord( ULWord deviceNumber, unsigned long address);
+ULWord READ_REGISTER_UWord( ULWord deviceNumber, unsigned long address);
+ULWord READ_REGISTER_UByte( ULWord deviceNumber, unsigned long address);
 
-void WRITE_REGISTER_ULWord( unsigned long address, ULWord regValue);
-void WRITE_REGISTER_UWord( unsigned long address, ULWord regValue);
-void WRITE_REGISTER_UByte( unsigned long address, ULWord regValue);
+void WRITE_REGISTER_ULWord( ULWord deviceNumber, unsigned long address, ULWord regValue);
+void WRITE_REGISTER_UWord( ULWord deviceNumber, unsigned long address, ULWord regValue);
+void WRITE_REGISTER_UByte( ULWord deviceNumber, unsigned long address, ULWord regValue);
 
 void GetActiveFrameBufferSize(ULWord deviceNumber,NTV2FrameDimensions * frameBufferSize);
 

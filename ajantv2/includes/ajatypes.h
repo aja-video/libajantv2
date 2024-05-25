@@ -82,15 +82,12 @@
 //#define NTV2_NULL_DEVICE	
 
 /**************************************************************************************************************
-	NTV2_NUB_CLIENT_SUPPORT		Controls whether or not the SDK will use plugin DLLs/dylibs/so's to connect
-								to remote or software NTV2 devices.
-								Introduced in SDK 12.4.
+	NTV2_NUB_CLIENT_SUPPORT		Deprecated in SDK 17.1
+								Before SDK 17.1, controlled whether or not the SDK would connect to remote or
+								software NTV2 devices. Before SDK 16.0, controlled whether or not the SDK would
+								connect to remote devices via TCP/IP. Introduced in SDK 12.4.
 
-	Undefined:	SDK clients cannot access or connect to remote or software devices. This may be useful for
-				SDK clients that require greater security by preventing the loading of plugins.
-
-	Defined:	(Default) SDK clients will be able to access and connect to remote or software devices (via
-				dynamically-loaded plugins).
+	NOTE:	Starting in SDK 17.1, the SDK will only load plugins authorized by AJA Video Systems.
 **************************************************************************************************************/
 #define NTV2_NUB_CLIENT_SUPPORT	
 

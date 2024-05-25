@@ -109,10 +109,21 @@ echo QT_ENABLED: %QT_ENABLED%
 echo QT_DEPLOY: %QT_DEPLOY%
 
 REM Set up VS Environment
-call "C:\Program Files (x86)\Microsoft Visual Studio\%VS_YEAR%\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" x64
-if not %errorlevel% == 0 (
-	echo Error calling vcvarsall.bat
-	exit /b 1
+where /Q cl.exe &^
+if ERRORLEVEL 1 (
+    echo Initializing MSVC 'x64' environment...
+	if %VS_YEAR% == 2022 (
+		call "C:\Program Files\Microsoft Visual Studio\%VS_YEAR%\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" x64
+	) else (
+		call "C:\Program Files (x86)\Microsoft Visual Studio\%VS_YEAR%\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" x64
+	)
+	if not ERRORLEVEL 0 (
+		echo Error calling vcvarsall.bat
+		exit /b 1
+	)
+	echo MSVC 'x64' environment successfully initialized.
+) else (
+    echo MSVC 'x64' environment already initialized.
 )
 
 echo Removing old build/install directories
@@ -139,7 +150,7 @@ cmake -S%ROOT_DIR% -B%BUILD_DIR% -G%GENERATOR% ^
 -DAJA_INSTALL_CMAKE=%INSTALL_CMAKE% ^
 -DAJA_INSTALL_MISC=%INSTALL_MISC% ^
 -DAJA_QT_ENABLED=%QT_ENABLED% ^
--DAJA_QT_DEPLOY=%QT_DEPLOY% 
+-DAJA_QT_DEPLOY=%QT_DEPLOY%
 
 if not %ERRORLEVEL% == 0 (
 	echo Error generating targets
@@ -154,7 +165,7 @@ if not %errorlevel% == 0 (
 )
 
 REM Install Project
-cmake --install %BUILD_DIR% 
+cmake --install %BUILD_DIR%
 if not %errorlevel% == 0 (
 	echo Error installing targets
 	exit /b 1

@@ -21,6 +21,7 @@
 #include "ajabase/system/atomic.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/system/process.h"
+#include "ajabase/common/common.h"	//	aja::join
 #include <string.h>
 #include <assert.h>
 #include <iostream>
@@ -272,7 +273,8 @@ bool CNTV2DriverInterface::OpenRemote (const string & inURLSpec)
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	DIDBG("Opening " << specParser.InfoString() << "...");
 	//	Remote or software device:
-	_pRPCAPI = NTV2RPCClientAPI::CreateClient(specParser.Results());
+	NTV2ConnectParams parms(specParser.Results());
+	_pRPCAPI = NTV2RPCClientAPI::CreateClient(parms);
 	if (!_pRPCAPI)
 		return false;	//	Failed to instantiate plugin client
 	//	A plugin's constructor might call its NTV2Connect method right away...
@@ -1104,13 +1106,30 @@ bool CNTV2DriverInterface::GetStreamingApplication (ULWord & outAppType, int32_t
 
 string CNTV2DriverInterface::GetDescription (void) const
 {
-	return IsRemote() ? _pRPCAPI->Description() : "";
+	if (!IsRemote())
+		return "";
+	string desc(_pRPCAPI->Description());
+	const NTV2Dictionary parms(ConnectParams());
+	if (desc.empty()  &&  !parms.empty())
+	{
+		NTV2StringList strs;
+		if (parms.hasKey(kNTV2PluginRegInfoKey_LongName))
+			strs.push_back("\"" + parms.valueForKey(kNTV2PluginRegInfoKey_LongName) + "\" plugin");
+		if (parms.hasKey(kNTV2PluginRegInfoKey_Description))
+			strs.push_back(parms.valueForKey(kNTV2PluginRegInfoKey_Description));
+		if (parms.hasKey(kNTV2PluginRegInfoKey_Copyright))
+			strs.push_back(parms.valueForKey(kNTV2PluginRegInfoKey_Copyright));
+		else if (parms.hasKey(kNTV2PluginRegInfoKey_Vendor))
+			strs.push_back(parms.valueForKey(kNTV2PluginRegInfoKey_Vendor));
+		if (!strs.empty())
+			desc = aja::join(strs, ", ");
+	}
+	return desc;
 }
 
-const NTV2Dictionary & CNTV2DriverInterface::ConnectParams (void) const
+NTV2Dictionary CNTV2DriverInterface::ConnectParams (void) const
 {
-	static const NTV2Dictionary sEmptyDict;
-	return IsRemote() ? _pRPCAPI->ConnectParams() : sEmptyDict;
+	return IsRemote() ? _pRPCAPI->ConnectParams() : NTV2Dictionary();
 }
 
 //	This function is used by the retail ControlPanel.
@@ -1628,11 +1647,13 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceHasRotaryEncoder:				outValue = ::NTV2DeviceHasRotaryEncoder(devID);						break;
 		case kDeviceHasSPIv5:						outValue = ::NTV2DeviceGetSPIFlashVersion(devID) == 5;				break;
 		case kDeviceHasXilinxDMA:					outValue = ::NTV2DeviceHasXilinxDMA(devID);							break;
+		case kDeviceCanDoStreamingDMA:				outValue = GetDeviceID() == DEVICE_ID_KONAXM;						break;
 		case kDeviceCanDoHDMIQuadRasterConversion:	outValue = (GetNumSupported(kDeviceGetNumHDMIVideoInputs)
 																	||  GetNumSupported(kDeviceGetNumHDMIVideoOutputs))	//	At least 1 HDMI in/out
 																&& (GetDeviceID() != DEVICE_ID_KONAHDMI)				//	Not a KonaHDMI
 																&& (!IsSupported(kDeviceCanDoAudioMixer));				//	No audio mixer
 													break;
+
 		case kDeviceCanDoAudioMixer:
 		case kDeviceHasMicrophoneInput:
 		default:									return false;	//	Bad param
