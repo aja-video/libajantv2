@@ -1,43 +1,43 @@
 # NOTE: Ensure that the CUDA Toolkit v11.1 or later is installed and in your PATH.
 
-if (AJA_DISABLE_NVIDIA OR NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if (AJA_DISABLE_NVIDIA OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 	message(STATUS "skipping cudalowlatencydemo...")
 	return()
 endif()
 
 find_package(CUDA 11.1)
 if (NOT CUDA_FOUND)
-	message("skipping cudalowlatencydemo (CUDA not found)")
+	message("skipping cudalowlatencydemo...CUDA not found")
 	return()
 endif()
+
 set(OpenGL_GL_PREFERENCE LEGACY)
 find_package(OpenGL)
 if (NOT OPENGL_FOUND)
-	message(STATUS "skipping cudalowlatencydemo (OpenGL not found)")
+	message(STATUS "skipping cudalowlatencydemo...OpenGL not found")
 	return()
 endif()
+
 find_package(GLEW)
 if (NOT GLEW_FOUND)
-	message(STATUS "skipping cudalowlatencydemo (GLEW not found)")
+	message(STATUS "skipping cudalowlatencydemo...GLEW not found")
 	return()
 endif()
-find_package(X11)
-if (NOT X11_FOUND)
-	message(STATUS "skipping cudalowlatencydemo (X11 not found)")
-	return()
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	find_package(X11)
+	if (NOT X11_FOUND)
+		message(STATUS "skipping cudalowlatencydemo...X11 not found")
+		return()
+	endif()
 endif()
 
 if (NOT CMAKE_CUDA_COMPILER)
 	set(CMAKE_CUDA_COMPILER ${CUDA_NVCC_EXECUTABLE})
-	message(STATUS "CUDA Compiler: ${CUDA_NVCC_EXECUTABLE}")
+	message(STATUS "CUDA Compiler override: ${CUDA_NVCC_EXECUTABLE}")
 endif()
 
 project(cudalowlatencydemo LANGUAGES CUDA CXX)
-
-set(TARGET_COMPILE_DEFS
-	-DAJA_LINUX
-	-DAJALinux
-	-DAJA_RDMA=1)
 
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA
@@ -96,12 +96,16 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_library(FOUNDATION_FRAMEWORK Foundation)
     set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(TARGET_LINK_LIBS X11 OpenGL::GL OpenGL::GLU GLEW::GLEW cuda dl pthread rt)
-	add_executable(cudalowlatencydemo ${TARGET_SOURCES} kernel.cu)
-	target_compile_definitions(cudalowlatencydemo PRIVATE ${TARGET_COMPILE_DEFS})
-	target_include_directories(cudalowlatencydemo PRIVATE ${TARGET_INCLUDE_DIRS})
-	target_link_libraries(cudalowlatencydemo PRIVATE ajantv2 ${TARGET_LINK_LIBS})
+	list(APPEND TARGET_COMPILE_DEFS
+		-DAJA_RDMA=1)
+	list(APPEND TARGET_LINK_LIBS X11 dl pthread rt)
 endif()
+
+list(APPEND TARGET_LINK_LIBS OpenGL::GL OpenGL::GLU GLEW::GLEW cuda)
+add_executable(cudalowlatencydemo ${TARGET_SOURCES} kernel.cu)
+target_compile_definitions(cudalowlatencydemo PRIVATE ${TARGET_COMPILE_DEFS})
+target_include_directories(cudalowlatencydemo PRIVATE ${TARGET_INCLUDE_DIRS})
+target_link_libraries(cudalowlatencydemo PRIVATE ajantv2 ${TARGET_LINK_LIBS})
 
 # Extra sources that were in the commonCUDA dir, but don't seem to actually be required to build cudalowlatencydemo or dvplowlatencydemo.
 list(APPEND NVIDIA_COMMONCUDA_SOURCES
