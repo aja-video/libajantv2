@@ -1132,24 +1132,12 @@ bool CNTV2MacDriverInterface::NTV2Message (NTV2_HEADER * pInOutMessage)
 	if (connection)
 	{
 		AJADebug::StatTimerStart(AJA_DebugStat_NTV2Message);
-		if(mIsDEXT)
-		{
-			kernResult = OS_IOConnectCallStructMethod (	connection,							//	an io_connect_t returned from IOServiceOpen
-														kDriverNTV2Message,					//	selector of the function to be called via the user client
-														pInOutMessage,						//	Pointer to struct
-														pInOutMessage->GetSizeInBytes(),	//	Size of the struct
-														NULL,								//	Output Struct
-														0);									//	Output stuct size
-		}
-		else
-		{
-			kernResult = OS_IOConnectCallScalarMethod (	connection,			//	an io_connect_t returned from IOServiceOpen
-														kDriverNTV2Message,	//	selector of the function to be called via the user client
-														scalarI_64,			//	array of scalar (64-bit) input values
-														2,					//	the number of scalar input values
-														AJA_NULL,			//	array of scalar (64-bit) output values
-														&numScalarOutputs);	//	pointer (in: number of scalar output values capable of receiving;  out: actual number of scalar output values)
-		}	
+		kernResult = OS_IOConnectCallScalarMethod (	connection,			//	an io_connect_t returned from IOServiceOpen
+													kDriverNTV2Message,	//	selector of the function to be called via the user client
+													scalarI_64,			//	array of scalar (64-bit) input values
+													2,					//	the number of scalar input values
+													AJA_NULL,			//	array of scalar (64-bit) output values
+													&numScalarOutputs);	//	pointer (in: number of scalar output values capable of receiving;  out: actual number of scalar output values)
 		AJADebug::StatTimerStop(AJA_DebugStat_NTV2Message);
 	}
 	if (kernResult != KERN_SUCCESS	&&	kernResult != kIOReturnOffline)
