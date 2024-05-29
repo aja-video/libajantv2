@@ -43,7 +43,7 @@ if (EXISTS ${THIRDPARTY_DIR}/nvidia/gpudirect)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# ...otherwise look for official installation.
 	if (NOT DEFINED NVIDIA_GPUDIRECT_DIR)
-		set(NVIDIA_GPUDIRECT_DIR "C:\\Program Files (x86)\\NVIDIA Corporation\\NVIDIA GPU Direct for Video SDK\\win")
+		set(NVIDIA_GPUDIRECT_DIR "C:\\Program Files (x86)\\NVIDIA Corporation\\NVIDIA GPU Direct for Video SDK")
 	endif()
 endif()
 if (NOT EXISTS ${NVIDIA_GPUDIRECT_DIR})
@@ -54,7 +54,6 @@ endif()
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../
 	${CMAKE_CURRENT_SOURCE_DIR}/../common
-	${CMAKE_BINARY_DIR}/thirdparty/gpudirect/include
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../ajantv2
 	${CMAKE_CURRENT_SOURCE_DIR}/../../../ajantv2/includes
 	${CUDA_INCLUDE_DIRS})
@@ -86,14 +85,17 @@ set(NVIDIA_COMMON_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/../common/simplegpuvio.h)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	list(APPEND TARGET_INCLUDE_DIRS ${LIBAJANTV2_DIR}/thirdparty/glew)
+	list(APPEND TARGET_INCLUDE_DIRS
+		${CMAKE_BINARY_DIR}/thirdparty/gpudirect/win/include
+		${LIBAJANTV2_DIR}/thirdparty/glew)
 	list(APPEND TARGET_LINK_LIBS dvp glew64)
 	list(APPEND TARGET_LINK_DIRS
-		${LIBAJANTV2_DIR}/thirdparty/glew/lib/x64
-		${CMAKE_BINARY_DIR}/thirdparty/gpudirect/lib/x64)
+		${CMAKE_BINARY_DIR}/thirdparty/gpudirect/win/lib/x64
+		${LIBAJANTV2_DIR}/thirdparty/glew/lib/x64)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	list(APPEND TARGET_INCLUDE_DIRS ${NVIDIA_GPUDIRECT_DIR}/linux/include)
 	list(APPEND TARGET_LINK_LIBS dvp GLEW::GLEW X11 dl pthread rt)
-	list(APPEND TARGET_LINK_DIRS ${CMAKE_BINARY_DIR}/thirdparty/gpudirect/lib64)
+	list(APPEND TARGET_LINK_DIRS ${NVIDIA_GPUDIRECT_DIR}/linux/lib64)
 endif()
 
 set(TARGET_SOURCES
@@ -122,25 +124,25 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 
 	add_custom_target(copy_gpudirect_sdk)
 	foreach(_file ${_sdk_files})
-		set(_tgt_path ${CMAKE_BINARY_DIR}/thirdparty/gpudirect)
+		set(_tgt_path ${CMAKE_BINARY_DIR}/thirdparty/gpudirect/win)
 		message(STATUS "Copying NVIDIA GPUDirect for Video SDK: ${_file} => ${_tgt_path}")
 		add_custom_command(TARGET copy_gpudirect_sdk PRE_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy
-			${NVIDIA_GPUDIRECT_DIR}/${_file} ${_tgt_path}/${_file})
+			${NVIDIA_GPUDIRECT_DIR}/win/${_file} ${_tgt_path}/${_file})
 	endforeach()
 	add_dependencies(${PROJECT_NAME} copy_gpudirect_sdk)
 
 	post_build_copy_file(${PROJECT_NAME}
-		${NVIDIA_GPUDIRECT_DIR}/bin/x64/dvp.dll
+		${NVIDIA_GPUDIRECT_DIR}/win/bin/x64/dvp.dll
 		$<TARGET_FILE_DIR:${PROJECT_NAME}>/dvp.dll)
 	post_build_copy_file(${PROJECT_NAME}
 		${LIBAJANTV2_DIR}/thirdparty/glew/bin/x64/glew64.dll
 		$<TARGET_FILE_DIR:${PROJECT_NAME}>/glew32.dll) # rename ... doh!
 	post_build_copy_file(${PROJECT_NAME}
-		${NVIDIA_GPUDIRECT_DIR}/bin/x64/msvcp100.dll
+		${NVIDIA_GPUDIRECT_DIR}/win/bin/x64/msvcp100.dll
 		$<TARGET_FILE_DIR:${PROJECT_NAME}>/msvcp100.dll)
 	post_build_copy_file(${PROJECT_NAME}
-		${NVIDIA_GPUDIRECT_DIR}/bin/x64/msvcr100.dll
+		${NVIDIA_GPUDIRECT_DIR}/win/bin/x64/msvcr100.dll
 		$<TARGET_FILE_DIR:${PROJECT_NAME}>/msvcr100.dll)
 endif()
 
