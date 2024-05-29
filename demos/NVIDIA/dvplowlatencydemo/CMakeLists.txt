@@ -1,7 +1,15 @@
 # NOTE: Ensure that the CUDA Toolkit v11.1 or later is installed and in your PATH.
 
-if (AJA_DISABLE_NVIDIA OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+if (AJA_DISABLE_NVIDIA)
 	message(STATUS "skipping dvplowlatencydemo...")
+	return()
+endif()
+if (CMAKE_SYSTEM_NAME MATCHES "^(Windows|Linux)")
+	message(STATUS "skipping dvplowlatencydemo...requires Windows or Linux")
+	return()
+endif()
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64)$")
+	message(STATUS "skipping dvplowlatencydemo...requires x64 arch")
 	return()
 endif()
 
