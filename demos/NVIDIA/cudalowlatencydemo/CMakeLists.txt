@@ -18,13 +18,12 @@ if (NOT OPENGL_FOUND)
 	return()
 endif()
 
-find_package(GLEW)
-if (NOT GLEW_FOUND)
-	message(STATUS "skipping cudalowlatencydemo...GLEW not found")
-	return()
-endif()
-
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	find_package(GLEW)
+	if (NOT GLEW_FOUND)
+		message(STATUS "skipping cudalowlatencydemo...GLEW not found")
+		return()
+	endif()
 	find_package(X11)
 	if (NOT X11_FOUND)
 		message(STATUS "skipping cudalowlatencydemo...X11 not found")
@@ -48,6 +47,8 @@ set(TARGET_INCLUDE_DIRS
 	${CUDA_INCLUDE_DIRS}
 	${OPENGL_INCLUDE_DIRS}
 	${GLEW_INCLUDE_DIRS})
+
+list(APPEND TARGET_LINK_LIBS OpenGL::GL OpenGL::GLU cuda)
 
 set(DEMO_APPS_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/../../ntv2democommon.cpp)
@@ -92,20 +93,27 @@ set(TARGET_SOURCES
 	${DEMO_APPS_SOURCES})
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    find_library(FOUNDATION_FRAMEWORK Foundation)
-    set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
+	list(APPEND TARGET_INCLUDE_DIRS ${LIBAJANTV2_DIR}/thirdparty/glew)
+	list(APPEND TARGET_LINK_LIBS glew64)
+	list(APPEND TARGET_LINK_DIRS
+		${LIBAJANTV2_DIR}/thirdparty/glew/lib/x64)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	list(APPEND TARGET_COMPILE_DEFS
-		-DAJA_RDMA=1)
-	list(APPEND TARGET_LINK_LIBS X11 dl pthread rt)
+	list(APPEND TARGET_COMPILE_DEFS -DAJA_RDMA=1)
+	list(APPEND TARGET_LINK_LIBS GLEW::GLEW X11 dl pthread rt)
 endif()
 
-list(APPEND TARGET_LINK_LIBS OpenGL::GL OpenGL::GLU GLEW::GLEW cuda)
-add_executable(cudalowlatencydemo ${TARGET_SOURCES} kernel.cu)
-target_compile_definitions(cudalowlatencydemo PRIVATE ${TARGET_COMPILE_DEFS})
-target_include_directories(cudalowlatencydemo PRIVATE ${TARGET_INCLUDE_DIRS})
-target_link_libraries(cudalowlatencydemo PRIVATE ajantv2 ${TARGET_LINK_LIBS})
+add_executable(${PROJECT_NAME} ${TARGET_SOURCES} kernel.cu)
+target_compile_definitions(${PROJECT_NAME} PRIVATE ${TARGET_COMPILE_DEFS})
+target_include_directories(${PROJECT_NAME} PRIVATE ${TARGET_INCLUDE_DIRS})
+target_link_directories(${PROJECT_NAME} PRIVATE ${TARGET_LINK_DIRS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ajantv2 ${TARGET_LINK_LIBS})
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+	post_build_copy_file(${PROJECT_NAME}
+		${LIBAJANTV2_DIR}/thirdparty/glew/bin/x64/glew64.dll
+		$<TARGET_FILE_DIR:${PROJECT_NAME}>/glew32.dll) # rename ... doh!
+endif()
 
 # Extra sources that were in the commonCUDA dir, but don't seem to actually be required to build cudalowlatencydemo or dvplowlatencydemo.
 list(APPEND NVIDIA_COMMONCUDA_SOURCES
@@ -123,12 +131,12 @@ if (AJA_INSTALL_SOURCES)
 	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/NVIDIA/cudalowlatencydemo)
 endif()
 
-install(TARGETS cudalowlatencydemo
+install(TARGETS ${PROJECT_NAME}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if (AJA_CODE_SIGN)
-    aja_code_sign(cudalowlatencydemo)
+    aja_code_sign(${PROJECT_NAME})
 endif()
