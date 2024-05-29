@@ -29,7 +29,7 @@ CGpuVideoIO::CGpuVideoIO(vioDesc *desc) :
 {
 	//  Open first device that supports input and output
 	CNTV2DeviceScanner * pNTV2DeviceScanner = new CNTV2DeviceScanner();
-	unsigned int   m_uiBoardNumber = 0;
+	unsigned int   m_uiBoardNumber = desc->deviceIndex;
 	if (m_uiBoardNumber >= pNTV2DeviceScanner->GetNumDevices())
 	{
 		return ;
