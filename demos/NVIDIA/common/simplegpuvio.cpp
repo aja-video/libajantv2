@@ -61,7 +61,7 @@ CGpuVideoIO::CGpuVideoIO(vioDesc *desc) :
 	mTransferSize = mActiveVideoPitch * mTransferLines;
 
 
-	if (desc->type == VIO_IN) {
+	if (desc->type == VIO_SDI_IN) {
 
 
 
