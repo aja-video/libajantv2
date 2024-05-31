@@ -397,7 +397,7 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 			pkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyVanc);
 			pkt.SetLocationDataChannel(AJAAncDataChannel_Y);
 			pkt.SetLocationLineNumber(9);
-			pkt.SetPayloadData (A, size_t(A));
+			pkt.SetPayloadData (A, static_cast<uint32_t>(size_t(A)));
 			AJAAncillaryData pktA(pkt);
 			CHECK(AJA_SUCCESS(pkt.Compare(pktA, /*ignoreLoc*/false, /*ignoreChkSum*/false)));
 			info =   pkt.CompareWithInfo (pktA, /*ignoreLoc*/false, /*ignoreChkSum*/false);
@@ -420,9 +420,9 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 
 			//	Validate "ignoreChkSum"
 			pkt.SetChecksum(pkt.Calculate8BitChecksum());
-			pktA = pkt;  pktA.SetPayloadData(B, size_t(B));	//	pkt & pktA payloads now differ
+			pktA = pkt;  pktA.SetPayloadData(B, static_cast<uint32_t>(size_t(B)));	//	pkt & pktA payloads now differ
 			pkt.SetChecksum(pktA.Calculate8BitChecksum());	//	force bad pkt CS
-			pktA.SetPayloadData(A, size_t(A));				//	pkt & pktA payloads now match, but CS differs
+			pktA.SetPayloadData(A, static_cast<uint32_t>(size_t(A)));				//	pkt & pktA payloads now match, but CS differs
 			CHECK(AJA_FAILURE(pkt.Compare(pktA, /*ignoreLoc*/false, /*ignoreChkSum*/false)));
 			info =   pkt.CompareWithInfo (pktA, /*ignoreLoc*/false, /*ignoreChkSum*/false);
 			CHECK_FALSE(info.empty());	if (gIsVerbose) cerr << "BFT_AncDataCompare " << __LINE__ << ": ignoreLoc=N ignoreCS=N " << info << endl;
@@ -466,7 +466,7 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 			pkt.SetLocationHorizOffset(AJAAncDataHorizOffset_AnyVanc);
 			pkt.SetLocationDataChannel(AJAAncDataChannel_Y);
 			pkt.SetLocationLineNumber(9);
-			pkt.SetPayloadData (A, size_t(A));
+			pkt.SetPayloadData (A, static_cast<uint32_t>(size_t(A)));
 			pkt.SetChecksum(123);	//	arbitrary CS
 
 			//	Make two lists with same 4 packets:  1st normal;  2nd uses LinkB;  3rd uses C chl;  4th uses line 10
@@ -539,7 +539,7 @@ static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return NTV2EndianS
 
 
 			//	Test 4:		3 diffs:	Combo of test 3 + different packet data in 4th packet of list B
-			pktsB.GetAncillaryDataAtIndex(3)->SetPayloadData (B, size_t(B));
+			pktsB.GetAncillaryDataAtIndex(3)->SetPayloadData (B, static_cast<uint32_t>(size_t(B)));
 			pktsB.GetAncillaryDataAtIndex(3)->GetDataLocation().SetLineNumber(11);
 			pktsB.GetAncillaryDataAtIndex(3)->SetSID(0xFE);
 			CHECK(AJA_FAILURE(pktsA.Compare (pktsB, /*ignoreLoc*/false, /*ignoreChkSum*/false)));
