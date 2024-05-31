@@ -15,8 +15,10 @@
 
 // Type / Direction
 typedef enum {
-	VIO_OUT,
-	VIO_IN
+	VIO_SDI_OUT,
+	VIO_SDI_IN,
+	VIO_HDMI_OUT,
+	VIO_HDMI_IN
 } VIO_TYPE;
 
 // GPU Object Description

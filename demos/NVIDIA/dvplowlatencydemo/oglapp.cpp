@@ -1026,7 +1026,7 @@ int main(int argc, char *argv[])
     indesc.videoFormat = videoFormat;
 	indesc.bufferFormat = frameBufferFormat;
     indesc.channel = NTV2_CHANNEL1;
-    indesc.type = VIO_IN;
+    indesc.type = VIO_SDI_IN;
     capture = new CGpuVideoIO(&indesc);
 
     // Assign GPU circular buffer for input
@@ -1042,7 +1042,7 @@ int main(int argc, char *argv[])
 	else
 		outdesc.channel = NTV2_CHANNEL3;  
 
-	outdesc.type = VIO_OUT;
+	outdesc.type = VIO_SDI_OUT;
 	playout = new CGpuVideoIO(&outdesc);
 
 	// Assign GPU circular buffer for output
