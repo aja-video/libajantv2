@@ -268,6 +268,10 @@
 		#endif
 
 		#include <Windows.h>
+
+        #if defined(DeviceCapabilities)
+        #undef DeviceCapabilities
+        #endif
 	#endif
 	#include <Basetsd.h>
 	typedef unsigned char Boolean;
