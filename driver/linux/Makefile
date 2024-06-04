@@ -346,7 +346,7 @@ dkms-pkg:
 dkms-install: dkms-pkg
 ifdef NVIDIA_RDMA
 	@if [ -n "$(DKMSINSTALLED)" ]; then \
-		printf "\n## installing DKMS NTV2 RMDA driver:\n"; \
+		printf "\n## installing DKMS NTV2 RDMA driver:\n"; \
 		sudo cp -a tmp/$(DKMSDIR) /usr/src/; \
 		sudo mkdir -p /etc/ajantv2; \
 		sudo touch /etc/ajantv2/rdma; \
