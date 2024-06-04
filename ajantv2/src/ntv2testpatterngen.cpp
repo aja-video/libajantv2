@@ -3674,7 +3674,7 @@ void NTV2TestPatternGen::PrepareForOutput()
 		NTV2Buffer tmpBuf (tmpBufSize);
 		uint16_t* pSrc16 = mRGBBuffer.data();
 		uint8_t* pTmp8 = tmpBuf;
-		for (int y = 0; y < mNumLines; y++) {
+		for (uint32_t y = 0; y < mNumLines; y++) {
 			int loops = mNumPixels/2;
 			int srcAdv = 6; // 6 bytes * 2px
 			int dstAdv = 9;  // 9 bytes per 2px

@@ -284,12 +284,12 @@ int ntv2_rdma_init(void)
 
     ntv2_set_rdma_fops(&rdma_fops);
 #ifdef NVIDIA_PROPRIETARY
-    printk(KERN_INFO "ntv2_rmda_init: RDMA proprietary\n");
+    printk(KERN_INFO "ntv2_rdma_init: RDMA proprietary\n");
 #else
-    printk(KERN_INFO "ntv2_rmda_init: RDMA open source\n");
+    printk(KERN_INFO "ntv2_rdma_init: RDMA open source\n");
 #endif    
 #else
-    printk(KERN_INFO "ntv2_rmda_init: RDMA not supported\n");
+    printk(KERN_INFO "ntv2_rdma_init: RDMA not supported\n");
 #endif
     return 0;
 }	
@@ -299,7 +299,7 @@ void ntv2_rdma_exit(void)
 #ifdef AJA_RDMA
     ntv2_set_rdma_fops(NULL);
 #endif    
-    printk(KERN_INFO "ntv2_rmda_exit\n");
+    printk(KERN_INFO "ntv2_rdma_exit\n");
     return;
 }
 
