@@ -5462,6 +5462,7 @@ typedef enum
 
 		#define NTV2_TYPE_VIRTUAL_DATA_RW		NTV2_FOURCC ('v', 'd', 'a', 't')	///< @brief Identifies NTV2VirtualData struct
 		#define NTV2_TYPE_BANKGETSET			NTV2_FOURCC ('b', 'n', 'k', 'S')	///< @brief Identifies NTV2BankSelGetSetRegs struct
+		#define NTV2_TYPE_ACCONTROL				NTV2_FOURCC ('c', 'o', 'n', 't')	///< @brief Identifies AUTOCIRCULATE_STATUS struct
 		#define NTV2_TYPE_ACSTATUS				NTV2_FOURCC ('s', 't', 'a', 't')	///< @brief Identifies AUTOCIRCULATE_STATUS struct
 		#define NTV2_TYPE_ACXFER				NTV2_FOURCC ('x', 'f', 'e', 'r')	///< @brief Identifies AUTOCIRCULATE_TRANSFER struct
 		#define NTV2_TYPE_ACXFERSTATUS			NTV2_FOURCC ('x', 'f', 's', 't')	///< @brief Identifies AUTOCIRCULATE_TRANSFER_STATUS struct
@@ -5996,8 +5997,8 @@ typedef enum
 				ULWord		fByteCount;				///< @brief The (maximum) size of the buffer pointed to by fUserSpacePtr, in bytes.
 													///			Do not set directly. Instead, use the constructor or the Set method.
 				ULWord		fFlags;					///< @brief Reserved for future use
+				ULWord64	fKernelSpacePtr;		///< @brief Reserved -- driver use only
 				#if defined (AJAMac)
-					ULWord64	fKernelSpacePtr;	///< @brief Reserved -- Mac driver use only
 					ULWord64	fIOMemoryDesc;		///< @brief Reserved -- Mac driver use only
 					ULWord64	fIOMemoryMap;		///< @brief Reserved -- Mac driver use only
 				#else

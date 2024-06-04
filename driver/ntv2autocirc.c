@@ -246,7 +246,6 @@ Ntv2Status AutoCircInit(NTV2AutoCirc* pAutoCirc,
 
 	if (!NTV2DeviceCanDoCustomAnc(deviceID))
 		bWithCustomAncData = false;
-
 	//Mac SpinlockAcquire
 
 	for(int32_t loopCount = 0; loopCount < lChannelCount; loopCount++)
@@ -1191,7 +1190,7 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 {
 	NTV2DeviceID deviceID = pAutoCirc->deviceID;
 	Ntv2SystemContext* pSysCon = pAutoCirc->pSysCon;
-
+	
 	NTV2Crosspoint channelSpec = pTransferStruct->acCrosspoint;
 	if (ILLEGAL_CHANNELSPEC(channelSpec))
 	{
@@ -1549,6 +1548,7 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 					dmaParams.ancF2Offset = withAnc ? pAuto->ancField2TransferOffset : 0;
 
 					status = AutoDmaTransfer(pAutoCirc->pFunCon, &dmaParams);
+					
 					if (pAuto->recording && (status == NTV2_STATUS_SUCCESS))
 					{
 						// update capture field data
@@ -1710,6 +1710,7 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 											  &(pTransferStruct->acTransferStatus),
 											  pAutoTemp, updateValid, transferPending);
 		}
+		//ntv2Message("DMA completed\n");
 	}
 	else
 	{
@@ -1926,7 +1927,7 @@ void BeginAutoCircTransfer(uint32_t frameNumber,
 	}
 	else
 	{
-		NTV2_RP188*		pInTCArray = (NTV2_RP188*)pTransferStruct->acOutputTimeCodes.fUserSpacePtr;
+		NTV2_RP188*		pInTCArray = (NTV2_RP188*)pTransferStruct->acOutputTimeCodes.fKernelSpacePtr;
 		uint32_t			byteCount = pTransferStruct->acOutputTimeCodes.fByteCount;
 
 		//	On playout, if the user-space client allocated the acOutputTimeCodes field of the AUTOCIRCULATE_TRANSFER struct,
@@ -2035,7 +2036,7 @@ void CompleteAutoCircTransfer(uint32_t frameNumber,
 			pUserOutBuffer->acAudioStartSample = pAuto->audioStartSample;
 			NTV2_RP188P_from_RP188_STRUCT(&pUserOutBuffer->acFrameStamp.acRP188, pAuto->frameStamp[frameNumber].rp188);
 			CopyFrameStampTCArrayToNTV2TimeCodeArray(&pAuto->frameStamp[frameNumber].internalTCArray,
-													 (NTV2_RP188 *)pUserOutBuffer->acFrameStamp.acTimeCodes.fUserSpacePtr,
+													 (NTV2_RP188 *)pUserOutBuffer->acFrameStamp.acTimeCodes.fKernelSpacePtr,
 				pUserOutBuffer->acFrameStamp.acTimeCodes.fByteCount);
 // 			CopyFrameStampSDIStatusArrayToNTV2SDIStatusArray(&pAuto->frameStamp[frameNumber].internalSDIStatusArray, reinterpret_cast <NTV2SDIInputStatus *> (pUserOutBuffer->acFrameStamp.acSDIInputStatusArray.fUserSpacePtr),
 // 				pUserOutBuffer->acFrameStamp.acSDIInputStatusArray.fByteCount);
@@ -3898,7 +3899,7 @@ bool AutoCircFrameStampImmediate(NTV2AutoCirc* pAutoCirc, FRAME_STAMP * pInOutFr
 		frameNumber = pAuto->startFrame;		//	Use start frame if active frame invalid
 	NTV2_RP188_from_RP188_STRUCT(pInOutFrameStamp->acRP188, pAuto->frameStamp[frameNumber].rp188);	//	NOTE:  acRP188 field is deprecated
 	if (!CopyFrameStampTCArrayToNTV2TimeCodeArray(&pAuto->frameStamp[frameNumber].internalTCArray,
-												  (NTV2_RP188*)pInOutFrameStamp->acTimeCodes.fUserSpacePtr,
+												  (NTV2_RP188*)pInOutFrameStamp->acTimeCodes.fKernelSpacePtr,
 												  pInOutFrameStamp->acTimeCodes.fByteCount))
 	{
 		//("AutoCircFrameStampImmediate: CopyFrameStampTCArrayToNTV2TimeCodeArray failed, frame=%d, byteCount=%d\n", frameNumber, pInOutFrameStamp->acTimeCodes.fByteCount);

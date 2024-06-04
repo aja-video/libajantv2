@@ -233,7 +233,7 @@ class AJAExport CNTV2DriverInterface
 		**/
 		AJA_VIRTUAL bool	ReadRegisters (NTV2RegisterReads & inOutValues);
 #endif	//	!defined(READREGMULTICHANGE)
-		AJA_VIRTUAL inline bool	RestoreHardwareProcampRegisters (void) {return false;}
+		//AJA_VIRTUAL inline bool	RestoreHardwareProcampRegisters (void) {return false;}
 	///@}
 
 	/**
