@@ -84,7 +84,6 @@ typedef struct {
 
 typedef struct {
 	Ntv2SystemContext*		pSysCon;
-	void*					pFunCon;
 	NTV2AutoCirculateState	state;
 	NTV2Crosspoint			channelSpec;
 	NTV2DMAEngine			DMAEngine;
@@ -139,7 +138,6 @@ typedef struct {
 typedef struct ntv2autocirc
 {
 	Ntv2SystemContext*	pSysCon;
-	void*				pFunCon;
 	NTV2DeviceID		deviceID;
 	INTERNAL_AUTOCIRCULATE_STRUCT	autoCirculate[NUM_CIRCULATORS];
 	NTV2Channel						ancInputChannel[NTV2_MAX_NUM_CHANNELS];

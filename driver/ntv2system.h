@@ -316,6 +316,7 @@
 	typedef struct ntv2_system_context
 	{
 		ntv2_mac_driver_ref		macDriverRef;
+		void*					pIOUserClient;
 	} Ntv2SystemContext;
 
 	// Mac register abstraction
