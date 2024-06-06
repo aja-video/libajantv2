@@ -8,8 +8,9 @@
 #ifndef NTV2NUBACCESS_H
 #define NTV2NUBACCESS_H
 
-#include "ntv2utils.h"		//	NTV2StringList
-#include "ajabase/system/lock.h"	//	AJALock
+#include "ntv2utils.h"					//	NTV2StringList
+#include "ajabase/system/lock.h"		//	AJALock
+#include "ajabase/common/ajarefptr.h"	//	AJARefPtr
 #include <string>
 #include <vector>
 #include <map>
@@ -39,6 +40,13 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 #define	kFuncNameCreateClient	"CreateClient"			///< @brief	Create an NTV2RPCClientAPI instance
 #define	kFuncNameCreateServer	"CreateServer"			///< @brief	Create an NTV2RPCServerAPI instance
 #define	kFuncNameGetRegInfo		"GetRegistrationInfo"	///< @brief	Answers with plugin registration info
+
+//	Other Info Keys:
+#define	kNTV2PluginInfoKey_PluginsPath			"PluginsPath"		///< @brief	Local host full path to folder containing plugins
+#define	kNTV2PluginInfoKey_PluginPath			"PluginPath"		///< @brief	Local host full path to plugin file
+#define	kNTV2PluginInfoKey_PluginSigPath		"PluginSigPath"		///< @brief	Local host full path to plugin signature file
+#define	kNTV2PluginInfoKey_PluginBaseName		"PluginBaseName"	///< @brief	Plugin base name (i.e. without extension)
+#define	kNTV2PluginInfoKey_IsValidated			"IsValidated"		///< @brief	If this key exists, plugin has been validated
 
 //	Plugin Registration Info Keys:
 #define	kNTV2PluginRegInfoKey_Vendor			"Vendor"			///< @brief	Plugin vendor (manufacturer) name
@@ -92,7 +100,7 @@ class AJAExport NTV2Dictionary
 		///@{
 		inline void			clear (void)	{mDict.clear();}		///< @brief	Removes all of my key/value pairs
 		bool				insert (const std::string & inKey, const std::string & inValue);	///< @brief	Stores the given value using the given key; overwrites existing value if already present
-		inline size_t		erase (const std::string & inKey)	{return mDict.erase(inKey);}	///< @brief	Erases the given key and its corresponding value from me, returns 1 if successful, 0 if not
+		inline size_t		erase (const std::string & inKey)	{return hasKey(inKey) ? mDict.erase(inKey) : 0;}	///< @brief	Erases the given key and its corresponding value from me, returns 1 if successful, 0 if not
 		size_t				updateFrom (const NTV2Dictionary & inDict);	///< @brief	Updates all values from inDict with matching keys, ignoring all non-matching keys
 		size_t				addFrom (const NTV2Dictionary & inDict);	///< @brief	Adds all values from inDict with non-matching keys, ignoring all matching keys
 		bool				deserialize (const std::string & inStr);	///< @brief	Resets me from the given string
@@ -126,37 +134,37 @@ inline std::ostream & operator << (std::ostream & oss, const NTV2Dictionary & in
 class AJAExport NTV2DeviceSpecParser
 {
 	public:
-		static bool							IsSupportedScheme (const std::string & inScheme);	///< @return	True if the given scheme starts with "ntv2"
+		static bool						IsSupportedScheme (const std::string & inScheme);	///< @return	True if the given scheme starts with "ntv2"
 
 	public:
-											NTV2DeviceSpecParser (const std::string inSpec = "");	///< @brief	My constructor. If given device specification is non-empty, proceeds to Parse it
-		void								Reset (const std::string inSpec = "");	///< @brief	Resets me, then parses the given device specification
-		inline const std::string &			DeviceSpec (void) const						{return mSpec;}		///< @return	The device specification I've parsed
-		inline bool							HasDeviceSpec (void) const					{return !DeviceSpec().empty();}	///< @return	True if I have a device specification
-		inline bool							Successful (void) const						{return !Failed();}	///< @return	True if successfully parsed
-		inline bool							Failed (void) const							{return DeviceSpec().empty() ? true : HasErrors();}	///< @return	True if empty device spec or parser had errors
-		inline bool							HasScheme (void) const						{return HasResult(kConnectParamScheme);}	///< @return	True if parser results contain a scheme
-		inline std::string					Scheme (void) const							{return Result(kConnectParamScheme);}	///< @return	The scheme (or empty if no scheme)
-		inline bool							IsLocalDevice (void) const					{return Scheme() == kLegalSchemeNTV2Local || Scheme() == kLegalSchemeNTV2;}	///< @return	True if parser results indicate a local device
-		inline size_t						ErrorCount (void) const						{return mErrors.size();}	///< @return	Number of errors found by parser
-		inline bool							HasErrors (void) const						{return ErrorCount() > 0;}	///< @return	True if ErrorCount is non-zero
-		inline std::string					Error (const size_t inIndex = 0) const		{if (inIndex < mErrors.size()) return mErrors.at(inIndex); return "";}	///< @return	The Nth error found by parser
-		inline NTV2StringList				Errors (void) const							{return mErrors;}	///< @return	All errors found by parser
-		inline NTV2ConnectParams			Results (void) const						{return mResult;}	///< @return	A copy of my parse results, a dictionary (of key/value pairs).
-		inline bool							HasResult (const std::string & inKey) const	{return mResult.hasKey(inKey);}	///< @return	True if the given result exists.
-		std::string							Result (const std::string & inKey) const	{return mResult.valueForKey(inKey);}	///< @return	The result value for the given key.
-		std::string							Resource (const bool inStripLeadSlash = true) const;	///< @return	The Result for the kConnectParamResource key
-		std::ostream &						PrintErrors (std::ostream & oss) const;
-		std::ostream &						Print (std::ostream & oss, const bool inDumpResults = false) const;
-		std::string							InfoString (void) const;
-		uint64_t							DeviceSerial (void) const;
-		inline std::string					DeviceModel (void) const					{return Result(kConnectParamDevModel);}
-		NTV2DeviceID						DeviceID (void) const;
-		UWord								DeviceIndex (void) const;
-		inline const NTV2Dictionary &		QueryParams (void) const					{return mQueryParams;}	///< @return	True if ErrorCount is non-zero
-		inline std::string					QueryParam (const std::string & inKey) const	{return mQueryParams.valueForKey(inKey);}	///< @return	Query parameter value for the given query parameter key (empty string if no such key)
+										NTV2DeviceSpecParser (const std::string inSpec = "");	///< @brief	My constructor. If given device specification is non-empty, proceeds to Parse it
+		void							Reset (const std::string inSpec = "");	///< @brief	Resets me, then parses the given device specification
+		inline const std::string &		DeviceSpec (void) const						{return mSpec;}		///< @return	The device specification I've parsed
+		inline bool						HasDeviceSpec (void) const					{return !DeviceSpec().empty();}	///< @return	True if I have a device specification
+		inline bool						Successful (void) const						{return !Failed();}	///< @return	True if successfully parsed
+		inline bool						Failed (void) const							{return DeviceSpec().empty() ? true : HasErrors();}	///< @return	True if empty device spec or parser had errors
+		inline bool						HasScheme (void) const						{return HasResult(kConnectParamScheme);}	///< @return	True if parser results contain a scheme
+		inline std::string				Scheme (void) const							{return Result(kConnectParamScheme);}	///< @return	The scheme (or empty if no scheme)
+		inline bool						IsLocalDevice (void) const					{return Scheme() == kLegalSchemeNTV2Local || Scheme() == kLegalSchemeNTV2;}	///< @return	True if parser results indicate a local device
+		inline size_t					ErrorCount (void) const						{return mErrors.size();}	///< @return	Number of errors found by parser
+		inline bool						HasErrors (void) const						{return ErrorCount() > 0;}	///< @return	True if ErrorCount is non-zero
+		inline std::string				Error (const size_t inIndex = 0) const		{if (inIndex < mErrors.size()) return mErrors.at(inIndex); return "";}	///< @return	The Nth error found by parser
+		inline NTV2StringList			Errors (void) const							{return mErrors;}	///< @return	All errors found by parser
+		inline NTV2ConnectParams		Results (void) const						{return mResult;}	///< @return	A copy of my parse results, a dictionary (of key/value pairs).
+		inline bool						HasResult (const std::string & inKey) const	{return mResult.hasKey(inKey);}	///< @return	True if the given result exists.
+		std::string						Result (const std::string & inKey) const	{return mResult.valueForKey(inKey);}	///< @return	The result value for the given key.
+		std::string						Resource (const bool inStripLeadSlash = true) const;	///< @return	The Result for the kConnectParamResource key
+		std::ostream &					PrintErrors (std::ostream & oss) const;
+		std::ostream &					Print (std::ostream & oss, const bool inDumpResults = false) const;
+		std::string						InfoString (void) const;
+		uint64_t						DeviceSerial (void) const;
+		inline std::string				DeviceModel (void) const					{return Result(kConnectParamDevModel);}
+		NTV2DeviceID					DeviceID (void) const;
+		UWord							DeviceIndex (void) const;
+		inline const NTV2Dictionary &	QueryParams (void) const					{return mQueryParams;}	///< @return	True if ErrorCount is non-zero
+		inline std::string				QueryParam (const std::string & inKey) const	{return mQueryParams.valueForKey(inKey);}	///< @return	Query parameter value for the given query parameter key (empty string if no such key)
 		#if defined(_DEBUG)
-		static void							test (void);
+		static void						test (void);
 		#endif	//	defined(_DEBUG)
 
 	private:
@@ -195,22 +203,46 @@ class AJAExport NTV2DeviceSpecParser
 		size_t				mPos;			///< @brief	Last character position
 };	//	NTV2DeviceSpecParser
 
+#if defined(NTV2_PREVENT_PLUGIN_LOAD)
+
+#else	//	!defined(NTV2_PREVENT_PLUGIN_LOAD)
+
+#endif  //  !defined(NTV2_PREVENT_PLUGIN_LOAD)
+
 
 /**
-	@brief	Base class of objects that can connect to, and operate remote or fake devices. I have three general API groups:
+	@brief	Common base class for NTV2RPCClientAPI and NTV2RPCServerAPI.
+**/
+class AJAExport NTV2RPCBase
+{
+	protected:
+		NTV2RPCBase (NTV2Dictionary params, uint32_t * pRefCon);
+		virtual ~NTV2RPCBase ();
+
+	protected:
+		NTV2Dictionary	mParams;	///< @brief	Copy of config params passed to my constructor
+		mutable AJALock	mParamLock;	///< @brief	Mutex to protect mParams
+		uint32_t *		mpRefCon;	///< @brief	Reserved for internal use
+};	//	NTV2RPCBase
+
+
+/**
+	@brief	An object that can connect to, and operate remote or fake devices. I have three general API groups:
 			-	connection:  NTV2Connect, IsConnected, NTV2Disconnect;
 			-	configuration:  ConnectParams, HasConnectParam, ConnectParam, ConnectHasScheme, SetConnectParams
 			-	inquiry:  Name, HostName, Print, Version, etc.;
-			-	device operation:  read/write register, (old) AutoCirculate, WaitForInterrupt, DMATransfer and NTV2Message.
-			-	The Create factory method attempts to find and load a plugin that implements the requested software or remote device.
-	@note	Starting in SDK 16.3, most functions no longer return an int value, but instead return boolean true (success) or false (failure).
-			(Check the AJADebug log for AJA_DebugUnit_RPCServer or AJA_DebugUnit_RPCClient messages.)
+			-	device operation:  ReadRegister, WriteRegister, (classic) AutoCirculate, WaitForInterrupt,
+				DMATransfer, NTV2Message.
+			-	The Create factory method attempts to find and load a plugin that implements the requested
+				software or remote device.
+	@note	The API changed in SDK 16.3 to have most functions return bool (success/fail) instead of int.
+			Check the AJADebug log for AJA_DebugUnit_RPCServer or AJA_DebugUnit_RPCClient messages.
 **/
-class AJAExport NTV2RPCClientAPI
+class AJAExport NTV2RPCClientAPI : public NTV2RPCBase
 {
 	public:
 		static NTV2RPCClientAPI *	CreateClient (NTV2ConnectParams & inParams);
-		static bool					ParseQueryParam (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams);	//	New in SDK 17.1
+		static bool					ParseQueryParams (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams);	//	New in SDK 17.1
 
 	public:
 		/**
@@ -236,7 +268,7 @@ class AJAExport NTV2RPCClientAPI
 			@name	Configuration Management
 		**/
 		///@{
-		virtual NTV2ConnectParams	ConnectParams (void) const;	///< @return	My connect parameters
+		virtual NTV2ConnectParams	ConnectParams (void) const;	///< @return	a copy of my connect parameters
 		virtual bool				HasConnectParam (const std::string & inParam) const;	///< @return	True if I have the given connect parameter
 		virtual std::string			ConnectParam (const std::string & inParam) const;	///< @return	The given connect parameter (or empty string if missing)
 		virtual bool				ConnectHasScheme (void) const;	///< @return	True if connect params contains a scheme
@@ -283,9 +315,6 @@ class AJAExport NTV2RPCClientAPI
 		**/
 		virtual bool	NTV2QueryDevices (NTV2StringList & outDeviceInfos)	{outDeviceInfos.clear(); return true;}
 
-						NTV2RPCClientAPI (NTV2ConnectParams inParams);	///< @brief	My constructor.
-		virtual			~NTV2RPCClientAPI();	///< @brief	My destructor, automatically calls NTV2Disconnect.
-
 		#if !defined(NTV2_DEPRECATE_16_3)	//	These functions are going away
 		virtual bool	NTV2DriverGetBitFileInformationRemote	(BITFILE_INFO_STRUCT & bitFileInfo, const NTV2BitFileType bitFileType);
 		virtual bool	NTV2DriverGetBuildInformationRemote	(BUILD_INFO_STRUCT & buildInfo);
@@ -295,14 +324,16 @@ class AJAExport NTV2RPCClientAPI
 		virtual bool	NTV2GetDriverVersionRemote	(ULWord & outDriverVersion);
 		#endif	//	!defined(NTV2_DEPRECATE_16_3)
 
+		virtual			~NTV2RPCClientAPI();	///< @brief	My destructor, automatically calls NTV2Disconnect.
+
 	protected:
+						NTV2RPCClientAPI (NTV2ConnectParams inParams, void * pRefCon);	///< @brief	My constructor.
+
 		virtual bool	NTV2OpenRemote	(void);
 		virtual bool	NTV2CloseRemote	(void);
 
 	protected:
-		NTV2ConnectParams	mConnectParams;		///< @brief	Copy of connection parameters passed in to NTV2Connect
-		mutable AJALock		mParamLock;			///< @brief	Mutex for mConnectParams
-		uint32_t			mSpare[1024];		///< @brief	Reserved
+		uint32_t	mSpare[1024];		///< @brief	Reserved
 };	//	NTV2RPCClientAPI
 
 typedef NTV2RPCClientAPI NTV2RPCAPI;
@@ -313,7 +344,7 @@ inline std::ostream & operator << (std::ostream & oss, const NTV2RPCClientAPI & 
 	@brief	Base class of objects that can serve device operation RPCs with NTV2RPCClientAPI instances.
 			-	The Create factory method attempts to find and load a plugin that instantiates a server with a requested configuration.
 **/
-class AJAExport NTV2RPCServerAPI
+class AJAExport NTV2RPCServerAPI : public NTV2RPCBase
 {
 	public:
 		/**
@@ -341,6 +372,7 @@ class AJAExport NTV2RPCServerAPI
 		**/
 		///@{
 		virtual std::ostream &	Print (std::ostream & oss) const;
+		virtual inline bool		IsRunning (void) const	{return mRunning;}	///< @returns	True if running; otherwise false
 		///@}
 
 		/**
@@ -358,24 +390,25 @@ class AJAExport NTV2RPCServerAPI
 		**/
 		///@{
 		virtual void		RunServer	(void);	///< @brief	Principal server thread function, subclsses should override
+		virtual inline void	Stop		(void)	{mTerminate = true;}	///< @brief	Call this to request the server to stop
 		///@}
 
 	protected:
-							NTV2RPCServerAPI (NTV2ConnectParams inParams);	///< @brief	My constructor.
+							NTV2RPCServerAPI (NTV2ConnectParams inParams, void * pRefCon);	///< @brief	My constructor.
 		virtual				~NTV2RPCServerAPI();	///< @brief	My destructor, automatically calls NTV2Disconnect.
 
 	protected:
-		NTV2ConfigParams	mConfigParams;		///< @brief	Copy of config params passed in to my constructor
-		mutable AJALock		mParamLock;			///< @brief	Mutex for mConfigParams
-		uint32_t			mSpare[1024];		///< @brief	Reserved
+		bool		mRunning;		///< @brief	Running?
+		bool		mTerminate;		///< @brief	Set true to stop server
+		uint32_t	mSpare[1024];	///< @brief	Reserved
 };	//	NTV2RPCServerAPI
 
 inline std::ostream & operator << (std::ostream & oss, const NTV2RPCServerAPI & inObj)	{return inObj.Print(oss);}
 
 /**
-	The scheme specified in a device specifier URL identifies the dynamically-loaded library to load in order to provide
-	a requested NTV2RPCClientAPI or NTV2RPCServerAPI. These are the functions the library must provide that instantiate
-	the client or server instance.
+	The scheme specified in a device specifier URL identifies the plugin (dynamically-loaded library) to load in order
+	to provide a requested NTV2RPCClientAPI or NTV2RPCServerAPI. These are the functions the library must provide that
+	instantiate the client or server instance.
 **/
 extern "C"
 {
@@ -396,22 +429,22 @@ extern "C"
 
 	/**
 		@brief	Instantiates a new client instance to talk to a remote server.
-				-	pHandle:	Obsolete, unused.
+				-	pRefCon:	For reference counting.
 				-	inParams:	The NTV2ConnectParams that specifies the client connection configuration.
 				-	inHostSDKVersion:	Specifies the NTV2 SDK version the caller was compiled with.
 		@return	A pointer to the new client instance if successful, or nullptr (zero) upon failure.
 	**/
-	typedef NTV2RPCClientAPI* (*fpCreateClient) (void * /*pHandle*/, const NTV2ConnectParams & /*inParams*/, const uint32_t /*inHostSDKVersion*/);
+	typedef NTV2RPCClientAPI* (*fpCreateClient) (void * /*pRefCon*/, const NTV2ConnectParams & /*inParams*/, const uint32_t /*inHostSDKVersion*/);
 
 	/**
 		@brief	Instantiates a new server instance for talking to clients.
-				-	pHandle:	Obsolete, unused.
+				-	pHandle:	For reference counting.
 				-	inParams:	The NTV2ConfigParams that specify how to configure the server.
 				-	inHostSDKVersion:	Specifies the NTV2 SDK version the caller was compiled with.
 		@return	A pointer to the new server instance if successful, or nullptr (zero) upon failure.
 		@note	Do not implement this function if a server implementation is not required.
 	**/
-	typedef NTV2RPCServerAPI* (*fpCreateServer) (void * /*pHandle*/, const NTV2ConfigParams & /*inParams*/, const uint32_t /*inHostSDKVersion*/);
+	typedef NTV2RPCServerAPI* (*fpCreateServer) (void * /*pRefCon*/, const NTV2ConfigParams & /*inParams*/, const uint32_t /*inHostSDKVersion*/);
 
 	#if !defined(NTV2_DEPRECATE_16_3)	//	Don't use these functions going forward
 	typedef NTV2RPCAPI* (*fpCreateNTV2SoftwareDevice) (void * /*pInDLLHandle*/, const std::string & /*inQueryStr*/, const uint32_t /*inHostSDKVersion*/);
