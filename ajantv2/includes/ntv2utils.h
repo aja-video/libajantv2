@@ -403,7 +403,7 @@ AJAExport NTV2_SHOULD_BE_DEPRECATED(bool NTV2DeviceCanDoFormat (const NTV2Device
 									framerate might be NTV2_FRAMERATE_3000, but since 2 links are coming out, the video rate
 									is effectively NTV2_FRAMERATE_6000. Defaults to false.
 	@return The number of audio samples.
-	@see	See \ref audiosamplecount
+	@see	See \ref audop-samplecount
 **/
 AJAExport ULWord				GetAudioSamplesPerFrame (const NTV2FrameRate inFrameRate, const NTV2AudioRate inAudioRate, ULWord inCadenceFrame = 0, bool inIsSMPTE372Enabled = false);
 AJAExport LWord64				GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr (NTV2FrameRate frameRate, NTV2AudioRate audioRate, ULWord frameNbrNonInclusive);
@@ -412,7 +412,7 @@ AJAExport LWord64				GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr (NTV2Frame
 	@brief	Returns the audio sample rate as a number of audio samples per second.
 	@param[in]	inAudioRate		Specifies the audio sample rate.
 	@return The number of audio samples per second, or zero upon failure.
-	@see	See \ref audiosamplecount
+	@see	See \ref audop-samplecount
 **/
 AJAExport double				GetAudioSamplesPerSecond (const NTV2AudioRate inAudioRate);	//	New in SDK 16.2
 

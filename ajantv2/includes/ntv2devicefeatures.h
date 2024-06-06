@@ -117,7 +117,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDo8KVideo,						///< @brief True if device supports 8K video formats.
 	kDeviceCanDoAudio192K,						///< @brief True if Audio System(s) support a 192kHz sample rate.
 	kDeviceCanDoAudioMixer,						///< @brief True if device has a firmware audio mixer.
-	kDeviceCanDoCustomAux,						///< @brief True if device supports HDMI AUX data insertion/extraction.
+	kDeviceCanDoHDMIAux,						///< @brief True if device supports HDMI AUX data insertion/extraction.
 	kDeviceCanDoFramePulseSelect,				///< @brief True if device supports frame pulse source independent of reference source.
 	kDeviceCanDoHDMIMultiView,					///< @brief True if device can rasterize 4 HD signals into a single HDMI output.
 	kDeviceHasMultiRasterWidget,				///< @brief True if device can rasterize 4 HD signals into a single HDMI output.
@@ -280,7 +280,7 @@ extern "C"
 		AJAExport NTV2_SHOULD_DEPRECATE(ULWord NTV2DeviceGetFrameBufferSize(NTV2DeviceID id));		///< @deprecated	Starting in SDK 17.1
 		AJAExport NTV2_SHOULD_DEPRECATE(ULWord NTV2DeviceGetNumberFrameBuffers(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
 		AJAExport NTV2_SHOULD_DEPRECATE(ULWord NTV2DeviceGetAudioFrameBuffer(NTV2DeviceID id));		///< @deprecated	Starting in SDK 17.1
-		AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetAudioFrameBuffer2(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
+		AJAExport NTV2_SHOULD_DEPRECATE(ULWord NTV2DeviceGetAudioFrameBuffer2(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
 	#else
 		AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetFrameBufferSize_Ex(NTV2DeviceID id));	///< @deprecated	Starting in SDK 17.1
 		AJAExport NTV2_DEPRECATED_f(ULWord NTV2DeviceGetNumberFrameBuffers_Ex(NTV2DeviceID id));///< @deprecated	Starting in SDK 17.1

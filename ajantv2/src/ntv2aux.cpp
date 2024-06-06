@@ -131,12 +131,6 @@ const static AUXExtractorInitParams	 extractorInitParamsTable [NTV2_NUM_STANDARD
 // 		kVRegAncField1Offset & kVRegAncField2Offset
 // To reduce user confusion, we created AuxSetFrameBufferSize, but it simply calls AncSetFrameBufferSize,
 // which sets these two registers.
-bool CNTV2Card::AuxSetFrameBufferSize (const ULWord inF1Size, const ULWord inF2Size)
-{
-	if (!IsSupported(kDeviceCanDoCustomAux))
-		return false;
-	return AncSetFrameBufferSize(inF1Size,inF2Size);
-}
 
 static bool GetAuxOffsets (CNTV2Card & inDevice, ULWord & outF1Offset, ULWord & outF2Offset)
 {
@@ -314,7 +308,7 @@ bool CNTV2Card::AuxInsertInit (const UWord inSDIOutput, const NTV2Channel inChan
 	NTV2_UNUSED(inStandard);
 	// if (!IsSupported(kDeviceCanDoPlayback))
 	// 	return false;
-	// if (!IsSupported(kDeviceCanDoCustomAux))
+	// if (!IsSupported(kDeviceCanDoHDMIAux))
 	// 	return false;
 	// if (IS_OUTPUT_SPIGOT_INVALID(inSDIOutput))
 	// 	return false;
@@ -396,7 +390,7 @@ bool CNTV2Card::AuxInsertSetEnable (const UWord inSDIOutput, const bool inIsEnab
 	NTV2_UNUSED(inIsEnabled);
 	// if (!IsSupported(kDeviceCanDoPlayback))
 	// 	return false;
-	// if (!IsSupported(kDeviceCanDoCustomAux))
+	// if (!IsSupported(kDeviceCanDoHDMIAux))
 	// 	return false;
 	// if (IS_OUTPUT_SPIGOT_INVALID(inSDIOutput))
 	// 	return false;
@@ -424,7 +418,7 @@ bool CNTV2Card::AuxInsertIsEnabled (const UWord inSDIOutput, bool & outIsRunning
 	// outIsRunning = false;
 	// if (!IsSupported(kDeviceCanDoPlayback))
 	// 	return false;
-	// if (!IsSupported(kDeviceCanDoCustomAux))
+	// if (!IsSupported(kDeviceCanDoHDMIAux))
 	// 	return false;
 	// if (ULWord(inSDIOutput) >= GetNumSupported(kDeviceGetNumVideoOutputs))
 	// 	return false;
@@ -448,7 +442,7 @@ bool CNTV2Card::AuxInsertSetReadParams (const UWord inSDIOutput, const ULWord in
 	NTV2_UNUSED(inFrameSize);
 	// if (!IsSupported(kDeviceCanDoPlayback))
 	// 	return false;
-	// if (!IsSupported(kDeviceCanDoCustomAux))
+	// if (!IsSupported(kDeviceCanDoHDMIAux))
 	// 	return false;
 	// if (IS_OUTPUT_SPIGOT_INVALID(inSDIOutput))
 	// 	return false;
@@ -497,7 +491,7 @@ bool CNTV2Card::AuxInsertSetField2ReadParams (const UWord inSDIOutput, const ULW
 	NTV2_UNUSED(inFrameSize);
 	// if (!IsSupported(kDeviceCanDoPlayback))
 	// 	return false;
-	// if (!IsSupported(kDeviceCanDoCustomAux))
+	// if (!IsSupported(kDeviceCanDoHDMIAux))
 	// 	return false;
 	// if (IS_OUTPUT_SPIGOT_INVALID(inSDIOutput))
 	// 	return false;
@@ -563,7 +557,7 @@ bool CNTV2Card::AuxInsertGetReadInfo (const UWord inSDIOutput, uint64_t & outF1S
 	// outF1StartAddr = outF2StartAddr = 0;
 	// if (!IsSupported(kDeviceCanDoPlayback))
 	// 	return false;
-	// if (!IsSupported(kDeviceCanDoCustomAux))
+	// if (!IsSupported(kDeviceCanDoHDMIAux))
 	// 	return false;
 	// if (IS_OUTPUT_SPIGOT_INVALID(inSDIOutput))
 	// 	return false;
@@ -677,7 +671,7 @@ bool CNTV2Card::AuxExtractInit (const UWord inHDMIInput, const NTV2Channel inCha
 {
 	if (!IsSupported(kDeviceCanDoCapture))
 		return false;
-	if (!IsSupported(kDeviceCanDoCustomAux))
+	if (!IsSupported(kDeviceCanDoHDMIAux))
 		return false;
 	if (IS_HDMI_INPUT_SPIGOT_INVALID(inHDMIInput))
 		return false;
@@ -714,7 +708,7 @@ bool CNTV2Card::AuxExtractSetEnable (const UWord inHDMIInput, const bool inIsEna
 {
 	if (!IsSupported(kDeviceCanDoCapture))
 		return false;
-	if (!IsSupported(kDeviceCanDoCustomAux))
+	if (!IsSupported(kDeviceCanDoHDMIAux))
 		return false;
 	if (IS_HDMI_INPUT_SPIGOT_INVALID(inHDMIInput))
 		return false;
@@ -729,7 +723,7 @@ bool CNTV2Card::AuxExtractIsEnabled (const UWord inHDMIInput, bool & outIsRunnin
 	outIsRunning = false;
 	if (!IsSupported(kDeviceCanDoCapture))
 		return false;
-	if (!IsSupported(kDeviceCanDoCustomAux))
+	if (!IsSupported(kDeviceCanDoHDMIAux))
 		return false;
 	if (IS_HDMI_INPUT_SPIGOT_INVALID(inHDMIInput))
 		return false;
@@ -746,7 +740,7 @@ bool CNTV2Card::AuxExtractSetWriteParams (const UWord inHDMIInput, const ULWord 
 {
 	if (!IsSupported(kDeviceCanDoCapture))
 		return false;
-	if (!IsSupported(kDeviceCanDoCustomAux))
+	if (!IsSupported(kDeviceCanDoHDMIAux))
 		return false;
 	if (IS_HDMI_INPUT_SPIGOT_INVALID(inHDMIInput))
 		return false;
@@ -793,7 +787,7 @@ bool CNTV2Card::AuxExtractSetField2WriteParams (const UWord inHDMIInput, const U
 {
 	if (!IsSupported(kDeviceCanDoCapture))
 		return false;
-	if (!IsSupported(kDeviceCanDoCustomAux))
+	if (!IsSupported(kDeviceCanDoHDMIAux))
 		return false;
 	if (IS_HDMI_INPUT_SPIGOT_INVALID(inHDMIInput))
 		return false;
@@ -846,7 +840,7 @@ bool CNTV2Card::AuxExtractGetWriteInfo (const UWord inHDMIInput,
 	outF1StartAddr = outF1EndAddr = outF2StartAddr = outF2EndAddr = 0;
 	if (!IsSupported(kDeviceCanDoCapture))
 		return false;
-	if (!IsSupported(kDeviceCanDoCustomAux))
+	if (!IsSupported(kDeviceCanDoHDMIAux))
 		return false;
 	if (IS_HDMI_INPUT_SPIGOT_INVALID(inHDMIInput))
 		return false;
@@ -868,7 +862,7 @@ bool CNTV2Card::AuxExtractGetPacketFilters (const UWord inHDMIInput, NTV2DIDSet 
 	outFilters.clear();
 	if (!IsSupported(kDeviceCanDoCapture))
 		return false;
-	if (!IsSupported(kDeviceCanDoCustomAux))
+	if (!IsSupported(kDeviceCanDoHDMIAux))
 		return false;
 	if (IS_HDMI_INPUT_SPIGOT_INVALID(inHDMIInput))
 		return false;
@@ -893,7 +887,7 @@ bool CNTV2Card::AuxExtractSetPacketFilters (const UWord inHDMIInput, const NTV2D
 {
 	if (!IsSupported(kDeviceCanDoCapture))
 		return false;
-	if (!IsSupported(kDeviceCanDoCustomAux))
+	if (!IsSupported(kDeviceCanDoHDMIAux))
 		return false;
 	if (IS_HDMI_INPUT_SPIGOT_INVALID(inHDMIInput))
 		return false;
@@ -919,7 +913,7 @@ bool CNTV2Card::AuxExtractSetFilterInclusionMode (const UWord inHDMIInput, const
 {
 	if (!IsSupported(kDeviceCanDoCapture))
 		return false;
-	if (!IsSupported(kDeviceCanDoCustomAux))
+	if (!IsSupported(kDeviceCanDoHDMIAux))
 		return false;
 	if (IS_HDMI_INPUT_SPIGOT_INVALID(inHDMIInput))
 		return false;	
@@ -933,7 +927,7 @@ bool CNTV2Card::AuxExtractGetFilterInclusionMode (const UWord inHDMIInput, bool 
 {
 	if (!IsSupported(kDeviceCanDoCapture))
 		return false;
-	if (!IsSupported(kDeviceCanDoCustomAux))
+	if (!IsSupported(kDeviceCanDoHDMIAux))
 		return false;
 	if (IS_HDMI_INPUT_SPIGOT_INVALID(inHDMIInput))
 		return false;	
@@ -948,7 +942,7 @@ bool CNTV2Card::AuxExtractGetField1Size (const UWord inHDMIInput, ULWord & outF1
 	outF1Size = 0;
 	if (!IsSupported(kDeviceCanDoCapture))
 		return false;
-	if (!IsSupported(kDeviceCanDoCustomAux))
+	if (!IsSupported(kDeviceCanDoHDMIAux))
 		return false;
 	if (IS_HDMI_INPUT_SPIGOT_INVALID(inHDMIInput))
 		return false;
@@ -969,7 +963,7 @@ bool CNTV2Card::AuxExtractGetField2Size (const UWord inHDMIInput, ULWord & outF2
 	outF2Size = 0;
 	if (!IsSupported(kDeviceCanDoCapture))
 		return false;
-	if (!IsSupported(kDeviceCanDoCustomAux))
+	if (!IsSupported(kDeviceCanDoHDMIAux))
 		return false;
 	if (IS_HDMI_INPUT_SPIGOT_INVALID(inHDMIInput))
 		return false;
@@ -990,7 +984,7 @@ bool CNTV2Card::AuxExtractGetBufferOverrun (const UWord inHDMIInput, bool & outI
 	outIsOverrun = false;
 	if (!IsSupported(kDeviceCanDoCapture))
 		return false;
-	if (!IsSupported(kDeviceCanDoCustomAux))
+	if (!IsSupported(kDeviceCanDoHDMIAux))
 		return false;
 	if (IS_HDMI_INPUT_SPIGOT_INVALID(inHDMIInput))
 		return false;
@@ -1017,7 +1011,7 @@ bool CNTV2Card::AuxExtractIsProgressive (const UWord inHDMIInput, bool & outIsPr
 {
 	if (!IsSupported(kDeviceCanDoCapture))
 		return false;
-	if (!IsSupported(kDeviceCanDoCustomAux))
+	if (!IsSupported(kDeviceCanDoHDMIAux))
 		return false;
 	if (IS_HDMI_INPUT_SPIGOT_INVALID(inHDMIInput))
 		return false;
