@@ -17,13 +17,6 @@
 static pthread_t child_id = 0;
 static bool run = false;
 
-static long long millitime()
-{
-    struct timespec tt;
-    clock_gettime(CLOCK_REALTIME, &tt);
-    return tt.tv_sec*1000LL + lround(tt.tv_nsec/1e6);
-}
-
 AJAPnpImpl::AJAPnpImpl() : mRefCon(NULL), mCallback(NULL), mDevices(0)
 {
 }
@@ -38,23 +31,23 @@ AJAPnpImpl::~AJAPnpImpl()
 AJAStatus 
 AJAPnpImpl::Install(AJAPnpCallback callback, void* refCon, uint32_t devices)
 {
-    pthread_t child;
+	pthread_t child;
 
 	mCallback = callback;
 	mRefCon = refCon;
 	mDevices = devices;
 
-    if (child_id != 0)
-        Uninstall();
-	
+	if (child_id != 0)
+		Uninstall();
+
 	if (mCallback)
 		(*(mCallback))(AJA_Pnp_DeviceAdded, mRefCon);
 
-    run = true;
-    if(pthread_create(&child, NULL, *Worker, (void *)this) < 0)
-        return AJA_STATUS_FAIL;
+	run = true;
+	if(pthread_create(&child, NULL, *Worker, (void *)this) < 0)
+		return AJA_STATUS_FAIL;
 
-    child_id = child;
+	child_id = child;
 
 	return AJA_STATUS_SUCCESS;
 }
@@ -112,7 +105,6 @@ AJAPnpImpl::Worker(void* refCon)
 	struct udev_device *dev;
    	struct udev_monitor *mon;
 	int fd;
-    int count = 0;
 
 	udev = udev_new();
 	if (udev == NULL)
