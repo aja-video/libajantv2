@@ -131,12 +131,6 @@ const static AUXExtractorInitParams	 extractorInitParamsTable [NTV2_NUM_STANDARD
 // 		kVRegAncField1Offset & kVRegAncField2Offset
 // To reduce user confusion, we created AuxSetFrameBufferSize, but it simply calls AncSetFrameBufferSize,
 // which sets these two registers.
-bool CNTV2Card::AuxSetFrameBufferSize (const ULWord inF1Size, const ULWord inF2Size)
-{
-	if (!IsSupported(kDeviceCanDoHDMIAux))
-		return false;
-	return AncSetFrameBufferSize(inF1Size,inF2Size);
-}
 
 static bool GetAuxOffsets (CNTV2Card & inDevice, ULWord & outF1Offset, ULWord & outF2Offset)
 {
