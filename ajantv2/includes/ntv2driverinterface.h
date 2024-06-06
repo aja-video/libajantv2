@@ -337,7 +337,7 @@ class AJAExport CNTV2DriverInterface
 			@param[in]	inEventCode		Specifies the interrupt of interest.
 			@param[out]	outCount		Receives the number of interrupt events that I successfully waited for.
 			@return		True if successful;  otherwise false.
-			@see		CNTV2DriverInterface::SetInterruptEventCount, \ref fieldframeinterrupts
+			@see		CNTV2DriverInterface::SetInterruptEventCount, \ref vidop-fldfrmint
 		**/
 		AJA_VIRTUAL bool	GetInterruptEventCount (const INTERRUPT_ENUMS inEventCode, ULWord & outCount);
 
@@ -346,7 +346,7 @@ class AJAExport CNTV2DriverInterface
 			@param[in]	inEventCode		Specifies the interrupt type.
 			@param[in]	inCount			Specifies the new count value. Use zero to reset the tally.
 			@return		True if successful;  otherwise false.
-			@see		CNTV2DriverInterface::GetInterruptEventCount, \ref fieldframeinterrupts
+			@see		CNTV2DriverInterface::GetInterruptEventCount, \ref vidop-fldfrmint
 		**/
 		AJA_VIRTUAL bool	SetInterruptEventCount (const INTERRUPT_ENUMS inEventCode, const ULWord inCount);
 	///@}

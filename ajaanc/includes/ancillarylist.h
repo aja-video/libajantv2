@@ -673,6 +673,8 @@ private:
 
 };	//	AJAAncillaryList
 
+typedef AJAAncillaryList	AJAAuxiliaryList, AJAAncList, AJAAuxList;
+
 
 /**
 	@brief		Writes a human-readable rendition of the given AJAAncillaryList into the given output stream.

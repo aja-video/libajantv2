@@ -1629,7 +1629,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanDo2110:						outValue = ::NTV2DeviceCanDo2110(devID);							break;
 		case kDeviceCanDo8KVideo:					outValue = ::NTV2DeviceCanDo8KVideo(devID);							break;
 		case kDeviceCanDoAudio192K:					outValue = ::NTV2DeviceCanDoAudio192K(devID);						break;
-		case kDeviceCanDoCustomAux:					outValue = ::NTV2DeviceCanDoCustomAux(devID);						break;
+		case kDeviceCanDoHDMIAux:					outValue = ::NTV2DeviceCanDoCustomAux(devID);						break;
 		case kDeviceCanDoFramePulseSelect:			outValue = ::NTV2DeviceCanDoFramePulseSelect(devID);				break;
 		case kDeviceCanDoHDMIMultiView:				outValue = ::NTV2DeviceCanDoHDMIMultiView(devID);					break;
 		case kDeviceCanDoHFRRGB:					outValue = ::NTV2DeviceCanDoHFRRGB(devID);							break;
