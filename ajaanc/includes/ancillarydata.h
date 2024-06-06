@@ -57,7 +57,7 @@ typedef enum
 	AJAAncDataType_HDR_SDR,
 	AJAAncDataType_HDR_HDR10,
 	AJAAncDataType_HDR_HLG,
-	AJAAncDataType_HDMI_Aux,
+	AJAAncDataType_HDMI_Aux,			///< @brief	HDMI Auxiliary data
 	AJAAncDataType_Size
 } AJAAncDataType;
 
@@ -495,12 +495,12 @@ AJAExport const std::string &	AJAAncDataCodingToString (const AJAAncDataCoding i
 **/
 typedef enum
 {
-	AJAAncBufferFormat_Unknown,		///< @brief	Unknown or "don't care".
-	AJAAncBufferFormat_FBVANC,		///< @brief	Frame buffer VANC line.
-	AJAAncBufferFormat_SDI,			///< @brief	SDI ("GUMP").
-	AJAAncBufferFormat_RTP,			///< @brief	RTP/IP.
+	AJAAncBufferFormat_Unknown,		///< @brief	Unknown or "don't care"
+	AJAAncBufferFormat_FBVANC,		///< @brief	Frame buffer VANC lines
+	AJAAncBufferFormat_SDI,			///< @brief	SDI (AJA "GUMP")
+	AJAAncBufferFormat_RTP,			///< @brief	RTP/IP
 	AJAAncBufferFormat_HDMI,		///< @brief HDMI
-	AJAAncBufferFormat_Invalid,		///< @brief	Invalid.
+	AJAAncBufferFormat_Invalid,		///< @brief	Invalid
 	AJAAncBufferFormat_Size	= AJAAncBufferFormat_Invalid
 
 } AJAAncBufferFormat;
@@ -1162,7 +1162,7 @@ public:
 
 };	//	AJAAncillaryData
 
-typedef AJAAncillaryData	AJAAncPacket, AJAAncData;
+typedef AJAAncillaryData	AJAAuxiliaryData, AJAAncPacket, AJAAuxPacket, AJAAncData, AJAAuxData;
 
 
 /**

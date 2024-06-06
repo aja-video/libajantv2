@@ -56,13 +56,13 @@ class AJAExport DeviceCapabilities
 		inline bool		CanDoColorCorrection (void)				{return dev.IsSupported(kDeviceCanDoColorCorrection);}
 		inline bool		CanDoCustomAnc (void)					{return dev.IsSupported(kDeviceCanDoCustomAnc);}
 		inline bool		CanDoCustomHancInsertion (void)			{return dev.IsSupported(kDeviceCanDoCustomHancInsertion);}
-		inline bool		CanDoCustomAux (void)					{return dev.IsSupported(kDeviceCanDoCustomAux);}
 		inline bool		CanDoDSKOpacity (void)					{return dev.IsSupported(kDeviceCanDoDSKOpacity);}
 		inline bool		CanDoDualLink (void)					{return dev.IsSupported(kDeviceCanDoDualLink);}
 		inline bool		CanDoDVCProHD (void)					{return dev.IsSupported(kDeviceCanDoDVCProHD);}
 		inline bool		CanDoEnhancedCSC (void)					{return dev.IsSupported(kDeviceCanDoEnhancedCSC);}
 		inline bool		CanDoFramePulseSelect (void)			{return dev.IsSupported(kDeviceCanDoFramePulseSelect);}
 		inline bool		CanDoFrameStore1Display (void)			{return dev.IsSupported(kDeviceCanDoFrameStore1Display);}
+		inline bool		CanDoHDMIAux (void)						{return dev.IsSupported(kDeviceCanDoHDMIAux);}
 		inline bool		CanDoHDMIHDROut (void)					{return dev.IsSupported(kDeviceCanDoHDMIHDROut);}
 		inline bool		CanDoHDMIMultiView (void)				{return dev.IsSupported(kDeviceCanDoHDMIMultiView);}
 		inline bool		CanDoHDMIOutStereo (void)				{return dev.IsSupported(kDeviceCanDoHDMIOutStereo);}
