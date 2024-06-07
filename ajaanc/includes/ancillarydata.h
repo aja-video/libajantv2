@@ -1037,10 +1037,15 @@ public:
 	/**
 		@return	A string containing a human-readable representation of a given HDMI Aux Packet Type value,
 				or empty for invalid or unknown values.
-		@param[in]	inDID	Specifies the Data ID value.
-		@param[in]	inSDID	Specifies the Secondary Data ID value.
+		@param[in]	inAuxPktType	Specifies the packet type of interest.
 	**/
-	static std::string						AuxPacketTypeToString (const uint8_t auxPacketType);
+	static std::string						AuxPacketTypeToString (const uint8_t inAuxPktType);
+
+	/**
+		@returns	true if the given HDMI Aux Packet Type value is valid;  otherwise false.
+		@param[in]	inAuxPktType	Specifies the packet type of interest.
+	**/
+	static bool								AuxPacketTypeIsValid (const uint8_t inAuxPktType);
 
 
 

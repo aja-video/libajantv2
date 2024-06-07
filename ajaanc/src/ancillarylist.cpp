@@ -661,8 +661,8 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const NTV2Buffer & inRecei
 
 }	//	AddReceivedAncillaryData
 
-// Parse a stream of "raw" ancillary data as collected by an AJAAncExtractorWidget.
-// Break the stream into separate AJAAncillaryData objects and add them to the list.
+//	Parse a stream of "raw" ancillary data as collected by an HDMI Aux Extractor.
+//	Break the stream into separate AJAAncillaryData objects and add them to the list.
 //
 AJAStatus AJAAncillaryList::AddReceivedAuxiliaryData (const NTV2Buffer & inReceivedData,
 														const uint32_t inFrameNum)
@@ -675,28 +675,24 @@ AJAStatus AJAAncillaryList::AddReceivedAuxiliaryData (const NTV2Buffer & inRecei
 
 	//	Use this as an uninitialized template...
 	AJAAncillaryData	newAncData;
-	//AJAAncDataLoc		defaultLoc		(AJAAncDataLink_A, AJAAncDataChannel_Y, AJAAncDataSpace_VANC, 9);
 	int32_t				remainingSize	(int32_t(dataSize + 0));
 	const uint8_t *		pInputData		(pRcvData);
 	bool				bMoreData		(true);
 
 	while (bMoreData)
 	{
-		//bool bInsertNew (false);	//	We'll set this 'true' if/when we find a new Anc packet to insert
-		AJAAncDataType newAncType (AJAAncDataType_HDMI_Aux); 
 		uint32_t packetSize (0);	//	This is where the AncillaryData object returns the number of bytes that were "consumed" from the input stream
-
 		status = newAncData.InitAuxWithReceivedData (pInputData, size_t(remainingSize), packetSize);
 		if (AJA_FAILURE(status))
 		{
-			//	TODO:	Someday, let's try to recover and process subsequent packets.
+			//	TODO:	Someday, try to recover and process subsequent packets.
 			break;		//	NOTE:	For now, bail on errors in the stream
 		}
 		else if (packetSize == 0)
 			break;		//	Nothing to do
-		
-		//	Create an AJAAncillaryData object of the appropriate type, and init it with our raw data...
-		AJAAncillaryData *	pData	(AJAAncillaryDataFactory::Create (newAncType, &newAncData));
+
+		//	Create an AJAAuxiliaryData object of the appropriate type, and init it with our raw data...
+		AJAAuxiliaryData *	pData	(AJAAncillaryDataFactory::Create (AJAAncDataType_HDMI_Aux, &newAncData));
 		if (pData)
 		{
 			pData->SetBufferFormat(AJAAncBufferFormat_HDMI);
