@@ -453,6 +453,23 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		CHECK_EQ(parser.Value("foo").AsString(), "nz");
 		CHECK_EQ(parser.Value("bar").AsInt32(), 23);
 		CHECK_EQ(parser.Value("qux").AsString(), "\"AJA Video Systems\"");
+
+		// If there are ambiguous single-dash args specified, read everything after the '-'
+		// and perform a look-up to see if it exactly matches one of the registered arg names.
+		// If found, consider that arg as "set", with no value. Otherwise, move on and treat
+		// the arg as unknown to the parser.
+		AJACommandLineParser parsnip;
+		parsnip.AddOption(AJACommandLineOption(AJAStringList{"f", "foo"}, "Tweak the foo"));
+		parsnip.AddOption(AJACommandLineOption(AJAStringList{"F", "food"},"Tweak the food"));
+		parsnip.AddOption(AJACommandLineOption(AJAStringList{"b", "bar"}, "Tweak the bar"));
+		AJAStringList argz;
+		argz.push_back("ut_ajabase"); // skipped by the parsnip
+		argz.push_back("-food");
+		parsnip.ParseArgs(argz);
+		CHECK_EQ(parsnip.IsSet("foo"), false);
+		CHECK_EQ(parsnip.Value("foo").AsString(), "");
+		CHECK_EQ(parsnip.IsSet("food"), true);
+		CHECK_EQ(parsnip.Value("food").AsString(), "");
 	}
 	TEST_CASE("AJACommandLineParser ParseArgs kShortOptionsAsLong")
 	{

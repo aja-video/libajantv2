@@ -105,12 +105,16 @@ public:
 	std::string GetValue(size_t index = 0) const;
 	AJAStringList GetValues() const;
 
+	bool IsSet() const;
+	void MarkSet(bool isSet = true);
+
 private:
 	AJAStringList mNames;
 	std::string mDesc;
 	std::string mDescExtra;
 	AJAStringList mValues;
 	std::string mDefaultValue;
+	bool mIsSet;
 };
 
 typedef AJACommandLineOption	AJACmdLineOption;
@@ -131,6 +135,8 @@ typedef std::map<std::string, OptionEntry> OptionEntryMap;
 
 typedef enum {
 	kShortOptionsAsLong = 1 << 0,
+	kAddDefaultHelpOption = 1 << 1,
+	kAddDefaultUsageOption = 1 << 2,
 } AJACommandLineParserFlags;
 
 /**
@@ -147,6 +153,8 @@ public:
 
 	void Reset(bool clearAll=false);
 	void Dump();
+
+	bool HaveOption(const std::string &name) const;
 
 	bool OptionByName(const std::string &name, AJACommandLineOption &opt) const;
 	/**
@@ -242,10 +250,17 @@ public:
 	 */
 	bool AddOptions(const std::vector<AJACommandLineOption> &options);
 	/**
-	 * Add help option to this args parser.
-	 * If -h/--help is specified from the command line, will print the help string.
+	 * Add default -h/--help option to this args parser.
+	 * The caller must check if IsSet("help"), and then call GetHelpText,
+	 * in order to retrieve the help text string for printing to the console.
 	 */
 	bool AddHelpOption();
+	/**
+	 * Add default --usage option to this args parser.
+	 * The caller must check if IsSet("usage"), and then call GetUsageText,
+	 * in order to retrieve the usage text string for printing to the console.
+	 */
+	bool AddUsageOption();
 	/**
 	 * Get the name of this command line args parser.
 	 *
@@ -278,30 +293,19 @@ public:
 	std::string GetHelpText() const;
 	/**
 	 * Get the name of the command (if-any) represented by this args parser.
-	 * 
+	 *
 	 * @return The command name string, if set, otherwise empty string.
 	 */
 	std::string GetCommandName();
-	/**
-	 * Get the list of known options parsed by this args parser from the command line.
-	 * 
-	 * @return A list of strings parsed from the command line recognized by this parser.
-	 */
-	AJAStringList GetKnownOptions();
-	/**
-	 * Get the list of unknown options parsed by this args parser from the command line.
-	 * 
-	 * @return A list of strings parsed from the command line not recognized by this parser.
-	 */
-	AJAStringList GetUnknownOptions();
 
 private:
 	static bool hasOptionPrefix(const std::string &name);
-	bool reverseOptionSearch(AJAStringListConstIter *iter, const AJAStringList &args, const std::string &arg, int prefixSize, AJACommandLineOption &opt);
+	static bool hasAssignmentOperator(const std::string &arg);
+	// bool reverseOptionSearch(AJAStringListConstIter *iter, const AJAStringList &args, const std::string &arg, int prefixSize, AJACommandLineOption &opt);
 	bool parseValue(const std::string &arg, std::string &value);
 	bool parseOptionValue(const std::string &name, const std::string &arg, AJAStringList::const_iterator *iter, AJAStringList::const_iterator end);
 	bool setOptionValue(const std::string &name, const std::string &value);
-	std::string removePrefix(const std::string &name, int &count);
+	bool setOption(const std::string &name, bool isSet = true);
 
 	int mFlags;
 	std::string mName;
@@ -311,8 +315,6 @@ private:
 	std::string mUsageText;
 	std::string mHelpText;
 	AJACommandLineOptionList mOptions;
-	AJAStringList mKnownOptions;
-	AJAStringList mUnknownOptions;
 	SubParserMap mSubParsers;
 };
 
