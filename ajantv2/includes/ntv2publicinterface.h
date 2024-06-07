@@ -8173,6 +8173,7 @@ typedef enum
 					@note	If using a non-NULL pointer address for either \c pInANCBuffer or \c pInANCF2Buffer, be sure they're aligned to the nearest 8-byte boundary.
 					@note	If using a non-zero byte count, AJA recommends using a 2048-byte buffer (per field). There's no need to fill the entire buffer,
 							but the data it contains should be compatible with what's documented in \ref anccapture or \ref ancplayout (as appropriate).
+					@note	This function also works for \ref auxiliarydata.
 					@return True if successful;	 otherwise false.
 				**/
 				bool									SetAncBuffers (ULWord * pInANCBuffer, const ULWord inANCByteCount,

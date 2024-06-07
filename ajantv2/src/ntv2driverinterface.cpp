@@ -94,8 +94,10 @@ CNTV2DriverInterface::CNTV2DriverInterface ()
 		_pCh2FrameBaseAddress			(AJA_NULL),
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 		_ulNumFrameBuffers				(0),
-		_ulFrameBufferSize				(0),
-		_pciSlot						(0)			//	DEPRECATE!
+		_ulFrameBufferSize				(0)
+#if !defined(NTV2_DEPRECATE_16_0)
+		,_pciSlot						(0)			//	DEPRECATE!
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
 {
 	mInterruptEventHandles.reserve(eNumInterruptTypes);
 	while (mInterruptEventHandles.size() < eNumInterruptTypes)
@@ -181,7 +183,7 @@ bool CNTV2DriverInterface::Open (const UWord inDeviceIndex)
 }
 
 //	Open remote or virtual device
-bool CNTV2DriverInterface::Open (const std::string & inURLSpec)
+bool CNTV2DriverInterface::Open (const string & inURLSpec)
 {
 	Close();
 	if (OpenRemote(inURLSpec))
@@ -273,8 +275,8 @@ bool CNTV2DriverInterface::OpenRemote (const string & inURLSpec)
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	DIDBG("Opening " << specParser.InfoString() << "...");
 	//	Remote or software device:
-	NTV2ConnectParams parms(specParser.Results());
-	_pRPCAPI = NTV2RPCClientAPI::CreateClient(parms);
+	NTV2Dictionary connectParams(specParser.Results());
+	_pRPCAPI = NTV2RPCClientAPI::CreateClient(connectParams);
 	if (!_pRPCAPI)
 		return false;	//	Failed to instantiate plugin client
 	//	A plugin's constructor might call its NTV2Connect method right away...
@@ -1629,7 +1631,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanDo2110:						outValue = ::NTV2DeviceCanDo2110(devID);							break;
 		case kDeviceCanDo8KVideo:					outValue = ::NTV2DeviceCanDo8KVideo(devID);							break;
 		case kDeviceCanDoAudio192K:					outValue = ::NTV2DeviceCanDoAudio192K(devID);						break;
-		case kDeviceCanDoCustomAux:					outValue = ::NTV2DeviceCanDoCustomAux(devID);						break;
+		case kDeviceCanDoHDMIAux:					outValue = ::NTV2DeviceCanDoCustomAux(devID);						break;
 		case kDeviceCanDoFramePulseSelect:			outValue = ::NTV2DeviceCanDoFramePulseSelect(devID);				break;
 		case kDeviceCanDoHDMIMultiView:				outValue = ::NTV2DeviceCanDoHDMIMultiView(devID);					break;
 		case kDeviceCanDoHFRRGB:					outValue = ::NTV2DeviceCanDoHFRRGB(devID);							break;

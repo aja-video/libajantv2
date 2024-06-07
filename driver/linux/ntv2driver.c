@@ -3860,8 +3860,15 @@ static void remove(struct pci_dev *pdev)
 
 	MSG("%s: device remove\n", ntv2pp->name);
 
-    // wait for io to close
     ntv2pp->ioRemove = true;
+
+#if defined(AJA_CREATE_DEVICE_NODES)
+    dev = MKDEV(getNTV2ModuleParams()->NTV2Major, deviceNumber);
+    device_destroy(getNTV2ModuleParams()->class, dev);
+    cdev_del(&ntv2pp->cdev);
+#endif
+    
+    // wait for io to close
     ioDone = false;
     while (!ioDone)
     {
@@ -3873,12 +3880,6 @@ static void remove(struct pci_dev *pdev)
         spin_unlock_irqrestore (&ntv2pp->ioLock, flags);
         msleep(10);
     }
-
-#if defined(AJA_CREATE_DEVICE_NODES)
-    dev = MKDEV(getNTV2ModuleParams()->NTV2Major, deviceNumber);
-    device_destroy(getNTV2ModuleParams()->class, dev);
-    cdev_del(&ntv2pp->cdev);
-#endif
 
 	// shut down autocirculate
     AutoCirculateInitialize(deviceNumber);
@@ -3981,6 +3982,19 @@ static void remove(struct pci_dev *pdev)
 
 	// disable register access
 	ntv2pp->registerEnable = false;
+
+    // wait for io to really close
+    ioDone = false;
+    while (!ioDone)
+    {
+        spin_lock_irqsave (&ntv2pp->ioLock, flags);
+        if (ntv2pp->ioCount == 0)
+        {
+            ioDone = true;
+        }
+        spin_unlock_irqrestore (&ntv2pp->ioLock, flags);
+        msleep(10);
+    }
 
     for(i = 0; i < eNumNTV2IRQDevices; ++i)
 	{

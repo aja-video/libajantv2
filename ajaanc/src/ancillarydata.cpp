@@ -1398,13 +1398,14 @@ const string & AJAAncDataTypeToString (const AJAAncDataType inValue, const bool 
 	static const string		gAncDataTypeToStr []			= { "Unknown", "SMPTE 2016-3 AFD", "SMPTE 12-M RP188", "SMPTE 12-M VITC",
 																"SMPTE 334 CEA708", "SMPTE 334 CEA608", "CEA608 Line21", "SMPTE 352 VPID",
 																"SMPTE 2051 2 Frame Marker", "524D Frame Status", "5251 Frame Status",
-																"HDR SDR", "HDR10", "HDR HLG", "?"};
+																"HDR SDR", "HDR10", "HDR HLG", "HDMI Aux", "?"};
 
 	static const string		gDAncDataTypeToStr []			= { "AJAAncDataType_Unknown", "AJAAncDataType_Smpte2016_3", "AJAAncDataType_Timecode_ATC",
 																"AJAAncDataType_Timecode_VITC", "AJAAncDataType_Cea708", "AJAAncDataType_Cea608_Vanc",
 																"AJAAncDataType_Cea608_Line21", "AJAAncDataType_Smpte352", "AJAAncDataType_Smpte2051",
 																"AJAAncDataType_FrameStatusInfo524D", "AJAAncDataType_FrameStatusInfo5251",
-																"AJAAncDataType_HDR_SDR", "AJAAncDataType_HDR_HDR10", "AJAAncDataType_HDR_HLG", "?"};
+																"AJAAncDataType_HDR_SDR", "AJAAncDataType_HDR_HDR10", "AJAAncDataType_HDR_HLG",
+																"AJAAncDataType_HDMI_Aux", "?"};
 
 	return inValue < AJAAncDataType_Size ? (inCompact ? gAncDataTypeToStr[inValue] : gDAncDataTypeToStr[inValue]) : gEmptyString;
 }

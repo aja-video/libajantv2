@@ -1992,21 +1992,29 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context)
 				FindHDMIOutputSource(context, &mrXptSelect, NTV2_CHANNEL1);
 				GetSourceVideoFormat(context, &mrVideoFormat, mrXptSelect, &mrQMode, &mrQQMode, &mrRegValues);
 				mrStandard = (NTV2_IS_PSF_VIDEO_FORMAT(mrVideoFormat) || mrVideoFormat == NTV2_FORMAT_UNKNOWN) ? NTV2_STANDARD_1080p : GetNTV2StandardFromVideoFormat(mrVideoFormat);
+				if (NTV2_IS_2K_1080_VIDEO_FORMAT(mrVideoFormat))
+					mrStandard = NTV2_STANDARD_2Kx1080p;
 				SetMultiRasterInputStandard(context, mrStandard, NTV2_CHANNEL1);
 
 				FindHDMIOutputSource(context, &mrXptSelect, NTV2_CHANNEL2);
 				GetSourceVideoFormat(context, &mrVideoFormat, mrXptSelect, &mrQMode, &mrQQMode, &mrRegValues);
 				mrStandard = (NTV2_IS_PSF_VIDEO_FORMAT(mrVideoFormat) || mrVideoFormat == NTV2_FORMAT_UNKNOWN) ? NTV2_STANDARD_1080p : GetNTV2StandardFromVideoFormat(mrVideoFormat);
+				if (NTV2_IS_2K_1080_VIDEO_FORMAT(mrVideoFormat))
+					mrStandard = NTV2_STANDARD_2Kx1080p;
 				SetMultiRasterInputStandard(context, mrStandard, NTV2_CHANNEL2);
 
 				FindHDMIOutputSource(context, &mrXptSelect, NTV2_CHANNEL3);
 				GetSourceVideoFormat(context, &mrVideoFormat, mrXptSelect, &mrQMode, &mrQQMode, &mrRegValues);
 				mrStandard = (NTV2_IS_PSF_VIDEO_FORMAT(mrVideoFormat) || mrVideoFormat == NTV2_FORMAT_UNKNOWN) ? NTV2_STANDARD_1080p : GetNTV2StandardFromVideoFormat(mrVideoFormat);
+				if (NTV2_IS_2K_1080_VIDEO_FORMAT(mrVideoFormat))
+					mrStandard = NTV2_STANDARD_2Kx1080p;
 				SetMultiRasterInputStandard(context, mrStandard, NTV2_CHANNEL3);
 
 				FindHDMIOutputSource(context, &mrXptSelect, NTV2_CHANNEL4);
 				GetSourceVideoFormat(context, &mrVideoFormat, mrXptSelect, &mrQMode, &mrQQMode, &mrRegValues);
 				mrStandard = (NTV2_IS_PSF_VIDEO_FORMAT(mrVideoFormat) || mrVideoFormat == NTV2_FORMAT_UNKNOWN) ? NTV2_STANDARD_1080p : GetNTV2StandardFromVideoFormat(mrVideoFormat);
+				if (NTV2_IS_2K_1080_VIDEO_FORMAT(mrVideoFormat))
+					mrStandard = NTV2_STANDARD_2Kx1080p;
 				SetMultiRasterInputStandard(context, mrStandard, NTV2_CHANNEL4);
 
 				SetEnableMultiRasterCapture(context, true);
