@@ -154,12 +154,14 @@ AJACommandLineParser::AJACommandLineParser(int flags)
 : mFlags(flags), mName(), mCommandName(), mDesc(), mDescExtra(), mUsageText(), mHelpText(),
   mOptions(), mSubParsers()
 {
+    init();
 }
 
 AJACommandLineParser::AJACommandLineParser(const std::string &name, int flags)
 : mFlags(flags), mName(name), mCommandName(), mDesc(), mDescExtra(), mUsageText(), mHelpText(),
   mOptions(), mSubParsers()
 {
+    init();
 }
 
 AJACommandLineParser::AJACommandLineParser(const AJACommandLineParser &other)
@@ -184,6 +186,16 @@ void AJACommandLineParser::operator=(const AJACommandLineParser &other)
     mSubParsers.clear();
     for (SubParserMapConstIter iter = other.mSubParsers.begin(); iter != other.mSubParsers.end(); iter++) {
         mSubParsers.insert(AJASubParserPair(iter->first, iter->second));
+    }
+}
+
+void AJACommandLineParser::init()
+{
+    if ((mFlags & kNoDefaultHelpOption) == 0) {
+        AddHelpOption();
+    }
+    if ((mFlags & kNoDefaultUsageOption) == 0) {
+        AddUsageOption();
     }
 }
 
@@ -531,82 +543,15 @@ bool AJACommandLineParser::AddHelpOption()
     helpOpt.AddName("h");
     helpOpt.AddName("help");
     helpOpt.SetDesc("Print the help text");
-    if (AddOption(helpOpt)) {
-        std::ostringstream oss;
-        std::string exePath;
-        AJAFileIO::GetExecutablePath(exePath);
-        oss << "usage: " << exePath;
-        if (!mName.empty())
-            oss << " " << mName;
-        oss << " [OPTION...]" << std::endl;
-
-        // Get the longest line size first...
-        size_t longestSize = 0;
-        for (AJACommandLineOptionListIter it = mOptions.begin();
-            it != mOptions.end(); it++) {
-            const AJAStringList &names = it->GetNames();
-            size_t namesLength = 0;
-            for (AJAStringListConstIter sIter = names.begin(); sIter != names.end(); sIter++) {
-                const std::string &name = *sIter;
-                namesLength += name.length();
-                // add size of dashes
-                if (name.length() == 1) {
-                    namesLength++;
-                } else {
-                    namesLength += 2;
-                }
-            }
-            // add size of commas/spaces (i.e. ", ")
-            namesLength += ((names.size()*2)-2);
-            if (namesLength > longestSize)
-                longestSize = namesLength;
-        }
-
-        mHelpText.clear();
-
-        // ...now calculate all of the line padding.
-        for (AJACommandLineOptionListIter it = mOptions.begin();
-            it != mOptions.end(); it++) {
-            oss << std::setw(2) << std::right;
-            const AJAStringList &names = it->GetNames();
-            size_t nameCount = 0;
-            size_t namesLength = 0;
-            for (AJAStringListConstIter sIter = names.begin(); sIter != names.end(); sIter++) {
-                const std::string &name = *sIter;
-                namesLength += name.length();
-                if (name.length() == 1) {
-                    oss << "-" << name;
-                    namesLength++;
-                } else {
-                    oss << "--" << name;
-                    namesLength += 2;
-                }
-                if (++nameCount < names.size()) {
-                    oss << ", ";
-                }
-            }
-            namesLength += ((names.size()*2)-2);
-            oss << std::setw((longestSize-namesLength) + it->GetDesc().length() + 8);
-            oss << it->GetDesc() << std::endl;
-        }
-
-        mHelpText = oss.str();
-
-        return true;
-    }
-
-    return false;
+    return AddOption(helpOpt);
 }
 
 bool AJACommandLineParser::AddUsageOption()
 {
     AJACommandLineOption usageOpt;
-    usageOpt.AddName("--usage");
+    usageOpt.AddName("usage");
     usageOpt.SetDesc("Print the usage text");
-    if (AddOption(usageOpt)) {
-        // TODO: Generate usage text
-    }
-    return true;
+    return AddOption(usageOpt);
 }
 
 std::string AJACommandLineParser::GetName() const
@@ -633,7 +578,7 @@ void AJACommandLineParser::SetUsageText(const std::string &usageText)
     }
 }
 
-std::string AJACommandLineParser::GetUsageText() const
+std::string AJACommandLineParser::GetUsageText()
 {
     if (!mCommandName.empty()) {
         AJACommandLineParser *sp = mSubParsers.at(mCommandName);
@@ -642,7 +587,13 @@ std::string AJACommandLineParser::GetUsageText() const
         }
     }
 
-    return mUsageText;
+    std::string usageText;
+    if (!mUsageText.empty()) {
+        usageText = mUsageText;
+    } else {
+        usageText = generateUsageText();
+    }
+    return usageText;
 }
 
 void AJACommandLineParser::SetHelpText(const std::string &helpText)
@@ -657,7 +608,7 @@ void AJACommandLineParser::SetHelpText(const std::string &helpText)
     }
 }
 
-std::string AJACommandLineParser::GetHelpText() const
+std::string AJACommandLineParser::GetHelpText()
 {
     if (!mCommandName.empty()) {
         AJACommandLineParser *sp = mSubParsers.at(mCommandName);
@@ -666,7 +617,91 @@ std::string AJACommandLineParser::GetHelpText() const
         }
     }
 
-    return mHelpText;
+    std::string helpText;
+    if (mHelpText.empty()) {
+        helpText = generateHelpText();
+    } else {
+        helpText = mHelpText;
+    }
+    return helpText;
+}
+
+std::string AJACommandLineParser::generateHelpText() const
+{
+    std::ostringstream oss;
+    std::string exePath;
+    AJAFileIO::GetExecutablePath(exePath);
+    oss << "Usage: " << exePath;
+    if (!mName.empty())
+        oss << " " << mName;
+    oss << " [OPTION...]" << std::endl;
+
+    // Get the longest line size first...
+    size_t longestSize = 0;
+    for (AJACommandLineOptionListIter it = mOptions.begin();
+        it != mOptions.end(); it++) {
+        const AJAStringList &names = it->GetNames();
+        size_t namesLength = 0;
+        for (AJAStringListConstIter sIter = names.begin(); sIter != names.end(); sIter++) {
+            const std::string &name = *sIter;
+            namesLength += name.length();
+            // add size of dashes
+            if (name.length() == 1) {
+                namesLength++;
+            } else {
+                namesLength += 2;
+            }
+        }
+        // add size of commas/spaces (i.e. ", ")
+        namesLength += ((names.size()*2)-2);
+        if (namesLength > longestSize)
+            longestSize = namesLength;
+    }
+
+    // ...now calculate all of the line padding.
+    for (AJACommandLineOptionListIter it = mOptions.begin();
+        it != mOptions.end(); it++) {
+        oss << std::setw(2) << std::right;
+        const AJAStringList &names = it->GetNames();
+        size_t nameCount = 0;
+        size_t namesLength = 0;
+        for (AJAStringListConstIter sIter = names.begin(); sIter != names.end(); sIter++) {
+            const std::string &name = *sIter;
+            namesLength += name.length();
+            if (name.length() == 1) {
+                oss << "-" << name;
+                namesLength++;
+            } else {
+                oss << "--" << name;
+                namesLength += 2;
+            }
+            if (++nameCount < names.size()) {
+                oss << ", ";
+            }
+        }
+        namesLength += ((names.size()*2)-2);
+        oss << std::setw((longestSize-namesLength) + it->GetDesc().length() + 8);
+        oss << it->GetDesc() << std::endl;
+    }
+
+    return oss.str();
+}
+
+std::string AJACommandLineParser::generateUsageText() const
+{
+    std::ostringstream oss;
+    std::string exePath;
+    AJAFileIO::GetExecutablePath(exePath);
+    oss << "Usage: " << exePath;
+    if (!mName.empty())
+        oss << " " << mName;
+    oss << "\nTODO" << std::endl;
+    return oss.str();
+}
+
+std::string AJACommandLineParser::GetCommandName()
+{
+    return mCommandName;
 }
 
 bool AJACommandLineParser::hasOptionPrefix(const std::string &name)

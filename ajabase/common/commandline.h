@@ -135,8 +135,8 @@ typedef std::map<std::string, OptionEntry> OptionEntryMap;
 
 typedef enum {
 	kShortOptionsAsLong = 1 << 0,
-	kAddDefaultHelpOption = 1 << 1,
-	kAddDefaultUsageOption = 1 << 2,
+	kNoDefaultHelpOption = 1 << 1,
+	kNoDefaultUsageOption = 1 << 2,
 } AJACommandLineParserFlags;
 
 /**
@@ -278,7 +278,7 @@ public:
 	 *
 	 * @return	The usage text string, if set, otherwise empty string.
 	 */
-	std::string GetUsageText() const;
+	std::string GetUsageText();
 	/**
 	 * Set the help text string to print if help is invoked by the args parser.
 	 *
@@ -290,7 +290,7 @@ public:
 	 *
 	 * @return	The help text string, if set, otherwise empty string.
 	 */
-	std::string GetHelpText() const;
+	std::string GetHelpText();
 	/**
 	 * Get the name of the command (if-any) represented by this args parser.
 	 *
@@ -301,7 +301,11 @@ public:
 private:
 	static bool hasOptionPrefix(const std::string &name);
 	static bool hasAssignmentOperator(const std::string &arg);
-	// bool reverseOptionSearch(AJAStringListConstIter *iter, const AJAStringList &args, const std::string &arg, int prefixSize, AJACommandLineOption &opt);
+
+	void init();
+	std::string generateHelpText() const;
+	std::string generateUsageText() const;
+
 	bool parseValue(const std::string &arg, std::string &value);
 	bool parseOptionValue(const std::string &name, const std::string &arg, AJAStringList::const_iterator *iter, AJAStringList::const_iterator end);
 	bool setOptionValue(const std::string &name, const std::string &value);
