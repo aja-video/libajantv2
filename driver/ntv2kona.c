@@ -1356,6 +1356,7 @@ bool SetHDMIOutputStandard(Ntv2SystemContext* context)
 				if (NTV2_IS_2K_1080_VIDEO_FORMAT(mrVideoFormat))
 					mrStandard = NTV2_STANDARD_2Kx1080p;
 				SetMultiRasterInputStandard(context, mrStandard, NTV2_CHANNEL1);
+				SetMultiRasterOutputStandard(context, mrStandard == NTV2_STANDARD_2Kx1080p ? NTV2_STANDARD_4096x2160p : NTV2_STANDARD_3840x2160p);
 
 				FindHDMIOutputSource(context, &mrXptSelect, NTV2_CHANNEL2);
 				GetSourceVideoFormat(context, &mrVideoFormat, mrXptSelect, &mrQMode, &mrQQMode, &mrRegValues);
@@ -1651,6 +1652,11 @@ bool SetHDMIV2LevelBEnable (Ntv2SystemContext* context, bool enable)
 bool SetMultiRasterInputStandard(Ntv2SystemContext* context, NTV2Standard mrStandard, NTV2Channel mrChannel)
 {
 	return ntv2WriteRegisterMS(	context, gChannelToMRRegNum[mrChannel], (ULWord)mrStandard, kRegMaskMRStandard, kRegShiftMRStandard);
+}
+
+bool SetMultiRasterOutputStandard(Ntv2SystemContext* context, NTV2Standard mrStandard)
+{
+	return ntv2WriteRegisterMS(	context, kRegMROutControl, (ULWord)mrStandard, kRegMaskMRStandard, kRegShiftMRStandard);
 }
 
 bool SetEnableMultiRasterCapture(Ntv2SystemContext* context, bool bEnable)
