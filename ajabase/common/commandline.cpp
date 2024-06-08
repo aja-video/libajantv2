@@ -269,26 +269,6 @@ bool AJACommandLineParser::AddSubParser(AJACommandLineParser *p)
     return false;
 }
 
-// bool AJACommandLineParser::reverseOptionSearch(AJAStringListConstIter *iter,
-//     const AJAStringList &args, const std::string &arg,
-//     int prefixSize, AJACommandLineOption &opt)
-// {
-//     if (static_cast<int>(arg.length()) > prefixSize) {
-//         std::string subStr;
-//         for (size_t c = arg.length(); static_cast<int>(c) > prefixSize; c--) {
-//             subStr = arg.substr(prefixSize, c-prefixSize);
-//             if (OptionByName(subStr, opt)) {
-//                 parseOptionValue(subStr, arg, iter, args.end());
-//                 mKnownOptions.push_back(subStr);
-//                 return true;
-//             } else {
-//                 mUnknownOptions.push_back(subStr);
-//             }
-//         }
-//     }
-//     return false;
-// }
-
 void AJACommandLineParser::ParseArgs(const AJAStringList &args)
 {
     // Must have at least 2 args (args[0] is the binary name, and args[1..N] are the user-specified args).
@@ -312,22 +292,6 @@ void AJACommandLineParser::ParseArgs(const AJAStringList &args)
     // > MyApp.exe theCommand -d1 -n3 --verbose
     if ((*iter != mName) && !mName.empty())
         return;
-
-    // PSEUDO-CODE
-    // for arg in args:
-    //     argStr = stripPrefix(arg)
-    //     argName = ""
-    //     haveOpt = false
-    //     for ch in argStr:
-    //         argName += ch
-    //         if haveOption(argName):
-    //             haveOpt = true
-    //             break
-    //     if haveOpt:
-    //         if haveAssignmentOperator(argStr):
-    //             argVal = readArgValAfterAssignmentOperator(argStr)
-    //         else:
-    //             argVal = readNextArgAsValue()
 
     // ...otherwise just parse the args.
     for (; iter != args.end(); iter++) {
@@ -713,63 +677,6 @@ bool AJACommandLineParser::hasAssignmentOperator(const std::string &arg)
 {
     size_t assignPos = arg.find_first_of(kAssignChar);
     return assignPos != std::string::npos;
-}
-
-bool AJACommandLineParser::parseOptionValue(const std::string &name,
-                                            const std::string &arg,
-                                            AJAStringList::const_iterator *iter,
-                                            AJAStringList::const_iterator end)
-{
-    std::string optName;
-    std::string optValue;
-    size_t assignPos = arg.find(kAssignChar, 0);
-    int prefixSize = aja::starts_with(arg, kDoubleDash) ?
-        2 : (aja::starts_with(arg, "-") ? 1 : 0);
-    if (assignPos != std::string::npos) {
-        // Get value after assignment operator.
-        optValue = arg.substr(assignPos+1, arg.length()-assignPos);
-    } else {
-        // Get value from next arg after this one if no assignment operator found.
-        optValue = arg.substr(prefixSize+name.length(), arg.length());
-        if (optValue.empty()) {
-            if (iter != NULL && *iter != end) {
-                AJAStringList::const_iterator tmp = *iter;
-                if (++tmp != end) {
-                    /* TODO(paulh): fix special case
-                    *  parser options: [foo], [b, bar]
-                    *  > program.exe --foo -b
-                    *  Will be parsed as:
-                    *     --foo=-b
-                    *     bar IsSet() == true
-                    *
-                    * The current workaround is to always use the assignment operator:
-                    * > program.exe --foo=-b
-                    * > program.exe --foo="-b"
-                    *
-                    * The fix is to iterate through all known options and check if the
-                    * arg specified here as "tmp" is one of the option names.
-                    * If the option is an option name, do not treat it as a value.
-                    * We might want to have an AJACommandLineParser flag to allow
-                    * handling either case.
-                    * CASE A:
-                    * > program.exe --foo -b
-                    * [foo] is treated as "set", with no value.
-                    * [b, bar] is treated as "set", with no value.
-                    * CASE B:
-                    * > program.exe --foo -b
-                    * [foo] is treated as "set", with a value of "-b"
-                    * [b, bar] is treated as "not set".
-                    */
-                    optValue = *(tmp);
-                }
-            }
-        }
-
-        if (optValue.empty())
-            return false;
-    }
-
-    return setOptionValue(name, optValue);
 }
 
 bool AJACommandLineParser::setOptionValue(const std::string &name, const std::string &value)
