@@ -306,8 +306,6 @@ private:
 	std::string generateHelpText() const;
 	std::string generateUsageText() const;
 
-	bool parseValue(const std::string &arg, std::string &value);
-	bool parseOptionValue(const std::string &name, const std::string &arg, AJAStringList::const_iterator *iter, AJAStringList::const_iterator end);
 	bool setOptionValue(const std::string &name, const std::string &value);
 	bool setOption(const std::string &name, bool isSet = true);
 
