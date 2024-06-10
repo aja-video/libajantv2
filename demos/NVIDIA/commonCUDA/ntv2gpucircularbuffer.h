@@ -37,6 +37,7 @@ typedef struct AVTextureBuffer {
 	
 	UByte*			        videoBufferUnaligned;
 	int64_t			        currentTime;
+	size_t					alignment;
 
 } AVTextureBuffer;
 
