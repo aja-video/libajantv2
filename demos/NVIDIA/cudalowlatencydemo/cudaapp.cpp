@@ -692,19 +692,23 @@ int main(int argc, const char *argv[])
 	ULWord numFramesOut = RING_BUFFER_SIZE;
 	// For RGB16, input buffer is 6 bytes / pixels, otherwise assume 4 bytes / pixel
 	// Will need to fix this for the RGB12 case.
+	ULWord alignment = 0x1000;
+#ifdef AJA_RDMA
+	alignment = 0x10000;
+#endif		
 	if (frameBufferFormat == NTV2_FBF_48BIT_RGB)
 	{
 		inGpuCircularBuffer->Allocate(numFramesIn, gWidth*gHeight * 6,
-			gWidth, gHeight, false, false, 4096, NTV2_TEXTURE_TYPE_CUDA_ARRAY);
+			gWidth, gHeight, false, false, alignment, NTV2_TEXTURE_TYPE_CUDA_ARRAY);
 		outGpuCircularBuffer->Allocate(numFramesOut, gWidth * gHeight * 6,
-			gWidth, gHeight, false, /*false*/true, 4096, NTV2_TEXTURE_TYPE_CUDA_ARRAY);
+			gWidth, gHeight, false, /*false*/true, alignment, NTV2_TEXTURE_TYPE_CUDA_ARRAY);
 	}
 	else
 	{
 		inGpuCircularBuffer->Allocate(numFramesIn, gWidth*gHeight * 4,
-			gWidth, gHeight, false, false, 4096, NTV2_TEXTURE_TYPE_CUDA_ARRAY);
+			gWidth, gHeight, false, false, alignment, NTV2_TEXTURE_TYPE_CUDA_ARRAY);
 		outGpuCircularBuffer->Allocate(numFramesOut, gWidth * gHeight * 4,
-			gWidth, gHeight, false, /*false*/true, 4096, NTV2_TEXTURE_TYPE_CUDA_ARRAY);
+			gWidth, gHeight, false, /*false*/true, alignment, NTV2_TEXTURE_TYPE_CUDA_ARRAY);
 	}
 
     // Assign GPU circular buffer for input
