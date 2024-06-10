@@ -282,7 +282,12 @@ int ntv2_rdma_init(void)
         ntv2_rdma_unmap_pages
     };
 
+    // request the unified virtual memory driver
+    request_module_nowait("nvidia-uvm");
+
+    // set rdma functions in the ntv2 driver
     ntv2_set_rdma_fops(&rdma_fops);
+    
 #ifdef NVIDIA_PROPRIETARY
     printk(KERN_INFO "ntv2_rdma_init: RDMA proprietary\n");
 #else
@@ -297,6 +302,7 @@ int ntv2_rdma_init(void)
 void ntv2_rdma_exit(void)
 {
 #ifdef AJA_RDMA
+    // clear the rdma functions in the ntv2 driver
     ntv2_set_rdma_fops(NULL);
 #endif    
     printk(KERN_INFO "ntv2_rdma_exit\n");
