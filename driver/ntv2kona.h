@@ -350,6 +350,7 @@ bool SetLHiHDMIOutputStandard(Ntv2SystemContext* context);
 bool SetHDMIOutputStandard(Ntv2SystemContext* context);
 bool SetHDMIV2LevelBEnable(Ntv2SystemContext* context, bool enable);
 bool SetMultiRasterInputStandard(Ntv2SystemContext* context, NTV2Standard mrStandard, NTV2Channel mrChannel);
+bool SetMultiRasterOutputStandard(Ntv2SystemContext* context, NTV2Standard mrStandard);
 bool SetEnableMultiRasterCapture(Ntv2SystemContext* context, bool bEnable);
 bool HasMultiRasterWidget(Ntv2SystemContext* context);
 bool IsMultiRasterEnabled(Ntv2SystemContext* context);
