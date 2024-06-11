@@ -273,7 +273,7 @@ bool CNTV2DriverInterface::OpenRemote (const string & inURLSpec)
 		return Open(card.GetIndexNumber());
 	}
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
-	DIDBG("Opening " << specParser.InfoString() << "...");
+	DIDBG("Opening " << specParser.InfoString());
 	//	Remote or software device:
 	NTV2Dictionary connectParams(specParser.Results());
 	_pRPCAPI = NTV2RPCClientAPI::CreateClient(connectParams);
