@@ -331,7 +331,7 @@ void AJACommandLineParser::ParseArgs(const AJAStringList &args)
                             if (HaveOption(subStr))
                                 setOption(subStr, true);
                         }
-                        return;
+                        continue;
                     } else {
                         for (size_t c = arg.length(); c > 1; c--) {
                             subStr = arg.substr(1, c-1);
