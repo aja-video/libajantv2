@@ -79,12 +79,13 @@ using namespace std;
 							AJA_sINFO   (AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
 #define	P_DBG(__x__)		if (useStdout()) cout << "## DEBUG: " << AJAFUNC << ": " << __x__ << endl;		\
 							AJA_sDEBUG  (AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
-#define	_DEBUGSTATS_			//	Define this to log above construct/destruct & open/close tallies
+#define	_DEBUGSTATS_		//	Define this to log above construct/destruct & open/close tallies
 #if defined(_DEBUGSTATS_)
 	#define PDBGX(__x__)	AJA_sDEBUG	(AJA_DebugUnit_Plugins, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #else
 	#define PDBGX(__x__)	
 #endif
+
 
 //	Stats
 static uint32_t gBaseConstructCount(0);		//	Number of NTV2RPCBase constructor calls made
@@ -425,7 +426,12 @@ void NTV2DeviceSpecParser::Parse (void)
 
 ostream & NTV2DeviceSpecParser::Print (ostream & oss, const bool inDumpResults) const
 {
-	oss << (IsLocalDevice() ? "local " : "") << "device";
+	if (IsLocalDevice())
+		oss << "local device";
+	else if (HasScheme())
+		oss << "device '" << Scheme() << "'";
+	else
+		oss << "device";
 	if (HasResult(kConnectParamDevSerial))
 		oss << " serial '" << DeviceSerial() << "'";
 	else if (HasResult(kConnectParamDevModel))
@@ -1095,6 +1101,8 @@ class PluginRegistry
 	public:	//	Class Methods
 		static PluginRegistry &	Get (void);
 		static void				Terminate (void);
+		static inline void		EnableDebugging (const bool inEnable = true)	{sDebugRegistry = inEnable;}
+		static inline bool		DebuggingEnabled (void)	{return sDebugRegistry;}
 
 	public:	//	Instance Methods
 						PluginRegistry();
@@ -1109,7 +1117,7 @@ class PluginRegistry
 		bool			indexForPath (const string & path, size_t & outIndex);
 		ULWord			countForPath (const string & path);
 		uint32_t *		refConForPath (const string & path);
-		inline bool		useStdout (void) const	{return true;}
+		inline bool		useStdout (void) const		{return DebuggingEnabled();}
 
 	private:
 		typedef map<string, NTV2PluginPtr>	NTV2PluginMap;
@@ -1125,10 +1133,12 @@ class PluginRegistry
 		void			monitor (void);	//	Monitor thread function
 		static PluginRegistryPtr	sSingleton;
 		static AJALock				sMutex;
+		static bool					sDebugRegistry;
 };	//	PluginRegistry
 
 PluginRegistryPtr	PluginRegistry::sSingleton;
 AJALock				PluginRegistry::sMutex;
+bool				PluginRegistry::sDebugRegistry(false);
 
 PluginRegistry & PluginRegistry::Get (void)
 {
@@ -1333,7 +1343,7 @@ class NTV2PluginLoader
 		inline string	pluginsPath (void) const	{return mDict.valueForKey(kNTV2PluginInfoKey_PluginsPath);}
 		inline string	pluginBaseName (void) const	{return mDict.valueForKey(kNTV2PluginInfoKey_PluginBaseName);}
 		inline bool		isValidated (void) const	{return mpPlugin ? true : false;}
-		inline bool		showParams (void) const		{return mQueryParams.hasKey("showparams");}
+		inline bool		showParams (void) const		{return mQueryParams.hasKey(kQParamShowParams);}
 		void *			refCon (void) const;
 
 	protected:	//	Used internally
@@ -1342,9 +1352,9 @@ class NTV2PluginLoader
 		bool			getPluginsFolder (string & outPath) const;
 		bool			getBaseNameFromScheme (string & outName) const;
 		inline bool		isOpen (void)					{return mpPlugin ? mpPlugin->isLoaded() : false;}
-		inline bool		useStdout (void) const			{return mQueryParams.hasKey("stdout") || mQueryParams.hasKey("cout");}
-		inline bool		isVerbose (void) const			{return mQueryParams.hasKey("verbose");}
-		inline bool		showCertificate (void) const	{return mQueryParams.hasKey("showx509cert");}
+		inline bool		useStdout (void) const			{return mQueryParams.hasKey(kQParamLogToStdout);}
+		inline bool		isVerbose (void) const			{return mQueryParams.hasKey(kQParamVerboseLogging);}
+		inline bool		showCertificate (void) const	{return mQueryParams.hasKey(kQParamShowX509Cert);}
 
 	private:	//	Instance Data
 		NTV2Dictionary &	mDict;			///< @brief	Writeable access to caller's config/connect dictionary
@@ -1352,6 +1362,7 @@ class NTV2PluginLoader
 		NTV2PluginPtr		mpPlugin;		///< @brief	Platform-dependent handle to open plugin .dylib/.dll/.so
 
 	protected:	//	Class Methods
+		static bool		ParseQueryParams (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams);
 		static bool		ExtractCertInfo (NTV2Dictionary & outInfo, const string & inStr);
 		static bool		ExtractIssuerInfo (NTV2Dictionary & outInfo, const string & inStr, const string & inParentKey);
 		static string	mbedErrStr (const int mbedtlsReturnCode);
@@ -1362,19 +1373,33 @@ class NTV2PluginLoader
 NTV2PluginLoader::NTV2PluginLoader (NTV2Dictionary & params)
 	:	mDict(params)
 {
+	PluginRegistry::EnableDebugging(mDict.hasKey(kQParamDebugRegistry) || PluginRegistry::DebuggingEnabled());
 	AJAAtomic::Increment(&gLoaderConstructCount);
 	mDict.erase(kNTV2PluginInfoKey_IsValidated);	//	start over, assume not validated
-	NTV2RPCClientAPI::ParseQueryParams (mDict, mQueryParams);
+	const NTV2Dictionary originalParams(mDict);
+	if (ParseQueryParams (mDict, mQueryParams)  &&  !mQueryParams.empty())
+		mDict.addFrom(mQueryParams);
 	P_INFO("Loader created for '" << mDict.valueForKey(kConnectParamScheme) << "', " << DEC(gLoaderConstructCount) << " created, "
 			<< DEC(gLoaderDestructCount) << " destroyed");
-	if (showParams())
-	{	cout << "## NOTE: Original params for '" << pluginPath() << "':" << endl;
-		mDict.Print(cout, false) << endl;
-	}
-	validate();
-	if (showParams())
-	{	cout << "## NOTE: Final params for '" << pluginPath() << "':" << endl;
-		params.Print(cout, false) << endl;
+
+	//	Determine plugin base name & where to find the dylib/dll/so...
+	string pluginBaseName, pluginsFolder;
+	if (getBaseNameFromScheme(pluginBaseName)  &&  getPluginsFolder(pluginsFolder))
+	{
+		const string path (pluginsFolder + PATH_DELIMITER + pluginBaseName);
+		const string sigPath (path + SIG_EXTENSION), dllPath (path + DLL_EXTENSION);
+		mDict.insert(kNTV2PluginInfoKey_PluginPath, dllPath);
+		mDict.insert(kNTV2PluginInfoKey_PluginSigPath, sigPath);
+		if (showParams())
+		{	cout << "## NOTE: Original params for '" << pluginPath() << "':" << endl;
+			originalParams.Print(cout, false) << endl;
+		}
+		//	Validate the plugin...
+		validate();
+		if (showParams())
+		{	cout << "## NOTE: Final params for '" << pluginPath() << "':" << endl;
+			mDict.Print(cout, false) << endl;
+		}
 	}
 }
 
@@ -1465,6 +1490,41 @@ bool NTV2PluginLoader::ExtractIssuerInfo (NTV2Dictionary & outInfo, const string
 	return true;
 }	//	ExtractIssuerInfo
 
+bool NTV2PluginLoader::ParseQueryParams (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams)
+{
+	if (!inParams.hasKey(kConnectParamQuery))
+		return false;
+	string queryStr(inParams.valueForKey(kConnectParamQuery));
+	if (!queryStr.empty())
+		if (queryStr[0] == '?')
+			queryStr.erase(0,1);	//	Remove leading '?'
+	const NTV2StringList strs(aja::split(queryStr, "&"));
+	for (NTV2StringListConstIter it(strs.begin());  it != strs.end();  ++it)
+	{
+		string str(*it), key, value;
+		if (str.find("=") == string::npos)
+		{	//	No assignment (i.e. no '=') --- just insert key with empty value...
+			key = aja::lower(str);
+			outQueryParams.insert(key, value);
+			PLGDBG("'" << key << "' = ''");
+			continue;
+		}
+		NTV2StringList pieces(aja::split(str,"="));
+		if (pieces.empty())
+			continue;
+		key = aja::lower(pieces.at(0));
+		if (pieces.size() > 1)
+			value = pieces.at(1);
+		if (key.empty())
+			{PLGWARN("Empty key '" << key << "'");  continue;}
+		if (outQueryParams.hasKey(key))
+			PLGDBG("Param '" << key << "' value '" << outQueryParams.valueForKey(key) << "' to be replaced with '" << value << "'");
+		outQueryParams.insert(key, ::PercentDecode(value));
+		PLGDBG("'" << key << "' = '" << outQueryParams.valueForKey(key) << "'");
+	}	//	for each &param
+	return true;
+}	//	ParseQueryParams
+
 void * NTV2PluginLoader::getSymbolAddress (const string & inSymbolName, string & outErrorMsg)
 {
 	outErrorMsg.clear();
@@ -1516,19 +1576,6 @@ bool NTV2PluginLoader::getBaseNameFromScheme (string & outName) const
 
 bool NTV2PluginLoader::validate (void)
 {
-	string pluginBaseName;
-	if (!getBaseNameFromScheme(pluginBaseName))
-		return false;
-
-	string pluginsFolder;
-	if (!getPluginsFolder(pluginsFolder))
-		return false;
-	{
-		const string path (pluginsFolder + PATH_DELIMITER + pluginBaseName);
-		const string sigPath (path + SIG_EXTENSION), dllPath (path + DLL_EXTENSION);
-		mDict.insert(kNTV2PluginInfoKey_PluginPath, dllPath);
-		mDict.insert(kNTV2PluginInfoKey_PluginSigPath, sigPath);
-	}
 	string errStr;
 
 	//	Load contents of plugin & sig files into sigContent & dllContent buffers...
@@ -1738,11 +1785,14 @@ NTV2RPCBase::NTV2RPCBase (NTV2Dictionary params, ULWord * pRefCon)
 	:	mParams(params),
 		mpRefCon(pRefCon)
 {
+	NTV2Dictionary queryParams;
 	AJAAtomic::Increment(&gBaseConstructCount);
 	if (mpRefCon)
 		AJAAtomic::Increment(mpRefCon);
 	PDBGX("refCnt=" << DEC(mpRefCon ? *mpRefCon : 0) << ", " << DEC(gBaseConstructCount) << " created, "
 		<< DEC(gBaseDestructCount) << " destroyed");
+	if (mParams.hasKey(kQParamLogToStdout) && (mParams.hasKey(kQParamVerboseLogging) || mParams.hasKey(kQParamShowParams)))
+		{cout << __FILE__ << "(" << __LINE__ << "):" << AJAFUNC << ":" << endl;  mParams.Print(cout, false) << endl;}
 }
 
 NTV2RPCBase::~NTV2RPCBase ()
@@ -1754,44 +1804,30 @@ NTV2RPCBase::~NTV2RPCBase ()
 		<< DEC(gBaseDestructCount) << " destroyed");
 }
 
+bool NTV2RPCBase::SetParams (const NTV2ConnectParams & inNewParams, const bool inAugment)
+{
+	AJAAutoLock tmp(&mParamLock);
+	size_t oldCount(mParams.size()), updated(0), added(0);
+	if (inAugment)
+	{
+		updated = mParams.updateFrom(inNewParams);
+		added = mParams.addFrom(inNewParams);
+        NBSDBG(DEC(updated) << " param(s) updated, " << DEC(added) << " added: " << mParams);
+	}
+	else
+	{
+		mParams = inNewParams;
+		NBSDBG(DEC(oldCount) << " param(s) removed, replaced with " << inNewParams);
+	}
+	if (mParams.empty())
+		NBSWARN("No params");
+	return true;
+}
+
+
 /*****************************************************************************************************************************************************
 	NTV2RPCClientAPI
 *****************************************************************************************************************************************************/
-
-bool NTV2RPCClientAPI::ParseQueryParams (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams)
-{
-	if (!inParams.hasKey(kConnectParamQuery))
-		return false;
-	string queryStr(inParams.valueForKey(kConnectParamQuery));
-	if (!queryStr.empty())
-		if (queryStr[0] == '?')
-			queryStr.erase(0,1);	//	Remove leading '?'
-	const NTV2StringList strs(aja::split(queryStr, "&"));
-	for (NTV2StringListConstIter it(strs.begin());  it != strs.end();  ++it)
-	{
-		string str(*it), key, value;
-		if (str.find("=") == string::npos)
-		{	//	No assignment (i.e. no '=') --- just insert key with empty value...
-			key = aja::lower(str);
-			outQueryParams.insert(key, value);
-			PLGDBG("'" << key << "' = ''");
-			continue;
-		}
-		NTV2StringList pieces(aja::split(str,"="));
-		if (pieces.empty())
-			continue;
-		key = aja::lower(pieces.at(0));
-		if (pieces.size() > 1)
-			value = pieces.at(1);
-		if (key.empty())
-			{PLGWARN("Empty key '" << key << "'");  continue;}
-		if (outQueryParams.hasKey(key))
-			PLGDBG("Param '" << key << "' value '" << outQueryParams.valueForKey(key) << "' to be replaced with '" << value << "'");
-		outQueryParams.insert(key, ::PercentDecode(value));
-		PLGDBG("'" << key << "' = '" << outQueryParams.valueForKey(key) << "'");
-	}	//	for each &param
-	return true;
-}	//	ParseQueryParam
 
 NTV2RPCClientAPI::NTV2RPCClientAPI (NTV2ConnectParams inParams, void * pRefCon)
 	:	NTV2RPCBase(inParams, reinterpret_cast<ULWord*>(pRefCon))
@@ -1830,28 +1866,6 @@ string NTV2RPCClientAPI::ConnectParam (const string & inParam) const
 bool NTV2RPCClientAPI::ConnectHasScheme (void) const
 {
 	return HasConnectParam(kConnectParamScheme);
-}
-
-bool NTV2RPCClientAPI::SetConnectParams (const NTV2ConnectParams & inNewParams, const bool inAugment)
-{
-	if (IsConnected())
-		{NBFAIL("Cannot set connect params while connected");  return false;}
-	AJAAutoLock tmp(&mParamLock);
-	size_t oldCount(mParams.size()), updated(0), added(0);
-	if (inAugment)
-	{
-		updated = mParams.updateFrom(inNewParams);
-		added = mParams.addFrom(inNewParams);
-		NBDBG(DEC(updated) << " connect param(s) updated, " << DEC(added) << " added: " << mParams);
-	}
-	else
-	{
-		mParams = inNewParams;
-		NBDBG(DEC(oldCount) << " connect param(s) removed, replaced with " << inNewParams);
-	}
-	if (mParams.empty())
-		NBWARN("No connect params");
-	return true;
 }
 
 ostream & NTV2RPCClientAPI::Print (ostream & oss) const
@@ -2084,24 +2098,4 @@ string NTV2RPCServerAPI::ConfigParam (const string & inParam) const
 {
 	AJAAutoLock tmp(&mParamLock);
 	return mParams.valueForKey(inParam);
-}
-
-bool NTV2RPCServerAPI::SetConfigParams (const NTV2ConnectParams & inNewParams, const bool inAugment)
-{
-	AJAAutoLock tmp(&mParamLock);
-	size_t oldCount(mParams.size()), updated(0), added(0);
-	if (inAugment)
-	{
-		updated = mParams.updateFrom(inNewParams);
-		added = mParams.addFrom(inNewParams);
-        NBSDBG(DEC(updated) << " config param(s) updated, " << DEC(added) << " added: " << mParams);
-	}
-	else
-	{
-		mParams = inNewParams;
-		NBSDBG(DEC(oldCount) << " config param(s) removed, replaced with " << inNewParams);
-	}
-	if (mParams.empty())
-		NBSWARN("No config params");
-	return true;
 }

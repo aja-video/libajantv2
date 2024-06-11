@@ -101,13 +101,12 @@ AJAStatus NTV2OutputTestPattern::Init (void)
 		return status;
 
 	#if defined(_DEBUG)
-		cerr << mConfig << endl;
-		const string desc(mDevice.GetDescription());
-		if (!desc.empty())
-			cerr << "Description:\t" << desc << endl;
-		const NTV2Dictionary parms(mDevice.ConnectParams());
-		if (!parms.empty())
-			{cerr << "Plugin Info:" << endl; parms.Print(cerr, false); cerr << endl;}
+		AJALabelValuePairs info(mConfig.Get());
+		if (!mDevice.GetDescription().empty())
+			for (AJALabelValuePairsConstIter it(info.begin());  it != info.end();  ++it)
+				if (it->first.find("Device Specifier") == 0)
+					{info.insert(++it, AJALabelValuePair("Device Description", mDevice.GetDescription())); break;}
+		cerr << AJASystemInfo::ToString(info);
 	#endif	//	defined(_DEBUG)
 	return AJA_STATUS_SUCCESS;
 
