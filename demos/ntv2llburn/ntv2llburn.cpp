@@ -202,6 +202,47 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 		case NTV2_INPUTSOURCE_INVALID:	cerr << "## ERROR:  Bad input source" << endl;  return AJA_STATUS_BAD_PARAM;
 	}
 
+	//	Determine the input video signal format, and set the device's reference source to that input...
+	mVideoFormat = mDevice.GetInputVideoFormat (mConfig.fInputSource);
+	if (mVideoFormat == NTV2_FORMAT_UNKNOWN)
+	{
+		cerr << "## ERROR:  The specified input has no signal, or the device cannot handle the signal format" << endl;
+		return AJA_STATUS_NOINPUT;	//	Sorry, can't handle this format
+	}
+
+	//	Will ping-pong between frames N and N+1, starting at GetIndexForNTV2Channel(mConfig.fInputChannel)
+	mInputStartFrame = mConfig.fInputChannel * 2;
+	mInputEndFrame = mInputStartFrame + 1;
+	//	Will ping-pong between frames M and M+1, starting at GetIndexForNTV2Channel(mConfig.fOutputChannel)
+	mOutputStartFrame = mConfig.fOutputChannel * 2;
+	mOutputEndFrame = mOutputStartFrame + 1;
+
+	// Check to see if desired input/output channels are in use by Auto-Circulate, i.e. another Auto-Circulate-based ntv2 demo is running.
+	if (!mDevice.AutoCirculateInitForInput(	mConfig.fInputChannel,								//	primary channel
+											2,	//	numFrames (zero if specifying range)
+											NTV2_AUDIOSYSTEM_INVALID,							//	audio system
+											AUTOCIRCULATE_WITH_RP188
+												| (mDevice.features().CanDoCustomAnc() ? AUTOCIRCULATE_WITH_ANC : 0),	//	flags
+											1,	//	numChannels to gang
+											mInputStartFrame, mInputEndFrame))
+	{
+		cerr << "Failed to init " << NTV2ChannelToString(mConfig.fInputChannel) << " for input. Is channel in-use by Auto-Circulate?" << endl;
+		return AJA_STATUS_FAIL;
+	}
+	if (!mDevice.AutoCirculateInitForOutput(	mConfig.fOutputChannel,									//	primary channel
+											(mOutputEndFrame - mOutputStartFrame)+1,	//	numFrames (zero if specifying range)
+											NTV2_AUDIOSYSTEM_INVALID,								//	audio system
+											AUTOCIRCULATE_WITH_RP188
+												| (mDevice.features().CanDoCustomAnc() ? AUTOCIRCULATE_WITH_ANC : 0),	//	flags
+											1,	//	numChannels to gang
+											mOutputStartFrame, mOutputEndFrame))
+	{
+		cerr << "Failed to init " << NTV2ChannelToString(mConfig.fOutputChannel) << " for output. Is channel in-use by Auto-Circulate?" << endl;
+		return AJA_STATUS_FAIL;
+	}
+	mDevice.AutoCirculateStop(mConfig.fInputChannel);
+	mDevice.AutoCirculateStop(mConfig.fOutputChannel);
+
 	bool isTransmit (false);
 	if (mDevice.features().HasBiDirectionalSDI()								//	If device has bidirectional SDI connectors...
 		&& NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource)						//	...and desired input source is SDI...
@@ -214,14 +255,6 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 
 	if (mConfig.WithAnc() && !NTV2_INPUT_SOURCE_IS_SDI(mConfig.fInputSource))
 		cerr << "## WARNING: Non-SDI input source, no Anc capture possible" << endl;
-
-	//	Determine the input video signal format, and set the device's reference source to that input...
-	mVideoFormat = mDevice.GetInputVideoFormat (mConfig.fInputSource);
-	if (mVideoFormat == NTV2_FORMAT_UNKNOWN)
-	{
-		cerr << "## ERROR:  The specified input has no signal, or the device cannot handle the signal format" << endl;
-		return AJA_STATUS_NOINPUT;	//	Sorry, can't handle this format
-	}
 
 	mDevice.SetReference (::NTV2InputSourceToReferenceSource (mConfig.fInputSource));
 	mAudioSystem	= ::NTV2InputSourceToAudioSystem (mConfig.fInputSource);
@@ -504,8 +537,8 @@ void NTV2LLBurn::ProcessFrames (void)
 	const UWord	sdiInput				(UWord(::GetIndexForNTV2InputSource(mConfig.fInputSource)));
 	const UWord	sdiOutput				(UWord(::NTV2OutputDestinationToChannel(mOutputDest)));
 	const bool	isInterlace				(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mVideoFormat));
-	uint32_t	currentInFrame			(0);	//	Will ping-pong between 0 and 1
-	uint32_t	currentOutFrame			(2);	//	Will ping-pong between 2 and 3
+	uint32_t	currentInFrame			(mInputStartFrame);
+	uint32_t	currentOutFrame			(mOutputStartFrame);
 	uint32_t	currentAudioInAddress	(0);
 	uint32_t	audioReadOffset			(0);
 	uint32_t	audioInWrapAddress		(0);
@@ -831,6 +864,9 @@ void NTV2LLBurn::ProcessFrames (void)
 			mDevice.AncInsertSetEnable (sdiOutput, true);
 
 	}	//	loop til quit signaled
+
+	mDevice.AutoCirculateStop(mConfig.fInputChannel);
+	mDevice.AutoCirculateStop(mConfig.fOutputChannel);
 
 	if (doAncInput)
 		mDevice.AncExtractSetEnable (sdiInput, false);	//	Stop ANC extractor
