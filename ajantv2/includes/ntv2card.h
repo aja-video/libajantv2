@@ -5821,7 +5821,7 @@ public:
 		@see		CNTV2Card::GetAuxRegionOffsetAndSize, \ref auxcapture-dataspace
 	**/
 	AJA_VIRTUAL bool	AuxSetFrameBufferSize (const ULWord inF1Size, const ULWord inF2Size)	//	New in SDK 17.1
-											{return IsSupported(kDeviceCanDoHDMIAux)  &&  AncSetFrameBufferSize(inF1Size,inF2Size);}
+											{return IsSupported(kDeviceCanDoHDMIAuxCapture)  &&  AncSetFrameBufferSize(inF1Size,inF2Size);}
 
 
 	/**
