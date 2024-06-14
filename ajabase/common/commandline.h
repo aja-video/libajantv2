@@ -25,7 +25,7 @@ typedef enum {
 } AJACommandLineOptionFlags;
 
 /**
- *	Class that represents a command line option.
+ *	Class that represents a command-line option.
  */
 class AJA_EXPORT AJACommandLineOption
 {
@@ -46,66 +46,98 @@ public:
 	virtual ~AJACommandLineOption();
 
 	/**
-	 * Add an arg name to this command line option.
+	 * Add an arg name to this AJACommandLineOption.
 	 *
 	 * @param[in] name	The arg name to add.
 	 */
 	bool AddName(const std::string &name);
 
 	/**
-	 * Get list of arg names attached to this command line option.
+	 * Get list of arg names attached to this AJACommandLineOption.
 	 *
 	 * @return	The list of names.
 	 */
 	AJAStringList GetNames() const;
 
 	/**
-	 * Get the description string for this command line option.
+	 * Get the description string for this AJACommandLineOption.
 	 *
 	 * @return	The description string.
 	 */
 	std::string GetDesc() const;
 
 	/**
-	 * Set the description string for this command line option.
+	 * Set the description string for this AJACommandLineOption.
 	 *
 	 * @param[in] desc	The description string.
 	 */
 	void SetDesc(const std::string &desc);
 
 	/**
-	 * Get the extra description string for this command line option.
+	 * Get the extra description string for this AJACommandLineOption.
 	 *
 	 * @return	The extra description string.
 	 */
 	std::string GetExtraDesc() const;
 
 	/**
-	 * Set the extra description string for this command line option.
+	 * Set the extra description string for this AJACommandLineOption.
 	 *
 	 * @param[in] desc	The extra description string.
 	 */
 	void SetExtraDesc(const std::string &desc);
 
 	/**
-	 * Set the default value string for this command line option.
+	 * Set the default value string for this AJACommandLineOption.
 	 *
 	 * @param[in] desc	The default value string.
 	 */
 	void SetDefaultValue(const std::string &value);
 
 	/**
-	 * Get the default value string for this command line option.
+	 * Get the default value string for this AJACommandLineOption.
 	 *
 	 * @return	The default value string.
 	 */
 	std::string GetDefaultValue() const;
 
+	/**
+	 * Add a value string to this AJACommandLineOption.
+	 *
+	 * @param[in] value	The value string.
+	 */
 	void AddValue(const std::string &value);
+
+	/**
+	 * Get value string at the specified index from this AJACommandLineOption.
+	 *
+	 * @param[in] index	The index of the value to retrieve.
+	 *
+	 * @return	The default value string.
+	 */
 	std::string GetValue(size_t index = 0) const;
+
+	/**
+	 * Get all value strings from this AJACommandLineOption.
+	 *
+	 * @return	The AJAStringList of all value strings.
+	 */
 	AJAStringList GetValues() const;
 
+	/**
+	 * Get all value strings from this AJACommandLineOption.
+	 *
+	 * @return	Returns true if the option is set, otherwise return false.
+	 */
 	bool IsSet() const;
+
+	/**
+	 * Mark this AJACommandLineOption as "set", or enabled.
+	 * Typically used by an AJACommandLineParser instance to flag specific options
+	 * as having been set at the command-line, at the time the arguments are parsed.
+	 *
+	 * @param[in] isSet	A boolean representing the enabled state of the option.
+	 */
 	void MarkSet(bool isSet = true);
 
 private:
@@ -127,12 +159,6 @@ typedef std::map<std::string, AJACommandLineParser *> SubParserMap;
 typedef SubParserMap::const_iterator SubParserMapConstIter;
 typedef std::pair<std::string, AJACommandLineParser*> AJASubParserPair;
 
-struct OptionEntry {
-	int pos;
-	std::string value;
-};
-typedef std::map<std::string, OptionEntry> OptionEntryMap;
-
 typedef enum {
 	kShortOptionsAsLong = 1 << 0,
 	kNoDefaultHelpOption = 1 << 1,
@@ -140,7 +166,7 @@ typedef enum {
 } AJACommandLineParserFlags;
 
 /**
- *	Class that represents a command line args parser.
+ *	Class that represents a command-line args parser.
  */
 class AJA_EXPORT AJACommandLineParser
 {
@@ -166,29 +192,29 @@ public:
 	 */
 	bool AddSubParser(AJACommandLineParser *sp);
 	/**
-	 * Parse a list of strings containing command line args.
+	 * Parse a list of strings containing command-line args.
 	 *
 	 * @param[in] desc	The list of arg strings.
 	 *
-	 * @return	Returns `true` if the command line args were parsed successfully, otherwise `false`.
+	 * @return	Returns `true` if the command-line args were parsed successfully, otherwise `false`.
 	 */
 	void ParseArgs(const AJAStringList &args);
 	/**
-	 * Parse a list of strings containing command line args.
+	 * Parse a list of strings containing command-line args.
 	 *
 	 * @param[in] argc	The arg count.
 	 * @param[in] argv	The list of arg strings.
 	 */
 	void ParseArgs(int argc, const char *argv[]);
 	/**
-	 * Parse a list of strings containing command line args.
+	 * Parse a list of strings containing command-line args.
 	 *
 	 * @param[in] argc	The arg count.
 	 * @param[in] argv	The list of arg strings.
 	 */
 	void ParseArgs(int argc, char *argv[]);
 	/**
-	 * Tests if the specified arg was set on the command line.
+	 * Tests if the specified arg was set on the command-line.
 	 *
 	 * @param[in] name	The arg name.
 	 *
@@ -230,21 +256,21 @@ public:
 	 */
 	AJAStringList ValueStrings(const std::string &name) const;
 	/**
-	 * Add a command line option to this args parser.
+	 * Add a AJACommandLineOption to this args parser.
 	 * This method will fail if another option with the
 	 * same name has already been added to this parser.
 	 *
-	 * @param[in] option	The command line option to add.
+	 * @param[in] option	The AJACommandLineOption to add.
 	 *
 	 * @return	`true` if option was added successfully, otherwise `false`.
 	 */
 	bool AddOption(const AJACommandLineOption &option);
 	/**
-	 * Add a list of command line options to this args parser.
+	 * Add a list of AJACommandLineOptions to this args parser.
 	 * This method will fail if the list contains an option whose
 	 * name has already been added to the args parser.
 	 *
-	 * @param[in] options	The list of command line options to add.
+	 * @param[in] options	The list of AJACommandLineOptions to add.
 	 *
 	 * @return	`true` if options are added successfully, otherwise `false`.
 	 */
@@ -262,7 +288,7 @@ public:
 	 */
 	bool AddUsageOption();
 	/**
-	 * Get the name of this command line args parser.
+	 * Get the name of this command-line args parser.
 	 *
 	 * @return	The name of the parser, if any has been set, otherwise empty string.
 	 */
