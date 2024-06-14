@@ -117,7 +117,8 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDo8KVideo,						///< @brief True if device supports 8K video formats.
 	kDeviceCanDoAudio192K,						///< @brief True if Audio System(s) support a 192kHz sample rate.
 	kDeviceCanDoAudioMixer,						///< @brief True if device has a firmware audio mixer.
-	kDeviceCanDoHDMIAux,						///< @brief True if device supports HDMI AUX data insertion/extraction.
+	kDeviceCanDoHDMIAuxCapture,					///< @brief True if device has HDMI AUX data extractor(s).
+	kDeviceCanDoHDMIAuxPlayback,				///< @brief True if device has HDMI AUX data inserter(s).
 	kDeviceCanDoFramePulseSelect,				///< @brief True if device supports frame pulse source independent of reference source.
 	kDeviceCanDoHDMIMultiView,					///< @brief True if device can rasterize 4 HD signals into a single HDMI output.
 	kDeviceHasMultiRasterWidget,				///< @brief True if device can rasterize 4 HD signals into a single HDMI output.

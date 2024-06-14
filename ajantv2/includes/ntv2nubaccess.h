@@ -32,6 +32,13 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 #define	kConnectParamResource	"ResourcePath"	///< @brief	Resource path -- everything past URL [scheme://host[:port]/], excluding [?query]
 #define	kConnectParamQuery		"Query"			///< @brief	Query -- everything past '?' in URL
 
+//	AJA query params:
+#define	kQParamVerboseLogging	"verbose"		///< @brief	Query parameter option that enables verbose message logging
+#define	kQParamLogToStdout		"stdout"		///< @brief	Query parameter option that logs messages to standard output
+#define	kQParamShowX509Cert		"showx509cert"	///< @brief	Query parameter option that dumps X509 certificate info into message log
+#define	kQParamShowParams		"showparams"	///< @brief	Query parameter option that dumps parameters into message log
+#define	kQParamDebugRegistry	"debugregistry"	///< @brief	Query parameter option that enables debugging of PluginRegistry
+
 //	Local URL schemes:
 #define	kLegalSchemeNTV2		"ntv2"
 #define	kLegalSchemeNTV2Local	"ntv2local"
@@ -216,13 +223,14 @@ class AJAExport NTV2DeviceSpecParser
 class AJAExport NTV2RPCBase
 {
 	protected:
-		NTV2RPCBase (NTV2Dictionary params, uint32_t * pRefCon);
-		virtual ~NTV2RPCBase ();
+						NTV2RPCBase (NTV2Dictionary params, uint32_t * pRefCon);
+		virtual			~NTV2RPCBase ();
+		bool			SetParams (const NTV2ConfigParams & inNewParams, const bool inAugment = false);
 
 	protected:
-		NTV2Dictionary	mParams;	///< @brief	Copy of config params passed to my constructor
-		mutable AJALock	mParamLock;	///< @brief	Mutex to protect mParams
-		uint32_t *		mpRefCon;	///< @brief	Reserved for internal use
+		NTV2Dictionary	mParams;		///< @brief	Copy of config params passed to my constructor
+		mutable AJALock	mParamLock;		///< @brief	Mutex to protect mParams
+		uint32_t *		mpRefCon;		///< @brief	Reserved for internal use
 };	//	NTV2RPCBase
 
 
@@ -241,8 +249,12 @@ class AJAExport NTV2RPCBase
 class AJAExport NTV2RPCClientAPI : public NTV2RPCBase
 {
 	public:
+		/**
+			@brief		Instantiates a new NTV2RPCClientAPI instance using the given ::NTV2ConnectParams.
+			@returns	A pointer to the new instance, or nullptr upon failure.
+			@param		inParams	A non-const reference to the NTV2ConnectParams dictionary.
+		**/
 		static NTV2RPCClientAPI *	CreateClient (NTV2ConnectParams & inParams);
-		static bool					ParseQueryParams (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams);	//	New in SDK 17.1
 
 	public:
 		/**
@@ -272,7 +284,7 @@ class AJAExport NTV2RPCClientAPI : public NTV2RPCBase
 		virtual bool				HasConnectParam (const std::string & inParam) const;	///< @return	True if I have the given connect parameter
 		virtual std::string			ConnectParam (const std::string & inParam) const;	///< @return	The given connect parameter (or empty string if missing)
 		virtual bool				ConnectHasScheme (void) const;	///< @return	True if connect params contains a scheme
-		virtual bool				SetConnectParams (const NTV2ConnectParams & inNewParams, const bool inAugment = false);	///< @brief	Replaces or adds to my connect parameters
+		virtual inline bool			SetConnectParams (const NTV2ConnectParams & inNewParams, const bool inAugment = false) {return !IsConnected() && SetParams(inNewParams, inAugment);}	///< @brief	Replaces or adds to my connect parameters
 		///@}
 
 		/**
@@ -382,7 +394,7 @@ class AJAExport NTV2RPCServerAPI : public NTV2RPCBase
 		virtual NTV2ConfigParams	ConfigParams (void) const;	///< @return	My config parameters
 		virtual bool				HasConfigParam (const std::string & inParam) const;	///< @return	True if I have the given config parameter
 		virtual std::string			ConfigParam (const std::string & inParam) const;	///< @return	The given config parameter (or empty string if missing)
-		virtual bool				SetConfigParams (const NTV2ConfigParams & inNewParams, const bool inAugment = false);	///< @brief	Replaces or adds to my config parameters
+		virtual inline bool			SetConfigParams (const NTV2ConfigParams & inNewParams, const bool inAugment = false) {return SetParams(inNewParams, inAugment);}	///< @brief	Replaces or adds to my config parameters
 		///@}
 
 		/**

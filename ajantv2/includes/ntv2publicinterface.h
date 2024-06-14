@@ -7929,24 +7929,34 @@ typedef enum
 				inline ULWord					GetDroppedFrameCount (void) const						{return acFramesDropped;}
 
 				/**
-					@return		The number of audio bytes deposited/transferred into the host audio buffer after
-								the last successful CNTV2Card::AutoCirculateTransfer.
+					@return		For the transferred frame, the number of valid audio bytes that were deposited
+                                into the device audio capture buffer.
+					@see		audop-capture
 				**/
 				inline ULWord					GetCapturedAudioByteCount (void) const					{return acAudioTransferSize;}
 
 				/**
-					@return		The number of ancillary data bytes deposited/transferred into the host anc buffer after
-								the last successful CNTV2Card::AutoCirculateTransfer.
+					@return		For the transferred frame, the number of valid ancillary data bytes that were deposited
+                                by the Anc Extractor into the device anc buffer.
 					@param[in]	inField2	Specify \c true for Field 2;  otherwise \c false (the default) for Field 1 (or progessive).
+					@see		anccapture
 				**/
 				inline ULWord					GetCapturedAncByteCount (const bool inField2 = false) const {return inField2 ? acAncField2TransferSize : acAncTransferSize;}
+
+				/**
+					@return		For the transferred frame, the number of valid HDMI auxiliary data bytes that were deposited
+                                by the Aux Extractor into the device aux buffer.
+					@param[in]	inField2	Specify \c true for Field 2;  otherwise \c false (the default) for Field 1 (or progessive).
+					@see		auxcapture
+				**/
+				inline ULWord					GetCapturedAuxByteCount (const bool inField2 = false) const {return GetCapturedAncByteCount(inField2);}
 
 				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(acHeader,acTrailer)
 
 				NTV2_BEGIN_PRIVATE
-					inline explicit							AUTOCIRCULATE_TRANSFER_STATUS (const AUTOCIRCULATE_TRANSFER_STATUS & inObj) : acHeader(0xFEFEFEFE, 0) {(void) inObj;}					///< @brief You cannot construct an AUTOCIRCULATE_TRANSFER_STATUS from another.
-					inline AUTOCIRCULATE_TRANSFER_STATUS &	operator = (const AUTOCIRCULATE_TRANSFER_STATUS & inRHS)					{(void) inRHS; return *this;}	///< @brief You cannot assign AUTOCIRCULATE_TRANSFER_STATUSs.
+					inline explicit	AUTOCIRCULATE_TRANSFER_STATUS (const AUTOCIRCULATE_TRANSFER_STATUS & inObj) : acHeader(0xFEFEFEFE, 0) {(void) inObj;}	///< @brief You cannot construct an AUTOCIRCULATE_TRANSFER_STATUS from another.
+					inline AUTOCIRCULATE_TRANSFER_STATUS &	operator = (const AUTOCIRCULATE_TRANSFER_STATUS & inRHS)	{(void) inRHS; return *this;}	///< @brief You cannot assign AUTOCIRCULATE_TRANSFER_STATUSs.
 				NTV2_END_PRIVATE
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
 		NTV2_STRUCT_END (AUTOCIRCULATE_TRANSFER_STATUS)

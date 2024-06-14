@@ -62,7 +62,8 @@ class AJAExport DeviceCapabilities
 		inline bool		CanDoEnhancedCSC (void)					{return dev.IsSupported(kDeviceCanDoEnhancedCSC);}
 		inline bool		CanDoFramePulseSelect (void)			{return dev.IsSupported(kDeviceCanDoFramePulseSelect);}
 		inline bool		CanDoFrameStore1Display (void)			{return dev.IsSupported(kDeviceCanDoFrameStore1Display);}
-		inline bool		CanDoHDMIAux (void)						{return dev.IsSupported(kDeviceCanDoHDMIAux);}
+		inline bool		CanDoHDMIAuxCapture (void)				{return dev.IsSupported(kDeviceCanDoHDMIAuxCapture);}
+		inline bool		CanDoHDMIAuxPlayback (void)				{return dev.IsSupported(kDeviceCanDoHDMIAuxPlayback);}
 		inline bool		CanDoHDMIHDROut (void)					{return dev.IsSupported(kDeviceCanDoHDMIHDROut);}
 		inline bool		CanDoHDMIMultiView (void)				{return dev.IsSupported(kDeviceCanDoHDMIMultiView);}
 		inline bool		CanDoHDMIOutStereo (void)				{return dev.IsSupported(kDeviceCanDoHDMIOutStereo);}

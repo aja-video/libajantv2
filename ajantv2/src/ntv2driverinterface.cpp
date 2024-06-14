@@ -273,7 +273,7 @@ bool CNTV2DriverInterface::OpenRemote (const string & inURLSpec)
 		return Open(card.GetIndexNumber());
 	}
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
-	DIDBG("Opening " << specParser.InfoString() << "...");
+	DIDBG("Opening " << specParser.InfoString());
 	//	Remote or software device:
 	NTV2Dictionary connectParams(specParser.Results());
 	_pRPCAPI = NTV2RPCClientAPI::CreateClient(connectParams);
@@ -1631,7 +1631,8 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanDo2110:						outValue = ::NTV2DeviceCanDo2110(devID);							break;
 		case kDeviceCanDo8KVideo:					outValue = ::NTV2DeviceCanDo8KVideo(devID);							break;
 		case kDeviceCanDoAudio192K:					outValue = ::NTV2DeviceCanDoAudio192K(devID);						break;
-		case kDeviceCanDoHDMIAux:					outValue = ::NTV2DeviceCanDoCustomAux(devID);						break;
+		case kDeviceCanDoHDMIAuxCapture:			outValue = ::NTV2DeviceCanDoCustomAux(devID);						break;
+		case kDeviceCanDoHDMIAuxPlayback:			outValue = false && ::NTV2DeviceCanDoCustomAux(devID);				break;	//	SDK 17.1 HDMI AUX is Capture-Only
 		case kDeviceCanDoFramePulseSelect:			outValue = ::NTV2DeviceCanDoFramePulseSelect(devID);				break;
 		case kDeviceCanDoHDMIMultiView:				outValue = ::NTV2DeviceCanDoHDMIMultiView(devID);					break;
 		case kDeviceCanDoHFRRGB:					outValue = ::NTV2DeviceCanDoHFRRGB(devID);							break;

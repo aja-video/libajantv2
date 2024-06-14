@@ -869,19 +869,20 @@ bool CNTV2MacDriverInterface::DmaTransfer ( const NTV2DMAEngine inDMAEngine,
 		return false;
 	kern_return_t kernResult = KERN_FAILURE;
 	size_t	outputStructSize = 0;
+	const ULWord numSegments = inNumSegments ? inNumSegments : 1; //  Prevent divide-by-zero exception:  zero segment count == single segment
 
 	DMA_TRANSFER_STRUCT_64 dmaTransfer64;
 	dmaTransfer64.dmaEngine				= inDMAEngine;
 	dmaTransfer64.dmaFlags				= 0;
-	dmaTransfer64.dmaHostBuffer			= Pointer64(pFrameBuffer);			// virtual address of host buffer
-	dmaTransfer64.dmaSize				= inByteCount;						// total number of bytes to DMA
-	dmaTransfer64.dmaCardFrameNumber	= inFrameNumber;					// card frame number
-	dmaTransfer64.dmaCardFrameOffset	= inCardOffsetBytes;				// offset (in bytes) into card frame to begin DMA
-	dmaTransfer64.dmaNumberOfSegments	= inNumSegments;					// number of segments of size videoBufferSize to DMA
-	dmaTransfer64.dmaSegmentSize		= (inByteCount / inNumSegments);	// size of each segment (if videoNumSegments > 1)
-	dmaTransfer64.dmaSegmentHostPitch	= inSegmentHostPitch;				// offset between the beginning of one host-memory segment and the next host-memory segment
-	dmaTransfer64.dmaSegmentCardPitch	= inSegmentCardPitch;				// offset between the beginning of one Kona-memory segment and the next Kona-memory segment
-	dmaTransfer64.dmaToCard				= !inIsRead;						// direction of DMA transfer
+	dmaTransfer64.dmaHostBuffer			= Pointer64(pFrameBuffer);		// virtual address of host buffer
+	dmaTransfer64.dmaSize				= inByteCount;					// total number of bytes to DMA
+	dmaTransfer64.dmaCardFrameNumber	= inFrameNumber;				// card frame number
+	dmaTransfer64.dmaCardFrameOffset	= inCardOffsetBytes;			// offset (in bytes) into card frame to begin DMA
+	dmaTransfer64.dmaNumberOfSegments	= numSegments;					// number of segments of size videoBufferSize to DMA
+	dmaTransfer64.dmaSegmentSize		= (inByteCount / numSegments);	// size of each segment (if videoNumSegments > 1)
+	dmaTransfer64.dmaSegmentHostPitch	= inSegmentHostPitch;			// offset between the beginning of one host-memory segment and the next host-memory segment
+	dmaTransfer64.dmaSegmentCardPitch	= inSegmentCardPitch;			// offset between the beginning of one Kona-memory segment and the next Kona-memory segment
+	dmaTransfer64.dmaToCard				= !inIsRead;					// direction of DMA transfer
 
 	if (GetIOConnect())
 	{
