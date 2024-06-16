@@ -10,7 +10,6 @@
 
 #include "ntv2driverinterface.h"
 
-#if defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
 /**
 	@brief	Convenience class/API for inquiring about device capabilities of physical and virtual devices.
 			Instead of calling the old global ::NTV2DeviceCanDoXXX(mDeviceID) functions,
@@ -263,6 +262,5 @@ class AJAExport DeviceCapabilities
 	private:
 		CNTV2DriverInterface &	dev;	//	My reference to the physical or virtual NTV2 device
 };	//	DeviceCapabilities
-#endif	//	defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
 
 #endif	//	NTV2_DEVICECAPABILITIES_H

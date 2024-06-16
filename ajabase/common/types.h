@@ -8,6 +8,19 @@
 #ifndef AJA_TYPES_H
 #define AJA_TYPES_H
 
+/**************************************************************************************************************
+	AJA_USE_CPLUSPLUS11		When defined (the default), the 'ajabase' portion of the SDK will use C++
+							language and/or STL features that require a C++11 compiler.
+
+							When undefined, the 'ajabase' portion of the SDK will not use C++11 features.
+
+							NOTE:	This macro will be deprecated in a future SDK, when it will no longer
+									be possible to build the SDK without a C++11-capable compiler.
+
+							See also:	NTV2_USE_CPLUSPLUS11 in 'ajantv2/include/ajatypes.h'
+
+							Introduced in SDK 16.0.
+**************************************************************************************************************/
 #if !defined(AJA_USE_CPLUSPLUS11)
 	#define AJA_USE_CPLUSPLUS11  //	If defined, use C++11 features (requires C++11 compiler)
 #endif	//	!defined(AJA_USE_CPLUSPLUS11)
