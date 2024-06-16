@@ -258,17 +258,23 @@ bool CNTV2DriverInterface::OpenRemote (const string & inURLSpec)
 		{DIFAIL("Bad device specification '" << inURLSpec << "': " << specParser.Error()); return false;}
 
 	if (specParser.IsLocalDevice())
-	{	//	Local device?
+	{	//	Local device...
 		CNTV2Card card;
 		if (specParser.HasResult(kConnectParamDevSerial))
-			CNTV2DeviceScanner::GetDeviceWithSerial(specParser.DeviceSerial(), card);
+		{	if (CNTV2DeviceScanner::GetDeviceWithSerial(specParser.DeviceSerial(), card))
+				Open(card.GetIndexNumber());
+		}
 		else if (specParser.HasResult(kConnectParamDevModel))
-			CNTV2DeviceScanner::GetFirstDeviceWithName(specParser.DeviceModel(), card);
+		{	if (CNTV2DeviceScanner::GetFirstDeviceWithName(specParser.DeviceModel(), card))
+				Open(card.GetIndexNumber());
+		}
 		else if (specParser.HasResult(kConnectParamDevID))
-			CNTV2DeviceScanner::GetFirstDeviceWithID(specParser.DeviceID(), card);
+		{	if (CNTV2DeviceScanner::GetFirstDeviceWithID(specParser.DeviceID(), card))
+				Open(card.GetIndexNumber());
+		}
 		else if (specParser.HasResult(kConnectParamDevIndex))
-			CNTV2DeviceScanner::GetDeviceAtIndex(specParser.DeviceIndex(), card);
-		if (!card.IsOpen())
+			Open(specParser.DeviceIndex());
+		if (!IsOpen())
 			{DIFAIL("Failed to open " << specParser.InfoString());  return false;}
 		return Open(card.GetIndexNumber());
 	}
