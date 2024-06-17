@@ -756,7 +756,7 @@ bool ProgramProductCode(Ntv2SystemContext* context)
 			WaitForFlashNOTBusy(context);
 			bankSelectNumber = NTV2DeviceGetSPIFlashVersion(deviceID) >= 5 ? 0x03 : 0x01;
 			ntv2WriteRegister(context, kRegXenaxFlashAddress, bankSelectNumber);
-			ntv2WriteRegister(context, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND);
+			ntv2WriteRegister(context, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMAND);
 			WaitForFlashNOTBusy(context);
 		}
 
@@ -774,7 +774,7 @@ bool ProgramProductCode(Ntv2SystemContext* context)
 			{
 				ntv2Message("CNTV2::InitializeBoard Io4K+ %08X incorrect serial location\n", serialNumber);
 				ntv2WriteRegister(context, kRegXenaxFlashAddress, 0x2);
-				ntv2WriteRegister(context, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND);
+				ntv2WriteRegister(context, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMAND);
 				WaitForFlashNOTBusy(context);
 				ntv2WriteRegister(context, kRegXenaxFlashAddress, baseAddress);
 				ntv2WriteRegister(context, kRegXenaxFlashControlStatus, READFAST_COMMAND);
@@ -790,7 +790,7 @@ bool ProgramProductCode(Ntv2SystemContext* context)
 			WaitForFlashNOTBusy(context);
 			bankSelectNumber = 0x00;
 			ntv2WriteRegister(context, kRegXenaxFlashAddress, bankSelectNumber);
-			ntv2WriteRegister(context, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND);
+			ntv2WriteRegister(context, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMAND);
 			WaitForFlashNOTBusy(context);
 		}
 	}
