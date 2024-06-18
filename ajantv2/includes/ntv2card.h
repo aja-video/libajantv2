@@ -3384,7 +3384,10 @@ public:
 												const NTV2Channel inFrameStore = NTV2_CHANNEL_INVALID);
 	///@}
 
-
+	/**
+		@name	Streaming API
+	**/
+	///@{
 #define NTV2_STREAM_SUCCESS(__status__)  (__status__ == NTV2_STREAM_SUCCESS)
 #define NTV2_STREAM_FAIL(__status__)  (__status__ != NTV2_STREAM_SUCCESS)
 
@@ -3461,9 +3464,7 @@ public:
 	AJA_VIRTUAL ULWord	StreamBufferStatus (const NTV2Channel inChannel,
 											ULWord64 bufferCookie,
 											NTV2StreamBuffer& status);
-
-
-
+	///@}
 
 
 #if defined(READREGMULTICHANGE)

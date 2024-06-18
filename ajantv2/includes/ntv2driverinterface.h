@@ -417,6 +417,7 @@ class AJAExport CNTV2DriverInterface
 		/**
 			@return		True if the requested device feature is supported.
 			@param[in]	inParamID	The NTV2BoolParamID of interest.
+			@see		vidop-features
 		**/
 		AJA_VIRTUAL bool		IsSupported (const NTV2BoolParamID inParamID)	//	New in SDK 17.0
 									{	ULWord value(0);
@@ -426,6 +427,7 @@ class AJAExport CNTV2DriverInterface
 		/**
 			@return		The requested quantity for the given device feature.
 			@param[in]	inParamID	The NTV2NumericParamID of interest.
+			@see		vidop-features
 		**/
 		AJA_VIRTUAL ULWord		GetNumSupported (const NTV2NumericParamID inParamID)	//	New in SDK 17.0
 									{	ULWord value(0);
@@ -436,6 +438,7 @@ class AJAExport CNTV2DriverInterface
 		/**
 			@param[in]	inEnumsID	The NTV2EnumsID of interest.
 			@return		The supported items.
+			@see		vidop-features
 		**/
 		AJA_VIRTUAL ULWordSet	GetSupportedItems (const NTV2EnumsID inEnumsID);	//	New in SDK 17.0
 	///@}
@@ -451,7 +454,7 @@ class AJAExport CNTV2DriverInterface
 												ULWord64 bufferCookie,
 												ULWord flags,
 												NTV2StreamBuffer& status);
-    
+
 	/**
 		@name	Device Ownership
 	**/
