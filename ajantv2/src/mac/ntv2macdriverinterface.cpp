@@ -469,6 +469,7 @@ bool CNTV2MacDriverInterface::WriteRegister (const ULWord inRegNum, const ULWord
 }
 
 
+const uint32_t	kAgentAppFcc (NTV2_FOURCC('A','j','a','A'));
 //--------------------------------------------------------------------------------------------------------------------
 //	AcquireStreamForApplication
 //
@@ -483,6 +484,13 @@ bool CNTV2MacDriverInterface::AcquireStreamForApplication (ULWord appType, int32
 	if (IsRemote())
 		return CNTV2DriverInterface::AcquireStreamForApplication (appType, pid);
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
+	ULWord svcInitialized(0);
+	if (ReadRegister(kVRegServicesInitialized, svcInitialized))
+		if (!svcInitialized)	//	if services have never initialized the device
+			if (appType != kAgentAppFcc)	//	if not AJA Agent
+				DIWARN(::NTV2DeviceIDToString(GetDeviceID()) << "-" << DEC(GetIndexNumber())
+					<< " uninitialized by AJAAgent, requesting app " << xHEX0N(appType,8) << ", pid=" << DEC(pid));
+
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
@@ -546,6 +554,13 @@ bool CNTV2MacDriverInterface::AcquireStreamForApplicationWithReference (ULWord a
 	if (IsRemote())
 		return CNTV2DriverInterface::AcquireStreamForApplicationWithReference (appType, pid);
 #endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
+	ULWord svcInitialized(0);
+	if (ReadRegister(kVRegServicesInitialized, svcInitialized))
+		if (!svcInitialized)	//	if services have never initialized the device
+			if (appType != kAgentAppFcc)	//	if not AJA Agent
+				DIWARN(::NTV2DeviceIDToString(GetDeviceID()) << "-" << DEC(GetIndexNumber())
+					<< " uninitialized by AJAAgent, requesting app " << xHEX0N(appType,8) << ", pid=" << DEC(pid));
+
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;

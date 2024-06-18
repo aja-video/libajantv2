@@ -1003,8 +1003,18 @@ bool CNTV2DriverInterface::ReadFlashULWord (const ULWord inAddress, ULWord & out
 //--------------------------------------------------------------------------------------------------------------------
 //	Application acquire and release stuff
 //--------------------------------------------------------------------------------------------------------------------
+const uint32_t	kAgentAppFcc (NTV2_FOURCC('A','j','a','A'));
+
+
 bool CNTV2DriverInterface::AcquireStreamForApplicationWithReference (const ULWord inAppCode, const int32_t inProcessID)
 {
+	ULWord svcInitialized(0);
+	if (ReadRegister(kVRegServicesInitialized, svcInitialized))
+		if (!svcInitialized)	//	if services have never initialized the device
+			if (inAppCode != kAgentAppFcc)	//	if not AJA Agent
+				DIWARN(::NTV2DeviceIDToString(GetDeviceID()) << "-" << DEC(GetIndexNumber())
+					<< " uninitialized by AJAAgent, requesting app " << xHEX0N(inAppCode,8) << ", pid=" << DEC(inProcessID));
+
 	ULWord currentCode(0), currentPID(0);
 	if (!ReadRegister(kVRegApplicationCode, currentCode) || !ReadRegister(kVRegApplicationPID, currentPID))
 		return false;
@@ -1060,7 +1070,14 @@ bool CNTV2DriverInterface::ReleaseStreamForApplicationWithReference (const ULWor
 
 bool CNTV2DriverInterface::AcquireStreamForApplication (const ULWord inAppCode, const int32_t inProcessID)
 {
-	// Loop for a while trying to acquire the board
+	ULWord svcInitialized(0);
+	if (ReadRegister(kVRegServicesInitialized, svcInitialized))
+		if (!svcInitialized)	//	if services have never initialized the device
+			if (inAppCode != kAgentAppFcc)	//	if not AJA Agent
+				DIWARN(::NTV2DeviceIDToString(GetDeviceID()) << "-" << DEC(GetIndexNumber())
+					<< " uninitialized by AJAAgent, requesting app " << xHEX0N(inAppCode,8) << ", pid=" << DEC(inProcessID));
+
+	//	Loop for a while trying to acquire the board
 	for (int count(0);	count < 20;	 count++)
 	{
 		if (WriteRegister(kVRegApplicationCode, inAppCode))
@@ -1547,9 +1564,11 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanDoAudioDelay:				outValue = ::NTV2DeviceCanDoAudioDelay(devID);						break;	//	Deprecate?
 		case kDeviceCanDoAudioInput:				outValue =	(GetNumSupported(kDeviceGetNumVideoInputs)
 																+ GetNumSupported(kDeviceGetNumHDMIAudioInputChannels)
+																+ GetNumSupported(kDeviceGetNumAESAudioInputChannels)
 																+ GetNumSupported(kDeviceGetNumAnalogAudioInputChannels)) > 0;break;
 		case kDeviceCanDoAudioOutput:				outValue =	(GetNumSupported(kDeviceGetNumVideoOutputs)
 																+ GetNumSupported(kDeviceGetNumHDMIAudioOutputChannels)
+																+ GetNumSupported(kDeviceGetNumAESAudioOutputChannels)
 																+ GetNumSupported(kDeviceGetNumAnalogAudioOutputChannels)) > 0;break;
 		case kDeviceCanDoBreakoutBoard:				outValue = ::NTV2DeviceCanDoBreakoutBoard(devID);					break;
 		case kDeviceCanDoBreakoutBox:				outValue = ::NTV2DeviceCanDoBreakoutBox(devID);						break;
@@ -1657,6 +1676,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceHasSPIv5:						outValue = ::NTV2DeviceGetSPIFlashVersion(devID) == 5;				break;
 		case kDeviceHasXilinxDMA:					outValue = ::NTV2DeviceHasXilinxDMA(devID);							break;
 		case kDeviceCanDoStreamingDMA:				outValue = GetDeviceID() == DEVICE_ID_KONAXM;						break;
+		case kDeviceHasPWMFanControl:				outValue = ::NTV2DeviceHasPWMFanControl(devID);						break;
 		case kDeviceCanDoHDMIQuadRasterConversion:	outValue = (GetNumSupported(kDeviceGetNumHDMIVideoInputs)
 																	||  GetNumSupported(kDeviceGetNumHDMIVideoOutputs))	//	At least 1 HDMI in/out
 																&& (GetDeviceID() != DEVICE_ID_KONAHDMI)				//	Not a KonaHDMI
