@@ -1382,6 +1382,8 @@ bool CNTV2DriverInterface::IsMBSystemReady (void)
 ULWordSet CNTV2DriverInterface::GetSupportedItems (const NTV2EnumsID inEnumsID)
 {
 	ULWordSet result;
+	if (!IsOpen())
+		return result;
 	if (IsRemote()  &&  _pRPCAPI->NTV2GetSupportedRemote (inEnumsID, result))
 		return result;
 	const NTV2DeviceID devID(GetDeviceID());
