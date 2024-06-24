@@ -276,7 +276,7 @@ bool CNTV2DriverInterface::OpenRemote (const string & inURLSpec)
 			Open(specParser.DeviceIndex());
 		if (!IsOpen())
 			{DIFAIL("Failed to open " << specParser.InfoString());  return false;}
-		return Open(card.GetIndexNumber());
+		return true;
 	}
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	DIDBG("Opening " << specParser.InfoString());
