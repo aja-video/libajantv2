@@ -57,6 +57,7 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 //	Plugin Registration Info Keys:
 #define	kNTV2PluginRegInfoKey_Vendor			"Vendor"			///< @brief	Plugin vendor (manufacturer) name
 #define	kNTV2PluginRegInfoKey_CommonName		"CommonName"		///< @brief	Plugin vendor domain name
+#define	kNTV2PluginRegInfoKey_OrgUnit			"OrgUnit"			///< @brief	Plugin organization unit (to match certificate subject OU)
 #define	kNTV2PluginRegInfoKey_ShortName			"ShortName"			///< @brief	Plugin short name
 #define	kNTV2PluginRegInfoKey_LongName			"LongName"			///< @brief	Plugin long name
 #define	kNTV2PluginRegInfoKey_Description		"Description"		///< @brief	Brief plugin description
@@ -69,7 +70,7 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 #define	kNTV2PluginSigFileKey_X509Certificate	"X509Certificate"	///< @brief	X509 certificate (encoded as hex string)
 #define	kNTV2PluginSigFileKey_Signature			"Signature"			///< @brief	X509 digital signature (encoded as hex string)
 
-//	X509 Issuer LDAP Keys:
+//	X509 Certificate Attribute Keys:
 #define	kNTV2PluginX500AttrKey_CommonName				"CN"
 #define	kNTV2PluginX500AttrKey_LocalityName				"L"
 #define	kNTV2PluginX500AttrKey_StateOrProvinceName		"ST"

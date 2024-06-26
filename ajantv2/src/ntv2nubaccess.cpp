@@ -1088,10 +1088,13 @@ void * NTV2Plugin::addressForSymbol (const string & inSymbolName, string & outEr
 	return result;
 }	//	addressForSymbol
 
-/*****************************************************************************************************************************************************
-	PluginRegistry
-*****************************************************************************************************************************************************/
 
+/*****************************************************************************************************************************************************
+	@brief	A singleton that tracks and monitors loaded plugins, and frees them when no one is using them.
+	@bug	This doesn't work on some platforms when libajantv2 is statically linked into the plugin. When
+			the plugin loads, the plugin gets its own separate libajantv2 static globals, and thus, a second
+			set of libajantv2 singletons, including this one.
+*****************************************************************************************************************************************************/
 class PluginRegistry;
 typedef AJARefPtr<PluginRegistry>	PluginRegistryPtr;
 
@@ -1328,10 +1331,8 @@ void PluginRegistry::monitor (void)
 }
 
 /*****************************************************************************************************************************************************
-	NTV2PluginLoader
+	@brief	Knows how to load & validate a plugin
 *****************************************************************************************************************************************************/
-
-//	Class that knows how to load & validate a plugin
 class NTV2PluginLoader
 {
 	public:	//	Instance Methods
@@ -1731,6 +1732,8 @@ bool NTV2PluginLoader::validate (void)
 					cnCert(issuerInfo.valueForKey(kNTV2PluginX500AttrKey_CommonName));
 	const string	onReg(regInfo.valueForKey(kNTV2PluginRegInfoKey_Vendor)),
 					onCert(issuerInfo.valueForKey(kNTV2PluginX500AttrKey_OrganizationName));
+	const string	ouReg(regInfo.valueForKey(kNTV2PluginRegInfoKey_OrgUnit)),
+					ouCert(issuerInfo.valueForKey(kNTV2PluginX500AttrKey_OrgranizationalUnitName));
 	if (onReg != onCert)
 	{	P_FAIL("Vendor name (key='" << kNTV2PluginRegInfoKey_Vendor << "') \"" << onReg << "\" from plugin \""
 				<< pluginPath() << "\" doesn't match organization name (key='" << kNTV2PluginX500AttrKey_OrganizationName
@@ -1741,6 +1744,12 @@ bool NTV2PluginLoader::validate (void)
 	{	P_FAIL("Common name (key='" << kNTV2PluginRegInfoKey_CommonName << "') \"" << cnReg << "\" from plugin \""
 				<< pluginPath() << "\" doesn't match common name (key='" << kNTV2PluginX500AttrKey_CommonName
 				<< "') \"" << cnCert << "\" from X509 certificate in '" << pluginSigPath() << "'");
+		return false;	//	fail
+	}
+	if (ouReg != ouCert)
+	{	P_FAIL("Org unit (key='" << kNTV2PluginRegInfoKey_CommonName << "') \"" << ouReg << "\" from plugin \""
+				<< pluginPath() << "\" doesn't match org unit (key='" << kNTV2PluginX500AttrKey_CommonName
+				<< "') \"" << ouCert << "\" from X509 certificate in '" << pluginSigPath() << "'");
 		return false;	//	fail
 	}
 	mDict.addFrom(regInfo);	//	Add regInfo key/val pairs into 'params'
