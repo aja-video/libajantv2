@@ -1617,7 +1617,7 @@ void EnableDMAInterrupts(ULWord deviceNumber)
 {
 	NTV2PrivateParams *pNTV2Params = getNTV2Params(deviceNumber);
 	ULWord boardID = pNTV2Params->_DeviceID;
-	ULWord numDMAEngines = NTV2GetNumDMAEngines(boardID);
+	ULWord numDMAEngines = NTV2DeviceGetNumDMAEngines(boardID);
 
 	if (numDMAEngines >= 1)
 	{
@@ -1641,7 +1641,7 @@ void DisableDMAInterrupts(ULWord deviceNumber)
 {
 	NTV2PrivateParams *pNTV2Params = getNTV2Params(deviceNumber);
 	ULWord boardID = pNTV2Params->_DeviceID;
-	ULWord numDMAEngines = NTV2GetNumDMAEngines(boardID);
+	ULWord numDMAEngines = NTV2DeviceGetNumDMAEngines(boardID);
 
 	if (numDMAEngines >= 1)
 	{
@@ -2722,7 +2722,7 @@ void StopAllDMAEngines(ULWord deviceNumber)
 	pNTV2Params = getNTV2Params(deviceNumber);
 
 	for (	dmaEngineIdx = 0;
-			dmaEngineIdx < NTV2GetNumDMAEngines(pNTV2Params->_DeviceID);
+			dmaEngineIdx < NTV2DeviceGetNumDMAEngines(pNTV2Params->_DeviceID);
 			dmaEngineIdx++)
 	{
 		// A stop will stop both directions
