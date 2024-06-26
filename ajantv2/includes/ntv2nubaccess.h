@@ -35,7 +35,7 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 //	AJA query params:
 #define	kQParamVerboseLogging	"verbose"		///< @brief	Query parameter option that enables verbose message logging
 #define	kQParamLogToStdout		"stdout"		///< @brief	Query parameter option that logs messages to standard output
-#define	kQParamShowX509Cert		"showx509cert"	///< @brief	Query parameter option that dumps X509 certificate info into message log
+#define	kQParamShowX509Cert		"showcert"		///< @brief	Query parameter option that dumps X509 certificate info into message log
 #define	kQParamShowParams		"showparams"	///< @brief	Query parameter option that dumps parameters into message log
 #define	kQParamDebugRegistry	"debugregistry"	///< @brief	Query parameter option that enables debugging of PluginRegistry
 
