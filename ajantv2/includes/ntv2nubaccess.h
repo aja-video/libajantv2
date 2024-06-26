@@ -222,6 +222,9 @@ class AJAExport NTV2DeviceSpecParser
 **/
 class AJAExport NTV2RPCBase
 {
+	public:
+		static std::string ShortSDKVersion (void);	///< @returns	shortened SDK version string
+
 	protected:
 						NTV2RPCBase (NTV2Dictionary params, uint32_t * pRefCon);
 		virtual			~NTV2RPCBase ();

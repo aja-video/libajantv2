@@ -1717,7 +1717,8 @@ bool NTV2PluginLoader::validate (void)
 	NTV2StringList missingRegInfoKeys;
 	static const NTV2StringList reqKeys = {kNTV2PluginRegInfoKey_Vendor, kNTV2PluginRegInfoKey_CommonName,
 											kNTV2PluginRegInfoKey_ShortName, kNTV2PluginRegInfoKey_LongName,
-											kNTV2PluginRegInfoKey_Description, kNTV2PluginRegInfoKey_Copyright};
+											kNTV2PluginRegInfoKey_Description, kNTV2PluginRegInfoKey_Copyright,
+											kNTV2PluginRegInfoKey_NTV2SDKVersion, kNTV2PluginRegInfoKey_Version};
 	for (size_t ndx(0);  ndx < reqKeys.size();  ndx++)
 		if (!regInfo.hasKey(reqKeys.at(ndx)))
 			missingRegInfoKeys.push_back(reqKeys.at(ndx));
@@ -1727,13 +1728,15 @@ bool NTV2PluginLoader::validate (void)
 		return false;	//	fail
 	}
 
-	//	Check that vendor matches common name in signature...
+	//	All planets must be aligned...
 	const string	cnReg(regInfo.valueForKey(kNTV2PluginRegInfoKey_CommonName)),
 					cnCert(issuerInfo.valueForKey(kNTV2PluginX500AttrKey_CommonName));
 	const string	onReg(regInfo.valueForKey(kNTV2PluginRegInfoKey_Vendor)),
 					onCert(issuerInfo.valueForKey(kNTV2PluginX500AttrKey_OrganizationName));
 	const string	ouReg(regInfo.valueForKey(kNTV2PluginRegInfoKey_OrgUnit)),
 					ouCert(issuerInfo.valueForKey(kNTV2PluginX500AttrKey_OrganizationalUnitName));
+	const string	myVers(NTV2RPCBase::ShortSDKVersion()),
+					plVers(regInfo.valueForKey(kNTV2PluginRegInfoKey_NTV2SDKVersion));
 	if (onReg != onCert)
 	{	P_FAIL("Vendor name (key='" << kNTV2PluginRegInfoKey_Vendor << "') \"" << onReg << "\" from plugin \""
 				<< pluginPath() << "\" doesn't match organization name (key='" << kNTV2PluginX500AttrKey_OrganizationName
@@ -1747,12 +1750,19 @@ bool NTV2PluginLoader::validate (void)
 		return false;	//	fail
 	}
 	if (ouReg != ouCert)
-	{	P_FAIL("Org unit (key='" << kNTV2PluginRegInfoKey_CommonName << "') \"" << ouReg << "\" from plugin \""
-				<< pluginPath() << "\" doesn't match org unit (key='" << kNTV2PluginX500AttrKey_CommonName
+	{	P_FAIL("Org unit (key='" << kNTV2PluginX500AttrKey_OrganizationalUnitName << "') \"" << ouReg << "\" from plugin \""
+				<< pluginPath() << "\" doesn't match org unit (key='" << kNTV2PluginX500AttrKey_OrganizationalUnitName
 				<< "') \"" << ouCert << "\" from X509 certificate in '" << pluginSigPath() << "'");
 		return false;	//	fail
 	}
-	mDict.addFrom(regInfo);	//	Add regInfo key/val pairs into 'params'
+	if (myVers != plVers)
+	{	P_FAIL("SDK version '" << plVers << "' from plugin \"" << pluginPath()
+				<< "\" doesn't match client SDK version '" << myVers << "'");
+		return false;	//	fail
+	}
+
+	//	Green light -- add all published regInfo into param dict shared between client & plugin
+	mDict.addFrom(regInfo);
 	mValidated = true;
 	return true;
 }	//	validate
@@ -1762,15 +1772,15 @@ void * NTV2PluginLoader::getFunctionAddress (const string & inFuncName)
 {
 	//	Load/open the shared library...
 	if (!isOpen())
-		{P_FAIL("'" << pluginPath() << "' not loaded");  return AJA_NULL;}
+		{P_FAIL("'" << inFuncName << "': '" << pluginPath() << "' not loaded");  return AJA_NULL;}
 	if (!isValidated())
-		{P_FAIL("'" << pluginPath() << "' not validated");  return AJA_NULL;}
+		{P_FAIL("'" << inFuncName << "': '" << pluginPath() << "' not validated");  return AJA_NULL;}
 
 	//	Finally, the last step ---- get address of requested function...
 	string errStr;
 	void * pResult = getSymbolAddress(inFuncName, errStr);
 	if (!pResult)
-		{P_FAIL("'" << pluginPath() << "': " << errStr);  return AJA_NULL;}
+		{P_FAIL("'" << inFuncName << "': '" << pluginPath() << "': " << errStr);  return AJA_NULL;}
 	P_DBG("Calling '" << inFuncName << "' in '" << pluginPath() << "'");
 	return pResult;
 }	//	getFunctionAddress
@@ -1837,6 +1847,18 @@ bool NTV2RPCBase::SetParams (const NTV2ConnectParams & inNewParams, const bool i
 	if (mParams.empty())
 		NBSWARN("No params");
 	return true;
+}
+
+string NTV2RPCBase::ShortSDKVersion (void)
+{
+	string result(::NTV2Version());
+	const NTV2StringList halves(aja::split(result, " "));
+	if (halves.empty())
+		return result;
+	NTV2StringList nums(aja::split(halves.front(), "."));
+	while (nums.size() > 3)
+		nums.pop_back();
+	return aja::join(nums, ".");
 }
 
 
