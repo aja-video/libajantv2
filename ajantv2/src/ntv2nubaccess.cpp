@@ -1342,7 +1342,7 @@ class NTV2PluginLoader
 		inline string	pluginSigPath (void) const	{return mDict.valueForKey(kNTV2PluginInfoKey_PluginSigPath);}
 		inline string	pluginsPath (void) const	{return mDict.valueForKey(kNTV2PluginInfoKey_PluginsPath);}
 		inline string	pluginBaseName (void) const	{return mDict.valueForKey(kNTV2PluginInfoKey_PluginBaseName);}
-		inline bool		isValidated (void) const	{return mpPlugin ? true : false;}
+		bool			isValidated (void) const;
 		inline bool		showParams (void) const		{return mQueryParams.hasKey(kQParamShowParams);}
 		void *			refCon (void) const;
 
@@ -1360,6 +1360,7 @@ class NTV2PluginLoader
 		NTV2Dictionary &	mDict;			///< @brief	Writeable access to caller's config/connect dictionary
 		NTV2Dictionary		mQueryParams;	///< @brief	Query parameters
 		NTV2PluginPtr		mpPlugin;		///< @brief	Platform-dependent handle to open plugin .dylib/.dll/.so
+		bool                mValidated;
 
 	protected:	//	Class Methods
 		static bool		ParseQueryParams (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams);
@@ -1371,11 +1372,11 @@ class NTV2PluginLoader
 
 //	Constructor -- peforms all preparatory work: determines which plugin to load, then loads & validates it
 NTV2PluginLoader::NTV2PluginLoader (NTV2Dictionary & params)
-	:	mDict(params)
+	:	mDict(params),
+		mValidated(false)
 {
 	PluginRegistry::EnableDebugging(mDict.hasKey(kQParamDebugRegistry) || PluginRegistry::DebuggingEnabled());
 	AJAAtomic::Increment(&gLoaderConstructCount);
-	mDict.erase(kNTV2PluginInfoKey_IsValidated);	//	start over, assume not validated
 	const NTV2Dictionary originalParams(mDict);
 	if (ParseQueryParams (mDict, mQueryParams)  &&  !mQueryParams.empty())
 		mDict.addFrom(mQueryParams);
@@ -1688,7 +1689,7 @@ bool NTV2PluginLoader::validate (void)
 		return false;
 	}
 	mbedtls_x509_crt_free(&crt);	//	Done using the mbedtls_x509_crt struct
-	P_DBG("'" << pluginPath() << "' is properly signed");
+	P_DBG("'mbedtls_pk_verify' succeeded for '" << pluginPath() << "' -- signature valid");
 
 	//	Load/open the shared library...
 	if (!mpPlugin)
@@ -1743,7 +1744,7 @@ bool NTV2PluginLoader::validate (void)
 		return false;	//	fail
 	}
 	mDict.addFrom(regInfo);	//	Add regInfo key/val pairs into 'params'
-	mDict.insert(kNTV2PluginInfoKey_IsValidated, "Yes");	//	Plugin has been validated
+	mValidated = true;
 	return true;
 }	//	validate
 
@@ -1764,6 +1765,11 @@ void * NTV2PluginLoader::getFunctionAddress (const string & inFuncName)
 	P_DBG("Calling '" << inFuncName << "' in '" << pluginPath() << "'");
 	return pResult;
 }	//	getFunctionAddress
+
+bool NTV2PluginLoader::isValidated (void) const
+{
+	return mpPlugin  &&  mValidated;
+}
 
 void DumpLoadedPlugins (void)
 {

@@ -53,7 +53,6 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 #define	kNTV2PluginInfoKey_PluginPath			"PluginPath"		///< @brief	Local host full path to plugin file
 #define	kNTV2PluginInfoKey_PluginSigPath		"PluginSigPath"		///< @brief	Local host full path to plugin signature file
 #define	kNTV2PluginInfoKey_PluginBaseName		"PluginBaseName"	///< @brief	Plugin base name (i.e. without extension)
-#define	kNTV2PluginInfoKey_IsValidated			"IsValidated"		///< @brief	If this key exists, plugin has been validated
 
 //	Plugin Registration Info Keys:
 #define	kNTV2PluginRegInfoKey_Vendor			"Vendor"			///< @brief	Plugin vendor (manufacturer) name

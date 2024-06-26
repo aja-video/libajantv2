@@ -1549,7 +1549,7 @@ bool NTV2Buffer::Truncate (const size_t inNewByteCount)
 		return false;	//	Cannot enlarge -- i.e. can't be greater than my current size
 	if (!inNewByteCount  &&  IsAllocatedBySDK())
 		return Deallocate();	//	A newByteCount of zero calls Deallocate
-	fByteCount = inNewByteCount;
+	fByteCount = ULWord(inNewByteCount);
 	return true;
 }
 
@@ -1799,7 +1799,7 @@ bool NTV2Buffer::SetFromHexString (const string & inStr)
 
 	//	Decode and copy in the data...
 	for (size_t srcNdx(0), dstNdx(0);  srcNdx < str.size();  srcNdx += 2)
-		U8(dstNdx++) = uint8_t(aja::stoul (str.substr(srcNdx,2), AJA_NULL, 16));
+		U8(int(dstNdx++)) = uint8_t(aja::stoul (str.substr(srcNdx,2), AJA_NULL, 16));
 
 	return true;
 }

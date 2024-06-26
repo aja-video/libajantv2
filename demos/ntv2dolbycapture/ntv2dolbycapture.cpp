@@ -124,8 +124,8 @@ AJAStatus NTV2DolbyCapture::Init (void)
 				<< "' on '" << mDevice.GetDisplayName() << "'" << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
-	if (mConfig.fWithAnc  &&  !mDevice.features().CanDoCustomAnc())
-		{cerr << "## ERROR: Anc capture requested, but '" << mDevice.GetDisplayName() << "' has no anc extractors";  return AJA_STATUS_UNSUPPORTED;}
+	if (!mConfig.fAncDataFilePath.empty()  &&  !mDevice.features().CanDoHDMIAuxCapture())
+		{cerr << "## ERROR: HDMI aux capture requested, but '" << mDevice.GetDisplayName() << "' has no HDMI aux extractors" << endl;  return AJA_STATUS_UNSUPPORTED;}
 
 	//	Set up the video and audio...
 	status = SetupVideo();
@@ -307,9 +307,9 @@ void NTV2DolbyCapture::ConsumeFrames (void)
 	uint64_t ancTally(0);
 	uint64_t audioTally(0);
 	uint64_t dolbyTally(0);
-	ofstream * pOFS(mConfig.fWithAnc ? new ofstream(mConfig.fAncDataFilePath.c_str(), ios::binary) : AJA_NULL);
-	ofstream * pAFS(mConfig.fWithAudio ? new ofstream(mConfig.fAudioDataFilePath.c_str(), ios::binary) : AJA_NULL);
-	ofstream * pDFS(mConfig.fWithDolby ? new ofstream(mConfig.fDolbyDataFilePath.c_str(), ios::binary) : AJA_NULL);
+	ofstream * pOFS(mConfig.fAncDataFilePath.empty() ? AJA_NULL : new ofstream(mConfig.fAncDataFilePath.c_str(), ios::binary));
+	ofstream * pAFS(mConfig.fAudioDataFilePath.empty() ? AJA_NULL : new ofstream(mConfig.fAudioDataFilePath.c_str(), ios::binary));
+	ofstream * pDFS(mConfig.fDolbyDataFilePath.empty() ? AJA_NULL : new ofstream(mConfig.fDolbyDataFilePath.c_str(), ios::binary));
 	while (!mGlobalQuit)
 	{
 		//	Wait for the next frame to become ready to "consume"...
@@ -320,7 +320,7 @@ void NTV2DolbyCapture::ConsumeFrames (void)
 			//	. . .		. . .		. . .		. . .
 			//		. . .		. . .		. . .		. . .
 			//			. . .		. . .		. . .		. . .
-			if (mConfig.fDoFrameData && pFrameData->AncBuffer())
+			if (mConfig.fDoFrameStats && pFrameData->AncBuffer())
 			{
 				uint8_t* pData = (uint8_t*)pFrameData->AncBuffer().GetHostAddress(0);
 				uint32_t i;
@@ -330,11 +330,10 @@ void NTV2DolbyCapture::ConsumeFrames (void)
 							break;
 				}
 				uint32_t audioSize = RecoverAudio(pFrameData->AncBuffer(), pFrameData->AncBufferSize() /*pFrameData->NumCapturedAncBytes()*/, pFrameData->AudioBuffer());
-				printf("f1 size reg %d  ffs %d  samples %d\n", pFrameData->NumCapturedAncBytes(), i, audioSize/4);
-				fflush(stdout);
+				cout << "f1 size reg " << DEC(pFrameData->NumCapturedAncBytes()) << "  ffs " << DEC(i) << "  samples " << DEC(audioSize/4) << endl << flush;
 			}
 
-			if (mConfig.fDoFrameData && /*!mProgressive &&*/ pFrameData->AncBuffer2())
+			if (mConfig.fDoFrameStats && /*!mProgressive &&*/ pFrameData->AncBuffer2())
 			{
 				uint8_t* pData = (uint8_t*)pFrameData->AncBuffer2().GetHostAddress(0);
 				uint32_t i;
@@ -344,8 +343,7 @@ void NTV2DolbyCapture::ConsumeFrames (void)
 							break;
 				}
 				uint32_t audioSize = RecoverAudio(pFrameData->AncBuffer2(), pFrameData->AncBuffer2Size() /*pFrameData->NumCapturedAnc2Bytes()*/, pFrameData->AudioBuffer());
-				printf("f2 size reg %d  ffs %d  samples %d\n", pFrameData->NumCapturedAnc2Bytes(), i, audioSize/4);
-				fflush(stdout);
+				cout << "f2 size reg " << DEC(pFrameData->NumCapturedAnc2Bytes()) << "  ffs " << DEC(i) << "  samples " << DEC(audioSize/4) << endl << flush;
 			}
 
 			if (pOFS && pFrameData->AncBuffer())
@@ -540,162 +538,160 @@ void NTV2DolbyCapture::GetACStatus (ULWord & outGoodFrames, ULWord & outDroppedF
 	outBufferLevel   = status.GetBufferLevel();
 }
 
-uint32_t NTV2DolbyCapture::RecoverAudio(NTV2Buffer & anc, uint32_t ancSize, NTV2Buffer & audio)
+uint32_t NTV2DolbyCapture::RecoverAudio (const NTV2Buffer & inAncBuffer, const uint32_t ancSize, NTV2Buffer & outAudioBuffer)
 {
-	uint8_t* audioData = (uint8_t*)audio.GetHostAddress(0);
-	uint32_t audioSize = 0;
-	uint8_t* ancData = (uint8_t*)anc.GetHostAddress(0);
+	const uint8_t * pInAncData(inAncBuffer);
+	uint8_t * pOutAudioData(outAudioBuffer);
+	uint32_t audioSize(0);
 
-	// extract the first 16 bit stereo pair from the aux data
-	for (uint32_t i = 0; i < ancSize/32; i++)
+	//	Extract first 16-bit stereo pair from the aux data
+	for (uint32_t num(0);  num < ancSize / 32;  num++)
 	{
-		// audio data aux packet?
-		if (ancData[0] == 0x02)
+		//	Audio data aux packet?
+		if (pInAncData[0] == 0x02)
 		{
-			// first sample present?
-			if ((ancData[1] & 0x01) != 0)
+			//	First sample present?
+			if ((pInAncData[1] & 0x01))
 			{
-				// first sample flat?
-				if ((ancData[2] & 0x01) != 0)
+				//	First sample flat?
+				if ((pInAncData[2] & 0x01))
 				{
-					*audioData++ = 0;
-					*audioData++ = 0;
-					*audioData++ = 0;
-					*audioData++ = 0;
+					*pOutAudioData++ = 0;
+					*pOutAudioData++ = 0;
+					*pOutAudioData++ = 0;
+					*pOutAudioData++ = 0;
 				}
 				else
 				{
-					*audioData++ = ancData[4];
-					*audioData++ = ancData[5];
-					*audioData++ = ancData[7];
-					*audioData++ = ancData[8];
+					*pOutAudioData++ = pInAncData[4];
+					*pOutAudioData++ = pInAncData[5];
+					*pOutAudioData++ = pInAncData[7];
+					*pOutAudioData++ = pInAncData[8];
 				}
 				audioSize += 4;
-			}
-			// only 2 channels?
-			if ((ancData[1] & 0x10) == 0)
+			}	//	if first sample present
+
+			//	Only 2 channels?
+			if ((pInAncData[1] & 0x10) == 0)
 			{
-				// second sample present?
-				if ((ancData[1] & 0x02) != 0)
+				//	Second sample present?
+				if ((pInAncData[1] & 0x02))
 				{
-					// second sampel flat?
-					if ((ancData[2] & 0x02) != 0)
+					//	Second sample flat?
+					if ((pInAncData[2] & 0x02))
 					{
-						*audioData++ = 0;
-						*audioData++ = 0;
-						*audioData++ = 0;
-						*audioData++ = 0;
+						*pOutAudioData++ = 0;
+						*pOutAudioData++ = 0;
+						*pOutAudioData++ = 0;
+						*pOutAudioData++ = 0;
 					}
 					else
 					{
-						*audioData++ = ancData[11];
-						*audioData++ = ancData[12];
-						*audioData++ = ancData[14];
-						*audioData++ = ancData[15];
+						*pOutAudioData++ = pInAncData[11];
+						*pOutAudioData++ = pInAncData[12];
+						*pOutAudioData++ = pInAncData[14];
+						*pOutAudioData++ = pInAncData[15];
 					}
 					audioSize += 4;
 				}
-				// third sample present?
-				if ((ancData[1] & 0x04) != 0)
-				{
-					// third sample flat?
-					if ((ancData[2] & 0x04) != 0)
-					{
-						*audioData++ = 0;
-						*audioData++ = 0;
-						*audioData++ = 0;
-						*audioData++ = 0;
-					}
-					else
-					{
-						*audioData++ = ancData[18];
-						*audioData++ = ancData[19];
-						*audioData++ = ancData[21];
-						*audioData++ = ancData[22];
-					}
-					audioSize += 4;
-				}
-				// fourth sample present?
-				if ((ancData[1] & 0x08) != 0)
-				{
-					// fourth sample flat?
-					if ((ancData[2] & 0x08) != 0)
-					{
-						*audioData++ = 0;
-						*audioData++ = 0;
-						*audioData++ = 0;
-						*audioData++ = 0;
-					}
-					else
-					{
-						*audioData++ = ancData[25];
-						*audioData++ = ancData[26];
-						*audioData++ = ancData[28];
-						*audioData++ = ancData[29];
-					}
-					audioSize += 4;
-				}
-			}
-		}
-		ancData += 32;
-	}
 
+				//	Third sample present?
+				if ((pInAncData[1] & 0x04))
+				{
+					//	Third sample flat?
+					if ((pInAncData[2] & 0x04))
+					{
+						*pOutAudioData++ = 0;
+						*pOutAudioData++ = 0;
+						*pOutAudioData++ = 0;
+						*pOutAudioData++ = 0;
+					}
+					else
+					{
+						*pOutAudioData++ = pInAncData[18];
+						*pOutAudioData++ = pInAncData[19];
+						*pOutAudioData++ = pInAncData[21];
+						*pOutAudioData++ = pInAncData[22];
+					}
+					audioSize += 4;
+				}
+
+				//	Fourth sample present?
+				if ((pInAncData[1] & 0x08))
+				{
+					//	Fourth sample flat?
+					if ((pInAncData[2] & 0x08))
+					{
+						*pOutAudioData++ = 0;
+						*pOutAudioData++ = 0;
+						*pOutAudioData++ = 0;
+						*pOutAudioData++ = 0;
+					}
+					else
+					{
+						*pOutAudioData++ = pInAncData[25];
+						*pOutAudioData++ = pInAncData[26];
+						*pOutAudioData++ = pInAncData[28];
+						*pOutAudioData++ = pInAncData[29];
+					}
+					audioSize += 4;
+				}	//	if 4th sample present
+			}	//	if only 2 channels
+		}	//	if audio data aux packet
+		pInAncData += 32;
+	}	//	for loop
 	return audioSize;
-}
+}	//	RecoverAudio
 
-uint32_t NTV2DolbyCapture::RecoverDolby(NTV2Buffer & audio, uint32_t audioSize, NTV2Buffer & dolby)
+uint32_t NTV2DolbyCapture::RecoverDolby (const NTV2Buffer & inAudioBuffer, const uint32_t inAudioSize, NTV2Buffer & outDolbyBuffer)
 {
-	uint16_t* dolbyData = (uint16_t*)dolby.GetHostAddress(0);
-	uint32_t dolbySize = 0;
-	uint16_t* audioData = (uint16_t*)audio.GetHostAddress(0);
+	const uint16_t * pInAudioData(inAudioBuffer);
+	uint16_t * pOutDolbyData(outDolbyBuffer);
+	uint32_t dolbySize(0);
 
-	// extract the dolby frames from the IEC61937 bursts
-	for (uint32_t i = 0; i < audioSize / 2; i++)
+	//	Extract the dolby frames from the IEC61937 bursts...
+	for (uint32_t cnt(0);  cnt < inAudioSize / 2;  cnt++)
 	{
 		switch (mDolbyState)
 		{
-		// find IEC61937 burst preamble
-		case 0:
-			mDolbyState = (*audioData == 0xf872)? 1 : 0;
-			break;
-		case 1:
-			mDolbyState = (*audioData == 0x4e1f)? 2 : 0;
-			break;
-		// check dolby code
-		case 2:
-			mDolbyState = ((*audioData & 0xff) == 0x15)? 3 : 0;
-			break;
-		// get burst length
-		case 3:
-			mDolbyLength = (uint32_t)*audioData / 2;
-			mDolbyState = 4;
-			break;
-		// copy dolby samples
-		case 4:
-			if (mDolbyLength > 0)
-			{
-				if (dolbySize < dolby.GetByteCount() / 2)
-				{
-					// endian swap the data
-					*dolbyData = (*audioData >> 8) & 0xff;
-					*dolbyData |= (*audioData & 0xff) << 8;
-					dolbyData++;
-					dolbySize++;
-					mDolbyLength--;
-				}
-			}
-			else
-			{
-				mDolbyState = 0;
-			}
-			break;
-		default:
-			mDolbyState = 0;
-			break;
-		}
-		audioData++;
-	}
+			//	Find IEC61937 burst preamble
+			case 0:		mDolbyState = (*pInAudioData == 0xf872) ? 1 : 0;
+						break;
 
+			case 1:		mDolbyState = (*pInAudioData == 0x4e1f) ? 2 : 0;
+						break;
+
+			//	Check dolby code
+			case 2:		mDolbyState = ((*pInAudioData & 0xff) == 0x15) ? 3 : 0;
+						break;
+
+			//	Get burst length
+			case 3:		mDolbyLength = uint32_t(*pInAudioData / 2);
+						mDolbyState = 4;
+						break;
+
+			//	Copy dolby samples
+			case 4:		if (mDolbyLength)
+						{
+							if (dolbySize < outDolbyBuffer.GetByteCount() / 2)
+							{
+								//	Endian swap the data...
+								*pOutDolbyData = (*pInAudioData >> 8) & 0xff;
+								*pOutDolbyData |= (*pInAudioData & 0xff) << 8;
+								pOutDolbyData++;
+								dolbySize++;
+								mDolbyLength--;
+							}
+						}
+						else
+							mDolbyState = 0;
+						break;
+
+			default:	mDolbyState = 0;
+						break;
+		}	//	switch
+		pInAudioData++;
+	}	//	for loop
 	return dolbySize * 2;
 }
 
@@ -705,17 +701,9 @@ uint32_t NTV2DolbyCapture::RecoverDolby(NTV2Buffer & audio, uint32_t audioSize, 
 
 AJALabelValuePairs DolbyCaptureConfig::Get (const bool inCompact) const
 {
-	AJALabelValuePairs result;
-	AJASystemInfo::append(result, "Capture Config");
-	AJASystemInfo::append(result, "Device Specifier",	fDeviceSpec);
-	AJASystemInfo::append(result, "Input Channel",		::NTV2ChannelToString(fInputChannel, inCompact));
-	AJASystemInfo::append(result, "Input Source",		::NTV2InputSourceToString(fInputSource, inCompact));
-	AJASystemInfo::append(result, "Pixel Format",		::NTV2FrameBufferFormatToString(fPixelFormat, inCompact));
-	AJASystemInfo::append(result, "AutoCirc Frames",	fFrames.toString());
-	AJASystemInfo::append(result, "MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
-	AJASystemInfo::append(result, "Anc Capture File",	fAncDataFilePath);
-	AJASystemInfo::append(result, "Audio Capture File",	fAudioDataFilePath);
-	AJASystemInfo::append(result, "Dolby Capture File",	fDolbyDataFilePath);
+	AJALabelValuePairs result(CaptureConfig::Get(inCompact));
+	AJASystemInfo::append(result,	"Audio Capture File",	fAudioDataFilePath.empty() ? "---" : fAudioDataFilePath);
+	AJASystemInfo::append(result,	"Dolby Capture File",	fDolbyDataFilePath.empty() ? "---" : fDolbyDataFilePath);
 	return result;
 }
 

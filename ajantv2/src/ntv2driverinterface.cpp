@@ -258,19 +258,25 @@ bool CNTV2DriverInterface::OpenRemote (const string & inURLSpec)
 		{DIFAIL("Bad device specification '" << inURLSpec << "': " << specParser.Error()); return false;}
 
 	if (specParser.IsLocalDevice())
-	{	//	Local device?
+	{	//	Local device...
 		CNTV2Card card;
 		if (specParser.HasResult(kConnectParamDevSerial))
-			CNTV2DeviceScanner::GetDeviceWithSerial(specParser.DeviceSerial(), card);
+		{	if (CNTV2DeviceScanner::GetDeviceWithSerial(specParser.DeviceSerial(), card))
+				Open(card.GetIndexNumber());
+		}
 		else if (specParser.HasResult(kConnectParamDevModel))
-			CNTV2DeviceScanner::GetFirstDeviceWithName(specParser.DeviceModel(), card);
+		{	if (CNTV2DeviceScanner::GetFirstDeviceWithName(specParser.DeviceModel(), card))
+				Open(card.GetIndexNumber());
+		}
 		else if (specParser.HasResult(kConnectParamDevID))
-			CNTV2DeviceScanner::GetFirstDeviceWithID(specParser.DeviceID(), card);
+		{	if (CNTV2DeviceScanner::GetFirstDeviceWithID(specParser.DeviceID(), card))
+				Open(card.GetIndexNumber());
+		}
 		else if (specParser.HasResult(kConnectParamDevIndex))
-			CNTV2DeviceScanner::GetDeviceAtIndex(specParser.DeviceIndex(), card);
-		if (!card.IsOpen())
+			Open(specParser.DeviceIndex());
+		if (!IsOpen())
 			{DIFAIL("Failed to open " << specParser.InfoString());  return false;}
-		return Open(card.GetIndexNumber());
+		return true;
 	}
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
 	DIDBG("Opening " << specParser.InfoString());
@@ -997,8 +1003,18 @@ bool CNTV2DriverInterface::ReadFlashULWord (const ULWord inAddress, ULWord & out
 //--------------------------------------------------------------------------------------------------------------------
 //	Application acquire and release stuff
 //--------------------------------------------------------------------------------------------------------------------
+const uint32_t	kAgentAppFcc (NTV2_FOURCC('A','j','a','A'));
+
+
 bool CNTV2DriverInterface::AcquireStreamForApplicationWithReference (const ULWord inAppCode, const int32_t inProcessID)
 {
+	ULWord svcInitialized(0);
+	if (ReadRegister(kVRegServicesInitialized, svcInitialized))
+		if (!svcInitialized)	//	if services have never initialized the device
+			if (inAppCode != kAgentAppFcc)	//	if not AJA Agent
+				DIWARN(::NTV2DeviceIDToString(GetDeviceID()) << "-" << DEC(GetIndexNumber())
+					<< " uninitialized by AJAAgent, requesting app " << xHEX0N(inAppCode,8) << ", pid=" << DEC(inProcessID));
+
 	ULWord currentCode(0), currentPID(0);
 	if (!ReadRegister(kVRegApplicationCode, currentCode) || !ReadRegister(kVRegApplicationPID, currentPID))
 		return false;
@@ -1054,7 +1070,14 @@ bool CNTV2DriverInterface::ReleaseStreamForApplicationWithReference (const ULWor
 
 bool CNTV2DriverInterface::AcquireStreamForApplication (const ULWord inAppCode, const int32_t inProcessID)
 {
-	// Loop for a while trying to acquire the board
+	ULWord svcInitialized(0);
+	if (ReadRegister(kVRegServicesInitialized, svcInitialized))
+		if (!svcInitialized)	//	if services have never initialized the device
+			if (inAppCode != kAgentAppFcc)	//	if not AJA Agent
+				DIWARN(::NTV2DeviceIDToString(GetDeviceID()) << "-" << DEC(GetIndexNumber())
+					<< " uninitialized by AJAAgent, requesting app " << xHEX0N(inAppCode,8) << ", pid=" << DEC(inProcessID));
+
+	//	Loop for a while trying to acquire the board
 	for (int count(0);	count < 20;	 count++)
 	{
 		if (WriteRegister(kVRegApplicationCode, inAppCode))
@@ -1359,6 +1382,8 @@ bool CNTV2DriverInterface::IsMBSystemReady (void)
 ULWordSet CNTV2DriverInterface::GetSupportedItems (const NTV2EnumsID inEnumsID)
 {
 	ULWordSet result;
+	if (!IsOpen())
+		return result;
 	if (IsRemote()  &&  _pRPCAPI->NTV2GetSupportedRemote (inEnumsID, result))
 		return result;
 	const NTV2DeviceID devID(GetDeviceID());
@@ -1541,9 +1566,11 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceCanDoAudioDelay:				outValue = ::NTV2DeviceCanDoAudioDelay(devID);						break;	//	Deprecate?
 		case kDeviceCanDoAudioInput:				outValue =	(GetNumSupported(kDeviceGetNumVideoInputs)
 																+ GetNumSupported(kDeviceGetNumHDMIAudioInputChannels)
+																+ GetNumSupported(kDeviceGetNumAESAudioInputChannels)
 																+ GetNumSupported(kDeviceGetNumAnalogAudioInputChannels)) > 0;break;
 		case kDeviceCanDoAudioOutput:				outValue =	(GetNumSupported(kDeviceGetNumVideoOutputs)
 																+ GetNumSupported(kDeviceGetNumHDMIAudioOutputChannels)
+																+ GetNumSupported(kDeviceGetNumAESAudioOutputChannels)
 																+ GetNumSupported(kDeviceGetNumAnalogAudioOutputChannels)) > 0;break;
 		case kDeviceCanDoBreakoutBoard:				outValue = ::NTV2DeviceCanDoBreakoutBoard(devID);					break;
 		case kDeviceCanDoBreakoutBox:				outValue = ::NTV2DeviceCanDoBreakoutBox(devID);						break;
@@ -1651,6 +1678,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceHasSPIv5:						outValue = ::NTV2DeviceGetSPIFlashVersion(devID) == 5;				break;
 		case kDeviceHasXilinxDMA:					outValue = ::NTV2DeviceHasXilinxDMA(devID);							break;
 		case kDeviceCanDoStreamingDMA:				outValue = GetDeviceID() == DEVICE_ID_KONAXM;						break;
+		case kDeviceHasPWMFanControl:				outValue = ::NTV2DeviceHasPWMFanControl(devID);						break;
 		case kDeviceCanDoHDMIQuadRasterConversion:	outValue = (GetNumSupported(kDeviceGetNumHDMIVideoInputs)
 																	||  GetNumSupported(kDeviceGetNumHDMIVideoOutputs))	//	At least 1 HDMI in/out
 																&& (GetDeviceID() != DEVICE_ID_KONAHDMI)				//	Not a KonaHDMI
