@@ -75,7 +75,7 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 #define	kNTV2PluginX500AttrKey_LocalityName				"L"
 #define	kNTV2PluginX500AttrKey_StateOrProvinceName		"ST"
 #define	kNTV2PluginX500AttrKey_OrganizationName			"O"
-#define	kNTV2PluginX500AttrKey_OrgranizationalUnitName	"OU"
+#define	kNTV2PluginX500AttrKey_OrganizationalUnitName	"OU"
 #define	kNTV2PluginX500AttrKey_CountryName				"C"
 
 

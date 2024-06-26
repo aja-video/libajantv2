@@ -1733,7 +1733,7 @@ bool NTV2PluginLoader::validate (void)
 	const string	onReg(regInfo.valueForKey(kNTV2PluginRegInfoKey_Vendor)),
 					onCert(issuerInfo.valueForKey(kNTV2PluginX500AttrKey_OrganizationName));
 	const string	ouReg(regInfo.valueForKey(kNTV2PluginRegInfoKey_OrgUnit)),
-					ouCert(issuerInfo.valueForKey(kNTV2PluginX500AttrKey_OrgranizationalUnitName));
+					ouCert(issuerInfo.valueForKey(kNTV2PluginX500AttrKey_OrganizationalUnitName));
 	if (onReg != onCert)
 	{	P_FAIL("Vendor name (key='" << kNTV2PluginRegInfoKey_Vendor << "') \"" << onReg << "\" from plugin \""
 				<< pluginPath() << "\" doesn't match organization name (key='" << kNTV2PluginX500AttrKey_OrganizationName
