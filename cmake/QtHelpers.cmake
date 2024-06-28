@@ -132,6 +132,12 @@ function(aja_deploy_qt_libs target)
             install(FILES $<TARGET_FILE_DIR:${target}>/qtlibs DESTINATION ${CMAKE_INSTALL_BINDIR})
             install(FILES $<TARGET_FILE_DIR:${target}>/plugins DESTINATION ${CMAKE_INSTALL_BINDIR})
             install(FILES $<TARGET_FILE_DIR:${target}>/qt.conf DESTINATION ${CMAKE_INSTALL_BINDIR})
+			install(FILES $<TARGET_FILE_DIR:${target}>/libexec/QtWebEngineProcess
+					PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+					DESTINATION ${CMAKE_INSTALL_BINDIR}/libexec/
+					OPTIONAL)
+			install(FILES $<TARGET_FILE_DIR:${target}>/resources DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL)
+			install(FILES $<TARGET_FILE_DIR:${target}>/translations DESTINATION ${CMAKE_INSTALL_BINDIR} OPTIONAL)
         else()
             message(STATUS "WARNING -- AJA Linux Deploy Qt script not found: ${_lin_deploy_qt_path}")
         endif()
@@ -209,6 +215,12 @@ function(aja_deploy_qt_libs_to_dest target dest)
 			install(FILES $<TARGET_FILE_DIR:${target}>/qtlibs DESTINATION ${dest})
 			install(FILES $<TARGET_FILE_DIR:${target}>/plugins DESTINATION ${dest})
 			install(FILES $<TARGET_FILE_DIR:${target}>/qt.conf DESTINATION ${dest})
+			install(FILES $<TARGET_FILE_DIR:${target}>/libexec/QtWebEngineProcess
+					PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+					DESTINATION ${dest}/libexec/
+					OPTIONAL)
+			install(FILES $<TARGET_FILE_DIR:${target}>/resources DESTINATION ${dest} OPTIONAL)
+			install(FILES $<TARGET_FILE_DIR:${target}>/translations DESTINATION ${dest} OPTIONAL)
         else()
             message(STATUS "WARNING -- AJA Linux Deploy Qt script not found: ${_lin_deploy_qt_path}")
         endif()
