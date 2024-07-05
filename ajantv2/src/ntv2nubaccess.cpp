@@ -991,7 +991,7 @@ bool NTV2Plugin::LoadPlugin (const string & path, const string & folderPath, NTV
 		aja::string_to_wstring(folderPath, dllsFolderW);
 		if (!AddDllDirectory(dllsFolderW.c_str()))
 		{
-			P_FAIL("AddDllDirectory '" << path << "' failed: " << WinErrStr(::GetLastError()));
+			loadErr << "AddDllDirectory '" << path << "' failed: " << WinErrStr(::GetLastError());
 			return false;
 		}	//	AddDllDirectory failed
 		HMODULE h = ::LoadLibraryExA(LPCSTR(path.c_str()), AJA_NULL, LOAD_LIBRARY_SEARCH_USER_DIRS);
@@ -1033,7 +1033,11 @@ NTV2Plugin & NTV2Plugin::operator = (const NTV2Plugin & rhs)
 	return *this;
 }
 
+#if defined(MSWindows)
+NTV2Plugin::NTV2Plugin (HMODULE handle, const string & path, const bool inUseStdout)
+#else
 NTV2Plugin::NTV2Plugin (void * handle, const string & path, const bool inUseStdout)
+#endif
 	:	mHandle(handle),
 		mPath(path)
 {

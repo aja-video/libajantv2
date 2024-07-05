@@ -52,44 +52,49 @@ if (AJANTV2_DISABLE_PLUGIN_LOAD)
 else()
     message(STATUS "NTV2 SDK will load signed 3rd-party plugins")
 
-    set(ENABLE_TESTING OFF)
-    set(LIB_INSTALL_DIR ${CMAKE_INSTALL_FULL_LIBDIR})
+    set(MBEDTLS_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/mbedtls-install)
+    set(MBEDTLS_INCLUDE_DIR ${MBEDTLS_INSTALL_DIR}/include)
+    set(MBEDTLS_LIBRARY_DIR ${MBEDTLS_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR})
 
-    set(MBEDTLS_INCLUDE_DIR ${CMAKE_BINARY_DIR}/mbedtls/src/mbedtls/include)
-    set(MBEDTLS_LIBRARY_DIR ${CMAKE_BINARY_DIR}/mbedtls/src/mbedtls-build/library)
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         set(MBEDTLS_LIBRARY ${MBEDTLS_LIBRARY_DIR}/mbedtls.lib)
         set(MBEDX509_LIBRARY ${MBEDTLS_LIBRARY_DIR}/mbedx509.lib)
         set(MBEDCRYPTO_LIBRARY ${MBEDTLS_LIBRARY_DIR}/mbedcrypto.lib)
+        set(MBEDTLS_EXTRA_CONFIG_FLAGS
+                "-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=ON"
+                "-DMSVC_STATIC_RUNTIME=ON"
+                "-DCMAKE_MSVC_RUNTIME_LIBRARY=${CMAKE_MSVC_RUNTIME_LIBRARY}")
     elseif (CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin)$")
         set(MBEDTLS_LIBRARY ${MBEDTLS_LIBRARY_DIR}/libmbedtls.a)
         set(MBEDX509_LIBRARY ${MBEDTLS_LIBRARY_DIR}/libmbedx509.a)
         set(MBEDCRYPTO_LIBRARY ${MBEDTLS_LIBRARY_DIR}/libmbedcrypto.a)
-        set(MBEDTLS_CXX_FLAGS -fPIC)
         set(MBEDTLS_C_FLAGS -fPIC)
     endif()
 
     # BUILD_BYPRODUCTS informing CMake where the .a files are located is required to make Ninja build work
     ExternalProject_Add(
         mbedtls
-        PREFIX ${CMAKE_BINARY_DIR}/mbedtls
-        GIT_REPOSITORY https://github.com/Mbed-TLS/mbedtls.git
-        GIT_TAG v3.6.0
-        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} 
-                   -DENABLE_TESTING=OFF 
-                   -DENABLE_PROGRAMS=OFF
-                   -DCMAKE_CXX_FLAGS=${MBEDTLS_CXX_FLAGS}
-                   -DCMAKE_C_FLAGS=${MBEDTLS_C_FLAGS}
+        GIT_REPOSITORY https://github.com/aja-video/mbedtls.git
+        GIT_TAG fix-win-dll-cmake
+        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${MBEDTLS_INSTALL_DIR}
+                    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+                    -DENABLE_TESTING=OFF 
+                    -DENABLE_PROGRAMS=OFF
+                    -DCMAKE_C_FLAGS=${MBEDTLS_C_FLAGS}
+                    -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}
+                    -DUSE_STATIC_MBEDTLS_LIBRARY=ON
+                    -DUSE_SHARED_MBEDTLS_LIBRARY=OFF
+                    ${MBEDTLS_EXTRA_CONFIG_FLAGS}
         BUILD_ALWAYS TRUE
         BUILD_BYPRODUCTS ${MBEDTLS_LIBRARY} ${MBEDX509_LIBRARY} ${MBEDCRYPTO_LIBRARY}
     )
 
     list(APPEND TARGET_INCLUDE_DIRS
             ${MBEDTLS_INCLUDE_DIR})
-    list(APPEND TARGET_LINK_LIBS
+    list(APPEND MBEDTLS_LINK_LIBS
             ${MBEDTLS_LIBRARY}
-            ${MBEDX509_LIBRARY}
-            ${MBEDCRYPTO_LIBRARY})
+            ${MBEDCRYPTO_LIBRARY}
+            ${MBEDX509_LIBRARY})
 endif()
 
 
@@ -535,7 +540,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     list(APPEND TARGET_LINK_LIBS
         advapi32 comctl32 netapi32
         odbc32 psapi rpcrt4 setupapi shell32
-        shlwapi user32 wbemuuid winmm ws2_32 wsock32)
+        shlwapi user32 wbemuuid winmm ws2_32 wsock32 bcrypt)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     list(APPEND TARGET_COMPILE_DEFS
         -DAJASTATIC)
@@ -714,6 +719,11 @@ if (NOT TARGET ${PROJECT_NAME})
     target_link_libraries(${PROJECT_NAME} PRIVATE ${TARGET_LINK_LIBS})
     target_link_libraries(${PROJECT_NAME} INTERFACE
         "$<BUILD_INTERFACE:${TARGET_LINK_LIBS}>")
+
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${MBEDTLS_LINK_LIBS})
+    target_link_libraries(${PROJECT_NAME} INTERFACE
+        "$<BUILD_INTERFACE:${MBEDTLS_LINK_LIBS}>")
+
 
 	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 		aja_get_msvc_tools_version()
