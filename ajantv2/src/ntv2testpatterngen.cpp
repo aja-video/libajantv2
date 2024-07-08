@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 /**
-	@file		testpatterngen.cpp
+	@file		ntv2testpatterngen.cpp
 	@brief		Contains the implementation of the NTV2TestPatternGen class.
 	@copyright	(C) 2010-2022 AJA Video Systems, Inc.
 **/
