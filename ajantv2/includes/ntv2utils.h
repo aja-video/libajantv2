@@ -538,6 +538,12 @@ AJAExport bool					IsTransportCompatibleFormat (const NTV2VideoFormat inFormat1,
 							Defaults to ::NTV2_INPUTSOURCES_SDI.
 **/
 AJAExport NTV2InputSource		GetNTV2InputSourceForIndex (const ULWord inIndex0, const NTV2IOKinds inKinds = NTV2_IOKINDS_SDI);
+
+/**
+	@return		The NTV2IOKinds classification of the given ::NTV2InputSource, or ::NTV2_IOKINDS_NONE upon failure.
+	@param[in]	inSrc		Specifies the input source of interest.
+**/
+AJAExport NTV2IOKinds			GetNTV2InputSourceKind (const NTV2InputSource inSrc);
 AJAExport ULWord				GetIndexForNTV2InputSource (const NTV2InputSource inValue);		//	0-based index
 
 /**
