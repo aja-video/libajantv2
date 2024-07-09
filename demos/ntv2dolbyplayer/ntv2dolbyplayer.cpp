@@ -1415,7 +1415,7 @@ silence:
 	memset(&pInAudioBuffer[sampleOffset * numChannels], 0, (numSamples - sampleOffset) * numChannels * 4);
 	return numSamples * numChannels * 4;
 }
-#endif	//	DOLBY_FULL_PARSER
+#endif	//	else DOLBY_FULL_PARSER
 
 AJALabelValuePairs DolbyPlayerConfig::Get (const bool inCompact) const
 {

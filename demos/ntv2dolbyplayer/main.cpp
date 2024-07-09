@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 /**
-	@file		ntv2dolby/main.cpp
+	@file		ntv2dolbyplayer/main.cpp
 	@brief		Demonstration application that uses AutoCirculate to playout video and Doly audio to HDMI.
 	@copyright	(C) 2012-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
@@ -161,7 +161,7 @@ int main (int argc, const char ** argv)
 				<< setw(9) << outputStatus.GetDroppedFrameCount()
 				<< setw(9) << outputStatus.GetBufferLevel() << "\r" << flush;
 		AJATime::Sleep(2000);
-	} while (player.IsRunning () && !gGlobalQuit);	//	loop til done
+	} while (player.IsRunning() && !gGlobalQuit);	//	loop til done
 
 	cout << endl;
 	return 0;
