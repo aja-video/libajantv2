@@ -1701,7 +1701,11 @@ bool AJAAncillaryList::StripNativeInserterGUMPPackets (const NTV2Buffer & inSrc,
 				uncopied	= 0;
 			}
 			else
-				{ptr++; i++; uncopied++;}
+			{
+				ptr			+= payloadSize + kGUMPHeaderSize; 
+				i			+= payloadSize + kGUMPHeaderSize;
+				uncopied	+= payloadSize + kGUMPHeaderSize;
+			}
 		}
 		else
 			{ptr++; i++; uncopied++;}
