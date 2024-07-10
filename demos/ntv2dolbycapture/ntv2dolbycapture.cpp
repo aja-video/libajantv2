@@ -115,9 +115,6 @@ AJAStatus NTV2DolbyCapture::Init (void)
 		mConfig.fInputChannel = ::NTV2InputSourceToChannel(mConfig.fInputSource);
 	else if (NTV2_IS_VALID_CHANNEL(mConfig.fInputChannel)  &&  !NTV2_IS_VALID_INPUT_SOURCE(mConfig.fInputSource))
 		mConfig.fInputSource = ::NTV2ChannelToInputSource(mConfig.fInputChannel, NTV2_IOKINDS_HDMI);
-	//	On KonaHDMI, map specified SDI input to equivalent HDMI input...
-	if (mDevice.features().GetNumHDMIVideoInputs() > 1  &&  NTV2_INPUT_SOURCE_IS_HDMI(mConfig.fInputSource))
-		mConfig.fInputSource = ::NTV2ChannelToInputSource(::NTV2InputSourceToChannel(mConfig.fInputSource), NTV2_IOKINDS_HDMI);
 	if (!mDevice.features().CanDoInputSource(mConfig.fInputSource))
 	{
 		cerr	<< "## ERROR:  No such input '" << ::NTV2InputSourceToString(mConfig.fInputSource, /*compact?*/true)
@@ -166,10 +163,12 @@ AJAStatus NTV2DolbyCapture::SetupVideo (void)
 	//	Determine the input video signal format...
 	mVideoFormat = mDevice.GetInputVideoFormat(mConfig.fInputSource);
 	if (mVideoFormat == NTV2_FORMAT_UNKNOWN)
-		{cerr << "## ERROR:  No input signal or unknown format" << endl;  return AJA_STATUS_NOINPUT;}
+	{	cerr << "## ERROR:  No input signal or unknown format on '" << ::NTV2InputSourceToString(mConfig.fInputSource, true)
+				<< "'" << endl;
+		return AJA_STATUS_NOINPUT;
+	}
 	if (!mDevice.features().CanDoVideoFormat(mVideoFormat))
-	{
-		cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' cannot handle " << ::NTV2VideoFormatToString(mVideoFormat) << endl;
+	{	cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' cannot handle " << ::NTV2VideoFormatToString(mVideoFormat) << endl;
 		return AJA_STATUS_UNSUPPORTED;	//	Device can't handle this format
 	}
 	CAPNOTE(::NTV2VideoFormatToString(mVideoFormat) << " detected on " << ::NTV2InputSourceToString(mConfig.fInputSource,true) << " on " << mDevice.GetDisplayName());
@@ -190,7 +189,6 @@ AJAStatus NTV2DolbyCapture::SetupVideo (void)
 		mDevice.SetTsiFrameEnable(false, mConfig.fInputChannel);
 		mDevice.SetFrameBufferFormat (mConfig.fInputChannel, mConfig.fPixelFormat);
 	}
-
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetupVideo

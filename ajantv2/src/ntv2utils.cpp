@@ -5297,6 +5297,18 @@ NTV2InputSource GetNTV2InputSourceForIndex (const ULWord inIndex0, const NTV2IOK
 }
 
 
+NTV2IOKinds GetNTV2InputSourceKind (const NTV2InputSource inSrc)
+{
+	if (NTV2_INPUT_SOURCE_IS_SDI(inSrc))
+		return NTV2_IOKINDS_SDI;
+	if (NTV2_INPUT_SOURCE_IS_HDMI(inSrc))
+		return NTV2_IOKINDS_HDMI;
+	if (NTV2_INPUT_SOURCE_IS_ANALOG(inSrc))
+		return NTV2_IOKINDS_ANALOG;
+	return NTV2_IOKINDS_NONE;
+}
+
+
 NTV2InputSource GetNTV2HDMIInputSourceForIndex (const ULWord inIndex0)	//	NTV2_SHOULD_BE_DEPRECATED
 {
 	return ::GetNTV2InputSourceForIndex(inIndex0, NTV2_IOKINDS_HDMI);

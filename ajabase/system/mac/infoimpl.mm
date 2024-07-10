@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 /**
-	@file		mac/infoimpl.cpp
+	@file		mac/infoimpl.mm
 	@brief		Implements the AJASystemInfoImpl class on the Mac platform.
 	@copyright	(C) 2009-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
