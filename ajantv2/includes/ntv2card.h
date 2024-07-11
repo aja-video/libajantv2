@@ -157,7 +157,7 @@ public:
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoDSKMode (const NTV2DSKMode inDSKM));	///< @deprecated	This function is obsolete. Do not use it.
 	AJA_VIRTUAL NTV2_DEPRECATED_f(bool DeviceCanDoInputSource (const NTV2InputSource inSrc));	///< @deprecated	Use DeviceCapabilities::CanDoInputSource instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool DeviceCanDoAudioMixer(void)) {return IsSupported(kDeviceCanDoAudioMixer);}	///< @deprecated	Use CNTV2DriverInterface::IsSupported with kDeviceCanDoAudioMixer instead.
-	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool DeviceIsDNxIV(void)) {return DeviceHasMicInput();}	///< @deprecated	Use DeviceCapabilities::IsDNxIV instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool DeviceIsDNxIV(void)) {return IsSupported(kDeviceHasMicrophoneInput);}	///< @deprecated	Use DeviceCapabilities::IsDNxIV instead.
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool DeviceHasMicInput(void)) {return IsSupported(kDeviceHasMicrophoneInput);}	///< @deprecated	Call DeviceCapabilities::HasMicInput via CNTV2Card::features or call CNTV2DriverInterface::IsSupported using ::kDeviceHasMicrophoneInput
 #endif	//	defined(NTV2_DEPRECATE_16_3)
 	AJA_VIRTUAL ULWord DeviceGetNumberFrameBuffers(void);
