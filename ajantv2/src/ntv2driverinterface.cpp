@@ -186,14 +186,42 @@ bool CNTV2DriverInterface::Open (const UWord inDeviceIndex)
 bool CNTV2DriverInterface::Open (const string & inURLSpec)
 {
 	Close();
-	if (OpenRemote(inURLSpec))
-	{
-		FinishOpen();
-		AJAAtomic::Increment(&gOpenCount);
-		DIDBGX(DEC(gOpenCount) << " opens, " << DEC(gCloseCount) << " closes");
+	NTV2_ASSERT(_pRPCAPI == AJA_NULL);
+	const NTV2DeviceSpecParser specParser (inURLSpec);
+	if (specParser.HasErrors())
+		{DIFAIL("Bad device specification '" << inURLSpec << "': " << specParser.Error()); return false;}
+
+	//	URLSpecs can specify locally-attached devices...
+	if (specParser.IsLocalDevice())
+	{	//	Local device...
+		CNTV2Card card;
+		if (specParser.HasResult(kConnectParamDevSerial))
+		{	if (CNTV2DeviceScanner::GetDeviceWithSerial(specParser.DeviceSerial(), card))
+				Open(card.GetIndexNumber());
+		}
+		else if (specParser.HasResult(kConnectParamDevModel))
+		{	if (CNTV2DeviceScanner::GetFirstDeviceWithName(specParser.DeviceModel(), card))
+				Open(card.GetIndexNumber());
+		}
+		else if (specParser.HasResult(kConnectParamDevID))
+		{	if (CNTV2DeviceScanner::GetFirstDeviceWithID(specParser.DeviceID(), card))
+				Open(card.GetIndexNumber());
+		}
+		else if (specParser.HasResult(kConnectParamDevIndex))
+			Open(specParser.DeviceIndex());
+		if (!IsOpen())
+			{DIFAIL("Failed to open " << specParser.InfoString());  return false;}
 		return true;
 	}
-	return false;
+
+	//	Open the remote/virtual device...
+	if (!OpenRemote(specParser))
+		return false;	//	Failed to open
+
+	FinishOpen();
+	AJAAtomic::Increment(&gOpenCount);
+	DIDBGX(DEC(gOpenCount) << " opens, " << DEC(gCloseCount) << " closes");
+	return true;
 }
 
 bool CNTV2DriverInterface::Close (void)
@@ -246,55 +274,45 @@ bool CNTV2DriverInterface::CloseLocalPhysical (void)
 	}
 #endif	//	AJA_WINDOWS
 
-bool CNTV2DriverInterface::OpenRemote (const string & inURLSpec)
+
+bool CNTV2DriverInterface::OpenRemote (const NTV2DeviceSpecParser & inParser)
 {
 #if defined(AJA_WINDOWS)
 	initWinsock();
 #endif	//	defined(AJA_WINDOWS)
 	NTV2_ASSERT(!IsOpen()); //	Must be closed!
-	_pRPCAPI = AJA_NULL;
-	NTV2DeviceSpecParser specParser (inURLSpec);
-	if (specParser.HasErrors())
-		{DIFAIL("Bad device specification '" << inURLSpec << "': " << specParser.Error()); return false;}
+	NTV2_ASSERT(_pRPCAPI == AJA_NULL);
 
-	if (specParser.IsLocalDevice())
-	{	//	Local device...
-		CNTV2Card card;
-		if (specParser.HasResult(kConnectParamDevSerial))
-		{	if (CNTV2DeviceScanner::GetDeviceWithSerial(specParser.DeviceSerial(), card))
-				Open(card.GetIndexNumber());
-		}
-		else if (specParser.HasResult(kConnectParamDevModel))
-		{	if (CNTV2DeviceScanner::GetFirstDeviceWithName(specParser.DeviceModel(), card))
-				Open(card.GetIndexNumber());
-		}
-		else if (specParser.HasResult(kConnectParamDevID))
-		{	if (CNTV2DeviceScanner::GetFirstDeviceWithID(specParser.DeviceID(), card))
-				Open(card.GetIndexNumber());
-		}
-		else if (specParser.HasResult(kConnectParamDevIndex))
-			Open(specParser.DeviceIndex());
-		if (!IsOpen())
-			{DIFAIL("Failed to open " << specParser.InfoString());  return false;}
-		return true;
-	}
 #if defined(NTV2_NUB_CLIENT_SUPPORT)
-	DIDBG("Opening " << specParser.InfoString());
+	if (inParser.Failed())
+		{ostringstream errs; inParser.PrintErrors(errs); DIFAIL("Bad parser: " << errs.str());  return false;}
+	if (inParser.IsLocalDevice())
+		{DIFAIL("Parser infers local device: " << inParser.InfoString());  return false;}
+
 	//	Remote or software device:
-	NTV2Dictionary connectParams(specParser.Results());
-	_pRPCAPI = NTV2RPCClientAPI::CreateClient(connectParams);
-	if (!_pRPCAPI)
+	DIDBG("Opening " << inParser.InfoString());
+	NTV2Dictionary connectParams(inParser.Results());
+	NTV2RPCAPI * pClient (NTV2RPCClientAPI::CreateClient(connectParams));
+	if (!pClient)
 		return false;	//	Failed to instantiate plugin client
-	//	A plugin's constructor might call its NTV2Connect method right away...
-	if (IsRemote()  &&  !_pRPCAPI->IsConnected())	//	... but if it doesn't...
-		_pRPCAPI->NTV2Connect();					//	... connect now
-	if (IsRemote())
-		_boardOpened = ReadRegister(kRegBoardID, _boardID)  &&  _boardID  &&  _boardID != 0xFFFFFFFF;	//	Try reading its kRegBoardID
+
+	//	Before SDK 17.1, the plugin's NTV2Connect was commonly called from its constructor.
+	//	After SDK 17.1, we prefer it be OpenRemote's responsibility, to allow tools like
+	//	NTV2Watcher to probe the plugin in stages through its NTV2RPCClient interface.
+	if (!pClient->IsConnected())
+		if (!pClient->NTV2Connect())
+			{DIFAIL("Failed to connect/open '" << inParser.DeviceSpec() << "'");  delete pClient;}
+
+	//	Traditionally, NTV2 devices always had a hardware identity: its _boardID as read from reg 50.
+	//	This is problematic for virtual devices that have no hardware corollary.
+	//	For now, continue to read _boardID from reg 50, and call it "open" if successful...
+	_pRPCAPI = pClient;
+	_boardOpened = ReadRegister(kRegBoardID, _boardID)  &&  _boardID  &&  _boardID != 0xFFFFFFFF;	//	Try reading its kRegBoardID
 	if (!IsRemote() || !IsOpen())
-		DIFAIL("Failed to open '" << inURLSpec << "'");
+		DIFAIL("Failed to open '" << inParser.DeviceSpec() << "'");
 	return IsRemote() && IsOpen();	//	Fail if not remote nor open
 #else	//	NTV2_NUB_CLIENT_SUPPORT
-	DIFAIL("SDK built without 'NTV2_NUB_CLIENT_SUPPORT' -- cannot OpenRemote '" << inURLSpec << "'");
+	DIFAIL("SDK built without 'NTV2_NUB_CLIENT_SUPPORT' -- cannot OpenRemote '" << inParser.DeviceSpec() << "'");
 	return false;
 #endif	//	NTV2_NUB_CLIENT_SUPPORT
 }	//	OpenRemote
