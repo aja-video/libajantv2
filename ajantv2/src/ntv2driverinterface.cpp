@@ -289,25 +289,33 @@ bool CNTV2DriverInterface::OpenRemote (const NTV2DeviceSpecParser & inParser)
 	if (inParser.IsLocalDevice())
 		{DIFAIL("Parser infers local device: " << inParser.InfoString());  return false;}
 
-	//	Remote or software device:
-	DIDBG("Opening " << inParser.InfoString());
 	NTV2Dictionary connectParams(inParser.Results());
+	//	This "connectParams" dictionary has keys/values that determine which plugin to load,
+	//	and any other configuration parameters specified by the caller. This dictionary is
+	//	modified during the call to "CreateClient" (below) by an NTV2PluginLoader that loads,
+	//	interrogates and validates the plugin.  Several new keys/values are added to it during
+	//	this process that describe the plugin, its signature, and any query parameters it
+	//	requires or accepts for further configuration.
+	DIDBG("Opening " << inParser.InfoString());
 	NTV2RPCAPI * pClient (NTV2RPCClientAPI::CreateClient(connectParams));
 	if (!pClient)
 		return false;	//	Failed to instantiate plugin client
 
-	//	Before SDK 17.1, the plugin's NTV2Connect was commonly called from its constructor.
-	//	After SDK 17.1, we prefer it be OpenRemote's responsibility, to allow tools like
-	//	NTV2Watcher to probe the plugin in stages through its NTV2RPCClient interface.
+	//	At this point, the plugin's NTV2RPCAPI object exists, but may or may not be useable,
+	//	depending on if it's "IsConnected". Before SDK 17.1, the plugin's NTV2Connect function
+	//	was commonly called directly from its constructor. After SDK 17.1.0, OpenRemote is
+	//	responsible for calling NTV2Connect, to allow tools like NTV2Watcher to probe the
+	//	plugin in stages via its client interface.
 	if (!pClient->IsConnected())
 		if (!pClient->NTV2Connect())
 			{DIFAIL("Failed to connect/open '" << inParser.DeviceSpec() << "'");  delete pClient;}
 
-	//	Traditionally, NTV2 devices always had a hardware identity: its _boardID as read from reg 50.
-	//	This is problematic for virtual devices that have no hardware corollary.
-	//	For now, continue to read _boardID from reg 50, and call it "open" if successful...
+	//	NTV2 physical devices always have a hardware identity -- the NTV2DeviceID read from register 50.
+	//	This plugin device is considered "open" if ReadRegister is successful, and returns a non-zero
+	//	value that's also not DEVICE_ID_NOTFOUND. (Virtual/software devices that have no NTV2 hardware
+	//	corollary should return DEVICE_ID_SOFTWARE.)
 	_pRPCAPI = pClient;
-	_boardOpened = ReadRegister(kRegBoardID, _boardID)  &&  _boardID  &&  _boardID != 0xFFFFFFFF;	//	Try reading its kRegBoardID
+	_boardOpened = ReadRegister(kRegBoardID, _boardID)  &&  _boardID  &&  _boardID != DEVICE_ID_NOTFOUND;
 	if (!IsRemote() || !IsOpen())
 		DIFAIL("Failed to open '" << inParser.DeviceSpec() << "'");
 	return IsRemote() && IsOpen();	//	Fail if not remote nor open
