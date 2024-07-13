@@ -31,15 +31,15 @@
 	#include <dlfcn.h>
 	#define	DLL_EXTENSION	".so"
 	#define PATH_DELIMITER	"/"
-	#define	FIRMWARE_FOLDER	"firmware" PATH_DELIMITER
+	#define	FIRMWARE_FOLDER	"firmware"
 #elif defined(MSWindows)
 	#define	DLL_EXTENSION	".dll"
 	#define PATH_DELIMITER	"\\"
-	#define	FIRMWARE_FOLDER	"Firmware" PATH_DELIMITER
+	#define	FIRMWARE_FOLDER	"Firmware"
 #elif defined(AJABareMetal)
 	#define	DLL_EXTENSION	".so"
 	#define PATH_DELIMITER	"/"
-	#define	FIRMWARE_FOLDER	"firmware" PATH_DELIMITER
+	#define	FIRMWARE_FOLDER	"firmware"
 #endif
 #define	SIG_EXTENSION	".sig"
 
