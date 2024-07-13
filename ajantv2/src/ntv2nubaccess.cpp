@@ -11,7 +11,6 @@
 #include "ntv2version.h"
 #include "ajabase/system/debug.h"
 #include "ajabase/common/common.h"
-#include "ajabase/system/info.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/system/thread.h"
 #include <iomanip>
@@ -27,7 +26,7 @@
 	#include <dlfcn.h>
 	#define	DLL_EXTENSION	".dylib"
 	#define PATH_DELIMITER	"/"
-	#define	FIRMWARE_FOLDER	"Firmware" PATH_DELIMITER
+	#define	FIRMWARE_FOLDER	"Firmware"
 #elif defined(AJALinux)
 	#include <dlfcn.h>
 	#define	DLL_EXTENSION	".so"
@@ -1550,13 +1549,13 @@ bool NTV2PluginLoader::getPluginsFolder (string & outPath) const
 		{outPath = pluginsPath();  return true;}	//	already known, assumed to be good
 
 	//	Plugins are expected to be in the "aja" folder (the parent folder of the "aja/firmware" folder)...
-	AJASystemInfo sysInfo (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path);
-	if (AJA_FAILURE(sysInfo.GetValue(AJA_SystemInfoTag_Path_Firmware, outPath)))
-		{P_FAIL("AJA_SystemInfoTag_Path_Firmware failed");  return false;}	//	Can't get firmware folder
+	outPath = ::NTV2GetFirmwareFolderPath();
+	if (outPath.empty())
+		return false;
 	PLGDBG("AJA firmware path is '" << outPath << "'");
 	if (outPath.find(FIRMWARE_FOLDER) == string::npos)
 		{P_FAIL("'" << outPath << "' doesn't end with '" << FIRMWARE_FOLDER << "'");  outPath.clear(); return false;}
-	outPath.erase(outPath.find(FIRMWARE_FOLDER), 9);		//	Lop off trailing "Firmware/"
+	outPath.erase(outPath.find(FIRMWARE_FOLDER), 9);		//	Lop off trailing "Firmware"
 	mDict.insert(kNTV2PluginInfoKey_PluginsPath, outPath);	//	Store it in 'PluginsPath'
 	if (outPath.back() == PATH_DELIMITER[0])
 		outPath.erase(outPath.length() - 1, 1);	//	Lop off trailing path delimiter
