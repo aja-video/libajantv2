@@ -18,7 +18,7 @@ if [ -z ${INSTALL_HEADERS} ]; then INSTALL_HEADERS=ON; fi
 if [ -z ${INSTALL_SOURCES} ]; then INSTALL_SOURCES=ON; fi
 if [ -z ${INSTALL_CMAKE} ]; then INSTALL_CMAKE=ON; fi
 if [ -z ${INSTALL_MISC} ]; then INSTALL_MISC=ON; fi
-if [ -z ${QT_ENABLED} ]; then QT_ENABLED=ON; fi
+if [ -z ${DISABLE_QT} ]; then DISABLE_QT=OFF; fi
 if [ -z ${QT_DEPLOY} ]; then QT_DEPLOY=ON; fi
 
 echo Configured Options:
@@ -40,7 +40,7 @@ echo INSTALL_HEADERS: $INSTALL_HEADERS
 echo INSTALL_SOURCES: $INSTALL_SOURCES
 echo INSTALL_CMAKE: $INSTALL_CMAKE
 echo INSTALL_MISC: $INSTALL_MISC
-echo QT_ENABLED: $QT_ENABLED
+echo DISABLE_QT: $DISABLE_QT
 echo QT_DEPLOY: $QT_DEPLOY
 echo -------------------
 
@@ -68,7 +68,7 @@ echo "Generating build targets"
         -DAJA_INSTALL_SOURCES="$INSTALL_SOURCES" \
         -DAJA_INSTALL_CMAKE="$INSTALL_CMAKE" \
         -DAJA_INSTALL_MISC="$INSTALL_MISC" \
-        -DAJA_QT_ENABLED="$QT_ENABLED" \
+        -DAJA_DISABLE_QT="$DISABLE_QT" \
         -DAJA_QT_DEPLOY="$QT_DEPLOY""
 
 if [ "$?" != 0 ]; then

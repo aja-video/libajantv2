@@ -338,3 +338,10 @@ bool ntv2WriteVirtRegCon32(Ntv2SystemContext* context, uint32_t regNum, uint32_t
 	return true;
 }
 
+bool ntv2WriteXlnxRegCon32(Ntv2SystemContext* context, uint32_t regNum, uint32_t data)
+{
+	if (context == NULL) return 0;
+	WriteXlnxRegister(context->devNum, regNum, data);
+	return true;
+}
+

@@ -104,26 +104,3 @@ install(TARGETS ${PROJECT_NAME}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-if (AJA_INSTALL_SOURCES)
-    list(REMOVE_ITEM NTV2STREAMPREVIEW_SOURCES win-ver.rc)
-    install(FILES ${AJA_LIB_GUI_ROOT}/ajaapplication.qrc
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajainternal/gui)
-    install(FILES ${NTV2STREAMPREVIEW_HEADERS} 
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2streampreview)
-    install(FILES ${NTV2STREAMPREVIEW_SOURCES}
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2streampreview)
-endif()
-if (AJA_INSTALL_CMAKE)
-    install(FILES CMakeLists.txt
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2streampreview)
-endif()
-if (AJA_INSTALL_MISC)
-    install(FILES Makefile
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2streampreview)
-    install(FILES app.icns
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2streampreview)
-    install(FILES app.ico
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2streampreview)
-    install(FILES splash.png
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2streampreview)
-endif()

@@ -152,6 +152,11 @@ class NTV2LLBurn
 		uint32_t			mFramesProcessed;		///< @brief My count of the number of burned frames produced
 		uint32_t			mFramesDropped;			///< @brief My count of the number of dropped frames
 
+		uint32_t			mInputStartFrame;	///< @brief The input starting frame to use
+		uint32_t			mInputEndFrame;		///< @brief The input ending frame to use
+		uint32_t			mOutputStartFrame;	///< @brief The output starting frame to use
+		uint32_t			mOutputEndFrame;	///< @brief The output ending frame to use
+
 };	//	NTV2LLBurn
 
 #endif	//	_NTV2LLBURN_H

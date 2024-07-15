@@ -32,5 +32,6 @@ void ntv2_setup_close(struct ntv2_setup *ntv2_setterupper);
 Ntv2Status ntv2_setup_configure(struct ntv2_setup *ntv2_setterupper);
 Ntv2Status ntv2_setup_enable(struct ntv2_setup *ntv2_setterupper);
 Ntv2Status ntv2_setup_disable(struct ntv2_setup *ntv2_setterupper);
-
+void ntv2_setup_monitor_shared(void* data);
 #endif
+

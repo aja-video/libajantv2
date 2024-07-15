@@ -32,6 +32,13 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 #define	kConnectParamResource	"ResourcePath"	///< @brief	Resource path -- everything past URL [scheme://host[:port]/], excluding [?query]
 #define	kConnectParamQuery		"Query"			///< @brief	Query -- everything past '?' in URL
 
+//	AJA query params:
+#define	kQParamVerboseLogging	"verbose"		///< @brief	Query parameter option that enables verbose message logging
+#define	kQParamLogToStdout		"stdout"		///< @brief	Query parameter option that logs messages to standard output
+#define	kQParamShowX509Cert		"showcert"		///< @brief	Query parameter option that dumps X509 certificate info into message log
+#define	kQParamShowParams		"showparams"	///< @brief	Query parameter option that dumps parameters into message log
+#define	kQParamDebugRegistry	"debugregistry"	///< @brief	Query parameter option that enables debugging of PluginRegistry
+
 //	Local URL schemes:
 #define	kLegalSchemeNTV2		"ntv2"
 #define	kLegalSchemeNTV2Local	"ntv2local"
@@ -46,11 +53,11 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 #define	kNTV2PluginInfoKey_PluginPath			"PluginPath"		///< @brief	Local host full path to plugin file
 #define	kNTV2PluginInfoKey_PluginSigPath		"PluginSigPath"		///< @brief	Local host full path to plugin signature file
 #define	kNTV2PluginInfoKey_PluginBaseName		"PluginBaseName"	///< @brief	Plugin base name (i.e. without extension)
-#define	kNTV2PluginInfoKey_IsValidated			"IsValidated"		///< @brief	If this key exists, plugin has been validated
 
 //	Plugin Registration Info Keys:
 #define	kNTV2PluginRegInfoKey_Vendor			"Vendor"			///< @brief	Plugin vendor (manufacturer) name
 #define	kNTV2PluginRegInfoKey_CommonName		"CommonName"		///< @brief	Plugin vendor domain name
+#define	kNTV2PluginRegInfoKey_OrgUnit			"OrgUnit"			///< @brief	Plugin organization unit (to match certificate subject OU)
 #define	kNTV2PluginRegInfoKey_ShortName			"ShortName"			///< @brief	Plugin short name
 #define	kNTV2PluginRegInfoKey_LongName			"LongName"			///< @brief	Plugin long name
 #define	kNTV2PluginRegInfoKey_Description		"Description"		///< @brief	Brief plugin description
@@ -63,12 +70,12 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 #define	kNTV2PluginSigFileKey_X509Certificate	"X509Certificate"	///< @brief	X509 certificate (encoded as hex string)
 #define	kNTV2PluginSigFileKey_Signature			"Signature"			///< @brief	X509 digital signature (encoded as hex string)
 
-//	X509 Issuer LDAP Keys:
+//	X509 Certificate Attribute Keys:
 #define	kNTV2PluginX500AttrKey_CommonName				"CN"
 #define	kNTV2PluginX500AttrKey_LocalityName				"L"
 #define	kNTV2PluginX500AttrKey_StateOrProvinceName		"ST"
 #define	kNTV2PluginX500AttrKey_OrganizationName			"O"
-#define	kNTV2PluginX500AttrKey_OrgranizationalUnitName	"OU"
+#define	kNTV2PluginX500AttrKey_OrganizationalUnitName	"OU"
 #define	kNTV2PluginX500AttrKey_CountryName				"C"
 
 
@@ -215,14 +222,18 @@ class AJAExport NTV2DeviceSpecParser
 **/
 class AJAExport NTV2RPCBase
 {
-	protected:
-		NTV2RPCBase (NTV2Dictionary params, uint32_t * pRefCon);
-		virtual ~NTV2RPCBase ();
+	public:
+		static std::string ShortSDKVersion (void);	///< @returns	shortened SDK version string
 
 	protected:
-		NTV2Dictionary	mParams;	///< @brief	Copy of config params passed to my constructor
-		mutable AJALock	mParamLock;	///< @brief	Mutex to protect mParams
-		uint32_t *		mpRefCon;	///< @brief	Reserved for internal use
+						NTV2RPCBase (NTV2Dictionary params, uint32_t * pRefCon);
+		virtual			~NTV2RPCBase ();
+		bool			SetParams (const NTV2ConfigParams & inNewParams, const bool inAugment = false);
+
+	protected:
+		NTV2Dictionary	mParams;		///< @brief	Copy of config params passed to my constructor
+		mutable AJALock	mParamLock;		///< @brief	Mutex to protect mParams
+		uint32_t *		mpRefCon;		///< @brief	Reserved for internal use
 };	//	NTV2RPCBase
 
 
@@ -241,8 +252,12 @@ class AJAExport NTV2RPCBase
 class AJAExport NTV2RPCClientAPI : public NTV2RPCBase
 {
 	public:
+		/**
+			@brief		Instantiates a new NTV2RPCClientAPI instance using the given ::NTV2ConnectParams.
+			@returns	A pointer to the new instance, or nullptr upon failure.
+			@param		inParams	A non-const reference to the NTV2ConnectParams dictionary.
+		**/
 		static NTV2RPCClientAPI *	CreateClient (NTV2ConnectParams & inParams);
-		static bool					ParseQueryParams (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams);	//	New in SDK 17.1
 
 	public:
 		/**
@@ -272,7 +287,7 @@ class AJAExport NTV2RPCClientAPI : public NTV2RPCBase
 		virtual bool				HasConnectParam (const std::string & inParam) const;	///< @return	True if I have the given connect parameter
 		virtual std::string			ConnectParam (const std::string & inParam) const;	///< @return	The given connect parameter (or empty string if missing)
 		virtual bool				ConnectHasScheme (void) const;	///< @return	True if connect params contains a scheme
-		virtual bool				SetConnectParams (const NTV2ConnectParams & inNewParams, const bool inAugment = false);	///< @brief	Replaces or adds to my connect parameters
+		virtual inline bool			SetConnectParams (const NTV2ConnectParams & inNewParams, const bool inAugment = false) {return !IsConnected() && SetParams(inNewParams, inAugment);}	///< @brief	Replaces or adds to my connect parameters
 		///@}
 
 		/**
@@ -382,7 +397,7 @@ class AJAExport NTV2RPCServerAPI : public NTV2RPCBase
 		virtual NTV2ConfigParams	ConfigParams (void) const;	///< @return	My config parameters
 		virtual bool				HasConfigParam (const std::string & inParam) const;	///< @return	True if I have the given config parameter
 		virtual std::string			ConfigParam (const std::string & inParam) const;	///< @return	The given config parameter (or empty string if missing)
-		virtual bool				SetConfigParams (const NTV2ConfigParams & inNewParams, const bool inAugment = false);	///< @brief	Replaces or adds to my config parameters
+		virtual inline bool			SetConfigParams (const NTV2ConfigParams & inNewParams, const bool inAugment = false) {return SetParams(inNewParams, inAugment);}	///< @brief	Replaces or adds to my config parameters
 		///@}
 
 		/**

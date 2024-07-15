@@ -11,7 +11,6 @@
 #include "ntv2version.h"
 #include "ajabase/system/debug.h"
 #include "ajabase/common/common.h"
-#include "ajabase/system/info.h"
 #include "ajabase/system/systemtime.h"
 #include "ajabase/system/thread.h"
 #include <iomanip>
@@ -27,20 +26,20 @@
 	#include <dlfcn.h>
 	#define	DLL_EXTENSION	".dylib"
 	#define PATH_DELIMITER	"/"
-	#define	FIRMWARE_FOLDER	"Firmware" PATH_DELIMITER
+	#define	FIRMWARE_FOLDER	"Firmware"
 #elif defined(AJALinux)
 	#include <dlfcn.h>
 	#define	DLL_EXTENSION	".so"
 	#define PATH_DELIMITER	"/"
-	#define	FIRMWARE_FOLDER	"firmware" PATH_DELIMITER
+	#define	FIRMWARE_FOLDER	"firmware"
 #elif defined(MSWindows)
 	#define	DLL_EXTENSION	".dll"
 	#define PATH_DELIMITER	"\\"
-	#define	FIRMWARE_FOLDER	"Firmware" PATH_DELIMITER
+	#define	FIRMWARE_FOLDER	"Firmware"
 #elif defined(AJABareMetal)
 	#define	DLL_EXTENSION	".so"
 	#define PATH_DELIMITER	"/"
-	#define	FIRMWARE_FOLDER	"firmware" PATH_DELIMITER
+	#define	FIRMWARE_FOLDER	"firmware"
 #endif
 #define	SIG_EXTENSION	".sig"
 
@@ -79,12 +78,13 @@ using namespace std;
 							AJA_sINFO   (AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
 #define	P_DBG(__x__)		if (useStdout()) cout << "## DEBUG: " << AJAFUNC << ": " << __x__ << endl;		\
 							AJA_sDEBUG  (AJA_DebugUnit_Plugins, AJAFUNC << ": " << __x__)
-#define	_DEBUGSTATS_			//	Define this to log above construct/destruct & open/close tallies
+#define	_DEBUGSTATS_		//	Define this to log above construct/destruct & open/close tallies
 #if defined(_DEBUGSTATS_)
 	#define PDBGX(__x__)	AJA_sDEBUG	(AJA_DebugUnit_Plugins, INSTP(this) << "::" << AJAFUNC << ": " << __x__)
 #else
 	#define PDBGX(__x__)	
 #endif
+
 
 //	Stats
 static uint32_t gBaseConstructCount(0);		//	Number of NTV2RPCBase constructor calls made
@@ -425,7 +425,12 @@ void NTV2DeviceSpecParser::Parse (void)
 
 ostream & NTV2DeviceSpecParser::Print (ostream & oss, const bool inDumpResults) const
 {
-	oss << (IsLocalDevice() ? "local " : "") << "device";
+	if (IsLocalDevice())
+		oss << "local device";
+	else if (HasScheme())
+		oss << "device '" << Scheme() << "'";
+	else
+		oss << "device";
 	if (HasResult(kConnectParamDevSerial))
 		oss << " serial '" << DeviceSerial() << "'";
 	else if (HasResult(kConnectParamDevModel))
@@ -985,7 +990,7 @@ bool NTV2Plugin::LoadPlugin (const string & path, const string & folderPath, NTV
 		aja::string_to_wstring(folderPath, dllsFolderW);
 		if (!AddDllDirectory(dllsFolderW.c_str()))
 		{
-			P_FAIL("AddDllDirectory '" << path << "' failed: " << WinErrStr(::GetLastError()));
+			loadErr << "AddDllDirectory '" << path << "' failed: " << WinErrStr(::GetLastError());
 			return false;
 		}	//	AddDllDirectory failed
 		HMODULE h = ::LoadLibraryExA(LPCSTR(path.c_str()), AJA_NULL, LOAD_LIBRARY_SEARCH_USER_DIRS);
@@ -1027,7 +1032,11 @@ NTV2Plugin & NTV2Plugin::operator = (const NTV2Plugin & rhs)
 	return *this;
 }
 
+#if defined(MSWindows)
+NTV2Plugin::NTV2Plugin (HMODULE handle, const string & path, const bool inUseStdout)
+#else
 NTV2Plugin::NTV2Plugin (void * handle, const string & path, const bool inUseStdout)
+#endif
 	:	mHandle(handle),
 		mPath(path)
 {
@@ -1082,10 +1091,13 @@ void * NTV2Plugin::addressForSymbol (const string & inSymbolName, string & outEr
 	return result;
 }	//	addressForSymbol
 
-/*****************************************************************************************************************************************************
-	PluginRegistry
-*****************************************************************************************************************************************************/
 
+/*****************************************************************************************************************************************************
+	@brief	A singleton that tracks and monitors loaded plugins, and frees them when no one is using them.
+	@bug	This doesn't work on some platforms when libajantv2 is statically linked into the plugin. When
+			the plugin loads, the plugin gets its own separate libajantv2 static globals, and thus, a second
+			set of libajantv2 singletons, including this one.
+*****************************************************************************************************************************************************/
 class PluginRegistry;
 typedef AJARefPtr<PluginRegistry>	PluginRegistryPtr;
 
@@ -1095,6 +1107,8 @@ class PluginRegistry
 	public:	//	Class Methods
 		static PluginRegistry &	Get (void);
 		static void				Terminate (void);
+		static inline void		EnableDebugging (const bool inEnable = true)	{sDebugRegistry = inEnable;}
+		static inline bool		DebuggingEnabled (void)	{return sDebugRegistry;}
 
 	public:	//	Instance Methods
 						PluginRegistry();
@@ -1109,7 +1123,7 @@ class PluginRegistry
 		bool			indexForPath (const string & path, size_t & outIndex);
 		ULWord			countForPath (const string & path);
 		uint32_t *		refConForPath (const string & path);
-		inline bool		useStdout (void) const	{return true;}
+		inline bool		useStdout (void) const		{return DebuggingEnabled();}
 
 	private:
 		typedef map<string, NTV2PluginPtr>	NTV2PluginMap;
@@ -1125,10 +1139,12 @@ class PluginRegistry
 		void			monitor (void);	//	Monitor thread function
 		static PluginRegistryPtr	sSingleton;
 		static AJALock				sMutex;
+		static bool					sDebugRegistry;
 };	//	PluginRegistry
 
 PluginRegistryPtr	PluginRegistry::sSingleton;
 AJALock				PluginRegistry::sMutex;
+bool				PluginRegistry::sDebugRegistry(false);
 
 PluginRegistry & PluginRegistry::Get (void)
 {
@@ -1318,10 +1334,8 @@ void PluginRegistry::monitor (void)
 }
 
 /*****************************************************************************************************************************************************
-	NTV2PluginLoader
+	@brief	Knows how to load & validate a plugin
 *****************************************************************************************************************************************************/
-
-//	Class that knows how to load & validate a plugin
 class NTV2PluginLoader
 {
 	public:	//	Instance Methods
@@ -1332,8 +1346,8 @@ class NTV2PluginLoader
 		inline string	pluginSigPath (void) const	{return mDict.valueForKey(kNTV2PluginInfoKey_PluginSigPath);}
 		inline string	pluginsPath (void) const	{return mDict.valueForKey(kNTV2PluginInfoKey_PluginsPath);}
 		inline string	pluginBaseName (void) const	{return mDict.valueForKey(kNTV2PluginInfoKey_PluginBaseName);}
-		inline bool		isValidated (void) const	{return mpPlugin ? true : false;}
-		inline bool		showParams (void) const		{return mQueryParams.hasKey("showparams");}
+		bool			isValidated (void) const;
+		inline bool		showParams (void) const		{return mQueryParams.hasKey(kQParamShowParams);}
 		void *			refCon (void) const;
 
 	protected:	//	Used internally
@@ -1342,16 +1356,18 @@ class NTV2PluginLoader
 		bool			getPluginsFolder (string & outPath) const;
 		bool			getBaseNameFromScheme (string & outName) const;
 		inline bool		isOpen (void)					{return mpPlugin ? mpPlugin->isLoaded() : false;}
-		inline bool		useStdout (void) const			{return mQueryParams.hasKey("stdout") || mQueryParams.hasKey("cout");}
-		inline bool		isVerbose (void) const			{return mQueryParams.hasKey("verbose");}
-		inline bool		showCertificate (void) const	{return mQueryParams.hasKey("showx509cert");}
+		inline bool		useStdout (void) const			{return mQueryParams.hasKey(kQParamLogToStdout);}
+		inline bool		isVerbose (void) const			{return mQueryParams.hasKey(kQParamVerboseLogging);}
+		inline bool		showCertificate (void) const	{return mQueryParams.hasKey(kQParamShowX509Cert);}
 
 	private:	//	Instance Data
 		NTV2Dictionary &	mDict;			///< @brief	Writeable access to caller's config/connect dictionary
 		NTV2Dictionary		mQueryParams;	///< @brief	Query parameters
 		NTV2PluginPtr		mpPlugin;		///< @brief	Platform-dependent handle to open plugin .dylib/.dll/.so
+		bool                mValidated;
 
 	protected:	//	Class Methods
+		static bool		ParseQueryParams (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams);
 		static bool		ExtractCertInfo (NTV2Dictionary & outInfo, const string & inStr);
 		static bool		ExtractIssuerInfo (NTV2Dictionary & outInfo, const string & inStr, const string & inParentKey);
 		static string	mbedErrStr (const int mbedtlsReturnCode);
@@ -1360,21 +1376,35 @@ class NTV2PluginLoader
 
 //	Constructor -- peforms all preparatory work: determines which plugin to load, then loads & validates it
 NTV2PluginLoader::NTV2PluginLoader (NTV2Dictionary & params)
-	:	mDict(params)
+	:	mDict(params),
+		mValidated(false)
 {
+	PluginRegistry::EnableDebugging(mDict.hasKey(kQParamDebugRegistry) || PluginRegistry::DebuggingEnabled());
 	AJAAtomic::Increment(&gLoaderConstructCount);
-	mDict.erase(kNTV2PluginInfoKey_IsValidated);	//	start over, assume not validated
-	NTV2RPCClientAPI::ParseQueryParams (mDict, mQueryParams);
+	const NTV2Dictionary originalParams(mDict);
+	if (ParseQueryParams (mDict, mQueryParams)  &&  !mQueryParams.empty())
+		mDict.addFrom(mQueryParams);
 	P_INFO("Loader created for '" << mDict.valueForKey(kConnectParamScheme) << "', " << DEC(gLoaderConstructCount) << " created, "
 			<< DEC(gLoaderDestructCount) << " destroyed");
-	if (showParams())
-	{	cout << "## NOTE: Original params for '" << pluginPath() << "':" << endl;
-		mDict.Print(cout, false) << endl;
-	}
-	validate();
-	if (showParams())
-	{	cout << "## NOTE: Final params for '" << pluginPath() << "':" << endl;
-		params.Print(cout, false) << endl;
+
+	//	Determine plugin base name & where to find the dylib/dll/so...
+	string pluginBaseName, pluginsFolder;
+	if (getBaseNameFromScheme(pluginBaseName)  &&  getPluginsFolder(pluginsFolder))
+	{
+		const string path (pluginsFolder + PATH_DELIMITER + pluginBaseName);
+		const string sigPath (path + SIG_EXTENSION), dllPath (path + DLL_EXTENSION);
+		mDict.insert(kNTV2PluginInfoKey_PluginPath, dllPath);
+		mDict.insert(kNTV2PluginInfoKey_PluginSigPath, sigPath);
+		if (showParams())
+		{	cout << "## NOTE: Original params for '" << pluginPath() << "':" << endl;
+			originalParams.Print(cout, false) << endl;
+		}
+		//	Validate the plugin...
+		validate();
+		if (showParams())
+		{	cout << "## NOTE: Final params for '" << pluginPath() << "':" << endl;
+			mDict.Print(cout, false) << endl;
+		}
 	}
 }
 
@@ -1465,6 +1495,41 @@ bool NTV2PluginLoader::ExtractIssuerInfo (NTV2Dictionary & outInfo, const string
 	return true;
 }	//	ExtractIssuerInfo
 
+bool NTV2PluginLoader::ParseQueryParams (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams)
+{
+	if (!inParams.hasKey(kConnectParamQuery))
+		return false;
+	string queryStr(inParams.valueForKey(kConnectParamQuery));
+	if (!queryStr.empty())
+		if (queryStr[0] == '?')
+			queryStr.erase(0,1);	//	Remove leading '?'
+	const NTV2StringList strs(aja::split(queryStr, "&"));
+	for (NTV2StringListConstIter it(strs.begin());  it != strs.end();  ++it)
+	{
+		string str(*it), key, value;
+		if (str.find("=") == string::npos)
+		{	//	No assignment (i.e. no '=') --- just insert key with empty value...
+			key = aja::lower(str);
+			outQueryParams.insert(key, value);
+			PLGDBG("'" << key << "' = ''");
+			continue;
+		}
+		NTV2StringList pieces(aja::split(str,"="));
+		if (pieces.empty())
+			continue;
+		key = aja::lower(pieces.at(0));
+		if (pieces.size() > 1)
+			value = pieces.at(1);
+		if (key.empty())
+			{PLGWARN("Empty key '" << key << "'");  continue;}
+		if (outQueryParams.hasKey(key))
+			PLGDBG("Param '" << key << "' value '" << outQueryParams.valueForKey(key) << "' to be replaced with '" << value << "'");
+		outQueryParams.insert(key, ::PercentDecode(value));
+		PLGDBG("'" << key << "' = '" << outQueryParams.valueForKey(key) << "'");
+	}	//	for each &param
+	return true;
+}	//	ParseQueryParams
+
 void * NTV2PluginLoader::getSymbolAddress (const string & inSymbolName, string & outErrorMsg)
 {
 	outErrorMsg.clear();
@@ -1484,13 +1549,13 @@ bool NTV2PluginLoader::getPluginsFolder (string & outPath) const
 		{outPath = pluginsPath();  return true;}	//	already known, assumed to be good
 
 	//	Plugins are expected to be in the "aja" folder (the parent folder of the "aja/firmware" folder)...
-	AJASystemInfo sysInfo (AJA_SystemInfoMemoryUnit_Megabytes, AJA_SystemInfoSection_Path);
-	if (AJA_FAILURE(sysInfo.GetValue(AJA_SystemInfoTag_Path_Firmware, outPath)))
-		{P_FAIL("AJA_SystemInfoTag_Path_Firmware failed");  return false;}	//	Can't get firmware folder
+	outPath = ::NTV2GetFirmwareFolderPath();
+	if (outPath.empty())
+		return false;
 	PLGDBG("AJA firmware path is '" << outPath << "'");
 	if (outPath.find(FIRMWARE_FOLDER) == string::npos)
 		{P_FAIL("'" << outPath << "' doesn't end with '" << FIRMWARE_FOLDER << "'");  outPath.clear(); return false;}
-	outPath.erase(outPath.find(FIRMWARE_FOLDER), 9);		//	Lop off trailing "Firmware/"
+	outPath.erase(outPath.find(FIRMWARE_FOLDER), 9);		//	Lop off trailing "Firmware"
 	mDict.insert(kNTV2PluginInfoKey_PluginsPath, outPath);	//	Store it in 'PluginsPath'
 	if (outPath.back() == PATH_DELIMITER[0])
 		outPath.erase(outPath.length() - 1, 1);	//	Lop off trailing path delimiter
@@ -1516,19 +1581,6 @@ bool NTV2PluginLoader::getBaseNameFromScheme (string & outName) const
 
 bool NTV2PluginLoader::validate (void)
 {
-	string pluginBaseName;
-	if (!getBaseNameFromScheme(pluginBaseName))
-		return false;
-
-	string pluginsFolder;
-	if (!getPluginsFolder(pluginsFolder))
-		return false;
-	{
-		const string path (pluginsFolder + PATH_DELIMITER + pluginBaseName);
-		const string sigPath (path + SIG_EXTENSION), dllPath (path + DLL_EXTENSION);
-		mDict.insert(kNTV2PluginInfoKey_PluginPath, dllPath);
-		mDict.insert(kNTV2PluginInfoKey_PluginSigPath, sigPath);
-	}
 	string errStr;
 
 	//	Load contents of plugin & sig files into sigContent & dllContent buffers...
@@ -1641,7 +1693,7 @@ bool NTV2PluginLoader::validate (void)
 		return false;
 	}
 	mbedtls_x509_crt_free(&crt);	//	Done using the mbedtls_x509_crt struct
-	P_DBG("'" << pluginPath() << "' is properly signed");
+	P_DBG("'mbedtls_pk_verify' succeeded for '" << pluginPath() << "' -- signature valid");
 
 	//	Load/open the shared library...
 	if (!mpPlugin)
@@ -1668,7 +1720,8 @@ bool NTV2PluginLoader::validate (void)
 	NTV2StringList missingRegInfoKeys;
 	static const NTV2StringList reqKeys = {kNTV2PluginRegInfoKey_Vendor, kNTV2PluginRegInfoKey_CommonName,
 											kNTV2PluginRegInfoKey_ShortName, kNTV2PluginRegInfoKey_LongName,
-											kNTV2PluginRegInfoKey_Description, kNTV2PluginRegInfoKey_Copyright};
+											kNTV2PluginRegInfoKey_Description, kNTV2PluginRegInfoKey_Copyright,
+											kNTV2PluginRegInfoKey_NTV2SDKVersion, kNTV2PluginRegInfoKey_Version};
 	for (size_t ndx(0);  ndx < reqKeys.size();  ndx++)
 		if (!regInfo.hasKey(reqKeys.at(ndx)))
 			missingRegInfoKeys.push_back(reqKeys.at(ndx));
@@ -1678,11 +1731,15 @@ bool NTV2PluginLoader::validate (void)
 		return false;	//	fail
 	}
 
-	//	Check that vendor matches common name in signature...
+	//	All planets must be aligned...
 	const string	cnReg(regInfo.valueForKey(kNTV2PluginRegInfoKey_CommonName)),
 					cnCert(issuerInfo.valueForKey(kNTV2PluginX500AttrKey_CommonName));
 	const string	onReg(regInfo.valueForKey(kNTV2PluginRegInfoKey_Vendor)),
 					onCert(issuerInfo.valueForKey(kNTV2PluginX500AttrKey_OrganizationName));
+	const string	ouReg(regInfo.valueForKey(kNTV2PluginRegInfoKey_OrgUnit)),
+					ouCert(issuerInfo.valueForKey(kNTV2PluginX500AttrKey_OrganizationalUnitName));
+	const string	myVers(NTV2RPCBase::ShortSDKVersion()),
+					plVers(regInfo.valueForKey(kNTV2PluginRegInfoKey_NTV2SDKVersion));
 	if (onReg != onCert)
 	{	P_FAIL("Vendor name (key='" << kNTV2PluginRegInfoKey_Vendor << "') \"" << onReg << "\" from plugin \""
 				<< pluginPath() << "\" doesn't match organization name (key='" << kNTV2PluginX500AttrKey_OrganizationName
@@ -1695,8 +1752,21 @@ bool NTV2PluginLoader::validate (void)
 				<< "') \"" << cnCert << "\" from X509 certificate in '" << pluginSigPath() << "'");
 		return false;	//	fail
 	}
-	mDict.addFrom(regInfo);	//	Add regInfo key/val pairs into 'params'
-	mDict.insert(kNTV2PluginInfoKey_IsValidated, "Yes");	//	Plugin has been validated
+	if (ouReg != ouCert)
+	{	P_FAIL("Org unit (key='" << kNTV2PluginX500AttrKey_OrganizationalUnitName << "') \"" << ouReg << "\" from plugin \""
+				<< pluginPath() << "\" doesn't match org unit (key='" << kNTV2PluginX500AttrKey_OrganizationalUnitName
+				<< "') \"" << ouCert << "\" from X509 certificate in '" << pluginSigPath() << "'");
+		return false;	//	fail
+	}
+	if (myVers != plVers)
+	{	P_FAIL("SDK version '" << plVers << "' from plugin \"" << pluginPath()
+				<< "\" doesn't match client SDK version '" << myVers << "'");
+		return false;	//	fail
+	}
+
+	//	Green light -- add all published regInfo into param dict shared between client & plugin
+	mDict.addFrom(regInfo);
+	mValidated = true;
 	return true;
 }	//	validate
 
@@ -1705,18 +1775,23 @@ void * NTV2PluginLoader::getFunctionAddress (const string & inFuncName)
 {
 	//	Load/open the shared library...
 	if (!isOpen())
-		{P_FAIL("'" << pluginPath() << "' not loaded");  return AJA_NULL;}
+		{P_FAIL("'" << inFuncName << "': '" << pluginPath() << "' not loaded");  return AJA_NULL;}
 	if (!isValidated())
-		{P_FAIL("'" << pluginPath() << "' not validated");  return AJA_NULL;}
+		{P_FAIL("'" << inFuncName << "': '" << pluginPath() << "' not validated");  return AJA_NULL;}
 
 	//	Finally, the last step ---- get address of requested function...
 	string errStr;
 	void * pResult = getSymbolAddress(inFuncName, errStr);
 	if (!pResult)
-		{P_FAIL("'" << pluginPath() << "': " << errStr);  return AJA_NULL;}
+		{P_FAIL("'" << inFuncName << "': '" << pluginPath() << "': " << errStr);  return AJA_NULL;}
 	P_DBG("Calling '" << inFuncName << "' in '" << pluginPath() << "'");
 	return pResult;
 }	//	getFunctionAddress
+
+bool NTV2PluginLoader::isValidated (void) const
+{
+	return mpPlugin  &&  mValidated;
+}
 
 void DumpLoadedPlugins (void)
 {
@@ -1738,11 +1813,14 @@ NTV2RPCBase::NTV2RPCBase (NTV2Dictionary params, ULWord * pRefCon)
 	:	mParams(params),
 		mpRefCon(pRefCon)
 {
+	NTV2Dictionary queryParams;
 	AJAAtomic::Increment(&gBaseConstructCount);
 	if (mpRefCon)
 		AJAAtomic::Increment(mpRefCon);
 	PDBGX("refCnt=" << DEC(mpRefCon ? *mpRefCon : 0) << ", " << DEC(gBaseConstructCount) << " created, "
 		<< DEC(gBaseDestructCount) << " destroyed");
+	if (mParams.hasKey(kQParamLogToStdout) && (mParams.hasKey(kQParamVerboseLogging) || mParams.hasKey(kQParamShowParams)))
+		{cout << __FILE__ << "(" << __LINE__ << "):" << AJAFUNC << ":" << endl;  mParams.Print(cout, false) << endl;}
 }
 
 NTV2RPCBase::~NTV2RPCBase ()
@@ -1754,44 +1832,42 @@ NTV2RPCBase::~NTV2RPCBase ()
 		<< DEC(gBaseDestructCount) << " destroyed");
 }
 
+bool NTV2RPCBase::SetParams (const NTV2ConnectParams & inNewParams, const bool inAugment)
+{
+	AJAAutoLock tmp(&mParamLock);
+	size_t oldCount(mParams.size()), updated(0), added(0);
+	if (inAugment)
+	{
+		updated = mParams.updateFrom(inNewParams);
+		added = mParams.addFrom(inNewParams);
+        NBSDBG(DEC(updated) << " param(s) updated, " << DEC(added) << " added: " << mParams);
+	}
+	else
+	{
+		mParams = inNewParams;
+		NBSDBG(DEC(oldCount) << " param(s) removed, replaced with " << inNewParams);
+	}
+	if (mParams.empty())
+		NBSWARN("No params");
+	return true;
+}
+
+string NTV2RPCBase::ShortSDKVersion (void)
+{
+	string result(::NTV2Version());
+	const NTV2StringList halves(aja::split(result, " "));
+	if (halves.empty())
+		return result;
+	NTV2StringList nums(aja::split(halves.front(), "."));
+	while (nums.size() > 3)
+		nums.pop_back();
+	return aja::join(nums, ".");
+}
+
+
 /*****************************************************************************************************************************************************
 	NTV2RPCClientAPI
 *****************************************************************************************************************************************************/
-
-bool NTV2RPCClientAPI::ParseQueryParams (const NTV2Dictionary & inParams, NTV2Dictionary & outQueryParams)
-{
-	if (!inParams.hasKey(kConnectParamQuery))
-		return false;
-	string queryStr(inParams.valueForKey(kConnectParamQuery));
-	if (!queryStr.empty())
-		if (queryStr[0] == '?')
-			queryStr.erase(0,1);	//	Remove leading '?'
-	const NTV2StringList strs(aja::split(queryStr, "&"));
-	for (NTV2StringListConstIter it(strs.begin());  it != strs.end();  ++it)
-	{
-		string str(*it), key, value;
-		if (str.find("=") == string::npos)
-		{	//	No assignment (i.e. no '=') --- just insert key with empty value...
-			key = aja::lower(str);
-			outQueryParams.insert(key, value);
-			PLGDBG("'" << key << "' = ''");
-			continue;
-		}
-		NTV2StringList pieces(aja::split(str,"="));
-		if (pieces.empty())
-			continue;
-		key = aja::lower(pieces.at(0));
-		if (pieces.size() > 1)
-			value = pieces.at(1);
-		if (key.empty())
-			{PLGWARN("Empty key '" << key << "'");  continue;}
-		if (outQueryParams.hasKey(key))
-			PLGDBG("Param '" << key << "' value '" << outQueryParams.valueForKey(key) << "' to be replaced with '" << value << "'");
-		outQueryParams.insert(key, ::PercentDecode(value));
-		PLGDBG("'" << key << "' = '" << outQueryParams.valueForKey(key) << "'");
-	}	//	for each &param
-	return true;
-}	//	ParseQueryParam
 
 NTV2RPCClientAPI::NTV2RPCClientAPI (NTV2ConnectParams inParams, void * pRefCon)
 	:	NTV2RPCBase(inParams, reinterpret_cast<ULWord*>(pRefCon))
@@ -1830,28 +1906,6 @@ string NTV2RPCClientAPI::ConnectParam (const string & inParam) const
 bool NTV2RPCClientAPI::ConnectHasScheme (void) const
 {
 	return HasConnectParam(kConnectParamScheme);
-}
-
-bool NTV2RPCClientAPI::SetConnectParams (const NTV2ConnectParams & inNewParams, const bool inAugment)
-{
-	if (IsConnected())
-		{NBFAIL("Cannot set connect params while connected");  return false;}
-	AJAAutoLock tmp(&mParamLock);
-	size_t oldCount(mParams.size()), updated(0), added(0);
-	if (inAugment)
-	{
-		updated = mParams.updateFrom(inNewParams);
-		added = mParams.addFrom(inNewParams);
-		NBDBG(DEC(updated) << " connect param(s) updated, " << DEC(added) << " added: " << mParams);
-	}
-	else
-	{
-		mParams = inNewParams;
-		NBDBG(DEC(oldCount) << " connect param(s) removed, replaced with " << inNewParams);
-	}
-	if (mParams.empty())
-		NBWARN("No connect params");
-	return true;
 }
 
 ostream & NTV2RPCClientAPI::Print (ostream & oss) const
@@ -2084,24 +2138,4 @@ string NTV2RPCServerAPI::ConfigParam (const string & inParam) const
 {
 	AJAAutoLock tmp(&mParamLock);
 	return mParams.valueForKey(inParam);
-}
-
-bool NTV2RPCServerAPI::SetConfigParams (const NTV2ConnectParams & inNewParams, const bool inAugment)
-{
-	AJAAutoLock tmp(&mParamLock);
-	size_t oldCount(mParams.size()), updated(0), added(0);
-	if (inAugment)
-	{
-		updated = mParams.updateFrom(inNewParams);
-		added = mParams.addFrom(inNewParams);
-        NBSDBG(DEC(updated) << " config param(s) updated, " << DEC(added) << " added: " << mParams);
-	}
-	else
-	{
-		mParams = inNewParams;
-		NBSDBG(DEC(oldCount) << " config param(s) removed, replaced with " << inNewParams);
-	}
-	if (mParams.empty())
-		NBSWARN("No config params");
-	return true;
 }

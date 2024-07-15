@@ -78,8 +78,8 @@ static inline uint32_t ENDIAN_32NtoH(const uint32_t inValue)	{return AJA_ENDIAN_
 static inline uint32_t ENDIAN_32HtoN(const uint32_t inValue)	{return AJA_ENDIAN_32HtoN(inValue);}
 
 
-const uint32_t AJAAncillaryDataWrapperSize = 7;		// 3 bytes header + DID + SID + DC + Checksum: i.e. everything EXCEPT the payload
-const uint32_t AJAAuxillaryPacketSize = 32;  // HDMI Aux packets are always 32 bytes
+const uint32_t AJAAncillaryDataWrapperSize	= 7;	//	3 bytes header + DID + SID + DC + Checksum: i.e. everything EXCEPT the payload
+const uint32_t AJAAuxillaryPacketSize		= 32;	//	HDMI Aux packets are always 32 bytes
 
 #if defined(_DEBUG)
 	static uint32_t gConstructCount(0); //	Number of constructor calls made
@@ -621,10 +621,9 @@ AJAStatus AJAAncillaryData::InitWithReceivedData (const uint8_t *			pInData,
 
 //**********
 //	[Re]Initializes me from the buffer received from extractor (ingest)
-AJAStatus AJAAncillaryData::InitAuxWithReceivedData (const uint8_t *			pInData,
-													const size_t			inMaxBytes,
-													//const AJAAncDataLoc &	inLocationInfo,
-													uint32_t &				outPacketByteCount)
+AJAStatus AJAAncillaryData::InitAuxWithReceivedData (const uint8_t *	pInData,
+													const size_t		inMaxBytes,
+													uint32_t &			outPacketByteCount)
 {
 	AJAStatus status = AJA_STATUS_SUCCESS;
 	Clear();
@@ -644,12 +643,8 @@ AJAStatus AJAAncillaryData::InitAuxWithReceivedData (const uint8_t *			pInData,
 	// ANC Data buffer. We use this as a sanity check to make sure we don't try to parse past the end
 	// of the captured data.
 	//
-	// The caller provides an AJAAncDataLoc struct with all of the information filled in
-	// except the line number.
-	//
-	// When we have extracted the useful data from the packet, we return the packet size, in bytes, so the
-	// caller can find the start of the next packet (if any).
-
+	//	Once the useful data has been copied from the packet buffer, we return the packet size,
+	//	in bytes, so the caller can find the start of the next packet (if any).
 
 	if (pInData == AJA_NULL)
 	{
@@ -660,7 +655,7 @@ AJAStatus AJAAncillaryData::InitAuxWithReceivedData (const uint8_t *			pInData,
 
 	// The first byte should be a recognized Aux Packet type. 
 	// If it's not, we will assume we are at the end of the valid data
-	if (AuxPacketTypeToString(pInData[0]) == "")  
+	if (!AuxPacketTypeIsValid(pInData[0]))  
 	{
 		//	Let the caller try to resynchronize...
 		outPacketByteCount = 0;
@@ -677,24 +672,24 @@ AJAStatus AJAAncillaryData::InitAuxWithReceivedData (const uint8_t *			pInData,
 		return AJA_STATUS_RANGE;
 	}
 
-	//	So we have at least enough bytes for a minimum packet
+	//	There are enough bytes for a minimum packet!
 
 	const uint32_t	totalBytes	(AJAAuxillaryPacketSize);
-	//	OK... There's enough data in the buffer to contain the packet, and everything else checks out,
+	//	There's enough data in the buffer to contain the packet, and everything else checks out,
 	//	so continue parsing the data...
-	m_auxType  = pInData[0];				// HDMI Header Byte 0 / Packet Type
-	m_auxHB1   = pInData[1];				// HDMI Header Byte 1 / Haeder Data 1
-	m_auxHB2   = pInData[2];				// HDMI Header Byte 2 / Header Data 2
-	
-	//HDMI Aux InfoFrames have a checksum and packet length specifier, while other packet types do not
+	m_auxType  = pInData[0];	//	HDMI Header Byte 0 / Packet Type
+	m_auxHB1   = pInData[1];	//	HDMI Header Byte 1 / Header Data 1
+	m_auxHB2   = pInData[2];	//	HDMI Header Byte 2 / Header Data 2
+
+	//	HDMI Aux InfoFrames have a checksum and packet length specifier, while other packet types do not
 	m_checksum = 0;
-	uint32_t		payloadSize (28);	//	HDMI Aux Maximum & Default payload. 
-	int payloadOffset = 3; // Default
-	if (m_auxType & 0x80) // Am I an InfoFrame?
-	{
-		m_checksum = pInData[3];		// Reported checksum
-		payloadSize =  m_auxHB2 & 0x0000001F;
-		payloadOffset = 4;
+	uint32_t payloadSize(28);	//	HDMI Aux Maximum & Default payload
+	int payloadOffset(3);		//	Packet payload normally starts at 4th byte
+	if (m_auxType & 0x80)		//	InfoFrame?
+	{											//	InfoFrames are special:
+		m_checksum = pInData[3];				//	InfoFrame checksum is in 4th byte
+		payloadSize =  m_auxHB2 & 0x0000001F;	//	InfoFrame payload size is in LS 5 bits of 3rd byte (HB2)
+		payloadOffset = 4;						//	InfoFrame payload starts at 5th byte
 	}
 
 	m_coding = AJAAncDataCoding_Digital;
@@ -2138,6 +2133,9 @@ string AJAAncillaryData::DIDSIDToString (const uint8_t inDID, const uint8_t inSI
 	return "";
 }	//	DIDSIDToString
 
+static const NTV2DIDSet sValidHDMIAuxPacketTypes = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A,
+													0x80, 0x81, 0x82, 0x83, 0x84, 0x85};	//	<== InfoFrame types
+
 string AJAAncillaryData::AuxPacketTypeToString (const uint8_t auxPacketType)
 {
 	switch (auxPacketType)
@@ -2161,6 +2159,11 @@ string AJAAncillaryData::AuxPacketTypeToString (const uint8_t auxPacketType)
 	}
 	return ""; 
 }	//	AuxPacketTypeToString
+
+bool AJAAncillaryData::AuxPacketTypeIsValid (const uint8_t inAuxPktType)
+{
+	return sValidHDMIAuxPacketTypes.find(inAuxPktType) != sValidHDMIAuxPacketTypes.end();
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //	AJARTPAncPayloadHeader

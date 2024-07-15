@@ -64,7 +64,7 @@ static const ULWord		gChannelToProgressiveMasks[]		= { kRegMaskInput1Progressive
 																kRegMaskInput1Progressive, kRegMaskInput2Progressive, kRegMaskInput1Progressive, kRegMaskInput2Progressive };
 static const ULWord		gChannelToProgressiveShifts[]		= { kRegShiftInput1Progressive, kRegShiftInput2Progressive, kRegShiftInput1Progressive, kRegShiftInput2Progressive,
 																kRegShiftInput1Progressive, kRegShiftInput2Progressive, kRegShiftInput1Progressive, kRegShiftInput2Progressive };
-static const VirtualRegisterNum		gShadowRegs[]			= { kVRegVideoFormatCh1, kVRegVideoFormatCh2, kVRegVideoFormatCh3, kVRegVideoFormatCh4,
+static const VirtualRegisterNum		gShadowRegs[]			= {	kVRegVideoFormatCh1, kVRegVideoFormatCh2, kVRegVideoFormatCh3, kVRegVideoFormatCh4,
 																kVRegVideoFormatCh5, kVRegVideoFormatCh6, kVRegVideoFormatCh7, kVRegVideoFormatCh8 };
 
 static const ULWord		gChannelToSDIIn6GModeMask[]			= {	kRegMaskSDIIn16GbpsMode, kRegMaskSDIIn26GbpsMode, kRegMaskSDIIn36GbpsMode, kRegMaskSDIIn46GbpsMode,
@@ -81,29 +81,669 @@ static const ULWord		gChannelToSDIIn12GModeShift[]		= {	kRegShiftSDIIn112GbpsMod
 
 static const ULWord		gChannelToMRRegNum[]				= {	kRegMRQ1Control, kRegMRQ2Control, kRegMRQ3Control, kRegMRQ4Control};
 
+static const ULWord    gChannelToVPIDTransferCharacteristics[] = {	kVRegNTV2VPIDTransferCharacteristics, kVRegNTV2VPIDTransferCharacteristics2, kVRegNTV2VPIDTransferCharacteristics3, kVRegNTV2VPIDTransferCharacteristics4,
+																	kVRegNTV2VPIDTransferCharacteristics5, kVRegNTV2VPIDTransferCharacteristics6, kVRegNTV2VPIDTransferCharacteristics7, kVRegNTV2VPIDTransferCharacteristics8, 0 };
 
-#if defined(NTV2_DEPRECATE_17_0)
-	//	Copied from ntv2devicefeatures.c, deprecated in SDK 17.0
-	bool NTV2DeviceHasSPIv2 (const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 2;}
-	bool NTV2DeviceHasSPIv3(const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 3;}
-	bool NTV2DeviceHasSPIv4(const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 4;}
-	bool NTV2DeviceHasSPIv5(const NTV2DeviceID inDeviceID)	{return NTV2DeviceGetSPIFlashVersion(inDeviceID) == 5;}
+static const ULWord    gChannelToVPIDColorimetry[]			= {	kVRegNTV2VPIDColorimetry, kVRegNTV2VPIDColorimetry2, kVRegNTV2VPIDColorimetry3, kVRegNTV2VPIDColorimetry4,
+																kVRegNTV2VPIDColorimetry5, kVRegNTV2VPIDColorimetry6, kVRegNTV2VPIDColorimetry7, kVRegNTV2VPIDColorimetry8, 0 };
 
-	bool NTV2DeviceHasGenlockv2(const NTV2DeviceID devID)	{return NTV2DeviceGetGenlockVersion(devID) == 2;}
-	bool NTV2DeviceHasGenlockv3(const NTV2DeviceID devID)	{return NTV2DeviceGetGenlockVersion(devID) == 3;}
+static const ULWord    gChannelToVPIDLuminance[]			= {	kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance,
+																kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, kVRegNTV2VPIDLuminance, 0 };
 
-	bool NTV2DeviceHasColorSpaceConverterOnChannel2(const NTV2DeviceID devID)	{return NTV2DeviceCanDoWidget(devID, NTV2_WgtCSC2);}
+#if defined(AJAMacDext)
+bool InitializeNtv2Driver(Ntv2DriverProcessContext* inProcessContext)
+{
+	ntv2Message("-> Enter\n");
 
-	bool NTV2DeviceCanDoAudio2Channels(const NTV2DeviceID devID)	{return NTV2DeviceGetMaxAudioChannels(devID) >= 2;}
-	bool NTV2DeviceCanDoAudio6Channels(const NTV2DeviceID devID)	{return NTV2DeviceGetMaxAudioChannels(devID) >= 6;}
-	bool NTV2DeviceCanDoAudio8Channels(const NTV2DeviceID devID)	{return NTV2DeviceGetMaxAudioChannels(devID) >= 8;}
+	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(inProcessContext->pSystemContext, kRegBoardID);
+	Ntv2SystemContext* pSystemContext = inProcessContext->pSystemContext;
+	
+	InitializeVirtualRegisters(inProcessContext->pSystemContext);
 
-	UWord NTV2DeviceGetNumAudioStreams(const NTV2DeviceID devID)	{return NTV2DeviceGetNumAudioSystems(devID);}
-	bool NTV2DeviceCanDoAudioN(const NTV2DeviceID devID, UWord index0)	{return index0 < NTV2DeviceGetNumAudioSystems(devID);}
-	bool NTV2DeviceCanDoLTCOutN(const NTV2DeviceID devID, UWord index0)	{return index0 < NTV2DeviceGetNumLTCOutputs(devID);}
-	bool NTV2DeviceCanDoLTCInN(const NTV2DeviceID devID, UWord index0)	{return index0 < NTV2DeviceGetNumLTCInputs(devID);}
-	bool NTV2DeviceCanDoRS422N(const NTV2DeviceID devID, const NTV2Channel ch)	{return ch < NTV2DeviceGetNumSerialPorts(devID);}
-#endif	//	!defined(NTV2_DEPRECATE_17_0)
+	if (!IsKonaIPDevice(pSystemContext))
+		ProgramProductCode(pSystemContext);
+	
+	// ready flag needs to be set
+	ntv2WriteRegister(pSystemContext, kVRegStartupStatusFlags, ntv2ReadRegister(pSystemContext, kVRegStartupStatusFlags) | kMaskDesktopDisplayReady);
+
+	InitRP188(pSystemContext);
+	if (NTV2DeviceCanDoCustomAnc(deviceID))
+	{
+		for(int i = 0; i < NTV2DeviceGetNumVideoOutputs(deviceID); i++)
+			EnableAncInserter(pSystemContext, (NTV2Channel)i, false);
+	}
+
+	if (IsKonaIPDevice(pSystemContext))
+		ntv2WriteRegisterMS(pSystemContext, kRegGlobalControl2, 0, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
+	if (NTV2DeviceGetNumVideoChannels(deviceID) > 4)
+		ntv2WriteRegisterMS(pSystemContext, kRegGlobalControl2, 0, kRegMaskRefSource2, kRegShiftRefSource2);
+	ntv2WriteRegisterMS(pSystemContext, kRegGlobalControl, NTV2_REFERENCE_FREERUN, kRegMaskRefSource, kRegShiftRefSource);
+
+	inProcessContext->pBitstream = ntv2_mcap_open(pSystemContext, "ntv2mcap");
+	if (inProcessContext->pBitstream != NULL)
+	{
+		Ntv2Status status = ntv2_mcap_configure(inProcessContext->pBitstream);
+		if (status != NTV2_STATUS_SUCCESS)
+		{
+			ntv2_mcap_close(inProcessContext->pBitstream);
+			inProcessContext->pBitstream = NULL;
+		}
+	}
+
+	// notify startup status
+	ntv2WriteRegister(pSystemContext, kVRegStartupStatusFlags, ntv2ReadRegister(pSystemContext, kVRegStartupStatusFlags) | kMaskStartComplete);
+	
+	ntv2Message("<- Exit\n");
+	return StartDriverProcesses(inProcessContext);
+}
+
+////////////////////////
+//Start/Stop Driver Processes
+bool StartDriverProcesses(Ntv2DriverProcessContext* inProcessContext)
+{
+	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(inProcessContext->pSystemContext, kRegBoardID);
+	Ntv2SystemContext* pSystemContext = inProcessContext->pSystemContext;
+	ntv2Message("-> Enter\n");
+
+	ntv2WriteRegister(inProcessContext->pSystemContext, kRegVidProc1Control, 0x105);
+	ntv2WriteRegister(inProcessContext->pSystemContext, kRegVidProcXptControl, 0x1010);
+		
+	// initialize lut registers to linear
+	InitLUTRegs(inProcessContext->pSystemContext);
+	
+	Ntv2Status status;
+	
+	#ifdef AJA_GENLOCK
+		// configure genlock monitor
+		if (deviceID == DEVICE_ID_IO4KPLUS)
+		{
+			ntv2Message("Starting Genlock v1\n");
+			inProcessContext->pGenlockMonitor = ntv2_genlock_open(pSystemContext, "ntv2genlock", 0);
+			if (inProcessContext->pGenlockMonitor != NULL)
+			{
+				status = ntv2_genlock_configure(inProcessContext->pGenlockMonitor);
+				if (status != NTV2_STATUS_SUCCESS)
+				{
+					ntv2_genlock_close(inProcessContext->pGenlockMonitor);
+					inProcessContext->pGenlockMonitor = NULL;
+				}
+				else
+				{
+					//This needs to be in the power management enable section but works for now
+					ntv2_genlock_enable(inProcessContext->pGenlockMonitor);
+					inProcessContext->processCount++;
+				}
+			}
+		}
+	
+		if ((deviceID == DEVICE_ID_KONAXM)	||
+			(deviceID == DEVICE_ID_KONAX))
+		{
+			ntv2Message("Starting Genlock v2\n");
+			inProcessContext->pGenlock2Monitor = ntv2_genlock2_open(pSystemContext, "ntv2genlock2", 0);
+			if (inProcessContext->pGenlock2Monitor != NULL)
+			{
+				status = ntv2_genlock2_configure(inProcessContext->pGenlock2Monitor);
+				if (status != NTV2_STATUS_SUCCESS)
+				{
+					ntv2_genlock2_close(inProcessContext->pGenlock2Monitor);
+					inProcessContext->pGenlock2Monitor = NULL;
+				}
+				else
+				{
+					//This needs to be in the power management enable section but works for now
+					ntv2_genlock2_enable(inProcessContext->pGenlock2Monitor);
+					inProcessContext->processCount++;
+				}
+			}
+		}
+	#endif
+	
+	#ifdef AJA_RASTERIZER
+		if ((deviceID == DEVICE_ID_KONAXM)	||
+			(deviceID == DEVICE_ID_KONAX))
+		{
+			ntv2Message("Starting Raster Monitor\n");
+			inProcessContext->pRasterMonitor = ntv2_videoraster_open(pSystemContext, "ntv2raster", 0);
+			if (inProcessContext->pRasterMonitor != NULL)
+			{
+				status = ntv2_videoraster_configure(inProcessContext->pRasterMonitor, 0x3400, 64, 4);
+				if (status != NTV2_STATUS_SUCCESS)
+				{
+					ntv2_videoraster_close(inProcessContext->pRasterMonitor);
+					inProcessContext->pRasterMonitor = NULL;
+				}
+				else
+				{
+					//This needs to be in the power management enable section but works for now
+					ntv2_videoraster_enable(inProcessContext->pRasterMonitor);
+					inProcessContext->processCount++;
+				}
+			}
+		}
+	#endif
+
+	#ifdef AJA_OUTPUT_SETUP
+		// configure outputs/vpid
+		ntv2Message("Starting Setup Monitor\n");
+		inProcessContext->pSetupMonitor = ntv2_setup_open(pSystemContext, "ntv2setup");
+		if (inProcessContext->pSetupMonitor != NULL)
+		{
+			status = ntv2_setup_configure(inProcessContext->pSetupMonitor);
+			if (status != NTV2_STATUS_SUCCESS)
+			{
+				ntv2_setup_close(inProcessContext->pSetupMonitor);
+				inProcessContext->pSetupMonitor = NULL;
+			}
+			else
+			{
+				//This needs to be in the power management enable section but works for now
+				ntv2_setup_enable(inProcessContext->pSetupMonitor);
+				inProcessContext->processCount++;
+			}
+		}
+	#endif
+	
+	#ifdef AJA_HDMI_IN
+		// configure hdmi input monitor
+		if ((NTV2DeviceGetHDMIVersion(deviceID) == 2 || NTV2DeviceGetHDMIVersion(deviceID) == 3) &&
+			(NTV2DeviceGetNumHDMIVideoInputs(deviceID) > 0))
+			{
+				ntv2Message("Starting HDMI In 1 v1\n");
+				inProcessContext->pHDMIInMonitor[0] = ntv2_hdmiin_open(pSystemContext, "ntv2hdmiin", 0);
+				if (inProcessContext->pHDMIInMonitor[0] != NULL)
+				{
+					if (deviceID == DEVICE_ID_IO4K)
+					{
+						status = ntv2_hdmiin_configure(inProcessContext->pHDMIInMonitor[0], ntv2_edid_type_io4k, 0);
+					}
+					else
+					{
+						status = ntv2_hdmiin_configure(inProcessContext->pHDMIInMonitor[0], ntv2_edid_type_iox3, 0);
+					}
+					if (status != NTV2_STATUS_SUCCESS)
+					{
+						ntv2_hdmiin_close(inProcessContext->pHDMIInMonitor[0]);
+						inProcessContext->pHDMIInMonitor[0] = NULL;
+					}
+					else
+					{
+						//This needs to be in the power management enable section but works for now
+						ntv2_hdmiin_enable(inProcessContext->pHDMIInMonitor[0]);
+						inProcessContext->processCount++;
+					}
+				}
+			}
+
+		// configure hdmi input version 4 monitor
+		if (NTV2DeviceGetHDMIVersion(deviceID) >= 4)
+		{
+			int numHdmiIn = NTV2DeviceGetNumHDMIVideoInputs(deviceID);
+
+			if (numHdmiIn > 0)
+			{
+				ntv2Message("Starting HDMI In 1 v4\n");
+				inProcessContext->pHDMIIn4Monitor[0] = ntv2_hdmiin4_open(pSystemContext, "ntv2hdmiin4", numHdmiIn==1 ? 0 : 1);
+				if (inProcessContext->pHDMIIn4Monitor[0] != NULL)
+				{
+					if (deviceID == DEVICE_ID_IO4KPLUS)
+					{
+						status = ntv2_hdmiin4_configure(inProcessContext->pHDMIIn4Monitor[0], ntv2_edid_type_io4kplus, 0);
+					}
+					else if (deviceID == DEVICE_ID_KONAHDMI)
+					{
+						status = ntv2_hdmiin4_configure(inProcessContext->pHDMIIn4Monitor[0], ntv2_edid_type_konahdmi_20, 0);
+					}
+					else if (deviceID == DEVICE_ID_KONAX || deviceID == DEVICE_ID_KONAXM)
+					{
+						status = ntv2_hdmiin4_configure(inProcessContext->pHDMIIn4Monitor[0], ntv2_edid_type_konax, 0);
+					}
+					else
+					{
+						status = ntv2_hdmiin4_configure(inProcessContext->pHDMIIn4Monitor[0], ntv2_edid_type_unknown, 0);
+					}
+					if (status != NTV2_STATUS_SUCCESS)
+					{
+						ntv2_hdmiin4_close(inProcessContext->pHDMIIn4Monitor[0]);
+						inProcessContext->pHDMIIn4Monitor[0] = NULL;
+					}
+					else
+					{
+						//This needs to be in the power management enable section but works for now
+						ntv2_hdmiin4_enable(inProcessContext->pHDMIIn4Monitor[0]);
+						inProcessContext->processCount++;
+					}
+				}
+			}
+
+			if (numHdmiIn > 1)    // e.g. KonaHDMI
+			{
+				ntv2Message("Starting HDMI In 2 v4\n");
+				inProcessContext->pHDMIIn4Monitor[1] = ntv2_hdmiin4_open(pSystemContext, "ntv2hdmi4in", 2);
+				if (inProcessContext->pHDMIIn4Monitor[1] != NULL)
+				{
+					status = ntv2_hdmiin4_configure(inProcessContext->pHDMIIn4Monitor[1], ntv2_edid_type_konahdmi_20, 1);
+					if (status != NTV2_STATUS_SUCCESS)
+					{
+						ntv2_hdmiin4_close(inProcessContext->pHDMIIn4Monitor[1]);
+						inProcessContext->pHDMIIn4Monitor[1] = NULL;
+					}
+					else
+					{
+						//This needs to be in the power management enable section but works for now
+						ntv2_hdmiin4_enable(inProcessContext->pHDMIIn4Monitor[1]);
+						inProcessContext->processCount++;
+					}
+				}
+			}
+				
+			if (numHdmiIn > 2)    // e.g. KonaHDMI
+			{
+				ntv2Message("Starting HDMI In 3 v1\n");
+				inProcessContext->pHDMIInMonitor[0] = ntv2_hdmiin_open(pSystemContext, "ntv2hdmiin", 1);
+				if (inProcessContext->pHDMIInMonitor[0] != NULL)
+				{
+					status = ntv2_hdmiin_configure(inProcessContext->pHDMIInMonitor[0], ntv2_edid_type_konahdmi_13, 2);
+					if (status != NTV2_STATUS_SUCCESS)
+					{
+						ntv2_hdmiin_close(inProcessContext->pHDMIInMonitor[0]);
+						inProcessContext->pHDMIInMonitor[0] = NULL;
+					}
+					else
+					{
+						//This needs to be in the power management enable section but works for now
+						ntv2_hdmiin_enable(inProcessContext->pHDMIInMonitor[0]);
+						inProcessContext->processCount++;
+					}
+				}
+			}
+
+			if (numHdmiIn > 3)    // e.g. KonaHDMI
+			{
+				ntv2Message("Starting HDMI In 4 v1\n");
+				inProcessContext->pHDMIInMonitor[1] = ntv2_hdmiin_open(pSystemContext, "ntv2hdmiin", 2);
+				if (inProcessContext->pHDMIInMonitor[1] != NULL)
+				{
+					status = ntv2_hdmiin_configure(inProcessContext->pHDMIInMonitor[1], ntv2_edid_type_konahdmi_13, 3);
+					if (status != NTV2_STATUS_SUCCESS)
+					{
+						ntv2_hdmiin_close(inProcessContext->pHDMIInMonitor[1]);
+						inProcessContext->pHDMIInMonitor[1] = NULL;
+					}
+					else
+					{
+						//This needs to be in the power management enable section but works for now
+						ntv2_hdmiin_enable(inProcessContext->pHDMIInMonitor[1]);
+						inProcessContext->processCount++;
+					}
+				}
+			}
+		}
+	#endif
+	
+	#ifdef AJA_HDMI_OUT
+		// configure hdmi output version 4 monitor
+		if ((NTV2DeviceGetHDMIVersion(deviceID) == 4) &&
+			(NTV2DeviceGetNumHDMIVideoOutputs(deviceID) > 0))
+		{
+			ntv2Message("Starting HDMI Out 1 v4\n");
+			inProcessContext->pHDMIOut4Monitor = ntv2_hdmiout4_open(pSystemContext, "ntv2hdmiout4", 0);
+			if (inProcessContext->pHDMIOut4Monitor != NULL)
+			{
+				status = ntv2_hdmiout4_configure(inProcessContext->pHDMIOut4Monitor);
+				if (status != NTV2_STATUS_SUCCESS)
+				{
+					ntv2_hdmiout4_close(inProcessContext->pHDMIOut4Monitor);
+					inProcessContext->pHDMIOut4Monitor = NULL;
+				}
+				else
+				{
+					//This needs to be in the power management enable section but works for now
+					ntv2_hdmiout4_enable(inProcessContext->pHDMIOut4Monitor);
+					inProcessContext->processCount++;
+				}
+			}
+		}
+	#endif
+
+	// Turn on interrupts
+	EnableNtv2Interrupts(inProcessContext->pSystemContext);
+
+	// turn on hdmi chip if needed
+	if (inProcessContext->pHDMIInMonitor[0] || inProcessContext->pHDMIIn4Monitor[0] || inProcessContext->pHDMIOut4Monitor)
+		ntv2WriteRegisterMS(inProcessContext->pSystemContext, kRegHDMIOutControl, 0xC, 0x0F000000, 24);
+		
+	// We are now running and theoretically daemon has initialized us
+	ntv2WriteRegister(inProcessContext->pSystemContext, kVRegStartupStatusFlags, ntv2ReadRegister(inProcessContext->pSystemContext, kVRegStartupStatusFlags) | kMaskDaemonInitialized);
+
+	ntv2Message("<- Exit\n");
+
+	return kIOReturnSuccess;
+
+}    //    StartDriverImmediate
+
+void StopDriverProcesses(Ntv2DriverProcessContext* inProcessContext)
+{
+	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(inProcessContext->pSystemContext, kRegBoardID);
+	Ntv2SystemContext* pSystemContext = inProcessContext->pSystemContext;
+	kern_return_t ret;
+	
+	ntv2Message("->Enter\n");
+	
+	ntv2Message("Disable Interrupts\n");
+	DisableNtv2Interrupts(pSystemContext);
+
+	if (inProcessContext->pGenlockMonitor != NULL)
+	{
+		ntv2Message("Disable Genlock v1\n");
+		ntv2_genlock_disable(inProcessContext->pGenlockMonitor);
+	}
+
+	if (inProcessContext->pGenlock2Monitor != NULL)
+	{
+		ntv2Message("Disable Genlock v2\n");
+		ntv2_genlock2_disable(inProcessContext->pGenlock2Monitor);
+	}
+	
+	if (inProcessContext->pRasterMonitor != NULL)
+	{
+		ntv2Message("Disable Raster\n");
+		ntv2_videoraster_disable(inProcessContext->pRasterMonitor);
+	}
+
+	for (int i = 0; i < NTV2_MAX_HDMI_MONITOR; i++)
+	{
+		if (inProcessContext->pHDMIInMonitor[i] != NULL)
+		{
+			ntv2Message("Disable HDMI In v1\n");
+			ntv2_hdmiin_disable(inProcessContext->pHDMIInMonitor[i]);
+		}
+		if (inProcessContext->pHDMIIn4Monitor[i] != NULL)
+		{
+			ntv2Message("Disable HDMI In v4\n");
+			ntv2_hdmiin4_disable(inProcessContext->pHDMIIn4Monitor[i]);
+		}
+		if (inProcessContext->pHDMIOut4Monitor != NULL)
+		{
+			ntv2Message("Disable HDMI Out v4\n");
+			ntv2_hdmiout4_disable(inProcessContext->pHDMIOut4Monitor);
+			inProcessContext->pHDMIOut4Monitor = NULL;
+		}
+	}
+
+	if(inProcessContext->pSetupMonitor != NULL)
+	{
+		ntv2Message("Disable Setup\n");
+		ntv2_setup_disable(inProcessContext->pSetupMonitor);
+	}
+
+	ntv2Message("<- Exit\n");
+}
+
+void EnableNtv2Interrupts(Ntv2SystemContext* pSystemContext)
+{
+	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(pSystemContext, kRegBoardID);
+	uint32_t enableMask = 0;
+	uint32_t enableMask2 = 0;
+	
+	ntv2Message("-> Enter\n");
+
+	if(NTV2DeviceCanDoAudioN(deviceID, 0))
+		enableMask += kIntAudioOutWrapEnable + kIntAudioInWrapEnable+kIntAudioWrapRateEnable;
+	if(NTV2DeviceCanDoRS422N(deviceID, NTV2_CHANNEL1))
+		enableMask += kIntUartTXEnable + kIntUartRXEnable;
+	if(NTV2DeviceCanDoRS422N(deviceID, NTV2_CHANNEL2))
+		enableMask += kIntUart2TXEnable;
+	switch(NTV2DeviceGetNumVideoChannels(deviceID))
+	{
+		case 8:
+			enableMask2 += kIntIn8Enable;
+			if(NTV2DeviceCanDoMultiFormat(deviceID))
+				enableMask2 += kIntOut8Enable;
+		case 7:
+			enableMask2 += kIntIn7Enable;
+			if(NTV2DeviceCanDoMultiFormat(deviceID))
+				enableMask2 += kIntOut7Enable;
+		case 6:
+			enableMask2 += kIntIn6Enable;
+			if(NTV2DeviceCanDoMultiFormat(deviceID))
+				enableMask2 += kIntOut6Enable;
+		case 5:
+			enableMask2 += kIntIn5Enable;
+			if(NTV2DeviceCanDoMultiFormat(deviceID))
+				enableMask2 += kIntOut5Enable;
+		case 4:
+			enableMask2 += kIntIn4Enable;
+			if(NTV2DeviceCanDoMultiFormat(deviceID))
+				enableMask += kIntOut4Enable;
+		case 3:
+			enableMask2 += kIntIn3Enable;
+			if(NTV2DeviceCanDoMultiFormat(deviceID))
+				enableMask += kIntOut3Enable;
+		case 2:
+			enableMask += kIntIn2Enable;
+			if(NTV2DeviceCanDoMultiFormat(deviceID))
+				enableMask += kIntOut2Enable;
+		default:
+		case 1:
+			enableMask += kIntIn1Enable;
+			enableMask += kIntOut1Enable;
+			break;
+	}
+
+	ntv2WriteRegister(pSystemContext, kRegVidIntControl, enableMask);
+
+	if (enableMask2 > 0)
+	{
+		ntv2WriteRegister(pSystemContext, kRegVidIntControl2, enableMask2);
+	}
+
+	// For devices using NWL DMA interface we need to also turn on NWL user interrupts since all VP interrupts go through the user bit.
+	if (NTV2DeviceHasNWL(deviceID) == true)
+	{
+		ntv2WriteRegisterMS(pSystemContext, kRegNwlCommonControlStatus, 1, kRegMaskNwlCommonUserInterruptEnable, kRegShiftNwlCommonUserInterruptEnable);
+		ntv2WriteRegisterMS(pSystemContext, kRegNwlCommonControlStatus, 1, kRegMaskNwlCommonDmaInterruptEnable, kRegShiftNwlCommonDmaInterruptEnable);
+	}
+	else if (NTV2DeviceHasXilinxDMA(deviceID) == true)
+	{
+		EnableXlnxUserInterrupt(pSystemContext, 0);
+	}
+	else
+	{
+		ntv2WriteRegister(pSystemContext, kRegDMAIntControl, kIntDmaEnableMask);
+	}
+	ntv2Message("Interrupts enabled, mask=0x%08x, mask2=0x%08x\n", enableMask, enableMask2);
+	ntv2Message("<- Exit\n");
+}
+
+void DisableNtv2Interrupts(Ntv2SystemContext* pSystemContext)
+{
+	uint32_t disableMask = 0;
+	uint32_t disableMask2 = 0;
+	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(pSystemContext, kRegBoardID);
+	
+	ntv2Message("-> Enter\n");
+	
+	if(NTV2DeviceCanDoAudioN(deviceID, 0))
+		disableMask += kIntAudioOutWrapEnable + kIntAudioInWrapEnable; // +kIntAudioWrapRateEnable; don't disable wrapRate it upsets CoreAudio
+	if(NTV2DeviceCanDoRS422N(deviceID, NTV2_CHANNEL1))
+		disableMask += kIntUartTXEnable + kIntUartRXEnable;
+	if(NTV2DeviceCanDoRS422N(deviceID, NTV2_CHANNEL2))
+		disableMask += kIntUart2TXEnable;
+	switch(NTV2DeviceGetNumVideoChannels(deviceID))
+	{
+		case 8:
+			disableMask2 += kIntIn8Enable;
+			if(NTV2DeviceCanDoMultiFormat(deviceID))
+				disableMask2 += kIntOut8Enable;
+		case 7:
+			disableMask2 += kIntIn7Enable;
+			if(NTV2DeviceCanDoMultiFormat(deviceID))
+				disableMask2 += kIntOut7Enable;
+		case 6:
+			disableMask2 += kIntIn6Enable;
+			if(NTV2DeviceCanDoMultiFormat(deviceID))
+				disableMask2 += kIntOut6Enable;
+		case 5:
+			disableMask2 += kIntIn5Enable;
+			if(NTV2DeviceCanDoMultiFormat(deviceID))
+				disableMask2 += kIntOut5Enable;
+		case 4:
+			disableMask2 += kIntIn4Enable;
+			if(NTV2DeviceCanDoMultiFormat(deviceID))
+				disableMask += kIntOut4Enable;
+		case 3:
+			disableMask2 += kIntIn3Enable;
+			if(NTV2DeviceCanDoMultiFormat(deviceID))
+				disableMask += kIntOut3Enable;
+		case 2:
+			disableMask += kIntIn2Enable;
+			if(NTV2DeviceCanDoMultiFormat(deviceID))
+				disableMask += kIntOut2Enable;
+		default:
+		case 1:
+			disableMask += kIntIn1Enable;
+			disableMask += kIntOut1Enable;
+			break;
+	}
+
+	ntv2WriteRegisterMS(pSystemContext, kRegVidIntControl, 0, disableMask, 0);
+
+	if (NTV2DeviceGetNumVideoChannels(deviceID) > 2)
+	{
+		ntv2WriteRegisterMS(pSystemContext, kRegVidIntControl2, 0, disableMask2, 0);
+	}
+
+	// For devices using NWL DMA interface we need to also turn on NWL user interrupts since all VP interrupts go through the user bit.
+	if (NTV2DeviceHasNWL(deviceID) == true)
+	{
+		ntv2WriteRegisterMS(pSystemContext, kRegNwlCommonControlStatus, 0, kRegMaskNwlCommonUserInterruptEnable, kRegShiftNwlCommonUserInterruptEnable);
+		ntv2WriteRegisterMS(pSystemContext, kRegNwlCommonControlStatus, 0, kRegMaskNwlCommonDmaInterruptEnable, kRegShiftNwlCommonDmaInterruptEnable);
+	}
+	else if (NTV2DeviceHasXilinxDMA(deviceID) == true)
+	{
+		DisableXlnxUserInterrupt(pSystemContext, 0);
+	}
+	else
+	{
+		ntv2WriteRegisterMS(pSystemContext, kRegDMAIntControl, 0, kIntDmaEnableMask, 0);
+	}
+	ntv2Message("Interrupts disabled, mask=0x%08x, mask2=0x%08x\n", disableMask, disableMask2);
+	ntv2Message("<- Exit\n");
+}
+
+void EnableXlnxUserInterrupt(Ntv2SystemContext* pSystemContext, int inIndex)
+{
+	uint32_t XlnxIrqRegBase = kRegXlnxTargetIRQ * XLNX_REG_TARGET_SIZE;
+	ntv2Message("-> Enter\n");
+	ntv2WriteXlnxRegister(pSystemContext, XlnxIrqRegBase + kRegXlnxIrqUserInterruptEnableW1S, ((uint32_t)0x1 << inIndex));
+	ntv2Message("<- Exit\n");
+}
+
+void DisableXlnxUserInterrupt(Ntv2SystemContext* pSystemContext, int inIndex)
+{
+	uint32_t XlnxIrqRegBase = kRegXlnxTargetIRQ * XLNX_REG_TARGET_SIZE;
+	ntv2Message("-> Enter\n");
+	ntv2WriteXlnxRegister(pSystemContext, XlnxIrqRegBase + kRegXlnxIrqUserInterruptEnableW1C, ((uint32_t)0x1 << inIndex));
+	ntv2Message("<- Exit\n");
+}
+
+void InitializeVirtualRegisters(Ntv2SystemContext* pSystemContext)
+{
+	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(pSystemContext, kRegBoardID);
+	//	Non-zero virtual registers are initialized here...
+	ULWord vers = NTV2DriverVersionEncode(AJA_NTV2_SDK_VERSION_MAJOR, AJA_NTV2_SDK_VERSION_MINOR, AJA_NTV2_SDK_VERSION_POINT, AJA_NTV2_SDK_BUILD_NUMBER) | NTV2DriverVersionEncodedBuildType;
+	
+	ntv2Message("-> Enter\n");
+	
+	ntv2WriteRegister(pSystemContext, kVRegDriverVersion, vers);
+	ntv2WriteRegister(pSystemContext, kVRegGammaMode, NTV2_GammaAuto);
+	ntv2WriteRegister(pSystemContext, kVRegLUTType, NTV2_LUTUnknown);
+	ntv2WriteRegister(pSystemContext, kVRegRGB10Range, NTV2_RGB10RangeSMPTE);
+	ntv2WriteRegister(pSystemContext, kVRegRGB10Endian, 1);
+	ntv2WriteRegister(pSystemContext, kVRegAudioSyncTolerance, 10000);
+	ntv2WriteRegister(pSystemContext, kVRegDualStreamTransportType, 1);
+	ntv2WriteRegister(pSystemContext, kVRegDSKAudioMode, NTV2_DSKAudioBackground);
+	ntv2WriteRegister(pSystemContext, kVRegCaptureReferenceSelect, kVideoIn);
+	ntv2WriteRegister(pSystemContext, kVRegSDIOutput1RGBRange, NTV2_RGBRangeSMPTE);
+	ntv2WriteRegister(pSystemContext, kVRegSDIInput1RGBRange, NTV2_RGBRangeSMPTE);
+	ntv2WriteRegister(pSystemContext, kVRegSDIInput2RGBRange, NTV2_RGBRangeSMPTE);
+	ntv2WriteRegister(pSystemContext, kVRegSDIInput1Stereo3DMode, NTV2_Stereo3DSideBySide);
+	ntv2WriteRegister(pSystemContext, kVRegSDIInput2Stereo3DMode, NTV2_Stereo3DSideBySide);
+	ntv2WriteRegister(pSystemContext, kVRegFrameBuffer1RGBRange, NTV2_RGBRangeFull);
+	ntv2WriteRegister(pSystemContext, kVRegFrameBuffer1Stereo3DMode, NTV2_Stereo3DSideBySide);
+	ntv2WriteRegister(pSystemContext, kVRegSDIInput1ColorSpaceMode, NTV2_ColorSpaceModeYCbCr);
+	ntv2WriteRegister(pSystemContext, kVRegSDIInput2ColorSpaceMode, NTV2_ColorSpaceModeYCbCr);
+	ntv2WriteRegister(pSystemContext, kVRegSDIOutput2RGBRange, NTV2_RGBRangeSMPTE);
+	ntv2WriteRegister(pSystemContext, kVRegSDIOutput1Stereo3DMode, NTV2_Stereo3DSideBySide);
+	ntv2WriteRegister(pSystemContext, kVRegSDIOutput2Stereo3DMode, NTV2_Stereo3DSideBySide);
+	ntv2WriteRegister(pSystemContext, kVRegFrameBuffer2RGBRange, NTV2_RGBRangeFull);
+	ntv2WriteRegister(pSystemContext, kVRegFrameBuffer2Stereo3DMode, NTV2_Stereo3DSideBySide);
+	ntv2WriteRegister(pSystemContext, kVRegAudioGainDisable, true);
+	ntv2WriteRegister(pSystemContext, kVRegActiveVideoOutFilter, kDropFrameFormats + kNonDropFrameFormats + kEuropeanFormats + k1080ProgressiveFormats + kREDFormats + k2KFormats + k4KFormats);	// Default to all video outs enabled
+	ntv2WriteRegister(pSystemContext, kVRegDeviceOnline, true);
+	ntv2WriteRegister(pSystemContext, kVRegSDIOutput1ColorSpaceMode, NTV2_ColorSpaceModeYCbCr);
+	ntv2WriteRegister(pSystemContext, kVRegSDIOutput2ColorSpaceMode, NTV2_ColorSpaceModeYCbCr);
+	ntv2WriteRegister(pSystemContext, kVRegTimelapseCaptureValue, 1);
+	ntv2WriteRegister(pSystemContext, kVRegTimelapseIntervalValue, 1);
+	ntv2WriteRegister(pSystemContext, kVRegTimelapseIntervalUnits, kTimelapseSeconds);
+	ntv2WriteRegister(pSystemContext, kVRegAnalogInStandard, NTV2_STANDARD_525);
+	ntv2WriteRegister(pSystemContext, kVRegLUT2Type, NTV2_LUTUnknown);
+	ntv2WriteRegister(pSystemContext, kVRegLUT3Type, NTV2_LUTUnknown);
+	ntv2WriteRegister(pSystemContext, kVRegLUT4Type, NTV2_LUTUnknown);
+	ntv2WriteRegister(pSystemContext, kVRegRGBRangeConverterLUTType, NTV2_LUTLinear);
+	ntv2WriteRegister(pSystemContext, kVRegTestPatternChoice, kTestPatternColorBar75);
+	ntv2WriteRegister(pSystemContext, kVRegEveryFrameTaskFilter, NTV2_STANDARD_TASKS);
+	ntv2WriteRegister(pSystemContext, kVRegDefaultInput, 1);
+	ntv2WriteRegister(pSystemContext, kVRegDefaultVideoOutMode, kDefaultModeVideoIn);
+	ntv2WriteRegister(pSystemContext, kVRegDefaultVideoFormat, NTV2_FORMAT_1080i_5994);
+	ntv2WriteRegister(pSystemContext, kVRegLUT5Type, NTV2_LUTUnknown);
+	ntv2WriteRegister(pSystemContext, kVRegEFTNeedsUpdating, true);
+	for(uint32_t i = 0; i < NTV2_MAX_NUM_CHANNELS; i++)
+		ntv2WriteRegister(pSystemContext, kVRegChannelCrosspointFirst+i, NTV2CROSSPOINT_INVALID);
+	ntv2WriteRegister(pSystemContext, kVRegAncField1Offset, ((deviceID == DEVICE_ID_IOIP_2110) || (deviceID == DEVICE_ID_IOIP_2110_RGB12)) ? 0x8000 : 0x4000);
+	ntv2WriteRegister(pSystemContext, kVRegMonAncField1Offset, ((deviceID == DEVICE_ID_IOIP_2110) || (deviceID == DEVICE_ID_IOIP_2110_RGB12)) ? 0x6000 : 0x4000);
+	ntv2WriteRegister(pSystemContext, kVRegAncField2Offset, ((deviceID == DEVICE_ID_IOIP_2110) || (deviceID == DEVICE_ID_IOIP_2110_RGB12)) ? 0x4000 : 0x2000);
+	ntv2WriteRegister(pSystemContext, kVRegMonAncField2Offset, 0x2000);
+	ntv2WriteRegister(pSystemContext, kVRegUseThermostat, 1);	//	Automatic fan control? (0=disabled)
+	ntv2WriteRegister(pSystemContext, kVRegFanSpeed, 50);	//	Default fan speed (percent)
+	ntv2WriteRegister(pSystemContext, kVRegEnableBT2020, 0);
+	ntv2WriteRegister(pSystemContext, kVRegDisableAutoVPID, 0);
+
+	for(uint32_t i = 0; i < 8; i++)
+	{
+		ntv2WriteRegister(pSystemContext, gChannelToVPIDTransferCharacteristics[i], 0);
+		ntv2WriteRegister(pSystemContext, gChannelToVPIDColorimetry[i], 0);
+		ntv2WriteRegister(pSystemContext, gChannelToVPIDLuminance[i], 0);
+	}
+
+	ntv2WriteRegister(pSystemContext, kVRegBaseFirmwareDeviceID, (uint32_t)deviceID);
+
+	ntv2Message("<- Exit\n");
+}
+#endif
+
+bool IsKonaIPDevice(Ntv2SystemContext* inSystemContext)
+{
+	NTV2DeviceID deviceID = (NTV2DeviceID)ntv2ReadRegister(inSystemContext, kRegBoardID);
+	
+	switch (deviceID)
+	{
+		case DEVICE_ID_KONAIP_2022:
+		case DEVICE_ID_KONAIP_4CH_2SFP:
+		case DEVICE_ID_KONAIP_1RX_1TX_1SFP_J2K:
+		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:
+		case DEVICE_ID_KONAIP_1RX_1TX_2110:
+		case DEVICE_ID_KONAIP_2110:
+		case DEVICE_ID_KONAIP_2110_RGB12:
+		case DEVICE_ID_IOIP_2022:
+		case DEVICE_ID_IOIP_2110:
+		case DEVICE_ID_IOIP_2110_RGB12:
+			return true;
+		default:
+			return false;
+	}
+}
 
 ////////////////////////
 //interrupt routines
@@ -333,7 +973,6 @@ bool IsMultiFormatActive (Ntv2SystemContext* context)
 
 	if(!NTV2DeviceCanDoMultiFormat(deviceID))
 		return false;
-
 	ntv2ReadRegisterMS(context, kRegGlobalControl2, &returnVal, kRegMaskIndependentMode, kRegShiftIndependentMode);
 	return (returnVal ? true : false);
 }
@@ -756,7 +1395,7 @@ bool ProgramProductCode(Ntv2SystemContext* context)
 			WaitForFlashNOTBusy(context);
 			bankSelectNumber = NTV2DeviceGetSPIFlashVersion(deviceID) >= 5 ? 0x03 : 0x01;
 			ntv2WriteRegister(context, kRegXenaxFlashAddress, bankSelectNumber);
-			ntv2WriteRegister(context, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND);
+			ntv2WriteRegister(context, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMAND);
 			WaitForFlashNOTBusy(context);
 		}
 
@@ -774,7 +1413,7 @@ bool ProgramProductCode(Ntv2SystemContext* context)
 			{
 				ntv2Message("CNTV2::InitializeBoard Io4K+ %08X incorrect serial location\n", serialNumber);
 				ntv2WriteRegister(context, kRegXenaxFlashAddress, 0x2);
-				ntv2WriteRegister(context, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND);
+				ntv2WriteRegister(context, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMAND);
 				WaitForFlashNOTBusy(context);
 				ntv2WriteRegister(context, kRegXenaxFlashAddress, baseAddress);
 				ntv2WriteRegister(context, kRegXenaxFlashControlStatus, READFAST_COMMAND);
@@ -790,7 +1429,7 @@ bool ProgramProductCode(Ntv2SystemContext* context)
 			WaitForFlashNOTBusy(context);
 			bankSelectNumber = 0x00;
 			ntv2WriteRegister(context, kRegXenaxFlashAddress, bankSelectNumber);
-			ntv2WriteRegister(context, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND);
+			ntv2WriteRegister(context, kRegXenaxFlashControlStatus, hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMAND);
 			WaitForFlashNOTBusy(context);
 		}
 	}

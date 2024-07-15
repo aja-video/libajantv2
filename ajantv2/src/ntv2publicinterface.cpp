@@ -1549,7 +1549,7 @@ bool NTV2Buffer::Truncate (const size_t inNewByteCount)
 		return false;	//	Cannot enlarge -- i.e. can't be greater than my current size
 	if (!inNewByteCount  &&  IsAllocatedBySDK())
 		return Deallocate();	//	A newByteCount of zero calls Deallocate
-	fByteCount = inNewByteCount;
+	fByteCount = ULWord(inNewByteCount);
 	return true;
 }
 
@@ -1799,7 +1799,7 @@ bool NTV2Buffer::SetFromHexString (const string & inStr)
 
 	//	Decode and copy in the data...
 	for (size_t srcNdx(0), dstNdx(0);  srcNdx < str.size();  srcNdx += 2)
-		U8(dstNdx++) = uint8_t(aja::stoul (str.substr(srcNdx,2), AJA_NULL, 16));
+		U8(int(dstNdx++)) = uint8_t(aja::stoul (str.substr(srcNdx,2), AJA_NULL, 16));
 
 	return true;
 }
@@ -3104,14 +3104,14 @@ bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterValueMap & outValues) cons
 	outValues.clear ();
 	if (!mOutGoodRegisters)
 		return false;		//	Empty/null 'mOutGoodRegisters' array!
-	if (!mOutNumRegisters)
-		return false;		//	Driver says zero successfully read!
-	if (mOutNumRegisters > mInNumRegisters)
-		return false;		//	Sanity check failed:  mOutNumRegisters must be less than or equal to mInNumRegisters!
-	if (!mOutValues)
-		return false;		//	Empty/null 'mOutValues' array!
-	if (mOutGoodRegisters.GetByteCount() != mOutValues.GetByteCount())
-		return false;		//	Sanity check failed:  These sizes should match
+	//if (!mOutNumRegisters)
+	//	return false;		//	Driver says zero successfully read!
+	//if (mOutNumRegisters > mInNumRegisters)
+	//	return false;		//	Sanity check failed:  mOutNumRegisters must be less than or equal to mInNumRegisters!
+	//if (!mOutValues)
+	//	return false;		//	Empty/null 'mOutValues' array!
+	//if (mOutGoodRegisters.GetByteCount() != mOutValues.GetByteCount())
+	//	return false;		//	Sanity check failed:  These sizes should match
 
 	const ULWord *	pRegArray	(mOutGoodRegisters);
 	const ULWord *	pValArray	(mOutValues);

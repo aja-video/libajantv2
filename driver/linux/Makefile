@@ -128,6 +128,7 @@ DRIVERINCS = ../ntv2anc.h \
 			../ntv2setup.h \
 			../ntv2stream.h \
 			../ntv2system.h \
+			../ntv2video.h \
 			../ntv2videoraster.h \
 			../ntv2videorasterreg.h \
 			../ntv2vpid.h \
@@ -152,6 +153,7 @@ DRIVERSRCS = ../ntv2anc.c \
 			../ntv2setup.c \
 			../ntv2stream.c \
 			../ntv2system.c \
+			../ntv2video.c \
 			../ntv2videoraster.c \
 			../ntv2vpid.c \
 			../ntv2xpt.c

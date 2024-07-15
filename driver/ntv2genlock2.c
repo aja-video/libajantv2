@@ -548,7 +548,7 @@ static bool wait_genlock2(struct ntv2_genlock2 *ntv2_gen, uint32_t numMicrosSeco
 #else
 		if (timeoutCount++ > 100)
 		{
-			NTV2_MSG_GENLOCK_INFO("Genlock2 200us wait TIMEDOUT");
+			NTV2_MSG_GENLOCK_INFO("%s: Genlock2 200us wait TIMEDOUT", ntv2_gen->name);
 			return false;
 		}
 		else

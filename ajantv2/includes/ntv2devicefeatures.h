@@ -28,6 +28,7 @@
 
 /**
 	@brief	Used with CNTV2DriverInterface::GetBoolParam to determine device capabilities.
+	@see	vidop-features
 **/
 typedef enum _NTV2BoolParamID
 {
@@ -40,19 +41,19 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoRGBLevelAConversion,			///< @brief True if the device can do RGB over 3G Level A.
 	kDeviceCanDo425Mux,							///< @brief True if the device supports SMPTE 425 mux control.
 	kDeviceCanDo4KVideo,						///< @brief True if the device can handle 4K/UHD video.
-	kDeviceCanDoAESAudioIn,						///< @note Calculate based on kDeviceGetNumAESAudioInputChannels
-	kDeviceCanDoAnalogAudio,					///< @note Calculate based on kDeviceGetNumAnalogAudioInputChannels and kDeviceGetNumAnalogAudioOutputChannels
-	kDeviceCanDoAnalogVideoIn,					///< @note Calculate based on kDeviceGetNumAnalogVideoInputs
-	kDeviceCanDoAnalogVideoOut,					///< @note Calculate based on kDeviceGetNumAnalogVideoOutputs
-	kDeviceCanDoAudio2Channels,					///< @note Calculate based on kDeviceGetMaxAudioChannels
-	kDeviceCanDoAudio6Channels,					///< @note Calculate based on kDeviceGetMaxAudioChannels
-	kDeviceCanDoAudio8Channels,					///< @note Calculate based on kDeviceGetMaxAudioChannels
+	kDeviceCanDoAESAudioIn,						///< @brief True if device has any AES audio inputs or outputs
+	kDeviceCanDoAnalogAudio,					///< @brief True if device has any analog inputs or outputs
+	kDeviceCanDoAnalogVideoIn,					///< @brief True if device has one or more analog video inputs
+	kDeviceCanDoAnalogVideoOut,					///< @brief True if device has one or more analog video outputs
+	kDeviceCanDoAudio2Channels,					///< @brief True if audio system(s) support 2 or more audio channels
+	kDeviceCanDoAudio6Channels,					///< @brief True if audio system(s) support 6 or more audio channels
+	kDeviceCanDoAudio8Channels,					///< @brief True if audio system(s) support 8 or more audio channels
 	kDeviceCanDoAudio96K,						///< @brief True if Audio System(s) support a 96kHz sample rate.
 	kDeviceCanDoAudioDelay,						///< @brief True if Audio System(s) support an adjustable delay.
 	kDeviceCanDoBreakoutBox,					///< @brief True if device supports an AJA breakout box.
-	kDeviceCanDoCapture,						///< @note Calculate based on kDeviceGetNumVideoInputs and kDeviceGetNumHDMIVideoInputs and kDeviceGetNumAnalogVideoInputs
-	kDeviceCanDoColorCorrection,				///< @note Calculate based on kDeviceGetNumLUTs
-	kDeviceCanDoCustomAnc,						///< @brief True if device has ANC inserter/extractor firmware.
+	kDeviceCanDoCapture,						///< @brief True if device has any SDI, HDMI or analog video inputs
+	kDeviceCanDoColorCorrection,				///< @brief True if device has any LUTs
+	kDeviceCanDoCustomAnc,						///< @brief True if device has SDI ANC inserter/extractor firmware.
 	kDeviceCanDoDSKOpacity,						///< @brief True if device mixer/keyer supports adjustable opacity.
 	kDeviceCanDoDualLink,						///< @brief True if device supports 10-bit RGB input/output over 2-wire SDI.
 	kDeviceCanDoDVCProHD,						///< @brief True if device can squeeze/stretch between 1920x1080/1280x1080 and 1280x720/960x720.
@@ -117,7 +118,8 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDo8KVideo,						///< @brief True if device supports 8K video formats.
 	kDeviceCanDoAudio192K,						///< @brief True if Audio System(s) support a 192kHz sample rate.
 	kDeviceCanDoAudioMixer,						///< @brief True if device has a firmware audio mixer.
-	kDeviceCanDoHDMIAux,						///< @brief True if device supports HDMI AUX data insertion/extraction.
+	kDeviceCanDoHDMIAuxCapture,					///< @brief True if device has HDMI AUX data extractor(s).
+	kDeviceCanDoHDMIAuxPlayback,				///< @brief True if device has HDMI AUX data inserter(s).
 	kDeviceCanDoFramePulseSelect,				///< @brief True if device supports frame pulse source independent of reference source.
 	kDeviceCanDoHDMIMultiView,					///< @brief True if device can rasterize 4 HD signals into a single HDMI output.
 	kDeviceHasMultiRasterWidget,				///< @brief True if device can rasterize 4 HD signals into a single HDMI output.
@@ -149,6 +151,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoHDMIQuadRasterConversion,		///< @brief	True if HDMI in/out supports square-division (quad) raster conversion.	(New in SDK 17.1)
 	kDeviceCanDoCustomHancInsertion,			///< @brief	True if device supports custom HANC packet insertion.	(New in SDK 17.1)
 	kDeviceCanDoStreamingDMA,					///< @brief	True if device supports streaming DMA.	(New in SDK 17.1)
+	kDeviceHasPWMFanControl,					///< @brief	True if device has a PWM-controlled cooling fan.	(New in SDK 17.1)
 	kNTV2BoolParam_LAST,
 	kNTV2BoolParam_COUNT	= kNTV2BoolParam_LAST-kNTV2BoolParam_FIRST,
 	kDeviceCanDo_INVALID	= kNTV2BoolParam_LAST
@@ -158,6 +161,7 @@ typedef enum _NTV2BoolParamID
 
 /**
 	@brief	Used with CNTV2DriverInterface::GetNumericParam to determine device capabilities.
+	@see	vidop-features
 **/
 typedef enum _NTV2NumericParamID
 {
@@ -165,7 +169,7 @@ typedef enum _NTV2NumericParamID
 	kDeviceGetActiveMemorySize	= kNTV2NumericParam_FIRST,	///< @brief The size, in bytes, of the device's active RAM available for video and audio.
 	kDeviceGetDACVersion,						///< @brief The version number of the DAC on the device.
 	kDeviceGetDownConverterDelay,				///< @brief The down-converter delay on the device.
-	kDeviceGetHDMIVersion,						///< @brief The HDMI input(s) and/or output(s) on the device.
+	kDeviceGetHDMIVersion,						///< @brief The version number of the HDMI chipset on the device.
 	kDeviceGetLUTVersion,						///< @brief The version number of the LUT(s) on the device.
 	kDeviceGetMaxAudioChannels,					///< @brief The maximum number of audio channels that a single Audio System can support on the device.
 	kDeviceGetMaxRegisterNumber,				///< @brief The highest register number for the device.
@@ -221,6 +225,7 @@ typedef enum _NTV2NumericParamID
 
 /**
 	@brief	Identifies NTV2 enumerated types, used in CNTV2DriverInterface::GetSupportedItems.
+	@see	vidop-features
 **/
 typedef enum _NTV2EnumsID
 {

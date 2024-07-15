@@ -4732,6 +4732,7 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_KONAX:					return inForRetailDisplay ? "KONA X"					: "KonaX";
 		case DEVICE_ID_KONAXM:					return inForRetailDisplay ? "KONA XM"					: "KonaXM";
 		case DEVICE_ID_SOJI_3DLUT:				return "SOJI-3DLUT";
+		case DEVICE_ID_SOJI_DIAGS:				return "SOJI-DIAGS";
 		case DEVICE_ID_SOJI_OE1:				return "SOJI-OE1";
 		case DEVICE_ID_SOJI_OE2:				return "SOJI-OE2";
 		case DEVICE_ID_SOJI_OE3:				return "SOJI-OE3";
@@ -4739,9 +4740,9 @@ std::string NTV2DeviceIDToString (const NTV2DeviceID inValue,	const bool inForRe
 		case DEVICE_ID_SOJI_OE5:				return "SOJI-OE5";
 		case DEVICE_ID_SOJI_OE6:				return "SOJI-OE6";
 		case DEVICE_ID_SOJI_OE7:				return "SOJI-OE7";
-		case DEVICE_ID_SOJI_DIAGS:				return "SOJI-DIAGS";
 		case DEVICE_ID_TTAP:					return inForRetailDisplay ? "T-TAP"						: "TTap";
 		case DEVICE_ID_TTAP_PRO:				return inForRetailDisplay ? "T-TAP Pro"					: "TTapPro";
+		case DEVICE_ID_SOFTWARE:				return inForRetailDisplay ? "Software"					: "Software";
 		case DEVICE_ID_NOTFOUND:				return inForRetailDisplay ? "AJA Device"				: "(Not Found)";
 #if defined(_DEBUG)
 #else
@@ -5294,6 +5295,18 @@ NTV2InputSource GetNTV2InputSourceForIndex (const ULWord inIndex0, const NTV2IOK
 	#endif
 	}
 	return NTV2_INPUTSOURCE_INVALID;
+}
+
+
+NTV2IOKinds GetNTV2InputSourceKind (const NTV2InputSource inSrc)
+{
+	if (NTV2_INPUT_SOURCE_IS_SDI(inSrc))
+		return NTV2_IOKINDS_SDI;
+	if (NTV2_INPUT_SOURCE_IS_HDMI(inSrc))
+		return NTV2_IOKINDS_HDMI;
+	if (NTV2_INPUT_SOURCE_IS_ANALOG(inSrc))
+		return NTV2_IOKINDS_ANALOG;
+	return NTV2_IOKINDS_NONE;
 }
 
 
@@ -7481,22 +7494,22 @@ string NTV2GetBitfileName (const NTV2DeviceID inBoardID)
 
 bool NTV2IsCompatibleBitfileName (const string & inBitfileName, const NTV2DeviceID inDeviceID)
 {
-	const string	deviceBitfileName	(::NTV2GetBitfileName (inDeviceID));
+	const string deviceBitfileName (::NTV2GetBitfileName(inDeviceID));
 	if (inBitfileName == deviceBitfileName)
 		return true;
 
 	switch (inDeviceID)
 	{
-	case DEVICE_ID_KONA3GQUAD:	return ::NTV2GetBitfileName (DEVICE_ID_KONA3G) == inBitfileName;
-	case DEVICE_ID_KONA3G:		return ::NTV2GetBitfileName (DEVICE_ID_KONA3GQUAD) == inBitfileName;
+		case DEVICE_ID_KONA3GQUAD:	return ::NTV2GetBitfileName (DEVICE_ID_KONA3G) == inBitfileName;
+		case DEVICE_ID_KONA3G:		return ::NTV2GetBitfileName (DEVICE_ID_KONA3GQUAD) == inBitfileName;
 
-	case DEVICE_ID_KONA4:		return ::NTV2GetBitfileName (DEVICE_ID_KONA4UFC) == inBitfileName;
-	case DEVICE_ID_KONA4UFC:	return ::NTV2GetBitfileName (DEVICE_ID_KONA4) == inBitfileName;
+		case DEVICE_ID_KONA4:		return ::NTV2GetBitfileName (DEVICE_ID_KONA4UFC) == inBitfileName;
+		case DEVICE_ID_KONA4UFC:	return ::NTV2GetBitfileName (DEVICE_ID_KONA4) == inBitfileName;
 
-	case DEVICE_ID_IO4K:		return ::NTV2GetBitfileName (DEVICE_ID_IO4KUFC) == inBitfileName;
-	case DEVICE_ID_IO4KUFC:		return ::NTV2GetBitfileName (DEVICE_ID_IO4K) == inBitfileName;
+		case DEVICE_ID_IO4K:		return ::NTV2GetBitfileName (DEVICE_ID_IO4KUFC) == inBitfileName;
+		case DEVICE_ID_IO4KUFC:		return ::NTV2GetBitfileName (DEVICE_ID_IO4K) == inBitfileName;
 
-	default:					break;
+		default:					break;
 	}
 	return false;
 
@@ -7602,6 +7615,8 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_KONALHEPLUS,
 														DEVICE_ID_KONALHI,
 														DEVICE_ID_KONALHIDVI,
+														DEVICE_ID_KONAX,
+														DEVICE_ID_KONAXM,
 														DEVICE_ID_SOJI_OE1,
 														DEVICE_ID_SOJI_OE2,
 														DEVICE_ID_SOJI_OE3,
@@ -7611,15 +7626,17 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_SOJI_OE7,
 														DEVICE_ID_SOJI_3DLUT,
 														DEVICE_ID_SOJI_DIAGS,
-														DEVICE_ID_TTAP_PRO,
 														DEVICE_ID_TTAP,
-														DEVICE_ID_KONAX,
-														DEVICE_ID_KONAXM,
+														DEVICE_ID_TTAP_PRO,
+														DEVICE_ID_SOFTWARE,
 														DEVICE_ID_NOTFOUND	};
 	if (inKinds == NTV2_DEVICEKIND_NONE)
 		return NTV2DeviceIDSet();
 
 	NTV2DeviceIDSet result;
+	if (inKinds == NTV2_DEVICEKIND_SOFTWARE)
+		{result.insert(DEVICE_ID_SOFTWARE); return result;}
+
 	for (unsigned ndx(0);  ndx < sizeof(sValidDeviceIDs) / sizeof(NTV2DeviceID);  ndx++)
 	{
 		const NTV2DeviceID	deviceID(sValidDeviceIDs[ndx]);
