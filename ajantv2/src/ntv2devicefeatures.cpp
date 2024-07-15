@@ -120,8 +120,10 @@
 	{
 		switch (index0)
 		{
-			case 0:		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn1) || NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn1) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn1));
-			case 1:		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn2) || NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn2) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn2));
+			case 0:		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn1) || NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn1) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn1) ||
+								NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut1));
+			case 1:		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn2) || NTV2DeviceCanDoWidget(boardID, NTV2_WgtSDIIn2) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn2) ||
+								NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIOut2));
 			case 2:		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn3) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn3));
 			case 3:		return (NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn4) || NTV2DeviceCanDoWidget(boardID, NTV2_Wgt12GSDIIn4));
 			case 4:		return NTV2DeviceCanDoWidget(boardID, NTV2_Wgt3GSDIIn5);
