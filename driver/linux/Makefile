@@ -31,47 +31,60 @@ ifdef AJA_HEVC
 	EXTRA_CFLAGS += -DAJA_HEVC=$(AJA_HEVC)
 endif
 
-# try to find the nvidia p2p include file
+# if rdma is set
+ifdef AJA_RDMA
+# force rdma build
+	NVIDIA_RDMA := 1
+else
+# if file rdma is present
+ifneq (,$(wildcard /etc/ajantv2/rdma))
+	NVIDIA_RDMA := 1
+endif
+endif
+
+ifdef AJA_RDMA
+
+# find the nvidia p2p include file
 ifeq ($(NVIDIA_SRC_DIR),)
-	NVIDIA_SRC_DIR := $(shell find /usr/src/nvidia-* -name nv-p2p.h 2>/dev/null|head -1|xargs dirname 2>/dev/null)
+	NVIDIA_SRC_DIR := $(shell find /usr/src/nvidia* -name nv-p2p.h 2>/dev/null|head -1|xargs dirname 2>/dev/null)
 endif
 ifeq ($(NVIDIA_SRC_DIR),)
 	NVIDIA_SRC_DIR := $(shell find /usr/src/linux-* -name nv-p2p.h 2>/dev/null|head -1|xargs dirname 2>/dev/null)
 endif
 
-# if rdma is set
-ifdef AJA_RDMA
-# force rdma build
-	NVIDIA_RDMA = 1
-else
-# if file rdma is present
-ifneq (,$(wildcard /etc/ajantv2/rdma))
-	NVIDIA_RDMA = 1
+# find the nvidia.ko file
+ifeq ($(NVIDIA_P2P),)
+	NVIDIA_P2P := $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia-p2p.ko'|grep -P 'nvidia-p2p(_[0-9]+)?.ko'|head -1)
 endif
+ifeq ($(NVIDIA_KO),)
+	NVIDIA_KO := $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia.ko'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
+endif	
+ifeq ($(NVIDIA_KO),)
+	NVIDIA_KO := $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia.ko.xz'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
 endif
 
-# if doing rdma build
-ifdef NVIDIA_RDMA
-ifeq ($(NVIDIA_KO),)
-	NVIDIA_KO = $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia*.ko'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
-endif	
-ifeq ($(NVIDIA_KO),)
-	NVIDIA_KO = $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia*.ko.xz'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
-endif	
-ifeq ($(shell modinfo $(NVIDIA_KO) | grep license: | grep GPL),)
-	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1 -DNVIDIA_PROPRIETARY=1
-else
-	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1
-endif
 ifdef AJA_IGPU
-# configure for igpu
 	EXTRA_CFLAGS += -DAJA_IGPU=1
+ifneq ($(NVIDIA_P2P),)
+ifeq ($(NVIDIA_SYMVERS),)
+	NVIDIA_GEN_SYMVERS := ./nvidia-ko-to-module-symvers $(NVIDIA_P2P) $(A_LINUX_DRIVER_PATH)/nvidia.symvers
+	NVIDIA_SYMVERS := $(A_LINUX_DRIVER_PATH)/nvidia.symvers
+endif
+endif
 else
 ifeq ($(NVIDIA_SYMVERS),)
 	NVIDIA_GEN_SYMVERS := ./nvidia-ko-to-module-symvers $(NVIDIA_KO) $(A_LINUX_DRIVER_PATH)/nvidia.symvers
 	NVIDIA_SYMVERS := $(A_LINUX_DRIVER_PATH)/nvidia.symvers
 endif
 endif
+
+endif
+
+# determine if the ko is gpl
+ifeq ($(shell modinfo $(NVIDIA_KO) | grep license: | grep GPL),)
+	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1 -DNVIDIA_PROPRIETARY=1
+else
+	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1
 endif
 
 ifdef AJA_CREATE_DEVICE_NODES
@@ -238,7 +251,7 @@ default: all
 	@echo linux distro flags: '$(DISTRO_INFO)'
 	@echo lib: $(LIB)
 ifdef NVIDIA_RDMA
-ifdef AJA_IGPU
+ifeq ($(NVIDIA_SYMVERS),)
 	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules
 else
 	${NVIDIA_GEN_SYMVERS}
