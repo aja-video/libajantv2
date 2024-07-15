@@ -27,7 +27,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	endif()
 
     if(NOT CMAKE_MSVC_RUNTIME_LIBRARY)
-        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded") 
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
     endif()
 endif()
 
