@@ -131,7 +131,9 @@ void ntv2_rdma_put_pages(PDMA_PAGE_BUFFER pBuffer)
 #endif								
         pRdmaBuffer->page);
 
+#ifndef AJA_IGPU				
     rdmaFreeCallback(pBuffer);
+#endif    
     return;
 }
 
@@ -233,8 +235,12 @@ void ntv2_rdma_unmap_pages(struct pci_dev* pci_dev, PDMA_PAGE_BUFFER pBuffer)
 static void rdmaFreeCallback(void* data)
 {
 	PDMA_PAGE_BUFFER pBuffer = (PDMA_PAGE_BUFFER)data;
-    PRDMA_PAGE_BUFFER pRdmaBuffer = (PRDMA_PAGE_BUFFER)pBuffer->rdmaContext;
-	struct nvidia_p2p_page_table* rdmaPage;
+    PRDMA_PAGE_BUFFER pRdmaBuffer = NULL;
+	struct nvidia_p2p_page_table* rdmaPage = NULL;;
+
+    if (pBuffer == NULL) return;
+    pRdmaBuffer = (PRDMA_PAGE_BUFFER)pBuffer->rdmaContext;
+    if (pRdmaBuffer == NULL) return;
 
 	rdmaPage = xchg(&pRdmaBuffer->page, NULL);
 	if (rdmaPage != NULL)

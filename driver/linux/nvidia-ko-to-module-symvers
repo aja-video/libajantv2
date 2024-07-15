@@ -1,8 +1,6 @@
 #!/bin/bash
 
 syms=()
-syms+=(nvidia_p2p_init_mapping)
-syms+=(nvidia_p2p_destroy_mapping)
 syms+=(nvidia_p2p_get_pages)
 syms+=(nvidia_p2p_put_pages)
 syms+=(nvidia_p2p_free_page_table)
