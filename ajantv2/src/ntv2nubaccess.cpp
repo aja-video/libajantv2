@@ -1673,7 +1673,7 @@ bool NTV2PluginLoader::validate (void)
 		{	P_FAIL("Missing 'Issuer' key '" << kNTV2PluginX500AttrKey_OrganizationName << "' in X509 certificate from '" << pluginSigPath() << "'");
 			return false;
 		}
-		if (!subjectInfo.hasKey(kNTV2PluginX500AttrKey_OrganizationUnit))
+		if (!subjectInfo.hasKey(kNTV2PluginX500AttrKey_OrganizationalUnitName))
 		{	P_FAIL("Missing 'Subject' key '" << kNTV2PluginX500AttrKey_OrganizationalUnitName << "' in X509 certificate from '" << pluginSigPath() << "'");
 			return false;
 		}
