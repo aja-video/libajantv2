@@ -1666,11 +1666,15 @@ bool NTV2PluginLoader::validate (void)
 			subjectInfo.Print(cout, false) << endl;
 		}
 		if (!issuerInfo.hasKey(kNTV2PluginX500AttrKey_CommonName))
-		{	P_FAIL("Missing issuer key '" << kNTV2PluginX500AttrKey_CommonName << "' in X509 certificate from '" << pluginSigPath() << "'");
+		{	P_FAIL("Missing 'Issuer' key '" << kNTV2PluginX500AttrKey_CommonName << "' in X509 certificate from '" << pluginSigPath() << "'");
 			return false;
 		}
 		if (!issuerInfo.hasKey(kNTV2PluginX500AttrKey_OrganizationName))
-		{	P_FAIL("Missing issuer key '" << kNTV2PluginX500AttrKey_OrganizationName << "' in X509 certificate from '" << pluginSigPath() << "'");
+		{	P_FAIL("Missing 'Issuer' key '" << kNTV2PluginX500AttrKey_OrganizationName << "' in X509 certificate from '" << pluginSigPath() << "'");
+			return false;
+		}
+		if (!subjectInfo.hasKey(kNTV2PluginX500AttrKey_OrganizationUnit))
+		{	P_FAIL("Missing 'Subject' key '" << kNTV2PluginX500AttrKey_OrganizationalUnitName << "' in X509 certificate from '" << pluginSigPath() << "'");
 			return false;
 		}
 		mDict.addFrom(certInfo);	//	Store certInfo key/value pairs into client/server instance's params...
@@ -1738,25 +1742,25 @@ bool NTV2PluginLoader::validate (void)
 	const string	onReg(regInfo.valueForKey(kNTV2PluginRegInfoKey_Vendor)),
 					onCert(issuerInfo.valueForKey(kNTV2PluginX500AttrKey_OrganizationName));
 	const string	ouReg(regInfo.valueForKey(kNTV2PluginRegInfoKey_OrgUnit)),
-					ouCert(issuerInfo.valueForKey(kNTV2PluginX500AttrKey_OrganizationalUnitName));
+					ouCert(subjectInfo.valueForKey(kNTV2PluginX500AttrKey_OrganizationalUnitName));
 	const string	myVers(NTV2RPCBase::ShortSDKVersion()),
 					plVers(regInfo.valueForKey(kNTV2PluginRegInfoKey_NTV2SDKVersion));
 	if (onReg != onCert)
 	{	P_FAIL("Vendor name (key='" << kNTV2PluginRegInfoKey_Vendor << "') \"" << onReg << "\" from plugin \""
 				<< pluginPath() << "\" doesn't match organization name (key='" << kNTV2PluginX500AttrKey_OrganizationName
-				<< "') \"" << onCert << "\" from X509 certificate in '" << pluginSigPath() << "'");
+				<< "') \"" << onCert << "\" from X509 certificate 'Issuer' in '" << pluginSigPath() << "'");
 		return false;	//	fail
 	}
 	if (cnReg != cnCert)
 	{	P_FAIL("Common name (key='" << kNTV2PluginRegInfoKey_CommonName << "') \"" << cnReg << "\" from plugin \""
 				<< pluginPath() << "\" doesn't match common name (key='" << kNTV2PluginX500AttrKey_CommonName
-				<< "') \"" << cnCert << "\" from X509 certificate in '" << pluginSigPath() << "'");
+				<< "') \"" << cnCert << "\" from X509 certificate 'Issuer' in '" << pluginSigPath() << "'");
 		return false;	//	fail
 	}
 	if (ouReg != ouCert)
 	{	P_FAIL("Org unit (key='" << kNTV2PluginX500AttrKey_OrganizationalUnitName << "') \"" << ouReg << "\" from plugin \""
 				<< pluginPath() << "\" doesn't match org unit (key='" << kNTV2PluginX500AttrKey_OrganizationalUnitName
-				<< "') \"" << ouCert << "\" from X509 certificate in '" << pluginSigPath() << "'");
+				<< "') \"" << ouCert << "\" from X509 certificate 'Subject' in '" << pluginSigPath() << "'");
 		return false;	//	fail
 	}
 	if (myVers != plVers)
