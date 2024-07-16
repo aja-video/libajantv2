@@ -25,6 +25,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	if (DEFINED AJA_MSVC_RUNTIME_LIBRARY)
 		set(CMAKE_MSVC_RUNTIME_LIBRARY "${AJA_MSVC_RUNTIME_LIBRARY}" PARENT_SCOPE)
 	endif()
+
+    if(NOT CMAKE_MSVC_RUNTIME_LIBRARY)
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+    endif()
 endif()
 
 option(AJANTV2_BUILD_OPENSOURCE    "Build libajantv2 as open-source (MIT license)?"   ON)
@@ -34,7 +38,7 @@ option(AJANTV2_DISABLE_DEMOS       "Disable building libajantv2 demo apps?"     
 option(AJANTV2_DISABLE_DRIVER      "Disable building libajantv2 driver (Linux-only)?" OFF)
 option(AJANTV2_DISABLE_TESTS       "Disable building libajantv2 tests?"               OFF)
 option(AJANTV2_DISABLE_TOOLS       "Disable building libajantv2 tools?"               OFF)
-option(AJANTV2_DISABLE_PLUGIN_LOAD "Disable NTV2 3rd party plugin loading?"           ON)
+option(AJANTV2_DISABLE_PLUGIN_LOAD "Disable NTV2 3rd party plugin loading?"           OFF)
 
 if (NOT DEFINED LIBAJANTV2_DIR)
     set(LIBAJANTV2_DIR ${CMAKE_CURRENT_SOURCE_DIR})

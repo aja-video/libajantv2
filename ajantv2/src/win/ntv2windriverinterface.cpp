@@ -838,7 +838,8 @@ bool CNTV2WinDriverInterface::DmaTransfer ( const NTV2DMAEngine inDMAEngine,
 											const bool			inSynchronous)
 {
 	if (IsRemote())
-		return false;
+		return CNTV2DriverInterface::DmaTransfer(inDMAEngine, inIsRead, inFrameNumber, pFrameBuffer,
+												inOffsetBytes, inByteCount, inSynchronous);
 	if (!IsOpen())
 		return false;
 
@@ -881,7 +882,8 @@ bool CNTV2WinDriverInterface::DmaTransfer ( const NTV2DMAEngine inDMAEngine,
 											const bool			inSynchronous)
 {
 	if (IsRemote())
-		return false;
+		return CNTV2DriverInterface::DmaTransfer (inDMAEngine, inIsRead, inFrameNumber, pFrameBuffer, inOffsetBytes, inByteCount,
+													inNumSegments, inHostPitch, inCardPitch, inSynchronous);
 	if (!IsOpen())
 		return false;
 
@@ -926,7 +928,8 @@ bool CNTV2WinDriverInterface::DmaTransfer ( const NTV2DMAEngine			inDMAEngine,
 											const PCHANNEL_P2P_STRUCT & inP2PData)
 {
 	if (IsRemote())
-		return false;
+		return CNTV2DriverInterface::DmaTransfer (inDMAEngine, inDMAChannel, inIsTarget, inFrameNumber, inCardOffsetBytes, inByteCount,
+													inNumSegments, inHostPitch, inCardPitch, inP2PData);
 	if (!IsOpen())
 		return false;
 	if (!inP2PData)

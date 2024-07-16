@@ -41,8 +41,8 @@
 #define NTV2_MSG_HDMIOUT4_AUX(string, ...)			NTV2_MSG_PRINT(NTV2_DEBUG_HDMIOUT4_AUX, string, __VA_ARGS__)
 
 static uint32_t ntv2_debug_mask = 0xffffffff;
-static uint32_t ntv2_user_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
-static uint32_t ntv2_active_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR;
+static uint32_t ntv2_user_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR | NTV2_DEBUG_HDMIOUT4_STATE;
+static uint32_t ntv2_active_mask = NTV2_DEBUG_INFO | NTV2_DEBUG_ERROR | NTV2_DEBUG_HDMIOUT4_STATE;
 
 #define NTV2_AUX_DATA_SIZE		0x40
 

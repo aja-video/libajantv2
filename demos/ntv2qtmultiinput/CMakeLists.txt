@@ -17,14 +17,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(AJA_DEMO_COMMON_ROOT
     ${CMAKE_CURRENT_SOURCE_DIR}/../)
 
-set(AJA_LIB_GUI_ROOT
-        ${LIBAJAQT_DIR}/gui)
-
 set(TARGET_INCLUDE_DIRS
-	${CMAKE_CURRENT_SOURCE_DIR}/../
-	${AJA_LIBRARIES_ROOT}
-	${AJA_LIB_NTV2_ROOT}/includes
-    ${AJA_LIB_GUI_ROOT}
     ${AJA_DEMO_COMMON_ROOT})
 
 set(NTV2QTMULTIINPUT_SOURCES
@@ -32,6 +25,8 @@ set(NTV2QTMULTIINPUT_SOURCES
     ntv2qtmultiinput.h
     ntv2qtmultiinput.cpp
     ntv2qtmultiinput.qrc
+    ${AJA_DEMO_COMMON_ROOT}/ajapreviewwidget.h
+    ${AJA_DEMO_COMMON_ROOT}/ajapreviewwidget.cpp
     ${AJA_DEMO_COMMON_ROOT}/ntv2framegrabber.h
     ${AJA_DEMO_COMMON_ROOT}/ntv2framegrabber.cpp
     ${AJA_DEMO_COMMON_ROOT}/ntv2democommon.h
@@ -68,7 +63,7 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 endif()
 
 set(TARGET_SOURCES ${NTV2QTMULTIINPUT_SOURCES})
-list(APPEND TARGET_LINK_LIBS ajantv2 ajagui)
+list(APPEND TARGET_LINK_LIBS ajantv2 )
 
 add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
@@ -104,22 +99,3 @@ install(TARGETS ${PROJECT_NAME}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-if (AJA_INSTALL_SOURCES)
-    list(REMOVE_ITEM NTV2QTMULTIINPUT_SOURCES win-ver.rc)
-    install(FILES ${AJA_LIB_GUI_ROOT}/ajaapplication.qrc
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/ajalibraries/ajainternal/gui)
-    install(FILES ${NTV2QTMULTIINPUT_HEADERS} 
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtmultiinput)
-    install(FILES ${NTV2QTMULTIINPUT_SOURCES}
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtmultiinput)
-endif()
-if (AJA_INSTALL_CMAKE)
-    install(FILES CMakeLists.txt
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtmultiinput)
-endif()
-if (AJA_INSTALL_MISC)
-    install(FILES Makefile      DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtmultiinput)
-    install(FILES app.icns      DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtmultiinput)
-    install(FILES app.ico       DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtmultiinput)
-    install(FILES splash.png    DESTINATION ${CMAKE_INSTALL_PREFIX}/libajantv2/demos/ntv2qtmultiinput)
-endif()

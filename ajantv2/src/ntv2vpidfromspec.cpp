@@ -11,6 +11,8 @@
 
 #if !defined(NTV2_BUILDING_DRIVER)
 	#include "ntv2utils.h"
+#elif defined(AJAMacDext)
+	#include "ntv2kona.h"
 #else
 	#ifdef __cplusplus
 		extern "C"

@@ -5462,6 +5462,7 @@ typedef enum
 
 		#define NTV2_TYPE_VIRTUAL_DATA_RW		NTV2_FOURCC ('v', 'd', 'a', 't')	///< @brief Identifies NTV2VirtualData struct
 		#define NTV2_TYPE_BANKGETSET			NTV2_FOURCC ('b', 'n', 'k', 'S')	///< @brief Identifies NTV2BankSelGetSetRegs struct
+		#define NTV2_TYPE_ACCONTROL				NTV2_FOURCC ('c', 'o', 'n', 't')	///< @brief Identifies AUTOCIRCULATE_STATUS struct
 		#define NTV2_TYPE_ACSTATUS				NTV2_FOURCC ('s', 't', 'a', 't')	///< @brief Identifies AUTOCIRCULATE_STATUS struct
 		#define NTV2_TYPE_ACXFER				NTV2_FOURCC ('x', 'f', 'e', 'r')	///< @brief Identifies AUTOCIRCULATE_TRANSFER struct
 		#define NTV2_TYPE_ACXFERSTATUS			NTV2_FOURCC ('x', 'f', 's', 't')	///< @brief Identifies AUTOCIRCULATE_TRANSFER_STATUS struct
@@ -5996,8 +5997,8 @@ typedef enum
 				ULWord		fByteCount;				///< @brief The (maximum) size of the buffer pointed to by fUserSpacePtr, in bytes.
 													///			Do not set directly. Instead, use the constructor or the Set method.
 				ULWord		fFlags;					///< @brief Reserved for future use
+				ULWord64	fKernelSpacePtr;		///< @brief Reserved -- driver use only
 				#if defined (AJAMac)
-					ULWord64	fKernelSpacePtr;	///< @brief Reserved -- Mac driver use only
 					ULWord64	fIOMemoryDesc;		///< @brief Reserved -- Mac driver use only
 					ULWord64	fIOMemoryMap;		///< @brief Reserved -- Mac driver use only
 				#else
@@ -6262,9 +6263,9 @@ typedef enum
 				}
 
 				/**
-					@brief		Truncates me to the given length (provided I'm not page-aligned).
-					@param[in]	inByteCount		Specifies my new length. Must be greater than zero and less
-												than my current length.
+					@brief		Truncates me to the given length. No reallocation takes place.
+					@param[in]	inByteCount		Specifies my new length. Specify zero to Deallocate.
+												Otherwise must be less than my current length.
 					@return		True if successful; otherwise false.
 				**/
 				bool			Truncate (const size_t inByteCount);
@@ -6316,6 +6317,7 @@ typedef enum
 											characters are skipped and ignored. All other characters
 											must be a hexadecimal digit (upper or lower case).
 					@return		True if successful; otherwise false.
+					@see		NTV2Buffer::toHexString
 				**/
 				bool			SetFromHexString (const std::string & inStr);
 
@@ -6400,10 +6402,11 @@ typedef enum
 
 				/**
 					@brief	Converts my contents into a hex-encoded string.
-					@param[out]	outStr		Receives the hexadecimal-encoded string representation of my contents.
-					@param[in]	inLineBreakInterval	Optionally specifies the number of bytes to encode before
-													inserting a newline. Defaults to zero (no newline insertion).
+					@param[out]	outStr				Receives the hexadecimal-encoded string representation of my contents.
+					@param[in]	inLineBreakInterval	Optionally inserts a newline into the resulting string at the specified
+													byte count interval. Defaults to zero (no newlines are inserted).
 					@return True if successful; otherwise false.
+					@see	NTV2Buffer::SetFromHexString
 				**/
 				bool			toHexString (std::string & outStr, const size_t inLineBreakInterval = 0) const;
 
@@ -6656,14 +6659,14 @@ typedef enum
 
 				/**
 					@brief		Answers with my contents as a character string.
-					@param[out] outString		Receives the character string copied verbatim from my contents.
+					@param[out] outString		Receives the character string copied from my contents.
 					@param[in]	inU8Offset		The starting offset, in bytes, where copying will commence.
 					@param[in]	inMaxSize		Specifies the maximum number of 8-bit values to be returned.
 												Use zero for unlimited.
 												The actual number of returned 8-bit values may be less than this, depending on my size.
 												Defaults to 128.
 					@return						True if successful;	 otherwise false.
-					@note		This function blindly copies my contents into the outgoing string, without checking for validity.
+					@note		Byte copying terminates at the first zero byte that's encountered in my buffer.
 				**/
 				bool						GetString (std::string & outString, const size_t inU8Offset = 0, const size_t inMaxSize = 128) const;
 
@@ -6674,7 +6677,7 @@ typedef enum
 												Use zero for unlimited.
 												The actual number of returned 8-bit values may be less than this, depending on my size.
 												Defaults to 128.
-					@note		This function blindly copies my contents into the outgoing string, without checking for validity.
+					@note		Byte copying terminates at the first zero byte that's encountered in my buffer.
 				**/
 				inline std::string			GetString (const size_t inU8Offset = 0, const size_t inMaxSize = 128) const {std::string result; GetString(result, inU8Offset, inMaxSize); return result;}
 
@@ -7926,24 +7929,34 @@ typedef enum
 				inline ULWord					GetDroppedFrameCount (void) const						{return acFramesDropped;}
 
 				/**
-					@return		The number of audio bytes deposited/transferred into the host audio buffer after
-								the last successful CNTV2Card::AutoCirculateTransfer.
+					@return		For the transferred frame, the number of valid audio bytes that were deposited
+                                into the device audio capture buffer.
+					@see		audop-capture
 				**/
 				inline ULWord					GetCapturedAudioByteCount (void) const					{return acAudioTransferSize;}
 
 				/**
-					@return		The number of ancillary data bytes deposited/transferred into the host anc buffer after
-								the last successful CNTV2Card::AutoCirculateTransfer.
+					@return		For the transferred frame, the number of valid ancillary data bytes that were deposited
+                                by the Anc Extractor into the device anc buffer.
 					@param[in]	inField2	Specify \c true for Field 2;  otherwise \c false (the default) for Field 1 (or progessive).
+					@see		anccapture
 				**/
 				inline ULWord					GetCapturedAncByteCount (const bool inField2 = false) const {return inField2 ? acAncField2TransferSize : acAncTransferSize;}
+
+				/**
+					@return		For the transferred frame, the number of valid HDMI auxiliary data bytes that were deposited
+                                by the Aux Extractor into the device aux buffer.
+					@param[in]	inField2	Specify \c true for Field 2;  otherwise \c false (the default) for Field 1 (or progessive).
+					@see		auxcapture
+				**/
+				inline ULWord					GetCapturedAuxByteCount (const bool inField2 = false) const {return GetCapturedAncByteCount(inField2);}
 
 				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(acHeader,acTrailer)
 
 				NTV2_BEGIN_PRIVATE
-					inline explicit							AUTOCIRCULATE_TRANSFER_STATUS (const AUTOCIRCULATE_TRANSFER_STATUS & inObj) : acHeader(0xFEFEFEFE, 0) {(void) inObj;}					///< @brief You cannot construct an AUTOCIRCULATE_TRANSFER_STATUS from another.
-					inline AUTOCIRCULATE_TRANSFER_STATUS &	operator = (const AUTOCIRCULATE_TRANSFER_STATUS & inRHS)					{(void) inRHS; return *this;}	///< @brief You cannot assign AUTOCIRCULATE_TRANSFER_STATUSs.
+					inline explicit	AUTOCIRCULATE_TRANSFER_STATUS (const AUTOCIRCULATE_TRANSFER_STATUS & inObj) : acHeader(0xFEFEFEFE, 0) {(void) inObj;}	///< @brief You cannot construct an AUTOCIRCULATE_TRANSFER_STATUS from another.
+					inline AUTOCIRCULATE_TRANSFER_STATUS &	operator = (const AUTOCIRCULATE_TRANSFER_STATUS & inRHS)	{(void) inRHS; return *this;}	///< @brief You cannot assign AUTOCIRCULATE_TRANSFER_STATUSs.
 				NTV2_END_PRIVATE
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
 		NTV2_STRUCT_END (AUTOCIRCULATE_TRANSFER_STATUS)
@@ -8170,6 +8183,7 @@ typedef enum
 					@note	If using a non-NULL pointer address for either \c pInANCBuffer or \c pInANCF2Buffer, be sure they're aligned to the nearest 8-byte boundary.
 					@note	If using a non-zero byte count, AJA recommends using a 2048-byte buffer (per field). There's no need to fill the entire buffer,
 							but the data it contains should be compatible with what's documented in \ref anccapture or \ref ancplayout (as appropriate).
+					@note	This function also works for \ref auxiliarydata.
 					@return True if successful;	 otherwise false.
 				**/
 				bool									SetAncBuffers (ULWord * pInANCBuffer, const ULWord inANCByteCount,

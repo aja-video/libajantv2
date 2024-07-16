@@ -53,7 +53,7 @@ public:
 	static std::string	FlashBlockIDToString (const FlashBlockID inID, const bool inShortDisplay = false);	//	New in SDK 16.0
 
 public:
-	virtual bool	SetBoard (UWord boardNumber, uint32_t index = 0);
+	virtual bool	SetBoard (uint32_t index = 0);
 	bool			ReadHeader (FlashBlockID flashBlock);
 	bool			ReadInfoString();
 	bool			SetBitFile (const std::string & inBitfileName, std::ostream & outMsgs, const FlashBlockID blockNumber = AUTO_FLASHBLOCK);	//	New in SDK 16.0
@@ -92,7 +92,7 @@ public:
 	bool ReadMACAddresses(MacAddr & mac1, MacAddr & mac2);
 	bool ProgramLicenseInfo(const std::string & licenseString);
 	bool ReadLicenseInfo(std::string & licenseString);
-	void DisplayData(uint32_t address, uint32_t len);
+	void DisplayData(const uint32_t address, const uint32_t len);
 	bool ProgramInfoFromString(std::string infoString);
 	bool FullProgram(std::vector<uint8_t> & dataBuffer);
 
@@ -106,7 +106,6 @@ public:
 	uint32_t ReadDeviceID();
 	bool SetDeviceProperties();
 	void DetermineFlashTypeAndBlockNumberFromFileName(const std::string & bitFileName);
-	static void SRecordOutput (const char *pSRecord);
 
 	uint32_t GetSectorAddressForSector(FlashBlockID flashBlockNumber,uint32_t sectorNumber)
 	{

@@ -282,8 +282,9 @@
 			#include <stdio.h>
 			#include <stdatomic.h>
 			#include <DriverKit/IOLib.h>
-			#define DebugLog(fmt, args...)  os_log(OS_LOG_DEFAULT, "NTV2PCIe::%s:  " fmt,  __FUNCTION__,##args)
-			#define DebugLog(fmt, args...)  os_log(OS_LOG_DEFAULT, "NTV2PCIe::%s:  " fmt,  __FUNCTION__,##args)
+			#include <DriverKit/IODispatchQueue.h>
+			#include <DriverKit/IOLib.h>
+			#define DebugLog(fmt, args...)  os_log(OS_LOG_DEFAULT, "NTV2Shared.c::%{public}s:  " fmt, __FUNCTION__,##args)
 		#else
 			#include <IOKit/IOLocks.h>
 			#include <IOKit/IOLib.h>
@@ -306,7 +307,7 @@
 
 	// windows message abstraction
 
-	#define ntv2Message(string, ...) 			DebugLog(string, __VA_ARGS__)
+#define ntv2Message(string, args...) 			DebugLog(string, ##args)
 
 	// Mac system context
 
@@ -315,6 +316,7 @@
 	typedef struct ntv2_system_context
 	{
 		ntv2_mac_driver_ref		macDriverRef;
+		void*					pIOUserClient;
 	} Ntv2SystemContext;
 
 	// Mac register abstraction
@@ -326,7 +328,7 @@
 	typedef struct ntv2_spinlock
 	{
 #if defined(AJAMacDext)
-		atomic_flag*			lock;
+		atomic_flag			lock;
 #else
 		IOSimpleLock*			lock;
 #endif
@@ -335,7 +337,7 @@
 	typedef struct ntv2_interrupt_lock
 	{
 #if defined(AJAMacDext)
-		atomic_flag*			lock;
+		atomic_flag			lock;
 #else
 		IOSimpleLock*			lock;
 #endif
@@ -347,7 +349,8 @@
 	typedef struct ntv2_event
 	{
 #if defined(AJAMacDext)
-		struct IORecursiveLock*	pRecursiveLock;
+		//struct IORecursiveLock*	pRecursiveLock;
+		IODispatchQueue*	pDispatchQueue;
 #else
 		IORecursiveLock*	pRecursiveLock;
 #endif
@@ -361,7 +364,8 @@
 	typedef struct ntv2_thread
 	{
 #if defined(AJAMacDext)
-		struct task_struct* pTask;
+		IODispatchQueue* 	pTask;
+		Ntv2SystemContext*	pSystemContext;
 #else
 		thread_t			pTask;
 #endif
@@ -438,8 +442,8 @@
 	#define ntv2ReadRegister32(reg)				ioread32((void*)(reg))
 
 	// linux message abstraction
-
-	#define ntv2Message(string, ...) 			printk(KERN_ALERT string, __VA_ARGS__)
+	
+#define ntv2Message(string, args...) 			printk(KERN_ALERT string, ##args)
 
 	// linux spinlock abstraction
 
@@ -517,16 +521,17 @@
 
 #if defined (AJAMac)
 	// Mac register read/write
-	uint32_t	ntv2ReadRegister32(Ntv2SystemContext* context, uint32_t regNum);
-	void		ntv2WriteRegister32(Ntv2SystemContext* context, uint32_t regNum, uint32_t regValue);
+	uint32_t	ntv2ReadRegister32(Ntv2SystemContext* pContext, uint32_t regNum);
+	void		ntv2WriteRegister32(Ntv2SystemContext* pContext, uint32_t regNum, uint32_t regValue);
 #endif
 
-uint32_t ntv2ReadRegister(Ntv2SystemContext* context, uint32_t regnNum);
-bool ntv2ReadRegisterMS(Ntv2SystemContext* context, uint32_t regnum, uint32_t* data, uint32_t regMask, uint32_t regShift);
-bool ntv2WriteRegister(Ntv2SystemContext* context, uint32_t regnum, uint32_t data);
-bool ntv2WriteRegisterMS(Ntv2SystemContext* context, uint32_t regnum, uint32_t data, uint32_t regMask, uint32_t regShift);
-uint32_t ntv2ReadVirtualRegister(Ntv2SystemContext* context, uint32_t regNum);
-bool ntv2WriteVirtualRegister(Ntv2SystemContext* context, uint32_t regNum, uint32_t data);
+uint32_t ntv2ReadRegister(Ntv2SystemContext* pContext, uint32_t regnNum);
+bool ntv2ReadRegisterMS(Ntv2SystemContext* pContext, uint32_t regnum, uint32_t* data, uint32_t regMask, uint32_t regShift);
+bool ntv2WriteRegister(Ntv2SystemContext* pContext, uint32_t regnum, uint32_t data);
+bool ntv2WriteRegisterMS(Ntv2SystemContext* pContext, uint32_t regnum, uint32_t data, uint32_t regMask, uint32_t regShift);
+uint32_t ntv2ReadVirtualRegister(Ntv2SystemContext* pContext, uint32_t regNum);
+bool ntv2WriteVirtualRegister(Ntv2SystemContext* pContext, uint32_t regNum, uint32_t data);
+bool ntv2WriteXlnxRegister(Ntv2SystemContext* pContext, uint32_t regNum, uint32_t data);
 
 // spinlock functions
 bool		ntv2SpinLockOpen(Ntv2SpinLock* pSpinLock, Ntv2SystemContext* pSysCon);

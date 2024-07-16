@@ -52,7 +52,12 @@ endif
 
 # if doing rdma build
 ifdef NVIDIA_RDMA
-	NVIDIA_KO ?= $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia*.ko'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
+ifeq ($(NVIDIA_KO),)
+	NVIDIA_KO = $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia*.ko'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
+endif	
+ifeq ($(NVIDIA_KO),)
+	NVIDIA_KO = $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia*.ko.xz'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
+endif	
 ifeq ($(shell modinfo $(NVIDIA_KO) | grep license: | grep GPL),)
 	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1 -DNVIDIA_PROPRIETARY=1
 else
@@ -123,6 +128,7 @@ DRIVERINCS = ../ntv2anc.h \
 			../ntv2setup.h \
 			../ntv2stream.h \
 			../ntv2system.h \
+			../ntv2video.h \
 			../ntv2videoraster.h \
 			../ntv2videorasterreg.h \
 			../ntv2vpid.h \
@@ -147,6 +153,7 @@ DRIVERSRCS = ../ntv2anc.c \
 			../ntv2setup.c \
 			../ntv2stream.c \
 			../ntv2system.c \
+			../ntv2video.c \
 			../ntv2videoraster.c \
 			../ntv2vpid.c \
 			../ntv2xpt.c
@@ -341,7 +348,7 @@ dkms-pkg:
 dkms-install: dkms-pkg
 ifdef NVIDIA_RDMA
 	@if [ -n "$(DKMSINSTALLED)" ]; then \
-		printf "\n## installing DKMS NTV2 RMDA driver:\n"; \
+		printf "\n## installing DKMS NTV2 RDMA driver:\n"; \
 		sudo cp -a tmp/$(DKMSDIR) /usr/src/; \
 		sudo mkdir -p /etc/ajantv2; \
 		sudo touch /etc/ajantv2/rdma; \

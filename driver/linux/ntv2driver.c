@@ -83,6 +83,7 @@
 #include "../ntv2kona.h"
 #include "ntv2mcap.h"
 #include "ntv2stream.h"
+#include "../ntv2video.h"
 
 #if  !defined(x86_64) && !defined(aarch64)
 #error "*** AJA driver must be built 64 bit ***"
@@ -3859,8 +3860,15 @@ static void remove(struct pci_dev *pdev)
 
 	MSG("%s: device remove\n", ntv2pp->name);
 
-    // wait for io to close
     ntv2pp->ioRemove = true;
+
+#if defined(AJA_CREATE_DEVICE_NODES)
+    dev = MKDEV(getNTV2ModuleParams()->NTV2Major, deviceNumber);
+    device_destroy(getNTV2ModuleParams()->class, dev);
+    cdev_del(&ntv2pp->cdev);
+#endif
+    
+    // wait for io to close
     ioDone = false;
     while (!ioDone)
     {
@@ -3872,12 +3880,6 @@ static void remove(struct pci_dev *pdev)
         spin_unlock_irqrestore (&ntv2pp->ioLock, flags);
         msleep(10);
     }
-
-#if defined(AJA_CREATE_DEVICE_NODES)
-    dev = MKDEV(getNTV2ModuleParams()->NTV2Major, deviceNumber);
-    device_destroy(getNTV2ModuleParams()->class, dev);
-    cdev_del(&ntv2pp->cdev);
-#endif
 
 	// shut down autocirculate
     AutoCirculateInitialize(deviceNumber);
@@ -3980,6 +3982,19 @@ static void remove(struct pci_dev *pdev)
 
 	// disable register access
 	ntv2pp->registerEnable = false;
+
+    // wait for io to really close
+    ioDone = false;
+    while (!ioDone)
+    {
+        spin_lock_irqsave (&ntv2pp->ioLock, flags);
+        if (ntv2pp->ioCount == 0)
+        {
+            ioDone = true;
+        }
+        spin_unlock_irqrestore (&ntv2pp->ioLock, flags);
+        msleep(10);
+    }
 
     for(i = 0; i < eNumNTV2IRQDevices; ++i)
 	{
@@ -4164,10 +4179,9 @@ static void initializeRegisterNames(NTV2PrivateParams *ntv2pp,
 
 static void SetupBoard(ULWord deviceNumber)
 {
-	NTV2PrivateParams *ntv2pp = getNTV2Params(deviceNumber);
+	NTV2PrivateParams* ntv2pp = getNTV2Params(deviceNumber);
 	int i = 0;
-	Ntv2SystemContext systemContext;
-	systemContext.devNum = deviceNumber;
+	Ntv2SystemContext* pSystemContext = &ntv2pp->systemContext;
 	// Disable Xena's machine control UART and flush the FIFOs
 	Init422Uart(deviceNumber);
 
@@ -4185,36 +4199,36 @@ static void SetupBoard(ULWord deviceNumber)
 		switch( NTV2DeviceGetNumLUTs( getNTV2Params(deviceNumber)->_DeviceID ) )
 		{
 		case 8:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL8, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL8, 1);
+			DownloadLinearLUTToHW (pSystemContext, NTV2_CHANNEL8, 0);
+			DownloadLinearLUTToHW (pSystemContext, NTV2_CHANNEL8, 1);
 			// fall through
 		case 7:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL7, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL7, 1);
+			DownloadLinearLUTToHW (pSystemContext, NTV2_CHANNEL7, 0);
+			DownloadLinearLUTToHW (pSystemContext, NTV2_CHANNEL7, 1);
 			// fall through
 		case 6:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL6, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL6, 1);
+			DownloadLinearLUTToHW (pSystemContext, NTV2_CHANNEL6, 0);
+			DownloadLinearLUTToHW (pSystemContext, NTV2_CHANNEL6, 1);
 			// fall through
 		case 5:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL5, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL5, 1);
+			DownloadLinearLUTToHW (pSystemContext, NTV2_CHANNEL5, 0);
+			DownloadLinearLUTToHW (pSystemContext, NTV2_CHANNEL5, 1);
 			// fall through
 		case 4:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL4, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL4, 1);
+			DownloadLinearLUTToHW (pSystemContext, NTV2_CHANNEL4, 0);
+			DownloadLinearLUTToHW (pSystemContext, NTV2_CHANNEL4, 1);
 			// fall through
 		case 3:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL3, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL3, 1);
+			DownloadLinearLUTToHW (pSystemContext, NTV2_CHANNEL3, 0);
+			DownloadLinearLUTToHW (pSystemContext, NTV2_CHANNEL3, 1);
 			// fall through
 		case 2:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL2, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL2, 1);
+			DownloadLinearLUTToHW (pSystemContext, NTV2_CHANNEL2, 0);
+			DownloadLinearLUTToHW (pSystemContext, NTV2_CHANNEL2, 1);
 			// fall through
 		case 1:
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL1, 0);
-			DownloadLinearLUTToHW (deviceNumber, NTV2_CHANNEL1, 1);
+			DownloadLinearLUTToHW (pSystemContext, NTV2_CHANNEL1, 0);
+			DownloadLinearLUTToHW (pSystemContext, NTV2_CHANNEL1, 1);
 			break;
 		default:
 			break;
@@ -4256,11 +4270,11 @@ static void SetupBoard(ULWord deviceNumber)
 	
 	if(NTV2DeviceHasSPIFlashSerial(ntv2pp->_DeviceID))
 	{
-		ProgramProductCode(&systemContext);
+		ProgramProductCode(pSystemContext);
 	}
 	
 	// Set default register clocking to match the video standard
-	if( IsProgressiveStandard( &systemContext, NTV2_CHANNEL1 ) )
+	if( IsProgressiveStandard( pSystemContext, NTV2_CHANNEL1 ) )
 	{
 		SetRegisterWriteMode( deviceNumber, NTV2_CHANNEL1, NTV2_REGWRITE_SYNCTOFIELD );
 	}
@@ -4274,7 +4288,7 @@ static void SetupBoard(ULWord deviceNumber)
 		switch( NTV2DeviceGetNumVideoChannels( ntv2pp->_DeviceID ) )
 		{
 		case 8:
-			if( IsProgressiveStandard( &systemContext, NTV2_CHANNEL8 ) )
+			if( IsProgressiveStandard( pSystemContext, NTV2_CHANNEL8 ) )
 			{
 				SetRegisterWriteMode( deviceNumber, NTV2_CHANNEL8, NTV2_REGWRITE_SYNCTOFIELD );
 			}
@@ -4284,7 +4298,7 @@ static void SetupBoard(ULWord deviceNumber)
 			}
 			// Fall through
 		case 7:
-			if( IsProgressiveStandard( &systemContext, NTV2_CHANNEL7 ) )
+			if( IsProgressiveStandard( pSystemContext, NTV2_CHANNEL7 ) )
 			{
 				SetRegisterWriteMode( deviceNumber, NTV2_CHANNEL7, NTV2_REGWRITE_SYNCTOFIELD );
 			}
@@ -4294,7 +4308,7 @@ static void SetupBoard(ULWord deviceNumber)
 			}
 			// Fall through
 		case 6:
-			if( IsProgressiveStandard( &systemContext, NTV2_CHANNEL6 ) )
+			if( IsProgressiveStandard( pSystemContext, NTV2_CHANNEL6 ) )
 			{
 				SetRegisterWriteMode( deviceNumber, NTV2_CHANNEL6, NTV2_REGWRITE_SYNCTOFIELD );
 			}
@@ -4304,7 +4318,7 @@ static void SetupBoard(ULWord deviceNumber)
 			}
 			// Fall through
 		case 5:
-			if( IsProgressiveStandard( &systemContext, NTV2_CHANNEL5 ) )
+			if( IsProgressiveStandard( pSystemContext, NTV2_CHANNEL5 ) )
 			{
 				SetRegisterWriteMode( deviceNumber, NTV2_CHANNEL5, NTV2_REGWRITE_SYNCTOFIELD );
 			}
@@ -4314,7 +4328,7 @@ static void SetupBoard(ULWord deviceNumber)
 			}
 			// Fall through
 		case 4:
-			if( IsProgressiveStandard( &systemContext, NTV2_CHANNEL4 ) )
+			if( IsProgressiveStandard( pSystemContext, NTV2_CHANNEL4 ) )
 			{
 				SetRegisterWriteMode( deviceNumber, NTV2_CHANNEL4, NTV2_REGWRITE_SYNCTOFIELD );
 			}
@@ -4324,7 +4338,7 @@ static void SetupBoard(ULWord deviceNumber)
 			}
 			// Fall through
 		case 3:
-			if( IsProgressiveStandard( &systemContext, NTV2_CHANNEL3 ) )
+			if( IsProgressiveStandard( pSystemContext, NTV2_CHANNEL3 ) )
 			{
 				SetRegisterWriteMode( deviceNumber, NTV2_CHANNEL3, NTV2_REGWRITE_SYNCTOFIELD );
 			}
@@ -4334,7 +4348,7 @@ static void SetupBoard(ULWord deviceNumber)
 			}
 			// Fall through
 		case 2:
-			if( IsProgressiveStandard( &systemContext, NTV2_CHANNEL2 ) )
+			if( IsProgressiveStandard( pSystemContext, NTV2_CHANNEL2 ) )
 			{
 				SetRegisterWriteMode( deviceNumber, NTV2_CHANNEL2, NTV2_REGWRITE_SYNCTOFIELD );
 			}
@@ -4351,10 +4365,10 @@ static void SetupBoard(ULWord deviceNumber)
 	//	Make an educated guess about the video formats of the channels
 	for( i = 0; i < NTV2DeviceGetNumVideoChannels( ntv2pp->_DeviceID ); i++)
 	{
-		NTV2Standard standard = GetStandard(&systemContext, i);
-		NTV2FrameRate frameRate = GetFrameRate(&systemContext, i);
-		NTV2FrameGeometry frameGeometry = GetFrameGeometry(&systemContext, i);
-		ULWord smpte372Enabled = GetSmpte372(&systemContext, i) ? 1 : 0;
+		NTV2Standard standard = GetStandard(pSystemContext, i);
+		NTV2FrameRate frameRate = GetFrameRate(pSystemContext, i);
+		NTV2FrameGeometry frameGeometry = GetFrameGeometry(pSystemContext, i);
+		ULWord smpte372Enabled = GetSmpte372(pSystemContext, i) ? 1 : 0;
 		NTV2VideoFormat videoFormat = NTV2_FORMAT_UNKNOWN;
 
 		NTV2DeviceGetVideoFormatFromState (&videoFormat,

@@ -33,6 +33,15 @@ static struct ntv2_page_fops rdma_fops = { NULL, NULL, NULL, NULL};
 
 void ntv2_set_rdma_fops(struct ntv2_page_fops* fops)
 {
+    if (fops == NULL)
+    {
+        rdma_fops.get_pages = NULL;
+        rdma_fops.put_pages = NULL;
+        rdma_fops.map_pages = NULL;
+        rdma_fops.unmap_pages = NULL;
+        return;
+    }
+
     rdma_fops = *fops;
 }
 EXPORT_SYMBOL(ntv2_set_rdma_fops);
@@ -4508,7 +4517,7 @@ int dmaOpsStreamStop(struct ntv2_stream *stream)
 
     // sync with the engine
     dmaEngineLock(pDmaEngine);
-    
+
     if (stream->engine_state == ntv2_stream_state_error)
     {
         dmaEngineUnlock(pDmaEngine);
@@ -4545,6 +4554,17 @@ int dmaOpsStreamAdvance(struct ntv2_stream *stream)
     // lock the engine
     dmaEngineLock(pDmaEngine);
 
+    // check dma state
+    
+    if(stream->stream_state == ntv2_stream_state_error)
+    {
+        // abort the dma
+        NTV2_MSG_STATE("%s%d:%s%d: dmaOpsStreamAdvance stop engine\n", DMA_MSG_ENGINE);
+        dmaXlnxStreamStop(pDmaEngine);
+        dmaEngineUnlock(pDmaEngine);
+        return NTV2_STREAM_OPS_FAIL;
+    }
+    
     // check the stream state
     if ((stream->stream_state != ntv2_stream_state_idle) &&
         (stream->stream_state != ntv2_stream_state_active))

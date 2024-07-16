@@ -438,6 +438,22 @@ public:	//	INSTANCE METHODS
 																const bool inIsProgressive = true, const uint32_t inF2StartLine = 0);
 
 	/**
+		@brief		Encodes my AJAAuxiliaryData packets into the given buffers in the default \ref auxbufferformat .
+					The buffer contents are replaced;  the unused remainder, if any, will be zeroed.
+		@param		F1Buffer			Specifies the buffer memory into which Field 1's anc data will be written.
+		@param		F2Buffer			Specifies the buffer memory into which Field 2's anc data will be written.
+		@param		inIsProgressive		Specify true to designate the output ancillary data stream as progressive; 
+										otherwise, specify false. Defaults to true (is progressive).
+		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
+										Defaults to zero (progressive). For interlaced video, see NTV2SmpteLineNumber::GetLastLine .
+		@bug		TBD -- not currently implemented.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual inline AJAStatus				GetHDMITransmitData (NTV2Buffer & F1Buffer, NTV2Buffer & F2Buffer,
+																const bool inIsProgressive = true, const uint32_t inF2StartLine = 0)
+																			{return AJA_STATUS_UNSUPPORTED;}
+
+	/**
 		@brief		Answers with the number of bytes required to store IP/RTP for my AJAAncillaryData packets in \ref ancrtpformat .
 		@param[out]	outF1ByteCount		Receives the requisite byte count for Field 1's IP/RTP packet data.
 		@param[out]	outF2ByteCount		Receives the requisite byte count for Field 1's IP/RTP packet data.
@@ -672,6 +688,8 @@ private:
 	bool					m_ignoreCS;		///< @brief	True: ignore checksum errors;  False: don't ignore CS errors
 
 };	//	AJAAncillaryList
+
+typedef AJAAncillaryList	AJAAuxiliaryList, AJAAncList, AJAAuxList;
 
 
 /**

@@ -7,4 +7,7 @@
 /driver/bin/*.ko
 /driver/win
 /driver/mac
+/driver/linux/.ntv2dma.o.d
+/driver/linux/ajardma.mod
+/driver/linux/ajardma.mod.c
 .DS_Store

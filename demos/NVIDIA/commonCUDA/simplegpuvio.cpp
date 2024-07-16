@@ -56,10 +56,21 @@ CGpuVideoIO::CGpuVideoIO(vioDesc *desc) :
 	mTransferLines = mActiveVideoHeight / s_iSubFrameCount;
 	mTransferSize = mActiveVideoPitch * mTransferLines;
 
-	if (desc->type == VIO_IN)
+
+	NTV2InputSource inputSource = NTV2_INPUTSOURCE_SDI1;
+	if (desc->type == VIO_SDI_IN)
+	{
+		inputSource = ::NTV2ChannelToInputSource(mChannel, NTV2_IOKINDS_SDI);
+	}
+	if (desc->type == VIO_HDMI_IN)
+	{
+		inputSource = ::NTV2ChannelToInputSource(mChannel, NTV2_IOKINDS_HDMI);
+	}
+
+	if (desc->type == VIO_SDI_IN || desc->type == VIO_HDMI_IN)
 	{
 		// Genlock the output to the input
-		mBoard->SetReference(::NTV2InputSourceToReferenceSource(::NTV2ChannelToInputSource(mChannel)));
+		mBoard->SetReference(::NTV2InputSourceToReferenceSource(inputSource));
 
 		// Set frame buffer format
 		mBoard->SetFrameBufferFormat(mChannel, desc->bufferFormat);
@@ -69,8 +80,25 @@ CGpuVideoIO::CGpuVideoIO(vioDesc *desc) :
 		mBoard->SetSDITransmitEnable(mChannel, false);
 
 		// Connect SDI source to frame store
-		mBoard->Connect(::GetCSCInputXptFromChannel(mChannel), ::GetInputSourceOutputXpt(::NTV2ChannelToInputSource(mChannel)));
-		mBoard->Connect(::GetFrameBufferInputXptFromChannel(mChannel), ::GetCSCOutputXptFromChannel(mChannel, false, true));
+		if (desc->type == VIO_SDI_IN)
+		{
+			mBoard->Connect(::GetCSCInputXptFromChannel(mChannel), ::GetInputSourceOutputXpt(inputSource));
+			mBoard->Connect(::GetFrameBufferInputXptFromChannel(mChannel), ::GetCSCOutputXptFromChannel(mChannel, false, true));
+		}
+		if (desc->type == VIO_HDMI_IN)
+		{
+        	NTV2LHIHDMIColorSpace	hdmiColor	(NTV2_LHIHDMIColorSpaceRGB);
+        	mBoard->GetHDMIInputColor (hdmiColor, mChannel);
+			if (hdmiColor == NTV2_LHIHDMIColorSpaceYCbCr)
+			{
+				mBoard->Connect(::GetCSCInputXptFromChannel(mChannel), ::GetInputSourceOutputXpt(inputSource));
+				mBoard->Connect(::GetFrameBufferInputXptFromChannel(mChannel), ::GetCSCOutputXptFromChannel(mChannel, false, true));
+			}
+			else
+			{
+				mBoard->Connect(::GetFrameBufferInputXptFromChannel(mChannel), ::GetInputSourceOutputXpt(inputSource, false, true));
+			}
+		}
 
 		// Get video standard
 		NTV2Standard videoStandard;
@@ -110,6 +138,9 @@ CGpuVideoIO::CGpuVideoIO(vioDesc *desc) :
 		// Connect frame store to SDI output
 		mBoard->Connect(::GetCSCInputXptFromChannel(mChannel), ::GetFrameBufferOutputXptFromChannel(mChannel,  true,  false));
 		mBoard->Connect(::GetSDIOutputInputXpt (mChannel, false), ::GetCSCOutputXptFromChannel(mChannel,  false,  false));
+
+		// Connect frame store to HDMI output
+		mBoard->Connect(::GetOutputDestInputXpt (NTV2_OUTPUTDESTINATION_HDMI), ::GetFrameBufferOutputXptFromChannel(mChannel,  true,  false));
 
 		// Setup the frame buffer parameters
 		mFrameNumber = s_iIndexFirstTarget;

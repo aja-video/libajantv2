@@ -349,7 +349,7 @@ bool NTV2Buffer::toHexString (std::string & outStr, const size_t inLineBreakInte
 		for (int ndx(0);  ndx < int(GetByteCount());  )
 		{
 			oss << HEX0N(uint16_t(U8(ndx++)),2);
-			if (inLineBreakInterval  &&  ((size_t(ndx) % inLineBreakInterval) == 0))
+			if (inLineBreakInterval  &&  ndx < int(GetByteCount())  &&  ((size_t(ndx) % inLineBreakInterval) == 0))
 				oss << endl;
 		}
 	outStr = oss.str();
@@ -681,7 +681,13 @@ bool NTV2Buffer::GetString (std::string & outString, const size_t inU8Offset, co
 	{
 		outString.reserve(maxSize);
 		for (size_t ndx(0);	 ndx < maxSize;	 ndx++)
-			outString += char(*pU8++);
+		{
+			const char c = *pU8++;
+			if (c)
+				outString += c;
+			else
+				break;
+		}
 	}
 	catch (...)
 	{
@@ -1535,17 +1541,15 @@ NTV2Buffer::NTV2Buffer (const NTV2Buffer & inObj)
 		SetFrom(inObj);
 }
 
-bool NTV2Buffer::Truncate (const size_t inByteCount)
+bool NTV2Buffer::Truncate (const size_t inNewByteCount)
 {
-	if (inByteCount == GetByteCount())
-		return true;	//	Same size -- okay
-	if (inByteCount > GetByteCount())
-		return false;	//	Can't be larger than my current size
-	if (!inByteCount)
-		return false;	//	Can't use zero
-	if (IsPageAligned())
-		return false;	//	Don't truncate if page-aligned
-	fByteCount = inByteCount;
+	if (inNewByteCount == GetByteCount())
+		return true;	//	Same size -- done!
+	if (inNewByteCount > GetByteCount())
+		return false;	//	Cannot enlarge -- i.e. can't be greater than my current size
+	if (!inNewByteCount  &&  IsAllocatedBySDK())
+		return Deallocate();	//	A newByteCount of zero calls Deallocate
+	fByteCount = ULWord(inNewByteCount);
 	return true;
 }
 
@@ -1795,7 +1799,7 @@ bool NTV2Buffer::SetFromHexString (const string & inStr)
 
 	//	Decode and copy in the data...
 	for (size_t srcNdx(0), dstNdx(0);  srcNdx < str.size();  srcNdx += 2)
-		U8(dstNdx++) = uint8_t(aja::stoul (str.substr(srcNdx,2), AJA_NULL, 16));
+		U8(int(dstNdx++)) = uint8_t(aja::stoul (str.substr(srcNdx,2), AJA_NULL, 16));
 
 	return true;
 }
@@ -3100,14 +3104,14 @@ bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterValueMap & outValues) cons
 	outValues.clear ();
 	if (!mOutGoodRegisters)
 		return false;		//	Empty/null 'mOutGoodRegisters' array!
-	if (!mOutNumRegisters)
-		return false;		//	Driver says zero successfully read!
-	if (mOutNumRegisters > mInNumRegisters)
-		return false;		//	Sanity check failed:  mOutNumRegisters must be less than or equal to mInNumRegisters!
-	if (!mOutValues)
-		return false;		//	Empty/null 'mOutValues' array!
-	if (mOutGoodRegisters.GetByteCount() != mOutValues.GetByteCount())
-		return false;		//	Sanity check failed:  These sizes should match
+	//if (!mOutNumRegisters)
+	//	return false;		//	Driver says zero successfully read!
+	//if (mOutNumRegisters > mInNumRegisters)
+	//	return false;		//	Sanity check failed:  mOutNumRegisters must be less than or equal to mInNumRegisters!
+	//if (!mOutValues)
+	//	return false;		//	Empty/null 'mOutValues' array!
+	//if (mOutGoodRegisters.GetByteCount() != mOutValues.GetByteCount())
+	//	return false;		//	Sanity check failed:  These sizes should match
 
 	const ULWord *	pRegArray	(mOutGoodRegisters);
 	const ULWord *	pValArray	(mOutValues);

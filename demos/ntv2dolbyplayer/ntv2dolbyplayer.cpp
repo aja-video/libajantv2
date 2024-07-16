@@ -143,6 +143,8 @@ AJAStatus NTV2DolbyPlayer::Init (void)
 		{cerr << "## ERROR:  Device '" << mDevice.GetDisplayName() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
 	if (!mDevice.features().CanDoPlayback())
 		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' is capture-only" << endl;  return AJA_STATUS_FEATURE;}
+	if (!mDevice.features().GetNumHDMIVideoOutputs())
+		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' has no HDMI outputs" << endl;  return AJA_STATUS_FEATURE;}
 
 	const UWord maxNumChannels (mDevice.features().GetNumFrameStores());
 
@@ -168,6 +170,13 @@ AJAStatus NTV2DolbyPlayer::Init (void)
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
 	else
 		mConfig.fDoMultiFormat = false;
+
+	if (!mConfig.fDolbyFilePath.empty())
+	{
+		status = mDolbyFileIO.Open(mConfig.fDolbyFilePath.c_str(), eAJAReadOnly, 0);
+		if (status != AJA_STATUS_SUCCESS)
+			{cerr << "## ERROR:  Could not open file: " << mConfig.fDolbyFilePath << endl;	return status;}
+	}
 
 	
 	//	Set up the video and audio...
@@ -206,7 +215,7 @@ AJAStatus NTV2DolbyPlayer::Init (void)
 }	//	Init
 
 
-AJAStatus NTV2DolbyPlayer::SetUpVideo ()
+AJAStatus NTV2DolbyPlayer::SetUpVideo (void)
 {
 	//	Configure the device to output the requested video format...
  	if (mConfig.fVideoFormat == NTV2_FORMAT_UNKNOWN)
@@ -277,7 +286,7 @@ AJAStatus NTV2DolbyPlayer::SetUpAudio (void)
 
     mDevice.SetHDMIOutAudioRate(mAudioRate);
 
-	 mDevice.SetHDMIOutAudioFormat(( mConfig.fDolbyFile != NULL) ? NTV2_AUDIO_FORMAT_DOLBY : NTV2_AUDIO_FORMAT_LPCM);
+	 mDevice.SetHDMIOutAudioFormat(mDolbyFileIO.IsOpen() ? NTV2_AUDIO_FORMAT_DOLBY : NTV2_AUDIO_FORMAT_LPCM);
 
 	//	If the last app using the device left it in end-to-end mode (input passthru),
 	//	then loopback must be disabled, or else the output will contain whatever audio
@@ -332,7 +341,7 @@ AJAStatus NTV2DolbyPlayer::SetUpHostBuffers (void)
 		mFrameDataRing.Add (&frameData);
 	}	//	for each NTV2FrameData
 	
-    if (mConfig.fDolbyFile != NULL)
+    if (mDolbyFileIO.IsOpen())
     {
 		//  Initialize IEC61937 burst size (32 milliseconds) for HDMI 192 kHz sample rate
 		mBurstSamples = 6144;  //  192000 * 0.032 samples
@@ -398,14 +407,13 @@ AJAStatus NTV2DolbyPlayer::SetUpTestPatternBuffers (void)
 
 bool NTV2DolbyPlayer::RouteOutputSignal (void)
 {
-	const bool			isRGB			(::IsRGBFormat(mConfig.fPixelFormat));
+	const bool isRGB (::IsRGBFormat(mConfig.fPixelFormat));
+	const NTV2OutputXptID fsVidOutXpt (::GetFrameBufferOutputXptFromChannel (mConfig.fOutputChannel, isRGB, false/*is425*/));
 
-    const NTV2OutputCrosspointID	fsVidOutXpt		(::GetFrameBufferOutputXptFromChannel (mConfig.fOutputChannel,  isRGB/*isRGB*/,  false/*is425*/));
+	mDevice.ClearRouting();		//	Start with clean slate
 
-    mDevice.ClearRouting();		//	Start with clean slate
-
-    //	And connect HDMI video output
-    return mDevice.Connect (::GetOutputDestInputXpt (NTV2_OUTPUTDESTINATION_HDMI),  fsVidOutXpt);
+	//	Connect HDMI video output...
+	return mDevice.Connect (::GetOutputDestInputXpt (NTV2_OUTPUTDESTINATION_HDMI),  fsVidOutXpt);
 
 }	//	RouteOutputSignal
 
@@ -415,7 +423,6 @@ AJAStatus NTV2DolbyPlayer::Run ()
 	//	Start my consumer and producer threads...
 	StartConsumerThread ();
 	StartProducerThread ();
-
 	return AJA_STATUS_SUCCESS;
 
 }	//	Run
@@ -437,21 +444,18 @@ void NTV2DolbyPlayer::StartConsumerThread ()
 
 //	The playout thread function
 void NTV2DolbyPlayer::ConsumerThreadStatic (AJAThread * pThread, void * pContext)		//	static
-{
-	(void) pThread;
-
+{	(void) pThread;
 	//	Grab the NTV2DolbyPlayer instance pointer from the pContext parameter,
-	//	then call its PlayFrames method...
-	NTV2DolbyPlayer *	pApp	(reinterpret_cast <NTV2DolbyPlayer *> (pContext));
+	//	then call its ConsumeFrames method...
+	NTV2DolbyPlayer * pApp (reinterpret_cast<NTV2DolbyPlayer*>(pContext));
 	if (pApp)
-		pApp->ConsumeFrames ();
+		pApp->ConsumeFrames();
 
 }	//	ConsumerThreadStatic
 
 
 void NTV2DolbyPlayer::ConsumeFrames (void)
 {
-	ULWord					acOptions		(AUTOCIRCULATE_WITH_RP188);	//	Add timecode
 	AUTOCIRCULATE_TRANSFER	outputXfer;
 	AUTOCIRCULATE_STATUS	outputStatus;
 	ULWord					goodXfers(0), badXfers(0), starves(0), noRoomWaits(0);
@@ -462,8 +466,9 @@ void NTV2DolbyPlayer::ConsumeFrames (void)
 	PLNOTE("Thread started");
 
 	//	Initialize & start AutoCirculate...
-	bool initOK = mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  mConfig.fFrames.count(),  mAudioSystem,  acOptions,
-														1 /*numChannels*/,  mConfig.fFrames.firstFrame(),  mConfig.fFrames.lastFrame());
+	bool initOK = mDevice.AutoCirculateInitForOutput (mConfig.fOutputChannel,  mConfig.fFrames.count(),
+														mAudioSystem,  AUTOCIRCULATE_WITH_RP188,  /*numChannels*/ 1,
+														mConfig.fFrames.firstFrame(),  mConfig.fFrames.lastFrame());
 	if (!initOK)
 		{PLFAIL("AutoCirculateInitForOutput failed");  mGlobalQuit = true;}
 	else if (!mConfig.WithVideo())
@@ -595,11 +600,11 @@ void NTV2DolbyPlayer::ProduceFrames (void)
 		//	If also playing audio...
 		if (pFrameData->AudioBuffer())	//	...then generate audio tone data for this frame...
 		{
-			if (mConfig.fDolbyFile != NULL)
+			if (mDolbyFileIO.IsOpen())
 				pFrameData->fNumAudioBytes = AddDolby(*pFrameData);
 			else
 			{
-				if (mConfig.fdoRamp)
+				if (mConfig.fDoRamp)
 					pFrameData->fNumAudioBytes = AddRamp(*pFrameData);
 				else
 					pFrameData->fNumAudioBytes = AddTone(*pFrameData);
@@ -668,7 +673,7 @@ uint32_t NTV2DolbyPlayer::AddTone (NTV2FrameData &  inFrameData)
 
 uint32_t NTV2DolbyPlayer::AddRamp (NTV2FrameData & inFrameData)
 {
-	ULWord*			audioBuffer	(inFrameData.AudioBuffer());
+	ULWord *		audioBuffer	(inFrameData.AudioBuffer());
 	NTV2FrameRate	frameRate	(NTV2_FRAMERATE_INVALID);
 	NTV2AudioRate	audioRate	(NTV2_AUDIO_RATE_INVALID);
 	ULWord			numChannels	(0);
@@ -680,22 +685,22 @@ uint32_t NTV2DolbyPlayer::AddRamp (NTV2FrameData & inFrameData)
 	//	Because audio on AJA devices use fixed sample rates (typically 48KHz), certain video frame rates will necessarily
 	//	result in some frames having more audio samples than others. The GetAudioSamplesPerFrame function
 	//	is used to calculate the correct sample count...
-	const ULWord	numSamples		(::GetAudioSamplesPerFrame (frameRate, audioRate, mCurrentFrame));
+	const ULWord numSamples (::GetAudioSamplesPerFrame (frameRate, audioRate, mCurrentFrame));
 
-	for (uint32_t i = 0; i < numSamples; i++)
+	for (uint32_t samp(0);  samp < numSamples;  samp++)
 	{
-		for (uint32_t j = 0; j < numChannels; j++)
+		for (uint32_t ch(0);  ch < numChannels;  ch++)
 		{
-			*audioBuffer = ((uint32_t)mRampSample) << 16;
+			*audioBuffer = uint32_t(mRampSample) << 16;
 			audioBuffer++;
 			mRampSample++;
-		}
-	}
+		}	//	for each channel
+	}	//	for each sample
 
 	return numSamples * numChannels * 4;
 }	//	AddRamp
 
-#ifdef DOLBY_FULL_PARSER
+#if defined(DOLBY_FULL_PARSER)
 
 uint32_t NTV2DolbyPlayer::AddDolby (NTV2FrameData & inFrameData)
 {
@@ -712,7 +717,7 @@ uint32_t NTV2DolbyPlayer::AddDolby (NTV2FrameData & inFrameData)
     mDevice.GetNumberAudioChannels (numChannels, mAudioSystem);
     const ULWord	numSamples		(::GetAudioSamplesPerFrame (frameRate, audioRate, mCurrentFrame));
 
-	if ((mConfig.fDolbyFile == NULL) || (mDolbyBuffer == NULL))
+	if (!mDolbyFileIO.IsOpen() || !mDolbyBuffer)
 		goto silence;
 
     //  Generate the samples for this frame
@@ -784,7 +789,7 @@ uint32_t NTV2DolbyPlayer::AddDolby (NTV2FrameData & inFrameData)
 					if (!GetDolbyFrame(&mDolbyBuffer[0], sampleCount))
 					{
 						cerr << "## ERROR:  Dolby frame not found" << endl;
-						mConfig.fDolbyFile = NULL;
+						mDolbyFileIO.Close();
 						goto silence;
 					}
 
@@ -818,7 +823,7 @@ uint32_t NTV2DolbyPlayer::AddDolby (NTV2FrameData & inFrameData)
 					if (burstOffset >= mBurstMax)
 					{
 						cerr << "## ERROR:  Dolby burst too large" << endl;
-						mConfig.fDolbyFile = NULL;
+						mDolbyFileIO.Close();
 						goto silence;
 					}
 
@@ -835,7 +840,7 @@ uint32_t NTV2DolbyPlayer::AddDolby (NTV2FrameData & inFrameData)
 					if (!GetDolbyFrame(&mDolbyBuffer[0], sampleCount))
 					{
 						cerr << "## ERROR:  Dolby frame not found" << endl;
-						mConfig.fDolbyFile = NULL;
+						mDolbyFileIO.Close();
 						goto silence;
 					}
 				}
@@ -908,11 +913,11 @@ bool NTV2DolbyPlayer::GetDolbyFrame (uint16_t * pInDolbyBuffer, uint32_t & numSa
 
 	while (!done)
 	{
-		bytes = mConfig.fDolbyFile->Read((uint8_t*)(&pInDolbyBuffer[0]), 2);
+		bytes = mDolbyFileIO.Read((uint8_t*)(&pInDolbyBuffer[0]), 2);
 		if (bytes != 2)
 		{
 			//  Reset file
-			mConfig.fDolbyFile->Seek(0, eAJASeekSet);
+			mDolbyFileIO.Seek(0, eAJASeekSet);
 			return false;
 		}
 
@@ -923,7 +928,7 @@ bool NTV2DolbyPlayer::GetDolbyFrame (uint16_t * pInDolbyBuffer, uint32_t & numSa
 	}
 
 	//  Read more of the sync frame header
-	bytes = mConfig.fDolbyFile->Read((uint8_t*)(&pInDolbyBuffer[1]), 4);
+	bytes = mDolbyFileIO.Read((uint8_t*)(&pInDolbyBuffer[1]), 4);
 	if (bytes != 4)
 		return false;
 
@@ -934,7 +939,7 @@ bool NTV2DolbyPlayer::GetDolbyFrame (uint16_t * pInDolbyBuffer, uint32_t & numSa
 
 	//  Read the rest of the sync frame
 	uint32_t len = (size - 3) * 2;
-	bytes = mConfig.fDolbyFile->Read((uint8_t*)(&pInDolbyBuffer[3]), len);
+	bytes = mDolbyFileIO.Read((uint8_t*)(&pInDolbyBuffer[3]), len);
 	if (bytes != len)
 		return false;
 
@@ -1290,7 +1295,7 @@ bool NTV2DolbyPlayer::GetBits(uint32_t & data, uint32_t bits)
 	return true;
 }
 
-#else
+#else	//	DOLBY_FULL_PARSER
 // NOTE:  The code under this #else is out of date and not maintaiend
 uint32_t NTV2DolbyPlayer::AddDolby (ULWord * pInAudioBuffer)
 {
@@ -1410,34 +1415,13 @@ silence:
 	memset(&pInAudioBuffer[sampleOffset * numChannels], 0, (numSamples - sampleOffset) * numChannels * 4);
 	return numSamples * numChannels * 4;
 }
-
-#endif
+#endif	//	else DOLBY_FULL_PARSER
 
 AJALabelValuePairs DolbyPlayerConfig::Get (const bool inCompact) const
 {
-	AJALabelValuePairs result;
-	AJASystemInfo::append (result,	"NTV2DolbyPlayer Config");
-	AJASystemInfo::append (result,		"Device Specifier",		fDeviceSpec);
-	AJASystemInfo::append (result,		"Video Format",			::NTV2VideoFormatToString(fVideoFormat));
-	AJASystemInfo::append (result,		"Pixel Format",			::NTV2FrameBufferFormatToString(fPixelFormat, inCompact));
-	AJASystemInfo::append (result,		"AutoCirc Frames",		fFrames.toString());
-	AJASystemInfo::append (result,		"MultiFormat Mode",		fDoMultiFormat ? "Y" : "N");
-	AJASystemInfo::append (result,		"VANC Mode",			::NTV2VANCModeToString(fVancMode));
-	AJASystemInfo::append (result,		"HDR Anc Type",			::AJAAncDataTypeToString(fTransmitHDRType));
-	AJASystemInfo::append (result,		"Output Channel",		::NTV2ChannelToString(fOutputChannel, inCompact));
-	AJASystemInfo::append (result,		"Output Connector",		::NTV2OutputDestinationToString(fOutputDest, inCompact));
-	AJASystemInfo::append (result,		"HDMI Output",			fDoHDMIOutput ? "Yes" : "No");
-	AJASystemInfo::append (result,		"Dolby Playback File", 	fDolbyFilePath);
-	AJASystemInfo::append (result,		"Aux Data Ramp",		fdoRamp ? "Yes" : "No");
-	AJASystemInfo::append (result,		"Num Audio Links",		aja::to_string(fNumAudioLinks));
-	AJASystemInfo::append (result,		"Suppress Video",		fSuppressVideo ? "Y" : "N");
-	AJASystemInfo::append (result,		"Suppress Audio",		fSuppressAudio ? "Y" : "N");
-	//AJASystemInfo::append (result,		"Embedded Timecode",	fTransmitLTC ? "LTC" : "VITC");
-	//AJASystemInfo::append (result,		"Level Conversion",		fDoABConversion ? "Y" : "N");
-	//AJASystemInfo::append (result,		"RGB-On-SDI",			fDoRGBOnWire ? "Yes" : "No");
-	//AJASystemInfo::append (result,		"TSI Routing",			fDoTsiRouting ? "Yes" : "No");
-	//AJASystemInfo::append (result,		"6G/12G Output",		fDoLinkGrouping ? "Yes" : "No");
-
+	AJALabelValuePairs result (PlayerConfig::Get(inCompact));
+	AJASystemInfo::append (result,	"Dolby Playback File", 	fDolbyFilePath.empty() ? "---" : fDolbyFilePath);
+	AJASystemInfo::append (result,	"Audio Data Ramp",		fDoRamp ? "Yes" : "No");
 	return result;
 }
 

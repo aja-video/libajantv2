@@ -21,6 +21,8 @@
 		NTV2DMAEngine		dmaEngine;				// dma engine
 		NTV2Channel			videoChannel;			// video channel for frame size
 		void*				pVidUserVa;				// user video buffer
+		void*				pVidDesc;				// video buffer memory descriptor
+		void*				pVidMap;				// video Buffer memory map
 		uint64_t			videoBusAddress;		// p2p video bus address
 		uint32_t			videoBusSize;			// p2p video bus size
 		uint64_t			messageBusAddress;		// p2p message bus address
@@ -32,14 +34,20 @@
 		uint32_t			vidFramePitch;			// card frame pitch
 		uint32_t			numSegments;			// number of segments
 		void*				pAudUserVa;				// audio user buffer
+		void*				pAudDesc;				// memory descriptor of audio buffer
+		void*				pAudMap;				// memory map of audio Buffer
 		NTV2AudioSystem		audioSystem;			// audio system target
 		uint32_t			audNumBytes;			// number of audio bytes
 		uint32_t			audOffset;				// card audio offset
 		void*				pAncF1UserVa;			// anc field 1 user buffer
+		void*				pAncF1Desc;				// anc field 1 buffer memory descriptor
+		void*				pAncF1Map;				// anc field 1 Buffer memory map
 		uint32_t			ancF1Frame;				// anc field 1 frame
 		uint32_t			ancF1NumBytes;			// number of anc field 1 bytes
 		uint32_t			ancF1Offset;			// anc field 1 frame offset
 		void*				pAncF2UserVa;			// anc field 2 user buffer
+		void*				pAncF2Desc;				// anc field 2 buffer memory descriptor
+		void*				pAncF2Map;				// anc field 2 Buffer memory map
 		uint32_t			ancF2Frame;				// anc field 2 frame
 		uint32_t			ancF2NumBytes;			// number of anc field 2 bytes
 		uint32_t			ancF2Offset;			// anc field 2 frame offset

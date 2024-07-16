@@ -73,7 +73,7 @@ class AJAExport CNTV2DriverInterface
 		static bool				GetShareMode (void);	///< @return	True if local devices will be opened in shared mode; otherwise false. (New in SDK 16.0)
 
 		/**
-			@brief		Specifies if the next Open call should try to open the device in shared mode or not.
+			@brief		Specifies if the next Open call should try to open the device in overlapped mode or not.
 			@note		On some platforms,  this function may have no effect.
 			@param[in]	inOverlapMode	Specify true for overlapped mode;  otherwise use false.
 		**/
@@ -233,7 +233,7 @@ class AJAExport CNTV2DriverInterface
 		**/
 		AJA_VIRTUAL bool	ReadRegisters (NTV2RegisterReads & inOutValues);
 #endif	//	!defined(READREGMULTICHANGE)
-		AJA_VIRTUAL inline bool	RestoreHardwareProcampRegisters (void) {return false;}
+		//AJA_VIRTUAL inline bool	RestoreHardwareProcampRegisters (void) {return false;}
 	///@}
 
 	/**
@@ -337,7 +337,7 @@ class AJAExport CNTV2DriverInterface
 			@param[in]	inEventCode		Specifies the interrupt of interest.
 			@param[out]	outCount		Receives the number of interrupt events that I successfully waited for.
 			@return		True if successful;  otherwise false.
-			@see		CNTV2DriverInterface::SetInterruptEventCount, \ref fieldframeinterrupts
+			@see		CNTV2DriverInterface::SetInterruptEventCount, \ref vidop-fldfrmint
 		**/
 		AJA_VIRTUAL bool	GetInterruptEventCount (const INTERRUPT_ENUMS inEventCode, ULWord & outCount);
 
@@ -346,7 +346,7 @@ class AJAExport CNTV2DriverInterface
 			@param[in]	inEventCode		Specifies the interrupt type.
 			@param[in]	inCount			Specifies the new count value. Use zero to reset the tally.
 			@return		True if successful;  otherwise false.
-			@see		CNTV2DriverInterface::GetInterruptEventCount, \ref fieldframeinterrupts
+			@see		CNTV2DriverInterface::GetInterruptEventCount, \ref vidop-fldfrmint
 		**/
 		AJA_VIRTUAL bool	SetInterruptEventCount (const INTERRUPT_ENUMS inEventCode, const ULWord inCount);
 	///@}
@@ -417,25 +417,30 @@ class AJAExport CNTV2DriverInterface
 		/**
 			@return		True if the requested device feature is supported.
 			@param[in]	inParamID	The NTV2BoolParamID of interest.
+			@see		vidop-features
 		**/
 		AJA_VIRTUAL bool		IsSupported (const NTV2BoolParamID inParamID)	//	New in SDK 17.0
 									{	ULWord value(0);
-										GetBoolParam (ULWord(inParamID), value);
+										if (IsOpen())
+											GetBoolParam (ULWord(inParamID), value);
 										return bool(value);
 									}
 		/**
 			@return		The requested quantity for the given device feature.
 			@param[in]	inParamID	The NTV2NumericParamID of interest.
+			@see		vidop-features
 		**/
 		AJA_VIRTUAL ULWord		GetNumSupported (const NTV2NumericParamID inParamID)	//	New in SDK 17.0
 									{	ULWord value(0);
-										GetNumericParam (ULWord(inParamID), value);
+										if (IsOpen())
+											GetNumericParam (ULWord(inParamID), value);
 										return value;
 									}
 
 		/**
 			@param[in]	inEnumsID	The NTV2EnumsID of interest.
 			@return		The supported items.
+			@see		vidop-features
 		**/
 		AJA_VIRTUAL ULWordSet	GetSupportedItems (const NTV2EnumsID inEnumsID);	//	New in SDK 17.0
 	///@}
@@ -451,7 +456,7 @@ class AJAExport CNTV2DriverInterface
 												ULWord64 bufferCookie,
 												ULWord flags,
 												NTV2StreamBuffer& status);
-    
+
 	/**
 		@name	Device Ownership
 	**/
@@ -594,8 +599,8 @@ class AJAExport CNTV2DriverInterface
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool PrepareMemoryForDMA(ULWord * pHostBuffer, const ULWord inNumBytes))	{(void)pHostBuffer; (void)inNumBytes; return false;}	///< @deprecated	Obsolete starting in SDK 16.0.
 	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(bool GetInterruptCount(const INTERRUPT_ENUMS eInt, ULWord *pCnt))	{return pCnt ? GetInterruptCount(eInt, *pCnt) : false;}	///< @deprecated	Use version of this function that accepts a non-const reference.
 	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(bool ReadRegisterMulti(const ULWord numRegs, ULWord * pOutWhichRegFailed, NTV2RegInfo aRegs[]));	///< @deprecated	Use CNTV2DriverInterface::ReadRegisters instead.
-	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(ULWord	GetPCISlotNumber(void) const)	{return _pciSlot;}			///< @deprecated	Obsolete starting in SDK 16.0.
-	AJA_VIRTUAL NTV2_SHOULD_BE_DEPRECATED(Word SleepMs(const LWord msec));	///< @deprecated	Obsolete starting in SDK 16.0. Use AJATime::Sleep instead.
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(ULWord	GetPCISlotNumber(void) const)	{return _pciSlot;}			///< @deprecated	Obsolete starting in SDK 16.0.
+	AJA_VIRTUAL NTV2_DEPRECATED_f(Word SleepMs(const LWord msec));	///< @deprecated	Obsolete starting in SDK 16.0. Use AJATime::Sleep instead.
 	AJA_VIRTUAL inline NTV2_SHOULD_BE_DEPRECATED(ULWord	GetAudioFrameBufferNumber(void) const)	{return GetNumFrameBuffers() - 1;}	///< @deprecated	Obsolete starting in SDK 16.0.
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 #if !defined(NTV2_DEPRECATE_16_3)
@@ -622,11 +627,11 @@ class AJAExport CNTV2DriverInterface
 	//	PROTECTED METHODS
 	protected:
 		/**
-			@brief		Peforms the housekeeping details of opening the specified local, remote or software device.
-			@param[in]	inURLSpec	Specifies the local, remote or software device to be opened.
+			@brief		Peforms the housekeeping details of opening the remote/virtual device using the given specParser.
+			@param[in]	inSpec	Specifies a valid NTV2DeviceSpecParser that has successfully parsed a remote device URL spec.
 			@result		True if successful; otherwise false.
 		**/
-		AJA_VIRTUAL bool	OpenRemote (const std::string & inURLSpec);
+		AJA_VIRTUAL bool	OpenRemote (const NTV2DeviceSpecParser & inSpec);
 		AJA_VIRTUAL bool	CloseRemote (void);	///< @brief	Releases host resources associated with the remote/special device connection.
 		AJA_VIRTUAL bool	OpenLocalPhysical (const UWord inDeviceIndex);	///< @brief	Opens the local/physical device connection.
 		AJA_VIRTUAL bool	CloseLocalPhysical (void);	///< @brief	Releases host resources associated with the local/physical device connection.
@@ -695,7 +700,9 @@ class AJAExport CNTV2DriverInterface
 #endif	//	!defined(NTV2_DEPRECATE_16_0)
 		ULWord				_ulNumFrameBuffers;
 		ULWord				_ulFrameBufferSize;
+#if !defined(NTV2_DEPRECATE_16_0)
 		ULWord				_pciSlot;					//	DEPRECATE!
+#endif	//	!defined(NTV2_DEPRECATE_16_0)
 
 };	//	CNTV2DriverInterface
 

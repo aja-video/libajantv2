@@ -403,7 +403,7 @@ AJAExport NTV2_SHOULD_BE_DEPRECATED(bool NTV2DeviceCanDoFormat (const NTV2Device
 									framerate might be NTV2_FRAMERATE_3000, but since 2 links are coming out, the video rate
 									is effectively NTV2_FRAMERATE_6000. Defaults to false.
 	@return The number of audio samples.
-	@see	See \ref audiosamplecount
+	@see	See \ref audop-samplecount
 **/
 AJAExport ULWord				GetAudioSamplesPerFrame (const NTV2FrameRate inFrameRate, const NTV2AudioRate inAudioRate, ULWord inCadenceFrame = 0, bool inIsSMPTE372Enabled = false);
 AJAExport LWord64				GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr (NTV2FrameRate frameRate, NTV2AudioRate audioRate, ULWord frameNbrNonInclusive);
@@ -412,7 +412,7 @@ AJAExport LWord64				GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr (NTV2Frame
 	@brief	Returns the audio sample rate as a number of audio samples per second.
 	@param[in]	inAudioRate		Specifies the audio sample rate.
 	@return The number of audio samples per second, or zero upon failure.
-	@see	See \ref audiosamplecount
+	@see	See \ref audop-samplecount
 **/
 AJAExport double				GetAudioSamplesPerSecond (const NTV2AudioRate inAudioRate);	//	New in SDK 16.2
 
@@ -538,6 +538,12 @@ AJAExport bool					IsTransportCompatibleFormat (const NTV2VideoFormat inFormat1,
 							Defaults to ::NTV2_INPUTSOURCES_SDI.
 **/
 AJAExport NTV2InputSource		GetNTV2InputSourceForIndex (const ULWord inIndex0, const NTV2IOKinds inKinds = NTV2_IOKINDS_SDI);
+
+/**
+	@return		The NTV2IOKinds classification of the given ::NTV2InputSource, or ::NTV2_IOKINDS_NONE upon failure.
+	@param[in]	inSrc		Specifies the input source of interest.
+**/
+AJAExport NTV2IOKinds			GetNTV2InputSourceKind (const NTV2InputSource inSrc);
 AJAExport ULWord				GetIndexForNTV2InputSource (const NTV2InputSource inValue);		//	0-based index
 
 /**

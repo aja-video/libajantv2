@@ -25,17 +25,15 @@
 typedef struct DolbyPlayerConfig : public PlayerConfig
 {
 	public:
-		bool				fdoRamp;					///< @brief	If true, replaces audio data with data values which ramp up
-		std::string			fDolbyFilePath;				///< @brief	Optional path to Dolby audio source file;		
-		AJAFileIO *         fDolbyFile;                 ///< @brief	The AJAFileIO created from the Dolby File Path
+		bool		fDoRamp;		///< @brief	If true, use audio ramp pattern instead of tone
+		std::string	fDolbyFilePath;	///< @brief	Optional path to Dolby audio source file
 
 		/**
 			@brief	Constructs a default DolbyPlayer configuration.
 		**/
-		inline explicit	DolbyPlayerConfig (const std::string & inDeviceSpecifier	= "0")
-			:	PlayerConfig		(inDeviceSpecifier),
-				fdoRamp				(false),
-				fDolbyFile			(NULL)
+		inline explicit	DolbyPlayerConfig (const std::string & inDeviceSpecifier = "0")
+			:	PlayerConfig	(inDeviceSpecifier),
+				fDoRamp			(false)
 		{
 		}
 
@@ -44,14 +42,11 @@ typedef struct DolbyPlayerConfig : public PlayerConfig
 }	DolbyPlayerConfig;
 
 // Takes DolbyPlayerConfig << operator overload takes precedence over the PlayConfig one declared in ntv2democommon.h
-AJAExport std::ostream &	operator << (std::ostream & ioStrm, const DolbyPlayerConfig & inObj);
+AJAExport std::ostream & operator << (std::ostream & ioStrm, const DolbyPlayerConfig & inObj);
 
 /**
-	@brief	I am an object that can play out a test pattern (with timecode) to an output of an AJA device
-			with or without audio tone in real time. I make use of the AJACircularBuffer, which simplifies
-			implementing a producer/consumer model, in which a "producer" thread generates the test pattern
-			frames, and a "consumer" thread (i.e., the "play" thread) sends those frames to the AJA device.
-			I demonstrate how to embed timecode into an SDI output signal using AutoCirculate during playout.
+	@brief	I am similar to NTV2Player, but I demonstrate how to play/output 8 channels of audio tone
+			(or ramp data, or Dolby audio read from a binary data file) to an AJA device's HDMI output.
 **/
 
 class NTV2DolbyPlayer
@@ -302,18 +297,18 @@ class NTV2DolbyPlayer
 		NTV2FrameDataArray	mHostBuffers;		///< @brief	My host buffers
 		FrameDataRingBuffer	mFrameDataRing;		///< @brief	AJACircularBuffer that controls frame data access by producer/consumer threads
 		NTV2Buffers			mTestPatRasters;	///< @brief	Pre-rendered test pattern rasters
-
-        NTV2AudioRate		mAudioRate;                 ///< @brief	My audio rate
-		uint16_t			mRampSample;				///< @brief	My current audio sample (maintains audio ramp generator st			
-		uint32_t   			mBurstIndex;				///< @brief	HDMI burst sample index
-		uint32_t   			mBurstSamples;				///< @brief	HDMI burst sample 			
-		uint16_t * 			mBurstBuffer;               ///< @brief	HDMI burst audio data buffer
-		uint32_t   			mBurstSize;                 ///< @brief	HDMI burst audio data size
-		uint32_t   			mBurstOffset;               ///< @brief	HDMI burst audio data offset
-		uint32_t   			mBurstMax;			        ///< @brief	HDMI burst and dolby max 			
-		uint16_t * 			mDolbyBuffer;               ///< @brief	Dolby audio data buffer
-		uint32_t   			mDolbySize;                 ///< @brief	Dolby audio data size
-		uint32_t			mDolbyBlocks;				///< @brief	Dolby audio block c			
+		AJAFileIO			mDolbyFileIO;		///< @brief	Dolby input audio file
+        NTV2AudioRate		mAudioRate;			///< @brief	My audio rate
+		uint16_t			mRampSample;		///< @brief	My current audio sample (maintains audio ramp generator st			
+		uint32_t   			mBurstIndex;		///< @brief	HDMI burst sample index
+		uint32_t   			mBurstSamples;		///< @brief	HDMI burst sample 			
+		uint16_t * 			mBurstBuffer;		///< @brief	HDMI burst audio data buffer
+		uint32_t   			mBurstSize;			///< @brief	HDMI burst audio data size
+		uint32_t   			mBurstOffset;		///< @brief	HDMI burst audio data offset
+		uint32_t   			mBurstMax;			///< @brief	HDMI burst and dolby max 			
+		uint16_t * 			mDolbyBuffer;		///< @brief	Dolby audio data buffer
+		uint32_t   			mDolbySize;			///< @brief	Dolby audio data size
+		uint32_t			mDolbyBlocks;		///< @brief	Dolby audio block c			
 		uint8_t *			mBitBuffer;
 		ULWord				mBitSize;
 		ULWord				mBitIndex;

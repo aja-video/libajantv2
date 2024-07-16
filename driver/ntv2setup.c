@@ -34,7 +34,7 @@ static bool ntv2_set_fan_speed(Ntv2SystemContext* sys_con, NTV2FanSpeed fanSpeed
 struct ntv2_setup *ntv2_setup_open(Ntv2SystemContext* sys_con, const char *name)
 {
 	struct ntv2_setup *ntv2_setterupper = NULL;
-
+	
 	if ((sys_con == NULL) ||
 		(name == NULL))
 		return NULL;
@@ -56,8 +56,6 @@ struct ntv2_setup *ntv2_setup_open(Ntv2SystemContext* sys_con, const char *name)
 	ntv2SpinLockOpen(&ntv2_setterupper->state_lock, sys_con);
 	ntv2ThreadOpen(&ntv2_setterupper->monitor_task, sys_con, "output monitor");
 	ntv2EventOpen(&ntv2_setterupper->monitor_event, sys_con);
-
-	NTV2_MSG_SETUP_INFO("%s: open ntv2_setup\n", ntv2_setterupper->name);
 
 	return ntv2_setterupper;
 }
@@ -131,6 +129,11 @@ Ntv2Status ntv2_setup_disable(struct ntv2_setup *ntv2_setterupper)
 }
 
 static void ntv2_setup_monitor(void* data)
+{
+	ntv2_setup_monitor_shared(data);
+}
+
+void ntv2_setup_monitor_shared(void* data)
 {
 	struct ntv2_setup *ntv2_setterupper = (struct ntv2_setup *)data;
 	Ntv2SystemContext *systemContext;

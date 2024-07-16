@@ -565,17 +565,33 @@ bool NTV2FrameGrabber::SetupInput (void)
             mNumChannels = 0;
             mTsi = false;
 
-            for (unsigned offset (0);  offset < 4;  offset++)
+			bool is6g;
+			bool is12g;
+			mNTV2Card.GetSDIInput6GPresent(is6g, mChannel);
+			mNTV2Card.GetSDIInput12GPresent(is12g, mChannel);
+
+			if (mNTV2Card.features().CanDo12gRouting() && (is6g || is12g))
 			{
-                mNumChannels++;
-				mNTV2Card.Connect (::GetCSCInputXptFromChannel (NTV2Channel (mChannel + offset)), ::GetSDIInputOutputXptFromChannel (NTV2Channel (mChannel + offset)));
-				mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (NTV2Channel (mChannel + offset)), ::GetCSCOutputXptFromChannel (NTV2Channel (mChannel + offset), false/*isKey*/, true/*isRGB*/));
-				mNTV2Card.SetFrameBufferFormat (NTV2Channel (mChannel + offset), mFrameBufferFormat);
-				mNTV2Card.EnableChannel (NTV2Channel (mChannel + offset));
-				mNTV2Card.SetSDIInLevelBtoLevelAConversion (mChannel + offset, IsInput3Gb (mInputSource) ? true : false);
-				if (!NTV2_IS_4K_VIDEO_FORMAT (mCurrentVideoFormat))
-					break;
-				mNTV2Card.Set4kSquaresEnable(true, NTV2_CHANNEL1);
+				mNTV2Card.Connect (::GetCSCInputXptFromChannel (NTV2Channel (mChannel)), ::GetSDIInputOutputXptFromChannel (NTV2Channel (mChannel)));
+				mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (NTV2Channel (mChannel)), ::GetCSCOutputXptFromChannel (NTV2Channel (mChannel), false/*isKey*/, true/*isRGB*/));
+				mNTV2Card.SetFrameBufferFormat (NTV2Channel (mChannel), mFrameBufferFormat);
+				mNTV2Card.EnableChannel (NTV2Channel (mChannel));
+				mNTV2Card.SetSDIInLevelBtoLevelAConversion (mChannel, IsInput3Gb (mInputSource) ? true : false);
+			}
+			else
+			{
+				for (unsigned offset (0);  offset < 4;  offset++)
+				{
+					mNumChannels++;
+					mNTV2Card.Connect (::GetCSCInputXptFromChannel (NTV2Channel (mChannel + offset)), ::GetSDIInputOutputXptFromChannel (NTV2Channel (mChannel + offset)));
+					mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (NTV2Channel (mChannel + offset)), ::GetCSCOutputXptFromChannel (NTV2Channel (mChannel + offset), false/*isKey*/, true/*isRGB*/));
+					mNTV2Card.SetFrameBufferFormat (NTV2Channel (mChannel + offset), mFrameBufferFormat);
+					mNTV2Card.EnableChannel (NTV2Channel (mChannel + offset));
+					mNTV2Card.SetSDIInLevelBtoLevelAConversion (mChannel + offset, IsInput3Gb (mInputSource) ? true : false);
+					if (!NTV2_IS_4K_VIDEO_FORMAT (mCurrentVideoFormat))
+						break;
+					mNTV2Card.Set4kSquaresEnable(true, NTV2_CHANNEL1);
+				}
 			}
 		}
 		else if (mInputSource == NTV2_INPUTSOURCE_ANALOG1)
@@ -601,7 +617,26 @@ bool NTV2FrameGrabber::SetupInput (void)
 				mNTV2Card.SetReference (::NTV2InputSourceToReferenceSource(mInputSource));
 
             // configure hdmi with 2.0 support
-            if (NTV2_IS_4K_VIDEO_FORMAT(mCurrentVideoFormat) && !mNTV2Card.features().CanDoHDMIQuadRasterConversion())
+			if (mNTV2Card.features().CanDo12gRouting())
+			{
+				mNumChannels = 1;
+				mNTV2Card.EnableChannel (mChannel);
+				mNTV2Card.SetMode (mChannel, NTV2_MODE_CAPTURE);
+				mNTV2Card.SetFrameBufferFormat (mChannel, mFrameBufferFormat);
+                if (mCurrentColorSpace == NTV2_LHIHDMIColorSpaceYCbCr)
+				{
+					mNTV2Card.Connect (::GetCSCInputXptFromChannel (mChannel),
+										::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, false/*isHDMI_RGB*/, 0/*hdmiQuadrant*/));
+					mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (mChannel),
+										::GetCSCOutputXptFromChannel (mChannel, false/*isKey*/, true/*isRGB*/));
+				}
+				else
+				{
+					mNTV2Card.Connect (::GetFrameBufferInputXptFromChannel (mChannel),
+										::GetInputSourceOutputXpt (mInputSource, false/*isSDI_DS2*/, true/*isHDMI_RGB*/, 0/*hdmiQuadrant*/));
+				}
+			}
+            else if (NTV2_IS_4K_VIDEO_FORMAT(mCurrentVideoFormat) && !mNTV2Card.features().CanDoHDMIQuadRasterConversion())
             {
                 //	Set two sample interleave
                 mChannel = NTV2_CHANNEL1;
@@ -767,30 +802,45 @@ NTV2VideoFormat NTV2FrameGrabber::GetVideoFormatFromInputSource (void)
 	NTV2_ASSERT (mNTV2Card.IsOpen ());
 	NTV2_ASSERT (mDeviceID != DEVICE_ID_NOTFOUND);
 
+	if (NTV2_INPUT_SOURCE_IS_SDI(mInputSource))
+	{
+		bool is6g;
+		bool is12g;
+		NTV2Channel channel = ::NTV2InputSourceToChannel (mInputSource);
+		mNTV2Card.GetSDIInput6GPresent(is6g, channel);
+		mNTV2Card.GetSDIInput12GPresent(is12g, channel);
+
+		if (mNTV2Card.features().CanDo12gRouting() && (is6g || is12g))
+		{
+				videoFormat = mNTV2Card.GetInputVideoFormat (mInputSource);
+				return videoFormat;
+		}
+	}
+
 	switch (mInputSource)
 	{
 		case NTV2_INPUTSOURCE_SDI1:
 		case NTV2_INPUTSOURCE_SDI5:
-		{
-			const ULWord	ndx	(::GetIndexForNTV2InputSource (mInputSource));
-			videoFormat = mNTV2Card.GetInputVideoFormat (::GetNTV2InputSourceForIndex (ndx + 0));
-			NTV2Standard	videoStandard	(::GetNTV2StandardFromVideoFormat (videoFormat));
-			if (mCheckFor4K  &&  (videoStandard == NTV2_STANDARD_1080p))
 			{
-				NTV2VideoFormat	videoFormatNext	(mNTV2Card.GetInputVideoFormat (::GetNTV2InputSourceForIndex (ndx + 1)));
-				if (videoFormatNext == videoFormat)
+				const ULWord	ndx	(::GetIndexForNTV2InputSource (mInputSource));
+				videoFormat = mNTV2Card.GetInputVideoFormat (::GetNTV2InputSourceForIndex (ndx + 0));
+				NTV2Standard	videoStandard	(::GetNTV2StandardFromVideoFormat (videoFormat));
+				if (mCheckFor4K  &&  (videoStandard == NTV2_STANDARD_1080p))
 				{
-					videoFormatNext = mNTV2Card.GetInputVideoFormat (::GetNTV2InputSourceForIndex (ndx + 2));
+					NTV2VideoFormat	videoFormatNext	(mNTV2Card.GetInputVideoFormat (::GetNTV2InputSourceForIndex (ndx + 1)));
 					if (videoFormatNext == videoFormat)
 					{
-						videoFormatNext = mNTV2Card.GetInputVideoFormat (::GetNTV2InputSourceForIndex (ndx + 3));
+						videoFormatNext = mNTV2Card.GetInputVideoFormat (::GetNTV2InputSourceForIndex (ndx + 2));
 						if (videoFormatNext == videoFormat)
-							CNTV2DemoCommon::Get4KInputFormat (videoFormat);
+						{
+							videoFormatNext = mNTV2Card.GetInputVideoFormat (::GetNTV2InputSourceForIndex (ndx + 3));
+							if (videoFormatNext == videoFormat)
+								CNTV2DemoCommon::Get4KInputFormat (videoFormat);
+						}
 					}
 				}
 			}
 			break;
-		}
 
 		case NTV2_NUM_INPUTSOURCES:
 			break;			//	indicates no source is currently selected

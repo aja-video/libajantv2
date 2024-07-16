@@ -1011,236 +1011,6 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 		}
 	}
 
-	TEST_CASE("NTV2Buffer")
-	{
-		//							              1         2         3         4
-		//							    01234567890123456789012345678901234567890123
-		static const std::string str1 ("The rain in Spain stays mainly on the plain.");
-		static const std::string str2 ("The rain in Japan stays mainly on the plain.");
-		static const std::string str3 ("APWRAPWR in Spain stays mainly on WRAPWRAPWR");
-
-		LOGNOTE("Started");
-		NTV2Buffer a(AJA_NULL, 0), b(str1.c_str(), 0), c(AJA_NULL, str1.length()), d(str1.c_str(),str1.length());
-		CHECK_FALSE(a);
-		CHECK_FALSE(b);
-		CHECK_FALSE(c);
-		CHECK((bool)d);
-		CHECK(a.Set(AJA_NULL, 0));
-		CHECK_FALSE(b.Set(str1.c_str(), 0));
-		CHECK_FALSE(c.Set(AJA_NULL, str1.length()));
-		CHECK(d.Set(str1.c_str(),str1.length()));
-
-		NTV2Buffer	spain	(str1.c_str(), str1.length());
-		NTV2Buffer	japan	(str2.c_str(), str2.length());
-		NTV2Buffer	wrap	(str3.c_str(), str3.length());
-		ULWord		firstDiff	(0);
-		ULWord		lastDiff	(0);
-		CHECK(spain.GetRingChangedByteRange (japan, firstDiff, lastDiff));
-		CHECK(firstDiff < lastDiff);
-		CHECK_EQ(firstDiff, 12);
-		CHECK_EQ(lastDiff, 15);
-		CHECK(spain.GetRingChangedByteRange (wrap, firstDiff, lastDiff));
-		CHECK_FALSE(firstDiff < lastDiff);
-		CHECK_EQ(firstDiff, 34);
-		CHECK_EQ(lastDiff, 7);
-		std::string			stringOutput[5];	//	= {"", "", "", "", ""};
-		std::ostringstream	ostreamOutput[5];
-		//								offset	length	radix	bytes/group	groups/line	addrRadix	ascii	addrOffset
-		spain.Dump(ostreamOutput[0],	0,		0,		16,		8,			8,			0,			false,	0);
-		spain.Dump(ostreamOutput[1],	0,		0,		16,		4,			16,			0,			false,	0);
-		spain.Dump(ostreamOutput[2],	0,		0,		16,		2,			32,			10,			true,	0);
-		spain.Dump(ostreamOutput[3],	0,		0,		16,		1,			64,			16,			true,	0x10000);
-		japan.Dump(ostreamOutput[4]);
-		spain.Dump(stringOutput[0],		0,		0,		16,		8,			8,			0,			false,	0);
-		spain.Dump(stringOutput[1],		0,		0,		16,		4,			16,			0,			false,	0);
-		spain.Dump(stringOutput[2],		0,		0,		16,		2,			32,			10,			true,	0);
-		spain.Dump(stringOutput[3],		0,		0,		16,		1,			64,			16,			true,	0x10000);
-		japan.Dump(stringOutput[4]);
-
-		auto CheckSizeT = [=](size_t x) {
-			return x ? true : false;
-		};
-		// Test cast operators
-		CHECK(CheckSizeT(spain));
-		CHECK_FALSE(CheckSizeT(NTV2Buffer()));
-		size_t sz(spain);
-		CHECK_EQ(sz, spain.GetByteCount());
-		sz = japan;
-		CHECK_EQ(sz, japan.GetByteCount());
-		sz = size_t(wrap) + 0;
-		CHECK_EQ(sz, wrap.GetByteCount());
-		sz = NTV2Buffer();
-		CHECK_EQ(sz, 0);
-
-		for (unsigned ndx(0);  ndx < 5;  ndx++)
-			CHECK_EQ(ostreamOutput[ndx].str(),  stringOutput[ndx]);
-
-		if (gVerboseOutput) {
-			for (unsigned len(7);  len < str1.length()+2;  len+=5)
-				for (unsigned n(0);  n <= str1.length()+2;  n++)
-					std::cerr << spain.GetString(n, len) << std::endl;
-		}
-
-		std::vector<uint64_t> u64s;
-		std::vector<uint32_t> u32s;
-		std::vector<uint16_t> u16s;
-		std::vector<uint8_t> u8s;
-		NTV2Buffer spainCmp(spain.GetByteCount());
-		CHECK(spain.GetU64s(u64s, 0, 0, true));
-		CHECK_EQ(u64s.size(), 5);
-		std::cerr << ULWord64Sequence(u64s) << std::endl;
-		spain.Dump(std::cerr, 0, spain.GetByteCount(), 16, 8, 16, 0, false, 0);
-		CHECK(spainCmp.PutU64s(u64s, 0, true));
-		std::cerr << "spain: " << spain << std::endl;
-		spain.Dump(std::cerr);
-		std::cerr << "spainCmp: " << spainCmp << std::endl;
-		spainCmp.Dump(std::cerr);
-		CHECK(spainCmp.IsContentEqual(spain, 0, ULWord(u64s.size()*sizeof(uint64_t))));
-		CHECK(spain.GetU64s(u64s, 0, 1));
-		CHECK_EQ(u64s.size(), 1);
-		CHECK(spainCmp.PutU64s(u64s, 0, true));
-
-		CHECK(spain.GetU32s(u32s, 0, 0, true));
-		CHECK_EQ(u32s.size(), 11);
-		std::cerr << ULWordSequence(u32s) << std::endl;
-		spain.Dump(std::cerr, 0, spain.GetByteCount(), 16, 4, 32, 0, false, 0);
-		CHECK(spain.GetU32s(u32s, 0, 2));
-		CHECK_EQ(u32s.size(), 2);
-
-		CHECK(spain.GetU16s(u16s, 0, 0, true));
-		CHECK_EQ(u16s.size(), 22);
-		std::cerr << UWordSequence(u16s) << std::endl;
-		spain.Dump(std::cerr, 0, spain.GetByteCount(), 16, 2, 64, 0, false, 0);
-		CHECK(spain.GetU16s(u16s, 0, 3));
-		CHECK_EQ(u16s.size(), 3);
-
-		//	NextDifference
-		ULWord byteOffset(0);
-		CHECK(spain.NextDifference(japan, byteOffset));
-		CHECK_EQ(byteOffset, 12);
-		CHECK_EQ(spain.U8(byteOffset), 'S');
-		CHECK_EQ(japan.U8(byteOffset), 'J');
-		byteOffset += 4;
-		CHECK(spain.NextDifference(japan, byteOffset));
-		CHECK_EQ(byteOffset, 0xFFFFFFFF);	//	No other diffs
-
-		//	Test cast-to-pointer & cast-to-size_t operators:
-		const char * pConstChars = spain;
-		std::string s;
-		for (size_t ndx(0); ndx < size_t(spain); ndx++)
-			s += pConstChars[ndx];
-		CHECK_EQ(s, str1);
-		const ULWord * pConstULWord = spain;
-		for (size_t num(0); num < size_t(spain)/sizeof(ULWord); num++)
-			CHECK_EQ(pConstULWord[num], spain.U32(int(num)));
-		::memcpy(japan, spain, spain);
-
-		//	Test scalar accessors:
-		uint32_t saved(spain.U32(3));
-		spain.U32(3) = 0x12345678;
-		CHECK_EQ(0x12345678, spain.U32(3));
-		spain.U32(3) = saved;
-		CHECK_EQ(saved, spain.U32(3));
-		//	Access from end:
-		for (int nd(-1);  nd > (-int(str1.length()+1));  nd--)
-			std::cout << char(spain.U8(nd));
-		std::cout << std::endl;
-
-		//           1         2         3         4
-		// 01234567890123456789012345678901234567890123
-		// The rain in Spain stays mainly on the plain.
-		NTV2Buffer foo(50);
-		NTV2SegmentedXferInfo segInfo;
-		segInfo.setSegmentCount(4).setSegmentLength(3).setSourceOffset(2).setSourcePitch(5);
-		CHECK(segInfo.isValid());
-		CHECK(foo.CopyFrom(spain, segInfo));
-		std::cerr << segInfo << foo << ":" << std::endl;
-		foo.Dump(std::cerr, 0, 0, 16, 1, 64, 16, true, 0);
-
-		// Check PutU64s..
-		u64s.clear();
-		// 16 x U64s is 128 bytes
-		for (uint64_t u64(0); u64 < 16; u64++)
-			u64s.push_back(u64 | 0xFEDCBA9800000000);
-		foo.Allocate(128);
-		foo.Fill(uint64_t(0));
-		CHECK_FALSE(foo.PutU64s(u64s, 1));
-		CHECK(foo.PutU64s(u64s, 0));
-		foo.Allocate(256);  foo.Fill(uint64_t(0)); // 256 bytes permits up to 32 U64s
-		for (size_t u64offset(0); u64offset < 17; u64offset++)
-			CHECK(foo.PutU64s(u64s, u64offset));
-		CHECK(foo.PutU64s(u64s, 16)); // Last U64 offset that will work
-		CHECK_FALSE(foo.PutU64s(u64s, 17)); // First U64 offset that will write past end
-
-		// Check PutU32s...
-		u32s.clear();
-		// 32 x U32s is 128 bytes
-		for (uint32_t u32(0); u32 < 32; u32++)
-			u32s.push_back(u32 | 0xFEDC0000);
-		foo.Allocate(128);
-		foo.Fill(uint32_t(0));
-		CHECK_FALSE(foo.PutU32s(u32s, 1));
-		CHECK(foo.PutU32s(u32s, 0));
-		foo.Allocate(256);  foo.Fill(uint32_t(0)); // 256 bytes permits up to 64 U32s
-		CHECK(foo.PutU32s(u32s, 32)); // Last U32 offset that will work
-		CHECK_FALSE(foo.PutU32s(u32s, 33)); // First U32 offset that will write past end
-
-		// Check PutU16s...
-		u16s.clear();
-		// 64 x U16s is 128 bytes
-		for (uint16_t u16(0); u16 < 64; u16++)
-			u16s.push_back(u16);
-		foo.Allocate(128);
-		foo.Fill(uint16_t(0));
-		CHECK_FALSE(foo.PutU16s(u16s, 1));
-		CHECK(foo.PutU16s(u16s, 0));
-		foo.Allocate(256);  foo.Fill(uint16_t(0)); // 256 bytes permits up to 128 U16s
-		CHECK(foo.PutU16s(u16s, 64)); // Last U16 offset that will work
-		CHECK_FALSE(foo.PutU16s(u16s, 65)); // First U16 offset that will write past end
-
-		// Check PutU8s...
-		u8s.clear();
-		// 128 x U8s is 128 bytes
-		for (uint8_t u8(0);  u8 < 128;  u8++)
-			u8s.push_back(u8);
-		foo.Allocate(128);
-		foo.Fill(uint8_t(0));
-		CHECK_FALSE(foo.PutU8s(u8s, 1));
-		CHECK(foo.PutU8s(u8s, 0));
-		foo.Allocate(256);
-		foo.Fill(uint8_t(0)); // 256 bytes permits up to 256 U8s
-		CHECK(foo.PutU8s(u8s, 128)); // Last U8 offset that will work
-		CHECK_FALSE(foo.PutU8s(u8s, 129)); // First U8 offset that will write past end
-
-		// Make a "raster" of character strings of '.'s, 64 rows tall x 256 chars wide
-		NTV2Buffer A(16*1024);
-		A.Fill('.');
-		for (ULWord row(1); row < A.GetByteCount() / 256; row++)
-			CHECK(A.PutU8s(UByteSequence{'\n'}, row * 256));
-		CHECK(A.PutU8s(UByteSequence{0x0}, A.GetByteCount() - 1)); // NUL terminate
-
-		const NTV2Buffer aOrig(A); // Keep copy of original
-		CHECK(A.IsContentEqual(aOrig)); // A == aOrig
-
-		// "Blit" 5Hx128W box of X's into the "raster" of '.'s...
-		NTV2Buffer X(16*1024);
-		X.Fill('X');
-		segInfo.reset().setSegmentInfo(5/*5 tall*/, 128 /*128 wide*/); // Xfer 128x5 box of X's
-		segInfo.setSourceOffset(0).setSourcePitch(256); // From upper-left corner of X...
-		segInfo.setDestInfo(8*256+64/*8 lines down, 64 chars in*/, 256/*charsPerLine*/);// ...into A @R8C64
-		CHECK(segInfo.isValid());
-		CHECK_EQ(segInfo.getTotalBytes(), segInfo.getTotalElements());
-		CHECK_EQ(segInfo.getTotalBytes(), 128*5);
-		if (gVerboseOutput) {
-			std::cout << std::endl << A.GetString(0, 16*1024) << std::endl;
-		}
-		CHECK(A.CopyFrom (X, segInfo)); // Do the CopyBlit
-		CHECK_FALSE(A.IsContentEqual(aOrig)); // A != aOrig
-		CHECK(A.IsContentEqual (aOrig, /*offset*/ 0, /*byteCount*/segInfo.getSourceOffset())); // 1st part up to srcOffset same
-		CHECK(A.IsContentEqual(aOrig, /*offset*/ segInfo.getDestEndOffset(), /*byteCount*/A.GetByteCount()-segInfo.getDestEndOffset()));
-		std::cout << std::endl << A.GetString(0, 16*1024) << std::endl;
-	}
-
 	TEST_CASE("devicespecparser")
 	{
 		AJADebug::Open();
@@ -3005,8 +2775,341 @@ TEST_SUITE("bft" * doctest::description("ajantv2 basic functionality tests")) {
 
 } //bft
 
+
+void ntv2buffer_marker() {}
+TEST_SUITE("NTV2Buffer" * doctest::description("NTV2Buffer tests"))
+{
+	TEST_CASE("buffer_bft")
+	{
+		//							              1         2         3         4
+		//							    01234567890123456789012345678901234567890123
+		static const std::string str1 ("The rain in Spain stays mainly on the plain.");
+		static const std::string str2 ("The rain in Japan stays mainly on the plain.");
+		static const std::string str3 ("APWRAPWR in Spain stays mainly on WRAPWRAPWR");
+
+		LOGNOTE("Started");
+		NTV2Buffer a(AJA_NULL, 0), b(str1.c_str(), 0), c(AJA_NULL, str1.length()), d(str1.c_str(),str1.length());
+		CHECK_FALSE(a);
+		CHECK_FALSE(b);
+		CHECK_FALSE(c);
+		CHECK((bool)d);
+		CHECK(a.Set(AJA_NULL, 0));
+		CHECK_FALSE(b.Set(str1.c_str(), 0));
+		CHECK_FALSE(c.Set(AJA_NULL, str1.length()));
+		CHECK(d.Set(str1.c_str(),str1.length()));
+
+		NTV2Buffer	spain	(str1.c_str(), str1.length());
+		NTV2Buffer	japan	(str2.c_str(), str2.length());
+		NTV2Buffer	wrap	(str3.c_str(), str3.length());
+		ULWord		firstDiff	(0);
+		ULWord		lastDiff	(0);
+		CHECK(spain.GetRingChangedByteRange (japan, firstDiff, lastDiff));
+		CHECK(firstDiff < lastDiff);
+		CHECK_EQ(firstDiff, 12);
+		CHECK_EQ(lastDiff, 15);
+		CHECK(spain.GetRingChangedByteRange (wrap, firstDiff, lastDiff));
+		CHECK_FALSE(firstDiff < lastDiff);
+		CHECK_EQ(firstDiff, 34);
+		CHECK_EQ(lastDiff, 7);
+		std::string			stringOutput[5];	//	= {"", "", "", "", ""};
+		std::ostringstream	ostreamOutput[5];
+		//								offset	length	radix	bytes/group	groups/line	addrRadix	ascii	addrOffset
+		spain.Dump(ostreamOutput[0],	0,		0,		16,		8,			8,			0,			false,	0);
+		spain.Dump(ostreamOutput[1],	0,		0,		16,		4,			16,			0,			false,	0);
+		spain.Dump(ostreamOutput[2],	0,		0,		16,		2,			32,			10,			true,	0);
+		spain.Dump(ostreamOutput[3],	0,		0,		16,		1,			64,			16,			true,	0x10000);
+		japan.Dump(ostreamOutput[4]);
+		spain.Dump(stringOutput[0],		0,		0,		16,		8,			8,			0,			false,	0);
+		spain.Dump(stringOutput[1],		0,		0,		16,		4,			16,			0,			false,	0);
+		spain.Dump(stringOutput[2],		0,		0,		16,		2,			32,			10,			true,	0);
+		spain.Dump(stringOutput[3],		0,		0,		16,		1,			64,			16,			true,	0x10000);
+		japan.Dump(stringOutput[4]);
+
+		auto CheckSizeT = [=](size_t x) {
+			return x ? true : false;
+		};
+		// Test cast operators
+		CHECK(CheckSizeT(spain));
+		CHECK_FALSE(CheckSizeT(NTV2Buffer()));
+		size_t sz(spain);
+		CHECK_EQ(sz, spain.GetByteCount());
+		sz = japan;
+		CHECK_EQ(sz, japan.GetByteCount());
+		sz = size_t(wrap) + 0;
+		CHECK_EQ(sz, wrap.GetByteCount());
+		sz = NTV2Buffer();
+		CHECK_EQ(sz, 0);
+
+		for (unsigned ndx(0);  ndx < 5;  ndx++)
+			CHECK_EQ(ostreamOutput[ndx].str(),  stringOutput[ndx]);
+
+		if (gVerboseOutput) {
+			for (unsigned len(7);  len < str1.length()+2;  len+=5)
+				for (unsigned n(0);  n <= str1.length()+2;  n++)
+					std::cerr << spain.GetString(n, len) << std::endl;
+		}
+
+		std::vector<uint64_t> u64s;
+		std::vector<uint32_t> u32s;
+		std::vector<uint16_t> u16s;
+		std::vector<uint8_t> u8s;
+		NTV2Buffer spainCmp(spain.GetByteCount());
+		CHECK(spain.GetU64s(u64s, 0, 0, true));
+		CHECK_EQ(u64s.size(), 5);
+		std::cerr << ULWord64Sequence(u64s) << std::endl;
+		spain.Dump(std::cerr, 0, spain.GetByteCount(), 16, 8, 16, 0, false, 0);
+		CHECK(spainCmp.PutU64s(u64s, 0, true));
+		std::cerr << "spain: " << spain << std::endl;
+		spain.Dump(std::cerr);
+		std::cerr << "spainCmp: " << spainCmp << std::endl;
+		spainCmp.Dump(std::cerr);
+		CHECK(spainCmp.IsContentEqual(spain, 0, ULWord(u64s.size()*sizeof(uint64_t))));
+		CHECK(spain.GetU64s(u64s, 0, 1));
+		CHECK_EQ(u64s.size(), 1);
+		CHECK(spainCmp.PutU64s(u64s, 0, true));
+
+		CHECK(spain.GetU32s(u32s, 0, 0, true));
+		CHECK_EQ(u32s.size(), 11);
+		std::cerr << ULWordSequence(u32s) << std::endl;
+		spain.Dump(std::cerr, 0, spain.GetByteCount(), 16, 4, 32, 0, false, 0);
+		CHECK(spain.GetU32s(u32s, 0, 2));
+		CHECK_EQ(u32s.size(), 2);
+
+		CHECK(spain.GetU16s(u16s, 0, 0, true));
+		CHECK_EQ(u16s.size(), 22);
+		std::cerr << UWordSequence(u16s) << std::endl;
+		spain.Dump(std::cerr, 0, spain.GetByteCount(), 16, 2, 64, 0, false, 0);
+		CHECK(spain.GetU16s(u16s, 0, 3));
+		CHECK_EQ(u16s.size(), 3);
+
+		//	NextDifference
+		ULWord byteOffset(0);
+		CHECK(spain.NextDifference(japan, byteOffset));
+		CHECK_EQ(byteOffset, 12);
+		CHECK_EQ(spain.U8(byteOffset), 'S');
+		CHECK_EQ(japan.U8(byteOffset), 'J');
+		byteOffset += 4;
+		CHECK(spain.NextDifference(japan, byteOffset));
+		CHECK_EQ(byteOffset, 0xFFFFFFFF);	//	No other diffs
+
+		//	Test cast-to-pointer & cast-to-size_t operators:
+		const char * pConstChars = spain;
+		std::string s;
+		for (size_t ndx(0); ndx < size_t(spain); ndx++)
+			s += pConstChars[ndx];
+		CHECK_EQ(s, str1);
+		const ULWord * pConstULWord = spain;
+		for (size_t num(0); num < size_t(spain)/sizeof(ULWord); num++)
+			CHECK_EQ(pConstULWord[num], spain.U32(int(num)));
+		::memcpy(japan, spain, spain);
+
+		//	Test scalar accessors:
+		uint32_t saved(spain.U32(3));
+		spain.U32(3) = 0x12345678;
+		CHECK_EQ(0x12345678, spain.U32(3));
+		spain.U32(3) = saved;
+		CHECK_EQ(saved, spain.U32(3));
+		//	Access from end:
+		for (int nd(-1);  nd > (-int(str1.length()+1));  nd--)
+			std::cout << char(spain.U8(nd));
+		std::cout << std::endl;
+
+		//           1         2         3         4
+		// 01234567890123456789012345678901234567890123
+		// The rain in Spain stays mainly on the plain.
+		NTV2Buffer foo(50);
+		NTV2SegmentedXferInfo segInfo;
+		segInfo.setSegmentCount(4).setSegmentLength(3).setSourceOffset(2).setSourcePitch(5);
+		CHECK(segInfo.isValid());
+		CHECK(foo.CopyFrom(spain, segInfo));
+		std::cerr << segInfo << foo << ":" << std::endl;
+		foo.Dump(std::cerr, 0, 0, 16, 1, 64, 16, true, 0);
+
+		// Check PutU64s..
+		u64s.clear();
+		// 16 x U64s is 128 bytes
+		for (uint64_t u64(0); u64 < 16; u64++)
+			u64s.push_back(u64 | 0xFEDCBA9800000000);
+		foo.Allocate(128);
+		foo.Fill(uint64_t(0));
+		CHECK_FALSE(foo.PutU64s(u64s, 1));
+		CHECK(foo.PutU64s(u64s, 0));
+		foo.Allocate(256);  foo.Fill(uint64_t(0)); // 256 bytes permits up to 32 U64s
+		for (size_t u64offset(0); u64offset < 17; u64offset++)
+			CHECK(foo.PutU64s(u64s, u64offset));
+		CHECK(foo.PutU64s(u64s, 16)); // Last U64 offset that will work
+		CHECK_FALSE(foo.PutU64s(u64s, 17)); // First U64 offset that will write past end
+
+		// Check PutU32s...
+		u32s.clear();
+		// 32 x U32s is 128 bytes
+		for (uint32_t u32(0); u32 < 32; u32++)
+			u32s.push_back(u32 | 0xFEDC0000);
+		foo.Allocate(128);
+		foo.Fill(uint32_t(0));
+		CHECK_FALSE(foo.PutU32s(u32s, 1));
+		CHECK(foo.PutU32s(u32s, 0));
+		foo.Allocate(256);  foo.Fill(uint32_t(0)); // 256 bytes permits up to 64 U32s
+		CHECK(foo.PutU32s(u32s, 32)); // Last U32 offset that will work
+		CHECK_FALSE(foo.PutU32s(u32s, 33)); // First U32 offset that will write past end
+
+		// Check PutU16s...
+		u16s.clear();
+		// 64 x U16s is 128 bytes
+		for (uint16_t u16(0); u16 < 64; u16++)
+			u16s.push_back(u16);
+		foo.Allocate(128);
+		foo.Fill(uint16_t(0));
+		CHECK_FALSE(foo.PutU16s(u16s, 1));
+		CHECK(foo.PutU16s(u16s, 0));
+		foo.Allocate(256);  foo.Fill(uint16_t(0)); // 256 bytes permits up to 128 U16s
+		CHECK(foo.PutU16s(u16s, 64)); // Last U16 offset that will work
+		CHECK_FALSE(foo.PutU16s(u16s, 65)); // First U16 offset that will write past end
+
+		// Check PutU8s...
+		u8s.clear();
+		// 128 x U8s is 128 bytes
+		for (uint8_t u8(0);  u8 < 128;  u8++)
+			u8s.push_back(u8);
+		foo.Allocate(128);
+		foo.Fill(uint8_t(0));
+		CHECK_FALSE(foo.PutU8s(u8s, 1));
+		CHECK(foo.PutU8s(u8s, 0));
+		foo.Allocate(256);
+		foo.Fill(uint8_t(0)); // 256 bytes permits up to 256 U8s
+		CHECK(foo.PutU8s(u8s, 128)); // Last U8 offset that will work
+		CHECK_FALSE(foo.PutU8s(u8s, 129)); // First U8 offset that will write past end
+
+		// Make a "raster" of character strings of '.'s, 64 rows tall x 256 chars wide
+		NTV2Buffer A(16*1024);
+		A.Fill('.');
+		for (ULWord row(1); row < A.GetByteCount() / 256; row++)
+			CHECK(A.PutU8s(UByteSequence{'\n'}, row * 256));
+		CHECK(A.PutU8s(UByteSequence{0x0}, A.GetByteCount() - 1)); // NUL terminate
+
+		const NTV2Buffer aOrig(A); // Keep copy of original
+		CHECK(A.IsContentEqual(aOrig)); // A == aOrig
+
+		// "Blit" 5Hx128W box of X's into the "raster" of '.'s...
+		NTV2Buffer X(16*1024);
+		X.Fill('X');
+		segInfo.reset().setSegmentInfo(5/*5 tall*/, 128 /*128 wide*/); // Xfer 128x5 box of X's
+		segInfo.setSourceOffset(0).setSourcePitch(256); // From upper-left corner of X...
+		segInfo.setDestInfo(8*256+64/*8 lines down, 64 chars in*/, 256/*charsPerLine*/);// ...into A @R8C64
+		CHECK(segInfo.isValid());
+		CHECK_EQ(segInfo.getTotalBytes(), segInfo.getTotalElements());
+		CHECK_EQ(segInfo.getTotalBytes(), 128*5);
+		if (gVerboseOutput) {
+			std::cout << std::endl << A.GetString(0, 16*1024) << std::endl;
+		}
+		CHECK(A.CopyFrom (X, segInfo)); // Do the CopyBlit
+		CHECK_FALSE(A.IsContentEqual(aOrig)); // A != aOrig
+		CHECK(A.IsContentEqual (aOrig, /*offset*/ 0, /*byteCount*/segInfo.getSourceOffset())); // 1st part up to srcOffset same
+		CHECK(A.IsContentEqual(aOrig, /*offset*/ segInfo.getDestEndOffset(), /*byteCount*/A.GetByteCount()-segInfo.getDestEndOffset()));
+		std::cout << std::endl << A.GetString(0, 16*1024) << std::endl;
+	}	//	buffer_bft	TEST_CASE("buffer_bft")
+
+	TEST_CASE("truncate_test")
+	{
+		NTV2Buffer buff(256);
+		CHECK(buff.Truncate(buff.GetByteCount()));	//	Truncate to same size does nothing
+		CHECK(buff.Truncate(buff));					//	Same as buff.Truncate(buff.GetByteCount())
+		CHECK_FALSE(buff.Truncate(buff.GetByteCount()+1));	//	Truncate cannot enlarge
+		CHECK_FALSE(buff.Truncate(1024));					//	Truncate cannot enlarge
+		while (buff)
+			CHECK(buff.Truncate(buff.GetByteCount()-1));	//	Keep shortening by 1 byte
+
+		NTV2Buffer nullBuff;
+		CHECK(nullBuff.Truncate(0));				//	Should be OK
+		CHECK_FALSE(nullBuff.Truncate(1));			//	Truncate cannot enlarge
+
+		const char chars[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+		NTV2Buffer buff16(chars, sizeof(chars));
+		while (buff16)
+			CHECK(buff16.Truncate(buff16.GetByteCount()-1));	//	Keep shortening by 1 byte
+	}	//	truncate_test
+
+	TEST_CASE("hexstring")
+	{
+		NTV2Buffer orig(256);
+		for (int ndx(0);  ndx < 256;  ndx++)
+			orig.U8(ndx) = uint8_t(ndx);
+
+		const string cmp =		"000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F"
+								"404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F"
+								"808182838485868788898A8B8C8D8E8F909192939495969798999A9B9C9D9E9FA0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF"
+								"C0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDEDFE0E1E2E3E4E5E6E7E8E9EAEBECEDEEEFF0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF";
+
+		const string cmp16 =	"000102030405060708090A0B0C0D0E0F\n"
+								"101112131415161718191A1B1C1D1E1F\n"
+								"202122232425262728292A2B2C2D2E2F\n"
+								"303132333435363738393A3B3C3D3E3F\n"
+								"404142434445464748494A4B4C4D4E4F\n"
+								"505152535455565758595A5B5C5D5E5F\n"
+								"606162636465666768696A6B6C6D6E6F\n"
+								"707172737475767778797A7B7C7D7E7F\n"
+								"808182838485868788898A8B8C8D8E8F\n"
+								"909192939495969798999A9B9C9D9E9F\n"
+								"A0A1A2A3A4A5A6A7A8A9AAABACADAEAF\n"
+								"B0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF\n"
+								"C0C1C2C3C4C5C6C7C8C9CACBCCCDCECF\n"
+								"D0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF\n"
+								"E0E1E2E3E4E5E6E7E8E9EAEBECEDEEEF\n"
+								"F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF";
+
+		const string cmp32 =	"000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F\n"
+								"202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F\n"
+								"404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F\n"
+								"606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F\n"
+								"808182838485868788898A8B8C8D8E8F909192939495969798999A9B9C9D9E9F\n"
+								"A0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF\n"
+								"C0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDEDF\n"
+								"E0E1E2E3E4E5E6E7E8E9EAEBECEDEEEFF0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF";
+
+		const string cmp48 =	"000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F202122232425262728292A2B2C2D2E2F\n"
+								"303132333435363738393A3B3C3D3E3F404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F\n"
+								"606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F808182838485868788898A8B8C8D8E8F\n"
+								"909192939495969798999A9B9C9D9E9FA0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF\n"
+								"C0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDEDFE0E1E2E3E4E5E6E7E8E9EAEBECEDEEEF\n"
+								"F0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF";
+
+		const string cmp64 =	"000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F\n"
+								"404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E7F\n"
+								"808182838485868788898A8B8C8D8E8F909192939495969798999A9B9C9D9E9FA0A1A2A3A4A5A6A7A8A9AAABACADAEAFB0B1B2B3B4B5B6B7B8B9BABBBCBDBEBF\n"
+								"C0C1C2C3C4C5C6C7C8C9CACBCCCDCECFD0D1D2D3D4D5D6D7D8D9DADBDCDDDEDFE0E1E2E3E4E5E6E7E8E9EAEBECEDEEEFF0F1F2F3F4F5F6F7F8F9FAFBFCFDFEFF";
+
+		//	Encode orig into hex strings with various line break intervals, and compare with expected string values...
+		string str, str16, str32, str48, str64;
+		CHECK(orig.toHexString(str));
+		CHECK_EQ(str, cmp);
+		CHECK(orig.toHexString(str16, 16));
+		CHECK_EQ(str16, cmp16);
+		CHECK(orig.toHexString(str32, 32));
+		CHECK_EQ(str32, cmp32);
+		CHECK(orig.toHexString(str48, 48));
+		CHECK_EQ(str48, cmp48);
+		CHECK(orig.toHexString(str64, 64));
+		CHECK_EQ(str64, cmp64);
+
+		//	Now restore from various hex strings, and compare with original...
+		NTV2Buffer cmpBuff;
+		CHECK(cmpBuff.SetFromHexString(str));
+		CHECK(orig.IsContentEqual(cmpBuff));
+		CHECK(cmpBuff.SetFromHexString(str16));
+		CHECK(orig.IsContentEqual(cmpBuff));
+		CHECK(cmpBuff.SetFromHexString(str32));
+		CHECK(orig.IsContentEqual(cmpBuff));
+		CHECK(cmpBuff.SetFromHexString(str48));
+		CHECK(orig.IsContentEqual(cmpBuff));
+		CHECK(cmpBuff.SetFromHexString(str64));
+		CHECK(orig.IsContentEqual(cmpBuff));
+	}	//	hexstring
+} //NTV2Buffer
+
+
 void signalrouter_marker() {}
-TEST_SUITE("signal router" * doctest::description("CNTV2SignalRouter & RoutingExpert tests")) {
+TEST_SUITE("signal router" * doctest::description("CNTV2SignalRouter & RoutingExpert tests"))
+{
 	TEST_CASE("RoutingExpert Instance") {
 		RoutingExpertPtr pExpert1 = RoutingExpert::GetInstance();
 		CHECK(pExpert1->NumInstances() == 1);

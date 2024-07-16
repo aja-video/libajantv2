@@ -434,7 +434,7 @@ bool CNTV2DemoCommon::IsValidDevice (const string & inDeviceSpec)
 	if (! CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, device))
 	{
 		if (deviceSpec != "LIST" && deviceSpec != "list" && deviceSpec != "?")
-			cerr << "## ERROR: Device spec '" << deviceSpec << "' not valid" << endl;
+			cerr << "## ERROR: Failed to open device spec '" << deviceSpec << "'" << endl;
 		return false;
 	}
 	return true;
@@ -1673,7 +1673,7 @@ AJALabelValuePairs CaptureConfig::Get (const bool inCompact) const
 	AJASystemInfo::append (result,		"A/B Conversion",	fDoABConversion ? "Y" : "N");
 	AJASystemInfo::append (result,		"MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
 	AJASystemInfo::append (result,		"Capture Anc",		fWithAnc ? "Y" : "N");
-	AJASystemInfo::append (result,		"Anc Capture File",	fAncDataFilePath);
+	AJASystemInfo::append (result,		"Anc Capture File",	fAncDataFilePath.empty() ? "---" : fAncDataFilePath);
 	AJASystemInfo::append (result,		"Capture Audio",	fWithAudio ? "Y" : "N");
 	AJASystemInfo::append (result,		"Num Audio Links",	aja::to_string(fNumAudioLinks));
 	AJASystemInfo::append (result,		"TSI Routing",		fDoTSIRouting ? "Y" : "N");
@@ -1704,7 +1704,7 @@ AJALabelValuePairs PlayerConfig::Get (const bool inCompact) const
 	AJASystemInfo::append (result,		"HDR Anc Type",			::AJAAncDataTypeToString(fTransmitHDRType));
 	AJASystemInfo::append (result,		"Output Channel",		::NTV2ChannelToString(fOutputChannel, inCompact));
 	AJASystemInfo::append (result,		"Output Connector",		::NTV2OutputDestinationToString(fOutputDest, inCompact));
-	AJASystemInfo::append (result,		"Anc Playback File",	fAncDataFilePath);
+	AJASystemInfo::append (result,		"Anc Playback File",	fAncDataFilePath.empty() ? "---" : fAncDataFilePath);
 	AJASystemInfo::append (result,		"Suppress Audio",		fSuppressAudio ? "Y" : "N");
 	AJASystemInfo::append (result,		"Num Audio Links",		aja::to_string(fNumAudioLinks));
 	AJASystemInfo::append (result,		"Suppress Video",		fSuppressVideo ? "Y" : "N");

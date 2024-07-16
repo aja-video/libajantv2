@@ -282,21 +282,30 @@ int ntv2_rdma_init(void)
         ntv2_rdma_unmap_pages
     };
 
+    // request the unified virtual memory driver
+    request_module_nowait("nvidia-uvm");
+
+    // set rdma functions in the ntv2 driver
     ntv2_set_rdma_fops(&rdma_fops);
+    
 #ifdef NVIDIA_PROPRIETARY
-    printk(KERN_INFO "ntv2_rmda_init: RDMA proprietary\n");
+    printk(KERN_INFO "ntv2_rdma_init: RDMA proprietary\n");
 #else
-    printk(KERN_INFO "ntv2_rmda_init: RDMA open source\n");
+    printk(KERN_INFO "ntv2_rdma_init: RDMA open source\n");
 #endif    
 #else
-    printk(KERN_INFO "ntv2_rmda_init: RDMA not supported\n");
+    printk(KERN_INFO "ntv2_rdma_init: RDMA not supported\n");
 #endif
     return 0;
 }	
 
 void ntv2_rdma_exit(void)
 {
-    printk(KERN_INFO "ntv2_rmda_exit\n");
+#ifdef AJA_RDMA
+    // clear the rdma functions in the ntv2 driver
+    ntv2_set_rdma_fops(NULL);
+#endif    
+    printk(KERN_INFO "ntv2_rdma_exit\n");
     return;
 }
 

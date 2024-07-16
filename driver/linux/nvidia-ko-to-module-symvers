@@ -1,7 +1,5 @@
 #!/bin/bash
 
-rm -rf nvidia.symvers
-
 syms=()
 syms+=(nvidia_p2p_init_mapping)
 syms+=(nvidia_p2p_destroy_mapping)
@@ -13,14 +11,24 @@ syms+=(nvidia_p2p_dma_unmap_pages)
 
 nvidia_ko_fn="$1"
 symvers_fn="$2"
+nvidia_ko_ofn=$nvidia_ko_fn
+nvidia_ko_tfn=nvidia_sym.ko
+
+rm -f $symvers_fn
+rm -f $nvidia_ko_tfn
+
+if [ "${nvidia_ko_fn: -3}" == ".xz" ]; then
+   unxz $nvidia_ko_fn --stdout > $nvidia_ko_tfn
+   nvidia_ko_ofn=$nvidia_ko_tfn
+fi
 
 # Get the offset to the CRC table
-crc_table_offset=$(objdump -h "${nvidia_ko_fn}" | grep __kcrctab | awk '{print $6}')
+crc_table_offset=$(objdump -h "${nvidia_ko_ofn}" | grep __kcrctab | awk '{print $6}')
 
 touch "${symvers_fn}"
 for sym in "${syms[@]}"; do
 	# Find the symbol entry
-	entry=$(objdump -t "${nvidia_ko_fn}" | grep "__crc_${sym}$")
+	entry=$(objdump -t "${nvidia_ko_ofn}" | grep "__crc_${sym}$")
 	crc=$(echo "${entry}" | awk '{print $1}')
 	if [ -z "${crc}" ]; then
 		echo "Warning: Can't find symbol ${sym} in ${nvidia_ko_fn}; assuming CONFIG_MODVERSIONS=n so setting CRC=0"
@@ -30,10 +38,13 @@ for sym in "${syms[@]}"; do
 	# If the entry type is an offset into the CRC table, look up the value
 	crc_type=$(echo "${entry}" | awk '{print $3}')
 	if [ "${crc_type}" = "__kcrctab" ]; then
-		crc=$(dd if="${nvidia_ko_fn}" status=none bs=1 count=4 skip=$((0x${crc_table_offset} + 0x${crc})) | od -A n -t x4)
+		crc=$(dd if="${nvidia_ko_ofn}" status=none bs=1 count=4 skip=$((0x${crc_table_offset} + 0x${crc})) | od -A n -t x4)
 		crc=00000000${crc:1}
 	fi
 
 	sed -i '/${sym}/d' "${symvers_fn}"
 	echo "0x${crc}	${sym}	${nvidia_ko_fn}	EXPORT_SYMBOL	" >> ${symvers_fn}
 done
+
+rm -f $nvidia_ko_tfn
+

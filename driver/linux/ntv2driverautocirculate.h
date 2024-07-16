@@ -267,8 +267,6 @@ void oemAutoCirculateWriteHDMIAux(ULWord deviceNumber, ULWord* pAuxData, ULWord 
 
 NTV2VideoFormat GetNTV2VideoFormat(UByte status, UByte frameRateHiBit);
 
-ULWord DownloadLinearLUTToHW (ULWord boardNumber, NTV2Channel channel, int bank);
-
 ULWord64 GetAudioClock(ULWord boardNumber);
 
 void CopyFrameStampOldToNew(const FRAME_STAMP_STRUCT * pInOldStruct, FRAME_STAMP * pOutNewStruct);
