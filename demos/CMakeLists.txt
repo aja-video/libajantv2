@@ -33,7 +33,7 @@ add_subdirectory(ntv2streamplayer)
 add_subdirectory(ntv2switchbitfile)
 
 if(NOT AJANTV2_BUILD_OPENSOURCE)
-    add_subdirectory(ntv2ccgrabber)
+    add_subdirectory(ntv2ccgrabber)  
     add_subdirectory(ntv2ccplayer)
 endif()
 

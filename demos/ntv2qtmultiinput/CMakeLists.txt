@@ -14,23 +14,26 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(AJA_DEMO_COMMON_ROOT
-    ${CMAKE_CURRENT_SOURCE_DIR}/../)
+set(AJA_LIB_GUI_ROOT
+        ${LIBAJAQT_DIR}/gui)
 
 set(TARGET_INCLUDE_DIRS
-    ${AJA_DEMO_COMMON_ROOT})
+    ${CMAKE_CURRENT_SOURCE_DIR}/../
+    ${AJA_LIBRARIES_ROOT}
+    ${AJA_LIB_NTV2_ROOT}/includes
+)
 
 set(NTV2QTMULTIINPUT_SOURCES
     main.cpp
     ntv2qtmultiinput.h
     ntv2qtmultiinput.cpp
     ntv2qtmultiinput.qrc
-    ${AJA_DEMO_COMMON_ROOT}/ajapreviewwidget.h
-    ${AJA_DEMO_COMMON_ROOT}/ajapreviewwidget.cpp
-    ${AJA_DEMO_COMMON_ROOT}/ntv2framegrabber.h
-    ${AJA_DEMO_COMMON_ROOT}/ntv2framegrabber.cpp
-    ${AJA_DEMO_COMMON_ROOT}/ntv2democommon.h
-    ${AJA_DEMO_COMMON_ROOT}/ntv2democommon.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/../ajapreviewwidget.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../ajapreviewwidget.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../ntv2framegrabber.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../ntv2framegrabber.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../ntv2democommon.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../ntv2democommon.cpp)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     remove_definitions(
@@ -63,9 +66,11 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 endif()
 
 set(TARGET_SOURCES ${NTV2QTMULTIINPUT_SOURCES})
-list(APPEND TARGET_LINK_LIBS ajantv2 )
+set(TARGET_DEPS ajantv2)
+list(APPEND TARGET_LINK_LIBS ajantv2)
 
 add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
+add_dependencies(${PROJECT_NAME} ${TARGET_DEPS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS})
 target_compile_definitions(${PROJECT_NAME} PUBLIC ${TARGET_COMPILE_DEFS})
