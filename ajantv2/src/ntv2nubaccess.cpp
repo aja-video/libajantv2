@@ -1776,19 +1776,31 @@ bool NTV2PluginLoader::validate (void)
 	{	P_FAIL("Vendor name (key='" << kNTV2PluginRegInfoKey_Vendor << "') \"" << onReg << "\" from plugin \""
 				<< pluginPath() << "\" doesn't match organization name (key='" << kNTV2PluginX500AttrKey_OrganizationName
 				<< "') \"" << onCert << "\" from X509 certificate 'Issuer' in '" << pluginSigPath() << "'");
+<<<<<<< HEAD
 		return fail();
+=======
+		return false;	//	fail
+>>>>>>> 0af737fb (SDK: Fixed plugin validation to seek 'OU' in x509 cert 'Subject')
 	}
 	if (cnReg != cnCert)
 	{	P_FAIL("Common name (key='" << kNTV2PluginRegInfoKey_CommonName << "') \"" << cnReg << "\" from plugin \""
 				<< pluginPath() << "\" doesn't match common name (key='" << kNTV2PluginX500AttrKey_CommonName
 				<< "') \"" << cnCert << "\" from X509 certificate 'Issuer' in '" << pluginSigPath() << "'");
+<<<<<<< HEAD
 		return fail();
+=======
+		return false;	//	fail
+>>>>>>> 0af737fb (SDK: Fixed plugin validation to seek 'OU' in x509 cert 'Subject')
 	}
 	if (ouReg != ouCert)
 	{	P_FAIL("Org unit (key='" << kNTV2PluginX500AttrKey_OrganizationalUnitName << "') \"" << ouReg << "\" from plugin \""
 				<< pluginPath() << "\" doesn't match org unit (key='" << kNTV2PluginX500AttrKey_OrganizationalUnitName
 				<< "') \"" << ouCert << "\" from X509 certificate 'Subject' in '" << pluginSigPath() << "'");
+<<<<<<< HEAD
 		return fail();
+=======
+		return false;	//	fail
+>>>>>>> 0af737fb (SDK: Fixed plugin validation to seek 'OU' in x509 cert 'Subject')
 	}
 	if (myVers != plVers)
 	{	P_FAIL("SDK version '" << plVers << "' from plugin \"" << pluginPath()
