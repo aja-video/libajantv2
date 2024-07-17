@@ -66,9 +66,11 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 endif()
 
 set(TARGET_SOURCES ${NTV2QTPREVIEW_SOURCES})
+set(TARGET_DEPS ajantv2)
 list(APPEND TARGET_LINK_LIBS ajantv2)
 
 add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
+add_dependencies(${PROJECT_NAME} ${TARGET_DEPS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS})
 target_compile_definitions(${PROJECT_NAME} PUBLIC ${TARGET_COMPILE_DEFS})
