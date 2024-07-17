@@ -23,6 +23,8 @@ struct ntv2_videoraster {
 	Ntv2SystemContext* 	system_context;
 	Ntv2InterruptLock   state_lock;
 	bool				monitor_enable;
+	uint32_t			version;
+	bool				useFullRasterValues;
 
     uint32_t            global_control[NTV2_VIDEORASTER_MAX_WIDGETS];
     uint32_t            global_control2[NTV2_VIDEORASTER_MAX_WIDGETS];
