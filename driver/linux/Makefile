@@ -80,11 +80,15 @@ endif
 
 endif
 
-# determine if the ko is gpl
+# determine if the ko is gpl - no ko is proprietary igpu
+ifeq ($(NVIDIA_KO),)
+	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1 -DNVIDIA_PROPRIETARY=1
+else
 ifeq ($(shell modinfo $(NVIDIA_KO) | grep license: | grep GPL),)
 	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1 -DNVIDIA_PROPRIETARY=1
 else
 	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1
+endif
 endif
 
 ifdef AJA_CREATE_DEVICE_NODES
