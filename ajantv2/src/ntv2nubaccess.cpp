@@ -1385,6 +1385,8 @@ NTV2PluginLoader::NTV2PluginLoader (NTV2Dictionary & params)
 	const NTV2Dictionary originalParams(mDict);
 	if (ParseQueryParams (mDict, mQueryParams)  &&  !mQueryParams.empty())
 		mDict.addFrom(mQueryParams);
+	if (mDict.hasKey(kNTV2PluginInfoKey_Fingerprint))
+		mDict.erase(kNTV2PluginInfoKey_Fingerprint);	//	Be sure caller can't cheat
 	P_INFO("Loader created for '" << mDict.valueForKey(kConnectParamScheme) << "', " << DEC(gLoaderConstructCount) << " created, "
 			<< DEC(gLoaderDestructCount) << " destroyed");
 
@@ -1657,6 +1659,10 @@ bool NTV2PluginLoader::validate (void)
 		if (certInfo.hasKey("subject name"))
 			if (!ExtractIssuerInfo (subjectInfo, certInfo.valueForKey("subject name"), "subject name"))
 				return false;
+		if (!certInfo.hasKey(kNTV2PluginInfoKey_Fingerprint))
+		{	P_FAIL("Missing key '" << kNTV2PluginInfoKey_Fingerprint << "' in X509 certificate from '" << pluginSigPath() << "'");
+			return false;
+		}
 		if (isVerbose()  &&  !issuerInfo.empty())
 		{	cout << "## NOTE: 'issuer name' info:" << endl;
 			issuerInfo.Print(cout, false) << endl;
@@ -1745,6 +1751,8 @@ bool NTV2PluginLoader::validate (void)
 					ouCert(subjectInfo.valueForKey(kNTV2PluginX500AttrKey_OrganizationalUnitName));
 	const string	myVers(NTV2RPCBase::ShortSDKVersion()),
 					plVers(regInfo.valueForKey(kNTV2PluginRegInfoKey_NTV2SDKVersion));
+	const string	fingerprint(mDict.valueForKey(kNTV2PluginInfoKey_Fingerprint)),
+					ajaFingerprint("70:1a:37:93:fa:4f:34:30:58:55:51:0c:01:4e:45:7c:be:5b:41:62");
 	if (onReg != onCert)
 	{	P_FAIL("Vendor name (key='" << kNTV2PluginRegInfoKey_Vendor << "') \"" << onReg << "\" from plugin \""
 				<< pluginPath() << "\" doesn't match organization name (key='" << kNTV2PluginX500AttrKey_OrganizationName
@@ -1766,6 +1774,11 @@ bool NTV2PluginLoader::validate (void)
 	if (myVers != plVers)
 	{	P_FAIL("SDK version '" << plVers << "' from plugin \"" << pluginPath()
 				<< "\" doesn't match client SDK version '" << myVers << "'");
+		return false;	//	fail
+	}
+	if (fingerprint != ajaFingerprint)
+	{	P_FAIL(pluginPath() << " not authorized/signed by AJA: Issuer serial mismatch: " << fingerprint
+				<< " vs " << ajaFingerprint);
 		return false;	//	fail
 	}
 
