@@ -288,9 +288,6 @@ struct ntv2_videoraster *ntv2_videoraster_open(Ntv2SystemContext* sys_con,
 	snprintf(ntv2_raster->name, NTV2_VIDEORASTER_STRING_SIZE, "%s%d", name, index);
 #endif
 	ntv2_raster->system_context = sys_con;
-	ntv2_raster->version = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_videoraster_version, index);
-	ntv2_raster->useFullRasterValues = ntv2_raster->version == 3 ? true : false;
-
 	ntv2InterruptLockOpen(&ntv2_raster->state_lock, sys_con);
 
     s_standard_size = sizeof(c_standard_data) / sizeof(struct standard_data);
@@ -338,6 +335,9 @@ Ntv2Status ntv2_videoraster_configure(struct ntv2_videoraster *ntv2_raster,
     ntv2_raster->widget_base = widget_base;
     ntv2_raster->widget_size = widget_size;
     ntv2_raster->num_widgets = num_widgets;
+
+	ntv2_raster->version = ntv2_regnum_read(ntv2_raster->system_context, widget_base + ntv2_reg_videoraster_version);
+	ntv2_raster->useFullRasterValues = ntv2_raster->version == 3 ? true : false;
 
 	return NTV2_STATUS_SUCCESS;
 }
