@@ -1751,8 +1751,9 @@ bool NTV2PluginLoader::validate (void)
 					ouCert(subjectInfo.valueForKey(kNTV2PluginX500AttrKey_OrganizationalUnitName));
 	const string	myVers(NTV2RPCBase::ShortSDKVersion()),
 					plVers(regInfo.valueForKey(kNTV2PluginRegInfoKey_NTV2SDKVersion));
-	const string	fingerprint(mDict.valueForKey(kNTV2PluginInfoKey_Fingerprint)),
-					ajaFingerprint("70:1a:37:93:fa:4f:34:30:58:55:51:0c:01:4e:45:7c:be:5b:41:62");
+	const string	ajaFingerprint("70:1a:37:93:fa:4f:34:30:58:55:51:0c:01:4e:45:7c:be:5b:41:62");
+	string	fingerprint(mDict.valueForKey(kNTV2PluginInfoKey_Fingerprint));
+	aja::lower(fingerprint);	//	since ajaFingerprint is lower case
 	if (onReg != onCert)
 	{	P_FAIL("Vendor name (key='" << kNTV2PluginRegInfoKey_Vendor << "') \"" << onReg << "\" from plugin \""
 				<< pluginPath() << "\" doesn't match organization name (key='" << kNTV2PluginX500AttrKey_OrganizationName
