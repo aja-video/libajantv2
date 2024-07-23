@@ -238,6 +238,8 @@ static int suspend(struct pci_dev *pdev, pm_message_t state);
 static int resume(struct pci_dev *pdev);
 
 void InitInterruptBitLUT(void);
+int allocNTV2DeviceNumber(unsigned int* pDeviceNumber);
+void freeNTV2DeviceNumber(unsigned int deviceNumber);
 
 /********************/
 /* Static variables */

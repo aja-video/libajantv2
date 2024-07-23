@@ -31,6 +31,8 @@
 
 static struct ntv2_page_fops rdma_fops = { NULL, NULL, NULL, NULL};
 
+void ntv2_set_rdma_fops(struct ntv2_page_fops* fops);
+
 void ntv2_set_rdma_fops(struct ntv2_page_fops* fops)
 {
     if (fops == NULL)
