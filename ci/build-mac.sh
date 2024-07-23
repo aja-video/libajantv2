@@ -48,7 +48,7 @@ echo "Removing old build/install directories"
 if [ -d $BUILD_DIR ]; then
     rm -rf $BUILD_DIR
 fi
-if [ -d $INSTALL_DIR]; then 
+if [ -d $INSTALL_DIR ]; then
     rm -rf $INSTALL_DIR
 fi
 
