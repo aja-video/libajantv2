@@ -916,8 +916,17 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     /* total lines */
     total_lines = c_standard_data[standard].line_total;
 
+	uint64_t pixelScale = c_pixel_rate_data[pixel_rate].scale;
+	if (quad && ntv2_raster->useFullRasterValues)
+	{
+		pixelScale *= 4;
+	}
+
+	NTV2_MSG_VIDEORASTER_STATE("pix scale: %d, frame duration: %d, pix duration: %d, frame scale: %d, total lines: %d\n",
+		pixelScale, c_frame_rate_data[frame_rate].duration, c_pixel_rate_data[pixel_rate].duration, c_frame_rate_data[frame_rate].scale, total_lines);
+
     /* calucate total width based on frame rate, pixel rate and total lines */
-    total_width = (uint32_t)((c_pixel_rate_data[pixel_rate].scale * c_frame_rate_data[frame_rate].duration) /
+    total_width = (uint32_t)((pixelScale * c_frame_rate_data[frame_rate].duration) /
         (c_pixel_rate_data[pixel_rate].duration * c_frame_rate_data[frame_rate].scale * total_lines));
 
     value = NTV2_FLD_SET(ntv2_fld_videoraster_videoh_active, width);
