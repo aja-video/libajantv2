@@ -177,7 +177,7 @@ NTV2_CON(ntv2_reg_videoraster_smpteframepulse,              18);    /**< SMPTE F
 
 NTV2_CON(ntv2_reg_videoraster_oddlinestartaddress,			19);    /**< UHD odd line addres*/
 
-NTV2_CON(ntv2_reg_videoraster_version,			            63);    /**< Raster Version*/
+NTV2_CON(ntv2_reg_videoraster_version,			            62);    /**< Raster Version*/
 
 //NTV2_CON(ntv2_reg_videoraster_offsetgreen,                  19);    /**< Green playback component offset (signed 12 bit) */
 //NTV2_CON(ntv2_reg_videoraster_offsetblue,                   20);    /**< Blue playback component offset (signed 12 bit) */
