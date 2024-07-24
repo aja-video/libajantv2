@@ -2651,7 +2651,15 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 						uint32_t actualLastIn = GetAudioLastIn(pSysCon, pAuto->audioSystem);
 						uint32_t startAddress = newStartAddress - GetAudioReadOffset(pSysCon, pAuto->audioSystem);
 						// calculate the difference between the expected start address and the actual address
-						uint64_t delta = abs(actualLastIn - startAddress);
+						uint64_t delta = 0;//abs(actualLastIn - startAddress);
+						if (actualLastIn < startAddress)
+						{
+							delta = (GetAudioWrapAddress(pSysCon, pAuto->audioSystem) - startAddress) + 1 + actualLastIn;
+						}
+						else
+						{
+							delta = actualLastIn - startAddress;
+						}
 						if (delta > GetAudioWrapAddress(pSysCon, pAuto->audioSystem) / 2)
 						{
 							delta = GetAudioWrapAddress(pSysCon, pAuto->audioSystem) - delta;
@@ -2966,7 +2974,15 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 								{
 									// calculate the difference between the expected start address and the actual address
 									uint32_t startAddress = pActiveFrameStamp->audioExpectedAddress;
-									uint64_t delta = abs(audioOutLastAddress - startAddress);
+									uint64_t delta = 0;//audioOutLastAddress - startAddress;
+									if (audioOutLastAddress < startAddress)
+									{
+										delta = (GetAudioWrapAddress(pSysCon, pAuto->audioSystem) - startAddress) + 1 + audioOutLastAddress;
+									}
+									else
+									{
+										delta = audioOutLastAddress - startAddress;
+									}
 									if (delta > GetAudioWrapAddress(pSysCon, pAuto->audioSystem) / 2)
 									{
 										delta = GetAudioWrapAddress(pSysCon, pAuto->audioSystem) - delta;
