@@ -65,6 +65,9 @@ endif
 ifeq ($(NVIDIA_KO),)
 	NVIDIA_KO := $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia.ko.xz'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
 endif
+ifeq  ($(shell objdump -t $(NVIDIA_KO) | grep nvidia_p2p_get_pages),)
+	NVIDIA_KO :=
+endif
 ifeq ($(NVIDIA_KO),)
 	NVIDIA_KO := $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia-p2p.ko'|grep -P 'nvidia-p2p(_[0-9]+)?.ko'|head -1)
 endif
