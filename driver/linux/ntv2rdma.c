@@ -280,6 +280,9 @@ static void dmaSgSetRdmaPage(struct scatterlist* pSg, struct nvidia_p2p_dma_mapp
 
 #endif
 
+int ntv2_rdma_init(void);
+void ntv2_rdma_exit(void);
+
 int ntv2_rdma_init(void)
 {
 #ifdef AJA_RDMA
