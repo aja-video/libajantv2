@@ -345,21 +345,21 @@ public:
 
 	//	Member Data
 	public:
-		ULWord					numLines;			///< @brief	Height -- total number of lines
-		ULWord					numPixels;			///< @brief	Width -- total number of pixels per line
-		ULWord					linePitch;			///< @brief	Number of 32-bit words per line. Shadows mLinePitch[0] * sizeof(ULWord).
-		ULWord					firstActiveLine;	///< @brief	First active line of video (0 if NTV2_VANCMODE_OFF)
+		ULWord				numLines;			///< @brief	Height -- total number of lines
+		ULWord				numPixels;			///< @brief	Width -- total number of pixels per line
+		ULWord				linePitch;			///< @brief	Number of 32-bit words per line. Shadows mLinePitch[0] * sizeof(ULWord).
+		ULWord				firstActiveLine;	///< @brief	First active line of video (0 if NTV2_VANCMODE_OFF)
 	private:
-		NTV2Standard			mStandard;			///< @brief	My originating video standard
-		NTV2VideoFormat			mVideoFormat;		///< @brief	My originating video format (if known)
-		NTV2FrameBufferFormat	mPixelFormat;		///< @brief	My originating frame buffer format
-		NTV2VANCMode			mVancMode;			///< @brief	My originating VANC mode
-		ULWord					mLinePitch[4];		///< @brief	Number of bytes per row/line (per-plane)
-		UWord					mNumPlanes;			///< @brief	Number of planes
-		NTV2FrameGeometry		mFrameGeometry;		///< @brief My originating frame geometry
-		UByte					mNumBitsLuma;		///≤ @brief	Number of bits in luminance component (0 for RGB)
-		UByte					mNumBitsChroma;		///≤ @brief	Number of bits in chroma components
-		UByte					mNumBitsAlpha;		///≤ @brief	Number of bits in alpha component (0 if no alpha)
+		NTV2Standard		mStandard;			///< @brief	My originating video standard
+		NTV2VideoFormat		mVideoFormat;		///< @brief	My originating video format (if known)
+		NTV2PixelFormat		mPixelFormat;		///< @brief	My originating frame buffer format
+		NTV2VANCMode		mVancMode;			///< @brief	My originating VANC mode
+		ULWord				mLinePitch[4];		///< @brief	Number of bytes per row/line (per-plane)
+		UWord				mNumPlanes;			///< @brief	Number of planes
+		NTV2FrameGeometry	mFrameGeometry;		///< @brief My originating frame geometry
+		UByte				mNumBitsLuma;		///< @brief	Number of bits in luminance component (0 for RGB)
+		UByte				mNumBitsChroma;		///< @brief	Number of bits in chroma components
+		UByte				mNumBitsAlpha;		///< @brief	Number of bits in alpha component (0 if no alpha)
 
 };	//	NTV2FormatDescriptor
 
