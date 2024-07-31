@@ -200,9 +200,12 @@ CGpuVideoIO::SetGpuCircularBuffer(CNTV2GpuCircularBuffer* gpuCircularBuffer)
 	
 	for (ULWord i = 0; i < gpuCircularBuffer->mNumFrames; i++)
 	{
-#ifdef AJA_RDMA		
+#ifdef AJA_RDMA
+		ULWord alignedSize = gpuCircularBuffer->mAVTextureBuffers[i].videoBufferSize;
+		alignedSize += gpuCircularBuffer->mAVTextureBuffers[i].alignment - 1;
+		alignedSize &= ~(gpuCircularBuffer->mAVTextureBuffers[i].alignment - 1);
 		if (!mBoard->DMABufferLock((ULWord*)gpuCircularBuffer->mAVTextureBuffers[i].videoBufferRDMA,
-								   gpuCircularBuffer->mAVTextureBuffers[i].videoBufferSize,
+								   alignedSize,
 								   true, true))
 		{
 			printf("error: RDMA buffer index %d size %d lock failed\n",

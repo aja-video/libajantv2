@@ -31,46 +31,72 @@ ifdef AJA_HEVC
 	EXTRA_CFLAGS += -DAJA_HEVC=$(AJA_HEVC)
 endif
 
-# try to find the nvidia p2p include file
+# if rdma is set
+ifdef AJA_RDMA
+# force rdma build
+	NVIDIA_RDMA := 1
+ifdef AJA_IGPU
+	NVIDIA_IGPU := 1
+endif
+else
+# if file rdma is present
+ifneq (,$(wildcard /etc/ajantv2/rdma))
+	NVIDIA_RDMA := 1
+ifneq (,$(wildcard /etc/ajantv2/igpu))
+	NVIDIA_IGPU := 1
+endif
+endif
+endif
+
+ifdef NVIDIA_RDMA
+
+# find the nvidia p2p include file
 ifeq ($(NVIDIA_SRC_DIR),)
-	NVIDIA_SRC_DIR := $(shell find /usr/src/nvidia-* -name nv-p2p.h 2>/dev/null|head -1|xargs dirname 2>/dev/null)
+	NVIDIA_SRC_DIR := $(shell find /usr/src/nvidia* -name nv-p2p.h 2>/dev/null|head -1|xargs dirname 2>/dev/null)
 endif
 ifeq ($(NVIDIA_SRC_DIR),)
 	NVIDIA_SRC_DIR := $(shell find /usr/src/linux-* -name nv-p2p.h 2>/dev/null|head -1|xargs dirname 2>/dev/null)
 endif
 
-# if rdma is set
-ifdef AJA_RDMA
-# force rdma build
-	NVIDIA_RDMA = 1
-else
-# if file rdma is present
-ifneq (,$(wildcard /etc/ajantv2/rdma))
-	NVIDIA_RDMA = 1
+# find the nvidia.ko file
+ifeq ($(NVIDIA_KO),)
+	NVIDIA_KO := $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia.ko'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
+endif	
+ifeq ($(NVIDIA_KO),)
+	NVIDIA_KO := $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia.ko.xz'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
 endif
+ifeq  ($(shell objdump -t $(NVIDIA_KO) | grep nvidia_p2p_get_pages),)
+	NVIDIA_KO :=
+endif
+ifeq ($(NVIDIA_KO),)
+	NVIDIA_KO := $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia-p2p.ko'|grep -P 'nvidia-p2p(_[0-9]+)?.ko'|head -1)
 endif
 
-# if doing rdma build
-ifdef NVIDIA_RDMA
-ifeq ($(NVIDIA_KO),)
-	NVIDIA_KO = $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia*.ko'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
-endif	
-ifeq ($(NVIDIA_KO),)
-	NVIDIA_KO = $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia*.ko.xz'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
-endif	
-ifeq ($(shell modinfo $(NVIDIA_KO) | grep license: | grep GPL),)
-	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1 -DNVIDIA_PROPRIETARY=1
-else
-	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1
-endif
-ifdef AJA_IGPU
-# configure for igpu
+ifdef NVIDIA_IGPU
 	EXTRA_CFLAGS += -DAJA_IGPU=1
+ifneq ($(NVIDIA_KO),)
+ifeq ($(NVIDIA_SYMVERS),)
+	NVIDIA_GEN_SYMVERS := ./nvidia-ko-to-module-symvers $(NVIDIA_KO) $(A_LINUX_DRIVER_PATH)/nvidia.symvers
+	NVIDIA_SYMVERS := $(A_LINUX_DRIVER_PATH)/nvidia.symvers
+endif
+endif
 else
 ifeq ($(NVIDIA_SYMVERS),)
 	NVIDIA_GEN_SYMVERS := ./nvidia-ko-to-module-symvers $(NVIDIA_KO) $(A_LINUX_DRIVER_PATH)/nvidia.symvers
 	NVIDIA_SYMVERS := $(A_LINUX_DRIVER_PATH)/nvidia.symvers
 endif
+endif
+
+endif
+
+# determine if the ko is gpl - no ko is proprietary igpu
+ifeq ($(NVIDIA_KO),)
+	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1 -DNVIDIA_PROPRIETARY=1
+else
+ifeq ($(shell modinfo $(NVIDIA_KO) | grep license: | grep GPL),)
+	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1 -DNVIDIA_PROPRIETARY=1
+else
+	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1
 endif
 endif
 
@@ -238,7 +264,7 @@ default: all
 	@echo linux distro flags: '$(DISTRO_INFO)'
 	@echo lib: $(LIB)
 ifdef NVIDIA_RDMA
-ifdef AJA_IGPU
+ifeq ($(NVIDIA_SYMVERS),)
 	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules
 else
 	${NVIDIA_GEN_SYMVERS}
@@ -347,6 +373,19 @@ dkms-pkg:
 
 dkms-install: dkms-pkg
 ifdef NVIDIA_RDMA
+ifdef NVIDIA_IGPU
+	@if [ -n "$(DKMSINSTALLED)" ]; then \
+		printf "\n## installing DKMS NTV2 RDMA IGPU driver:\n"; \
+		sudo cp -a tmp/$(DKMSDIR) /usr/src/; \
+		sudo mkdir -p /etc/ajantv2; \
+		sudo touch /etc/ajantv2/rdma; \
+		sudo touch /etc/ajantv2/igpu; \
+		sudo dkms install ajantv2/$(DKMSVER); \
+		sudo modprobe ajantv2; \
+	else \
+		echo "!! DKMS system is not installed"; \
+	fi
+else
 	@if [ -n "$(DKMSINSTALLED)" ]; then \
 		printf "\n## installing DKMS NTV2 RDMA driver:\n"; \
 		sudo cp -a tmp/$(DKMSDIR) /usr/src/; \
@@ -357,6 +396,7 @@ ifdef NVIDIA_RDMA
 	else \
 		echo "!! DKMS system is not installed"; \
 	fi
+endif
 else
 	@if [ -n "$(DKMSINSTALLED)" ]; then \
 		printf "\n## installing DKMS NTV2 driver:\n"; \
@@ -371,10 +411,11 @@ endif
 
 dkms-uninstall:
 	@if [ -n "$(DKMSINSTALLED)" ]; then \
-		printf "\n## uninstalling DKMS driver:\n"; \
+		printf "\n## uninstalling DKMS NTV2 driver:\n"; \
 		sudo dkms remove ajantv2/$(DKMSVER) --all; \
 		sudo rm -rf /usr/src/ajantv2-$(DKMSVER); \
 		sudo rm -f /etc/ajantv2/rdma; \
+		sudo rm -f /etc/ajantv2/igpu; \
 		sudo rmmod -s ajardma; \
 		sudo rmmod -s ajantv2; \
 	else \
