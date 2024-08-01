@@ -326,7 +326,7 @@ bool CNTV2DriverInterface::OpenRemote (const NTV2DeviceSpecParser & inParser)
 }	//	OpenRemote
 
 
-bool CNTV2DriverInterface::CloseRemote()
+bool CNTV2DriverInterface::CloseRemote (void)
 {
 	if (_pRPCAPI)
 	{
@@ -700,6 +700,7 @@ bool CNTV2DriverInterface::DriverGetBitFileInformation (BITFILE_INFO_STRUCT & bi
 		case DEVICE_ID_IOX3:						bitFileInfo.bitFileType = NTV2_BITFILE_IOX3_MAIN;					break;
 		case DEVICE_ID_KONAX:						bitFileInfo.bitFileType = NTV2_BITFILE_KONAX;						break;
 		case DEVICE_ID_KONAXM:						bitFileInfo.bitFileType = NTV2_BITFILE_KONAXM;						break;
+		case DEVICE_ID_SOFTWARE:
 		case DEVICE_ID_NOTFOUND:					bitFileInfo.bitFileType = NTV2_BITFILE_TYPE_INVALID;				break;
 	#if !defined (_DEBUG)
 		default:					break;
