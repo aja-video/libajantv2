@@ -1650,8 +1650,8 @@ ostream & AJAAncillaryList::Print (ostream & inOutStream, const bool inDumpPaylo
 	return inOutStream;
 }
 
-//	Copies GUMP from inSrc to outDst buffers, but removes ATC, VPID & VITC packets
-bool AJAAncillaryList::StripNativeInserterGUMPPackets (const NTV2Buffer & inSrc, NTV2Buffer outDst)
+//	Copies GUMP from inSrc to outDst buffers, but removes ATC, VPID, VITC & analog packets
+bool AJAAncillaryList::StripNativeInserterGUMPPackets (const NTV2Buffer & inSrc, NTV2Buffer & outDst)		//	STATIC
 {
 	if (!inSrc || !outDst)
 		return false;	//	Buffers must be valid
@@ -1662,55 +1662,57 @@ bool AJAAncillaryList::StripNativeInserterGUMPPackets (const NTV2Buffer & inSrc,
 	uint8_t * ptr		= srcPtr;
 	size_t srcBufSize	= inSrc;
 	uint8_t * tgtPtr	= outDst;
-	size_t uncopied		= 0;
+	size_t uncopied(0);//, numStripped(0), bytesRemoved(0);
 	const size_t kGUMPHeaderSize(7);
 
-	for (size_t i(0);  i < srcBufSize;  ) 
+	for (size_t ndx(0);  ndx < srcBufSize;  ) 
 	{	
-		if (ptr[0] == 0xff  &&  (i+kGUMPHeaderSize) < srcBufSize) 
+		if (ptr[0] == 0xff  &&  (ndx + kGUMPHeaderSize) < srcBufSize) 
 		{
 			bool bFiltered{false};
-			uint8_t payloadSize = ptr[5];
+			const uint8_t payloadSize(ptr[5]);
 
-			//	ATC
-			if (ptr[3] == 0x60 && ptr[4] == 0x60 && payloadSize == 16)
-				bFiltered  = true;
-
-			//	SMPTE 352 - VPID
-			else if (ptr[3] == 0x41 && ptr[4] == 0x01 && payloadSize == 4)
+			if (ptr[1] & 0x40)		//	"Analog/raw"
 				bFiltered = true;
-
-			//	VITC
-			else
+			else if (ptr[3] == 0x60  &&  ptr[4] == 0x60  &&  payloadSize == 16)		//	ATC
+				bFiltered  = true;
+			else if (ptr[3] == 0x41  &&  ptr[4] == 0x01  &&  payloadSize == 4)		//	SMPTE 352 - VPID
+				bFiltered = true;
+			else					//	VITC
 			{
-				AJAAncDataCoding coding = ((ptr[1] & 0x40) == 0) ? AJAAncDataCoding_Digital : AJAAncDataCoding_Raw;
-				const uint16_t lineNum = uint16_t((ptr[1] & 0x0F) << 7) + uint16_t(ptr[2] & 0x7F);
-				bFiltered = (coding == AJAAncDataCoding_Raw)  &&  (lineNum == 14 || lineNum == 277);
+				const uint16_t lineNum (uint16_t((ptr[1] & 0x0F) << 7) + uint16_t(ptr[2] & 0x7F));
+				bFiltered = (ptr[1] & 0x40)  &&  (lineNum == 14 || lineNum == 277);
 			}
 			
 			if (bFiltered)
-			{
-				//	Copy everything that came before filtered content...
-				::memcpy(tgtPtr, srcPtr, uncopied);
+			{	//	Copy everything that came before filtered content...
+				if (uncopied)
+					::memcpy(tgtPtr, srcPtr, uncopied);
 
 				//	Skip srcPtr past the filtered content...
 				srcPtr		+= uncopied + payloadSize + kGUMPHeaderSize;
 				tgtPtr		+= uncopied;
-				i			+= payloadSize + kGUMPHeaderSize;
+				ndx			+= payloadSize + kGUMPHeaderSize;
 				ptr			= srcPtr;
 				uncopied	= 0;
+//				numStripped++;
+//				bytesRemoved += size_t(payloadSize) + kGUMPHeaderSize;
 			}
 			else
-				{ptr++; i++; uncopied++;}
+			{
+				ptr			+= payloadSize + kGUMPHeaderSize; 
+				ndx			+= payloadSize + kGUMPHeaderSize;
+				uncopied	+= payloadSize + kGUMPHeaderSize;
+			}
 		}
 		else
-			{ptr++; i++; uncopied++;}
+			{ptr++; ndx++; uncopied++;}
 	}	//	for each byte in source buffer
-		
-	// copy last bits if remainder
-	if (uncopied > 0)
-		::memcpy(tgtPtr, srcPtr, uncopied);
-	return true;
+
+	if (uncopied)	//	Any uncopied remainder?
+		::memcpy(tgtPtr, srcPtr, uncopied);	//	Copy last uncopied bytes
+//	cout << DEC(numStripped) << " pkts removed, " << DEC(bytesRemoved) << " bytes removed" << endl;
+	return true;	//	Success if at least one packet stripped
 }	//	StripNativeInserterPackets
 
 
