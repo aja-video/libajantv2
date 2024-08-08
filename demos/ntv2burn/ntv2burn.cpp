@@ -11,6 +11,7 @@
 #include "ajabase/common/types.h"
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
+#include "ajaanc/includes/ancillarylist.h"
 #include <iostream>
 
 using namespace std;
@@ -166,7 +167,7 @@ AJAStatus NTV2Burn::SetupVideo (void)
 	//	Pick an appropriate output NTV2Channel, and enable its frame buffer...
 	switch (mConfig.fInputSource)
 	{
-		case NTV2_INPUTSOURCE_SDI1:		mConfig.fOutputChannel = numFrameStores == 2 || numFrameStores > 4 ? NTV2_CHANNEL2 : NTV2_CHANNEL3;
+		case NTV2_INPUTSOURCE_SDI1:		mConfig.fOutputChannel = numFrameStores > 4 ? NTV2_CHANNEL5 : (numFrameStores == 2 ? NTV2_CHANNEL2 : NTV2_CHANNEL3);
 										break;
 
 		case NTV2_INPUTSOURCE_HDMI2:
@@ -595,7 +596,7 @@ void NTV2Burn::PlayFrames (void)
 			if (pFrameData->AudioBuffer())
 				outputXferInfo.SetAudioBuffer (pFrameData->AudioBuffer(), pFrameData->NumCapturedAudioBytes());
 			if (pFrameData->AncBuffer() || pFrameData->AncBuffer2())
-				outputXferInfo.SetAncBuffers (pFrameData->AncBuffer(), pFrameData->NumCapturedAncBytes(), pFrameData->AncBuffer2(), pFrameData->NumCapturedAnc2Bytes());
+				outputXferInfo.SetAncBuffers (pFrameData->AncBuffer(), pFrameData->AncBufferSize(), pFrameData->AncBuffer2(), pFrameData->AncBuffer2Size());
 
 			//	Tell AutoCirculate to embed this frame's timecode(s) into the SDI output(s)...
 			outputXferInfo.SetOutputTimeCodes(pFrameData->fTimecodes);
@@ -715,6 +716,23 @@ void NTV2Burn::CaptureFrames (void)
 			pFrameData->fNumAudioBytes	= pFrameData->AudioBuffer()	? inputXferInfo.GetCapturedAudioByteCount()			: 0;
 			pFrameData->fNumAncBytes	= pFrameData->AncBuffer()	? inputXferInfo.GetCapturedAncByteCount(false/*F1*/): 0;
 			pFrameData->fNumAnc2Bytes	= pFrameData->AncBuffer2()	? inputXferInfo.GetCapturedAncByteCount(true/*F2*/)	: 0;
+			if (pFrameData->AncBuffer())
+			{	//	Zero F1 anc buffer memory past last byte written by anc extractor
+				NTV2Buffer stale (pFrameData->fAncBuffer.GetHostAddress(pFrameData->fNumAncBytes),
+									pFrameData->fAncBuffer.GetByteCount() - pFrameData->fNumAncBytes);
+				stale.Fill(uint8_t(0));
+			}
+			if (pFrameData->AncBuffer2())
+			{	//	Zero F2 anc buffer memory past last byte written by anc extractor
+				NTV2Buffer stale (pFrameData->AncBuffer2().GetHostAddress(pFrameData->fNumAnc2Bytes),
+									pFrameData->AncBuffer2().GetByteCount() - pFrameData->fNumAnc2Bytes);
+				stale.Fill(uint8_t(0));
+			}
+
+			if (pFrameData->AncBuffer())
+				AJAAncList::StripNativeInserterGUMPPackets (pFrameData->AncBuffer(), pFrameData->AncBuffer());
+			if (pFrameData->AncBuffer2())
+				AJAAncList::StripNativeInserterGUMPPackets (pFrameData->AncBuffer2(), pFrameData->AncBuffer2());
 
 			//	Determine which timecode value should be burned in to the video frame
 			string timeCodeString;
