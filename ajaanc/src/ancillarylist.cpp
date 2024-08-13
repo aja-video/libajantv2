@@ -1650,7 +1650,7 @@ ostream & AJAAncillaryList::Print (ostream & inOutStream, const bool inDumpPaylo
 	return inOutStream;
 }
 
-//	Copies GUMP from inSrc to outDst buffers, but removes ATC, VPID, VITC & analog packets
+//	Copies GUMP from inSrc to outDst buffers, but removes ATC, VPID, EDH, VITC & analog packets
 bool AJAAncillaryList::StripNativeInserterGUMPPackets (const NTV2Buffer & inSrc, NTV2Buffer & outDst)		//	STATIC
 {
 	if (!inSrc || !outDst)
@@ -1662,7 +1662,9 @@ bool AJAAncillaryList::StripNativeInserterGUMPPackets (const NTV2Buffer & inSrc,
 	uint8_t * ptr		= srcPtr;
 	size_t srcBufSize	= inSrc;
 	uint8_t * tgtPtr	= outDst;
-	size_t uncopied(0);//, numStripped(0), bytesRemoved(0);
+	size_t uncopied		= 0;
+//	size_t numStripped	= 0;
+//	size_t bytesRemoved	= 0;
 	const size_t kGUMPHeaderSize(7);
 
 	for (size_t ndx(0);  ndx < srcBufSize;  ) 
@@ -1677,6 +1679,8 @@ bool AJAAncillaryList::StripNativeInserterGUMPPackets (const NTV2Buffer & inSrc,
 			else if (ptr[3] == 0x60  &&  ptr[4] == 0x60  &&  payloadSize == 16)		//	ATC
 				bFiltered  = true;
 			else if (ptr[3] == 0x41  &&  ptr[4] == 0x01  &&  payloadSize == 4)		//	SMPTE 352 - VPID
+				bFiltered = true;
+			else if (ptr[3] == 0xF4  &&  ptr[4] == 0x00  &&  payloadSize == 16)		//	RP165 EDH
 				bFiltered = true;
 			else					//	VITC
 			{
@@ -1695,8 +1699,7 @@ bool AJAAncillaryList::StripNativeInserterGUMPPackets (const NTV2Buffer & inSrc,
 				ndx			+= payloadSize + kGUMPHeaderSize;
 				ptr			= srcPtr;
 				uncopied	= 0;
-//				numStripped++;
-//				bytesRemoved += size_t(payloadSize) + kGUMPHeaderSize;
+//				numStripped++;	bytesRemoved += size_t(payloadSize) + kGUMPHeaderSize;
 			}
 			else
 			{
@@ -1711,8 +1714,8 @@ bool AJAAncillaryList::StripNativeInserterGUMPPackets (const NTV2Buffer & inSrc,
 
 	if (uncopied)	//	Any uncopied remainder?
 		::memcpy(tgtPtr, srcPtr, uncopied);	//	Copy last uncopied bytes
-//	cout << DEC(numStripped) << " pkts removed, " << DEC(bytesRemoved) << " bytes removed" << endl;
-	return true;	//	Success if at least one packet stripped
+	//	cout << DEC(numStripped) << " pkts removed, " << DEC(bytesRemoved) << " bytes removed" << endl;
+	return true;
 }	//	StripNativeInserterPackets
 
 

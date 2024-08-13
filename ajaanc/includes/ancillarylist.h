@@ -597,7 +597,7 @@ public:	//	INSTANCE METHODS
 	///@}
 
 	/**
-		@brief		Copies GUMP from inSrc to outDst buffers, but removes ATC, VPID, VITC & raw/analog packets.
+		@brief		Copies GUMP from inSrc to outDst buffers, but removes ATC, VPID, VITC, EDH & raw/analog packets.
 		@param[in]	inSrc		Specifies the source GUMP buffer.
 		@param		outDst		Specifies the destination buffer. It must be at least as large as inSrc.
 		@note		Both inSrc and outDst buffers can refer to the same buffer.
