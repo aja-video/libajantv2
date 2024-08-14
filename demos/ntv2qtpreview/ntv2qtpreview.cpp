@@ -32,17 +32,6 @@ NTV2QtPreview::NTV2QtPreview (QWidget * parent, Qt::WindowFlags flags)
 		setObjectName (QString::fromUtf8 ("Dialog"));
 
 	mBoardChoiceCombo = new QComboBox;
-	for (ULWord ndx (0);  ndx < 100;  ndx++)
-	{
-		CNTV2Card	device;
-		if (CNTV2DeviceScanner::GetDeviceAtIndex (ndx, device))
-			mBoardChoiceCombo->addItem (tr (device.GetDisplayName ().c_str ()));
-		else if (ndx == 0)
-			{mBoardChoiceCombo->addItem (tr ("No Devices Found"));	break;}
-		else
-			break;
-	}
-	mBoardChoiceCombo->setCurrentIndex (0);
 
 	//	Input selection radio button group...
 	mInputButtonGroup = new QButtonGroup ();
@@ -102,7 +91,7 @@ NTV2QtPreview::NTV2QtPreview (QWidget * parent, Qt::WindowFlags flags)
 		bottomLayout->addLayout (bottomRightLayout);
 		layout->addLayout (bottomLayout);
 	#else	//	!defined (INCLUDE_AJACC)
-		for (QButtonIterator iter (mInputButtonGroup->buttons());  iter.hasNext ();  )
+		for (QButtonIterator iter(mInputButtonGroup->buttons());  iter.hasNext();  )
 			layout->addWidget (iter.next());
 		layout->addWidget (mWithAudioCheckBox);
         layout->addWidget (mCheckFor4kCheckBox);
@@ -112,13 +101,13 @@ NTV2QtPreview::NTV2QtPreview (QWidget * parent, Qt::WindowFlags flags)
 	layout->addStretch (1);
 	setLayout (layout);
 
-    QObject::connect (mBoardChoiceCombo,	SIGNAL (currentIndexChanged (int)),				this,					SLOT (RequestDeviceChange (const int)));
-	QObject::connect (mInputButtonGroup,	SIGNAL (buttonReleased (int)),					this,					SLOT (inputChanged (int)));
-	QObject::connect (mWithAudioCheckBox,	SIGNAL (stateChanged (int)),					this,					SLOT (withAudioChanged (int)));
-    QObject::connect (mCheckFixedReference,	SIGNAL (toggled (bool)),                        this,					SLOT (fixedRefChanged (bool)));
-	QObject::connect (mCheckFor4kCheckBox,	SIGNAL (stateChanged (int)),					this,					SLOT (checkFor4kChanged (int)));
-			 connect (mFrameGrabber,		SIGNAL (newFrame (const QImage &, bool)),		mVideoPreviewWidget,	SLOT (updateFrame (const QImage &, bool)));
-			 connect (mFrameGrabber,		SIGNAL (newStatusString (const QString)),		mVideoPreviewWidget,	SLOT (updateStatusString (const QString)));
+    QObject::connect (mBoardChoiceCombo,	SIGNAL(currentIndexChanged(int)),		this,					SLOT(RequestDeviceChange(const int)));
+	QObject::connect (mInputButtonGroup,	SIGNAL(buttonReleased(int)),			this,					SLOT(inputChanged(int)));
+	QObject::connect (mWithAudioCheckBox,	SIGNAL(stateChanged(int)),				this,					SLOT(withAudioChanged(int)));
+    QObject::connect (mCheckFixedReference,	SIGNAL(toggled(bool)),					this,					SLOT(fixedRefChanged(bool)));
+	QObject::connect (mCheckFor4kCheckBox,	SIGNAL(stateChanged(int)),				this,					SLOT(checkFor4kChanged(int)));
+			 connect (mFrameGrabber,		SIGNAL(newFrame(const QImage &, bool)),	mVideoPreviewWidget,	SLOT(updateFrame(const QImage &, bool)));
+			 connect (mFrameGrabber,		SIGNAL(newStatusString(const QString)),	mVideoPreviewWidget,	SLOT(updateStatusString(const QString)));
 	#if defined (INCLUDE_AJACC)
 			 connect (mFrameGrabber,		SIGNAL (captionScreenChanged (const ushort *)),	mVideoPreviewWidget,	SLOT (updateCaptionScreen (const ushort *)));
 	QObject::connect (mCaptionButtonGroup,	SIGNAL (buttonReleased (int)),					mFrameGrabber,			SLOT (changeCaptionChannel (int)));
@@ -129,13 +118,14 @@ NTV2QtPreview::NTV2QtPreview (QWidget * parent, Qt::WindowFlags flags)
 	mTimerID = startTimer (100);
 
 	mPnp.Install (PnpCallback, this, AJA_Pnp_PciVideoDevices);
+	devicesChanged();
 
 }	//	constructor
 
 
 NTV2QtPreview::~NTV2QtPreview ()
 {
-	mPnp.Uninstall ();
+	mPnp.Uninstall();
 	delete mFrameGrabber;
 
 }	//	destructor
@@ -145,7 +135,7 @@ void NTV2QtPreview::RequestDeviceChange (const int inDeviceIndexNum)
 {
 	//	Notify my frame grabber to change devices...
 	if (mFrameGrabber)
-		mFrameGrabber->SetDeviceIndex (inDeviceIndexNum);
+		mFrameGrabber->SetDeviceIndex(inDeviceIndexNum);
 	qDebug ("## NOTE:  Device changed to %d", inDeviceIndexNum);
 
 }	//	RequestDeviceChange
@@ -153,20 +143,20 @@ void NTV2QtPreview::RequestDeviceChange (const int inDeviceIndexNum)
 
 void NTV2QtPreview::inputChanged (int inputRadioButtonId)
 {
-	const NTV2InputSource	chosenInputSource	(static_cast <NTV2InputSource> (inputRadioButtonId));
+	const NTV2InputSource chosenInputSource(NTV2InputSource(inputRadioButtonId+0));
 
-	CNTV2Card	device;
-	CNTV2DeviceScanner::GetDeviceAtIndex (mBoardChoiceCombo->currentIndex (), device);
+	CNTV2Card device;
+	CNTV2DeviceScanner::GetDeviceAtIndex (mBoardChoiceCombo->currentIndex(), device);
 
-	if (!NTV2_IS_VALID_INPUT_SOURCE (chosenInputSource))
+	if (!NTV2_IS_VALID_INPUT_SOURCE(chosenInputSource))
 	{
-		mFrameGrabber->SetInputSource (NTV2_INPUTSOURCE_INVALID);
+		mFrameGrabber->SetInputSource(NTV2_INPUTSOURCE_INVALID);
 		qDebug ("## DEBUG:  NTV2QtPreview::inputChanged:  off");
 	}
 	else if (device.features().CanDoInputSource(chosenInputSource))
 	{
-		mFrameGrabber->SetInputSource (chosenInputSource);
-		cerr << "## DEBUG:  NTV2QtPreview::inputChanged:  " << ::NTV2InputSourceToString (chosenInputSource) << endl;
+		mFrameGrabber->SetInputSource(chosenInputSource);
+		cerr << "## DEBUG:  NTV2QtPreview::inputChanged:  " << ::NTV2InputSourceToString(chosenInputSource) << endl;
 	}
 
 }	//	inputChanged
@@ -195,7 +185,7 @@ void NTV2QtPreview::checkFor4kChanged (int state)
 
 void NTV2QtPreview::updateInputs (void)
 {
-	CNTV2Card	ntv2Card (mBoardChoiceCombo->currentIndex());
+	CNTV2Card ntv2Card (mBoardChoiceCombo->currentIndex());
 	if (ntv2Card.IsOpen())
 	{
 		for (QButtonIterator iter(mInputButtonGroup->buttons());  iter.hasNext();  )
@@ -207,63 +197,55 @@ void NTV2QtPreview::updateInputs (void)
 				const bool		hasInputSource	(ntv2Card.features().CanDoInputSource(inputSource));
 				const string	videoFormatStr	(hasInputSource ? ::NTV2VideoFormatToString(ntv2Card.GetInputVideoFormat(inputSource)) : "");
 				const QString	buttonLabel		(QString("%1   %2").arg(::NTV2InputSourceToString(inputSource, true).c_str(), videoFormatStr.empty() ? "No Detected Input" : videoFormatStr.c_str()));
-				pButton->setText (buttonLabel);
-				pButton->setEnabled (hasInputSource);
+				pButton->setText(buttonLabel);
+				pButton->setEnabled(hasInputSource);
 			}
-		}
-
+		}   //  for each radio button
 		#if defined (INCLUDE_AJACC)
 			const bool hasCustomAnc (mDevice.features().CanDoCustomAnc());
 			for (QButtonIterator iter (mCaptionButtonGroup->buttons());  iter.hasNext();  )
 				iter.next()->setEnabled(hasCustomAnc);
 		#endif	//	defined (INCLUDE_AJACC)
-
 	}	//	if board opened ok
-
 }	//	updateInputs
 
 
 void NTV2QtPreview::timerEvent (QTimerEvent * event)
 {
-	if (event->timerId () == mTimerID)
-		updateInputs ();
+	if (event->timerId() == mTimerID)
+		updateInputs();
 	else
-		QWidget::timerEvent (event);
-
+		QWidget::timerEvent(event);
 }	//	timerEvent
 
 
 void NTV2QtPreview::devicesChanged (void)
 {
-	qDebug () << QString ("devicesChanged");
-	mInputButtonGroup->button (NTV2_INPUTSOURCE_INVALID)->setChecked (true);
+	qDebug() << "devicesChanged";
+	mInputButtonGroup->button (NTV2_INPUTSOURCE_INVALID)->setChecked(true);
 	inputChanged (NTV2_INPUTSOURCE_INVALID);	//	necessary?
 
-	mBoardChoiceCombo->clear ();
-	for (ULWord ndx (0);  ndx < 100;  ndx++)
+	mBoardChoiceCombo->clear();
+	for (ULWord ndx(0);  ndx < 100;  ndx++)
 	{
-		CNTV2Card	device;
-		if (CNTV2DeviceScanner::GetDeviceAtIndex (ndx, device))
-			mBoardChoiceCombo->addItem (tr (device.GetDisplayName ().c_str ()));
-		else if (ndx == 0)
-			{mBoardChoiceCombo->addItem (tr ("No Devices Found"));	break;}
+		CNTV2Card device(ndx);
+		if (device.IsOpen())
+			mBoardChoiceCombo->addItem(tr(device.GetDisplayName().c_str()), QVariant());
+		else if (!ndx)
+			{mBoardChoiceCombo->addItem(tr("No Devices Found"));  break;}
 		else
 			break;
 	}
-	mBoardChoiceCombo->setCurrentIndex (0);
-
+	mBoardChoiceCombo->setCurrentIndex(0);
 }	//	devicesChanged
 
 
 void NTV2QtPreview::PnpCallback (AJAPnpMessage inMessage, void * pUserData)		//  static
 {
 	if (pUserData)
-	{
 		if (inMessage == AJA_Pnp_DeviceAdded  ||  inMessage == AJA_Pnp_DeviceRemoved)
 		{
-			NTV2QtPreview *	pMainWindow	(reinterpret_cast <NTV2QtPreview *>(pUserData));
-			pMainWindow->devicesChanged ();
+			NTV2QtPreview *	pMainWindow	(reinterpret_cast<NTV2QtPreview*>(pUserData));
+			pMainWindow->devicesChanged();
 		}
-	}
-
-} // PnpCallback
+}	//	PnpCallback
