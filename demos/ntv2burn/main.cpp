@@ -50,7 +50,7 @@ int main (int argc, const char ** argv)
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"device to use",			"index#, serial#, or model"	},
 		{"multiFormat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"use multi-format/channel",	AJA_NULL					},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",		"'?' or 'list' to list"		},
-		{"input",		'i',	POPT_ARG_STRING,	&pInputSrcSpec,	0,	"SDI input to use",			"1-8, ?=list"				},
+		{"input",		'i',	POPT_ARG_STRING,	&pInputSrcSpec,	0,	"input to use",             "1-8, ?=list"				},
 		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio?",			AJA_NULL					},
 		{"novideo",		0,		POPT_ARG_NONE,		&noVideo,		0,	"disable video?",			AJA_NULL					},
 		{"noanc",		0,		POPT_ARG_NONE,		&noAnc,			0,	"disable anc?",				AJA_NULL					},
