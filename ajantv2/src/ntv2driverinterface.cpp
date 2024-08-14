@@ -1615,8 +1615,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 																|| devID == DEVICE_ID_KONA5_8K			|| devID == DEVICE_ID_KONA5_3DLUT
 																|| devID == DEVICE_ID_KONA5_8K_MV_TX	|| devID == DEVICE_ID_CORVID44_8KMK
 																|| devID == DEVICE_ID_CORVID44_8K		|| devID == DEVICE_ID_CORVID44_2X4K
-																|| devID == DEVICE_ID_CORVID44_PLNR		|| devID == DEVICE_ID_KONAX
-                                                                || devID == DEVICE_ID_KONAIP_25G;
+																|| devID == DEVICE_ID_CORVID44_PLNR		|| devID == DEVICE_ID_KONAX;
 													break;
 
 		case kDeviceCanDoDSKOpacity:				outValue = ::NTV2DeviceCanDoDSKOpacity(devID);						break;	//	Deprecate?

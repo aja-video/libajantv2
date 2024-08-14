@@ -143,7 +143,8 @@ typedef enum
 													||	(__d__) == DEVICE_ID_KONAIP_2110_RGB12		\
 													||	(__d__) == DEVICE_ID_KONAIP_1RX_1TX_2110	\
 													||	(__d__) == DEVICE_ID_IOIP_2110				\
-													||	(__d__) == DEVICE_ID_IOIP_2110_RGB12	)
+													||	(__d__) == DEVICE_ID_IOIP_2110_RGB12		\
+													||	(__d__) == DEVICE_ID_KONAIP_25G)
 
 #define NTV2_DEVICE_SUPPORTS_SMPTE2022(__d__)	(		(__d__) == DEVICE_ID_KONAIP_2022			\
 													||	(__d__) == DEVICE_ID_IOIP_2022	)
