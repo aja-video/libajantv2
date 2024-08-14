@@ -1311,7 +1311,7 @@ void CNTV2DriverInterface::BumpEventCount (const INTERRUPT_ENUMS eInterruptType)
 
 bool CNTV2DriverInterface::IsDeviceReady (const bool checkValid)
 {
-	if (!IsIPDevice())
+	if (!IsIPDevice() || GetDeviceID() == DEVICE_ID_KONAIP_25G)
 		return true;	//	Non-IP devices always ready
 
 	if (!IsMBSystemReady())
@@ -1325,7 +1325,7 @@ bool CNTV2DriverInterface::IsDeviceReady (const bool checkValid)
 
 bool CNTV2DriverInterface::IsMBSystemValid (void)
 {
-	if (IsIPDevice())
+	if (IsIPDevice() && GetDeviceID() != DEVICE_ID_KONAIP_25G)
 	{
 		uint32_t val;
 		ReadRegister(SAREK_REGS + kRegSarekIfVersion, val);
