@@ -390,6 +390,7 @@ typedef struct BurnConfig
 		bool				fSuppressVideo;		///< @brief	If true, suppress video;  otherwise include video
 		bool				fIsFieldMode;		///< @brief	True if Field Mode, otherwise Frame Mode
 		bool				fWithAnc;			///< @brief	If true, capture & play anc data (LLBurn). Defaults to false.
+		bool				fWithTallFrames;	///< @brief	If true && fWithAnc, use "taller" VANC mode for anc. Defaults to false.
 		bool				fWithHanc;			///< @brief	If true, capture & play HANC data, including audio (LLBurn). Defaults to false.
 
 		/**
@@ -410,6 +411,7 @@ typedef struct BurnConfig
 				fSuppressVideo		(false),
 				fIsFieldMode		(false),
 				fWithAnc			(false),
+				fWithTallFrames		(false),
 				fWithHanc			(false)
 		{
 		}
@@ -417,6 +419,7 @@ typedef struct BurnConfig
 		inline bool	WithAudio(void) const		{return !fSuppressAudio;}	///< @return	True if streaming audio, false if not.
 		inline bool	WithVideo(void) const		{return !fSuppressVideo;}	///< @return	True if streaming video, false if not.
 		inline bool	WithAnc(void) const			{return fWithAnc;}			///< @return	True if streaming anc data, false if not.
+		inline bool WithTallVANC(void) const	{return fWithTallFrames;}	///< @return	True if using taller VANC mode, otherwise false.
 		inline bool	WithHanc(void) const		{return fWithHanc;}			///< @return	True if streaming HANC, false if not.
 		inline bool WithTimecode(void) const	{return NTV2_IS_VALID_TIMECODE_INDEX(fTimecodeSource);}	///< @return	True if valid TC source
 		inline bool FieldMode(void) const		{return fIsFieldMode;}		///< @return	True if field mode, otherwise false.

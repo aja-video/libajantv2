@@ -53,6 +53,8 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 #define	kNTV2PluginInfoKey_PluginPath			"PluginPath"		///< @brief	Local host full path to plugin file
 #define	kNTV2PluginInfoKey_PluginSigPath		"PluginSigPath"		///< @brief	Local host full path to plugin signature file
 #define	kNTV2PluginInfoKey_PluginBaseName		"PluginBaseName"	///< @brief	Plugin base name (i.e. without extension)
+#define	kNTV2PluginInfoKey_Fingerprint			"serial number"		///< @brief	Issuer cert fingerprint
+#define	kNTV2PluginInfoKey_Errors				"errors"			///< @brief	Plugin load or validation error(s), if any
 
 //	Plugin Registration Info Keys:
 #define	kNTV2PluginRegInfoKey_Vendor			"Vendor"			///< @brief	Plugin vendor (manufacturer) name
@@ -65,6 +67,8 @@ typedef NTV2DeviceIDSerialPairs::const_iterator	NTV2DeviceIDSerialPairsConstIter
 #define	kNTV2PluginRegInfoKey_NTV2SDKVersion	"NTV2SDKVersion"	///< @brief	NTV2 SDK version that plugin was compiled with
 #define	kNTV2PluginRegInfoKey_Version			"Version"			///< @brief	Plugin version (string)
 #define	kNTV2PluginRegInfoKey_CommitSHA			"CommitSHA"			///< @brief	Plugin last commit SHA
+#define	kNTV2PluginRegInfoKey_ReqParams			"RequiredParams"	///< @brief	Plugin required parameters
+#define	kNTV2PluginRegInfoKey_OptParams			"OptionalParams"	///< @brief	Plugin optional parameters
 
 //	Plugin Signature File Keys:
 #define	kNTV2PluginSigFileKey_X509Certificate	"X509Certificate"	///< @brief	X509 certificate (encoded as hex string)
@@ -117,9 +121,10 @@ class AJAExport NTV2Dictionary
 	#endif	//	!defined(NTV2_DEPRECATE_17_1)
 		///@}
 
-	protected:
+	public:
 		typedef std::map<std::string, std::string>	Dict;
 		typedef Dict::const_iterator				DictConstIter;
+		inline size_t		initializeFrom (const Dict & inDict)	{mDict = inDict; return size();}
 
 	private:
 		Dict	mDict;	///< @brief	My map
@@ -210,12 +215,6 @@ class AJAExport NTV2DeviceSpecParser
 		size_t				mPos;			///< @brief	Last character position
 };	//	NTV2DeviceSpecParser
 
-#if defined(NTV2_PREVENT_PLUGIN_LOAD)
-
-#else	//	!defined(NTV2_PREVENT_PLUGIN_LOAD)
-
-#endif  //  !defined(NTV2_PREVENT_PLUGIN_LOAD)
-
 
 /**
 	@brief	Common base class for NTV2RPCClientAPI and NTV2RPCServerAPI.
@@ -224,6 +223,7 @@ class AJAExport NTV2RPCBase
 {
 	public:
 		static std::string ShortSDKVersion (void);	///< @returns	shortened SDK version string
+		static std::string AJAFingerprint (const bool inLowerCase = false, const bool inStripColons = false);	///< @returns	AJA's public X509 cert fingerprint
 
 	protected:
 						NTV2RPCBase (NTV2Dictionary params, uint32_t * pRefCon);

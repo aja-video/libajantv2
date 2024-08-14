@@ -597,12 +597,13 @@ public:	//	INSTANCE METHODS
 	///@}
 
 	/**
-		@brief		Copies GUMP from inSrc to outDst buffers, but removes ATC, VPID & VITC packets.
+		@brief		Copies GUMP from inSrc to outDst buffers, but removes ATC, VPID, VITC, EDH & raw/analog packets.
 		@param[in]	inSrc		Specifies the source GUMP buffer.
 		@param		outDst		Specifies the destination buffer. It must be at least as large as inSrc.
+		@note		Both inSrc and outDst buffers can refer to the same buffer.
 		@return		True if successful; otherwise false.
 	**/
-	static bool					StripNativeInserterGUMPPackets (const NTV2Buffer & inSrc, NTV2Buffer outDst);
+	static bool					StripNativeInserterGUMPPackets (const NTV2Buffer & inSrc, NTV2Buffer & outDst);
 
 protected:
 	friend class CNTV2Card;	//	CNTV2Card's member functions can call AJAAncillaryList's private & protected member functions

@@ -39,7 +39,8 @@ int main (int argc, const char ** argv)
 	int				showVersion		(0);			//	Show version?
 	int				noAudio			(0);			//	Disable audio?
 	int				noVideo			(0);			//	Disable video?
-	int				noAnc			(0);			//	Disable use of Anc Extractor/Inserter?
+	int				noAnc			(0);			//	Disable capture/playback of anc data?
+	int				doVanc			(0);			//	Use tall-frame VANC?
 	AJADebug::Open();
 
 	//	Command line option descriptions:
@@ -49,10 +50,11 @@ int main (int argc, const char ** argv)
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"device to use",			"index#, serial#, or model"	},
 		{"multiFormat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"use multi-format/channel",	AJA_NULL					},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",		"'?' or 'list' to list"		},
-		{"input",		'i',	POPT_ARG_STRING,	&pInputSrcSpec,	0,	"SDI input to use",			"1-8, ?=list"				},
+		{"input",		'i',	POPT_ARG_STRING,	&pInputSrcSpec,	0,	"input to use",             "1-8, ?=list"				},
 		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio?",			AJA_NULL					},
 		{"novideo",		0,		POPT_ARG_NONE,		&noVideo,		0,	"disable video?",			AJA_NULL					},
 		{"noanc",		0,		POPT_ARG_NONE,		&noAnc,			0,	"disable anc?",				AJA_NULL					},
+		{"vanc",		0,		POPT_ARG_NONE,		&doVanc,		0,	"enable tall-frame VANC?",	AJA_NULL					},
 		{"iframes",		0,		POPT_ARG_STRING,	&pInFramesSpec,	0,	"input AutoCirc frames",	"num[@min] or min-max"		},
 		{"oframes",		0,		POPT_ARG_STRING,	&pOutFramesSpec,0,	"output AutoCirc frames",	"num[@min] or min-max"		},
 		{"tcsource",	't',	POPT_ARG_STRING,	&pTcSource,		0,	"time code source",			"'?' to list"				},
@@ -135,6 +137,11 @@ int main (int argc, const char ** argv)
 	config.fSuppressAudio	= noAudio ? true  : false;
 	config.fSuppressVideo	= noVideo ? true  : false;
 	config.fWithAnc			= noAnc   ? false : true;
+	config.fWithTallFrames	= doVanc  ? true  : false;
+	if (!config.fWithAnc  &&  config.fWithTallFrames)
+		{cerr	<< "## ERROR:  '--noanc' and '--vanc' are contradictory" << endl;  return 1;}
+	if (!config.fWithAnc  &&  config.fWithHanc)
+		{cerr	<< "## ERROR:  '--noanc' and '--hanc' are contradictory" << endl;  return 1;}
 
 	//	Instantiate the NTV2Burn object...
 	NTV2Burn burner (config);
