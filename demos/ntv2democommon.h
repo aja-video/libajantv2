@@ -103,50 +103,50 @@ class AJAExport NTV2FrameData
 				fFrameFlags(0)	{}
 
 		//	Inquiry Methods
-		inline NTV2Buffer &	VideoBuffer (void)				{return fVideoBuffer;}
-		inline ULWord	VideoBufferSize (void) const		{return fVideoBuffer.GetByteCount();}
+		inline NTV2Buffer &	VideoBuffer (void)							{return fVideoBuffer;}
+		inline ULWord		VideoBufferSize (void) const				{return fVideoBuffer.GetByteCount();}
 
-		inline NTV2Buffer &	AudioBuffer (void)				{return fAudioBuffer;}
-		inline ULWord	AudioBufferSize (void) const		{return fAudioBuffer.GetByteCount();}
-		inline ULWord	NumCapturedAudioBytes (void) const	{return fNumAudioBytes;}
+		inline NTV2Buffer &	AudioBuffer (void)							{return fAudioBuffer;}
+		inline ULWord		AudioBufferSize (void) const				{return fAudioBuffer.GetByteCount();}
+		inline ULWord		NumCapturedAudioBytes (void) const			{return fNumAudioBytes;}
 
-		inline NTV2Buffer &	AncBuffer (void)				{return fAncBuffer;}
-		inline ULWord	AncBufferSize (void) const			{return fAncBuffer.GetByteCount();}
-		inline ULWord	NumCapturedAncBytes (void) const	{return fNumAncBytes;}
+		inline NTV2Buffer &	AncBuffer (void)							{return fAncBuffer;}
+		inline ULWord		AncBufferSize (void) const					{return fAncBuffer.GetByteCount();}
+		inline ULWord		NumCapturedAncBytes (void) const			{return fNumAncBytes;}
 
-		inline NTV2Buffer &	AncBuffer2 (void)				{return fAncBuffer2;}
-		inline ULWord	AncBuffer2Size (void) const			{return fAncBuffer2.GetByteCount();}
-		inline ULWord	NumCapturedAnc2Bytes (void) const	{return fNumAnc2Bytes;}
+		inline NTV2Buffer &	AncBuffer2 (void)							{return fAncBuffer2;}
+		inline ULWord		AncBuffer2Size (void) const					{return fAncBuffer2.GetByteCount();}
+		inline ULWord		NumCapturedAnc2Bytes (void) const			{return fNumAnc2Bytes;}
 
-		inline NTV2Buffer &	VideoBuffer2 (void)				{return fVideoBuffer2;}
-		inline ULWord	VideoBufferSize2 (void) const		{return fVideoBuffer2.GetByteCount();}
+		inline NTV2Buffer &	VideoBuffer2 (void)							{return fVideoBuffer2;}
+		inline ULWord		VideoBufferSize2 (void) const				{return fVideoBuffer2.GetByteCount();}
 
-		inline bool		IsNULL (void) const					{return fVideoBuffer.IsNULL() && fVideoBuffer2.IsNULL()
-																	&& fAudioBuffer.IsNULL() && fAncBuffer.IsNULL()
-																	&& fAncBuffer2.IsNULL();}
-		inline bool	HasTimecode (const NTV2TCIndex inTCNdx) const	{return fTimecodes.find(inTCNdx) != fTimecodes.end();}
+		inline bool			IsNULL (void) const							{return fVideoBuffer.IsNULL() && fVideoBuffer2.IsNULL()
+																			&& fAudioBuffer.IsNULL() && fAncBuffer.IsNULL()
+																			&& fAncBuffer2.IsNULL();}
+		inline bool	HasTimecode (const NTV2TCIndex inTCNdx) const		{return fTimecodes.find(inTCNdx) != fTimecodes.end();}
 		NTV2_RP188	Timecode (const NTV2TCIndex inTCNdx) const;
 		inline bool	HasValidTimecode (const NTV2TCIndex inTCNdx) const	{return Timecode(inTCNdx).IsValid();}
 
 		//	Modifier Methods
-		inline void		ZeroBuffers (void)					{	if (fVideoBuffer)
-																	fVideoBuffer.Fill(ULWord(0));
-																if (fVideoBuffer2)
-																	fVideoBuffer2.Fill(ULWord(0));
-																if (fAudioBuffer)
-																	fAudioBuffer.Fill(ULWord(0));
-																if (fAncBuffer)
-																	fAncBuffer.Fill(ULWord(0));
-																if (fAncBuffer2)
-																	fAncBuffer2.Fill(ULWord(0));
-																fNumAudioBytes = fNumAncBytes = fNumAnc2Bytes = 0;
-															}
-		bool			LockAll								(CNTV2Card & inDevice);
-		bool			UnlockAll							(CNTV2Card & inDevice);
+		inline void		ZeroBuffers (void)		{	if (fVideoBuffer)
+														fVideoBuffer.Fill(ULWord(0));
+													if (fVideoBuffer2)
+														fVideoBuffer2.Fill(ULWord(0));
+													if (fAudioBuffer)
+														fAudioBuffer.Fill(ULWord(0));
+													if (fAncBuffer)
+														fAncBuffer.Fill(ULWord(0));
+													if (fAncBuffer2)
+														fAncBuffer2.Fill(ULWord(0));
+													fNumAudioBytes = fNumAncBytes = fNumAnc2Bytes = 0;
+												}
+		bool			LockAll					(CNTV2Card & inDevice);
+		bool			UnlockAll				(CNTV2Card & inDevice);
 
-		bool			Reset (void)						{return fVideoBuffer.Allocate(0) && fVideoBuffer2.Allocate(0)
-																	&& fAudioBuffer.Allocate(0) && fAncBuffer.Allocate(0)
-																	&& fAncBuffer2.Allocate(0);}
+		bool			Reset (void)			{return fVideoBuffer.Allocate(0) && fVideoBuffer2.Allocate(0)
+														&& fAudioBuffer.Allocate(0) && fAncBuffer.Allocate(0)
+														&& fAncBuffer2.Allocate(0);}
 };	//	NTV2FrameData
 
 typedef std::vector<NTV2FrameData>			NTV2FrameDataArray;				///< @brief A vector of NTV2FrameData elements
@@ -225,13 +225,14 @@ typedef enum _NTV2VideoFormatKinds
 	VIDEO_FORMATS_NON_4KUHD	= 1,
 	VIDEO_FORMATS_4KUHD		= 2,
 	VIDEO_FORMATS_8KUHD2	= 3,
-	VIDEO_FORMATS_NONE		= 0,
+	VIDEO_FORMATS_NONE		= 0
+#if !defined(NTV2_DEPRECATE_17_5)
 	//	Deprecated old ones:
-	VIDEO_FORMATS_UHD2		= VIDEO_FORMATS_8KUHD2,
-	BOTH_VIDEO_FORMATS		= VIDEO_FORMATS_ALL,
-	NON_UHD_VIDEO_FORMATS	= VIDEO_FORMATS_NON_4KUHD,
-	UHD_VIDEO_FORMATS		= VIDEO_FORMATS_4KUHD
-
+	,VIDEO_FORMATS_UHD2		= VIDEO_FORMATS_8KUHD2
+	,BOTH_VIDEO_FORMATS		= VIDEO_FORMATS_ALL
+	,NON_UHD_VIDEO_FORMATS	= VIDEO_FORMATS_NON_4KUHD
+	,UHD_VIDEO_FORMATS		= VIDEO_FORMATS_4KUHD
+#endif	//	!defined(NTV2_DEPRECATE_17_5)
 } NTV2VideoFormatKinds;
 
 
@@ -321,8 +322,8 @@ typedef struct PlayerConfig
 		AJAAncDataType		fTransmitHDRType;	///< @brief	Specifies the HDR anc data packet to transmit, if any.
 		UWord				fNumAudioLinks;		///< @brief	The number of audio systems to control for multi-link audio (4K/8K)
 		bool				fDoMultiFormat;		///< @brief	If true, enable device-sharing;  otherwise take exclusive control of device
-		bool				fSuppressAudio;		///< @brief	If true, suppress audio;  otherwise generate audio tone
-		bool				fSuppressVideo;		///< @brief	If true, suppress video;  otherwise generate test patterns
+		bool				fSuppressAudio;		///< @brief	If true, suppress audio;  otherwise generate & xfer audio tone
+		bool				fSuppressVideo;		///< @brief	If true, suppress video;  otherwise generate & xfer test patterns
 		bool				fTransmitLTC;		///< @brief	If true, embed LTC;  otherwise embed VITC
 		bool				fDoABConversion;	///< @brief	If true, do level-A/B conversion;  otherwise don't
 		bool				fDoHDMIOutput;		///< @brief	If true, enable HDMI output;  otherwise, disable HDMI output
@@ -489,7 +490,7 @@ class AJAExport CNTV2DemoCommon
 						and are subject to change without notice. They are not intended to be canonical in any way.
 		**/
 		static std::string					GetVideoFormatStrings (const NTV2VideoFormatKinds inKinds = VIDEO_FORMATS_NON_4KUHD,
-																	const std::string inDeviceSpecifier = std::string ());
+																	const std::string inDeviceSpecifier = std::string());
 
 		/**
 			@brief	Returns the ::NTV2VideoFormat that matches the given string.
@@ -498,7 +499,9 @@ class AJAExport CNTV2DemoCommon
 									exclusively 4K/UHD, or both/all.
 			@return		The given string converted to an ::NTV2VideoFormat, or ::NTV2_FORMAT_UNKNOWN if there's no match.
 		**/
-		static NTV2VideoFormat				GetVideoFormatFromString (const std::string & inStr,  const NTV2VideoFormatKinds inKinds = VIDEO_FORMATS_NON_4KUHD);
+		static NTV2VideoFormat				GetVideoFormatFromString (const std::string & inStr,
+																		const NTV2VideoFormatKinds inKinds	= VIDEO_FORMATS_NON_4KUHD,
+																		const std::string & inDevSpec		= std::string());
 
 		/**
 			@brief		Given a video format, if all 4 inputs are the same and promotable to 4K, this function does the promotion.
