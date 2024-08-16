@@ -63,6 +63,7 @@
 #define NTV2_DEVICE_ID_IOX3					0xEB27 
 #define NTV2_DEVICE_ID_KONAXM               0xEB28
 #define NTV2_DEVICE_ID_KONAX                0xEB29
+#define NTV2_DEVICE_ID_KONAIP_25G			0XEB30
 #define PRIVATIZE(name)						AJANTV2_ ## name
 
 

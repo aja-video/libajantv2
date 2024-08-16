@@ -115,6 +115,7 @@ void getDeviceVersionString(ULWord deviceNumber, char *deviceVersionString, ULWo
     case DEVICE_ID_KONAXM: deviceStr = "KONAXM"; break;
 	case DEVICE_ID_IOX3: deviceStr = "IoX3"; break;
     case DEVICE_ID_TTAP_PRO: deviceStr = "TTAP_PRO"; break;
+    case DEVICE_ID_KONAIP_25G: deviceStr = "KonaIP_25G"; break;
 	
 	default:
 		deviceStr = "Unknown Device";
