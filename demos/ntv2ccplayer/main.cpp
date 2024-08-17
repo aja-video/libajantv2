@@ -124,9 +124,9 @@ int main (int argc, const char ** argv)
 	//	VideoFormat
 	const string videoFormatStr (pVideoFormat  ?  pVideoFormat  :  "");
 	config.fVideoFormat = videoFormatStr.empty()	?	NTV2_FORMAT_1080i_5994
-													:	CNTV2DemoCommon::GetVideoFormatFromString(videoFormatStr, VIDEO_FORMATS_ALL);
+													:	CNTV2DemoCommon::GetVideoFormatFromString(videoFormatStr, VIDEO_FORMATS_ALL, deviceSpec);
 	if (videoFormatStr == "?"  ||  videoFormatStr == "list")
-		{cout	<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_ALL, deviceSpec) << endl;  return 0;}
+		{cout	<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_ALL, pDeviceSpec ? deviceSpec : "") << endl;  return 0;}
 	else if (!videoFormatStr.empty()  &&  !NTV2_IS_VALID_VIDEO_FORMAT(config.fVideoFormat))
 	{	cerr	<< "## ERROR:  Invalid '--videoFormat' value '" << videoFormatStr << "' -- expected values:" << endl
 				<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_ALL, deviceSpec) << endl;

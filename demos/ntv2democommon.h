@@ -219,33 +219,40 @@ template <typename T> class Bouncer
 };	//	Bouncer
 
 
-typedef enum _NTV2VideoFormatKinds
+typedef enum _NTV2VideoFormatKind
 {
-	VIDEO_FORMATS_ALL		= 0xFF,
-	VIDEO_FORMATS_NON_4KUHD	= 1,
-	VIDEO_FORMATS_4KUHD		= 2,
-	VIDEO_FORMATS_8KUHD2	= 3,
-	VIDEO_FORMATS_NONE		= 0
+	VIDEO_FORMATS_NONE			= 0,
+	VIDEO_FORMATS_SDHD			= 1,
+	VIDEO_FORMATS_4KUHD			= 2,
+	VIDEO_FORMATS_8KUHD2		= 4,
+	VIDEO_FORMATS_ALL_UHD4K8K	= (VIDEO_FORMATS_4KUHD | VIDEO_FORMATS_8KUHD2),
+	VIDEO_FORMATS_ALL			= (VIDEO_FORMATS_SDHD | VIDEO_FORMATS_4KUHD | VIDEO_FORMATS_8KUHD2)
 #if !defined(NTV2_DEPRECATE_17_5)
 	//	Deprecated old ones:
-	,VIDEO_FORMATS_UHD2		= VIDEO_FORMATS_8KUHD2
-	,BOTH_VIDEO_FORMATS		= VIDEO_FORMATS_ALL
-	,NON_UHD_VIDEO_FORMATS	= VIDEO_FORMATS_NON_4KUHD
-	,UHD_VIDEO_FORMATS		= VIDEO_FORMATS_4KUHD
+	,VIDEO_FORMATS_NON_4KUHD	= VIDEO_FORMATS_SDHD
+	,VIDEO_FORMATS_UHD2			= VIDEO_FORMATS_8KUHD2
+	,BOTH_VIDEO_FORMATS			= VIDEO_FORMATS_ALL
+	,NON_UHD_VIDEO_FORMATS		= VIDEO_FORMATS_SDHD
+	,UHD_VIDEO_FORMATS			= VIDEO_FORMATS_4KUHD
 #endif	//	!defined(NTV2_DEPRECATE_17_5)
-} NTV2VideoFormatKinds;
+} NTV2VideoFormatKind;
+
+typedef ULWord NTV2VideoFormatKinds;
 
 
-typedef enum _NTV2PixelFormatKinds
+typedef enum _NTV2PixelFormatKind
 {
-	PIXEL_FORMATS_ALL		= 0xFF,
+	PIXEL_FORMATS_NONE		= 0,
 	PIXEL_FORMATS_RGB		= 1,
 	PIXEL_FORMATS_PLANAR	= 2,
 	PIXEL_FORMATS_RAW		= 4,
 	PIXEL_FORMATS_PACKED	= 8,
 	PIXEL_FORMATS_ALPHA		= 16,
-	PIXEL_FORMATS_NONE		= 0
-} NTV2PixelFormatKinds;
+	PIXEL_FORMATS_NO_RAW	= (PIXEL_FORMATS_RGB | PIXEL_FORMATS_PLANAR | PIXEL_FORMATS_PACKED | PIXEL_FORMATS_ALPHA),
+	PIXEL_FORMATS_ALL		= (PIXEL_FORMATS_RGB | PIXEL_FORMATS_PLANAR | PIXEL_FORMATS_RAW | PIXEL_FORMATS_PACKED | PIXEL_FORMATS_ALPHA)
+} NTV2PixelFormatKind;
+
+typedef ULWord NTV2PixelFormatKinds;
 
 
 typedef enum _NTV2TCIndexKinds
@@ -479,28 +486,30 @@ class AJAExport CNTV2DemoCommon
 			@param[in]	inKinds		Specifies the types of video formats returned. Defaults to non-4K/UHD formats.
 			@return		The supported ::NTV2VideoFormatSet.
 		**/
-		static const NTV2VideoFormatSet &	GetSupportedVideoFormats (const NTV2VideoFormatKinds inKinds = VIDEO_FORMATS_NON_4KUHD);
+		static NTV2VideoFormatSet			GetSupportedVideoFormats (const NTV2VideoFormatKinds inKinds = VIDEO_FORMATS_SDHD);
 
 		/**
-			@param[in]	inKinds				Specifies the types of video formats returned. Defaults to non-4K/UHD formats.
-			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
-											warns if the video format is incompatible with that device.
+			@param[in]	inKinds		Specifies the types of video formats returned. Defaults to non-4K/UHD formats.
+			@param[in]	inDevSpec	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
+									returns those video formats that are supported by the device.
 			@return		A string that can be printed to show the supported video formats.
 			@note		These video format strings are mere conveniences for specifying video formats in the command-line-based demo apps,
 						and are subject to change without notice. They are not intended to be canonical in any way.
 		**/
-		static std::string					GetVideoFormatStrings (const NTV2VideoFormatKinds inKinds = VIDEO_FORMATS_NON_4KUHD,
-																	const std::string inDeviceSpecifier = std::string());
+		static std::string					GetVideoFormatStrings (const NTV2VideoFormatKinds inKinds = VIDEO_FORMATS_SDHD,
+																	const std::string inDevSpec = std::string());
 
 		/**
 			@brief	Returns the ::NTV2VideoFormat that matches the given string.
 			@param[in]	inStr		Specifies the string to be converted to an ::NTV2VideoFormat.
 			@param[in]	inKinds		Specifies which video format type is expected in "inStr", whether non-4K/UHD (the default),
 									exclusively 4K/UHD, or both/all.
+			@param[in]	inDevSpec	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
+									returns a valid video format only if supported by the device.
 			@return		The given string converted to an ::NTV2VideoFormat, or ::NTV2_FORMAT_UNKNOWN if there's no match.
 		**/
 		static NTV2VideoFormat				GetVideoFormatFromString (const std::string & inStr,
-																		const NTV2VideoFormatKinds inKinds	= VIDEO_FORMATS_NON_4KUHD,
+																		const NTV2VideoFormatKinds inKinds	= VIDEO_FORMATS_SDHD,
 																		const std::string & inDevSpec		= std::string());
 
 		/**
@@ -526,31 +535,36 @@ class AJAExport CNTV2DemoCommon
 			@param[in]	inKinds		Specifies the types of pixel formats returned. Defaults to all formats.
 			@return		The supported ::NTV2FrameBufferFormatSet.
 		**/
-		static NTV2FrameBufferFormatSet		GetSupportedPixelFormats (const NTV2PixelFormatKinds inKinds = PIXEL_FORMATS_ALL);
+		static NTV2PixelFormats				GetSupportedPixelFormats (const NTV2PixelFormatKinds inKinds = PIXEL_FORMATS_ALL);
 
 		/**
-			@param[in]	inKinds				Specifies the types of pixel formats returned. Defaults to all formats.
-			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
-											warns if the pixel format is incompatible with that device.
+			@param[in]	inKinds		Specifies the types of pixel formats returned. Defaults to all formats.
+			@param[in]	inDevSpec	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
+									returns those pixel formats that are supported by the device.
 			@return		A string that can be printed to show the available pixel formats (or those that are supported by a given device).
 			@note		These pixel format strings are mere conveniences for specifying pixel formats in the command-line-based demo apps,
 						and are subject to change without notice. They are not intended to be canonical in any way.
 		**/
 		static std::string					GetPixelFormatStrings (const NTV2PixelFormatKinds inKinds = PIXEL_FORMATS_ALL,
-																	const std::string inDeviceSpecifier = std::string ());
+																	const std::string inDevSpec = std::string());
 
 		/**
-			@brief	Returns the ::NTV2FrameBufferFormat that matches the given string.
-			@param[in]	inStr	Specifies the string to be converted to an ::NTV2FrameBufferFormat.
-			@return		The given string converted to an ::NTV2FrameBufferFormat, or ::NTV2_FBF_INVALID if there's no match.
+			@brief	Returns the ::NTV2PixelFormat that matches the given string.
+			@param[in]	inStr		Specifies the string to be converted to an ::NTV2PixelFormat.
+			@param[in]	inKinds		Specifies the types of pixel formats returned. Defaults to all formats.
+			@param[in]	inDevSpec	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
+									returns a valid pixel format only if supported by the device.
+			@return		An ::NTV2PixelFormat, or ::NTV2_FBF_INVALID if there's no match.
 		**/
-		static NTV2FrameBufferFormat		GetPixelFormatFromString (const std::string & inStr);
+		static NTV2PixelFormat				GetPixelFormatFromString (const std::string & inStr,
+																		const NTV2PixelFormatKinds inKinds = PIXEL_FORMATS_ALL,
+																		const std::string inDevSpec = std::string());
 
 		/**
 			@return		The equivalent ::AJA_PixelFormat for the given ::NTV2FrameBufferFormat.
 			@param[in]	inFormat	Specifies the ::NTV2FrameBufferFormat to be converted into an equivalent ::AJA_PixelFormat.
 		**/
-		static AJA_PixelFormat				GetAJAPixelFormat (const NTV2FrameBufferFormat inFormat);
+		static AJA_PixelFormat				GetAJAPixelFormat (const NTV2PixelFormat inFormat);
 	///@}
 
 	/**

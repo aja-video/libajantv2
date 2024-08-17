@@ -75,7 +75,7 @@ int main (int argc, const char ** argv)
 	config.fVideoFormat = videoFormatStr.empty()	?	NTV2_FORMAT_1080i_5994
 													:	CNTV2DemoCommon::GetVideoFormatFromString(videoFormatStr, VIDEO_FORMATS_ALL);
 	if (videoFormatStr == "?"  ||  videoFormatStr == "list")
-		{cout	<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_ALL, deviceSpec) << endl;  return 0;}
+		{cout	<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_ALL, pDeviceSpec ? deviceSpec : "") << endl;  return 0;}
 	else if (!videoFormatStr.empty()  &&  config.fVideoFormat == NTV2_FORMAT_UNKNOWN)
 	{	cerr	<< "## ERROR:  Invalid '--videoFormat' value '" << videoFormatStr << "' -- expected values:" << endl
 				<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_ALL, deviceSpec) << endl;
@@ -86,7 +86,7 @@ int main (int argc, const char ** argv)
 	const string pixelFormatStr (pPixelFormat  ?  pPixelFormat  :  "");
 	config.fPixelFormat = pixelFormatStr.empty() ? NTV2_FBF_8BIT_YCBCR : CNTV2DemoCommon::GetPixelFormatFromString(pixelFormatStr);
 	if (pixelFormatStr == "?"  ||  pixelFormatStr == "list")
-		{cout << CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 0;}
+		{cout << CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, pDeviceSpec ? deviceSpec : "") << endl;  return 0;}
 	else if (!pixelFormatStr.empty()  &&  !NTV2_IS_VALID_FRAME_BUFFER_FORMAT(config.fPixelFormat))
 	{
 		cerr	<< "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl

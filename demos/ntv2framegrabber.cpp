@@ -388,10 +388,10 @@ void NTV2FrameGrabber::run (void)
 				}
 				else if (!mNTV2Card.features().GetNumCSCs())
 				{
-					qDebug() << mNTV2Card.GetDisplayName().c_str() << "has no CSCs, won't work with AJAPreviewWidget";
+					qDebug() << mNTV2Card.GetDisplayName().c_str() << "has no CSCs, won't work with NTV2FrameGrabberthis demo";
 					QImage * currentImage (images[framesCaptured % NTV2_NUM_IMAGES]);
 					currentImage->fill(qRgba(40, 40, 40, 255));
-					QString	status (QString("%1 has no CSCs, won't work with AJAPreviewWidget").arg(mNTV2Card.GetDisplayName().c_str()));
+					QString	status (QString("%1 won't work with NTV2QtPreview (no CSCs)").arg(mNTV2Card.GetDisplayName().c_str()));
 					emit newStatusString(status);
 					emit newFrame(*currentImage, true);
 					AJATime::Sleep(1000);	//	Keep the UI responsive while waiting for device to become ready

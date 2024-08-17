@@ -162,7 +162,7 @@ int main (int argc, const char ** argv)
 	//	Pixel format
 	const string	legalFBFs(CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec));
 	if (pixelFormatStr == "?" || pixelFormatStr == "list")
-		{cout << CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 0;}
+		{cout << CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, pDeviceSpec ? deviceSpec : "") << endl;  return 0;}
 	else if (!pixelFormatStr.empty())
 	{
 		config.fPixelFormat = CNTV2DemoCommon::GetPixelFormatFromString(pixelFormatStr);

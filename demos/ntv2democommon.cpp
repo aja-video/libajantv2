@@ -51,7 +51,7 @@ typedef	String2TPNamesMap::const_iterator		String2TPNamesMapConstIter;
 
 static const string				gGlobalMutexName	("com.aja.ntv2.mutex.demo");
 static NTV2VideoFormatSet		gAllFormats;
-static NTV2VideoFormatSet		gNon4KFormats;
+static NTV2VideoFormatSet		gSDHDFormats;
 static NTV2VideoFormatSet		g4KFormats;
 static NTV2VideoFormatSet		g8KFormats;
 static NTV2FrameBufferFormatSet	gPixelFormats;
@@ -96,7 +96,7 @@ class DemoCommonInitializer
 			typedef	pair <string, NTV2InputSource>			String2InputSourcePair;
 			typedef	pair <string, NTV2OutputDestination>	String2OutputDestPair;
 
-			NTV2_ASSERT (gNon4KFormats.empty());
+			NTV2_ASSERT (gSDHDFormats.empty());
 			for (NTV2VideoFormat legalFormat(NTV2_FORMAT_UNKNOWN);  legalFormat < NTV2_MAX_NUM_VIDEO_FORMATS;  legalFormat = NTV2VideoFormat(legalFormat + 1))
 			{
 				if (!NTV2_IS_VALID_VIDEO_FORMAT(legalFormat))
@@ -108,7 +108,7 @@ class DemoCommonInitializer
 				else if (NTV2_IS_4K_VIDEO_FORMAT(legalFormat))
 					g4KFormats.insert(legalFormat);
 				else
-					gNon4KFormats.insert(legalFormat);
+					gSDHDFormats.insert(legalFormat);
 				gAllFormats.insert(legalFormat);
 
 				if		(legalFormat == NTV2_FORMAT_525_5994)	str = "525i2997";
@@ -552,15 +552,19 @@ string CNTV2DemoCommon::GetDeviceStrings (const NTV2DeviceKinds inKinds)
 }
 
 
-const NTV2VideoFormatSet &	CNTV2DemoCommon::GetSupportedVideoFormats (const NTV2VideoFormatKinds inKinds)
+NTV2VideoFormatSet CNTV2DemoCommon::GetSupportedVideoFormats (const NTV2VideoFormatKinds inKinds)
 {
-	switch(inKinds)
-	{
-		case VIDEO_FORMATS_ALL:		return gAllFormats;
-		case VIDEO_FORMATS_4KUHD:	return g4KFormats;
-		case VIDEO_FORMATS_8KUHD2:	return g8KFormats;
-		default:					return gNon4KFormats;
-	}
+	if ((inKinds & VIDEO_FORMATS_ALL) == VIDEO_FORMATS_ALL)
+		return gAllFormats;
+
+	NTV2VideoFormatSet result;
+	if (inKinds & VIDEO_FORMATS_SDHD)
+		result += gSDHDFormats;
+	if (inKinds & VIDEO_FORMATS_4KUHD)
+		result += g4KFormats;
+	if (inKinds & VIDEO_FORMATS_8KUHD2)
+		result += g8KFormats;
+	return result;
 }
 
 
@@ -614,13 +618,13 @@ NTV2VideoFormat CNTV2DemoCommon::GetVideoFormatFromString (const string & inStr,
 			return NTV2_FORMAT_UNKNOWN;
 		vf = iter->second;
 	}
-	if (inKinds == VIDEO_FORMATS_ALL)
+	if ((inKinds & VIDEO_FORMATS_ALL) == VIDEO_FORMATS_ALL)
 		return vf;
-	if (inKinds == VIDEO_FORMATS_4KUHD  &&  NTV2_IS_4K_VIDEO_FORMAT(vf))
+	if (inKinds & VIDEO_FORMATS_4KUHD  &&  NTV2_IS_4K_VIDEO_FORMAT(vf))
 		return vf;
-	if (inKinds == VIDEO_FORMATS_8KUHD2  &&  NTV2_IS_QUAD_QUAD_FORMAT(vf))
+	if (inKinds & VIDEO_FORMATS_8KUHD2  &&  NTV2_IS_QUAD_QUAD_FORMAT(vf))
 		return vf;
-	if (inKinds == VIDEO_FORMATS_NON_4KUHD  &&  !NTV2_IS_4K_VIDEO_FORMAT(vf))
+	if (inKinds & VIDEO_FORMATS_SDHD  &&  !NTV2_IS_4K_VIDEO_FORMAT(vf))
 		return vf;
 	return NTV2_FORMAT_UNKNOWN;
 }
@@ -631,8 +635,7 @@ NTV2FrameBufferFormatSet CNTV2DemoCommon::GetSupportedPixelFormats (const NTV2Pi
 	if (inKinds == PIXEL_FORMATS_ALL)
 		return gPixelFormats;
 
-	NTV2FrameBufferFormatSet	result;
-
+	NTV2FrameBufferFormatSet result;
 	if (inKinds & PIXEL_FORMATS_RGB)
 		result += gFBFsRGB;
 	if (inKinds & PIXEL_FORMATS_PLANAR)
@@ -643,50 +646,75 @@ NTV2FrameBufferFormatSet CNTV2DemoCommon::GetSupportedPixelFormats (const NTV2Pi
 		result += gFBFsPacked;
 	if (inKinds & PIXEL_FORMATS_ALPHA)
 		result += gFBFsAlpha;
-
 	return result;
 }
 
 
-string CNTV2DemoCommon::GetPixelFormatStrings (const NTV2PixelFormatKinds inKinds, const string inDeviceSpecifier)
+string CNTV2DemoCommon::GetPixelFormatStrings (const NTV2PixelFormatKinds inKinds, const string inDevSpec)
 {
 	const NTV2FrameBufferFormatSet & formatSet (GetSupportedPixelFormats(inKinds));
-	string			displayName;
-	CNTV2Card		device;
-	ostringstream	oss;
+	CNTV2Card dev;
+	ostringstream oss;
 
-	if (!inDeviceSpecifier.empty())
+	if (!inDevSpec.empty())
+		dev.Open(inDevSpec);
+
+	oss << setw(34) << left << "Frame Buffer Format"				<< "\t" << setw(32) << left << "Legal -p Values" << endl
+		<< setw(34) << left << "----------------------------------"	<< "\t" << setw(32) << left << "--------------------------------" << endl;
+	for (NTV2FrameBufferFormatSetConstIter iter(formatSet.begin());  iter != formatSet.end();  ++iter)
 	{
-		CNTV2DeviceScanner::GetFirstDeviceFromArgument (inDeviceSpecifier, device);
-		if (device.IsOpen ())
-			displayName = device.GetDisplayName();
-	}
-
-
-	oss << setw (34) << left << "Frame Buffer Format"					<< "\t" << setw (32) << left << "Legal -p Values" << endl
-		<< setw (34) << left << "----------------------------------"	<< "\t" << setw (32) << left << "--------------------------------" << endl;
-	for (NTV2FrameBufferFormatSetConstIter iter (formatSet.begin ());  iter != formatSet.end ();  ++iter)
-	{
-		string	formatName	(::NTV2FrameBufferFormatToString (*iter, true));
-		for (String2PixelFormatMapConstIter it (gString2PixelFormatMap.begin ());  it != gString2PixelFormatMap.end ();  ++it)
-			if (*iter == it->second)
+		const NTV2PixelFormat pf(*iter);
+		const string pfName (::NTV2FrameBufferFormatToString (pf, true));
+		if (pfName.empty())
+			continue;
+		NTV2StringList pfNames;
+		for (String2PixelFormatMapConstIter it(gString2PixelFormatMap.begin());  it != gString2PixelFormatMap.end();  ++it)
+			if (pf == it->second)
 			{
-				oss << setw(35) << left << formatName << "\t" << setw(25) << left << it->first;
-				if (!displayName.empty()  &&  !device.features().CanDoFrameBufferFormat(*iter))
-					oss << "\t## Incompatible with " << displayName;
-				oss << endl;
-				formatName.clear ();
+				if (!inDevSpec.empty()  &&  dev.IsOpen()  &&  !dev.features().CanDoFrameBufferFormat(pf))
+					continue;
+				pfNames.push_back(it->first);
 			}
-		oss << endl;
+		if (!pfNames.empty())
+			oss << setw(35) << left << pfName << "\t" << aja::join(pfNames, ", ") << endl;
 	}
 	return oss.str();
 }
 
 
-NTV2FrameBufferFormat CNTV2DemoCommon::GetPixelFormatFromString (const string & inStr)
+NTV2PixelFormat CNTV2DemoCommon::GetPixelFormatFromString (const string & inStr, const NTV2PixelFormatKinds inKinds, const string inDevSpec)
 {
-	String2PixelFormatMapConstIter	iter	(gString2PixelFormatMap.find (inStr));
-	return  iter != gString2PixelFormatMap.end ()  ?  iter->second  :  NTV2_FBF_INVALID;
+	String2PixelFormatMapConstIter iter (gString2PixelFormatMap.find(inStr));
+	if (iter == gString2PixelFormatMap.end())
+		return NTV2_FBF_INVALID;
+
+	CNTV2Card dev;
+	if (!inDevSpec.empty())
+		dev.Open(inDevSpec);
+
+	//	If a device was specifed, look for the first name-matching format it supports...
+	NTV2PixelFormat pf(iter->second);
+	while (dev.IsOpen()  &&  !dev.features().CanDoPixelFormat(pf))
+	{
+		if (++iter == gString2PixelFormatMap.end())
+			return NTV2_FBF_INVALID;
+		if (inStr != iter->first)
+			return NTV2_FBF_INVALID;
+		pf = iter->second;
+	}
+	if ((inKinds & PIXEL_FORMATS_ALL) == PIXEL_FORMATS_ALL)
+		return pf;
+	if (inKinds & PIXEL_FORMATS_RGB  &&  NTV2_IS_FBF_RGB(pf))
+		return pf;
+	if (inKinds & PIXEL_FORMATS_PLANAR  &&  NTV2_IS_FBF_PLANAR(pf))
+		return pf;
+	if (inKinds & PIXEL_FORMATS_RAW  &&  !NTV2_FBF_IS_RAW(pf))
+		return pf;
+	if (inKinds & PIXEL_FORMATS_PACKED  &&  !NTV2_IS_FBF_PRORES(pf))
+		return pf;
+	if (inKinds & PIXEL_FORMATS_ALPHA  &&  !NTV2_FBF_HAS_ALPHA(pf))
+		return pf;
+	return NTV2_FBF_INVALID;
 }
 
 
@@ -695,7 +723,7 @@ const NTV2InputSourceSet CNTV2DemoCommon::GetSupportedInputSources (const NTV2IO
 	if (inKinds == NTV2_IOKINDS_ALL)
 		return gInputSources;
 
-	NTV2InputSourceSet	result;
+	NTV2InputSourceSet result;
 
 	if (inKinds & NTV2_IOKINDS_SDI)
 		result += gInputSourcesSDI;
@@ -1073,7 +1101,7 @@ AJA_FrameRate CNTV2DemoCommon::GetAJAFrameRate (const NTV2FrameRate inFrameRate)
 }	//	GetAJAFrameRate
 
 
-AJA_PixelFormat CNTV2DemoCommon::GetAJAPixelFormat (const NTV2FrameBufferFormat inFormat)
+AJA_PixelFormat CNTV2DemoCommon::GetAJAPixelFormat (const NTV2PixelFormat inFormat)
 {
 	switch (inFormat)
 	{
