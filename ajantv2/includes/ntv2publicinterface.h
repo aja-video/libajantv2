@@ -8831,6 +8831,14 @@ typedef enum
 			AJAExport bool NTV2DeviceGetSupportedVideoFormats (const NTV2DeviceID inDeviceID, NTV2VideoFormatSet & outFormats);
 
 			/**
+				@brief		Appends the given ::NTV2VideoFormatSet contents into the given set.
+				@param		inOutSet	The set to which the other set will be appended.
+				@param[in]	inSet		Specifies the set whose contents will be appended.
+				@return		A reference to the modified set.
+			**/
+			AJAExport NTV2VideoFormatSet & operator += (NTV2VideoFormatSet & inOutSet, const NTV2VideoFormatSet inSet);
+
+			/**
 				@brief		Prints the given ::NTV2VideoFormatSet contents into the given output stream.
 				@param		inOStream	The stream into which the human-readable list will be written.
 				@param[in]	inFormats	Specifies the set of video formats to be streamed.

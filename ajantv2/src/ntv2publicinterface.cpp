@@ -1001,6 +1001,15 @@ ostream & operator << (ostream & inOutStream, const NTV2ColorCorrectionData & in
 }
 
 
+NTV2VideoFormatSet & operator += (NTV2VideoFormatSet & inOutSet, const NTV2VideoFormatSet inSet)
+{
+	for (NTV2VideoFormatSetConstIter iter(inSet.begin());  iter != inSet.end();  ++iter)
+		if (inOutSet.find(*iter) == inOutSet.end())
+			inOutSet.insert(*iter);
+	return inOutSet;
+}
+
+
 //	Implementation of NTV2VideoFormatSet's ostream writer...
 ostream & operator << (ostream & inOStream, const NTV2VideoFormatSet & inFormats)
 {
