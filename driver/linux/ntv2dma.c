@@ -354,6 +354,7 @@ int dmaInit(ULWord deviceNumber)
 		pDmaEngine->deviceNumber = deviceNumber;
 		pDmaEngine->engIndex = iEng;
 		pDmaEngine->dmaMethod = pNTV2Params->_dmaMethod;
+        pDmaEngine->deviceDMAOffset = 0;
 
 		// init context lock
 		spin_lock_init(&pDmaEngine->engineLock);
@@ -778,6 +779,7 @@ static PDMA_ENGINE dmaMapEngine(ULWord deviceNumber, NTV2DMAEngine eDMAEngine, b
 static bool dmaHardwareInit(PDMA_ENGINE pDmaEngine)
 {
 	ULWord deviceNumber = pDmaEngine->deviceNumber;
+	NTV2PrivateParams *pNTV2Params = getNTV2Params(deviceNumber);
     ULWord value = 0;
 	bool present = false;
 	
@@ -808,6 +810,7 @@ static bool dmaHardwareInit(PDMA_ENGINE pDmaEngine)
             pDmaEngine->alignmentMask = 0x3f;
             pDmaEngine->granularityMask = 0x3f;
         }
+        pDmaEngine->deviceDMAOffset = (pNTV2Params->_DeviceID == DEVICE_ID_KONAIP_25G) ? 0x50000000000 : 0;
 
 		break;
 	default:
@@ -4183,12 +4186,12 @@ static int dmaXlnxProgram(PDMA_CONTEXT pDmaContext)
 			if (xlnxC2H)
 			{
 				pDescriptor->llDstAddress = descSystemAddress;
-				pDescriptor->llSrcAddress = descCardAddress;
+				pDescriptor->llSrcAddress = descCardAddress + pDmaEngine->deviceDMAOffset;
 			}
 			else
 			{
 				pDescriptor->llSrcAddress = descSystemAddress;
-				pDescriptor->llDstAddress = descCardAddress;
+				pDescriptor->llDstAddress = descCardAddress + pDmaEngine->deviceDMAOffset;
 			}
 
 			// setup for next segment descriptor

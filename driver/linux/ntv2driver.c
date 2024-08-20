@@ -455,6 +455,12 @@ static struct pci_device_id pci_device_id_tab[] =
 	   0, 0,											// Class, class_mask
 	   0												// Opaque data
 	},
+	{  // KonaX
+        NTV2_VENDOR_ID, NTV2_DEVICE_ID_KONAIP_25G,		// Vendor and device IDs
+	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
+	   0, 0,											// Class, class_mask
+	   0												// Opaque data
+	},
 
 #if defined(AJA_HEVC)
     {  // CORVIDHEVC K7
@@ -3730,6 +3736,20 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
                 ntv2pp->m_pHDMIOut4Monitor[0] = NULL;
             }
         }
+    }
+
+    if (ntv2pp->_DeviceID == DEVICE_ID_KONAIP_25G)
+    {
+		ntv2pp->m_pRasterMonitor = ntv2_videoraster_open(&ntv2pp->systemContext, "ntv2videoraster", 0);
+		if (ntv2pp->m_pRasterMonitor != NULL)
+		{
+			status = ntv2_videoraster_configure(ntv2pp->m_pRasterMonitor, 0x3400, 64, 4);
+			if (status != NTV2_STATUS_SUCCESS)
+			{
+				ntv2_videoraster_close(ntv2pp->m_pRasterMonitor);
+				ntv2pp->m_pRasterMonitor = NULL;
+			}
+		}
     }
 	
 	ntv2pp->m_pSetupMonitor = ntv2_setup_open(&ntv2pp->systemContext, "ntv2setup");
