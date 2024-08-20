@@ -58,10 +58,14 @@ The instructions for building the default static library are generally the same 
 To prevent building certain targets, these CMake variables can be set to 'ON' in your CMake build environment:
 - `AJANTV2_DISABLE_DEMOS` — If ON, prevents building the demonstration programs (e.g. **ntv2capture**, **ntv2player**, …).\
 Demo apps are normally built by default.
+- `AJANTV2_DISABLE_DRIVER` — If ON, prevents building the driver.\
+Building the driver is enabled by default for Linux
 - `AJANTV2_DISABLE_TOOLS` — If ON, prevents building the command-line tools (e.g. **ntv2thermo**, **regio**, **supportlog**, …).\
 Command-line tools are normally built by default.
 - `AJANTV2_DISABLE_TESTS` — If ON, prevents building the unit test(s).\
 The test programs are normally built by default.
+- `AJANTV2_DISABLE_PLUGIN_LOAD` — If ON, prevents the NTV2 library from loading plugins (and also eliminates the dependency on the third-party `mbedtls` library).\
+The default is OFF, which includes the `mbedtls` library depdendency and the ability to load AJA-signed plugins.
 
 Please follow the instructions below to build libajantv2 on the supported platform and development environment of your preference.
 
@@ -118,6 +122,13 @@ Follow these instructions to build libajantv2 via the Microsoft Visual Studio CM
    ```
    $ cd libajantv2
    $ cmake -S . -B build -G Xcode
+   ```
+
+   NOTE: CMake supports universal `arm64|x86_64` architecture binaries through the [`CMAKE_OSX_ARCITECTURES`](https://cmake.org/cmake/help/latest/variable/CMAKE_OSX_ARCHITECTURES.html) property. For example:
+   ```
+   $ cmake -S . -B build -G Xcode -DCMAKE_OSX_ARCHITECTURES=arm64 // generate 'arm64' binaries only
+   $ cmake -S . -B build -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64 // generate 'x86_64' binaries only
+   $ cmake -S . -B build -G Xcode -DCMAKE_OSX_ARCHITECTURES=arm64;x86_64 //generate 'universal' binaries
    ```
 2. Build libajantv2 static library from the terminal, via the generated XCode Project:
    ```
