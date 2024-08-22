@@ -1120,6 +1120,7 @@ AJAExport std::string NTV2AncDataRgnToStr				(const NTV2AncDataRgn			inValue,	co
 AJAExport std::string NTV2UpConvertModeToString			(const NTV2UpConvertMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
 AJAExport std::string NTV2DownConvertModeToString		(const NTV2DownConvertMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
 AJAExport std::string NTV2IsoConvertModeToString		(const NTV2IsoConvertMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
+AJAExport std::string NTV2ScanMethodToString			(const NTV2ScanMethod			inValue,	const bool inCompactDisplay = false);	//	New in SDK 17.5
 
 AJAExport std::string NTV2HDMIBitDepthToString			(const NTV2HDMIBitDepth			inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
 AJAExport std::string NTV2HDMIAudioChannelsToString		(const NTV2HDMIAudioChannels	inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1

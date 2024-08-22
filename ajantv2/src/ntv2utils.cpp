@@ -5321,7 +5321,7 @@ ULWord GetIndexForNTV2InputSource (const NTV2InputSource inValue)
 	static const ULWord sInputSourcesIndexes [] = { 0,							//	NTV2_INPUTSOURCE_ANALOG1,
 													0, 1, 2, 3,					//	NTV2_INPUTSOURCE_HDMI1 ... NTV2_INPUTSOURCE_HDMI4,
 													0, 1, 2, 3, 4, 5, 6, 7 };	//	NTV2_INPUTSOURCE_SDI1 ... NTV2_INPUTSOURCE_SDI8
-	if (static_cast <size_t> (inValue) < sizeof (sInputSourcesIndexes) / sizeof (ULWord))
+	if (size_t(inValue) < sizeof(sInputSourcesIndexes) / sizeof(ULWord))
 		return sInputSourcesIndexes [inValue];
 	else
 		return 0xFFFFFFFF;
@@ -6464,7 +6464,8 @@ string NTV2AudioChannelPairToString (const NTV2AudioChannelPair inValue, const b
 {
 	ostringstream	oss;
 	if (NTV2_IS_VALID_AUDIO_CHANNEL_PAIR(inValue))
-		oss << (inCompactDisplay ? "" : "NTV2_AudioChannel")  <<  DEC(inValue * 2 + 1)	<<	(inCompactDisplay ? "-" : "_")	<<	DEC(inValue * 2 + 2);
+		oss << (inCompactDisplay ? "" : "NTV2_AudioChannel")
+			<<  DEC(inValue * 2 + 1)	<<	(inCompactDisplay ? "-" : "_")	<<	DEC(inValue * 2 + 2);
 	else if (!inCompactDisplay)
 		oss << "NTV2_AUDIO_CHANNEL_PAIR_INVALID";
 	return oss.str();
@@ -6474,8 +6475,9 @@ string NTV2AudioChannelPairToString (const NTV2AudioChannelPair inValue, const b
 string NTV2AudioChannelQuadToString (const NTV2Audio4ChannelSelect inValue, const bool inCompactDisplay)
 {
 	ostringstream	oss;
-	if (NTV2_IS_VALID_AUDIO_CHANNEL_QUAD (inValue))
-		oss << (inCompactDisplay ? "" : "NTV2_AudioChannel")  <<  (inValue * 4 + 1)	 <<	 (inCompactDisplay ? "-" : "_")	 <<	 (inValue * 4 + 4);
+	if (NTV2_IS_VALID_AUDIO_CHANNEL_QUAD(inValue))
+		oss << (inCompactDisplay ? "" : "NTV2_AudioChannel")
+			<<  (inValue * 4 + 1)	 <<	 (inCompactDisplay ? "-" : "_")	 <<	 (inValue * 4 + 4);
 	else if (!inCompactDisplay)
 		oss << "NTV2_AUDIO_CHANNEL_QUAD_INVALID";
 	return oss.str ();
@@ -6485,8 +6487,9 @@ string NTV2AudioChannelQuadToString (const NTV2Audio4ChannelSelect inValue, cons
 string NTV2AudioChannelOctetToString (const NTV2Audio8ChannelSelect inValue, const bool inCompactDisplay)
 {
 	ostringstream	oss;
-	if (NTV2_IS_VALID_AUDIO_CHANNEL_OCTET (inValue))
-		oss << (inCompactDisplay ? "" : "NTV2_AudioChannel")  <<  (inValue * 8 + 1)	 <<	 (inCompactDisplay ? "-" : "_")	 <<	 (inValue * 8 + 8);
+	if (NTV2_IS_VALID_AUDIO_CHANNEL_OCTET(inValue))
+		oss << (inCompactDisplay ? "" : "NTV2_AudioChannel")
+			<<  (inValue * 8 + 1)	 <<	 (inCompactDisplay ? "-" : "_")	 <<	 (inValue * 8 + 8);
 	else if (!inCompactDisplay)
 		oss << "NTV2_AUDIO_CHANNEL_OCTET_INVALID";
 	return oss.str ();
@@ -6640,6 +6643,18 @@ string NTV2DownConvertModeToString (const NTV2DownConvertMode inValue, const boo
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Anamorphic",						NTV2_DownConvertAnamorphic);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "Zoomed 14" "\xC3\x97" "9",		NTV2_DownConvert14x9);
 		case NTV2_MAX_NUM_DownConvertModes:			break;	//special case
+	}
+	return "";
+}
+
+string NTV2ScanMethodToString (const NTV2ScanMethod inValue, const bool inCompact)
+{
+	switch(inValue)
+	{
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "p",		NTV2Scan_Progressive);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "i",		NTV2Scan_Interlaced);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompact, "psf",	NTV2Scan_PSF);
+		case NTV2_NUM_SCANMETHODS:	break;
 	}
 	return "";
 }

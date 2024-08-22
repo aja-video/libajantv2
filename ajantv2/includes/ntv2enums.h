@@ -472,6 +472,26 @@ typedef enum
 } NTV2ScanGeometry;
 
 
+/**
+	@brief	Identifies a particular scan method.
+**/
+typedef enum _NTV2ScanMethod
+{
+	NTV2Scan_Progressive	= 0,						///< @brief	Progressive
+	NTV2Scan_NonInterlaced	= NTV2Scan_Progressive,
+	NTV2Scan_Interlaced,								///< @brief	Interlaced
+	NTV2Scan_PSF,										///< @brief	Progressive Segmented Frame
+	NTV2Scan_ProgressiveSegmentedFrame	= NTV2Scan_PSF,
+	NTV2_NUM_SCANMETHODS,
+	NTV2Scan_Invalid	= NTV2_NUM_SCANMETHODS			///< @brief	Invalid or unknown
+} NTV2ScanMethod;
+
+#define NTV2_IS_VALID_NTV2ScanMethod(__m__)		((__m__) >= NTV2Scan_Progressive && (__m__) < NTV2_NUM_SCANMETHODS)
+#define NTV2_IS_PROGRESSIVE_SCAN(__m__)			((__m__) == NTV2Scan_Progressive)
+#define NTV2_IS_INTERLACED_SCAN(__m__)			((__m__) == NTV2Scan_Interlaced)
+#define NTV2_IS_PSF_SCAN(__m__)					((__m__) == NTV2Scan_PSF)
+
+
 // IMPORTANT When adding to the NTV2VideoFormat enum, don't forget to:
 //		Add a corresponding case to GetNTV2FrameGeometryFromVideoFormat in r2deviceservices.cpp
 //		Add a corresponding case to GetNTV2QuarterSizedVideoFormat in ntv2utils.cpp
@@ -2221,7 +2241,8 @@ typedef enum
 typedef enum
 {
 	NTV2_MixerRGBRangeFull,
-	NTV2_MixerRGBRangeSMPTE
+	NTV2_MixerRGBRangeSMPTE,
+	NTV2_MAX_NUM_MixerRGBRanges
 } NTV2MixerRGBRange;
 
 
@@ -3373,7 +3394,8 @@ typedef enum
 	NTV2_CSC_Method_Original,
 	NTV2_CSC_Method_Enhanced,
 	NTV2_CSC_Method_Enhanced_4K,
-	NTV2_MAX_NUM_ColorSpaceMethods
+	NTV2_MAX_NUM_ColorSpaceMethods,
+	NTV2_CSC_Method_INVALID	= NTV2_MAX_NUM_ColorSpaceMethods
 } NTV2ColorSpaceMethod;
 
 
@@ -3533,7 +3555,8 @@ typedef enum
 	NTV2_INVALID_HDMI_COLORSPACE	= NTV2_MAX_NUM_HDMIColorSpaces
 } NTV2HDMIColorSpace;
 
-#define NTV2_IS_VALID_HDMI_COLORSPACE(__x__)		((__x__) > NTV2_HDMIColorSpaceAuto	&&	(__x__) < NTV2_MAX_NUM_HDMIColorSpaces)
+#define NTV2_IS_VALID_HDMI_COLORSPACE(__x__)	((__x__) > NTV2_HDMIColorSpaceAuto	&&	(__x__) < NTV2_MAX_NUM_HDMIColorSpaces)
+#define NTV2_OEM_VALID_HDMI_COLORSPACE(__x__)	((__x__) > NTV2_HDMIColorSpaceRGB	&&	(__x__) < NTV2_MAX_NUM_HDMIColorSpaces)
 
 
 /**
@@ -3925,6 +3948,8 @@ typedef enum
 	NTV2_HDMI_V2_4K_PLAYBACK,
 	NTV2_HDMI_V2_MODE_INVALID
 } NTV2HDMIV2Mode;
+
+#define NTV2_IS_VALID_HDMI_V2MODE(__x__)		((__x__) >= NTV2_HDMI_V2_HDSD_BIDIRECTIONAL && (__x__) < NTV2_HDMI_V2_MODE_INVALID)
 
 typedef enum
 {
