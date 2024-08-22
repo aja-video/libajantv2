@@ -1207,7 +1207,7 @@ bool PluginRegistry::loadPlugin (const string & path, const string & folderPath,
 	if (hasPath(path))
 		{P_WARN(INSTP(this) << ": '" << path << "': 'pluginForPath' returned false, but 'hasPath' returned true, count=" << countForPath(path));}
 	string msg;
-	if (!NTV2Plugin::LoadPlugin (path, folderPath, outPtr, errMsg, inUseStdout))
+	if (!NTV2Plugin::LoadPlugin (path, folderPath, outPtr, msg, inUseStdout))
 		{P_FAIL(msg);  return false;}
 	P_NOTE(INSTP(this) << ": Dynamic/shared library '" << path << "' loaded");
 	mPluginMap[path] = outPtr;
