@@ -3380,3 +3380,59 @@ TEST_SUITE("AutoCirculate" * doctest::description("AutoCirculate tests"))
 		CHECK_FALSE(fRange.valid());
 	}	//	TEST_CASE("NTV2ACFrameRange")
 }	//	TEST_SUITE("AutoCirculate")
+
+
+TEST_SUITE("NTV2ScanMethod" * doctest::description("NTV2ScanMethod tests"))
+{
+	TEST_CASE("ScanMethodMacros")
+	{
+		CHECK(NTV2_IS_VALID_NTV2ScanMethod(NTV2Scan_Progressive));
+		CHECK(NTV2_IS_VALID_NTV2ScanMethod(NTV2Scan_NonInterlaced));
+		CHECK(NTV2_IS_VALID_NTV2ScanMethod(NTV2Scan_Interlaced));
+		CHECK(NTV2_IS_VALID_NTV2ScanMethod(NTV2Scan_PSF));
+		CHECK(NTV2_IS_VALID_NTV2ScanMethod(NTV2Scan_ProgressiveSegmentedFrame));
+		CHECK_FALSE(NTV2_IS_VALID_NTV2ScanMethod(NTV2_NUM_SCANMETHODS));
+		CHECK_FALSE(NTV2_IS_VALID_NTV2ScanMethod(NTV2Scan_Invalid));
+		CHECK_FALSE(NTV2_IS_VALID_NTV2ScanMethod(200));
+		CHECK_FALSE(NTV2_IS_VALID_NTV2ScanMethod(2000));
+		CHECK_FALSE(NTV2_IS_VALID_NTV2ScanMethod(20000));
+
+		CHECK(NTV2_IS_PROGRESSIVE_SCAN(NTV2Scan_Progressive));
+		CHECK(NTV2_IS_PROGRESSIVE_SCAN(NTV2Scan_NonInterlaced));
+		CHECK_FALSE(NTV2_IS_PROGRESSIVE_SCAN(NTV2Scan_Interlaced));
+		CHECK_FALSE(NTV2_IS_PROGRESSIVE_SCAN(NTV2Scan_PSF));
+		CHECK_FALSE(NTV2_IS_PROGRESSIVE_SCAN(NTV2Scan_ProgressiveSegmentedFrame));
+		CHECK_FALSE(NTV2_IS_PROGRESSIVE_SCAN(NTV2Scan_Invalid));
+
+		CHECK_FALSE(NTV2_IS_INTERLACED_SCAN(NTV2Scan_Progressive));
+		CHECK_FALSE(NTV2_IS_INTERLACED_SCAN(NTV2Scan_NonInterlaced));
+		CHECK(NTV2_IS_INTERLACED_SCAN(NTV2Scan_Interlaced));
+		CHECK_FALSE(NTV2_IS_INTERLACED_SCAN(NTV2Scan_PSF));
+		CHECK_FALSE(NTV2_IS_INTERLACED_SCAN(NTV2Scan_ProgressiveSegmentedFrame));
+		CHECK_FALSE(NTV2_IS_INTERLACED_SCAN(NTV2Scan_Invalid));
+
+		CHECK_FALSE(NTV2_IS_PSF_SCAN(NTV2Scan_Progressive));
+		CHECK_FALSE(NTV2_IS_PSF_SCAN(NTV2Scan_NonInterlaced));
+		CHECK_FALSE(NTV2_IS_PSF_SCAN(NTV2Scan_Interlaced));
+		CHECK(NTV2_IS_PSF_SCAN(NTV2Scan_PSF));
+		CHECK(NTV2_IS_PSF_SCAN(NTV2Scan_ProgressiveSegmentedFrame));
+		CHECK_FALSE(NTV2_IS_PSF_SCAN(NTV2Scan_Invalid));
+	}	//	TEST_CASE("ScanMethodMacros")
+
+	TEST_CASE("ScanMethodToString")
+	{
+		static const vector<NTV2ScanMethod> sSMs	= {NTV2Scan_Progressive,   NTV2Scan_NonInterlaced, NTV2Scan_Interlaced,   NTV2Scan_PSF,   NTV2Scan_ProgressiveSegmentedFrame, NTV2_NUM_SCANMETHODS, NTV2Scan_Invalid, NTV2ScanMethod(4096)};
+		static const NTV2StringList sCompact		= {"p",                    "p",                    "i",                   "psf",          "psf",                              "",                   "",               ""};
+		static const NTV2StringList sFull			= {"NTV2Scan_Progressive", "NTV2Scan_Progressive", "NTV2Scan_Interlaced", "NTV2Scan_PSF", "NTV2Scan_PSF",                     "",                   "",               ""};
+		CHECK_EQ(sSMs.size(), sCompact.size());
+		CHECK_EQ(sSMs.size(), sFull.size());
+		CHECK_EQ(sCompact.size(), sFull.size());
+		for (size_t ndx(0);  ndx < sSMs.size();  ndx++)
+		{	const NTV2ScanMethod sm(sSMs.at(ndx));
+			const string strSmall(::NTV2ScanMethodToString(sm, /*isCompact*/true)), strLarge(::NTV2ScanMethodToString(sm, /*isCompact*/false));
+			const string strSmallA(sCompact.at(ndx)), strLargeA(sFull.at(ndx));
+			CHECK_EQ(strSmall, strSmallA);
+			CHECK_EQ(strLarge, strLargeA);
+		}
+	}	//	TEST_CASE("ScanMethodMacros")
+}	//	TEST_SUITE("NTV2ScanMethod")
