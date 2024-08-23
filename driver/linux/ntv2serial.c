@@ -568,7 +568,7 @@ static bool ntv2_serial_receive(struct ntv2_serial *ntv2_ser)
 	return true;
 }
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,10,0))
+#if defined(KERNEL_6_10_0_SERIAL_SWITCH_TO_KFIFO)
 static bool ntv2_serial_transmit(struct ntv2_serial *ntv2_ser)
 {
 	struct uart_port *port = &ntv2_ser->uart_port;
