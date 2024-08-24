@@ -20,7 +20,7 @@ using namespace std;
 	typedef struct NTV2DeviceInfo
 	{
 		NTV2DeviceID	deviceID;
-		string			deviceSerialNumber;
+		string			serialNumber;
 		string			deviceIdentifier;
 	#if defined(VIRTUAL_DEVICES_SUPPORT)
 		bool			isVirtualDevice=false;
@@ -115,7 +115,7 @@ size_t CNTV2DeviceScanner::GetNumDevices (void)
 				break;
 			NTV2DeviceInfo info;
 			info.deviceID = tmpDev.GetDeviceID();
-			tmpDev.GetSerialNumberString(info.deviceSerialNumber);
+			tmpDev.GetSerialNumberString(info.serialNumber);
 			info.deviceIdentifier = tmpDev.GetDisplayName();
 			sDevInfoList.push_back(info);
 			ndx++;
@@ -162,7 +162,7 @@ void CNTV2DeviceScanner::ScanHardware (void)
 			NTV2DeviceInfo	info;
 			info.deviceIndex		= boardNum;
 			info.deviceID			= deviceID;
-			tmpDev.GetSerialNumberString(info.deviceSerialNumber);
+			tmpDev.GetSerialNumberString(info.serialNumber);
 
 			oss << ::NTV2DeviceIDToString (deviceID, tmpDev.IsSupported(kDeviceHasMicrophoneInput)) << " - " << boardNum;
 
@@ -223,7 +223,7 @@ void CNTV2DeviceScanner::ScanHardware (void)
 	int vdIndex = 100;
 	for (auto hwInfo : hwList)
 	{
-		string hwSN = hwInfo.deviceSerialNumber;
+		string hwSN = hwInfo.serialNumber;
 		auto it = vdMap.find(hwSN);
 		if (it != vdMap.end())
 		{
@@ -365,7 +365,7 @@ bool CNTV2DeviceScanner::GetDeviceWithSerial (const string & inSerialNumber, CNT
 	AJAAutoLock tmpLock(&sDevInfoListLock);
 	ScanHardware();
 	for (size_t ndx(0);  ndx < sDevInfoList.size();  ndx++)
-		if (sDevInfoList.at(ndx).deviceSerialNumber == inSerialNumber)
+		if (sDevInfoList.at(ndx).serialNumber == inSerialNumber)
 			return outDevice.Open(UWord(ndx));
 	return false;
 }
@@ -390,9 +390,9 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 		for (size_t ndx(0);  ndx < sDevInfoList.size();  ndx++)
 		{
 			cout << DECN(ndx,2) << " | " << setw(16) << ::NTV2DeviceIDToString(sDevInfoList.at(ndx).deviceID);
-			const string serNum(sDevInfoList.at(ndx).deviceSerialNumber);
+			const string serNum(sDevInfoList.at(ndx).serialNumber);
 			if (!serNum.empty())
-				cout << " | " << setw(10) << serNum;// << " | " << HEX0N(sDevInfoList.at(ndx).deviceSerialNumber,8);
+				cout << " | " << setw(10) << serNum;
 			cout << endl;
 		}
 #if defined(VIRTUAL_DEVICES_SUPPORT)
@@ -401,7 +401,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 			cout << "*** Virtual Devices ***" << endl;
 			while (iter != sDevInfoList.end())
 			{
-				const string serNum(CNTV2Card::SerialNum64ToString(iter->deviceSerialNumber));
+				const string serNum(iter->serialNumber);
 				cout << DECN(iter->deviceIndex,2) << " | " << setw(15) << iter->virtualDeviceName;// NTV2DeviceIDToString(iter->deviceID);
 				cout << " | " << iter->virtualDeviceID;
 				cout << " (" << NTV2DeviceIDToString(iter->deviceID); 
@@ -430,7 +430,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 				iter->virtualDeviceID == inArgument)
 			{
 				string inVDSpec = "ntv2virtualdev://localhost/?CP2ConfigPath=" + cp2ConfigPath +
-						  "&DeviceSN=" +  CNTV2Card::SerialNum64ToString(iter->deviceSerialNumber) + 
+						  "&DeviceSN=" +  iter->serialNumber + 
 						  "&vdid=" + iter->virtualDeviceID + 
 						  "&verbose";
 				return outDevice.Open(inVDSpec);
@@ -487,11 +487,11 @@ bool NTV2DeviceInfo::operator == (const NTV2DeviceInfo & second) const
 	//	its "boardIdentifier" field are indeterminate, making it worthless for accurate comparisons.
 	//	"boardSerialNumber" and boardNumber are the only required comparisons, but I also check boardType,
 	//	boardID, and pciSlot for good measure...
-	if (first.deviceID							!=	second.deviceID)						diffs++;
-	if (first.deviceIndex						!=	second.deviceIndex)						diffs++;
-	if (first.deviceSerialNumber				!=	second.deviceSerialNumber)				diffs++;
-	if (first.pciSlot							!=	second.pciSlot)							diffs++;
-	
+	if (first.deviceID		!=	second.deviceID)		diffs++;
+	if (first.deviceIndex	!=	second.deviceIndex)		diffs++;
+	if (first.serialNumber	!=	second.serialNumber)	diffs++;
+	if (first.pciSlot		!=	second.pciSlot)			diffs++;
+
 	// Needs to be fixed now that deviceIdentifier is a std::string
 	//#if defined (AJA_DEBUG)
 	//	if (::strncmp (first.deviceIdentifier.c_str (), second.deviceIdentifier.c_str (), first.deviceIdentifier.length ())))	diffs++;
@@ -508,7 +508,8 @@ NTV2DeviceInfo::NTV2DeviceInfo()
 	deviceID						= DEVICE_ID_INVALID;
 	deviceIndex						= 0;
 	pciSlot							= 0;
-	deviceSerialNumber				= "";
+	deviceSerialNumber				= 0;
+	serialNumber					= "";
 	numVidInputs					= 0;
 	numVidOutputs					= 0;
 	numAnlgVidInputs				= 0;
@@ -684,7 +685,7 @@ ostream &	operator << (ostream & inOutStr, const NTV2DeviceInfo & inInfo)
 	inOutStr	<< "Device Info for '" << inInfo.deviceIdentifier << "'" << endl
 				<< "            Device Index Number: " << inInfo.deviceIndex << endl
 				<< "                      Device ID: 0x" << hex << inInfo.deviceID << dec << endl
-				<< "                  Serial Number: 0x" << hex << inInfo.deviceSerialNumber << dec << endl
+				<< "                  Serial Number: " << inInfo.serialNumber << endl
 				<< "                       PCI Slot: 0x" << hex << inInfo.pciSlot << dec << endl
 				<< "                   Video Inputs: " << inInfo.numVidInputs << endl
 				<< "                  Video Outputs: " << inInfo.numVidOutputs << endl

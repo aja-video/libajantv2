@@ -59,7 +59,8 @@ typedef struct NTV2DeviceInfo
 	NTV2DeviceID					deviceID;							///< @brief Device ID/species	(e.g., DEVICE_ID_KONA3G, DEVICE_ID_IOXT, etc.)
 	ULWord							deviceIndex;						///< @brief		Device index number -- this will be phased out someday
 	ULWord							pciSlot;							///< @brief PCI slot (if applicable and/or known)
-	std::string						deviceSerialNumber;					///< @brief Unique device serial number
+	uint64_t						deviceSerialNumber;					///< @brief Unique device serial number (obsolete)
+	std::string						serialNumber;						///< @brief Unique device serial number (new in SDK 17.5)
 	std::string						deviceIdentifier;					///< @brief Device name as seen in Control Panel, Watcher, Cables, etc.
 	UWord							numVidInputs;						///< @brief Total number of video inputs -- analog, digital, whatever
 	UWord							numVidOutputs;						///< @brief Total number of video outputs -- analog, digital, whatever
