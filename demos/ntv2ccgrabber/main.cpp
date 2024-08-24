@@ -69,20 +69,20 @@ int main (int argc, const char ** argv)
 	const string	legal608Sources	(CCGrabberConfig::CaptionDataSrcToString(kCaptionDataSrc_INVALID));
 	const string	legalOutputModes(CCGrabberConfig::OutputModeToString(kOutputMode_INVALID));
 	const string	legalFramesSpec	("{frameCount}[@{firstFrameNum}]  or  {firstFrameNum}-{lastFrameNum}");
-	char *			pDeviceSpec		(AJA_NULL);				//	Device spec
-	char *			pInputSrcSpec	(AJA_NULL);				//	SDI source spec
-	char *			pTimecodeSpec	(AJA_NULL);				//	Timecode source spec
-	char *			pPixelFormat	(AJA_NULL);				//	Pixel format spec
-	char *			pCaptionChannel	(AJA_NULL);				//	Caption channel of interest (cc1, cc2 ... text1, text2, ...)
-	char *			pCaptionSource	(AJA_NULL);				//	Caption source of interest (line21, 608vanc, 608anc ...)
-	char *			pOutputMode		(AJA_NULL);				//	Output mode (stream, screen, file ...)
-	char *			pFramesSpec		(AJA_NULL);				//	AutoCirculate frames spec
-	int				channelNumber	(1);					//	Channel (framestore) spec
-	int				burnCaptions	(0);					//	Burn-in captions?
-	int				doMultiFormat	(0);					//	MultiFormat mode?
-	int				useVanc			(0);					//	Use Vanc (tall frame) geometry?
-	int				grabAudio		(0);					//	Grab audio?
-	int				showVersion		(0);					//	Show version?
+	char *			pDeviceSpec		(AJA_NULL);		//	Device spec
+	char *			pInputSrcSpec	(AJA_NULL);		//	SDI source spec
+	char *			pTcSource		(AJA_NULL);		//	Timecode source spec
+	char *			pPixelFormat	(AJA_NULL);		//	Pixel format spec
+	char *			pCaptionChannel	(AJA_NULL);		//	Caption channel of interest (cc1, cc2 ... text1, text2, ...)
+	char *			pCaptionSource	(AJA_NULL);		//	Caption source of interest (line21, 608vanc, 608anc ...)
+	char *			pOutputMode		(AJA_NULL);		//	Output mode (stream, screen, file ...)
+	char *			pFramesSpec		(AJA_NULL);		//	AutoCirculate frames spec
+	int				channelNumber	(1);			//	Channel (framestore) spec
+	int				burnCaptions	(0);			//	Burn-in captions?
+	int				doMultiFormat	(0);			//	MultiFormat mode?
+	int				useVanc			(0);			//	Use Vanc (tall frame) geometry?
+	int				grabAudio		(0);			//	Grab audio?
+	int				showVersion		(0);			//	Show version?
 	AJADebug::Open();
 
 	::setlocale (LC_ALL, "");	//	Might have to emit UTF-8 Unicode
@@ -99,7 +99,7 @@ int main (int argc, const char ** argv)
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,		0,	"pixel format to use",		"'?' or 'list' to list"		},
 		{"frames",		  0,	POPT_ARG_STRING,	&pFramesSpec,		0,	"frames to AutoCirculate",	"num[@min] or min-max"		},
 		{"input",		'i',	POPT_ARG_STRING,	&pInputSrcSpec,		0,	"which SDI input",			"1-8, ?=list"				},
-		{"tcsource",	't',	POPT_ARG_STRING,	&pTimecodeSpec,		0,	"timecode source",			"'?' or 'list' to list"		},
+		{"tcsource",	't',	POPT_ARG_STRING,	&pTcSource,			0,	"timecode source",			"'?' or 'list' to list"		},
 		{"608chan",		  0,	POPT_ARG_STRING,	&pCaptionChannel,	0,	"608 cap chan to monitor",	legalChannels.c_str()		},
 		{"608src",		  0,	POPT_ARG_STRING,	&pCaptionSource,	0,	"608 source to use",		legal608Sources.c_str()		},
 		{"output",		  0,	POPT_ARG_STRING,	&pOutputMode,		0,	"608 output mode",			legalOutputModes.c_str()	},
@@ -114,21 +114,13 @@ int main (int argc, const char ** argv)
 	CNTV2DemoCommon::Popt popt(argc, argv, optionsTable);
 	if (!popt)
 		{cerr << "## ERROR: " << popt.errorStr() << endl;  return 2;}
-
-	const string	deviceSpec		(pDeviceSpec   ? pDeviceSpec : "0");
-	const string	inputSourceStr	(pInputSrcSpec ? CNTV2DemoCommon::ToLower(string(pInputSrcSpec)) : "");
-	const string	tcSourceStr		(pTimecodeSpec ? CNTV2DemoCommon::ToLower(string(pTimecodeSpec)) : "");
-	const string	pixelFormatStr	(pPixelFormat  ? pPixelFormat :  "");
-	const string	framesSpec		(pFramesSpec   ? pFramesSpec  :  "");
 	if (showVersion)
 		{cout << argv[0] << ", NTV2 SDK " << ::NTV2Version() << endl;  return 0;}
 
 	//	Device
-	const string	legalDevices(CNTV2DemoCommon::GetDeviceStrings());
-	if (deviceSpec == "?" || deviceSpec == "list")
-		{cout << legalDevices << endl;  return 0;}
+	const string deviceSpec (pDeviceSpec ? pDeviceSpec : "0");
 	if (!CNTV2DemoCommon::IsValidDevice(deviceSpec))
-		{cout << "## ERROR:  No such device '" << deviceSpec << "'" << endl << legalDevices;  return 1;}
+		return 1;
 
 	CCGrabberConfig	config(deviceSpec);
 
@@ -138,29 +130,31 @@ int main (int argc, const char ** argv)
 	config.fInputChannel = NTV2Channel(channelNumber - 1);
 
 	//	Input source
-	const string	legalSources(CNTV2DemoCommon::GetInputSourceStrings(NTV2_IOKINDS_SDI, deviceSpec));
+	const string inputSourceStr (pInputSrcSpec ? CNTV2DemoCommon::ToLower(string(pInputSrcSpec)) : "");
+	const string legalSources (CNTV2DemoCommon::GetInputSourceStrings(NTV2_IOKINDS_SDI, deviceSpec));
+	config.fInputSource = CNTV2DemoCommon::GetInputSourceFromString (inputSourceStr,
+																		NTV2_IOKINDS_SDI | NTV2_IOKINDS_ANALOG,
+																		pDeviceSpec ? deviceSpec : "");
 	if (inputSourceStr == "?" || inputSourceStr == "list")
 		{cout << legalSources << endl;  return 0;}
 	if (!inputSourceStr.empty())
 	{
-		config.fInputSource = CNTV2DemoCommon::GetInputSourceFromString(inputSourceStr);
 		if (!NTV2_IS_VALID_INPUT_SOURCE(config.fInputSource))
 			{cerr << "## ERROR:  Input source '" << inputSourceStr << "' not one of these:" << endl << legalSources << endl;	return 1;}
 	}	//	if input source specified
 
 	//	Timecode source
-	const string	legalTCSources(CNTV2DemoCommon::GetTCIndexStrings(TC_INDEXES_ALL, deviceSpec));
-	if (tcSourceStr == "?" || tcSourceStr == "list")
+	const string tcSourceStr (pTcSource ? CNTV2DemoCommon::ToLower(pTcSource) : "");
+	const string legalTCSources (CNTV2DemoCommon::GetTCIndexStrings(TC_INDEXES_ALL, pDeviceSpec ? deviceSpec : ""));
+	config.fTimecodeSource = CNTV2DemoCommon::GetTCIndexFromString(tcSourceStr);
+	if (tcSourceStr == "?"  ||  tcSourceStr == "list")
 		{cout << legalTCSources << endl;  return 0;}
-	if (!tcSourceStr.empty())
-	{
-		config.fTimecodeSrc = CNTV2DemoCommon::GetTCIndexFromString(tcSourceStr);
-		if (!NTV2_IS_VALID_TIMECODE_INDEX(config.fTimecodeSrc))
-			{cerr << "## ERROR:  Timecode source '" << tcSourceStr << "' not one of these:" << endl << legalTCSources << endl;	return 1;}
-	}
+	if (!tcSourceStr.empty()  &&  !NTV2_IS_VALID_TIMECODE_INDEX(config.fTimecodeSource))
+		{cerr << "## ERROR:  Timecode source '" << tcSourceStr << "' not one of these:" << endl << legalTCSources << endl;	return 1;}
 
 	//	Pixel format
-	const string	legalFBFs(CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec));
+	const string pixelFormatStr (pPixelFormat  ? pPixelFormat :  "");
+	const string legalFBFs (CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec));
 	if (pixelFormatStr == "?" || pixelFormatStr == "list")
 		{cout << CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, pDeviceSpec ? deviceSpec : "") << endl;  return 0;}
 	else if (!pixelFormatStr.empty())
@@ -179,7 +173,7 @@ int main (int argc, const char ** argv)
 	}
 
 	//	Caption Source
-	const string	captionSrcStr(pCaptionSource ? pCaptionSource : "");
+	const string captionSrcStr (pCaptionSource ? pCaptionSource : "");
 	if (captionSrcStr == "?" || captionSrcStr == "list")
 		{cout << "## NOTE: Legal --608src values: " << legal608Sources << endl;  return 0;}
 	else if (!captionSrcStr.empty())
@@ -190,7 +184,7 @@ int main (int argc, const char ** argv)
 	}
 
 	//	Output mode
-	const string	outputModeStr(pOutputMode ? pOutputMode : "");
+	const string outputModeStr (pOutputMode ? pOutputMode : "");
 	if (outputModeStr == "?" || outputModeStr == "list")
 		{cout << "## NOTE: Legal --output values: " << legalOutputModes << endl;  return 0;}
 	else if (!outputModeStr.empty())
@@ -208,6 +202,7 @@ int main (int argc, const char ** argv)
 	}
 
 	//	AutoCirculate frames
+	const string framesSpec (pFramesSpec ? pFramesSpec : "");
 	if (!framesSpec.empty())
 	{
 		const string parseResult(config.fFrames.setFromString(framesSpec));

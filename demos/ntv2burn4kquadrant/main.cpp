@@ -31,12 +31,12 @@ static void SignalHandler (int inSignal)
 
 int main (int argc, const char ** argv)
 {
-	char *			pDeviceSpec		(AJA_NULL);		//	Which device to use for input
-	char *			pOutDevSpec 	(AJA_NULL);		//	Which device to use for output
-	char *			pTcSource		(AJA_NULL);		//	Time code source string
-	char *			pPixelFormat	(AJA_NULL);		//	Pixel format spec
-	int				showVersion		(0);			//	Show version?
-	int				noAudio			(0);			//	Disable audio?
+	char *	pDeviceSpec		(AJA_NULL);		//	Which device to use for input
+	char *	pOutDevSpec 	(AJA_NULL);		//	Which device to use for output
+	char *	pTcSource		(AJA_NULL);		//	Timecode source spec
+	char *	pPixelFormat	(AJA_NULL);		//	Pixel format spec
+	int		showVersion		(0);			//	Show version?
+	int		noAudio			(0);			//	Disable audio?
 	AJADebug::Open();
 
 	//	Command line option descriptions:
@@ -45,7 +45,7 @@ int main (int argc, const char ** argv)
 		{"version",		  0,	POPT_ARG_NONE,		&showVersion,	0,	"show version & exit",	AJA_NULL					},
 		{"input",		'i',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"input device to use",	"index#, serial#, or model"	},
 		{"output",		'o',	POPT_ARG_STRING,	&pOutDevSpec,	0,	"output device",		"index#, serial#, or model"	},
-		{"tcsource",	't',	POPT_ARG_STRING,	&pTcSource,		0,	"time code source",		"'?' to list"				},
+		{"tcsource",	't',	POPT_ARG_STRING,	&pTcSource,		0,	"timecode source",		"'?' or 'list' to list"		},
 		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio?",		AJA_NULL					},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",	"'?' or 'list' to list"		},
 		POPT_AUTOHELP
@@ -82,16 +82,13 @@ int main (int argc, const char ** argv)
 	}
 
 	//	Timecode source...
-	const string	legalTCSources(CNTV2DemoCommon::GetTCIndexStrings(TC_INDEXES_ALL, deviceSpec));
-	const string	tcSourceStr		(pTcSource ? CNTV2DemoCommon::ToLower(pTcSource) : "");
+	const string tcSourceStr (pTcSource ? CNTV2DemoCommon::ToLower(pTcSource) : "");
+	const string legalTCSources (CNTV2DemoCommon::GetTCIndexStrings(TC_INDEXES_ALL, pDeviceSpec ? deviceSpec : ""));
+	config.fTimecodeSource = CNTV2DemoCommon::GetTCIndexFromString(tcSourceStr);
 	if (tcSourceStr == "?"  ||  tcSourceStr == "list")
 		{cout << legalTCSources << endl;  return 0;}
-	if (!tcSourceStr.empty())
-	{
-		config.fTimecodeSource = CNTV2DemoCommon::GetTCIndexFromString(tcSourceStr);
-		if (!NTV2_IS_VALID_TIMECODE_INDEX(config.fTimecodeSource))
-			{cerr << "## ERROR:  Timecode source '" << tcSourceStr << "' not one of these:" << endl << legalTCSources << endl;	return 1;}
-	}
+	if (!tcSourceStr.empty()  &&  !NTV2_IS_VALID_TIMECODE_INDEX(config.fTimecodeSource))
+		{cerr << "## ERROR:  Timecode source '" << tcSourceStr << "' not one of these:" << endl << legalTCSources << endl;	return 1;}
 
 	config.fSuppressAudio	= noAudio ? true  : false;
 	config.fInputFrames.setCountOnly(5);

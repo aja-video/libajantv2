@@ -169,7 +169,7 @@ class AJAExport NTV2DeviceSpecParser
 		std::ostream &					PrintErrors (std::ostream & oss) const;
 		std::ostream &					Print (std::ostream & oss, const bool inDumpResults = false) const;
 		std::string						InfoString (void) const;
-		uint64_t						DeviceSerial (void) const;
+		std::string						DeviceSerial (void) const					{return Result(kConnectParamDevSerial);}
 		inline std::string				DeviceModel (void) const					{return Result(kConnectParamDevModel);}
 		NTV2DeviceID					DeviceID (void) const;
 		UWord							DeviceIndex (void) const;

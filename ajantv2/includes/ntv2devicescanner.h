@@ -59,7 +59,7 @@ typedef struct NTV2DeviceInfo
 	NTV2DeviceID					deviceID;							///< @brief Device ID/species	(e.g., DEVICE_ID_KONA3G, DEVICE_ID_IOXT, etc.)
 	ULWord							deviceIndex;						///< @brief		Device index number -- this will be phased out someday
 	ULWord							pciSlot;							///< @brief PCI slot (if applicable and/or known)
-	uint64_t						deviceSerialNumber;					///< @brief Unique device serial number
+	std::string						deviceSerialNumber;					///< @brief Unique device serial number
 	std::string						deviceIdentifier;					///< @brief Device name as seen in Control Panel, Watcher, Cables, etc.
 	UWord							numVidInputs;						///< @brief Total number of video inputs -- analog, digital, whatever
 	UWord							numVidOutputs;						///< @brief Total number of video outputs -- analog, digital, whatever
@@ -272,12 +272,13 @@ public:
 	static bool									GetFirstDeviceWithSerial (const std::string & inSerialStr, CNTV2Card & outDevice);	//	New in SDK 16.0
 
 	/**
-		@brief		Rescans the host, and returns an open CNTV2Card instance for the first AJA device whose serial number matches the given value.
+		@brief		Rescans the host, and returns an open CNTV2Card instance for the first AJA device whose serial number
+					matches the given value.
 		@return		True if successful; otherwise false.
 		@param[in]	inSerialNumber		Specifies the device serial value to search for.
 		@param[out] outDevice			Receives the open, ready-to-use CNTV2Card instance.
 	**/
-	static bool									GetDeviceWithSerial (const uint64_t inSerialNumber, CNTV2Card & outDevice); //	New in SDK 16.0
+	static bool									GetDeviceWithSerial (const std::string & inSerialNumber, CNTV2Card & outDevice); //	New in SDK 17.5, replaced uint64_t version
 
 	/**
 		@brief		Rescans the host, and returns an open CNTV2Card instance for the AJA device that matches a command line argument
@@ -315,6 +316,9 @@ public:
 	static NTV2_DEPRECATED_f(bool IsAlphaNumeric (const char inStr));	///< @deprecated	Use aja::is_alpha_numeric instead
 	static NTV2_DEPRECATED_f(bool IsAlphaNumeric (const std::string & inStr)); ///< @deprecated	Use aja::is_alpha_numeric instead
 #endif	//	!defined(NTV2_DEPRECATE_17_1)
+#if !defined(NTV2_DEPRECATE_17_5)
+	static NTV2_MUST_DEPRECATE(bool GetDeviceWithSerial (const uint64_t sn, CNTV2Card & dev)); ///< @deprecated	Use the string version of this function instead
+#endif	//	!defined(NTV2_DEPRECATE_17_5)
 
 #if !defined(NTV2_DEPRECATE_17_1)
 //	Instance Methods

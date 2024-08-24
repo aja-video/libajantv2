@@ -75,23 +75,20 @@ int main (int argc, const char ** argv)
 	BurnConfig config(deviceSpec);
 
 	//	Input source
-	const string	legalSources(CNTV2DemoCommon::GetInputSourceStrings(NTV2_IOKINDS_ALL, deviceSpec));
 	const string inputSourceStr	(pInputSrcSpec ? CNTV2DemoCommon::ToLower(string(pInputSrcSpec)) : "");
+	const string legalSources (CNTV2DemoCommon::GetInputSourceStrings(NTV2_IOKINDS_ALL, pDeviceSpec ? deviceSpec : ""));
+	config.fInputSource = CNTV2DemoCommon::GetInputSourceFromString(inputSourceStr, NTV2_IOKINDS_ALL, pDeviceSpec ? deviceSpec : "");
 	if (inputSourceStr == "?" || inputSourceStr == "list")
 		{cout << legalSources << endl;  return 0;}
-	if (!inputSourceStr.empty())
-	{
-		config.fInputSource = CNTV2DemoCommon::GetInputSourceFromString(inputSourceStr);
-		if (!NTV2_IS_VALID_INPUT_SOURCE(config.fInputSource))
-			{cerr << "## ERROR:  Input source '" << inputSourceStr << "' not one of:" << endl << legalSources << endl;	return 1;}
-	}	//	if input source specified
+	if (!inputSourceStr.empty()  &&  !NTV2_IS_VALID_INPUT_SOURCE(config.fInputSource))
+		{cerr << "## ERROR:  Input source '" << inputSourceStr << "' not one of:" << endl << legalSources << endl;	return 1;}
 
 	//	Pixel Format
 	const string pixelFormatStr (pPixelFormat  ?  pPixelFormat  :  "");
 	config.fPixelFormat = pixelFormatStr.empty() ? NTV2_FBF_8BIT_YCBCR : CNTV2DemoCommon::GetPixelFormatFromString(pixelFormatStr);
 	if (pixelFormatStr == "?"  ||  pixelFormatStr == "list")
 		{cout << CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, pDeviceSpec ? deviceSpec : "") << endl;  return 0;}
-	else if (!pixelFormatStr.empty()  &&  !NTV2_IS_VALID_FRAME_BUFFER_FORMAT(config.fPixelFormat))
+	if (!pixelFormatStr.empty()  &&  !NTV2_IS_VALID_FRAME_BUFFER_FORMAT(config.fPixelFormat))
 	{
 		cerr	<< "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl
 				<< CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec) << endl;
@@ -99,16 +96,13 @@ int main (int argc, const char ** argv)
 	}
 
 	//	Timecode source...
-	const string	legalTCSources(CNTV2DemoCommon::GetTCIndexStrings(TC_INDEXES_ALL, deviceSpec));
-	const string	tcSourceStr		(pTcSource ? CNTV2DemoCommon::ToLower(pTcSource) : "");
+	const string tcSourceStr (pTcSource ? CNTV2DemoCommon::ToLower(pTcSource) : "");
+	const string legalTCSources (CNTV2DemoCommon::GetTCIndexStrings(TC_INDEXES_ALL, pDeviceSpec ? deviceSpec : ""));
+	config.fTimecodeSource = CNTV2DemoCommon::GetTCIndexFromString(tcSourceStr);
 	if (tcSourceStr == "?"  ||  tcSourceStr == "list")
 		{cout << legalTCSources << endl;  return 0;}
-	if (!tcSourceStr.empty())
-	{
-		config.fTimecodeSource = CNTV2DemoCommon::GetTCIndexFromString(tcSourceStr);
-		if (!NTV2_IS_VALID_TIMECODE_INDEX(config.fTimecodeSource))
-			{cerr << "## ERROR:  Timecode source '" << tcSourceStr << "' not one of these:" << endl << legalTCSources << endl;	return 1;}
-	}
+	if (!tcSourceStr.empty()  &&  !NTV2_IS_VALID_TIMECODE_INDEX(config.fTimecodeSource))
+		{cerr << "## ERROR:  Timecode source '" << tcSourceStr << "' not one of these:" << endl << legalTCSources << endl;	return 1;}
 
 	//	InputFrames
 	string framesSpec(pInFramesSpec ? pInFramesSpec : "");

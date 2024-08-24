@@ -20,7 +20,7 @@ using namespace std;
 	typedef struct NTV2DeviceInfo
 	{
 		NTV2DeviceID	deviceID;
-		uint64_t		deviceSerialNumber;
+		string			deviceSerialNumber;
 		string			deviceIdentifier;
 	#if defined(VIRTUAL_DEVICES_SUPPORT)
 		bool			isVirtualDevice=false;
@@ -115,7 +115,7 @@ size_t CNTV2DeviceScanner::GetNumDevices (void)
 				break;
 			NTV2DeviceInfo info;
 			info.deviceID = tmpDev.GetDeviceID();
-			info.deviceSerialNumber = tmpDev.GetSerialNumber();
+			tmpDev.GetSerialNumberString(info.deviceSerialNumber);
 			info.deviceIdentifier = tmpDev.GetDisplayName();
 			sDevInfoList.push_back(info);
 			ndx++;
@@ -162,7 +162,7 @@ void CNTV2DeviceScanner::ScanHardware (void)
 			NTV2DeviceInfo	info;
 			info.deviceIndex		= boardNum;
 			info.deviceID			= deviceID;
-			info.deviceSerialNumber	= tmpDev.GetSerialNumber();
+			tmpDev.GetSerialNumberString(info.deviceSerialNumber);
 
 			oss << ::NTV2DeviceIDToString (deviceID, tmpDev.IsSupported(kDeviceHasMicrophoneInput)) << " - " << boardNum;
 
@@ -223,7 +223,7 @@ void CNTV2DeviceScanner::ScanHardware (void)
 	int vdIndex = 100;
 	for (auto hwInfo : hwList)
 	{
-		string hwSN = CNTV2Card::SerialNum64ToString(hwInfo.deviceSerialNumber);
+		string hwSN = hwInfo.deviceSerialNumber;
 		auto it = vdMap.find(hwSN);
 		if (it != vdMap.end())
 		{
@@ -351,7 +351,15 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithSerial (const string & inSerialStr, C
 }
 
 
+#if !defined(NTV2_DEPRECATE_17_5)
 bool CNTV2DeviceScanner::GetDeviceWithSerial (const uint64_t inSerialNumber, CNTV2Card & outDevice)
+{
+	const string serNumStr(::SerialNum64ToString(inSerialNumber));
+	return GetDeviceWithSerial(serNumStr, outDevice);
+}
+#endif	//	!defined(NTV2_DEPRECATE_17_5)
+
+bool CNTV2DeviceScanner::GetDeviceWithSerial (const string & inSerialNumber, CNTV2Card & outDevice)
 {
 	outDevice.Close();
 	AJAAutoLock tmpLock(&sDevInfoListLock);
@@ -376,15 +384,15 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 	if (upperArg == "LIST" || upperArg == "?")
 	{
 		if (sDevInfoList.empty())
-			cout << "No devices detected" << endl;
+			cout << "No local devices detected" << endl;
 		else
-			cout << DEC(sDevInfoList.size()) << " available " << (sDevInfoList.size() == 1 ? "device:" : "devices:") << endl;
+			cout << DEC(sDevInfoList.size()) << " available local " << (sDevInfoList.size() == 1 ? "device:" : "devices:") << endl;
 		for (size_t ndx(0);  ndx < sDevInfoList.size();  ndx++)
 		{
-			cout << DECN(ndx,2) << " | " << setw(8) << ::NTV2DeviceIDToString(sDevInfoList.at(ndx).deviceID);
-			const string serNum(CNTV2Card::SerialNum64ToString(sDevInfoList.at(ndx).deviceSerialNumber));
+			cout << DECN(ndx,2) << " | " << setw(16) << ::NTV2DeviceIDToString(sDevInfoList.at(ndx).deviceID);
+			const string serNum(sDevInfoList.at(ndx).deviceSerialNumber);
 			if (!serNum.empty())
-				cout << " | " << setw(9) << serNum << " | " << HEX0N(sDevInfoList.at(ndx).deviceSerialNumber,8);
+				cout << " | " << setw(10) << serNum;// << " | " << HEX0N(sDevInfoList.at(ndx).deviceSerialNumber,8);
 			cout << endl;
 		}
 #if defined(VIRTUAL_DEVICES_SUPPORT)
@@ -500,7 +508,7 @@ NTV2DeviceInfo::NTV2DeviceInfo()
 	deviceID						= DEVICE_ID_INVALID;
 	deviceIndex						= 0;
 	pciSlot							= 0;
-	deviceSerialNumber				= 0;
+	deviceSerialNumber				= "";
 	numVidInputs					= 0;
 	numVidOutputs					= 0;
 	numAnlgVidInputs				= 0;

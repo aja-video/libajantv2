@@ -1268,11 +1268,11 @@ typedef enum
 **/
 typedef enum
 {
-	NTV2_IOKINDS_ALL			= 0xFF, ///< @brief Specifies any/all input/output kinds.
+	NTV2_IOKINDS_NONE			= 0,	///< @brief Doesn't specify any kind of input/output.
 	NTV2_IOKINDS_SDI			= 1,	///< @brief Specifies SDI input/output kinds.
 	NTV2_IOKINDS_HDMI			= 2,	///< @brief Specifies HDMI input/output kinds.
 	NTV2_IOKINDS_ANALOG			= 4,	///< @brief Specifies analog input/output kinds.
-	NTV2_IOKINDS_NONE			= 0		///< @brief Doesn't specify any kind of input/output.
+	NTV2_IOKINDS_ALL			= (NTV2_IOKINDS_SDI | NTV2_IOKINDS_HDMI | NTV2_IOKINDS_ANALOG) ///< @brief Specifies any/all input/output kinds.
 	#if !defined(NTV2_DEPRECATE_16_3)
 	,	NTV2_INPUTSOURCES_ALL		= NTV2_IOKINDS_ALL,
 		NTV2_INPUTSOURCES_SDI		= NTV2_IOKINDS_SDI,
@@ -1280,7 +1280,9 @@ typedef enum
 		NTV2_INPUTSOURCES_ANALOG	= NTV2_IOKINDS_ANALOG,
 		NTV2_INPUTSOURCES_NONE		= NTV2_IOKINDS_NONE
 	#endif	//	!defined(NTV2_DEPRECATE_16_3)
-} NTV2InputSourceKinds, NTV2OutputDestKinds, NTV2IOKinds;
+} NTV2InputSourceKind, NTV2OutputDestKind, NTV2IOKind;
+
+typedef ULWord NTV2InputSourceKinds, NTV2OutputDestKinds, NTV2IOKinds;
 
 #define NTV2_IS_VALID_IOKINDS(_k_)		(((_k_) == NTV2_IOKINDS_ALL) || ((_k_) == NTV2_IOKINDS_SDI) || ((_k_) == NTV2_IOKINDS_HDMI) || ((_k_) == NTV2_IOKINDS_ANALOG))
 

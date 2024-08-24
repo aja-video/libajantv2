@@ -257,13 +257,14 @@ typedef ULWord NTV2PixelFormatKinds;
 
 typedef enum _NTV2TCIndexKinds
 {
-	TC_INDEXES_ALL		= 0xFF,
-	TC_INDEXES_SDI		= 1,
-	TC_INDEXES_ANALOG	= 2,
-	TC_INDEXES_ATCLTC	= 4,
-	TC_INDEXES_VITC1	= 8,
-	TC_INDEXES_VITC2	= 16,
-	TC_INDEXES_NONE		= 0
+	TC_INDEXES_NONE			= 0,
+	TC_INDEXES_SDI			= 1,
+	TC_INDEXES_ANALOG		= 2,
+	TC_INDEXES_ATCLTC		= 4,
+	TC_INDEXES_VITC1		= 8,
+	TC_INDEXES_VITC2		= 16,
+	TC_INDEXES_NO_ANALOG	= (TC_INDEXES_SDI | TC_INDEXES_ATCLTC | TC_INDEXES_VITC1 | TC_INDEXES_VITC2),
+	TC_INDEXES_ALL			= (TC_INDEXES_NO_ANALOG | TC_INDEXES_ANALOG )
 } NTV2TCIndexKinds;
 
 
@@ -468,14 +469,6 @@ class AJAExport CNTV2DemoCommon
 			@return		True if the specified device exists and can be opened.
 		**/
 		static bool							IsValidDevice (const std::string & inDeviceSpec);
-
-		/**
-			@param[in]	inKinds				Specifies the kinds of devices to be returned. Defaults to all available devices.
-			@return		A string that can be printed to show the available supported devices.
-			@note		These device identifier strings are mere conveniences for specifying devices in the command-line-based demo apps,
-						and are subject to change without notice. They are not intended to be canonical in any way.
-		**/
-		static std::string					GetDeviceStrings (const NTV2DeviceKinds inKinds = NTV2_DEVICEKIND_ALL);
 	///@}
 
 	/**
@@ -580,7 +573,7 @@ class AJAExport CNTV2DemoCommon
 		/**
 			@param[in]	inKinds				Specifies the types of input sources returned. Defaults to all sources.
 			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
-											warns if the input source is incompatible with that device.
+											returns those input sources that are supported by the device.
 			@return		A string that can be printed to show the available input sources (or those that are supported by a given device).
 			@note		These input source strings are mere conveniences for specifying input sources in the command-line-based demo apps,
 						and are subject to change without notice. They are not intended to be canonical in any way.
@@ -590,10 +583,15 @@ class AJAExport CNTV2DemoCommon
 
 		/**
 			@brief		Returns the ::NTV2InputSource that matches the given string.
-			@param[in]	inStr	Specifies the string to be converted to an ::NTV2InputSource.
+			@param[in]	inStr				Specifies the string to be converted to an ::NTV2InputSource.
+			@param[in]	inKinds				Specifies the types of input sources returned. Defaults to all sources.
+			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
+											returns a valid input source only if supported by the device.
 			@return		The given string converted to an ::NTV2InputSource, or ::NTV2_INPUTSOURCE_INVALID if there's no match.
 		**/
-		static NTV2InputSource				GetInputSourceFromString (const std::string & inStr);
+		static NTV2InputSource				GetInputSourceFromString (const std::string & inStr,
+																		const NTV2IOKinds inKinds = NTV2_IOKINDS_ALL,
+																		const std::string inDevSpec = std::string());
 	///@}
 
 	/**
@@ -630,7 +628,7 @@ class AJAExport CNTV2DemoCommon
 		/**
 			@param[in]	inKinds				Specifies the types of timecode indexes returned. Defaults to all indexes.
 			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
-											warns if the timecode index is incompatible with that device.
+											returns a valid timecode index only if supported by the device.
 			@param[in]	inIsInputOnly		Optionally specifies if intended for timecode input (capture).
 											Defaults to 'true'. Specify 'false' to obtain the list of timecode indexes
 											that are valid for the given device for either input (capture) or output
@@ -648,7 +646,9 @@ class AJAExport CNTV2DemoCommon
 			@param[in]	inStr	Specifies the string to be converted to an ::NTV2TCIndex.
 			@return		The given string converted to an ::NTV2TCIndex, or ::NTV2_TCINDEX_INVALID if there's no match.
 		**/
-		static NTV2TCIndex					GetTCIndexFromString (const std::string & inStr);
+		static NTV2TCIndex					GetTCIndexFromString (const std::string & inStr,
+																		const NTV2TCIndexKinds inKinds = TC_INDEXES_ALL,
+																		const std::string inDevSpec = std::string());
 	///@}
 
 	/**

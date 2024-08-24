@@ -346,6 +346,8 @@ class DemoCommonInitializer
 			for (uint16_t ndx (0);  ndx < NTV2_MAX_NUM_TIMECODE_INDEXES;  ndx++)
 			{
 				const NTV2TCIndex	tcIndex	(NTV2TCIndex(ndx+0));
+				if (tcIndex == NTV2_TCINDEX_DEFAULT)
+					continue;	//	Skip NTV2_TCINDEX_DEFAULT
 				gTCIndexes.insert (tcIndex);
 				gString2TCIndexMap.insert (String2TCIndexPair(ULWordToString(ndx), tcIndex));
 				gString2TCIndexMap.insert (String2TCIndexPair(::NTV2TCIndexToString(tcIndex, false), tcIndex));
@@ -465,7 +467,7 @@ static string DeviceFilterString (const NTV2DeviceKinds inKinds)
 	else if (inKinds == NTV2_DEVICEKIND_NONE)
 		return "no device";
 
-	vector<string>	strs;
+	NTV2StringList strs;
 	if (inKinds & NTV2_DEVICEKIND_INPUT)
 		strs.push_back("capture");
 	if (inKinds & NTV2_DEVICEKIND_OUTPUT)
@@ -492,63 +494,7 @@ static string DeviceFilterString (const NTV2DeviceKinds inKinds)
 		strs.push_back("SDI relays");
 	if (strs.empty())
 		return "??";
-
-	ostringstream	oss;
-	for (vector<string>::const_iterator it(strs.begin());  it != strs.end();  )
-	{
-		oss << *it;
-		if (++it != strs.end())
-			oss << " | ";
-	}
-	return oss.str();
-}
-
-
-string CNTV2DemoCommon::GetDeviceStrings (const NTV2DeviceKinds inKinds)
-{
-	ostringstream			oss, hdr;
-	CNTV2Card				device;
-	ULWord					ndx(0);
-	const NTV2DeviceIDSet	supportedDevices(::NTV2GetSupportedDevices(inKinds));
-	const string			filterString(DeviceFilterString(inKinds));
-
-	typedef map<NTV2DeviceID,UWord>	DeviceTallies;
-	DeviceTallies	tallies;
-
-	for (ndx = 0;  CNTV2DeviceScanner::GetDeviceAtIndex(ndx, device);  ndx++)
-	{
-		const NTV2DeviceID	deviceID(device.GetDeviceID());
-		string	serialNum;
-		oss	<< endl
-			<< DEC(ndx);
-		if (tallies.find(deviceID) == tallies.end())
-		{
-			tallies[deviceID] = 1;
-			oss << endl
-				<< ToLower(::NTV2DeviceIDToString(deviceID));
-		}
-		else
-		{
-			const UWord num(tallies[deviceID]);
-			tallies.erase(deviceID);
-			tallies[deviceID] = num+1;
-		}
-		if (device.GetSerialNumberString(serialNum))
-			oss << endl
-				<< serialNum;
-		if (inKinds != NTV2_DEVICEKIND_ALL  &&  inKinds != NTV2_DEVICEKIND_NONE)
-			if (supportedDevices.find(deviceID) == supportedDevices.end())
-				oss << "\t## Doesn't support one of " << filterString;
-		oss << endl;
-	}
-
-	if (!ndx)
-		return string("No devices\n");
-	hdr << DEC(ndx) << " local " << (ndx == 1 ? "device" : "devices") << " found:" << endl
-		<< setw(16) << left << "Legal -d Values" << endl
-		<< setw(16) << left << "----------------";
-	hdr << oss.str();
-	return hdr.str();
+	return aja::join(strs, " | ");
 }
 
 
@@ -724,52 +670,77 @@ const NTV2InputSourceSet CNTV2DemoCommon::GetSupportedInputSources (const NTV2IO
 		return gInputSources;
 
 	NTV2InputSourceSet result;
-
 	if (inKinds & NTV2_IOKINDS_SDI)
 		result += gInputSourcesSDI;
 	if (inKinds & NTV2_IOKINDS_HDMI)
 		result += gInputSourcesHDMI;
 	if (inKinds & NTV2_IOKINDS_ANALOG)
 		result += gInputSourcesAnalog;
-
 	return result;
 }
 
 
-string CNTV2DemoCommon::GetInputSourceStrings (const NTV2IOKinds inKinds,  const string inDeviceSpecifier)
+string CNTV2DemoCommon::GetInputSourceStrings (const NTV2IOKinds inKinds,  const string inDevSpec)
 {
-	const NTV2InputSourceSet &	sourceSet	(GetSupportedInputSources (inKinds));
-	ostringstream				oss;
-	CNTV2Card					theDevice;
-	if (!inDeviceSpecifier.empty ())
-		CNTV2DeviceScanner::GetFirstDeviceFromArgument (inDeviceSpecifier, theDevice);
+	const NTV2InputSourceSet & sourceSet (GetSupportedInputSources(inKinds));
+	CNTV2Card dev;
+	ostringstream oss;
+
+	if (!inDevSpec.empty())
+		dev.Open(inDevSpec);
 
 	oss	<< setw (25) << left << "Input Source"				<< "\t" << setw (16) << left << "Legal -i Values" << endl
 		<< setw (25) << left << "------------------------"	<< "\t" << setw (16) << left << "----------------" << endl;
 	for (NTV2InputSourceSetConstIter iter(sourceSet.begin());  iter != sourceSet.end();  ++iter)
 	{
-		string	sourceName	(::NTV2InputSourceToString (*iter));
+		const NTV2InputSource src(*iter);
+		string srcName (::NTV2InputSourceToString(src));
+		if (srcName.empty())
+			continue;
+		NTV2StringList srcNames;
 		for (String2InputSourceMapConstIter it(gString2InputSourceMap.begin());  it != gString2InputSourceMap.end();  ++it)
-			if (*iter == it->second)
+			if (src == it->second)
 			{
-				oss << setw (25) << left << sourceName << "\t" << setw (16) << left << it->first;
-				if (!inDeviceSpecifier.empty ()  &&  theDevice.IsOpen()  &&  !theDevice.features().CanDoInputSource(*iter))
-					oss << "\t## Incompatible with " << theDevice.GetDisplayName();
-				oss << endl;
-				sourceName.clear();
+				if (!inDevSpec.empty()  &&  dev.IsOpen()  &&  !dev.features().CanDoInputSource(src))
+					continue;
+				srcNames.push_back(it->first);
 			}
-		oss << endl;
+		if (!srcNames.empty())
+			oss << setw(25) << left << srcName << "\t" << aja::join(srcNames, ", ") << endl;
 	}
 	return oss.str ();
 }
 
 
-NTV2InputSource CNTV2DemoCommon::GetInputSourceFromString (const string & inStr)
+NTV2InputSource CNTV2DemoCommon::GetInputSourceFromString (const string & inStr, const NTV2IOKinds inKinds, const string inDevSpec)
 {
-	String2InputSourceMapConstIter	iter	(gString2InputSourceMap.find (inStr));
-	if (iter == gString2InputSourceMap.end ())
+	String2InputSourceMapConstIter iter (gString2InputSourceMap.find(inStr));
+	if (iter == gString2InputSourceMap.end())
 		return NTV2_INPUTSOURCE_INVALID;
-	return iter->second;
+
+	CNTV2Card dev;
+	if (!inDevSpec.empty())
+		dev.Open(inDevSpec);
+
+	//	If a device was specifed, look for the first name-matching format it supports...
+	NTV2InputSource src(iter->second);
+	while (dev.IsOpen()  &&  !dev.features().CanDoInputSource(src))
+	{
+		if (++iter == gString2InputSourceMap.end())
+			return NTV2_INPUTSOURCE_INVALID;
+		if (inStr != iter->first)
+			return NTV2_INPUTSOURCE_INVALID;
+		src = iter->second;
+	}
+	if ((inKinds & NTV2_IOKINDS_ALL) == NTV2_IOKINDS_ALL)
+		return src;
+	if (inKinds & NTV2_IOKINDS_SDI  &&  NTV2_INPUT_SOURCE_IS_SDI(src))
+		return src;
+	if (inKinds & NTV2_IOKINDS_HDMI  &&  NTV2_INPUT_SOURCE_IS_HDMI(src))
+		return src;
+	if (inKinds & NTV2_IOKINDS_ANALOG  &&  NTV2_INPUT_SOURCE_IS_ANALOG(src))
+		return src;
+	return NTV2_INPUTSOURCE_INVALID;
 }
 
 
@@ -816,7 +787,6 @@ const NTV2TCIndexes CNTV2DemoCommon::GetSupportedTCIndexes (const NTV2TCIndexKin
 		return gTCIndexes;
 
 	NTV2TCIndexes	result;
-
 	if (inKinds & TC_INDEXES_SDI)
 		result += gTCIndexesSDI;
 	if (inKinds & TC_INDEXES_ANALOG)
@@ -827,52 +797,79 @@ const NTV2TCIndexes CNTV2DemoCommon::GetSupportedTCIndexes (const NTV2TCIndexKin
 		result += gTCIndexesVITC1;
 	if (inKinds & TC_INDEXES_VITC2)
 		result += gTCIndexesVITC2;
-
 	return result;
 }
 
 string CNTV2DemoCommon::GetTCIndexStrings (const NTV2TCIndexKinds inKinds,
-											const string inDeviceSpecifier,
+											const string inDevSpec,
 											const bool inIsInputOnly)
 {
-	const NTV2TCIndexes &	tcIndexes	(GetSupportedTCIndexes(inKinds));
-	ostringstream			oss;
-	CNTV2Card				theDevice;
-	if (!inDeviceSpecifier.empty())
-		CNTV2DeviceScanner::GetFirstDeviceFromArgument (inDeviceSpecifier, theDevice);
+	const NTV2TCIndexes & tcIndexes (GetSupportedTCIndexes(inKinds));
+	CNTV2Card dev;
+	ostringstream oss;
+
+	if (!inDevSpec.empty())
+		dev.Open(inDevSpec);
 
 	oss	<< setw(25) << left << "Timecode Index"				<< "\t" << setw(16) << left << "Legal Values" << endl
 		<< setw(25) << left << "------------------------"	<< "\t" << setw(16) << left << "----------------" << endl;
 	for (NTV2TCIndexesConstIter iter (tcIndexes.begin());  iter != tcIndexes.end();  ++iter)
 	{
-		string	tcNdxName(::NTV2TCIndexToString(*iter));
+		const NTV2TCIndex tcNdx(*iter);
+		const string tcNdxName (::NTV2TCIndexToString(tcNdx));
+		if (tcNdxName.empty())
+			continue;
+		NTV2StringList tcNdxNames;
 		for (String2TCIndexMapConstIter it (gString2TCIndexMap.begin());  it != gString2TCIndexMap.end();  ++it)
-			if (*iter == it->second)
+			if (tcNdx == it->second)
 			{
-				oss << setw (25) << left << tcNdxName << "\t" << setw (16) << left << it->first;
-				if (!inDeviceSpecifier.empty()  &&  theDevice.IsOpen())
-				{
-//					const NTV2DeviceID	deviceID(theDevice.GetDeviceID());
-					const bool canDoTCIndex	(inIsInputOnly	? theDevice.features().CanDoInputTCIndex(*iter)
-															: theDevice.features().CanDoOutputTCIndex(*iter));
-					if (!canDoTCIndex)
-						oss << "\t## Incompatible with " << theDevice.GetDisplayName();
-				}
-				oss << endl;
-				tcNdxName.clear();
+				if (!inDevSpec.empty()  &&  dev.IsOpen())
+					if (!(inIsInputOnly ? dev.features().CanDoInputTCIndex(tcNdx) : dev.features().CanDoOutputTCIndex(tcNdx)))
+						continue;
+				tcNdxNames.push_back(it->first);
 			}
-		oss << endl;
+		if (!tcNdxNames.empty())
+			oss << setw(25) << left << tcNdxName << "\t" << aja::join(tcNdxNames, ", ") << endl;
 	}
 	return oss.str();
 }
 
 
-NTV2TCIndex CNTV2DemoCommon::GetTCIndexFromString (const string & inStr)
+NTV2TCIndex CNTV2DemoCommon::GetTCIndexFromString (const string & inStr, const NTV2TCIndexKinds inKinds, const string inDevSpec)
 {
-	String2TCIndexMapConstIter	iter	(gString2TCIndexMap.find (inStr));
-	if (iter == gString2TCIndexMap.end ())
+	String2TCIndexMapConstIter iter (gString2TCIndexMap.find(inStr));
+	if (iter == gString2TCIndexMap.end())
 		return NTV2_TCINDEX_INVALID;
-	return iter->second;
+
+	CNTV2Card dev;
+	if (!inDevSpec.empty())
+		dev.Open(inDevSpec);
+
+	//	If a device was specifed, look for the first name-matching format it supports...
+	NTV2TCIndex tcNdx(iter->second);
+	NTV2InputSource tcInpSrc (::NTV2TimecodeIndexToInputSource(tcNdx));
+	while (dev.IsOpen()  &&  !dev.features().CanDoInputSource(tcInpSrc))
+	{
+		if (++iter == gString2TCIndexMap.end())
+			return NTV2_TCINDEX_INVALID;
+		if (inStr != iter->first)
+			return NTV2_TCINDEX_INVALID;
+		tcNdx = iter->second;
+		tcInpSrc = ::NTV2TimecodeIndexToInputSource(tcNdx);
+	}
+	if ((inKinds & TC_INDEXES_ALL) == TC_INDEXES_ALL)
+		return tcNdx;
+	if (inKinds & TC_INDEXES_SDI  &&  (NTV2_IS_ATC_VITC1_TIMECODE_INDEX(tcNdx) || NTV2_IS_ATC_VITC2_TIMECODE_INDEX(tcNdx) || NTV2_IS_ATC_LTC_TIMECODE_INDEX(tcNdx)))
+		return tcNdx;
+	if (inKinds & TC_INDEXES_ANALOG  &&  NTV2_IS_ANALOG_TIMECODE_INDEX(tcNdx))
+		return tcNdx;
+	if (inKinds & TC_INDEXES_ATCLTC  &&  NTV2_IS_ATC_LTC_TIMECODE_INDEX(tcNdx))
+		return tcNdx;
+	if (inKinds & TC_INDEXES_VITC1  &&  NTV2_IS_ATC_VITC1_TIMECODE_INDEX(tcNdx))
+		return tcNdx;
+	if (inKinds & TC_INDEXES_VITC2  &&  NTV2_IS_ATC_VITC2_TIMECODE_INDEX(tcNdx))
+		return tcNdx;
+	return NTV2_TCINDEX_INVALID;
 }
 
 

@@ -466,13 +466,6 @@ string NTV2DeviceSpecParser::InfoString (void) const
 	return oss.str();
 }
 
-uint64_t NTV2DeviceSpecParser::DeviceSerial (void) const
-{
-	uint64_t result(0);
-	StringToSerialNum64 (Result(kConnectParamDevSerial), result);
-	return result;
-}
-
 NTV2DeviceID NTV2DeviceSpecParser::DeviceID (void) const
 {
 	string devIDStr (Result(kConnectParamDevID));
