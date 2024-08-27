@@ -220,11 +220,11 @@ void NTV2OutputTestPattern::RouteOutputSignal (void)
 
 	//	And connect analog video output, if the device has one...
 	if (mDevice.features().GetNumAnalogVideoOutputs())
-		connections.insert(NTV2Connection(::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_ANALOG), outputXpt));
+		connections.insert(NTV2Connection(::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_ANALOG1), outputXpt));
 
 	//	And connect HDMI video output, if the device has one...
 	if (mDevice.features().GetNumHDMIVideoOutputs())
-		connections.insert(NTV2Connection(::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_HDMI), outputXpt));
+		connections.insert(NTV2Connection(::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_HDMI1), outputXpt));
 
 	//	Apply all the accumulated connections...
 	mDevice.ApplySignalRoute(connections, /*replaceExistingRoutes*/true);

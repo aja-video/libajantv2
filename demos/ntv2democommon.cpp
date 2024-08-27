@@ -66,6 +66,9 @@ static NTV2InputSourceSet		gInputSourcesSDI;
 static NTV2InputSourceSet		gInputSourcesHDMI;
 static NTV2InputSourceSet		gInputSourcesAnalog;
 static NTV2OutputDestinations	gOutputDestinations;
+static NTV2OutputDestinations	gOutputDestsSDI;
+static NTV2OutputDestinations	gOutputDestsHDMI;
+static NTV2OutputDestinations	gOutputDestsAnalog;
 static String2VideoFormatMMap	gString2VideoFormatMMap;
 static String2PixelFormatMap	gString2PixelFormatMap;
 static String2AudioSystemMap	gString2AudioSystemMap;
@@ -326,7 +329,10 @@ class DemoCommonInitializer
 			gString2InputSourceMap.insert(String2InputSourcePair(string("hdmi"),NTV2_INPUTSOURCE_HDMI1));
 
 			//	Output Destinations...
-			::NTV2DeviceGetSupportedOutputDests (DEVICE_ID_INVALID, gOutputDestinations);
+			::NTV2DeviceGetSupportedOutputDests (DEVICE_ID_INVALID, gOutputDestinations, NTV2_IOKINDS_ALL);
+			::NTV2DeviceGetSupportedOutputDests (DEVICE_ID_INVALID, gOutputDestsSDI, NTV2_IOKINDS_SDI);
+			::NTV2DeviceGetSupportedOutputDests (DEVICE_ID_INVALID, gOutputDestsHDMI, NTV2_IOKINDS_HDMI);
+			::NTV2DeviceGetSupportedOutputDests (DEVICE_ID_INVALID, gOutputDestsAnalog, NTV2_IOKINDS_ANALOG);
 			for (NTV2OutputDestinationsConstIter it(gOutputDestinations.begin());  it != gOutputDestinations.end();  ++it)
 			{
 				const NTV2OutputDest dst(*it);
@@ -340,7 +346,7 @@ class DemoCommonInitializer
 					gString2OutputDestMap.insert(String2OutputDestPair(str, dst));
 				}
 			}	//	for each output dest
-			gString2OutputDestMap.insert(String2OutputDestPair(string("hdmi1"),NTV2_OUTPUTDESTINATION_HDMI));
+			gString2OutputDestMap.insert(String2OutputDestPair(string("hdmi1"), NTV2_OUTPUTDESTINATION_HDMI1));
 
 			//	TCIndexes...
 			for (uint16_t ndx (0);  ndx < NTV2_MAX_NUM_TIMECODE_INDEXES;  ndx++)
@@ -689,12 +695,12 @@ string CNTV2DemoCommon::GetInputSourceStrings (const NTV2IOKinds inKinds,  const
 	if (!inDevSpec.empty())
 		dev.Open(inDevSpec);
 
-	oss	<< setw (25) << left << "Input Source"				<< "\t" << setw (16) << left << "Legal -i Values" << endl
-		<< setw (25) << left << "------------------------"	<< "\t" << setw (16) << left << "----------------" << endl;
+	oss	<< setw(25) << left << "Input Source"             << "\t" << setw(16) << left << "Legal -i Values"  << endl
+		<< setw(25) << left << "------------------------" << "\t" << setw(16) << left << "----------------" << endl;
 	for (NTV2InputSourceSetConstIter iter(sourceSet.begin());  iter != sourceSet.end();  ++iter)
 	{
 		const NTV2InputSource src(*iter);
-		string srcName (::NTV2InputSourceToString(src));
+		const string srcName (::NTV2InputSourceToString(src));
 		if (srcName.empty())
 			continue;
 		NTV2StringList srcNames;
@@ -708,7 +714,7 @@ string CNTV2DemoCommon::GetInputSourceStrings (const NTV2IOKinds inKinds,  const
 		if (!srcNames.empty())
 			oss << setw(25) << left << srcName << "\t" << aja::join(srcNames, ", ") << endl;
 	}
-	return oss.str ();
+	return oss.str();
 }
 
 
@@ -722,7 +728,7 @@ NTV2InputSource CNTV2DemoCommon::GetInputSourceFromString (const string & inStr,
 	if (!inDevSpec.empty())
 		dev.Open(inDevSpec);
 
-	//	If a device was specifed, look for the first name-matching format it supports...
+	//	If a device was specifed, look for the first name-matching input source it supports...
 	NTV2InputSource src(iter->second);
 	while (dev.IsOpen()  &&  !dev.features().CanDoInputSource(src))
 	{
@@ -744,40 +750,83 @@ NTV2InputSource CNTV2DemoCommon::GetInputSourceFromString (const string & inStr,
 }
 
 
-string CNTV2DemoCommon::GetOutputDestinationStrings (const string inDeviceSpecifier)
+const NTV2OutputDestinations CNTV2DemoCommon::GetSupportedOutputDestinations (const NTV2IOKinds inKinds)
 {
-	const NTV2OutputDestinations &	dests (gOutputDestinations);
-	ostringstream					oss;
-	CNTV2Card						theDevice;
-	if (!inDeviceSpecifier.empty())
-		CNTV2DeviceScanner::GetFirstDeviceFromArgument(inDeviceSpecifier, theDevice);
+	if (inKinds == NTV2_IOKINDS_ALL)
+		return gOutputDestinations;
 
-	oss	<< setw (25) << left << "Output Destination"		<< "\t" << setw(16) << left << "Legal -o Values" << endl
-		<< setw (25) << left << "------------------------"	<< "\t" << setw(16) << left << "----------------" << endl;
+	NTV2OutputDestinations result;
+	if (inKinds & NTV2_IOKINDS_SDI)
+		result += gOutputDestsSDI;
+	if (inKinds & NTV2_IOKINDS_HDMI)
+		result += gOutputDestsHDMI;
+	if (inKinds & NTV2_IOKINDS_ANALOG)
+		result += gOutputDestsAnalog;
+	return result;
+}
+
+
+string CNTV2DemoCommon::GetOutputDestinationStrings (const NTV2IOKinds inKinds, const string inDevSpec)
+{
+	const NTV2OutputDestinations & dests (GetSupportedOutputDestinations(inKinds));
+	CNTV2Card dev;
+	ostringstream oss;
+
+	if (!inDevSpec.empty())
+		dev.Open(inDevSpec);
+
+	oss	<< setw(25) << left << "Output Destination"       << "\t" << setw(16) << left << "Legal -o Values"  << endl
+		<< setw(25) << left << "------------------------" << "\t" << setw(16) << left << "----------------" << endl;
 	for (NTV2OutputDestinationsConstIter iter(dests.begin());  iter != dests.end();  ++iter)
 	{
-		string	destName(::NTV2OutputDestinationToString(*iter));
+		const NTV2OutputDest dest(*iter);
+		const string destName(::NTV2OutputDestinationToString(dest));
+		if (destName.empty())
+			continue;
+		NTV2StringList destNames;
 		for (String2OutputDestMapConstIter it(gString2OutputDestMap.begin());  it != gString2OutputDestMap.end();  ++it)
 			if (*iter == it->second)
 			{
-				oss << setw(25) << left << destName << "\t" << setw(16) << left << it->first;
-				if (!inDeviceSpecifier.empty()  &&  theDevice.IsOpen()  &&  !theDevice.features().CanDoOutputDestination(*iter))
-					oss << "\t## Incompatible with " << theDevice.GetDisplayName();
-				oss << endl;
-				destName.clear();
+				if (!inDevSpec.empty()  &&  dev.IsOpen()  &&  !dev.features().CanDoOutputDestination(dest))
+					continue;
+				destNames.push_back(it->first);
 			}
-		oss << endl;
+		if (!destNames.empty())
+			oss << setw(25) << left << destName << "\t" << aja::join(destNames, ", ") << endl;
 	}
 	return oss.str();
 }
 
 
-NTV2OutputDestination CNTV2DemoCommon::GetOutputDestinationFromString (const string & inStr)
+NTV2OutputDestination CNTV2DemoCommon::GetOutputDestinationFromString (const string & inStr, const NTV2IOKinds inKinds, const string inDevSpec)
 {
 	String2OutputDestMapConstIter iter(gString2OutputDestMap.find(inStr));
 	if (iter == gString2OutputDestMap.end())
 		return NTV2_OUTPUTDESTINATION_INVALID;
-	return iter->second;
+
+	CNTV2Card dev;
+	if (!inDevSpec.empty())
+		dev.Open(inDevSpec);
+
+	//	If a device was specifed, look for the first name-matching output destination it supports...
+	NTV2OutputDest dst(iter->second);
+	while (dev.IsOpen()  &&  !dev.features().CanDoOutputDestination(dst))
+	{
+		if (++iter == gString2OutputDestMap.end())
+			return NTV2_OUTPUTDESTINATION_INVALID;
+		if (inStr != iter->first)
+			return NTV2_OUTPUTDESTINATION_INVALID;
+		dst = iter->second;
+	}
+	if ((inKinds & NTV2_IOKINDS_ALL) == NTV2_IOKINDS_ALL)
+		return dst;
+	if (inKinds & NTV2_IOKINDS_SDI  &&  NTV2_OUTPUT_DEST_IS_SDI(dst))
+		return dst;
+	if (inKinds & NTV2_IOKINDS_HDMI  &&  NTV2_OUTPUT_DEST_IS_HDMI(dst))
+		return dst;
+	if (inKinds & NTV2_IOKINDS_ANALOG  &&  NTV2_OUTPUT_DEST_IS_ANALOG(dst))
+		return dst;
+	return NTV2_OUTPUTDESTINATION_INVALID;
 }
 
 
@@ -1802,6 +1851,7 @@ AJALabelValuePairs BurnConfig::Get (const bool inCompact) const
 	AJASystemInfo::append(result, "Input Source",		::NTV2InputSourceToString(fInputSource, inCompact));
 	if (WithTimecode())
 		AJASystemInfo::append(result, "Timecode Source",	::NTV2TCIndexToString(fTimecodeSource, inCompact));
+	AJASystemInfo::append(result, "Output Destination",	::NTV2OutputDestinationToString(fOutputDest, inCompact));
 	AJASystemInfo::append(result, "Pixel Format",		::NTV2FrameBufferFormatToString(fPixelFormat, inCompact));
 	AJASystemInfo::append(result, "AC Input Frames",	fInputFrames.toString());
 	AJASystemInfo::append(result, "AC Output Frames",	fOutputFrames.toString());
@@ -1811,5 +1861,6 @@ AJALabelValuePairs BurnConfig::Get (const bool inCompact) const
 	AJASystemInfo::append(result, "Include HANC",		WithHanc() ? "Y" : "N");
 	AJASystemInfo::append(result, "MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
 	AJASystemInfo::append(result, "Field Mode",			FieldMode() ? "Y" : "N");
+	AJASystemInfo::append(result, "Verbose Mode",		IsVerbose() ? "Y" : "N");
 	return result;
 }

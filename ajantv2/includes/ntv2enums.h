@@ -1294,12 +1294,12 @@ typedef ULWord NTV2InputSourceKinds, NTV2OutputDestKinds, NTV2IOKinds;
 				Call ::GetInputSourceOutputXpt to get an NTV2OutputCrosspointID for one of these inputs to pass to
 				CNTV2Card::Connect. See \ref vidop-signalio.
 	@warning	Do not rely on the ordinal values of these constants between successive SDKs, since new devices
-				can be introduced that require additional inputs.
+				with multiple HDMI or Analog outputs could be introduced.
 **/
 typedef enum
 {
-	NTV2_OUTPUTDESTINATION_ANALOG,
-	NTV2_OUTPUTDESTINATION_HDMI,
+	NTV2_OUTPUTDESTINATION_ANALOG1,
+	NTV2_OUTPUTDESTINATION_HDMI1,
 	NTV2_OUTPUTDESTINATION_SDI1,
 	NTV2_OUTPUTDESTINATION_SDI2,
 	NTV2_OUTPUTDESTINATION_SDI3,
@@ -1309,11 +1309,15 @@ typedef enum
 	NTV2_OUTPUTDESTINATION_SDI7,
 	NTV2_OUTPUTDESTINATION_SDI8,
 	NTV2_OUTPUTDESTINATION_INVALID,
-	NTV2_NUM_OUTPUTDESTINATIONS = NTV2_OUTPUTDESTINATION_INVALID	//	Always last!
+	NTV2_NUM_OUTPUTDESTINATIONS		= NTV2_OUTPUTDESTINATION_INVALID	//	Always last!
+#if !defined(NTV2_DEPRECATE_17_5)
+	,NTV2_OUTPUTDESTINATION_ANALOG	= NTV2_OUTPUTDESTINATION_ANALOG1
+	,NTV2_OUTPUTDESTINATION_HDMI	= NTV2_OUTPUTDESTINATION_HDMI1
+#endif	//	!defined(NTV2_DEPRECATE_17_5)
 } NTV2OutputDestination, NTV2OutputDest;
 
-#define NTV2_OUTPUT_DEST_IS_HDMI(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_HDMI)
-#define NTV2_OUTPUT_DEST_IS_ANALOG(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_ANALOG)
+#define NTV2_OUTPUT_DEST_IS_HDMI(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_HDMI1)
+#define NTV2_OUTPUT_DEST_IS_ANALOG(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_ANALOG1)
 #define NTV2_OUTPUT_DEST_IS_SDI(_dest_)				((_dest_) >= NTV2_OUTPUTDESTINATION_SDI1 && (_dest_) <= NTV2_OUTPUTDESTINATION_SDI8)
 #define NTV2_IS_VALID_OUTPUT_DEST(_dest_)			(((_dest_) >= 0) && ((_dest_) < NTV2_NUM_OUTPUTDESTINATIONS))
 

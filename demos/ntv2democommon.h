@@ -390,6 +390,7 @@ typedef struct BurnConfig
 		NTV2Channel			fInputChannel;		///< @brief	The input channel to use
 		NTV2Channel			fOutputChannel;		///< @brief	The output channel to use
 		NTV2InputSource		fInputSource;		///< @brief	The device input connector to use
+		NTV2OutputDest		fOutputDest;		///< @brief	The device output connector to use (NTV2_OUTPUTDESTINATION_INVALID means unspecified)
 		NTV2ACFrameRange	fInputFrames;		///< @brief	Ingest frame count or range
 		NTV2ACFrameRange	fOutputFrames;		///< @brief	Playout frame count or range
 		NTV2PixelFormat		fPixelFormat;		///< @brief	The pixel format to use
@@ -401,6 +402,7 @@ typedef struct BurnConfig
 		bool				fWithAnc;			///< @brief	If true, capture & play anc data (LLBurn). Defaults to false.
 		bool				fWithTallFrames;	///< @brief	If true && fWithAnc, use "taller" VANC mode for anc. Defaults to false.
 		bool				fWithHanc;			///< @brief	If true, capture & play HANC data, including audio (LLBurn). Defaults to false.
+		bool				fVerbose;			///< @brief	If true, emit explanatory messages to stdout/stderr. Defaults to false.
 
 		/**
 			@brief	Constructs a default Player configuration.
@@ -411,6 +413,7 @@ typedef struct BurnConfig
 				fInputChannel		(NTV2_CHANNEL1),
 				fOutputChannel		(NTV2_CHANNEL3),
 				fInputSource		(NTV2_INPUTSOURCE_SDI1),
+				fOutputDest			(NTV2_OUTPUTDESTINATION_INVALID),
 				fInputFrames		(7),
 				fOutputFrames		(7),
 				fPixelFormat		(NTV2_FBF_8BIT_YCBCR),
@@ -421,7 +424,8 @@ typedef struct BurnConfig
 				fIsFieldMode		(false),
 				fWithAnc			(false),
 				fWithTallFrames		(false),
-				fWithHanc			(false)
+				fWithHanc			(false),
+				fVerbose			(false)
 		{
 		}
 
@@ -432,6 +436,16 @@ typedef struct BurnConfig
 		inline bool	WithHanc(void) const		{return fWithHanc;}			///< @return	True if streaming HANC, false if not.
 		inline bool WithTimecode(void) const	{return NTV2_IS_VALID_TIMECODE_INDEX(fTimecodeSource);}	///< @return	True if valid TC source
 		inline bool FieldMode(void) const		{return fIsFieldMode;}		///< @return	True if field mode, otherwise false.
+		inline bool OutputSpecified(void) const	{return NTV2_IS_VALID_OUTPUT_DEST(fOutputDest);}	///< @return	True if output destination was specified
+		inline bool	IsVerbose(void) const		{return fVerbose;}			///< @return	True if in verbose mode, otherwise false.
+		inline std::string	ISrcStr(void) const	{return ::NTV2InputSourceToString(fInputSource, true);}
+		inline NTV2Channel	ISrcCh(void) const	{return ::NTV2InputSourceToChannel(fInputSource);}
+		inline bool	ISrcIsSDI(void) const		{return NTV2_INPUT_SOURCE_IS_SDI(fInputSource);}
+		inline std::string	ODstStr(void) const	{return ::NTV2OutputDestinationToString(fOutputDest, true);}
+		inline NTV2Channel	ODstCh(void) const	{return ::NTV2OutputDestinationToChannel(fOutputDest);}
+		inline std::string	IChStr(void) const	{std::ostringstream oss; oss << "Ch" << int(fInputChannel); return oss.str();}
+		inline std::string	OChStr(void) const	{std::ostringstream oss; oss << "Ch" << int(fOutputChannel); return oss.str();}
+		inline bool	ODstIsSDI(void) const		{return NTV2_OUTPUT_DEST_IS_SDI(fOutputDest);}
 
 		/**
 			@brief		Renders a human-readable representation of me.
@@ -571,22 +585,22 @@ class AJAExport CNTV2DemoCommon
 		static const NTV2InputSourceSet		GetSupportedInputSources (const NTV2IOKinds inKinds = NTV2_IOKINDS_ALL);
 
 		/**
-			@param[in]	inKinds				Specifies the types of input sources returned. Defaults to all sources.
-			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
-											returns those input sources that are supported by the device.
+			@param[in]	inKinds		Specifies the types of input sources returned. Defaults to all sources.
+			@param[in]	inDevSpec	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
+									returns those input sources that are supported by the device.
 			@return		A string that can be printed to show the available input sources (or those that are supported by a given device).
 			@note		These input source strings are mere conveniences for specifying input sources in the command-line-based demo apps,
 						and are subject to change without notice. They are not intended to be canonical in any way.
 		**/
 		static std::string					GetInputSourceStrings (const NTV2IOKinds inKinds = NTV2_IOKINDS_ALL,
-																	const std::string inDeviceSpecifier = std::string ());
+																	const std::string inDevSpec = std::string ());
 
 		/**
 			@brief		Returns the ::NTV2InputSource that matches the given string.
-			@param[in]	inStr				Specifies the string to be converted to an ::NTV2InputSource.
-			@param[in]	inKinds				Specifies the types of input sources returned. Defaults to all sources.
-			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
-											returns a valid input source only if supported by the device.
+			@param[in]	inStr		Specifies the string to be converted to an ::NTV2InputSource.
+			@param[in]	inKinds		Specifies the types of input sources returned. Defaults to all sources.
+			@param[in]	inDevSpec	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
+									returns a valid input source only if supported by the device.
 			@return		The given string converted to an ::NTV2InputSource, or ::NTV2_INPUTSOURCE_INVALID if there's no match.
 		**/
 		static NTV2InputSource				GetInputSourceFromString (const std::string & inStr,
@@ -599,20 +613,33 @@ class AJAExport CNTV2DemoCommon
 	**/
 	///@{
 		/**
-			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
-											warns if the output destination is incompatible with that device.
-			@return		A string that can be printed to show the available output destinations (or those that are supported by a given device).
-			@note		These output destination strings are mere conveniences for specifying output destinations in the command-line-based demo apps,
-						and are subject to change without notice. They are not intended to be canonical in any way.
+			@param[in]	inKinds		Specifies the types of output destinations returned. Defaults to all types.
+			@return		The supported ::NTV2OutputDestinations.
 		**/
-		static std::string					GetOutputDestinationStrings (const std::string inDeviceSpecifier = std::string ());
+		static const NTV2OutputDestinations	GetSupportedOutputDestinations (const NTV2IOKinds inKinds);
+
+		/**
+			@param[in]	inKinds		Specifies the types of output destinations returned. Defaults to all types.
+			@param[in]	inDevSpec	An optional device specifier. If non-empty, and resolves to a valid device, the returned
+									string will only contain output destination values that are compatible with that device.
+			@return		A string that can be printed to show the available output destinations (or those that are supported by a given device).
+			@note		These output destination strings are mere conveniences for specifying output destinations in the
+						command-line-based demo apps, and are subject to change without notice. They are not intended to
+						be canonical in any way.
+		**/
+		static std::string					GetOutputDestinationStrings (const NTV2IOKinds inKinds, const std::string inDevSpec = std::string ());
 
 		/**
 			@brief		Returns the ::NTV2OutputDestination that matches the given string.
-			@param[in]	inStr	Specifies the string to be converted to an ::NTV2OutputDestination.
+			@param[in]	inStr		Specifies the string to be converted to an ::NTV2OutputDestination.
+			@param[in]	inKinds		Specifies the types of output destinations returned. Defaults to all types.
+			@param[in]	inDevSpec	An optional device specifier. If non-empty, and resolves to a valid device,
+									the returned value, if valid, will be compatible with that device.
 			@return		The given string converted to an ::NTV2OutputDestination, or ::NTV2_OUTPUTDESTINATION_INVALID if there's no match.
 		**/
-		static NTV2OutputDestination		GetOutputDestinationFromString (const std::string & inStr);
+		static NTV2OutputDestination		GetOutputDestinationFromString (const std::string & inStr,
+																			const NTV2IOKinds inKinds = NTV2_IOKINDS_ALL,
+																			const std::string inDevSpec = std::string());
 	///@}
 
 	/**

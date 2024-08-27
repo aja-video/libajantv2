@@ -139,17 +139,17 @@
 		const UWord numSDIs = NTV2DeviceGetNumVideoOutputs(inDeviceID);
 		switch(inOutputDest)
 		{
-			case NTV2_OUTPUTDESTINATION_ANALOG: return NTV2DeviceGetNumAnalogVideoOutputs(inDeviceID) > 0;
-			case NTV2_OUTPUTDESTINATION_HDMI:	return NTV2DeviceGetNumHDMIVideoOutputs(inDeviceID) > 0;
-			case NTV2_OUTPUTDESTINATION_SDI1:	return numSDIs > 0;
-			case NTV2_OUTPUTDESTINATION_SDI2:	return numSDIs > 1;
-			case NTV2_OUTPUTDESTINATION_SDI3:	return numSDIs > 2;
-			case NTV2_OUTPUTDESTINATION_SDI4:	return numSDIs > 3;
-			case NTV2_OUTPUTDESTINATION_SDI5:	return numSDIs > 4;
-			case NTV2_OUTPUTDESTINATION_SDI6:	return numSDIs > 5;
-			case NTV2_OUTPUTDESTINATION_SDI7:	return numSDIs > 6;
-			case NTV2_OUTPUTDESTINATION_SDI8:	return numSDIs > 7;
-			default:							break;
+			case NTV2_OUTPUTDESTINATION_ANALOG1:	return NTV2DeviceGetNumAnalogVideoOutputs(inDeviceID) > 0;
+			case NTV2_OUTPUTDESTINATION_HDMI1:		return NTV2DeviceGetNumHDMIVideoOutputs(inDeviceID) > 0;
+			case NTV2_OUTPUTDESTINATION_SDI1:		return numSDIs > 0;
+			case NTV2_OUTPUTDESTINATION_SDI2:		return numSDIs > 1;
+			case NTV2_OUTPUTDESTINATION_SDI3:		return numSDIs > 2;
+			case NTV2_OUTPUTDESTINATION_SDI4:		return numSDIs > 3;
+			case NTV2_OUTPUTDESTINATION_SDI5:		return numSDIs > 4;
+			case NTV2_OUTPUTDESTINATION_SDI6:		return numSDIs > 5;
+			case NTV2_OUTPUTDESTINATION_SDI7:		return numSDIs > 6;
+			case NTV2_OUTPUTDESTINATION_SDI8:		return numSDIs > 7;
+			default:	break;
 		}
 		return false;
 	}
