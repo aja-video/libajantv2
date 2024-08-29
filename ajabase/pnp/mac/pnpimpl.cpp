@@ -49,22 +49,26 @@ AJAPnpImpl::~AJAPnpImpl()
 }
 
 
-AJAStatus AJAPnpImpl::Install(AJAPnpCallback callback, void* refCon, uint32_t devices)
+AJAStatus AJAPnpImpl::Install (AJAPnpCallback callback, void* refCon, uint32_t devices)
 {
 	mCallback = callback;
-	mRefCon = refCon;
-	mDevices = devices;
-	
-	// pci devices
-	if ((mDevices & AJA_Pnp_PciVideoDevices) != 0)
-	{
-		mPciDevices->Install();
-	}
-	return AJA_STATUS_SUCCESS;
+	mRefCon   = refCon;
+	mDevices  = devices;
+
+	if (!mCallback)
+		return AJA_STATUS_NULL;	//	NULL callback
+
+	//	MacOS only handles PCIe devices
+	if (mDevices & AJA_Pnp_PciVideoDevices)	//	PCIe devices requested?
+		if (mPciDevices)					//	DeviceNotifier or KonaNotifier exists?
+			if (mPciDevices->Install())		//	DeviceNotifier/KonaNotifier install successful?
+				return AJA_STATUS_SUCCESS;	//	Success!
+
+	return AJA_STATUS_FAIL;	//	Nothing installed
 }
 	
 
-AJAStatus AJAPnpImpl::Uninstall(void)
+AJAStatus AJAPnpImpl::Uninstall (void)
 {
 	mCallback = NULL;
 	mRefCon = NULL;
