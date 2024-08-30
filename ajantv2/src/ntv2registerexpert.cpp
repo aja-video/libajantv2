@@ -308,6 +308,16 @@ private:
 		DefineRegister (kRegSDIOut6Control,		"", mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel6, kRegClass_NULL);
 		DefineRegister (kRegSDIOut7Control,		"", mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel7, kRegClass_NULL);
 		DefineRegister (kRegSDIOut8Control,		"", mDecodeSDIOutputControl,	READWRITE,	kRegClass_Output,	kRegClass_Channel8, kRegClass_NULL);
+
+		DefineRegister (kRegOutputTimingControl,	"", mDecodeSDIOutTimingCtrl,READWRITE,	kRegClass_Output,	kRegClass_Channel1, kRegClass_NULL);
+		DefineRegister (kRegOutputTimingControlch2,	"", mDecodeSDIOutTimingCtrl,READWRITE,	kRegClass_Output,	kRegClass_Channel2, kRegClass_NULL);
+		DefineRegister (kRegOutputTimingControlch3,	"", mDecodeSDIOutTimingCtrl,READWRITE,	kRegClass_Output,	kRegClass_Channel3, kRegClass_NULL);
+		DefineRegister (kRegOutputTimingControlch4,	"", mDecodeSDIOutTimingCtrl,READWRITE,	kRegClass_Output,	kRegClass_Channel4, kRegClass_NULL);
+		DefineRegister (kRegOutputTimingControlch5,	"", mDecodeSDIOutTimingCtrl,READWRITE,	kRegClass_Output,	kRegClass_Channel5, kRegClass_NULL);
+		DefineRegister (kRegOutputTimingControlch6,	"", mDecodeSDIOutTimingCtrl,READWRITE,	kRegClass_Output,	kRegClass_Channel6, kRegClass_NULL);
+		DefineRegister (kRegOutputTimingControlch7,	"", mDecodeSDIOutTimingCtrl,READWRITE,	kRegClass_Output,	kRegClass_Channel7, kRegClass_NULL);
+		DefineRegister (kRegOutputTimingControlch8,	"", mDecodeSDIOutTimingCtrl,READWRITE,	kRegClass_Output,	kRegClass_Channel8, kRegClass_NULL);
+
 		DefineRegister (kRegCh1ControlExtended, "", mDecodeChannelControlExt,	READWRITE,	kRegClass_NULL,		kRegClass_Channel1, kRegClass_NULL);
 		DefineRegister (kRegCh2ControlExtended, "", mDecodeChannelControlExt,	READWRITE,	kRegClass_NULL,		kRegClass_Channel2, kRegClass_NULL);
 		DefineRegister (kRegBoardID,			"", mDecodeBoardID,				READONLY,	kRegClass_Info,		kRegClass_NULL,		kRegClass_NULL);
@@ -3857,7 +3867,21 @@ private:
 			return oss.str();
 		}
 	}	mDecodeSDIOutputControl;
-	
+
+	struct DecodeSDIOutTimingCtrl : public Decoder
+	{
+		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
+		{	(void)inRegNum;  (void)inDeviceID;
+			ostringstream oss;
+			const uint32_t hMask(0x00001FFF), vMask(0x1FFF0000);
+			const uint32_t hOffset(inRegValue & hMask), vOffset((inRegValue & vMask) >> 16);
+			oss << "Horz Offset: "			<< xHEX0N(UWord(hOffset),4)	<< endl
+				<< "Vert Offset: "			<< xHEX0N(UWord(vOffset),4)	<< endl
+				<< "E-E Timing Override: "	<< EnabDisab(inRegValue & BIT(31));
+			return oss.str();
+		}
+	}	mDecodeSDIOutTimingCtrl;
+
 	struct DecodeDMAControl : public Decoder
 	{
 		virtual string operator()(const uint32_t inRegNum, const uint32_t inRegValue, const NTV2DeviceID inDeviceID) const
