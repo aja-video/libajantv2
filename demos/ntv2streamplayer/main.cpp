@@ -138,8 +138,8 @@ int main (int argc, const char ** argv)
 	//	Run it...
 	player.Run();
 
-	cout	<< "   Frames   Frames   Buffer" << endl
-			<< "   Played  Dropped    Level" << endl;
+	cout	<< "   Active   Repeat    Queue" << endl
+			<< "    Count    Count    Depth" << endl;
 	do
 	{	//	Poll its status until stopped...
 		NTV2StreamChannel strStatus;
