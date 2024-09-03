@@ -6499,9 +6499,9 @@ public:
 	AJA_VIRTUAL bool Load1DLUTTable (const NTV2Channel inChannel);	//	New in SDK 16.0
 
 	//	MultiViewer/MultiRasterizer
-	AJA_VIRTUAL bool HasMultiRasterWidget (void);						//	New in SDK 16.1
-	AJA_VIRTUAL bool SetMultiRasterBypassEnable (const bool inEnable);	//	New in SDK 16.1
-	AJA_VIRTUAL bool GetMultiRasterBypassEnable (bool & outEnabled);	//	New in SDK 16.1
+	AJA_VIRTUAL inline bool HasMultiRasterWidget (void)	{return IsSupported(kDeviceCanDoHDMIMultiView);}	//	New in SDK 16.1
+	AJA_VIRTUAL bool SetMultiRasterBypassEnable (const bool inEnable);			//	New in SDK 16.1
+	AJA_VIRTUAL bool GetMultiRasterBypassEnable (bool & outEnabled);			//	New in SDK 16.1
 	AJA_VIRTUAL bool IsMultiRasterWidgetChannel (const NTV2Channel inChannel);	//	New in SDK 16.2
 	///@}
 
