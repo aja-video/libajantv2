@@ -5708,7 +5708,6 @@ typedef enum
 		NTV2_STRUCT_END(NTV2FrameDimensions)
 
 
-		#if !defined (NTV2_BUILDING_DRIVER)
 		/**
 			@brief		Describes a segmented data transfer (copy or move) from a source memory location to a
 						destination location, with independent pitch and direction attributes for source and
@@ -5721,18 +5720,13 @@ typedef enum
 						The element size defaults to 1 byte per element, must be a power-of-2, and cannot be
 						larger than 8 bytes.
 						There are also some optional attributes:
-						-	Optional "source vertical flip" flag to indicate that the source offset is
-							interpreted as an offset, in elements, from the bottom of the source buffer, and
-							during the transfer, the source pitch is subtracted instead of added. Defaults to
-							normal "from top" source offset reference.
-						-	Optional "destination vertical flip" flag to indicate that the destination offset
-							is interpreted as an offset, in elements, from the bottom of the destination buffer,
-							and during the transfer, the destination pitch is subtracted instead of added.
-							Defaults to normal "from top" destination offset reference.
+						-	Optional "source vertical flip" flag that if set indicates that during the transfer,
+							the source is read bottom-to-top. Defaults to normal "top-to-bottom" operation.
+						-	Optional "destination vertical flip" flag that if set indicates that during the
+							transfer, the destination is written bottom-to-top. Defaults to normal operation.
 		**/
-		class AJAExport NTV2SegmentedXferInfo
-		{
-			public:
+		NTV2_STRUCT_BEGIN(NTV2SegmentedXferInfo)
+			#if !defined (NTV2_BUILDING_DRIVER)
 				/**
 					@brief	Constructs me as empty/invalid.
 				**/
@@ -5876,16 +5870,24 @@ typedef enum
 												{mSrcElementsPerRow = inPitch;	return *this;}
 
 				/**
-					@brief		Sets my source direction.
-					@param[in]	inTopDown	Specify true to traverse the source segments top-to-bottom;	 otherwise specify false for bottom-to-top.
+					@brief		Sets the scan direction for the source.
+					@param[in]	inTopDown	Specify Direction_TopToBottom, Direction_TopDown or Direction_Normal to traverse the source segments top-to-bottom;
+											otherwise specify Direction_BottomToTop, Direction_BottomUp or Direction_Flipped for bottom-to-top.
 					@return		A reference to me.
 				**/
 				inline NTV2SegmentedXferInfo &	setSourceDirection (const bool inTopDown)
-												{	mFlags &= (0xFFFFFFFF - BIT(8));
+												{	mFlags &= ~(BIT(8));	//	set top-down
 													if (!inTopDown)
-														mFlags |= BIT(8);
+														mFlags |= BIT(8);	//	set bottom-up
 													return *this;
 												}
+				/**
+					@brief		Sets the scan direction for the source.
+					@param[in]	inFlipped	Optionally specifies if my scan direction is flipped (i.e. bottom-to-top)
+											instead of top-to-bottom. Defaults to Direction_Flipped (i.e. bottom-to-top).
+					@return		A reference to me.
+				**/
+				inline NTV2SegmentedXferInfo &	setSourceFlipped (const bool inFlipped = Direction_Flipped)	{return setSourceDirection(inFlipped);}
 
 				/**
 					@brief		A convenience function that sets both my destination offset and pitch.
@@ -5911,11 +5913,24 @@ typedef enum
 				inline NTV2SegmentedXferInfo &	setDestPitch (const ULWord inPitch)				{mDstElementsPerRow = inPitch;	return *this;}
 
 				/**
-					@brief		Sets my destination scan direction.
-					@param[in]	inTopDown	Specify true to traverse the destination segments top-to-bottom;  otherwise specify false for bottom-to-top.
+					@brief		Sets the scan direction for the destination.
+					@param[in]	inTopDown	Specify Direction_TopToBottom, Direction_TopDown or Direction_Normal to traverse the destination segments top-to-bottom;
+											otherwise specify Direction_BottomToTop, Direction_BottomUp or Direction_Flipped for bottom-to-top.
 					@return		A reference to me.
 				**/
-				inline NTV2SegmentedXferInfo &	setDestDirection (const bool inTopDown)			{mFlags = (0xFFFFFFFF - BIT(9)); if (!inTopDown) mFlags |= BIT(9);	return *this;}
+				inline NTV2SegmentedXferInfo &	setDestDirection (const bool inTopDown)
+												{	mFlags &= ~(BIT(9));	//	set top-down
+													if (!inTopDown)
+														mFlags |= BIT(9);	//	set bottom-up
+													return *this;
+												}
+				/**
+					@brief		Sets the scan direction for the destination.
+					@param[in]	inFlipped	Optionally specifies if my scan direction is flipped (i.e. bottom-to-top)
+											instead of top-to-bottom. Defaults to Direction_Flipped (i.e. bottom-to-top).
+					@return		A reference to me.
+				**/
+				inline NTV2SegmentedXferInfo &	setDestFlipped (const bool inFlipped = Direction_Flipped)	{return setDestDirection(inFlipped);}
 
 				/**
 					@brief		Sets my element length.
@@ -5936,22 +5951,35 @@ typedef enum
 													return *this;
 												}
 				/**
-					@brief		Swaps my source and destination offsets and pitches.
+					@brief		Swaps my source and destination offsets, pitches and scan directions.
 					@return		A reference to me.
 				**/
 				NTV2SegmentedXferInfo &			swapSourceAndDestination (void);	//	New in SDK 16.0
 				///@}
 
-			private:
-				ULWord	mFlags;					///< @brief Lowest 2 bits determines element size, kRegMaskFrameOrientation is bit 10
+				/**
+					@name	Scan Direction Constants
+				**/
+				///@{
+				static bool Direction_TopToBottom;	///< @brief Use this in setDestDirection or setSourceDirection for top-to-bottom scanning
+				static bool Direction_TopDown;		///< @brief Use this in setDestDirection or setSourceDirection for top-to-bottom scanning
+				static bool Direction_Normal;		///< @brief Use this in setDestDirection or setSourceDirection for top-to-bottom scanning
+				static bool Direction_BottomToTop;	///< @brief Use this in setDestDirection or setSourceDirection for bottom-to-top scanning
+				static bool Direction_BottomUp;		///< @brief Use this in setDestDirection or setSourceDirection for bottom-to-top scanning
+				static bool Direction_Flipped;		///< @brief Use this in setDestDirection or setSourceDirection for bottom-to-top scanning
+				///@}
+			#endif	//	!defined (NTV2_BUILDING_DRIVER)
+
+			NTV2_BEGIN_PRIVATE
+				ULWord	mFlags;					///< @brief Lowest 2 bits determines element size, direction bits 8 & 9 (src & dst)
 				ULWord	mNumSegments;			///< @brief Number of segments to transfer (i.e. row count).
 				ULWord	mElementsPerSegment;	///< @brief Size of each segment, in elements.
 				ULWord	mInitialSrcOffset;		///< @brief Initial source offset, in elements.
 				ULWord	mInitialDstOffset;		///< @brief Initial destination offset, in elements.
 				ULWord	mSrcElementsPerRow;		///< @brief Source pitch (i.e. the span, in elements, between the starting elements of adjacent segments on the source).
 				ULWord	mDstElementsPerRow;		///< @brief Destination pitch (i.e. the span, in elements, between the starting elements of adjacent segments on the destination).
-		};
-		#endif	//	!defined (NTV2_BUILDING_DRIVER)
+			NTV2_END_PRIVATE
+		NTV2_STRUCT_END(NTV2SegmentedXferInfo)
 
 		/**
 			@brief	A generic user-space buffer object that has an address and a length.
@@ -6342,9 +6370,9 @@ typedef enum
 				bool			CopyFrom (const NTV2Buffer & inSrcBuffer, const ULWord inSrcByteOffset, const ULWord inDstByteOffset, const ULWord inByteCount);
 
 				/**
-					@brief		Copies data segments from a given buffer into me.
+					@brief		Copies data segments from a given source buffer into me (the destination).
 					@param[in]	inSrcBuffer			Specifies the source memory buffer to be copied into me.
-					@param[in]	inXferInfo			The segmented transfer info.
+					@param[in]	inXferInfo			Specifies how segments are transferred.
 					@return		True if successful; otherwise false.
 					@note		Offsets and lengths are checked. The function will return false for any overflow or underflow.
 				**/
