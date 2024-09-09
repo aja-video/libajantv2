@@ -62,61 +62,78 @@
 //#define NTV2_DEPRECATE_16_3		//	If defined, excludes all symbols/APIs first deprecated in SDK 16.3 (never released)
 //#define NTV2_DEPRECATE_17_0		//	If defined, excludes all symbols/APIs first deprecated in SDK 17.0
 //#define NTV2_DEPRECATE_17_1		//	If defined, excludes all symbols/APIs first deprecated in SDK 17.1
+//#define NTV2_DEPRECATE_17_2		//	If defined, excludes all symbols/APIs first deprecated in SDK 17.2 (never released)
+//#define NTV2_DEPRECATE_17_5		//	If defined, excludes all symbols/APIs first deprecated in SDK 17.5
 
 
 /*/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////	COMPILE-TIME FEATURES
 ////////	These macros control important aspects of SDK behavior.
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+
 /**************************************************************************************************************
-	NTV2_NULL_DEVICE			Controls whether or not the SDK will be able to connect to the NTV2 kernel
-								driver via the normal connection method provided by the host operating system.
+	NTV2_NULL_DEVICE			When undefined (the default), the platform-specific implementations of
+								OpenLocalPhysical are included in the build, making it possible to connect to
+								locally-attached physical devices via the NTV2 kernel driver.
+
+								When defined, all platform-specific implementations of OpenLocalPhysical are
+								omitted from the build, making it impossible to connect to locally-attached
+								physical devices via the NTV2 kernel driver. (Only remote or software/virtual
+								devices will be able to be opened via OpenRemote.)
+
 								Introduced in SDK 12.4.
-
-	Undefined:	(Default) Locally-connected/installed NTV2 devices will be enumerable via
-				CNTV2DeviceScanner and accessible via CNTV2Card::Open.
-
-	Defined:	"OpenLocalPhysical" calls will fail, and CNTV2DeviceScanner won't find any locally
-				connected/installed devices.
 **************************************************************************************************************/
 //#define NTV2_NULL_DEVICE	
 
+
 /**************************************************************************************************************
-	NTV2_NUB_CLIENT_SUPPORT		Controls whether or not the SDK will use plugin DLLs/dylibs/so's to connect
-								to remote or software NTV2 devices.
+	NTV2_NUB_CLIENT_SUPPORT		Deprecated in SDK 17.1
+
+								When defined (the default), the SDK will load and connect to AJA-authorized
+								plugins to support remote or software/virtual NTV2 devices.
+
+								When undefined, the SDK cannot talk to remote or software/virtual devices.
+
+								NOTE: In a future SDK, this macro will be eliminated, and it won't be possible
+								to build the SDK without the capability of connecting to AJA-authorized remote
+								or software/virtual NTV2 devices.
+
+								SDK 16.x - 17.0: Defined by default. This allowed the SDK to connect to
+								unauthenticated remote or software/virtual NTV2 devices.
+
+								SDK 12.4 - 15.5, this macro was defined by default, allowing the SDK to connect
+								(only) to remote devices via the TCP/IP "nub". (The SDK had no software/virtual
+								device capability before SDK 16.0.)
+
 								Introduced in SDK 12.4.
-
-	Undefined:	SDK clients cannot access or connect to remote or software devices. This may be useful for
-				SDK clients that require greater security by preventing the loading of plugins.
-
-	Defined:	(Default) SDK clients will be able to access and connect to remote or software devices (via
-				dynamically-loaded plugins).
 **************************************************************************************************************/
 #define NTV2_NUB_CLIENT_SUPPORT	
 
+
 /**************************************************************************************************************
-	NTV2_WRITEREG_PROFILING		Controls profiling of WriteRegister calls.
+	NTV2_WRITEREG_PROFILING		When defined (the default), calls to WriteRegister can be profiled, and
+								CNTV2Card's WriteRegister profiling API is available.
+
+								When undefined, WriteRegister calls cannot be profiled, and CNTV2Card's
+								WriteRegister profiling API is unavailable.
+
 								Introduced in SDK 15.1.
-
-	Undefined:	WriteRegister calls cannot be profiled, and the *RecordRegisterWrites API functions are
-				unavailable.
-
-	Defined:	(Default) WriteRegister calls can be profiled, and the API that controls profiling and
-				retrieve results is available (e.g. the *RecordRegisterWrites API functions).
 **************************************************************************************************************/
-#define NTV2_WRITEREG_PROFILING		//	If defined, enables register write profiling
+#define NTV2_WRITEREG_PROFILING
 
 
 /**************************************************************************************************************
-	NTV2_USE_CPLUSPLUS11		Controls use of C++11 language features.
+	NTV2_USE_CPLUSPLUS11		When defined (the default), the 'ajantv2' portion of the SDK will use C++
+								language and/or STL features that require a C++11 compiler.
+
+								When undefined, the 'ajantv2' portion of the SDK will not use C++11 features.
+
+								NOTE:	This macro will be deprecated in a future SDK, when it will no longer
+										be possible to build the SDK without a C++11-capable compiler.
+
+								See also:	AJA_USE_CPLUSPLUS11 in 'ajabase/include/types.h'
+
 								Introduced in SDK 16.0.
-
-	Undefined:	The 'libajantv2' portion of the SDK will not use C++11 features.
-
-	Defined:	(Default) The 'libajantv2' portion of the SDK will use C++11 features that require
-				a C++11 compiler.
-
-	See also:	AJA_USE_CPLUSPLUS11 in 'libajabase/include/types.h'
 **************************************************************************************************************/
 #if !defined(NTV2_USE_CPLUSPLUS11)
 	#define NTV2_USE_CPLUSPLUS11 	
@@ -124,25 +141,16 @@
 
 
 /**************************************************************************************************************
-	NTV2_INCLUDE_DEVICE_CAPABILITIES_API	Controls the availability of the new DeviceCapabilities class/API.
-											Introduced in SDK 17.0.
+	NTV2_ALLOW_OPEN_UNSUPPORTED		When undefined (the default), unsupported physical devices (see the
+									NTV2GetSupportedDevices utility function) that are attached to the local
+									host cannot be opened (via OpenLocalPhysical).
 
-	Undefined:	No DeviceCapabilities class/API is declared. SDK clients will have to use the lower-level
-				CNTV2DriverInterface::IsSupported and CNTV2DriverInterface::GetNumSupported member functions.
+									When defined, unsupported physical devices that are attached to the local
+									host will be opened (via OpenLocalPhysical).
 
-	Defined:	(Default) The DeviceCapabilities class/API is defined. SDK clients will be able to access
-				and use this API via the CNTV2Card::features() accessor function.
-**************************************************************************************************************/
-#define	NTV2_INCLUDE_DEVICE_CAPABILITIES_API
+									See also:	AJA_USE_CPLUSPLUS11 in 'ajabase/include/types.h'
 
-
-/**************************************************************************************************************
-	NTV2_ALLOW_OPEN_UNSUPPORTED				Controls whether unsupported devices can be opened.
-											Introduced in SDK 17.0.
-
-	Undefined:	(Default) Unsupported devices attached to the host cannot be opened.
-
-	Defined:	Unsupported devices attached to the host can be opened.
+									Introduced in SDK 17.0.
 **************************************************************************************************************/
 //#define	NTV2_ALLOW_OPEN_UNSUPPORTED
 
@@ -271,6 +279,10 @@
 		#endif
 
 		#include <Windows.h>
+
+        #if defined(DeviceCapabilities)
+        #undef DeviceCapabilities
+        #endif
 	#endif
 	#include <Basetsd.h>
 	typedef unsigned char Boolean;
@@ -509,6 +521,8 @@
 #define NTV2_DEPRECATED_TYPEDEF						//	Just a marker/reminder
 #define NTV2_DEPRECATED_CLASS						//	Just a marker/reminder
 #define NTV2_SHOULD_BE_DEPRECATED(__f__)			__f__
+#define NTV2_SHOULD_DEPRECATE(__f__)				__f__
+#define NTV2_MUST_DEPRECATE(__f__)					__f__
 #if defined(NTV2_BUILDING_DRIVER)
 	//	Disable deprecation warnings in driver builds
 	#define NTV2_DEPRECATED_f(__f__)				__f__

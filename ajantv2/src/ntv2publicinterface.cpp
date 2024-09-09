@@ -325,7 +325,7 @@ ostream & NTV2Buffer::Print (ostream & inOutStream) const
 
 string NTV2Buffer::AsString (UWord inDumpMaxBytes) const
 {
-	ostringstream	oss;
+	ostringstream oss;
 	oss << xHEX0N(GetRawHostPointer(),16) << ":" << DEC(GetByteCount()) << " bytes";
 	if (inDumpMaxBytes	&&	GetHostPointer())
 	{
@@ -341,10 +341,25 @@ string NTV2Buffer::AsString (UWord inDumpMaxBytes) const
 	return oss.str();
 }
 
+bool NTV2Buffer::toHexString (std::string & outStr, const size_t inLineBreakInterval) const
+{
+	outStr.clear();
+	ostringstream oss;
+	if (GetHostPointer() && GetByteCount())
+		for (int ndx(0);  ndx < int(GetByteCount());  )
+		{
+			oss << HEX0N(uint16_t(U8(ndx++)),2);
+			if (inLineBreakInterval  &&  ndx < int(GetByteCount())  &&  ((size_t(ndx) % inLineBreakInterval) == 0))
+				oss << endl;
+		}
+	outStr = oss.str();
+	return !outStr.empty();
+}
+
 static string print_address_offset (const size_t inRadix, const ULWord64 inOffset)
 {
-	const streamsize	maxAddrWidth (sizeof(ULWord64) * 2);
-	ostringstream		oss;
+	const streamsize maxAddrWidth (sizeof(ULWord64) * 2);
+	ostringstream oss;
 	if (inRadix == 8)
 		oss << OCT0N(inOffset,maxAddrWidth) << ": ";
 	else if (inRadix == 10)
@@ -354,15 +369,15 @@ static string print_address_offset (const size_t inRadix, const ULWord64 inOffse
 	return oss.str();
 }
 
-ostream & NTV2Buffer::Dump (	ostream &		inOStream,
-								const size_t	inStartOffset,
-								const size_t	inByteCount,
-								const size_t	inRadix,
-								const size_t	inBytesPerGroup,
-								const size_t	inGroupsPerRow,
-								const size_t	inAddressRadix,
-								const bool		inShowAscii,
-								const size_t	inAddrOffset) const
+ostream & NTV2Buffer::Dump (ostream &		inOStream,
+							const size_t	inStartOffset,
+							const size_t	inByteCount,
+							const size_t	inRadix,
+							const size_t	inBytesPerGroup,
+							const size_t	inGroupsPerRow,
+							const size_t	inAddressRadix,
+							const bool		inShowAscii,
+							const size_t	inAddrOffset) const
 {
 	if (IsNULL())
 		return inOStream;
@@ -666,7 +681,13 @@ bool NTV2Buffer::GetString (std::string & outString, const size_t inU8Offset, co
 	{
 		outString.reserve(maxSize);
 		for (size_t ndx(0);	 ndx < maxSize;	 ndx++)
-			outString += char(*pU8++);
+		{
+			const char c = *pU8++;
+			if (c)
+				outString += c;
+			else
+				break;
+		}
 	}
 	catch (...)
 	{
@@ -980,6 +1001,15 @@ ostream & operator << (ostream & inOutStream, const NTV2ColorCorrectionData & in
 }
 
 
+NTV2VideoFormatSet & operator += (NTV2VideoFormatSet & inOutSet, const NTV2VideoFormatSet inSet)
+{
+	for (NTV2VideoFormatSetConstIter iter(inSet.begin());  iter != inSet.end();  ++iter)
+		if (inOutSet.find(*iter) == inOutSet.end())
+			inOutSet.insert(*iter);
+	return inOutSet;
+}
+
+
 //	Implementation of NTV2VideoFormatSet's ostream writer...
 ostream & operator << (ostream & inOStream, const NTV2VideoFormatSet & inFormats)
 {
@@ -1271,7 +1301,7 @@ bool NTV2DeviceGetSupportedInputSources (const NTV2DeviceID inDeviceID, NTV2Inpu
 
 bool NTV2DeviceGetSupportedOutputDests (const NTV2DeviceID inDeviceID, NTV2OutputDestinations & outOutputDests, const NTV2IOKinds inKinds)
 {
-	static const NTV2OutputDest sDsts[] = {	NTV2_OUTPUTDESTINATION_ANALOG,	NTV2_OUTPUTDESTINATION_HDMI,
+	static const NTV2OutputDest sDsts[] = {	NTV2_OUTPUTDESTINATION_ANALOG1,	NTV2_OUTPUTDESTINATION_HDMI1,
 											NTV2_OUTPUTDESTINATION_SDI1,	NTV2_OUTPUTDESTINATION_SDI2,	NTV2_OUTPUTDESTINATION_SDI3,	NTV2_OUTPUTDESTINATION_SDI4,
 											NTV2_OUTPUTDESTINATION_SDI5,	NTV2_OUTPUTDESTINATION_SDI6,	NTV2_OUTPUTDESTINATION_SDI7,	NTV2_OUTPUTDESTINATION_SDI8};
 	outOutputDests.clear();
@@ -1351,6 +1381,12 @@ NTV2_TRAILER::NTV2_TRAILER ()
 
 
 static const string sSegXferUnits[] = {"", " U8", " U16", "", " U32", "", "", "", " U64", ""};
+bool NTV2SegmentedXferInfo::Direction_TopToBottom (true);
+bool NTV2SegmentedXferInfo::Direction_TopDown (true);
+bool NTV2SegmentedXferInfo::Direction_Normal (true);
+bool NTV2SegmentedXferInfo::Direction_BottomToTop (false);
+bool NTV2SegmentedXferInfo::Direction_BottomUp (false);
+bool NTV2SegmentedXferInfo::Direction_Flipped (false);
 
 ostream & NTV2SegmentedXferInfo::Print (ostream & inStrm, const bool inDumpSegments) const
 {
@@ -1467,6 +1503,8 @@ NTV2SegmentedXferInfo & NTV2SegmentedXferInfo::swapSourceAndDestination (void)
 {
 	std::swap(mSrcElementsPerRow, mDstElementsPerRow);
 	std::swap(mInitialSrcOffset, mInitialDstOffset);
+	const bool srcNormal(this->isSourceTopDown()), dstNormal(this->isDestTopDown());
+	setSourceDirection(dstNormal).setDestDirection(srcNormal);
 	return *this;
 }
 
@@ -1520,6 +1558,17 @@ NTV2Buffer::NTV2Buffer (const NTV2Buffer & inObj)
 		SetFrom(inObj);
 }
 
+bool NTV2Buffer::Truncate (const size_t inNewByteCount)
+{
+	if (inNewByteCount == GetByteCount())
+		return true;	//	Same size -- done!
+	if (inNewByteCount > GetByteCount())
+		return false;	//	Cannot enlarge -- i.e. can't be greater than my current size
+	if (!inNewByteCount  &&  IsAllocatedBySDK())
+		return Deallocate();	//	A newByteCount of zero calls Deallocate
+	fByteCount = ULWord(inNewByteCount);
+	return true;
+}
 
 NTV2Buffer & NTV2Buffer::operator = (const NTV2Buffer & inRHS)
 {
@@ -1723,11 +1772,15 @@ bool NTV2Buffer::CopyFrom (const NTV2Buffer & inSrcBuffer, const NTV2SegmentedXf
 		return false;
 
 	//	Copy every segment...
-	ULWord			srcOffset	(inXferInfo.getSourceOffset() * inXferInfo.getElementLength());
-	ULWord			dstOffset	(inXferInfo.getDestOffset() * inXferInfo.getElementLength());
-	const ULWord	srcPitch	(inXferInfo.getSourcePitch() * inXferInfo.getElementLength());
-	const ULWord	dstPitch	(inXferInfo.getDestPitch() * inXferInfo.getElementLength());
-	const ULWord	bytesPerSeg (inXferInfo.getSegmentLength() * inXferInfo.getElementLength());
+	LWord	srcOffset	(LWord(inXferInfo.getSourceOffset() * inXferInfo.getElementLength()));
+	LWord	dstOffset	(LWord(inXferInfo.getDestOffset() * inXferInfo.getElementLength()));
+	LWord	srcPitch	(LWord(inXferInfo.getSourcePitch() * inXferInfo.getElementLength()));
+	LWord	dstPitch	(LWord(inXferInfo.getDestPitch() * inXferInfo.getElementLength()));
+	const LWord	bytesPerSeg (inXferInfo.getSegmentLength() * inXferInfo.getElementLength());
+	if (inXferInfo.isSourceBottomUp())
+		srcPitch = 0 - srcPitch;
+	if (inXferInfo.isDestBottomUp())
+		dstPitch = 0 - dstPitch;
 	for (ULWord segNdx(0);	segNdx < inXferInfo.getSegmentCount();	segNdx++)
 	{
 		const void *	pSrc (inSrcBuffer.GetHostAddress(srcOffset));
@@ -1738,13 +1791,39 @@ bool NTV2Buffer::CopyFrom (const NTV2Buffer & inSrcBuffer, const NTV2SegmentedXf
 			return false;	//	memcpy will read past end of srcBuffer
 		if (dstOffset + bytesPerSeg > GetByteCount())
 			return false;	//	memcpy will write past end of me
-		::memcpy (pDst,	 pSrc,	bytesPerSeg);
+		::memcpy (pDst,	 pSrc,	size_t(bytesPerSeg));
 		srcOffset += srcPitch;	//	Bump src offset
 		dstOffset += dstPitch;	//	Bump dst offset
 	}	//	for each segment
 	return true;
 }
 
+bool NTV2Buffer::SetFromHexString (const string & inStr)
+{
+	string str(inStr);
+
+	//	Remove all whitespace...
+	const string newline("\n"), tab("\t");
+	aja::replace(str, newline, string());
+	aja::replace(str, tab, string());
+	aja::upper(str);
+
+	//	Fail if any non-hex found...
+	for (size_t ndx(0);  ndx < str.size();  ndx++)
+		if (!aja::is_hex_digit(str.at(ndx)))
+			return false;
+
+	if (str.size() & 1)
+		return false;	//	Remaining length must be even
+	if (!Allocate(str.size() / 2))
+		return false;	//	Resize failed
+
+	//	Decode and copy in the data...
+	for (size_t srcNdx(0), dstNdx(0);  srcNdx < str.size();  srcNdx += 2)
+		U8(int(dstNdx++)) = uint8_t(aja::stoul (str.substr(srcNdx,2), AJA_NULL, 16));
+
+	return true;
+}
 
 bool NTV2Buffer::SwapWith (NTV2Buffer & inBuffer)
 {
@@ -2894,59 +2973,6 @@ ostream & NTV2Bitstream::Print (ostream & inOutStream) const
 	return inOutStream;
 }
 
-
-NTV2DmaStream::NTV2DmaStream()
-	:	mHeader (NTV2_TYPE_AJADMASTREAM, sizeof(NTV2DmaStream))
-{
-	NTV2_ASSERT_STRUCT_VALID;
-}
-
-NTV2DmaStream::NTV2DmaStream (const NTV2Buffer & inBuffer, const NTV2Channel inChannel, const ULWord inFlags)
-	:	mHeader (NTV2_TYPE_AJADMASTREAM, sizeof(NTV2DmaStream))
-{
-	NTV2_ASSERT_STRUCT_VALID;
-	SetBuffer (inBuffer);
-	SetChannel (inChannel);
-	SetFlags (inFlags);
-}
-
-NTV2DmaStream::NTV2DmaStream(const ULWord * pInBuffer, const ULWord inByteCount, const NTV2Channel inChannel, const ULWord inFlags)
-	:	mHeader (NTV2_TYPE_AJADMASTREAM, sizeof(NTV2DmaStream))
-{
-	NTV2_ASSERT_STRUCT_VALID;
-	SetBuffer (NTV2Buffer(pInBuffer, inByteCount));
-	SetChannel (inChannel);
-	SetFlags (inFlags);
-}
-
-NTV2DmaStream::NTV2DmaStream(const NTV2Channel inChannel, const ULWord inFlags)
-	:	mHeader (NTV2_TYPE_AJADMASTREAM, sizeof(NTV2DmaStream))
-{
-	NTV2_ASSERT_STRUCT_VALID;
-	SetChannel (inChannel);
-	SetFlags (inFlags);
-}
-
-bool NTV2DmaStream::SetBuffer (const NTV2Buffer & inBuffer)
-{	//	Just use address & length (don't deep copy)...
-	NTV2_ASSERT_STRUCT_VALID;
-	return mBuffer.Set (inBuffer.GetHostPointer(), inBuffer.GetByteCount());
-}
-
-bool NTV2DmaStream::SetChannel (const NTV2Channel inChannel)
-{
-	NTV2_ASSERT_STRUCT_VALID;
-	mChannel = inChannel;
-	return true;
-}
-
-ostream & NTV2DmaStream::Print (ostream & inOutStream) const
-{
-	NTV2_ASSERT_STRUCT_VALID;
-	inOutStream << mHeader << mBuffer << " flags=" << xHEX0N(mFlags,8) << " " << mTrailer;
-	return inOutStream;
-}
-
 NTV2StreamChannel::NTV2StreamChannel()
 	:	mHeader (NTV2_TYPE_AJASTREAMCHANNEL, sizeof(NTV2StreamChannel))
 {
@@ -3099,14 +3125,14 @@ bool NTV2GetRegisters::GetRegisterValues (NTV2RegisterValueMap & outValues) cons
 	outValues.clear ();
 	if (!mOutGoodRegisters)
 		return false;		//	Empty/null 'mOutGoodRegisters' array!
-	if (!mOutNumRegisters)
-		return false;		//	Driver says zero successfully read!
-	if (mOutNumRegisters > mInNumRegisters)
-		return false;		//	Sanity check failed:  mOutNumRegisters must be less than or equal to mInNumRegisters!
-	if (!mOutValues)
-		return false;		//	Empty/null 'mOutValues' array!
-	if (mOutGoodRegisters.GetByteCount() != mOutValues.GetByteCount())
-		return false;		//	Sanity check failed:  These sizes should match
+	//if (!mOutNumRegisters)
+	//	return false;		//	Driver says zero successfully read!
+	//if (mOutNumRegisters > mInNumRegisters)
+	//	return false;		//	Sanity check failed:  mOutNumRegisters must be less than or equal to mInNumRegisters!
+	//if (!mOutValues)
+	//	return false;		//	Empty/null 'mOutValues' array!
+	//if (mOutGoodRegisters.GetByteCount() != mOutValues.GetByteCount())
+	//	return false;		//	Sanity check failed:  These sizes should match
 
 	const ULWord *	pRegArray	(mOutGoodRegisters);
 	const ULWord *	pValArray	(mOutValues);

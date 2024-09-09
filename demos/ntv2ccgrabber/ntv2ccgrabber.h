@@ -62,24 +62,24 @@ typedef enum _CaptionDataSrc
 typedef struct CCGrabberConfig	:	public CaptureConfig
 {
 	public:
-		OutputMode				fOutputMode;		///< @brief	Desired output (captionStream, Screen etc)
-		CaptionDataSrc			fCaptionSrc;		///< @brief	Caption data source (Line21? 608 VANC? 608 Anc?  etc)
-		NTV2TCIndex				fTimecodeSrc;		///< @brief	Timecode source to use (if any)
-		NTV2Line21Channel		fCaptionChannel;	///< @brief	Caption channel to monitor (defaults to CC1)
-		bool					fBurnCaptions;		///< @brief	If true, burn-in captions on 2nd channel
-		bool					fUseVanc;			///< @brief	If true, use Vanc, even if the device supports Anc insertion
+		OutputMode			fOutputMode;		///< @brief	Desired output (captionStream, Screen etc)
+		CaptionDataSrc		fCaptionSrc;		///< @brief	Caption data source (Line21? 608 VANC? 608 Anc?  etc)
+		NTV2TCIndex			fTimecodeSource;	///< @brief	Timecode source to use (if any)
+		NTV2Line21Channel	fCaptionChannel;	///< @brief	Caption channel to monitor (defaults to CC1)
+		bool				fBurnCaptions;		///< @brief	If true, burn-in captions on 2nd channel
+		bool				fUseVanc;			///< @brief	If true, use Vanc, even if the device supports Anc insertion
 
 		/**
 			@brief	Constructs a default CCPlayer configuration.
 		**/
 		inline explicit	CCGrabberConfig (const std::string & inDeviceSpecifier	= "0")
-			:	CaptureConfig		(inDeviceSpecifier),
-				fOutputMode			(kOutputMode_CaptionStream),
-				fCaptionSrc			(kCaptionDataSrc_Default),
-				fTimecodeSrc		(NTV2_TCINDEX_INVALID),
-				fCaptionChannel		(NTV2_CC608_CC1),
-				fBurnCaptions		(false),
-				fUseVanc			(false)
+			:	CaptureConfig	(inDeviceSpecifier),
+				fOutputMode		(kOutputMode_CaptionStream),
+				fCaptionSrc		(kCaptionDataSrc_Default),
+				fTimecodeSource	(NTV2_TCINDEX_INVALID),
+				fCaptionChannel	(NTV2_CC608_CC1),
+				fBurnCaptions	(false),
+				fUseVanc		(false)
 		{
 			fWithAnc = true;
 			fWithAudio = false;

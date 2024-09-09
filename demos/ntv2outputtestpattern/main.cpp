@@ -22,6 +22,7 @@ int main (int argc, const char ** argv)
 	char *			pVancMode		(AJA_NULL);		//	VANC mode argument
 	char *			pVideoFormat	(AJA_NULL);		//	Video format to use
 	int				channelNumber	(1);			//	Channel/FrameStore to use
+	int				doMultiFormat	(0);			//	MultiFormat mode?
 	int				showVersion		(0);			//	Show version?
 	AJADebug::Open();
 
@@ -31,6 +32,7 @@ int main (int argc, const char ** argv)
 		{"version",		  0,	POPT_ARG_NONE,		&showVersion,	0,	"show version & exit",		AJA_NULL					},
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"device to use",			"index#, serial#, or model"	},
 		{"channel",		'c',	POPT_ARG_INT,		&channelNumber,	0,	"channel to use",			"1-8"						},
+		{"multiFormat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"use multi-format/channel",	AJA_NULL					},
 		{"pattern",		'p',	POPT_ARG_STRING,	&pTestPattern,	0,	"test pattern to show",		"0-15, name or '?' to list"	},
 		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,	0,	"video format to produce",	"'?' or 'list' to list"},
 		{"pixelFormat",	  0,	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",		"'?' or 'list' to list"},
@@ -50,6 +52,7 @@ int main (int argc, const char ** argv)
 		return 1;
 
 	TestPatConfig config(deviceSpec);
+	config.fDoMultiFormat	= doMultiFormat	? true	: false;	//	Multiformat mode?
 
 	//	Channel
 	if ((channelNumber < 1)  ||  (channelNumber > 8))
@@ -59,12 +62,14 @@ int main (int argc, const char ** argv)
 	//	VideoFormat
 	const string videoFormatStr (pVideoFormat  ?  pVideoFormat  :  "");
 	config.fVideoFormat = videoFormatStr.empty()	?	NTV2_FORMAT_1080i_5994
-													:	CNTV2DemoCommon::GetVideoFormatFromString(videoFormatStr);
+													:	CNTV2DemoCommon::GetVideoFormatFromString(videoFormatStr,
+																									VIDEO_FORMATS_SDHD | VIDEO_FORMATS_4KUHD,
+																									deviceSpec);
 	if (videoFormatStr == "?"  ||  videoFormatStr == "list")
-		{cout	<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_NON_4KUHD, deviceSpec) << endl;  return 0;}
+		{cout	<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_SDHD, pDeviceSpec ? deviceSpec : "") << endl;  return 0;}
 	else if (!videoFormatStr.empty()  &&  config.fVideoFormat == NTV2_FORMAT_UNKNOWN)
 	{	cerr	<< "## ERROR:  Invalid '--videoFormat' value '" << videoFormatStr << "' -- expected values:" << endl
-				<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_NON_4KUHD, deviceSpec) << endl;
+				<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_SDHD, deviceSpec) << endl;
 		return 2;
 	}
 
@@ -72,7 +77,7 @@ int main (int argc, const char ** argv)
 	const string pixelFormatStr (pPixelFormat  ?  pPixelFormat  :  "");
 	config.fPixelFormat = pixelFormatStr.empty() ? NTV2_FBF_8BIT_YCBCR : CNTV2DemoCommon::GetPixelFormatFromString(pixelFormatStr);
 	if (pixelFormatStr == "?"  ||  pixelFormatStr == "list")
-		{cout << CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 0;}
+		{cout << CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, pDeviceSpec ? deviceSpec : "") << endl;  return 0;}
 	else if (!pixelFormatStr.empty()  &&  !NTV2_IS_VALID_FRAME_BUFFER_FORMAT(config.fPixelFormat))
 	{
 		cerr	<< "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl

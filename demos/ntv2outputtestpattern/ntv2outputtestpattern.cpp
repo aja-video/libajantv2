@@ -88,7 +88,7 @@ AJAStatus NTV2OutputTestPattern::Init (void)
 		if (!mDevice.AcquireStreamForApplication (kDemoAppSignature, int32_t(AJAProcess::GetPid())))
 			return AJA_STATUS_BUSY;		//	Device is in use by another app -- fail
 	}
-	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);			//	Set OEM service level
+	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);		//	Set OEM service level
 
 	if (mDevice.features().CanDoMultiFormat())
 		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
@@ -101,7 +101,12 @@ AJAStatus NTV2OutputTestPattern::Init (void)
 		return status;
 
 	#if defined(_DEBUG)
-		cerr << mConfig << endl;
+		AJALabelValuePairs info(mConfig.Get());
+		if (!mDevice.GetDescription().empty())
+			for (AJALabelValuePairsConstIter it(info.begin());  it != info.end();  ++it)
+				if (it->first.find("Device Specifier") == 0)
+					{info.insert(++it, AJALabelValuePair("Device Description", mDevice.GetDescription())); break;}
+		cerr << AJASystemInfo::ToString(info);
 	#endif	//	defined(_DEBUG)
 	return AJA_STATUS_SUCCESS;
 
@@ -215,11 +220,11 @@ void NTV2OutputTestPattern::RouteOutputSignal (void)
 
 	//	And connect analog video output, if the device has one...
 	if (mDevice.features().GetNumAnalogVideoOutputs())
-		connections.insert(NTV2Connection(::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_ANALOG), outputXpt));
+		connections.insert(NTV2Connection(::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_ANALOG1), outputXpt));
 
 	//	And connect HDMI video output, if the device has one...
 	if (mDevice.features().GetNumHDMIVideoOutputs())
-		connections.insert(NTV2Connection(::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_HDMI), outputXpt));
+		connections.insert(NTV2Connection(::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_HDMI1), outputXpt));
 
 	//	Apply all the accumulated connections...
 	mDevice.ApplySignalRoute(connections, /*replaceExistingRoutes*/true);

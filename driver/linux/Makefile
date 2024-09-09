@@ -18,7 +18,8 @@ AJA_CREATE_DEVICE_NODES = 1
 
 CC			 ?= gcc
 
-DRIVERTARGET = $(NTV2TARGET).o
+NTV2_DRIVER_TARGET = $(NTV2TARGET).o
+RDMA_DRIVER_TARGET = $(RDMATARGET).o
 INCLUDES 	 = -I$(A_LIB_NTV2_INC) -I$(A_LINUX_DRIVER_PATH) -I$(A_LIB_NTV2_SRC) -I$(A_LIB_NTV2_SRC)/lin -I$(A_DRIVER_PATH)
 VERSIONING 	 = -DSDKVER_MAJ=$(SDKVER_MAJ) -DSDKVER_MIN=$(SDKVER_MIN) -DSDKVER_PNT=$(SDKVER_PNT) -DSDKVER_BLD=$(SDKVER_BLD) -DAJA_BETA=$(AJA_BETA) -DAJA_DEBUG=$(AJA_DEBUG)
 DISTRO_INFO  = -DDISTRO_TYPE=$(DISTRO_TYPE) -DDISTRO_IS_RHEL_LIKE=$(DISTRO_IS_RHEL_LIKE) \
@@ -30,22 +31,72 @@ ifdef AJA_HEVC
 	EXTRA_CFLAGS += -DAJA_HEVC=$(AJA_HEVC)
 endif
 
+# if rdma is set
 ifdef AJA_RDMA
+# force rdma build
+	NVIDIA_RDMA := 1
+ifdef AJA_IGPU
+	NVIDIA_IGPU := 1
+endif
+else
+# if file rdma is present
+ifneq (,$(wildcard /etc/ajantv2/rdma))
+	NVIDIA_RDMA := 1
+ifneq (,$(wildcard /etc/ajantv2/igpu))
+	NVIDIA_IGPU := 1
+endif
+endif
+endif
+
+ifdef NVIDIA_RDMA
+
+# find the nvidia p2p include file
 ifeq ($(NVIDIA_SRC_DIR),)
-	NVIDIA_SRC_DIR := $(shell find /usr/src/nvidia-* -name nv-p2p.h 2>/dev/null|head -1|xargs dirname 2>/dev/null)
+	NVIDIA_SRC_DIR := $(shell find /usr/src/nvidia* -name nv-p2p.h 2>/dev/null|head -1|xargs dirname 2>/dev/null)
 endif
 ifeq ($(NVIDIA_SRC_DIR),)
 	NVIDIA_SRC_DIR := $(shell find /usr/src/linux-* -name nv-p2p.h 2>/dev/null|head -1|xargs dirname 2>/dev/null)
 endif
-	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=$(AJA_RDMA)
-ifdef AJA_IGPU
-	EXTRA_CFLAGS += -DAJA_IGPU=$(AJA_IGPU)
+
+# find the nvidia.ko file
+ifeq ($(NVIDIA_KO),)
+	NVIDIA_KO := $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia.ko'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
+endif	
+ifeq ($(NVIDIA_KO),)
+	NVIDIA_KO := $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia.ko.xz'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
+endif
+ifeq  ($(shell objdump -t $(NVIDIA_KO) | grep nvidia_p2p_get_pages),)
+	NVIDIA_KO :=
+endif
+ifeq ($(NVIDIA_KO),)
+	NVIDIA_KO := $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia-p2p.ko'|grep -P 'nvidia-p2p(_[0-9]+)?.ko'|head -1)
+endif
+
+ifdef NVIDIA_IGPU
+	EXTRA_CFLAGS += -DAJA_IGPU=1
+ifneq ($(NVIDIA_KO),)
+ifeq ($(NVIDIA_SYMVERS),)
+	NVIDIA_GEN_SYMVERS := ./nvidia-ko-to-module-symvers $(NVIDIA_KO) $(A_LINUX_DRIVER_PATH)/nvidia.symvers
+	NVIDIA_SYMVERS := $(A_LINUX_DRIVER_PATH)/nvidia.symvers
+endif
+endif
 else
 ifeq ($(NVIDIA_SYMVERS),)
-	NVIDIA_KO ?= $(shell find /lib/modules/$(KVERSION)/ -name 'nvidia*.ko'|grep -P 'nvidia(_[0-9]+)?.ko'|head -1)
-	NVIDIA_GEN_SYMVERS := ./nvidia-ko-to-module-symvers $(NVIDIA_KO) $(DIR)/nvidia.symvers
-	NVIDIA_SYMVERS := $(DIR)/nvidia.symvers
+	NVIDIA_GEN_SYMVERS := ./nvidia-ko-to-module-symvers $(NVIDIA_KO) $(A_LINUX_DRIVER_PATH)/nvidia.symvers
+	NVIDIA_SYMVERS := $(A_LINUX_DRIVER_PATH)/nvidia.symvers
 endif
+endif
+
+endif
+
+# determine if the ko is gpl - no ko is proprietary igpu
+ifeq ($(NVIDIA_KO),)
+	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1 -DNVIDIA_PROPRIETARY=1
+else
+ifeq ($(shell modinfo $(NVIDIA_KO) | grep license: | grep GPL),)
+	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1 -DNVIDIA_PROPRIETARY=1
+else
+	EXTRA_CFLAGS += -I$(NVIDIA_SRC_DIR) -DAJA_RDMA=1
 endif
 endif
 
@@ -103,6 +154,7 @@ DRIVERINCS = ../ntv2anc.h \
 			../ntv2setup.h \
 			../ntv2stream.h \
 			../ntv2system.h \
+			../ntv2video.h \
 			../ntv2videoraster.h \
 			../ntv2videorasterreg.h \
 			../ntv2vpid.h \
@@ -127,6 +179,7 @@ DRIVERSRCS = ../ntv2anc.c \
 			../ntv2setup.c \
 			../ntv2stream.c \
 			../ntv2system.c \
+			../ntv2video.c \
 			../ntv2videoraster.c \
 			../ntv2vpid.c \
 			../ntv2xpt.c
@@ -181,18 +234,22 @@ HEVCSRCS =
 HEVCINCS =
 endif
 
-ifdef AJA_RDMA
+ifdef NVIDIA_RDMA
+RDMASRCS = ntv2rdma.c
 RDMAINCS = $(NVIDIA_SRC_DIR)/nv-p2p.h
 else
+RDMASRCS = ntv2rdma.c
 RDMAINCS =
 endif
 
 ALLDRIVERINCS =$(AJANTV2_INCS) $(AJANTV2SRCLIN) $(DRIVERINCS) $(DRIVERLININCS) $(HEVCSINCS) $(RDMAINCS)
 ALLDRIVERSRCS =$(DRIVERSRCS) $(DRIVERLINSRCS) $(HEVCSRCS) ntv2devicefeatures.c ntv2driverprocamp.c ntv2vpidfromspec.c
 ALLDRIVEROBJS =$(patsubst %.c,%.o,$(ALLDRIVERSRCS))
+RDMADRIVEROBJS =$(patsubst %.c,%.o,$(RDMASRCS))
 
-$(NTV2TARGET)-objs := $(ALLDRIVEROBJS)
-obj-m				:= $(DRIVERTARGET)
+$(NTV2TARGET)-objs	:= $(ALLDRIVEROBJS)
+$(RDMATARGET)-objs	:= $(RDMADRIVEROBJS)
+obj-m				:= $(NTV2_DRIVER_TARGET) $(RDMA_DRIVER_TARGET) 
 
 DKMSVER = $(SDKVER_MAJ).$(SDKVER_MIN).$(SDKVER_PNT)
 DKMSDIR = ajantv2-$(DKMSVER)
@@ -206,18 +263,19 @@ default: all
 	@echo linux distro: $(DISTRO_TYPE)
 	@echo linux distro flags: '$(DISTRO_INFO)'
 	@echo lib: $(LIB)
-ifdef AJA_RDMA
-ifdef AJA_IGPU
+ifdef NVIDIA_RDMA
+ifeq ($(NVIDIA_SYMVERS),)
 	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules
 else
 	${NVIDIA_GEN_SYMVERS}
-	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules KBUILD_EXTRA_SYMBOLS=$(NVIDIA_SYMVERS)
+	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules KBUILD_EXTRA_SYMBOLS='$(NVIDIA_SYMVERS)'
 endif
 else
 	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) DRIVERDIR=$(A_LINUX_DRIVER_PATH) modules
 endif
 	$(call ensure_dir_exists, $(A_DRIVER_PATH)/bin)
 	cp $(NTV2TARGET).ko $(A_DRIVER_PATH)/bin
+	cp $(RDMATARGET).ko $(A_DRIVER_PATH)/bin
 
 modules_install:
 	$(MAKE) -C $(KDIR) M=$(A_LINUX_DRIVER_PATH) modules_install
@@ -239,7 +297,7 @@ ntv2version_gen:
 	fi
 
 .PHONY: all
-all: ntv2version_gen $(ALLDRIVERINCS) $(ALLDRIVERSRCS)
+all: ntv2version_gen $(ALLDRIVERINCS) $(ALLDRIVERSRCS) $(RDMAINCS) $(RDMASRCS)
 
 # Make a symlink to the C-only CPP files we need in classes.
 
@@ -255,7 +313,7 @@ ntv2vpidfromspec.c:
 .PHONY: clean cleandeps realclean
 
 clean:
-	rm -f $(A_DRIVER_PATH)/bin/$(NTV2TARGET).ko $(A_UBER_BIN)/*.ko $(A_DRIVER_PATH)/*.o $(A_DRIVER_PATH)/.*o.cmd *.ko *.o .*o.cmd *.mod.c *~ errors.txt semantic.cache
+	rm -f $(A_DRIVER_PATH)/bin/$(NTV2TARGET).ko $(A_DRIVER_PATH)/bin/$(RDMATARGET).ko $(A_UBER_BIN)/*.ko $(A_DRIVER_PATH)/*.o $(A_DRIVER_PATH)/.*o.cmd *.ko *.o .*o.cmd .*o.d *.mod.c *~ errors.txt semantic.cache
 	rm -f *.markers *.symvers *.order *.o.ur-safe *.mod
 	rm -f ntv2devicefeatures.*
 	rm -f ntv2driverprocamp.c
@@ -305,27 +363,62 @@ dkms-pkg:
 	@for i in "$(DRIVERLINSRCS)" ; do \
 		cp $$i tmp/$(DKMSDIR)/libajantv2/driver/linux ; \
 	done
+	@for i in "$(RDMASRCS)" ; do \
+		cp $$i tmp/$(DKMSDIR)/libajantv2/driver/linux ; \
+	done
 	@awk '\
 		sub("@AJA_DKMS_PKG_VERSION@", "$(DKMSVER)") {print;next} \
 		{print} \
 	' dkms.conf > "tmp/$(DKMSDIR)/dkms.conf"
 
 dkms-install: dkms-pkg
+ifdef NVIDIA_RDMA
+ifdef NVIDIA_IGPU
 	@if [ -n "$(DKMSINSTALLED)" ]; then \
-		printf "\n## installing DKMS driver:\n"; \
+		printf "\n## installing DKMS NTV2 RDMA IGPU driver:\n"; \
 		sudo cp -a tmp/$(DKMSDIR) /usr/src/; \
+		sudo mkdir -p /etc/ajantv2; \
+		sudo touch /etc/ajantv2/rdma; \
+		sudo touch /etc/ajantv2/igpu; \
 		sudo dkms install ajantv2/$(DKMSVER); \
 		sudo modprobe ajantv2; \
 	else \
 		echo "!! DKMS system is not installed"; \
 	fi
-
-dkms-uninstall:
+else
 	@if [ -n "$(DKMSINSTALLED)" ]; then \
-		printf "\n## uninstalling DKMS driver:\n"; \
-		sudo dkms remove ajantv2/$(DKMSVER) --all; \
-		sudo rm -rf /usr/src/ajantv2-$(DKMSVER); \
-		sudo rmmod ajantv2; \
+		printf "\n## installing DKMS NTV2 RDMA driver:\n"; \
+		sudo cp -a tmp/$(DKMSDIR) /usr/src/; \
+		sudo mkdir -p /etc/ajantv2; \
+		sudo touch /etc/ajantv2/rdma; \
+		sudo dkms install ajantv2/$(DKMSVER); \
+		sudo modprobe ajantv2; \
 	else \
 		echo "!! DKMS system is not installed"; \
 	fi
+endif
+else
+	@if [ -n "$(DKMSINSTALLED)" ]; then \
+		printf "\n## installing DKMS NTV2 driver:\n"; \
+		sudo cp -a tmp/$(DKMSDIR) /usr/src/; \
+		sudo rm -f /etc/ajantv2/rdma; \
+		sudo dkms install ajantv2/$(DKMSVER); \
+		sudo modprobe ajantv2; \
+	else \
+		echo "!! DKMS system is not installed"; \
+	fi
+endif
+
+dkms-uninstall:
+	@if [ -n "$(DKMSINSTALLED)" ]; then \
+		printf "\n## uninstalling DKMS NTV2 driver:\n"; \
+		sudo dkms remove ajantv2/$(DKMSVER) --all; \
+		sudo rm -rf /usr/src/ajantv2-$(DKMSVER); \
+		sudo rm -f /etc/ajantv2/rdma; \
+		sudo rm -f /etc/ajantv2/igpu; \
+		sudo rmmod -s ajardma; \
+		sudo rmmod -s ajantv2; \
+	else \
+		echo "!! DKMS system is not installed"; \
+	fi
+

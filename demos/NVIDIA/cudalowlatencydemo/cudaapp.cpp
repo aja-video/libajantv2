@@ -575,12 +575,14 @@ int main(int argc, const char *argv[])
 	uint32_t deviceIndex(0);	// default device index
 	uint32_t inputIndex(0);		// default SDI input index
 	uint32_t outputIndex(1);	// default SDI output index
+	uint32_t hdmiIndex(0);		// default HDMI input index
 
 #ifdef AJA_LINUX
 	//	Command line option descriptions:
 	const CNTV2DemoCommon::PoptOpts optionsTable [] =
 	{
 		{"device",		'd',	POPT_ARG_INT,	&deviceIndex,	0,	"which device",			"index"	},
+		{"hdmi",		'h',	POPT_ARG_INT,	&hdmiIndex,		0,	"which HDMI input",		"index"	},
 		{"input",		'i',	POPT_ARG_INT,	&inputIndex,	0,	"which SDI input",		"index"	},
 		{"output",		'o',	POPT_ARG_INT,	&outputIndex,	0,	"which SDI output",		"index"	},
 		POPT_AUTOHELP
@@ -613,7 +615,7 @@ int main(int argc, const char *argv[])
 		if ((AJATime::GetSystemMilliseconds() - sTime) > 1000)
 			break;
 		AJATime::Sleep(50);
-		videoFormat = ntv2Card.GetInputVideoFormat(NTV2_INPUTSOURCE_SDI1,true);
+		videoFormat = ntv2Card.GetInputVideoFormat((hdmiIndex? NTV2_INPUTSOURCE_HDMI1 : NTV2_INPUTSOURCE_SDI1), true);
 	}
 	
 	if (videoFormat == NTV2_FORMAT_UNKNOWN)
@@ -674,7 +676,7 @@ int main(int argc, const char *argv[])
     indesc.videoFormat = videoFormat;
 	indesc.bufferFormat = frameBufferFormat;
     indesc.channel = NTV2_CHANNEL1;
-    indesc.type = VIO_IN;
+    indesc.type = (hdmiIndex != 0)? VIO_HDMI_IN : VIO_SDI_IN;
     capture = new CCudaVideoIO(&indesc);
 
 	// Initialize video output
@@ -683,26 +685,30 @@ int main(int argc, const char *argv[])
 	outdesc.videoFormat = videoFormat;
 	outdesc.bufferFormat = frameBufferFormat;
 	outdesc.channel = NTV2_CHANNEL2;
-	outdesc.type = VIO_OUT;
+	outdesc.type = VIO_SDI_OUT;
 	playout = new CCudaVideoIO(&outdesc);
 
 	ULWord numFramesIn = RING_BUFFER_SIZE;
 	ULWord numFramesOut = RING_BUFFER_SIZE;
 	// For RGB16, input buffer is 6 bytes / pixels, otherwise assume 4 bytes / pixel
 	// Will need to fix this for the RGB12 case.
+	ULWord alignment = 0x1000;
+#ifdef AJA_RDMA
+	alignment = 0x10000;
+#endif		
 	if (frameBufferFormat == NTV2_FBF_48BIT_RGB)
 	{
 		inGpuCircularBuffer->Allocate(numFramesIn, gWidth*gHeight * 6,
-			gWidth, gHeight, false, false, 4096, NTV2_TEXTURE_TYPE_CUDA_ARRAY);
+			gWidth, gHeight, false, false, alignment, NTV2_TEXTURE_TYPE_CUDA_ARRAY);
 		outGpuCircularBuffer->Allocate(numFramesOut, gWidth * gHeight * 6,
-			gWidth, gHeight, false, /*false*/true, 4096, NTV2_TEXTURE_TYPE_CUDA_ARRAY);
+			gWidth, gHeight, false, /*false*/true, alignment, NTV2_TEXTURE_TYPE_CUDA_ARRAY);
 	}
 	else
 	{
 		inGpuCircularBuffer->Allocate(numFramesIn, gWidth*gHeight * 4,
-			gWidth, gHeight, false, false, 4096, NTV2_TEXTURE_TYPE_CUDA_ARRAY);
+			gWidth, gHeight, false, false, alignment, NTV2_TEXTURE_TYPE_CUDA_ARRAY);
 		outGpuCircularBuffer->Allocate(numFramesOut, gWidth * gHeight * 4,
-			gWidth, gHeight, false, /*false*/true, 4096, NTV2_TEXTURE_TYPE_CUDA_ARRAY);
+			gWidth, gHeight, false, /*false*/true, alignment, NTV2_TEXTURE_TYPE_CUDA_ARRAY);
 	}
 
     // Assign GPU circular buffer for input

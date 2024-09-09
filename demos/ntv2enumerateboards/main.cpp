@@ -44,10 +44,8 @@ static int ShowDeviceInfo (CNTV2Card & inCard)
 			<< "\t" << inCard.features().GetNumEmbeddedAudioOutputChannels() << " channel(s) of Embedded Audio Output" << endl;
 
 	//	Show its video and pixel format capabilities:
-	NTV2VideoFormatSet videoFormats;
-	NTV2PixelFormats pixelFormats;
-	inCard.GetSupportedVideoFormats(videoFormats);
-	inCard.GetSupportedPixelFormats(pixelFormats);
+	const NTV2VideoFormatSet videoFormats(inCard.features().VideoFormats());
+	const NTV2PixelFormats pixelFormats(inCard.features().PixelFormats());
 	cout	<< "\t" << videoFormats << endl
 			<< "\t" << pixelFormats << endl;
 	return 0;
@@ -91,26 +89,18 @@ int main (int argc, const char ** argv)
 			{cerr << "## ERROR: Failed to open '" << deviceSpec << "'";  return 2;}
 	}	//	if -d option used
 
-	//	Discover the AJA device(s) on the local host...
-	CNTV2DeviceScanner scanner;
-	const size_t deviceCount (scanner.GetNumDevices());
-
 	cout << "AJA NTV2 SDK " << ::NTV2Version() << " supports devices:  " << ::NTV2GetSupportedDevices() << endl;
 
-	//	Print the results of the scan...
-	if (deviceCount)
+	//	Discover the AJA device(s) on the local host...
+	ULWord deviceCount(0);
+	while (CNTV2DeviceScanner::GetDeviceAtIndex(deviceCount, device))
 	{
-		cout << deviceCount << " AJA device(s) found" << endl;
-		uint32_t deviceIndex(0);
-		while (CNTV2DeviceScanner::GetDeviceAtIndex(deviceIndex, device))
-		{
-			if (deviceIndex)
-				cout << endl << endl << endl;
-			ShowDeviceInfo(device);
-			deviceIndex++;
-		}	//	for each device
-	}	//	if deviceCount > 0
-	else
+		if (deviceCount)
+			cout << endl << endl << endl;
+		ShowDeviceInfo(device);
+		deviceCount++;
+	}	//	for each device
+	if (!deviceCount)
 		cout << "No AJA devices found" << endl;
 
 	return deviceCount ? 0 : 1;

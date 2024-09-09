@@ -56,9 +56,6 @@ if "%DISABLE_DEMOS%" == "" (
 if "%DISABLE_TOOLS%" == "" (
 	set DISABLE_TOOLS=OFF
 )
-if "%DISABLE_PLUGINS%" == "" (
-	set DISABLE_PLUGINS=OFF
-)
 
 if "%DISABLE_TESTS%" == "" (
 	set DISABLE_TESTS=OFF
@@ -80,8 +77,8 @@ if "%INSTALL_MISC%" == "" (
 	set INSTALL_MISC=ON
 )
 
-if "%QT_ENABLED%" == "" (
-	set QT_ENABLED=ON
+if "%DISABLE_QT%" == "" (
+	set DISABLE_QT=OFF
 )
 
 if "%QT_DEPLOY%" == "" (
@@ -103,20 +100,30 @@ echo BUILD_OPENSOURCE: %BUILD_OPENSOURCE%
 echo DISABLE_DRIVER: %DISABLE_DRIVER%
 echo DISABLE_DEMOS: %DISABLE_DEMOS%
 echo DISABLE_TOOLS: %DISABLE_TOOLS%
-echo DISABLE_PLUGINS: %DISABLE_PLUGINS%
 echo DISABLE_TESTS: %DISABLE_TESTS%
 echo INSTALL_HEADERS: %INSTALL_HEADERS%
 echo INSTALL_SOURCES: %INSTALL_SOURCES%
 echo INSTALL_CMAKE: %INSTALL_CMAKE%
 echo INSTALL_MISC: %INSTALL_MISC%
-echo QT_ENABLED: %QT_ENABLED%
+echo DISABLE_QT: %DISABLE_QT%
 echo QT_DEPLOY: %QT_DEPLOY%
 
 REM Set up VS Environment
-call "C:\Program Files (x86)\Microsoft Visual Studio\%VS_YEAR%\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" x64
-if not %errorlevel% == 0 (
-	echo Error calling vcvarsall.bat
-	exit /b 1
+where /Q cl.exe &^
+if ERRORLEVEL 1 (
+    echo Initializing MSVC 'x64' environment...
+	if %VS_YEAR% == 2022 (
+		call "C:\Program Files\Microsoft Visual Studio\%VS_YEAR%\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" x64
+	) else (
+		call "C:\Program Files (x86)\Microsoft Visual Studio\%VS_YEAR%\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" x64
+	)
+	if not ERRORLEVEL 0 (
+		echo Error calling vcvarsall.bat
+		exit /b 1
+	)
+	echo MSVC 'x64' environment successfully initialized.
+) else (
+    echo MSVC 'x64' environment already initialized.
 )
 
 echo Removing old build/install directories
@@ -138,13 +145,12 @@ cmake -S%ROOT_DIR% -B%BUILD_DIR% -G%GENERATOR% ^
 -DAJA_DISABLE_TESTS=%DISABLE_TESTS% ^
 -DAJA_DISABLE_DEMOS=%DISABLE_DEMOS% ^
 -DAJA_DISABLE_TOOLS=%DISABLE_TOOLS% ^
--DAJA_DISABLE_PLUGINS=%DISABLE_PLUGINS% ^
 -DAJA_INSTALL_HEADERS=%INSTALL_HEADERS% ^
 -DAJA_INSTALL_SOURCES=%INSTALL_SOURCES% ^
 -DAJA_INSTALL_CMAKE=%INSTALL_CMAKE% ^
 -DAJA_INSTALL_MISC=%INSTALL_MISC% ^
--DAJA_QT_ENABLED=%QT_ENABLED% ^
--DAJA_QT_DEPLOY=%QT_DEPLOY% 
+-DAJA_DISABLE_QT=%DISABLE_QT% ^
+-DAJA_QT_DEPLOY=%QT_DEPLOY%
 
 if not %ERRORLEVEL% == 0 (
 	echo Error generating targets
@@ -159,7 +165,7 @@ if not %errorlevel% == 0 (
 )
 
 REM Install Project
-cmake --install %BUILD_DIR% 
+cmake --install %BUILD_DIR%
 if not %errorlevel% == 0 (
 	echo Error installing targets
 	exit /b 1

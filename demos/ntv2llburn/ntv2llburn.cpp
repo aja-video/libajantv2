@@ -22,6 +22,7 @@ using namespace std;
 
 
 const uint32_t	kAppSignature	(NTV2_FOURCC('L','l','b','u'));
+const uint32_t  kNumFrameBuffers (2); // ping-pong between frames N and N+1 (determined by querying Auto-Circulate for available frame-buffers)
 
 #define AsULWordPtr(_p_)		reinterpret_cast<ULWord*>(_p_)
 #define AsCU8Ptr(_p_)			reinterpret_cast<const uint8_t*>(_p_)
@@ -201,6 +202,49 @@ AJAStatus NTV2LLBurn::SetupVideo (void)
 //		default:
 		case NTV2_INPUTSOURCE_INVALID:	cerr << "## ERROR:  Bad input source" << endl;  return AJA_STATUS_BAD_PARAM;
 	}
+
+	// Check to see if desired input/output channels are in use by Auto-Circulate, i.e. another Auto-Circulate-based ntv2 demo is running.
+	AUTOCIRCULATE_STATUS acStatus;
+	if (!mDevice.AutoCirculateInitForInput( mConfig.fInputChannel,
+										    kNumFrameBuffers,
+											NTV2_AUDIOSYSTEM_INVALID,
+											AUTOCIRCULATE_WITH_RP188
+												| (mDevice.features().CanDoCustomAnc() ? AUTOCIRCULATE_WITH_ANC : 0),
+											1,	//	numChannels to gang
+											0, 0))
+	{
+		cerr << "Failed to init " << NTV2ChannelToString(mConfig.fInputChannel) << " for input. Is channel in-use by Auto-Circulate?" << endl;
+		return AJA_STATUS_FAIL;
+	}
+	if (!mDevice.AutoCirculateGetStatus(mConfig.fInputChannel, acStatus))
+	{
+		cerr << "Error getting Auto-Circulate status for input channel " << NTV2ChannelToString(mConfig.fInputChannel) << endl;
+		return AJA_STATUS_FAIL;
+	}
+	mInputStartFrame = acStatus.acStartFrame;
+	mInputEndFrame = acStatus.acEndFrame;
+
+	if (!mDevice.AutoCirculateInitForOutput( mConfig.fOutputChannel,
+											 kNumFrameBuffers,
+											 NTV2_AUDIOSYSTEM_INVALID,
+											 AUTOCIRCULATE_WITH_RP188
+												| (mDevice.features().CanDoCustomAnc() ? AUTOCIRCULATE_WITH_ANC : 0),
+											 1,	//	numChannels to gang
+											 0, 0))
+	{
+		cerr << "Failed to init " << NTV2ChannelToString(mConfig.fOutputChannel) << " for output. Is channel in-use by Auto-Circulate?" << endl;
+		return AJA_STATUS_FAIL;
+	}
+	if (!mDevice.AutoCirculateGetStatus(mConfig.fOutputChannel, acStatus))
+	{
+		cerr << "Error getting Auto-Circulate status for output channel " << NTV2ChannelToString(mConfig.fOutputChannel) << endl;
+		return AJA_STATUS_FAIL;
+	}
+	mOutputStartFrame = acStatus.acStartFrame;
+	mOutputEndFrame = acStatus.acEndFrame;
+
+	mDevice.AutoCirculateStop(mConfig.fInputChannel);
+	mDevice.AutoCirculateStop(mConfig.fOutputChannel);
 
 	bool isTransmit (false);
 	if (mDevice.features().HasBiDirectionalSDI()								//	If device has bidirectional SDI connectors...
@@ -504,8 +548,8 @@ void NTV2LLBurn::ProcessFrames (void)
 	const UWord	sdiInput				(UWord(::GetIndexForNTV2InputSource(mConfig.fInputSource)));
 	const UWord	sdiOutput				(UWord(::NTV2OutputDestinationToChannel(mOutputDest)));
 	const bool	isInterlace				(!NTV2_VIDEO_FORMAT_HAS_PROGRESSIVE_PICTURE(mVideoFormat));
-	uint32_t	currentInFrame			(0);	//	Will ping-pong between 0 and 1
-	uint32_t	currentOutFrame			(2);	//	Will ping-pong between 2 and 3
+	uint32_t	currentInFrame			(mInputStartFrame);
+	uint32_t	currentOutFrame			(mOutputStartFrame);
 	uint32_t	currentAudioInAddress	(0);
 	uint32_t	audioReadOffset			(0);
 	uint32_t	audioInWrapAddress		(0);

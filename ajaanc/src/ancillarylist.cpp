@@ -20,23 +20,27 @@
 
 using namespace std;
 
-#define LOGMYERROR(__x__)	AJA_sERROR	(AJA_DebugUnit_AJAAncList,		AJAFUNC << ": " << __x__)
-#define LOGMYWARN(__x__)	AJA_sWARNING(AJA_DebugUnit_AJAAncList,		AJAFUNC << ": " << __x__)
-#define LOGMYNOTE(__x__)	AJA_sNOTICE (AJA_DebugUnit_AJAAncList,		AJAFUNC << ": " << __x__)
-#define LOGMYINFO(__x__)	AJA_sINFO	(AJA_DebugUnit_AJAAncList,		AJAFUNC << ": " << __x__)
-#define LOGMYDEBUG(__x__)	AJA_sDEBUG	(AJA_DebugUnit_AJAAncList,		AJAFUNC << ": " << __x__)
+#define LOGGING_ANCLIST		AJADebug::IsActive(AJA_DebugUnit_AJAAncList)
+#define LOGGING_ANC2110RX	AJADebug::IsActive(AJA_DebugUnit_Anc2110Rcv)
+#define LOGGING_ANC2110TX	AJADebug::IsActive(AJA_DebugUnit_Anc2110Xmit)
 
-#define RCVFAIL(__x__)		AJA_sERROR	(AJA_DebugUnit_Anc2110Rcv,		AJAFUNC << ": " << __x__)
-#define RCVWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_Anc2110Rcv,		AJAFUNC << ": " << __x__)
-#define RCVNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_Anc2110Rcv,		AJAFUNC << ": " << __x__)
-#define RCVINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_Anc2110Rcv,		AJAFUNC << ": " << __x__)
-#define RCVDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_Anc2110Rcv,		AJAFUNC << ": " << __x__)
+#define LOGMYERROR(__x__)	{if (LOGGING_ANCLIST) AJA_sERROR  (AJA_DebugUnit_AJAAncList, AJAFUNC << ": " << __x__);}
+#define LOGMYWARN(__x__)	{if (LOGGING_ANCLIST) AJA_sWARNING(AJA_DebugUnit_AJAAncList, AJAFUNC << ": " << __x__);}
+#define LOGMYNOTE(__x__)	{if (LOGGING_ANCLIST) AJA_sNOTICE (AJA_DebugUnit_AJAAncList, AJAFUNC << ": " << __x__);}
+#define LOGMYINFO(__x__)	{if (LOGGING_ANCLIST) AJA_sINFO   (AJA_DebugUnit_AJAAncList, AJAFUNC << ": " << __x__);}
+#define LOGMYDEBUG(__x__)	{if (LOGGING_ANCLIST) AJA_sDEBUG  (AJA_DebugUnit_AJAAncList, AJAFUNC << ": " << __x__);}
 
-#define XMTFAIL(__x__)		AJA_sERROR	(AJA_DebugUnit_Anc2110Xmit,		AJAFUNC << ": " << __x__)
-#define XMTWARN(__x__)		AJA_sWARNING(AJA_DebugUnit_Anc2110Xmit,		AJAFUNC << ": " << __x__)
-#define XMTNOTE(__x__)		AJA_sNOTICE (AJA_DebugUnit_Anc2110Xmit,		AJAFUNC << ": " << __x__)
-#define XMTINFO(__x__)		AJA_sINFO	(AJA_DebugUnit_Anc2110Xmit,		AJAFUNC << ": " << __x__)
-#define XMTDBG(__x__)		AJA_sDEBUG	(AJA_DebugUnit_Anc2110Xmit,		AJAFUNC << ": " << __x__)
+#define RCVFAIL(__x__)		{if (LOGGING_ANC2110RX) AJA_sERROR  (AJA_DebugUnit_Anc2110Rcv, AJAFUNC << ": " << __x__);}
+#define RCVWARN(__x__)		{if (LOGGING_ANC2110RX) AJA_sWARNING(AJA_DebugUnit_Anc2110Rcv, AJAFUNC << ": " << __x__);}
+#define RCVNOTE(__x__)		{if (LOGGING_ANC2110RX) AJA_sNOTICE (AJA_DebugUnit_Anc2110Rcv, AJAFUNC << ": " << __x__);}
+#define RCVINFO(__x__)		{if (LOGGING_ANC2110RX) AJA_sINFO   (AJA_DebugUnit_Anc2110Rcv, AJAFUNC << ": " << __x__);}
+#define RCVDBG(__x__)		{if (LOGGING_ANC2110RX) AJA_sDEBUG  (AJA_DebugUnit_Anc2110Rcv, AJAFUNC << ": " << __x__);}
+
+#define XMTFAIL(__x__)		{if (LOGGING_ANC2110TX) AJA_sERROR  (AJA_DebugUnit_Anc2110Xmit, AJAFUNC << ": " << __x__);}
+#define XMTWARN(__x__)		{if (LOGGING_ANC2110TX) AJA_sWARNING(AJA_DebugUnit_Anc2110Xmit, AJAFUNC << ": " << __x__);}
+#define XMTNOTE(__x__)		{if (LOGGING_ANC2110TX) AJA_sNOTICE (AJA_DebugUnit_Anc2110Xmit, AJAFUNC << ": " << __x__);}
+#define XMTINFO(__x__)		{if (LOGGING_ANC2110TX) AJA_sINFO   (AJA_DebugUnit_Anc2110Xmit, AJAFUNC << ": " << __x__);}
+#define XMTDBG(__x__)		{if (LOGGING_ANC2110TX) AJA_sDEBUG  (AJA_DebugUnit_Anc2110Xmit, AJAFUNC << ": " << __x__);}
 
 #if defined(AJAHostIsBigEndian)
 	//	Host is BigEndian (BE)
@@ -535,20 +539,17 @@ bool AJAAncillaryList::CompareWithInfo (vector<string> & outDiffInfo, const AJAA
 // Parse a stream of "raw" ancillary data as collected by an AJAAncExtractorWidget.
 // Break the stream into separate AJAAncillaryData objects and add them to the list.
 //
-AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
-														const uint32_t dataSize,
-														const uint32_t inFrameNum)
+AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const NTV2Buffer & inReceivedData, const uint32_t inFrameNum)
 {
 	AJAStatus	status	(AJA_STATUS_SUCCESS);
-
-	if (!pRcvData || !dataSize)
+	if (!inReceivedData)
 		return AJA_STATUS_NULL;
 
 	AJAAncillaryDataList rawPkts;		//	Accumulate "analog/raw" packets separately
 	AJAAncillaryData	newAncData;		//	Use this as an uninitialized template
 	AJAAncDataLoc		defaultLoc		(AJAAncDataLink_A, AJAAncDataChannel_Y, AJAAncDataSpace_VANC, 9);
-	int32_t				remainingSize	(int32_t(dataSize + 0));
-	const uint8_t *		pInputData		(pRcvData);
+	int32_t				remainingSize	(int32_t(inReceivedData.GetByteCount()));
+	const uint8_t *		pInputData		(inReceivedData);
 	bool				bMoreData		(true);
 
 	while (bMoreData)
@@ -660,42 +661,38 @@ AJAStatus AJAAncillaryList::AddReceivedAncillaryData (const uint8_t * pRcvData,
 
 }	//	AddReceivedAncillaryData
 
-// Parse a stream of "raw" ancillary data as collected by an AJAAncExtractorWidget.
-// Break the stream into separate AJAAncillaryData objects and add them to the list.
+//	Parse a stream of "raw" ancillary data as collected by an HDMI Aux Extractor.
+//	Break the stream into separate AJAAncillaryData objects and add them to the list.
 //
-AJAStatus AJAAncillaryList::AddReceivedAuxillaryData (const uint8_t * pRcvData,
-														const uint32_t dataSize,
+AJAStatus AJAAncillaryList::AddReceivedAuxiliaryData (const NTV2Buffer & inReceivedData,
 														const uint32_t inFrameNum)
 {
 	AJAStatus	status	(AJA_STATUS_SUCCESS);
-
+	const uint8_t * pRcvData = inReceivedData;
+	const uint32_t dataSize = inReceivedData.GetByteCount();
 	if (!pRcvData || !dataSize)
 		return AJA_STATUS_NULL;
 
 	//	Use this as an uninitialized template...
 	AJAAncillaryData	newAncData;
-	//AJAAncDataLoc		defaultLoc		(AJAAncDataLink_A, AJAAncDataChannel_Y, AJAAncDataSpace_VANC, 9);
 	int32_t				remainingSize	(int32_t(dataSize + 0));
 	const uint8_t *		pInputData		(pRcvData);
 	bool				bMoreData		(true);
 
 	while (bMoreData)
 	{
-		//bool bInsertNew (false);	//	We'll set this 'true' if/when we find a new Anc packet to insert
-		AJAAncDataType newAncType (AJAAncDataType_HDMI_Aux); 
 		uint32_t packetSize (0);	//	This is where the AncillaryData object returns the number of bytes that were "consumed" from the input stream
-
 		status = newAncData.InitAuxWithReceivedData (pInputData, size_t(remainingSize), packetSize);
 		if (AJA_FAILURE(status))
 		{
-			//	TODO:	Someday, let's try to recover and process subsequent packets.
+			//	TODO:	Someday, try to recover and process subsequent packets.
 			break;		//	NOTE:	For now, bail on errors in the stream
 		}
 		else if (packetSize == 0)
 			break;		//	Nothing to do
-		
-		//	Create an AJAAncillaryData object of the appropriate type, and init it with our raw data...
-		AJAAncillaryData *	pData	(AJAAncillaryDataFactory::Create (newAncType, &newAncData));
+
+		//	Create an AJAAuxiliaryData object of the appropriate type, and init it with our raw data...
+		AJAAuxiliaryData *	pData	(AJAAncillaryDataFactory::Create (AJAAncDataType_HDMI_Aux, &newAncData));
 		if (pData)
 		{
 			pData->SetBufferFormat(AJAAncBufferFormat_HDMI);
@@ -784,7 +781,7 @@ LOGMYDEBUG(RTPheader);
 	if (AJA_FAILURE(status))
 		LOGMYERROR(::AJAStatusToString(status) << ": Failed at pkt[" << DEC(pktNum) << "] of " << DEC(numPackets));
 	if (CountAncillaryData() < numPackets)
-		LOGMYWARN(DEC(pktsAdded) << " of " << DEC(numPackets) << " anc pkt(s) decoded from RTP pkt");
+		{LOGMYWARN(DEC(pktsAdded) << " of " << DEC(numPackets) << " anc pkt(s) decoded from RTP pkt");}
 	else
 		LOGMYINFO(DEC(numPackets) << " pkts added from RTP pkt: " << *this);
 	return status;
@@ -982,7 +979,7 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2Buffer & inAncBuff
 	//	Try GUMP first...
 	if (BufferHasGUMPData(inAncBuffer))
 	{	//	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP	GUMP  GUMP
-		result = outPackets.AddReceivedAncillaryData (inAncBuffer, inAncBuffer.GetByteCount(), inFrameNum);
+		result = outPackets.AddReceivedAncillaryData (inAncBuffer, inFrameNum);
 		if (result == AJA_STATUS_NULL)
 			result = AJA_STATUS_SUCCESS;	//	A NULL/empty buffer is not an error
 	}	//	if GUMP
@@ -1044,7 +1041,7 @@ AJAStatus AJAAncillaryList::AddFromDeviceAncBuffer (const NTV2Buffer & inAncBuff
 
 	const uint32_t	pktsAdded (outPackets.CountAncillaryData() - origPktCount);
 	if (AJA_SUCCESS(result))
-		LOGMYDEBUG("Success:  " << DEC(pktsAdded) << " pkts added");
+		{LOGMYDEBUG("Success:  " << DEC(pktsAdded) << " pkts added");}
 	else
 		LOGMYERROR(AJAStatusToString(result) << ": " << DEC(pktsAdded) << " pkts added");
 	return result;
@@ -1061,13 +1058,13 @@ AJAStatus AJAAncillaryList::AddFromDeviceAuxBuffer (const NTV2Buffer & inAuxBuff
 	AJAStatus		result			(AJA_STATUS_SUCCESS);
 
 
-	result = outPackets.AddReceivedAuxillaryData (inAuxBuffer, inAuxBuffer.GetByteCount(), inFrameNum);
+	result = outPackets.AddReceivedAuxiliaryData (inAuxBuffer, inFrameNum);
 	if (result == AJA_STATUS_NULL)
 		result = AJA_STATUS_SUCCESS;	//	A NULL/empty buffer is not an error
 
 	const uint32_t	pktsAdded (outPackets.CountAncillaryData() - origPktCount);
 	if (AJA_SUCCESS(result))
-		LOGMYDEBUG("Success:  " << DEC(pktsAdded) << " pkts added");
+		{LOGMYDEBUG("Success:  " << DEC(pktsAdded) << " pkts added");}
 	else
 		LOGMYERROR(AJAStatusToString(result) << ": " << DEC(pktsAdded) << " pkts added");
 	return result;
@@ -1109,16 +1106,6 @@ AJAStatus AJAAncillaryList::SetFromDeviceAuxBuffers (const NTV2Buffer & inF1AuxB
 	if (AJA_FAILURE(resultF2))
 		return resultF2;
 	return AJA_STATUS_SUCCESS;
-}
-
-bool AJAAncillaryList::BufferHasGUMPData (const NTV2Buffer & inBuffer)
-{
-	if (!inBuffer)
-		return false;
-	const uint8_t * pBytes (reinterpret_cast <const uint8_t*>(inBuffer.GetHostPointer()));
-	if (!pBytes)
-		return false;
-	return *pBytes == 0xFF;
 }
 
 static const size_t		MAX_RTP_PKT_LENGTH_BYTES	(0x0000FFFF);	//	65535 max
@@ -1224,7 +1211,7 @@ AJAStatus AJAAncillaryList::GetRTPPackets (AJAU32Pkts & outF1U32Pkts,  AJAU32Pkt
 	}	//	for each SMPTE Anc packet
 
 	if (AJA_FAILURE(result))
-		LOGMYERROR(::AJAStatusToString(result) << ": Pkt " << DEC(pktNdx+1) << " of " << DEC(CountAncillaryData()) << " failed in GenerateTransmitData: " << ::AJAStatusToString(result));
+		{LOGMYERROR(::AJAStatusToString(result) << ": Pkt " << DEC(pktNdx+1) << " of " << DEC(CountAncillaryData()) << " failed in GenerateTransmitData: " << ::AJAStatusToString(result));}
 	else if (!AllowMultiRTPTransmit())
 	{	//	SINGLE RTP PKT
 		outF1U32Pkts.push_back(F1U32s);					//	Append all F1
@@ -1233,9 +1220,9 @@ AJAStatus AJAAncillaryList::GetRTPPackets (AJAU32Pkts & outF1U32Pkts,  AJAU32Pkt
 		outF2AncCounts.push_back(uint8_t(actF2PktCnt)); //	Total F2 SMPTE Anc packets in this one F2 RTP packet
 	}
 	if (overflowWords && countOverflows)
-		LOGMYWARN("Overflow: " << DEC(countOverflows) << " pkts skipped, " << DEC(overflowWords) << " U32s dropped");
+		{LOGMYWARN("Overflow: " << DEC(countOverflows) << " pkts skipped, " << DEC(overflowWords) << " U32s dropped");}
 	else if (overflowWords)
-		LOGMYWARN("Data overflow: " << DEC(overflowWords) << " U32s dropped");
+		{LOGMYWARN("Data overflow: " << DEC(overflowWords) << " U32s dropped");}
 	else if (countOverflows)
 		LOGMYWARN("Packet overflow: " << DEC(countOverflows) << " pkts skipped");
 	XMTDBG("F1 (Content Only): " << outF1U32Pkts);
@@ -1662,6 +1649,74 @@ ostream & AJAAncillaryList::Print (ostream & inOutStream, const bool inDumpPaylo
 	}
 	return inOutStream;
 }
+
+//	Copies GUMP from inSrc to outDst buffers, but removes ATC, VPID, EDH, VITC & analog packets
+bool AJAAncillaryList::StripNativeInserterGUMPPackets (const NTV2Buffer & inSrc, NTV2Buffer & outDst)		//	STATIC
+{
+	if (!inSrc || !outDst)
+		return false;	//	Buffers must be valid
+	if (inSrc.GetByteCount() > outDst.GetByteCount())
+		return false;	//	Target buffer must be at least as large as source buffer
+
+	uint8_t * srcPtr	= inSrc;
+	uint8_t * ptr		= srcPtr;
+	size_t srcBufSize	= inSrc;
+	uint8_t * tgtPtr	= outDst;
+	size_t uncopied		= 0;
+//	size_t numStripped	= 0;
+//	size_t bytesRemoved	= 0;
+	const size_t kGUMPHeaderSize(7);
+
+	for (size_t ndx(0);  ndx < srcBufSize;  ) 
+	{	
+		if (ptr[0] == 0xff  &&  (ndx + kGUMPHeaderSize) < srcBufSize) 
+		{
+			bool bFiltered{false};
+			const uint8_t payloadSize(ptr[5]);
+
+			if (ptr[1] & 0x40)		//	"Analog/raw"
+				bFiltered = true;
+			else if (ptr[3] == 0x60  &&  ptr[4] == 0x60  &&  payloadSize == 16)		//	ATC
+				bFiltered  = true;
+			else if (ptr[3] == 0x41  &&  ptr[4] == 0x01  &&  payloadSize == 4)		//	SMPTE 352 - VPID
+				bFiltered = true;
+			else if (ptr[3] == 0xF4  &&  ptr[4] == 0x00  &&  payloadSize == 16)		//	RP165 EDH
+				bFiltered = true;
+			else					//	VITC
+			{
+				const uint16_t lineNum (uint16_t((ptr[1] & 0x0F) << 7) + uint16_t(ptr[2] & 0x7F));
+				bFiltered = (ptr[1] & 0x40)  &&  (lineNum == 14 || lineNum == 277);
+			}
+			
+			if (bFiltered)
+			{	//	Copy everything that came before filtered content...
+				if (uncopied)
+					::memcpy(tgtPtr, srcPtr, uncopied);
+
+				//	Skip srcPtr past the filtered content...
+				srcPtr		+= uncopied + payloadSize + kGUMPHeaderSize;
+				tgtPtr		+= uncopied;
+				ndx			+= payloadSize + kGUMPHeaderSize;
+				ptr			= srcPtr;
+				uncopied	= 0;
+//				numStripped++;	bytesRemoved += size_t(payloadSize) + kGUMPHeaderSize;
+			}
+			else
+			{
+				ptr			+= payloadSize + kGUMPHeaderSize; 
+				ndx			+= payloadSize + kGUMPHeaderSize;
+				uncopied	+= payloadSize + kGUMPHeaderSize;
+			}
+		}
+		else
+			{ptr++; ndx++; uncopied++;}
+	}	//	for each byte in source buffer
+
+	if (uncopied)	//	Any uncopied remainder?
+		::memcpy(tgtPtr, srcPtr, uncopied);	//	Copy last uncopied bytes
+	//	cout << DEC(numStripped) << " pkts removed, " << DEC(bytesRemoved) << " bytes removed" << endl;
+	return true;
+}	//	StripNativeInserterPackets
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////

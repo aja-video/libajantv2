@@ -29,8 +29,6 @@ oglapp:
 
 #include "oglview.h"
 
-#include "fbo.h"
-
 #include "AJA_Logo_Small.h"
 
 #include "ntv2formatdescriptor.h"
@@ -979,8 +977,9 @@ int main(int argc, char *argv[])
 #endif
 	// Just default to current input.
 	// No dynamic checking of inputs.
+	uint32_t deviceIndex(0);
 	NTV2VideoFormat videoFormat;
-	CNTV2Card ntv2Card(0);
+	CNTV2Card ntv2Card(deviceIndex);
 	if (ntv2Card.IsOpen() == false)
 		return false;
 	ntv2Card.SetMultiFormatMode(false);
@@ -1023,10 +1022,11 @@ int main(int argc, char *argv[])
 
     // Initialize video input
     vioDesc indesc;
+	indesc.deviceIndex = deviceIndex;
     indesc.videoFormat = videoFormat;
 	indesc.bufferFormat = frameBufferFormat;
     indesc.channel = NTV2_CHANNEL1;
-    indesc.type = VIO_IN;
+    indesc.type = VIO_SDI_IN;
     capture = new CGpuVideoIO(&indesc);
 
     // Assign GPU circular buffer for input
@@ -1034,6 +1034,7 @@ int main(int argc, char *argv[])
 
 	// Initialize video output
 	vioDesc outdesc;
+	outdesc.deviceIndex = deviceIndex;
 	outdesc.videoFormat = videoFormat;
 	outdesc.bufferFormat = frameBufferFormat;
 	if (NTV2_IS_QUAD_FRAME_FORMAT(videoFormat))
@@ -1041,7 +1042,7 @@ int main(int argc, char *argv[])
 	else
 		outdesc.channel = NTV2_CHANNEL3;  
 
-	outdesc.type = VIO_OUT;
+	outdesc.type = VIO_SDI_OUT;
 	playout = new CGpuVideoIO(&outdesc);
 
 	// Assign GPU circular buffer for output

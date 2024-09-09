@@ -1376,6 +1376,7 @@ typedef enum
 	//	kRegCanDoStatus
 	kRegMaskCanDoValidXptROM			= BIT(0),
 	kRegMaskCanDoAudioWaitForVBI		= BIT(1),
+	kRegMaskCanDoHancInsertion			= BIT(2),
 
 	//	kRegLUTV2Control
 	kRegMaskLUT1Enable					= BIT(0),
@@ -2459,6 +2460,7 @@ typedef enum
 	//	kRegCanDoStatus
 	kRegShiftCanDoValidXptROM			= 0,
 	kRegShiftCanDoAudioWaitForVBI		= 1,
+	kRegShiftCanDoHancInsertion			= 2,
 
 	//	kRegLUTV2Control
 	kRegShiftLUT1Enable					= 0,
@@ -5460,6 +5462,7 @@ typedef enum
 
 		#define NTV2_TYPE_VIRTUAL_DATA_RW		NTV2_FOURCC ('v', 'd', 'a', 't')	///< @brief Identifies NTV2VirtualData struct
 		#define NTV2_TYPE_BANKGETSET			NTV2_FOURCC ('b', 'n', 'k', 'S')	///< @brief Identifies NTV2BankSelGetSetRegs struct
+		#define NTV2_TYPE_ACCONTROL				NTV2_FOURCC ('c', 'o', 'n', 't')	///< @brief Identifies AUTOCIRCULATE_STATUS struct
 		#define NTV2_TYPE_ACSTATUS				NTV2_FOURCC ('s', 't', 'a', 't')	///< @brief Identifies AUTOCIRCULATE_STATUS struct
 		#define NTV2_TYPE_ACXFER				NTV2_FOURCC ('x', 'f', 'e', 'r')	///< @brief Identifies AUTOCIRCULATE_TRANSFER struct
 		#define NTV2_TYPE_ACXFERSTATUS			NTV2_FOURCC ('x', 'f', 's', 't')	///< @brief Identifies AUTOCIRCULATE_TRANSFER_STATUS struct
@@ -5471,7 +5474,6 @@ typedef enum
 		#define NTV2_TYPE_AJADEBUGLOGGING		NTV2_FOURCC ('d', 'b', 'l', 'g')	///< @brief Identifies NTV2DebugLogging struct
 		#define NTV2_TYPE_AJABUFFERLOCK			NTV2_FOURCC ('b', 'f', 'l', 'k')	///< @brief Identifies NTV2BufferLock struct
 		#define NTV2_TYPE_AJABITSTREAM			NTV2_FOURCC ('b', 't', 's', 't')	///< @brief Identifies NTV2Bitstream struct
-		#define NTV2_TYPE_AJADMASTREAM			NTV2_FOURCC ('d', 'm', 's', 't')	///< @brief Identifies NTV2DmaStream struct
 		#define NTV2_TYPE_AJASTREAMCHANNEL		NTV2_FOURCC ('s', 't', 'c', 'h')	///< @brief Identifies NTV2StreamChannel struct
 		#define NTV2_TYPE_AJASTREAMBUFFER		NTV2_FOURCC ('s', 't', 'b', 'u')	///< @brief Identifies NTV2StreamBuffer struct
 		#if defined(NTV2_DEPRECATE_16_3)
@@ -5498,7 +5500,6 @@ typedef enum
 													(_x_) == NTV2_TYPE_AJADEBUGLOGGING	||	\
 													(_x_) == NTV2_TYPE_AJABUFFERLOCK	||	\
 													(_x_) == NTV2_TYPE_AJABITSTREAM		||	\
-													(_x_) == NTV2_TYPE_AJADMASTREAM		||	\
 													(_x_) == NTV2_TYPE_AJASTREAMCHANNEL	||	\
 													(_x_) == NTV2_TYPE_AJASTREAMBUFFER)
 
@@ -5570,11 +5571,6 @@ typedef enum
 		#define BITSTREAM_MCAP_DATA					6			///< @brief MCAP data register
 		#define BITSTREAM_NUM_REGISTERS				7			///< @brief Number of MCAP registes
 	
-		// DMA Stream flags
-		#define DMASTREAM_START						BIT(0)		///< @brief Used in ::NTV2DmaStream to start DMA streaming
-		#define DMASTREAM_STOP						BIT(1)		///< @brief Used in ::NTV2DmaStream to stop DMA streaming
-		#define DMASTREAM_TO_HOST					BIT(2)		///< @brief Used in ::NTV2DmaStream to host
-	
 		#if !defined (NTV2_BUILDING_DRIVER)
 			/**
 				Convenience macros that delimit the new structs.
@@ -5607,7 +5603,7 @@ typedef enum
 			#define xHEXN(__x__,__n__)		"0x" << HEXN((__x__),(__n__))
 			#define HEX0N(__x__,__n__)		std::hex << std::uppercase << std::setw(int(__n__)) << std::setfill('0') << (__x__) << std::dec << std::setfill(' ') << std::nouppercase
 			#define xHEX0N(__x__,__n__)		"0x" << HEX0N((__x__),(__n__))
-			#define DEC(__x__)				std::dec << std::right << (__x__)
+			#define DEC(__x__)				std::dec << std::right << (int(__x__))
 			#define DECN(__x__,__n__)		std::dec << std::setw(int(__n__)) << std::right << (__x__)
 			#define DEC0N(__x__,__n__)		std::dec << std::setw(int(__n__)) << std::setfill('0') << std::right << (__x__) << std::dec << std::setfill(' ')
 			#define OCT(__x__)				std::oct << (__x__) << std::dec
@@ -5712,7 +5708,6 @@ typedef enum
 		NTV2_STRUCT_END(NTV2FrameDimensions)
 
 
-		#if !defined (NTV2_BUILDING_DRIVER)
 		/**
 			@brief		Describes a segmented data transfer (copy or move) from a source memory location to a
 						destination location, with independent pitch and direction attributes for source and
@@ -5725,18 +5720,13 @@ typedef enum
 						The element size defaults to 1 byte per element, must be a power-of-2, and cannot be
 						larger than 8 bytes.
 						There are also some optional attributes:
-						-	Optional "source vertical flip" flag to indicate that the source offset is
-							interpreted as an offset, in elements, from the bottom of the source buffer, and
-							during the transfer, the source pitch is subtracted instead of added. Defaults to
-							normal "from top" source offset reference.
-						-	Optional "destination vertical flip" flag to indicate that the destination offset
-							is interpreted as an offset, in elements, from the bottom of the destination buffer,
-							and during the transfer, the destination pitch is subtracted instead of added.
-							Defaults to normal "from top" destination offset reference.
+						-	Optional "source vertical flip" flag that if set indicates that during the transfer,
+							the source is read bottom-to-top. Defaults to normal "top-to-bottom" operation.
+						-	Optional "destination vertical flip" flag that if set indicates that during the
+							transfer, the destination is written bottom-to-top. Defaults to normal operation.
 		**/
-		class AJAExport NTV2SegmentedXferInfo
-		{
-			public:
+		NTV2_STRUCT_BEGIN(NTV2SegmentedXferInfo)
+			#if !defined (NTV2_BUILDING_DRIVER)
 				/**
 					@brief	Constructs me as empty/invalid.
 				**/
@@ -5880,16 +5870,24 @@ typedef enum
 												{mSrcElementsPerRow = inPitch;	return *this;}
 
 				/**
-					@brief		Sets my source direction.
-					@param[in]	inTopDown	Specify true to traverse the source segments top-to-bottom;	 otherwise specify false for bottom-to-top.
+					@brief		Sets the scan direction for the source.
+					@param[in]	inTopDown	Specify Direction_TopToBottom, Direction_TopDown or Direction_Normal to traverse the source segments top-to-bottom;
+											otherwise specify Direction_BottomToTop, Direction_BottomUp or Direction_Flipped for bottom-to-top.
 					@return		A reference to me.
 				**/
 				inline NTV2SegmentedXferInfo &	setSourceDirection (const bool inTopDown)
-												{	mFlags &= (0xFFFFFFFF - BIT(8));
+												{	mFlags &= ~(BIT(8));	//	set top-down
 													if (!inTopDown)
-														mFlags |= BIT(8);
+														mFlags |= BIT(8);	//	set bottom-up
 													return *this;
 												}
+				/**
+					@brief		Sets the scan direction for the source.
+					@param[in]	inFlipped	Optionally specifies if my scan direction is flipped (i.e. bottom-to-top)
+											instead of top-to-bottom. Defaults to Direction_Flipped (i.e. bottom-to-top).
+					@return		A reference to me.
+				**/
+				inline NTV2SegmentedXferInfo &	setSourceFlipped (const bool inFlipped = Direction_Flipped)	{return setSourceDirection(inFlipped);}
 
 				/**
 					@brief		A convenience function that sets both my destination offset and pitch.
@@ -5915,11 +5913,24 @@ typedef enum
 				inline NTV2SegmentedXferInfo &	setDestPitch (const ULWord inPitch)				{mDstElementsPerRow = inPitch;	return *this;}
 
 				/**
-					@brief		Sets my destination scan direction.
-					@param[in]	inTopDown	Specify true to traverse the destination segments top-to-bottom;  otherwise specify false for bottom-to-top.
+					@brief		Sets the scan direction for the destination.
+					@param[in]	inTopDown	Specify Direction_TopToBottom, Direction_TopDown or Direction_Normal to traverse the destination segments top-to-bottom;
+											otherwise specify Direction_BottomToTop, Direction_BottomUp or Direction_Flipped for bottom-to-top.
 					@return		A reference to me.
 				**/
-				inline NTV2SegmentedXferInfo &	setDestDirection (const bool inTopDown)			{mFlags = (0xFFFFFFFF - BIT(9)); if (!inTopDown) mFlags |= BIT(9);	return *this;}
+				inline NTV2SegmentedXferInfo &	setDestDirection (const bool inTopDown)
+												{	mFlags &= ~(BIT(9));	//	set top-down
+													if (!inTopDown)
+														mFlags |= BIT(9);	//	set bottom-up
+													return *this;
+												}
+				/**
+					@brief		Sets the scan direction for the destination.
+					@param[in]	inFlipped	Optionally specifies if my scan direction is flipped (i.e. bottom-to-top)
+											instead of top-to-bottom. Defaults to Direction_Flipped (i.e. bottom-to-top).
+					@return		A reference to me.
+				**/
+				inline NTV2SegmentedXferInfo &	setDestFlipped (const bool inFlipped = Direction_Flipped)	{return setDestDirection(inFlipped);}
 
 				/**
 					@brief		Sets my element length.
@@ -5940,22 +5951,35 @@ typedef enum
 													return *this;
 												}
 				/**
-					@brief		Swaps my source and destination offsets and pitches.
+					@brief		Swaps my source and destination offsets, pitches and scan directions.
 					@return		A reference to me.
 				**/
 				NTV2SegmentedXferInfo &			swapSourceAndDestination (void);	//	New in SDK 16.0
 				///@}
 
-			private:
-				ULWord	mFlags;					///< @brief Lowest 2 bits determines element size, kRegMaskFrameOrientation is bit 10
+				/**
+					@name	Scan Direction Constants
+				**/
+				///@{
+				static bool Direction_TopToBottom;	///< @brief Use this in setDestDirection or setSourceDirection for top-to-bottom scanning
+				static bool Direction_TopDown;		///< @brief Use this in setDestDirection or setSourceDirection for top-to-bottom scanning
+				static bool Direction_Normal;		///< @brief Use this in setDestDirection or setSourceDirection for top-to-bottom scanning
+				static bool Direction_BottomToTop;	///< @brief Use this in setDestDirection or setSourceDirection for bottom-to-top scanning
+				static bool Direction_BottomUp;		///< @brief Use this in setDestDirection or setSourceDirection for bottom-to-top scanning
+				static bool Direction_Flipped;		///< @brief Use this in setDestDirection or setSourceDirection for bottom-to-top scanning
+				///@}
+			#endif	//	!defined (NTV2_BUILDING_DRIVER)
+
+			NTV2_BEGIN_PRIVATE
+				ULWord	mFlags;					///< @brief Lowest 2 bits determines element size, direction bits 8 & 9 (src & dst)
 				ULWord	mNumSegments;			///< @brief Number of segments to transfer (i.e. row count).
 				ULWord	mElementsPerSegment;	///< @brief Size of each segment, in elements.
 				ULWord	mInitialSrcOffset;		///< @brief Initial source offset, in elements.
 				ULWord	mInitialDstOffset;		///< @brief Initial destination offset, in elements.
 				ULWord	mSrcElementsPerRow;		///< @brief Source pitch (i.e. the span, in elements, between the starting elements of adjacent segments on the source).
 				ULWord	mDstElementsPerRow;		///< @brief Destination pitch (i.e. the span, in elements, between the starting elements of adjacent segments on the destination).
-		};
-		#endif	//	!defined (NTV2_BUILDING_DRIVER)
+			NTV2_END_PRIVATE
+		NTV2_STRUCT_END(NTV2SegmentedXferInfo)
 
 		/**
 			@brief	A generic user-space buffer object that has an address and a length.
@@ -6001,8 +6025,8 @@ typedef enum
 				ULWord		fByteCount;				///< @brief The (maximum) size of the buffer pointed to by fUserSpacePtr, in bytes.
 													///			Do not set directly. Instead, use the constructor or the Set method.
 				ULWord		fFlags;					///< @brief Reserved for future use
+				ULWord64	fKernelSpacePtr;		///< @brief Reserved -- driver use only
 				#if defined (AJAMac)
-					ULWord64	fKernelSpacePtr;	///< @brief Reserved -- Mac driver use only
 					ULWord64	fIOMemoryDesc;		///< @brief Reserved -- Mac driver use only
 					ULWord64	fIOMemoryMap;		///< @brief Reserved -- Mac driver use only
 				#else
@@ -6267,6 +6291,14 @@ typedef enum
 				}
 
 				/**
+					@brief		Truncates me to the given length. No reallocation takes place.
+					@param[in]	inByteCount		Specifies my new length. Specify zero to Deallocate.
+												Otherwise must be less than my current length.
+					@return		True if successful; otherwise false.
+				**/
+				bool			Truncate (const size_t inByteCount);
+
+				/**
 					@brief		Assigns me from another NTV2Buffer instance.
 					@param[in]	inRHS		Specifies the NTV2Buffer instance to assign ("deep" copy) to me.
 				**/
@@ -6307,6 +6339,17 @@ typedef enum
 				bool			SetFrom (const NTV2Buffer & inBuffer);
 
 				/**
+					@brief		Replaces my contents from the given hex-encoded string, resizing me if necessary.
+					@param[in]	inStr		Specifies the hex-encoded string whose contents will be
+											decoded and used to resize and fill me. Any whitespace
+											characters are skipped and ignored. All other characters
+											must be a hexadecimal digit (upper or lower case).
+					@return		True if successful; otherwise false.
+					@see		NTV2Buffer::toHexString
+				**/
+				bool			SetFromHexString (const std::string & inStr);
+
+				/**
 					@brief		Replaces my contents from the given memory buffer, resizing me to the new byte count.
 					@param[in]	pInSrcBuffer	Specifies the memory buffer whose contents are to be copied into my own.
 					@param[in]	inByteCount		Specifies the number of bytes to be copied.
@@ -6327,9 +6370,9 @@ typedef enum
 				bool			CopyFrom (const NTV2Buffer & inSrcBuffer, const ULWord inSrcByteOffset, const ULWord inDstByteOffset, const ULWord inByteCount);
 
 				/**
-					@brief		Copies data segments from a given buffer into me.
+					@brief		Copies data segments from a given source buffer into me (the destination).
 					@param[in]	inSrcBuffer			Specifies the source memory buffer to be copied into me.
-					@param[in]	inXferInfo			The segmented transfer info.
+					@param[in]	inXferInfo			Specifies how segments are transferred.
 					@return		True if successful; otherwise false.
 					@note		Offsets and lengths are checked. The function will return false for any overflow or underflow.
 				**/
@@ -6384,6 +6427,16 @@ typedef enum
 					@return A string containing a human-readable representation of me.
 				**/
 				std::string		AsString (UWord inDumpMaxBytes = 0) const;
+
+				/**
+					@brief	Converts my contents into a hex-encoded string.
+					@param[out]	outStr				Receives the hexadecimal-encoded string representation of my contents.
+					@param[in]	inLineBreakInterval	Optionally inserts a newline into the resulting string at the specified
+													byte count interval. Defaults to zero (no newlines are inserted).
+					@return True if successful; otherwise false.
+					@see	NTV2Buffer::SetFromHexString
+				**/
+				bool			toHexString (std::string & outStr, const size_t inLineBreakInterval = 0) const;
 
 				/**
 					@brief	Dumps me in hex/octal/decimal, with/without Ascii, to the given output stream.
@@ -6634,14 +6687,14 @@ typedef enum
 
 				/**
 					@brief		Answers with my contents as a character string.
-					@param[out] outString		Receives the character string copied verbatim from my contents.
+					@param[out] outString		Receives the character string copied from my contents.
 					@param[in]	inU8Offset		The starting offset, in bytes, where copying will commence.
 					@param[in]	inMaxSize		Specifies the maximum number of 8-bit values to be returned.
 												Use zero for unlimited.
 												The actual number of returned 8-bit values may be less than this, depending on my size.
 												Defaults to 128.
 					@return						True if successful;	 otherwise false.
-					@note		This function blindly copies my contents into the outgoing string, without checking for validity.
+					@note		Byte copying terminates at the first zero byte that's encountered in my buffer.
 				**/
 				bool						GetString (std::string & outString, const size_t inU8Offset = 0, const size_t inMaxSize = 128) const;
 
@@ -6652,7 +6705,7 @@ typedef enum
 												Use zero for unlimited.
 												The actual number of returned 8-bit values may be less than this, depending on my size.
 												Defaults to 128.
-					@note		This function blindly copies my contents into the outgoing string, without checking for validity.
+					@note		Byte copying terminates at the first zero byte that's encountered in my buffer.
 				**/
 				inline std::string			GetString (const size_t inU8Offset = 0, const size_t inMaxSize = 128) const {std::string result; GetString(result, inU8Offset, inMaxSize); return result;}
 
@@ -6822,8 +6875,8 @@ typedef enum
 			typedef std::map <NTV2TCIndex, NTV2_RP188>	NTV2TimeCodes;				///< @brief A mapping of NTV2TCIndex enum values to NTV2_RP188 structures.
 			typedef NTV2TimeCodes::const_iterator		NTV2TimeCodesConstIter;		///< @brief A handy const interator for iterating over NTV2TCIndex/NTV2TimeCodeList pairs.
 
-			typedef std::set <NTV2TCIndex>				NTV2TCIndexes;				///< @brief A set of distinct NTV2TCIndex values.
-			typedef NTV2TCIndexes::const_iterator		NTV2TCIndexesConstIter;		///< @brief A handy const interator for iterating over an NTV2TCIndexes set.
+			typedef std::set <NTV2TCIndex>				NTV2TCIndexes, NTV2TCIndexSet;	///< @brief A set of distinct NTV2TCIndex values.
+			typedef NTV2TCIndexes::const_iterator		NTV2TCIndexesConstIter, NTV2TCIndexSetConstIter;	///< @brief A handy const interator for iterating over an NTV2TCIndexes set.
 
 			/**
 				@brief	Appends the given NTV2_RP188 struct to the specified NTV2TimeCodeList.
@@ -7904,24 +7957,34 @@ typedef enum
 				inline ULWord					GetDroppedFrameCount (void) const						{return acFramesDropped;}
 
 				/**
-					@return		The number of audio bytes deposited/transferred into the host audio buffer after
-								the last successful CNTV2Card::AutoCirculateTransfer.
+					@return		For the transferred frame, the number of valid audio bytes that were deposited
+                                into the device audio capture buffer.
+					@see		audop-capture
 				**/
 				inline ULWord					GetCapturedAudioByteCount (void) const					{return acAudioTransferSize;}
 
 				/**
-					@return		The number of ancillary data bytes deposited/transferred into the host anc buffer after
-								the last successful CNTV2Card::AutoCirculateTransfer.
+					@return		For the transferred frame, the number of valid ancillary data bytes that were deposited
+                                by the Anc Extractor into the device anc buffer.
 					@param[in]	inField2	Specify \c true for Field 2;  otherwise \c false (the default) for Field 1 (or progessive).
+					@see		anccapture
 				**/
 				inline ULWord					GetCapturedAncByteCount (const bool inField2 = false) const {return inField2 ? acAncField2TransferSize : acAncTransferSize;}
+
+				/**
+					@return		For the transferred frame, the number of valid HDMI auxiliary data bytes that were deposited
+                                by the Aux Extractor into the device aux buffer.
+					@param[in]	inField2	Specify \c true for Field 2;  otherwise \c false (the default) for Field 1 (or progessive).
+					@see		auxcapture
+				**/
+				inline ULWord					GetCapturedAuxByteCount (const bool inField2 = false) const {return GetCapturedAncByteCount(inField2);}
 
 				NTV2_RPC_CODEC_DECLS
 				NTV2_IS_STRUCT_VALID_IMPL(acHeader,acTrailer)
 
 				NTV2_BEGIN_PRIVATE
-					inline explicit							AUTOCIRCULATE_TRANSFER_STATUS (const AUTOCIRCULATE_TRANSFER_STATUS & inObj) : acHeader(0xFEFEFEFE, 0) {(void) inObj;}					///< @brief You cannot construct an AUTOCIRCULATE_TRANSFER_STATUS from another.
-					inline AUTOCIRCULATE_TRANSFER_STATUS &	operator = (const AUTOCIRCULATE_TRANSFER_STATUS & inRHS)					{(void) inRHS; return *this;}	///< @brief You cannot assign AUTOCIRCULATE_TRANSFER_STATUSs.
+					inline explicit	AUTOCIRCULATE_TRANSFER_STATUS (const AUTOCIRCULATE_TRANSFER_STATUS & inObj) : acHeader(0xFEFEFEFE, 0) {(void) inObj;}	///< @brief You cannot construct an AUTOCIRCULATE_TRANSFER_STATUS from another.
+					inline AUTOCIRCULATE_TRANSFER_STATUS &	operator = (const AUTOCIRCULATE_TRANSFER_STATUS & inRHS)	{(void) inRHS; return *this;}	///< @brief You cannot assign AUTOCIRCULATE_TRANSFER_STATUSs.
 				NTV2_END_PRIVATE
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
 		NTV2_STRUCT_END (AUTOCIRCULATE_TRANSFER_STATUS)
@@ -8148,6 +8211,7 @@ typedef enum
 					@note	If using a non-NULL pointer address for either \c pInANCBuffer or \c pInANCF2Buffer, be sure they're aligned to the nearest 8-byte boundary.
 					@note	If using a non-zero byte count, AJA recommends using a 2048-byte buffer (per field). There's no need to fill the entire buffer,
 							but the data it contains should be compatible with what's documented in \ref anccapture or \ref ancplayout (as appropriate).
+					@note	This function also works for \ref auxiliarydata.
 					@return True if successful;	 otherwise false.
 				**/
 				bool									SetAncBuffers (ULWord * pInANCBuffer, const ULWord inANCByteCount,
@@ -8591,105 +8655,6 @@ typedef enum
 		NTV2_STRUCT_END (NTV2Bitstream)
 
 
-		/**
-			@brief	This is used for streaming dma.
-			@note	This struct uses a constructor to properly initialize itself.
-					Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
-		**/
-		NTV2_STRUCT_BEGIN (NTV2DmaStream)
-			NTV2_HEADER		mHeader;			///< @brief The common structure header -- ALWAYS FIRST!
-				NTV2Buffer		mBuffer;			///< @brief Virtual address of a DMA stream buffer and its length.
-				NTV2Channel		mChannel;			///< @brief Video stream channel
-				ULWord			mFlags;				///< @brief Action flags (lock, unlock, etc)
-				ULWord			mStatus;			///< @brief Action status
-				ULWord			mReserved[32];		///< @brief Reserved for future expansion.
-			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
-
-			#if !defined (NTV2_BUILDING_DRIVER)
-				/**
-					@name	Construction & Destruction
-				**/
-				///@{
-				explicit	NTV2DmaStream ();		///< @brief Constructs a default NTV2DmaStream struct.
-				inline		~NTV2DmaStream ()	{}	///< @brief My default destructor, which frees all allocatable fields that I own.
-
-				/**
-					@brief	Constructs an NTV2DmaStream object to use to specify a streaming buffer.
-					@param	inBuffer		Specifies the memory to use for streaming.
-					@param	inChannel		Specifies the video channel to use for streaming.
-					@param	inFlags			Specifies action flags (start, stop, etc.).
-				**/
-				explicit	NTV2DmaStream (const NTV2Buffer & inBuffer, const NTV2Channel inChannel, const ULWord inFlags);
-
-				/**
-					@brief	Constructs an NTV2DmaStream object to use in a CNTV2Card::StartDmaStream.
-					@param	pInBuffer		Specifies a pointer to the host buffer to stream to or from.
-					@param	inByteCount		Specifies a the length of the buffer in bytes.
-					@param	inChannel		Specifies the video channel to use for streaming.
-					@param	inFlags			Specifies action flags (start, stop etc)
-				**/
-				explicit	NTV2DmaStream (const ULWord * pInBuffer, const ULWord inByteCount, const NTV2Channel inChannel, const ULWord inFlags);
-				///@}
-
-				/**
-					@brief	Constructs an NTV2DmaStream object to use to specify a streaming flags.
-					@param	inChannel		Specifies the video channel to use for streaming.
-					@param	inFlags			Specifies action flags (start, stop, etc.).
-				**/
-				explicit	NTV2DmaStream (const NTV2Channel inChannel, const ULWord inFlags);
-
-				/**
-					@name	Changing
-				**/
-				///@{
-				/**
-					@brief	Sets the buffer to use for streaming.
-					@param	inBuffer		Specifies the memory containing the DMA buffer.
-					@return True if successful;	 otherwise false.
-				**/
-				bool		SetBuffer (const NTV2Buffer & inBuffer);
-
-				/**
-					@brief	Sets the buffer to use for streaming.
-					@param	pInBuffer			Specifies a pointer to the host buffer.
-					@param	inByteCount			Specifies a the length of the buffer in bytes.
-					@return True if successful;	 otherwise false.
-				**/
-				inline bool SetBuffer (const ULWord * pInBuffer, const ULWord inByteCount)	{return SetBuffer(NTV2Buffer(pInBuffer, inByteCount));}
-
-				///@{
-				/**
-					@brief	Sets the video channel to use for streaming.
-					@param	inChannel		Specifies the video channel.
-					@return True if successful;	 otherwise false.
-				**/
-				bool		SetChannel (const NTV2Channel inChannel);
-
-				/**
-					@brief	Sets the action flags.
-					@param	inFlags			Specifies action flags (fragment, swap, etc)
-				**/
-				inline void SetFlags (const ULWord inFlags)		{NTV2_ASSERT_STRUCT_VALID;	mFlags = inFlags;}
-
-				/**
-					@brief	Resets the struct to its initialized state.
-				**/
-				inline void Clear (void)		{SetBuffer(NTV2Buffer());}
-				///@}
-
-				/**
-					@brief	Prints a human-readable representation of me to the given output stream.
-					@param	inOutStream		Specifies the output stream to use.
-					@return A reference to the output stream.
-				**/
-				std::ostream &	Print (std::ostream & inOutStream) const;
-
-				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
-
-			#endif	//	!defined (NTV2_BUILDING_DRIVER)
-		NTV2_STRUCT_END (NTV2DmaStream)
-
-
 		// Stream channel action flags
 		#define NTV2_STREAM_CHANNEL_INITIALIZE			BIT(0)			///< @brief Used in ::NTV2StreamChannel to initialize the stream
         #define NTV2_STREAM_CHANNEL_RELEASE				BIT(1)			///< @brief Used in ::NTV2StreamChannel to release stream
@@ -8702,9 +8667,10 @@ typedef enum
 		// Stream channel state flags
 		#define NTV2_STREAM_CHANNEL_STATE_DISABLED		BIT(0)			///< @brief Used in ::NTV2StreamChannel stream disabled
 		#define NTV2_STREAM_CHANNEL_STATE_INITIALIZED	BIT(1)			///< @brief Used in ::NTV2StreamChannel stream initialized
-		#define NTV2_STREAM_CHANNEL_STATE_IDLE			BIT(2)			///< @brief Used in ::NTV2StreamChannel stream idle
-		#define NTV2_STREAM_CHANNEL_STATE_ACTIVE		BIT(3)			///< @brief Used in ::NTV2StreamChannel stream active
-		#define NTV2_STREAM_CHANNEL_STATE_ERROR			BIT(4)			///< @brief Used in ::NTV2StreamChannel stream error
+		#define NTV2_STREAM_CHANNEL_STATE_RELEASED		BIT(2)			///< @brief Used in ::NTV2StreamChannel stream initialized
+		#define NTV2_STREAM_CHANNEL_STATE_IDLE			BIT(3)			///< @brief Used in ::NTV2StreamChannel stream idle
+		#define NTV2_STREAM_CHANNEL_STATE_ACTIVE		BIT(4)			///< @brief Used in ::NTV2StreamChannel stream active
+		#define NTV2_STREAM_CHANNEL_STATE_ERROR			BIT(5)			///< @brief Used in ::NTV2StreamChannel stream error
 
 		// Stream buffer action flags
 		#define NTV2_STREAM_BUFFER_QUEUE				BIT(1)			///< @brief Used in ::NTV2StreamBuffer to add buffer to queue
@@ -8714,9 +8680,9 @@ typedef enum
 		// Stream buffer state flags
 		#define NTV2_STREAM_BUFFER_STATE_QUEUED			BIT(0)			///< @brief Used in ::NTV2StreamBuffer buffer queued
 		#define NTV2_STREAM_BUFFER_STATE_LINKED			BIT(1)			///< @brief Used in ::NTV2StreamBuffer buffer linked
-		#define NTV2_STREAM_BUFFER_STATE_ACTIVE			BIT(2)			///< @brief Used in ::NTV2StreamBuffer buffer transfering
-		#define NTV2_STREAM_BUFFER_STATE_COMPLETED		BIT(3)			///< @brief Used in ::NTV2StreamBuffer buffer completed
-		#define NTV2_STREAM_BUFFER_STATE_FLUSHED		BIT(4)			///< @brief Used in ::NTV2StreamBuffer buffer flushed
+		#define NTV2_STREAM_BUFFER_STATE_COMPLETED		BIT(2)			///< @brief Used in ::NTV2StreamBuffer buffer completed
+		#define NTV2_STREAM_BUFFER_STATE_FLUSHED		BIT(3)			///< @brief Used in ::NTV2StreamBuffer buffer flushed
+		#define NTV2_STREAM_BUFFER_STATE_RELEASED		BIT(4)			///< @brief Used in ::NTV2StreamBuffer buffer released
 		#define NTV2_STREAM_BUFFER_STATE_ERROR			BIT(5)			///< @brief Used in ::NTV2StreamBuffer buffer error
 
 		// Stream action status flags
@@ -8734,15 +8700,15 @@ typedef enum
 				NTV2Channel		mChannel;			///< @brief Stream channel
 				ULWord			mFlags;				///< @brief Action flags
 				ULWord			mStatus;            ///< @brief Action status
-				ULWord64		mSteps;				///< @brief Stream number of steps
                 ULWord			mStreamState;		///< @brief Stream state
 				ULWord64		mBufferCookie;		///< @brief Active buffer user cookie
 				LWord64			mStartTime;			///< @brief Stream start time
 				LWord64			mStopTime;			///< @brief Stream stop time
 				ULWord64		mQueueCount;		///< @brief Number of buffers queued
 				ULWord64		mReleaseCount;		///< @brief Number of buffers released
-				ULWord64		mActiveCount;		///< @brief Number of buffers active
-				ULWord64		mRepeatCount;		///< @brief Number of buffer repeats
+				ULWord64		mActiveCount;		///< @brief Number of active transfers
+				ULWord64		mRepeatCount;		///< @brief Number of repeated transfers
+				ULWord64		mIdleCount;			///< @brief Number of idle transfers
 				ULWord			mReserved[32];		///< @brief Reserved for future expansion.
 			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
 
@@ -8763,6 +8729,24 @@ typedef enum
 				**/
 				inline ULWord GetQueueDepth (void)		{return (ULWord)(mQueueCount - mReleaseCount);}
 
+				/**
+					@brief	Is the stream idle.
+					@return True if idle.
+				**/
+				inline bool IsIdle (void)		{return ((mStreamState & NTV2_STREAM_CHANNEL_STATE_IDLE) != 0);}
+
+				/**
+					@brief	Is the stream active.
+					@return True if active.
+				**/
+				inline bool IsActive (void)		{return ((mStreamState & NTV2_STREAM_CHANNEL_STATE_ACTIVE) != 0);}
+
+				/**
+					@brief	Has the stream encountered an error.
+					@return True if error.
+				**/
+				inline bool HasError (void)		{return ((mStreamState & NTV2_STREAM_CHANNEL_STATE_ERROR) != 0);}
+
 				std::ostream &	Print (std::ostream & inOutStream) const;
 
 				NTV2_IS_STRUCT_VALID_IMPL(mHeader, mTrailer)
@@ -8777,14 +8761,16 @@ typedef enum
 				ULWord			mFlags;				///< @brief Action flags
 				ULWord			mStatus;            ///< @brief Action status
 				NTV2Buffer		mBuffer;			///< @brief Virtual address of a stream buffer and its length.
+				ULWord			mSegmentSize;		///< @brief Segmented transfer size
+				LWord			mSegmentPitch;		///< @brief Segmented transfer pitch
+				ULWord			mNumSegments;		///< @brief Number of segments
 				ULWord64		mBufferCookie;		///< @brief Buffer User cookie
 				ULWord			mBufferState;		///< @brief Buffer state
 				LWord64			mQueueTime;			///< @brief Queue time (queued to driver by app)
-				LWord64			mLinkTime;			///< @brief Link time (linked into stream by irq)
-				LWord64			mStartTime;			///< @brief Active start time (on air interrupt time)
-				LWord64			mStopTime;			///< @brief Active stop time (off air interrupt time)
+				LWord64			mActiveTime;		///< @brief Active time (on air interrupt time)
+				LWord64			mCompleteTime;		///< @brief Complete time (off air interrupt time)
 				LWord64			mFlushTime;			///< @brief Flush time (if flushed before on air)
-				ULWord64		mRepeatCount;		///< @brief Number of repeat cycles
+				ULWord64		mTransferCount;		///< @brief Number of transfers
 				ULWord			mReserved[32];		///< @brief Reserved for future expansion.
 			NTV2_TRAILER	mTrailer;			///< @brief The common structure trailer -- ALWAYS LAST!
 
@@ -8871,6 +8857,14 @@ typedef enum
 				@todo	This needs to be moved to a C++ compatible "device features" module.
 			**/
 			AJAExport bool NTV2DeviceGetSupportedVideoFormats (const NTV2DeviceID inDeviceID, NTV2VideoFormatSet & outFormats);
+
+			/**
+				@brief		Appends the given ::NTV2VideoFormatSet contents into the given set.
+				@param		inOutSet	The set to which the other set will be appended.
+				@param[in]	inSet		Specifies the set whose contents will be appended.
+				@return		A reference to the modified set.
+			**/
+			AJAExport NTV2VideoFormatSet & operator += (NTV2VideoFormatSet & inOutSet, const NTV2VideoFormatSet inSet);
 
 			/**
 				@brief		Prints the given ::NTV2VideoFormatSet contents into the given output stream.

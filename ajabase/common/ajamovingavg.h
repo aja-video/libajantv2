@@ -98,6 +98,11 @@ template <typename T> class AJAMovingAvg
 		inline bool				isEmpty (void) const			{AJAAutoLock tmp(&mLock);  return mValues.empty();}
 
 		/**
+		 *	@returns true if I've received at least enough samples to fill my deque.
+		 */
+		inline bool				isFilled (void) const			{AJAAutoLock tmp(&mLock);  return totalSamples() >= sampleCapacity();}
+
+		/**
 		 *	@returns my recent average.
 		 */
 		inline T				average (void) const

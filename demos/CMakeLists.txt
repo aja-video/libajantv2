@@ -17,6 +17,9 @@ add_subdirectory(ntv2enumerateboards)
 add_subdirectory(ntv2fieldburn)
 add_subdirectory(ntv2hdrsetup)
 if(NOT AJA_DISABLE_QT)
+    add_subdirectory(ntv2qtpreview)
+    add_subdirectory(ntv2streampreview)
+    add_subdirectory(ntv2qtmultiinput)
     add_subdirectory(ntv2konaipj2ksetup)
     add_subdirectory(ntv2konaipjsonsetup)
 endif()
@@ -30,20 +33,15 @@ add_subdirectory(ntv2streamplayer)
 add_subdirectory(ntv2switchbitfile)
 
 if(NOT AJANTV2_BUILD_OPENSOURCE)
-    if(NOT AJA_DISABLE_QT)
-        add_subdirectory(ntv2qtmultiinput) 
-        add_subdirectory(ntv2qtpreview) # optionally requires libajacc
-        add_subdirectory(ntv2streampreview) # optionally requires libajacc
-    endif()
-
     add_subdirectory(ntv2ccgrabber)  
     add_subdirectory(ntv2ccplayer)
 endif()
-    
+
 if (NOT AJA_DISABLE_AMD)
     add_subdirectory(AMD)
 endif()
 if (NOT AJA_DISABLE_NVIDIA)
+    message(STATUS "Adding NVIDIA demos...")
     add_subdirectory(NVIDIA)
 endif()
 

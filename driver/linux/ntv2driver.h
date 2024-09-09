@@ -38,7 +38,9 @@
 #define NTV2_DEVICE_ID_KONA3G_P2P			0xDB07
 #define NTV2_DEVICE_ID_KONA3G_QUAD_P2P		0xDB08
 #define NTV2_DEVICE_ID_CORVID24				0xDB09
-#define NTV2_DEVICE_ID_TTAP					0xDB11 
+#define NTV2_DEVICE_ID_TTAP					0xDB11
+#define NTV2_DEVICE_ID_IO4K                 0xEB07
+#define NTV2_DEVICE_ID_IO4K_UFC             0xEB0A
 #define NTV2_DEVICE_ID_KONA4				0xEB0B
 #define NTV2_DEVICE_ID_KONA4_UFC			0xEB0C
 #define NTV2_DEVICE_ID_CORVID88				0xEB0D
@@ -93,7 +95,6 @@ int         ntv2_release(struct inode *minode, struct file *mfile);
 #define smp_mb__before_clear_bit smp_mb__before_atomic
 #define smp_mb__after_clear_bit  smp_mb__after_atomic
 #endif
-
 
 #endif	// NTV2_DRIVER_HEADER
 

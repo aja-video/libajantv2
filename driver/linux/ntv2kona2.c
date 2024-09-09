@@ -27,6 +27,13 @@
 #include "driverdbg.h"
 #include "../ntv2kona.h"
 
+/*********************************************/
+/* Prototypes for private utility functions. */
+/*********************************************/
+void SetXpt8SDIOut4InputSelect (ULWord boardNumber, NTV2OutputXptID value);
+void GetXpt8SDIOut4InputSelect(ULWord boardNumber, NTV2OutputXptID* value);
+void SetXpt8SDIOut3InputSelect (ULWord boardNumber, NTV2OutputXptID value);
+void GetXpt8SDIOut3InputSelect(ULWord boardNumber, NTV2OutputXptID* value);
 
 void SetXpt8SDIOut4InputSelect (ULWord boardNumber, NTV2OutputXptID value)
 {
@@ -328,6 +335,13 @@ bool ntv2WriteVirtRegCon32(Ntv2SystemContext* context, uint32_t regNum, uint32_t
 {
 	if (context == NULL) return 0;
 	WriteRegister(context->devNum, regNum, data, NO_MASK, NO_SHIFT);
+	return true;
+}
+
+bool ntv2WriteXlnxRegCon32(Ntv2SystemContext* context, uint32_t regNum, uint32_t data)
+{
+	if (context == NULL) return 0;
+	WriteXlnxRegister(context->devNum, regNum, data);
 	return true;
 }
 

@@ -347,6 +347,18 @@ void AJACommandLineParser::ParseArgs(const AJAStringList &args)
     }
 }
 
+void AJACommandLineParser::ParseArgs(int argc, const char *argv[])
+{
+    if (argc == 0 || argc == 1 || argv == NULL)
+        return;
+
+    AJAStringList argList;
+    for (int i = 0; i < argc; i++)
+        argList.push_back(std::string(argv[i]));
+
+    ParseArgs(argList);
+}
+
 void AJACommandLineParser::ParseArgs(int argc, char *argv[])
 {
     if (argc == 0 || argc == 1 || argv == NULL)

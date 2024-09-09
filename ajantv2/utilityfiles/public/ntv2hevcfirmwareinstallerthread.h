@@ -8,7 +8,6 @@
 #define __NTV2HEVCFIRMWAREINSTALLERTHREAD_H__
 
 #include "ntv2card.h"
-#include "ntv2devicescanner.h"
 #include "ajabase/system/thread.h"
 
 // Bar offsets
@@ -94,12 +93,12 @@ class CNTV2HEVCFirmwareInstallerThread : public AJAThread
 	
 		/**
 			@brief		Constructs me for a given device and bitfile.
-			@param[in]	inDeviceInfo	Specifies the device to be flashed.
+			@param[in]	inDevice		Specifies the device to be flashed.
 			@param[in]	inBitfilePath	Specifies the path (relative or absolute) to the firmware bitfile to install.
 			@param[in]	inVerbose		If true (the default), emit detailed messages to the standard output stream when
 										flashing has started and when it has successfully completed; otherwise, don't.
 		**/
-		explicit									CNTV2HEVCFirmwareInstallerThread (const NTV2DeviceInfo & inDeviceInfo,
+		explicit									CNTV2HEVCFirmwareInstallerThread (CNTV2Card & inDevice,
 																				  const std::string & inBitfilePath,
 																				  const bool inVerbose = true);
 		virtual inline								~CNTV2HEVCFirmwareInstallerThread ()				{}
@@ -189,11 +188,10 @@ class CNTV2HEVCFirmwareInstallerThread : public AJAThread
 
 	//	Instance Data
 	protected:
-		const NTV2DeviceInfo						m_deviceInfo;				///<	Device info passed to me at construction
+		CNTV2Card &									m_device;					///<	Device passed to me at birth
 		std::string									m_bitfilePath;				///<	Absolute path to bitfile on host that's to be flashed into device
 		bool										m_updateSuccessful;			///<	Initially False, is set True if firmware successfully installed
 		const bool									m_verbose;					///<	Verbose logging to cout/cerr?
-		mutable CNTV2Card							m_device;					///<	Talks to the AJA device
 		mutable SSC_GET_FIRMWARE_PROGRESS_STRUCT	m_statusStruct;				///<	Firmware update progress
 	
 		uint64_t									m_updateTime;
@@ -203,6 +201,5 @@ class CNTV2HEVCFirmwareInstallerThread : public AJAThread
 	
 		HevcDeviceInfo								m_hevcInfo;
 };	//	HEVCFirmwareInstallerThread
-
 
 #endif	//	__NTV2HEVCFIRMWAREINSTALLERTHREAD_H__

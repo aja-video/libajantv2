@@ -46,7 +46,6 @@ class AJAPnpImpl;
 	@brief		This is a platform-agnostic plug-and-play class that notifies a client when AJA devices are
 				attached/detached, powered on/off, sleep/wake, etc.
 	@ingroup	AJAGroupPnp
-	@bug		This class has no Linux implementation.
 **/
 class AJA_EXPORT AJAPnp
 {
@@ -63,25 +62,26 @@ public:	//	INSTANCE METHODS
 	virtual ~AJAPnp();
 
 	/**
-	 *  @brief		Installs the given plug-n-play notification callback function, replacing any callback function that
-	 *				may have been installed previously. If any matching devices are attached to the host, the callback
-	 *				function is immediately called for each attached device with the AJA_Pnp_DeviceAdded message.
+	 *  @brief		Installs the given plug & play notification callback function, replacing any callback function that
+	 *				may have been installed earlier.
 	 *
-	 *	@param[in]	callback		Specifies a pointer to a client-defined function to be called when AJA devices
-	 *								sleep/wake or are attached/detached to/from the host. If non-NULL, must be valid.
-	 *	@param[in]	refCon			Specifies a pointer-sized reference cookie that gets passed to the callback function.
-	 *								Defaults to NULL.
-	 *	@param[in]	devices			Specifies a bit mask that filters which devices to include/ignore (see implementation).
-	 *								Use zero (the default) to see all possible devices.
+	 *	@param[in]	pInCallback		Specifies a valid (non-NULL) pointer to a client-defined function to be called when
+	 *								AJA devices are attached/detached to/from the host.
+	 *	@param[in]	inRefCon		Optionally specifies a pointer-sized reference value that gets passed to the callback
+	 *								function. Defaults to zero.
+	 *	@param[in]	inDeviceMask	Optionally specifies a bit mask that filters the types of devices to include/ignore
+	 *								(see AJAPnpDevice). Defaults to no filtering (i.e. notify for any/all device types).
 	 *
-	 *	@bug		The current Windows implementation doesn't automatically invoke the callback for each attached device.
-	 *				As a workaround, the caller must explicitly enumerate the devices immediately before or after calling
-	 *				this function.
+	 *	@note		On macOS, the callback function is immediately called for each currently-attached matching device.
+	 *
+	 *	@bug		macOS: doesn't work on programs that don't provide a run loop.
+	 *
+	 *	@bug		Windows: doesn't work if the calling process is a Windows service.
 	 *
 	 *	@return		AJA_STATUS_SUCCESS		Install succeeded
 	 *				AJA_STATUS_FAIL			Install failed
 	 */
-	virtual AJAStatus Install(AJAPnpCallback callback, void* refCon= NULL, uint32_t devices = 0);
+	virtual AJAStatus Install (AJAPnpCallback pInCallback, void * inRefCon = NULL, uint32_t inDeviceMask = 0xFFFFFFFF);
 
 	/**
 	 *	@return		the address of the currently-installed callback (NULL if none installed).

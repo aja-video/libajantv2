@@ -80,6 +80,16 @@ static const ULWord	gChannelToSDIOutVPIDLuminance[] = {	kVRegNTV2VPIDLuminance1,
 static const ULWord	gChannelToSDIOutVPIDRGBRange[] = {	kVRegNTV2VPIDRGBRange1, kVRegNTV2VPIDRGBRange2, kVRegNTV2VPIDRGBRange3, kVRegNTV2VPIDRGBRange4,
 														kVRegNTV2VPIDRGBRange5, kVRegNTV2VPIDRGBRange6, kVRegNTV2VPIDRGBRange7, kVRegNTV2VPIDRGBRange8, 0 };
 
+/*********************************************/
+/* Prototypes for private utility functions. */
+/*********************************************/
+bool SetTransferCharacteristics(uint32_t* inOutVPIDValue, NTV2VPIDXferChars iXferChars);
+VPIDStandard GetVPIDStandard(uint32_t inOutVPIDValue);
+bool SetColorimetry(uint32_t* inOutVPIDValue, NTV2VPIDColorimetry inColorimetry);
+bool SetLuminance(uint32_t* inOutVPIDValue, NTV2VPIDLuminance inLuminance);
+VPIDBitDepth GetBitDepth(uint32_t inOutVPIDValue);
+bool SetBitDepth(uint32_t* inOutVPIDValue, VPIDBitDepth inBitDepth);
+bool SetRGBRange(uint32_t* inOutVPIDValue, NTV2VPIDRGBRange inRGBRange);
 
 VPIDChannel GetChannelFrom425XPT(ULWord index)
 {
@@ -183,9 +193,9 @@ bool ReadSDIInVPID(Ntv2SystemContext* context, NTV2Channel channel, ULWord* valu
 				*valueB = RtlUlongByteSwap(ntv2ReadRegister(context, gVPIDBInRegs[channel]));
 #elif defined (AJAMac)
 	#ifdef AJAMacDext
-				*valueA = OSSwapBigToHostInt32(regValue);
+				*valueB = OSSwapBigToHostInt32(regValue);
 	#else
-				*valueB = OSSwapInt64(regValue);
+				*valueB = OSSwapInt32(regValue);
 	#endif
 #elif defined (AJALinux)
 				*valueB = be32_to_cpu(regValue);

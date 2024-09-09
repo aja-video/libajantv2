@@ -52,15 +52,21 @@ public:
 
 	/**
 		@brief	Construct from line and pixel count, plus line pitch.
-		@param[in]	inNumLines			Specifies the total number of lines.
-		@param[in]	inNumPixels			Specifies the total number of pixels.
-		@param[in]	inLinePitch			Specifies the line pitch as the number of 32-bit words per line.
-		@param[in]	inFirstActiveLine	Optionally specifies the first active line of video, where zero is the first (top) line. Defaults to zero.
+		@param[in]	inNumLines		Specifies the total number of lines.
+		@param[in]	inNumPixels		Specifies the total number of pixels.
+		@param[in]	inLinePitch		Specifies the line pitch as the number of 32-bit words per line.
+		@param[in]	in1stActiveLine	Optionally specifies the first active line of video, where zero is the first (top) line. Defaults to zero.
+		@param[in]	inNumLumaBits	Optionally specifies the number of luma bits. Defaults to zero.
+		@param[in]	inNumChromaBits	Optionally specifies the number of chroma bits. Defaults to zero.
+		@param[in]	inNumAlphaBits	Optionally specifies the number of alpha bits. Defaults to zero.
 	**/
 	explicit 		NTV2FormatDescriptor (	const ULWord inNumLines,
 											const ULWord inNumPixels,
 											const ULWord inLinePitch,
-											const ULWord inFirstActiveLine = 0);
+											const ULWord in1stActiveLine = 0,
+											const UByte inNumLumaBits = 0,
+											const UByte inNumChromaBits = 0,
+											const UByte inNumAlphaBits = 0);
 
 	/**
 		@brief		Constructs me from the given video standard, pixel format, and VANC settings.
@@ -345,25 +351,26 @@ public:
 
 	//	Member Data
 	public:
-		ULWord					numLines;			///< @brief	Height -- total number of lines
-		ULWord					numPixels;			///< @brief	Width -- total number of pixels per line
-		ULWord					linePitch;			///< @brief	Number of 32-bit words per line. Shadows mLinePitch[0] * sizeof(ULWord).
-		ULWord					firstActiveLine;	///< @brief	First active line of video (0 if NTV2_VANCMODE_OFF)
+		ULWord				numLines;			///< @brief	Height -- total number of lines
+		ULWord				numPixels;			///< @brief	Width -- total number of pixels per line
+		ULWord				linePitch;			///< @brief	Number of 32-bit words per line -- shadows mLinePitch[0] / sizeof(ULWord)
+		ULWord				firstActiveLine;	///< @brief	First active line of video (0 if NTV2_VANCMODE_OFF)
 	private:
-		NTV2Standard			mStandard;			///< @brief	My originating video standard
-		NTV2VideoFormat			mVideoFormat;		///< @brief	My originating video format (if known)
-		NTV2FrameBufferFormat	mPixelFormat;		///< @brief	My originating frame buffer format
-		NTV2VANCMode			mVancMode;			///< @brief	My originating VANC mode
-		ULWord					mLinePitch[4];		///< @brief	Number of bytes per row/line (per-plane)
-		UWord					mNumPlanes;			///< @brief	Number of planes
-		NTV2FrameGeometry		mFrameGeometry;		///< @brief My originating frame geometry
-		UByte					mNumBitsLuma;		///≤ @brief	Number of bits in luminance component (0 for RGB)
-		UByte					mNumBitsChroma;		///≤ @brief	Number of bits in chroma components
-		UByte					mNumBitsAlpha;		///≤ @brief	Number of bits in alpha component (0 if no alpha)
+		NTV2Standard		mStandard;			///< @brief	My originating video standard
+		NTV2VideoFormat		mVideoFormat;		///< @brief	My originating video format (if known)
+		NTV2PixelFormat		mPixelFormat;		///< @brief	My originating frame buffer format
+		NTV2VANCMode		mVancMode;			///< @brief	My originating VANC mode
+		ULWord				mLinePitch[4];		///< @brief	Per-plane number of bytes per row/line
+		UWord				mNumPlanes;			///< @brief	Number of planes
+		NTV2FrameGeometry	mFrameGeometry;		///< @brief My originating frame geometry
+		UByte				mNumBitsLuma;		///< @brief	Number of bits in luminance component (0 for RGB)
+		UByte				mNumBitsChroma;		///< @brief	Number of bits in chroma components
+		UByte				mNumBitsAlpha;		///< @brief	Number of bits in alpha component (0 if no alpha)
 
 };	//	NTV2FormatDescriptor
 
-typedef NTV2FormatDescriptor NTV2FormatDesc;	///< @brief Shorthand for ::NTV2FormatDescriptor
+typedef NTV2FormatDescriptor	NTV2FormatDesc;	///< @brief Shorthand for ::NTV2FormatDescriptor
+typedef NTV2FormatDesc			NTV2RasterInfo;	///< @brief Shorthand for ::NTV2FormatDescriptor
 
 /**
 	@brief		Writes the given NTV2FormatDescriptor to the specified output stream.

@@ -403,7 +403,7 @@ AJAExport NTV2_SHOULD_BE_DEPRECATED(bool NTV2DeviceCanDoFormat (const NTV2Device
 									framerate might be NTV2_FRAMERATE_3000, but since 2 links are coming out, the video rate
 									is effectively NTV2_FRAMERATE_6000. Defaults to false.
 	@return The number of audio samples.
-	@see	See \ref audiosamplecount
+	@see	See \ref audop-samplecount
 **/
 AJAExport ULWord				GetAudioSamplesPerFrame (const NTV2FrameRate inFrameRate, const NTV2AudioRate inAudioRate, ULWord inCadenceFrame = 0, bool inIsSMPTE372Enabled = false);
 AJAExport LWord64				GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr (NTV2FrameRate frameRate, NTV2AudioRate audioRate, ULWord frameNbrNonInclusive);
@@ -412,7 +412,7 @@ AJAExport LWord64				GetTotalAudioSamplesFromFrameNbrZeroUpToFrameNbr (NTV2Frame
 	@brief	Returns the audio sample rate as a number of audio samples per second.
 	@param[in]	inAudioRate		Specifies the audio sample rate.
 	@return The number of audio samples per second, or zero upon failure.
-	@see	See \ref audiosamplecount
+	@see	See \ref audop-samplecount
 **/
 AJAExport double				GetAudioSamplesPerSecond (const NTV2AudioRate inAudioRate);	//	New in SDK 16.2
 
@@ -538,6 +538,12 @@ AJAExport bool					IsTransportCompatibleFormat (const NTV2VideoFormat inFormat1,
 							Defaults to ::NTV2_INPUTSOURCES_SDI.
 **/
 AJAExport NTV2InputSource		GetNTV2InputSourceForIndex (const ULWord inIndex0, const NTV2IOKinds inKinds = NTV2_IOKINDS_SDI);
+
+/**
+	@return		The NTV2IOKinds classification of the given ::NTV2InputSource, or ::NTV2_IOKINDS_NONE upon failure.
+	@param[in]	inSrc		Specifies the input source of interest.
+**/
+AJAExport NTV2IOKinds			GetNTV2InputSourceKind (const NTV2InputSource inSrc);
 AJAExport ULWord				GetIndexForNTV2InputSource (const NTV2InputSource inValue);		//	0-based index
 
 /**
@@ -687,9 +693,11 @@ AJAExport NTV2Channel NTV2OutputDestinationToChannel (const NTV2OutputDestinatio
 /**
 	@brief		Converts the given NTV2Channel value into its ordinary equivalent NTV2OutputDestination.
 	@param[in]	inChannel		Specifies the NTV2Channel to be converted.
+	@param[in]	inKinds			Specifies the type of output destination of interest (SDI, HDMI, etc.).
+								Defaults to SDI.
 	@return		The equivalent NTV2OutputDestination value.
 **/
-AJAExport NTV2OutputDestination NTV2ChannelToOutputDestination (const NTV2Channel inChannel);
+AJAExport NTV2OutputDestination NTV2ChannelToOutputDestination (const NTV2Channel inChannel, const NTV2IOKinds inKinds = NTV2_IOKINDS_SDI);
 
 /**
 	@return		The frame rate family that the given ::NTV2FrameRate belongs to.
@@ -1114,6 +1122,7 @@ AJAExport std::string NTV2AncDataRgnToStr				(const NTV2AncDataRgn			inValue,	co
 AJAExport std::string NTV2UpConvertModeToString			(const NTV2UpConvertMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
 AJAExport std::string NTV2DownConvertModeToString		(const NTV2DownConvertMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
 AJAExport std::string NTV2IsoConvertModeToString		(const NTV2IsoConvertMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
+AJAExport std::string NTV2ScanMethodToString			(const NTV2ScanMethod			inValue,	const bool inCompactDisplay = false);	//	New in SDK 17.5
 
 AJAExport std::string NTV2HDMIBitDepthToString			(const NTV2HDMIBitDepth			inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
 AJAExport std::string NTV2HDMIAudioChannelsToString		(const NTV2HDMIAudioChannels	inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1

@@ -469,6 +469,7 @@ bool CNTV2MacDriverInterface::WriteRegister (const ULWord inRegNum, const ULWord
 }
 
 
+const uint32_t	kAgentAppFcc (NTV2_FOURCC('A','j','a','A'));
 //--------------------------------------------------------------------------------------------------------------------
 //	AcquireStreamForApplication
 //
@@ -479,6 +480,17 @@ bool CNTV2MacDriverInterface::WriteRegister (const ULWord inRegNum, const ULWord
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::AcquireStreamForApplication (ULWord appType, int32_t pid)
 {
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+		return CNTV2DriverInterface::AcquireStreamForApplication (appType, pid);
+#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
+	ULWord svcInitialized(0);
+	if (ReadRegister(kVRegServicesInitialized, svcInitialized))
+		if (!svcInitialized)	//	if services have never initialized the device
+			if (appType != kAgentAppFcc)	//	if not AJA Agent
+				DIWARN(::NTV2DeviceIDToString(GetDeviceID()) << "-" << DEC(GetIndexNumber())
+					<< " uninitialized by AJAAgent, requesting app " << xHEX0N(appType,8) << ", pid=" << DEC(pid));
+
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
@@ -503,6 +515,10 @@ bool CNTV2MacDriverInterface::AcquireStreamForApplication (ULWord appType, int32
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::ReleaseStreamForApplication (ULWord appType, int32_t pid)
 {
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+		return CNTV2DriverInterface::ReleaseStreamForApplication (appType, pid);
+#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
@@ -534,6 +550,17 @@ bool CNTV2MacDriverInterface::ReleaseStreamForApplication (ULWord appType, int32
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::AcquireStreamForApplicationWithReference (ULWord appType, int32_t pid)
 {
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+		return CNTV2DriverInterface::AcquireStreamForApplicationWithReference (appType, pid);
+#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
+	ULWord svcInitialized(0);
+	if (ReadRegister(kVRegServicesInitialized, svcInitialized))
+		if (!svcInitialized)	//	if services have never initialized the device
+			if (appType != kAgentAppFcc)	//	if not AJA Agent
+				DIWARN(::NTV2DeviceIDToString(GetDeviceID()) << "-" << DEC(GetIndexNumber())
+					<< " uninitialized by AJAAgent, requesting app " << xHEX0N(appType,8) << ", pid=" << DEC(pid));
+
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
@@ -561,6 +588,10 @@ bool CNTV2MacDriverInterface::AcquireStreamForApplicationWithReference (ULWord a
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::ReleaseStreamForApplicationWithReference (ULWord appType, int32_t pid)
 {
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+		return CNTV2DriverInterface::ReleaseStreamForApplicationWithReference (appType, pid);
+#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
@@ -591,6 +622,10 @@ bool CNTV2MacDriverInterface::ReleaseStreamForApplicationWithReference (ULWord a
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::SetStreamingApplication (ULWord appType, int32_t pid)
 {
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+		return CNTV2DriverInterface::SetStreamingApplication (appType, pid);
+#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarI_64[2] = {uint64_t(appType), uint64_t(pid)};
 	uint32_t	outputCount = 0;
@@ -615,6 +650,10 @@ bool CNTV2MacDriverInterface::SetStreamingApplication (ULWord appType, int32_t p
 //--------------------------------------------------------------------------------------------------------------------
 bool CNTV2MacDriverInterface::GetStreamingApplication (ULWord & outAppType, int32_t & outProcessID)
 {
+#if defined(NTV2_NUB_CLIENT_SUPPORT)
+	if (IsRemote())
+		return CNTV2DriverInterface::GetStreamingApplication (outAppType, outProcessID);
+#endif	//	defined (NTV2_NUB_CLIENT_SUPPORT)
 	kern_return_t kernResult = KERN_FAILURE;
 	uint64_t	scalarO_64[2]	= {0, 0};
 	uint32_t	outputCount(2);
@@ -845,19 +884,20 @@ bool CNTV2MacDriverInterface::DmaTransfer ( const NTV2DMAEngine inDMAEngine,
 		return false;
 	kern_return_t kernResult = KERN_FAILURE;
 	size_t	outputStructSize = 0;
+	const ULWord numSegments = inNumSegments ? inNumSegments : 1; //  Prevent divide-by-zero exception:  zero segment count == single segment
 
 	DMA_TRANSFER_STRUCT_64 dmaTransfer64;
 	dmaTransfer64.dmaEngine				= inDMAEngine;
 	dmaTransfer64.dmaFlags				= 0;
-	dmaTransfer64.dmaHostBuffer			= Pointer64(pFrameBuffer);			// virtual address of host buffer
-	dmaTransfer64.dmaSize				= inByteCount;						// total number of bytes to DMA
-	dmaTransfer64.dmaCardFrameNumber	= inFrameNumber;					// card frame number
-	dmaTransfer64.dmaCardFrameOffset	= inCardOffsetBytes;				// offset (in bytes) into card frame to begin DMA
-	dmaTransfer64.dmaNumberOfSegments	= inNumSegments;					// number of segments of size videoBufferSize to DMA
-	dmaTransfer64.dmaSegmentSize		= (inByteCount / inNumSegments);	// size of each segment (if videoNumSegments > 1)
-	dmaTransfer64.dmaSegmentHostPitch	= inSegmentHostPitch;				// offset between the beginning of one host-memory segment and the next host-memory segment
-	dmaTransfer64.dmaSegmentCardPitch	= inSegmentCardPitch;				// offset between the beginning of one Kona-memory segment and the next Kona-memory segment
-	dmaTransfer64.dmaToCard				= !inIsRead;						// direction of DMA transfer
+	dmaTransfer64.dmaHostBuffer			= Pointer64(pFrameBuffer);		// virtual address of host buffer
+	dmaTransfer64.dmaSize				= inByteCount;					// total number of bytes to DMA
+	dmaTransfer64.dmaCardFrameNumber	= inFrameNumber;				// card frame number
+	dmaTransfer64.dmaCardFrameOffset	= inCardOffsetBytes;			// offset (in bytes) into card frame to begin DMA
+	dmaTransfer64.dmaNumberOfSegments	= numSegments;					// number of segments of size videoBufferSize to DMA
+	dmaTransfer64.dmaSegmentSize		= (inByteCount / numSegments);	// size of each segment (if videoNumSegments > 1)
+	dmaTransfer64.dmaSegmentHostPitch	= inSegmentHostPitch;			// offset between the beginning of one host-memory segment and the next host-memory segment
+	dmaTransfer64.dmaSegmentCardPitch	= inSegmentCardPitch;			// offset between the beginning of one Kona-memory segment and the next Kona-memory segment
+	dmaTransfer64.dmaToCard				= !inIsRead;					// direction of DMA transfer
 
 	if (GetIOConnect())
 	{
@@ -894,7 +934,7 @@ bool CNTV2MacDriverInterface::DmaTransfer ( const NTV2DMAEngine			inDMAEngine,
 	return false;
 }
 
-
+#if 0
 //--------------------------------------------------------------------------------------------------------------------
 //	RestoreHardwareProcampRegisters
 //--------------------------------------------------------------------------------------------------------------------
@@ -915,7 +955,9 @@ bool CNTV2MacDriverInterface::RestoreHardwareProcampRegisters (void)
 	return false;
 }
 
+#endif
 
+#if 0
 //--------------------------------------------------------------------------------------------------------------------
 //	SystemStatus
 //--------------------------------------------------------------------------------------------------------------------
@@ -938,6 +980,7 @@ bool CNTV2MacDriverInterface::SystemStatus ( void* dataPtr, SystemStatusCode sta
 	MDIFAIL (KR(kernResult) << INSTP(this) << ", con=" << HEX8(GetIOConnect()));
 	return false;
 }
+#endif
 
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -982,7 +1025,7 @@ bool CNTV2MacDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculate);
 			break;
 		}	//	eInit, eStart, eStop, eAbort, etc...
-
+#if 0
 		case eGetAutoCirc:
 		{
 			uint64_t	scalarI_64[1];
@@ -1073,6 +1116,7 @@ bool CNTV2MacDriverInterface::AutoCirculate (AUTOCIRCULATE_DATA & autoCircData)
 			AJADebug::StatTimerStop(AJA_DebugStat_AutoCirculateXfer);
 			break;
 		}	//	eTransferAutoCirculate, eTransferAutoCirculateEx, eTransferAutoCirculateEx2
+#endif
 
 		default:
 			//DisplayNTV2Error("Unsupported AC command type in AutoCirculate()\n");

@@ -19,17 +19,13 @@ using namespace std;
 
 // Default Constructor
 CNTV2Card::CNTV2Card ()
-#if defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
 	:	mDevCap(driverInterface())
-#endif	//	defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
 {
 	_boardOpened = false;
 }
 
 CNTV2Card::CNTV2Card (const UWord inDeviceIndex, const string & inHostName)
-#if defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
 	:	mDevCap(driverInterface())
-#endif	//	defined(NTV2_INCLUDE_DEVICE_CAPABILITIES_API)
 {
 	string hostName(inHostName);
 	aja::strip(hostName);
@@ -215,42 +211,41 @@ string CNTV2Card::SerialNum64ToString (const uint64_t inSerialNumber)	//	Class m
 }	//	SerialNum64ToString
 
 
-bool CNTV2Card::GetSerialNumberString (string & outSerialNumberString)
+bool CNTV2Card::GetSerialNumberString (string & outStr)
 {
-    if (NTV2DeviceGetSPIFlashVersion(GetDeviceID()) <= 5)
-    {
-        outSerialNumberString = ::SerialNum64ToString(GetSerialNumber());
-        if (outSerialNumberString.empty())
-        {
-            outSerialNumberString = "INVALID?";
-            return false;
-        }
-    
-        const NTV2DeviceID deviceID(GetDeviceID());
-        if (deviceID == DEVICE_ID_IO4KPLUS)							//	Io4K+/DNxIV?
-            outSerialNumberString = "5" + outSerialNumberString;	//		prepend with "5"
-        else if (deviceID == DEVICE_ID_IOIP_2022 ||
-                 deviceID == DEVICE_ID_IOIP_2110 ||
-                 deviceID == DEVICE_ID_IOIP_2110_RGB12)				//	IoIP/DNxIP?
-            outSerialNumberString = "6" + outSerialNumberString;	//		prepend with "6"
-        else if (deviceID == DEVICE_ID_IOX3)
-            outSerialNumberString = "7" + outSerialNumberString;	//		prepend with "7"
-    }
-    else
-    {
-        ULWord serialArray[] = {0,0,0,0};
+	outStr.clear();
+	ULWord spiFlashVers(0);
+	if (!GetNumericParam(kDeviceGetSPIFlashVersion, spiFlashVers))
+		return false;
+	if (spiFlashVers < 6)
+	{	//	Older devices use 2 regs:  kRegReserved54 & kRegReserved55
+		outStr = ::SerialNum64ToString(GetSerialNumber());
+		if (outStr.empty())
+			{outStr = "INVALID?";  return false;}
+
+		//	Prepend 5/6/7 for Io4K+/IoIP/IoX3, respectively...
+		const NTV2DeviceID devID(GetDeviceID());
+		if (devID == DEVICE_ID_IO4KPLUS)
+			outStr = "5" + outStr;	//	Io4K+/DNXIV: prepend "5"
+		else if (devID == DEVICE_ID_IOIP_2022 || devID == DEVICE_ID_IOIP_2110 || devID == DEVICE_ID_IOIP_2110_RGB12)
+			outStr = "6" + outStr;	//	IoIP: prepend "6"
+		else if (devID == DEVICE_ID_IOX3)
+			outStr = "7" + outStr;	//	IoX3: prepend "7"
+	}
+	else
+	{	//	Newer devices use 4 regs:  kRegReserved54 thru kRegReserved57
+		ULWord serialArray[] = {0,0,0,0};
 		ReadRegister(kRegReserved56, serialArray[0]);
 		ReadRegister(kRegReserved57, serialArray[1]);
 		ReadRegister(kRegReserved54, serialArray[2]);
 		ReadRegister(kRegReserved55, serialArray[3]);
-		outSerialNumberString.clear();
 		for (int serialIndex(0);  serialIndex < 4;  serialIndex++)
 			if (serialArray[serialIndex] != 0xffffffff)
 				for (int i(0);  i < 4;  i++)
 				{
 					const char tempChar(((serialArray[serialIndex] >> (i*8)) & 0xff));
 					if (tempChar > 0 && tempChar != '.')
-						outSerialNumberString.push_back(tempChar);
+						outStr.push_back(tempChar);
 				}
 	}
 	return true;
@@ -269,7 +264,8 @@ bool CNTV2Card::IS_OUTPUT_SPIGOT_INVALID (const UWord inOutputSpigot)
 {
 	if (inOutputSpigot >= UWord(GetNumSupported(kDeviceGetNumVideoOutputs)))
 	{
-		if (IsWidgetIDSupported(NTV2_WgtSDIMonOut1)  &&  inOutputSpigot == 4)
+		const ULWordSet itms (GetSupportedItems(kNTV2EnumsID_WidgetID));
+		if (itms.find(ULWord(NTV2_WgtSDIMonOut1)) != itms.end()  &&  inOutputSpigot == 4)
 			return false;	//	Io4K Monitor Output exception
 		return true;		//	Invalid
 	}
@@ -291,14 +287,6 @@ bool CNTV2Card::IS_HDMI_INPUT_SPIGOT_INVALID (const UWord inInputHDMIPort)
 	return false;
 }
 
-bool CNTV2Card::IsWidgetIDSupported (const NTV2WidgetID inWgtID)
-{
-	AJAAutoLock tmp(&mSupportedWgtsLock);
-	if (mSupportedWgts.empty())
-		mSupportedWgts = GetSupportedItems(kNTV2EnumsID_WidgetID);
-	return mSupportedWgts.find(ULWord(inWgtID)) != mSupportedWgts.end();
-}
-
 ULWord CNTV2Card::DeviceGetNumberFrameBuffers (void)
 {
 	if (IsSupported(kDeviceCanDoStackedAudio))
@@ -311,217 +299,6 @@ ULWord CNTV2Card::DeviceGetNumberFrameBuffers (void)
 	}
 	return ::NTV2DeviceGetNumberFrameBuffers(_boardID); //  Handle non-stacked-audio devices
 }
-
-bool CNTV2Card::DeviceCanDo292In (const UWord ndx0)
-{
-	static const NTV2WidgetID sSDI292Inputs[] = {NTV2_WgtSDIIn1, NTV2_WgtSDIIn2};
-	return ndx0 < sizeof(sSDI292Inputs) / sizeof(NTV2WidgetID)
-				? IsWidgetIDSupported(sSDI292Inputs[ndx0])
-				: false;
-}
-
-bool CNTV2Card::DeviceCanDo3GIn (const UWord ndx0)
-{
-	static const NTV2WidgetID sSDI3GInputs[] = {NTV2_Wgt3GSDIIn1, NTV2_Wgt3GSDIIn2, NTV2_Wgt3GSDIIn3, NTV2_Wgt3GSDIIn4,
-												NTV2_Wgt3GSDIIn5, NTV2_Wgt3GSDIIn6, NTV2_Wgt3GSDIIn7, NTV2_Wgt3GSDIIn8};
-	return ndx0 < sizeof(sSDI3GInputs) / sizeof(NTV2WidgetID)
-				? IsWidgetIDSupported(sSDI3GInputs[ndx0])
-				: false;
-}
-
-bool CNTV2Card::DeviceCanDo12GIn (const UWord ndx0)
-{
-	static const NTV2WidgetID sSDI12GInputs[] = {NTV2_Wgt12GSDIIn1, NTV2_Wgt12GSDIIn2, NTV2_Wgt12GSDIIn3, NTV2_Wgt12GSDIIn4};
-	return ndx0 < sizeof(sSDI12GInputs) / sizeof(NTV2WidgetID)
-				? IsWidgetIDSupported(sSDI12GInputs[ndx0])
-				: false;
-}
-
-bool CNTV2Card::DeviceCanDo292Out (const UWord ndx0)
-{
-	static const NTV2WidgetID sSDI292Outputs[] = {NTV2_WgtSDIOut1, NTV2_WgtSDIOut2, NTV2_WgtSDIOut3, NTV2_WgtSDIOut4};
-	return ndx0 < sizeof(sSDI292Outputs) / sizeof(NTV2WidgetID)
-				? IsWidgetIDSupported(sSDI292Outputs[ndx0])
-				: false;
-}
-
-bool CNTV2Card::DeviceCanDo3GOut (const UWord ndx0)
-{
-	static const NTV2WidgetID sSDI3GOutputs[] = {NTV2_Wgt3GSDIOut1, NTV2_Wgt3GSDIOut2, NTV2_Wgt3GSDIOut3, NTV2_Wgt3GSDIOut4,
-												NTV2_Wgt3GSDIOut5, NTV2_Wgt3GSDIOut6, NTV2_Wgt3GSDIOut7, NTV2_Wgt3GSDIOut8};
-	return ndx0 < sizeof(sSDI3GOutputs) / sizeof(NTV2WidgetID)
-				? IsWidgetIDSupported(sSDI3GOutputs[ndx0])
-				: false;
-}
-
-bool CNTV2Card::DeviceCanDo12GOut (const UWord ndx0)
-{
-	static const NTV2WidgetID sSDI12GOutputs[] = {NTV2_Wgt12GSDIOut1, NTV2_Wgt12GSDIOut2, NTV2_Wgt12GSDIOut3, NTV2_Wgt12GSDIOut4};
-	return ndx0 < sizeof(sSDI12GOutputs) / sizeof(NTV2WidgetID)
-				? IsWidgetIDSupported(sSDI12GOutputs[ndx0])
-				: false;
-}
-
-bool CNTV2Card::DeviceCanDoLTCEmbeddedN (const UWord ndx0)
-{
-	static const NTV2WidgetID sSDI292Inputs[] = {NTV2_WgtSDIIn1, NTV2_WgtSDIIn2};
-	static const NTV2WidgetID sSDI3GInputs[] = {NTV2_Wgt3GSDIIn1, NTV2_Wgt3GSDIIn2, NTV2_Wgt3GSDIIn3, NTV2_Wgt3GSDIIn4,
-												NTV2_Wgt3GSDIIn5, NTV2_Wgt3GSDIIn6, NTV2_Wgt3GSDIIn7, NTV2_Wgt3GSDIIn8};
-	static const NTV2WidgetID sSDI12GInputs[] = {NTV2_Wgt12GSDIIn1, NTV2_Wgt12GSDIIn2, NTV2_Wgt12GSDIIn3, NTV2_Wgt12GSDIIn4};
-	switch (ndx0)
-	{
-		case 0:
-		case 1:	return IsWidgetIDSupported(sSDI292Inputs[ndx0]) || IsWidgetIDSupported(sSDI3GInputs[ndx0]) || IsWidgetIDSupported(sSDI12GInputs[ndx0]);
-
-		case 2:
-		case 3:	return IsWidgetIDSupported(sSDI3GInputs[ndx0]) || IsWidgetIDSupported(sSDI12GInputs[ndx0]);
-
-		case 4:
-		case 5:
-		case 6:
-		case 7:	return IsWidgetIDSupported(sSDI3GInputs[ndx0]);
-		default: break;
-	}
-	return false;
-}
-
-bool CNTV2Card::DeviceCanDoOutputDestination (const NTV2OutputDest dst)
-{
-	const ULWordSet itms (GetSupportedItems(kNTV2EnumsID_OutputDest));
-	return itms.find(ULWord(dst)) != itms.end();
-}
-
-bool CNTV2Card::GetSupportedVideoFormats (NTV2VideoFormatSet & outFormats)
-{
-	const ULWordSet itms (GetSupportedItems(kNTV2EnumsID_VideoFormat));
-	outFormats.clear();
-	for (ULWordSetConstIter it(itms.begin());  it != itms.end();  ++it)
-        outFormats.insert(NTV2VideoFormat(*it));
-	return !outFormats.empty();
-}
-
-bool CNTV2Card::GetSupportedPixelFormats (NTV2PixelFormats & outPFs)
-{
-	const ULWordSet itms (GetSupportedItems(kNTV2EnumsID_PixelFormat));
-	outPFs.clear();
-	for (ULWordSetConstIter it(itms.begin());  it != itms.end();  ++it)
-        outPFs.insert(NTV2PixelFormat(*it));
-	return !outPFs.empty();
-}
-
-bool CNTV2Card::DeviceCanDoHDMIQuadRasterConversion (void)
-{
-	if (!GetNumSupported(kDeviceGetNumHDMIVideoInputs)  &&  !GetNumSupported(kDeviceGetNumHDMIVideoOutputs))
-		return false;	//	Must have at least one HDMI input or output
-	if (GetDeviceID() == DEVICE_ID_KONAHDMI)
-		return false;	//	Can't be KonaHDMI
-	if (IsSupported(kDeviceCanDoAudioMixer))
-		return false;	//	Can't have audio mixer
-	return true;
-}
-
-#define MAX_OF(__a__,__b__)		((__a__) > (__b__) ? (__a__) : (__b__))
-
-bool CNTV2Card::DeviceCanDoTCIndex (const NTV2TCIndex inTCIndex)
-{
-	const UWord	maxNumLTCs (MAX_OF(GetNumSupported(kDeviceGetNumLTCInputs), GetNumSupported(kDeviceGetNumLTCOutputs)));
-	const UWord	maxNumSDIs (MAX_OF(GetNumSupported(kDeviceGetNumVideoInputs), GetNumSupported(kDeviceGetNumVideoOutputs)));
-
-	if (NTV2_IS_ATC_VITC2_TIMECODE_INDEX(inTCIndex)	 &&	 !IsSupported(kDeviceCanDoVITC2))
-		return false;	//	Can't do VITC2
-
-	switch (inTCIndex)
-	{
-		case NTV2_TCINDEX_DEFAULT:		return true;	//	All devices support this index
-
-		case NTV2_TCINDEX_LTC1:			return maxNumLTCs > 0;
-		case NTV2_TCINDEX_LTC2:			return maxNumLTCs > 1;
-
-		case NTV2_TCINDEX_SDI1:
-		case NTV2_TCINDEX_SDI1_LTC:
-		case NTV2_TCINDEX_SDI1_2:		return maxNumSDIs > 0;
-
-		case NTV2_TCINDEX_SDI2:
-		case NTV2_TCINDEX_SDI2_LTC:
-		case NTV2_TCINDEX_SDI2_2:		return maxNumSDIs > 1;
-
-		case NTV2_TCINDEX_SDI3:
-		case NTV2_TCINDEX_SDI3_LTC:
-		case NTV2_TCINDEX_SDI3_2:		return maxNumSDIs > 2;
-
-		case NTV2_TCINDEX_SDI4:
-		case NTV2_TCINDEX_SDI4_LTC:
-		case NTV2_TCINDEX_SDI4_2:		return maxNumSDIs > 3;
-
-		case NTV2_TCINDEX_SDI5:
-		case NTV2_TCINDEX_SDI5_LTC:
-		case NTV2_TCINDEX_SDI5_2:		return maxNumSDIs > 4;
-
-		case NTV2_TCINDEX_SDI6:
-		case NTV2_TCINDEX_SDI6_LTC:
-		case NTV2_TCINDEX_SDI6_2:
-		case NTV2_TCINDEX_SDI7:
-		case NTV2_TCINDEX_SDI7_LTC:
-		case NTV2_TCINDEX_SDI7_2:
-		case NTV2_TCINDEX_SDI8:
-		case NTV2_TCINDEX_SDI8_LTC:
-		case NTV2_TCINDEX_SDI8_2:		return maxNumSDIs > 5;
-
-		default:						break;
-	}
-	return false;
-}
-
-bool CNTV2Card::DeviceCanDoInputTCIndex (const NTV2TCIndex inTCIndex)
-{
-	const UWord maxNumLTCs (GetNumSupported(kDeviceGetNumLTCInputs));
-	const UWord maxNumSDIs (GetNumSupported(kDeviceGetNumVideoInputs));
-
-	if (NTV2_IS_ATC_VITC2_TIMECODE_INDEX(inTCIndex)	 &&	 !IsSupported(kDeviceCanDoVITC2))
-		return false;	//	Can't do VITC2
-
-	switch (inTCIndex)
-	{
-		case NTV2_TCINDEX_DEFAULT:		return true;	//	All devices support this index
-
-		case NTV2_TCINDEX_LTC1:			return maxNumLTCs > 0;
-		case NTV2_TCINDEX_LTC2:			return maxNumLTCs > 1;
-
-		case NTV2_TCINDEX_SDI1:
-		case NTV2_TCINDEX_SDI1_LTC:
-		case NTV2_TCINDEX_SDI1_2:		return maxNumSDIs > 0;
-
-		case NTV2_TCINDEX_SDI2:
-		case NTV2_TCINDEX_SDI2_LTC:
-		case NTV2_TCINDEX_SDI2_2:		return maxNumSDIs > 1;
-
-		case NTV2_TCINDEX_SDI3:
-		case NTV2_TCINDEX_SDI3_LTC:
-		case NTV2_TCINDEX_SDI3_2:		return maxNumSDIs > 2;
-
-		case NTV2_TCINDEX_SDI4:
-		case NTV2_TCINDEX_SDI4_LTC:
-		case NTV2_TCINDEX_SDI4_2:		return maxNumSDIs > 3;
-
-		case NTV2_TCINDEX_SDI5:
-		case NTV2_TCINDEX_SDI5_LTC:
-		case NTV2_TCINDEX_SDI5_2:		return maxNumSDIs > 4;
-
-		case NTV2_TCINDEX_SDI6:
-		case NTV2_TCINDEX_SDI6_LTC:
-		case NTV2_TCINDEX_SDI6_2:
-		case NTV2_TCINDEX_SDI7:
-		case NTV2_TCINDEX_SDI7_LTC:
-		case NTV2_TCINDEX_SDI7_2:
-		case NTV2_TCINDEX_SDI8:
-		case NTV2_TCINDEX_SDI8_LTC:
-		case NTV2_TCINDEX_SDI8_2:		return maxNumSDIs > 5;
-
-		default:						break;
-	}
-	return false;
-}
-
 
 bool CNTV2Card::GetInstalledBitfileInfo (ULWord & outNumBytes, std::string & outDateStr, std::string & outTimeStr)
 {
@@ -694,7 +471,8 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 
 	bool CNTV2Card::DeviceCanDoWidget (const NTV2WidgetID inWidgetID)
 	{
-		return IsWidgetIDSupported(inWidgetID);
+		const ULWordSet wgtIDs (GetSupportedItems(kNTV2EnumsID_WidgetID));
+		return wgtIDs.find(inWidgetID) != wgtIDs.end();
 	}
 	
 	bool CNTV2Card::DeviceCanDoConversionMode (const NTV2ConversionMode inConversionMode)
@@ -711,25 +489,19 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 	{	const ULWordSet itms (GetSupportedItems(kNTV2EnumsID_InputSource));
 		return itms.find(ULWord(inInputSource)) != itms.end();
 	}
-
-	bool CNTV2Card::DeviceCanDoAudioMixer (void)
-	{
-		return IsSupported(kDeviceCanDoAudioMixer);
-	}
-
-	bool CNTV2Card::DeviceIsDNxIV (void)
-	{
-		return IsSupported(kDeviceHasMicrophoneInput);
-	}
-
-	bool CNTV2Card::DeviceHasMicInput (void)
-	{
-		return GetNumSupported(kDeviceGetNumMicInputs) > 0;
-	}
 #endif	//	!defined(NTV2_DEPRECATE_16_3)
 
 
 NTV2Buffer CNTV2Card::NULL_POINTER (AJA_NULL, 0);
+
+
+bool DeviceCapabilities::CanDoWidget (const NTV2WidgetType inWgtType, const UWord index0)
+{
+	return CanDoWidget(CNTV2SignalRouter::WidgetIDFromTypeAndChannel(inWgtType, NTV2Channel(index0)));
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////	SDRAMAuditor
 
 
 bool SDRAMAuditor::AssessDevice (CNTV2Card & inDevice, const bool inMarkStoppedAudioBuffersFree)

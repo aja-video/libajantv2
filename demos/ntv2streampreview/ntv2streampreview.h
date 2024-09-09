@@ -24,7 +24,7 @@
 
 
 /**
-	@brief	I am a QDialog that displays whatever video is present on the SDI inputs of an AJA device.
+	@brief	I am a QDialog that displays whatever video is present on the SDI inputs of an AJA streaming device.
 			I also have a popup menu for choosing a different device, and a button group for choosing a different SDI input.
 **/
 class NTV2StreamPreview : public QDialog
@@ -53,15 +53,11 @@ class NTV2StreamPreview : public QDialog
 
 		void	devicesChanged ();				///< @brief	This gets called when an AJA device is attached or detached to/from the host.
 		void	inputChanged (int id);			///< @brief	This gets called when a different NTV2InputSource is selected by the user.
-		void	withAudioChanged (int state);	///< @brief	This gets called when the Audio checkbox is toggled.
         void	fixedRefChanged (bool checked);
-		void	checkFor4kChanged (int state);	///< @brief	This gets called when the 4K checkbox is toggled.
 
 	//	Instance Data
 	private:
 		QDialogButtonBox *		mCloseBox;					///< @brief	My "Close" button
-		QCheckBox *				mWithAudioCheckBox;			///< @brief	My "with audio" checkbox
-		QCheckBox *				mCheckFor4kCheckBox;		///< @brief	My "check for 4K" checkbox
         QCheckBox *				mCheckFixedReference;
         QComboBox *				mBoardChoiceCombo;			///< @brief	My device selector popup menu
 		QButtonGroup *			mInputButtonGroup;			///< @brief	My input selection radio buttons (Off|SDI1|2|3|4|5|6|7|8|HDMI|Analog)
@@ -70,9 +66,6 @@ class NTV2StreamPreview : public QDialog
 		QPixmap					mPixmap;					///< @brief	My QPixmap
 		int						mTimerID;					///< @brief	My timer ID
 		NTV2StreamGrabber *		mStreamGrabber;				///< @brief	My frame grabber
-		#if defined (INCLUDE_AJACC)
-			QButtonGroup *		mCaptionButtonGroup;		///< @brief	My caption channel radio buttons (Off|CC1|CC2|CC3|CC4|TXT1|TXT2|TXT3|TXT4)
-		#endif	//	defined (INCLUDE_AJACC)
 
 };	//	class NTV2StreamPreview
 

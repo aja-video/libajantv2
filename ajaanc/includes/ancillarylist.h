@@ -97,7 +97,6 @@ public:	//	CLASS METHODS
 																	const NTV2Buffer & inF2AncBuffer,
 																	AJAAncillaryList & outPackets,
 																	const uint32_t inFrameNum = 0);
-	///@}
 
 	/**
 		@brief		Returns all HDMI Aux data packets found in the given F1 and F2 aux data buffers.
@@ -439,6 +438,22 @@ public:	//	INSTANCE METHODS
 																const bool inIsProgressive = true, const uint32_t inF2StartLine = 0);
 
 	/**
+		@brief		Encodes my AJAAuxiliaryData packets into the given buffers in the default \ref auxbufferformat .
+					The buffer contents are replaced;  the unused remainder, if any, will be zeroed.
+		@param		F1Buffer			Specifies the buffer memory into which Field 1's anc data will be written.
+		@param		F2Buffer			Specifies the buffer memory into which Field 2's anc data will be written.
+		@param		inIsProgressive		Specify true to designate the output ancillary data stream as progressive; 
+										otherwise, specify false. Defaults to true (is progressive).
+		@param[in]	inF2StartLine		For interlaced/psf frames, specifies the line number where Field 2 begins;  otherwise ignored.
+										Defaults to zero (progressive). For interlaced video, see NTV2SmpteLineNumber::GetLastLine .
+		@bug		TBD -- not currently implemented.
+		@return		AJA_STATUS_SUCCESS if successful.
+	**/
+	virtual inline AJAStatus				GetHDMITransmitData (NTV2Buffer & F1Buffer, NTV2Buffer & F2Buffer,
+																const bool inIsProgressive = true, const uint32_t inF2StartLine = 0)
+																			{return AJA_STATUS_UNSUPPORTED;}
+
+	/**
 		@brief		Answers with the number of bytes required to store IP/RTP for my AJAAncillaryData packets in \ref ancrtpformat .
 		@param[out]	outF1ByteCount		Receives the requisite byte count for Field 1's IP/RTP packet data.
 		@param[out]	outF2ByteCount		Receives the requisite byte count for Field 1's IP/RTP packet data.
@@ -476,19 +491,19 @@ public:	//	INSTANCE METHODS
 	/**
 		@brief		Parse "raw" ancillary data bytes received from hardware (ingest) -- see \ref ancgumpformat --
 					into separate AJAAncillaryData objects and appends them to me.
-		@param[in]	pInReceivedData		Specifies a valid, non-NULL address of the first byte of "raw" ancillary data received by an AncExtractor widget.
-		@param[in]	inByteCount			Specifies the number of bytes of data in the specified buffer to process.
-		@param[in]	inFrameNum			If non-zero, replaces the frame identifier of new packets that have a zero frame ID.
+		@param[in]	inReceivedData		Specifies the buffer that contains "raw" ancillary data received from an
+										Anc Extractor widget.
+		@param[in]	inFrameNum			Optionally specifies the frame identifier.
 		@details	For each packet parsed from the received data, AJAAncillaryDataFactory::GuessAncillaryDataType
 					is called to ascertain the packet's AJAAncDataType, then AJAAncillaryDataFactory::Create
 					is used to instantiate the specific AJAAncillaryData subclass instance.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						AddReceivedAncillaryData (const uint8_t * pInReceivedData, const uint32_t inByteCount, const uint32_t inFrameNum = 0);
+	virtual AJAStatus			AddReceivedAncillaryData (const NTV2Buffer & inReceivedData, const uint32_t inFrameNum = 0);	//	New in SDK 17.1
 
 	/**
-		@brief		Parse "raw" HDMI auxillary data bytes received from hardware (ingest) -- see \ref ancgumpformat --
-					into separate AJAAncillaryData objects and appends them to me.
+		@brief		Parse "raw" HDMI auxillary data bytes received from hardware (ingest) into separate
+					AJAAncillaryData objects and appends them to me.
 		@param[in]	pInReceivedData		Specifies a valid, non-NULL address of the first byte of "raw" ancillary data received by an AncExtractor widget.
 		@param[in]	inByteCount			Specifies the number of bytes of data in the specified buffer to process.
 		@param[in]	inFrameNum			If non-zero, replaces the frame identifier of new packets that have a zero frame ID.
@@ -497,7 +512,7 @@ public:	//	INSTANCE METHODS
 					is used to instantiate the specific AJAAncillaryData subclass instance.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						AddReceivedAuxillaryData (const uint8_t * pInReceivedData, const uint32_t inByteCount, const uint32_t inFrameNum = 0);
+	virtual AJAStatus			AddReceivedAuxiliaryData (const NTV2Buffer & inReceivedData, const uint32_t inFrameNum = 0);	//	New in SDK 17.1
 
 	/**
 		@brief		Parse a "raw" RTP packet received from hardware (ingest) in network byte order into separate
@@ -508,7 +523,7 @@ public:	//	INSTANCE METHODS
 					is used to instantiate the specific AJAAncillaryData subclass instance.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						AddReceivedAncillaryData (const ULWordSequence & inReceivedData);
+	virtual AJAStatus			AddReceivedAncillaryData (const ULWordSequence & inReceivedData);
 
 
 	/**
@@ -520,23 +535,23 @@ public:	//	INSTANCE METHODS
 		@param[in]	inFrameNum			If non-zero, specifies/sets the frame identifier for the added packets.
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus						AddVANCData (const UWordSequence & inPacketWords,
-														const AJAAncillaryDataLocation & inLocation,
-														const uint32_t inFrameNum = 0);
+	virtual AJAStatus			AddVANCData (const UWordSequence & inPacketWords,
+											const AJAAncillaryDataLocation & inLocation,
+											const uint32_t inFrameNum = 0);
 
 	/**
 		@brief		Answers true if multiple RTP packets are allowed for capture/receive.
 					The default behavior is to process all (multiple) received RTP packets.
 		@return		True if multiple RTP packets are allowed to be decoded;  otherwise false.
 	**/
-	virtual inline bool						AllowMultiRTPReceive (void) const					{return m_rcvMultiRTP;}
+	virtual inline bool			AllowMultiRTPReceive (void) const					{return m_rcvMultiRTP;}
 
 	/**
 		@brief		Determines if more than one RTP packet will be processed/decoded (via AddReceivedAncillaryData).
 		@param[in]	inAllow		Specify true to allow processing/decoding multiple RTP packets from the receiving Anc buffer.
 								Specify false to only process/decode the first RTP packet found in the receiving Anc buffer.
 	**/
-	virtual inline void						SetAllowMultiRTPReceive (const bool inAllow)		{m_rcvMultiRTP = inAllow;}
+	virtual inline void			SetAllowMultiRTPReceive (const bool inAllow)		{m_rcvMultiRTP = inAllow;}
 
 	/**
 		@brief		Answers if checksum errors are to be ignored or not.
@@ -544,20 +559,26 @@ public:	//	INSTANCE METHODS
 		@note		This applies to capture/ingest (i.e. AddReceivedAncillaryData methods).
 		@return		True if ignoring checksum errors;  otherwise false.
 	**/
-	virtual inline bool						IgnoreChecksumErrors (void) const	{return m_ignoreCS;}
+	virtual inline bool			IgnoreChecksumErrors (void) const	{return m_ignoreCS;}
 
 	/**
 		@brief		Determines if checksum errors encountered during capture/ingest
 					(via AddReceivedAncillaryData) will be ignored or not.
 		@param[in]	inIgnore	Specify true to ignore checksum errors;  otherwise use false.
 	**/
-	virtual inline void						SetIgnoreChecksumErrors (const bool inIgnore)		{m_ignoreCS = inIgnore;}
+	virtual inline void			SetIgnoreChecksumErrors (const bool inIgnore)		{m_ignoreCS = inIgnore;}
 
 	/**
 		@brief		Sends a "ParsePayloadData" command to all of my AJAAncillaryData objects.
 		@return		AJA_STATUS_SUCCESS if all items parse successfully;  otherwise the last failure result.
 	**/
-	virtual AJAStatus						ParseAllAncillaryData (void);
+	virtual AJAStatus			ParseAllAncillaryData (void);
+
+	virtual inline AJAStatus	AddReceivedAncillaryData (	const uint8_t * rcvData,						\
+															const uint32_t rcvCnt,							\
+															const uint32_t frmNum = 0)						\
+								{	return AddReceivedAncillaryData (NTV2Buffer (rcvData, rcvCnt), frmNum);	\
+								}	///< @deprecated	In SDK 17.1, use AJAAncillaryList::AddReceivedAncillaryData(const NTV2Buffer&, const uint32_t) instead
 	///@}
 
 
@@ -575,6 +596,14 @@ public:	//	INSTANCE METHODS
 	virtual std::ostream &					Print (std::ostream & inOutStream, const bool inDetailed = true) const;
 	///@}
 
+	/**
+		@brief		Copies GUMP from inSrc to outDst buffers, but removes ATC, VPID, VITC, EDH & raw/analog packets.
+		@param[in]	inSrc		Specifies the source GUMP buffer.
+		@param		outDst		Specifies the destination buffer. It must be at least as large as inSrc.
+		@note		Both inSrc and outDst buffers can refer to the same buffer.
+		@return		True if successful; otherwise false.
+	**/
+	static bool					StripNativeInserterGUMPPackets (const NTV2Buffer & inSrc, NTV2Buffer & outDst);
 
 protected:
 	friend class CNTV2Card;	//	CNTV2Card's member functions can call AJAAncillaryList's private & protected member functions
@@ -589,7 +618,7 @@ protected:
 
 	virtual inline AJAAncDataType					GetAnalogAncillaryDataType (const AJAAncillaryData & inAncData)	{return GetAnalogAncillaryDataTypeForLine(inAncData.GetLocationLineNumber());}
 
-	static bool								BufferHasGUMPData (const NTV2Buffer & inBuffer);
+	static inline bool          			BufferHasGUMPData (const NTV2Buffer & inBuffer) {return inBuffer ? inBuffer.U8(0) == 0xFF : false;}
 
 	/**
 		@brief		Appends whatever can be decoded from the given device Anc buffer to the AJAAncillaryList.
@@ -660,6 +689,8 @@ private:
 	bool					m_ignoreCS;		///< @brief	True: ignore checksum errors;  False: don't ignore CS errors
 
 };	//	AJAAncillaryList
+
+typedef AJAAncillaryList	AJAAuxiliaryList, AJAAncList, AJAAuxList;
 
 
 /**

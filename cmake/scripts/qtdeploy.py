@@ -46,7 +46,13 @@ if __name__ == "__main__":
 
     res = subprocess.run(qtdeploy_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8")
     if res.returncode == 0:
-        blob = json.loads(res.stdout)
+        # Qt6.5.3 windeployqt when run with --json will print a string before the json output, find the first part of the json output ('{')
+        # EX: if you print(res):
+        # stdout='Skipping plugin qinsighttracker.dll. Use -deploy-insighttracker if you want to use it.\n{\n    "files": [ ... ]
+        start = res.stdout.index('{')
+        substr = res.stdout[start:len(res.stdout)]
+        # print(substr)
+        blob = json.loads(substr)
         if not blob or not "files" in blob:
             print("Invalid json parsed from Qt deploy command!")
             sys.exit(1)

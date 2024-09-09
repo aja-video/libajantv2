@@ -27,5 +27,6 @@ bool ntv2WriteRegCon32(Ntv2SystemContext* context, uint32_t regNum, uint32_t reg
 bool ntv2WriteRegMSCon32(Ntv2SystemContext* context, uint32_t regNum, uint32_t regValue, RegisterMask mask, RegisterShift shift);
 uint32_t ntv2ReadVirtRegCon32(Ntv2SystemContext* context, uint32_t regNum);
 bool ntv2WriteVirtRegCon32(Ntv2SystemContext* context, uint32_t regNum, uint32_t data);
+bool ntv2WriteXlnxRegCon32(Ntv2SystemContext* context, uint32_t regNum, uint32_t data);
 
 #endif

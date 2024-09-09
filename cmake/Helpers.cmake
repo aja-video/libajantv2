@@ -244,7 +244,7 @@ function(aja_code_sign targets)
 		return()
 	endif()
 
-	set(sign_script_path ${AJAPY_DIR}/aja/scripts/cli/ntv2sign.py)
+	set(sign_script_path ${AJAPY_DIR}/aja/scripts/cli/evsign.py)
 	foreach(target IN LISTS targets)
 		if (EXISTS "${sign_script_path}")
 			set(ajapy_path ${AJAPY_DIR}/aja)
@@ -256,10 +256,7 @@ function(aja_code_sign targets)
 					${CMAKE_COMMAND} -E env "PYTHONPATH=\"${ajapy_path}\""
 					${Python3_EXECUTABLE}
 					${sign_script_path}
-					--re-sign
-					--notarize
-					--strict
-					$<TARGET_FILE:${target}>
+					--path=$<TARGET_FILE:${target}>
 				COMMENT "Signing '$<TARGET_FILE:${target}>' ...")
 		endif()
 	endforeach()

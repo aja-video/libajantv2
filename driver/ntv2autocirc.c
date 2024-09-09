@@ -14,7 +14,7 @@
 #include "ntv2autofunc.h"
 #include "ntv2fixed.h"
 
-static char* CrosspointName[] =
+static const char* CrosspointName[] =
 {
 	"Channel 1",
 	"Channel 2",
@@ -49,6 +49,10 @@ static const uint32_t gNTV2InputSourceToANCChannel[NTV2_NUM_INPUTSOURCES+1] = {
 	NTV2_CHANNEL_INVALID, NTV2_CHANNEL_INVALID, NTV2_CHANNEL_INVALID, NTV2_CHANNEL_INVALID, NTV2_CHANNEL_INVALID,
 	NTV2_CHANNEL1, NTV2_CHANNEL2, NTV2_CHANNEL3, NTV2_CHANNEL4,
 	NTV2_CHANNEL5, NTV2_CHANNEL6, NTV2_CHANNEL7, NTV2_CHANNEL8, NTV2_CHANNEL_INVALID};
+
+#if defined(AJAMacDext)
+	extern uint32_t Ntv2DMATransferCon(Ntv2SystemContext* context, PAUTO_DMA_PARAMS pDmaParams);
+#endif
 
 //-------------------------------------------------------------------------------------------------------
 //	AutoCirculateControl
@@ -242,7 +246,6 @@ Ntv2Status AutoCircInit(NTV2AutoCirc* pAutoCirc,
 
 	if (!NTV2DeviceCanDoCustomAnc(deviceID))
 		bWithCustomAncData = false;
-
 	//Mac SpinlockAcquire
 
 	for(int32_t loopCount = 0; loopCount < lChannelCount; loopCount++)
@@ -258,7 +261,6 @@ Ntv2Status AutoCircInit(NTV2AutoCirc* pAutoCirc,
 		AutoCircReset(pAutoCirc, channelSpecAtIndex);  // Reset AutoCirculate Database
 
 		pAuto->pSysCon						= pAutoCirc->pSysCon;
-		pAuto->pFunCon						= pAutoCirc->pFunCon;
 		pAuto->channelSpec					= channelSpecAtIndex;
 		pAuto->startFrame					= lStartFrameNum + (loopCount * channelRange);
 		pAuto->endFrame						= lEndFrameNum + (loopCount * channelRange);
@@ -1062,7 +1064,7 @@ Ntv2Status AutoCircGetStatus(NTV2AutoCirc* pAutoCirc, AUTOCIRCULATE_STATUS* pUse
 	pUserOutBuffer->acAudioClockStartTime = pAuto->startAudioClockTimeStamp;
 
 	pUserOutBuffer->acRDTSCCurrentTime = ntv2Time100ns();
-	pUserOutBuffer->acAudioClockCurrentTime = AutoGetAudioClock(pAutoCirc->pFunCon);
+	pUserOutBuffer->acAudioClockCurrentTime = AutoGetAudioClock(pAutoCirc->pSysCon);
 	pUserOutBuffer->acFramesProcessed = pAuto->framesProcessed;
 	pUserOutBuffer->acFramesDropped = pAuto->droppedFrames;
 	pUserOutBuffer->acBufferLevel = AutoCircGetBufferLevel(pAuto);
@@ -1101,7 +1103,7 @@ Ntv2Status AutoCircGetFrameStamp (NTV2AutoCirc* pAutoCirc,
 		memset(pFrameStamp, 0, sizeof(FRAME_STAMP_STRUCT));
 		pFrameStamp->currentFrame = NTV2_INVALID_FRAME;
 		// Always can set these
-		pFrameStamp->audioClockCurrentTime = AutoGetAudioClock(pAutoCirc->pFunCon);
+		pFrameStamp->audioClockCurrentTime = AutoGetAudioClock(pAutoCirc->pSysCon);
 		pFrameStamp->currentTime = ntv2Time100ns();
 		pFrameStamp->currentLineCount = ntv2ReadRegister(pSysCon, kRegLineCount);
 		pFrameStamp->currentFrameTime = pAuto->VBILastRDTSC;
@@ -1145,7 +1147,7 @@ Ntv2Status AutoCircGetFrameStamp (NTV2AutoCirc* pAutoCirc,
         lCurrentFrame = pAuto->startFrame;
 
     pFrameStamp->currentFrame = lCurrentFrame;
-    pFrameStamp->audioClockCurrentTime = AutoGetAudioClock(pAutoCirc->pFunCon);
+    pFrameStamp->audioClockCurrentTime = AutoGetAudioClock(pAutoCirc->pSysCon);
     pFrameStamp->currentTime = ntv2Time100ns();
 
     pFrameStamp->currentRP188 = pAuto->frameStamp[lCurrentFrame].rp188;
@@ -1187,7 +1189,7 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 {
 	NTV2DeviceID deviceID = pAutoCirc->deviceID;
 	Ntv2SystemContext* pSysCon = pAutoCirc->pSysCon;
-
+	
 	NTV2Crosspoint channelSpec = pTransferStruct->acCrosspoint;
 	if (ILLEGAL_CHANNELSPEC(channelSpec))
 	{
@@ -1306,7 +1308,7 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 					CrosspointName[pAuto->channelSpec], frameNumber);
 				status = NTV2_STATUS_BAD_PARAMETER;
 			}
-			else if (!AutoBoardCanDoP2P(pAutoCirc->pFunCon))
+			else if (!AutoBoardCanDoP2P(pAutoCirc->pSysCon))
 			{
 				ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA frame %d P2P target not supported (prepare)\n",
 							CrosspointName[pAuto->channelSpec], frameNumber);
@@ -1322,8 +1324,8 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 				uint32_t ulVideoOffset = frameNumber*GetFrameBufferSize(pSysCon, channel) + ulFrameOffset;
 				uint32_t ulVideoSize = GetFrameBufferSize(pSysCon, channel) - ulFrameOffset;
 
-				uint64_t paFrameBuffer = AutoGetFrameAperturePhysicalAddress(pAutoCirc->pFunCon);
-				uint32_t ulFrameBufferSize = AutoGetFrameApertureBaseSize(pAutoCirc->pFunCon);
+				uint64_t paFrameBuffer = AutoGetFrameAperturePhysicalAddress(pAutoCirc->pSysCon);
+				uint32_t ulFrameBufferSize = AutoGetFrameApertureBaseSize(pAutoCirc->pSysCon);
 
 				if ((paFrameBuffer != 0) &&
 					((ulVideoOffset + ulVideoSize) <= ulFrameBufferSize))
@@ -1335,7 +1337,7 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 					// for target transfers (vs prepare) the source will also do a message transfer
 					if ((pTransferStruct->acPeerToPeerFlags & AUTOCIRCULATE_P2P_TARGET) == AUTOCIRCULATE_P2P_TARGET)
 					{
-						dmaData.messageBusAddress = AutoGetMessageAddress(pAutoCirc->pFunCon, channelSpec);
+						dmaData.messageBusAddress = AutoGetMessageAddress(pAutoCirc->pSysCon, channel);
 						if (dmaData.messageBusAddress != 0)
 						{
 							dmaData.messageData = frameNumber;
@@ -1360,7 +1362,7 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 											(PAUTOCIRCULATE_P2P_STRUCT)pTransferStruct->acVideoBuffer.fUserSpacePtr,
 											false))
 				{
-					AutoWriteFrameApertureOffset(pAutoCirc->pFunCon, 0);
+					AutoWriteFrameApertureOffset(pAutoCirc->pSysCon, 0);
 					transferPending = true;
 				}
 				else
@@ -1379,7 +1381,7 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 							CrosspointName[pAuto->channelSpec], frameNumber);
 				status = NTV2_STATUS_BAD_PARAMETER;
 			}
-			else if (!AutoBoardCanDoP2P(pAutoCirc->pFunCon))
+			else if (!AutoBoardCanDoP2P(pAutoCirc->pSysCon))
 			{
 				ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA frame %d P2P target not supported (complete)\n",
 							CrosspointName[pAuto->channelSpec], frameNumber);
@@ -1405,7 +1407,7 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 							CrosspointName[pAuto->channelSpec], frameNumber);
 				status = NTV2_STATUS_BAD_PARAMETER;
 			}
-			else if (!AutoBoardCanDoP2P(pAutoCirc->pFunCon))
+			else if (!AutoBoardCanDoP2P(pAutoCirc->pSysCon))
 			{
 				ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA frame %d P2P transfer not supported (transfer)\n",
 							CrosspointName[pAuto->channelSpec], frameNumber);
@@ -1435,7 +1437,7 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 					dmaParams.vidFramePitch = pTransferStruct->acInSegmentedDMAInfo.acSegmentDevicePitch;
 					dmaParams.numSegments = pTransferStruct->acInSegmentedDMAInfo.acNumSegments;
 
-					status = AutoDmaTransfer(pAutoCirc->pFunCon, &dmaParams);
+					status = AutoDmaTransfer(pAutoCirc->pSysCon, &dmaParams);
 				}
 				else
 				{
@@ -1517,6 +1519,8 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 					dmaParams.dmaEngine = eVideoDmaEngine;
 					dmaParams.videoChannel = channel;
 					dmaParams.pVidUserVa = (PVOID)transfer.acVideoBuffer.fUserSpacePtr;
+					dmaParams.pVidDesc = (PVOID)transfer.acVideoBuffer.fIOMemoryDesc;
+					dmaParams.pVidMap = (PVOID)transfer.acVideoBuffer.fIOMemoryMap;
 					dmaParams.videoFrame = frameNumber;
 					dmaParams.vidNumBytes = transfer.acVideoBuffer.fByteCount;
 					dmaParams.frameOffset = transfer.acInVideoDMAOffset;
@@ -1524,19 +1528,26 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 					dmaParams.vidFramePitch = transfer.acInSegmentedDMAInfo.acSegmentDevicePitch;
 					dmaParams.numSegments = transfer.acInSegmentedDMAInfo.acNumSegments;
 					dmaParams.pAudUserVa = withAudio ? (PVOID)transfer.acAudioBuffer.fUserSpacePtr : NULL;
+					dmaParams.pAudDesc = withAudio ? (PVOID)transfer.acAudioBuffer.fIOMemoryDesc : NULL;
+					dmaParams.pAudMap = withAudio ? (PVOID)transfer.acAudioBuffer.fIOMemoryMap : NULL;
 					dmaParams.audioSystem = pAuto->audioSystem;
 					dmaParams.audNumBytes = withAudio ? pAuto->audioTransferSize : 0;
 					dmaParams.audOffset = withAudio ? pAuto->audioTransferOffset : 0;
 					dmaParams.pAncF1UserVa = withAnc ? (PVOID)transfer.acANCBuffer.fUserSpacePtr : NULL;
+					dmaParams.pAncF1Desc = withAnc ? (PVOID)transfer.acANCBuffer.fIOMemoryDesc : NULL;
+					dmaParams.pAncF1Map = withAnc ? (PVOID)transfer.acANCBuffer.fIOMemoryMap : NULL;
 					dmaParams.ancF1Frame = frameNumber;
 					dmaParams.ancF1NumBytes = withAnc ? pAuto->ancTransferSize : 0;
 					dmaParams.ancF1Offset = withAnc ? pAuto->ancTransferOffset : 0;
 					dmaParams.pAncF2UserVa = withAnc ? (PVOID)transfer.acANCField2Buffer.fUserSpacePtr : NULL;
+					dmaParams.pAncF2Desc = withAnc ? (PVOID)transfer.acANCField2Buffer.fIOMemoryDesc : NULL;
+					dmaParams.pAncF2Map = withAnc ? (PVOID)transfer.acANCField2Buffer.fIOMemoryMap : NULL;
 					dmaParams.ancF2Frame = frameNumber;
 					dmaParams.ancF2NumBytes = withAnc ? pAuto->ancField2TransferSize : 0;
 					dmaParams.ancF2Offset = withAnc ? pAuto->ancField2TransferOffset : 0;
 
-					status = AutoDmaTransfer(pAutoCirc->pFunCon, &dmaParams);
+					status = AutoDmaTransfer(pAutoCirc->pSysCon, &dmaParams);
+					
 					if (pAuto->recording && (status == NTV2_STATUS_SUCCESS))
 					{
 						// update capture field data
@@ -1554,6 +1565,8 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 						dmaParams.dmaEngine = eVideoDmaEngine;
 						dmaParams.videoChannel = channel;
 						dmaParams.pVidUserVa = (PVOID)transfer.acVideoBuffer.fUserSpacePtr;
+						dmaParams.pVidDesc = (PVOID)transfer.acVideoBuffer.fIOMemoryDesc;
+						dmaParams.pVidMap = (PVOID)transfer.acVideoBuffer.fIOMemoryMap;
 						dmaParams.videoFrame = frameNumber;
 						dmaParams.vidNumBytes = transfer.acVideoBuffer.fByteCount;
 						dmaParams.frameOffset = transfer.acInVideoDMAOffset;
@@ -1561,7 +1574,7 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 						dmaParams.vidFramePitch = transfer.acInSegmentedDMAInfo.acSegmentDevicePitch;
 						dmaParams.numSegments = transfer.acInSegmentedDMAInfo.acNumSegments;
 
-						AutoDmaTransfer(pAutoCirc->pFunCon, &dmaParams);
+						AutoDmaTransfer(pAutoCirc->pSysCon, &dmaParams);
 					}
 				}
 				else
@@ -1572,6 +1585,8 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 					dmaParams.dmaEngine = eVideoDmaEngine;
 					dmaParams.videoChannel = channel;
 					dmaParams.pVidUserVa = (PVOID)pTransferStruct->acVideoBuffer.fUserSpacePtr;
+					dmaParams.pVidDesc = (PVOID)pTransferStruct->acVideoBuffer.fIOMemoryDesc;
+					dmaParams.pVidMap = (PVOID)pTransferStruct->acVideoBuffer.fIOMemoryMap;
 					dmaParams.videoFrame = frameNumber;
 					dmaParams.vidNumBytes = pTransferStruct->acVideoBuffer.fByteCount;
 					dmaParams.frameOffset = pTransferStruct->acInVideoDMAOffset;
@@ -1579,19 +1594,25 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 					dmaParams.vidFramePitch = pTransferStruct->acInSegmentedDMAInfo.acSegmentDevicePitch;
 					dmaParams.numSegments = pTransferStruct->acInSegmentedDMAInfo.acNumSegments;
 					dmaParams.pAudUserVa = withAudio ? (PVOID)pTransferStruct->acAudioBuffer.fUserSpacePtr : NULL;
+					dmaParams.pAudDesc = withAudio ? (PVOID)pTransferStruct->acAudioBuffer.fIOMemoryDesc : NULL;
+					dmaParams.pAudMap = withAudio ? (PVOID)pTransferStruct->acAudioBuffer.fIOMemoryMap : NULL;
 					dmaParams.audioSystem = pAuto->audioSystem;
 					dmaParams.audNumBytes = withAudio ? pAuto->audioTransferSize : 0;
 					dmaParams.audOffset = withAudio ? pAuto->audioTransferOffset : 0;
 					dmaParams.pAncF1UserVa = withAnc ? (PVOID)pTransferStruct->acANCBuffer.fUserSpacePtr : NULL;
+					dmaParams.pAncF1Desc = withAnc ? (PVOID)pTransferStruct->acANCBuffer.fIOMemoryDesc : NULL;
+					dmaParams.pAncF1Map = withAnc ? (PVOID)pTransferStruct->acANCBuffer.fIOMemoryMap : NULL;
 					dmaParams.ancF1Frame = frameNumber;
 					dmaParams.ancF1NumBytes = withAnc ? pAuto->ancTransferSize : 0;
 					dmaParams.ancF1Offset = withAnc ? pAuto->ancTransferOffset : 0;
 					dmaParams.pAncF2UserVa = withAnc ? (PVOID)pTransferStruct->acANCField2Buffer.fUserSpacePtr : NULL;
+					dmaParams.pAncF2Desc = withAnc ? (PVOID)pTransferStruct->acANCField2Buffer.fIOMemoryDesc : NULL;
+					dmaParams.pAncF2Map = withAnc ? (PVOID)pTransferStruct->acANCField2Buffer.fIOMemoryMap : NULL;
 					dmaParams.ancF2Frame = frameNumber;
 					dmaParams.ancF2NumBytes = withAnc ? pAuto->ancField2TransferSize : 0;
 					dmaParams.ancF2Offset = withAnc ? pAuto->ancField2TransferOffset : 0;
 
-					status = AutoDmaTransfer(pAutoCirc->pFunCon, &dmaParams);
+					status = AutoDmaTransfer(pAutoCirc->pSysCon, &dmaParams);
 				}
 				if (withAudio)
 					audioTransferDone = true;
@@ -1630,11 +1651,13 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 			dmaParams.dmaEngine = eAudioDmaEngine;
 			dmaParams.videoChannel = channel;
 			dmaParams.pAudUserVa = (PVOID)pTransferStruct->acAudioBuffer.fUserSpacePtr;
+			dmaParams.pAudDesc = (PVOID)pTransferStruct->acAudioBuffer.fIOMemoryDesc;
+			dmaParams.pAudMap = (PVOID)pTransferStruct->acAudioBuffer.fIOMemoryMap;
 			dmaParams.audioSystem = pAuto->audioSystem;
 			dmaParams.audNumBytes = pAuto->audioTransferSize;
 			dmaParams.audOffset = pAuto->audioTransferOffset;
 
-			status = AutoDmaTransfer(pAutoCirc->pFunCon, &dmaParams);
+			status = AutoDmaTransfer(pAutoCirc->pSysCon, &dmaParams);
 			if (status != NTV2_STATUS_SUCCESS)
 			{
 				ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA audio transfer failed  Ntv2Status = %d\n",
@@ -1665,7 +1688,7 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 			dmaParams.ancF2NumBytes = pAuto->ancField2TransferSize;
 			dmaParams.ancF2Offset = pAuto->ancField2TransferOffset;
 
-			status = AutoDmaTransfer(pAutoCirc->pFunCon, &dmaParams);
+			status = AutoDmaTransfer(pAutoCirc->pSysCon, &dmaParams);
 			if (status != NTV2_STATUS_SUCCESS)
 			{
 				ntv2Message("CNTV2Device::AutoCircTransfer - Auto %s: DMA ANC transfer failed  Ntv2Status = %d\n",
@@ -1686,6 +1709,7 @@ Ntv2Status AutoCircTransfer(NTV2AutoCirc* pAutoCirc,
 											  &(pTransferStruct->acTransferStatus),
 											  pAutoTemp, updateValid, transferPending);
 		}
+		//ntv2Message("DMA completed\n");
 	}
 	else
 	{
@@ -1902,7 +1926,7 @@ void BeginAutoCircTransfer(uint32_t frameNumber,
 	}
 	else
 	{
-		NTV2_RP188*		pInTCArray = (NTV2_RP188*)pTransferStruct->acOutputTimeCodes.fUserSpacePtr;
+		NTV2_RP188*		pInTCArray = (NTV2_RP188*)pTransferStruct->acOutputTimeCodes.fKernelSpacePtr;
 		uint32_t			byteCount = pTransferStruct->acOutputTimeCodes.fByteCount;
 
 		//	On playout, if the user-space client allocated the acOutputTimeCodes field of the AUTOCIRCULATE_TRANSFER struct,
@@ -2011,7 +2035,7 @@ void CompleteAutoCircTransfer(uint32_t frameNumber,
 			pUserOutBuffer->acAudioStartSample = pAuto->audioStartSample;
 			NTV2_RP188P_from_RP188_STRUCT(&pUserOutBuffer->acFrameStamp.acRP188, pAuto->frameStamp[frameNumber].rp188);
 			CopyFrameStampTCArrayToNTV2TimeCodeArray(&pAuto->frameStamp[frameNumber].internalTCArray,
-													 (NTV2_RP188 *)pUserOutBuffer->acFrameStamp.acTimeCodes.fUserSpacePtr,
+													 (NTV2_RP188 *)pUserOutBuffer->acFrameStamp.acTimeCodes.fKernelSpacePtr,
 				pUserOutBuffer->acFrameStamp.acTimeCodes.fByteCount);
 // 			CopyFrameStampSDIStatusArrayToNTV2SDIStatusArray(&pAuto->frameStamp[frameNumber].internalSDIStatusArray, reinterpret_cast <NTV2SDIInputStatus *> (pUserOutBuffer->acFrameStamp.acSDIInputStatusArray.fUserSpacePtr),
 // 				pUserOutBuffer->acFrameStamp.acSDIInputStatusArray.fByteCount);
@@ -2048,7 +2072,7 @@ void CompleteAutoCircTransfer(uint32_t frameNumber,
 	if (ulCurrentFrame >= (uint32_t)pAuto->startFrame && ulCurrentFrame <= (uint32_t)pAuto->endFrame)
 	{
 		pUserOutBuffer->acFrameStamp.acCurrentFrameTime = pAuto->frameStamp[ulCurrentFrame].frameTime;
-		pUserOutBuffer->acFrameStamp.acAudioClockCurrentTime = AutoGetAudioClock(pAuto->pFunCon);
+		pUserOutBuffer->acFrameStamp.acAudioClockCurrentTime = AutoGetAudioClock(pAuto->pSysCon);
 
 		// If playing, fill in timing data from the current (active) frame
 		if (!pAuto->recording)
@@ -2065,7 +2089,7 @@ void CompleteAutoCircTransfer(uint32_t frameNumber,
 	{
 
 		pUserOutBuffer->acFrameStamp.acCurrentFrameTime = 0;
-		pUserOutBuffer->acFrameStamp.acAudioClockCurrentTime = AutoGetAudioClock(pAuto->pFunCon);
+		pUserOutBuffer->acFrameStamp.acAudioClockCurrentTime = AutoGetAudioClock(pAuto->pSysCon);
 
 		// If playing, fill in timing data from the current (active) frame
 		if (!pAuto->recording)
@@ -2223,6 +2247,7 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 	{
 		syncChannel = GetNTV2ChannelForNTV2Crosspoint(pautoChannelSpec);
 	}
+	
 	bool syncProgressive = IsProgressiveStandard(pSysCon, syncChannel);
 	bool fieldMode = false;
 	bool syncField0 = true;
@@ -2278,7 +2303,7 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 			// Update the current vertical blank time
 			pAuto->VBIRDTSC = isrTimeStamp;
 
-			audioCounter = AutoGetAudioClock(pAutoCirc->pFunCon);
+			audioCounter = AutoGetAudioClock(pAutoCirc->pSysCon);
 		}
 
 		if(pAuto->state == NTV2_AUTOCIRCULATE_RUNNING ||
@@ -2645,9 +2670,7 @@ bool AutoCirculate (NTV2AutoCirc* pAutoCirc, NTV2Crosspoint channelSpec, int32_t
 						// if the time difference is larger than the tolerance correct the expected start address
 						if (time > (uint64_t)(ntv2ReadVirtualRegister(pSysCon, kVRegAudioSyncTolerance) * 10))
 						{
-							newStartAddress = oemAudioSampleAlign(
-								pAutoCirc->pFunCon,
-								pAuto->audioSystem, actualLastIn) + GetAudioReadOffset(pSysCon, pAuto->audioSystem);
+							newStartAddress = oemAudioSampleAlign(pSysCon, pAuto->audioSystem, actualLastIn) + GetAudioReadOffset(pSysCon, pAuto->audioSystem);
 							ntv2Message("CNTV2Device::AutoCirculate - Auto %s:  frame %d  correct audio sync start %d  actual %d  time %lld\n",
 										CrosspointName[pAuto->channelSpec], pAuto->framesProcessed,
 										startAddress, actualLastIn, (long long)time);
@@ -3875,7 +3898,7 @@ bool AutoCircFrameStampImmediate(NTV2AutoCirc* pAutoCirc, FRAME_STAMP * pInOutFr
 		frameNumber = pAuto->startFrame;		//	Use start frame if active frame invalid
 	NTV2_RP188_from_RP188_STRUCT(pInOutFrameStamp->acRP188, pAuto->frameStamp[frameNumber].rp188);	//	NOTE:  acRP188 field is deprecated
 	if (!CopyFrameStampTCArrayToNTV2TimeCodeArray(&pAuto->frameStamp[frameNumber].internalTCArray,
-												  (NTV2_RP188*)pInOutFrameStamp->acTimeCodes.fUserSpacePtr,
+												  (NTV2_RP188*)pInOutFrameStamp->acTimeCodes.fKernelSpacePtr,
 												  pInOutFrameStamp->acTimeCodes.fByteCount))
 	{
 		//("AutoCircFrameStampImmediate: CopyFrameStampTCArrayToNTV2TimeCodeArray failed, frame=%d, byteCount=%d\n", frameNumber, pInOutFrameStamp->acTimeCodes.fByteCount);
@@ -3918,6 +3941,10 @@ bool AutoCircCanDoFieldMode(INTERNAL_AUTOCIRCULATE_STRUCT* pAuto)
 //	Real device drivers and fake devices must implement:
 Ntv2Status	AutoDmaTransfer(void* pContext, PAUTO_DMA_PARAMS pDmaParams)
 {
+#if defined(AJAMacDext)
+	extern Ntv2Status ntv2DMATransferCon(Ntv2SystemContext* pSysCon, PAUTO_DMA_PARAMS pDmaParams);
+	return ntv2DMATransferCon((Ntv2SystemContext*) pContext, pDmaParams);
+#endif
 	return NTV2_STATUS_SUCCESS;
 }
 

@@ -24,9 +24,9 @@ typedef enum
 	DEVICE_ID_CORVID24					= 0x10402100,	///< @brief See \ref corvid24
 	DEVICE_ID_CORVID3G					= 0x10294900,	///< @brief See \ref corvid1corvid3g
 	DEVICE_ID_CORVID44					= 0x10565400,	///< @brief See \ref corvid44
-	DEVICE_ID_CORVID44_8KMK				= 0x10832400,	///< @brief See \ref corvid4412g
-	DEVICE_ID_CORVID44_8K				= 0X10832401,	///< @brief See \ref corvid4412g
 	DEVICE_ID_CORVID44_2X4K				= 0X10832402,	///< @brief See \ref corvid4412g
+	DEVICE_ID_CORVID44_8K				= 0X10832401,	///< @brief See \ref corvid4412g
+	DEVICE_ID_CORVID44_8KMK				= 0x10832400,	///< @brief See \ref corvid4412g
 	DEVICE_ID_CORVID44_PLNR				= 0X10832403,	///< @brief See \ref corvid4412g
 	DEVICE_ID_CORVID88					= 0x10538200,	///< @brief See \ref corvid88
 	DEVICE_ID_CORVIDHBR					= 0x10668200,	///< @brief See \ref corvidhbr
@@ -77,6 +77,7 @@ typedef enum
 	DEVICE_ID_KONAX						= 0X10958501,	///< @brief See \ref konax
 	DEVICE_ID_KONAXM					= 0X10958500,	///< @brief See \ref konaxm
 	DEVICE_ID_SOJI_3DLUT				= 0x10922400,
+    DEVICE_ID_SOJI_DIAGS                = 0x10922499,
 	DEVICE_ID_SOJI_OE1					= 0x10922401,
 	DEVICE_ID_SOJI_OE2					= 0x10922402,
 	DEVICE_ID_SOJI_OE3					= 0x10922403,
@@ -84,11 +85,11 @@ typedef enum
 	DEVICE_ID_SOJI_OE5					= 0x10922405,
 	DEVICE_ID_SOJI_OE6					= 0x10922406,
 	DEVICE_ID_SOJI_OE7					= 0x10922407,
-    DEVICE_ID_SOJI_DIAGS                = 0x10922499,
 	DEVICE_ID_TTAP						= 0x10416000,	///< @brief See \ref ttap
 	DEVICE_ID_TTAP_PRO					= 0x10879000,	///< @brief See \ref ttappro
-	DEVICE_ID_NOTFOUND				= 0xFFFFFFFF,		///< @brief Invalid or "not found"
-	DEVICE_ID_INVALID				= DEVICE_ID_NOTFOUND
+	DEVICE_ID_SOFTWARE					= 0x534F4654,	///< @brief Software device that doesn't emulate one of the above devices
+	DEVICE_ID_NOTFOUND					= 0xFFFFFFFF,	///< @brief Invalid or "not found"
+	DEVICE_ID_INVALID					= DEVICE_ID_NOTFOUND
 
 } NTV2DeviceID;
 
@@ -469,6 +470,26 @@ typedef enum
 	NTV2_SG_2Kx1080 = 8,
 	NTV2_SG_2Kx1556 = 9
 } NTV2ScanGeometry;
+
+
+/**
+	@brief	Identifies a particular scan method.
+**/
+typedef enum _NTV2ScanMethod
+{
+	NTV2Scan_Progressive	= 0,						///< @brief	Progressive
+	NTV2Scan_NonInterlaced	= NTV2Scan_Progressive,
+	NTV2Scan_Interlaced,								///< @brief	Interlaced
+	NTV2Scan_PSF,										///< @brief	Progressive Segmented Frame
+	NTV2Scan_ProgressiveSegmentedFrame	= NTV2Scan_PSF,
+	NTV2_NUM_SCANMETHODS,
+	NTV2Scan_Invalid	= NTV2_NUM_SCANMETHODS			///< @brief	Invalid or unknown
+} NTV2ScanMethod;
+
+#define NTV2_IS_VALID_NTV2ScanMethod(__m__)		((__m__) >= NTV2Scan_Progressive && (__m__) < NTV2_NUM_SCANMETHODS)
+#define NTV2_IS_PROGRESSIVE_SCAN(__m__)			((__m__) == NTV2Scan_Progressive)
+#define NTV2_IS_INTERLACED_SCAN(__m__)			((__m__) == NTV2Scan_Interlaced)
+#define NTV2_IS_PSF_SCAN(__m__)					((__m__) == NTV2Scan_PSF)
 
 
 // IMPORTANT When adding to the NTV2VideoFormat enum, don't forget to:
@@ -1214,7 +1235,7 @@ typedef enum
 	@details	Always call ::NTV2DeviceCanDoInputSource to determine if a device has one of these input sources.
 				Call CNTV2Card::GetInputVideoFormat to determine what video signal is present on the input (if any).
 				Call ::GetInputSourceOutputXpt to get an NTV2OutputCrosspointID for one of these inputs to pass to
-				CNTV2Card::Connect. See \ref devicesignalinputsoutputs.
+				CNTV2Card::Connect. See \ref vidop-signalio.
 	@warning	Do not rely on the ordinal values of these constants between successive SDKs, since new devices
 				can be introduced that require additional inputs.
 **/
@@ -1247,11 +1268,11 @@ typedef enum
 **/
 typedef enum
 {
-	NTV2_IOKINDS_ALL			= 0xFF, ///< @brief Specifies any/all input/output kinds.
+	NTV2_IOKINDS_NONE			= 0,	///< @brief Doesn't specify any kind of input/output.
 	NTV2_IOKINDS_SDI			= 1,	///< @brief Specifies SDI input/output kinds.
 	NTV2_IOKINDS_HDMI			= 2,	///< @brief Specifies HDMI input/output kinds.
 	NTV2_IOKINDS_ANALOG			= 4,	///< @brief Specifies analog input/output kinds.
-	NTV2_IOKINDS_NONE			= 0		///< @brief Doesn't specify any kind of input/output.
+	NTV2_IOKINDS_ALL			= (NTV2_IOKINDS_SDI | NTV2_IOKINDS_HDMI | NTV2_IOKINDS_ANALOG) ///< @brief Specifies any/all input/output kinds.
 	#if !defined(NTV2_DEPRECATE_16_3)
 	,	NTV2_INPUTSOURCES_ALL		= NTV2_IOKINDS_ALL,
 		NTV2_INPUTSOURCES_SDI		= NTV2_IOKINDS_SDI,
@@ -1259,7 +1280,9 @@ typedef enum
 		NTV2_INPUTSOURCES_ANALOG	= NTV2_IOKINDS_ANALOG,
 		NTV2_INPUTSOURCES_NONE		= NTV2_IOKINDS_NONE
 	#endif	//	!defined(NTV2_DEPRECATE_16_3)
-} NTV2InputSourceKinds, NTV2OutputDestKinds, NTV2IOKinds;
+} NTV2InputSourceKind, NTV2OutputDestKind, NTV2IOKind;
+
+typedef ULWord NTV2InputSourceKinds, NTV2OutputDestKinds, NTV2IOKinds;
 
 #define NTV2_IS_VALID_IOKINDS(_k_)		(((_k_) == NTV2_IOKINDS_ALL) || ((_k_) == NTV2_IOKINDS_SDI) || ((_k_) == NTV2_IOKINDS_HDMI) || ((_k_) == NTV2_IOKINDS_ANALOG))
 
@@ -1269,14 +1292,14 @@ typedef enum
 	@details	Always call ::NTV2DeviceCanDoOutputDest to determine if a device has one of these input sources.
 				Call CNTV2Card::GetInputVideoFormat to determine what video signal is present on the input (if any).
 				Call ::GetInputSourceOutputXpt to get an NTV2OutputCrosspointID for one of these inputs to pass to
-				CNTV2Card::Connect. See \ref devicesignalinputsoutputs.
+				CNTV2Card::Connect. See \ref vidop-signalio.
 	@warning	Do not rely on the ordinal values of these constants between successive SDKs, since new devices
-				can be introduced that require additional inputs.
+				with multiple HDMI or Analog outputs could be introduced.
 **/
 typedef enum
 {
-	NTV2_OUTPUTDESTINATION_ANALOG,
-	NTV2_OUTPUTDESTINATION_HDMI,
+	NTV2_OUTPUTDESTINATION_ANALOG1,
+	NTV2_OUTPUTDESTINATION_HDMI1,
 	NTV2_OUTPUTDESTINATION_SDI1,
 	NTV2_OUTPUTDESTINATION_SDI2,
 	NTV2_OUTPUTDESTINATION_SDI3,
@@ -1286,11 +1309,15 @@ typedef enum
 	NTV2_OUTPUTDESTINATION_SDI7,
 	NTV2_OUTPUTDESTINATION_SDI8,
 	NTV2_OUTPUTDESTINATION_INVALID,
-	NTV2_NUM_OUTPUTDESTINATIONS = NTV2_OUTPUTDESTINATION_INVALID	//	Always last!
+	NTV2_NUM_OUTPUTDESTINATIONS		= NTV2_OUTPUTDESTINATION_INVALID	//	Always last!
+#if !defined(NTV2_DEPRECATE_17_5)
+	,NTV2_OUTPUTDESTINATION_ANALOG	= NTV2_OUTPUTDESTINATION_ANALOG1
+	,NTV2_OUTPUTDESTINATION_HDMI	= NTV2_OUTPUTDESTINATION_HDMI1
+#endif	//	!defined(NTV2_DEPRECATE_17_5)
 } NTV2OutputDestination, NTV2OutputDest;
 
-#define NTV2_OUTPUT_DEST_IS_HDMI(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_HDMI)
-#define NTV2_OUTPUT_DEST_IS_ANALOG(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_ANALOG)
+#define NTV2_OUTPUT_DEST_IS_HDMI(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_HDMI1)
+#define NTV2_OUTPUT_DEST_IS_ANALOG(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_ANALOG1)
 #define NTV2_OUTPUT_DEST_IS_SDI(_dest_)				((_dest_) >= NTV2_OUTPUTDESTINATION_SDI1 && (_dest_) <= NTV2_OUTPUTDESTINATION_SDI8)
 #define NTV2_IS_VALID_OUTPUT_DEST(_dest_)			(((_dest_) >= 0) && ((_dest_) < NTV2_NUM_OUTPUTDESTINATIONS))
 
@@ -1326,6 +1353,7 @@ typedef enum
 typedef enum _NTV2DeviceKinds
 {
 	NTV2_DEVICEKIND_ALL			= 0xFFFF,	///< @brief Specifies any/all devices.
+	NTV2_DEVICEKIND_SOFTWARE	= 0x8000,	///< @brief Specifies software devices that don't model/emulate "real" ones.
 	NTV2_DEVICEKIND_INPUT		= 0x0001,	///< @brief Specifies devices that input (capture).
 	NTV2_DEVICEKIND_OUTPUT		= 0x0002,	///< @brief Specifies devices that output (playout).
 	NTV2_DEVICEKIND_SDI			= 0x0004,	///< @brief Specifies devices with SDI connectors.
@@ -1392,7 +1420,7 @@ typedef enum
 
 /**
 	@brief		These enum values identify a specific source for the device's (output) reference clock.
-	@see		CNTV2Card::GetReference, CNTV2Card::SetReference, \ref deviceclockingandsync
+	@see		CNTV2Card::GetReference, CNTV2Card::SetReference, \ref vidop-clocking
 	@warning	Do not rely on the ordinal values of these constants between successive SDKs, since new devices
 				can be introduced that require additional inputs.
 **/
@@ -1619,7 +1647,7 @@ typedef enum
 
 /**
 	@brief	These values are used to determine when certain register writes actually take effect.
-			See CNTV2Card::SetRegisterWriteMode or \ref fieldframeinterrupts
+			See CNTV2Card::SetRegisterWriteMode or \ref vidop-fldfrmint
 **/
 typedef enum
 {
@@ -1780,7 +1808,7 @@ typedef enum
 
 /**
 	@brief	These values are used to identify fields for interlaced video.
-			See \ref fieldframeinterrupts and CNTV2Card::WaitForInputFieldID.
+			See \ref vidop-fldfrmint and CNTV2Card::WaitForInputFieldID.
 **/
 typedef enum
 {
@@ -1930,7 +1958,7 @@ typedef enum
 	@brief	This enum value determines/states the device audio clock reference source.
 			It was important to set this to ::NTV2_EMBEDDED_AUDIO_CLOCK_VIDEO_INPUT on older devices.
 			Newer devices always use ::NTV2_EMBEDDED_AUDIO_CLOCK_VIDEO_INPUT and cannot be changed.
-	@see	CNTV2Card::GetEmbeddedAudioClock, CNTV2Card::SetEmbeddedAudioClock, \ref audiooperation
+	@see	CNTV2Card::GetEmbeddedAudioClock, CNTV2Card::SetEmbeddedAudioClock, \ref audop-section
 **/
 typedef enum
 {
@@ -1945,7 +1973,7 @@ typedef enum
 
 /**
 	@brief	This enum value determines/states where an audio system will obtain its audio samples.
-	@see	CNTV2Card::SetAudioSystemInputSource, CNTV2Card::GetAudioSystemInputSource, \ref audiocapture
+	@see	CNTV2Card::SetAudioSystemInputSource, CNTV2Card::GetAudioSystemInputSource, \ref audop-capture
 **/
 typedef enum
 {
@@ -1968,7 +1996,7 @@ typedef enum
 /**
 	@brief	This enum value determines/states if an audio output embedder will embed silence (zeroes)
 			or de-embedded audio from an SDI input.
-	@see	CNTV2Card::SetAudioLoopBack, CNTV2Card::GetAudioLoopBack, CNTV2Card::SetAudioSystemInputSource, CNTV2Card::GetAudioSystemInputSource, \ref audioplayout
+	@see	CNTV2Card::SetAudioLoopBack, CNTV2Card::GetAudioLoopBack, CNTV2Card::SetAudioSystemInputSource, CNTV2Card::GetAudioSystemInputSource, \ref audop-playout
 **/
 typedef enum
 {
@@ -2219,7 +2247,8 @@ typedef enum
 typedef enum
 {
 	NTV2_MixerRGBRangeFull,
-	NTV2_MixerRGBRangeSMPTE
+	NTV2_MixerRGBRangeSMPTE,
+	NTV2_MAX_NUM_MixerRGBRanges
 } NTV2MixerRGBRange;
 
 
@@ -2685,6 +2714,7 @@ typedef enum NTV2OutputCrosspointID
 	@brief	Identifies a widget input that potentially can accept a signal emitted
 			from another widget's output (identified by ::NTV2OutputCrosspointID).
 	@see	CNTV2Card::Connect and also \ref ntv2signalrouting
+	@warning	Firmware now depends on the order of these values.
 **/
 typedef enum NTV2InputCrosspointID
 {
@@ -3050,7 +3080,7 @@ typedef enum
 	@note	The audio channels in the pair are adjacent, and never span an audio group.
 	@see	CNTV2Card::GetAudioPCMControl(const NTV2AudioSystem, const NTV2AudioChannelPair),
 			CNTV2Card::SetAudioPCMControl(const NTV2AudioSystem, const NTV2AudioChannelPair),
-			::NTV2DeviceGetMaxAudioChannels, \ref audiooperation
+			::NTV2DeviceGetMaxAudioChannels, \ref audop-section
 **/
 typedef enum
 {
@@ -3173,7 +3203,7 @@ typedef enum
 
 /**
 	@brief	Identifies the Audio Mixer's audio inputs.
-	@see	See \ref audiomixer
+	@see	See \ref audop-mixer
 **/
 typedef enum
 {
@@ -3190,7 +3220,7 @@ typedef enum
 
 /**
 	@brief	Identifies a contiguous, adjacent group of four audio channels.
-	@see	CNTV2Card::GetAESOutputSource, CNTV2Card::SetAESOutputSource, \ref audiooperation
+	@see	CNTV2Card::GetAESOutputSource, CNTV2Card::SetAESOutputSource, \ref audop-section
 **/
 typedef enum
 {
@@ -3239,7 +3269,7 @@ typedef NTV2Audio4ChannelSelect NTV2AudioChannelQuad;
 
 /**
 	@brief	Identifies a contiguous, adjacent group of eight audio channels.
-	@see	CNTV2Card::GetHDMIOutAudioSource8Channel, CNTV2Card::SetHDMIOutAudioSource8Channel, \ref audiooperation
+	@see	CNTV2Card::GetHDMIOutAudioSource8Channel, CNTV2Card::SetHDMIOutAudioSource8Channel, \ref audop-section
 **/
 typedef enum
 {
@@ -3370,7 +3400,8 @@ typedef enum
 	NTV2_CSC_Method_Original,
 	NTV2_CSC_Method_Enhanced,
 	NTV2_CSC_Method_Enhanced_4K,
-	NTV2_MAX_NUM_ColorSpaceMethods
+	NTV2_MAX_NUM_ColorSpaceMethods,
+	NTV2_CSC_Method_INVALID	= NTV2_MAX_NUM_ColorSpaceMethods
 } NTV2ColorSpaceMethod;
 
 
@@ -3530,7 +3561,8 @@ typedef enum
 	NTV2_INVALID_HDMI_COLORSPACE	= NTV2_MAX_NUM_HDMIColorSpaces
 } NTV2HDMIColorSpace;
 
-#define NTV2_IS_VALID_HDMI_COLORSPACE(__x__)		((__x__) > NTV2_HDMIColorSpaceAuto	&&	(__x__) < NTV2_MAX_NUM_HDMIColorSpaces)
+#define NTV2_IS_VALID_HDMI_COLORSPACE(__x__)	((__x__) > NTV2_HDMIColorSpaceAuto	&&	(__x__) < NTV2_MAX_NUM_HDMIColorSpaces)
+#define NTV2_OEM_VALID_HDMI_COLORSPACE(__x__)	((__x__) > NTV2_HDMIColorSpaceRGB	&&	(__x__) < NTV2_MAX_NUM_HDMIColorSpaces)
 
 
 /**
@@ -3808,7 +3840,7 @@ typedef enum
 
 /**
 	@brief	Used to identify an Audio System on an NTV2 device.
-			See \ref audiooperation for more information.
+			See \ref audop-section for more information.
 **/
 typedef enum
 {
@@ -3922,6 +3954,8 @@ typedef enum
 	NTV2_HDMI_V2_4K_PLAYBACK,
 	NTV2_HDMI_V2_MODE_INVALID
 } NTV2HDMIV2Mode;
+
+#define NTV2_IS_VALID_HDMI_V2MODE(__x__)		((__x__) >= NTV2_HDMI_V2_HDSD_BIDIRECTIONAL && (__x__) < NTV2_HDMI_V2_MODE_INVALID)
 
 typedef enum
 {
@@ -4216,7 +4250,7 @@ typedef enum {
 	PAGEPROGRAM_COMMAND		= 0x02,
 	SECTORERASE_COMMAND		= 0xD8,
 	CHIPERASE_COMMAND		= 0xC7,
-	BANKSELECT_COMMMAND		= 0x17,
+	BANKSELECT_COMMAND		= 0x17,
 	READBANKSELECT_COMMAND	= 0x16,
 	EXTENDEDADDRESS_COMMAND = 0xC5,
 	READEXTENDEDADDRESS_COMMAND = 0xC8,

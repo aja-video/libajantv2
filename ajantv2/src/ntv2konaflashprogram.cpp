@@ -125,9 +125,7 @@ void CNTV2KonaFlashProgram::SetQuietMode()
 {
 	_bQuiet = true;
 	if (_spiFlash)
-	{
 		_spiFlash->SetVerbosity(false);
-	}
 }
 
 bool CNTV2KonaFlashProgram::WriteCommand(_FLASH_COMMAND inCommand)
@@ -207,9 +205,9 @@ bool CNTV2KonaFlashProgram::IsInstalledFWRunning (bool & outIsRunning, ostream &
 	return true;
 }
 
-bool CNTV2KonaFlashProgram::SetBoard(UWord boardNumber, uint32_t index)
+bool CNTV2KonaFlashProgram::SetBoard(uint32_t index)
 {
-	if (!Open(boardNumber))
+	if (!IsOpen())
 		return false;
 
 	if (!SetDeviceProperties())
@@ -473,21 +471,19 @@ void CNTV2KonaFlashProgram::DetermineFlashTypeAndBlockNumberFromFileName (const 
 		_flashID = FAILSAFE_FLASHBLOCK;
 }
 
-bool CNTV2KonaFlashProgram::ReadHeader(FlashBlockID blockID)
+bool CNTV2KonaFlashProgram::ReadHeader (FlashBlockID blockID)
 {
-	uint32_t baseAddress (GetBaseAddressForProgramming(blockID));
-	SetFlashBlockIDBank(blockID);
+	bool status (SetFlashBlockIDBank(blockID));
 	NTV2Buffer bitFileHeader(MAXBITFILE_HEADERSIZE);
-	const uint32_t dwordSizeCount (bitFileHeader.GetByteCount() / 4);
-	for (uint32_t count(0);  count < dwordSizeCount;  count++, baseAddress += 4)
-	{
-		WriteRegister(kRegXenaxFlashAddress, baseAddress);
-		WriteCommand(READFAST_COMMAND);
-		WaitForFlashNOTBusy();
-		ReadRegister(kRegXenaxFlashDOUT, bitFileHeader.U32(int(count)));
-	}
+	uint32_t baseAddress (GetBaseAddressForProgramming(blockID));
+	const int dwordSizeCount (int(bitFileHeader.GetByteCount()) / 4);
+	for (int count(0);  status  &&  count < dwordSizeCount;  count++, baseAddress += 4)
+		status = WriteRegister(kRegXenaxFlashAddress, baseAddress)
+				&& WriteCommand(READFAST_COMMAND)
+				&& WaitForFlashNOTBusy()
+				&& ReadRegister(kRegXenaxFlashDOUT, bitFileHeader.U32(count));
 	ostringstream msgs;
-	const bool status (_parser.ParseHeader(bitFileHeader, msgs));
+	if (status) status = _parser.ParseHeader(bitFileHeader, msgs);
 	SetBankSelect(BANK_0);	//	Make sure to reset bank to lower
 	return status;
 }
@@ -901,21 +897,18 @@ bool CNTV2KonaFlashProgram::CheckFlashErasedWithBlockID (FlashBlockID flashID)
 	return status;
 }
 
-void CNTV2KonaFlashProgram::SRecordOutput (const char *pSRecord)
-{
-	cout << pSRecord << endl;
-}
 
 bool CNTV2KonaFlashProgram::CreateSRecord(bool bChangeEndian)
 {
 	uint32_t baseAddress = 0;
-	char sRecord[100];
+	//	char sRecord[100];
 	uint32_t partitionOffset = 0;
 
-	SRecordOutput("S0030000FC");
+	cout << "S0030000FC" << endl;
 
 	for ( uint32_t count = 0; count < _flashSize; count+=32)
 	{
+		ostringstream sRec;
 		if (ROMHasBankSelect() && count % _bankSize == 0)
 		{
 			baseAddress = 0;
@@ -937,28 +930,27 @@ bool CNTV2KonaFlashProgram::CreateSRecord(bool bChangeEndian)
 
 		UByte checksum = 0;
 
-		sRecord[0] = 'S';
-		sRecord[1] = '3';
+		sRec << "S3";	//	sRecord[0] = 'S';	sRecord[1] = '3';
 
 		uint32_t cc (recordSize + 5);
-		sprintf(&sRecord[2], "%02x", cc);
+		sRec << Hex0N(cc,2);	//sprintf(&sRecord[2], "%02x", cc);
 		checksum += cc;
 
 		uint32_t addr = baseAddress+partitionOffset;
 		UWord aa = ((addr >> 24) &0xff);
-		sprintf(&sRecord[4], "%02x", aa);
+		sRec << Hex0N(aa,2);	//	sprintf(&sRecord[4], "%02x", aa);
 		checksum += aa;
 
 		aa = ((addr >> 16) & 0xff);
-		sprintf (&sRecord[6],"%02x", aa);
+		sRec << Hex0N(aa,2);	//	sprintf (&sRecord[6],"%02x", aa);
 		checksum += aa;
 
 		aa = ((addr >> 8) & 0xff);
-		sprintf (&sRecord[8],"%02x", aa);
+		sRec << Hex0N(aa,2);	//	sprintf (&sRecord[8],"%02x", aa);
 		checksum += aa;
 
 		aa = (addr & 0xff);
-		sprintf (&sRecord[10],"%02x", aa);
+		sRec << Hex0N(aa,2);	//	sprintf (&sRecord[10],"%02x", aa);
 		checksum += aa;
 
 		uint32_t i = 0;
@@ -974,19 +966,19 @@ bool CNTV2KonaFlashProgram::CreateSRecord(bool bChangeEndian)
 				flashValue = NTV2EndianSwap32(flashValue);
 
 			UWord dd = (flashValue & 0xff);
-			sprintf(&sRecord[index], "%02x", dd);
+			sRec << Hex0N(dd,2);	//	sprintf(&sRecord[index], "%02x", dd);
 			checksum += dd;
 
 			dd = ((flashValue >> 8) & 0xff);
-			sprintf(&sRecord[index+2], "%02x", dd);
+			sRec << Hex0N(dd,2);	//	sprintf(&sRecord[index+2], "%02x", dd);
 			checksum += dd;
 
 			dd = ((flashValue >> 16) & 0xff);
-			sprintf(&sRecord[index+4], "%02x", dd);
+			sRec << Hex0N(dd,2);	//	sprintf(&sRecord[index+4], "%02x", dd);
 			checksum += dd;
 
 			dd = ((flashValue >> 24) & 0xff);
-			sprintf(&sRecord[index+6], "%02x", dd);
+			sRec << Hex0N(dd,2);	//	sprintf(&sRecord[index+6], "%02x", dd);
 			checksum += dd;
 
 			i += 4;
@@ -994,14 +986,14 @@ bool CNTV2KonaFlashProgram::CreateSRecord(bool bChangeEndian)
 			baseAddress += 4;
 		}
 		checksum = ~checksum;
-		sprintf(&sRecord[index], "%02x", checksum);
+		sRec << Hex0N(UWord(checksum),2);	//	sprintf(&sRecord[index], "%02x", checksum);
 
-		SRecordOutput(sRecord);
-	}
+		cout << sRec.str() << endl;	//	sRecord);
+	}	//	for loop
 
 	SetBankSelect(BANK_0);
 
-	SRecordOutput ("S705FFF001000A");
+	cout << "S705FFF001000A" << endl;
 
 	return true;
 }
@@ -1009,10 +1001,10 @@ bool CNTV2KonaFlashProgram::CreateSRecord(bool bChangeEndian)
 bool CNTV2KonaFlashProgram::CreateBankRecord(BankSelect bankID)
 {
 	uint32_t baseAddress = 0;
-	char sRecord[100];
+	ostringstream sRec;	//	char sRecord[100];
 	uint32_t partitionOffset = 0;
 
-	SRecordOutput("S0030000FC");
+	cout << "S0030000FC" << endl;
 
 	for (uint32_t count = 0; count < _bankSize; count += 32)
 	{
@@ -1027,28 +1019,27 @@ bool CNTV2KonaFlashProgram::CreateBankRecord(BankSelect bankID)
 
 		UByte checksum = 0;
 
-		sRecord[0] = 'S';
-		sRecord[1] = '3';
+		sRec << "S3";	//	sRecord[0] = 'S';	sRecord[1] = '3';
 
 		UWord cc (UWord(recordSize) + 5);
-		sprintf(&sRecord[2], "%02x", cc);
+		sRec << Hex0N(cc,2);	//	sprintf(&sRecord[2], "%02x", cc);
 		checksum += cc;
 
 		uint32_t addr = baseAddress + partitionOffset;
 		UWord aa = ((addr >> 24) & 0xff);
-		sprintf(&sRecord[4], "%02x", aa);
+		sRec << Hex0N(aa,2);	//	sprintf(&sRecord[4], "%02x", aa);
 		checksum += aa;
 
 		aa = ((addr >> 16) & 0xff);
-		sprintf(&sRecord[6], "%02x", aa);
+		sRec << Hex0N(aa,2);	//	sprintf(&sRecord[6], "%02x", aa);
 		checksum += aa;
 
 		aa = ((addr >> 8) & 0xff);
-		sprintf(&sRecord[8], "%02x", aa);
+		sRec << Hex0N(aa,2);	//	sprintf(&sRecord[8], "%02x", aa);
 		checksum += aa;
 
 		aa = (addr & 0xff);
-		sprintf(&sRecord[10], "%02x", aa);
+		sRec << Hex0N(aa,2);	//	sprintf(&sRecord[10], "%02x", aa);
 		checksum += aa;
 
 		uint32_t i = 0;
@@ -1063,19 +1054,19 @@ bool CNTV2KonaFlashProgram::CreateBankRecord(BankSelect bankID)
 			//flashValue = NTV2EndianSwap32(flashValue);
 
 			UWord dd = (flashValue & 0xff);
-			sprintf(&sRecord[index], "%02x", dd);
+			sRec << Hex0N(dd,2);	//	sprintf(&sRecord[index], "%02x", dd);
 			checksum += dd;
 
 			dd = ((flashValue >> 8) & 0xff);
-			sprintf(&sRecord[index + 2], "%02x", dd);
+			sRec << Hex0N(dd,2);	//	sprintf(&sRecord[index + 2], "%02x", dd);
 			checksum += dd;
 
 			dd = ((flashValue >> 16) & 0xff);
-			sprintf(&sRecord[index + 4], "%02x", dd);
+			sRec << Hex0N(dd,2);	//	sprintf(&sRecord[index + 4], "%02x", dd);
 			checksum += dd;
 
 			dd = ((flashValue >> 24) & 0xff);
-			sprintf(&sRecord[index + 6], "%02x", dd);
+			sRec << Hex0N(dd,2);	//	sprintf(&sRecord[index + 6], "%02x", dd);
 			checksum += dd;
 
 			i += 4;
@@ -1083,21 +1074,21 @@ bool CNTV2KonaFlashProgram::CreateBankRecord(BankSelect bankID)
 			baseAddress += 4;
 		}
 		checksum = ~checksum;
-		sprintf(&sRecord[index], "%02x", checksum);
+		sRec << Hex0N(UWord(checksum),2);	//	sprintf(&sRecord[index], "%02x", checksum);
 
-		SRecordOutput(sRecord);
-	}
+		cout << sRec.str() << endl;	//	sRecord);
+	}	//	for loop
 
 	SetBankSelect(BANK_0);
 
-	SRecordOutput("S705FFF001000A");
+	cout << "S705FFF001000A" << endl;
 
 	return true;
 }
 
 bool CNTV2KonaFlashProgram::CreateEDIDIntelRecord()
 {
-	char iRecord[100];
+	ostringstream iRec;	//	char iRecord[100];
 	int32_t recordSize = 16;
 	UWord baseAddress = 0x0000;
 	UByte checksum = 0;
@@ -1112,21 +1103,21 @@ bool CNTV2KonaFlashProgram::CreateEDIDIntelRecord()
 		int32_t index = 0;
 		checksum = 0;
 
-		iRecord[0] = ':';
+		iRec << ":";	//	iRecord[0] = ':';
 
-		sprintf(&iRecord[1], "%02x", byteCount);
+		iRec << Hex0N(UWord(byteCount),2);	//	sprintf(&iRecord[1], "%02x", byteCount);
 		checksum += byteCount;
 
 		UWord addr = baseAddress;
 		UByte aa = ((addr >> 8) & 0xff);
-		sprintf(&iRecord[3], "%02x", aa);
+		iRec << Hex0N(UWord(aa),2);	//	sprintf(&iRecord[3], "%02x", aa);
 		checksum += aa;
 		
 		aa = ((addr) & 0xff);
-		sprintf(&iRecord[5], "%02x", aa);
+		iRec << Hex0N(UWord(aa),2);	//	sprintf(&iRecord[5], "%02x", aa);
 		checksum += aa;
 
-		sprintf (&iRecord[7], "%02x", recordType);
+		iRec << Hex0N(UWord(recordType),2);	//	sprintf (&iRecord[7], "%02x", recordType);
 
 		index = 9;
 
@@ -1140,7 +1131,7 @@ bool CNTV2KonaFlashProgram::CreateEDIDIntelRecord()
 			ReadRegister(kRegFS1I2C1Data, flashValue);
 
 			UByte dd = ((flashValue >> 8) & 0xff);
-			sprintf(&iRecord[index], "%02x", dd);
+			iRec << Hex0N(UWord(dd),2);	//	sprintf(&iRecord[index], "%02x", dd);
 			checksum += dd;
 
 			i++;
@@ -1150,12 +1141,12 @@ bool CNTV2KonaFlashProgram::CreateEDIDIntelRecord()
 
 		baseAddress += 0x0010;
 		checksum = (checksum ^ 0xFF)+1;
-		sprintf(&iRecord[index], "%02x", checksum);
+		iRec << Hex0N(UWord(checksum),2);	//	sprintf(&iRecord[index], "%02x", checksum);
 
-		SRecordOutput(iRecord);
-	}
+		cout << iRec.str() << endl;	//	iRecord);
+	}	//	for loop
 
-	SRecordOutput(":00000001FF");
+	cout << ":00000001FF" << endl;
 
 	return true;
 
@@ -1494,11 +1485,13 @@ bool CNTV2KonaFlashProgram::SetBankSelect( BankSelect bankNumber )
 {
 	if (ROMHasBankSelect())
 	{
+		if (int(bankNumber) > int(BANK_3))
+			return false;	//	illegal value
 		WriteCommand(WRITEENABLE_COMMAND);
 		WaitForFlashNOTBusy();
 		WriteRegister(kRegXenaxFlashAddress, uint32_t(bankNumber));
 		
-		WriteCommand(_hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMMAND);
+		WriteCommand(_hasExtendedCommandSupport ? EXTENDEDADDRESS_COMMAND : BANKSELECT_COMMAND);
 		WaitForFlashNOTBusy();
 		KFPDBUG ("selected bank: " << ReadBankSelect());
 	}
@@ -2260,41 +2253,42 @@ bool CNTV2KonaFlashProgram::VerifySOCPartition(FlashBlockID flashID, uint32_t fl
 	return true;
 }
 
-void CNTV2KonaFlashProgram::DisplayData(uint32_t address, uint32_t count)
+void CNTV2KonaFlashProgram::DisplayData (const uint32_t address, const uint32_t wordCount)
 {
-#define WORDS_PER_LINE 4
+	const uint32_t WORDS_PER_LINE(4);
+	uint32_t addr(address), bank(999), offset(addr % _bankSize);
+//	SetBankSelect(BankSelect(bank));
 
-	uint32_t bank	=  address / _bankSize;
-	uint32_t offset =  address % _bankSize;
-	SetBankSelect(BankSelect(bank));
-
-	char line[1024];
-	memset(line, 0, 1024);
-	char * pLine = &line[0];
-	pLine += sprintf(pLine, "%08x: ", uint32_t((bank * _bankSize) + offset));
-	
-	int32_t lineCount = 0; 
-	for (uint32_t i = 0; i < count; i++, offset += 4)
+	uint32_t lineCount(0); 
+	for (uint32_t words(0);  words < wordCount;  words++, offset += 4, addr += 4)
 	{
+		uint32_t newBank(addr / _bankSize), newOffset(addr % _bankSize);
+		if (newBank != bank)
+		{
+			if (!SetBankSelect(BankSelect(bank = newBank)))
+				break;
+			offset = newOffset;
+			if (words)
+				cout << endl;
+			cout << Hex0N(bank * _bankSize + offset,8) << ": ";
+		}
 		WriteRegister(kRegXenaxFlashAddress, offset);
 		WriteCommand(READFAST_COMMAND);
 		WaitForFlashNOTBusy();
 		uint32_t flashValue;
 		ReadRegister(kRegXenaxFlashDOUT, flashValue);
 		flashValue = NTV2EndianSwap32(flashValue);
-		pLine += sprintf(pLine, "%08x  ", uint32_t(flashValue));
+		cout << Hex0N(flashValue,8) << "  ";
 		if (++lineCount == WORDS_PER_LINE)
 		{
-			if (!_bQuiet)
-				cout << line << endl;
-			memset(line, 0, 1024);
-			pLine = &line[0];
-			pLine += sprintf(pLine, "%08x: ", uint32_t((bank * _bankSize) + offset + 4));
+			cout << endl
+				<< Hex0N((bank * _bankSize + offset + 4),8) << ": ";
 			lineCount = 0;
 		}
-	}
-	if (!_bQuiet && lineCount != 0)
-		cout << line << endl;
+		NTV2_ASSERT((bank * _bankSize + offset) == addr);
+	}	//	for each word of requested wordCount
+	if (lineCount)
+		cout << endl;
 }
 
 bool CNTV2KonaFlashProgram::FullProgram (vector<uint8_t> & dataBuffer)

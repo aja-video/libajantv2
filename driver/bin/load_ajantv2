@@ -9,17 +9,14 @@ if [ `id -u` != "0" ]; then
     exit 13
 fi
 
-# install module into kernel
-# Default install:
+# install modules into kernel
 /sbin/insmod "$SELF_DIR/ajantv2.ko" 2>/dev/null
-
-# To install without mapping framebuffers (driverbuffer-DMA only, 
-# see readme-linux.txt) do this instead:
-#/sbin/insmod "$SELF_DIR/ajantv2.ko" AJANTV2_MapFrameBuffers=0
-
-# To install with a particular number of driverbuffers, do this instead:
-# /sbin/insmod "$SELF_DIR/ajantv2.ko" AJANTV2_NumDmaDriverBuffers=2
-
 if [ $? -eq 0 ]; then
     echo "loaded ajantv2 driver module"
 fi
+
+/sbin/insmod "$SELF_DIR/ajardma.ko" 2>/dev/null
+if [ $? -eq 0 ]; then
+    echo "loaded ajardma driver module"
+fi
+

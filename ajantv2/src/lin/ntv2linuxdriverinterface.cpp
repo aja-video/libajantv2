@@ -67,11 +67,25 @@ bool CNTV2LinuxDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 	NTV2_ASSERT(!IsRemote());
 	NTV2_ASSERT(!IsOpen());
 
-	ostringstream oss;	oss << "/dev/" << kAJANTV2 << DEC(inDeviceIndex);
-	string boardStr(oss.str());
-	_hDevice = HANDLE(open(boardStr.c_str(), O_RDWR));
+    string boardStr;
+    UWord count = 0;
+    for (UWord index = 0; index < NTV2_MAXBOARDS; index++)
+    {
+        ostringstream oss;	oss << "/dev/" << kAJANTV2 << DEC(index);
+        boardStr = oss.str();
+		_hDevice = HANDLE(open(boardStr.c_str(), O_RDWR));
+        if (_hDevice != INVALID_HANDLE_VALUE)
+        {
+            if (count == inDeviceIndex)
+                break;
+            count++;
+            close(int(_hDevice));
+            _hDevice = INVALID_HANDLE_VALUE;
+        }
+    }
+
 	if (_hDevice == INVALID_HANDLE_VALUE)
-		{LDIFAIL("Failed to open '" << boardStr << "'");  return false;}
+        {LDIFAIL("Failed to open device index '" << inDeviceIndex << "'");  return false;}
 
 	_boardNumber = inDeviceIndex;
 	if (!CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID))
@@ -80,7 +94,7 @@ bool CNTV2LinuxDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 		if (!CNTV2DriverInterface::ReadRegister(kRegBoardID, _boardID))
 		{
 			LDIFAIL ("ReadReg retry failed for 'kRegBoardID': ndx=" << inDeviceIndex << " hDev=" << _hDevice << " id=" << HEX8(_boardID));
-			Close();
+			close(int(_hDevice));
 			return false;
 		}
 		LDIDBG("Retry succeeded: ndx=" << _boardNumber << " hDev=" << _hDevice << " id=" << ::NTV2DeviceIDToString(_boardID));
@@ -93,10 +107,6 @@ bool CNTV2LinuxDriverInterface::OpenLocalPhysical (const UWord inDeviceIndex)
 
 bool CNTV2LinuxDriverInterface::CloseLocalPhysical (void)
 {
-	NTV2_ASSERT(!IsRemote());
-	NTV2_ASSERT(IsOpen());
-	NTV2_ASSERT(_hDevice);
-
 #if !defined(NTV2_DEPRECATE_16_0)
 	UnmapXena2Flash();
 	UnmapDMADriverBuffer();
@@ -107,6 +117,8 @@ bool CNTV2LinuxDriverInterface::CloseLocalPhysical (void)
 		close(int(_hDevice));
 	_hDevice = INVALID_HANDLE_VALUE;
 	_boardOpened = false;
+	_boardID = DEVICE_ID_NOTFOUND;
+	_boardNumber = NTV2_MAXBOARDS;
 	return true;
 }
 #endif	//	!defined(NTV2_NULL_DEVICE)
@@ -128,7 +140,8 @@ bool CNTV2LinuxDriverInterface::ReadRegister (const ULWord inRegNum,  ULWord & o
 	if (IsRemote())
 		return CNTV2DriverInterface::ReadRegister (inRegNum, outValue, inMask, inShift);
 #endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
-	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0));
+	if ((_hDevice == INVALID_HANDLE_VALUE) || (_hDevice == 0))
+		return false;
 
 	REGISTER_ACCESS ra;
 	ra.RegisterNumber = inRegNum;
@@ -165,7 +178,8 @@ bool CNTV2LinuxDriverInterface::WriteRegister (const ULWord inRegNum,  const ULW
 	if (IsRemote())
 		return CNTV2DriverInterface::WriteRegister(inRegNum, inValue, inMask, inShift);
 #endif	//	defined(NTV2_NUB_CLIENT_SUPPORT)
-	NTV2_ASSERT( (_hDevice != INVALID_HANDLE_VALUE) && (_hDevice != 0) );
+	if ((_hDevice == INVALID_HANDLE_VALUE) || (_hDevice == 0))
+		{LDIFAIL("_hDevice is invalid (0 or -1)");  return false;}
 	REGISTER_ACCESS ra;
 	ra.RegisterNumber	= inRegNum;
 	ra.RegisterValue	= inValue;
@@ -598,12 +612,16 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (	const NTV2DMAEngine inDMAEngine,
 												const ULWord		inByteCount,
 												const bool			inSynchronous)
 {
-	if (IsRemote())
-		return CNTV2DriverInterface::DmaTransfer(inDMAEngine, inIsRead, inFrameNumber, pFrameBuffer,
-												inOffsetBytes, inByteCount, inSynchronous);
 	if (!IsOpen())
 		return false;
-
+	if (IsRemote())
+	{
+		NTV2Buffer buffer(pFrameBuffer, inByteCount);
+		return _pRPCAPI->NTV2DMATransferRemote (inDMAEngine, inIsRead, inFrameNumber,
+												buffer, inOffsetBytes, 0/*numSegs*/,
+												0/*hostPitch*/,  0/*cardPitch*/,
+												inSynchronous);
+	}
 	NTV2_DMA_CONTROL_STRUCT dmaControlBuf;
 	dmaControlBuf.engine			= inDMAEngine;
 	dmaControlBuf.dmaChannel		= NTV2_CHANNEL1;
@@ -668,7 +686,7 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (	const NTV2DMAEngine inDMAEngine,
 	AJADebug::StatTimerStop(AJA_DebugStat_DMATransfer);
 	if (result)
 	{
-		LDIFAIL(errMsg);
+		LDIFAIL(errMsg << " FRM=" << inFrameNumber << " ENG=" << inDMAEngine << " CNT=" << inByteCount);
 		return false;
 	}
 	return true;
@@ -687,12 +705,18 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 {
 	if (!IsOpen())
 		return false;
-
+	if (IsRemote())
+	{
+		NTV2Buffer buffer(pFrameBuffer, inByteCount);
+		return _pRPCAPI->NTV2DMATransferRemote (inDMAEngine, inIsRead, inFrameNumber, buffer, inOffsetBytes,
+												inNumSegments, inHostPitch, inCardPitch, inIsSynchronous);
+	}
 	LDIDBG("FRM=" << inFrameNumber << " ENG=" << inDMAEngine << " NB=" << inByteCount << (inIsRead?" Rd":" Wr"));
 
 	// NOTE: Linux driver assumes driver buffers to be used if pFrameBuffer < numDmaDriverBuffers
 	NTV2_DMA_SEGMENT_CONTROL_STRUCT dmaControlBuf;
 	dmaControlBuf.engine				= inDMAEngine;
+	dmaControlBuf.dmaChannel		    = NTV2_CHANNEL1;
 	dmaControlBuf.frameNumber			= inFrameNumber;
 	dmaControlBuf.frameBuffer			= pFrameBuffer;
 	dmaControlBuf.frameOffsetSrc		= inIsRead ? inOffsetBytes : 0;
@@ -752,7 +776,7 @@ bool CNTV2LinuxDriverInterface::DmaTransfer (const NTV2DMAEngine	inDMAEngine,
 	AJADebug::StatTimerStop(AJA_DebugStat_DMATransferEx);
 	if (result)
 	{
-		LDIFAIL(errMsg);
+		LDIFAIL(errMsg << " FRM=" << inFrameNumber << " ENG=" << inDMAEngine << " CNT=" << inByteCount);
 		return false;
 	}
 	return true;

@@ -508,4 +508,57 @@ char* safer_strncpy(char* target, const char* source, size_t num, size_t maxSize
 	return retVal;
 }
 
+bool is_hex_digit (const char inChr)
+{	static const std::string sHexDigits("0123456789ABCDEFabcdef");
+	return sHexDigits.find(inChr) != std::string::npos;
+}
+
+bool is_decimal_digit (const char inChr)
+{	static const std::string sDecDigits("0123456789");
+	return sDecDigits.find(inChr) != std::string::npos;
+}
+
+bool is_alpha_numeric (const char inChr)
+{	static const std::string sLegalChars("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+	return sLegalChars.find(inChr) != std::string::npos;
+}
+
+bool is_legal_decimal_number (const std::string & inStr, const size_t inMaxLength)
+{
+	if (inStr.length() > inMaxLength)
+		return false;	//	Too long
+	for (size_t ndx(0);  ndx < inStr.size();  ndx++)
+		if (!is_decimal_digit(inStr.at(ndx)))
+			return false;
+	return true;
+}
+
+uint64_t is_legal_hex_serial_number (const std::string & inStr)	//	0x3236333331375458
+{
+	if (inStr.length() < 3)
+		return 0ULL;	//	Too small
+	std::string hexStr(inStr);  lower(hexStr);	//	hexStr is lower case
+	if (hexStr[0] == '0'  &&  hexStr[1] == 'x')
+		hexStr.erase(0, 2);	//	Remove '0x' if present
+	if (hexStr.length() > 16)
+		return 0ULL;	//	Too big
+	for (size_t ndx(0);  ndx < hexStr.size();  ndx++)
+		if (!is_hex_digit(hexStr.at(ndx)))
+			return 0ULL;	//	Invalid hex digit
+	while (hexStr.length() != 16)
+		hexStr = '0' + hexStr;	//	prepend another '0'
+	std::istringstream iss(hexStr);
+	uint64_t u64(0);
+	iss >> std::hex >> u64;
+	return u64;
+}
+
+bool is_alpha_numeric (const std::string & inStr)
+{
+	for (size_t ndx(0);  ndx < inStr.size();  ndx++)
+		if (!is_alpha_numeric(inStr.at(ndx)))
+			return false;
+	return true;
+}
+
 } //end aja namespace

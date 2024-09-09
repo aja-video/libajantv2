@@ -133,29 +133,6 @@ bool CNTV2Card::DmaP2PTransferFrame (NTV2DMAEngine DMAEngine,
 }
 
 
-bool CNTV2Card::DMAStreamStart  (ULWord * inBuffer, const ULWord inByteCount, const NTV2Channel inChannel, const bool inToHost)
-{
-	if (!_boardOpened)
-		return false;		//	Device not open!
-
-	if (!inBuffer)
-		return false;
-
-	NTV2DmaStream streamMsg (inBuffer, inByteCount, inChannel, DMASTREAM_START | (inToHost? DMASTREAM_TO_HOST : 0));
-	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&streamMsg));
-}
-
-
-bool CNTV2Card::DMAStreamStop  (const NTV2Channel inChannel, const bool inToHost)
-{
-	if (!_boardOpened)
-		return false;		//	Device not open!
-
-	NTV2DmaStream streamMsg (inChannel, DMASTREAM_STOP | (inToHost? DMASTREAM_TO_HOST : 0));
-	return NTV2Message (reinterpret_cast<NTV2_HEADER*>(&streamMsg));
-}
-
-
 bool CNTV2Card::DMAReadAudio (	const NTV2AudioSystem	inAudioSystem,
 								ULWord *				pOutAudioBuffer,
 								const ULWord			inOffsetBytes,
@@ -437,7 +414,7 @@ bool CNTV2Card::DeviceAddressToFrameNumber (const uint64_t inAddress,  UWord & o
 		}
 	}
 	if (!frameBytes)
-	{
+	{	//	Corvid1, Corvid22, Corvid3G, IoExpress, Kona3G, Kona3GQuad, KonaLHe+, KonaLHi, TTap
 		NTV2FrameBufferFormat frameBufferFormat(NTV2_FBF_10BIT_YCBCR);
 		GetFrameBufferFormat(NTV2_CHANNEL1, frameBufferFormat);
 		NTV2FrameGeometry frameGeometry;

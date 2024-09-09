@@ -139,7 +139,7 @@ static const struct format_data c_format_data[] =
     { ntv2_pixel_format_argb,                    1,  4,  1,  4,  4,  ntv2_color_space_rgb444,   ntv2_color_depth_8bit,    ntv2_frame_format_packed },
     { ntv2_pixel_format_rgba,                    1,  4,  1,  4,  4,  ntv2_color_space_rgb444,   ntv2_color_depth_8bit,    ntv2_frame_format_packed },
     { ntv2_pixel_format_10bit_rgb,               1,  4,  1,  4,  3,  ntv2_color_space_rgb444,   ntv2_color_depth_10bit,   ntv2_frame_format_packed },
-    { ntv2_pixel_format_8bit_ycbcr_yuy2,         1,  4,  2,  4,  2,  ntv2_color_space_yuv422,   ntv2_color_depth_8bit,    ntv2_frame_format_packed },
+    { ntv2_pixel_format_8bit_ycbcr_yuy2,         2,  4,  2,  4,  2,  ntv2_color_space_yuv422,   ntv2_color_depth_8bit,    ntv2_frame_format_packed },
     { ntv2_pixel_format_abgr,                    1,  4,  1,  4,  4,  ntv2_color_space_rgb444,   ntv2_color_depth_8bit,    ntv2_frame_format_packed },
     { ntv2_pixel_format_10bit_dpx,               1,  4,  1,  4,  3,  ntv2_color_space_rgb444,   ntv2_color_depth_10bit,   ntv2_frame_format_packed },
     { ntv2_pixel_format_10bit_ycbcr_dpx,         6,  16, 48, 128,2,  ntv2_color_space_yuv422,   ntv2_color_depth_10bit,   ntv2_frame_format_packed },
@@ -150,8 +150,8 @@ static const struct format_data c_format_data[] =
     { ntv2_pixel_format_24bit_bgr,               1,  3,  1,  3,  3,  ntv2_color_space_rgb444,   ntv2_color_depth_8bit,    ntv2_frame_format_packed },
     { ntv2_pixel_format_10bit_ycbcra,            1,  1,  1,  1,  4,  ntv2_color_space_yuv422,   ntv2_color_depth_10bit,   ntv2_frame_format_packed },
     { ntv2_pixel_format_10bit_dpx_le,            1,  4,  1,  4,  3,  ntv2_color_space_rgb444,   ntv2_color_depth_10bit,   ntv2_frame_format_packed },
-    { ntv2_pixel_format_48bit_rgb,               1,  6,  1,  6,  3,  ntv2_color_space_rgb444,   ntv2_color_depth_12bit,   ntv2_frame_format_packed },
-    { ntv2_pixel_format_12bit_rgb_packed,        6,  9,  12, 18, 3,  ntv2_color_space_yuv422,   ntv2_color_depth_10bit,   ntv2_frame_format_packed },
+    { ntv2_pixel_format_48bit_rgb,               1,  6,  1,  6,  3,  ntv2_color_space_rgb444,   ntv2_color_depth_16bit,   ntv2_frame_format_packed },
+    { ntv2_pixel_format_12bit_rgb_packed,        2,  9,  8,  36, 3,  ntv2_color_space_rgb444,   ntv2_color_depth_12bit,   ntv2_frame_format_packed },
     { ntv2_pixel_format_prores_dvcpro,           1,  1,  1,  1,  1,  ntv2_color_space_none,     ntv2_color_depth_none,    ntv2_frame_format_raw },
     { ntv2_pixel_format_prores_hdv,              1,  1,  1,  1,  1,  ntv2_color_space_none,     ntv2_color_depth_none,    ntv2_frame_format_raw },
     { ntv2_pixel_format_10bit_rgb_packed,        12, 15, 12, 15, 3,  ntv2_color_space_rgb444,   ntv2_color_depth_10bit,   ntv2_frame_format_packed },
@@ -422,12 +422,17 @@ Ntv2Status ntv2_videoraster_update_frame(struct ntv2_videoraster *ntv2_raster, u
 {
     uint32_t base = 0;
     uint32_t global_control = 0;
+    uint32_t channel_control = 0;
     uint32_t standard = 0;
+    uint32_t geometry = 0;
+    uint32_t height = 0;
     uint32_t frame_size = 0;
-    uint32_t frame_pitch = 0;
+    uint32_t pitch = 0;
     uint32_t field1_address = 0;
     uint32_t field2_address = 0;
     uint32_t oddline_address = 0;
+    uint32_t vid_control = 0;
+    bool invert = false;
     bool progressive = false;
     bool top_first = false;
 	bool quad = false;
@@ -454,41 +459,79 @@ Ntv2Status ntv2_videoraster_update_frame(struct ntv2_videoraster *ntv2_raster, u
 	quad = NTV2_FLD_GET(ntv2_fld_global_control_quad_tsi_enable, global_control) != 0;
     progressive = c_standard_data[standard].video_scan == ntv2_video_scan_progressive;
     top_first = c_standard_data[standard].video_scan == ntv2_video_scan_top_first;
+    geometry = NTV2_FLD_GET(ntv2_fld_global_control_geometry, global_control);
+    if (geometry >= s_geometry_size) return false;
+	height = c_geometry_data[geometry].frame_height;
+    channel_control = ntv2_raster->channel_control[index];
+    invert = (NTV2_FLD_GET(ntv2_fld_channel_control_frame_orientation, channel_control) != 0);
 
     frame_size = ntv2_raster->frame_size[index];
-    frame_pitch = ntv2_raster->frame_pitch[index];
+    pitch = ntv2_raster->frame_pitch[index];
 
     if (input)
         ntv2_raster->input_frame[index] = frame_number;
     else
         ntv2_raster->output_frame[index] = frame_number;
 
-    if (progressive)
+    if (invert)
     {
-        field1_address = frame_number * frame_size;
-        if (quad)
-            oddline_address = frame_number * frame_size + frame_pitch;            
-    }
-    else if (top_first)
-    {
-        field1_address = frame_number * frame_size;
-        field2_address = frame_number * frame_size + frame_pitch;
+        /* handle upside down */
+        if (progressive)
+        {
+            if (quad)
+            {
+                field1_address = frame_number * frame_size + pitch * (height * 2 - 1);
+                oddline_address = frame_number * frame_size + pitch * (height * 2 - 2);
+            }
+            else
+            {
+                field1_address = frame_number * frame_size + pitch * (height - 1);
+            }
+        }
+        else if (top_first)
+        {
+            field1_address = frame_number * frame_size + pitch * (height - 1);
+            field2_address = frame_number * frame_size + pitch * (height - 2);
+        }
+        else
+        {
+            field1_address = frame_number * frame_size + pitch * (height - 2);
+            field2_address = frame_number * frame_size + pitch * (height - 1);
+        }
     }
     else
     {
-        field1_address = frame_number * frame_size + frame_pitch;
-        field2_address = frame_number * frame_size;
+        if (progressive)
+        {
+            field1_address = frame_number * frame_size;
+            if (quad)
+                oddline_address = frame_number * frame_size + pitch;            
+        }
+        else if (top_first)
+        {
+            field1_address = frame_number * frame_size;
+            field2_address = frame_number * frame_size + pitch;
+        }
+        else
+        {
+            field1_address = frame_number * frame_size + pitch;
+            field2_address = frame_number * frame_size;
+        }
     }
 
     ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_roifield1startaddress, field1_address);
     ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_roifield2startaddress, field2_address);
     ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_oddlinestartaddress, oddline_address);
+    vid_control = ntv2_raster->videoraster_control[index] & ~NTV2_FLD_MASK(ntv2_fld_videoraster_control_negpitch);
+    vid_control |= NTV2_FLD_SET(ntv2_fld_videoraster_control_negpitch, (invert? 1 : 0));
+    ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_control, vid_control);
 
     ntv2InterruptLockRelease(&ntv2_raster->state_lock);
 
     NTV2_MSG_VIDEORASTER_STATE("%s: chn %d  f1 address        %08x\n", ntv2_raster->name, index, field1_address);
     NTV2_MSG_VIDEORASTER_STATE("%s: chn %d  f2 address        %08x\n", ntv2_raster->name, index, field2_address);
-    
+    NTV2_MSG_VIDEORASTER_STATE("%s: chn %d  od address        %08x\n", ntv2_raster->name, index, oddline_address);
+    NTV2_MSG_VIDEORASTER_STATE("%s: chn %d  invert            %d\n", ntv2_raster->name, index, (int)invert);
 
    	return NTV2_STATUS_SUCCESS;
 }
@@ -504,6 +547,8 @@ static Ntv2Status ntv2_videoraster_initialize(struct ntv2_videoraster *ntv2_rast
     ntv2_raster->output_frame[index] = 0;
     ntv2_raster->input_frame[index] = 0;
     ntv2_raster->master_index[index] = 0;
+    ntv2_raster->videoraster_control[index] = 0;
+    ntv2_raster->negative_pitch[index] = false;
     ntv2_raster->mode_change[index] = true;
 
     return NTV2_STATUS_SUCCESS;
@@ -609,6 +654,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     uint32_t register_sync = 0;
 	uint32_t qRezMode = 0;
     uint32_t video_raster = 0;
+    bool invert = false;
     bool progressive = false;
     bool top_first = false;
 	bool quad = false;
@@ -630,6 +676,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     pixel_rate = get_sdi_pixel_rate(standard, frame_rate);
     if (pixel_rate >= s_pixel_rate_size) return false;
     register_sync = NTV2_FLD_GET(ntv2_fld_global_control_reg_sync, global_control);
+    invert = (NTV2_FLD_GET(ntv2_fld_channel_control_frame_orientation, channel_control) != 0);
 
 	qRezMode = NTV2_FLD_GET(ntv2_fld_channel_control_quarter_size_mode, channel_control);
 
@@ -663,8 +710,6 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
 
     /* frame size and number */
     frame_size = get_frame_size(ntv2_raster, index);
-//	if (quad)
-//		frame_size *= 4;
 
     if (mode == ntv2_con_videoraster_mode_capture)
         frame_number = input_frame;
@@ -691,28 +736,64 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     ntv2_raster->frame_pitch[index] = pitch;
 
 	/* frame buffer address and pitch correction */
-    if (progressive)
+    if (invert)
     {
-        field1_address = frame_number * frame_size;
-        if (quad)
+        /* handle upside down */
+        if (progressive)
         {
-            oddline_address = frame_number * frame_size + pitch;
+            if (quad)
+            {
+                field1_address = frame_number * frame_size + pitch * (height * 2 - 1);
+                oddline_address = frame_number * frame_size + pitch * (height * 2 - 2);
+                pitch *= 2;
+            }
+            else
+            {
+                field1_address = frame_number * frame_size + pitch * (height - 1);
+            }
+        }
+        else if (top_first)
+        {
+            field1_address = frame_number * frame_size + pitch * (height - 1);
+            field2_address = frame_number * frame_size + pitch * (height - 2);
+            pitch *= 2;
+        }
+        else
+        {
+            field1_address = frame_number * frame_size + pitch * (height - 2);
+            field2_address = frame_number * frame_size + pitch * (height - 1);
             pitch *= 2;
         }
     }
-    else if (top_first)
-    {
-        field1_address = frame_number * frame_size;
-        field2_address = frame_number * frame_size + pitch;
-        pitch *= 2;
-    }
     else
     {
-        field1_address = frame_number * frame_size + pitch;
-        field2_address = frame_number * frame_size;
-        pitch *= 2;
+        if (progressive)
+        {
+            if (quad)
+            {
+                field1_address = frame_number * frame_size;
+                oddline_address = frame_number * frame_size + pitch;
+                pitch *= 2;
+            }
+            else
+            {
+                field1_address = frame_number * frame_size;
+            }
+        }
+        else if (top_first)
+        {
+            field1_address = frame_number * frame_size;
+            field2_address = frame_number * frame_size + pitch;
+            pitch *= 2;
+        }
+        else
+        {
+            field1_address = frame_number * frame_size + pitch;
+            field2_address = frame_number * frame_size;
+            pitch *= 2;
+        }
     }
-
+    
     value = NTV2_FLD_SET(ntv2_fld_videoraster_linepitch_length, length);
     value |= NTV2_FLD_SET(ntv2_fld_videoraster_linepitch_pitch, pitch);
     ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_linepitch, value);
@@ -727,6 +808,8 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     NTV2_MSG_VIDEORASTER_STATE("%s: chn %d  line pitch        %d\n", ntv2_raster->name, index, pitch);
     NTV2_MSG_VIDEORASTER_STATE("%s: chn %d  f1 address        %08x\n", ntv2_raster->name, index, field1_address);
     NTV2_MSG_VIDEORASTER_STATE("%s: chn %d  f2 address        %08x\n", ntv2_raster->name, index, field2_address);
+    NTV2_MSG_VIDEORASTER_STATE("%s: chn %d  od address        %08x\n", ntv2_raster->name, index, oddline_address);
+    NTV2_MSG_VIDEORASTER_STATE("%s: chn %d  invert            %d\n", ntv2_raster->name, index, (int)invert);
 
 	/* pixel dimensions (pixels) */
     value = NTV2_FLD_SET(ntv2_fld_videoraster_roisize_h, width);
@@ -852,7 +935,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     value |= NTV2_FLD_SET(ntv2_fld_videoraster_control_progressive, (progressive ? 1 : 0));
     value |= NTV2_FLD_SET(ntv2_fld_videoraster_control_twosampleinterleave, (quad? 1 : 0));
     value |= NTV2_FLD_SET(ntv2_fld_videoraster_control_imageformat, format);
-
+    value |= NTV2_FLD_SET(ntv2_fld_videoraster_control_negpitch, (invert? 1 : 0));
     switch (pixel_rate)
     {
     case ntv2_pixel_rate_1350:
@@ -894,6 +977,7 @@ static bool update_format_single(struct ntv2_videoraster *ntv2_raster, uint32_t 
     }
 
     ntv2_regnum_write(ntv2_raster->system_context, base + ntv2_reg_videoraster_control, value);
+    ntv2_raster->videoraster_control[index] = value;
     video_raster = value;
 
     /* extra parameters */

@@ -113,6 +113,8 @@ private:
 	std::string mDefaultValue;
 };
 
+typedef AJACommandLineOption	AJACmdLineOption;
+
 typedef std::vector<AJACommandLineOption> AJACommandLineOptionList;
 typedef AJACommandLineOptionList::const_iterator AJACommandLineOptionListIter;
 
@@ -163,6 +165,13 @@ public:
 	 * @return	Returns `true` if the command line args were parsed successfully, otherwise `false`.
 	 */
 	void ParseArgs(const AJAStringList &args);
+	/**
+	 * Parse a list of strings containing command line args.
+	 *
+	 * @param[in] argc	The arg count.
+	 * @param[in] argv	The list of arg strings.
+	 */
+	void ParseArgs(int argc, const char *argv[]);
 	/**
 	 * Parse a list of strings containing command line args.
 	 *
@@ -306,5 +315,7 @@ private:
 	AJAStringList mUnknownOptions;
 	SubParserMap mSubParsers;
 };
+
+typedef AJACommandLineParser	AJACmdLineParser;
 
 #endif // AJA_COMMANDLINE_H

@@ -1,5 +1,5 @@
-if (AJA_DISABLE_NVIDIA)
-	message(STATUS "AJA_DISABLE_NVIDIA enabled. Skipping rdmawhacker...")
+if (AJA_DISABLE_NVIDIA OR NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	message(STATUS "skipping rdmawhacker...")
 	return()
 endif()
 
@@ -48,8 +48,9 @@ message(STATUS "CUDA Libs: ${CUDA_LIBRARIES}")
 
 add_executable(${PROJECT_NAME} ${TARGET_SOURCES})
 add_dependencies(${PROJECT_NAME} ajantv2)
-target_include_directories(${PROJECT_NAME} PUBLIC ${TARGET_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${TARGET_LINK_LIBS} ajantv2)
+target_compile_definitions(${PROJECT_NAME} PRIVATE ${TARGET_COMPILE_DEFS})
+target_include_directories(${PROJECT_NAME} PRIVATE ${TARGET_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${TARGET_LINK_LIBS} ajantv2)
 
 if (AJA_CODE_SIGN)
     aja_code_sign(${PROJECT_NAME})

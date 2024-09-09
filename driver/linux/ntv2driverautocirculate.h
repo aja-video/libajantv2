@@ -257,6 +257,8 @@ void SetAudioPlaybackMode(ULWord boardNumber, NTV2_GlobalAudioPlaybackMode mode)
 
 NTV2_GlobalAudioPlaybackMode GetAudioPlaybackMode(ULWord boardNumber);
 
+ULWord GetFPGARevision(ULWord deviceNumber);
+
 ULWord GetNumFrameBuffers(ULWord boardNumber, ULWord boardID);
 
 void OemAutoCirculateSetupNTV2Routing(ULWord boardNumber, NTV2RoutingTable* pNTV2RoutingTable);
@@ -264,8 +266,6 @@ void OemAutoCirculateSetupNTV2Routing(ULWord boardNumber, NTV2RoutingTable* pNTV
 void oemAutoCirculateWriteHDMIAux(ULWord deviceNumber, ULWord* pAuxData, ULWord auxDataSize);
 
 NTV2VideoFormat GetNTV2VideoFormat(UByte status, UByte frameRateHiBit);
-
-ULWord DownloadLinearLUTToHW (ULWord boardNumber, NTV2Channel channel, int bank);
 
 ULWord64 GetAudioClock(ULWord boardNumber);
 

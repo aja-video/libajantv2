@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 /**
-	@file		ntv2dolby/main.cpp
+	@file		ntv2dolbyplayer/main.cpp
 	@brief		Demonstration application that uses AutoCirculate to playout video and Doly audio to HDMI.
 	@copyright	(C) 2012-2022 AJA Video Systems, Inc.  All rights reserved.
 **/
@@ -28,7 +28,7 @@ int main (int argc, const char ** argv)
 	char *			pDeviceSpec		(AJA_NULL);		//	Device specifier string, if any
 	char *			pPixelFormat	(AJA_NULL);		//	Pixel format argument
 	char *			pFramesSpec		(AJA_NULL);		//	AutoCirculate frames spec
-    char *			pDolbyFilePath	(AJA_NULL);		//	Dolby audio file name
+    char *			pDolbyFile		(AJA_NULL);		//	Optional path to Dolby audio file
 	char *			pVideoFormat	(AJA_NULL);		//	Video format to use
 	int				channelNumber	(2);			//	Channel/FrameStore to use
 	int				doMultiFormat	(0);			//	MultiFormat mode?
@@ -50,9 +50,9 @@ int main (int argc, const char ** argv)
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",			"'?' or 'list' to list"		},
 		{"frames",		  0,	POPT_ARG_STRING,	&pFramesSpec,	0,	"frames to AutoCirculate",		"num[@min] or min-max"		},
 		{"videoFormat",	'v',	POPT_ARG_STRING,	&pVideoFormat,	0,	"video format to produce",		"'?' or 'list' to list"		},
-		{"dolbyFile",	'f',	POPT_ARG_STRING,	&pDolbyFilePath,0,	"dolby audio to play",			"file name"					},
+		{"dolby",		  0,	POPT_ARG_STRING,	&pDolbyFile,	0,	"dolby audio to play",			"path to binary file"		},
 		{"ramp",		'r',	POPT_ARG_NONE,		&doRamp,		0,	"audio data ramp",				AJA_NULL					},
-		{"noaudio",		  0,	POPT_ARG_NONE,		&noAudio,		0,	"disable audio tone",			AJA_NULL					},
+		{"noaudio",		  0,	POPT_ARG_NONE,		&noAudio,		0,	"disable audio",				AJA_NULL					},
 		{"novideo",		  0,	POPT_ARG_NONE,		&noVideo,		0,	"disable video",				AJA_NULL					},
 
 		POPT_AUTOHELP
@@ -79,17 +79,13 @@ int main (int argc, const char ** argv)
 	//	VideoFormat
 	const string videoFormatStr	(pVideoFormat  ?  pVideoFormat  :  "");
 	config.fVideoFormat = videoFormatStr.empty()	?	NTV2_FORMAT_1080i_5994
-													:	CNTV2DemoCommon::GetVideoFormatFromString(videoFormatStr);
-	if (config.fVideoFormat == NTV2_FORMAT_UNKNOWN)
-		config.fVideoFormat = CNTV2DemoCommon::GetVideoFormatFromString (videoFormatStr, VIDEO_FORMATS_4KUHD);
+													:	CNTV2DemoCommon::GetVideoFormatFromString(videoFormatStr, VIDEO_FORMATS_SDHD | VIDEO_FORMATS_4KUHD, deviceSpec);
 	if (videoFormatStr == "?" || videoFormatStr == "list")
-		{cout << CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_NON_4KUHD, deviceSpec)
-			  << CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_4KUHD, deviceSpec) << endl;  return 0;}
-	else if (!videoFormatStr.empty () && config.fVideoFormat == NTV2_FORMAT_UNKNOWN)
+		{cout << CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_SDHD | VIDEO_FORMATS_4KUHD, pDeviceSpec ? deviceSpec : "") << endl;  return 0;}
+	else if (!videoFormatStr.empty() && config.fVideoFormat == NTV2_FORMAT_UNKNOWN)
 	{
 		cerr	<< "## ERROR:  Invalid '--videoFormat' value '" << videoFormatStr << "' -- expected values:" << endl
-				<< CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_NON_4KUHD, deviceSpec)
-				<< CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_4KUHD, deviceSpec) << endl;
+				<< CNTV2DemoCommon::GetVideoFormatStrings (VIDEO_FORMATS_SDHD | VIDEO_FORMATS_4KUHD, deviceSpec) << endl;
 		return 2;
 	}
 
@@ -97,7 +93,7 @@ int main (int argc, const char ** argv)
 	const string pixelFormatStr	(pPixelFormat  ?  pPixelFormat  :  "");
 	config.fPixelFormat = (pixelFormatStr.empty () ? NTV2_FBF_10BIT_YCBCR : CNTV2DemoCommon::GetPixelFormatFromString (pixelFormatStr));
 	if (pixelFormatStr == "?" || pixelFormatStr == "list")
-		{cout << CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 0;}
+		{cout << CNTV2DemoCommon::GetPixelFormatStrings (PIXEL_FORMATS_ALL, pDeviceSpec ? deviceSpec : "") << endl;  return 0;}
 	else if (!pixelFormatStr.empty () && !NTV2_IS_VALID_FRAME_BUFFER_FORMAT (config.fPixelFormat))
 	{
 		cerr	<< "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl
@@ -119,26 +115,23 @@ int main (int argc, const char ** argv)
 		
 	if (noVideo  &&  noAudio)
 		{cerr	<< "## ERROR:  conflicting options '--novideo' and '--noaudio'" << endl;  return 1;}
+		
+	if (noAudio  &&  doRamp)
+		{cerr	<< "## ERROR:  conflicting options '--noaudio' and '--ramp'" << endl;  return 1;}
+		
+	if (noAudio  &&  pDolbyFile)
+		{cerr	<< "## ERROR:  conflicting options '--noaudio' and '--dolby'" << endl;  return 1;}
+		
+	if (doRamp  &&  pDolbyFile)
+		{cerr	<< "## ERROR:  conflicting options '--ramp' and '--dolby'" << endl;  return 1;}
 
 	//remaining options for this demo
 	config.fSuppressAudio	= noAudio		? true	: false;
 	config.fSuppressVideo	= noVideo		? true	: false;
 	config.fDoMultiFormat	= doMultiFormat	? true	: false;	//	Multiformat mode?
-	config.fdoRamp 			= doRamp		? true  : false;	//  inDoRamp
-	config.fDoHDMIOutput = true;  
-	
-    AJAFileIO fileIO;
-    config.fDolbyFilePath = pDolbyFilePath  ?  pDolbyFilePath  :  "";
-    if (!config.fDolbyFilePath.empty())
-    {
-        status = fileIO.Open(pDolbyFilePath, eAJAReadOnly, 0);
-        if (status == AJA_STATUS_SUCCESS)
-            config.fDolbyFile = &fileIO;
-		else
-			{cout << "## ERROR:  Could not open file: " << config.fDolbyFilePath << endl;	return 1;}
-    }
-	else
-		 config.fDolbyFilePath = "None Specified";
+	config.fDoRamp 			= doRamp		? true  : false;	//  inDoRamp
+	config.fDoHDMIOutput	= true;  
+	config.fDolbyFilePath = pDolbyFile  ?  pDolbyFile  :  "";
 
 	NTV2DolbyPlayer	player (config);
 	status = player.Init();
@@ -164,7 +157,7 @@ int main (int argc, const char ** argv)
 				<< setw(9) << outputStatus.GetDroppedFrameCount()
 				<< setw(9) << outputStatus.GetBufferLevel() << "\r" << flush;
 		AJATime::Sleep(2000);
-	} while (player.IsRunning () && !gGlobalQuit);	//	loop til done
+	} while (player.IsRunning() && !gGlobalQuit);	//	loop til done
 
 	cout << endl;
 	return 0;

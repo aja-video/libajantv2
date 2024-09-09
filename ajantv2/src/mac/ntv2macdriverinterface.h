@@ -80,7 +80,7 @@ class CNTV2MacDriverInterface : public CNTV2DriverInterface
 	AJA_VIRTUAL bool	AutoCirculate (AUTOCIRCULATE_DATA & autoCircData);
 	AJA_VIRTUAL bool	NTV2Message (NTV2_HEADER * pInMessage);
 	AJA_VIRTUAL bool	ControlDriverDebugMessages (NTV2_DriverDebugMessageSet /*msgSet*/, bool /*enable*/) {return false;}
-	AJA_VIRTUAL bool	RestoreHardwareProcampRegisters (void);
+	//AJA_VIRTUAL bool	RestoreHardwareProcampRegisters (void);
 	///@}
 
 #if !defined(NTV2_DEPRECATE_16_0)
@@ -100,7 +100,7 @@ class CNTV2MacDriverInterface : public CNTV2DriverInterface
 	AJA_VIRTUAL bool	SetAudioOutputMode(NTV2_GlobalAudioPlaybackMode mode);
 	AJA_VIRTUAL bool	GetAudioOutputMode(NTV2_GlobalAudioPlaybackMode* mode);
 
-	AJA_VIRTUAL bool	SystemStatus( void* dataPtr, SystemStatusCode systemStatusCode );
+	//AJA_VIRTUAL bool	SystemStatus( void* dataPtr, SystemStatusCode systemStatusCode );
 	AJA_VIRTUAL bool	KernelLog( void* dataPtr, UInt32 dataSize );
 	AJA_VIRTUAL bool	ConfigureInterrupt( bool /*bEnable*/, INTERRUPT_ENUMS /*eInterruptType*/ ) {return true;}
 	AJA_VIRTUAL std::string	GetConnectionType (void) const	{return IsOpen() && !IsRemote()  ?  (mIsDEXT ? "DEXT" : "KEXT")  :  "";}	//	New in SDK 17.0

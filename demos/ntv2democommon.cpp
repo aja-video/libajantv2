@@ -22,11 +22,8 @@
 
 using namespace std;
 
-typedef NTV2TCIndexes							NTV2TCIndexSet;				///< @brief	An alias to NTV2TCIndexes.
-typedef NTV2TCIndexesConstIter					NTV2TCIndexSetConstIter;	///< @brief	An alias to NTV2TCIndexesConstIter.
-
-typedef	map <string, NTV2VideoFormat>			String2VideoFormatMap;
-typedef	String2VideoFormatMap::const_iterator	String2VideoFormatMapConstIter;
+typedef	multimap <string, NTV2VideoFormat>		String2VideoFormatMMap;
+typedef	String2VideoFormatMMap::const_iterator	String2VideoFormatMMapCI;
 
 typedef	map <string, NTV2FrameBufferFormat>		String2PixelFormatMap;
 typedef	String2PixelFormatMap::const_iterator	String2PixelFormatMapConstIter;
@@ -54,7 +51,7 @@ typedef	String2TPNamesMap::const_iterator		String2TPNamesMapConstIter;
 
 static const string				gGlobalMutexName	("com.aja.ntv2.mutex.demo");
 static NTV2VideoFormatSet		gAllFormats;
-static NTV2VideoFormatSet		gNon4KFormats;
+static NTV2VideoFormatSet		gSDHDFormats;
 static NTV2VideoFormatSet		g4KFormats;
 static NTV2VideoFormatSet		g8KFormats;
 static NTV2FrameBufferFormatSet	gPixelFormats;
@@ -69,7 +66,10 @@ static NTV2InputSourceSet		gInputSourcesSDI;
 static NTV2InputSourceSet		gInputSourcesHDMI;
 static NTV2InputSourceSet		gInputSourcesAnalog;
 static NTV2OutputDestinations	gOutputDestinations;
-static String2VideoFormatMap	gString2VideoFormatMap;
+static NTV2OutputDestinations	gOutputDestsSDI;
+static NTV2OutputDestinations	gOutputDestsHDMI;
+static NTV2OutputDestinations	gOutputDestsAnalog;
+static String2VideoFormatMMap	gString2VideoFormatMMap;
 static String2PixelFormatMap	gString2PixelFormatMap;
 static String2AudioSystemMap	gString2AudioSystemMap;
 static String2VANCModeMap		gString2VANCModeMap;
@@ -99,20 +99,20 @@ class DemoCommonInitializer
 			typedef	pair <string, NTV2InputSource>			String2InputSourcePair;
 			typedef	pair <string, NTV2OutputDestination>	String2OutputDestPair;
 
-			NTV2_ASSERT (gNon4KFormats.empty ());
-			for (NTV2VideoFormat legalFormat (NTV2_FORMAT_UNKNOWN);  legalFormat < NTV2_MAX_NUM_VIDEO_FORMATS;  legalFormat = NTV2VideoFormat (legalFormat + 1))
+			NTV2_ASSERT (gSDHDFormats.empty());
+			for (NTV2VideoFormat legalFormat(NTV2_FORMAT_UNKNOWN);  legalFormat < NTV2_MAX_NUM_VIDEO_FORMATS;  legalFormat = NTV2VideoFormat(legalFormat + 1))
 			{
-				string	str;
-				if (!NTV2_IS_VALID_VIDEO_FORMAT (legalFormat))
+				if (!NTV2_IS_VALID_VIDEO_FORMAT(legalFormat))
 					continue;
+				string str(::NTV2VideoFormatToString (legalFormat));
 
 				if (NTV2_IS_QUAD_QUAD_FORMAT(legalFormat))
-					g8KFormats.insert (legalFormat);
-				else if (NTV2_IS_4K_VIDEO_FORMAT (legalFormat))
-					g4KFormats.insert (legalFormat);
+					g8KFormats.insert(legalFormat);
+				else if (NTV2_IS_4K_VIDEO_FORMAT(legalFormat))
+					g4KFormats.insert(legalFormat);
 				else
-					gNon4KFormats.insert (legalFormat);
-				gAllFormats.insert (legalFormat);
+					gSDHDFormats.insert(legalFormat);
+				gAllFormats.insert(legalFormat);
 
 				if		(legalFormat == NTV2_FORMAT_525_5994)	str = "525i2997";
 				else if	(legalFormat == NTV2_FORMAT_625_5000)	str = "625i25";
@@ -120,73 +120,90 @@ class DemoCommonInitializer
 				else if	(legalFormat == NTV2_FORMAT_525_2400)	str = "525i24";
 				else
 				{
-					str = ::NTV2VideoFormatToString (legalFormat);
-					if (str.at (str.length () - 1) == 'a')	//	If it ends in "a"...
-						str.erase (str.length () - 1);		//	...lop off the "a"
+					if (str.at (str.length() - 1) == 'a')	//	If it ends in "a"...
+						str.erase (str.length() - 1);		//	...lop off the "a"
 
-					if (str.find (".00") != string::npos)	//	If it ends in ".00"...
-						str.erase (str.find (".00"), 3);	//	...lop off the ".00" (but keep the "b", if any)
+					if (str.find(".00") != string::npos)	//	If it ends in ".00"...
+						str.erase (str.find(".00"), 3);	//	...lop off the ".00" (but keep the "b", if any)
 
-					while (str.find (" ") != string::npos)
-						str.erase (str.find (" "), 1);		//	Remove all spaces
+					while (str.find(" ") != string::npos)
+						str.erase (str.find(" "), 1);		//	Remove all spaces
 
-					if (str.find (".") != string::npos)
-						str.erase (str.find ("."), 1);		//	Remove "."
+					if (str.find(".") != string::npos)
+						str.erase (str.find("."), 1);		//	Remove "."
 
-					str = CNTV2DemoCommon::ToLower (str);	//	Fold to lower case
+					str = CNTV2DemoCommon::ToLower(str);	//	Fold to lower case
 				}
-				gString2VideoFormatMap.insert (String2VideoFormatPair (str, legalFormat));
-				gString2VideoFormatMap.insert (String2VideoFormatPair (ULWordToString (legalFormat), legalFormat));
+				gString2VideoFormatMMap.insert (String2VideoFormatPair (str, legalFormat));
+				gString2VideoFormatMMap.insert (String2VideoFormatPair (ULWordToString(legalFormat), legalFormat));
 			}	//	for each video format supported in demo apps
 
 			//	Add popular format names...
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("sd",			NTV2_FORMAT_525_5994));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("525i",			NTV2_FORMAT_525_5994));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("625i",			NTV2_FORMAT_625_5000));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("720p",			NTV2_FORMAT_720p_5994));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("hd",			NTV2_FORMAT_1080i_5994));
-            gString2VideoFormatMap.insert (String2VideoFormatPair ("1080i",			NTV2_FORMAT_1080i_5994));
-            gString2VideoFormatMap.insert (String2VideoFormatPair ("1080i50",	    NTV2_FORMAT_1080i_5000));
-            gString2VideoFormatMap.insert (String2VideoFormatPair ("1080p",	        NTV2_FORMAT_1080p_5994_B));
-            gString2VideoFormatMap.insert (String2VideoFormatPair ("1080p50",	    NTV2_FORMAT_1080p_5000_B));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("sd",			NTV2_FORMAT_525_5994));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("525i",			NTV2_FORMAT_525_5994));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("625i",			NTV2_FORMAT_625_5000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("720p",			NTV2_FORMAT_720p_5994));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("hd",			NTV2_FORMAT_1080i_5994));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("1080i",		NTV2_FORMAT_1080i_5994));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("1080i50",		NTV2_FORMAT_1080i_5000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("1080p",		NTV2_FORMAT_1080p_5994_B));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("1080p50",		NTV2_FORMAT_1080p_5000_B));
 
-            gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd",			NTV2_FORMAT_4x1920x1080p_6000));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd2398",		NTV2_FORMAT_4x1920x1080p_2398));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd24",			NTV2_FORMAT_4x1920x1080p_2400));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd25",			NTV2_FORMAT_4x1920x1080p_2500));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd50",			NTV2_FORMAT_4x1920x1080p_5000));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd5994",		NTV2_FORMAT_4x1920x1080p_5994));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd60",			NTV2_FORMAT_4x1920x1080p_6000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd",			NTV2_FORMAT_4x1920x1080p_6000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd",			NTV2_FORMAT_3840x2160p_6000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd2398",		NTV2_FORMAT_4x1920x1080p_2398));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd2398",		NTV2_FORMAT_3840x2160p_2398));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd24",		NTV2_FORMAT_4x1920x1080p_2400));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd24",		NTV2_FORMAT_3840x2160p_2400));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd25",		NTV2_FORMAT_4x1920x1080p_2500));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd25",		NTV2_FORMAT_3840x2160p_2500));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd50",		NTV2_FORMAT_4x1920x1080p_5000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd50",		NTV2_FORMAT_3840x2160p_5000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd5994",		NTV2_FORMAT_4x1920x1080p_5994));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd5994",		NTV2_FORMAT_3840x2160p_5994));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd60",		NTV2_FORMAT_4x1920x1080p_6000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd60",		NTV2_FORMAT_3840x2160p_6000));
 
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("4k",			NTV2_FORMAT_4x2048x1080p_6000));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("4k2398",		NTV2_FORMAT_4x2048x1080p_2398));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("4k24",			NTV2_FORMAT_4x2048x1080p_2400));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("4k25",			NTV2_FORMAT_4x2048x1080p_2500));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("4k4795",		NTV2_FORMAT_4x2048x1080p_4795));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("4k48",			NTV2_FORMAT_4x2048x1080p_4800));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("4k50",			NTV2_FORMAT_4x2048x1080p_5000));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("4k5994",		NTV2_FORMAT_4x2048x1080p_5994));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("4k60",			NTV2_FORMAT_4x2048x1080p_6000));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("4k11988",		NTV2_FORMAT_4x2048x1080p_11988));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("4k120",			NTV2_FORMAT_4x2048x1080p_12000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k",			NTV2_FORMAT_4x2048x1080p_6000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k",			NTV2_FORMAT_4096x2160p_6000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k2398",		NTV2_FORMAT_4x2048x1080p_2398));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k2398",		NTV2_FORMAT_4096x2160p_2398));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k24",			NTV2_FORMAT_4x2048x1080p_2400));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k24",			NTV2_FORMAT_4096x2160p_2400));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k25",			NTV2_FORMAT_4x2048x1080p_2500));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k25",			NTV2_FORMAT_4096x2160p_2500));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k4795",		NTV2_FORMAT_4x2048x1080p_4795));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k4795",		NTV2_FORMAT_4096x2160p_4795));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k48",			NTV2_FORMAT_4x2048x1080p_4800));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k48",			NTV2_FORMAT_4096x2160p_4800));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k50",			NTV2_FORMAT_4x2048x1080p_5000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k50",			NTV2_FORMAT_4096x2160p_5000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k5994",		NTV2_FORMAT_4x2048x1080p_5994));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k5994",		NTV2_FORMAT_4096x2160p_5994));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k60",			NTV2_FORMAT_4x2048x1080p_6000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k60",			NTV2_FORMAT_4096x2160p_6000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k11988",		NTV2_FORMAT_4x2048x1080p_11988));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k11988",		NTV2_FORMAT_4096x2160p_11988));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k120",		NTV2_FORMAT_4x2048x1080p_12000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("4k120",		NTV2_FORMAT_4096x2160p_12000));
 
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd2",			NTV2_FORMAT_4x3840x2160p_2398));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd22398",		NTV2_FORMAT_4x3840x2160p_2398));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd224",		NTV2_FORMAT_4x3840x2160p_2400));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd225",		NTV2_FORMAT_4x3840x2160p_2500));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd250",		NTV2_FORMAT_4x3840x2160p_5000));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd25994",		NTV2_FORMAT_4x3840x2160p_5994));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("uhd260",		NTV2_FORMAT_4x3840x2160p_6000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd2",			NTV2_FORMAT_4x3840x2160p_2398));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd22398",		NTV2_FORMAT_4x3840x2160p_2398));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd224",		NTV2_FORMAT_4x3840x2160p_2400));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd225",		NTV2_FORMAT_4x3840x2160p_2500));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd250",		NTV2_FORMAT_4x3840x2160p_5000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd25994",		NTV2_FORMAT_4x3840x2160p_5994));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("uhd260",		NTV2_FORMAT_4x3840x2160p_6000));
 
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("8k",			NTV2_FORMAT_4x4096x2160p_6000));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("8k2398",		NTV2_FORMAT_4x4096x2160p_2398));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("8k24",			NTV2_FORMAT_4x4096x2160p_2400));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("8k25",			NTV2_FORMAT_4x4096x2160p_2500));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("8k4795",		NTV2_FORMAT_4x4096x2160p_4795));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("8k48",			NTV2_FORMAT_4x4096x2160p_4800));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("8k50",			NTV2_FORMAT_4x4096x2160p_5000));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("8k5994",		NTV2_FORMAT_4x4096x2160p_5994));
-			gString2VideoFormatMap.insert (String2VideoFormatPair ("8k60",			NTV2_FORMAT_4x4096x2160p_6000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("8k",			NTV2_FORMAT_4x4096x2160p_6000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("8k2398",		NTV2_FORMAT_4x4096x2160p_2398));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("8k24",			NTV2_FORMAT_4x4096x2160p_2400));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("8k25",			NTV2_FORMAT_4x4096x2160p_2500));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("8k4795",		NTV2_FORMAT_4x4096x2160p_4795));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("8k48",			NTV2_FORMAT_4x4096x2160p_4800));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("8k50",			NTV2_FORMAT_4x4096x2160p_5000));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("8k5994",		NTV2_FORMAT_4x4096x2160p_5994));
+			gString2VideoFormatMMap.insert (String2VideoFormatPair ("8k60",			NTV2_FORMAT_4x4096x2160p_6000));
 			
 			NTV2_ASSERT (gPixelFormats.empty ());
 			for (NTV2FrameBufferFormat legalFormat (NTV2_FBF_10BIT_YCBCR);  legalFormat < NTV2_FBF_NUMFRAMEBUFFERFORMATS;  legalFormat = NTV2FrameBufferFormat (legalFormat + 1))
@@ -269,7 +286,7 @@ class DemoCommonInitializer
 			gString2PixelFormatMap.insert (String2PixelFormatPair ("rgb24",			NTV2_FBF_24BIT_RGB));
 			gString2PixelFormatMap.insert (String2PixelFormatPair ("bgr24",			NTV2_FBF_24BIT_BGR));
 			gString2PixelFormatMap.insert (String2PixelFormatPair ("ycbcra10",		NTV2_FBF_10BIT_YCBCRA));
-            gString2PixelFormatMap.insert (String2PixelFormatPair ("rgb10dpxle",	NTV2_FBF_10BIT_DPX_LE));
+			gString2PixelFormatMap.insert (String2PixelFormatPair ("rgb10dpxle",	NTV2_FBF_10BIT_DPX_LE));
 			gString2PixelFormatMap.insert (String2PixelFormatPair ("proresdvcpro",	NTV2_FBF_PRORES_DVCPRO));
 			gString2PixelFormatMap.insert (String2PixelFormatPair ("proreshdv",		NTV2_FBF_PRORES_HDV));
 			gString2PixelFormatMap.insert (String2PixelFormatPair ("rgb10packed",	NTV2_FBF_10BIT_RGB_PACKED));
@@ -312,7 +329,10 @@ class DemoCommonInitializer
 			gString2InputSourceMap.insert(String2InputSourcePair(string("hdmi"),NTV2_INPUTSOURCE_HDMI1));
 
 			//	Output Destinations...
-			::NTV2DeviceGetSupportedOutputDests (DEVICE_ID_INVALID, gOutputDestinations);
+			::NTV2DeviceGetSupportedOutputDests (DEVICE_ID_INVALID, gOutputDestinations, NTV2_IOKINDS_ALL);
+			::NTV2DeviceGetSupportedOutputDests (DEVICE_ID_INVALID, gOutputDestsSDI, NTV2_IOKINDS_SDI);
+			::NTV2DeviceGetSupportedOutputDests (DEVICE_ID_INVALID, gOutputDestsHDMI, NTV2_IOKINDS_HDMI);
+			::NTV2DeviceGetSupportedOutputDests (DEVICE_ID_INVALID, gOutputDestsAnalog, NTV2_IOKINDS_ANALOG);
 			for (NTV2OutputDestinationsConstIter it(gOutputDestinations.begin());  it != gOutputDestinations.end();  ++it)
 			{
 				const NTV2OutputDest dst(*it);
@@ -326,12 +346,14 @@ class DemoCommonInitializer
 					gString2OutputDestMap.insert(String2OutputDestPair(str, dst));
 				}
 			}	//	for each output dest
-			gString2OutputDestMap.insert(String2OutputDestPair(string("hdmi1"),NTV2_OUTPUTDESTINATION_HDMI));
+			gString2OutputDestMap.insert(String2OutputDestPair(string("hdmi1"), NTV2_OUTPUTDESTINATION_HDMI1));
 
 			//	TCIndexes...
 			for (uint16_t ndx (0);  ndx < NTV2_MAX_NUM_TIMECODE_INDEXES;  ndx++)
 			{
 				const NTV2TCIndex	tcIndex	(NTV2TCIndex(ndx+0));
+				if (tcIndex == NTV2_TCINDEX_DEFAULT)
+					continue;	//	Skip NTV2_TCINDEX_DEFAULT
 				gTCIndexes.insert (tcIndex);
 				gString2TCIndexMap.insert (String2TCIndexPair(ULWordToString(ndx), tcIndex));
 				gString2TCIndexMap.insert (String2TCIndexPair(::NTV2TCIndexToString(tcIndex, false), tcIndex));
@@ -437,7 +459,7 @@ bool CNTV2DemoCommon::IsValidDevice (const string & inDeviceSpec)
 	if (! CNTV2DeviceScanner::GetFirstDeviceFromArgument (deviceSpec, device))
 	{
 		if (deviceSpec != "LIST" && deviceSpec != "list" && deviceSpec != "?")
-			cerr << "## ERROR: Device spec '" << deviceSpec << "' not valid" << endl;
+			cerr << "## ERROR: Failed to open device spec '" << deviceSpec << "'" << endl;
 		return false;
 	}
 	return true;
@@ -451,7 +473,7 @@ static string DeviceFilterString (const NTV2DeviceKinds inKinds)
 	else if (inKinds == NTV2_DEVICEKIND_NONE)
 		return "no device";
 
-	vector<string>	strs;
+	NTV2StringList strs;
 	if (inKinds & NTV2_DEVICEKIND_INPUT)
 		strs.push_back("capture");
 	if (inKinds & NTV2_DEVICEKIND_OUTPUT)
@@ -478,103 +500,85 @@ static string DeviceFilterString (const NTV2DeviceKinds inKinds)
 		strs.push_back("SDI relays");
 	if (strs.empty())
 		return "??";
-
-	ostringstream	oss;
-	for (vector<string>::const_iterator it(strs.begin());  it != strs.end();  )
-	{
-		oss << *it;
-		if (++it != strs.end())
-			oss << " | ";
-	}
-	return oss.str();
+	return aja::join(strs, " | ");
 }
 
 
-string CNTV2DemoCommon::GetDeviceStrings (const NTV2DeviceKinds inKinds)
+NTV2VideoFormatSet CNTV2DemoCommon::GetSupportedVideoFormats (const NTV2VideoFormatKinds inKinds)
 {
-	ostringstream			oss, hdr;
-	CNTV2Card				device;
-	ULWord					ndx(0);
-	const NTV2DeviceIDSet	supportedDevices(::NTV2GetSupportedDevices(inKinds));
-	const string			filterString(DeviceFilterString(inKinds));
+	if ((inKinds & VIDEO_FORMATS_ALL) == VIDEO_FORMATS_ALL)
+		return gAllFormats;
 
-	typedef map<NTV2DeviceID,UWord>	DeviceTallies;
-	DeviceTallies	tallies;
-
-	for (ndx = 0;  CNTV2DeviceScanner::GetDeviceAtIndex(ndx, device);  ndx++)
-	{
-		const NTV2DeviceID	deviceID(device.GetDeviceID());
-		string	serialNum;
-		oss	<< endl
-			<< DEC(ndx);
-		if (tallies.find(deviceID) == tallies.end())
-		{
-			tallies[deviceID] = 1;
-			oss << endl
-				<< ToLower(::NTV2DeviceIDToString(deviceID));
-		}
-		else
-		{
-			const UWord num(tallies[deviceID]);
-			tallies.erase(deviceID);
-			tallies[deviceID] = num+1;
-		}
-		if (device.GetSerialNumberString(serialNum))
-			oss << endl
-				<< serialNum;
-		if (inKinds != NTV2_DEVICEKIND_ALL  &&  inKinds != NTV2_DEVICEKIND_NONE)
-			if (supportedDevices.find(deviceID) == supportedDevices.end())
-				oss << "\t## Doesn't support one of " << filterString;
-		oss << endl;
-	}
-
-	if (!ndx)
-		return string("No devices\n");
-	hdr << DEC(ndx) << " local " << (ndx == 1 ? "device" : "devices") << " found:" << endl
-		<< setw(16) << left << "Legal -d Values" << endl
-		<< setw(16) << left << "----------------";
-	hdr << oss.str();
-	return hdr.str();
+	NTV2VideoFormatSet result;
+	if (inKinds & VIDEO_FORMATS_SDHD)
+		result += gSDHDFormats;
+	if (inKinds & VIDEO_FORMATS_4KUHD)
+		result += g4KFormats;
+	if (inKinds & VIDEO_FORMATS_8KUHD2)
+		result += g8KFormats;
+	return result;
 }
 
 
-const NTV2VideoFormatSet &	CNTV2DemoCommon::GetSupportedVideoFormats (const NTV2VideoFormatKinds inKinds)
+string CNTV2DemoCommon::GetVideoFormatStrings (const NTV2VideoFormatKinds inKinds, const string inDevSpec)
 {
-	switch(inKinds)
-	{
-		case VIDEO_FORMATS_ALL:			return gAllFormats;
-		case VIDEO_FORMATS_4KUHD:		return g4KFormats;
-		case VIDEO_FORMATS_8KUHD2:		return g8KFormats;
-		default:						return gNon4KFormats;
-	}
-}
+	const NTV2VideoFormatSet & formatSet(GetSupportedVideoFormats(inKinds));
+	ostringstream oss;
+	CNTV2Card dev;
+	if (!inDevSpec.empty())
+		dev.Open(inDevSpec);
 
-
-string CNTV2DemoCommon::GetVideoFormatStrings (const NTV2VideoFormatKinds inKinds, const string inDeviceSpecifier)
-{
-	const NTV2VideoFormatSet &	formatSet	(GetSupportedVideoFormats(inKinds));
-	ostringstream				oss;
-	CNTV2Card					theDevice;
-	if (!inDeviceSpecifier.empty())
-		CNTV2DeviceScanner::GetFirstDeviceFromArgument (inDeviceSpecifier, theDevice);
-
-	oss	<< setw(25) << left << "Video Format"				<< "\t" << setw(16) << left << "Legal -v Values" << endl
+	oss	<< setw(25) << left << "Supported Video Format"		<< "\t" << setw(16) << left << "Legal -v Values" << endl
 		<< setw(25) << left << "------------------------"	<< "\t" << setw(16) << left << "----------------" << endl;
 	for (NTV2VideoFormatSetConstIter iter(formatSet.begin());  iter != formatSet.end();  ++iter)
-	{
-		string	formatName	(::NTV2VideoFormatToString (*iter));
-		for (String2VideoFormatMapConstIter it(gString2VideoFormatMap.begin());  it != gString2VideoFormatMap.end();  ++it)
-			if (*iter == it->second)
+	{	const NTV2VideoFormat vf(*iter);
+		const string vfName (::NTV2VideoFormatToString(vf, true));
+		if (vfName == "Unknown")
+			continue;
+		NTV2StringList vfNames;
+		for (String2VideoFormatMMapCI it(gString2VideoFormatMMap.begin());  it != gString2VideoFormatMMap.end();  ++it)
+			if (vf == it->second)
 			{
-				oss << setw(25) << left << formatName << "\t" << setw(16) << left << it->first;
-				if (!inDeviceSpecifier.empty()  &&  theDevice.IsOpen()  &&  !theDevice.features().CanDoVideoFormat(*iter))
-					oss << "\t## Incompatible with " << theDevice.GetDisplayName();
-				oss << endl;
-				formatName.clear();
+				if (!inDevSpec.empty()  &&  dev.IsOpen()  &&  !dev.features().CanDoVideoFormat(vf))
+					continue;
+				vfNames.push_back(it->first);
 			}
-		oss << endl;
+		if (!vfNames.empty())
+			oss << setw(25) << left << vfName << "\t" << aja::join(vfNames,", ") << endl;
 	}
 	return oss.str();
+}
+
+
+NTV2VideoFormat CNTV2DemoCommon::GetVideoFormatFromString (const string & inStr, const NTV2VideoFormatKinds inKinds, const string & inDevSpec)
+{
+	String2VideoFormatMMapCI iter (gString2VideoFormatMMap.find(inStr));
+	if (iter == gString2VideoFormatMMap.end())
+		return NTV2_FORMAT_UNKNOWN;
+
+	CNTV2Card dev;
+	if (!inDevSpec.empty())
+		dev.Open(inDevSpec);
+
+	//	If a device was specifed, look for the first name-matching format it supports...
+	NTV2VideoFormat vf(iter->second);
+	while (dev.IsOpen()  &&  !dev.features().CanDoVideoFormat(vf))
+	{
+		if (++iter == gString2VideoFormatMMap.end())
+			return NTV2_FORMAT_UNKNOWN;
+		if (inStr != iter->first)
+			return NTV2_FORMAT_UNKNOWN;
+		vf = iter->second;
+	}
+	if ((inKinds & VIDEO_FORMATS_ALL) == VIDEO_FORMATS_ALL)
+		return vf;
+	if (inKinds & VIDEO_FORMATS_4KUHD  &&  NTV2_IS_4K_VIDEO_FORMAT(vf))
+		return vf;
+	if (inKinds & VIDEO_FORMATS_8KUHD2  &&  NTV2_IS_QUAD_QUAD_FORMAT(vf))
+		return vf;
+	if (inKinds & VIDEO_FORMATS_SDHD  &&  !NTV2_IS_4K_VIDEO_FORMAT(vf))
+		return vf;
+	return NTV2_FORMAT_UNKNOWN;
 }
 
 
@@ -583,8 +587,7 @@ NTV2FrameBufferFormatSet CNTV2DemoCommon::GetSupportedPixelFormats (const NTV2Pi
 	if (inKinds == PIXEL_FORMATS_ALL)
 		return gPixelFormats;
 
-	NTV2FrameBufferFormatSet	result;
-
+	NTV2FrameBufferFormatSet result;
 	if (inKinds & PIXEL_FORMATS_RGB)
 		result += gFBFsRGB;
 	if (inKinds & PIXEL_FORMATS_PLANAR)
@@ -595,68 +598,75 @@ NTV2FrameBufferFormatSet CNTV2DemoCommon::GetSupportedPixelFormats (const NTV2Pi
 		result += gFBFsPacked;
 	if (inKinds & PIXEL_FORMATS_ALPHA)
 		result += gFBFsAlpha;
-
 	return result;
 }
 
 
-string CNTV2DemoCommon::GetPixelFormatStrings (const NTV2PixelFormatKinds inKinds, const string inDeviceSpecifier)
+string CNTV2DemoCommon::GetPixelFormatStrings (const NTV2PixelFormatKinds inKinds, const string inDevSpec)
 {
 	const NTV2FrameBufferFormatSet & formatSet (GetSupportedPixelFormats(inKinds));
-	string			displayName;
-	CNTV2Card		device;
-	ostringstream	oss;
+	CNTV2Card dev;
+	ostringstream oss;
 
-	if (!inDeviceSpecifier.empty())
+	if (!inDevSpec.empty())
+		dev.Open(inDevSpec);
+
+	oss << setw(34) << left << "Frame Buffer Format"				<< "\t" << setw(32) << left << "Legal -p Values" << endl
+		<< setw(34) << left << "----------------------------------"	<< "\t" << setw(32) << left << "--------------------------------" << endl;
+	for (NTV2FrameBufferFormatSetConstIter iter(formatSet.begin());  iter != formatSet.end();  ++iter)
 	{
-		CNTV2DeviceScanner::GetFirstDeviceFromArgument (inDeviceSpecifier, device);
-		if (device.IsOpen ())
-			displayName = device.GetDisplayName();
-	}
-
-
-	oss << setw (34) << left << "Frame Buffer Format"					<< "\t" << setw (32) << left << "Legal -p Values" << endl
-		<< setw (34) << left << "----------------------------------"	<< "\t" << setw (32) << left << "--------------------------------" << endl;
-	for (NTV2FrameBufferFormatSetConstIter iter (formatSet.begin ());  iter != formatSet.end ();  ++iter)
-	{
-		string	formatName	(::NTV2FrameBufferFormatToString (*iter, true));
-		for (String2PixelFormatMapConstIter it (gString2PixelFormatMap.begin ());  it != gString2PixelFormatMap.end ();  ++it)
-			if (*iter == it->second)
+		const NTV2PixelFormat pf(*iter);
+		const string pfName (::NTV2FrameBufferFormatToString (pf, true));
+		if (pfName.empty())
+			continue;
+		NTV2StringList pfNames;
+		for (String2PixelFormatMapConstIter it(gString2PixelFormatMap.begin());  it != gString2PixelFormatMap.end();  ++it)
+			if (pf == it->second)
 			{
-				oss << setw(35) << left << formatName << "\t" << setw(25) << left << it->first;
-				if (!displayName.empty()  &&  !device.features().CanDoFrameBufferFormat(*iter))
-					oss << "\t## Incompatible with " << displayName;
-				oss << endl;
-				formatName.clear ();
+				if (!inDevSpec.empty()  &&  dev.IsOpen()  &&  !dev.features().CanDoFrameBufferFormat(pf))
+					continue;
+				pfNames.push_back(it->first);
 			}
-		oss << endl;
+		if (!pfNames.empty())
+			oss << setw(35) << left << pfName << "\t" << aja::join(pfNames, ", ") << endl;
 	}
 	return oss.str();
 }
 
 
-NTV2VideoFormat CNTV2DemoCommon::GetVideoFormatFromString (const string & inStr, const NTV2VideoFormatKinds inKinds)
+NTV2PixelFormat CNTV2DemoCommon::GetPixelFormatFromString (const string & inStr, const NTV2PixelFormatKinds inKinds, const string inDevSpec)
 {
-	String2VideoFormatMapConstIter	iter	(gString2VideoFormatMap.find(inStr));
-	if (iter == gString2VideoFormatMap.end())
-		return NTV2_FORMAT_UNKNOWN;
-	const NTV2VideoFormat	format	(iter->second);
-	if (inKinds == VIDEO_FORMATS_ALL)
-		return format;
-	if (inKinds == VIDEO_FORMATS_4KUHD && NTV2_IS_4K_VIDEO_FORMAT(format))
-		return format;
-	if (inKinds == VIDEO_FORMATS_8KUHD2 && NTV2_IS_QUAD_QUAD_FORMAT(format))
-		return format;
-	if (inKinds == VIDEO_FORMATS_NON_4KUHD && !NTV2_IS_4K_VIDEO_FORMAT(format))
-		return format;
-	return NTV2_FORMAT_UNKNOWN;
-}
+	String2PixelFormatMapConstIter iter (gString2PixelFormatMap.find(inStr));
+	if (iter == gString2PixelFormatMap.end())
+		return NTV2_FBF_INVALID;
 
+	CNTV2Card dev;
+	if (!inDevSpec.empty())
+		dev.Open(inDevSpec);
 
-NTV2FrameBufferFormat CNTV2DemoCommon::GetPixelFormatFromString (const string & inStr)
-{
-	String2PixelFormatMapConstIter	iter	(gString2PixelFormatMap.find (inStr));
-	return  iter != gString2PixelFormatMap.end ()  ?  iter->second  :  NTV2_FBF_INVALID;
+	//	If a device was specifed, look for the first name-matching format it supports...
+	NTV2PixelFormat pf(iter->second);
+	while (dev.IsOpen()  &&  !dev.features().CanDoPixelFormat(pf))
+	{
+		if (++iter == gString2PixelFormatMap.end())
+			return NTV2_FBF_INVALID;
+		if (inStr != iter->first)
+			return NTV2_FBF_INVALID;
+		pf = iter->second;
+	}
+	if ((inKinds & PIXEL_FORMATS_ALL) == PIXEL_FORMATS_ALL)
+		return pf;
+	if (inKinds & PIXEL_FORMATS_RGB  &&  NTV2_IS_FBF_RGB(pf))
+		return pf;
+	if (inKinds & PIXEL_FORMATS_PLANAR  &&  NTV2_IS_FBF_PLANAR(pf))
+		return pf;
+	if (inKinds & PIXEL_FORMATS_RAW  &&  !NTV2_FBF_IS_RAW(pf))
+		return pf;
+	if (inKinds & PIXEL_FORMATS_PACKED  &&  !NTV2_IS_FBF_PRORES(pf))
+		return pf;
+	if (inKinds & PIXEL_FORMATS_ALPHA  &&  !NTV2_FBF_HAS_ALPHA(pf))
+		return pf;
+	return NTV2_FBF_INVALID;
 }
 
 
@@ -665,90 +675,158 @@ const NTV2InputSourceSet CNTV2DemoCommon::GetSupportedInputSources (const NTV2IO
 	if (inKinds == NTV2_IOKINDS_ALL)
 		return gInputSources;
 
-	NTV2InputSourceSet	result;
-
+	NTV2InputSourceSet result;
 	if (inKinds & NTV2_IOKINDS_SDI)
 		result += gInputSourcesSDI;
 	if (inKinds & NTV2_IOKINDS_HDMI)
 		result += gInputSourcesHDMI;
 	if (inKinds & NTV2_IOKINDS_ANALOG)
 		result += gInputSourcesAnalog;
-
 	return result;
 }
 
 
-string CNTV2DemoCommon::GetInputSourceStrings (const NTV2IOKinds inKinds,  const string inDeviceSpecifier)
+string CNTV2DemoCommon::GetInputSourceStrings (const NTV2IOKinds inKinds,  const string inDevSpec)
 {
-	const NTV2InputSourceSet &	sourceSet	(GetSupportedInputSources (inKinds));
-	ostringstream				oss;
-	CNTV2Card					theDevice;
-	if (!inDeviceSpecifier.empty ())
-		CNTV2DeviceScanner::GetFirstDeviceFromArgument (inDeviceSpecifier, theDevice);
+	const NTV2InputSourceSet & sourceSet (GetSupportedInputSources(inKinds));
+	CNTV2Card dev;
+	ostringstream oss;
 
-	oss	<< setw (25) << left << "Input Source"				<< "\t" << setw (16) << left << "Legal -i Values" << endl
-		<< setw (25) << left << "------------------------"	<< "\t" << setw (16) << left << "----------------" << endl;
+	if (!inDevSpec.empty())
+		dev.Open(inDevSpec);
+
+	oss	<< setw(25) << left << "Input Source"             << "\t" << setw(16) << left << "Legal -i Values"  << endl
+		<< setw(25) << left << "------------------------" << "\t" << setw(16) << left << "----------------" << endl;
 	for (NTV2InputSourceSetConstIter iter(sourceSet.begin());  iter != sourceSet.end();  ++iter)
 	{
-		string	sourceName	(::NTV2InputSourceToString (*iter));
+		const NTV2InputSource src(*iter);
+		const string srcName (::NTV2InputSourceToString(src));
+		if (srcName.empty())
+			continue;
+		NTV2StringList srcNames;
 		for (String2InputSourceMapConstIter it(gString2InputSourceMap.begin());  it != gString2InputSourceMap.end();  ++it)
-			if (*iter == it->second)
+			if (src == it->second)
 			{
-				oss << setw (25) << left << sourceName << "\t" << setw (16) << left << it->first;
-				if (!inDeviceSpecifier.empty ()  &&  theDevice.IsOpen()  &&  !theDevice.features().CanDoInputSource(*iter))
-					oss << "\t## Incompatible with " << theDevice.GetDisplayName();
-				oss << endl;
-				sourceName.clear();
+				if (!inDevSpec.empty()  &&  dev.IsOpen()  &&  !dev.features().CanDoInputSource(src))
+					continue;
+				srcNames.push_back(it->first);
 			}
-		oss << endl;
-	}
-	return oss.str ();
-}
-
-
-NTV2InputSource CNTV2DemoCommon::GetInputSourceFromString (const string & inStr)
-{
-	String2InputSourceMapConstIter	iter	(gString2InputSourceMap.find (inStr));
-	if (iter == gString2InputSourceMap.end ())
-		return NTV2_INPUTSOURCE_INVALID;
-	return iter->second;
-}
-
-
-string CNTV2DemoCommon::GetOutputDestinationStrings (const string inDeviceSpecifier)
-{
-	const NTV2OutputDestinations &	dests (gOutputDestinations);
-	ostringstream					oss;
-	CNTV2Card						theDevice;
-	if (!inDeviceSpecifier.empty())
-		CNTV2DeviceScanner::GetFirstDeviceFromArgument(inDeviceSpecifier, theDevice);
-
-	oss	<< setw (25) << left << "Output Destination"		<< "\t" << setw(16) << left << "Legal -o Values" << endl
-		<< setw (25) << left << "------------------------"	<< "\t" << setw(16) << left << "----------------" << endl;
-	for (NTV2OutputDestinationsConstIter iter(dests.begin());  iter != dests.end();  ++iter)
-	{
-		string	destName(::NTV2OutputDestinationToString(*iter));
-		for (String2OutputDestMapConstIter it(gString2OutputDestMap.begin());  it != gString2OutputDestMap.end();  ++it)
-			if (*iter == it->second)
-			{
-				oss << setw(25) << left << destName << "\t" << setw(16) << left << it->first;
-				if (!inDeviceSpecifier.empty()  &&  theDevice.IsOpen()  &&  !theDevice.features().CanDoOutputDestination(*iter))
-					oss << "\t## Incompatible with " << theDevice.GetDisplayName();
-				oss << endl;
-				destName.clear();
-			}
-		oss << endl;
+		if (!srcNames.empty())
+			oss << setw(25) << left << srcName << "\t" << aja::join(srcNames, ", ") << endl;
 	}
 	return oss.str();
 }
 
 
-NTV2OutputDestination CNTV2DemoCommon::GetOutputDestinationFromString (const string & inStr)
+NTV2InputSource CNTV2DemoCommon::GetInputSourceFromString (const string & inStr, const NTV2IOKinds inKinds, const string inDevSpec)
+{
+	String2InputSourceMapConstIter iter (gString2InputSourceMap.find(inStr));
+	if (iter == gString2InputSourceMap.end())
+		return NTV2_INPUTSOURCE_INVALID;
+
+	CNTV2Card dev;
+	if (!inDevSpec.empty())
+		dev.Open(inDevSpec);
+
+	//	If a device was specifed, look for the first name-matching input source it supports...
+	NTV2InputSource src(iter->second);
+	while (dev.IsOpen()  &&  !dev.features().CanDoInputSource(src))
+	{
+		if (++iter == gString2InputSourceMap.end())
+			return NTV2_INPUTSOURCE_INVALID;
+		if (inStr != iter->first)
+			return NTV2_INPUTSOURCE_INVALID;
+		src = iter->second;
+	}
+	if ((inKinds & NTV2_IOKINDS_ALL) == NTV2_IOKINDS_ALL)
+		return src;
+	if (inKinds & NTV2_IOKINDS_SDI  &&  NTV2_INPUT_SOURCE_IS_SDI(src))
+		return src;
+	if (inKinds & NTV2_IOKINDS_HDMI  &&  NTV2_INPUT_SOURCE_IS_HDMI(src))
+		return src;
+	if (inKinds & NTV2_IOKINDS_ANALOG  &&  NTV2_INPUT_SOURCE_IS_ANALOG(src))
+		return src;
+	return NTV2_INPUTSOURCE_INVALID;
+}
+
+
+const NTV2OutputDestinations CNTV2DemoCommon::GetSupportedOutputDestinations (const NTV2IOKinds inKinds)
+{
+	if (inKinds == NTV2_IOKINDS_ALL)
+		return gOutputDestinations;
+
+	NTV2OutputDestinations result;
+	if (inKinds & NTV2_IOKINDS_SDI)
+		result += gOutputDestsSDI;
+	if (inKinds & NTV2_IOKINDS_HDMI)
+		result += gOutputDestsHDMI;
+	if (inKinds & NTV2_IOKINDS_ANALOG)
+		result += gOutputDestsAnalog;
+	return result;
+}
+
+
+string CNTV2DemoCommon::GetOutputDestinationStrings (const NTV2IOKinds inKinds, const string inDevSpec)
+{
+	const NTV2OutputDestinations & dests (GetSupportedOutputDestinations(inKinds));
+	CNTV2Card dev;
+	ostringstream oss;
+
+	if (!inDevSpec.empty())
+		dev.Open(inDevSpec);
+
+	oss	<< setw(25) << left << "Output Destination"       << "\t" << setw(16) << left << "Legal -o Values"  << endl
+		<< setw(25) << left << "------------------------" << "\t" << setw(16) << left << "----------------" << endl;
+	for (NTV2OutputDestinationsConstIter iter(dests.begin());  iter != dests.end();  ++iter)
+	{
+		const NTV2OutputDest dest(*iter);
+		const string destName(::NTV2OutputDestinationToString(dest));
+		if (destName.empty())
+			continue;
+		NTV2StringList destNames;
+		for (String2OutputDestMapConstIter it(gString2OutputDestMap.begin());  it != gString2OutputDestMap.end();  ++it)
+			if (*iter == it->second)
+			{
+				if (!inDevSpec.empty()  &&  dev.IsOpen()  &&  !dev.features().CanDoOutputDestination(dest))
+					continue;
+				destNames.push_back(it->first);
+			}
+		if (!destNames.empty())
+			oss << setw(25) << left << destName << "\t" << aja::join(destNames, ", ") << endl;
+	}
+	return oss.str();
+}
+
+
+NTV2OutputDestination CNTV2DemoCommon::GetOutputDestinationFromString (const string & inStr, const NTV2IOKinds inKinds, const string inDevSpec)
 {
 	String2OutputDestMapConstIter iter(gString2OutputDestMap.find(inStr));
 	if (iter == gString2OutputDestMap.end())
 		return NTV2_OUTPUTDESTINATION_INVALID;
-	return iter->second;
+
+	CNTV2Card dev;
+	if (!inDevSpec.empty())
+		dev.Open(inDevSpec);
+
+	//	If a device was specifed, look for the first name-matching output destination it supports...
+	NTV2OutputDest dst(iter->second);
+	while (dev.IsOpen()  &&  !dev.features().CanDoOutputDestination(dst))
+	{
+		if (++iter == gString2OutputDestMap.end())
+			return NTV2_OUTPUTDESTINATION_INVALID;
+		if (inStr != iter->first)
+			return NTV2_OUTPUTDESTINATION_INVALID;
+		dst = iter->second;
+	}
+	if ((inKinds & NTV2_IOKINDS_ALL) == NTV2_IOKINDS_ALL)
+		return dst;
+	if (inKinds & NTV2_IOKINDS_SDI  &&  NTV2_OUTPUT_DEST_IS_SDI(dst))
+		return dst;
+	if (inKinds & NTV2_IOKINDS_HDMI  &&  NTV2_OUTPUT_DEST_IS_HDMI(dst))
+		return dst;
+	if (inKinds & NTV2_IOKINDS_ANALOG  &&  NTV2_OUTPUT_DEST_IS_ANALOG(dst))
+		return dst;
+	return NTV2_OUTPUTDESTINATION_INVALID;
 }
 
 
@@ -758,7 +836,6 @@ const NTV2TCIndexes CNTV2DemoCommon::GetSupportedTCIndexes (const NTV2TCIndexKin
 		return gTCIndexes;
 
 	NTV2TCIndexes	result;
-
 	if (inKinds & TC_INDEXES_SDI)
 		result += gTCIndexesSDI;
 	if (inKinds & TC_INDEXES_ANALOG)
@@ -769,52 +846,79 @@ const NTV2TCIndexes CNTV2DemoCommon::GetSupportedTCIndexes (const NTV2TCIndexKin
 		result += gTCIndexesVITC1;
 	if (inKinds & TC_INDEXES_VITC2)
 		result += gTCIndexesVITC2;
-
 	return result;
 }
 
 string CNTV2DemoCommon::GetTCIndexStrings (const NTV2TCIndexKinds inKinds,
-											const string inDeviceSpecifier,
+											const string inDevSpec,
 											const bool inIsInputOnly)
 {
-	const NTV2TCIndexes &	tcIndexes	(GetSupportedTCIndexes(inKinds));
-	ostringstream			oss;
-	CNTV2Card				theDevice;
-	if (!inDeviceSpecifier.empty())
-		CNTV2DeviceScanner::GetFirstDeviceFromArgument (inDeviceSpecifier, theDevice);
+	const NTV2TCIndexes & tcIndexes (GetSupportedTCIndexes(inKinds));
+	CNTV2Card dev;
+	ostringstream oss;
 
-	oss	<< setw (25) << left << "Timecode Index"			<< "\t" << setw (16) << left << "Legal Values    " << endl
-		<< setw (25) << left << "------------------------"	<< "\t" << setw (16) << left << "----------------" << endl;
+	if (!inDevSpec.empty())
+		dev.Open(inDevSpec);
+
+	oss	<< setw(25) << left << "Timecode Index"				<< "\t" << setw(16) << left << "Legal Values" << endl
+		<< setw(25) << left << "------------------------"	<< "\t" << setw(16) << left << "----------------" << endl;
 	for (NTV2TCIndexesConstIter iter (tcIndexes.begin());  iter != tcIndexes.end();  ++iter)
 	{
-		string	tcNdxName(::NTV2TCIndexToString(*iter));
+		const NTV2TCIndex tcNdx(*iter);
+		const string tcNdxName (::NTV2TCIndexToString(tcNdx));
+		if (tcNdxName.empty())
+			continue;
+		NTV2StringList tcNdxNames;
 		for (String2TCIndexMapConstIter it (gString2TCIndexMap.begin());  it != gString2TCIndexMap.end();  ++it)
-			if (*iter == it->second)
+			if (tcNdx == it->second)
 			{
-				oss << setw (25) << left << tcNdxName << "\t" << setw (16) << left << it->first;
-				if (!inDeviceSpecifier.empty()  &&  theDevice.IsOpen())
-				{
-//					const NTV2DeviceID	deviceID(theDevice.GetDeviceID());
-					const bool canDoTCIndex	(inIsInputOnly	? theDevice.DeviceCanDoInputTCIndex(*iter)
-															: theDevice.DeviceCanDoTCIndex(*iter));
-					if (!canDoTCIndex)
-						oss << "\t## Incompatible with " << theDevice.GetDisplayName();
-				}
-				oss << endl;
-				tcNdxName.clear();
+				if (!inDevSpec.empty()  &&  dev.IsOpen())
+					if (!(inIsInputOnly ? dev.features().CanDoInputTCIndex(tcNdx) : dev.features().CanDoOutputTCIndex(tcNdx)))
+						continue;
+				tcNdxNames.push_back(it->first);
 			}
-		oss << endl;
+		if (!tcNdxNames.empty())
+			oss << setw(25) << left << tcNdxName << "\t" << aja::join(tcNdxNames, ", ") << endl;
 	}
 	return oss.str();
 }
 
 
-NTV2TCIndex CNTV2DemoCommon::GetTCIndexFromString (const string & inStr)
+NTV2TCIndex CNTV2DemoCommon::GetTCIndexFromString (const string & inStr, const NTV2TCIndexKinds inKinds, const string inDevSpec)
 {
-	String2TCIndexMapConstIter	iter	(gString2TCIndexMap.find (inStr));
-	if (iter == gString2TCIndexMap.end ())
+	String2TCIndexMapConstIter iter (gString2TCIndexMap.find(inStr));
+	if (iter == gString2TCIndexMap.end())
 		return NTV2_TCINDEX_INVALID;
-	return iter->second;
+
+	CNTV2Card dev;
+	if (!inDevSpec.empty())
+		dev.Open(inDevSpec);
+
+	//	If a device was specifed, look for the first name-matching format it supports...
+	NTV2TCIndex tcNdx(iter->second);
+	NTV2InputSource tcInpSrc (::NTV2TimecodeIndexToInputSource(tcNdx));
+	while (dev.IsOpen()  &&  !dev.features().CanDoInputSource(tcInpSrc))
+	{
+		if (++iter == gString2TCIndexMap.end())
+			return NTV2_TCINDEX_INVALID;
+		if (inStr != iter->first)
+			return NTV2_TCINDEX_INVALID;
+		tcNdx = iter->second;
+		tcInpSrc = ::NTV2TimecodeIndexToInputSource(tcNdx);
+	}
+	if ((inKinds & TC_INDEXES_ALL) == TC_INDEXES_ALL)
+		return tcNdx;
+	if (inKinds & TC_INDEXES_SDI  &&  (NTV2_IS_ATC_VITC1_TIMECODE_INDEX(tcNdx) || NTV2_IS_ATC_VITC2_TIMECODE_INDEX(tcNdx) || NTV2_IS_ATC_LTC_TIMECODE_INDEX(tcNdx)))
+		return tcNdx;
+	if (inKinds & TC_INDEXES_ANALOG  &&  NTV2_IS_ANALOG_TIMECODE_INDEX(tcNdx))
+		return tcNdx;
+	if (inKinds & TC_INDEXES_ATCLTC  &&  NTV2_IS_ATC_LTC_TIMECODE_INDEX(tcNdx))
+		return tcNdx;
+	if (inKinds & TC_INDEXES_VITC1  &&  NTV2_IS_ATC_VITC1_TIMECODE_INDEX(tcNdx))
+		return tcNdx;
+	if (inKinds & TC_INDEXES_VITC2  &&  NTV2_IS_ATC_VITC2_TIMECODE_INDEX(tcNdx))
+		return tcNdx;
+	return NTV2_TCINDEX_INVALID;
 }
 
 
@@ -1043,7 +1147,7 @@ AJA_FrameRate CNTV2DemoCommon::GetAJAFrameRate (const NTV2FrameRate inFrameRate)
 }	//	GetAJAFrameRate
 
 
-AJA_PixelFormat CNTV2DemoCommon::GetAJAPixelFormat (const NTV2FrameBufferFormat inFormat)
+AJA_PixelFormat CNTV2DemoCommon::GetAJAPixelFormat (const NTV2PixelFormat inFormat)
 {
 	switch (inFormat)
 	{
@@ -1640,8 +1744,8 @@ bool CNTV2DemoCommon::BFT(void)
 								{"",					NTV2_FORMAT_UNKNOWN}	};
 	if (true)
 	{
-		//	Dump the gString2VideoFormatMap map...
-		for (String2VideoFormatMapConstIter it(gString2VideoFormatMap.begin());  it != gString2VideoFormatMap.end();  ++it)
+		//	Dump the gString2VideoFormatMMap map...
+		for (String2VideoFormatMMapCI it(gString2VideoFormatMMap.begin());  it != gString2VideoFormatMMap.end();  ++it)
 		{
 			cout << "'" << it->first << "'\t'" << ::NTV2VideoFormatToString(it->second) << "'\t" << ::NTV2VideoFormatString(it->second) << "\t" << DEC(it->second) << endl;
 		}
@@ -1651,8 +1755,8 @@ bool CNTV2DemoCommon::BFT(void)
 	{
 		const string &			str		(sVFmtDict[ndx].fName);
 		const NTV2VideoFormat	vFormat	(sVFmtDict[ndx].fFormat);
-		String2VideoFormatMapConstIter	it	(gString2VideoFormatMap.find(str));
-		const NTV2VideoFormat	vFormat2	(it != gString2VideoFormatMap.end() ? it->second : NTV2_FORMAT_UNKNOWN);
+		String2VideoFormatMMapCI	it	(gString2VideoFormatMMap.find(str));
+		const NTV2VideoFormat	vFormat2	(it != gString2VideoFormatMMap.end() ? it->second : NTV2_FORMAT_UNKNOWN);
 		if (vFormat != vFormat2)
 			cerr << "'" << str << "': '" << ::NTV2VideoFormatString(vFormat) << "' (" << DEC(vFormat) << ") != '" << ::NTV2VideoFormatString(vFormat2) << "' (" << DEC(vFormat2) << ")" << endl;
 		//SHOULD_BE_EQUAL(vFormat, vFormat2);
@@ -1676,7 +1780,7 @@ AJALabelValuePairs CaptureConfig::Get (const bool inCompact) const
 	AJASystemInfo::append (result,		"A/B Conversion",	fDoABConversion ? "Y" : "N");
 	AJASystemInfo::append (result,		"MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
 	AJASystemInfo::append (result,		"Capture Anc",		fWithAnc ? "Y" : "N");
-	AJASystemInfo::append (result,		"Anc Capture File",	fAncDataFilePath);
+	AJASystemInfo::append (result,		"Anc Capture File",	fAncDataFilePath.empty() ? "---" : fAncDataFilePath);
 	AJASystemInfo::append (result,		"Capture Audio",	fWithAudio ? "Y" : "N");
 	AJASystemInfo::append (result,		"Num Audio Links",	aja::to_string(fNumAudioLinks));
 	AJASystemInfo::append (result,		"TSI Routing",		fDoTSIRouting ? "Y" : "N");
@@ -1707,7 +1811,7 @@ AJALabelValuePairs PlayerConfig::Get (const bool inCompact) const
 	AJASystemInfo::append (result,		"HDR Anc Type",			::AJAAncDataTypeToString(fTransmitHDRType));
 	AJASystemInfo::append (result,		"Output Channel",		::NTV2ChannelToString(fOutputChannel, inCompact));
 	AJASystemInfo::append (result,		"Output Connector",		::NTV2OutputDestinationToString(fOutputDest, inCompact));
-	AJASystemInfo::append (result,		"Anc Playback File",	fAncDataFilePath);
+	AJASystemInfo::append (result,		"Anc Playback File",	fAncDataFilePath.empty() ? "---" : fAncDataFilePath);
 	AJASystemInfo::append (result,		"Suppress Audio",		fSuppressAudio ? "Y" : "N");
 	AJASystemInfo::append (result,		"Num Audio Links",		aja::to_string(fNumAudioLinks));
 	AJASystemInfo::append (result,		"Suppress Video",		fSuppressVideo ? "Y" : "N");
@@ -1747,6 +1851,7 @@ AJALabelValuePairs BurnConfig::Get (const bool inCompact) const
 	AJASystemInfo::append(result, "Input Source",		::NTV2InputSourceToString(fInputSource, inCompact));
 	if (WithTimecode())
 		AJASystemInfo::append(result, "Timecode Source",	::NTV2TCIndexToString(fTimecodeSource, inCompact));
+	AJASystemInfo::append(result, "Output Destination",	::NTV2OutputDestinationToString(fOutputDest, inCompact));
 	AJASystemInfo::append(result, "Pixel Format",		::NTV2FrameBufferFormatToString(fPixelFormat, inCompact));
 	AJASystemInfo::append(result, "AC Input Frames",	fInputFrames.toString());
 	AJASystemInfo::append(result, "AC Output Frames",	fOutputFrames.toString());
@@ -1756,5 +1861,6 @@ AJALabelValuePairs BurnConfig::Get (const bool inCompact) const
 	AJASystemInfo::append(result, "Include HANC",		WithHanc() ? "Y" : "N");
 	AJASystemInfo::append(result, "MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");
 	AJASystemInfo::append(result, "Field Mode",			FieldMode() ? "Y" : "N");
+	AJASystemInfo::append(result, "Verbose Mode",		IsVerbose() ? "Y" : "N");
 	return result;
 }

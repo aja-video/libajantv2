@@ -25,7 +25,7 @@ endif()
 
 if (NOT TARGET ut_ajantv2)
 	add_executable(ut_ajantv2 ut_ajantv2.cpp ${DOCTEST_INCLUDE_DIR}/doctest.h)
-	add_dependencies(ut_ajantv2 ajantv2)
+    add_dependencies(ut_ajantv2 ajantv2)
 	target_include_directories(ut_ajantv2 PUBLIC ${TARGET_INCLUDE_DIRS})
 	target_link_libraries(ut_ajantv2 PUBLIC ajantv2 ${TARGET_LINK_LIBS})
 	#doctest_discover_tests(${PROJECT_NAME} JUNIT_OUTPUT_DIR ${TEST_XML_DIR})

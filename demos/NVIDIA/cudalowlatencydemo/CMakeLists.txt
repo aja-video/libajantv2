@@ -1,42 +1,46 @@
 # NOTE: Ensure that the CUDA Toolkit v11.1 or later is installed and in your PATH.
 
-if (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	message(STATUS "skipping cudalowlatencydemo (requires Linux)")
+if (AJA_DISABLE_NVIDIA)
+	message(STATUS "skipping cudalowlatencydemo...")
+	return()
+endif()
+if (NOT CMAKE_SYSTEM_NAME MATCHES "^(Windows|Linux)$")
+	message(STATUS "skipping cudalowlatencydemo...requires Windows or Linux")
 	return()
 endif()
 
 find_package(CUDA 11.1)
 if (NOT CUDA_FOUND)
-	message("skipping cudalowlatencydemo (CUDA not found)")
+	message("skipping cudalowlatencydemo...CUDA not found")
 	return()
 endif()
+
 set(OpenGL_GL_PREFERENCE LEGACY)
 find_package(OpenGL)
 if (NOT OPENGL_FOUND)
-	message(STATUS "skipping cudalowlatencydemo (OpenGL not found)")
+	message(STATUS "skipping cudalowlatencydemo...OpenGL not found")
 	return()
 endif()
-find_package(GLEW)
-if (NOT GLEW_FOUND)
-	message(STATUS "skipping cudalowlatencydemo (GLEW not found)")
-	return()
-endif()
-find_package(X11)
-if (NOT X11_FOUND)
-	message(STATUS "skipping cudalowlatencydemo (X11 not found)")
-	return()
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	find_package(GLEW)
+	if (NOT GLEW_FOUND)
+		message(STATUS "skipping cudalowlatencydemo...GLEW not found")
+		return()
+	endif()
+	find_package(X11)
+	if (NOT X11_FOUND)
+		message(STATUS "skipping cudalowlatencydemo...X11 not found")
+		return()
+	endif()
 endif()
 
 if (NOT CMAKE_CUDA_COMPILER)
 	set(CMAKE_CUDA_COMPILER ${CUDA_NVCC_EXECUTABLE})
+	message(STATUS "CUDA Compiler override: ${CUDA_NVCC_EXECUTABLE}")
 endif()
 
 project(cudalowlatencydemo LANGUAGES CUDA CXX)
-
-set(TARGET_COMPILE_DEFS
-	-DAJA_LINUX
-	-DAJALinux
-	-DAJA_RDMA=1)
 
 set(TARGET_INCLUDE_DIRS
 	${CMAKE_CURRENT_SOURCE_DIR}/../commonCUDA
@@ -47,6 +51,8 @@ set(TARGET_INCLUDE_DIRS
 	${CUDA_INCLUDE_DIRS}
 	${OPENGL_INCLUDE_DIRS}
 	${GLEW_INCLUDE_DIRS})
+
+list(APPEND TARGET_LINK_LIBS OpenGL::GL OpenGL::GLU cuda)
 
 set(DEMO_APPS_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/../../ntv2democommon.cpp)
@@ -91,16 +97,26 @@ set(TARGET_SOURCES
 	${DEMO_APPS_SOURCES})
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-elseif (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    find_library(FOUNDATION_FRAMEWORK Foundation)
-    set(TARGET_LINK_LIBS ${FOUNDATION_FRAMEWORK})
+	list(APPEND TARGET_INCLUDE_DIRS ${LIBAJANTV2_DIR}/thirdparty/glew)
+	list(APPEND TARGET_LINK_LIBS glew64)
+	list(APPEND TARGET_LINK_DIRS
+		${LIBAJANTV2_DIR}/thirdparty/glew/lib/x64)
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-	set(TARGET_LINK_LIBS X11 OpenGL::GL OpenGL::GLU GLEW::GLEW cuda dl pthread rt)
-	add_executable(cudalowlatencydemo ${TARGET_SOURCES} kernel.cu)
-	add_dependencies(cudalowlatencydemo ${CUDA_OBJ} ajantv2)
-	target_compile_definitions(cudalowlatencydemo PRIVATE ${TARGET_COMPILE_DEFS})
-	target_include_directories(cudalowlatencydemo PRIVATE ${TARGET_INCLUDE_DIRS})
-	target_link_libraries(cudalowlatencydemo PRIVATE ajantv2 ${TARGET_LINK_LIBS})
+	list(APPEND TARGET_COMPILE_DEFS -DAJA_RDMA=1)
+	list(APPEND TARGET_LINK_LIBS GLEW::GLEW X11 dl pthread rt)
+endif()
+
+add_executable(${PROJECT_NAME} ${TARGET_SOURCES} kernel.cu)
+target_compile_definitions(${PROJECT_NAME} PRIVATE ${TARGET_COMPILE_DEFS})
+target_include_directories(${PROJECT_NAME} PRIVATE ${TARGET_INCLUDE_DIRS})
+target_link_directories(${PROJECT_NAME} PRIVATE ${TARGET_LINK_DIRS})
+target_link_libraries(${PROJECT_NAME} PRIVATE ajantv2 ${TARGET_LINK_LIBS})
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+	post_build_copy_file(${PROJECT_NAME}
+		${LIBAJANTV2_DIR}/thirdparty/glew/bin/x64/glew64.dll
+		$<TARGET_FILE_DIR:${PROJECT_NAME}>/glew32.dll) # rename ... doh!
 endif()
 
 # Extra sources that were in the commonCUDA dir, but don't seem to actually be required to build cudalowlatencydemo or dvplowlatencydemo.
@@ -119,12 +135,12 @@ if (AJA_INSTALL_SOURCES)
 	install(FILES CMakeLists.txt DESTINATION ${CMAKE_INSTALL_PREFIX}/demos/NVIDIA/cudalowlatencydemo)
 endif()
 
-install(TARGETS cudalowlatencydemo
+install(TARGETS ${PROJECT_NAME}
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 	FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if (AJA_CODE_SIGN)
-    aja_code_sign(cudalowlatencydemo)
+    aja_code_sign(${PROJECT_NAME})
 endif()

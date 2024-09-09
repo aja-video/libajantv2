@@ -3,8 +3,18 @@ option(AJA_INSTALL_HEADERS "Deploy headers into CMake install directory?" ON)
 option(AJA_INSTALL_LIBS    "Deploy libs into CMake install directory?" OFF)
 option(AJA_INSTALL_CMAKE   "Deploy CMake build files (i.e. CMakeLists.txt, etc.) into CMake install directory?" ON)
 option(AJA_INSTALL_MISC    "Deploy misc build files for apps and libs into CMake install directory?" ON)
-option(AJA_QT_ENABLED      "Build AJA QT Targets (apps/demos)" OFF)
+option(AJA_DISABLE_QT      "Build AJA QT Targets (apps/demos)" ON)
 option(AJA_QT_DEPLOY  "Run winqtdeploy/macqtdeploy/patchelf to fix-up Qt library paths and deploy in build directory?" ON)
+
+# Deprecated variable AJA_QT_ENABLED
+if (DEFINED AJA_QT_ENABLED)
+    message(STATUS "Overriding AJA_DISABLE_QT with deprecated variable AJA_QT_ENABLED: ${AJA_QT_ENABLED}")
+    if (AJA_QT_ENABLED)
+        set(AJA_DISABLE_QT OFF)
+    else()
+        set(AJA_DISABLE_QT ON)
+    endif()
+endif()
 
 # AJA CI system options, for internal use only
 option(AJA_CODE_SIGN            "Code sign binary outputs?" OFF) # for AJA internal CI builds only
@@ -49,7 +59,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(MACOS_FRAMEWORKS_DIR ${CMAKE_OSX_SYSROOT}/System/Library/Frameworks)
 endif()
 
-option (AJA_FORCE_ANSI_COLORS "Force ANSI terminal coloration when building with Ninja and GNU/Clang?" ON)
+option (AJA_FORCE_ANSI_COLORS "Force ANSI terminal coloration when building with Ninja and GNU/Clang?" OFF)
 if (${AJA_FORCE_ANSI_COLORS} AND ${CMAKE_GENERATOR} STREQUAL "Ninja")
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
         add_compile_options(-fdiagnostics-color=always)

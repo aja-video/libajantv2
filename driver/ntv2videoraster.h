@@ -35,17 +35,14 @@ struct ntv2_videoraster {
     uint32_t            frame_length[NTV2_VIDEORASTER_MAX_WIDGETS];
     uint32_t            frame_pitch[NTV2_VIDEORASTER_MAX_WIDGETS];
     uint32_t            channel_mode[NTV2_VIDEORASTER_MAX_WIDGETS];
+    uint32_t            videoraster_control[NTV2_VIDEORASTER_MAX_WIDGETS];
+    bool                negative_pitch[NTV2_VIDEORASTER_MAX_WIDGETS];
     bool                mode_change[NTV2_VIDEORASTER_MAX_WIDGETS];
 
     uint32_t            widget_base;
     uint32_t            widget_size;
     uint32_t            num_widgets;
 };
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
 
 struct ntv2_videoraster *ntv2_videoraster_open(Ntv2SystemContext* sys_con,
                                                const char *name, int index);
@@ -59,9 +56,5 @@ Ntv2Status ntv2_videoraster_disable(struct ntv2_videoraster *ntv2_raster);
 Ntv2Status ntv2_videoraster_update_global(struct ntv2_videoraster *ntv2_raster, uint32_t reg, uint32_t value);
 Ntv2Status ntv2_videoraster_update_channel(struct ntv2_videoraster *ntv2_raster, uint32_t index);
 Ntv2Status ntv2_videoraster_update_frame(struct ntv2_videoraster *ntv2_raster, uint32_t index, bool input, uint32_t frame_number);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

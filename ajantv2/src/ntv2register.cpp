@@ -947,7 +947,7 @@ bool CNTV2Card::SetFrameGeometry (NTV2FrameGeometry value, bool ajaRetail, NTV2C
 	status = WriteRegister (regNum, newFrameStoreGeometry, kRegMaskGeometry, kRegShiftGeometry);
 
 	// If software set the frame buffer size, read the values from hardware
-	if ( GetFBSizeAndCountFromHW(&_ulFrameBufferSize, &_ulNumFrameBuffers) )
+	if ( GetFBSizeAndCountFromHW(_ulFrameBufferSize, _ulNumFrameBuffers) )
 	{
 		changeBufferSize = false;
 	}
@@ -1687,54 +1687,51 @@ bool CNTV2Card::IsBufferSizeSetBySW (void)
 	return swControl != 0;
 }
 
-bool CNTV2Card::GetFBSizeAndCountFromHW(ULWord* size, ULWord* count)
+bool CNTV2Card::GetFBSizeAndCountFromHW (ULWord & outSize, ULWord & outCount)
 {
-	ULWord ch1Control;
-	ULWord multiplier;
-	ULWord sizeMultiplier;
-
 	if (!IsBufferSizeSetBySW())
 		return false;
 
+	ULWord ch1Control(0), multiplier(0), sizeMultiplier(0);
 	if (!ReadRegister(kRegCh1Control, ch1Control))
 		return false;
 
 	ch1Control &= BIT_20 | BIT_21;
-	switch(ch1Control)
+	switch (ch1Control)
 	{
-	default:
-	case 0:
-		multiplier = 4; // 2MB frame buffers
-		sizeMultiplier = 2;
-		break;
-	case BIT_20:
-		multiplier = 2; // 4MB
-		sizeMultiplier = 4;
-		break;
-	case BIT_21:
-		multiplier = 1; // 8MB
-		sizeMultiplier = 8;
-		break;
-	case BIT_20 | BIT_21:
-		multiplier = 0;		// 16MB
-		sizeMultiplier = 16;
-		break;
+		default:
+		case 0:					multiplier = 4;		//	2MB frame buffers
+								sizeMultiplier = 2;
+								break;
+
+		case BIT_20:			multiplier = 2;		//	4MB
+								sizeMultiplier = 4;
+								break;
+
+		case BIT_21:			multiplier = 1;		//	8MB
+								sizeMultiplier = 8;
+								break;
+
+		case BIT_20 | BIT_21:	multiplier = 0;		//	16MB
+								sizeMultiplier = 16;
+								break;
 	}
 
-	if (size)
-		*size = sizeMultiplier * 1024 * 1024;
+	outSize = sizeMultiplier * 1024 * 1024;
+	outCount = multiplier  ?  multiplier * DeviceGetNumberFrameBuffers()  :  DeviceGetNumberFrameBuffers() / 2;
 
-	if (count)
-		*count = multiplier  ?  multiplier * DeviceGetNumberFrameBuffers()  :  DeviceGetNumberFrameBuffers() / 2;
-
-	NTV2FrameGeometry geometry = NTV2_FG_NUMFRAMEGEOMETRIES;
+	NTV2FrameGeometry geometry(NTV2_FG_INVALID);
 	GetFrameGeometry(geometry);
-	if(geometry == NTV2_FG_4x1920x1080 || geometry == NTV2_FG_4x2048x1080)
+	if (geometry == NTV2_FG_4x1920x1080  ||  geometry == NTV2_FG_4x2048x1080)
 	{
-		*size *= 4;
-		*count /= 4;
+		outSize *= 4;
+		outCount /= 4;
 	}
-
+	if (geometry == NTV2_FG_4x3840x2160  ||  geometry == NTV2_FG_4x4096x2160)
+	{
+		outSize *= 16;
+		outCount /= 16;
+	}
 	return true;
 }
 
@@ -1755,9 +1752,7 @@ bool CNTV2Card::SetFrameBufferSize (const NTV2Framesize inSize)
 	if (!WriteRegister(kRegCh1Control, reg1Contents))
 		return false;
 
-	if (!GetFBSizeAndCountFromHW(&_ulFrameBufferSize, &_ulNumFrameBuffers))
-		return false;
-	return true;
+	return GetFBSizeAndCountFromHW(_ulFrameBufferSize, _ulNumFrameBuffers);
 }
 
 bool CNTV2Card::GetLargestFrameBufferFormatInUse(NTV2FrameBufferFormat & outFBF)
@@ -1837,7 +1832,7 @@ bool CNTV2Card::SetFrameBufferFormat (NTV2Channel inChannel, NTV2FrameBufferForm
 		  &&  WriteRegister (regNum, hiValue, kRegMaskFrameFormatHiBit, kRegShiftFrameFormatHiBit);
 
 	// If software set the frame buffer size, read the values from hardware
-	if ( !GetFBSizeAndCountFromHW(&_ulFrameBufferSize, &_ulNumFrameBuffers) &&
+	if ( !GetFBSizeAndCountFromHW(_ulFrameBufferSize, _ulNumFrameBuffers) &&
 		  IsBufferSizeChangeRequired(inChannel, currentGeometry, currentFormat, inNewFormat) )
 	{
 		_ulFrameBufferSize = ::NTV2DeviceGetFrameBufferSize(_boardID,currentGeometry, inNewFormat);
@@ -3411,8 +3406,13 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 	
 	if(inputRate == NTV2_FRAMERATE_INVALID)
 		return NTV2_FORMAT_UNKNOWN;
-	
-	if (DeviceCanDo3GIn(inChannel) || DeviceCanDo12GIn(inChannel))
+
+	const ULWordSet wgtIDs (GetSupportedItems(kNTV2EnumsID_WidgetID));
+	const bool canDo292In (wgtIDs.find(CNTV2SignalRouter::WidgetIDFromTypeAndChannel(NTV2WidgetType_SDIIn, inChannel)) != wgtIDs.end());
+	const bool canDo3GIn (wgtIDs.find(CNTV2SignalRouter::WidgetIDFromTypeAndChannel(NTV2WidgetType_SDIIn3G, inChannel)) != wgtIDs.end());
+	const bool canDo12GIn (wgtIDs.find(CNTV2SignalRouter::WidgetIDFromTypeAndChannel(NTV2WidgetType_SDIIn12G, inChannel)) != wgtIDs.end());
+
+	if (canDo3GIn || canDo12GIn)
 	{
 		GetSDIInput3GPresent(isInput3G, inChannel);
 		NTV2VideoFormat format = isValidVPID ? inputVPID.GetVideoFormat() : GetNTV2VideoFormat(inputRate, inputGeometry, isProgressiveTrans, isInput3G, isProgressivePic);
@@ -3423,7 +3423,7 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 			isProgressivePic = inIsProgressivePicture;
 			format = GetNTV2VideoFormat(inputRate, inputGeometry, isProgressiveTrans, isInput3G, isProgressivePic);
 		}
-		if (DeviceCanDo12GIn(inChannel) && format != NTV2_FORMAT_UNKNOWN && !isValidVPID)
+		if (canDo12GIn  &&  format != NTV2_FORMAT_UNKNOWN  &&  !isValidVPID)
 		{
 			bool is6G(false), is12G(false);
 			GetSDIInput6GPresent(is6G, inChannel);
@@ -3440,7 +3440,7 @@ NTV2VideoFormat CNTV2Card::GetSDIInputVideoFormat (NTV2Channel inChannel, bool i
 		return format;
 	}
 
-	if (DeviceCanDo292In(inChannel))
+	if (canDo292In)
 	{
 		if (_boardID == DEVICE_ID_KONALHI || _boardID == DEVICE_ID_KONALHIDVI)
 		{
@@ -4609,151 +4609,86 @@ bool CNTV2Card::WriteRegisters (const NTV2RegisterWrites & inRegWrites)
 
 bool CNTV2Card::BankSelectWriteRegister (const NTV2RegInfo & inBankSelect, const NTV2RegInfo & inRegInfo)
 {
-	bool					result	(false);
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (IsRemote())
-	{
-		// NOTE: DO NOT REMOVE THIS
-		// It's needed for the nub client to work
-		// TODO: Make an 'atomic bank-select op.---
-		// For now, we just do 2 ops and hope nobody else clobbers the
-		// bank select register
-		if (!WriteRegister(inBankSelect.registerNumber, inBankSelect.registerValue, inBankSelect.registerMask,	inBankSelect.registerShift))
-			return false;
-		return WriteRegister(inRegInfo.registerNumber, inRegInfo.registerValue, inRegInfo.registerMask, inRegInfo.registerShift);
-	}
-	else
-#endif	//	NTV2_NUB_CLIENT_SUPPORT
-	{
-		NTV2BankSelGetSetRegs	bankSelGetSetMsg	(inBankSelect, inRegInfo, true);
-		//cerr << "## DEBUG:  CNTV2Card::BankSelectWriteRegister:  " << bankSelGetSetMsg << endl;
-		result = NTV2Message(bankSelGetSetMsg);
-		return result;
-	}
+	NTV2BankSelGetSetRegs bankSelGetSetMsg (inBankSelect, inRegInfo, true);
+	//cerr << "## DEBUG:  CNTV2Card::BankSelectWriteRegister:  " << bankSelGetSetMsg << endl;
+	if (!NTV2Message(bankSelGetSetMsg))
+		//	Fall back to doing 2 ops & hope nobody else clobbers the bank select register...
+		return WriteRegister(inBankSelect.registerNumber, inBankSelect.registerValue, inBankSelect.registerMask, inBankSelect.registerShift)
+			&& WriteRegister(inRegInfo.registerNumber, inRegInfo.registerValue, inRegInfo.registerMask, inRegInfo.registerShift);
+	return true;
 }
 
 bool CNTV2Card::BankSelectReadRegister (const NTV2RegInfo & inBankSelect, NTV2RegInfo & inOutRegInfo)
 {
-	bool					result	(false);
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (IsRemote())
-	{
-		// NOTE: DO NOT REMOVE THIS
-		// It's needed for the nub client to work
-
-		// TODO: Make an 'atomic bank-select op.
-		// For now, we just do 2 ops and hope nobody else clobbers the
-		// bank select register
-		if (!WriteRegister(inBankSelect.registerNumber, inBankSelect.registerValue, inBankSelect.registerMask, inBankSelect.registerShift))
-			return false;
-		return ReadRegister(inOutRegInfo.registerNumber, inOutRegInfo.registerValue, inOutRegInfo.registerMask, inOutRegInfo.registerShift);
-	}
-	else
-#endif	//	NTV2_NUB_CLIENT_SUPPORT
-	{
-		NTV2BankSelGetSetRegs	bankSelGetSetMsg	(inBankSelect, inOutRegInfo);
-		//cerr << "## DEBUG:  CNTV2Card::BankSelectReadRegister:  " << bankSelGetSetMsg << endl;
-		result = NTV2Message(bankSelGetSetMsg);
-		if (result && !bankSelGetSetMsg.mInRegInfos.IsNULL ())
-			inOutRegInfo = bankSelGetSetMsg.GetRegInfo ();
-		return result;
-	}
+	NTV2BankSelGetSetRegs	bankSelGetSetMsg	(inBankSelect, inOutRegInfo);
+	//cerr << "## DEBUG:  CNTV2Card::BankSelectReadRegister:  " << bankSelGetSetMsg << endl;
+	if (!NTV2Message(bankSelGetSetMsg))
+		//	Fall back to doing 2 ops & hope nobody else clobbers the bank select register...
+		return WriteRegister(inBankSelect.registerNumber, inBankSelect.registerValue, inBankSelect.registerMask, inBankSelect.registerShift)
+			&& ReadRegister(inOutRegInfo.registerNumber, inOutRegInfo.registerValue, inOutRegInfo.registerMask, inOutRegInfo.registerShift);
+	if (bankSelGetSetMsg.mInRegInfos)
+		inOutRegInfo = bankSelGetSetMsg.GetRegInfo();
+	return true;
 }
 
 bool CNTV2Card::WriteVirtualData (const ULWord inTag, const void* inVirtualData, const ULWord inVirtualDataSize)
 {
-	bool	result	(false);
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (IsRemote())
-	{
-		// NOTE: DO NOT REMOVE THIS
-		// It's needed for the nub client to work
-	}
-	else
-#endif	//	NTV2_NUB_CLIENT_SUPPORT
-	{
-		NTV2VirtualData virtualDataMsg	(inTag, inVirtualData, inVirtualDataSize, true);
-		//cerr << "## DEBUG:  CNTV2Card::WriteVirtualData:	" << virtualDataMsg << endl;
-		result = NTV2Message(virtualDataMsg);
-	}
-	return result;
+	NTV2VirtualData virtualDataMsg	(inTag, inVirtualData, inVirtualDataSize, true);
+	//cerr << "## DEBUG:  CNTV2Card::WriteVirtualData:	" << virtualDataMsg << endl;
+	return NTV2Message(virtualDataMsg);
 }
 
 bool CNTV2Card::ReadVirtualData (const ULWord inTag, void* outVirtualData, const ULWord inVirtualDataSize)
 {
-	bool	result	(false);
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (IsRemote())
-	{
-		// NOTE: DO NOT REMOVE THIS
-		// It's needed for the nub client to work
-	}
-	else
-#endif	//	NTV2_NUB_CLIENT_SUPPORT
-	{
-		NTV2VirtualData virtualDataMsg	(inTag, outVirtualData, inVirtualDataSize, false);
-		//cerr << "## DEBUG:  CNTV2Card::ReadVirtualData:  " << virtualDataMsg << endl;
-		result = NTV2Message(virtualDataMsg);
-	}
-	return result;
+	NTV2VirtualData virtualDataMsg	(inTag, outVirtualData, inVirtualDataSize, false);
+	//cerr << "## DEBUG:  CNTV2Card::ReadVirtualData:  " << virtualDataMsg << endl;
+	return NTV2Message(virtualDataMsg);
 }
 
 bool CNTV2Card::ReadSDIStatistics (NTV2SDIInStatistics & outStats)
 {
 	outStats.Clear ();
 	if (!_boardOpened)
-		return false;		//	Device not open!
+		return false;	//	Device not open!
 	if (!IsSupported(kDeviceCanDoSDIErrorChecks))
 		return false;	//	Device doesn't support it!
-#if defined (NTV2_NUB_CLIENT_SUPPORT)
-	if (IsRemote())
-		return false;
-#endif	//	NTV2_NUB_CLIENT_SUPPORT
-#if defined(AJAMac) //	Unimplemented in Mac driver at least thru SDK 16.0, so implement it here
-	NTV2RegisterReads sdiStatRegInfos;
-	for (size_t sdi(0);	 sdi < 8;  sdi++)
-		for (ULWord reg(0);	 reg < 6;  reg++)
-			sdiStatRegInfos.push_back(NTV2RegInfo(reg + gChannelToRXSDIStatusRegs[sdi]));
-	sdiStatRegInfos.push_back(NTV2RegInfo(kRegRXSDIFreeRunningClockLow));
-	sdiStatRegInfos.push_back(NTV2RegInfo(kRegRXSDIFreeRunningClockHigh));
-	//	Read the registers all at once...
-	if (!ReadRegisters(sdiStatRegInfos))
-		return false;
-	//	Stuff the results into outStats...
-	for (size_t sdi(0);	 sdi < 8;  sdi++)
+	if (!NTV2Message(reinterpret_cast<NTV2_HEADER*>(&outStats)))
 	{
-		NTV2SDIInputStatus & outStat(outStats[sdi]);
-		size_t ndx(sdi*6 + 0);	//	Start at kRegRXSDINStatus register
-		NTV2_ASSERT(ndx < sdiStatRegInfos.size());
-		NTV2RegInfo & regInfo(sdiStatRegInfos.at(ndx));
-		NTV2_ASSERT(regInfo.registerNumber == gChannelToRXSDIStatusRegs[sdi]);
-		outStat.mUnlockTally	= regInfo.registerValue & kRegMaskSDIInUnlockCount;
-		outStat.mLocked			= regInfo.registerValue & kRegMaskSDIInLocked ? true : false;
-		outStat.mFrameTRSError	= regInfo.registerValue & kRegMaskSDIInTRSError ? true : false;
-		outStat.mVPIDValidA		= regInfo.registerValue & kRegMaskSDIInVpidValidA ? true : false;
-		outStat.mVPIDValidB		= regInfo.registerValue & kRegMaskSDIInVpidValidB ? true : false;
-		regInfo = sdiStatRegInfos.at(ndx+1);	//	kRegRXSDINCRCErrorCount
-		outStat.mCRCTallyA		= regInfo.registerValue & kRegMaskSDIInCRCErrorCountA;
-		outStat.mCRCTallyB		= (regInfo.registerValue & kRegMaskSDIInCRCErrorCountB) >> kRegShiftSDIInCRCErrorCountB;
-		//									kRegRXSDINFrameCountHigh									kRegRXSDINFrameCountLow
-		//outStat.mFrameTally = (ULWord64(sdiStatRegInfos.at(ndx+2).registerValue) << 32) | ULWord64(sdiStatRegInfos.at(ndx+1).registerValue);
-		//									kRegRXSDINFrameRefCountHigh									kRegRXSDINFrameRefCountLow
-		outStat.mFrameRefClockCount = (ULWord64(sdiStatRegInfos.at(ndx+5).registerValue) << 32) | ULWord64(sdiStatRegInfos.at(ndx+4).registerValue);
-		//									kRegRXSDIFreeRunningClockHigh								kRegRXSDIFreeRunningClockLow
-		outStat.mGlobalClockCount = (ULWord64(sdiStatRegInfos.at(8*6+1).registerValue) << 32) | ULWord64(sdiStatRegInfos.at(8*6+0).registerValue);
-	}	//	for each SDI
+		const ULWord numSDIInputs(GetNumSupported(kDeviceGetNumVideoInputs));
+		NTV2RegisterReads sdiStatRegInfos;
+		for (size_t sdi(0);	 sdi < numSDIInputs;  sdi++)
+			for (ULWord reg(0);	 reg < 6;  reg++)
+				sdiStatRegInfos.push_back(NTV2RegInfo(reg + gChannelToRXSDIStatusRegs[sdi]));
+		sdiStatRegInfos.push_back(NTV2RegInfo(kRegRXSDIFreeRunningClockLow));
+		sdiStatRegInfos.push_back(NTV2RegInfo(kRegRXSDIFreeRunningClockHigh));
+		//	Read the registers all at once...
+		if (!ReadRegisters(sdiStatRegInfos))
+			return false;
+		//	Stuff the results into outStats...
+		for (size_t sdi(0);	 sdi < numSDIInputs;  sdi++)
+		{
+			NTV2SDIInputStatus & outStat(outStats[sdi]);
+			size_t ndx(sdi*6 + 0);	//	Start at kRegRXSDINStatus register
+			NTV2_ASSERT(ndx < sdiStatRegInfos.size());
+			NTV2RegInfo & regInfo(sdiStatRegInfos.at(ndx));
+			NTV2_ASSERT(regInfo.registerNumber == gChannelToRXSDIStatusRegs[sdi]);
+			outStat.mUnlockTally	= regInfo.registerValue & kRegMaskSDIInUnlockCount;
+			outStat.mLocked			= regInfo.registerValue & kRegMaskSDIInLocked ? true : false;
+			outStat.mFrameTRSError	= regInfo.registerValue & kRegMaskSDIInTRSError ? true : false;
+			outStat.mVPIDValidA		= regInfo.registerValue & kRegMaskSDIInVpidValidA ? true : false;
+			outStat.mVPIDValidB		= regInfo.registerValue & kRegMaskSDIInVpidValidB ? true : false;
+			regInfo = sdiStatRegInfos.at(ndx+1);	//	kRegRXSDINCRCErrorCount
+			outStat.mCRCTallyA		= regInfo.registerValue & kRegMaskSDIInCRCErrorCountA;
+			outStat.mCRCTallyB		= (regInfo.registerValue & kRegMaskSDIInCRCErrorCountB) >> kRegShiftSDIInCRCErrorCountB;
+			//									kRegRXSDINFrameCountHigh									kRegRXSDINFrameCountLow
+			//outStat.mFrameTally = (ULWord64(sdiStatRegInfos.at(ndx+2).registerValue) << 32) | ULWord64(sdiStatRegInfos.at(ndx+1).registerValue);
+			//									kRegRXSDINFrameRefCountHigh									kRegRXSDINFrameRefCountLow
+			outStat.mFrameRefClockCount = (ULWord64(sdiStatRegInfos.at(ndx+5).registerValue) << 32) | ULWord64(sdiStatRegInfos.at(ndx+4).registerValue);
+			//									kRegRXSDIFreeRunningClockHigh								kRegRXSDIFreeRunningClockLow
+			outStat.mGlobalClockCount = (ULWord64(sdiStatRegInfos.at(8*6+1).registerValue) << 32) | ULWord64(sdiStatRegInfos.at(8*6+0).registerValue);
+		}	//	for each SDI input
+	}
 	return true;
-#else	//	else not MacOS
-	return NTV2Message(reinterpret_cast<NTV2_HEADER*>(&outStats));
-#endif
-}
-
-bool CNTV2Card::HasMultiRasterWidget (void)
-{
-	bool hasMultiRasterWidget(false);
-	return NTV2DeviceCanDoHDMIMultiView(_boardID)
-			&&  CNTV2DriverInterface::ReadRegister(kRegMRSupport, hasMultiRasterWidget, kRegMaskMRSupport, kRegShiftMRSupport)
-			&&  hasMultiRasterWidget;
 }
 
 bool CNTV2Card::SetMultiRasterBypassEnable (const bool inEnable)

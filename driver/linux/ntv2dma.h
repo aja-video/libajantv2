@@ -12,21 +12,16 @@
 #ifndef NTV2DMA_HEADER
 #define NTV2DMA_HEADER
 
-#ifdef AJA_RDMA
-struct nvidia_p2p_page_table;
-struct nvidia_p2p_dma_mapping;
-#endif
-
-struct ntv2_stream;
-struct ntv2_stream_buffer;
-
 #define DMA_NUM_ENGINES     8
 #define DMA_NUM_CONTEXTS    2
 
 #define DMA_TRANSFERCOUNT_64     			0x10000000
 #define DMA_TRANSFERCOUNT_TOHOST 			0x80000000
 #define DMA_TRANSFERCOUNT_BYTES  			4
-#define DMA_DESCRIPTOR_PAGES_MAX			1024
+#define DMA_DESCRIPTOR_PAGES_MAX			4096
+
+struct ntv2_stream;
+struct ntv2_stream_buffer;
 
 typedef enum _NTV2DmaMethod
 {
@@ -123,14 +118,7 @@ typedef struct _dmaPageBuffer
 	LWord64					lockCount;			// lock access count
 	LWord64					lockSize;			// locked bytes
 	bool					rdma;				// use nvidia rdma
-#ifdef AJA_RDMA
-	ULWord64				rdmaAddress;		// rdma gpu aligned buffer address
-	ULWord64				rdmaOffset;			// rdma gpu aligned offset
-	ULWord64				rdmaLen;			// rdma buffer length
-	ULWord64				rdmaAlignedLen;		// rdma gpu aligned buffer length
-	struct nvidia_p2p_page_table*	rdmaPage;
-	struct nvidia_p2p_dma_mapping*	rdmaMap;
-#endif
+    void*                   rdmaContext;        // rdma context
 } DMA_PAGE_BUFFER, *PDMA_PAGE_BUFFER;
 
 // dma transfer parameters
@@ -319,6 +307,16 @@ typedef struct _dmaEngine_
 	LWord64					csLastDisplayTime;
 } DMA_ENGINE, *PDMA_ENGINE;
 
+struct ntv2_page_fops
+{
+    int (*get_pages)(PDMA_PAGE_BUFFER pBuffer,
+                     PVOID pAddress, ULWord size, ULWord direction);
+    void (*put_pages)(PDMA_PAGE_BUFFER pBuffer);
+    int (*map_pages)(struct pci_dev* pci_dev, PDMA_PAGE_BUFFER pBuffer);
+    void (*unmap_pages)(struct pci_dev* pci_dev, PDMA_PAGE_BUFFER pBuffer);
+};
+
+
 int dmaInit(ULWord deviceNumber);
 void dmaRelease(ULWord deviceNumber);
 
@@ -342,9 +340,6 @@ void dmaDisable(ULWord deviceNumber);
 int dmaTransfer(PDMA_PARAMS pDmaParams);
 int dmaTargetP2P(ULWord deviceNumber, NTV2_DMA_P2P_CONTROL_STRUCT* pParams);
 
-int dmaStreamStart(PDMA_PARAMS pDmaParams);
-int dmaStreamStop(PDMA_PARAMS pDmaParams);
-
 void dmaInterrupt(ULWord deviceNumber, ULWord intStatus);
 
 int dmaOpsStreamInitialize(struct ntv2_stream *stream);
@@ -352,7 +347,7 @@ int dmaOpsStreamRelease(struct ntv2_stream *stream);
 int dmaOpsStreamStart(struct ntv2_stream *stream);
 int dmaOpsStreamStop(struct ntv2_stream *stream);
 int dmaOpsStreamAdvance(struct ntv2_stream *stream);
-int dmaOpsBufferPrepare(struct ntv2_stream *stream, int index);
+int dmaOpsBufferQueue(struct ntv2_stream *stream, int index);
 int dmaOpsBufferLink(struct ntv2_stream *stream, int from_index, int to_index);
 int dmaOpsBufferComplete(struct ntv2_stream *stream, int index);
 int dmaOpsBufferFlush(struct ntv2_stream *stream, int index);

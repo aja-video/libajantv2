@@ -165,10 +165,10 @@ public:
 	/**
 		@brief		Answers with my timecode "time" as an AJATimeCode.
 		@param[out]	outTimecode		Receives the timecode.
- 		@param[out]	outTimeBase		Receives the time base (frame rate).
+ 		@param[in]	inTimeBase		Specifies the time base (frame rate).
 		@return		AJA_STATUS_SUCCESS if successful.
 	**/
-	virtual AJAStatus GetTimecode (AJATimeCode & outTimecode, AJATimeBase & outTimeBase) const;
+	virtual AJAStatus GetTimecode (AJATimeCode & outTimecode, const AJATimeBase & inTimeBase) const;
 
 
 	/**

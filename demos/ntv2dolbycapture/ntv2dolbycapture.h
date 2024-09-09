@@ -19,21 +19,18 @@
 typedef struct DolbyCaptureConfig : CaptureConfig
 {
 	public:
-		std::string						fAudioDataFilePath;	///< @brief	Optional path to Audio binary data file
-		std::string						fDolbyDataFilePath;	///< @brief	Optional path to Dolby binary data file
-		bool							fDoAudioFilter;		///< @brief	If true, capture only audio anc
-		bool							fDoFrameData;		///< @brief if true, output per frame statistics
-		bool							fWithDolby;			///< @brief	If true, also capture Dolby
+		std::string	fAudioDataFilePath;	///< @brief	Optional path to Audio binary data file
+		std::string	fDolbyDataFilePath;	///< @brief	Optional path to Dolby binary data file
+		bool		fDoAudioFilter;		///< @brief	If true, capture only audio anc
+		bool		fDoFrameStats;		///< @brief if true, output per frame statistics
 
 		/**
-			@brief	Constructs a default NTV2Capture configuration.
+			@brief	Constructs a default DolbyCaptureConfig
 		**/
 		inline explicit	DolbyCaptureConfig (const std::string & inDeviceSpec = "0")
 			:	CaptureConfig(inDeviceSpec),
-                fDolbyDataFilePath(),
 				fDoAudioFilter	(false),
-				fDoFrameData	(false),
-				fWithDolby      (false)
+				fDoFrameStats	(false)
 		{
 		}
 		AJALabelValuePairs	Get (const bool inCompact = false) const;
@@ -43,7 +40,7 @@ std::ostream &	operator << (std::ostream & ioStrm, const DolbyCaptureConfig & in
 
 
 /**
-	@brief	Instances of me capture frames in real time from a video signal provided to an input of an AJA device.
+	@brief	I capture HDMI Dolby audio from an HDMI input of an AJA device.
 **/
 class NTV2DolbyCapture
 {
@@ -126,14 +123,19 @@ class NTV2DolbyCapture
 		virtual void			ConsumeFrames (void);
 
 		/**
-			@brief	Recover audio from ancillary data.
+			@brief		Recover audio from ancillary data.
+			@returns	The number of audio bytes copied into outAudioBuffer.
 		**/
-		virtual uint32_t		RecoverAudio (NTV2Buffer & anc, uint32_t ancSize, NTV2Buffer & audio);
+		virtual uint32_t		RecoverAudio (const NTV2Buffer & inAncBuffer, const uint32_t inAncSize, NTV2Buffer & outAudioBuffer);
 
 		/**
-			@brief	Recover dolby from audio data.
+			@brief		Recover Dolby data from the given audio data.
+			@param[in]	inAudioBuffer	A valid buffer containing the captured audio data.
+			@param[in]	inAudioSize		Specifies the size of the given audio data buffer.
+			@param[out]	inAudioSize		Specifies the size of the given audio data buffer.
+			@returns	The number of 16-bit words copied into outDolbyBuffer.
 		**/
-		virtual uint32_t		RecoverDolby (NTV2Buffer & audio, uint32_t audioSize, NTV2Buffer & dolby);
+		virtual uint32_t		RecoverDolby (const NTV2Buffer & inAudioBuffer, const uint32_t inAudioSize, NTV2Buffer & outDolbyBuffer);
 
 	//	Protected Class Methods
 	protected:
