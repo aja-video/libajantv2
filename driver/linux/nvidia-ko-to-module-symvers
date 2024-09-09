@@ -22,6 +22,7 @@ fi
 
 # Get the offset to the CRC table
 crc_table_offset=$(objdump -h "${nvidia_ko_ofn}" | grep __kcrctab | awk '{print $6}')
+crc_table_offset_gpl=$(objdump -h "${nvidia_ko_ofn}" | grep __kcrctab_gpl | awk '{print $6}')
 
 touch "${symvers_fn}"
 for sym in "${syms[@]}"; do
@@ -37,6 +38,10 @@ for sym in "${syms[@]}"; do
 	crc_type=$(echo "${entry}" | awk '{print $3}')
 	if [ "${crc_type}" = "__kcrctab" ]; then
 		crc=$(dd if="${nvidia_ko_ofn}" status=none bs=1 count=4 skip=$((0x${crc_table_offset} + 0x${crc})) | od -A n -t x4)
+		crc=00000000${crc:1}
+	fi
+	if [ "${crc_type}" = "__kcrctab_gpl" ]; then
+		crc=$(dd if="${nvidia_ko_ofn}" status=none bs=1 count=4 skip=$((0x${crc_table_offset_gpl} + 0x${crc})) | od -A n -t x4)
 		crc=00000000${crc:1}
 	fi
 
