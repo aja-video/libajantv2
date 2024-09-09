@@ -130,6 +130,7 @@ typedef DATMap::const_iterator					DATMapCIter;
 		help					No			Displays parameter help to stdout/stderr.
 		verbose					No			Displays mapping information to stderr.
 
+	VDTODO Modify example usage
 	EXAMPLE USAGE:
 		To use this virtual device in the NTV2Player demo on MacOS as a proxy to channels 3 & 4 on the first Corvid88 board on the host:
 			./bin/ntv2player  --device 'ntv2kona1://localhost/?devspec=corvid88&channel=2'
@@ -702,14 +703,12 @@ bool NTV2VirtualDev::SetupMapping (void)
 
 bool NTV2VirtualDev::SetupWidgetMapping (void)
 {
-	// With CP2, the parent's widget list should be provided.
-	// Currently assuming the VDEV channel is always NTV2_CHANNEL1
 
 	//	Channel mapping...
 	//  mChannel is used in various places in the plugin, and aligns
 	//  with the framestore channel being used.  
 	//  While processing widgets, set mChannel to the lowest channel device framestore.
-	mChannel = 999;
+	mChannel = -1;
 	json mappedWidgets = mVDjson["mappedWidgets"];
 	for (const auto& widMap : mappedWidgets) 
 	{
@@ -719,21 +718,18 @@ bool NTV2VirtualDev::SetupWidgetMapping (void)
 		if (wgtType == NTV2WidgetType_FrameStore)
 		{
 			NTV2Channel chan = CNTV2SignalRouter::WidgetIDToChannel(cardWgt);
-			if (chan < mChannel)
+			if (mChannel == -1 || chan < mChannel )
 				mChannel = chan;
 		}
 		mVDevToCardWgts [VDevWgt]	= cardWgt;
 		mCardToVDevWgts [cardWgt]	= VDevWgt;
 	}   
-	//VDTODO:  Error tests & checking 
 
-	if (mChannel == 999)
+	if (mChannel == -1)
 		mChannel = 0;
 
 	mCardToVDevChls[NTV2Channel(mChannel)] = NTV2_CHANNEL1;
 	mVDevToCardChls[NTV2_CHANNEL1] = NTV2Channel(mChannel);
-
-
 
 // Below is from the Kona1 plugin which mapped all widgets from a Kona 1
 /*  // Now assuming the widget mappings will be provided directly by CP2
@@ -770,7 +766,7 @@ bool NTV2VirtualDev::SetupWidgetMapping (void)
 		oss << endl
 				<< "\t" << ::NTV2WidgetIDToString(it->first, true) << "\t=>\t" << ::NTV2WidgetIDToString(it->second, true);
 	if (HasConnectParam("verbose"))
-	cerr << DEC(mVDevToCardWgts.size()) << " widget mappings for 'VDev' => '" << mCard.GetDisplayName() << "' Ch" << DEC(mChannel+1) << ":" << oss.str();
+	cerr << DEC(mVDevToCardWgts.size()) << " widget mappings for 'VDev' => '" << mCard.GetDisplayName() << "' Ch" << DEC(mChannel+1) << ":" << oss.str() << std::endl;
 	return true;
 }	//	SetupWidgetMapping
 

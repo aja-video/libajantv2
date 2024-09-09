@@ -13,7 +13,7 @@
 #include <vector>
 #include <algorithm>
 
-//#define VIRTUAL_DEVICES_SUPPORT		0
+//#define VIRTUAL_DEVICES_SUPPORT
 
 #if defined VIRTUAL_DEVICES_SUPPORT
 
