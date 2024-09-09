@@ -243,25 +243,22 @@ static void ntv2_rdma_unmap_pages(struct pci_dev* pci_dev, PDMA_PAGE_BUFFER pBuf
 
 static void rdmaFreeCallback(void* data)
 {
-	PDMA_PAGE_BUFFER pBuffer = (PDMA_PAGE_BUFFER)data;
+    PDMA_PAGE_BUFFER pBuffer = (PDMA_PAGE_BUFFER)data;
     PRDMA_PAGE_BUFFER pRdmaBuffer = NULL;
-	struct nvidia_p2p_page_table* rdmaPage = NULL;;
 
     if (pBuffer == NULL) return;
-    pRdmaBuffer = (PRDMA_PAGE_BUFFER)pBuffer->rdmaContext;
+
+    pRdmaBuffer = (PRDMA_PAGE_BUFFER)xchg(&pBuffer->rdmaContext, NULL);
     if (pRdmaBuffer == NULL) return;
 
-	rdmaPage = xchg(&pRdmaBuffer->page, NULL);
-	if (rdmaPage == NULL) return;
+    if (pRdmaBuffer->page != NULL)
+    {
+        nvidia_p2p_free_page_table(pRdmaBuffer->page);
+    }
 
-    nvidia_p2p_free_page_table(rdmaPage);
+    vfree(pRdmaBuffer);
 
-    if (pBuffer->rdmaContext != NULL)
-        vfree(pBuffer->rdmaContext);
-    pBuffer->rdmaContext = NULL;    
-
-    pRdmaBuffer->address = 0;
-	pBuffer->pageLock = false;
+    pBuffer->pageLock = false;
 }
 
 static void dmaSgSetRdmaPage(struct scatterlist* pSg, struct nvidia_p2p_dma_mapping	*rdmaMap,
