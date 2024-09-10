@@ -571,7 +571,11 @@ static bool ntv2_serial_receive(struct ntv2_serial *ntv2_ser)
 static bool ntv2_serial_transmit(struct ntv2_serial *ntv2_ser)
 {
 	struct uart_port *port = &ntv2_ser->uart_port;
+#if defined(KERNEL_6_10_0_SERIAL_KFIFO)
+	struct tty_port *tport  = &port->state->port;
+#else
 	struct circ_buf *xmit  = &port->state->xmit;
+#endif
 	u32 full = ntv2_kona_fld_serial_tx_full;
 	u32 status;
 
@@ -588,6 +592,21 @@ static bool ntv2_serial_transmit(struct ntv2_serial *ntv2_ser)
 		return true;
 	}
 
+#if defined(KERNEL_6_10_0_SERIAL_KFIFO)
+	if (uart_tx_stopped(port))
+		return false;
+
+	/* tx data */
+	u8 ch = kfifo_get(&tport->xmit_fifo, &ch);
+	NTV2_MSG_SERIAL_STREAM("%s: uart tx %02x\n", ntv2_ser->name, ch);
+	ntv2WriteRegister32(ntv2_ser->uart_reg + ntv2_kona_reg_serial_tx, (u32)ch);
+	kfifo_skip_count(&tport->xmit_fifo, 1);
+	port->icount.tx++;
+
+	/* wake up */
+	if (kfifo_len(&tport->xmit_fifo) < WAKEUP_CHARS)
+		uart_write_wakeup(port);
+#else
 	if (uart_circ_empty(xmit) || uart_tx_stopped(port))
 		return false;
 
@@ -600,6 +619,7 @@ static bool ntv2_serial_transmit(struct ntv2_serial *ntv2_ser)
 	/* wake up */
 	if (uart_circ_chars_pending(xmit) < WAKEUP_CHARS)
 		uart_write_wakeup(port);
+#endif
 
 	return true;
 }
