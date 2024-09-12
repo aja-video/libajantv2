@@ -1915,6 +1915,10 @@ TEST_SUITE("info" * doctest::description("functions in ajabase/system/info.h")) 
 	{
 		// just create an instance to make sure everything works at runtime
 		AJASystemInfo i;
+		std::string cpuType;
+		CHECK(i.GetValue(AJA_SystemInfoTag_CPU_Type, cpuType) == AJA_STATUS_SUCCESS);
+		std::cout << "CPU Type: " << cpuType << std::endl;
+		CHECK(!cpuType.empty());
 	}
 
 } //info
