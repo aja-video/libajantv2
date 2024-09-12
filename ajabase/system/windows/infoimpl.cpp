@@ -369,25 +369,9 @@ aja_getosname()
 std::string
 aja_getcputype()
 {
-	// get CPU info
-	int CPUInfo[4] = {-1};
-	char CPUBrandString[0x40];
-	__cpuid(CPUInfo, 0x80000000);
-	unsigned int nExIds = CPUInfo[0];
-	memset(CPUBrandString, 0, sizeof(CPUBrandString));
-	for (unsigned int i=0x80000000; i<=nExIds; ++i)
-	{
-		// Get the information associated with each extended ID.
-		__cpuid(CPUInfo, i);
-		// Interpret CPU brand string.
-		if	(i == 0x80000002)
-			memcpy(CPUBrandString, CPUInfo, sizeof(CPUInfo));
-		else if	 (i == 0x80000003)
-			memcpy(CPUBrandString + 16, CPUInfo, sizeof(CPUInfo));
-		else if	 (i == 0x80000004)
-			memcpy(CPUBrandString + 32, CPUInfo, sizeof(CPUInfo));
-	}
-
+	std::string CPUBrandString = aja::read_registry_string(HKEY_LOCAL_MACHINE,
+		"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0",
+		"ProcessorNameString");
 	return CPUBrandString;
 }
 
