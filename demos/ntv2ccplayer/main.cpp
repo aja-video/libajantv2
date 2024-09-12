@@ -124,9 +124,9 @@ int main (int argc, const char ** argv)
 	//	VideoFormat
 	const string videoFormatStr (pVideoFormat  ?  pVideoFormat  :  "");
 	config.fVideoFormat = videoFormatStr.empty()	?	NTV2_FORMAT_1080i_5994
-													:	CNTV2DemoCommon::GetVideoFormatFromString(videoFormatStr, VIDEO_FORMATS_ALL);
+													:	CNTV2DemoCommon::GetVideoFormatFromString(videoFormatStr, VIDEO_FORMATS_ALL, deviceSpec);
 	if (videoFormatStr == "?"  ||  videoFormatStr == "list")
-		{cout	<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_ALL, deviceSpec) << endl;  return 0;}
+		{cout	<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_ALL, pDeviceSpec ? deviceSpec : "") << endl;  return 0;}
 	else if (!videoFormatStr.empty()  &&  !NTV2_IS_VALID_VIDEO_FORMAT(config.fVideoFormat))
 	{	cerr	<< "## ERROR:  Invalid '--videoFormat' value '" << videoFormatStr << "' -- expected values:" << endl
 				<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_ALL, deviceSpec) << endl;
@@ -170,14 +170,17 @@ int main (int argc, const char ** argv)
 		{cerr << "## ERROR:  Bad 'frames' spec '" << framesSpec << "'\n## Expected " << legalFramesSpec << endl;  return 1;}
 
 	//	Output Spigot
-	const string legalOutputs (CNTV2DemoCommon::GetOutputDestinationStrings(deviceSpec));
+	const string legalOutputs (CNTV2DemoCommon::GetOutputDestinationStrings(NTV2_IOKINDS_SDI | NTV2_IOKINDS_ANALOG,
+																			pDeviceSpec ? deviceSpec : ""));
 	const string outputDestStr (pOutputDest ? CNTV2DemoCommon::ToLower(string(pOutputDest)) : "");
 	NTV2OutputDestination outputSpigot(NTV2_OUTPUTDESTINATION_INVALID);
 	if (outputDestStr == "?" || outputDestStr == "list")
 		{cout << legalOutputs << endl;  return 0;}
 	if (!outputDestStr.empty())
 	{
-		outputSpigot = CNTV2DemoCommon::GetOutputDestinationFromString(outputDestStr);
+		outputSpigot = CNTV2DemoCommon::GetOutputDestinationFromString (outputDestStr,
+																		NTV2_IOKINDS_SDI | NTV2_IOKINDS_ANALOG,
+																		pDeviceSpec ? deviceSpec : "");
 		if (!NTV2_IS_VALID_OUTPUT_DEST(outputSpigot))
 			{cerr << "## ERROR:  Output '" << outputDestStr << "' not of:" << endl << legalOutputs << endl;	return 1;}
 	}	//	if output spigot specified

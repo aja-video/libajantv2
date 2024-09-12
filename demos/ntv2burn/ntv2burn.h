@@ -154,7 +154,6 @@ class NTV2Burn
 		NTV2VideoFormat		mVideoFormat;		///< @brief	Format of video being ingested & played
 		NTV2FormatDesc		mFormatDesc;		///< @brief	Describes raster images
 		NTV2TaskMode		mSavedTaskMode;		///< @brief	For restoring prior state
-		NTV2OutputDest		mOutputDest;		///< @brief	The desired output connector to use
 		NTV2AudioSystem		mAudioSystem;		///< @brief	The audio system I'm using
 		AJATimeCodeBurn		mTCBurner;			///< @brief	My timecode burner
 		NTV2TCIndexes		mTCOutputs;			///< @brief	My output timecode destinations

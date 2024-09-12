@@ -31,25 +31,30 @@ AJAPnpImpl::~AJAPnpImpl()
 AJAStatus 
 AJAPnpImpl::Install(AJAPnpCallback callback, void* refCon, uint32_t devices)
 {
-	pthread_t child;
-
 	mCallback = callback;
-	mRefCon = refCon;
-	mDevices = devices;
+	mRefCon   = refCon;
+	mDevices  = devices;
 
-	if (child_id != 0)
+	if (!mCallback)
+		return AJA_STATUS_NULL;	//	NULL callback
+
+	if (child_id)
 		Uninstall();
 
-	if (mCallback)
+	//	Linux only handles PCIe devices
+	if (mDevices & AJA_Pnp_PciVideoDevices)
+	{
+		run = true;
+		pthread_t child;
+		if (pthread_create(&child, NULL, *Worker, (void *)this) < 0)
+			return AJA_STATUS_FAIL;	//	Failed to create Worker thread
+
 		(*(mCallback))(AJA_Pnp_DeviceAdded, mRefCon);
 
-	run = true;
-	if(pthread_create(&child, NULL, *Worker, (void *)this) < 0)
-		return AJA_STATUS_FAIL;
-
-	child_id = child;
-
-	return AJA_STATUS_SUCCESS;
+		child_id = child;
+		return AJA_STATUS_SUCCESS;
+	}
+	return AJA_STATUS_FAIL;
 }
 	
 
@@ -73,27 +78,6 @@ AJAPnpImpl::Uninstall(void)
 	mDevices = 0;
 
 	return AJA_STATUS_SUCCESS;
-}
-
-
-AJAPnpCallback 
-AJAPnpImpl::GetCallback()
-{
-	return mCallback;
-}
-
-
-void* 
-AJAPnpImpl::GetRefCon()
-{
-	return mRefCon;
-}
-
-
-uint32_t
-AJAPnpImpl::GetPnpDevices()
-{
-	return mDevices;
 }
 
 

@@ -1064,7 +1064,7 @@ AJAStatus NTV2CCPlayer::SetUpOutputVideo (void)
 		cerr << "## ERROR:  No such output connector '" << ::NTV2OutputDestinationToString(mConfig.fOutputDest,true) << "'" << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
-	if (NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat))
+	if (NTV2_IS_QUAD_FRAME_FORMAT(mConfig.fVideoFormat) && !mDevice.features().CanDo12gRouting())
 	{
 		if (!mConfig.fDoTsiRouting  &&  mConfig.fOutputChannel != NTV2_CHANNEL1  &&  mConfig.fOutputChannel != NTV2_CHANNEL5)
 		{

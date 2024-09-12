@@ -1001,6 +1001,15 @@ ostream & operator << (ostream & inOutStream, const NTV2ColorCorrectionData & in
 }
 
 
+NTV2VideoFormatSet & operator += (NTV2VideoFormatSet & inOutSet, const NTV2VideoFormatSet inSet)
+{
+	for (NTV2VideoFormatSetConstIter iter(inSet.begin());  iter != inSet.end();  ++iter)
+		if (inOutSet.find(*iter) == inOutSet.end())
+			inOutSet.insert(*iter);
+	return inOutSet;
+}
+
+
 //	Implementation of NTV2VideoFormatSet's ostream writer...
 ostream & operator << (ostream & inOStream, const NTV2VideoFormatSet & inFormats)
 {
@@ -1292,7 +1301,7 @@ bool NTV2DeviceGetSupportedInputSources (const NTV2DeviceID inDeviceID, NTV2Inpu
 
 bool NTV2DeviceGetSupportedOutputDests (const NTV2DeviceID inDeviceID, NTV2OutputDestinations & outOutputDests, const NTV2IOKinds inKinds)
 {
-	static const NTV2OutputDest sDsts[] = {	NTV2_OUTPUTDESTINATION_ANALOG,	NTV2_OUTPUTDESTINATION_HDMI,
+	static const NTV2OutputDest sDsts[] = {	NTV2_OUTPUTDESTINATION_ANALOG1,	NTV2_OUTPUTDESTINATION_HDMI1,
 											NTV2_OUTPUTDESTINATION_SDI1,	NTV2_OUTPUTDESTINATION_SDI2,	NTV2_OUTPUTDESTINATION_SDI3,	NTV2_OUTPUTDESTINATION_SDI4,
 											NTV2_OUTPUTDESTINATION_SDI5,	NTV2_OUTPUTDESTINATION_SDI6,	NTV2_OUTPUTDESTINATION_SDI7,	NTV2_OUTPUTDESTINATION_SDI8};
 	outOutputDests.clear();
@@ -1372,6 +1381,12 @@ NTV2_TRAILER::NTV2_TRAILER ()
 
 
 static const string sSegXferUnits[] = {"", " U8", " U16", "", " U32", "", "", "", " U64", ""};
+bool NTV2SegmentedXferInfo::Direction_TopToBottom (true);
+bool NTV2SegmentedXferInfo::Direction_TopDown (true);
+bool NTV2SegmentedXferInfo::Direction_Normal (true);
+bool NTV2SegmentedXferInfo::Direction_BottomToTop (false);
+bool NTV2SegmentedXferInfo::Direction_BottomUp (false);
+bool NTV2SegmentedXferInfo::Direction_Flipped (false);
 
 ostream & NTV2SegmentedXferInfo::Print (ostream & inStrm, const bool inDumpSegments) const
 {
@@ -1488,6 +1503,8 @@ NTV2SegmentedXferInfo & NTV2SegmentedXferInfo::swapSourceAndDestination (void)
 {
 	std::swap(mSrcElementsPerRow, mDstElementsPerRow);
 	std::swap(mInitialSrcOffset, mInitialDstOffset);
+	const bool srcNormal(this->isSourceTopDown()), dstNormal(this->isDestTopDown());
+	setSourceDirection(dstNormal).setDestDirection(srcNormal);
 	return *this;
 }
 
@@ -1755,11 +1772,15 @@ bool NTV2Buffer::CopyFrom (const NTV2Buffer & inSrcBuffer, const NTV2SegmentedXf
 		return false;
 
 	//	Copy every segment...
-	ULWord			srcOffset	(inXferInfo.getSourceOffset() * inXferInfo.getElementLength());
-	ULWord			dstOffset	(inXferInfo.getDestOffset() * inXferInfo.getElementLength());
-	const ULWord	srcPitch	(inXferInfo.getSourcePitch() * inXferInfo.getElementLength());
-	const ULWord	dstPitch	(inXferInfo.getDestPitch() * inXferInfo.getElementLength());
-	const ULWord	bytesPerSeg (inXferInfo.getSegmentLength() * inXferInfo.getElementLength());
+	LWord	srcOffset	(LWord(inXferInfo.getSourceOffset() * inXferInfo.getElementLength()));
+	LWord	dstOffset	(LWord(inXferInfo.getDestOffset() * inXferInfo.getElementLength()));
+	LWord	srcPitch	(LWord(inXferInfo.getSourcePitch() * inXferInfo.getElementLength()));
+	LWord	dstPitch	(LWord(inXferInfo.getDestPitch() * inXferInfo.getElementLength()));
+	const LWord	bytesPerSeg (inXferInfo.getSegmentLength() * inXferInfo.getElementLength());
+	if (inXferInfo.isSourceBottomUp())
+		srcPitch = 0 - srcPitch;
+	if (inXferInfo.isDestBottomUp())
+		dstPitch = 0 - dstPitch;
 	for (ULWord segNdx(0);	segNdx < inXferInfo.getSegmentCount();	segNdx++)
 	{
 		const void *	pSrc (inSrcBuffer.GetHostAddress(srcOffset));
@@ -1770,7 +1791,7 @@ bool NTV2Buffer::CopyFrom (const NTV2Buffer & inSrcBuffer, const NTV2SegmentedXf
 			return false;	//	memcpy will read past end of srcBuffer
 		if (dstOffset + bytesPerSeg > GetByteCount())
 			return false;	//	memcpy will write past end of me
-		::memcpy (pDst,	 pSrc,	bytesPerSeg);
+		::memcpy (pDst,	 pSrc,	size_t(bytesPerSeg));
 		srcOffset += srcPitch;	//	Bump src offset
 		dstOffset += dstPitch;	//	Bump dst offset
 	}	//	for each segment

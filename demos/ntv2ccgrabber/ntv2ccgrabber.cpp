@@ -1573,7 +1573,7 @@ AJALabelValuePairs CCGrabberConfig::Get (const bool inCompact) const
 	AJALabelValuePairs result (CaptureConfig::Get(inCompact));
 	AJASystemInfo::append(result, "Output Mode",		IS_VALID_OutputMode(fOutputMode) ? OutputModeToString(fOutputMode) : "(invalid)");
 	AJASystemInfo::append(result, "Caption Source",		IS_VALID_CaptionDataSrc(fCaptionSrc) ? CaptionDataSrcToString(fCaptionSrc) : "(invalid)");
-	AJASystemInfo::append(result, "Timecode Source",	::NTV2TCIndexToString(fTimecodeSrc, inCompact));
+	AJASystemInfo::append(result, "Timecode Source",	::NTV2TCIndexToString(fTimecodeSource, inCompact));
 	AJASystemInfo::append(result, "Caption Channel",	::NTV2Line21ChannelToStr(fCaptionChannel, inCompact));
 	AJASystemInfo::append(result, "Burn-In Captions",	fBurnCaptions ? "Y" : "N");
 	AJASystemInfo::append(result, "MultiFormat Mode",	fDoMultiFormat ? "Y" : "N");

@@ -59,12 +59,18 @@ typedef struct rdma_page_buffer {
 
 extern void ntv2_set_rdma_fops(struct ntv2_page_fops* fops);
 
+static int ntv2_rdma_get_pages(PDMA_PAGE_BUFFER pBuffer,
+                               PVOID pAddress, ULWord size, ULWord direction);
+static void ntv2_rdma_put_pages(PDMA_PAGE_BUFFER pBuffer);
+static int ntv2_rdma_map_pages(struct pci_dev* pci_dev, PDMA_PAGE_BUFFER pBuffer);
+static void ntv2_rdma_unmap_pages(struct pci_dev* pci_dev, PDMA_PAGE_BUFFER pBuffer);
+
 static void rdmaFreeCallback(void* data);
 static void dmaSgSetRdmaPage(struct scatterlist* pSg, struct nvidia_p2p_dma_mapping	*rdmaMap,
 							 int index, ULWord64 length, ULWord64 offset);
 
-int ntv2_rdma_get_pages(PDMA_PAGE_BUFFER pBuffer,
-                        PVOID pAddress, ULWord size, ULWord direction)
+static int ntv2_rdma_get_pages(PDMA_PAGE_BUFFER pBuffer,
+                               PVOID pAddress, ULWord size, ULWord direction)
 {
     PRDMA_PAGE_BUFFER pRdmaBuffer = NULL;
 	ULWord64 address = (unsigned long)pAddress;
@@ -115,7 +121,7 @@ int ntv2_rdma_get_pages(PDMA_PAGE_BUFFER pBuffer,
     return 0;
 }
 
-void ntv2_rdma_put_pages(PDMA_PAGE_BUFFER pBuffer)
+static void ntv2_rdma_put_pages(PDMA_PAGE_BUFFER pBuffer)
 {
     PRDMA_PAGE_BUFFER pRdmaBuffer = (PRDMA_PAGE_BUFFER)pBuffer->rdmaContext;
 
@@ -138,7 +144,7 @@ void ntv2_rdma_put_pages(PDMA_PAGE_BUFFER pBuffer)
     return;
 }
 
-int ntv2_rdma_map_pages(struct pci_dev* pci_dev, PDMA_PAGE_BUFFER pBuffer)
+static int ntv2_rdma_map_pages(struct pci_dev* pci_dev, PDMA_PAGE_BUFFER pBuffer)
 {
     PRDMA_PAGE_BUFFER pRdmaBuffer = (PRDMA_PAGE_BUFFER)pBuffer->rdmaContext;
     ULWord numEntries;
@@ -207,7 +213,7 @@ int ntv2_rdma_map_pages(struct pci_dev* pci_dev, PDMA_PAGE_BUFFER pBuffer)
     return 0;
 }
 
-void ntv2_rdma_unmap_pages(struct pci_dev* pci_dev, PDMA_PAGE_BUFFER pBuffer)
+static void ntv2_rdma_unmap_pages(struct pci_dev* pci_dev, PDMA_PAGE_BUFFER pBuffer)
 {
     PRDMA_PAGE_BUFFER pRdmaBuffer = (PRDMA_PAGE_BUFFER)pBuffer->rdmaContext;
 

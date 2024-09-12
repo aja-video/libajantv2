@@ -103,50 +103,50 @@ class AJAExport NTV2FrameData
 				fFrameFlags(0)	{}
 
 		//	Inquiry Methods
-		inline NTV2Buffer &	VideoBuffer (void)				{return fVideoBuffer;}
-		inline ULWord	VideoBufferSize (void) const		{return fVideoBuffer.GetByteCount();}
+		inline NTV2Buffer &	VideoBuffer (void)							{return fVideoBuffer;}
+		inline ULWord		VideoBufferSize (void) const				{return fVideoBuffer.GetByteCount();}
 
-		inline NTV2Buffer &	AudioBuffer (void)				{return fAudioBuffer;}
-		inline ULWord	AudioBufferSize (void) const		{return fAudioBuffer.GetByteCount();}
-		inline ULWord	NumCapturedAudioBytes (void) const	{return fNumAudioBytes;}
+		inline NTV2Buffer &	AudioBuffer (void)							{return fAudioBuffer;}
+		inline ULWord		AudioBufferSize (void) const				{return fAudioBuffer.GetByteCount();}
+		inline ULWord		NumCapturedAudioBytes (void) const			{return fNumAudioBytes;}
 
-		inline NTV2Buffer &	AncBuffer (void)				{return fAncBuffer;}
-		inline ULWord	AncBufferSize (void) const			{return fAncBuffer.GetByteCount();}
-		inline ULWord	NumCapturedAncBytes (void) const	{return fNumAncBytes;}
+		inline NTV2Buffer &	AncBuffer (void)							{return fAncBuffer;}
+		inline ULWord		AncBufferSize (void) const					{return fAncBuffer.GetByteCount();}
+		inline ULWord		NumCapturedAncBytes (void) const			{return fNumAncBytes;}
 
-		inline NTV2Buffer &	AncBuffer2 (void)				{return fAncBuffer2;}
-		inline ULWord	AncBuffer2Size (void) const			{return fAncBuffer2.GetByteCount();}
-		inline ULWord	NumCapturedAnc2Bytes (void) const	{return fNumAnc2Bytes;}
+		inline NTV2Buffer &	AncBuffer2 (void)							{return fAncBuffer2;}
+		inline ULWord		AncBuffer2Size (void) const					{return fAncBuffer2.GetByteCount();}
+		inline ULWord		NumCapturedAnc2Bytes (void) const			{return fNumAnc2Bytes;}
 
-		inline NTV2Buffer &	VideoBuffer2 (void)				{return fVideoBuffer2;}
-		inline ULWord	VideoBufferSize2 (void) const		{return fVideoBuffer2.GetByteCount();}
+		inline NTV2Buffer &	VideoBuffer2 (void)							{return fVideoBuffer2;}
+		inline ULWord		VideoBufferSize2 (void) const				{return fVideoBuffer2.GetByteCount();}
 
-		inline bool		IsNULL (void) const					{return fVideoBuffer.IsNULL() && fVideoBuffer2.IsNULL()
-																	&& fAudioBuffer.IsNULL() && fAncBuffer.IsNULL()
-																	&& fAncBuffer2.IsNULL();}
-		inline bool	HasTimecode (const NTV2TCIndex inTCNdx) const	{return fTimecodes.find(inTCNdx) != fTimecodes.end();}
+		inline bool			IsNULL (void) const							{return fVideoBuffer.IsNULL() && fVideoBuffer2.IsNULL()
+																			&& fAudioBuffer.IsNULL() && fAncBuffer.IsNULL()
+																			&& fAncBuffer2.IsNULL();}
+		inline bool	HasTimecode (const NTV2TCIndex inTCNdx) const		{return fTimecodes.find(inTCNdx) != fTimecodes.end();}
 		NTV2_RP188	Timecode (const NTV2TCIndex inTCNdx) const;
 		inline bool	HasValidTimecode (const NTV2TCIndex inTCNdx) const	{return Timecode(inTCNdx).IsValid();}
 
 		//	Modifier Methods
-		inline void		ZeroBuffers (void)					{	if (fVideoBuffer)
-																	fVideoBuffer.Fill(ULWord(0));
-																if (fVideoBuffer2)
-																	fVideoBuffer2.Fill(ULWord(0));
-																if (fAudioBuffer)
-																	fAudioBuffer.Fill(ULWord(0));
-																if (fAncBuffer)
-																	fAncBuffer.Fill(ULWord(0));
-																if (fAncBuffer2)
-																	fAncBuffer2.Fill(ULWord(0));
-																fNumAudioBytes = fNumAncBytes = fNumAnc2Bytes = 0;
-															}
-		bool			LockAll								(CNTV2Card & inDevice);
-		bool			UnlockAll							(CNTV2Card & inDevice);
+		inline void		ZeroBuffers (void)		{	if (fVideoBuffer)
+														fVideoBuffer.Fill(ULWord(0));
+													if (fVideoBuffer2)
+														fVideoBuffer2.Fill(ULWord(0));
+													if (fAudioBuffer)
+														fAudioBuffer.Fill(ULWord(0));
+													if (fAncBuffer)
+														fAncBuffer.Fill(ULWord(0));
+													if (fAncBuffer2)
+														fAncBuffer2.Fill(ULWord(0));
+													fNumAudioBytes = fNumAncBytes = fNumAnc2Bytes = 0;
+												}
+		bool			LockAll					(CNTV2Card & inDevice);
+		bool			UnlockAll				(CNTV2Card & inDevice);
 
-		bool			Reset (void)						{return fVideoBuffer.Allocate(0) && fVideoBuffer2.Allocate(0)
-																	&& fAudioBuffer.Allocate(0) && fAncBuffer.Allocate(0)
-																	&& fAncBuffer2.Allocate(0);}
+		bool			Reset (void)			{return fVideoBuffer.Allocate(0) && fVideoBuffer2.Allocate(0)
+														&& fAudioBuffer.Allocate(0) && fAncBuffer.Allocate(0)
+														&& fAncBuffer2.Allocate(0);}
 };	//	NTV2FrameData
 
 typedef std::vector<NTV2FrameData>			NTV2FrameDataArray;				///< @brief A vector of NTV2FrameData elements
@@ -219,43 +219,52 @@ template <typename T> class Bouncer
 };	//	Bouncer
 
 
-typedef enum _NTV2VideoFormatKinds
+typedef enum _NTV2VideoFormatKind
 {
-	VIDEO_FORMATS_ALL		= 0xFF,
-	VIDEO_FORMATS_NON_4KUHD	= 1,
-	VIDEO_FORMATS_4KUHD		= 2,
-	VIDEO_FORMATS_8KUHD2	= 3,
-	VIDEO_FORMATS_NONE		= 0,
+	VIDEO_FORMATS_NONE			= 0,
+	VIDEO_FORMATS_SDHD			= 1,
+	VIDEO_FORMATS_4KUHD			= 2,
+	VIDEO_FORMATS_8KUHD2		= 4,
+	VIDEO_FORMATS_ALL_UHD4K8K	= (VIDEO_FORMATS_4KUHD | VIDEO_FORMATS_8KUHD2),
+	VIDEO_FORMATS_ALL			= (VIDEO_FORMATS_SDHD | VIDEO_FORMATS_4KUHD | VIDEO_FORMATS_8KUHD2)
+#if !defined(NTV2_DEPRECATE_17_5)
 	//	Deprecated old ones:
-	VIDEO_FORMATS_UHD2		= VIDEO_FORMATS_8KUHD2,
-	BOTH_VIDEO_FORMATS		= VIDEO_FORMATS_ALL,
-	NON_UHD_VIDEO_FORMATS	= VIDEO_FORMATS_NON_4KUHD,
-	UHD_VIDEO_FORMATS		= VIDEO_FORMATS_4KUHD
+	,VIDEO_FORMATS_NON_4KUHD	= VIDEO_FORMATS_SDHD
+	,VIDEO_FORMATS_UHD2			= VIDEO_FORMATS_8KUHD2
+	,BOTH_VIDEO_FORMATS			= VIDEO_FORMATS_ALL
+	,NON_UHD_VIDEO_FORMATS		= VIDEO_FORMATS_SDHD
+	,UHD_VIDEO_FORMATS			= VIDEO_FORMATS_4KUHD
+#endif	//	!defined(NTV2_DEPRECATE_17_5)
+} NTV2VideoFormatKind;
 
-} NTV2VideoFormatKinds;
+typedef ULWord NTV2VideoFormatKinds;
 
 
-typedef enum _NTV2PixelFormatKinds
+typedef enum _NTV2PixelFormatKind
 {
-	PIXEL_FORMATS_ALL		= 0xFF,
+	PIXEL_FORMATS_NONE		= 0,
 	PIXEL_FORMATS_RGB		= 1,
 	PIXEL_FORMATS_PLANAR	= 2,
 	PIXEL_FORMATS_RAW		= 4,
 	PIXEL_FORMATS_PACKED	= 8,
 	PIXEL_FORMATS_ALPHA		= 16,
-	PIXEL_FORMATS_NONE		= 0
-} NTV2PixelFormatKinds;
+	PIXEL_FORMATS_NO_RAW	= (PIXEL_FORMATS_RGB | PIXEL_FORMATS_PLANAR | PIXEL_FORMATS_PACKED | PIXEL_FORMATS_ALPHA),
+	PIXEL_FORMATS_ALL		= (PIXEL_FORMATS_RGB | PIXEL_FORMATS_PLANAR | PIXEL_FORMATS_RAW | PIXEL_FORMATS_PACKED | PIXEL_FORMATS_ALPHA)
+} NTV2PixelFormatKind;
+
+typedef ULWord NTV2PixelFormatKinds;
 
 
 typedef enum _NTV2TCIndexKinds
 {
-	TC_INDEXES_ALL		= 0xFF,
-	TC_INDEXES_SDI		= 1,
-	TC_INDEXES_ANALOG	= 2,
-	TC_INDEXES_ATCLTC	= 4,
-	TC_INDEXES_VITC1	= 8,
-	TC_INDEXES_VITC2	= 16,
-	TC_INDEXES_NONE		= 0
+	TC_INDEXES_NONE			= 0,
+	TC_INDEXES_SDI			= 1,
+	TC_INDEXES_ANALOG		= 2,
+	TC_INDEXES_ATCLTC		= 4,
+	TC_INDEXES_VITC1		= 8,
+	TC_INDEXES_VITC2		= 16,
+	TC_INDEXES_NO_ANALOG	= (TC_INDEXES_SDI | TC_INDEXES_ATCLTC | TC_INDEXES_VITC1 | TC_INDEXES_VITC2),
+	TC_INDEXES_ALL			= (TC_INDEXES_NO_ANALOG | TC_INDEXES_ANALOG )
 } NTV2TCIndexKinds;
 
 
@@ -321,8 +330,8 @@ typedef struct PlayerConfig
 		AJAAncDataType		fTransmitHDRType;	///< @brief	Specifies the HDR anc data packet to transmit, if any.
 		UWord				fNumAudioLinks;		///< @brief	The number of audio systems to control for multi-link audio (4K/8K)
 		bool				fDoMultiFormat;		///< @brief	If true, enable device-sharing;  otherwise take exclusive control of device
-		bool				fSuppressAudio;		///< @brief	If true, suppress audio;  otherwise generate audio tone
-		bool				fSuppressVideo;		///< @brief	If true, suppress video;  otherwise generate test patterns
+		bool				fSuppressAudio;		///< @brief	If true, suppress audio;  otherwise generate & xfer audio tone
+		bool				fSuppressVideo;		///< @brief	If true, suppress video;  otherwise generate & xfer test patterns
 		bool				fTransmitLTC;		///< @brief	If true, embed LTC;  otherwise embed VITC
 		bool				fDoABConversion;	///< @brief	If true, do level-A/B conversion;  otherwise don't
 		bool				fDoHDMIOutput;		///< @brief	If true, enable HDMI output;  otherwise, disable HDMI output
@@ -381,6 +390,7 @@ typedef struct BurnConfig
 		NTV2Channel			fInputChannel;		///< @brief	The input channel to use
 		NTV2Channel			fOutputChannel;		///< @brief	The output channel to use
 		NTV2InputSource		fInputSource;		///< @brief	The device input connector to use
+		NTV2OutputDest		fOutputDest;		///< @brief	The device output connector to use (NTV2_OUTPUTDESTINATION_INVALID means unspecified)
 		NTV2ACFrameRange	fInputFrames;		///< @brief	Ingest frame count or range
 		NTV2ACFrameRange	fOutputFrames;		///< @brief	Playout frame count or range
 		NTV2PixelFormat		fPixelFormat;		///< @brief	The pixel format to use
@@ -392,6 +402,7 @@ typedef struct BurnConfig
 		bool				fWithAnc;			///< @brief	If true, capture & play anc data (LLBurn). Defaults to false.
 		bool				fWithTallFrames;	///< @brief	If true && fWithAnc, use "taller" VANC mode for anc. Defaults to false.
 		bool				fWithHanc;			///< @brief	If true, capture & play HANC data, including audio (LLBurn). Defaults to false.
+		bool				fVerbose;			///< @brief	If true, emit explanatory messages to stdout/stderr. Defaults to false.
 
 		/**
 			@brief	Constructs a default Player configuration.
@@ -402,6 +413,7 @@ typedef struct BurnConfig
 				fInputChannel		(NTV2_CHANNEL1),
 				fOutputChannel		(NTV2_CHANNEL3),
 				fInputSource		(NTV2_INPUTSOURCE_SDI1),
+				fOutputDest			(NTV2_OUTPUTDESTINATION_INVALID),
 				fInputFrames		(7),
 				fOutputFrames		(7),
 				fPixelFormat		(NTV2_FBF_8BIT_YCBCR),
@@ -412,7 +424,8 @@ typedef struct BurnConfig
 				fIsFieldMode		(false),
 				fWithAnc			(false),
 				fWithTallFrames		(false),
-				fWithHanc			(false)
+				fWithHanc			(false),
+				fVerbose			(false)
 		{
 		}
 
@@ -423,6 +436,16 @@ typedef struct BurnConfig
 		inline bool	WithHanc(void) const		{return fWithHanc;}			///< @return	True if streaming HANC, false if not.
 		inline bool WithTimecode(void) const	{return NTV2_IS_VALID_TIMECODE_INDEX(fTimecodeSource);}	///< @return	True if valid TC source
 		inline bool FieldMode(void) const		{return fIsFieldMode;}		///< @return	True if field mode, otherwise false.
+		inline bool OutputSpecified(void) const	{return NTV2_IS_VALID_OUTPUT_DEST(fOutputDest);}	///< @return	True if output destination was specified
+		inline bool	IsVerbose(void) const		{return fVerbose;}			///< @return	True if in verbose mode, otherwise false.
+		inline std::string	ISrcStr(void) const	{return ::NTV2InputSourceToString(fInputSource, true);}
+		inline NTV2Channel	ISrcCh(void) const	{return ::NTV2InputSourceToChannel(fInputSource);}
+		inline bool	ISrcIsSDI(void) const		{return NTV2_INPUT_SOURCE_IS_SDI(fInputSource);}
+		inline std::string	ODstStr(void) const	{return ::NTV2OutputDestinationToString(fOutputDest, true);}
+		inline NTV2Channel	ODstCh(void) const	{return ::NTV2OutputDestinationToChannel(fOutputDest);}
+		inline std::string	IChStr(void) const	{std::ostringstream oss; oss << "Ch" << int(fInputChannel); return oss.str();}
+		inline std::string	OChStr(void) const	{std::ostringstream oss; oss << "Ch" << int(fOutputChannel); return oss.str();}
+		inline bool	ODstIsSDI(void) const		{return NTV2_OUTPUT_DEST_IS_SDI(fOutputDest);}
 
 		/**
 			@brief		Renders a human-readable representation of me.
@@ -460,14 +483,6 @@ class AJAExport CNTV2DemoCommon
 			@return		True if the specified device exists and can be opened.
 		**/
 		static bool							IsValidDevice (const std::string & inDeviceSpec);
-
-		/**
-			@param[in]	inKinds				Specifies the kinds of devices to be returned. Defaults to all available devices.
-			@return		A string that can be printed to show the available supported devices.
-			@note		These device identifier strings are mere conveniences for specifying devices in the command-line-based demo apps,
-						and are subject to change without notice. They are not intended to be canonical in any way.
-		**/
-		static std::string					GetDeviceStrings (const NTV2DeviceKinds inKinds = NTV2_DEVICEKIND_ALL);
 	///@}
 
 	/**
@@ -478,27 +493,31 @@ class AJAExport CNTV2DemoCommon
 			@param[in]	inKinds		Specifies the types of video formats returned. Defaults to non-4K/UHD formats.
 			@return		The supported ::NTV2VideoFormatSet.
 		**/
-		static const NTV2VideoFormatSet &	GetSupportedVideoFormats (const NTV2VideoFormatKinds inKinds = VIDEO_FORMATS_NON_4KUHD);
+		static NTV2VideoFormatSet			GetSupportedVideoFormats (const NTV2VideoFormatKinds inKinds = VIDEO_FORMATS_SDHD);
 
 		/**
-			@param[in]	inKinds				Specifies the types of video formats returned. Defaults to non-4K/UHD formats.
-			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
-											warns if the video format is incompatible with that device.
+			@param[in]	inKinds		Specifies the types of video formats returned. Defaults to non-4K/UHD formats.
+			@param[in]	inDevSpec	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
+									returns those video formats that are supported by the device.
 			@return		A string that can be printed to show the supported video formats.
 			@note		These video format strings are mere conveniences for specifying video formats in the command-line-based demo apps,
 						and are subject to change without notice. They are not intended to be canonical in any way.
 		**/
-		static std::string					GetVideoFormatStrings (const NTV2VideoFormatKinds inKinds = VIDEO_FORMATS_NON_4KUHD,
-																	const std::string inDeviceSpecifier = std::string ());
+		static std::string					GetVideoFormatStrings (const NTV2VideoFormatKinds inKinds = VIDEO_FORMATS_SDHD,
+																	const std::string inDevSpec = std::string());
 
 		/**
 			@brief	Returns the ::NTV2VideoFormat that matches the given string.
 			@param[in]	inStr		Specifies the string to be converted to an ::NTV2VideoFormat.
 			@param[in]	inKinds		Specifies which video format type is expected in "inStr", whether non-4K/UHD (the default),
 									exclusively 4K/UHD, or both/all.
+			@param[in]	inDevSpec	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
+									returns a valid video format only if supported by the device.
 			@return		The given string converted to an ::NTV2VideoFormat, or ::NTV2_FORMAT_UNKNOWN if there's no match.
 		**/
-		static NTV2VideoFormat				GetVideoFormatFromString (const std::string & inStr,  const NTV2VideoFormatKinds inKinds = VIDEO_FORMATS_NON_4KUHD);
+		static NTV2VideoFormat				GetVideoFormatFromString (const std::string & inStr,
+																		const NTV2VideoFormatKinds inKinds	= VIDEO_FORMATS_SDHD,
+																		const std::string & inDevSpec		= std::string());
 
 		/**
 			@brief		Given a video format, if all 4 inputs are the same and promotable to 4K, this function does the promotion.
@@ -523,31 +542,36 @@ class AJAExport CNTV2DemoCommon
 			@param[in]	inKinds		Specifies the types of pixel formats returned. Defaults to all formats.
 			@return		The supported ::NTV2FrameBufferFormatSet.
 		**/
-		static NTV2FrameBufferFormatSet		GetSupportedPixelFormats (const NTV2PixelFormatKinds inKinds = PIXEL_FORMATS_ALL);
+		static NTV2PixelFormats				GetSupportedPixelFormats (const NTV2PixelFormatKinds inKinds = PIXEL_FORMATS_ALL);
 
 		/**
-			@param[in]	inKinds				Specifies the types of pixel formats returned. Defaults to all formats.
-			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
-											warns if the pixel format is incompatible with that device.
+			@param[in]	inKinds		Specifies the types of pixel formats returned. Defaults to all formats.
+			@param[in]	inDevSpec	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
+									returns those pixel formats that are supported by the device.
 			@return		A string that can be printed to show the available pixel formats (or those that are supported by a given device).
 			@note		These pixel format strings are mere conveniences for specifying pixel formats in the command-line-based demo apps,
 						and are subject to change without notice. They are not intended to be canonical in any way.
 		**/
 		static std::string					GetPixelFormatStrings (const NTV2PixelFormatKinds inKinds = PIXEL_FORMATS_ALL,
-																	const std::string inDeviceSpecifier = std::string ());
+																	const std::string inDevSpec = std::string());
 
 		/**
-			@brief	Returns the ::NTV2FrameBufferFormat that matches the given string.
-			@param[in]	inStr	Specifies the string to be converted to an ::NTV2FrameBufferFormat.
-			@return		The given string converted to an ::NTV2FrameBufferFormat, or ::NTV2_FBF_INVALID if there's no match.
+			@brief	Returns the ::NTV2PixelFormat that matches the given string.
+			@param[in]	inStr		Specifies the string to be converted to an ::NTV2PixelFormat.
+			@param[in]	inKinds		Specifies the types of pixel formats returned. Defaults to all formats.
+			@param[in]	inDevSpec	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
+									returns a valid pixel format only if supported by the device.
+			@return		An ::NTV2PixelFormat, or ::NTV2_FBF_INVALID if there's no match.
 		**/
-		static NTV2FrameBufferFormat		GetPixelFormatFromString (const std::string & inStr);
+		static NTV2PixelFormat				GetPixelFormatFromString (const std::string & inStr,
+																		const NTV2PixelFormatKinds inKinds = PIXEL_FORMATS_ALL,
+																		const std::string inDevSpec = std::string());
 
 		/**
 			@return		The equivalent ::AJA_PixelFormat for the given ::NTV2FrameBufferFormat.
 			@param[in]	inFormat	Specifies the ::NTV2FrameBufferFormat to be converted into an equivalent ::AJA_PixelFormat.
 		**/
-		static AJA_PixelFormat				GetAJAPixelFormat (const NTV2FrameBufferFormat inFormat);
+		static AJA_PixelFormat				GetAJAPixelFormat (const NTV2PixelFormat inFormat);
 	///@}
 
 	/**
@@ -561,22 +585,27 @@ class AJAExport CNTV2DemoCommon
 		static const NTV2InputSourceSet		GetSupportedInputSources (const NTV2IOKinds inKinds = NTV2_IOKINDS_ALL);
 
 		/**
-			@param[in]	inKinds				Specifies the types of input sources returned. Defaults to all sources.
-			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
-											warns if the input source is incompatible with that device.
+			@param[in]	inKinds		Specifies the types of input sources returned. Defaults to all sources.
+			@param[in]	inDevSpec	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
+									returns those input sources that are supported by the device.
 			@return		A string that can be printed to show the available input sources (or those that are supported by a given device).
 			@note		These input source strings are mere conveniences for specifying input sources in the command-line-based demo apps,
 						and are subject to change without notice. They are not intended to be canonical in any way.
 		**/
 		static std::string					GetInputSourceStrings (const NTV2IOKinds inKinds = NTV2_IOKINDS_ALL,
-																	const std::string inDeviceSpecifier = std::string ());
+																	const std::string inDevSpec = std::string ());
 
 		/**
 			@brief		Returns the ::NTV2InputSource that matches the given string.
-			@param[in]	inStr	Specifies the string to be converted to an ::NTV2InputSource.
+			@param[in]	inStr		Specifies the string to be converted to an ::NTV2InputSource.
+			@param[in]	inKinds		Specifies the types of input sources returned. Defaults to all sources.
+			@param[in]	inDevSpec	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
+									returns a valid input source only if supported by the device.
 			@return		The given string converted to an ::NTV2InputSource, or ::NTV2_INPUTSOURCE_INVALID if there's no match.
 		**/
-		static NTV2InputSource				GetInputSourceFromString (const std::string & inStr);
+		static NTV2InputSource				GetInputSourceFromString (const std::string & inStr,
+																		const NTV2IOKinds inKinds = NTV2_IOKINDS_ALL,
+																		const std::string inDevSpec = std::string());
 	///@}
 
 	/**
@@ -584,20 +613,33 @@ class AJAExport CNTV2DemoCommon
 	**/
 	///@{
 		/**
-			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
-											warns if the output destination is incompatible with that device.
-			@return		A string that can be printed to show the available output destinations (or those that are supported by a given device).
-			@note		These output destination strings are mere conveniences for specifying output destinations in the command-line-based demo apps,
-						and are subject to change without notice. They are not intended to be canonical in any way.
+			@param[in]	inKinds		Specifies the types of output destinations returned. Defaults to all types.
+			@return		The supported ::NTV2OutputDestinations.
 		**/
-		static std::string					GetOutputDestinationStrings (const std::string inDeviceSpecifier = std::string ());
+		static const NTV2OutputDestinations	GetSupportedOutputDestinations (const NTV2IOKinds inKinds);
+
+		/**
+			@param[in]	inKinds		Specifies the types of output destinations returned. Defaults to all types.
+			@param[in]	inDevSpec	An optional device specifier. If non-empty, and resolves to a valid device, the returned
+									string will only contain output destination values that are compatible with that device.
+			@return		A string that can be printed to show the available output destinations (or those that are supported by a given device).
+			@note		These output destination strings are mere conveniences for specifying output destinations in the
+						command-line-based demo apps, and are subject to change without notice. They are not intended to
+						be canonical in any way.
+		**/
+		static std::string					GetOutputDestinationStrings (const NTV2IOKinds inKinds, const std::string inDevSpec = std::string ());
 
 		/**
 			@brief		Returns the ::NTV2OutputDestination that matches the given string.
-			@param[in]	inStr	Specifies the string to be converted to an ::NTV2OutputDestination.
+			@param[in]	inStr		Specifies the string to be converted to an ::NTV2OutputDestination.
+			@param[in]	inKinds		Specifies the types of output destinations returned. Defaults to all types.
+			@param[in]	inDevSpec	An optional device specifier. If non-empty, and resolves to a valid device,
+									the returned value, if valid, will be compatible with that device.
 			@return		The given string converted to an ::NTV2OutputDestination, or ::NTV2_OUTPUTDESTINATION_INVALID if there's no match.
 		**/
-		static NTV2OutputDestination		GetOutputDestinationFromString (const std::string & inStr);
+		static NTV2OutputDestination		GetOutputDestinationFromString (const std::string & inStr,
+																			const NTV2IOKinds inKinds = NTV2_IOKINDS_ALL,
+																			const std::string inDevSpec = std::string());
 	///@}
 
 	/**
@@ -613,7 +655,7 @@ class AJAExport CNTV2DemoCommon
 		/**
 			@param[in]	inKinds				Specifies the types of timecode indexes returned. Defaults to all indexes.
 			@param[in]	inDeviceSpecifier	An optional device specifier. If non-empty, and resolves to a valid, connected AJA device,
-											warns if the timecode index is incompatible with that device.
+											returns a valid timecode index only if supported by the device.
 			@param[in]	inIsInputOnly		Optionally specifies if intended for timecode input (capture).
 											Defaults to 'true'. Specify 'false' to obtain the list of timecode indexes
 											that are valid for the given device for either input (capture) or output
@@ -631,7 +673,9 @@ class AJAExport CNTV2DemoCommon
 			@param[in]	inStr	Specifies the string to be converted to an ::NTV2TCIndex.
 			@return		The given string converted to an ::NTV2TCIndex, or ::NTV2_TCINDEX_INVALID if there's no match.
 		**/
-		static NTV2TCIndex					GetTCIndexFromString (const std::string & inStr);
+		static NTV2TCIndex					GetTCIndexFromString (const std::string & inStr,
+																		const NTV2TCIndexKinds inKinds = TC_INDEXES_ALL,
+																		const std::string inDevSpec = std::string());
 	///@}
 
 	/**

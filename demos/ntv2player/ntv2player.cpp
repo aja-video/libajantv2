@@ -462,12 +462,12 @@ bool NTV2Player::RouteOutputSignal (void)
 
 		//	And connect analog video output, if the device has one...
 		if (mDevice.features().GetNumAnalogVideoOutputs())
-			if (!mDevice.Connect (::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_ANALOG),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
+			if (!mDevice.Connect (::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_ANALOG1),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
 				connectFailures++;
 
 		//	And connect HDMI video output, if the device has one...
 		if (mDevice.features().GetNumHDMIVideoOutputs())
-			if (!mDevice.Connect (::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_HDMI),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
+			if (!mDevice.Connect (::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_HDMI1),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
 				connectFailures++;
 	}
 	TCNOTE(mTCIndexes);

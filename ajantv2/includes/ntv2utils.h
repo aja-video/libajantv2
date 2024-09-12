@@ -693,9 +693,11 @@ AJAExport NTV2Channel NTV2OutputDestinationToChannel (const NTV2OutputDestinatio
 /**
 	@brief		Converts the given NTV2Channel value into its ordinary equivalent NTV2OutputDestination.
 	@param[in]	inChannel		Specifies the NTV2Channel to be converted.
+	@param[in]	inKinds			Specifies the type of output destination of interest (SDI, HDMI, etc.).
+								Defaults to SDI.
 	@return		The equivalent NTV2OutputDestination value.
 **/
-AJAExport NTV2OutputDestination NTV2ChannelToOutputDestination (const NTV2Channel inChannel);
+AJAExport NTV2OutputDestination NTV2ChannelToOutputDestination (const NTV2Channel inChannel, const NTV2IOKinds inKinds = NTV2_IOKINDS_SDI);
 
 /**
 	@return		The frame rate family that the given ::NTV2FrameRate belongs to.
@@ -1120,6 +1122,7 @@ AJAExport std::string NTV2AncDataRgnToStr				(const NTV2AncDataRgn			inValue,	co
 AJAExport std::string NTV2UpConvertModeToString			(const NTV2UpConvertMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
 AJAExport std::string NTV2DownConvertModeToString		(const NTV2DownConvertMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
 AJAExport std::string NTV2IsoConvertModeToString		(const NTV2IsoConvertMode		inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
+AJAExport std::string NTV2ScanMethodToString			(const NTV2ScanMethod			inValue,	const bool inCompactDisplay = false);	//	New in SDK 17.5
 
 AJAExport std::string NTV2HDMIBitDepthToString			(const NTV2HDMIBitDepth			inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1
 AJAExport std::string NTV2HDMIAudioChannelsToString		(const NTV2HDMIAudioChannels	inValue,	const bool inCompactDisplay = false);	//	New in SDK 16.1

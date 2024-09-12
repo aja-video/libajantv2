@@ -474,6 +474,26 @@ typedef enum
 } NTV2ScanGeometry;
 
 
+/**
+	@brief	Identifies a particular scan method.
+**/
+typedef enum _NTV2ScanMethod
+{
+	NTV2Scan_Progressive	= 0,						///< @brief	Progressive
+	NTV2Scan_NonInterlaced	= NTV2Scan_Progressive,
+	NTV2Scan_Interlaced,								///< @brief	Interlaced
+	NTV2Scan_PSF,										///< @brief	Progressive Segmented Frame
+	NTV2Scan_ProgressiveSegmentedFrame	= NTV2Scan_PSF,
+	NTV2_NUM_SCANMETHODS,
+	NTV2Scan_Invalid	= NTV2_NUM_SCANMETHODS			///< @brief	Invalid or unknown
+} NTV2ScanMethod;
+
+#define NTV2_IS_VALID_NTV2ScanMethod(__m__)		((__m__) >= NTV2Scan_Progressive && (__m__) < NTV2_NUM_SCANMETHODS)
+#define NTV2_IS_PROGRESSIVE_SCAN(__m__)			((__m__) == NTV2Scan_Progressive)
+#define NTV2_IS_INTERLACED_SCAN(__m__)			((__m__) == NTV2Scan_Interlaced)
+#define NTV2_IS_PSF_SCAN(__m__)					((__m__) == NTV2Scan_PSF)
+
+
 // IMPORTANT When adding to the NTV2VideoFormat enum, don't forget to:
 //		Add a corresponding case to GetNTV2FrameGeometryFromVideoFormat in r2deviceservices.cpp
 //		Add a corresponding case to GetNTV2QuarterSizedVideoFormat in ntv2utils.cpp
@@ -1250,11 +1270,11 @@ typedef enum
 **/
 typedef enum
 {
-	NTV2_IOKINDS_ALL			= 0xFF, ///< @brief Specifies any/all input/output kinds.
+	NTV2_IOKINDS_NONE			= 0,	///< @brief Doesn't specify any kind of input/output.
 	NTV2_IOKINDS_SDI			= 1,	///< @brief Specifies SDI input/output kinds.
 	NTV2_IOKINDS_HDMI			= 2,	///< @brief Specifies HDMI input/output kinds.
 	NTV2_IOKINDS_ANALOG			= 4,	///< @brief Specifies analog input/output kinds.
-	NTV2_IOKINDS_NONE			= 0		///< @brief Doesn't specify any kind of input/output.
+	NTV2_IOKINDS_ALL			= (NTV2_IOKINDS_SDI | NTV2_IOKINDS_HDMI | NTV2_IOKINDS_ANALOG) ///< @brief Specifies any/all input/output kinds.
 	#if !defined(NTV2_DEPRECATE_16_3)
 	,	NTV2_INPUTSOURCES_ALL		= NTV2_IOKINDS_ALL,
 		NTV2_INPUTSOURCES_SDI		= NTV2_IOKINDS_SDI,
@@ -1262,7 +1282,9 @@ typedef enum
 		NTV2_INPUTSOURCES_ANALOG	= NTV2_IOKINDS_ANALOG,
 		NTV2_INPUTSOURCES_NONE		= NTV2_IOKINDS_NONE
 	#endif	//	!defined(NTV2_DEPRECATE_16_3)
-} NTV2InputSourceKinds, NTV2OutputDestKinds, NTV2IOKinds;
+} NTV2InputSourceKind, NTV2OutputDestKind, NTV2IOKind;
+
+typedef ULWord NTV2InputSourceKinds, NTV2OutputDestKinds, NTV2IOKinds;
 
 #define NTV2_IS_VALID_IOKINDS(_k_)		(((_k_) == NTV2_IOKINDS_ALL) || ((_k_) == NTV2_IOKINDS_SDI) || ((_k_) == NTV2_IOKINDS_HDMI) || ((_k_) == NTV2_IOKINDS_ANALOG))
 
@@ -1274,12 +1296,12 @@ typedef enum
 				Call ::GetInputSourceOutputXpt to get an NTV2OutputCrosspointID for one of these inputs to pass to
 				CNTV2Card::Connect. See \ref vidop-signalio.
 	@warning	Do not rely on the ordinal values of these constants between successive SDKs, since new devices
-				can be introduced that require additional inputs.
+				with multiple HDMI or Analog outputs could be introduced.
 **/
 typedef enum
 {
-	NTV2_OUTPUTDESTINATION_ANALOG,
-	NTV2_OUTPUTDESTINATION_HDMI,
+	NTV2_OUTPUTDESTINATION_ANALOG1,
+	NTV2_OUTPUTDESTINATION_HDMI1,
 	NTV2_OUTPUTDESTINATION_SDI1,
 	NTV2_OUTPUTDESTINATION_SDI2,
 	NTV2_OUTPUTDESTINATION_SDI3,
@@ -1289,11 +1311,15 @@ typedef enum
 	NTV2_OUTPUTDESTINATION_SDI7,
 	NTV2_OUTPUTDESTINATION_SDI8,
 	NTV2_OUTPUTDESTINATION_INVALID,
-	NTV2_NUM_OUTPUTDESTINATIONS = NTV2_OUTPUTDESTINATION_INVALID	//	Always last!
+	NTV2_NUM_OUTPUTDESTINATIONS		= NTV2_OUTPUTDESTINATION_INVALID	//	Always last!
+#if !defined(NTV2_DEPRECATE_17_5)
+	,NTV2_OUTPUTDESTINATION_ANALOG	= NTV2_OUTPUTDESTINATION_ANALOG1
+	,NTV2_OUTPUTDESTINATION_HDMI	= NTV2_OUTPUTDESTINATION_HDMI1
+#endif	//	!defined(NTV2_DEPRECATE_17_5)
 } NTV2OutputDestination, NTV2OutputDest;
 
-#define NTV2_OUTPUT_DEST_IS_HDMI(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_HDMI)
-#define NTV2_OUTPUT_DEST_IS_ANALOG(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_ANALOG)
+#define NTV2_OUTPUT_DEST_IS_HDMI(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_HDMI1)
+#define NTV2_OUTPUT_DEST_IS_ANALOG(_dest_)			((_dest_) == NTV2_OUTPUTDESTINATION_ANALOG1)
 #define NTV2_OUTPUT_DEST_IS_SDI(_dest_)				((_dest_) >= NTV2_OUTPUTDESTINATION_SDI1 && (_dest_) <= NTV2_OUTPUTDESTINATION_SDI8)
 #define NTV2_IS_VALID_OUTPUT_DEST(_dest_)			(((_dest_) >= 0) && ((_dest_) < NTV2_NUM_OUTPUTDESTINATIONS))
 
@@ -2223,7 +2249,8 @@ typedef enum
 typedef enum
 {
 	NTV2_MixerRGBRangeFull,
-	NTV2_MixerRGBRangeSMPTE
+	NTV2_MixerRGBRangeSMPTE,
+	NTV2_MAX_NUM_MixerRGBRanges
 } NTV2MixerRGBRange;
 
 
@@ -3376,7 +3403,8 @@ typedef enum
 	NTV2_CSC_Method_Original,
 	NTV2_CSC_Method_Enhanced,
 	NTV2_CSC_Method_Enhanced_4K,
-	NTV2_MAX_NUM_ColorSpaceMethods
+	NTV2_MAX_NUM_ColorSpaceMethods,
+	NTV2_CSC_Method_INVALID	= NTV2_MAX_NUM_ColorSpaceMethods
 } NTV2ColorSpaceMethod;
 
 
@@ -3536,7 +3564,8 @@ typedef enum
 	NTV2_INVALID_HDMI_COLORSPACE	= NTV2_MAX_NUM_HDMIColorSpaces
 } NTV2HDMIColorSpace;
 
-#define NTV2_IS_VALID_HDMI_COLORSPACE(__x__)		((__x__) > NTV2_HDMIColorSpaceAuto	&&	(__x__) < NTV2_MAX_NUM_HDMIColorSpaces)
+#define NTV2_IS_VALID_HDMI_COLORSPACE(__x__)	((__x__) > NTV2_HDMIColorSpaceAuto	&&	(__x__) < NTV2_MAX_NUM_HDMIColorSpaces)
+#define NTV2_OEM_VALID_HDMI_COLORSPACE(__x__)	((__x__) > NTV2_HDMIColorSpaceRGB	&&	(__x__) < NTV2_MAX_NUM_HDMIColorSpaces)
 
 
 /**
@@ -3928,6 +3957,8 @@ typedef enum
 	NTV2_HDMI_V2_4K_PLAYBACK,
 	NTV2_HDMI_V2_MODE_INVALID
 } NTV2HDMIV2Mode;
+
+#define NTV2_IS_VALID_HDMI_V2MODE(__x__)		((__x__) >= NTV2_HDMI_V2_HDSD_BIDIRECTIONAL && (__x__) < NTV2_HDMI_V2_MODE_INVALID)
 
 typedef enum
 {

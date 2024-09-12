@@ -19,6 +19,10 @@
 
 #include <linux/version.h>
 
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,10,0))
+	#define KERNEL_6_10_0_SERIAL_SWITCH_TO_KFIFO
+#endif
+
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(6,5,0))
 	#define KERNEL_6_5_0_GET_USER_PAGES
 #endif

@@ -31,6 +31,7 @@ int main (int argc, const char ** argv)
 {
 	char *			pDeviceSpec		(AJA_NULL);		//	Which device to use
 	char *			pInputSrcSpec	(AJA_NULL);		//	SDI source spec
+	char *			pOutputDest		(AJA_NULL);		//	SDI output spec (sdi1 ... sdi8)
 	char *			pTcSource		(AJA_NULL);		//	Time code source string
 	char *			pPixelFormat	(AJA_NULL);		//	Pixel format spec
 	char *			pInFramesSpec	(AJA_NULL);		//	Input AutoCirculate frames spec
@@ -41,6 +42,7 @@ int main (int argc, const char ** argv)
 	int				noVideo			(0);			//	Disable video?
 	int				noAnc			(0);			//	Disable capture/playback of anc data?
 	int				doVanc			(0);			//	Use tall-frame VANC?
+	int				verbose			(0);			//	Verbose mode?
 	AJADebug::Open();
 
 	//	Command line option descriptions:
@@ -51,10 +53,12 @@ int main (int argc, const char ** argv)
 		{"multiFormat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"use multi-format/channel",	AJA_NULL					},
 		{"pixelFormat",	'p',	POPT_ARG_STRING,	&pPixelFormat,	0,	"pixel format to use",		"'?' or 'list' to list"		},
 		{"input",		'i',	POPT_ARG_STRING,	&pInputSrcSpec,	0,	"input to use",             "1-8, ?=list"				},
+		{"output",		'o',	POPT_ARG_STRING,	&pOutputDest,	0,	"output to use",			"'?' or 'list' to list"		},
 		{"noaudio",		0,		POPT_ARG_NONE,		&noAudio,		0,	"disable audio?",			AJA_NULL					},
 		{"novideo",		0,		POPT_ARG_NONE,		&noVideo,		0,	"disable video?",			AJA_NULL					},
 		{"noanc",		0,		POPT_ARG_NONE,		&noAnc,			0,	"disable anc?",				AJA_NULL					},
 		{"vanc",		0,		POPT_ARG_NONE,		&doVanc,		0,	"enable tall-frame VANC?",	AJA_NULL					},
+		{"verbose",		0,		POPT_ARG_NONE,		&verbose,		0,	"verbose mode?",			AJA_NULL					},
 		{"iframes",		0,		POPT_ARG_STRING,	&pInFramesSpec,	0,	"input AutoCirc frames",	"num[@min] or min-max"		},
 		{"oframes",		0,		POPT_ARG_STRING,	&pOutFramesSpec,0,	"output AutoCirc frames",	"num[@min] or min-max"		},
 		{"tcsource",	't',	POPT_ARG_STRING,	&pTcSource,		0,	"time code source",			"'?' to list"				},
@@ -75,23 +79,29 @@ int main (int argc, const char ** argv)
 	BurnConfig config(deviceSpec);
 
 	//	Input source
-	const string	legalSources(CNTV2DemoCommon::GetInputSourceStrings(NTV2_IOKINDS_ALL, deviceSpec));
 	const string inputSourceStr	(pInputSrcSpec ? CNTV2DemoCommon::ToLower(string(pInputSrcSpec)) : "");
+	const string legalSources (CNTV2DemoCommon::GetInputSourceStrings(NTV2_IOKINDS_ALL, pDeviceSpec ? deviceSpec : ""));
+	config.fInputSource = CNTV2DemoCommon::GetInputSourceFromString(inputSourceStr, NTV2_IOKINDS_ALL, pDeviceSpec ? deviceSpec : "");
 	if (inputSourceStr == "?" || inputSourceStr == "list")
 		{cout << legalSources << endl;  return 0;}
-	if (!inputSourceStr.empty())
-	{
-		config.fInputSource = CNTV2DemoCommon::GetInputSourceFromString(inputSourceStr);
-		if (!NTV2_IS_VALID_INPUT_SOURCE(config.fInputSource))
-			{cerr << "## ERROR:  Input source '" << inputSourceStr << "' not one of:" << endl << legalSources << endl;	return 1;}
-	}	//	if input source specified
+	if (!inputSourceStr.empty()  &&  !NTV2_IS_VALID_INPUT_SOURCE(config.fInputSource))
+		{cerr << "## ERROR:  Input source '" << inputSourceStr << "' not one of:" << endl << legalSources << endl;	return 1;}
+
+	//	Output destination
+	const string outputDestStr (pOutputDest ? CNTV2DemoCommon::ToLower(string(pOutputDest)) : "");
+	const string legalOutputs (CNTV2DemoCommon::GetOutputDestinationStrings(NTV2_IOKINDS_ALL, pDeviceSpec ? deviceSpec : ""));
+	config.fOutputDest = CNTV2DemoCommon::GetOutputDestinationFromString(outputDestStr, NTV2_IOKINDS_ALL, pDeviceSpec ? deviceSpec : "");
+	if (outputDestStr == "?" || outputDestStr == "list")
+		{cout << legalOutputs << endl;  return 0;}
+	if (!outputDestStr.empty() && !NTV2_IS_VALID_OUTPUT_DEST(config.fOutputDest))
+		{cerr << "## ERROR:  Output '" << outputDestStr << "' not of:" << endl << legalOutputs << endl;	return 1;}
 
 	//	Pixel Format
 	const string pixelFormatStr (pPixelFormat  ?  pPixelFormat  :  "");
 	config.fPixelFormat = pixelFormatStr.empty() ? NTV2_FBF_8BIT_YCBCR : CNTV2DemoCommon::GetPixelFormatFromString(pixelFormatStr);
 	if (pixelFormatStr == "?"  ||  pixelFormatStr == "list")
-		{cout << CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec) << endl;  return 0;}
-	else if (!pixelFormatStr.empty()  &&  !NTV2_IS_VALID_FRAME_BUFFER_FORMAT(config.fPixelFormat))
+		{cout << CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, pDeviceSpec ? deviceSpec : "") << endl;  return 0;}
+	if (!pixelFormatStr.empty()  &&  !NTV2_IS_VALID_FRAME_BUFFER_FORMAT(config.fPixelFormat))
 	{
 		cerr	<< "## ERROR:  Invalid '--pixelFormat' value '" << pixelFormatStr << "' -- expected values:" << endl
 				<< CNTV2DemoCommon::GetPixelFormatStrings(PIXEL_FORMATS_ALL, deviceSpec) << endl;
@@ -99,16 +109,13 @@ int main (int argc, const char ** argv)
 	}
 
 	//	Timecode source...
-	const string	legalTCSources(CNTV2DemoCommon::GetTCIndexStrings(TC_INDEXES_ALL, deviceSpec));
-	const string	tcSourceStr		(pTcSource ? CNTV2DemoCommon::ToLower(pTcSource) : "");
+	const string tcSourceStr (pTcSource ? CNTV2DemoCommon::ToLower(pTcSource) : "");
+	const string legalTCSources (CNTV2DemoCommon::GetTCIndexStrings(TC_INDEXES_ALL, pDeviceSpec ? deviceSpec : ""));
+	config.fTimecodeSource = CNTV2DemoCommon::GetTCIndexFromString(tcSourceStr);
 	if (tcSourceStr == "?"  ||  tcSourceStr == "list")
 		{cout << legalTCSources << endl;  return 0;}
-	if (!tcSourceStr.empty())
-	{
-		config.fTimecodeSource = CNTV2DemoCommon::GetTCIndexFromString(tcSourceStr);
-		if (!NTV2_IS_VALID_TIMECODE_INDEX(config.fTimecodeSource))
-			{cerr << "## ERROR:  Timecode source '" << tcSourceStr << "' not one of these:" << endl << legalTCSources << endl;	return 1;}
-	}
+	if (!tcSourceStr.empty()  &&  !NTV2_IS_VALID_TIMECODE_INDEX(config.fTimecodeSource))
+		{cerr << "## ERROR:  Timecode source '" << tcSourceStr << "' not one of these:" << endl << legalTCSources << endl;	return 1;}
 
 	//	InputFrames
 	string framesSpec(pInFramesSpec ? pInFramesSpec : "");
@@ -136,6 +143,7 @@ int main (int argc, const char ** argv)
 	config.fDoMultiFormat	= doMultiFormat ? true : false;
 	config.fSuppressAudio	= noAudio ? true  : false;
 	config.fSuppressVideo	= noVideo ? true  : false;
+	config.fVerbose			= verbose ? true  : false;
 	config.fWithAnc			= noAnc   ? false : true;
 	config.fWithTallFrames	= doVanc  ? true  : false;
 	if (!config.fWithAnc  &&  config.fWithTallFrames)

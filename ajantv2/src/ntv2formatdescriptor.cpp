@@ -815,17 +815,21 @@ NTV2FormatDescriptor::NTV2FormatDescriptor ()
 }
 
 
-NTV2FormatDescriptor::NTV2FormatDescriptor (const ULWord inNumLines, const ULWord inNumPixels, const ULWord inLinePitch, const ULWord inFirstActiveLine)
+NTV2FormatDescriptor::NTV2FormatDescriptor (const ULWord inNumLines, const ULWord inNumPixels, const ULWord inLinePitch, const ULWord in1stActiveLine,
+											const UByte inNumLumaBits, const UByte inNumChromaBits, const UByte inNumAlphaBits)
 	:	numLines		(inNumLines),
 		numPixels		(inNumPixels),
 		linePitch		(inLinePitch),
-		firstActiveLine	(inFirstActiveLine),
+		firstActiveLine	(in1stActiveLine),
 		mStandard		(NTV2_STANDARD_INVALID),
 		mVideoFormat	(NTV2_FORMAT_UNKNOWN),
 		mPixelFormat	(NTV2_FBF_INVALID),
 		mVancMode		(NTV2_VANCMODE_INVALID),
 		mNumPlanes		(1),
-		mFrameGeometry	(NTV2_FG_INVALID)
+		mFrameGeometry	(NTV2_FG_INVALID),
+		mNumBitsLuma	(inNumLumaBits),
+		mNumBitsChroma	(inNumChromaBits),
+		mNumBitsAlpha	(inNumAlphaBits)
 {
 	mLinePitch[0] = inLinePitch * 4;	//	mLinePitch is in bytes, inLinePitch is in 32-bit longwords
 	mLinePitch[1] = mLinePitch[2] = mLinePitch[3] = 0;
