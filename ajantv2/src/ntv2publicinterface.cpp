@@ -1787,9 +1787,9 @@ bool NTV2Buffer::CopyFrom (const NTV2Buffer & inSrcBuffer, const NTV2SegmentedXf
 		void *			pDst (GetHostAddress(dstOffset));
 		if (!pSrc)	return false;
 		if (!pDst)	return false;
-		if (srcOffset + bytesPerSeg > inSrcBuffer.GetByteCount())
+		if (srcOffset + bytesPerSeg > LWord(inSrcBuffer.GetByteCount()))
 			return false;	//	memcpy will read past end of srcBuffer
-		if (dstOffset + bytesPerSeg > GetByteCount())
+		if (dstOffset + bytesPerSeg > LWord(GetByteCount()))
 			return false;	//	memcpy will write past end of me
 		::memcpy (pDst,	 pSrc,	size_t(bytesPerSeg));
 		srcOffset += srcPitch;	//	Bump src offset
