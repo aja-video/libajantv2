@@ -1038,7 +1038,7 @@ int dmaTransfer(PDMA_PARAMS pDmaParams)
 		if(videoNumSegments > 1000000)
 		{
 			hasVideo = false;
-			NTV2_MSG_ERROR("%s%d:%s%d:%s%d: dmaTransfer number of video segment to large %d\n", 
+			NTV2_MSG_ERROR("%s%d:%s%d:%s%d: dmaTransfer number of video segment too large %d\n", 
 						   DMA_MSG_CONTEXT, videoNumSegments);
 		}
 		if(videoNumSegments == 0)
