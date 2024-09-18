@@ -3523,11 +3523,12 @@ private:
 			switch (NTV4FrameStoreRegs(ntv4RegNum))
 			{
 				case regNTV4FS_RasterControl:
-				{	const ULWord sync ((inRegValue & (BIT(20)|BIT(21))) >> 20);
+				{	const ULWord disabled (inRegValue & BIT(1));
+					const ULWord sync ((inRegValue & (BIT(20)|BIT(21))) >> 20);
 					const ULWord pixClkSel((inRegValue & (BIT(16)|BIT(17)|BIT(18))) >> 16);
 					const ULWord pixFmt((inRegValue & (BIT(8)|BIT(9)|BIT(10)|BIT(11)|BIT(12))) >> 8);
-					if (inRegValue & BIT(1))
-						oss	<< "Enabled: "		<< YesNo(inRegValue & BIT( 1))							<< endl
+					if (!disabled)
+						oss	<< "Enabled: "		<< YesNo(!disabled)										<< endl
 							<< "Mode: "			<< ((inRegValue & BIT( 0)) ? "Capture" : "Display")		<< endl
 							<< "DRT_DISP: "		<< OnOff(inRegValue & BIT( 2))							<< endl
 							<< "Fill Bit: "		<< DEC((inRegValue & BIT( 3)) ? 1 : 0)					<< endl
@@ -3538,7 +3539,7 @@ private:
 							<< "Pix Clk Sel: "	<< sPixClkSelects[pixClkSel] << " MHz"					<< endl
 							<< "Sync: "			<< sSyncs[sync];
 					else
-						oss	<< "Enabled: "		<< YesNo(inRegValue & BIT( 1));
+						oss	<< "Enabled: "		<< YesNo(!disabled);
 					break;
 				}
 				case regNTV4FS_Status:

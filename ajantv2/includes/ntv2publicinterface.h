@@ -6025,11 +6025,12 @@ typedef enum
 				ULWord		fByteCount;				///< @brief The (maximum) size of the buffer pointed to by fUserSpacePtr, in bytes.
 													///			Do not set directly. Instead, use the constructor or the Set method.
 				ULWord		fFlags;					///< @brief Reserved for future use
-				ULWord64	fKernelSpacePtr;		///< @brief Reserved -- driver use only
 				#if defined (AJAMac)
+					ULWord64	fKernelSpacePtr;	///< @brief Reserved -- Mac driver use only
 					ULWord64	fIOMemoryDesc;		///< @brief Reserved -- Mac driver use only
 					ULWord64	fIOMemoryMap;		///< @brief Reserved -- Mac driver use only
 				#else
+					ULWord64	fKernelSpacePtr;	///< @brief Reserved -- New in SDK 17.5
 					ULWord64	fKernelHandle;		///< @brief Reserved -- driver use only
 				#endif
 			NTV2_END_PRIVATE
@@ -7008,6 +7009,7 @@ typedef enum
 					inline ULWord	GetPointerSize (void) const			{return fPointerSize;}	//	New in SDK 16.3
 					inline ULWord	GetConnectionID (void) const			{return fOperation;}	//	New in SDK 16.3
 					inline void		SetConnectionID (const ULWord inValue)	{fOperation = inValue;}	//	New in SDK 16.3
+					inline ULWord	GetResultStatus (void) const			{return fResultStatus;}	//	New in SDK 17.5
 
 					/**
 						@brief	Prints a human-readable representation of me into the given output stream.
@@ -7020,6 +7022,8 @@ typedef enum
 						@return		True if my tag and type fields are valid;  otherwise false.
 					**/
 					inline bool		IsValid (void) const	{return NTV2_IS_VALID_HEADER_TAG(fHeaderTag) && NTV2_IS_VALID_STRUCT_TYPE(fType);}
+
+					inline void		ClearResultStatus (void)		{fResultStatus = 0;}	//	New in SDK 17.5
 
 					static std::string FourCCToString (const ULWord in4CC);
 
