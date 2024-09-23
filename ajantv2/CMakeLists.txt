@@ -676,6 +676,7 @@ if (NOT TARGET ${PROJECT_NAME})
         target_compile_definitions(${PROJECT_NAME} PUBLIC
             ${TARGET_COMPILE_DEFS_DYNAMIC}
             ${AJANTV2_TARGET_COMPILE_DEFS})
+        target_compile_definitions(${PROJECT_NAME} PRIVATE ${AJANTV2_TARGET_COMPILE_DEFS_PRIVATE})
 
         set_target_properties(${PROJECT_NAME} PROPERTIES VERSION "${AJA_NTV2_VER_STR}")
 
@@ -694,6 +695,7 @@ if (NOT TARGET ${PROJECT_NAME})
         target_compile_definitions(${PROJECT_NAME} PUBLIC
             ${TARGET_COMPILE_DEFS_STATIC}
             ${AJANTV2_TARGET_COMPILE_DEFS})
+        target_compile_definitions(${PROJECT_NAME} PRIVATE ${AJANTV2_TARGET_COMPILE_DEFS_PRIVATE})
     endif()
 
     set(_compiler_id_c_or_cxx_msvc $<OR:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>)
