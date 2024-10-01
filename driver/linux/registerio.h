@@ -603,13 +603,28 @@ void WriteRegister(	ULWord deviceNumber,
 					ULWord registerMask,
 					ULWord registerShift);
 
+int WriteReg(	ULWord deviceNumber,
+				ULWord registerNumber,
+				ULWord registerValue,
+				ULWord registerMask,
+				ULWord registerShift);
+
 // Write a group of registers as a block
 void WriteRegisterBufferULWord(	ULWord deviceNumber,
 								ULWord registerNumber,
 								ULWord* sourceData,
 								ULWord sourceDataSizeULWords);
 
-ULWord ReadRegister(ULWord deviceNumber,ULWord registerNumber, ULWord registerMask, ULWord registerShift);
+ULWord ReadRegister(    ULWord deviceNumber,
+                        ULWord registerNumber,
+                        ULWord registerMask,
+                        ULWord registerShift);
+
+int ReadReg(    ULWord deviceNumber,
+                ULWord registerNumber,
+                ULWord* registerValue,
+                ULWord registerMask,
+                ULWord registerShift);
 
 // old stuff
 void WriteVideoProcessingControl(ULWord deviceNumber,ULWord value);

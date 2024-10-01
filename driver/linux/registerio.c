@@ -297,11 +297,25 @@ void WriteRegister(	ULWord deviceNumber,
 					ULWord registerMask,
 					ULWord registerShift)
 {
+    WriteReg(   deviceNumber,
+                registerNumber,
+                registerValue,
+                registerMask,
+                registerShift);
+}
+
+int WriteReg(	ULWord deviceNumber,
+				ULWord registerNumber,
+				ULWord registerValue,
+				ULWord registerMask,
+				ULWord registerShift)
+{
 	unsigned long flags = 0;
 	NTV2PrivateParams *pNTV2Params;
 	NTV2ModulePrivateParams *pNTV2ModuleParams;
 	unsigned long address = 0;
 	ULWord oldValue = 0;
+    int status = 0;
 
 	//	printk("WR(%d): r(%x) v(%x)\n", deviceNumber, registerNumber, registerValue );
 
@@ -311,7 +325,7 @@ void WriteRegister(	ULWord deviceNumber,
 	if (!pNTV2Params->registerEnable &&
 		!((registerNumber >= VIRTUALREG_START) && (registerNumber <= kVRegLast)))
 	{
-		return;
+		return -EACCES;
 	}
 	
 	address = GetRegisterAddress(deviceNumber, registerNumber);
@@ -324,7 +338,7 @@ void WriteRegister(	ULWord deviceNumber,
 		if ( !IsRegisterNumValid(pNTV2Params, registerNumber, address))
 		{
 //			printk("%s: attempt to write unsupported hardware register %d address 0x%08lx\n", __FUNCTION__, registerNumber, address);
-			return;
+			return -EINVAL;
 		}
 		if (registerNumber <= pNTV2Params->_numberOfHWRegisters)
 		{
@@ -592,13 +606,14 @@ void WriteRegister(	ULWord deviceNumber,
             }
         }
         
-		return;
+		return 0;
 	}
 
 	// Handle virtual registers
 	if ( (registerNumber >= VIRTUALREG_START) && (registerNumber <= kVRegLast) )
 	{
 		ntv2_spin_lock_irqsave(&(pNTV2Params->_virtualRegisterLock), flags);
+        status = 0;
 
 		switch(registerNumber)
 		{
@@ -673,7 +688,10 @@ void WriteRegister(	ULWord deviceNumber,
 			break;
 
 		case kVRegApplicationCode:
-			pNTV2Params->_ApplicationCode = registerValue;
+			if( pNTV2Params->_ApplicationPID == 0 )
+                pNTV2Params->_ApplicationCode = registerValue;
+            else
+                status = -EBUSY;
 			break;
 
 		case kVRegReleaseApplication:
@@ -721,11 +739,12 @@ void WriteRegister(	ULWord deviceNumber,
 
 		ntv2_spin_unlock_irqrestore(&(pNTV2Params->_virtualRegisterLock), flags);
 
-		return;
+		return status;
 	}
 
 	MSG("%s: BUG BUG %s: Attempt to write register %u with value 0x%x was not handled\n",
 		pNTV2Params->name, __FUNCTION__, registerNumber, registerValue);
+    return -EINVAL;
 }
 
 // Write a group of registers as a block
@@ -770,7 +789,26 @@ void WriteRegisterBufferULWord(	ULWord deviceNumber,
 
 // Read a register by number.  Reading of virual registers is done here too.
 //
-ULWord ReadRegister(ULWord deviceNumber, ULWord registerNumber, ULWord registerMask, ULWord registerShift)
+ULWord ReadRegister(    ULWord deviceNumber,
+                        ULWord registerNumber,
+                        ULWord registerMask,
+                        ULWord registerShift)
+{
+    ULWord value = 0;
+    ReadReg(deviceNumber,
+            registerNumber,
+            &value,
+            registerMask,
+            registerShift);
+
+    return value;
+}
+
+int ReadReg(    ULWord deviceNumber,
+                ULWord registerNumber,
+                ULWord* registerValue,
+                ULWord registerMask,
+                ULWord registerShift)
 {
 	ULWord value;
 	NTV2PrivateParams* pNTV2Params;
@@ -781,12 +819,16 @@ ULWord ReadRegister(ULWord deviceNumber, ULWord registerNumber, ULWord registerM
 	pNTV2ModuleParams = getNTV2ModuleParams();
 	pNTV2Params = getNTV2Params(deviceNumber);
 
+	if (registerValue == NULL)
+		return -EPERM;
+
 	if (!pNTV2Params->registerEnable &&
 		!((registerNumber >= VIRTUALREG_START) && (registerNumber <= kVRegLast)))
 	{
 		if (registerNumber == kRegBoardID)
 			return pNTV2Params->_DeviceID;
-		return 0;
+		*registerValue = 0;
+        return -EACCES;
 	}
 
 	address = GetRegisterAddress( deviceNumber, registerNumber);
@@ -803,7 +845,8 @@ ULWord ReadRegister(ULWord deviceNumber, ULWord registerNumber, ULWord registerM
 //			MSG("%s: attempt to read unsupported hardware register %u address 0x%08lx\n",
 //				pNTV2Params->name, registerNumber, address);
 //			return 0xFFFFFFFF;
-			return 0;
+            *registerValue = 0;
+			return -EINVAL;
 		}
 
 #ifdef SOFTWARE_UART_FIFO
@@ -940,7 +983,8 @@ ULWord ReadRegister(ULWord deviceNumber, ULWord registerNumber, ULWord registerM
 		// Mask and shift is only applied to real registers.
 		value &= registerMask;
 		value >>= registerShift;
-		return value;
+		*registerValue = value;
+        return 0;
 	}
 
 	// It is a virtual register, return the right value here.
@@ -949,16 +993,20 @@ ULWord ReadRegister(ULWord deviceNumber, ULWord registerNumber, ULWord registerM
 		switch(registerNumber)
 		{
 		case kVRegBA0MemorySize:
-			return pNTV2Params->_BAR0MemorySize;
+			*registerValue = pNTV2Params->_BAR0MemorySize;
+            return 0;
 
 		case kVRegBA1MemorySize:
-			return pNTV2Params->_BAR1MemorySize;
+			*registerValue = pNTV2Params->_BAR1MemorySize;
+            return 0;
 
 		case kVRegBA2MemorySize:
-			return pNTV2Params->_BAR2MemorySize;
+			*registerValue = pNTV2Params->_BAR2MemorySize;
+            return 0;
 
 		case kVRegBA4MemorySize:
-			return 0;
+			*registerValue = 0;
+            return 0;
 
 			//			case kRegBA4MemoryBase:
 			//				return pNTV2Params->_BA4MemorySize;
@@ -968,14 +1016,17 @@ ULWord ReadRegister(ULWord deviceNumber, ULWord registerNumber, ULWord registerM
 
 		case kVRegDMADriverBufferPhysicalAddress:
 			// If value is 0, failure or bigphysarea patch not applied
-			return pNTV2Params->_dmaBuffer ?  : -1;
+			*registerValue = pNTV2Params->_dmaBuffer ?  : -1;
+            return 0;
 
 		case kVRegNumDmaDriverBuffers:
-			return 0;
+			*registerValue = 0;
+            return 0;
 
 		case kVRegGlobalAudioPlaybackMode:
 			// If value is 0, failure or bigphysarea patch not applied
-			return pNTV2Params->_globalAudioPlaybackMode;
+			*registerValue = pNTV2Params->_globalAudioPlaybackMode;
+            return 0;
 
 		case kVRegProcAmpSDRegsInitialized:
 		case kVRegProcAmpStandardDefBrightness:
@@ -998,32 +1049,39 @@ ULWord ReadRegister(ULWord deviceNumber, ULWord registerNumber, ULWord registerM
 			{
 //				MSG("%s: Attempt to read virtual procamp register %u failed\n",
 //					pNTV2Params->name, registerNumber );
-				return -1;
+				*registerValue = -1;
+                return -EIO;
 			}
 			else
-				return value;
+            {
+				*registerValue = value;
+                return 0;
+            }
 
 		case kVRegAudioSyncTolerance:
-			return pNTV2Params->_audioSyncTolerance;
+			*registerValue = pNTV2Params->_audioSyncTolerance;
+            return 0;
 
 		case kVRegDmaSerialize:
-			return pNTV2Params->_dmaSerialize;
+			*registerValue = pNTV2Params->_dmaSerialize;
+            return 0;
 
 		case kVRegSyncChannels:
-			return pNTV2Params->_syncChannels;
+			*registerValue = pNTV2Params->_syncChannels;
+            return 0;
 
 		// Control panel
 		case kVRegApplicationPID:
-			return pNTV2Params->_ApplicationPID;
-			break;
+			*registerValue = pNTV2Params->_ApplicationPID;
+			return 0;
 
 		case kVRegApplicationCode:
-			return pNTV2Params->_ApplicationCode;
-			break;
+			*registerValue = pNTV2Params->_ApplicationCode;
+			return 0;
 
 		case kVRegAcquireLinuxReferenceCount:
-			return pNTV2Params->_ApplicationReferenceCount;
-			break;
+			*registerValue = pNTV2Params->_ApplicationReferenceCount;
+			return 0;
 
 		case kVRegMailBoxAcquire:
 			{
@@ -1032,39 +1090,41 @@ ULWord ReadRegister(ULWord deviceNumber, ULWord registerNumber, ULWord registerM
 				ULWord	timeout = ntv2_getRoundedUpTimeoutJiffies(pNTV2Params->_VirtualMailBoxTimeoutNS / 10000);
 
 				status = down_timeout(&pNTV2Params->_mailBoxSemaphore, timeout);
-				return (status < 0) ? false : true;
+				*registerValue = (status < 0) ? false : true;
+                return 0;
 			}
 			break;
 
 		case kVRegMailBoxRelease:
 			up(&pNTV2Params->_mailBoxSemaphore);
-			return true;
-			break;
+			*registerValue = (ULWord)true;
+			return 0;
 
 		case kVRegMailBoxAbort:
 			up(&pNTV2Params->_mailBoxSemaphore);
-			return true;
-			break;
+			*registerValue = (ULWord)true;
+			return 0;
 
 		case kVRegMailBoxTimeoutNS:
-			return pNTV2Params->_VirtualMailBoxTimeoutNS;
-			break;
+			*registerValue = pNTV2Params->_VirtualMailBoxTimeoutNS;
+			return 0;
 
 		case kVRegPCIMaxReadRequestSize:
-			return ntv2ReadPciMaxReadRequestSize(&pNTV2Params->systemContext);
-			break;
+			*registerValue = ntv2ReadPciMaxReadRequestSize(&pNTV2Params->systemContext);
+			return 0;
 			
 		default:
 			// return virtual reg
-			return pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START];
-			break;
+			*registerValue = pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START];
+			return 0;
 		} // switch
 	}
 
 	MSG("%s: BUG BUG: Attempt to read register %u was not handled\n",
 		pNTV2Params->name, registerNumber );
 
-	return 0xFFFFFFFF;
+	*registerValue = 0xFFFFFFFF;
+    return -EINVAL;
 }
 
 void WriteVideoProcessingControl(ULWord deviceNumber,ULWord value)
