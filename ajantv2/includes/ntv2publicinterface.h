@@ -4287,9 +4287,9 @@ typedef enum
 **/
 typedef enum
 {
-	NTV2_DISABLE_TASKS,				///< @brief 0: Disabled: Device is completely configured by controlling application(s) -- no driver involvement.
-	NTV2_STANDARD_TASKS,			///< @brief 1: Standard/Retail: Device is completely controlled by AJA ControlPanel, service/daemon, and driver.
-	NTV2_OEM_TASKS,					///< @brief 2: OEM: Device is configured by controlling application(s), with minimal driver involvement.
+	NTV2_DISABLE_TASKS,		///< @brief 0: Disabled (never recommended): device configured exclusively by client application(s).
+	NTV2_STANDARD_TASKS,	///< @brief 1: Standard/Retail: device configured by AJA ControlPanel, service/daemon, and driver.
+	NTV2_OEM_TASKS,			///< @brief 2: OEM (recommended): device configured by client application(s) with some driver involvement.
 	NTV2_TASK_MODE_INVALID	= 0xFF
 } NTV2EveryFrameTaskMode, NTV2TaskMode;
 
