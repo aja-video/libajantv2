@@ -92,6 +92,14 @@
 #define NTV2_MAX_HDMI_MONITOR	4
 #define NTV2_MAX_DMA_STREAMS    8
 
+// module driver mode
+typedef enum _NTV2DriveMode
+{
+    eDriverModeAll = 0,     // support all driver functions
+    eDriverModeRegister,    // only support register access
+    eDriverModeGenlock      // register access with genlock initialization
+} NTV2DriverMode;
+
 // Singleton module params
 typedef struct ntv2_module_private
 {
@@ -101,6 +109,7 @@ typedef struct ntv2_module_private
 	char *	driverName;
 	ULWord	intrBitLut[eNumInterruptTypes];
 	struct class *class;
+    NTV2DriverMode driverMode;
 
 	// uart driver
 	struct uart_driver 			*uart_driver;
