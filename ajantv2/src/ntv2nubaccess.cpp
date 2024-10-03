@@ -1894,7 +1894,7 @@ string NTV2RPCBase::ShortSDKVersion (void)
 
 string NTV2RPCBase::AJAFingerprint (const bool inLowerCase, const bool inStripColons)
 {
-	static const string	sAJAFingerprint ("70:1A:37:93:FA:4F:34:30:58:55:51:0C:01:4E:45:7C:BE:5B:41:62");
+	static const string	sAJAFingerprint ("70:1A:37:93:FA:4F:34:30:58:55:51:0C:01:4E:45:7C:BE:5B:41:65");
 	string result(sAJAFingerprint);
 	if (inStripColons)
 		aja::replace(result, ":", "");
