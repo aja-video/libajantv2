@@ -3103,7 +3103,6 @@ static int __init aja_ntv2_module_init(void)
     strncpy(versionString, DriverMode, STRMAX);
     versionString[STRMAX - 1] = '\0';
     driverModeString = strstrip(versionString);
-    for (char* c = driverModeString; *c != '\0'; c++) *c = tolower(*c);
     if (strcmp(driverModeString, "all") == 0)
     {
         getNTV2ModuleParams()->driverMode = eDriverModeAll;
