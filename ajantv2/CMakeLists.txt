@@ -494,7 +494,7 @@ set(AJABASE_SOURCES
     ${AJABASE_PNP_SOURCES}
     ${AJABASE_SYS_SOURCES})
 
-list(APPEND TARGET_COMPILE_DEFS
+list(APPEND TARGET_COMPILE_DEFS_PRIVATE
     -DAJA_GIT_COMMIT_HASH="${AJA_GIT_COMMIT_HASH}"
     -DAJA_GIT_COMMIT_HASH_SHORT="${AJA_GIT_COMMIT_HASH_SHORT}")
 
@@ -506,7 +506,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	list(REMOVE_ITEM AJANTV2_TARGET_COMPILE_DEFS
 		-DUNICODE
 		-D_UNICODE)
-    list(APPEND TARGET_COMPILE_DEFS
+    list(APPEND TARGET_COMPILE_DEFS_PRIVATE
         -D_MBCS
         -DCRT_NONSTDC_DEPRECATE
         -D_WINSOCK_DEPRECATED_NO_WARNINGS
@@ -674,9 +674,14 @@ if (NOT TARGET ${PROJECT_NAME})
         endif()
 
         target_compile_definitions(${PROJECT_NAME} PUBLIC
+            $<$<CONFIG:Debug>:AJA_DEBUG>
             ${TARGET_COMPILE_DEFS_DYNAMIC}
             ${AJANTV2_TARGET_COMPILE_DEFS})
-        target_compile_definitions(${PROJECT_NAME} PRIVATE ${AJANTV2_TARGET_COMPILE_DEFS_PRIVATE})
+        target_compile_definitions(${PROJECT_NAME} PRIVATE 
+            $<$<CONFIG:DEBUG>:_DEBUG>
+            $<$<NOT:$<CONFIG:DEBUG>>:AJA_NDEBUG>
+            ${TARGET_COMPILE_DEFS_PRIVATE}
+            ${AJANTV2_TARGET_COMPILE_DEFS_PRIVATE})
 
         set_target_properties(${PROJECT_NAME} PROPERTIES VERSION "${AJA_NTV2_VER_STR}")
 
@@ -693,9 +698,14 @@ if (NOT TARGET ${PROJECT_NAME})
         endif()
 
         target_compile_definitions(${PROJECT_NAME} PUBLIC
+            $<$<CONFIG:Debug>:AJA_DEBUG>
             ${TARGET_COMPILE_DEFS_STATIC}
             ${AJANTV2_TARGET_COMPILE_DEFS})
-        target_compile_definitions(${PROJECT_NAME} PRIVATE ${AJANTV2_TARGET_COMPILE_DEFS_PRIVATE})
+        target_compile_definitions(${PROJECT_NAME} PRIVATE
+            $<$<CONFIG:DEBUG>:_DEBUG>
+            $<$<NOT:$<CONFIG:DEBUG>>:NDEBUG>
+            ${TARGET_COMPILE_DEFS_PRIVATE}
+            ${AJANTV2_TARGET_COMPILE_DEFS_PRIVATE})
     endif()
 
     set(_compiler_id_c_or_cxx_msvc $<OR:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>)

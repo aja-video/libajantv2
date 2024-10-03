@@ -1,18 +1,5 @@
 include_guard(GLOBAL)
 
-# Common preprocessor defines
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-    list(APPEND AJANTV2_TARGET_COMPILE_DEFS
-        -DAJA_DEBUG
-        -D_DEBUG)
-elseif(CMAKE_BUILD_TYPE MATCHES RelWithDebInfo)
-    list(APPEND AJANTV2_TARGET_COMPILE_DEFS
-        -DNDEBUG)
-else()
-    list(APPEND AJANTV2_TARGET_COMPILE_DEFS
-        -DNDEBUG)
-endif()
-
 # Platform-specific preprocessor defines
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     list(APPEND AJANTV2_TARGET_COMPILE_DEFS
