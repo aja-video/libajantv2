@@ -1554,11 +1554,16 @@ bool CNTV2Card::GetInputAudioChannelPairsWithoutPCM (const NTV2Channel inSDIInpu
 	return true;
 }
 
-
+//	GetSDIOutputAudioEnabled, SetSDIOutputAudioEnabled:
+//	The audio HANC disable bit actually controls the SDI Output, not the Audio System
+//	(They probably should've been put in the SDIOut widget control registers.)
+//	Also thanks to "legacy", bits 13 & 15 control an even-numbered and odd-numbered, respectively, SDI output:
+//	Thus the ctrl reg of AudSys1 controls SDI1 & SDI2;  AudSys3 controls SDIOut3 & SDIOut4;  AudSys5 for SDI5 & SDI6; etc...
+//	The control registers of Audio Systems 2, 4, 6 & 8 ignore bits 13 & 15.
 static const ULWord kAudCtrlRegsForSDIOutputs []	=	{	kRegAud1Control,	kRegAud1Control,	kRegAud3Control,	kRegAud3Control,
 															kRegAud5Control,	kRegAud5Control,	kRegAud7Control,	kRegAud7Control };
 
-bool CNTV2Card::GetAudioOutputEmbedderState (const NTV2Channel inSDIOutputSpigot, bool & outIsEnabled)
+bool CNTV2Card::GetSDIOutputAudioEnabled (const NTV2Channel inSDIOutputSpigot, bool & outIsEnabled)
 {
 	outIsEnabled = true;	//	presume normal
 	if (!NTV2_IS_VALID_CHANNEL (inSDIOutputSpigot))
@@ -1575,7 +1580,7 @@ bool CNTV2Card::GetAudioOutputEmbedderState (const NTV2Channel inSDIOutputSpigot
 	return true;
 }
 
-bool CNTV2Card::SetAudioOutputEmbedderState (const NTV2Channel inSDIOutputSpigot, const bool & inEnable)
+bool CNTV2Card::SetSDIOutputAudioEnabled (const NTV2Channel inSDIOutputSpigot, const bool & inEnable)
 {
 	if (!NTV2_IS_VALID_CHANNEL (inSDIOutputSpigot))
 		return false;

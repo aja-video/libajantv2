@@ -817,7 +817,7 @@ void CNTV2SupportLogger::FetchAudioLog (ostringstream & oss) const
 			else if (NTV2_IS_OUTPUT_MODE(mode))
 			{
 				bool isEmbedderEnabled = false;
-				mDevice.GetAudioOutputEmbedderState(NTV2Channel(audSys), isEmbedderEnabled);
+				mDevice.GetSDIOutputAudioEnabled(NTV2Channel(audSys), isEmbedderEnabled);
 				UWord inChannelCount = isEmbedderEnabled ? maxNumChannels : 0;
 
 				//	Generates a NTV2AudioChannelPairs set for the given number of audio channels...
