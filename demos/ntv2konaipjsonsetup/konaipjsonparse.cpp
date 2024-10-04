@@ -479,7 +479,7 @@ void CKonaIpJsonParse2110::GetGrandMasterID(const std::string str, uint8_t (&id)
 QString CKonaIpJsonParse2110::GetGrandMasterID(const uint8_t id[8])
 {
 	char buf[256];
-    sprintf(buf, "%02X-%02X-%02X-%02X-%02X-%02X-%02X-%02X",
+    snprintf(buf, sizeof(buf), "%02X-%02X-%02X-%02X-%02X-%02X-%02X-%02X",
             id[0], id[1], id[2], id[3], id[4], id[5], id[6], id[7]);
     return QString(buf);
 }

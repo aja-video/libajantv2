@@ -212,11 +212,11 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 		{
 			//Insert ELAR
 			string ELARString(":02000004000000");
-			::sprintf(&ELARString[9], "%04X", ExtendedBaseAddress);
+			::snprintf(&ELARString[9],sizeof(ELARString)-9, "%04X", ExtendedBaseAddress);
 			for (i = 1;	 i < 13;  i++)
 				checksum += UByte(ELARString[i]) - 0x30;
 			checksum = (~checksum) + 1;
-			::sprintf(&ELARString[13], "%02X", checksum);
+			::snprintf(&ELARString[13],sizeof(ELARString)-13, "%02X", checksum);
 			IRecordOutput(ELARString.c_str());
 			ExtendedBaseAddress++;
 			checksum = 0;
@@ -224,26 +224,26 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 
 		iRecord[0] = ':';
 
-		::sprintf(&iRecord[1], "%02X", UByte(recordSize));
+		::snprintf(&iRecord[1],sizeof(iRecord)-1, "%02X", UByte(recordSize));
 		checksum += UByte(recordSize);
 
 		UWord addr = baseAddress;
 		UByte aa = ((addr >> 8) & 0xff);
-		::sprintf(&iRecord[3], "%02X", aa);
+		::snprintf(&iRecord[3],sizeof(iRecord)-3, "%02X", aa);
 		checksum += aa;
 
 		aa = ((addr)& 0xff);
-		::sprintf(&iRecord[5], "%02X", aa);
+		::snprintf(&iRecord[5],sizeof(iRecord)-5, "%02X", aa);
 		checksum += aa;
 
-		::sprintf(&iRecord[7], "%02X", recordType);
+		::snprintf(&iRecord[7],sizeof(iRecord)-7, "%02X", recordType);
 
 		index = 9;
 
 		while (i < int(recordSize))
 		{
 			unsigned char dd = bitfileBuffer.U8(int(bitfileBufferNdx++));
-			::sprintf(&iRecord[index], "%02X", dd);
+			::snprintf(&iRecord[index],sizeof(iRecord)-index, "%02X", dd);
 			checksum += dd;
 			i++;
 			index += 2;
@@ -252,7 +252,7 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 
 		baseAddress += 0x0010;
 		checksum = (~checksum) + 1;
-		::sprintf(&iRecord[index], "%02X", checksum);
+		::snprintf(&iRecord[index],sizeof(iRecord)-index, "%02X", checksum);
 
 		IRecordOutput(iRecord);
 	}	//	while bytesLeftToWrite > 0
@@ -277,11 +277,11 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 		{
 			//Insert ELAR
 			string ELARString(":02000004000000");
-			::sprintf(&ELARString[9], "%04X", ExtendedBaseAddress);
+			::snprintf(&ELARString[9],sizeof(ELARString)-9, "%04X", ExtendedBaseAddress);
 			for (i = 1;	 i < 13;  i++)
 				checksum += ELARString[i] - 0x30;
 			checksum = (~checksum) + 1;
-			::sprintf(&ELARString[13], "%02X", checksum);
+			::snprintf(&ELARString[13],sizeof(ELARString)-13, "%02X", checksum);
 			IRecordOutput(ELARString.c_str());
 			ExtendedBaseAddress++;
 			checksum = 0;
@@ -289,25 +289,25 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 
 		iRecord[0] = ':';
 
-		::sprintf(&iRecord[1], "%02X", UByte(recordSize));
+		::snprintf(&iRecord[1],sizeof(iRecord)-1, "%02X", UByte(recordSize));
 		checksum += UByte(recordSize);
 
 		UWord addr = baseAddress;
 		UByte aa = ((addr >> 8) & 0xff);
-		::sprintf(&iRecord[3], "%02X", aa);
+		::snprintf(&iRecord[3],sizeof(iRecord)-3, "%02X", aa);
 		checksum += aa;
 
 		aa = ((addr)& 0xff);
-		::sprintf(&iRecord[5], "%02X", aa);
+		::snprintf(&iRecord[5],sizeof(iRecord)-5, "%02X", aa);
 		checksum += aa;
 
-		::sprintf(&iRecord[7], "%02X", recordType);
+		::snprintf(&iRecord[7],sizeof(iRecord)-7, "%02X", recordType);
 
 		index = 9;
 		while (i < int(recordSize))
 		{
 			unsigned char dd = mCommentString.at(commentIndex);
-			::sprintf(&iRecord[index], "%02X", dd);
+			::snprintf(&iRecord[index],sizeof(iRecord)-index, "%02X", dd);
 			checksum += dd;
 			i++;
 			index += 2;
@@ -317,7 +317,7 @@ bool CNTV2MCSfile::InsertBitFile (const string & inBitFileName, const string & i
 
 		baseAddress += 0x0010;
 		checksum = (~checksum) + 1;
-		::sprintf(&iRecord[index], "%02X", checksum);
+		::snprintf(&iRecord[index],sizeof(iRecord)-index, "%02X", checksum);
 		IRecordOutput(iRecord);
 	}
 
@@ -384,12 +384,12 @@ uint32_t CNTV2MCSfile::GetFileByteStream (uint32_t numberOfLines)
 bool CNTV2MCSfile::FindExtendedLinearAddressRecord (uint16_t address /*= 0x0000*/)
 {
 	string ELARString(":02000004000000");
-	::sprintf(&ELARString[9], "%04X", address);
+	::snprintf(&ELARString[9],sizeof(ELARString)-9, "%04X", address);
 	uint8_t checksum = 0;
 	for (int i = 1;	 i < 13;  i++)
 		checksum += ELARString[i] - 0x30;
 	checksum = (~checksum) + 1;
-	::sprintf(&ELARString[13], "%02X", checksum);
+	::snprintf(&ELARString[13],sizeof(ELARString)-13, "%02X", checksum);
 
 	// Do a search for a match, don't search on the checksum
 	string needle(ELARString, 0, 13);

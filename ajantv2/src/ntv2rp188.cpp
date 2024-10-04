@@ -702,9 +702,9 @@ void CRP188::SetRP188 (ULWord ulFrms, ULWord ulSecs, ULWord ulMins, ULWord ulHrs
 	// format TC
 	char timeCodeString[80];
 	if (bDropFrame)
-		sprintf(timeCodeString,"%02d:%02d:%02d;%02d", ulHrs, ulMins, ulSecs, ulFrms);	// drop frame uses ';'
+		snprintf(timeCodeString,sizeof(timeCodeString),"%02d:%02d:%02d;%02d", ulHrs, ulMins, ulSecs, ulFrms);	// drop frame uses ';'
 	else
-		sprintf(timeCodeString,"%02d:%02d:%02d:%02d", ulHrs, ulMins, ulSecs, ulFrms);	// non-drop uses ':'
+		snprintf(timeCodeString,sizeof(timeCodeString),"%02d:%02d:%02d:%02d", ulHrs, ulMins, ulSecs, ulFrms);	// non-drop uses ':'
 
 	_sHMSF = timeCodeString;
 
