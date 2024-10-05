@@ -16,15 +16,14 @@ This is the open-source SDK for discovering, interrogating and controlling NTV2 
 
 # Table of Contents
 1. [Directory Layout](#directory-layout)
-1. [Obtaining libajantv2](#obtaining)
-1. [Building libajantv2](#building)
-1. [Building the Kernel Module Driver (Linux)](#building-kernel-module)
-1. [Verifying the Kernel Module Driver (Linux)](#verifying-kernel-module)
-1. [Customizing libajantv2](#customizing-ntv2)
+1. [Obtaining ‘libajantv2’](#obtaining-libajantv2)
+1. [Building ‘libajantv2’](#building-libajantv2)
+1. [Building the NTV2 Device Driver](#building-driver)
+1. [Verifying the NTV2 Device Driver](#verifying-driver)
 1. [SDK Forward & Backward Compatibility](#fwdbackcompatibility)
-1. [Driver Compatibility](#drivercompat)
+1. [SDK & Driver Compatibility](#drivercompat)
 1. [Firmware and Device Features](#fwdevicefeatures)
-1. [libajantv2 Dynamic (Shared) Libary](#dynamiclib)
+1. [‘libajantv2’ Dynamic (Shared) Libary](#dynamiclib)
 
 ## Directory Layout
 The **libajantv2** folder contains the following items:
@@ -44,14 +43,14 @@ The **libajantv2** folder contains the following items:
 - **thirdparty** — Required non-AJA packages (e.g. **doctest**)
 - **tools** — Useful command-line utilities.
 
-## Obtaining libajantv2
+## Obtaining libajantv2 <a name="obtaining-libajantv2"></a>
 
 Clone the libajantv2 repository from GitHub:
 ```
 > git clone git@github.com:aja-video/libajantv2.git
 ```
 
-## Building libajantv2
+## Building libajantv2 <a name="building-libajantv2"></a>
 Starting in the NTV2 SDK version 17.0, AJA has standardized on [CMake](https://cmake.org/) for describing how to build the libraries, demonstration applications, command-line tools, unit tests, and plugins. AJA requires CMake version 3.15 or later.
 
 The instructions for building the default static library are generally the same on each supported platform (Windows, macOS, Linux). Note that the default "CMake Generator" varies by platform.
@@ -73,12 +72,12 @@ The default is `OFF`, which includes the `mbedtls` library depdendency and the a
 
 Please follow the instructions below to build `libajantv2` on the supported platform and development environment of your preference.
 
-## Windows
-  <details><summary>Option 1: Command-line build instructions:</summary>
+### Windows
+  <details><summary>Command-line build instructions:</summary>
 
-  1. Open a command prompt window (`cmd`) and initialize your Visual Studio environment by running the `vcvarsall.cmd` script from the desired Microsoft Visual Studio directory. The location of vcvarsall.cmd may vary depending on the version of Visual Studio installed on the development system.
+  1. Open a command prompt window (`cmd`) and initialize your Visual Studio environment by running the `vcvarsall.cmd` script from the desired Microsoft Visual Studio directory. The location of `vcvarsall.cmd` may vary depending on the version of Visual Studio installed on the development system.
 
-     For example, if using Visual Studio 2019 Community Edition:
+     For example, if using **Visual Studio 2019 Community Edition**:
      ```
      > SET VS_YEAR=2019
      > SET VS_EDITION=Community
@@ -103,16 +102,15 @@ Please follow the instructions below to build `libajantv2` on the supported plat
 
   </details>
 
-  <details><summary>Option 2: Visual Studio IDE build instructions:</summary>
-  Follow these instructions to build `libajantv2` via the Microsoft Visual Studio CMake integration. This requires Visual Studio 2019 or later.
+  <details><summary>Visual Studio 2019 (or later) IDE:</summary>
 
-  1. Open Microsoft Visual Studio 2019.
-  1. From the initial splash page, select “Open a local folder…” and navigate to the `libajantv2` repo directory.
-  1. If CMake is installed and configured properly, the Output window should show the CMake configuration logs and end with a message saying `CMake generation finished`.
-  1. To reconfigure the build with custom settings for certain CMake variables, additional CMake or build flags, etc. click the **Project** menu and select “CMake settings for libajantv2”. Make any changes to the build flags, CMake flags, variables, etc. and then save the `CMakeSettings.json` document. The CMake configuration step should automatically re-run upon saving.
+  1. Open Microsoft Visual Studio 2019 (or later).
+  1. From the initial splash page, select “**Open a local folder…**” and navigate to the `libajantv2` repo directory.
+  1. If CMake is installed and configured properly, the **Output** window should show the CMake configuration logs and end with a message saying “CMake generation finished”.
+  1. To reconfigure the build with custom settings for certain CMake variables, additional CMake or build flags, etc. choose “**CMake settings for libajantv2**” from the **Project** menu. Make any changes to the build flags, CMake flags, variables, etc. and then save the `CMakeSettings.json` document. The CMake configuration step should automatically re-run upon saving.
 
      **NOTE:**\
-     To manually re-run the CMake configure step with new settings, click the **Project** menu and select **Configure libajantv2**. If you’ve added `libajantv2` as a sub-folder in another project you may see a different project name in the **Configure** menu item.
+     To manually re-run the CMake configure step with new settings, choose “**Configure libajantv2**” from the **Project** menu. If you’ve added `libajantv2` as a sub-folder in another project you may see a different project name in the **Configure** menu item.
   1. Choose **Build All** from the **Build** menu.
   1. If the build completes without errors, the static library should be in `out\build\<arch>-<build type>\ajantv2` under the `libajantv2` directory.
 
@@ -123,7 +121,7 @@ Please follow the instructions below to build `libajantv2` on the supported plat
   </details>
 
 
-## macOS
+### macOS
   <details><summary>CMake Xcode Project Generation:</summary>
 
  1. Open a **Terminal** window, and generate the XCode project files:
@@ -158,7 +156,7 @@ Please follow the instructions below to build `libajantv2` on the supported plat
      Alternatively, the generated XCode project `build/libajantv2.xcodeproj` can be opened in **Xcode**, where the static library can be built via the usual mechanisms.
   </details>
 
-## macOS and Linux
+### macOS and Linux
   <details><summary>GNU Makefile Generation:</summary>
 
  1. Open a terminal window and run `cmake` to generate the GNU Makefiles in a directory called `build`.
@@ -177,7 +175,7 @@ Please follow the instructions below to build `libajantv2` on the supported plat
     For example, the `ntv2enumerateboards` demo app will be located in `out\build\demos\ntv2enumerateboards`.
   </details>
 
-## All Platforms
+### All Platforms
   <details><summary>Ninja Build:</summary>
 
   If Ninja Build is installed in the `PATH` it is possible to generate `.ninja` build configuration files with CMake.
@@ -223,7 +221,22 @@ The `libajantv2` repository can be opened as a directory in **Visual Studio Code
 The `libajantv2` repository can be opened as a directory in **Qt Creator** and built with **Qt Creator**’s built-in CMake integration.
   </details>
 
-## Building the Kernel Module Driver (Linux) <a name="building-kernel-module"></a>
+### Compile-Time Customization <a name="customizing-ntv2"></a>
+There are a number of compile-time macros that control certain capabilities and/or aspects of NTV2:
+- `NTV2_USE_CPLUSPLUS11` (in `ajantv2/includes/ajatypes.h`) — If defined (the default), assumes a C++11 compiler (or later) is being used, and C++11 language features will be used in `libajantv2/ajantv2`.
+Note that this macro will automatically be defined or undefined as necessary by CMake depending on the `CMAKE_CXX_STANDARD` that's in use at build-time.
+Also note that if this macro is defined, so must `AJA_USE_CPLUSPLUS11` (see below) … and vice-versa.
+- `AJA_USE_CPLUSPLUS11` (in `ajabase/common/types.h`) — If defined (the default), assumes a C++11 compiler (or later) is being used, and C++11 language features will be used in `libajantv2/ajabase`.
+Note that this macro will automatically be defined or undefined as necessary by CMake depending on the `CMAKE_CXX_STANDARD` that's in use at build-time.
+Also note that if this macro is defined, so must `NTV2_USE_CPLUSPLUS11` (see above) … and vice-versa.
+- `NTV2_NULL_DEVICE` (in `ajantv2/includes/ajatypes.h`) — If defined, removes all linkage to the NTV2 kernel driver. This is used, for example, to build a “sandboxed” MacOS X application with no linkage to Apple’s IOKit framework. This has the side effect of having `CNTV2DriverInterface::OpenLocalPhysical` always fail, thus permitting only remote or software-plugin/virtual devices to be accessed. This macro is undefined by default.
+- `NTV2_NUB_CLIENT_SUPPORT` (in `ajantv2/includes/ajatypes.h`) — If defined (the default), the SDK will load plugins (DLLs, dylibs, .so’s) as necessary to connect to remote or virtual devices.
+For applications requiring higher security, this macro can be undefined to prevent dynamic plugin loading.
+- `NTV2_WRITEREG_PROFILING` (in `ajantv2/includes/ajatypes.h`) — If defined (the default), the `WriteRegister` profiling API in `CNTV2Card` is available.
+- `NTV2_ALLOW_OPEN_UNSUPPORTED` (in `ajantv2/includes/ajatypes.h`) — If defined, the SDK won’t check if the host-attached device being opened is supported; otherwise (the default), the SDK will fail the `Open` call if the host-attached device being opened is “unsupported”. (See the `NTV2GetSupportedDevices` function in `ntv2utils.h`.)
+
+## Building the NTV2 Device Driver <a name="building-driver"></a>
+  <details><summary>Linux:</summary>
 
 ### Prerequisites
 Before building the driver please ensure that you have installed the Linux kernel headers for your current distro:
@@ -275,8 +288,17 @@ Uninstall the kernel module using DKMS:
 ```
 $ make dkms-uninstall
 ```
+  </details>
+  <details><summary>macOS:</summary>
+  The NTV2 device driver for macOS is not open-source, but is distributed and installed from the AJA NTV2 “retail” software installer package available for download from [aja.com](https://www.aja.com/).
+  </details>
+  <details><summary>Windows:</summary>
+  The NTV2 device driver for Windows is not open-source, but is distributed and installed from the AJA NTV2 “retail” software installer “exe” available for download from [aja.com](https://www.aja.com/).
+  </details>
 
-## Verifying the Kernel Module Driver (Linux) <a name="verifying-kernel-module"></a>
+## Verifying the NTV2 Device Driver <a name="verifying-driver"></a>
+
+  <details><summary>Linux:</summary>
 
 To confirm that the driver is loaded and running on a host that has an AJA NTV2 device installed or connected, issue
 an `lsmod` command, and look for **ajantv2** in the list.
@@ -290,20 +312,34 @@ If `lsmod` doesn’t report the device, or it doesn’t appear in `/dev`:
 -  Check the `dmesg` log for error messages from the AJA NTV2 kernel driver.
 -  Try installing the AJA device in a different PCIe slot on the host motherboard.
 
+  </details>
 
-## Customizing libajantv2 <a name="customizing-ntv2"></a>
-There are a number of compile-time macros that control certain capabilities and/or aspects of NTV2:
-- `NTV2_USE_CPLUSPLUS11` (in `ajantv2/includes/ajatypes.h`) — If defined (the default), assumes a C++11 compiler (or later) is being used, and C++11 language features will be used in 'ajantv2'.
-Note that this macro will automatically be defined or undefined as necessary by CMake depending on the `CMAKE_CXX_STANDARD` that's in use at build-time.
-Also note that if this macro is defined, so must `AJA_USE_CPLUSPLUS11` (see below) … and vice-versa.
-- `AJA_USE_CPLUSPLUS11` (in `ajabase/common/types.h`) — If defined (the default), assumes a C++11 compiler (or later) is being used, and C++11 language features will be used in 'ajabase'.
-Note that this macro will automatically be defined or undefined as necessary by CMake depending on the `CMAKE_CXX_STANDARD` that's in use at build-time.
-Also note that if this macro is defined, so must `NTV2_USE_CPLUSPLUS11` (see above) … and vice-versa.
-- `NTV2_NULL_DEVICE` (in `ajantv2/includes/ajatypes.h`) — If defined, removes all linkage to the NTV2 kernel driver. This is used, for example, to build a “sandboxed” MacOS X application with no linkage to Apple’s IOKit framework. This has the side effect of having `CNTV2DriverInterface::OpenLocalPhysical` always fail, thus permitting only remote or software-plugin/virtual devices to be accessed. This macro is undefined by default.
-- `NTV2_NUB_CLIENT_SUPPORT` (in `ajantv2/includes/ajatypes.h`) — If defined (the default), the SDK will load plugins (DLLs, dylibs, .so’s) as necessary to connect to remote or virtual devices.
-For applications requiring higher security, this macro can be undefined to prevent dynamic plugin loading.
-- `NTV2_WRITEREG_PROFILING` (in `ajantv2/includes/ajatypes.h`) — If defined (the default), the `WriteRegister` profiling API in `CNTV2Card` is available.
-- `NTV2_ALLOW_OPEN_UNSUPPORTED` (in `ajantv2/includes/ajatypes.h`) — If defined, the SDK won’t check if the host-attached device being opened is supported; otherwise (the default), the SDK will fail the Open call if the host-attached device being opened is “unsupported”. (See the `NTV2GetSupportedDevices` function in `ntv2utils.h`.)
+  <details><summary>macOS:</summary>
+  To confirm that the driver is loaded and running on a host that has an AJA NTV2 device installed or connected:
+
+  1. Run the `ntv2enumerateboards` demo.\
+     If no devices are listed…
+  1. Check that the NTV2 IOKit kernel extension is installed:
+     ```
+     $ ls -lah /Library/Extensions | grep AJA
+     ```
+  1. If the extension is there, check the **IORegistry** for AJA PCIe devices:
+     ```
+     $ ioreg | grep aja
+     ```
+  If this comes up empty, the driver might not have been “approved” by the machine’s owner/administrator at installation time. In that case, run the **AJA Uninstaller** application, then reinstall AJA’s NTV2 “retail” software installer package, taking care to approve the installation of the kernel extension when prompted to do so.
+  </details>
+
+  <details><summary>Windows:</summary>
+
+  Check the Windows **Device Manager** control panel. If no AJA devices are listed there:
+
+-  Try disabling any/all “fast boot” options in the host BIOS.
+-  Try disabling any/all power management options in the host BIOS (e.g. ASPM).
+-  Be sure the installed AJA board(s) each have two green LEDs lit after host power-on.
+-  Try installing the AJA device in a different PCIe slot on the host motherboard.
+  </details>
+
 
 ## SDK Forward and Backward Compatibility <a name="fwdbackcompatibility"></a>
 The NTV2 source files originated many years ago from some of the earliest hardware products produced by AJA. These products ceased being dependent on NTV2 many years ago, but unfortunately, their legacy symbols remained in the SDK.
