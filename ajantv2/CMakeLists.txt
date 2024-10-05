@@ -65,7 +65,6 @@ else()
         set(MBEDCRYPTO_LIBRARY ${MBEDTLS_LIBRARY_DIR}/mbedcrypto.lib)
         set(MBEDTLS_EXTRA_CONFIG_FLAGS
                 "-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=ON"
-                "-DMSVC_STATIC_RUNTIME=ON"
                 "-DCMAKE_MSVC_RUNTIME_LIBRARY=${CMAKE_MSVC_RUNTIME_LIBRARY}")
     elseif (CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin)$")
         set(MBEDTLS_LIBRARY ${MBEDTLS_LIBRARY_DIR}/libmbedtls.a)
