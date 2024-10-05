@@ -9,7 +9,10 @@
 
 This is the open-source SDK for discovering, interrogating and controlling NTV2 professional video I/O devices from AJA Video Systems, Inc. All code herein is licensed under the MIT license.
 
-## NOTE: Only the "release" branch will have ongoing support for AJA Video Systems, Inc. Official releases will be tagged from the release branch going forward. The main branch should be considered unstable and is for ongoing development.
+> **NOTE:**\
+> Only the “release” branch has ongoing support from AJA Video Systems, Inc.\
+> Starting with v17.1, official releases are tagged from the “release” branch.\
+> The “main” branch should be considered unstable, and is for ongoing development.
 
 # Table of Contents
 1. [Directory Layout](#directory-layout)
@@ -53,156 +56,172 @@ Starting in the NTV2 SDK version 17.0, AJA has standardized on [CMake](https://c
 
 The instructions for building the default static library are generally the same on each supported platform (Windows, macOS, Linux). Note that the default "CMake Generator" varies by platform.
 
-**NOTE: By default — absent any parameters — all standard targets are built (static library, demos, tools, tests, plugins).**
+> **NOTE:**\
+> By default — absent any parameters — all standard targets are built (static library, demos, tools, tests, plugins).
 
-To prevent building certain targets, these CMake variables can be set to 'ON' in your CMake build environment:
-- `AJANTV2_DISABLE_DEMOS` — If ON, prevents building the demonstration programs (e.g. **ntv2capture**, **ntv2player**, …).\
+To prevent building certain targets, these CMake variables can be set to `ON` in your CMake build environment:
+- `AJANTV2_DISABLE_DEMOS` — If `ON`, prevents building the demonstration programs (e.g. **ntv2capture**, **ntv2player**, …).\
 Demo apps are normally built by default.
-- `AJANTV2_DISABLE_DRIVER` — If ON, prevents building the driver.\
+- `AJANTV2_DISABLE_DRIVER` — If `ON`, prevents building the driver (Linux only).\
 Building the driver is enabled by default for Linux
-- `AJANTV2_DISABLE_TOOLS` — If ON, prevents building the command-line tools (e.g. **ntv2thermo**, **regio**, **supportlog**, …).\
+- `AJANTV2_DISABLE_TOOLS` — If `ON`, prevents building the command-line tools (e.g. **ntv2thermo**, **regio**, **supportlog**, …).\
 Command-line tools are normally built by default.
-- `AJANTV2_DISABLE_TESTS` — If ON, prevents building the unit test(s).\
+- `AJANTV2_DISABLE_TESTS` — If `ON`, prevents building the unit test(s).\
 The test programs are normally built by default.
-- `AJANTV2_DISABLE_PLUGIN_LOAD` — If ON, prevents the NTV2 library from loading plugins (and also eliminates the dependency on the third-party `mbedtls` library).\
-The default is OFF, which includes the `mbedtls` library depdendency and the ability to load AJA-signed plugins.
+- `AJANTV2_DISABLE_PLUGIN_LOAD` — If `ON`, prevents the NTV2 library from loading plugins (and also eliminates the dependency on the third-party `mbedtls` library).\
+The default is `OFF`, which includes the `mbedtls` library depdendency and the ability to load AJA-signed plugins.
 
-Please follow the instructions below to build libajantv2 on the supported platform and development environment of your preference.
+Please follow the instructions below to build `libajantv2` on the supported platform and development environment of your preference.
 
 ## Windows
-### Option 1: Developer Command Prompt for Visual Studio
+  <details><summary>Option 1: Command-line build instructions:</summary>
 
-Follow these instructions to build libajantv2 from a Developer Command Prompt for Visual Studio:
+  1. Open a command prompt window (`cmd`) and initialize your Visual Studio environment by running the `vcvarsall.cmd` script from the desired Microsoft Visual Studio directory. The location of vcvarsall.cmd may vary depending on the version of Visual Studio installed on the development system.
 
-1. Open a command prompt window (`cmd`) and initialize your Visual Studio environment by running the `vcvarsall.cmd` script from the desired Microsoft Visual Studio directory. The location of vcvarsall.cmd may vary depending on the version of Visual Studio installed on the development system.
+     For example, if using Visual Studio 2019 Community Edition:
+     ```
+     > SET VS_YEAR=2019
+     > SET VS_EDITION=Community
+     > call "C:\Program Files (x86)\Microsoft Visual Studio\%VS_YEAR%\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" x64
+     ```
+  1. Run `cmake` to generate the `libajantv2` Visual Studio Solution file in a directory called `build`:
+     ```
+     > cd libajantv2
+     > cmake -S . -B build
+     ```
+  1. Build `libajantv2` from the command line, via the generated Visual Studio Solution:
+     ```
+     > cmake --build build
+     ```
+  1. If the build completes without errors, the static library should be in `out\build\<arch>-<build type>\ajantv2` under the `libajantv2` directory.
 
-   For example, if using Visual Studio 2019 Community Edition:
-   ```
-   > SET VS_YEAR=2019
-   > SET VS_EDITION=Community
-   > call "C:\Program Files (x86)\Microsoft Visual Studio\%VS_YEAR%\%VS_EDITION%\VC\Auxiliary\Build\vcvarsall.bat" x64
-   ```
-2. Run cmake to generate the libajantv2 Visual Studio Solution file in a directory called `build`:
-   ```
-   > cd libajantv2
-   > cmake -S . -B build
-   ```
-3. Build libajantv2 from the command line, via the generated Visual Studio Solution:
-   ```
-   > cmake --build build
-   ```
-4. If the build completes without errors, the static library should be output to `out\build\<arch>-<build type>\ajantv2` under the libajantv2 directory.
+     Other build target outputs (demos, tools, etc.) will be available in subdirectories under the build directory mirroring their original location in the `libajantv2` source tree.
 
-   Other build target outputs (demos, tools, etc.) will be available in subdirectories under the build directory mirroring their original location in the libajantv2 source tree.
-
-   For example, the `ntv2enumerateboards.exe` demo app will be located in: `out\build\demos\ntv2enumerateboards`.
+     For example, the `ntv2enumerateboards.exe` demo app will be located in: `out\build\demos\ntv2enumerateboards`.
    
-Alternatively, the generated Visual Studio solution from `build/libajantv2.sln` may be opened in Visual Studio, where libajantv2 can be built via the usual mechanisms.
+  Alternatively, the generated Visual Studio solution from `build/libajantv2.sln` may be opened in Visual Studio, where `libajantv2` can be built via the usual mechanisms.
 
-### Option 2: Visual Studio CMake Integration
+  </details>
 
-Follow these instructions to build libajantv2 via the Microsoft Visual Studio CMake integration. This requires Visual Studio 2019 or 2022.
-1. Open Microsoft Visual Studio 2019.
-2. From the initial splash page, select "Open a local folder..." and navigate to the libajantv2 repo directory.
-3. If CMake is installed and configured properly, the Output window should show the CMake configuration logs and end with a message saying "`CMake generation finished`".
-4. To reconfigure the build with custom settings for certain CMake variables, additional CMake or build flags, etc. go to the Project menu and select "CMake settings for libajantv2". Make any changes to the build flags, CMake flags, variables, etc. and then save the CMakeSettings.json document. The CMake configure step should automatically be re-run upon saving.
-   
-   _NOTE: To manually re-run the CMake configure step with new settings, go to the Project menu and select "Configure libajantv2". If you've added libajantv2 as a sub-folder in another project you may see a different project name in the Configure menu item.
-5. From the Build menu select "Build All".
-6. If the build completes without errors, the static library should be output to `out\build\<arch>-<build type>\ajantv2` under the libajantv2 directory.
+  <details><summary>Option 2: Visual Studio IDE build instructions:</summary>
+  Follow these instructions to build `libajantv2` via the Microsoft Visual Studio CMake integration. This requires Visual Studio 2019 or later.
 
-   Other build target outputs (demos, tools, etc.) will be available in subdirectories under the build directory mirroring their original location in the libajantv2 source tree.
+  1. Open Microsoft Visual Studio 2019.
+  1. From the initial splash page, select “Open a local folder…” and navigate to the `libajantv2` repo directory.
+  1. If CMake is installed and configured properly, the Output window should show the CMake configuration logs and end with a message saying `CMake generation finished`.
+  1. To reconfigure the build with custom settings for certain CMake variables, additional CMake or build flags, etc. click the **Project** menu and select “CMake settings for libajantv2”. Make any changes to the build flags, CMake flags, variables, etc. and then save the `CMakeSettings.json` document. The CMake configuration step should automatically re-run upon saving.
 
-   For example, the `ntv2enumerateboards.exe` demo app will be located in: `out\build\demos\ntv2enumerateboards`.
+     **NOTE:**\
+     To manually re-run the CMake configure step with new settings, click the **Project** menu and select **Configure libajantv2**. If you’ve added `libajantv2` as a sub-folder in another project you may see a different project name in the **Configure** menu item.
+  1. Choose **Build All** from the **Build** menu.
+  1. If the build completes without errors, the static library should be in `out\build\<arch>-<build type>\ajantv2` under the `libajantv2` directory.
+
+     Other build target outputs (demos, tools, etc.) will be available in subdirectories under the build directory mirroring their original location in the `libajantv2` source tree.
+
+     For example, the `ntv2enumerateboards.exe` demo app will be located in `out\build\demos\ntv2enumerateboards`.
+
+  </details>
+
 
 ## macOS
-### CMake Xcode Project Generation
+  <details><summary>CMake Xcode Project Generation:</summary>
 
-1. Open a Terminal and generate the XCode project files:
-   ```
-   $ cd libajantv2
-   $ cmake -S . -B build -G Xcode
-   ```
+ 1. Open a **Terminal** window, and generate the XCode project files:
+     ```
+     $ cd libajantv2
+     $ cmake  -S .  -B build  -G Xcode
+     ```
+     **NOTE:**\
+     CMake supports universal `arm64|x86_64` architecture binaries through the [`CMAKE_OSX_ARCITECTURES`](https://cmake.org/cmake/help/latest/variable/CMAKE_OSX_ARCHITECTURES.html) property. For example:
+     ```
+     $ cmake -S . -B bld-arm -G Xcode -DCMAKE_OSX_ARCHITECTURES=arm64
+     $ cmake -S . -B bld-x86 -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64
+     $ cmake -S . -B bld-fat -G Xcode -DCMAKE_OSX_ARCHITECTURES=arm64;x86_64
+     ```
 
-   NOTE: CMake supports universal `arm64|x86_64` architecture binaries through the [`CMAKE_OSX_ARCITECTURES`](https://cmake.org/cmake/help/latest/variable/CMAKE_OSX_ARCHITECTURES.html) property. For example:
-   ```
-   $ cmake -S . -B build -G Xcode -DCMAKE_OSX_ARCHITECTURES=arm64 // generate 'arm64' binaries only
-   $ cmake -S . -B build -G Xcode -DCMAKE_OSX_ARCHITECTURES=x86_64 // generate 'x86_64' binaries only
-   $ cmake -S . -B build -G Xcode -DCMAKE_OSX_ARCHITECTURES=arm64;x86_64 //generate 'universal' binaries
-   ```
-2. Build libajantv2 static library from the terminal, via the generated XCode Project:
-   ```
-   $ cmake --build build
-   ```
+ 1. Build the `libajantv2` static library from the **Terminal**, via the generated XCode Project:
+     ```
+     $ cmake --build build
+     ```
 
-   NOTE: It is also possible to build the generated XCode Project via the typical `xcrun` command:
-   ```
-   $ xcrun xcodebuild -project build/libajantv2.xcodeproj -target ALL_BUILD
-   ```
-3. If the build completes without errors, the static library should be output to `build/ajantv2/<Debug|Release>/libajantv2d.a` under the libajantv2 directory.
+     **NOTE:**\
+     It is also possible to build the generated XCode Project via the typical `xcrun` command:
+     ```
+     $ xcrun xcodebuild -project build/libajantv2.xcodeproj -target ALL_BUILD
+     ```
+ 1. If the build completes without errors, the static library should be in `build/ajantv2/<Debug|Release>/libajantv2d.a` in the `libajantv2` directory.
 
-   Other build target outputs (demos, tools, etc.) will be available in subdirectories under the build directory mirroring their original location in the libajantv2 source tree.
+     Other build target outputs (demos, tools, etc.) will be available in subdirectories under the build directory mirroring their original location in the libajantv2 source tree.
 
-   For example, the `ntv2enumerateboards` demo app will be located in: `build/demos/ntv2enumerateboards`.
+     For example, the `ntv2enumerateboards` demo app will be located in: `build/demos/ntv2enumerateboards`.
 
-Alternatively, the generated XCode project from `build/libajantv2.xcodeproj` may be opened in XCode, where the static library can be build via the usual mechanisms.
+     Alternatively, the generated XCode project `build/libajantv2.xcodeproj` can be opened in **Xcode**, where the static library can be built via the usual mechanisms.
+  </details>
 
 ## macOS and Linux
-### GNU Makefiles
-1. Open a Terminal window and run cmake to generate the GNU Makefiles in a directory called `build`.
-   ```
-   $ cd libajantv2
-   $ cmake -S . -B build
-   ```
-2. Build the libajantv2 static library from the generated GNU Makefiles:
-   ```
-   $ cmake --build build
-   ```
-3. If the build completes without errors, the static library should be output to `out\build\<arch>-<build type>\ajantv2` under the libajantv2 directory.
+  <details><summary>GNU Makefile Generation:</summary>
 
-   Other build target outputs (demos, tools, etc.) will be available in subdirectories under the build directory mirroring their original location in the libajantv2 source tree.
+ 1. Open a terminal window and run `cmake` to generate the GNU Makefiles in a directory called `build`.
+     ```
+     $ cd libajantv2
+     $ cmake -S . -B build
+     ```
+ 2. Build the `libajantv2` static library from the generated GNU Makefiles:
+     ```
+     $ cmake --build build
+     ```
+ 3. If the build completes without errors, the static library should be in `out\build\<arch>-<build type>\ajantv2` under the `libajantv2` directory.
 
-   For example, the `ntv2enumerateboards` demo app will be located in: `out\build\demos\ntv2enumerateboards`.
+    Other build target outputs (demos, tools, etc.) will be available in subdirectories under the build directory mirroring their original location in the `libajantv2` source tree.
+
+    For example, the `ntv2enumerateboards` demo app will be located in `out\build\demos\ntv2enumerateboards`.
+  </details>
 
 ## All Platforms
-### Ninja Build
+  <details><summary>Ninja Build:</summary>
 
-If Ninja Build is installed in the PATH it is possible to generate .ninja build configuration files with CMake.
+  If Ninja Build is installed in the `PATH` it is possible to generate `.ninja` build configuration files with CMake.
 
-Ninja Build is available from GitHub, or via the package manager of your preference.
+  Ninja Build is available from GitHub, or via the package manager of your preference.
 
-Download: https://github.com/ninja-build/ninja/releases
+  Download: https://github.com/ninja-build/ninja/releases
 
-NOTE: The compiler toolset used by Ninja Build will vary depending which compiler CMake finds in the PATH by default. On macOS and Linux this is clang or gcc, and on Windows this is usually the cl compiler available under the current Developer Command Prompt for Visual Studio Environment.
+  **NOTE:**\
+  The compiler toolset used by Ninja Build will vary depending which compiler CMake finds in the `PATH` by default. On macOS and Linux this is `clang` or `gcc`, and on Windows this is usually the `cl` compiler available under the current Developer Command Prompt for Visual Studio Environment.
 
-1. Open a Terminal or Command Prompt window and run cmake with the Ninja generator specified, to created .ninja files in a directory called `build`.
-   ```
-   $ cd libajantv2
-   $ cmake -S . -B build -GNinja
-   ```
-2. Build all configured libajantv2 targets:
-   ```
-   $ cmake --build build
-   ```
-3. If the build completes without errors, the libajantv2 static library should be available in `build/ajantv2`.
+ 1. Open a Terminal or Command Prompt window and run `cmake` with the Ninja generator specified, to create `.ninja` files in a directory called `build`.
+     ```
+     $ cd libajantv2
+     $ cmake -S . -B build -GNinja
+     ```
+ 2. Build all configured libajantv2 targets:
+     ```
+     $ cmake --build build
+     ```
+ 3. If the build completes without errors, the libajantv2 static library should be available in `build/ajantv2`.
 
-   Other build target outputs (demos, tools, etc.) will be available in subdirectories under the build directory mirroring their original location in the libajantv2 source tree.
+    Other build target outputs (demos, tools, etc.) will be available in subdirectories under the build directory mirroring their original location in the `libajantv2` source tree.
+  </details>
 
-### Visual Studio Code
-The libajantv2 repository can be opened as a directory in Visual Studio Code and built with the optional Microsoft CMake Extension for VSCode.
+  <details><summary>Visual Studio Code IDE:</summary>
 
-1. Launch Visual Studio Code
-2. From the File menu select Open (or Open Folder on macOS) and navigate to the libajantv2 repo directory.
-3. In the left-hand sidebar click on the Extensions button or press Ctrl+Shift+P (Cmd+Shift+P on macOS) to open the Command Palette and search for "Extensions: Install Extensions".
-4. In the left-hand sidebar search for the "cmake" extension from developer "twxs" (also available in the CMake Tools extension from Microsoft) and install it.
-5. Open the Command Palette once again and search for "CMake: Configure".
-6. If the configuration completes successfully, open the Command Palette and search for "CMake: Build".
-7. If the build completes without errors, the libajantv2 static library should be available in `build/ajantv2`.
+The `libajantv2` repository can be opened as a directory in **Visual Studio Code** and built with the optional **Microsoft CMake Extension for VSCode**.
 
-   Other build target outputs (demos, tools, etc.) will be available in subdirectories under the build directory mirroring their original location in the libajantv2 source tree.
+1. Launch **Visual Studio Code**
+2. Choose **Open** (or **Open Folder** on macOS) from the **File** menu, and navigate to the `libajantv2` repo directory.
+3. In the left-hand sidebar click on the **Extensions** button or press `Ctrl+Shift+P` (`Cmd+Shift+P` on macOS) to open the **Command Palette** and search for “Extensions: Install Extensions”.
+4. In the left-hand sidebar search for the “cmake” extension from developer “twxs” (also available in the **CMake Tools** extension from Microsoft) and install it.
+5. Open the **Command Palette** once again and search for “CMake: Configure”.
+6. If the configuration completes successfully, open the **Command Palette** and search for “CMake: Build”.
+7. If the build completes without errors, the `libajantv2` static library should be in `build/ajantv2`.
 
-### Qt Creator
-The libajantv2 repository can be opened as a directory in Qt Creator and built with the Qt Creator CMake integration.
+   Other build target outputs (demos, tools, etc.) will be available in subdirectories under the build directory mirroring their original location in the `libajantv2` source tree.
+  </details>
+
+  <details><summary>Qt Creator IDE:</summary>
+
+The `libajantv2` repository can be opened as a directory in **Qt Creator** and built with **Qt Creator**’s built-in CMake integration.
+  </details>
 
 ## Building the Kernel Module Driver (Linux) <a name="building-kernel-module"></a>
 
@@ -273,14 +292,14 @@ If `lsmod` doesn’t report the device, or it doesn’t appear in `/dev`:
 
 
 ## Customizing libajantv2 <a name="customizing-ntv2"></a>
-There are a number of macros that control certain aspects of NTV2:
+There are a number of compile-time macros that control certain capabilities and/or aspects of NTV2:
 - `NTV2_USE_CPLUSPLUS11` (in `ajantv2/includes/ajatypes.h`) — If defined (the default), assumes a C++11 compiler (or later) is being used, and C++11 language features will be used in 'ajantv2'.
 Note that this macro will automatically be defined or undefined as necessary by CMake depending on the `CMAKE_CXX_STANDARD` that's in use at build-time.
 Also note that if this macro is defined, so must `AJA_USE_CPLUSPLUS11` (see below) … and vice-versa.
 - `AJA_USE_CPLUSPLUS11` (in `ajabase/common/types.h`) — If defined (the default), assumes a C++11 compiler (or later) is being used, and C++11 language features will be used in 'ajabase'.
 Note that this macro will automatically be defined or undefined as necessary by CMake depending on the `CMAKE_CXX_STANDARD` that's in use at build-time.
 Also note that if this macro is defined, so must `NTV2_USE_CPLUSPLUS11` (see above) … and vice-versa.
-- `NTV2_NULL_DEVICE` (in `ajantv2/includes/ajatypes.h`) — If defined, removes all linkage to the NTV2 kernel driver. This is used, for example, to build a “sandboxed” MacOS X application with no linkage to Apple’s IOKit framework. This has the side effect of having `CNTV2DriverInterface::OpenLocalPhysical` always fail, thus permitting only remote devices to be accessed. This macro is undefined by default.
+- `NTV2_NULL_DEVICE` (in `ajantv2/includes/ajatypes.h`) — If defined, removes all linkage to the NTV2 kernel driver. This is used, for example, to build a “sandboxed” MacOS X application with no linkage to Apple’s IOKit framework. This has the side effect of having `CNTV2DriverInterface::OpenLocalPhysical` always fail, thus permitting only remote or software-plugin/virtual devices to be accessed. This macro is undefined by default.
 - `NTV2_NUB_CLIENT_SUPPORT` (in `ajantv2/includes/ajatypes.h`) — If defined (the default), the SDK will load plugins (DLLs, dylibs, .so’s) as necessary to connect to remote or virtual devices.
 For applications requiring higher security, this macro can be undefined to prevent dynamic plugin loading.
 - `NTV2_WRITEREG_PROFILING` (in `ajantv2/includes/ajatypes.h`) — If defined (the default), the `WriteRegister` profiling API in `CNTV2Card` is available.
@@ -488,12 +507,12 @@ system at launch time), the library can be queried for more specific version inf
 	that includes the _major_, _minor_, and _point_ version number values in decimal form.
 -	`NTV2GetSDKVersionComponent` – returns any of the _major_, _minor_, and _point_ version number values by passing 0, 1, 2 or 3, respectively, for the _version component_ being requested.
 
-**NOTE:** It is strongly recommended that the SDK client software operates with the SDK dynamic library that has the same version.
+**NOTE:** It is _strongly_ recommended that the SDK client software operates with the SDK dynamic library that has the _exact_ same version.
 
 **WARNING:** Do not use an SDK dynamic library whose _major_ version number differs from the SDK _major_ version number when the SDK client was compiled.
 
 ## Building the libajantv2 Dynamic (Shared) Libary
 
-To build the libajantv2 dynamic library, set the `AJANTV2_BUILD_SHARED` CMake variable to 'ON' in your build environment.
-- `AJANTV2_BUILD_SHARED` — If ON, produces the libajantv2 dynamic library.\
-By default, the libajantv2 dynamic library is _not_ built.
+To build the `libajantv2` dynamic library, set the `AJANTV2_BUILD_SHARED` CMake variable to `ON` in your build environment.
+- `AJANTV2_BUILD_SHARED` — If `ON`, produces the `libajantv2` dynamic library.\
+By default, the `libajantv2` dynamic library is _not_ built.
