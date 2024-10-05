@@ -2084,27 +2084,6 @@ public:
 	AJA_VIRTUAL bool		GetAudioOutputMonitorSource (NTV2AudioChannelPair & outChannelPair, NTV2AudioSystem & outAudioSystem);
 
 	/**
-		@brief		Answers with the current state of the audio output embedder for the given SDI output connector (specified as a channel number).
-					When the embedder is disabled, the device will not embed any SMPTE 299M (HD) or SMPTE 272M (SD) packets in the HANC in the SDI output stream.
-		@param[in]	inSDIOutputConnector	Specifies the SDI output of interest.
-		@param[out] outIsEnabled			Receives 'true' if the audio output embedder is enabled;  otherwise 'false' if disabled.
-		@return		True if successful;	 otherwise false.
-		@see		CNTV2Card::SetAudioOutputEmbedderState, \ref audop-playout
-	**/
-	AJA_VIRTUAL bool		GetAudioOutputEmbedderState (const NTV2Channel inSDIOutputConnector, bool & outIsEnabled);	//	New in SDK 13.0
-
-	/**
-		@brief		Enables or disables the audio output embedder for the given SDI output connector (specified as a channel number).
-					When the embedder is disabled, the device will not embed any SMPTE 299M (HD) or SMPTE 272M (SD) packets in the HANC in the SDI output stream.
-		@param[in]	inSDIOutputConnector	Specifies the SDI output of interest.
-		@param[in]	inEnable				Specify 'true' to enable the audio output embedder (normal operation).
-											Specify 'false' to disable the embedder.
-		@return		True if successful;	 otherwise false.
-		@see		CNTV2Card::GetAudioOutputEmbedderState, \ref audop-playout
-	**/
-	AJA_VIRTUAL bool		SetAudioOutputEmbedderState (const NTV2Channel inSDIOutputConnector, const bool & inEnable);	//	New in SDK 13.0
-
-	/**
 		@brief		Answers with the current state of the audio output erase mode for the given Audio System.
 					If enabled, the Audio System automatically writes zeroes into the audio output buffer behind the output read head during playout.
 		@param[in]	inAudioSystem			Specifies the audio system of interest.
@@ -2221,6 +2200,10 @@ public:
 #if !defined(NTV2_DEPRECATE_17_0)
 	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool CanDoAudioWaitForVBI(void)) {return IsSupported(kDeviceAudioCanWaitForVBI);}	///< @deprecated	Use CNTV2DriverInterface::IsSupported instead. (Was new in SDK 16.0)
 #endif	//	!defined(NTV2_DEPRECATE_17_0)
+#if !defined(NTV2_DEPRECATE_17_5)
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool GetAudioOutputEmbedderState (const NTV2Channel sdi, bool & enb)) {return GetSDIOutputAudioEnabled(sdi,enb);} ///< @deprecated	Introduced in SDK 13.0, replaced in SDK 17.5 with CNTV2Card::GetSDIOutputAudioEnabled
+	AJA_VIRTUAL inline NTV2_DEPRECATED_f(bool SetAudioOutputEmbedderState (const NTV2Channel sdi, const bool & enb)) {return SetSDIOutputAudioEnabled(sdi,enb);} ///< @deprecated	Introduced in SDK 13.0, replaced in SDK 17.5 with CNTV2Card::SetSDIOutputAudioEnabled
+#endif	//	defined(NTV2_DEPRECATE_17_5)
 	///@}
 
 	/**
@@ -5102,6 +5085,29 @@ public:
 		@see		CNTV2Card::SetSDIOutputAudioSystem, CNTV2Card::GetSDIOutputAudioSystem, CNTV2Card::SetSDIOutputDS2AudioSystem, \ref audop-playout
 	**/
 	AJA_VIRTUAL bool		GetSDIOutputDS2AudioSystem (const NTV2Channel inSDIOutputConnector, NTV2AudioSystem & outAudioSystem);
+
+	/**
+		@brief		Answers with the current state of the audio output embedder for the given SDI output connector
+					(specified as a channel number). When the embedder is disabled, the device will not embed any SMPTE 299M (HD)
+					or SMPTE 272M (SD) packets in the HANC in the SDI output stream.
+		@param[in]	inSDIOutput		Specifies the SDI output of interest.
+		@param[out] outIsEnabled	Receives 'true' if the SDI output's audio embedder is enabled;  otherwise 'false' if disabled.
+		@return		True if successful;	 otherwise false.
+		@see		CNTV2Card::SetSDIOutputAudioEnabled, \ref audop-playout
+	**/
+	AJA_VIRTUAL bool		GetSDIOutputAudioEnabled (const NTV2Channel inSDIOutput, bool & outIsEnabled);	//	New in SDK 17.5
+
+	/**
+		@brief		Enables or disables the audio output embedder for the given SDI output connector (specified as a channel number).
+					When the embedder is disabled, the device will not embed any SMPTE 299M (HD) or SMPTE 272M (SD) packets in the
+					HANC in the SDI output stream.
+		@param[in]	inSDIOutput	Specifies the SDI output of interest.
+		@param[in]	inEnable	Specify 'true' to enable the SDI output's audio embedder (normal operation).
+								Specify 'false' to disable the embedder.
+		@return		True if successful;	 otherwise false.
+		@see		CNTV2Card::GetSDIOutputAudioEnabled, \ref audop-playout
+	**/
+	AJA_VIRTUAL bool		SetSDIOutputAudioEnabled (const NTV2Channel inSDIOutput, const bool & inEnable);	//	New in SDK 17.5
 
 
 	/**

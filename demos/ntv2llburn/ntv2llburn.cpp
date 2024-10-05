@@ -628,7 +628,7 @@ void NTV2LLBurn::ProcessFrames (void)
 		mDevice.AncInsertSetField2ReadParams (sdiOutput, 0, 0, mConfig.fOutputChannel);
 	}
 
-	mDevice.SetAudioOutputEmbedderState (::NTV2OutputDestinationToChannel(mOutputDest), mConfig.WithAudio());
+	mDevice.SetSDIOutputAudioEnabled (::NTV2OutputDestinationToChannel(mOutputDest), mConfig.WithAudio());
 
 	mFramesProcessed = mFramesDropped = 0;	//	Start with a fresh frame count
 

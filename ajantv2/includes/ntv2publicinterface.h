@@ -4287,9 +4287,9 @@ typedef enum
 **/
 typedef enum
 {
-	NTV2_DISABLE_TASKS,				///< @brief 0: Disabled: Device is completely configured by controlling application(s) -- no driver involvement.
-	NTV2_STANDARD_TASKS,			///< @brief 1: Standard/Retail: Device is completely controlled by AJA ControlPanel, service/daemon, and driver.
-	NTV2_OEM_TASKS,					///< @brief 2: OEM: Device is configured by controlling application(s), with minimal driver involvement.
+	NTV2_DISABLE_TASKS,		///< @brief 0: Disabled (never recommended): device configured exclusively by client application(s).
+	NTV2_STANDARD_TASKS,	///< @brief 1: Standard/Retail: device configured by AJA ControlPanel, service/daemon, and driver.
+	NTV2_OEM_TASKS,			///< @brief 2: OEM (recommended): device configured by client application(s) with some driver involvement.
 	NTV2_TASK_MODE_INVALID	= 0xFF
 } NTV2EveryFrameTaskMode, NTV2TaskMode;
 
@@ -7256,7 +7256,7 @@ typedef enum
 				/**
 					@return		The number of "unoccupied" output (playout) frames the device's AutoCirculate channel can currently accommodate.
 				**/
-				inline ULWord			GetNumAvailableOutputFrames (void) const			{return GetFrameCount () > acBufferLevel ? GetFrameCount () - acBufferLevel : 0;}
+				inline ULWord			GetNumAvailableOutputFrames (void) const			{return GetFrameCount () > GetBufferLevel() ? GetFrameCount () - GetBufferLevel() : 0;}
 
 				/**
 					@return		True if the device's AutoCirculate channel is ready to accept at least one more output frame.
@@ -7264,9 +7264,43 @@ typedef enum
 				inline bool				CanAcceptMoreOutputFrames (void) const				{return GetNumAvailableOutputFrames () > 1;}
 
 				/**
-					@return		True if there's at least one captured frame that's ready to transfer from the device to the host;  otherwise false.
+					@return		True if there's 2 or more captured frames that are ready to transfer from the device to the host;
+								otherwise false.
+					@details	This function returns true only when the buffer level <i><b>exceeds</b></i> one.
+								Developers who want to reduce latency sometimes ask why this function doesn't return true
+								when the capture buffer level is <i><b>at least</b></i> one -- i.e. <tt>acBufferLevel >= 1</tt>.
+								The reason it doesn't is to prevent the possibility of reading past the audio system's write head
+								(see \ref audop-capture).
+
+								Normally CNTV2Card::AutoCirculateTransfer is called from inside the frame processing loop like this:
+								@code
+									if (acStatus.IsRunning()  &&  acStatus.HasAvailableInputFrame())
+									{
+										mDev.AutoCirculateTransfer (mInputChannel, inputXfer);
+										...
+									}
+								@endcode
+								But if CNTV2Card::AutoCirculateTransfer is called when the capture buffer level is at least 1:
+								@code
+									if (acStatus.IsRunning()  &&  acStatus.GetBufferLevel() >= 1)
+									{
+										mDev.AutoCirculateTransfer (mInputChannel, inputXfer);
+										...
+									}
+								@endcode
+								The problem is not with VANC data (which has been recorded in device SDRAM well ahead of the next VBI).
+								The problem is that the firmware audio system writes audio samples into the capture audio buffer in
+								device SDRAM in 512-byte chunks, and it's possible audio samples near the tail end of a progressive
+								frame (or last field of an interlaced frame) will be missed by the transfer (resulting in some stale
+								audio samples being transferred into the host audio buffer). It's possible to work around this problem
+								by reducing the initial number of requested audio samples for the first transfer (to stay about a
+								millisecond or two behind the write head), but then the audio would remain slightly out of sync with
+								the video.
+
+								Normal (default) AutoCirculate operation as shown in the \ref demoapps guarantees Audio/Video/Anc
+								alignment.
 				**/
-				inline bool				HasAvailableInputFrame (void) const					{return acBufferLevel > 1;}
+				inline bool				HasAvailableInputFrame (void) const					{return GetBufferLevel() > 1;}
 
 				/**
 					@return		The current active frame number.
@@ -7754,57 +7788,101 @@ typedef enum
 
 
 		/**
-			@brief	This is returned by the CNTV2Card::AutoCirculateGetFrameStamp function, and is also embedded in the AUTOCIRCULATE_TRANSFER struct
-					returned from CNTV2Card::AutoCirculateTransfer. If used as its own CNTV2DriverInterface::NTV2Message (the new API version of the old CNTV2Card::GetFrameStamp call),
-					pass the NTV2Channel in the least significant byte of FRAME_STAMP::acFrameTime, and the requested frame in FRAME_STAMP::acRequestedFrame.
-			@note	This struct uses a constructor to properly initialize itself. Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
+			@brief		This class/object reports information about the current and/or requested AutoCirculate frame.
+			@details	When used to implement CNTV2Card::AutoCirculateGetFrameStamp, it is its own NTV2_TYPE_ACFRAMESTAMP
+						<tt>'stmp'</tt> message (that replaced the old, obsolete CNTV2Card::GetFrameStamp function).
+						-	The ::NTV2Channel of interest is placed into the least significant byte of FRAME_STAMP::acFrameTime,
+						-	The frame number of interest is placed into the FRAME_STAMP::acRequestedFrame field.
+
+						This class/struct is also embedded in the AUTOCIRCULATE_TRANSFER class/object returned from
+						CNTV2Card::AutoCirculateTransfer to return information about the just-transferred frame (and the
+						frame being actively recorded or played).
+			@note		This struct uses a constructor to properly initialize itself.
+						Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
 		**/
 		NTV2_STRUCT_BEGIN (FRAME_STAMP) //	NTV2_TYPE_ACFRAMESTAMP
-				NTV2_HEADER			acHeader;						///< @brief The common structure header -- ALWAYS FIRST!
-					LWord64				acFrameTime;					///< @brief On exit, contains host OS clock at time of capture/play.
-																		///<		On entry, contains ::NTV2Channel of interest, but only for new API ::FRAME_STAMP message.
-					ULWord				acRequestedFrame;				///< @brief The frame requested (0xFFFFFFFF == "not available"), including for new API (::FRAME_STAMP message).
-					ULWord64			acAudioClockTimeStamp;			///< @brief Number of 10MHz ticks at moment of play or record, based on 48kHz clock (from register 28).
-					ULWord				acAudioExpectedAddress;			///< @brief The address that was used to transfer
-					ULWord				acAudioInStartAddress;			///< @brief For record - first position in buffer of audio (includes base offset) -- AudioInAddress at the time this Frame was stamped
-					ULWord				acAudioInStopAddress;			///< @brief For record - end position (exclusive) in buffer of audio (includes base offset) -- AudioInAddress at the Frame AFTER this Frame was stamped
-					ULWord				acAudioOutStopAddress;			///< @brief For play - first position in buffer of audio -- AudioOutAddress at the time this Frame was stamped
-					ULWord				acAudioOutStartAddress;			///< @brief For play - end position (exclusive) in buffer of audio -- AudioOutAddress at the Frame AFTER it was stamped
-					ULWord				acTotalBytesTransferred;		///< @brief Total audio and video bytes transferred
-					ULWord				acStartSample;					///< @brief The actual start sample when this frame was started in VBI, which may be used to check sync against
-																		///<		acAudioInStartAddress (Play) or acAudioOutStartAddress (Record).  In record it will always be equal,
-																		///<		but in playback if the clocks drift or the user supplies non aligned audio sizes, then this will
-																		///<		give the current difference from expected versus actual position. To be useful, playback audio must
-																		///<		be clocked in at the correct rate.
+				NTV2_HEADER			acHeader;						///< @brief The common message header -- ALWAYS FIRST!
 					/**
-						@name	Current (Active) Frame Information
+						@name	Requested Frame Information
 					**/
 					///@{
+					LWord64				acFrameTime;					///< @brief (input/ingest/capture only) The absolute timestamp at
+																		///<		the VBI when the frame started recording into device
+																		///<		SDRAM. Uses the hi-res OS clock (which usually starts
+																		///<		at zero at boot-time).
+					ULWord				acRequestedFrame;				///< @brief On entry for NTV2_TYPE_ACFRAMESTAMP message, the
+																		///<		requested frame. Upon exit, 0xFFFFFFFF means "not
+																		///<		available".
+					ULWord64			acAudioClockTimeStamp;			///< @brief (input/ingest/capture only) The absolute timestamp at
+																		///<		the VBI when the frame started recording into device
+																		///<		SDRAM. Uses the AJA device's audio clock, as expressed
+																		///<		through register 28 (::kRegAud1Counter), but extended
+																		///<		to 64-bits. (This clock increments 48,000 times per
+																		///<		second, and starts at zero at FPGA load at power-up.)
+					ULWord				acAudioExpectedAddress;			///< @brief Audio transfer address.
+					ULWord				acAudioInStartAddress;			///< @brief (input/ingest/capture only) Starting audio record head
+																		///<		position when this frame was stamped.
+					ULWord				acAudioInStopAddress;			///< @brief (input/ingest/capture only) Ending audio record head
+																		///<		position (exclusive) AFTER this frame was stamped.
+					ULWord				acAudioOutStopAddress;			///< @brief (output/playback only) Audio play head position when
+																		///<		this frame was stamped.
+					ULWord				acAudioOutStartAddress;			///< @brief (output/playback only) Audio play head position
+																		///<		(exclusive) AFTER this frame was stamped.
+					ULWord				acTotalBytesTransferred;		///< @brief Total audio and video bytes transferred.
+					ULWord				acStartSample;					///< @brief The actual audio start sample when this frame was
+																		///<		started at the VBI, which may be used to check sync
+																		///<		against acAudioInStartAddress or acAudioOutStartAddress.
+																		///<		In record it will always be equal, but in playback, if
+																		///<		the clocks drift or the user supplies unaligned audio
+																		///<		sizes, then this will give the current difference from
+																		///<		expected versus actual position. To be useful, playback
+																		///<		audio must be clocked in at the correct rate.
+					///@}
 
 					/**
-						@brief	Intended for capture, this is a sequence of ::NTV2_RP188 values received from the device (in ::NTV2TCIndex order).
-								If empty, no timecodes will be transferred. This field is ignored if ::AUTOCIRCULATE_WITH_RP188 option is not set.
-						@note	This field is owned by the SDK, which is responsible for allocating and/or freeing it.
-								Call FRAME_STAMP::GetInputTimeCodes or FRAME_STAMP::GetInputTimeCode to retrieve the timecodes stored in this field.
+						@name	Current/Active Frame Information
 					**/
-					NTV2Buffer			acTimeCodes;
-					LWord64				acCurrentTime;					///< @brief Current processor time, derived from the finest-grained counter available on the host OS.
-																		///<		Granularity can vary depending on the HAL. FRAME_STAMP::acAudioClockCurrentTime is the recommended time-stamp to use instead of this.
+					///@{
+					NTV2Buffer			acTimeCodes;					///< @brief Intended for capture, this is a sequence of ::NTV2_RP188
+																		///<		values received from the device (in ::NTV2TCIndex order).
+																		///<		If empty, no timecodes will be transferred. This field
+																		///<		is ignored if ::AUTOCIRCULATE_WITH_RP188 option is not
+																		///<		set.
+																		///< @note	This field is owned by the SDK, which is responsible for
+																		///<		allocating and/or freeing it.
+																		///<		Call FRAME_STAMP::GetInputTimeCodes
+																		///<		or FRAME_STAMP::GetInputTimeCode to retrieve the
+																		///<		timecodes stored in this field.
+					LWord64				acCurrentTime;					///< @brief The absolute timestamp at the moment the
+																		///<		CNTV2Card::AutoCirculateTransfer or
+																		///<		CNTV2Card::AutoCirculateGetFrameStamp calls were handled
+																		///<		in the driver. Uses the hi-res OS clock (which usually
+																		///<		starts at zero at boot-time).
 					ULWord				acCurrentFrame;					///< @brief Last vertical blank frame for this autocirculate channel (when CNTV2Card::AutoCirculateGetFrameStamp was called)
-					LWord64				acCurrentFrameTime;				///< @brief Vertical blank start of current frame
-					ULWord64			acAudioClockCurrentTime;		///< @brief Current time expressed as a count of 10MHz ticks, based on 48kHz clock (from register 28).
+					LWord64				acCurrentFrameTime;				///< @brief The VBI timestamp of the current/active frame currently
+																		///<		being ingested on the device (capture), or currently
+																		///<		going out the SDI connector (playback). Uses the hi-res
+																		///<		OS clock (which usually starts at zero at boot-time).
+					ULWord64			acAudioClockCurrentTime;		///< @brief The absolute timestamp at the moment the
+																		///<		CNTV2Card::AutoCirculateTransfer or
+																		///<		CNTV2Card::AutoCirculateGetFrameStamp calls were handled
+																		///<		in the driver. Uses the AJA device's audio clock, as
+																		///<		expressed through register 28 (::kRegAud1Counter), but
+																		///<		extended to 64-bits. (This clock increments 48,000 times
+																		///<		per second, and starts at zero at FPGA load at power-up.)
 					ULWord				acCurrentAudioExpectedAddress;	//	FIXFIXFIX	Document		What is this?!
 					ULWord				acCurrentAudioStartAddress;		///< @brief As set by play
 					ULWord				acCurrentFieldCount;			///< @brief As found by ISR at Call Field0 or Field1 _currently_ being OUTPUT (when CNTV2Card::AutoCirculateGetFrameStamp was called)
 					ULWord				acCurrentLineCount;				///< @brief At Call Line# _currently_ being OUTPUT (at the time of the IOCTL_NTV2_GET_FRAMESTAMP)
 					ULWord				acCurrentReps;					///< @brief Contains validCount (Playout:  on repeated frames, number of reps remaining; Record: drops on frame)
-					ULWord64			acCurrentUserCookie;			///< @brief The frame's AUTOCIRCULATE_TRANSFER::acInUserCookie value that was set when CNTV2Card::AutoCirculateTransfer was called.
-																		///			This can tell clients which frame was on-air at the last VBI.
-					ULWord				acFrame;						///< @brief Record/capture -- current frame number
+					ULWord64			acCurrentUserCookie;			///< @brief The frame's AUTOCIRCULATE_TRANSFER::acInUserCookie value
+																		///<		that was set when CNTV2Card::AutoCirculateTransfer was
+																		///<		called. This can tell clients which frame was going
+																		///<		"on-the-air" (i.e. "out the jack") at the last VBI.
+					ULWord				acFrame;						///< @brief (input/ingest/capture only) Current/active frame number.
 					NTV2_SHOULD_BE_DEPRECATED	(NTV2_RP188 acRP188);	///< @brief Deprecated -- call FRAME_STAMP::GetInputTimeCode instead.
-
 					///@}
-				NTV2_TRAILER		acTrailer;						///< @brief The common structure trailer -- ALWAYS LAST!
+				NTV2_TRAILER		acTrailer;						///< @brief The common message trailer -- ALWAYS LAST!
 
 			#if !defined (NTV2_BUILDING_DRIVER)
 				/**
