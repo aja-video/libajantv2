@@ -16,24 +16,6 @@
 #include <vector>
 #include <algorithm>
 
-//#define VIRTUAL_DEVICES_SUPPORT
-
-#if defined(VIRTUAL_DEVICES_SUPPORT)
-#include "ajabase/system/info.h"
-#include "ajabase/common/json.hpp"
-#include <fstream>
-
-using json = nlohmann::json;
-
-typedef struct VirtualDeviceInfo
-{
-	std::string				vdID;
-	std::string				vdName;
-} VirtualDeviceInfo;
-
-typedef std::map<string, std::vector<VirtualDeviceInfo>> 	NTV2SerialToVirtualDevices;	/// Serial number to Virtual Device Names
-#endif	//	defined(VIRTUAL_DEVICES_SUPPORT)
-
 #if !defined(NTV2_DEPRECATE_17_1)
 typedef std::vector <AudioSampleRateEnum>				NTV2AudioSampleRateList;
 typedef NTV2AudioSampleRateList::const_iterator			NTV2AudioSampleRateListConstIter;
@@ -118,11 +100,8 @@ typedef struct NTV2DeviceInfo
 	UWord							numDMAEngines;						///< @brief Total number of DMA engines
 	UWord							numSerialPorts;						///< @brief Total number of serial ports
 	ULWord							pingLED;
-#if defined(VIRTUAL_DEVICES_SUPPORT)
 	bool							isVirtualDevice=false;
-	std::string						virtualDeviceName;
-	std::string						virtualDeviceID;
-#endif	//	defined(VIRTUAL_DEVICES_SUPPORT)
+	std::string						vdevUrl;
 
 	AJAExport	bool operator == (const NTV2DeviceInfo & rhs) const;	///< @return	True if I'm equivalent to another ::NTV2DeviceInfo struct.
 	AJAExport	inline bool operator != (const NTV2DeviceInfo & rhs) const	{ return !(*this == rhs); } ///< @return	True if I'm different from another ::NTV2DeviceInfo struct.
@@ -344,10 +323,7 @@ public:
 											NTV2DeviceInfoList & outDevicesRemoved);
 private:
 	static void		SetAudioAttributes (NTV2DeviceInfo & inDeviceInfo, CNTV2Card & inDevice);
-#if defined(VIRTUAL_DEVICES_SUPPORT)
-	static bool		GetSerialToVirtualDeviceMap(NTV2SerialToVirtualDevices & outSerialToVirtualDevMap);
-	static bool 	GetCP2ConfigPath(string & outCP2ConfigPath);
-#endif	//	defined(VIRTUAL_DEVICES_SUPPORT)
+	static bool		GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevList);
 #endif	//	!defined(NTV2_DEPRECATE_17_1)
 };	//	CNTV2DeviceScanner
 
