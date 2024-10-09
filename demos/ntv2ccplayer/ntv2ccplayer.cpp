@@ -1600,11 +1600,14 @@ void NTV2CCPlayer::PlayoutFrames (void)
 	NTV2Buffer					audioBuffer;
 	AUTOCIRCULATE_TRANSFER		xferInfo;
 
+    ULWord ANCKB (2);	//	2 (default, works),  64 fails, 63 works										//	**MrBill**
 	if (NTV2_IS_VANCMODE_OFF(mConfig.fVancMode))
 	{
-		xferInfo.acANCBuffer.Allocate(2048);
+		mDevice.WriteRegister(10006, ANCKB);															//	**MrBill**
+		PLINFO("Anc buffer size is " << DEC(ANCKB) << "K");												//	**MrBill**
+		xferInfo.acANCBuffer.Allocate(ANCKB*1024);
 		if (isInterlaced)
-			xferInfo.acANCField2Buffer.Allocate(2048);
+			xferInfo.acANCField2Buffer.Allocate(ANCKB*1024);
 	}
 
 	if (!mConfig.fSuppressAudio)
@@ -1808,7 +1811,18 @@ void NTV2CCPlayer::PlayoutFrames (void)
 													false,				//	false means "don't byte swap"
 													numAudioChannels));	//	number of audio channels
 		//	Finally ... transfer the frame data to the device...
-		mDevice.AutoCirculateTransfer (mConfig.fOutputChannel, xferInfo);
+		if (!mDevice.AutoCirculateTransfer (mConfig.fOutputChannel, xferInfo))
+			PLFAIL("AutoCirculateTransfer failed");
+
+		ULWord val(0);																					//	**MrBill**
+		if (xferInfo.acANCBuffer  &&  mDevice.ReadRegister(10006, val)  &&  val  &&  val != ANCKB)		//	**MrBill**
+		{																								//	**MrBill**
+			PLINFO("Anc buffer size changed from " << DEC(ANCKB) << "K to " << DEC(val) << "K");		//	**MrBill**
+			ANCKB = val;																				//	**MrBill**
+			xferInfo.acANCBuffer.Allocate(ANCKB*1024);													//	**MrBill**
+			if (isInterlaced)																			//	**MrBill**
+				xferInfo.acANCField2Buffer.Allocate(ANCKB*1024);										//	**MrBill**
+		}																								//	**MrBill**
 	}	//	loop til quit signaled
 
 	//	Stop AutoCirculate...
