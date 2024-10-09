@@ -394,15 +394,15 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 		{
 			if (sDevInfoList.at(ndx).isVirtualDevice)
 			{
-				cout << DECN(ndx, 2) << " | " << sDevInfoList.at(ndx).vdevUrl << " | " << setw(8) << "virtual" << endl;
+				cout << DECN(ndx, 2) << " | " << setw(8) << "virtual" << " | " << sDevInfoList.at(ndx).vdevUrl << endl;
 			}
 			else
 			{
-				cout << DECN(ndx, 2) << " | " << setw(16) << ::NTV2DeviceIDToString(sDevInfoList.at(ndx).deviceID);
+				cout << DECN(ndx, 2) << " | " << setw(8) << "local";
 				const string serNum(sDevInfoList.at(ndx).serialNumber);
 				if (!serNum.empty())
 					cout << " | " << setw(10) << serNum;
-				cout << " | " << setw(8) << "local";
+				cout << " | " << setw(16) << ::NTV2DeviceIDToString(sDevInfoList.at(ndx).deviceID);
 				cout << endl;
 			}
 		}
@@ -852,8 +852,14 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 		NTV2DeviceInfo newVDev;
 		newVDev.isVirtualDevice = true;
 		newVDev.deviceIndex = vdIndex++;
-		newVDev.deviceIdentifier = vdevJson["plugin"];
-		newVDev.vdevUrl = "ntv2" + vdevJson["plugin"].get<std::string>() + "://localhost/?ip=" + vdevJson["ip"].get<std::string>() + "&tx1=" + vdevJson["tx1"].get<std::string>() + "&rx1=" + vdevJson["rx1"].get<std::string>();
+		newVDev.vdevUrl = "ntv2" + vdevJson["plugin"].get<std::string>() + "://localhost/?";
+		for (auto it = vdevJson.begin(); it != vdevJson.end(); ++it)
+		{
+			if (it.key() != "plugin")
+			{
+				newVDev.vdevUrl += "&" + it.key() + "=" + it.value().dump();
+			}
+		}
 		outVirtualDevList.push_back(newVDev);
 	}
 	return true;
