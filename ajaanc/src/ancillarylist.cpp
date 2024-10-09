@@ -1277,11 +1277,9 @@ AJAStatus AJAAncillaryList::GetAncillaryDataTransmitData (const bool bProgressiv
 AJAStatus AJAAncillaryList::GetTransmitData (NTV2Buffer & F1Buffer, NTV2Buffer & F2Buffer,
 												const bool inIsProgressive, const uint32_t inF2StartLine)
 {
-	AJAStatus	status		(AJA_STATUS_SUCCESS);
-	size_t		maxF1Data	(F1Buffer.GetByteCount());
-	size_t		maxF2Data	(F2Buffer.GetByteCount());
-	uint8_t *	pF1AncData	(reinterpret_cast<uint8_t*>(F1Buffer.GetHostPointer()));
-	uint8_t *	pF2AncData	(reinterpret_cast<uint8_t*>(F2Buffer.GetHostPointer()));
+	AJAStatus status (AJA_STATUS_SUCCESS);
+	size_t maxF1Data(F1Buffer), maxF2Data(F2Buffer);
+	uint8_t *pF1AncData(F1Buffer), *pF2AncData(F2Buffer);
 
 	F1Buffer.Fill(uint64_t(0));	 F2Buffer.Fill(uint64_t(0));
 
