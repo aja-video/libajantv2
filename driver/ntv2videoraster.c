@@ -588,15 +588,9 @@ static bool has_config_changed(struct ntv2_videoraster *ntv2_raster, uint32_t in
     uint32_t input_frame_value = 0;
     bool ret = true;
 
-	global_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control, 0);
+	global_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control, index);
     global_control2_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control2, 0);
 	global_control3_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control3, 0);
-
-    /* find global control register value */
-    if (NTV2_FLD_GET(ntv2_fld_global_control_independent_mode, global_control2_value))
-    {
-        global_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control, index);
-    }
 
     channel_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_channel_control, index);
     
