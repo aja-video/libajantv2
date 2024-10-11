@@ -842,6 +842,7 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 				cout << "JSON parse error: " << e.what() << endl;
 				cout << "Exception id: " << e.id << endl;
 				cout << "Byte position of error: " << e.byte << endl;
+				return false;
 			}
 		}
 		else
