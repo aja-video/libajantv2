@@ -409,20 +409,19 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 		return false;
 	}
 
-	// special handling for virtual devices
 	for (NTV2DeviceInfoListConstIter iter(sDevInfoList.begin());  iter != sDevInfoList.end();  ++iter)
 	{
-		if (iter->isVirtualDevice)
+		if (to_string(iter->deviceIndex) == inArgument)
+			return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
+		else if (iter->deviceIdentifier == inArgument)
+			return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
+		else
 		{
-			if (inArgument.substr(0, inArgument.find(':')) == iter->vdevUrl.substr(0, iter->vdevUrl.find(':')))
-			{
-				return outDevice.Open(iter->vdevUrl);
-			}
+			if (CNTV2DeviceScanner::IsLegalDecimalNumber(inArgument, inArgument.length()) && CNTV2DeviceScanner::IsLegalHexSerialNumber(inArgument) && iter->deviceID == stoi(inArgument))
+				return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
 		}
 	}
-
-	return outDevice.Open(inArgument);
-
+	return false;
 }	//	GetFirstDeviceFromArgument
 
 
@@ -852,12 +851,15 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 		NTV2DeviceInfo newVDev;
 		newVDev.isVirtualDevice = true;
 		newVDev.deviceIndex = vdIndex++;
+		newVDev.deviceIdentifier = vdevJson["name"];
 		newVDev.vdevUrl = "ntv2" + vdevJson["plugin"].get<std::string>() + "://localhost/?";
+		bool isFirstParam = true;
 		for (auto it = vdevJson.begin(); it != vdevJson.end(); ++it)
 		{
-			if (it.key() != "plugin")
+			if (it.key() != "plugin" && it.key() != "name")
 			{
-				newVDev.vdevUrl += "&" + it.key() + "=" + it.value().dump();
+				newVDev.vdevUrl += (isFirstParam ? "" : "&") + it.key() + "=" + it.value().dump();
+				isFirstParam = false;
 			}
 		}
 		outVirtualDevList.push_back(newVDev);
