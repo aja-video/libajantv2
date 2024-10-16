@@ -864,6 +864,7 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 				isFirstParam = false;
 			}
 		}
+		PercentEncode(newVDev.vdevUrl);
 		outVirtualDevList.push_back(newVDev);
 	}
 	return true;
