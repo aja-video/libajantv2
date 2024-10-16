@@ -824,7 +824,7 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 	if (info.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreUser, vdevPath) != AJA_STATUS_SUCCESS)
 		return false;
 	vdevPath = vdevPath + "/virtualdevices";
-	int vdIndex = 100;
+	int vdIndex = outVirtualDevList.size();
 	std::vector<std::string> vdevFiles;
 	AJAFileIO::ReadDirectory(vdevPath, "*.vdev", vdevFiles);
 	for (const auto& vdevFile : vdevFiles)
@@ -852,6 +852,7 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 		NTV2DeviceInfo newVDev;
 		newVDev.isVirtualDevice = true;
 		newVDev.deviceIndex = vdIndex++;
+		newVDev.deviceID = DEVICE_ID_SOFTWARE;
 		newVDev.deviceIdentifier = vdevJson["name"];
 		newVDev.vdevUrl = "ntv2" + vdevJson["plugin"].get<std::string>() + "://localhost/?";
 		bool isFirstParam = true;
