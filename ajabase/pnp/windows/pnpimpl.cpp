@@ -48,15 +48,14 @@ AJAPnpImpl::Install(AJAPnpCallback callback, void* refCon, uint32_t devices)
 	//	Windows only handles PCIe devices
 	if (mDevices & AJA_Pnp_PciVideoDevices)
 	{
-		BOOL ok(false);
-	 	mAddEventHandle = CreateEventW(NULL, FALSE, FALSE, L"Global\\AJAPNPAddEvent");
-	 	if (!mAddWaitHandle)
+		mAddEventHandle = CreateEventW(NULL, FALSE, FALSE, L"Global\\AJAPNPAddEvent");
+		if (!mAddEventHandle)
 			return AJA_STATUS_FAIL;
 		if (!RegisterWaitForSingleObject(&mAddWaitHandle, mAddEventHandle, (WAITORTIMERCALLBACK)&SignaledAddRoutine, this, INFINITE, NULL))
 			return AJA_STATUS_FAIL;
- 
-	 	mRemoveEventHandle = CreateEventW(NULL, FALSE, FALSE, L"Global\\AJAPNPRemoveEvent");
-		if (!mRemoveWaitHandle)
+
+		mRemoveEventHandle = CreateEventW(NULL, FALSE, FALSE, L"Global\\AJAPNPRemoveEvent");
+		if (!mRemoveEventHandle)
 			return AJA_STATUS_FAIL;
 		if (!RegisterWaitForSingleObject(&mRemoveWaitHandle, mRemoveEventHandle, (WAITORTIMERCALLBACK)&SignaledRemoveRoutine, this, INFINITE, NULL))
 			return AJA_STATUS_FAIL;
