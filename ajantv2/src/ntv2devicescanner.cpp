@@ -854,7 +854,11 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 		newVDev.deviceIndex = vdIndex++;
 		newVDev.deviceID = DEVICE_ID_SOFTWARE;
 		newVDev.deviceIdentifier = vdevJson["name"];
-		newVDev.vdevUrl = "ntv2" + vdevJson["plugin"].get<std::string>() + "://localhost/?";
+		newVDev.vdevUrl = vdevJson["plugin"].get<std::string>();
+		string hostName = vdevJson["host"].get<std::string>();
+		if (hostName.empty())
+			hostName = "localhost";
+		newVDev.vdevUrl += "://" + hostName + "/?";
 		bool isFirstParam = true;
 		for (auto it = vdevJson.begin(); it != vdevJson.end(); ++it)
 		{
