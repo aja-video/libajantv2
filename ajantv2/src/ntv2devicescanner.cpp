@@ -860,11 +860,12 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 		{
 			if (it.key() != "plugin" && it.key() != "name")
 			{
-				newVDev.vdevUrl += (isFirstParam ? "" : "&") + it.key() + "=" + it.value().dump();
+				auto paramValStr = to_string(it.value());
+				aja::strip(paramValStr, "\"");
+				newVDev.vdevUrl += (isFirstParam ? "" : "&") + it.key() + "=" + PercentEncode(paramValStr);
 				isFirstParam = false;
 			}
 		}
-		PercentEncode(newVDev.vdevUrl);
 		outVirtualDevList.push_back(newVDev);
 	}
 	return true;
