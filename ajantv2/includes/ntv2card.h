@@ -4252,7 +4252,6 @@ public:
 	**/
 	AJA_VIRTUAL bool	IsConnectedTo (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, bool & outIsConnected);
 
-
 	/**
 		@brief		Answers whether or not the given widget signal input (sink) can legally be connected to the given signal output (source).
 		@param[in]	inInputXpt		Specifies the input (signal sink) of interest.
@@ -4263,6 +4262,16 @@ public:
 		@see		\ref ntv2signalrouting, CNTV2Card::Connect
 	**/
 	AJA_VIRTUAL bool	CanConnect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, bool & outCanConnect);
+
+	/**
+		@brief		Answers with the set of output (sources) that can legally be connected to the given input (sink).
+		@param[in]	inInputXpt		Specifies the input (signal sink) of interest.
+		@param[out]	outOutputXpts	Receives the supported outputs (signal sources) for this device.
+		@return		True if successful;	 otherwise false.
+		@note		This function will return false (failure) if the device firmware doesn't support route validation.
+		@see		\ref ntv2signalrouting, CNTV2Card::CanConnect
+	**/
+	AJA_VIRTUAL bool	SupportedOutputXptsForInputXpt (const NTV2InputXptID inInputXptID, NTV2OutputXptIDSet & outOutputXpts);
 
 
 	/**
