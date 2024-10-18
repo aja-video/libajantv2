@@ -33,10 +33,9 @@ AJAProcessImpl::GetPid()
 bool
 AJAProcessImpl::IsValid(uint64_t pid)
 {
-    if( kill(pid,0) != ESRCH )
-		return true;
-	else
+    if((kill(pid, 0) != 0) && (errno == ESRCH))
 		return false;
+	return true;
 }
 
 bool
