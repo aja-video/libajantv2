@@ -839,9 +839,9 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 			}
 			catch (const json::parse_error& e)
 			{
-				cout << "JSON parse error: " << e.what() << endl;
-				cout << "Exception id: " << e.id << endl;
-				cout << "Byte position of error: " << e.byte << endl;
+				cerr << "JSON parse error: " << e.what() << endl;
+				cerr << "Exception id: " << e.id << endl;
+				cerr << "Byte position of error: " << e.byte << endl;
 				return false;
 			}
 		}
@@ -853,16 +853,46 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 		newVDev.isVirtualDevice = true;
 		newVDev.deviceIndex = vdIndex++;
 		newVDev.deviceID = DEVICE_ID_SOFTWARE;
-		newVDev.deviceIdentifier = vdevJson["name"];
-		newVDev.vdevUrl = vdevJson["plugin"].get<std::string>();
-		string hostName = vdevJson["host"].get<std::string>();
+		newVDev.deviceIdentifier = "";
+
+		// There are 3 special keys:
+		// plugin - this is required, specifies the name of plug-in to try loading.
+		// name - optional, specifies a human readable name for the virtual device,
+		//		  defaults to "" if not specified.
+		// host - optional, host to use in the plug-in url, defaults to "localhost"
+		//        if not specified.
+		string hostName;
+		auto pluginVal = vdevJson["plugin"];
+		auto nameVal = vdevJson["name"];
+		auto hostVal = vdevJson["host"];
+
+		if (pluginVal.is_null())
+		{
+			cerr << "JSON file: '" << vdevFile << "' is missing the required paramater 'plugin'." << endl;
+			return false;
+		}
+		newVDev.vdevUrl = pluginVal.get<std::string>();
+
+		if (!nameVal.is_null())
+		{
+			newVDev.deviceIdentifier = nameVal.get<std::string>();
+		}
+
+		if (!hostVal.is_null())
+		{
+			hostName = hostVal.get<std::string>();
+		}
+
 		if (hostName.empty())
+		{
 			hostName = "localhost";
+		}
+
 		newVDev.vdevUrl += "://" + hostName + "/?";
 		bool isFirstParam = true;
 		for (auto it = vdevJson.begin(); it != vdevJson.end(); ++it)
 		{
-			if (it.key() != "plugin" && it.key() != "name")
+			if (it.key() != "plugin" && it.key() != "name" && it.key() != "host")
 			{
 				auto paramValStr = to_string(it.value());
 				aja::strip(paramValStr, "\"");
