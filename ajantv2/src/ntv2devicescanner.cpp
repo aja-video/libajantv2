@@ -331,18 +331,13 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithSerial (const string & inSerialStr, C
 	string searchSerialStr(inSerialStr);  aja::lower(searchSerialStr);
 	for (size_t ndx(0);  ndx < sDevInfoList.size();  ndx++)
 	{
-		CNTV2Card dev(UWord(ndx+0));
-		string serNumStr;
-		if (dev.GetSerialNumberString(serNumStr))
+		string ser(sDevInfoList.at(ndx).serialNumber);  aja::lower(ser);
+		if (ser.find(searchSerialStr) != string::npos)
 		{
-			aja::lower(serNumStr);
-			if (serNumStr.find(searchSerialStr) != string::npos)
-			{
-				if (sDevInfoList.at(ndx).isVirtualDevice)
-					return outDevice.Open(sDevInfoList.at(ndx).vdevUrl);
-				else
-					return outDevice.Open(UWord(ndx));
-			}
+			if (sDevInfoList.at(ndx).isVirtualDevice)
+				return outDevice.Open(sDevInfoList.at(ndx).vdevUrl);
+			else
+				return outDevice.Open(UWord(ndx));
 		}
 	}
 	return false;
@@ -415,11 +410,10 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 			return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
 		else if (iter->deviceIdentifier == inArgument)
 			return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
-		else
-		{
-			if (CNTV2DeviceScanner::IsLegalDecimalNumber(inArgument, inArgument.length()) && CNTV2DeviceScanner::IsLegalHexSerialNumber(inArgument) && iter->deviceID == stoi(inArgument))
-				return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
-		}
+		else if (CNTV2DeviceScanner::IsLegalDecimalNumber(inArgument, inArgument.length()) && CNTV2DeviceScanner::IsLegalHexSerialNumber(inArgument) && iter->deviceID == stoi(inArgument))
+			+ return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
+		+else if (inArgument.find("://") != string::npos && iter->isVirtualDevice)
+			+ return outDevice.Open(iter->vdevUrl);
 	}
 	return false;
 }	//	GetFirstDeviceFromArgument
@@ -869,7 +863,7 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 		if (pluginVal.is_null())
 		{
 			cerr << "JSON file: '" << vdevFile << "' is missing the required paramater 'plugin'." << endl;
-			return false;
+			continue;
 		}
 		newVDev.vdevUrl = pluginVal.get<std::string>();
 
@@ -900,6 +894,16 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 				isFirstParam = false;
 			}
 		}
+
+		CNTV2Card tmpDev;
+		tmpDev.Open(newVDev.vdevUrl);
+		if (!tmpDev.IsOpen())
+		{
+			cerr << "Unable to open device based on JSON file: " << vdevFile << endl;
+			continue;
+		}
+		tmpDev.GetSerialNumberString(newVDev.serialNumber);
+
 		outVirtualDevList.push_back(newVDev);
 	}
 	return true;
