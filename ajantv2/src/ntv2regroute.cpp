@@ -238,6 +238,26 @@ bool CNTV2Card::CanConnect (const NTV2InputCrosspointID inInputXpt, const NTV2Ou
 	return true;
 }
 
+bool CNTV2Card::SupportedOutputXptsForInputXpt (const NTV2InputXptID inInputXptID, NTV2OutputXptIDSet & outputXpts)
+{
+	if (!IsSupported(kDeviceHasXptConnectROM))
+		return false;	//	No CanConnect ROM -- can't say
+	if (!NTV2_IS_VALID_InputCrosspointID(inInputXptID))
+		return false;
+
+	//	Determine all legal output xpts for this input xpt...
+	outputXpts.clear();
+	const uint32_t regBase(uint32_t(kRegFirstValidXptROMRegister)  +  4UL * uint32_t(inInputXptID - NTV2_FIRST_INPUT_CROSSPOINT));
+	for (uint32_t ndx(0);  ndx < 4;	 ndx++)
+	{
+		ULWord regVal(0);
+		NTV2InputXptID inputXpt;
+		if (ReadRegister(regBase + ndx, regVal))
+			CNTV2SignalRouter::GetRouteROMInfoFromReg (regBase + ndx, regVal, inputXpt, outputXpts, true/*append*/);
+	}
+	return !outputXpts.empty();
+}
+
 
 bool CNTV2Card::ApplySignalRoute (const CNTV2SignalRouter & inRouter, const bool inReplace)
 {

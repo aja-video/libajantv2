@@ -222,6 +222,14 @@ AJAStatus NTV2Player::SetUpVideo (void)
 	if (!mFormatDesc.IsValid())
 		return AJA_STATUS_FAIL;
 
+	//  If we own the whole device, make sure all FrameStores are disabled (good practice) 
+	if (!mConfig.fDoMultiFormat)
+	{
+		NTV2ChannelSet enabledChannels;
+		mDevice.GetEnabledChannels(enabledChannels);
+		mDevice.DisableChannels(enabledChannels);
+	}
+
 	//	Turn on the FrameStore (to read frame buffer memory and transmit video)...
 	mDevice.EnableChannel(mConfig.fOutputChannel);
 
@@ -413,62 +421,40 @@ bool NTV2Player::RouteOutputSignal (void)
 	const NTV2OutputXptID	cscVidOutXpt(::GetCSCOutputXptFromChannel(mConfig.fOutputChannel,  false/*isKey*/,  !isRGB/*isRGB*/));
 	const NTV2OutputXptID	fsVidOutXpt (::GetFrameBufferOutputXptFromChannel(mConfig.fOutputChannel,  isRGB/*isRGB*/,  false/*is425*/));
 	const NTV2InputXptID	cscInputXpt (isRGB ? ::GetCSCInputXptFromChannel(mConfig.fOutputChannel, false/*isKeyInput*/) : NTV2_INPUT_CROSSPOINT_INVALID);
+
+	if (!mConfig.fDoMultiFormat)  //	Not multiformat:  We own the whole device...
+	{
+		mDevice.ClearRouting();		//	Start with clean slate
+	}
+
 	if (isRGB)
 		if (!mDevice.Connect (cscInputXpt,  fsVidOutXpt,  canVerify))
 			connectFailures++;
 
-	if (mConfig.fDoMultiFormat)
+	if (mDevice.features().HasBiDirectionalSDI())
+		mDevice.SetSDITransmitEnable(mConfig.fOutputChannel, true);
+
+	if (!mDevice.Connect (::GetSDIOutputInputXpt (mConfig.fOutputChannel, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
+		connectFailures++;
+
+	mDevice.SetSDIOutputStandard (mConfig.fOutputChannel, outputStandard);
+
+	mTCIndexes.insert (::NTV2ChannelToTimecodeIndex(mConfig.fOutputChannel, /*inEmbeddedLTC=*/mConfig.fTransmitLTC));
+	//	NOTE: No need to send VITC2 with VITC1 (for "i" formats) -- firmware does this automatically
+
+	if (!mConfig.fDoMultiFormat)  //	Not multiformat:  We own the whole device...
 	{
-		//	Multiformat --- We may be sharing the device with other processes, so route only one SDI output...
-		if (mDevice.features().HasBiDirectionalSDI())
-			mDevice.SetSDITransmitEnable(mConfig.fOutputChannel, true);
-
-		if (!mDevice.Connect (::GetSDIOutputInputXpt (mConfig.fOutputChannel, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
-			connectFailures++;
-		mTCIndexes.insert (::NTV2ChannelToTimecodeIndex(mConfig.fOutputChannel, /*inEmbeddedLTC=*/mConfig.fTransmitLTC));
-		//	NOTE: No need to send VITC2 with VITC1 (for "i" formats) -- firmware does this automatically
-		mDevice.SetSDIOutputStandard (mConfig.fOutputChannel, outputStandard);
-	}
-	else
-	{
-		//	Not multiformat:  We own the whole device, so connect all possible SDI outputs...
-		const UWord	numFrameStores(mDevice.features().GetNumFrameStores());
-		mDevice.ClearRouting();		//	Start with clean slate
-
-		if (isRGB)
-			if (!mDevice.Connect (cscInputXpt,  fsVidOutXpt,  canVerify))
-				connectFailures++;
-
-		for (NTV2Channel chan(NTV2_CHANNEL1);  ULWord(chan) < numSDIOutputs;  chan = NTV2Channel(chan+1))
-		{
-			if (chan != mConfig.fOutputChannel  &&  chan < numFrameStores)
-				mDevice.DisableChannel(chan);				//	Disable unused FrameStore
-			if (mDevice.features().HasBiDirectionalSDI())
-				mDevice.SetSDITransmitEnable (chan, true);	//	Make it an output
-
-			const NTV2OutputDestination sdiOutput(::NTV2ChannelToOutputDestination(chan));
-			if (NTV2_OUTPUT_DEST_IS_SDI(sdiOutput))
-				if (OutputDestHasRP188BypassEnabled(sdiOutput))
-					DisableRP188Bypass(sdiOutput);
-			if (!mDevice.Connect (::GetSDIOutputInputXpt (chan, false/*isDS2*/),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
-				connectFailures++;
-			mDevice.SetSDIOutputStandard (chan, outputStandard);
-			mTCIndexes.insert (::NTV2ChannelToTimecodeIndex (chan, /*inEmbeddedLTC=*/mConfig.fTransmitLTC));	//	Add SDI spigot's TC index
-			//	NOTE: No need to send VITC2 with VITC1 (for "i" formats) -- firmware does this automatically
-
-			if (mConfig.WithAudio())
-				mDevice.SetSDIOutputAudioSystem (chan, mAudioSystem);	//	Ensure SDIOut embedder gets audio from mAudioSystem
-		}	//	for each SDI output spigot
-
-		//	And connect analog video output, if the device has one...
-		if (mDevice.features().GetNumAnalogVideoOutputs())
+		//	Also connect analog video output, if the device has one...
+		if (mDevice.features().GetNumAnalogVideoOutputs() && mConfig.fOutputChannel == NTV2_CHANNEL1)
 			if (!mDevice.Connect (::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_ANALOG1),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
 				connectFailures++;
 
-		//	And connect HDMI video output, if the device has one...
-		if (mDevice.features().GetNumHDMIVideoOutputs())
+		//	Also connect HDMI video output, if the device has one...
+		if (mDevice.features().GetNumHDMIVideoOutputs() && mConfig.fOutputChannel == NTV2_CHANNEL1)
+		{
 			if (!mDevice.Connect (::GetOutputDestInputXpt(NTV2_OUTPUTDESTINATION_HDMI1),  isRGB ? cscVidOutXpt : fsVidOutXpt,  canVerify))
 				connectFailures++;
+		}
 	}
 	TCNOTE(mTCIndexes);
 	if (connectFailures)
@@ -831,47 +817,3 @@ void NTV2Player::GetACStatus (AUTOCIRCULATE_STATUS & outStatus)
 {
 	mDevice.AutoCirculateGetStatus (mConfig.fOutputChannel, outStatus);
 }
-
-
-ULWord GetRP188RegisterForOutput (const NTV2OutputDestination inOutputDest)
-{
-	switch (inOutputDest)
-	{
-		case NTV2_OUTPUTDESTINATION_SDI1:	return kRegRP188InOut1DBB;	//	reg 29
-		case NTV2_OUTPUTDESTINATION_SDI2:	return kRegRP188InOut2DBB;	//	reg 64
-		case NTV2_OUTPUTDESTINATION_SDI3:	return kRegRP188InOut3DBB;	//	reg 268
-		case NTV2_OUTPUTDESTINATION_SDI4:	return kRegRP188InOut4DBB;	//	reg 273
-		case NTV2_OUTPUTDESTINATION_SDI5:	return kRegRP188InOut5DBB;	//	reg 29
-		case NTV2_OUTPUTDESTINATION_SDI6:	return kRegRP188InOut6DBB;	//	reg 64
-		case NTV2_OUTPUTDESTINATION_SDI7:	return kRegRP188InOut7DBB;	//	reg 268
-		case NTV2_OUTPUTDESTINATION_SDI8:	return kRegRP188InOut8DBB;	//	reg 273
-		default:							return 0;
-	}	//	switch on output destination
-
-}	//	GetRP188RegisterForOutput
-
-
-bool NTV2Player::OutputDestHasRP188BypassEnabled (const NTV2OutputDestination inOutputDest)
-{
-	bool			result	(false);
-	const ULWord	regNum	(GetRP188RegisterForOutput(inOutputDest));
-	ULWord			regValue(0);
-
-	//	Bit 23 of the RP188 DBB register will be set if output timecode is pulled
-	//	directly from an SDI input (bypass source)...
-	if (regNum  &&  mDevice.ReadRegister(regNum, regValue)  &&  regValue & BIT(23))
-		result = true;
-
-	return result;
-
-}	//	OutputDestHasRP188BypassEnabled
-
-
-void NTV2Player::DisableRP188Bypass (const NTV2OutputDestination inOutputDest)
-{
-	//	Clear bit 23 of SDI output's RP188 DBB register...
-	const ULWord regNum (GetRP188RegisterForOutput(inOutputDest));
-	if (regNum)
-		mDevice.WriteRegister (regNum, 0, BIT(23), 23);
-
-}	//	DisableRP188Bypass

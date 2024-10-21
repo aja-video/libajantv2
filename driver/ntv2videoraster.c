@@ -241,14 +241,14 @@ static const struct timing_offset_data c_offset_data[] =
     { ntv2_video_standard_625i,         1,      0,      1,      0,      0,      0 },
     { ntv2_video_standard_1080p,        1,      4,      1,      0,      0,      0 },
     { ntv2_video_standard_2048x1556,    1,      0,      1,      0,      0,      0 },
-    { ntv2_video_standard_2048x1080p,   1,      0,      1,      0,      0,      0 },
+    { ntv2_video_standard_2048x1080p,   1,      4,      1,      0,      0,      0 },
     { ntv2_video_standard_2048x1080i,   1,      0,      1,      0,      0,      0 },
-    { ntv2_video_standard_3840x2160p,   1,      0,      1,      0,      0,      0 },
-    { ntv2_video_standard_4096x2160p,   1,      0,      1,      0,      0,      0 },
-    { ntv2_video_standard_3840_hfr,     1,      0,      1,      0,      0,      0 },
-    { ntv2_video_standard_4096_hfr,     1,      0,      1,      0,      0,      0 },
-    { ntv2_video_standard_7680,         1,      0,      1,      0,      0,      0 },
-    { ntv2_video_standard_8192,         1,      0,      1,      0,      0,      0 },
+    { ntv2_video_standard_3840x2160p,   1,      4,      1,      0,      0,      0 },
+    { ntv2_video_standard_4096x2160p,   1,      4,      1,      0,      0,      0 },
+    { ntv2_video_standard_3840_hfr,     1,      4,      1,      0,      0,      0 },
+    { ntv2_video_standard_4096_hfr,     1,      4,      1,      0,      0,      0 },
+    { ntv2_video_standard_7680,         1,      4,      1,      0,      0,      0 },
+    { ntv2_video_standard_8192,         1,      4,      1,      0,      0,      0 },
     { ntv2_video_standard_3840i,        1,      0,      1,      0,      0,      0 },
     { ntv2_video_standard_4096i,        1,      0,      1,      0,      0,      0 },
     { ntv2_video_standard_none,         1,      0,      1,      0,      0,      0 }
@@ -410,7 +410,7 @@ Ntv2Status ntv2_videoraster_update_channel(struct ntv2_videoraster *ntv2_raster,
 	if (index >= ntv2_raster->num_widgets)
 		return NTV2_STATUS_SUCCESS;
 
-	NTV2_MSG_VIDEORASTER_STATE("%s: video raster update channel\n", ntv2_raster->name);
+	NTV2_MSG_VIDEORASTER_STATE("%s: video raster update channel %d\n", ntv2_raster->name, index);
 
 	if (has_config_changed(ntv2_raster, index))
 	{
@@ -588,15 +588,9 @@ static bool has_config_changed(struct ntv2_videoraster *ntv2_raster, uint32_t in
     uint32_t input_frame_value = 0;
     bool ret = true;
 
-	global_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control, 0);
+	global_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control, index);
     global_control2_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control2, 0);
 	global_control3_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control3, 0);
-
-    /* find global control register value */
-    if (NTV2_FLD_GET(ntv2_fld_global_control_independent_mode, global_control2_value))
-    {
-        global_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_global_control, index);
-    }
 
     channel_control_value = ntv2_reg_read(ntv2_raster->system_context, ntv2_reg_channel_control, index);
     
