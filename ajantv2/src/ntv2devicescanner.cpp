@@ -411,9 +411,9 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 		else if (iter->deviceIdentifier == inArgument)
 			return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
 		else if (CNTV2DeviceScanner::IsLegalDecimalNumber(inArgument, inArgument.length()) && CNTV2DeviceScanner::IsLegalHexSerialNumber(inArgument) && iter->deviceID == stoi(inArgument))
-			+ return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
-		+else if (inArgument.find("://") != string::npos && iter->isVirtualDevice)
-			+ return outDevice.Open(iter->vdevUrl);
+			return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
+		else if (inArgument.find("://") != string::npos && iter->isVirtualDevice)
+			return outDevice.Open(iter->vdevUrl);
 	}
 	return false;
 }	//	GetFirstDeviceFromArgument
