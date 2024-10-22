@@ -322,6 +322,7 @@ public:
 											NTV2DeviceInfoList & outDevicesAdded,
 											NTV2DeviceInfoList & outDevicesRemoved);
 private:
+	static void		SetDeviceAttributes (NTV2DeviceInfo & inDeviceInfo, CNTV2Card & inDevice);
 	static void		SetAudioAttributes (NTV2DeviceInfo & inDeviceInfo, CNTV2Card & inDevice);
 	static bool		GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevList);
 #endif	//	!defined(NTV2_DEPRECATE_17_1)

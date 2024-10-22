@@ -166,50 +166,8 @@ void CNTV2DeviceScanner::ScanHardware (void)
 
 			oss << ::NTV2DeviceIDToString (deviceID, tmpDev.IsSupported(kDeviceHasMicrophoneInput)) << " - " << boardNum;
 
-			const ULWordSet wgtIDs (tmpDev.GetSupportedItems(kNTV2EnumsID_WidgetID));
-			info.deviceIdentifier		= oss.str();
-			info.numVidInputs			= tmpDev.GetNumSupported(kDeviceGetNumVideoInputs);
-			info.numVidOutputs			= tmpDev.GetNumSupported(kDeviceGetNumVideoOutputs);
-			info.numAnlgVidOutputs		= tmpDev.GetNumSupported(kDeviceGetNumAnalogVideoOutputs);
-			info.numAnlgVidInputs		= tmpDev.GetNumSupported(kDeviceGetNumAnalogVideoInputs);
-			info.numHDMIVidOutputs		= tmpDev.GetNumSupported(kDeviceGetNumHDMIVideoOutputs);
-			info.numHDMIVidInputs		= tmpDev.GetNumSupported(kDeviceGetNumHDMIVideoInputs);
-			info.numInputConverters		= tmpDev.GetNumSupported(kDeviceGetNumInputConverters);
-			info.numOutputConverters	= tmpDev.GetNumSupported(kDeviceGetNumOutputConverters);
-			info.numUpConverters		= tmpDev.GetNumSupported(kDeviceGetNumUpConverters);
-			info.numDownConverters		= tmpDev.GetNumSupported(kDeviceGetNumDownConverters);
-			info.downConverterDelay		= tmpDev.GetNumSupported(kDeviceGetDownConverterDelay);
-			info.dvcproHDSupport		= tmpDev.IsSupported(kDeviceCanDoDVCProHD);
-			info.qrezSupport			= tmpDev.IsSupported(kDeviceCanDoQREZ);
-			info.hdvSupport				= tmpDev.IsSupported(kDeviceCanDoHDV);
-			info.quarterExpandSupport	= tmpDev.IsSupported(kDeviceCanDoQuarterExpand);
-			info.colorCorrectionSupport	= tmpDev.IsSupported(kDeviceCanDoColorCorrection);
-			info.programmableCSCSupport	= tmpDev.IsSupported(kDeviceCanDoProgrammableCSC);
-			info.rgbAlphaOutputSupport	= tmpDev.IsSupported(kDeviceCanDoRGBPlusAlphaOut);
-			info.breakoutBoxSupport		= tmpDev.IsSupported(kDeviceCanDoBreakoutBox);
-			info.vidProcSupport			= tmpDev.IsSupported(kDeviceCanDoVideoProcessing);
-			info.dualLinkSupport		= tmpDev.IsSupported(kDeviceCanDoDualLink);
-			info.numDMAEngines			= UWord(tmpDev.GetNumSupported(kDeviceGetNumDMAEngines));
-			info.pingLED				= tmpDev.GetNumSupported(kDeviceGetPingLED);
-			info.has2KSupport			= tmpDev.IsSupported(kDeviceCanDo2KVideo);
-			info.has4KSupport			= tmpDev.IsSupported(kDeviceCanDo4KVideo);
-			info.has8KSupport			= tmpDev.IsSupported(kDeviceCanDo8KVideo);
-			info.has3GLevelConversion   = tmpDev.IsSupported(kDeviceCanDo3GLevelConversion);
-			info.isoConvertSupport		= tmpDev.IsSupported(kDeviceCanDoIsoConvert);
-			info.rateConvertSupport		= tmpDev.IsSupported(kDeviceCanDoRateConvert);
-			info.proResSupport			= tmpDev.IsSupported(kDeviceCanDoProRes);
-			info.sdi3GSupport			= wgtIDs.find(NTV2_Wgt3GSDIOut1) != wgtIDs.end();
-			info.sdi12GSupport			= tmpDev.IsSupported(kDeviceCanDo12GSDI);
-			info.ipSupport				= tmpDev.IsSupported(kDeviceCanDoIP);
-			info.biDirectionalSDI		= tmpDev.IsSupported(kDeviceHasBiDirectionalSDI);
-			info.ltcInSupport			= tmpDev.GetNumSupported(kDeviceGetNumLTCInputs) > 0;
-			info.ltcOutSupport			= tmpDev.GetNumSupported(kDeviceGetNumLTCOutputs) > 0;
-			info.ltcInOnRefPort			= tmpDev.IsSupported(kDeviceCanDoLTCInOnRefPort);
-			info.stereoOutSupport		= tmpDev.IsSupported(kDeviceCanDoStereoOut);
-			info.stereoInSupport		= tmpDev.IsSupported(kDeviceCanDoStereoIn);
-			info.multiFormat			= tmpDev.IsSupported(kDeviceCanDoMultiFormat);
-			info.numSerialPorts			= tmpDev.GetNumSupported(kDeviceGetNumSerialPorts);
-			info.procAmpSupport			= false;
+			info.deviceIdentifier = oss.str();
+			SetDeviceAttributes(info, tmpDev);
 			SetAudioAttributes(info, tmpDev);
 			sDevInfoList.push_back(info);
 		}
@@ -755,6 +713,54 @@ std::ostream &	operator << (std::ostream & inOutStr, const NTV2AudioPhysicalForm
 
 // Private methods
 
+void CNTV2DeviceScanner::SetDeviceAttributes (NTV2DeviceInfo & inDeviceInfo, CNTV2Card & inDevice)
+{
+	inDevice.GetSerialNumberString(inDeviceInfo.serialNumber);
+	const ULWordSet wgtIDs (inDevice.GetSupportedItems(kNTV2EnumsID_WidgetID));
+	inDeviceInfo.numVidInputs			= inDevice.GetNumSupported(kDeviceGetNumVideoInputs);
+	inDeviceInfo.numVidOutputs			= inDevice.GetNumSupported(kDeviceGetNumVideoOutputs);
+	inDeviceInfo.numAnlgVidOutputs		= inDevice.GetNumSupported(kDeviceGetNumAnalogVideoOutputs);
+	inDeviceInfo.numAnlgVidInputs		= inDevice.GetNumSupported(kDeviceGetNumAnalogVideoInputs);
+	inDeviceInfo.numHDMIVidOutputs		= inDevice.GetNumSupported(kDeviceGetNumHDMIVideoOutputs);
+	inDeviceInfo.numHDMIVidInputs		= inDevice.GetNumSupported(kDeviceGetNumHDMIVideoInputs);
+	inDeviceInfo.numInputConverters		= inDevice.GetNumSupported(kDeviceGetNumInputConverters);
+	inDeviceInfo.numOutputConverters	= inDevice.GetNumSupported(kDeviceGetNumOutputConverters);
+	inDeviceInfo.numUpConverters		= inDevice.GetNumSupported(kDeviceGetNumUpConverters);
+	inDeviceInfo.numDownConverters		= inDevice.GetNumSupported(kDeviceGetNumDownConverters);
+	inDeviceInfo.downConverterDelay		= inDevice.GetNumSupported(kDeviceGetDownConverterDelay);
+	inDeviceInfo.dvcproHDSupport		= inDevice.IsSupported(kDeviceCanDoDVCProHD);
+	inDeviceInfo.qrezSupport			= inDevice.IsSupported(kDeviceCanDoQREZ);
+	inDeviceInfo.hdvSupport				= inDevice.IsSupported(kDeviceCanDoHDV);
+	inDeviceInfo.quarterExpandSupport	= inDevice.IsSupported(kDeviceCanDoQuarterExpand);
+	inDeviceInfo.colorCorrectionSupport	= inDevice.IsSupported(kDeviceCanDoColorCorrection);
+	inDeviceInfo.programmableCSCSupport	= inDevice.IsSupported(kDeviceCanDoProgrammableCSC);
+	inDeviceInfo.rgbAlphaOutputSupport	= inDevice.IsSupported(kDeviceCanDoRGBPlusAlphaOut);
+	inDeviceInfo.breakoutBoxSupport		= inDevice.IsSupported(kDeviceCanDoBreakoutBox);
+	inDeviceInfo.vidProcSupport			= inDevice.IsSupported(kDeviceCanDoVideoProcessing);
+	inDeviceInfo.dualLinkSupport		= inDevice.IsSupported(kDeviceCanDoDualLink);
+	inDeviceInfo.numDMAEngines			= UWord(inDevice.GetNumSupported(kDeviceGetNumDMAEngines));
+	inDeviceInfo.pingLED				= inDevice.GetNumSupported(kDeviceGetPingLED);
+	inDeviceInfo.has2KSupport			= inDevice.IsSupported(kDeviceCanDo2KVideo);
+	inDeviceInfo.has4KSupport			= inDevice.IsSupported(kDeviceCanDo4KVideo);
+	inDeviceInfo.has8KSupport			= inDevice.IsSupported(kDeviceCanDo8KVideo);
+	inDeviceInfo.has3GLevelConversion   = inDevice.IsSupported(kDeviceCanDo3GLevelConversion);
+	inDeviceInfo.isoConvertSupport		= inDevice.IsSupported(kDeviceCanDoIsoConvert);
+	inDeviceInfo.rateConvertSupport		= inDevice.IsSupported(kDeviceCanDoRateConvert);
+	inDeviceInfo.proResSupport			= inDevice.IsSupported(kDeviceCanDoProRes);
+	inDeviceInfo.sdi3GSupport			= wgtIDs.find(NTV2_Wgt3GSDIOut1) != wgtIDs.end();
+	inDeviceInfo.sdi12GSupport			= inDevice.IsSupported(kDeviceCanDo12GSDI);
+	inDeviceInfo.ipSupport				= inDevice.IsSupported(kDeviceCanDoIP);
+	inDeviceInfo.biDirectionalSDI		= inDevice.IsSupported(kDeviceHasBiDirectionalSDI);
+	inDeviceInfo.ltcInSupport			= inDevice.GetNumSupported(kDeviceGetNumLTCInputs) > 0;
+	inDeviceInfo.ltcOutSupport			= inDevice.GetNumSupported(kDeviceGetNumLTCOutputs) > 0;
+	inDeviceInfo.ltcInOnRefPort			= inDevice.IsSupported(kDeviceCanDoLTCInOnRefPort);
+	inDeviceInfo.stereoOutSupport		= inDevice.IsSupported(kDeviceCanDoStereoOut);
+	inDeviceInfo.stereoInSupport		= inDevice.IsSupported(kDeviceCanDoStereoIn);
+	inDeviceInfo.multiFormat			= inDevice.IsSupported(kDeviceCanDoMultiFormat);
+	inDeviceInfo.numSerialPorts			= inDevice.GetNumSupported(kDeviceGetNumSerialPorts);
+	inDeviceInfo.procAmpSupport			= false;
+}
+
 void CNTV2DeviceScanner::SetAudioAttributes (NTV2DeviceInfo & info, CNTV2Card & inBoard)
 {
 	//	Start with empty lists...
@@ -869,7 +875,10 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 
 		if (!nameVal.is_null())
 		{
-			newVDev.deviceIdentifier = nameVal.get<std::string>();
+			ostringstream oss;
+			oss << nameVal.get<std::string>() << " - " << newVDev.deviceIndex;
+
+			newVDev.deviceIdentifier = oss.str();
 		}
 
 		if (!hostVal.is_null())
@@ -902,7 +911,8 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 			cerr << "Unable to open device based on JSON file: " << vdevFile << endl;
 			continue;
 		}
-		tmpDev.GetSerialNumberString(newVDev.serialNumber);
+		SetDeviceAttributes(newVDev, tmpDev);
+		SetAudioAttributes(newVDev, tmpDev);
 
 		outVirtualDevList.push_back(newVDev);
 	}
