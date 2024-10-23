@@ -7648,6 +7648,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_KONALHIDVI,
 														DEVICE_ID_KONAX,
 														DEVICE_ID_KONAXM,
+														DEVICE_ID_SOFTWARE,
 														DEVICE_ID_SOJI_OE1,
 														DEVICE_ID_SOJI_OE2,
 														DEVICE_ID_SOJI_OE3,
@@ -7659,7 +7660,6 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_SOJI_DIAGS,
 														DEVICE_ID_TTAP,
 														DEVICE_ID_TTAP_PRO,
-														DEVICE_ID_SOFTWARE,
 														DEVICE_ID_NOTFOUND	};
 	if (inKinds == NTV2_DEVICEKIND_NONE)
 		return NTV2DeviceIDSet();
