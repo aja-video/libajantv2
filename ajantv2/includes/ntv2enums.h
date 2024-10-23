@@ -1333,14 +1333,14 @@ typedef enum
 **/
 typedef enum
 {
-	NTV2_CHANNEL1,		///< @brief Specifies channel or Frame Store 1 (or the first item).
-	NTV2_CHANNEL2,		///< @brief Specifies channel or Frame Store 2 (or the 2nd item).
-	NTV2_CHANNEL3,		///< @brief Specifies channel or Frame Store 3 (or the 3rd item).
-	NTV2_CHANNEL4,		///< @brief Specifies channel or Frame Store 4 (or the 4th item).
-	NTV2_CHANNEL5,		///< @brief Specifies channel or Frame Store 5 (or the 5th item).
-	NTV2_CHANNEL6,		///< @brief Specifies channel or Frame Store 6 (or the 6th item).
-	NTV2_CHANNEL7,		///< @brief Specifies channel or Frame Store 7 (or the 7th item).
-	NTV2_CHANNEL8,		///< @brief Specifies channel or Frame Store 8 (or the 8th item).
+	NTV2_CHANNEL1,		///< @brief Specifies channel or FrameStore 1 (or the first item).
+	NTV2_CHANNEL2,		///< @brief Specifies channel or FrameStore 2 (or the 2nd item).
+	NTV2_CHANNEL3,		///< @brief Specifies channel or FrameStore 3 (or the 3rd item).
+	NTV2_CHANNEL4,		///< @brief Specifies channel or FrameStore 4 (or the 4th item).
+	NTV2_CHANNEL5,		///< @brief Specifies channel or FrameStore 5 (or the 5th item).
+	NTV2_CHANNEL6,		///< @brief Specifies channel or FrameStore 6 (or the 6th item).
+	NTV2_CHANNEL7,		///< @brief Specifies channel or FrameStore 7 (or the 7th item).
+	NTV2_CHANNEL8,		///< @brief Specifies channel or FrameStore 8 (or the 8th item).
 	NTV2_MAX_NUM_CHANNELS,			//	Always last!
 	NTV2_CHANNEL_INVALID = NTV2_MAX_NUM_CHANNELS
 } NTV2Channel;
@@ -1352,28 +1352,30 @@ typedef enum
 	@brief		These enum values are used for device selection/filtering.
 	@see		::NTV2GetSupportedDevices
 **/
-typedef enum _NTV2DeviceKinds
+typedef enum NTV2DeviceKindFilter
 {
-	NTV2_DEVICEKIND_ALL			= 0xFFFF,	///< @brief Specifies any/all devices.
-	NTV2_DEVICEKIND_SOFTWARE	= 0x8000,	///< @brief Specifies software devices that don't model/emulate "real" ones.
-	NTV2_DEVICEKIND_INPUT		= 0x0001,	///< @brief Specifies devices that input (capture).
-	NTV2_DEVICEKIND_OUTPUT		= 0x0002,	///< @brief Specifies devices that output (playout).
-	NTV2_DEVICEKIND_SDI			= 0x0004,	///< @brief Specifies devices with SDI connectors.
-	NTV2_DEVICEKIND_HDMI		= 0x0008,	///< @brief Specifies devices with HDMI connectors.
-	NTV2_DEVICEKIND_ANALOG		= 0x0010,	///< @brief Specifies devices with analog video connectors.
-	NTV2_DEVICEKIND_SFP			= 0x0020,	///< @brief Specifies devices with SFP connectors.
-	NTV2_DEVICEKIND_IP			= NTV2_DEVICEKIND_SFP,
-	NTV2_DEVICEKIND_EXTERNAL	= 0x0040,	///< @brief Specifies external devices (e.g. Thunderbolt).
-	NTV2_DEVICEKIND_4K			= 0x0080,	///< @brief Specifies devices that can do 4K video.
-	NTV2_DEVICEKIND_8K			= 0x0100,	///< @brief Specifies devices that can do 8K video.
-//	NTV2_DEVICEKIND_HFR			= 0x0200,	///< @brief Specifies devices that can handle HFR video.
-	NTV2_DEVICEKIND_6G			= 0x0400,	///< @brief Specifies devices that have 6G SDI connectors.
-	NTV2_DEVICEKIND_12G			= 0x0800,	///< @brief Specifies devices that have 12G SDI connectors.
-	NTV2_DEVICEKIND_CUSTOM_ANC	= 0x1000,	///< @brief Specifies devices that have custom Anc inserter/extractor firmware.
-	NTV2_DEVICEKIND_RELAYS		= 0x2000,	///< @brief Specifies devices that have bypass relays.
-	NTV2_DEVICEKIND_NONE		= 0			///< @brief Doesn't specify any kind of device.
-} NTV2DeviceKinds;
+	NTV2_DEVICEKIND_ALL				= 0xFFFF,	///< @brief Specifies any/all devices.
+	NTV2_DEVICEKIND_INPUT			= 0x0001,	///< @brief Specifies devices that input (capture).
+	NTV2_DEVICEKIND_OUTPUT			= 0x0002,	///< @brief Specifies devices that output (playout).
+	NTV2_DEVICEKIND_EXTERNAL		= 0x0004,	///< @brief Specifies external devices (e.g. Thunderbolt).
+	NTV2_DEVICEKIND_SOFTWARE		= 0x0008,	///< @brief Specifies software devices (that don't model "real" ones).
+	NTV2_DEVICEKIND_SDI				= 0x0010,	///< @brief Specifies devices with SDI connectors.
+	NTV2_DEVICEKIND_HDMI			= 0x0020,	///< @brief Specifies devices with HDMI connectors.
+	NTV2_DEVICEKIND_ANALOG			= 0x0040,	///< @brief Specifies devices with analog video connectors.
+	NTV2_DEVICEKIND_SFP				= 0x0080,	///< @brief Specifies devices with SFP connectors.
+	NTV2_DEVICEKIND_IP				= NTV2_DEVICEKIND_SFP,
+	NTV2_DEVICEKIND_4K				= 0x0100,	///< @brief Specifies devices that can do 4K video.
+	NTV2_DEVICEKIND_8K				= 0x0200,	///< @brief Specifies devices that can do 8K video.
+	NTV2_DEVICEKIND_6G				= 0x0400,	///< @brief Specifies devices that have 6G SDI connectors.
+	NTV2_DEVICEKIND_12G				= 0x0800,	///< @brief Specifies devices that have 12G SDI connectors.
+	NTV2_DEVICEKIND_CUSTOM_ANC		= 0x1000,	///< @brief Specifies devices that have Anc/Aux inserters/extractors.
+	NTV2_DEVICEKIND_CUSTOM_AUX		= NTV2_DEVICEKIND_CUSTOM_ANC,
+	NTV2_DEVICEKIND_RELAYS			= 0x2000,	///< @brief Specifies devices that have SDI bypass relays.
+	NTV2_DEVICEKIND_MICROCONTROLLER	= 0x4000,	///< @brief Specifies devices that have a microcontroller.
+	NTV2_DEVICEKIND_NONE			= 0x0000	///< @brief Doesn't specify any kind of device.
+} NTV2DeviceKindFilter;
 
+typedef uint16_t	NTV2DeviceKinds;	///< @brief A combination of NTV2DeviceKindFilter values
 
 /**
 	@brief		Identifies a specific IP-based data stream.
@@ -1381,22 +1383,22 @@ typedef enum _NTV2DeviceKinds
 **/
 typedef enum
 {
-	NTV2_VIDEO1_STREAM		= 0,
-	NTV2_VIDEO2_STREAM		= 1,
-	NTV2_VIDEO3_STREAM		= 2,
-	NTV2_VIDEO4_STREAM		= 3,
-	NTV2_AUDIO1_STREAM		= 4,
-	NTV2_AUDIO2_STREAM		= 5,
-	NTV2_AUDIO3_STREAM		= 6,
-	NTV2_AUDIO4_STREAM		= 7,
-	NTV2_ANC1_STREAM		= 8,
-	NTV2_ANC2_STREAM		= 9,
-	NTV2_ANC3_STREAM		= 10,
-	NTV2_ANC4_STREAM		= 11,
-	NTV2_VIDEO4K_STREAM		= 12,
-	NTV2_MAX_NUM_SINGLE_STREAMS = NTV2_VIDEO4K_STREAM,
-	NTV2_MAX_NUM_STREAMS	= 13,
-	NTV2_STREAM_INVALID = NTV2_MAX_NUM_STREAMS
+	NTV2_VIDEO1_STREAM			= 0,
+	NTV2_VIDEO2_STREAM			= 1,
+	NTV2_VIDEO3_STREAM			= 2,
+	NTV2_VIDEO4_STREAM			= 3,
+	NTV2_AUDIO1_STREAM			= 4,
+	NTV2_AUDIO2_STREAM			= 5,
+	NTV2_AUDIO3_STREAM			= 6,
+	NTV2_AUDIO4_STREAM			= 7,
+	NTV2_ANC1_STREAM			= 8,
+	NTV2_ANC2_STREAM			= 9,
+	NTV2_ANC3_STREAM			= 10,
+	NTV2_ANC4_STREAM			= 11,
+	NTV2_VIDEO4K_STREAM			= 12,
+	NTV2_MAX_NUM_SINGLE_STREAMS	= NTV2_VIDEO4K_STREAM,
+	NTV2_MAX_NUM_STREAMS		= 13,
+	NTV2_STREAM_INVALID			= NTV2_MAX_NUM_STREAMS
 } NTV2Stream;
 
 #define NTV2_STREAM_MASK_ALL ((1 << NTV2_MAX_NUM_STREAMS) - 1)
