@@ -433,6 +433,18 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		CHECK_EQ(optNames[0], "F");
 		CHECK_EQ(optNames[1], "fabulous");
 	}
+	TEST_CASE("AJACommandLineParser::ParseArgs Error-on-unknown-arg")
+	{
+		AJACommandLineParser parser;
+		parser.AddOption(AJACommandLineOption(AJAStringList{"d", "device"}, "Device to use"));
+		AJAStringList args;
+		args.push_back("ut_ajabase"); // skipped by the parser
+		args.push_back("--device=kona4");
+		args.push_back("--whoami");
+		CHECK_EQ(parser.ParseArgs(args), true); // errUnknown set to false
+		parser.Reset();
+		CHECK_EQ(parser.ParseArgs(args, true), false); // errUnknown set to true
+	}
 	TEST_CASE("AJACommandLineParser::ParseArgs Double-Dash")
 	{
 		AJACommandLineParser parser;

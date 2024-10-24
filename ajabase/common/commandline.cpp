@@ -363,6 +363,9 @@ bool AJACommandLineParser::ParseArgs(const AJAStringList &args, bool errUnknown)
                                 size_t count = (arg.length()-1)-optName.length();
                                 optValue = arg.substr(optName.length()+1, count);
                                 break;
+                            } else if (errUnknown) {
+                                std::cerr << "Unknown arg: " << subStr << std::endl;
+                                return false;
                             }
                         }
                     }
@@ -388,6 +391,9 @@ bool AJACommandLineParser::ParseArgs(const AJAStringList &args, bool errUnknown)
                     setOptionValue(optName, optValue);
                 }
                 setOption(optName, true);
+            } else if (errUnknown) {
+                std::cerr << "Unknown arg: " << optName << std::endl;
+                return false;
             }
         }
     }

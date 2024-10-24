@@ -325,7 +325,7 @@ public:
 
 	/**
 	 * Add default -?/--help option to this args parser.
-	 * The caller must check if IsSet("help"), and then call GetHelpText,
+	 * The caller must check if IsSet("help"), and then call HelpText,
 	 * in order to retrieve the help text string for printing to the console.
 	 *
 	 * @param[in] useShortName  Specify whether or not the help option should consume the '-h' shortname.
