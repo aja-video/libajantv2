@@ -1537,8 +1537,7 @@ NTV2Buffer::NTV2Buffer (const size_t inByteCount)
 	#endif
 {
 	if (inByteCount)
-		if (Allocate(inByteCount))
-			Fill(UByte(0));
+		Allocate(inByteCount);
 }
 
 
