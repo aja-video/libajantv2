@@ -8,7 +8,8 @@
 #ifndef AJA_VARIANT_H
 #define AJA_VARIANT_H
 
-#include "ajabase/common/public.h"
+#include "ajabase/common/export.h"
+#include <string>
 #include <vector>
 
 /**
