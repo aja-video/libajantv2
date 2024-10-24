@@ -8,7 +8,6 @@
 #ifndef AJA_COMMANDLINE_H
 #define AJA_COMMANDLINE_H
 
-#include "ajabase/common/types.h"
 #include "ajabase/common/export.h"
 #include "ajabase/common/variant.h"
 
@@ -31,18 +30,12 @@ class AJA_EXPORT AJACommandLineOption
 {
 public:
 	AJACommandLineOption();
-	AJACommandLineOption(const std::string &name);
 	AJACommandLineOption(const std::string &name,
-						 const std::string &desc);
-	AJACommandLineOption(const std::string &name,
-						 const std::string &desc,
-						 const std::string &defaultValue);
-	AJACommandLineOption(const AJAStringList &names);
+						 const std::string &desc = "",
+						 const std::string &defaultValue = "");
 	AJACommandLineOption(const AJAStringList &names,
-						 const std::string &desc);
-	AJACommandLineOption(const AJAStringList &names,
-						 const std::string &desc,
-						 const std::string &defaultValue);
+						 const std::string &desc = "",
+						 const std::string &defaultValue = "");
 	virtual ~AJACommandLineOption();
 
 	/**
@@ -57,14 +50,23 @@ public:
 	 *
 	 * @return	The list of names.
 	 */
-	AJAStringList GetNames() const;
+	AJAStringList Names() const;
+
+	/**
+	 * Determine if this AJACommandLineOption contains the specified name.
+	 *
+	 * @param[in] name	The option name to check.
+	 *
+	 * @return	Returns true if the option name is found, otherwise false.
+	 */
+	bool HaveName(const std::string &name) const;
 
 	/**
 	 * Get the description string for this AJACommandLineOption.
 	 *
 	 * @return	The description string.
 	 */
-	std::string GetDesc() const;
+	std::string Desc() const;
 
 	/**
 	 * Set the description string for this AJACommandLineOption.
@@ -78,7 +80,7 @@ public:
 	 *
 	 * @return	The extra description string.
 	 */
-	std::string GetExtraDesc() const;
+	std::string ExtraDesc() const;
 
 	/**
 	 * Set the extra description string for this AJACommandLineOption.
@@ -99,7 +101,7 @@ public:
 	 *
 	 * @return	The default value string.
 	 */
-	std::string GetDefaultValue() const;
+	std::string DefaultValue() const;
 
 	/**
 	 * Add a value string to this AJACommandLineOption.
@@ -115,14 +117,19 @@ public:
 	 *
 	 * @return	The default value string.
 	 */
-	std::string GetValue(size_t index = 0) const;
+	std::string Value(size_t index = 0) const;
 
 	/**
 	 * Get all value strings from this AJACommandLineOption.
 	 *
 	 * @return	The AJAStringList of all value strings.
 	 */
-	AJAStringList GetValues() const;
+	AJAStringList Values() const;
+
+	/**
+	 * Reset values and "set" state of this AJACommandLineOption.
+	 */
+	void Reset();
 
 	/**
 	 * Get all value strings from this AJACommandLineOption.
@@ -141,12 +148,12 @@ public:
 	void MarkSet(bool isSet = true);
 
 private:
-	AJAStringList mNames;
-	std::string mDesc;
-	std::string mDescExtra;
-	AJAStringList mValues;
-	std::string mDefaultValue;
-	bool mIsSet;
+	AJAStringList _names;
+	std::string _desc;
+	std::string _descExtra;
+	AJAStringList _values;
+	std::string _defaultValue;
+	bool _isSet;
 };
 
 typedef AJACommandLineOption	AJACmdLineOption;
@@ -177,12 +184,42 @@ public:
 	~AJACommandLineParser();
 	void operator=(const AJACommandLineParser &other);
 
+	/**
+	 * Delete all sub-parsers and options from this AJACommandLineParser.
+	 */
+	void Clear();
+
+	/**
+	 * Reset the values and "set" state of all sub-parsers and options in this AJACommandLineParser.
+	 *
+	 * @param[in] clearAll	Delete all sub-parsers and options instead of resetting them?
+	 */
 	void Reset(bool clearAll=false);
+
+	/**
+	 * Dump the contents of this AJACommandLineParser to stdout.
+	 */
 	void Dump();
 
+	/**
+	 * Determine this AJACommandLineParser has an option with the specified name.
+	 *
+	 * @param[in] name	The name of the option to look up.
+	 *
+	 * @return	Returns `true` if the option is found, otherwise `false`.
+	 */
 	bool HaveOption(const std::string &name) const;
 
+	/**
+	 * Look up AJACommandLineOption by name in this AJACommandLineParser.
+	 *
+	 * @param[in] name	The name of the option to look up.
+	 * @param[out] opt	The AJACommandLineOption to retrieve.
+	 *
+	 * @return	Returns `true` if the option is found, otherwise `false`.
+	 */
 	bool OptionByName(const std::string &name, AJACommandLineOption &opt) const;
+
 	/**
 	 * Register another AJACommandLineParser instance with this parser.
 	 *
@@ -191,6 +228,7 @@ public:
 	 * @return	Returns `true` if the subparser was added successfully, otherwise `false`.
 	 */
 	bool AddSubParser(AJACommandLineParser *sp);
+
 	/**
 	 * Parse a list of strings containing command-line args.
 	 *
@@ -198,21 +236,24 @@ public:
 	 *
 	 * @return	Returns `true` if the command-line args were parsed successfully, otherwise `false`.
 	 */
-	void ParseArgs(const AJAStringList &args);
+	bool ParseArgs(const AJAStringList &args, bool errUnknown=false);
+
 	/**
 	 * Parse a list of strings containing command-line args.
 	 *
 	 * @param[in] argc	The arg count.
 	 * @param[in] argv	The list of arg strings.
 	 */
-	void ParseArgs(int argc, const char *argv[]);
+	bool ParseArgs(int argc, const char *argv[], bool errUnknown=false);
+
 	/**
 	 * Parse a list of strings containing command-line args.
 	 *
 	 * @param[in] argc	The arg count.
 	 * @param[in] argv	The list of arg strings.
 	 */
-	void ParseArgs(int argc, char *argv[]);
+	bool ParseArgs(int argc, char *argv[], bool errUnknown=false);
+
 	/**
 	 * Tests if the specified arg was set on the command-line.
 	 *
@@ -221,6 +262,7 @@ public:
 	 * @return	Returns `true` if the arg was set, otherwise `false`.
 	 */
 	bool IsSet(const std::string &name) const;
+
 	/**
 	 * Get a variant representing the value of the specified arg name.
 	 *
@@ -230,6 +272,7 @@ public:
 	 * @return	AJAVariant representing the arg value, if the arg was set, otherwise 0.
 	 */
 	AJAVariant Value(const std::string &name, size_t index = 0) const;
+
 	/**
 	 * Get a list of variants representing the values of the specified arg name.
 	 *
@@ -238,6 +281,7 @@ public:
 	 * @return	AJAVariantList of values, empty if no values set.
 	 */
 	AJAVariantList Values(const std::string &name) const;
+
 	/**
 	 * Get the string value for the specified arg name.
 	 *
@@ -247,6 +291,7 @@ public:
 	 * @return	std::string value of the arg, if set, otherwise empty std::string.
 	 */
 	std::string ValueString(const std::string &name, size_t index = 0) const;
+
 	/**
 	 * Get a list of string values for the specified arg name.
 	 *
@@ -255,6 +300,7 @@ public:
 	 * @return	AJAStringList of string values, empty if no values set.
 	 */
 	AJAStringList ValueStrings(const std::string &name) const;
+
 	/**
 	 * Add a AJACommandLineOption to this args parser.
 	 * This method will fail if another option with the
@@ -265,6 +311,7 @@ public:
 	 * @return	`true` if option was added successfully, otherwise `false`.
 	 */
 	bool AddOption(const AJACommandLineOption &option);
+
 	/**
 	 * Add a list of AJACommandLineOptions to this args parser.
 	 * This method will fail if the list contains an option whose
@@ -275,54 +322,66 @@ public:
 	 * @return	`true` if options are added successfully, otherwise `false`.
 	 */
 	bool AddOptions(const std::vector<AJACommandLineOption> &options);
+
 	/**
-	 * Add default -h/--help option to this args parser.
+	 * Add default -?/--help option to this args parser.
 	 * The caller must check if IsSet("help"), and then call GetHelpText,
 	 * in order to retrieve the help text string for printing to the console.
+	 *
+	 * @param[in] useShortName  Specify whether or not the help option should consume the '-h' shortname.
 	 */
-	bool AddHelpOption();
+	bool AddHelpOption(bool useShortName=false);
+
 	/**
 	 * Add default --usage option to this args parser.
 	 * The caller must check if IsSet("usage"), and then call GetUsageText,
 	 * in order to retrieve the usage text string for printing to the console.
+	 *
+	 * @param[in] useShortName	Specify whether or not the usage option should consume the '-u' shortname.
 	 */
-	bool AddUsageOption();
+	bool AddUsageOption(bool useShortName=false);
+
 	/**
 	 * Get the name of this command-line args parser.
 	 *
 	 * @return	The name of the parser, if any has been set, otherwise empty string.
 	 */
-	std::string GetName() const;
+	std::string Name() const;
+
 	/**
 	 * Set the usage text string to print if help is invoked by the args parser.
 	 *
 	 * @param[in] name	The usage text string.
 	 */
 	void SetUsageText(const std::string &usageText);
+
 	/**
 	 * Get the usage text string for this args parser.
 	 *
 	 * @return	The usage text string, if set, otherwise empty string.
 	 */
-	std::string GetUsageText();
+	std::string UsageText();
+
 	/**
 	 * Set the help text string to print if help is invoked by the args parser.
 	 *
 	 * @param[in] name	The help text string.
 	 */
 	void SetHelpText(const std::string &helpText);
+
 	/**
 	 * Get the help text string for this args parser.
 	 *
 	 * @return	The help text string, if set, otherwise empty string.
 	 */
-	std::string GetHelpText();
+	std::string HelpText();
+
 	/**
 	 * Get the name of the command (if-any) represented by this args parser.
 	 *
 	 * @return The command name string, if set, otherwise empty string.
 	 */
-	std::string GetCommandName();
+	std::string CommandName();
 
 private:
 	static bool hasOptionPrefix(const std::string &name);
@@ -335,15 +394,15 @@ private:
 	bool setOptionValue(const std::string &name, const std::string &value);
 	bool setOption(const std::string &name, bool isSet = true);
 
-	int mFlags;
-	std::string mName;
-	std::string mCommandName;
-	std::string mDesc;
-	std::string mDescExtra;
-	std::string mUsageText;
-	std::string mHelpText;
-	AJACommandLineOptionList mOptions;
-	SubParserMap mSubParsers;
+	int _flags;
+	std::string _name;
+	std::string _commandName;
+	std::string _desc;
+	std::string _descExtra;
+	std::string _usageText;
+	std::string _helpText;
+	AJACommandLineOptionList _options;
+	SubParserMap _subParsers;
 };
 
 typedef AJACommandLineParser	AJACmdLineParser;

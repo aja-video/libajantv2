@@ -16,56 +16,40 @@ static const char kSingleDash = '-';
 static const char *kDoubleDash = "--";
 
 AJACommandLineOption::AJACommandLineOption()
-: mNames(), mDesc(), mDescExtra(), mValues(), mDefaultValue(), mIsSet(false)
+: _names(),
+  _desc(),
+  _descExtra(),
+  _values(),
+  _defaultValue(),
+  _isSet(false)
 {}
-
-AJACommandLineOption::AJACommandLineOption(const std::string &name)
-: mNames(), mDesc(), mDescExtra(), mValues(), mDefaultValue(), mIsSet(false)
-{
-    AddName(name);
-}
-
-AJACommandLineOption::AJACommandLineOption(const std::string &name,
-                                           const std::string &desc)
-: mNames(), mDesc(desc), mDescExtra(), mValues(), mDefaultValue(), mIsSet(false)
-{
-    AddName(name);
-}
 
 AJACommandLineOption::AJACommandLineOption(const std::string &name,
                         const std::string &desc,
                         const std::string &defaultValue)
-: mNames(), mDesc(desc), mDescExtra(), mValues(), mDefaultValue(defaultValue), mIsSet(false)
+: _names(),
+  _desc(desc),
+  _descExtra(),
+  _values(),
+  _defaultValue(defaultValue),
+  _isSet(false)
 {
     AddName(name);
 }
 
-AJACommandLineOption::AJACommandLineOption(const AJAStringList &names)
-: mNames(), mDesc(), mDescExtra(), mValues(), mDefaultValue(), mIsSet(false)
-{
-    for (size_t i = 0; i < names.size(); i++) {
-        AddName(names.at(i));
-    }
-}
-
 AJACommandLineOption::AJACommandLineOption(const AJAStringList &names,
-                                           const std::string &desc)
-: mNames(), mDesc(desc), mDescExtra(), mValues(), mDefaultValue(), mIsSet(false)
+                        const std::string &desc,
+                        const std::string &defaultValue)
+: _names(),
+  _desc(desc),
+  _descExtra(),
+  _values(),
+  _defaultValue(defaultValue),
+  _isSet(false)
 {
-    for (size_t i = 0; i < names.size(); i++) {
-        AddName(names.at(i));
+    for (const auto &name : names) {
+        AddName(name);
     }
-}
-
-AJACommandLineOption::AJACommandLineOption(const AJAStringList &names,
-                                           const std::string &desc,
-                                           const std::string &defaultValue)
-: mNames(), mDesc(desc), mDescExtra(), mValues(), mDefaultValue(), mIsSet(false)
-{
-    for (size_t i = 0; i < names.size(); i++) {
-        AddName(names.at(i));
-    }
-    mDefaultValue = defaultValue;
 }
 
 AJACommandLineOption::~AJACommandLineOption()
@@ -75,91 +59,108 @@ AJACommandLineOption::~AJACommandLineOption()
 bool AJACommandLineOption::AddName(const std::string &name)
 {
     bool haveName = false;
-    for (size_t i = 0; i < mNames.size(); i++) {
-        if (mNames.at(i) == name) {
+    for (size_t i = 0; i < _names.size(); i++) {
+        if (_names.at(i) == name) {
             haveName = true;
             break;
         }
     }
     if (!haveName) {
-        mNames.push_back(name);
+        _names.push_back(name);
     }
 
     return haveName;
 }
 
-AJAStringList AJACommandLineOption::GetNames() const
+AJAStringList AJACommandLineOption::Names() const
 {
-    return mNames;
+    return _names;
 }
 
-std::string AJACommandLineOption::GetDesc() const
+bool AJACommandLineOption::HaveName(const std::string &name) const
 {
-    return mDesc;
+    for (const auto &n : _names) {
+        if (n == name) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+std::string AJACommandLineOption::Desc() const
+{
+    return _desc;
 }
 
 void AJACommandLineOption::SetDesc(const std::string &desc)
 {
-    mDesc = desc;
+    _desc = desc;
 }
 
-std::string AJACommandLineOption::GetExtraDesc() const
+std::string AJACommandLineOption::ExtraDesc() const
 {
-    return mDescExtra;
+    return _descExtra;
 }
 
 void AJACommandLineOption::SetExtraDesc(const std::string &desc)
 {
-    mDescExtra = desc;
+    _descExtra = desc;
 }
 
 
 void AJACommandLineOption::SetDefaultValue(const std::string &value)
 {
-    mDefaultValue = value;
+    _defaultValue = value;
 }
 
-std::string AJACommandLineOption::GetDefaultValue() const
+std::string AJACommandLineOption::DefaultValue() const
 {
-    return mDefaultValue;
+    return _defaultValue;
 }
 
 void AJACommandLineOption::AddValue(const std::string &value)
 {
-    mValues.push_back(value);
+    _values.push_back(value);
 }
 
-std::string AJACommandLineOption::GetValue(size_t index) const
+std::string AJACommandLineOption::Value(size_t index) const
 {
-    if (index > mValues.size() || mValues.empty())
+    if (index > _values.size() || _values.empty())
         return "";
-    return mValues.at(index);
+    return _values.at(index);
 }
 
-AJAStringList AJACommandLineOption::GetValues() const
+AJAStringList AJACommandLineOption::Values() const
 {
-    return mValues;
+    return _values;
+}
+
+void AJACommandLineOption::Reset()
+{
+    _values.clear();
+    _isSet = false;
 }
 
 bool AJACommandLineOption::IsSet() const
 {
-    return mIsSet;
+    return _isSet;
 }
 void AJACommandLineOption::MarkSet(bool isSet)
 {
-    mIsSet = isSet;
+    _isSet = isSet;
 }
 
 AJACommandLineParser::AJACommandLineParser(int flags)
-: mFlags(flags), mName(), mCommandName(), mDesc(), mDescExtra(), mUsageText(), mHelpText(),
-  mOptions(), mSubParsers()
+: _flags(flags), _name(), _commandName(), _desc(), _descExtra(), _usageText(), _helpText(),
+  _options(), _subParsers()
 {
     init();
 }
 
 AJACommandLineParser::AJACommandLineParser(const std::string &name, int flags)
-: mFlags(flags), mName(name), mCommandName(), mDesc(), mDescExtra(), mUsageText(), mHelpText(),
-  mOptions(), mSubParsers()
+: _flags(flags), _name(name), _commandName(), _desc(), _descExtra(), _usageText(), _helpText(),
+  _options(), _subParsers()
 {
     init();
 }
@@ -175,49 +176,63 @@ AJACommandLineParser::~AJACommandLineParser()
 
 void AJACommandLineParser::operator=(const AJACommandLineParser &other)
 {
-	mFlags = other.mFlags;
-	mName = other.mName;
-	mCommandName = other.mCommandName;
-	mDesc = other.mDesc;
-	mDescExtra = other.mDescExtra;
-	mUsageText = other.mUsageText;
-	mHelpText = other.mHelpText;
-	mOptions = other.mOptions;
-    mSubParsers.clear();
-    for (SubParserMapConstIter iter = other.mSubParsers.begin(); iter != other.mSubParsers.end(); iter++) {
-        mSubParsers.insert(AJASubParserPair(iter->first, iter->second));
+	_flags = other._flags;
+	_name = other._name;
+	_commandName = other._commandName;
+	_desc = other._desc;
+	_descExtra = other._descExtra;
+	_usageText = other._usageText;
+	_helpText = other._helpText;
+	_options = other._options;
+    _subParsers.clear();
+    for (SubParserMapConstIter iter = other._subParsers.begin(); iter != other._subParsers.end(); iter++) {
+        _subParsers.insert(AJASubParserPair(iter->first, iter->second));
     }
 }
 
 void AJACommandLineParser::init()
 {
-    if ((mFlags & kNoDefaultHelpOption) == 0) {
+    if ((_flags & kNoDefaultHelpOption) == 0) {
         AddHelpOption();
     }
-    if ((mFlags & kNoDefaultUsageOption) == 0) {
+    if ((_flags & kNoDefaultUsageOption) == 0) {
         AddUsageOption();
     }
+}
+
+void AJACommandLineParser::Clear()
+{
+    _subParsers.clear();
+    _options.clear();
 }
 
 void AJACommandLineParser::Reset(bool clearAll)
 {
     if (clearAll) {
-        mSubParsers.clear();
-        mOptions.clear();
+        Clear();
+    } else {
+        for (auto &sp : _subParsers) {
+            if (sp.second) {
+                sp.second->Reset();
+            }
+        }
+        for (auto &opt : _options) {
+            opt.Reset();
+        }
     }
 }
 
 void AJACommandLineParser::Dump()
 {
-    if (!mCommandName.empty()) {
-        AJACommandLineParser *sp = mSubParsers.at(mCommandName);
+    if (!_commandName.empty()) {
+        AJACommandLineParser *sp = _subParsers.at(_commandName);
         if (sp != NULL)
             return sp->Dump();
     } else {
-        for (AJACommandLineOptionListIter iter = mOptions.begin();
-            iter != mOptions.end(); iter++) {
+        for (AJACommandLineOptionListIter iter = _options.begin();
+            iter != _options.end(); iter++) {
             const AJACommandLineOption &o = *iter;
-            const AJAStringList & names = o.GetNames();
+            const AJAStringList & names = o.Names();
             std::ostringstream oss;
             oss << "[";
             std::string name;
@@ -228,7 +243,7 @@ void AJACommandLineParser::Dump()
                 if (++count < names.size())
                     oss << ", ";
             }
-            oss << "] " << "set? " << (IsSet(name) ? "true" : "false") << " value = " << o.GetValue();
+            oss << "] " << "set? " << (IsSet(name) ? "true" : "false") << " value = " << o.Value();
             std::cout << oss.str() << std::endl;
         }
     }
@@ -236,8 +251,8 @@ void AJACommandLineParser::Dump()
 
 bool AJACommandLineParser::HaveOption(const std::string &name) const
 {
-    for (const auto &opt : mOptions) {
-        for (const auto &n : opt.GetNames()) {
+    for (const auto &opt : _options) {
+        for (const auto &n : opt.Names()) {
             if (n == name)
                 return true;
         }
@@ -247,8 +262,8 @@ bool AJACommandLineParser::HaveOption(const std::string &name) const
 
 bool AJACommandLineParser::OptionByName(const std::string &name, AJACommandLineOption &opt) const
 {
-    for (const auto &o : mOptions) {
-        for (const auto &n : o.GetNames()) {
+    for (const auto &o : _options) {
+        for (const auto &n : o.Names()) {
             if (n == name) {
                 opt = o;
                 return true;
@@ -260,38 +275,47 @@ bool AJACommandLineParser::OptionByName(const std::string &name, AJACommandLineO
 
 bool AJACommandLineParser::AddSubParser(AJACommandLineParser *p)
 {
-    const std::string &name = p->GetName();
-    if (mSubParsers.find(name) == mSubParsers.end()) {
-        mSubParsers.insert(AJASubParserPair(name, p));
+    const std::string &name = p->Name();
+    if (_subParsers.find(name) == _subParsers.end()) {
+        _subParsers.insert(AJASubParserPair(name, p));
         return true;
     }
 
     return false;
 }
 
-void AJACommandLineParser::ParseArgs(const AJAStringList &args)
+bool AJACommandLineParser::ParseArgs(const AJAStringList &args, bool errUnknown)
 {
     // Must have at least 2 args (args[0] is the binary name, and args[1..N] are the user-specified args).
-    if (args.size() <= 1)
-        return;
+    if (args.size() <= 1) {
+        return false;
+    }
 
     AJAStringList::const_iterator iter = args.begin();
     ++iter;
 
-    for (SubParserMap::iterator spIter = mSubParsers.begin(); spIter != mSubParsers.end(); spIter++) {
+    for (SubParserMap::iterator spIter = _subParsers.begin(); spIter != _subParsers.end(); spIter++) {
         // Is second arg a command name which belongs to a sub-parser?
-        if (*iter == spIter->first)
-            mCommandName = *iter;
+        if (*iter == spIter->first) {
+            _commandName = *iter;
+        }
         // Iterate all args with all sub-parsers...
-        if (spIter->second != NULL)
-            spIter->second->ParseArgs(args);
+        if (spIter->second != NULL) {
+            if (!spIter->second->ParseArgs(args)) {
+                std::cerr << "Error parsing args with sub-parser: " << spIter->second->Name() << std::endl;
+                return false;
+            }
+        }
     }
 
-    // If the parser name is specified, expect 2nd arg to match.
-    // The parser name is treated as a "sub-command name", eg.
+    // If the the parser name is set, expect the second arg to match (i.e. we are in a sub-parser).
+    // For example, the following case "name" would be "theCommand".
+    // If the second arg doesn't match the name, the sub-parser name is simply not present in the
+    // list of args provided. This is not an error condition.
     // > MyApp.exe theCommand -d1 -n3 --verbose
-    if ((*iter != mName) && !mName.empty())
-        return;
+    if (!_name.empty() && *iter != _name) {
+        return true;
+    }
 
     // ...otherwise just parse the args.
     for (; iter != args.end(); iter++) {
@@ -303,11 +327,11 @@ void AJACommandLineParser::ParseArgs(const AJAStringList &args)
             std::string argStr;
             bool doubleDash = aja::starts_with(arg, kDoubleDash);
             bool singleDash = aja::starts_with(arg, kSingleDash) && !doubleDash;
-            if (doubleDash)
+            if (doubleDash) {
                 argStr = arg.substr(2, arg.length());
-            else if (singleDash)
+            } else if (singleDash) {
                 argStr = arg.substr(1, arg.length());
-
+            }
             if (hasAssignmentOperator(argStr)) {
                 size_t assignPos = argStr.find_first_of(kAssignChar);
                 optName  = argStr.substr(0, assignPos);
@@ -321,11 +345,10 @@ void AJACommandLineParser::ParseArgs(const AJAStringList &args)
                 // -abc // SPECIAL CASE: short opts as long opts
                 // Should we even allow setting a value for a single-dash arg if the arg name is longer than 1 character?
                 // i.e. should -devicekona5 be legal? seems weird to me...
-
                 if (singleDash) { /* -argname */
                     /* handle single-dash option */
                     std::string subStr;
-                    if (mFlags & kShortOptionsAsLong) {
+                    if (_flags & kShortOptionsAsLong) {
                         for (size_t c = 1; c < arg.length(); c++) {
                             subStr = arg.substr(c, 1);
                             if (HaveOption(subStr))
@@ -337,10 +360,8 @@ void AJACommandLineParser::ParseArgs(const AJAStringList &args)
                             subStr = arg.substr(1, c-1);
                             if (HaveOption(subStr)) {
                                 optName = subStr;
-                                optValue = arg.substr(
-                                    arg.find_last_of(optName)+1,
-                                    arg.length()-optName.length()
-                                );
+                                size_t count = (arg.length()-1)-optName.length();
+                                optValue = arg.substr(optName.length()+1, count);
                                 break;
                             }
                         }
@@ -355,49 +376,53 @@ void AJACommandLineParser::ParseArgs(const AJAStringList &args)
                     nextIter++;
                     if (nextIter != args.end()) {
                         std::string nextArg = *(nextIter++);
-                        if (!hasOptionPrefix(nextArg))
+                        if (!hasOptionPrefix(nextArg)) {
                             optValue = nextArg;
+                        }
                     }
                 }
             }
 
             if (HaveOption(optName)) {
-                if (!optValue.empty())
+                if (!optValue.empty()) {
                     setOptionValue(optName, optValue);
+                }
                 setOption(optName, true);
             }
         }
     }
+
+    return true;
 }
 
-void AJACommandLineParser::ParseArgs(int argc, const char *argv[])
+bool AJACommandLineParser::ParseArgs(int argc, const char *argv[], bool errUnknown)
 {
-    if (argc == 0 || argc == 1 || argv == NULL)
-        return;
-
+    if (argc == 0 || argc == 1 || argv == NULL) {
+        return false;
+    }
     AJAStringList argList;
-    for (int i = 0; i < argc; i++)
+    for (int i = 0; i < argc; i++) {
         argList.push_back(std::string(argv[i]));
-
-    ParseArgs(argList);
+    }
+    return ParseArgs(argList, errUnknown);
 }
 
-void AJACommandLineParser::ParseArgs(int argc, char *argv[])
+bool AJACommandLineParser::ParseArgs(int argc, char *argv[], bool errUnknown)
 {
-    if (argc == 0 || argc == 1 || argv == NULL)
-        return;
-
+    if (argc == 0 || argc == 1 || argv == NULL) {
+        return false;
+    }
     AJAStringList argList;
-    for (int i = 0; i < argc; i++)
+    for (int i = 0; i < argc; i++) {
         argList.push_back(std::string(argv[i]));
-
-    ParseArgs(argList);
+    }
+    return ParseArgs(argList, errUnknown);
 }
 
 bool AJACommandLineParser::IsSet(const std::string &name) const
 {
-    if (!mCommandName.empty()) {
-        AJACommandLineParser *sp = mSubParsers.at(mCommandName);
+    if (!_commandName.empty()) {
+        AJACommandLineParser *sp = _subParsers.at(_commandName);
         if (sp != NULL) {
             return sp->IsSet(name);
         }
@@ -431,17 +456,17 @@ AJAVariantList AJACommandLineParser::Values(const std::string &name) const
 std::string AJACommandLineParser::ValueString(const std::string &name, size_t index) const
 {
     std::string val;
-    if (!mCommandName.empty()) {
-        AJACommandLineParser *sp = mSubParsers.at(mCommandName);
+    if (!_commandName.empty()) {
+        AJACommandLineParser *sp = _subParsers.at(_commandName);
         if (sp != NULL) {
             return sp->ValueString(name, index);
         }
     } else {
         AJACommandLineOption opt;
         if (OptionByName(name, opt)) {
-            val = opt.GetValue(index);
+            val = opt.Value(index);
             if (val.empty()) {
-                val = opt.GetDefaultValue();
+                val = opt.DefaultValue();
             }
         }
     }
@@ -451,15 +476,15 @@ std::string AJACommandLineParser::ValueString(const std::string &name, size_t in
 
 AJAStringList AJACommandLineParser::ValueStrings(const std::string &name) const
 {
-    if (!mCommandName.empty()) {
-        AJACommandLineParser *sp = mSubParsers.at(mCommandName);
+    if (!_commandName.empty()) {
+        AJACommandLineParser *sp = _subParsers.at(_commandName);
         if (sp != NULL) {
             return sp->ValueStrings(name);
         }
     } else {
         AJACommandLineOption opt;
         if (OptionByName(name, opt)) {
-            return opt.GetValues();
+            return opt.Values();
         }
     }
     return AJAStringList();
@@ -468,9 +493,9 @@ AJAStringList AJACommandLineParser::ValueStrings(const std::string &name) const
 bool AJACommandLineParser::AddOption(const AJACommandLineOption &option)
 {
     bool exists = false;
-    const AJAStringList &wantNames = option.GetNames();
-    for (AJACommandLineOptionListIter optIter = mOptions.begin(); optIter != mOptions.end(); optIter++) {
-        const AJAStringList &names = optIter->GetNames();
+    const AJAStringList &wantNames = option.Names();
+    for (AJACommandLineOptionListIter optIter = _options.begin(); optIter != _options.end(); optIter++) {
+        const AJAStringList &names = optIter->Names();
         for (AJAStringListConstIter nameIter = names.begin(); nameIter != names.end(); nameIter++) {
             for (AJAStringListConstIter wantIter = wantNames.begin(); wantIter != wantNames.end(); wantIter++) {
                 if (*wantIter == *nameIter) {
@@ -485,7 +510,7 @@ next:
     if (exists) {
         return false;
     } else {
-        mOptions.push_back(option);
+        _options.push_back(option);
         return true;
     }
 }
@@ -500,60 +525,65 @@ bool AJACommandLineParser::AddOptions(const AJACommandLineOptionList &options)
     return options.size() > 0 ? (okCount == (uint32_t)options.size() ? true : false) : false;
 }
 
-bool AJACommandLineParser::AddHelpOption()
+bool AJACommandLineParser::AddHelpOption(bool useShortName)
 {
     AJACommandLineOption helpOpt;
     helpOpt.AddName("?");
-    helpOpt.AddName("h");
+    if (useShortName) {
+        helpOpt.AddName("h");
+    }
     helpOpt.AddName("help");
     helpOpt.SetDesc("Print the help text");
     return AddOption(helpOpt);
 }
 
-bool AJACommandLineParser::AddUsageOption()
+bool AJACommandLineParser::AddUsageOption(bool useShortName)
 {
     AJACommandLineOption usageOpt;
     usageOpt.AddName("usage");
+    if (useShortName) {
+        usageOpt.AddName("u");
+    }
     usageOpt.SetDesc("Print the usage text");
     return AddOption(usageOpt);
 }
 
-std::string AJACommandLineParser::GetName() const
+std::string AJACommandLineParser::Name() const
 {
-    if (!mCommandName.empty()) {
-        AJACommandLineParser *sp = mSubParsers.at(mCommandName);
+    if (!_commandName.empty()) {
+        AJACommandLineParser *sp = _subParsers.at(_commandName);
         if (sp != NULL) {
-            return sp->GetName();
+            return sp->Name();
         }
     }
 
-    return mName;
+    return _name;
 }
 
 void AJACommandLineParser::SetUsageText(const std::string &usageText)
 {
-    if (!mCommandName.empty()) {
-        AJACommandLineParser *sp = mSubParsers.at(mCommandName);
+    if (!_commandName.empty()) {
+        AJACommandLineParser *sp = _subParsers.at(_commandName);
         if (sp != NULL) {
             sp->SetUsageText(usageText);
         }
     } else {
-        mUsageText = usageText;
+        _usageText = usageText;
     }
 }
 
-std::string AJACommandLineParser::GetUsageText()
+std::string AJACommandLineParser::UsageText()
 {
-    if (!mCommandName.empty()) {
-        AJACommandLineParser *sp = mSubParsers.at(mCommandName);
+    if (!_commandName.empty()) {
+        AJACommandLineParser *sp = _subParsers.at(_commandName);
         if (sp != NULL) {
-            return sp->GetUsageText();
+            return sp->UsageText();
         }
     }
 
     std::string usageText;
-    if (!mUsageText.empty()) {
-        usageText = mUsageText;
+    if (!_usageText.empty()) {
+        usageText = _usageText;
     } else {
         usageText = generateUsageText();
     }
@@ -562,30 +592,30 @@ std::string AJACommandLineParser::GetUsageText()
 
 void AJACommandLineParser::SetHelpText(const std::string &helpText)
 {
-    if (!mCommandName.empty()) {
-        AJACommandLineParser *sp = mSubParsers.at(mCommandName);
+    if (!_commandName.empty()) {
+        AJACommandLineParser *sp = _subParsers.at(_commandName);
         if (sp != NULL) {
             sp->SetHelpText(helpText);
         }
     } else {
-        mHelpText = helpText;
+        _helpText = helpText;
     }
 }
 
-std::string AJACommandLineParser::GetHelpText()
+std::string AJACommandLineParser::HelpText()
 {
-    if (!mCommandName.empty()) {
-        AJACommandLineParser *sp = mSubParsers.at(mCommandName);
+    if (!_commandName.empty()) {
+        AJACommandLineParser *sp = _subParsers.at(_commandName);
         if (sp != NULL) {
-            return sp->GetHelpText();
+            return sp->HelpText();
         }
     }
 
     std::string helpText;
-    if (mHelpText.empty()) {
+    if (_helpText.empty()) {
         helpText = generateHelpText();
     } else {
-        helpText = mHelpText;
+        helpText = _helpText;
     }
     return helpText;
 }
@@ -596,15 +626,15 @@ std::string AJACommandLineParser::generateHelpText() const
     std::string exePath;
     AJAFileIO::GetExecutablePath(exePath);
     oss << "Usage: " << exePath;
-    if (!mName.empty())
-        oss << " " << mName;
+    if (!_name.empty())
+        oss << " " << _name;
     oss << " [OPTION...]" << std::endl;
 
     // Get the longest line size first...
     size_t longestSize = 0;
-    for (AJACommandLineOptionListIter it = mOptions.begin();
-        it != mOptions.end(); it++) {
-        const AJAStringList &names = it->GetNames();
+    for (AJACommandLineOptionListIter it = _options.begin();
+        it != _options.end(); it++) {
+        const AJAStringList &names = it->Names();
         size_t namesLength = 0;
         for (AJAStringListConstIter sIter = names.begin(); sIter != names.end(); sIter++) {
             const std::string &name = *sIter;
@@ -623,10 +653,10 @@ std::string AJACommandLineParser::generateHelpText() const
     }
 
     // ...now calculate all of the line padding.
-    for (AJACommandLineOptionListIter it = mOptions.begin();
-        it != mOptions.end(); it++) {
+    for (AJACommandLineOptionListIter it = _options.begin();
+        it != _options.end(); it++) {
         oss << std::setw(2) << std::right;
-        const AJAStringList &names = it->GetNames();
+        const AJAStringList &names = it->Names();
         size_t nameCount = 0;
         size_t namesLength = 0;
         for (AJAStringListConstIter sIter = names.begin(); sIter != names.end(); sIter++) {
@@ -644,8 +674,8 @@ std::string AJACommandLineParser::generateHelpText() const
             }
         }
         namesLength += ((names.size()*2)-2);
-        oss << std::setw((longestSize-namesLength) + it->GetDesc().length() + 8);
-        oss << it->GetDesc() << std::endl;
+        oss << std::setw((longestSize-namesLength) + it->Desc().length() + 8);
+        oss << it->Desc() << std::endl;
     }
 
     return oss.str();
@@ -657,15 +687,69 @@ std::string AJACommandLineParser::generateUsageText() const
     std::string exePath;
     AJAFileIO::GetExecutablePath(exePath);
     oss << "Usage: " << exePath;
-    if (!mName.empty())
-        oss << " " << mName;
-    oss << "\nTODO" << std::endl;
+    if (!_name.empty()) {
+        oss << " " << _name;
+    }
+
+    std::string abbrev;
+    std::ostringstream usages;
+    bool haveHelp = false;
+    bool haveUsage = false;
+    for (const auto &opt : _options) {
+        if (opt.HaveName("?")) {
+            haveHelp = true;
+        } else if (opt.HaveName("usage")) {
+            haveUsage = true;
+        } else {
+            auto names = opt.Names();
+            usages << "\t[";
+            for (size_t ndx = 0; ndx < names.size(); ndx++) {
+                auto name = names.at(ndx);
+                bool isShortName = name.length() == 1;
+                if (isShortName) {
+                    abbrev += name;
+                    usages << '-' << name;
+                } else {
+                    usages << "--" << name;
+                }
+                if (ndx < names.size()-1) {
+                     usages << '|';
+                }
+            }
+            usages << ']' << std::endl;
+        }
+    }
+
+    // Make sure help and usage options appear at the end
+    if (haveHelp) {
+        usages << "\t[" << "-?|--help]" << std::endl;
+    }
+    if (haveUsage) {
+        usages << "\t[" << "--usage]" << std::endl;
+    }
+
+    if (!abbrev.empty()) {
+        if (haveHelp) {
+            abbrev += '?';
+        }
+        oss << " [-" << abbrev << "]" << std::endl;
+    }
+    oss << usages.str() << std::endl;
+
+    if (!_subParsers.empty()) {
+        oss << '\n' << "commands: " << std::endl;
+        for (const auto &sp : _subParsers) {
+            if (sp.second) {
+                oss << "\t  " << sp.second->Name() << std::endl;
+            }
+        }
+    }
     return oss.str();
 }
 
-std::string AJACommandLineParser::GetCommandName()
+std::string AJACommandLineParser::CommandName()
 {
-    return mCommandName;
+    return _commandName;
 }
 
 bool AJACommandLineParser::hasOptionPrefix(const std::string &name)
@@ -682,12 +766,12 @@ bool AJACommandLineParser::hasAssignmentOperator(const std::string &arg)
 bool AJACommandLineParser::setOptionValue(const std::string &name, const std::string &value)
 {
     if (!value.empty()) {
-        for (size_t i = 0; i < mOptions.size(); i++) {
-            AJACommandLineOption opt = mOptions.at(i);
-            const AJAStringList &names = opt.GetNames();
+        for (size_t i = 0; i < _options.size(); i++) {
+            AJACommandLineOption opt = _options.at(i);
+            const AJAStringList &names = opt.Names();
             for (AJAStringListConstIter iter = names.begin(); iter != names.end(); iter++) {
                 if (name == *iter) {
-                    mOptions[i].AddValue(value);
+                    _options[i].AddValue(value);
                     return true;
                 }
             }
@@ -699,12 +783,12 @@ bool AJACommandLineParser::setOptionValue(const std::string &name, const std::st
 
 bool AJACommandLineParser::setOption(const std::string &name, bool isSet)
 {
-    for (size_t i = 0; i < mOptions.size(); i++) {
-        AJACommandLineOption opt = mOptions.at(i);
-        const AJAStringList &names = opt.GetNames();
+    for (size_t i = 0; i < _options.size(); i++) {
+        AJACommandLineOption opt = _options.at(i);
+        const AJAStringList &names = opt.Names();
         for (AJAStringListConstIter iter = names.begin(); iter != names.end(); iter++) {
             if (name == *iter) {
-                mOptions[i].MarkSet(isSet);
+                _options[i].MarkSet(isSet);
                 return true;
             }
         }
