@@ -404,9 +404,9 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 	TEST_CASE("AJACommandLineParser Constructor")
 	{
 		AJACommandLineParser parser;
-		CHECK(parser.GetName().empty() == true);
+		CHECK(parser.Name().empty() == true);
 		AJACommandLineParser parser2("foobar");
-		CHECK(parser2.GetName() == "foobar");
+		CHECK(parser2.Name() == "foobar");
 	}
 	TEST_CASE("AJACommandLineParser AddOption")
 	{
@@ -428,10 +428,83 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		parser.AddOption(AJACommandLineOption(AJAStringList{"z", "baz"}, "Tweak the baz"));
 		AJACommandLineOption opt;
 		parser.OptionByName("fabulous", opt);
-		AJAStringList optNames = opt.GetNames();
+		AJAStringList optNames = opt.Names();
 		CHECK_EQ(optNames.size(), 2);
 		CHECK_EQ(optNames[0], "F");
 		CHECK_EQ(optNames[1], "fabulous");
+	}
+	TEST_CASE("AJACommandLineParser::ParseArgs Double-Dash")
+	{
+		AJACommandLineParser parser;
+		parser.AddOption(AJACommandLineOption(AJAStringList{"d", "device"}, "Device to use"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"p", "pf", "pix-fmt", "pixel-format"}, "Pixel Format to use"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"v", "vf", "vid-fmt", "video-format"}, "Video Format to use"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"i", "inp", "input"}, "Input to use"));
+		AJAStringList args;
+		args.push_back("ut_ajabase"); // skipped by the parser
+		args.push_back("--device=kona4");
+		args.push_back("--vid-fmt=1080i59");
+		args.push_back("--pix-fmt=yuv10");
+		CHECK_EQ(parser.ParseArgs(args), true);
+		CHECK_EQ(parser.IsSet("device"), true);
+		CHECK_EQ(parser.IsSet("vid-fmt"), true);
+		CHECK_EQ(parser.IsSet("vf"), true);
+		CHECK_EQ(parser.IsSet("pix-fmt"), true);
+		CHECK_EQ(parser.IsSet("pf"), true);
+		CHECK_EQ(parser.IsSet("input"), false);
+		CHECK_EQ(parser.Value("device").AsString(), "kona4");
+		CHECK_EQ(parser.Value("vid-fmt").AsString(), "1080i59");
+		CHECK_EQ(parser.Value("pix-fmt").AsString(), "yuv10");
+		parser.Reset();
+		args.push_back("--input");
+		args.push_back("sdi1");
+		CHECK_EQ(parser.ParseArgs(args), true);
+		CHECK_EQ(parser.IsSet("input"), true);
+		CHECK_EQ(parser.IsSet("vid-fmt"), true);
+		CHECK_EQ(parser.IsSet("pix-fmt"), true);
+		CHECK_EQ(parser.Value("device").AsString(), "kona4");
+		CHECK_EQ(parser.Value("vid-fmt").AsString(), "1080i59");
+		CHECK_EQ(parser.Value("pix-fmt").AsString(), "yuv10");
+		CHECK_EQ(parser.Value("input").AsString(), "sdi1");
+
+		// negative tests
+		CHECK_EQ(parser.IsSet("in"), false); // expect the full exact argname
+		CHECK_EQ(parser.IsSet("-vid"), false);
+		CHECK_EQ(parser.IsSet("--pix"), false);
+	}
+	TEST_CASE("AJACommandLineParser::ParseArgs Single-Dash")
+	{
+		AJACommandLineParser parser;
+		parser.AddOption(AJACommandLineOption(AJAStringList{"d", "device"}, "Device to use"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"p", "pf", "pix-fmt", "pixel-format"}, "Pixel Format to use"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"v", "vf", "vid-fmt", "video-format"}, "Video Format to use"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"i", "inp", "input"}, "Input to use"));
+		AJAStringList args;
+		args.push_back("ut_ajabase"); // skipped by the parser
+		args.push_back("-device=kona4");
+		args.push_back("-vid-fmt=1080i59");
+		args.push_back("-pix-fmt");
+		args.push_back("yuv10");
+		CHECK_EQ(parser.ParseArgs(args), true);
+		CHECK_EQ(parser.IsSet("device"), true);
+		CHECK_EQ(parser.IsSet("vid-fmt"), true);
+		CHECK_EQ(parser.IsSet("pix-fmt"), true);
+		CHECK_EQ(parser.IsSet("input"), false);
+		parser.Reset();
+		args.push_back("-inputsdi1");
+		parser.ParseArgs(args);
+		CHECK_EQ(parser.IsSet("device"), true);
+		CHECK_EQ(parser.IsSet("vid-fmt"), true);
+		CHECK_EQ(parser.IsSet("pix-fmt"), true);
+		CHECK_EQ(parser.IsSet("input"), true);
+		CHECK_EQ(parser.Value("device").AsString(), "kona4");
+		CHECK_EQ(parser.Value("vid-fmt").AsString(), "1080i59");
+		CHECK_EQ(parser.Value("pix-fmt").AsString(), "yuv10");
+		CHECK_EQ(parser.Value("input").AsString(), "sdi1");
+
+		// negative tests
+		CHECK_EQ(parser.IsSet("dev"), false); // expect the full exact argname
+		CHECK_EQ(parser.IsSet("-fmt"), false);
 	}
 	TEST_CASE("AJACommandLineParser ParseArgs kShortOptionsDefault")
 	{
@@ -446,7 +519,7 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		args.push_back("-b23");
 		args.push_back("-q");
 		args.push_back("\"AJA Video Systems\"");
-		parser.ParseArgs(args);
+		CHECK_EQ(parser.ParseArgs(args), true);
 		CHECK_EQ(parser.IsSet("foo"), true);
 		CHECK_EQ(parser.IsSet("bar"), true);
 		CHECK_EQ(parser.IsSet("baz"), false);
@@ -465,7 +538,7 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		AJAStringList argz;
 		argz.push_back("ut_ajabase"); // skipped by the parsnip
 		argz.push_back("-food");
-		parsnip.ParseArgs(argz);
+		CHECK_EQ(parsnip.ParseArgs(argz), true);
 		CHECK_EQ(parsnip.IsSet("foo"), false);
 		CHECK_EQ(parsnip.Value("foo").AsString(), "");
 		CHECK_EQ(parsnip.IsSet("food"), true);
@@ -480,7 +553,7 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		AJAStringList args;
 		args.push_back("ut_ajabase"); // skipped by the parser
 		args.push_back("-fnz");
-		parser.ParseArgs(args);
+		CHECK_EQ(parser.ParseArgs(args), true);
 		CHECK_EQ(parser.IsSet("foo"), true);
 		CHECK_EQ(parser.IsSet("bar"), false);
 		CHECK_EQ(parser.IsSet("baz"), true);
@@ -488,7 +561,7 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		args.clear();
 		args.push_back("ut_ajabase"); // skipped by the parser
 		args.push_back("-fubz");
-		parser.ParseArgs(args);
+		CHECK_EQ(parser.ParseArgs(args), true);
 		CHECK_EQ(parser.IsSet("foo"), true);
 		CHECK_EQ(parser.IsSet("bar"), true);
 		CHECK_EQ(parser.IsSet("baz"), true);
@@ -500,17 +573,42 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		parser.AddOption(AJACommandLineOption(AJAStringList{"f", "foo"}, "Tweak the foo"));
 		parser.AddOption(AJACommandLineOption(AJAStringList{"b", "bar"}, "Tweak the bar"));
 		parser.AddOption(AJACommandLineOption(AJAStringList{"z", "baz"}, "Tweak the baz"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"m", "myoption"}, "My awesome option"));
 		AJAStringList args;
 		args.push_back("ut_ajabase"); // skipped by the parser
 		args.push_back("--foo=123");
 		args.push_back("--bar");
 		args.push_back("42");
-		parser.ParseArgs(args);
+		args.push_back("--myopt=yum");
+		CHECK_EQ(parser.ParseArgs(args), true);
 		CHECK_EQ(parser.IsSet("foo"), true);
 		CHECK_EQ(parser.IsSet("bar"), true);
 		CHECK_EQ(parser.IsSet("baz"), false);
 		CHECK_EQ(parser.Value("foo").AsInt32(), 123);
 		CHECK_EQ(parser.Value("bar").AsInt32(), 42);
+		CHECK_EQ(parser.IsSet("myoption"), false);
+	}
+	TEST_CASE("AJACommandLineParser ParseArgs Long (no whitespace or assignment operator)")
+	{
+		AJACommandLineParser parser;
+		parser.AddOption(AJACommandLineOption(AJAStringList{"f", "foo"}, "Tweak the foo"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"b", "bar"}, "Tweak the bar"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"z", "baz"}, "Tweak the baz"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"m", "myoption"}, "My awesome option"));
+		AJAStringList args;
+		args.push_back("ut_ajabase"); // skipped by the parser
+		args.push_back("--foo=123");
+		args.push_back("--bar");
+		args.push_back("42");
+		args.push_back("-myoptionyum");
+		CHECK_EQ(parser.ParseArgs(args), true);
+		CHECK_EQ(parser.IsSet("foo"), true);
+		CHECK_EQ(parser.IsSet("bar"), true);
+		CHECK_EQ(parser.IsSet("baz"), false);
+		CHECK_EQ(parser.Value("foo").AsInt32(), 123);
+		CHECK_EQ(parser.Value("bar").AsInt32(), 42);
+		CHECK_EQ(parser.IsSet("myoption"), true);
+		CHECK_EQ(parser.Value("myoption").AsString(), "yum");
 	}
 	TEST_CASE("AJACommandLineParser Subparser")
 	{
@@ -532,7 +630,7 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		args.push_back("--foo=123");
 		args.push_back("--bar=42");
 		args.push_back("--baz=999");
-		parser.ParseArgs(args);
+		CHECK_EQ(parser.ParseArgs(args), true);
 		CHECK_EQ(parser.Value("foo").AsInt32(), 123);
 		CHECK_EQ(parser.Value("bar").AsInt32(), 42);
 		CHECK_EQ(parser.Value("baz").AsInt32(), 999);
@@ -542,7 +640,7 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		args.push_back("-qa");
 		args.push_back("-ub");
 		args.push_back("-xc");
-		parser.ParseArgs(args);
+		CHECK_EQ(parser.ParseArgs(args), true);
 		CHECK_EQ(parser.Value("quack").AsString(), "a");
 		CHECK_EQ(parser.Value("update").AsString(), "b");
 		CHECK_EQ(parser.Value("jinx").AsString(), "c");
@@ -556,6 +654,22 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		CHECK_EQ(parser.IsSet("foo"), false);
 		CHECK_EQ(parser.IsSet("bar"), false);
 		CHECK_EQ(parser.IsSet("baz"), false);
+	}
+	TEST_CASE("AJACommandLineParser::GetUsageText")
+	{
+		AJACommandLineParser parser;
+		parser.AddOption(AJACommandLineOption(AJAStringList{"d", "device"}, "Device to use"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"p", "pf", "pix-fmt", "pixel-format"}, "Pixel Format to use"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"v", "vf", "vid-fmt", "video-format"}, "Video Format to use"));
+		parser.AddOption(AJACommandLineOption(AJAStringList{"i", "inp", "input"}, "Input to use"));
+		AJAStringList args;
+		args.push_back("ut_ajabase"); // skipped by the parser
+		args.push_back("-device=kona4");
+		args.push_back("-vid-fmt=1080i59");
+		args.push_back("-pix-fmt");
+		args.push_back("yuv10");
+		CHECK_EQ(parser.ParseArgs(args), true);
+		std::cout << parser.UsageText();
 	}
 	TEST_CASE("AJACommandLineParser C++98 compliant")
 	{
@@ -578,7 +692,7 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		args.push_back("--abc=123");
 		args.push_back("--abcdef=456");
 		args.push_back("--abcdefg=600");
-		parser.ParseArgs(args);
+		CHECK_EQ(parser.ParseArgs(args), true);
 		CHECK_EQ(parser.Value("foo").AsUInt32(), 42);
 		CHECK_EQ(parser.Value("abc").AsUInt32(), 123);
 		CHECK_EQ(parser.Value("abcdef").AsUInt32(), 456);
@@ -590,6 +704,7 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		args.push_back("-abc=123");
 		args.push_back("-abcdef=456");
 		args.push_back("-abcdefg=600");
+		CHECK_EQ(parser.ParseArgs(args), true);
 		CHECK_EQ(parser.Value("foo").AsUInt32(), 42);
 		CHECK_EQ(parser.Value("abc").AsUInt32(), 123);
 		CHECK_EQ(parser.Value("abcdef").AsUInt32(), 456);
@@ -610,7 +725,7 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		CHECK_EQ(parser.AddOption(opt2), false);
 		CHECK_EQ(parser.AddOption(opt3), true);
 		CHECK_EQ(parser.AddOption(abc), true);
-		parser.ParseArgs(args);
+		CHECK_EQ(parser.ParseArgs(args), true);
 		CHECK_EQ(parser.Value("foo").AsUInt32(), 99);
 		CHECK_EQ(parser.Value("abc").AsString(), "hello");
 		CHECK_EQ(parser.Value("foobar").AsFloat(), doctest::Approx(3.14159f));
