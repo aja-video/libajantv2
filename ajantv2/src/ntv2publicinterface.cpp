@@ -1518,6 +1518,7 @@ NTV2Buffer::NTV2Buffer (const void * pInUserPointer, const size_t inByteCount)
 		fIOMemoryDesc		(0),
 		fIOMemoryMap		(0)
 	#else
+		fKernelSpacePtr		(0),
 		fKernelHandle		(0)
 	#endif
 {
@@ -1533,6 +1534,7 @@ NTV2Buffer::NTV2Buffer (const size_t inByteCount)
 		fIOMemoryDesc		(0),
 		fIOMemoryMap		(0)
 	#else
+		fKernelSpacePtr		(0),
 		fKernelHandle		(0)
 	#endif
 {
@@ -1550,6 +1552,7 @@ NTV2Buffer::NTV2Buffer (const NTV2Buffer & inObj)
 		fIOMemoryDesc		(0),
 		fIOMemoryMap		(0)
 	#else
+		fKernelSpacePtr		(0),
 		fKernelHandle		(0)
 	#endif
 {
