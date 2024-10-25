@@ -7548,21 +7548,23 @@ bool NTV2IsCompatibleBitfileName (const string & inBitfileName, const NTV2Device
 
 NTV2DeviceID NTV2GetDeviceIDFromBitfileName (const string & inBitfileName)
 {
-	typedef map <string, NTV2DeviceID>	BitfileName2DeviceID;
-	static BitfileName2DeviceID			sBitfileName2DeviceID;
-	if (sBitfileName2DeviceID.empty ())
+	typedef map<string, NTV2DeviceID>	BitfileName2DevID;
+	typedef BitfileName2DevID::const_iterator	BitfileName2DevCI;
+	static BitfileName2DevID	sBitfileName2DevID;
+	static AJALock	sBFN2DevIDMutex;
+	AJAAutoLock tmpLock(&sBFN2DevIDMutex);
+	if (sBitfileName2DevID.empty())
 	{
-		static	NTV2DeviceID	sDeviceIDs [] = {	DEVICE_ID_KONA3GQUAD,	DEVICE_ID_KONA3G,	DEVICE_ID_KONA4,		DEVICE_ID_KONA4UFC, DEVICE_ID_KONALHI,
-													DEVICE_ID_KONALHEPLUS,	DEVICE_ID_TTAP,		DEVICE_ID_CORVID1,		DEVICE_ID_CORVID22, DEVICE_ID_CORVID24,
-													DEVICE_ID_CORVID3G,		DEVICE_ID_IOXT,		DEVICE_ID_IOEXPRESS,	DEVICE_ID_IO4K,		DEVICE_ID_IO4KUFC,
-													DEVICE_ID_KONA1,		DEVICE_ID_KONAHDMI, DEVICE_ID_KONA5,		DEVICE_ID_KONA5_8KMK,DEVICE_ID_CORVID44_8KMK,
-													DEVICE_ID_KONA5_8K,		DEVICE_ID_CORVID44_8K,	DEVICE_ID_TTAP_PRO, DEVICE_ID_KONA5_2X4K,	DEVICE_ID_CORVID44_2X4K,
-													DEVICE_ID_CORVID44_PLNR,DEVICE_ID_IOX3,		DEVICE_ID_KONA5_8K_MV_TX, DEVICE_ID_KONAX, DEVICE_ID_KONAXM,
-													DEVICE_ID_NOTFOUND };
-		for (unsigned ndx (0);	ndx < sizeof (sDeviceIDs) / sizeof (NTV2DeviceID);	ndx++)
-			sBitfileName2DeviceID [::NTV2GetBitfileName (sDeviceIDs [ndx])] = sDeviceIDs [ndx];
+		const NTV2DeviceIDSet supportedDevices (::NTV2GetSupportedDevices());
+		for (NTV2DeviceIDSetConstIter it(supportedDevices.begin());	 it != supportedDevices.end();	++it)
+		{
+			const string bitFileName(::NTV2GetBitfileName(*it));
+			if (!bitFileName.empty())
+				sBitfileName2DevID[bitFileName] = *it;
+		}
 	}
-	return sBitfileName2DeviceID [inBitfileName];
+	BitfileName2DevCI it(sBitfileName2DevID.find(inBitfileName));
+	return it != sBitfileName2DevID.end() ? it->second : DEVICE_ID_INVALID;
 }
 
 
@@ -7648,6 +7650,7 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_KONALHIDVI,
 														DEVICE_ID_KONAX,
 														DEVICE_ID_KONAXM,
+														DEVICE_ID_SOFTWARE,
 														DEVICE_ID_SOJI_OE1,
 														DEVICE_ID_SOJI_OE2,
 														DEVICE_ID_SOJI_OE3,
@@ -7659,7 +7662,6 @@ NTV2DeviceIDSet NTV2GetSupportedDevices (const NTV2DeviceKinds inKinds)
 														DEVICE_ID_SOJI_DIAGS,
 														DEVICE_ID_TTAP,
 														DEVICE_ID_TTAP_PRO,
-														DEVICE_ID_SOFTWARE,
 														DEVICE_ID_NOTFOUND	};
 	if (inKinds == NTV2_DEVICEKIND_NONE)
 		return NTV2DeviceIDSet();
@@ -7808,6 +7810,7 @@ string NTV2BitfileTypeToString (const NTV2BitfileType inValue, const bool inComp
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaIP 1Rx 1Tx 1SFP J2K",	NTV2_BITFILE_KONAIP_1RX_1TX_1SFP_J2K);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaIP 2Tx 1SFP J2K",		NTV2_BITFILE_KONAIP_2TX_1SFP_J2K);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaIP 1Rx 1Tx 2110",		NTV2_BITFILE_KONAIP_1RX_1TX_2110);
+		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"KonaIP 25G",				NTV2_BITFILE_KONAIP_25G);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"Io4K Plus",				NTV2_BITFILE_IO4KPLUS_MAIN);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"IoIP 2022",				NTV2_BITFILE_IOIP_2022);
 		NTV2UTILS_ENUM_CASE_RETURN_VAL_OR_ENUM_STR(inCompactDisplay,	"IoIP 2110",				NTV2_BITFILE_IOIP_2110);

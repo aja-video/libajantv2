@@ -1596,21 +1596,40 @@ bool NTV2PluginLoader::validate (void)
 {
 	//	Load contents of plugin & sig files into sigContent & dllContent buffers...
 	NTV2Buffer sigContent, dllContent;
-	{	NTV2Buffer tmp(512*1024*1024);	//	no more than 500MB
-		ifstream dllF(pluginPath().c_str(), std::ios::in | std::ios::binary);
-		if (!dllF.good())
-			{P_FAIL("Plugin file '" << pluginPath() << "' missing");  return fail();}
+	{
+		// no more than 500MB
+		const size_t maxBufSize = 512*1024*1024;
+
+		ifstream dllF;
+		dllF.open(pluginPath(), std::ios::in | std::ios::binary);
+		if (dllF.fail())
+		{P_FAIL("Could not open plugin file '" << pluginPath() << "'"); return fail();}
+		if (!dllF.seekg(0, ios_base::end))
+		{P_FAIL("Could not seek to end of plugin file '" << pluginPath() << "'"); return fail();}
+		ifstream::pos_type curOffset(dllF.tellg());
+		if (int(curOffset) == -1)
+		{P_FAIL("Could not determine size of plugin file '" << pluginPath() << "'"); return fail();}
+		size_t size = size_t(curOffset);
+		if (size == 0)
+		{P_FAIL("Plugin file '" << pluginPath() << "' is empty"); return fail();}
+		if (size > maxBufSize)
+		{P_FAIL("EOF not reached in plugin file '" << pluginPath() << "' -- over 500MB in size?"); return fail();}
+		size += 1;
+
+		NTV2Buffer tmp(size);
+		if (!dllF.seekg(0, ios_base::beg))
+		{P_FAIL("Could not seek back to start of plugin file '" << pluginPath() << "'");return fail();}
 		if (!dllF.read(tmp, tmp.GetByteCount()).eof())
-			{P_FAIL("EOF not reached in plugin file '" << pluginPath() << "' -- over 500MB in size?");  return fail();}
+		{P_FAIL("EOF not reached in plugin file '" << pluginPath() << "' -- over 500MB in size?");  return fail();}
 		tmp.Truncate(size_t(dllF.gcount()));
 		dllContent = tmp;
 
-		tmp.Allocate(512*1024*1024);	//	no more than 500MB
+		tmp.Allocate(size);
 		ifstream sigF(pluginSigPath().c_str(), std::ios::in | std::ios::binary);
 		if (!sigF.good())
-			{P_FAIL("Signature file '" << pluginSigPath() << "' missing");  return fail();}
+		{P_FAIL("Signature file '" << pluginSigPath() << "' missing");  return fail();}
 		if (!sigF.read(tmp, tmp.GetByteCount()).eof())
-			{P_FAIL("EOF not reached in signature file '" << pluginSigPath() << "' -- over 500MB in size?");  return fail();}
+		{P_FAIL("EOF not reached in signature file '" << pluginSigPath() << "' -- over 500MB in size?");  return fail();}
 		tmp.Truncate(size_t(sigF.gcount()));
 		sigContent = tmp;
 	}

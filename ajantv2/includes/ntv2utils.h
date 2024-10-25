@@ -1074,7 +1074,7 @@ AJAExport std::ostream &	operator << (std::ostream & inOutStr, const NTV2OutputC
 
 
 AJAExport std::string NTV2DeviceIDToString				(const NTV2DeviceID				inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
-AJAExport std::string NTV2VideoFormatToString			(const NTV2VideoFormat			inValue,	const bool inUseFrameRate = false); //	New in SDK 12.0
+AJAExport std::string NTV2VideoFormatToString			(const NTV2VideoFormat			inValue,	const bool inUseFrameRate = false);		//	New in SDK 12.0
 AJAExport std::string NTV2StandardToString				(const NTV2Standard				inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
 AJAExport std::string NTV2FrameBufferFormatToString		(const NTV2FrameBufferFormat	inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0
 AJAExport std::string NTV2M31VideoPresetToString		(const M31VideoPreset			inValue,	const bool inForRetailDisplay = false); //	New in SDK 12.0

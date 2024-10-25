@@ -466,44 +466,6 @@ bool CNTV2DemoCommon::IsValidDevice (const string & inDeviceSpec)
 }
 
 
-static string DeviceFilterString (const NTV2DeviceKinds inKinds)
-{
-	if (inKinds == NTV2_DEVICEKIND_ALL)
-		return "any device";
-	else if (inKinds == NTV2_DEVICEKIND_NONE)
-		return "no device";
-
-	NTV2StringList strs;
-	if (inKinds & NTV2_DEVICEKIND_INPUT)
-		strs.push_back("capture");
-	if (inKinds & NTV2_DEVICEKIND_OUTPUT)
-		strs.push_back("playout");
-	if (inKinds & NTV2_DEVICEKIND_SDI)
-		strs.push_back("SDI");
-	if (inKinds & NTV2_DEVICEKIND_HDMI)
-		strs.push_back("HDMI");
-	if (inKinds & NTV2_DEVICEKIND_ANALOG)
-		strs.push_back("analog video");
-	if (inKinds & NTV2_DEVICEKIND_SFP)
-		strs.push_back("IP/SFPs");
-	if (inKinds & NTV2_DEVICEKIND_EXTERNAL)
-		strs.push_back("Thunderbolt/PCMCIA");
-	if (inKinds & NTV2_DEVICEKIND_4K)
-		strs.push_back("4K");
-	if (inKinds & NTV2_DEVICEKIND_12G)
-		strs.push_back("12G SDI");
-	if (inKinds & NTV2_DEVICEKIND_6G)
-		strs.push_back("6G SDI");
-	if (inKinds & NTV2_DEVICEKIND_CUSTOM_ANC)
-		strs.push_back("custom Anc");
-	if (inKinds & NTV2_DEVICEKIND_RELAYS)
-		strs.push_back("SDI relays");
-	if (strs.empty())
-		return "??";
-	return aja::join(strs, " | ");
-}
-
-
 NTV2VideoFormatSet CNTV2DemoCommon::GetSupportedVideoFormats (const NTV2VideoFormatKinds inKinds)
 {
 	if ((inKinds & VIDEO_FORMATS_ALL) == VIDEO_FORMATS_ALL)
