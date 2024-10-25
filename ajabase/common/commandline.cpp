@@ -126,8 +126,9 @@ void AJACommandLineOption::AddValue(const std::string &value)
 
 std::string AJACommandLineOption::Value(size_t index) const
 {
-    if (index > _values.size() || _values.empty())
+    if (index > _values.size() || _values.empty()) {
         return "";
+    }
     return _values.at(index);
 }
 
@@ -226,8 +227,9 @@ void AJACommandLineParser::Dump()
 {
     if (!_commandName.empty()) {
         AJACommandLineParser *sp = _subParsers.at(_commandName);
-        if (sp != NULL)
+        if (sp != NULL) {
             return sp->Dump();
+        }
     } else {
         for (AJACommandLineOptionListIter iter = _options.begin();
             iter != _options.end(); iter++) {
@@ -240,8 +242,9 @@ void AJACommandLineParser::Dump()
             for (AJAStringListConstIter sIter = names.begin(); sIter != names.end(); sIter++) {
                 name = *sIter;
                 oss << name;
-                if (++count < names.size())
+                if (++count < names.size()) {
                     oss << ", ";
+                }
             }
             oss << "] " << "set? " << (IsSet(name) ? "true" : "false") << " value = " << o.Value();
             std::cout << oss.str() << std::endl;
@@ -253,11 +256,27 @@ bool AJACommandLineParser::HaveOption(const std::string &name) const
 {
     for (const auto &opt : _options) {
         for (const auto &n : opt.Names()) {
-            if (n == name)
+            if (n == name) {
                 return true;
+            }
         }
     }
     return false;
+}
+
+bool AJACommandLineParser::HavePositionalArg(const std::string &name) const
+{
+    for (const auto &arg : _positionalArgs) {
+        if (arg == name) {
+            return true;
+        }
+    }
+    return false;
+}
+
+AJAStringList AJACommandLineParser::PositionalArgs() const
+{
+    return _positionalArgs;
 }
 
 bool AJACommandLineParser::OptionByName(const std::string &name, AJACommandLineOption &opt) const
@@ -318,8 +337,20 @@ bool AJACommandLineParser::ParseArgs(const AJAStringList &args, bool errUnknown)
     }
 
     // ...otherwise just parse the args.
+    bool havePositionalArgs = false;
     for (; iter != args.end(); iter++) {
         const std::string &arg = *iter;
+        // Treat subsequent args as "positional"
+        if (!havePositionalArgs && arg == kDoubleDash) {
+            havePositionalArgs = true;
+            continue;
+        }
+
+        if (havePositionalArgs) {
+            _positionalArgs.push_back(arg);
+            continue;
+        }
+
         if (hasOptionPrefix(arg)) {
             AJACommandLineOption opt;
             std::string optName;
@@ -525,8 +556,9 @@ bool AJACommandLineParser::AddOptions(const AJACommandLineOptionList &options)
 {
     uint32_t okCount = 0;
     for (size_t i = 0; i < options.size(); i++) {
-        if (AddOption(options.at(i)))
+        if (AddOption(options.at(i))) {
             ++okCount;
+        }
     }
     return options.size() > 0 ? (okCount == (uint32_t)options.size() ? true : false) : false;
 }
@@ -632,8 +664,9 @@ std::string AJACommandLineParser::generateHelpText() const
     std::string exePath;
     AJAFileIO::GetExecutablePath(exePath);
     oss << "Usage: " << exePath;
-    if (!_name.empty())
+    if (!_name.empty()) {
         oss << " " << _name;
+    }
     oss << " [OPTION...]" << std::endl;
 
     // Get the longest line size first...
@@ -654,8 +687,9 @@ std::string AJACommandLineParser::generateHelpText() const
         }
         // add size of commas/spaces (i.e. ", ")
         namesLength += ((names.size()*2)-2);
-        if (namesLength > longestSize)
+        if (namesLength > longestSize) {
             longestSize = namesLength;
+        }
     }
 
     // ...now calculate all of the line padding.

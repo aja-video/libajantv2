@@ -211,6 +211,22 @@ public:
 	bool HaveOption(const std::string &name) const;
 
 	/**
+	 * Determine this AJACommandLineParser has a positional arg.
+	 *
+	 * @param[in] name	The positional arg string to look up.
+	 *
+	 * @return	Returns `true` if the positional arg is found, otherwise `false`.
+	 */
+	bool HavePositionalArg(const std::string &name) const;
+
+	/**
+	 * Get a vector containing all positional args parsed from the command line args.
+	 *
+	 * @return	Returns an AJAStringList of all positional args found.
+	 */
+	AJAStringList PositionalArgs() const;
+
+	/**
 	 * Look up AJACommandLineOption by name in this AJACommandLineParser.
 	 *
 	 * @param[in] name	The name of the option to look up.
@@ -388,6 +404,7 @@ private:
 	static bool hasAssignmentOperator(const std::string &arg);
 
 	void init();
+
 	std::string generateHelpText() const;
 	std::string generateUsageText() const;
 
@@ -402,6 +419,7 @@ private:
 	std::string _usageText;
 	std::string _helpText;
 	AJACommandLineOptionList _options;
+	AJAStringList _positionalArgs;
 	SubParserMap _subParsers;
 };
 

@@ -622,6 +622,25 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		CHECK_EQ(parser.IsSet("myoption"), true);
 		CHECK_EQ(parser.Value("myoption").AsString(), "yum");
 	}
+	TEST_CASE("AJACommandLineParser::ParseArgs Positional Args")
+	{
+		AJACommandLineParser parser;
+		parser.AddOption(AJACommandLineOption(AJAStringList{"f", "foo"}, "Tweak the foo"));
+		AJAStringList args;
+		args.push_back("ut_ajabase"); // skipped by the parser
+		args.push_back("--foo=123");
+		args.push_back("--");
+		args.push_back("-a");
+		args.push_back("-b");
+		args.push_back("-c");
+		CHECK_EQ(parser.ParseArgs(args), true);
+		CHECK_EQ(parser.PositionalArgs().size(), 3);
+		CHECK_EQ(parser.HavePositionalArg("-a"), true);
+		CHECK_EQ(parser.HavePositionalArg("-b"), true);
+		CHECK_EQ(parser.HavePositionalArg("-c"), true);
+		CHECK_EQ(parser.HavePositionalArg("-d"), false);
+		CHECK_EQ(parser.HavePositionalArg("--foo"), false);
+	}
 	TEST_CASE("AJACommandLineParser Subparser")
 	{
 		AJACommandLineParser subParser("sub");
@@ -681,7 +700,7 @@ TEST_SUITE("commandline" * doctest::description("function in ajabase/common/comm
 		args.push_back("-pix-fmt");
 		args.push_back("yuv10");
 		CHECK_EQ(parser.ParseArgs(args), true);
-		std::cout << parser.UsageText();
+		CHECK_EQ(parser.UsageText().length(), 226);
 	}
 	TEST_CASE("AJACommandLineParser C++98 compliant")
 	{
