@@ -19,12 +19,6 @@ using namespace std;
 
 #define NTV2_BUFFER_LOCKING		//	IMPORTANT FOR 8K: Define this to pre-lock video/audio buffers in kernel
 
-//	Convenience macros for EZ logging:
-#define	TCFAIL(_expr_)	AJA_sERROR  (AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
-#define	TCWARN(_expr_)	AJA_sWARNING(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
-#define	TCNOTE(_expr_)	AJA_sNOTICE	(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
-#define	TCINFO(_expr_)	AJA_sINFO	(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
-#define	TCDBG(_expr_)	AJA_sDEBUG	(AJA_DebugUnit_TimecodeGeneric, AJAFUNC << ": " << _expr_)
 
 /**
 	@brief	The maximum number of bytes of ancillary data that can be transferred for a single field.
@@ -200,6 +194,11 @@ AJAStatus NTV2Player8K::SetUpVideo (void)
 				<< ::NTV2FrameBufferFormatString(mConfig.fPixelFormat) << endl;
 		return AJA_STATUS_UNSUPPORTED;
 	}
+	if (::IsRGBFormat(mConfig.fPixelFormat) != mConfig.fDoRGBOnWire  &&  mDevice.features().GetNumCSCs() == 0)
+	{	cerr	<< "## ERROR: '" << mDevice.GetDisplayName() << "' has no CSCs, and '--pixelFormat' \""
+				<< ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat, true) << "\" contradicts '--rgb' setting" << endl;
+		return AJA_STATUS_UNSUPPORTED;
+	}
 
 	NTV2ChannelSet channels13, frameStores;
 	channels13.insert(NTV2_CHANNEL1);  channels13.insert(NTV2_CHANNEL3);
@@ -349,7 +348,6 @@ AJAStatus NTV2Player8K::SetUpHostBuffers (void)
 		}
 		mFrameDataRing.Add (&frameData);
 	}	//	for each NTV2FrameData
-
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetUpHostBuffers
@@ -408,7 +406,8 @@ AJAStatus NTV2Player8K::SetUpTestPatternBuffers (void)
 				PLWARN("Test pattern buffer " << DEC(tpNdx+1) << " of " << DEC(testPatIDs.size()) << ": failed to pre-lock");
 		#endif
 	}	//	loop for each predefined pattern
-
+	PLNOTE(DEC(testPatIDs.size()) << " test pattern buffers created, " << DEC(mFormatDesc.GetVideoWriteSize() / 1024 / 1024)
+			<< "MB each, " << DEC(mFormatDesc.GetVideoWriteSize() / 1024 / 1024 * testPatIDs.size()) << "MB total");
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetUpTestPatternBuffers
@@ -421,7 +420,7 @@ bool NTV2Player8K::RouteOutputSignal (void)
 	if (mConfig.fDoTsiRouting)
 	{
 		if (::IsRGBFormat(mConfig.fPixelFormat))
-		{
+		{	//	RGB on wire requires DualLinkOut widgets
 			if (mConfig.fOutputChannel < NTV2_CHANNEL3)
 			{
 				connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut1Input,	NTV2_XptFrameBuffer1RGB));
@@ -546,7 +545,7 @@ bool NTV2Player8K::RouteOutputSignal (void)
 	else
 	{
 		if (::IsRGBFormat(mConfig.fPixelFormat))
-		{
+		{	//	RGB on wire requires DualLinkOut widgets
 			connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut1Input,	NTV2_XptFrameBuffer1RGB));
 			connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut2Input,	NTV2_XptFrameBuffer2RGB));
 			connections.insert(NTV2XptConnection(NTV2_XptDualLinkOut3Input,	NTV2_XptFrameBuffer3RGB));
