@@ -904,6 +904,12 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 			}
 		}
 
+		if (!newVDev.deviceIdentifier.empty())
+		{
+			string displayNameParam = "displayname";
+			newVDev.vdevUrl += (isFirstParam ? "" : "&") + displayNameParam + "=" + PercentEncode(newVDev.deviceIdentifier);
+		}
+
 		CNTV2Card tmpDev;
 		tmpDev.Open(newVDev.vdevUrl);
 		if (!tmpDev.IsOpen())
