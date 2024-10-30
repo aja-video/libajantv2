@@ -6250,8 +6250,15 @@ typedef enum
 					T * pT	(reinterpret_cast<T*>(GetHostPointer()));
 					const size_t loopCount(GetByteCount() / sizeof(T));
 					if (pT)
-						for (size_t n(0);  n < loopCount;  n++)
-							pT[n] = inValue;
+					{
+                        if (sizeof(T) == 1)
+                            ::memset(pT, inValue, loopCount);
+                        else
+                        {
+                            for (size_t n(0);  n < loopCount;  n++)
+                                pT[n] = inValue;
+                        }
+					}
 					return pT ? true : false;
 				}
 
