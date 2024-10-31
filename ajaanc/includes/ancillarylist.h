@@ -176,6 +176,9 @@ public:	//	INSTANCE METHODS
 	///@{
 											AJAAncillaryList ();			///< @brief	Instantiate and initialize with a default set of values.
 	inline									AJAAncillaryList (const AJAAncillaryList & inRHS)	{*this = inRHS;}	///< @brief	My copy constructor.
+#if defined(AJA_USE_CPLUSPLUS11)
+											AJAAncillaryList (AJAAncillaryList && inRHS);	///< @brief Move-construct constructor.
+#endif
 	virtual									~AJAAncillaryList ();			///< @brief	My destructor.
 
 	/**
@@ -185,6 +188,15 @@ public:	//	INSTANCE METHODS
 	**/
 	virtual AJAAncillaryList &				operator = (const AJAAncillaryList & inRHS);
 	///@}
+
+#if defined(AJA_USE_CPLUSPLUS11)
+	/**
+		@brief		Move-assignment operator -- moves contents from the right-hand-side to my contents, replacing my contents, and resets the right-hand-side.
+		@param[in]	inRHS	The list of packets to be move into me.
+		@return		An r-value reference to myself.
+	**/
+	virtual AJAAncillaryList &				operator = (AJAAncillaryList && inRHS);	///< @brief Move-construct constructor.
+#endif
 
 
 	/**
