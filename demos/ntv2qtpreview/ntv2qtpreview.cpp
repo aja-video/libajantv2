@@ -12,14 +12,18 @@
 #else
     #include <QtGui>
 #endif
-
 #include "ntv2qtpreview.h"
-#include "ntv2devicefeatures.h"
-#include "ajabase/common/types.h"
+#include "ajabase/system/debug.h"
 #include "ntv2utils.h"
 
-
 using namespace std;
+
+//	Convenience macros for EZ logging:
+#define	FGFAIL(_expr_)		AJA_sERROR  (AJA_DebugUnit_DemoCapture, AJAFUNC << ": " << _expr_)
+#define	FGWARN(_expr_)		AJA_sWARNING(AJA_DebugUnit_DemoCapture, AJAFUNC << ": " << _expr_)
+#define	FGDBG(_expr_)		AJA_sDEBUG	(AJA_DebugUnit_DemoCapture, AJAFUNC << ": " << _expr_)
+#define	FGNOTE(_expr_)		AJA_sNOTICE	(AJA_DebugUnit_DemoCapture, AJAFUNC << ": " << _expr_)
+#define	FGINFO(_expr_)		AJA_sINFO	(AJA_DebugUnit_DemoCapture, AJAFUNC << ": " << _expr_)
 
 
 typedef QListIterator <QAbstractButton *>	QButtonIterator;
@@ -101,19 +105,19 @@ NTV2QtPreview::NTV2QtPreview (QWidget * parent, Qt::WindowFlags flags)
 	layout->addStretch (1);
 	setLayout (layout);
 
-    QObject::connect (mBoardChoiceCombo,	SIGNAL(currentIndexChanged(int)),		this,					SLOT(RequestDeviceChange(const int)));
-	QObject::connect (mInputButtonGroup,	SIGNAL(buttonReleased(int)),			this,					SLOT(inputChanged(int)));
-	QObject::connect (mWithAudioCheckBox,	SIGNAL(stateChanged(int)),				this,					SLOT(withAudioChanged(int)));
-    QObject::connect (mCheckFixedReference,	SIGNAL(toggled(bool)),					this,					SLOT(fixedRefChanged(bool)));
-	QObject::connect (mCheckFor4kCheckBox,	SIGNAL(stateChanged(int)),				this,					SLOT(checkFor4kChanged(int)));
-			 connect (mFrameGrabber,		SIGNAL(newFrame(const QImage &, bool)),	mVideoPreviewWidget,	SLOT(updateFrame(const QImage &, bool)));
-			 connect (mFrameGrabber,		SIGNAL(newStatusString(const QString)),	mVideoPreviewWidget,	SLOT(updateStatusString(const QString)));
+    connect (mBoardChoiceCombo,	SIGNAL(currentIndexChanged(int)),		this,					SLOT(RequestDeviceChange(const int)));
+	connect (mInputButtonGroup,	SIGNAL(idReleased(int)),				this,					SLOT(inputChanged(int)));
+	connect (mWithAudioCheckBox,	SIGNAL(stateChanged(int)),			this,					SLOT(withAudioChanged(int)));
+    connect (mCheckFixedReference,	SIGNAL(toggled(bool)),				this,					SLOT(fixedRefChanged(bool)));
+	connect (mCheckFor4kCheckBox,	SIGNAL(stateChanged(int)),			this,					SLOT(checkFor4kChanged(int)));
+	connect (mFrameGrabber,		SIGNAL(newFrame(const QImage&, bool)),	mVideoPreviewWidget,	SLOT(updateFrame(const QImage &, bool)));
+	connect (mFrameGrabber,		SIGNAL(newStatusString(const QString)),	mVideoPreviewWidget,	SLOT(updateStatusString(const QString)));
 	#if defined (INCLUDE_AJACC)
-			 connect (mFrameGrabber,		SIGNAL (captionScreenChanged (const ushort *)),	mVideoPreviewWidget,	SLOT (updateCaptionScreen (const ushort *)));
-	QObject::connect (mCaptionButtonGroup,	SIGNAL (buttonReleased (int)),					mFrameGrabber,			SLOT (changeCaptionChannel (int)));
+		connect (mFrameGrabber,		SIGNAL (captionScreenChanged (const ushort *)),	mVideoPreviewWidget,	SLOT (updateCaptionScreen (const ushort *)));
+		connect (mCaptionButtonGroup,	SIGNAL (buttonReleased (int)),					mFrameGrabber,			SLOT (changeCaptionChannel (int)));
 	#endif	//	defined (INCLUDE_AJACC)
 
-	mFrameGrabber->SetInputSource (NTV2_NUM_INPUTSOURCES);
+	mFrameGrabber->SetInputSource (NTV2_INPUTSOURCE_INVALID);
 	mFrameGrabber->start ();
 	mTimerID = startTimer (100);
 
@@ -136,7 +140,7 @@ void NTV2QtPreview::RequestDeviceChange (const int inDeviceIndexNum)
 	//	Notify my frame grabber to change devices...
 	if (mFrameGrabber)
 		mFrameGrabber->SetDeviceIndex(inDeviceIndexNum);
-	qDebug ("## NOTE:  Device changed to %d", inDeviceIndexNum);
+	FGNOTE("Device changed to " << inDeviceIndexNum);
 
 }	//	RequestDeviceChange
 
@@ -146,18 +150,20 @@ void NTV2QtPreview::inputChanged (int inputRadioButtonId)
 	const NTV2InputSource chosenInputSource(NTV2InputSource(inputRadioButtonId+0));
 
 	CNTV2Card device;
-	CNTV2DeviceScanner::GetDeviceAtIndex (mBoardChoiceCombo->currentIndex(), device);
+	if (!CNTV2DeviceScanner::GetDeviceAtIndex (ULWord(mBoardChoiceCombo->currentIndex()), device))
+		{FGNOTE("No device at " << mBoardChoiceCombo->currentIndex()); return;}
 
 	if (!NTV2_IS_VALID_INPUT_SOURCE(chosenInputSource))
 	{
 		mFrameGrabber->SetInputSource(NTV2_INPUTSOURCE_INVALID);
-		qDebug ("## DEBUG:  NTV2QtPreview::inputChanged:  off");
+		FGNOTE("off");
 	}
 	else if (device.features().CanDoInputSource(chosenInputSource))
 	{
 		mFrameGrabber->SetInputSource(chosenInputSource);
-		cerr << "## DEBUG:  NTV2QtPreview::inputChanged:  " << ::NTV2InputSourceToString(chosenInputSource) << endl;
+		FGNOTE(::NTV2InputSourceToString(chosenInputSource));
 	}
+	else FGWARN("input source " << inputRadioButtonId << " unsupported by device");
 
 }	//	inputChanged
 
@@ -221,7 +227,7 @@ void NTV2QtPreview::timerEvent (QTimerEvent * event)
 
 void NTV2QtPreview::devicesChanged (void)
 {
-	qDebug() << "devicesChanged";
+	FGNOTE("");
 	mInputButtonGroup->button (NTV2_INPUTSOURCE_INVALID)->setChecked(true);
 	inputChanged (NTV2_INPUTSOURCE_INVALID);	//	necessary?
 
