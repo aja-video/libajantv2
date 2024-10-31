@@ -172,11 +172,7 @@ struct ntv2_stream *ntv2_stream_open(Ntv2SystemContext* sys_con,
 	memset(ntv2_str, 0, sizeof(struct ntv2_stream));
 
 	ntv2_str->index = index;
-#if defined(MSWindows)
-	sprintf(ntv2_str->name, "%s%d", name, index);
-#else
-	snprintf(ntv2_str->name, NTV2_STREAM_STRING_SIZE, "%s%d", name, index);
-#endif
+	snprintf(ntv2_str->name, sizeof(ntv2_str->name), "%s%d", name, index);
 	ntv2_str->system_context = sys_con;
 
 	ntv2SemaphoreOpen(&ntv2_str->state_sema, sys_con, 1);

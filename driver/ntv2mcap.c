@@ -78,11 +78,7 @@ struct ntv2_mcap *ntv2_mcap_open(Ntv2SystemContext *sys_con,
 	}
 	memset(ntv2_mc, 0, sizeof(struct ntv2_mcap));
 
-#if defined(MSWindows)
-	sprintf(ntv2_mc->name, "%s", name);
-#else
-	snprintf(ntv2_mc->name, NTV2_MCAP_STRING_SIZE, "%s", name);
-#endif
+	snprintf(ntv2_mc->name, sizeof(ntv2_mc->name), "%s", name);
 	ntv2_mc->system_context = sys_con;
 
 	NTV2_MSG_MCAP_INFO("%s: open ntv2_mcap\n", ntv2_mc->name);

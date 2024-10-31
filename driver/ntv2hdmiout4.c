@@ -349,11 +349,7 @@ struct ntv2_hdmiout4 *ntv2_hdmiout4_open(Ntv2SystemContext* sys_con,
 	memset(ntv2_hout, 0, sizeof(struct ntv2_hdmiout4));
 
 	ntv2_hout->index = index;
-#if defined(MSWindows)
-	sprintf(ntv2_hout->name, "%s%d", name, index);
-#else
-	snprintf(ntv2_hout->name, NTV2_HDMIOUT4_STRING_SIZE, "%s%d", name, index);
-#endif
+	snprintf(ntv2_hout->name, sizeof(ntv2_hout->name), "%s%d", name, index);
 	ntv2_hout->system_context = sys_con;
 
 	ntv2SpinLockOpen(&ntv2_hout->state_lock, sys_con);

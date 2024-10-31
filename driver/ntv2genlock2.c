@@ -125,11 +125,7 @@ struct ntv2_genlock2 *ntv2_genlock2_open(Ntv2SystemContext* sys_con,
 	memset(ntv2_gen, 0, sizeof(struct ntv2_genlock2));
 
 	ntv2_gen->index = index;
-#if defined(MSWindows)
-	sprintf(ntv2_gen->name, "%s%d", name, index);
-#else
-	snprintf(ntv2_gen->name, NTV2_GENLOCK2_STRING_SIZE, "%s%d", name, index);
-#endif
+	snprintf(ntv2_gen->name, sizeof(ntv2_gen->name), "%s%d", name, index);
 	ntv2_gen->system_context = sys_con;
 
 	ntv2SpinLockOpen(&ntv2_gen->state_lock, sys_con);
