@@ -282,7 +282,11 @@ struct ntv2_videoraster *ntv2_videoraster_open(Ntv2SystemContext* sys_con,
 	memset(ntv2_raster, 0, sizeof(struct ntv2_videoraster));
 
 	ntv2_raster->index = index;
-	snprintf(ntv2_raster->name, sizeof(ntv2_raster->name), "%s%d", name, index);
+#if defined(MSWindows)
+	sprintf(ntv2_raster->name, "%s%d", name, index);
+#else
+	snprintf(ntv2_raster->name, NTV2_VIDEORASTER_STRING_SIZE, "%s%d", name, index);
+#endif
 	ntv2_raster->system_context = sys_con;
 	ntv2InterruptLockOpen(&ntv2_raster->state_lock, sys_con);
 

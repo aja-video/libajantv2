@@ -46,7 +46,11 @@ struct ntv2_setup *ntv2_setup_open(Ntv2SystemContext* sys_con, const char *name)
 	}
 	memset(ntv2_setterupper, 0, sizeof(struct ntv2_setup));
 
-	snprintf(ntv2_setterupper->name, sizeof(ntv2_setterupper->name), "%s", name);
+#if defined(MSWindows)
+	sprintf(ntv2_setterupper->name, "%s", name);
+#else
+	snprintf(ntv2_setterupper->name, NTV2_SETUP_STRING_SIZE, "%s", name);
+#endif
 	ntv2_setterupper->system_context = sys_con;
 
 	ntv2SpinLockOpen(&ntv2_setterupper->state_lock, sys_con);

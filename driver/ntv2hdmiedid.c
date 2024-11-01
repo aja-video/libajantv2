@@ -186,7 +186,11 @@ struct ntv2_hdmiedid *ntv2_hdmiedid_open(Ntv2SystemContext* sys_con,
 	memset(ntv2_hed, 0, sizeof(struct ntv2_hdmiedid));
 
 	ntv2_hed->index = index;
-	snprintf(ntv2_hed->name, sizeof(ntv2_hed->name), "%s%d", name, index);
+#if defined(MSWindows)
+	sprintf(ntv2_hed->name, "%s%d", name, index);
+#else
+	snprintf(ntv2_hed->name, NTV2_HDMIEDID_STRING_SIZE, "%s%d", name, index);
+#endif
 	ntv2_hed->system_context = sys_con;
 
 	NTV2_MSG_INFO("%s: open ntv2_hdmiedid\n", ntv2_hed->name);

@@ -274,7 +274,11 @@ struct ntv2_hdmiin4 *ntv2_hdmiin4_open(Ntv2SystemContext* sys_con,
 	memset(ntv2_hin, 0, sizeof(struct ntv2_hdmiin4));
 
 	ntv2_hin->index = index;
-	snprintf(ntv2_hin->name, sizeof(ntv2_hin->name), "%s%d", name, index);
+#if defined(MSWindows)
+	sprintf(ntv2_hin->name, "%s%d", name, index);
+#else
+	snprintf(ntv2_hin->name, NTV2_HDMIIN4_STRING_SIZE, "%s%d", name, index);
+#endif
 	ntv2_hin->system_context = sys_con;
 
 	ntv2SpinLockOpen(&ntv2_hin->state_lock, sys_con);
