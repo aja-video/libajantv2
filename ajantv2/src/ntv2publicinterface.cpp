@@ -1518,6 +1518,7 @@ NTV2Buffer::NTV2Buffer (const void * pInUserPointer, const size_t inByteCount)
 		fIOMemoryDesc		(0),
 		fIOMemoryMap		(0)
 	#else
+		fKernelSpacePtr		(0),
 		fKernelHandle		(0)
 	#endif
 {
@@ -1533,12 +1534,12 @@ NTV2Buffer::NTV2Buffer (const size_t inByteCount)
 		fIOMemoryDesc		(0),
 		fIOMemoryMap		(0)
 	#else
+		fKernelSpacePtr		(0),
 		fKernelHandle		(0)
 	#endif
 {
 	if (inByteCount)
-		if (Allocate(inByteCount))
-			Fill(UByte(0));
+		Allocate(inByteCount);
 }
 
 
@@ -1551,6 +1552,7 @@ NTV2Buffer::NTV2Buffer (const NTV2Buffer & inObj)
 		fIOMemoryDesc		(0),
 		fIOMemoryMap		(0)
 	#else
+		fKernelSpacePtr		(0),
 		fKernelHandle		(0)
 	#endif
 {
@@ -1649,7 +1651,7 @@ bool NTV2Buffer::Allocate (const size_t inByteCount, const bool inPageAligned)
 	if (GetByteCount()	&&	fFlags & NTV2Buffer_ALLOCATED)	//	If already was Allocated
 		if (inByteCount == GetByteCount())					//	If same byte count
 		{
-			Fill(0);		//	Zero it...
+			Fill(UByte(0));		//	Zero it...
 			return true;	//	...and return true
 		}
 
@@ -1671,7 +1673,7 @@ bool NTV2Buffer::Allocate (const size_t inByteCount, const bool inPageAligned)
 			fFlags |= NTV2Buffer_ALLOCATED;
 			if (inPageAligned)
 				fFlags |= NTV2Buffer_PAGE_ALIGNED;	//	Set "page aligned" flag
-			Fill(0);	//	Zero it
+			Fill(UByte(0));	//	Zero it
 		}
 	}	//	if requested size is non-zero
 	return result;

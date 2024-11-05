@@ -4225,6 +4225,17 @@ public:
 	AJA_VIRTUAL bool	Connect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, const bool inValidate = false);
 
 	/**
+		@brief		Makes the given connection.
+		@param[in]	inConnection	Specifies the connection of interest.
+		@param[in]	inValidate		If true, calls NTV2Card::CanConnect to verify that the connection exists in
+									firmware before writing the crosspoint register;  otherwise writes the
+									crosspoint register regardless. Defaults to false.
+		@return		True if successful;	 otherwise false.
+		@see		\ref ntv2signalrouting, CNTV2Card::Disconnect, CNTV2Card::IsConnected
+	**/
+	AJA_VIRTUAL bool	Connect (const NTV2XptConnection & inConnection, const bool inValidate = false);
+
+	/**
 		@brief		Disconnects the given widget signal input (sink) from whatever output (source) it may be connected.
 		@param[in]	inInputXpt		Specifies the input (signal sink) to be disconnected.
 		@return		True if successful;	 otherwise false.
@@ -4241,6 +4252,17 @@ public:
 		@see		\ref ntv2signalrouting, CNTV2Card::IsConnectedTo
 	**/
 	AJA_VIRTUAL bool	IsConnected (const NTV2InputCrosspointID inInputXpt, bool & outIsConnected);
+
+	/**
+		@brief		Answers if the given connection is established or not.
+		@param[in]	inConnection	Specifies the connection of interest.
+									Its NTV2OutputXptID must not be NTV2_XptBlack.
+		@param[out] outIsConnected	Receives true if the connection is established.
+		@return		True if successful;	 otherwise false.
+		@note		If the input is connected to NTV2_XptBlack, "outIsConnected" will be "false".
+		@see		\ref ntv2signalrouting, CNTV2Card::IsConnectedTo
+	**/
+	AJA_VIRTUAL bool	IsConnected (const NTV2XptConnection inConnection, bool & outIsConnected);
 
 	/**
 		@brief		Answers whether or not the given widget signal input (sink) is connected to another output (source).
@@ -4262,6 +4284,16 @@ public:
 		@see		\ref ntv2signalrouting, CNTV2Card::Connect
 	**/
 	AJA_VIRTUAL bool	CanConnect (const NTV2InputCrosspointID inInputXpt, const NTV2OutputCrosspointID inOutputXpt, bool & outCanConnect);
+
+	/**
+		@brief		Answers whether or not the given connection can legally be made.
+		@param[in]	inConnection	Specifies the connection of interest.
+		@param[out] outCanConnect	Receives true if the connection can be made;  otherwise false.
+		@return		True if successful;	 otherwise false.
+		@note		This function will return false (failure) if the device firmware doesn't support route validation.
+		@see		\ref ntv2signalrouting, CNTV2Card::Connect
+	**/
+	AJA_VIRTUAL bool	CanConnect (const NTV2XptConnection & inConnection, bool & outCanConnect);
 
 	/**
 		@brief		Answers with the set of output (sources) that can legally be connected to the given input (sink).

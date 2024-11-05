@@ -40,9 +40,10 @@ endif()
 if (NOT AJA_DISABLE_AMD)
     add_subdirectory(AMD)
 endif()
+
 if (NOT AJA_DISABLE_NVIDIA)
-    message(STATUS "Adding NVIDIA demos...")
     add_subdirectory(NVIDIA)
+    message(STATUS "Adding NVIDIA demos...")
 endif()
 
 if(AJA_INSTALL_CMAKE)

@@ -6,7 +6,6 @@
 **/
 
 #include "ntv2rp188.h"
-#include "stdio.h" // for sprintf
 
 using namespace std;
 

@@ -76,7 +76,7 @@ int main (int argc, const char ** argv)
 	//	VideoFormat
 	const string videoFormatStr (pVideoFormat  ?  pVideoFormat  :  "");
 	config.fVideoFormat = videoFormatStr.empty()	?	NTV2_FORMAT_4x3840x2160p_2398
-													:	CNTV2DemoCommon::GetVideoFormatFromString(videoFormatStr, VIDEO_FORMATS_4KUHD, deviceSpec);
+													:	CNTV2DemoCommon::GetVideoFormatFromString(videoFormatStr, VIDEO_FORMATS_8KUHD2, deviceSpec);
 	if (videoFormatStr == "?"  ||  videoFormatStr == "list")
 		{cout	<< CNTV2DemoCommon::GetVideoFormatStrings(VIDEO_FORMATS_8KUHD2, pDeviceSpec ? deviceSpec : "") << endl;  return 0;}
 	else if (!videoFormatStr.empty()  &&  !NTV2_IS_8K_VIDEO_FORMAT(config.fVideoFormat))
