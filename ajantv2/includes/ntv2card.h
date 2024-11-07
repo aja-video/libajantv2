@@ -2441,7 +2441,8 @@ public:
 		@return		True if successful;	 otherwise false.
 		@note		This date may differ from the build date of the installed firmware if, after erasing
 					or reflashing, the device was never power-cycled to force its FPGA to reload.
-		@see		CNTV2Card::GetRunningFirmwareTime, CNTV2Card::GetRunningFirmwareRevision, \ref devfw-section.
+		@see		CNTV2Card::GetRunningFirmwareTime, CNTV2Card::GetRunningFirmwareRevision,
+					CNTV2Card::GetInstalledBitfileInfo, \ref devfw-section
 	**/
 	AJA_VIRTUAL bool	GetRunningFirmwareDate (UWord & outYear, UWord & outMonth, UWord & outDay);
 
@@ -2456,7 +2457,8 @@ public:
 		@return		True if successful;	 otherwise false.
 		@note		This date may differ from the build date of the installed firmware if, after erasing
 					or reflashing, the device was never power-cycled to force its FPGA to reload.
-		@see		CNTV2Card::GetRunningFirmwareDate, CNTV2Card::GetRunningFirmwareRevision, \ref devfw-section.
+		@see		CNTV2Card::GetRunningFirmwareDate, CNTV2Card::GetRunningFirmwareRevision,
+					CNTV2Card::GetInstalledBitfileInfo, \ref devfw-section
 	**/
 	AJA_VIRTUAL bool	GetRunningFirmwareTime (UWord & outHours, UWord & outMinutes, UWord & outSeconds);
 
@@ -6172,7 +6174,8 @@ public:
 	AJA_VIRTUAL std::string		GetPCIFPGAVersionString (void);
 
 	/**
-		@brief		Returns the size and time/date stamp of the device's currently-installed firmware.
+		@brief		Returns the bitfile size and time/date stamp from the header of the bitfile that's currently
+					installed in device EEPROM.
 		@param[out] outNumBytes		Receives the size of the installed firmware image, in bytes.
 		@param[out] outDateStr		Receives a human-readable string containing the date the currently-installed firmware was built.
 									The string has the format "YYYY/MM/DD", where "YYYY" is the year, "MM" is the month ("00" thru "12"),
@@ -6181,7 +6184,11 @@ public:
 									(in local Pacific time). The string has the format "HH:MM:SS", where HH is "00" thru "23",
 									and both MM and SS are "00" thru "59".
 		@return		True if successful;	 otherwise false.
-		@note		This function has nothing to do with the firmware bitfiles that are currently installed on the local host's file system.
+		@note		It's possible that the date returned from this function is one calendar day past the date returned from
+					CNTV2Card::GetRunningFirmwareDate, which can happen when a firmware compile is started late on one day,
+					and finishes the following day.
+		@note		This function has nothing to do with firmware bitfiles that may be installed on the local host's file system.
+		@see		CNTV2Card::GetRunningFirmwareDate, CNTV2Card::GetRunningFirmwareTime
 	**/
 	AJA_VIRTUAL bool			GetInstalledBitfileInfo (ULWord & outNumBytes, std::string & outDateStr, std::string & outTimeStr);
 
