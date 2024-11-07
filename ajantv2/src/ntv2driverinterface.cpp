@@ -1711,6 +1711,8 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 																&& (GetDeviceID() != DEVICE_ID_KONAHDMI)				//	Not a KonaHDMI
 																&& (!IsSupported(kDeviceCanDoAudioMixer));				//	No audio mixer
 													break;
+		case kDeviceROMHasBankSelect:				outValue = GetNumSupported(kDeviceGetSPIFlashVersion) >= 3
+																&&  GetNumSupported(kDeviceGetSPIFlashVersion) <= 6;	break;
 
 		case kDeviceCanDoAudioMixer:
 		case kDeviceHasMicrophoneInput:
