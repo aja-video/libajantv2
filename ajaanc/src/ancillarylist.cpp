@@ -167,19 +167,19 @@ AJAAncillaryList::AJAAncillaryList ()
 }
 
 #if defined(AJA_USE_CPLUSPLUS11)
-AJAAncillaryList::AJAAncillaryList(AJAAncillaryList && inRHS)
-	:	m_ancList(std::move(inRHS.m_ancList)),
-		m_rcvMultiRTP(inRHS.m_rcvMultiRTP),		//	By default, handle receiving multiple RTP packets
-		m_xmitMultiRTP(inRHS.m_xmitMultiRTP),	//	By default, transmit single RTP packet
-		m_ignoreCS(inRHS.m_ignoreCS)
+AJAAncillaryList::AJAAncillaryList (AJAAncillaryList && inRHS) noexcept
+	:	m_ancList		(std::move(inRHS.m_ancList)),
+		m_rcvMultiRTP	(inRHS.m_rcvMultiRTP),		//	By default, handle receiving multiple RTP packets
+		m_xmitMultiRTP	(inRHS.m_xmitMultiRTP),	//	By default, transmit single RTP packet
+		m_ignoreCS		(inRHS.m_ignoreCS)
 {
-	// Reset RHS.
+	//	Reset RHS...
 	inRHS.m_rcvMultiRTP = true;
 	inRHS.m_xmitMultiRTP = false;
 	inRHS.m_ignoreCS = false;
-	// inRHS.m_ancList - already moved/reset.
+	//	inRHS.m_ancList - already moved/reset
 }
-#endif
+#endif	//	defined(AJA_USE_CPLUSPLUS11)
 
 
 AJAAncillaryList::~AJAAncillaryList ()
@@ -222,7 +222,7 @@ AJAAncillaryList & AJAAncillaryList::operator = (AJAAncillaryList && inRHS)
 	}
 	return *this;
 }
-#endif
+#endif	//	defined(AJA_USE_CPLUSPLUS11)
 
 AJAAncillaryData * AJAAncillaryList::GetAncillaryDataAtIndex (const uint32_t inIndex) const
 {
