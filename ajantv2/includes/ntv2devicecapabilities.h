@@ -138,6 +138,8 @@ class AJAExport DeviceCapabilities
 		inline bool		IsSupported (void)						{return dev.IsSupported(kDeviceIsSupported);}									///< @returns	True if device is supported by this SDK
 		inline bool		NeedsRoutingSetup (void)				{return dev.IsSupported(kDeviceNeedsRoutingSetup);}								///< @returns	True if device widget routing can be queried or changed
 		inline bool		SoftwareCanChangeFrameBufferSize (void)	{return dev.IsSupported(kDeviceSoftwareCanChangeFrameBufferSize);}				///< @returns	True if device frame buffer size can be changed
+		inline bool		ROMHasBankSelect (void)					{return dev.IsSupported(kDeviceROMHasBankSelect);}								///< @returns	True if device flash ROM has selectable banks
+
 		inline ULWord	GetActiveMemorySize (void)				{return dev.GetNumSupported(kDeviceGetActiveMemorySize);}						///< @returns	The size, in bytes, of the device's active RAM available for video and audio
 		inline UWord	GetDACVersion (void)					{return UWord(dev.GetNumSupported(kDeviceGetDACVersion));}						///< @returns	The version number of the DAC on the device
 		inline UWord	GetDownConverterDelay (void)			{return UWord(dev.GetNumSupported(kDeviceGetDownConverterDelay));}				///< @returns	The down-converter delay on the device
@@ -188,7 +190,7 @@ class AJAExport DeviceCapabilities
 		inline UWord	GetTotalNumAudioSystems (void)			{return UWord(dev.GetNumSupported(kDeviceGetTotalNumAudioSystems));}			///< @returns	The number of independent Audio Systems on the device
 		inline UWord	GetNumBufferedAudioSystems (void)		{return UWord(dev.GetNumSupported(kDeviceGetNumBufferedAudioSystems));}			///< @returns	The total number of audio systems on the device that can read/write audio buffer memory, including the host audio system, if present
 		inline ULWord	GetUFCVersion (void)					{return dev.GetNumSupported(kDeviceGetUFCVersion);}								///< @returns	The version number of the UFC on the device
-        
+
 		/**
 			@param[in]	inChannel	Specifies the channel or FrameStore of interest.
 			@returns	True if the device has the given FrameStore; otherwise false.

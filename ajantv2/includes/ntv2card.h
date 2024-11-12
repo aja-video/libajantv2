@@ -2441,7 +2441,8 @@ public:
 		@return		True if successful;	 otherwise false.
 		@note		This date may differ from the build date of the installed firmware if, after erasing
 					or reflashing, the device was never power-cycled to force its FPGA to reload.
-		@see		CNTV2Card::GetRunningFirmwareTime, CNTV2Card::GetRunningFirmwareRevision, \ref devfw-section.
+		@see		CNTV2Card::GetRunningFirmwareTime, CNTV2Card::GetRunningFirmwareRevision,
+					CNTV2Card::GetInstalledBitfileInfo, \ref devfw-section
 	**/
 	AJA_VIRTUAL bool	GetRunningFirmwareDate (UWord & outYear, UWord & outMonth, UWord & outDay);
 
@@ -2456,7 +2457,8 @@ public:
 		@return		True if successful;	 otherwise false.
 		@note		This date may differ from the build date of the installed firmware if, after erasing
 					or reflashing, the device was never power-cycled to force its FPGA to reload.
-		@see		CNTV2Card::GetRunningFirmwareDate, CNTV2Card::GetRunningFirmwareRevision, \ref devfw-section.
+		@see		CNTV2Card::GetRunningFirmwareDate, CNTV2Card::GetRunningFirmwareRevision,
+					CNTV2Card::GetInstalledBitfileInfo, \ref devfw-section
 	**/
 	AJA_VIRTUAL bool	GetRunningFirmwareTime (UWord & outHours, UWord & outMinutes, UWord & outSeconds);
 
@@ -3376,66 +3378,75 @@ public:
 
 	/**
 		@brief		Initialize a stream.  Put the stream queue and hardware in a known good state ready for use.  Releases
-                    all buffers remaining in the queue.  At least one new buffer must be queued before starting the stream.
-    **/
+					all buffers remaining in the queue.  At least one new buffer must be queued before starting the stream.
+		@see		See \ref streamingdma
+	**/
 	AJA_VIRTUAL ULWord	StreamChannelInitialize (const NTV2Channel inChannel);
 
    	/**
 		@brief		Release a stream.  Releases all buffers remaining in the queue.
-    **/
+		@see		See \ref streamingdma
+	**/
 	AJA_VIRTUAL ULWord	StreamChannelRelease (const NTV2Channel inChannel);
 
 	/**
 		@brief		Start a stream.  Put the stream is the active state to start processing queued buffers.  For frame
-                    based video, the stream will start with the current buffer on the next frame sync.
+					based video, the stream will start with the current buffer on the next frame sync.
 		@return		The current stream status.
-    **/
+		@see		See \ref streamingdma
+	**/
 	AJA_VIRTUAL ULWord	StreamChannelStart (const NTV2Channel inChannel,
-                                            NTV2StreamChannel& status);
+											NTV2StreamChannel& status);
 
 	/**
 		@brief		Stop a stream.  Put the stream is the idle state.  For frame based video, the stream will idle on 
-                    the buffer on air after the next frame sync.
+					the buffer on air after the next frame sync.
 		@return		The current stream status.
-    **/
+		@see		See \ref streamingdma
+	**/
 	AJA_VIRTUAL ULWord	StreamChannelStop (const NTV2Channel inChannel,
-                                           NTV2StreamChannel& status);
+										   NTV2StreamChannel& status);
 
 	/**
 		@brief		Flush a stream.  Remove all the buffers from the stream except a currently active idle buffer.
-                    The stream must be in the initialize or idle state.
+					The stream must be in the initialize or idle state.
 		@return		The current stream status.
-    **/
-    AJA_VIRTUAL ULWord	StreamChannelFlush (const NTV2Channel inChannel,
-                                            NTV2StreamChannel& status);
+		@see		See \ref streamingdma
+	**/
+	AJA_VIRTUAL ULWord	StreamChannelFlush (const NTV2Channel inChannel,
+											NTV2StreamChannel& status);
 
 	/**
 		@brief		Get the current stream status.
 		@return		The current stream status.
-    **/
+		@see		See \ref streamingdma
+	**/
 	AJA_VIRTUAL ULWord	StreamChannelStatus (const NTV2Channel inChannel,
-                                             NTV2StreamChannel& status);
+											 NTV2StreamChannel& status);
 
 	/**
 		@brief		Wait for any stream event.  Returns for any state or buffer change.
 		@return		The current stream status.
-    **/
+		@see		See \ref streamingdma
+	**/
 	AJA_VIRTUAL ULWord	StreamChannelWait (const NTV2Channel inChannel,
-                                           NTV2StreamChannel& status);
+										   NTV2StreamChannel& status);
 
 	/**
 		@brief		Queue a buffer to the stream.  The bufferCookie is a user defined identifier of the buffer
-                    used by the stream methods.
+					used by the stream methods.
 		@return		The queued buffer status.
-    **/
+		@see		See \ref streamingdma
+	**/
 	AJA_VIRTUAL ULWord	StreamBufferQueue (const NTV2Channel inChannel,
-                                           NTV2Buffer& inBuffer,
-                                           ULWord64 bufferCookie,
-                                           NTV2StreamBuffer& status);
+										   NTV2Buffer& inBuffer,
+										   ULWord64 bufferCookie,
+										   NTV2StreamBuffer& status);
 
 	/**
 		@brief		Remove the oldest buffer released by the streaming engine from the buffer queue.
 		@return		The removed buffer status.
+		@see		See \ref streamingdma
 	**/
 	AJA_VIRTUAL ULWord	StreamBufferRelease (const NTV2Channel inChannel,
 											NTV2StreamBuffer& status);
@@ -3443,7 +3454,8 @@ public:
 	/**
 		@brief		Get the status of the buffer identified by the bufferCookie.
 		@return		The buffer status.
-    **/
+		@see		See \ref streamingdma
+	**/
 	AJA_VIRTUAL ULWord	StreamBufferStatus (const NTV2Channel inChannel,
 											ULWord64 bufferCookie,
 											NTV2StreamBuffer& status);
@@ -6172,7 +6184,8 @@ public:
 	AJA_VIRTUAL std::string		GetPCIFPGAVersionString (void);
 
 	/**
-		@brief		Returns the size and time/date stamp of the device's currently-installed firmware.
+		@brief		Returns the bitfile size and time/date stamp from the header of the bitfile that's currently
+					installed in device EEPROM.
 		@param[out] outNumBytes		Receives the size of the installed firmware image, in bytes.
 		@param[out] outDateStr		Receives a human-readable string containing the date the currently-installed firmware was built.
 									The string has the format "YYYY/MM/DD", where "YYYY" is the year, "MM" is the month ("00" thru "12"),
@@ -6181,7 +6194,11 @@ public:
 									(in local Pacific time). The string has the format "HH:MM:SS", where HH is "00" thru "23",
 									and both MM and SS are "00" thru "59".
 		@return		True if successful;	 otherwise false.
-		@note		This function has nothing to do with the firmware bitfiles that are currently installed on the local host's file system.
+		@note		It's possible that the date returned from this function is one calendar day past the date returned from
+					CNTV2Card::GetRunningFirmwareDate, which can happen when a firmware compile is started late on one day,
+					and finishes the following day.
+		@note		This function has nothing to do with firmware bitfiles that may be installed on the local host's file system.
+		@see		CNTV2Card::GetRunningFirmwareDate, CNTV2Card::GetRunningFirmwareTime
 	**/
 	AJA_VIRTUAL bool			GetInstalledBitfileInfo (ULWord & outNumBytes, std::string & outDateStr, std::string & outTimeStr);
 
