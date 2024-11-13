@@ -169,8 +169,8 @@ AJAAncillaryList::AJAAncillaryList ()
 #if defined(AJA_USE_CPLUSPLUS11)
 AJAAncillaryList::AJAAncillaryList(AJAAncillaryList && inRHS)
 	:	m_ancList(std::move(inRHS.m_ancList)),
-		m_rcvMultiRTP(inRHS.m_rcvMultiRTP),		//	By default, handle receiving multiple RTP packets
-		m_xmitMultiRTP(inRHS.m_xmitMultiRTP),	//	By default, transmit single RTP packet
+		m_rcvMultiRTP(inRHS.m_rcvMultiRTP),
+		m_xmitMultiRTP(inRHS.m_xmitMultiRTP),
 		m_ignoreCS(inRHS.m_ignoreCS)
 {
 	// Reset RHS.

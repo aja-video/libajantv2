@@ -195,7 +195,7 @@ public:	//	INSTANCE METHODS
 		@param[in]	inRHS	The list of packets to be move into me.
 		@return		An r-value reference to myself.
 	**/
-	virtual AJAAncillaryList &				operator = (AJAAncillaryList && inRHS);	///< @brief Move-construct constructor.
+	virtual AJAAncillaryList &				operator = (AJAAncillaryList && inRHS);
 #endif
 
 
