@@ -361,7 +361,7 @@ class AJAExport CNTV2SignalRouter
 		static bool					GetWidgetInputs (const NTV2WidgetID inWidgetID, NTV2InputXptIDSet & outInputs);
 
 		/**
-			@brief		Returns all known widget input crosspoints for the given device.
+			@brief		Returns all supported widget input crosspoints for the given device.
 			@param[in]	inDeviceID		Specifies the ::NTV2DeviceID of the device of interest.
 			@param[out] outInputs		Receives the ::NTV2InputXptIDSet (or empty upon failure).
 			@return		True if successful;	 otherwise false.
@@ -384,6 +384,14 @@ class AJAExport CNTV2SignalRouter
 			@return		True if successful;	 otherwise false.
 		**/
 		static bool					GetWidgetOutputs (const NTV2WidgetID inWidgetID, NTV2OutputXptIDSet & outOutputs);
+
+		/**
+			@brief		Returns all supported widget output crosspoints for the given device.
+			@param[in]	inDeviceID		Specifies the ::NTV2DeviceID of the device of interest.
+			@param[out] outOutputs		Receives the ::NTV2OutputXptIDSet (or empty upon failure).
+			@return		True if successful;	 otherwise false.
+		**/
+		static bool					GetAllWidgetOutputs (const NTV2DeviceID inDeviceID, NTV2OutputXptIDSet & outOutputs);	//	New in SDK 17.5
 
 		/**
 			@brief		Converts a set of crosspoint registers into a set of crosspoint connections.
