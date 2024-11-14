@@ -458,9 +458,17 @@ bool CNTV2SignalRouter::GetAllWidgetInputs (const NTV2DeviceID inDeviceID, NTV2I
 
 	for (NTV2WidgetIDSetConstIter iter(widgetIDs.begin());	iter != widgetIDs.end ();  ++iter)
 	{
-		NTV2InputXptIDSet	inputs;
+		NTV2InputXptIDSet inputs;
 		CNTV2SignalRouter::GetWidgetInputs (*iter, inputs);
-		outInputs.insert(inputs.begin(), inputs.end());
+		for (NTV2InputXptIDSetConstIter it(inputs.begin());  it != inputs.end();  ++it)
+		{
+			if (WidgetIDToType(*iter) == NTV2WidgetType_FrameStore)
+				if (::NTV2DeviceCanDoIP(inDeviceID))
+					if (::NTV2DeviceCanDo12gRouting(inDeviceID))
+						if (::NTV2InputCrosspointIDToString(*it, false).find("DS2") != string::npos)	//	is DS2 input?
+							continue;	//	do not include FrameStore DS2 inputs for IP devices that have 12G crosspoints
+			outInputs.insert(*it);
+		}
 	}
 	return true;
 }
@@ -488,6 +496,30 @@ bool CNTV2SignalRouter::GetWidgetOutputs (const NTV2WidgetID inWidgetID, NTV2Out
 	outOutputs.clear();
 	RoutingExpertPtr	pExpert(RoutingExpert::GetInstance());
 	return pExpert ? pExpert->GetWidgetOutputs(inWidgetID, outOutputs) : false;
+}
+
+bool CNTV2SignalRouter::GetAllWidgetOutputs (const NTV2DeviceID inDeviceID, NTV2OutputXptIDSet & outOutputs)	//	STATIC
+{
+	outOutputs.clear();
+	NTV2WidgetIDSet widgetIDs;
+	if (!GetWidgetIDs (inDeviceID, widgetIDs))
+		return false;	//	Fail
+
+	for (NTV2WidgetIDSetConstIter iter(widgetIDs.begin());	iter != widgetIDs.end ();  ++iter)
+	{
+		NTV2OutputXptIDSet outputs;
+		CNTV2SignalRouter::GetWidgetOutputs (*iter, outputs);
+		for (NTV2OutputXptIDSetConstIter it(outputs.begin());  it != outputs.end();  ++it)
+		{
+			if (WidgetIDToType(*iter) == NTV2WidgetType_FrameStore)
+				if (::NTV2DeviceCanDoIP(inDeviceID))
+					if (::NTV2DeviceCanDo12gRouting(inDeviceID))
+						if (::NTV2OutputCrosspointIDToString(*it, false).find("DS2") != string::npos)	//	is DS2 output?
+							continue;	//	do not include FrameStore DS2 outputs for IP devices that have 12G crosspoints
+			outOutputs.insert(*it);
+		}
+	}
+	return true;
 }
 
 bool CNTV2SignalRouter::IsRGBOnlyInputXpt (const NTV2InputXptID inInputXpt)
