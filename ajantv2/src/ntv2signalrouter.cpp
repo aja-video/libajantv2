@@ -463,10 +463,10 @@ bool CNTV2SignalRouter::GetAllWidgetInputs (const NTV2DeviceID inDeviceID, NTV2I
 		for (NTV2InputXptIDSetConstIter it(inputs.begin());  it != inputs.end();  ++it)
 		{
 			if (WidgetIDToType(*iter) == NTV2WidgetType_FrameStore)
-				if (::NTV2DeviceCanDoIP(inDeviceID))
-					if (::NTV2DeviceCanDo12gRouting(inDeviceID))
+				if (!::NTV2DeviceCanDo425Mux(inDeviceID))
+					if (!::NTV2DeviceCanDo8KVideo(inDeviceID))
 						if (::NTV2InputCrosspointIDToString(*it, false).find("DS2") != string::npos)	//	is DS2 input?
-							continue;	//	do not include FrameStore DS2 inputs for IP devices that have 12G crosspoints
+							continue;	//	do not include FrameStore DS2 inputs for IP25G
 			outInputs.insert(*it);
 		}
 	}
@@ -512,10 +512,10 @@ bool CNTV2SignalRouter::GetAllWidgetOutputs (const NTV2DeviceID inDeviceID, NTV2
 		for (NTV2OutputXptIDSetConstIter it(outputs.begin());  it != outputs.end();  ++it)
 		{
 			if (WidgetIDToType(*iter) == NTV2WidgetType_FrameStore)
-				if (::NTV2DeviceCanDoIP(inDeviceID))
-					if (::NTV2DeviceCanDo12gRouting(inDeviceID))
+				if (!::NTV2DeviceCanDo425Mux(inDeviceID))
+					if (!::NTV2DeviceCanDo8KVideo(inDeviceID))
 						if (::NTV2OutputCrosspointIDToString(*it, false).find("DS2") != string::npos)	//	is DS2 output?
-							continue;	//	do not include FrameStore DS2 outputs for IP devices that have 12G crosspoints
+							continue;	//	do not include FrameStore DS2 outputs for IP25G
 			outOutputs.insert(*it);
 		}
 	}
