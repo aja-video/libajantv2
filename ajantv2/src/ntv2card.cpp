@@ -85,8 +85,27 @@ string CNTV2Card::GetModelName (void)
 
 string CNTV2Card::GetDisplayName (void)
 {
-	ostringstream	oss;
-	oss << GetModelName() << " - " << GetIndexNumber();
+	ostringstream oss;
+	if (IsRemote())
+	{
+		auto params = CNTV2DriverInterface::ConnectParams();
+		if (params.hasKey("displayname"))
+		{
+			oss << params.valueForKey("displayname");
+		}
+		else if (params.hasKey(kNTV2PluginRegInfoKey_LongName))
+		{
+			oss << params.valueForKey(kNTV2PluginRegInfoKey_LongName);
+		}
+		else if (params.hasKey(kNTV2PluginRegInfoKey_ShortName))
+		{
+			oss << params.valueForKey(kNTV2PluginRegInfoKey_ShortName);
+		}
+	}
+	else
+	{
+		oss << GetModelName() << " - " << GetIndexNumber();
+	}
 	return oss.str();
 }
 

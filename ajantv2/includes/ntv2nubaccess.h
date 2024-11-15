@@ -146,9 +146,6 @@ inline std::ostream & operator << (std::ostream & oss, const NTV2Dictionary & in
 class AJAExport NTV2DeviceSpecParser
 {
 	public:
-		static bool						IsSupportedScheme (const std::string & inScheme);	///< @return	True if the given scheme starts with "ntv2"
-
-	public:
 										NTV2DeviceSpecParser (const std::string inSpec = "");	///< @brief	My constructor. If given device specification is non-empty, proceeds to Parse it
 		void							Reset (const std::string inSpec = "");	///< @brief	Resets me, then parses the given device specification
 		inline const std::string &		DeviceSpec (void) const						{return mSpec;}		///< @return	The device specification I've parsed

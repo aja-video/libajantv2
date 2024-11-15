@@ -21,6 +21,19 @@
 #endif
 
 
+std::string AJAPnp::MessageToString (const AJAPnpMessage inMsg)		//	STATIC
+{
+	switch (inMsg)
+	{
+		case AJA_Pnp_DeviceAdded:			return "AJA_Pnp_DeviceAdded";
+		case AJA_Pnp_DeviceRemoved:			return "AJA_Pnp_DeviceRemoved";
+		case AJA_Pnp_DeviceOnline:			return "AJA_Pnp_DeviceOnline";
+		case AJA_Pnp_DeviceOffline:			return "AJA_Pnp_DeviceOffline";
+		case AJA_Pnp_DeviceGoingToSleep:	return "AJA_Pnp_DeviceGoingToSleep";
+		case AJA_Pnp_DeviceWakingUp:		return "AJA_Pnp_DeviceWakingUp";
+	}
+	return "";
+}
 
 AJAPnp::AJAPnp()
 {
