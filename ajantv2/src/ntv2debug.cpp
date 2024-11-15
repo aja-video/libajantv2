@@ -148,7 +148,7 @@ const char * NTV2DeviceString (const NTV2DeviceID id)
 		case DEVICE_ID_KONAIP_2110_RGB12:			return "KonaIP_2110_RGB12";
 		case DEVICE_ID_KONAIP_2TX_1SFP_J2K:			return "KonaIP_2Tx1SFPJ2K";
 		case DEVICE_ID_KONAIP_4CH_2SFP:				return "KonaIP_4ch2SFP";
-		case DEVICE_ID_KONAIP_25G:					return "KonaIO_25G";
+		case DEVICE_ID_KONAIP_25G:					return "KonaIP_25G";
 		case DEVICE_ID_KONALHEPLUS:					return "KonaLHePlus";
 		case DEVICE_ID_KONALHI:						return "KonaLHi";
 		case DEVICE_ID_KONALHIDVI:					return "KonaLHiDVI";
