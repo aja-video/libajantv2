@@ -135,6 +135,7 @@ class AJAExport DeviceCapabilities
 		inline bool		IsDirectAddressable (void)				{return dev.IsSupported(kDeviceIsDirectAddressable);}							///< @returns	True if device is direct addressable
 		inline bool		IsDNxIV (void)							{return dev.IsSupported(kDeviceHasMicrophoneInput);}							///< @deprecated	Use DeviceCapabilities::HasMicInput instead
 		inline bool		IsExternalToHost (void)					{return dev.IsSupported(kDeviceIsExternalToHost);}								///< @returns	True if device connects to the host via a cable
+		inline bool		IsLocalPhysical (void)					{return dev.IsSupported(kDeviceIsLocalPhysical);}								///< @returns	True if device is local-host-attached, not remote, software or virtual
 		inline bool		IsSupported (void)						{return dev.IsSupported(kDeviceIsSupported);}									///< @returns	True if device is supported by this SDK
 		inline bool		NeedsRoutingSetup (void)				{return dev.IsSupported(kDeviceNeedsRoutingSetup);}								///< @returns	True if device widget routing can be queried or changed
 		inline bool		SoftwareCanChangeFrameBufferSize (void)	{return dev.IsSupported(kDeviceSoftwareCanChangeFrameBufferSize);}				///< @returns	True if device frame buffer size can be changed

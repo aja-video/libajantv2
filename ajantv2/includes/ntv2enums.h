@@ -217,7 +217,7 @@ typedef enum
 	,NTV2_FBF_10BIT_RGB									///< @brief See \ref fbformats10bitrgb
 	,NTV2_FBF_8BIT_YCBCR_YUY2							///< @brief See \ref fbformatsyuy2
 	,NTV2_FBF_ABGR										///< @brief See \ref fbformats8bitrgb
-	,NTV2_FBF_LAST_SD_FBF = NTV2_FBF_ABGR
+	,NTV2_FBF_LAST_SD_FBF			= NTV2_FBF_ABGR
 	,NTV2_FBF_10BIT_DPX									///< @brief See \ref fbformats10bitrgbdpx
 	,NTV2_FBF_10BIT_YCBCR_DPX							///< @brief See \ref fbformats10bitycbcrdpx
 	,NTV2_FBF_8BIT_DVCPRO								///< @brief See \ref fbformats8bitdvcpro

@@ -1670,6 +1670,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 		case kDeviceIs64Bit:						outValue = ::NTV2DeviceIs64Bit(devID);								break;	//	Deprecate?
 		case kDeviceIsDirectAddressable:			outValue = ::NTV2DeviceIsDirectAddressable(devID);					break;	//	Deprecate?
 		case kDeviceIsExternalToHost:				outValue = ::NTV2DeviceIsExternalToHost(devID);						break;
+		case kDeviceIsLocalPhysical:				outValue = !IsRemote();												break;
 		case kDeviceIsSupported:					outValue = ::NTV2DeviceIsSupported(devID);							break;
 		case kDeviceNeedsRoutingSetup:				outValue = ::NTV2DeviceNeedsRoutingSetup(devID);					break;	//	Deprecate?
 		case kDeviceSoftwareCanChangeFrameBufferSize:	outValue = ::NTV2DeviceSoftwareCanChangeFrameBufferSize(devID);	break;

@@ -103,6 +103,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceIs64Bit,								///< @brief True if device is 64-bit addressable.
 	kDeviceIsDirectAddressable,					///< @brief True if device is direct addressable.
 	kDeviceIsExternalToHost,					///< @brief True if device connects to the host with a cable.
+	kDeviceIsLocalPhysical,						///< @brief True if device is local-host-attached, and not remote, software or virtual (new in SDK 17.5)
 	kDeviceIsSupported,							///< @brief True if device is supported by this SDK.
 	kDeviceNeedsRoutingSetup,					///< @brief True if device widget routing can be queried or changed.
 	kDeviceSoftwareCanChangeFrameBufferSize,	///< @brief True if device frame buffer size can be changed.
