@@ -49,32 +49,12 @@ using json = nlohmann::json;
 
 	bool CNTV2DeviceScanner::IsLegalDecimalNumber (const string & inStr, const size_t inMaxLength)
 	{
-		if (inStr.length() > inMaxLength)
-			return false;	//	Too long
-		for (size_t ndx(0);  ndx < inStr.size();  ndx++)
-			if (!aja::is_decimal_digit(inStr.at(ndx)))
-				return false;
-		return true;
+		return aja::is_legal_decimal_number(inStr, inMaxLength);
 	}
 
 	uint64_t CNTV2DeviceScanner::IsLegalHexSerialNumber (const string & inStr)	//	0x3236333331375458
 	{
-		if (inStr.length() < 3)
-			return 0ULL;	//	Too small
-		string hexStr(inStr); aja::lower(hexStr);
-		if (hexStr[0] == '0'  &&  hexStr[1] == 'x')
-			hexStr.erase(0, 2);	//	Remove '0x' if present
-		if (hexStr.length() > 16)
-			return 0ULL;	//	Too big
-		for (size_t ndx(0);  ndx < hexStr.size();  ndx++)
-			if (!aja::is_hex_digit(hexStr.at(ndx)))
-				return 0ULL;	//	Invalid hex digit
-		while (hexStr.length() != 16)
-			hexStr = '0' + hexStr;	//	prepend another '0'
-		istringstream iss(hexStr);
-		uint64_t u64(0);
-		iss >> hex >> u64;
-		return u64;
+		return aja::is_legal_hex_serial_number(inStr);
 	}
 
 	bool CNTV2DeviceScanner::IsAlphaNumeric (const string & inStr)
@@ -368,8 +348,10 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 			return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
 		else if (iter->deviceIdentifier == inArgument)
 			return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
-		else if (IsLegalDecimalNumber(inArgument, inArgument.length()) && IsLegalHexSerialNumber(inArgument) && iter->deviceID == stoi(inArgument))
-			return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
+		else if (aja::is_legal_decimal_number(inArgument, inArgument.length())
+			&& aja::is_legal_hex_serial_number(inArgument)
+			&& iter->deviceID == stoi(inArgument))
+				return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
 		else if (IsLegalSerialNumber(inArgument))
 			return outDevice.Open(inArgument);
 		else if (inArgument.find("://") != string::npos)
