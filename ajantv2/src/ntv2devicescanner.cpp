@@ -372,8 +372,8 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 			return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
 		else if (IsLegalSerialNumber(inArgument))
 			return outDevice.Open(inArgument);
-		else if (inArgument.find("://") != string::npos && iter->isVirtualDevice)
-			return outDevice.Open(iter->vdevUrl);
+		else if (inArgument.find("://") != string::npos)
+			return outDevice.Open(inArgument);
 	}
 	return false;
 }	//	GetFirstDeviceFromArgument
