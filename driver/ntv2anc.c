@@ -258,8 +258,6 @@ bool SetAncExtWriteParams(Ntv2SystemContext* context, NTV2Channel channel, ULWor
 	ANCStopMemory -= 1;
 	SetAncExtField1StartAddr(context, channel, ANCStartMemory);
 	SetAncExtField1EndAddr(context, channel, ANCStopMemory);
-	if (GetAncExtProgressive(context, channel))
-		SetAncExtField2WriteParams(context, channel, frameNumber);
 	return true;
 }
 
@@ -344,13 +342,6 @@ bool SetAncExtSDDemux(Ntv2SystemContext* context, NTV2Channel channel, bool bEna
 bool SetAncExtProgressive(Ntv2SystemContext* context, NTV2Channel channel, bool bEnable)
 {
 	return ntv2WriteRegisterMS(context, gChannelToAncExtOffset[channel] + regAncExtControl, bEnable ? 1 : 0, maskSetProgressive, shiftSetProgressive);
-}
-
-bool GetAncExtProgressive(Ntv2SystemContext* context, NTV2Channel channel)
-{
-	uint32_t bProgressive = 0;
-	ntv2ReadRegisterMS(context, gChannelToAncExtOffset[channel] + regAncExtControl, &bProgressive, maskSetProgressive, shiftSetProgressive);
-	return bProgressive ? true : false;
 }
 
 bool SetAncExtSynchro(Ntv2SystemContext* context, NTV2Channel channel)
