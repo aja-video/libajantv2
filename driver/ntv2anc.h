@@ -24,6 +24,7 @@ bool EnableAncExtVancY(Ntv2SystemContext* context, NTV2Channel channel, bool bEn
 bool EnableAncExtVancC(Ntv2SystemContext* context, NTV2Channel channel, bool bEnable);
 bool SetAncExtSDDemux(Ntv2SystemContext* context, NTV2Channel channel, bool bEnable);
 bool SetAncExtProgressive(Ntv2SystemContext* context, NTV2Channel channel, bool bEnable);
+bool GetAncExtProgressive(Ntv2SystemContext* context, NTV2Channel channel);
 bool SetAncExtSynchro(Ntv2SystemContext* context, NTV2Channel channel);
 bool SetAncExtField1StartAddr(Ntv2SystemContext* context, NTV2Channel channel, ULWord addr);
 bool SetAncExtLSBEnable(Ntv2SystemContext* context, NTV2Channel channel, bool bEnable);
