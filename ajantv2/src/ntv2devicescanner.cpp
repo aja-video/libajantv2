@@ -357,7 +357,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 		else if (inArgument.find("://") != string::npos)
 			return outDevice.Open(inArgument);
 	}
-	return false;
+	return outDevice.Open(inArgument);
 }	//	GetFirstDeviceFromArgument
 
 
