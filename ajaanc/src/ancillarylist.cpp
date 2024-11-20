@@ -228,13 +228,17 @@ AJAAncillaryData * AJAAncillaryList::GetAncillaryDataAtIndex (const uint32_t inI
 {
 	AJAAncillaryData *	pAncData(AJA_NULL);
 
-	if (!m_ancList.empty()	&&	inIndex < m_ancList.size())
+	if (inIndex < m_ancList.size())
 	{
+#if defined(AJAANCLISTIMPL_VECTOR)
+		pAncData = m_ancList[inIndex]; // Yay! std::vector has random access.
+#else
 		AJAAncDataListConstIter it	(m_ancList.begin());
 
 		for (uint32_t i(0);	 i < inIndex;  i++) //	Dang, std::list has no random access
 			++it;
 		pAncData = *it;
+#endif
 	}
 	return pAncData;
 }
