@@ -17,6 +17,9 @@
 #if defined(AJAANCLISTIMPL_VECTOR)
 	#include <algorithm>
 #endif
+#if defined(AJA_USE_CPLUSPLUS11)
+	#include <utility>		//	For std::move
+#endif
 
 using namespace std;
 
@@ -163,6 +166,21 @@ AJAAncillaryList::AJAAncillaryList ()
 	SetAnalogAncillaryDataTypeForLine (285, AJAAncDataType_Cea608_Line21);
 }
 
+#if defined(AJA_USE_CPLUSPLUS11)
+AJAAncillaryList::AJAAncillaryList(AJAAncillaryList && inRHS)
+	:	m_ancList(std::move(inRHS.m_ancList)),
+		m_rcvMultiRTP(inRHS.m_rcvMultiRTP),
+		m_xmitMultiRTP(inRHS.m_xmitMultiRTP),
+		m_ignoreCS(inRHS.m_ignoreCS)
+{
+	// Reset RHS.
+	inRHS.m_rcvMultiRTP = true;
+	inRHS.m_xmitMultiRTP = false;
+	inRHS.m_ignoreCS = false;
+	// inRHS.m_ancList - already moved/reset.
+}
+#endif
+
 
 AJAAncillaryList::~AJAAncillaryList ()
 {
@@ -185,6 +203,26 @@ AJAAncillaryList & AJAAncillaryList::operator = (const AJAAncillaryList & inRHS)
 	return *this;
 }
 
+#if defined(AJA_USE_CPLUSPLUS11)
+AJAAncillaryList & AJAAncillaryList::operator = (AJAAncillaryList && inRHS)
+{
+	if (this != &inRHS)
+	{
+		m_xmitMultiRTP = inRHS.m_xmitMultiRTP;
+		inRHS.m_xmitMultiRTP = false;
+
+		m_rcvMultiRTP = inRHS.m_rcvMultiRTP;			
+		inRHS.m_rcvMultiRTP	= true;
+		
+		m_ignoreCS = inRHS.m_ignoreCS;
+		inRHS.m_ignoreCS = false;
+		
+		Clear(); // Clear down any packets currently being held in 'this'
+		m_ancList = std::move(inRHS.m_ancList);
+	}
+	return *this;
+}
+#endif
 
 AJAAncillaryData * AJAAncillaryList::GetAncillaryDataAtIndex (const uint32_t inIndex) const
 {
