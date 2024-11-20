@@ -4514,9 +4514,18 @@ bool CNTV2Card::GetDieTemperature (double & outTemp, const NTV2DieTempScale inTe
 	ULWord			rawRegValue (0);
 	if (!ReadRegister (kRegSysmonVccIntDieTemp, rawRegValue))
 		return false;
-
-	const UWord		dieTempRaw	((rawRegValue & 0x0000FFFF) >> 6);
-	const double	celsius		(double (dieTempRaw) * 503.975 / 1024.0 - 273.15);
+	
+	double celsius (0);
+	if (IsSupported(kDeviceCanDoVersalSysMon))
+	{
+		UWord dieTempRaw (rawRegValue & 0x0000FFFF);
+		celsius = double (dieTempRaw) / 128.0;
+	}
+	else
+	{
+		UWord dieTempRaw ((rawRegValue & 0x0000FFFF) >> 6);
+		celsius = (double (dieTempRaw) * 503.975 / 1024.0 - 273.15);
+	}
 	switch (inTempScale)
 	{
 		case NTV2DieTempScale_Celsius:		outTemp = celsius;							break;

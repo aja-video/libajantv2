@@ -2285,9 +2285,19 @@ private:
 		{
 			(void) inRegNum;
 			(void) inDeviceID;
-			const UWord		rawDieTemp	((inRegValue & 0x0000FFFF) >> 6);
+			UWord	rawDieTemp	(0);
+			double	dieTempC	(0);
+			if (NTV2DeviceCanDoVersalSysMon(inDeviceID))
+			{
+				rawDieTemp = (inRegValue & 0x0000FFFF);
+				dieTempC = double(rawDieTemp) / 128.0;
+			}
+			else
+			{
+				rawDieTemp = ((inRegValue & 0x0000FFFF) >> 6);
+				dieTempC = ((double(rawDieTemp)) * 503.975 / 1024.0 - 273.15 );
+			}
 			const UWord		rawVoltage	((inRegValue >> 22) & 0x3FF);
-			const double	dieTempC	((double(rawDieTemp)) * 503.975 / 1024.0 - 273.15 );
 			const double	dieTempF	(dieTempC * 9.0 / 5.0  +  32.0);
 			const double	voltage		(double(rawVoltage)/ 1024.0 * 3.0);
 			ostringstream	oss;

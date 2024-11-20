@@ -154,6 +154,7 @@ typedef enum _NTV2BoolParamID
 	kDeviceCanDoStreamingDMA,					///< @brief	True if device supports streaming DMA.	(New in SDK 17.1)
 	kDeviceHasPWMFanControl,					///< @brief	True if device has a PWM-controlled cooling fan.	(New in SDK 17.1)
 	kDeviceROMHasBankSelect,					///< @brief	True if device SPIFlash ROM is bank-selected.	(New in SDK 17.1)
+	kDeviceCanDoVersalSysMon,					///< @brief	True if device supports Versal Adaptive SoC System Monitor.
 	kNTV2BoolParam_LAST,
 	kNTV2BoolParam_COUNT	= kNTV2BoolParam_LAST-kNTV2BoolParam_FIRST,
 	kDeviceCanDo_INVALID	= kNTV2BoolParam_LAST

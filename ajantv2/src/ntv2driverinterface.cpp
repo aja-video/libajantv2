@@ -1714,7 +1714,7 @@ bool CNTV2DriverInterface::GetBoolParam (const ULWord inParamID, ULWord & outVal
 													break;
 		case kDeviceROMHasBankSelect:				outValue = GetNumSupported(kDeviceGetSPIFlashVersion) >= 3
 																&&  GetNumSupported(kDeviceGetSPIFlashVersion) <= 6;	break;
-
+		case kDeviceCanDoVersalSysMon:				outValue = ::NTV2DeviceCanDoVersalSysMon(devID);					break;
 		case kDeviceCanDoAudioMixer:
 		case kDeviceHasMicrophoneInput:
 		default:									return false;	//	Bad param
