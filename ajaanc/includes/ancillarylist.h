@@ -184,6 +184,23 @@ public:	//	INSTANCE METHODS
 		@return		A non-const reference to myself.
 	**/
 	virtual AJAAncillaryList &				operator = (const AJAAncillaryList & inRHS);
+
+#if defined(AJA_USE_CPLUSPLUS11)
+	/**
+		@brief		Move-assignment constructor -- moves contents from the right-hand-side to my contents,
+					replacing my contents, and resets the right-hand-side.
+		@param[in]	inRHS	The list of packets to move into me.
+		@return		A non-const reference to myself.
+	**/
+											AJAAncillaryList (AJAAncillaryList && inRHS) noexcept;	//	(New in SDK 17.5)
+	/**
+		@brief		Move-assignment operator -- moves contents from the right-hand-side to my contents,
+					replacing my contents, and resets the right-hand-side.
+		@param[in]	inRHS	The list of packets to move into me.
+		@return		A non-const reference to myself.
+	**/
+	virtual AJAAncillaryList &				operator = (AJAAncillaryList && inRHS);	//	(New in SDK 17.5)
+#endif	//	AJA_USE_CPLUSPLUS11
 	///@}
 
 
