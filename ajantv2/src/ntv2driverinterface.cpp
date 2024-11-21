@@ -1311,14 +1311,22 @@ void CNTV2DriverInterface::BumpEventCount (const INTERRUPT_ENUMS eInterruptType)
 
 bool CNTV2DriverInterface::IsDeviceReady (const bool checkValid)
 {
-	if (!IsIPDevice())
+    if (!IsIPDevice() && !::NTV2DeviceCanDo25GIP(GetDeviceID()))
 		return true;	//	Non-IP devices always ready
-
-	if (!IsMBSystemReady())
-		return false;
-
-	if (checkValid && !IsMBSystemValid())
-		return false;
+    
+    if (IsIPDevice())
+    {
+        if (!IsMBSystemReady())
+            return false;
+    
+        if (checkValid && !IsMBSystemValid())
+            return false;
+    }
+    else
+    {
+        if (!IsLPSystemReady())
+            return false;
+    }
 
 	return true;	//	Ready!
 }
@@ -1347,6 +1355,19 @@ bool CNTV2DriverInterface::IsMBSystemReady (void)
 	// Not enough to read MB State, we need to make sure MB is running
 	ReadRegister(SAREK_REGS + kRegSarekMBUptime, val);
 	return (val < 2) ? false : true;
+}
+
+bool CNTV2DriverInterface::IsLPSystemReady (void)
+{
+    if (!::NTV2DeviceCanDo25GIP(GetDeviceID()))
+        return false;	//	No local proc
+    
+    uint32_t val;
+    ReadRegister(kRegReserved83, val);
+    if (val == 0x00)
+        return false;	//	MB not ready
+
+    return true;
 }
 
 #if defined(NTV2_WRITEREG_PROFILING)	//	Register Write Profiling

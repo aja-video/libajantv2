@@ -125,6 +125,7 @@ class AJAExport CNTV2DriverInterface
 		AJA_VIRTUAL bool		IsMBSystemValid (void);	///< @return	True if microblaze system exists (is valid); otherwise false.
 		AJA_VIRTUAL bool		IsMBSystemReady (void);	///< @return	True if microblaze system is in ready state; otherwise false.
 		AJA_VIRTUAL inline bool	IsIPDevice (void)	{return ::NTV2DeviceCanDoIP(GetDeviceID());}	///< @return	True if I am an IP device; otherwise false.
+        AJA_VIRTUAL bool        IsLPSystemReady (void);
 	///@}
 
 	/**
