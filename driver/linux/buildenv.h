@@ -71,6 +71,11 @@
 		#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(5,14,0)) && DISTRO_KERNEL_PKG_MAJ >= 449)
 			#define KERNEL_6_3_0_VM_FLAGS
 		#endif
+
+		// This change was back-ported from kernel 6.3.0 for kernel 5.14.0-503
+		#if ((LINUX_VERSION_CODE >= KERNEL_VERSION(5,14,0)) && DISTRO_KERNEL_PKG_MAJ >= 503)
+			#define KERNEL_6_3_0_VM_FLAGS
+		#endif
 	#endif
 #endif
 
