@@ -3932,15 +3932,17 @@ bool CNTV2Card::GetSDIOutputAudioSystem (const NTV2Channel inChannel, NTV2AudioS
 	if (ULWord(inChannel) >= GetNumSupported(kDeviceGetNumVideoOutputs))
 		return false;	//	illegal channel
 
-	ULWord	b2(0),	b1(0),	b0(0);	//	The three bits that determine which audio system feeds the SDI output
+	ULWord readVal;
 	const ULWord regNum (gChannelToSDIOutControlRegNum[inChannel]);
-	if (!ReadRegister (regNum, b2, BIT(18), 18))	//	bit 18 is MSB
+	if (!ReadRegister (regNum, readVal, kK2RegMaskSDIOutDS1AudioSelect, kK2RegShiftSDIOutDS1AudioSelect))
 		return false;
-	if (!ReadRegister (regNum, b1, BIT(28), 28))
-		return false;
-	if (!ReadRegister (regNum, b0, BIT(30), 30))	//	bit 30 is LSB
-		return false;
-	outAudioSystem = NTV2AudioSystem(b2 * 4	+  b1 * 2  +  b0);
+
+	readVal <<= kK2RegShiftSDIOutDS1AudioSelect;
+	ULWord b2 = (readVal & kK2RegMaskSDIOutDS1Audio_Bit2) ? 1 : 0;
+	ULWord b1 = (readVal & kK2RegMaskSDIOutDS1Audio_Bit1) ? 1 : 0;
+	ULWord b0 = (readVal & kK2RegMaskSDIOutDS1Audio_Bit0) ? 1 : 0;
+	
+	outAudioSystem = NTV2AudioSystem(b2 * 4  +  b1 * 2  +  b0);
 	return true;
 
 }	//	GetSDIOutputAudioSystem
@@ -3948,27 +3950,20 @@ bool CNTV2Card::GetSDIOutputAudioSystem (const NTV2Channel inChannel, NTV2AudioS
 
 bool CNTV2Card::SetSDIOutputAudioSystem (const NTV2Channel inChannel, const NTV2AudioSystem inAudioSystem)
 {
+	
 	if (ULWord(inChannel) >= GetNumSupported(kDeviceGetNumVideoOutputs))
 		return false;	//	Invalid channel
 	if (ULWord(inAudioSystem) >= GetNumSupported(kDeviceGetTotalNumAudioSystems))
 		return false;	//	Invalid audio system
 
-	ULWord	value	(inAudioSystem);
-	ULWord	b2		(value / 4);
-	if (!WriteRegister (gChannelToSDIOutControlRegNum [inChannel], b2, BIT(18), 18))	//	bit 18 is MSB
-		return false;
+	//  shift each bit from it's position in inAudioSystem to it's position in the register
+	//  bit 18 (MSB), bit 28, bit 30 (LSB)
+	ULWord b2 = (inAudioSystem << 16) & kK2RegMaskSDIOutDS1Audio_Bit2;
+	ULWord b1 = (inAudioSystem << 27) & kK2RegMaskSDIOutDS1Audio_Bit1;
+	ULWord b0 = (inAudioSystem << 30) & kK2RegMaskSDIOutDS1Audio_Bit0;
 
-	value -= b2 * 4;
-	ULWord	b1		(value / 2);
-	if (!WriteRegister (gChannelToSDIOutControlRegNum [inChannel], b1, BIT(28), 28))
-		return false;
-
-	value -= b1 * 2;
-	ULWord	b0		(value);
-	if (!WriteRegister (gChannelToSDIOutControlRegNum [inChannel], b0, BIT(30), 30))	//	bit 30 is LSB
-		return false;
-
-	return true;
+	return WriteRegister (gChannelToSDIOutControlRegNum [inChannel], (b2 | b1 | b0) >> kK2RegShiftSDIOutDS1AudioSelect , 
+							kK2RegMaskSDIOutDS1AudioSelect, kK2RegShiftSDIOutDS1AudioSelect);
 
 }	//	SetSDIOutputAudioSystem
 
@@ -3989,14 +3984,16 @@ bool CNTV2Card::GetSDIOutputDS2AudioSystem (const NTV2Channel inChannel, NTV2Aud
 	if (ULWord(inChannel) >= GetNumSupported(kDeviceGetNumVideoOutputs))
 		return false;	//	illegal channel
 
-	ULWord			b2(0),	b1(0),	b0(0);		//	The three bits that determine which audio system feeds the SDI output's DS2
-	const ULWord	regNum	(gChannelToSDIOutControlRegNum[inChannel]);
-	if (!ReadRegister (regNum, b2, BIT(19), 19))	//	bit 19 is MSB
+	ULWord readVal;
+	const ULWord regNum (gChannelToSDIOutControlRegNum[inChannel]);
+	if (!ReadRegister (regNum, readVal, kK2RegMaskSDIOutDS2AudioSelect, kK2RegShiftSDIOutDS2AudioSelect))
 		return false;
-	if (!ReadRegister (regNum, b1, BIT(29), 29))
-		return false;
-	if (!ReadRegister (regNum, b0, BIT(31), 31))	//	bit 31 is LSB
-		return false;
+
+	readVal <<= kK2RegShiftSDIOutDS2AudioSelect;
+	ULWord b2 = (readVal & kK2RegMaskSDIOutDS2Audio_Bit2) ? 1 : 0;
+	ULWord b1 = (readVal & kK2RegMaskSDIOutDS2Audio_Bit1) ? 1 : 0;
+	ULWord b0 = (readVal & kK2RegMaskSDIOutDS2Audio_Bit0) ? 1 : 0;
+	
 	outAudioSystem = NTV2AudioSystem(b2 * 4  +  b1 * 2  +  b0);
 	return true;
 
@@ -4010,25 +4007,14 @@ bool CNTV2Card::SetSDIOutputDS2AudioSystem (const NTV2Channel inChannel, const N
 	if (ULWord(inAudioSystem) >= GetNumSupported(kDeviceGetTotalNumAudioSystems))
 		return false;	//	Invalid audio system
 
-	ULWord	value	(inAudioSystem);
-	ULWord	b2		(value / 4);
-	if (!WriteRegister (gChannelToSDIOutControlRegNum [inChannel], b2, BIT(19), 19))	//	bit 19 is MSB
-		return false;
+	//  shift each bit from it's position in inAudioSystem to it's position in the register
+	//  bit 19 (MSB), bit 29, bit 31 (LSB)
+	ULWord b2 = (inAudioSystem << 17) & kK2RegMaskSDIOutDS2Audio_Bit2;
+	ULWord b1 = (inAudioSystem << 28) & kK2RegMaskSDIOutDS2Audio_Bit1;
+	ULWord b0 = (inAudioSystem << 31) & kK2RegMaskSDIOutDS2Audio_Bit0;
 
-	value -= b2 * 4;
-	ULWord	b1		(value / 2);
-	if (!WriteRegister (gChannelToSDIOutControlRegNum [inChannel], b1, BIT(29), 29))
-		return false;
-
-	value -= b1 * 2;
-	ULWord	b0		(value);
-	if (!WriteRegister (gChannelToSDIOutControlRegNum [inChannel], b0, BIT(31), 31))	//	bit 31 is LSB
-		return false;
-
-	//NTV2AudioSystem	compareA;
-	//GetSDIOutputDS2AudioSystem (inChannel, compareA);
-	//NTV2_ASSERT(compareA == inAudioSystem);
-	return true;
+	return WriteRegister (gChannelToSDIOutControlRegNum [inChannel], (b2 | b1 | b0) >> kK2RegShiftSDIOutDS2AudioSelect , 
+							kK2RegMaskSDIOutDS2AudioSelect, kK2RegShiftSDIOutDS2AudioSelect);
 
 }	//	SetSDIOutputDS2AudioSystem
 
