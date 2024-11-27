@@ -1602,8 +1602,15 @@ typedef enum
 	kLHIRegMaskSDIOutSMPTELevelBMode = BIT(25),
 	kK2RegMaskVPIDInsertionEnable = BIT(26),
 	kK2RegMaskVPIDInsertionOverwrite = BIT(27), 
-	kK2RegMaskSDIOutDS1AudioSelect = BIT(28)+BIT(30),
-	kK2RegMaskSDIOutDS2AudioSelect = BIT(29)+BIT(31),
+	kK2RegMaskSDIOutDS1Audio_Bit2 = BIT(18), // MSB
+	kK2RegMaskSDIOutDS1Audio_Bit1 = BIT(28),
+	kK2RegMaskSDIOutDS1Audio_Bit0 = BIT(30),
+	kK2RegMaskSDIOutDS2Audio_Bit2 = BIT(19), //MSB
+	kK2RegMaskSDIOutDS2Audio_Bit1 = BIT(29),
+	kK2RegMaskSDIOutDS2Audio_Bit0 = BIT(31),
+	kK2RegMaskSDIOutDS1AudioSelect = kK2RegMaskSDIOutDS1Audio_Bit2 + kK2RegMaskSDIOutDS1Audio_Bit1 + kK2RegMaskSDIOutDS1Audio_Bit0,
+	kK2RegMaskSDIOutDS2AudioSelect = kK2RegMaskSDIOutDS2Audio_Bit2 + kK2RegMaskSDIOutDS2Audio_Bit1 + kK2RegMaskSDIOutDS2Audio_Bit0,
+
 
 	//kK2RegConversionControl and kK2Reg2ndConversionControl,
 	kK2RegMaskConverterOutStandard = BIT(12)+BIT(13)+BIT(14),
@@ -2679,8 +2686,8 @@ typedef enum
 	kLHIRegShiftSDIOutSMPTELevelBMode	= 25,
 	kK2RegShiftVPIDInsertionEnable		= 26,
 	kK2RegShiftVPIDInsertionOverwrite	= 27,
-	kK2RegShiftSDIOutDS1AudioSelect		= 28,//30,
-	kK2RegShiftSDIOutDS2AudioSelect		= 29,//31,
+	kK2RegShiftSDIOutDS1AudioSelect		= 18, //28,//30,
+	kK2RegShiftSDIOutDS2AudioSelect		= 19, //29,//31,
 
 	//kK2RegConversionControl,
 	kK2RegShiftConverterOutStandard		= 12,
