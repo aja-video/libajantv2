@@ -350,7 +350,7 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 			return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
 		else if (aja::is_legal_decimal_number(inArgument, inArgument.length())
 			&& aja::is_legal_hex_serial_number(inArgument)
-			&& iter->deviceID == stoi(inArgument))
+			&& iter->deviceID == NTV2DeviceID(stoi(inArgument)))
 				return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
 		else if (IsLegalSerialNumber(inArgument))
 			return outDevice.Open(inArgument);
