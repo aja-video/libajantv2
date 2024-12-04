@@ -803,6 +803,10 @@ void CNTV2DeviceScanner::SetAudioAttributes (NTV2DeviceInfo & info, CNTV2Card & 
 
 bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevList)
 {
+#if defined(NTV2_PREVENT_PLUGIN_LOAD)
+	return false;
+#endif
+
 	string vdevPath;
 	AJASystemInfo info;
 	if (info.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreUser, vdevPath) != AJA_STATUS_SUCCESS)
