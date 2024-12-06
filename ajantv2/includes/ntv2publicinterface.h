@@ -1084,6 +1084,14 @@ typedef enum
 	kRegCMWHDMIOut
 } NTV2ClockMonitorWidgetRegisters;
 
+typedef enum
+{
+	kRegLPRJ45IP = 14080,
+	kRegLPTunnelIP = 14081,
+	//14082 - 14094 available - define as needed
+	kRegLPFrameTask = 14095
+} NTV2LocalProcBlockRegisters;
+
 #define NTV2_HDMIAuxMaxFrames	8
 #define NTV2_HDMIAuxDataSize	32
 
