@@ -1511,7 +1511,7 @@ bool CNTV2Card::SetReference (const NTV2ReferenceSource inRefSource, const bool 
 	if (IsIPDevice())
 		WriteRegister(kRegGlobalControl2, ptpControl, kRegMaskPCRReferenceEnable, kRegShiftPCRReferenceEnable);
 
-	if (GetNumSupported(kDeviceGetNumVideoChannels) > 4 || IsIPDevice())
+	if (GetNumSupported(kDeviceGetNumVideoChannels) > 4 || (IsIPDevice() || Is25GIPDevice()) )
 		WriteRegister (kRegGlobalControl2, refControl2, kRegMaskRefSource2, kRegShiftRefSource2);
 		
 	return WriteRegister (kRegGlobalControl, refControl1, kRegMaskRefSource, kRegShiftRefSource);
