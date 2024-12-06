@@ -729,7 +729,11 @@ int WriteReg(	ULWord deviceNumber,
 		case kVRegPCIMaxReadRequestSize:
 			ntv2WritePciMaxReadRequestSize(&pNTV2Params->systemContext, registerValue);
 			break;
-
+		
+		case kVRegEveryFrameTaskFilter:
+			if (NTV2DeviceHasLPProductCode(pNTV2Params->_DeviceID))
+				ntv2WriteRegister (&pNTV2Params->systemContext, kRegLPFrameTask, registerValue);
+			// fallthrough
 		default:
 			// store virtual reg
 			pNTV2Params->_virtualRegisterMem[registerNumber - VIRTUALREG_START] = registerValue;
