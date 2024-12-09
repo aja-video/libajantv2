@@ -8101,7 +8101,7 @@ string PercentDecode (const string & inStr)
 		switch (state)
 		{
 			case 0:
-				if (::isalnum(chr)	||	chr == '-'	||	chr == '_'	||	chr == '.'	||	chr == '~' || chr == '/' || chr == '\\')
+				if (::isalnum(chr)	||	chr == '-'	||	chr == '_'	||	chr == '.'	||	chr == '~')
 					oss << chr;
 				if (chr == '%')
 					{state++;  break;}
