@@ -43,24 +43,24 @@ using namespace std;
 //---------------------------------------------------------------------------------------------------------------------
 AJATimeCode::AJATimeCode() :
 	m_frame(0),
-	m_stdTimecodeForHfr(true)
+	m_stdTcForHfr(true)
 {
 }
 
-AJATimeCode::AJATimeCode(uint32_t frame) :
-	m_stdTimecodeForHfr(true)
+AJATimeCode::AJATimeCode(uint32_t frame, bool bStdTcForHfr) :
+	m_stdTcForHfr(bStdTcForHfr)
 {
 	Set(frame);
 }
 
-AJATimeCode::AJATimeCode(const std::string &str, const AJATimeBase& timeBase, bool bDropFrame, bool bStdTc)
-	: m_stdTimecodeForHfr(bStdTc)
+AJATimeCode::AJATimeCode(const std::string &str, const AJATimeBase& timeBase, bool bDropFrame, bool bStdTcForHfr)
+	: m_stdTcForHfr(bStdTcForHfr)
 {
 	Set(str.c_str(), timeBase, bDropFrame);
 }
 
 AJATimeCode::AJATimeCode(const std::string &str, const AJATimeBase& timeBase)
-	: m_stdTimecodeForHfr(true)
+	: m_stdTcForHfr(true)
 {
 	Set(str.c_str(), timeBase);
 }
@@ -68,7 +68,7 @@ AJATimeCode::AJATimeCode(const std::string &str, const AJATimeBase& timeBase)
 AJATimeCode::AJATimeCode(const AJATimeCode& other)
 {
 	m_frame = other.m_frame;
-	m_stdTimecodeForHfr = other.m_stdTimecodeForHfr;
+	m_stdTcForHfr = other.m_stdTcForHfr;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -80,9 +80,7 @@ AJATimeCode::~AJATimeCode()
 
 bool AJATimeCode::QueryIsDropFrame(const string &str)
 {
-	bool bHasSemicolon = false;
-	if (str.find(";", 0) != string::npos)
-		bHasSemicolon = true;
+	bool bHasSemicolon = str.find(";", 0) != string::npos;
 	return bHasSemicolon;
 }
 
@@ -106,25 +104,91 @@ inline int64_t AJATimeCodeAbs(int64_t x)
 	return (((x)>=0)?(x):-(x));
 }
 
-void AJATimeCode::QueryHmsf(uint32_t &h, uint32_t &m, uint32_t &s, uint32_t &f, const AJATimeBase& timeBase, bool bDropFrame) const
+uint32_t AJATimeCode::CalcFrame(uint32_t h, uint32_t m, uint32_t s, uint32_t f, const AJATimeBase& timeBase, bool bDropFrame, bool bStdTcForHfr, uint32_t addFrame)
 {
-	// This code was pulled from the NTV2RP188 class and appears to work correctly.
-	int64_t frame, frameRate,frameDuration;
-	timeBase.GetFrameRate(frameRate,frameDuration);
+	int64_t frameRate, frameRate2, frameDuration;
+	timeBase.GetFrameRate(frameRate, frameDuration);
 	AJA_FrameRate ajaFrameRate = timeBase.GetAJAFrameRate();
 	
-	frame = m_frame;
-	if (ajaFrameRate >= AJA_FrameRate_4795 && m_stdTimecodeForHfr == true)
+	frameRate2 = frameRate;
+	if (ajaFrameRate >= AJA_FrameRate_10000 && bStdTcForHfr == true)
 	{
+		frameRate2 /=4;
+	}
+	else if (ajaFrameRate >= AJA_FrameRate_4795 && bStdTcForHfr == true)
+	{
+		frameRate2 /=2;
+	}
+	
+	uint32_t frame;
+	if (frameRate == 0 || frameDuration == 0)
+	{
+		frame = 0;
+	}
+	else if (bDropFrame)
+	{
+		// this is just good for 29.97, 59.94, 23.976
+		double dFrameRate	= double(frameRate2) / double(frameDuration);
+		uint32_t dropFrames = AJATimeCodeRound(dFrameRate*.066666);		//Number of drop frames is 6% of framerate rounded to nearest integer
+		uint32_t tb			= AJATimeCodeRound(dFrameRate);				//We don't need the exact framerate anymore, we just need it rounded to nearest integer
+		
+		uint32_t hourFrames		= tb*60*60;								//Number of frames per hour (non-drop)
+		uint32_t minuteFrames	= tb*60;								//Number of frames per minute (non-drop)
+		uint32_t totalMinutes	= (60*h) + m;							//Total number of minutes
+		
+		// if TC does not exist then we need to round up to the next valid frame
+		if ( (s == 0) && ((m % 10) > 0) && ((f & ~1) == 0))
+			f = 2;
+		
+		frame = ((hourFrames * h) + (minuteFrames * m) + (tb * s) + f) - (dropFrames * (totalMinutes - (totalMinutes / 10)));
+	}
+	else
+	{
+		double dFrameRate	= double(frameRate2) / double(frameDuration);
+		uint32_t tb			= AJATimeCodeRound(dFrameRate);			//We don't need the exact framerate anymore, we just need it rounded to nearest integer
+		
+		uint32_t hourFrames	  = tb*60*60;							//Number of frames per hour (non-drop)
+		uint32_t minuteFrames = tb*60;								//Number of frames per minute (non-drop)
+		//uint32_t totalMinutes = (60*h) + m;						//Total number of minutes
+		frame = ((hourFrames * h) + (minuteFrames * m) + (tb * s) + f);
+	}
+	
+	if (ajaFrameRate >= AJA_FrameRate_10000 && bStdTcForHfr == true)
+	{
+		frame *=4;
+	}
+	else if (ajaFrameRate >= AJA_FrameRate_4795 && bStdTcForHfr == true)
+	{
+		frame *=2;
+	}
+	
+	frame += bStdTcForHfr ? addFrame : 0;
+	return frame;
+	
+} //end CalcFrame
+
+uint32_t AJATimeCode::CalcHmsf(uint32_t &h, uint32_t &m, uint32_t &s, uint32_t &f, uint32_t frame, const AJATimeBase& timeBase, bool bDropFrame, bool bStdTcForHfr=true)
+{
+	// This code was pulled from the NTV2RP188 class and appears to work correctly.
+	int64_t frameRate,frameDuration;
+	timeBase.GetFrameRate(frameRate,frameDuration);
+	AJA_FrameRate ajaFrameRate = timeBase.GetAJAFrameRate();
+	uint32_t remainder = 0;
+	
+	if (ajaFrameRate >= AJA_FrameRate_10000 && bStdTcForHfr == true)
+	{
+		remainder = frame % 4;
+		frame /= 4;
+		frameRate /= 4;
+	}
+	else if (ajaFrameRate >= AJA_FrameRate_4795 && bStdTcForHfr == true)
+	{
+		remainder = frame % 2;
 		frame /= 2;
 		frameRate /= 2;
 	}
 	
-	if ((frameRate == 0) || (frameDuration == 0))
-	{
-		h = m = s = f = 0;
-	}
-	else if (frameRate < frameDuration)
+	if (frameRate == 0 || frameDuration == 0 || frameRate < frameDuration)
 	{
 		h = m = s = f = 0;
 	}
@@ -220,35 +284,109 @@ void AJATimeCode::QueryHmsf(uint32_t &h, uint32_t &m, uint32_t &s, uint32_t &f, 
 				f += droppedFrames;
 		}
 	}
+	return remainder;
+	
+} //end CalcHmsf
+
+
+void AJATimeCode::QueryHmsf(uint32_t &h, uint32_t &m, uint32_t &s, uint32_t &f, const AJATimeBase& timeBase, bool bDropFrame) const
+{
+	// WARNING: Possible loss of frame accuracy for HFR using std TC presentation, should use CalcHmsf directly instead
+	uint32_t remainder = CalcHmsf(h, m, s, f, m_frame, timeBase, bDropFrame, m_stdTcForHfr);
+	AJA_UNUSED(remainder);
 }
 
-void AJATimeCode::QueryString(std::string &str, const AJATimeBase& timeBase, bool bDropFrame)
+void AJATimeCode::QueryString(std::string &str, const AJATimeBase& timeBase, bool bDropFrame, bool bStdTcForHfr, AJATimecodeNotation notation)
 {
 	uint32_t h = 0,m = 0,s = 0,f = 0;
-	QueryHmsf(h,m,s,f,timeBase,bDropFrame);
-
+	uint32_t r = CalcHmsf(h,m,s,f,m_frame,timeBase,bDropFrame,bStdTcForHfr);
+	AJA_FrameRate frameRate = timeBase.GetAJAFrameRate();
+	char delim = bDropFrame ? ';' : ':';
 	std::ostringstream oss;
-	if (bDropFrame)
+	
+	if (notation == AJA_TIMECODE_STANDARD) // AJA standard notation for delimiters
 	{
-		oss << setfill('0') << setw(2) << h << ":"
-			<< setfill('0') << setw(2) << m << ":"
-			<< setfill('0') << setw(2) << s << ";"
-			<< setfill('0') << setw(2) << f;
+		if (bStdTcForHfr)	// using standardize f values, i.e. divided f values for fps > 30
+		{
+			if (frameRate <= AJA_FrameRate_3000)
+			{
+				oss << setfill('0') << setw(2) << h << delim
+					<< setfill('0') << setw(2) << m << delim
+					<< setfill('0') << setw(2) << s << delim
+					<< setfill('0') << setw(2) << f;
+			}
+			else if (frameRate < AJA_FrameRate_10000)
+			{
+				oss << setfill('0') << setw(2) << h << delim
+					<< setfill('0') << setw(2) << m << delim
+					<< setfill('0') << setw(2) << s << (r == 0 ? delim : '.')
+					<< setfill('0') << setw(2) << f;
+			}
+			else
+			{
+				oss << setfill('0') << setw(2) << h << delim
+					<< setfill('0') << setw(2) << m << delim
+					<< setfill('0') << setw(2) << s << (r <= 1 ? delim : '.')
+					<< setfill('0') << setw(2) << f;
+			}
+		}
+		else // using full frame values for f
+		{
+			if (frameRate < AJA_FrameRate_10000) // e.g. 01:02:03#04
+			{
+				oss << setfill('0') << setw(2) << h << delim
+					<< setfill('0') << setw(2) << m << delim
+					<< setfill('0') << setw(2) << s << '#'
+					<< setfill('0') << setw(2) << f;
+			}
+			else // e.g. 01:02:03#004
+			{
+				oss << setfill('0') << setw(2) << h << delim
+					<< setfill('0') << setw(2) << m << delim
+					<< setfill('0') << setw(2) << s << '#'
+					<< setfill('0') << setw(3) << f;
+			}	
+		}
 	}
-	else
+	else // AJA_TIMECODE_LEGACY legacy notation for delimiters
 	{
-		oss << setfill('0') << setw(2) << h << ":"
-			<< setfill('0') << setw(2) << m << ":"
-			<< setfill('0') << setw(2) << s << ":"
-			<< setfill('0') << setw(2) << f;
+		if (frameRate < AJA_FrameRate_10000)	// e.g. 01:02:03:04
+		{
+			oss << setfill('0') << setw(2) << h << ':'
+				<< setfill('0') << setw(2) << m << ':'
+				<< setfill('0') << setw(2) << s << delim
+				<< setfill('0') << setw(2) << f;
+		}
+		else	// e.g. 120 fps
+		{
+			if (bStdTcForHfr)	// using standardize f values, f values divided by 4 require only 2 digits
+			{
+				oss << setfill('0') << setw(2) << h << ':'
+					<< setfill('0') << setw(2) << m << ':'
+					<< setfill('0') << setw(2) << s << delim
+					<< setfill('0') << setw(2) << f;
+			}
+			else // using standardize f values, show full frame values at 3 digits
+			{
+				oss << setfill('0') << setw(2) << h << ':'
+					<< setfill('0') << setw(2) << m << ':'
+					<< setfill('0') << setw(2) << s << delim
+					<< setfill('0') << setw(3) << f;
+			}
+		}	
 	}
 	str.assign(oss.str());
 }
 
-void AJATimeCode::QueryString(char *pString, const AJATimeBase& timeBase, bool bDropFrame)
+void AJATimeCode::QueryString(std::string &str, const AJATimeBase& timeBase, bool bDropFrame, AJATimecodeNotation notation)
+{
+	QueryString(str, timeBase, bDropFrame, m_stdTcForHfr, notation);
+}
+
+void AJATimeCode::QueryString(char *pString, const AJATimeBase& timeBase, bool bDropFrame, AJATimecodeNotation notation)
 {
 	string s;
-	QueryString(s, timeBase, bDropFrame);
+	QueryString(s, timeBase, bDropFrame, notation);
 	strncpy(pString, s.c_str(), s.length());
 	pString[11] = '\0';
 }
@@ -261,7 +399,8 @@ int AJATimeCode::QuerySMPTEStringSize(void)
 void AJATimeCode::QuerySMPTEString(char *pBufr,const AJATimeBase& timeBase,bool bDrop)
 {
 	uint32_t h=0, m=0, s=0, f=0;
-	QueryHmsf(h,m,s,f,timeBase,bDrop);
+	uint32_t r = CalcHmsf(h,m,s,f,m_frame,timeBase,bDrop,m_stdTcForHfr);
+	AJA_UNUSED(r);
 	
 	pBufr[0] = ((f/10) << 4) + (f % 10);
 	pBufr[1] = ((s/10) << 4) + (s % 10);
@@ -281,58 +420,19 @@ void AJATimeCode::Set(uint32_t frame)
 	m_frame = frame;
 }
 
+void AJATimeCode::SetHmsf(uint32_t h, uint32_t m, uint32_t s, uint32_t f, const AJATimeBase& timeBase, bool bDropFrame, bool bStdTcForHfr, uint32_t addFrame)
+{
+	uint32_t frame = CalcFrame(h, m, s, f, timeBase, bDropFrame, bStdTcForHfr, addFrame); 
+	Set(frame);
+}
+
 void AJATimeCode::SetHmsf(uint32_t h, uint32_t m, uint32_t s, uint32_t f, const AJATimeBase& timeBase, bool bDropFrame)
 {
-	int64_t frameRate, frameRate2, frameDuration;
-	timeBase.GetFrameRate(frameRate, frameDuration);
-	AJA_FrameRate ajaFrameRate = timeBase.GetAJAFrameRate();
-	
-	frameRate2 = frameRate;
-	if (ajaFrameRate >= AJA_FrameRate_4795 && m_stdTimecodeForHfr == true)
-	{
-		frameRate2 /=2;
-	}
-	
-	uint32_t frame;
-	if ((frameRate == 0) || (frameDuration == 0))
-	{
-		frame = 0;
-	}
-	else if (bDropFrame)
-	{
-		// this is just good for 29.97, 59.94, 23.976
-		double dFrameRate	= double(frameRate2) / double(frameDuration);
-		uint32_t dropFrames = AJATimeCodeRound(dFrameRate*.066666);		//Number of drop frames is 6% of framerate rounded to nearest integer
-		uint32_t tb			= AJATimeCodeRound(dFrameRate);				//We don't need the exact framerate anymore, we just need it rounded to nearest integer
-		
-		uint32_t hourFrames		= tb*60*60;								//Number of frames per hour (non-drop)
-		uint32_t minuteFrames	= tb*60;								//Number of frames per minute (non-drop)
-		uint32_t totalMinutes	= (60*h) + m;							//Total number of minutes
-		
-		// if TC does not exist then we need to round up to the next valid frame
-		if ( (s == 0) && ((m % 10) > 0) && ((f & ~1) == 0))
-			f = 2;
-		
-		frame = ((hourFrames * h) + (minuteFrames * m) + (tb * s) + f) - (dropFrames * (totalMinutes - (totalMinutes / 10)));
-	}
-	else
-	{
-		double dFrameRate	= double(frameRate2) / double(frameDuration);
-		uint32_t tb			= AJATimeCodeRound(dFrameRate);			//We don't need the exact framerate anymore, we just need it rounded to nearest integer
-		
-		uint32_t hourFrames	  = tb*60*60;							//Number of frames per hour (non-drop)
-		uint32_t minuteFrames = tb*60;								//Number of frames per minute (non-drop)
-		//uint32_t totalMinutes = (60*h) + m;						//Total number of minutes
-		frame = ((hourFrames * h) + (minuteFrames * m) + (tb * s) + f);
-	}
-	
-	if (ajaFrameRate >= AJA_FrameRate_4795 && m_stdTimecodeForHfr == true)
-	{
-		frame *=2;
-	}
-	
+	// WARNING: may lose a frame in calculation accuracy if HFR and m_stdTcForHfr=true
+	uint32_t frame = CalcFrame(h, m, s, f, timeBase, bDropFrame, m_stdTcForHfr, 0); 
 	Set(frame);
-} //end SetHmsf
+	
+}
 
 void AJATimeCode::Set(const std::string &str, const AJATimeBase& timeBase, bool bDropFrame)
 {
@@ -343,9 +443,13 @@ void AJATimeCode::Set(const std::string &str, const AJATimeBase& timeBase, bool 
 	// work from bottom up so that partial time code
 	// (ie. something like 10:02 rather than 00:00:10:02)
 	// is handled
-	size_t len = str.length();
-	int valOffset = 0;
-	int valMult	  = 1;
+	size_t len					= str.length();
+	int valOffset				= 0;
+	int valMult					= 1;
+	int addFrame				= 0;
+	int stdTcForHfr				= m_stdTcForHfr;
+	AJA_FrameRate ajaFrameRate	= timeBase.GetAJAFrameRate();
+	
 	for (size_t i = 0; i < len; i++)
 	{
 		char theChar = str[len - i - 1];
@@ -356,6 +460,18 @@ void AJATimeCode::Set(const std::string &str, const AJATimeBase& timeBase, bool 
 		}
 		else
 		{
+			if (valOffset == 0)				// if frame level value
+			{
+				if (theChar == '#')			// temp set to non-std
+					stdTcForHfr = false;
+				
+				// if using std timecode, add frame(s) if '.'
+				if (ajaFrameRate >= AJA_FrameRate_10000 && stdTcForHfr == true && theChar == '.')
+					addFrame = 2;			// WARNING: possible loss of frame accuracy due to limitaion of TC presentation 
+				else if (ajaFrameRate >= AJA_FrameRate_4795 && stdTcForHfr == true && theChar == '.')
+					addFrame = 1;
+			}
+				
 			valOffset++;
 			valMult = 1;
 		}
@@ -363,23 +479,14 @@ void AJATimeCode::Set(const std::string &str, const AJATimeBase& timeBase, bool 
 		if (valOffset >= 4)
 			break;
 	}
-
-	SetHmsf(val[3], val[2], val[1], val[0], timeBase, bDropFrame);
+	
+	uint32_t frame = CalcFrame(val[3], val[2], val[1], val[0], timeBase, bDropFrame, stdTcForHfr, addFrame);
+	Set(frame);
 }
 
 void AJATimeCode::Set(const std::string &str, const AJATimeBase& timeBase)
-{
-	bool bDropFrame = false;
-	std::string::const_iterator it = str.begin();
-	while(it != str.end())
-	{
-		if ((*it == ';') || (*it == '.'))
-		{
-			bDropFrame = true;
-			break;
-		}
-		++it;
-	}
+{	
+	bool bDropFrame = QueryIsDropFrame(str);
 	Set(str, timeBase, bDropFrame);
 }
 
@@ -387,49 +494,54 @@ void AJATimeCode::SetWithCleanup(const std::string &str, const AJATimeBase& time
 {
 	if (str.empty())
 		return;
+	
+	int results[4] = {0, 0, 0, 0};	// Temporary array to store the results
+	char delim[3] = {0, 0, 0};		// Holds TC delimiter chars	 
+    int index = 3;					// Start filling from the last slot in the results array
+	uint32_t addFrame = 0;			// 
 
-	bool bHasMark = false;
-	if ( (str.find(";", 0) != string::npos) || (str.find(":", 0) != string::npos) )
+    // Traverse the string from the end
+    for (int i = str.length() - 1; i >= 0 && index >= 0; ) 
 	{
-		bHasMark = true;
-	}
+        // Skip non-digit characters
+        while (i >= 0 && !std::isdigit(str[i]))
+            i--;
 
-	if (bHasMark)
-	{
-		std::string tmp(str);
-		aja::strip(tmp);
-
-		if (tmp.length() > 11)
-			tmp.resize(11);
-
-		Set(tmp, timeBase);
-	}
-	else
-	{
-		std::string tmp;
-		if (bDrop)
-			tmp = "00:00:00;00";
-		else
-			tmp = "00:00:00:00";
-
-		size_t len = str.length();
-		int tgtOffset = 10;
-		for (size_t i = 0; i < len; i++)
+        // Find the start of the number
+        if (i >= 0 && std::isdigit(str[i])) 
 		{
-			size_t srcOffset = len - i - 1;
-			if ((str[srcOffset] >= '0') && (str[srcOffset] <= '9'))
-			{
-				tmp[tgtOffset] = str[srcOffset];
-				tgtOffset--;
-				if ((tgtOffset == 8) || (tgtOffset == 5) || (tgtOffset == 2))
-					tgtOffset--;
+            int start = i;
+            while (start > 0 && std::isdigit(str[start - 1]))
+                start--;
+			
+			if (start > 0 && index > 0)
+				delim[index-1] = str[start - 1];
 
-				if (tgtOffset < 0)
-					break;
-			}
-		}
-		Set(tmp, timeBase);
-	}
+            // Convert the substring to an integer
+            std::string numberStr = str.substr(start, i - start + 1);
+            results[index--] = std::stoi(numberStr);
+
+            // update i to continue, start-1 was already identified as a non-digit 
+            i = start - 2;
+        }
+    }
+	
+	uint32_t fps = AJATimeCodeRound(timeBase.GetFramesPerSecondDouble());
+	bool stdTcForHfr = m_stdTcForHfr;
+	char lastDelim = delim[2];
+	
+	if (lastDelim == '#')
+		stdTcForHfr = false;
+	
+	// if using std timecode for hfr, add frame(s) if indicated by '.'
+	if (fps >= 100 && stdTcForHfr == true && lastDelim == '.')
+		addFrame = 2;
+	else if (fps >= 48 && stdTcForHfr == true && lastDelim == '.')
+		addFrame = 1;
+	
+	uint32_t frame = CalcFrame(results[0], results[1], results[2], results[3], timeBase, bDrop, stdTcForHfr, addFrame);
+	Set(frame);
+
 }
 
 void AJATimeCode::SetSMPTEString(const char *pBufr, const AJATimeBase& timeBase)
@@ -453,13 +565,9 @@ bool AJATimeCode::QueryIsRP188DropFrame (const uint32_t inDBB, const uint32_t in
 	return (inLo >> 10) & 0x01;
 }
 
-
 void AJATimeCode::SetRP188 (const uint32_t inDBB, const uint32_t inLo, const uint32_t inHi, const AJATimeBase & inTimeBase)
 {
-	AJATimeBase tb25(25000,1000);
-	AJATimeBase tb50(50000,1000);
-	AJATimeBase tb60(60000,1000);
-	AJATimeBase tb5994(60000,1001);
+	bool bDrop = AJATimeCode::QueryIsRP188DropFrame(inDBB, inLo, inHi);
 
 	//	HRS
 	const uint32_t h0 (((inHi >> 16) & 0xF)		);
@@ -474,14 +582,15 @@ void AJATimeCode::SetRP188 (const uint32_t inDBB, const uint32_t inLo, const uin
 	uint32_t f0(0);
 	uint32_t f1(0);
 
-	if (!m_stdTimecodeForHfr  &&  (inTimeBase.IsCloseTo(tb50) || inTimeBase.IsCloseTo(tb60) || inTimeBase.IsCloseTo(tb5994)))
+	AJA_FrameRate frameRate = inTimeBase.GetAJAFrameRate();
+	if (m_stdTcForHfr == false && frameRate >= AJA_FrameRate_4795)
 	{
 		// for frame rates > 39 fps, we need an extra bit for the frame "10s". By convention,
 		// we use the field ID bit to be the LS bit of the three bit number.
 		bool fieldID;
 		
 		// Note: FID is in different words for PAL & NTSC!
-		if(inTimeBase.IsCloseTo(tb25) || inTimeBase.IsCloseTo(tb50))
+		if(frameRate == AJA_FrameRate_5000 || frameRate == AJA_FrameRate_10000)
 			fieldID = ((inHi & (1u<<27)) != 0);
 		else
 			fieldID = ((inLo & (1u<<27)) != 0);
@@ -497,7 +606,7 @@ void AJATimeCode::SetRP188 (const uint32_t inDBB, const uint32_t inLo, const uin
 		f1 = ((inLo >> 8) & 0x3) * 10;
 	}
 
-	SetHmsf (h0+h1, m0+m1, s0+s1, f0+f1, inTimeBase, AJATimeCode::QueryIsRP188DropFrame(inDBB, inLo, inHi));
+	SetHmsf (h0+h1, m0+m1, s0+s1, f0+f1, inTimeBase, bDrop);
 }
 
 
@@ -533,7 +642,7 @@ AJATimeCode& AJATimeCode::operator=(const AJATimeCode &val)
 	if (this != &val)
 	{
 		m_frame = val.m_frame;
-		m_stdTimecodeForHfr = val.m_stdTimecodeForHfr;
+		m_stdTcForHfr = val.m_stdTcForHfr;
 	}
 	return *this;
 } //end '='

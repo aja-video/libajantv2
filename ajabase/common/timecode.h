@@ -9,6 +9,13 @@
 #define AJA_TIMECODE_H
 #include "ajabase/common/timebase.h"
 
+typedef enum
+{
+	AJA_TIMECODE_LEGACY			= 0,	///< @brief Legacy notation for display of delimiters (eg 01:02:03;29 .. 01:02:03:58)
+	AJA_TIMECODE_STANDARD		= 1		///< @brief AJA standard notation for display of delimiters (eg 01;02;03.29 .. 01;02;03;29 .. 01:02:03#58)
+} AJATimecodeNotation;
+
+
 /** \class AJATimeCode timecode.h
  *	\brief Utility class for timecodes.
  *
@@ -18,12 +25,43 @@ class AJA_EXPORT AJATimeCode
 {
 public:
 	AJATimeCode();
-	AJATimeCode(uint32_t frame);
-	AJATimeCode(const std::string &str, const AJATimeBase& timeBase, bool bDropFrame, bool bStdTc=false);
+	AJATimeCode(uint32_t frame, bool bStdTcForHfr=true);
+	AJATimeCode(const std::string &str, const AJATimeBase& timeBase, bool bDropFrame, bool bStdTcForHfr=true);
 	AJATimeCode(const std::string &str, const AJATimeBase& timeBase);
 	AJATimeCode(const AJATimeCode& other);
 
 	virtual ~AJATimeCode();
+	
+	/**
+	 *	Calculate frame count given hmsf presentation.
+	 *
+	 *	@param[in]  h							place in which to put hours value.
+	 *	@param[in]  m							place in which to put minutes value.
+	 *	@param[in]  s							place in which to put seconds value.
+	 *	@param[in]  f							place in which to put frames value.
+	 *	@param[in]	timeBase					frame rate from which to calculate string.
+	 *	@param[in]  bDropFrame					true if using drop frame calculation.
+	 *	@param[in]	bStdTcForHfr				true to use standardized frame values (1/2 frame values for framerates above 30 fps, 1/4 for rates above 60)
+	 *	@param[in]	addFrame					number of frames to add when bStdTcForHfr=true (e.g given 60 fps, h=m=s=0 f=29 addFrame=1 -> return=59).
+	 *	@return Return calculated frame count based on input values
+	 */
+	static uint32_t CalcFrame(uint32_t h, uint32_t m, uint32_t s, uint32_t f, const AJATimeBase& timeBase, bool bDropFrame, bool bStdTcForHfr, uint32_t addFrame);
+	
+	/**
+	 *	Calculate hmsf values given frame count. Return add-frame remainder when using std timecode presentation
+	 *
+	 *	@param[out]  h							place in which to put hours value.
+	 *	@param[out]  m							place in which to put minutes value.
+	 *	@param[out]  s							place in which to put seconds value.
+	 *	@param[out]  f							place in which to put frames value.
+	 *	@param[in]   frame						frame count.
+	 *	@param[in]   timeBase					frame rate from which to calculate hmsf values.
+	 *	@param[in]   bDropFrame					true to use drop frame calculation.
+	 *	@param[in]	 bStdTcForHfr				true to use standardized frame values (1/2 frame values for framerates above 30 fps, 1/4 for rates above 60 fps)
+	 *	@return Return remaining uncounted frame with bStdTcForHfr=true (e.g given 60 fps, frame=59 => h=m=s=0 f=29 return=1)
+	 */
+	static uint32_t CalcHmsf(uint32_t &h, uint32_t &m, uint32_t &s, uint32_t &f, uint32_t frame, const AJATimeBase& timeBase, bool bDropFrame, bool bStdTcForHfr);
+
 	
 	/**
 	 *	Query string showing timecode for current frame count given the passed parameters.
@@ -31,9 +69,12 @@ public:
 	 *	@param[out] str							string in which to place timecode.
 	 *	@param[in]	timeBase					frame rate from which to calculate string.
 	 *	@param[in]	bDropFrame					drop frame value for string.
+	 *	@param[in]	bStdTcForHfr				true to use standardized frame values (1/2 frame values for framerates above 30 fps, 1/4 for rates above 60)
+	 *	@param[in]  notation					sets target output notation for TC delimiters
 	 */
-	void				QueryString(std::string &str, const AJATimeBase& timeBase, bool bDropFrame);
-	void				QueryString(char *pString, const AJATimeBase& timeBase, bool bDropFrame);	  ///< @deprecated	Use QueryString(std::string) instead.
+	void				QueryString(std::string &str, const AJATimeBase& timeBase, bool bDropFrame, bool bStdTcForHfr, AJATimecodeNotation notation=AJA_TIMECODE_LEGACY);
+	void				QueryString(std::string &str, const AJATimeBase& timeBase, bool bDropFrame, AJATimecodeNotation notation=AJA_TIMECODE_LEGACY);
+	void				QueryString(char *pString, const AJATimeBase& timeBase, bool bDropFrame, AJATimecodeNotation notation=AJA_TIMECODE_LEGACY);	  ///< @deprecated	Use QueryString(std::string) instead.
 
 	/**
 	 *	Query SMPTE string showing timecode for current frame count given the passed parameters.
@@ -62,9 +103,9 @@ public:
 	/**
 	 *	Query HFR divide-by-two flag.
 	 *
-	 *	@return bStdTc	 Return true when using standard TC notation for HFR (e.g 01:00:00:59 -> 01:00:00:29*), set to true by default
+	 *	@return bStdTc	 Return true when using standard TC notation for HFR (e.g 01:00:00#59 -> 01:00:00:29), set to true by default
 	 */
-	bool				QueryStdTimecodeForHfr() { return m_stdTimecodeForHfr; }
+	bool				QueryStdTimecodeForHfr() { return m_stdTcForHfr; }
 	
 	/**
 	 *	Query hmsf values showing timecode for current frame count given the passed parameters.
@@ -120,7 +161,10 @@ public:
 	 *	@param[in]	f							frames value.
 	 *	@param[in]	timeBase					frame rate associated with hmsf.
 	 *	@param[in]	bDropFrame					true if forcing dropframe, false otherwise.
+	 *	@param[in]	bStdTcForHfr				true to use standardized frame values (1/2 frame values for framerates above 30 fps, 1/4 for rates above 60)
+	 *	@param[in]	addFrame					number of frames to add when using std TC presentation (e.g given 60 fps, 00:00:00.29 addFrame=0 => set:frame=58 .. 00:00:00:29 addFrame=1 => set:frame=59).
 	 */
+	void				SetHmsf(uint32_t h, uint32_t m, uint32_t s, uint32_t f, const AJATimeBase& timeBase, bool bDropFrame, bool bStdTcForHfr, uint32_t addFrame);
 	void				SetHmsf(uint32_t h, uint32_t m, uint32_t s, uint32_t f, const AJATimeBase& timeBase, bool bDropFrame);
 	
 	/**
@@ -170,9 +214,9 @@ public:
 	/**
 	 *	Set HFR divide-by-two flag.
 	 *
-	 *	@param[in]	bStdTc	  Set true when using standard TC notation for HFR (e.g 01:00:00:59 -> 01:00:00:29*), set to true by default
+	 *	@param[in]	bStdTc	  Set true when using standard TC notation for HFR (e.g 01:00:00#59 -> 01:00:00:29), set to true by default
 	 */
-	void				SetStdTimecodeForHfr(bool bStdTc) {m_stdTimecodeForHfr = bStdTc;}
+	void				SetStdTimecodeForHfr(bool bStdTc) {m_stdTcForHfr = bStdTc;}
 
 	
 	/**
@@ -211,7 +255,7 @@ public:
 	bool				operator!=(const AJATimeCode &val) const;
 	
 	uint32_t			m_frame;
-	bool				m_stdTimecodeForHfr;
+	bool				m_stdTcForHfr;
 protected:
 private:
 };
