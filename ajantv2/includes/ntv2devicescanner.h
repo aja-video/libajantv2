@@ -102,6 +102,7 @@ typedef struct NTV2DeviceInfo
 	ULWord							pingLED;
 	bool							isVirtualDevice=false;
 	std::string						vdevUrl;
+	std::string						vdevName;
 
 	AJAExport	bool operator == (const NTV2DeviceInfo & rhs) const;	///< @return	True if I'm equivalent to another ::NTV2DeviceInfo struct.
 	AJAExport	inline bool operator != (const NTV2DeviceInfo & rhs) const	{ return !(*this == rhs); } ///< @return	True if I'm different from another ::NTV2DeviceInfo struct.

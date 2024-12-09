@@ -327,7 +327,10 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 		{
 			if (sDevInfoList.at(ndx).isVirtualDevice)
 			{
-				cout << DECN(ndx, 2) << " | " << setw(8) << "virtual" << " | " << sDevInfoList.at(ndx).vdevUrl << endl;
+				cout << DECN(ndx, 2) << " | " << setw(8) << "virtual";
+				if (!sDevInfoList.at(ndx).vdevName.empty())
+					cout << " | " << setw(10) << sDevInfoList.at(ndx).vdevName;
+				cout << " | " << sDevInfoList.at(ndx).vdevUrl << endl;
 			}
 			else
 			{
@@ -348,6 +351,8 @@ bool CNTV2DeviceScanner::GetFirstDeviceFromArgument (const string & inArgument, 
 			return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
 		else if (iter->deviceIdentifier == inArgument)
 			return outDevice.Open(iter->isVirtualDevice ? iter->vdevUrl : inArgument);
+		else if (iter->isVirtualDevice && iter->vdevName == inArgument)
+			return outDevice.Open( iter->vdevUrl );
 		else if (aja::is_legal_decimal_number(inArgument, inArgument.length())
 			&& aja::is_legal_hex_serial_number(inArgument)
 			&& iter->deviceID == NTV2DeviceID(stoi(inArgument)))
@@ -842,6 +847,7 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 		newVDev.deviceIndex = vdIndex++;
 		newVDev.deviceID = DEVICE_ID_SOFTWARE;
 		newVDev.deviceIdentifier = "";
+		newVDev.vdevName = "";
 
 		// There are 3 special keys:
 		// plugin - this is required, specifies the name of plug-in to try loading.
@@ -865,8 +871,9 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 		{
 			ostringstream oss;
 			oss << nameVal.get<std::string>() << " - " << newVDev.deviceIndex;
-
 			newVDev.deviceIdentifier = oss.str();
+
+			newVDev.vdevName = nameVal.get<std::string>();
 		}
 
 		if (!hostVal.is_null())
