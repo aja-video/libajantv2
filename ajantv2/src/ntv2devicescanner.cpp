@@ -811,7 +811,7 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 	AJASystemInfo info;
 	if (info.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreUser, vdevPath) != AJA_STATUS_SUCCESS)
 		return false;
-	vdevPath = vdevPath + "/virtualdevices";
+	vdevPath = vdevPath + "virtualdevices";
 	int vdIndex = outVirtualDevList.size();
 	std::vector<std::string> vdevFiles;
 	AJAFileIO::ReadDirectory(vdevPath, "*.vdev", vdevFiles);
@@ -898,15 +898,15 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 			newVDev.vdevUrl += (isFirstParam ? "" : "&") + displayNameParam + "=" + PercentEncode(newVDev.deviceIdentifier);
 		}
 
-		CNTV2Card tmpDev;
-		tmpDev.Open(newVDev.vdevUrl);
-		if (!tmpDev.IsOpen())
-		{
-			cerr << "Unable to open device based on JSON file: " << vdevFile << endl;
-			continue;
-		}
-		SetDeviceAttributes(newVDev, tmpDev);
-		SetAudioAttributes(newVDev, tmpDev);
+		//CNTV2Card tmpDev;
+		//tmpDev.Open(newVDev.vdevUrl);
+		//if (!tmpDev.IsOpen())
+		//{
+		//	cerr << "Unable to open device based on JSON file: " << vdevFile << endl;
+		//	continue;
+		//}
+		//SetDeviceAttributes(newVDev, tmpDev);
+		//SetAudioAttributes(newVDev, tmpDev);
 
 		outVirtualDevList.push_back(newVDev);
 	}
