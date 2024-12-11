@@ -383,13 +383,15 @@ void AJATimeCode::QueryString(std::string &str, const AJATimeBase& timeBase, boo
 	QueryString(str, timeBase, bDropFrame, m_stdTcForHfr, notation);
 }
 
-void AJATimeCode::QueryString(char *pString, const AJATimeBase& timeBase, bool bDropFrame, AJATimecodeNotation notation)
-{
-	string s;
-	QueryString(s, timeBase, bDropFrame, notation);
-	strncpy(pString, s.c_str(), s.length());
-	pString[11] = '\0';
-}
+#if !defined(NTV2_DEPRECATE_17_5)
+	void AJATimeCode::QueryString(char *pString, const AJATimeBase& timeBase, bool bDropFrame, AJATimecodeNotation notation)
+	{
+		string s;
+		QueryString(s, timeBase, bDropFrame, notation);
+		strncpy(pString, s.c_str(), s.length());
+		pString[11] = '\0';
+	}
+#endif	//	NTV2_DEPRECATE_17_5
 
 int AJATimeCode::QuerySMPTEStringSize(void)
 {
@@ -609,15 +611,16 @@ void AJATimeCode::SetRP188 (const uint32_t inDBB, const uint32_t inLo, const uin
 	SetHmsf (h0+h1, m0+m1, s0+s1, f0+f1, inTimeBase, bDrop);
 }
 
-
-void AJATimeCode::QueryRP188(uint32_t *pDbb, uint32_t *pLow, uint32_t *pHigh, const AJATimeBase& timeBase, bool bDrop)
-{
-	uint32_t dbb(0), low(0), high(0);
-	QueryRP188(dbb, low, high, timeBase, bDrop);
-	if (*pDbb)	*pDbb = dbb;
-	if (*pLow)	*pLow = low;
-	if (*pHigh) *pHigh = high;
-}
+#if !defined(NTV2_DEPRECATE_17_5)
+	void AJATimeCode::QueryRP188(uint32_t *pDbb, uint32_t *pLow, uint32_t *pHigh, const AJATimeBase& timeBase, bool bDrop)
+	{
+		uint32_t dbb(0), low(0), high(0);
+		QueryRP188(dbb, low, high, timeBase, bDrop);
+		if (*pDbb)	*pDbb = dbb;
+		if (*pLow)	*pLow = low;
+		if (*pHigh) *pHigh = high;
+	}
+#endif	//	!defined(NTV2_DEPRECATE_17_5)
 
 void AJATimeCode::QueryRP188(uint32_t & outDBB, uint32_t & outLo, uint32_t & outHi, const AJATimeBase & timeBase, const bool bDrop)
 {
