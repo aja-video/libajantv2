@@ -905,16 +905,6 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 			newVDev.vdevUrl += (isFirstParam ? "" : "&") + displayNameParam + "=" + PercentEncode(newVDev.deviceIdentifier);
 		}
 
-		//CNTV2Card tmpDev;
-		//tmpDev.Open(newVDev.vdevUrl);
-		//if (!tmpDev.IsOpen())
-		//{
-		//	cerr << "Unable to open device based on JSON file: " << vdevFile << endl;
-		//	continue;
-		//}
-		//SetDeviceAttributes(newVDev, tmpDev);
-		//SetAudioAttributes(newVDev, tmpDev);
-
 		outVirtualDevList.push_back(newVDev);
 	}
 	return true;
