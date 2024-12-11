@@ -13,8 +13,6 @@
 #if defined(AJA_USE_CPLUSPLUS11) && !defined(AJA_BAREMETAL)
 	#include <mutex>
 	#include <string>
-	using std::recursive_timed_mutex;
-	using std::string;
 #endif
 
 #define LOCK_TIME_INFINITE 0xffffffff
@@ -78,8 +76,8 @@ public:
 
 private:
 #if defined(AJA_USE_CPLUSPLUS11) && !defined(AJA_BAREMETAL)
-	recursive_timed_mutex* mpMutex={nullptr};
-	string name;
+	std::recursive_timed_mutex* mpMutex={nullptr};
+	std::string mName;
 #else
 	AJALockImpl* mpImpl;
 #endif
@@ -108,6 +106,5 @@ private:
 
 	AJALock* mpLock;
 };
-
 
 #endif	//	AJA_LOCK_H
