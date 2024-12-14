@@ -1,0 +1,138 @@
+/* SPDX-License-Identifier: MIT */
+/**
+	@file	ntv2overlay.h
+	@brief	Header file for the NTV2Overlay demonstration class.
+	@copyright	(C) 2012-2022 AJA Video Systems, Inc.  All rights reserved.
+**/
+
+#ifndef _NTV2OVERLAY_H
+#define _NTV2OVERLAY_H
+
+#include "ntv2card.h"
+#include "ntv2formatdescriptor.h"
+#include "ntv2democommon.h"
+#include "ajabase/system/thread.h"
+//#include "ajabase/common/types.h"
+
+typedef BurnConfig	OverlayConfig;
+
+
+/**
+	@brief	I output live input video overlaid with an image that has transparency.
+**/
+class NTV2Overlay
+{
+	//	Public Instance Methods
+	public:
+		/**
+			@brief		Constructs me using the given configuration settings.
+			@param[in]	inConfig		Specifies the configuration parameters.
+			@note		I'm not completely initialized and ready for use until after my Init method has been called.
+		**/
+							NTV2Overlay (const OverlayConfig & inConfig);
+		virtual				~NTV2Overlay ();
+
+		/**
+			@brief	Initializes me and prepares me to Run.
+		**/
+		virtual AJAStatus		Init (void);
+
+		/**
+			@brief	Runs me.
+			@note	Do not call this method without first calling my Init method.
+		**/
+		virtual AJAStatus		Run (void);
+
+		/**
+			@brief	Gracefully stops me from running.
+		**/
+		virtual void			Quit (void);
+
+
+	//	Protected Instance Methods
+	protected:
+		/**
+			@brief	Sets up everything I need for capturing and playing video.
+		**/
+		virtual AJAStatus		SetupVideo (void);
+
+		/**
+			@brief	Sets up everything I need for capturing and playing audio.
+		**/
+		virtual AJAStatus		SetupAudio (void);
+
+		/**
+			@brief		Wait for a stable input signal, and return it.
+			@return		The input video format. Guaranteed to be valid unless terminating.
+		**/
+		virtual NTV2VideoFormat	WaitForStableInputSignal (void);
+
+		/**
+			@brief	Determines input widget signal routing.
+			@param[out]	connections		The connection set to be modified.
+			@return	True if any connections were added to the set.
+		**/
+		virtual bool			GetInputSignalRouting (NTV2XptConnections & connections);
+
+		/**
+			@brief	Determines output widget signal routing.
+			@param[out]	connections		The connection set to be modified.
+			@return	True if any connections were added to the set.
+		**/
+		virtual bool			GetOutputSignalRouting (NTV2XptConnections & connections);
+
+		/**
+			@brief	Starts my playout thread.
+		**/
+		virtual void			StartOutputThread (void);
+
+		/**
+			@brief	Repeatedly plays out frames using AutoCirculate (until global quit flag set).
+		**/
+		virtual void			OutputThread (void);
+
+		/**
+			@brief	Starts my capture thread.
+		**/
+		virtual void			StartInputThread (void);
+
+		/**
+			@brief	Repeatedly captures frames using AutoCirculate (until global quit flag set).
+		**/
+		virtual void			InputThread (void);
+
+
+	//	Protected Class Methods
+	protected:
+		/**
+			@brief	This is the playout thread's static callback function that gets called when the playout thread runs.
+					This function gets "Attached" to the playout thread's AJAThread instance.
+			@param[in]	pThread		A valid pointer to the playout thread's AJAThread instance.
+			@param[in]	pContext	Context information to pass to the thread.
+									(For this application, this will be set to point to the NTV2Overlay instance.)
+		**/
+		static void				OutputThreadStatic (AJAThread * pThread, void * pContext);
+
+		/**
+			@brief	This is the capture thread's static callback function that gets called when the capture thread runs.
+					This function gets "Attached" to the AJAThread instance.
+			@param[in]	pThread		Points to the AJAThread instance.
+			@param[in]	pContext	Context information to pass to the thread.
+									(For this application, this will be set to point to the NTV2Overlay instance.)
+		**/
+		static void				InputThreadStatic (AJAThread * pThread, void * pContext);
+
+	//	Private Member Data
+	private:
+		OverlayConfig		mConfig;			///< @brief	My configuration info
+		AJAThread			mPlayThread;		///< @brief	My output thread object
+		AJAThread			mCaptureThread;		///< @brief	My input thread object
+		CNTV2Card			mDevice;			///< @brief	My CNTV2Card instance
+		NTV2DeviceID		mDeviceID;			///< @brief	Keep my device ID handy
+		NTV2VideoFormat		mVideoFormat;		///< @brief	Format of background video
+		NTV2TaskMode		mSavedTaskMode;		///< @brief	For restoring prior state
+		bool				mGlobalQuit;		///< @brief	Set "true" to gracefully stop
+
+};	//	NTV2Overlay
+
+#endif	//	_NTV2OVERLAY_H

@@ -26,6 +26,7 @@ endif()
 
 add_subdirectory(ntv2llburn)
 add_subdirectory(ntv2outputtestpattern)
+add_subdirectory(ntv2overlay)
 add_subdirectory(ntv2player)
 add_subdirectory(ntv2player4k)
 add_subdirectory(ntv2player8k)
