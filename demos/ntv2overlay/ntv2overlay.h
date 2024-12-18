@@ -12,7 +12,6 @@
 #include "ntv2formatdescriptor.h"
 #include "ntv2democommon.h"
 #include "ajabase/system/thread.h"
-//#include "ajabase/common/types.h"
 
 typedef BurnConfig	OverlayConfig;
 
@@ -62,24 +61,27 @@ class NTV2Overlay
 		virtual AJAStatus		SetupAudio (void);
 
 		/**
+			@brief	Sets up my overlay "bug" image buffer.
+		**/
+		virtual AJAStatus		SetupOverlayBug (void);
+
+		/**
 			@brief		Wait for a stable input signal, and return it.
 			@return		The input video format. Guaranteed to be valid unless terminating.
 		**/
 		virtual NTV2VideoFormat	WaitForStableInputSignal (void);
 
 		/**
-			@brief	Determines input widget signal routing.
-			@param[out]	connections		The connection set to be modified.
-			@return	True if any connections were added to the set.
+			@brief	Performs input widget signal routing.
+			@return	True if successful.
 		**/
-		virtual bool			GetInputSignalRouting (NTV2XptConnections & connections);
+		virtual bool			RouteInputSignal (void);
 
 		/**
-			@brief	Determines output widget signal routing.
-			@param[out]	connections		The connection set to be modified.
-			@return	True if any connections were added to the set.
+			@brief	Performs output widget signal routing.
+			@return	True if successful.
 		**/
-		virtual bool			GetOutputSignalRouting (NTV2XptConnections & connections);
+		virtual bool			RouteOutputSignal (void);
 
 		/**
 			@brief	Starts my playout thread.
@@ -124,14 +126,18 @@ class NTV2Overlay
 
 	//	Private Member Data
 	private:
-		OverlayConfig		mConfig;			///< @brief	My configuration info
-		AJAThread			mPlayThread;		///< @brief	My output thread object
-		AJAThread			mCaptureThread;		///< @brief	My input thread object
-		CNTV2Card			mDevice;			///< @brief	My CNTV2Card instance
-		NTV2DeviceID		mDeviceID;			///< @brief	Keep my device ID handy
-		NTV2VideoFormat		mVideoFormat;		///< @brief	Format of background video
-		NTV2TaskMode		mSavedTaskMode;		///< @brief	For restoring prior state
-		bool				mGlobalQuit;		///< @brief	Set "true" to gracefully stop
+		OverlayConfig			mConfig;			///< @brief	My configuration info
+		AJAThread				mPlayThread;		///< @brief	My output thread object
+		AJAThread				mCaptureThread;		///< @brief	My input thread object
+		CNTV2Card				mDevice;			///< @brief	My CNTV2Card instance
+		NTV2VideoFormat			mVideoFormat;		///< @brief	Input video format (for change detection)
+		NTV2LHIHDMIColorSpace	mHDMIColorSpace;	///< @brief	HDMI input colorspace (for change detection)
+		NTV2Buffer				mBug;				///< @brief	Overlay "bug" image buffer
+		NTV2RasterInfo			mBugRasterInfo;		///< @brief	Overlay "bug" raster info
+		NTV2TaskMode			mSavedTaskMode;		///< @brief	For restoring prior state
+		NTV2XptConnections		mInputConnections;	///< @brief	My capture routing connections
+		NTV2XptConnections		mOutputConnections;	///< @brief	My output routing connections
+		bool					mGlobalQuit;		///< @brief	Set "true" to gracefully stop
 
 };	//	NTV2Overlay
 
