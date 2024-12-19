@@ -308,7 +308,11 @@ bool CNTV2DriverInterface::OpenRemote (const NTV2DeviceSpecParser & inParser)
 	//	plugin in stages via its client interface.
 	if (!pClient->IsConnected())
 		if (!pClient->NTV2Connect())
-			{DIFAIL("Failed to connect/open '" << inParser.DeviceSpec() << "'");  delete pClient;}
+		{	DIFAIL("Failed to connect/open '" << inParser.DeviceSpec() << "'");
+			delete pClient;
+			CloseRemote();
+			return false;
+		}
 
 	//	NTV2 physical devices always have a hardware identity -- the NTV2DeviceID read from register 50.
 	//	This plugin device is considered "open" if ReadRegister is successful, and returns a non-zero
