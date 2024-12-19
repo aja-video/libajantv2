@@ -103,6 +103,11 @@ class NTV2Overlay
 		**/
 		virtual void			InputThread (void);
 
+		/**
+			@returns	The zero-based index number of the Mixer/Keyer widget to use.
+		**/
+		virtual inline UWord	MixerNum (void)				{return mConfig.fInputChannel / 2;}
+
 
 	//	Protected Class Methods
 	protected:

@@ -88,6 +88,9 @@ AJAStatus NTV2Overlay::Init (void)
 		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' cannot capture" << endl;  return AJA_STATUS_FEATURE;}
 	if (!mDevice.features().CanDoPlayback())
 		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' cannot playout" << endl;  return AJA_STATUS_FEATURE;}
+	const UWord	numMixers(mDevice.features().GetNumMixers());
+	if (!numMixers)
+		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' has no Mixer/Keyer widget" << endl;  return AJA_STATUS_FEATURE;}
 
 	ULWord	appSig(0);
 	int32_t	appPID(0);
@@ -118,7 +121,9 @@ AJAStatus NTV2Overlay::Init (void)
 		return status;
 
 	//	Set up Mixer...
-	const UWord	mixerNum (mConfig.fInputChannel);
+	const UWord mixerNum (MixerNum());
+	if (mixerNum >= numMixers)
+		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' has no Mixer" << DEC(mixerNum+1) << ", has " << DEC(numMixers) << " mixers" << endl;  return AJA_STATUS_FEATURE;}
 	mDevice.SetMixerMode (mixerNum, NTV2MIXERMODE_MIX);	//	"mix" mode
 	mDevice.SetMixerFGMatteEnabled (mixerNum, false);	//	no FG matte
 	mDevice.SetMixerBGMatteEnabled (mixerNum, false);	//	no BG matte
@@ -191,11 +196,13 @@ AJAStatus NTV2Overlay::SetupVideo (void)
 	const UWord	numFrameStores (mDevice.features().GetNumFrameStores());
 	switch (mConfig.fInputSource)
 	{
-		case NTV2_INPUTSOURCE_SDI1:		mConfig.fOutputChannel = NTV2_CHANNEL2;
+		case NTV2_INPUTSOURCE_SDI1:
+		case NTV2_INPUTSOURCE_ANALOG1:
+		case NTV2_INPUTSOURCE_HDMI1:	mConfig.fOutputChannel = NTV2_CHANNEL2;
 										break;
 
 		case NTV2_INPUTSOURCE_HDMI2:
-		case NTV2_INPUTSOURCE_SDI2:		mConfig.fOutputChannel = numFrameStores > 4 ? NTV2_CHANNEL3 : NTV2_CHANNEL4;
+		case NTV2_INPUTSOURCE_SDI2:		mConfig.fOutputChannel = numFrameStores > 4 ? NTV2_CHANNEL3 : NTV2_CHANNEL1;
 										break;
 
 		case NTV2_INPUTSOURCE_HDMI3:
@@ -211,11 +218,8 @@ AJAStatus NTV2Overlay::SetupVideo (void)
 		case NTV2_INPUTSOURCE_SDI7:		mConfig.fOutputChannel = NTV2_CHANNEL8;		break;
 		case NTV2_INPUTSOURCE_SDI8:		mConfig.fOutputChannel = NTV2_CHANNEL7;		break;
 
-		case NTV2_INPUTSOURCE_ANALOG1:
-		case NTV2_INPUTSOURCE_HDMI1:	mConfig.fOutputChannel = NTV2_CHANNEL2;
-										break;
 		default:
-		case NTV2_INPUTSOURCE_INVALID:	cerr << "## ERROR:  Bad input source" << endl;  return AJA_STATUS_BAD_PARAM;
+		case NTV2_INPUTSOURCE_INVALID:	cerr << "## ERROR:  Bad input source " << DEC(mConfig.fInputSource) << endl;  return AJA_STATUS_BAD_PARAM;
 	}
 	if (mConfig.IsVerbose())
 		cout << "## NOTE:  Output FrameStore chosen to be " << mConfig.OChStr() << endl;
@@ -584,7 +588,7 @@ void NTV2Overlay::OutputThread (void)
 				++badXfers;
 			mDevice.SetOutputFrame (mConfig.fOutputChannel, fbNum + pingPong);
 			pingPong = pingPong ? 0 : 1;
-			mDevice.SetMixerCoefficient (UWord(mConfig.fInputChannel), mixPct.Next() * 0x10000 / 400);
+			mDevice.SetMixerCoefficient (MixerNum(), mixPct.Next() * 0x10000 / 400);
 		}
 		else
 			++badWaits;
