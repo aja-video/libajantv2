@@ -260,6 +260,24 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithName (const string & inNameSubString,
 
 }	//	GetFirstDeviceWithName
 
+bool CNTV2DeviceScanner::GetVirtualDeviceWithName (const string & inNameString, CNTV2Card & outDevice)
+{
+	outDevice.Close();
+	AJAAutoLock tmpLock(&sDevInfoListLock);
+	ScanHardware();
+	string	nameString(inNameString);  aja::lower(nameString);
+	for (size_t ndx(0);  ndx < sDevInfoList.size();  ndx++)
+	{
+		if (!sDevInfoList.at(ndx).isVirtualDevice)
+			continue;
+		string deviceName(sDevInfoList.at(ndx).vdevName);  aja::lower(deviceName);
+		if (deviceName == nameString)
+		{
+			return outDevice.Open(sDevInfoList.at(ndx).vdevUrl);
+		}
+	}
+	return false;	//	Not found
+}
 
 bool CNTV2DeviceScanner::GetFirstDeviceWithSerial (const string & inSerialStr, CNTV2Card & outDevice)
 {
