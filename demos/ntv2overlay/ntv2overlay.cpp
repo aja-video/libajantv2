@@ -84,27 +84,19 @@ AJAStatus NTV2Overlay::Init (void)
 		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
     if (!mDevice.IsDeviceReady(false))
 		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
-	if (!mDevice.features().CanDoCapture())
-		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' cannot capture" << endl;  return AJA_STATUS_FEATURE;}
-	if (!mDevice.features().CanDoPlayback())
-		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' cannot playout" << endl;  return AJA_STATUS_FEATURE;}
-	const UWord	numMixers(mDevice.features().GetNumMixers());
-	if (!numMixers)
-		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' has no Mixer/Keyer widget" << endl;  return AJA_STATUS_FEATURE;}
 
 	ULWord	appSig(0);
 	int32_t	appPID(0);
 	mDevice.GetStreamingApplication (appSig, appPID);	//	Who currently "owns" the device?
 	mDevice.GetEveryFrameServices(mSavedTaskMode);		//	Save the current device state
-	if (!mConfig.fDoMultiFormat)
+
+	if (!mDevice.AcquireStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid())))
 	{
-		if (!mDevice.AcquireStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid())))
-		{
-			cerr << "## ERROR:  Cannot acquire device because another app (pid " << appPID << ") owns it" << endl;
-			return AJA_STATUS_BUSY;		//	Some other app is using the device
-		}
-		mDevice.ClearRouting();	//	Clear current device routing (since I "own" the device)
+		cerr << "## ERROR:  Cannot acquire device because another app (pid " << appPID << ") owns it" << endl;
+		return AJA_STATUS_BUSY;		//	Some other app is using the device
 	}
+	mDevice.ClearRouting();	//	Clear current device routing (since I "own" the device)
+	
 	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);	//	Force OEM tasks
 
 	//	Set up the overlay image...
@@ -119,18 +111,6 @@ AJAStatus NTV2Overlay::Init (void)
 	status = SetupAudio();
 	if (AJA_FAILURE(status))
 		return status;
-
-	//	Set up Mixer...
-	const UWord mixerNum (MixerNum());
-	if (mixerNum >= numMixers)
-		{cerr << "## ERROR:  '" << mDevice.GetDisplayName() << "' has no Mixer" << DEC(mixerNum+1) << ", has " << DEC(numMixers) << " mixers" << endl;  return AJA_STATUS_FEATURE;}
-	mDevice.SetMixerMode (mixerNum, NTV2MIXERMODE_MIX);	//	"mix" mode
-	mDevice.SetMixerFGMatteEnabled (mixerNum, false);	//	no FG matte
-	mDevice.SetMixerBGMatteEnabled (mixerNum, false);	//	no BG matte
-	mDevice.SetMixerCoefficient (mixerNum, 0x10000);	//	FG "bug" overlay full strength (initially)
-	mDevice.SetMixerFGInputControl (mixerNum, NTV2MIXERINPUTCONTROL_SHAPED);		//	respect FG alpha channel
-	mDevice.SetMixerBGInputControl (mixerNum, NTV2MIXERINPUTCONTROL_FULLRASTER);	//	BG uses full raster
-	mDevice.SetMixerVancOutputFromForeground (mixerNum, false);	//	false means "use BG VANC, not FG"
 
 	//	Ready to go...
 	if (mConfig.IsVerbose() || sShowConfig)
@@ -147,137 +127,115 @@ AJAStatus NTV2Overlay::Init (void)
 
 AJAStatus NTV2Overlay::SetupVideo (void)
 {
-	//	If no input source specified, choose a default...
-	if (!NTV2_IS_VALID_INPUT_SOURCE(mConfig.fInputSource))
-	{
-		mConfig.fInputSource = ::NTV2ChannelToInputSource(NTV2_CHANNEL1,
-															mDevice.GetDeviceID() == DEVICE_ID_KONAHDMI
-																? NTV2_IOKINDS_HDMI
-																: NTV2_IOKINDS_SDI);
-		if (mConfig.IsVerbose())
-			cout << "## NOTE:  Input source was not specified, will use " << mConfig.ISrcStr() << endl;
-	}
-
-	//	Does this device have the requested input source?
-	if (!mDevice.features().CanDoInputSource(mConfig.fInputSource))
-		{cerr << "## ERROR:  Device does not have input source " << mConfig.ISrcStr() << endl;  return AJA_STATUS_BAD_PARAM;}
-
 	//	Enable/subscribe interrupts...
-	mConfig.fInputChannel = ::NTV2InputSourceToChannel(mConfig.fInputSource);
-	mDevice.EnableInputInterrupt(mConfig.fInputChannel);
-	mDevice.SubscribeInputVerticalEvent(mConfig.fInputChannel);
-	mDevice.EnableOutputInterrupt(NTV2_CHANNEL1);
+	mConfig.fInputChannel = NTV2_CHANNEL1;
+	mConfig.fOutputChannel = NTV2_CHANNEL2;
+	mDevice.SubscribeInputVerticalEvent(NTV2_CHANNEL1);
 	mDevice.SubscribeOutputVerticalEvent(NTV2_CHANNEL1);
+	mDevice.SubscribeOutputVerticalEvent(NTV2_CHANNEL2);
 
 	//	Flip the input spigot to "receive" if necessary...
-	bool isXmit (false);
-	if (mDevice.features().HasBiDirectionalSDI()							//	If device has bidirectional SDI connectors...
-		&& mConfig.ISrcIsSDI()												//	...and desired input source is SDI...
-		&& mDevice.GetSDITransmitEnable (mConfig.fInputChannel, isXmit)		//	...and GetSDITransmitEnable succeeds...
-		&& isXmit)															//	...and input is set to "transmit"...
-		{
-			mDevice.SetSDITransmitEnable (mConfig.fInputChannel, false);		//	...then disable transmit mode...
-			mDevice.WaitForOutputVerticalInterrupt (NTV2_CHANNEL1, 10);			//	...and give device time to lock to input
-		}	//	if input SDI connector needs to switch from transmit mode
+	mDevice.SetSDITransmitEnable (NTV2_CHANNEL1, false);
+	mDevice.SetSDITransmitEnable (NTV2_CHANNEL2, true);
+	
+	mDevice.WaitForOutputVerticalInterrupt (NTV2_CHANNEL1, 10);			//	...and give device time to lock to input
 
 	//	Since this demo runs in E-to-E mode (thru Mixer/Keyer), reference must be tied to the input...
-	mDevice.SetReference(::NTV2InputSourceToReferenceSource(mConfig.fInputSource));
+	mDevice.SetReference(NTV2_REFERENCE_INPUT1);
 
 	//	Transparent overlays will need an ARGB buffer format...
 	mConfig.fPixelFormat = NTV2_FBF_ARGB;
-	if (!mDevice.features().CanDoFrameBufferFormat(mConfig.fPixelFormat))
-		{cerr << "## ERROR: " << ::NTV2FrameBufferFormatToString(mConfig.fPixelFormat) << " unsupported" << endl;  return AJA_STATUS_UNSUPPORTED;}
 
 	//	If the device supports different per-channel video formats, configure it as requested...
-	if (mDevice.features().CanDoMultiFormat())
-		mDevice.SetMultiFormatMode(mConfig.fDoMultiFormat);
-
-	//	Choose an output channel/FrameStore...
-	const UWord	numFrameStores (mDevice.features().GetNumFrameStores());
-	switch (mConfig.fInputSource)
-	{
-		case NTV2_INPUTSOURCE_SDI1:
-		case NTV2_INPUTSOURCE_ANALOG1:
-		case NTV2_INPUTSOURCE_HDMI1:	mConfig.fOutputChannel = NTV2_CHANNEL2;
-										break;
-
-		case NTV2_INPUTSOURCE_HDMI2:
-		case NTV2_INPUTSOURCE_SDI2:		mConfig.fOutputChannel = numFrameStores > 4 ? NTV2_CHANNEL3 : NTV2_CHANNEL1;
-										break;
-
-		case NTV2_INPUTSOURCE_HDMI3:
-		case NTV2_INPUTSOURCE_SDI3:		mConfig.fOutputChannel = NTV2_CHANNEL4;
-										break;
-
-		case NTV2_INPUTSOURCE_HDMI4:
-		case NTV2_INPUTSOURCE_SDI4:		mConfig.fOutputChannel = numFrameStores > 4 ? NTV2_CHANNEL5 : NTV2_CHANNEL3;
-										break;
-
-		case NTV2_INPUTSOURCE_SDI5: 	mConfig.fOutputChannel = NTV2_CHANNEL6;		break;
-		case NTV2_INPUTSOURCE_SDI6:		mConfig.fOutputChannel = NTV2_CHANNEL7;		break;
-		case NTV2_INPUTSOURCE_SDI7:		mConfig.fOutputChannel = NTV2_CHANNEL8;		break;
-		case NTV2_INPUTSOURCE_SDI8:		mConfig.fOutputChannel = NTV2_CHANNEL7;		break;
-
-		default:
-		case NTV2_INPUTSOURCE_INVALID:	cerr << "## ERROR:  Bad input source " << DEC(mConfig.fInputSource) << endl;  return AJA_STATUS_BAD_PARAM;
-	}
-	if (mConfig.IsVerbose())
-		cout << "## NOTE:  Output FrameStore chosen to be " << mConfig.OChStr() << endl;
-	if (NTV2_IS_VALID_OUTPUT_DEST(mConfig.fOutputDest))
-	{
-		if (NTV2_OUTPUT_DEST_IS_SDI(mConfig.fOutputDest))
-			if (NTV2_IS_VALID_CHANNEL(mConfig.ODstCh()))
-				if (mConfig.ODstCh() != mConfig.fOutputChannel)
-				{
-					const string oldChStr(mConfig.OChStr());
-					mConfig.fOutputChannel = mConfig.ODstCh();
-					if (mConfig.IsVerbose())
-						cout << "## NOTE:  Output " << mConfig.ODstStr() << " with Anc forced FrameStore change to "
-								<< mConfig.OChStr() << " from " << oldChStr << endl;
-				}
-	}
-	else	//	else output destination not specified
-	{	//	Pick an appropriate output spigot based on the output channel...
-		mConfig.fOutputDest	= ::NTV2ChannelToOutputDestination(mConfig.fOutputChannel);
-		if (!HasWidgetsAnyOf(NTV2_Wgt12GSDIOut2, NTV2_Wgt3GSDIOut2, NTV2_WgtSDIOut2))
-		{	//	If device has only one SDI output
-			mConfig.fOutputDest = NTV2_OUTPUTDESTINATION_SDI1;
-			if (mConfig.IsVerbose())
-				cout << "## NOTE:  Output destination was not specified, will use " << mConfig.ODstStr() << endl;
-		}
-	}
-	if (mDevice.features().HasBiDirectionalSDI()					//	If device has bidirectional SDI connectors...
-		&& mConfig.ODstIsSDI())										//	...and output destination is SDI...
-			mDevice.SetSDITransmitEnable (mConfig.ODstCh(), true);	//	...then enable transmit mode
-	if (mConfig.fInputChannel == mConfig.fOutputChannel)
-		{cerr << "## ERROR: Input " << mConfig.IChStr() << " & output " << mConfig.OChStr() << " conflict" << endl;  return AJA_STATUS_BAD_PARAM;}
-	if (mDevice.features().HasBiDirectionalSDI() && mConfig.ISrcIsSDI() && mConfig.ODstIsSDI() && mConfig.ISrcCh() == mConfig.ODstCh())
-		{cerr << "## ERROR: SDI conflict:  input " << mConfig.ISrcStr() << " & output " << mConfig.ODstStr() << " are same connector" << endl;  return AJA_STATUS_BAD_PARAM;}
+	mDevice.SetMultiFormatMode(true);
+	
+	mDevice.ClearRouting();
+	RouteInputSignal();
+	RouteOutputSignal();
+	
+	//	Set up Mixer...
+	const UWord mixerNum (0);
+	mDevice.SetMixerMode (mixerNum, NTV2MIXERMODE_MIX);	//	"mix" mode
+	mDevice.SetMixerFGMatteEnabled (mixerNum, false);	//	no FG matte
+	mDevice.SetMixerBGMatteEnabled (mixerNum, false);	//	no BG matte
+	mDevice.SetMixerCoefficient (mixerNum, 0x10000);	//	FG "bug" overlay full strength (initially)
+	mDevice.SetMixerFGInputControl (mixerNum, NTV2MIXERINPUTCONTROL_SHAPED);		//	respect FG alpha channel
+	mDevice.SetMixerBGInputControl (mixerNum, NTV2MIXERINPUTCONTROL_FULLRASTER);	//	BG uses full raster
+	mDevice.SetMixerVancOutputFromForeground (mixerNum, false);	//	false means "use BG VANC, not FG"
+	
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetupVideo
 
+bool NTV2Overlay::RouteInputSignal (void)
+{
+	mInputConnections.clear();
+	const NTV2OutputXptID inputOutputXpt (::GetInputSourceOutputXpt(mConfig.fInputSource));
+	const NTV2InputXptID mixBGVidInputXpt(::GetMixerBGInputXpt(mConfig.fInputChannel));
+	const NTV2InputXptID mixBGKeyInputXpt(::GetMixerBGInputXpt(mConfig.fInputChannel, /*key*/true));
+	const NTV2InputXptID fsInputXpt (::GetFrameStoreInputXptFromChannel(mConfig.fInputChannel));
+	
+	if (mConfig.fInputSource == NTV2_INPUTSOURCE_HDMI1
+		&&  mDevice.GetHDMIInputColor(mHDMIColorSpace, mConfig.fInputChannel)
+		&&  mHDMIColorSpace == NTV2_LHIHDMIColorSpaceRGB)
+	{
+		//	The HDMI input video is RGB, but the Mixer only accepts YCbCr video or key.
+		//	The HDMI video signal must go thru a CSC on its way to the Mixer...
+		const NTV2InputXptID cscVidInputXpt(::GetCSCInputXptFromChannel(mConfig.fInputChannel));
+		const NTV2OutputXptID cscVidOutputXpt(::GetCSCOutputXptFromChannel(mConfig.fInputChannel, false/*isKey*/));
+		const NTV2OutputXptID cscKeyOutputXpt(::GetCSCOutputXptFromChannel(mConfig.fInputChannel, true/*isKey*/));
+		
+		mInputConnections.insert(NTV2XptConnection(cscVidInputXpt, inputOutputXpt));	//	CSC vid input from HDMI input
+		mInputConnections.insert(NTV2XptConnection(mixBGVidInputXpt, cscVidOutputXpt));	//	Mixer BG vid input from CSC vid output
+		mInputConnections.insert(NTV2XptConnection(mixBGKeyInputXpt, cscKeyOutputXpt));	//	Mixer BG key input from CSC key output
+		mInputConnections.insert(NTV2XptConnection(fsInputXpt, cscVidOutputXpt));		//	Capture FrameStore's input from CSC vid output
+	}
+	else
+	{
+		mInputConnections.insert(NTV2XptConnection(mixBGVidInputXpt, inputOutputXpt));	//	Mixer BG vid input from input spigot
+		mInputConnections.insert(NTV2XptConnection(mixBGKeyInputXpt, inputOutputXpt));	//	Mixer BG key input from input spigot
+		mInputConnections.insert(NTV2XptConnection(fsInputXpt, inputOutputXpt));		//	Capture FrameStore's input from input spigot
+	}
+	return mDevice.ApplySignalRoute(mInputConnections);
+	
+}	//	RouteInputSignal
+
+
+bool NTV2Overlay::RouteOutputSignal (void)
+{
+	{	//	FrameStore to CSC to Mixer FG routing...
+		const NTV2OutputXptID fsRGBOutputXpt (::GetFrameStoreOutputXptFromChannel(mConfig.fOutputChannel, /*rgb*/true));
+		const NTV2InputXptID cscVidInputXpt(::GetCSCInputXptFromChannel(mConfig.fOutputChannel));
+		const NTV2OutputXptID cscVidOutputXpt(::GetCSCOutputXptFromChannel(mConfig.fOutputChannel, /*key*/false));
+		const NTV2OutputXptID cscKeyOutputXpt(::GetCSCOutputXptFromChannel(mConfig.fOutputChannel, /*key*/true));
+		const NTV2InputXptID mixFGVidInputXpt(::GetMixerFGInputXpt(mConfig.fInputChannel));
+		const NTV2InputXptID mixFGKeyInputXpt(::GetMixerFGInputXpt(mConfig.fInputChannel, /*key*/true));
+		
+		mOutputConnections.insert(NTV2XptConnection(cscVidInputXpt, fsRGBOutputXpt));		//	CSC vid input from FrameStore RGB output
+		mOutputConnections.insert(NTV2XptConnection(mixFGVidInputXpt, cscVidOutputXpt));	//	Mixer FG vid input from CSC vid output
+		mOutputConnections.insert(NTV2XptConnection(mixFGKeyInputXpt, cscKeyOutputXpt));	//	Mixer FG key input from CSC key output
+	}
+	{	//	Mixer to Output
+		const NTV2InputXptID outputInputXpt (::GetOutputDestInputXpt(mConfig.fOutputDest));
+		const NTV2OutputXptID mixOutputXpt (::GetMixerOutputXptFromChannel(mConfig.fInputChannel));
+		mOutputConnections.insert(NTV2XptConnection(outputInputXpt, mixOutputXpt));	//	SDIOut from Mixer output
+		mOutputConnections.insert(NTV2XptConnection(NTV2_XptHDMIOutQ1Input, mixOutputXpt));	//	HDMIOut from Mixer output
+		
+	}
+	return mDevice.ApplySignalRoute(mOutputConnections);
+	
+}	//	RouteOutputSignal
+
 
 AJAStatus NTV2Overlay::SetupAudio (void)
 {
-	NTV2AudioSystem audioSystem = NTV2_AUDIOSYSTEM_1;	//	the audio system that's associated with the input spigot
-
 	//	Set up the output audio embedders...
-	if (mDevice.features().GetNumAudioSystems() > 1)
-	{
-		//	Some devices, like the Kona1, have 2 FrameStores but only 1 SDI output,
-		//	which makes mConfig.fOutputChannel == NTV2_CHANNEL2, but need SDIoutput to be NTV2_CHANNEL1...
-		UWord	SDIoutput(mConfig.fOutputChannel);
-		if (SDIoutput >= mDevice.features().GetNumVideoOutputs())
-			SDIoutput = mDevice.features().GetNumVideoOutputs() - 1;
-		mDevice.SetSDIOutputAudioSystem (NTV2Channel(SDIoutput), audioSystem);
-
-		if (mDevice.features().GetNumHDMIVideoOutputs() > 0)
-			mDevice.SetHDMIOutAudioSource2Channel(NTV2_AudioChannel1_2, audioSystem);
-	}
+	NTV2AudioSystem audioSystem = NTV2_AUDIOSYSTEM_1;
+	mDevice.SetSDIOutputAudioSystem (NTV2_CHANNEL2, audioSystem);
+	mDevice.SetHDMIOutAudioSource2Channel(NTV2_AudioChannel1_2, audioSystem);
 
 	//	Enable loopback for E-E mode (i.e. output whatever audio is in input signal)...
-	mDevice.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_ON, audioSystem);
+	mDevice.SetAudioLoopBack (NTV2_AUDIO_LOOPBACK_OFF, audioSystem); // Don't turn loopback on until input signal is stable
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetupAudio
@@ -342,80 +300,6 @@ AJAStatus NTV2Overlay::SetupOverlayBug (void)
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetupOverlayBug
-
-
-bool NTV2Overlay::RouteInputSignal (void)
-{
-	if (!mInputConnections.empty())
-		mDevice.RemoveConnections(mInputConnections);
-	mInputConnections.clear();
-	const NTV2OutputXptID inputOutputXpt (::GetInputSourceOutputXpt(mConfig.fInputSource));
-	const NTV2InputXptID mixBGVidInputXpt(::GetMixerBGInputXpt(mConfig.fInputChannel));
-	const NTV2InputXptID mixBGKeyInputXpt(::GetMixerBGInputXpt(mConfig.fInputChannel, /*key*/true));
-	const NTV2InputXptID fsInputXpt (::GetFrameStoreInputXptFromChannel(mConfig.fInputChannel));
-
-	if (NTV2IOKind(::GetNTV2InputSourceKind(mConfig.fInputSource)) == NTV2_IOKINDS_HDMI
-		&&  mDevice.GetHDMIInputColor(mHDMIColorSpace, mConfig.fInputChannel)
-		&&  mHDMIColorSpace == NTV2_LHIHDMIColorSpaceRGB)
-		{
-			//	The HDMI input video is RGB, but the Mixer only accepts YCbCr video or key.
-			//	The HDMI video signal must go thru a CSC on its way to the Mixer...
-			const NTV2InputXptID cscVidInputXpt(::GetCSCInputXptFromChannel(mConfig.fInputChannel));
-			const NTV2OutputXptID cscVidOutputXpt(::GetCSCOutputXptFromChannel(mConfig.fInputChannel, false/*isKey*/));
-			const NTV2OutputXptID cscKeyOutputXpt(::GetCSCOutputXptFromChannel(mConfig.fInputChannel, true/*isKey*/));
-
-			mInputConnections.insert(NTV2XptConnection(cscVidInputXpt, inputOutputXpt));	//	CSC vid input from HDMI input
-			mInputConnections.insert(NTV2XptConnection(mixBGVidInputXpt, cscVidOutputXpt));	//	Mixer BG vid input from CSC vid output
-			mInputConnections.insert(NTV2XptConnection(mixBGKeyInputXpt, cscKeyOutputXpt));	//	Mixer BG key input from CSC key output
-			mInputConnections.insert(NTV2XptConnection(fsInputXpt, cscVidOutputXpt));		//	Capture FrameStore's input from CSC vid output
-		}
-	else
-	{
-		mInputConnections.insert(NTV2XptConnection(mixBGVidInputXpt, inputOutputXpt));	//	Mixer BG vid input from input spigot
-		mInputConnections.insert(NTV2XptConnection(mixBGKeyInputXpt, inputOutputXpt));	//	Mixer BG key input from input spigot
-		mInputConnections.insert(NTV2XptConnection(fsInputXpt, inputOutputXpt));		//	Capture FrameStore's input from input spigot
-	}
-	return mDevice.ApplySignalRoute(mInputConnections);
-
-}	//	DoInputSignalRouting
-
-
-bool NTV2Overlay::RouteOutputSignal (void)
-{
-	if (!mOutputConnections.empty())
-		mDevice.RemoveConnections(mOutputConnections);
-	mOutputConnections.clear();
-
-	{	//	FrameStore to CSC to Mixer FG routing...
-		const NTV2OutputXptID fsRGBOutputXpt (::GetFrameStoreOutputXptFromChannel(mConfig.fOutputChannel, /*rgb*/true));
-		const NTV2InputXptID cscVidInputXpt(::GetCSCInputXptFromChannel(mConfig.fOutputChannel));
-		const NTV2OutputXptID cscVidOutputXpt(::GetCSCOutputXptFromChannel(mConfig.fOutputChannel, /*key*/false));
-		const NTV2OutputXptID cscKeyOutputXpt(::GetCSCOutputXptFromChannel(mConfig.fOutputChannel, /*key*/true));
-		const NTV2InputXptID mixFGVidInputXpt(::GetMixerFGInputXpt(mConfig.fInputChannel));
-		const NTV2InputXptID mixFGKeyInputXpt(::GetMixerFGInputXpt(mConfig.fInputChannel, /*key*/true));
-
-		mOutputConnections.insert(NTV2XptConnection(cscVidInputXpt, fsRGBOutputXpt));		//	CSC vid input from FrameStore RGB output
-		mOutputConnections.insert(NTV2XptConnection(mixFGVidInputXpt, cscVidOutputXpt));	//	Mixer FG vid input from CSC vid output
-		mOutputConnections.insert(NTV2XptConnection(mixFGKeyInputXpt, cscKeyOutputXpt));	//	Mixer FG key input from CSC key output
-	}
-	{	//	Mixer to Output
-		const NTV2InputXptID outputInputXpt (::GetOutputDestInputXpt(mConfig.fOutputDest));
-		const NTV2OutputXptID mixOutputXpt (::GetMixerOutputXptFromChannel(mConfig.fInputChannel));
-		mOutputConnections.insert(NTV2XptConnection(outputInputXpt, mixOutputXpt));	//	SDIOut from Mixer output
-		if (!mConfig.fDoMultiFormat)
-		{
-			//	Also route HDMIOut, SDIMonOut and/or AnalogOut (if available)...
-			if (mDevice.features().GetNumHDMIVideoOutputs() > 0)
-				mOutputConnections.insert(NTV2XptConnection(NTV2_XptHDMIOutQ1Input, mixOutputXpt));	//	HDMIOut from Mixer output
-			if (mDevice.features().CanDoWidget(NTV2_WgtAnalogOut1))
-				mOutputConnections.insert(NTV2XptConnection(NTV2_XptAnalogOutInput, mixOutputXpt));	//	AnalogOut from Mixer output
-			if (mDevice.features().CanDoWidget(NTV2_WgtSDIMonOut1))
-				mOutputConnections.insert(NTV2XptConnection(::GetSDIOutputInputXpt(NTV2_CHANNEL5), mixOutputXpt));	//	SDIMonOut from Mixer output
-		}	//	if not multiChannel
-	}
-	return mDevice.ApplySignalRoute(mOutputConnections);
-
-}	//	DoOutputSignalRouting
 
 NTV2VideoFormat NTV2Overlay::WaitForStableInputSignal (void)
 {
@@ -539,8 +423,6 @@ void NTV2Overlay::OutputThread (void)
 	NTV2RasterInfo rasterInfo (mVideoFormat, mConfig.fPixelFormat);
 	if (!hostBuffer.Allocate(rasterInfo.GetTotalRasterBytes(), /*pageAligned*/true))
 		{cerr << "## ERROR:  Failed to allocate " << rasterInfo.GetTotalRasterBytes() << "-byte vid buffer" << endl;	return;}
-
-	RouteOutputSignal();
 
 	mDevice.AutoCirculateStop(mConfig.fOutputChannel);
 	if (mDevice.AutoCirculateInitForOutput(mConfig.fOutputChannel, 2) && mDevice.AutoCirculateGetStatus(mConfig.fOutputChannel, acStatus))	//	Find out which buffers we got
@@ -669,7 +551,6 @@ void NTV2Overlay::InputThread (void)
 		mDevice.SetFrameBufferFormat (mConfig.fInputChannel, NTV2_FBF_8BIT_YCBCR);
 		mDevice.SetVideoFormat (mVideoFormat, /*retail*/false,  /*keepVanc*/false, mConfig.fInputChannel);
 		mDevice.SetVANCMode (NTV2_VANCMODE_OFF, mConfig.fInputChannel);
-		RouteInputSignal();
 
 		AUTOCIRCULATE_STATUS acStatus;
 		ULWord fbNum (10);

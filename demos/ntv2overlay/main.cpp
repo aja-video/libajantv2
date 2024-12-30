@@ -29,8 +29,6 @@ static void SignalHandler (int inSignal)
 int main (int argc, const char ** argv)
 {
 	char *	pDeviceSpec		(AJA_NULL);		//	Which device to use
-	char *	pInputSrcSpec	(AJA_NULL);		//	SDI source spec
-	char *	pOutputDest		(AJA_NULL);		//	SDI output spec (sdi1 ... sdi8)
 	int		doMultiFormat	(0);			//	MultiFormat mode?
 	int		showVersion		(0);			//	Show version?
 	int		verbose			(0);			//	Verbose mode?
@@ -41,10 +39,6 @@ int main (int argc, const char ** argv)
 	{
 		{"version",		  0,	POPT_ARG_NONE,		&showVersion,	0,	"show version & exit",		AJA_NULL					},
 		{"device",		'd',	POPT_ARG_STRING,	&pDeviceSpec,	0,	"device to use",			"index#, serial#, or model"	},
-		{"multiFormat",	'm',	POPT_ARG_NONE,		&doMultiFormat,	0,	"use multi-format/channel",	AJA_NULL					},
-		{"input",		'i',	POPT_ARG_STRING,	&pInputSrcSpec,	0,	"input to use",             "1-8, ?=list"				},
-		{"output",		'o',	POPT_ARG_STRING,	&pOutputDest,	0,	"output to use",			"'?' or 'list' to list"		},
-		{"verbose",		0,		POPT_ARG_NONE,		&verbose,		0,	"verbose mode?",			AJA_NULL					},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -61,26 +55,11 @@ int main (int argc, const char ** argv)
 
 	OverlayConfig config(deviceSpec);
 
-	//	Input source
-	const string inputSourceStr	(pInputSrcSpec ? CNTV2DemoCommon::ToLower(string(pInputSrcSpec)) : "");
-	const string legalSources (CNTV2DemoCommon::GetInputSourceStrings(NTV2_IOKINDS_ALL, pDeviceSpec ? deviceSpec : ""));
-	config.fInputSource = CNTV2DemoCommon::GetInputSourceFromString(inputSourceStr, NTV2_IOKINDS_ALL, pDeviceSpec ? deviceSpec : "");
-	if (inputSourceStr == "?" || inputSourceStr == "list")
-		{cout << legalSources << endl;  return 0;}
-	if (!inputSourceStr.empty()  &&  !NTV2_IS_VALID_INPUT_SOURCE(config.fInputSource))
-		{cerr << "## ERROR:  Input source '" << inputSourceStr << "' not one of:" << endl << legalSources << endl;	return 1;}
-
-	//	Output destination
-	const string outputDestStr (pOutputDest ? CNTV2DemoCommon::ToLower(string(pOutputDest)) : "");
-	const string legalOutputs (CNTV2DemoCommon::GetOutputDestinationStrings(NTV2_IOKINDS_ALL, pDeviceSpec ? deviceSpec : ""));
-	config.fOutputDest = CNTV2DemoCommon::GetOutputDestinationFromString(outputDestStr, NTV2_IOKINDS_ALL, pDeviceSpec ? deviceSpec : "");
-	if (outputDestStr == "?" || outputDestStr == "list")
-		{cout << legalOutputs << endl;  return 0;}
-	if (!outputDestStr.empty() && !NTV2_IS_VALID_OUTPUT_DEST(config.fOutputDest))
-		{cerr << "## ERROR:  Output '" << outputDestStr << "' not of:" << endl << legalOutputs << endl;	return 1;}
-
-	config.fDoMultiFormat	= doMultiFormat ? true : false;
-	config.fVerbose			= verbose ? true  : false;
+	config.fInputSource = NTV2_INPUTSOURCE_SDI1;
+	config.fOutputDest = NTV2_OUTPUTDESTINATION_SDI1;
+	
+	config.fDoMultiFormat	= true;
+	config.fVerbose			= true;
 
 	//	Instantiate the NTV2Overlay object...
 	NTV2Overlay overlayer (config);
