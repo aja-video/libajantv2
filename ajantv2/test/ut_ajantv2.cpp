@@ -601,6 +601,15 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 	cerr << ::NTV2StandardToString(st) << " " << ::NTV2FrameBufferFormatToString(pf) << endl;
 #endif
 				//	Make black test pattern buffer for comparison later...
+				if (st == NTV2_STANDARD_720) {
+					printf("720\n");
+				} else if (st == NTV2_STANDARD_2Kx1080p) {
+					printf("2K\n");
+				} else if (st == NTV2_STANDARD_4096x2160p) {
+					printf("4K\n");
+				} else if (st == NTV2_STANDARD_8192) {
+					printf("8K\n");
+				}
 				NTV2TestPatternGen gen;
 				NTV2Buffer tpBuffer(fd.GetTotalBytes());	//	Allocate test pattern buffer
 				if (!gen.DrawTestPattern (NTV2_TestPatt_Black, fd, tpBuffer))	//	Fill with black test pattern
@@ -630,13 +639,14 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 					//	but NTV2TestPatternGen stops writing after the "logical" end of line,
 					//	which causes mis-compares between the two buffers.
 					//	In these cases, the two buffers are compared logical-line-by-logical-line.
+					//  Line lengths (truncated) calculated by rasterWidth / 6 * 16.
 					ULWord logicalLineLength(0);
 					switch (st)
 					{
 						case NTV2_STANDARD_720:			logicalLineLength = 0xD55;	break;
-						case NTV2_STANDARD_2Kx1080p:	logicalLineLength = 0x1556;	break;
-						case NTV2_STANDARD_4096x2160p:	logicalLineLength = 0x2AAB;	break;
-						case NTV2_STANDARD_8192:		logicalLineLength = 0x5556;	break;
+						case NTV2_STANDARD_2Kx1080p:	logicalLineLength = 0x1555;	break;
+						case NTV2_STANDARD_4096x2160p:	logicalLineLength = 0x2AAA;	break;
+						case NTV2_STANDARD_8192:		logicalLineLength = 0x5555;	break;
 						default:						NTV2_ASSERT(false);  break;
 					}
 					NTV2Buffer rowBuff(fd.GetBytesPerRow()), tpRowBuff(fd.GetBytesPerRow());
@@ -646,6 +656,14 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 						CHECK(fd.GetRowBuffer(buff, rowBuff, rowNdx));
 						CHECK(rowBuff.IsContentEqual(tpRowBuff, /*byteOffset*/0, /*byteCount*/logicalLineLength));
 					}	//	for each row
+					
+					// TODO: Check this test case on Big Endian machine
+					// Check last 10-bits of the buffers
+					auto rowBuffPtr = (uint8_t*)rowBuff.GetHostPointer();
+					auto patBuffPtr = (uint8_t*)tpRowBuff.GetHostPointer();
+					uint16_t rowBufEnd = (rowBuffPtr[logicalLineLength-1] << 2 | (rowBuffPtr[logicalLineLength] & 0x3));
+					uint16_t patBufEnd = (patBuffPtr[logicalLineLength-1] << 2 | (patBuffPtr[logicalLineLength] & 0x3));
+					CHECK_EQ(rowBufEnd, patBufEnd);
 				}	//	if 10-bit YUV and special-case geometry
 				else
 					CHECK(buff.IsContentEqual(tpBuffer));	//	Verify frame buffer content matches

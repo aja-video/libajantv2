@@ -6262,19 +6262,21 @@ typedef enum
 				**/
 				template<typename T>	bool Fill (const T & inValue)
 				{
-					T * pT	(reinterpret_cast<T*>(GetHostPointer()));
-					const size_t loopCount(GetByteCount() / sizeof(T));
-					if (pT)
-					{
-                        if (sizeof(T) == 1)
-                            ::memset(pT, inValue, loopCount);
-                        else
-                        {
-                            for (size_t n(0);  n < loopCount;  n++)
-                                pT[n] = inValue;
-                        }
-					}
-					return pT ? true : false;
+    				T* pT = reinterpret_cast<T*>(GetHostPointer());
+    				if (!pT) {
+        				return false;
+    				}
+
+					size_t bufferSize = GetByteCount() / sizeof(T);
+					if (bufferSize == 0) {
+						return false;
+    				}
+
+    				for (size_t i = 0; i < bufferSize; ++i) {
+        				pT[i] = inValue;
+    				}
+
+    				return true;
 				}
 
 				/**

@@ -817,7 +817,7 @@ bool CNTV2DeviceScanner::GetVirtualDeviceList(NTV2DeviceInfoList& outVirtualDevL
 	if (info.GetValue(AJA_SystemInfoTag_Path_PersistenceStoreUser, vdevPath) != AJA_STATUS_SUCCESS)
 		return false;
 	vdevPath = vdevPath + "virtualdevices";
-	int vdIndex = outVirtualDevList.size();
+	ULWord vdIndex = ULWord(outVirtualDevList.size());
 	std::vector<std::string> vdevFiles;
 	AJAFileIO::ReadDirectory(vdevPath, "*.vdev", vdevFiles);
 	for (const auto& vdevFile : vdevFiles)
