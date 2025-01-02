@@ -249,8 +249,9 @@ public:
 		@return		True if successful; otherwise false.
 		@param[in]	inNameString		Specifies the virtual device name to search for.
 		@param[out] outDevice			Receives the open, ready-to-use CNTV2Card instance.
+		@param[in]  inRescan			Will rescan devices before returning the open CNTV2Card instance.
 	**/
-	static bool									GetVirtualDeviceWithName (const std::string & inNameString, CNTV2Card & outDevice);
+	static bool									GetVirtualDeviceWithName (const std::string & inNameString, CNTV2Card & outDevice, const bool inRescan = true);
 
 	/**
 		@brief		Rescans the host, and returns an open CNTV2Card instance for the first AJA device whose serial number contains the given value.

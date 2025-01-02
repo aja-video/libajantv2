@@ -260,11 +260,12 @@ bool CNTV2DeviceScanner::GetFirstDeviceWithName (const string & inNameSubString,
 
 }	//	GetFirstDeviceWithName
 
-bool CNTV2DeviceScanner::GetVirtualDeviceWithName (const string & inNameString, CNTV2Card & outDevice)
+bool CNTV2DeviceScanner::GetVirtualDeviceWithName (const string & inNameString, CNTV2Card & outDevice, const bool inRescan)
 {
 	outDevice.Close();
 	AJAAutoLock tmpLock(&sDevInfoListLock);
-	ScanHardware();
+	if (inRescan)
+		ScanHardware();
 	string	nameString(inNameString);  aja::lower(nameString);
 	for (size_t ndx(0);  ndx < sDevInfoList.size();  ndx++)
 	{
