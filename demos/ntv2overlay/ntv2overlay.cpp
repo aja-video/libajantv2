@@ -397,14 +397,12 @@ static ULWord gPlayEnterCount(0), gPlayExitCount(0);
 //	The output thread:
 //		-	at startup:
 //			-	configures the overlay FrameStore
-//			-	routes my (output) widgets
 //			-	initializes (but doesn't start) AutoCirculate (to allocate 2 device buffers)
 //		-	while running:
 //			-	blits the overlay image into the host overlay raster buffer
 //			-	DMAs the overlay raster buffer to the device for mixing
 //		-	terminates when AutoCirculate channel is stopped or when mGlobalQuit goes true
 //			-	ensures my AutoCirculate channel is stopped
-//			-	removes my (output) widget routing
 //
 void NTV2Overlay::OutputThread (void)
 {
@@ -439,13 +437,13 @@ void NTV2Overlay::OutputThread (void)
 	while (!mGlobalQuit)
 	{
 		//	Input thread will signal us to terminate by stopping A/C...
-		if (mDevice.AutoCirculateGetStatus(mConfig.fOutputChannel, acStatus)  &&  acStatus.IsStopped())
+		if (mDevice.AutoCirculateGetStatus(mConfig.fInputChannel, acStatus)  &&  acStatus.IsStopped())
 			break;	//	Stopped, exit thread
 
 		//	Wait for the next input vertical interrupt event to get signaled...
 		if (mDevice.WaitForInputVerticalInterrupt(mConfig.fInputChannel))
-		{	++goodWaits;
-
+		{
+			++goodWaits;
 			//	Clear host buffer, blit the "bug" into it, then transfer it to device...
 			hostBuffer.Fill(ULWord(0));
 			if (::CopyRaster (mConfig.fPixelFormat,
@@ -521,15 +519,12 @@ void NTV2Overlay::InputThreadStatic (AJAThread * pThread, void * pContext)		//	s
 //	The input thread:
 //		-	waits indefinitely for a stable input signal, and if one is found:
 //			-	configures an input FrameStore (if needed for capturing frames to host)
-//			-	routes all input widgets
 //			-	initializes AutoCirculate to reserve a couple of device frame buffers
 //			-	starts a new output thread
 //			-	waits indefinitely to see if the input signal is lost or changes, and if it does:
-//				-	tells the output thread to exit
-//				-	stops input AutoCirculate, and disables my monitor/capture FrameStore
+//				-	stops input AutoCirculate which signals the output thread to exit
 //		-	upon termination:
 //			-	ensures my monitor/capture AutoCirculate channel is stopped
-//			-	clears my input widget routing
 //
 void NTV2Overlay::InputThread (void)
 {
@@ -560,6 +555,8 @@ void NTV2Overlay::InputThread (void)
 		else
 			{cerr << "## NOTE:  Input A/C allocate device frame buffer range failed" << endl;	return;}
 		mDevice.SetInputFrame (mConfig.fInputChannel, fbNum);
+		
+		mDevice.AutoCirculateStart(mConfig.fInputChannel);
 
 		StartOutputThread();	//	Start a new playout thread
 
@@ -596,15 +593,12 @@ void NTV2Overlay::InputThread (void)
 			}
 			if (vfChanged || csChanged)
 			{
-				mDevice.AutoCirculateStop(mConfig.fOutputChannel);	//	This signals output thread to exit
-				mDevice.AutoCirculateStop(mConfig.fInputChannel);	//	Stop input A/C
-				mDevice.DisableChannel(mConfig.fInputChannel);		//	Disable input FrameStore
+				mDevice.AutoCirculateStop(mConfig.fInputChannel);	//	Stop input A/C which also signals output thread to stop
 				break;	//	exit inner loop
 			}	//	if incoming video format changed
 		}	//	inner loop -- until signal change
 	}	//	loop til quit signaled
 	mDevice.AutoCirculateStop(mConfig.fInputChannel);
-	mDevice.RemoveConnections(mInputConnections);
 	OVRLNOTE("Completed: " << DEC(vfChgTally) << " signal changes, " << DEC(waitTally) << " good waits, " << DEC(badWaits) << " bad waits");
 
 }	//	InputThread
