@@ -625,8 +625,10 @@ typedef enum
 	kVRegHDMIOutStatus1						= VIRTUALREG_START+641,
 	kVRegAudioOutputToneSelect				= VIRTUALREG_START+642,
 	kVRegDynFirmwareUpdateCounts			= VIRTUALREG_START+643,		//	MS 16 bits: # attempts;  LS 16 bits: # successful
+	kVRegPCILinkSpeed       				= VIRTUALREG_START+644,
+	kVRegPCILinkWidth		        		= VIRTUALREG_START+645,
 
-	kVRegLastAJA							= VIRTUALREG_START+644,		///< @brief The last AJA virtual register slot
+	kVRegLastAJA							= VIRTUALREG_START+646,		///< @brief The last AJA virtual register slot
 	kVRegFirstOEM							= kVRegLastAJA + 1,			///< @brief The first virtual register slot available for general use
 	kVRegLast								= VIRTUALREG_START + MAX_NUM_VIRTUAL_REGISTERS - 1	///< @brief Last virtual register slot
 

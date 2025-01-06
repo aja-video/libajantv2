@@ -84,6 +84,7 @@
 #include "ntv2mcap.h"
 #include "ntv2stream.h"
 #include "../ntv2video.h"
+#include "../ntv2pciconfig.h"
 
 #if  !defined(x86_64) && !defined(aarch64)
 #error "*** AJA driver must be built 64 bit ***"
@@ -3529,7 +3530,10 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
         MSG("%s: serial number %s\n", ntv2pp->name, versionString);
         getPCIFPGAVersionString(deviceNumber, versionString, STRMAX);
         MSG("%s: firmware version %s\n", ntv2pp->name, versionString);
-        MSG("%s: hotplug %s\n", ntv2pp->name, ntv2pp->hotplug? "enabled":"disabled");
+        MSG("%s: pci speed %d  width %d  hotplug %s\n", ntv2pp->name,
+            ntv2ReadPciLinkSpeed(&ntv2pp->systemContext),
+            ntv2ReadPciLinkWidth(&ntv2pp->systemContext),
+            ntv2pp->hotplug? "enabled":"disabled");
 
         // initialize dma
         dmaInit(deviceNumber);
