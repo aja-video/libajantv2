@@ -3937,14 +3937,42 @@ typedef enum
 		@return		An NTV2AudioSystemSet having the specified contiguous range of NTV2AudioSystems.
 	**/
 	AJAExport NTV2AudioSystemSet NTV2MakeAudioSystemSet (const NTV2AudioSystem inFirstAudioSystem, const UWord inCount = 1);	//	New in SDK 16.2
+
+
+	/**
+		Convenience macros that delimit NTV2Message structs.
+		For driver builds, the structs are simply structs.
+		For client builds, the structs are classes with the appropriate __declspec(dllexport)
+		or __declspec(dllimport) decorations, constructors, ostream writers, etc.
+	**/
+	#define NTV2_STRUCT_BEGIN(__struct_name__)		class AJAExport __struct_name__ {public:
+	#define NTV2_STRUCT_END(__struct_name__)		};
+	#define NTV2_BEGIN_PRIVATE						private:
+	#define NTV2_END_PRIVATE						public:
+	#define NTV2_BEGIN_PROTECTED					protected:
+	#define NTV2_END_PROTECTED						public:
+
+	#if defined (_DEBUG)
+		#define NTV2_IS_STRUCT_VALID_IMPL(__hr__,__tr__)	bool NTV2_IS_STRUCT_VALID (void) const		{return __hr__.IsValid() && __tr__.IsValid();}
+		#define NTV2_ASSERT_STRUCT_VALID					do	{NTV2_ASSERT (NTV2_IS_STRUCT_VALID ());} while (false)
+	#else
+		#define NTV2_IS_STRUCT_VALID_IMPL(__hr__,__tr__)
+		#define NTV2_ASSERT_STRUCT_VALID
+	#endif
+#else	//	defined (NTV2_BUILDING_DRIVER)
+	#define NTV2_STRUCT_BEGIN(__struct_name__)		typedef struct __struct_name__ {
+	#define NTV2_STRUCT_END(__struct_name__)		} __struct_name__;
+	#define NTV2_BEGIN_PRIVATE
+	#define NTV2_END_PRIVATE
+	#define NTV2_IS_STRUCT_VALID_IMPL(__hr__,__tr__)
+	#define NTV2_ASSERT_STRUCT_VALID
 #endif	//	!defined (NTV2_BUILDING_DRIVER)
 
 
 /**
 	@brief	Everything needed to call CNTV2Card::ReadRegister or CNTV2Card::WriteRegister functions.
 **/
-typedef struct NTV2RegInfo
-{
+NTV2_STRUCT_BEGIN(NTV2RegInfo)
 	ULWord	registerNumber;		///< @brief My register number to use in a ReadRegister or WriteRegister call.
 	ULWord	registerValue;		///< @brief My register value to use in a ReadRegister or WriteRegister call.
 	ULWord	registerMask;		///< @brief My register mask value to use in a ReadRegister or WriteRegister call.
@@ -3954,50 +3982,55 @@ typedef struct NTV2RegInfo
 		/**
 			@brief	Constructs me from the given parameters.
 			@param[in]	inRegNum	Specifies the register number to use. If not specified, defaults to zero.
-			@param[in]	inRegValue	Specifies the register value to use. If not specified, defaults to zero.
-			@param[in]	inRegMask	Specifies the bit mask to use. If not specified, defaults to 0xFFFFFFFF.
-			@param[in]	inRegShift	Specifies the shift to use. If not specified, defaults to zero.
+			@param[in]	inValue		Specifies the register value to use. If not specified, defaults to zero.
+			@param[in]	inMask		Specifies the bit mask to use. If not specified, defaults to 0xFFFFFFFF.
+			@param[in]	inShift		Specifies the shift to use. If not specified, defaults to zero.
 		**/
-		AJAExport NTV2RegInfo (const ULWord inRegNum = 0, const ULWord inRegValue = 0, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0)
+		NTV2RegInfo (const ULWord inRegNum = 0, const ULWord inValue = 0, const ULWord inMask = 0xFFFFFFFF, const ULWord inShift = 0)
 			:	registerNumber	(inRegNum),
-				registerValue	(inRegValue),
-				registerMask	(inRegMask),
-				registerShift	(inRegShift)
+				registerValue	(inValue),
+				registerMask	(inMask),
+				registerShift	(inShift)
 		{
 		}
 
 		/**
 			@brief	Sets me from the given parameters.
 			@param[in]	inRegNum	Specifies the register number to use.
-			@param[in]	inRegValue	Specifies the register value to use.
-			@param[in]	inRegMask	Specifies the bit mask to use. If not specified, defaults to 0xFFFFFFFF.
-			@param[in]	inRegShift	Specifies the shift to use. If not specified, defaults to zero.
+			@param[in]	inValue		Specifies the register value to use.
+			@param[in]	inMask		Specifies the bit mask to use. If not specified, defaults to 0xFFFFFFFF.
+			@param[in]	inShift		Specifies the shift to use. If not specified, defaults to zero.
 		**/
-		AJAExport inline void	Set (const ULWord inRegNum, const ULWord inRegValue, const ULWord inRegMask = 0xFFFFFFFF, const ULWord inRegShift = 0)
-													{registerNumber = inRegNum; registerValue = inRegValue; registerMask = inRegMask; registerShift = inRegShift;}
+		inline void	Set (const ULWord inRegNum, const ULWord inValue,
+							const ULWord inMask = 0xFFFFFFFF, const ULWord inShift = 0)
+									{setRegNum(inRegNum).setValue(inValue).setMask(inMask).setShift(inShift);}
 		/**
 			@brief	Invalidates me, setting my register number, value, mask and shift values to 0xFFFFFFFF.
 		**/
-		AJAExport inline void	MakeInvalid (void)				{registerNumber = registerValue = registerMask	= registerShift = 0xFFFFFFFF;}
+		inline void		MakeInvalid (void)
+									{registerNumber = registerValue = registerMask	= registerShift = 0xFFFFFFFF;}
 
 		/**
-			@return True if I'm considered "valid", or false if my register number, value, mask and shift values are all 0xFFFFFFFF.
+			@return True if I'm considered "valid", or false if my register number, value,
+					mask and shift values are all 0xFFFFFFFF.
 		**/
-		AJAExport inline bool	IsValid (void) const			{return registerNumber != 0xFFFFFFFF || registerValue != 0xFFFFFFFF || registerMask != 0xFFFFFFFF || registerShift != 0xFFFFFFFF;}
+		inline bool		IsValid (void) const	{return regNum() != 0xFFFFFFFF || value() != 0xFFFFFFFF
+														|| mask() != 0xFFFFFFFF || shift() != 0xFFFFFFFF;}
 
 		/**
 			@return		True if I'm identical to the right-hand-side NTV2RegInfo.
 			@param[in]	inRHS	Specifies the right-hand-side NTV2RegInfo that will be compared to me.
-			@note		To synthesize the other comparison operators (!=, <=, >, >=), in client code, add "#include <utility>", and "using namespace std::rel_ops;".
+			@note		To synthesize the other comparison operators (!=, <=, >, >=), in client code,
+						add "#include <utility>", and "using namespace std::rel_ops;".
 		**/
-		AJAExport inline bool	operator == (const NTV2RegInfo & inRHS) const	{return registerNumber == inRHS.registerNumber && registerValue == inRHS.registerValue
-																			&& registerMask == inRHS.registerMask && registerShift == inRHS.registerShift;}
+		inline bool	operator == (const NTV2RegInfo & inRHS) const	{return regNum() == inRHS.regNum() && value() == inRHS.value()
+																			&& mask() == inRHS.mask() && shift() == inRHS.shift();}
 		/**
 			@return		True if I'm less than the right-hand-side NTV2RegInfo.
 			@param[in]	inRHS		Specifies the right-hand-side NTV2RegInfo that will be compared to me.
 			@note		To synthesize the other comparison operators (!=, <=, >, >=), in client code, add "#include <utility>", and "using namespace std::rel_ops;".
 		**/
-		AJAExport bool			operator < (const NTV2RegInfo & inRHS) const;
+		bool			operator < (const NTV2RegInfo & inRHS) const;
 
 		/**
 			@brief		Renders me to the given output stream in a human-readable format.
@@ -4006,7 +4039,7 @@ typedef struct NTV2RegInfo
 										If true, renders me as source code.
 			@return		The output stream.
 		**/
-		AJAExport std::ostream & Print (std::ostream & outputStream, const bool inAsCode = false) const;
+		std::ostream &	Print (std::ostream & outputStream, const bool inAsCode = false) const;
 
 		/**
 			@brief		Renders me to the given output stream as source code using a "WriteRegister" function call.
@@ -4015,10 +4048,18 @@ typedef struct NTV2RegInfo
 			@param[in]	inDeviceID		Optionally specifies the ::NTV2DeviceID for properly interpreting my register values.
 			@return		The output stream.
 		**/
-		AJAExport std::ostream & PrintCode (std::ostream & outputStream, const int inRadix = 16, const NTV2DeviceID inDeviceID = DEVICE_ID_INVALID) const; //	New in SDK 16.0, added inDeviceID in 16.2
-	#endif	//	not NTV2_BUILDING_DRIVER
-} NTV2RegInfo;
+		std::ostream &	PrintCode (std::ostream & outputStream, const int inRadix = 16, const NTV2DeviceID inDeviceID = DEVICE_ID_INVALID) const; //	New in SDK 16.0, added inDeviceID in 16.2
 
+		inline ULWord			regNum (void) const	{return registerNumber;}	//	New in SDK 17.5
+		inline ULWord			value (void) const	{return registerValue;}		//	New in SDK 17.5
+		inline ULWord			mask (void) const	{return registerMask;}		//	New in SDK 17.5
+		inline ULWord			shift (void) const	{return registerShift;}		//	New in SDK 17.5
+		inline NTV2RegInfo &	setRegNum (const ULWord val){registerNumber = val; return *this;}	//	New in SDK 17.5
+		inline NTV2RegInfo &	setValue (const ULWord val)	{registerShift = val; return *this;}	//	New in SDK 17.5
+		inline NTV2RegInfo &	setMask (const ULWord val)	{registerMask = val; return *this;}	//	New in SDK 17.5
+		inline NTV2RegInfo &	setShift (const ULWord val)	{if (val < 32) registerShift = val; return *this;}	//	New in SDK 17.5
+	#endif	//	!defined(NTV2_BUILDING_DRIVER)
+NTV2_STRUCT_END(NTV2RegInfo)
 
 typedef NTV2RegInfo NTV2ReadWriteRegisterSingle;	///< @brief This is an alias for NTV2RegInfo -- everything needed to make a future ReadRegister or WriteRegister call.
 
@@ -4410,6 +4451,7 @@ typedef struct AUTOCIRCULATE_DATA
 	#if !defined (NTV2_BUILDING_DRIVER)
 		public:
 			AJAExport explicit AUTOCIRCULATE_DATA (const AUTO_CIRC_COMMAND inCommand = AUTO_CIRC_COMMAND_INVALID, const NTV2Crosspoint inCrosspoint = NTV2CROSSPOINT_INVALID);
+			AJAExport std::ostream & Print (std::ostream & oss) const;
 			NTV2_RPC_CODEC_DECLS
 	#endif	//	user-space clients only
 } AUTOCIRCULATE_DATA;
@@ -5585,26 +5627,8 @@ typedef enum
 		#define BITSTREAM_MCAP_CONTROL				5			///< @brief MCAP control register
 		#define BITSTREAM_MCAP_DATA					6			///< @brief MCAP data register
 		#define BITSTREAM_NUM_REGISTERS				7			///< @brief Number of MCAP registes
-	
+
 		#if !defined (NTV2_BUILDING_DRIVER)
-			/**
-				Convenience macros that delimit the new structs.
-				For driver builds, the structs are simply structs.
-				For client builds, the structs are classes with the appropriate __declspec(dllexport) or __declspec(dllimport) decorations.
-			**/
-			#define NTV2_STRUCT_BEGIN(__struct_name__)		class AJAExport __struct_name__ {public:
-			#define NTV2_STRUCT_END(__struct_name__)		};
-			#define NTV2_BEGIN_PRIVATE						private:
-			#define NTV2_END_PRIVATE						public:
-
-			#if defined (_DEBUG)
-				#define NTV2_IS_STRUCT_VALID_IMPL(__hr__,__tr__)	bool NTV2_IS_STRUCT_VALID (void) const		{return __hr__.IsValid() && __tr__.IsValid();}
-				#define NTV2_ASSERT_STRUCT_VALID					do	{NTV2_ASSERT (NTV2_IS_STRUCT_VALID ());} while (false)
-			#else
-				#define NTV2_IS_STRUCT_VALID_IMPL(__hr__,__tr__)
-				#define NTV2_ASSERT_STRUCT_VALID
-			#endif
-
 			//	Convenience macros for compactly formatting ostream output...
 			#define Hex(__x__)				std::hex << (__x__) << std::dec
 			#define xHex(__x__)				"0x" << Hex(__x__)
@@ -5653,14 +5677,7 @@ typedef enum
 			#define bBIN04(__x__)			"b" << BIN04(__x__)
 			#define bBIN0N(__x__,__n__)		"b" << BIN0N(__x__,__n__)
 			#define fDEC(__x__,__w__,__p__) std::dec << std::fixed << std::setw(__w__) << std::setprecision(__p__) << (__x__)
-		#else
-			#define NTV2_STRUCT_BEGIN(__struct_name__)		typedef struct __struct_name__ {
-			#define NTV2_STRUCT_END(__struct_name__)		} __struct_name__;
-			#define NTV2_BEGIN_PRIVATE
-			#define NTV2_END_PRIVATE
-			#define NTV2_IS_STRUCT_VALID_IMPL(__hr__,__tr__)
-			#define NTV2_ASSERT_STRUCT_VALID
-		#endif
+		#endif	//	!defined (NTV2_BUILDING_DRIVER)
 
 
 		#if defined (AJAMac)
@@ -5670,8 +5687,9 @@ typedef enum
 
 		/**
 			@brief	Describes the horizontal and vertical size dimensions of a raster, bitmap, frame or image.
+			@note   Renamed in SDK 17.5 from NTV2FrameDimensions to NTV2FrameSize.
 		**/
-		NTV2_STRUCT_BEGIN(NTV2FrameDimensions)
+		NTV2_STRUCT_BEGIN(NTV2FrameSize)
 			#if !defined (NTV2_BUILDING_DRIVER)
 				//	Member Functions
 
@@ -5680,26 +5698,29 @@ typedef enum
 					@param[in]	inWidth		Optionally specifies my initial width dimension, in pixels. Defaults to zero.
 					@param[in]	inHeight	Optionally specifies my initial height dimension, in lines. Defaults to zero.
 				**/
-				inline NTV2FrameDimensions (const ULWord inWidth = 0, const ULWord inHeight = 0)	{Set (inWidth, inHeight);}
-				inline ULWord					GetWidth (void) const		{return mWidth;}	///< @return	My width, in pixels.
-				inline ULWord					GetHeight (void) const		{return mHeight;}	///< @return	My height, in lines/rows.
-				inline ULWord					Width (void) const			{return mWidth;}	///< @return	My width, in pixels.
-				inline ULWord					Height (void) const			{return mHeight;}	///< @return	My height, in lines/rows.
-				inline bool						IsValid (void) const		{return Width() && Height();}	///< @return	True if both my width and height are non-zero.
+				explicit inline NTV2FrameSize (const ULWord inWidth = 0, const ULWord inHeight = 0)	{Set (inWidth, inHeight);}
+				explicit inline	NTV2FrameSize (const NTV2FrameGeometry inFG)	{set(FGWidth(inFG), FGHeight(inFG));}
+				inline ULWord	width (void) const		{return mWidth;}	///< @return	My width, in pixels.
+				inline ULWord	height (void) const		{return mHeight;}	///< @return	My height, in lines/rows.
+				inline bool		isValid (void) const	{return magnitude() > 0;}	///< @return	True if both my width and height are non-zero.
+				inline bool		operator == (const NTV2FrameSize & rhs) const	{return magnitude() == rhs.magnitude();}	///< @return	True if I'm equal to the rhs argument
+				inline bool		operator < (const NTV2FrameSize & rhs) const	{return magnitude() < rhs.magnitude();}	///< @return	True if I precede the rhs argument
+				inline operator	bool() const	{return isValid();}	///< @return	True if I'm valid (cast to bool)
+				operator		NTV2FrameGeometry() const;	///< @returns	my NTV2FrameGeometry or NTV2_FG_INVALID if invalid or non-SMPTE
 
 				/**
 					@brief		Sets my width dimension.
 					@param[in]	inValue		Specifies the new width dimension, in pixels.
 					@return		A non-constant reference to me.
 				**/
-				inline NTV2FrameDimensions &	SetWidth (const ULWord inValue)						{mWidth = inValue; return *this;}
+				inline NTV2FrameSize &	setWidth (const ULWord inValue)			{mWidth = inValue; return *this;}
 
 				/**
 					@brief		Sets my height dimension.
 					@param[in]	inValue		Specifies the new height dimension, in lines.
 					@return		A non-constant reference to me.
 				**/
-				inline NTV2FrameDimensions &	SetHeight (const ULWord inValue)					{mHeight = inValue; return *this;}
+				inline NTV2FrameSize &	setHeight (const ULWord inValue)		{mHeight = inValue; return *this;}
 
 				/**
 					@brief		Sets my dimension values.
@@ -5707,21 +5728,57 @@ typedef enum
 					@param[in]	inHeight	Specifies the new height dimension, in lines.
 					@return		A non-constant reference to me.
 				**/
-				inline NTV2FrameDimensions &	Set (const ULWord inWidth, const ULWord inHeight)	{return SetWidth (inWidth).SetHeight (inHeight);}
+				inline NTV2FrameSize &	set (const ULWord inWidth, const ULWord inHeight)	{return setWidth(inWidth).setHeight(inHeight);}
+
+				/**
+					@brief		Assigns me from an NTV2FrameGeometry.
+					@param[in]	rhs		Specifies the NTV2FrameGeometry.
+					@return		A non-constant reference to me.
+				**/
+				inline NTV2FrameSize &	operator = (const NTV2FrameGeometry & rhs)	{return set(FGWidth(rhs), FGHeight(rhs));}
 
 				/**
 					@brief		Sets both my width and height to zero (an invalid state).
 					@return		A non-constant reference to me.
 				**/
-				inline NTV2FrameDimensions &	Reset (void)										{return Set (0, 0);}
+				inline NTV2FrameSize &	reset (void)			{return set (0, 0);}
+
+				/**
+					@brief		Swaps my width and height.
+					@return		A non-constant reference to me.
+				**/
+				inline NTV2FrameSize &	swap (void)				{return set (height(), width());}
+
+				#if !defined(NTV2_DEPRECATE_17_5)
+					inline ULWord GetWidth (void) const  {return width();}	///< @deprecated	Use width() instead
+					inline ULWord GetHeight (void) const  {return height();}///< @deprecated	Use height() instead
+					inline ULWord Width (void) const  {return width();}		///< @deprecated	Use width() instead
+					inline ULWord Height (void) const  {return height();}	///< @deprecated	Use height() instead
+					inline bool IsValid (void) const  {return isValid();}	///< @deprecated	Use isValid() instead
+					inline NTV2FrameSize & SetWidth (const ULWord v)	{return setWidth(v);}	///< @deprecated	Use setWidth() instead
+					inline NTV2FrameSize & SetHeight (const ULWord v)	{return setHeight(v);}	///< @deprecated	Use setHeight() instead
+					inline NTV2FrameSize & Set (const ULWord w, const ULWord h)	{return set(w,h);}	///< @deprecated	Use set() instead
+					inline NTV2FrameSize & Reset (void)	{return reset();}	///< @deprecated	Use reset() instead
+				#endif	//	!defined(NTV2_DEPRECATE_17_5)
+
+				static ULWord	FGWidth (const NTV2FrameGeometry fg);
+				static ULWord	FGHeight (const NTV2FrameGeometry fg);
+
+				NTV2_BEGIN_PROTECTED
+					inline uint64_t		magnitude(void) const	{return (uint64_t(width()) << 32) | uint64_t(height());}
+					typedef std::map<NTV2FrameGeometry, ULWord>		FGSizesMap;
+					typedef FGSizesMap::const_iterator				FGSizesMapCI;
+				NTV2_END_PROTECTED
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
 
 			NTV2_BEGIN_PRIVATE
 				ULWord	mWidth;		///< @brief The horizontal dimension, in pixels.
 				ULWord	mHeight;	///< @brief The vertical dimension, in lines.
 			NTV2_END_PRIVATE
-		NTV2_STRUCT_END(NTV2FrameDimensions)
-
+		NTV2_STRUCT_END(NTV2FrameSize)
+		#if !defined(NTV2_DEPRECATE_17_5)
+			typedef NTV2FrameSize	NTV2FrameDimensions;
+		#endif	//	!defined(NTV2_DEPRECATE_17_5)
 
 		/**
 			@brief		Describes a segmented data transfer (copy or move) from a source memory location to a
