@@ -6033,12 +6033,12 @@ typedef enum
 					@name	Scan Direction Constants
 				**/
 				///@{
-				static bool Direction_TopToBottom;	///< @brief Use this in setDestDirection or setSourceDirection for top-to-bottom scanning
-				static bool Direction_TopDown;		///< @brief Use this in setDestDirection or setSourceDirection for top-to-bottom scanning
-				static bool Direction_Normal;		///< @brief Use this in setDestDirection or setSourceDirection for top-to-bottom scanning
-				static bool Direction_BottomToTop;	///< @brief Use this in setDestDirection or setSourceDirection for bottom-to-top scanning
-				static bool Direction_BottomUp;		///< @brief Use this in setDestDirection or setSourceDirection for bottom-to-top scanning
-				static bool Direction_Flipped;		///< @brief Use this in setDestDirection or setSourceDirection for bottom-to-top scanning
+				static const bool Direction_TopToBottom	= true;		///< @brief Use this in setDestDirection or setSourceDirection for top-to-bottom scanning
+				static const bool Direction_TopDown		= true;		///< @brief Use this in setDestDirection or setSourceDirection for top-to-bottom scanning
+				static const bool Direction_Normal		= true;		///< @brief Use this in setDestDirection or setSourceDirection for top-to-bottom scanning
+				static const bool Direction_BottomToTop	= false;	///< @brief Use this in setDestDirection or setSourceDirection for bottom-to-top scanning
+				static const bool Direction_BottomUp	= false;	///< @brief Use this in setDestDirection or setSourceDirection for bottom-to-top scanning
+				static const bool Direction_Flipped		= false;	///< @brief Use this in setDestDirection or setSourceDirection for bottom-to-top scanning
 				///@}
 			#endif	//	!defined (NTV2_BUILDING_DRIVER)
 

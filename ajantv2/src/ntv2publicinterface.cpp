@@ -1507,12 +1507,6 @@ ULWord NTV2FrameSize::FGHeight (const NTV2FrameGeometry fg)
 
 
 static const string sSegXferUnits[] = {"", " U8", " U16", "", " U32", "", "", "", " U64", ""};
-bool NTV2SegmentedXferInfo::Direction_TopToBottom (true);
-bool NTV2SegmentedXferInfo::Direction_TopDown (true);
-bool NTV2SegmentedXferInfo::Direction_Normal (true);
-bool NTV2SegmentedXferInfo::Direction_BottomToTop (false);
-bool NTV2SegmentedXferInfo::Direction_BottomUp (false);
-bool NTV2SegmentedXferInfo::Direction_Flipped (false);
 
 ostream & NTV2SegmentedXferInfo::Print (ostream & inStrm, const bool inDumpSegments) const
 {
