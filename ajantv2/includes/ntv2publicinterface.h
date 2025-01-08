@@ -6054,39 +6054,37 @@ typedef enum
 		NTV2_STRUCT_END(NTV2SegmentedXferInfo)
 
 		/**
-			@brief	A generic user-space buffer object that has an address and a length.
-					Used most often to share an arbitrary-sized chunk of host memory with the NTV2 kernel driver
-					through a CNTV2DriverInterface::NTV2Message call.
-
+			@brief	Describes a user-space buffer on the host computer.
+					I have an address and a length, plus some optional attributes (allocated by SDK?, page-aligned?  etc.).
 					-	For a static or global buffer, simply construct from the variable:
 						@code
-							static ULWord pFoo [1000];
+							static ULWord pFoo[1000];
 							{
-								NTV2Buffer foo (pFoo, sizeof (pFoo));
+								NTV2Buffer foo (pFoo, sizeof(pFoo));
 								. . .
 							}	//	When foo goes out of scope, it won't try to free pFoo
 						@endcode
 					-	For stack-based buffers, simply construct from the variable:
 						@code
 							{
-								ULWord pFoo [100];
-								NTV2Buffer foo (pFoo, sizeof (pFoo));
+								ULWord pFoo[100];
+								NTV2Buffer foo (pFoo, sizeof(pFoo));
 								. . .
-							}	//	No need to do anything, as both foo and pFoo are automatically freed when they go out of scope
+							}	//	Both foo and pFoo are automatically freed when they go out of scope
 						@endcode
-					-	For a buffer you allocate and free yourself:
+					-	To allocate and free a buffer of 100 Bar's:
 						@code
-							NTV2Buffer	foo (new Bar [1], sizeof (Bar));
+							NTV2Buffer	foo (new Bar[100], sizeof(Bar));
 							. . .
-							delete [] (Bar*) foo.GetHostPointer ();		//	You must free the memory yourself
+							delete [] (Bar*) foo.GetHostPointer();		//	You must free the memory yourself
 						@endcode
-					-	For a 2K-byte buffer that's allocated and freed automatically by the SDK:
+					-	Let the SDK allocate and free a buffer of 100 Bar's:
 						@code
 							{
-								NTV2Buffer foo (2048);
+								NTV2Buffer foo (100 * sizeof(Bar));
 								::memset (foo.GetHostPointer(), 0, foo.GetByteCount());
 								. . .
-							}	//	The memory is freed automatically when foo goes out of scope
+							}	//	Automatically freed when foo goes out of scope
 						@endcode
 			@note	This struct uses a constructor to properly initialize itself.
 					Do not use <b>memset</b> or <b>bzero</b> to initialize or "clear" it.
@@ -6096,7 +6094,7 @@ typedef enum
 				ULWord64	fUserSpacePtr;			///< @brief User space pointer. Do not set directly. Use constructor or Set method.
 				ULWord		fByteCount;				///< @brief The (maximum) size of the buffer pointed to by fUserSpacePtr, in bytes.
 													///			Do not set directly. Instead, use the constructor or the Set method.
-				ULWord		fFlags;					///< @brief Reserved for future use
+				ULWord		fFlags;					///< @brief	Reserved -- for internal SDK use only
 				#if defined (AJAMac)
 					ULWord64	fKernelSpacePtr;	///< @brief Reserved -- Mac driver use only
 					ULWord64	fIOMemoryDesc;		///< @brief Reserved -- Mac driver use only
