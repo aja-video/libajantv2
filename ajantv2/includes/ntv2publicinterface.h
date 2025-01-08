@@ -3964,6 +3964,8 @@ typedef enum
 	#define NTV2_STRUCT_END(__struct_name__)		} __struct_name__;
 	#define NTV2_BEGIN_PRIVATE
 	#define NTV2_END_PRIVATE
+	#define NTV2_BEGIN_PROTECTED
+	#define NTV2_END_PROTECTED
 	#define NTV2_IS_STRUCT_VALID_IMPL(__hr__,__tr__)
 	#define NTV2_ASSERT_STRUCT_VALID
 #endif	//	!defined (NTV2_BUILDING_DRIVER)
