@@ -59,6 +59,8 @@ class NTV2Overlay
 			@brief	Sets up everything I need for capturing and playing audio.
 		**/
 		virtual AJAStatus		SetupAudio (void);
+		
+		virtual AJAStatus		SetupHostBuffers (void);
 
 		/**
 			@brief	Sets up my overlay "bug" image buffer.
@@ -131,6 +133,7 @@ class NTV2Overlay
 
 	//	Private Member Data
 	private:
+		typedef AJACircularBuffer<NTV2FrameData*>	CircularBuffer;
 		OverlayConfig			mConfig;			///< @brief	My configuration info
 		AJAThread				mPlayThread;		///< @brief	My output thread object
 		AJAThread				mCaptureThread;		///< @brief	My input thread object
@@ -142,6 +145,7 @@ class NTV2Overlay
 		NTV2TaskMode			mSavedTaskMode;		///< @brief	For restoring prior state
 		NTV2XptConnections		mInputConnections;	///< @brief	My capture routing connections
 		NTV2XptConnections		mOutputConnections;	///< @brief	My output routing connections
+		CircularBuffer			mFrameDataRing;		///< @brief	AJACircularBuffer that controls frame data access by producer/consumer threads
 		bool					mGlobalQuit;		///< @brief	Set "true" to gracefully stop
 
 };	//	NTV2Overlay

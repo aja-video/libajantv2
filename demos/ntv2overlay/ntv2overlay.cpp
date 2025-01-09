@@ -240,6 +240,77 @@ AJAStatus NTV2Overlay::SetupAudio (void)
 
 }	//	SetupAudio
 
+AJAStatus NTV2Overlay::SetupHostBuffers (void)
+{
+	CNTV2DemoCommon::SetDefaultPageSize();	//	Set host-specific page size
+	
+	//	Let my circular buffer know when it's time to quit...
+	mFrameDataRing.SetAbortFlag (&mGlobalQuit);
+	
+	//  Determine video buffer size...
+	const ULWord vidBuffSizeBytes (mFormatDesc.GetVideoWriteSize(ULWord(NTV2Buffer::DefaultPageSize())));
+	
+	//	Determine per-field max Anc buffer size...
+	ULWord ancBuffSizeBytes (0);
+	if (!mDevice.GetAncRegionOffsetFromBottom (ancBuffSizeBytes, NTV2_AncRgn_Field2))
+		ancBuffSizeBytes = NTV2_ANCSIZE_MAX;
+	
+	//	Allocate and add each in-host NTV2FrameData to my mFrameDataRing...
+	mHostBuffers.reserve(CIRCULAR_BUFFER_SIZE);
+	while (mHostBuffers.size() < CIRCULAR_BUFFER_SIZE)
+	{
+		mHostBuffers.push_back(NTV2FrameData());			//	Make a new NTV2FrameData...
+		NTV2FrameData & frameData (mHostBuffers.back());	//	...and get a reference to it
+		
+		//	Allocate a page-aligned video buffer (if handling video)...
+		if (!mConfig.fSuppressVideo)
+			if (!frameData.fVideoBuffer.Allocate (vidBuffSizeBytes, /*pageAligned*/true))
+			{
+				BURNFAIL("Failed to allocate " << xHEX0N(vidBuffSizeBytes,8) << "-byte video buffer");
+				return AJA_STATUS_MEMORY;
+			}
+#ifdef NTV2_BUFFER_LOCKING
+		if (frameData.fVideoBuffer)
+			mDevice.DMABufferLock(frameData.fVideoBuffer, true);
+#endif
+#if 0
+		//	Allocate a page-aligned audio buffer (if handling audio)...
+		if (NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem)  &&  mConfig.WithAudio())
+			if (!frameData.fAudioBuffer.Allocate (NTV2_AUDIOSIZE_MAX, /*pageAligned*/true))
+			{
+				BURNFAIL("Failed to allocate " << xHEX0N(NTV2_AUDIOSIZE_MAX,8) << "-byte audio buffer");
+				return AJA_STATUS_MEMORY;
+			}
+		if (frameData.AudioBuffer())
+			frameData.fAudioBuffer.Fill(ULWord(0));
+		
+		if (mConfig.WithAnc() && !mConfig.WithTallVANC())
+		{	//	Allocate page-aligned anc buffers...
+			if (!frameData.fAncBuffer.Allocate (ancBuffSizeBytes, /*pageAligned*/true))
+			{
+				BURNFAIL("Failed to allocate " << xHEX0N(ancBuffSizeBytes,8) << "-byte anc buffer");
+				return AJA_STATUS_MEMORY;
+			}
+			if (!::IsProgressivePicture(mVideoFormat))
+				if (!frameData.fAncBuffer2.Allocate(ancBuffSizeBytes, /*pageAligned*/true))
+				{
+					BURNFAIL("Failed to allocate " << xHEX0N(ancBuffSizeBytes,8) << "-byte F2 anc buffer");
+					return AJA_STATUS_MEMORY;
+				}
+		}
+		if (frameData.AncBuffer())
+			frameData.AncBuffer().Fill(ULWord(0));
+		if (frameData.AncBuffer2())
+			frameData.AncBuffer2().Fill(ULWord(0));
+#endif
+		//	Add this NTV2FrameData to the ring...
+		mFrameDataRing.Add(&frameData);
+	}	//	for each NTV2FrameData
+	
+	return AJA_STATUS_SUCCESS;
+	
+}	//	SetupHostBuffers
+
 
 //	4-byte-per-pixel DrawVLine -- draws a vertical line using the given pixel value and line thickness
 static bool DrawVLine (NTV2Buffer & buf, const NTV2RasterInfo & info, const ULWord argbPixValue, const ULWord pixThickness,
@@ -568,34 +639,9 @@ void NTV2Overlay::InputThread (void)
 				++waitTally;
 			else
 				++badWaits;
-
-			//	Input signal format change?
-			NTV2LHIHDMIColorSpace colorSpace (NTV2_LHIHDMIColorSpaceYCbCr);
-			const NTV2VideoFormat vf (mDevice.GetInputVideoFormat(mConfig.fInputSource));
-			const bool vfChanged(vf != mVideoFormat);
-			const bool csChanged(NTV2IOKind(::GetNTV2InputSourceKind(mConfig.fInputSource)) == NTV2_IOKINDS_HDMI
-								&& mDevice.GetHDMIInputColor(colorSpace, mConfig.fInputChannel)
-								&& colorSpace != mHDMIColorSpace);
-			if (vfChanged)
-			{
-				++vfChgTally;
-				OVRLWARN("Signal format at " << ::NTV2InputSourceToString(mConfig.fInputSource) << " changed from '"
-							<< ::NTV2VideoFormatToString(mVideoFormat) << "' to '" << ::NTV2VideoFormatToString(vf) << "'");
-				cout << "## NOTE: Signal format at " << ::NTV2InputSourceToString(mConfig.fInputSource) << " changed from "
-							<< ::NTV2VideoFormatToString(mVideoFormat) << " to " << ::NTV2VideoFormatToString(vf) << endl;
-			}
-			if (csChanged)
-			{
-				OVRLWARN("HDMI colorspace at " << ::NTV2InputSourceToString(mConfig.fInputSource) << " changed from "
-							<< (mHDMIColorSpace?"RGB":"YUV") << " to " << (colorSpace?"RGB":"YUV"));
-				cout << "## NOTE: " << ::NTV2InputSourceToString(mConfig.fInputSource) << " colorspace changed from "
-							<< (mHDMIColorSpace?"RGB":"YUV") << " to " << (colorSpace?"RGB":"YUV");
-			}
-			if (vfChanged || csChanged)
-			{
-				mDevice.AutoCirculateStop(mConfig.fInputChannel);	//	Stop input A/C which also signals output thread to stop
-				break;	//	exit inner loop
-			}	//	if incoming video format changed
+			
+			mDevice.AutoCirculateTransfer(mConfig.fInputChannel, );
+			
 		}	//	inner loop -- until signal change
 	}	//	loop til quit signaled
 	mDevice.AutoCirculateStop(mConfig.fInputChannel);
