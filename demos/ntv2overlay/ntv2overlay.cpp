@@ -7,8 +7,6 @@
 
 #include "ntv2overlay.h"
 #include "ntv2devicescanner.h"
-#include "ntv2testpatterngen.h"	//	Needed for --novideo
-#include "ntv2vpid.h"
 #include "ajabase/common/types.h"
 #include "ajabase/system/process.h"
 #include "ajabase/system/systemtime.h"
@@ -23,15 +21,7 @@ using namespace std;
 #define	OVRLNOTE	BURNNOTE
 #define	OVRLINFO	BURNINFO
 
-//#define NTV2_BUFFER_LOCKING		//	Define this to pre-lock video/audio buffers in kernel
-#define HasWidgetsAnyOf(_w1,_w2,_w3)	(mDevice.features().CanDoWidget(_w1) || mDevice.features().CanDoWidget(_w2) || mDevice.features().CanDoWidget(_w3))
-#if defined(_DEBUG)
-	static const bool sShowConfig(true);
-#else
-	static const bool sShowConfig(false);
-#endif
 static const uint32_t	kAppSignature	(NTV2_FOURCC('O','v','r','l'));
-
 
 //////////////////////	IMPLEMENTATION
 
@@ -51,7 +41,9 @@ NTV2Overlay::NTV2Overlay (const OverlayConfig & inConfig)
 NTV2Overlay::~NTV2Overlay ()
 {
 	Quit();	//	Stop my capture and playout threads, then destroy them
-	mDevice.UnsubscribeInputVerticalEvent(mConfig.fInputChannel);	//	Unsubscribe from input VBI event
+	mDevice.UnsubscribeInputVerticalEvent(NTV2_CHANNEL1);
+	mDevice.UnsubscribeOutputVerticalEvent(NTV2_CHANNEL1);
+	mDevice.UnsubscribeOutputVerticalEvent(NTV2_CHANNEL2);
 }	//	destructor
 
 
@@ -95,9 +87,18 @@ AJAStatus NTV2Overlay::Init (void)
 		cerr << "## ERROR:  Cannot acquire device because another app (pid " << appPID << ") owns it" << endl;
 		return AJA_STATUS_BUSY;		//	Some other app is using the device
 	}
-	mDevice.ClearRouting();	//	Clear current device routing (since I "own" the device)
 	
 	mDevice.SetEveryFrameServices(NTV2_OEM_TASKS);	//	Force OEM tasks
+	
+	mDevice.EnableChannel(NTV2_CHANNEL1);
+	mDevice.EnableChannel(NTV2_CHANNEL2);
+	
+	//	Enable/subscribe interrupts...
+	mConfig.fInputChannel = NTV2_CHANNEL1;
+	mConfig.fOutputChannel = NTV2_CHANNEL2;
+	mDevice.SubscribeInputVerticalEvent(NTV2_CHANNEL1);
+	mDevice.SubscribeOutputVerticalEvent(NTV2_CHANNEL1);
+	mDevice.SubscribeOutputVerticalEvent(NTV2_CHANNEL2);
 
 	//	Set up the overlay image...
 	status = SetupOverlayBug();
@@ -113,12 +114,11 @@ AJAStatus NTV2Overlay::Init (void)
 		return status;
 
 	//	Ready to go...
-	if (mConfig.IsVerbose() || sShowConfig)
-	{	cerr << mConfig;
-		if (mDevice.IsRemote())
-			cerr	<< "Device Description:  " << mDevice.GetDescription() << endl;
-		cerr << endl;
-	}
+	cerr << mConfig;
+	if (mDevice.IsRemote())
+		cerr	<< "Device Description:  " << mDevice.GetDescription() << endl;
+	cerr << endl;
+
 	OVRLINFO("Configuration: " << mConfig);
 	return AJA_STATUS_SUCCESS;
 
@@ -127,30 +127,20 @@ AJAStatus NTV2Overlay::Init (void)
 
 AJAStatus NTV2Overlay::SetupVideo (void)
 {
-	//	Enable/subscribe interrupts...
-	mConfig.fInputChannel = NTV2_CHANNEL1;
-	mConfig.fOutputChannel = NTV2_CHANNEL2;
-	mDevice.SubscribeInputVerticalEvent(NTV2_CHANNEL1);
-	mDevice.SubscribeOutputVerticalEvent(NTV2_CHANNEL1);
-	mDevice.SubscribeOutputVerticalEvent(NTV2_CHANNEL2);
-
 	//	Flip the input spigot to "receive" if necessary...
 	mDevice.SetSDITransmitEnable (NTV2_CHANNEL1, false);
 	mDevice.SetSDITransmitEnable (NTV2_CHANNEL2, true);
 	
-	mDevice.WaitForOutputVerticalInterrupt (NTV2_CHANNEL1, 10);			//	...and give device time to lock to input
+	mDevice.WaitForOutputVerticalInterrupt (NTV2_CHANNEL1, 10);	
 
 	//	Since this demo runs in E-to-E mode (thru Mixer/Keyer), reference must be tied to the input...
 	mDevice.SetReference(NTV2_REFERENCE_INPUT1);
 
-	//	Transparent overlays will need an ARGB buffer format...
-	mConfig.fPixelFormat = NTV2_FBF_ARGB;
-
-	//	If the device supports different per-channel video formats, configure it as requested...
 	mDevice.SetMultiFormatMode(true);
 	
 	mDevice.ClearRouting();
 	RouteInputSignal();
+	RouteOverlaySignal();
 	RouteOutputSignal();
 	
 	//	Set up Mixer...
@@ -167,63 +157,25 @@ AJAStatus NTV2Overlay::SetupVideo (void)
 
 }	//	SetupVideo
 
-bool NTV2Overlay::RouteInputSignal (void)
+void NTV2Overlay::RouteInputSignal (void)
 {
-	mInputConnections.clear();
-	const NTV2OutputXptID inputOutputXpt (::GetInputSourceOutputXpt(mConfig.fInputSource));
-	const NTV2InputXptID mixBGVidInputXpt(::GetMixerBGInputXpt(mConfig.fInputChannel));
-	const NTV2InputXptID mixBGKeyInputXpt(::GetMixerBGInputXpt(mConfig.fInputChannel, /*key*/true));
-	const NTV2InputXptID fsInputXpt (::GetFrameStoreInputXptFromChannel(mConfig.fInputChannel));
-	
-	if (mConfig.fInputSource == NTV2_INPUTSOURCE_HDMI1
-		&&  mDevice.GetHDMIInputColor(mHDMIColorSpace, mConfig.fInputChannel)
-		&&  mHDMIColorSpace == NTV2_LHIHDMIColorSpaceRGB)
-	{
-		//	The HDMI input video is RGB, but the Mixer only accepts YCbCr video or key.
-		//	The HDMI video signal must go thru a CSC on its way to the Mixer...
-		const NTV2InputXptID cscVidInputXpt(::GetCSCInputXptFromChannel(mConfig.fInputChannel));
-		const NTV2OutputXptID cscVidOutputXpt(::GetCSCOutputXptFromChannel(mConfig.fInputChannel, false/*isKey*/));
-		const NTV2OutputXptID cscKeyOutputXpt(::GetCSCOutputXptFromChannel(mConfig.fInputChannel, true/*isKey*/));
-		
-		mInputConnections.insert(NTV2XptConnection(cscVidInputXpt, inputOutputXpt));	//	CSC vid input from HDMI input
-		mInputConnections.insert(NTV2XptConnection(mixBGVidInputXpt, cscVidOutputXpt));	//	Mixer BG vid input from CSC vid output
-		mInputConnections.insert(NTV2XptConnection(mixBGKeyInputXpt, cscKeyOutputXpt));	//	Mixer BG key input from CSC key output
-		mInputConnections.insert(NTV2XptConnection(fsInputXpt, cscVidOutputXpt));		//	Capture FrameStore's input from CSC vid output
-	}
-	else
-	{
-		mInputConnections.insert(NTV2XptConnection(mixBGVidInputXpt, inputOutputXpt));	//	Mixer BG vid input from input spigot
-		mInputConnections.insert(NTV2XptConnection(mixBGKeyInputXpt, inputOutputXpt));	//	Mixer BG key input from input spigot
-		mInputConnections.insert(NTV2XptConnection(fsInputXpt, inputOutputXpt));		//	Capture FrameStore's input from input spigot
-	}
-	return mDevice.ApplySignalRoute(mInputConnections);
-	
+	mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1, false);
+	mDevice.Connect(NTV2_XptMixer1BGVidInput, NTV2_XptSDIIn1, false);
+	mDevice.Connect(NTV2_XptMixer1BGKeyInput, NTV2_XptSDIIn1, false);
 }	//	RouteInputSignal
 
-
-bool NTV2Overlay::RouteOutputSignal (void)
+void NTV2Overlay::RouteOverlaySignal (void)
 {
-	{	//	FrameStore to CSC to Mixer FG routing...
-		const NTV2OutputXptID fsRGBOutputXpt (::GetFrameStoreOutputXptFromChannel(mConfig.fOutputChannel, /*rgb*/true));
-		const NTV2InputXptID cscVidInputXpt(::GetCSCInputXptFromChannel(mConfig.fOutputChannel));
-		const NTV2OutputXptID cscVidOutputXpt(::GetCSCOutputXptFromChannel(mConfig.fOutputChannel, /*key*/false));
-		const NTV2OutputXptID cscKeyOutputXpt(::GetCSCOutputXptFromChannel(mConfig.fOutputChannel, /*key*/true));
-		const NTV2InputXptID mixFGVidInputXpt(::GetMixerFGInputXpt(mConfig.fInputChannel));
-		const NTV2InputXptID mixFGKeyInputXpt(::GetMixerFGInputXpt(mConfig.fInputChannel, /*key*/true));
-		
-		mOutputConnections.insert(NTV2XptConnection(cscVidInputXpt, fsRGBOutputXpt));		//	CSC vid input from FrameStore RGB output
-		mOutputConnections.insert(NTV2XptConnection(mixFGVidInputXpt, cscVidOutputXpt));	//	Mixer FG vid input from CSC vid output
-		mOutputConnections.insert(NTV2XptConnection(mixFGKeyInputXpt, cscKeyOutputXpt));	//	Mixer FG key input from CSC key output
-	}
-	{	//	Mixer to Output
-		const NTV2InputXptID outputInputXpt (::GetOutputDestInputXpt(mConfig.fOutputDest));
-		const NTV2OutputXptID mixOutputXpt (::GetMixerOutputXptFromChannel(mConfig.fInputChannel));
-		mOutputConnections.insert(NTV2XptConnection(outputInputXpt, mixOutputXpt));	//	SDIOut from Mixer output
-		mOutputConnections.insert(NTV2XptConnection(NTV2_XptHDMIOutQ1Input, mixOutputXpt));	//	HDMIOut from Mixer output
-		
-	}
-	return mDevice.ApplySignalRoute(mOutputConnections);
-	
+	mDevice.Connect(NTV2_XptCSC2VidInput, NTV2_XptFrameBuffer2RGB, false);
+	mDevice.Connect(NTV2_XptMixer1FGVidInput, NTV2_XptCSC2VidYUV, false);
+	mDevice.Connect(NTV2_XptMixer1FGKeyInput, NTV2_XptCSC2KeyYUV, false);
+}	//	RouteOverlaySignal
+
+
+void NTV2Overlay::RouteOutputSignal (void)
+{
+	mDevice.Connect(NTV2_XptSDIOut2Input, NTV2_XptMixer1VidYUV, false);
+	mDevice.Connect(NTV2_XptHDMIOutInput, NTV2_XptMixer1VidYUV, false);
 }	//	RouteOutputSignal
 
 
@@ -239,78 +191,6 @@ AJAStatus NTV2Overlay::SetupAudio (void)
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetupAudio
-
-AJAStatus NTV2Overlay::SetupHostBuffers (void)
-{
-	CNTV2DemoCommon::SetDefaultPageSize();	//	Set host-specific page size
-	
-	//	Let my circular buffer know when it's time to quit...
-	mFrameDataRing.SetAbortFlag (&mGlobalQuit);
-	
-	//  Determine video buffer size...
-	const ULWord vidBuffSizeBytes (mFormatDesc.GetVideoWriteSize(ULWord(NTV2Buffer::DefaultPageSize())));
-	
-	//	Determine per-field max Anc buffer size...
-	ULWord ancBuffSizeBytes (0);
-	if (!mDevice.GetAncRegionOffsetFromBottom (ancBuffSizeBytes, NTV2_AncRgn_Field2))
-		ancBuffSizeBytes = NTV2_ANCSIZE_MAX;
-	
-	//	Allocate and add each in-host NTV2FrameData to my mFrameDataRing...
-	mHostBuffers.reserve(CIRCULAR_BUFFER_SIZE);
-	while (mHostBuffers.size() < CIRCULAR_BUFFER_SIZE)
-	{
-		mHostBuffers.push_back(NTV2FrameData());			//	Make a new NTV2FrameData...
-		NTV2FrameData & frameData (mHostBuffers.back());	//	...and get a reference to it
-		
-		//	Allocate a page-aligned video buffer (if handling video)...
-		if (!mConfig.fSuppressVideo)
-			if (!frameData.fVideoBuffer.Allocate (vidBuffSizeBytes, /*pageAligned*/true))
-			{
-				BURNFAIL("Failed to allocate " << xHEX0N(vidBuffSizeBytes,8) << "-byte video buffer");
-				return AJA_STATUS_MEMORY;
-			}
-#ifdef NTV2_BUFFER_LOCKING
-		if (frameData.fVideoBuffer)
-			mDevice.DMABufferLock(frameData.fVideoBuffer, true);
-#endif
-#if 0
-		//	Allocate a page-aligned audio buffer (if handling audio)...
-		if (NTV2_IS_VALID_AUDIO_SYSTEM(mAudioSystem)  &&  mConfig.WithAudio())
-			if (!frameData.fAudioBuffer.Allocate (NTV2_AUDIOSIZE_MAX, /*pageAligned*/true))
-			{
-				BURNFAIL("Failed to allocate " << xHEX0N(NTV2_AUDIOSIZE_MAX,8) << "-byte audio buffer");
-				return AJA_STATUS_MEMORY;
-			}
-		if (frameData.AudioBuffer())
-			frameData.fAudioBuffer.Fill(ULWord(0));
-		
-		if (mConfig.WithAnc() && !mConfig.WithTallVANC())
-		{	//	Allocate page-aligned anc buffers...
-			if (!frameData.fAncBuffer.Allocate (ancBuffSizeBytes, /*pageAligned*/true))
-			{
-				BURNFAIL("Failed to allocate " << xHEX0N(ancBuffSizeBytes,8) << "-byte anc buffer");
-				return AJA_STATUS_MEMORY;
-			}
-			if (!::IsProgressivePicture(mVideoFormat))
-				if (!frameData.fAncBuffer2.Allocate(ancBuffSizeBytes, /*pageAligned*/true))
-				{
-					BURNFAIL("Failed to allocate " << xHEX0N(ancBuffSizeBytes,8) << "-byte F2 anc buffer");
-					return AJA_STATUS_MEMORY;
-				}
-		}
-		if (frameData.AncBuffer())
-			frameData.AncBuffer().Fill(ULWord(0));
-		if (frameData.AncBuffer2())
-			frameData.AncBuffer2().Fill(ULWord(0));
-#endif
-		//	Add this NTV2FrameData to the ring...
-		mFrameDataRing.Add(&frameData);
-	}	//	for each NTV2FrameData
-	
-	return AJA_STATUS_SUCCESS;
-	
-}	//	SetupHostBuffers
-
 
 //	4-byte-per-pixel DrawVLine -- draws a vertical line using the given pixel value and line thickness
 static bool DrawVLine (NTV2Buffer & buf, const NTV2RasterInfo & info, const ULWord argbPixValue, const ULWord pixThickness,
@@ -409,15 +289,6 @@ NTV2VideoFormat NTV2Overlay::WaitForStableInputSignal (void)
 				numConsecutiveFrames = (lastVF == currVF) ? numConsecutiveFrames + 1 : 0;
 		}	//	loop while input video format is unstable
 
-		//	At this point, the video format is stable and valid.
-		if (!mDevice.features().CanDoVideoFormat(result))	//	Can this device handle this video format?
-		{
-			OVRLWARN(mDevice.GetModelName() << " can't handle " << ::NTV2VideoFormatToString(result));
-			cerr << endl << "## NOTE:  " << mDevice.GetModelName() << " can't handle " << ::NTV2VideoFormatToString(result) << endl;
-			result = NTV2_FORMAT_UNKNOWN;
-			mDevice.WaitForInputVerticalInterrupt(mConfig.fInputChannel, 30);	//	Wait 30 frames
-			continue;	//	Retry
-		}
 		OVRLNOTE(::NTV2InputSourceToString(mConfig.fInputSource,true) << " video format: " << ::NTV2VideoFormatToString(result));
 		cerr << endl << "## NOTE:  " << ::NTV2InputSourceToString(mConfig.fInputSource,true)
 						<< " video format is " << ::NTV2VideoFormatToString(result) << endl;
@@ -484,7 +355,6 @@ void NTV2Overlay::OutputThread (void)
 	NTV2Buffer hostBuffer;
 
 	//	Configure the output FrameStore...
-	mDevice.EnableChannel(mConfig.fOutputChannel);
 	mDevice.SetMode (mConfig.fOutputChannel, NTV2_MODE_DISPLAY);
 	mDevice.SetFrameBufferFormat (mConfig.fOutputChannel, mConfig.fPixelFormat);
 	mDevice.SetVideoFormat (mVideoFormat, /*retail*/false,  /*keepVanc*/false, mConfig.fOutputChannel);
@@ -612,9 +482,8 @@ void NTV2Overlay::InputThread (void)
 		//	At this point, the input video format is stable.
 
 		//	Configure the input FrameStore...
-		mDevice.EnableChannel(mConfig.fInputChannel);
 		mDevice.SetMode (mConfig.fInputChannel, NTV2_MODE_CAPTURE);
-		mDevice.SetFrameBufferFormat (mConfig.fInputChannel, NTV2_FBF_8BIT_YCBCR);
+		mDevice.SetFrameBufferFormat (mConfig.fInputChannel, NTV2_FBF_10BIT_YCBCR);
 		mDevice.SetVideoFormat (mVideoFormat, /*retail*/false,  /*keepVanc*/false, mConfig.fInputChannel);
 		mDevice.SetVANCMode (NTV2_VANCMODE_OFF, mConfig.fInputChannel);
 
@@ -638,10 +507,7 @@ void NTV2Overlay::InputThread (void)
 			if (mDevice.WaitForInputVerticalInterrupt(mConfig.fInputChannel))
 				++waitTally;
 			else
-				++badWaits;
-			
-			mDevice.AutoCirculateTransfer(mConfig.fInputChannel, );
-			
+				++badWaits;			
 		}	//	inner loop -- until signal change
 	}	//	loop til quit signaled
 	mDevice.AutoCirculateStop(mConfig.fInputChannel);

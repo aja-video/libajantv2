@@ -59,8 +59,6 @@ class NTV2Overlay
 			@brief	Sets up everything I need for capturing and playing audio.
 		**/
 		virtual AJAStatus		SetupAudio (void);
-		
-		virtual AJAStatus		SetupHostBuffers (void);
 
 		/**
 			@brief	Sets up my overlay "bug" image buffer.
@@ -77,13 +75,9 @@ class NTV2Overlay
 			@brief	Performs input widget signal routing.
 			@return	True if successful.
 		**/
-		virtual bool			RouteInputSignal (void);
-
-		/**
-			@brief	Performs output widget signal routing.
-			@return	True if successful.
-		**/
-		virtual bool			RouteOutputSignal (void);
+		virtual void			RouteInputSignal (void);
+		virtual void			RouteOverlaySignal (void);
+		virtual void			RouteOutputSignal (void);
 
 		/**
 			@brief	Starts my playout thread.
