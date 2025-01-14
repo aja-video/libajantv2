@@ -16,7 +16,7 @@
 class RoutingExpert;
 typedef AJARefPtr<RoutingExpert>	RoutingExpertPtr;
 
-class RoutingExpert
+class AJAExport RoutingExpert
 {
 	public:
 		friend class CNTV2SignalRouter;

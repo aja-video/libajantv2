@@ -468,9 +468,9 @@ void AJATimeCode::Set(const std::string &str, const AJATimeBase& timeBase, bool 
 					stdTcForHfr = false;
 				
 				// if using std timecode, add frame(s) if '.'
-				if (ajaFrameRate >= AJA_FrameRate_10000 && stdTcForHfr == true && theChar == '.')
+				if (ajaFrameRate >= AJA_FrameRate_10000 && stdTcForHfr && theChar == '.')
 					addFrame = 2;			// WARNING: possible loss of frame accuracy due to limitaion of TC presentation 
-				else if (ajaFrameRate >= AJA_FrameRate_4795 && stdTcForHfr == true && theChar == '.')
+				else if (ajaFrameRate >= AJA_FrameRate_4795 && stdTcForHfr && theChar == '.')
 					addFrame = 1;
 			}
 				
@@ -500,20 +500,20 @@ void AJATimeCode::SetWithCleanup(const std::string &str, const AJATimeBase& time
 	int results[4] = {0, 0, 0, 0};	// Temporary array to store the results
 	char delim[3] = {0, 0, 0};		// Holds TC delimiter chars	 
     int index = 3;					// Start filling from the last slot in the results array
-	uint32_t addFrame = 0;			// 
+	uint32_t addFrame = 0;
 
     // Traverse the string from the end
-    for (int i = str.length() - 1; i >= 0 && index >= 0; ) 
+    for (size_t i = str.length() - 1; i >= 0 && index >= 0; ) 
 	{
         // Skip non-digit characters
-        while (i >= 0 && !std::isdigit(str[i]))
+        while (i >= 0 && !aja::is_decimal_digit(str[i]))
             i--;
 
         // Find the start of the number
-        if (i >= 0 && std::isdigit(str[i])) 
+        if (i >= 0 && aja::is_decimal_digit(str[i])) 
 		{
-            int start = i;
-            while (start > 0 && std::isdigit(str[start - 1]))
+            size_t start = i;
+            while (start > 0 && aja::is_decimal_digit(str[start - 1]))
                 start--;
 			
 			if (start > 0 && index > 0)

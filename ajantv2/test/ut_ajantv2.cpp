@@ -601,15 +601,15 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 	cerr << ::NTV2StandardToString(st) << " " << ::NTV2FrameBufferFormatToString(pf) << endl;
 #endif
 				//	Make black test pattern buffer for comparison later...
-				if (st == NTV2_STANDARD_720) {
-					printf("720\n");
-				} else if (st == NTV2_STANDARD_2Kx1080p) {
-					printf("2K\n");
-				} else if (st == NTV2_STANDARD_4096x2160p) {
-					printf("4K\n");
-				} else if (st == NTV2_STANDARD_8192) {
-					printf("8K\n");
-				}
+				if (st == NTV2_STANDARD_720)
+					cout << "720" << endl;
+				else if (st == NTV2_STANDARD_2Kx1080p)
+					cout << "2K" << endl;
+				else if (st == NTV2_STANDARD_4096x2160p)
+					cout << "4K" << endl;
+				else if (st == NTV2_STANDARD_8192)
+					cout << "8K" << endl;
+
 				NTV2TestPatternGen gen;
 				NTV2Buffer tpBuffer(fd.GetTotalBytes());	//	Allocate test pattern buffer
 				if (!gen.DrawTestPattern (NTV2_TestPatt_Black, fd, tpBuffer))	//	Fill with black test pattern
@@ -656,11 +656,11 @@ TEST_SUITE("ntv2utils" * doctest::description("ntv2 utils functions")) {
 						CHECK(fd.GetRowBuffer(buff, rowBuff, rowNdx));
 						CHECK(rowBuff.IsContentEqual(tpRowBuff, /*byteOffset*/0, /*byteCount*/logicalLineLength));
 					}	//	for each row
-					
+
 					// TODO: Check this test case on Big Endian machine
 					// Check last 10-bits of the buffers
-					auto rowBuffPtr = (uint8_t*)rowBuff.GetHostPointer();
-					auto patBuffPtr = (uint8_t*)tpRowBuff.GetHostPointer();
+					uint8_t * rowBuffPtr = rowBuff;
+					uint8_t * patBuffPtr = tpRowBuff;
 					uint16_t rowBufEnd = (rowBuffPtr[logicalLineLength-1] << 2 | (rowBuffPtr[logicalLineLength] & 0x3));
 					uint16_t patBufEnd = (patBuffPtr[logicalLineLength-1] << 2 | (patBuffPtr[logicalLineLength] & 0x3));
 					CHECK_EQ(rowBufEnd, patBufEnd);

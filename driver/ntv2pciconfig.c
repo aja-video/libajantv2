@@ -93,18 +93,27 @@ int32_t ntv2PciFindExtCapability(Ntv2SystemContext* pSysCon, uint32_t ext_id)
 }
 
 
-// PCI max read request size constants
+// PCI device capability structure id
 #define NTV2_PCI_CAPABILITY_EXPRESS_ID			0x10
+// PCI max read request size constants
 #define NTV2_PCI_DEVICE_CONTROL_OFFSET			0x8
 #define NTV2_PCI_DEVICE_CONTROL_LENGTH			2
 #define NTV2_PCI_MAX_READ_REQUEST_SIZE_MASK		0x7000
-#define NTV2_PCI_MAX_READ_REQUEST_SIZE_SHIFT		12
+#define NTV2_PCI_MAX_READ_REQUEST_SIZE_SHIFT	12
 #define NTV2_PCI_MAX_READ_REQUEST_SIZE_128		0x0
 #define NTV2_PCI_MAX_READ_REQUEST_SIZE_256		0x1
 #define NTV2_PCI_MAX_READ_REQUEST_SIZE_512		0x2
 #define NTV2_PCI_MAX_READ_REQUEST_SIZE_1024		0x3
 #define NTV2_PCI_MAX_READ_REQUEST_SIZE_2048		0x4
 #define NTV2_PCI_MAX_READ_REQUEST_SIZE_4096		0x5
+// PCI link speed/width constants
+#define NTV2_PCI_LINK_STATUS_OFFSET			    0x12
+#define NTV2_PCI_LINK_STATUS_LENGTH			    2
+#define NTV2_PCI_LINK_SPEED_MASK                0xf
+#define NTV2_PCI_LINK_SPEED_SHIFT               0
+#define NTV2_PCI_LINK_WIDTH_MASK                0x3f0
+#define NTV2_PCI_LINK_WIDTH_SHIFT               4
+
 
 uint32_t
 ntv2ReadPciMaxReadRequestSize(Ntv2SystemContext* pSysCon)
@@ -160,3 +169,52 @@ ntv2WritePciMaxReadRequestSize(Ntv2SystemContext* pSysCon, uint32_t reqSize)
 
 	return NTV2_STATUS_SUCCESS;
 }
+
+uint32_t
+ntv2ReadPciLinkSpeed(Ntv2SystemContext* pSysCon)
+{
+	uint32_t buffer;
+	int32_t offset;
+	uint32_t req;
+	Ntv2Status status;
+
+	if (pSysCon == NULL) return 0xbad0;
+
+	// compute the device control register offset
+	offset = ntv2PciFindCapability(pSysCon, NTV2_PCI_CAPABILITY_EXPRESS_ID);
+	if (offset == 0) return 0xbad1;
+	offset += NTV2_PCI_LINK_STATUS_OFFSET;
+
+	// read the device control data
+	buffer = 0;
+	status = ntv2ReadPciConfig(pSysCon, &buffer, offset, NTV2_PCI_LINK_STATUS_LENGTH);
+	if (status != NTV2_STATUS_SUCCESS) return 0xbad2;
+	req = (buffer & NTV2_PCI_LINK_SPEED_MASK) >> NTV2_PCI_LINK_SPEED_SHIFT;
+
+	return req;
+}
+
+uint32_t
+ntv2ReadPciLinkWidth(Ntv2SystemContext* pSysCon)
+{
+	uint32_t buffer;
+	int32_t offset;
+	uint32_t req;
+	Ntv2Status status;
+
+	if (pSysCon == NULL) return 0xbad0;
+
+	// compute the device control register offset
+	offset = ntv2PciFindCapability(pSysCon, NTV2_PCI_CAPABILITY_EXPRESS_ID);
+	if (offset == 0) return 0xbad1;
+	offset += NTV2_PCI_LINK_STATUS_OFFSET;
+
+	// read the device control data
+	buffer = 0;
+	status = ntv2ReadPciConfig(pSysCon, &buffer, offset, NTV2_PCI_LINK_STATUS_LENGTH);
+	if (status != NTV2_STATUS_SUCCESS) return 0xbad2;
+	req = (buffer & NTV2_PCI_LINK_WIDTH_MASK) >> NTV2_PCI_LINK_WIDTH_SHIFT;
+
+	return req;
+}
+

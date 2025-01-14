@@ -87,6 +87,18 @@ public:
 	explicit		NTV2FormatDescriptor (	const NTV2VideoFormat		inVideoFormat,
 											const NTV2FrameBufferFormat	inFrameBufferFormat,
 											const NTV2VANCMode			inVancMode	= NTV2_VANCMODE_OFF);
+
+	/**
+		@brief		Constructs me from the given video format, pixel format and VANC settings.
+		@param[in]	inRasterSize	Specifies the raster dimensions. 
+		@param[in]	inPixelFormat	Specifies the pixel format of the frame buffer.
+		@param[in]	inVancMode		Specifies the VANC mode. If NTV2_VANCMODE_TALL or NTV2_VANCMODE_TALLER,
+									"inRasterSize" must match a "tall" or "taller" NTV2FrameGeometry.
+		@note		Invalid or conflicting parameters will construct an invalid descriptor.
+	**/
+	explicit		NTV2FormatDescriptor (	const NTV2FrameSize &	inRasterSize,
+											const NTV2PixelFormat	inPixelFormat,
+											const NTV2VANCMode		inVancMode	= NTV2_VANCMODE_OFF);
 	///@}
 	
 	/**

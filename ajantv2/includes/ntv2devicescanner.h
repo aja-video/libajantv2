@@ -244,6 +244,16 @@ public:
 	static bool									GetFirstDeviceWithName (const std::string & inNameSubString, CNTV2Card & outDevice);
 
 	/**
+		@brief		Rescans the host, and returns an open CNTV2Card instance for the first virtual device with a matching name.
+		@note		Only virtual devices are compared.  The name is compared case-insensitively (e.g., "KONA5_Playout1" == "kona5_playout1").
+		@return		True if successful; otherwise false.
+		@param[in]	inNameString		Specifies the virtual device name to search for.
+		@param[out] outDevice			Receives the open, ready-to-use CNTV2Card instance.
+		@param[in]  inRescan			Will rescan devices before returning the open CNTV2Card instance.
+	**/
+	static bool									GetVirtualDeviceWithName (const std::string & inNameString, CNTV2Card & outDevice, const bool inRescan = true);
+
+	/**
 		@brief		Rescans the host, and returns an open CNTV2Card instance for the first AJA device whose serial number contains the given value.
 		@note		The serial value is compared case-sensitively.
 		@return		True if successful; otherwise false.
