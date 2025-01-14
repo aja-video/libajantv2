@@ -134,6 +134,12 @@ public:
 		@return My current breakout box hardware type, if any is attached.
 	**/
 	AJA_VIRTUAL NTV2BreakoutType	GetBreakoutHardware (void);
+	
+	/**
+		@return The Local Proc Managment port URL
+	**/
+	AJA_VIRTUAL bool GetLPExternalPortURLString (std::string & outURLString);
+	AJA_VIRTUAL bool GetLPTunnelPortURLString (std::string & outURLString);
 
 	/**
 		@return A reference to my DeviceCapabilities API, for querying my capabilities.

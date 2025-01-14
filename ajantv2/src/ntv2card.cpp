@@ -438,6 +438,58 @@ NTV2BreakoutType CNTV2Card::GetBreakoutHardware (void)
 	return result;
 }
 
+bool CNTV2Card::GetLPExternalPortURLString (string & outURLString)
+{
+	if (!NTV2DeviceHasLPProductCode(GetDeviceID()))
+		return false;
+	uint32_t portIP(0);
+	int ipOctet(0);
+	ostringstream tempString;
+	ReadRegister(kRegLPRJ45IP, portIP);
+	if (portIP == 0)
+		return false;
+	
+	outURLString.clear();
+	tempString << "http://";
+	ipOctet = (portIP & 0xFF000000) >> 24;
+	tempString << ipOctet << ".";
+	ipOctet = (portIP & 0x00FF0000) >> 16;
+	tempString << ipOctet << ".";
+	ipOctet = (portIP & 0x0000FF00) >> 8;
+	tempString << ipOctet << ".";
+	ipOctet = (portIP & 0x000000FF);
+	tempString << ipOctet;
+	
+	outURLString = tempString.str();
+	return true;
+}
+
+bool CNTV2Card::GetLPTunnelPortURLString (string & outURLString)
+{
+	if (!NTV2DeviceHasLPProductCode(GetDeviceID()))
+		return false;
+	uint32_t portIP(0);
+	int ipOctet(0);
+	ostringstream tempString;
+	ReadRegister(kRegLPTunnelIP, portIP);
+	if (portIP == 0)
+		return false;
+	
+	outURLString.clear();
+	tempString << "http://";
+	ipOctet = (portIP & 0xFF000000) >> 24;
+	tempString << ipOctet << ".";
+	ipOctet = (portIP & 0x00FF0000) >> 16;
+	tempString << ipOctet << ".";
+	ipOctet = (portIP & 0x0000FF00) >> 8;
+	tempString << ipOctet << ".";
+	ipOctet = (portIP & 0x000000FF);
+	tempString << ipOctet;
+	
+	outURLString = tempString.str();
+	return true;
+}
+
 #if !defined(NTV2_DEPRECATE_16_3)
 //////////	Device Features
 	bool CNTV2Card::DeviceCanDoFormat (NTV2FrameRate		inFrameRate,
