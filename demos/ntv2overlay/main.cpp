@@ -28,10 +28,8 @@ static void SignalHandler (int inSignal)
 
 int main (int argc, const char ** argv)
 {
-	char *	pDeviceSpec		(AJA_NULL);		//	Which device to use
-	int		doMultiFormat	(0);			//	MultiFormat mode?
-	int		showVersion		(0);			//	Show version?
-	int		verbose			(0);			//	Verbose mode?
+	char *	pDeviceSpec	(AJA_NULL);	//	Which device to use
+	int		showVersion	(0);		//	Show version?
 	AJADebug::Open();
 
 	//	Command line option descriptions:
@@ -54,10 +52,9 @@ int main (int argc, const char ** argv)
 		return 1;
 
 	OverlayConfig config(deviceSpec);
-
-	config.fInputSource = NTV2_INPUTSOURCE_SDI1;
-	config.fOutputDest = NTV2_OUTPUTDESTINATION_SDI1;
-	
+	config.fInputSource		= NTV2_INPUTSOURCE_SDI1;
+	config.fOutputDest		= NTV2_OUTPUTDESTINATION_SDI1;
+	config.fPixelFormat		= NTV2_FBF_10BIT_YCBCR;
 	config.fDoMultiFormat	= true;
 	config.fVerbose			= true;
 

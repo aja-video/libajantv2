@@ -33,8 +33,11 @@ NTV2Overlay::NTV2Overlay (const OverlayConfig & inConfig)
 		mVideoFormat	(NTV2_FORMAT_UNKNOWN),
 		mHDMIColorSpace	(NTV2_LHIHDMIColorSpaceYCbCr),
 		mSavedTaskMode	(NTV2_DISABLE_TASKS),
+		mInputPixFormat	(inConfig.fPixelFormat),	//	fixed to 10-bit YCbCr
+		mOutputPixFormat(NTV2_FBF_ARGB),			//	fixed to 8-bit ARGB
 		mGlobalQuit		(false)
 {
+	mAVCircularBuffer.SetAbortFlag(&mGlobalQuit);	//	Ring buffer abandons waits when mGlobalQuit goes true
 }	//	constructor
 
 
@@ -44,6 +47,7 @@ NTV2Overlay::~NTV2Overlay ()
 	mDevice.UnsubscribeInputVerticalEvent(NTV2_CHANNEL1);
 	mDevice.UnsubscribeOutputVerticalEvent(NTV2_CHANNEL1);
 	mDevice.UnsubscribeOutputVerticalEvent(NTV2_CHANNEL2);
+	ReleaseCaptureBuffers();
 }	//	destructor
 
 
@@ -75,7 +79,9 @@ AJAStatus NTV2Overlay::Init (void)
 	if (!CNTV2DeviceScanner::GetFirstDeviceFromArgument (mConfig.fDeviceSpec, mDevice))
 		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not found" << endl;  return AJA_STATUS_OPEN;}
     if (!mDevice.IsDeviceReady(false))
-		{cerr << "## ERROR:  Device '" << mConfig.fDeviceSpec << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
+		{cerr << "## ERROR:  Device '" << mDevice.GetDescription() << "' not ready" << endl;  return AJA_STATUS_INITIALIZE;}
+    if (mDevice.GetDeviceID() != DEVICE_ID_KONAX)
+		cerr << "## WARNING:  Device '" << mDevice.GetDescription() << "' is not KONA X" << endl;
 
 	ULWord	appSig(0);
 	int32_t	appPID(0);
@@ -84,7 +90,7 @@ AJAStatus NTV2Overlay::Init (void)
 
 	if (!mDevice.AcquireStreamForApplication (kAppSignature, int32_t(AJAProcess::GetPid())))
 	{
-		cerr << "## ERROR:  Cannot acquire device because another app (pid " << appPID << ") owns it" << endl;
+		cerr << "## ERROR:  Cannot acquire '" << mDevice.GetDescription() << "' because another app (pid " << appPID << ") owns it" << endl;
 		return AJA_STATUS_BUSY;		//	Some other app is using the device
 	}
 	
@@ -121,7 +127,6 @@ AJAStatus NTV2Overlay::Init (void)
 
 	OVRLINFO("Configuration: " << mConfig);
 	return AJA_STATUS_SUCCESS;
-
 }	//	Init
 
 
@@ -159,6 +164,7 @@ AJAStatus NTV2Overlay::SetupVideo (void)
 
 void NTV2Overlay::RouteInputSignal (void)
 {
+	//	Connect SDIIn1 to FrameStore1 and Mixer1 background...
 	mDevice.Connect(NTV2_XptFrameBuffer1Input, NTV2_XptSDIIn1, false);
 	mDevice.Connect(NTV2_XptMixer1BGVidInput, NTV2_XptSDIIn1, false);
 	mDevice.Connect(NTV2_XptMixer1BGKeyInput, NTV2_XptSDIIn1, false);
@@ -166,6 +172,7 @@ void NTV2Overlay::RouteInputSignal (void)
 
 void NTV2Overlay::RouteOverlaySignal (void)
 {
+	//	Connect FrameStore2 RGB output through CSC2 to Mixer1 foreground...
 	mDevice.Connect(NTV2_XptCSC2VidInput, NTV2_XptFrameBuffer2RGB, false);
 	mDevice.Connect(NTV2_XptMixer1FGVidInput, NTV2_XptCSC2VidYUV, false);
 	mDevice.Connect(NTV2_XptMixer1FGKeyInput, NTV2_XptCSC2KeyYUV, false);
@@ -174,6 +181,7 @@ void NTV2Overlay::RouteOverlaySignal (void)
 
 void NTV2Overlay::RouteOutputSignal (void)
 {
+	//	Connect Mixer1 output to SDI & HDMI outputs...
 	mDevice.Connect(NTV2_XptSDIOut2Input, NTV2_XptMixer1VidYUV, false);
 	mDevice.Connect(NTV2_XptHDMIOutInput, NTV2_XptMixer1VidYUV, false);
 }	//	RouteOutputSignal
@@ -191,6 +199,37 @@ AJAStatus NTV2Overlay::SetupAudio (void)
 	return AJA_STATUS_SUCCESS;
 
 }	//	SetupAudio
+
+
+AJAStatus NTV2Overlay::SetupCaptureBuffers (void)
+{
+	if (!NTV2_IS_VALID_VIDEO_FORMAT(mVideoFormat))
+		return AJA_STATUS_NOINPUT;
+
+	ReleaseCaptureBuffers();
+
+	//	Allocate and add each NTV2FrameData to my circular buffer member variable...
+	const ULWord captureBufferSize (::GetVideoWriteSize (mVideoFormat, mInputPixFormat));
+	mBuffers.reserve(CIRCULAR_BUFFER_SIZE);
+	while (mBuffers.size() < CIRCULAR_BUFFER_SIZE)
+	{
+		mBuffers.push_back(NTV2FrameData());		//	Make a new NTV2FrameData...
+		NTV2FrameData & frameData(mBuffers.back());	//	...and get a reference to it
+		//	Allocate a page-aligned video buffer
+		if (!frameData.fVideoBuffer.Allocate(captureBufferSize, /*pageAlign?*/true))
+			return AJA_STATUS_MEMORY;
+		mAVCircularBuffer.Add(&frameData);	//	Add to my circular buffer
+	}	//	for each NTV2FrameData
+	return AJA_STATUS_SUCCESS;
+}	//	SetupCaptureBuffers
+
+
+void NTV2Overlay::ReleaseCaptureBuffers (void)
+{
+	mBuffers.clear();
+	mAVCircularBuffer.Clear();
+	return;
+}	//	ReleaseCaptureBuffers
 
 //	4-byte-per-pixel DrawVLine -- draws a vertical line using the given pixel value and line thickness
 static bool DrawVLine (NTV2Buffer & buf, const NTV2RasterInfo & info, const ULWord argbPixValue, const ULWord pixThickness,
@@ -225,12 +264,14 @@ static bool DrawBox (NTV2Buffer & buf, const NTV2RasterInfo & info, const ULWord
 
 AJAStatus NTV2Overlay::SetupOverlayBug (void)
 {
-	static const ULWord sOpaqueRed(0xFFFF0000), sOpaqueBlue(0xFF0000FF), sOpaqueGreen(0xFF008000), sOpaqueWhite(0xFFFFFFFF), sOpaqueBlack(0xFF000000);
+	static const ULWord sOpaqueRed(0xFFFF0000), sOpaqueBlue(0xFF0000FF), sOpaqueGreen(0xFF008000),
+						sOpaqueWhite(0xFFFFFFFF), sOpaqueBlack(0xFF000000);
 
-	//	The overlay "bug" is a 256x256 pixel raster image composed of four opaque rectangles of varying color and
-	//	diminishing size, each set inside each other, centered in the raster. All space between them is transparent to
-	//	reveal the background video.  The line thickness of each rectangle is the same:  1/16th the width or height of
-	//	the raster. The pixel format is NTV2_FBF_ARGB, which all devices handle, and easy to traverse at 4-bytes-per-pixel.
+	//	The overlay "bug" is a 256x256 pixel raster image composed of four opaque rectangles of
+	//	varying color and diminishing size, each set inside each other, centered in the raster.
+	//	All space between them is transparent to reveal the background video. The line thickness
+	//	of each rectangle is the same:  1/16th the width or height of the raster. The pixel format
+	//	is NTV2_FBF_ARGB, which all devices handle, and easy to traverse at 4-bytes-per-pixel.
 	static const vector<ULWord> sColors = {sOpaqueWhite, sOpaqueRed, sOpaqueBlue, sOpaqueGreen};
 	const ULWord hght(256), wdth(256), thickness(wdth/16);
 
@@ -265,7 +306,7 @@ NTV2VideoFormat NTV2Overlay::WaitForStableInputSignal (void)
 		UWord loopCount(0);
 		while (result == NTV2_FORMAT_UNKNOWN)
 		{
-			mDevice.WaitForInputVerticalInterrupt(mConfig.fInputChannel);
+			mDevice.WaitForOutputVerticalInterrupt(NTV2_CHANNEL1);	//	Just delay til next output VBI
 			if (mGlobalQuit)
 				return NTV2_FORMAT_UNKNOWN;	//	Terminate if asked to do so
 
@@ -273,7 +314,7 @@ NTV2VideoFormat NTV2Overlay::WaitForStableInputSignal (void)
 			if (currVF == NTV2_FORMAT_UNKNOWN)
 			{	//	Wait for video signal to appear
 				if (++loopCount % 500 == 0)	//	Log message every minute or so at ~50ms
-					OVRLDBG("Waiting for valid video signal to appear at " << ::NTV2InputSourceToString(mConfig.fInputSource,true));
+					CAPDBG("Waiting for valid video signal to appear at " << ::NTV2InputSourceToString(mConfig.fInputSource,true));
 			}
 			else if (numConsecutiveFrames == 0)
 			{
@@ -289,7 +330,8 @@ NTV2VideoFormat NTV2Overlay::WaitForStableInputSignal (void)
 				numConsecutiveFrames = (lastVF == currVF) ? numConsecutiveFrames + 1 : 0;
 		}	//	loop while input video format is unstable
 
-		OVRLNOTE(::NTV2InputSourceToString(mConfig.fInputSource,true) << " video format: " << ::NTV2VideoFormatToString(result));
+		CAPNOTE(::NTV2InputSourceToString(mConfig.fInputSource,true) << " video format: "
+				<< ::NTV2VideoFormatToString(result));
 		cerr << endl << "## NOTE:  " << ::NTV2InputSourceToString(mConfig.fInputSource,true)
 						<< " video format is " << ::NTV2VideoFormatToString(result) << endl;
 		break;	//	Done!
@@ -305,32 +347,27 @@ AJAStatus NTV2Overlay::Run (void)
 	//	Start the input thread...
 	StartInputThread();
 	return AJA_STATUS_SUCCESS;
-
 }	//	Run
-
 
 
 //////////////////////////////////////////////
 
-//	This is where we will start the play thread
+//	This is where the play thread is started
 void NTV2Overlay::StartOutputThread (void)
 {
 	//	Create and start the playout thread...
 	mPlayThread.Attach(OutputThreadStatic, this);
 	mPlayThread.SetPriority(AJA_ThreadPriority_High);
 	mPlayThread.Start();
-
 }	//	StartOutputThread
 
-
-//	The playout thread function
+//	The static output thread function
 void NTV2Overlay::OutputThreadStatic (AJAThread * pThread, void * pContext)		//	static
 {	(void) pThread;
 	//	Grab the NTV2Overlay instance pointer from the pContext parameter,
 	//	then call its OutputThread method...
 	NTV2Overlay * pApp (reinterpret_cast<NTV2Overlay*>(pContext));
 	pApp->OutputThread();
-
 }	//	OutputThreadStatic
 
 static ULWord gPlayEnterCount(0), gPlayExitCount(0);
@@ -349,17 +386,17 @@ static ULWord gPlayEnterCount(0), gPlayExitCount(0);
 void NTV2Overlay::OutputThread (void)
 {
 	AJAAtomic::Increment(&gPlayEnterCount);
-	const ULWord threadTally(gPlayEnterCount);
-	ULWord goodWaits(0), badWaits(0), goodBlits(0), badBlits(0), goodXfers(0), badXfers(0), pingPong(0), fbNum(10);
+	ULWord thrdNum(gPlayEnterCount), fbNum(10), loops(0);
+	ULWord goodWaits(0), badWaits(0), goodBlits(0), badBlits(0), goodXfers(0), badXfers(0), pingPong(0);
 	AUTOCIRCULATE_STATUS acStatus;
 	NTV2Buffer hostBuffer;
 
 	//	Configure the output FrameStore...
 	mDevice.SetMode (mConfig.fOutputChannel, NTV2_MODE_DISPLAY);
-	mDevice.SetFrameBufferFormat (mConfig.fOutputChannel, mConfig.fPixelFormat);
+	mDevice.SetFrameBufferFormat (mConfig.fOutputChannel, mOutputPixFormat);
 	mDevice.SetVideoFormat (mVideoFormat, /*retail*/false,  /*keepVanc*/false, mConfig.fOutputChannel);
 	mDevice.SetVANCMode (NTV2_VANCMODE_OFF, mConfig.fOutputChannel);
-	NTV2RasterInfo rasterInfo (mVideoFormat, mConfig.fPixelFormat);
+	NTV2RasterInfo rasterInfo (mVideoFormat, mOutputPixFormat);
 	if (!hostBuffer.Allocate(rasterInfo.GetTotalRasterBytes(), /*pageAligned*/true))
 		{cerr << "## ERROR:  Failed to allocate " << rasterInfo.GetTotalRasterBytes() << "-byte vid buffer" << endl;	return;}
 
@@ -369,7 +406,8 @@ void NTV2Overlay::OutputThread (void)
 	else
 		{cerr << "## NOTE:  Allocate 2-frame AC" << DEC(mConfig.fOutputChannel+1) << " range failed" << endl;	return;}
 
-	OVRLNOTE(DEC(threadTally) << " started, " << ::NTV2VideoFormatToString(mVideoFormat) << " raster:" << rasterInfo << ", bug:" << mBugRasterInfo);
+	PLNOTE(DEC(thrdNum) << " started, " << ::NTV2VideoFormatToString(mVideoFormat)
+			<< " raster:" << rasterInfo << ", bug:" << mBugRasterInfo);
 	Bouncer<ULWord> mixPct (/*max*/400, /*min*/100, /*start*/100),
 					xPos (/*max*/rasterInfo.GetRasterWidth() - mBugRasterInfo.GetRasterWidth()),
 					yPos (/*max*/rasterInfo.GetVisibleRasterHeight() - mBugRasterInfo.GetVisibleRasterHeight() - 1);
@@ -377,17 +415,26 @@ void NTV2Overlay::OutputThread (void)
 	//	Loop til Quit or my AC channel stops...
 	while (!mGlobalQuit)
 	{
-		//	Input thread will signal us to terminate by stopping A/C...
-		if (mDevice.AutoCirculateGetStatus(mConfig.fInputChannel, acStatus)  &&  acStatus.IsStopped())
+		//	Terminate this output thread when video format changes...
+		if (mDevice.GetInputVideoFormat(mConfig.fInputSource) != mVideoFormat)
 			break;	//	Stopped, exit thread
 
-		//	Wait for the next input vertical interrupt event to get signaled...
-		if (mDevice.WaitForInputVerticalInterrupt(mConfig.fInputChannel))
+		NTV2FrameData *	pFrameData (mAVCircularBuffer.StartConsumeNextBuffer());
+		if (pFrameData)
+		{
+			//	Consume captured frame ... it's simply dropped on the floor.
+			//	(The frame can't be used here anyway, since it's NTV2_FBF_10BIT_YCBCR,
+			//	and the output pixel format is NTV2_FBF_ARGB.)
+			mAVCircularBuffer.EndConsumeNextBuffer();	//	Signal "done with this frame"
+		}
+
+		//	Wait for the next output vertical interrupt event to get signaled...
+		if (mDevice.WaitForOutputVerticalInterrupt(mConfig.fOutputChannel))
 		{
 			++goodWaits;
 			//	Clear host buffer, blit the "bug" into it, then transfer it to device...
 			hostBuffer.Fill(ULWord(0));
-			if (::CopyRaster (mConfig.fPixelFormat,
+			if (::CopyRaster (mOutputPixFormat,							//	src & dst pixel format
 							hostBuffer,									//	dstBuffer
 							rasterInfo.GetBytesPerRow(),				//	dstBytesPerLine
 							rasterInfo.GetVisibleRasterHeight(),		//	dstTotalLines
@@ -413,13 +460,16 @@ void NTV2Overlay::OutputThread (void)
 		}
 		else
 			++badWaits;
+
+		if (++loops % 500 == 0)	//	Log message every minute or so
+			PLDBG(DEC(thrdNum) << ": " << DEC(goodXfers) << " xfers (" << DEC(badXfers) << " failed), " << DEC(goodBlits)
+					<< " blits (" << DEC(badBlits) << " failed), " << DEC(goodWaits) << " waits ("
+					<< DEC(badWaits) << " failed)");
 	}	//	loop til quit or A/C stopped
 
 	mDevice.AutoCirculateStop(mConfig.fOutputChannel);
-	mDevice.RemoveConnections(mOutputConnections);
-
 	AJAAtomic::Increment(&gPlayExitCount);
-	OVRLNOTE(DEC(threadTally) << " completed: " << DEC(goodXfers) << " xfers (" << DEC(badXfers) << " failed), "
+	PLNOTE(DEC(thrdNum) << " done: " << DEC(goodXfers) << " xfers (" << DEC(badXfers) << " failed), "
 			<< DEC(goodBlits) << " blits (" << DEC(badBlits) << " failed), " << DEC(goodWaits) << " waits (" << DEC(badWaits) << " failed)");
 	NTV2_ASSERT(gPlayEnterCount == gPlayExitCount);
 
@@ -429,24 +479,16 @@ void NTV2Overlay::OutputThread (void)
 //////////////////////////////////////////////
 
 
-
-//////////////////////////////////////////////
-//
 //	This is where the input thread gets started
-//
 void NTV2Overlay::StartInputThread (void)
 {
 	//	Create and start the capture thread...
 	mCaptureThread.Attach(InputThreadStatic, this);
 	mCaptureThread.SetPriority(AJA_ThreadPriority_High);
 	mCaptureThread.Start();
-
 }	//	StartInputThread
 
-
-//
 //	The static input thread function
-//
 void NTV2Overlay::InputThreadStatic (AJAThread * pThread, void * pContext)		//	static
 {	(void) pThread;
 	//	Grab the NTV2Overlay instance pointer from the pContext parameter,
@@ -469,49 +511,84 @@ void NTV2Overlay::InputThreadStatic (AJAThread * pThread, void * pContext)		//	s
 //
 void NTV2Overlay::InputThread (void)
 {
-	ULWord	vfChgTally(0), badWaits(0), waitTally(0);
-	OVRLNOTE("Started");
+	ULWord	loops(0), bails(0), vfChgTally(0), badWaits(0), waitTally(0), goodXfers(0), badXfers(0);
+	AUTOCIRCULATE_TRANSFER xferInfo;
+	CAPNOTE("Started");
 
 	//	Loop until time to quit...
 	while (!mGlobalQuit)
 	{
+		mDevice.AutoCirculateStop(mConfig.fInputChannel);
 		mVideoFormat = WaitForStableInputSignal();
 		if (mVideoFormat == NTV2_FORMAT_UNKNOWN)
 			break;	//	Quit
 
 		//	At this point, the input video format is stable.
-
 		//	Configure the input FrameStore...
 		mDevice.SetMode (mConfig.fInputChannel, NTV2_MODE_CAPTURE);
 		mDevice.SetFrameBufferFormat (mConfig.fInputChannel, NTV2_FBF_10BIT_YCBCR);
 		mDevice.SetVideoFormat (mVideoFormat, /*retail*/false,  /*keepVanc*/false, mConfig.fInputChannel);
 		mDevice.SetVANCMode (NTV2_VANCMODE_OFF, mConfig.fInputChannel);
+		if (AJA_FAILURE(SetupCaptureBuffers()))
+		{	cerr << "## NOTE:  Failed to [re]allocate host buffers" << endl;
+			mGlobalQuit = true;
+			continue;
+		}
 
 		AUTOCIRCULATE_STATUS acStatus;
-		ULWord fbNum (10);
-		mDevice.AutoCirculateStop(mConfig.fInputChannel);
-		if (mDevice.AutoCirculateInitForInput(mConfig.fInputChannel, 2) && mDevice.AutoCirculateGetStatus(mConfig.fInputChannel, acStatus))	//	Which buffers did we get?
-			fbNum = ULWord(acStatus.acStartFrame);	//	Use them
-		else
-			{cerr << "## NOTE:  Input A/C allocate device frame buffer range failed" << endl;	return;}
-		mDevice.SetInputFrame (mConfig.fInputChannel, fbNum);
+		if (!mDevice.AutoCirculateInitForInput(mConfig.fInputChannel, 7))
+		{	cerr << "## NOTE:  Input A/C allocate device frame buffer range failed" << endl;
+			mGlobalQuit = true;
+			continue;
+		}
 		
-		mDevice.AutoCirculateStart(mConfig.fInputChannel);
+		mDevice.AutoCirculateStart(mConfig.fInputChannel);	//	Start capturing
+		StartOutputThread();								//	Start a new playout thread
 
-		StartOutputThread();	//	Start a new playout thread
-
-		//	Spin until signal format changes...
+		//	Capture frames until signal format changes...
 		while (!mGlobalQuit)
 		{
-			//	Wait for the next input vertical interrupt event to get signaled...
-			if (mDevice.WaitForInputVerticalInterrupt(mConfig.fInputChannel))
-				++waitTally;
+			AUTOCIRCULATE_STATUS acStatus;
+			mDevice.AutoCirculateGetStatus (mConfig.fInputChannel, acStatus);
+			if (acStatus.IsRunning()  &&  acStatus.HasAvailableInputFrame())
+			{
+				//	At least one fully-formed frame is available in device frame buffer
+				//	memory that can be transferred to the host. Reserve an NTV2FrameData
+				//	to "produce", and use it to store the next frame to be transferred...
+				NTV2FrameData *	pCaptureData (mAVCircularBuffer.StartProduceNextBuffer());
+				if (pCaptureData)
+				{	//	Transfer frame from device...
+					xferInfo.SetVideoBuffer (pCaptureData->VideoBuffer(), pCaptureData->VideoBufferSize());
+					if (mDevice.AutoCirculateTransfer (mConfig.fInputChannel, xferInfo))  ++goodXfers;
+					else  ++badXfers;
+					mAVCircularBuffer.EndProduceNextBuffer();	//	Signal "done with this frame"
+				}	//	if pCaptureData != NULL
+				else ++bails;
+			}	//	if A/C running and frame(s) are available for transfer
 			else
-				++badWaits;			
+			{	//	Wait for next input VBI...
+				if (mDevice.WaitForInputVerticalInterrupt(mConfig.fInputChannel))  ++waitTally;
+				else  ++badWaits;
+			}
+			if (++loops % 500 == 0)	//	Log message every minute or so
+				CAPDBG(DEC(vfChgTally) << " sigChgs, " << DEC(bails) << " bails, " << DEC(waitTally)
+						<< " waits (" << DEC(badWaits) << " failed), " << DEC(goodXfers) << " xfers ("
+						<< DEC(badXfers) << " failed)");
+
+			//	Check input signal format...
+			if (mDevice.GetInputVideoFormat(mConfig.fInputSource) != mVideoFormat)
+			{	//	Input signal format changed!
+				++vfChgTally;
+				mAVCircularBuffer.StartProduceNextBuffer();	//	Unblock output thread
+				mAVCircularBuffer.EndProduceNextBuffer();
+				mDevice.WaitForOutputVerticalInterrupt(mConfig.fOutputChannel);
+				break;	//	Break to outer loop to wait for stable input signal
+			}
 		}	//	inner loop -- until signal change
 	}	//	loop til quit signaled
-	mDevice.AutoCirculateStop(mConfig.fInputChannel);
-	OVRLNOTE("Completed: " << DEC(vfChgTally) << " signal changes, " << DEC(waitTally) << " good waits, " << DEC(badWaits) << " bad waits");
 
+	mDevice.AutoCirculateStop(mConfig.fInputChannel);	//	This will signal OutputThread to exit
+	CAPNOTE("Done: " << DEC(vfChgTally) << " sigChgs, " << DEC(bails) << " bails, " << DEC(waitTally)
+			<< " waits (" << DEC(badWaits) << " failed), " << DEC(goodXfers) << " xfers ("
+			<< DEC(badXfers) << " failed)");
 }	//	InputThread
-
