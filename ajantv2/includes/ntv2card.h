@@ -3974,9 +3974,15 @@ public:
 	AJA_VIRTUAL bool		SetLUTV2HostAccessBank (const NTV2ColorCorrectionHostAccessBank inValue);
 	AJA_VIRTUAL bool		GetLUTV2HostAccessBank (NTV2ColorCorrectionHostAccessBank & outValue, const NTV2Channel inChannel);
 
+    AJA_VIRTUAL bool        SetLUTV3HostAccessBank (const NTV2ColorCorrectionHostAccessBank inValue);
+    AJA_VIRTUAL bool        GetLUTV3HostAccessBank (NTV2ColorCorrectionHostAccessBank & outValue, const NTV2Channel inChannel);
+    
 	AJA_VIRTUAL bool		SetLUTV2OutputBank (const NTV2Channel inLUTWidget, const ULWord inBank);
 	AJA_VIRTUAL bool		GetLUTV2OutputBank (const NTV2Channel inLUTWidget, ULWord & outBank);
 
+	AJA_VIRTUAL bool		SetLUTV3OutputBank (const NTV2Channel inLUTWidget, const ULWord inBank);
+	AJA_VIRTUAL bool		GetLUTV3OutputBank (const NTV2Channel inLUTWidget, ULWord & outBank);
+    
 	AJA_VIRTUAL bool		Has12BitLUTSupport (void);
 	
 	/**
@@ -3984,14 +3990,14 @@ public:
 		@param[in]	inLUTPlane	Specifies the LUT plane of interest.
 		@return		True if successful;	 otherwise false.
 	**/
-	AJA_VIRTUAL bool		Set12BitLUTPlaneSelect (const NTV2LUTPlaneSelect inLUTPlane);
+	AJA_VIRTUAL bool		Set12BitLUTPlaneSelect (const NTV2LUTPlaneSelect inLUTPlane, const NTV2Channel inChannel = NTV2_MAX_NUM_CHANNELS);
 
 	/**
 		@brief		Answers with the current LUT plane.
 		@param[out] outLUTPlane Receives the current LUT plane.
 		@return		True if successful;	 otherwise false.
 	**/
-	AJA_VIRTUAL bool		Get12BitLUTPlaneSelect (NTV2LUTPlaneSelect & outLUTPlane);
+	AJA_VIRTUAL bool		Get12BitLUTPlaneSelect (NTV2LUTPlaneSelect & outLUTPlane, const NTV2Channel inChannel = NTV2_MAX_NUM_CHANNELS);
 
 	/**
 		@brief		Sets the RGB range for the given CSC.

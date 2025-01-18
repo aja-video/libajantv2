@@ -61,6 +61,38 @@ static const ULWord gChannelToCSCoeff910RegNum []		= { kRegCSCoefficients9_10, k
 static const ULWord gChannelTo1DLutControlRegNum []		= { kReg1DLUTLoadControl1,	kReg1DLUTLoadControl2,	kReg1DLUTLoadControl3,	kReg1DLUTLoadControl4,
 															kReg1DLUTLoadControl5,	kReg1DLUTLoadControl6,	kReg1DLUTLoadControl7,	kReg1DLUTLoadControl8,	0};
 
+static const ULWord gChannelCapabilities [] = {
+    ((kColorCorrectionLUTV3WidgetOffset + (0 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3Capabilities),
+    ((kColorCorrectionLUTV3WidgetOffset + (1 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3Capabilities),
+    ((kColorCorrectionLUTV3WidgetOffset + (2 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3Capabilities),
+    ((kColorCorrectionLUTV3WidgetOffset + (3 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3Capabilities),
+    ((kColorCorrectionLUTV3WidgetOffset + (4 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3Capabilities),
+    ((kColorCorrectionLUTV3WidgetOffset + (5 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3Capabilities),
+    ((kColorCorrectionLUTV3WidgetOffset + (6 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3Capabilities),
+    ((kColorCorrectionLUTV3WidgetOffset + (7 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3Capabilities),
+    0 };
+
+static const ULWord gChannelDmaLoad [] = {
+    ((kColorCorrectionLUTV3WidgetOffset + (0 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3DmaLoad),
+    ((kColorCorrectionLUTV3WidgetOffset + (1 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3DmaLoad),
+    ((kColorCorrectionLUTV3WidgetOffset + (2 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3DmaLoad),
+    ((kColorCorrectionLUTV3WidgetOffset + (3 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3DmaLoad),
+    ((kColorCorrectionLUTV3WidgetOffset + (4 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3DmaLoad),
+    ((kColorCorrectionLUTV3WidgetOffset + (5 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3DmaLoad),
+    ((kColorCorrectionLUTV3WidgetOffset + (6 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3DmaLoad),
+    ((kColorCorrectionLUTV3WidgetOffset + (7 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3DmaLoad),
+    0 };
+
+static const ULWord gChannelHostLoad [] = {
+    ((kColorCorrectionLUTV3WidgetOffset + (0 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3HostLoad),
+    ((kColorCorrectionLUTV3WidgetOffset + (1 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3HostLoad),
+    ((kColorCorrectionLUTV3WidgetOffset + (2 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3HostLoad),
+    ((kColorCorrectionLUTV3WidgetOffset + (3 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3HostLoad),
+    ((kColorCorrectionLUTV3WidgetOffset + (4 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3HostLoad),
+    ((kColorCorrectionLUTV3WidgetOffset + (5 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3HostLoad),
+    ((kColorCorrectionLUTV3WidgetOffset + (6 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3HostLoad),
+    ((kColorCorrectionLUTV3WidgetOffset + (7 * kColorCorrectionLUTV3WidgetSize)) / 4 + regCCLUTV3HostLoad),
+    0 };
 
 //////////////////////////////////////////////////////////////////
 // OEM Color Correction Methods (KHD-22 only )
@@ -88,6 +120,9 @@ bool CNTV2Card::SetColorCorrectionOutputBank (const NTV2Channel inChannel, const
 		return false;
 	if (GetNumSupported(kDeviceGetLUTVersion) == 2)
 		return SetLUTV2OutputBank(inChannel, inBank);
+	if (GetNumSupported(kDeviceGetLUTVersion) == 3)
+		return SetLUTV3OutputBank(inChannel, inBank);
+
 	switch(inChannel)
 	{
 		case NTV2_CHANNEL1:		return WriteRegister (kRegCh1ColorCorrectionControl, inBank, kRegMaskCCOutputBankSelect,	kRegShiftCCOutputBankSelect);
@@ -117,12 +152,29 @@ bool CNTV2Card::SetLUTV2OutputBank (const NTV2Channel inChannel, const ULWord in
 	}
 }
 
+bool CNTV2Card::SetLUTV3OutputBank (const NTV2Channel inChannel, const ULWord inBank)
+{
+	if (IS_CHANNEL_INVALID(inChannel))
+		return false;
+
+    ULWord supported;
+    if (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
+        return false;
+    if ((inBank > 0) &&
+        (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3Banks2, shiftCCLUTV3Banks2) || (supported == 0)))
+        return false;
+    return WriteRegister(gChannelHostLoad[inChannel], inBank, maskCCLUTV3OutputBank, shiftCCLUTV3OutputBank);
+}
+
 bool CNTV2Card::GetColorCorrectionOutputBank (const NTV2Channel inChannel, ULWord & outBank)
 {
 	if (IS_CHANNEL_INVALID (inChannel))
 		return false;
 	if (GetNumSupported(kDeviceGetLUTVersion) == 2)
 		return GetLUTV2OutputBank(inChannel, outBank);
+	if (GetNumSupported(kDeviceGetLUTVersion) == 3)
+		return GetLUTV3OutputBank(inChannel, outBank);
+
 	switch(inChannel)
 	{
 		case NTV2_CHANNEL1:		return ReadRegister (kRegCh1ColorCorrectionControl, outBank,	kRegMaskCCOutputBankSelect,		kRegShiftCCOutputBankSelect);
@@ -152,10 +204,24 @@ bool CNTV2Card::GetLUTV2OutputBank (const NTV2Channel inChannel, ULWord & outBan
 	}
 }
 
+bool CNTV2Card::GetLUTV3OutputBank (const NTV2Channel inChannel, ULWord & outBank)
+{
+	if (IS_CHANNEL_INVALID(inChannel))
+		return false;
+
+    ULWord supported;
+    if (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
+        return false;
+    
+    return ReadRegister(gChannelHostLoad[inChannel], outBank, maskCCLUTV3OutputBank, shiftCCLUTV3OutputBank);
+}
+
 bool CNTV2Card::SetColorCorrectionHostAccessBank (const NTV2ColorCorrectionHostAccessBank inValue)
 {
 	if (GetNumSupported(kDeviceGetLUTVersion) == 2)
 		return SetLUTV2HostAccessBank(inValue);
+	if (GetNumSupported(kDeviceGetLUTVersion) == 3)
+		return SetLUTV3HostAccessBank(inValue);
 
 	switch(inValue)
 	{
@@ -190,7 +256,7 @@ bool CNTV2Card::SetColorCorrectionHostAccessBank (const NTV2ColorCorrectionHostA
 
 		default:	return false;
 	}
-}
+ }
 
 bool CNTV2Card::SetLUTV2HostAccessBank (const NTV2ColorCorrectionHostAccessBank inValue)
 {
@@ -224,12 +290,58 @@ bool CNTV2Card::SetLUTV2HostAccessBank (const NTV2ColorCorrectionHostAccessBank 
 	}
 }
 
+bool CNTV2Card::SetLUTV3HostAccessBank (const NTV2ColorCorrectionHostAccessBank inValue)
+{
+    ULWord channel = 0;
+    ULWord bank = 0;
+    
+	switch(inValue)
+	{
+    case NTV2_CCHOSTACCESS_CH1BANK0: channel = 0; bank = 0; break;
+    case NTV2_CCHOSTACCESS_CH1BANK1: channel = 0; bank = 1; break;
+
+    case NTV2_CCHOSTACCESS_CH2BANK0: channel = 1; bank = 0; break;
+    case NTV2_CCHOSTACCESS_CH2BANK1: channel = 1; bank = 1; break;
+
+    case NTV2_CCHOSTACCESS_CH3BANK0: channel = 2; bank = 0; break;
+    case NTV2_CCHOSTACCESS_CH3BANK1: channel = 2; bank = 1; break;
+
+    case NTV2_CCHOSTACCESS_CH4BANK0: channel = 3; bank = 0; break;
+    case NTV2_CCHOSTACCESS_CH4BANK1: channel = 3; bank = 1; break;
+
+    case NTV2_CCHOSTACCESS_CH5BANK0: channel = 4; bank = 0; break;
+    case NTV2_CCHOSTACCESS_CH5BANK1: channel = 4; bank = 1; break;
+        
+    case NTV2_CCHOSTACCESS_CH6BANK0: channel = 5; bank = 0; break;
+    case NTV2_CCHOSTACCESS_CH6BANK1: channel = 5; bank = 1; break;
+
+    case NTV2_CCHOSTACCESS_CH7BANK0: channel = 6; bank = 0; break;
+    case NTV2_CCHOSTACCESS_CH7BANK1: channel = 6; bank = 1; break;
+
+    case NTV2_CCHOSTACCESS_CH8BANK0: channel = 7; bank = 0; break;
+    case NTV2_CCHOSTACCESS_CH8BANK1: channel = 7; bank = 1; break;
+
+    default:						 return false;
+	}
+
+    ULWord supported;
+    if (!ReadRegister(gChannelCapabilities[channel], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
+        return false;
+    if ((bank > 0) &&
+        (!ReadRegister(gChannelCapabilities[channel], supported, maskCCLUTV3Banks2, shiftCCLUTV3Banks2) || (supported == 0)))
+        return false;
+    
+    return WriteRegister(gChannelHostLoad[channel], bank, maskCCLUTV3BankSelect, shiftCCLUTV3BankSelect);
+}
+
 bool CNTV2Card::GetColorCorrectionHostAccessBank (NTV2ColorCorrectionHostAccessBank & outValue, const NTV2Channel inChannel)
 {
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
 	if (GetNumSupported(kDeviceGetLUTVersion) == 2)
 		return GetLUTV2HostAccessBank(outValue, inChannel);
+	if (GetNumSupported(kDeviceGetLUTVersion) == 3)
+		return GetLUTV3HostAccessBank(outValue, inChannel);
 
 	bool	result	(false);
 	ULWord	regValue(0);
@@ -308,6 +420,18 @@ bool CNTV2Card::GetLUTV2HostAccessBank (NTV2ColorCorrectionHostAccessBank & outV
 	return result;
 }
 
+bool CNTV2Card::GetLUTV3HostAccessBank (NTV2ColorCorrectionHostAccessBank & outValue, const NTV2Channel inChannel)
+{
+	if (IS_CHANNEL_INVALID(inChannel))
+		return false;
+
+    ULWord supported;
+    if (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
+        return false;
+
+    return CNTV2DriverInterface::ReadRegister (gChannelHostLoad[inChannel], outValue, maskCCLUTV3BankSelect, shiftCCLUTV3BankSelect);
+}
+
 bool CNTV2Card::SetColorCorrectionSaturation (const NTV2Channel inChannel, const ULWord inValue)
 {
 	if (IS_CHANNEL_INVALID(inChannel))
@@ -339,23 +463,74 @@ bool CNTV2Card::GetLUTControlSelect(NTV2LUTControlSelect & outLUTSelect)
 bool CNTV2Card::Has12BitLUTSupport()
 {
 	ULWord has12BitLUTSupport(0);
-	return ReadRegister(kRegLUTV2Control, has12BitLUTSupport, kRegMask12BitLUTSupport, kRegShift12BitLUTSupport)  &&  (has12BitLUTSupport ? true : false);
+	bool result = ReadRegister(kRegLUTV2Control, has12BitLUTSupport, kRegMask12BitLUTSupport, kRegShift12BitLUTSupport)  &&
+        (has12BitLUTSupport ? true : false);
+    result |= (GetNumSupported(kDeviceGetLUTVersion) == 3);
+    return result;
 }
 
-bool CNTV2Card::Set12BitLUTPlaneSelect(NTV2LUTPlaneSelect inLUTPlaneSelect)
+bool CNTV2Card::Set12BitLUTPlaneSelect(NTV2LUTPlaneSelect inLUTPlaneSelect, const NTV2Channel inChannel)
+{
+	if(!Has12BitLUTSupport())
+		return false;
+
+    bool result = false;
+
+    if (GetNumSupported(kDeviceGetLUTVersion) == 3)
+    {
+        ULWord supported;
+        if (inChannel < NTV2_MAX_NUM_CHANNELS)
+        {
+            if (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
+                return false;
+            result = WriteRegister(gChannelHostLoad[inChannel], inLUTPlaneSelect, maskLUTV3PlaneSelect, shiftLUTV3PlaneSelect);
+        }
+        else
+        {
+            ULWord iChn;
+            for (iChn = 0; iChn < GetNumSupported(kDeviceGetNumLUTs); iChn++)
+            {
+                if (!ReadRegister(gChannelCapabilities[iChn], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
+                    return false;
+                result = WriteRegister(gChannelHostLoad[iChn], inLUTPlaneSelect, maskLUTV3PlaneSelect, shiftLUTV3PlaneSelect);
+                if (!result) break;
+            }
+        }
+    }
+    else
+    {
+        result = WriteRegister(kRegLUTV2Control, inLUTPlaneSelect, kRegMask12BitLUTPlaneSelect, kRegShift12BitLUTPlaneSelect);
+    }
+
+    return result;
+}
+
+bool CNTV2Card::Get12BitLUTPlaneSelect(NTV2LUTPlaneSelect & outLUTPlaneSelect, const NTV2Channel inChannel)
 {
 	if(!Has12BitLUTSupport())
 		return false;
 	
-	return WriteRegister(kRegLUTV2Control, inLUTPlaneSelect, kRegMask12BitLUTPlaneSelect, kRegShift12BitLUTPlaneSelect);
-}
+    bool result = false;
 
-bool CNTV2Card::Get12BitLUTPlaneSelect(NTV2LUTPlaneSelect & outLUTPlaneSelect)
-{
-	if(!Has12BitLUTSupport())
-		return false;
-	
-	return CNTV2DriverInterface::ReadRegister(kRegLUTV2Control, outLUTPlaneSelect, kRegMask12BitLUTPlaneSelect, kRegShift12BitLUTPlaneSelect);
+    if (GetNumSupported(kDeviceGetLUTVersion) == 3)
+    {
+        NTV2Channel chn = inChannel;
+        if (inChannel >= NTV2_MAX_NUM_CHANNELS)
+            chn = NTV2_CHANNEL1;
+        
+        ULWord supported;
+        if (!ReadRegister(gChannelCapabilities[chn], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
+            return false;
+        result = CNTV2DriverInterface::ReadRegister(gChannelHostLoad[chn], outLUTPlaneSelect,
+                                                    maskLUTV3PlaneSelect, shiftLUTV3PlaneSelect);
+    }
+    else
+    {
+        result = CNTV2DriverInterface::ReadRegister(kRegLUTV2Control, outLUTPlaneSelect,
+                                                    kRegMask12BitLUTPlaneSelect, kRegShift12BitLUTPlaneSelect);
+    }
+
+    return result;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -1135,29 +1310,39 @@ bool CNTV2Card::SetLUTEnable (const bool inEnable, const NTV2Channel inLUT)
 
 	if (IS_CHANNEL_INVALID(inLUT))
 		{LUTFAIL("Bad LUT number (> 7): " << DEC(inLUT)); return false;}
-	if (GetNumSupported(kDeviceGetLUTVersion) != 2)
+	if (GetNumSupported(kDeviceGetLUTVersion) < 2)
 		return true;	//	LUT init not needed
+    if (GetNumSupported(kDeviceGetLUTVersion) == 3)
+    {
+        ULWord supported;
+        if (!ReadRegister(gChannelCapabilities[inLUT], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
+            return false;
+        if (!WriteRegister(gChannelHostLoad[inLUT], inEnable, maskCCLUTV3LoadEnable, shiftCCLUTV3LoadEnable))
+            return false;
+    }
+    else
+    {
+        //	Sanity check...
+        const ULWord mask(LUTEnableMasks[inLUT]), shift(LUTEnableShifts[inLUT]); ULWord tmp(0);
+        if (ReadRegister(kRegLUTV2Control, tmp))
+            if (((tmp & mask)?true:false) == inEnable)
+                LUTWARN(GetDisplayName() << " V2 LUT" << DEC(inLUT+1) << " Enable bit already " << (inEnable?"set":"clear"));
+        tmp &= 0x000000FF;
+        if (inEnable)
+            if (BitCountNibble[tmp & 0xF] || BitCountNibble[(tmp >> 4) & 0xF])
+                LUTWARN(GetDisplayName() << " Setting V2 LUT" << DEC(inLUT+1) << " Enable bit: multiple Enable bits set: " << xHEX0N(tmp,4));
 
-	//	Sanity check...
-	const ULWord mask(LUTEnableMasks[inLUT]), shift(LUTEnableShifts[inLUT]); ULWord tmp(0);
-	if (ReadRegister(kRegLUTV2Control, tmp))
-		if (((tmp & mask)?true:false) == inEnable)
-			LUTWARN(GetDisplayName() << " V2 LUT" << DEC(inLUT+1) << " Enable bit already " << (inEnable?"set":"clear"));
-	tmp &= 0x000000FF;
-	if (inEnable)
-		if (BitCountNibble[tmp & 0xF] || BitCountNibble[(tmp >> 4) & 0xF])
-			LUTWARN(GetDisplayName() << " Setting V2 LUT" << DEC(inLUT+1) << " Enable bit: multiple Enable bits set: " << xHEX0N(tmp,4));
-
-	//	Set or Clear the Enable bit...
-	if (!WriteRegister (kRegLUTV2Control, inEnable ? 1 : 0, mask, shift))
+        //	Set or Clear the Enable bit...
+        if (!WriteRegister (kRegLUTV2Control, inEnable ? 1 : 0, mask, shift))
 		{LUTFAIL(GetDisplayName() << " WriteRegister kRegLUTV2Control failed, enable=" << DEC(UWord(inEnable))); return false;}
 
-	//	Sanity check...
-	if (!inEnable)
-		if (ReadRegister(kRegLUTV2Control, tmp, 0x000000FF))	//	all enable masks
-			if (tmp)
-				LUTWARN(GetDisplayName() << " Clearing V2 LUT" << DEC(inLUT+1) << " Enable bit: still has Enable bit(s) set: " << xHEX0N(tmp,4));
-
+        //	Sanity check...
+        if (!inEnable)
+            if (ReadRegister(kRegLUTV2Control, tmp, 0x000000FF))	//	all enable masks
+                if (tmp)
+                    LUTWARN(GetDisplayName() << " Clearing V2 LUT" << DEC(inLUT+1) << " Enable bit: still has Enable bit(s) set: " << xHEX0N(tmp,4));
+    }
+    
 	return true;
 }
 
@@ -1436,13 +1621,42 @@ bool CNTV2Card::Set1DLUTTableLocation (const NTV2Channel inChannel, const ULWord
 	if (quadQuadEnabled)
 		actualFrameSize *= 4;
     ULWord lutTableLocation (((actualFrameSize * inFrameNumber)/4) + LUTTableIndexOffset/4);
-	return WriteRegister(gChannelTo1DLutControlRegNum[inChannel], lutTableLocation, kRegMaskLUTAddress, kRegShiftLUTAddress);
+
+    bool result = false;
+    if (GetNumSupported(kDeviceGetLUTVersion) == 3)
+    {
+        ULWord supported;
+        if (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3DmaLoad, shiftCCLUTV3DmaLoad) || (supported == 0))
+            return false;
+        if (!WriteRegister(gChannelDmaLoad[inChannel], lutTableLocation, maskCCLUTV3Address, shiftCCLUTV3Address))
+            return false;
+    }
+    else
+    {
+        result = WriteRegister(gChannelTo1DLutControlRegNum[inChannel], lutTableLocation, kRegMaskLUTAddress, kRegShiftLUTAddress);
+    }
+    return result;
 }
 
 bool CNTV2Card::Load1DLUTTable (const NTV2Channel inChannel)
 {
-	WriteRegister(gChannelTo1DLutControlRegNum[inChannel], 0, static_cast<ULWord>(kRegMaskLUTLoad), kRegShiftLUTLoad);
-	return WriteRegister(gChannelTo1DLutControlRegNum[inChannel], 1, static_cast<ULWord>(kRegMaskLUTLoad), kRegShiftLUTLoad);
+    bool result = false;
+    if (GetNumSupported(kDeviceGetLUTVersion) == 3)
+    {
+        ULWord supported;
+        if (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3DmaLoad, shiftCCLUTV3DmaLoad) || (supported == 0))
+            return false;
+        if (!WriteRegister(gChannelDmaLoad[inChannel], 0, maskCCLUTV3Load, shiftCCLUTV3Load))
+            return false;
+        result = WriteRegister(gChannelDmaLoad[inChannel], 1, maskCCLUTV3Load, shiftCCLUTV3Load);
+    }
+    else
+    {
+        if (!WriteRegister(gChannelTo1DLutControlRegNum[inChannel], 0, static_cast<ULWord>(kRegMaskLUTLoad), kRegShiftLUTLoad))
+            return false;
+        result = WriteRegister(gChannelTo1DLutControlRegNum[inChannel], 1, static_cast<ULWord>(kRegMaskLUTLoad), kRegShiftLUTLoad);
+    }
+    return result;
 }
 
 

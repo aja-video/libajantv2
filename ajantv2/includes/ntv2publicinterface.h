@@ -4243,6 +4243,53 @@ typedef struct {
 #define kColorCorrectionLUTOffset_Base	(0x0800)	// BYTE offset
 #define kColorCorrection12BitLUTOffset_Base (0xe000)	// BYTE offset
 
+//  cc lut v3 locations
+
+#define kColorCorrectionLUTV3WidgetOffset (0xd800)   // byte offset
+#define kColorCorrectionLUTV3WidgetSize (16)         // byte size
+#define kColorCorrectionLUTV3DataOffset (0xe000)	 // byte offset
+
+//  cc lut v3 registers
+typedef enum
+{
+	regCCLUTV3_FIRST,
+	regCCLUTV3Capabilities	=	regCCLUTV3_FIRST,   //	Reg 0 - read only  
+	regCCLUTV3DmaLoad,                              //	Reg 1 - dma load address and trigger
+    regCCLUTV3HostLoad,                             //  Reg 2 - host load enable and bank/plain selects
+	regCCLUTV3_LAST
+} CCLUTV3Registers;
+
+typedef enum
+{
+    // regCCLUTV3Capabilities
+    maskCCLUTV3Depth12 = BIT(0),    // lut supports 12/10 bits
+    shiftCCLUTV3Depth12 = 0,
+    maskCCLUTV3DmaLoad = BIT(4),    // lut supports dma loading
+    shiftCCLUTV3DmaLoad = 4,
+    maskCCLUTV3Banks2 = BIT(8),     // lut supports 2 banks
+    shiftCCLUTV3Banks2 = 8,
+    maskCCLUTV3HostLoad = BIT(12),  // lut supports host loading
+    shiftCCLUTV3HostLoad = 12,
+	// regCCLUTV3DmaLoad
+	maskCCLUTV3Address =
+        BIT(0) + BIT(1) + BIT(2) + BIT(3) + BIT(4) + BIT(5) + BIT(6) + BIT(7) +
+        BIT(8) + BIT(9) + BIT(10) + BIT(11) + BIT(12) + BIT(13) + BIT(14) + BIT(15) +         \
+        BIT(16) + BIT(17) + BIT(18) + BIT(19) + BIT(20) + BIT(21) + BIT(22) + BIT(23) +
+        BIT(24) + BIT(25) + BIT(26) + BIT(27) + BIT(28) + BIT(29),
+	shiftCCLUTV3Address = 0,
+	maskCCLUTV3Load = BIT(31),
+	shiftCCLUTV3Load = 31,
+    // regCCLUTV3HostLoad
+    maskCCLUTV3LoadEnable = BIT(0),
+    shiftCCLUTV3LoadEnable = 0,
+    maskCCLUTV3BankSelect = BIT(4),
+    shiftCCLUTV3BankSelect = 4,
+    maskLUTV3PlaneSelect = BIT(8) + BIT(9),
+    shiftLUTV3PlaneSelect = 8,
+    maskCCLUTV3OutputBank = BIT(12),
+    shiftCCLUTV3OutputBank = 12
+} CCLUTV3MaskShift;
+
 
 /////////////////////////////////////////////////////////////////////////////////////
 // VidProc data structure used in AutoCirculate
