@@ -3111,7 +3111,7 @@ public:
 		@param[in]	inOptionFlags		A bit mask that specifies additional AutoCirculate options (e.g., ::AUTOCIRCULATE_WITH_RP188,
 										::AUTOCIRCULATE_WITH_LTC, ::AUTOCIRCULATE_WITH_ANC, etc.). Defaults to zero (no options).
 		@param[in]	inNumChannels		Optionally specifies the number of channels to operate on when CNTV2Card::AutoCirculateStart or
-										CNTV2Card::AutoCirculateStop are called. Defaults to 7. Must be greater than zero.
+										CNTV2Card::AutoCirculateStop are called. Defaults to 1. Must be greater than zero.
 		@param[in]	inStartFrameNumber	Specifies the starting frame index number as a zero-based unsigned decimal integer. Defaults to zero.
 										This parameter always overrides \c inFrameCount if, when specified with \c inEndFrameNumber,
 										are both non-zero. If specified, must be less than \c inEndFrameNumber -- see \ref vidop-indexing
