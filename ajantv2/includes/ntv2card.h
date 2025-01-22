@@ -3983,7 +3983,7 @@ public:
 	AJA_VIRTUAL bool		SetLUTV3OutputBank (const NTV2Channel inLUTWidget, const ULWord inBank);
 	AJA_VIRTUAL bool		GetLUTV3OutputBank (const NTV2Channel inLUTWidget, ULWord & outBank);
     
-	AJA_VIRTUAL bool		Has12BitLUTSupport (void);
+	AJA_VIRTUAL bool		Has12BitLUTSupport (const NTV2Channel inChannel = NTV2_CHANNEL1);
 	
 	/**
 		@brief		Sets the LUT plane.

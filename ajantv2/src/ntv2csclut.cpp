@@ -154,10 +154,11 @@ bool CNTV2Card::SetLUTV2OutputBank (const NTV2Channel inChannel, const ULWord in
 
 bool CNTV2Card::SetLUTV3OutputBank (const NTV2Channel inChannel, const ULWord inBank)
 {
+    ULWord supported = 0;
+
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
 
-    ULWord supported;
     if (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
         return false;
     if ((inBank > 0) &&
@@ -206,10 +207,11 @@ bool CNTV2Card::GetLUTV2OutputBank (const NTV2Channel inChannel, ULWord & outBan
 
 bool CNTV2Card::GetLUTV3OutputBank (const NTV2Channel inChannel, ULWord & outBank)
 {
+    ULWord supported = 0;
+
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
 
-    ULWord supported;
     if (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
         return false;
     
@@ -294,6 +296,7 @@ bool CNTV2Card::SetLUTV3HostAccessBank (const NTV2ColorCorrectionHostAccessBank 
 {
     ULWord channel = 0;
     ULWord bank = 0;
+    ULWord supported = 0;
     
 	switch(inValue)
 	{
@@ -324,7 +327,6 @@ bool CNTV2Card::SetLUTV3HostAccessBank (const NTV2ColorCorrectionHostAccessBank 
     default:						 return false;
 	}
 
-    ULWord supported;
     if (!ReadRegister(gChannelCapabilities[channel], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
         return false;
     if ((bank > 0) &&
@@ -422,10 +424,11 @@ bool CNTV2Card::GetLUTV2HostAccessBank (NTV2ColorCorrectionHostAccessBank & outV
 
 bool CNTV2Card::GetLUTV3HostAccessBank (NTV2ColorCorrectionHostAccessBank & outValue, const NTV2Channel inChannel)
 {
+    ULWord supported = 0;
+
 	if (IS_CHANNEL_INVALID(inChannel))
 		return false;
 
-    ULWord supported;
     if (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
         return false;
 
@@ -460,26 +463,40 @@ bool CNTV2Card::GetLUTControlSelect(NTV2LUTControlSelect & outLUTSelect)
 	return CNTV2DriverInterface::ReadRegister (kRegCh1ColorCorrectionControl, outLUTSelect, kRegMaskLUTSelect, kRegShiftLUTSelect);
 }
 
-bool CNTV2Card::Has12BitLUTSupport()
+bool CNTV2Card::Has12BitLUTSupport(const NTV2Channel inChannel)
 {
 	ULWord has12BitLUTSupport(0);
-	bool result = ReadRegister(kRegLUTV2Control, has12BitLUTSupport, kRegMask12BitLUTSupport, kRegShift12BitLUTSupport)  &&
-        (has12BitLUTSupport ? true : false);
-    result |= (GetNumSupported(kDeviceGetLUTVersion) == 3);
+    ULWord supported = 0;
+    bool result = false;
+    
+    if (GetNumSupported(kDeviceGetLUTVersion) == 3)
+    {
+        if (inChannel >= GetNumSupported(kDeviceGetNumLUTs))
+            return false;
+        if (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3Depth12, shiftCCLUTV3Depth12) || (supported == 0))
+            return false;
+    }
+    else
+    {
+        result = ReadRegister(kRegLUTV2Control, has12BitLUTSupport, kRegMask12BitLUTSupport, kRegShift12BitLUTSupport)  &&
+            (has12BitLUTSupport ? true : false);
+    }
+    
     return result;
 }
 
 bool CNTV2Card::Set12BitLUTPlaneSelect(NTV2LUTPlaneSelect inLUTPlaneSelect, const NTV2Channel inChannel)
 {
+    ULWord supported = 0;
+    ULWord iChn = 0;
+    bool result = false;
+
 	if(!Has12BitLUTSupport())
 		return false;
 
-    bool result = false;
-
     if (GetNumSupported(kDeviceGetLUTVersion) == 3)
     {
-        ULWord supported;
-        if (inChannel < NTV2_MAX_NUM_CHANNELS)
+        if (inChannel < GetNumSupported(kDeviceGetNumLUTs))
         {
             if (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
                 return false;
@@ -487,7 +504,6 @@ bool CNTV2Card::Set12BitLUTPlaneSelect(NTV2LUTPlaneSelect inLUTPlaneSelect, cons
         }
         else
         {
-            ULWord iChn;
             for (iChn = 0; iChn < GetNumSupported(kDeviceGetNumLUTs); iChn++)
             {
                 if (!ReadRegister(gChannelCapabilities[iChn], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
@@ -507,21 +523,20 @@ bool CNTV2Card::Set12BitLUTPlaneSelect(NTV2LUTPlaneSelect inLUTPlaneSelect, cons
 
 bool CNTV2Card::Get12BitLUTPlaneSelect(NTV2LUTPlaneSelect & outLUTPlaneSelect, const NTV2Channel inChannel)
 {
+    ULWord supported = 0;
+    bool result = false;
+
 	if(!Has12BitLUTSupport())
 		return false;
 	
-    bool result = false;
-
     if (GetNumSupported(kDeviceGetLUTVersion) == 3)
     {
-        NTV2Channel chn = inChannel;
-        if (inChannel >= NTV2_MAX_NUM_CHANNELS)
-            chn = NTV2_CHANNEL1;
-        
-        ULWord supported;
-        if (!ReadRegister(gChannelCapabilities[chn], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
+        if (inChannel >= GetNumSupported(kDeviceGetNumLUTs))
             return false;
-        result = CNTV2DriverInterface::ReadRegister(gChannelHostLoad[chn], outLUTPlaneSelect,
+        
+        if (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
+            return false;
+        result = CNTV2DriverInterface::ReadRegister(gChannelHostLoad[inChannel], outLUTPlaneSelect,
                                                     maskLUTV3PlaneSelect, shiftLUTV3PlaneSelect);
     }
     else
@@ -1307,6 +1322,7 @@ bool CNTV2Card::SetLUTEnable (const bool inEnable, const NTV2Channel inLUT)
 	static const ULWord LUTEnableShifts []	= { kRegShiftLUT1Enable,	kRegShiftLUT2Enable,	kRegShiftLUT3Enable,	kRegShiftLUT4Enable,
 												kRegShiftLUT5Enable,	kRegShiftLUT6Enable,	kRegShiftLUT7Enable,	kRegShiftLUT8Enable };
 	static const UWord	BitCountNibble[]	= { 0,	1,	1,	2,	1,	2,	2,	3,	1,	2,	2,	3,	2,	3,	3,	4};
+    ULWord supported = 0;
 
 	if (IS_CHANNEL_INVALID(inLUT))
 		{LUTFAIL("Bad LUT number (> 7): " << DEC(inLUT)); return false;}
@@ -1314,7 +1330,8 @@ bool CNTV2Card::SetLUTEnable (const bool inEnable, const NTV2Channel inLUT)
 		return true;	//	LUT init not needed
     if (GetNumSupported(kDeviceGetLUTVersion) == 3)
     {
-        ULWord supported;
+        if (inLUT >= GetNumSupported(kDeviceGetNumLUTs))
+            return false;
         if (!ReadRegister(gChannelCapabilities[inLUT], supported, maskCCLUTV3HostLoad, shiftCCLUTV3HostLoad) || (supported == 0))
             return false;
         if (!WriteRegister(gChannelHostLoad[inLUT], inEnable, maskCCLUTV3LoadEnable, shiftCCLUTV3LoadEnable))
@@ -1622,10 +1639,12 @@ bool CNTV2Card::Set1DLUTTableLocation (const NTV2Channel inChannel, const ULWord
 		actualFrameSize *= 4;
     ULWord lutTableLocation (((actualFrameSize * inFrameNumber)/4) + LUTTableIndexOffset/4);
 
+    ULWord supported = 0;
     bool result = false;
     if (GetNumSupported(kDeviceGetLUTVersion) == 3)
     {
-        ULWord supported;
+        if (inChannel >= GetNumSupported(kDeviceGetNumLUTs))
+            return false;
         if (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3DmaLoad, shiftCCLUTV3DmaLoad) || (supported == 0))
             return false;
         if (!WriteRegister(gChannelDmaLoad[inChannel], lutTableLocation, maskCCLUTV3Address, shiftCCLUTV3Address))
@@ -1640,10 +1659,12 @@ bool CNTV2Card::Set1DLUTTableLocation (const NTV2Channel inChannel, const ULWord
 
 bool CNTV2Card::Load1DLUTTable (const NTV2Channel inChannel)
 {
+    ULWord supported = 0;
     bool result = false;
     if (GetNumSupported(kDeviceGetLUTVersion) == 3)
     {
-        ULWord supported;
+        if (inChannel >= GetNumSupported(kDeviceGetNumLUTs))
+            return false;
         if (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3DmaLoad, shiftCCLUTV3DmaLoad) || (supported == 0))
             return false;
         if (!WriteRegister(gChannelDmaLoad[inChannel], 0, maskCCLUTV3Load, shiftCCLUTV3Load))
