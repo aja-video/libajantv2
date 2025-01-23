@@ -473,8 +473,7 @@ bool CNTV2Card::Has12BitLUTSupport(const NTV2Channel inChannel)
     {
         if (inChannel >= GetNumSupported(kDeviceGetNumLUTs))
             return false;
-        if (!ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3Depth12, shiftCCLUTV3Depth12) || (supported == 0))
-            return false;
+        result = ReadRegister(gChannelCapabilities[inChannel], supported, maskCCLUTV3Depth12, shiftCCLUTV3Depth12) && (supported != 0);
     }
     else
     {
