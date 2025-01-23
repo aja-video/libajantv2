@@ -90,7 +90,7 @@ public:
 	/**
 	 * Set the default value string for this command line option.
 	 *
-	 * @param[in] desc	The default value string.
+	 * @param[in] value	The default value string.
 	 */
 	void SetDefaultValue(const std::string &value);
 
@@ -160,7 +160,7 @@ public:
 	/**
 	 * Parse a list of strings containing command line args.
 	 *
-	 * @param[in] desc	The list of arg strings.
+	 * @param[in] args	The list of arg strings.
 	 *
 	 * @return	Returns `true` if the command line args were parsed successfully, otherwise `false`.
 	 */
@@ -255,7 +255,7 @@ public:
 	/**
 	 * Set the usage text string to print if help is invoked by the args parser.
 	 *
-	 * @param[in] name	The usage text string.
+	 * @param[in] usageText	The usage text string.
 	 */
 	void SetUsageText(const std::string &usageText);
 	/**
@@ -267,7 +267,7 @@ public:
 	/**
 	 * Set the help text string to print if help is invoked by the args parser.
 	 *
-	 * @param[in] name	The help text string.
+	 * @param[in] helpText	The help text string.
 	 */
 	void SetHelpText(const std::string &helpText);
 	/**

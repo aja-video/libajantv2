@@ -9187,7 +9187,7 @@ typedef enum
 				@brief		Returns a set of distinct ::NTV2OutputDest values supported on the given device.
 				@param[in]	inDeviceID			Specifies the ::NTV2DeviceID of the device of interest.
 												Specify ::DEVICE_ID_INVALID to disable the "is supported" check.
-				@param[out] outOutputSources	Receives the set of distinct ::NTV2OutputDest values supported by the device.
+				@param[out] outOutputDests		Receives the set of distinct ::NTV2OutputDest values supported by the device.
 				@param[in]	inKinds				Specifies the kinds of outputs of interest.  Defaults to ALL.
 				@return		True if successful;	 otherwise false.
 				@todo		Needs to be moved to a C++ compatible "device features" module.

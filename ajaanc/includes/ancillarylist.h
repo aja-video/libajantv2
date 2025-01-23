@@ -521,8 +521,8 @@ public:	//	INSTANCE METHODS
 	/**
 		@brief		Parse "raw" HDMI auxillary data bytes received from hardware (ingest) into separate
 					AJAAncillaryData objects and appends them to me.
-		@param[in]	pInReceivedData		Specifies a valid, non-NULL address of the first byte of "raw" ancillary data received by an AncExtractor widget.
-		@param[in]	inByteCount			Specifies the number of bytes of data in the specified buffer to process.
+		@param[in]	inReceivedData		Specifies the buffer that contains "raw" auxiliary data received from an
+										HDMI Aux Extractor widget.
 		@param[in]	inFrameNum			If non-zero, replaces the frame identifier of new packets that have a zero frame ID.
 		@details	For each packet parsed from the received data, AJAAncillaryDataFactory::GuessAncillaryDataType
 					is called to ascertain the packet's AJAAncDataType, then AJAAncillaryDataFactory::Create
@@ -606,11 +606,12 @@ public:	//	INSTANCE METHODS
 
 	/**
 		@brief		Dumps a human-readable description of every packet in my list to the given output stream.
+		@param		oss				The output stream.
 		@param[in]	inDetailed		If true, include some of the packet data;  otherwise omit packet data.
 									Defaults to true.
 		@return		The specified output stream.
 	**/
-	virtual std::ostream &					Print (std::ostream & inOutStream, const bool inDetailed = true) const;
+	virtual std::ostream &		Print (std::ostream & oss, const bool inDetailed = true) const;
 	///@}
 
 	/**

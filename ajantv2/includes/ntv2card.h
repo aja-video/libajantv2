@@ -764,7 +764,7 @@ public:
 	/**
 		@brief		Sets the capture or playout mode of a set of FrameStores on the AJA device.
 		@param[in]	inChannels		Specifies the FrameStore(s) of interest.
-		@param[in]	inNewValue		Specifies the desired mode (::NTV2_MODE_DISPLAY or ::NTV2_MODE_CAPTURE).
+		@param[in]	inMode			Specifies the desired mode (::NTV2_MODE_DISPLAY or ::NTV2_MODE_CAPTURE).
 		@return		True if all FrameStore(s) were successfully configured; otherwise false.
 		@details	In ::NTV2_MODE_CAPTURE mode, device frame memory is written;  in ::NTV2_MODE_DISPLAY mode, it's read from.
 		@note		\ref aboutautocirculate automatically sets the ::NTV2Mode (but doesn't automatically un-set it after use).
@@ -1091,7 +1091,7 @@ public:
 
 	/**
 		@brief		Sets the device's video range limiting mode.
-		@param[in]	outValue	Specifies the NTV2VideoLimiting setting to be used.
+		@param[in]	inValue		Specifies the NTV2VideoLimiting setting to be used.
 		@return		True if successful;	 otherwise false.
 		@see		CNTV2Card::GetVideoLimiting
 	**/
@@ -1471,12 +1471,12 @@ public:
 	/**
 		@brief		Changes the size of the audio buffer used for the given Audio System(s).
 		@return		True if successful; otherwise false.
-		@param[in]	inValue			Specifies the desired size of the capture/playout audio buffer to be used on the AJA device.
+		@param[in]	inSize			Specifies the desired size of the capture/playout audio buffer to be used on the AJA device.
 									All modern AJA devices use ::NTV2_AUDIO_BUFFER_BIG (4 MB).
 		@param[in]	inAudioSystems	Specifies the Audio System(s) of interest.
 		@see		CNTV2Card::GetAudioBufferSize
 	**/
-	AJA_VIRTUAL bool		SetAudioBufferSize (const NTV2AudioBufferSize inMode, const NTV2AudioSystemSet & inAudioSystems);	//	New in SDK 16.2
+	AJA_VIRTUAL bool		SetAudioBufferSize (const NTV2AudioBufferSize inSize, const NTV2AudioSystemSet & inAudioSystems);	//	New in SDK 16.2
 
 	/**
 		@brief		Retrieves the size of the input or output audio buffer being used for a given Audio System on the AJA device.
@@ -2180,7 +2180,7 @@ public:
 		@brief		Answers with the current multi-link audio mode for the given audio system.
 		@return		True if successful; otherwise false.
 		@param[in]	inAudioSystem	Specifies the ::NTV2AudioSystem of interest.
-		@param[out]	outEnable		Receives true if multi-link audio mode is currently enabled;  otherwise false if disabled.
+		@param[out]	outEnabled		Receives true if multi-link audio mode is currently enabled;  otherwise false if disabled.
 		@see		CNTV2Card::SetMultiLinkAudioMode, ::NTV2DeviceCanDoMultiLinkAudio, \ref audop-multilink
 	**/
 	AJA_VIRTUAL bool		GetMultiLinkAudioMode (const NTV2AudioSystem inAudioSystem, bool & outEnabled);	//	New in SDK 16.2
@@ -2902,7 +2902,7 @@ public:
 		@param[out] outFieldID		The current field ID of the specified output channel.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetOutputFieldID (const NTV2Channel channel, NTV2FieldID & outFieldID);
+	AJA_VIRTUAL bool	GetOutputFieldID (const NTV2Channel inChannel, NTV2FieldID & outFieldID);
 
 	/**
 		@brief		Returns the current field ID of the specified input channel.
@@ -2910,7 +2910,7 @@ public:
 		@param[out] outFieldID		The current field ID of the specified input channel.
 		@return		True if successful; otherwise false.
 	**/
-	AJA_VIRTUAL bool	GetInputFieldID (const NTV2Channel channel, NTV2FieldID & outFieldID);
+	AJA_VIRTUAL bool	GetInputFieldID (const NTV2Channel inChannel, NTV2FieldID & outFieldID);
 
 	//
 	//	Wait for event
@@ -4315,7 +4315,7 @@ public:
 
 	/**
 		@brief		Answers with the set of output (sources) that can legally be connected to the given input (sink).
-		@param[in]	inInputXpt		Specifies the input (signal sink) of interest.
+		@param[in]	inInputXptID	Specifies the input (signal sink) of interest.
 		@param[out]	outOutputXpts	Receives the supported outputs (signal sources) for this device.
 		@return		True if successful;	 otherwise false.
 		@note		This function will return false (failure) if the device firmware doesn't support route validation.
@@ -4591,7 +4591,7 @@ public:
 
 	/**
 		@brief						Answers with the given HDMI input's video dynamic range and mastering information.
-		@param[out] outRegValue		Receives the HDMI input's current HDRRegValues data.
+		@param[out] outRegValues	Receives the HDMI input's current HDRRegValues data.
 		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
 		@return						True if successful;	 false if no information present.
 	**/
@@ -4599,7 +4599,7 @@ public:
 
 	/**
 		@brief						Answers with the given HDMI input's video dynamic range and mastering information.
-		@param[out] outFloatValue	Receives the HDMI input's current HDRFloatValues data.
+		@param[out] outFloatValues	Receives the HDMI input's current HDRFloatValues data.
 		@param[in]	inChannel		Specifies the HDMI input of interest as an ::NTV2Channel (a zero-based index number). Defaults to NTV2_CHANNEL1.
 		@return						True if successful;	 false if no information present.
 	**/
@@ -4863,8 +4863,8 @@ public:
 	/**
 		@brief		Answers true if the device is currently configured to read analog LTC from the reference
 					input connector (instead of reference).
-		@param[out]	outEnabled	Receives true if the device is set to read analog LTC from its reference connector,
-								or false if it's configured to read reference.
+		@param[out]	outIsEnabled	Receives true if the device is set to read analog LTC from its reference connector,
+									or false if it's configured to read reference.
 		@return		True if successful; otherwise false.
 		@note		Not all devices are able to read analog LTC from their reference input.
 					Call ::NTV2DeviceCanDoLTCInOnRefPort to find out.
@@ -5823,8 +5823,8 @@ public:
 		@brief		Answers whether or not the given SDI input's Anc extractor was configured with a progressive video format.
 					(Call ::NTV2DeviceCanDoCustomAnc to determine if the device supports Anc extractor firmware.)
 		@return		True if successful; otherwise false.
-		@param[in]	inHDMIInput		Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
-		@param[out] outIsProgressive Receives true if the extractor was configured with a progressive format. Otherwise false.
+		@param[in]	inSDIInput			Specifies the SDI input of interest (e.g., 0=SDIIn1, 1=SDIIn2, etc.).
+		@param[out] outIsProgressive	Receives true if the extractor was configured with a progressive format. Otherwise false.
 	**/
 	AJA_VIRTUAL bool 	AncExtractIsProgressive (const UWord inSDIInput, bool & outIsProgressive); // New in SDK 17.1
 
@@ -6007,7 +6007,6 @@ public:
 		@brief		Configures the given HDMI input's Aux extractor to receive the next frame's F1 Aux data.
 		@return		True if successful; otherwise false.
 		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
-		// Question / TODO:  Needs accurate description for extraction, apply to Anc also. 
 		@param[in]	inFrameNumber	Tells the Aux extractor where to write the received Aux data, specified as a
 									frame number.
 		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's driving the HDMI input,
@@ -6026,8 +6025,7 @@ public:
 	/**
 		@brief		Configures the given HDMI input's Aux extractor to receive the next frame's F2 Aux data.
 		@return		True if successful; otherwise false.
-		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
-		// Question / TODO:  Needs accurate description for extraction, apply to Anc also. 
+		@param[in]	inHDMIInput		Specifies the HDMI input of interest as a zero-based index number (e.g., 0 = HDMIIn1).
 		@param[in]	inFrameNumber	Tells the Aux extractor where to write the received Aux data, specified as a
 									frame number.
 		@param[in]	inChannel		Optionally specifies the ::NTV2Channel (FrameStore) that's driving the HDMI input,
@@ -6070,7 +6068,7 @@ public:
 		@brief		Answers with the number of bytes of field 2 HDMI AUX data extracted.
 		@return		True if successful; otherwise false.
 		@param[in]	inHDMIInput		Specifies the HDMI input of interest (e.g., 0=HDMIIn1, 1=HDMIIn2, etc.).
-		@param[out] outF1Size		Receives the number of bytes of field 2 HDMI AUX data extracted
+		@param[out] outF2Size		Receives the number of bytes of field 2 HDMI AUX data extracted
 		@see		CNTV2Card::AuxExtractGetField1Size, \ref auxcapture
 	**/
 	AJA_VIRTUAL bool	AuxExtractGetField2Size (const UWord inHDMIInput, ULWord & outF2Size);	//	New in SDK 17.1

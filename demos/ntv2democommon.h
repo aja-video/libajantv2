@@ -670,12 +670,14 @@ class AJAExport CNTV2DemoCommon
 
 		/**
 			@brief		Returns the ::NTV2TCIndex that matches the given string.
-			@param[in]	inStr	Specifies the string to be converted to an ::NTV2TCIndex.
+			@param[in]	inStr		Specifies the string to be converted to an ::NTV2TCIndex.
+			@param[in]	inKinds		Optionally specifies the timecode types to filter for.
+			@param[in]	inDevSpec	Optionally specifies the device specification.
 			@return		The given string converted to an ::NTV2TCIndex, or ::NTV2_TCINDEX_INVALID if there's no match.
 		**/
 		static NTV2TCIndex					GetTCIndexFromString (const std::string & inStr,
-																		const NTV2TCIndexKinds inKinds = TC_INDEXES_ALL,
-																		const std::string inDevSpec = std::string());
+																const NTV2TCIndexKinds inKinds = TC_INDEXES_ALL,
+																const std::string inDevSpec = std::string());
 	///@}
 
 	/**
@@ -763,10 +765,11 @@ class AJAExport CNTV2DemoCommon
 
 		/**
 			@brief		Answers with the crosspoint connections needed to implement the given 8K/UHD2 capture configuration.
+			@param[out]	outConnections	Receives the crosspoint connection set.
 			@param[in]	inConfig		Specifies the CaptureConfig to route for.
+			@param[in]	inVidFormat		Specifies the NTV2VideoFormat.
 			@param[in]	inDevID			Optionally specifies the NTV2DeviceID.
 			@param[in]	isInputRGB		Optionally specifies if the input is RGB. Defaults to false (YUV).
-			@param[out]	outConnections	Receives the crosspoint connection set.
 		**/
 		static bool							GetInputRouting8K (	NTV2XptConnections & outConnections,
 																const CaptureConfig & inConfig,
