@@ -3278,7 +3278,6 @@ static int probe(struct pci_dev *pdev, const struct pci_device_id *id)	/* New de
 		(id->device == NTV2_DEVICE_ID_IO4K) ||
 		(id->device == NTV2_DEVICE_ID_IO4K_UFC) ||
 		(id->device == NTV2_DEVICE_ID_IO4KPLUS) ||
-		(id->device == NTV2_DEVICE_ID_IOIP) ||
 		(id->device == NTV2_DEVICE_ID_TTAPPRO) ||
 		(id->device == NTV2_DEVICE_ID_IOX3))
 	{
