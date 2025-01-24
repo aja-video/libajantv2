@@ -379,44 +379,14 @@ static struct pci_device_id pci_device_id_tab[] =
 	   0, 0,											// Class, class_mask
 	   0												// Opaque data
 	},
-	{  // KONAIP_CH1SFP
-	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_KONAIP_CH1SFP,	// Vendor and device IDs
-	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
-	   0, 0,											// Class, class_mask
-	   0												// Opaque data
-	},
-	{  // KONAIP_PHANTOM
-	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_KONAIP_PHANTOM,	// Vendor and device IDs
-	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
-	   0, 0,											// Class, class_mask
-	   0												// Opaque data
-	},
-	{  // KONAIP_CH2SFP
-	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_KONAIP_CH2SFP,	// Vendor and device IDs
-	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
-	   0, 0,											// Class, class_mask
-	   0												// Opaque data
-	},
 	{  // IO4KPLUS
 	   NTV2_VENDOR_ID, NTV2_DEVICE_ID_IO4KPLUS,			// Vendor and device IDs
 	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
 	   0, 0,											// Class, class_mask
 	   0												// Opaque data
 	},
-    {  // IOIP
-        NTV2_VENDOR_ID, NTV2_DEVICE_ID_IOIP,			// Vendor and device IDs
-        PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
-        0, 0,											// Class, class_mask
-        0												// Opaque data
-    },
 	{  // KONA4PLUS
        NTV2_VENDOR_ID, NTV2_DEVICE_ID_KONA5,        	// Vendor and device IDs
-	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
-	   0, 0,											// Class, class_mask
-	   0												// Opaque data
-	},
-	{  // KONA4IP
-       NTV2_VENDOR_ID, NTV2_DEVICE_ID_KONA5IP,			// Vendor and device IDs
 	   PCI_ANY_ID, PCI_ANY_ID,							// Subvendor, Subdevice IDs
 	   0, 0,											// Class, class_mask
 	   0												// Opaque data
