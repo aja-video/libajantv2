@@ -483,9 +483,7 @@ bool CNTV2Card::GetLPTunnelPortURLString (string & outURLString)
 	tempString << ipOctet << ".";
 	ipOctet = (portIP & 0x0000FF00) >> 8;
 	tempString << ipOctet << ".";
-	//The address advertised is the LP side
-	//of the tunnel, the host is +1
-	ipOctet = ((portIP & 0x000000FF) + 1);
+	ipOctet = (portIP & 0x000000FF);
 	tempString << ipOctet;
 	
 	outURLString = tempString.str();
