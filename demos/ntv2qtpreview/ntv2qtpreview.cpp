@@ -113,7 +113,7 @@ NTV2QtPreview::NTV2QtPreview (QWidget * parent, Qt::WindowFlags flags)
 	setLayout (layout);
 
     QObject::connect (mBoardChoiceCombo,	SIGNAL (currentIndexChanged (int)),				this,					SLOT (RequestDeviceChange (const int)));
-	QObject::connect (mInputButtonGroup,	SIGNAL (buttonReleased (int)),					this,					SLOT (inputChanged (int)));
+	QObject::connect (mInputButtonGroup,	SIGNAL (idReleased (int)),					this,					SLOT (inputChanged (int)));
 	QObject::connect (mWithAudioCheckBox,	SIGNAL (stateChanged (int)),					this,					SLOT (withAudioChanged (int)));
     QObject::connect (mCheckFixedReference,	SIGNAL (toggled (bool)),                        this,					SLOT (fixedRefChanged (bool)));
 	QObject::connect (mCheckFor4kCheckBox,	SIGNAL (stateChanged (int)),					this,					SLOT (checkFor4kChanged (int)));
