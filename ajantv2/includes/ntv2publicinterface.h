@@ -6149,7 +6149,7 @@ typedef enum
 					ULWord64	fIOMemoryDesc;		///< @brief Reserved -- Mac driver use only
 					ULWord64	fIOMemoryMap;		///< @brief Reserved -- Mac driver use only
 				#else
-					ULWord64	fKernelSpacePtr;	///< @brief Reserved -- New in SDK 17.5
+					//ULWord64	fKernelSpacePtr;	///< @brief Reserved -- New in SDK 17.5
 					ULWord64	fKernelHandle;		///< @brief Reserved -- driver use only
 				#endif
 			NTV2_END_PRIVATE
